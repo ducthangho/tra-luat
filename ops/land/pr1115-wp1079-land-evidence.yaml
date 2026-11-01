@@ -32,7 +32,7 @@ merge_commit_tree: 8485ab51880da68bc0e7ed48a7f8fcb30026f64a
 merge_commit_parents: [f4b513da5802d439aedbe58ae4a5cd38ff47d6ab, af057e982ccc99b1f5eef2ae86dd129ccaa969b5]
 pre_merge_checks:
   - {name: 'ci.yml pull_request (ubuntu) tren head cuoi', sha: af057e982ccc99b1f5eef2ae86dd129ccaa969b5, conclusion: success, ghi_chu: 'loi_khai_co_neo — 28 check run (27 success, 1 skipped launcher Windows), mergeable_state clean; doc REST trong phien luc 14:36Z; ghi trong handoff.'}
-  - {name: 'Codex connector', sha: af057e982ccc99b1f5eef2ae86dd129ccaa969b5, conclusion: 'completed; khong finding', nguon: readback-comments-1115.json, ghi_chu: 'measured — comment 6559102548 codex-review-state commit_sha af057e9, has_any_findings false, status completed.'}
+  - {name: 'Codex connector', sha: af057e982ccc99b1f5eef2ae86dd129ccaa969b5, conclusion: 'completed; khong finding', nguon: readback-comments-1115.json, ghi_chu: 'measured — readback-comments-1115.json: comment 6559102548 codex-review-state commit_sha af057e9, has_any_findings false, status completed.'}
   - {name: 'executor cross-review Codex luot 8/8 (launcher.py run e2cb50f8)', sha: af057e982ccc99b1f5eef2ae86dd129ccaa969b5, conclusion: 'changes_requested; 0 P0, 0 P1, 0 P2, 0 P3; HINT rong', nguon: 'ops/handoff/wp1079-g1-claude/luot8/{VERDICT.md,run/run.json} (nhanh ops/wp1079-r1-g1-lease, SHA256SUMS kem)', ghi_chu: 'thuat_lai tu hien vat handoff: run.json ma_thoat 0, head af057e9, 1465.254 s, model DO_DUOC gpt-6.1-sol, effort xhigh DO_DUOC, sandbox KHONG_DO_DUOC (DanhTinhDoi). Bang dong finding: 12/12 dong F01-F09 DONG; F04 = no #1117. changes_requested CHI vi reviewer khong do duoc A1 (/tmp/.git trong sandbox) va CI (cam mang).'}
   - {name: 'A1 tai cho tren head cuoi (/tmp/.git vang)', sha: af057e982ccc99b1f5eef2ae86dd129ccaa969b5, conclusion: 'launcher_test 350/350, --dot-bien 548/548, codex_cred_test TONG DAT', nguon: 'ops/handoff/wp1079-g1-claude/nghiem-thu-af057e9/{suite,db,cc}.log (nhanh lease)'}
 post_merge_checks:
@@ -47,7 +47,7 @@ post_merge_checks:
     moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition: passed (wd-run 41327945916, artifact workflow-definition-41322980582), ci_provenance.py thu tu tinh lai blob/sha256.'
     moc_gate_output: 'measured — gate-output-41322980582.txt (log REST tung job, sha256 + so byte kem): 23/23 job success, ##[error] = 0; == tl selftest 1774/1774 ==, == transport selftest 12/12 ==, == gen_instructions selftest 44/44 ==; DOT BIEN 343/343, 392/392, 106/106, 80/80, 13/13 bi giet dung ly do; TỔNG: ĐẠT 8x, TONG: DAT 6x. GHI CHU: gate ci.yml KHONG chay launcher_test --dot-bien; lane do no la launcher-windows.yml (post_merge_checks muc 2, DO tren Windows).'
     ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master).'
-  - {name: 'launcher-windows.yml push master — DUNG merge SHA (lane launcher, khong phai gate)', run_id: 41322980509, sha: c82047da4d6f9546ce1d68282c37acf9567b74bc, conclusion: failure, ghi_chu: 'measured — REST run 41322980509: job launcher (ubuntu-latest) success; job launcher (windows-latest) 124896936117 failure o buoc Tu dot bien, DOT BIEN 430/434 (3 tin dung gia ca chi-Windows + neutral t73 TypeError); buoc launcher_test.py thuong 278/278 (74 bo qua). Packet va #1122.'}
+  - {name: 'launcher-windows.yml push master — DUNG merge SHA (lane launcher, khong phai gate)', run_id: 41322980509, sha: c82047da4d6f9546ce1d68282c37acf9567b74bc, conclusion: failure, ghi_chu: 'measured — readback-run-41322980509-launcher-windows.json + readback-jobs-41322980509-launcher-windows.json: job launcher (ubuntu-latest) success, job launcher (windows-latest) 124896936117 failure; log-trich-124896936117-windows.txt: DOT BIEN 430/434 (3 tin dung gia ca chi-Windows + neutral t73 TypeError), suite thuong 278/278 (74 bo qua). Packet va #1122.'}
 bookkeeping:
   - {item: 'rut han lease wp1079-r1-g10-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: claude/ghi-so-land-1077-1078-1079}
@@ -121,7 +121,7 @@ landed_20261101:
     noi_dung: >-
       Chu kho chon "Chap nhan, ghi landed true ca ba" (AskUserQuestion, phien session_01J7EgTVGTrNi4xqh7MeBFQv, 01-11-2026):
       chap nhan luot 8 (launcher.py run e2cb50f8) changes_requested 0 P0-P3 (HINT rong; 12/12 finding F01-F09 DONG) + A1 do ngoai sandbox reviewer (350/350, 548/548, codex_cred_test DAT) + CI PR 27/28 xanh tren DUNG af057e982ccc99b1f5eef2ae86dd129ccaa969b5, voi sandbox mode KHONG_DO_DUOC (DanhTinhDoi, #1105).
-    do_duoc: 'measured — comment 6560351106 dang luc ghi so (MCP add_issue_comment). CAVEAT #566: agent dang bang token chu kho; ban chep, khong phai chu ky.'
+    do_duoc: 'measured — readback-comments-1079.json: comment 6560351106 (user ducthangho, OWNER) dang luc ghi so (MCP add_issue_comment). CAVEAT #566: agent dang bang token chu kho; ban chep, khong phai chu ky.'
   landed: false
   landed_ha_cap:
     comment: https://github.com/ducthangho/tra-luat/issues/1079#issuecomment-6560564188
@@ -130,7 +130,7 @@ landed_20261101:
       3 dot bien tin dung gia o ca CHI-Windows con assert tran (r484_g4_windows_sid_alias_identity, r484_g2_storage_kernel_guardrails)
       + neutral t73 TypeError trong vong --dot-bien. Chu kho chon "Mo packet va, ha #1079 ve landed false" (AskUserQuestion).
     packet_va: 'Issue #1122, giao phien xu ly no session_015Gtxra7iT6mwM1kqpdggt6, uu tien truoc tien.'
-    do_duoc: 'measured — log REST job 124896936117 (dong DOT BIEN va 4 dong SAI chep trong Issue #1122).'
+    do_duoc: 'measured — log-trich-124896936117-windows.txt (dong DOT BIEN va 4 dong SAI that; chep lai trong Issue #1122); readback-comments-1079.json: comment 6560564188.'
   landed_dieu_kien: >-
     (1) bon moc §10.2.2 tren merge c82047da: xem post_merge_checks. (2) lease g10 rut han sau merge. (4) review neo DUNG authorized_head af057e9: CHUA_DAT theo nghia den (khong approve) — chu kho CHAP NHAN luot 8 0 P0-P3. (3) bookkeeping: ho so nay. (5) uy quyen land: DAT co caveat #566.
     (6) muc tieu packet: DAT theo gate + review. (7) §8.1: CHUA_DAT ve sandbox — chu kho CHAP NHAN bang quyet_dinh_chu_kho tren.

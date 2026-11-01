@@ -12,5 +12,12 @@
   "author_association": "NONE",
   "created_at": "2026-11-01T03:25:19Z",
   "body_dau": "**Lease `wp1078-r1-g2-claude`** — đăng tự động từ `ops/leases/wp1078-r1-g2-claude.yaml`.\n\nNguồn sự thật là tệp trong kho, comment này chỉ là **bản chiếu**. Sửa lease thì sửa tệp rồi push; đừng sửa tay comment này.\n\n```yaml\nschema_version: 2\nevent: executor_lease_granted\npacket_issue: 1078\npacket_id: CAI-CONG-CU-PYTHON-HAM-KE-THUA\nrevision: 1\ngeneration: 2\nlease_id: wp1078-r1-g2-claude\nrole: execut"
+ },
+ {
+  "id": 6560349491,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-11-01T16:00:50Z",
+  "body_dau": "**Quyết định land #1078** (PR #1097, merge `7eeb1d9a10aea8e1805b66fbf3d68549eb6778da`, head `7f8be85a7cf9077400fc1747aa6e23128f087677`)\n\nBản chép chỉ thị của chủ kho trong phiên `session_01J7EgTVGTrNi4xqh7MeBFQv` (01-11-2026, qua AskUserQuestion). Chủ kho chọn: **\"Chấp nhận, ghi landed true cả ba\"**.\n\nNội dung được chấp nhận:\n- Lượt Codex 3/3 (`launcher.py run 57324dd9`) là **approve, 0 P0–P3**, t"
  }
 ]

@@ -34,7 +34,7 @@ merge_commit_parents: [53d670cf5bdeee1c5a5dcb5cefa6a0e7ff9a8b54, 7f8be85a7cf9077
 pre_merge_checks:
   - {name: 'ci.yml pull_request (ubuntu) tren head cuoi', sha: 7f8be85a7cf9077400fc1747aa6e23128f087677, conclusion: success, ghi_chu: 'loi_khai_co_neo — 41 check run (39 success, 2 skipped theo thiet ke) doc qua REST check-runs trong phien executor 05:3xZ; ghi trong handoff ops/handoff/wp1078-g1-claude.md (nhanh ops/wp1078-r1-g1-lease).'}
   - {name: 'ci.yml workflow_dispatch runner_set=windows-only (spec A4)', run_id: 41270527156, sha: 7f8be85a7cf9077400fc1747aa6e23128f087677, conclusion: success, ghi_chu: 'loi_khai_co_neo — 15 job windows-latest runner_id khac 0, buoc cai shellcheck/rg (bash ops/cai_cong_cu.sh) success; handoff.'}
-  - {name: 'Codex connector', sha: 7f8be85a7cf9077400fc1747aa6e23128f087677, conclusion: 'completed; khong finding', nguon: readback-comments-1097.json, ghi_chu: 'measured — comment 6553978552 codex-review-state commit_sha 7f8be85, has_any_findings false, status completed.'}
+  - {name: 'Codex connector', sha: 7f8be85a7cf9077400fc1747aa6e23128f087677, conclusion: 'completed; khong finding', nguon: readback-comments-1097.json, ghi_chu: 'measured — readback-comments-1097.json: comment 6553978552 codex-review-state commit_sha 7f8be85, has_any_findings false, status completed.'}
   - {name: 'executor cross-review Codex luot 3/3 (launcher.py run 57324dd9)', sha: 7f8be85a7cf9077400fc1747aa6e23128f087677, conclusion: 'approve; 0 P0-P3', nguon: 'ops/handoff/wp1078-g1-claude/luot3/{VERDICT.md,run/run.json} (nhanh ops/wp1078-r1-g1-lease, SHA256SUMS kem)', ghi_chu: 'thuat_lai tu hien vat handoff: run.json ma_thoat 0, head 7f8be85, 1225.274 s, model_phuc_vu DO_DUOC gpt-6.1-sol, effort xhigh DO_DUOC, sandbox_trang_thai KHONG_DO_DUOC (DanhTinhDoi).'}
 post_merge_checks:
   - name: 'ci.yml push master — DUNG merge SHA'
@@ -48,7 +48,7 @@ post_merge_checks:
     moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition: passed (wd-run 41323664523, artifact workflow-definition-41279007434), ci_provenance.py thu tu tinh lai blob/sha256.'
     moc_gate_output: 'measured — gate-output-41279007434.txt (log REST tung job, sha256 + so byte kem): 23/23 job success, ##[error] = 0; == tl selftest 1774/1774 ==, == transport selftest 12/12 ==, == gen_instructions selftest 44/44 ==; DOT BIEN 343/343, 392/392, 106/106, 80/80, 13/13 bi giet dung ly do; TỔNG: ĐẠT 8x, TONG: DAT 6x.'
     ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master).'
-  - {name: 'launcher-windows.yml push master — DUNG merge SHA (lane launcher, khong phai gate)', run_id: 41279007470, sha: 7eeb1d9a10aea8e1805b66fbf3d68549eb6778da, conclusion: success, ghi_chu: 'measured — REST run 41279007470 (launcher-windows.yml, event push, head 7eeb1d9a) conclusion success.'}
+  - {name: 'launcher-windows.yml push master — DUNG merge SHA (lane launcher, khong phai gate)', run_id: 41279007470, sha: 7eeb1d9a10aea8e1805b66fbf3d68549eb6778da, conclusion: success, ghi_chu: 'measured — readback-run-41279007470-launcher-windows.json + readback-jobs-41279007470-launcher-windows.json: launcher-windows.yml, event push, head 7eeb1d9a, conclusion success (job ubuntu + windows).'}
 bookkeeping:
   - {item: 'rut han lease wp1078-r1-g2-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: claude/ghi-so-land-1077-1078-1079}
@@ -116,7 +116,7 @@ landed_20261101:
     noi_dung: >-
       Chu kho chon "Chap nhan, ghi landed true ca ba" (AskUserQuestion, phien session_01J7EgTVGTrNi4xqh7MeBFQv, 01-11-2026):
       chap nhan luot 3 (launcher.py run 57324dd9) approve 0 P0-P3 tren DUNG 7f8be85a7cf9077400fc1747aa6e23128f087677, voi sandbox mode KHONG_DO_DUOC (DanhTinhDoi, #1105).
-    do_duoc: 'measured — comment 6560349491 dang luc ghi so (MCP add_issue_comment). CAVEAT #566: agent dang bang token chu kho; ban chep, khong phai chu ky.'
+    do_duoc: 'measured — readback-comments-1078.json: comment 6560349491 (user ducthangho, OWNER) dang luc ghi so (MCP add_issue_comment). CAVEAT #566: agent dang bang token chu kho; ban chep, khong phai chu ky.'
   landed: true
   landed_dieu_kien: >-
     (1) bon moc §10.2.2 tren merge 7eeb1d9a: xem post_merge_checks. (2) lease g2 rut han 6da7c0d. (4) review neo DUNG authorized_head 7f8be85: DAT. (3) bookkeeping: ho so nay. (5) uy quyen land: DAT co caveat #566.

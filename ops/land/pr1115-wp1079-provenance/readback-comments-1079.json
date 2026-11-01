@@ -68,5 +68,19 @@
   "author_association": "NONE",
   "created_at": "2026-11-01T15:19:42Z",
   "body_dau": "**Lease `wp1079-r1-g10-claude`** — đăng tự động từ `ops/leases/wp1079-r1-g10-claude.yaml`.\n\nNguồn sự thật là tệp trong kho, comment này chỉ là **bản chiếu**. Sửa lease thì sửa tệp rồi push; đừng sửa tay comment này.\n\n```yaml\nschema_version: 2\nevent: executor_lease_granted\npacket_issue: 1079\npacket_id: LAUNCHER-TEST-ORACLE-VA-FIXTURE\nrevision: 1\ngeneration: 10\nlease_id: wp1079-r1-g10-claude\nrole: e"
+ },
+ {
+  "id": 6560351106,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-11-01T16:00:58Z",
+  "body_dau": "**Quyết định merge và land #1079** (PR #1115, merge `c82047da4d6f9546ce1d68282c37acf9567b74bc`, head `af057e982ccc99b1f5eef2ae86dd129ccaa969b5`)\n\nBản chép các chỉ thị của chủ kho trong phiên `session_01J7EgTVGTrNi4xqh7MeBFQv` (01-11-2026):\n1. **Merge:** chủ kho viết nguyên văn \"Đồng ý merge đi.\", sau khi phiên báo kết quả lượt Codex 8, M-1 chưa đạt theo nghĩa đen, và A1 cùng CI đã được đo ngoài sa"
+ },
+ {
+  "id": 6560564188,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-11-01T16:18:48Z",
+  "body_dau": "**Hạ hồ sơ land #1079 về `landed: false`**\n\nComment này thay quyết định land ở comment 6560351106.\n\nSau khi merge `c82047d`, lane `launcher (Windows that)` ĐỎ: bảng đột biến ra 430/434 (run [41322980509](https://github.com/ducthangho/tra-luat/actions/runs/41322980509)). Có hai nguồn:\n- Ba ca chỉ chạy trên Windows vẫn dùng `assert` trần, nên bộ chấm mới của #1079 coi đó là tín dụng giả.\n- Neutral c"
  }
 ]

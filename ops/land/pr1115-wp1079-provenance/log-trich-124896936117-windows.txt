@@ -1,0 +1,15 @@
+# Trich log REST job 124896936117 (launcher (windows-latest), run 41322980509) — sha256 214bd9a4b067c9151c34c737a0d67d08d51cc3074104f65d9da393a84255f7bd, 127369 byte
+# Mau: dong tong ket suite thuong, moi dong ' SAI', DOT BIEN:, ##[error]. 6 dong dau ('r1079_*', 'review_missing') la output TU IN cua ca khoa r1079 khi chay — khong phai dot bien SAI.
+  r1079_a                      SAI - KHONG DO DUOC (neutral do: review_do_san)
+  r1079_thieu                  SAI - ca dich khong tim thay/trung: ['review_ca_vang']
+  r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+  review_missing               SAI - ca dich khong tim thay/trung: ['review_missing_case']
+  r1079_thieu                  SAI - ca dich khong tim thay/trung: ['review_ca_vang']
+  r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+278/278 ca DA CHAY QUA (tong 352, bo qua 74, hong 0) - KHONG DU: 74 ca BO QUA, chua do gi
+  g4_windows_sid_alias_not_normalized SAI  giet 0/1: (khong ca nao chet) [tin dung gia: r484_g4_windows_sid_alias_identity(AssertionError)]
+  g4_windows_LA_not_current_owner SAI  giet 0/1: (khong ca nao chet) [tin dung gia: r484_g4_windows_sid_alias_identity(AssertionError)]
+  g2_windows_directory_pin_access SAI  giet 0/1: (khong ca nao chet) [tin dung gia: r484_g2_storage_kernel_guardrails(AssertionError)]
+  doctor_bo_do_bash            SAI - KHONG DO DUOC (neutral do: t73_doctor_phai_do_bash_va_npm(TypeError))
+DOT BIEN: 430/434 dat  (118 khong do duoc tren nen nay)
+##[error]Process completed with exit code 1.

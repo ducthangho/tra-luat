@@ -2,8 +2,8 @@
 # KHONG phai packet: viec chu kho giao truc tiep trong phien Claude Code (khong Issue packet, khong lease, khong spec_hash).
 # Schema: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1; khuon: ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml.
 #
-# TRANG THAI: merged (c6bb7c1), `landed: true` (chu kho quyet trong phien 01-11-2026 "Land và Hinsel" — phien hieu la "land
-# va ghi so"; comment neo head cuoi tren PR ghi so). Bon moc §10.2.2 cua run hau merge 41342580238 deu da do (Run, Checkout,
+# TRANG THAI: merged (c6bb7c1), `landed: true` (chu kho quyet trong phien 01-11-2026 "Land và ghi sổ"; comment neo head cuoi
+# tren PR ghi so). Bon moc §10.2.2 cua run hau merge 41342580238 deu da do (Run, Checkout,
 # Gate output, Workflow definition). "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
 # NHAN: measured = do lai trong phien ghi so tu tep trong thu muc provenance (ten tep ghi kem); thuat_lai = loi khai cua phien,
 # KHONG tai chay; not_measured = khong do duoc, ghi ly do.
@@ -86,9 +86,9 @@ trang_thai_packet:
   quyet_dinh_chu_kho:
     trang_thai: da_quyet
     do_duoc: >-
-      thuat_lai — chu kho go trong phien Claude Code session_015GtxrZLeJAkLFUg1SRa5G8 ngay 2026-11-01: "Land và Hinsel."
-      Phien hieu "Hinsel" la "ghi so" (loi go/nhan giong noi) va da noi ro cach hieu ay voi chu kho trong phien. Phien ghi so chep
-      loi ay vao comment tren PR ghi so, neo day du SHA head cuoi, truoc khi merge.
+      thuat_lai — chu kho go trong phien Claude Code session_015GtxrZLeJAkLFUg1SRa5G8 ngay 2026-11-01: "Land và Hinsel.", roi
+      tu xac nhan lai sau khi phien neu cach hieu: "Land và ghi sổ". Phien ghi so chep loi ay vao comment tren PR ghi so, neo day
+      du SHA head cuoi, truoc khi merge.
   uy_quyen_head_cuoi:
     trang_thai: da_quyet_caveat_566
     caveat: >-
@@ -125,7 +125,7 @@ trang_thai_packet:
         la output ben trong mot ca test (`{"ok": false, "error": "STUB_EARLY_EXIT"}`), khong phai ket qua buoc.
     - id: QUYET-DINH-LANDED-CHU-KHO
       trang_thai: da_quyet
-      mo_ta: 'Chu kho quyet trong phien 2026-11-01 "Land và Hinsel." (caveat #566) — xem quyet_dinh_chu_kho.'
+      mo_ta: 'Chu kho quyet trong phien 2026-11-01 "Land và ghi sổ" (caveat #566) — xem quyet_dinh_chu_kho.'
 
 post_merge_checks:
   - ten: gate ci.yml tren merge c6bb7c1 (push master)
@@ -144,9 +144,6 @@ post_merge_checks:
 no_con_mo:
   - id: DUYET-CHI-TRONG-PHIEN
     mo_ta: 'Loi duyet merge chi co trong phien (authorization_ghi_chu); khong co comment GitHub neo SHA truoc merge.'
-  - id: CACH-HIEU-HINSEL
-    mo_ta: >-
-      Loi chu kho "Land và Hinsel." duoc phien hieu la "land va ghi so". Neu chu kho y khac, ho so nay phai ha `landed` ve false.
 
 bookkeeping:
   - {item: 'hien vat cross-review #1118', ket_qua: 'ops/reviews/pr1118-review-1..2-codex* (trong chinh PR #1118)'}

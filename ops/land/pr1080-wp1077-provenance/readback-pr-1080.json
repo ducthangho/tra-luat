@@ -1,0 +1,15 @@
+{
+ "number": 1080,
+ "state": "closed",
+ "merged": true,
+ "merged_at": "2026-11-01T01:07:32Z",
+ "merge_commit_sha": "9ced16f3764aed80a3f2ac21ca3db475cbf8aea5",
+ "draft": false,
+ "additions": 340,
+ "deletions": 20,
+ "changed_files": 2,
+ "title": "launcher: doctor đo tệp không shebang như shell — ENOEXEC chạy lại qua /bin/sh (#1077)",
+ "head_sha": "ee3dc6d20d47becd0ab9379c22583bc5587c64b2",
+ "base_sha": "086f1b7343fc1d778e50797e6c9ca0964b11a755",
+ "merged_by": "ducthangho"
+}

@@ -72,7 +72,7 @@ jobs:
     # ngan thoi gian chan tu 360 phut mac dinh xuong day. Tran trong o hai buoc phan loai ben duoi (het gio => roi day_du).
     timeout-minutes: 20
     outputs:
-      os: ${{ steps.phan-loai.outputs.che_do == 'duong_nhanh' && '["ubuntu-latest"]'
+      os: ${{ (steps.phan-loai.outputs.che_do == 'duong_nhanh') && '["ubuntu-latest"]'
               || (github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only')
               && '["windows-latest"]'
               || (github.event_name == 'workflow_dispatch'

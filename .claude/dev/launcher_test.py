@@ -81,7 +81,7 @@ LAUNCHER_DANG_DUNG = LAUNCHER
 
 def chay(*doi_so, cwd=None, env=None) -> subprocess.CompletedProcess:
     return subprocess.run([PY, str(LAUNCHER_DANG_DUNG), *doi_so], capture_output=True,
-                          text=True, cwd=cwd, env=env)
+                          text=True, encoding="utf-8", errors="replace", cwd=cwd, env=env)
 
 
 def _bo_qua_neu_ban_sao_roi_thieu(*duong: Path, goc_kho: Path | None = None) -> str | None:
@@ -732,7 +732,7 @@ def t33_stop_giet_that():
         pr = subprocess.Popen([PY, str(LAUNCHER_DANG_DUNG), "run", "--workspace", str(repo),
                                "--run-root", str(rr), "--", PY, "-c",
                                "import time; time.sleep(60)"],
-                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace")
         for _ in range(100):
             time.sleep(0.1)
             ds = list(rr.iterdir()) if rr.is_dir() else []
@@ -741,7 +741,7 @@ def t33_stop_giet_that():
                 if d.get("pid"):
                     break
         else:
-            raise AssertionError("khong thay pid trong so")
+            bang(False, "khong thay pid trong so")
         r = chay("stop", "--run-root", str(rr), "--id", d["short_id"])
         bang(r.returncode == MA_OK, f"stop that bai: {r.returncode} {r.stdout}")
         pr.wait(timeout=30)
@@ -1802,7 +1802,7 @@ def t72_bi_ngat_KHONG_duoc_ghi_thanh_xong():
         pr = subprocess.Popen([PY, str(LAUNCHER_DANG_DUNG), "run",
                                "--workspace", str(repo), "--run-root", str(rr),
                                "--", PY, "-c", "import time;time.sleep(30)"],
-                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace")
         try:
             f = None
             for _ in range(200):
@@ -7763,7 +7763,7 @@ def _r345_venv(td: Path):
 def _r345_chay(py: Path, d: Path, than: str, reqs: str, *them: str) -> int:
     (d / "requirements.txt").write_text(reqs, encoding="utf-8")
     return subprocess.run([str(py), "-c", than, *them], cwd=d,
-                          capture_output=True, text=True, timeout=600).returncode
+                          capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600).returncode
 
 
 @ca
@@ -8265,7 +8265,7 @@ def r349_backend_PDF_du_phong_chay_thi_dung_noi_la_bi_chan():
 
     def do(hong, tot, chan):
         p = subprocess.run([PY, "-c", kich, str(goc), json.dumps([hong, tot, chan])],
-                           capture_output=True, text=True, timeout=300)
+                           capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=300)
         bang(p.returncode == 0, f"kich ban con hong: {(p.stdout + p.stderr)[-200:]!r}")
         return json.loads(p.stdout.strip().splitlines()[-1])
 
@@ -8304,7 +8304,7 @@ def r484_g2_doctor_doc_dung_home_da_materialize():
         script = ("import json,runpy,sys; m=runpy.run_path(sys.argv[1]); "
                   "print(json.dumps(m['_han_token_codex']()))")
         result = subprocess.run([PY, "-c", script, str(LAUNCHER_DANG_DUNG)],
-                                env=env, capture_output=True, text=True, timeout=30)
+                                env=env, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30)
         bang(result.returncode == 0, result.stderr)
         measured = json.loads(result.stdout)
         bang(measured["doc_duoc"], "doctor ignored the credential in CODEX_HOME")
@@ -8331,7 +8331,7 @@ def r484_g2_env_policy_cung_home_hai_chieu():
 
         def gate(*args):
             return subprocess.run([PY, str(CODEX_ENV_POLICY), *args], env=env,
-                                  capture_output=True, text=True, timeout=30)
+                                  capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30)
 
         (custom / "config.toml").write_bytes(block)
         bang(gate("--tep", str(custom / "config.toml")).returncode == 3, "invalid control fixture")
@@ -8356,7 +8356,7 @@ def r484_g2_auth_hong_utf8_tra_loi_co_kiem_soat():
         script = ("import json,runpy,sys; m=runpy.run_path(sys.argv[1]); "
                   "print(json.dumps(m['chuan_bi_xac_thuc'](that_su=False)))")
         result = subprocess.run([PY, "-c", script, str(LAUNCHER_DANG_DUNG)],
-                                env=env, capture_output=True, text=True, timeout=30)
+                                env=env, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30)
         bang(result.returncode == 0, "corrupt auth escaped as traceback: " + result.stderr)
         measured = json.loads(result.stdout)
         bang(measured and measured[0]["ok"] is False, "unreadable disk auth was reported healthy")
@@ -8383,7 +8383,7 @@ def r484_g2_schema_truoc_freshness_va_home_materialize():
                        CODEX_HOME=str(custom), CODEX_AUTH_JSON=json.dumps({
                            "tokens": tokens, "last_refresh": "2026-09-08T00:00:00Z"}))
             p = subprocess.run([PY, "-c", script, str(LAUNCHER_DANG_DUNG)],
-                               env=env, capture_output=True, text=True, timeout=30)
+                               env=env, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30)
             bang(p.returncode == 0, "schema validation escaped controlled result")
             result = json.loads(p.stdout)[0]
             bang(result["ok"] is expected, "freshness hid invalid schema")
@@ -8416,7 +8416,7 @@ def r484_g2_child_khong_nhan_snapshot_va_rac_chan_truoc_probe():
         p = subprocess.run([PY, str(LAUNCHER_DANG_DUNG), "run", "--workspace", str(repo),
                             "--expected-head", head_cua(repo), "--deadline-utc", mai_sau(30),
                             "--run-root", str(rr), "--", PY, "-c", code],
-                           env=env, capture_output=True, text=True, timeout=45)
+                           env=env, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=45)
         bang(p.returncode == 0, "inert launcher child failed: " + p.stderr)
         logs = list(rr.glob("*/stdout*"))
         bang(logs and any("BOUNDARY-OK" in f.read_text(encoding="utf-8") for f in logs), 'logs and any("BOUNDARY-OK" in f.read_text(encoding="utf-8") for f in logs)')
@@ -8426,7 +8426,7 @@ def r484_g2_child_khong_nhan_snapshot_va_rac_chan_truoc_probe():
         p = subprocess.run([PY, str(LAUNCHER_DANG_DUNG), "run", "--workspace", str(repo),
                             "--expected-head", head_cua(repo), "--run-root", str(bad_runs),
                             "--", PY, "-c", "raise AssertionError('child must not run')"],
-                           env=env, capture_output=True, text=True, timeout=30)
+                           env=env, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30)
         bang(p.returncode == MA_CHUA_XAC_THUC, 'p.returncode == MA_CHUA_XAC_THUC')
         bang(not bad_runs.exists(), "invalid snapshot reached probe/run stage")
         bang("INERT-BAD" not in p.stdout + p.stderr, '"INERT-BAD" not in p.stdout + p.stderr')
@@ -8449,7 +8449,7 @@ def r484_g2_storage_kernel_guardrails():
                 except OSError:
                     pass
                 else:
-                    raise AssertionError("rename failure was accepted")
+                    bang(False, "rename failure was accepted")
             bang(store.read() == b"INERT-OLD", 'store.read() == b"INERT-OLD"')
             bang(not list(home.glob("*.tmp-*")), 'not list(home.glob("*.tmp-*"))')
             try:
@@ -8457,7 +8457,7 @@ def r484_g2_storage_kernel_guardrails():
             except OSError:
                 pass
             else:
-                raise AssertionError("changed credential was overwritten")
+                bang(False, "changed credential was overwritten")
             link = s / "hardlink"
             os.link(home / "auth.json", link)
             try:
@@ -8465,7 +8465,7 @@ def r484_g2_storage_kernel_guardrails():
             except OSError:
                 pass
             else:
-                raise AssertionError("hardlinked credential was accepted")
+                bang(False, "hardlinked credential was accepted")
             link.unlink()
             moved = s / "moved"
             bang(home.resolve().is_relative_to(s.resolve()), 'home.resolve().is_relative_to(s.resolve())')
@@ -8476,7 +8476,7 @@ def r484_g2_storage_kernel_guardrails():
                 except OSError:
                     pass
                 else:
-                    raise AssertionError("Windows ancestor was not pinned")
+                    bang(False, "Windows ancestor was not pinned")
             else:
                 home.rename(moved)
                 home.mkdir()
@@ -8488,7 +8488,7 @@ def r484_g2_storage_kernel_guardrails():
         (repo / ".git").mkdir(parents=True)
         try:
             with m._KhoCodex(repo / "credentials", create=True):
-                raise AssertionError("repository credential destination accepted")
+                bang(False, "repository credential destination accepted")
         except OSError:
             pass
         bang(not (repo / "credentials").exists(), 'not (repo / "credentials").exists()')
@@ -8504,7 +8504,7 @@ def r484_g2_storage_kernel_guardrails():
             junction.symlink_to(target, target_is_directory=True)
         try:
             with m._KhoCodex(junction / "credentials", create=True):
-                raise AssertionError("ancestor redirect accepted")
+                bang(False, "ancestor redirect accepted")
         except OSError:
             pass
         bang(not (target / "credentials").exists(), 'not (target / "credentials").exists()')
@@ -8520,7 +8520,7 @@ def r484_g2_storage_kernel_guardrails():
             except OSError:
                 pass
             else:
-                raise AssertionError("credential readable by Everyone was accepted")
+                bang(False, "credential readable by Everyone was accepted")
 
 
 @ca
@@ -8941,7 +8941,7 @@ def r484_g7_bo_test_kin_voi_credential_cua_phien():
               "print('CON' if 'CODEX_AUTH_JSON' in os.environ else 'SACH')")
     r = subprocess.run([PY, "-B", "-c", script, str(Path(__file__).resolve())],
                        env=dict(os.environ, CODEX_AUTH_JSON="INERT-PHIEN"),
-                       capture_output=True, text=True, timeout=60)
+                       capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
     bang(r.returncode == 0, f"nạp module hỏng: {r.stderr[-300:]}")
     bang(r.stdout.strip().splitlines()[-1:] == ["SACH"], f"bộ test thừa hưởng credential phiên: {r.stdout!r}")
 
@@ -10000,7 +10000,9 @@ def r1122_loi_mang_thong_diep_cat_160():
     bang(kq == ("loi", "review_vo_can(TypeError: " + "x" * 160 + ")"), f"chi tiet loi sai: {kq[0]} {kq[1][:60]}...")
 
 
-ASSERT_TRAN_CHO_PHEP = frozenset({"r1079_cham_mot_ca_chi_TinHieuChotCa_la_giet"})
+ASSERT_TRAN_CHO_PHEP = frozenset({   # CỐ Ý ném AssertionError trần: ca thử chính bộ chấm/headline
+    "r1079_cham_mot_ca_chi_TinHieuChotCa_la_giet", "r1079_cc_chay_suite_phai_do_hanh_vi",
+    "t119_main_nhanh_mac_dinh_PHAI_in_headline_bang_dong_ket_qua"})
 
 
 @ca
@@ -10008,16 +10010,47 @@ def r1122_khong_assert_tran_trong_ca():
     """#1122 spec A1: bộ chấm (từ #1079) chỉ tính `TinHieuChotCa` là giết, nên một `assert` trần trong ca
     biến mọi đột biến nhắm ca ấy thành tín dụng giả. Lane Windows đỏ 430/434 vì ba đột biến như vậy (run
     41322980509); phép quét #1079 chỉ chạy trên Linux nên không thấy. Ca này quét AST của CHÍNH tệp, không
-    phụ thuộc nền. Danh sách cho phép phải BẰNG ĐÚNG tập ca đang chứa `assert`; tên thừa cũng đỏ."""
+    phụ thuộc nền. Hai đường vào cùng lớp: `assert` trần VÀ `raise AssertionError` tường minh (dòng SAI
+    `g2_windows_directory_pin_access` ở run 41328709141 đến từ đường thứ hai). Danh sách cho phép phải BẰNG
+    ĐÚNG tập ca đang chứa một trong hai; tên thừa cũng đỏ."""
     import ast
     cay = ast.parse(Path(__file__).read_text(encoding="utf-8"))
     co_assert = {n.name for n in cay.body
                  if isinstance(n, ast.FunctionDef) and any(isinstance(d, ast.Name) and d.id == "ca"
                                                            for d in n.decorator_list)
-                 and any(isinstance(x, ast.Assert) for x in ast.walk(n))}
+                 and any(isinstance(x, ast.Assert) or (
+                     isinstance(x, ast.Raise) and isinstance(getattr(x.exc, "func", x.exc), ast.Name)
+                     and getattr(x.exc, "func", x.exc).id == "AssertionError")
+                     for x in ast.walk(n))}
     bang(co_assert == set(ASSERT_TRAN_CHO_PHEP),
          f"assert tran trong ca: thua {sorted(co_assert - ASSERT_TRAN_CHO_PHEP)}, "
          f"cho phep khong con dung {sorted(ASSERT_TRAN_CHO_PHEP - co_assert)}")
+
+
+@ca
+def r1122_con_python_giai_ma_utf8():
+    """#1122 spec mục tiêu 4 (gốc ĐÃ ĐO ở run 41328709141): `chay()` gọi `subprocess.run(text=True)` không
+    `encoding` ⇒ Windows giải mã stdout của launcher (UTF-8) bằng cp1252, byte 0x90 giết `_readerthread`
+    (`UnicodeDecodeError`), `r.stdout` thành `None`, `t73` ném `TypeError` trong `json.loads`. Mọi lời gọi
+    `subprocess` có `text=True` mà tiến trình con là Python (`PY`/`py`) phải khai `encoding`. Con là shell/git/
+    hệ thống thì không thuộc luật này (bảng mã của chúng không do kho quyết)."""
+    import ast
+    cay = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    def con_python(x):
+        if not x.args or not isinstance(x.args[0], ast.List) or not x.args[0].elts:
+            return False
+        e = x.args[0].elts[0]
+        if isinstance(e, ast.Call) and isinstance(e.func, ast.Name) and e.func.id == "str" and e.args:
+            e = e.args[0]
+        return isinstance(e, ast.Name) and e.id in ("PY", "py")
+    thieu = []
+    for x in ast.walk(cay):
+        if isinstance(x, ast.Call) and con_python(x):
+            kw = {k.arg: k.value for k in x.keywords if k.arg}
+            if (isinstance(kw.get("text"), ast.Constant) and kw["text"].value is True
+                    and "encoding" not in kw):
+                thieu.append(x.lineno)
+    bang(not thieu, f"text=True khong encoding o con Python, dong: {thieu}")
 
 
 @ca
@@ -10400,7 +10433,7 @@ def r1079_review5_harness_direct_CA_must_reject_before_running():
                                   extra + '\nif __name__ == "__main__":')
             dev = _dung_cay_harness(s / mode, text, LAUNCHER.read_text(encoding='utf-8'))
             p = subprocess.run([PY, str(dev / 'launcher_test.py'), *args], cwd=dev,
-                               capture_output=True, text=True, timeout=30,
+                               capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30,
                                env=dict(os.environ, PYTHONDONTWRITEBYTECODE='1'))
             results[mode] = (p.returncode != 0 and '__code__' in p.stderr and not marker.exists())
     bang(all(results.values()), f'direct CA bypassed shared-code registration guard: {results}')
@@ -10670,7 +10703,7 @@ def _r886_kiem(s, chi, path, env_them=None):
     shutil.copy2(LAUNCHER.parents[2] / "ops" / "bash_nen.py", ops / "bash_nen.py")
     env = dict(os.environ, PATH=os.pathsep.join(str(x) for x in path), **(env_them or {}))
     p = subprocess.run([PY, str(ops / "cong_cu.py"), "kiem-tra", "--chi", chi, "--json", "--ban-ke", str(YAML_DANG_DUNG)],
-                       env=env, capture_output=True, text=True, timeout=60)
+                       env=env, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
     try:
         return p.returncode, json.loads(p.stdout)["cong_cu"][0]
     except (ValueError, KeyError, IndexError):
@@ -14685,9 +14718,16 @@ DOT_BIEN_HARNESS = [
      ('        bang(not accepted, "same native SID rejected because of SDDL alias")',
       '        assert not accepted, "same native SID rejected because of SDDL alias"'),
      ["r1122_khong_assert_tran_trong_ca"]),
+    ("wp1122_chen_lai_raise_assertion",
+     ('bang(False, "Windows ancestor was not pinned")', 'raise AssertionError("Windows ancestor was not pinned")'),
+     ["r1122_khong_assert_tran_trong_ca"]),
+    ("wp1122_chay_bo_encoding",
+     ('                          text=True, encoding="utf-8", errors="replace", cwd=cwd, env=env)',
+      '                          text=True, cwd=cwd, env=env)'),
+     ["r1122_con_python_giai_ma_utf8"]),
     ("wp1122_noi_danh_sach_cho_phep",
-     ('ASSERT_TRAN_CHO_PHEP = frozenset({"r1079_cham_mot_ca_chi_TinHieuChotCa_la_giet"})',
-      'ASSERT_TRAN_CHO_PHEP = frozenset({"r1079_cham_mot_ca_chi_TinHieuChotCa_la_giet", "t73_doctor_phai_do_bash_va_npm"})'),
+     ('    "t119_main_nhanh_mac_dinh_PHAI_in_headline_bang_dong_ket_qua"})',
+      '    "t119_main_nhanh_mac_dinh_PHAI_in_headline_bang_dong_ket_qua", "t73_doctor_phai_do_bash_va_npm"})'),
      ["r1122_khong_assert_tran_trong_ca"]),
     ("wp1079_neutral_harness_bo",
      ('                    neutral_h[ten_ca] = cham_lap_ca(goc_h, ten_ca)\n', '                    neutral_h[ten_ca] = ("qua", ten_ca)\n'),

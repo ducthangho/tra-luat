@@ -86,7 +86,7 @@ def nap(env=os.environ):
                              start_new_session=os.name != "nt")
     except OSError as e:
         print(f"agent_creds: KHÔNG ĐO ĐƯỢC — không chạy được bootstrap ({type(e).__name__})")
-        return 0
+        return _dau_sau_nap("KHÔNG ĐO ĐƯỢC") or 0   # review lượt 1 P2: mọi đường thoát của nap đều xử lý dấu
     try:
         (ra, _), rc, het_han = p.communicate(timeout=han), p.returncode, None
     except Exception as e:  # noqa: BLE001 — quá hạn hay lỗi chờ: dọn cả nhóm, vẫn chuyển tiếp log đã nhận (F12), đúng một dòng
@@ -241,7 +241,8 @@ def _lam_ghi_nguoc(neu_doi, khoa, het, huy):
         r = None
     v = r.get("version") if isinstance(r, dict) and r.get("ok") is True else None
     if (b := ban_webapp(v)) is None or b < BAN_TOI_THIEU:
-        return "KHÔNG HỖ TRỢ", f"webapp {v[:40] if isinstance(v, str) else 'không đo được'}"
+        # review lượt 1 P3: chuỗi từ server có thể mang xuống dòng/ký tự điều khiển ⇒ chỉ giữ ký tự an toàn (một dòng)
+        return "KHÔNG HỖ TRỢ", f"webapp {re.sub(r'[^0-9A-Za-z._+-]', '?', v[:40]) if isinstance(v, str) else 'không đo được'}"
     fid = tl_gws.AGENT_CREDS_FILEID
     for _ in range(LAN_CAS):
         if (blob := tl_gws._public_curl_bytes(fid, timeout=con())) is None:

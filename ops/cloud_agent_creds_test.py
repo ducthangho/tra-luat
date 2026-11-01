@@ -441,6 +441,10 @@ def p3a9_mot_dong_khong_lo():
         bang(len(k.dong) == 1 and k.ra.count(TIEN_TO) == 1, f"{sc}: {len(k.dong)} dòng")
         lo = [x for x in (SEN_KHOA, SEN_RT, *[g for g in dr.gui if g]) if x in k.ra]
         bang(not lo, f"{sc}: đầu ra lộ {len(lo)} chuỗi bí mật")
+def p3a13_phien_ban_la_van_mot_dong():   # review lượt 1 P3: version không hợp lệ có xuống dòng ⇒ vẫn ĐÚNG MỘT dòng
+    k = chay_gn(DriveGia(_bundle(3, LR_CU), ping="abc\nphien-ban-khong-hop-le\r\x1b[2J"))
+    _trang(k, "KHÔNG HỖ TRỢ — webapp abc?")
+    bang(len(k.ra.splitlines()) == 1 and k.dr.dem["post"] == 0, f"đầu ra {len(k.ra.splitlines())} dòng: {k.ra!r}")
 def p3a10_rc0_va_cu_phap():
     k = chay_gn(DriveGia(_bundle(3, LR_CU)), argv=["ghi-nguoc", "--la"])
     bang(k.rc == 2 and _mang(k) == 0, f"--la: rc={k.rc} {k.dr.dem}")
@@ -480,6 +484,11 @@ def p3c1_nap_ghi_xoa_dau():
             chay_nap({"in": in_}, them={"CODEX_HOME": t})
             d = json.loads(f.read_text(encoding="utf-8")) if f.exists() else None
             bang((d == {"last_refresh": LR_MOI, "md5": None} and f.stat().st_mode & 0o777 == 0o600) if co_dau else d is None, f"{in_.strip()}: dấu {d}")
+def p3c4_nap_khong_chay_duoc_xoa_dau():   # review lượt 1 P2: lỗi KHỞI CHẠY bootstrap cũng phải xoá dấu
+    with tempfile.TemporaryDirectory() as t:
+        (f := Path(t) / TEN_DAU).write_text(json.dumps({"last_refresh": LR_MOI, "md5": None}), encoding="utf-8")
+        k = chay_nap({}, xoa_tl=True, them={"CODEX_HOME": t})
+        bang(k.ag and "không chạy được bootstrap" in k.ag[0] and not f.exists(), f"{k.ag}: dấu còn={f.exists()}")
 def p3c2_neu_doi():
     k = chay_gn(DriveGia(_bundle(3, LR_CU)), neu_doi=True, dau=json.dumps({"last_refresh": LR_MOI, "md5": None}))
     bang(k.ra == "" and _mang(k) == 0, f"dấu == đĩa: {k.ra!r} {k.dr.dem}")
@@ -656,6 +665,8 @@ DOT_BIEN = (
     ("P3C1_ghi_dau_bat_ke", "ma", 'if kl.startswith("ĐÃ NẠP — ") and "codex auth.json → " in kl and isinstance(d, dict):', "if isinstance(d, dict):", "p3c1_nap_ghi_xoa_dau"),
     ("P3C2_so_khac", "ma", "and k_dia <= tl_gws._last_refresh_key(dau):", "and k_dia != tl_gws._last_refresh_key(dau):", "p3c2_neu_doi"),
     ("P3C2_bo_doc_dau", "ma", "    if neu_doi and isinstance(dau := _doc_json(_codex_dir() / TEN_DAU), dict)", "    if neu_doi and isinstance(dau := None, dict)", "p3c2_neu_doi"),
+    ("P3C4_nap_loi_khoi_chay_giu_dau", "ma", '        return _dau_sau_nap("KHÔNG ĐO ĐƯỢC") or 0', "        return 0", "p3c4_nap_khong_chay_duoc_xoa_dau"),
+    ("P3A13_in_version_tho", "ma", "re.sub(r'[^0-9A-Za-z._+-]', '?', v[:40])", "v[:40]", "p3a13_phien_ban_la_van_mot_dong"),
     ("P3C3_khong_dau_sau_cu", "ma", '            huy.is_set() or _ghi_dau(ca.get("last_refresh"), md5)\n', "", "p3c3_dau_sau_ghi_va_cu"),
     ("P3B1_khong_ghi", "gs", "    Drive.Files.update({}, fid, Utilities.newBlob(bytes, 'application/octet-stream'),\n                       {supportsAllDrives:true, fields:'id'});\n", "", "p3b1_cas_khop_thi_ghi"),
     ("P3B2_bo_so_cas", "gs", "    if (cur !== expect) return {ok:false, error:'CAS_CONFLICT', md5:cur};\n", "", "p3b2_cas_lech_khong_ghi"),

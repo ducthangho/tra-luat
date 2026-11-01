@@ -17,9 +17,16 @@ authority_ghi_chu: 'duyet spec_hash 614f9eec…afbe5 (blob f26076e0, commit e447
 recorded_by: anthropic_claude_dispatcher
 recorder_is_dispatcher: true
 leased_at_utc: '2026-10-31T13:21:00Z'
-heartbeat_at: '2026-10-31T13:21:54Z'
-lease_until: '2026-11-01T13:21:00Z'
-lease_expires_at_utc: '2026-11-01T13:21:00Z'
+heartbeat_at: '2026-11-01T00:00:19Z'
+lease_until: '2026-11-01T00:15:19Z'
+lease_expires_at_utc: '2026-11-01T00:15:19Z'
+rut_han:
+  han_cu: '2026-11-01T13:21:00Z'
+  han_moi: '2026-11-01T00:15:19Z'
+  rut_boi: ducthangho
+  ly_do: 'packet DIEU-KIEN-MERGE-VA-SO-SACH r1 da merge (PR #1087, head f73898291437b371654626063be1a33681cbcc05, merge 36d7c5dcdcbbb27176b75135125b9009f9fe0587, 2026-10-31T16:12:55Z, merged_by ducthangho) va landed true (ban ghi so #1085 issuecomment-6550871073).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; han moi dat 15 phut sau de luot ops-publish-lease khong do rc=8 vi sua lease da het han (CLAUDE.md)'
+  ghi_boi: claude-session session_015GtxrYPjZCTZeRiazdssgq
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude

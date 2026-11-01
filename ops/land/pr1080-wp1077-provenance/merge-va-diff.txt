@@ -1,0 +1,9 @@
+$ git show -s --format='%H %P %T' 9ced16f3764aed80a3f2ac21ca3db475cbf8aea5
+9ced16f3764aed80a3f2ac21ca3db475cbf8aea5 0b8d15610ee768224916a390269984baa4b1b8ce ee3dc6d20d47becd0ab9379c22583bc5587c64b2 c76b79ee84ef117796bf9144b9339bc2eef24590
+$ git diff --numstat 086f1b7343fc1d778e50797e6c9ca0964b11a755 9ced16f3764aed80a3f2ac21ca3db475cbf8aea5~0^2 -- (PR head so base packet)
+57	9	.claude/dev/launcher.py
+283	11	.claude/dev/launcher_test.py
+$ git diff --stat 9ced16f3764aed80a3f2ac21ca3db475cbf8aea5^1 9ced16f3764aed80a3f2ac21ca3db475cbf8aea5
+ .claude/dev/launcher.py      |  66 ++++++++--
+ .claude/dev/launcher_test.py | 294 +++++++++++++++++++++++++++++++++++++++++--
+ 2 files changed, 340 insertions(+), 20 deletions(-)

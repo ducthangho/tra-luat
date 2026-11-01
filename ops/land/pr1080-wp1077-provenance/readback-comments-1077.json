@@ -1,0 +1,44 @@
+[
+ {
+  "id": 6542213678,
+  "user": "github-actions[bot]",
+  "author_association": "NONE",
+  "created_at": "2026-10-31T10:26:14Z",
+  "body_dau": "**Lease `wp1077-r1-g1-claude`** — đăng tự động từ `ops/leases/wp1077-r1-g1-claude.yaml`.\n\nNguồn sự thật là tệp trong kho, comment này chỉ là **bản chiếu**. Sửa lease thì sửa tệp rồi push; đừng sửa tay comment này.\n\n```yaml\nschema_version: 2\nevent: executor_lease_granted\npacket_issue: 1077\npacket_id: DOCTOR-ENOEXEC-BI-CHE\nrevision: 1\ngeneration: 1\nlease_id: wp1077-r1-g1-claude\nrole: executor\nprovid"
+ },
+ {
+  "id": 6543300655,
+  "user": "github-actions[bot]",
+  "author_association": "NONE",
+  "created_at": "2026-10-31T12:22:10Z",
+  "body_dau": "**Lease `wp1077-r1-g2-claude`** — đăng tự động từ `ops/leases/wp1077-r1-g2-claude.yaml`.\n\nNguồn sự thật là tệp trong kho, comment này chỉ là **bản chiếu**. Sửa lease thì sửa tệp rồi push; đừng sửa tay comment này.\n\n```yaml\nschema_version: 2\nevent: executor_lease_granted\npacket_issue: 1077\npacket_id: DOCTOR-ENOEXEC-BI-CHE\nrevision: 1\ngeneration: 2\nlease_id: wp1077-r1-g2-claude\nrole: executor\nprovid"
+ },
+ {
+  "id": 6544337579,
+  "user": "github-actions[bot]",
+  "author_association": "NONE",
+  "created_at": "2026-10-31T13:59:51Z",
+  "body_dau": "**Lease `wp1077-r1-g3-claude`** — đăng tự động từ `ops/leases/wp1077-r1-g3-claude.yaml`.\n\nNguồn sự thật là tệp trong kho, comment này chỉ là **bản chiếu**. Sửa lease thì sửa tệp rồi push; đừng sửa tay comment này.\n\n```yaml\nschema_version: 2\nevent: executor_lease_granted\npacket_issue: 1077\npacket_id: DOCTOR-ENOEXEC-BI-CHE\nrevision: 1\ngeneration: 3\nlease_id: wp1077-r1-g3-claude\nrole: executor\nprovid"
+ },
+ {
+  "id": 6544485201,
+  "user": "github-actions[bot]",
+  "author_association": "NONE",
+  "created_at": "2026-10-31T14:10:56Z",
+  "body_dau": "**Lease `wp1077-r1-g4-claude`** — đăng tự động từ `ops/leases/wp1077-r1-g4-claude.yaml`.\n\nNguồn sự thật là tệp trong kho, comment này chỉ là **bản chiếu**. Sửa lease thì sửa tệp rồi push; đừng sửa tay comment này.\n\n```yaml\nschema_version: 2\nevent: executor_lease_granted\npacket_issue: 1077\npacket_id: DOCTOR-ENOEXEC-BI-CHE\nrevision: 1\ngeneration: 4\nlease_id: wp1077-r1-g4-claude\nrole: executor\nprovid"
+ },
+ {
+  "id": 6545796356,
+  "user": "github-actions[bot]",
+  "author_association": "NONE",
+  "created_at": "2026-10-31T16:03:25Z",
+  "body_dau": "**Lease `wp1077-r1-g5-claude`** — đăng tự động từ `ops/leases/wp1077-r1-g5-claude.yaml`.\n\nNguồn sự thật là tệp trong kho, comment này chỉ là **bản chiếu**. Sửa lease thì sửa tệp rồi push; đừng sửa tay comment này.\n\n```yaml\nschema_version: 2\nevent: executor_lease_granted\npacket_issue: 1077\npacket_id: DOCTOR-ENOEXEC-BI-CHE\nrevision: 1\ngeneration: 5\nlease_id: wp1077-r1-g5-claude\nrole: executor\nprovid"
+ },
+ {
+  "id": 6550915191,
+  "user": "github-actions[bot]",
+  "author_association": "NONE",
+  "created_at": "2026-11-01T00:04:01Z",
+  "body_dau": "**Lease `wp1077-r1-g6-claude`** — đăng tự động từ `ops/leases/wp1077-r1-g6-claude.yaml`.\n\nNguồn sự thật là tệp trong kho, comment này chỉ là **bản chiếu**. Sửa lease thì sửa tệp rồi push; đừng sửa tay comment này.\n\n```yaml\nschema_version: 2\nevent: executor_lease_granted\npacket_issue: 1077\npacket_id: DOCTOR-ENOEXEC-BI-CHE\nrevision: 1\ngeneration: 6\nlease_id: wp1077-r1-g6-claude\nrole: executor\nprovid"
+ }
+]

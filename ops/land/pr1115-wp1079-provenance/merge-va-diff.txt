@@ -1,0 +1,52 @@
+$ git show -s --format='%H %P %T' c82047da4d6f9546ce1d68282c37acf9567b74bc
+c82047da4d6f9546ce1d68282c37acf9567b74bc f4b513da5802d439aedbe58ae4a5cd38ff47d6ab af057e982ccc99b1f5eef2ae86dd129ccaa969b5 8485ab51880da68bc0e7ed48a7f8fcb30026f64a
+$ git diff --numstat 7eeb1d9a10aea8e1805b66fbf3d68549eb6778da c82047da4d6f9546ce1d68282c37acf9567b74bc~0^2 -- (PR head so base packet)
+49	7	.claude/dev/codex_cred_test.py
+785	111	.claude/dev/launcher_test.py
+39	14	ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml
+1	0	ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/SHA256SUMS.txt
+474	0	ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/gate-output-41173244891.txt
+155	0	ops/land/pr1100-wp1089-r2-land-evidence.yaml
+2930	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs.json
+2	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756382924.trich.txt
+35	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396359.trich.txt
+15	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396373.trich.txt
+16	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396380.trich.txt
+10	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396417.trich.txt
+10	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396428.trich.txt
+10	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396429.trich.txt
+10	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396435.trich.txt
+14	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396439.trich.txt
+10	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396443.trich.txt
+14	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396446.trich.txt
+14	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396449.trich.txt
+14	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396451.trich.txt
+14	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396464.trich.txt
+14	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396465.trich.txt
+10	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396474.trich.txt
+10	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396481.trich.txt
+14	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396482.trich.txt
+14	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396510.trich.txt
+10	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756396514.trich.txt
+10	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756713428.trich.txt
+15	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756768893.trich.txt
+9	0	ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124760412194.trich.txt
+1568	0	ops/land/pr1100-wp1089-r2-provenance/ci/provenance.yaml
+1	0	ops/land/pr1100-wp1089-r2-provenance/ci/run.json
+112	0	ops/land/pr1100-wp1089-r2-provenance/gate-output-41271627232-a2.txt
+15	0	ops/land/pr1100-wp1089-r2-provenance/merge-va-diff.txt
+66	0	ops/land/pr1100-wp1089-r2-provenance/readback-comments-1089.json
+26	0	ops/land/pr1100-wp1089-r2-provenance/readback-comments-1100.json
+10	0	ops/land/pr1100-wp1089-r2-provenance/readback-pr-1100.json
+499	0	ops/land/pr1100-wp1089-r2-provenance/verdicts/run-c611c6b9.json
+487	0	ops/land/pr1100-wp1089-r2-provenance/verdicts/run-dfebe0ba.json
+137	0	ops/land/pr1100-wp1089-r2-provenance/verdicts/wp1089-r2-luot1-VERDICT.md
+123	0	ops/land/pr1100-wp1089-r2-provenance/verdicts/wp1089-r2-luot2-VERDICT.md
+218	0	ops/specs/CI-LAN-LUU-TRU-r1.md
+140	0	ops/specs/DIEU-KIEN-MERGE-CONG-r1.md
+225	0	ops/specs/launcher-sandbox-lay-mau-r1.md
+242	0	ops/specs/launcher-sandbox-lay-mau-r2.md
+$ git diff --stat c82047da4d6f9546ce1d68282c37acf9567b74bc^1 c82047da4d6f9546ce1d68282c37acf9567b74bc
+ .claude/dev/codex_cred_test.py |  56 ++-
+ .claude/dev/launcher_test.py   | 896 ++++++++++++++++++++++++++++++++++++-----
+ 2 files changed, 834 insertions(+), 118 deletions(-)

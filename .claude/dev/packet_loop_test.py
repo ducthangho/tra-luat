@@ -9133,14 +9133,14 @@ def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None, env=None, git_loi
     return (_rev_list_loi if git_loi else run)(c.script, args, c.sd(), env)
 
 
-def _c1106_ca(rc_doi, phai="", **kw):
+def _c1106_ca(rc_doi, phai="", cam=None, **kw):
     def ca(c):
         rc, o, e = (_c1106 if "bb" not in kw else _d1106)(c, **{k: v for k, v in kw.items() if k != "bb"})
         if _co_banner(o) or _co_banner(e):
             raise CliSapDo(f"c1106 SẬP: rc={rc}; stderr={_txt(e)[-300:]!r}")
         _doi(rc_doi, rc, e, "c1106")
-        if phai not in _txt(e):
-            raise AssertionError(f"c1106: rc đúng mà lý do khác — đòi {phai!r}, stderr={_txt(e)!r}")
+        if phai not in _txt(e) or (cam and cam in _txt(e)):
+            raise AssertionError(f"c1106: rc đúng mà lý do khác — đòi {phai!r}, cấm {cam!r}, stderr={_txt(e)!r}")
     return ca
 
 
@@ -9361,8 +9361,7 @@ CASES += [
     ("cong_m9_m6_hai_thieu", _c1106_ca(12, "K2 CI; K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _KHONG_DD(x, w, h), h and x["jobs"][0].update(conclusion="failure")))),
     ("cong_m9_git_loi", _m9_git_loi),
     # review offline lượt 1 (F01–F09): mỗi đường vào một ca, mỗi chốt một đột biến
-    ("cong_m9_hai_run_hai_tep", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and (
-        x["ddr"].append({**x["ddr"][0], "id": 701}), x.update(ddj_them=[[{"id": 900, "run_id": 701, "run_attempt": 1, "status": "completed", "conclusion": "success"}]]))))),
+    ("cong_m9_hai_run_hai_tep", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and ( x["ddr"].append({**x["ddr"][0], "id": 701}), x.update(ddj_them=[[{"id": 900, "run_id": 701, "run_attempt": 1, "status": "completed", "conclusion": "success"}]]))))),
     ("cong_m9_jobs_tron_run", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddj", 1, run_id=701)(x, w, h)))),
     ("cong_m9_jobs_trung_tep", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and x.update(ddj_them=[[{**x["ddj"][0], "id": 901}]])))),
     ("cong_m9_job_run_khac", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and [j.update(run_id=701) for j in x["ddj"]]))),
@@ -9377,20 +9376,24 @@ CASES += [
     ("cong_m9_mien_duoi_tab", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien", "full_mutant_audit: H mien\t")(x, w, h), _KHONG_DD(x, w, h)))),
     ("cong_m9_k6_diff_rong", _m9_k6_diff_rong),
     # review offline lượt 2 (F10–F16): bool ≠ int ở cả ba chốt kiểu · SHA rút gọn · git lỗi kèm output · biên phạm vi trên git thật
-    ("cong_m9_job_run_id_bool", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and (
-        x["ddr"][0].update(id=1), [j.update(run_id=True) for j in x["ddj"]])))),
+    ("cong_m9_job_run_id_bool", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and ( x["ddr"][0].update(id=1), [j.update(run_id=True) for j in x["ddj"]])))),
     ("cong_m9_job_attempt_bool", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and [j.update(run_attempt=True) for j in x["ddj"]]))),
     ("cong_m9_run_attempt_bool", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddr", run_attempt=True)(x, w, h)))),
-    ("cong_m9_mien_sha_rut_gon", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_KHONG_DD(x, w, h), h and x.update(
-        cmt={"user": {"login": "ducthangho"}, "body": f"windows: {h} mien\nfull_mutant_audit: {h[:7]} mien"})))),
+    ("cong_m9_mien_sha_rut_gon", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_KHONG_DD(x, w, h), h and x.update( cmt={"user": {"login": "ducthangho"}, "body": f"windows: {h} mien\nfull_mutant_audit: {h[:7]} mien"})))),
     ("cong_m9_git_loi_co_output", lambda c: _m9_git_loi(c, b":100644 100644 a b M\0docs/x.md\0")),
     ("cong_m9_pham_vi_git", _m9_pham_vi_git),
     # lượt 3: F03 mọi ký tự `splitlines` tách ở hai đầu · F17/F18 run đạt nằm GIỮA hai run không đạt · F19 attempt 2 · F20/F21 job SAU job đầu
-    ("cong_m9_mien_ky_tu_tach", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_KHONG_DD(x, w, h), h and x.update(cmt={"user": {"login": "ducthangho"},
-        "body": "\n".join([f"windows: {h} mien"] + [v for k in "\x0b\x0c\x1c\x1d\x1e\x85\u2028\u2029" for v in (f"full_mutant_audit: {h} mien{k}", f"{k}full_mutant_audit: {h} mien")])})))),
+    ("cong_m9_mien_ky_tu_tach", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_KHONG_DD(x, w, h), h and x.update(cmt={"user": {"login": "ducthangho"}, "body": "\n".join([f"windows: {h} mien"] + [v for k in "\x0b\x0c\x1c\x1d\x1e\x85\u2028\u2029" for v in (f"full_mutant_audit: {h} mien{k}", f"{k}full_mutant_audit: {h} mien")])})))),
     ("cong_m9_run_xanh_o_giua", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and x.update(ddr=[{**x["ddr"][0], "id": 699, "conclusion": "failure"}, x["ddr"][0], {**x["ddr"][0], "id": 702, "head_sha": "0" * 40}])))),
     ("cong_m9_attempt_2", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddr", run_attempt=2)(x, w, h), h and [j.update(run_attempt=2) for j in x["ddj"]]))),
     ("cong_m9_job_sau_float", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddj", 1, run_attempt=1.0)(x, w, h)))),
+    # lượt 4: F25 comment người khác + run xanh ⇒ K7 đạt (K6 vẫn đỏ vì comment) · F26 run_id float ở job sau · F27 nhóm jobs ĐÚNG run
+    # được chọn (nhóm đầu/cuối xanh, nhóm của run đạt đỏ) · F28 CRLF hợp lệ · F29 run không đạt thiếu run_attempt đứng trước run đạt
+    ("cong_m9_nguoi_khac_run_xanh", _c1106_ca(12, "K6", cam="K7", them=_GH, doi=lambda x, w, h: (_CMT("full_mutant_audit: H mien")(x, w, h), h and x["cmt"]["user"].update(login="evil")))),
+    ("cong_m9_job_sau_run_id_float", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddj", 1, run_id=700.0)(x, w, h)))),
+    ("cong_m9_nhom_jobs_dung_run", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and ( x.update(ddr=[x["ddr"][0], *({**x["ddr"][0], "id": i, "conclusion": "failure"} for i in (702, 703))], ddj=[{**x["ddj"][0], "run_id": 702}], ddj_them=[[{**j, "conclusion": "failure"} for j in x["ddj"]], [{**x["ddj"][0], "id": 903, "run_id": 703}]]))))),
+    ("cong_m9_mien_crlf", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_KHONG_DD(x, w, h), h and x.update(cmt={"user": {"login": "ducthangho"}, "body": f"windows: {h} mien\r\nfull_mutant_audit: {h} mien\r\n"})))),
+    ("cong_m9_run_thieu_attempt_truoc", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and x["ddr"].insert(0, {k: v for k, v in {**x["ddr"][0], "id": 698}.items() if k != "run_attempt"})))),
     ("cong_m9_job_dau_dang_chay", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddj", 0, status="in_progress")(x, w, h)))),
 ]
 MUTANTS.update({
@@ -9407,19 +9410,13 @@ MUTANTS.update({
     "m9_bo_job_completed": ("and js and all(map(xanh, js))", 'and js and all(j.get("conclusion") == "success" for j in js)', ["cong_m9_job_dang_chay"]),
     "m9_bo_trang_jobs": ('js = _trang_du(_doc_json(p, RC_GATE)[0], "jobs", f"--dot-bien-du-jobs {p}")', 'js = _doc_json(p, RC_GATE)[0]["jobs"]', ["cong_m9_trang_jobs_thieu"]),
     "m9_mien_strip": ("_dong_chu_kho(a.chu_kho_comment, tho=True)", "_dong_chu_kho(a.chu_kho_comment)", ["cong_m9_mien_dau_khoang_trang", "cong_m9_mien_duoi_tab"]),
-    "m9_bool_job_run_id": ('all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int for j in js)',
-                           'all(isinstance(j.get("run_id"), int) and type(j.get("run_attempt")) is int for j in js)', ["cong_m9_job_run_id_bool"]),
-    "m9_bool_job_attempt": ('all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int for j in js)',
-                            'all(type(j.get("run_id")) is int and isinstance(j.get("run_attempt"), int) for j in js)', ["cong_m9_job_attempt_bool"]),
+    "m9_bool_job_run_id": ('all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int for j in js)', 'all(isinstance(j.get("run_id"), int) and type(j.get("run_attempt")) is int for j in js)', ["cong_m9_job_run_id_bool"]),
+    "m9_bool_job_attempt": ('all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int for j in js)', 'all(type(j.get("run_id")) is int and isinstance(j.get("run_attempt"), int) for j in js)', ["cong_m9_job_attempt_bool"]),
     "m9_bool_run_attempt": ('if type(r.get("run_attempt")) is int else None', 'if isinstance(r.get("run_attempt"), int) else None', ["cong_m9_run_attempt_bool"]),
-    "m9_mien_tien_to_sha": ('f"full_mutant_audit: {h} mien" in _dong_chu_kho(a.chu_kho_comment, tho=True)',
-                            'any(x in (f"full_mutant_audit: {h} mien", f"full_mutant_audit: {h[:7]} mien") for x in _dong_chu_kho(a.chu_kho_comment, tho=True))',
-                            ["cong_m9_mien_sha_rut_gon"]),
-    "m9_git_loi_co_output": ('    if rc:\n        raise ValueError("không đo được diff base..head")', '    if rc and not raw:\n        raise ValueError("không đo được diff base..head")',
-                             ["cong_m9_git_loi_co_output"]),
+    "m9_mien_tien_to_sha": ('f"full_mutant_audit: {h} mien" in _dong_chu_kho(a.chu_kho_comment, tho=True)', 'any(x in (f"full_mutant_audit: {h} mien", f"full_mutant_audit: {h[:7]} mien") for x in _dong_chu_kho(a.chu_kho_comment, tho=True))', ["cong_m9_mien_sha_rut_gon"]),
+    "m9_git_loi_co_output": ('    if rc:\n        raise ValueError("không đo được diff base..head")', '    if rc and not raw:\n        raise ValueError("không đo được diff base..head")', ["cong_m9_git_loi_co_output"]),
     "m9_pham_vi_py_hoa": ('(p.startswith("ops/") and p.endswith(".py"))', '(p.startswith("ops/") and p.lower().endswith(".py"))', ["cong_m9_pham_vi_git"]),
-    "m9_pham_vi_bo_tep_xoa": ("for _, p in _diff_raw(root, b, h))", 'for _, p in _diff_raw(root, b, h) if _git_do(root, "cat-file", "-e", f"{h}:{p}")[0] == 0)',
-                              ["cong_m9_pham_vi_git"]),
+    "m9_pham_vi_bo_tep_xoa": ("for _, p in _diff_raw(root, b, h))", 'for _, p in _diff_raw(root, b, h) if _git_do(root, "cat-file", "-e", f"{h}:{p}")[0] == 0)', ["cong_m9_pham_vi_git"]),
     "m9_mien_splitlines": ('re.split(r"\\r?\\n", d["body"]) if tho else ', "", ["cong_m9_mien_ky_tu_tach"]),
     "m9_chi_run_dau": ("        for r in runs:\n", "        for r in runs[:1]:\n", ["cong_m9_run_xanh_o_giua"]),
     "m9_chi_run_cuoi": ("        for r in runs:\n", "        for r in runs[-1:]:\n", ["cong_m9_run_xanh_o_giua"]),
@@ -9429,6 +9426,12 @@ MUTANTS.update({
     "m9_nhan_rename": ('"diff", "--raw", "--no-renames", "-z", b, h)', '"diff", "--raw", "-z", b, h)', ["cong_m9_pham_vi_git"]),
     "m9_bo_symlink": ("for _, p in _diff_raw(root, b, h))", 'for m, p in _diff_raw(root, b, h) if m != "120000")', ["cong_m9_pham_vi_git"]),
     "m9_bo_chi_doi_mode": ('for i in range(0, len(t) - 1, 2) if t[i].startswith(":")]', 'for i in range(0, len(t) - 1, 2) if t[i].startswith(":") and t[i].split()[2] != t[i].split()[3]]', ["cong_m9_pham_vi_git"]),
+    "m9_mien_phu_quyet_run": ("        except ValueError:\n            mien = False\n", "        except ValueError:\n            raise\n", ["cong_m9_nguoi_khac_run_xanh"]),
+    "m9_kieu_run_id_job_dau": ('all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int for j in js)', 'all(type(j.get("run_id")) is int for j in js[:1]) and all(type(j.get("run_attempt")) is int for j in js)', ["cong_m9_job_sau_run_id_float"]),
+    "m9_nhom_dau": ('nhom.get((r["id"], r["run_attempt"]))', '(list(nhom.values())[0] if (r["id"], r["run_attempt"]) in nhom else None)', ["cong_m9_nhom_jobs_dung_run"]),
+    "m9_nhom_cuoi": ('nhom.get((r["id"], r["run_attempt"]))', '(list(nhom.values())[-1] if (r["id"], r["run_attempt"]) in nhom else None)', ["cong_m9_nhom_jobs_dung_run"]),
+    "m9_mien_chi_lf": ('re.split(r"\\r?\\n", d["body"]) if tho', 'd["body"].split("\\n") if tho', ["cong_m9_mien_crlf"]),
+    "m9_doc_attempt_som": ('js = nhom.get((r["id"], r["run_attempt"])) if type(r.get("run_attempt")) is int else None', 'js = nhom.get((r["id"], r["run_attempt"])) if type(r["run_attempt"]) is int else None', ["cong_m9_run_thieu_attempt_truoc"]),
     "m9_k6_nhan_diff_rong": ('    if not tep:\n        raise ValueError("không đo được diff base..head")', '    if False:\n        raise ValueError("không đo được diff base..head")', ["cong_m9_k6_diff_rong"]),
     "m9_bo_kiem_nguoi_mien": ('d["user"].get("login") != CHU_KHO or ', "", ["cong_m9_mien_sai_nguoi"]),
     "m9_bo_pham_vi_workflow": ('p.startswith((".claude/dev/", ".github/workflows/"))', 'p.startswith((".claude/dev/",))', ["cong_m9_pham_vi_workflow"]),

@@ -1,0 +1,11 @@
+--- luot1/probes/mutations.py
++++ probes/mutations.py
+@@ -38,7 +38,7 @@
+     'reset_root_instead_of_children': (one(original, reset, reset.replace("(Join-Path $Script:ThuMucCaiDat '*')", '$Script:ThuMucCaiDat')), test),
+     'no_final_setowner': (original[:original.rindex(owner)] + original[original.rindex(owner):].replace(owner, '    # MUTANT no final setowner', 1), test),
+     'users_modify': (one(original, grant, grant.replace('545:(OI)(CI)RX', '545:(OI)(CI)M')), test),
+-    'model_reset_noop': (original, one(test, "if ($DoiSo -contains '/reset') { $node.Access = @($Script:AclGia[$goc].Access); continue }", "if ($DoiSo -contains '/reset') { continue }")),
++    'model_reset_noop': (original, one(test, "if ($DoiSo -contains '/reset') { $node.Access = @($Script:AclGia[(Split-Path -Parent $key)].Access); continue }", "if ($DoiSo -contains '/reset') { continue }")),
+     'model_copy_no_denial': (original, one(test, "if ($cu -and -not @($cu.Access | Where-Object { $_.IdentityReference -eq 'BUILTIN\\Administrators' -and $_.FileSystemRights -eq 'FullControl' }).Count)", 'if ($false)')),
+ }
+ 

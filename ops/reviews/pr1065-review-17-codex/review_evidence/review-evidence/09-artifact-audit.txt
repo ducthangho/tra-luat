@@ -1,0 +1,15 @@
+Review file count: 103 ; scanner skipped: [] ; max bytes: 110568
+Repository secret scanner: no matches; all files covered
+Extra credential pattern hits (path/line/category only): []
+Home/credential path candidates: 0
+No network was called; scanning file bytes only. Scratch paths /tmp/claude-0/... and generic install paths C:\Tools/C:\Program Files identify test artifacts and product locations, not credential material.
+Retained round16 test records: 115 unique cases, Boolean true: 115
+mutations16.log : 17 mutant records
+more-mutants16.log : 23 mutant records
+Retained mutation count: 40 ; killed with non-parser failed cases: 40
+Claim check: retained verdict/final-audit says 40/40, not 41; raw log records also 40. Mutant byte uniqueness is reported by historical final audit; omitted mutant files prevent rehashing mutant bodies now.
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr17-pr1065.CMv7/audit_artifacts.py", line 63, in <module>
+    assert inventory['case_count'] == inventory['unique_case_names'] == 115
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

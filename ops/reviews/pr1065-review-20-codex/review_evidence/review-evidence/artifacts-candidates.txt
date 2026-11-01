@@ -1,0 +1,22 @@
+Review file count: 105 ; scanner skipped: [] ; max bytes: 110568
+Repository secret scanner: no matches; all files covered
+Extra credential pattern hits (path/line/category only): []
+Home/credential path candidates: 0
+No network was called; scanning file bytes only. Scratch paths /tmp/claude-0/... and generic install paths C:\Tools/C:\Program Files identify test artifacts and product locations, not credential material.
+Retained round16 test records: 115 unique cases, Boolean true: 115
+mutations16.log : 17 mutant records
+more-mutants16.log : 23 mutant records
+Retained mutation count: 40 ; killed with non-parser failed cases: 40
+Claim check: retained verdict/final-audit says 40/40, not 41; raw log records also 40. Mutant byte uniqueness is reported by historical final audit; omitted mutant files prevent rehashing mutant bodies now.
+Retained inventory: {'parse_errors': 0, 'add_count': 50, 'nonloi_count': 19, 'case_count': 119, 'unique_case_names': 119}
+AST cases not registered in historical Linux run: ['admin_ca_ma_thoat_3_khong_do_duoc', 'dang_ky_lich_khong_admin_thoat_3', 'he_thong_khong_admin_thoat_3', 'sai_may_thoat_5_truoc_moi_thay_doi']
+All four not-registered cases are explicitly named in retained verdict; 119 AST != 115 executed is documented, not an overstated pass
+Round15 finding closure readback: control=nang_cap; post-mismatch=loi; keep-mismatch=loi; all driver rc0
+Replay-map retained probe hashes: 28 MATCH
+ARTIFACT AUDIT: PASS within retained files; historical tests were read back, not rerun as current Windows/native evidence
+All changed review paths scanned: 108 ; credential candidates (location/category only): [] ; private-path candidates (location only): [('ops/reviews/README.md', 704), ('ops/reviews/README.md', 706), ('ops/reviews/README.md', 843), ('ops/reviews/README.md', 846)]
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr20-pr1065.wDqh/audit_artifacts.py", line 102, in <module>
+    assert not extra_hits and not extra_paths
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

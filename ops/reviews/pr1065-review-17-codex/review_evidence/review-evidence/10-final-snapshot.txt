@@ -1,0 +1,12 @@
+Checkout before/after files: 9414 9414
+Added: [] ; removed: [] ; changed hash/mode: []
+$ git rev-parse HEAD HEAD^{tree} origin/master; rc=0
+4b3f07ed64e45e65cc4645b8601c666bafed8bd0
+5a5b6631dcb1108173323f0bd58fe8a4c471512c
+7b845f59e150047ca44582331fb9207860297e24
+$ git status --porcelain=v1 --ignored --untracked-files=all; rc=0
+$ git diff --exit-code HEAD --; rc=0
+$ git diff --cached --exit-code --; rc=0
+Finding headings: ['### khai-resolved-khong-co-readback  [P2]  Lời khai measured về thread đã resolve thiếu nguồn đo']
+Previous round16: approve, 0 findings; no old finding to mark fixed. New scope verifies bookkeeping and merge, not a repeat of Windows native testing.
+FINAL SNAPSHOT: PASS; files unchanged at observed endpoints; no claim about writes-and-restores between snapshots

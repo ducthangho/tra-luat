@@ -1,0 +1,3 @@
+Stored diff.patch and numstat.txt match Git b0814f4 -> 210ab81 exactly; only 3 ops/vm files
+Receipt result counts, run version/duration, README entry and all 5 caveats match their retained sources
+Bookkeeping quantitative clauses: PASS; historical retention separately checked by audit_storage.py

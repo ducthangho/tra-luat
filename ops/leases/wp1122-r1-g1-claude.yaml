@@ -21,7 +21,7 @@ reviewer_model_family: openai
 reviewer_execution_surface: codex_cli
 reviewer_transport: machine
 assurance_target: cross_approved
-assurance_ghi_chu: 'cham bo cham dot bien => sensitive; executor ho claude, reviewer ho openai; tran codex ADR-0055 (10), du kien 2-3, qua 3 chua approve thi DUNG hoi chu kho. Luot Windows workflow_dispatch: khong tran cung, bao chu kho neu qua 5.'
+assurance_ghi_chu: 'cham bo cham dot bien => sensitive; executor ho claude, reviewer ho openai; tran codex ADR-0055 (10). Chu kho 01-11-2026 (AskUserQuestion "Dung: chay toi sach, dung o tran 10"): bo moc dung-o-3, chay toi het P1/P2/P3, dung o tran 10. Luot Windows workflow_dispatch: khong tran cung, bao chu kho neu qua 5.'
 access: read-write
 review_class: sensitive
 effective_review_class: sensitive
@@ -83,7 +83,7 @@ attempts_basis: 'mac dinh kho (tien le wp1045).'
 review_rounds_limit: 3
 budget:
   codex_review_calls:
-    pr_wp1122_g1: {used: 2, reserved: 0, limit: 10}
+    pr_wp1122_g1: {used: 3, reserved: 0, limit: 10}
   attempt:
     packet_1122_r1: {used: 0, reserved: 0, limit: 2}
   khong_reset_theo_generation: true
@@ -93,4 +93,5 @@ push_policy: 'day nhanh agent/wp1122-g1-claude som de goi workflow_dispatch Wind
 codex_da_goi:
 - {luot: 1, run_id: e03d300896404d949c69ef6a9a0e4a92, head: 30ee4ae1b62170c86b8c75e6b0c73663ab934d88, verdict: changes_requested, ket_qua: '0 P0, 1 P1, 1 P2, 0 P3'}
 - {luot: 2, run_id: 2f334acd7bf34ce6a6934b9da5548dda, head: 6cf0cc5231adc6b4fd5bd63c4e97f6aeee30ecdb, verdict: changes_requested, ket_qua: '0 P0, 1 P1, 0 P2, 0 P3'}
+- {luot: 3, run_id: 50169eba8b024838bcf731ab21a23a0a, head: 4c6f9331e35331b41ca1c4b982ee6c088cad8898, verdict: changes_requested, ket_qua: '0 P0, 1 P1, 0 P2, 0 P3'}
 pham_vi_mo_rong_da_duyet: 'chu kho duyet qua AskUserQuestion (01-11-2026): raise AssertionError tuong minh trong ca -> bang(False,...) va khoa AST chung ("Co: doi sang bang(False, ...) + khoa AST chung"); moi loi goi con Python text=True khai encoding utf-8 + khoa AST ("Va moi loi goi con python/launcher + ca khoa AST"). Khong doi write set.'

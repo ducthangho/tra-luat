@@ -1,0 +1,5 @@
+Đã ghi [VERDICT.md](./VERDICT.md) và [HINT.patch](./HINT.patch).
+
+Kết luận: **changes_requested — 1 P1 (F01)**, gồm reporter chết khi xuất Unicode lên stdout không UTF-8 và đường tách nhóm bỏ thông điệp lỗi.
+
+HEAD: suite `326/349`, đột biến `532/564`; tập lỗi trùng nền, delta 0. `cay-kho/` nguyên vẹn, bản sao tạm đã dọn. Windows/CI chưa đo độc lập.

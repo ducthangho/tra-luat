@@ -14279,9 +14279,11 @@ DOT_BIEN_HARNESS = [
       '            {"nonce": nonce, "ten": ten_ca, "hong": 1, "loai": "TinHieuChotCa"}\n'
       '            if p.returncode == 1 and f"LAP {ten_ca}: 0/1 qua" in p.stdout else {})'),
      ["r1079_cham_lap_ca_doi_dung_TinHieuChotCa", "r1079_harness_duoi_stdout_gia_khong_cap_tin_dung"]),
-    ("wp1079_bao_cao_theo_ten_lop",
-     ('            LOAI_HONG[fn.__name__] = "TinHieuChotCa" if isinstance(e, TinHieuChotCa) else type(e).__qualname__',
-      '            LOAI_HONG[fn.__name__] = type(e).__name__'),
+    ("wp1079_bao_cao_theo_ten_lop",   # bản lỗi gốc ghi `__name__` ở CẢ HAI nhánh except
+     [('            LOAI_HONG[fn.__name__] = "TinHieuChotCa" if isinstance(e, TinHieuChotCa) else type(e).__qualname__',
+       '            LOAI_HONG[fn.__name__] = type(e).__name__'),
+      ('            LOAI_HONG[fn.__name__] = type(e).__qualname__\n            ket = f"LOI',
+       '            LOAI_HONG[fn.__name__] = type(e).__name__\n            ket = f"LOI')],
      ["r1079_harness_trung_ten_loai_khong_cap_tin_dung"]),
     ("wp1079_n13_do_bash_ngoai_env_sach",
      ('        with patch.dict(os.environ, env, clear=True):\n            vo, chan_doan',

@@ -9394,6 +9394,18 @@ CASES += [
     ("cong_m9_nhom_jobs_dung_run", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and ( x.update(ddr=[x["ddr"][0], *({**x["ddr"][0], "id": i, "conclusion": "failure"} for i in (702, 703))], ddj=[{**x["ddj"][0], "run_id": 702}], ddj_them=[[{**j, "conclusion": "failure"} for j in x["ddj"]], [{**x["ddj"][0], "id": 903, "run_id": 703}]]))))),
     ("cong_m9_mien_crlf", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_KHONG_DD(x, w, h), h and x.update(cmt={"user": {"login": "ducthangho"}, "body": f"windows: {h} mien\r\nfull_mutant_audit: {h} mien\r\n"})))),
     ("cong_m9_run_thieu_attempt_truoc", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and x["ddr"].insert(0, {k: v for k, v in {**x["ddr"][0], "id": 698}.items() if k != "run_attempt"})))),
+    # lượt 5: F30 tệp M9 KHÔNG đứng đầu diff · F31 job ở GIỮA lô ba · F32 nhóm jobs của run khác đỏ vẫn đạt · F33 ranh giới prefix/đuôi
+    ("cong_m9_pham_vi_tep_sau", _c1106_ca(12, "K7 full_mutant_audit", them={".a.txt": "x\n", "ops/x.py": "a = 1\n"},
+                                          doi=lambda x, w, h: (_CMT("windows: H not_required")(x, w, h), _KHONG_DD(x, w, h)))),
+    ("cong_m9_job_giua_dang_chay", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (
+        _CMT("windows: H mien")(x, w, h), h and (x["ddj"].append({**x["ddj"][0], "id": 802}), x["ddj"][1].update(status="in_progress"))))),
+    ("cong_m9_job_giua_float", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (
+        _CMT("windows: H mien")(x, w, h), h and (x["ddj"].append({**x["ddj"][0], "id": 802}), x["ddj"][1].update(run_attempt=1.0))))),
+    ("cong_m9_nhom_khac_do_van_dat", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and x.update(
+        ddr=[x["ddr"][0], {**x["ddr"][0], "id": 701, "conclusion": "failure"}],
+        ddj_them=[[{**x["ddj"][0], "id": 901, "run_id": 701, "conclusion": "failure"}]])))),
+    ("cong_m9_ranh_gioi_pham_vi", _c1106_ca(0, them=dict.fromkeys((".claude/developer/x.txt", ".github/workflows-old/x.txt", "ops-old/x.py", "ops/x.pyc"), "x\n"),
+                                            doi=lambda x, w, h: (_CMT("windows: H not_required")(x, w, h), _KHONG_DD(x, w, h)))),
     ("cong_m9_job_dau_dang_chay", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddj", 0, status="in_progress")(x, w, h)))),
 ]
 MUTANTS.update({
@@ -9432,6 +9444,14 @@ MUTANTS.update({
     "m9_nhom_cuoi": ('nhom.get((r["id"], r["run_attempt"]))', '(list(nhom.values())[-1] if (r["id"], r["run_attempt"]) in nhom else None)', ["cong_m9_nhom_jobs_dung_run"]),
     "m9_mien_chi_lf": ('re.split(r"\\r?\\n", d["body"]) if tho', 'd["body"].split("\\n") if tho', ["cong_m9_mien_crlf"]),
     "m9_doc_attempt_som": ('js = nhom.get((r["id"], r["run_attempt"])) if type(r.get("run_attempt")) is int else None', 'js = nhom.get((r["id"], r["run_attempt"])) if type(r["run_attempt"]) is int else None', ["cong_m9_run_thieu_attempt_truoc"]),
+    "m9_chi_tep_dau_diff": ("for _, p in _diff_raw(root, b, h))", "for _, p in _diff_raw(root, b, h)[:1])", ["cong_m9_pham_vi_tep_sau"]),
+    "m9_xanh_chi_hai_dau": ("and js and all(map(xanh, js))", "and js and all(map(xanh, js[:1] + js[-1:]))", ["cong_m9_job_giua_dang_chay"]),
+    "m9_kieu_chi_hai_dau": ("is int for j in js) or len(khoa)", "is int for j in js[:1] + js[-1:]) or len(khoa)", ["cong_m9_job_giua_float"]),
+    "m9_xanh_moi_nhom": ("and js and all(map(xanh, js))", "and js and all(xanh(j) for g in nhom.values() for j in g)", ["cong_m9_nhom_khac_do_van_dat"]),
+    "m9_dev_bo_gach": ('p.startswith((".claude/dev/", ".github/workflows/"))', 'p.startswith((".claude/dev", ".github/workflows/"))', ["cong_m9_ranh_gioi_pham_vi"]),
+    "m9_workflow_bo_gach": ('p.startswith((".claude/dev/", ".github/workflows/"))', 'p.startswith((".claude/dev/", ".github/workflows"))', ["cong_m9_ranh_gioi_pham_vi"]),
+    "m9_ops_bo_gach": ('(p.startswith("ops/") and p.endswith(".py"))', '(p.startswith("ops") and p.endswith(".py"))', ["cong_m9_ranh_gioi_pham_vi"]),
+    "m9_duoi_chuoi_con": ('(p.startswith("ops/") and p.endswith(".py"))', '(p.startswith("ops/") and ".py" in p)', ["cong_m9_ranh_gioi_pham_vi"]),
     "m9_k6_nhan_diff_rong": ('    if not tep:\n        raise ValueError("không đo được diff base..head")', '    if False:\n        raise ValueError("không đo được diff base..head")', ["cong_m9_k6_diff_rong"]),
     "m9_bo_kiem_nguoi_mien": ('d["user"].get("login") != CHU_KHO or ', "", ["cong_m9_mien_sai_nguoi"]),
     "m9_bo_pham_vi_workflow": ('p.startswith((".claude/dev/", ".github/workflows/"))', 'p.startswith((".claude/dev/",))', ["cong_m9_pham_vi_workflow"]),

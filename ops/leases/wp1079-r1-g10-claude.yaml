@@ -76,8 +76,8 @@ heartbeat_at: '2026-11-01T15:15:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
 heartbeat_required_minutes: 360
 heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
-lease_until: '2026-11-02T15:15:00Z'
-lease_expires_at_utc: '2026-11-02T15:15:00Z'
+lease_until: '2026-11-01T16:07:00Z'
+lease_expires_at_utc: '2026-11-01T16:07:00Z'
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 0
@@ -112,3 +112,12 @@ codex_da_goi:
 - {luot: 6, run_id: dc65e6da38724bdc83cabd478c976e30, head: e3bcaf0b376e80367b750ccc8c41cce9b686b407, verdict: changes_requested, ket_qua: '0 P0, 1 P1, 0 P2, 0 P3'}
 - {luot: 7, run_id: ba939a5a96d54063a3a0c6fe245b8a73, head: af057e982ccc99b1f5eef2ae86dd129ccaa969b5, verdict: KHONG_CO (sandbox het dung luong — No space left on device), ket_qua: 'khong co; 623.5 s; tinh 1 loi goi'}
 codex_da_goi_ghi_chu: 'mot lan chay truoc luot 1 bi launcher CHAN [11] TRUOC spawn (remote clone khong phai GitHub) — khong goi codex, khong tinh vao tran.'
+lease_sua_lan_cuoi: '2026-11-01T15:47:00Z'
+lease_sua_ghi_chu: 'Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch, budget.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-02T15:15:00Z'
+  han_moi_utc: '2026-11-01T16:07:00Z'
+  chi_thi: 'Chu kho go "Dong y merge di." trong phien session_01J7EgTVGTrNi4xqh7MeBFQv (01-11-2026); PR #1115 merge c82047da4d6f.'
+  ly_do: 'Packet #1079 da merge (PR #1115, merge c82047da4d6f9546ce1d68282c37acf9567b74bc). Nha .claude/dev/launcher_test.py, .claude/dev/codex_cred_test.py, ops/handoff/wp1079-g1-claude.md.'
+  vi_sao_han_moi_khong_bang_luc_sua: 'Han moi = luc sua + 20 phut de luot ops-publish-lease cua commit nay doc lease CON HAN (rc=9 da dang), khong roi vao rc=8 (bai hoc CLAUDE.md 20-09-2026). Khong viet bia mo: khong co lease ke nhiem cung packet.'
+  tien_le: 'wp1078-r1-g2-claude (thu_hoi_bang_rut_han, 6da7c0d).'

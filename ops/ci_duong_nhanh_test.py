@@ -1035,8 +1035,8 @@ LOI_GOI_DOC_THUOC_TINH = {
     "raw goc -> merge ref (kiem_mode_git)": lambda a: a[1:3] == ["diff", "--raw"] and a[-2:] == [GOC_A, HOP_GIA],
 }
 # So loi goi mong doi != 1: `merge-tree` chay HAI lan o kiem-re (bo phan loai + kiem_mode_git), cung doi so.
-SO_LOI_GOI = {"merge-tree": 3, "raw ba cham (kiem_mode_git)": 2, "raw goc -> cay merge-tree (kiem_mode_git)": 2,
-              "raw goc -> merge ref (kiem_mode_git)": 2}   # wp1113: them mot lan cho `doc_raw_ba_cap` cua bo phan loai
+SO_LOI_GOI = {"merge-tree": 4, "raw ba cham (kiem_mode_git)": 3, "raw goc -> cay merge-tree (kiem_mode_git)": 3,
+              "raw goc -> merge ref (kiem_mode_git)": 3}   # wp1113: them mot lan cho bo phan loai, mot lan cho kiem_xoa_bi_trich
 
 
 @ca
@@ -3490,7 +3490,11 @@ def phan_hang(rc, dau_ra, ten_dich):
     return "HONG"
 
 
+THOI_HAN_CA = {"t56_dau_do_bi_bat_tren_duong_nhanh": 400}   # worktree kho that + phan loai moi dau do: >120s tren runner CI
+
+
 def chay_con(ten_ca, cay, thoi_han=120):
+    thoi_han = THOI_HAN_CA.get(ten_ca, thoi_han)
     env = dict(os.environ, CI_DUONG_NHANH_CAY=str(cay), PYTHONDONTWRITEBYTECODE="1")
     r = subprocess.run([sys.executable, "-B", str(HERE / "ci_duong_nhanh_test.py"),
                         "--nguon-test", str(Path(cay) / "ops" / "ci_duong_nhanh_test.py"), "--mot-ca", ten_ca],

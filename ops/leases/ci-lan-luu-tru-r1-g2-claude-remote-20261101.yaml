@@ -19,8 +19,8 @@ recorded_by: anthropic_claude_dispatcher
 recorder_is_dispatcher: true
 leased_at_utc: '2026-11-01T10:30:35Z'
 heartbeat_at: '2026-11-01T10:30:35Z'
-lease_until: '2026-11-02T10:30:35Z'
-lease_expires_at_utc: '2026-11-02T10:30:35Z'
+lease_until: '2026-11-01T23:10:00Z'
+lease_expires_at_utc: '2026-11-01T23:10:00Z'
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude
@@ -87,3 +87,17 @@ prohibited_actions:
 - kill_other_session_process
 - write_outside_effective_write_set
 land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-02T10:30:35Z'
+  han_moi_utc: '2026-11-01T23:10:00Z'
+  chi_thi: >-
+    ADR-0060 M7: lan duyet duy nhat cua chu kho (merge PR #1128 boi ducthangho luc 2026-11-01T22:22:50Z) bao gom
+    nha lease. Chi thi truoc do trong phien session_015GtxrcRSrPnyeixJVDudWu: "CI xanh thi bo draft, toi merge".
+  ly_do: >-
+    Packet #1113 (CI-LAN-LUU-TRU r1, D1) da MERGE: PR #1128 (agent/wp1113-g1-claude, head 0445b938) merge bang merge commit
+    c165a5d0d4048e10e7da875f2ba7524136fb5735 (cha c6bb7c14 + 0445b938). Lease khong tu chet khi land (CLAUDE.md).
+  vi_sao_khong_dung_bia_mo: >-
+    Tien le wp773/#772: rut han dung co che da cai. Han moi dat SAU luc push de luot dang lease con thay lease song,
+    tranh rc=8 che rc=9. Khong bia mo: khong co lease ke nhiem.
+  nguoi_rut: 'land operator = executor, phien Claude Code session_015GtxrcRSrPnyeixJVDudWu'
+  nghiem_thu: 'ai-dang-giu cho write set sau 23:10Z phai ra NGUOI_GIU 0.'

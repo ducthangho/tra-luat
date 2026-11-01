@@ -92,3 +92,5 @@ budget:
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp1079-g1-claude khi A1-A4 dat; mo PR draft.'
+da_bi_thay_the: wp1079-r1-g2-claude
+da_bi_thay_the_ly_do: 'Chu kho nang tran dong them 300->380 (phien session_01J7EgTVGTrNi4xqh7MeBFQv, 01-11-2026); g2 thay the. Lease g1 nay KHONG con hieu luc; giu tep lam hien vat.'

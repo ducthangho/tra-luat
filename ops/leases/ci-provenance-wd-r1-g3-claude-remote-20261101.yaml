@@ -18,9 +18,9 @@ authority_ghi_chu: 'chu kho duyet nang tran sensitive lan hai 6/520 -> 6/560 (sp
 recorded_by: anthropic_claude_dispatcher
 recorder_is_dispatcher: true
 leased_at_utc: '2026-11-01T02:50:10Z'
-heartbeat_at: '2026-11-01T02:50:10Z'
-lease_until: '2026-11-02T02:50:10Z'
-lease_expires_at_utc: '2026-11-02T02:50:10Z'
+heartbeat_at: '2026-11-01T05:17:45Z'
+lease_until: '2026-11-01T05:32:45Z'
+lease_expires_at_utc: '2026-11-01T05:32:45Z'
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude
@@ -85,3 +85,10 @@ prohibited_actions:
 - kill_other_session_process
 - write_outside_effective_write_set
 land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate
+rut_han:
+  han_cu: '2026-11-02T02:50:10Z'
+  han_moi: '2026-11-01T05:32:45Z'
+  rut_boi: ducthangho
+  ly_do: 'packet CI-PROVENANCE-WD r1 da merge (PR #1102, head de21e1273ac48a7c10a08b13e050853138a84b58, merge a284f8a5d5f980cc155dfb939253fc84c7901ea3, 2026-11-01T04:05:46Z, merged_by ducthangho) va landed true (ban ghi so #1094 issuecomment-6553638237).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; han moi dat 15 phut sau de luot ops-publish-lease khong do rc=8 vi sua lease da het han (CLAUDE.md)'
+  ghi_boi: claude-session session_015GtxrYPjZCTZeRiazdssgq

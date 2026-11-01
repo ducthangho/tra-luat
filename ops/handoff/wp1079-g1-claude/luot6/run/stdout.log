@@ -1,0 +1,3 @@
+Đã ghi [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/f5ea9c29-b7bf-59b1-89c5-898536fe68e2/scratchpad/cr1079-6/VERDICT.md): `changes_requested`, **1 P1** về hai hàm gọi ca chưa kiểm registry trước thực thi.
+
+Có `HINT.patch` kèm test phản chứng. Không sửa `cay-kho/`.

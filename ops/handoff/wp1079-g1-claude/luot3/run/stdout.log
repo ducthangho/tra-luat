@@ -1,0 +1,3 @@
+Đã ghi [VERDICT.md](./VERDICT.md): **changes_requested**, có **1 P1** về chặn nhầm assertion hợp lệ ở cả ba điểm chấm.
+
+Kèm [HINT.patch](./HINT.patch) với ba ca hồi quy đã kiểm chứng. Cây `cay-kho/` giữ nguyên.

@@ -1,0 +1,47 @@
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -10358,6 +10358,44 @@
+                                env=dict(os.environ, PYTHONDONTWRITEBYTECODE='1'))
+             results[mode] = (p.returncode != 0 and '__code__' in p.stderr and not marker.exists())
+     bang(all(results.values()), f'direct CA bypassed shared-code registration guard: {results}')
++
++
++
++def _review6_registry_raw_phai_tu_choi(runner):
++    from unittest.mock import patch
++    for mode in ("pass", "skip", "own"):
++        calls = []
++        def factory(name):
++            def target():
++                calls.append(name)
++                if mode == "own":
++                    bang(False, "own assertion " + name)
++                if mode == "skip":
++                    return "BO QUA platform"
++            target.__name__ = name
++            return target
++        target, alias = factory("review_target"), factory("review_alias")
++        rejected = False
++        with patch.dict(runner.__globals__, {"CA": [target, alias]}):
++            try:
++                if runner is cham_mot_ca:
++                    runner(target)
++                else:
++                    runner([target])
++            except ValueError as e:
++                rejected = "__code__" in str(e)
++        bang(rejected and not calls,
++             f"{runner.__name__}/{mode}: raw CA must be rejected BEFORE case execution: {calls}")
++
++
++@ca
++def r1079_review6_cham_mot_ca_kiem_registry_truoc_chay():
++    _review6_registry_raw_phai_tu_choi(cham_mot_ca)
++
++
++@ca
++def r1079_review6_chay_bo_ca_kiem_registry_truoc_chay():
++    _review6_registry_raw_phai_tu_choi(chay_bo_ca)
+ 
+ 
+ # wp858 (L1): ca hành vi chạy NGUYÊN công thức qua cai_cong_cu.sh, installer là stub (POSIX); ca hình dạng thuần Python

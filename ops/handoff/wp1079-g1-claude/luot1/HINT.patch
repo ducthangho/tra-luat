@@ -1,0 +1,83 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+# Gợi ý ca hồi quy; hướng sửa bộ chấm được mô tả trong VERDICT.md.
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -10041,6 +10041,78 @@
+          and ns["ten_do"]("t1", ns["TinHieuChotCa"]("x")) == "t1", "ten_do khong tach loi vo can")
+     import inspect
+     bang("do.add(ten_do(ca.__name__, e))" in inspect.getsource(ns["chay_suite"]), "chay_suite khong cham bang ten_do")
++
++
++@ca
++def r1079_harness_trung_ten_loai_khong_cap_tin_dung():
++    """Regression: lớp khác trùng tên tín hiệu không phải chốt của suite."""
++    ma = Path(__file__).read_text(encoding="utf-8")
++    them = '''
++@ca
++def review_trung_ten():
++    class TinHieuChotCa(RuntimeError): pass
++    raise TinHieuChotCa("loi vo can")
++'''
++    ma = ma.replace('\nif __name__ == "__main__":', them + '\nif __name__ == "__main__":')
++    with San() as s:
++        dev = _dung_cay_harness(s / "tree", ma, LAUNCHER.read_text(encoding="utf-8"))
++        kq = cham_lap_ca(dev, "review_trung_ten")
++    bang(kq[0] == "loi", f"lop khac trung ten duoc cap tin dung: {kq}")
++
++
++@ca
++def r1079_harness_duoi_stdout_gia_khong_cap_tin_dung():
++    """Regression: in đuôi giống runner rồi thoát không phải một assertion."""
++    with San() as s:
++        (s / "launcher_test.py").write_text(
++            'print("LOAI_HONG review_gia: TinHieuChotCa", flush=True)\n'
++            'print("\\nLAP review_gia: 0/1 qua, 0 bo qua, 1 hong", flush=True)\n'
++            'raise SystemExit(1)\n', encoding="utf-8")
++        kq = cham_lap_ca(s, "review_gia")
++    bang(kq[0] == "loi", f"stdout gia duoc cap tin dung: {kq}")
++
++
++@ca
++def r1079_n13_do_bash_cung_phai_loc_env_cha():
++    """Regression: môi trường sạch phải bao cả bước dò Bash của N13."""
++    if LA_WINDOWS:
++        return "BO QUA shell POSIX"
++    from unittest.mock import patch
++    with San() as s:
++        ky = s / "ambient.log"
++        init = s / "init.sh"
++        init.write_text(f"printf 'AMBIENT_INIT\\n' >> {shlex.quote(str(ky))}\n", encoding="utf-8")
++        home = s / "parent-home"; home.mkdir()
++        with patch.dict(os.environ, {"BASH_ENV": str(init), "ENV": str(init), "HOME": str(home)}):
++            r484_g7_hook_vang_codex_cai_cli_truoc_materialize()
++        dong = ky.read_text(encoding="utf-8").splitlines() if ky.exists() else []
++    bang(not dong, f"N13 van chay init cua cha khi do bash: {dong}")
++
++
++@ca
++def r1079_cc_chay_suite_phai_do_hanh_vi():
++    """Regression: chạy chay_suite thật; comment chứa lời gọi không thay được hành vi."""
++    import runpy
++    from types import SimpleNamespace
++    from unittest.mock import patch
++    ns = runpy.run_path(str(CC_TEST_DANG_DUNG), run_name="review_cc_behavior")
++    runner = ns["chay_suite"]
++    ten = "t2_chua_thay_thi_tra_None_khong_doan"
++    def vo_can(_):
++        raise AttributeError("loi vo can")
++    def doi_kieu(_):
++        try:
++            vo_can(None)
++        except AttributeError:
++            raise AssertionError("doi kieu") from None
++    th = {}
++    for nhan, fn in (("neutral", lambda _: (None, None)), ("chot", lambda _: ("sai", "sai")),
++                     ("vo_can", vo_can), ("doi_kieu", doi_kieu)):
++        m = SimpleNamespace(__nguon__="inert", __nhan__="inert", doc_moc_device=fn)
++        with patch.dict(runner.__globals__, {"nap": lambda *_, m=m: m}):
++            th[nhan] = runner(m, {ten})
++    bang(th == {"neutral": set(), "chot": {ten}, "vo_can": {f"{ten}(AttributeError)"},
++                "doi_kieu": {f"{ten}(AssertionError)"}}, f"chay_suite cap sai tin dung: {th}")
+ 
+ 
+ # wp858 (L1): ca hành vi chạy NGUYÊN công thức qua cai_cong_cu.sh, installer là stub (POSIX); ca hình dạng thuần Python

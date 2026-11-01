@@ -1,0 +1,65 @@
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -10293,6 +10293,62 @@
+         except ValueError:
+             th["cc"] = "tu_choi"
+     bang(th == {"launcher": "tu_choi", "launcher_rieng": True, "cc": "tu_choi"}, f"ca trung __code__ khong bi chan: {th}")
++
++
++
++@ca
++def r1079_review5_product_direct_CA_must_reject_shared_code():
++    from unittest.mock import patch
++    calls = []
++    def factory(name):
++        def target():
++            calls.append(name)
++            bang(LAUNCHER_DANG_DUNG == LAUNCHER, 'own assertion ' + name)
++        target.__name__ = name
++        return target
++    target, alias = factory('review_target'), factory('review_alias')
++    rejected = False
++    with patch.dict(chay_dot_bien.__globals__, {
++            'CA': [target, alias], 'DOT_BIEN_HOOK': [], 'DOT_BIEN_HARNESS': [],
++            'DOT_BIEN': [('review_direct_registry', ('#!/usr/bin/env python3',
++                          '#!/usr/bin/env python3\n# inert mutation'), ['review_target'])]}):
++        try:
++            chay_dot_bien()
++        except ValueError as e:
++            rejected = '__code__' in str(e)
++    bang(rejected and not calls,
++         f'direct CA with shared code reached cases instead of registration rejection: {calls}')
++
++
++@ca
++def r1079_review5_harness_direct_CA_must_reject_before_running():
++    source = Path(__file__).read_text(encoding='utf-8')
++    results = {}
++    with San() as s:
++        for mode, args in (('default', []), ('repeat', ['--lap-ca', 'review_target', '--lan', '1']),
++                           ('mutants', ['--dot-bien'])):
++            marker = s / (mode + '.log')
++            extra = (
++                '\nREVIEW_MUTATED = 0\n'
++                'def review_factory(name):\n'
++                '    def target():\n'
++                f'        p = Path({str(marker)!r})\n'
++                '        with p.open("a") as f: f.write(name + "\\n")\n'
++                '        bang(not REVIEW_MUTATED, "own assertion " + name)\n'
++                '    target.__name__ = name\n'
++                '    return target\n'
++                'CA = [review_factory("review_target"), review_factory("review_alias")]\n'
++                'DOT_BIEN = [("review_direct_registry", ("#!/usr/bin/env python3", '
++                '"#!/usr/bin/env python3\\n# inert"), ["review_target"])]\n'
++                'DOT_BIEN_HOOK = []\nDOT_BIEN_HARNESS = []\n')
++            text = source.replace('\nif __name__ == "__main__":',
++                                  extra + '\nif __name__ == "__main__":')
++            dev = _dung_cay_harness(s / mode, text, LAUNCHER.read_text(encoding='utf-8'))
++            p = subprocess.run([PY, str(dev / 'launcher_test.py'), *args], cwd=dev,
++                               capture_output=True, text=True, timeout=30,
++                               env=dict(os.environ, PYTHONDONTWRITEBYTECODE='1'))
++            results[mode] = (p.returncode != 0 and '__code__' in p.stderr and not marker.exists())
++    bang(all(results.values()), f'direct CA bypassed shared-code registration guard: {results}')
+ 
+ 
+ # wp858 (L1): ca hành vi chạy NGUYÊN công thức qua cai_cong_cu.sh, installer là stub (POSIX); ca hình dạng thuần Python

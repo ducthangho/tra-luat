@@ -1,0 +1,91 @@
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -10302,6 +10302,88 @@
+             results.append(runner(inert, {"review_target"}))
+     bang(calls == ["review_target", "review_target"], f"unexpected calls: {calls}")
+     bang(results == [set(), {"review_target"}], f"own assertion rejected for sharing code: {results}")
++
++
++@ca
++def r1079_review4_product_shared_template_call_other():
++    """Shared code does not make a real call to another registered case an own assertion."""
++    from unittest.mock import patch
++    calls, registry = [], {}
++    def factory(name):
++        def target():
++            calls.append(name)
++            if LAUNCHER_DANG_DUNG == LAUNCHER:
++                return
++            if name == "review_target":
++                return registry["other"]()
++            bang(False, "assertion exclusively from registered other case")
++        target.__name__ = name
++        return target
++    target, other = factory("review_target"), factory("review_other")
++    registry["other"] = other
++    anchor = ("#!/usr/bin/env python3", "#!/usr/bin/env python3\n# inert review mutation")
++    with patch.dict(chay_dot_bien.__globals__, {
++            "CA": [target, other], "DOT_BIEN_HOOK": [], "DOT_BIEN_HARNESS": [],
++            "DOT_BIEN": [("review_shared_call", anchor, ["review_target"])]}):
++        result = chay_dot_bien()
++    bang(calls == ["review_target", "review_target", "review_other"], f"unexpected calls: {calls}")
++    bang(result == (1, 0), f"credited other case sharing target code: {result}")
++
++
++@ca
++def r1079_review4_harness_shared_template_call_other():
++    source = Path(__file__).read_text(encoding="utf-8")
++    addition = (
++        "\nREVIEW_SHARED_CALL_FLAG = 0\n"
++        "def _review_shared_call_factory(name):\n"
++        "    def target():\n"
++        "        if not REVIEW_SHARED_CALL_FLAG: return\n"
++        "        if name == 'review_target': return review_shared_other()\n"
++        "        bang(False, 'assertion exclusively from registered other case')\n"
++        "    target.__name__ = name\n"
++        "    return ca(target)\n"
++        "review_shared_target = _review_shared_call_factory('review_target')\n"
++        "review_shared_other = _review_shared_call_factory('review_other')\n")
++    source = source.replace('\nif __name__ == "__main__":', addition + '\nif __name__ == "__main__":')
++    with San() as s:
++        dev = _dung_cay_harness(s / "tree", source, LAUNCHER.read_text(encoding="utf-8"))
++        neutral = cham_lap_ca(dev, "review_target")
++        p = dev / "launcher_test.py"
++        p.write_text(p.read_text(encoding="utf-8").replace(
++            "\nREVIEW_SHARED_CALL_FLAG = 0\n", "\nREVIEW_SHARED_CALL_FLAG = 1\n", 1), encoding="utf-8")
++        mutant = cham_lap_ca(dev, "review_target")
++    bang(neutral == ("qua", "review_target"), f"neutral did not pass: {neutral}")
++    bang(mutant[0] == "loi", f"credited other case sharing target code: {mutant}")
++
++
++@ca
++def r1079_review4_credential_shared_template_call_other():
++    import runpy
++    from types import SimpleNamespace
++    from unittest.mock import patch
++    ns = runpy.run_path(str(CC_TEST_DANG_DUNG), run_name="review_shared_call_cc")
++    runner, signal = ns["chay_suite"], ns["TinHieuChotCa"]
++    calls, registry = [], {}
++    def factory(name):
++        def target(M):
++            calls.append(name)
++            if not M.red:
++                return
++            if name == "review_target":
++                return registry["other"](M)
++            raise signal("assertion exclusively from registered other case")
++        target.__name__ = name
++        return target
++    target, other = factory("review_target"), factory("review_other")
++    registry["other"] = other
++    results = []
++    for red in (False, True):
++        inert = SimpleNamespace(__nguon__="inert", __nhan__="inert", red=red)
++        with patch.dict(runner.__globals__, {"CA": [target, other], "nap": lambda *_, m=inert: m}):
++            results.append(runner(inert, {"review_target"}))
++    bang(calls == ["review_target", "review_target", "review_other"], f"unexpected calls: {calls}")
++    bang(results == [set(), {"review_target(chot cua ca khac)"}],
++         f"credited other case sharing target code: {results}")
+ 
+ 
+ # wp858 (L1): ca hành vi chạy NGUYÊN công thức qua cai_cong_cu.sh, installer là stub (POSIX); ca hình dạng thuần Python

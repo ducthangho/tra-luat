@@ -1,0 +1,3 @@
+Đã ghi [VERDICT.md](VERDICT.md): `changes_requested`, **2 P1** — hồi quy F05 ở cả ba bộ chấm và số mutant khai sai.
+
+Kèm [HINT.patch](HINT.patch) cùng bằng chứng chạy. Không sửa `cay-kho/`.

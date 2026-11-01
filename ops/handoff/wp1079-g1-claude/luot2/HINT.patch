@@ -1,0 +1,115 @@
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -10112,6 +10112,112 @@
+             th[nhan] = runner(m, {ten})
+     bang(th == {"neutral": set(), "chot": {ten}, "vo_can": {f"{ten}(AttributeError)"},
+                 "doi_kieu": {f"{ten}(AssertionError)"}}, f"chay_suite cap sai tin dung: {th}")
++
++
++
++@ca
++def r1079_review_lop_khac_cung_qualname_khong_la_chot():
++    """Reviewer hint: identity must survive equal __qualname__, not only local class names."""
++    ma = Path(__file__).read_text(encoding="utf-8")
++    them = '\n@ca\ndef review_target():\n    raise type("TinHieuChotCa", (RuntimeError,), {})("inert")\n'
++    ma = ma.replace('\nif __name__ == "__main__":', them + '\nif __name__ == "__main__":')
++    with San() as s:
++        dev = _dung_cay_harness(s / "tree", ma, LAUNCHER.read_text(encoding="utf-8"))
++        kq = cham_lap_ca(dev, "review_target")
++    bang(kq[0] == "loi", f"equal qualname received kill: {kq}")
++
++
++@ca
++def r1079_review_khoi_tao_module_khong_duoc_gia_kenh():
++    """Reviewer hint: forged result before main must not substitute for running a target."""
++    ma = Path(__file__).read_text(encoding="utf-8")
++    them = """
++@ca
++def review_target():
++    pass
++if os.environ.get("LT_KENH_KET_QUA"):
++    Path(os.environ["LT_KENH_KET_QUA"]).write_text(json.dumps({
++        "nonce": os.environ["LT_KENH_NONCE"], "ten": "review_target",
++        "qua": 0, "bo_qua": 0, "hong": 1, "loai": "TinHieuChotCa"}))
++    raise SystemExit(1)
++"""
++    ma = ma.replace('\nif __name__ == "__main__":', them + '\nif __name__ == "__main__":')
++    with San() as s:
++        dev = _dung_cay_harness(s / "tree", ma, LAUNCHER.read_text(encoding="utf-8"))
++        kq = cham_lap_ca(dev, "review_target")
++    bang(kq[0] == "loi", f"module initializer received kill without a target: {kq}")
++
++
++@ca
++def r1079_review_san_pham_chot_ca_khac_khong_la_giet():
++    def review_other_case():
++        bang(False, "assertion of OTHER case")
++    def review_target():
++        review_other_case()
++    from unittest.mock import patch
++    with patch.dict(cham_mot_ca.__globals__, {"CA": [review_target, review_other_case]}):
++        kq = cham_mot_ca(review_target)
++    bang(kq[0] == "loi", f"another case assertion received kill: {kq}")
++
++
++@ca
++def r1079_review_harness_chot_ca_khac_khong_la_giet():
++    ma = Path(__file__).read_text(encoding="utf-8")
++    them = '\n@ca\ndef review_other_case():\n    bang(False, "other")\n@ca\ndef review_target():\n    review_other_case()\n'
++    ma = ma.replace('\nif __name__ == "__main__":', them + '\nif __name__ == "__main__":')
++    with San() as s:
++        dev = _dung_cay_harness(s / "tree", ma, LAUNCHER.read_text(encoding="utf-8"))
++        kq = cham_lap_ca(dev, "review_target")
++    bang(kq[0] == "loi", f"another case assertion received harness kill: {kq}")
++
++
++@ca
++def r1079_review_credential_chot_ca_khac_khong_la_giet():
++    import runpy
++    from types import SimpleNamespace
++    from unittest.mock import patch
++    ns = runpy.run_path(str(CC_TEST_DANG_DUNG), run_name="review_origin_cc")
++    ten = "t2_chua_thay_thi_tra_None_khong_doan"
++    def sai(*_):
++        ns["t1_doc_duoc_url_va_ma_tu_dau_ra_that"](
++            SimpleNamespace(doc_moc_device=lambda *_: (None, None)))
++    m = SimpleNamespace(__nguon__="inert", __nhan__="inert", doc_moc_device=sai)
++    runner = ns["chay_suite"]
++    with patch.dict(runner.__globals__, {"nap": lambda *_: m}):
++        do = runner(m, {ten})
++    bang(do != {ten}, f"t1 assertion counted as t2 kill: {do}")
++
++
++@ca
++def r1079_review_ca_dich_vang_phai_lam_cong_do():
++    from unittest.mock import patch
++    runner = chay_dot_bien
++    with patch.dict(runner.__globals__, {
++            "CA": [], "DOT_BIEN_HOOK": [], "DOT_BIEN_HARNESS": [],
++            "DOT_BIEN": [("review_missing", ("#!/usr/bin/env python3",
++                          "#!/usr/bin/env python3\n# inert"), ["review_missing_case"])]}):
++        hong, bo = runner()
++    bang((hong, bo) == (1, 0), f"missing target treated as platform skip: {(hong, bo)}")
++
++
++
++@ca
++def r1079_review_khoa_neutral_phai_do_hanh_vi():
++    import runpy
++    ma = Path(__file__).read_text(encoding="utf-8")
++    cu = '                    LAUNCHER_DANG_DUNG = LAUNCHER\n                    neutral[fn.__name__] = cham_mot_ca(fn)\n'
++    moi = '                    neutral[fn.__name__] = ("qua", fn.__name__)\n'
++    bang(ma.count(cu) == 1, "hint mutation anchor changed; rederive the behavioral counterexample")
++    ma = ma.replace(cu, moi, 1)
++    ma = ma.replace('    neutral = {}\n', '    """\n' + cu + '    """\n    neutral = {}\n', 1)
++    with San() as s:
++        dev = _dung_cay_harness(s / "tree", ma, LAUNCHER.read_text(encoding="utf-8"))
++        ns = runpy.run_path(str(dev / "launcher_test.py"), run_name="review_neutral_lock")
++        try:
++            ns["r1079_chay_dot_bien_noi_neutral_va_cham_theo_loai"]()
++        except ns["TinHieuChotCa"]:
++            return
++    bang(False, "neutral lock survived removed execution plus preserved source literal")
+ 
+ 
+ # wp858 (L1): ca hành vi chạy NGUYÊN công thức qua cai_cong_cu.sh, installer là stub (POSIX); ca hình dạng thuần Python

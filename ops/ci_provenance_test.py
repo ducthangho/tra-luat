@@ -1090,9 +1090,8 @@ WD_BYTES = b"name: ci\non: push\njobs: {}\n"
 WF_WD_TEP = ROOT_THAT / ".github/workflows/ops-do-workflow-definition.yml"
 
 def wd_node(**sua):
-    n = {"databaseId": 7, "runNumber": 3, "createdAt": "2026-11-01T00:00:00Z", "checkSuite": {"commit": {"oid": WD_OID}},
-         "file": {"path": WD_PATH, "repositoryFileUrl": f"https://github.com/o/r/blob/{WD_OID}/{WD_PATH}"}}
-    return {k: v for k, v in (n | sua).items()}
+    return {"databaseId": 7, "runNumber": 3, "createdAt": "2026-11-01T00:00:00Z", "checkSuite": {"commit": {"oid": WD_OID}},
+         "file": {"path": WD_PATH, "repositoryFileUrl": f"https://github.com/o/r/blob/{WD_OID}/{WD_PATH}"}} | sua
 
 def do_wd_gia(run=None, gql=None, gql_ma=200, loi=None, node=None):
     run = {"id": 7, "run_attempt": 1, "event": "push", "head_sha": WD_OID, "path": WD_PATH, "check_suite_id": 1, "node_id": "WFR_x"} | (run or {})
@@ -1118,8 +1117,8 @@ def do_wd_gia(run=None, gql=None, gql_ma=200, loi=None, node=None):
 def c53_wd_passed():   # A2
     rc, j = do_wd_gia()
     git = subprocess.run(["git", "hash-object", "--stdin"], input=WD_BYTES, capture_output=True).stdout.decode().strip()
-    bang(rc == 0 and j["trang_thai"] == "passed" and j["oid_dinh_nghia"] == WD_OID, f"{rc} {j}")
-    bang(j["blob"] == git and j["sha256"] == hashlib.sha256(WD_BYTES).hexdigest(), f"blob {j.get('blob')} git {git}")
+    bang(rc == 0 and j["trang_thai"] == "passed" and j["oid_dinh_nghia"] == WD_OID and j["blob"] == git
+         and j["sha256"] == hashlib.sha256(WD_BYTES).hexdigest(), f"{rc} {j} git {git}")
 
 @ca
 def c54_wd_not_measured():   # A3: mỗi dòng not_measured của bảng §2.1 — đúng rc, đúng ly_do; JSON luôn có
@@ -1171,8 +1170,7 @@ def wd_zip(**sua):
     j = {"schema": "wd/1", "repo": "o/r", "run_id": 5, "path": WD_PATH, "trang_thai": "passed", "oid_dinh_nghia": H,
          "blob": hashlib.sha1(b"blob %d\0" % len(WD_BYTES) + WD_BYTES).hexdigest(), "sha256": hashlib.sha256(WD_BYTES).hexdigest(),
          "repository_file_url": f"https://github.com/o/r/blob/{H}/{WD_PATH}"} | sua
-    b = io.BytesIO()
-    with zipfile.ZipFile(b, "w") as z:
+    with zipfile.ZipFile(b := io.BytesIO(), "w") as z:
         z.writestr("wd.json", json.dumps(j))
     return b.getvalue()
 
@@ -1243,8 +1241,7 @@ def kiem_wf(van):   # A7: luật tĩnh của workflow; trả danh sách vi phạ
 
 @ca
 def c59_workflow_tinh():   # A7: tệp thật sạch; MỖI đột biến YAML một vi phạm đúng tên
-    van = WF_WD_TEP.read_text(encoding="utf-8")
-    bang(kiem_wf(van) == [], f"workflow thật vi phạm: {kiem_wf(van)}")
+    bang(kiem_wf(van := WF_WD_TEP.read_text(encoding="utf-8")) == [], f"workflow thật vi phạm: {kiem_wf(van)}")
     for cu, moi, mong in (("    runs-on: ubuntu-latest\n", "    runs-on: ubuntu-latest\n    permissions:\n      pull-requests: write\n", "permissions"),
                           ("          ref: master\n", "", "checkout"), ("ref: master", "ref: ${{ github.sha }}", "checkout"),
                           ("          persist-credentials: false\n", "", "checkout"), ('          rc=$?\n', '          rc=$?\n          eval "$RUN_ID"\n', "run_bieu_thuc"),
@@ -1257,21 +1254,18 @@ def chay_than(van, ghi=False, rc=3):   # A7b: chạy CHÍNH thân `run:` của b
     b = next(b for jb in yaml.safe_load(van)["jobs"].values() for b in jb["steps"] if "do-wd" in b.get("run", ""))
     with tempfile.TemporaryDirectory(prefix="cip_than_") as thu:
         t, gia = Path(thu), Path(thu) / "bin"
-        gia.mkdir()
-        (gia / "python3").write_text("#!/bin/sh\nprintf '%s\\n' \"$@\" > argv.txt\n" + ('printf "{}" > wd.json\n' if ghi else "") + f"exit {rc}\n")
+        gia.mkdir() or (gia / "python3").write_text("#!/bin/sh\nprintf '%s\\n' \"$@\" > argv.txt\n" + ('printf "{}" > wd.json\n' if ghi else "") + f"exit {rc}\n")
         (gia / "python3").chmod(0o755)
         (t / "than.sh").write_text(b["run"])
         env = dict(os.environ, RUN_ID="1; touch PWNED", REPO="o/r", GH_TOKEN="x", GITHUB_STEP_SUMMARY=str(t / "sum.md"),
                    PATH=f"{gia}{os.pathsep}{os.environ.get('PATH', '')}")
         r = subprocess.run(["bash", "-e", str(t / "than.sh")], cwd=thu, env=env, capture_output=True, timeout=60)
-        doc = lambda n: (t / n).read_text() if (t / n).exists() else None
-        return r.returncode, doc("argv.txt"), doc("wd.json"), doc("sum.md"), (t / "PWNED").exists()
+        return r.returncode, *[(t / n).read_text() if (t / n).exists() else None for n in ("argv.txt", "wd.json", "sum.md")], (t / "PWNED").exists()
 
 @ca
 def c60_workflow_than_chay():   # A7b
     if not shutil.which("bash"):
-        bang(not (ROOT_THAT / ".git").exists(), "không có bash trong kho thật: KHÔNG ĐO ĐƯỢC ⇒ đỏ")
-        return
+        return bang(not (ROOT_THAT / ".git").exists(), "không có bash trong kho thật: KHÔNG ĐO ĐƯỢC ⇒ đỏ")
     van = WF_WD_TEP.read_text(encoding="utf-8")
     rc, argv, wd, tom, pw = chay_than(van)
     bang(argv is not None and argv.splitlines() == ["ops/ci_provenance.py", "do-wd", "--repo", "o/r", "--run", "1; touch PWNED", "--out", "wd.json"], f"argv {argv!r}")
@@ -1283,6 +1277,16 @@ def c60_workflow_than_chay():   # A7b
         rc2, argv2, wd2, tom2, _ = chay_than(van.replace(cu, moi))
         bang((argv2, rc2, wd2, tom2) != (argv, rc, wd, tom), f"đột biến {cu!r} không bị bắt")
 
+@ca
+def c61_actionlint_bat_yaml_sai():   # A8: tệp thật sạch; YAML parse được mà sai hợp đồng Actions ⇒ đỏ; thiếu công cụ trong kho thật ⇒ đỏ
+    if not (al := shutil.which("actionlint")):
+        return bang(not (ROOT_THAT / ".git").exists(), "thiếu actionlint trong kho thật: KHÔNG ĐO ĐƯỢC ⇒ đỏ")
+    van = WF_WD_TEP.read_text(encoding="utf-8")
+    with tempfile.TemporaryDirectory(prefix="cip_al_") as thu:
+        for v, mong in ((van, 0), (van.replace("RUN_ID: ${{ inputs.run_id }}", "RUN_ID: ${{ inputs.run_ix }}"), 1)):
+            (Path(thu) / "w.yml").write_text(v, encoding="utf-8")
+            r = subprocess.run([al, "-shellcheck=", str(Path(thu) / "w.yml")], capture_output=True, text=True, timeout=120)
+            bang(r.returncode == mong and (mong == 0 or "run_ix" in r.stdout), f"mong rc {mong}, được {r.returncode}: {r.stdout[-300:]}")
 
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
     ("A1_xoa_co_attempt", 't.add_argument("--attempt", required=True, type=int, help="run_attempt phải đo")', 't.add_argument("--attempt", type=int, default=1, help=argparse.SUPPRESS)', "c01"),

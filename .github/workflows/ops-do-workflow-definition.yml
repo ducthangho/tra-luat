@@ -2,8 +2,7 @@ name: ops — đo mốc Workflow definition (chỉ đọc)
 
 # CI-PROVENANCE-WD r1 (Issue #1094, ADR-0060 packet B): đo mốc Workflow definition §10.2.2 của MỘT run bằng GraphQL
 # `WorkflowRun.file`, thứ phiên Claude Code trên web không gọi được (403). Chỉ đọc: không ghi Issue, PR hay kho.
-# Kết quả là artifact `workflow-definition-<run_id>` chứa `wd.json`; `ops/ci_provenance.py thu --wd-run <id lượt này>`
-# nhập nó và tự tính lại blob/sha256. Input đi qua env của bước, không nội suy vào thân lệnh.
+# Ra artifact `workflow-definition-<run_id>` (`wd.json`); `thu --wd-run <id lượt này>` nhập và tự tính lại blob/sha256.
 
 on:
   workflow_dispatch:
@@ -41,11 +40,7 @@ jobs:
             printf '{"schema": "wd/1", "trang_thai": "not_measured", "ly_do": "collector_khong_ghi_rc_%s"}\n' "$rc" > wd.json
           fi
           cat wd.json
-          {
-            echo '```json'
-            cat wd.json
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          { echo '```json'; cat wd.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           exit "$rc"
       - uses: actions/upload-artifact@v4
         if: always()

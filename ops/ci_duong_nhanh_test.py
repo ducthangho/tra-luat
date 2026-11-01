@@ -781,10 +781,14 @@ def t18_main_khong_ghi_duoc_output_thi_do():
 
 # ---------------------------------------------------------------- `kiem-re`
 CA_DU_LIEU_GOI: list = []
+LAND_GOI: list = []
 
 
 def chay_that_bo_ca_du_lieu(argv, **kw):
     """Kho tam trong ca kiem-re khong co lease_publish_test.py: chi CHAN dung lenh ca-du-lieu (ghi lai), con lai chay that."""
+    if "ops/land_evidence_nguon.py" in argv:
+        LAND_GOI.append(list(argv))
+        return KQ(0, b"TONG: DAT\n")
     if "ops/lease_publish_test.py" in argv:
         CA_DU_LIEU_GOI.append(list(argv))
         return KQ(0, b"DAT\n")
@@ -2206,6 +2210,21 @@ def t53_dispatch_input_che_do():
             bang(kq[0] == "day_du", f"dispatch {ten}: phai day_du, duoc {kq}")
         bang(m.phan_loai(_env_su_kien("workflow_dispatch", "", dau, CI_DUONG_NHANH_CHE_DO_VAO=1,
                                       CI_DUONG_NHANH_NHANH_MAC_DINH="main"), chay_that, kho)[0] == "day_du", "input khong phai str phai day_du")
+
+
+@ca
+def t55_kiem_re_chay_validator_land_toan_cay():
+    """Uy nhiem DO4: `kiem-re` goi `ops/land_evidence_nguon.py --root .` DUNG mot lan; validator DO ⇒ kiem-re DO."""
+    m = nap_module()
+    with kho_that(nhanh_pr={"ops/land/x.yaml": "a: 1\n"}) as (kho, goc, dau):
+        LAND_GOI.clear()
+        rc, log = kiem_re(m, kho, goc, dau)
+        bang(rc == 0 and len(LAND_GOI) == 1 and LAND_GOI[0][-3:] == ["ops/land_evidence_nguon.py", "--root", "."],
+             f"kiem-re phai goi validator land DUNG mot lan tren toan cay: rc={rc} goi={LAND_GOI}: {log}")
+    def hong(argv, **kw):
+        return KQ(3, b"L6 CHO_DIEN\n") if "ops/land_evidence_nguon.py" in argv else KQ(0, b"")
+    bang(m.kiem_land_evidence(ROOT_THAT, hong) and not m.kiem_land_evidence(ROOT_THAT, lambda a, **k: KQ(0, b"")),
+         "validator land DO phai thanh loi; DAT thi khong loi")
 
 
 @ca
@@ -3794,6 +3813,8 @@ DOT_BIEN += [
     ("wp1113_rong_khong_pr_tat", _ma('if doi is not None and not doi and su_kien != "pull_request":', "if False:"), ("t52_push_phan_loai_fail_close",)),
     ("wp1113_dispatch_bo_day_du", _ma('    if vao == "day_du":\n', '    if False:\n'), ("t53_dispatch_input_che_do",)),
     ("wp1113_dispatch_nhan_input_la", _ma('if type(vao) is not str or vao not in ("", "tu_dong", "day_du"):', "if False:"), ("t53_dispatch_input_che_do",)),
+    ("wp1113_kiem_re_bo_land", _ma("           + kiem_land_evidence(kho, chay))", "           + [])"), ("t55_kiem_re_chay_validator_land_toan_cay",)),
+    ("wp1113_land_bo_kiem_rc", _ma("    if getattr(r, \"returncode\", None) != 0:\n        return [f\"land_evidence_nguon", "    if False:\n        return [f\"land_evidence_nguon"), ("t55_kiem_re_chay_validator_land_toan_cay",)),
     ("wp1113_chuan_bi_khong_xuat_cap", _ma('if che_do == DUONG_NHANH else ""', 'if False else ""'), ("t54_kiem_re_doc_cap_cua_chuan_bi",)),
 ]
 

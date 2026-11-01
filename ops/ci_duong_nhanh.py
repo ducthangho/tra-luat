@@ -695,6 +695,18 @@ def kiem_ca_du_lieu(kho=ROOT, chay=subprocess.run) -> list[str]:
     return []
 
 
+def kiem_land_evidence(kho=ROOT, chay=subprocess.run) -> list[str]:
+    """wp1113 (uy nhiem DO4 cua dac ta CI-LAN-LUU-TRU r1): validator ho so land tren TOAN cay `ops/land`, thay cho ca c11 cua
+    `ops/land_evidence_nguon_test.py` (chi chay trong `test registry`, bi bo o duong nhanh)."""
+    try:
+        r = chay([sys.executable, "-B", "ops/land_evidence_nguon.py", "--root", "."], cwd=kho, capture_output=True)
+    except Exception as e:
+        return [f"KHONG DO DUOC: land_evidence_nguon nem {type(e).__name__}"]
+    if getattr(r, "returncode", None) != 0:
+        return [f"land_evidence_nguon rc={getattr(r, 'returncode', None)}: " + " | ".join(_dau_ra(r).strip().splitlines()[-3:])]
+    return []
+
+
 def lenh_kiem_re(env=os.environ, chay=subprocess.run, kho=ROOT, ra=None, bay_gio=None) -> int:
     ra = ra if ra is not None else sys.stdout
     doi, che_do, ly_do = phan_loai_day_du(env, chay, kho)
@@ -712,7 +724,8 @@ def lenh_kiem_re(env=os.environ, chay=subprocess.run, kho=ROOT, ra=None, bay_gio
            + kiem_mode_git(env, chay, kho, doi)
            + kiem_symlink_treo_ca_cay(kho)
            + kiem_lease(doi, kho, chay, bay_gio, ra)
-           + kiem_ca_du_lieu(kho, chay))
+           + kiem_ca_du_lieu(kho, chay)
+           + kiem_land_evidence(kho, chay))
     for x in loi:
         print("DUONG_NHANH: LOI - " + x, file=ra)
     print(f"DUONG_NHANH: kiem-re {'DO' if loi or lech else 'DAT'} ({len(doi)} tep doi, {len(loi)} loi)", file=ra)

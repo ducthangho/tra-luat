@@ -1,0 +1,103 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1078
+packet_id: CAI-CONG-CU-PYTHON-HAM-KE-THUA
+revision: 1
+generation: 2
+lease_id: wp1078-r1-g2-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: [1077]
+depends_on_ghi_chu: 'chung .claude/dev/launcher_test.py voi #1077; #1077 da merge (PR #1080, 9ced16f) va lease wp1077-r1-g6-claude da rut han ve 2026-11-01T01:28Z (37574c8).'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'write set ops/** => sensitive; executor ho claude, reviewer ho openai; toi da 3 loi goi Codex (nang_tran 2->3).'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1078.md
+spec_sha256_required: 2fb1b2633ae09e4b737f97d601186389fd801cc294a5217ea07b3e761c3bf13b
+spec_hash: 2fb1b2633ae09e4b737f97d601186389fd801cc294a5217ea07b3e761c3bf13b
+spec_ref: refs/heads/ops/wp1078-r1-g1-lease@f03c494572abf841056bf5b9d37ad36c866e3157
+prompt_path: ops/specs/wp1078.md
+prompt_sha256_required: 2fb1b2633ae09e4b737f97d601186389fd801cc294a5217ea07b3e761c3bf13b
+write_set:
+- ops/cai_cong_cu.sh
+- .claude/dev/launcher_test.py
+- ops/handoff/wp1078-g1-claude.md
+write_set_hash: 3015c245e202bd2634bd1f0d81a10a44efa0cdd2f9b6c996dbb6ce2718d27028
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'cai_cong_cu.sh CHI buoc chon/ghim PY; launcher_test.py CHI ca moi + bang dot bien; handoff chi tren nhanh lease; diff PR 2 tep. ADR-0044 sensitive: <=3 tep, <=300 dong them.'
+change_policy_sha: null
+effective_write_set:
+- ops/cai_cong_cu.sh
+- .claude/dev/launcher_test.py
+- ops/handoff/wp1078-g1-claude.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1/P2; toi da 3 loi goi codex (nang_tran); moi thread connector duoc tra loi'}
+- {id: M-2, dieu_kien: 'ci.yml luot PR XANH tren head cuoi doc bang check run; Windows workflow_dispatch windows-only cho buoc cai cong cu xanh hoac neu ro ly do runner (spec A4)'}
+- {id: M-3, dieu_kien: 'A1-A4 cua spec: phan chung tren base do, dot bien moi giet dung ca dich; cong_cu_test N/N khong doi; ruff F delta 0; doctrine-scan, git diff --check, bash -n rc0'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp1078-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 90c101b8d1f8895b66607de8582a18c5e72d834c
+start_from_sha: 90c101b8d1f8895b66607de8582a18c5e72d834c
+start_from_ghi_chu: 'origin/master luc cap lease (merge #1092). Spec dong bang ghi base 086f1b7 (luc soan); so dong trong spec tinh tai 086f1b7 — doi chieu lai tai base nay.'
+reviewed_sha_required: 90c101b8d1f8895b66607de8582a18c5e72d834c
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1078
+granted_on_instruction_readback: 'chu kho go "Cap spec va lease cho #1077, #1078 roi lam tiep" trong phien session_01J7EgTVGTrNi4xqh7MeBFQv (31-10-2026); ghi ho. Bam byte KHONG DO DUOC.'
+recorded_by: claude-executor-session
+recorder_is_executor: true
+recorder_ghi_chu: 'phien ghi lease CUNG la executor, theo chi thi chu kho trong chinh phien; tien le wp1077-r1-g1-claude.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-01T01:30:00Z'
+  goc_quet: 'master 90c101b8d1f8895b66607de8582a18c5e72d834c, fetch +refs/heads/*, ls-remote so TAP ten voi for-each-ref: thieu 0; nhanh cuc bo ff ve origin'
+  ket_qua: 'ai-dang-giu 3 duong dan: NGUOI_GIU 0 (wp1077 g1-g5 CON_HAN nhung DA_BI_THAY_THE; g6 het han 01:28Z).'
+thay_the_cho: [wp1078-r1-g1-claude]
+thay_the_cho_ghi_chu: 'g1 CON HAN (toi 2026-11-02T01:32:00Z) => bia mo hai chieu: g1 mang da_bi_thay_the trong cung commit.'
+leased_at_utc: '2026-11-01T03:21:00Z'
+heartbeat_at: '2026-11-01T03:21:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+heartbeat_required_minutes: 360
+heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
+lease_until: '2026-11-02T03:21:00Z'
+lease_expires_at_utc: '2026-11-02T03:21:00Z'
+run_minutes: 60
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+attempts_basis: 'mac dinh kho (tien le wp1045).'
+review_rounds_limit: 2
+budget:
+  codex_review_calls:
+    pr_wp1078_g1: {used: 2, reserved: 0, limit: 3}
+  attempt:
+    packet_1078_r1: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+nang_tran:
+  truc: codex_review_calls
+  tran_cu: 2
+  tran_moi: 3
+  ai_nang: ducthangho
+  khi_nao: 'sau verdict luot 2 changes_requested (1 P2 fixture: marker export/allexport) tren 0311db4'
+  can_cu: 'chu kho chon "Ap ban va, +1 loi goi Codex (Recommended)" trong phien session_01J7EgTVGTrNi4xqh7MeBFQv (01-11-2026, AskUserQuestion); ghi ho. Bam byte KHONG DO DUOC.'
+  dieu_kien_dung: 'luot 3 van con loi chan => dung.'
+push_policy: 'day nhanh agent/wp1078-g1-claude khi A1-A4 dat; mo PR draft.'

@@ -343,12 +343,13 @@ TAI_LIEU_TRICH = ("docs", "references", "CHANGELOG.md", "SKILL.md", "CLAUDE.md",
 
 
 def xoa_bi_trich(env, raw, chay=subprocess.run, kho=ROOT):
-    """Ly do (chuoi) neu mot tep bi XOA ma tai lieu o `dau` con trich; '' neu khong; chuoi `KHONG DO DUOC` khi git grep loi."""
+    """Ly do (chuoi) neu mot tep bi XOA ma tai lieu tren cay MERGE (cay CI kiem; PR chua cap nhat tu nhanh dich van thay trich
+    dan moi cua nhanh dich — connector P2 #1128) con trich; '' neu khong; chuoi `KHONG DO DUOC` khi git grep loi."""
     xoa = sorted(d for d, cac in raw.items() if any(tt == "D" for _, _, tt in cac))
     if not xoa:
         return ""
-    dau = env.get(BIEN_DAU) or ""
-    lenh = ["git", "grep", "-F", "-l", "-z"] + [x for d in xoa for x in ("-e", d)] + [dau, "--", *TAI_LIEU_TRICH]
+    hop = env.get(BIEN_MERGE) or ""
+    lenh = ["git", "grep", "-F", "-l", "-z"] + [x for d in xoa for x in ("-e", d)] + [hop, "--", *TAI_LIEU_TRICH]
     try:
         r = chay(lenh, cwd=kho, capture_output=True)
     except Exception as e:

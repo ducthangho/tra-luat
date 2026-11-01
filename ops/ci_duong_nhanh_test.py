@@ -2192,8 +2192,8 @@ def t57_xoa_tep_tai_lieu_con_trich_kiem_re_do():
     log = []
     m.xoa_bi_trich(env_pr(), {"ops/land/a.md": [("100644", "000000", "D")]}, chay_gia(log=log))
     lenh = next((a for a in map(bo_attr_source, log) if a[:2] == ["git", "grep"]), None)
-    bang(lenh is not None and "-F" in lenh and lenh[-8:] == [GOC_B, "--", "docs", "references", "CHANGELOG.md", "SKILL.md",
-         "CLAUDE.md", "CONTEXT.md"], f"git grep phai tim chuoi co dinh tren `dau`, dung pham vi: {lenh}")
+    bang(lenh is not None and "-F" in lenh and lenh[-8:] == [HOP_GIA, "--", "docs", "references", "CHANGELOG.md", "SKILL.md",
+         "CLAUDE.md", "CONTEXT.md"], f"git grep phai tim chuoi co dinh tren cay MERGE, dung pham vi: {lenh}")
 
 
 def _env_su_kien(su_kien, goc, hop, **them):
@@ -4012,7 +4012,9 @@ DOT_BIEN += [
     ("wp1113_dau_do_bo_land", _ma("           + kiem_land_evidence(kho, chay)\n", "           + []\n"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
     ("wp1113_xoa_trich_tat", _ma("           + kiem_xoa_bi_trich(env, chay, kho))", "           + [])"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
     ("wp1113_xoa_trich_rc0_rong_la_khop", _ma("isinstance(ra, (bytes, bytearray)) or not ra:", "isinstance(ra, (bytes, bytearray)):"), ("t57_xoa_tep_tai_lieu_con_trich_kiem_re_do",)),
-    ("wp1113_xoa_trich_tren_goc", _ma("+ [dau, \"--\", *TAI_LIEU_TRICH]", "+ [env.get(BIEN_GOC) or \"\", \"--\", *TAI_LIEU_TRICH]"), ("t57_xoa_tep_tai_lieu_con_trich_kiem_re_do",)),
+    ("wp1113_xoa_trich_tren_goc", _ma("+ [hop, \"--\", *TAI_LIEU_TRICH]", "+ [env.get(BIEN_GOC) or \"\", \"--\", *TAI_LIEU_TRICH]"),
+     ("t57_xoa_tep_tai_lieu_con_trich_kiem_re_do",)),
+    ("wp1113_xoa_trich_tren_dau", _ma("+ [hop, \"--\", *TAI_LIEU_TRICH]", "+ [env.get(BIEN_DAU) or \"\", \"--\", *TAI_LIEU_TRICH]"), ("t57_xoa_tep_tai_lieu_con_trich_kiem_re_do",)),
     ("wp1113_uy_nhiem_thieu_dong", _test("    ('gate', 'py_compile'): 'khong_doi_mau',\n", ""), ("t58_bang_uy_nhiem_phu_dung_buoc_bi_bo",)),
     ("wp1113_uy_nhiem_g5_cai_dat", _test("    ('gate-registry', 'G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6'): 'khong_doi_" + "mau',\n",
                                          "    ('gate-registry', 'G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6'): 'cai_dat',\n"), ("t58_bang_uy_nhiem_phu_dung_buoc_bi_bo",)),

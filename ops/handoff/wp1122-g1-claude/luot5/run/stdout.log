@@ -1,0 +1,5 @@
+Đã hoàn tất review: **changes_requested, còn 1 P1** — kênh kết quả có thể ghi nhầm loại/thông điệp lỗi của ca lồng.
+
+Kết quả và gợi ý sửa: [VERDICT.md](VERDICT.md), [HINT.patch](HINT.patch).
+
+Linux có delta lỗi bằng 0 so với base; Windows chưa đo độc lập. `cay-kho/` không thay đổi.

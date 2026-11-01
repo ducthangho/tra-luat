@@ -22,8 +22,16 @@ recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; K
 
 leased_at_utc: '2026-11-01T02:25:00Z'
 heartbeat_at: '2026-11-01T02:25:00Z'
-lease_until: '2026-11-02T01:20:00Z'
-lease_expires_at_utc: '2026-11-02T01:20:00Z'
+lease_until: '2026-11-01T04:17:00Z'
+lease_expires_at_utc: '2026-11-01T04:17:00Z'
+rut_han:
+  han_cu: '2026-11-02T01:20:00Z'
+  han_moi: '2026-11-01T04:17:00Z'
+  rut_boi: ducthangho
+  ly_do: 'packet CLOUD-SETUP-P3-WRITEBACK da merge: PR #1100 (head 6120ab88382ce605a2b7d1e853db208a15aaf835, merge e4fdab583a33b08f364a9daa30035d48416190bf, 2026-11-01T04:04Z).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp1039 g1 (c4c03ef5).'
+  han_moi_ghi_chu: 'han moi dat sau luc rut ~12 phut de workflow dang lease con thay lease song (tranh rc=8), tien le 9828f470 / c4c03ef5.'
+  ghi_boi: 'claude-session session_015GtxraXfMD1t2FJLzzGDr4 (phien dieu phoi) theo chi thi chu kho "Xanh thì merge, land và ghi sổ P3" (#1089 issuecomment-6552453945).'
 
 packet_id: CLOUD-SETUP-P3-WRITEBACK
 packet_slug: cloud-setup-p3-writeback

@@ -37,14 +37,14 @@ anchor/alias; rồi mới `safe_load`. Mọi số nguyên kiểm `type(x) is int
 
 ### 2.1 `kiem-merge`
 
-Đối số: `--root`, `--repo`, `--pr`, `--head H` (40 hex), `--base B` (40 hex), `--spec` (đường dẫn trong cây tại H),
+Đối số: `--root`, `--repo`, `--pr`, `--head H` (40 hex), `--base B` (40 hex), `--spec` (đường dẫn trong cây tại H), `--lease <tệp lease>`,
 `--workflow-runs`, `--workflow-jobs` (lặp), `--check-runs`, `--connector`, `--offline-run-json`, `--offline-stdout`,
 `--p3-offline <slug>` (lặp, có thể vắng), `--chu-kho-comment <readback JSON>` (có thể vắng), `--windows-json <tệp>` (có thể vắng).
 
 | # | điều kiện | phép đo |
 |---|---|---|
-| K0 | đầu vào neo | `B` là tổ tiên của `H` và `B ≠ H`; `git merge-base --is-ancestor B refs/remotes/origin/master` |
-| K1 | hiệu lực M10 | blob `--spec` tại H có **đúng một** dòng `^dieu_kien_merge: ADR-0060@([0-9a-f]{40})$`; OID L: `cat-file -e L:docs/adr/0060-…md` rc 0, `cat-file -e L^1:…` rc ≠ 0, L ∈ `rev-list --first-parent refs/remotes/origin/master`; kho không shallow |
+| K0 | đầu vào neo | `B` là tổ tiên của `H` và `B ≠ H`; `git merge-base --is-ancestor B refs/remotes/origin/master`; `git ls-remote origin refs/pull/<pr>/head` trả đúng H (PR head hiện hành = H, M6; cùng khuôn đối chiếu remote của `cmd_accept`) |
+| K1 | hiệu lực M10 | `sha256(blob --spec tại H)` = `spec_hash` của `--lease` (M10: chính blob lease trỏ tới); blob ấy có **đúng một** dòng `^dieu_kien_merge: ADR-0060@([0-9a-f]{40})$`; OID L: `cat-file -e L:docs/adr/0060-…md` rc 0, `cat-file -e L^1:…` rc ≠ 0, L ∈ `rev-list --first-parent refs/remotes/origin/master`; kho không shallow |
 | K2 | CI | `_kiem_ci` trên H, `required_checks` = `CHECK_BAT_BUOC` (gọi nguyên hàm) |
 | K3 | connector | `_doc_connector(…, repo, pr, H)`: xong trên H, không P0–P2; trả tập P3 connector |
 | K4 | review offline M12 | `run.json`: `head` = H, `trang_thai` = `xong`, `ma_thoat` là `int` 0; `sha256(--offline-stdout)` = `run.json.stdout_sha256`; dòng không rỗng cuối của stdout đúng `KET_LUAN: approve` |
@@ -57,8 +57,8 @@ anchor/alias; rồi mới `safe_load`. Mọi số nguyên kiểm `type(x) is int
 
 | # | điều kiện | phép đo |
 |---|---|---|
-| D1 | trường M8 | có đủ, đúng kiểu: `packet` (str), `revision` (int ≥ 1), `generation` (int ≥ 1), `spec_hash` (64 hex), `head_da_review` (40 hex), `tree_h` (40 hex), `review` (map), `windows` (map), `duyet_chu_kho` (URL `https://github.com/…`), `merge_commit` (40 hex), `tree_m` (40 hex), `ci_master` (int), `nghiem_thu` (map), `lease_cuoi` (str), `landed` (bool), `moc_10_2_2` (map đúng 4 khoá `run`/`checkout`/`workflow_definition`/`gate_output`) |
-| D2 | đã land | `landed is True` **và** mọi mốc ∈ {`passed`, `owner_waived`}. `landed: false` (dù trung thực) ⇒ chưa đóng được |
+| D1 | trường M8 | có đủ, đúng kiểu: `packet` (str), `revision` (int ≥ 1), `generation` (int ≥ 1), `spec_hash` (64 hex), `head_da_review` (40 hex), `tree_h` (40 hex), `review` (map), `windows` (map), `duyet_chu_kho` (URL `https://github.com/…`), `merge_commit` (40 hex), `tree_m` (40 hex), `ci_master` (map `{run_id: int, conclusion: str}`), `nghiem_thu` (map khác rỗng), `lease_cuoi` (str), `landed` (bool), `moc_10_2_2` (map đúng 4 khoá `run`/`checkout`/`workflow_definition`/`gate_output`) |
+| D2 | đã land | `landed is True` **và** mọi mốc ∈ {`passed`, `owner_waived`} **và** mọi giá trị của `nghiem_thu` ∈ {`passed`, `owner_waived`} **và** `ci_master.conclusion` = `success`. `landed: false` (dù trung thực) ⇒ chưa đóng được |
 | D3 | git | `merge_commit^2` = `head_da_review`; `merge_commit` ∈ `rev-list --first-parent refs/remotes/origin/master`; `rev-parse head_da_review^{tree}` = `tree_h`, `rev-parse merge_commit^{tree}` = `tree_m` |
 | D4 | lease đã nhả | tệp lease: `lease_id` = `lease_cuoi`, `packet_id` = `packet`, `generation` = `generation`, và `lease_until` (UTC, hậu tố `Z`) **≤ giờ hiện tại** |
 
@@ -104,12 +104,12 @@ bị giết **đúng lý do** (tín hiệu assertion của ca đích); đột bi
 | # | tiêu chí | phép đo làm ĐỎ |
 |---|---|---|
 | A1 | `packet_loop_test.py` N/N, hai số bằng nhau | bất kỳ ca đỏ |
-| A2 | `kiem-merge` trên bộ fixture đủ điều kiện ⇒ rc 0; mỗi K0–K6 một ca thiếu ⇒ rc `RC_GATE` và tên điều kiện có trong thông báo | — |
+| A2 | `kiem-merge` trên bộ fixture đủ điều kiện ⇒ rc 0; mỗi K0–K6 một ca thiếu ⇒ rc `RC_GATE` và tên điều kiện có trong thông báo; gồm ca PR head ở H2 mà evidence ở H (K0) và ca `--spec` của packet khác có dòng khai hợp lệ nhưng băm khác `spec_hash` của lease (K1) | — |
 | A3 | M6: hai điều kiện cùng thiếu ⇒ thông báo nêu cả hai | — |
 | A4 | đột biến đích `kiem-merge` (mỗi cái giết ca tương ứng): bỏ so `head` = H (K4) · bỏ so `stdout_sha256` (K4) · không gọi `_doc_connector` (K3) · nhận comment không phải `CHU_KHO` (K5) · so tập khoá bằng ⊆ (K5) · `--windows-json` `tests` rỗng vẫn đạt (K6) · bỏ điều kiện mode/đuôi ở bước 1 §2.3, để `ops/land/x.py` lọt làn lưu trữ (K6) · bỏ phép `L^1` (K1) | đột biến sống ⇒ đỏ |
 | A5 | §2.3 bảng ca: `ops/land/a.yaml` ⇒ `not_required`; `ops/land/x.py` ⇒ `unknown` (không trigger) và `required` khi dòng thêm có `subprocess`; `docs/x.ps1` ⇒ `required`; `README.md` thêm chữ `subprocess` ⇒ `not_required`; symlink trong `ops/reviews/` ⇒ không phải bước 1 | — |
 | A6 | `mien_p3:` có dòng phủ định ("không miễn") hoặc thiếu H ⇒ không khớp regex ⇒ đỏ; khoá YAML trùng trong `--bien-ban` ⇒ `RC_ARG` | — |
-| A7 | `kiem-dong-wp`: fixture đủ ⇒ rc 0; `landed: true` + một mốc `not_measured` ⇒ đỏ; `landed: false` trung thực ⇒ đỏ; `generation: true` ⇒ đỏ; lease `lease_until` tương lai ⇒ đỏ; `merge_commit^2` ≠ H ⇒ đỏ | đột biến đích: bỏ D2 · bỏ so `lease_until` với giờ hiện tại · nhận `bool` cho `generation` |
+| A7 | `kiem-dong-wp` (đột biến đích thêm: bỏ kiểm `nghiem_thu`; bỏ so PR head ở K0; bỏ so `spec_hash` ở K1): fixture đủ ⇒ rc 0; `landed: true` + một mốc `not_measured` ⇒ đỏ; `landed: false` trung thực ⇒ đỏ; `generation: true` ⇒ đỏ; lease `lease_until` tương lai ⇒ đỏ; `merge_commit^2` ≠ H ⇒ đỏ; `nghiem_thu: {A9: failed}` ⇒ đỏ; `nghiem_thu: {}` ⇒ đỏ; `ci_master.conclusion: failure` ⇒ đỏ | đột biến đích: bỏ D2 · bỏ so `lease_until` với giờ hiện tại · nhận `bool` cho `generation` |
 | A8 | canary sau land trên dữ liệu thật: `kiem-dong-wp` trên khối YAML biên bản M8 packet B (#1094 issuecomment-6553638237) ⇒ **đỏ ở D1** (thiếu `generation` `spec_hash` `tree_h` `tree_m`); trên biên bản M8 của chính packet này ⇒ rc 0 trước khi đăng | `chưa đo được` tới sau land; ai đo: executor; ghi lệnh + rc + stdout vào biên bản M8. B mà rc 0 ⇒ D1 mù |
 | A9 | `git diff --numstat <base> <ứng viên>`: đúng năm tệp §3, ≤ 500 dòng thêm | tệp thứ sáu ⇒ đỏ |
 | A10 | tài liệu, vế dương và vế âm: bảng M11 của ADR-0060 có `kiem-merge` và không còn *"0 cổng"*; dòng §20 `ADR-0060` có `kiem-merge` và không còn *"không cổng — kỷ luật executor/reviewer"*; skill có `kiem-dong-wp`. Đo trên văn bản đã gộp khoảng trắng từng đoạn (L6 b) | khôi phục câu cũ ở từng chỗ ⇒ đỏ chỗ ấy |

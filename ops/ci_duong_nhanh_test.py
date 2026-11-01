@@ -2227,6 +2227,81 @@ def t55_kiem_re_chay_validator_land_toan_cay():
          "validator land DO phai thanh loi; DAT thi khong loi")
 
 
+# A7c (dac ta CI-LAN-LUU-TRU r1 §2.2 muc 3): bo dau do CO DINH tren bon tien to; moi dau do phai bi DUNG validator da uy
+# nhiem bat, bang DAU RIENG cua no. Validator du lieu = tap cho phep tru buoc setup va tru `ci-duong-nhanh selftest` (buoc
+# chua chinh harness nay — chay no la de quy). Lenh lay tu CHINH ci.yml; buoc mang `che_do` thi khong con o duong nhanh.
+BUOC_SETUP = frozenset({"Force LF checkout (hash parity với manifest)", "actions/checkout@v4", "actions/setup-python@v5",
+                        "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)"})
+BUOC_HARNESS = "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)"
+KIEM_RE = "DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)"
+DAU_DO = {   # ten: (thay doi tren cay, buoc phai bat, dau rieng trong dau ra)
+    "DO1": ({"ops/leases/zz-dau-do-do1.yaml": b"schema_version: 2\nlease_id: zz-dau-do-do1\n"}, KIEM_RE, "kiem lease rc="),
+    "DO2": ("sai_bam_bien_nhan", KIEM_RE, "ca du lieu cua lease_publish_test"),
+    "DO3": ({"ops/reviews/zz-dau-do-do3-verdict.md": b"# verdict mo coi\n"}, KIEM_RE, "ca du lieu cua lease_publish_test"),
+    "DO4": ({"ops/land/zz-dau-do-do4-land-evidence.yaml": b"packet_id: zz\ntrang_thai_packet:\n  landed: true\n"
+             b"post_merge_checks: CHO_DIEN\nbookkeeping: CHO_DIEN\n"}, KIEM_RE, "land_evidence_nguon rc="),
+    "DO5": ({"ops/specs/zz-dau-do-do5.md": b"first\rsecond\n"}, "eol-policy survey", "LONE_CR_IN_INDEX"),
+}
+
+
+def _lenh_validator(ten):
+    """Lenh `run:` cua buoc `ten` (gate hoac gate-ops) trong ci.yml dang do; None neu buoc vang hoac mang che_do."""
+    for job in ("gate", "gate-ops"):
+        for b in buoc(doc_wf(), job):
+            if ten_buoc(b) == ten:
+                return None if "che_do" in str(b.get("if", "")) and ten != KIEM_RE else str(b.get("run", ""))
+    return None
+
+
+@ca
+def t56_dau_do_bi_bat_tren_duong_nhanh():
+    """A7c: tren worktree tam cua kho THAT (du ref cho bia mo lease), doi chung (them mot tep ho so lanh) phai DAT o kiem-re
+    va eol; moi dau do DO1-DO5 phai lam DO dung buoc uy nhiem voi dau rieng. Ma `ci_duong_nhanh.py` lay tu cay dang do."""
+    bang(os.environ.get("CI_DUONG_NHANH_DAU_DO") is None, "harness dau do bi goi long nhau (de quy)")
+    bang(TAP_CHO_PHEP - BUOC_SETUP - {BUOC_HARNESS} == {"bien-nhan v2 selftest", "eol-policy survey", "doc-claims-check strict"},
+         "tap validator du lieu lech tap cho phep")
+    if not (ROOT_THAT / ".git").exists():
+        bang(False, "KHONG DO DUOC: kho that khong co .git")
+    tam = Path(tempfile.mkdtemp(prefix="cdn_daudo_"))
+    wt = tam / "w"
+    try:
+        git(ROOT_THAT, "worktree", "add", "-q", "--detach", str(wt), "HEAD")
+        goc = git(wt, "rev-parse", "HEAD").stdout.decode().strip()
+        for ten, (thay, can, dau) in [("NEN", ({"ops/land/zz-nen.md": b"# x\n"}, None, None))] + list(DAU_DO.items()):
+            git(wt, "reset", "-q", "--hard", goc)
+            if thay == "sai_bam_bien_nhan":
+                p = wt / "ops/reviews/wp461-review-1-codex-verdict.receipt.yaml"
+                p.write_text(re.sub(r"(verdict_sha256: )[0-9a-f]{64}", r"\g<1>" + "0" * 64, p.read_text(encoding="utf-8"), count=1),
+                             encoding="utf-8")
+            else:
+                for d, nd in thay.items():
+                    (wt / d).write_bytes(nd)
+            git(wt, "add", "-A")
+            git(wt, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", ten)
+            dau_sha = git(wt, "rev-parse", "HEAD").stdout.decode().strip()
+            shutil.copyfile(CAY / "ops" / "ci_duong_nhanh.py", wt / "ops" / "ci_duong_nhanh.py")
+            env = dict(os.environ, CI_DUONG_NHANH_DAU_DO="1", CI_DUONG_NHANH_SU_KIEN="pull_request", CI_DUONG_NHANH_GOC=goc,
+                       CI_DUONG_NHANH_DAU=dau_sha, CI_DUONG_NHANH_MERGE=dau_sha)
+            kq = {}
+            for buoc_ten in ([KIEM_RE, "eol-policy survey"] if can is None else [can]):
+                lenh = _lenh_validator(buoc_ten)
+                lenh = "python ops/ci_duong_nhanh.py kiem-re" if buoc_ten == KIEM_RE and lenh else lenh
+                if lenh is None:
+                    kq[buoc_ten] = (None, "vang o duong nhanh")
+                    continue
+                r = subprocess.run(["bash", "-c", lenh.replace("python ", sys.executable + " ", 1)], cwd=wt, env=env,
+                                   capture_output=True, timeout=110)
+                kq[buoc_ten] = (r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace"))
+            if can is None:
+                bang(all(rc == 0 for rc, _ in kq.values()), f"doi chung phai DAT: { {k: v[0] for k, v in kq.items()} }")
+            else:
+                rc, ra = kq[can]
+                bang(rc not in (None, 0) and dau in ra, f"{ten}: buoc {can!r} phai DO voi dau {dau!r}, duoc rc={rc}: {ra[-300:]}")
+    finally:
+        subprocess.run(["git", "-C", str(ROOT_THAT), "worktree", "remove", "--force", str(wt)], capture_output=True)
+        shutil.rmtree(tam, ignore_errors=True)
+
+
 @ca
 def t54_kiem_re_doc_cap_cua_chuan_bi():
     """A7b: `kiem-re` voi cap goc/dau/hop do `main` (chuan-bi) xuat ⇒ DAT; cap vang hoac sai ⇒ DO — rieng push va dispatch."""
@@ -3815,6 +3890,9 @@ DOT_BIEN += [
     ("wp1113_dispatch_nhan_input_la", _ma('if type(vao) is not str or vao not in ("", "tu_dong", "day_du"):', "if False:"), ("t53_dispatch_input_che_do",)),
     ("wp1113_kiem_re_bo_land", _ma("           + kiem_land_evidence(kho, chay))", "           + [])"), ("t55_kiem_re_chay_validator_land_toan_cay",)),
     ("wp1113_land_bo_kiem_rc", _ma("    if getattr(r, \"returncode\", None) != 0:\n        return [f\"land_evidence_nguon", "    if False:\n        return [f\"land_evidence_nguon"), ("t55_kiem_re_chay_validator_land_toan_cay",)),
+    ("wp1113_dau_do_bo_t26", _ma('CA_DU_LIEU = ("t23_MOI_lease_THAT_trong_kho_phai_QUA", "t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi",', 'CA_DU_LIEU = ("t23_MOI_lease_THAT_trong_kho_phai_QUA",'), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
+    ("wp1113_dau_do_bo_land", _ma("           + kiem_land_evidence(kho, chay))", "           + [])"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
+    ("wp1113_dau_do_eol_che_do", _yml("      - name: eol-policy survey\n", "      - name: eol-policy survey\n        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
     ("wp1113_chuan_bi_khong_xuat_cap", _ma('if che_do == DUONG_NHANH else ""', 'if False else ""'), ("t54_kiem_re_doc_cap_cua_chuan_bi",)),
 ]
 

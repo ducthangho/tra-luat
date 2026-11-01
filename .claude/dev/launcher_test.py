@@ -56,6 +56,10 @@ CA: list = []
 
 
 def ca(fn):
+    # #1079 F05/F08 (Codex lượt 4): bộ chấm nhận diện "ca khác" theo `__code__`, nên hai ca chung
+    # `__code__` (cùng factory) là bất khả phân biệt — CẤM từ lúc đăng ký thay vì đoán lúc chấm.
+    if any(c.__code__ is fn.__code__ for c in CA):
+        raise ValueError(f"ca {fn.__name__} trung __code__ voi mot ca da dang ky — dung ham rieng")
     CA.append(fn)
     return fn
 
@@ -165,8 +169,7 @@ def bang(dieu_kien, thong_diep):
 def chot_tu_ca_khac(e, fn):
     """#1079 F05 (Codex lượt 2): tín hiệu sinh ra BÊN TRONG một ca đã đăng ký KHÁC (ca đích gọi
     sang nó) không phải chốt của ca đích. Dò từng khung traceback theo `__code__` của `CA`."""
-    # F08 (Codex lượt 3): ca sinh từ CÙNG factory có chung `__code__` — mã của CHÍNH ca đích không phải "ca khác".
-    khac = {c.__code__ for c in CA if c is not fn} - {fn.__code__}
+    khac = {c.__code__ for c in CA if c is not fn}
     tb = e.__traceback__
     while tb is not None:
         if tb.tb_frame.f_code in khac:
@@ -10234,74 +10237,62 @@ def r1079_review_khoa_neutral_phai_do_hanh_vi():
 
 
 @ca
-def r1079_review3_product_shared_template_own_assertion():
-    """Two registered cases may share code without calling one another."""
+def r1079_review4_product_shared_template_call_other():
+    """Shared code does not make a real call to another registered case an own assertion."""
     from unittest.mock import patch
-    calls = []
-    def make_case(name):
+    calls, registry = [], {}
+    def factory(name):
         def target():
             calls.append(name)
-            bang(LAUNCHER_DANG_DUNG == LAUNCHER, "own assertion " + name)
+            if LAUNCHER_DANG_DUNG == LAUNCHER:
+                return
+            if name == "review_target":
+                return registry["other"]()
+            bang(False, "assertion exclusively from registered other case")
         target.__name__ = name
         return target
-    target, alias = make_case("review_target"), make_case("review_alias")
-    neo = ("#!/usr/bin/env python3", "#!/usr/bin/env python3\n# inert mutation")
+    target, other = factory("review_target"), factory("review_other")
+    registry["other"] = other
+    anchor = ("#!/usr/bin/env python3", "#!/usr/bin/env python3\n# inert review mutation")
     with patch.dict(chay_dot_bien.__globals__, {
-            "CA": [target, alias], "DOT_BIEN_HOOK": [], "DOT_BIEN_HARNESS": [],
-            "DOT_BIEN": [("review_shared_template", neo, ["review_target"])]}):
+            "CA": [target, other], "DOT_BIEN_HOOK": [], "DOT_BIEN_HARNESS": [],
+            "DOT_BIEN": [("review_shared_call", anchor, ["review_target"])]}):
         result = chay_dot_bien()
-    bang(calls == ["review_target", "review_target"], f"unexpected calls: {calls}")
-    bang(result == (0, 0), f"own assertion rejected for sharing code: {result}")
+    bang(calls == ["review_target", "review_target", "review_other"], f"unexpected calls: {calls}")
+    bang(result == (1, 0), f"credited other case sharing target code: {result}")
 
 
 @ca
-def r1079_review3_harness_shared_template_own_assertion():
-    source = Path(__file__).read_text(encoding="utf-8")
-    addition = (
-        "\nREVIEW_SHARED_FLAG = 0\n"
-        "def _review_shared_factory(name):\n"
-        "    def target():\n"
-        "        bang(not REVIEW_SHARED_FLAG, 'own assertion ' + name)\n"
-        "    target.__name__ = name\n"
-        "    return ca(target)\n"
-        "_review_shared_factory('review_target')\n"
-        "_review_shared_factory('review_alias')\n")
-    source = source.replace('\nif __name__ == "__main__":',
-                            addition + '\nif __name__ == "__main__":')
-    with San() as s:
-        dev = _dung_cay_harness(s / "tree", source, LAUNCHER.read_text(encoding="utf-8"))
-        neutral = cham_lap_ca(dev, "review_target")
-        p = dev / "launcher_test.py"
-        p.write_text(p.read_text(encoding="utf-8").replace(
-            "\nREVIEW_SHARED_FLAG = 0\n", "\nREVIEW_SHARED_FLAG = 1\n", 1), encoding="utf-8")
-        mutant = cham_lap_ca(dev, "review_target")
-    bang(neutral == ("qua", "review_target"), f"neutral did not pass: {neutral}")
-    bang(mutant == ("giet", "review_target"), f"own assertion rejected for sharing code: {mutant}")
-
-
-@ca
-def r1079_review3_credential_shared_template_own_assertion():
+def r1079_ca_trung_ma_bi_tu_choi_luc_dang_ky():
+    """#1079 F05/F08 (Codex lượt 4): hai ca chung `__code__` (cùng factory) bị TỪ CHỐI lúc đăng ký —
+    `launcher_test.ca` lẫn `codex_cred_test.chay_suite` — nên bộ chấm theo `__code__` không phải đoán."""
     import runpy
-    from types import SimpleNamespace
     from unittest.mock import patch
-    ns = runpy.run_path(str(CC_TEST_DANG_DUNG), run_name="review_shared_template_cc")
-    runner, signal = ns["chay_suite"], ns["TinHieuChotCa"]
-    calls = []
-    def make_case(name):
-        def target(M):
-            calls.append(name)
-            if M.red:
-                raise signal("own assertion " + name)
-        target.__name__ = name
-        return target
-    target, alias = make_case("review_target"), make_case("review_alias")
-    results = []
-    for red in (False, True):
-        inert = SimpleNamespace(__nguon__="inert", __nhan__="inert", red=red)
-        with patch.dict(runner.__globals__, {"CA": [target, alias], "nap": lambda *_, m=inert: m}):
-            results.append(runner(inert, {"review_target"}))
-    bang(calls == ["review_target", "review_target"], f"unexpected calls: {calls}")
-    bang(results == [set(), {"review_target"}], f"own assertion rejected for sharing code: {results}")
+    def nha_may(ten):
+        def f(_=None):
+            bang(False, ten)
+        f.__name__ = ten
+        return f
+    a, b = nha_may("review_a"), nha_may("review_b")
+    th = {}
+    with patch.dict(ca.__globals__, {"CA": []}):
+        ca(a)
+        try:
+            ca(b)
+            th["launcher"] = "nhan"
+        except ValueError:
+            th["launcher"] = "tu_choi"
+        th["launcher_rieng"] = (ca(cham_mot_ca) is cham_mot_ca)   # hàm có mã riêng vẫn đăng ký được
+    from types import SimpleNamespace
+    ns = runpy.run_path(str(CC_TEST_DANG_DUNG), run_name="r1079_trung_ma_cc")
+    tro = SimpleNamespace(__nguon__="", __nhan__="tro")
+    with patch.dict(ns["chay_suite"].__globals__, {"CA": [a, b], "nap": lambda *_: tro}):
+        try:
+            ns["chay_suite"](tro)
+            th["cc"] = "nhan"
+        except ValueError:
+            th["cc"] = "tu_choi"
+    bang(th == {"launcher": "tu_choi", "launcher_rieng": True, "cc": "tu_choi"}, f"ca trung __code__ khong bi chan: {th}")
 
 
 # wp858 (L1): ca hành vi chạy NGUYÊN công thức qua cai_cong_cu.sh, installer là stub (POSIX); ca hình dạng thuần Python
@@ -14408,10 +14399,8 @@ DOT_BIEN_HOOK = [
     ("wp1079_cc_bo_kiem_ca_khac", ("        if tb.tb_frame.f_code in khac:\n            return f\"{ten}(chot cua ca khac)\"",
                                    "        if False:\n            return f\"{ten}(chot cua ca khac)\""),
      ["r1079_review_credential_chot_ca_khac_khong_la_giet"], "cc_test"),
-    ("wp1079_cc_f08_tinh_ma_chinh_ca_la_khac",
-     ("    khac = ({c.__code__ for c in CA if c is not ca} - {ca.__code__}) if ca is not None else set()",
-      "    khac = {c.__code__ for c in CA if c is not ca} if ca is not None else set()"),
-     ["r1079_review3_credential_shared_template_own_assertion"], "cc_test"),
+    ("wp1079_cc_cho_trung_ma", ("    if len({c.__code__ for c in CA}) != len(CA):", "    if False:"),
+     ["r1079_ca_trung_ma_bi_tu_choi_luc_dang_ky"], "cc_test"),
     ("wp1079_cc_chay_suite_bo_ten_do", ("            do.add(ten_do(ca.__name__, e, ca))",
                                         "            do.add(ca.__name__)  # do.add(ten_do(ca.__name__, e, ca))"),
      ["r1079_cc_chay_suite_phai_do_hanh_vi"], "cc_test"),
@@ -14488,9 +14477,9 @@ DOT_BIEN_HARNESS = [
     ("wp1079_bo_kiem_ca_khac", ("        if tb.tb_frame.f_code in khac:\n            return True\n        tb = tb.tb_next\n    return False",
                                 "        if False:\n            return True\n        tb = tb.tb_next\n    return False"),
      ["r1079_review_san_pham_chot_ca_khac_khong_la_giet", "r1079_review_harness_chot_ca_khac_khong_la_giet"]),
-    ("wp1079_f08_tinh_ma_chinh_ca_la_khac", ("    khac = {c.__code__ for c in CA if c is not fn} - {fn.__code__}",
-                                             "    khac = {c.__code__ for c in CA if c is not fn}"),
-     ["r1079_review3_product_shared_template_own_assertion", "r1079_review3_harness_shared_template_own_assertion"]),
+    ("wp1079_ca_cho_trung_ma", ("    if any(c.__code__ is fn.__code__ for c in CA):\n        raise ValueError(",
+                                "    if False:\n        raise ValueError("),
+     ["r1079_ca_trung_ma_bi_tu_choi_luc_dang_ky"]),
     ("wp1079_bo_kiem_ca_dich_vang", ("            if sorted(fn.__name__ for fn in dich) != sorted(set(phai_chet)):   # #1079 F06",
                                      "            if False:   # #1079 F06"),
      ["r1079_review_ca_dich_vang_phai_lam_cong_do", "r1079_chay_dot_bien_noi_neutral_va_cham_theo_loai"]),
@@ -14773,8 +14762,9 @@ def _dung_cay_harness(goc_cay, ma_test, ma_launcher):
     dev.mkdir(parents=True)
     (dev / "launcher_test.py").write_text(ma_test, encoding="utf-8")
     (dev / "launcher.py").write_text(ma_launcher, encoding="utf-8")
-    if LAUNCHER.with_name("codex_cred.py").is_file():
-        shutil.copy2(LAUNCHER.with_name("codex_cred.py"), dev)
+    for ten in ("codex_cred.py", "codex_cred_test.py"):   # ca r1079 nạp codex_cred_test qua CC_TEST_DANG_DUNG
+        if LAUNCHER.with_name(ten).is_file():
+            shutil.copy2(LAUNCHER.with_name(ten), dev)
     shutil.copytree(LAUNCHER.parents[1] / "hooks", goc_cay / ".claude" / "hooks")
     (goc_cay / "ops").mkdir()
     shutil.copy2(LAUNCHER.parents[2] / "ops" / "bash_nen.py", goc_cay / "ops")

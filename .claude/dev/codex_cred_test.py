@@ -581,8 +581,7 @@ def ten_do(ten: str, e: BaseException, ca=None) -> str:
     F05 (Codex lượt 2): chốt sinh BÊN TRONG một ca đã đăng ký KHÁC mang `(chot cua ca khac)`."""
     if not la_chot_cua_suite(e):
         return f"{ten}({type(e).__name__})"
-    # F08 (Codex lượt 3): ca cùng factory có chung `__code__` — mã của CHÍNH ca đích không phải "ca khác".
-    khac = ({c.__code__ for c in CA if c is not ca} - {ca.__code__}) if ca is not None else set()
+    khac = {c.__code__ for c in CA if c is not ca} if ca is not None else set()
     tb = e.__traceback__
     while tb is not None:
         if tb.tb_frame.f_code in khac:
@@ -594,8 +593,12 @@ def ten_do(ten: str, e: BaseException, ca=None) -> str:
 def chay_suite(M, chi_chay: set[str] | None = None) -> set[str]:
     """Chạy toàn bộ hoặc đúng `chi_chay`, trả tập tên ca ĐỎ.
 
+    #1079 F05/F08 (Codex lượt 4): hai ca chung `__code__` thì `ten_do` không phân biệt được — từ chối.
+
     #1079 F01: ca đỏ vì lỗi VÔ CAN (không qua `la_chot_cua_suite`) mang tên
     `<ca>(<Loại>)`, nên không bao giờ khớp `phai_chet` — tín dụng giả, không phải giết."""
+    if len({c.__code__ for c in CA}) != len(CA):
+        raise ValueError("CA co hai ca trung __code__ — dung ham rieng cho moi ca")
     do = set()
     for ca in CA:
         if chi_chay is not None and ca.__name__ not in chi_chay:

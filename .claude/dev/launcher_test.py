@@ -55,11 +55,17 @@ MA_WORKTREE, MA_PROBE = 14, 15
 CA: list = []
 
 
+def kiem_registry(ds):
+    """#1079 F05/F08 (Codex lượt 4–5): bộ chấm nhận diện "ca khác" theo `__code__`, nên hai ca chung
+    `__code__` (cùng factory) là bất khả phân biệt — TỪ CHỐI. Gọi ở `ca` VÀ ở mọi điểm vào chạy ca
+    (`main`, `chay_dot_bien`, `chot_tu_ca_khac`), vì `CA` còn có thể bị GÁN THẲNG, không qua `ca`."""
+    trung = [c.__name__ for i, c in enumerate(ds) if any(c.__code__ is d.__code__ for d in ds[:i])]
+    if trung:
+        raise ValueError(f"CA co ca trung __code__ voi mot ca da dang ky: {trung} — dung ham rieng")
+
+
 def ca(fn):
-    # #1079 F05/F08 (Codex lượt 4): bộ chấm nhận diện "ca khác" theo `__code__`, nên hai ca chung
-    # `__code__` (cùng factory) là bất khả phân biệt — CẤM từ lúc đăng ký thay vì đoán lúc chấm.
-    if any(c.__code__ is fn.__code__ for c in CA):
-        raise ValueError(f"ca {fn.__name__} trung __code__ voi mot ca da dang ky — dung ham rieng")
+    kiem_registry([*CA, fn])
     CA.append(fn)
     return fn
 
@@ -169,6 +175,7 @@ def bang(dieu_kien, thong_diep):
 def chot_tu_ca_khac(e, fn):
     """#1079 F05 (Codex lượt 2): tín hiệu sinh ra BÊN TRONG một ca đã đăng ký KHÁC (ca đích gọi
     sang nó) không phải chốt của ca đích. Dò từng khung traceback theo `__code__` của `CA`."""
+    kiem_registry(CA)
     khac = {c.__code__ for c in CA if c is not fn}
     tb = e.__traceback__
     while tb is not None:
@@ -10257,9 +10264,11 @@ def r1079_review4_product_shared_template_call_other():
     with patch.dict(chay_dot_bien.__globals__, {
             "CA": [target, other], "DOT_BIEN_HOOK": [], "DOT_BIEN_HARNESS": [],
             "DOT_BIEN": [("review_shared_call", anchor, ["review_target"])]}):
-        result = chay_dot_bien()
-    bang(calls == ["review_target", "review_target", "review_other"], f"unexpected calls: {calls}")
-    bang(result == (1, 0), f"credited other case sharing target code: {result}")
+        try:   # #1079 (Codex lượt 5): registry chung `__code__` bị TỪ CHỐI trước khi chạy ca nào
+            result = chay_dot_bien()
+        except ValueError as e:
+            result = "tu_choi" if "__code__" in str(e) else repr(e)
+    bang(result == "tu_choi" and not calls, f"credited/ran other case sharing target code: {result} {calls}")
 
 
 @ca
@@ -10293,6 +10302,62 @@ def r1079_ca_trung_ma_bi_tu_choi_luc_dang_ky():
         except ValueError:
             th["cc"] = "tu_choi"
     bang(th == {"launcher": "tu_choi", "launcher_rieng": True, "cc": "tu_choi"}, f"ca trung __code__ khong bi chan: {th}")
+
+
+
+@ca
+def r1079_review5_product_direct_CA_must_reject_shared_code():
+    from unittest.mock import patch
+    calls = []
+    def factory(name):
+        def target():
+            calls.append(name)
+            bang(LAUNCHER_DANG_DUNG == LAUNCHER, 'own assertion ' + name)
+        target.__name__ = name
+        return target
+    target, alias = factory('review_target'), factory('review_alias')
+    rejected = False
+    with patch.dict(chay_dot_bien.__globals__, {
+            'CA': [target, alias], 'DOT_BIEN_HOOK': [], 'DOT_BIEN_HARNESS': [],
+            'DOT_BIEN': [('review_direct_registry', ('#!/usr/bin/env python3',
+                          '#!/usr/bin/env python3\n# inert mutation'), ['review_target'])]}):
+        try:
+            chay_dot_bien()
+        except ValueError as e:
+            rejected = '__code__' in str(e)
+    bang(rejected and not calls,
+         f'direct CA with shared code reached cases instead of registration rejection: {calls}')
+
+
+@ca
+def r1079_review5_harness_direct_CA_must_reject_before_running():
+    source = Path(__file__).read_text(encoding='utf-8')
+    results = {}
+    with San() as s:
+        for mode, args in (('default', []), ('repeat', ['--lap-ca', 'review_target', '--lan', '1']),
+                           ('mutants', ['--dot-bien'])):
+            marker = s / (mode + '.log')
+            extra = (
+                '\nREVIEW_MUTATED = 0\n'
+                'def review_factory(name):\n'
+                '    def target():\n'
+                f'        p = Path({str(marker)!r})\n'
+                '        with p.open("a") as f: f.write(name + "\\n")\n'
+                '        bang(not REVIEW_MUTATED, "own assertion " + name)\n'
+                '    target.__name__ = name\n'
+                '    return target\n'
+                'CA = [review_factory("review_target"), review_factory("review_alias")]\n'
+                'DOT_BIEN = [("review_direct_registry", ("#!/usr/bin/env python3", '
+                '"#!/usr/bin/env python3\\n# inert"), ["review_target"])]\n'
+                'DOT_BIEN_HOOK = []\nDOT_BIEN_HARNESS = []\n')
+            text = source.replace('\nif __name__ == "__main__":',
+                                  extra + '\nif __name__ == "__main__":')
+            dev = _dung_cay_harness(s / mode, text, LAUNCHER.read_text(encoding='utf-8'))
+            p = subprocess.run([PY, str(dev / 'launcher_test.py'), *args], cwd=dev,
+                               capture_output=True, text=True, timeout=30,
+                               env=dict(os.environ, PYTHONDONTWRITEBYTECODE='1'))
+            results[mode] = (p.returncode != 0 and '__code__' in p.stderr and not marker.exists())
+    bang(all(results.values()), f'direct CA bypassed shared-code registration guard: {results}')
 
 
 # wp858 (L1): ca hành vi chạy NGUYÊN công thức qua cai_cong_cu.sh, installer là stub (POSIX); ca hình dạng thuần Python
@@ -14477,9 +14542,14 @@ DOT_BIEN_HARNESS = [
     ("wp1079_bo_kiem_ca_khac", ("        if tb.tb_frame.f_code in khac:\n            return True\n        tb = tb.tb_next\n    return False",
                                 "        if False:\n            return True\n        tb = tb.tb_next\n    return False"),
      ["r1079_review_san_pham_chot_ca_khac_khong_la_giet", "r1079_review_harness_chot_ca_khac_khong_la_giet"]),
-    ("wp1079_ca_cho_trung_ma", ("    if any(c.__code__ is fn.__code__ for c in CA):\n        raise ValueError(",
-                                "    if False:\n        raise ValueError("),
+    ("wp1079_ca_cho_trung_ma", ("def ca(fn):\n    kiem_registry([*CA, fn])\n", "def ca(fn):\n"),
      ["r1079_ca_trung_ma_bi_tu_choi_luc_dang_ky"]),
+    ("wp1079_registry_bo_kiem_chay_dot_bien",
+     ("    kiem_registry(CA)   # #1079 F08 (Codex lượt 5): gọi thẳng `chay_dot_bien` cũng phải qua chốt\n", ""),
+     ["r1079_review5_product_direct_CA_must_reject_shared_code"]),
+    ("wp1079_registry_bo_kiem_main",
+     ("    kiem_registry(CA)   # #1079 F08 (Codex lượt 5): trước MỌI chế độ chạy ca (mặc định, --lap-ca, --dot-bien)\n", ""),
+     ["r1079_review5_harness_direct_CA_must_reject_before_running"]),
     ("wp1079_bo_kiem_ca_dich_vang", ("            if sorted(fn.__name__ for fn in dich) != sorted(set(phai_chet)):   # #1079 F06",
                                      "            if False:   # #1079 F06"),
      ["r1079_review_ca_dich_vang_phai_lam_cong_do", "r1079_chay_dot_bien_noi_neutral_va_cham_theo_loai"]),
@@ -14528,6 +14598,7 @@ def chay_dot_bien() -> int:
     bị ghi, nên dù bị SIGKILL (không bắt được) cây làm việc vẫn nguyên.
     """
     global LAUNCHER_DANG_DUNG, HOOK_DANG_DUNG, YAML_DANG_DUNG, CAI_SH_DANG_DUNG, SELFTEST_DANG_DUNG, CONG_CU_DANG_DUNG, CC_TEST_DANG_DUNG
+    kiem_registry(CA)   # #1079 F08 (Codex lượt 5): gọi thẳng `chay_dot_bien` cũng phải qua chốt
     goc = LAUNCHER.read_text(encoding="utf-8")
     goc_test = Path(__file__).read_text(encoding="utf-8")
     hong = 0
@@ -14933,6 +15004,7 @@ def main() -> int:
     if a.moi_truong:
         print(json.dumps(mt, ensure_ascii=False, indent=2, default=str))
         return 0
+    kiem_registry(CA)   # #1079 F08 (Codex lượt 5): trước MỌI chế độ chạy ca (mặc định, --lap-ca, --dot-bien)
     print(_mot_dong_moi_truong(mt))
     print(f"nhom tien trinh: {_tu_tach_nhom_neu_can()}")
     if a.dot_bien:

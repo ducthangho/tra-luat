@@ -1,85 +1,474 @@
 # Trich log run 41173244891 (push master, merge 3dfb973, run_attempt 1), tai qua REST actions/jobs/<id>/logs boi phien ghi so 2026-11-01.
-# Moi job: runner_id, sha256 + so byte log day du (log goc KHONG luu trong kho; GitHub giu log co han), dong checkout
-# (log -1 --format=%H cua actions/checkout), so dong 'BỎ QUA', dau hieu duong/am cua gate output, so dong ##[error].
+# Log goc KHONG luu trong kho (GitHub giu log co han); moi job ghi sha256 + so byte log day du de doi chieu.
+# Moi job: checkout (git log -1 --format=%H cua actions/checkout), roi TUNG BUOC `Run` theo thu tu: lenh (dong dau; ban in lai
+# cua script bi loai), dong '"ok": true|false' dau tien neu buoc in JSON, va toi da 3 dong output cuoi khac rong cua buoc.
+# rc: step.conclusion cua readback-jobs-41173244891.json (success = rc 0); log GitHub in '##[error]Process completed with exit
+# code N' khi khac 0 — dem o dong '##[error]'. Buoc 'skipped' giu rieng, khong tinh dat/hong. Buoc khong in gi: '(khong co output)'.
 
 == job 124462897887 | chuan-bi | runner_id 1000028314 | success | log sha256 3fa4729ab9cdf7d9c126b1eae751361bf670c3b8632ee171f628b5a28a950fdd | 3519 byte
    checkout: KHONG CO BUOC CHECKOUT
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: echo "DUONG_NHANH: khong phan loai - su_kien=${SU_KIEN} khong phai pull_request, luon DAY_DU"
+       | Set output 'os'
+       | Set output 'che_do'
+       | Cleaning up orphan processes
+   step.conclusion: 1=success, 2=skipped, 3=skipped, 4=success, 5=success
 == job 124462913173 | gate (ubuntu-latest) | runner_id 1000028316 | success | log sha256 651cb8a23e9357515fe282fd33eb46c0235051a03a7255f67f27d4e469d358fc | 693584 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 1 · dong ##[error]: 0
-   1x == ci_phamvi_test 7/7 ==
-   2x == gen_instructions selftest 44/44 ==
-   1x == tl selftest 1774/1774 ==
-   1x == transport selftest 12/12 ==
-   2x TỔNG: ĐẠT
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+       | (khong co output)
+   - Run: bash ops/cai_actionlint.sh
+       | /home/runner/work/_temp/actionlint
+   - Run: bash ops/cai_cong_cu.sh shellcheck
+       | cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: bash ops/cai_cong_cu.sh rg
+       | cai_cong_cu: 'rg' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: python ops/cong_cu.py kiem-tra --json
+       | TỰ KIỂM SONG SONG (N126): ĐẠT
+       | BÁN KÍNH ĐỘT BIẾN (490 đột biến): GIAO cho job `gate-cong-cu` (mảnh) + `gate-cong-cu-gop` (gom) — KHÔNG đo trong tiến trình này (CONG_CU_TEST_BAN_KINH=manh)
+       | SỐ LIỆU: ca=61 · đột biến=490 (giao mảnh) · lỗi đột biến=0 · tiền kiểm bỏ qua=0 · cổng cây thật=ĐẠT
+   - Run: python -m pip install --quiet ruff==0.15.15
+       | ruff 0.15.15
+   - Run: python -m py_compile scripts/tl.py scripts/tl_boot.py scripts/gen_instructions.py scripts/tl_core/__init__.py scripts/tl_core/deterministic.py scripts/tl_core/j
+       | (khong co output)
+   - Run: python .claude/dev/codex_cred_test.py
+       | ĐỎ: không đọc credential an toàn được
+       | SỐ LIỆU:  ca 18  ·  đột biến 18
+       | TỔNG: ĐẠT
+   - Run: python .claude/dev/idiom_py_test.py
+       | tự chứng minh KHÔNG RỖNG (ca đích ĐỎ · nền vẫn phải xanh trước đó):
+       | SỐ LIỆU (đếm bằng máy):
+       | TỔNG: ĐẠT
+   - Run: python .githooks/eol_policy_test.py
+       | PASS case_ho_binary_thieu_khai_thi_bi_bat
+       | PASS case_binary_giu_nguyen_byte_qua_renormalize
+       | 30/30 dat
+   - Run: python .githooks/pre_push_test.py
+       | PASS case_unexpected_gate_exception_blocks_master
+       | PASS case_missing_python_blocks_with_reason
+       | 9/9 dat
+   - Run: python .githooks/eol_policy.py --all --json
+       ok-line: "ok": true,
+       | {
+       | }
+   - Run: python .github/checks/bundle_fragment_check.py --json
+       ok-line: "ok": true,
+       | {
+       | }
+   - Run: python scripts/gen_instructions.py --selftest
+       | == gen_instructions selftest 44/44 ==
+   - Run: python scripts/tl_core/command_registry_test.py
+       | ----------------------------------------------------------------------
+       | Ran 10 tests in 0.666s
+       | OK
+   - Run: set -euo pipefail
+       ok-line: "ok": true,
+       | [gas-retry] list: lỗi transient (webapp GET list: URLError: <urlopen error TL_SELFTEST_NO_NET…) → thử lại 2/2 sau 3.0s
+       | == tl selftest 1774/1774 ==
+       | {"ok": true, "status": "pass", "name": "tl-selftest", "returncode": 0, "duration_seconds": 261.339078, "evidence": "/home/runner/work/tra-luat/tra-luat/scripts/.tl_state/gate/tl-selftest-Linux.json"}
+   - Run: python scripts/tl.py workflow-audit --strict --json
+       ok-line: "ok": true,
+       | {
+       | }
+   - Run: python scripts/tl.py golden-test --json
+       ok-line: "ok": true,
+       | {
+       | }
+   - Run: python scripts/tl.py doc-claims-check --strict --json
+       ok-line: "ok": true,
+       | {
+       | }
+   - Run: python scripts/tl.py determinism-audit --strict --json
+       ok-line: "ok": true,
+       | {
+       | }
+   - Run: python .github/checks/ci_phamvi.py --kiem-bam
+       | OK ci_phamvi (ve BAM)
+   - Run: python .github/checks/ci_phamvi_test.py
+       | == ci_phamvi_test 7/7 ==
+   - Run: python scripts/tl.py release-check --full --json
+       ok-line: "ok": true,
+       | {
+       | }
+   - Run: python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
+       ok-line: "ok": true,
+       | {
+       | }
+   - Run: python scripts/tl.py release-bundle --out dist/a.zip --json > /dev/null
+       | bundle sha256 = eba36a73c272dae3ff25e1725ccea48105a3f0c24dde3b77c606a11d156bc846
+   - Run: python scripts/tl_boot.py --version
+       | tl 1.36.69 (webapp target 2.21.2p)
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 11=skipped, 12=skipped, 13=success, 14=success, 15=success, 16=success, 17=success, 18=success, 19=success, 20=success, 21=success, 22=skipped, 23=success, 24=success, 25=success, 26=success, 27=success, 28=success, 29=success, 30=success, 31=success, 32=success, 33=skipped, 34=success, 35=success, 69=success, 70=success, 71=success
 == job 124462913174 | gate-ops (ubuntu-latest) | runner_id 1000028315 | success | log sha256 630ea70a9c929bf57deca4db06301d24c5bc4e9c1a066cb7feeee443f686b955 | 386342 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
-   1x TONG: DAT
-   1x TỔNG: ĐẠT
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+       | (khong co output)
+   - Run: bash ops/cai_cong_cu.sh shellcheck
+       | cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: bash ops/cai_cong_cu.sh rg
+       | cai_cong_cu: 'rg' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: python ops/ci_duong_nhanh_test.py
+       | KIEM KE: ca hanh_vi=74 + cau_truc_yaml=16 + so_dang_ky=3 + tu_kiem=11 = 104 · dot bien .claude/dev/ci_dang_ky_test.py=2 + .github/workflows/ci.yml=83 + ops/ci_duong_nhanh.py=211 + ops/ci_duong_nhanh_test.py=93 + ops/leas
+       | TU KIEM PHAN HANG: DAT (5 mau rc, 3 dot bien that)
+       | TONG: DAT
+   - Run: python ops/bien_nhan_v2_test.py
+       | ĐỘT BIẾN (mỗi cái phải làm ĐÚNG ca đích đỏ):
+       | bien_nhan_v2_test: 95/95 ca đạt · 137/137 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 119/137 đột biến thường khai đối chứng
+       | TỔNG: ĐẠT
+   - Run: bash ops/chay_lease_publish_test.sh
+       | >>> vao t217_a9_regex_dong_bo_LEASE_ID_san_pham 2026-10-31T06:29:27Z
+       | <<< ra t217_a9_regex_dong_bo_LEASE_ID_san_pham 0.026s QUA
+       | lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
+   - Run: pwsh -NoProfile -File scripts/don-nhanh_test.ps1
+       | don-nhanh: 21/21 dat
+   - Run: set -euo pipefail
+       | [cach-ly] cap cgroup     : DUOC (tl-gate-88336-58bc47f5)
+       | [cach-ly] CO CHE THAT SU : cgroup2
+       | gate lifecycle tests: 28/28 ca QUA (bo qua 0, hong 0)
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=skipped, 9=skipped, 10=success, 11=success, 12=success, 13=success, 14=success, 15=skipped, 29=success, 30=success, 31=success
 == job 124462913238 | gate-packet-loop (ubuntu-latest) | runner_id 1000028321 | success | log sha256 9230c8b5a0ef38e0e9f88debb5fcc9b7ee85526a3b9f47b38deb3f489feb1ab8 | 299882 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 3 · dong ##[error]: 0
-   1x TỔNG: ĐẠT
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+       | (khong co output)
+   - Run: bash ops/cai_actionlint.sh
+       | /home/runner/work/_temp/actionlint
+   - Run: bash ops/cai_cong_cu.sh shellcheck
+       | cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: bash ops/cai_cong_cu.sh rg
+       | cai_cong_cu: 'rg' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: python ops/cong_cu.py kiem-tra --json
+       | {
+       | }
+   - Run: python -m pip install --quiet ruff==0.15.15
+       | ruff 0.15.15
+   - Run: python .claude/dev/packet_loop_test.py
+       | AC 18 — mỗi LỚP LÁCH phải có đột biến của nó:
+       | SỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):
+       | TỔNG: ĐẠT
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 11=skipped, 12=success, 23=success, 24=success, 25=success
 == job 124462913273 | gate-cong-cu (ubuntu-latest, 0) | runner_id 1000028317 | success | log sha256 07062df1aeacb91756663fab81c894da4a0a3fe985cc44a489fe2cb5bc3f8614 | 130535 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+       | (khong co output)
+   - Run: bash ops/cai_actionlint.sh
+       | /home/runner/work/_temp/actionlint
+   - Run: bash ops/cai_cong_cu.sh shellcheck
+       | cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: bash ops/cai_cong_cu.sh rg
+       | cai_cong_cu: 'rg' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: python ops/cong_cu.py kiem-tra --json
+       | cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+       | BÁN KÍNH ĐỘT BIẾN — MẢNH 0/8 (62/490 đột biến; 4 tiến trình):
+       | MẢNH 0/8: 62/62 đột biến bán kính 1 · ghi manh/manh-0.txt
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124462913296 | gate-cong-cu (ubuntu-latest, 7) | runner_id 1000028323 | success | log sha256 71f10c7a981008c3caffa34b97cc5899a0d5c1a3de6902cd8c8c5dd588795a4f | 130314 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+       | (khong co output)
+   - Run: bash ops/cai_actionlint.sh
+       | /home/runner/work/_temp/actionlint
+   - Run: bash ops/cai_cong_cu.sh shellcheck
+       | cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: bash ops/cai_cong_cu.sh rg
+       | cai_cong_cu: 'rg' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: python ops/cong_cu.py kiem-tra --json
+       | cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+       | BÁN KÍNH ĐỘT BIẾN — MẢNH 7/8 (61/490 đột biến; 4 tiến trình):
+       | MẢNH 7/8: 61/61 đột biến bán kính 1 · ghi manh/manh-7.txt
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124462913297 | gate-nhanh-manh (ubuntu-latest, 0) | runner_id 1000028318 | success | log sha256 5268727514fb23ed85b6aa8107f2ee4a2055c7ec55db1b5a7c430e0c7a4b5e83 | 118443 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python ops/nhanh_don_duoc_test.py
+       | TU KIEM: 1/1
+       | KET QUA ca:r518: passed (0.0s)
+       | targeted_mutant_gate MANH 0/8: rc=0 · passed 39/39
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124462913299 | gate-cong-cu (ubuntu-latest, 3) | runner_id 1000028325 | success | log sha256 eacf40f68596f9c858baf53e0e640fb9f854c08a12da1fa038e24f89327d84da | 130298 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+       | (khong co output)
+   - Run: bash ops/cai_actionlint.sh
+       | /home/runner/work/_temp/actionlint
+   - Run: bash ops/cai_cong_cu.sh shellcheck
+       | cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: bash ops/cai_cong_cu.sh rg
+       | cai_cong_cu: 'rg' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: python ops/cong_cu.py kiem-tra --json
+       | cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+       | BÁN KÍNH ĐỘT BIẾN — MẢNH 3/8 (61/490 đột biến; 4 tiến trình):
+       | MẢNH 3/8: 61/61 đột biến bán kính 1 · ghi manh/manh-3.txt
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124462913310 | gate-nhanh-manh (ubuntu-latest, 3) | runner_id 1000028319 | success | log sha256 189646bd96ab7fc72b3554e5bd8c828358fe92998d1cb33b1877f7dfe97918f7 | 118863 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python ops/nhanh_don_duoc_test.py
+       | TU KIEM: 1/1
+       | KET QUA ca:r507: passed (0.0s)
+       | targeted_mutant_gate MANH 3/8: rc=0 · passed 40/40
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124462913312 | gate-cong-cu (ubuntu-latest, 2) | runner_id 1000028322 | success | log sha256 36ffcb90346ee72fc5ebf0fa8b5e74cacdf212b6197541d1ff8ec2518df0cc78 | 130370 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+       | (khong co output)
+   - Run: bash ops/cai_actionlint.sh
+       | /home/runner/work/_temp/actionlint
+   - Run: bash ops/cai_cong_cu.sh shellcheck
+       | cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: bash ops/cai_cong_cu.sh rg
+       | cai_cong_cu: 'rg' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: python ops/cong_cu.py kiem-tra --json
+       | cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+       | BÁN KÍNH ĐỘT BIẾN — MẢNH 2/8 (61/490 đột biến; 4 tiến trình):
+       | MẢNH 2/8: 61/61 đột biến bán kính 1 · ghi manh/manh-2.txt
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124462913319 | gate-nhanh-manh (ubuntu-latest, 1) | runner_id 1000028320 | success | log sha256 06b6daefd2679cda70e71297d853356f6749daa68c93f86d0c53ce1f2f9a8f77 | 119183 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python ops/nhanh_don_duoc_test.py
+       | TU KIEM: 1/1
+       | KET QUA ca:r524: passed (0.0s)
+       | targeted_mutant_gate MANH 1/8: rc=0 · passed 41/41
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124462913330 | gate-cong-cu (ubuntu-latest, 4) | runner_id 1000028329 | success | log sha256 fd5915fea6bbf8e5c4a91b9e91fd25ff14cfa897cb0166a1ba36457ed279d4d5 | 130340 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+       | (khong co output)
+   - Run: bash ops/cai_actionlint.sh
+       | /home/runner/work/_temp/actionlint
+   - Run: bash ops/cai_cong_cu.sh shellcheck
+       | cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: bash ops/cai_cong_cu.sh rg
+       | cai_cong_cu: 'rg' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: python ops/cong_cu.py kiem-tra --json
+       | cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+       | BÁN KÍNH ĐỘT BIẾN — MẢNH 4/8 (61/490 đột biến; 4 tiến trình):
+       | MẢNH 4/8: 61/61 đột biến bán kính 1 · ghi manh/manh-4.txt
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124462913340 | gate-nhanh-manh (ubuntu-latest, 4) | runner_id 1000028327 | success | log sha256 4b76ab591774d979283377e22ff0184901dc8268be71c2d2d73c495992184db7 | 118561 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python ops/nhanh_don_duoc_test.py
+       | TU KIEM: 1/1
+       | KET QUA ca:r541: passed (0.1s)
+       | targeted_mutant_gate MANH 4/8: rc=0 · passed 39/39
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124462913345 | gate-nhanh-manh (ubuntu-latest, 5) | runner_id 1000028324 | success | log sha256 55264ba088fd26c7d304c7a7b3c329b58177a59118db8401545ad8ed5fe86a3e | 119318 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python ops/nhanh_don_duoc_test.py
+       | TU KIEM: 1/1
+       | KET QUA ca:r503: passed (0.0s)
+       | targeted_mutant_gate MANH 5/8: rc=0 · passed 41/41
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124462913361 | gate-cong-cu (ubuntu-latest, 1) | runner_id 1000028330 | success | log sha256 22c797f96165f63a4e669d671fe6d0f9ecbb4f1825f72211a450541ceca73a5a | 130528 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+       | (khong co output)
+   - Run: bash ops/cai_actionlint.sh
+       | /home/runner/work/_temp/actionlint
+   - Run: bash ops/cai_cong_cu.sh shellcheck
+       | cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: bash ops/cai_cong_cu.sh rg
+       | cai_cong_cu: 'rg' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: python ops/cong_cu.py kiem-tra --json
+       | cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+       | BÁN KÍNH ĐỘT BIẾN — MẢNH 1/8 (62/490 đột biến; 4 tiến trình):
+       | MẢNH 1/8: 62/62 đột biến bán kính 1 · ghi manh/manh-1.txt
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124462913371 | gate-nhanh-manh (ubuntu-latest, 7) | runner_id 1000028326 | success | log sha256 659a53065f3d35f78df61ee5c20b2f2319b2559755ee55df94d5fb86559e5ce7 | 119560 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python ops/nhanh_don_duoc_test.py
+       | TU KIEM: 1/1
+       | KET QUA ca:r510: passed (0.0s)
+       | targeted_mutant_gate MANH 7/8: rc=0 · passed 42/42
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124462913373 | gate-cong-cu (ubuntu-latest, 6) | runner_id 1000028333 | success | log sha256 b45661978ec16a96d4bcb4084b1bc8fa189ff208255c2a0ee69209888be2c4e1 | 130221 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+       | (khong co output)
+   - Run: bash ops/cai_actionlint.sh
+       | /home/runner/work/_temp/actionlint
+   - Run: bash ops/cai_cong_cu.sh shellcheck
+       | cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: bash ops/cai_cong_cu.sh rg
+       | cai_cong_cu: 'rg' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: python ops/cong_cu.py kiem-tra --json
+       | cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+       | BÁN KÍNH ĐỘT BIẾN — MẢNH 6/8 (61/490 đột biến; 4 tiến trình):
+       | MẢNH 6/8: 61/61 đột biến bán kính 1 · ghi manh/manh-6.txt
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124462913397 | gate-nhanh-manh (ubuntu-latest, 6) | runner_id 1000028328 | success | log sha256 6a72ac3dc9ae0112933b177045ceb52d7e341126e01be87c60d9b2029cd1cad4 | 118764 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python ops/nhanh_don_duoc_test.py
+       | TU KIEM: 1/1
+       | KET QUA ca:r527: passed (0.1s)
+       | targeted_mutant_gate MANH 6/8: rc=0 · passed 39/39
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124462913424 | gate-cong-cu (ubuntu-latest, 5) | runner_id 1000028332 | success | log sha256 48a94ceffd04ed10803a12a5d1f3f4bd147d36c1b90a70d309960547bbdd5cf0 | 130194 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+       | (khong co output)
+   - Run: bash ops/cai_actionlint.sh
+       | /home/runner/work/_temp/actionlint
+   - Run: bash ops/cai_cong_cu.sh shellcheck
+       | cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: bash ops/cai_cong_cu.sh rg
+       | cai_cong_cu: 'rg' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: python ops/cong_cu.py kiem-tra --json
+       | cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+       | BÁN KÍNH ĐỘT BIẾN — MẢNH 5/8 (61/490 đột biến; 4 tiến trình):
+       | MẢNH 5/8: 61/61 đột biến bán kính 1 · ghi manh/manh-5.txt
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124462913465 | gate-nhanh-manh (ubuntu-latest, 2) | runner_id 1000028331 | success | log sha256 f8d030a965a93b95d6bb1d9a85762cbd65a4eb9857204a0dd2dfedfef1fdd9b7 | 118650 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python ops/nhanh_don_duoc_test.py
+       | TU KIEM: 1/1
+       | KET QUA ca:r511: passed (0.0s)
+       | targeted_mutant_gate MANH 2/8: rc=0 · passed 40/40
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124463256851 | gate-nhanh-gop (ubuntu-latest) | runner_id 1000028335 | success | log sha256 c9b594b964c9048b3db7bee59ed5e28e2ed8c2505f259e077ea9e2e496ce39de | 114260 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python ops/nhanh_don_duoc_test.py --gop-dich manh
+       | CA NEN: 56/56 passed · TU DOT BIEN (chi ca dich): 255/255 giet · DOT BIEN SAN PHAM: 10/10 giet
+       | DUONG GANG: 84.48s / tran 540s · RAM dinh 130.2 MB · chay lai 0
+       | targeted_mutant_gate: DAT — KHONG phai full mutant audit; full_mutant_audit van BAT BUOC truoc merge/land/release
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124463313157 | gate-registry (ubuntu-latest) | runner_id 1000028336 | success | log sha256 26098bdba6ac946911ec19ec282e151b57ff8d2ce368936d1c078b2572516652 | 242317 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
-   1x TONG: CA 44/44 dat · DOT BIEN 43 muc CHE DO NHE — do khi diff cham vung
-   1x TONG: CA 45/45 dat · DOT BIEN 25 muc CHE DO NHE — do khi diff cham vung
-   4x TONG: DAT
-   4x TỔNG: ĐẠT
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+       | (khong co output)
+   - Run: bash ops/cai_actionlint.sh
+       | /home/runner/work/_temp/actionlint
+   - Run: bash ops/cai_cong_cu.sh shellcheck
+       | cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: bash ops/cai_cong_cu.sh rg
+       | cai_cong_cu: 'rg' ten tran da DAT, giu nguyen PATH
+       | {
+       | }
+   - Run: python ops/cong_cu.py kiem-tra --json
+       | {
+       | }
+   - Run: python -m pip install --quiet ruff==0.15.15
+       | ruff 0.15.15
+   - Run: python .claude/dev/ci_dang_ky_test.py --chay
+       | CI_DANG_KY ops/ci_provenance_test.py: ĐẠT rc=0
+       | CI_DANG_KY_THOI_GIAN {"ke_hoach": {"ops/nhanh_don_duoc_test.py": {"che_do": "nhe", "ly_do": "vòng đột biến do job mảnh + gom (ci-dot-bien-du.yml)"}, ".claude/hooks/pretooluse_guard_test.py": {"che_do": "nhe", "ly_do": "d
+       | TỔNG: ĐẠT
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 11=success, 21=success, 22=success, 23=success
 == job 124467284182 | gate-cong-cu-gop (ubuntu-latest) | runner_id 1000028361 | success | log sha256 20f5b932fea7705173e7007c4de19212dcdb693b584c9604c0176cd4a7461af3 | 98085 byte
    checkout: ['3dfb9731ceda05afbcec4e803a919c4df5e2e5a2']
-   dong BỎ QUA: 0 · dong ##[error]: 0
+   dong ##[error]: 0
+   - Run: git config --global core.autocrlf false
+       | (khong co output)
+   - Run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+       | (khong co output)
+   - Run: python ops/cong_cu_test.py --gop manh
+       | GOM MẢNH 8/8
+       | BÁN KÍNH ĐỘT BIẾN (490 đột biến, mỗi ca đúng một; 8 mảnh):
+       | SỐ LIỆU GOM: ca=61 · đột biến=490 · lỗi đột biến=0
+   step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 13=success, 14=success, 15=success

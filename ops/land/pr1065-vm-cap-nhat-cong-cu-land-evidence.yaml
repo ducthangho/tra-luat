@@ -73,8 +73,8 @@ trang_thai_packet:
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 3dfb973: DAT — bon moc §10.2.2: Run (readback-run/-jobs-41173244891.json 23/23
     success), Checkout (gate-output-41173244891.txt: 22/22 job co buoc checkout in 3dfb9731ceda05afbcec4e803a919c4df5e2e5a2,
-    tree ddb5ae9 = 3dfb973^{tree}), Gate output (cung tep: marker duong `== tl selftest 1774/1774 ==`, `TỔNG: ĐẠT`, `TONG: CA
-    44/44`/`45/45`; 0 marker am; 0 dong ##[error] tren 23 log), Workflow definition (MOC-WORKFLOW-DEFINITION); (2) lease:
+    tree ddb5ae9 = 3dfb973^{tree}), Gate output (cung tep: lenh + rc (step.conclusion) + trich output tung buoc `Run`;
+    0 dong ##[error] tren 23 log — xem MOC-CHECKOUT-VA-GATE-OUTPUT), Workflow definition (MOC-WORKFLOW-DEFINITION); (2) lease:
     KHONG_AP_DUNG (khong phai packet); (3) bookkeeping: ho so nay; (4) review: cross_approved tren BAN VA — ban merge b0814f4
     co finding P0/P1 o luot 1, da va o PR #1069 (approve luot 20 tren dcb295a, merge 634d5a2) va PR #1091 (approve luot 2
     tren 90b3f1c, merge 40609d4); gate master xanh tren a284f8a chua ca hai (run 41271721309, thuat lai trong phien);
@@ -113,9 +113,13 @@ trang_thai_packet:
       trang_thai: da_dong
       mo_ta: >-
         measured — gate-output-41173244891.txt (log 23 job tai qua REST actions/jobs/<id>/logs ngay 2026-11-01, sha256 + so byte
-        tung log ghi kem; log goc khong vao kho): 22/22 job co buoc checkout in `git log -1 --format=%H` =
-        3dfb9731ceda05afbcec4e803a919c4df5e2e5a2 (chuan-bi khong co checkout); marker duong o gate, gate-ops, gate-packet-loop,
-        gate-registry, gate-*-gop; khong job nao co ##[error].
+        tung log ghi kem; log goc khong vao kho). Checkout: 22/22 job co buoc checkout in `git log -1 --format=%H` =
+        3dfb9731ceda05afbcec4e803a919c4df5e2e5a2 (chuan-bi khong co checkout). Gate output: TUNG buoc `Run` cua tung job ghi
+        lenh + toi da 3 dong output cuoi + dong `"ok": …` neu buoc in JSON (122 buoc; 9 dong `"ok": true`, 0 `"ok": false`;
+        37 buoc cau hinh/cai dat khong in gi, ghi '(khong co output)'). rc tung buoc: step.conclusion trong
+        readback-jobs-41173244891.json — 275 success, 10 skipped (giu rieng); 0 dong ##[error] tren 23 log. Vi du duong:
+        `== tl selftest 1774/1774 ==`, `targeted_mutant_gate: DAT`, `GOM MẢNH 8/8`, `MẢNH k/8: …`. Codex connector P1 tren PR #1111
+        (comment 4434706400) chi ra ban dau chi co so dem marker — ban nay bo sung lenh/rc/trich output tung buoc.
     - id: ASSURANCE-REVIEWER-81
       trang_thai: dat_tren_ban_va
       mo_ta: >-

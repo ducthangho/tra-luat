@@ -1,0 +1,6 @@
+Đã hoàn tất review. [VERDICT.md](VERDICT.md) kết luận **changes_requested**:
+
+- **P1:** Reporter cắt và ghép thông điệp lỗi chưa đúng.
+- **P2:** Khóa UTF-8 vẫn chấp nhận `encoding` sai hoặc `None`.
+
+Đã tạo [HINT.patch](HINT.patch) và kiểm chứng trên bản sao tạm. Lỗi Linux có delta bằng 0 so với base; Windows/CI chưa xác minh độc lập. Mã nguồn `cay-kho/` giữ nguyên, trạng thái kho sạch.

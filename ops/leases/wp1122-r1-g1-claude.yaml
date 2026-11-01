@@ -83,11 +83,13 @@ attempts_basis: 'mac dinh kho (tien le wp1045).'
 review_rounds_limit: 3
 budget:
   codex_review_calls:
-    pr_wp1122_g1: {used: 0, reserved: 0, limit: 10}
+    pr_wp1122_g1: {used: 1, reserved: 0, limit: 10}
   attempt:
     packet_1122_r1: {used: 0, reserved: 0, limit: 2}
   khong_reset_theo_generation: true
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp1122-g1-claude som de goi workflow_dispatch Windows (N0); mo PR draft khi A1-A5 dat.'
-codex_da_goi: []
+codex_da_goi:
+- {luot: 1, run_id: e03d300896404d949c69ef6a9a0e4a92, head: 30ee4ae1b62170c86b8c75e6b0c73663ab934d88, verdict: changes_requested, ket_qua: '0 P0, 1 P1, 1 P2, 0 P3'}
+pham_vi_mo_rong_da_duyet: 'chu kho duyet qua AskUserQuestion (01-11-2026): raise AssertionError tuong minh trong ca -> bang(False,...) va khoa AST chung ("Co: doi sang bang(False, ...) + khoa AST chung"); moi loi goi con Python text=True khai encoding utf-8 + khoa AST ("Va moi loi goi con python/launcher + ca khoa AST"). Khong doi write set.'

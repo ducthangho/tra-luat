@@ -156,11 +156,12 @@ def _tra_gia(gia_tri):
 
 
 def _raw_tu_ten(kq):
-    """`git diff --raw -z` gia dung tu dau ra `--name-only -z`: moi ten mot ban ghi `M` 100644 -> 100644 (tep thuong)."""
+    """`git diff --raw -z` gia dung tu dau ra `--name-only -z`: moi ten mot ban ghi `A` 000000 -> 100644 (tep thuong MOI;
+    wp1113: `M` tren `ops/specs/**` nay ve DAY_DU, nen do gia mac dinh la THEM tep)."""
     ra = kq.stdout if isinstance(kq.stdout, (bytes, bytearray)) else b""
     if kq.returncode != 0 or (ra and not ra.endswith(b"\0")):
         return kq
-    return KQ(0, b"".join(b":100644 100644 " + b"0" * 40 + b" " + b"1" * 40 + b" M\0" + x + b"\0" for x in ra.split(b"\0") if x))
+    return KQ(0, b"".join(b":000000 100644 " + b"0" * 40 + b" " + b"1" * 40 + b" A\0" + x + b"\0" for x in ra.split(b"\0") if x))
 
 
 def raw_ghi(*ban_ghi):
@@ -233,13 +234,15 @@ def t02_co_tep_ma_day_du():
 @ca
 def t03_push_va_dispatch_khong_goi_git():
     m = nap_module()
-    for su_kien in ("push", "workflow_dispatch", "", "schedule", "PULL_REQUEST", "pull_request_target"):
+    # wp1113: push va workflow_dispatch NAY duoc phan loai (ca rieng t03b/t03c); con lai van khong goi git.
+    for su_kien in ("", "schedule", "PULL_REQUEST", "pull_request_target", "PUSH", "workflow_run"):
         log = []
         che_do, ly_do = m.phan_loai(env_pr(su_kien), chay_gia(nul("ops/land/x.yaml"), log=log))
         bang(che_do == "day_du", f"su_kien={su_kien!r} phai la day_du, duoc {che_do!r}")
         bang(not log, f"su_kien={su_kien!r} khong duoc goi git: {log}")
-        bang("khong phan loai" in ly_do, f"ly do phai noi khong phan loai: {ly_do!r}")
-        bang(m.doc_diff(env_pr(su_kien), chay_gia(nul("ops/land/x.yaml"), log=log)) is None and not log,
+        bang("khong phan loai" in ly_do and f"su_kien={su_kien!r}" in ly_do, f"ly do phai noi khong phan loai su kien nay: {ly_do!r}")
+        # dau == merge ref: cap hop le theo `kiem_cap_khong_pr`, nen chi chot su kien cua `doc_diff` chan duoc loi goi git.
+        bang(m.doc_diff(env_pr(su_kien, dau=HOP_GIA), chay_gia(nul("ops/land/x.yaml"), log=log)) is None and not log,
              f"doc_diff cho su_kien={su_kien!r} phai la None va khong goi git")
     log = []
     bang(m.phan_loai({}, chay_gia(log=log))[0] == "day_du" and not log, "moi truong rong phai la day_du, khong git")
@@ -286,6 +289,8 @@ def t06_git_loi_hoac_dau_ra_hong_day_du():
             # Dau ra lac kieu la CHINH lop loi ma phan_loai phai tu xu ly (fail-close), khong duoc de no ra ngoai.
             raise TinHieuChotCa(f"{ten}: phan_loai ne {type(e).__name__} thay vi fail-close ve day_du: {e}") from e
         bang(che_do == "day_du", f"{ten}: phai la day_du (fail-close), duoc {che_do!r}")
+        # wp1113: lop `--raw` cua bo phan loai cung fail-close, nen do THANG `doc_diff` de chot cua no khong bi che.
+        bang(m.doc_diff(env_pr(), chay) is None, f"{ten}: doc_diff phai la None (KHONG DO DUOC)")
     try:
         che_do, _ = m.phan_loai(env_pr(), chay_gia(nem=SuDoGia("git no")))
     except SuDoGia as e:
@@ -572,9 +577,12 @@ def t11c_goc_doi_ten_ho_so_ra_vung_ma_day_du():
     for ten, kw in cac.items():
         try:
             che_do = m.phan_loai(env_pr(), chay_gia(ho_so, **kw))[0]
+            dd = m.doc_diff(env_pr(), chay_gia(ho_so, **kw))
         except SuDoGia as e:
             raise TinHieuChotCa(f"{ten}: git nem ma phan loai KHONG bat: {e}") from e
         bang(che_do == "day_du", f"{ten}: phai la day_du (fail-close), duoc {che_do!r}")
+        # wp1113: do THANG doc_diff — lop `--raw` cung fail-close nen che_do day_du chua chung minh chot cua doc_diff.
+        bang(dd is None or "scripts/f.py" in dd, f"{ten}: doc_diff phai None hoac chua tep ma, duoc {dd!r}")
 
 
 @ca
@@ -608,9 +616,12 @@ def t11d_merge_ref_that_dung_base_moi_hon_day_du():
     for ten, kw in cac.items():
         try:
             che_do = m.phan_loai(env_pr(), chay_gia(ho_so, **kw))[0]
+            dd = m.doc_diff(env_pr(), chay_gia(ho_so, **kw))
         except SuDoGia as e:
             raise TinHieuChotCa(f"{ten}: git nem ma phan loai KHONG bat: {e}") from e
         bang(che_do == "day_du", f"{ten}: phai la day_du (fail-close), duoc {che_do!r}")
+        # wp1113: do THANG doc_diff — lop `--raw` cung fail-close nen che_do day_du chua chung minh chot cua doc_diff.
+        bang(dd is None or "scripts/f.py" in dd, f"{ten}: doc_diff phai None hoac chua tep ma, duoc {dd!r}")
 
 
 @ca
@@ -641,6 +652,9 @@ def t11e_thuoc_tinh_cua_pr_khong_cau_hinh_duoc_merge_tree():
              "fixture vo hieu: thuoc tinh GOC phai cho merge XUNG DOT (doi ten thu muc dua tep moi vao scripts/d/)")
         che_do, ly_do = phan_loai_that(m, kho, goc, dau)
         bang(che_do == "day_du", f"thuoc tinh cua PR khong duoc bien merge xung dot thanh duong nhanh: {che_do!r}: {ly_do}")
+        # wp1113: merge-tree cua lop `--raw` cung doc thuoc tinh tu goc va cung xung dot => do THANG doc_diff de khong bi che.
+        env = env_pr(goc=goc, dau=dau, CI_DUONG_NHANH_MERGE=merge_ref_that(kho, goc, dau))
+        bang(m.doc_diff(env, chay_that, kho) is None, "doc_diff phai KHONG DO DUOC (merge xung dot) khi thuoc tinh doc tu goc")
 
 
 @ca
@@ -665,7 +679,10 @@ def t12_doi_ten_ra_khoi_vung_ma_day_du():
             return KQ(0, (CAY_GIA + "\n").encode())
         if argv[:4] == ["git", "diff", "--no-renames", "--name-only"]:
             return KQ(0, b"")
-        return KQ(0, nul("ops/land/tl.py", "scripts/tl.py") if "--no-renames" in argv else nul("ops/land/tl.py"))
+        # wp1113: dich doi ten dat SAU hon cap nong (`ops/land/x/tl.py`) de luat ma cap nong khong che dot bien; `--raw`
+        # dung tu cung ten (do gia `_raw_tu_ten`), vi bo phan loai doc them `--raw` (luon co `--no-renames`).
+        ten = nul("ops/land/x/tl.py", "scripts/tl.py") if "--no-renames" in argv else nul("ops/land/x/tl.py")
+        return _raw_tu_ten(KQ(0, ten)) if "--raw" in argv else KQ(0, ten)
     che_do, ly_do = m.phan_loai(env_pr(), chay_doi_ten)
     bang(che_do == "day_du", f"ba cham PHAI tu tat do doi ten (khong dua vao merge): duoc {che_do!r}: {ly_do}")
 
@@ -706,7 +723,7 @@ def t16_main_ghi_output_dung_che_do():
         for ten, env, chay, mong in (
             ("hoso", env_pr(), chay_gia(nul("ops/land/x.yaml")), "duong_nhanh"),
             ("ma", env_pr(), chay_gia(nul("scripts/tl.py")), "day_du"),
-            ("push", env_pr("push"), chay_gia(nul("ops/land/x.yaml")), "day_du"),
+            ("schedule", env_pr("schedule"), chay_gia(nul("ops/land/x.yaml")), "day_du"),
         ):
             ra = tam / f"out_{ten}.txt"
             ra.write_text("da co\n", encoding="utf-8")
@@ -716,7 +733,8 @@ def t16_main_ghi_output_dung_che_do():
             bo_dem.seek(0)
             log = bo_dem.read()
             bang(rc == 0, f"{ten}: main phai thoat 0, duoc {rc}")
-            bang(ra.read_text(encoding="utf-8") == f"da co\nche_do={mong}\n", f"{ten}: GITHUB_OUTPUT sai: {ra.read_text()!r}")
+            cap = (f"goc={GOC_A}\ndau={GOC_B}\nhop={HOP_GIA}\n" if mong == "duong_nhanh" else "goc=\ndau=\nhop=\n")
+            bang(ra.read_text(encoding="utf-8") == f"da co\nche_do={mong}\n" + cap, f"{ten}: GITHUB_OUTPUT sai: {ra.read_text()!r}")
             bang("DUONG_NHANH" in log, f"{ten}: log phai co dong DUONG_NHANH: {log!r}")
     finally:
         shutil.rmtree(tam, ignore_errors=True)
@@ -742,7 +760,8 @@ def t17_main_loi_noi_bo_fail_close():
         except SuDoGia as e:
             raise TinHieuChotCa(f"loi noi bo cua phan loai lot ra ngoai main (main phai fail-close ve day_du): {e}") from e
         bang(rc == 0, f"loi noi bo: main van phai thoat 0 (khong lam PR do oan), duoc {rc}")
-        bang(ra.read_text(encoding="utf-8") == "che_do=day_du\n", f"loi noi bo phai ghi day_du: {ra.read_text()!r}")
+        bang(ra.read_text(encoding="utf-8") == "che_do=day_du\ngoc=\ndau=\nhop=\n",
+             f"loi noi bo phai ghi day_du (cap goc/dau/hop RONG): {ra.read_text()!r}")
     finally:
         shutil.rmtree(tam, ignore_errors=True)
 
@@ -770,6 +789,13 @@ def chay_that_bo_ca_du_lieu(argv, **kw):
         CA_DU_LIEU_GOI.append(list(argv))
         return KQ(0, b"DAT\n")
     return chay_that(argv, **kw)
+
+
+def kiem_mode_va_phan_loai(m, kho, goc, dau):
+    """(loi cua kiem_mode_git, che_do cua bo phan loai) tren kho git that — wp1113: tach chot mode khoi luat ve DAY_DU."""
+    env = env_pr(goc=goc, dau=dau, CI_DUONG_NHANH_MERGE=merge_ref_that(kho, goc, dau))
+    doi = m.doc_diff(env, subprocess.run, kho)
+    return m.kiem_mode_git(env, subprocess.run, kho, doi), m.phan_loai_day_du(env, subprocess.run, kho)[1]
 
 
 def kiem_re(m, kho, goc, dau, bay_gio=None):
@@ -1002,7 +1028,8 @@ LOI_GOI_DOC_THUOC_TINH = {
     "raw goc -> merge ref (kiem_mode_git)": lambda a: a[1:3] == ["diff", "--raw"] and a[-2:] == [GOC_A, HOP_GIA],
 }
 # So loi goi mong doi != 1: `merge-tree` chay HAI lan o kiem-re (bo phan loai + kiem_mode_git), cung doi so.
-SO_LOI_GOI = {"merge-tree": 2}
+SO_LOI_GOI = {"merge-tree": 3, "raw ba cham (kiem_mode_git)": 2, "raw goc -> cay merge-tree (kiem_mode_git)": 2,
+              "raw goc -> merge ref (kiem_mode_git)": 2}   # wp1113: them mot lan cho `doc_raw_ba_cap` cua bo phan loai
 
 
 @ca
@@ -1092,8 +1119,10 @@ def t20x_kiem_re_symlink_tren_nen_khong_symlink_do():
         git(kho, "-c", "core.symlinks=false", "checkout", "--", duong)
         bang((kho / duong).is_file() and not (kho / duong).is_symlink() and m.kiem_loai_tep({duong}, kho) == [],
              "fixture vo hieu: core.symlinks=false phai checkout symlink thanh tep thuong ma kiem_loai_tep khong thay")
-        rc, log = kiem_re(m, kho, goc, dau2)
-        bang(rc == 1 and "mode 120000" in log and duong in log, f"symlink (dia la tep thuong) phai DO kiem-re: rc={rc}: {log}")
+        loi, che_do = kiem_mode_va_phan_loai(m, kho, goc, dau2)
+        # wp1113: bo phan loai dua symlink ve DAY_DU truoc; chot `kiem_mode_git` do THANG de khong bi lop ay che.
+        bang(any("mode 120000" in x and duong in x for x in loi), f"symlink (dia la tep thuong) phai DO kiem_mode_git: {loi}")
+        bang(che_do == "day_du", f"wp1113: symlink duoi allowlist phai ve DAY_DU, duoc {che_do!r}")
 
 
 @ca
@@ -1109,8 +1138,9 @@ def t20y_kiem_re_mode_755_va_tep_thanh_thu_muc_dat():
         git(kho, "commit", "-q", "-m", "755")
         dau2 = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
         bang(git(kho, "ls-tree", dau2, "--", "ops/land/a.md").stdout.decode().startswith("100755 "), "fixture vo hieu: phai la 100755")
-        rc, log = kiem_re(m, kho, goc, dau2)
-        bang(rc == 0, f"doi chung: tep ho so 100755 la tep thuong, phai DAT: rc={rc}: {log}")
+        loi, che_do = kiem_mode_va_phan_loai(m, kho, goc, dau2)
+        bang(loi == [], f"doi chung: tep ho so 100755 la tep thuong, kiem_mode_git phai DAT: {loi}")
+        bang(che_do == "day_du", f"wp1113: tep 100755 duoi allowlist phai ve DAY_DU o bo phan loai, duoc {che_do!r}")
     with kho_that(nen={"README.md": "x\n", "ops/land/a.md": "a\n"}, nhanh_pr={"ops/land/a.md": None}) as (kho, goc, _d):
         viet(kho, "ops/land/a.md/x.md", "x\n")
         git(kho, "add", "-A")
@@ -1266,8 +1296,9 @@ def t20zf_kiem_re_symlink_doi_thanh_tep_thuong_dat():
         raw = git(kho, "diff", "--raw", "--no-abbrev", f"{goc}...{dau}").stdout.decode()
         bang(re.search(r"^:120000 100644 [0-9a-f]+ [0-9a-f]+ T\tops/specs/x\.md$", raw, re.M) is not None,
              f"fixture vo hieu: phai la doi kieu T 120000 -> 100644: {raw!r}")
-        rc, log = kiem_re(m, kho, goc, dau)
-        bang(rc == 0, f"symlink -> tep thuong (T, 100644) phai DAT kiem-re: rc={rc}: {log}")
+        loi, che_do = kiem_mode_va_phan_loai(m, kho, goc, dau)
+        bang(loi == [], f"symlink -> tep thuong (T, 100644) phai DAT kiem_mode_git: {loi}")
+        bang(che_do == "day_du", f"wp1113: doi mode tren spec da co phai ve DAY_DU, duoc {che_do!r}")
 
 
 @ca
@@ -1302,8 +1333,9 @@ def t20zg_kiem_re_o_chap_nhan_con_lai_dat():
                        (r"^:100644 100644 [0-9a-f]+ [0-9a-f]+ M\tops/specs/sua\.md$", "M 100644"),
                        (r"^:120000 100755 [0-9a-f]+ [0-9a-f]+ T\tops/specs/y\.md$", "T 120000 -> 100755")):
             bang(re.search(mau, raw, re.M) is not None, f"fixture vo hieu: thieu o {o}: {raw!r}")
-        rc, log = kiem_re(m, kho, goc, dau)
-        bang(rc == 0, f"A 100755 / M 100644 / T -> 100755 deu la tep thuong, phai DAT kiem-re: rc={rc}: {log}")
+        loi, che_do = kiem_mode_va_phan_loai(m, kho, goc, dau)
+        bang(loi == [], f"A 100755 / M 100644 / T -> 100755 deu la tep thuong, phai DAT kiem_mode_git: {loi}")
+        bang(che_do == "day_du", f"wp1113: 100755 / sua spec da co phai ve DAY_DU, duoc {che_do!r}")
 
 
 # LUAT (lop `kiem-mode-git-chot-khong-rang`, dong theo CAU TRUC o luot 14): bang quyet dinh DAY DU cua `kiem_mode_git` tren
@@ -1384,18 +1416,18 @@ def t20q_kiem_re_symlink_hop_le_moi_duoi_do():
 # Lop `buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca` (cross-review luot 8b, P2): moi DUONG VAO mot nhanh rieng cua t20zi, moi nhanh mot
 # dot bien rieng chi nhanh ay bat. Symlink HOP LE co san tren goc (vao qua PR day du); PR ho so chi XOA => symlink TREO ngoai diff.
 SYMLINK_GOC = {   # duong symlink -> dich (tuong doi thu muc cha cua symlink)
-    "docs/l1.md": "../ops/specs/D1.md",                      # E1: ngoai allowlist, dich la TEP
-    "docs/tm": "../ops/specs/tm",                            # E1b: ngoai allowlist, dich la THU MUC (os.walk xep symlink treo vao TEP)
-    "ops/land/l3.md": "../specs/D3.md",                      # E3: DUOI allowlist nhung KHONG trong diff
-    "docs/xuyen.md": ("../ops/specs/qua/q.md" if sys.platform == "win32" else "../ops/specs/qua/../../../README.md"),  # E4: dich ngoai ho so, DUONG DI xuyen thu muc ho so
-    ".claude/l5.md": "../ops/specs/D5.md",                   # E5: trong thu muc CHAM (t82 chep ca thu muc cham, tru .git)
+    "docs/l1.md": "../ops/land/D1.md",                      # E1: ngoai allowlist, dich la TEP
+    "docs/tm": "../ops/land/tm",                            # E1b: ngoai allowlist, dich la THU MUC (os.walk xep symlink treo vao TEP)
+    "ops/land/l3.md": "../land/D3.md",                      # E3: DUOI allowlist nhung KHONG trong diff
+    "docs/xuyen.md": ("../ops/land/qua/q.md" if sys.platform == "win32" else "../ops/land/qua/../../../README.md"),  # E4: dich ngoai ho so, DUONG DI xuyen thu muc ho so
+    ".claude/l5.md": "../ops/land/D5.md",                   # E5: trong thu muc CHAM (t82 chep ca thu muc cham, tru .git)
 }
 NHANH_XOA = {   # nhanh PR -> (lenh git rm, symlink phai bi bao TREO)
-    "e1-xoa-dich-tep": (("ops/specs/D1.md",), "docs/l1.md"),
-    "e1b-xoa-thu-muc-dich": (("-r", "ops/specs/tm"), "docs/tm"),
-    "e3-xoa-dich-trong-allowlist": (("ops/specs/D3.md",), "ops/land/l3.md"),
-    "e4-xoa-thu-muc-tren-duong-di": (("-r", "ops/specs/qua"), "docs/xuyen.md"),
-    "e5-xoa-dich-cua-thu-muc-cham": (("ops/specs/D5.md",), ".claude/l5.md"),
+    "e1-xoa-dich-tep": (("ops/land/D1.md",), "docs/l1.md"),
+    "e1b-xoa-thu-muc-dich": (("-r", "ops/land/tm"), "docs/tm"),
+    "e3-xoa-dich-trong-allowlist": (("ops/land/D3.md",), "ops/land/l3.md"),
+    "e4-xoa-thu-muc-tren-duong-di": (("-r", "ops/land/qua"), "docs/xuyen.md"),
+    "e5-xoa-dich-cua-thu-muc-cham": (("ops/land/D5.md",), ".claude/l5.md"),
 }
 
 
@@ -1409,8 +1441,8 @@ def t20zi_kiem_re_symlink_treo_ngoai_diff_do():
     `kiem-re` DA DO nho ca du lieu t23 (glob `*.yaml`). E1b dung chung duong voi E1 (symlink treo luon nam trong danh sach TEP
     cua `os.walk`), nen khong co dot bien rieng."""
     m = nap_module()
-    nen = {"README.md": "x\n", "ops/specs/E.md": "# e\n", "ops/specs/D1.md": "# 1\n", "ops/specs/tm/a.md": "a\n",
-           "ops/specs/D3.md": "# 3\n", "ops/specs/qua/q.md": "q\n", "ops/specs/D5.md": "# 5\n", "ops/land/x.yaml": "a: 1\n"}
+    nen = {"README.md": "x\n", "ops/land/E.md": "# e\n", "ops/land/D1.md": "# 1\n", "ops/land/tm/a.md": "a\n",
+           "ops/land/D3.md": "# 3\n", "ops/land/qua/q.md": "q\n", "ops/land/D5.md": "# 5\n", "ops/land/x.yaml": "a: 1\n"}
     with kho_that(nen=nen) as (kho, _a, _h):
         git(kho, "checkout", "-q", "main")
         for duong, dich in SYMLINK_GOC.items():
@@ -1432,7 +1464,7 @@ def t20zi_kiem_re_symlink_treo_ngoai_diff_do():
         bang(os.path.exists(qua_bd) and not os.path.exists(os.path.normpath(os.path.join(qua_bd.parent, os.readlink(qua_bd)))),
              "fixture vo hieu: symlink qua bi danh phai HOP LE theo nhan nhung TREO theo ghep tu vung")
         git(kho, "checkout", "-q", "-b", "doi-chung", goc)
-        viet(kho, "ops/specs/E.md", "# e2\n")
+        viet(kho, "ops/land/E.md", "# e2\n")
         git(kho, "commit", "-q", "-am", "PR ho so sua tep khac")
         dau0 = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
         rac = (kho / ".git" / "zz-treo", kho / "docs" / "__pycache__" / "zz", kho / "docs" / "zz.pyc")
@@ -1560,7 +1592,7 @@ def t20zk_kiem_re_symlink_treo_qua_bi_danh_thu_muc_do():
     m = nap_module()
     for ten_tm, co_bi_danh in (("kho.pyc", True), ("__pycache__", True), ("kho.pyc", False)):
         nhan = f"{ten_tm}, bi danh={co_bi_danh}"
-        with kho_that(nen={"README.md": "x\n", f"ops/land/{ten_tm}/f.yaml": "a: 1\n", "ops/specs/E.md": "# e\n"}) as (kho, _a, _h):
+        with kho_that(nen={"README.md": "x\n", f"ops/land/{ten_tm}/f.yaml": "a: 1\n", "ops/land/E.md": "# e\n"}) as (kho, _a, _h):
             git(kho, "checkout", "-q", "main")
             (kho / "ops" / "land" / ten_tm / "s").symlink_to("f.yaml")
             if co_bi_danh:
@@ -1570,7 +1602,7 @@ def t20zk_kiem_re_symlink_treo_qua_bi_danh_thu_muc_do():
             goc = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
             bang(chep_nhu_t82(kho) == "CHEP_DUOC", f"fixture vo hieu ({nhan}): t82 phai chep duoc cay goc")
             git(kho, "checkout", "-q", "-b", "doi-chung", goc)
-            viet(kho, "ops/specs/E.md", "# e2\n")
+            viet(kho, "ops/land/E.md", "# e2\n")
             git(kho, "commit", "-q", "-am", "PR ho so sua tep khac")
             rc0, log0 = kiem_re(m, kho, goc, git(kho, "rev-parse", "HEAD").stdout.decode().strip())
             bang(rc0 == 0, f"doi chung ({nhan}, PR sua tep khac) phai DAT: rc={rc0}: {log0}")
@@ -3171,8 +3203,8 @@ DOT_BIEN = [
                                           "    except ZeroDivisionError:\n        return None\n    if getattr(r,"), ("t06_git_loi_hoac_dau_ra_hong_day_du",)),
     ("fail_open_dau_ra_cut", _ma('    if ra and not bytes(ra).endswith(b"\\0"):\n        return None\n', ""), ("t06_git_loi_hoac_dau_ra_hong_day_du",)),
     ("fail_open_dau_ra_khong_phai_bytes", _ma("    if not isinstance(ra, (bytes, bytearray)):\n        return None\n", ""), ("t06_git_loi_hoac_dau_ra_hong_day_du",)),
-    ("git_cho_push_doc_diff", _ma('    if su_kien != "pull_request":\n        return None\n    if not all(MAU_SHA', "    if not all(MAU_SHA"), ("t03_push_va_dispatch_khong_goi_git",)),
-    ("git_cho_push_phan_loai", _ma('    if su_kien != "pull_request":\n        return DAY_DU, f"DUONG_NHANH: khong phan loai', '    if False:\n        return DAY_DU, f"DUONG_NHANH: khong phan loai'), ("t03_push_va_dispatch_khong_goi_git",)),
+    ("git_cho_su_kien_la_doc_diff", _ma('    if su_kien not in SU_KIEN_PHAN_LOAI:\n        return None\n', ''), ("t03_push_va_dispatch_khong_goi_git",)),
+    ("git_cho_su_kien_la_phan_loai", _ma('    if su_kien not in SU_KIEN_PHAN_LOAI:\n        return None, f"su_kien=', '    if False:\n        return None, f"su_kien='), ("t03_push_va_dispatch_khong_goi_git",)),
     ("diff_rong_thanh_day_du", _ma("    if not doi:\n        return DUONG_NHANH,", "    if not doi:\n        return DAY_DU,"), ("t07_diff_rong_duong_nhanh_co_dong_log_rieng",)),
     ("hai_cham_thay_ba_cham", _ma('"-z", f"{goc}...{dau}"]', '"-z", f"{goc}..{dau}"]'), ("t11_ba_cham_khong_tinh_nhanh_dich_da_tien",)),
     ("bo_no_renames", _ma('"--name-only", "--no-renames", "-z"', '"--name-only", "-z"'), ("t12_doi_ten_ra_khoi_vung_ma_day_du",)),
@@ -3184,11 +3216,11 @@ DOT_BIEN = [
     ("bo_kiem_thanh_phan_cham", _ma('("", ".", "..")', '("", "..")'), ("t10c_thanh_phan_cham_day_du",)),
     ("bo_kiem_cheo_nguoc", _ma('or "\\\\" in duong:', ":"), ("t10d_dau_cheo_nguoc_day_du",)),
     ("bo_kiem_ky_tu_dieu_khien", _ma("    if any(ord(c) < 32 or ord(c) == 127 for c in duong):\n        return False\n", ""), ("t10e_ky_tu_dieu_khien_day_du",)),
-    ("main_ghi_cung_duong_nhanh", _ma('f.write(f"che_do={che_do}\\n")', 'f.write("che_do=duong_nhanh\\n")'), ("t16_main_ghi_output_dung_che_do",)),
+    ("main_ghi_cung_duong_nhanh", _ma('f.write(f"che_do={che_do}\\n" + ', 'f.write("che_do=duong_nhanh\\n" + '), ("t16_main_ghi_output_dung_che_do",)),
     ("main_nuot_loi_thanh_duong_nhanh", _ma('che_do, ly_do = DAY_DU, f"DUONG_NHANH: LOI NOI BO', 'che_do, ly_do = DUONG_NHANH, f"DUONG_NHANH: LOI NOI BO'), ("t17_main_loi_noi_bo_fail_close",)),
     ("main_nuot_loi_ghi_output", _ma('        except OSError as e:\n            print(f"DUONG_NHANH: khong ghi duoc GITHUB_OUTPUT ({type(e).__name__}) - DO", file=sys.stderr)\n            return 1',
                                     '        except OSError:\n            return 0'), ("t18_main_khong_ghi_duoc_output_thi_do",)),
-    ("kiem_re_khong_doi_khop", _ma("    if che_do != DUONG_NHANH:\n        print(\"DUONG_NHANH: kiem-re CHI", "    if False:\n        print(\"DUONG_NHANH: kiem-re CHI"), ("t19a_kiem_re_co_tep_ma_thi_do",)),
+    ("kiem_re_khong_doi_khop", _ma("    if che_do != DUONG_NHANH:\n        lech = True\n", "    if False:\n        lech = True\n"), ("t19a_kiem_re_co_tep_ma_thi_do",)),
     ("kiem_re_bo_yaml", _ma("loi = (kiem_yaml(doi, kho) +", "loi = ([] +"), ("t20b_kiem_re_yaml_hong_do",)),
     ("kiem_re_bo_diff_check", _ma("kiem_diff_check(env, chay, kho) + kiem_nhi_phan(", "[] + kiem_nhi_phan("), ("t20c_kiem_re_dau_xung_dot_do",)),
     ("kiem_re_bo_lease", _ma("+ kiem_lease(doi, kho, chay, bay_gio, ra)", "+ []"), ("t20e_kiem_re_lease_con_han_loi_do",)),
@@ -3493,7 +3525,7 @@ DOT_BIEN = [
     ('mode_git_raw_trang_thai_long', _ma('r":([0-7]{6}) ([0-7]{6}) ([0-9a-f]{40}(?:[0-9a-f]{24})?) ([0-9a-f]{40}(?:[0-9a-f]{24})?) ([AMDT])"', 'r":([0-7]{6}) ([0-7]{6}) ([0-9a-f]{40}(?:[0-9a-f]{24})?) ([0-9a-f]{40}(?:[0-9a-f]{24})?) ([A-Z])"'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
     ('mode_git_raw_sha_long', _ma('r":([0-7]{6}) ([0-7]{6}) ([0-9a-f]{40}(?:[0-9a-f]{24})?) ([0-9a-f]{40}(?:[0-9a-f]{24})?) ([AMDT])"', 'r":([0-7]{6}) ([0-7]{6}) (\\S+) (\\S+) ([AMDT])"'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
     ('mode_git_raw_nhan_duong_rong', _ma(' or not duong or duong in kq:', ' or duong in kq:'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
-    ('mode_git_raw_doc_mode_cu', _ma('kq[duong] = (k.group(2), k.group(5))', 'kq[duong] = (k.group(1), k.group(5))'), ('t20zc_kiem_re_doi_ten_tep_ho_so_dat',)),
+    ('mode_git_raw_doc_mode_cu', _ma('kq[duong] = (k.group(2), k.group(5), k.group(1))', 'kq[duong] = (k.group(1), k.group(5), k.group(1))'), ('t20zc_kiem_re_doi_ten_tep_ho_so_dat',)),
     ('mode_git_loi_cap_bo_qua', _ma('        if isinstance(ban_ghi, str):\n            return [ban_ghi]', '        if isinstance(ban_ghi, str):\n            continue'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
     ('mode_git_thay_gan_de', _ma('        thay |= set(ban_ghi)', '        thay = set(ban_ghi)'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
     ('mode_git_tap_chi_bat_thieu', _ma('    if thay != set(doi):', '    if not thay >= set(doi):'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
@@ -3571,7 +3603,7 @@ DOT_BIEN = [
 # Lop `kiem-mode-git-chot-khong-rang` (luot 14, dong theo CAU TRUC): moi o cua bang quyet dinh mot dot bien LAT dung o ay — o
 # CHAP NHAN thanh TU CHOI, o TU CHOI thanh CHAP NHAN — chen ngay dau vong quyet dinh nen KHONG o nao khac doi. Dich: t20zh.
 # Bo sot mot o trong vong lap cua ca, hay ky vong sai mot o, thi dot bien cua o ay SONG.
-_NEO_O_BANG = "        for duong, (mode, trang_thai) in sorted(ban_ghi.items()):\n"
+_NEO_O_BANG = "        for duong, (mode, trang_thai, _cu) in sorted(ban_ghi.items()):\n"
 
 
 def _lat_o(tt, mode):

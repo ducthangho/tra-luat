@@ -9638,8 +9638,8 @@ def _wp831_chay_cai_rg(s, nen, tot, dau="hong", venv=False, batch=False, tiem=Fa
     hay không vào `dau.log`. `allexport`: `"co"` chạy `bash -a`, `"env"` đặt `SHELLOPTS=allexport` (Codex lượt 5);
     `thu_tu`: thứ tự hai mục của bảng kê batch. Trả (process, GITHUB_PATH, ứng viên, thư mục đầu)."""
     kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
-    for t in ("cai_cong_cu.sh", "cong_cu.py"):
-        shutil.copy2(LAUNCHER.parents[2] / "ops" / t, ops / t)
+    shutil.copy2(CAI_SH_DANG_DUNG, ops / "cai_cong_cu.sh")   # wp1078: bản ĐANG THỬ (đột biến), không phải tệp thật
+    shutil.copy2(LAUNCHER.parents[2] / "ops" / "cong_cu.py", ops / "cong_cu.py")
     if batch:
         import yaml
         d = yaml.safe_load(YAML_DANG_DUNG.read_text(encoding="utf-8"))
@@ -9785,6 +9785,91 @@ def r831_cai_rg_linux_chon_ban_chay_duoc():
 def r831_cai_rg_macos_chon_ban_chay_duoc():
     """N2/N3: NGUYÊN `rg.cai.macos`; ứng viên `$(brew --prefix)/bin`, cùng hai chiều như Linux."""
     return _wp831_cai_rg_chon_ban_chay_duoc("macos")
+
+
+# wp1078 (spec ops/specs/wp1078.md M3): hàm `python` export qua môi trường (`BASH_FUNC_python%%`). `command -v` nhận
+# hàm và in TÊN TRẦN ⇒ phép ghim PY[0] không ghim gì (review độc lập #832 F03 tái mở; ca HINT của reviewer).
+def _r1078_python_ham_ke_thua(nen, than_ham='command python "$@"'):
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    global _wp802_bash_env
+    env_goc = _wp802_bash_env
+
+    def env_co_ham():
+        vo, env = env_goc()
+        env["R1078_HAM_LOG"] = str(ham_log)
+        env["BASH_FUNC_python%%"] = (
+            '() { printf "%s\\n" goi >> "$R1078_HAM_LOG"; ' + than_ham + ";\n}")
+        return vo, env
+
+    _wp802_bash_env = env_co_ham
+    try:
+        with San() as s:
+            ham_log = s / "ham.log"
+            p, gp, uv, _d = _wp831_chay_cai_rg(s, nen, "echo 'ripgrep 14.1.0'", venv=True, batch=True)
+            bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv),
+                 f"{nen}: ham python ke thua ({than_ham}) doi interpreter: rc={p.returncode} "
+                 f"GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+            bang(not ham_log.exists(), f"{nen}: ham python ke thua da bi goi")
+    finally:
+        _wp802_bash_env = env_goc
+
+
+@ca
+def r831_cai_rg_linux_python_ham_ke_thua():
+    return _r1078_python_ham_ke_thua("linux")
+
+
+@ca
+def r831_cai_rg_macos_python_ham_ke_thua():
+    return _r1078_python_ham_ke_thua("macos")
+
+
+@ca
+def r1078_ham_python_khong_phai_python_khong_duoc_goi():
+    """M3: hàm `python` export KHÔNG phải Python (in rác) ⇒ vẫn DAT bằng interpreter thật — hàm không bao giờ được gọi."""
+    return _r1078_python_ham_ke_thua("linux", "echo khong-phai-python")
+
+
+@ca
+def r1078_hinh_dang_chon_python_bang_type_P():
+    """M1/M2 (hình dạng, chạy cả Windows): chọn bằng `type -P`, không `command -v python*`; PY[0] không tuyệt đối ⇒ thoát 4."""
+    sh = CAI_SH_DANG_DUNG.read_text(encoding="utf-8")
+    bang(all(f'_PY_TEP="$(type -P {t})"' in sh for t in ("python", "python3", "py")),
+         "chon interpreter phai bang type -P cho ca ba ten")
+    bang(not re.search(r"command -v (python3?|py)\b", sh) and 'PY[0]="$(command -v' not in sh,
+         "con chon/ghim interpreter bang command -v (nhan ca HAM)")
+    bang(re.search(r'case "\$\{PY\[0\]\}" in /\*\) ;; \*\) echo [^\n]*>&2; exit 4 ;; esac', sh) is not None,
+         "thieu chot PY[0] tuyet doi (fail-close, thoat 4)")
+
+
+@ca
+def r1078_py_dung_lai_khong_tuyet_doi_phai_thoat_4():
+    """M2: kiểm nhánh dùng lại PY cả khi kế thừa allexport/marker export; checker giả chặn installer."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        ops = s / "kho" / "ops"
+        ops.mkdir(parents=True)
+        kich = ops / "cai_cong_cu.sh"
+        shutil.copy2(CAI_SH_DANG_DUNG, kich)
+        (ops / "cong_cu.py").write_text("raise SystemExit(23)\n", encoding="utf-8")
+        vo, env = _wp802_bash_env()
+        for nhan, co, them_env in (
+                ("thuong", (), {}),
+                ("bash-a", ("-a",), {}),
+                ("SHELLOPTS", (), {"SHELLOPTS": "allexport"}),
+                ("marker-export", (), {"CAI_CONG_CU_PY_CUA": "r1078-gia"})):
+            for ten in ("python", "./python"):
+                p = subprocess.run(
+                    [vo, *co, "-c", 'CAI_CONG_CU_PY_CUA=$$; declare +x CAI_CONG_CU_PY_CUA; PY=("$2"); . "$1" rg',
+                     "r1078", str(kich), ten],
+                    env={**env, **them_env}, capture_output=True, text=True, timeout=30)
+                bang(p.returncode == 4 and p.stdout == ""
+                     and len(p.stderr.splitlines()) == 1
+                     and "PY[0] khong phai duong dan tuyet doi" in p.stderr,
+                     f"PY dung lai {ten!r} ({nhan}) phai thoat 4 truoc checker: "
+                     f"rc={p.returncode} out={p.stdout!r} err={p.stderr!r}")
 
 
 # wp858 (L1): ca hành vi chạy NGUYÊN công thức qua cai_cong_cu.sh, installer là stub (POSIX); ca hình dạng thuần Python
@@ -10122,10 +10207,10 @@ def r886_n1_bo_qua_tep_khong_thuc_thi():
 @ca
 def r886_ten_python_khop_cai_cong_cu_sh():
     """Q1: `TEN_PYTHON` của cong_cu.py khớp ĐÚNG thứ tự + tập tên dòng chọn `PY` trong `ops/cai_cong_cu.sh`."""
-    sh = re.findall(r"^elif command -v (\S+) >/dev/null 2>&1; then PY=\(([^)]*)\)$",
+    # wp1078: dòng chọn là `elif _PY_TEP="$(type -P <tên>)"; then PY=("$_PY_TEP"[ đối số])`.
+    sh = re.findall(r'^elif _PY_TEP="\$\(type -P (\S+)\)"; then PY=\("\$_PY_TEP"([^)]*)\)$',
                     CAI_SH_DANG_DUNG.read_text(encoding="utf-8"), re.M)
-    bang([tuple(pha.split()) for _ten, pha in sh] == [tuple(x) for x in _r886_nap().TEN_PYTHON]
-         and all(pha.split()[0] == ten for ten, pha in sh),
+    bang(sh and [(ten, *them.split()) for ten, them in sh] == [tuple(x) for x in _r886_nap().TEN_PYTHON],
          f"TEN_PYTHON lech cai_cong_cu.sh: sh={sh} py={_r886_nap().TEN_PYTHON}")
 
 
@@ -13661,6 +13746,19 @@ DOT_BIEN_HOOK = [
     # wp831 (N1–N3 + F01): wp868 (N4) chuyển `rg.cai.linux/macos` sang bộ chọn chung nên ba đột biến YAML về `-x`, chọn
     # theo mã thoát và ghi $GITHUB_PATH vô điều kiện mất neo — chốt ấy nay nằm trong hàm (wp858_sh_*). Giữ hai đột biến ứng
     # viên, kèm ca hình dạng để đo được trên Windows.
+    # wp1078 (M4): chọn bằng `command -v` (nhận hàm) · bỏ riêng chốt tuyệt đối · bỏ cả hai.
+    ("wp1078_chon_bang_command_v", ('elif _PY_TEP="$(type -P python)"; then PY=("$_PY_TEP")',
+      'elif command -v python >/dev/null 2>&1; then PY=(python)'),
+     ["r831_cai_rg_linux_python_ham_ke_thua", "r831_cai_rg_macos_python_ham_ke_thua",
+      "r1078_ham_python_khong_phai_python_khong_duoc_goi", "r1078_hinh_dang_chon_python_bang_type_P"], "cai_sh"),
+    ("wp1078_goi_ham_python_thua", ('unset _PY_TEP',
+      'unset _PY_TEP\nif declare -F python >/dev/null; then python -c pass >/dev/null; fi'),
+     ["r1078_ham_python_khong_phai_python_khong_duoc_goi"], "cai_sh"),
+    ("wp1078_chot_chi_nhanh_chon_moi", ('case "${PY[0]}" in /*) ;; *) echo "cai_cong_cu: PY[0] khong phai duong dan tuyet doi: \'${PY[0]}\'" >&2; exit 4 ;; esac',
+      'if [ "${CAI_CONG_CU_PY_CUA:-}" != "$$" ]; then\ncase "${PY[0]}" in /*) ;; *) echo "cai_cong_cu: PY[0] khong phai duong dan tuyet doi: \'${PY[0]}\'" >&2; exit 4 ;; esac\nfi'),
+     ["r1078_py_dung_lai_khong_tuyet_doi_phai_thoat_4"], "cai_sh"),
+    ("wp1078_bo_chot_tuyet_doi", ('case "${PY[0]}" in /*) ;; *) echo', 'case "${PY[0]}" in *) ;; /*) echo'),
+     ["r1078_hinh_dang_chon_python_bang_type_P"], "cai_sh"),
     ("wp831_yaml_linux_bo_ung_vien_usrbin", ('chon_thu_muc_chay_duoc rg "${CONG_CU_GOC:-}/usr/bin" ', 'chon_thu_muc_chay_duoc rg '),
      ["r831_cai_rg_linux_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "yaml"),
     ("wp831_yaml_macos_bo_ung_vien_brew", ('chon_thu_muc_chay_duoc rg "$(brew --prefix)/bin" ', 'chon_thu_muc_chay_duoc rg '),

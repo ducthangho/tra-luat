@@ -1,0 +1,106 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1121
+packet_id: DOC-CLAIMS-XOA
+revision: 5
+generation: 1
+lease_id: wp1121-r5-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: []
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'doi hanh vi buoc gate CI doc-claims-check strict => sensitive; executor ho claude, reviewer ho openai; tran codex ADR-0055 (10), da dung 6 (2 offline + 3 connector dac ta r3/r4/r5 + 1 connector thi cong f9e4342).'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/DOC-CLAIMS-XOA-r5.md
+spec_sha256_required: d4626ecbe5389ea4fc15c7b453b2001728ac629a1928deb9cdaaf053eeab2a3b
+spec_hash: d4626ecbe5389ea4fc15c7b453b2001728ac629a1928deb9cdaaf053eeab2a3b
+spec_commit_pr: 0832d3d9a9a6f2536974ec0842d0b3f450732cc3
+spec_ghi_chu: 'dac ta nam tren PR #1123 (chua merge); ban tren nhanh lease nay byte-identical (sha256 khop).'
+prompt_path: ops/specs/DOC-CLAIMS-XOA-r5.md
+prompt_sha256_required: d4626ecbe5389ea4fc15c7b453b2001728ac629a1928deb9cdaaf053eeab2a3b
+dieu_kien_merge: ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587
+windows: required
+full_mutant_audit: not_required
+write_set:
+- scripts/tl_core/workflow.py
+- scripts/test_fragments/wp1121_doc_claims_xoa.py
+- scripts/tl_test_fragments_bundled.py
+- RELEASE_MANIFEST.json
+- ops/handoff/wp1121-g1-claude.md
+write_set_hash: d03002d231680f51497adfaef36421b91584879e6901e439f6aff965f50a46d2
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'bundle va RELEASE_MANIFEST.json CHI tai sinh (dac ta M5, M6; Q8 theo tien le wp1030); handoff chi tren nhanh lease; diff PR 4 tep (r5 bo changelog.d/wp-1121.md, Q9: goi o tran 198). ADR-0053 sensitive: <=6 tep / <=450 dong them.'
+change_policy_sha: null
+effective_write_set:
+- scripts/tl_core/workflow.py
+- scripts/test_fragments/wp1121_doc_claims_xoa.py
+- scripts/tl_test_fragments_bundled.py
+- RELEASE_MANIFEST.json
+- ops/handoff/wp1121-g1-claude.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1/P2; toi da 10 loi goi codex (ADR-0055); moi thread connector duoc tra loi'}
+- {id: M-2, dieu_kien: 'ci.yml luot PR XANH tren head cuoi doc bang check run'}
+- {id: M-3, dieu_kien: 'N1-N5 cua dac ta (r5: file_count 198, ba ca tran goi r291/r357/wp44 DAT): selftest N/N hai so bang nhau; dot bien D1-D11 doc ten ca; tai hien lo rc=2; nen rc=0; release-verify strict + bundle_fragment_check rc0; ruff F delta 0; doctrine-scan, git diff --check rc0'}
+- {id: M-4, dieu_kien: 'N6 Windows (ADR-0060 M3 required): chay tren may chu kho qua Desktop Commander theo ADR-0057/0058/0059'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land do chu kho. Khong deploy Package.'
+branch: agent/wp1121-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: f4b513da5802d439aedbe58ae4a5cd38ff47d6ab
+start_from_sha: 683ae454b9bbfa7c5732953941d5ca646f390a57
+start_from_ghi_chu: 'r5 tiep tuc nhanh thi cong agent/wp1121-g1-claude da co (head 683ae45, PR #1125). origin/master luc cap lease (merge #1115). Tu base dac ta f4b513d den c82047d chi doi .claude/dev/launcher_test.py va .claude/dev/codex_cred_test.py, khong cham tep nao dac ta mo ta.'
+reviewed_sha_required: 683ae454b9bbfa7c5732953941d5ca646f390a57
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1121
+granted_on_instruction_readback: 'chu kho go "Duyet bam R5 cho toi" trong phien session_015GtxraNWSWRDjqY58pqwAN (01-11-2026), ngay sau khi phien dua bam r5 d4626ecbe5389ea4fc15c7b453b2001728ac629a1928deb9cdaaf053eeab2a3b (duy nhat) cho chu kho; chu kho KHONG go lai bam. Ghi ho. Bam byte KHONG DO DUOC.'
+recorded_by: claude-executor-session
+recorder_is_executor: true
+recorder_ghi_chu: 'phien ghi lease CUNG la executor, theo chi thi chu kho; tien le wp1117-r1-g1-claude.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-01T17:07:00Z'
+  goc_quet: 'fetch +refs/heads/* ; ls-remote 748 nhanh, thieu cuc bo 0 (so tap ten); nhanh master cuc bo ff ve origin'
+  ket_qua: 'ai-dang-giu 4 duong dan write set: chi lease wp1121-r4-g1-claude (chinh lease bi thay the boi lease nay).'
+thay_the_cho:
+  - wp1121-r4-g1-claude
+thay_the_cho_ghi_chu: 'r4 con han (toi 2026-11-02T16:35Z) => bia mo hai chieu: lease cu mang da_bi_thay_the.'
+leased_at_utc: '2026-11-01T17:07:00Z'
+heartbeat_at: '2026-11-01T17:07:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+heartbeat_required_minutes: 360
+heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
+lease_until: '2026-11-02T17:07:00Z'
+lease_expires_at_utc: '2026-11-02T17:07:00Z'
+run_minutes: 60
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+attempts_basis: 'mac dinh kho (tien le wp1045).'
+review_rounds_limit: 3
+budget:
+  codex_review_calls:
+    pr_wp1121_g1: {used: 1, reserved: 0, limit: 4}
+  attempt:
+    packet_1121_r4: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+budget_ghi_chu: 'tran tong ADR-0055 = 10 cho packet; 6 da dung => con 4.'
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'nhanh da day (f9e4342 lan chinh, 683ae45 sua CI do chinh PR gay ra); PR #1125.'
+codex_da_goi: []

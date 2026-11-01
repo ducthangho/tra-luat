@@ -5,7 +5,7 @@
 # KHONG_DO_DUOC (DanhTinhDoi, Issue #1105) o luot approve — cung ly do va cung xu ly nhu tien le pr1100.
 # Gate hau merge: run 41259734324 attempt 1 bi HUY truoc khi co job (0 job — concurrency, merge ke tiep chiem nhom); phien ghi so chay
 # lai MOT lan (attempt 2). Bon moc §10.2.2 do tren attempt 2: Run + Checkout + Workflow definition bang ops/ci_provenance.py thu
-# (--wd-run <WD_RUN>); Gate output trich log REST tung job.
+# (--wd-run 41330644054); Gate output trich log REST tung job.
 # NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nghia nhu khuon.
 # Readback tho: ops/land/pr1080-wp1077-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-11-01.
 
@@ -44,13 +44,13 @@ post_merge_checks:
     run_id: 41259734324
     run_attempt: 2
     sha: 9ced16f3764aed80a3f2ac21ca3db475cbf8aea5
-    conclusion: <KET_LUAN>
+    conclusion: success
     attempt_1: 'measured — attempt 1 (01:07:35Z -> 01:14:52Z) conclusion cancelled, 0 job (REST jobs total 0) — huy truoc khi test nao chay; phien ghi so chay lai MOT lan (POST runs/41259734324/rerun -> 201) luc 2026-11-01T15:5xZ.'
     nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, gate-output-41259734324-a2.txt]
-    moc_run: <MOC_RUN>
-    moc_checkout: <MOC_CHECKOUT>
-    moc_workflow_definition: <MOC_WD>
-    moc_gate_output: <MOC_GATE>
+    moc_run: 'measured — ci/provenance.yaml moc.run: event push, head_sha 9ced16f3, run_attempt 2, trang_thai passed; ci/jobs.json 23 job success.'
+    moc_checkout: 'measured — ci/provenance.yaml moc.checkout: 22/22 job gate* checkout passed 9ced16f3764aed80a3f2ac21ca3db475cbf8aea5 (attempt 2 chay luc master da tien xa, van checkout DUNG merge SHA); chuan-bi khong co buoc checkout (not_measured co ly do).'
+    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition: passed (wd-run 41330644054, artifact workflow-definition-41259734324), ci_provenance.py thu tu tinh lai blob/sha256.'
+    moc_gate_output: 'measured — gate-output-41259734324-a2.txt (log REST tung job, sha256 + so byte kem): 23/23 job success, ##[error] = 0; == tl selftest 1774/1774 ==, == transport selftest 12/12 ==, == gen_instructions selftest 44/44 ==; DOT BIEN 392/392, 292/292, 106/106, 49/49, 13/13 bi giet dung ly do; TỔNG: ĐẠT 8x, TONG: DAT 6x.'
     ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master). Attempt 2 chay SAU nhieu commit master khac nhung checkout DUNG merge SHA (moc_checkout).'
   - {name: 'launcher-windows.yml push master — DUNG merge SHA (lane launcher, khong phai gate)', run_id: 41259734315, sha: 9ced16f3764aed80a3f2ac21ca3db475cbf8aea5, conclusion: success, ghi_chu: 'measured — REST run 41259734315 (launcher-windows.yml, event push, head 9ced16f3) conclusion success.'}
 bookkeeping:
@@ -91,7 +91,7 @@ trang_thai_packet:
   landed: false
   reviewer_assurance_81: CHUA_DAT
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren merge SHA 9ced16f3: <DK1>; (2) lease nha: rut han 37574c8; (3) bookkeeping: ho so nay;
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 9ced16f3: DAT (bon moc ci.yml attempt 2; lane launcher-windows success); (2) lease nha: rut han 37574c8; (3) bookkeeping: ho so nay;
     (4) review neo DUNG authorized_head ee3dc6d: DAT (luot 10 approve 0 P0-P3); (5) uy quyen land: chu kho tu merge;
     (6) muc tieu packet: A1-A4 dat (handoff), F1 thu hep (#1083); (7) §8.1: CHUA_DAT — sandbox mode KHONG_DO_DUOC (DanhTinhDoi, #1105).
 

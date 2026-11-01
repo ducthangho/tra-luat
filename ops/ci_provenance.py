@@ -499,7 +499,7 @@ def nhap_wd(goi, repo, run, r, wd_run):
     if type(j) is not dict:
         return ko("c", "schema")
     for truong, ok in (("schema", j.get("schema") == "wd/1"), ("repo", j.get("repo") == repo), ("run_id", _so(j.get("run_id"), 1) and j.get("run_id") == run),
-                       ("path", j.get("path") == r.get("path")), ("trang_thai", j.get("trang_thai") == "passed"),
+                       ("path", _chuoi(j.get("path")) and j.get("path") == r.get("path")), ("trang_thai", j.get("trang_thai") == "passed"),
                        ("oid", type(j.get("oid_dinh_nghia")) is str and bool(RE_HEX40.fullmatch(j["oid_dinh_nghia"]))),
                        ("blob", type(j.get("blob")) is str and bool(RE_HEX40.fullmatch(j["blob"]))),
                        ("sha256", type(j.get("sha256")) is str and bool(re.fullmatch(r"[0-9a-f]{64}", j["sha256"]))),
@@ -567,7 +567,7 @@ def main_do_wd(argv, goi, gql):
     try:
         a = p.parse_args(argv)
         ok = bool(RE_REPO.fullmatch(a.repo)) and a.run.isascii() and a.run.isdigit() and int(a.run) > 0
-    except SystemExit:
+    except (SystemExit, ValueError):   # ValueError: `int()` vượt giới hạn chữ số của Python 3.11+
         ok = False
     if not ok:
         kq, rc = {"schema": "wd/1", "trang_thai": "not_measured", "ly_do": "sai_doi_so"}, 2

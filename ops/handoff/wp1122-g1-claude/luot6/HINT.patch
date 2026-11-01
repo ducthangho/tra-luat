@@ -1,0 +1,46 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+# Gợi ý TEST; hướng sửa producer nằm trong VERDICT.md.
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -9991,29 +9991,31 @@
+ 
+ @ca
+ def r1122_kenh_loi_phai_thuoc_luot_ngoai():
+-    """#1122 (Codex lượt 5, F01; hint_provenance: ca của HINT lượt 5, chỉ giữ phép đo `loai` vì chủ kho chốt
+-    gỡ thông điệp khỏi kênh): ca lồng CÙNG TÊN chạy ở lần lặp sau không được đổi `loai` của lỗi ngoài đã ghi.
+-    Ca lồng ném `TinHieuChotCa` mà kênh đọc map lúc ghi thì lỗi ngoài `TypeError` thành GIẾT — tín dụng giả."""
++    """#1122 F01: loại lỗi ngoài phải đúng dù ca lồng chạy ở lượt sau hoặc ngay trong __str__ của lỗi.
++    Kênh không mang thông điệp theo quyết định chủ kho; ca lồng không được biến lỗi thường thành giết."""
+     text = Path(__file__).read_text(encoding="utf-8")
+     neo = chr(10) + 'if __name__ == "__main__":'
+     bang(text.count(neo) == 1, "neo main khong duy nhat")
+     with San() as s:
+-        for i, (ngoai, trong, bo_qua) in enumerate((
+-                ("TypeError", "RuntimeError", False),
+-                ("TypeError", "TinHieuChotCa", False),
+-                ("TinHieuChotCa", "RuntimeError", False),
+-                ("TypeError", "RuntimeError", True))):
++        for i, (ngoai, trong, bo_qua, khi_in) in enumerate((
++                ("TypeError", "RuntimeError", False, False), ("TypeError", "TinHieuChotCa", False, False),
++                ("TinHieuChotCa", "RuntimeError", False, False), ("TypeError", "RuntimeError", True, False),
++                ("TypeError", "RuntimeError", False, True), ("TypeError", "TinHieuChotCa", False, True))):
+             them = (
+                 '\nreview_n = 0\nreview_depth = 0\n@ca\ndef review_repeat():\n'
+                 '    global review_n, review_depth\n'
+                 '    if review_depth:\n        raise ' + trong + '("review-inner")\n'
+                 '    review_n += 1\n'
+                 '    if review_n == 1:\n        raise ' + ngoai + '("review-current")\n'
+-                '    review_depth = 1\n'
+-                '    try:\n        chay_bo_ca([review_repeat])\n'
++                '    review_depth = 1\n    try:\n        chay_bo_ca([review_repeat])\n'
+                 '    finally:\n        review_depth = 0\n'
+                 + ('    return "review-skip"\n' if bo_qua else '')
+                 + 'CA = [review_repeat]\n')
++            if khi_in:
++                them = ('\nclass TypeError(TypeError):\n    def __str__(self):\n'
++                        '        global review_depth\n        review_depth = 1\n'
++                        '        try:\n            chay_bo_ca([review_repeat])\n'
++                        '        finally:\n            review_depth = 0\n        return "review-current"\n') + them
+             dev = _dung_cay_harness(s / str(i), text.replace(neo, them + neo, 1),
+                                    LAUNCHER.read_text(encoding="utf-8"))
+             kenh = s / (str(i) + ".json")

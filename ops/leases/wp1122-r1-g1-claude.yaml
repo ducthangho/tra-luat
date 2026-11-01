@@ -83,7 +83,7 @@ attempts_basis: 'mac dinh kho (tien le wp1045).'
 review_rounds_limit: 3
 budget:
   codex_review_calls:
-    pr_wp1122_g1: {used: 5, reserved: 0, limit: 10}
+    pr_wp1122_g1: {used: 6, reserved: 0, limit: 10}
   attempt:
     packet_1122_r1: {used: 0, reserved: 0, limit: 2}
   khong_reset_theo_generation: true
@@ -96,4 +96,5 @@ codex_da_goi:
 - {luot: 3, run_id: 50169eba8b024838bcf731ab21a23a0a, head: 4c6f9331e35331b41ca1c4b982ee6c088cad8898, verdict: changes_requested, ket_qua: '0 P0, 1 P1, 0 P2, 0 P3'}
 - {luot: 4, run_id: 0f89b3941ccc448e8b90ff36f249b94d, head: 93a9afe7bda76c55349bf72ba4fe77455758365d, verdict: changes_requested, ket_qua: '0 P0, 1 P1, 0 P2, 0 P3'}
 - {luot: 5, run_id: 46d50c1b1cf648a0acfe6eb8a9b55135, head: 365c7511f2255129e7d05fa59bb26425e1e988c1, verdict: changes_requested, ket_qua: '0 P0, 1 P1, 0 P2, 0 P3', ghi_chu: 'HINT +455 dong vuot tran 450; chu kho chon go thong diep khoi kenh --lap-ca (5d21d55)'}
+- {luot: 6, run_id: e57eafc061b24566bf034f01439a3509, head: 5d21d552ba8799fe9a4a01ea42d2dc4311a4cdb3, verdict: changes_requested, ket_qua: '0 P0, 1 P1, 0 P2, 0 P3'}
 pham_vi_mo_rong_da_duyet: 'chu kho duyet qua AskUserQuestion (01-11-2026): raise AssertionError tuong minh trong ca -> bang(False,...) va khoa AST chung ("Co: doi sang bang(False, ...) + khoa AST chung"); moi loi goi con Python text=True khai encoding utf-8 + khoa AST ("Va moi loi goi con python/launcher + ca khoa AST"). Khong doi write set.'

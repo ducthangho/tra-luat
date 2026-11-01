@@ -1,0 +1,6 @@
+Đã hoàn tất review: **changes_requested — 1 P1 (F01)**. Ca lồng trong `__str__` vẫn có thể ghi đè loại lỗi, khiến lỗi thường được tính là `giet`.
+
+- [VERDICT.md](VERDICT.md): kết luận và bằng chứng.
+- [HINT.patch](HINT.patch): khóa hồi quy bổ sung.
+
+Đã chạy A/B suite và đột biến; tập lỗi nền không đổi. Windows/CI chưa đo độc lập. Không sửa `cay-kho/`.

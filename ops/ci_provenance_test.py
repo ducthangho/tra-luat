@@ -1096,8 +1096,8 @@ def wd_node(**sua):
             "file": {"path": WD_PATH, "repositoryFileUrl": f"https://github.com/o/r/blob/{WD_OID}/{WD_PATH}"}} | sua
 
 def do_wd_gia(run=None, gql=None, gql_ma=200, loi=None, node=None, than_run=None, noi=B64):
-    run = {"id": 7, "run_attempt": 1, "event": "push", "head_sha": WD_OID, "path": WD_PATH, "check_suite_id": 1, "node_id": "WFR_x"} | (run or {})
-    run = {k: v for k, v in run.items() if v is not None}
+    run = {k: v for k, v in ({"id": 7, "run_attempt": 1, "event": "push", "head_sha": WD_OID, "path": WD_PATH, "check_suite_id": 1, "node_id": "WFR_x"}
+                             | (run or {})).items() if v is not None}
     than = gql if isinstance(gql, bytes) else json.dumps(gql if gql is not None else {"data": {"node": node or wd_node()}}).encode()
     def goi(url):   # trả 404 cho mọi URL ngoài hợp đồng — kể cả contents sai `ref`
         u = urllib.parse.urlsplit(url)
@@ -1193,15 +1193,14 @@ def wd_zip(**sua):
     with zipfile.ZipFile(b := io.BytesIO(), "w") as z:
         z.writestr(zipfile.ZipInfo("wd.json", (2026, 11, 1, 0, 0, 0)), json.dumps(j))   # dấu giờ GHIM: zip tất định
     return b.getvalue()
-def thu_wd(w=None, arts=None, j=None, bo=False, run=None, kho=b'{"default_branch": "master"}'):   # đi qua CLI thật `thu ... --wd-run 77`
+def thu_wd(w=None, arts=None, j=None, bo=False, run=None, kho=b'{"default_branch": "master"}', cmp="behind"):   # đi qua CLI thật `thu ... --wd-run 77`
     zb = wd_zip(**(j or {}))
-    w = {"path": ".github/workflows/ops-do-workflow-definition.yml", "head_branch": "master", "event": "workflow_dispatch",
-         "conclusion": "success", "repository": {"full_name": "o/r"}} | (w or {})
-    w = {k: v for k, v in w.items() if v is not None}
+    w = {k: v for k, v in ({"path": ".github/workflows/ops-do-workflow-definition.yml", "head_branch": "master", "event": "workflow_dispatch",
+         "conclusion": "success", "repository": {"full_name": "o/r"}, "head_sha": "a" * 40} | (w or {})).items() if v is not None}
     arts = arts if arts is not None else [{"id": 9, "name": "workflow-definition-5", "expired": False, "digest": "sha256:" + hashlib.sha256(zb).hexdigest()}]
     dap = {"/repos/o/r": kho, "/repos/o/r/actions/runs/77": json.dumps(w).encode(), "/repos/o/r/actions/artifacts/9/zip": zb,
            "/repos/o/r/actions/runs/77/artifacts": json.dumps({"total_count": len(arts), "artifacts": arts}).encode(),
-           f"/repos/o/r/contents/{WD_PATH}?ref={H}": B64, f"/repos/o/r/contents/{WD_PATH}?ref={'f' * 40}": B64}
+           f"/repos/o/r/compare/master...{'a' * 40}": json.dumps({"status": cmp}).encode(), f"/repos/o/r/contents/{WD_PATH}?ref={H}": B64, f"/repos/o/r/contents/{WD_PATH}?ref={'f' * 40}": B64}
     def sua(m):
         goc = m.nhap_wd
         m.nhap_wd = lambda goi, *a: goc(lambda url: (lambda u: (200, dap[u]) if u in dap else goi(url))(
@@ -1213,8 +1212,8 @@ def c58_thu_wd_run():   # A6: bằng chứng chỉ từ artifact của chính l�
     d = thu_wd()
     bang(d["trang_thai"] == "passed" and d["artifact_id"] == 9 and d["wd_run_id"] == 77 and d["oid"] == H
          and d["artifact_sha256"] == hashlib.sha256(wd_zip()).hexdigest(), f"{d}")
-    for kw, ly in ((dict(w={"path": ".github/workflows/ci.yml"}), "a:path"), (dict(w={"head_branch": "x"}), "a:head_branch"),
-                   (dict(w={"head_branch": None}, kho=b"{}"), "a:head_branch"), (dict(w={"event": "push"}), "a:event"),
+    for kw, ly in ((dict(w={"path": ".github/workflows/ci.yml"}), "a:path"), *[(dict(cmp=c), "a:head_sha") for c in ("ahead", "diverged", None)],   # tag `master` ngoài nhánh mặc định ⇒ compare ahead/diverged
+                   (dict(w={"head_sha": None}), "a:head_sha"), (dict(kho=b"{}"), "a:head_sha"), (dict(cmp="identical", w={"head_branch": "v1"}), None), (dict(w={"event": "push"}), "a:event"),
                    (dict(w={"conclusion": "failure"}), "a:conclusion"), (dict(w={"repository": {"full_name": "o/x"}}), "a:repo"),
                    (dict(w={"repository": "o/r"}), "a:repo"), (dict(arts=[]), "b:artifact"),
                    (dict(arts=[{"id": 9, "name": "workflow-definition-5", "expired": False, "digest": "sha256:" + "0" * 64}]), "b:digest"),
@@ -1228,7 +1227,7 @@ def c58_thu_wd_run():   # A6: bằng chứng chỉ từ artifact của chính l�
                    (dict(j={"oid_dinh_nghia": "f" * 40, "repository_file_url": f"https://github.com/o/r/blob/{'f' * 40}/{WD_PATH}"}), "d:oid_head_sha"),
                    (dict(j={"oid_dinh_nghia": "e" * 40, "repository_file_url": f"https://github.com/o/r/blob/{'e' * 40}/{WD_PATH}"}), "d:rest_404")):
         d = thu_wd(**kw)
-        bang(d["trang_thai"] == "not_measured" and d.get("ly_do") == f"wd_khong_hop_le:{ly}", f"{ly}: {d}")
+        bang(d["trang_thai"] == "passed" if ly is None else d["trang_thai"] == "not_measured" and d.get("ly_do") == f"wd_khong_hop_le:{ly}", f"{ly}: {d}")
     a9 = {"id": 9, "name": "workflow-definition-5", "expired": False, "digest": "sha256:" + hashlib.sha256(wd_zip()).hexdigest()}
     for ds in ([a9, a9], [a9, a9 | {"id": 10}], [a9 | {"expired": True}]):   # trùng ID (du=False) · hai artifact · hết hạn — digest ĐÚNG
         bang(thu_wd(arts=ds).get("ly_do") == "wd_khong_hop_le:b:artifact", f"{ds} phải không hợp lệ: {thu_wd(arts=ds)}")
@@ -1293,10 +1292,8 @@ def chay_than(van, ghi=False, rc=3):   # A7b: chạy CHÍNH thân `run:` của b
 def c60_workflow_than_chay():   # A7b: mỗi đột biến một phép kiểm RIÊNG, và collector giả phải ĐÃ CHẠY (lỗi setup không được tính giết)
     if not shutil.which("bash"):
         return bang(not (ROOT_THAT / ".git").exists(), "không có bash trong kho thật: KHÔNG ĐO ĐƯỢC ⇒ đỏ")
-    van = WF_WD_TEP.read_text(encoding="utf-8")
-    rc, argv, wd, tom, pw = chay_than(van)
-    bang(argv is not None and argv.splitlines() == ["ops/ci_provenance.py", "do-wd", "--repo", "o/r", "--run", "1; touch PWNED", "--out", "wd.json"], f"argv {argv!r}")
-    bang(not pw, "không được tạo PWNED")
+    rc, argv, wd, tom, pw = chay_than(van := WF_WD_TEP.read_text(encoding="utf-8"))
+    bang(argv is not None and argv.splitlines() == ["ops/ci_provenance.py", "do-wd", "--repo", "o/r", "--run", "1; touch PWNED", "--out", "wd.json"] and not pw, f"argv {argv!r} / PWNED={pw}")
     bang(rc == 3 and wd is not None and "collector_khong_ghi_rc_3" in wd and tom is not None and "collector_khong_ghi_rc_3" in tom, f"rc={rc} wd={wd!r}")
     bang(chay_than(van, ghi=True, rc=12)[:3] == (12, argv, "{}"), "collector đã ghi wd.json thì không được ghi đè")
     for cu, moi, ok in (('--run "$RUN_ID"', "--run $RUN_ID", lambda r, a, w, t: r == 3 and a is not None and "touch" in a.splitlines()),
@@ -1310,9 +1307,8 @@ def c60_workflow_than_chay():   # A7b: mỗi đột biến một phép kiểm RI
 def c61_actionlint_bat_yaml_sai():   # A8: actionlint + ShellCheck; tệp thật sạch; `type: number123` ⇒ đỏ; thiếu công cụ trong kho thật ⇒ KHÔNG ĐO ĐỦ ⇒ đỏ
     if not ((al := shutil.which("actionlint")) and shutil.which("shellcheck")):
         return bang(not (ROOT_THAT / ".git").exists(), "thiếu actionlint/shellcheck trong kho thật: KHÔNG ĐO ĐỦ ⇒ đỏ")
-    van = WF_WD_TEP.read_text(encoding="utf-8")
     with tempfile.TemporaryDirectory(prefix="cip_al_") as thu:
-        for v, mong in ((van, 0), (van.replace("        type: string\n", "        type: number123\n"), 1)):
+        for v, mong in (((van := WF_WD_TEP.read_text(encoding="utf-8")), 0), (van.replace("        type: string\n", "        type: number123\n"), 1)):
             (Path(thu) / "w.yml").write_text(v, encoding="utf-8")
             r = subprocess.run([al, str(Path(thu) / "w.yml")], capture_output=True, text=True, timeout=120)
             bang(r.returncode == mong and (mong == 0 or "number123" in r.stdout), f"mong rc {mong}, được {r.returncode}: {r.stdout[-300:]}")
@@ -1626,9 +1622,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("B6_bo_tinh_lai", '("blob", blob_cua(b) == j["blob"]), ("sha256", hashlib.sha256(b).hexdigest() == j["sha256"])', '("blob", True), ("sha256", True)', "c58"),
     ("B6_bo_du", 'if not ds["du"] or len(arts) != 1', "if len(arts) != 1", "c58"),
     ("B6_bo_digest", 'if arts[0].get("digest") != f"sha256:{sz}":', "if False:", "c58"),
-    ("B6_bo_nhanh", '("head_branch", _chuoi(w.get("head_branch")) and w.get("head_branch") == kho.get("default_branch"))', '("head_branch", True)', "c58"),
     ("B6_bo_wd_run", "    if wd_run is not None:\n        prov", "    if False:\n        prov", "c58"),
-    ("B1_bo_nhanh_hien_dien", '_chuoi(w.get("head_branch")) and w.get("head_branch")', 'w.get("head_branch")', "c58"),
     ("B3_bo_run_attempt", 'for k in ("id", "run_attempt", "path", "head_sha", "event")', 'for k in ("id", "path", "head_sha", "event")', "c54"),
     ("B3_commit_kieu", 'cso = cm.get("oid") if type(cm) is dict else None', 'cso = cm.get("oid")', "c54"),
     ("B3_base64_long", 'validate=True)', "validate=False)", "c54"),
@@ -1654,6 +1648,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     *[(f"B2_bo_chon{i}", a, "", "c53") for i, a in enumerate(("runNumber createdAt ", "file { path repositoryFileUrl } ", "checkSuite { commit { oid } } "))],
     ("B3_errors_kieu_ngoai", 'if type(d.get("errors", [])) is not list:', "if False:", "c54"),
     ("B3_thieu_bang_null", 'n.get(khoa, ...)) is None:', "n.get(khoa)) is None:", "c54"),
+    ("B6_bo_to_tien", 'so.get("status") in ("identical", "behind")', 'so.get("status") is not None', "c58"),
     ("B6_bo_meta", '("meta", all(', '("meta", True or all(', "c58"),
     ("B6_bo_khoa", '("khoa", set(j) == KHOA_WD and', '("khoa", True or', "c58"),
     ("B3_cso_khong_hex", 'type(cso) is str and bool(RE_HEX40.fullmatch(cso)) and', "_chuoi(cso) and", "c54"),

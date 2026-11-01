@@ -473,7 +473,12 @@ def nhap_wd(goi, repo, run, r, wd_run):
         return ko("a", f"rest_{e.ma}")
     if type(kho) is not dict or type(w) is not dict:
         return ko("a", "than_sai_dang")
-    for truong, ok in (("path", w.get("path") == WF_WD), ("head_branch", _chuoi(w.get("head_branch")) and w.get("head_branch") == kho.get("default_branch")),
+    try:   # nhánh mặc định đo bằng TỔ TIÊN, không bằng TÊN: tag trùng tên `master` cũng cho head_branch=master (#1102 P1)
+        so = lay_json(goi, f"{API}/repos/{repo}/compare/{urllib.parse.quote(kho['default_branch'])}...{w['head_sha']}")[0] \
+            if _chuoi(kho.get("default_branch")) and RUN_BAT_BUOC["head_sha"](w.get("head_sha")) else {}
+    except LoiRest as e:
+        return ko("a", f"rest_{e.ma}")
+    for truong, ok in (("path", w.get("path") == WF_WD), ("head_sha", type(so) is dict and so.get("status") in ("identical", "behind")),
                        ("event", w.get("event") == "workflow_dispatch"), ("conclusion", w.get("conclusion") == "success"),
                        ("repo", type(w.get("repository")) is dict and w["repository"].get("full_name") == repo)):
         if not ok:

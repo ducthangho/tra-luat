@@ -1,0 +1,15 @@
+merge e4fdab583a33b08f364a9daa30035d48416190bf | parents 3574cb07dba8a8f7f32384ee3d1d3dfbf3a4f70e 6120ab88382ce605a2b7d1e853db208a15aaf835 | tree 490c4f7fd29832ce889aa189da960f9e4be7d977
+# git diff --stat 3574cb07 e4fdab58 (cha 1 -> merge = dung thay doi cua packet)
+ .claude/settings.json         |   11 +
+ RELEASE_MANIFEST.json         |   17 +-
+ ops/cloud_agent_creds.py      |  130 +-
+ ops/cloud_agent_creds_test.py |  318 +++-
+ ops/cong_cu_test.py           |   12 +-
+ references/Code.2.21.2q.gs    | 4115 +++++++++++++++++++++++++++++++++++++++++
+ scripts/tl_selftest.py        |    6 +-
+ 7 files changed, 4586 insertions(+), 23 deletions(-)
+# git diff --no-index --numstat Code.2.21.2p.gs Code.2.21.2q.gs (K2 .gs)
+33	1	references/{Code.2.21.2p.gs => Code.2.21.2q.gs}
+# spec r2 tai 8f123b27: blob, sha256
+518d7488814e667805198b2d25a4be6162fcc73c
+c12e0449511f248de743ab603983c53d0a1c6f83f949bc4c1fa78b03f12bd020  -

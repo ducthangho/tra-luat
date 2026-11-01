@@ -1,0 +1,155 @@
+# HO SO LAND — packet #1089 CLOUD-SETUP-P3-WRITEBACK r2 (lease g2), code qua PR #1100. Khuon: ops/land/pr1073-wp1039-r1-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+#
+# TRANG THAI: merged (e4fdab58). Truong goc trang_thai_packet.landed = false vi (7) reviewer assurance §8.1 CHUA_DAT (sandbox mode
+# KHONG_DO_DUOC o ca hai luot Codex, DanhTinhDoi — xem #1105). Khoi landed_20261101 ghi landed true theo quyet dinh chu kho (kieu b,
+# tien le pr1073): chu kho chap nhan luot 2 voi sandbox KHONG_DO_DUOC (issuecomment-6552702223, neo 6120ab8).
+# Bon moc §10.2.2 du cho gate hau merge run 41271627232 attempt 2 (attempt 1 bi huy do concurrency khi #1102 merge 1 phut sau):
+# Run + Checkout + Workflow definition do bang ops/ci_provenance.py thu (--wd-run 41280334845, workflow ops-do-workflow-definition.yml
+# cua #1094 — lan dau khong can VM/chu kho); Gate output trich log REST.
+# NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
+# review/executor, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr1100-wp1089-r2-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-11-01.
+
+schema_version: 1
+mission_id: gh-1008
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxraXfMD1t2FJLzzGDr4
+input_packet_generations:
+  - {packet_issue: 1089, packet_id: CLOUD-SETUP-P3-WRITEBACK, revision: 2, generation: 1, lease_id: wp1089-cloud-setup-p3-r2-g1-claude}
+  - {packet_issue: 1089, packet_id: CLOUD-SETUP-P3-WRITEBACK, revision: 2, generation: 2, lease_id: wp1089-cloud-setup-p3-r2-g2-claude}
+authorized_head_sha: 6120ab88382ce605a2b7d1e853db208a15aaf835
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/issues/1089#issuecomment-6552453945
+authorization_lease_url: https://github.com/ducthangho/tra-luat/issues/1089#issuecomment-6551710277
+authorization_ghi_chu: >-
+  measured — readback-comments-1089.json: issuecomment-6552453945 (2026-11-01T02:4xZ) chep nguyen van chi thi chu kho trong phien dieu
+  phoi: "Xanh thì merge, land và ghi sổ P3", kem cach hieu "xanh" (CI exact head, cross-review approve exact head, connector sach,
+  mergeable). Comment KHONG neo SHA (dang truoc khi co head cuoi); SHA neo nam o quyet dinh assurance issuecomment-6552702223 (6120ab8).
+  CAVEAT #566: comment do agent dang bang token chu kho.
+land_operator: >-
+  measured — readback-pr-1100.json: merged true, merged_at 2026-11-01T04:04:23Z, merged_by ducthangho (MCP merge_pull_request cua
+  phien dieu phoi dung credential chu kho, expectedHeadSha 6120ab8), merge_commit_sha e4fdab58.
+merge_method: merge
+merge_commit: e4fdab583a33b08f364a9daa30035d48416190bf
+merge_commit_tree: 490c4f7fd29832ce889aa189da960f9e4be7d977
+merge_commit_parents: [3574cb07dba8a8f7f32384ee3d1d3dfbf3a4f70e, 6120ab88382ce605a2b7d1e853db208a15aaf835]
+pre_merge_checks:
+  - {name: 'ci.yml pull_request (ubuntu) tren head cuoi', run_id: 41267056646, sha: 6120ab88382ce605a2b7d1e853db208a15aaf835, conclusion: success, ghi_chu: 'loi_khai_co_neo — 23/23 job success do qua MCP actions_list list_workflow_jobs luc ~03:54Z trong phien dieu phoi; readback tho khong luu (ket qua cua gate hau merge ben duoi la phep do du cho land).'}
+  - {name: 'Codex connector', sha: 6120ab88382ce605a2b7d1e853db208a15aaf835, conclusion: 'completed; khong finding', nguon: readback-comments-1100.json, ghi_chu: 'measured — readback-comments-1100.json: chatgpt-codex-connector "Didn''t find any major issues ... Reviewed commit: 6120ab8838" (2026-11-01T04:04Z).'}
+  - {name: 'executor cross-review Codex luot 2/8 (launcher.py run c611c6b9)', sha: 6120ab88382ce605a2b7d1e853db208a15aaf835, conclusion: 'approve; 0 P0-P3', nguon: [verdicts/run-c611c6b9.json, verdicts/wp1089-r2-luot2-VERDICT.md], ghi_chu: 'measured — verdicts/run-c611c6b9.json: trang_thai xong, ma_thoat 0, head 6120ab8, thoi_luong 645.1 s, model_phuc_vu_trang_thai DO_DUOC (gpt-6.1-sol), effort xhigh DO_DUOC, sandbox_trang_thai KHONG_DO_DUOC (DanhTinhDoi); VERDICT dong 1-2: approve / reviewed_sha 6120ab8. Hien vat nhan tu phien executor qua tarball base64, sha256 tung tep khop ban goc (xem review.hien_vat_nhan).'}
+post_merge_checks:
+  - name: 'ci.yml push master — DUNG merge SHA'
+    run_id: 41271627232
+    run_attempt: 2
+    sha: e4fdab583a33b08f364a9daa30035d48416190bf
+    conclusion: success
+    attempt_1: 'measured — ci/run.json la attempt 2; attempt 1 (04:04:25Z -> 04:05:50Z) ket thuc cancelled vi #1102 merge (a284f8a5) luc 04:05:48Z chiem nhom concurrency truoc khi test nao chay; phien dieu phoi chay lai MOT lan dung run nay (rerun_workflow_run) — khong phai chay lai mot lan do.'
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, gate-output-41271627232-a2.txt]
+    moc_run: 'measured — ci/provenance.yaml moc.run: event push, head_sha e4fdab58, run_attempt 2, loi_khai_rest_path .github/workflows/ci.yml, check_suite_id 111863903805, trang_thai passed; ci/jobs.json 23 job success.'
+    moc_checkout: 'measured — ci/provenance.yaml moc.checkout: 22/22 job gate* co dong git log -1 --format=%H = e4fdab583a33b08f364a9daa30035d48416190bf (cha 3574cb07 + 6120ab8); chuan-bi khong co buoc checkout (not_measured co ly do khong_co_dong_sha_checkout).'
+    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition: trang_thai passed, path .github/workflows/ci.yml, oid e4fdab58, blob 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc, sha256 ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb; do bang workflow ops-do-workflow-definition.yml run 41280334845 (GraphQL WorkflowRun.file trong Actions, artifact 13072832728 sha256 8d291f95…), ci_provenance.py thu tu tinh lai blob/sha256.'
+    moc_gate_output: 'measured — gate-output-41271627232-a2.txt (log REST tung job, sha256 + so byte kem): 23/23 job ##[error] = 0; gate: == tl selftest 1774/1774 ==, == transport selftest 12/12 ==, == gen_instructions selftest 44/44 == (2x); gate-registry: CA: 52/52 dat + DOT BIEN: 80/80 bi giet dung ly do (ops/cloud_agent_creds_test.py), CA: 22/22 dat + DOT BIEN 106/106, DOT BIEN 13/13, DOT BIEN 292/292, TỔNG: ĐẠT 4x / TONG: DAT 5x. ci/provenance.yaml ghi gate=not_measured cho tung job vi collector chi doc artifact gate-evidence; phep trich log nay thay cho no.'
+    ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master).'
+bookkeeping:
+  - {item: 'rut han lease wp1089-cloud-setup-p3-r2-g2-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', nhanh: ccr-004fa546-sde2w7}
+# ---- het truong chuan
+packet_id: CLOUD-SETUP-P3-WRITEBACK
+packet_issue: 1089
+generation: 2
+generation_nghia: 'webapp Code.2.21.2q.gs action agent_creds_put (CAS md5 trong LockService, fileId ghim); ops/cloud_agent_creds.py ghi-nguoc [--neu-doi] + tep dau; hook Stop; nap ghi/xoa dau.'
+pham_vi_land: code
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session session_015GtxraXfMD1t2FJLzzGDr4 — phien DIEU PHOI (khong thi hanh packet); executor la session_015GtxraHfEdeH72Xpd5nQCW.
+
+spec:
+  path: ops/specs/cloud-setup-p3-writeback-r2.md
+  sha256: c12e0449511f248de743ab603983c53d0a1c6f83f949bc4c1fa78b03f12bd020
+  blob: 518d7488814e667805198b2d25a4be6162fcc73c
+  nguon: 'measured — merge-va-diff.txt: git rev-parse 8f123b27:<path> = 518d7488; sha256 = spec_sha256 cua lease g1/g2. Spec r1 + errata r2 vao master qua PR #1095 (merge 8f123b27 = base lease). r2 chi sua A12 (finding P2 Codex connector PR #1095).'
+
+ngoai_le_pham_vi:
+  nguon: 'issuecomment-6552277210 (chu kho chon "Nới write set", caveat #566); lease g2 d883e991'
+  muc:
+    - '(a) them scripts/tl_selftest.py: CHI 197 -> 198 o r291_docs_ngoai_goi va r357_agents_ngoai_goi + dong KE KHAI SLOT'
+    - '(b) them ops/cong_cu_test.py: CHI stem scripts/*.py vao tap noi_bo cua _goi_ngoai + ve am trong t16; dot bien do hai chieu bang tay (DOT_BIEN cua tep chi dot bien ops/cong_cu.py), lenh tai lap trong mo ta PR #1100'
+    - '(c) tran 5 -> 7 tep (600 dong giu nguyen)'
+  do: 'measured — merge-va-diff.txt: git diff --stat 3574cb07 e4fdab58 = 7 tep (dung write set g2); --numstat: 471 dong them ngoai .gs + 33 dong .gs so Code.2.21.2p.gs = 504 <= 600; .gs 33 <= 120.'
+
+lease:
+  lease_id: wp1089-cloud-setup-p3-r2-g2-claude
+  path: ops/leases/wp1089-cloud-setup-p3-r2-g2-claude.yaml (nhanh ops/cap-lease-1089-g1)
+  thay_the_cho: 'wp1089-cloud-setup-p3-r2-g1-claude — bia mo hai chieu cung commit d883e991 (g1 mang da_bi_thay_the).'
+  cap_boi: 'measured — readback-comments-1089.json: issuecomment-6551710277 (g1) github-actions[bot]; g2 dang qua workflow ops-publish-lease run 41264934470 (success 02:28Z) truoc khi executor day ban va 2 tep moi.'
+  write_set_so_tep: 7
+  thu_hoi_cuoi: 'DA NHA bang RUT HAN: commit 29f06699 tren ops/cap-lease-1089-g1 dua lease_until g2 ve 2026-11-01T04:17:00Z (khoi rut_han trong tep lease); khong bia mo vi khong co lease ke nhiem. lease_publish check rc 0 truoc khi day.'
+  heartbeat_ghi_chu: 'not_measured — heartbeat_at khong cap nhat sau leased_at_utc.'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-1100.json merged true, merge_commit_sha e4fdab58, head_sha 6120ab8; merge-va-diff.txt cha 3574cb07 + 6120ab8, tree 490c4f7f.'
+  landed: false
+  reviewer_assurance_81: CHUA_DAT
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA e4fdab58: DAT — bon moc §10.2.2 (post_merge_checks); (2) lease da nha: rut han 29f06699;
+    (3) bookkeeping: ho so nay; (4) review neo DUNG authorized_head_sha 6120ab8: DAT — luot 2 approve + connector sach tren 6120ab8;
+    (5) uy quyen land: DAT co caveat #566 (chi thi khong tu neo SHA; SHA neo o quyet dinh assurance); (6) muc tieu packet: tieu chi spec r2
+    dat theo gate executor, cross-review do lai va CI Ubuntu; M1 LIVE chua do (sau land, chu kho duyet rieng); (7) reviewer assurance §8.1:
+    CHUA_DAT — sandbox mode KHONG_DO_DUOC (xem assurance_81) => truong goc landed false; landed qua khoi landed_20261101.
+
+assurance_81:
+  reviewer_assurance_81: CHUA_DAT
+  review_exact_sha: 'DAT — verdicts/run-c611c6b9.json head 6120ab8 = authorized_head_sha, ma_thoat 0, VERDICT approve.'
+  thuc_thi:
+    model: 'measured — verdicts/run-c611c6b9.json model_phuc_vu_trang_thai DO_DUOC, moi su kien gpt-6.1-sol (ho openai, khac ho claude cua executor).'
+    effort: 'measured — verdicts/run-c611c6b9.json effort_phuc_vu [xhigh], effort_phuc_vu_trang_thai DO_DUOC.'
+    sandbox_mode: 'not_measured — verdicts/run-c611c6b9.json sandbox_trang_thai KHONG_DO_DUOC, sandbox_ly_do "luong lay mau sandbox hong (DanhTinhDoi)"; sandbox_quan_sat (codex-linux-sandbox, bwrap --unshare-net, network restricted) chi la mau quan sat. Loi he thong cua launcher: Issue #1105.'
+
+review:
+  so_loi_goi_codex_cli: 2
+  tran: 'ADR-0052: 8 loi goi; da dung 2.'
+  cac_luot:
+    - {luot: 1, run: dfebe0ba, head: cf8d1efa24f597e4c6f9d336fdabc51fe094b39a, ket_qua: 'measured — verdicts/wp1089-r2-luot1-VERDICT.md dong 1: request_changes; P2 nap-loi-khong-xoa-dau, P3 phien-ban-ngoai-hop-dong-in-thang; verdicts/run-dfebe0ba.json sandbox KHONG_DO_DUOC', hien_vat: [verdicts/run-dfebe0ba.json, verdicts/wp1089-r2-luot1-VERDICT.md]}
+    - {luot: 2, run: c611c6b9, head: 6120ab88382ce605a2b7d1e853db208a15aaf835, ket_qua: 'measured — verdicts/wp1089-r2-luot2-VERDICT.md dong 1: approve; ca hai finding luot 1 "DA VA THAT"', hien_vat: [verdicts/run-c611c6b9.json, verdicts/wp1089-r2-luot2-VERDICT.md]}
+  hien_vat_nhan: >-
+    measured — 4 tep o verdicts/ nhan tu phien executor qua tarball base64 (p3-hienvat.tgz sha256 55317f1f6ad0257f4b49404dcf2eec80087f9892282005e0c487f9505584c567,
+    6 phan, sha256 tung phan khop); sha256 sau giai nen khop ban goc: run-dfebe0ba.json ce7f9ae0…, wp1089-r2-luot1-VERDICT.md 931d8b22…,
+    run-c611c6b9.json 31531497…, wp1089-r2-luot2-VERDICT.md 2cbdd822…. Ban gui nguyen van truoc do bi tang van chuyen doi > thanh &gt; nen bo
+    (bai hoc CLAUDE.md "tang van chuyen chuan hoa chuoi").
+
+no_ngoai_pham_vi:
+  - {ma: 'cloud-setup-p3-m1-live', muc: P2, ghi_chu: 'M1 LIVE (chu kho deploy 2.21.2q qua clasp giu deployment ID + dat Script Property TL_AGENT_CREDS_FILEID; ba ve) chua do — chu kho duyet rieng.'}
+  - {ma: 'cloud-setup-p3c-contract', muc: P2, ghi_chu: 'Bump EXPECT_VERSION/API_CONTRACT len 2.21.2q + ca khoa cu -> khoa moi: packet CLOUD-SETUP-P3C-CONTRACT, mo sau M1.'}
+  - {ma: 'launcher-sandbox-lay-mau', muc: P2, ghi_chu: 'Issue #1105: luong lay mau sandbox ha moi luot Codex that ve KHONG_DO_DUOC.'}
+  - {ma: 'a11-subreaper-chap-chon', muc: P3, ghi_chu: 'ca a11_subreaper_va_esrch chap chon tren CI; F2 cam doi than ca cu nen khong sua o packet nay.'}
+
+khong_do_duoc:
+  - 'Danh tinh nguoi ky cac comment uy quyen: #566.'
+  - 'Windows cho gate: khong co luot (spec L1 khong doi).'
+  - 'Sandbox mode cua luot approve (verdicts/run-c611c6b9.json): KHONG_DO_DUOC (DanhTinhDoi) => §8.1 CHUA_DAT.'
+
+landed_20261101:
+  bo_canh: >-
+    Khoi nay ghi landed theo quyet dinh chu kho (kieu b, tien le pr1073 landed_20261031). Khong sua dong nao o tren: reviewer_assurance_81
+    van CHUA_DAT vi sandbox mode KHONG_DO_DUOC.
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/issues/1089#issuecomment-6552702223
+    noi_dung: >-
+      Chap nhan luot 2 (launcher.py run c611c6b9, approve 0 P0-P3 tren DUNG 6120ab88382ce605a2b7d1e853db208a15aaf835, model gpt-6.1-sol
+      va effort xhigh DO_DUOC, ho openai khac ho executor claude) voi sandbox mode KHONG_DO_DUOC (DanhTinhDoi); khong goi luot 3/8; mo
+      Issue sua luong lay mau sandbox (#1105).
+    do_duoc: 'measured — readback-comments-1089.json: id 6552702223, user ducthangho, author_association OWNER. CAVEAT #566.'
+  landed: true
+  landed_dieu_kien: >-
+    (1) bon moc §10.2.2 tren merge e4fdab58: DAT (post_merge_checks). (2) lease g2 rut han 29f06699. (3) bookkeeping: ho so nay.
+    (4) review neo DUNG authorized_head 6120ab8: DAT. (5) uy quyen land: DAT co caveat #566. (6) muc tieu packet: DAT theo gate + review;
+    M1 LIVE con mo. (7) §8.1: CHUA_DAT ve sandbox — chu kho CHAP NHAN bang quyet_dinh_chu_kho tren.

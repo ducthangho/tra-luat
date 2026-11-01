@@ -1283,9 +1283,9 @@ def chay_than(van, ghi=False, rc=3, bash=None):   # A7b: chạy CHÍNH thân `ru
     b = next(b for jb in yaml.safe_load(van)["jobs"].values() for b in jb["steps"] if "do-wd" in b.get("run", ""))
     with tempfile.TemporaryDirectory(prefix="cip_than_") as thu:
         t, gia = Path(thu), Path(thu) / "bin"
-        gia.mkdir() or (gia / "python3").write_text("#!/bin/sh\nprintf '%s\\n' \"$@\" > argv.txt\n" + ('printf "{}" > wd.json\n' if ghi else "") + f"exit {rc}\n")
+        gia.mkdir() or (gia / "python3").write_text("#!/bin/sh\nprintf '%s\\n' \"$@\" > argv.txt\n" + ('printf "{}" > wd.json\n' if ghi else "") + f"exit {rc}\n", newline="\n")
         (gia / "python3").chmod(0o755)
-        (t / "than.sh").write_text(b["run"])
+        (t / "than.sh").write_text(b["run"], newline="\n")   # ghim LF: Windows native ghi CRLF ⇒ `set +e\r` gãy (review lượt 9)
         env = dict(os.environ, RUN_ID="1; touch PWNED", REPO="o/r", GH_TOKEN="x", GITHUB_STEP_SUMMARY=str(t / "sum.md"),
                    PATH=f"{gia}{os.pathsep}{os.environ.get('PATH', '')}")
         r = subprocess.run([bash or __import__("bash_nen").tim_bash()[0], "-e", str(t / "than.sh")], cwd=thu, env=env, capture_output=True, timeout=60)

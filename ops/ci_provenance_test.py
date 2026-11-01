@@ -1279,7 +1279,7 @@ def c59_workflow_tinh():   # A7: tệp thật sạch; MỖI đột biến YAML m
                           ("name: workflow-definition-${{ inputs.run_id }}", "name: wd", "upload")):
         bang(van.count(cu) == 1, f"neo YAML {cu!r} phải xuất hiện đúng 1 lần")
         bang(kiem_wf(van.replace(cu, moi)) == [] if mong is None else mong in kiem_wf(van.replace(cu, moi)), f"đột biến {cu!r} -> {moi!r} không bị bắt: {kiem_wf(van.replace(cu, moi))}")
-def chay_than(van, ghi=False, rc=3):   # A7b: chạy CHÍNH thân `run:` của bước collector với python3 giả
+def chay_than(van, ghi=False, rc=3, bash=None):   # A7b: chạy CHÍNH thân `run:` của bước collector với python3 giả
     b = next(b for jb in yaml.safe_load(van)["jobs"].values() for b in jb["steps"] if "do-wd" in b.get("run", ""))
     with tempfile.TemporaryDirectory(prefix="cip_than_") as thu:
         t, gia = Path(thu), Path(thu) / "bin"
@@ -1288,13 +1288,13 @@ def chay_than(van, ghi=False, rc=3):   # A7b: chạy CHÍNH thân `run:` của b
         (t / "than.sh").write_text(b["run"])
         env = dict(os.environ, RUN_ID="1; touch PWNED", REPO="o/r", GH_TOKEN="x", GITHUB_STEP_SUMMARY=str(t / "sum.md"),
                    PATH=f"{gia}{os.pathsep}{os.environ.get('PATH', '')}")
-        r = subprocess.run(["bash", "-e", str(t / "than.sh")], cwd=thu, env=env, capture_output=True, timeout=60)
+        r = subprocess.run([bash or __import__("bash_nen").tim_bash()[0], "-e", str(t / "than.sh")], cwd=thu, env=env, capture_output=True, timeout=60)
         return r.returncode, *[(t / n).read_text() if (t / n).exists() else None for n in ("argv.txt", "wd.json", "sum.md")], (t / "PWNED").exists()
 
 @ca
 def c60_workflow_than_chay():   # A7b: mỗi đột biến một phép kiểm RIÊNG, và collector giả phải ĐÃ CHẠY (lỗi setup không được tính giết)
-    if not shutil.which("bash"):
-        return bang(not (ROOT_THAT / ".git").exists(), "không có bash trong kho thật: KHÔNG ĐO ĐƯỢC ⇒ đỏ")
+    if not __import__("bash_nen").tim_bash()[0]:   # bộ giải dùng chung (#570): `bash` trần trên Windows có thể là WSL
+        return bang(not (ROOT_THAT / ".git").exists(), "không có bash dùng được trong kho thật: KHÔNG ĐO ĐƯỢC ⇒ đỏ")
     rc, argv, wd, tom, pw = chay_than(van := WF_WD_TEP.read_text(encoding="utf-8"))
     bang(argv is not None and argv.splitlines() == ["ops/ci_provenance.py", "do-wd", "--repo", "o/r", "--run", "1; touch PWNED", "--out", "wd.json"] and not pw, f"argv {argv!r} / PWNED={pw}")
     bang(rc == 3 and wd is not None and "collector_khong_ghi_rc_3" in wd and tom is not None and "collector_khong_ghi_rc_3" in tom, f"rc={rc} wd={wd!r}")

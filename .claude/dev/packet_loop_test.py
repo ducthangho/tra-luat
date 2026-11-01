@@ -9438,7 +9438,7 @@ MUTANTS.update({
     "m9_nhan_rename": ('"diff", "--raw", "--no-renames", "-z", b, h)', '"diff", "--raw", "-z", b, h)', ["cong_m9_pham_vi_git"]),
     "m9_bo_symlink": ("for _, p in _diff_raw(root, b, h))", 'for m, p in _diff_raw(root, b, h) if m != "120000")', ["cong_m9_pham_vi_git"]),
     "m9_bo_chi_doi_mode": ('for i in range(0, len(t) - 1, 2) if t[i].startswith(":")]', 'for i in range(0, len(t) - 1, 2) if t[i].startswith(":") and t[i].split()[2] != t[i].split()[3]]', ["cong_m9_pham_vi_git"]),
-    "m9_mien_phu_quyet_run": ("        except ValueError:\n            mien = False\n", "        except ValueError:\n            raise\n", ["cong_m9_nguoi_khac_run_xanh"]),
+    "m9_mien_phu_quyet_run": ("            mien = False\n", "            raise\n", ["cong_m9_nguoi_khac_run_xanh"]),
     "m9_kieu_run_id_job_dau": ('all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int for j in js)', 'all(type(j.get("run_id")) is int for j in js[:1]) and all(type(j.get("run_attempt")) is int for j in js)', ["cong_m9_job_sau_run_id_float"]),
     "m9_nhom_dau": ('nhom.get((r["id"], r["run_attempt"]))', '(list(nhom.values())[0] if (r["id"], r["run_attempt"]) in nhom else None)', ["cong_m9_nhom_jobs_dung_run"]),
     "m9_nhom_cuoi": ('nhom.get((r["id"], r["run_attempt"]))', '(list(nhom.values())[-1] if (r["id"], r["run_attempt"]) in nhom else None)', ["cong_m9_nhom_jobs_dung_run"]),

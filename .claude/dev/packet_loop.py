@@ -3233,9 +3233,9 @@ def cmd_kiem_merge(a, state_dir: Path) -> int:
                 _die(RC_GATE, "Windows `required`: thiếu lượt ứng viên xanh (sha = head, os Windows, tests khác rỗng, mọi ca passed) hoặc dòng miễn")
 
     def k7():  # #1120 ADR-0060 M9: run `ci-dot-bien-du.yml` success ĐÚNG H với mọi job của đúng run_id/run_attempt, hoặc dòng miễn của chủ kho
-        try:  # lượt 4 F25: comment KHÔNG của chủ kho không cấp miễn, nhưng cũng không phủ quyết nhánh (b) run xanh
+        try:
             mien = bool(a.chu_kho_comment) and f"full_mutant_audit: {h} mien" in _dong_chu_kho(a.chu_kho_comment, tho=True)
-        except ValueError:
+        except ValueError:  # lượt 4 F25: comment KHÔNG của chủ kho không cấp miễn, cũng không phủ quyết nhánh (b) run xanh
             mien = False
         if not _cham_m9(root, a.base, h) or mien:
             return

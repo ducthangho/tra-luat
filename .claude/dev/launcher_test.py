@@ -187,6 +187,17 @@ def chot_tu_ca_khac(e, fn):
     return False
 
 
+TRAN_THONG_DIEP_LOI = 160
+
+
+def mo_ta_loi(e) -> str:
+    """#1122: `<Loại>: <thông điệp cắt TRAN_THONG_DIEP_LOI ký tự>`, hoặc chỉ `<Loại>` khi thông điệp rỗng.
+    Trước đây chi tiết `loi` chỉ mang tên loại, nên `t73(TypeError)` trên lane Windows (run 41322980509) không
+    chẩn đoán được từ log."""
+    tin = str(e)
+    return f"{type(e).__name__}: {tin[:TRAN_THONG_DIEP_LOI]}" if tin else type(e).__name__
+
+
 def cham_mot_ca(fn):
     """#1079 F01: chạy một ca, trả `(loai, chi_tiet)`; loai ∈ qua · bo_qua · giet · loi.
     CHỈ `TinHieuChotCa` là `giet` — AssertionError trần hay lỗi vô can (kể cả khi một `except`
@@ -200,7 +211,7 @@ def cham_mot_ca(fn):
             return "giet", fn.__name__
         return "loi", f"{fn.__name__}(chot cua ca khac)"
     except Exception as e:  # noqa: BLE001 - chinh la thu dang phan hang
-        return "loi", f"{fn.__name__}({type(e).__name__})"
+        return "loi", f"{fn.__name__}({mo_ta_loi(e)})"
     return ("bo_qua" if isinstance(kq, str) else "qua"), fn.__name__
 
 
@@ -9978,6 +9989,18 @@ def r1078_py_dung_lai_khong_tuyet_doi_phai_thoat_4():
 
 
 @ca
+def r1122_loi_mang_thong_diep_cat_160():
+    """#1122 spec A2: chi tiết `loi` mang loại + thông điệp cắt ĐÚNG 160 ký tự (số viết cứng ở đây, không đọc
+    hằng), và ca vẫn là `loi`. Đỏ khi bỏ thông điệp hoặc đổi trần cắt."""
+    from unittest.mock import patch
+    def review_vo_can():
+        raise TypeError("x" * 500)
+    with patch.dict(cham_mot_ca.__globals__, {"CA": [review_vo_can]}):
+        kq = cham_mot_ca(review_vo_can)
+    bang(kq == ("loi", "review_vo_can(TypeError: " + "x" * 160 + ")"), f"chi tiet loi sai: {kq[0]} {kq[1][:60]}...")
+
+
+@ca
 def r1079_cham_mot_ca_chi_TinHieuChotCa_la_giet():
     """#1079 F01 (a): lỗi vô can là tín dụng giả KỂ CẢ khi một `except` đã đổi kiểu sang AssertionError."""
     def chot():
@@ -14631,6 +14654,12 @@ DOT_BIEN_HARNESS = [
      ('                    LAUNCHER_DANG_DUNG = LAUNCHER\n                    neutral[fn.__name__] = cham_mot_ca(fn)\n',
       '                    neutral[fn.__name__] = ("qua", fn.__name__)\n'),
      ["r1079_chay_dot_bien_noi_neutral_va_cham_theo_loai"]),
+    # #1122 (spec wp1122 A2): chi tiết `loi` mang thông điệp cắt 160 ký tự.
+    ("wp1122_loi_bo_thong_diep",
+     ('        return "loi", f"{fn.__name__}({mo_ta_loi(e)})"', '        return "loi", f"{fn.__name__}({type(e).__name__})"'),
+     ["r1122_loi_mang_thong_diep_cat_160"]),
+    ("wp1122_doi_tran_cat", ("TRAN_THONG_DIEP_LOI = 160\n", "TRAN_THONG_DIEP_LOI = 80\n"),
+     ["r1122_loi_mang_thong_diep_cat_160"]),
     ("wp1079_neutral_harness_bo",
      ('                    neutral_h[ten_ca] = cham_lap_ca(goc_h, ten_ca)\n', '                    neutral_h[ten_ca] = ("qua", ten_ca)\n'),
      ["r1079_chay_dot_bien_noi_neutral_va_cham_theo_loai"]),
@@ -14769,7 +14798,7 @@ def chay_dot_bien() -> int:
                     except TinHieuChotCa:
                         chet.append(fn.__name__)
                     except Exception as e:  # noqa: BLE001 - tín dụng giả, không phải giết
-                        loi.append(f"{fn.__name__}({type(e).__name__})")
+                        loi.append(f"{fn.__name__}({mo_ta_loi(e)})")
             finally:
                 HOOK_DANG_DUNG, YAML_DANG_DUNG = hook_goc, yaml_goc
                 CAI_SH_DANG_DUNG, SELFTEST_DANG_DUNG, CONG_CU_DANG_DUNG = cai_sh_goc, selftest_goc, cong_cu_goc
@@ -14930,7 +14959,8 @@ def cham_lap_ca(thu_muc, ten_ca):
         return "loi", f"{ten_ca}(khong co ket qua kenh, rc={p.returncode})"
     if kq.get("hong"):
         return ("giet" if kq.get("loai") == "TinHieuChotCa" else "loi"), (
-            ten_ca if kq.get("loai") == "TinHieuChotCa" else f"{ten_ca}({kq.get('loai')})")
+            ten_ca if kq.get("loai") == "TinHieuChotCa" else
+            f"{ten_ca}({kq.get('loai')}" + (f": {kq['thong_diep']}" if kq.get("thong_diep") else "") + ")")
     # wp484 g7 (launcher-windows 39057167905): ca POSIX tự bỏ qua là KHÔNG ĐO ĐƯỢC.
     return ("bo_qua" if kq.get("bo_qua") else "qua"), ten_ca
 
@@ -15122,7 +15152,10 @@ def main() -> int:
         if kenh:   # #1079 F01: kênh kết quả cho runner harness (cham_lap_ca)
             Path(kenh).write_text(json.dumps({"nonce": nonce, "ten": chon[0].__name__, "qua": qua,
                                               "bo_qua": bo_qua, "hong": len(hong_ds),
-                                              "loai": LOAI_HONG.get(chon[0].__name__)}), encoding="utf-8")
+                                              "loai": LOAI_HONG.get(chon[0].__name__),
+                                              # #1122: thông điệp (cắt) cho chi tiết `loi` của `cham_lap_ca`
+                                              "thong_diep": (hong_ds[-1][1][:TRAN_THONG_DIEP_LOI]
+                                                             if hong_ds else None)}), encoding="utf-8")
         print(f"\nLAP {chon[0].__name__}: {qua}/{a.lan} qua, {bo_qua} bo qua, "
               f"{len(hong_ds)} hong", flush=True)
         return 1 if hong_ds else 0

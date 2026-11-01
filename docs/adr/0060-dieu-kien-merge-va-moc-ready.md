@@ -155,14 +155,16 @@ Mọi phép so của §7 giữ nguyên, chỉ đổi mỏ neo.
 
 ## Cưỡng chế — M11
 
-**1 cổng** (packet C, #1106): `.claude/dev/packet_loop.py kiem-merge` (điều kiện bỏ draft/merge K0–K6) và `kiem-dong-wp` (đóng WP
-D1–D4), không đọc state. Đo trên đủ sáu vị trí cổng mà §20 của protocol liệt kê bằng
+**1 cổng** (packet C, #1106): `.claude/dev/packet_loop.py kiem-merge` (điều kiện bỏ draft/merge K0–K7) và `kiem-dong-wp` (đóng WP
+D1–D4), không đọc state. K7 (packet `KIEM-MERGE-M9`, #1120) cưỡng chế M9: diff chạm vùng M9 thì phải có một run
+`ci-dot-bien-du.yml` `success` đúng head với mọi job `success` (`--dot-bien-du-runs`, `--dot-bien-du-jobs`), hoặc dòng
+`full_mutant_audit: <head> mien` của chủ kho. Đo trên đủ sáu vị trí cổng mà §20 của protocol liệt kê bằng
 `rg -c 'ADR-0060|dieu_kien_merge' <tệp>`:
 
 | vị trí cổng | kết quả |
 |---|---|
 | `ops/lease_publish.py` | 0 dòng |
-| `.claude/dev/packet_loop.py` | 6 dòng (đo khi thi công packet C; lúc soạn ADR: 0) |
+| `.claude/dev/packet_loop.py` | 9 dòng (đo khi thi công #1120; packet C: 6; lúc soạn ADR: 0) |
 | `.claude/dev/launcher.py` | 0 dòng |
 | `.claude/dev/gate_lifecycle.py` | 0 dòng |
 | `.github/workflows/ci.yml` | 0 dòng |

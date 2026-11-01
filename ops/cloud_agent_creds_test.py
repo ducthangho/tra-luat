@@ -502,7 +502,7 @@ def p3c3_dau_sau_ghi_va_cu():
     bang(k.dau and json.loads(k.dau) == {"last_refresh": "2026-11-05T00:00:00Z", "md5": _md5(b)}, f"sau ĐÃ CŨ: {k.dau}")
     bang(SEN_RT not in k.dau and "tokens" not in k.dau, "tệp dấu chứa token")
 # ---------- P3 B: `agent_creds_put` trích NGUYÊN VĂN từ Code.2.21.2q.gs, chạy bằng node ----------
-JS_GIA = r"""const c = require('crypto'), st = JSON.parse(process.argv[2]), nk = [];
+JS_GIA = r"""const c = require('crypto'), st = JSON.parse(require('fs').readFileSync(0, 'utf8')), nk = [];
 let tep = Buffer.from(st.tep, 'base64'), ghi = 0, doc = 0;
 const md5 = b => c.createHash('md5').update(b).digest('hex');
 globalThis.PropertiesService = {getScriptProperties: () => ({getProperty: k => (st.prop && k === 'TL_AGENT_CREDS_FILEID') ? st.prop : null})};
@@ -534,7 +534,8 @@ TEP0, FID = b"ban-cu-cua-tl_agent_creds.enc", "fid-dung"
 def chay_b(p=None, tep=TEP0, prop=FID, **st):
     with tempfile.TemporaryDirectory(prefix="cac_gs_") as t:
         (js := Path(t) / "b.js").write_text(JS_GIA + _trich_gs() + JS_CHAY, encoding="utf-8")
-        r = subprocess.run([_node(), str(js), json.dumps({"tep": base64.b64encode(tep).decode(), "prop": prop, "p": p or {}, **st})],
+        # v1.36.69 (#1110: WinError 206 ở p3b4 — payload ~87K ký tự qua argv vượt trần 32767 của Windows) — đưa payload qua stdin
+        r = subprocess.run([_node(), str(js)], input=json.dumps({"tep": base64.b64encode(tep).decode(), "prop": prop, "p": p or {}, **st}).encode(),
                            capture_output=True, timeout=60)
     bang(r.returncode == 0, f"node rc={r.returncode}: {r.stderr[-300:]!r}")
     return SimpleNamespace(**json.loads(r.stdout))

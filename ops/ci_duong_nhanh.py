@@ -333,6 +333,10 @@ def ly_do_ve_day_du(doi, raw):
                 ly.append(f"doi mode {cu}->{moi} {duong!r}")
             if duong.startswith("ops/specs/") and tt in ("M", "D", "T"):
                 ly.append(f"sua/xoa dac ta da co ({tt}) {duong!r}")
+            # wp1113 (dau do DO6) — lan luu tru chi THEM ho so. Xoa (ke ca doi ten: `--no-renames` tach thanh D+A) mot tep
+            # da co thi doc-claims-check chi ghi PATH_DELETED la advisory, nen KHONG buoc nao bat tren ca hai duong ⇒ DAY_DU.
+            if tt == "D":
+                ly.append(f"xoa tep da co {duong!r}")
     return sorted(set(ly))
 
 

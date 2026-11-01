@@ -2788,7 +2788,9 @@ def _neo_connector(k: str, x: dict, head: str, biet: set):
     Issue comment (dạng connector `**Reviewed commit:** `sha``): phần còn lại của DÒNG sau MỖI nhãn phải đúng một SHA 7–40 hex (backtick
     đủ cặp hoặc không), mọi khai cùng một phía; tiền tố chỉ là head khi không SHA nào khác đã biết trong readback (`biet`) cùng tiền tố."""
     if k != "issue_comments":
-        c = x.get("commit_id")
+        # v1.x #1106 (PR #1116: P2 4435201341 viết trên b2f318e mà commit_id bị GitHub DỜI sang head mới vì push không đổi dòng nó bám) —
+        # review comment neo theo `original_commit_id` (commit nơi finding được VIẾT); `commit_id` chỉ là chỗ nó còn áp được.
+        c = x["original_commit_id"] if k == "review_comments" and "original_commit_id" in x else x.get("commit_id")
         return "hien" if c == head else "cu" if type(c) is str and SHA_RE.fullmatch(c) else "hong"
     khai = [re.fullmatch(r"(`?)([0-9a-f]{7,40})\1", t.strip()) for t in re.findall(r"Reviewed commit:(?:\*\*)?([^\n]*)", x["body"])]
     if not khai:

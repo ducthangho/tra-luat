@@ -75,8 +75,8 @@ heartbeat_at: '2026-11-01T16:10:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
 heartbeat_required_minutes: 360
 heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
-lease_until: '2026-11-02T16:10:00Z'
-lease_expires_at_utc: '2026-11-02T16:10:00Z'
+lease_until: '2026-11-01T16:46:00Z'
+lease_expires_at_utc: '2026-11-01T16:46:00Z'
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 0
@@ -93,3 +93,13 @@ requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp1117-g1-claude khi N0, A1-A6 dat; mo PR draft.'
 codex_da_goi: []
+lease_sua_lan_cuoi: '2026-11-01T16:26:00Z'
+lease_sua_ghi_chu: 'Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch, budget.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-02T16:10:00Z'
+  han_moi_utc: '2026-11-01T16:46:00Z'
+  chi_thi: 'Chu kho chon "Tam dung #1117, lam #1122 truoc (Recommended)" qua AskUserQuestion trong phien session_015Gtxra7iT6mwM1kqpdggt6 (01-11-2026); ghi ho. Bam byte KHONG DO DUOC.'
+  ly_do: 'Packet #1122 (uu tien truoc tien) cung sua .claude/dev/launcher_test.py. #1117 TAM DUNG, CHUA land: nhanh agent/wp1117-g1-claude giu nguyen (head 0 diff ngoai 2 tep); se rebase len master moi va xin lease g2.'
+  vi_sao_han_moi_khong_bang_luc_sua: 'Han moi = luc sua + 20 phut de luot ops-publish-lease cua commit nay doc lease CON HAN (rc=9 da dang), khong roi vao rc=8 (bai hoc CLAUDE.md 20-09-2026). Khong viet bia mo: chua co lease ke nhiem cung packet.'
+  tien_le: 'wp1079-r1-g10-claude, wp1078-r1-g2-claude (thu_hoi_bang_rut_han).'
+  lech_spec_da_duyet: 'cham_lap_ca chay runner TRONG thu_muc (do _dung_cay_harness that chep) thay vi canh __file__, de chot trong runner dot bien duoc qua DOT_BIEN_HARNESS; chu kho chon "Duyet, ghi vao handoff (Recommended)".'

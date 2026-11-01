@@ -1,0 +1,7 @@
+launcher.err	sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	bytes 0	ly do: tep rong
+evidence/base-argv.jsonl	sha256 a7ea48fd223782d38d9e2e153e04fc95a8c438cfe640e74d6d45142c6880d728	bytes 822015	ly do: >500 KB (tien le TEP-LON-KHONG-VAO-KHO); giu tai sandbox reviewer
+evidence/head-argv.jsonl	sha256 4325fd4e005d62065b1b8969cad71257259fc9f7f665c1a0f946380a490156f1	bytes 838749	ly do: >500 KB (tien le TEP-LON-KHONG-VAO-KHO); giu tai sandbox reviewer
+cay-kho/ copies/	khong chep: ban sao kho/ban sao lam viec cua sandbox reviewer; tai lap bang clone tai reviewed_sha / base
+evidence/ruff-cache-created/.gitignore	sha256 9e3a60f1e6ec4ae60215c11d54b171392745ec25e9dded433d5bd921363af316	bytes 35	ly do: cache ruff do reviewer chuyen ra khoi cay (VERDICT goc dong 138); .gitignore cua no chua "*" nen chep vao kho se tu an thu muc
+evidence/ruff-cache-created/CACHEDIR.TAG	sha256 5953156d7e0c564a427251316eaf26f8870e6483ae2197f916b630e4f93e31ae	bytes 43	ly do: cache ruff do reviewer chuyen ra khoi cay (VERDICT goc dong 138); .gitignore cua no chua "*" nen chep vao kho se tu an thu muc
+evidence/ruff-cache-created/0.17.3/12591984194595340168	sha256 d001930daafa34484d4322965804766ba8b1fce65cd1999142048c4f36b41588	bytes 252	ly do: cache ruff do reviewer chuyen ra khoi cay (VERDICT goc dong 138); .gitignore cua no chua "*" nen chep vao kho se tu an thu muc

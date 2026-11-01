@@ -153,3 +153,29 @@ landed_20261101:
     (1) bon moc §10.2.2 tren merge e4fdab58: DAT (post_merge_checks). (2) lease g2 rut han 29f06699. (3) bookkeeping: ho so nay.
     (4) review neo DUNG authorized_head 6120ab8: DAT. (5) uy quyen land: DAT co caveat #566. (6) muc tieu packet: DAT theo gate + review;
     M1 LIVE con mo. (7) §8.1: CHUA_DAT ve sandbox — chu kho CHAP NHAN bang quyet_dinh_chu_kho tren.
+m1_live_20261101:
+  bo_canh: >-
+    Do tieu chi M1 (LIVE) cua spec r2 sau land, theo chi thi chu kho trong phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4
+    (01-11-2026: "Ban tu deploy cho toi tren may thong qua desktop commander di", roi "Da dat xong" cho Script Property).
+    Khoi nay KHONG sua dong nao o tren; muc no_ngoai_pham_vi 'cloud-setup-p3-m1-live' nay DA DONG (ca ba vế DAT).
+  phien_do: session_015GtxraXfMD1t2FJLzzGDr4
+  sha_do: c82047da4d6f9546ce1d68282c37acf9567b74bc
+  deploy: >-
+    measured — m1-live/deploy-clasp-20261101.txt: Code.gs = origin/master:references/Code.2.21.2q.gs (blob 7bc2b869, sha256
+    8fabb594…, 226231 byte); clasp 3.4.1 push 2 tep -> create-version 81 -> update-deployment AKfycbzNrsx… tu @80 (2.21.2p) sang
+    @81, giu nguyen deployment id/URL /exec. Script Property TL_AGENT_CREDS_FILEID do chu kho tu dat (clasp khong dat duoc).
+  ve_i: 'DAT — measured: tl ping tu phien cloud tra version 2.21.2q (17:2xZ va lai 17:31:24Z trong readback-m1-p3-vii.json).'
+  ve_ii: >-
+    DAT — measured: m1-live/readback-m1-p3-vii.json (17:31:24Z..17:31:35Z). agent_creds_put voi expect_md5 = 32 so 0 va payload
+    = CHINH bytes hien tai cua tep (an toan ca khi CAS hong) => {ok:false, error:CAS_CONFLICT, md5:c8d0bd73…}. Drive metadata
+    truoc/sau bang nhau: md5Checksum c8d0bd739492cab85fa60c2873c8ab13, size 4725, headRevisionId 0B6rMgRJ…, modifiedTime
+    2026-10-30T15:48:03.437Z; md5 bytes tai cong khai truoc/sau cung c8d0bd73…. CAS_CONFLICT (khong phai AGENT_CREDS_NOT_CONFIGURED
+    hay AGENT_CREDS_FILEID_MISMATCH) cung xac nhan Script Property da dat va khop fileId.
+  ve_iii: >-
+    DAT — measured. Ghi: chu kho dang nhap lai codex (device-auth, 17:38:37Z) trong phien dieu phoi, mot luot codex exec that
+    (PONG, rc 0), roi 'ops/cloud_agent_creds.py ghi-nguoc' => rc 0, 'agent_creds_ghi_nguoc: ĐÃ GHI — rev=2'; Drive md5
+    c8d0bd73… -> e764ada32c15ab809dbdfd8e980c6fad, size 4725 -> 4894, headRevisionId moi, modifiedTime 2026-11-01T17:39:21.708Z;
+    md5 tai cong khai = md5 Drive = md5 tep dau (m1-live/readback-m1-p3-viii-ghi.json). Nap: phien MOI
+    session_015Gtxrb8TceyWuSwmRH7jcJ, su kien hook_progress 6a524293 (17:40:03Z) co dong 'agent_creds: ĐÃ NẠP — rev=2 …
+    (bootstrap rc=0)' (m1-live/readback-m1-p3-viii-nap.yaml, doc nguoc qua list_events). Khong ghi token.
+  m1: DAT — ca ba vế (i)(ii)(iii) DAT.

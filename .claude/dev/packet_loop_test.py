@@ -9080,23 +9080,28 @@ def _rev_list_loi(script, args, sd, env=None):
     return 0, b"", loi.getvalue().encode()
 
 
-def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None, env=None, git_loi=False):
+def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None, env=None, git_loi=False, lien=None):
     import yaml
     goc = Path(tempfile.mkdtemp(prefix="c1106-", dir=c.tmp))
     w = goc / "w"
     _g(goc, "init", "-q", "--bare", "o.git"), _g(goc, "init", "-q", "-b", "master", "w"), _g(w, "remote", "add", "origin", "../o.git")
 
-    def ghi(nd, msg):
+    def ghi(nd, msg, lien=None):
+        # LF + UTF-8 TƯỜNG MINH: băm kỳ vọng tính trên chuỗi LF, mà `write_text` mặc định ra CRLF trên Windows (connector P2, #1116).
         for p, b in nd.items():
-            (w / p).parent.mkdir(parents=True, exist_ok=True), (w / p).write_text(b)
-        return [_g(w, "add", "-A"), _g(w, "commit", "-qm", msg), _g(w, "rev-parse", "HEAD")][-1]
+            (w / p).parent.mkdir(parents=True, exist_ok=True), (w / p).write_text(b, encoding="utf-8", newline="\n")
+        _g(w, "add", "-A")
+        for p, dich in (lien or {}).items():  # symlink đi thẳng vào index (120000) — khỏi cần quyền tạo symlink trên Windows
+            (goc / "lien").write_text(dich, encoding="utf-8", newline="\n")
+            _g(w, "update-index", "--add", "--cacheinfo", f"120000,{_g(w, 'hash-object', '-w', str(goc / 'lien'))},{p}")
+        return [_g(w, "commit", "-qm", msg), _g(w, "rev-parse", "HEAD")][-1]
     ghi({"README.md": "a\n"}, "A")
     L = ghi({"docs/adr/0060-dieu-kien-merge-va-moc-ready.md": "adr\n"}, "L")
     L2 = ghi({"docs/z.md": "z\n"}, "L2")
     x = {"spec": f"# spec\ndieu_kien_merge: ADR-0060@{L}\n", "L2": L2}
     (doi or (lambda *_: None))(x, w, None)
     _g(w, "push", "-q", "origin", "master"), _g(w, "checkout", "-qb", "pr")
-    h = ghi({spec_path: x["spec"], **(them or {})}, "H")
+    h = ghi({spec_path: x["spec"], **(them or {})}, "H", lien)
     _g(w, "push", "-q", "origin", "HEAD:refs/pull/55/head"), _g(w, "fetch", "-q", "origin")
     out = "review\nKET_LUAN: approve\n"
     x.update(runs=[{"id": 100, "path": ".github/workflows/ci.yml", "head_sha": h, "repository": {"full_name": "o/r"}, "run_attempt": 1,
@@ -9111,7 +9116,7 @@ def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None, env=None, git_loi
              lease={"spec_hash": hashlib.sha256(x["spec"].encode()).hexdigest()}, cmt=None, win=None, p3off=[])
     (doi or (lambda *_: None))(x, w, h)
     trang = lambda k, v: {"total_count": len({i["id"] for i in v}), k: v}  # noqa: E731
-    f = lambda ten, d: ((goc / ten).write_text(d if isinstance(d, str) else json.dumps(d)), goc / ten)[1]  # noqa: E731
+    f = lambda ten, d: ((goc / ten).write_text(d if isinstance(d, str) else json.dumps(d), encoding="utf-8", newline="\n"), goc / ten)[1]  # noqa: E731
     cn = {"repo": "o/r", "pr": 55, "head_sha": h, **{k: trang("items", x[k]) for k in ("reviews", "review_comments", "issue_comments")}}
     args = ["kiem-merge", "--root", w, "--repo", "o/r", "--pr", 55, "--head", h, "--base", x.get("base", L2), "--spec", spec_path,
             "--lease", f("l.yaml", x["lease"] if isinstance(x["lease"], str) else yaml.safe_dump(x["lease"])), "--workflow-runs", f("wr.json", trang("workflow_runs", x["runs"])),
@@ -9138,8 +9143,8 @@ def _d1106(c, doi=None, raw=None, raw_ls=None, env=None, git_loi=False):
     goc = Path(tempfile.mkdtemp(prefix="d1106-", dir=c.tmp))
     w = goc / "w"
     _g(goc, "init", "-q", "--bare", "o.git"), _g(goc, "init", "-q", "-b", "master", "w"), _g(w, "remote", "add", "origin", "../o.git")
-    (w / "a").write_text("a\n"), _g(w, "add", "-A"), _g(w, "commit", "-qm", "A"), _g(w, "checkout", "-qb", "pr")
-    (w / "b").write_text("b\n"), _g(w, "add", "-A"), _g(w, "commit", "-qm", "H"), _g(w, "checkout", "-q", "master")
+    (w / "a").write_text("a\n", encoding="utf-8", newline="\n"), _g(w, "add", "-A"), _g(w, "commit", "-qm", "A"), _g(w, "checkout", "-qb", "pr")
+    (w / "b").write_text("b\n", encoding="utf-8", newline="\n"), _g(w, "add", "-A"), _g(w, "commit", "-qm", "H"), _g(w, "checkout", "-q", "master")
     h = _g(w, "rev-parse", "pr")
     _g(w, "merge", "-q", "--no-ff", "-m", "M", "pr"), _g(w, "push", "-q", "origin", "master"), _g(w, "fetch", "-q", "origin")
     m = _g(w, "rev-parse", "HEAD")
@@ -9149,7 +9154,8 @@ def _d1106(c, doi=None, raw=None, raw_ls=None, env=None, git_loi=False):
           "lease_cuoi": "l1", "landed": True, "moc_10_2_2": dict.fromkeys(("run", "checkout", "workflow_definition", "gate_output"), "passed")}
     ls = {"lease_id": "l1", "packet_id": "P", "generation": 1, "lease_until": "2026-01-01T00:00:00Z"}
     (doi or (lambda *_: None))(bb, ls)
-    (goc / "bb.yaml").write_text(raw or yaml.safe_dump(bb, allow_unicode=True)), (goc / "ls.yaml").write_text(raw_ls or yaml.safe_dump(ls))
+    (goc / "bb.yaml").write_text(raw or yaml.safe_dump(bb, allow_unicode=True), encoding="utf-8", newline="\n")
+    (goc / "ls.yaml").write_text(raw_ls or yaml.safe_dump(ls), encoding="utf-8", newline="\n")
     return (_rev_list_loi if git_loi else run)(c.script, ["kiem-dong-wp", "--root", w, "--bien-ban", goc / "bb.yaml", "--lease", goc / "ls.yaml"], c.sd(), env)
 
 
@@ -9163,6 +9169,17 @@ def _c1106_diff_loi(c):
     except ValueError:
         return
     raise AssertionError(f"git diff -U0 lỗi mà vẫn phân loại {loai!r}")
+
+
+def _c1106_crlf(c):
+    """Giả lập `write_text` của Windows (newline=None ⇒ CRLF): ca dương của fixture phải VẪN ĐẠT — connector P2 #1116."""
+    goc = Path.write_text
+    Path.write_text = lambda self, d, encoding=None, errors=None, newline=None: goc(self, d, encoding=encoding, errors=errors,
+                                                                                   newline="\r\n" if newline is None else newline)
+    try:
+        _c1106_ca(0)(c), _c1106_ca(0, bb=1)(c)
+    finally:
+        Path.write_text = goc
 
 
 _S1106 = lambda k, **v: lambda x, w, h: h and x[k].update(v)  # noqa: E731
@@ -9227,6 +9244,10 @@ CASES += [
     ("cong_c_d1_tag_hong", _c1106_ca(2, "YAML hỏng", bb=1, raw="packet: !!timestamp nope\n")),
     ("cong_c_d3_git_loi", _c1106_ca(12, "D3", bb=1, git_loi=True)),
     ("cong_c_k1_git_loi", _c1106_ca(12, "K1", git_loi=True)),
+    ("cong_c_fixture_crlf", _c1106_crlf),
+    # symlink 120000 trong ops/reviews/ không được bước 1 đọc thành hồ sơ thụ động; spec khai `windows: required` ⇒ K6 đòi bằng chứng (connector P2 #1116)
+    ("cong_c_k6_symlink", _c1106_ca(12, "K6", spec_path="ops/land/X.md", lien={"ops/reviews/a.log": "../../scripts/tl.py"},
+                                    doi=lambda x, w, h: h is None and x.update(spec=x["spec"] + "windows: required\n"))),
 ]
 MUTANTS.update({
     "c1106_k0_bo_pr_head": ("x[0] or x[1].split()[:1] != [h.encode()]", "x[0]", ["cong_c_k0_pr_head"]),
@@ -9247,6 +9268,7 @@ MUTANTS.update({
     "c1106_d2_bo": ('elif not (bb["landed"] is True and', 'elif False and (bb["landed"] is True and', ["cong_c_d2_not_measured"]),
     "c1106_d2_bo_nghiem_thu": (' and all(v in DAT_MOC for v in bb["nghiem_thu"].values())', "", ["cong_c_d2_nghiem_thu"]),
     "c1106_d4_bo_han": ("het = datetime.strptime", "het = True or datetime.strptime", ["cong_c_d4_tuong_lai"]),
+    "c1106_k6_buoc1_bo_mode": (' and m == "100644"', "", ["cong_c_k6_symlink"]),
     "c1106_d1_nhan_bool": ("so = lambda v: type(v) is int and v >= 1", "so = lambda v: isinstance(v, int) and v >= 1", ["cong_c_d1_generation_bool"]),
 })
 

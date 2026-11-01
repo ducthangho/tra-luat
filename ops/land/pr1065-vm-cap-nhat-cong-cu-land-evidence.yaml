@@ -121,6 +121,15 @@ review:
       reviewed_sha: 210ab81c3f1af36243748458eb5e70180baeab71
       verdict: approve
       nguon: ops/reviews/pr1065-review-16-codex-verdict.receipt.yaml
+    - luot: 17-19
+      reviewed_sha: '4b3f07e 958ca60 4337254 (head PR #1069 sau ghi so + merge master)'
+      verdict: changes_requested
+      nguon: 'ops/reviews/pr1065-review-17-codex-verdict.receipt.yaml, -18-, -19- (moi luot 1 P2 ve cau chu ghi so)'
+    - luot: 20
+      reviewed_sha: dcb295a903f7e51eab84d3dbd1feb48832471827
+      verdict: approve
+      nguon: ops/reviews/pr1065-review-20-codex-verdict.receipt.yaml
+      ghi_chu: 'Head PR #1069 luc merge (634d5a2). Ban va tiep theo cho -DangKyLich (icacls /T DACL rong): PR #1091, xem ops/reviews/pr1091-review-2-codex-verdict.receipt.yaml.'
   cross_review_ghi_chu: >-
     measured — luot 16: ops/reviews/pr1065-review-16-codex/run/run.json (head 210ab81, ma_thoat 0) va
     ops/reviews/pr1065-review-16-codex/VERDICT.md; luot 1–15: ops/reviews/pr1065-review-16-codex/luot-truoc/ (chi verdict + HINT,

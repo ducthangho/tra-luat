@@ -854,13 +854,13 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 | `pr1110-review-2-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. |
 | `pr1114-review-1-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong. |
 | `pr1114-review-1-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai e101b11. |
-| `pr1114-review-1-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. |
+| `pr1114-review-1-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | Tep >500 KB (evidence/{base,head}-argv.jsonl), cache ruff evidence/ruff-cache-created/ va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. DIFF.patch CO trong kho. |
 | `pr1114-review-1-codex-verdict.md` | `SANDBOX-KHONG-DO-DUOC` | run.json sandbox_trang_thai KHONG_DO_DUOC: launcher khong quan sat duoc co che sandbox cua luot nay (khong chung minh lenh chay ngoai sandbox). |
 | `pr1114-review-1-codex-verdict.md` | `KHONG-PHAI-HEAD-CUOI` | Luot nay duyet e101b11, KHONG phai head luc merge; head cuoi do luot 2 duyet. |
 | `pr1114-review-1-codex-verdict.md` | `WINDOWS-THAT-KHONG-DO-TRONG-SANDBOX` | Reviewer chi mo phong tran dong lenh Windows tren Linux; Windows that do o CI ngoai luot review. |
 | `pr1114-review-2-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong. |
 | `pr1114-review-2-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai 51435a4. |
-| `pr1114-review-2-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. |
+| `pr1114-review-2-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | Tep >500 KB (evidence/initial-hashes.json) va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. DIFF.patch CO trong kho. |
 | `pr1114-review-2-codex-verdict.md` | `SANDBOX-KHONG-DO-DUOC` | run.json sandbox_trang_thai KHONG_DO_DUOC: launcher khong quan sat duoc co che sandbox cua luot nay (khong chung minh lenh chay ngoai sandbox). |
 | `pr1114-review-2-codex-verdict.md` | `WINDOWS-THAT-KHONG-DO-TRONG-SANDBOX` | Reviewer chi mo phong tran dong lenh Windows tren Linux; Windows that do o CI ngoai luot review. |
 | `pr1048-review-1-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong. |

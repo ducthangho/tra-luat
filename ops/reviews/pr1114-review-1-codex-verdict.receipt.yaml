@@ -86,7 +86,7 @@ verdict_usage_caveats:
     mo_ta: 'Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai e101b11.'
   - id: TEP-LON-KHONG-VAO-KHO
     muc: P3
-    mo_ta: 'Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt.'
+    mo_ta: 'Tep >500 KB (evidence/{base,head}-argv.jsonl), cache ruff evidence/ruff-cache-created/ va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. DIFF.patch CO trong kho.'
   - id: SANDBOX-KHONG-DO-DUOC
     muc: P3
     mo_ta: 'run.json sandbox_trang_thai KHONG_DO_DUOC: launcher khong quan sat duoc co che sandbox cua luot nay (khong chung minh lenh chay ngoai sandbox).'

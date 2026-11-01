@@ -1,0 +1,748 @@
+[
+  {
+    "name": "verdict",
+    "actual": "approve",
+    "expected": "approve",
+    "ok": true
+  },
+  {
+    "name": "reviewed_sha/verdict",
+    "actual": "907c474e5dd22b2f389e8c342e7c79c6fbcb760e",
+    "expected": "907c474e5dd22b2f389e8c342e7c79c6fbcb760e",
+    "ok": true
+  },
+  {
+    "name": "reviewed_sha/run",
+    "actual": "907c474e5dd22b2f389e8c342e7c79c6fbcb760e",
+    "expected": "907c474e5dd22b2f389e8c342e7c79c6fbcb760e",
+    "ok": true
+  },
+  {
+    "name": "reviewed_tree/git",
+    "actual": "d01f444ce113e812178093aab25ce3ea9d14aeed",
+    "expected": "d01f444ce113e812178093aab25ce3ea9d14aeed",
+    "ok": true
+  },
+  {
+    "name": "verdict_sha256/source",
+    "actual": "b823f2bc10297143977095eca1474d1fc73e2e98be0305173b2c486e9f8c38f6",
+    "expected": "b823f2bc10297143977095eca1474d1fc73e2e98be0305173b2c486e9f8c38f6",
+    "ok": true
+  },
+  {
+    "name": "verdict_bytes/source",
+    "actual": 13376,
+    "expected": 13376,
+    "ok": true
+  },
+  {
+    "name": "verdict_path/byte_source",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "receipt_id/suffix",
+    "actual": "pr1075-review-1-codex-b823f2bc",
+    "expected": "pr1075-review-1-codex-b823f2bc",
+    "ok": true
+  },
+  {
+    "name": "target_pr",
+    "actual": 1075,
+    "expected": 1075,
+    "ok": true
+  },
+  {
+    "name": "round",
+    "actual": 1,
+    "expected": 1,
+    "ok": true
+  },
+  {
+    "name": "finding_count/P0",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "finding_summary/P0",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "finding_count/P1",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "finding_summary/P1",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "finding_count/P2",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "finding_summary/P2",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "finding_count/P3",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "finding_summary/P3",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "findings_ids",
+    "actual": [],
+    "expected": [],
+    "ok": true
+  },
+  {
+    "name": "verdict_line4",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "land/two_parents",
+    "actual": 2,
+    "expected": 2,
+    "ok": true
+  },
+  {
+    "name": "land/second_parent",
+    "actual": "907c474e5dd22b2f389e8c342e7c79c6fbcb760e",
+    "expected": "907c474e5dd22b2f389e8c342e7c79c6fbcb760e",
+    "ok": true
+  },
+  {
+    "name": "land/ancestor_master",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "land/ancestor_HEAD",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "base/merge_base_with_first_parent",
+    "actual": "3574cb07dba8a8f7f32384ee3d1d3dfbf3a4f70e",
+    "expected": "3574cb07dba8a8f7f32384ee3d1d3dfbf3a4f70e",
+    "ok": true
+  },
+  {
+    "name": "source_DIFF.patch/git",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "evidence_url/form",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "evidence_url/path",
+    "actual": "ops/reviews/pr1075-review-1-codex-verdict.md",
+    "expected": "ops/reviews/pr1075-review-1-codex-verdict.md",
+    "ok": true
+  },
+  {
+    "name": "evidence_url/ancestor_HEAD",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "evidence_url/ancestor_receipt_commit",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "evidence_url/blob_sha256",
+    "actual": "b823f2bc10297143977095eca1474d1fc73e2e98be0305173b2c486e9f8c38f6",
+    "expected": "b823f2bc10297143977095eca1474d1fc73e2e98be0305173b2c486e9f8c38f6",
+    "ok": true
+  },
+  {
+    "name": "evidence_url/blob_bytes",
+    "actual": 13376,
+    "expected": 13376,
+    "ok": true
+  },
+  {
+    "name": "evidence_url/blob_equals_source",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "session_run_id",
+    "actual": "71490d5a710944e395c81836182f3c99",
+    "expected": "71490d5a710944e395c81836182f3c99",
+    "ok": true
+  },
+  {
+    "name": "run_json/path",
+    "actual": {
+      "json_sha256": "88676d7dfa79aa074fd31f7ff046a52a6b5df2dedd693c222e8ba56d94b5f56e"
+    },
+    "expected": {
+      "json_sha256": "88676d7dfa79aa074fd31f7ff046a52a6b5df2dedd693c222e8ba56d94b5f56e"
+    },
+    "ok": true
+  },
+  {
+    "name": "launcher/run_json",
+    "actual": {
+      "json_sha256": "88676d7dfa79aa074fd31f7ff046a52a6b5df2dedd693c222e8ba56d94b5f56e"
+    },
+    "expected": {
+      "json_sha256": "88676d7dfa79aa074fd31f7ff046a52a6b5df2dedd693c222e8ba56d94b5f56e"
+    },
+    "ok": true
+  },
+  {
+    "name": "run/ma_thoat",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "run/trang_thai",
+    "actual": "xong",
+    "expected": "xong",
+    "ok": true
+  },
+  {
+    "name": "run/thoi_luong_giay",
+    "actual": 412.567,
+    "expected": 412.567,
+    "ok": true
+  },
+  {
+    "name": "run/duration_rounded",
+    "actual": 412.567,
+    "expected": 412.567,
+    "ok": true
+  },
+  {
+    "name": "run/clean",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "run/dirty_items",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "run/provider",
+    "actual": "openai_codex",
+    "expected": "openai_codex",
+    "ok": true
+  },
+  {
+    "name": "run/historical_surface",
+    "actual": "codex_cli",
+    "expected": "codex_cli",
+    "ok": true
+  },
+  {
+    "name": "run/transport",
+    "actual": "machine",
+    "expected": "machine",
+    "ok": true
+  },
+  {
+    "name": "run/prompt_hash",
+    "actual": "766febde02127566e8ab3b4b0248c5ecc95bc6794fee912fcee60e9dd9854550",
+    "expected": "766febde02127566e8ab3b4b0248c5ecc95bc6794fee912fcee60e9dd9854550",
+    "ok": true
+  },
+  {
+    "name": "run/prompt_prefix_in_note",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "run/sandbox_status",
+    "actual": "DO_DUOC",
+    "expected": "DO_DUOC",
+    "ok": true
+  },
+  {
+    "name": "run/sandbox_observations_present",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "run/sandbox_sampling_limit_present",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "run/model_status",
+    "actual": "DO_DUOC",
+    "expected": "DO_DUOC",
+    "ok": true
+  },
+  {
+    "name": "run/model_events",
+    "actual": 19,
+    "expected": 19,
+    "ok": true
+  },
+  {
+    "name": "run/model_unique_response_ids",
+    "actual": 19,
+    "expected": 19,
+    "ok": true
+  },
+  {
+    "name": "run/model_event_types",
+    "actual": [
+      "response.created"
+    ],
+    "expected": [
+      "response.created"
+    ],
+    "ok": true
+  },
+  {
+    "name": "run/model",
+    "actual": [
+      "gpt-6-astra"
+    ],
+    "expected": [
+      "gpt-6-astra"
+    ],
+    "ok": true
+  },
+  {
+    "name": "run/model_da_chay",
+    "actual": [
+      "gpt-6-astra"
+    ],
+    "expected": [
+      "gpt-6-astra"
+    ],
+    "ok": true
+  },
+  {
+    "name": "run/model_evidence",
+    "actual": "do_may",
+    "expected": "do_may",
+    "ok": true
+  },
+  {
+    "name": "run/model_evidence_ref",
+    "actual": "ops/reviews/pr1075-review-1-codex/run/run.json#model_phuc_vu",
+    "expected": "ops/reviews/pr1075-review-1-codex/run/run.json#model_phuc_vu",
+    "ok": true
+  },
+  {
+    "name": "run/effort",
+    "actual": [
+      "xhigh"
+    ],
+    "expected": [
+      "xhigh"
+    ],
+    "ok": true
+  },
+  {
+    "name": "run/effort_status",
+    "actual": "DO_DUOC",
+    "expected": "DO_DUOC",
+    "ok": true
+  },
+  {
+    "name": "model_note/19 su kien",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "model_note/gpt-6-astra",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "model_note/xhigh",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "model_note/DO_DUOC",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "run_note/ma_thoat 0",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "run_note/trang_thai xong",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "run_note/412.567",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "run_note/head 907c474",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "run_note/worktree_sach true",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "run_note/sandbox_trang_thai DO_DUOC",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "stdout/bytes",
+    "actual": 303,
+    "expected": 303,
+    "ok": true
+  },
+  {
+    "name": "stdout/sha256",
+    "actual": "b26621383c92e6b0c04983e6d6e76efcff1567ca37b21702085b18f7e0449c9c",
+    "expected": "b26621383c92e6b0c04983e6d6e76efcff1567ca37b21702085b18f7e0449c9c",
+    "ok": true
+  },
+  {
+    "name": "stderr/bytes",
+    "actual": 39,
+    "expected": 39,
+    "ok": true
+  },
+  {
+    "name": "stderr/sha256",
+    "actual": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+    "expected": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+    "ok": true
+  },
+  {
+    "name": "checkpoint/hash",
+    "actual": "5d8ebd7867249d44a470eb403dff89ddbaf1d7b87de687722511b4b1d5f99c67",
+    "expected": "5d8ebd7867249d44a470eb403dff89ddbaf1d7b87de687722511b4b1d5f99c67",
+    "ok": true
+  },
+  {
+    "name": "checkpoint/checkpoint_id",
+    "actual": "71490d5a710944e395c81836182f3c99",
+    "expected": "71490d5a710944e395c81836182f3c99",
+    "ok": true
+  },
+  {
+    "name": "checkpoint/head",
+    "actual": "907c474e5dd22b2f389e8c342e7c79c6fbcb760e",
+    "expected": "907c474e5dd22b2f389e8c342e7c79c6fbcb760e",
+    "ok": true
+  },
+  {
+    "name": "checkpoint/prompt_sha256",
+    "actual": "766febde02127566e8ab3b4b0248c5ecc95bc6794fee912fcee60e9dd9854550",
+    "expected": "766febde02127566e8ab3b4b0248c5ecc95bc6794fee912fcee60e9dd9854550",
+    "ok": true
+  },
+  {
+    "name": "review_class",
+    "actual": "sensitive",
+    "expected": "sensitive",
+    "ok": true
+  },
+  {
+    "name": "effective_review_class",
+    "actual": "sensitive",
+    "expected": "sensitive",
+    "ok": true
+  },
+  {
+    "name": "review_class/path_count",
+    "actual": 58,
+    "expected": 58,
+    "ok": true
+  },
+  {
+    "name": "review_class/scope",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "class_note/58 tep",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "class_note/3574cb0..907c474",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "class_note/sensitive",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "review_class/implementation_unchanged_since_reviewed",
+    "actual": {
+      "bytes": 141087,
+      "sha256": "d8079330007ab6ba53d328ba2d4abb1d4eb2737e2b5466b702ce9152958014f6"
+    },
+    "expected": {
+      "bytes": 141087,
+      "sha256": "d8079330007ab6ba53d328ba2d4abb1d4eb2737e2b5466b702ce9152958014f6"
+    },
+    "ok": true
+  },
+  {
+    "name": "ket_luan/copied",
+    "actual": 53,
+    "expected": 53,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/omitted",
+    "actual": 2,
+    "expected": 2,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/receipt_checks",
+    "actual": 75,
+    "expected": 75,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/readme_added",
+    "actual": 4,
+    "expected": 4,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/readme_removed",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/mutation_rc",
+    "actual": 1,
+    "expected": 1,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/receipt_count_consistent",
+    "actual": 75,
+    "expected": 75,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/mutation_target",
+    "actual": [
+      "pr1071-review-1-codex-verdict.receipt.yaml"
+    ],
+    "expected": [
+      "pr1071-review-1-codex-verdict.receipt.yaml"
+    ],
+    "ok": true
+  },
+  {
+    "name": "ket_luan/token/0 finding",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/token/53 tep",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/token/2 tep",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/token/75 doi chieu",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/token/4 hang",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/token/dot bien bam",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/verdict/53 tệp",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/verdict/hai tệp",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/verdict/75 đối chiếu",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/verdict/bốn hàng",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "ket_luan/verdict/Đột biến băm bị chặn",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "precedent/pr1071_fixed_fields",
+    "actual": {},
+    "expected": {},
+    "ok": true
+  },
+  {
+    "name": "precedent/anchor_type",
+    "actual": "canonical_ancestry",
+    "expected": "canonical_ancestry",
+    "ok": true
+  },
+  {
+    "name": "precedent/anchor_strength",
+    "actual": "thap",
+    "expected": "thap",
+    "ok": true
+  },
+  {
+    "name": "precedent/caveat_ids",
+    "actual": [
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      "TEP-LON-KHONG-VAO-KHO"
+    ],
+    "expected": [
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      "TEP-LON-KHONG-VAO-KHO"
+    ],
+    "ok": true
+  },
+  {
+    "name": "precedent/caveat_severity",
+    "actual": [
+      "P3",
+      "P3",
+      "P3"
+    ],
+    "expected": [
+      "P3",
+      "P3",
+      "P3"
+    ],
+    "ok": true
+  },
+  {
+    "name": "precedent/identity/provider",
+    "actual": "openai_codex",
+    "expected": "openai_codex",
+    "ok": true
+  },
+  {
+    "name": "precedent/identity/surface",
+    "actual": "codex_cli",
+    "expected": "codex_cli",
+    "ok": true
+  },
+  {
+    "name": "precedent/identity/transport",
+    "actual": "machine",
+    "expected": "machine",
+    "ok": true
+  },
+  {
+    "name": "precedent/identity/model",
+    "actual": "gpt-6-astra",
+    "expected": "gpt-6-astra",
+    "ok": true
+  },
+  {
+    "name": "precedent/identity/model_da_chay",
+    "actual": "gpt-6-astra",
+    "expected": "gpt-6-astra",
+    "ok": true
+  },
+  {
+    "name": "precedent/identity/model_evidence",
+    "actual": "do_may",
+    "expected": "do_may",
+    "ok": true
+  }
+]

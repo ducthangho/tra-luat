@@ -1,0 +1,65 @@
+{
+  "base_rows": 1213,
+  "head_rows": 1217,
+  "removed": [],
+  "added_count": 4,
+  "added": [
+    "| `pr1075-review-1-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong. |",
+    "| `pr1075-review-1-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | Script/bang chung cua reviewer (evidence/*) tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai 907c474. |",
+    "| `pr1075-review-1-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | DIFF.patch, ban sao kho/nguon cua sandbox (cay-kho/ work/ nguon/) va launcher.err (rong) KHONG vao kho; sha256/so byte o OMITTED.txt. |",
+    "| [`pr1075-review-1-codex-verdict.md`](pr1075-review-1-codex-verdict.md) | [`.receipt.yaml`](pr1075-review-1-codex-verdict.receipt.yaml) | khong co (PR ghi so review #1071, chu kho giao truc tiep) | **`approve`** · `cross_approved` · luot **1** cua PR **#1075** · 0/0/0/0 (P0/P1/P2/P3) · codex CLI `launcher.py run 71490d5a`, `gpt-6-astra` do_may · head da duyet = head PR #1075 luc merge (merge `53d670c`) · thu muc goc [`pr1075-review-1-codex/`](pr1075-review-1-codex/) | `907c474` | 13376 |"
+  ],
+  "new_rows_count": 4,
+  "caveats": [
+    {
+      "id": "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      "exact_row_match": true
+    },
+    {
+      "id": "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      "exact_row_match": true
+    },
+    {
+      "id": "TEP-LON-KHONG-VAO-KHO",
+      "exact_row_match": true
+    }
+  ],
+  "without_new_rows_equal_base_bytes": true,
+  "merges": [
+    {
+      "commit": "e137f8c",
+      "parents": [
+        "6af4c9a58224a31bb845949d402a6dc55a1ef9d0",
+        "c6dd7b33b4f215809bf281ee1533bc1e8fa6920c"
+      ],
+      "parent_rows": [
+        1217,
+        1213
+      ],
+      "merge_rows": 1217,
+      "missing_from_parents": [
+        [],
+        []
+      ],
+      "PR_artifact_delta_bytes": 0
+    },
+    {
+      "commit": "3a3aac5",
+      "parents": [
+        "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d",
+        "fb74c6eca742205acc0af9bb7ea89da94f15aa21"
+      ],
+      "parent_rows": [
+        1217,
+        1213
+      ],
+      "merge_rows": 1217,
+      "missing_from_parents": [
+        [],
+        []
+      ],
+      "PR_artifact_delta_bytes": 0
+    }
+  ],
+  "errors": []
+}

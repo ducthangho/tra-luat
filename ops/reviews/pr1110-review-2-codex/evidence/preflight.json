@@ -1,0 +1,20 @@
+{
+  "head": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+  "tree": "2fc9c77d7fb38e2b09b755bb125cb1dff4a33562",
+  "base": "fb74c6eca742205acc0af9bb7ea89da94f15aa21",
+  "merge_base_origin_master": "fb74c6eca742205acc0af9bb7ea89da94f15aa21",
+  "status": "",
+  "abbrev": "7",
+  "changed_count": 46,
+  "outside_reviews": [],
+  "diff_equal": true,
+  "diff_sha256": "79c3d941cbfbc0cb32301c73d00237885aaf275bfef3aef347c1a5ded42968b6",
+  "round1_ops_delta_bytes": 0,
+  "round1_patch_equal": true,
+  "commits": [
+    "3a3aac561ba359c08dfe92d95584b56494fc12d4 e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d fb74c6eca742205acc0af9bb7ea89da94f15aa21 Merge origin/master (fb74c6e, gồm vá #1114) vào nhánh ghi sổ #1075",
+    "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d 6af4c9a58224a31bb845949d402a6dc55a1ef9d0 c6dd7b33b4f215809bf281ee1533bc1e8fa6920c Merge origin/master (c6dd7b3) vào nhánh ghi sổ #1075",
+    "6af4c9a58224a31bb845949d402a6dc55a1ef9d0 f0c4ed69e5901bd2122f51cf96c7c7d6a7af8606 ops/reviews: biên nhận v2 + mục lục README cho cross-review lượt 1 của PR #1075",
+    "f0c4ed69e5901bd2122f51cf96c7c7d6a7af8606 7eeb1d9a10aea8e1805b66fbf3d68549eb6778da ops/reviews: hiện vật cross-review Codex lượt 1 của PR #1075"
+  ]
+}

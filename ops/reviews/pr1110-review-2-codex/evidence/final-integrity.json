@@ -1,0 +1,37 @@
+{
+  "trees": {
+    "cay-kho": {
+      "head": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+      "tree": "2fc9c77d7fb38e2b09b755bb125cb1dff4a33562",
+      "status": "",
+      "core_abbrev": "7"
+    },
+    "work/head": {
+      "head": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+      "tree": "2fc9c77d7fb38e2b09b755bb125cb1dff4a33562",
+      "status": "",
+      "core_abbrev": "7"
+    },
+    "work/base": {
+      "head": "fb74c6eca742205acc0af9bb7ea89da94f15aa21",
+      "tree": "7c160ae144195d4f22089ec49d39e45033030381",
+      "status": "",
+      "core_abbrev": "7"
+    },
+    "work/mutant": {
+      "head": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+      "tree": "2fc9c77d7fb38e2b09b755bb125cb1dff4a33562",
+      "status": "",
+      "core_abbrev": "7"
+    }
+  },
+  "equal_logs": {
+    "land": true,
+    "doctrine": true,
+    "diff-check": true
+  },
+  "direct_logs_equal_after_cwd_normalization": true,
+  "original_diff_check_rc": 0,
+  "original_diff_check_bytes": 0,
+  "errors": []
+}

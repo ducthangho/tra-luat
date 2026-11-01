@@ -1642,6 +1642,10 @@ def t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so():
 
 @ca
 def t70_PROMPT_FILE_ma_khong_co_prompt_file_phai_bi_CHAN():
+    return _t70_prompt_file_chan()
+
+
+def _t70_prompt_file_chan():
     """Có {PROMPT_FILE} mà không truyền --prompt-file ⇒ chặn, không đi tiếp im lặng.
 
     Bản trước: con nhận CHUỖI NGUYÊN VĂN "{PROMPT_FILE}" làm đường dẫn, rc=0, sổ
@@ -6418,7 +6422,8 @@ def r12_prompt_doi_ngay_sau_preflight_phai_DO():
 
 @ca
 def r13_PROMPT_FILE_thieu_prompt_file_phai_DO():
-    return t70_PROMPT_FILE_ma_khong_co_prompt_file_phai_bi_CHAN()
+    # #1079 F05: gọi HELPER chung, không gọi ca đã đăng ký khác (chốt của ca khác không phải chốt của ca này).
+    return _t70_prompt_file_chan()
 
 
 @ca
@@ -14378,7 +14383,7 @@ DOT_BIEN_HARNESS = [
      ["r858_goc_tam_tranh_to_tien_co_git"]),
     # #1079 F01 (a)(b) + F02: mỗi chốt mới một đột biến; chỉ `TinHieuChotCa` của ca đích là giết.
     ("wp1079_cham_mot_ca_nhan_AssertionError",
-     ('    except TinHieuChotCa:\n        return "giet", fn.__name__', '    except AssertionError:\n        return "giet", fn.__name__'),
+     ('    except TinHieuChotCa as e:\n        if not chot_tu_ca_khac(e, fn):', '    except AssertionError as e:\n        if not chot_tu_ca_khac(e, fn):'),
      ["r1079_cham_mot_ca_chi_TinHieuChotCa_la_giet"]),
     ("wp1079_ket_luan_bo_neutral",
      ('    xau = [neutral[t][1] for t in dich if neutral[t][0] in ("giet", "loi")]', '    xau = []'),

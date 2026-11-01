@@ -576,9 +576,18 @@ DOT_BIEN = [
 ]
 
 
-def ten_do(ten: str, e: BaseException) -> str:
-    """#1079 F01: tên ghi vào tập đỏ — lỗi vô can mang `(<Loại>)` nên không khớp `phai_chet`."""
-    return ten if la_chot_cua_suite(e) else f"{ten}({type(e).__name__})"
+def ten_do(ten: str, e: BaseException, ca=None) -> str:
+    """#1079 F01: tên ghi vào tập đỏ — lỗi vô can mang `(<Loại>)` nên không khớp `phai_chet`.
+    F05 (Codex lượt 2): chốt sinh BÊN TRONG một ca đã đăng ký KHÁC mang `(chot cua ca khac)`."""
+    if not la_chot_cua_suite(e):
+        return f"{ten}({type(e).__name__})"
+    khac = {c.__code__ for c in CA if c is not ca} if ca is not None else set()
+    tb = e.__traceback__
+    while tb is not None:
+        if tb.tb_frame.f_code in khac:
+            return f"{ten}(chot cua ca khac)"
+        tb = tb.tb_next
+    return ten
 
 
 def chay_suite(M, chi_chay: set[str] | None = None) -> set[str]:
@@ -597,7 +606,7 @@ def chay_suite(M, chi_chay: set[str] | None = None) -> set[str]:
         try:
             ca(Mi)
         except Exception as e:
-            do.add(ten_do(ca.__name__, e))
+            do.add(ten_do(ca.__name__, e, ca))
             if os.environ.get("CC_CHI_TIET"):
                 print(f"    ĐỎ {ca.__name__}: {type(e).__name__}: {e}")
     return do

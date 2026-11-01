@@ -162,6 +162,18 @@ def bang(dieu_kien, thong_diep):
         raise TinHieuChotCa(thong_diep)
 
 
+def chot_tu_ca_khac(e, fn):
+    """#1079 F05 (Codex lượt 2): tín hiệu sinh ra BÊN TRONG một ca đã đăng ký KHÁC (ca đích gọi
+    sang nó) không phải chốt của ca đích. Dò từng khung traceback theo `__code__` của `CA`."""
+    khac = {c.__code__ for c in CA if c is not fn}
+    tb = e.__traceback__
+    while tb is not None:
+        if tb.tb_frame.f_code in khac:
+            return True
+        tb = tb.tb_next
+    return False
+
+
 def cham_mot_ca(fn):
     """#1079 F01: chạy một ca, trả `(loai, chi_tiet)`; loai ∈ qua · bo_qua · giet · loi.
     CHỈ `TinHieuChotCa` là `giet` — AssertionError trần hay lỗi vô can (kể cả khi một `except`
@@ -169,8 +181,10 @@ def cham_mot_ca(fn):
     try:
         with _co_lap_toan_cuc():
             kq = fn()
-    except TinHieuChotCa:
-        return "giet", fn.__name__
+    except TinHieuChotCa as e:
+        if not chot_tu_ca_khac(e, fn):
+            return "giet", fn.__name__
+        return "loi", f"{fn.__name__}(chot cua ca khac)"
     except Exception as e:  # noqa: BLE001 - chinh la thu dang phan hang
         return "loi", f"{fn.__name__}({type(e).__name__})"
     return ("bo_qua" if isinstance(kq, str) else "qua"), fn.__name__
@@ -10001,16 +10015,29 @@ def r1079_cham_lap_ca_doi_dung_TinHieuChotCa():
 
 @ca
 def r1079_chay_dot_bien_noi_neutral_va_cham_theo_loai():
-    """#1079 F01: khoá CÁCH NỐI — hai nhánh (a)(b) chấm bằng `ket_luan_mutant`, neutral (a) chạy
-    trên `LAUNCHER` gốc, neutral (b) trên bản sao NGUYÊN của tệp test."""
-    import inspect
-    nguon = inspect.getsource(chay_dot_bien)
-    for doan in ("LAUNCHER_DANG_DUNG = LAUNCHER\n                    neutral[fn.__name__] = cham_mot_ca(fn)",
-                 "neutral_h[ten_ca] = cham_lap_ca(goc_h, ten_ca)",
-                 '_dung_cay_harness(tam / "harness_goc", goc_test, goc)',
-                 "{fn.__name__: cham_mot_ca(fn) for fn in dich}", "{t: cham_lap_ca(thu_muc, t) for t in phai_chet}"):
-        bang(nguon.count(doan) == 1, f"chay_dot_bien thieu/lap doan: {doan!r}")
-    bang(nguon.count("ket_luan_mutant(") == 2, "hai nhanh (a)(b) phai cham bang ket_luan_mutant")
+    """#1079 F01 + F07 (Codex lượt 2): đo HÀNH VI, không đọc chuỗi nguồn — chạy `chay_dot_bien` thật
+    với một ca đích ĐỎ SẴN trên bản gốc: neutral (a) và (b) phải biến nó thành hỏng `(1, 0)`; mutant
+    giết bằng chính chốt ấy KHÔNG được thành OK. Ca đích thiếu (F06) cũng phải là hỏng."""
+    from unittest.mock import patch
+    def review_do_san():
+        bang(False, "do san tren ban goc")
+    goi = []
+    def lap_ca_gia(thu_muc, ten_ca):
+        goi.append(str(thu_muc))
+        return ("giet", ten_ca) if "harness_db_" in str(thu_muc) else ("loi", f"{ten_ca}(neutral do)")
+    neo = ("#!/usr/bin/env python3", "#!/usr/bin/env python3\n# r1079 tro")
+    kq = {}
+    for nhan, them in {
+            "a": {"DOT_BIEN": [("r1079_a", neo, ["review_do_san"])], "DOT_BIEN_HARNESS": []},
+            "a_thieu": {"DOT_BIEN": [("r1079_thieu", neo, ["review_ca_vang"])], "DOT_BIEN_HARNESS": []},
+            "b": {"DOT_BIEN": [], "DOT_BIEN_HARNESS": [
+                ("r1079_b", ("def b" + "ang(dieu_kien, thong_diep):", "def b" + "ang(dieu_kien, thong_diep):  # tro"),
+                 ["review_do_san"])]}}.items():
+        with patch.dict(chay_dot_bien.__globals__, {"CA": [review_do_san], "DOT_BIEN_HOOK": [],
+                                                    "cham_lap_ca": lap_ca_gia, **them}):
+            kq[nhan] = chay_dot_bien()
+    bang(kq == {"a": (1, 0), "a_thieu": (1, 0), "b": (1, 0)}, f"neutral/ca dich vang khong lam cong do: {kq}")
+    bang(any("harness_goc" in g for g in goi), f"neutral (b) khong chay tren ban sao NGUYEN: {goi}")
 
 
 @ca
@@ -10112,6 +10139,91 @@ def r1079_cc_chay_suite_phai_do_hanh_vi():
             th[nhan] = runner(m, {ten})
     bang(th == {"neutral": set(), "chot": {ten}, "vo_can": {f"{ten}(AttributeError)"},
                 "doi_kieu": {f"{ten}(AssertionError)"}}, f"chay_suite cap sai tin dung: {th}")
+
+
+
+@ca
+def r1079_review_lop_khac_cung_qualname_khong_la_chot():
+    """Reviewer hint: identity must survive equal __qualname__, not only local class names."""
+    ma = Path(__file__).read_text(encoding="utf-8")
+    them = '\n@ca\ndef review_target():\n    raise type("TinHieuChotCa", (RuntimeError,), {})("inert")\n'
+    ma = ma.replace('\nif __name__ == "__main__":', them + '\nif __name__ == "__main__":')
+    with San() as s:
+        dev = _dung_cay_harness(s / "tree", ma, LAUNCHER.read_text(encoding="utf-8"))
+        kq = cham_lap_ca(dev, "review_target")
+    bang(kq[0] == "loi", f"equal qualname received kill: {kq}")
+
+
+@ca
+def r1079_review_san_pham_chot_ca_khac_khong_la_giet():
+    def review_other_case():
+        bang(False, "assertion of OTHER case")
+    def review_target():
+        review_other_case()
+    from unittest.mock import patch
+    with patch.dict(cham_mot_ca.__globals__, {"CA": [review_target, review_other_case]}):
+        kq = cham_mot_ca(review_target)
+    bang(kq[0] == "loi", f"another case assertion received kill: {kq}")
+
+
+@ca
+def r1079_review_harness_chot_ca_khac_khong_la_giet():
+    ma = Path(__file__).read_text(encoding="utf-8")
+    them = '\n@ca\ndef review_other_case():\n    bang(False, "other")\n@ca\ndef review_target():\n    review_other_case()\n'
+    ma = ma.replace('\nif __name__ == "__main__":', them + '\nif __name__ == "__main__":')
+    with San() as s:
+        dev = _dung_cay_harness(s / "tree", ma, LAUNCHER.read_text(encoding="utf-8"))
+        kq = cham_lap_ca(dev, "review_target")
+    bang(kq[0] == "loi", f"another case assertion received harness kill: {kq}")
+
+
+@ca
+def r1079_review_credential_chot_ca_khac_khong_la_giet():
+    import runpy
+    from types import SimpleNamespace
+    from unittest.mock import patch
+    ns = runpy.run_path(str(CC_TEST_DANG_DUNG), run_name="review_origin_cc")
+    ten = "t2_chua_thay_thi_tra_None_khong_doan"
+    def sai(*_):
+        ns["t1_doc_duoc_url_va_ma_tu_dau_ra_that"](
+            SimpleNamespace(doc_moc_device=lambda *_: (None, None)))
+    m = SimpleNamespace(__nguon__="inert", __nhan__="inert", doc_moc_device=sai)
+    runner = ns["chay_suite"]
+    with patch.dict(runner.__globals__, {"nap": lambda *_: m}):
+        do = runner(m, {ten})
+    bang(do != {ten}, f"t1 assertion counted as t2 kill: {do}")
+
+
+@ca
+def r1079_review_ca_dich_vang_phai_lam_cong_do():
+    from unittest.mock import patch
+    runner = chay_dot_bien
+    with patch.dict(runner.__globals__, {
+            "CA": [], "DOT_BIEN_HOOK": [], "DOT_BIEN_HARNESS": [],
+            "DOT_BIEN": [("review_missing", ("#!/usr/bin/env python3",
+                          "#!/usr/bin/env python3\n# inert"), ["review_missing_case"])]}):
+        hong, bo = runner()
+    bang((hong, bo) == (1, 0), f"missing target treated as platform skip: {(hong, bo)}")
+
+
+
+@ca
+def r1079_review_khoa_neutral_phai_do_hanh_vi():
+    import runpy
+    ma = Path(__file__).read_text(encoding="utf-8")
+    cu = '                    LAUNCHER_DANG_DUNG = LAUNCHER\n                    neutral[fn.__name__] = cham_mot_ca(fn)\n'
+    moi = '                    neutral[fn.__name__] = ("qua", fn.__name__)\n'
+    bang(ma.count(cu) == 1, "hint mutation anchor changed; rederive the behavioral counterexample")
+    ma = ma.replace(cu, moi, 1)
+    ma = ma.replace('    neutral = {}\n', '    """\n' + cu + '    """\n    neutral = {}\n', 1)
+    with San() as s:
+        dev = _dung_cay_harness(s / "tree", ma, LAUNCHER.read_text(encoding="utf-8"))
+        ns = runpy.run_path(str(dev / "launcher_test.py"), run_name="review_neutral_lock")
+        try:
+            ns["r1079_chay_dot_bien_noi_neutral_va_cham_theo_loai"]()
+        except ns["TinHieuChotCa"]:
+            return
+    bang(False, "neutral lock survived removed execution plus preserved source literal")
 
 
 # wp858 (L1): ca hành vi chạy NGUYÊN công thức qua cai_cong_cu.sh, installer là stub (POSIX); ca hình dạng thuần Python
@@ -14211,11 +14323,15 @@ DOT_BIEN_HOOK = [
     ("wp1079_cc_bo_kiem_dong_assert", ('            and linecache.getline(tep, tb.tb_lineno).lstrip().startswith("assert"))',
                                        "            and True)"),
      ["r1079_cc_test_chi_chot_cua_suite_la_do"], "cc_test"),
-    ("wp1079_cc_ten_do_bo_loai", ('    return ten if la_chot_cua_suite(e) else f"{ten}({type(e).__name__})"', "    return ten"),
+    ("wp1079_cc_ten_do_bo_loai", ('    if not la_chot_cua_suite(e):\n        return f"{ten}({type(e).__name__})"',
+                                  '    if False:\n        return f"{ten}({type(e).__name__})"'),
      ["r1079_cc_test_chi_chot_cua_suite_la_do"], "cc_test"),
     # F03 (Codex lượt 1): đổi câu thực thi nhưng GIỮ lời gọi cũ trong chú thích — chỉ ca hành vi giết được.
-    ("wp1079_cc_chay_suite_bo_ten_do", ("            do.add(ten_do(ca.__name__, e))",
-                                        "            do.add(ca.__name__)  # do.add(ten_do(ca.__name__, e))"),
+    ("wp1079_cc_bo_kiem_ca_khac", ("        if tb.tb_frame.f_code in khac:\n            return f\"{ten}(chot cua ca khac)\"",
+                                   "        if False:\n            return f\"{ten}(chot cua ca khac)\""),
+     ["r1079_review_credential_chot_ca_khac_khong_la_giet"], "cc_test"),
+    ("wp1079_cc_chay_suite_bo_ten_do", ("            do.add(ten_do(ca.__name__, e, ca))",
+                                        "            do.add(ca.__name__)  # do.add(ten_do(ca.__name__, e, ca))"),
      ["r1079_cc_chay_suite_phai_do_hanh_vi"], "cc_test"),
 ]
 
@@ -14280,11 +14396,24 @@ DOT_BIEN_HARNESS = [
       '            if p.returncode == 1 and f"LAP {ten_ca}: 0/1 qua" in p.stdout else {})'),
      ["r1079_cham_lap_ca_doi_dung_TinHieuChotCa", "r1079_harness_duoi_stdout_gia_khong_cap_tin_dung"]),
     ("wp1079_bao_cao_theo_ten_lop",   # bản lỗi gốc ghi `__name__` ở CẢ HAI nhánh except
-     [('            LOAI_HONG[fn.__name__] = "TinHieuChotCa" if isinstance(e, TinHieuChotCa) else type(e).__qualname__',
+     [('            LOAI_HONG[fn.__name__] = ("TinHieuChotCa" if isinstance(e, TinHieuChotCa) and not chot_tu_ca_khac(e, fn)\n'
+       '                                      else f"khac:{type(e).__qualname__}")',
        '            LOAI_HONG[fn.__name__] = type(e).__name__'),
-      ('            LOAI_HONG[fn.__name__] = type(e).__qualname__\n            ket = f"LOI',
+      ('            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"\n            ket = f"LOI',
        '            LOAI_HONG[fn.__name__] = type(e).__name__\n            ket = f"LOI')],
      ["r1079_harness_trung_ten_loai_khong_cap_tin_dung"]),
+    # Codex lượt 2: F05 nguồn gốc chốt · F06 ca đích vắng · F01 tiền tố `khac:`.
+    ("wp1079_bo_kiem_ca_khac", ("        if tb.tb_frame.f_code in khac:\n            return True\n        tb = tb.tb_next\n    return False",
+                                "        if False:\n            return True\n        tb = tb.tb_next\n    return False"),
+     ["r1079_review_san_pham_chot_ca_khac_khong_la_giet", "r1079_review_harness_chot_ca_khac_khong_la_giet"]),
+    ("wp1079_bo_kiem_ca_dich_vang", ("            if sorted(fn.__name__ for fn in dich) != sorted(set(phai_chet)):   # #1079 F06",
+                                     "            if False:   # #1079 F06"),
+     ["r1079_review_ca_dich_vang_phai_lam_cong_do", "r1079_chay_dot_bien_noi_neutral_va_cham_theo_loai"]),
+    ("wp1079_bo_tien_to_khac", [('                                      else f"khac:{type(e).__qualname__}")',
+                                 '                                      else type(e).__qualname__)'),
+                                ('            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"\n            ket = f"LOI',
+                                 '            LOAI_HONG[fn.__name__] = type(e).__qualname__\n            ket = f"LOI')],
+     ["r1079_review_lop_khac_cung_qualname_khong_la_chot"]),
     ("wp1079_n13_do_bash_ngoai_env_sach",
      ('        with patch.dict(os.environ, env, clear=True):\n            vo, chan_doan',
       '        with patch.dict(os.environ, {}):\n            vo, chan_doan'),
@@ -14376,6 +14505,11 @@ def chay_dot_bien() -> int:
                 hong += 1
                 continue
             dich = [fn for fn in CA if fn.__name__ in phai_chet]
+            if sorted(fn.__name__ for fn in dich) != sorted(set(phai_chet)):   # #1079 F06
+                hong += 1
+                print(f"  {ten:<28} SAI - ca dich khong tim thay/trung: "
+                      f"{sorted(set(phai_chet) - {fn.__name__ for fn in dich})}")
+                continue
             for fn in dich:   # #1079 F01: NEUTRAL trên bản gốc, mỗi ca đo một lần
                 if fn.__name__ not in neutral:
                     LAUNCHER_DANG_DUNG = LAUNCHER
@@ -14565,7 +14699,9 @@ def _dung_cay_harness(goc_cay, ma_test, ma_launcher):
 def cham_lap_ca(thu_muc, ten_ca):
     """#1079 F01: chạy `--lap-ca` trên bản `launcher_test.py` trong `thu_muc`, trả `(loai, chi_tiet)`
     như `cham_mot_ca`. Chứng cứ là KÊNH KẾT QUẢ riêng (tệp + nonce, biến bị gỡ khỏi `os.environ` trước
-    khi ca chạy), KHÔNG phải stdout của ca: in đuôi giả rồi thoát thì không có kết quả ⇒ `loi`."""
+    khi CA chạy), KHÔNG phải stdout của ca: in đuôi giả rồi thoát thì không có kết quả ⇒ `loi`.
+    GIỚI HẠN (nợ #1117, Codex lượt 2 F04): mã CẤP MODULE của bản đột biến chạy TRƯỚC `main` nên vẫn
+    thấy nonce — kênh này chặn ca giả, KHÔNG chặn được đột biến chủ ý giả kênh lúc nạp module."""
     import secrets
     kenh = Path(tempfile.mkdtemp(prefix="lt_kenh_")) / "ket_qua.json"
     nonce = secrets.token_hex(16)
@@ -14614,12 +14750,13 @@ def chay_bo_ca(ds_ca, nk=None, bat_dau=0):
                 ket = "qua"
         except AssertionError as e:
             hong_ds.append((fn.__name__, str(e)))
-            # #1079 F01: danh tính lớp THẬT, không phải tên lớp — lớp khác trùng tên không qua.
-            LOAI_HONG[fn.__name__] = "TinHieuChotCa" if isinstance(e, TinHieuChotCa) else type(e).__qualname__
+            # #1079 F01: danh tính lớp THẬT; lớp khác (kể cả cùng `__qualname__`) mang tiền tố `khac:`.
+            LOAI_HONG[fn.__name__] = ("TinHieuChotCa" if isinstance(e, TinHieuChotCa) and not chot_tu_ca_khac(e, fn)
+                                      else f"khac:{type(e).__qualname__}")
             ket = f"HONG: {str(e)[:60]}"
         except Exception as e:  # noqa: BLE001
             hong_ds.append((fn.__name__, f"{type(e).__name__}: {e}"))
-            LOAI_HONG[fn.__name__] = type(e).__qualname__
+            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"
             ket = f"LOI {type(e).__name__}"
         if nk:
             nk.ra(i, fn.__name__, ket)

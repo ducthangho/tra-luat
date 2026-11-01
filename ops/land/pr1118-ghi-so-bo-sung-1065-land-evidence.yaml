@@ -118,11 +118,18 @@ trang_thai_packet:
         measured — gate-output-41342580238.txt (log 23 job tai qua REST actions/jobs/<id>/logs ngay 2026-11-01, sha256 + so byte
         tung log ghi kem; log goc khong vao kho). Checkout: 22/22 job co buoc checkout in `git log -1 --format=%H` =
         c6bb7c142623267a1b270fdb2492a89089b58d27 (chuan-bi khong co checkout). Gate output: TUNG buoc `Run` cua tung job ghi
-        lenh + toi da 3 dong output cuoi + dong `"ok": …` CUOI CUNG neu buoc in JSON (185 buoc; 9 dong `"ok": true`, 0
-        `"ok": false`). rc tung buoc: step.conclusion trong readback-jobs-41342580238.json — 275 success, 10 skipped (giu rieng);
-        0 dong ##[error] tren 23 log. Vi du duong: `== tl selftest 1774/1774 ==`, `lease_publish: 268/268 đạt`,
-        `targeted_mutant_gate MANH k/8: rc=0`. Ghi chu cach trich: chon dong `"ok"` CUOI CUNG vi dong dau tien cua buoc selftest
-        la output ben trong mot ca test (`{"ok": false, "error": "STUB_EARLY_EXIT"}`), khong phai ket qua buoc.
+        lenh, toi da 5 dong KET QUA (dong '*', khop mau tong ket), toi da 3 dong output cuoi (dong '|') va dong `"ok": …` CUOI
+        CUNG neu buoc in JSON (185 buoc; 9 dong `"ok": true`, 0 `"ok": false`). Output cua buoc dung o ranh gioi buoc
+        (`##[group]` ke tiep, hoac `Post job cleanup.` / `Cleaning up orphan processes`) — phan don dep sau job KHONG tinh.
+        rc tung buoc: step.conclusion trong readback-jobs-41342580238.json — 275 success, 10 skipped (giu rieng); 0 dong
+        ##[error] tren 23 log. Moi job gate co dong ket qua duong: `== tl selftest 1774/1774 ==` (gate), `nền: 1088/1088 đạt`
+        + `TỔNG: ĐẠT` (gate-packet-loop), `gate lifecycle tests: 28/28 ca QUA` (gate-ops), `TỔNG: ĐẠT` (gate-registry,
+        `ci_dang_ky_test.py --chay`), `MẢNH k/8: …` (8 job gate-cong-cu), `targeted_mutant_gate MANH k/8: rc=0 · passed N/N`
+        (8 job gate-nhanh-manh), `targeted_mutant_gate: DAT` (gate-nhanh-gop), `GOM MẢNH 8/8` + `SỐ LIỆU GOM: … lỗi đột biến=0`
+        (gate-cong-cu-gop); chuan-bi chi phan loai, khong co test. Lich su sua: ban dau trich ca phan don dep sau job vao buoc
+        `Run` cuoi nen bon job (packet-loop, registry, hai job gop) mat dong ket qua — Codex connector P1 tren PR #1133 (comment
+        4437683014) chi ra; ban nay cat dung ranh gioi buoc va giu dong ket qua. Dong `"ok"` lay CUOI CUNG vi dong dau cua buoc
+        selftest la output ben trong mot ca test (`{"ok": false, "error": "STUB_EARLY_EXIT"}`), khong phai ket qua buoc.
     - id: QUYET-DINH-LANDED-CHU-KHO
       trang_thai: da_quyet
       mo_ta: 'Chu kho quyet trong phien 2026-11-01 "Land và ghi sổ" (caveat #566) — xem quyet_dinh_chu_kho.'

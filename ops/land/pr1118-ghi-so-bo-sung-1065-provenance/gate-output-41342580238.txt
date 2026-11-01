@@ -1,7 +1,7 @@
 # Trich log run 41342580238 (push master, merge c6bb7c1, run_attempt 1), tai qua REST actions/jobs/<id>/logs boi phien ghi so 2026-11-01.
 # Log goc KHONG luu trong kho (GitHub giu log co han); moi job ghi sha256 + so byte log day du de doi chieu.
 # Moi job: checkout (git log -1 --format=%H cua actions/checkout), roi TUNG BUOC `Run` theo thu tu: lenh (dong dau; ban in lai
-# cua script bi loai), dong '"ok": true|false' CUOI CUNG neu buoc in JSON (dong dau co the la output ben trong mot ca test), va toi da 3 dong output cuoi khac rong cua buoc.
+# cua script bi loai; output cua buoc dung o '##[group]' ke tiep hoac o 'Post job cleanup.'/'Cleaning up orphan processes' — phan don dep sau job KHONG tinh), dong '"ok": true|false' CUOI CUNG neu buoc in JSON (dong dau co the la output ben trong mot ca test), toi da 5 dong KET QUA (dong '*': khop mau tong ket nhu `TỔNG:`, `GOM MẢNH`, `MẢNH k/8:`, `selftest N/N`, `N/N dat`) nam truoc 3 dong cuoi, va toi da 3 dong output cuoi khac rong cua buoc (dong '|').
 # rc: step.conclusion cua readback-jobs-41342580238.json (success = rc 0); log GitHub in '##[error]Process completed with exit
 # code N' khi khac 0 — dem o dong '##[error]'. Buoc 'skipped' giu rieng, khong tinh dat/hong. Buoc khong in gi: '(khong co output)'.
 
@@ -9,9 +9,9 @@
    checkout: KHONG CO BUOC CHECKOUT
    dong ##[error]: 0
    - Run: echo "DUONG_NHANH: khong phan loai - su_kien=${SU_KIEN} khong phai pull_request, luon DAY_DU"
+       | Evaluate and set job outputs
        | Set output 'os'
        | Set output 'che_do'
-       | Cleaning up orphan processes
    step.conclusion: 1=success, 2=skipped, 3=skipped, 4=success, 5=success
 == job 124958579601 | gate (ubuntu-latest) | runner_id 1000033414 | success | log sha256 5b4ae5d37cc353f0c8abd758fbe705db64559e6a2d49cb4e8b3837c210593cdb | 698107 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -35,6 +35,7 @@
        |   "canary": []
        | }
    - Run: python ops/cong_cu.py kiem-tra --json
+       * cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
        | TỰ KIỂM SONG SONG (N126): ĐẠT
        | BÁN KÍNH ĐỘT BIẾN (490 đột biến): GIAO cho job `gate-cong-cu` (mảnh) + `gate-cong-cu-gop` (gom) — KHÔNG đo trong tiến trình này (CONG_CU_TEST_BAN_KINH=manh)
        | SỐ LIỆU: ca=61 · đột biến=490 (giao mảnh) · lỗi đột biến=0 · tiền kiểm bỏ qua=0 · cổng cây thật=ĐẠT
@@ -43,10 +44,13 @@
    - Run: python -m py_compile scripts/tl.py scripts/tl_boot.py scripts/gen_instructions.py scripts/tl_core/__init__.py scripts/tl_core/deterministic.py scripts/tl_core/j
        | (khong co output)
    - Run: python .claude/dev/codex_cred_test.py
+       * nền: 18/18 đạt
        |   ok  t18_doc_lai_sau_probe      giết 1/1 trong phai_chet
        | SỐ LIỆU:  ca 18  ·  đột biến 18
        | TỔNG: ĐẠT
    - Run: python .claude/dev/idiom_py_test.py
+       * nền: 7/7 đạt · BỎ QUA: 0
+       * SỐ LIỆU (đếm bằng máy):
        |   đột biến        : 9
        |   tệp trong phạm vi: 7
        | TỔNG: ĐẠT
@@ -78,6 +82,7 @@
        | OK
    - Run: set -euo pipefail
        ok: {"ok": true, "status": "pass", "name": "tl-selftest", "returncode": 0, "duration_seconds": 249.462567, "evidence": "/home/runner/work/tra-luat/tra-luat/scripts/
+       * == transport selftest 12/12 ==
        |   [OK] wp42_complete_runtime_test_ids_unique
        | == tl selftest 1774/1774 ==
        | {"ok": true, "status": "pass", "name": "tl-selftest", "returncode": 0, "duration_seconds": 249.462567, "evidence": "/home/runner/work/tra-luat/tra-luat/scripts/.tl_state/gate/tl-selftest-Linux.json"}
@@ -113,6 +118,7 @@
        | == ci_phamvi_test 7/7 ==
    - Run: python scripts/tl.py release-check --full --json
        ok: "ok": true,
+       *       "detail": "[OK] tier_full_audit_ok\n  [OK] tier_core_fails_full_audit\n  [OK] tier_full_litany_deduped\n  [OK] tier_core_size_budget\n  [OK] tier_nlm_unaffected_by_tier\n  [OK] style_template_se
        |   ],
        |   "note": "Offline only: không gọi Drive/NLM, không ghi registry. Dùng live-smoke-plan cho test live có auth."
        | }
@@ -124,9 +130,7 @@
    - Run: python scripts/tl.py release-bundle --out dist/a.zip --json > /dev/null
        | bundle sha256 = e5880839fff0542b7d7686dc7ba994e0f2e77f5934607fad625f46df54ea017c
    - Run: python scripts/tl_boot.py --version
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | tl 1.36.69 (webapp target 2.21.2p)
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 11=skipped, 12=skipped, 13=success, 14=success, 15=success, 16=success, 17=success, 18=success, 19=success, 20=success, 21=success, 22=skipped, 23=success, 24=success, 25=success, 26=success, 27=success, 28=success, 29=success, 30=success, 31=success, 32=success, 33=skipped, 34=success, 35=success, 69=success, 70=success, 71=success
 == job 124958579613 | gate-packet-loop (ubuntu-latest) | runner_id 1000033409 | success | log sha256 1234556023f7b2749e3ec7c96afed368bed2ec84feb51fed47b69511ae1d1f0f | 312813 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -156,9 +160,11 @@
    - Run: python -m pip install --quiet ruff==0.15.15
        | ruff 0.15.15
    - Run: python .claude/dev/packet_loop_test.py
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://
+       * nền: 1088/1088 đạt · BỎ QUA: 1
+       * SỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):
+       |   ca bắt-oan       : 35
+       |   ngoại lệ AC 18   : 0
+       | TỔNG: ĐẠT
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 11=skipped, 12=success, 23=success, 24=success, 25=success
 == job 124958579654 | gate-ops (ubuntu-latest) | runner_id 1000033422 | success | log sha256 a0309f0ba531a9b47a8b863f90496659f67f6c347dfdd26095717b53021a167c | 394703 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -180,6 +186,7 @@
        |   "canary": []
        | }
    - Run: python ops/ci_duong_nhanh_test.py
+       * CA: 104/104 dat · 0 do · 0 hong
        | KIEM KE: ca hanh_vi=74 + cau_truc_yaml=16 + so_dang_ky=3 + tu_kiem=11 = 104 · dot bien .claude/dev/ci_dang_ky_test.py=2 + .github/workflows/ci.yml=83 + ops/ci_duong_nhanh.py=211 + ops/ci_duong_nhanh_t
        | TU KIEM PHAN HANG: DAT (5 mau rc, 3 dot bien that)
        | TONG: DAT
@@ -188,15 +195,17 @@
        | bien_nhan_v2_test: 98/98 ca đạt · 153/153 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 135/153 đột biến thường khai đối chứng
        | TỔNG: ĐẠT
    - Run: bash ops/chay_lease_publish_test.sh
+       * [A] lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
+       * [B] lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
        | >>> vao t217_a9_regex_dong_bo_LEASE_ID_san_pham 2026-11-01T20:02:47Z
        | <<< ra t217_a9_regex_dong_bo_LEASE_ID_san_pham 0.025s QUA
        | lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
    - Run: pwsh -NoProfile -File scripts/don-nhanh_test.ps1
        | don-nhanh: 21/21 dat
    - Run: set -euo pipefail
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://
+       | [cach-ly] cap cgroup     : DUOC (tl-gate-91289-36dba207)
+       | [cach-ly] CO CHE THAT SU : cgroup2
+       | gate lifecycle tests: 28/28 ca QUA (bo qua 0, hong 0)
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=skipped, 9=skipped, 10=success, 11=success, 12=success, 13=success, 14=success, 15=skipped, 29=success, 30=success, 31=success
 == job 124958579672 | gate-nhanh-manh (ubuntu-latest, 7) | runner_id 1000033411 | success | log sha256 8990f9bca092c91f42a55d1944a64699351f5108b2594736bf4e2b01e8dbf163 | 124079 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -208,13 +217,14 @@
    - Run: actions/setup-python@v5
        | (khong co output)
    - Run: python ops/nhanh_don_duoc_test.py
+       * targeted_mutant_gate MANH 7/8: 42 muc — KHONG phai full mutant audit
        | TU KIEM: 1/1
        | KET QUA ca:r510: passed (0.0s)
        | targeted_mutant_gate MANH 7/8: rc=0 · passed 42/42
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-nhanh-ubuntu-latest-7.zip successfully finalized. Artifact ID 13098600908
+       | Artifact gate-nhanh-ubuntu-latest-7 has been successfully uploaded! Final size is 2481 bytes. Artifact ID is 13098600908
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13098600908
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124958579687 | gate-cong-cu (ubuntu-latest, 6) | runner_id 1000033410 | success | log sha256 242a4b0bead8d74bbc5438b1de6858ae1409c58edd0e1e6faac0ddea4d369f20 | 134939 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -238,13 +248,14 @@
        |   "canary": []
        | }
    - Run: python ops/cong_cu.py kiem-tra --json
+       * cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
        |   ok  f36_suffix_4096 → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
        |   ok  f37_bo_f35 → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
        | MẢNH 6/8: 61/61 đột biến bán kính 1 · ghi manh/manh-6.txt
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-cong-cu-manh-ubuntu-latest-6.zip successfully finalized. Artifact ID 13099076841
+       | Artifact gate-cong-cu-manh-ubuntu-latest-6 has been successfully uploaded! Final size is 16753 bytes. Artifact ID is 13099076841
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13099076841
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124958579690 | gate-cong-cu (ubuntu-latest, 1) | runner_id 1000033419 | success | log sha256 58b13e3e6f08c705ce997997f1e53b3dda22903be16b6b7d720ca0e94ed4504f | 135047 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -268,13 +279,14 @@
        |   "canary": []
        | }
    - Run: python ops/cong_cu.py kiem-tra --json
+       * cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
        |   ok  f36_casefold → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
        |   ok  f41_f40_khong_ra_ngoai → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
        | MẢNH 1/8: 62/62 đột biến bán kính 1 · ghi manh/manh-1.txt
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-cong-cu-manh-ubuntu-latest-1.zip successfully finalized. Artifact ID 13098189809
+       | Artifact gate-cong-cu-manh-ubuntu-latest-1 has been successfully uploaded! Final size is 24355 bytes. Artifact ID is 13098189809
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13098189809
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124958579692 | gate-cong-cu (ubuntu-latest, 3) | runner_id 1000033412 | success | log sha256 32226e7841e2b83c7b9c5bf5f6fe6975bb9e1d1a5e8b43534b7abf5470e277cd | 134816 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -298,13 +310,14 @@
        |   "canary": []
        | }
    - Run: python ops/cong_cu.py kiem-tra --json
+       * cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
        |   ok  w698_x3_wr5_nfkc → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
        |   ok  f24_nhan_symlink → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
        | MẢNH 3/8: 61/61 đột biến bán kính 1 · ghi manh/manh-3.txt
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-cong-cu-manh-ubuntu-latest-3.zip successfully finalized. Artifact ID 13099360815
+       | Artifact gate-cong-cu-manh-ubuntu-latest-3 has been successfully uploaded! Final size is 24561 bytes. Artifact ID is 13099360815
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13099360815
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124958579698 | gate-nhanh-manh (ubuntu-latest, 5) | runner_id 1000033421 | success | log sha256 7105f7e8909cebcbacdd1e35dc0f30828c827189bbef9538904412713fb88f0c | 123836 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -316,13 +329,14 @@
    - Run: actions/setup-python@v5
        | (khong co output)
    - Run: python ops/nhanh_don_duoc_test.py
+       * targeted_mutant_gate MANH 5/8: 41 muc — KHONG phai full mutant audit
        | TU KIEM: 1/1
        | KET QUA ca:r503: passed (0.0s)
        | targeted_mutant_gate MANH 5/8: rc=0 · passed 41/41
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-nhanh-ubuntu-latest-5.zip successfully finalized. Artifact ID 13098252329
+       | Artifact gate-nhanh-ubuntu-latest-5 has been successfully uploaded! Final size is 2532 bytes. Artifact ID is 13098252329
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13098252329
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124958579701 | gate-nhanh-manh (ubuntu-latest, 0) | runner_id 1000033415 | success | log sha256 211117db399083c222b605eb6a6d02138a402688f262041cbc3579f5cb3ff638 | 123164 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -334,13 +348,14 @@
    - Run: actions/setup-python@v5
        | (khong co output)
    - Run: python ops/nhanh_don_duoc_test.py
+       * targeted_mutant_gate MANH 0/8: 39 muc — KHONG phai full mutant audit
        | TU KIEM: 1/1
        | KET QUA ca:r518: passed (0.0s)
        | targeted_mutant_gate MANH 0/8: rc=0 · passed 39/39
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-nhanh-ubuntu-latest-0.zip successfully finalized. Artifact ID 13098482349
+       | Artifact gate-nhanh-ubuntu-latest-0 has been successfully uploaded! Final size is 2308 bytes. Artifact ID is 13098482349
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13098482349
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124958579707 | gate-nhanh-manh (ubuntu-latest, 2) | runner_id 1000033420 | success | log sha256 d32c70de58febe539e4aff185880ba17344792339c29505b0325be79e37eeae5 | 123172 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -352,13 +367,14 @@
    - Run: actions/setup-python@v5
        | (khong co output)
    - Run: python ops/nhanh_don_duoc_test.py
+       * targeted_mutant_gate MANH 2/8: 40 muc — KHONG phai full mutant audit
        | TU KIEM: 1/1
        | KET QUA ca:r511: passed (0.0s)
        | targeted_mutant_gate MANH 2/8: rc=0 · passed 40/40
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-nhanh-ubuntu-latest-2.zip successfully finalized. Artifact ID 13098556931
+       | Artifact gate-nhanh-ubuntu-latest-2 has been successfully uploaded! Final size is 2363 bytes. Artifact ID is 13098556931
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13098556931
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124958579712 | gate-nhanh-manh (ubuntu-latest, 3) | runner_id 1000033418 | success | log sha256 6844f6ff1b204be14cb4a27db2ae2feaabdf6d92bf19fa44a8901241c9e0b58d | 123382 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -370,13 +386,14 @@
    - Run: actions/setup-python@v5
        | (khong co output)
    - Run: python ops/nhanh_don_duoc_test.py
+       * targeted_mutant_gate MANH 3/8: 40 muc — KHONG phai full mutant audit
        | TU KIEM: 1/1
        | KET QUA ca:r507: passed (0.0s)
        | targeted_mutant_gate MANH 3/8: rc=0 · passed 40/40
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-nhanh-ubuntu-latest-3.zip successfully finalized. Artifact ID 13098417853
+       | Artifact gate-nhanh-ubuntu-latest-3 has been successfully uploaded! Final size is 2435 bytes. Artifact ID is 13098417853
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13098417853
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124958579719 | gate-cong-cu (ubuntu-latest, 5) | runner_id 1000033413 | success | log sha256 87b9acefabe2a4f80f195a7381e6450558c774558bd13b15bf5c6d7c6f64b971 | 134912 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -400,13 +417,14 @@
        |   "canary": []
        | }
    - Run: python ops/cong_cu.py kiem-tra --json
+       * cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
        |   ok  f36_prefix_64 → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
        |   ok  f37_bo_f24 → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
        | MẢNH 5/8: 61/61 đột biến bán kính 1 · ghi manh/manh-5.txt
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-cong-cu-manh-ubuntu-latest-5.zip successfully finalized. Artifact ID 13098747835
+       | Artifact gate-cong-cu-manh-ubuntu-latest-5 has been successfully uploaded! Final size is 28019 bytes. Artifact ID is 13098747835
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13098747835
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124958579727 | gate-cong-cu (ubuntu-latest, 0) | runner_id 1000033417 | success | log sha256 b2e7a3081f0105d4f128a11f6bb4573c41a931a93d57b89957fbfb1f42803cc9 | 135251 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -430,13 +448,14 @@
        |   "canary": []
        | }
    - Run: python ops/cong_cu.py kiem-tra --json
+       * cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
        |   ok  f36_ascii_ignore → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
        |   ok  f41_bo_f40_luon → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
        | MẢNH 0/8: 62/62 đột biến bán kính 1 · ghi manh/manh-0.txt
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-cong-cu-manh-ubuntu-latest-0.zip successfully finalized. Artifact ID 13099041913
+       | Artifact gate-cong-cu-manh-ubuntu-latest-0 has been successfully uploaded! Final size is 20886 bytes. Artifact ID is 13099041913
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13099041913
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124958579744 | gate-nhanh-manh (ubuntu-latest, 1) | runner_id 1000033426 | success | log sha256 78a8e1f15b1e6898ebc17af12d0fb801c31afbe07e6ea68377dd2aa97eb7ced5 | 123694 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -448,13 +467,14 @@
    - Run: actions/setup-python@v5
        | (khong co output)
    - Run: python ops/nhanh_don_duoc_test.py
+       * targeted_mutant_gate MANH 1/8: 41 muc — KHONG phai full mutant audit
        | TU KIEM: 1/1
        | KET QUA ca:r524: passed (0.0s)
        | targeted_mutant_gate MANH 1/8: rc=0 · passed 41/41
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-nhanh-ubuntu-latest-1.zip successfully finalized. Artifact ID 13098412728
+       | Artifact gate-nhanh-ubuntu-latest-1 has been successfully uploaded! Final size is 2461 bytes. Artifact ID is 13098412728
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13098412728
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124958579745 | gate-cong-cu (ubuntu-latest, 7) | runner_id 1000033416 | success | log sha256 74552f7d409958dc2536dd055600e540945d7f0621fa0575afc7f08530a84d8e | 134836 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -478,13 +498,14 @@
        |   "canary": []
        | }
    - Run: python ops/cong_cu.py kiem-tra --json
+       * cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
        |   ok  f36_suffix_64 → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
        |   ok  f40_false_luon → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
        | MẢNH 7/8: 61/61 đột biến bán kính 1 · ghi manh/manh-7.txt
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-cong-cu-manh-ubuntu-latest-7.zip successfully finalized. Artifact ID 13098657488
+       | Artifact gate-cong-cu-manh-ubuntu-latest-7 has been successfully uploaded! Final size is 22790 bytes. Artifact ID is 13098657488
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13098657488
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124958579748 | gate-cong-cu (ubuntu-latest, 4) | runner_id 1000033424 | success | log sha256 f752f36f5e58c3919ac68e6f329a04d4d793ed4d0dd3cb6ba65ad6b95d12b25e | 134860 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -508,13 +529,14 @@
        |   "canary": []
        | }
    - Run: python ops/cong_cu.py kiem-tra --json
+       * cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
        |   ok  f36_prefix_4096 → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
        |   ok  f35_writer_broken_link → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
        | MẢNH 4/8: 61/61 đột biến bán kính 1 · ghi manh/manh-4.txt
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-cong-cu-manh-ubuntu-latest-4.zip successfully finalized. Artifact ID 13098896715
+       | Artifact gate-cong-cu-manh-ubuntu-latest-4 has been successfully uploaded! Final size is 26340 bytes. Artifact ID is 13098896715
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13098896715
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124958579755 | gate-nhanh-manh (ubuntu-latest, 4) | runner_id 1000033425 | success | log sha256 39fa62a231dc3971115cdb3372c3a963e7e5fa07b385e678c4dde3b446e3dd9c | 123286 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -526,13 +548,14 @@
    - Run: actions/setup-python@v5
        | (khong co output)
    - Run: python ops/nhanh_don_duoc_test.py
+       * targeted_mutant_gate MANH 4/8: 39 muc — KHONG phai full mutant audit
        | TU KIEM: 1/1
        | KET QUA ca:r541: passed (0.1s)
        | targeted_mutant_gate MANH 4/8: rc=0 · passed 39/39
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-nhanh-ubuntu-latest-4.zip successfully finalized. Artifact ID 13098368273
+       | Artifact gate-nhanh-ubuntu-latest-4 has been successfully uploaded! Final size is 2354 bytes. Artifact ID is 13098368273
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13098368273
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124958579756 | gate-cong-cu (ubuntu-latest, 2) | runner_id 1000033423 | success | log sha256 81961d5ac17c5653b91e9d2eca3484dbce1dfef98f37ace509a08a125383817d | 135091 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -556,13 +579,14 @@
        |   "canary": []
        | }
    - Run: python ops/cong_cu.py kiem-tra --json
+       * cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
        |   ok  w698_x_wr_ra_nfkc → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
        |   ok  f36_bo_khoang_trang → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
        | MẢNH 2/8: 61/61 đột biến bán kính 1 · ghi manh/manh-2.txt
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-cong-cu-manh-ubuntu-latest-2.zip successfully finalized. Artifact ID 13098852241
+       | Artifact gate-cong-cu-manh-ubuntu-latest-2 has been successfully uploaded! Final size is 15826 bytes. Artifact ID is 13098852241
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13098852241
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 19=success, 20=success, 21=success
 == job 124958579766 | gate-nhanh-manh (ubuntu-latest, 6) | runner_id 1000033427 | success | log sha256 b5719e6da5baeb8dc30106f63f2a28130c9dc6f74385a8710efd523196b28a63 | 123275 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -574,13 +598,14 @@
    - Run: actions/setup-python@v5
        | (khong co output)
    - Run: python ops/nhanh_don_duoc_test.py
+       * targeted_mutant_gate MANH 6/8: 39 muc — KHONG phai full mutant audit
        | TU KIEM: 1/1
        | KET QUA ca:r527: passed (0.1s)
        | targeted_mutant_gate MANH 6/8: rc=0 · passed 39/39
    - Run: actions/upload-artifact@v4
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For mo
+       | Artifact gate-nhanh-ubuntu-latest-6.zip successfully finalized. Artifact ID 13098112621
+       | Artifact gate-nhanh-ubuntu-latest-6 has been successfully uploaded! Final size is 2434 bytes. Artifact ID is 13098112621
+       | Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/41342580238/artifacts/13098112621
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124958995179 | gate-nhanh-gop (ubuntu-latest) | runner_id 1000033428 | success | log sha256 2d12a2cbbbcb4c89356a3ac1839bba88a660e4b0463c75473177d9e2c71e09dc | 118790 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -596,9 +621,10 @@
        | Total of 8 artifact(s) downloaded
        | Download artifact has finished successfully
    - Run: python ops/nhanh_don_duoc_test.py --gop-dich manh
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/download-artifact@v4, actions/setup-python@v5. For 
+       * targeted_mutant_gate GOP 8/8 manh · head c6bb7c142623267a1b270fdb2492a89089b58d27
+       | CA NEN: 56/56 passed · TU DOT BIEN (chi ca dich): 255/255 giet · DOT BIEN SAN PHAM: 10/10 giet
+       | DUONG GANG: 81.88s / tran 540s · RAM dinh 130.3 MB · chay lai 0
+       | targeted_mutant_gate: DAT — KHONG phai full mutant audit; full_mutant_audit van BAT BUOC truoc merge/land/release
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 11=success, 12=success, 13=success
 == job 124959063052 | gate-registry (ubuntu-latest) | runner_id 1000033429 | success | log sha256 33191c42d8ac8e98a7c4da9a53d730942628efe61c58a9849f8aa080fa8c1eac | 247318 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -628,9 +654,14 @@
    - Run: python -m pip install --quiet ruff==0.15.15
        | ruff 0.15.15
    - Run: python .claude/dev/ci_dang_ky_test.py --chay
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://
+       * TONG: CA 44/44 dat · DOT BIEN 43 muc CHE DO NHE — do khi diff cham vung
+       * TONG: CA 45/45 dat · DOT BIEN 25 muc CHE DO NHE — do khi diff cham vung
+       * CA: 22/22 dat
+       * CA: 61/61 dat
+       * CA: 52/52 dat
+       | CI_DANG_KY ops/cloud_agent_creds_test.py: ĐẠT rc=0
+       | CI_DANG_KY_THOI_GIAN {"ke_hoach": {"ops/nhanh_don_duoc_test.py": {"che_do": "nhe", "ly_do": "vòng đột biến do job mảnh + gom (ci-dot-bien-du.yml)"}, ".claude/hooks/pretooluse_guard_test.py": {"che_do"
+       | TỔNG: ĐẠT
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 8=success, 9=success, 10=success, 11=success, 21=success, 22=success, 23=success
 == job 124963940798 | gate-cong-cu-gop (ubuntu-latest) | runner_id 1000033430 | success | log sha256 c9eb5fdbdd6f48228eab94a8dde63f5dbde97e3a093b639590a99110b99684ec | 98095 byte
    checkout: ['c6bb7c142623267a1b270fdb2492a89089b58d27']
@@ -648,9 +679,10 @@
        | Total of 8 artifact(s) downloaded
        | Download artifact has finished successfully
    - Run: python ops/cong_cu_test.py --gop manh
-       | [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-       | Cleaning up orphan processes
-       | ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/download-artifact@v4, actions/setup-python@v5. For 
+       * GOM MẢNH 8/8
+       |   ok  f41_bo_f40_luon → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+       |   ok  f41_f40_khong_ra_ngoai → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+       | SỐ LIỆU GOM: ca=61 · đột biến=490 · lỗi đột biến=0
    step.conclusion: 1=success, 2=success, 3=success, 4=success, 5=success, 6=success, 7=success, 13=success, 14=success, 15=success
 
 == TONG: 23 job · buoc `Run` 185 · checkout 22 job, SHA ['c6bb7c142623267a1b270fdb2492a89089b58d27'] · dong ##[error] 0 · '"ok": true' 9 · '"ok": false' 0 · step.conclusion {'success': 275, 'skipped': 10}

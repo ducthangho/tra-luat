@@ -3167,13 +3167,13 @@ def _phan_loai_windows(root: Path, b: str, h: str, spec: bytes) -> str:
 
 def _dong_chu_kho(duong, tho=False) -> list[str]:
     """Các dòng của MỘT comment readback chỉ khi tác giả là `CHU_KHO` (hằng trong mã, không có cờ đổi). `tho`: giữ nguyên dòng (#1120 K7
-    khớp `^full_mutant_audit: H mien$` đúng chữ — review offline lượt 1 F03: `strip()` nhận cả dòng thụt/đuôi khoảng trắng)."""
+    khớp `^full_mutant_audit: H mien$` đúng chữ, chỉ tách ở LF/CRLF — review offline lượt 1+3 F03: `strip()`/`splitlines()` sửa dòng)."""
     if not duong:
         return []
     d = _doc_json(duong, RC_GATE)[0]
     if not isinstance(d, dict) or not isinstance(d.get("user"), dict) or d["user"].get("login") != CHU_KHO or type(d.get("body")) is not str:
         raise ValueError(f"comment không phải của chủ kho {CHU_KHO}")
-    return [x if tho else x.strip() for x in d["body"].splitlines()]
+    return [x if tho else x.strip() for x in (re.split(r"\r?\n", d["body"]) if tho else d["body"].splitlines())]  # lượt 3 F03: splitlines tách cả \v \f \x85 \u2028…
 
 
 def cmd_kiem_merge(a, state_dir: Path) -> int:

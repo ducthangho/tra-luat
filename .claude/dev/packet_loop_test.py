@@ -9294,16 +9294,17 @@ MUTANTS.update({
 
 
 # --- #1120 KIEM-MERGE-M9 (`ops/specs/KIEM-MERGE-M9-r1.md`): K7 `full_mutant_audit` trên cùng fixture `_c1106`.
-def _m9_git_loi(c):
-    """`git diff --raw` lỗi ⇒ `_cham_m9` KHÔNG ĐO ĐƯỢC (ValueError), không được đọc thành "không chạm M9" (A3)."""
+def _m9_git_loi(c, raw=b""):
+    """git rc≠0 ⇒ K7 (và K6 khi stdout vẫn có bản ghi raw hợp lệ) KHÔNG ĐO ĐƯỢC, không phải "không chạm" (A3; lượt 2 F14)."""
     m = importlib.util.module_from_spec(sp := importlib.util.spec_from_file_location("pl1120", c.script))
     sys.path.insert(0, str(c.script.parent)), sp.loader.exec_module(m)
-    m._git_do = lambda root, *x: (128, b"")
-    try:
-        cham = m._cham_m9(Path("."), "a" * 40, "b" * 40)
-    except ValueError:
-        return
-    raise AssertionError(f"git diff lỗi mà vẫn kết luận chạm M9 = {cham!r}")
+    m._git_do = lambda root, *x: (128, raw)
+    for ten, fn in (("K7", lambda: m._cham_m9(Path("."), "a" * 40, "b" * 40)), ("K6", lambda: m._phan_loai_windows(Path("."), "a" * 40, "b" * 40, b""))):
+        try:
+            kq = fn()
+        except ValueError:
+            continue
+        raise AssertionError(f"{ten}: git rc=128 (raw={raw!r}) mà vẫn kết luận {kq!r}")
 
 
 def _m9_k6_diff_rong(c):
@@ -9318,36 +9319,23 @@ def _m9_k6_diff_rong(c):
     raise AssertionError(f"diff rỗng mà K6 vẫn phân loại {loai!r}")
 
 
-def _m9_git_loi_co_output(c):
-    """git rc≠0 mà stdout VẪN có bản ghi raw hợp lệ ⇒ cả K7 lẫn K6 KHÔNG ĐO ĐƯỢC (review offline lượt 2 F14)."""
-    m = importlib.util.module_from_spec(sp := importlib.util.spec_from_file_location("pl1120o", c.script))
-    sys.path.insert(0, str(c.script.parent)), sp.loader.exec_module(m)
-    m._git_do = lambda root, *x: (128, b":100644 100644 a b M\0docs/x.md\0")
-    for ten, fn in (("K7", lambda: m._cham_m9(Path("."), "a" * 40, "b" * 40)), ("K6", lambda: m._phan_loai_windows(Path("."), "a" * 40, "b" * 40, b""))):
-        try:
-            kq = fn()
-        except ValueError:
-            continue
-        raise AssertionError(f"{ten}: git rc=128 kèm raw khác rỗng mà vẫn kết luận {kq!r}")
-
-
 def _m9_pham_vi_git(c):
-    """Phạm vi M9 trên lịch sử git THẬT (review offline lượt 2 F15/F16): XOÁ `ops/x.py` vẫn chạm; `ops/y.PY` khớp nguyên chữ ⇒ không."""
+    """Phạm vi M9 trên lịch sử git THẬT, mỗi bước một commit (lượt 2 F15/F16, lượt 3 F22–F24): xoá · `.PY` · rename từ ngoài VÀO · symlink · chỉ đổi mode."""
     m = importlib.util.module_from_spec(sp := importlib.util.spec_from_file_location("pl1120p", c.script))
     sys.path.insert(0, str(c.script.parent)), sp.loader.exec_module(m)
     w = Path(tempfile.mkdtemp(prefix="m9pv-", dir=c.tmp))
-    _g(w, "init", "-q", "-b", "master")
-    for p in ("ops/x.py", "README.md"):
-        (w / p).parent.mkdir(parents=True, exist_ok=True), (w / p).write_text("a\n", encoding="utf-8", newline="\n")
-    _g(w, "add", "-A"), _g(w, "commit", "-qm", "B")
-    b = _g(w, "rev-parse", "HEAD")
-    _g(w, "rm", "-q", "ops/x.py"), _g(w, "commit", "-qm", "XOA")
-    xoa = _g(w, "rev-parse", "HEAD")
-    (w / "ops").mkdir(exist_ok=True), (w / "ops/y.PY").write_text("a\n", encoding="utf-8", newline="\n"), _g(w, "add", "-A"), _g(w, "commit", "-qm", "HOA")
-    hoa = _g(w, "rev-parse", "HEAD")
-    kq = (m._cham_m9(w, b, xoa), m._cham_m9(w, xoa, hoa))
-    if kq != (True, False):
-        raise AssertionError(f"phạm vi M9 (xoá ops/x.py, thêm ops/y.PY) phải là (True, False), được {kq!r}")
+    _g(w, "init", "-q", "-b", "master"), (w / ".claude/dev").mkdir(parents=True)
+    def buoc(*lenh, tep=()):
+        for p in tep:
+            (w / p).parent.mkdir(parents=True, exist_ok=True), (w / p).write_text("a\n", encoding="utf-8", newline="\n"), _g(w, "add", p)
+        _ = [_g(w, *x) for x in lenh]
+        return _g(w, "commit", "-qm", "b"), _g(w, "rev-parse", "HEAD")
+    sha = [buoc(tep=("ops/x.py", "docs/a.txt", ".github/workflows/w.yml"))[1], buoc(("rm", "-q", "ops/x.py"))[1], buoc(tep=("ops/y.PY",))[1],
+           buoc(("mv", "docs/a.txt", ".claude/dev/a.txt"))[1], buoc(("update-index", "--add", "--cacheinfo", f"120000,{_g(w, 'hash-object', '-w', '.claude/dev/a.txt')},ops/l.py"))[1],
+           buoc(("update-index", "--chmod=+x", ".github/workflows/w.yml"))[1]]
+    kq = tuple(m._cham_m9(w, a, b) for a, b in zip(sha, sha[1:]))
+    if kq != (True, False, True, True, True):
+        raise AssertionError(f"phạm vi M9 (xoá · .PY · rename vào · symlink ops/l.py · chỉ mode) phải là (True, False, True, True, True), được {kq!r}")
 
 
 _KHONG_DD = lambda x, w, h: h and x.update(ddr=None)  # noqa: E731
@@ -9395,8 +9383,15 @@ CASES += [
     ("cong_m9_run_attempt_bool", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddr", run_attempt=True)(x, w, h)))),
     ("cong_m9_mien_sha_rut_gon", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_KHONG_DD(x, w, h), h and x.update(
         cmt={"user": {"login": "ducthangho"}, "body": f"windows: {h} mien\nfull_mutant_audit: {h[:7]} mien"})))),
-    ("cong_m9_git_loi_co_output", _m9_git_loi_co_output),
+    ("cong_m9_git_loi_co_output", lambda c: _m9_git_loi(c, b":100644 100644 a b M\0docs/x.md\0")),
     ("cong_m9_pham_vi_git", _m9_pham_vi_git),
+    # lượt 3: F03 mọi ký tự `splitlines` tách ở hai đầu · F17/F18 run đạt nằm GIỮA hai run không đạt · F19 attempt 2 · F20/F21 job SAU job đầu
+    ("cong_m9_mien_ky_tu_tach", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_KHONG_DD(x, w, h), h and x.update(cmt={"user": {"login": "ducthangho"},
+        "body": "\n".join([f"windows: {h} mien"] + [v for k in "\x0b\x0c\x1c\x1d\x1e\x85\u2028\u2029" for v in (f"full_mutant_audit: {h} mien{k}", f"{k}full_mutant_audit: {h} mien")])})))),
+    ("cong_m9_run_xanh_o_giua", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and x.update(ddr=[{**x["ddr"][0], "id": 699, "conclusion": "failure"}, x["ddr"][0], {**x["ddr"][0], "id": 702, "head_sha": "0" * 40}])))),
+    ("cong_m9_attempt_2", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddr", run_attempt=2)(x, w, h), h and [j.update(run_attempt=2) for j in x["ddj"]]))),
+    ("cong_m9_job_sau_float", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddj", 1, run_attempt=1.0)(x, w, h)))),
+    ("cong_m9_job_dau_dang_chay", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddj", 0, status="in_progress")(x, w, h)))),
 ]
 MUTANTS.update({
     "m9_bo_head_sha": (' and r.get("head_sha") == h and xanh(r)', " and xanh(r)", ["cong_m9_run_head_khac"]),
@@ -9425,6 +9420,15 @@ MUTANTS.update({
     "m9_pham_vi_py_hoa": ('(p.startswith("ops/") and p.endswith(".py"))', '(p.startswith("ops/") and p.lower().endswith(".py"))', ["cong_m9_pham_vi_git"]),
     "m9_pham_vi_bo_tep_xoa": ("for _, p in _diff_raw(root, b, h))", 'for _, p in _diff_raw(root, b, h) if _git_do(root, "cat-file", "-e", f"{h}:{p}")[0] == 0)',
                               ["cong_m9_pham_vi_git"]),
+    "m9_mien_splitlines": ('re.split(r"\\r?\\n", d["body"]) if tho else ', "", ["cong_m9_mien_ky_tu_tach"]),
+    "m9_chi_run_dau": ("        for r in runs:\n", "        for r in runs[:1]:\n", ["cong_m9_run_xanh_o_giua"]),
+    "m9_chi_run_cuoi": ("        for r in runs:\n", "        for r in runs[-1:]:\n", ["cong_m9_run_xanh_o_giua"]),
+    "m9_ghim_attempt_1": ('nhom.get((r["id"], r["run_attempt"]))', 'nhom.get((r["id"], 1))', ["cong_m9_attempt_2"]),
+    "m9_kieu_chi_job_dau": ("is int for j in js) or len(khoa)", "is int for j in js[:1]) or len(khoa)", ["cong_m9_job_sau_float"]),
+    "m9_xanh_chi_job_cuoi": ("and js and all(map(xanh, js))", "and js and all(map(xanh, js[-1:]))", ["cong_m9_job_dau_dang_chay"]),
+    "m9_nhan_rename": ('"diff", "--raw", "--no-renames", "-z", b, h)', '"diff", "--raw", "-z", b, h)', ["cong_m9_pham_vi_git"]),
+    "m9_bo_symlink": ("for _, p in _diff_raw(root, b, h))", 'for m, p in _diff_raw(root, b, h) if m != "120000")', ["cong_m9_pham_vi_git"]),
+    "m9_bo_chi_doi_mode": ('for i in range(0, len(t) - 1, 2) if t[i].startswith(":")]', 'for i in range(0, len(t) - 1, 2) if t[i].startswith(":") and t[i].split()[2] != t[i].split()[3]]', ["cong_m9_pham_vi_git"]),
     "m9_k6_nhan_diff_rong": ('    if not tep:\n        raise ValueError("không đo được diff base..head")', '    if False:\n        raise ValueError("không đo được diff base..head")', ["cong_m9_k6_diff_rong"]),
     "m9_bo_kiem_nguoi_mien": ('d["user"].get("login") != CHU_KHO or ', "", ["cong_m9_mien_sai_nguoi"]),
     "m9_bo_pham_vi_workflow": ('p.startswith((".claude/dev/", ".github/workflows/"))', 'p.startswith((".claude/dev/",))', ["cong_m9_pham_vi_workflow"]),

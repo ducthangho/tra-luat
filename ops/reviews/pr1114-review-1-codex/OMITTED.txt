@@ -1,0 +1,4 @@
+launcher.err	sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	bytes 0	ly do: tep rong
+evidence/base-argv.jsonl	sha256 a7ea48fd223782d38d9e2e153e04fc95a8c438cfe640e74d6d45142c6880d728	bytes 822015	ly do: >500 KB (tien le TEP-LON-KHONG-VAO-KHO); giu tai sandbox reviewer
+evidence/head-argv.jsonl	sha256 4325fd4e005d62065b1b8969cad71257259fc9f7f665c1a0f946380a490156f1	bytes 838749	ly do: >500 KB (tien le TEP-LON-KHONG-VAO-KHO); giu tai sandbox reviewer
+cay-kho/ copies/	khong chep: ban sao kho/ban sao lam viec cua sandbox reviewer; tai lap bang clone tai reviewed_sha / base

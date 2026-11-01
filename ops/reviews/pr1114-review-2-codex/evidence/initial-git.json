@@ -1,0 +1,96 @@
+[
+  {
+    "command": [
+      "git",
+      "-C",
+      "cay-kho",
+      "rev-parse",
+      "HEAD",
+      "HEAD^{tree}"
+    ],
+    "rc": 0,
+    "stdout": "51435a44659c4026539497a47ace971a71a64f40\n7c160ae144195d4f22089ec49d39e45033030381\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "cay-kho",
+      "merge-base",
+      "HEAD",
+      "refs/remotes/origin/master"
+    ],
+    "rc": 0,
+    "stdout": "3bdd9877cab2543adc413a32a47decbb585ded97\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "cay-kho",
+      "diff",
+      "--name-only",
+      "3bdd9877cab2543adc413a32a47decbb585ded97",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "ops/cloud_agent_creds_test.py\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "cay-kho",
+      "status",
+      "--porcelain",
+      "--untracked-files=all"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "cay-kho",
+      "ls-files",
+      "--others",
+      "--ignored",
+      "--exclude-standard"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "cay-kho",
+      "diff",
+      "--check",
+      "3bdd9877cab2543adc413a32a47decbb585ded97",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "cay-kho",
+      "diff",
+      "--exit-code",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

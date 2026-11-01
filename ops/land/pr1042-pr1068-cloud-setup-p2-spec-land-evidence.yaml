@@ -49,6 +49,8 @@ prs:
     merge_commit_tree: a56e5916186df87fde92ad97dec4f830fbac6a9a
     merge_commit_parents: [086f1b7343fc1d778e50797e6c9ca0964b11a755, 019d044739068d393e7067d3b88250e90c492713]
     merged_nguon: 'measured — readback-pr-1074.json: merged true, merged_at 2026-10-31T11:43:20Z, merged_by ducthangho, merge 1bc46845, head 019d044; merge-va-diff-1074.txt: cha, tree, diff 1 tep +220; diff merge-base(97120d3c)..019d044 va 1bc46845^1..1bc46845 cung sha256 8f859d40…; origin/master spec r2 sha256 3de590be…, blob 6dc7ff17.'
+authorized_head_sha: 780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3
+authorized_head_sha_ghi_chu: 'Head cua PR #1068 (spec P2b r1) — PR cuoi cung cua ho so duoc dong boi khoi landed_20261031. Head tung PR o prs[].'
 approver: ducthangho
 authorization_url: https://github.com/ducthangho/tra-luat/issues/1038#issuecomment-6539003369
 authorization_ghi_chu: >-
@@ -148,3 +150,23 @@ khong_do_duoc:
   - 'Ho model phuc vu cua Codex connector: connector khong tra model.'
   - 'GraphQL WorkflowRun.file: phien web 403; output do laptop ASUS-LAPTOP (08:09Z, 09:49Z) va VM tra-luat-win (13:06Z) chay bang gh cua chu kho qua Remote Desktop Commander — loi khai co neo, phan REST/git do lai.'
   - 'Danh tinh nguoi ky cac comment uy quyen: #566.'
+
+landed_20261031:
+  bo_canh: >-
+    Dong muc con mo cua ho so: spec P2b r1 (#1068). Khoi nay KHONG sua dong nao o tren. Spec P2a r2 da landed (landed_theo_dac_ta).
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/issues/1039#issuecomment-6545979440
+    noi_dung: >-
+      Packet #1039 land qua PR #1073 (merge a253c169), ho so ops/land/pr1073-wp1039-r1-land-evidence.yaml khoi landed_20261031
+      (chu kho chap nhan luot approve 2bfa8722 voi sandbox KHONG_DO_DUOC). Ba phep do ma review spec S-B (26f1b808) chi ra — H1 sau pip
+      that, A4 ca nhom tien trinh, agy khop token 1.4.12 — da duoc siet trong #1073 (quyet dinh issuecomment-6541865575, do bang ca test
+      + dot bien cua executor, luot 7 approve). Sai sot da biet cua spec r1: muc 10 cong thuc doi khoa (RUNBOOK A0.4e trong #1073 da
+      viet theo hanh vi that).
+    do_duoc: >-
+      measured — readback-comment-quyet-dinh-6545979440.json: user ducthangho, author_association OWNER, 2026-10-31T16:19:39Z.
+      CAVEAT #566.
+  landed: true
+  landed_dieu_kien: >-
+    Spec P2a r2: landed (landed_theo_dac_ta.spec_p2a_r2). Spec P2b r1: bon moc §10.2.2 cua #1068 du; review spec request_changes duoc
+    giai quyet bang cach siet trong #1073 va packet #1039 da land theo quyet dinh chu kho tren.

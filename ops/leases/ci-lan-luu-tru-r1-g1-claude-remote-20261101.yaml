@@ -1,0 +1,88 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1113
+packet_id: CI-LAN-LUU-TRU
+mission_issue: 1113
+mission_id: gh-1113
+mission_ghi_chu: 'packet don le (packet D phan D1 cua ADR-0060 M11), dung chinh Packet Issue #1113 lam o chua'
+revision: 1
+generation: 1
+lease_id: ci-lan-luu-tru-r1-g1-claude-remote-20261101
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease dau tien cua packet'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1113#issuecomment-6555677593
+authority_url: https://github.com/ducthangho/tra-luat/issues/1113#issuecomment-6555677593
+authority_ghi_chu: 'duyet spec_hash 7bd567f5…833c (commit 1ac712b, land 3bdd987); ghi ho theo chi thi truc tiep cua chu kho trong phien session_015GtxrcRSrPnyeixJVDudWu 01-11-2026; A10 Windows duyet chay, A11 owner_waived (issuecomment-6555213830); tran loi goi Codex 14 (issuecomment-6555347181)'
+recorded_by: anthropic_claude_dispatcher
+recorder_is_dispatcher: true
+leased_at_utc: '2026-11-01T08:46:30Z'
+heartbeat_at: '2026-11-01T08:46:30Z'
+lease_until: '2026-11-02T08:46:30Z'
+lease_expires_at_utc: '2026-11-02T08:46:30Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); may la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: systemic
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer: codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: 'fresh independent session, read-only exact head, qua launcher.py run; connector Codex goi bang @codex review tren PR draft (ADR-0060 M6)'
+spec_path: ops/specs/CI-LAN-LUU-TRU-r1.md
+spec_ref: refs/heads/ops/ci-lan-luu-tru-r1-lease
+spec_ref_ghi_chu: 'spec da land tren master (3bdd987, PR #1109); nhanh lease re tu master nen chua dung blob ay; thu dinh danh la BAM.'
+spec_hash: 7bd567f5fe75e4c5564fde767b39d4845fbb595b30f7005aae9e9f4468d1833c
+spec_sha256: 7bd567f5fe75e4c5564fde767b39d4845fbb595b30f7005aae9e9f4468d1833c
+spec_blob: e80ecd7e3ffd326648baa24d3acb8adb8135226b
+branch: agent/wp1113-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 3bdd9877cab2543adc413a32a47decbb585ded97
+start_from_sha: 3bdd9877cab2543adc413a32a47decbb585ded97
+reviewed_sha_required: 3bdd9877cab2543adc413a32a47decbb585ded97
+reviewed_sha_ghi_chu: 'chua co head code luc cap lease; moi luot review neo dung SHA cua luot'
+write_set:
+- .github/workflows/ci.yml
+- ops/ci_duong_nhanh.py
+- ops/ci_duong_nhanh_test.py
+- ops/lease_publish_test.py
+- .claude/dev/ci_dang_ky_test.py
+- ops/cong_cu_test.py
+write_set_planned: []
+write_set_hash: a401c341a7397990e99d26c62bd1ea2212dee0ba194065b466883d378de840c9
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: 'holder scan 2026-11-01T08:45:38Z: ls-remote 740, thieu cuc bo 0; 6/6 duong dan NGUOI_GIU 0'
+tran_kich_thuoc: '<= 6 tep / <= 650 dong them (nang_tran trong spec §3; tran goc ADR-0053@8ab1007 la 450)'
+nang_tran:
+  kich_thuoc: {tran_cu: '6 tep / 450 dong them', tran_moi: '6 tep / 650 dong them', ai_nang: ducthangho, nguon: 'spec §3'}
+  loi_goi_codex: {tran_cu: 10, tran_moi: 14, ai_nang: ducthangho, nguon: 'https://github.com/ducthangho/tra-luat/issues/1113#issuecomment-6555347181'}
+tran_loi_goi_codex: '14 (nang tu 10 cua ADR-0055@d2e3052); da dung 0 tren PR thi cong (10 luot tren PR spec #1109 khong tinh, theo tien le lease #1094)'
+dieu_kien_merge_bo_sung: 'ADR-0060@36d7c5d (dong khai trong spec): het P0-P2, P3 dong hoac chu kho mien; Windows required va DUOC CHAY (A10); full_mutant_audit A11 owner_waived, exact_sha dien khi de xuat merge'
+coordination_paths:
+- ops/leases/ci-lan-luu-tru-r1-g1-claude-remote-20261101.yaml
+- ops/specs/CI-LAN-LUU-TRU-r1.md
+run_minutes: 1440
+heartbeat_required_minutes: 360
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- kill_other_session_process
+- write_outside_effective_write_set
+land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate

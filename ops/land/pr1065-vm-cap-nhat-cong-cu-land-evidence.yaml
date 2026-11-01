@@ -217,4 +217,4 @@ no_con_mo:
 bookkeeping:
   - {item: 'hien vat cross-review #1065/#1069/#1091', ket_qua: 'ops/reviews/pr1065-review-16..20-codex*, pr1091-review-1..2-codex* (PR #1069, #1104)'}
   - {item: 'moc Checkout + Gate output run 41173244891', ket_qua: 'ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/gate-output-41173244891.txt'}
-  - {item: 'PR ghi so landed', nhanh: ccr-5249948c-9epnbs, pr: CHO_SO}
+  - {item: 'PR ghi so landed', nhanh: ccr-5249948c-9epnbs, pr: 1111}

@@ -84,3 +84,4 @@ prohibited_actions:
 - kill_other_session_process
 - write_outside_effective_write_set
 land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate
+da_bi_thay_the: ci-provenance-wd-r1-g3-claude-remote-20261101

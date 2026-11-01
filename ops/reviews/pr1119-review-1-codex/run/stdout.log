@@ -1,0 +1,6 @@
+Đã ghi [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119b/VERDICT.md): **request_changes — 2 P3**.
+
+- Ba tệp cache nguồn bị bỏ nhưng không khai trong `OMITTED.txt`.
+- Hai caveat #1114 khai sai rằng `DIFF.patch` không vào kho.
+
+Cổng HEAD/base đều đạt; bốn đột biến đều bị chặn đúng biên nhận. Clone gốc không đổi byte.

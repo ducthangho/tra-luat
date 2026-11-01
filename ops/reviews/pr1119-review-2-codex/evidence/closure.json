@@ -1,0 +1,54 @@
+{
+  "cache": [
+    {
+      "source": "evidence/ruff-cache-created/.gitignore",
+      "sha256": "9e3a60f1e6ec4ae60215c11d54b171392745ec25e9dded433d5bd921363af316",
+      "bytes": 35,
+      "old_declared": false,
+      "new_declared": true,
+      "absent_from_archive": true
+    },
+    {
+      "source": "evidence/ruff-cache-created/0.17.3/12591984194595340168",
+      "sha256": "d001930daafa34484d4322965804766ba8b1fce65cd1999142048c4f36b41588",
+      "bytes": 252,
+      "old_declared": false,
+      "new_declared": true,
+      "absent_from_archive": true
+    },
+    {
+      "source": "evidence/ruff-cache-created/CACHEDIR.TAG",
+      "sha256": "5953156d7e0c564a427251316eaf26f8870e6483ae2197f916b630e4f93e31ae",
+      "bytes": 43,
+      "old_declared": false,
+      "new_declared": true,
+      "absent_from_archive": true
+    }
+  ],
+  "diffs": [
+    {
+      "stem": "pr1114-review-1-codex",
+      "old_claim": "Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt.",
+      "new_claim": "Tep >500 KB (evidence/{base,head}-argv.jsonl), cache ruff evidence/ruff-cache-created/ va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. DIFF.patch CO trong kho.",
+      "bytes": 1913,
+      "sha256": "11c407a6c076de2f9326e05afdd4c246b7d70a2da951efcdaa4921dab5a8f06e",
+      "equal_source": true,
+      "manifest_has_diff": true,
+      "new_claims_present": true,
+      "readme_same": true
+    },
+    {
+      "stem": "pr1114-review-2-codex",
+      "old_claim": "Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt.",
+      "new_claim": "Tep >500 KB (evidence/initial-hashes.json) va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. DIFF.patch CO trong kho.",
+      "bytes": 4160,
+      "sha256": "c0d31ead491e166215d5a894bc41d861b1df72443b0e951478beccc828532042",
+      "equal_source": true,
+      "manifest_has_diff": true,
+      "new_claims_present": true,
+      "readme_same": true
+    }
+  ],
+  "old_missing": 3,
+  "new_missing": 0
+}

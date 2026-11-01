@@ -85,8 +85,8 @@ heartbeat_at: '2026-11-01T17:07:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
 heartbeat_required_minutes: 360
 heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
-lease_until: '2026-11-02T17:07:00Z'
-lease_expires_at_utc: '2026-11-02T17:07:00Z'
+lease_until: '2026-11-01T22:59:00Z'
+lease_expires_at_utc: '2026-11-01T22:59:00Z'
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 0
@@ -104,3 +104,16 @@ requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'nhanh da day (f9e4342 lan chinh, 683ae45 sua CI do chinh PR gay ra); PR #1125.'
 codex_da_goi: []
+lease_sua_lan_cuoi: '2026-11-01T22:34:00Z'
+lease_sua_ghi_chu: 'Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han) sau khi PR #1125 merge. Khong doi write set, spec, branch, budget.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-02T17:07:00Z'
+  han_moi_utc: '2026-11-01T22:59:00Z'
+  chi_thi: 'Chu kho go "Land va ghi so" trong phien session_015GtxraNWSWRDjqY58pqwAN (01-11-2026) sau khi merge PR #1125 (merge 70ab34e). ADR-0060 M7: lan duyet bao gom nha lease. Ghi ho. Bam byte KHONG DO DUOC.'
+  ly_do: 'Packet DONG: PR #1125 da merge vao master (70ab34e, cha thu hai 1868503 = head da kiem-merge). Nha write set cho packet sau.'
+  vi_sao_han_moi_khong_bang_luc_sua: 'Han moi = luc sua + 25 phut de luot ops-publish-lease cua commit nay doc lease CON HAN (rc=9 da dang), khong roi vao rc=8 (bai hoc CLAUDE.md 20-09-2026). Khong viet bia mo: khong co lease ke nhiem.'
+  tien_le: 'wp1117-r1-g1-claude, wp1079-r1-g10-claude (thu_hoi_bang_rut_han).'
+codex_vuot_tran:
+  so_loi_goi: 11
+  tran: 10
+  ghi_chu: 'Loi goi thu 11 = review connector TU kich hoat khi chu kho bam ready_for_review tren PR #1125 (22:24Z, head 1868503), khong do executor goi; ket qua sach (has_any_findings false).'

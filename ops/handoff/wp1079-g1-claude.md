@@ -1,11 +1,11 @@
 # Handoff wp1079 — executor `claude` (phiên cloud), 01-11-2026
 
-- Packet #1079 `LAUNCHER-TEST-ORACLE-VA-FIXTURE` r1 · lease hiệu lực `ops/leases/wp1079-r1-g7-claude.yaml` (g1–g6 mang
+- Packet #1079 `LAUNCHER-TEST-ORACLE-VA-FIXTURE` r1 · lease hiệu lực `ops/leases/wp1079-r1-g8-claude.yaml` (g1–g7 mang
   `da_bi_thay_the`) · đặc tả `ops/specs/wp1079.md`, sha256 `81070fa2c5a00bc0bb63867c7173f310cba9002001b68a26d62726ec904cbf5b`.
 - Nhánh `agent/wp1079-g1-claude`, PR #1115, head **`af057e9`**. Diff so base `7eeb1d9` (chỉ `.claude/`; head có merge
   `origin/master`): `.claude/dev/launcher_test.py` +785/−111, `.claude/dev/codex_cred_test.py` +49/−7 (tổng **+834/−118**).
-- **TRẦN DÒNG VƯỢT:** lease g7 cho 800, diff thật 834 (+34) — phần tăng là bản vá Codex lượt 6 (chủ kho duyệt "Vá 2 hàm, dừng
-  gọi Codex") + ca khoá nhánh hook. CHƯA có quyết định nâng trần cho +34 này — chờ chủ kho.
+- **TRẦN DÒNG:** lease g7 cho 800, diff thật 834 (+34); chủ kho nâng 800→1000 ở g8 ("đồng ý nâng trần dòng để merge có thể lên tới 1000 dòng"). Phần tăng là bản vá Codex lượt 6 (chủ kho duyệt "Vá 2 hàm, dừng
+  gọi Codex") + ca khoá nhánh hook.
 - **M-1 CHƯA ĐẠT:** head cuối KHÔNG có verdict approve của Codex. Lượt 6/6 (cuối, trên `e3bcaf0`) còn 1 P1; bản vá của nó
   (`af057e9`) đúng nguyên mẫu Codex đã đo, nhưng chưa được Codex review. Chủ kho chọn dừng gọi Codex.
 - Nợ tách: **#1117** (F04 lượt 2 — mã cấp module của bản test đột biến thấy nonce kênh trước `main`; lỗi kiến trúc).
@@ -79,6 +79,6 @@ không gọi codex, không tính vào trần. HINT.patch giữ nguyên byte củ
 vì đổi thiết kế), lượt 4 ×1 (+2 thay bằng ca từ chối), lượt 5 ×2, lượt 6 ×2.
 
 ## Việc còn lại
-- Chủ kho: quyết trần dòng (+34 so g7) và merge khi M-1 chưa đạt (`uy_quyen_merge: false`).
+- Chủ kho: quyết merge khi M-1 chưa đạt (trần dòng đã nâng 1000 ở g8) (`uy_quyen_merge: false`).
 - Nợ #1117 (runner tin cậy ngoài mã bị đột biến); nợ cũ #824–#826 vẫn mở; nợ "cô lập process từng mutant" (spec Ngoài phạm vi).
-- Sau merge: rút hạn lease g7.
+- Sau merge: rút hạn lease g8.

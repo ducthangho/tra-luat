@@ -162,6 +162,41 @@ def bang(dieu_kien, thong_diep):
         raise TinHieuChotCa(thong_diep)
 
 
+def cham_mot_ca(fn):
+    """#1079 F01: chạy một ca, trả `(loai, chi_tiet)`; loai ∈ qua · bo_qua · giet · loi.
+    CHỈ `TinHieuChotCa` là `giet` — AssertionError trần hay lỗi vô can (kể cả khi một `except`
+    đã đổi kiểu sang AssertionError) là `loi`, tức tín dụng giả."""
+    try:
+        with _co_lap_toan_cuc():
+            kq = fn()
+    except TinHieuChotCa:
+        return "giet", fn.__name__
+    except Exception as e:  # noqa: BLE001 - chinh la thu dang phan hang
+        return "loi", f"{fn.__name__}({type(e).__name__})"
+    return ("bo_qua" if isinstance(kq, str) else "qua"), fn.__name__
+
+
+def ket_luan_mutant(dich, neutral, mutant):
+    """#1079 F01 — thuần. `neutral`/`mutant`: tên ca → `(loai, chi_tiet)`.
+    Trả `(trang_thai, so_chet, can_do, mo_ta)`; trang_thai ∈ OK · SAI · KHONG_DO (ca đích bỏ qua
+    theo nền) · KHONG_DO_NEUTRAL (neutral không qua ⇒ tính hỏng, KHÔNG cấp tín dụng)."""
+    xau = [neutral[t][1] for t in dich if neutral[t][0] in ("giet", "loi")]
+    if xau:
+        return "KHONG_DO_NEUTRAL", 0, 0, ", ".join(xau)
+    bo_qua = [t for t in dich if "bo_qua" in (neutral[t][0], mutant[t][0])]
+    can_do = len(dich) - len(bo_qua)
+    chet = [mutant[t][1] for t in dich if t not in bo_qua and mutant[t][0] == "giet"]
+    gia = [mutant[t][1] for t in dich if t not in bo_qua and mutant[t][0] == "loi"]
+    if can_do == 0:
+        return "KHONG_DO", 0, 0, ", ".join(bo_qua)
+    mo_ta = ", ".join(chet) or "(khong ca nao chet)"
+    if gia:
+        mo_ta += f" [tin dung gia: {', '.join(gia)}]"
+    if bo_qua:
+        mo_ta += f" [bo qua: {', '.join(bo_qua)}]"
+    return ("OK" if len(chet) == can_do else "SAI"), len(chet), can_do, mo_ta
+
+
 def _con_song_that(pid: int) -> bool:
     """Còn sống THẬT — zombie tính là ĐÃ CHẾT.
 
@@ -1862,7 +1897,7 @@ def t79_job_windows_phai_kiem_ket_qua_dat_gioi_han():
         def CreateJobObjectW(self, *_a): return 41
         def SetInformationJobObject(self, *_a): return 0
         def CloseHandle(self, h): self.dong.append(h); return 1
-        def OpenProcess(self, *_a): raise AssertionError("khong duoc di tiep sau SetInformation hong")
+        def OpenProcess(self, *_a): raise TinHieuChotCa("khong duoc di tiep sau SetInformation hong")
 
     cu = getattr(ctypes, "windll", None)
     fake = type("Windll", (), {})(); fake.kernel32 = K32()
@@ -3789,7 +3824,10 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
         with tempfile.TemporaryDirectory() as td:
             def do(mong_goi=1, vi_tri=""):
                 nhat_ky.clear()
-                kq = m._doc_mcp_json(td)
+                try:   # #1079 F01: hợp đồng là BẮT lỗi rồi trả kết quả — ném ra ngoài là ĐỎ do chốt
+                    kq = m._doc_mcp_json(td)
+                except Exception as e:  # noqa: BLE001
+                    raise TinHieuChotCa(f"[{vi_tri}] `_doc_mcp_json` nem {type(e).__name__} thay vi tra ket qua: {e}")
                 bang(len(kq) == 4,
                      f"`_doc_mcp_json` phai tra 4 phan tu (them `url`), do {len(kq)}")
                 if kq[0]:
@@ -6188,6 +6226,13 @@ def t155_m3_hook_cuc_bo_ghi_dau_vet_truoc_cong_remote():
         bang(len(truong) >= 2 and truong[1] == "cuc_bo", f"Lop 8: dau vet phai mang nhan cuc_bo, thuc te: {truong}")
 
 
+def _r1079_run_json(rr, ngu_canh=""):
+    """#1079 F01: sổ `run.json` vắng là ĐỎ do chốt, không phải FileNotFoundError vô can."""
+    ds = sorted(rr.iterdir()) if rr.is_dir() else []
+    bang(len(ds) == 1 and (ds[0] / "run.json").is_file(), f"khong ghi so run.json: {ds} {ngu_canh}")
+    return json.loads((ds[0] / "run.json").read_text(encoding="utf-8"))
+
+
 @ca
 def r01_worktree_that_bi_chan():
     with San() as s:
@@ -6197,7 +6242,7 @@ def r01_worktree_that_bi_chan():
         bang(r.returncode == MA_WORKTREE and "clone doc lap" in r.stderr,
              f"worktree khong bi chan dung cach: {r.returncode} {r.stderr}")
         bang(not dau.exists(), "lenh con da chay trong worktree")
-        d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        d = _r1079_run_json(rr)
         bang(d["trang_thai"] == "hong" and d.get("giai_doan") == "probe"
              and d["ma_thoat"] == MA_WORKTREE and d["probe"]["workspace"]["trang_thai"] == "DO"
              and "worktree" in d["ly_do_dung"], f"chan probe khong vao so: {d}")
@@ -6305,7 +6350,7 @@ def r10_trust_json_hong_bi_chan_sach():
         env = dict(os.environ, HOME=str(home), USERPROFILE=str(home))
         r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--",
                  str(claude), "-c", f"open({str(dau)!r},'w').write('x')", env=env)
-        d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        d = _r1079_run_json(rr, f"rc={r.returncode} {r.stderr[-300:]}")
         bang(r.returncode == MA_PROBE and not dau.exists() and "Traceback" not in r.stderr
              and d["probe"]["claude_trust"]["trang_thai"] == "KHONG_DO_DUOC",
              f"JSON hong khong bi chan sach: {r.returncode} {r.stderr} {d}")
@@ -8448,42 +8493,42 @@ def r484_g2_recovery_probe_rollback_va_snapshot_moi():
                                   payload("INERT-NEW", 3), payload("INERT-ROTATED", 4))
         with m._KhoCodex(home, create=True) as store:
             store.write("auth.json", old, None)
-        assert m._danh_dau_auth_hong(home)
-        assert m._dang_cho_snapshot(home)
+        bang(m._danh_dau_auth_hong(home), 'm._danh_dau_auth_hong(home)')
+        bang(m._dang_cho_snapshot(home), 'm._dang_cho_snapshot(home)')
         calls = []
         def failed(data):
             calls.append(data)
-            assert (home / "auth.json").read_bytes() == old
+            bang((home / "auth.json").read_bytes() == old, '(home / "auth.json").read_bytes() == old')
             return None, True
         m._probe_snapshot = failed
         with patch.dict(os.environ, {"CODEX_HOME": str(home)}):
             result = m.chuan_bi_xac_thuc(snapshot=json.dumps(json.loads(old), indent=2))
-            assert not result[0]["ok"] and not calls
-            assert not m.chuan_bi_xac_thuc(snapshot=bad.decode())[0]["ok"]
-            assert calls == [bad]
-            assert not m.chuan_bi_xac_thuc(snapshot=json.dumps(json.loads(bad), indent=2))[0]["ok"]
-            assert calls == [bad], "same rejected token was probed again"
+            bang(not result[0]["ok"] and not calls, 'not result[0]["ok"] and not calls')
+            bang(not m.chuan_bi_xac_thuc(snapshot=bad.decode())[0]["ok"], 'not m.chuan_bi_xac_thuc(snapshot=bad.decode())[0]["ok"]')
+            bang(calls == [bad], 'calls == [bad]')
+            bang(not m.chuan_bi_xac_thuc(snapshot=json.dumps(json.loads(bad), indent=2))[0]["ok"], 'not m.chuan_bi_xac_thuc(snapshot=json.dumps(json.loads(bad), indent=2)')
+            bang(calls == [bad], "same rejected token was probed again")
             spoof = json.loads(bad)
             spoof["tokens"].update(access_token="INERT-SPOOF", account_id="changed")
-            assert not m.chuan_bi_xac_thuc(snapshot=json.dumps(spoof))[0]["ok"]
-            assert calls == [bad], "changed metadata revived the rejected refresh token"
-            assert (home / "auth.json").read_bytes() == old
+            bang(not m.chuan_bi_xac_thuc(snapshot=json.dumps(spoof))[0]["ok"], 'not m.chuan_bi_xac_thuc(snapshot=json.dumps(spoof))[0]["ok"]')
+            bang(calls == [bad], "changed metadata revived the rejected refresh token")
+            bang((home / "auth.json").read_bytes() == old, '(home / "auth.json").read_bytes() == old')
             m._probe_snapshot = lambda data: (None, False)
-            assert not m.chuan_bi_xac_thuc(snapshot=new.decode())[0]["ok"]
-            assert (home / "auth.json").read_bytes() == old
+            bang(not m.chuan_bi_xac_thuc(snapshot=new.decode())[0]["ok"], 'not m.chuan_bi_xac_thuc(snapshot=new.decode())[0]["ok"]')
+            bang((home / "auth.json").read_bytes() == old, '(home / "auth.json").read_bytes() == old')
             m._probe_snapshot = lambda data: (rotated, False)
-            assert m.chuan_bi_xac_thuc(snapshot=new.decode())[0]["ok"]
-            assert (home / "auth.json").read_bytes() == rotated
-            assert not m._dang_cho_snapshot(home)
+            bang(m.chuan_bi_xac_thuc(snapshot=new.decode())[0]["ok"], 'm.chuan_bi_xac_thuc(snapshot=new.decode())[0]["ok"]')
+            bang((home / "auth.json").read_bytes() == rotated, '(home / "auth.json").read_bytes() == rotated')
+            bang(not m._dang_cho_snapshot(home), 'not m._dang_cho_snapshot(home)')
             def unexpected(data):
-                raise AssertionError("older snapshot must not reach live probe")
+                raise TinHieuChotCa("older snapshot must not reach live probe")
             m._probe_snapshot = unexpected
             result = m.chuan_bi_xac_thuc(snapshot=payload("INERT-OLDER", 2).decode())[0]
-            assert result["ok"] and not result["doi"]
-            assert (home / "auth.json").read_bytes() == rotated
+            bang(result["ok"] and not result["doi"], 'result["ok"] and not result["doi"]')
+            bang((home / "auth.json").read_bytes() == rotated, '(home / "auth.json").read_bytes() == rotated')
             m._probe_snapshot = lambda data: (payload("INERT-DOWNGRADE", 2), False)
-            assert not m.chuan_bi_xac_thuc(snapshot=payload("INERT-LATER", 5).decode())[0]["ok"]
-            assert (home / "auth.json").read_bytes() == rotated
+            bang(not m.chuan_bi_xac_thuc(snapshot=payload("INERT-LATER", 5).decode())[0]["ok"], 'not m.chuan_bi_xac_thuc(snapshot=payload("INERT-LATER", 5).decode())[0')
+            bang((home / "auth.json").read_bytes() == rotated, '(home / "auth.json").read_bytes() == rotated')
 
 
 @ca
@@ -8502,20 +8547,20 @@ def r484_g2_checkpoint_resume_va_gia_auth_khong_refund():
                 "--prompt-file", str(prompt), "--expected-prompt-sha256", sha,
                 "--run-root", str(rr), "--attempt-state", str(state), "--void-reason", "infrastructure"]
         r = chay(*args, "--", PY, "-c", "print('401 unauthorized quota exceeded'); raise SystemExit(1)")
-        assert r.returncode != 0
+        bang(r.returncode != 0, 'r.returncode != 0')
         folder = next(rr.iterdir())
         record = json.loads((folder / "run.json").read_text(encoding="utf-8"))
-        assert "void_reason" not in record, "untrusted child text became refund evidence"
-        assert record["failure_class"] == "unknown"
+        bang("void_reason" not in record, "untrusted child text became refund evidence")
+        bang(record["failure_class"] == "unknown", 'record["failure_class"] == "unknown"')
         checkpoint = folder / "checkpoint.json"
         digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
-        assert digest == record["checkpoint_sha256"]
+        bang(digest == record["checkpoint_sha256"], 'digest == record["checkpoint_sha256"]')
         cp = json.loads(checkpoint.read_bytes())
-        assert cp == {"schema_version": 1, "checkpoint_id": record["run_id"],
-                      "head": head_cua(repo), "prompt_sha256": sha}
+        bang(cp == {"schema_version": 1, "checkpoint_id": record["run_id"],
+                      "head": head_cua(repo), "prompt_sha256": sha}, 'cp == {"schema_version": 1, "checkpoint_id": record["run_id"],\n       ')
         resume = ["--resume-checkpoint", str(checkpoint), "--expected-checkpoint-sha256", digest]
         r = chay(*args, *resume, "--", PY, "-c", "print('RESUME-OK')")
-        assert r.returncode == 0, r.stderr
+        bang(r.returncode == 0, r.stderr)
         count = len(list(rr.iterdir()))
         for field, value in (("head", "0" * 40), ("prompt_sha256", "0" * 64),
                              ("checkpoint_id", "bad")):
@@ -8525,9 +8570,9 @@ def r484_g2_checkpoint_resume_va_gia_auth_khong_refund():
             r = chay(*args, "--resume-checkpoint", str(checkpoint),
                      "--expected-checkpoint-sha256", badsha,
                      "--", PY, "-c", "raise AssertionError('must not spawn')")
-            assert r.returncode != 0 and len(list(rr.iterdir())) == count
+            bang(r.returncode != 0 and len(list(rr.iterdir())) == count, 'r.returncode != 0 and len(list(rr.iterdir())) == count')
         r = chay(*args, *resume, "--", PY, "-c", "raise AssertionError('must not spawn')")
-        assert r.returncode != 0 and len(list(rr.iterdir())) == count
+        bang(r.returncode != 0 and len(list(rr.iterdir())) == count, 'r.returncode != 0 and len(list(rr.iterdir())) == count')
 
 
 @ca
@@ -8931,13 +8976,33 @@ def r484_g7_hook_vang_codex_cai_cli_truoc_materialize():
             f"  echo \"LAUNCHER $2\" >> '{ky}'; exit 0\n"
             "fi\n"
             f"exec '{PY}' \"$@\"\n", encoding="utf-8")
-        for f in fakebin.iterdir():
+        # #1079 F02: mọi lối vào installer của hook nằm TRONG fixture. rg/actionlint giả chạy được;
+        # installer còn lại là shim ghi log rồi thất bại. Môi trường cha được dựng THÙ ĐỊCH (rg hỏng,
+        # installer ghi AMBIENT, BASH_ENV ghi log) để chứng minh không lối nào thoát ra máy chạy.
+        for tool in ("rg", "actionlint"):
+            (fakebin / tool).write_text(f"#!/bin/sh\necho '{tool} 1.0 (gia)'\n", encoding="utf-8")
+        cai = ("apt-get", "apt", "sudo", "cargo", "brew", "winget", "choco", "pip", "pip3", "curl", "wget")
+        for tool in cai:
+            (fakebin / tool).write_text(f"#!/bin/sh\necho 'CAI {tool}' >> '{ky}'\nexit 97\n", encoding="utf-8")
+        thu = s / "moi_truong"; thu.mkdir()
+        (thu / "rg").write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+        for tool in cai:
+            (thu / tool).write_text(f"#!/bin/sh\necho 'AMBIENT {tool}' >> '{ky}'\nexit 97\n", encoding="utf-8")
+        (s / "bash_env.sh").write_text(f"echo BASH_ENV >> '{ky}'\n", encoding="utf-8")
+        for f in [*fakebin.iterdir(), *thu.iterdir()]:
             f.chmod(0o755)
         sach = [d for d in os.environ.get("PATH", "").split(os.pathsep)
                 if d and not any((Path(d) / t).exists() for t in ("codex", "npm", "claude"))]
-        env = dict(os.environ, CLAUDE_CODE_REMOTE="true", CLAUDE_PROJECT_DIR=str(project),
+        cha = dict(os.environ, BASH_ENV=str(s / "bash_env.sh"), ENV=str(s / "bash_env.sh"),
+                   PATH=os.pathsep.join([str(thu)] + sach))
+        env = {k: v for k, v in cha.items() if k not in ("BASH_ENV", "ENV") and not k.startswith("BASH_FUNC_")}
+        (s / "home").mkdir()
+        env.update(CLAUDE_CODE_REMOTE="true", CLAUDE_PROJECT_DIR=str(project), HOME=str(s / "home"),
                    CODEX_HOME=str(s / "codex"), CODEX_AUTH_JSON='{"tokens":{}}',
-                   PATH=os.pathsep.join([str(fakebin)] + sach))
+                   PATH=os.pathsep.join([str(fakebin)] + cha["PATH"].split(os.pathsep)))
+        lot = {t: shutil.which(t, path=env["PATH"]) for t in cai}
+        bang(all(v and Path(v).parent == fakebin for v in lot.values()),
+             f"installer không giải về shim của fixture: {lot}")
         import runpy
         vo, chan_doan = runpy.run_path(str(LAUNCHER.parents[2] / "ops" / "bash_nen.py"))["tim_bash"]()
         bang(vo is not None, f"không tìm được bash dùng được: {chan_doan}")
@@ -8949,6 +9014,8 @@ def r484_g7_hook_vang_codex_cai_cli_truoc_materialize():
         bang(npm and cb, f"thiếu bước cài hoặc materialize: {dong} · rc={p.returncode} {p.stdout[-300:]}")
         bang(npm[0] < cb[0], f"materialize chạy TRƯỚC cài codex: {dong}")
         bang("BAN-NPM" not in dong, f"installer thấy snapshot: {dong}")
+        bang(not [x for x in dong if x.split(" ")[0] in ("CAI", "AMBIENT", "BASH_ENV")],
+             f"fixture gọi installer/BASH_ENV ngoài npm giả: {dong}")
 
 
 @ca
@@ -9130,6 +9197,8 @@ CAI_SH_DANG_DUNG = LAUNCHER.parents[2] / "ops" / "cai_cong_cu.sh"
 SELFTEST_DANG_DUNG = LAUNCHER.parents[2] / "scripts" / "tl_selftest.py"
 # wp886: đích đột biến thứ năm (phần tử thứ tư "cong_cu") — `ops/cong_cu.py`, cùng luật con trỏ.
 CONG_CU_DANG_DUNG = LAUNCHER.parents[2] / "ops" / "cong_cu.py"
+# #1079: đích đột biến thứ sáu (phần tử thứ tư "cc_test") — `.claude/dev/codex_cred_test.py`.
+CC_TEST_DANG_DUNG = LAUNCHER.with_name("codex_cred_test.py")
 
 
 def _wp802_doctor(m, ten, cap, env=None):
@@ -9870,6 +9939,105 @@ def r1078_py_dung_lai_khong_tuyet_doi_phai_thoat_4():
                      and "PY[0] khong phai duong dan tuyet doi" in p.stderr,
                      f"PY dung lai {ten!r} ({nhan}) phai thoat 4 truoc checker: "
                      f"rc={p.returncode} out={p.stdout!r} err={p.stderr!r}")
+
+
+@ca
+def r1079_cham_mot_ca_chi_TinHieuChotCa_la_giet():
+    """#1079 F01 (a): lỗi vô can là tín dụng giả KỂ CẢ khi một `except` đã đổi kiểu sang AssertionError."""
+    def chot():
+        bang(False, "chot cua ca")
+    def doi_kieu():
+        try:
+            None.x  # noqa: B018
+        except AttributeError as e:
+            raise AssertionError(f"boc {type(e).__name__}") from None
+    def tran():
+        assert False, "assert tran"  # noqa: B011
+    def vo_can():
+        raise AttributeError("vo can")
+    def qua():
+        return None
+    def bo():
+        return "BO QUA nen"
+    kq = {f.__name__: cham_mot_ca(f)[0] for f in (chot, doi_kieu, tran, vo_can, qua, bo)}
+    bang(kq == {"chot": "giet", "doi_kieu": "loi", "tran": "loi", "vo_can": "loi", "qua": "qua",
+                "bo": "bo_qua"}, f"phan hang sai: {kq}")
+
+
+@ca
+def r1079_ket_luan_mutant_neutral_do_khong_cap_tin_dung():
+    """#1079 F01 (a)(b): neutral không qua ⇒ KHÔNG ĐO ĐƯỢC tính hỏng; lỗi vô can ⇒ SAI; bỏ qua giữ luật cũ."""
+    Q, G, L, B = ("qua", "x"), ("giet", "x"), ("loi", "x(AttributeError)"), ("bo_qua", "x")
+    th = {k: ket_luan_mutant(*v)[0] for k, v in {
+        "neutral_giet": (["x"], {"x": G}, {"x": G}), "neutral_loi": (["x"], {"x": L}, {"x": G}),
+        "giet": (["x"], {"x": Q}, {"x": G}), "vo_can": (["x"], {"x": Q}, {"x": L}),
+        "song": (["x"], {"x": Q}, {"x": Q}), "bo_ca": (["x"], {"x": B}, {"x": B}),
+        "tron": (["x", "y"], {"x": Q, "y": B}, {"x": G, "y": B})}.items()}
+    bang(th == {"neutral_giet": "KHONG_DO_NEUTRAL", "neutral_loi": "KHONG_DO_NEUTRAL", "giet": "OK",
+                "vo_can": "SAI", "song": "SAI", "bo_ca": "KHONG_DO", "tron": "OK"}, f"ket luan sai: {th}")
+
+
+@ca
+def r1079_cham_lap_ca_doi_dung_TinHieuChotCa():
+    """#1079 F01 (b): headline `0/1 qua` + rc=1 mà loại hỏng khác `TinHieuChotCa` (hoặc dòng loại
+    bị giả ở giữa output) KHÔNG phải giết."""
+    vi_du = {"giet": "print('  HONG giet: x');print('LOAI_HONG giet: TinHieuChotCa');"
+                     "print();print('LAP giet: 0/1 qua, 0 bo qua, 1 hong');sys.exit(1)",
+             "vocan": "print('LOAI_HONG vocan: AttributeError');print();"
+                      "print('LAP vocan: 0/1 qua, 0 bo qua, 1 hong');sys.exit(1)",
+             "gia": "print('LOAI_HONG gia: TinHieuChotCa');print('LOAI_HONG gia: OSError');print();"
+                    "print('LAP gia: 0/1 qua, 0 bo qua, 1 hong');sys.exit(1)",
+             "bo": "print('LAP bo: 0/1 qua, 1 bo qua, 0 hong')",
+             "qua": "print('LAP qua: 1/1 qua, 0 bo qua, 0 hong')"}
+    with San() as s:
+        (s / "launcher_test.py").write_text(
+            "import sys\nten = sys.argv[2]\n" + "".join(
+                f"if ten == {k!r}:\n    {v}\n" for k, v in vi_du.items()), encoding="utf-8")
+        kq = {k: cham_lap_ca(s, k)[0] for k in vi_du}
+    bang(kq == {"giet": "giet", "vocan": "loi", "gia": "loi", "bo": "bo_qua", "qua": "qua"},
+         f"cham_lap_ca sai: {kq}")
+
+
+@ca
+def r1079_chay_dot_bien_noi_neutral_va_cham_theo_loai():
+    """#1079 F01: khoá CÁCH NỐI — hai nhánh (a)(b) chấm bằng `ket_luan_mutant`, neutral (a) chạy
+    trên `LAUNCHER` gốc, neutral (b) trên bản sao NGUYÊN của tệp test."""
+    import inspect
+    nguon = inspect.getsource(chay_dot_bien)
+    for doan in ("LAUNCHER_DANG_DUNG = LAUNCHER\n                    neutral[fn.__name__] = cham_mot_ca(fn)",
+                 "neutral_h[ten_ca] = cham_lap_ca(goc_h, ten_ca)",
+                 '(goc_h / "launcher_test.py").write_text(goc_test, encoding="utf-8")',
+                 "{fn.__name__: cham_mot_ca(fn) for fn in dich}", "{t: cham_lap_ca(thu_muc, t) for t in phai_chet}"):
+        bang(nguon.count(doan) == 1, f"chay_dot_bien thieu/lap doan: {doan!r}")
+    bang(nguon.count("ket_luan_mutant(") == 2, "hai nhanh (a)(b) phai cham bang ket_luan_mutant")
+
+
+@ca
+def r1079_cc_test_chi_chot_cua_suite_la_do():
+    """#1079 F01 (c): `codex_cred_test` chỉ tính đỏ-do-assertion khi `TinHieuChotCa` hoặc `assert`
+    trần ở CHÍNH tệp ấy; lỗi vô can mang tên `<ca>(<Loại>)` nên không khớp `phai_chet`."""
+    import runpy
+    ns = runpy.run_path(str(CC_TEST_DANG_DUNG), run_name="cc_test_1079")
+    dong = CC_TEST_DANG_DUNG.read_text(encoding="utf-8").splitlines()
+    n_assert = next(i for i, x in enumerate(dong, 1) if x.lstrip().startswith("assert "))
+    def nem(ma, tep, so_dong):
+        try:
+            exec(compile("\n" * (so_dong - 1) + ma, tep, "exec"), {})
+        except BaseException as e:  # noqa: BLE001
+            return e
+    tep = str(CC_TEST_DANG_DUNG)
+    la = ns["la_chot_cua_suite"]
+    th = {"assert_tran": la(nem("assert False", tep, n_assert)),
+          "doi_kieu": la(nem("raise AssertionError('boc')", tep, 1)),
+          "vo_can_dong_assert": la(nem("raise AttributeError('x')", tep, n_assert)),
+          "tep_khac": la(nem("assert False", tep + ".khac", n_assert)),
+          "tin_hieu": la(ns["TinHieuChotCa"]("x"))}
+    bang(th == {"assert_tran": True, "doi_kieu": False, "vo_can_dong_assert": False, "tep_khac": False,
+                "tin_hieu": True}, f"la_chot_cua_suite sai: {th}")
+    bang(ns["ten_do"]("t1", AttributeError("x")) == "t1(AttributeError)"
+         and ns["ten_do"]("t1", ns["TinHieuChotCa"]("x")) == "t1", "ten_do khong tach loi vo can")
+    import inspect
+    bang("do.add(ten_do(ca.__name__, e))" in inspect.getsource(ns["chay_suite"]), "chay_suite khong cham bang ten_do")
 
 
 # wp858 (L1): ca hành vi chạy NGUYÊN công thức qua cai_cong_cu.sh, installer là stub (POSIX); ca hình dạng thuần Python
@@ -13960,6 +14128,19 @@ DOT_BIEN_HOOK = [
      ('    _esd = Path(_tfx.mkdtemp(prefix="_selftest_editskill_"))\n    _esf = _esd / "_selftest_editskill.py"',
       '    _esd = Path(_tfx.gettempdir())\n    _esf = _esd / "_selftest_editskill.py"'),
      ["r858_selftest_editskill_thu_muc_rieng"], "selftest"),
+    # #1079 F01 (c): đột biến BẢN SAO `codex_cred_test.py` (phần tử thứ tư "cc_test").
+    ("wp1079_cc_bo_kiem_kieu", ("    if type(e) is not AssertionError or e.__traceback__ is None:",
+                                "    if e.__traceback__ is None:"),
+     ["r1079_cc_test_chi_chot_cua_suite_la_do"], "cc_test"),
+    ("wp1079_cc_bo_kiem_tep", ("    return (os.path.realpath(tep) == os.path.realpath(__file__)\n", "    return (True\n"),
+     ["r1079_cc_test_chi_chot_cua_suite_la_do"], "cc_test"),
+    ("wp1079_cc_bo_kiem_dong_assert", ('            and linecache.getline(tep, tb.tb_lineno).lstrip().startswith("assert"))',
+                                       "            and True)"),
+     ["r1079_cc_test_chi_chot_cua_suite_la_do"], "cc_test"),
+    ("wp1079_cc_ten_do_bo_loai", ('    return ten if la_chot_cua_suite(e) else f"{ten}({type(e).__name__})"', "    return ten"),
+     ["r1079_cc_test_chi_chot_cua_suite_la_do"], "cc_test"),
+    ("wp1079_cc_chay_suite_bo_ten_do", ("            do.add(ten_do(ca.__name__, e))", "            do.add(ca.__name__)"),
+     ["r1079_cc_test_chi_chot_cua_suite_la_do"], "cc_test"),
 ]
 
 
@@ -14003,6 +14184,37 @@ DOT_BIEN_HARNESS = [
     ("wp858_goc_tam_bo_kiem_to_tien",
      ('not any(os.path.lexists(q / ".git") for q in (p, *p.parents))', 'not os.path.lexists(p / ".git")'),
      ["r858_goc_tam_tranh_to_tien_co_git"]),
+    # #1079 F01 (a)(b) + F02: mỗi chốt mới một đột biến; chỉ `TinHieuChotCa` của ca đích là giết.
+    ("wp1079_cham_mot_ca_nhan_AssertionError",
+     ('    except TinHieuChotCa:\n        return "giet", fn.__name__', '    except AssertionError:\n        return "giet", fn.__name__'),
+     ["r1079_cham_mot_ca_chi_TinHieuChotCa_la_giet"]),
+    ("wp1079_ket_luan_bo_neutral",
+     ('    xau = [neutral[t][1] for t in dich if neutral[t][0] in ("giet", "loi")]', '    xau = []'),
+     ["r1079_ket_luan_mutant_neutral_do_khong_cap_tin_dung"]),
+    ("wp1079_ket_luan_dem_tin_dung_gia",
+     ('    return ("OK" if len(chet) == can_do else "SAI")', '    return ("OK" if len(chet) + len(gia) == can_do else "SAI")'),
+     ["r1079_ket_luan_mutant_neutral_do_khong_cap_tin_dung"]),
+    ("wp1079_lap_ca_tin_headline",
+     ('    if p.returncode == 1 and p.stdout.endswith(duoi):', '    if p.returncode == 1 and f"LAP {ten_ca}: 0/1 qua, 0 bo qua" in p.stdout:'),
+     ["r1079_cham_lap_ca_doi_dung_TinHieuChotCa"]),
+    ("wp1079_neutral_san_pham_bo",
+     ('                    LAUNCHER_DANG_DUNG = LAUNCHER\n                    neutral[fn.__name__] = cham_mot_ca(fn)\n',
+      '                    neutral[fn.__name__] = ("qua", fn.__name__)\n'),
+     ["r1079_chay_dot_bien_noi_neutral_va_cham_theo_loai"]),
+    ("wp1079_neutral_harness_bo",
+     ('                    neutral_h[ten_ca] = cham_lap_ca(goc_h, ten_ca)\n', '                    neutral_h[ten_ca] = ("qua", ten_ca)\n'),
+     ["r1079_chay_dot_bien_noi_neutral_va_cham_theo_loai"]),
+    ("wp1079_n13_bo_rg_gia",
+     ('        for tool in ("rg", "actionlint"):\n            (fakebin / tool).write_text(f"#!/bin/sh\\necho \'{tool} 1.0 (gia)\'',
+      '        for tool in ():\n            (fakebin / tool).write_text(f"#!/bin/sh\\necho \'{tool} 1.0 (gia)\''),
+     ["r484_g7_hook_vang_codex_cai_cli_truoc_materialize"]),
+    ("wp1079_n13_bo_shim_installer",
+     ('        for tool in cai:\n            (fakebin / tool)', '        for tool in ():\n            (fakebin / tool)'),
+     ["r484_g7_hook_vang_codex_cai_cli_truoc_materialize"]),
+    ("wp1079_n13_bo_loc_bash_env",
+     ('        env = {k: v for k, v in cha.items() if k not in ("BASH_ENV", "ENV") and not k.startswith("BASH_FUNC_")}',
+      '        env = dict(cha)'),
+     ["r484_g7_hook_vang_codex_cai_cli_truoc_materialize"]),
 ]
 
 
@@ -14020,11 +14232,13 @@ def chay_dot_bien() -> int:
     Sửa ở TẦNG chứ không vá triệu chứng: tệp dưới quản lý phiên bản không bao giờ
     bị ghi, nên dù bị SIGKILL (không bắt được) cây làm việc vẫn nguyên.
     """
-    global LAUNCHER_DANG_DUNG, HOOK_DANG_DUNG, YAML_DANG_DUNG, CAI_SH_DANG_DUNG, SELFTEST_DANG_DUNG, CONG_CU_DANG_DUNG
+    global LAUNCHER_DANG_DUNG, HOOK_DANG_DUNG, YAML_DANG_DUNG, CAI_SH_DANG_DUNG, SELFTEST_DANG_DUNG, CONG_CU_DANG_DUNG, CC_TEST_DANG_DUNG
     goc = LAUNCHER.read_text(encoding="utf-8")
     goc_test = Path(__file__).read_text(encoding="utf-8")
     hong = 0
     khong_do = 0
+    neutral = {}
+    neutral_h = {}
     tam = Path(tempfile.mkdtemp(prefix="lt_db_"))
     try:
         # Preserve the real delegated probe dependency in neutral/mutant copies.
@@ -14069,48 +14283,36 @@ def chay_dot_bien() -> int:
                 print(f"  {ten:<28} SAI - dot bien khong bien dich: {e.msg}")
                 hong += 1
                 continue
+            dich = [fn for fn in CA if fn.__name__ in phai_chet]
+            for fn in dich:   # #1079 F01: NEUTRAL trên bản gốc, mỗi ca đo một lần
+                if fn.__name__ not in neutral:
+                    LAUNCHER_DANG_DUNG = LAUNCHER
+                    neutral[fn.__name__] = cham_mot_ca(fn)
             LAUNCHER_DANG_DUNG = ban_sao
-            chet, bo_qua = [], []
-            for fn in CA:
-                if fn.__name__ not in phai_chet:
-                    continue
-                try:
-                    with _co_lap_toan_cuc():
-                        kq = fn()
-                    # Ca TỰ BỎ QUA trên nền này thì đột biến KHÔNG ĐO ĐƯỢC, chứ
-                    # không phải "test yếu". Audit codex: trên Windows t03 và t50
-                    # bỏ qua nên gate 14/14 thành BẤT KHẢ THI ở đúng nền cần nghiệm
-                    # thu — một cổng không bao giờ xanh được thì người ta sẽ bỏ qua nó.
-                    if isinstance(kq, str):
-                        bo_qua.append(fn.__name__)
-                except TinHieuChotCa:
-                    chet.append(fn.__name__)
-                except AssertionError as e:
-                    # AssertionError trần không qua TinHieuChotCa (hoặc từ ca khác/thư viện)
-                    chet.append(f"{fn.__name__}(AssertionError:{e})")
-                except Exception as e:  # noqa: BLE001
-                    chet.append(f"{fn.__name__}({type(e).__name__})")
-            can_do = len(phai_chet) - len(bo_qua)
-            if can_do == 0:
+            # Ca TỰ BỎ QUA trên nền này thì đột biến KHÔNG ĐO ĐƯỢC, chứ không phải "test yếu"
+            # (audit codex: Windows t03/t50). Chỉ `TinHieuChotCa` mới là giết (`cham_mot_ca`).
+            tt, so_chet, can_do, mo_ta = ket_luan_mutant(
+                [fn.__name__ for fn in dich], neutral, {fn.__name__: cham_mot_ca(fn) for fn in dich})
+            if tt == "KHONG_DO":
                 khong_do += 1
-                print(f"  {ten:<28} KHONG DO DUOC tren nen nay (ca dich bo qua: "
-                      f"{', '.join(bo_qua)})")
+                print(f"  {ten:<28} KHONG DO DUOC tren nen nay (ca dich bo qua: {mo_ta})")
                 continue
-            ok = len(chet) == can_do
-            if not ok:
+            if tt == "KHONG_DO_NEUTRAL":
                 hong += 1
-            ghi_chu = f" [bo qua: {', '.join(bo_qua)}]" if bo_qua else ""
-            print(f"  {ten:<28} {'OK' if ok else 'SAI'}  giet {len(chet)}/{can_do}: "
-                  f"{', '.join(chet) or '(khong ca nao chet)'}{ghi_chu}")
+                print(f"  {ten:<28} SAI - KHONG DO DUOC (neutral do: {mo_ta})")
+                continue
+            hong += 0 if tt == "OK" else 1
+            print(f"  {ten:<28} {tt}  giet {so_chet}/{can_do}: {mo_ta}")
 
         # wp802: đột biến HOOK — cùng luật bản sao tạm; chỉ `TinHieuChotCa` mới là giết.
         hook_goc, yaml_goc = HOOK_DANG_DUNG, YAML_DANG_DUNG   # F3: trả ĐÚNG con trỏ người gọi
         cai_sh_goc, selftest_goc, cong_cu_goc = CAI_SH_DANG_DUNG, SELFTEST_DANG_DUNG, CONG_CU_DANG_DUNG
+        cc_test_goc = CC_TEST_DANG_DUNG
         for i, muc in enumerate(DOT_BIEN_HOOK):
             ten, (c, m), phai_chet = muc[:3]
             loai = muc[3] if muc[3:] else "hook"
             dich = {"yaml": yaml_goc, "cai_sh": cai_sh_goc, "selftest": selftest_goc,
-                    "cong_cu": cong_cu_goc}.get(loai, hook_goc)
+                    "cong_cu": cong_cu_goc, "cc_test": cc_test_goc}.get(loai, hook_goc)
             goc_dich = dich.read_text(encoding="utf-8")
             if goc_dich.count(c) != 1:
                 print(f"  {ten:<28} SAI - neo hook/yaml khong khop DUNG MOT cho")
@@ -14119,7 +14321,8 @@ def chay_dot_bien() -> int:
             ban = tam / f"hook_db_{i:02d}{dich.suffix}"
             ban.write_text(goc_dich.replace(c, m, 1), encoding="utf-8")
             globals()[{"yaml": "YAML_DANG_DUNG", "cai_sh": "CAI_SH_DANG_DUNG",
-                       "selftest": "SELFTEST_DANG_DUNG", "cong_cu": "CONG_CU_DANG_DUNG"}.get(loai, "HOOK_DANG_DUNG")] = ban
+                       "selftest": "SELFTEST_DANG_DUNG", "cong_cu": "CONG_CU_DANG_DUNG",
+                       "cc_test": "CC_TEST_DANG_DUNG"}.get(loai, "HOOK_DANG_DUNG")] = ban
             chet, bo_qua, loi = [], [], []
             try:
                 for fn in [f for f in CA if f.__name__ in phai_chet]:
@@ -14134,6 +14337,7 @@ def chay_dot_bien() -> int:
             finally:
                 HOOK_DANG_DUNG, YAML_DANG_DUNG = hook_goc, yaml_goc
                 CAI_SH_DANG_DUNG, SELFTEST_DANG_DUNG, CONG_CU_DANG_DUNG = cai_sh_goc, selftest_goc, cong_cu_goc
+                CC_TEST_DANG_DUNG = cc_test_goc
             can_do = len(phai_chet) - len(bo_qua)
             if can_do == 0 and not loi:
                 khong_do += 1
@@ -14183,44 +14387,26 @@ def chay_dot_bien() -> int:
             ban_test = thu_muc / "launcher_test.py"
             ban_test.write_text(moi_test, encoding="utf-8")
             (thu_muc / "launcher.py").write_text(goc, encoding="utf-8")
-            chet = []
-            bo_qua = []
-            loi_runner = []
-            for ten_ca in phai_chet:
-                try:
-                    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
-                    p = subprocess.run(
-                        [PY, str(ban_test), "--lap-ca", ten_ca, "--lan", "1"],
-                        capture_output=True, text=True, encoding="utf-8", errors="replace",
-                        timeout=180, env=env, cwd=thu_muc)
-                except (OSError, subprocess.SubprocessError) as e:
-                    loi_runner.append(f"{ten_ca}({type(e).__name__})")
-                    continue
-                dau_hong = f"LAP {ten_ca}: 0/1 qua, 0 bo qua"
-                dau_bo_qua = f"LAP {ten_ca}: 0/1 qua, 1 bo qua, 0 hong"
-                if p.returncode == 1 and dau_hong in p.stdout:
-                    chet.append(ten_ca)
-                elif p.returncode == 0 and dau_bo_qua in p.stdout:
-                    # wp484 g7 (đo: launcher-windows 39057167905, `g8_fixture_chep_nguyen_moi_truong`
-                    # SAI 0/1 vì ca đích POSIX tự bỏ qua trên Windows) — cùng luật runner sản phẩm
-                    # phía trên: ca TỰ BỎ QUA trên nền này là KHÔNG ĐO ĐƯỢC, không phải "test yếu".
-                    bo_qua.append(ten_ca)
-                elif p.returncode != 0:
-                    loi_runner.append(f"{ten_ca}(rc={p.returncode})")
-            can_do = len(phai_chet) - len(bo_qua)
-            if can_do == 0 and not loi_runner:
+            for ten_ca in phai_chet:   # #1079 F01: neutral trên bản sao NGUYÊN của tệp test
+                if ten_ca not in neutral_h:
+                    goc_h = tam / "harness_goc"
+                    if not goc_h.is_dir():
+                        goc_h.mkdir()
+                        (goc_h / "launcher_test.py").write_text(goc_test, encoding="utf-8")
+                        (goc_h / "launcher.py").write_text(goc, encoding="utf-8")
+                    neutral_h[ten_ca] = cham_lap_ca(goc_h, ten_ca)
+            tt, so_chet, can_do, mo_ta = ket_luan_mutant(
+                list(phai_chet), neutral_h, {t: cham_lap_ca(thu_muc, t) for t in phai_chet})
+            if tt == "KHONG_DO":
                 khong_do += 1
-                print(f"  {ten:<28} KHONG DO DUOC tren nen nay (ca dich bo qua: "
-                      f"{', '.join(bo_qua)})")
+                print(f"  {ten:<28} KHONG DO DUOC tren nen nay (ca dich bo qua: {mo_ta})")
                 continue
-            ok = len(chet) == can_do and not loi_runner
-            if not ok:
+            if tt == "KHONG_DO_NEUTRAL":
                 hong += 1
-            ghi_chu = f" [loi runner: {', '.join(loi_runner)}]" if loi_runner else ""
-            if bo_qua:
-                ghi_chu += f" [bo qua: {', '.join(bo_qua)}]"
-            print(f"  {ten:<28} {'OK' if ok else 'SAI'}  giet {len(chet)}/{can_do}: "
-                  f"{', '.join(chet) or '(khong ca nao chet)'}{ghi_chu}")
+                print(f"  {ten:<28} SAI - KHONG DO DUOC (neutral do: {mo_ta})")
+                continue
+            hong += 0 if tt == "OK" else 1
+            print(f"  {ten:<28} {tt}  giet {so_chet}/{can_do}: {mo_ta}")
     finally:
         LAUNCHER_DANG_DUNG = LAUNCHER
         shutil.rmtree(tam, ignore_errors=True)
@@ -14274,6 +14460,32 @@ class NhatKyCa:
         self.tep.close()
 
 
+def cham_lap_ca(thu_muc, ten_ca):
+    """#1079 F01: chạy `--lap-ca` trên bản `launcher_test.py` trong `thu_muc`, trả `(loai, chi_tiet)`
+    như `cham_mot_ca`. `giet` CHỈ khi tiến trình con khai `LOAI_HONG <ca>: TinHieuChotCa` ngay trước
+    headline `0/1 qua` — rc hay headline một mình không phải chứng cứ nguyên nhân."""
+    try:
+        p = subprocess.run(
+            [PY, str(thu_muc / "launcher_test.py"), "--lap-ca", ten_ca, "--lan", "1"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180,
+            env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"), cwd=thu_muc)
+    except (OSError, subprocess.SubprocessError) as e:
+        return "loi", f"{ten_ca}({type(e).__name__})"
+    if p.returncode == 0 and f"LAP {ten_ca}: 0/1 qua, 1 bo qua, 0 hong" in p.stdout:
+        # wp484 g7 (launcher-windows 39057167905): ca POSIX tự bỏ qua là KHÔNG ĐO ĐƯỢC.
+        return "bo_qua", ten_ca
+    if p.returncode == 0 and f"LAP {ten_ca}: 1/1 qua" in p.stdout:
+        return "qua", ten_ca
+    duoi = f"LOAI_HONG {ten_ca}: TinHieuChotCa\n\nLAP {ten_ca}: 0/1 qua, 0 bo qua, 1 hong\n"
+    if p.returncode == 1 and p.stdout.endswith(duoi):
+        return "giet", ten_ca
+    loai = re.findall(rf"^LOAI_HONG {re.escape(ten_ca)}: (\S+)$", p.stdout, re.M)
+    return "loi", f"{ten_ca}({loai[-1] if loai else f'rc={p.returncode}'})"
+
+
+LOAI_HONG: dict = {}
+
+
 def chay_bo_ca(ds_ca, nk=None, bat_dau=0):
     """Chạy một danh sách ca, trả `(qua, bo_qua, hong_ds)`.
 
@@ -14297,9 +14509,11 @@ def chay_bo_ca(ds_ca, nk=None, bat_dau=0):
                 ket = "qua"
         except AssertionError as e:
             hong_ds.append((fn.__name__, str(e)))
+            LOAI_HONG[fn.__name__] = type(e).__name__   # #1079 F01: runner harness đọc
             ket = f"HONG: {str(e)[:60]}"
         except Exception as e:  # noqa: BLE001
             hong_ds.append((fn.__name__, f"{type(e).__name__}: {e}"))
+            LOAI_HONG[fn.__name__] = type(e).__name__
             ket = f"LOI {type(e).__name__}"
         if nk:
             nk.ra(i, fn.__name__, ket)
@@ -14449,6 +14663,8 @@ def main() -> int:
                 nk.dong()
         for ten, ly_do in hong_ds:
             print(f"  HONG {ten}: {ly_do}", flush=True)
+        if hong_ds:
+            print(f"LOAI_HONG {chon[0].__name__}: {LOAI_HONG.get(chon[0].__name__, '?')}", flush=True)
         print(f"\nLAP {chon[0].__name__}: {qua}/{a.lan} qua, {bo_qua} bo qua, "
               f"{len(hong_ds)} hong", flush=True)
         return 1 if hong_ds else 0

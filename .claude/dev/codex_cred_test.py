@@ -27,6 +27,27 @@ GOC = Path(__file__).with_name("codex_cred.py")
 _dem = 0
 
 
+class TinHieuChotCa(AssertionError):
+    """#1079 F01: tín hiệu chốt của suite; mã triển khai không tự ném lớp này."""
+
+
+def la_chot_cua_suite(e: BaseException) -> bool:
+    """#1079 F01 — đỏ-do-assertion CHỈ khi `TinHieuChotCa`, hoặc `assert` trần mà khung
+    trong cùng là một câu `assert` của CHÍNH tệp này. `except … raise AssertionError` hay
+    AssertionError từ codex_cred.py không qua được: khung trong cùng không phải `assert` ở đây."""
+    if isinstance(e, TinHieuChotCa):
+        return True
+    if type(e) is not AssertionError or e.__traceback__ is None:
+        return False
+    tb = e.__traceback__
+    while tb.tb_next is not None:
+        tb = tb.tb_next
+    import linecache
+    tep = tb.tb_frame.f_code.co_filename
+    return (os.path.realpath(tep) == os.path.realpath(__file__)
+            and linecache.getline(tep, tb.tb_lineno).lstrip().startswith("assert"))
+
+
 def nap(nguon: str, nhan: str):
     """Nạp `nguon` thành module với tên tệp RIÊNG cho từng lần gọi."""
     global _dem
@@ -169,7 +190,7 @@ def t6_khong_in_gia_tri_khi_khong_co_co(M, capsys=None):
         except OSError:
             pass
         else:
-            raise AssertionError("hardlinked credential artifact was accepted")
+            raise TinHieuChotCa("hardlinked credential artifact was accepted")
     assert ra_tep.read_text() == vat_giu.read_text() == "GIU-NGUYEN"
     ra_tep.unlink()
     with redirect_stdout(buf):
@@ -318,7 +339,7 @@ def t11_sao_luu_tu_choi_symlink(M):
     except OSError as e:
         assert "từ chối sao lưu qua symlink" in str(e), f"từ chối sai tầng: {e}"
     else:
-        raise AssertionError("_sao_luu không từ chối đích là symlink")
+        raise TinHieuChotCa("_sao_luu không từ chối đích là symlink")
     assert nguon.read_text() == "BI-MAT", "đã sửa nguồn mà symlink trỏ tới"
 
 
@@ -361,7 +382,7 @@ def t12_sao_luu_O_NOFOLLOW_tai_diem_doc(M):
     except OSError:
         pass
     else:
-        raise AssertionError("đổi nguồn thành symlink giữa check/use mà vẫn sao lưu")
+        raise TinHieuChotCa("đổi nguồn thành symlink giữa check/use mà vẫn sao lưu")
     assert os_doi.da_doi, "ca chưa chạm lần os.open nguồn"
     assert bi_mat.read_text() == "BI-MAT-KHAC", "đã sửa nguồn ngoài phạm vi"
 
@@ -374,7 +395,7 @@ def t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW(M):
     co_nofollow = hasattr(os, "O_NOFOLLOW")
     nofollow = getattr(os, "O_NOFOLLOW", None)
     def cam_mo(*_a, **_kw):
-        raise AssertionError("đã gọi os.open trên nền thiếu O_NOFOLLOW")
+        raise TinHieuChotCa("đã gọi os.open trên nền thiếu O_NOFOLLOW")
     try:
         if co_nofollow:
             delattr(os, "O_NOFOLLOW")
@@ -384,7 +405,7 @@ def t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW(M):
         except OSError as e:
             assert "O_NOFOLLOW" in str(e), f"lỗi không nêu giới hạn nền: {e}"
         else:
-            raise AssertionError("nền thiếu O_NOFOLLOW mà _sao_luu vẫn chạy")
+            raise TinHieuChotCa("nền thiếu O_NOFOLLOW mà _sao_luu vẫn chạy")
         assert not list(d.glob("*.bak-*")), "đã tạo .bak trước khi fail-closed"
     finally:
         os.open = mo_that
@@ -555,8 +576,16 @@ DOT_BIEN = [
 ]
 
 
+def ten_do(ten: str, e: BaseException) -> str:
+    """#1079 F01: tên ghi vào tập đỏ — lỗi vô can mang `(<Loại>)` nên không khớp `phai_chet`."""
+    return ten if la_chot_cua_suite(e) else f"{ten}({type(e).__name__})"
+
+
 def chay_suite(M, chi_chay: set[str] | None = None) -> set[str]:
-    """Chạy toàn bộ hoặc đúng `chi_chay`, trả tập tên ca ĐỎ."""
+    """Chạy toàn bộ hoặc đúng `chi_chay`, trả tập tên ca ĐỎ.
+
+    #1079 F01: ca đỏ vì lỗi VÔ CAN (không qua `la_chot_cua_suite`) mang tên
+    `<ca>(<Loại>)`, nên không bao giờ khớp `phai_chet` — tín dụng giả, không phải giết."""
     do = set()
     for ca in CA:
         if chi_chay is not None and ca.__name__ not in chi_chay:
@@ -568,7 +597,7 @@ def chay_suite(M, chi_chay: set[str] | None = None) -> set[str]:
         try:
             ca(Mi)
         except Exception as e:
-            do.add(ca.__name__)
+            do.add(ten_do(ca.__name__, e))
             if os.environ.get("CC_CHI_TIET"):
                 print(f"    ĐỎ {ca.__name__}: {type(e).__name__}: {e}")
     return do

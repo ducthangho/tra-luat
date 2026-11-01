@@ -400,7 +400,7 @@ def tai_noi_dung(goi, repo, path, oid):
     c = lay_json(goi, f"{API}/repos/{repo}/contents/{urllib.parse.quote(path)}?ref={oid}")[0]
     if type(c) is not dict or c.get("encoding") != "base64" or type(c.get("content")) is not str:
         raise ValueError("contents_khong_phai_base64")
-    return base64.b64decode(c["content"], validate=False)
+    return base64.b64decode("".join(c["content"].split()), validate=True)
 
 def do_wd(repo, run, goi, gql):
     """(JSON wd/1, rc). rc 0 passed · 12 failed · 3 not_measured. OID định nghĩa CHỈ lấy từ `repositoryFileUrl`."""
@@ -411,8 +411,8 @@ def do_wd(repo, run, goi, gql):
     try:
         r = lay_json(goi, f"{API}/repos/{repo}/actions/runs/{run}")[0]
     except LoiRest as e:
-        return ket("not_measured", f"rest_run_{e.ma}", 3)
-    if type(r) is not dict or not all(RUN_BAT_BUOC[k](r.get(k)) for k in ("id", "path", "head_sha", "event")) or not _chuoi(r.get("node_id")):
+        return ket("not_measured", "phan_hoi_hong" if e.ma == "than_khong_phai_json" else f"rest_run_{e.ma}", 3)
+    if type(r) is not dict or not all(RUN_BAT_BUOC[k](r.get(k)) for k in ("id", "run_attempt", "path", "head_sha", "event")) or not _chuoi(r.get("node_id")):
         return ket("not_measured", "phan_hoi_hong", 3)
     kq.update(run_attempt_luc_do=r.get("run_attempt"), event=r["event"], node_id=r["node_id"], head_sha_rest=r["head_sha"])
     ma, byte = gql(GQL_WD, {"id": r["node_id"]})
@@ -425,6 +425,8 @@ def do_wd(repo, run, goi, gql):
     if type(d) is not dict:
         return ket("not_measured", "phan_hoi_hong", 3)
     if d.get("errors"):
+        if type(d["errors"]) is not list:
+            return ket("not_measured", "phan_hoi_hong", 3)
         kq["loi_graphql"] = [{"path": e.get("path"), "type": e.get("type"), "message": RE_TOKEN.sub("***", str(e.get("message", "")))[:300]}
                              for e in d["errors"] if type(e) is dict]
         return ket("not_measured", "graphql_errors", 3)
@@ -434,8 +436,9 @@ def do_wd(repo, run, goi, gql):
             return ket("not_measured", ten, 3)
         if type(n if khoa is None else n.get(khoa)) is not dict:
             return ket("not_measured", "phan_hoi_hong", 3)
-    url, fp, cso = n["file"].get("repositoryFileUrl"), n["file"].get("path"), (n["checkSuite"].get("commit") or {}).get("oid")
-    if not (_chuoi(url) and _chuoi(fp) and _chuoi(cso)):
+    url, fp, cm = n["file"].get("repositoryFileUrl"), n["file"].get("path"), n["checkSuite"].get("commit")
+    cso = cm.get("oid") if type(cm) is dict else None
+    if not (_chuoi(url) and _chuoi(fp) and _chuoi(cso) and _so(n.get("databaseId"), 1) and _so(n.get("runNumber"), 1) and _chuoi(n.get("createdAt"))):
         return ket("not_measured", "phan_hoi_hong", 3)
     kq.update(run_number=n.get("runNumber"), created_at=n.get("createdAt"), path=fp, repository_file_url=url, check_suite_commit=cso)
     m = RE_URL_WD.fullmatch(url)
@@ -451,7 +454,7 @@ def do_wd(repo, run, goi, gql):
     try:
         b = tai_noi_dung(goi, repo, fp, oid)
     except LoiRest as e:
-        return ket("not_measured", f"blob_http_{e.ma}", 3)
+        return ket("not_measured", "phan_hoi_hong" if e.ma == "than_khong_phai_json" else f"blob_http_{e.ma}", 3)
     except (ValueError, binascii.Error):
         return ket("not_measured", "phan_hoi_hong", 3)
     kq.update(blob=blob_cua(b), sha256=hashlib.sha256(b).hexdigest())
@@ -468,9 +471,9 @@ def nhap_wd(goi, repo, run, r, wd_run):
         return ko("a", f"rest_{e.ma}")
     if type(kho) is not dict or type(w) is not dict:
         return ko("a", "than_sai_dang")
-    for truong, ok in (("path", w.get("path") == WF_WD), ("head_branch", w.get("head_branch") == kho.get("default_branch")),
+    for truong, ok in (("path", w.get("path") == WF_WD), ("head_branch", _chuoi(w.get("head_branch")) and w.get("head_branch") == kho.get("default_branch")),
                        ("event", w.get("event") == "workflow_dispatch"), ("conclusion", w.get("conclusion") == "success"),
-                       ("repo", (w.get("repository") or {}).get("full_name") == repo)):
+                       ("repo", type(w.get("repository")) is dict and w["repository"].get("full_name") == repo)):
         if not ok:
             return ko("a", truong)
     try:
@@ -546,7 +549,12 @@ def cac_trang_thai(prov):
 
 def main_do_wd(argv, goi, gql):
     """`do-wd`: LUÔN ghi JSON khi `--out` đọc được (kể cả sai đối số); rc theo bảng §2.1 của đặc tả."""
-    out = argv[argv.index("--out") + 1] if "--out" in argv and argv.index("--out") + 1 < len(argv) else None
+    po = argparse.ArgumentParser(add_help=False)
+    po.add_argument("--out")
+    try:   # cùng luật với parser chính (`--out=x`, lặp ⇒ cái cuối), để đích ghi khi sai đối số không lệch đích khi đúng
+        out = po.parse_known_args(argv)[0].out
+    except SystemExit:
+        out = None
     p = argparse.ArgumentParser(prog="ci_provenance.py do-wd")
     p.add_argument("--repo", required=True)
     p.add_argument("--run", required=True)
@@ -559,7 +567,10 @@ def main_do_wd(argv, goi, gql):
     if not ok:
         kq, rc = {"schema": "wd/1", "trang_thai": "not_measured", "ly_do": "sai_doi_so"}, 2
     else:
-        kq, rc = do_wd(a.repo, int(a.run), goi, gql)
+        try:
+            kq, rc = do_wd(a.repo, int(a.run), goi, gql)
+        except (KeyError, TypeError, AttributeError, ValueError):   # dữ liệu lạ chưa lường ⇒ vẫn ghi JSON, không nâng mốc
+            kq, rc = {"schema": "wd/1", "trang_thai": "not_measured", "ly_do": "phan_hoi_hong"}, 3
     if out:
         Path(out).write_text(json.dumps(kq, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"WORKFLOW_DEFINITION: {kq['trang_thai']} ({kq.get('ly_do') or '-'})")

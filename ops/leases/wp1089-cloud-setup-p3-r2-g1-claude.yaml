@@ -114,3 +114,8 @@ heartbeat_required_minutes: 360
 chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'M1 (LIVE sau land: chu kho deploy 2.21.2q qua clasp + dat TL_AGENT_CREDS_FILEID; ba ve (i)(ii)(iii)) — chu kho duyet rieng; khong phai viec cua executor truoc land.'
+da_bi_thay_the: wp1089-cloud-setup-p3-r2-g2-claude
+da_bi_thay_the_ly_do: >-
+  Chu kho chon 'Nới write set' (issuecomment-6552277210) sau khi executor dung o S1 tren PR #1100. Lease
+  wp1089-cloud-setup-p3-r2-g2-claude thay lease nay, them scripts/tl_selftest.py va ops/cong_cu_test.py. Lease nay con han luc ghi
+  bia mo (toi 2026-11-02T01:20:00Z), nen bia mo hai chieu la duong thu hoi.

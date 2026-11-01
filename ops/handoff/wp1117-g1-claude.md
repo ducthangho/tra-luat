@@ -7,7 +7,7 @@ Trạng thái lúc 16:26Z 01-11-2026: **TẠM DỪNG, CHƯA land, CHƯA có PR, 
 - Nhánh thi công: `agent/wp1117-g1-claude`, head `git rev-parse origin/agent/wp1117-g1-claude`, base `c82047d`.
   2 tệp: `.claude/dev/launcher_test.py` (+168/−35) và `.claude/dev/launcher_test_runner.py` (mới, 80 dòng).
 - **N0 đạt** (16:18Z, base `c82047d` cộng hai ca mục 5): cả hai ca cùng ĐỎ với `('giet', 'review_target')`.
-- Trên head: hai ca mục 5, ca A2 và 6 ca kênh cũ của #1079 đều xanh khi chạy `--lap-ca`. ruff F base 1 / head 1,
+- Trên head: hai ca mục 5, ca A2 và 6 ca kênh cũ của #1079 đều xanh khi chạy `--lap-ca`. ruff F (ĐO LẠI 17:2xZ sau khi cài ruff; số "1/1" ghi trước đó là SAI — ruff chưa cài, lệnh đếm dòng `No module named ruff`) `launcher_test.py` base 5 / head 5, runner 0 — delta 0,
   `doctrine-scan` rc=0, `git diff --check` rc=0, `codex_cred_test` TỔNG: ĐẠT.
 - **A5 CHƯA ĐO XONG:** suite đầy đủ và `--dot-bien` đang chạy khi tạm dừng. Phải đo lại sau khi rebase.
 - **Lệch spec đã được chủ kho duyệt** ("Duyệt, ghi vào handoff"). `cham_lap_ca` chạy runner nằm TRONG

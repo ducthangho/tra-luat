@@ -1,0 +1,68 @@
+HEAD KHOP "352d31e03bc846cae5b4ee7bc17bbea6830fb64d"
+PR1111 number KHOP 1111
+PR1111 merged KHOP true
+PR1111 merged_at KHOP "2026-11-01T07:43:08Z"
+PR1111 merge_commit_sha KHOP "4397ee616273a97c1503e8359452aef4e78cd75a"
+PR1111 head KHOP "f783bee391ada131df8df195acfd3d4c4ae394c9"
+comment anchors exact head KHOP true
+head < comment < merge KHOP true
+ancestor 4397ee6 -> 165b27a KHOP 0
+ancestor 4397ee6 -> 3bdd987 KHOP 0
+ancestor 3bdd987 -> 180039c KHOP 0
+ancestor cb39aca -> 40609d4 KHOP 0
+merge parents KHOP ["c6dd7b33b4f215809bf281ee1533bc1e8fa6920c", "f783bee391ada131df8df195acfd3d4c4ae394c9"]
+merge files KHOP ["ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml", "ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/SHA256SUMS.txt", "ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/gate-output-41173244891.txt"]
+3 intervening merges KHOP ["165b27a", "2cea625", "3bdd987"]
+4 added specs KHOP ["A\tops/specs/CI-LAN-LUU-TRU-r1.md", "A\tops/specs/DIEU-KIEN-MERGE-CONG-r1.md", "A\tops/specs/launcher-sandbox-lay-mau-r1.md", "A\tops/specs/launcher-sandbox-lay-mau-r2.md"]
+no change in dossier or VM KHOP ""
+run 41285898441 id KHOP 41285898441
+run 41285898441 event KHOP "push"
+run 41285898441 path KHOP ".github/workflows/ci.yml"
+run 41285898441 run_attempt KHOP 1
+run 41285898441 head_sha KHOP "4397ee616273a97c1503e8359452aef4e78cd75a"
+run 41285898441 status KHOP "completed"
+run 41285898441 conclusion KHOP "cancelled"
+run 41285898441 created_at KHOP "2026-11-01T07:43:11Z"
+run 41285898441 updated_at KHOP "2026-11-01T09:07:12Z"
+run 41285898441 repository KHOP "ducthangho/tra-luat"
+run 41287486328 id KHOP 41287486328
+run 41287486328 event KHOP "push"
+run 41287486328 path KHOP ".github/workflows/ci.yml"
+run 41287486328 run_attempt KHOP 1
+run 41287486328 head_sha KHOP "165b27a4bfe02e81af7bc94bda1e71c10d8c38e4"
+run 41287486328 status KHOP "completed"
+run 41287486328 conclusion KHOP "success"
+run 41287486328 created_at KHOP "2026-11-01T09:07:11Z"
+run 41287486328 updated_at KHOP "2026-11-01T09:23:36Z"
+run 41287486328 repository KHOP "ducthangho/tra-luat"
+run 41290009265 id KHOP 41290009265
+run 41290009265 event KHOP "push"
+run 41290009265 path KHOP ".github/workflows/ci.yml"
+run 41290009265 run_attempt KHOP 1
+run 41290009265 head_sha KHOP "3bdd9877cab2543adc413a32a47decbb585ded97"
+run 41290009265 status KHOP "completed"
+run 41290009265 conclusion KHOP "success"
+run 41290009265 created_at KHOP "2026-11-01T09:42:53Z"
+run 41290009265 updated_at KHOP "2026-11-01T10:22:24Z"
+run 41290009265 repository KHOP "ducthangho/tra-luat"
+cancelled run total_count / jobs KHOP [0, []]
+returned / total_count KHOP [23, 23]
+success KHOP 23
+ubuntu-latest KHOP 23
+runner_id != 0 KHOP 23
+started_at < run.created_at KHOP 22
+completed_at < run.created_at KHOP 15
+min started_at KHOP "2026-11-01T09:23:37Z"
+all job run_id/attempt/head match KHOP true
+successful run order in supplied window KHOP [41287486328, 41290009265]
+static hash ops/vm/cap-nhat-cong-cu.ps1 KHOP "8efc063a"
+static bytes same at merge ops/vm/cap-nhat-cong-cu.ps1 KHOP true
+static hash ops/cong_cu.yaml KHOP "71631bb6"
+static bytes same at merge ops/cong_cu.yaml KHOP true
+static hash requirements.txt KHOP "97733a88"
+static bytes same at merge requirements.txt KHOP true
+static schedule KHOP true
+landed bool KHOP true
+VM label KHOP "thuat_lai"
+post_merge labels KHOP ["measured", "measured", "thuat_lai"]
+CLAIMS 67 KHOP 67 LECH 0

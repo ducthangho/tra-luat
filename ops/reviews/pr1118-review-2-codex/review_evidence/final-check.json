@@ -1,0 +1,23 @@
+{
+  "files_before": 10168,
+  "files_after": 10168,
+  "added": [],
+  "removed": [],
+  "changed": [],
+  "status-after": {
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "identity-after": {
+    "rc": 0,
+    "stdout": "352d31e03bc846cae5b4ee7bc17bbea6830fb64d\n8d95d1d7baf35a4f3c8d7bc6ceb3995a0f77b3b4\n",
+    "stderr": ""
+  },
+  "diff-check": {
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "hint_bytes": 0
+}

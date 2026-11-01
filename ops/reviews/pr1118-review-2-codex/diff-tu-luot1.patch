@@ -1,0 +1,429 @@
+diff --git a/ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml b/ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml
+index 0b6513bd..600150d2 100644
+--- a/ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml
++++ b/ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml
+@@ -12,9 +12,10 @@
+ # https://api.github.com/repos/ducthangho/tra-luat/<duong dan> bang curl, 2026-10-31, gio do khac nhau theo tep). NGOAI LE, khong
+ # phai ban tho: readback-graphql-workflowrun-41173244891.json (output `gh api graphql` qua ASUS, luu nguyen van);
+ # readback-review-threads-1065.json (BAN TRICH cac truong id/trang thai tu phan hoi MCP get_review_comments, than comment luoc
+-# bo — tep tu ghi ro); thuatlai-gate-windows-3dfb973.json (chep tay tu VM, nhan thuat_lai); readback-pr-1111.json,
+-# readback-commit-4397ee6.json, readback-run-41285898441.json, readback-run-41290009265.json, readback-jobs-41285898441.json va
+-# readback-jobs-41290009265.json (BAN TRICH truong tu REST, 2026-11-01, ghi so bo sung sau khi PR #1111 merge).
++# bo — tep tu ghi ro); thuatlai-gate-windows-3dfb973.json (chep tay tu VM, nhan thuat_lai). Ghi so bo sung sau khi PR #1111
++# merge (2026-11-01) — BAN TRICH truong tu REST, khong phai ban tho: readback-pr-1111.json, readback-commit-4397ee6.json,
++# readback-run-41285898441.json, readback-run-41287486328.json, readback-run-41290009265.json, readback-jobs-41285898441.json,
++# readback-jobs-41290009265.json (ban nay giu ca started_at/completed_at tung job, tai ~18:40Z).
+ 
+ schema_version: 1
+ mission_id: null
+@@ -201,12 +202,21 @@ post_merge_checks:
+     run_id: 41285898441
+     trang_thai: measured
+     do_duoc: >-
+-      measured — readback-run-41285898441.json: event push, head_sha 4397ee6, status completed, conclusion CANCELLED,
+-      readback-jobs-41285898441.json (filter=all) total_count 0: run bi thay the truoc khi co job nao (push master tiep theo
+-      cua #1108/#1112/#1109), KHONG phai test do. Run ke tiep da chay tron la 41290009265 tren 3bdd987 (merge #1109), ma 4397ee6
+-      la to tien (`git merge-base --is-ancestor`): readback-run-41290009265.json completed/success; readback-jobs-41290009265.json
+-      (filter=all) 23 job, 23 success, ca 23 nhan ubuntu-latest, runner_id khac 0. Run nay do CAY 3bdd987, khong phai rieng
+-      4397ee6; ba PR xen giua chi them spec/ops, khong dung tep ho so nay hay ops/vm/. Chi Ubuntu.
++      measured — readback-run-41285898441.json: event push, head_sha 4397ee6, run_attempt 1, status completed, conclusion
++      cancelled (created_at 07:43:11Z, updated_at 09:07:12Z); readback-jobs-41285898441.json (filter=all) total_count 0.
++      Khong co job nao, nen khong co test that bai duoc ghi nhan. Nguyen nhan huy: not_measured — REST run/jobs khong ghi ly
++      do. (Suy luan, KHONG phai phep do: run 41287486328 cua push #1108 duoc tao 09:07:11Z, mot giay truoc luc 41285898441
++      ket thuc, phu hop gia thuyet luot cho bi thay the.)
++      Run thanh cong dau tien sau do: 41287486328 — readback-run-41287486328.json: push, head_sha 165b27a (merge #1108),
++      run_attempt 1, completed/success (09:07:11Z -> 09:23:36Z); 4397ee6 la to tien cua 165b27a. Chi do metadata Run;
++      khong tai jobs/log cua run nay.
++      Run thanh cong ke tiep: 41290009265 — readback-run-41290009265.json: push, REST head_sha 3bdd987 (merge #1109),
++      run_attempt 1, completed/success; readback-jobs-41290009265.json (filter=all) 23 job, 23 success, ca 23 nhan
++      ubuntu-latest, runner_id khac 0. Gioi han nguon: started_at cua 22/23 job (som nhat 09:23:37Z) SOM hon created_at cua run
++      (09:42:53Z), 15/23 job completed_at cung som hon — bat nhat ngay trong phan hoi REST, nguyen nhan not_measured.
++      Ca hai run tren chi la moc Run (REST head_sha); Checkout, Workflow definition va Gate output cua chung not_measured,
++      nen KHONG khang dinh cay thuc chay. Ba PR xen giua 4397ee6 va 3bdd987 (#1108/#1112/#1109) chi them bon tep
++      ops/specs/ (`git diff --name-status 4397ee6 3bdd987`), khong dung tep ho so nay hay ops/vm/. Chi Ubuntu.
+   - ten: full gate 8 buoc tren VM Windows tra-luat-win, merge 3dfb973 (theo yeu cau chu kho "do tren Windows")
+     trang_thai: thuat_lai
+     do_duoc: >-
+diff --git a/ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/SHA256SUMS.txt b/ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/SHA256SUMS.txt
+index b63047d4..c9b71a48 100644
+--- a/ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/SHA256SUMS.txt
++++ b/ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/SHA256SUMS.txt
+@@ -19,4 +19,5 @@ e99139f48460ca923d8b99e251d19a6f6bd0f8222439bbf7323f9d42827d1953  readback-pr-11
+ 2f6591fe66175fc248fa969eedbee4908962a651cae76c2ce410db7076d821e5  readback-run-41285898441.json
+ ca6c1a67488b7e5d15c1c96c06f36448af589de3ab23377108c95d86d3723ebc  readback-run-41290009265.json
+ 4a69cbb38c503adb0b27e52d41e008b2409573dc3183b05ff36b2c802c8c3808  readback-jobs-41285898441.json
+-3f0dfa73218cc2267d0de187501ec96c02d1b8ab892095f774d269b626e43ece  readback-jobs-41290009265.json
++de345d2f4d53c635d7e24b239090dcabfc93b6b56d3f2e1f88e6d97c26f89852  readback-run-41287486328.json
++d77ff80bafd918d48f03e94c8a7be9b776703161c674dc0d87a146466543ac7a  readback-jobs-41290009265.json
+diff --git a/ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/readback-jobs-41290009265.json b/ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/readback-jobs-41290009265.json
+index c46401f2..bb44cb83 100644
+--- a/ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/readback-jobs-41290009265.json
++++ b/ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/readback-jobs-41290009265.json
+@@ -3,6 +3,7 @@
+  "jobs": [
+   {
+    "id": 124807777230,
++   "run_id": 41290009265,
+    "name": "chuan-bi",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -11,10 +12,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:37Z",
++   "completed_at": "2026-11-01T09:23:39Z"
+   },
+   {
+    "id": 124807791546,
++   "run_id": 41290009265,
+    "name": "gate-packet-loop (ubuntu-latest)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -23,10 +27,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:42Z",
++   "completed_at": "2026-11-01T10:22:23Z"
+   },
+   {
+    "id": 124807791552,
++   "run_id": 41290009265,
+    "name": "gate (ubuntu-latest)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -35,10 +42,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:42Z",
++   "completed_at": "2026-11-01T09:35:06Z"
+   },
+   {
+    "id": 124807791557,
++   "run_id": 41290009265,
+    "name": "gate-ops (ubuntu-latest)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -47,10 +57,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:42Z",
++   "completed_at": "2026-11-01T09:40:50Z"
+   },
+   {
+    "id": 124807791612,
++   "run_id": 41290009265,
+    "name": "gate-nhanh-manh (ubuntu-latest, 1)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -59,10 +72,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:42Z",
++   "completed_at": "2026-11-01T09:24:29Z"
+   },
+   {
+    "id": 124807791617,
++   "run_id": 41290009265,
+    "name": "gate-cong-cu (ubuntu-latest, 2)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -71,10 +87,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:41Z",
++   "completed_at": "2026-11-01T09:44:18Z"
+   },
+   {
+    "id": 124807791621,
++   "run_id": 41290009265,
+    "name": "gate-nhanh-manh (ubuntu-latest, 0)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -83,10 +102,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:41Z",
++   "completed_at": "2026-11-01T09:24:39Z"
+   },
+   {
+    "id": 124807791623,
++   "run_id": 41290009265,
+    "name": "gate-cong-cu (ubuntu-latest, 6)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -95,10 +117,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:41Z",
++   "completed_at": "2026-11-01T09:43:59Z"
+   },
+   {
+    "id": 124807791627,
++   "run_id": 41290009265,
+    "name": "gate-cong-cu (ubuntu-latest, 4)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -107,10 +132,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:42Z",
++   "completed_at": "2026-11-01T09:44:19Z"
+   },
+   {
+    "id": 124807791632,
++   "run_id": 41290009265,
+    "name": "gate-nhanh-manh (ubuntu-latest, 3)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -119,10 +147,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:42Z",
++   "completed_at": "2026-11-01T09:25:12Z"
+   },
+   {
+    "id": 124807791643,
++   "run_id": 41290009265,
+    "name": "gate-nhanh-manh (ubuntu-latest, 6)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -131,10 +162,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:41Z",
++   "completed_at": "2026-11-01T09:25:00Z"
+   },
+   {
+    "id": 124807791654,
++   "run_id": 41290009265,
+    "name": "gate-cong-cu (ubuntu-latest, 5)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -143,10 +177,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:41Z",
++   "completed_at": "2026-11-01T09:36:08Z"
+   },
+   {
+    "id": 124807791659,
++   "run_id": 41290009265,
+    "name": "gate-cong-cu (ubuntu-latest, 7)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -155,10 +192,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:42Z",
++   "completed_at": "2026-11-01T09:44:36Z"
+   },
+   {
+    "id": 124807791665,
++   "run_id": 41290009265,
+    "name": "gate-cong-cu (ubuntu-latest, 0)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -167,10 +207,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:42Z",
++   "completed_at": "2026-11-01T09:44:37Z"
+   },
+   {
+    "id": 124807791674,
++   "run_id": 41290009265,
+    "name": "gate-nhanh-manh (ubuntu-latest, 7)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -179,10 +222,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:42Z",
++   "completed_at": "2026-11-01T09:25:17Z"
+   },
+   {
+    "id": 124807791677,
++   "run_id": 41290009265,
+    "name": "gate-nhanh-manh (ubuntu-latest, 5)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -191,10 +237,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:42Z",
++   "completed_at": "2026-11-01T09:24:42Z"
+   },
+   {
+    "id": 124807791678,
++   "run_id": 41290009265,
+    "name": "gate-cong-cu (ubuntu-latest, 3)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -203,10 +252,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:41Z",
++   "completed_at": "2026-11-01T09:36:31Z"
+   },
+   {
+    "id": 124807791687,
++   "run_id": 41290009265,
+    "name": "gate-nhanh-manh (ubuntu-latest, 2)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -215,10 +267,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:42Z",
++   "completed_at": "2026-11-01T09:24:30Z"
+   },
+   {
+    "id": 124807791705,
++   "run_id": 41290009265,
+    "name": "gate-nhanh-manh (ubuntu-latest, 4)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -227,10 +282,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:42Z",
++   "completed_at": "2026-11-01T09:25:07Z"
+   },
+   {
+    "id": 124807791751,
++   "run_id": 41290009265,
+    "name": "gate-cong-cu (ubuntu-latest, 1)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -239,10 +297,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:23:42Z",
++   "completed_at": "2026-11-01T09:39:36Z"
+   },
+   {
+    "id": 124808139069,
++   "run_id": 41290009265,
+    "name": "gate-nhanh-gop (ubuntu-latest)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -251,10 +312,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:25:19Z",
++   "completed_at": "2026-11-01T09:25:33Z"
+   },
+   {
+    "id": 124808200155,
++   "run_id": 41290009265,
+    "name": "gate-registry (ubuntu-latest)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -263,10 +327,13 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:25:36Z",
++   "completed_at": "2026-11-01T10:05:19Z"
+   },
+   {
+    "id": 124812189901,
++   "run_id": 41290009265,
+    "name": "gate-cong-cu-gop (ubuntu-latest)",
+    "run_attempt": 1,
+    "status": "completed",
+@@ -275,7 +342,9 @@
+    "labels": [
+     "ubuntu-latest"
+    ],
+-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
++   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
++   "started_at": "2026-11-01T09:44:44Z",
++   "completed_at": "2026-11-01T09:44:55Z"
+   }
+  ]
+ }
+diff --git a/ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/readback-run-41287486328.json b/ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/readback-run-41287486328.json
+new file mode 100644
+index 00000000..be3b38c1
+--- /dev/null
++++ b/ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/readback-run-41287486328.json
+@@ -0,0 +1,13 @@
++{
++ "id": 41287486328,
++ "name": "gate",
++ "event": "push",
++ "path": ".github/workflows/ci.yml",
++ "head_sha": "165b27a4bfe02e81af7bc94bda1e71c10d8c38e4",
++ "run_attempt": 1,
++ "status": "completed",
++ "conclusion": "success",
++ "created_at": "2026-11-01T09:07:11Z",
++ "updated_at": "2026-11-01T09:23:36Z",
++ "node_id": "WFR_kwLOTNeRjc8AAAAJnO0LeA"
++}

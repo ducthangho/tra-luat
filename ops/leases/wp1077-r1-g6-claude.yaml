@@ -76,8 +76,8 @@ heartbeat_at: '2026-11-01T00:00:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
 heartbeat_required_minutes: 360
 heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
-lease_until: '2026-11-02T00:00:00Z'
-lease_expires_at_utc: '2026-11-02T00:00:00Z'
+lease_until: '2026-11-01T01:28:00Z'
+lease_expires_at_utc: '2026-11-01T01:28:00Z'
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 0
@@ -135,3 +135,12 @@ mien_tru:
   can_cu: 'cung chi thi nang_tran_lan_4'
   reviewer_khong_tinh_la_finding: true
 push_policy: 'day nhanh agent/wp1077-g1-claude khi A1-A4 dat; mo PR draft.'
+lease_sua_lan_cuoi: '2026-11-01T01:08:00Z'
+lease_sua_ghi_chu: 'Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch, budget.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-02T00:00:00Z'
+  han_moi_utc: '2026-11-01T01:28:00Z'
+  chi_thi: 'Chu kho trong phien session_01J7EgTVGTrNi4xqh7MeBFQv: "Cap spec va lease cho #1077, #1078 roi lam tiep" — #1078 can launcher_test.py ma lease nay dang giu.'
+  ly_do: 'Packet #1077 da merge (PR #1080, merge 9ced16f3764a). Nha .claude/dev/launcher.py, .claude/dev/launcher_test.py, ops/handoff/wp1077-g1-claude.md.'
+  vi_sao_han_moi_khong_bang_luc_sua: 'Han moi = luc sua + 20 phut de luot ops-publish-lease cua commit nay doc lease CON HAN (rc=9 da dang), khong roi vao rc=8 (bai hoc CLAUDE.md 20-09-2026). Khong viet bia mo: khong co lease ke nhiem cung packet.'
+  tien_le: 'wp1045-r1-g2-claude (thu_hoi_bang_rut_han, a430543).'

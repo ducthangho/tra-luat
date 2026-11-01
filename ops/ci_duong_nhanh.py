@@ -280,7 +280,7 @@ def chuan_hoa_cap(env, chay=subprocess.run, kho=ROOT):
     if vao == "day_du":
         return None, "input che_do=day_du (chu kho yeu cau chay du), DAY_DU"
     nhanh = env.get(BIEN_NHANH_MAC_DINH) or ""
-    if not (type(nhanh) is str and MAU_TEN_NHANH.fullmatch(nhanh) and ".." not in nhanh):
+    if not (type(nhanh) is str and MAU_TEN_NHANH.fullmatch(nhanh)):
         return None, f"KHONG DO DUOC nhanh mac dinh {nhanh!r}, DAY_DU"
     if not (type(hop) is str and MAU_SHA.fullmatch(hop) and set(hop) != {"0"}):
         return None, "KHONG DO DUOC merge ref cua dispatch, DAY_DU"

@@ -2123,6 +2123,105 @@ def tim_buoc(wf, job, ten):
     return r[0]
 
 
+# ---------------------------------------------------------------- wp1113 (CI-LAN-LUU-TRU r1): lan luu tru
+def raw3(*ban_ghi):
+    """Dau ra `--raw -z` gia: moi phan tu (mode_cu, mode_moi, trang_thai, duong)."""
+    return b"".join(f":{cu} {moi} {'0' * 40} {'1' * 40} {tt}".encode() + b"\0" + d.encode() + b"\0" for cu, moi, tt, d in ban_ghi)
+
+
+@ca
+def t50_ma_cap_nong_ve_day_du():
+    """A1: ma dat THANG duoi mot tien to ve DAY_DU; ban sao sau hon va ho so `.yaml` cap nong van duong nhanh."""
+    m = nap_module()
+    for tep, mong in (("ops/land/x.py", "day_du"), ("ops/reviews/x.SH", "day_du"), ("ops/specs/x.ps1", "day_du"),
+                      ("ops/reviews/a/run/x.py", "duong_nhanh"), ("ops/land/x.yaml", "duong_nhanh"), ("ops/land/py", "duong_nhanh")):
+        che_do, ly_do = phan_loai_gia(m, [tep])
+        bang(che_do == mong, f"{tep}: phai {mong}, duoc {che_do!r}: {ly_do}")
+
+
+@ca
+def t51_luat_mode_va_dac_ta_da_co():
+    """A1b + A2: mode phia moi 100755/120000/160000, doi mode (ca hai chieu), sua/xoa spec DA CO ve DAY_DU; them spec moi,
+    sua/xoa ho so khac, them tep 100644 van duong nhanh. Moi o mot ban ghi raw rieng tren ca ba cap."""
+    m = nap_module()
+    for cu, moi, tt, d, mong in (
+            ("000000", "100755", "A", "ops/land/a.md", "day_du"), ("000000", "120000", "A", "ops/land/a.md", "day_du"),
+            ("000000", "160000", "A", "ops/land/a.md", "day_du"), ("100644", "100755", "M", "ops/land/a.md", "day_du"),
+            ("100755", "100644", "M", "ops/land/a.md", "day_du"), ("100755", "100755", "M", "ops/land/a.md", "day_du"),
+            ("100644", "100644", "M", "ops/specs/a.md", "day_du"), ("100644", "000000", "D", "ops/specs/a.md", "day_du"),
+            ("000000", "100644", "A", "ops/specs/moi.md", "duong_nhanh"), ("100644", "100644", "M", "ops/land/a.md", "duong_nhanh"),
+            ("100644", "000000", "D", "ops/land/a.md", "duong_nhanh"), ("100755", "000000", "D", "ops/land/a.md", "duong_nhanh")):
+        r = raw3((cu, moi, tt, d))
+        che_do, ly_do = phan_loai_gia(m, [d], raw={"ba_cham": r, "cay": r, "hop": r})
+        bang(che_do == mong, f"{cu}->{moi} {tt} {d}: phai {mong}, duoc {che_do!r}: {ly_do}")
+
+
+def _env_su_kien(su_kien, goc, hop, **them):
+    e = {"CI_DUONG_NHANH_SU_KIEN": su_kien, "CI_DUONG_NHANH_GOC": goc, "CI_DUONG_NHANH_MERGE": hop}
+    e.update(them)
+    return e
+
+
+@ca
+def t52_push_phan_loai_fail_close():
+    """A4: push ⇒ diff `before..sha` tren git that; before vang, toan so khong, sai mau, khong la to tien, diff rong, git loi ⇒ DAY_DU."""
+    m = nap_module()
+    with kho_that(nhanh_pr={"ops/land/x.yaml": "a: 1\n"}) as (kho, goc, dau):
+        def pl(e, chay=chay_that):
+            return m.phan_loai(e, chay, kho)
+        bang(pl(_env_su_kien("push", goc, dau))[0] == "duong_nhanh", "push thuan ho so phai duong nhanh")
+        for ten, e in (("before vang", _env_su_kien("push", "", dau)), ("before toan 0", _env_su_kien("push", "0" * 40, dau)),
+                       ("before sai mau", _env_su_kien("push", goc[:7], dau)), ("khong la to tien", _env_su_kien("push", dau, goc)),
+                       ("diff rong", _env_su_kien("push", dau, dau))):
+            che_do, ly_do = pl(e)
+            bang(che_do == "day_du", f"push {ten}: phai day_du, duoc {che_do!r}: {ly_do}")
+        bang(pl(_env_su_kien("push", goc, dau), chay_gia(nul("ops/land/x.yaml"), rc=128))[0] == "day_du", "push git loi phai day_du")
+    with kho_that(nhanh_pr={"ops/land/x.yaml": "a: 1\n", "scripts/y.py": "x\n"}) as (kho, goc, dau):
+        bang(m.phan_loai(_env_su_kien("push", goc, dau), chay_that, kho)[0] == "day_du", "push co ma phai day_du")
+
+
+@ca
+def t53_dispatch_input_che_do():
+    """A5: dispatch ⇒ diff merge-base(origin/<mac dinh>, sha)..sha; `day_du` ⇒ day du; vang ⇒ nhu `tu_dong`; la ⇒ day du;
+    diff rong (dispatch tren chinh nhanh mac dinh) ⇒ day du; thieu ref / ten nhanh hong ⇒ day du."""
+    m = nap_module()
+    with kho_that(nhanh_pr={"ops/land/x.yaml": "a: 1\n"}) as (kho, goc, dau):
+        git(kho, "update-ref", "refs/remotes/origin/main", goc)
+        def pl(vao, hop=dau, nhanh="main"):
+            return m.phan_loai(_env_su_kien("workflow_dispatch", "", hop, CI_DUONG_NHANH_CHE_DO_VAO=vao,
+                                            CI_DUONG_NHANH_NHANH_MAC_DINH=nhanh), chay_that, kho)
+        for vao in ("tu_dong", ""):
+            bang(pl(vao)[0] == "duong_nhanh", f"dispatch che_do={vao!r} tren ho so phai duong nhanh: {pl(vao)}")
+        for ten, kq in (("day_du", pl("day_du")), ("la TU_DONG", pl("TU_DONG")), ("la x", pl("x")), ("diff rong", pl("tu_dong", goc)),
+                        ("thieu ref", pl("tu_dong", nhanh="khong-co")), ("ten nhanh hong", pl("tu_dong", nhanh="../main"))):
+            bang(kq[0] == "day_du", f"dispatch {ten}: phai day_du, duoc {kq}")
+        bang(m.phan_loai(_env_su_kien("workflow_dispatch", "", dau, CI_DUONG_NHANH_CHE_DO_VAO=1,
+                                      CI_DUONG_NHANH_NHANH_MAC_DINH="main"), chay_that, kho)[0] == "day_du", "input khong phai str phai day_du")
+
+
+@ca
+def t54_kiem_re_doc_cap_cua_chuan_bi():
+    """A7b: `kiem-re` voi cap goc/dau/hop do `main` (chuan-bi) xuat ⇒ DAT; cap vang hoac sai ⇒ DO — rieng push va dispatch."""
+    m = nap_module()
+    with kho_that(nhanh_pr={"ops/land/x.yaml": "a: 1\n"}) as (kho, goc, dau):
+        git(kho, "update-ref", "refs/remotes/origin/main", goc)
+        for e in (_env_su_kien("push", goc, dau),
+                  _env_su_kien("workflow_dispatch", "", dau, CI_DUONG_NHANH_NHANH_MAC_DINH="main")):
+            ten = e["CI_DUONG_NHANH_SU_KIEN"]
+            ra = Path(kho) / f"out-{ten}.txt"
+            bo_dem = tempfile.TemporaryFile("w+", encoding="utf-8")
+            bang(m.main([], dict(e, GITHUB_OUTPUT=str(ra)), chay_that_bo_ca_du_lieu, kho, bo_dem) == 0, f"{ten}: main phai thoat 0")
+            out = dict(x.split("=", 1) for x in ra.read_text(encoding="utf-8").splitlines())
+            ra.unlink()
+            bang(out["che_do"] == "duong_nhanh" and out["dau"] == dau, f"{ten}: chuan-bi phai xuat duong nhanh + cap: {out}")
+            for nhan, goc2 in (("hop le", out["goc"]), ("vang", ""), ("sai mau", "x" * 40)):
+                env = {"CI_DUONG_NHANH_SU_KIEN": ten, "CI_DUONG_NHANH_GOC": goc2, "CI_DUONG_NHANH_DAU": out["dau"],
+                       "CI_DUONG_NHANH_MERGE": out["hop"]}
+                CA_DU_LIEU_GOI.clear()
+                rc = m.lenh_kiem_re(env, chay_that_bo_ca_du_lieu, kho, tempfile.TemporaryFile("w+", encoding="utf-8"))
+                bang((rc == 0) == (nhan == "hop le"), f"{ten} cap {nhan}: kiem-re rc={rc}")
+
+
 @ca
 def y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job():
     wf = doc_wf()
@@ -3614,6 +3713,22 @@ def _lat_o(tt, mode):
 
 DOT_BIEN += [(f"mode_git_lat_o_{tt}_{mode}", _lat_o(tt, mode), ("t20zh_kiem_mode_git_bang_quyet_dinh_day_du",))
              for tt in TRANG_THAI_BANG for mode in MODE_BANG]
+# wp1113 (CI-LAN-LUU-TRU r1): moi luat moi mot dot bien, ca dich dung luat ay.
+DOT_BIEN += [
+    ("wp1113_cap_nong_tat", _ma("if len(tp) == 3 and tp[2].lower().endswith(DUOI_MA_CAP_NONG):", "if False:"), ("t50_ma_cap_nong_ve_day_du",)),
+    ("wp1113_cap_nong_phan_biet_hoa", _ma("tp[2].lower().endswith(", "tp[2].endswith("), ("t50_ma_cap_nong_ve_day_du",)),
+    ("wp1113_cap_nong_moi_do_sau", _ma("if len(tp) == 3 and tp[2].lower()", "if tp[-1].lower()"), ("t50_ma_cap_nong_ve_day_du",)),
+    ("wp1113_mode_moi_tat", _ma("            if moi in MODE_MOI_VE_DAY_DU:", "            if False:"), ("t51_luat_mode_va_dac_ta_da_co",)),
+    ("wp1113_doi_mode_tat", _ma('elif cu != "000000" and moi != "000000" and cu != moi:', "elif False:"), ("t51_luat_mode_va_dac_ta_da_co",)),
+    ("wp1113_spec_tat", _ma('if duong.startswith("ops/specs/") and tt in ("M", "D", "T"):', "if False:"), ("t51_luat_mode_va_dac_ta_da_co",)),
+    ("wp1113_spec_ca_them_moi", _ma('tt in ("M", "D", "T"):', 'tt in ("M", "D", "T", "A"):'), ("t51_luat_mode_va_dac_ta_da_co",)),
+    ("wp1113_spec_moi_tien_to", _ma('if duong.startswith("ops/specs/") and tt', "if tt"), ("t51_luat_mode_va_dac_ta_da_co",)),
+    ("wp1113_push_bo_to_tien", _ma('    rc = getattr(r, "returncode", None)\n    if rc == 1:', '    rc = 0\n    if rc == 1:'), ("t52_push_phan_loai_fail_close",)),
+    ("wp1113_rong_khong_pr_tat", _ma('if doi is not None and not doi and su_kien != "pull_request":', "if False:"), ("t52_push_phan_loai_fail_close",)),
+    ("wp1113_dispatch_bo_day_du", _ma('    if vao == "day_du":\n', '    if False:\n'), ("t53_dispatch_input_che_do",)),
+    ("wp1113_dispatch_nhan_input_la", _ma('if type(vao) is not str or vao not in ("", "tu_dong", "day_du"):', "if False:"), ("t53_dispatch_input_che_do",)),
+    ("wp1113_chuan_bi_khong_xuat_cap", _ma('if che_do == DUONG_NHANH else ""', 'if False else ""'), ("t54_kiem_re_doc_cap_cua_chuan_bi",)),
+]
 
 
 def _bo_nhanh(nhom, tu):

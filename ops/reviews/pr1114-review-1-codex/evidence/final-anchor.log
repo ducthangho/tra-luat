@@ -1,0 +1,9 @@
+candidate HEAD=e101b11e9586de3125f811ec4f42a89af69de8f2 rc=0
+candidate tracked_diff_rc=0
+base_copy HEAD=165b27a4bfe02e81af7bc94bda1e71c10d8c38e4 rc=0
+base_copy tracked_diff_rc=0
+head_copy HEAD=e101b11e9586de3125f811ec4f42a89af69de8f2 rc=0
+head_copy tracked_diff_rc=0
+CANDIDATE_HEAD_COPY_TEST_BYTES_EQUAL=True sha256=72e97b3a536aeb57317d5af11c2e09e087bc4f6d7db73ead27beb8f4892c52cf
+base final_trace_rows=918 actual_spawns=595
+head final_trace_rows=934 actual_spawns=603

@@ -1,0 +1,9 @@
+# M1 vế (iii) phía ĐỌC: phiên MỚI session_015Gtxrb8TceyWuSwmRH7jcJ (mở 17:39:38Z, sau lần ghi 17:39:21Z).
+# Nguồn: list_events của phiên đó (đọc ngược transcript, KHÔNG từ bản tóm tắt phiên đo gửi về).
+nguon: list_events session_015Gtxrb8TceyWuSwmRH7jcJ
+su_kien: 6a524293-6115-476b-a766-127244749dbd
+loai: system/hook_progress, hook_event SessionStart, hook_name SessionStart:startup
+created_at: '2026-11-01T17:40:03.490772Z'
+dong_chep_nguyen_van:
+  - '[session-start] agent_creds: ĐÃ NẠP — rev=2; codex auth.json → /root/.codex/auth.json (0600); có khoá claude_oauth_token, antigravity_api_key (không export, không ghi tệp) (bootstrap rc=0)'
+  - '[session-start] agent-creds-bootstrap: rc=0'

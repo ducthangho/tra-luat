@@ -1,0 +1,3 @@
+launcher.err	sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	bytes 0	ly do: tep rong
+evidence/initial-hashes.json	sha256 c9a1abb30bf9e1538f1aac2f956f6cc44d2b621a98617553c28a190cd4727c98	bytes 1415498	ly do: >500 KB (tien le TEP-LON-KHONG-VAO-KHO); giu tai sandbox reviewer
+cay-kho/ work/	khong chep: ban sao kho/ban sao lam viec cua sandbox reviewer; tai lap bang clone tai reviewed_sha / base

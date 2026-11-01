@@ -1,0 +1,16 @@
+{
+  "mutation": "only verdict_sha256 -> 64 f characters",
+  "changed_paths": [
+    "ops/reviews/pr1075-review-1-codex-verdict.receipt.yaml"
+  ],
+  "gate_rc": 1,
+  "red_diagnostics": [
+    "  ĐỎ  pr1075-review-1-codex-verdict.receipt.yaml: KHÔNG đạt v2 và KHÔNG nằm trong danh sách nào — pr1075-review-1-codex-verdict.receipt.yaml: blob tại `evidence_url` băm b823f2bc1029… nhưng biên nhận khai `verdict_sha256` ffffffffffff… — mỏ neo KHÔNG trỏ đúng thứ nó khai"
+  ],
+  "direct_rc": 1,
+  "t26_failed": true,
+  "t27_passed": 2,
+  "restored": true,
+  "status_after": "",
+  "errors": []
+}

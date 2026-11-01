@@ -1,0 +1,20 @@
+[
+  {
+    "mode": "parent_only",
+    "path": "work/mutations/parent_only.py",
+    "anchor": "os.killpg(p.pid, signal.SIGKILL) if os.name != \"nt\" else p.kill()",
+    "replacement": "p.kill()"
+  },
+  {
+    "mode": "no_kill",
+    "path": "work/mutations/no_kill.py",
+    "anchor": "os.killpg(p.pid, signal.SIGKILL) if os.name != \"nt\" else p.kill()",
+    "replacement": "None"
+  },
+  {
+    "mode": "a9_default",
+    "path": "work/head/ops/review_a9_default.py",
+    "anchor": ", cho_chet=0)",
+    "replacement": ")"
+  }
+]

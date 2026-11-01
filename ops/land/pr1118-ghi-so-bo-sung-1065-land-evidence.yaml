@@ -151,4 +151,4 @@ no_con_mo:
 bookkeeping:
   - {item: 'hien vat cross-review #1118', ket_qua: 'ops/reviews/pr1118-review-1..2-codex* (trong chinh PR #1118)'}
   - {item: 'moc Checkout + Gate output run 41342580238', ket_qua: 'ops/land/pr1118-ghi-so-bo-sung-1065-provenance/gate-output-41342580238.txt'}
-  - {item: 'PR ghi so landed', nhanh: ccr-5249948c-9epnbs, pr: 'PR ghi so land #1118'}
+  - {item: 'PR ghi so landed', nhanh: ccr-5249948c-9epnbs, pr: 1133}

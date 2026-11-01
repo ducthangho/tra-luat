@@ -1,0 +1,24 @@
+base p_none {"ra": {"ok": false, "error": "AGENT_CREDS_FILEID_MISMATCH"}, "argc": 3, "wire_bytes": 80, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 0, "quoted_chars": 139}
+base p_empty {"ra": {"ok": false, "error": "AGENT_CREDS_FILEID_MISMATCH"}, "argc": 3, "wire_bytes": 80, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 0, "quoted_chars": 139}
+base blob_empty {"ra": {"ok": false, "error": "BLOB_SIZE"}, "argc": 3, "wire_bytes": 161, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 0, "quoted_chars": 232}
+base old_file_empty {"ra": {"ok": true, "md5": "22af645d1859cb5ca6da0c484f1f37ea", "size": 3}, "argc": 3, "wire_bytes": 125, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 3, "quoted_chars": 196}
+base binary_unicode {"ra": {"ok": true, "md5": "e2c865db4162bed963bfaa9ef6ac18f0", "size": 256}, "argc": 3, "wire_bytes": 557, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 256, "quoted_chars": 628}
+base throw_unicode {"ra": {"nem": "ghi lỗi"}, "argc": 3, "wire_bytes": 186, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 7, "quoted_chars": 259}
+base boundary_65536 {"ra": {"ok": true, "md5": "598bf98d5c865461aef3eaa8d95a0fd9", "size": 65536}, "argc": 3, "wire_bytes": 87545, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 65536, "quoted_chars": 87616}
+base boundary_65537 {"ra": {"ok": false, "error": "BLOB_SIZE"}, "argc": 3, "wire_bytes": 87545, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 65537, "quoted_chars": 87616}
+base CA_IDS 52 MUTATION_IDS 80
+head p_none {"ra": {"ok": false, "error": "AGENT_CREDS_FILEID_MISMATCH"}, "argc": 2, "wire_bytes": 80, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 0, "quoted_chars": 46}
+head p_empty {"ra": {"ok": false, "error": "AGENT_CREDS_FILEID_MISMATCH"}, "argc": 2, "wire_bytes": 80, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 0, "quoted_chars": 46}
+head blob_empty {"ra": {"ok": false, "error": "BLOB_SIZE"}, "argc": 2, "wire_bytes": 161, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 0, "quoted_chars": 46}
+head old_file_empty {"ra": {"ok": true, "md5": "22af645d1859cb5ca6da0c484f1f37ea", "size": 3}, "argc": 2, "wire_bytes": 125, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 3, "quoted_chars": 46}
+head binary_unicode {"ra": {"ok": true, "md5": "e2c865db4162bed963bfaa9ef6ac18f0", "size": 256}, "argc": 2, "wire_bytes": 557, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 256, "quoted_chars": 46}
+head throw_unicode {"ra": {"nem": "ghi lỗi"}, "argc": 2, "wire_bytes": 186, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 7, "quoted_chars": 46}
+head boundary_65536 {"ra": {"ok": true, "md5": "598bf98d5c865461aef3eaa8d95a0fd9", "size": 65536}, "argc": 2, "wire_bytes": 87545, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 65536, "quoted_chars": 46}
+head boundary_65537 {"ra": {"ok": false, "error": "BLOB_SIZE"}, "argc": 2, "wire_bytes": 87545, "utf8_decode_ok": true, "ascii_only": true, "blob_bytes": 65537, "quoted_chars": 46}
+head CA_IDS 52 MUTATION_IDS 80
+BASE_HEAD_SEMANTICS_EQUAL=8/8
+EXTRACTED_GS_PLUS_JS_CHAY_STDIN_OR_ARGV_HITS=[]
+RAW_NONASCII_UTF8 input_bytes=523 rc=0 FD0_READS=1 binary_sha_matches=True
+EMPTY_STDIN rc=1 SyntaxError: Unexpected end of JSON input
+EMPTY_P_WITH_STDIN_GUARD rc=0 FD0_READS=1 AGENT_CREDS_FILEID_MISMATCH
+SEMANTICS_PROBES=PASS

@@ -1,0 +1,289 @@
+[
+  {
+    "archive": "PROMPT.md",
+    "source": "PROMPT.md",
+    "equal": true,
+    "bytes": 4073,
+    "sha256": "766febde02127566e8ab3b4b0248c5ecc95bc6794fee912fcee60e9dd9854550"
+  },
+  {
+    "archive": "VERDICT.md",
+    "source": "VERDICT.md",
+    "equal": true,
+    "bytes": 13376,
+    "sha256": "b823f2bc10297143977095eca1474d1fc73e2e98be0305173b2c486e9f8c38f6"
+  },
+  {
+    "archive": "evidence/archive-mapping.json",
+    "source": "evidence/archive-mapping.json",
+    "equal": true,
+    "bytes": 11230,
+    "sha256": "4408086119a9d5dc0d4d6e60de674884ff284d15bac450d4f812ba3dc50b3f97"
+  },
+  {
+    "archive": "evidence/archive.json",
+    "source": "evidence/archive.json",
+    "equal": true,
+    "bytes": 755,
+    "sha256": "9cf051619e63396383a6a946ba39efc0d47de2fdd386f1b694b838f4c42d8f7e"
+  },
+  {
+    "archive": "evidence/base-bien-nhan.log",
+    "source": "evidence/base-bien-nhan.log",
+    "equal": true,
+    "bytes": 259,
+    "sha256": "99fa14d7a9f187f3eae2f1dade8de5fd70d3786ad685e05761422d0761278e02"
+  },
+  {
+    "archive": "evidence/base-diff-check.log",
+    "source": "evidence/base-diff-check.log",
+    "equal": true,
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "archive": "evidence/base-direct.log",
+    "source": "evidence/base-direct.log",
+    "equal": true,
+    "bytes": 855,
+    "sha256": "6142351bcaadd5a924b3a25d4cedb08154e1e7b511f6687a3b86d4669b440d24"
+  },
+  {
+    "archive": "evidence/base-doctrine.log",
+    "source": "evidence/base-doctrine.log",
+    "equal": true,
+    "bytes": 70,
+    "sha256": "5dc320d098e17eea22fc3d940e41b58774b648394253380eeb99bf85aacdba83"
+  },
+  {
+    "archive": "evidence/base-gates.json",
+    "source": "evidence/base-gates.json",
+    "equal": true,
+    "bytes": 1695,
+    "sha256": "e76ddfa758a86bbf00e2b0bbe8b1c542278087b3c4e98870d5d87e93a61d5621"
+  },
+  {
+    "archive": "evidence/base-land.log",
+    "source": "evidence/base-land.log",
+    "equal": true,
+    "bytes": 7408,
+    "sha256": "9c788e811835bb322793876b52a1d72c7f501f5ef10ff2fd1246cd442e20f23e"
+  },
+  {
+    "archive": "evidence/changed-paths.txt",
+    "source": "evidence/changed-paths.txt",
+    "equal": true,
+    "bytes": 3369,
+    "sha256": "f22a1e16f5f797afc8422f77b5cba44c6e4e8ba2618f1bf6a5df30b295054f97"
+  },
+  {
+    "archive": "evidence/direct_checks.py",
+    "source": "direct_checks.py",
+    "equal": true,
+    "bytes": 871,
+    "sha256": "8d3ab54943cd1923f1147cadd32f47a4341d898ef8a162bc0a3c4023608d81b2"
+  },
+  {
+    "archive": "evidence/final-integrity.json",
+    "source": "evidence/final-integrity.json",
+    "equal": true,
+    "bytes": 1295,
+    "sha256": "4abdf131ae64afd8cc9d758dee84b3dcc8b6f7182ae43494e2dfe8a6dbea52f7"
+  },
+  {
+    "archive": "evidence/final_integrity.py",
+    "source": "final_integrity.py",
+    "equal": true,
+    "bytes": 2286,
+    "sha256": "d39221aa3bd5234efb365686c1e6e5f38e344723aaecaa2a718a05166f5bab93"
+  },
+  {
+    "archive": "evidence/head-bien-nhan.log",
+    "source": "evidence/head-bien-nhan.log",
+    "equal": true,
+    "bytes": 259,
+    "sha256": "1f31873d284a1ec8a741991b06e41603f16fa721abed85ceb22363b0241329d6"
+  },
+  {
+    "archive": "evidence/head-diff-check.log",
+    "source": "evidence/head-diff-check.log",
+    "equal": true,
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "archive": "evidence/head-direct.log",
+    "source": "evidence/head-direct.log",
+    "equal": true,
+    "bytes": 855,
+    "sha256": "d6bebe9c74dd33ac89141ae917ec12e24d77fae363e580744087af07ea6f0693"
+  },
+  {
+    "archive": "evidence/head-doctrine.log",
+    "source": "evidence/head-doctrine.log",
+    "equal": true,
+    "bytes": 70,
+    "sha256": "5dc320d098e17eea22fc3d940e41b58774b648394253380eeb99bf85aacdba83"
+  },
+  {
+    "archive": "evidence/head-gates.json",
+    "source": "evidence/head-gates.json",
+    "equal": true,
+    "bytes": 1695,
+    "sha256": "f451c88c3a25142283afb8b6e287ac429ee30cad9a4b2e5491031b91f8e677cc"
+  },
+  {
+    "archive": "evidence/head-land.log",
+    "source": "evidence/head-land.log",
+    "equal": true,
+    "bytes": 7408,
+    "sha256": "9c788e811835bb322793876b52a1d72c7f501f5ef10ff2fd1246cd442e20f23e"
+  },
+  {
+    "archive": "evidence/measure_archive.py",
+    "source": "measure_archive.py",
+    "equal": true,
+    "bytes": 5410,
+    "sha256": "0d7eb08dcf71efb9577610edd41abbfe72b63cf2065976d729467ea06547687e"
+  },
+  {
+    "archive": "evidence/measure_readme_history.py",
+    "source": "measure_readme_history.py",
+    "equal": true,
+    "bytes": 4233,
+    "sha256": "8d7487d24bfb1ee3827706f6eb00402ef442e892e7c2411cffccc83a318e69a2"
+  },
+  {
+    "archive": "evidence/measure_receipt.py",
+    "source": "measure_receipt.py",
+    "equal": true,
+    "bytes": 11386,
+    "sha256": "623d96099567538b8fc8774dd0c1aaca3f2c2aef8e9b36f1070a4dde1352d136"
+  },
+  {
+    "archive": "evidence/mutant-bien-nhan.log",
+    "source": "evidence/mutant-bien-nhan.log",
+    "equal": true,
+    "bytes": 568,
+    "sha256": "d421cd5cfb3a72447f07f98c50ebc3a274d0f67646e10cca65224ad4822ff4c8"
+  },
+  {
+    "archive": "evidence/mutant-direct.log",
+    "source": "evidence/mutant-direct.log",
+    "equal": true,
+    "bytes": 3101,
+    "sha256": "ee459a2cf56fa35bf297b7ddf8d639962fb62b4a914ec270219d9f230b7c3d44"
+  },
+  {
+    "archive": "evidence/mutate_hash.py",
+    "source": "mutate_hash.py",
+    "equal": true,
+    "bytes": 1803,
+    "sha256": "1b6a7a537cc4702873673c64e478311df415ec7f992bcbe681f01ed33c1e0450"
+  },
+  {
+    "archive": "evidence/mutation.json",
+    "source": "evidence/mutation.json",
+    "equal": true,
+    "bytes": 2042,
+    "sha256": "ff99acc5797b3b9dc35a74d407b41846a389c395b5690ae1d056dd7b3acc1acd"
+  },
+  {
+    "archive": "evidence/preflight.json",
+    "source": "evidence/preflight.json",
+    "equal": true,
+    "bytes": 274,
+    "sha256": "369b4beacc406a810b4a2c6ede9540611c96d51d9ec9a7d33ce7470f49c2dfb5"
+  },
+  {
+    "archive": "evidence/readme-history.json",
+    "source": "evidence/readme-history.json",
+    "equal": true,
+    "bytes": 85835,
+    "sha256": "ab2deea044ff9399a6ce14429b8d30ae6ba7593d48ae6721a10fe475e34d85ac"
+  },
+  {
+    "archive": "evidence/readme.diff",
+    "source": "evidence/readme.diff",
+    "equal": true,
+    "bytes": 5797,
+    "sha256": "c07adfee237a846d79ecbd8c0257e575c7bc32d89f0f44685c3578cfed577ff4"
+  },
+  {
+    "archive": "evidence/receipt-checks.json",
+    "source": "evidence/receipt-checks.json",
+    "equal": true,
+    "bytes": 9770,
+    "sha256": "23c567babc622c4343a5f8d594ca1df1569f3c4dadeec73e83a7569db44273dc"
+  },
+  {
+    "archive": "evidence/receipt.json",
+    "source": "evidence/receipt.json",
+    "equal": true,
+    "bytes": 4754,
+    "sha256": "ff8e891c51c6a1c6e1827a4e110d1c23286fa3b92d5ad4ac319ecd70f6638f27"
+  },
+  {
+    "archive": "evidence/run_checks.py",
+    "source": "run_checks.py",
+    "equal": true,
+    "bytes": 1672,
+    "sha256": "307463bb792257da3d2d1f10f2b51f687369b4089ebaf9bada57af274f755bbb"
+  },
+  {
+    "archive": "evidence/sha256sum.log",
+    "source": "evidence/sha256sum.log",
+    "equal": true,
+    "bytes": 1690,
+    "sha256": "5bde434321c0617ce77ca59e5698cd47a1cbe92fd4e3f6a686e0d6f7633572d1"
+  },
+  {
+    "archive": "evidence/source-files.txt",
+    "source": "evidence/source-files.txt",
+    "equal": true,
+    "bytes": 2336,
+    "sha256": "294dfb140e4b1cba70999543efe2986e82ed57467fce0aaa57aded91080cbcb3"
+  },
+  {
+    "archive": "evidence/supplement.json",
+    "source": "evidence/supplement.json",
+    "equal": true,
+    "bytes": 133,
+    "sha256": "5f01b9b9f79d024f8d26677fe98119c3aa21a7858caeef018066261937049ca7"
+  },
+  {
+    "archive": "launcher.out",
+    "source": "launcher.json",
+    "equal": true,
+    "bytes": 6857,
+    "sha256": "57dbe92652f0b3c33cea6d10272655940ff5375c305f7edb8371440b5509e6d0"
+  },
+  {
+    "archive": "run/checkpoint.json",
+    "source": "runs/71490d5a/checkpoint.json",
+    "equal": true,
+    "bytes": 212,
+    "sha256": "5d8ebd7867249d44a470eb403dff89ddbaf1d7b87de687722511b4b1d5f99c67"
+  },
+  {
+    "archive": "run/run.json",
+    "source": "runs/71490d5a/run.json",
+    "equal": true,
+    "bytes": 9776,
+    "sha256": "ba01050e8808dccf6b36a667259c73f73700df2b5a4a2368e7fbd39d8d15eff1"
+  },
+  {
+    "archive": "run/stderr.log",
+    "source": "runs/71490d5a/stderr.log",
+    "equal": true,
+    "bytes": 39,
+    "sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+  },
+  {
+    "archive": "run/stdout.log",
+    "source": "runs/71490d5a/stdout.log",
+    "equal": true,
+    "bytes": 303,
+    "sha256": "b26621383c92e6b0c04983e6d6e76efcff1567ca37b21702085b18f7e0449c9c"
+  }
+]

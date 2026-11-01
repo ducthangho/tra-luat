@@ -1,0 +1,48 @@
+{
+  "bien-nhan": {
+    "command": [
+      "python3",
+      "ops/bien_nhan_v2.py",
+      "--root",
+      "."
+    ],
+    "rc": 1,
+    "red_receipts": [
+      "pr1075-review-1-codex-verdict.receipt.yaml"
+    ],
+    "target_lines": [
+      "  ĐỎ  pr1075-review-1-codex-verdict.receipt.yaml: KHÔNG đạt v2 và KHÔNG nằm trong danh sách nào — pr1075-review-1-codex-verdict.receipt.yaml: blob tại `evidence_url` băm b823f2bc1029… nhưng biên nhận khai `verdict_sha256` ffffffffffff… — mỏ neo KHÔNG trỏ đúng thứ nó khai"
+    ]
+  },
+  "direct": {
+    "command": [
+      "python3",
+      "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1110a/direct_gates.py",
+      "."
+    ],
+    "rc": 1,
+    "red_receipts": [],
+    "target_lines": [
+      "    \"error\": \"pr1075-review-1-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, tệp 'ops/reviews/pr1075-review-1-codex-verdict.md' thực b823f2bc10297143977095eca1474d1fc73e2e98be0305173b2c486e9f8c38f6. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào.\"",
+      "AssertionError: pr1075-review-1-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, tệp 'ops/reviews/pr1075-review-1-codex-verdict.md' thực b823f2bc10297143977095eca1474d1fc73e2e98be0305173b2c486e9f8c38f6. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào."
+    ],
+    "results": [
+      {
+        "name": "t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi",
+        "result": "FAIL",
+        "error": "pr1075-review-1-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, tệp 'ops/reviews/pr1075-review-1-codex-verdict.md' thực b823f2bc10297143977095eca1474d1fc73e2e98be0305173b2c486e9f8c38f6. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào."
+      },
+      {
+        "name": "t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc",
+        "result": "PASS"
+      },
+      {
+        "name": "t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen",
+        "result": "PASS"
+      }
+    ]
+  },
+  "restored_bytewise": true,
+  "status_after": "",
+  "one_field_diff_numstat": "1\t1\tops/reviews/pr1075-review-1-codex-verdict.receipt.yaml"
+}

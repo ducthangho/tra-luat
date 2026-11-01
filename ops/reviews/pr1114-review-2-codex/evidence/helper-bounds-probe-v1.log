@@ -1,0 +1,3 @@
+{"label": "default_live_30s", "seconds": 5.007501, "reported_alive": true, "returncode": -9}
+{"label": "zero_live_30s", "seconds": 5.001941, "reported_alive": true, "returncode": -9}
+{"label": "default_self_exit_1s", "seconds": 1.012556, "reported_alive": false, "returncode": 0}

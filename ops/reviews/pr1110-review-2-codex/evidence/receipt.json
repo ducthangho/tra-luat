@@ -1,0 +1,39 @@
+{
+  "checks": 91,
+  "errors": [],
+  "reviewed_sha": "907c474e5dd22b2f389e8c342e7c79c6fbcb760e",
+  "reviewed_tree": "d01f444ce113e812178093aab25ce3ea9d14aeed",
+  "land_commit": "53d670cf5bdeee1c5a5dcb5cefa6a0e7ff9a8b54",
+  "land_parents": [
+    "a284f8a5d5f980cc155dfb939253fc84c7901ea3",
+    "907c474e5dd22b2f389e8c342e7c79c6fbcb760e"
+  ],
+  "land_date": "2026-11-01T12:53:47+07:00",
+  "anchor": "f0c4ed69e5901bd2122f51cf96c7c7d6a7af8606",
+  "anchor_blob_oid": "2aae30d29bd9faa967e013ed0470cb7f3ec4dd33",
+  "counts": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "run_id": "71490d5a710944e395c81836182f3c99",
+  "exit": 0,
+  "state": "xong",
+  "duration": 412.567,
+  "timestamp_duration": 412.566729,
+  "events": 19,
+  "models": [
+    "gpt-6-astra"
+  ],
+  "effort": [
+    "xhigh"
+  ],
+  "prompt_sha256": "766febde02127566e8ab3b4b0248c5ecc95bc6794fee912fcee60e9dd9854550",
+  "sandbox_state": "DO_DUOC",
+  "sandbox_limits": "lay mau /proc tu ben ngoai moi 0.2s: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. Moi lech danh tinh tien trinh (ke ca vong doi binh thuong nhu cha zombie) => KHONG_DO_DUOC: co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do",
+  "class": "sensitive",
+  "historical_diff_paths": 58,
+  "ket_luan": "(a) 0 finding; 53 tep chep khop byte nguon, 2 tep loai khai dung o OMITTED.txt, 75 doi chieu bien nhan khop, README giu du hang cu va them dung 4 hang; dot bien bam bi cong chan dung ten bien nhan.",
+  "precedent_fixed_differences": {}
+}

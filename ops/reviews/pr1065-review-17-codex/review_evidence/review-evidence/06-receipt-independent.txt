@@ -1,0 +1,24 @@
+pr1065-review-16-codex/SHA256SUMS: entries=102, actual files=102, mismatches=[], unlisted=[], extra=[], duplicates=0
+pr1065-vm-cap-nhat-cong-cu-provenance/SHA256SUMS.txt: entries=14, actual files=14, mismatches=[], unlisted=[], extra=[], duplicates=0
+Verdict flat == original == supplied luot16: True
+Verdict SHA256: 342b33a0d5efeb7dc82f3610853507338804ceee72745efd6ddd13cae61bdf33 ; bytes: 26427
+Reviewed commit/tree: 210ab81c3f1af36243748458eb5e70180baeab71 40a4cbe161e513f202bd4681f9713e7f04fee741
+Measured merge-base: 3dfb9731ceda05afbcec4e803a919c4df5e2e5a2
+Blob at pinned commit equals verdict: True
+is-ancestor 210ab81c3f1af36243748458eb5e70180baeab71 cbe05f27b3bbad14063196e83d9c04d6d2848b54 rc= 0
+is-ancestor cbe05f27b3bbad14063196e83d9c04d6d2848b54 HEAD rc= 0
+Anchor commit delta paths: 104 ; only ops/reviews: True
+Launcher run: {'run_id': '52f05f6568ee4ae8888d3e738f95158e', 'head': '210ab81c3f1af36243748458eb5e70180baeab71', 'ma_thoat': 0, 'trang_thai': 'xong', 'worktree_sach': True, 'thoi_luong_giay': 889.793, 'provider': 'openai_codex', 'execution_surface': 'codex_cli', 'transport': 'machine', 'sandbox_trang_thai': 'KHONG_DO_DUOC'}
+Model events: 36 ; unique response IDs: 36 ; models: ['gpt-6.1-sol']
+Model/effort status: DO_DUOC ['xhigh'] DO_DUOC
+Prompt SHA256: 64421fa9a73ef83d354f75ba9b2a670bf7a00713f4a2a1999d0b5b7121983360 MATCH
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr17-pr1065.CMv7/audit_receipt.py", line 78, in <module>
+    b = p.read_bytes()
+  File "/usr/lib/python3.13/pathlib/_abc.py", line 625, in read_bytes
+    with self.open(mode='rb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "/usr/lib/python3.13/pathlib/_local.py", line 537, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr17-pr1065.CMv7/cay-kho/ops/reviews/pr1065-review-16-codex/run/stdout.json'

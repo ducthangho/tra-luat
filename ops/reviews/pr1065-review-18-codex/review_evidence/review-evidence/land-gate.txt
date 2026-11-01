@@ -1,0 +1,3 @@
+ĐẠT ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT

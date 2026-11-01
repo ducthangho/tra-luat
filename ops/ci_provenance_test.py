@@ -1193,14 +1193,15 @@ def wd_zip(**sua):
     with zipfile.ZipFile(b := io.BytesIO(), "w") as z:
         z.writestr(zipfile.ZipInfo("wd.json", (2026, 11, 1, 0, 0, 0)), json.dumps(j))   # dấu giờ GHIM: zip tất định
     return b.getvalue()
-def thu_wd(w=None, arts=None, j=None, bo=False, run=None, kho=b'{"default_branch": "master"}', cmp="behind"):   # đi qua CLI thật `thu ... --wd-run 77`
+def thu_wd(w=None, arts=None, j=None, bo=False, run=None, kho=b'{"default_branch": "master"}', cmp="behind",
+           ref={"ref": "refs/heads/master", "object": {"type": "commit", "sha": "b" * 40}}):   # đi qua CLI thật `thu ... --wd-run 77`
     zb = wd_zip(**(j or {}))
     w = {k: v for k, v in ({"path": ".github/workflows/ops-do-workflow-definition.yml", "head_branch": "master", "event": "workflow_dispatch",
          "conclusion": "success", "repository": {"full_name": "o/r"}, "head_sha": "a" * 40} | (w or {})).items() if v is not None}
     arts = arts if arts is not None else [{"id": 9, "name": "workflow-definition-5", "expired": False, "digest": "sha256:" + hashlib.sha256(zb).hexdigest()}]
     dap = {"/repos/o/r": kho, "/repos/o/r/actions/runs/77": json.dumps(w).encode(), "/repos/o/r/actions/artifacts/9/zip": zb,
            "/repos/o/r/actions/runs/77/artifacts": json.dumps({"total_count": len(arts), "artifacts": arts}).encode(),
-           f"/repos/o/r/compare/master...{'a' * 40}": json.dumps({"status": cmp}).encode(), f"/repos/o/r/contents/{WD_PATH}?ref={H}": B64, f"/repos/o/r/contents/{WD_PATH}?ref={'f' * 40}": B64}
+           "/repos/o/r/git/ref/heads/master": json.dumps(ref).encode(), f"/repos/o/r/compare/{'b' * 40}...{'a' * 40}": json.dumps({"status": cmp}).encode(), f"/repos/o/r/contents/{WD_PATH}?ref={H}": B64, f"/repos/o/r/contents/{WD_PATH}?ref={'f' * 40}": B64}
     def sua(m):
         goc = m.nhap_wd
         m.nhap_wd = lambda goi, *a: goc(lambda url: (lambda u: (200, dap[u]) if u in dap else goi(url))(
@@ -1213,7 +1214,9 @@ def c58_thu_wd_run():   # A6: bằng chứng chỉ từ artifact của chính l�
     bang(d["trang_thai"] == "passed" and d["artifact_id"] == 9 and d["wd_run_id"] == 77 and d["oid"] == H
          and d["artifact_sha256"] == hashlib.sha256(wd_zip()).hexdigest(), f"{d}")
     for kw, ly in ((dict(w={"path": ".github/workflows/ci.yml"}), "a:path"), *[(dict(cmp=c), "a:head_sha") for c in ("ahead", "diverged", None)],   # tag `master` ngoài nhánh mặc định ⇒ compare ahead/diverged
-                   (dict(w={"head_sha": None}), "a:head_sha"), (dict(kho=b"{}"), "a:head_sha"), (dict(cmp="identical", w={"head_branch": "v1"}), None), (dict(w={"event": "push"}), "a:event"),
+                   (dict(w={"head_sha": None}), "a:head_sha"), (dict(kho=b"{}"), "a:head_sha"), (dict(cmp="identical", w={"head_branch": "v1"}), None),
+                   *[(dict(ref=r), "a:head_sha") for r in ({"ref": "refs/tags/master", "object": {"type": "commit", "sha": "b" * 40}},
+                                                           {"ref": "refs/heads/master", "object": {"type": "tag", "sha": "b" * 40}}, [], {"ref": "refs/heads/master"})], (dict(w={"event": "push"}), "a:event"),
                    (dict(w={"conclusion": "failure"}), "a:conclusion"), (dict(w={"repository": {"full_name": "o/x"}}), "a:repo"),
                    (dict(w={"repository": "o/r"}), "a:repo"), (dict(arts=[]), "b:artifact"),
                    (dict(arts=[{"id": 9, "name": "workflow-definition-5", "expired": False, "digest": "sha256:" + "0" * 64}]), "b:digest"),
@@ -1648,6 +1651,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     *[(f"B2_bo_chon{i}", a, "", "c53") for i, a in enumerate(("runNumber createdAt ", "file { path repositoryFileUrl } ", "checkSuite { commit { oid } } "))],
     ("B3_errors_kieu_ngoai", 'if type(d.get("errors", [])) is not list:', "if False:", "c54"),
     ("B3_thieu_bang_null", 'n.get(khoa, ...)) is None:', "n.get(khoa)) is None:", "c54"),
+    ("B6_ref_khong_heads", 'ref.get("ref") == f"refs/heads/{kho.get(\'default_branch\')}"', "True", "c58"), ("B6_ref_khong_commit", 'o.get("type") == "commit"', "True", "c58"),
     ("B6_bo_to_tien", 'so.get("status") in ("identical", "behind")', 'so.get("status") is not None', "c58"),
     ("B6_bo_meta", '("meta", all(', '("meta", True or all(', "c58"),
     ("B6_bo_khoa", '("khoa", set(j) == KHOA_WD and', '("khoa", True or', "c58"),

@@ -473,9 +473,11 @@ def nhap_wd(goi, repo, run, r, wd_run):
         return ko("a", f"rest_{e.ma}")
     if type(kho) is not dict or type(w) is not dict:
         return ko("a", "than_sai_dang")
-    try:   # nhánh mặc định đo bằng TỔ TIÊN, không bằng TÊN: tag trùng tên `master` cũng cho head_branch=master (#1102 P1)
-        so = lay_json(goi, f"{API}/repos/{repo}/compare/{urllib.parse.quote(kho['default_branch'])}...{w['head_sha']}")[0] \
-            if _chuoi(kho.get("default_branch")) and RUN_BAT_BUOC["head_sha"](w.get("head_sha")) else {}
+    try:   # nhánh mặc định đo bằng TỔ TIÊN trên OID của `refs/heads/<default>` — tên trần có thể trùng tag (#1102 P1, hai lượt)
+        ref = lay_json(goi, f"{API}/repos/{repo}/git/ref/heads/{urllib.parse.quote(kho['default_branch'])}")[0] if _chuoi(kho.get("default_branch")) else {}
+        o = ref.get("object") if type(ref) is dict and ref.get("ref") == f"refs/heads/{kho.get('default_branch')}" else None
+        dau = o.get("sha") if type(o) is dict and o.get("type") == "commit" else None
+        so = lay_json(goi, f"{API}/repos/{repo}/compare/{dau}...{w['head_sha']}")[0] if RUN_BAT_BUOC["head_sha"](dau) and RUN_BAT_BUOC["head_sha"](w.get("head_sha")) else {}
     except LoiRest as e:
         return ko("a", f"rest_{e.ma}")
     for truong, ok in (("path", w.get("path") == WF_WD), ("head_sha", type(so) is dict and so.get("status") in ("identical", "behind")),

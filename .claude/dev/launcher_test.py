@@ -9990,6 +9990,46 @@ def r1078_py_dung_lai_khong_tuyet_doi_phai_thoat_4():
 
 
 @ca
+def r1122_kenh_loi_phai_thuoc_luot_ngoai():
+    """#1122 (Codex lượt 5, F01; hint_provenance: ca của HINT lượt 5, chỉ giữ phép đo `loai` vì chủ kho chốt
+    gỡ thông điệp khỏi kênh): ca lồng CÙNG TÊN chạy ở lần lặp sau không được đổi `loai` của lỗi ngoài đã ghi.
+    Ca lồng ném `TinHieuChotCa` mà kênh đọc map lúc ghi thì lỗi ngoài `TypeError` thành GIẾT — tín dụng giả."""
+    text = Path(__file__).read_text(encoding="utf-8")
+    neo = chr(10) + 'if __name__ == "__main__":'
+    bang(text.count(neo) == 1, "neo main khong duy nhat")
+    with San() as s:
+        for i, (ngoai, trong, bo_qua) in enumerate((
+                ("TypeError", "RuntimeError", False),
+                ("TypeError", "TinHieuChotCa", False),
+                ("TinHieuChotCa", "RuntimeError", False),
+                ("TypeError", "RuntimeError", True))):
+            them = (
+                '\nreview_n = 0\nreview_depth = 0\n@ca\ndef review_repeat():\n'
+                '    global review_n, review_depth\n'
+                '    if review_depth:\n        raise ' + trong + '("review-inner")\n'
+                '    review_n += 1\n'
+                '    if review_n == 1:\n        raise ' + ngoai + '("review-current")\n'
+                '    review_depth = 1\n'
+                '    try:\n        chay_bo_ca([review_repeat])\n'
+                '    finally:\n        review_depth = 0\n'
+                + ('    return "review-skip"\n' if bo_qua else '')
+                + 'CA = [review_repeat]\n')
+            dev = _dung_cay_harness(s / str(i), text.replace(neo, them + neo, 1),
+                                   LAUNCHER.read_text(encoding="utf-8"))
+            kenh = s / (str(i) + ".json")
+            p = subprocess.run([PY, str(dev / "launcher_test.py"), "--lap-ca", "review_repeat", "--lan", "2"],
+                               capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60,
+                               env=dict(os.environ, LT_KENH_KET_QUA=str(kenh), LT_KENH_NONCE="inert"))
+            got = json.loads(kenh.read_text(encoding="utf-8"))
+            loai = "TinHieuChotCa" if ngoai == "TinHieuChotCa" else "khac:" + ngoai
+            bang(p.returncode == 1 and got.get("hong") == 1
+                 and got.get("qua") == int(not bo_qua) and got.get("bo_qua") == int(bo_qua),
+                 "fixture lap co loi ngoai khong do duoc")
+            bang(got.get("loai") == loai and "ten_loai" not in got and "thong_diep" not in got,
+                 f"kenh lay loai ca long thay loi ngoai hoac con mang thong diep: {i} {got.get('loai')}")
+
+
+@ca
 def r1122_kenh_ca_qua_khong_mang_chi_tiet_cu():
     """Kênh lượt qua không được phát lại lỗi của lượt trước hoặc lỗi ca lồng cùng tên."""
     text = Path(__file__).read_text(encoding="utf-8")
@@ -10192,7 +10232,7 @@ def r1122_reporter_giu_loai_va_cat_dung_thong_diep():
         dev = _dung_cay_harness(s / "reporter", text.replace(anchor, extra + anchor, 1),
                                LAUNCHER.read_text(encoding="utf-8"))
         got = cham_lap_ca(dev, "review_loi_con")
-        bang(got == ("loi", "review_loi_con(TypeError: " + "x" * 160 + ")"),
+        bang(got == ("loi", "review_loi_con(khac:TypeError)"),   # kênh không mang thông điệp (chủ kho, sau lượt 5)
              f"chi tiet lap sai: {got}")
         bang(cham_lap_ca(dev, "review_chot_con") == ("giet", "review_chot_con"),
              "lap doi nhan TinHieuChotCa")
@@ -14785,9 +14825,9 @@ DOT_BIEN_HOOK = [
 
 
 DOT_BIEN_HARNESS = [
-    ('wp1122_kenh_ca_qua_ro_0', ('"loai": (LOAI_HONG.get(chon[0].__name__) if hong_ds else None)', '"loai": LOAI_HONG.get(chon[0].__name__)'), ['r1122_kenh_ca_qua_khong_mang_chi_tiet_cu']),
-    ('wp1122_kenh_ca_qua_ro_1', ('"ten_loai": (CHI_TIET_HONG.get(chon[0].__name__, (None, None))[0] if hong_ds else None)', '"ten_loai": CHI_TIET_HONG.get(chon[0].__name__, (None, None))[0]'), ['r1122_kenh_ca_qua_khong_mang_chi_tiet_cu']),
-    ('wp1122_kenh_ca_qua_ro_2', ('"thong_diep": (CHI_TIET_HONG.get(chon[0].__name__, (None, None))[1] if hong_ds else None)', '"thong_diep": CHI_TIET_HONG.get(chon[0].__name__, (None, None))[1]'), ['r1122_kenh_ca_qua_khong_mang_chi_tiet_cu']),
+    ('wp1122_kenh_chup_ca_qua', ('                if h:  # #1122: chụp loại của lỗi NGOÀI', '                if h or q or b:  # #1122: chụp loại của lỗi NGOÀI'), ['r1122_kenh_loi_phai_thuoc_luot_ngoai']),
+    ('wp1122_kenh_loi_doc_lai_map', ('"loai": loai_luot', '"loai": (LOAI_HONG.get(chon[0].__name__) if hong_ds else None)'), ['r1122_kenh_loi_phai_thuoc_luot_ngoai']),
+    ('wp1122_kenh_ca_qua_ro_0', ('"loai": loai_luot', '"loai": LOAI_HONG.get(chon[0].__name__)'), ['r1122_kenh_ca_qua_khong_mang_chi_tiet_cu']),
     ('wp1122_nhat_ky_loi_io_khong_cat', ('        print(mo_ta_loi(e), file=sys.stderr)', '        print(f"{type(e).__name__}: {e}", file=sys.stderr)'), ['r1122_nhat_ky_loi_io_khong_in_traceback_dai']),
     ('wp1122_nhat_ky_loi_io_bo_reporter', ('if __name__ == "__main__":\n    try:\n        sys.exit(main())\n    except Exception as e:  # noqa: BLE001 - bao loi ha tang CLI qua formatter chung\n        print(mo_ta_loi(e), file=sys.stderr)\n        sys.exit(1)', 'if __name__ == "__main__":\n    sys.exit(main())'), ['r1122_nhat_ky_loi_io_khong_in_traceback_dai']),
 
@@ -14800,9 +14840,8 @@ DOT_BIEN_HARNESS = [
     ('wp1122_chot_ca_khac_mat_chi_tiet', ('return "loi", f"{fn.__name__}({mo_ta_loi(e)}; chot cua ca khac)"', 'return "loi", f"{fn.__name__}(chot cua ca khac)"'), ['r1122_chot_ca_khac_giu_thong_diep_nhung_van_la_loi']),
     ('wp1122_bien_dich_khong_cat', ('print(f"  {ten:<28} SAI - dot bien khong bien dich: {mo_ta_loi(e)}")', 'print(f"  {ten:<28} SAI - dot bien khong bien dich: {e.msg}")'), ['r1122_loi_bien_dich_dot_bien_cat_160']),
     ('wp1122_reporter_transport_bo_thong_diep', ('return "loi", f"{ten_ca}({mo_ta_loi(e)})"', 'return "loi", f"{ten_ca}({type(e).__name__})"'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
-    ('wp1122_reporter_assertion_khong_cat', ('            CHI_TIET_HONG[fn.__name__] = (type(e).__name__, str(e)[:TRAN_THONG_DIEP_LOI])\n            hong_ds.append((fn.__name__, mo_ta_loi(e)))\n            # #1079 F01:', '            CHI_TIET_HONG[fn.__name__] = (type(e).__name__, str(e)[:TRAN_THONG_DIEP_LOI])\n            hong_ds.append((fn.__name__, str(e)))\n            # #1079 F01:'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
+    ('wp1122_reporter_assertion_khong_cat', ('            hong_ds.append((fn.__name__, mo_ta_loi(e)))\n            # #1079 F01:', '            hong_ds.append((fn.__name__, str(e)))\n            # #1079 F01:'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
     ('wp1122_reporter_exception_khong_cat', ('            hong_ds.append((fn.__name__, mo_ta_loi(e)))\n            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"', '            hong_ds.append((fn.__name__, f"{type(e).__name__}: {e}"))\n            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
-    ('wp1122_reporter_lap_lay_ca_loai', ('"thong_diep": (CHI_TIET_HONG.get(chon[0].__name__, (None, None))[1] if hong_ds else None)', '"thong_diep": (hong_ds[-1][1][:TRAN_THONG_DIEP_LOI] if hong_ds else None)'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
     ('wp1122_encoding_cp1252', ('                          text=True, encoding="utf-8", errors="replace", cwd=cwd, env=env)', '                          text=True, encoding="cp1252", errors="replace", cwd=cwd, env=env)'), ['r1122_con_python_giai_ma_utf8']),
     ('wp1122_encoding_none', ('                          text=True, encoding="utf-8", errors="replace", cwd=cwd, env=env)', '                          text=True, encoding=None, errors="replace", cwd=cwd, env=env)'), ['r1122_con_python_giai_ma_utf8']),
     # Hai dòng fixture mới phải dùng đúng tên `MODULE_PY`; đổi phối hợp cả hai về
@@ -15224,14 +15263,12 @@ def cham_lap_ca(thu_muc, ten_ca):
     if kq.get("hong"):
         return ("giet" if kq.get("loai") == "TinHieuChotCa" else "loi"), (
             ten_ca if kq.get("loai") == "TinHieuChotCa" else
-            f"{ten_ca}({kq.get('ten_loai', kq.get('loai'))}"
-            + (f": {kq['thong_diep']}" if kq.get("thong_diep") else "") + ")")
+            f"{ten_ca}({kq.get('loai')})")
     # wp484 g7 (launcher-windows 39057167905): ca POSIX tự bỏ qua là KHÔNG ĐO ĐƯỢC.
     return ("bo_qua" if kq.get("bo_qua") else "qua"), ten_ca
 
 
 LOAI_HONG: dict = {}
-CHI_TIET_HONG: dict = {}
 
 
 def chay_bo_ca(ds_ca, nk=None, bat_dau=0):
@@ -15257,14 +15294,12 @@ def chay_bo_ca(ds_ca, nk=None, bat_dau=0):
                 qua += 1
                 ket = "qua"
         except AssertionError as e:
-            CHI_TIET_HONG[fn.__name__] = (type(e).__name__, str(e)[:TRAN_THONG_DIEP_LOI])
             hong_ds.append((fn.__name__, mo_ta_loi(e)))
             # #1079 F01: danh tính lớp THẬT; lớp khác (kể cả cùng `__qualname__`) mang tiền tố `khac:`.
             LOAI_HONG[fn.__name__] = ("TinHieuChotCa" if isinstance(e, TinHieuChotCa) and not chot_tu_ca_khac(e, fn)
                                       else f"khac:{type(e).__qualname__}")
             ket = f"HONG: {mo_ta_loi(e)}"
         except Exception as e:  # noqa: BLE001
-            CHI_TIET_HONG[fn.__name__] = (type(e).__name__, str(e)[:TRAN_THONG_DIEP_LOI])
             hong_ds.append((fn.__name__, mo_ta_loi(e)))
             LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"
             ket = f"LOI: {mo_ta_loi(e)}"
@@ -15414,12 +15449,15 @@ def main() -> int:
         kenh, nonce = os.environ.pop("LT_KENH_KET_QUA", None), os.environ.pop("LT_KENH_NONCE", None)
         qua = bo_qua = 0
         hong_ds = []
+        loai_luot = None
         try:
             for i in range(a.lan):
                 q, b, h = chay_bo_ca(chon, nk, bat_dau=i)
                 qua += q
                 bo_qua += b
                 hong_ds += h
+                if h:  # #1122: chụp loại của lỗi NGOÀI ngay ở lần hỏng; ca lồng chạy sau có thể ghi đè LOAI_HONG.
+                    loai_luot = LOAI_HONG.get(chon[0].__name__)
                 print(f"  lan {i + 1}/{a.lan}: {'qua' if q else ('BO QUA' if b else 'HONG')}",
                       flush=True)
         finally:
@@ -15430,10 +15468,10 @@ def main() -> int:
         if kenh:   # #1079 F01: kênh kết quả cho runner harness (cham_lap_ca)
             Path(kenh).write_text(json.dumps({"nonce": nonce, "ten": chon[0].__name__, "qua": qua,
                                               "bo_qua": bo_qua, "hong": len(hong_ds),
-                                              "loai": (LOAI_HONG.get(chon[0].__name__) if hong_ds else None),
-                                              # #1122: thông điệp (cắt) cho chi tiết `loi` của `cham_lap_ca`
-                                              "ten_loai": (CHI_TIET_HONG.get(chon[0].__name__, (None, None))[0] if hong_ds else None),
-                                              "thong_diep": (CHI_TIET_HONG.get(chon[0].__name__, (None, None))[1] if hong_ds else None)}), encoding="utf-8")
+                                              # #1122 (chủ kho chốt sau Codex lượt 5): KHÔNG mang thông điệp
+                                              # qua kênh này — #1117 thay cả kênh bằng runner; `loai` là ảnh
+                                              # chụp của lần lặp NGOÀI, không đọc map toàn cục lúc ghi.
+                                              "loai": loai_luot}), encoding="utf-8")
         print(f"\nLAP {chon[0].__name__}: {qua}/{a.lan} qua, {bo_qua} bo qua, "
               f"{len(hong_ds)} hong", flush=True)
         return 1 if hong_ds else 0

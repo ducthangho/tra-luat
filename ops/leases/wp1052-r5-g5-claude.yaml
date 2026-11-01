@@ -87,8 +87,8 @@ thay_the_cho_ghi_chu: 'g4 con han toi 2026-11-01T12:20:00Z; bia mo hai chieu (da
 leased_at_utc: '2026-10-31T15:00:00Z'
 heartbeat_at: '2026-10-31T15:00:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
-lease_until: '2026-11-01T15:00:00Z'
-lease_expires_at_utc: '2026-11-01T15:00:00Z'
+lease_until: '2026-11-01T00:31:00Z'
+lease_expires_at_utc: '2026-11-01T00:31:00Z'
 run_minutes: 90
 heartbeat_minutes: 30
 attempts_used: 0
@@ -104,3 +104,11 @@ nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh claude/epic-ritchie-quvrz1 khi N1/N2/N4/N5/N6 dat; PR #1055 giu draft toi khi B3 xong'
+rut_han:
+  han_cu: '2026-11-01T15:00:00Z'
+  han_moi: '2026-11-01T00:31:00Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #1052 da merge: PR #1055 (head 9d5588b6b5442b197a63764f002fae12ba6e4877, merge commit 906b24fe23086e3ea47943e0311e8d75a6bbed6f, merged 2026-11-01T00:15:18Z, merged_by ducthangho); chu kho chi thi "Làm cả ba đi" (rut han lease + ho so land + dong Issue) trong phien session_015GtxrcSEjPkSR4KLHEyEsm.'
+  vi_sao_khong_bia_mo: 'khong co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp929-r1-g1-claude.'
+  vi_sao_han_moi_o_tuong_lai: 'dat han moi vai phut sau luc ghi de cong dang lease khong gap rc=8 khi quet tep vua doi (bai hoc CLAUDE.md, run 35519177197).'
+  ghi_boi: claude-executor-session session_015GtxrcSEjPkSR4KLHEyEsm

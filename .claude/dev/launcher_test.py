@@ -10029,8 +10029,6 @@ def r1122_kenh_loi_phai_thuoc_luot_ngoai():
                  "fixture lap co loi ngoai khong do duoc")
             bang(got.get("loai") == loai and "ten_loai" not in got and "thong_diep" not in got,
                  f"kenh lay loai ca long thay loi ngoai hoac con mang thong diep: {i} {got.get('loai')}")
-
-
 @ca
 def r1122_kenh_ca_qua_khong_mang_chi_tiet_cu():
     """Kênh lượt qua không được phát lại lỗi của lượt trước hoặc lỗi ca lồng cùng tên."""
@@ -10059,8 +10057,6 @@ def r1122_kenh_ca_qua_khong_mang_chi_tiet_cu():
                  "fixture ca qua khong do duoc")
             bang(all(got.get(k) is None for k in ("loai", "ten_loai", "thong_diep")),
                  "kenh ca qua mang chi tiet loi cu: " + nhan)
-
-
 @ca
 def r1122_nhat_ky_loi_io_khong_in_traceback_dai():
     """Lỗi mở nhật ký qua CLI vẫn có loại + 160 ký tự; không đi qua excepthook thô."""
@@ -10078,7 +10074,6 @@ def r1122_nhat_ky_loi_io_khong_in_traceback_dai():
     tin = str(FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), str(tep)))[:160]
     bang(p.returncode == 1 and p.stderr.strip() == "FileNotFoundError: " + tin,
          "loi I/O nhat ky thoat ra traceback hoac khong cat dung 160")
-
 @ca
 def r1122_loi_mang_thong_diep_cat_160():
     """#1122 spec A2: chi tiết `loi` mang loại + thông điệp cắt ĐÚNG 160 ký tự (số viết cứng ở đây, không đọc
@@ -10089,13 +10084,9 @@ def r1122_loi_mang_thong_diep_cat_160():
     with patch.dict(cham_mot_ca.__globals__, {"CA": [review_vo_can]}):
         kq = cham_mot_ca(review_vo_can)
     bang(kq == ("loi", "review_vo_can(TypeError: " + "x" * 160 + ")"), f"chi tiet loi sai: {kq[0]} {kq[1][:60]}...")
-
-
 ASSERT_TRAN_CHO_PHEP = frozenset({   # CỐ Ý ném AssertionError trần: ca thử chính bộ chấm/headline
     "r1079_cham_mot_ca_chi_TinHieuChotCa_la_giet", "r1079_cc_chay_suite_phai_do_hanh_vi",
     "t119_main_nhanh_mac_dinh_PHAI_in_headline_bang_dong_ket_qua"})
-
-
 @ca
 def r1122_khong_assert_tran_trong_ca():
     """#1122 spec A1: bộ chấm (từ #1079) chỉ tính `TinHieuChotCa` là giết, nên một `assert` trần trong ca
@@ -10116,8 +10107,6 @@ def r1122_khong_assert_tran_trong_ca():
     bang(co_assert == set(ASSERT_TRAN_CHO_PHEP),
          f"assert tran trong ca: thua {sorted(co_assert - ASSERT_TRAN_CHO_PHEP)}, "
          f"cho phep khong con dung {sorted(ASSERT_TRAN_CHO_PHEP - co_assert)}")
-
-
 @ca
 def r1122_tach_nhom_loi_giu_loai_va_thong_diep_160():
     """Thông báo lỗi tách nhóm do main in cũng giữ loại và đúng 160 ký tự thông điệp."""
@@ -10127,8 +10116,6 @@ def r1122_tach_nhom_loi_giu_loai_va_thong_diep_160():
         got = _tu_tach_nhom_neu_can()
     bang(got == "KHONG tach duoc (PermissionError: " + "x" * 160 + ") - killpg co the giet vo shell",
          "reporter tach nhom mat loai hoac khong giu dung 160 ky tu thong diep")
-
-
 @ca
 def r1122_reporter_unicode_console_khong_utf8():
     """Thông điệp Unicode không được làm reporter chết trước tổng kết khi console mặc định không UTF-8."""
@@ -10151,14 +10138,27 @@ def r1122_reporter_unicode_console_khong_utf8():
     bang(p.returncode == 1 and "DOT BIEN: 0/1 dat" in p.stdout and p.stdout.count("✓") == 160
          and "UnicodeEncodeError" not in p.stderr,
          "reporter mat thong diep Unicode hoac chet truoc tong ket tren console khong UTF-8")
-
-
 @ca
 def r1122_nhat_ky_giu_loai_va_thong_diep_160():
     """Cùng chi tiết loại/thông điệp phải sống trong nhật ký khi stdout chưa được in."""
+    from unittest.mock import patch
+    dang_in, dinh_dang_that = False, mo_ta_loi
+    def review_in(e):
+        nonlocal dang_in
+        if not dang_in:
+            dang_in = True
+            try:
+                chay_bo_ca([fn])
+            finally:
+                dang_in = False
+        return dinh_dang_that(e)
     def review_loi():
+        if dang_in:
+            bang(False, "review-inner")
         raise TypeError("x" * 500)
     def review_chot():
+        if dang_in:
+            raise TypeError("review-inner")
         bang(False, "x" * 500)
     with San() as s:
         for fn, loai, nhan in ((review_loi, "TypeError", "LOI"),
@@ -10166,15 +10166,16 @@ def r1122_nhat_ky_giu_loai_va_thong_diep_160():
             tep = s / (fn.__name__ + ".log")
             nk = NhatKyCa(tep)
             try:
-                chay_bo_ca([fn], nk)
+                with patch.dict(globals(), mo_ta_loi=review_in):
+                    chay_bo_ca([fn], nk)
             finally:
                 nk.dong()
             dong = next(x for x in tep.read_text(encoding="utf-8").splitlines()
                         if x.startswith("<<< ra"))
             bang(dong.endswith(" -> " + nhan + ": " + loai + ": " + "x" * 160),
                  "nhat ky mat loai hoac khong giu dung 160 ky tu thong diep")
-
-
+            bang(LOAI_HONG[fn.__name__] == ("TinHieuChotCa" if loai == "TinHieuChotCa" else "khac:" + loai),
+                 "formatter long doi loai loi ngoai: " + loai)
 @ca
 def r1122_chot_ca_khac_giu_thong_diep_nhung_van_la_loi():
     """Lỗi gọi chốt của ca khác vẫn có chi tiết, không được nhận tín dụng giết."""
@@ -10187,8 +10188,6 @@ def r1122_chot_ca_khac_giu_thong_diep_nhung_van_la_loi():
         got = cham_mot_ca(review_goi)
     bang(got == ("loi", "review_goi(TinHieuChotCa: " + "x" * 160 + "; chot cua ca khac)"),
          "chi tiet chot ca khac mat loai/thong diep hoac doi thanh giet")
-
-
 @ca
 def r1122_loi_bien_dich_dot_bien_cat_160():
     """Ngoại lệ ở bước biên dịch cũng phải giữ loại và cắt thông điệp ở reporter SAI."""
@@ -10206,7 +10205,6 @@ def r1122_loi_bien_dich_dot_bien_cat_160():
     thong_diep = ("duplicate argument '" + tham_so + "' in function definition")[:160]
     bang(got == (1, 0) and out.getvalue().rstrip().endswith("SyntaxError: " + thong_diep),
          "reporter bien dich mat loai hoac khong cat dung 160 ky tu")
-
 
 @ca
 def r1122_reporter_giu_loai_va_cat_dung_thong_diep():
@@ -14827,6 +14825,8 @@ DOT_BIEN_HOOK = [
 
 
 DOT_BIEN_HARNESS = [
+    ('wp1122_assertion_dinh_dang_lai_sau_map', ('ket = f"HONG: {tin}"', 'ket = f"HONG: {mo_ta_loi(e)}"'), ['r1122_nhat_ky_giu_loai_va_thong_diep_160']),
+    ('wp1122_assertion_map_truoc_dinh_dang', ('except AssertionError as e:\n            tin = mo_ta_loi(e)   # #1122 (Codex lượt 6): định dạng MỘT lần, TRƯỚC khi ghi map; `str(e)` chạy mã của ngoại lệ\n            hong_ds.append((fn.__name__, tin))\n            # #1079 F01: danh tính lớp THẬT; lớp khác (kể cả cùng `__qualname__`) mang tiền tố `khac:`.\n            LOAI_HONG[fn.__name__] = ("TinHieuChotCa" if isinstance(e, TinHieuChotCa) and not chot_tu_ca_khac(e, fn)\n                                      else f"khac:{type(e).__qualname__}")\n            ket = f"HONG: {tin}"', 'except AssertionError as e:\n            LOAI_HONG[fn.__name__] = ("TinHieuChotCa" if isinstance(e, TinHieuChotCa) and not chot_tu_ca_khac(e, fn)\n                                      else f"khac:{type(e).__qualname__}")\n            tin = mo_ta_loi(e)   # #1122 (Codex lượt 6): định dạng MỘT lần, TRƯỚC khi ghi map; `str(e)` chạy mã của ngoại lệ\n            hong_ds.append((fn.__name__, tin))\n            # #1079 F01: danh tính lớp THẬT; lớp khác (kể cả cùng `__qualname__`) mang tiền tố `khac:`.\n            ket = f"HONG: {tin}"'), ['r1122_nhat_ky_giu_loai_va_thong_diep_160']),
     ('wp1122_dinh_dang_lai_sau_ghi_map', ('ket = f"LOI: {tin}"', 'ket = f"LOI: {mo_ta_loi(e)}"'), ['r1122_kenh_loi_phai_thuoc_luot_ngoai']),
     ('wp1122_kenh_chup_ca_qua', ('                if h:  # #1122: chụp loại của lỗi NGOÀI', '                if h or q or b:  # #1122: chụp loại của lỗi NGOÀI'), ['r1122_kenh_loi_phai_thuoc_luot_ngoai']),
     ('wp1122_kenh_loi_doc_lai_map', ('"loai": loai_luot', '"loai": (LOAI_HONG.get(chon[0].__name__) if hong_ds else None)'), ['r1122_kenh_loi_phai_thuoc_luot_ngoai']),

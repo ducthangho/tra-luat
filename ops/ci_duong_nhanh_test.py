@@ -2275,7 +2275,7 @@ DAU_DO = {   # ten: (thay doi tren cay, buoc phai bat, dau rieng trong dau ra)
 
 
 # Bang uy nhiem (dac ta CI-LAN-LUU-TRU r1, phep do dau do): moi buoc bi bo o duong nhanh dung mot dong. Do tren 591cc9d (= 3bdd987
-# + commit CI cua packet, khong doi du lieu ho so; 01-11): `khong_doi_mau` = nen va nen+DO1..DO6 cung rc; `uy_nhiem` = doi mau va buoc con chay bat; `cai_dat` = cai/tai cong cu,
+# + commit CI cua packet, khong doi du lieu ho so): `khong_doi_mau` = nen va nen+DO1..DO6 cung rc; `uy_nhiem` = doi mau va buoc con chay bat; `cai_dat` = cai/tai cong cu,
 # khong kiem cay (buoc chay test/kiem-tra KHONG duoc gan loai nay); `chua_do` = CHUA do. t58 khoa: thieu/thua dong, gia tri la ⇒ DO.
 UY_NHIEM_GOC = "591cc9d"
 CAI_DAT_HOP_LE = ("cài actionlint", "cài shellcheck", "cài rg", "cài Ruff", "tai len gate-evidence", "actions/upload-artifact@",

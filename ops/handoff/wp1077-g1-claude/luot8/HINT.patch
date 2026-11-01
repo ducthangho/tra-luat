@@ -1,0 +1,32 @@
+# TEST THUAN — chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -9357,8 +9357,8 @@
+     with (contextlib.chdir(cwd) if cwd else contextlib.nullcontext()), patch.dict(os.environ, env, clear=True):
+         try:
+             return m._do_openai_llm(env, False)
+-        except OSError as e:
+-            return ("OSError", f"errno={e.errno} {e}")
++        except (OSError, UnicodeError) as e:
++            return ("OSError" if isinstance(e, OSError) else type(e).__name__, f"errno={getattr(e, 'errno', None)} {e}")
+ 
+ 
+ def _wp1077_llm_tep(d, nhan, shebang=False, dau=""):
+@@ -9402,7 +9402,7 @@
+ @ca
+ def r1077_PATH_rong_khong_bo_qua_wrapper_dau():
+     """F4 (Codex lượt 2–5): bản đầu PATH không shebang thắng bản sau có shebang (PATH tuyệt đối, rỗng, `link/..`);
+-    bản đầu thiếu interpreter (ENOENT) thì sang bản sau."""
++    phần tử PATH quá dài trước `:` còn thử cwd (glibc); bản đầu thiếu interpreter (ENOENT) thì sang bản sau."""
+     if LA_WINDOWS:
+         return "BO QUA shell POSIX"
+     with San() as d:
+@@ -9411,7 +9411,7 @@
+         (d / "first" / "sub").mkdir()
+         (d / "link").symlink_to(d / "first" / "sub", target_is_directory=True)
+         (d / "llm").symlink_to(d / "later" / "llm")
+-        for dau in (str(d / "first"), "", str(d / "link" / "..")):
++        for dau in (str(d / "first"), "", str(d / "link" / ".."), "x" * 4200):
+             path = dau + os.pathsep + str(d / "later")
+             kq = _wp1077_llm({"PATH": path}, cwd=d / "first")
+             bang(kq[0] == "CO_CREDENTIAL" and "llm-FIRST" in kq[1], f"PATH={path!r}: do nham llm phia sau: {kq}")

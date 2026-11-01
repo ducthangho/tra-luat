@@ -1,0 +1,12 @@
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -9418,6 +9418,9 @@
+         _wp1077_tep(d / "thieu", "llm", "#!/khong-ton-tai-wp1077/interpreter\nexit 1\n")   # lượt 5: ENOENT ⇒ sang bản sau
+         kq = _wp1077_llm({"PATH": str(d / "thieu") + os.pathsep + str(d / "later")})
+         bang(kq[0] == "CO_CREDENTIAL" and "llm-LATER" in kq[1], f"dung o ban thieu interpreter: {kq}")
++        _wp1077_llm_tep(d / "first", "FIRST", shebang=True, dau='[ "$0" = llm ] || exit 42\n')
++        kq = _wp1077_llm({"PATH": "x" * 4200 + os.pathsep + str(d / "later")}, cwd=d / "first")
++        bang(kq[0] == "CO_CREDENTIAL" and "llm-FIRST" in kq[1], f"PATH dai KHONG rong doi $0 shebang (ngoai W-1077-1): {kq}")
+ 
+ 
+ @ca

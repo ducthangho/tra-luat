@@ -1,0 +1,84 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+# Chỉ thêm TEST; hướng sửa mã sản phẩm được mô tả trong VERDICT.md.
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -9429,6 +9429,79 @@
+                 tt, mo_ta = m._do_openai_llm(env, False)
+             bang(tt == "CO_CREDENTIAL" and "llm-FIRST" in mo_ta,
+                  f"PATH={path!r}: do nham llm phia sau: {tt} {mo_ta!r}")
++
++
++@ca
++def r1077_PATH_tuong_doi_giu_dollar_zero():
++    """F4 lượt 5: PATH tương đối giữ $0 mà bash/execvp truyền cho wrapper POSIX."""
++    if LA_WINDOWS:
++        return "BO QUA shell POSIX"
++    from unittest.mock import patch
++    m = _tai_launcher_thu()
++    with San() as d:
++        _wp1077_tep(d / "bin", "llm", 'case "$0" in bin/llm) ;; *) exit 42;; esac\n'
++                     'case "$1" in --version) echo llm-FIRST;; keys) echo openai;; esac\n')
++        env = {"PATH": "bin", "LANG": "C.UTF-8", "TL_LAUNCHER_ENV_DA_DOC": "1"}
++        with contextlib.chdir(d), patch.dict(os.environ, env, clear=True):
++            try:
++                kq = m._do_openai_llm(env, False)
++            except (OSError, subprocess.SubprocessError) as e:
++                kq = (type(e).__name__, str(e))
++        bang(kq[0] == "CO_CREDENTIAL" and "llm-FIRST" in kq[1],
++             f"$0 tuong doi bi doi thanh tuyet doi: {kq}")
++
++
++@ca
++def r1077_cwd_dai_khong_keo_dai_duong_da_chay_duoc():
++    """F4 lượt 5: tên tương đối ngắn vẫn chạy được khi cwd vượt PATH_MAX."""
++    if platform.system() != "Linux":
++        return "BO QUA can getcwd Linux dai hon PATH_MAX"
++    from unittest.mock import patch
++    m = _tai_launcher_thu()
++    with San() as d:
++        goc_fd = os.open(".", os.O_RDONLY)
++        try:
++            os.chdir(d)
++            while len(os.getcwd()) < 4200:
++                ten = "a" * 220
++                os.mkdir(ten)
++                os.chdir(ten)
++            env = {"PATH": ".", "LANG": "C.UTF-8", "TL_LAUNCHER_ENV_DA_DOC": "1"}
++            for shebang in (True, False):
++                _wp1077_tep(Path("."), "llm", ("#!/bin/sh\n" if shebang else "") +
++                             'case "$1" in --version) echo llm-FIRST;; keys) echo openai;; esac\n')
++                with patch.dict(os.environ, env, clear=True):
++                    try:
++                        kq = m._do_openai_llm(env, False)
++                    except (OSError, subprocess.SubprocessError) as e:
++                        kq = (type(e).__name__, getattr(e, "errno", None))
++                bang(kq[0] == "CO_CREDENTIAL" and "llm-FIRST" in kq[1],
++                     f"cwd dai lam hong ten tuong doi ngan, shebang={shebang}: {kq}")
++        finally:
++            os.fchdir(goc_fd)
++            os.close(goc_fd)
++
++
++@ca
++def r1077_PATH_khong_chan_ban_sau_khi_interpreter_dau_bi_thieu():
++    """F4: lệnh trần không được mất lượt chạy thành công sẵn có khi bản đầu lỗi ENOENT."""
++    if LA_WINDOWS:
++        return "BO QUA shell POSIX"
++    from unittest.mock import patch
++    m = _tai_launcher_thu()
++    with San() as d:
++        _wp1077_tep(d / "first", "llm", '#!/khong-ton-tai-wp1077/interpreter\nexit 1\n')
++        _wp1077_tep(d / "later", "llm", '#!/bin/sh\n'
++                     'case "$1" in --version) echo llm-LATER;; keys) echo openai;; esac\n')
++        env = {"PATH": str(d / "first") + os.pathsep + str(d / "later"),
++               "LANG": "C.UTF-8", "TL_LAUNCHER_ENV_DA_DOC": "1"}
++        with patch.dict(os.environ, env, clear=True):
++            try:
++                kq = m._do_openai_llm(env, False)
++            except (OSError, subprocess.SubprocessError) as e:
++                kq = (type(e).__name__, getattr(e, "errno", None))
++        bang(kq[0] == "CO_CREDENTIAL" and "llm-LATER" in kq[1],
++             f"PATH dung o ban thieu interpreter (ENOENT), mat ban sau chay duoc: {kq}")
+ 
+ 
+ @ca

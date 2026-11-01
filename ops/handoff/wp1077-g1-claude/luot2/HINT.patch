@@ -1,0 +1,45 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+# Test-only hint for sensitive launcher; both new cases must be RED on reviewed HEAD.
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -9387,6 +9387,40 @@
+                     tran.append(f"{n.name}:{c.lineno}")
+     bang(thay == can, f"thieu ham probe trong launcher: {sorted(can - thay)}")
+     bang(not tran, f"probe doctor con spawn tran (khong qua _chay_probe_nhu_shell): {tran}")
++
++
++
++@ca
++def r1077_ten_tran_khong_duoc_bo_qua_wrapper_dau():
++    """subprocess searches past ENOEXEC; resolve before its first call."""
++    if LA_WINDOWS:
++        return "BO QUA shell POSIX"
++    m = _tai_launcher_thu()
++    with San() as d:
++        _wp1077_tep(d / "first", "cli", "echo FIRST\n")
++        _wp1077_tep(d / "later", "cli", "#!/bin/sh\necho LATER\n")
++        env = {"PATH": os.pathsep.join([str(d / "first"), str(d / "later")])}
++        p = m._chay_probe_nhu_shell(["cli", "--version"], env=env,
++                                    capture_output=True, text=True)
++        bang(p.returncode == 0 and p.stdout == "FIRST\n",
++             f"probe skipped the first executable: {p.returncode} {p.stdout!r}")
++
++
++@ca
++def r1077_git_probe_doctor_khong_shebang():
++    """No network: the fake git answers ls-remote locally."""
++    if LA_WINDOWS:
++        return "BO QUA shell POSIX"
++    from unittest.mock import patch
++    m = _tai_launcher_thu()
++    with San() as d:
++        _wp1077_tep(d, "git", 'echo "fixture"\n')
++        m._do_rest_github = lambda *a, **k: ("chan", "offline stub", False)
++        m._doc_mcp_json = lambda *a: (False, "offline fixture", None, None)
++        env = {"PATH": str(d)}
++        with patch.dict(os.environ, env, clear=True):
++            answer = m._do_github(str(d), env)
++        bang(answer[0] == "DUNG_DUOC", f"doctor git probe still ENOEXEC: {answer}")
+ 
+ 
+ @ca

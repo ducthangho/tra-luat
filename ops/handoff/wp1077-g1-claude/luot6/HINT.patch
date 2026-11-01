@@ -1,0 +1,50 @@
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -9459,6 +9459,47 @@
+         _wp1077_llm_tep(d / "later", "LATER", shebang=True)
+         kq = _wp1077_llm({"PATH": str(d / "first") + os.pathsep + str(d / "later")})
+         bang(kq[0] == "CO_CREDENTIAL" and "llm-LATER" in kq[1], f"dung o ban thieu interpreter: {kq}")
++
++
++@ca
++def r1077_PATH_hoan_toan_rong_giu_dollar_zero():
++    """F4 lượt 6: PATH='' giữ $0 là tên trần như bash/glibc, kể cả fallback ENOEXEC."""
++    if LA_WINDOWS:
++        return "BO QUA shell POSIX"
++    m = _tai_launcher_thu()
++    with San() as d:
++        _wp1077_tep(d, "rg", '[ "$0" = rg ] || exit 42\necho ripgrep-FIRST\n')
++        with contextlib.chdir(d):
++            ver = m._phien_ban("rg", env={"PATH": ""})
++            auth = m._xac_thuc_kem_dau_ra("rg", ["status"], env={"PATH": ""})
++        bang(ver[0] is True and auth[0] is True and "FIRST" in ver[1],
++             f"PATH rong lam doi $0 cua wrapper ten tran: version={ver}, auth={auth}")
++
++
++@ca
++def r1077_PATH_ETXTBSY_khong_duoc_thu_ban_sau():
++    """F4 lượt 6: ETXTBSY là lỗi exec dừng của glibc/bash; không được đo bản sau."""
++    if platform.system() != "Linux":
++        return "BO QUA can Linux ETXTBSY"
++    with San() as d:
++        _wp1077_llm_tep(d / "first", "FIRST", shebang=True)
++        _wp1077_llm_tep(d / "later", "LATER", shebang=True)
++        with (d / "first" / "llm").open("ab"):
++            kq = _wp1077_llm({"PATH": str(d / "first") + os.pathsep + str(d / "later")})
++        bang(kq[0] == "OSError" and "errno=26 " in kq[1],
++             f"ETXTBSY dau PATH bi nuot, do nham ban sau: {kq}")
++
++
++@ca
++def r1077_PATH_dau_gach_cuoi_giu_dollar_zero_glibc():
++    """F4 lượt 6: giữ chuỗi ứng viên glibc, kể cả '/' đã có cuối phần tử PATH."""
++    if LA_WINDOWS:
++        return "BO QUA shell POSIX"
++    with San() as d:
++        _wp1077_llm_tep(d / "bin", "FIRST", dau='[ "$0" = bin//llm ] || exit 42\n')
++        kq = _wp1077_llm({"PATH": "bin/"}, cwd=d)
++        bang(kq[0] == "CO_CREDENTIAL" and "llm-FIRST" in kq[1],
++             f"ghep PATH lam mat '/' cuoi, doi $0 so voi glibc: {kq}")
+ 
+ 
+ @ca

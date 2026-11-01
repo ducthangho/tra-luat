@@ -1,0 +1,61 @@
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -9461,6 +9461,58 @@
+         with (d / "first" / "llm").open("ab"):
+             kq = _wp1077_llm({"PATH": str(d / "first") + os.pathsep + str(d / "later")})
+         bang(kq[0] == "OSError" and "errno=26 " in kq[1], f"ETXTBSY dau PATH bi nuot, do nham ban sau: {kq}")
++
++
++@ca
++def r1077_PATH_byte_ngoai_UTF8_khong_lam_mat_kha_nang():
++    """F4: PATH POSIX dùng filesystem encoding/surrogateescape, kể cả phần tử không chứa CLI."""
++    if LA_WINDOWS:
++        return "BO QUA shell POSIX"
++    from unittest.mock import patch
++    m = _tai_launcher_thu()
++    with San() as d:
++        raw = os.fsencode(d) + b"/byte-\xff"
++        os.mkdir(raw)
++        odd = Path(os.fsdecode(raw))
++        for bin_ in (odd, d / "ascii"):
++            _wp1077_llm_tep(bin_, "BYTES", shebang=True)
++            with (bin_ / "llm").open("a") as f:
++                f.write('case "$1" in prompt) echo ok;; esac\n')
++        for path in (str(odd), str(odd) + os.pathsep + str(d / "ascii")):
++            env = {"PATH": path, "HOME": str(d / "home"), "OPENAI_API_KEY": "fixture-inert",
++                   "TL_LAUNCHER_ENV_DA_DOC": "1"}
++            m.CONG_CU = [c for c in m.CONG_CU if c["ten"] == "llm"]
++            m.MODULE_PY = []
++            m.KHA_NANG = [k for k in m.KHA_NANG if k["ten"] == "openai-llm"]
++            m._doc_moi_truong = lambda: (env, {"da_doc_truoc_cong_cu": True})
++            m.tim_workspace = lambda _: None
++            m._chuan_bi_va_bo_snapshot = lambda: None
++            m.quet_bien_moi_truong = lambda: {}
++            a = type("A", (), {"json": True, "workspace": None,
++                               "doi_kha_dung": True, "kiem_song": True})()
++            out = io.StringIO()
++            with patch.dict(os.environ, env, clear=True), contextlib.redirect_stdout(out):
++                rc = m.lenh_doctor(a)
++            info = json.loads(out.getvalue())
++            cap = info["kha_nang"][0]
++            bang(rc == 0 and cap["trang_thai"] == "DUNG_DUOC" and info["cong_cu"][0]["co"] is True,
++                 f"PATH byte hop le lam probe mat kha nang: rc={rc}, cap={cap}, cong_cu={info['cong_cu']}")
++            # Lượt hai chỉ còn CLI ASCII ở sau: phần tử byte không cần chứa công cụ.
++            if path == str(odd):
++                (odd / "llm").unlink()
++
++
++@ca
++def r1077_shebang_PATH_rong_giu_dollar_zero_glibc():
++    """F4: shebang hợp lệ qua phần tử rỗng vẫn giữ `$0` mà glibc và BASE truyền."""
++    if LA_WINDOWS:
++        return "BO QUA shell POSIX"
++    with San() as d:
++        _wp1077_llm_tep(d, "SHEBANG", shebang=True, dau='[ "$0" = llm ] || exit 42\n')
++        _wp1077_llm_tep(d / "later", "LATER", shebang=True)
++        result = _wp1077_llm({"PATH": os.pathsep + str(d / "later")}, cwd=d)
++        bang(result[0] == "CO_CREDENTIAL" and "llm-SHEBANG" in result[1],
++             f"shebang hop le bi doi $0: {result}")
+ 
+ 
+ @ca

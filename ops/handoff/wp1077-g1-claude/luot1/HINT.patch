@@ -1,0 +1,105 @@
+--- .claude/dev/launcher.py
++++ .claude/dev/launcher.py
+@@ -2919,11 +2919,12 @@
+ 
+ 
+ def _chay_probe_nhu_shell(lenh: list[str], **kw):
+-    """`subprocess.run(lenh, **kw)`, cộng MỘT ngữ nghĩa của shell: tệp không shebang chạy bằng `/bin/sh`.
++    """`subprocess.run(lenh, **kw)`, cộng ngữ nghĩa ENOEXEC của glibc execvp: chạy lại bằng `/bin/sh`.
+ 
+     wp1077 (review độc lập #823 F1, tái hiện trên master `2bcd8f3`): kernel trả `ENOEXEC` cho tệp
+-    thực thi KHÔNG có shebang; bash và `execvp` của libc khi ấy chạy lại tệp bằng `/bin/sh`, còn
+-    `subprocess` ném `OSError`. Bộ dò tên trần wp802 vì thế gắn BI_CHE (rc=12) cho một `rg` mà
++    thực thi KHÔNG có shebang; `execvp` của glibc chạy lại tệp bằng `/bin/sh`, còn
++    `subprocess` ném `OSError`. Bash có thể chạy lại bằng chính bash; helper này chỉ theo
++    hợp đồng `/bin/sh` của M1, không đảm bảo tương đương với mọi wrapper bash. Bộ dò tên trần wp802 vì thế gắn BI_CHE (rc=12) cho một `rg` mà
+     chính shell của người dùng gọi được. Chỉ `ENOEXEC` mới được chạy lại: thiếu bit thực thi
+     (`PermissionError`), không tồn tại… vẫn là hỏng như shell báo. Windows không có ngữ nghĩa này
+     (`CreateProcessW`), nên giữ nguyên. Lượt chạy lại trả kết quả cho phía gọi phân loại Y NHƯ lượt
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -9234,7 +9234,7 @@
+              f"ten tran tu muc PATH rong khong duoc do: rc={rc}, bi_che={che}")
+ 
+ 
+-# wp1077 (spec ops/specs/wp1077.md M3): tệp KHÔNG shebang — shell chạy bằng `/bin/sh`, probe phải đo như shell.
++# wp1077 (spec ops/specs/wp1077.md M3): probe ENOEXEC theo `/bin/sh` của glibc execvp; bash có thể khác.
+ def _wp1077_tep(d, ten, than, mode=0o755):
+     d.mkdir(parents=True, exist_ok=True)
+     (d / ten).write_text(than)
+@@ -9299,6 +9299,64 @@
+         ok, mo_ta, qua_han, ra = m._xac_thuc_kem_dau_ra(str(f), ["status"], env=dict(os.environ))
+         bang(ok is True and "Logged in" in ra,
+              f"probe xac thuc khong chay tep khong shebang: ok={ok} mo_ta={mo_ta!r}")
++
++
++@ca
++def r1077_doctor_codex_status_khong_shebang():
++    """Probe status Codex phải cùng nhận wrapper POSIX không shebang với probe version."""
++    if LA_WINDOWS:
++        return "BO QUA shell POSIX"
++    from unittest.mock import patch
++
++    m = _tai_launcher_thu()
++    with San() as d:
++        _wp1077_tep(d, "codex", "echo 'Logged in using ChatGPT'\n")
++        env = {"PATH": str(d), "LANG": "C.UTF-8", "TL_LAUNCHER_ENV_DA_DOC": "1"}
++        m.CONG_CU = [c for c in m.CONG_CU if c["ten"] == "codex"]
++        m.MODULE_PY = []
++        m.KHA_NANG = [k for k in m.KHA_NANG if k["ten"] == "codex"]
++        m._doc_moi_truong = lambda: (env, {"da_doc_truoc_cong_cu": True})
++        m.tim_workspace = lambda _: None
++        m._co_chan_codex = lambda: None
++        m._dang_cho_snapshot = lambda _: False
++        m._codex_home_hieu_luc = lambda: d / "isolated-home"
++        m._han_token_codex = lambda: {
++            "gio_con_lai": {},
++            "last_refresh": None,
++            "tuoi_anh_chup_gio": None,
++        }
++        with patch.dict(os.environ, env, clear=True):
++            rc, info = _doctor_json(m)
++        cap = info["kha_nang"][0]
++        bang(
++            info["cong_cu"][0]["co"] is True and cap["trang_thai"] == "CO_CREDENTIAL",
++            f"version xanh nhung probe status van nem ENOEXEC: rc={rc}, capability={cap}",
++        )
++
++
++@ca
++def r1077_retry_giu_argv_env():
++    """M1: lượt chạy lại phải giữ đối số (kể cả khoảng trắng) và env của caller."""
++    if LA_WINDOWS:
++        return "BO QUA shell POSIX"
++    m = _tai_launcher_thu()
++    with San() as d:
++        body = """[ "$MEASURE" = value ] || exit 7
++case "$1" in
++  --version) [ "$#" = 1 ] || exit 8; echo 'version-correct';;
++  status) [ "$#" = 2 ] && [ "$2" = 'two words' ] || exit 9; echo 'auth-correct';;
++  *) echo 'lost arguments' >&2; exit 6;;
++esac
++"""
++        p = _wp1077_tep(d, "cli", body)
++        env = {"PATH": str(d), "MEASURE": "value"}
++        ver = m._phien_ban(str(p), env=env)
++        auth = m._xac_thuc_kem_dau_ra(str(p), ["status", "two words"], env=env)
++        bang(
++            ver == (True, "version-correct", False)
++            and auth == (True, "ok", False, "auth-correct\n"),
++            f"argv/env lost on retry: version={ver}, auth={auth}",
++        )
+ 
+ 
+ @ca
+@@ -12218,6 +12276,10 @@
+     ("wp802_ten_co_duoi_khong_noi_them", ('([""] if any(ten.upper().endswith(e.upper()) for e in ext) else []) + ext)',
+      '([""] if any(ten.upper().endswith(e.upper()) for e in ext) else ext))'), ["r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT"]),
+     # wp1077 (M4): mỗi chốt của probe chạy-như-shell một đột biến.
++    ("wp1077_retry_mat_doi_so",
++     ('    return subprocess.run(["/bin/sh", *lenh], **kw)',
++      '    return subprocess.run(["/bin/sh", lenh[0]], **kw)'),
++     ["r1077_retry_giu_argv_env"]),
+     ("wp1077_bo_chay_lai_ENOEXEC",
+      ('        if e.errno != errno.ENOEXEC or os.name == "nt" or not os.path.isfile("/bin/sh"):\n            raise',
+       '        raise'),

@@ -1,0 +1,3 @@
+Đã ghi [VERDICT.md](VERDICT.md): **changes_requested — 1 P1**, gồm hai biểu hiện của F4: PATH ngoài UTF-8 và đổi `$0` của shebang.
+
+Kèm [HINT.patch](HINT.patch) và bằng chứng kiểm thử. Source tracked trong `cay-kho/` không đổi.

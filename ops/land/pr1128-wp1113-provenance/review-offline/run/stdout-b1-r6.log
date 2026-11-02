@@ -1,0 +1,34 @@
+VERDICT: approve — P0/P1/P2/P3 = 0/0/0/0
+
+Áp dụng cho diff **15 thêm/8 xoá** được giao và tương tác trong hai tệp.
+
+- `reviewed_sha`: `0445b93839e843e5f712b2055eebeef7e99280b0`
+- `tree`: `3770cf57c1014f7a5e89b00435487991ddbf750e`
+- Spec r1/g1: SHA-256 khớp giá trị được giao.
+- Checkout sạch ở đầu/cuối; không sửa tệp.
+
+| id | lớp | mức | tệp:dòng | mô tả | sửa |
+|---|---|---|---|---|---|
+| — | — | — | — | Không phát hiện lỗi mới trong phạm vi | — |
+
+Kết quả theo lớp:
+
+1. **Fail-open:** chuyển sang `BIEN_MERGE` đúng cây cần kiểm. SHA thiếu/hỏng bị chặn trước grep; Git thật trả rc=128 với SHA rỗng/sai/thiếu object, được chuyển thành lỗi. `-F` và `-e` bảo vệ mẫu có dấu `-` hoặc glob. `--no-renames` giữ dấu xoá khi đổi tên; grep trên cây merge đọc nội dung tài liệu sau sửa.
+2. **Chi phí:** ba lượt đọc raw là phần lặp có thể dùng lại trong cùng lần `kiem-re`. Chưa có bằng chứng để coi đây là lỗi hiệu năng phải chặn; nới số ghim phản ánh đúng số lời gọi hiện tại. Thời gian tiết kiệm thực tế: **KHÔNG ĐO ĐƯỢC**.
+3. **Test/đột biến:** `t57` bắt đúng việc chọn merge SHA; `t20u` vẫn kiểm thuộc tính trên từng lời gọi. Hạn 400s chỉ dành cho `t56`; timeout vẫn phát lỗi, không được tính là giết đột biến.
+4. **Spec/write set:** phần sửa mới nằm đúng hai tệp được phép; hai merge commit không đổi chúng.
+
+Bằng chứng chạy trên Linux, Python 3.13.18, Git 2.43.0:
+
+| trạng thái | phép kiểm | kết quả |
+|---|---|---|
+| `passed` | `python3 -B ops/ci_duong_nhanh_test.py --mot-ca t57_xoa_tep_tai_lieu_con_trich_kiem_re_do` | rc=0 |
+| `passed` | Chạy lại `t57`, `t20u`; thay luồng ghi tạm bằng `StringIO` | rc=0; 8 và 29 assertion |
+| `passed` | Đột biến trong bộ nhớ: `tren_goc`, `tren_dau`, `rc0_rong_la_khop` | 3/3 bị giết đúng assertion, rc=3 |
+| `passed` | Probe Git thật, 12 tổ hợp merge SHA thiếu/hỏng, mô phỏng timeout | rc=0 |
+| `failed` | Probe ban đầu chọn chuỗi không được tài liệu trích | Lỗi fixture; đổi đối chứng có trích dẫn rồi đạt |
+| `not_run` | `t56`, đột biến nhắm `t56`, toàn bộ suite/mutant, CI/Windows | **KHÔNG ĐO ĐƯỢC**; sandbox chỉ đọc |
+
+Đối chiếu lượt 5: theo hồ sơ giao việc, không có finding mở để tái đóng.
+
+Provider `openai_codex`, transport `machine`; execution surface và model/effort từ launcher: **KHÔNG ĐO ĐƯỢC**. Verdict này không tự xác lập receipt `cross_approved` hay quyền land.

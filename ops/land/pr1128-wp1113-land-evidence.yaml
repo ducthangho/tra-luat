@@ -103,7 +103,8 @@ review:
   so_loi_goi_codex_cli: 6
   tran: 'chu kho nang tran len 14 loi goi; da dung 6 cho ban thi cong (2 luot review dac ta tinh rieng truoc lease).'
   ket_qua_theo_luot: 'P0/P1/P2/P3 — r1 4b391be 0/1/3/0 · r2 015093f 0/0/1/0 · r3 bb931ea 0/0/1/1 · r4 c76e38b 0/0/1/0 · r5 21a3e45 0/0/0/0 approve · r6 0445b93 0/0/0/0 approve.'
-  hien_vat: 'provenance/review-offline/verdict-b1-r{1..6}.md + run/run-b1-r{1..6}.json (SHA256SUMS kem).'
+  hien_vat: 'provenance/review-offline/run/stdout-b1-r{1..6}.log = byte launcher ghi, khop stdout_sha256/stdout_byte cua run/run-b1-r{1..6}.json;
+    verdict-b1-r{1..6}.md = tep -o cua codex exec (thieu LF cuoi so voi stdout); doi chieu ca hai + kiem am: review-offline/kiem-verdict-vs-receipt.txt (TONG DAT). Connector P2 #1140.'
   xu_ly_finding: 'F1 bash tran -> tim_bash; F2 DO6 ne sang day_du -> kiem-re do (kiem_xoa_bi_trich); F3 bang UY_NHIEM do du (bang-chung-dau-do-F3.md); F4 tran 650 -> lease g2 1000; F4(r3) cai_dat theo danh sach cho phep; connector P2 -> grep tren cay merge.'
 
 canary_a12:

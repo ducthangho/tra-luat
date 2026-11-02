@@ -8,7 +8,8 @@
 # Bon moc §10.2.2 cho gate hau merge run 41322980582 attempt 1: Run + Checkout + Workflow definition bang ops/ci_provenance.py thu
 # (--wd-run 41327945916); Gate output trich log REST tung job.
 # NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nghia nhu khuon.
-# Readback tho: ops/land/pr1115-wp1079-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-11-01.
+# Readback tho: ops/land/pr1115-wp1079-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT —
+# 2026-11-01 cho moi nguon co tu truoc; 2026-11-02 cho cac nguon cua khoi landed_20261102 (run 41365578430, wd-run 41376105695, PR #1130, comment 6567244450).
 
 schema_version: 1
 # ---- TRUONG CHUAN PROTOCOL §7
@@ -158,10 +159,14 @@ landed_20261102:
     run_id: 41365578430
     sha: c7174bfe03b3acd22cfa055b5fce176129d29542
     conclusion: success
-    nguon: [readback-run-41365578430-launcher-windows.json, readback-jobs-41365578430-launcher-windows.json, log-trich-125024913633-windows.txt]
+    nguon: [readback-run-41365578430-launcher-windows.json, readback-jobs-41365578430-launcher-windows.json, log-trich-125024913633-windows.txt, windows-41365578430/provenance.yaml, windows-41365578430/run.json, windows-41365578430/jobs.json, gate-output-41365578430-launcher-windows.txt]
     do_duoc: 'measured — readback-run/jobs: event push, head c7174bfe, run success; job launcher (ubuntu-latest) success, job launcher (windows-latest) 125024913633 success, labels windows-latest, runner_id 1000033788. log-trich-125024913633-windows.txt: 290/290 ca DA CHAY QUA (bo qua 74, hong 0), DOT BIEN: 461/461 dat (118 khong do duoc tren nen nay), ##[error] = 0; 4 dot bien tung SAI tren c82047da nay OK giet 1/1 dung ca dich (r484_g4_windows_sid_alias_identity x2, r484_g2_storage_kernel_guardrails, t73_doctor_phai_do_bash_va_npm).'
-    not_measured: 'Bon moc §10.2.2 (Checkout / Workflow definition / Gate output qua ci_provenance.py) cho run 41365578430 KHONG thu: launcher-windows.yml la lane launcher, khong phai gate ci.yml; bon moc gate da do cho ci.yml tren c82047da (post_merge_checks muc 1).'
+    moc_run: 'measured — windows-41365578430/provenance.yaml moc.run: event push, head_sha c7174bfe, run_attempt 1 (yeu cau 1), trang_thai passed; windows-41365578430/run.json.'
+    moc_checkout: 'measured — windows-41365578430/provenance.yaml moc.checkout: job 125024913633 launcher (windows-latest) va job 125024913403 launcher (ubuntu-latest) checkout passed c7174bfe03b3acd22cfa055b5fce176129d29542; windows-41365578430/jobs.json.'
+    moc_workflow_definition: 'measured — windows-41365578430/provenance.yaml workflow_definition: passed, path .github/workflows/launcher-windows.yml, oid c7174bfe, blob 308f0e0d7939fc873a587c12aa738789250a6c07, sha256 b8d0345f7e3e364423ccc03cf4b7e2c1c26ce6904356c711d9c22a1577716e8b, wd-run 41376105695, artifact 13110889241 (artifact_sha256 612f88cf…); ci_provenance.py thu tu tinh lai blob/sha256.'
+    moc_gate_output: 'measured — gate-output-41365578430-launcher-windows.txt (log REST tung job, sha256 + so byte): job windows 125024913633 success, ##[error] = 0, 290/290 ca DA CHAY QUA (bo qua 74), DOT BIEN: 461/461 (118 khong do duoc tren nen); buoc 10 python .claude/dev/launcher_test.py success 00:09:53Z->00:15:34Z, buoc 11 python .claude/dev/launcher_test.py --dot-bien success 00:15:34Z->00:21:27Z (rc suy tu ket luan buoc, workflow khong co continue-on-error). Collector ghi gate_output.jobs[].trang_thai = not_measured (no khong doc log); moc nay do bang tep trich, khong bang collector.'
   landed: true
   landed_dieu_kien: >-
-    Nhu landed_20261101.landed_dieu_kien, cong: lane launcher-windows XANH tren merge ban va c7174bfe (windows_sau_va). (7) §8.1
+    Nhu landed_20261101.landed_dieu_kien, cong: lane launcher-windows XANH tren merge ban va c7174bfe, du bon moc §10.2.2 cho
+    run 41365578430 attempt 1 (windows_sau_va). (7) §8.1
     van CHUA_DAT ve sandbox — chu kho chap nhan (quyet_dinh_chu_kho o khoi nay va o landed_20261101).

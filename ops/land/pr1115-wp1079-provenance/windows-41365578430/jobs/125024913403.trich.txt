@@ -1,0 +1,14 @@
+2026-11-02T00:09:01.4999037Z Image: ubuntu-24.04
+2026-11-02T00:09:02.1555286Z ##[group]Run git config --global core.autocrlf false
+2026-11-02T00:09:02.1937363Z ##[group]Run actions/checkout@v4
+2026-11-02T00:09:07.2577292Z [command]/usr/bin/git log -1 --format=%H
+2026-11-02T00:09:07.2607472Z c7174bfe03b3acd22cfa055b5fce176129d29542
+2026-11-02T00:09:07.2789828Z ##[group]Run actions/setup-python@v5
+2026-11-02T00:09:07.4079195Z ##[group]Run python -c "import platform,sys;print('he:',platform.system(),'| python:',sys.version.split()[0])"
+2026-11-02T00:09:13.4759756Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-11-02T00:09:15.3268472Z ##[group]Run set -euo pipefail
+2026-11-02T00:09:24.7039388Z ##[group]Run python ops/cong_cu.py kiem-tra --json
+2026-11-02T00:09:24.9692883Z ##[group]Run python .claude/dev/launcher.py doctor
+2026-11-02T00:09:26.4320346Z ##[group]Run python .claude/dev/launcher_test.py
+2026-11-02T00:13:58.5563134Z ##[group]Run python .claude/dev/launcher_test.py --dot-bien
+2026-11-02T00:20:57.1074608Z ##[group]Run $ban = git status --porcelain

@@ -1,0 +1,20 @@
+# Gate output — run 41365578430 attempt 1; log REST tung job (GET .../actions/jobs/<id>/logs), 2 job.
+# Moi job: ten | conclusion | so dong '##[error]' | sha256 + so byte cua log day du | cac dong khop mau so lieu.
+
+== launcher (ubuntu-latest) | job 125024913403 | success | ##[error]=0 | sha256 5a08e1e864bd0fcdac29cf3e8dfb934d21e7cfab3c2260ecf9a0b1c8f9490f76 | 113570 byte
+   KET LUAN  : DU CONG CU BAT BUOC
+   362/362 ca DA CHAY QUA (tong 364, bo qua 2, hong 0) - KHONG DU: 2 ca BO QUA, chua do gi
+   DOT BIEN: 575/575 dat  (4 khong do duoc tren nen nay)
+== launcher (windows-latest) | job 125024913633 | success | ##[error]=0 | sha256 41d6d9ee33bea87decd6edf23bbeaedfc4b77487ec0d594c3fba9513fb6dff41 | 143781 byte
+   KET LUAN  : DU CONG CU BAT BUOC
+   290/290 ca DA CHAY QUA (tong 364, bo qua 74, hong 0) - KHONG DU: 74 ca BO QUA, chua do gi
+   DOT BIEN: 461/461 dat  (118 khong do duoc tren nen nay)
+   KET LUAN  : QUA HET CHOT
+
+TONG ##[error] tren 2 job: 0
+
+# Lenh + thoi gian + ket luan buoc test (job launcher (windows-latest) 125024913633), tu windows-41365578430/jobs.json
+# (steps[].name/conclusion/started_at/completed_at) va dong '##[group]Run ...' trong log day du (sha256 o tren).
+# rc: GitHub khong tra ma thoat tung buoc qua REST; buoc 'success' trong shell mac dinh cua job nghia la lenh thoat 0 (khong co continue-on-error o hai buoc nay — xem .github/workflows/launcher-windows.yml).
+   buoc 10: Bo phan chung (day du, giu nguyen danh sach bo qua) | success | 2026-11-02T00:09:53Z -> 2026-11-02T00:15:34Z | lenh: python .claude/dev/launcher_test.py
+   buoc 11: Tu dot bien | success | 2026-11-02T00:15:34Z -> 2026-11-02T00:21:27Z | lenh: python .claude/dev/launcher_test.py --dot-bien

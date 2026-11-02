@@ -1,0 +1,25 @@
+VERDICT: changes_requested — P0/P1/P2/P3 = 0/0/1/0
+
+Đếm **lớp còn mở**: F3; gán sai loại G5 là biểu hiện mới của cùng lớp.
+
+| id | lớp | mức | tệp:dòng | mô tả | sửa đề xuất |
+|---|---|---|---|---|---|
+| F1 | bash trần | P1 → đóng | `ops/ci_duong_nhanh_test.py:2372` | Đã dùng `tim_bash()`. Quét `_loi_goi_tran` trả `[]`; giả lập không có bash làm `t56` đỏ đúng thông báo, rc=3. | Không cần sửa thêm cho biểu hiện này. |
+| F2 | DO6 né validator | P2 → đóng | `ops/ci_duong_nhanh.py:736,762` | `t57` rc=0. Đo trong bộ nhớ: không trích ⇒ rc=0; còn trích ⇒ rc=1 đúng dấu riêng; git lỗi ⇒ rc=1 `KHONG DO DUOC`. Gỡ lời gọi kiểm tra khiến ca còn trích xanh sai. | Không cần sửa thêm trong D1. Chưa đo tích hợp trên Git thật. |
+| F3 | thiếu bằng chứng ủy nhiệm | **P2 — chưa đóng** | `ops/ci_duong_nhanh_test.py:2286,2287,2320,2353` | Còn **7 dòng `chua_do`**, cộng phần `packet_loop_test` chưa đo trong dòng registry. Khai thật là đúng, nhưng chưa đáp ứng phép đo bắt buộc tại spec §2.2. **Mới:** G5 bị gán `cai_dat` dù workflow dòng 186–187 chạy bộ test, và `cong_cu_test.py:9125` gọi cổng quét cây thật. `t58` xanh chỉ chứng minh bảng đủ khóa/hợp lệ cú pháp. | Đo phần còn thiếu, phân loại lại G5 theo kết quả. Nếu giảm acceptance, cần quyết định sửa đặc tả. Khóa bằng kiểm tra hoàn tất evidence và ca từ chối gán G5 thành bước chỉ cài đặt. Tránh đổi nhãn thành `khong_doi_mau` khi chưa đo. |
+| F4 | trần kích thước | P2 → đóng theo lease offline | lease g2, khóa `nang_tran.kich_thuoc` | Ref cục bộ **có** lease tại `4f72ce0a793d0476888b49ea355cc0903cd92822`, ghi trần 6 tệp/1.000 dòng. `git diff --numstat origin/master HEAD` đo **6 tệp/970 dòng thêm**; spec trên ref khớp băm được giao. | Không cần giảm diff theo trần ghi trong lease. Readback comment cấp quyền GitHub: **KHÔNG ĐO ĐƯỢC** trong lượt offline. |
+
+Bằng chứng chạy độc lập:
+
+- **passed:** `python3 -B ops/ci_duong_nhanh_test.py --mot-ca <tên>` với `t57_xoa_tep_tai_lieu_con_trich_kiem_re_do` và `t58_bang_uy_nhiem_phu_dung_buoc_bi_bo`: rc=0.
+- **passed trong bộ nhớ:** 5 đột biến chọn lọc đỏ đúng assertion, rc=3; gồm sai cây tìm trích dẫn, nhận rc=0/rỗng, thiếu dòng bảng, giá trị lạ và bỏ validator khỏi harness.
+- **KHÔNG ĐO ĐƯỢC:** probe `tim_bash()` thực lỗi `No usable temporary directory`, rc=1. **not_run:** toàn bộ `t56`, đột biến cần bản sao trên đĩa, Windows và CI. Không chạy cả bộ đột biến.
+
+Không xác nhận thêm lỗi fail-open hoặc đột biến đích sai trong phạm vi đã đo.
+
+`reviewed_sha`: `015093f82ecfc4375b6b58522b835e0d83a6d3dd`  
+`tree`: `6d146f6bd1c865ab4d8350ee57e44460da260c68`
+
+HEAD/tree đầu–cuối giữ nguyên; tracked, untracked và ignored sạch. Không sửa tệp. Provider `openai_codex`, transport `machine`; execution surface/model/effort theo receipt runtime: **KHÔNG ĐO ĐƯỢC**.
+
+F3 còn mở ở lượt 2: chuyển checkpoint chủ kho theo chính sách review hiện hành.

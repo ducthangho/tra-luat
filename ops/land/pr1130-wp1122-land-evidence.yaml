@@ -40,11 +40,11 @@ post_merge_checks:
     run_attempt: 1
     sha: c7174bfe03b3acd22cfa055b5fce176129d29542
     conclusion: success
-    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, gate-output-41365578445.txt]
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, gate-output-41365578445.txt, danh-gia-gate-output-41365578445.txt, danh_gia_gate.py]
     moc_run: 'measured — ci/provenance.yaml moc.run: event push, nhanh master, head_sha c7174bfe, run_attempt 1, passed.'
     moc_checkout: 'measured — ci/provenance.yaml moc.checkout: 23/23 job passed tai c7174bfe03b3acd22cfa055b5fce176129d29542 (doi_chieu sha_bang_head_sha).'
     moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition: passed (wd-run 41399464496, artifact workflow-definition-41365578445), ci_provenance.py thu tu tinh lai blob/sha256.'
-    moc_gate_output: 'measured — gate-output-41365578445.txt (log REST tung job, sha256 + so byte): 23/23 success, ##[error] = 0; ci/provenance.yaml de gate=not_measured tung job (collector khong co marker dang ky) nen moc lay tu log, nhu khuon pr1128.'
+    moc_gate_output: 'measured — danh-gia-gate-output-41365578445.txt (danh_gia_gate.py: moi job PHAI co dong ket qua duong khop luat cua loai job, thieu => not_measured): 23/23 job passed, vd gate-cong-cu "cong_cu_test: 61/61 đạt" + "MẢNH k/8: N/N đột biến", gate-cong-cu-gop "SỐ LIỆU GOM: ... lỗi đột biến=0", gate-nhanh-manh "rc=0 · passed N/N", gate/ops/packet-loop/registry "TỔNG: ĐẠT". gate-output-41365578445.txt giu sha256 + so byte log tung job. Ban dau chi dua vao conclusion + ##[error]=0 — connector P1 r4439522915 bat; da sua. Lane launcher-windows 41365578430: danh-gia-gate-output-41365578430.txt 2/2 job co dau hieu duong (N/N ca + DOT BIEN N/N).'
   - name: 'launcher-windows.yml push master tai DUNG merge SHA (A6 cua spec)'
     run_id: 41365578430
     run_attempt: 1

@@ -1,0 +1,5 @@
+# Phan chung (--am): xoa dong dau hieu duong cua mot loai job khoi log roi danh gia lai run 41389693283 — moc PHAI ra not_measured
+am gate-cong-cu-gop -> MOC_GATE_OUTPUT: not_measured (22/23 job co dau hieu duong)
+am gate-nhanh-manh -> MOC_GATE_OUTPUT: not_measured (15/23 job co dau hieu duong)
+am gate-cong-cu ( -> MOC_GATE_OUTPUT: not_measured (15/23 job co dau hieu duong)
+am gate-registry -> MOC_GATE_OUTPUT: not_measured (22/23 job co dau hieu duong)

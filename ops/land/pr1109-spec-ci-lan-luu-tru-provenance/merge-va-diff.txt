@@ -1,0 +1,8 @@
+# merge 3bdd987 — do 2026-11-02
+commit 3bdd9877cab2543adc413a32a47decbb585ded97
+parents 2cea62517d0bbc331afa4dcffabbc81f3b613a87 1ac712b8652fa75f75b4c279cebbac9eac8709c0
+tree 167c145074f711d95fee837c81801c5cbd2a9c82
+tree(head 1ac712b8) fac5c898d992aa8aa1603e993bd9ef71dd3f41fb
+ ops/specs/CI-LAN-LUU-TRU-r1.md | 218 +++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 218 insertions(+)
+sha256 ops/specs/CI-LAN-LUU-TRU-r1.md tai 3bdd987: 7bd567f5fe75e4c5564fde767b39d4845fbb595b30f7005aae9e9f4468d1833c

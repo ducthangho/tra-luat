@@ -19,8 +19,8 @@ recorded_by: openai_codex_dispatcher
 recorder_is_dispatcher: true
 leased_at_utc: '2026-11-02T09:29:25Z'
 heartbeat_at: '2026-11-02T09:29:25Z'
-lease_until: '2026-11-03T09:29:25Z'
-lease_expires_at_utc: '2026-11-03T09:29:25Z'
+lease_until: '2026-11-02T17:39:15Z'
+lease_expires_at_utc: '2026-11-02T17:39:15Z'
 role: executor
 provider: openai_codex
 executor: openai_codex

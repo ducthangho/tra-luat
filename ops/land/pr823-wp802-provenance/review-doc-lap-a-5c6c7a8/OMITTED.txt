@@ -1,0 +1,4 @@
+# Tep KHONG vao kho (bang chung phu, lon hoac trung gian): sha256  byte  duong_dan_tuong_doi_trong_thu_muc_review
+527326d8362f8041a5fa06e21b0db261d58cb83f1962568469716379d275052b  212  runs/a34aff65/checkpoint.json
+1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721  39  runs/a34aff65/stderr.log
+ed985b494defd7990e789351980a1351c80bb0fd75c96f7a01e99202261fdef5  209  runs/a34aff65/stdout.log

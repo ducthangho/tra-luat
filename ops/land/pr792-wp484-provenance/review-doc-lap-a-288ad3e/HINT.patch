@@ -1,0 +1,34 @@
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -7822,11 +7822,22 @@
+             f"  echo \"LAUNCHER $2\" >> '{ky}'; exit 0\n"
+             "fi\n"
+             f"exec '{PY}' \"$@\"\n", encoding="utf-8")
++        # Test-only hint: keep every installer entry point inside this fixture.
++        for tool in ("rg", "actionlint"):
++            (fakebin / tool).write_text(
++                f"#!/bin/sh\necho inert-{tool}\n", encoding="utf-8")
++        for tool in ("apt-get", "sudo", "cargo"):
++            (fakebin / tool).write_text(
++                f"#!/bin/sh\necho 'CAI {tool}' >> '{ky}'\nexit 97\n", encoding="utf-8")
+         for f in fakebin.iterdir():
+             f.chmod(0o755)
+         sach = [d for d in os.environ.get("PATH", "").split(os.pathsep)
+                 if d and not any((Path(d) / t).exists() for t in ("codex", "npm", "claude"))]
+-        env = dict(os.environ, CLAUDE_CODE_REMOTE="true", CLAUDE_PROJECT_DIR=str(project),
++        env = {k: v for k, v in os.environ.items()
++               if k not in ("BASH_ENV", "ENV") and not k.startswith("BASH_FUNC_")}
++        (s / "home").mkdir()
++        env.update(CLAUDE_CODE_REMOTE="true", CLAUDE_PROJECT_DIR=str(project),
++                   HOME=str(s / "home"),
+                    CODEX_HOME=str(s / "codex"), CODEX_AUTH_JSON='{"tokens":{}}',
+                    PATH=os.pathsep.join([str(fakebin)] + sach))
+         import runpy
+@@ -7841,6 +7852,7 @@
+         bang(npm[0] < cb[0], f"materialize chạy TRƯỚC cài codex: {dong}")
+         bang("BAN-NPM" not in dong, f"installer thấy snapshot: {dong}")
+ 
++        bang(not any(x.startswith("CAI ") for x in dong), f"fixture gọi installer ngoài npm giả: {dong}")
+ 
+ @ca
+ def r484_g7_materializer_khong_ghi_duoc_trang_thai_noi_dung_ly_do():

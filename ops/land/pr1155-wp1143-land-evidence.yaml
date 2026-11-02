@@ -1,4 +1,4 @@
-# Packet #1143, PR #1155. Hồ sơ A11 được cập nhật sau ba run; trạng thái hiện tại là merged, chưa landed.
+# Packet #1143, PR #1155. A11 ba lượt đạt; CI hậu merge và bốn mốc đã đo; landed ngày 2026-11-02.
 schema_version: 1
 packet: CI-DUONG-NHANH-BO-DOT-BIEN
 packet_issue: 1143
@@ -34,23 +34,38 @@ merge_commit: bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
 tree_m: 38271ee1dee8a475674f9eddd43fb248b693b2d6
 ci_master:
   run_id: 41425851232
-  conclusion: pending
+  conclusion: success
 nghiem_thu:
   A1_A10: passed
-  A11_archive_pr: pending
-  A11_dispatch_before_merge: pending
-  A11_push_master: pending
+  A11_archive_pr: passed
+  A11_dispatch_before_merge: passed
+  A11_push_master: passed
 lease_cuoi: ci-duong-nhanh-bo-dot-bien-r1-g1-codex-20261102
-landed: false
+landed: true
+landed_2026_11_02: true
 moc_10_2_2:
-  run: pending
-  checkout: pending
-  workflow_definition: pending
-  gate_output: pending
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed
 evidence:
   code_pr: https://github.com/ducthangho/tra-luat/pull/1155
   ci_pr: https://github.com/ducthangho/tra-luat/actions/runs/41413466192
   m9: https://github.com/ducthangho/tra-luat/actions/runs/41420415501
   pre_canary_a6: https://github.com/ducthangho/tra-luat/actions/runs/41414412379
   kiem_merge: 'K0-K7 exit 0 trên head_da_review, 2026-11-02'
-  archive_canary: Chưa đo; PR hồ sơ này chỉ thay ops/land/**.
+  archive_canary: 'passed — PR #1157 head c3731ea; run PR 41426125071 (673 runner-giây), dispatch 41427360983 (569 runner-giây) trên đúng head trước merge; push 41428563676 (608 runner-giây) trên merge 5202d3d. Cả ba success, đủ 3 check bắt buộc, đủ marker, 0 Windows chạy thật.'
+  archive_pr: https://github.com/ducthangho/tra-luat/pull/1157
+  a11_pr: https://github.com/ducthangho/tra-luat/actions/runs/41426125071
+  a11_dispatch: https://github.com/ducthangho/tra-luat/actions/runs/41427360983
+  a11_push: https://github.com/ducthangho/tra-luat/actions/runs/41428563676
+  a11_provenance: ops/land/pr1155-wp1143-provenance/SHA256SUMS
+
+post_merge_provenance:
+  method: 'Readback REST + gh run logs; collector ops/ci_provenance.py thu gặp HTTP 403 tại URL log chuyển hướng, nên bốn mốc được kiểm trực tiếp và lưu chứng cứ rút gọn.'
+  run: '41425851232 attempt 1, push trên bae0c966, success; 23/23 job success.'
+  checkout: '23/23 job có log actions/checkout@v4 ghi đúng bae0c966; xem ci-master-markers.txt.'
+  workflow_definition: '41429154809 success; do-wd báo passed, oid bae0c966; blob 75b5add9186c158b2f6f36891074e9c4bd592515 và sha256 cb5487d459082c0441bee2493e99ecc070589cbb9fa819888788b5fd969c47b9 khớp git local.'
+  gate_output: '23/23 job success, log tổng không có ##[error]; gate-ops CA 118/118, DOT BIEN 431/431, TONG DAT; gate-registry TỔNG ĐẠT.'
+  workflow_definition_url: https://github.com/ducthangho/tra-luat/actions/runs/41429154809
+  lease_release_commit: 902efd897e31364b42a5d537192cb2267a361b7c

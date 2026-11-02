@@ -30,6 +30,7 @@ RE_SHA = re.compile(rf"^{TS} ([0-9a-f]{{40}})$")
 RE_GIO = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z")
 RE_ANSI = re.compile(r"\x1b\[[0-9;]*m")
 RE_HEX40 = re.compile(r"^[0-9a-f]{40}$")
+RE_OID_B = re.compile(rb"[0-9a-f]{40}|[0-9a-f]{64}")   # F13: OID SHA-1/SHA-256 dạng bytes (dòng tree/parent của commit)
 RE_REPO = re.compile(r"^[\w.-]+/[\w.-]+$")
 LY_DO_WD = "graphql_bi_chan_trong_phien_claude; cho P-B"
 # CI-PROVENANCE-WD r1 (Issue #1094): mốc Workflow definition đo bằng `do-wd` trong Actions, nhập bằng `thu --wd-run`.
@@ -155,14 +156,29 @@ def doc_moi(duong=CI_DANG_KY):
     return dict(m.MOI), m.bang_chung_xanh
 
 def git_cuc_bo(sha, goc=ROOT):
-    """parents/tree của commit trong kho cục bộ; không có object (hoặc không phải commit) ⇒ None."""
-    try:
-        r = subprocess.run(["git", "-C", str(goc), "cat-file", "-p", sha], capture_output=True, text=True, timeout=60)
-    except (OSError, subprocess.SubprocessError):
+    """parents/tree của commit trong kho cục bộ; không có object (hoặc không phải commit) ⇒ None.
+    F13 (#955 review A): đọc BYTES — message/author không phải UTF-8 là commit HỢP LỆ; chỉ giải mã dòng tree/parent, và chỉ khi là OID hex.
+    #978 review lượt 1: loại object đọc từ CHÍNH lời gọi `--batch` (không peel tag; blob dạng commit ⇒ None), và tách
+    header theo LF của định dạng Git — `splitlines()` tách cả CR nằm TRONG author thành một dòng `parent` giả."""
+    if type(sha) is not str:   # nhiều dòng (`a\nb`) ⇒ `--batch` trả nhiều object ⇒ lệch kích thước bên dưới ⇒ None
         return None
-    dau = r.stdout.split("\n\n", 1)[0].splitlines() if r.returncode == 0 else []
-    tree = [x[5:] for x in dau if x.startswith("tree ")]
-    return {"tree": tree[0], "parents": [x[7:] for x in dau if x.startswith("parent ")]} if len(tree) == 1 else None
+    try:
+        r = subprocess.run(["git", "-C", str(goc), "cat-file", "--batch"], input=sha.encode() + b"\n", capture_output=True, timeout=60)
+    except (OSError, subprocess.SubprocessError, UnicodeEncodeError):
+        return None
+    dau, _, than = r.stdout.partition(b"\n")
+    loai = dau.split(b" ")
+    if r.returncode != 0 or len(loai) != 3 or loai[1] != b"commit" or not loai[2].isdigit() or len(than) != int(loai[2]) + 1:
+        return None
+    dong = than[:int(loai[2])].split(b"\n\n", 1)[0].split(b"\n")
+    tree, cha = [x[5:] for x in dong if x.startswith(b"tree ")], []
+    for x in dong[1:]:   # lượt 3: ngữ pháp Git — `parent` là dãy LIỀN SAU dòng `tree` đầu; `parent` sau committer/header mở rộng không phải cha
+        if not x.startswith(b"parent "):
+            break
+        cha.append(x[7:])
+    if len(tree) != 1 or not dong[0].startswith(b"tree ") or not all(RE_OID_B.fullmatch(x) for x in tree + cha):
+        return None
+    return {"tree": tree[0].decode("ascii"), "parents": [x.decode("ascii") for x in cha]}
 
 def git_blob(sha, path, goc=ROOT):
     """Văn bản blob `<sha>:<path>` trong kho cục bộ; thiếu object/tệp, không phải blob hay không UTF-8 ⇒ None."""

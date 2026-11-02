@@ -1,0 +1,16 @@
+# Phan chung A5 cua spec CI-CONCURRENCY-MASTER r1 (#1132). Nhanh thu dung mot lan, KHONG merge vao master.
+# Nhanh nay dong vai master: refs/heads/master thay bang refs/heads/ops/thu-concurrency-1132.
+name: thu-concurrency
+on:
+  push:
+    branches: [ops/thu-concurrency-1132]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/ops/thu-concurrency-1132' }}
+permissions: {}
+jobs:
+  ngu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: sleep 120

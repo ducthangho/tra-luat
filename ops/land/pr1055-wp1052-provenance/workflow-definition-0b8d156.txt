@@ -1,0 +1,13 @@
+# Moc §10.2.2 Workflow definition cho run 41257563723 (gate ci.yml, push master, head 0b8d156).
+# GraphQL WorkflowRun.file do phien session_015GtxrcSEjPkSR4KLHEyEsm chay TREN MAY CHU KHO qua Desktop Commander
+# (ASUS-LAPTOP, deviceId 7404cfba-9034-4787-b46b-7c358126a411, pwsh 7; gh 2.95.0, dang nhap github.com account ducthangho
+# (keyring)), luc 2026-11-01T01:54:39Z. Lenh (pwsh, cau truy van trong nhay don de $id khong bi mo rong):
+#   $q = 'query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt file { path repositoryFileUrl } checkSuite { commit { oid } } } } }'
+#   gh api graphql -f id=WFR_kwLOTNeRjc8AAAAJmyR2Sw -f query=$q
+# Ma thoat: RC=0. Output nguyen van:
+{"data":{"node":{"databaseId":41257563723,"runNumber":3759,"createdAt":"2026-11-01T00:37:37Z","file":{"path":".github/workflows/ci.yml","repositoryFileUrl":"https://github.com/ducthangho/tra-luat/blob/0b8d15610ee768224916a390269984baa4b1b8ce/.github/workflows/ci.yml"},"checkSuite":{"commit":{"oid":"0b8d15610ee768224916a390269984baa4b1b8ce"}}}}}
+# Doi chieu (phien, 2026-11-01):
+# REST run (readback-run-41257563723.json): node_id head_sha path run_number = WFR_kwLOTNeRjc8AAAAJmyR2Sw 0b8d15610ee768224916a390269984baa4b1b8ce .github/workflows/ci.yml 3759
+# blob ci.yml @0b8d156 qua REST contents?ref=0b8d156: 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
+# blob ci.yml @0b8d156 qua git rev-parse:              82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
+# sha256 noi dung ci.yml @0b8d156 (git show):          ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb

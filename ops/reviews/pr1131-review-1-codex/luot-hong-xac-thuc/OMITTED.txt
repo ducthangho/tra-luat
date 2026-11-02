@@ -1,0 +1,4 @@
+DIFF.patch	sha256 b3cd603ebe29f46e0d614306e3d050f77fa3a653eadd31cf12c6dc3c1fe760d2	bytes 946152	ly do: tai lap bang git diff 180039c 0e824fe; giong DIFF.patch cua luot tinh
+launcher.err	sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	bytes 0	ly do: tep rong
+VERDICT.md	khong ton tai: codex thoat rc=1 truoc khi ghi (401 workspace routing discovery unauthorized)
+cay-kho/ nguon/	khong chep: ban sao kho/nguon cua sandbox

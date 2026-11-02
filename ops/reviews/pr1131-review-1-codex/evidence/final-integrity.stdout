@@ -1,0 +1,70 @@
+{
+  "before_files": 10638,
+  "after_files": 10638,
+  "changed": [],
+  "added": [],
+  "removed": [],
+  "original_head": {
+    "cmd": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "0e824fe4c1ac674081c93c6f2098e5433c932890",
+    "stderr": ""
+  },
+  "original_tree": {
+    "cmd": [
+      "git",
+      "rev-parse",
+      "HEAD^{tree}"
+    ],
+    "rc": 0,
+    "stdout": "e3d867387abbcee063ab7b72803655d826bb0964",
+    "stderr": ""
+  },
+  "original_status": {
+    "cmd": [
+      "git",
+      "status",
+      "--porcelain=v1",
+      "--untracked-files=all"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "head_copy_head": {
+    "cmd": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "0e824fe4c1ac674081c93c6f2098e5433c932890",
+    "stderr": ""
+  },
+  "head_copy_tree": {
+    "cmd": [
+      "git",
+      "rev-parse",
+      "HEAD^{tree}"
+    ],
+    "rc": 0,
+    "stdout": "e3d867387abbcee063ab7b72803655d826bb0964",
+    "stderr": ""
+  },
+  "head_copy_status": {
+    "cmd": [
+      "git",
+      "status",
+      "--porcelain=v1",
+      "--untracked-files=all"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "mutated_receipts_restored": true
+}

@@ -1,0 +1,3 @@
+FAIL t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi AssertionError("pr1119-review-1-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai 028c2594116bff50653a6486fa07fd97cb2ad5e6b440c43277ad644f2f014d65, tệp 'ops/reviews/pr1119-review-1-codex-verdict.md' thực a28c2594116bff50653a6486fa07fd97cb2ad5e6b440c43277ad644f2f014d65. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào.")
+PASS t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc
+PASS t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen

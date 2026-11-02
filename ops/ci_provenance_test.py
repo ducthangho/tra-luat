@@ -1090,7 +1090,12 @@ def c62_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
         cay = g("mktree", i=f"100644 blob {g('hash-object', '-w', '--stdin', i=b'x')}\tf\n".encode())
         dau = f"tree {cay}\nparent {P1}\nparent {P2}\n".encode()
         ai = lambda ten: b"author " + ten + b" <a@b> 1700000000 +0000\ncommitter " + ten + b" <a@b> 1700000000 +0000\n"  # noqa: E731
-        cm = lambda b, lit=(): g("hash-object", "-t", "commit", "-w", *lit, "--stdin", i=b)  # noqa: E731
+        cho = []   # r2 (Windows thật, tra-luat-win): ~600 lời gọi `hash-object` lẻ + oracle từng commit đẩy ca này quá timeout 300 s
+        def cm(b, lit=()):   # của `chay_con` ⇒ commit hợp lệ GHI MỘT LƯỢT (`--stdin-paths`); OID tính trước, đối chiếu với OID Git trả về
+            if lit:
+                return g("hash-object", "-t", "commit", "-w", *lit, "--stdin", i=b)
+            cho.append(b)
+            return hashlib.sha1(b"commit %d\0" % len(b) + b).hexdigest()
         dung, goc = {"tree": cay, "parents": [P1, P2]}, {"tree": cay, "parents": []}
         hop_le = [cm(dau + x) for x in (ai("Nguyễn".encode()) + "\nthông điệp UTF-8\n".encode(), ai(b"A") + b"encoding ISO-8859-1\n\nm\xe9ssage\n",
                                          ai(b"Jos\xe9") + b"encoding ISO-8859-1\n\nm\xe9ssage\n",
@@ -1136,6 +1141,12 @@ def c62_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
                 b"tree " + b"g" * 40 + b"\n", b"tree " + cay.upper().encode() + b"\n", f"tree {cay}\nparent zz\n".encode(),
                 f"tree {cay}\nparent {P1[:20]}".encode() + b"\xff" + P1[20:].encode() + b"\n", f"parent {P1}\ntree {cay}\n".encode(), f"tree {cay}\rparent {P1}\n".encode()]
         ca += [(cm(x + ai(b"A") + b"\nh\n", ("--literally",)), None) for x in hong]
+        tep = []
+        for i, b in enumerate(cho):
+            (Path(thu) / f"c{i}").write_bytes(b)
+            tep.append(str(Path(thu) / f"c{i}"))
+        ghi = g("hash-object", "-t", "commit", "-w", "--stdin-paths", i="\n".join(tep).encode() + b"\n").split("\n")
+        bang(ghi == [hashlib.sha1(b"commit %d\0" % len(b) + b).hexdigest() for b in cho], f"OID tính trước ≠ OID Git ghi ({len(ghi)}/{len(cho)})")
         ca += [(g("hash-object", "-w", "--stdin", i=v), None) for v in (b"\xff\n", b"tree zz\n", dau + ai(b"A") + b"\nblob\n")]   # blob, kể cả dạng commit
         the = g("hash-object", "-t", "tag", "-w", "--stdin",   # tag annotated dựng đúng byte: `git tag -a` đòi danh tính (runner CI không có)
                 i=f"object {hop_le[0]}\ntype commit\ntag the\ntagger A <a@b> 1700000000 +0000\n\nt\n".encode())
@@ -1148,9 +1159,14 @@ def c62_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
         kq = [doc(x, d1) for x, _ in ca] + [doc(c2, d2)]
         mong = [k for _, k in ca] + [{"tree": cay2, "parents": ba2}]
         bang(kq == mong, f"git_cuc_bo lệch ở {[(i, a) for i, (a, b) in enumerate(zip(kq, mong)) if a != b]}")
-        for x, d, gg in [(x, d1, g) for x, k in ca if type(k) is dict] + [(c2, d2, g2)]:   # oracle Git NATIVE cho mọi commit hợp lệ
-            t, _, p = gg("log", "-1", "--no-walk", "--format=%T%n%P", x).partition("\n")
-            bang(doc(x, d) == {"tree": t, "parents": p.split()}, f"lệch Git native ở {x}: {doc(x, d)} ≠ {t} {p.split()}")
+        hop = [i for i, (_, k) in enumerate(ca) if type(k) is dict]   # oracle Git NATIVE cho mọi commit hợp lệ, MỘT lời gọi mỗi kho
+        nat = {}
+        for gg, xs in ((g, [ca[i][0] for i in hop]), (g2, [c2])):
+            for dong in gg("log", "--no-walk=unsorted", "--stdin", "--format=%H%x00%T%x00%P", i="\n".join(xs).encode() + b"\n").split("\n"):
+                h, t, p = dong.split("\0")
+                nat[h] = {"tree": t, "parents": p.split()}
+        for x, a in [(ca[i][0], kq[i]) for i in hop] + [(c2, kq[-1])]:   # `kq` là đầu ra reader đã đo ở trên, không gọi lại
+            bang(a == nat.get(x), f"lệch Git native ở {x}: {a} ≠ {nat.get(x)}")
         with mock.patch.dict(os.environ, {"PATH": thu}):
             bang(doc(hop_le[0], d1) is None, "không có git trên PATH ⇒ None")
         ra_that = subprocess.run(["git", "-C", d1, "cat-file", "--batch"], input=hop_le[0].encode() + b"\n", capture_output=True, check=True).stdout

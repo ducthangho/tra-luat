@@ -3,7 +3,7 @@
 - **Trạng thái:** Accepted (2026-11-02). Chủ kho `ducthangho` chọn "ADR chấp nhận (Recommended)" cho Issue #825 qua
   AskUserQuestion trong phiên `session_015Gtxra7iT6mwM1kqpdggt6` ngày 01-11-2026, rồi bảo làm ngay ("Đồng ý làm đi",
   02-11-2026). Thi hành bằng packet `CODEX-REJECTED-STATE-KHONG-GHI-DUOC-ADR` revision 1 · generation 1, đặc tả
-  `ops/specs/wp825.md` (sha256 `dee36a11…812e`), không phải một phiên tự đặt quy ước. Thứ định danh đặc tả là băm, không
+  wp825.md trong ops/specs (sha256 `dee36a11…812e`), không phải một phiên tự đặt quy ước. Thứ định danh đặc tả là băm, không
   phải tên nhánh: tìm tệp ở `master` trước, chưa thấy thì fetch nhánh `ops/wp825-r1-g1-lease`.
 - Đóng nợ có tên `codex-rejected-state-khong-ghi-duoc` (#825), sinh từ packet #484 (land qua PR #792).
 
@@ -25,9 +25,9 @@ kho **không có chỗ nào khác** để nhớ hộ. ADR này chấp nhận vĩ
 ## Cách phát hiện — cả ba lối đều báo lỗi to, mỗi lối có lý do riêng
 1. `launcher._do_codex_song` (đo trên `c7174bf`): khi `_danh_dau_auth_hong` trả `False`, lối này trả lý do bắt đầu bằng
    `KHÔNG ghi được trạng thái chờ snapshot sau khi …`, kèm `CHẶN: sửa CODEX_HOME (quyền/dung lượng) trước khi thử lại`.
-   Lý do này khác hẳn trường hợp đã ghi xong. Khoá bằng ca `r484_g7_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra` và đột
+   Lý do này khác hẳn trường hợp đã ghi xong. Khoá bằng ca r484_g7_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra và đột
    biến `g7_nuot_loi_ghi_trang_thai` trong `.claude/dev/launcher_test.py`.
-2. Materializer `chuan_bi_xac_thuc`: khoá bằng ca `r484_g7_materializer_khong_ghi_duoc_trang_thai_noi_dung_ly_do` và đột
+2. Materializer `chuan_bi_xac_thuc`: khoá bằng ca r484_g7_materializer_khong_ghi_duoc_trang_thai_noi_dung_ly_do và đột
    biến `g7_f01_materializer_gop_loi`.
 3. `codex_cred.cmd_kiem`: khoá bằng ca `t16_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra` trong
    `.claude/dev/codex_cred_test.py`.

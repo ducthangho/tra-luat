@@ -12,15 +12,24 @@ Khi credential Codex bị dịch vụ **từ chối**, `.claude/dev/launcher.py`
 snapshot. Việc ghi này do `_danh_dau_auth_hong` làm, qua `_KhoCodex` dưới `CODEX_HOME`. Có state ấy thì lần gọi sau
 không thử lại đúng credential đã biết là hỏng.
 
-Nếu chính lần ghi đó hỏng (đĩa đầy, sai quyền trên `CODEX_HOME`, hệ tệp chỉ đọc), `_danh_dau_auth_hong` trả `False`, và
-kho **không có chỗ nào khác** để nhớ hộ. ADR này chấp nhận vĩnh viễn rằng trong trường hợp đó, lần gọi sau sẽ probe lại
-đúng credential đã bị từ chối.
+Nếu lần ghi danh tính bị từ chối hỏng, hai lối kiểm sống báo lỗi ghi; materializer cũng có
+lý do riêng. Kho không dựng chỗ lưu dự phòng cho danh tính ấy. ADR này chấp nhận vĩnh viễn
+khả năng probe lặp khi state vẫn đọc được nhưng chưa nhớ danh tính đã bị từ chối.
 
-## Hậu quả quan sát được
-Đơn vị đếm là **lời probe mạng mỗi lần gọi**:
-- mỗi lần gọi sau một lần ghi hỏng tốn thêm **1** lần probe credential đã bị từ chối;
-- lần nào kết quả cũng là từ chối, kèm cùng lý do CHẶN (xem mục dưới);
-- không có trạng thái nào bị ghi sai. Kho chỉ *không nhớ* được điều đã biết.
+## Hậu quả và điều kiện áp dụng
+Đơn vị đếm là **lời probe mạng ở mức gọi helper**; số lần gọi suy từ luồng mã,
+chưa đo số request mạng bên trong Codex CLI.
+Khi state vẫn đọc được, chưa chứa danh tính bị từ chối, credential giữ nguyên và probe vẫn
+bị dịch vụ từ chối, lỗi ghi lặp trước bước promote state sẽ làm lần gọi kiểm sống sau thử lại
+credential ấy. Mỗi lượt đi đến nhánh này gọi helper probe một lần; materializer cần có snapshot
+đủ điều kiện probe thay cho credential cũ. Lý do CHẶN lỗi ghi lặp lại khi cùng lỗi ghi còn tồn tại.
+
+Kết quả ghi hỏng không bảo đảm state chưa thay đổi: `_KhoCodex.write` có thể đã `os.replace`
+state rồi mới lỗi ở `os.fsync` thư mục trên POSIX. Nếu lần sau đọc được danh tính đã lưu thì
+lượt đó không probe. Nếu state không đọc được, `_dang_cho_snapshot` cũng chặn mà không probe;
+materializer có thể trả lỗi đọc/ghi state chung. Vì vậy lý do lần sau có thể khác lý do lỗi ghi.
+Các ca ở dưới khóa việc báo lỗi, không chứng minh một bảo đảm tổng quát về mọi lỗi I/O hoặc
+mọi xen kẽ ghi; không suy từ kết quả `False` rằng mọi tệp state đều giữ nguyên.
 
 ## Cách phát hiện — cả ba lối đều báo lỗi to, mỗi lối có lý do riêng
 1. `launcher._do_codex_song` (đo trên `c7174bf`): khi `_danh_dau_auth_hong` trả `False`, lối này trả lý do bắt đầu bằng
@@ -34,7 +43,13 @@ kho **không có chỗ nào khác** để nhớ hộ. ADR này chấp nhận vĩ
 
 Đo trên `c7174bf` lúc 00:5xZ ngày 02-11-2026: hai ca `r484_g7_*` ra `1/1 qua` khi chạy `--lap-ca`, và
 `codex_cred_test.py` ra `TỔNG: ĐẠT`. Các ca này là **bằng chứng hành vi** rằng lỗi không bị nuốt. Chúng không phải cổng
-đọc ADR này.
+đọc ADR này. Lệnh tái lập từ gốc kho (dùng temp ngoài repository và tránh `/tmp/.git` nếu có):
+
+```bash
+python3 -B .claude/dev/launcher_test.py --lap-ca r484_g7_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra --lan 1
+python3 -B .claude/dev/launcher_test.py --lap-ca r484_g7_materializer_khong_ghi_duoc_trang_thai_noi_dung_ly_do --lan 1
+python3 -B .claude/dev/codex_cred_test.py
+```
 
 ## Cách gỡ
 Sửa quyền hoặc giải phóng dung lượng của `CODEX_HOME`, rồi gọi lại. Lần ghi kế tiếp thành công thì state được lưu, và
@@ -48,17 +63,23 @@ luận, CHƯA ĐO trên từng loại hỏng.** Nếu sau này có số đo cho 
 phổ biến, ADR này phải được xét lại bằng một ADR mới.
 
 ## Cưỡng chế
-**0 cổng đọc ADR này.** Đo trên `origin/master` `c7174bf`, với `rg -c 'ADR-0061|0061-codex' <tệp>` trên đủ sáu vị trí
-cổng mà §20 của `docs/PROTOCOL_DA_PHIEN.md` liệt kê:
+Đo trên `origin/master` `c7174bf`: `rg -c 'ADR-0061|0061-codex' <tệp>` không khớp ở cả sáu
+vị trí dưới đây (stdout rỗng, rc=1). Đây chỉ là số dòng nhắc định danh ADR. Đo thêm khái niệm
+bằng `rg -c 'codex-rejected-state-khong-ghi-duoc|_danh_dau_auth_hong|KHÔNG ghi được trạng thái' <tệp>`:
 
-| vị trí cổng | kết quả |
-|---|---|
-| `ops/lease_publish.py` | 0 dòng |
-| `.claude/dev/packet_loop.py` | 0 dòng |
-| `.claude/dev/launcher.py` | 0 dòng |
-| `.claude/dev/gate_lifecycle.py` | 0 dòng |
-| `.github/workflows/ci.yml` | 0 dòng |
-| `.github/workflows/ops-publish-lease.yml` | 0 dòng |
+| vị trí cổng | khớp định danh ADR | khớp khái niệm |
+|---|---|---|
+| `ops/lease_publish.py` | 0 | 0 |
+| `.claude/dev/packet_loop.py` | 0 | 0 |
+| `.claude/dev/launcher.py` | 0 | 4 dòng |
+| `.claude/dev/gate_lifecycle.py` | 0 | 0 |
+| `.github/workflows/ci.yml` | 0 | 0 |
+| `.github/workflows/ops-publish-lease.yml` | 0 | 0 |
 
-Hành vi được ADR này mô tả (báo lỗi to) vẫn có ca test và đột biến khoá ở mục *Cách phát hiện*. Việc **chấp nhận** giới
-hạn thì chỉ sống bằng kỷ luật đọc. `adr-song` canh việc ADR này được đăng ký trong §20, không canh nội dung của nó.
+Theo định nghĩa cột §20, đây là mức **có nhắc: launcher.py×4**, chưa chứng minh có cổng đọc
+quyết định chấp nhận giới hạn. Đọc các nhánh `_danh_dau_auth_hong`, `chuan_bi_xac_thuc`,
+`_do_codex_song` và `codex_cred.cmd_kiem` thấy hành vi báo lỗi được mã hóa sẵn; không thấy
+consumer của quyết định chấp nhận trong ADR. Đây là đối chiếu luồng mã, không phải hệ quả
+riêng của phép grep tên. Việc chấp nhận vẫn sống bằng kỷ luật đọc. `adr-song` đọc đăng ký
+và metadata trạng thái của ADR, không kiểm hậu quả hay thực thi quyết định chấp nhận này.
+Các ca/đột biến ở mục *Cách phát hiện* là bằng chứng hành vi báo lỗi.

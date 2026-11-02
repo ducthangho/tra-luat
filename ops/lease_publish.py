@@ -1918,13 +1918,13 @@ class KhoObject:
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self.env,
                              start_new_session=hasattr(os, "killpg"))
         ket_qua: dict = {}
-        tong_truoc = self.tong_bytes; dung_doc = threading.Event()
+        tong_truoc = self.tong_bytes; dung_doc = threading.Event(); reader = None
 
         def _doc_thuc():
             try:
                 p.stdin.write((oid + "\n").encode("ascii")); p.stdin.close()
                 if dung_doc.is_set(): return
-                dau = p.stdout.readline().decode("ascii", "replace").rstrip("\n")
+                dau = reader.readline().decode("ascii", "replace").rstrip("\n")
                 if dung_doc.is_set(): return
                 ket_qua["dau"] = dau
                 cot = dau.split()
@@ -1936,11 +1936,13 @@ class KhoObject:
                     if tong_truoc + kich > self.ngan_sach["max_total_object_bytes"]:
                         ket_qua["qua_tong"] = kich      # F05: kiểm TỔNG từ header, trước khi cấp phát body
                         return
-                    ket_qua["than"] = p.stdout.read(kich + 1)
+                    pause = getattr(self, "_truoc_doc_than", None)
+                    if pause: pause()  # test seam: scheduler can stop here after the cancellation check
+                    ket_qua["than"] = reader.read(kich + 1)
             except Exception as e:  # noqa: BLE001
                 ket_qua["loi"] = repr(e)
             finally:
-                for luong in (p.stdin, p.stdout):
+                for luong in (p.stdin, reader):
                     if luong is not None and not luong.closed:
                         try: luong.close()
                         except OSError: pass
@@ -1963,6 +1965,9 @@ class KhoObject:
 
         t = threading.Thread(target=_doc_thuc, daemon=True)
         try:
+            fd = os.dup(p.stdout.fileno())
+            try: reader = os.fdopen(fd, "rb")
+            except BaseException: os.close(fd); raise
             t.start(); t.join(timeout=con)
             if t.is_alive():
                 raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: hết deadline reader khi đọc {oid[:12]} (đã kill cat-file)")
@@ -2002,17 +2007,21 @@ class KhoObject:
             return than
         finally:
             dung_doc.set()
-            if p.poll() is None:
+            if p.poll() is None or (t.is_alive() and hasattr(os, "killpg")):
                 try:
                     getattr(os, "killpg")(p.pid, 9)
                 except Exception:  # noqa: BLE001 — không có killpg / nhóm đã chết: kill trực tiếp
-                    p.kill()
-                p.wait()
+                    if p.poll() is None: p.kill()
+                if p.poll() is None: p.wait()
             if t.is_alive():
                 _huy_doc_win()
                 t.join(timeout=0.05)
-            if t.is_alive(): _huy_doc_win()
-            for luong in ((p.stdin, p.stdout, p.stderr) if t.ident is None else (p.stderr,)):
+            if t.is_alive() and os.name == "nt":
+                def watchdog():
+                    while t.is_alive():
+                        _huy_doc_win(); t.join(timeout=0.01)
+                threading.Thread(target=watchdog, daemon=True).start()
+            for luong in ((p.stdin, reader, p.stdout, p.stderr) if t.ident is None else (p.stdout, p.stderr)):
                 if luong is None or luong.closed:
                     continue
                 try:

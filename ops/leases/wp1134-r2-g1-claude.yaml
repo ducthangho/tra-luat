@@ -88,8 +88,8 @@ heartbeat_at: '2026-11-01T23:53:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
 heartbeat_required_minutes: 360
 heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
-lease_until: '2026-11-02T23:53:00Z'
-lease_expires_at_utc: '2026-11-02T23:53:00Z'
+lease_until: '2026-11-02T06:20:00Z'
+lease_expires_at_utc: '2026-11-02T06:20:00Z'
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 0
@@ -107,3 +107,16 @@ requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp1134-g1-claude MOT lan chinh khi N1-N5 dat (ADR-0060 M5); mo PR draft.'
 codex_da_goi: []
+lease_sua_lan_cuoi: '2026-11-02T06:02:00Z'
+lease_sua_ghi_chu: 'Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han) sau khi PR #1137 merge. Khong doi write set, spec, branch, budget.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-02T23:53:00Z'
+  han_moi_utc: '2026-11-02T06:20:00Z'
+  chi_thi: 'Chu kho go "Ca 2. Land va ghi so" trong phien session_015GtxraNWSWRDjqY58pqwAN (01-11-2026); PR #1137 merge boi ducthangho 05:57:57Z (merge 2be93d3); phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq chuyen yeu cau rut han som de packet #1099 nhan RELEASE_MANIFEST.json va scripts/tl_test_fragments_bundled.py. ADR-0060 M7: lan duyet bao gom nha lease. Ghi ho. Bam byte KHONG DO DUOC.'
+  ly_do: 'Thi cong xong: PR #1137 da merge vao master (2be93d3, cha thu hai 15872b7 = head da kiem-merge). Phan con lai (CI hau merge, bien ban M8) khong ghi vao write set.'
+  vi_sao_han_moi_khong_bang_luc_sua: 'Han moi = luc sua + 18 phut de luot ops-publish-lease cua commit nay doc lease CON HAN (rc=9 da dang), khong roi vao rc=8 (bai hoc CLAUDE.md 20-09-2026). Khong viet bia mo: khong co lease ke nhiem.'
+  tien_le: 'wp1121-r5-g1-claude (95ece89), wp1117-r1-g1-claude.'
+codex_loi_goi_thuc_te:
+  so_loi_goi: 8
+  tran: 10
+  ghi_chu: 'dac ta: offline r1 + connector #1135 x2 (goi tay, ready_for_review); thi cong: connector 232ac54, connector 15872b7 x3 (goi tay, ready_for_review, xin receipt cho K3), offline 169de7ad. Dem theo ADR-0055.'

@@ -75,8 +75,8 @@ heartbeat_at: '2026-11-02T00:31:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
 heartbeat_required_minutes: 360
 heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
-lease_until: '2026-11-03T00:31:00Z'
-lease_expires_at_utc: '2026-11-03T00:31:00Z'
+lease_until: '2026-11-02T06:47:00Z'
+lease_expires_at_utc: '2026-11-02T06:47:00Z'
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 0
@@ -98,3 +98,11 @@ codex_da_goi:
 - {luot: 3, run_id: 5fb23c4595394de9b1941e672f35ad4f, head: 4a0d45d3c689600f749866f7b27e83b9d6039c00, verdict: approve, ket_qua: '0 P0, 0 P1, 0 P2, 0 P3; Windows/CI/A-B exact head do o handoff'}
 - {luot: 4, run_id: e9dab4183a284a51b142651b401617bf, head: 6f4b88991b14f1a15ceafdf4b4b3b564039449a1, verdict: approve, ket_qua: '0 P0, 0 P1, 0 P2, 0 P3 tren dung head cuoi (merge master 9091cf5; .claude trung byte 4a0d45d)'}
 - {luot: 5, run_id: e7296898c1a4450c83d9775d085f2ede, head: 8f0dfcf35c8ee92a9a754bde82846eb11430bd0e, verdict: approve, ket_qua: '0 P0, 0 P1, 0 P2, 0 P3 tren head cuoi sau va P2 connector r4438879478'}
+lease_sua_lan_cuoi: '2026-11-02T06:27:00Z'
+lease_sua_ghi_chu: 'Rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch, budget.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-03T00:31:00Z'
+  han_moi_utc: '2026-11-02T06:47:00Z'
+  chi_thi: 'Chu kho uy quyen merge #1142 tren head 8f0dfcf35c8ee92a9a754bde82846eb11430bd0e (comment PR #1142 luc 06:24Z) va tu merge 279a39e34c26027ad792008962859aa79c16e35c (merged_by ducthangho 06:24:26Z); chi thi phien "land, ghi so tat ca cac wp, pr da merge trong phien nay". Bam byte KHONG DO DUOC.'
+  ly_do: 'Packet #1117 da merge. Nha .claude/dev/launcher_test.py, .claude/dev/launcher_test_runner.py va handoff.'
+  vi_sao_han_moi_khong_bang_luc_sua: 'Han moi = luc sua + 20 phut de luot ops-publish-lease cua commit nay doc lease CON HAN (rc=9 da dang), khong roi vao rc=8. Khong viet bia mo: chua co lease ke nhiem.'

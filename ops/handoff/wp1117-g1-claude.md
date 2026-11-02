@@ -1,6 +1,8 @@
 # Handoff #1117 HARNESS-KET-QUA-NGOAI-MA-DOT-BIEN — lease wp1117-r2-g2-claude (r2)
 
-Trạng thái lúc 04:55Z 02-11-2026: head cuối `8f0dfcf`. Lượt bỏ draft trên `6f4b889` có connector báo P2 `r4438879478`; đã vá, trả lời và resolve thread.
+Trạng thái lúc 06:27Z 02-11-2026: **ĐÃ MERGE.** Chủ kho tự merge PR #1142 lúc 06:24:26Z, merge commit `279a39e34c26027ad792008962859aa79c16e35c`, head `8f0dfcf`. Lease đã rút hạn về 06:47Z. Lúc merge, lượt `ci.yml` `windows-only` 41388158239 VẪN ĐANG CHẠY.
+
+Trạng thái lúc 04:55Z: head cuối `8f0dfcf`. Lượt bỏ draft trên `6f4b889` có connector báo P2 `r4438879478`; đã vá, trả lời và resolve thread.
 Trên `8f0dfcf`:
 - Codex offline lượt 5/10: approve 0/0/0/0;
 - connector: sạch;

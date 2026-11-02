@@ -1437,6 +1437,28 @@ def c61_actionlint_bat_yaml_sai():   # A8: actionlint + ShellCheck; tệp thật
             r = subprocess.run([al, str(Path(thu) / "w.yml")], capture_output=True, text=True, timeout=120)
             bang(r.returncode == mong and (mong == 0 or "number123" in r.stdout), f"mong rc {mong}, được {r.returncode}: {r.stdout[-300:]}")
 
+@ca
+def c63_ban_goc_mot_lan_moi_ca():   # #997 hậu merge: bản gốc chạy MỘT lần mỗi (ca đích, bản gốc); quá hạn ⇒ HONG có tên, không sập bộ
+    goi = []
+    def gia(ten_ca, ma):
+        goi.append((ten_ca, Path(ma).name))
+        return (0, "") if Path(ma).name == "goc.py" else (3, f"DO:{ten_ca}: x")
+    nhom = [d for d in DOT_BIEN if d[3] == "c34"][:2]
+    bang(len(nhom) == 2, f"cần 2 mục đột biến nhắm c34, có {len(nhom)}")
+    with mock.patch.dict(_NEN, clear=True), mock.patch(__name__ + ".chay_con", side_effect=gia):
+        hang = [chay_dot_bien(*d)[0] for d in nhom]
+    bang(hang == ["GIET", "GIET"] and [x for x in goi if x[1] == "goc.py"] == [("c34_git_blob_that", "goc.py")]
+         and sum(x[1] != "goc.py" for x in goi) == 2, f"bản gốc phải chạy đúng 1 lần cho 2 mục: {hang} {goi}")
+    with mock.patch.dict(_NEN, clear=True), mock.patch(__name__ + ".chay_con", return_value=(3, "DO:c34_git_blob_that: goc do")) as cc:
+        hang = [chay_dot_bien(*d)[0] for d in nhom]
+    bang(hang == ["HONG", "HONG"] and cc.call_count == 1, f"bản gốc đỏ ⇒ MỌI mục HONG, chạy gốc 1 lần: {hang} {cc.call_count}")
+    with mock.patch.object(subprocess, "run", side_effect=subprocess.TimeoutExpired("python", 300)):
+        try:
+            rc, ra = chay_con("c34_git_blob_that", HERE / "ci_provenance.py")
+        except subprocess.TimeoutExpired:
+            rc, ra = None, "TimeoutExpired lọt khỏi chay_con"
+    bang(rc == 124 and "QUA_HAN:c34_git_blob_that" in ra and phan_hang(rc, ra, "c34_git_blob_that") == "HONG", f"quá hạn ⇒ 124/HONG: {rc} {ra}")
+
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
     ("A1_xoa_co_attempt", 't.add_argument("--attempt", required=True, type=int, help="run_attempt phải đo")', 't.add_argument("--attempt", type=int, default=1, help=argparse.SUPPRESS)', "c01"),
     ("A2_bo_so_attempt", 'if k not in thieu and r.get(k) != v]', "if False]", "c02"),
@@ -1834,9 +1856,23 @@ TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
 )
 
 def chay_con(ten_ca, ma):
-    r = subprocess.run([sys.executable, "-B", str(HERE / "ci_provenance_test.py"), "--mot-ca", ten_ca], capture_output=True,
-                       env=dict(os.environ, CI_PROVENANCE_MA=str(ma), PYTHONDONTWRITEBYTECODE="1"), timeout=300)
+    try:
+        r = subprocess.run([sys.executable, "-B", str(HERE / "ci_provenance_test.py"), "--mot-ca", ten_ca], capture_output=True,
+                           env=dict(os.environ, CI_PROVENANCE_MA=str(ma), PYTHONDONTWRITEBYTECODE="1"), timeout=300)
+    except subprocess.TimeoutExpired:   # Windows that (#997): ca nang qua han ⇒ HONG co ten, khong lam sap ca bo
+        return 124, f"QUA_HAN:{ten_ca}: tien trinh con qua 300 s"
     return r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace")
+
+_NEN = {}   # (ca đích, sha256 bản gốc) -> (rc, ra): bản gốc chạy MỘT lần mỗi ca, không phải mỗi mục đột biến
+
+def nen_cua(ten_ca, goc):
+    khoa = (ten_ca, hashlib.sha256(goc.encode("utf-8")).hexdigest())
+    if khoa not in _NEN:
+        with tempfile.TemporaryDirectory(prefix="cip_nen_") as thu:
+            ban_goc = Path(thu) / "goc.py"
+            ban_goc.write_text(goc, encoding="utf-8")
+            _NEN[khoa] = chay_con(ten_ca, ban_goc)
+    return _NEN[khoa]
 
 def phan_hang(rc, ra, ten_ca):
     if rc == 0:
@@ -1853,13 +1889,12 @@ def chay_dot_bien(ten, cu, moi, tien_to):
     goc = (HERE / "ci_provenance.py").read_text(encoding="utf-8")
     if goc.count(cu) != 1 or cu == moi:
         return "HONG", f"neo phải xuất hiện đúng 1 lần và đột biến phải đổi mã (thấy {goc.count(cu)})"
+    rc, ra = nen_cua(ten_ca, goc)
+    if rc != 0:
+        return "HONG", f"ca đích không xanh trên bản gốc (rc={rc}): {ra[-200:]}"
     with tempfile.TemporaryDirectory(prefix="cip_db_") as thu:
-        ban_goc, ban_db = Path(thu) / "goc.py", Path(thu) / f"db_{ten}.py"
-        ban_goc.write_text(goc, encoding="utf-8")
+        ban_db = Path(thu) / f"db_{ten}.py"
         ban_db.write_text(goc.replace(cu, moi), encoding="utf-8")
-        rc, ra = chay_con(ten_ca, ban_goc)
-        if rc != 0:
-            return "HONG", f"ca đích không xanh trên bản gốc (rc={rc}): {ra[-200:]}"
         rc, ra = chay_con(ten_ca, ban_db)
         return phan_hang(rc, ra, ten_ca), ra.strip()[-200:]
 

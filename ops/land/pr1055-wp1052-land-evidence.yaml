@@ -1,7 +1,8 @@
 # HO SO LAND — PR #1055 "wp1052: references/windows-testing.md + con tro trong SKILL.md" (Packet #1052).
 # Schema: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1; khuon gan nhat: ops/land/pr1048-claude-md-powershell-land-evidence.yaml.
 #
-# TRANG THAI: merged (906b24f), `landed: false` — 4/4 moc §10.2.2 measured tren run 41257563723 (commit con 0b8d156); cho chu kho.
+# TRANG THAI: merged (906b24f), LANDED theo quyet dinh chu kho 02-11-2026 (khoi landed_20261102, kieu b) — 4/4 moc §10.2.2
+# measured tren run 41257563723 cua commit CON dau tien 0b8d156. trang_thai_packet.landed giu false la ban ghi luc truoc quyet dinh.
 # Gate hau merge cua CHINH 906b24f (run 41255939050) bi HUY o trang thai pending, 0 job: GitHub concurrency cua ci.yml
 # chi giu MOT luot pending moi nhom, nen luot cua 0b8d156 (#1093, tao 00:37:37Z) thay luot nay (huy 00:37:38Z).
 # Gate dau tien CHUA 906b24f la cua commit con 0b8d156 — run 41257563723 success 23/23 (do 2026-11-01T01:3xZ). "merged" KHONG dong nghia "landed"
@@ -94,7 +95,8 @@ trang_thai_packet:
         identity va identity_after cung head 0b8d156 + tree 1a77872 (= tree commit), tracked_clean va worktree_clean true.
       gioi_han: 'Do tren commit CON 0b8d156, khong tren chinh 906b24f (run cua 906b24f bi huy, 0 job).'
     - id: QUYET-DINH-LANDED-CHU-KHO
-      trang_thai: cho_chu_kho
+      trang_thai: da_duyet
+      mo_ta: 'Da quyet 02-11-2026: xem khoi landed_20261102 cuoi tep.'
 
 pre_merge_checks:
   - ten: gate ci.yml tren head 9d5588b (pull_request)
@@ -132,3 +134,26 @@ no_con_mo:
 
 khong_do_duoc:
   - 'Bam byte cua chi thi chu kho trong hoi thoai: KHONG_DO_DUOC.'
+
+landed_20261102:
+  bo_canh: >-
+    Khoi nay ghi landed theo quyet dinh chu kho (kieu b, tien le pr1080/pr1100 landed_20261101). Khong sua lai cac loi khai o
+    tren: trang_thai_packet.landed false va GATE-HAU-MERGE-906B24F not_measured la ban ghi dung luc truoc quyet dinh.
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/pull/1096#issuecomment-6569229949
+    noi_dung: >-
+      Chu kho quyet ghi landed true cho ho so land #1052. Can cu ghi trong comment: du 4/4 moc §10.2.2 cung tren run 41257563723
+      (push master, head 0b8d156, commit con dau tien chua merge 906b24f); run rieng cua 906b24f (41255939050) bi concurrency
+      theo ref huy khi con pending, 0 job, nen khong co gi de do tren chinh merge commit; lo concurrency dang duoc va o #1132 / PR #1141.
+      Comment ghi ho chi thi truc tiep cua chu kho trong phien session_015GtxrYPjZCTZeRiazdssgq ngay 02-11-2026.
+    do_duoc: >-
+      measured — readback-comment-6569229949.json: comment 6569229949 (user ducthangho, author_association OWNER,
+      created_at 2026-11-02T04:41:11Z) tren PR #1096. CAVEAT #566: agent dang bang token chu kho; ban chep, khong phai chu ky.
+  landed: true
+  landed_dieu_kien: >-
+    (1) bon moc §10.2.2 measured tren run 41257563723 cua commit CON dau tien 0b8d156, KHONG tren chinh merge 906b24f (run cua
+    906b24f bi huy, 0 job; 906b24f..0b8d156 chi them 1 tep ops/specs tu #1093): xem GATE-HAU-MERGE-CON-0B8D156,
+    MOC-10-2-2-WORKFLOW-DEFINITION, MOC-10-2-2-CHECKOUT-GATE-OUTPUT. (2) lease wp1052-r5-g5-claude rut han cec84f1. (3) Issue #1052
+    da dong. (4) review Codex connector 3 luot khong finding, luot cuoi tren DUNG head da merge 9d5588b. (5) uy quyen land:
+    quyet_dinh_chu_kho tren, co caveat #566. Chu kho CHAP NHAN do tren commit con thay cho merge commit.

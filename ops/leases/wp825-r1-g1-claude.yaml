@@ -1,0 +1,95 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 825
+packet_id: CODEX-REJECTED-STATE-KHONG-GHI-DUOC-ADR
+revision: 1
+generation: 1
+lease_id: wp825-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: []
+depends_on_ghi_chu: 'no wp484 g7 (2/3); dong bang ADR theo tieu chi Issue #825.'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'sua PROTOCOL §20 (bang dinh tuyen authority) => sensitive; executor ho claude, reviewer ho openai; tran codex ADR-0055 (10). Khong ap ADR-0060.'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp825.md
+spec_sha256_required: dee36a1148bc1fe8a934a9dceb74dbe0eab7d3a2830908d7f15afb3293f0812e
+spec_hash: dee36a1148bc1fe8a934a9dceb74dbe0eab7d3a2830908d7f15afb3293f0812e
+prompt_path: ops/specs/wp825.md
+prompt_sha256_required: dee36a1148bc1fe8a934a9dceb74dbe0eab7d3a2830908d7f15afb3293f0812e
+write_set:
+- docs/adr/0061-codex-trang-thai-tu-choi-khong-ghi-duoc.md
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/handoff/wp825-g1-claude.md
+write_set_hash: 89e53701fb1f94f7617f6fdf39b3e64f1114d09d82b2e1350f5520f7b03a4925
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'ADR moi + 1 dong bang §20; handoff chi tren nhanh lease; diff PR 2 tep. ADR-0053 sensitive: <=6 tep / <=450 dong them.'
+change_policy_sha: null
+effective_write_set:
+- docs/adr/0061-codex-trang-thai-tu-choi-khong-ghi-duoc.md
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/handoff/wp825-g1-claude.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1/P2/P3 mo; toi da 10 loi goi codex (ADR-0055); moi thread connector duoc tra loi'}
+- {id: M-2, dieu_kien: 'ci.yml luot PR XANH tren head cuoi doc bang check run'}
+- {id: M-3, dieu_kien: 'A1-A4 cua spec: adr-song rc0 60/60, doctrine-scan rc0, chuoi duong/am cua ADR, ca dan chung xanh tren base'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp825-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: c7174bfe03b3acd22cfa055b5fce176129d29542
+start_from_sha: c7174bfe03b3acd22cfa055b5fce176129d29542
+start_from_ghi_chu: 'origin/master luc cap lease (merge #1130); trung base spec.'
+reviewed_sha_required: c7174bfe03b3acd22cfa055b5fce176129d29542
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/825
+granted_on_instruction_readback: 'chu kho chon "ADR chap nhan (Recommended)" cho #825 (AskUserQuestion 01-11-2026) va "Dong y lam di" (02-11-2026) trong phien session_015Gtxra7iT6mwM1kqpdggt6; ghi ho. Bam byte KHONG DO DUOC.'
+recorded_by: claude-executor-session
+recorder_is_executor: true
+recorder_ghi_chu: 'phien ghi lease CUNG la executor, theo chi thi chu kho; tien le wp1117-r1-g1-claude.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-02T00:45:00Z'
+  goc_quet: 'fetch +refs/heads/*, so tap ls-remote voi for-each-ref, nhanh cuc bo ff ve origin'
+  ket_qua: 'ai-dang-giu 3 duong dan: NGUOI_GIU 0 ca ba; tap ls-remote = for-each-ref (thieu 0, fetch 00:4xZ).'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease dau cua packet.'
+leased_at_utc: '2026-11-02T00:46:00Z'
+heartbeat_at: '2026-11-02T00:46:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+heartbeat_required_minutes: 360
+heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
+lease_until: '2026-11-03T00:46:00Z'
+lease_expires_at_utc: '2026-11-03T00:46:00Z'
+run_minutes: 60
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+attempts_basis: 'mac dinh kho (tien le wp1045).'
+review_rounds_limit: 3
+budget:
+  codex_review_calls:
+    pr_wp825_g1: {used: 0, reserved: 0, limit: 10}
+  attempt:
+    packet_825_r1: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'day nhanh agent/wp825-g1-claude khi A1-A4 dat; mo PR draft.'
+codex_da_goi: []

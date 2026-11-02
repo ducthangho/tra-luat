@@ -1,0 +1,5 @@
+# kiem-gate offline tren readback-check-runs-<sha>-all.json (filter=all); ten bat buoc = moi job khong skipped cua attempt cuoi cua run do.
+== run 40476173630 attempt 1 event workflow_dispatch conclusion failure suite 109702911935 37 ten (bo skipped)
+  ĐỎ  'gate-packet-loop (windows-latest)' id=122094872443: status='completed' conclusion='failure' head_sha='ab94c4fb01d0d122d2f00a1f2c386c6a191349c5'
+gate KHÔNG xanh trên ab94c4fb01d0d122d2f00a1f2c386c6a191349c5: 1/37 tên bắt buộc đỏ
+rc=12

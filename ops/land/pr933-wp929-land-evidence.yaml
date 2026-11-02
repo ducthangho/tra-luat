@@ -124,3 +124,58 @@ khong_do_duoc:
   - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'
   - 'Provenance CI §10.2.2 tren merge SHA: KHONG CO run nao chay job tren ab94c4f.'
   - 'Bam byte cua chi thi chu kho trong hoi thoai (xu ly head drift, ghi so land): KHONG_DO_DUOC.'
+
+cap_nhat_20261027:
+  bo_canh: >-
+    Phien executor session_015mnX4fNuWP4GFL5cnj5AFk, chi thi chu kho trong phien ("Dong y" buoc 1 tao gate exact-SHA;
+    "dong y thi cong theo khuyen nghi", ghi ho #929 issuecomment-6448100522). Khoi nay KHONG sua dong nao o tren.
+  gate_dung_merge_sha:
+    cach_dung_ref: >-
+      measured — tag luu-tru/wp929-merge-ab94c4f -> ab94c4fb01d0d122d2f00a1f2c386c6a191349c5, tao qua ops-don-ref (thu kho run
+      40476045018, that run 40476110077); ls-remote: do-1027-ab94c4f/ls-remote-tag-luu-tru.txt.
+    run: >-
+      measured — readback-run-40476173630.json: ci.yml, event workflow_dispatch, head_branch luu-tru/wp929-merge-ab94c4f,
+      head_sha ab94c4fb01d0d122d2f00a1f2c386c6a191349c5, run_attempt 1, check_suite 109702911935, conclusion failure.
+      readback-jobs-40476173630.json: 36 success + 1 failure, nhan ubuntu-latest va windows-latest.
+    kiem_gate_toan_run: 'measured — do-1027-ab94c4f/kiem-gate-dispatch-ab94c4f.txt: 37 ten (bo skipped), DO 1/37, rc=12.'
+    kiem_gate_bat_buoc: >-
+      measured — do-1027-ab94c4f/kiem-gate-dispatch-ab94c4f-bat-buoc.txt: 5 ten CHECK_BAT_BUOC (gate, gate-cong-cu-gop,
+      gate-ops, gate-packet-loop, gate-registry; ubuntu-latest) cung suite, XANH, rc=0.
+    job_do: >-
+      measured — do-1027-ab94c4f/log-job-122094872443-trich.txt (trich log job 122094872443; sha256 log goc ghi o dau tep):
+      "ĐỎ  r929_show_loi_la_false: PermissionError: [WinError 5] Access is denied: ...\.git\objects\56\5656b85a..." ;
+      "nền: 871/872 đạt · BỎ QUA: 4" ; "TỔNG: 1 lỗi". Ca nay do #933 dua vao (fixture xoa loose object chi-doc tren Windows).
+    moc_10_2_2: >-
+      Run measured (tren). Checkout: not_measured trong khoi nay (log job co dong "HEAD is now at ab94c4f", doc o
+      verdict luot 3 L908; chua do tren job Ubuntu). Workflow definition: not_measured — cho chu kho chay GraphQL cho run
+      40476173630 (node_id WFR_kwLOTNeRjc8AAAAJbJFlPg). Gate output: chua tach marker/artifact.
+  review_luot_3:
+    sha: f3b54d260bcdecf5b6d2348730a958e168bf7330
+    tran: 'chu kho nang tran codex_review_calls 2 -> 3 (ghi ho #929 issuecomment-6448100522); luot nay la 3/3.'
+    ket_luan: >-
+      measured — verdicts/wp929-r1-g1-claude-review-3-codex-verdict.md: "Verdict: request_changes", Reviewed commit
+      f3b54d260bcdecf5b6d2348730a958e168bf7330. Mot P2 wp929-windows-readonly-object-delete (hoi quy Windows o tren, chan
+      approve) + P3 ke thua wp929-git-error-guards-unmeasured. Ba finding luot 1 xac nhan da va that tren f3b54d2.
+    thuc_thi:
+      model: 'measured — verdicts/wp929-r1-g1-claude-review-3-codex-run.json model_phuc_vu_trang_thai DO_DUOC, 24/24 response gpt-6.1-sol'
+      effort: 'measured — verdicts/wp929-r1-g1-claude-review-3-codex-run.json effort_phuc_vu [xhigh], effort_phuc_vu_trang_thai DO_DUOC'
+      sandbox_mode: >-
+        measured — verdicts/wp929-r1-g1-claude-review-3-codex-run.json sandbox_trang_thai DO_DUOC; sandbox_quan_sat:
+        codex-linux-sandbox, permission_profile file_system restricted, ghi to_tien_workspace + /tmp + tmpdir, network restricted.
+    nguon:
+      - ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-3-codex-verdict.md
+      - ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-3-codex-prompt.md
+      - ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-3-codex-run.json
+  assurance_81:
+    reviewer_assurance_81: CHUA_DAT
+    ly_do: 'luot exact-SHA tren f3b54d2 request_changes (P2 mo); ngan sach Codex 3/3 da het.'
+  ban_va_windows:
+    trang_thai: mo
+    da_bao: 'measured — readback-comment-6448061560.json (#814): de nghi executor wp814-r2-g1-claude (dang giu .claude/dev/packet_loop_test.py) gop ban va chmod truoc unlink.'
+  landed: false
+  landed_dieu_kien: >-
+    Mo lai khi: (1) ban va Windows vao master va gate-packet-loop (windows-latest) xanh; (2) mot luot review moi approve
+    (can nang tran tiep); (3) du bon moc §10.2.2 tren dung merge SHA cua lan sua.
+no_co_ten_20261027:
+  - {ma: wp929-windows-readonly-object-delete, trang_thai: mo, ghi_chu: 'P2 Codex luot 3; hoi quy do #933; ban va 1 dong de nghi gop vao #814 (readback-comment-6448061560.json).'}
+  - {ma: actions-khong-cap-runner-20261027, trang_thai: mo, ghi_chu: 'tu 16:53Z 27-10 moi job moi runner_id 0 (ops-don-ref 40545274842 hai attempt); nhieu kha nang han muc Actions; viec don nhanh claude/skill-graphql-cmd-pointer tam hoan.'}

@@ -1,7 +1,11 @@
 # Handoff #1117 HARNESS-KET-QUA-NGOAI-MA-DOT-BIEN — lease wp1117-r2-g2-claude (r2)
 
-Trạng thái lúc 01:40Z 02-11-2026: Codex lượt 3/10 cho **`approve`** trên `4a0d45d`, kết quả 0 P0 · 0 P1 · 0 P2 · 0 P3.
-Đã mở PR #1142 (draft). Chưa merge, vì merge thuộc quyền chủ kho.
+Trạng thái lúc 04:15Z 02-11-2026: **ĐỦ ĐIỀU KIỆN, chờ chủ kho duyệt merge.** Trên đúng head `6f4b889` có:
+- Codex offline lượt 4/10: approve 0/0/0/0;
+- connector Codex: sạch;
+- CI: xanh;
+- `ci.yml` `windows-only`: xanh.
+PR #1142 đã bỏ draft. Phiên này không tự merge.
 
 - Nhánh `agent/wp1117-g1-claude`, head `4a0d45d3c689600f749866f7b27e83b9d6039c00`, base `c7174bf` (master sau #1122).
 - Diff: 2 tệp, +326/−85 (trần 450 của ADR-0053). Spec r2 `ops/specs/wp1117-r2.md` (sha256 `c34d5066…`).
@@ -31,8 +35,10 @@ hint_provenance:
   - `b6fe853`: 466/468, 2 SAI = F02 (run 41368402146);
   - `b9f010b`: **469/469** (run 41370605227, job `windows-latest`);
   - `4a0d45d`: success (run 41372451716).
-  - `ci.yml` `windows-only` trên `6f4b889`: run 41376440756 — CHỜ.
-- CI `ci.yml` trên PR #1142: ĐANG CHẠY. Ruff F 5 = nền.
+  - `ci.yml` `windows-only` trên `6f4b889`: run 41376440756 = **success**. 16 job, mỗi job nhãn `windows-latest` và có `runner_id` khác 0. Các dòng BỎ QUA là bỏ qua theo nền, ở những bộ mà #1117 không sửa: `gate-ops` 52, `gate-registry` 20, `gate` 9, `gate-packet-loop` 9, `gate-cong-cu` 2; gate lifecycle 16/28 với 12 bỏ qua. Các bộ đều in `TỔNG: ĐẠT`; registry in `DOT BIEN: 53/53`. Bộ `launcher_test` chạy trên Windows bằng `launcher-windows.yml` với cây `.claude/` trùng byte (`4a0d45d`).
+- CI trên PR #1142, head `6f4b889`: 38 success, 2 skipped, 0 failure.
+- Connector Codex: `Reviewed commit: 6f4b88991b`, sạch (comment 6567483567).
+- Ruff F: 5 = nền.
 
 ## Lịch sử r1 (tạm dừng 01-11)
 Trạng thái lúc 16:26Z 01-11-2026: **TẠM DỪNG, CHƯA land, CHƯA có PR, CHƯA gọi Codex (0/10).** Chủ kho chọn

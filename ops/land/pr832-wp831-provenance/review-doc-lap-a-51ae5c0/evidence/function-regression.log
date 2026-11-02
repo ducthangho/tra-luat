@@ -1,0 +1,4 @@
+{"case": "r831_cai_rg_linux_python_ham_ke_thua", "scratch_type_P": false, "result": "TinHieuChotCa", "detail": "linux: Python ham ke thua van bi PATH doi interpreter: rc=2 GITHUB_PATH='' "}
+{"case": "r831_cai_rg_macos_python_ham_ke_thua", "scratch_type_P": false, "result": "TinHieuChotCa", "detail": "macos: Python ham ke thua van bi PATH doi interpreter: rc=2 GITHUB_PATH='' "}
+{"case": "r831_cai_rg_linux_python_ham_ke_thua", "scratch_type_P": true, "result": "PASS"}
+{"case": "r831_cai_rg_macos_python_ham_ke_thua", "scratch_type_P": true, "result": "PASS"}

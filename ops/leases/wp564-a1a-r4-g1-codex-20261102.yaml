@@ -1,0 +1,57 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 564
+packet_id: THU-HOI-LEASE-A1a
+revision: 4
+generation: 1
+lease_id: wp564-a1a-r4-g1-codex-20261102
+role: executor
+provider: openai_codex
+executor: openai_codex
+model_family: openai
+execution_surface: codex_cli
+transport: machine
+reviewer: openai_codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: same_provider_approved
+environment: local
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+access: read-write
+spec_path: ops/specs/THU-HOI-LEASE-A1a-r4.md
+spec_hash: 62a51da2a9c5d44cab1fd831ac50c12c18545d810e25b51ea958fffafa91bf97
+spec_sha256_required: 62a51da2a9c5d44cab1fd831ac50c12c18545d810e25b51ea958fffafa91bf97
+prompt_path: ops/specs/THU-HOI-LEASE-A1a-r4.md
+prompt_sha256_required: 62a51da2a9c5d44cab1fd831ac50c12c18545d810e25b51ea958fffafa91bf97
+write_set:
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+- .github/workflows/ops-thu-hoi-admission.yml
+effective_write_set:
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+- .github/workflows/ops-thu-hoi-admission.yml
+branch: agent/wp564-a1a-r4-g1-codex-20261102
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 7f65476afdac57023be1b83ddec0df36a5e8d4b8
+start_from_sha: 7f65476afdac57023be1b83ddec0df36a5e8d4b8
+reviewed_sha_required: 7f65476afdac57023be1b83ddec0df36a5e8d4b8
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/pull/1159
+granted_on_instruction_note: 'Owner authorized Codex executor and independent Codex reviewer in r4; current chat instructs completion and self-service prerequisites.'
+recorded_by: codex-dispatcher-session
+recorder_is_executor: false
+recorder_is_dispatcher: true
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-02T14:34:40Z'
+  goc_quet: 'origin/master 7f65476; 792 remote heads = 792 local refs; missing 0; complete repository'
+  ket_qua: 'All three paths: ai-dang-giu rc=0, NGUOI_GIU 0.'
+thay_the_cho: []
+leased_at_utc: '2026-11-02T14:34:40Z'
+heartbeat_at: '2026-11-02T14:34:40Z'
+lease_until: '2026-11-03T14:34:40Z'
+lease_expires_at_utc: '2026-11-03T14:34:40Z'

@@ -1,0 +1,32 @@
+{
+  "source_files": 55,
+  "archive_files": 55,
+  "copied_equal": 53,
+  "manifest_entries": 54,
+  "manifest_coverage": true,
+  "sha256sum_rc": 0,
+  "flat_equal": true,
+  "omitted": [
+    {
+      "source": "DIFF.patch",
+      "bytes": 358925,
+      "sha256": "f99409474b3e9f3a43825cc71c3cad7eacb7ce80346e260cea55711752431deb",
+      "declared_correctly": true
+    },
+    {
+      "source": "evidence/readme.diff",
+      "bytes": 4902,
+      "sha256": "031d91875474e867f2572eeed3ed9e816ae358dd57bee778f2c3bfdf8d9fdae4",
+      "declared_correctly": true
+    }
+  ],
+  "unaccounted_source_files": [],
+  "historical_patch_equal": true,
+  "omitted_directories_not_supplied": [
+    "cay-kho",
+    "base-copy",
+    "mutation-copy",
+    "nguon"
+  ],
+  "errors": []
+}

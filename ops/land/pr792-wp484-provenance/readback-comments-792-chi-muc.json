@@ -1,0 +1,150 @@
+{
+ "review_comments": [
+  {
+   "id": 4303407217,
+   "user": "chatgpt-codex-connector[bot]",
+   "created_at": "2026-10-17T16:12:23Z",
+   "in_reply_to_id": null,
+   "commit_id": "288ad3ea79ef94e061b649effe7bee2c7e2a0a9b",
+   "body_sha256": "d31c9d0ffc37a9bbd8b74bb0329caf7b914662cd3250ca0b43f71e1fc21e63f4",
+   "body_dau": "**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Commit the packet spec and lease"
+  },
+  {
+   "id": 4303407223,
+   "user": "chatgpt-codex-connector[bot]",
+   "created_at": "2026-10-17T16:12:24Z",
+   "in_reply_to_id": null,
+   "commit_id": "288ad3ea79ef94e061b649effe7bee2c7e2a0a9b",
+   "body_sha256": "a95446dc2934842ba4a5ae4811f289839912873b55d034ac20855106cf53a6d7",
+   "body_dau": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Bind resume checkpoints to an or"
+  },
+  {
+   "id": 4303407226,
+   "user": "chatgpt-codex-connector[bot]",
+   "created_at": "2026-10-17T16:12:24Z",
+   "in_reply_to_id": null,
+   "commit_id": "288ad3ea79ef94e061b649effe7bee2c7e2a0a9b",
+   "body_sha256": "6626927ac35ebe970d7ca2147d7439030cab7cde899c4e9369e21affcc2151c7",
+   "body_dau": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Do not mark successful runs as u"
+  },
+  {
+   "id": 4303423284,
+   "user": "ducthangho",
+   "created_at": "2026-10-17T16:16:23Z",
+   "in_reply_to_id": 4303407217,
+   "commit_id": "288ad3ea79ef94e061b649effe7bee2c7e2a0a9b",
+   "body_sha256": "3ae35184d2a9275fc5ba961f2e47a7f382d0e1a7c1a5bd15e2a5064bb36e25fc",
+   "body_dau": "Spec và lease có tồn tại, nhưng không nằm trong cây của PR này. Lý do: theo quy ước của kho, lease sống trên nhánh `ops/"
+  },
+  {
+   "id": 4303423527,
+   "user": "ducthangho",
+   "created_at": "2026-10-17T16:16:27Z",
+   "in_reply_to_id": 4303407226,
+   "commit_id": "288ad3ea79ef94e061b649effe7bee2c7e2a0a9b",
+   "body_sha256": "898dd22d513e6f6507cb663d767336c1fbfc429375710effadcfee4fe6b90cd8",
+   "body_dau": "Xác nhận lỗi bằng phép đo. Bản ghi của chính lượt review 3 (run `47cf857e`) có `trang_thai: \"xong\"`, `ma_thoat: 0`, `fai"
+  },
+  {
+   "id": 4303423793,
+   "user": "ducthangho",
+   "created_at": "2026-10-17T16:16:32Z",
+   "in_reply_to_id": 4303407223,
+   "commit_id": "288ad3ea79ef94e061b649effe7bee2c7e2a0a9b",
+   "body_sha256": "38971ed189251b6aaff8d0866356db930986db7c597d463a5b794a24957baff3",
+   "body_dau": "Đường đi có thật. Tôi đọc mã: `_kiem_resume` chỉ kiểm băm do người gọi đưa vào, khuôn `checkpoint_id` 32 hex, và `head`/"
+  },
+  {
+   "id": 4303799501,
+   "user": "ducthangho",
+   "created_at": "2026-10-17T17:49:04Z",
+   "in_reply_to_id": 4303407226,
+   "commit_id": "288ad3ea79ef94e061b649effe7bee2c7e2a0a9b",
+   "body_sha256": "743e073412dc6364c9be9eadfb60563390a6b2789d1d93bea5bea241cc5af961",
+   "body_dau": "Đã vá ở `907214d` theo quyết định của chủ kho. `launcher.py` bỏ nhãn `failure_class` khi `trang_thai == \"xong\"` và mã th"
+  },
+  {
+   "id": 4303799646,
+   "user": "ducthangho",
+   "created_at": "2026-10-17T17:49:07Z",
+   "in_reply_to_id": 4303407223,
+   "commit_id": "288ad3ea79ef94e061b649effe7bee2c7e2a0a9b",
+   "body_sha256": "e130f9fe5567cb4f01cbdd9e68661d65e4c1c8881f0f3ab529611db7ec4816a5",
+   "body_dau": "Chủ kho quyết KHÔNG vá trong packet này: ghi thành nợ có tên `launcher-resume-checkpoint-khong-rang-buoc-luot-goc`, làm "
+  },
+  {
+   "id": 4303799814,
+   "user": "ducthangho",
+   "created_at": "2026-10-17T17:49:11Z",
+   "in_reply_to_id": 4303407217,
+   "commit_id": "288ad3ea79ef94e061b649effe7bee2c7e2a0a9b",
+   "body_sha256": "66bb851797090d6a2fa01a165a71a386b505eaf36c907c7461bd30d583cd0e16",
+   "body_dau": "Codex lượt 5, một lượt review độc lập, đã đánh giá lại lập luận trên và **không giữ phát hiện này ở mức P1**. Codex đã k"
+  }
+ ],
+ "issue_comments": [
+  {
+   "id": 6228612630,
+   "user": "ducthangho",
+   "created_at": "2026-10-17T02:39:58Z",
+   "in_reply_to_id": null,
+   "commit_id": null,
+   "body_sha256": "068dbf912d3341b69d774eb8e0dde7737bc0a263545b6643ae99ad6310345978",
+   "body_dau": "**Check đỏ (Windows, lượt `workflow_dispatch` `ci.yml` gọi tay để đo M-3, head `b355ff8`):**\n\n1. `gate`/`gate-cong-cu (w"
+  },
+  {
+   "id": 6228990793,
+   "user": "ducthangho",
+   "created_at": "2026-10-17T03:22:37Z",
+   "in_reply_to_id": null,
+   "commit_id": null,
+   "body_sha256": "ade55a8e9cab320034859293dce711831888def5cfaacbaa38e625e5492758ac",
+   "body_dau": "## Cross-review Codex: bản chiếu 3 lượt\n\nReviewer là Codex CLI, khác họ với executor (Claude), chạy qua `launcher.py run"
+  },
+  {
+   "id": 6233974839,
+   "user": "ducthangho",
+   "created_at": "2026-10-17T12:38:55Z",
+   "in_reply_to_id": null,
+   "commit_id": null,
+   "body_sha256": "257581e7c7d0275d8770cd32e1e34487dfcf75c1ac33852415241663051847e6",
+   "body_dau": "## Attempt 4: vá H01, delta chỉ đụng tệp test, cần chủ kho audit\n\nHead `0f31bb3e6151dd0cc67e8d4664b139259383b8d5` (cha `"
+  },
+  {
+   "id": 6236269763,
+   "user": "chatgpt-codex-connector[bot]",
+   "created_at": "2026-10-17T16:02:23Z",
+   "in_reply_to_id": null,
+   "commit_id": null,
+   "body_sha256": "5e4d36211233706f5caf7ea2c1792b1fff2a29b50a777a84b248ba6b8deb9a7a",
+   "body_dau": "<!-- codex-pull-request-review-summary -->\n<!-- codex-review-state:v1 {\"code_review\":{\"commit_sha\":\"0f31bb3e6151dd0cc67e"
+  },
+  {
+   "id": 6236469065,
+   "user": "ducthangho",
+   "created_at": "2026-10-17T16:16:43Z",
+   "in_reply_to_id": null,
+   "commit_id": null,
+   "body_sha256": "9f2635172ef6ba015439c545bd25e44520e626c1eefdbefad1ce3fbf1b929c9e",
+   "body_dau": "## Review trên `0f31bb3`: hai nguồn, chưa hết P2\n\n**1. Cross-review Codex CLI lượt 4** (lời gọi Codex thứ 4, chủ kho duy"
+  },
+  {
+   "id": 6238001582,
+   "user": "ducthangho",
+   "created_at": "2026-10-17T17:49:26Z",
+   "in_reply_to_id": null,
+   "commit_id": null,
+   "body_sha256": "19db55d9dc35dc1cadabcb234f19d74667dfea61b58ba596fd3d4b2ee47af68a",
+   "body_dau": "## Cross-review Codex lượt 5 trên `907214d`: approve, hết P0–P3\n\n- `Reviewed commit: 907214d2cd0b67ff444b3adf734811eab39"
+  },
+  {
+   "id": 6238374649,
+   "user": "ducthangho",
+   "created_at": "2026-10-17T18:13:50Z",
+   "in_reply_to_id": null,
+   "commit_id": null,
+   "body_sha256": "cc06d6b9b6fce2e2025f542d2ac9b64db4a8f559ab4edc48cc6f4c705f419916",
+   "body_dau": "## M-4: đã merge master; `launcher-windows` đỏ ở bước cài công cụ\n\n**1. Merge master (M-4).** wp775 land lúc 16:55Z (#77"
+  }
+ ]
+}

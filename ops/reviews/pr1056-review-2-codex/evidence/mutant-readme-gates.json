@@ -1,0 +1,52 @@
+{
+  "bien_nhan_v2": {
+    "command": "python3 ops/bien_nhan_v2.py --root .",
+    "rc": 0,
+    "summary": [
+      "bien_nhan_v2: 257 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 310",
+      "TỔNG: ĐẠT"
+    ],
+    "sandbox_artifact": false
+  },
+  "land_evidence_nguon": {
+    "command": "python3 ops/land_evidence_nguon.py --root .",
+    "rc": 0,
+    "summary": [
+      "land_evidence_nguon: 66 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 91",
+      "TỔNG: ĐẠT"
+    ],
+    "sandbox_artifact": false
+  },
+  "doctrine_scan": {
+    "command": "python3 .claude/dev/packet_loop.py doctrine-scan --root .",
+    "rc": 0,
+    "summary": [
+      "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine"
+    ],
+    "sandbox_artifact": false
+  },
+  "t26": {
+    "command": "python3 ops/lease_publish_test.py --chi-ca=t26_",
+    "rc": 0,
+    "summary": [
+      "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"
+    ],
+    "sandbox_artifact": false
+  },
+  "t27": {
+    "command": "python3 ops/lease_publish_test.py --chi-ca=t27_",
+    "rc": 1,
+    "summary": [
+      "lease_publish: 1/2 đạt; đã chạy=2, bỏ qua=0"
+    ],
+    "sandbox_artifact": false
+  },
+  "t138": {
+    "command": "python3 ops/lease_publish_test.py --chi-ca=t138_",
+    "rc": 0,
+    "summary": [
+      "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"
+    ],
+    "sandbox_artifact": false
+  }
+}

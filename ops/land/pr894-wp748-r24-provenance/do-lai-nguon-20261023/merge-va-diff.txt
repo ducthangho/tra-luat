@@ -1,0 +1,21 @@
+# merge 0e0bc63: cha va tree
+commit 0e0bc6319021598be76217d2e7409e458e209979
+parents d9ef666b3cbe5acb246c2bdfb0b6e294f2fdbffc f08efa1043680134e3534eef8ac95dd901ae7dab
+tree 33ac72330d99e7b93957ec96be8af6a51dc53b11
+committer 2026-10-24T00:21:38+07:00
+# head f08efa1
+commit f08efa1043680134e3534eef8ac95dd901ae7dab
+parents 77ec458d78d302ba89b317bd04a7282d4493c75b d9ef666b3cbe5acb246c2bdfb0b6e294f2fdbffc
+tree 33ac72330d99e7b93957ec96be8af6a51dc53b11
+committer 2026-10-23T16:44:12+00:00
+# commit tren nhanh 1d7e642..f08efa1 (first-parent, committer time)
+f08efa1 2026-10-23T16:44:12+00:00 Merge origin/master vao agent/wp748-r24-claude — pr864 lay nguyen ban master (giu landed true)
+77ec458 2026-10-23T13:39:49+00:00 land(#748 r24): va Codex luot 1 (7181d4b1) — F01 pr836 luot 6 that bai khong verdict; F02 neo dong; F03 pr672; F04 pham vi dem khoa
+d42713c 2026-10-23T13:23:44+00:00 land(#748 r24): ha 15 ho so landed true -> false — ho model reviewer khong_do_duoc / audit sai head (§8, §8.1)
+# diff --stat d9ef666..f08efa1 (so master luc merge vao nhanh)
+ 14 files changed, 311 insertions(+), 14 deletions(-)
+# diff --stat 0e0bc63^1..0e0bc63
+ 14 files changed, 311 insertions(+), 14 deletions(-)
+# sha256 patch
+4b6eb394dd6d04139f1a1d432603f9b27866e97b8012881896c7c1c75cea3384  -
+4b6eb394dd6d04139f1a1d432603f9b27866e97b8012881896c7c1c75cea3384  -

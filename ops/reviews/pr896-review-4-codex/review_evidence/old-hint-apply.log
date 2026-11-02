@@ -1,0 +1,22 @@
+patching file ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml
+Hunk #1 FAILED at 241.
+1 out of 1 hunk FAILED -- saving rejects to file ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml.rej
+patching file ops/reviews/README.md
+Hunk #4 FAILED at 740.
+Hunk #5 FAILED at 1037.
+2 out of 5 hunks FAILED -- saving rejects to file ops/reviews/README.md.rej
+patching file ops/reviews/phan-bien-quy-trinh-review-3-codex-verdict.receipt.yaml
+patching file ops/reviews/phan-bien-quy-trinh-review-4-codex-verdict.receipt.yaml
+patching file ops/reviews/phan-bien-quy-trinh-review-5-codex-verdict.receipt.yaml
+patching file ops/reviews/pr455-bien-nhan-v2-review-1-codex-verdict.receipt.yaml
+patching file ops/reviews/pr455-bien-nhan-v2-review-2-codex-verdict.receipt.yaml
+patching file ops/reviews/pr455-bien-nhan-v2-review-3-codex-verdict.receipt.yaml
+patching file ops/reviews/pr455-bien-nhan-v2-review-4-codex-verdict.receipt.yaml
+patching file ops/reviews/pr455-bien-nhan-v2-review-5-codex-verdict.receipt.yaml
+patching file ops/reviews/pr455-bien-nhan-v2-review-6-codex-verdict.receipt.yaml
+patching file ops/reviews/pr455-bien-nhan-v2-review-7-gpt6astra-verdict.receipt.yaml
+patching file ops/reviews/pr455-bien-nhan-v2-review-8-gpt6astra-verdict.receipt.yaml
+patching file ops/reviews/pr460-bien-nhan-v2-review-9-gpt6astra-verdict.receipt.yaml
+patching file ops/reviews/pr493-review-5-codex-verdict.receipt.yaml
+patching file ops/reviews/pr896-review-2-codex-verdict.receipt.yaml
+patching file ops/reviews/wp766-r1-g1-exec-review-1-codex-verdict.receipt.yaml

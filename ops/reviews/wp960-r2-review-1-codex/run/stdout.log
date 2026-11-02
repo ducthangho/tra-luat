@@ -1,0 +1,5 @@
+Đã hoàn tất và ghi [VERDICT.md](/tmp/claude-0/rv/wp960-r2-review-1-codex/VERDICT.md): **changes_requested — 6 P1, 1 P2, 1 P3**.
+
+Suite đạt 87/87, nhưng 5/9 đột biến riêng vẫn vượt qua toàn bộ ca test. [HINT.patch](/tmp/claude-0/rv/wp960-r2-review-1-codex/HINT.patch) đã dry-run sạch.
+
+Không sửa `cay-kho/`, không gọi mạng. Theo Q8, executor phải dừng để chủ kho quyết định.

@@ -1,0 +1,5 @@
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutation": "r8-receipt-encoding", "cases": 87, "passed": 87, "red": [], "old": "except (UnicodeDecodeError, OSError) as ex:\n            raise KhongDoDuoc", "new": "except OSError as ex:\n            raise KhongDoDuoc"}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutation": "r9-rethrow-alias", "failed": ["c82_alias_VONG_la_KHONG_DO_DUOC_alias_dung_lai_van_duyet", "giet_that", "alias vòng làm `kiem` chết bằng TinHieuChotCa, không phải KhongDoDuoc"]}
+{"mutation": "r9-rethrow-alias", "cases": 87, "passed": 86, "red": [["c82_alias_VONG_la_KHONG_DO_DUOC_alias_dung_lai_van_duyet", "giet_that", "alias vòng làm `kiem` chết bằng TinHieuChotCa, không phải KhongDoDuoc"]], "old": "        except KhongDoDuoc:\n            raise\n", "new": ""}

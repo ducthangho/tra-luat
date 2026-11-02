@@ -1,0 +1,7 @@
+ĐỎ: test sống chưa đăng ký: ops/land_evidence_nguon_test.py
+ĐỎ: mục đăng ký không có tệp: ops/not_exists_test.py
+ĐĂNG KÝ: 24/24
+TRẠNG THÁI: chan=24 cach_ly=0
+LAUNCHER WINDOWS: 4/4 hợp đồng
+RUFF CI: 3/3 hợp đồng
+TỔNG: ĐỎ

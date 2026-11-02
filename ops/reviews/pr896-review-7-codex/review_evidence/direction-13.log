@@ -1,0 +1,7 @@
+patch_paths=5 dry_run_rc=0 apply_rc=0
+checking file ops/land/pr491-r358-ghi-so-land-evidence.yaml
+checking file ops/land/pr823-wp802-land-evidence.yaml
+checking file ops/land/pr877-wp854-land-evidence.yaml
+checking file ops/reviews/README.md
+checking file ops/reviews/pr896-review-6-codex-verdict.receipt.yaml
+YAML parsed; 5/5 applied files byte-match intended text. No receipt v1 or verdict modified.

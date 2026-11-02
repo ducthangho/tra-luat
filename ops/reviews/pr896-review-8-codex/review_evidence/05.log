@@ -1,0 +1,19 @@
+copy=/tmp/pr896-r8-copy-c2n3k2yh/repo
+HEAD=fb87110cfab832406984f893e6a4c79fbb932aef
+delete-new-index-row removed_bytes=737
+t26 rc=0 lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+t27 rc=1 !!! do t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc README.md: verdict 'pr896-review-7-codex-verdict.md' KHÔNG có trong CỘT 'tệp verdict' của bảng 'Mục lục'. Nằm ở đoạn giải thích, trong comment HTML, hay ở một cột mô tả nào đó thì bảng render ra vẫn thiếu nó.
+  ĐỎ  t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc: README.md: verdict 'pr896-review-7-codex-verdict.md' KHÔNG có trong CỘT 'tệp verdict' của bảng 'Mục lục'. Nằm ở đoạn giải thích, trong comment HTML, hay ở một cột mô tả nào đó thì bảng render ra vẫn thiếu nó.
+lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+t138 rc=0 lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+delete-new-caveat-readme-row removed_bytes=388
+t26 rc=0 lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+t27 rc=1 !!! do t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc README.md: caveat 'LAN-CHAY-DAU-CHET-VI-MAY-CHU-QUA-TAI' của pr896-review-7-codex-verdict.receipt.yaml KHÔNG nằm ở CỘT 'id' trên cùng hàng với 'pr896-review-7-codex-verdict.md' ở CỘT 'tệp verdict', trong bảng 'Cảnh báo đang có hiệu lực'. Bị nhắc trong phần mô tả của hàng khác KHÔNG tính — verdict này vẫn phải có hàng cảnh báo của riêng nó.
+  ĐỎ  t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc: README.md: caveat 'LAN-CHAY-DAU-CHET-VI-MAY-CHU-QUA-TAI' của pr896-review-7-codex-verdict.receipt.yaml KHÔNG nằm ở CỘT 'id' trên cùng hàng với 'pr896-review-7-codex-verdict.md' ở CỘT 'tệp verdict', trong bảng 'Cảnh báo đang có hiệu lực'. Bị nhắc trong phần mô tả của hàng khác KHÔNG tính — verdict này vẫn phải có hàng cảnh báo của riêng nó.
+lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+t138 rc=0 lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+delete-new-receipt-caveat removed_bytes=384
+t26 rc=0 lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+t27 rc=0 lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+t138 rc=0 lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+status_after_restore=''

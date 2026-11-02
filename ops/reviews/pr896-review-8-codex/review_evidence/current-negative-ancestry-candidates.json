@@ -1,0 +1,1312 @@
+[
+  {
+    "path": "ops/reviews/assurance-ho-model-review-2-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 49,
+    "text": "Neo BLOB ghim `c8a652e3bbc25ae86f654818428095defa5fcac3` — commit DAU TIEN chua tep verdict, tren nhanh claude/review-551-luot2-20260918. Thu dinh danh tep la BAM, khong phai ten nhanh. Tim o `master` truoc; chua thay thi fetch nhanh tren.",
+    "historical": false,
+    "evidence_oid": "c8a652e3bbc25ae86f654818428095defa5fcac3",
+    "ancestor_master_rc": 0,
+    "excerpt": "view-551-luot2-20260918. Thu dinh danh tep la BAM, khong phai ten nhanh. Tim o `master` truoc; chua thay thi fetch nhanh tren."
+  },
+  {
+    "path": "ops/reviews/assurance-ho-model-review-2-claude-verdict.receipt.yaml",
+    "field": "bang_san.0.huong",
+    "line": 86,
+    "text": "head co troi khong, va da hoa master chua",
+    "historical": false,
+    "evidence_oid": "c8a652e3bbc25ae86f654818428095defa5fcac3",
+    "ancestor_master_rc": 0,
+    "excerpt": "head co troi khong, va da hoa master chua"
+  },
+  {
+    "path": "ops/reviews/cai-cong-cu-sigpipe-r2-human-audit-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 79,
+    "text": "cuong_do THAP vi chua land. Chi song neu PR bookkeeping land bang MERGE COMMIT hoac FAST-FORWARD — squash lam mo neo khong con la to tien (lop khuyet tat da ghi trong CLAUDE.md va bien nhan #523).",
+    "historical": false,
+    "evidence_oid": "ad868deff20bdecc7c3791f89fffd1f30e598239",
+    "ancestor_master_rc": 0,
+    "excerpt": "MERGE COMMIT hoac FAST-FORWARD — squash lam mo neo khong con la to tien (lop khuyet tat da ghi trong CLAUDE.md va bien nhan #523)."
+  },
+  {
+    "path": "ops/reviews/cai-cong-cu-sigpipe-r2-review-5-codex-verdict.receipt.yaml",
+    "field": "verdict_usage_caveats.1.canh_bao",
+    "line": 74,
+    "text": "`approve` nay KHONG dong lop `phep-do-khong-neo-ma-chay`: J1 (probe B1 cua W4 goi `lam` voi bo doi so co dinh; hoi quy chi o nhanh `tao-tag` lot 53/53) duoc CHAP NHAN la gioi han theo quyet dinh chu kho, chuyen packet ke nhiem.",
+    "historical": false,
+    "evidence_oid": "2ccdf6c657b7555f3fd8a580d10cc5cb53ef0d4e",
+    "ancestor_master_rc": 0,
+    "excerpt": "1 cua W4 goi `lam` voi bo doi so co dinh; hoi quy chi o nhanh `tao-tag` lot 53/53) duoc CHAP NHAN la gioi han theo quyet dinh chu kho, chuyen packet ke nhiem."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-1-codex-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 46,
+    "text": "(a) git merge-base --is-ancestor: c8f52b6 LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.",
+    "historical": false,
+    "evidence_oid": "7850209711417dc985beeb76408537911a5536d0",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-1-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 52,
+    "text": "(a) Neo BLOB ghim `7850209` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob 7850209:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-1-codex-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "7850209711417dc985beeb76408537911a5536d0",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-10-codex-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 46,
+    "text": "(a) git merge-base --is-ancestor: 0acd3a9 LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.",
+    "historical": false,
+    "evidence_oid": "645bdb6341754faa5dcbf81254e570dd532fbb26",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-10-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 52,
+    "text": "(a) Neo BLOB ghim `645bdb6` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob 645bdb6:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-10-codex-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "645bdb6341754faa5dcbf81254e570dd532fbb26",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-12-codex-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 46,
+    "text": "(a) git merge-base --is-ancestor: 0b22f55 LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.",
+    "historical": false,
+    "evidence_oid": "9b7fed4138111480166190a473fee10c41ba0672",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-12-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 52,
+    "text": "(a) Neo BLOB ghim `9b7fed4` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob 9b7fed4:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-12-codex-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "9b7fed4138111480166190a473fee10c41ba0672",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-14-codex-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 46,
+    "text": "(a) git merge-base --is-ancestor: 9440dc1 LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.",
+    "historical": false,
+    "evidence_oid": "05918a0c55cee8b2e46be1707e3066076c34d80e",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-14-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 52,
+    "text": "(a) Neo BLOB ghim `05918a0` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob 05918a0:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-14-codex-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "05918a0c55cee8b2e46be1707e3066076c34d80e",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-15-codex-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 46,
+    "text": "(a) git merge-base --is-ancestor: b3863e2 LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.",
+    "historical": false,
+    "evidence_oid": "7c16d11bc431882f4ffa780995b2cb281e41eb67",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-15-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 52,
+    "text": "(a) Neo BLOB ghim `7c16d11` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob 7c16d11:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-15-codex-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "7c16d11bc431882f4ffa780995b2cb281e41eb67",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-16-codex-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 46,
+    "text": "(a) git merge-base --is-ancestor: 54b4a01 LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.",
+    "historical": false,
+    "evidence_oid": "2ae5646de60219638c2fef8f838cd86920537154",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-16-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 52,
+    "text": "(a) Neo BLOB ghim `2ae5646` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob 2ae5646:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-16-codex-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "2ae5646de60219638c2fef8f838cd86920537154",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-17-codex-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 46,
+    "text": "(a) git merge-base --is-ancestor: 161c4b6 LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.",
+    "historical": false,
+    "evidence_oid": "37fe90352ae0fa003ba87091b58fffb6d4954d4f",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-17-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 52,
+    "text": "(a) Neo BLOB ghim `37fe903` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob 37fe903:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-17-codex-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "37fe90352ae0fa003ba87091b58fffb6d4954d4f",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-18-codex-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 46,
+    "text": "(a) git merge-base --is-ancestor: 42f74db LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.",
+    "historical": false,
+    "evidence_oid": "66559b79ebe3ea4881925979519512987b80a6c6",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-18-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 52,
+    "text": "(a) Neo BLOB ghim `66559b7` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob 66559b7:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-18-codex-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "66559b79ebe3ea4881925979519512987b80a6c6",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-2-codex-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 46,
+    "text": "(a) git merge-base --is-ancestor: c454ee9 LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.",
+    "historical": false,
+    "evidence_oid": "c8b5c4e05436c8cb59b75488df0affc8a728e1c0",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-2-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 52,
+    "text": "(a) Neo BLOB ghim `c8b5c4e` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob c8b5c4e:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-2-codex-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "c8b5c4e05436c8cb59b75488df0affc8a728e1c0",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-20-claude-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 48,
+    "text": "(a) git merge-base --is-ancestor: 0842283 LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.",
+    "historical": false,
+    "evidence_oid": "d5c97266947e0661da5fd38182d359a35976ca0c",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-20-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 54,
+    "text": "(a) Neo BLOB ghim `d5c9726` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob d5c9726:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-20-claude-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "d5c97266947e0661da5fd38182d359a35976ca0c",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-21-claude-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 48,
+    "text": "(a) git merge-base --is-ancestor: cc78b33 LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Day la head DA duoc approve o luot nay; 5 tep write set cua 3ddda02 trung byte cc78b33 (git diff --quiet cc78b33 3ddda02 -- W1..W5 rc=0).",
+    "historical": false,
+    "evidence_oid": "64b1c0f4c3be2e8999950d7ee4e40a47fb4e2d25",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Day la head DA duoc approve o luot nay; 5 tep write set cua 3ddda02 trung byte cc78b33 (git diff --quiet cc78b33 3ddda02 -- W1..W"
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-21-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 54,
+    "text": "(a) Neo BLOB ghim `64b1c0f` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob 64b1c0f:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-21-claude-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "64b1c0f4c3be2e8999950d7ee4e40a47fb4e2d25",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-4-codex-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 46,
+    "text": "(a) git merge-base --is-ancestor: 971e14c LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.",
+    "historical": false,
+    "evidence_oid": "59aeafcda23b7b28b655b494d4b43c5d43b35a05",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-4-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 52,
+    "text": "(a) Neo BLOB ghim `59aeafc` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob 59aeafc:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-4-codex-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "59aeafcda23b7b28b655b494d4b43c5d43b35a05",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-5-codex-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 46,
+    "text": "(a) git merge-base --is-ancestor: ef01112 LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.",
+    "historical": false,
+    "evidence_oid": "007af122f5ffb8b6a3da3424da5ade9e250ff77c",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-5-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 52,
+    "text": "(a) Neo BLOB ghim `007af12` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob 007af12:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-5-codex-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "007af122f5ffb8b6a3da3424da5ade9e250ff77c",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-6-codex-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 46,
+    "text": "(a) git merge-base --is-ancestor: b6e0598 LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.",
+    "historical": false,
+    "evidence_oid": "4152bf4e502c11f8fcc0af7b750caef022346399",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-6-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 52,
+    "text": "(a) Neo BLOB ghim `4152bf4` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob 4152bf4:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-6-codex-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "4152bf4e502c11f8fcc0af7b750caef022346399",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-7-codex-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 46,
+    "text": "(a) git merge-base --is-ancestor: 2bb11df LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.",
+    "historical": false,
+    "evidence_oid": "c5fda22124dc65f29b0932bfafd6764f807c799e",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-7-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 52,
+    "text": "(a) Neo BLOB ghim `c5fda22` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob c5fda22:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-7-codex-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "c5fda22124dc65f29b0932bfafd6764f807c799e",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-8-codex-verdict.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 46,
+    "text": "(a) git merge-base --is-ancestor: 3204752 LA to tien cua 423b4ba (merge PR #696) va cua origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.",
+    "historical": false,
+    "evidence_oid": "0987403fd6cac7501bd363e198069ef472282de4",
+    "ancestor_master_rc": 0,
+    "excerpt": "gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master."
+  },
+  {
+    "path": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-8-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 52,
+    "text": "(a) Neo BLOB ghim `0987403` — commit DUY NHAT them tep: git log --diff-filter=A tren origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua sau khi them). Blob 0987403:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-8-codex-verdict.md bam dung verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.",
+    "historical": false,
+    "evidence_oid": "0987403fd6cac7501bd363e198069ef472282de4",
+    "ancestor_master_rc": 0,
+    "excerpt": "claude/bookkeeping-668 (bc57bca, merge 86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master."
+  },
+  {
+    "path": "ops/reviews/ci-registry-nang-tran-bo-day-du-human-audit-ducthangho-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 84,
+    "text": "cuong_do THAP vi chua land. Chi song neu nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE COMMIT hoac FAST-FORWARD.",
+    "historical": false,
+    "evidence_oid": "233a8195443a83b10911edc8bf245d1b7d2fb4b8",
+    "ancestor_master_rc": 0,
+    "excerpt": "cuong_do THAP vi chua land. Chi song neu nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE COMMIT hoac FAST-FORWARD."
+  },
+  {
+    "path": "ops/reviews/ci-registry-nang-tran-bo-day-du-human-audit-ducthangho-verdict.receipt.yaml",
+    "field": "gioi_han_duoc_chap_nhan.0",
+    "line": 123,
+    "text": "5400 s chua bao dam cho moi runner (bien ~48% tren 3645 s); giai phap ben la chia manh nhanh_don_duoc_test — packet ke nhiem.",
+    "historical": false,
+    "evidence_oid": "233a8195443a83b10911edc8bf245d1b7d2fb4b8",
+    "ancestor_master_rc": 0,
+    "excerpt": " runner (bien ~48% tren 3645 s); giai phap ben la chia manh nhanh_don_duoc_test — packet ke nhiem."
+  },
+  {
+    "path": "ops/reviews/ci-registry-nang-tran-bo-day-du-human-audit-ducthangho-verdict.receipt.yaml",
+    "field": "verdict_usage_caveats.4.noi_dung",
+    "line": 143,
+    "text": "Mo neo canonical_ancestry chi song neu nhanh bookkeeping duoc push nguyen ven va land bang merge commit hoac fast-forward.",
+    "historical": false,
+    "evidence_oid": "233a8195443a83b10911edc8bf245d1b7d2fb4b8",
+    "ancestor_master_rc": 0,
+    "excerpt": "Mo neo canonical_ancestry chi song neu nhanh bookkeeping duoc push nguyen ven va land bang merge commit hoac fast-forward."
+  },
+  {
+    "path": "ops/reviews/ci-registry-nang-tran-bo-day-du-review-luot1-codex.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 114,
+    "text": "Len trung_binh/cao chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "233a8195443a83b10911edc8bf245d1b7d2fb4b8",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh/cao chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/ci-registry-nang-tran-bo-day-du-review-luot2-codex.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 110,
+    "text": "Len trung_binh/cao chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "233a8195443a83b10911edc8bf245d1b7d2fb4b8",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh/cao chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/doctor-github-mcp-review-6-codex-verdict.receipt.yaml",
+    "field": "truy_xuat_ghi_chu",
+    "line": 60,
+    "text": "ĐÃ LAND: PR #146 merge bằng MERGE COMMIT `f9730f6`, nên `4920113a` là tổ tiên của master và `evidence_url` tra được không phụ thuộc nhánh `ops/**`. NÓI RÕ CHỖ YẾU HƠN HAI BIÊN NHẬN KIA: commit này KHÔNG có tag `luu-tru/*` riêng — bảo đảm của nó là DÒNG DÕI master, không phải mỏ neo tag. Hai thứ đó không tương đương: dòng dõi mất nếu master bị ép lùi (proxy chặn xoá ref nhưng VẪN cho `git push --force`, đã ghi trong `CLAUDE.md`), còn tag thì `xoa-tag` dưới `luu-tru/` cấm tuyệt đối. Muốn ngang bằng thì tạo thêm một tag trỏ `4920113a` — CHƯA làm, và chưa làm thì đừng khai là đã làm.",
+    "historical": false,
+    "evidence_oid": "4920113a639d81385c0f98b1488c0f497776d2ff",
+    "ancestor_master_rc": 0,
+    "excerpt": "DÒNG DÕI master, không phải mỏ neo tag. Hai thứ đó không tương đương: dòng dõi mất nếu master bị ép lùi (proxy chặn xoá ref nhưng VẪN cho `git push --force`, đã ghi trong `CLAUDE.md`), còn tag thì `xoa-tag` dưới `luu-tru/` cấm tuyệt đối. Muốn ngang bằng thì tạo thêm một t"
+  },
+  {
+    "path": "ops/reviews/doctor-github-mcp-review-6-codex-verdict.receipt.yaml",
+    "field": "receipt_khong_khai.0",
+    "line": 146,
+    "text": "Không khai rằng `evidence_url` là BỀN. Nó trỏ một commit hiện chỉ được giữ bởi nhánh `ops/**`; xem `evidence_url_han_che` và `truy_xuat_*`. URL ĐÚNG ≠ URL SỐNG LÂU.",
+    "historical": false,
+    "evidence_oid": "4920113a639d81385c0f98b1488c0f497776d2ff",
+    "ancestor_master_rc": 0,
+    "excerpt": "ằng `evidence_url` là BỀN. Nó trỏ một commit hiện chỉ được giữ bởi nhánh `ops/**`; xem `evidence_url_han_che` và `truy_xuat_*`. URL ĐÚNG ≠ URL SỐNG LÂU."
+  },
+  {
+    "path": "ops/reviews/doctor-github-mcp-review-6-codex-verdict.receipt.yaml",
+    "field": "receipt_khong_khai.1",
+    "line": 148,
+    "text": "Không khai verdict này đã land lên master — lúc viết thì CHƯA.",
+    "historical": false,
+    "evidence_oid": "4920113a639d81385c0f98b1488c0f497776d2ff",
+    "ancestor_master_rc": 0,
+    "excerpt": "Không khai verdict này đã land lên master — lúc viết thì CHƯA."
+  },
+  {
+    "path": "ops/reviews/doctor-github-mcp-review-9-codex-verdict.receipt.yaml",
+    "field": "evidence_url_han_che",
+    "line": 26,
+    "text": "Trỏ commit ĐẦU TIÊN chứa tệp verdict. ĐIỀU KIỆN NÊU Ở BẢN ĐẦU NAY ĐÃ THOẢ: PR #146 land bằng MERGE COMMIT (`f9730f6`), không squash, nên commit giữ nguyên tổ tiên. Ngoài ra đã có tag neo — xem `truy_xuat_*`.",
+    "historical": false,
+    "evidence_oid": "de86c2475c1410f73874fb3f75f233ee3eecc962",
+    "ancestor_master_rc": 0,
+    "excerpt": "THOẢ: PR #146 land bằng MERGE COMMIT (`f9730f6`), không squash, nên commit giữ nguyên tổ tiên. Ngoài ra đã có tag neo — xem `truy_xuat_*`."
+  },
+  {
+    "path": "ops/reviews/don-nhanh-base-review-1-codex-verdict.receipt.yaml",
+    "field": "truy_xuat_ghi_chu",
+    "line": 29,
+    "text": "#150 CHƯA land. Commit công bố hiện chỉ được nhánh `ops/**` giữ. Bền khi #150 merge bằng MERGE COMMIT, hoặc khi tạo tag `luu-tru/*` trỏ `e872e98`. Chưa làm cái nào.",
+    "historical": false,
+    "evidence_oid": "e872e98e7b3612baf71fc177b54ce8b3bafd033d",
+    "ancestor_master_rc": 0,
+    "excerpt": "#150 CHƯA land. Commit công bố hiện chỉ được nhánh `ops/**` giữ. Bền khi #150 merge bằng MERGE COMMIT, hoặc khi tạo tag `luu-tru/*` trỏ `e872e98`. Chưa làm cái nào."
+  },
+  {
+    "path": "ops/reviews/don-nhanh-base-review-4-claude-verdict.receipt.yaml",
+    "field": "truy_xuat_ghi_chu",
+    "line": 60,
+    "text": "CẢNH BÁO BỀN VỮNG — đọc kỹ. `evidence_url` neo vào một commit chỉ tồn tại trên nhánh `claude/wp55-r2g2-executor-p4tee0`. #150 đã merge TRƯỚC commit này, nên hai verdict lượt 4/5 KHÔNG nằm trong lịch sử `master`. Xoá nhánh ấy ⇒ commit không tra được ⇒ `evidence_url` chết, và ta quay lại đúng tình trạng nợ mà bản ghi này sinh ra để đóng. Muốn bền thì phải land nhánh này vào `master` HOẶC tạo tag `luu-tru/*` trỏ commit. Phiên web KHÔNG tạo được tag (proxy 403) — việc này thuộc chủ kho.",
+    "historical": false,
+    "evidence_oid": "03f12ac63284dd814dcf14664968af4872ef7f8a",
+    "ancestor_master_rc": 0,
+    "excerpt": "N VỮNG — đọc kỹ. `evidence_url` neo vào một commit chỉ tồn tại trên nhánh `claude/wp55-r2g2-executor-p4tee0`. #150 đã merge TRƯỚC commit này, nên hai verdict lượt 4/5 KHÔNG nằm trong lịch sử `master`. Xoá nhánh ấy ⇒ commit không tra được ⇒ `evidence_ur"
+  },
+  {
+    "path": "ops/reviews/don-nhanh-base-review-5-claude-verdict.receipt.yaml",
+    "field": "truy_xuat_ghi_chu",
+    "line": 73,
+    "text": "Y HỆT lượt 4: commit chỉ sống trên nhánh `claude/wp55-r2g2-executor-p4tee0`, KHÔNG trong lịch sử `master` (#150 merge TRƯỚC commit này). Xoá nhánh ⇒ link chết ⇒ nợ mở lại. Cần land vào `master` hoặc gắn tag `luu-tru/*`; phiên web không tạo được tag (proxy 403).",
+    "historical": false,
+    "evidence_oid": "03f12ac63284dd814dcf14664968af4872ef7f8a",
+    "ancestor_master_rc": 0,
+    "excerpt": "Y HỆT lượt 4: commit chỉ sống trên nhánh `claude/wp55-r2g2-executor-p4tee0`, KHÔNG trong lịch sử `master` (#150 merge TRƯỚC commit này). Xoá nhánh ⇒ link chết ⇒ nợ mở lại. Cần land vào `master` hoặc gắn tag `luu-tru/*`; "
+  },
+  {
+    "path": "ops/reviews/don-nhanh-base-review-7-claude-verdict.receipt.yaml",
+    "field": "windows_reviewer_ket_luan_DOC_LAP.suy_ra_3_ca_dat",
+    "line": 124,
+    "text": "t4/t8/t9 — ba ca duy nhất không kiểm `rc`, chỉ đòi \"nhánh còn\"; script chết sớm nên không xoá gì nên chúng xanh. Đúng nghĩa \"ca có MẶT khác ca có ĐO\". (Reviewer khai đây là SUY LUẬN từ mã + thông điệp lỗi, không phải log từng ca.)",
+    "historical": false,
+    "evidence_oid": "a8c1d1dfe1eb5f493951d82a135bcfac82fa370a",
+    "ancestor_master_rc": 0,
+    "excerpt": "t4/t8/t9 — ba ca duy nhất không kiểm `rc`, chỉ đòi \"nhánh còn\"; script chết sớm nên không xoá gì nên chúng xanh. Đúng nghĩa \"ca có MẶT khác ca có ĐO\". (Reviewer khai đây là SUY LUẬN từ mã + thông điệp lỗi, không phải log từng ca.)"
+  },
+  {
+    "path": "ops/reviews/handoff-264-review-1-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 54,
+    "text": "ĐÃ GHIM theo commit `0fdd70b9` — commit ĐẦU TIÊN chứa tệp verdict. Hai bước vì một commit không chứa được băm của chính nó; `t26` chỉ kiểm HÌNH DẠNG nên URL nhánh cũng qua, mà nhánh là thứ bị xoá.",
+    "historical": false,
+    "evidence_oid": "0fdd70b9d6e6b6b143ac54591c98178f2ddaf613",
+    "ancestor_master_rc": 0,
+    "excerpt": "một commit không chứa được băm của chính nó; `t26` chỉ kiểm HÌNH DẠNG nên URL nhánh cũng qua, mà nhánh là thứ bị xoá."
+  },
+  {
+    "path": "ops/reviews/lease-dang-review-4-claude-verdict.receipt.yaml",
+    "field": "verdict_usage_caveats.3.noi_dung",
+    "line": 75,
+    "text": "Reviewer TÁCH câu hỏi D lần 4 làm hai trục và TỪ CHỐI tự quyết. **Trục vế: KHÔNG phải D** — nhãn chỉ có hai nhưng `t66` tính HAI boolean độc lập (`co_post` theo vị trí POST, `da_mark` theo vị trí `mark`) nên tập vế thực tế phân BA lớp; chiều ngược của `M4` chứng minh trục thứ hai có răng. **Trục ĐƠN VỊ guard: đúng hình dạng D lần 1–2** (câu kiểm chứng ở độ phân giải KHỐI trong khi thứ được khẳng định sống ở độ phân giải NHÁNH). Reviewer nêu thẳng rằng nếu đọc bộ đếm theo HÌNH DẠNG thì đây là **D = 4** và chốt đã đăng ký của `r6` biến verdict thành `dung_lai`. **Người giữ kho quyết: KHÔNG tăng bộ đếm** — lựa chọn \"guard = khối `set +e`\" là của `r5`/Q25, đã qua hai lượt review, không phải nước đi mới của lượt 6; cái mới chỉ là một nhánh sót chưa khai. Bộ đếm D giữ **3**.",
+    "historical": false,
+    "evidence_oid": "dffad8105e7561aaa9f2c34c2fff6e4c01006748",
+    "ancestor_master_rc": 0,
+    "excerpt": "t review, không phải nước đi mới của lượt 6; cái mới chỉ là một nhánh sót chưa khai. Bộ đếm D giữ **3**."
+  },
+  {
+    "path": "ops/reviews/lease-publish-windows-do-review-r1-codex.receipt.yaml",
+    "field": "reviewed_sha_to_tien",
+    "line": 50,
+    "text": "(a) git merge-base --is-ancestor 4bc9432 163fd5d rc 1: KHONG la to tien master. Commit 'ci-tam' nang timeout cho luot do Windows (thong diep: 'commit nay KHONG land'), cha 1741e0a (merge PR #673). Chi nam tren origin/ops/do-lease-publish-windows-150 (for-each-ref --contains, 461 ref); 0/64 tag giu no.",
+    "historical": false,
+    "evidence_oid": "ff98b0f6957e98ac14d585a58f87d43edbe0c663",
+    "ancestor_master_rc": 0,
+    "excerpt": "it merge-base --is-ancestor 4bc9432 163fd5d rc 1: KHONG la to tien master. Commit 'ci-tam' nang timeout cho luot do Windows (thong diep: 'commit nay KHONG land'), cha 1741e0a (merge PR #673). Chi nam tren origin/ops/do-lease-publish-windows-150 (for-eac"
+  },
+  {
+    "path": "ops/reviews/lease-publish-windows-do-review-r1-codex.receipt.yaml",
+    "field": "verdict_usage_caveats.1.mo_ta",
+    "line": 113,
+    "text": "reviewed_sha 4bc9432 KHONG la to tien master va 0/64 tag giu no; chi nhanh ops/do-lease-publish-windows-150 giu. Xoa nhanh ay thi bien_nhan_v2 se KHONG DO DUOC reviewed_sha cua bien nhan nay (rc 2, cong DO). Truoc khi xoa phai co tag luu-tru/* giu 4bc9432, hoac chu kho quyet cach khac.",
+    "historical": false,
+    "evidence_oid": "ff98b0f6957e98ac14d585a58f87d43edbe0c663",
+    "ancestor_master_rc": 0,
+    "excerpt": "reviewed_sha 4bc9432 KHONG la to tien master va 0/64 tag giu no; chi nhanh ops/do-lease-publish-windows-150 giu. Xoa nhanh ay thi bien_nhan_v2 se KHONG DO DUOC reviewed_sha cua bien nhan nay (rc 2, cong DO). Truoc khi xoa ph"
+  },
+  {
+    "path": "ops/reviews/no-p3-ho-so-exec-review-1-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 69,
+    "text": "Neo BLOB ghim commit 75fa4ff cua nhanh claude/bookkeeping-p3a-land; commit ay CHI mang ban sao verdict/HINT, bien nhan di o commit sau. Link chi song khi nhanh duoc push nguyen ven (khong rebase/squash).",
+    "historical": false,
+    "evidence_oid": "75fa4ff7cf2acd57981eb878a7d64cb5d4fe8574",
+    "ancestor_master_rc": 0,
+    "excerpt": "sao verdict/HINT, bien nhan di o commit sau. Link chi song khi nhanh duoc push nguyen ven (khong rebase/squash)."
+  },
+  {
+    "path": "ops/reviews/no-p3-ho-so-exec-review-1-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 103,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "75fa4ff7cf2acd57981eb878a7d64cb5d4fe8574",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/no-p3-ho-so-spec-review-1-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 61,
+    "text": "Neo BLOB ghim commit 75fa4ff cua nhanh claude/bookkeeping-p3a-land; commit ay CHI mang ban sao verdict/HINT, bien nhan di o commit sau. Link chi song khi nhanh duoc push nguyen ven (khong rebase/squash).",
+    "historical": false,
+    "evidence_oid": "75fa4ff7cf2acd57981eb878a7d64cb5d4fe8574",
+    "ancestor_master_rc": 0,
+    "excerpt": "sao verdict/HINT, bien nhan di o commit sau. Link chi song khi nhanh duoc push nguyen ven (khong rebase/squash)."
+  },
+  {
+    "path": "ops/reviews/no-p3-ho-so-spec-review-1-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 95,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "75fa4ff7cf2acd57981eb878a7d64cb5d4fe8574",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/no-p3-ho-so-spec-review-2-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 60,
+    "text": "Neo BLOB ghim commit 75fa4ff cua nhanh claude/bookkeeping-p3a-land; commit ay CHI mang ban sao verdict/HINT, bien nhan di o commit sau. Link chi song khi nhanh duoc push nguyen ven (khong rebase/squash).",
+    "historical": false,
+    "evidence_oid": "75fa4ff7cf2acd57981eb878a7d64cb5d4fe8574",
+    "ancestor_master_rc": 0,
+    "excerpt": "sao verdict/HINT, bien nhan di o commit sau. Link chi song khi nhanh duoc push nguyen ven (khong rebase/squash)."
+  },
+  {
+    "path": "ops/reviews/no-p3-ho-so-spec-review-2-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 98,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "75fa4ff7cf2acd57981eb878a7d64cb5d4fe8574",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/plat-x8-review-3-claude-verdict.receipt.yaml",
+    "field": "la_canonical_ghi_chu",
+    "line": 15,
+    "text": "MỘT lý do, không phải ba. Đối chiếu với lượt 1 và 2: (a) \"không có lease `role: reviewer`\" — nay ĐÃ THOẢ: lease `plat-x8-review-3-claude-20260822`,\n    `role: reviewer`, `access: read-only`, `branch_ownership: none`, cấp trước khi review chạy.\n(c) \"người review là NGƯỜI SOẠN ĐẶC TẢ\" — nay ĐÃ THOẢ: phiên claude RIÊNG, chạy trong sandbox rời\n    qua `launcher.py` với `--expected-head` neo exact head; nó tìm được đúng thứ hai lượt do tác\n    giả đặc tả tự làm đã bỏ sót, nên tính độc lập không chỉ là lời khai về quy trình.\n(b) \"biên nhận không qua validation\" — VẪN CHƯA THOẢ, và đây là lý do duy nhất còn lại.\n    `PROTOCOL:460-464`: `schema_version: 1` do tác giả tệp MỚI tự khai KHÔNG tạo miễn trừ; miễn\n    trừ v1 neo vào allowlist ĐÓNG BĂNG đúng 11 filename+hash. Tệp này không nằm trong 11 tệp ấy\n    ⇒ phải validate như v2. **Biên nhận này được viết là v1, nên nó không validate. Đó là toàn bộ\n    lý do — và đó là THIẾU SÓT CỦA PHIÊN ĐIỀU PHỐI, không phải một rào cản cấu trúc.**\n\n    ĐÍNH CHÍNH (ghi 22-08 cùng ngày, sau khi đọc lại nguồn): bản đầu của trường này khai lý do là\n    *\"v2 đòi receipt ID và HAI danh tính chứng thực ĐỘC LẬP, mà reviewer và điều phối đều là\n    `claude` cùng container nên không phải hai danh tính độc lập\"*. **SAI, và sai theo hướng\n    nguy hiểm hơn: nó dựng một điều kiện bất khả rồi tự tha cho mình.** Hai identity của v2 KHÔNG\n    phải hai bên chứng thực độc lập — đọc `PROTOCOL:424-440` và `ADR-0040`, chúng là\n    `model_reviewer_identity` (provider/model/session đã TẠO verdict) và\n    `github_submitter_identity` (actor đã VẬN CHUYỂN nó lên GitHub). Cả hai đều biết được ở lượt\n    này. Chính `ADR-0040` tách chúng ra để tài khoản vận chuyển KHÔNG bị đọc thành bằng chứng\n    reviewer độc lập — tức mục đích của nó ngược hẳn với cách bản đầu diễn giải.\n    Hệ quả đúng: lượt 3 **lẽ ra đủ tư cách canon** nếu biên nhận được viết là v2. Nó không phải,\n    nên nó không canon — nhưng lý do là một việc CHƯA LÀM, không phải một việc KHÔNG LÀM ĐƯỢC.\n    Không sửa lùi nhãn `la_canonical`: nhãn đúng với hiện vật đang tồn tại; chỉ sửa LÝ DO.\n    Đo kèm, để không ai đọc \"viết v2\" thành đường mòn: 22-08-2026, **40/40** biên nhận trong\n    `ops/reviews/` đều `schema_version: 1` — kho CHƯA TỪNG có receipt v2 nào.\n\n    Theo `PROTOCOL:755-760` (`review_rounds_used` chỉ tăng khi qua schema + exact-SHA + receipt\n    validation) ⇒ lượt này KHÔNG vào bộ đếm.\nHỆ QUẢ: `PLAT-X8` vẫn còn NGUYÊN hai vòng canon. Con số này không đổi kể từ lượt 1.",
+    "historical": false,
+    "evidence_oid": "247c6fb5d283cb78abfecbd50aeb1830c935dcc9",
+    "ancestor_master_rc": 0,
+    "excerpt": "ude-20260822`,\n    `role: reviewer`, `access: read-only`, `branch_ownership: none`, cấp trước khi review chạy.\n(c) \"người review là NGƯỜI SOẠN ĐẶC TẢ\" — nay ĐÃ THOẢ: phiên claude RIÊNG, chạy trong sandbox rời\n    qua `launcher.py` với `--expect"
+  },
+  {
+    "path": "ops/reviews/pr460-bien-nhan-v2-review-9-gpt6astra-verdict.receipt.yaml",
+    "field": "phan_bac_cua_reviewer",
+    "line": 94,
+    "text": "Reviewer XAC NHAN nam khang dinh cua phien thi cong thay vi nhan loi khai: (a) hai mutant m56/m57 THAT SU song sot truoc va — reviewer dung ban sao base va ap nguyen phep thay lay tu AST head, ca hai rc=0 voi 45/45 . 57/57 . 2/2; (b) master KHONG do — `403fe125` khong ton tai, `cacaba3` co hai cha, tam neo deu la to tien, cong tren clone ghim dung `cacaba3` cho rc=0/16 dat/tong 69; (c) sau luot nguon cho 0,2,2,2,2,2; (d) hai mau so transport 1/16->2/17 va 1/15->2/16 khop; (e) `m49` ba tap 11/12/13 khop. Reviewer cung DO GIOI HAN cua chinh co che chong tin dung gia: `TinHieuChotCa` chi xac minh nguon CA, KHONG xac minh nguon THUOC TINH — ho dung mot phep lam yeu de mot mutant chet o mot assertion KHAC trong cung ca ma van duoc phan `giet_that`. Ho khong dung thi nghiem ay de phu nhan nam kill dung, chi de chung minh vi sao van phai DOC THONG BAO.",
+    "historical": false,
+    "evidence_oid": "329f7c6b02ba0502b002040a4b0df358f280b9f1",
+    "ancestor_master_rc": 0,
+    "excerpt": "/45 . 57/57 . 2/2; (b) master KHONG do — `403fe125` khong ton tai, `cacaba3` co hai cha, tam neo deu la to tien, cong tren clone ghim dung `cacaba3` cho rc=0/16 dat/tong 69; (c) sau luot nguon cho 0,2,2,2,2,2; (d) hai mau so transport 1/16->2/17 va 1/15->2/16 khop; (e) `m49` ba tap 11/12/"
+  },
+  {
+    "path": "ops/reviews/pr468-hoso-4-packet-review-14-codex-verdict.receipt.yaml",
+    "field": "anchor.mo_ta",
+    "line": 102,
+    "text": "`evidence_url` neo blob tại `8f7becb` — commit ĐẦU TIÊN chứa tệp verdict, trên nhánh `claude/land-468-20260908` (PR #478). Lúc lập biên nhận, `8f7becb` là TỔ TIÊN của head PR đang được kiểm, nhưng CHƯA vào `master`. Không có tag `luu-tru/*`, không có bằng chứng ref được bảo vệ hay chính sách giữ object. Nếu PR #478 được squash/rebase thì neo này PHẢI được lập lại từ nguồn thật, không được giữ nguyên URL cũ.",
+    "historical": false,
+    "evidence_oid": "8f7becbd3b1e7dd678b1729295e46437fdddd410",
+    "ancestor_master_rc": 0,
+    "excerpt": "becb` là TỔ TIÊN của head PR đang được kiểm, nhưng CHƯA vào `master`. Không có tag `luu-tru/*`, không có bằng chứng ref được bảo vệ hay chính sách giữ object. Nếu PR #478 được squash/rebase thì neo này PHẢI được lập lại từ nguồn thật, không được "
+  },
+  {
+    "path": "ops/reviews/pr468-hoso-4-packet-review-15-codex-verdict.receipt.yaml",
+    "field": "anchor.mo_ta",
+    "line": 102,
+    "text": "`evidence_url` neo blob tại `8f7becb` — commit ĐẦU TIÊN chứa tệp verdict, trên nhánh `claude/land-468-20260908` (PR #478). Lúc lập biên nhận, `8f7becb` là TỔ TIÊN của head PR đang được kiểm, nhưng CHƯA vào `master`. Không có tag `luu-tru/*`, không có bằng chứng ref được bảo vệ hay chính sách giữ object. Nếu PR #478 được squash/rebase thì neo này PHẢI được lập lại từ nguồn thật, không được giữ nguyên URL cũ.",
+    "historical": false,
+    "evidence_oid": "8f7becbd3b1e7dd678b1729295e46437fdddd410",
+    "ancestor_master_rc": 0,
+    "excerpt": "becb` là TỔ TIÊN của head PR đang được kiểm, nhưng CHƯA vào `master`. Không có tag `luu-tru/*`, không có bằng chứng ref được bảo vệ hay chính sách giữ object. Nếu PR #478 được squash/rebase thì neo này PHẢI được lập lại từ nguồn thật, không được "
+  },
+  {
+    "path": "ops/reviews/pr478-land-review-4-codex-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 125,
+    "text": "Neo (1) sống trong CSDL Issue nên SỬA/XOÁ ĐƯỢC và không có quan hệ tổ tiên; neo (2) chỉ vững nếu land bằng MERGE hoặc fast-forward — SQUASH sẽ thay commit và phá quan hệ ấy (xem hàng `neo-canonical-ancestry-chi-dung-khi-land-bang-merge` ở mục cảnh báo). Không có tag `luu-tru/*`.",
+    "historical": false,
+    "evidence_oid": "718fc41272cf7f9aaa004a70041906aad64a03d0",
+    "ancestor_master_rc": 0,
+    "excerpt": "Neo (1) sống trong CSDL Issue nên SỬA/XOÁ ĐƯỢC và không có quan hệ tổ tiên; neo (2) chỉ vững nếu land bằng MERGE hoặc fast-forward — SQUASH sẽ thay commit và phá quan hệ ấy (xem hàng `neo-canonical-ancestry-chi-dung-khi-land-bang-merge` ở mục cảnh báo). "
+  },
+  {
+    "path": "ops/reviews/pr478-land-review-5-codex-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 125,
+    "text": "Neo (1) sống trong CSDL Issue nên SỬA/XOÁ ĐƯỢC và không có quan hệ tổ tiên; neo (2) chỉ vững nếu land bằng MERGE hoặc fast-forward — SQUASH sẽ thay commit và phá quan hệ ấy (xem hàng `neo-canonical-ancestry-chi-dung-khi-land-bang-merge` ở mục cảnh báo). Không có tag `luu-tru/*`.",
+    "historical": false,
+    "evidence_oid": "718fc41272cf7f9aaa004a70041906aad64a03d0",
+    "ancestor_master_rc": 0,
+    "excerpt": "Neo (1) sống trong CSDL Issue nên SỬA/XOÁ ĐƯỢC và không có quan hệ tổ tiên; neo (2) chỉ vững nếu land bằng MERGE hoặc fast-forward — SQUASH sẽ thay commit và phá quan hệ ấy (xem hàng `neo-canonical-ancestry-chi-dung-khi-land-bang-merge` ở mục cảnh báo). "
+  },
+  {
+    "path": "ops/reviews/pr478-land-review-6-codex-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 125,
+    "text": "Neo (1) sống trong CSDL Issue nên SỬA/XOÁ ĐƯỢC và không có quan hệ tổ tiên; neo (2) chỉ vững nếu land bằng MERGE hoặc fast-forward — SQUASH sẽ thay commit và phá quan hệ ấy (xem hàng `neo-canonical-ancestry-chi-dung-khi-land-bang-merge` ở mục cảnh báo). Không có tag `luu-tru/*`.",
+    "historical": false,
+    "evidence_oid": "718fc41272cf7f9aaa004a70041906aad64a03d0",
+    "ancestor_master_rc": 0,
+    "excerpt": "Neo (1) sống trong CSDL Issue nên SỬA/XOÁ ĐƯỢC và không có quan hệ tổ tiên; neo (2) chỉ vững nếu land bằng MERGE hoặc fast-forward — SQUASH sẽ thay commit và phá quan hệ ấy (xem hàng `neo-canonical-ancestry-chi-dung-khi-land-bang-merge` ở mục cảnh báo). "
+  },
+  {
+    "path": "ops/reviews/pr480-land-review-1-codex-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 140,
+    "text": "PR #487 chưa được hồ sơ này chứng nhận đã merge. Quan hệ commit với master sau land phải đo trên SHA thực land; squash có thể thay commit ghim. Comment sửa/xoá được và không có quan hệ tổ tiên Git. Trạng thái PR không chứng minh có hay không có người theo dõi. Loại/cường độ mỏ neo được khai không tự thành merge authorization.",
+    "historical": false,
+    "evidence_oid": "01c5a2713778d06535bad8e617be70ea4f5fac4d",
+    "ancestor_master_rc": 0,
+    "excerpt": " có thể thay commit ghim. Comment sửa/xoá được và không có quan hệ tổ tiên Git. Trạng thái PR không chứng minh có hay không có người theo dõi. Loại/cường độ mỏ neo được khai không tự thành merge authorization."
+  },
+  {
+    "path": "ops/reviews/pr480-land-review-2-codex-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 157,
+    "text": "PR #487 chưa được hồ sơ này chứng nhận đã merge. Quan hệ commit với master sau land phải đo trên SHA thực land; squash có thể thay commit ghim. Comment sửa/xoá được và không có quan hệ tổ tiên Git. Trạng thái PR không chứng minh có hay không có người theo dõi. Loại/cường độ mỏ neo được khai không tự thành merge authorization.",
+    "historical": false,
+    "evidence_oid": "60d62aa60da45fdd7c79bd71dc17a0d2ffc1e439",
+    "ancestor_master_rc": 0,
+    "excerpt": " có thể thay commit ghim. Comment sửa/xoá được và không có quan hệ tổ tiên Git. Trạng thái PR không chứng minh có hay không có người theo dõi. Loại/cường độ mỏ neo được khai không tự thành merge authorization."
+  },
+  {
+    "path": "ops/reviews/pr486-hau-kiem-review-1-codex-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 142,
+    "text": "PR #487 chưa được hồ sơ này chứng nhận đã merge. Quan hệ commit với master sau land phải đo trên SHA thực land; squash có thể thay commit ghim. Comment sửa/xoá được và không có quan hệ tổ tiên Git. Trạng thái PR không chứng minh có hay không có người theo dõi. Loại/cường độ mỏ neo được khai không tự thành merge authorization.",
+    "historical": false,
+    "evidence_oid": "ee23363171ca0a5218a5d7f067649487470acd0c",
+    "ancestor_master_rc": 0,
+    "excerpt": " có thể thay commit ghim. Comment sửa/xoá được và không có quan hệ tổ tiên Git. Trạng thái PR không chứng minh có hay không có người theo dõi. Loại/cường độ mỏ neo được khai không tự thành merge authorization."
+  },
+  {
+    "path": "ops/reviews/pr487-review-1-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 32,
+    "text": "Neo BLOB ghim commit `a0b154d` — commit ĐẦU TIÊN chứa tệp verdict, trên chính nhánh của PR #487. Băm blob trong kho đối chứng được bằng `sha256sum`; câu \"bằng băm bản gốc trong gói scratchpad\" là ATTESTATION vì bản gốc ấy không vào kho.",
+    "historical": false,
+    "evidence_oid": "a0b154d7c8e6491fb53825301ace2d6d4e97ac9f",
+    "ancestor_master_rc": 0,
+    "excerpt": "`a0b154d` — commit ĐẦU TIÊN chứa tệp verdict, trên chính nhánh của PR #487. Băm blob trong kho đối chứng được bằng `sha256sum`; câu \"bằng băm bản gốc trong gói scratchpad\" là ATTESTATION vì bản gốc ấy không vào kho."
+  },
+  {
+    "path": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 32,
+    "text": "Neo BLOB ghim commit `edb288e` — commit ĐẦU TIÊN chứa tệp verdict, trên chính nhánh của PR #487. Băm blob đối chứng được bằng `sha256sum`.",
+    "historical": false,
+    "evidence_oid": "edb288e4e95081b83661c94c88addea005d3f121",
+    "ancestor_master_rc": 0,
+    "excerpt": "`edb288e` — commit ĐẦU TIÊN chứa tệp verdict, trên chính nhánh của PR #487. Băm blob đối chứng được bằng `sha256sum`."
+  },
+  {
+    "path": "ops/reviews/pr489-review-1-codex-verdict.receipt.yaml",
+    "field": "bon_loi_lich_su_git_dieu_phoi_tu_kiem_lai.1.khai_cu",
+    "line": 68,
+    "text": "\"commit đầu tiên chứa tệp có `f4d74fe` là tổ tiên\"",
+    "historical": false,
+    "evidence_oid": "45bd80e08c5efdcb9d713e42fe0804f7d9fd3af1",
+    "ancestor_master_rc": 0,
+    "excerpt": "\"commit đầu tiên chứa tệp có `f4d74fe` là tổ tiên\""
+  },
+  {
+    "path": "ops/reviews/pr490-review-7-codex-verdict.receipt.yaml",
+    "field": "verdict_usage_caveats.1.phep_do_BA_LOI_LAND.squash",
+    "line": 214,
+    "text": "rc=1 — dựng commit squash (base `c31d8f1` + toàn bộ diff PR thành 1 commit, `74a0a21`) ⇒ `453c6bc` KHÔNG còn là tổ tiên, dù object vẫn tồn tại (`cat-file -t` ⇒ commit).",
+    "historical": false,
+    "evidence_oid": "453c6bcdf8ce34bd1751a8442936a201d51a2495",
+    "ancestor_master_rc": 0,
+    "excerpt": "n bộ diff PR thành 1 commit, `74a0a21`) ⇒ `453c6bc` KHÔNG còn là tổ tiên, dù object vẫn tồn tại (`cat-file -t` ⇒ commit)."
+  },
+  {
+    "path": "ops/reviews/pr490-review-7-codex-verdict.receipt.yaml",
+    "field": "verdict_usage_caveats.1.phep_do_BA_LOI_LAND.cong_tren_ban_squash",
+    "line": 217,
+    "text": "`python3 ops/bien_nhan_v2.py --root <cây squash>` ⇒ rc=1, `TỔNG: ĐỎ`, `1 vi phạm`, nguyên văn \"commit `453c6bcdf8ce…` CÓ THẬT nhưng KHÔNG phải tổ tiên của HEAD\". Trên cây thật (chưa land) cùng lệnh cho rc=0, `48 ĐẠT v2`, `0 vi phạm`, `TỔNG: ĐẠT`.",
+    "historical": false,
+    "evidence_oid": "453c6bcdf8ce34bd1751a8442936a201d51a2495",
+    "ancestor_master_rc": 0,
+    "excerpt": "`, nguyên văn \"commit `453c6bcdf8ce…` CÓ THẬT nhưng KHÔNG phải tổ tiên của HEAD\". Trên cây thật (chưa land) cùng lệnh cho rc=0, `48 ĐẠT v2`, `0 vi phạm`, `TỔNG: ĐẠT`."
+  },
+  {
+    "path": "ops/reviews/pr490-review-7-codex-verdict.receipt.yaml",
+    "field": "verdict_usage_caveats.1.phep_do_BA_LOI_LAND.ghi_chu_chieu_lech",
+    "line": 221,
+    "text": "KHÔNG viết \"chỉ vững khi land bằng MERGE COMMIT\" — đó là lời khai HẸP một chiều đã bị đính chính ở `R9-F06` (mục lục, hàng `neo-canonical-ancestry-chi-dung-khi-land-bang-merge`): fast-forward cũng giữ neo. Thứ phá quan hệ tổ tiên là SQUASH, và chỉ với neo chưa có sẵn trong nhánh đích.",
+    "historical": false,
+    "evidence_oid": "453c6bcdf8ce34bd1751a8442936a201d51a2495",
+    "ancestor_master_rc": 0,
+    "excerpt": "ũng giữ neo. Thứ phá quan hệ tổ tiên là SQUASH, và chỉ với neo chưa có sẵn trong nhánh đích."
+  },
+  {
+    "path": "ops/reviews/pr497-review-2-codex-verdict.receipt.yaml",
+    "field": "verdict_usage_caveats.0.hau_qua_DO_DUOC",
+    "line": 275,
+    "text": "Quét `r362` trên TOÀN mirror ra **2** ref (`claude/handoff-tra-luat-repo-2ak5th` + `pr497-head`), không phải 1. Ai dùng gói này để kiểm lời khai *\"r362 chỉ ở một nhánh\"* sẽ thấy nó KHÔNG khớp, và cái không khớp ấy là **tạo tác của gói**, không phải của kho.",
+    "historical": false,
+    "evidence_oid": "4d2a6f69e67ce5299253bf8905b6b742d516f3fc",
+    "ancestor_master_rc": 0,
+    "excerpt": "g phải 1. Ai dùng gói này để kiểm lời khai *\"r362 chỉ ở một nhánh\"* sẽ thấy nó KHÔNG khớp, và cái không khớp ấy là **tạo tác của gói**, không phải của kho."
+  },
+  {
+    "path": "ops/reviews/pr500-review-2-codex-verdict.receipt.yaml",
+    "field": "noi_dung_do_duoc_van_dung.4",
+    "line": 47,
+    "text": "4 mutant cổng ĐỎ đúng chốt (M4 evidence_url trỏ commit không chứa tệp: CÓ bị bắt); 3 lối land: merge/ff giữ tổ tiên df7ec13, squash mất — v2 ĐỎ đúng 4 receipt.",
+    "historical": false,
+    "evidence_oid": "d100b6ff92da10f9ae0213ea56bcf3a30cdcff0b",
+    "ancestor_master_rc": 0,
+    "excerpt": "ant cổng ĐỎ đúng chốt (M4 evidence_url trỏ commit không chứa tệp: CÓ bị bắt); 3 lối land: merge/ff giữ tổ tiên df7ec13, squash mất — v2 ĐỎ đúng 4 receipt."
+  },
+  {
+    "path": "ops/reviews/pr521-review-5-codex-verdict.receipt.yaml",
+    "field": "anchor.mo_ta",
+    "line": 160,
+    "text": "Blob verdict ghim `e759a7e`. Head đã review `36acc52` là tổ tiên của `e759a7e`: #521 đã land vào `master` bằng MERGE COMMIT `dc02c9b` (không squash), nên quan hệ tổ tiên tới canonical đã THÀNH LẬP, không còn chờ.",
+    "historical": false,
+    "evidence_oid": "e759a7e21646a8fa2b8aac689c05d66bb488c3a8",
+    "ancestor_master_rc": 0,
+    "excerpt": "đã land vào `master` bằng MERGE COMMIT `dc02c9b` (không squash), nên quan hệ tổ tiên tới canonical đã THÀNH LẬP, không còn chờ."
+  },
+  {
+    "path": "ops/reviews/pr521-review-6-codex-verdict.receipt.yaml",
+    "field": "anchor.mo_ta",
+    "line": 159,
+    "text": "Blob verdict ghim `e759a7e`. Head đã review `e849e2e` là tổ tiên của `e759a7e`: #521 đã land vào `master` bằng MERGE COMMIT `dc02c9b` (không squash), nên quan hệ tổ tiên tới canonical đã THÀNH LẬP, không còn chờ.",
+    "historical": false,
+    "evidence_oid": "e759a7e21646a8fa2b8aac689c05d66bb488c3a8",
+    "ancestor_master_rc": 0,
+    "excerpt": "đã land vào `master` bằng MERGE COMMIT `dc02c9b` (không squash), nên quan hệ tổ tiên tới canonical đã THÀNH LẬP, không còn chờ."
+  },
+  {
+    "path": "ops/reviews/pr521-review-7-codex-verdict.receipt.yaml",
+    "field": "anchor.mo_ta",
+    "line": 159,
+    "text": "Blob verdict ghim `e759a7e`. Head đã review `aaef55b` là tổ tiên của `e759a7e`: #521 đã land vào `master` bằng MERGE COMMIT `dc02c9b` (không squash), nên quan hệ tổ tiên tới canonical đã THÀNH LẬP, không còn chờ.",
+    "historical": false,
+    "evidence_oid": "e759a7e21646a8fa2b8aac689c05d66bb488c3a8",
+    "ancestor_master_rc": 0,
+    "excerpt": "đã land vào `master` bằng MERGE COMMIT `dc02c9b` (không squash), nên quan hệ tổ tiên tới canonical đã THÀNH LẬP, không còn chờ."
+  },
+  {
+    "path": "ops/reviews/pr521-review-8-codex-verdict.receipt.yaml",
+    "field": "anchor.mo_ta",
+    "line": 201,
+    "text": "Blob verdict ghim `e759a7e`. Head đã review `91bbc82` là tổ tiên của `e759a7e`: #521 đã land vào `master` bằng MERGE COMMIT `dc02c9b` (không squash), nên quan hệ tổ tiên tới canonical đã THÀNH LẬP, không còn chờ.",
+    "historical": false,
+    "evidence_oid": "e759a7e21646a8fa2b8aac689c05d66bb488c3a8",
+    "ancestor_master_rc": 0,
+    "excerpt": "đã land vào `master` bằng MERGE COMMIT `dc02c9b` (không squash), nên quan hệ tổ tiên tới canonical đã THÀNH LẬP, không còn chờ."
+  },
+  {
+    "path": "ops/reviews/pr526-review-3-codex-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 137,
+    "text": "`7bdd8ad` CHƯA vào master lúc viết biên nhận — PR #526 còn mở. Quan hệ tổ tiên tới canonical chỉ thành lập sau khi land, và CHỈ vững khi land bằng merge commit hoặc fast-forward; squash phá quan hệ ấy và làm `evidence_url` thành blob không tra được. Vì thế `cuong_do: vua`, không phải `cao`.",
+    "historical": false,
+    "evidence_oid": "b0a98a415953d756b98e9d62a5a421edb7b7bb85",
+    "ancestor_master_rc": 0,
+    "excerpt": "`7bdd8ad` CHƯA vào master lúc viết biên nhận — PR #526 còn mở. Quan hệ tổ tiên tới canonical chỉ thành lập sau khi land, và CHỈ vững khi land bằng merge commit hoặc fast-forward; squash phá quan hệ ấy và l"
+  },
+  {
+    "path": "ops/reviews/r330-rig-quyet-mau-audit-nguoi-verdict.receipt.yaml",
+    "field": "chua_co_pull_request.DA_THAY_DOI",
+    "line": 248,
+    "text": "Chủ kho ra chỉ thị \"Merge cả hai nhánh đi\" lúc ~04:2xZ 20-09-2026 ⇒ mở PR là ĐÚNG lúc ấy, vì \"cho đến khi merge\" chính là mốc này. PR #573 mở 04:32Z, merge 04:50Z. Giữ mục này thay vì xoá, để người đọc sau thấy điều kiện đã đổi chứ không tưởng biên nhận tự mâu thuẫn.",
+    "historical": false,
+    "evidence_oid": "5c713298c49c1dde5c550112d6bc4daf6b876735",
+    "ancestor_master_rc": 0,
+    "excerpt": "Chủ kho ra chỉ thị \"Merge cả hai nhánh đi\" lúc ~04:2xZ 20-09-2026 ⇒ mở PR là ĐÚNG lúc ấy, vì \"cho đến khi merge\" chính là mốc này. PR #573 mở 04:32Z, merge 04:50Z. Giữ mục này thay vì xoá, để người đọc sau thấy điều ki"
+  },
+  {
+    "path": "ops/reviews/r330-rig-quyet-mau-audit-nguoi-verdict.receipt.yaml",
+    "field": "land.head_da_doi_TRUOC_merge.vi_sao",
+    "line": 342,
+    "text": "Cổng `thu-hoi` ĐỎ trên head cũ, `CHAN [12]: KHÔNG_XÁC_ĐỊNH: S e1324285eea1 không phải tổ tiên của H 8c425b1934ec`. Nhánh rẽ từ `dc85dd0a`, master đã đi 8 commit ⇒ quan hệ tổ tiên đứt. Chữa bằng MERGE `origin/master` vào nhánh, không bằng re-run — và re-run cũng không được phép (`manual_ci_budget: 0`).",
+    "historical": false,
+    "evidence_oid": "5c713298c49c1dde5c550112d6bc4daf6b876735",
+    "ancestor_master_rc": 0,
+    "excerpt": "Cổng `thu-hoi` ĐỎ trên head cũ, `CHAN [12]: KHÔNG_XÁC_ĐỊNH: S e1324285eea1 không phải tổ tiên của H 8c425b1934ec`. Nhánh rẽ từ `dc85dd0a`, master đã đi 8 commit ⇒ quan hệ tổ tiên đứt. Chữa bằng MERGE `origin/master` vào nhánh, không bằng re-run — và re-run cũng không được "
+  },
+  {
+    "path": "ops/reviews/r330-rig-quyet-mau-audit-nguoi-verdict.receipt.yaml",
+    "field": "land.nen_do_san_da_loai_tru.vi_sao_ghi_vao_day",
+    "line": 408,
+    "text": "Ghi để người đọc sau KHÔNG đọc \"master từng đỏ\" thành \"bản vá này làm đỏ\". Và để biết ca T6 là một chập chờn CHƯA có nguyên nhân — nó thuộc #568, không thuộc packet này.",
+    "historical": false,
+    "evidence_oid": "5c713298c49c1dde5c550112d6bc4daf6b876735",
+    "ancestor_master_rc": 0,
+    "excerpt": "Ghi để người đọc sau KHÔNG đọc \"master từng đỏ\" thành \"bản vá này làm đỏ\". Và để biết ca T6 là một chập chờn CHƯA có nguyên nhân — nó thuộc #568, không thuộc packet này."
+  },
+  {
+    "path": "ops/reviews/tao-tag-luu-tru-review-1-codex-verdict.receipt.yaml",
+    "field": "evidence_url_han_che",
+    "line": 26,
+    "text": "Trỏ commit ĐẦU TIÊN chứa tệp verdict. ĐIỀU KIỆN NÊU Ở BẢN ĐẦU NAY ĐÃ THOẢ: PR #147 land bằng MERGE COMMIT (`64451c5`), không squash, nên commit giữ nguyên tổ tiên. Ngoài ra đã có tag neo — xem `truy_xuat_*`.",
+    "historical": false,
+    "evidence_oid": "9d3e3e9e399397ee958e0f87c1af60f8cf2621fb",
+    "ancestor_master_rc": 0,
+    "excerpt": "THOẢ: PR #147 land bằng MERGE COMMIT (`64451c5`), không squash, nên commit giữ nguyên tổ tiên. Ngoài ra đã có tag neo — xem `truy_xuat_*`."
+  },
+  {
+    "path": "ops/reviews/tao-tag-luu-tru-review-1-codex-verdict.receipt.yaml",
+    "field": "pham_vi_mo_reviewer_do_duoc.xoa_nhanh_luu_tru",
+    "line": 65,
+    "text": "KHÔNG bị nới: chỉ QUA khi đọc được SHA nhánh VÀ danh sách tag có SHA ấy; không tag, không đọc được SHA, hoặc lỗi giữa phân trang đều DỪNG (đúng doctrine `None ≠ False`).",
+    "historical": false,
+    "evidence_oid": "9d3e3e9e399397ee958e0f87c1af60f8cf2621fb",
+    "ancestor_master_rc": 0,
+    "excerpt": "KHÔNG bị nới: chỉ QUA khi đọc được SHA nhánh VÀ danh sách tag có SHA ấy; không tag, không đọc được SHA, hoặc lỗi giữa phân trang đều DỪNG (đúng doctrine `None ≠ False`)."
+  },
+  {
+    "path": "ops/reviews/wp461-review-1-codex-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 102,
+    "text": "Validator đo tổ tiên trên checkout hiện hành, không chứng minh canonical inclusion của commit evidence_url; kiểm sau land bằng `git merge-base --is-ancestor ef72264cb268643a89df3e15cf6cb840da92307b origin/master`. Không chứng minh nội dung review đã đọc gì — connector không xuất bằng chứng đọc.",
+    "historical": false,
+    "evidence_oid": "ef72264cb268643a89df3e15cf6cb840da92307b",
+    "ancestor_master_rc": 0,
+    "excerpt": "Validator đo tổ tiên trên checkout hiện hành, không chứng minh canonical inclusion của commit evidence_url; kiểm sau land bằng `git merge-base --is-ancestor ef72264cb268643a89df3e15cf6cb840da92307b origin/master`. Không chứng minh nội dung review đã đọ"
+  },
+  {
+    "path": "ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml",
+    "field": "reviewed_sha_nghia",
+    "line": 28,
+    "text": "Exact head của PR #613 lúc gọi review — đúng `reviewed_sha_required` của lease g17. KHÔNG phải head sau (61a39096, chỉ thêm merge master: `git diff 92adc711 61a39096 -- ops/reviews/` rỗng), KHÔNG phải commit tổng hợp nào. Comment reviewer tự khai `Reviewed commit: 92adc71121`.",
+    "historical": false,
+    "evidence_oid": "b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc",
+    "ancestor_master_rc": 0,
+    "excerpt": "view — đúng `reviewed_sha_required` của lease g17. KHÔNG phải head sau (61a39096, chỉ thêm merge master: `git diff 92adc711 61a39096 -- ops/reviews/` rỗng), KHÔNG phải commit tổng hợp nào. Comment reviewer tự khai `Reviewed commit: 92adc71121`."
+  },
+  {
+    "path": "ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 89,
+    "text": "Validator đo tổ tiên trên checkout hiện hành, không chứng minh canonical inclusion của commit evidence_url; kiểm sau land bằng `git merge-base --is-ancestor b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc origin/master`. Không chứng minh nội dung review đã đọc gì — connector không xuất bằng chứng đọc.",
+    "historical": false,
+    "evidence_oid": "b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc",
+    "ancestor_master_rc": 0,
+    "excerpt": "Validator đo tổ tiên trên checkout hiện hành, không chứng minh canonical inclusion của commit evidence_url; kiểm sau land bằng `git merge-base --is-ancestor b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc origin/master`. Không chứng minh nội dung review đã đọ"
+  },
+  {
+    "path": "ops/reviews/wp541-review-1-claude-verdict.receipt.yaml",
+    "field": "bang_san.9.ket_qua",
+    "line": 100,
+    "text": "nhanh lease khai KHONG ton tai; merge-base = a612c70 (khong phai d705623); master KHONG phai to tien",
+    "historical": false,
+    "evidence_oid": "34ebd10850d407b4cb1c1575284cc191e6f11bc5",
+    "ancestor_master_rc": 0,
+    "excerpt": "h lease khai KHONG ton tai; merge-base = a612c70 (khong phai d705623); master KHONG phai to tien"
+  },
+  {
+    "path": "ops/reviews/wp541-review-1-claude-verdict.receipt.yaml",
+    "field": "ci_tu_dong_tren_ung_vien.thu_hoi",
+    "line": 119,
+    "text": "failure — run 35290612007; S d705623 khong phai to tien cua H 2170a4a",
+    "historical": false,
+    "evidence_oid": "34ebd10850d407b4cb1c1575284cc191e6f11bc5",
+    "ancestor_master_rc": 0,
+    "excerpt": "failure — run 35290612007; S d705623 khong phai to tien cua H 2170a4a"
+  },
+  {
+    "path": "ops/reviews/wp55-r4-review-rebase-codex-verdict.receipt.yaml",
+    "field": "receipt_basis",
+    "line": 105,
+    "text": "sha256 tệp trên master và trên commit công bố (bằng nhau); ngày commit; `lease_id`/`reviewed_sha` từ `ops/leases/wp55-r4-review-rebase-codex-20260816.yaml`; `verdict` đọc trong chính tệp verdict. Nhánh công bố tìm bằng cách quét MỌI nhánh remote xem nhánh nào chứa tệp, không suy từ quy ước đặt tên.",
+    "historical": false,
+    "evidence_oid": "3223644dbea3d0164d5fcf24bfdd0237eec395c7",
+    "ancestor_master_rc": 0,
+    "excerpt": "-rebase-codex-20260816.yaml`; `verdict` đọc trong chính tệp verdict. Nhánh công bố tìm bằng cách quét MỌI nhánh remote xem nhánh nào chứa tệp, không suy từ quy ước đặt tên."
+  },
+  {
+    "path": "ops/reviews/wp678-exec-human-audit-ducthangho-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 84,
+    "text": "cuong_do THAP vi chua land. Chi song neu nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE COMMIT hoac FAST-FORWARD.",
+    "historical": false,
+    "evidence_oid": "9e5da35b0cb96d2d3f3ddcc01ac5fc434c7f8ed1",
+    "ancestor_master_rc": 0,
+    "excerpt": "cuong_do THAP vi chua land. Chi song neu nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE COMMIT hoac FAST-FORWARD."
+  },
+  {
+    "path": "ops/reviews/wp678-exec-human-audit-ducthangho-verdict.receipt.yaml",
+    "field": "verdict_usage_caveats.5.noi_dung",
+    "line": 142,
+    "text": "Mo neo canonical_ancestry chi song neu nhanh bookkeeping duoc push nguyen ven va land bang merge commit hoac fast-forward.",
+    "historical": false,
+    "evidence_oid": "9e5da35b0cb96d2d3f3ddcc01ac5fc434c7f8ed1",
+    "ancestor_master_rc": 0,
+    "excerpt": "Mo neo canonical_ancestry chi song neu nhanh bookkeeping duoc push nguyen ven va land bang merge commit hoac fast-forward."
+  },
+  {
+    "path": "ops/reviews/wp678-exec-review-1-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 95,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "9e5da35b0cb96d2d3f3ddcc01ac5fc434c7f8ed1",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp678-exec-review-2-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 95,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "9e5da35b0cb96d2d3f3ddcc01ac5fc434c7f8ed1",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp678-exec-review-3-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 95,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "9e5da35b0cb96d2d3f3ddcc01ac5fc434c7f8ed1",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp678-exec-review-4-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 95,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "9e5da35b0cb96d2d3f3ddcc01ac5fc434c7f8ed1",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-10-claude-verdict.receipt.yaml",
+    "field": "reviewed_sha_trang_thai",
+    "line": 48,
+    "text": "tren nhanh claude/spec-wp678-r7, DA DAY 2026-10-07 truoc commit bien nhan (xem caveat REVIEWED-SHA-CHI-TREN-NHANH-SPEC)",
+    "historical": false,
+    "evidence_oid": "8e822ba71dabea50f54926dec8d8903827e5090d",
+    "ancestor_master_rc": 0,
+    "excerpt": "7 truoc commit bien nhan (xem caveat REVIEWED-SHA-CHI-TREN-NHANH-SPEC)"
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-10-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 50,
+    "text": "Neo BLOB ghim commit chi mang tep verdict cua nhanh bookkeeping claude/bookkeeping-678-bien-nhan-7-12; bien nhan di o commit sau, nen mo neo la to tien cua HEAD nhanh. Dien SHA SAU KHI day thanh cong (bai hoc rebase lease-dang-review-1).",
+    "historical": false,
+    "evidence_oid": "8e822ba71dabea50f54926dec8d8903827e5090d",
+    "ancestor_master_rc": 0,
+    "excerpt": "Neo BLOB ghim commit chi mang tep verdict cua nhanh bookkeeping claude/bookkeeping-678-bien-nhan-7-12; bien nhan di o commit sau, nen mo neo la to tien cua HEAD nhanh. Dien SHA SAU KHI day thanh cong (bai hoc rebase lease-dang-revi"
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-11-claude-verdict.receipt.yaml",
+    "field": "reviewed_sha_trang_thai",
+    "line": 48,
+    "text": "tren nhanh claude/spec-wp678-r7, DA DAY 2026-10-07 truoc commit bien nhan (xem caveat REVIEWED-SHA-CHI-TREN-NHANH-SPEC)",
+    "historical": false,
+    "evidence_oid": "8e822ba71dabea50f54926dec8d8903827e5090d",
+    "ancestor_master_rc": 0,
+    "excerpt": "7 truoc commit bien nhan (xem caveat REVIEWED-SHA-CHI-TREN-NHANH-SPEC)"
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-11-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 50,
+    "text": "Neo BLOB ghim commit chi mang tep verdict cua nhanh bookkeeping claude/bookkeeping-678-bien-nhan-7-12; bien nhan di o commit sau, nen mo neo la to tien cua HEAD nhanh. Dien SHA SAU KHI day thanh cong (bai hoc rebase lease-dang-review-1).",
+    "historical": false,
+    "evidence_oid": "8e822ba71dabea50f54926dec8d8903827e5090d",
+    "ancestor_master_rc": 0,
+    "excerpt": "Neo BLOB ghim commit chi mang tep verdict cua nhanh bookkeeping claude/bookkeeping-678-bien-nhan-7-12; bien nhan di o commit sau, nen mo neo la to tien cua HEAD nhanh. Dien SHA SAU KHI day thanh cong (bai hoc rebase lease-dang-revi"
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-12-claude-verdict.receipt.yaml",
+    "field": "reviewed_sha_trang_thai",
+    "line": 48,
+    "text": "tren nhanh claude/spec-wp678-r7, DA DAY 2026-10-07 truoc commit bien nhan (xem caveat REVIEWED-SHA-CHI-TREN-NHANH-SPEC)",
+    "historical": false,
+    "evidence_oid": "8e822ba71dabea50f54926dec8d8903827e5090d",
+    "ancestor_master_rc": 0,
+    "excerpt": "7 truoc commit bien nhan (xem caveat REVIEWED-SHA-CHI-TREN-NHANH-SPEC)"
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-12-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 50,
+    "text": "Neo BLOB ghim commit chi mang tep verdict cua nhanh bookkeeping claude/bookkeeping-678-bien-nhan-7-12; bien nhan di o commit sau, nen mo neo la to tien cua HEAD nhanh. Dien SHA SAU KHI day thanh cong (bai hoc rebase lease-dang-review-1).",
+    "historical": false,
+    "evidence_oid": "8e822ba71dabea50f54926dec8d8903827e5090d",
+    "ancestor_master_rc": 0,
+    "excerpt": "Neo BLOB ghim commit chi mang tep verdict cua nhanh bookkeeping claude/bookkeeping-678-bien-nhan-7-12; bien nhan di o commit sau, nen mo neo la to tien cua HEAD nhanh. Dien SHA SAU KHI day thanh cong (bai hoc rebase lease-dang-revi"
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-13-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 93,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "9e5da35b0cb96d2d3f3ddcc01ac5fc434c7f8ed1",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-14-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 93,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "9e5da35b0cb96d2d3f3ddcc01ac5fc434c7f8ed1",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-15-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 93,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "9e5da35b0cb96d2d3f3ddcc01ac5fc434c7f8ed1",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-16-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 93,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "9e5da35b0cb96d2d3f3ddcc01ac5fc434c7f8ed1",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-17-codex-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 99,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "9e5da35b0cb96d2d3f3ddcc01ac5fc434c7f8ed1",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-7-claude-verdict.receipt.yaml",
+    "field": "reviewed_sha_trang_thai",
+    "line": 48,
+    "text": "tren nhanh claude/spec-wp678-r7, DA DAY 2026-10-07 truoc commit bien nhan (xem caveat REVIEWED-SHA-CHI-TREN-NHANH-SPEC)",
+    "historical": false,
+    "evidence_oid": "8e822ba71dabea50f54926dec8d8903827e5090d",
+    "ancestor_master_rc": 0,
+    "excerpt": "7 truoc commit bien nhan (xem caveat REVIEWED-SHA-CHI-TREN-NHANH-SPEC)"
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-7-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 50,
+    "text": "Neo BLOB ghim commit chi mang tep verdict cua nhanh bookkeeping claude/bookkeeping-678-bien-nhan-7-12; bien nhan di o commit sau, nen mo neo la to tien cua HEAD nhanh. Dien SHA SAU KHI day thanh cong (bai hoc rebase lease-dang-review-1).",
+    "historical": false,
+    "evidence_oid": "8e822ba71dabea50f54926dec8d8903827e5090d",
+    "ancestor_master_rc": 0,
+    "excerpt": "Neo BLOB ghim commit chi mang tep verdict cua nhanh bookkeeping claude/bookkeeping-678-bien-nhan-7-12; bien nhan di o commit sau, nen mo neo la to tien cua HEAD nhanh. Dien SHA SAU KHI day thanh cong (bai hoc rebase lease-dang-revi"
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-8-claude-verdict.receipt.yaml",
+    "field": "reviewed_sha_trang_thai",
+    "line": 48,
+    "text": "tren nhanh claude/spec-wp678-r7, DA DAY 2026-10-07 truoc commit bien nhan (xem caveat REVIEWED-SHA-CHI-TREN-NHANH-SPEC)",
+    "historical": false,
+    "evidence_oid": "8e822ba71dabea50f54926dec8d8903827e5090d",
+    "ancestor_master_rc": 0,
+    "excerpt": "7 truoc commit bien nhan (xem caveat REVIEWED-SHA-CHI-TREN-NHANH-SPEC)"
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-8-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 50,
+    "text": "Neo BLOB ghim commit chi mang tep verdict cua nhanh bookkeeping claude/bookkeeping-678-bien-nhan-7-12; bien nhan di o commit sau, nen mo neo la to tien cua HEAD nhanh. Dien SHA SAU KHI day thanh cong (bai hoc rebase lease-dang-review-1).",
+    "historical": false,
+    "evidence_oid": "8e822ba71dabea50f54926dec8d8903827e5090d",
+    "ancestor_master_rc": 0,
+    "excerpt": "Neo BLOB ghim commit chi mang tep verdict cua nhanh bookkeeping claude/bookkeeping-678-bien-nhan-7-12; bien nhan di o commit sau, nen mo neo la to tien cua HEAD nhanh. Dien SHA SAU KHI day thanh cong (bai hoc rebase lease-dang-revi"
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-9-claude-verdict.receipt.yaml",
+    "field": "reviewed_sha_trang_thai",
+    "line": 48,
+    "text": "tren nhanh claude/spec-wp678-r7, DA DAY 2026-10-07 truoc commit bien nhan (xem caveat REVIEWED-SHA-CHI-TREN-NHANH-SPEC)",
+    "historical": false,
+    "evidence_oid": "8e822ba71dabea50f54926dec8d8903827e5090d",
+    "ancestor_master_rc": 0,
+    "excerpt": "7 truoc commit bien nhan (xem caveat REVIEWED-SHA-CHI-TREN-NHANH-SPEC)"
+  },
+  {
+    "path": "ops/reviews/wp678-spec-review-9-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 50,
+    "text": "Neo BLOB ghim commit chi mang tep verdict cua nhanh bookkeeping claude/bookkeeping-678-bien-nhan-7-12; bien nhan di o commit sau, nen mo neo la to tien cua HEAD nhanh. Dien SHA SAU KHI day thanh cong (bai hoc rebase lease-dang-review-1).",
+    "historical": false,
+    "evidence_oid": "8e822ba71dabea50f54926dec8d8903827e5090d",
+    "ancestor_master_rc": 0,
+    "excerpt": "Neo BLOB ghim commit chi mang tep verdict cua nhanh bookkeeping claude/bookkeeping-678-bien-nhan-7-12; bien nhan di o commit sau, nen mo neo la to tien cua HEAD nhanh. Dien SHA SAU KHI day thanh cong (bai hoc rebase lease-dang-revi"
+  },
+  {
+    "path": "ops/reviews/wp698-exec-review-g2-1-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 92,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "2de112ef60b1a2d72375b5286616236fd8a7dd2e",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp698-exec-review-g2-2-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 93,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "2de112ef60b1a2d72375b5286616236fd8a7dd2e",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-12-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 94,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "2de112ef60b1a2d72375b5286616236fd8a7dd2e",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-13-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 94,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "2de112ef60b1a2d72375b5286616236fd8a7dd2e",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-14-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 95,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "2de112ef60b1a2d72375b5286616236fd8a7dd2e",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-2-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 96,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "2de112ef60b1a2d72375b5286616236fd8a7dd2e",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-3-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 96,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "2de112ef60b1a2d72375b5286616236fd8a7dd2e",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-4-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 96,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "2de112ef60b1a2d72375b5286616236fd8a7dd2e",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-5-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 96,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "2de112ef60b1a2d72375b5286616236fd8a7dd2e",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-6-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 96,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "2de112ef60b1a2d72375b5286616236fd8a7dd2e",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-7-claude-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 96,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "2de112ef60b1a2d72375b5286616236fd8a7dd2e",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp710-exec-review-1-codex-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 102,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "8b4a99e0b0dff0a257ff6e0440cc9feb209b8a75",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp710-exec-review-2-codex-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 102,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "8b4a99e0b0dff0a257ff6e0440cc9feb209b8a75",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp710-exec-review-3-codex-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 102,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "8b4a99e0b0dff0a257ff6e0440cc9feb209b8a75",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  },
+  {
+    "path": "ops/reviews/wp710-exec-review-9-codex-verdict.receipt.yaml",
+    "field": "anchor.gioi_han",
+    "line": 117,
+    "text": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien.",
+    "historical": false,
+    "evidence_oid": "6bb5358f414edfb5e76c164473523dcf38cade47",
+    "ancestor_master_rc": 0,
+    "excerpt": "Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH/rebase pha quan he to tien."
+  }
+]

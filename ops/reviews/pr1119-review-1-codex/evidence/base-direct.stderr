@@ -1,0 +1,4 @@
+/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119b/work/base/ops/lease_publish_test.py:3062: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119b/work/base/ops/lease_publish_test.py:5205: SyntaxWarning: invalid escape sequence '\d'
+  KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ

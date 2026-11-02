@@ -1,0 +1,60 @@
+HINT.patch — reviewer lượt 5 (advisory_review, Claude Opus 5.5) cho PR #690 / packet #671, áp lên 8757a8406489a306736c8257a7933546b8c81042
+Nhãn §8 (nguyên văn): chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+Áp: từ GỐC cây làm việc, `patch -p0 --fuzz=0 < HINT.patch` (đường dẫn repo-relative, không tiền tố a/ b/).
+Phân loại: MỌI hunk nằm trong ops/cong_cu_test.py (tệp test thuần — §8 ràng buộc 3(a)): một cửa TỰ KIỂM chỉ `t62` gọi và
+một chú thích; không hunk nào chạm bash_nen.py, khối tự phóng lại, `main()`, `_main_gop()`, `.github/workflows/**` hay đường
+CI gọi (`python ops/cong_cu_test.py` không đối số · `--gop manh` — hai đường ấy đi đúng như cũ). Mức: mã đầy đủ (đã chạy trên
+bản sao tạm), KHÔNG phải mệnh lệnh.
+  hunk 1 (@@ -12)   LOI-KHAI-RONG-HON-PHEP-DO [P4, tái phát do ghép #668]  con số AST trong chú thích đầu tệp: 36→38,
+                    `{**os.environ, …}` 3→5 (2 điểm phóng của #668 `:7234`, `:8073` — cả hai vẫn thừa kế).
+  hunk 2–3 (@@ -8619, -8626) CUA-UTF8-NGOAI-BANG-CUA [P1]  cửa `--tu-kiem-che-do-utf8` thành hàm `_in_tu_kiem_che_do_utf8`
+                    ĐĂNG KÝ trong bảng `_CUA` (một đường dispatch như mọi cửa #668); khối `__main__` trở lại y hệt master
+                    `fc852ff` trừ một khoá bảng. Khoá: bán kính `f25_cua_moi_vi_tri` (mảnh CI 5/8) ĐỎ → `ok … 1/60`.
+Sau áp: +297 dòng so merge-base mới fc852ff (trần ADR-0044: 300); mọi dòng thêm ≤ 118 ký tự.
+
+diff --git ops/cong_cu_test.py ops/cong_cu_test.py
+index 195c046..1f9cb86 100644
+--- ops/cong_cu_test.py
++++ ops/cong_cu_test.py
+@@ -12,8 +12,8 @@ from pathlib import Path
+ # cho MỌI tiến trình con/cháu. Đo 27-09-2026 (Linux, `PYTHONIOENCODING=ascii` cho con): `t29`, `t42`,
+ # `t45` chết `tin_dung_gia` vì cháu in chữ Việt ra stdout ASCII; chạy tay trên Windows (cp1252/cp1258)
+ # ĐỎ oan, còn CI che mất vì tự đặt hai biến này. Đặt vào `os.environ` chứ không vá từng lời gọi. Phạm vi
+-# ĐÃ ĐO (AST, lượt vá 4): 36 Call mang `env=` trong tệp này — 12 `moi_truong(…)`, 3 `dict(os.environ, …)`,
+-# 3 `{**os.environ, …}`, 18 biến/`dict(biến, …)` truy tay về ba dạng ấy hoặc tham số `None` (= thừa kế); lời
++# ĐÃ ĐO (AST, sau ghép #668): 38 Call mang `env=` trong tệp này — 12 `moi_truong(…)`, 3 `dict(os.environ, …)`,
++# 5 `{**os.environ, …}` (2 của #668), 18 biến/`dict(biến, …)` truy tay về các dạng ấy hoặc `None` (= thừa kế); lời
+ # gọi không `env=` thì thừa kế. Điểm phóng viết SAU phải tự giữ điều đó — chưa ca nào khoá.
+ # `t61` đo từng vế trong một tiến trình con CỐ Ý ép ASCII, nên nó có răng cả khi CI đã đặt sẵn.
+ _BIEN_UTF8 = (("PYTHONIOENCODING", "utf-8"), ("PYTHONUTF8", "1"))
+@@ -8619,6 +8619,14 @@ def _in_tu_kiem_ban_kinh():
+             print(d)
+ 
+ 
++def _in_tu_kiem_che_do_utf8():
++    """Cửa con cho `t62` (#671): chế độ tiến trình CHẠY BỘ CA, mã thoát RIÊNG. TRONG `_CUA` — một đường dispatch;
++    ngoài bảng thì đột biến `f25_cua_moi_vi_tri` đẩy con của `t62` vào `main()`, `t62` tín dụng giả (lượt 5)."""
++    print(f"UTF8_MODE={sys.flags.utf8_mode} B={sys.flags.dont_write_bytecode} "
++          f"DA_PHONG_LAI={int(_DA_PHONG_LAI)} DAU_SOT={int(_DAU_PHONG_LAI in os.environ)}")
++    sys.exit(_MA_TU_KIEM_UTF8)
++
++
+ if __name__ == "__main__":
+     # #668 F25 (Codex lượt 8): cửa CHỈ đọc ở argv[1]. Bản trước dò MỌI vị trí, nên `--gop --tu-kiem-che-do` chạy cửa tự
+     # kiểm, rc=0, KHÔNG gom — một giá trị đối số chiếm quyền chọn chế độ. Đối số lạ ⇒ rc=2, không lặng lẽ chạy `main`.
+@@ -8626,13 +8634,9 @@ if __name__ == "__main__":
+             "--tu-kiem-tien-kiem": _in_tu_kiem_tien_kiem, "--tu-kiem-dong-ho": _in_tu_kiem_dong_ho,
+             "--tu-kiem-luat-phan-quyet": _in_tu_kiem_luat_phan_quyet, "--tu-kiem-cong-that": _in_tu_kiem_cong_that,
+             "--ban-kinh-con": _in_ban_kinh_con, "--tu-kiem-gom": _in_tu_kiem_gom,
+-            "--tu-kiem-che-do": _in_tu_kiem_che_do, "--tu-kiem-main": _in_tu_kiem_main}
++            "--tu-kiem-che-do": _in_tu_kiem_che_do, "--tu-kiem-main": _in_tu_kiem_main,
++            "--tu-kiem-che-do-utf8": _in_tu_kiem_che_do_utf8}
+     cua = sys.argv[1] if len(sys.argv) > 1 else None
+-    # #671: cửa tự kiểm chế độ UTF-8 (`t62`) — theo quy ước #668, CHỈ đọc argv[1]; mã thoát RIÊNG `_MA_TU_KIEM_UTF8`.
+-    if cua == "--tu-kiem-che-do-utf8":
+-        print(f"UTF8_MODE={sys.flags.utf8_mode} B={sys.flags.dont_write_bytecode} "
+-              f"DA_PHONG_LAI={int(_DA_PHONG_LAI)} DAU_SOT={int(_DAU_PHONG_LAI in os.environ)}")
+-        sys.exit(_MA_TU_KIEM_UTF8)
+     if cua == "--gop":
+         sys.exit(_main_gop())
+     if cua in _CUA:

@@ -1,0 +1,9 @@
+[
+ {
+  "id": 6553978552,
+  "user": "chatgpt-codex-connector[bot]",
+  "author_association": "NONE",
+  "created_at": "2026-11-01T05:35:09Z",
+  "body_dau": "<!-- codex-pull-request-review-summary -->\n<!-- codex-review-state:v1 {\"code_review\":{\"commit_sha\":\"7f8be85a7cf9077400fc1747aa6e23128f087677\",\"has_any_findings\":false,\"has_unresolved_findings\":false,\"status\":\"completed\"},\"security_review\":{\"commit_sha\":null,\"has_any_findings\":null,\"has_unresolved_findings\":null,\"status\":null}} -->\n\n## Codex Review Summary\n\nThis comment shows the latest Codex revie"
+ }
+]

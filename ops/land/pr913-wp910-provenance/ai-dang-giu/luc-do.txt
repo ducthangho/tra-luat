@@ -1,0 +1,16 @@
+# do luc 2026-10-24T12:06:04Z — lease KHONG rut han (pha B dung tiep, chi thi chu kho #910 issuecomment-6383990077)
+ls-remote heads=580 for-each-ref=580 thieu_cuc_bo=0
+== .github/workflows/ci.yml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp892-r1-g1-claude	refs/remotes/origin/ops/wp892-r1-g1-lease:ops/leases/wp892-r1-g1-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp910-r1-g1-claude	refs/remotes/origin/ops/wp910-r1-g1-lease:ops/leases/wp910-r1-g1-claude.yaml
+CÒN_HẠN	wp910-r2-g2-claude	refs/remotes/origin/ops/wp910-r2-g2-lease:ops/leases/wp910-r2-g2-claude.yaml
+NGƯỜI_GIỮ 1: wp910-r2-g2-claude
+== .github/workflows/launcher-windows.yml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp910-r1-g1-claude	refs/remotes/origin/ops/wp910-r1-g1-lease:ops/leases/wp910-r1-g1-claude.yaml
+CÒN_HẠN	wp910-r2-g2-claude	refs/remotes/origin/ops/wp910-r2-g2-lease:ops/leases/wp910-r2-g2-claude.yaml
+NGƯỜI_GIỮ 1: wp910-r2-g2-claude
+== ops/ci_duong_nhanh_test.py
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp892-r1-g1-claude	refs/remotes/origin/ops/wp892-r1-g1-lease:ops/leases/wp892-r1-g1-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp910-r1-g1-claude	refs/remotes/origin/ops/wp910-r1-g1-lease:ops/leases/wp910-r1-g1-claude.yaml
+CÒN_HẠN	wp910-r2-g2-claude	refs/remotes/origin/ops/wp910-r2-g2-lease:ops/leases/wp910-r2-g2-claude.yaml
+NGƯỜI_GIỮ 1: wp910-r2-g2-claude

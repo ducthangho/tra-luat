@@ -1,0 +1,2821 @@
+{
+  "ok": true,
+  "schema": "doc_claims_check.v1",
+  "roots": [
+    "CHANGELOG.md",
+    "SKILL.md",
+    "CLAUDE.md",
+    "CONTEXT.md",
+    "references",
+    "docs"
+  ],
+  "files_scanned": 117,
+  "claims_flagged": 381,
+  "flags": [],
+  "advisories": [
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 130,
+      "claim": "ops/reviews/wp538/",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 130,
+      "claim": "ops/reviews/wp540/",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 147,
+      "claim": "ops/reviews/wp540/",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 213,
+      "claim": "ops/thu-hoi/_ngoai-le-closure.retired.yaml",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L8",
+      "file": "CHANGELOG.md",
+      "line": 311,
+      "claim": "tl selftest",
+      "reason": "TL_COMMAND_UNKNOWN"
+    },
+    {
+      "layer": "L2",
+      "file": "CHANGELOG.md",
+      "line": 553,
+      "claim": "0449ddb0",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "CHANGELOG.md",
+      "line": 553,
+      "claim": "457a6568",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "CHANGELOG.md",
+      "line": 553,
+      "claim": "a146d00d",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "CHANGELOG.md",
+      "line": 554,
+      "claim": "04792ddf",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "CHANGELOG.md",
+      "line": 554,
+      "claim": "6c8b0629",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "CHANGELOG.md",
+      "line": 575,
+      "claim": "6fe742e",
+      "reason": "SHA_NOT_A_COMMIT_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 1278,
+      "claim": "references/golden/fixtures/",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 1797,
+      "claim": "ops/thu-hoi/",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 2584,
+      "claim": "ops/reviews/phep-do/",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 3736,
+      "claim": "r345_cac_phep_do_cuc_bo_van_dung",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 3757,
+      "claim": "r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 3777,
+      "claim": "r345_cac_phep_do_cuc_bo_van_dung",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 4104,
+      "claim": "ops/reviews/x.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 4794,
+      "claim": "r345_than_hook_KHONG_duoc_co_duong_mang_nao",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 4859,
+      "claim": "r345_than_hook_KHONG_duoc_co_duong_mang_nao",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 5160,
+      "claim": "r338_ten_goi_pip_khac_ten_module_import",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 5163,
+      "claim": "r338_dot_bien_bo_ban_do_lam_ca_dich_DO",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L8",
+      "file": "CHANGELOG.md",
+      "line": 5212,
+      "claim": "tl selftest",
+      "reason": "TL_COMMAND_UNKNOWN"
+    },
+    {
+      "layer": "L8",
+      "file": "CHANGELOG.md",
+      "line": 5265,
+      "claim": "tl selftest",
+      "reason": "TL_COMMAND_UNKNOWN"
+    },
+    {
+      "layer": "L8",
+      "file": "CHANGELOG.md",
+      "line": 5308,
+      "claim": "tl selftest",
+      "reason": "TL_COMMAND_UNKNOWN"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 6850,
+      "claim": "references/KHONG_CO_FILE.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7201,
+      "claim": "r285_hang_cuoi_config_van_con_va_la_ngoai_le_duy_nhat",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7307,
+      "claim": "r292_bkl_migrate_v1_dua_doc_loi_quay_lai",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7309,
+      "claim": "r292_bkl_reg_bulk_verdict_khong_tin_ok_tran",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7311,
+      "claim": "r292_bkl_main_khong_con_bao_xong_oan",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7357,
+      "claim": "r291_ingest_commit_verdict_doi_du_marker",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7361,
+      "claim": "r291_ca_hai_call_site_deu_co_cong",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7363,
+      "claim": "r291_stage_write_chan_commit_mot_phan",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7433,
+      "claim": "r290_orch_dry_khong_goi_action_ghi",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7436,
+      "claim": "r290_orch_apply_van_goi_changes_pull",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7438,
+      "claim": "r290_orch_decide_not_probed_bao_thu",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7485,
+      "claim": "r289_pfr_duong_xanh_van_chay_du",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7487,
+      "claim": "r289_pfr_ma_tran_buoc_con_hong_khong_thao_registry",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7490,
+      "claim": "r289_pfr_reg_delete_readback_khong_tin_ok_tran",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7493,
+      "claim": "r289_pfr_khong_thao_tac_nao_khong_con_bao_xanh",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7502,
+      "claim": "r288_helper1_chi_gan_o_noi_da_khai",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7502,
+      "claim": "r288_helper1_chua_gan_vao_lenh_nao",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7542,
+      "claim": "r288_helper1_ok_duoc_tinh_va_rc_dan_xuat",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7542,
+      "claim": "r288_helper1_vi_ngu_ket_qua_duong_fail_closed",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7543,
+      "claim": "r288_helper1_chan_mutation_phia_sau_va_ke_da_ghi",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7543,
+      "claim": "r288_helper1_chua_gan_vao_lenh_nao",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7585,
+      "claim": "r287_golden_raw_drift_lam_do_gate",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7588,
+      "claim": "r287_write_cam_ghi_khi_raw_bat_dinh",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7590,
+      "claim": "r287_rc_khac_0_qua_lenh_that",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7648,
+      "claim": "r286_frozen_age_dong_bang_va_giu_none",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7650,
+      "claim": "r286_sweep_raw_bat_bien_khi_tuoi_cache_troi",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7652,
+      "claim": "r286_counts_va_ingest_missing_cung_mau",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7697,
+      "claim": "r285_hang_cuoi_config_van_con_va_la_ngoai_le_duy_nhat",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 7706,
+      "claim": "r285_hang_cuoi_config_van_con_va_la_ngoai_le_duy_nhat",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L2",
+      "file": "CHANGELOG.md",
+      "line": 8547,
+      "claim": "e53947f2",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "CHANGELOG.md",
+      "line": 8563,
+      "claim": "8f0ab7cf",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "CHANGELOG.md",
+      "line": 8593,
+      "claim": "e53947f2",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 8901,
+      "claim": "scripts/nlm_log.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 8901,
+      "claim": "templates/_nguon-goc/",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 9553,
+      "claim": "rasoat/X.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 9628,
+      "claim": "scripts/wire_deploy_guard.py",
+      "reason": "PATH_DELETED"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 9657,
+      "claim": "scripts/wire_deploy_guard.py",
+      "reason": "PATH_DELETED"
+    },
+    {
+      "layer": "L2",
+      "file": "CHANGELOG.md",
+      "line": 10023,
+      "claim": "743ed200",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 10304,
+      "claim": "r218_sach_khong_bao_gia",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 10305,
+      "claim": "r219_l9_tu_tat_khi_quet_hep",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 10339,
+      "claim": "references/MO_COI_R228.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L8",
+      "file": "CHANGELOG.md",
+      "line": 10816,
+      "claim": "tl cho",
+      "reason": "TL_COMMAND_UNKNOWN"
+    },
+    {
+      "layer": "L8",
+      "file": "CHANGELOG.md",
+      "line": 10816,
+      "claim": "tl rebase",
+      "reason": "TL_COMMAND_UNKNOWN"
+    },
+    {
+      "layer": "L8",
+      "file": "CHANGELOG.md",
+      "line": 10816,
+      "claim": "tl selftest",
+      "reason": "TL_COMMAND_UNKNOWN"
+    },
+    {
+      "layer": "L8",
+      "file": "CHANGELOG.md",
+      "line": 10898,
+      "claim": "tl khong-co-lenh-nay",
+      "reason": "TL_COMMAND_UNKNOWN"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 10906,
+      "claim": "references/X.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 10961,
+      "claim": "scripts/manifest_build.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 10962,
+      "claim": "references/Code.2.21.2h.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 10963,
+      "claim": "references/Code.2.21.2i.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 10965,
+      "claim": "references/BANG_PHAN_TANG_RUI_RO.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 10985,
+      "claim": "references/golden/fixtures/",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 11028,
+      "claim": "docs/_doc_patch_bak/",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 11524,
+      "claim": "scripts/build_parts.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "CHANGELOG.md",
+      "line": 11524,
+      "claim": "scripts/tl_rebuild.sh",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 11583,
+      "claim": "r192_f7_cookie_50p_chan_lo",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 11761,
+      "claim": "r198_ingest_local_giu_duong_cu",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 12077,
+      "claim": "r117_nlm_add_no_wait_skips_reg_link",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "CHANGELOG.md",
+      "line": 12539,
+      "claim": "r179_t",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L2",
+      "file": "SKILL.md",
+      "line": 91,
+      "claim": "45739ff7",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "SKILL.md",
+      "line": 91,
+      "claim": "743ed200",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L1",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 17,
+      "claim": "scripts/build_parts.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 17,
+      "claim": "scripts/nlm_log.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 17,
+      "claim": "templates/_nguon-goc/",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L2",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 39,
+      "claim": "1835b46",
+      "reason": "SHA_NOT_A_COMMIT_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 44,
+      "claim": "v1.35.38",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 48,
+      "claim": "scripts/nlm_log.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 63,
+      "claim": "scripts/build_parts.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 63,
+      "claim": "scripts/build_parts.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 63,
+      "claim": "scripts/tl_rebuild.sh",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 63,
+      "claim": "scripts/tl_rebuild.sh",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 64,
+      "claim": "scripts/nlm_log.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 64,
+      "claim": "templates/_nguon-goc/",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 66,
+      "claim": "scripts/manifest_build.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L6",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 79,
+      "claim": "r207",
+      "reason": "R_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 163,
+      "claim": "v1.35.38",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 177,
+      "claim": "scripts/nlm_log.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L12",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 205,
+      "claim": "r208_baseline_ratchet",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 205,
+      "claim": "r208_cay_that_tang_A_B",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 205,
+      "claim": "r208_pointer_findings_pure",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L1",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 206,
+      "claim": "scripts/build_parts.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 206,
+      "claim": "scripts/tl_rebuild.sh",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L12",
+      "file": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 206,
+      "claim": "r208_skill_md_khong_tro_file_ma",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L6",
+      "file": "docs/WORKFLOW_RASOAT_TU_DONG.md",
+      "line": 201,
+      "claim": "r207",
+      "reason": "R_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L2",
+      "file": "docs/adr/0010-tu-vung-nlm-status-dong-va-tach-claim-due.md",
+      "line": 9,
+      "claim": "59e8d0de",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L5",
+      "file": "docs/research/2026-08-04-lua-chon-orchestrator-da-model-codex-claude.md",
+      "line": 265,
+      "claim": "v1.0.6",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "docs/research/2026-08-04-lua-chon-orchestrator-da-model-codex-claude.md",
+      "line": 268,
+      "claim": "v1.9.0",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/API_CONTRACT.md",
+      "line": 155,
+      "claim": "v1.14.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L2",
+      "file": "references/COMMANDS.md",
+      "line": 32,
+      "claim": "dbe706a0",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "references/DELTA_v1.19.md",
+      "line": 99,
+      "claim": "fec6c125",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L5",
+      "file": "references/DEPENDENCIES.md",
+      "line": 58,
+      "claim": "v1.17.24",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DEPENDENCIES.md",
+      "line": 90,
+      "claim": "v1.17.14",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DEPENDENCIES.md",
+      "line": 97,
+      "claim": "v1.17.13",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DEPENDENCIES.md",
+      "line": 110,
+      "claim": "v1.17.11",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DEPENDENCIES.md",
+      "line": 131,
+      "claim": "v1.17.20",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DEPENDENCIES.md",
+      "line": 134,
+      "claim": "v1.17.20",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DEPENDENCIES.md",
+      "line": 136,
+      "claim": "v1.17.21",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 13,
+      "claim": "v1.15.6",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 26,
+      "claim": "scripts/boot.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 55,
+      "claim": "v1.15.5",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 56,
+      "claim": "references/NLM_QA_POLICY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 62,
+      "claim": "scripts/nlm_log.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 76,
+      "claim": "v1.15.4",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 85,
+      "claim": "scripts/nlm_log.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 89,
+      "claim": "v1.15.3",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 95,
+      "claim": "references/BANG_PHAN_TANG_RUI_RO.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 102,
+      "claim": "v1.15.2",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 115,
+      "claim": "v1.15.1",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 116,
+      "claim": "references/PATCH_reg_delete.gs.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 116,
+      "claim": "scripts/reg_delete.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 120,
+      "claim": "v1.15.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 123,
+      "claim": "v1.12.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 124,
+      "claim": "v1.13.4",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 127,
+      "claim": "scripts/manifest_build.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 148,
+      "claim": "v1.12.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 156,
+      "claim": "v1.12.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 160,
+      "claim": "v1.14.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 181,
+      "claim": "references/LOCATE_SHARED_DRIVE.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 186,
+      "claim": "v1.13.4",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 205,
+      "claim": "scripts/backfill_keywords.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 214,
+      "claim": "v1.10.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 245,
+      "claim": "v1.13.3",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 257,
+      "claim": "v1.13.2",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 267,
+      "claim": "v1.13.1",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 279,
+      "claim": "v1.13.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 295,
+      "claim": "v1.12.9",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 397,
+      "claim": "scripts/preingest_gate.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 416,
+      "claim": "references/PATCH_v2.18.0.gs.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 421,
+      "claim": "scripts/preingest_gate.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 425,
+      "claim": "v1.12.3",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 456,
+      "claim": "v1.12.2",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 467,
+      "claim": "scripts/dedup_gate2.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 468,
+      "claim": "v1.11.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 471,
+      "claim": "scripts/split_gdoc_plain.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 474,
+      "claim": "scripts/wizard.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 492,
+      "claim": "v1.12.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 509,
+      "claim": "v1.15.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 521,
+      "claim": "v1.15.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 560,
+      "claim": "v1.11.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 567,
+      "claim": "scripts/nlm_dedup.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 588,
+      "claim": "references/PATCH_nlm_dedup_v1.11.0.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 590,
+      "claim": "references/tra_luat_v2_13_6_FULL.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 603,
+      "claim": "v1.10.6",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 606,
+      "claim": "v1.10.3",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 606,
+      "claim": "v1.10.4",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 634,
+      "claim": "v1.10.5",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 652,
+      "claim": "v1.10.3",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 669,
+      "claim": "references/CONVERT_SHEETS_v2_13_5.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 671,
+      "claim": "v1.10.3",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 691,
+      "claim": "v1.10.1",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 696,
+      "claim": "v1.10.4",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 725,
+      "claim": "scripts/vbhn_audit.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 763,
+      "claim": "scripts/push_gates.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 773,
+      "claim": "references/tra_luat_v2_13_4_FULL.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 781,
+      "claim": "v1.10.1",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 791,
+      "claim": "scripts/napext.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 820,
+      "claim": "v1.10.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 822,
+      "claim": "references/OPERATING_CHANGES_v1.10.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 823,
+      "claim": "references/tra_luat_v2_13_3_FULL.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 834,
+      "claim": "scripts/migrate_45chude.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 847,
+      "claim": "v1.9.13",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 847,
+      "claim": "v1.9.14",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 903,
+      "claim": "v1.9.13",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 906,
+      "claim": "v1.9.13",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 913,
+      "claim": "references/tra_luat_v2_12_1_FULL.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 919,
+      "claim": "v1.9.13",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 920,
+      "claim": "references/tra_luat_v2_12_FULL.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 932,
+      "claim": "v1.9.12",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 941,
+      "claim": "references/APPSSCRIPT_V2_12_REGISTRY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 943,
+      "claim": "v1.9.12",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 952,
+      "claim": "scripts/traluat_checkpoint.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 957,
+      "claim": "scripts/traluat_integrity.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 959,
+      "claim": "references/tra_luat_fetch_to_drive_v2.8.0.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 959,
+      "claim": "v1.9.11",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 966,
+      "claim": "v1.9.11",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 967,
+      "claim": "references/APPSSCRIPT_V2_8_IMPORT.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 968,
+      "claim": "scripts/nlm_push.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 989,
+      "claim": "v1.9.10",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 990,
+      "claim": "references/DRIVE_LINK_IMPORT.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 990,
+      "claim": "scripts/import_drive_link.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1002,
+      "claim": "references/NLM_QA_POLICY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1002,
+      "claim": "scripts/nlm_qa.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1021,
+      "claim": "references/APPSSCRIPT_MANIFEST.example.json",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1021,
+      "claim": "references/INGEST_PRIORITY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1021,
+      "claim": "scripts/tl_ingest_external.sh",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1021,
+      "claim": "scripts/tl_lib.sh",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1024,
+      "claim": "references/DRIVE_API_PRIORITY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1044,
+      "claim": "references/INGEST_PRIORITY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1044,
+      "claim": "scripts/find_sources.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1047,
+      "claim": "references/INGEST_PRIORITY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1047,
+      "claim": "scripts/find_sources.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1053,
+      "claim": "references/INGEST_PRIORITY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1059,
+      "claim": "references/INGEST_PRIORITY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1114,
+      "claim": "scripts/upload_folder.sh",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1127,
+      "claim": "references/origin_route_appsscript.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L4",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1149,
+      "claim": "TODO",
+      "reason": "DRAFT_MARKER"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1150,
+      "claim": "references/origin_route_appsscript.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1178,
+      "claim": "references/origin_route_appsscript.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1210,
+      "claim": "v1.9.11",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1212,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1230,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1232,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1247,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1249,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1250,
+      "claim": "scripts/context_budget.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1263,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1265,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1267,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1269,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1271,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1273,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1282,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1284,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1286,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1296,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1298,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1308,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1310,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1323,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1325,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1345,
+      "claim": "v1.9.7",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1347,
+      "claim": "v1.9.7",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1349,
+      "claim": "v1.9.6",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1349,
+      "claim": "v1.9.7",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1351,
+      "claim": "v1.9.6",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1357,
+      "claim": "v1.9.6",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1358,
+      "claim": "v1.9.5",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1367,
+      "claim": "references/bang_bieu_mau.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1367,
+      "claim": "scripts/extract_tables.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1367,
+      "claim": "v1.9.4",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1375,
+      "claim": "v1.9.3",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1377,
+      "claim": "v1.9.2",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1379,
+      "claim": "v1.9.1",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1444,
+      "claim": "scripts/help.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1445,
+      "claim": "references/huong_dan_nhanh.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1452,
+      "claim": "references/danh_muc_luat.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1473,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1512,
+      "claim": "references/INGEST_PRIORITY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1512,
+      "claim": "scripts/tl_lib.sh",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1519,
+      "claim": "references/DRIVE_API_PRIORITY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1535,
+      "claim": "v1.9.11",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1553,
+      "claim": "v1.9.11",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1566,
+      "claim": "v1.9.10",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1578,
+      "claim": "references/DRIVE_LINK_IMPORT.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1580,
+      "claim": "v1.9.10",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1583,
+      "claim": "references/NLM_QA_POLICY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1599,
+      "claim": "scripts/split_structure.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1725,
+      "claim": "scripts/doctor.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1746,
+      "claim": "v1.10.5",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1749,
+      "claim": "v1.10.5",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1752,
+      "claim": "v1.10.5",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1755,
+      "claim": "references/CONVERT_SHEETS_v2_13_5.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1756,
+      "claim": "v1.13.3",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1758,
+      "claim": "v1.13.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1759,
+      "claim": "v1.12.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1759,
+      "claim": "v1.15.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1762,
+      "claim": "v1.15.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1765,
+      "claim": "v1.12.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1765,
+      "claim": "v1.15.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1766,
+      "claim": "v1.15.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1770,
+      "claim": "v1.15.1",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1772,
+      "claim": "references/PATCH_reg_delete.gs.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1775,
+      "claim": "v1.15.1",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1776,
+      "claim": "v1.13.3",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1777,
+      "claim": "v1.13.4",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1778,
+      "claim": "v1.13.4",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1778,
+      "claim": "v1.13.4",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1779,
+      "claim": "v1.13.4",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1781,
+      "claim": "v1.10.6",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1785,
+      "claim": "v1.10.5",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1788,
+      "claim": "v1.9.11",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1792,
+      "claim": "references/APPSSCRIPT_V2_8_IMPORT.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1793,
+      "claim": "v1.9.10",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1795,
+      "claim": "references/DRIVE_LINK_IMPORT.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1796,
+      "claim": "v1.9.10",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1799,
+      "claim": "references/NLM_QA_POLICY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1804,
+      "claim": "references/DRIVE_API_PRIORITY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1807,
+      "claim": "references/INGEST_PRIORITY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1810,
+      "claim": "v1.9.1",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1813,
+      "claim": "references/danh_muc_luat.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1822,
+      "claim": "scripts/context_budget.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1822,
+      "claim": "v1.9.8",
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1834,
+      "claim": "references/LOCATE_SHARED_DRIVE.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1834,
+      "claim": "references/OPERATING_CHANGES_v1.10.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1834,
+      "claim": "v1.14.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1842,
+      "claim": "scripts/upload_folder.sh",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1846,
+      "claim": "scripts/tl_lib.sh",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1851,
+      "claim": "scripts/tl_ingest_external.sh",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1853,
+      "claim": "references/INGEST_PRIORITY.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1854,
+      "claim": "references/APPSSCRIPT_MANIFEST.example.json",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1857,
+      "claim": "scripts/appscript_client.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/DOCTRINE_APPENDIX.md",
+      "line": 1860,
+      "claim": "references/origin_route_appsscript.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L5",
+      "file": "references/KERNEL_APPENDIX.md",
+      "line": 12,
+      "claim": "v1.22.44",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/RUNBOOK.md",
+      "line": 421,
+      "claim": "v1.17.24",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/RUNBOOK.md",
+      "line": 568,
+      "claim": "v1.12.0",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/RUNBOOK.md",
+      "line": 664,
+      "claim": "v1.17.24",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/STALE_RELATION_GUARD.md",
+      "line": 1,
+      "claim": "v1.17.24",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/VBHN_MINISTRY_YEAR_GUARD.md",
+      "line": 1,
+      "claim": "v1.17.18",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/VBHN_OFFICIAL_FIRST.md",
+      "line": 1,
+      "claim": "v1.17.14",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L5",
+      "file": "references/VBHN_QT5_VERIFICATION.md",
+      "line": 1,
+      "claim": "v1.17.14",
+      "reason": "VERSION_NOT_IN_CHANGELOG"
+    },
+    {
+      "layer": "L2",
+      "file": "references/changelog_archive/CHANGELOG-1.33.54-den-1.34.99.md",
+      "line": 323,
+      "claim": "45739ff7",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "references/changelog_archive/CHANGELOG-1.33.54-den-1.34.99.md",
+      "line": 323,
+      "claim": "743ed200",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "references/changelog_archive/CHANGELOG-1.33.54-den-1.34.99.md",
+      "line": 988,
+      "claim": "4e2bc585",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "references/changelog_archive/CHANGELOG-1.33.54-den-1.34.99.md",
+      "line": 988,
+      "claim": "a1322194",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "references/changelog_archive/CHANGELOG-1.33.54-den-1.34.99.md",
+      "line": 1018,
+      "claim": "dbe706a0",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "references/changelog_archive/CHANGELOG-1.33.54-den-1.34.99.md",
+      "line": 1060,
+      "claim": "45739ff7",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "references/changelog_archive/CHANGELOG-1.33.54-den-1.34.99.md",
+      "line": 1882,
+      "claim": "59e8d0de",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-1.33.54-den-1.34.99.md",
+      "line": 1957,
+      "claim": "references/Code.2.21.2j.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L12",
+      "file": "references/changelog_archive/CHANGELOG-1.33.54-den-1.34.99.md",
+      "line": 2030,
+      "claim": "r76_engine_stays_in_tl",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L12",
+      "file": "references/changelog_archive/CHANGELOG-1.33.54-den-1.34.99.md",
+      "line": 2116,
+      "claim": "r76_engine_stays_in_tl",
+      "reason": "TEST_ID_UNKNOWN"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-1.33.54-den-1.34.99.md",
+      "line": 2294,
+      "claim": "references/SKILL_KERNEL_DRAFT.md",
+      "reason": "PATH_DELETED"
+    },
+    {
+      "layer": "L2",
+      "file": "references/changelog_archive/CHANGELOG-1.33.54-den-1.34.99.md",
+      "line": 2498,
+      "claim": "dcca0cd7",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 107,
+      "claim": "59e8d0de",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 2116,
+      "claim": "references/Code.2.21.2i.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 2131,
+      "claim": "references/Code.2.21.2i.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 2135,
+      "claim": "references/Code.2.21.2i.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 2962,
+      "claim": "scripts/_parts/",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L8",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 3028,
+      "claim": "tl regen2",
+      "reason": "TL_COMMAND_UNKNOWN"
+    },
+    {
+      "layer": "L8",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 3073,
+      "claim": "tl regen2",
+      "reason": "TL_COMMAND_UNKNOWN"
+    },
+    {
+      "layer": "L2",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 3306,
+      "claim": "743ed200",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 3509,
+      "claim": "scripts/tl_rebuild.sh",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 3587,
+      "claim": "scripts/build_parts.py",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 3637,
+      "claim": "scripts/_parts/",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4208,
+      "claim": "references/REVIEW_BLLD_V1.19.18.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4251,
+      "claim": "references/FETCHER_V1.19.14.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4262,
+      "claim": "references/FETCHER_V1.19.14.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4272,
+      "claim": "references/TVPL_AUTODOWNLOAD_V1.19.13.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4282,
+      "claim": "references/NLM_CLI_ALLREADS_V1.19.12.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L2",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4300,
+      "claim": "cc39895d",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4306,
+      "claim": "references/SHARDING_V1.19.10.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L2",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4312,
+      "claim": "45739ff7",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4327,
+      "claim": "59e8d0de",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L2",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4327,
+      "claim": "fec6c125",
+      "reason": "SHA_LIKE_NOT_A_COMMIT",
+      "detail": {
+        "len": 8
+      }
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4331,
+      "claim": "references/NLM_CLI_FASTLANE_V1.19.8.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4344,
+      "claim": "references/IDENTITY_XREF_V1.19.7.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4389,
+      "claim": "references/MERGE_V1.19.5.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4427,
+      "claim": "references/MERGE_V1.19.2.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4427,
+      "claim": "references/PROFILE_SCOPE_V1.19.2.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4451,
+      "claim": "references/Code.2.21.2f.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4465,
+      "claim": "references/DELTA_v1.18.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4465,
+      "claim": "references/MERGE_V1.18.0.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4471,
+      "claim": "references/Code.2.21.2e.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4474,
+      "claim": "references/DELTA_v1.18.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4474,
+      "claim": "references/GS_2.21.2E_MULTI_CORPUS_SLOT.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4474,
+      "claim": "references/MERGE_V1.18.0.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4483,
+      "claim": "references/INSTRUCTION_SKILL_BINDING.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4483,
+      "claim": "references/MERGE_V1.17.26.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4508,
+      "claim": "references/RA_SOAT_LESSONS_2026_06.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4516,
+      "claim": "references/Code.2.21.2d.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4520,
+      "claim": "references/Code.2.21.2d.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4533,
+      "claim": "references/Code.2.21.2c.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4682,
+      "claim": "references/COMPARISON_HOTFIX.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4694,
+      "claim": "references/SKILL_ISSUES_FIRSTRUN.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4718,
+      "claim": "references/Code.2.21.1.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4734,
+      "claim": "references/Code.2.21.1.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4747,
+      "claim": "references/Code.2.21.1.gs",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    },
+    {
+      "layer": "L1",
+      "file": "references/changelog_archive/CHANGELOG-den-1.33.53.md",
+      "line": 4747,
+      "claim": "references/PATCH_REPORT.sample.md",
+      "reason": "PATH_MISSING_IN_HISTORICAL_DOC"
+    }
+  ],
+  "by_layer": {
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0,
+    "L5": 0,
+    "L6": 0,
+    "L7": 0,
+    "L8": 0,
+    "L9": 0,
+    "L12": 0
+  },
+  "advisory_count": 381,
+  "layers": [
+    "L1",
+    "L2",
+    "L3",
+    "L4",
+    "L5",
+    "L6",
+    "L7",
+    "L8",
+    "L9",
+    "L12"
+  ],
+  "layers_skipped": {},
+  "basis": {
+    "version": "1.36.69",
+    "sha_lens": [
+      7,
+      40
+    ],
+    "changelog_files": 3,
+    "changelog_versions": 491,
+    "changelog_rs": 352,
+    "changelog_headings": 1067,
+    "floor_version": "1.9.9",
+    "floor_r": 10,
+    "max_r": 376,
+    "commands_source": "references/golden/parser_surface.json",
+    "commands_known": 198,
+    "test_ids_known": 1386,
+    "test_id_kinds": {
+      "legacy": 1316,
+      "packet": 70
+    },
+    "layers_bac": {
+      "L10": "24/30 version GAS được dẫn không có tệp .gs — kho giữ 6 bản gần nhất là có chủ đích",
+      "L11": "2/2 hit ở tài liệu sống đều viết ĐÚNG (số hiệu chính thức là dạng bare); bất biến NN-YYYY-VBHN-XXX áp cho khoá registry, đã có cổng vbhn-year-fix"
+    },
+    "note": "tập tra cứu = CHANGELOG.md + references/changelog_archive/*.md, quét toàn văn; dưới sàn ⇒ advisory (khuyết của sổ, không phải trích dẫn sai)"
+  },
+  "strict": false
+}

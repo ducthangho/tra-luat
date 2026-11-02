@@ -1,0 +1,11 @@
+# do 2026-10-19
+a5a89622376495186ae265f18f4f6d1ce7e2b2e3b7613c61c2d96087a2c3af0b  -
+spec_hash: a5a89622376495186ae265f18f4f6d1ce7e2b2e3b7613c61c2d96087a2c3af0b
+verdict: changes_requested reviewed_sha: c95bd7f80a45a592f3cb089149c0c23fb4df2317 
+verdict: changes_requested reviewed_sha: fa4fb7ce98c56b56a2523bf8c2b6a6bc2fb98181 
+verdict: changes_requested reviewed_sha: ecebffe9675d0952f3a0ab65eaa44087853a26bc 
+verdict: approve reviewed_sha: 7a39463e8b6c25d4811bcc9cd544b164e7ce53a7 
+14dff9526d6ab599b007a9e5e3dedccd9642ee679bbf9a0fc7f676a8d382497b  ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot1-codex-verdict.md
+8b326994185af1829fbaa4402777c0cc93b59bef5554b0567a1a3837eaf9b242  ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot2-codex-verdict.md
+45a7ddfe68cd39cc733181a6591741b1525aa455b8c13304037b220a9a5c67de  ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot3-codex-verdict.md
+4fbebb391fbef159d859121c4137effb621a9574de5d2cef864a834cbd0aefb0  ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot4-codex-verdict.md

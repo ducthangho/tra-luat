@@ -1,0 +1,6 @@
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutant": "u1-health-probe-rc", "count": 93, "passed": 93, "red": [], "seconds": 259.316}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutant": "u2-health-probe-environment", "count": 93, "passed": 92, "red": [["c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no", "giet_that", "git_vang/khong-no: đòi rc=2, không NỢ CHẾT, stderr nêu `không gọi được `git`; được rc=2: \"  KHÔNG ĐO ĐƯỢC  [*] r.receipt.yaml: KHÔNG ĐO ĐƯỢC câu lịch sử — FileNotFoundError: [Errno 2] No such file or directory: 'git'\\nTỔNG: KHÔNG ĐO ĐƯỢC\\n\""]], "seconds": 238.864}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutant": "u3-query-environment", "count": 93, "passed": 92, "red": [["c95_moi_truong_git_KHONG_doi_ket_qua_do", "giet_that", "replace_ref: đòi đúng một L-ANCESTRY rc=1; được rc=0: ''"]], "seconds": 244.2}

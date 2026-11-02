@@ -1,0 +1,2 @@
+probe_no_input.py exactly_one_replacement=True
+probe_argv_read.py exactly_one_replacement=True

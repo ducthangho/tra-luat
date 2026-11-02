@@ -1,0 +1,22 @@
+pr870-review-3-codex: base_resolves=9e9a74b2a396ef458d25c51a5563efafbb45ba0c; base_prompt=True; base_is_ancestor rc=0; numstat_bytes_equal=True
+diff.patch exact_git_bytes_equal=True; git_bytes=5195
+stdout.log bytes actual/run=360/360; sha256_matches_run=True
+stderr.log bytes actual/run=39/39; sha256_matches_run=True
+checkpoint.json sha256_matches_run=True
+pr889-review-3-codex: base_resolves=e63961f27b53e66db8e6600009f97d5706743063; base_prompt=True; base_is_ancestor rc=0; numstat_bytes_equal=True
+diff.patch exact_git_bytes_equal=True; git_bytes=3138
+stdout.log bytes actual/run=347/347; sha256_matches_run=True
+stderr.log bytes actual/run=39/39; sha256_matches_run=True
+checkpoint.json sha256_matches_run=True
+pr915-review-1-codex: base_resolves=50a59a945026a2ab2f97dc0e7ef7b5a540e17652; base_prompt=True; base_is_ancestor rc=0; numstat_bytes_equal=True
+omitted diff.patch declaration=14bfd8ec9bb561d2ed4b395acbf044cb573bf251b7b9a4190e109ea02b6bb592  1334705  diff.patch; git_diff_sha256=14bfd8ec9bb561d2ed4b395acbf044cb573bf251b7b9a4190e109ea02b6bb592; git_diff_bytes=1334705
+stdout.log bytes actual/run=227/227; sha256_matches_run=True
+stderr.log bytes actual/run=39/39; sha256_matches_run=True
+checkpoint.json sha256_matches_run=True
+3bc4244: file_count=1; paths_outside_reviews=['CLAUDE.md']
+7cfe062: file_count=91; paths_outside_reviews=[]
+2789cbb: file_count=4; paths_outside_reviews=[]
+cc0a3c9: file_count=106; paths_outside_reviews=[]
+cap_nhat #870: {"reviewed_sha": true, "verdict": true, "provider": true, "luot": true, "assurance": true, "so_lop_matches_receipt": true}
+cap_nhat #889: {"reviewed_sha": true, "verdict": true, "provider": true, "luot": true, "assurance": true, "so_lop_matches_receipt": true}
+cap_nhat #896: {"reviewed_sha": true, "verdict": true, "provider": true, "luot": true, "assurance": true, "so_lop_matches_receipt": true}

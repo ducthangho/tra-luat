@@ -1,0 +1,16 @@
+{
+  "label": "ruff",
+  "cwd": "work/head",
+  "command": [
+    "python3",
+    "-m",
+    "ruff",
+    "check",
+    "--select",
+    "F",
+    "ops/cloud_agent_creds_test.py"
+  ],
+  "rc": 0,
+  "seconds": 0.033421,
+  "output": "All checks passed!\n"
+}

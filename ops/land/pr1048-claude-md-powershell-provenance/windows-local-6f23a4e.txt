@@ -1,0 +1,33 @@
+# Bang chung Windows local (ADR-0057) cho PR #1048, head 6f23a4e68805b4af3e2efe77be6e10b513843e93.
+# May: VM tra-luat-win (Desktop Commander deviceId f7281f27-f79f-40a2-a2f5-b454b58a166a), thu muc C:\tl-win\session_015GtxrbUPS7zGdffB8Sfo8Y\.
+# Script: st1048b.ps1 (lay khoa C:\tl-win\KHOA.txt + doc lai sau 3 s, fetch, checkout --detach dung SHA, 3 cong, selftest, tra khoa).
+# Day la BAN CHEP doc qua Desktop Commander (cmd `type`/powershell), KHONG phai ban sao nguyen byte; tep goc nam tren VM, bam do TREN VM bang certutil:
+#   kq1048b.txt  sha256 59c5ac44470931e9b79453f121925b74e68d811f288940b4fbe9a25360f48536 (UTF-8 co BOM)
+#   st1048b.log  sha256 5a3da4aea19fa0ecc008fcf296d1e1c8e101e1d93c6ec0b75ce511650174458c, 81685 byte, 1806 dong
+# Local KHONG phai check run CI va KHONG thay bang chung Windows cua CI (ADR-0057 muc "Nhung gi KHONG doi").
+
+== kq1048b.txt (chep)
+BAT_DAU=2026-10-31T02:03:57.5581398Z
+KHOA_LAY=session_015GtxrbUPS7zGdffB8Sfo8Y<TAB>2026-10-31T02:03:57Z<TAB>PR #1048 6f23a4e: tl --selftest + 3 cong tai lieu
+fetch_rc=0
+HEAD=6f23a4e68805b4af3e2efe77be6e10b513843e93
+STATUS=[]
+TAI_TRUOC=5216:kho2 | 2764:kho2
+adr_song_rc=0
+doctrine_scan_rc=0
+doc_claims_rc=0
+selftest_rc=0
+SELFTEST_S=1090
+TONG_S=1294
+TAI_SAU=
+KHOA_TRA=da xoa noi dung
+KET_THUC=2026-10-31T02:26:25.5968194Z
+
+== st1048b.log (3 dong cuoi, chep)
+  [OK] r332_registry_coverage_duong_san_xuat
+  [OK] wp42_complete_runtime_test_ids_unique
+== tl selftest 1759/1759 ==
+
+== doi chieu nen (luot truoc, cung VM, cung script mau)
+48b54d8 (truoc merge master): selftest 1758/1759, rc 1; ca do wp1030_pkg_secret_scan_duoi_la "BIEN fixture lech ... ['nul.txt']".
+Ca do co san tren master 8cdb15a (cung blob 4d8d38f) => delta PR = 0; va o PR #1059 (merge 5a174b9), sau do 1759/1759 tren 4d07b9c.

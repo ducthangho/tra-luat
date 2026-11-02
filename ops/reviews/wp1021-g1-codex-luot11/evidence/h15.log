@@ -1,0 +1,23 @@
+HEAD=a16932aa09ce860a614f0bab4b2015699e7221bc
+tree=d4eea17c04edc0a62c320d4f44cae8290082cf2f
+snapshot_files_before=8972; after=8972
+all_file_contents_and_modes_equal=True
+index_entries_equal=True
+tracked_untracked_ignored_status=''
+full_snapshot_equal=True
+bien_nhan_v2_test: 98/98 ca đạt · 153/153 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 135/153 đột biến thường khai đối chứng
+positive_case_lines=98; header_denominator=98; equal=True
+135/153 là số mutant KHAI đối chứng, không phải tỉ lệ đạt.
+Codex home is inside a repository: absent
+Không có ca bỏ khỏi mẫu số; không có dòng ca thường ĐỎ/KHÔNG ĐO ĐƯỢC.
+suite ĐẠT c14_cli_ba_trang_thai
+suite ĐẠT c40_R7_01_nguon_hong_tren_bien_nhan_THAT_khong_ket_toi_bien_nhan_nao
+suite ĐẠT c76_A6_kho_that_voi_no_RONG_phai_DO_dung_bang_so_no
+suite ĐẠT c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan
+suite ĐẠT c89_B2_receipt_KHONG_DOC_DUOC_la_rc2_khong_traceback
+suite ĐẠT c98_TIN_DUNG_GIA_phai_in_DU_ngoai_le_va_vi_tri_nem
+suite ĐẠT c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE
+suite ĐẠT c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang
+suite ĐẠT c101_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen
+ops/bien_nhan_v2.py sha256=7f9a86f3fc07429877f2959ad2ecbe238ef145d08860b8f78197340a06e276a6
+ops/bien_nhan_v2_test.py sha256=cac81d460abd280c461cf0acf938e412fc4b1c4cb477f36b55d2c5b1b0474b87

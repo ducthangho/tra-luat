@@ -1,0 +1,7 @@
+A4-fixture-git {"git_rc": 0, "head": "3de4ae026fc56363dc0945362a353aeadd45d9b2", "files": ["ops/reviews/r.receipt.yaml", "ops/reviews/v.md", "ops/reviews/v/run.json"]}
+A4-fixture-git {"git_rc": 0, "head": "3a993cb3a26ef9aeaaa53dda683b9ea729efce2b", "files": ["ops/reviews/r.receipt.yaml", "ops/reviews/v.md", "ops/reviews/v/run.json"]}
+A4-fixture-git {"git_rc": 0, "head": "70c278bfff48b7975200c4d749fdc43b48bb0131", "files": ["ops/reviews/r.receipt.yaml", "ops/reviews/v.md", "ops/reviews/v/run.json"]}
+A4-fixture-git {"git_rc": 0, "head": "5776d999a0d193946b7238bee7b2b5fbdd0d6e92", "files": ["ops/reviews/r.receipt.yaml", "ops/reviews/v.md", "ops/reviews/v/run.json"]}
+A4-case {"result": ["qua", null]}
+fixture-dates {"iteration": 0, "B0": "a19f1fcf233fc6c1358ca2e765f2e98cd9cb858d", "X": "3ccd98856a70ffd3358ef59089963f08648370fc", "M": "e72d8570d56391888423561308429963ae4f1b56"}
+fixture-dates {"iteration": 1, "B0": "a19f1fcf233fc6c1358ca2e765f2e98cd9cb858d", "X": "3ccd98856a70ffd3358ef59089963f08648370fc", "M": "e72d8570d56391888423561308429963ae4f1b56"}

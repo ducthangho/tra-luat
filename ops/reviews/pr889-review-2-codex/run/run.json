@@ -1,0 +1,59 @@
+{
+  "version": "1.5.0",
+  "run_id": "d955f9efb3624041b86dcf97f2624175",
+  "short_id": "d955f9ef",
+  "ten": "pr889-review-2-codex",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 9,
+    "van_tay": "4f5bee90d5c1511a"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-24T16:37:08.935576+00:00",
+  "ket_thuc_utc": "2026-10-24T16:43:29.723037+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 859,
+  "khoa_danh_tinh": "linux:32434",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr2-pr889.2dlx/cay-kho",
+  "head": "094e8d17ae4dfcf21dca63702c9262267bdc072c",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "00773f21a7131d479374c5f8bf74b0d9dd65790a030aa731d36d97374daeb8b0",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "4d4cdbc79dfe8930ac9da1d220cd43d6d0fc75aa60d7eeb7b6223395db6410b1",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr2-pr889.2dlx/runs/d955f9ef/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 380.787,
+  "stdout_byte": 382,
+  "stdout_sha256": "d08f2d229080984216dd3d9e22b14a02089b3b37cd993b9120681b4ecf59d00a",
+  "stderr_byte": 2085807,
+  "stderr_sha256": "225de917845de7cb54f894b1715b63166e200cbc1b540de7f8f971f286a10c9d"
+}

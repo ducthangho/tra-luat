@@ -1,0 +1,950 @@
+﻿2026-10-20T06:30:34.1276770Z Current runner version: '2.337.0'
+2026-10-20T06:30:34.1305881Z ##[group]Runner Image Provisioner
+2026-10-20T06:30:34.1306981Z Hosted Compute Agent
+2026-10-20T06:30:34.1307758Z Version: 20261015.610
+2026-10-20T06:30:34.1308602Z Commit: 267fdb4e8bbec4ab5ea31367f3a00d5c480c7656
+2026-10-20T06:30:34.1309775Z Build Date: 2026-10-14T17:06:54Z
+2026-10-20T06:30:34.1310662Z Worker ID: {44a3de80-e47e-4616-b477-bc9e8fdc7c3e}
+2026-10-20T06:30:34.1311647Z Region: westus3
+2026-10-20T06:30:34.1312400Z Cloud: Azure
+2026-10-20T06:30:34.1313096Z ##[endgroup]
+2026-10-20T06:30:34.1336184Z ##[group]Operating System
+2026-10-20T06:30:34.1337020Z Ubuntu
+2026-10-20T06:30:34.1337776Z 24.04.5
+2026-10-20T06:30:34.1338487Z LTS
+2026-10-20T06:30:34.1339217Z ##[endgroup]
+2026-10-20T06:30:34.1340584Z ##[group]Runner Image
+2026-10-20T06:30:34.1341377Z Image: ubuntu-24.04
+2026-10-20T06:30:34.1342171Z Version: 20261018.339.1
+2026-10-20T06:30:34.1344075Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261018.339/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-20T06:30:34.1346301Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261018.339
+2026-10-20T06:30:34.1347567Z ##[endgroup]
+2026-10-20T06:30:34.1351768Z ##[group]GITHUB_TOKEN Permissions
+2026-10-20T06:30:34.1374926Z Actions: write
+2026-10-20T06:30:34.1375928Z ArtifactMetadata: write
+2026-10-20T06:30:34.1376726Z Attestations: write
+2026-10-20T06:30:34.1377438Z Checks: write
+2026-10-20T06:30:34.1378284Z CodeQuality: write
+2026-10-20T06:30:34.1379028Z Contents: write
+2026-10-20T06:30:34.1379825Z CopilotRequests: write
+2026-10-20T06:30:34.1380643Z Deployments: write
+2026-10-20T06:30:34.1381380Z Discussions: write
+2026-10-20T06:30:34.1382171Z Drives: write
+2026-10-20T06:30:34.1382862Z Issues: write
+2026-10-20T06:30:34.1383831Z Metadata: read
+2026-10-20T06:30:34.1384737Z Models: read
+2026-10-20T06:30:34.1385456Z Packages: write
+2026-10-20T06:30:34.1386293Z Pages: write
+2026-10-20T06:30:34.1387009Z PullRequests: write
+2026-10-20T06:30:34.1387765Z RepositoryProjects: write
+2026-10-20T06:30:34.1388706Z SecurityEvents: write
+2026-10-20T06:30:34.1389459Z Statuses: write
+2026-10-20T06:30:34.1390350Z VulnerabilityAlerts: read
+2026-10-20T06:30:34.1391157Z ##[endgroup]
+2026-10-20T06:30:34.1393647Z Secret source: Actions
+2026-10-20T06:30:34.1415471Z Cache mode: write
+2026-10-20T06:30:34.1416824Z Prepare workflow directory
+2026-10-20T06:30:34.1955127Z Prepare all required actions
+2026-10-20T06:30:34.2026983Z Getting action download info
+2026-10-20T06:30:34.5174646Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-20T06:30:34.6692834Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-20T06:30:34.8508044Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-20T06:30:35.2526954Z Complete job name: gate-nhanh-manh (ubuntu-latest, 7)
+2026-10-20T06:30:35.3043704Z ##[group]Run git config --global core.autocrlf false
+2026-10-20T06:30:35.3044608Z [36;1mgit config --global core.autocrlf false[0m
+2026-10-20T06:30:35.3045182Z [36;1mgit config --global core.eol lf[0m
+2026-10-20T06:30:35.3045707Z [36;1mgit config --global core.abbrev 7[0m
+2026-10-20T06:30:35.3175164Z shell: /usr/bin/bash -e {0}
+2026-10-20T06:30:35.3175892Z env:
+2026-10-20T06:30:35.3176271Z   PYTHONIOENCODING: utf-8
+2026-10-20T06:30:35.3176692Z   PYTHONUTF8: 1
+2026-10-20T06:30:35.3177077Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-20T06:30:35.3177507Z ##[endgroup]
+2026-10-20T06:30:35.4000797Z ##[group]Run actions/checkout@v4
+2026-10-20T06:30:35.4001354Z with:
+2026-10-20T06:30:35.4001718Z   fetch-depth: 0
+2026-10-20T06:30:35.4002133Z   repository: ducthangho/tra-luat
+2026-10-20T06:30:35.4005595Z   token: ***
+2026-10-20T06:30:35.4005992Z   ssh-strict: true
+2026-10-20T06:30:35.4006376Z   ssh-user: git
+2026-10-20T06:30:35.4006758Z   persist-credentials: true
+2026-10-20T06:30:35.4007172Z   clean: true
+2026-10-20T06:30:35.4007553Z   sparse-checkout-cone-mode: true
+2026-10-20T06:30:35.4008225Z   fetch-tags: false
+2026-10-20T06:30:35.4008686Z   show-progress: true
+2026-10-20T06:30:35.4009085Z   lfs: false
+2026-10-20T06:30:35.4009444Z   submodules: false
+2026-10-20T06:30:35.4009832Z   set-safe-directory: true
+2026-10-20T06:30:35.4010267Z   allow-unsafe-pr-checkout: false
+2026-10-20T06:30:35.4010698Z env:
+2026-10-20T06:30:35.4011059Z   PYTHONIOENCODING: utf-8
+2026-10-20T06:30:35.4011485Z   PYTHONUTF8: 1
+2026-10-20T06:30:35.4011898Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-20T06:30:35.4012355Z ##[endgroup]
+2026-10-20T06:30:35.4967824Z Syncing repository: ducthangho/tra-luat
+2026-10-20T06:30:35.4971375Z ##[group]Getting Git version info
+2026-10-20T06:30:35.4972605Z Working directory is '/home/runner/work/tra-luat/tra-luat'
+2026-10-20T06:30:35.5009125Z [command]/usr/bin/git version
+2026-10-20T06:30:35.5055049Z git version 2.55.0
+2026-10-20T06:30:35.5096888Z ##[endgroup]
+2026-10-20T06:30:35.5104876Z Copying '/home/runner/.gitconfig' to '/home/runner/work/_temp/bd614da6-8fbc-4994-8c59-0eae455406c1/.gitconfig'
+2026-10-20T06:30:35.5107718Z Temporarily overriding HOME='/home/runner/work/_temp/bd614da6-8fbc-4994-8c59-0eae455406c1' before making global git config changes
+2026-10-20T06:30:35.5110024Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-20T06:30:35.5113799Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/tra-luat/tra-luat
+2026-10-20T06:30:35.5167846Z Deleting the contents of '/home/runner/work/tra-luat/tra-luat'
+2026-10-20T06:30:35.5182324Z ##[group]Initializing the repository
+2026-10-20T06:30:35.5185049Z [command]/usr/bin/git init /home/runner/work/tra-luat/tra-luat
+2026-10-20T06:30:35.5295793Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-20T06:30:35.5319377Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-20T06:30:35.5329193Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-20T06:30:35.5330485Z hint: call:
+2026-10-20T06:30:35.5331155Z hint:
+2026-10-20T06:30:35.5332024Z hint: 	git config --global init.defaultBranch <name>
+2026-10-20T06:30:35.5333340Z hint:
+2026-10-20T06:30:35.5334381Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-20T06:30:35.5355768Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-20T06:30:35.5373777Z hint:
+2026-10-20T06:30:35.5407277Z hint: 	git branch -m <name>
+2026-10-20T06:30:35.5408220Z hint:
+2026-10-20T06:30:35.5409315Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-20T06:30:35.5410866Z Initialized empty Git repository in /home/runner/work/tra-luat/tra-luat/.git/
+2026-10-20T06:30:35.5416596Z [command]/usr/bin/git remote add origin https://github.com/ducthangho/tra-luat
+2026-10-20T06:30:35.6861430Z ##[endgroup]
+2026-10-20T06:30:35.6862859Z ##[group]Disabling automatic garbage collection
+2026-10-20T06:30:35.6864460Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-20T06:30:35.6942467Z ##[endgroup]
+2026-10-20T06:30:35.6943317Z ##[group]Setting up auth
+2026-10-20T06:30:35.6944332Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-20T06:30:35.7000231Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-20T06:30:35.9576421Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-20T06:30:35.9599238Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-20T06:30:35.9762681Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-20T06:30:35.9803677Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-20T06:30:36.0039232Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-20T06:30:36.2038362Z ##[endgroup]
+2026-10-20T06:30:36.2054373Z ##[group]Fetching the repository
+2026-10-20T06:30:36.2084541Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+2026-10-20T06:30:43.6576040Z From https://github.com/ducthangho/tra-luat
+2026-10-20T06:30:43.6577046Z  * [new branch]      agent/ag-packet3-launcher-windows-plan -> origin/agent/ag-packet3-launcher-windows-plan
+2026-10-20T06:30:43.6577652Z  * [new branch]      agent/ag-t0-05-registry-ratchet -> origin/agent/ag-t0-05-registry-ratchet
+2026-10-20T06:30:43.6578193Z  * [new branch]      agent/codex-credential-refresh-g1 -> origin/agent/codex-credential-refresh-g1
+2026-10-20T06:30:43.6578718Z  * [new branch]      agent/ra04a-envelope-g1-claude -> origin/agent/ra04a-envelope-g1-claude
+2026-10-20T06:30:43.6579207Z  * [new branch]      agent/wp122-g1-codex        -> origin/agent/wp122-g1-codex
+2026-10-20T06:30:43.6579634Z  * [new branch]      agent/wp125-g1-claude       -> origin/agent/wp125-g1-claude
+2026-10-20T06:30:43.6580075Z  * [new branch]      agent/wp125-g2-claude       -> origin/agent/wp125-g2-claude
+2026-10-20T06:30:43.6580475Z  * [new branch]      agent/wp430-g1-codex        -> origin/agent/wp430-g1-codex
+2026-10-20T06:30:43.6580903Z  * [new branch]      agent/wp710-g1-codex        -> origin/agent/wp710-g1-codex
+2026-10-20T06:30:43.6581343Z  * [new branch]      agent/wp744-g2-antigravity  -> origin/agent/wp744-g2-antigravity
+2026-10-20T06:30:43.6581778Z  * [new branch]      agent/wp744-g3-claude       -> origin/agent/wp744-g3-claude
+2026-10-20T06:30:43.6582195Z  * [new branch]      agent/wp748-g19-claude      -> origin/agent/wp748-g19-claude
+2026-10-20T06:30:43.6582609Z  * [new branch]      agent/wp748-g9-claude       -> origin/agent/wp748-g9-claude
+2026-10-20T06:30:43.6583074Z  * [new branch]      agent/wp748-r21-claude      -> origin/agent/wp748-r21-claude
+2026-10-20T06:30:43.6583577Z  * [new branch]      agent/wp77-g1-claude        -> origin/agent/wp77-g1-claude
+2026-10-20T06:30:43.6584210Z  * [new branch]      agent/wp77-g2-claude        -> origin/agent/wp77-g2-claude
+2026-10-20T06:30:43.6584844Z  * [new branch]      agent/wp77-g3-claude        -> origin/agent/wp77-g3-claude
+2026-10-20T06:30:43.6585321Z  * [new branch]      agent/wp822-g1-claude       -> origin/agent/wp822-g1-claude
+2026-10-20T06:30:43.6585788Z  * [new branch]      agent/wp835-g2-claude       -> origin/agent/wp835-g2-claude
+2026-10-20T06:30:43.6586207Z  * [new branch]      agent/wp99-g2-codex         -> origin/agent/wp99-g2-codex
+2026-10-20T06:30:43.6586664Z  * [new branch]      agent/wp99-g3-claude        -> origin/agent/wp99-g3-claude
+2026-10-20T06:30:43.6587077Z  * [new branch]      agent/wp99-g4-claude        -> origin/agent/wp99-g4-claude
+2026-10-20T06:30:43.6587478Z  * [new branch]      ccr-159d006d-0lnl5s         -> origin/ccr-159d006d-0lnl5s
+2026-10-20T06:30:43.6587884Z  * [new branch]      ccr-e425b16e-j9g9p7         -> origin/ccr-e425b16e-j9g9p7
+2026-10-20T06:30:43.6588391Z  * [new branch]      claude/audit-errors-patch-plan-56x4rq -> origin/claude/audit-errors-patch-plan-56x4rq
+2026-10-20T06:30:43.6588955Z  * [new branch]      claude/bai-hoc-do-luong-20260822 -> origin/claude/bai-hoc-do-luong-20260822
+2026-10-20T06:30:43.6589762Z  * [new branch]      claude/bia-mo-wp538-g2-20260916 -> origin/claude/bia-mo-wp538-g2-20260916
+2026-10-20T06:30:43.6590272Z  * [new branch]      claude/bia-mo-wp538-g3-20260916 -> origin/claude/bia-mo-wp538-g3-20260916
+2026-10-20T06:30:43.6590811Z  * [new branch]      claude/bia-mo-wp540-g1-20260916 -> origin/claude/bia-mo-wp540-g1-20260916
+2026-10-20T06:30:43.6591478Z  * [new branch]      claude/bn-523-human-audit-20260921 -> origin/claude/bn-523-human-audit-20260921
+2026-10-20T06:30:43.6678092Z  * [new branch]      claude/bookkeeping-677-pr689 -> origin/claude/bookkeeping-677-pr689
+2026-10-20T06:30:43.6679426Z  * [new branch]      claude/bookkeeping-744-land -> origin/claude/bookkeeping-744-land
+2026-10-20T06:30:43.6680125Z  * [new branch]      claude/bookkeeping-822-land -> origin/claude/bookkeeping-822-land
+2026-10-20T06:30:43.6680743Z  * [new branch]      claude/bookkeeping-831-land -> origin/claude/bookkeeping-831-land
+2026-10-20T06:30:43.6681368Z  * [new branch]      claude/cap-lease-704-g2     -> origin/claude/cap-lease-704-g2
+2026-10-20T06:30:43.6682145Z  * [new branch]      claude/cham-dot-bien-mien-nhiem-lease-suite -> origin/claude/cham-dot-bien-mien-nhiem-lease-suite
+2026-10-20T06:30:43.6682982Z  * [new branch]      claude/ci-bang-phu-thuoc-1  -> origin/claude/ci-bang-phu-thuoc-1
+2026-10-20T06:30:43.6683747Z  * [new branch]      claude/ci-bang-phu-thuoc-exec-3v3kco -> origin/claude/ci-bang-phu-thuoc-exec-3v3kco
+2026-10-20T06:30:43.6684837Z  * [new branch]      claude/code-task-assignment-7e4a5b -> origin/claude/code-task-assignment-7e4a5b
+2026-10-20T06:30:43.6685833Z  * [new branch]      claude/codegraph-github-evaluation-749y38 -> origin/claude/codegraph-github-evaluation-749y38
+2026-10-20T06:30:43.6686782Z  * [new branch]      claude/cong-ci-packet-loop-exec-1 -> origin/claude/cong-ci-packet-loop-exec-1
+2026-10-20T06:30:43.6687632Z  * [new branch]      claude/cong-same-failure-exec-1 -> origin/claude/cong-same-failure-exec-1
+2026-10-20T06:30:43.6688463Z  * [new branch]      claude/cuu-viec-treo-2026-08-03 -> origin/claude/cuu-viec-treo-2026-08-03
+2026-10-20T06:30:43.6689319Z  * [new branch]      claude/determined-euler-rw6l8i -> origin/claude/determined-euler-rw6l8i
+2026-10-20T06:30:43.6690244Z  * [new branch]      claude/doctrine-allowlist-reviewer-exec-1 -> origin/claude/doctrine-allowlist-reviewer-exec-1
+2026-10-20T06:30:43.6691204Z  * [new branch]      claude/doctrine-rest-do-lai-20260925 -> origin/claude/doctrine-rest-do-lai-20260925
+2026-10-20T06:30:43.6692099Z  * [new branch]      claude/elegant-bun-cd554f   -> origin/claude/elegant-bun-cd554f
+2026-10-20T06:30:43.6692930Z  * [new branch]      claude/ho-so-audit-551-20260919 -> origin/claude/ho-so-audit-551-20260919
+2026-10-20T06:30:43.6693861Z  * [new branch]      claude/human-audited-khai-ai-dang-r1 -> origin/claude/human-audited-khai-ai-dang-r1
+2026-10-20T06:30:43.6694902Z  * [new branch]      claude/land-318-334         -> origin/claude/land-318-334
+2026-10-20T06:30:43.6695684Z  * [new branch]      claude/launcher-chot-cong-cu -> origin/claude/launcher-chot-cong-cu
+2026-10-20T06:30:43.6696596Z  * [new branch]      claude/lease-publish-windows-do -> origin/claude/lease-publish-windows-do
+2026-10-20T06:30:43.6697552Z  * [new branch]      claude/n8-review-kem-patch-exec-1 -> origin/claude/n8-review-kem-patch-exec-1
+2026-10-20T06:30:43.6698337Z  * [new branch]      claude/new-session-i0kv8e   -> origin/claude/new-session-i0kv8e
+2026-10-20T06:30:43.6699177Z  * [new branch]      claude/nhap-dinh-chinh-578-20260920 -> origin/claude/nhap-dinh-chinh-578-20260920
+2026-10-20T06:30:43.6700054Z  * [new branch]      claude/nhap-gia-han-578-20260921 -> origin/claude/nhap-gia-han-578-20260921
+2026-10-20T06:30:43.6700930Z  * [new branch]      claude/nhap-lease-541-g2-20260918 -> origin/claude/nhap-lease-541-g2-20260918
+2026-10-20T06:30:43.6701783Z  * [new branch]      claude/nhap-lease-541-g3-20260919 -> origin/claude/nhap-lease-541-g3-20260919
+2026-10-20T06:30:43.6702613Z  * [new branch]      claude/nhap-lease-552-20260917 -> origin/claude/nhap-lease-552-20260917
+2026-10-20T06:30:43.6703804Z  * [new branch]      claude/nhap-lease-562-20260918 -> origin/claude/nhap-lease-562-20260918
+2026-10-20T06:30:43.6704843Z  * [new branch]      claude/nhap-thu-hep-579-20260921 -> origin/claude/nhap-thu-hep-579-20260921
+2026-10-20T06:30:43.6705760Z  * [new branch]      claude/nlm-registry-sheet-dup-s22fk7 -> origin/claude/nlm-registry-sheet-dup-s22fk7
+2026-10-20T06:30:43.6706580Z  * [new branch]      claude/no-ton-677-687       -> origin/claude/no-ton-677-687
+2026-10-20T06:30:43.6707463Z  * [new branch]      claude/plan-protocol-refinement-9qrcua -> origin/claude/plan-protocol-refinement-9qrcua
+2026-10-20T06:30:43.6708585Z  * [new branch]      claude/prompt-541-exec-1-20260918 -> origin/claude/prompt-541-exec-1-20260918
+2026-10-20T06:30:43.6709502Z  * [new branch]      claude/prompt-541-exec-2-20260918 -> origin/claude/prompt-541-exec-2-20260918
+2026-10-20T06:30:43.6710344Z  * [new branch]      claude/quy-trinh-lap-review-r2 -> origin/claude/quy-trinh-lap-review-r2
+2026-10-20T06:30:43.6711274Z  * [new branch]      claude/ras-17-data-pr13-windows-bjovq2 -> origin/claude/ras-17-data-pr13-windows-bjovq2
+2026-10-20T06:30:43.6712331Z  * [new branch]      claude/read-handoff-phien-dieu-phoi-oqbsz4 -> origin/claude/read-handoff-phien-dieu-phoi-oqbsz4
+2026-10-20T06:30:43.6713293Z  * [new branch]      claude/review-541-luot3-20260918 -> origin/claude/review-541-luot3-20260918
+2026-10-20T06:30:43.6714257Z  * [new branch]      claude/review-546-luot1-20260916 -> origin/claude/review-546-luot1-20260916
+2026-10-20T06:30:43.6715097Z  * [new branch]      claude/review-546-luot2-20260917 -> origin/claude/review-546-luot2-20260917
+2026-10-20T06:30:43.6715946Z  * [new branch]      claude/review-546-luot3-20260917 -> origin/claude/review-546-luot3-20260917
+2026-10-20T06:30:43.6716771Z  * [new branch]      claude/review-546-luot4-20260917 -> origin/claude/review-546-luot4-20260917
+2026-10-20T06:30:43.6717591Z  * [new branch]      claude/review-546-luot5-20260917 -> origin/claude/review-546-luot5-20260917
+2026-10-20T06:30:43.6718437Z  * [new branch]      claude/review-548-luot1-20260917 -> origin/claude/review-548-luot1-20260917
+2026-10-20T06:30:43.6719267Z  * [new branch]      claude/review-548-luot2-20260917 -> origin/claude/review-548-luot2-20260917
+2026-10-20T06:30:43.6720097Z  * [new branch]      claude/review-548-luot3-20260917 -> origin/claude/review-548-luot3-20260917
+2026-10-20T06:30:43.6720930Z  * [new branch]      claude/review-548-luot4-20260917 -> origin/claude/review-548-luot4-20260917
+2026-10-20T06:30:43.6721736Z  * [new branch]      claude/review-wp538-20260916 -> origin/claude/review-wp538-20260916
+2026-10-20T06:30:43.6722581Z  * [new branch]      claude/review-wp538-luot2-20260916 -> origin/claude/review-wp538-luot2-20260916
+2026-10-20T06:30:43.6723450Z  * [new branch]      claude/slice-523-skills-20260920 -> origin/claude/slice-523-skills-20260920
+2026-10-20T06:30:43.6724442Z  * [new branch]      claude/spec-541-r1-20260917 -> origin/claude/spec-541-r1-20260917
+2026-10-20T06:30:43.6725198Z  * [new branch]      claude/spec-541-r2-20260917 -> origin/claude/spec-541-r2-20260917
+2026-10-20T06:30:43.6725944Z  * [new branch]      claude/spec-541-r3-20260918 -> origin/claude/spec-541-r3-20260918
+2026-10-20T06:30:43.6726682Z  * [new branch]      claude/spec-548-r1-20260916 -> origin/claude/spec-548-r1-20260916
+2026-10-20T06:30:43.6727413Z  * [new branch]      claude/spec-548-r2-20260917 -> origin/claude/spec-548-r2-20260917
+2026-10-20T06:30:43.6728140Z  * [new branch]      claude/spec-551-r2-20260918 -> origin/claude/spec-551-r2-20260918
+2026-10-20T06:30:43.6728864Z  * [new branch]      claude/spec-551-r3-20260918 -> origin/claude/spec-551-r3-20260918
+2026-10-20T06:30:43.6729591Z  * [new branch]      claude/spec-552-r1-20260917 -> origin/claude/spec-552-r1-20260917
+2026-10-20T06:30:43.6730326Z  * [new branch]      claude/spec-552-r2-20260917 -> origin/claude/spec-552-r2-20260917
+2026-10-20T06:30:43.6731042Z  * [new branch]      claude/spec-562-r1-20260918 -> origin/claude/spec-562-r1-20260918
+2026-10-20T06:30:43.6731907Z  * [new branch]      claude/spec-565-r1-20260919 -> origin/claude/spec-565-r1-20260919
+2026-10-20T06:30:43.6732635Z  * [new branch]      claude/spec-566-r1-20260919 -> origin/claude/spec-566-r1-20260919
+2026-10-20T06:30:43.6733359Z  * [new branch]      claude/spec-568-r1-20260919 -> origin/claude/spec-568-r1-20260919
+2026-10-20T06:30:43.6734200Z  * [new branch]      claude/spec-570-r1-20260919 -> origin/claude/spec-570-r1-20260919
+2026-10-20T06:30:43.6734919Z  * [new branch]      claude/spec-570-r2-20260920 -> origin/claude/spec-570-r2-20260920
+2026-10-20T06:30:43.6735836Z  * [new branch]      claude/spec-570-r3-20260920 -> origin/claude/spec-570-r3-20260920
+2026-10-20T06:30:43.6736561Z  * [new branch]      claude/spec-570-r4-20260920 -> origin/claude/spec-570-r4-20260920
+2026-10-20T06:30:43.6737282Z  * [new branch]      claude/spec-570-r6-20260921 -> origin/claude/spec-570-r6-20260921
+2026-10-20T06:30:43.6738000Z  * [new branch]      claude/spec-578-r1-20260920 -> origin/claude/spec-578-r1-20260920
+2026-10-20T06:30:43.6738828Z  * [new branch]      claude/spec-assurance-ho-model-r1 -> origin/claude/spec-assurance-ho-model-r1
+2026-10-20T06:30:43.6739771Z  * [new branch]      claude/spec-doctrine-scan-r1-20260916 -> origin/claude/spec-doctrine-scan-r1-20260916
+2026-10-20T06:30:43.6740701Z  * [new branch]      claude/spec-moi-truong-r1-20260916 -> origin/claude/spec-moi-truong-r1-20260916
+2026-10-20T06:30:43.6741515Z  * [new branch]      claude/spec-no-p3-r3        -> origin/claude/spec-no-p3-r3
+2026-10-20T06:30:43.6742396Z  * [new branch]      claude/spec-quy-trinh-r10-20260913 -> origin/claude/spec-quy-trinh-r10-20260913
+2026-10-20T06:30:43.6743271Z  * [new branch]      claude/spec-quy-trinh-r11-20260913 -> origin/claude/spec-quy-trinh-r11-20260913
+2026-10-20T06:30:43.6744400Z  * [new branch]      claude/spec-quy-trinh-r12-20260920 -> origin/claude/spec-quy-trinh-r12-20260920
+2026-10-20T06:30:43.6745264Z  * [new branch]      claude/spec-quy-trinh-r13-20260921 -> origin/claude/spec-quy-trinh-r13-20260921
+2026-10-20T06:30:43.6746152Z  * [new branch]      claude/spec-quy-trinh-r3-20260912 -> origin/claude/spec-quy-trinh-r3-20260912
+2026-10-20T06:30:43.6747291Z  * [new branch]      claude/spec-quy-trinh-r4-20260912 -> origin/claude/spec-quy-trinh-r4-20260912
+2026-10-20T06:30:43.6748138Z  * [new branch]      claude/spec-quy-trinh-r5-20260912 -> origin/claude/spec-quy-trinh-r5-20260912
+2026-10-20T06:30:43.6748985Z  * [new branch]      claude/spec-quy-trinh-r6-20260912 -> origin/claude/spec-quy-trinh-r6-20260912
+2026-10-20T06:30:43.6749815Z  * [new branch]      claude/spec-quy-trinh-r7-20260912 -> origin/claude/spec-quy-trinh-r7-20260912
+2026-10-20T06:30:43.6750621Z  * [new branch]      claude/spec-quy-trinh-r8-20260913 -> origin/claude/spec-quy-trinh-r8-20260913
+2026-10-20T06:30:43.6751424Z  * [new branch]      claude/spec-quy-trinh-r9-20260913 -> origin/claude/spec-quy-trinh-r9-20260913
+2026-10-20T06:30:43.6752365Z  * [new branch]      claude/spec-quy-trinh-review-r2-20260912 -> origin/claude/spec-quy-trinh-review-r2-20260912
+2026-10-20T06:30:43.6753440Z  * [new branch]      claude/spec-r5-overclaim-exec-1 -> origin/claude/spec-r5-overclaim-exec-1
+2026-10-20T06:30:43.6754489Z  * [new branch]      claude/spec-tran-vong-r3-20260912 -> origin/claude/spec-tran-vong-r3-20260912
+2026-10-20T06:30:43.6755323Z  * [new branch]      claude/spec-wp538-r3-20260916 -> origin/claude/spec-wp538-r3-20260916
+2026-10-20T06:30:43.6756037Z  * [new branch]      claude/spec-wp538-r4-20260916 -> origin/claude/spec-wp538-r4-20260916
+2026-10-20T06:30:43.6756778Z  * [new branch]      claude/spec-wp540-r2-20260916 -> origin/claude/spec-wp540-r2-20260916
+2026-10-20T06:30:43.6757615Z  * [new branch]      claude/tai-sinh-manifest-725-727 -> origin/claude/tai-sinh-manifest-725-727
+2026-10-20T06:30:43.6758660Z  * [new branch]      claude/tra-luat-deployment-d1-d2-otcxau -> origin/claude/tra-luat-deployment-d1-d2-otcxau
+2026-10-20T06:30:43.6759668Z  * [new branch]      claude/vong-8-va-4-khe-ho-launcher -> origin/claude/vong-8-va-4-khe-ho-launcher
+2026-10-20T06:30:43.6760947Z  * [new branch]      claude/wp-f3-03-release-nested -> origin/claude/wp-f3-03-release-nested
+2026-10-20T06:30:43.6761768Z  * [new branch]      claude/wp55-f3-03           -> origin/claude/wp55-f3-03
+2026-10-20T06:30:43.6762671Z  * [new branch]      claude/wp55-r2-review-codex-bang-chung -> origin/claude/wp55-r2-review-codex-bang-chung
+2026-10-20T06:30:43.6763672Z  * [new branch]      claude/wp60-g1-f3-01-github-schema -> origin/claude/wp60-g1-f3-01-github-schema
+2026-10-20T06:30:43.6764860Z  * [new branch]      claude/wp60-g2-f3-01-github-schema -> origin/claude/wp60-g2-f3-01-github-schema
+2026-10-20T06:30:43.6765951Z  * [new branch]      claude/wp685-r22-de-xuat    -> origin/claude/wp685-r22-de-xuat
+2026-10-20T06:30:43.6766817Z  * [new branch]      claude/wp86-cloud-linux-migration-ix5keq -> origin/claude/wp86-cloud-linux-migration-ix5keq
+2026-10-20T06:30:43.6767718Z  * [new branch]      codex/f2-d-reopen-writer    -> origin/codex/f2-d-reopen-writer
+2026-10-20T06:30:43.6768476Z  * [new branch]      codex/f3-02-impact-policy   -> origin/codex/f3-02-impact-policy
+2026-10-20T06:30:43.6769280Z  * [new branch]      codex/gate-463-g4-lease-20260914 -> origin/codex/gate-463-g4-lease-20260914
+2026-10-20T06:30:43.6770156Z  * [new branch]      codex/gate-463-g5-lease-20260914 -> origin/codex/gate-463-g5-lease-20260914
+2026-10-20T06:30:43.6771011Z  * [new branch]      codex/gate-463-g6-lease-20260914 -> origin/codex/gate-463-g6-lease-20260914
+2026-10-20T06:30:43.6771845Z  * [new branch]      codex/gate-463-lease-20260913 -> origin/codex/gate-463-lease-20260913
+2026-10-20T06:30:43.6772699Z  * [new branch]      codex/gate-463-r22-lease-20260913 -> origin/codex/gate-463-r22-lease-20260913
+2026-10-20T06:30:43.6773674Z  * [new branch]      codex/gate-463-review-evidence-20260913 -> origin/codex/gate-463-review-evidence-20260913
+2026-10-20T06:30:43.6774713Z  * [new branch]      codex/khoa-neo-luot3-wip    -> origin/codex/khoa-neo-luot3-wip
+2026-10-20T06:30:43.6775485Z  * [new branch]      codex/mission-686-versioned -> origin/codex/mission-686-versioned
+2026-10-20T06:30:43.6776390Z  * [new branch]      codex/probe-agent-r2-exec-1 -> origin/codex/probe-agent-r2-exec-1
+2026-10-20T06:30:43.6777453Z  * [new branch]      codex/session-credential-bootstrap -> origin/codex/session-credential-bootstrap
+2026-10-20T06:30:43.6778429Z  * [new branch]      codex/session-credential-bootstrap-r4 -> origin/codex/session-credential-bootstrap-r4
+2026-10-20T06:30:43.6779413Z  * [new branch]      codex/session-credential-bootstrap-r5 -> origin/codex/session-credential-bootstrap-r5
+2026-10-20T06:30:43.6780193Z  * [new branch]      codex/thu-hoi-lease-exec-1  -> origin/codex/thu-hoi-lease-exec-1
+2026-10-20T06:30:43.6781106Z  * [new branch]      codex/w1-p1-van-chuyen-prompt-exec-3 -> origin/codex/w1-p1-van-chuyen-prompt-exec-3
+2026-10-20T06:30:43.6781991Z  * [new branch]      codex/wp422-authority-r1    -> origin/codex/wp422-authority-r1
+2026-10-20T06:30:43.6783051Z  * [new branch]      codex/wp433-g1-credential-destination-remediation -> origin/codex/wp433-g1-credential-destination-remediation
+2026-10-20T06:30:43.6784368Z  * [new branch]      codex/wp433-r10-cleanup-claude-evidence -> origin/codex/wp433-r10-cleanup-claude-evidence
+2026-10-20T06:30:43.6785457Z  * [new branch]      codex/wp433-r11-provider-exec-tl-cleanup -> origin/codex/wp433-r11-provider-exec-tl-cleanup
+2026-10-20T06:30:43.6786429Z  * [new branch]      codex/wp433-r13-runtime-closure -> origin/codex/wp433-r13-runtime-closure
+2026-10-20T06:30:43.6787482Z  * [new branch]      codex/wp433-r4-unified-credential-boundaries -> origin/codex/wp433-r4-unified-credential-boundaries
+2026-10-20T06:30:43.6788586Z  * [new branch]      codex/wp433-r5-final-review-remediation -> origin/codex/wp433-r5-final-review-remediation
+2026-10-20T06:30:43.6789516Z  * [new branch]      codex/wp433-r6-provider-boundaries -> origin/codex/wp433-r6-provider-boundaries
+2026-10-20T06:30:43.6790515Z  * [new branch]      codex/wp433-r7-provider-identity-live-check -> origin/codex/wp433-r7-provider-identity-live-check
+2026-10-20T06:30:43.6791824Z  * [new branch]      codex/wp433-r8-final-boundaries -> origin/codex/wp433-r8-final-boundaries
+2026-10-20T06:30:43.6792701Z  * [new branch]      codex/wp433-r9-capability-status -> origin/codex/wp433-r9-capability-status
+2026-10-20T06:30:43.6793535Z  * [new branch]      codex/wp484-g4-windows      -> origin/codex/wp484-g4-windows
+2026-10-20T06:30:43.6800829Z  * [new branch]      codex/wp498-authority-r1    -> origin/codex/wp498-authority-r1
+2026-10-20T06:30:43.6801591Z  * [new branch]      codex/wp523-r13-authority   -> origin/codex/wp523-r13-authority
+2026-10-20T06:30:43.6802543Z  * [new branch]      codex/wp523-r14-authority   -> origin/codex/wp523-r14-authority
+2026-10-20T06:30:43.6803265Z  * [new branch]      codex/wp568-r7-authority    -> origin/codex/wp568-r7-authority
+2026-10-20T06:30:43.6804228Z  * [new branch]      codex/wp60-g7-f3-01-github-schema -> origin/codex/wp60-g7-f3-01-github-schema
+2026-10-20T06:30:43.6805012Z  * [new branch]      codex/wp607-authority       -> origin/codex/wp607-authority
+2026-10-20T06:30:43.6805689Z  * [new branch]      codex/wp610-authority       -> origin/codex/wp610-authority
+2026-10-20T06:30:43.6806435Z  * [new branch]      codex/wp68-g8-release-nested -> origin/codex/wp68-g8-release-nested
+2026-10-20T06:30:43.6807156Z  * [new branch]      codex/wp709-bootstrap       -> origin/codex/wp709-bootstrap
+2026-10-20T06:30:43.6807829Z  * [new branch]      codex/wp744-spec-r2         -> origin/codex/wp744-spec-r2
+2026-10-20T06:30:43.6808702Z  * [new branch]      codex/wp84-r3-g3-protocol-hash-hardening -> origin/codex/wp84-r3-g3-protocol-hash-hardening
+2026-10-20T06:30:43.6809730Z  * [new branch]      codex/wp84-r5-g5-protocol-hash-hardening -> origin/codex/wp84-r5-g5-protocol-hash-hardening
+2026-10-20T06:30:43.6810625Z  * [new branch]      codex/wp86-g4-sandbox-oracle -> origin/codex/wp86-g4-sandbox-oracle
+2026-10-20T06:30:43.6811542Z  * [new branch]      dispatcher/wp99-r3-target-schema-632401a -> origin/dispatcher/wp99-r3-target-schema-632401a
+2026-10-20T06:30:43.6812407Z  * [new branch]      do-windows/vong-8           -> origin/do-windows/vong-8
+2026-10-20T06:30:43.6813131Z  * [new branch]      do-windows/vong-8-do        -> origin/do-windows/vong-8-do
+2026-10-20T06:30:43.6813861Z  * [new branch]      docs/goi-claude-cli         -> origin/docs/goi-claude-cli
+2026-10-20T06:30:43.6814880Z  * [new branch]      ducthangho-patch-1          -> origin/ducthangho-patch-1
+2026-10-20T06:30:43.6815837Z  * [new branch]      luu-tru/238-ho-so-cross-review -> origin/luu-tru/238-ho-so-cross-review
+2026-10-20T06:30:43.6816616Z  * [new branch]      master                      -> origin/master
+2026-10-20T06:30:43.6817145Z  * [new branch]      mission/744/integration     -> origin/mission/744/integration
+2026-10-20T06:30:43.6817641Z  * [new branch]      mission/76/integration      -> origin/mission/76/integration
+2026-10-20T06:30:43.6818121Z  * [new branch]      nhap/wp802-n9-do            -> origin/nhap/wp802-n9-do
+2026-10-20T06:30:43.6818627Z  * [new branch]      ops/bai-hoc-cong-cu-da-nen  -> origin/ops/bai-hoc-cong-cu-da-nen
+2026-10-20T06:30:43.6819140Z  * [new branch]      ops/bai-hoc-github-mcp      -> origin/ops/bai-hoc-github-mcp
+2026-10-20T06:30:43.6819635Z  * [new branch]      ops/ban-giao-cap-nhat       -> origin/ops/ban-giao-cap-nhat
+2026-10-20T06:30:43.6820181Z  * [new branch]      ops/cap-lease-4-packet-20260826 -> origin/ops/cap-lease-4-packet-20260826
+2026-10-20T06:30:43.6820708Z  * [new branch]      ops/cap-lease-461-g4        -> origin/ops/cap-lease-461-g4
+2026-10-20T06:30:43.6821185Z  * [new branch]      ops/cap-lease-463           -> origin/ops/cap-lease-463
+2026-10-20T06:30:43.6821643Z  * [new branch]      ops/cap-lease-488           -> origin/ops/cap-lease-488
+2026-10-20T06:30:43.6822120Z  * [new branch]      ops/cap-lease-502           -> origin/ops/cap-lease-502
+2026-10-20T06:30:43.6822560Z  * [new branch]      ops/cap-lease-503           -> origin/ops/cap-lease-503
+2026-10-20T06:30:43.6823049Z  * [new branch]      ops/cap-lease-504           -> origin/ops/cap-lease-504
+2026-10-20T06:30:43.6824371Z  * [new branch]      ops/cap-lease-513           -> origin/ops/cap-lease-513
+2026-10-20T06:30:43.6824996Z  * [new branch]      ops/cap-lease-522-523       -> origin/ops/cap-lease-522-523
+2026-10-20T06:30:43.6825493Z  * [new branch]      ops/cap-lease-523-g19       -> origin/ops/cap-lease-523-g19
+2026-10-20T06:30:43.6825966Z  * [new branch]      ops/cap-lease-523-g20       -> origin/ops/cap-lease-523-g20
+2026-10-20T06:30:43.6826433Z  * [new branch]      ops/cap-lease-523-r12       -> origin/ops/cap-lease-523-r12
+2026-10-20T06:30:43.6827015Z  * [new branch]      ops/cap-lease-523-r17       -> origin/ops/cap-lease-523-r17
+2026-10-20T06:30:43.6827474Z  * [new branch]      ops/cap-lease-523-r18       -> origin/ops/cap-lease-523-r18
+2026-10-20T06:30:43.6827941Z  * [new branch]      ops/cap-lease-530           -> origin/ops/cap-lease-530
+2026-10-20T06:30:43.6828413Z  * [new branch]      ops/cap-lease-538-r3        -> origin/ops/cap-lease-538-r3
+2026-10-20T06:30:43.6828890Z  * [new branch]      ops/cap-lease-538-r4        -> origin/ops/cap-lease-538-r4
+2026-10-20T06:30:43.6829357Z  * [new branch]      ops/cap-lease-540-r2        -> origin/ops/cap-lease-540-r2
+2026-10-20T06:30:43.6829806Z  * [new branch]      ops/cap-lease-541           -> origin/ops/cap-lease-541
+2026-10-20T06:30:43.6830259Z  * [new branch]      ops/cap-lease-541-g2        -> origin/ops/cap-lease-541-g2
+2026-10-20T06:30:43.6830712Z  * [new branch]      ops/cap-lease-541-g3        -> origin/ops/cap-lease-541-g3
+2026-10-20T06:30:43.6831183Z  * [new branch]      ops/cap-lease-541-g4        -> origin/ops/cap-lease-541-g4
+2026-10-20T06:30:43.6831641Z  * [new branch]      ops/cap-lease-543           -> origin/ops/cap-lease-543
+2026-10-20T06:30:43.6832078Z  * [new branch]      ops/cap-lease-546           -> origin/ops/cap-lease-546
+2026-10-20T06:30:43.6832511Z  * [new branch]      ops/cap-lease-548           -> origin/ops/cap-lease-548
+2026-10-20T06:30:43.6832956Z  * [new branch]      ops/cap-lease-548-r2        -> origin/ops/cap-lease-548-r2
+2026-10-20T06:30:43.6833404Z  * [new branch]      ops/cap-lease-551           -> origin/ops/cap-lease-551
+2026-10-20T06:30:43.6833839Z  * [new branch]      ops/cap-lease-552           -> origin/ops/cap-lease-552
+2026-10-20T06:30:43.6834677Z  * [new branch]      ops/cap-lease-562           -> origin/ops/cap-lease-562
+2026-10-20T06:30:43.6835301Z  * [new branch]      ops/cap-lease-565           -> origin/ops/cap-lease-565
+2026-10-20T06:30:43.6835942Z  * [new branch]      ops/cap-lease-566           -> origin/ops/cap-lease-566
+2026-10-20T06:30:43.6836618Z  * [new branch]      ops/cap-lease-568           -> origin/ops/cap-lease-568
+2026-10-20T06:30:43.6837253Z  * [new branch]      ops/cap-lease-570           -> origin/ops/cap-lease-570
+2026-10-20T06:30:43.6837952Z  * [new branch]      ops/cap-lease-570-g10       -> origin/ops/cap-lease-570-g10
+2026-10-20T06:30:43.6838656Z  * [new branch]      ops/cap-lease-570-g11       -> origin/ops/cap-lease-570-g11
+2026-10-20T06:30:43.6839346Z  * [new branch]      ops/cap-lease-570-g12       -> origin/ops/cap-lease-570-g12
+2026-10-20T06:30:43.6840030Z  * [new branch]      ops/cap-lease-570-g13       -> origin/ops/cap-lease-570-g13
+2026-10-20T06:30:43.6840777Z  * [new branch]      ops/cap-lease-570-g14       -> origin/ops/cap-lease-570-g14
+2026-10-20T06:30:43.6841514Z  * [new branch]      ops/cap-lease-570-g15       -> origin/ops/cap-lease-570-g15
+2026-10-20T06:30:43.6842248Z  * [new branch]      ops/cap-lease-570-g16       -> origin/ops/cap-lease-570-g16
+2026-10-20T06:30:43.6842939Z  * [new branch]      ops/cap-lease-570-g17       -> origin/ops/cap-lease-570-g17
+2026-10-20T06:30:43.6843621Z  * [new branch]      ops/cap-lease-570-g18       -> origin/ops/cap-lease-570-g18
+2026-10-20T06:30:43.6845619Z  * [new branch]      ops/cap-lease-570-g19       -> origin/ops/cap-lease-570-g19
+2026-10-20T06:30:43.6846378Z  * [new branch]      ops/cap-lease-570-g2        -> origin/ops/cap-lease-570-g2
+2026-10-20T06:30:43.6847334Z  * [new branch]      ops/cap-lease-570-g20       -> origin/ops/cap-lease-570-g20
+2026-10-20T06:30:43.6848050Z  * [new branch]      ops/cap-lease-570-g21       -> origin/ops/cap-lease-570-g21
+2026-10-20T06:30:43.6848758Z  * [new branch]      ops/cap-lease-570-g22       -> origin/ops/cap-lease-570-g22
+2026-10-20T06:30:43.6849465Z  * [new branch]      ops/cap-lease-570-g23       -> origin/ops/cap-lease-570-g23
+2026-10-20T06:30:43.6850148Z  * [new branch]      ops/cap-lease-570-g24       -> origin/ops/cap-lease-570-g24
+2026-10-20T06:30:43.6850838Z  * [new branch]      ops/cap-lease-570-g25       -> origin/ops/cap-lease-570-g25
+2026-10-20T06:30:43.6851693Z  * [new branch]      ops/cap-lease-570-g26       -> origin/ops/cap-lease-570-g26
+2026-10-20T06:30:43.6852397Z  * [new branch]      ops/cap-lease-570-g27       -> origin/ops/cap-lease-570-g27
+2026-10-20T06:30:43.6853109Z  * [new branch]      ops/cap-lease-570-g28       -> origin/ops/cap-lease-570-g28
+2026-10-20T06:30:43.6853808Z  * [new branch]      ops/cap-lease-570-g29       -> origin/ops/cap-lease-570-g29
+2026-10-20T06:30:43.6854737Z  * [new branch]      ops/cap-lease-570-g3        -> origin/ops/cap-lease-570-g3
+2026-10-20T06:30:43.6855445Z  * [new branch]      ops/cap-lease-570-g30       -> origin/ops/cap-lease-570-g30
+2026-10-20T06:30:43.6856138Z  * [new branch]      ops/cap-lease-570-g31       -> origin/ops/cap-lease-570-g31
+2026-10-20T06:30:43.6856825Z  * [new branch]      ops/cap-lease-570-g32       -> origin/ops/cap-lease-570-g32
+2026-10-20T06:30:43.6857562Z  * [new branch]      ops/cap-lease-570-g33       -> origin/ops/cap-lease-570-g33
+2026-10-20T06:30:43.6858266Z  * [new branch]      ops/cap-lease-570-g34       -> origin/ops/cap-lease-570-g34
+2026-10-20T06:30:43.6858952Z  * [new branch]      ops/cap-lease-570-g35       -> origin/ops/cap-lease-570-g35
+2026-10-20T06:30:43.6859641Z  * [new branch]      ops/cap-lease-570-g36       -> origin/ops/cap-lease-570-g36
+2026-10-20T06:30:43.6860244Z  * [new branch]      ops/cap-lease-570-g37       -> origin/ops/cap-lease-570-g37
+2026-10-20T06:30:43.6860877Z  * [new branch]      ops/cap-lease-570-g38       -> origin/ops/cap-lease-570-g38
+2026-10-20T06:30:43.6861593Z  * [new branch]      ops/cap-lease-570-g39       -> origin/ops/cap-lease-570-g39
+2026-10-20T06:30:43.6862295Z  * [new branch]      ops/cap-lease-570-g4        -> origin/ops/cap-lease-570-g4
+2026-10-20T06:30:43.6862992Z  * [new branch]      ops/cap-lease-570-g40       -> origin/ops/cap-lease-570-g40
+2026-10-20T06:30:43.6863689Z  * [new branch]      ops/cap-lease-570-g41       -> origin/ops/cap-lease-570-g41
+2026-10-20T06:30:43.6864646Z  * [new branch]      ops/cap-lease-570-g42       -> origin/ops/cap-lease-570-g42
+2026-10-20T06:30:43.6865346Z  * [new branch]      ops/cap-lease-570-g43       -> origin/ops/cap-lease-570-g43
+2026-10-20T06:30:43.6866044Z  * [new branch]      ops/cap-lease-570-g44       -> origin/ops/cap-lease-570-g44
+2026-10-20T06:30:43.6866747Z  * [new branch]      ops/cap-lease-570-g45       -> origin/ops/cap-lease-570-g45
+2026-10-20T06:30:43.6867453Z  * [new branch]      ops/cap-lease-570-g46       -> origin/ops/cap-lease-570-g46
+2026-10-20T06:30:43.6868153Z  * [new branch]      ops/cap-lease-570-g5        -> origin/ops/cap-lease-570-g5
+2026-10-20T06:30:43.6868862Z  * [new branch]      ops/cap-lease-570-g6        -> origin/ops/cap-lease-570-g6
+2026-10-20T06:30:43.6869549Z  * [new branch]      ops/cap-lease-570-g7        -> origin/ops/cap-lease-570-g7
+2026-10-20T06:30:43.6870280Z  * [new branch]      ops/cap-lease-570-g8        -> origin/ops/cap-lease-570-g8
+2026-10-20T06:30:43.6871024Z  * [new branch]      ops/cap-lease-570-g9        -> origin/ops/cap-lease-570-g9
+2026-10-20T06:30:43.6871704Z  * [new branch]      ops/cap-lease-574           -> origin/ops/cap-lease-574
+2026-10-20T06:30:43.6872386Z  * [new branch]      ops/cap-lease-574-g10       -> origin/ops/cap-lease-574-g10
+2026-10-20T06:30:43.6873082Z  * [new branch]      ops/cap-lease-574-g11       -> origin/ops/cap-lease-574-g11
+2026-10-20T06:30:43.6873780Z  * [new branch]      ops/cap-lease-574-g12       -> origin/ops/cap-lease-574-g12
+2026-10-20T06:30:43.6874899Z  * [new branch]      ops/cap-lease-574-g13       -> origin/ops/cap-lease-574-g13
+2026-10-20T06:30:43.6875589Z  * [new branch]      ops/cap-lease-574-g14       -> origin/ops/cap-lease-574-g14
+2026-10-20T06:30:43.6876365Z  * [new branch]      ops/cap-lease-574-g15       -> origin/ops/cap-lease-574-g15
+2026-10-20T06:30:43.6877036Z  * [new branch]      ops/cap-lease-574-g16       -> origin/ops/cap-lease-574-g16
+2026-10-20T06:30:43.6877710Z  * [new branch]      ops/cap-lease-574-g17       -> origin/ops/cap-lease-574-g17
+2026-10-20T06:30:43.6878555Z  * [new branch]      ops/cap-lease-574-g18       -> origin/ops/cap-lease-574-g18
+2026-10-20T06:30:43.6879224Z  * [new branch]      ops/cap-lease-574-g19       -> origin/ops/cap-lease-574-g19
+2026-10-20T06:30:43.6879907Z  * [new branch]      ops/cap-lease-574-g20       -> origin/ops/cap-lease-574-g20
+2026-10-20T06:30:43.6880582Z  * [new branch]      ops/cap-lease-574-g21       -> origin/ops/cap-lease-574-g21
+2026-10-20T06:30:43.6881266Z  * [new branch]      ops/cap-lease-574-g22       -> origin/ops/cap-lease-574-g22
+2026-10-20T06:30:43.6881951Z  * [new branch]      ops/cap-lease-574-g23       -> origin/ops/cap-lease-574-g23
+2026-10-20T06:30:43.6882630Z  * [new branch]      ops/cap-lease-574-g24       -> origin/ops/cap-lease-574-g24
+2026-10-20T06:30:43.6883314Z  * [new branch]      ops/cap-lease-574-g25       -> origin/ops/cap-lease-574-g25
+2026-10-20T06:30:43.6884065Z  * [new branch]      ops/cap-lease-574-g26       -> origin/ops/cap-lease-574-g26
+2026-10-20T06:30:43.6884575Z  * [new branch]      ops/cap-lease-574-g27       -> origin/ops/cap-lease-574-g27
+2026-10-20T06:30:43.6885044Z  * [new branch]      ops/cap-lease-574-g28       -> origin/ops/cap-lease-574-g28
+2026-10-20T06:30:43.6885510Z  * [new branch]      ops/cap-lease-574-g29       -> origin/ops/cap-lease-574-g29
+2026-10-20T06:30:43.6886005Z  * [new branch]      ops/cap-lease-574-g30       -> origin/ops/cap-lease-574-g30
+2026-10-20T06:30:43.6886679Z  * [new branch]      ops/cap-lease-574-g31       -> origin/ops/cap-lease-574-g31
+2026-10-20T06:30:43.6887141Z  * [new branch]      ops/cap-lease-574-g32       -> origin/ops/cap-lease-574-g32
+2026-10-20T06:30:43.6887603Z  * [new branch]      ops/cap-lease-574-g33       -> origin/ops/cap-lease-574-g33
+2026-10-20T06:30:43.6888059Z  * [new branch]      ops/cap-lease-574-g34       -> origin/ops/cap-lease-574-g34
+2026-10-20T06:30:43.6888629Z  * [new branch]      ops/cap-lease-574-g35       -> origin/ops/cap-lease-574-g35
+2026-10-20T06:30:43.6889105Z  * [new branch]      ops/cap-lease-574-g36       -> origin/ops/cap-lease-574-g36
+2026-10-20T06:30:43.6889582Z  * [new branch]      ops/cap-lease-574-g37       -> origin/ops/cap-lease-574-g37
+2026-10-20T06:30:43.6890045Z  * [new branch]      ops/cap-lease-574-g38       -> origin/ops/cap-lease-574-g38
+2026-10-20T06:30:43.6890619Z  * [new branch]      ops/cap-lease-574-g39       -> origin/ops/cap-lease-574-g39
+2026-10-20T06:30:43.6891276Z  * [new branch]      ops/cap-lease-574-g4        -> origin/ops/cap-lease-574-g4
+2026-10-20T06:30:43.6891946Z  * [new branch]      ops/cap-lease-574-g40       -> origin/ops/cap-lease-574-g40
+2026-10-20T06:30:43.6892581Z  * [new branch]      ops/cap-lease-574-g41       -> origin/ops/cap-lease-574-g41
+2026-10-20T06:30:43.6893108Z  * [new branch]      ops/cap-lease-574-g42       -> origin/ops/cap-lease-574-g42
+2026-10-20T06:30:43.6893650Z  * [new branch]      ops/cap-lease-574-g43       -> origin/ops/cap-lease-574-g43
+2026-10-20T06:30:43.6894510Z  * [new branch]      ops/cap-lease-574-g5        -> origin/ops/cap-lease-574-g5
+2026-10-20T06:30:43.6895235Z  * [new branch]      ops/cap-lease-574-g6        -> origin/ops/cap-lease-574-g6
+2026-10-20T06:30:43.6896033Z  * [new branch]      ops/cap-lease-574-g7        -> origin/ops/cap-lease-574-g7
+2026-10-20T06:30:43.6896730Z  * [new branch]      ops/cap-lease-574-g8        -> origin/ops/cap-lease-574-g8
+2026-10-20T06:30:43.6897440Z  * [new branch]      ops/cap-lease-574-g9        -> origin/ops/cap-lease-574-g9
+2026-10-20T06:30:43.6898288Z  * [new branch]      ops/cap-lease-574-r3        -> origin/ops/cap-lease-574-r3
+2026-10-20T06:30:43.6898993Z  * [new branch]      ops/cap-lease-574-r4        -> origin/ops/cap-lease-574-r4
+2026-10-20T06:30:43.6899616Z  * [new branch]      ops/cap-lease-578           -> origin/ops/cap-lease-578
+2026-10-20T06:30:43.6900183Z  * [new branch]      ops/cap-lease-578-g2        -> origin/ops/cap-lease-578-g2
+2026-10-20T06:30:43.6900798Z  * [new branch]      ops/cap-lease-578-g3        -> origin/ops/cap-lease-578-g3
+2026-10-20T06:30:43.6901669Z  * [new branch]      ops/cap-lease-578-g4        -> origin/ops/cap-lease-578-g4
+2026-10-20T06:30:43.6902359Z  * [new branch]      ops/cap-lease-579           -> origin/ops/cap-lease-579
+2026-10-20T06:30:43.6903049Z  * [new branch]      ops/cap-lease-579-g10       -> origin/ops/cap-lease-579-g10
+2026-10-20T06:30:43.6903742Z  * [new branch]      ops/cap-lease-579-g11       -> origin/ops/cap-lease-579-g11
+2026-10-20T06:30:43.6904698Z  * [new branch]      ops/cap-lease-579-g12       -> origin/ops/cap-lease-579-g12
+2026-10-20T06:30:43.6905424Z  * [new branch]      ops/cap-lease-579-g13       -> origin/ops/cap-lease-579-g13
+2026-10-20T06:30:43.6906110Z  * [new branch]      ops/cap-lease-579-g14       -> origin/ops/cap-lease-579-g14
+2026-10-20T06:30:43.6906797Z  * [new branch]      ops/cap-lease-579-g15       -> origin/ops/cap-lease-579-g15
+2026-10-20T06:30:43.6907496Z  * [new branch]      ops/cap-lease-579-g16       -> origin/ops/cap-lease-579-g16
+2026-10-20T06:30:43.6908215Z  * [new branch]      ops/cap-lease-579-g17       -> origin/ops/cap-lease-579-g17
+2026-10-20T06:30:43.6908917Z  * [new branch]      ops/cap-lease-579-g18       -> origin/ops/cap-lease-579-g18
+2026-10-20T06:30:43.6909612Z  * [new branch]      ops/cap-lease-579-g19       -> origin/ops/cap-lease-579-g19
+2026-10-20T06:30:43.6910314Z  * [new branch]      ops/cap-lease-579-g2        -> origin/ops/cap-lease-579-g2
+2026-10-20T06:30:43.6911514Z  * [new branch]      ops/cap-lease-579-g20       -> origin/ops/cap-lease-579-g20
+2026-10-20T06:30:43.6912250Z  * [new branch]      ops/cap-lease-579-g21       -> origin/ops/cap-lease-579-g21
+2026-10-20T06:30:43.6912978Z  * [new branch]      ops/cap-lease-579-g22       -> origin/ops/cap-lease-579-g22
+2026-10-20T06:30:43.6913688Z  * [new branch]      ops/cap-lease-579-g23       -> origin/ops/cap-lease-579-g23
+2026-10-20T06:30:43.6914541Z  * [new branch]      ops/cap-lease-579-g24       -> origin/ops/cap-lease-579-g24
+2026-10-20T06:30:43.6915255Z  * [new branch]      ops/cap-lease-579-g25       -> origin/ops/cap-lease-579-g25
+2026-10-20T06:30:43.6915964Z  * [new branch]      ops/cap-lease-579-g26       -> origin/ops/cap-lease-579-g26
+2026-10-20T06:30:43.6916672Z  * [new branch]      ops/cap-lease-579-g27       -> origin/ops/cap-lease-579-g27
+2026-10-20T06:30:43.6917374Z  * [new branch]      ops/cap-lease-579-g28       -> origin/ops/cap-lease-579-g28
+2026-10-20T06:30:43.6918077Z  * [new branch]      ops/cap-lease-579-g29       -> origin/ops/cap-lease-579-g29
+2026-10-20T06:30:43.6918902Z  * [new branch]      ops/cap-lease-579-g3        -> origin/ops/cap-lease-579-g3
+2026-10-20T06:30:43.6919611Z  * [new branch]      ops/cap-lease-579-g4        -> origin/ops/cap-lease-579-g4
+2026-10-20T06:30:43.6920313Z  * [new branch]      ops/cap-lease-579-g5        -> origin/ops/cap-lease-579-g5
+2026-10-20T06:30:43.6921005Z  * [new branch]      ops/cap-lease-579-g6        -> origin/ops/cap-lease-579-g6
+2026-10-20T06:30:43.6921707Z  * [new branch]      ops/cap-lease-579-g7        -> origin/ops/cap-lease-579-g7
+2026-10-20T06:30:43.6922405Z  * [new branch]      ops/cap-lease-579-g8        -> origin/ops/cap-lease-579-g8
+2026-10-20T06:30:43.6923139Z  * [new branch]      ops/cap-lease-579-g9        -> origin/ops/cap-lease-579-g9
+2026-10-20T06:30:43.6923785Z  * [new branch]      ops/cap-lease-593           -> origin/ops/cap-lease-593
+2026-10-20T06:30:43.6924689Z  * [new branch]      ops/cap-lease-618           -> origin/ops/cap-lease-618
+2026-10-20T06:30:43.6925329Z  * [new branch]      ops/cap-lease-650           -> origin/ops/cap-lease-650
+2026-10-20T06:30:43.6926155Z  * [new branch]      ops/cap-lease-676           -> origin/ops/cap-lease-676
+2026-10-20T06:30:43.6926733Z  * [new branch]      ops/cap-lease-782           -> origin/ops/cap-lease-782
+2026-10-20T06:30:43.6927408Z  * [new branch]      ops/cap-lease-784           -> origin/ops/cap-lease-784
+2026-10-20T06:30:43.6928178Z  * [new branch]      ops/cap-lease-agent-quyen-a1 -> origin/ops/cap-lease-agent-quyen-a1
+2026-10-20T06:30:43.6929028Z  * [new branch]      ops/cap-lease-bia-mo-mot-chieu -> origin/ops/cap-lease-bia-mo-mot-chieu
+2026-10-20T06:30:43.6930108Z  * [new branch]      ops/cap-lease-chon-reviewer-20260827 -> origin/ops/cap-lease-chon-reviewer-20260827
+2026-10-20T06:30:43.6931100Z  * [new branch]      ops/cap-lease-ci-dot-bien-chia-manh -> origin/ops/cap-lease-ci-dot-bien-chia-manh
+2026-10-20T06:30:43.6932024Z  * [new branch]      ops/cap-lease-ci-idiom-20260827 -> origin/ops/cap-lease-ci-idiom-20260827
+2026-10-20T06:30:43.6932933Z  * [new branch]      ops/cap-lease-doctrine-allowlist -> origin/ops/cap-lease-doctrine-allowlist
+2026-10-20T06:30:43.6933798Z  * [new branch]      ops/cap-lease-l7-trich-dan  -> origin/ops/cap-lease-l7-trich-dan
+2026-10-20T06:30:43.6934790Z  * [new branch]      ops/cap-lease-launcher-r3-va -> origin/ops/cap-lease-launcher-r3-va
+2026-10-20T06:30:43.6935620Z  * [new branch]      ops/cap-lease-mcp-github-doc -> origin/ops/cap-lease-mcp-github-doc
+2026-10-20T06:30:43.6936458Z  * [new branch]      ops/cap-lease-mu-ref-va-verdict -> origin/ops/cap-lease-mu-ref-va-verdict
+2026-10-20T06:30:43.6937360Z  * [new branch]      ops/cap-lease-n6-hook-giai-ma-utf8 -> origin/ops/cap-lease-n6-hook-giai-ma-utf8
+2026-10-20T06:30:43.6938265Z  * [new branch]      ops/cap-lease-n8-review-kem-patch -> origin/ops/cap-lease-n8-review-kem-patch
+2026-10-20T06:30:43.6939297Z  * [new branch]      ops/cap-lease-n9-ci-manifest-lane -> origin/ops/cap-lease-n9-ci-manifest-lane
+2026-10-20T06:30:43.6940143Z  * [new branch]      ops/cap-lease-no-p3-20260828 -> origin/ops/cap-lease-no-p3-20260828
+2026-10-20T06:30:43.6940920Z  * [new branch]      ops/cap-lease-p3-dot        -> origin/ops/cap-lease-p3-dot
+2026-10-20T06:30:43.6941669Z  * [new branch]      ops/cap-lease-plat-x8-2     -> origin/ops/cap-lease-plat-x8-2
+2026-10-20T06:30:43.6942517Z  * [new branch]      ops/cap-lease-probe-agent-20260828 -> origin/ops/cap-lease-probe-agent-20260828
+2026-10-20T06:30:43.6943459Z  * [new branch]      ops/cap-lease-probe-agent-r2-20260829 -> origin/ops/cap-lease-probe-agent-r2-20260829
+2026-10-20T06:30:43.6947675Z  * [new branch]      ops/cap-lease-t33-doi-shellcheck -> origin/ops/cap-lease-t33-doi-shellcheck
+2026-10-20T06:30:43.6948519Z  * [new branch]      ops/cap-lease-tach-314      -> origin/ops/cap-lease-tach-314
+2026-10-20T06:30:43.6949411Z  * [new branch]      ops/cap-lease-tach-danh-tinh-20260827 -> origin/ops/cap-lease-tach-danh-tinh-20260827
+2026-10-20T06:30:43.6950291Z  * [new branch]      ops/cap-lease-w1-p1         -> origin/ops/cap-lease-w1-p1
+2026-10-20T06:30:43.6950854Z  * [new branch]      ops/ci-bang-phu-thuoc       -> origin/ops/ci-bang-phu-thuoc
+2026-10-20T06:30:43.6951501Z  * [new branch]      ops/ci-noi-bang-vao-gate    -> origin/ops/ci-noi-bang-vao-gate
+2026-10-20T06:30:43.6952314Z  * [new branch]      ops/cong-duyet-tham-quyen-386 -> origin/ops/cong-duyet-tham-quyen-386
+2026-10-20T06:30:43.6953110Z  * [new branch]      ops/dac-ta-n6-loi-khai      -> origin/ops/dac-ta-n6-loi-khai
+2026-10-20T06:30:43.6953845Z  * [new branch]      ops/danh-sach-don-nhanh     -> origin/ops/danh-sach-don-nhanh
+2026-10-20T06:30:43.6954865Z  * [new branch]      ops/de-xuat-cho-luong-moi-truong -> origin/ops/de-xuat-cho-luong-moi-truong
+2026-10-20T06:30:43.6955762Z  * [new branch]      ops/de-xuat-lease-8-superseded -> origin/ops/de-xuat-lease-8-superseded
+2026-10-20T06:30:43.6956663Z  * [new branch]      ops/do-lease-publish-windows-150 -> origin/ops/do-lease-publish-windows-150
+2026-10-20T06:30:43.6957513Z  * [new branch]      ops/handoff-512-luot6       -> origin/ops/handoff-512-luot6
+2026-10-20T06:30:43.6958437Z  * [new branch]      ops/handoff-512-luot7       -> origin/ops/handoff-512-luot7
+2026-10-20T06:30:43.6959158Z  * [new branch]      ops/handoff-530             -> origin/ops/handoff-530
+2026-10-20T06:30:43.6959847Z  * [new branch]      ops/ke-hoach-tham-dinh      -> origin/ops/ke-hoach-tham-dinh
+2026-10-20T06:30:43.6960575Z  * [new branch]      ops/l7-symbol-aware         -> origin/ops/l7-symbol-aware
+2026-10-20T06:30:43.6961296Z  * [new branch]      ops/land-574-nen-windows    -> origin/ops/land-574-nen-windows
+2026-10-20T06:30:43.6962252Z  * [new branch]      ops/land-574-tich-hop       -> origin/ops/land-574-tich-hop
+2026-10-20T06:30:43.6963005Z  * [new branch]      ops/land-574-tich-hop-2     -> origin/ops/land-574-tich-hop-2
+2026-10-20T06:30:43.6963770Z  * [new branch]      ops/land-574-tich-hop-3     -> origin/ops/land-574-tich-hop-3
+2026-10-20T06:30:43.6964669Z  * [new branch]      ops/land-574-tich-hop-4     -> origin/ops/land-574-tich-hop-4
+2026-10-20T06:30:43.6965415Z  * [new branch]      ops/lease-ag-t0-01b         -> origin/ops/lease-ag-t0-01b
+2026-10-20T06:30:43.6966127Z  * [new branch]      ops/lease-ag-t0-01b-r2      -> origin/ops/lease-ag-t0-01b-r2
+2026-10-20T06:30:43.6966873Z  * [new branch]      ops/lease-dong-so-20260820  -> origin/ops/lease-dong-so-20260820
+2026-10-20T06:30:43.6967652Z  * [new branch]      ops/lease-donref-exec-r2    -> origin/ops/lease-donref-exec-r2
+2026-10-20T06:30:43.6968429Z  * [new branch]      ops/lease-donref-review-1   -> origin/ops/lease-donref-review-1
+2026-10-20T06:30:43.6969209Z  * [new branch]      ops/lease-donref-review-2   -> origin/ops/lease-donref-review-2
+2026-10-20T06:30:43.6969975Z  * [new branch]      ops/lease-donref-review-2b  -> origin/ops/lease-donref-review-2b
+2026-10-20T06:30:43.6970791Z  * [new branch]      ops/lease-donref-review-exec1 -> origin/ops/lease-donref-review-exec1
+2026-10-20T06:30:43.6971653Z  * [new branch]      ops/lease-donref-xoa-an-toan -> origin/ops/lease-donref-xoa-an-toan
+2026-10-20T06:30:43.6972437Z  * [new branch]      ops/lease-m4-review-2       -> origin/ops/lease-m4-review-2
+2026-10-20T06:30:43.6973190Z  * [new branch]      ops/lease-m4-v0             -> origin/ops/lease-m4-v0
+2026-10-20T06:30:43.6974259Z  * [new branch]      ops/lease-plat-m4-exec-1    -> origin/ops/lease-plat-m4-exec-1
+2026-10-20T06:30:43.6974982Z  * [new branch]      ops/lease-plat-x2           -> origin/ops/lease-plat-x2
+2026-10-20T06:30:43.6975697Z  * [new branch]      ops/lease-review-m4-x4      -> origin/ops/lease-review-m4-x4
+2026-10-20T06:30:43.6976440Z  * [new branch]      ops/lease-slice-b-c         -> origin/ops/lease-slice-b-c
+2026-10-20T06:30:43.6977128Z  * [new branch]      ops/lease-x5-exec-r4        -> origin/ops/lease-x5-exec-r4
+2026-10-20T06:30:43.6977846Z  * [new branch]      ops/lease-x5-review-2       -> origin/ops/lease-x5-review-2
+2026-10-20T06:30:43.6978562Z  * [new branch]      ops/lease-x5-review-3       -> origin/ops/lease-x5-review-3
+2026-10-20T06:30:43.6979319Z  * [new branch]      ops/manifest-725-727-lease  -> origin/ops/manifest-725-727-lease
+2026-10-20T06:30:43.6980153Z  * [new branch]      ops/master-ac19-evidence-block -> origin/ops/master-ac19-evidence-block
+2026-10-20T06:30:43.6980966Z  * [new branch]      ops/master-ac19-viet-lai    -> origin/ops/master-ac19-viet-lai
+2026-10-20T06:30:43.6981797Z  * [new branch]      ops/moi-truong-review-1-verdict -> origin/ops/moi-truong-review-1-verdict
+2026-10-20T06:30:43.6982610Z  * [new branch]      ops/moi-truong-review-10    -> origin/ops/moi-truong-review-10
+2026-10-20T06:30:43.6983461Z  * [new branch]      ops/moi-truong-review-10-verdict -> origin/ops/moi-truong-review-10-verdict
+2026-10-20T06:30:43.6984423Z  * [new branch]      ops/moi-truong-review-2     -> origin/ops/moi-truong-review-2
+2026-10-20T06:30:43.6985251Z  * [new branch]      ops/moi-truong-review-2-verdict -> origin/ops/moi-truong-review-2-verdict
+2026-10-20T06:30:43.6986042Z  * [new branch]      ops/moi-truong-review-3     -> origin/ops/moi-truong-review-3
+2026-10-20T06:30:43.6987197Z  * [new branch]      ops/moi-truong-review-3-verdict -> origin/ops/moi-truong-review-3-verdict
+2026-10-20T06:30:43.6987995Z  * [new branch]      ops/moi-truong-review-4     -> origin/ops/moi-truong-review-4
+2026-10-20T06:30:43.6988798Z  * [new branch]      ops/moi-truong-review-4-verdict -> origin/ops/moi-truong-review-4-verdict
+2026-10-20T06:30:43.6989591Z  * [new branch]      ops/moi-truong-review-5     -> origin/ops/moi-truong-review-5
+2026-10-20T06:30:43.6990309Z  * [new branch]      ops/moi-truong-review-6     -> origin/ops/moi-truong-review-6
+2026-10-20T06:30:43.6991247Z  * [new branch]      ops/moi-truong-review-6-verdict -> origin/ops/moi-truong-review-6-verdict
+2026-10-20T06:30:43.6992052Z  * [new branch]      ops/moi-truong-review-7     -> origin/ops/moi-truong-review-7
+2026-10-20T06:30:43.6992868Z  * [new branch]      ops/moi-truong-review-7-verdict -> origin/ops/moi-truong-review-7-verdict
+2026-10-20T06:30:43.6993668Z  * [new branch]      ops/moi-truong-review-8     -> origin/ops/moi-truong-review-8
+2026-10-20T06:30:43.6994735Z  * [new branch]      ops/moi-truong-review-8-verdict -> origin/ops/moi-truong-review-8-verdict
+2026-10-20T06:30:43.6995514Z  * [new branch]      ops/moi-truong-review-9     -> origin/ops/moi-truong-review-9
+2026-10-20T06:30:43.6996300Z  * [new branch]      ops/moi-truong-review-9-verdict -> origin/ops/moi-truong-review-9-verdict
+2026-10-20T06:30:43.6997209Z  * [new branch]      ops/nghien-cuu-tat-dinh-cong-cu -> origin/ops/nghien-cuu-tat-dinh-cong-cu
+2026-10-20T06:30:43.6997980Z  * [new branch]      ops/no-ky-thuat-muc6        -> origin/ops/no-ky-thuat-muc6
+2026-10-20T06:30:43.6998703Z  * [new branch]      ops/pkg-windows             -> origin/ops/pkg-windows
+2026-10-20T06:30:43.6999451Z  * [new branch]      ops/review-674-ci-duong-nhanh -> origin/ops/review-674-ci-duong-nhanh
+2026-10-20T06:30:43.7000189Z  * [new branch]      ops/so-sach-18-08           -> origin/ops/so-sach-18-08
+2026-10-20T06:30:43.7000844Z  * [new branch]      ops/soan-w0m4-20260828      -> origin/ops/soan-w0m4-20260828
+2026-10-20T06:30:43.7001652Z  * [new branch]      ops/song-song-write-set-exclusion -> origin/ops/song-song-write-set-exclusion
+2026-10-20T06:30:43.7002478Z  * [new branch]      ops/spec-donref-xoa-an-toan -> origin/ops/spec-donref-xoa-an-toan
+2026-10-20T06:30:43.7003260Z  * [new branch]      ops/spec-harness-tu-kiem-694 -> origin/ops/spec-harness-tu-kiem-694
+2026-10-20T06:30:43.7004084Z  * [new branch]      ops/spec-launcher-con-song-esrch -> origin/ops/spec-launcher-con-song-esrch
+2026-10-20T06:30:43.7004709Z  * [new branch]      ops/spec-probe-agent-r2     -> origin/ops/spec-probe-agent-r2
+2026-10-20T06:30:43.7005367Z  * [new branch]      ops/spec-thua-huong-actor   -> origin/ops/spec-thua-huong-actor
+2026-10-20T06:30:43.7006066Z  * [new branch]      ops/spec-w1-p1              -> origin/ops/spec-w1-p1
+2026-10-20T06:30:43.7006865Z  * [new branch]      ops/successor-packet-session-mutex -> origin/ops/successor-packet-session-mutex
+2026-10-20T06:30:43.7007504Z  * [new branch]      ops/thu-hoi-lease-538       -> origin/ops/thu-hoi-lease-538
+2026-10-20T06:30:43.7007981Z  * [new branch]      ops/verdict-donref          -> origin/ops/verdict-donref
+2026-10-20T06:30:43.7008574Z  * [new branch]      ops/verdict-m4-review-2     -> origin/ops/verdict-m4-review-2
+2026-10-20T06:30:43.7009276Z  * [new branch]      ops/wp484-r7-spec           -> origin/ops/wp484-r7-spec
+2026-10-20T06:30:43.7009948Z  * [new branch]      ops/wp55-lease-exec-3       -> origin/ops/wp55-lease-exec-3
+2026-10-20T06:30:43.7010680Z  * [new branch]      ops/wp55-lease-review-5     -> origin/ops/wp55-lease-review-5
+2026-10-20T06:30:43.7011464Z  * [new branch]      ops/wp55-r2-review-5-verdict -> origin/ops/wp55-r2-review-5-verdict
+2026-10-20T06:30:43.7012210Z  * [new branch]      ops/wp55-r3-exec-4          -> origin/ops/wp55-r3-exec-4
+2026-10-20T06:30:43.7012897Z  * [new branch]      ops/wp55-r3-exec-5          -> origin/ops/wp55-r3-exec-5
+2026-10-20T06:30:43.7013629Z  * [new branch]      ops/wp55-r3-exec-9          -> origin/ops/wp55-r3-exec-9
+2026-10-20T06:30:43.7014765Z  * [new branch]      ops/wp55-r3-fix-html-table-token -> origin/ops/wp55-r3-fix-html-table-token
+2026-10-20T06:30:43.7015576Z  * [new branch]      ops/wp55-r3-review-10       -> origin/ops/wp55-r3-review-10
+2026-10-20T06:30:43.7016346Z  * [new branch]      ops/wp55-r3-review-10-verdict -> origin/ops/wp55-r3-review-10-verdict
+2026-10-20T06:30:43.7017100Z  * [new branch]      ops/wp55-r3-review-11       -> origin/ops/wp55-r3-review-11
+2026-10-20T06:30:43.7017859Z  * [new branch]      ops/wp55-r3-review-11-verdict -> origin/ops/wp55-r3-review-11-verdict
+2026-10-20T06:30:43.7018749Z  * [new branch]      ops/wp55-r3-review-12       -> origin/ops/wp55-r3-review-12
+2026-10-20T06:30:43.7019450Z  * [new branch]      ops/wp55-r3-review-6        -> origin/ops/wp55-r3-review-6
+2026-10-20T06:30:43.7020147Z  * [new branch]      ops/wp55-r3-review-7        -> origin/ops/wp55-r3-review-7
+2026-10-20T06:30:43.7020830Z  * [new branch]      ops/wp55-r3-review-8        -> origin/ops/wp55-r3-review-8
+2026-10-20T06:30:43.7021632Z  * [new branch]      ops/wp55-r3-review-8-ngoai-lease -> origin/ops/wp55-r3-review-8-ngoai-lease
+2026-10-20T06:30:43.7022418Z  * [new branch]      ops/wp55-r3-review-9        -> origin/ops/wp55-r3-review-9
+2026-10-20T06:30:43.7023162Z  * [new branch]      ops/wp55-r3-review-9-verdict -> origin/ops/wp55-r3-review-9-verdict
+2026-10-20T06:30:43.7024026Z  * [new branch]      ops/wp55-r3-spec            -> origin/ops/wp55-r3-spec
+2026-10-20T06:30:43.7025041Z  * [new branch]      ops/wp55-r3g4-exec-4-evidence -> origin/ops/wp55-r3g4-exec-4-evidence
+2026-10-20T06:30:43.7025876Z  * [new branch]      ops/wp55-r3g5-exec-5-evidence -> origin/ops/wp55-r3g5-exec-5-evidence
+2026-10-20T06:30:43.7026702Z  * [new branch]      ops/wp55-r3g9-exec-9-an-ninh -> origin/ops/wp55-r3g9-exec-9-an-ninh
+2026-10-20T06:30:43.7027465Z  * [new branch]      ops/wp55-r3g9-handoff       -> origin/ops/wp55-r3g9-handoff
+2026-10-20T06:30:43.7028173Z  * [new branch]      ops/wp55-verdict-6          -> origin/ops/wp55-verdict-6
+2026-10-20T06:30:43.7028907Z  * [new branch]      ops/wp685-r18-g1-lease      -> origin/ops/wp685-r18-g1-lease
+2026-10-20T06:30:43.7029669Z  * [new branch]      ops/wp685-r19-g2-metadata   -> origin/ops/wp685-r19-g2-metadata
+2026-10-20T06:30:43.7030408Z  * [new branch]      ops/wp685-r20-g3-metadata   -> origin/ops/wp685-r20-g3-metadata
+2026-10-20T06:30:43.7031249Z  * [new branch]      ops/wp685-r28-g5-su-kien-review-1 -> origin/ops/wp685-r28-g5-su-kien-review-1
+2026-10-20T06:30:43.7032123Z  * [new branch]      ops/wp710-g5-hien-vat-review -> origin/ops/wp710-g5-hien-vat-review
+2026-10-20T06:30:43.7032894Z  * [new branch]      ops/wp728-r2-do-linux       -> origin/ops/wp728-r2-do-linux
+2026-10-20T06:30:43.7033599Z  * [new branch]      ops/wp744-r1-g1-lease       -> origin/ops/wp744-r1-g1-lease
+2026-10-20T06:30:43.7034448Z  * [new branch]      ops/wp744-r2-g2-lease       -> origin/ops/wp744-r2-g2-lease
+2026-10-20T06:30:43.7035149Z  * [new branch]      ops/wp744-r3-g3-lease       -> origin/ops/wp744-r3-g3-lease
+2026-10-20T06:30:43.7035870Z  * [new branch]      ops/wp748-r1-g1-lease       -> origin/ops/wp748-r1-g1-lease
+2026-10-20T06:30:43.7036598Z  * [new branch]      ops/wp748-r10-g10-lease     -> origin/ops/wp748-r10-g10-lease
+2026-10-20T06:30:43.7037332Z  * [new branch]      ops/wp748-r11-g11-lease     -> origin/ops/wp748-r11-g11-lease
+2026-10-20T06:30:43.7038085Z  * [new branch]      ops/wp748-r12-g12-lease     -> origin/ops/wp748-r12-g12-lease
+2026-10-20T06:30:43.7038805Z  * [new branch]      ops/wp748-r13-g13-lease     -> origin/ops/wp748-r13-g13-lease
+2026-10-20T06:30:43.7039532Z  * [new branch]      ops/wp748-r14-g14-lease     -> origin/ops/wp748-r14-g14-lease
+2026-10-20T06:30:43.7040253Z  * [new branch]      ops/wp748-r15-g15-lease     -> origin/ops/wp748-r15-g15-lease
+2026-10-20T06:30:43.7040976Z  * [new branch]      ops/wp748-r16-g16-lease     -> origin/ops/wp748-r16-g16-lease
+2026-10-20T06:30:43.7041693Z  * [new branch]      ops/wp748-r17-g17-lease     -> origin/ops/wp748-r17-g17-lease
+2026-10-20T06:30:43.7042571Z  * [new branch]      ops/wp748-r18-g18-lease     -> origin/ops/wp748-r18-g18-lease
+2026-10-20T06:30:43.7043294Z  * [new branch]      ops/wp748-r19-g19-lease     -> origin/ops/wp748-r19-g19-lease
+2026-10-20T06:30:43.7044118Z  * [new branch]      ops/wp748-r2-g2-lease       -> origin/ops/wp748-r2-g2-lease
+2026-10-20T06:30:43.7044924Z  * [new branch]      ops/wp748-r20-g20-lease     -> origin/ops/wp748-r20-g20-lease
+2026-10-20T06:30:43.7045653Z  * [new branch]      ops/wp748-r21-g21-lease     -> origin/ops/wp748-r21-g21-lease
+2026-10-20T06:30:43.7046511Z  * [new branch]      ops/wp748-r3-g3-lease       -> origin/ops/wp748-r3-g3-lease
+2026-10-20T06:30:43.7047215Z  * [new branch]      ops/wp748-r4-g4-lease       -> origin/ops/wp748-r4-g4-lease
+2026-10-20T06:30:43.7047916Z  * [new branch]      ops/wp748-r5-g5-lease       -> origin/ops/wp748-r5-g5-lease
+2026-10-20T06:30:43.7048616Z  * [new branch]      ops/wp748-r6-g6-lease       -> origin/ops/wp748-r6-g6-lease
+2026-10-20T06:30:43.7049320Z  * [new branch]      ops/wp748-r7-g7-lease       -> origin/ops/wp748-r7-g7-lease
+2026-10-20T06:30:43.7050017Z  * [new branch]      ops/wp748-r8-g8-lease       -> origin/ops/wp748-r8-g8-lease
+2026-10-20T06:30:43.7050719Z  * [new branch]      ops/wp748-r9-g9-lease       -> origin/ops/wp748-r9-g9-lease
+2026-10-20T06:30:43.7051419Z  * [new branch]      ops/wp760-spec              -> origin/ops/wp760-spec
+2026-10-20T06:30:43.7052066Z  * [new branch]      ops/wp768-spec              -> origin/ops/wp768-spec
+2026-10-20T06:30:43.7052720Z  * [new branch]      ops/wp769-spec              -> origin/ops/wp769-spec
+2026-10-20T06:30:43.7053372Z  * [new branch]      ops/wp770-spec              -> origin/ops/wp770-spec
+2026-10-20T06:30:43.7054147Z  * [new branch]      ops/wp775-spec              -> origin/ops/wp775-spec
+2026-10-20T06:30:43.7054796Z  * [new branch]      ops/wp780-spec              -> origin/ops/wp780-spec
+2026-10-20T06:30:43.7055326Z  * [new branch]      ops/wp788-spec              -> origin/ops/wp788-spec
+2026-10-20T06:30:43.7055796Z  * [new branch]      ops/wp802-r1-g1-lease       -> origin/ops/wp802-r1-g1-lease
+2026-10-20T06:30:43.7056272Z  * [new branch]      ops/wp812-g2-reviews        -> origin/ops/wp812-g2-reviews
+2026-10-20T06:30:43.7084702Z  * [new branch]      ops/wp812-spec              -> origin/ops/wp812-spec
+2026-10-20T06:30:43.7086036Z  * [new branch]      ops/wp822-g1-reviews        -> origin/ops/wp822-g1-reviews
+2026-10-20T06:30:43.7088376Z  * [new branch]      ops/wp822-spec              -> origin/ops/wp822-spec
+2026-10-20T06:30:43.7089592Z  * [new branch]      ops/wp831-r1-g1-lease       -> origin/ops/wp831-r1-g1-lease
+2026-10-20T06:30:43.7090514Z  * [new branch]      ops/wp831-r2-g2-lease       -> origin/ops/wp831-r2-g2-lease
+2026-10-20T06:30:43.7091754Z  * [new branch]      ops/wp831-r3-g3-lease       -> origin/ops/wp831-r3-g3-lease
+2026-10-20T06:30:43.7092713Z  * [new branch]      ops/wp831-r4-g4-lease       -> origin/ops/wp831-r4-g4-lease
+2026-10-20T06:30:43.7094109Z  * [new branch]      ops/wp831-spec              -> origin/ops/wp831-spec
+2026-10-20T06:30:43.7095193Z  * [new branch]      ops/wp835-r1-g1-lease       -> origin/ops/wp835-r1-g1-lease
+2026-10-20T06:30:43.7096422Z  * [new branch]      ops/wp835-r2-g2-lease       -> origin/ops/wp835-r2-g2-lease
+2026-10-20T06:30:43.7097459Z  * [new branch]      ops/wp845-r1-g1-lease       -> origin/ops/wp845-r1-g1-lease
+2026-10-20T06:30:43.7098636Z  * [new branch]      ops/wp856-spec              -> origin/ops/wp856-spec
+2026-10-20T06:30:43.7099601Z  * [new branch]      ops/wp858-r1-g1-lease       -> origin/ops/wp858-r1-g1-lease
+2026-10-20T06:30:43.7100861Z  * [new branch]      ops/wp858-spec              -> origin/ops/wp858-spec
+2026-10-20T06:30:43.7101861Z  * [new branch]      packet/wp710-spec-r4        -> origin/packet/wp710-spec-r4
+2026-10-20T06:30:43.7103264Z  * [new tag]         archive/codex-gate-lifecycle-ec8d08c -> archive/codex-gate-lifecycle-ec8d08c
+2026-10-20T06:30:43.7104582Z  * [new tag]         archive/dlbrut-ke-hoach-dau -> archive/dlbrut-ke-hoach-dau
+2026-10-20T06:30:43.7106259Z  * [new tag]         archive/rasoat-design-docs-2026-07-26 -> archive/rasoat-design-docs-2026-07-26
+2026-10-20T06:30:43.7107315Z  * [new tag]         bak/pre-renumber            -> bak/pre-renumber
+2026-10-20T06:30:43.7108420Z  * [new tag]         luu-tru/238-verdict-1       -> luu-tru/238-verdict-1
+2026-10-20T06:30:43.7109318Z  * [new tag]         luu-tru/238-verdict-2       -> luu-tru/238-verdict-2
+2026-10-20T06:30:43.7110494Z  * [new tag]         luu-tru/238-verdict-3       -> luu-tru/238-verdict-3
+2026-10-20T06:30:43.7113624Z  * [new tag]         luu-tru/bookkeeping-831-land-79045a0 -> luu-tru/bookkeeping-831-land-79045a0
+2026-10-20T06:30:43.7114686Z  * [new tag]         luu-tru/doctor-github-mcp-verdict-6 -> luu-tru/doctor-github-mcp-verdict-6
+2026-10-20T06:30:43.7115589Z  * [new tag]         luu-tru/doctor-github-mcp-verdict-9 -> luu-tru/doctor-github-mcp-verdict-9
+2026-10-20T06:30:43.7116623Z  * [new tag]         luu-tru/lease-publish-windows-do-r1-verdict -> luu-tru/lease-publish-windows-do-r1-verdict
+2026-10-20T06:30:43.7117607Z  * [new tag]         luu-tru/nhanh/wp55-r4-lease-di-tru -> luu-tru/nhanh/wp55-r4-lease-di-tru
+2026-10-20T06:30:43.7118433Z  * [new tag]         luu-tru/nhanh/wp55-r4-lease-exec-1 -> luu-tru/nhanh/wp55-r4-lease-exec-1
+2026-10-20T06:30:43.7119281Z  * [new tag]         luu-tru/nhanh/wp55-r4-lease-exec-2 -> luu-tru/nhanh/wp55-r4-lease-exec-2
+2026-10-20T06:30:43.7120116Z  * [new tag]         luu-tru/nhanh/wp55-r4-lease-rebase -> luu-tru/nhanh/wp55-r4-lease-rebase
+2026-10-20T06:30:43.7120991Z  * [new tag]         luu-tru/nhanh/wp55-r4-lease-review-1 -> luu-tru/nhanh/wp55-r4-lease-review-1
+2026-10-20T06:30:43.7121871Z  * [new tag]         luu-tru/nhanh/wp55-r4-lease-review-2 -> luu-tru/nhanh/wp55-r4-lease-review-2
+2026-10-20T06:30:43.7122755Z  * [new tag]         luu-tru/nhanh/wp55-r4-lease-viet-lai -> luu-tru/nhanh/wp55-r4-lease-viet-lai
+2026-10-20T06:30:43.7123755Z  * [new tag]         luu-tru/nhanh/wp55-r4-review-1-codex-verdict -> luu-tru/nhanh/wp55-r4-review-1-codex-verdict
+2026-10-20T06:30:43.7124956Z  * [new tag]         luu-tru/nhanh/wp55-r4-review-2-codex-verdict -> luu-tru/nhanh/wp55-r4-review-2-codex-verdict
+2026-10-20T06:30:43.7125887Z  * [new tag]         luu-tru/nhanh/wp55-r4-spec-draft -> luu-tru/nhanh/wp55-r4-spec-draft
+2026-10-20T06:30:43.7126744Z  * [new tag]         luu-tru/nhanh/wp55-r4-verdict-di-tru -> luu-tru/nhanh/wp55-r4-verdict-di-tru
+2026-10-20T06:30:43.7127651Z  * [new tag]         luu-tru/nhanh/wp55-r4-verdict-viet-lai -> luu-tru/nhanh/wp55-r4-verdict-viet-lai
+2026-10-20T06:30:43.7128520Z  * [new tag]         luu-tru/nhanh/wp55-r4g1-handoff -> luu-tru/nhanh/wp55-r4g1-handoff
+2026-10-20T06:30:43.7129272Z  * [new tag]         luu-tru/nhanh/wp55-r4g1-wip -> luu-tru/nhanh/wp55-r4g1-wip
+2026-10-20T06:30:43.7130061Z  * [new tag]         luu-tru/tao-tag-luu-tru-verdict-1 -> luu-tru/tao-tag-luu-tru-verdict-1
+2026-10-20T06:30:43.7131015Z  * [new tag]         luu-tru/verdict/moi-truong-review-1-verdict -> luu-tru/verdict/moi-truong-review-1-verdict
+2026-10-20T06:30:43.7132056Z  * [new tag]         luu-tru/verdict/moi-truong-review-10-verdict -> luu-tru/verdict/moi-truong-review-10-verdict
+2026-10-20T06:30:43.7133101Z  * [new tag]         luu-tru/verdict/moi-truong-review-2-verdict -> luu-tru/verdict/moi-truong-review-2-verdict
+2026-10-20T06:30:43.7134245Z  * [new tag]         luu-tru/verdict/moi-truong-review-3-verdict -> luu-tru/verdict/moi-truong-review-3-verdict
+2026-10-20T06:30:43.7135267Z  * [new tag]         luu-tru/verdict/moi-truong-review-4-verdict -> luu-tru/verdict/moi-truong-review-4-verdict
+2026-10-20T06:30:43.7136300Z  * [new tag]         luu-tru/verdict/moi-truong-review-6-verdict -> luu-tru/verdict/moi-truong-review-6-verdict
+2026-10-20T06:30:43.7137303Z  * [new tag]         luu-tru/verdict/moi-truong-review-7-verdict -> luu-tru/verdict/moi-truong-review-7-verdict
+2026-10-20T06:30:43.7138321Z  * [new tag]         luu-tru/verdict/moi-truong-review-8-verdict -> luu-tru/verdict/moi-truong-review-8-verdict
+2026-10-20T06:30:43.7139496Z  * [new tag]         luu-tru/verdict/moi-truong-review-9-verdict -> luu-tru/verdict/moi-truong-review-9-verdict
+2026-10-20T06:30:43.7140530Z  * [new tag]         luu-tru/verdict/plat-x4-ho-so-review-1-2-3 -> luu-tru/verdict/plat-x4-ho-so-review-1-2-3
+2026-10-20T06:30:43.7141515Z  * [new tag]         luu-tru/verdict/wp55-r2-review-5-verdict -> luu-tru/verdict/wp55-r2-review-5-verdict
+2026-10-20T06:30:43.7142468Z  * [new tag]         luu-tru/verdict/wp55-r3-review-10-verdict -> luu-tru/verdict/wp55-r3-review-10-verdict
+2026-10-20T06:30:43.7143595Z  * [new tag]         luu-tru/verdict/wp55-r3-review-11-verdict -> luu-tru/verdict/wp55-r3-review-11-verdict
+2026-10-20T06:30:43.7144673Z  * [new tag]         luu-tru/verdict/wp55-r3-review-9-verdict -> luu-tru/verdict/wp55-r3-review-9-verdict
+2026-10-20T06:30:43.7145533Z  * [new tag]         luu-tru/verdict/wp55-verdict-6 -> luu-tru/verdict/wp55-verdict-6
+2026-10-20T06:30:43.7146310Z  * [new tag]         luu-tru/wp523-r12-human-audited -> luu-tru/wp523-r12-human-audited
+2026-10-20T06:30:43.7147041Z  * [new tag]         luu-tru/wp523-spec-r11      -> luu-tru/wp523-spec-r11
+2026-10-20T06:30:43.7147754Z  * [new tag]         luu-tru/wp55-r4-verdict-di-tru -> luu-tru/wp55-r4-verdict-di-tru
+2026-10-20T06:30:43.7148536Z  * [new tag]         luu-tru/wp55-r4-verdict-rebase -> luu-tru/wp55-r4-verdict-rebase
+2026-10-20T06:30:43.7149329Z  * [new tag]         luu-tru/wp55-r4-verdict-review-1 -> luu-tru/wp55-r4-verdict-review-1
+2026-10-20T06:30:43.7150237Z  * [new tag]         luu-tru/wp55-r4-verdict-review-1-ban-dau -> luu-tru/wp55-r4-verdict-review-1-ban-dau
+2026-10-20T06:30:43.7151138Z  * [new tag]         luu-tru/wp55-r4-verdict-review-2 -> luu-tru/wp55-r4-verdict-review-2
+2026-10-20T06:30:43.7151951Z  * [new tag]         luu-tru/wp55-r4-verdict-viet-lai -> luu-tru/wp55-r4-verdict-viet-lai
+2026-10-20T06:30:43.7152694Z  * [new tag]         luu-tru/wp812-g2-reviews    -> luu-tru/wp812-g2-reviews
+2026-10-20T06:30:43.7153350Z  * [new tag]         luu-tru/wp812-spec          -> luu-tru/wp812-spec
+2026-10-20T06:30:43.7154064Z  * [new tag]         v1.29.7                     -> v1.29.7
+2026-10-20T06:30:43.7154592Z  * [new tag]         v1.33.0                     -> v1.33.0
+2026-10-20T06:30:43.7155112Z  * [new tag]         v1.33.1                     -> v1.33.1
+2026-10-20T06:30:43.7155641Z  * [new tag]         v1.33.10                    -> v1.33.10
+2026-10-20T06:30:43.7156172Z  * [new tag]         v1.33.11                    -> v1.33.11
+2026-10-20T06:30:43.7156698Z  * [new tag]         v1.33.12                    -> v1.33.12
+2026-10-20T06:30:43.7157231Z  * [new tag]         v1.33.13                    -> v1.33.13
+2026-10-20T06:30:43.7157753Z  * [new tag]         v1.33.14                    -> v1.33.14
+2026-10-20T06:30:43.7158273Z  * [new tag]         v1.33.2                     -> v1.33.2
+2026-10-20T06:30:43.7158798Z  * [new tag]         v1.33.3                     -> v1.33.3
+2026-10-20T06:30:43.7159314Z  * [new tag]         v1.33.4                     -> v1.33.4
+2026-10-20T06:30:43.7159832Z  * [new tag]         v1.33.5                     -> v1.33.5
+2026-10-20T06:30:43.7160342Z  * [new tag]         v1.33.6                     -> v1.33.6
+2026-10-20T06:30:43.7160852Z  * [new tag]         v1.33.7                     -> v1.33.7
+2026-10-20T06:30:43.7161359Z  * [new tag]         v1.33.8                     -> v1.33.8
+2026-10-20T06:30:43.7161872Z  * [new tag]         v1.33.9                     -> v1.33.9
+2026-10-20T06:30:43.7162439Z  * [new tag]         rescue/d0-2026-08-04        -> rescue/d0-2026-08-04
+2026-10-20T06:30:43.7164216Z [command]/usr/bin/git branch --list --remote origin/master
+2026-10-20T06:30:43.7164705Z   origin/master
+2026-10-20T06:30:43.7165625Z [command]/usr/bin/git rev-parse refs/remotes/origin/master
+2026-10-20T06:30:43.7166166Z 401d4f15362b3270d5dc8437ade3be5ab449eb22
+2026-10-20T06:30:43.7167250Z ##[endgroup]
+2026-10-20T06:30:43.7167837Z ##[group]Determining the checkout info
+2026-10-20T06:30:43.7168409Z ##[endgroup]
+2026-10-20T06:30:43.7168785Z [command]/usr/bin/git sparse-checkout disable
+2026-10-20T06:30:43.7170081Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-20T06:30:43.7171255Z ##[group]Checking out the ref
+2026-10-20T06:30:43.7171866Z [command]/usr/bin/git checkout --progress --force -B master refs/remotes/origin/master
+2026-10-20T06:30:44.2209217Z Reset branch 'master'
+2026-10-20T06:30:44.2215812Z branch 'master' set up to track 'origin/master'.
+2026-10-20T06:30:44.2265066Z ##[endgroup]
+2026-10-20T06:30:44.2310930Z [command]/usr/bin/git log -1 --format=%H
+2026-10-20T06:30:44.2343397Z 401d4f15362b3270d5dc8437ade3be5ab449eb22
+2026-10-20T06:30:44.2547064Z ##[group]Run actions/setup-python@v5
+2026-10-20T06:30:44.2547297Z with:
+2026-10-20T06:30:44.2547471Z   python-version: 3.12
+2026-10-20T06:30:44.2547656Z   check-latest: false
+2026-10-20T06:30:44.2549549Z   token: ***
+2026-10-20T06:30:44.2549738Z   update-environment: true
+2026-10-20T06:30:44.2549935Z   allow-prereleases: false
+2026-10-20T06:30:44.2550128Z   freethreaded: false
+2026-10-20T06:30:44.2550300Z env:
+2026-10-20T06:30:44.2550462Z   PYTHONIOENCODING: utf-8
+2026-10-20T06:30:44.2550664Z   PYTHONUTF8: 1
+2026-10-20T06:30:44.2550854Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-20T06:30:44.2551058Z ##[endgroup]
+2026-10-20T06:30:44.3736033Z ##[group]Installed versions
+2026-10-20T06:30:44.5130480Z (node:1997) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-20T06:30:44.5131633Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-20T06:30:44.5132162Z Successfully set up CPython (3.12.15)
+2026-10-20T06:30:44.5133147Z ##[endgroup]
+2026-10-20T06:30:44.5360935Z ##[group]Run python ops/nhanh_don_duoc_test.py
+2026-10-20T06:30:44.5361391Z [36;1mpython ops/nhanh_don_duoc_test.py[0m
+2026-10-20T06:30:44.7186822Z shell: /usr/bin/bash -e {0}
+2026-10-20T06:30:44.7187180Z env:
+2026-10-20T06:30:44.7187456Z   PYTHONIOENCODING: utf-8
+2026-10-20T06:30:44.7187757Z   PYTHONUTF8: 1
+2026-10-20T06:30:44.7188012Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-20T06:30:44.7188406Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T06:30:44.7188974Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-20T06:30:44.7189509Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T06:30:44.7189988Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T06:30:44.7190448Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T06:30:44.7190948Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-20T06:30:44.7191390Z   NHANH_DON_DUOC_DICH: 7/8
+2026-10-20T06:30:44.7191779Z   NHANH_DON_DUOC_DICH_RA: manh/manh-7.json
+2026-10-20T06:30:44.7192136Z ##[endgroup]
+2026-10-20T06:30:45.1320428Z targeted_mutant_gate MANH 7/8: 38 muc — KHONG phai full mutant audit
+2026-10-20T06:30:45.1321260Z TIEN DO MANH 7/8 nen san pham T1..T8
+2026-10-20T06:30:45.4099915Z CASE T1: DAT
+2026-10-20T06:30:45.7359238Z CASE T2: DAT
+2026-10-20T06:30:46.0669349Z CASE T3: DAT
+2026-10-20T06:30:46.2062884Z CASE T4: DAT
+2026-10-20T06:30:46.3901412Z CASE T5: DAT
+2026-10-20T06:30:46.5141752Z CASE T6: DAT
+2026-10-20T06:30:46.6259442Z CASE T7: DAT
+2026-10-20T06:30:46.7461675Z CASE T8: DAT
+2026-10-20T06:30:46.7484526Z TIEN DO MANH 7/8 [1/38] tk:ghi-so-gop ca=r546
+2026-10-20T06:30:54.6006416Z DOT BIEN TU KIEM ghi-so-gop | r546 | 1/1
+2026-10-20T06:30:54.6007106Z KET QUA tk:ghi-so-gop: passed (7.9s)
+2026-10-20T06:30:54.6007667Z TIEN DO MANH 7/8 [2/38] tk:runner-bo-doi-nhan-loi-khac ca=r546
+2026-10-20T06:31:01.7791562Z DOT BIEN TU KIEM runner-bo-doi-nhan-loi-khac | r546 | 1/1
+2026-10-20T06:31:01.7792360Z KET QUA tk:runner-bo-doi-nhan-loi-khac: passed (7.2s)
+2026-10-20T06:31:01.7792859Z TIEN DO MANH 7/8 [3/38] db:loi-thanh-khong-commit-rieng ca=T4
+2026-10-20T06:31:04.0915721Z MUTANT loi-thanh-khong-commit-rieng | T4 | 1/1
+2026-10-20T06:31:04.0933789Z KET QUA db:loi-thanh-khong-commit-rieng: passed (2.3s)
+2026-10-20T06:31:04.0934883Z TIEN DO MANH 7/8 [4/38] tk:gop-khong-do-vao-khong-giet ca=r514
+2026-10-20T06:31:04.3172621Z DOT BIEN TU KIEM gop-khong-do-vao-khong-giet | r514 | 1/1
+2026-10-20T06:31:04.3173665Z KET QUA tk:gop-khong-do-vao-khong-giet: passed (0.2s)
+2026-10-20T06:31:04.3192855Z TIEN DO MANH 7/8 [5/38] tk:tu-dot-bien-nhan-giao-khac-rong ca=r516,r539
+2026-10-20T06:31:05.6365196Z DOT BIEN TU KIEM tu-dot-bien-nhan-giao-khac-rong | r516,r539 | 2/2
+2026-10-20T06:31:05.6366084Z KET QUA tk:tu-dot-bien-nhan-giao-khac-rong: passed (1.3s)
+2026-10-20T06:31:05.6366590Z TIEN DO MANH 7/8 [6/38] tk:bo-xoa-co-chi-tu-kiem ca=r519
+2026-10-20T06:31:05.9495462Z DOT BIEN TU KIEM bo-xoa-co-chi-tu-kiem | r519 | 1/1
+2026-10-20T06:31:05.9515173Z KET QUA tk:bo-xoa-co-chi-tu-kiem: passed (0.3s)
+2026-10-20T06:31:05.9515820Z TIEN DO MANH 7/8 [7/38] tk:mo-cong-tu-dot-bien-thieu-giet ca=r513
+2026-10-20T06:31:06.5765281Z DOT BIEN TU KIEM mo-cong-tu-dot-bien-thieu-giet | r513 | 1/1
+2026-10-20T06:31:06.5765870Z KET QUA tk:mo-cong-tu-dot-bien-thieu-giet: passed (0.6s)
+2026-10-20T06:31:06.5766473Z TIEN DO MANH 7/8 [8/38] tk:chan-doan-dung-o-dong-dau ca=r524,r531,r533,r535,r536,r537,r538,r542
+2026-10-20T06:31:07.2315319Z DOT BIEN TU KIEM chan-doan-dung-o-dong-dau | r524,r531,r533,r535,r536,r537,r538,r542 | 8/8
+2026-10-20T06:31:07.2315989Z KET QUA tk:chan-doan-dung-o-dong-dau: passed (0.7s)
+2026-10-20T06:31:07.2316446Z TIEN DO MANH 7/8 [9/38] tk:src-tat-ky-khong-chay ca=r506
+2026-10-20T06:31:07.5755170Z DOT BIEN TU KIEM src-tat-ky-khong-chay | r506 | 1/1
+2026-10-20T06:31:07.5755694Z KET QUA tk:src-tat-ky-khong-chay: passed (0.3s)
+2026-10-20T06:31:07.5756186Z TIEN DO MANH 7/8 [10/38] tk:tu-dot-bien-bo-so-rc-con ca=r516
+2026-10-20T06:31:07.8061587Z DOT BIEN TU KIEM tu-dot-bien-bo-so-rc-con | r516 | 1/1
+2026-10-20T06:31:07.8062536Z KET QUA tk:tu-dot-bien-bo-so-rc-con: passed (0.2s)
+2026-10-20T06:31:07.8063253Z TIEN DO MANH 7/8 [11/38] tk:bo-bat-loi-phong-con ca=r520,r522,r545
+2026-10-20T06:31:08.0685255Z DOT BIEN TU KIEM bo-bat-loi-phong-con | r520,r522,r545 | 3/3
+2026-10-20T06:31:08.0685790Z KET QUA tk:bo-bat-loi-phong-con: passed (0.3s)
+2026-10-20T06:31:08.0686249Z TIEN DO MANH 7/8 [12/38] tk:manh-bo-so-hang-khong-do ca=r551
+2026-10-20T06:31:08.5035213Z DOT BIEN TU KIEM manh-bo-so-hang-khong-do | r551 | 1/1
+2026-10-20T06:31:08.5035760Z KET QUA tk:manh-bo-so-hang-khong-do: passed (0.4s)
+2026-10-20T06:31:08.5036246Z TIEN DO MANH 7/8 [13/38] tk:tk-diagnostic-prefix-erasure ca=r542
+2026-10-20T06:31:08.8515110Z DOT BIEN TU KIEM tk-diagnostic-prefix-erasure | r542 | 1/1
+2026-10-20T06:31:08.8515775Z KET QUA tk:tk-diagnostic-prefix-erasure: passed (0.3s)
+2026-10-20T06:31:08.8516351Z TIEN DO MANH 7/8 [14/38] tk:chan-doan-bo-dem-phan-bi-bo ca=r531,r533,r534,r535,r536,r538
+2026-10-20T06:31:09.2795572Z DOT BIEN TU KIEM chan-doan-bo-dem-phan-bi-bo | r531,r533,r534,r535,r536,r538 | 6/6
+2026-10-20T06:31:09.2796498Z KET QUA tk:chan-doan-bo-dem-phan-bi-bo: passed (0.4s)
+2026-10-20T06:31:09.2797347Z TIEN DO MANH 7/8 [15/38] tk:chan-doan-khai-bo-qua-ca-khi-khong-mat ca=r531,r533,r534,r535,r536,r538
+2026-10-20T06:31:09.7125408Z DOT BIEN TU KIEM chan-doan-khai-bo-qua-ca-khi-khong-mat | r531,r533,r534,r535,r536,r538 | 6/6
+2026-10-20T06:31:09.7126151Z KET QUA tk:chan-doan-khai-bo-qua-ca-khi-khong-mat: passed (0.4s)
+2026-10-20T06:31:09.7126646Z TIEN DO MANH 7/8 [16/38] tk:gop-bo-kiem-bam ca=r552
+2026-10-20T06:31:10.6577278Z DOT BIEN TU KIEM gop-bo-kiem-bam | r552 | 1/1
+2026-10-20T06:31:10.6578137Z KET QUA tk:gop-bo-kiem-bam: passed (0.9s)
+2026-10-20T06:31:10.6578701Z TIEN DO MANH 7/8 [17/38] tk:gop-bo-kiem-so-manh ca=r552
+2026-10-20T06:31:10.9355113Z DOT BIEN TU KIEM gop-bo-kiem-so-manh | r552 | 1/1
+2026-10-20T06:31:10.9374765Z KET QUA tk:gop-bo-kiem-so-manh: passed (0.3s)
+2026-10-20T06:31:10.9375270Z TIEN DO MANH 7/8 [18/38] tk:gop-chi-mot-bang ca=r552
+2026-10-20T06:31:11.1008062Z DOT BIEN TU KIEM gop-chi-mot-bang | r552 | 1/1
+2026-10-20T06:31:11.1008807Z KET QUA tk:gop-chi-mot-bang: passed (0.2s)
+2026-10-20T06:31:11.1009409Z TIEN DO MANH 7/8 [19/38] tk:nap-boc-lop-dong-ten ca=r502
+2026-10-20T06:31:11.3427686Z DOT BIEN TU KIEM nap-boc-lop-dong-ten | r502 | 1/1
+2026-10-20T06:31:11.3428543Z KET QUA tk:nap-boc-lop-dong-ten: passed (0.2s)
+2026-10-20T06:31:11.3429401Z TIEN DO MANH 7/8 [20/38] tk:entropy-bo-bit-cao-byte-giua ca=r509
+2026-10-20T06:31:11.4455222Z DOT BIEN TU KIEM entropy-bo-bit-cao-byte-giua | r509 | 1/1
+2026-10-20T06:31:11.4455791Z KET QUA tk:entropy-bo-bit-cao-byte-giua: passed (0.1s)
+2026-10-20T06:31:11.4456299Z TIEN DO MANH 7/8 [21/38] tk:r528-ha-tang-chi-ba-loai-da-thu ca=r543,r545
+2026-10-20T06:31:11.6605192Z DOT BIEN TU KIEM r528-ha-tang-chi-ba-loai-da-thu | r543,r545 | 2/2
+2026-10-20T06:31:11.6606084Z KET QUA tk:r528-ha-tang-chi-ba-loai-da-thu: passed (0.2s)
+2026-10-20T06:31:11.6606579Z TIEN DO MANH 7/8 [22/38] tk:bo-mien-tru-vang-tep ca=r547
+2026-10-20T06:31:11.9295181Z DOT BIEN TU KIEM bo-mien-tru-vang-tep | r547 | 1/1
+2026-10-20T06:31:11.9295702Z KET QUA tk:bo-mien-tru-vang-tep: passed (0.3s)
+2026-10-20T06:31:11.9296110Z TIEN DO MANH 7/8 [23/38] tk:vang-moi-tep ca=r547
+2026-10-20T06:31:12.1958926Z DOT BIEN TU KIEM vang-moi-tep | r547 | 1/1
+2026-10-20T06:31:12.1959833Z KET QUA tk:vang-moi-tep: passed (0.3s)
+2026-10-20T06:31:12.1960447Z TIEN DO MANH 7/8 [24/38] tk:chan-doan-bo-dau-phan-cach-cua-nhan ca=r538
+2026-10-20T06:31:12.3575147Z DOT BIEN TU KIEM chan-doan-bo-dau-phan-cach-cua-nhan | r538 | 1/1
+2026-10-20T06:31:12.3576001Z KET QUA tk:chan-doan-bo-dau-phan-cach-cua-nhan: passed (0.2s)
+2026-10-20T06:31:12.3576733Z TIEN DO MANH 7/8 [25/38] tk:chan-doan-ly-do-chi-kiem-khong-rong ca=r538
+2026-10-20T06:31:12.5245427Z DOT BIEN TU KIEM chan-doan-ly-do-chi-kiem-khong-rong | r538 | 1/1
+2026-10-20T06:31:12.5246115Z KET QUA tk:chan-doan-ly-do-chi-kiem-khong-rong: passed (0.2s)
+2026-10-20T06:31:12.5246928Z TIEN DO MANH 7/8 [26/38] tk:chan-doan-quen-dong-tong-ket-nhom ca=r538
+2026-10-20T06:31:12.6865332Z DOT BIEN TU KIEM chan-doan-quen-dong-tong-ket-nhom | r538 | 1/1
+2026-10-20T06:31:12.6865968Z KET QUA tk:chan-doan-quen-dong-tong-ket-nhom: passed (0.2s)
+2026-10-20T06:31:12.6866461Z TIEN DO MANH 7/8 [27/38] tk:tk-summary-diagnostics ca=r540
+2026-10-20T06:31:12.8445215Z DOT BIEN TU KIEM tk-summary-diagnostics | r540 | 1/1
+2026-10-20T06:31:12.8446099Z KET QUA tk:tk-summary-diagnostics: passed (0.2s)
+2026-10-20T06:31:12.8446864Z TIEN DO MANH 7/8 [28/38] tk:r528-ha-tang-bo-dem-chot-long ca=r543
+2026-10-20T06:31:13.0085382Z DOT BIEN TU KIEM r528-ha-tang-bo-dem-chot-long | r543 | 1/1
+2026-10-20T06:31:13.0085967Z KET QUA tk:r528-ha-tang-bo-dem-chot-long: passed (0.2s)
+2026-10-20T06:31:13.0086454Z TIEN DO MANH 7/8 [29/38] tk:manh-fullmatch-thanh-match ca=r549
+2026-10-20T06:31:13.1673310Z DOT BIEN TU KIEM manh-fullmatch-thanh-match | r549 | 1/1
+2026-10-20T06:31:13.1674537Z KET QUA tk:manh-fullmatch-thanh-match: passed (0.2s)
+2026-10-20T06:31:13.1675268Z TIEN DO MANH 7/8 [30/38] ca:r502 ca=r502
+2026-10-20T06:31:14.6780900Z TU KIEM r502: DAT
+2026-10-20T06:31:14.6784561Z TU KIEM: 1/1
+2026-10-20T06:31:14.6785009Z KET QUA ca:r502: passed (1.5s)
+2026-10-20T06:31:14.6785488Z TIEN DO MANH 7/8 [31/38] tk:ghi-so-bo-duyet-chuoi ca=r545
+2026-10-20T06:31:14.8405259Z DOT BIEN TU KIEM ghi-so-bo-duyet-chuoi | r545 | 1/1
+2026-10-20T06:31:14.8406033Z KET QUA tk:ghi-so-bo-duyet-chuoi: passed (0.2s)
+2026-10-20T06:31:14.8406669Z TIEN DO MANH 7/8 [32/38] tk:r545-don-het-so ca=r545
+2026-10-20T06:31:15.0025012Z DOT BIEN TU KIEM r545-don-het-so | r545 | 1/1
+2026-10-20T06:31:15.0025491Z KET QUA tk:r545-don-het-so: passed (0.2s)
+2026-10-20T06:31:15.0026002Z TIEN DO MANH 7/8 [33/38] tk:dau-phien-can-tran-ma-lang-le-tra-cap-trung ca=r527
+2026-10-20T06:31:15.1615483Z DOT BIEN TU KIEM dau-phien-can-tran-ma-lang-le-tra-cap-trung | r527 | 1/1
+2026-10-20T06:31:15.1635130Z KET QUA tk:dau-phien-can-tran-ma-lang-le-tra-cap-trung: passed (0.2s)
+2026-10-20T06:31:15.1640546Z TIEN DO MANH 7/8 [34/38] ca:r547 ca=r547
+2026-10-20T06:31:15.3195160Z TU KIEM r547: DAT
+2026-10-20T06:31:15.3195949Z TU KIEM: 1/1
+2026-10-20T06:31:15.3196446Z KET QUA ca:r547: passed (0.2s)
+2026-10-20T06:31:15.3196993Z TIEN DO MANH 7/8 [35/38] ca:r517 ca=r517
+2026-10-20T06:31:15.3259106Z TU KIEM r517: DAT
+2026-10-20T06:31:15.3262541Z TU KIEM: 1/1
+2026-10-20T06:31:15.3263067Z KET QUA ca:r517: passed (0.0s)
+2026-10-20T06:31:15.3263642Z TIEN DO MANH 7/8 [36/38] ca:r545 ca=r545
+2026-10-20T06:31:15.3794199Z TU KIEM r545: DAT
+2026-10-20T06:31:15.3796608Z TU KIEM: 1/1
+2026-10-20T06:31:15.3797072Z KET QUA ca:r545: passed (0.1s)
+2026-10-20T06:31:15.3797791Z TIEN DO MANH 7/8 [37/38] ca:r518 ca=r518
+2026-10-20T06:31:15.3812695Z TU KIEM r518: DAT
+2026-10-20T06:31:15.3814823Z TU KIEM: 1/1
+2026-10-20T06:31:15.3815447Z KET QUA ca:r518: passed (0.0s)
+2026-10-20T06:31:15.3844967Z TIEN DO MANH 7/8 [38/38] ca:r553 ca=r553
+2026-10-20T06:31:15.5043158Z TU KIEM r553: DAT
+2026-10-20T06:31:15.5044532Z TU KIEM: 1/1
+2026-10-20T06:31:15.5045031Z KET QUA ca:r553: passed (0.1s)
+2026-10-20T06:31:15.5045879Z targeted_mutant_gate MANH 7/8: rc=0 · passed 38/38
+2026-10-20T06:31:15.5334406Z ##[group]Run actions/upload-artifact@v4
+2026-10-20T06:31:15.5334670Z with:
+2026-10-20T06:31:15.5334850Z   name: gate-nhanh-ubuntu-latest-7
+2026-10-20T06:31:15.5335072Z   path: manh/manh-7.json
+2026-10-20T06:31:15.5335282Z   if-no-files-found: error
+2026-10-20T06:31:15.5335483Z   compression-level: 6
+2026-10-20T06:31:15.5335672Z   overwrite: false
+2026-10-20T06:31:15.5335849Z   include-hidden-files: false
+2026-10-20T06:31:15.5336044Z env:
+2026-10-20T06:31:15.5336204Z   PYTHONIOENCODING: utf-8
+2026-10-20T06:31:15.5336389Z   PYTHONUTF8: 1
+2026-10-20T06:31:15.5336569Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-20T06:31:15.5336814Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T06:31:15.5337164Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-20T06:31:15.5337493Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T06:31:15.5337791Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T06:31:15.5338123Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T06:31:15.5338424Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-20T06:31:15.5338674Z ##[endgroup]
+2026-10-20T06:31:15.6875791Z (node:3422) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-20T06:31:15.6876929Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-20T06:31:15.6938852Z With the provided path, there will be 1 file uploaded
+2026-10-20T06:31:15.6989413Z Artifact name is valid!
+2026-10-20T06:31:15.6994402Z Root directory input is valid!
+2026-10-20T06:31:16.0685041Z Beginning upload of artifact content to blob storage
+2026-10-20T06:31:16.0796390Z (node:3422) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-20T06:31:16.2785088Z Uploaded bytes 2337
+2026-10-20T06:31:16.3354056Z Finished uploading artifact content to blob storage!
+2026-10-20T06:31:16.3355310Z SHA256 digest of uploaded artifact zip is 8b9272f73e7e8e15b73cdf8f66066dc9174019a72a4890bebd1b2969a99f0915
+2026-10-20T06:31:16.3356224Z Finalizing artifact upload
+2026-10-20T06:31:16.6111510Z Artifact gate-nhanh-ubuntu-latest-7.zip successfully finalized. Artifact ID 12245601651
+2026-10-20T06:31:16.6112584Z Artifact gate-nhanh-ubuntu-latest-7 has been successfully uploaded! Final size is 2337 bytes. Artifact ID is 12245601651
+2026-10-20T06:31:16.6117642Z Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/39380754094/artifacts/12245601651
+2026-10-20T06:31:16.6289676Z Post job cleanup.
+2026-10-20T06:31:16.7365045Z (node:3434) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-20T06:31:16.7366142Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-20T06:31:16.7678514Z Post job cleanup.
+2026-10-20T06:31:16.8637223Z [command]/usr/bin/git version
+2026-10-20T06:31:16.8701892Z git version 2.55.0
+2026-10-20T06:31:16.8776157Z Copying '/home/runner/.gitconfig' to '/home/runner/work/_temp/3fe761ea-a2e9-4463-93af-dbf91561a9cf/.gitconfig'
+2026-10-20T06:31:16.8777422Z Temporarily overriding HOME='/home/runner/work/_temp/3fe761ea-a2e9-4463-93af-dbf91561a9cf' before making global git config changes
+2026-10-20T06:31:16.8778516Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-20T06:31:16.8786237Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/tra-luat/tra-luat
+2026-10-20T06:31:16.8865907Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-20T06:31:16.8926489Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-20T06:31:16.9349111Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-20T06:31:16.9389492Z http.https://github.com/.extraheader
+2026-10-20T06:31:16.9405755Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-20T06:31:16.9478203Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-20T06:31:16.9782367Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-20T06:31:16.9837251Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-20T06:31:17.0282331Z Cleaning up orphan processes
+2026-10-20T06:31:17.0512537Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -1,0 +1,4 @@
+{"case": "c86_B1_moc_dung_tai_KHONG_con_mien", "state": "giet_that", "message": "review: mốc còn miễn được câu cũ: rc=0 loi=[] chua=[]"}
+{"case": "c89_B2_receipt_KHONG_DOC_DUOC_la_rc2_khong_traceback", "state": "giet_that", "message": "CLI chết bằng IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmpwsi166pz/ops/reviews/thu-muc.receipt.yaml' — đòi rc=2"}
+{"case": "c87_B3_OID_khong_tra_duoc_theo_NGU_CANH", "state": "giet_that", "message": "40-hex: đòi rc=2, được 0: loi=[] chua=[]"}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "giet_that", "message": "ii-trich-dan-ke: đòi rc=0, được 1: loi=[\"[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`\"] chua=[]"}

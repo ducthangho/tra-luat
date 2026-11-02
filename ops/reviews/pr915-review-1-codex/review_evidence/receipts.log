@@ -1,0 +1,19 @@
+pr870-review-2-codex:
+  sha256=8b222ab37b7de41499829abb52d1958043ee8fd2969212596277aacc211026a6 bytes=79752
+  reviewed_sha=06a50c5feea77c2654f31edd26efeed7eeee62f5 tree=0fa694daf17e10c37fc3e61690531ade4bd528bf base=9e9a74b2a396ef458d25c51a5563efafbb45ba0c
+  verdict=approve counts=[0, 0, 0, 0]; Kết quả: 0 P0, 0 P1, 0 P2, 0 P3.
+  checks={"base_sha": true, "counts": true, "diff_patch": true, "flat_equals_original": true, "git_tree": true, "merge_second_parent": true, "numstat": true, "reviewed_sha": true, "reviewed_tree": true, "run_head": true, "verdict": true, "verdict_bytes": true, "verdict_sha256": true}
+  diff_numstat='21\t9\tCLAUDE.md\n'
+pr889-review-2-codex:
+  sha256=c5fe298af73bb6081ecf44638b7fce7e7dd220c11c3ddcee5ba5fcc234a4b612 bytes=34167
+  reviewed_sha=094e8d17ae4dfcf21dca63702c9262267bdc072c tree=55f5edf2f8601c976f390e8994193129a71203a1 base=e63961f27b53e66db8e6600009f97d5706743063
+  verdict=approve counts=[0, 0, 0, 0]; Kết quả: 0 P0, 0 P1, 0 P2, 0 P3.
+  checks={"base_sha": true, "counts": true, "diff_patch": true, "flat_equals_original": true, "git_tree": true, "merge_second_parent": true, "numstat": true, "reviewed_sha": true, "reviewed_tree": true, "run_head": true, "verdict": true, "verdict_bytes": true, "verdict_sha256": true}
+  diff_numstat='12\t0\tCLAUDE.md\n'
+pr896-review-1-codex:
+  sha256=3feaad3e207ae2dea5323cb6f831ba2980546ec1d3febeead6d415baccbbb803 bytes=63341
+  reviewed_sha=816f43988eb3012726120ad00166a989cc2b9af6 tree=3da0ce24590dfcf2e60805b2bef76687cdd64405 base=1ccc31498b7d37c12305e8f1b5bf2d1fc217b92e
+  verdict=changes_requested counts=[0, 0, 1, 0]; Kết quả: 0 P0, 0 P1, 1 P2, 0 P3.
+  checks={"base_sha": true, "counts": true, "diff_patch": true, "flat_equals_original": true, "git_tree": true, "merge_second_parent": true, "numstat": true, "reviewed_sha": true, "reviewed_tree": true, "run_head": true, "verdict": true, "verdict_bytes": true, "verdict_sha256": true}
+  diff_numstat='31\t34\tCLAUDE.md\n27\t0\tops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml\n3\t0\tops/land/pr889-claude-md-bai-hoc-c-provenance/SHA256SUMS.txt\n6\t0\tops/land/pr889-claude-md-bai-hoc-c-provenance/readback-blob-claude-md-094e8d1-6ac385f.txt\n436\t0\tops/land/pr889-claude-md-bai-hoc-c-provenance/readback-comments-889-sau-review-lai.json\n29\t0\tops/land/pr889-claude-md-bai-hoc-c-provenance/readback-reactions-pr-889-sau-review-lai.json\n'
+rc=0

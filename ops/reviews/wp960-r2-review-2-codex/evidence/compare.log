@@ -1,0 +1,8 @@
+{"label": "corpus-oid-compare", "occurrences": 99, "unique": 31, "changed": []}
+{"label": "benchmark-run", "label_run": "previous", "index": 0, "seconds": 29.6323, "git_calls": 1418, "rc": 0}
+{"label": "benchmark-run", "label_run": "head", "index": 0, "seconds": 24.8357, "git_calls": 1515, "rc": 0}
+{"label": "benchmark-run", "label_run": "previous", "index": 1, "seconds": 24.6782, "git_calls": 1418, "rc": 0}
+{"label": "benchmark-run", "label_run": "head", "index": 1, "seconds": 25.8829, "git_calls": 1515, "rc": 0}
+{"label": "benchmark-run", "label_run": "previous", "index": 2, "seconds": 25.3182, "git_calls": 1418, "rc": 0}
+{"label": "benchmark-run", "label_run": "head", "index": 2, "seconds": 25.3249, "git_calls": 1515, "rc": 0}
+{"label": "benchmark-summary", "seconds": {"previous": [29.632298442999854, 24.678240799999912, 25.318233342999974], "head": [24.835683790000076, 25.882922145000066, 25.324865932999955]}, "median": {"previous": 25.318233342999974, "head": 25.324865932999955}, "git_calls": {"previous": 1418, "head": 1515}}

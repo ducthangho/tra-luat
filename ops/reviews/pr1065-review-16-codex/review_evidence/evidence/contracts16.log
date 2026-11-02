@@ -1,0 +1,7 @@
+target-equality-oracle 0 Target equality oracle: 5 / 5 PASS
+zip-target-oracle 0 ZIP target oracle: 7/7 PASS
+install-contract-oracle 0 Install contract oracle: 4/4 PASS
+real-pip-oracle 0 Real pip oracle: 2/2 PASS
+absence-oracle 0 {"mode": "metadata-recover", "rc": 1, "ok": false, "errors": 2, "rows": 11, "actions": {"python": "giu", "pip": "nang_cap", "PyYAML": "nang_cap", "jsonschema": "nang_cap", "venv-kho": "loi", "claude": "giu", "codex": "giu", "rg": "giu", "shellcheck": "giu", "actionlint": "giu", "nlm": "loi"}, "installs": 8}
+real-nlm-oracle 0 Real NLM stale launcher: REJECTED
+run-user-extra 0 {"mode": "nlm-version-fails", "rc": 0, "error": null, "errors": 1, "rows": 11, "restored": true, "last": {"cong_cu": "nlm", "truoc": "", "sau": "", "hanh_dong": "loi", "chi_tiet": "pip rc=0 "}, "native_installs": 8}

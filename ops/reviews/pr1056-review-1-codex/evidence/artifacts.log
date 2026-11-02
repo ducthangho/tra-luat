@@ -1,0 +1,25 @@
+ROUND 1: manifest=92, actual=92, missing=[], extra=[], duplicate=0, bad_hash=[]
+flat_equal= True sha256= a26aab3018f613c785a1abc3c5e3291d25427be1d872cad0c29bc19c7fc81a35 bytes= 41128
+verdict_header= ['verdict: changes_requested', 'reviewed_sha: c24875d00e93e6a98e0a0abd0837e0cbcad65d4d', 'Kết quả: 0 P0, 1 P1, 1 P2, 0 P3.']
+run_fields= {"run_id": "1b0ff763deb040368dbd0b50bcefbeaa", "head": "c24875d00e93e6a98e0a0abd0837e0cbcad65d4d", "worktree_sach": true, "ma_thoat": 0, "trang_thai": "xong", "thoi_luong_giay": 790.067, "provider": "openai_codex", "execution_surface": "codex_cli", "transport": "machine", "model_phuc_vu_trang_thai": "DO_DUOC", "effort_phuc_vu": ["xhigh"], "effort_phuc_vu_trang_thai": "DO_DUOC"}
+prompt_sha256= 9705d1982dd8680373b8c40348ac61d86fb0802f5fedc08eb341e951cb68878c matches_run= True
+model_events= 30 models= ['gpt-6.1-sol']
+stdout bytes= 379 hash= 735fbb50ba84af28a913b67390d895afddff42db6a21c4f5563ce2cd2085a91d matches_run= True
+stderr bytes= 39 hash= 1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721 matches_run= True
+regenerated_diff bytes= 520915 sha256= 0aba68a37e02f9532406b5ae9397271a9614494bcfd84a296a343b35ced43d63 matches_OMITTED= True
+tree= 9382f7512f3adf569f1f82c4d597c66fa1b463d7 matches_receipt= True blob_equal= True
+receipt_counts= [0, 1, 1, 0] receipt_assurance= cross_reviewed review_class= standard
+ROUND 2: manifest=81, actual=81, missing=[], extra=[], duplicate=0, bad_hash=[]
+flat_equal= True sha256= 109dcb6aa2325ab048933ab477171ed30a4004b1b335cae515e201efebeb8f11 bytes= 37384
+verdict_header= ['verdict: approve', 'reviewed_sha: f37b5195978f1fe35b9cb55b6f79a2e09d165af0', 'Kết quả: 0 P0, 0 P1, 0 P2, 0 P3.']
+run_fields= {"run_id": "8c095c6b5f22407a9a443d42a08d7fbc", "head": "f37b5195978f1fe35b9cb55b6f79a2e09d165af0", "worktree_sach": true, "ma_thoat": 0, "trang_thai": "xong", "thoi_luong_giay": 606.043, "provider": "openai_codex", "execution_surface": "codex_cli", "transport": "machine", "model_phuc_vu_trang_thai": "DO_DUOC", "effort_phuc_vu": ["xhigh"], "effort_phuc_vu_trang_thai": "DO_DUOC"}
+prompt_sha256= 23a3a3f8be4b87f91bf897b1656add36826168e7dd9253f8ef516bdeba7fd7a5 matches_run= True
+model_events= 25 models= ['gpt-6.1-sol']
+stdout bytes= 401 hash= 52d8b11fee269dcd1f126a5b064869f542fd4c004ec8e1445091d3be3d39da95 matches_run= True
+stderr bytes= 39 hash= 1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721 matches_run= True
+regenerated_diff bytes= 525788 sha256= 1d9762a7d9e6ec6f4c724a0c21ba71ac4a816aa76fcb1f23538cab4aa27883db matches_OMITTED= True
+tree= 235444656cad85bd969f99907b1dbeb4007d961a matches_receipt= True blob_equal= True
+receipt_counts= [0, 0, 0, 0] receipt_assurance= cross_approved review_class= standard
+verdict-cu/luot1-VERDICT.md matches_round1= True
+verdict-cu/luot1-HINT.patch matches_round1= True
+diff-tu-luot1.patch_equal= True git_diff_bytes= 11192

@@ -1,0 +1,192 @@
+{
+  "version": "1.5.0",
+  "run_id": "7aae60dabce248738dac30eb4853b6f0",
+  "short_id": "7aae60da",
+  "ten": "l909c",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 14,
+    "van_tay": "2831f0bf2d1ba9c9"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-24T09:51:50.928183+00:00",
+  "ket_thuc_utc": "2026-10-24T10:05:35.837542+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 21765,
+  "khoa_danh_tinh": "linux:167218",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/90305cb1-2842-509b-9816-acb554eadd20/scratchpad/rvL/l909c/src",
+  "head": "83d305fbf63d5978189a9796141e3d547a46b2c6",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "4c6fb9599877cfda83a364669df713d3e83e5369333b9d998224d3a44c56ed26",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "f0015ea3cba66b8504345e44721fca84a4194855492c0910a45e35c2aeeb66ac",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/90305cb1-2842-509b-9816-acb554eadd20/scratchpad/rvL/runs/7aae60da/prompt.snapshot",
+  "prompt_kin_hoan_toan": false,
+  "model_phuc_vu": [
+    {
+      "response_id": "resp_059b086da7500338016adc7fb7e7708195ab22a5a24e6389f3",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc7fb86f9481959e4439fcc4104a2a",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc7fbfe82c81958c1f8742d6ee9b78",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc7fcf752c81959111332f89b60719",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc7fd48cc081958895de832520d827",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc7fdfabc08195bfbcdf358f59ecaa",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc7ffb8d948195a1540fe1e42a056e",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc8021785081958d1264a82648980f",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc80301ea08195a3001b0ad1b3ba12",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc803ec2d88195b672723ee26c3274",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc8050f52c8195b3afcb136dae21e1",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc80713a8881959f08f4326a41f335",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc80803c9c8195b12e527249e83611",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc809cacbc81958fe7ae05562d0af5",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc80ddb200819580a7302046aad909",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc80f872b88195ae43658047ce3422",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc811a14948195a4d0edf2f901dbe3",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc812975e0819589d5b7e8a7f1f40f",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc815052a481958639f97d2cdf5626",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc818f5ed08195ad9af1f6e4349c5a",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc819b6c788195b0e71d1f5bc06a8f",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc81aa01ac8195a0bf6aad8292dc89",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc81c529e48195ab27910e55fc32d3",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc820ad26481959ac325ba3e45e9b4",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc82b3c2f88195a1b352e09ce62806",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_059b086da7500338016adc82eb38088195b293dba661dd660e",
+      "model": "gpt-6-astra",
+      "su_kien": "response.created"
+    }
+  ],
+  "model_phuc_vu_trang_thai": "DO_DUOC",
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 824.909,
+  "stdout_byte": 738912,
+  "stdout_sha256": "e672a088639cafe03e4a0e560e3cb77ecc826b1eaaa927e1b0d9bc58b6ac3c44",
+  "stderr_byte": 39,
+  "stderr_sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+}

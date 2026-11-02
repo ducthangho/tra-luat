@@ -1,0 +1,82 @@
+# BIEN NHAN GIAO HANG — cross-review Codex CLI LUOT 1 packet #763 (PR #930), KHAC NEN (codex review ma do claude viet).
+
+schema_version: 2
+receipt_id: wp763-r2-cli-luot1-codex-c4103982
+kind: review_delivery_receipt
+packet_id: no-p3-dang-ky-ci
+packet_issue: 763
+revision_reviewed: 2
+spec_path: ops/specs/no-p3-dang-ky-ci-r2.md
+spec_sha256: 30776483ab40e57708c6b03ba0877bc3f40dd27edf334e7dceb0fe5629a113e2
+lease_id: wp763-r2-g1-claude
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+assurance_ghi_chu: >-
+  KHONG khai cross_approved: verdict la changes_requested (0 finding moi muc) vi reviewer khong tai lap duoc C8 trong
+  sandbox (bind Unix socket bi chan). C8 da do tren runner GitHub that cung head: gate-ops job 121216017879 (run
+  40208988593) in `CA: 104/104 dat · 0 do · 0 hong`, `DOT BIEN: 392/392 bi giet dung ly do`, `TONG: DAT` — bang chung
+  ay KHONG nam trong luot review nay va KHONG nang assurance cua bien nhan nay.
+verdict: changes_requested
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+so_dem_theo: tieu_de_finding
+so_dem_ghi_chu: dem bang grep tieu de `### ... [P1|P2|P3]` tren chinh tep verdict luc ghi so.
+verdict_path: ops/reviews/wp763-r2-cli-luot1-codex-verdict.md
+verdict_sha256: dfe0dda1b5adf68aab940d222e69d288440bcc278d6e499371d2311cf985dd52
+verdict_bytes: 18378
+reviewed_sha: b0fadc96366115d3545b9c723b30f04281898d94
+evidence_url: https://github.com/ducthangho/tra-luat/blob/b7b28a3ae91a77b6d061d8c98f8ecfcdf83b97a4/ops/reviews/wp763-r2-cli-luot1-codex-verdict.md
+ngan_sach_ghi_chu: 'loi goi Codex 2/2 cua lease wp763-r2-g1-claude; loi goi 1/2 la connector tu chay khi PR #930 roi draft (b0fadc9, khong finding).'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: c4103982ae4c4a8b9a98e308d7b7beb1
+  prompt_path: ops/reviews/wp763-r2-cli-luot1-prompt.md
+  prompt_sha256: 0febd2bb961117cb5aa04e855953c11bddd82ab378d3b0e9c42b3a580b4bcab2
+  prompt_kin_hoan_toan: true
+  thoi_luong_giay: 709.61
+  ma_thoat: 0
+  model_yeu_cau: gpt-6-astra
+  effort_yeu_cau: xhigh
+  KHONG_do_duoc: >-
+    Model thuc su phuc vu moi yeu cau va header model/effort cua luot nay (stderr khong luu; chinh reviewer ghi chua
+    doc duoc header luc chay). codex-cli khong xuat modelUsage.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    ADR-0040: bien nhan do tai khoan tac gia day len KHONG thanh required check hay merge authorization. Truong nay ghi
+    AI VAN CHUYEN (phien agent bang credential chu kho), khong cap tham quyen.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    Neo bang verdict_sha256 + commit dau tien chua tep verdict (b7b28a3a) tren nhanh lease ops/wp763-r2-g1-lease.
+    Nhanh lease CHUA vao master; khong tag luu-tru/*, khong protected ref ⇒ TRUNG BINH.
+
+run_neo:
+  run_id: c4103982ae4c4a8b9a98e308d7b7beb1
+  prompt_sha256: 0febd2bb961117cb5aa04e855953c11bddd82ab378d3b0e9c42b3a580b4bcab2
+  worktree_sach: true
+  thoi_luong_giay: 709.61
+  stdout_byte: 85
+  stderr_byte: 39
+  ma_thoat: 0
+
+verdict_usage_caveats:
+  - id: GOI-BANG-CHUNG-KHONG-LUU-TRONG-KHO
+    muc: P3
+    mo_ta: >-
+      Verdict tro toi artifact cua goi review bang duong dan tuong doi; goi ay nam ngoai kho va KHONG duoc luu.
+      (a) DO DUOC tu kho: verdict_sha256/bytes, prompt, run.json, reviewed_sha, spec_sha256. (b) THUAT LAI: ket qua
+      sandbox trong verdict.

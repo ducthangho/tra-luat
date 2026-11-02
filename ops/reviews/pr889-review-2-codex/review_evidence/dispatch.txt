@@ -1,0 +1,14 @@
+runner_set={"default": "windows-and-ubuntu", "description": "windows-and-ubuntu (mặc định) hoặc windows-only (bỏ các job ma trận Ubuntu)", "options": ["windows-and-ubuntu", "windows-only"], "required": false, "type": "choice"}
+AST source=ops/lease_publish_test.py:_danh_gia_bieu_thuc_chuan_bi
+{"event": "workflow_dispatch", "runner_set": "windows-only", "labels": [], "os": ["windows-latest"]}
+{"event": "workflow_dispatch", "runner_set": "windows-and-ubuntu", "labels": [], "os": ["ubuntu-latest", "windows-latest"]}
+{"event": "workflow_dispatch", "runner_set": "other", "labels": [], "os": ["ubuntu-latest", "windows-latest"]}
+{"event": "workflow_dispatch", "runner_set": "", "labels": [], "os": ["ubuntu-latest", "windows-latest"]}
+{"event": "workflow_dispatch", "runner_set": null, "labels": [], "os": ["ubuntu-latest", "windows-latest"]}
+{"event": "push", "runner_set": null, "labels": [], "os": ["ubuntu-latest"]}
+{"event": "push", "runner_set": "windows-only", "labels": [], "os": ["ubuntu-latest"]}
+{"event": "pull_request", "runner_set": null, "labels": [], "os": ["ubuntu-latest"]}
+{"event": "pull_request", "runner_set": null, "labels": ["windows"], "os": ["ubuntu-latest", "windows-latest"]}
+{"event": "pull_request", "runner_set": "windows-only", "labels": [], "os": ["ubuntu-latest"]}
+{"event": "pull_request", "runner_set": "windows-only", "labels": ["windows"], "os": ["ubuntu-latest", "windows-latest"]}
+PASS: 11 cases; ci.yml at e63961f == reviewed SHA

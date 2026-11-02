@@ -1,0 +1,11 @@
+patch --dry-run -p0 --fuzz=0: rc=0; 'checking file ops/reviews/pr889-review-1-codex-verdict.receipt.yaml\nchecking file ops/reviews/README.md\n'
+patch -p0 --fuzz=0: rc=0; 'patching file ops/reviews/pr889-review-1-codex-verdict.receipt.yaml\npatching file ops/reviews/README.md\n'
+patched t26_: rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+patched t27_: rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+patched t138_: rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+patched bien_nhan_v2: rc=0; 'bien_nhan_v2: 235 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 288\nTỔNG: ĐẠT'
+patched, remove_new_README_row t27_: rc=1;   ĐỎ  t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc: README.md: caveat 'VERDICT-KHAI-SAI-EXECUTION-SURFACE' của pr889-review-1-codex-verdict.receipt.yaml KHÔNG nằm ở CỘT 'id' trên cùng hàng với 'pr889-review-1-codex-verdict.md' ở CỘT 'tệp verdict', trong bảng 'Cảnh báo đang có hiệu lực'. Bị nhắc trong phần mô tả của hàng khác KHÔNG tính — verdict này vẫn phải có hàng cảnh báo của riêng nó. | lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+copy changed_files=['ops/reviews/README.md', 'ops/reviews/pr889-review-1-codex-verdict.receipt.yaml']
+preserved ops/reviews/pr889-review-1-codex-verdict.md=True
+preserved ops/reviews/pr889-review-1-codex/VERDICT.md=True
+preserved ops/reviews/pr889-review-1-codex/SHA256SUMS=True

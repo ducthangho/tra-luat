@@ -9,6 +9,7 @@ argument-hint: "[so-issue-packet] [so-PR]"
 **Đọc trước:** `docs/PROTOCOL_DA_PHIEN.md` §8 (mức review, quyền của người review, xử lý quota) và
 §13 (trigger, hai trục, dạng verdict, nơi ghi verdict, định nghĩa hoàn tất) · §8.1–§8.3
 (bootstrap, receipt, cache và lịch sử lớp) · §10.2.1–§10.2.3 (CI plan/provenance).
+Packet áp `ADR-0060`: điều kiện severity, tìm theo lớp, phân loại Windows và cách gọi connector đọc ở ADR-0060 (M1–M3, M6).
 
 Tệp này **không tóm tắt** những mục trên — đợt đầu của chính adapter này chép §13 rồi ghi sai nơi
 đăng verdict. Chốt cơ học:
@@ -136,18 +137,23 @@ bản chụp), chứ đừng dán cả prompt vào argv.
    từng báo cạn. Các quan sát này chưa xác định quota riêng theo model, số pool hay tính độc lập.
    Probe ngắn chỉ đo khả năng đáp ứng tại lúc gọi, không bảo đảm quota cho cả lượt review;
    thông điệp reset vẫn là dữ liệu do dịch vụ báo. Xử lý quota theo protocol §8.
-4. **Đầu `stderr.log` ghi model/effort mà CLI công bố cho lượt chạy.** Xem ngữ cảnh đầu tệp bằng:
+4. **Model/effort/sandbox của lượt đọc từ `run.json` mà `launcher.py run` ghi, KHÔNG từ `stderr.log`.**
+   Tên trường lấy theo `.claude/dev/launcher.py` (`_BoLocStderr.ghi_so`, `_LayMauSandbox.ghi_so`):
 
 ```bash
-sed -n '1,80p' <run-root>/<short_id>/stderr.log
-# rc=0: doc duoc tep (ke ca tep rong), chua xac nhan co header hay du hai truong.
+PY="$(command -v python3 || command -v python || command -v py)"
+"$PY" -B -c 'import json,sys; r=json.load(open(sys.argv[1],encoding="utf-8")); [print(k,"=",json.dumps(r.get(k),ensure_ascii=False)) for k in ("model_phuc_vu","model_phuc_vu_trang_thai","model_phuc_vu_ly_do","effort_phuc_vu","effort_phuc_vu_trang_thai","effort_phuc_vu_ly_do","sandbox_quan_sat","sandbox_trang_thai","sandbox_ly_do")]' <run-root>/<short_id>/run.json
 ```
 
-Lệnh chỉ in 80 dòng đầu; nếu chưa thấy đủ header CLI thì đọc tiếp log. Chỉ lấy `model:` và
-`reasoning effort:` trong header khởi tạo của đúng lượt; dòng cùng tên trong prompt/output
-không thay được trường header bị thiếu. Không xác định được header thì chưa đo được hai trường.
+Chỉ `*_trang_thai` = `DO_DUOC` mới là đo được; trạng thái khác thì đọc `*_ly_do`
+(`sandbox_trang_thai` còn có `KHONG_THAY_LENH`). Launcher tự đặt `RUST_LOG` để bắt khung
+`response.created`/`response.completed` của máy chủ; `sandbox_quan_sat` lấy mẫu `/proc` (chỉ Linux);
+không thấy tiến trình sandbox thì launcher đọc sự kiện `--json` trên stdout để phân biệt.
+`codex-cli` 0.164 không in header `model:`/`reasoning effort:` vào `stderr.log` (lượt wp923 g2: 39 byte);
+header, nếu có, chỉ là lời khai phụ để đối chiếu —
+vắng header không có nghĩa là chưa đo được. Cờ `-m`/`-c model_reasoning_effort` là cấu hình yêu cầu.
 
-Header này không phải thống kê model thực thi mọi yêu cầu như `modelUsage` của lane `claude`.
+`model_phuc_vu` là danh sách model theo từng khung response, không phải `modelUsage` của lane `claude`.
 Hồ sơ `r368` ghi lời khai `xhigh` lệch header `none`; đó là đối chiếu hai nguồn khai,
 không đo tác động của effort lên độ phủ review.
 
@@ -747,6 +753,10 @@ query($id: ID!) {
 ```bash
 gh api graphql -F query=@"$SCRATCH/query.graphql" -f id="$RUN_NODE_ID" > "$SCRATCH/workflow-run.json"
 ```
+
+Mẫu trên chạy trong phiên có GraphQL. Phiên Claude Code trên web bị 403 nên phải nhờ chủ kho chạy; lệnh đưa
+cho chủ kho theo mục *"Lệnh `gh api graphql` đưa cho chủ kho chạy"* của `CLAUDE.md` (máy chủ kho là `cmd`, mẫu
+trên vỡ ở đó). Đọc mục ấy từ `origin/master` ngay trước khi soạn lệnh — phiên mở từ trước có thể đang giữ bản cũ.
 
 `WorkflowRun.file` nullable; cấu trúc tham chiếu ở [GitHub Actions GraphQL](https://docs.github.com/en/graphql/reference/actions).
 Phân loại missing/errors và kiểm OID của URL theo §10.2.2. Khi đã xác minh repo/path/OID,

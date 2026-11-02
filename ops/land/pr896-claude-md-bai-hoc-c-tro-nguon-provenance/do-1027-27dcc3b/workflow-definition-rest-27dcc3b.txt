@@ -1,0 +1,11 @@
+# Moc Workflow definition §10.2.2 — run 39983914661 attempt 1 (ci.yml push master, merge 27dcc3b) — PHAN REST
+# do 2026-10-27 trong phien Claude Code session_01WZT2MvvoQV8QGF1vX9STrJ. GraphQL (WorkflowRun.file) bi chan trong phien:
+#   gh api graphql -> HTTP 403 "GitHub GraphQL is not available from Claude Code sessions". Phan GraphQL CHO chu kho dan.
+$ GET repos/ducthangho/tra-luat/actions/runs/39983914661   (readback-run-39983914661.json)
+  head_sha 27dcc3bb67f6115608688a265bd8dcd3aa2a6ecc · path .github/workflows/ci.yml · run_attempt 1 · conclusion success · node_id WFR_kwLOTNeRjc8AAAAJTzoepQ
+$ GET repos/ducthangho/tra-luat/contents/.github/workflows/ci.yml?ref=27dcc3bb67f6115608688a265bd8dcd3aa2a6ecc
+  sha (blob OID): f618cdb469016ac585724d286b498b7e1dcc80ea  size: 68426
+  sha256(bytes giai base64): b630260ce676292ced82da65f4cb54ec1dc0f66109901e7c1d61746d21baab06
+  bam git cua chinh bytes (sha1 cua 'blob <N>' + byte NUL + bytes): f618cdb469016ac585724d286b498b7e1dcc80ea
+$ git rev-parse 27dcc3b:.github/workflows/ci.yml -> f618cdb469016ac585724d286b498b7e1dcc80ea
+KET LUAN TAM: blob tai 27dcc3b khop REST va git. CHUA khep moc: con thieu WorkflowRun.file (repositoryFileUrl neo OID) tu GraphQL.

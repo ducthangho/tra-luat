@@ -1,0 +1,146 @@
+{
+  "original_files_before": 13334,
+  "original_files_after": 13334,
+  "changed": [],
+  "added": [],
+  "removed": [],
+  "original_status": "",
+  "original_head": "8715ac9f591b27d9b176e9d656437ef4b71b54dc",
+  "original_tree": "ad90d9046a4367e0649a2f812daccdb2b0622af7",
+  "mutant_status": "",
+  "original_diff_check": {
+    "cmd": [
+      "git",
+      "diff",
+      "--check",
+      "c82047da4d6f9546ce1d68282c37acf9567b74bc",
+      "HEAD"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/cay-kho",
+    "rc": 0,
+    "stdout": "original-diff-check.stdout",
+    "stderr": "original-diff-check.stderr"
+  },
+  "warnings_equal": true,
+  "gate_delta": {
+    "bien-nhan": {
+      "stdout_equal": false,
+      "base": "\nbien_nhan_v2: 287 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 340\ncâu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0\nTỔNG: ĐẠT\n",
+      "head": "\nbien_nhan_v2: 291 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 344\ncâu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0\nTỔNG: ĐẠT\n"
+    },
+    "land": {
+      "stdout_equal": true,
+      "base": "vidence.yaml\nĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml\nĐẠT ops/land/pr995-wp960-land-evidence.yaml\nland_evidence_nguon: 75 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 100\nTỔNG: ĐẠT\n",
+      "head": "vidence.yaml\nĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml\nĐẠT ops/land/pr995-wp960-land-evidence.yaml\nland_evidence_nguon: 75 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 100\nTỔNG: ĐẠT\n"
+    },
+    "direct": {
+      "stdout_equal": true,
+      "base": "t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi: PASS\nt27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc: PASS\nt27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen: PASS\n3/3 PASS\n",
+      "head": "t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi: PASS\nt27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc: PASS\nt27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen: PASS\n3/3 PASS\n"
+    },
+    "doctrine": {
+      "stdout_equal": true,
+      "base": "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine\n",
+      "head": "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine\n"
+    },
+    "diff-check": {
+      "stdout_equal": true,
+      "base": "",
+      "head": ""
+    }
+  },
+  "mutations_verified": [
+    {
+      "receipt": "pr1110-review-1-codex-verdict.receipt.yaml",
+      "results": [
+        {
+          "rc": 1,
+          "diagnostic_receipts": [
+            "pr1110-review-1-codex-verdict.receipt.yaml"
+          ],
+          "exact_target": true,
+          "one_error": true,
+          "positive_error": true
+        },
+        {
+          "rc": 1,
+          "diagnostic_receipts": [
+            "pr1110-review-1-codex-verdict.receipt.yaml"
+          ],
+          "exact_target": true,
+          "one_error": true,
+          "positive_error": true
+        }
+      ]
+    },
+    {
+      "receipt": "pr1110-review-2-codex-verdict.receipt.yaml",
+      "results": [
+        {
+          "rc": 1,
+          "diagnostic_receipts": [
+            "pr1110-review-2-codex-verdict.receipt.yaml"
+          ],
+          "exact_target": true,
+          "one_error": true,
+          "positive_error": true
+        },
+        {
+          "rc": 1,
+          "diagnostic_receipts": [
+            "pr1110-review-2-codex-verdict.receipt.yaml"
+          ],
+          "exact_target": true,
+          "one_error": true,
+          "positive_error": true
+        }
+      ]
+    },
+    {
+      "receipt": "pr1114-review-1-codex-verdict.receipt.yaml",
+      "results": [
+        {
+          "rc": 1,
+          "diagnostic_receipts": [
+            "pr1114-review-1-codex-verdict.receipt.yaml"
+          ],
+          "exact_target": true,
+          "one_error": true,
+          "positive_error": true
+        },
+        {
+          "rc": 1,
+          "diagnostic_receipts": [
+            "pr1114-review-1-codex-verdict.receipt.yaml"
+          ],
+          "exact_target": true,
+          "one_error": true,
+          "positive_error": true
+        }
+      ]
+    },
+    {
+      "receipt": "pr1114-review-2-codex-verdict.receipt.yaml",
+      "results": [
+        {
+          "rc": 1,
+          "diagnostic_receipts": [
+            "pr1114-review-2-codex-verdict.receipt.yaml"
+          ],
+          "exact_target": true,
+          "one_error": true,
+          "positive_error": true
+        },
+        {
+          "rc": 1,
+          "diagnostic_receipts": [
+            "pr1114-review-2-codex-verdict.receipt.yaml"
+          ],
+          "exact_target": true,
+          "one_error": true,
+          "positive_error": true
+        }
+      ]
+    }
+  ]
+}

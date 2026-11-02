@@ -18,9 +18,11 @@ import json
 import os
 import pathlib
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
+import time
 
 HERE = pathlib.Path(__file__).resolve().parent
 HOOK = HERE / "subagent_ghi_detect.py"
@@ -302,12 +304,27 @@ def t11b_agent_type_lech_tren_CUNG_cay_la_UNKNOWN(h):
 def t12_anh_chup_KHONG_nam_trong_cay_dang_do(h):
     """Neu anh chup nam trong worktree thi may TU TAO dung thay doi ma no to cao."""
     c, s = _cay(), _snap()
-    goi("SubagentStart", "tl-auditor", "a12", c, s, h)
+    rc_bd, kq_bd, ly_bd, _ = goi_byte("SubagentStart", "tl-auditor", "a12", c, s, h)
     trong_cay = list(pathlib.Path(c).rglob("*.json"))
-    _, kq, _ = goi("SubagentStop", "tl-auditor", "a12", c, s, h)
+    rc, kq, ly_do, chi_tiet = goi_byte("SubagentStop", "tl-auditor", "a12", c, s, h)
+    ok = not trong_cay and kq == "clean"
+    msg = f"anh chup trong cay={len(trong_cay)} (mong doi 0) · ket_qua={kq}"
+    if not ok:
+        # WP748 r12 — registry g11 cho t12 `unknown` ma targeted 10/10 dat: nguyen nhan
+        # CHUA BIET. Khi do, in DUNG `ly_do` cua hook + ngu canh AN TOAN, CO TRAN (khong
+        # noi dung tep, chi ten duong/khoa) de lan do sau dinh vi duoc. Phan quyet khong doi.
+        msg += (f" · start=(rc={rc_bd}, {kq_bd}, {ly_bd[:160]!r}) · stop_rc={rc}"
+                f" · ly_do={ly_do[:200]!r} · chi_tiet={_tom_chi_tiet(chi_tiet)}"
+                f" · trong_cay={[str(p.relative_to(c)) for p in trong_cay][:5]}")
     shutil.rmtree(c, ignore_errors=True)
-    return (not trong_cay and kq == "clean",
-            f"anh chup trong cay={len(trong_cay)} (mong doi 0) · ket_qua={kq}")
+    return (ok, msg)
+
+
+def _tom_chi_tiet(chi_tiet, tran=400):
+    """`chi_tiet` cua hook, bo `MU` (hang so), cat TRAN — khong bao gio in noi dung tep."""
+    gon = {k: v for k, v in (chi_tiet or {}).items() if k != "MU"}
+    s = json.dumps(gon, ensure_ascii=True, sort_keys=True)
+    return s if len(s) <= tran else s[:tran] + f"...(+{len(s) - tran})"
 
 
 def t13_index_byte_khong_doi_khi_chi_DOC(h):
@@ -503,15 +520,47 @@ def _ung_vien_bash():
         if all(os.path.normcase(os.path.abspath(x)) != khoa for x in ds):
             ds.append(p)
 
-    # Giu ung vien PATH dau tien de probe co the TU CHOI vo System32 that.
-    them(shutil.which("bash"))
+    # WP748 r12 (do 16-10-2026, registry g11 `5dfb3ee`: t21 0/4 `bash: line 1: : command
+    # not found`) — GIT BASH TRUOC, ung vien PATH SAU. May co WSL KEM distro thi
+    # `System32\bash.EXE` qua ca `--version` lan `-c :`, nen dat no dau la de no THANG roi
+    # chay lenh hook trong Linux (khong co `python` => `PY` rong). Thu tu chi la uu tien;
+    # thu RA QUYET DINH van la phep do trong `_bash_tuyet_doi` (them phep mo duong ban dia).
     if os.name == "nt":
         usr_bin = _git_for_windows_usr_bin()
         if usr_bin:
             root = usr_bin.parents[1]
             them(root / "bin" / "bash.exe")
             them(usr_bin / "bash.exe")
+    them(shutil.which("bash"))
     return ds
+
+
+_DAU_BAN_DIA = b"TL329_BASH_MO_DUONG_BAN_DIA"
+
+
+def _mo_duong_ban_dia(duong, chay):
+    """Conjunct THU TU: bash phai CHAY duoc mot script truyen bang `str(Path)` ban dia.
+
+    WP748 r12: `--version` (GNU) va `-c :` deu DAT voi vo WSL co distro, nen ba conjunct cu
+    khong tach duoc no khoi Git Bash. Thu tach duoc la DUONG DAN: WSL khong mo noi
+    `C:\\...\\x.sh` (cung chu ky ma `ops/bash_nen.py` `_do_nang_luc` phep (2) da do)."""
+    tam = tempfile.mkdtemp(prefix="tl329-bash-ban-dia-")
+    try:
+        tep = pathlib.Path(tam) / "mo_duong.sh"
+        tep.write_bytes(b'printf "%s\\n" "' + _DAU_BAN_DIA + b'"\n')
+        try:
+            n = chay([duong, str(tep)], stdout=subprocess.PIPE,
+                     stderr=subprocess.PIPE, timeout=15)
+        except (OSError, subprocess.SubprocessError) as e:
+            return False, f"script_ban_dia: {type(e).__name__}: {e}"
+        ra = (n.stdout or b"") + (n.stderr or b"")
+        if n.returncode == 0 and _DAU_BAN_DIA in (n.stdout or b""):
+            return True, ""
+        tom = ra[:100].decode("utf-8", "backslashreplace").strip()
+        return False, (f"script_ban_dia_rc={n.returncode} khong mo duoc {str(tep)!r} "
+                       f"output={tom or 'RONG'}")
+    finally:
+        shutil.rmtree(tam, ignore_errors=True)
 
 
 def _bash_tuyet_doi(ung_vien=None, chay=subprocess.run):
@@ -554,6 +603,10 @@ def _bash_tuyet_doi(ung_vien=None, chay=subprocess.run):
             bi_tu_choi.append(f"{duong}: version_rc={v.returncode} shell_rc={c.returncode} "
                               f"output={tom or 'RONG'}")
             continue
+        mo_duoc, ly_mo = _mo_duong_ban_dia(duong, chay)
+        if not mo_duoc:  # named-mutant: reject-bash-cannot-open-native-path
+            bi_tu_choi.append(f"{duong}: {ly_mo}")
+            continue
         return duong, None
     if not cac:
         return None, "khong phan giai duoc `bash`"
@@ -561,12 +614,16 @@ def _bash_tuyet_doi(ung_vien=None, chay=subprocess.run):
 
 
 def _probe_bash_co_rang():
-    """Phan chung: rc, GNU-output va `bash -c` la ba conjunct doc lap."""
+    """Phan chung: rc, GNU-output, `bash -c` va mo-duong-ban-dia la bon conjunct doc lap.
+
+    `wsl_co_distro` (WP748 r12) la CA AM cua bash SAI: GNU, `-c :` rc=0 — y het vo WSL co
+    distro tren may chu kho — nhung khong chay duoc script truyen bang duong dan ban dia.
+    No dung TRUOC `tot`, nen resolver chi chon `tot` khi conjunct thu tu co rang."""
     with tempfile.TemporaryDirectory(prefix="tl329-bash-") as d:
         base = pathlib.Path(d)
-        hong, khong_gnu, khong_c, tot = (base / x for x in
-            ("hong.exe", "khong-gnu.exe", "khong-c.exe", "tot.exe"))
-        for path in (hong, khong_gnu, khong_c, tot):
+        hong, khong_gnu, khong_c, wsl, tot = (base / x for x in
+            ("hong.exe", "khong-gnu.exe", "khong-c.exe", "wsl-co-distro.exe", "tot.exe"))
+        for path in (hong, khong_gnu, khong_c, wsl, tot):
             path.touch()
 
         def gia(argv, **_kwargs):
@@ -578,11 +635,16 @@ def _probe_bash_co_rang():
                        .encode("utf-16-le") if path == os.path.normcase(str(khong_gnu))
                        else b"GNU bash, version fixture")
                 return subprocess.CompletedProcess(argv, 0, out, b"")
+            if argv[1] != "-c":      # script ban dia
+                if path == os.path.normcase(str(wsl)):
+                    return subprocess.CompletedProcess(
+                        argv, 127, b"", b"/bin/bash: C:\\x\\mo_duong.sh: No such file or directory")
+                return subprocess.CompletedProcess(argv, 0, _DAU_BAN_DIA + b"\n", b"")
             rc = 1 if path == os.path.normcase(str(khong_c)) else 0
             return subprocess.CompletedProcess(argv, rc, b"", b"")
 
         chon, _ = _bash_tuyet_doi(
-            [str(hong), str(khong_gnu), str(khong_c), str(tot)], gia)
+            [str(hong), str(khong_gnu), str(khong_c), str(wsl), str(tot)], gia)
         return chon is not None and os.path.normcase(chon) == os.path.normcase(str(tot))
 
 
@@ -644,6 +706,14 @@ def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h, doi_lenh=None):
     `None`. No ton tai de chinh ca nay CHUNG MINH duoc minh con do duoc."""
     if not _probe_bash_co_rang():
         return (False, "fixture resolver da chap nhan bash co mat nhung khong chay duoc")
+    # WP748 r12 — CA AM THAT, khong chi fixture: vo WSL o `%SystemRoot%\System32` (neu co)
+    # phai bi resolver TU CHOI tren chinh may dang chay, co distro hay khong.
+    if os.name == "nt":
+        vo_wsl = pathlib.Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "bash.exe"
+        if vo_wsl.is_file():
+            chon_wsl, _ = _bash_tuyet_doi([str(vo_wsl)])
+            if chon_wsl is not None:
+                return (False, f"resolver CHAP NHAN vo WSL {vo_wsl} — bash sai se chay lenh hook")
     goc = HERE.parent.parent
     bash, ly_do = _bash_tuyet_doi()
     if bash is None:
@@ -1342,6 +1412,11 @@ DOT_BIEN_NHAM_TEST = [
      "        if not dung_duoc:  # named-mutant: reject-present-unusable-bash\n",
      "        if False:  # named-mutant: subagent_present_unusable_bash_is_accepted\n",
      "t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT"),
+    # WP748 r12: conjunct thu tu — vo WSL co distro phai bi tu choi.
+    ("subagent_wsl_bash_cannot_open_native_path_is_accepted",
+     "        if not mo_duoc:  # named-mutant: reject-bash-cannot-open-native-path\n",
+     "        if False:  # named-mutant: subagent_wsl_bash_cannot_open_native_path_is_accepted\n",
+     "t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT"),
     # #651: moi chot cua che do nhe mot dot bien rieng.
     ("mt4_co_nhe_nhan_moi_gia_tri_khac_rong",
      '    return "nhe" if (os.environ if env is None else env).get(CO_NHE) == "1" else "du"\n',
@@ -1537,5 +1612,71 @@ def chay():
     return 0 if dat else 1
 
 
+def _xoa_cay(p):
+    """Xoa cay `p`, KE CA tep CHI DOC; khong xoa duoc thi NEM, khong nuot (#854).
+
+    Git ghi `.git/objects/**` chi doc. Linux xoa duoc tep chi doc (quyen nam o THU MUC), Windows
+    thi khong: `shutil.rmtree` nem `PermissionError` — va 43 cho `ignore_errors=True` trong bo nay
+    NUOT dung loi ay, de cay o lai trong `TMP` ma registry cap (`bo-*`), roi chot don tam cua
+    `.claude/dev/ci_dang_ky_test.py` bao DO "don thu muc tam that bai" du bo `rc=0`.
+    Go bit chi doc roi thu lai; con loi khac (vd tep con bi giu tren Windows) thi doi ngan va
+    thu lai toan cay, het lan thi de loi bay ra.
+    """
+    def go_chi_doc(ham, duong, loi):
+        loi = loi[1] if isinstance(loi, tuple) else loi   # `onerror` trao exc_info, `onexc` trao chinh loi
+        # CHI loi chi-doc khi XOA moi go bit roi thu lai; con lai (vd `os.open` can them doi so,
+        # quyen THU MUC tren Linux) thi tra NGUYEN loi goc — review Codex #854 P3.
+        if ham not in (os.unlink, os.remove, os.rmdir) or not isinstance(loi, PermissionError):
+            raise loi
+        os.chmod(duong, stat.S_IWRITE)
+        ham(duong)
+
+    kieu = {"onexc": go_chi_doc} if sys.version_info >= (3, 12) else {"onerror": go_chi_doc}
+    for lan in range(3):
+        try:
+            shutil.rmtree(p, **kieu)
+            return
+        except FileNotFoundError:
+            return
+        except OSError:
+            if lan == 2:
+                raise
+            time.sleep(0.5)
+
+
+def chay_trong_goc_tam():
+    """Chay bo trong mot GOC TAM RIENG, va don no bang `_xoa_cay` khi xong (#854).
+
+    Moi `mkdtemp`/`TemporaryDirectory` cua bo (ke ca cac kho git KHONG duoc don nhu
+    `tl329-gitcfg-`, `tl329-wt-`) roi vao goc nay qua `tempfile.tempdir`. Don hong thi bo
+    TU DO voi ly do ro, khong doi registry phat hien mot thu muc con sot ma khong biet vi sao.
+    """
+    goc, cu = tempfile.mkdtemp(prefix="tl329-bo-"), tempfile.tempdir
+    # `tempfile.tempdir` chi doi tien trinh NAY. Tien trinh con (hook, ke ca dot bien m9 khong doc
+    # `TL_SUBAGENT_SNAP_DIR`) doc bien moi truong, nen ba bien cung phai tro vao goc — review Codex
+    # #854 P2 do duoc `tl-subagent-snap/` + 7 JSON con sot NGOAI goc. Luu ca trang thai VANG de tra lai.
+    bien_cu = {k: os.environ.get(k) for k in ("TMPDIR", "TEMP", "TMP")}
+    tempfile.tempdir = goc
+    os.environ.update(dict.fromkeys(bien_cu, goc))
+    try:
+        rc = chay()
+    finally:
+        tempfile.tempdir = cu
+        for k, v in bien_cu.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+        try:
+            _xoa_cay(goc)
+            loi = f"{goc} con" if os.path.exists(goc) else ""
+        except OSError as e:
+            loi = f"{type(e).__name__}: {e}"
+    if loi:
+        print(f"TONG: DO — don goc tam cua bo that bai: {loi}")
+        return rc or 1
+    return rc
+
+
 if __name__ == "__main__":
-    sys.exit(chay())
+    sys.exit(chay_trong_goc_tam())

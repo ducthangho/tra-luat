@@ -1,0 +1,412 @@
+{
+  "base_rows": 1217,
+  "head_rows": 1240,
+  "added": 23,
+  "removed": 0,
+  "added_rows": [
+    "| `pr1110-review-1-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong. |",
+    "| `pr1110-review-1-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai e137f8c. |",
+    "| `pr1110-review-1-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. |",
+    "| `pr1110-review-1-codex-verdict.md` | `SANDBOX-KHONG-DO-DUOC` | run.json sandbox_trang_thai KHONG_DO_DUOC: launcher khong quan sat duoc co che sandbox cua luot nay (khong chung minh lenh chay ngoai sandbox). |",
+    "| `pr1110-review-1-codex-verdict.md` | `KHONG-PHAI-HEAD-CUOI` | Luot nay duyet e137f8c, KHONG phai head luc merge; head cuoi do luot 2 duyet. |",
+    "| `pr1110-review-2-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong. |",
+    "| `pr1110-review-2-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai 3a3aac5. |",
+    "| `pr1110-review-2-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. |",
+    "| `pr1114-review-1-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong. |",
+    "| `pr1114-review-1-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai e101b11. |",
+    "| `pr1114-review-1-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | Tep >500 KB (evidence/{base,head}-argv.jsonl), cache ruff evidence/ruff-cache-created/ va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. DIFF.patch CO trong kho. |",
+    "| `pr1114-review-1-codex-verdict.md` | `SANDBOX-KHONG-DO-DUOC` | run.json sandbox_trang_thai KHONG_DO_DUOC: launcher khong quan sat duoc co che sandbox cua luot nay (khong chung minh lenh chay ngoai sandbox). |",
+    "| `pr1114-review-1-codex-verdict.md` | `KHONG-PHAI-HEAD-CUOI` | Luot nay duyet e101b11, KHONG phai head luc merge; head cuoi do luot 2 duyet. |",
+    "| `pr1114-review-1-codex-verdict.md` | `WINDOWS-THAT-KHONG-DO-TRONG-SANDBOX` | Reviewer chi mo phong tran dong lenh Windows tren Linux; Windows that do o CI ngoai luot review. |",
+    "| `pr1114-review-2-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong. |",
+    "| `pr1114-review-2-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai 51435a4. |",
+    "| `pr1114-review-2-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | Tep >500 KB (evidence/initial-hashes.json) va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. DIFF.patch CO trong kho. |",
+    "| `pr1114-review-2-codex-verdict.md` | `SANDBOX-KHONG-DO-DUOC` | run.json sandbox_trang_thai KHONG_DO_DUOC: launcher khong quan sat duoc co che sandbox cua luot nay (khong chung minh lenh chay ngoai sandbox). |",
+    "| `pr1114-review-2-codex-verdict.md` | `WINDOWS-THAT-KHONG-DO-TRONG-SANDBOX` | Reviewer chi mo phong tran dong lenh Windows tren Linux; Windows that do o CI ngoai luot review. |",
+    "| [`pr1110-review-1-codex-verdict.md`](pr1110-review-1-codex-verdict.md) | [`.receipt.yaml`](pr1110-review-1-codex-verdict.receipt.yaml) | khong co (PR ghi so review #1075, chu kho giao truc tiep) | **`approve`** · `cross_approved` · luot **1** cua PR **#1110** · 0/0/0/0 (P0/P1/P2/P3) · codex CLI `launcher.py run 0f91d66d`, `gpt-6-astra` do_may · head da duyet KHONG phai head cuoi (merge `f4b513d`) · thu muc goc [`pr1110-review-1-codex/`](pr1110-review-1-codex/) | `e137f8c` | 14628 |",
+    "| [`pr1110-review-2-codex-verdict.md`](pr1110-review-2-codex-verdict.md) | [`.receipt.yaml`](pr1110-review-2-codex-verdict.receipt.yaml) | khong co (PR ghi so review #1075, chu kho giao truc tiep) | **`approve`** · `cross_approved` · luot **2** cua PR **#1110** · 0/0/0/0 (P0/P1/P2/P3) · codex CLI `launcher.py run cac7c0b6`, `gpt-6-astra` do_may · head da duyet = head PR #1110 luc merge (merge `f4b513d`) · thu muc goc [`pr1110-review-2-codex/`](pr1110-review-2-codex/) | `3a3aac5` | 10919 |",
+    "| [`pr1114-review-1-codex-verdict.md`](pr1114-review-1-codex-verdict.md) | [`.receipt.yaml`](pr1114-review-1-codex-verdict.receipt.yaml) | khong co (PR va test, chu kho chi thi truc tiep) | **`approve`** · `cross_approved` · luot **1** cua PR **#1114** · 0/0/0/0 (P0/P1/P2/P3) · codex CLI `launcher.py run df61ed4f`, `gpt-6-astra` do_may · head da duyet KHONG phai head cuoi (merge `fb74c6e`) · thu muc goc [`pr1114-review-1-codex/`](pr1114-review-1-codex/) | `e101b11` | 17095 |",
+    "| [`pr1114-review-2-codex-verdict.md`](pr1114-review-2-codex-verdict.md) | [`.receipt.yaml`](pr1114-review-2-codex-verdict.receipt.yaml) | khong co (PR va test, chu kho chi thi truc tiep) | **`approve`** · `cross_approved` · luot **2** cua PR **#1114** · 0/0/0/0 (P0/P1/P2/P3) · codex CLI `launcher.py run a545a3bc`, `gpt-6-astra` do_may · head da duyet = head PR #1114 luc merge (merge `fb74c6e`) · thu muc goc [`pr1114-review-2-codex/`](pr1114-review-2-codex/) | `51435a4` | 14674 |"
+  ],
+  "removed_rows": [],
+  "extra": [],
+  "missing": [],
+  "checks": [
+    [
+      "pr1110-review-1-codex",
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "TEP-LON-KHONG-VAO-KHO",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "SANDBOX-KHONG-DO-DUOC",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "KHONG-PHAI-HEAD-CUOI",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "one index",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "(pr1110-review-1-codex-verdict.receipt.yaml)",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "**`approve`**",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "`cross_approved`",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "luot **1**",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "PR **#1110**",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "0/0/0/0",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "0f91d66d",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "gpt-6-astra",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "f4b513d",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "(pr1110-review-1-codex/)",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "sha cell",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "bytes cell",
+      true
+    ],
+    [
+      "pr1110-review-1-codex",
+      "head clause",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "TEP-LON-KHONG-VAO-KHO",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "one index",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "(pr1110-review-2-codex-verdict.receipt.yaml)",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "**`approve`**",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "`cross_approved`",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "luot **2**",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "PR **#1110**",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "0/0/0/0",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "cac7c0b6",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "gpt-6-astra",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "f4b513d",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "(pr1110-review-2-codex/)",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "sha cell",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "bytes cell",
+      true
+    ],
+    [
+      "pr1110-review-2-codex",
+      "head clause",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "TEP-LON-KHONG-VAO-KHO",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "SANDBOX-KHONG-DO-DUOC",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "KHONG-PHAI-HEAD-CUOI",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "WINDOWS-THAT-KHONG-DO-TRONG-SANDBOX",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "one index",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "(pr1114-review-1-codex-verdict.receipt.yaml)",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "**`approve`**",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "`cross_approved`",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "luot **1**",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "PR **#1114**",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "0/0/0/0",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "df61ed4f",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "gpt-6-astra",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "fb74c6e",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "(pr1114-review-1-codex/)",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "sha cell",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "bytes cell",
+      true
+    ],
+    [
+      "pr1114-review-1-codex",
+      "head clause",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "TEP-LON-KHONG-VAO-KHO",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "SANDBOX-KHONG-DO-DUOC",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "WINDOWS-THAT-KHONG-DO-TRONG-SANDBOX",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "one index",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "(pr1114-review-2-codex-verdict.receipt.yaml)",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "**`approve`**",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "`cross_approved`",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "luot **2**",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "PR **#1114**",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "0/0/0/0",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "a545a3bc",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "gpt-6-astra",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "fb74c6e",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "(pr1114-review-2-codex/)",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "sha cell",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "bytes cell",
+      true
+    ],
+    [
+      "pr1114-review-2-codex",
+      "head clause",
+      true
+    ]
+  ],
+  "failures": []
+}

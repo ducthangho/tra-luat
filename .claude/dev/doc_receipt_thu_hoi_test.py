@@ -432,7 +432,7 @@ DB = [
     ("M1s7", "không sửa list toàn cục tại chỗ (F29)", "list_toan_cuc", ("_VANG = object()", _DAU),
      ("_NHAT_KY = []\n_VANG = object()", _DAU + "\n    _NHAT_KY.append(len(raw))"), "tinh", None),
     ("M1s8", "không mở tệp qua io.open (F29)", "io_open", _DAU, _DAU + '\n    __import__("io").open(__import__("os").devnull, "w").close()', "tinh", None),
-    ("M1s9", "không posix_spawn (F29)", "posix_spawn", _DAU, _DAU + '\n    __import__("os").posix_spawn(sys.executable, [sys.executable, "-c", "pass"], {})', "tinh", None),
+    ("M1s9", "không posix_spawn/spawnv (F29)", "posix_spawn", _DAU, _DAU + '\n    __import__("os").posix_spawn(sys.executable, [sys.executable, "-c", "pass"], {}) if hasattr(__import__("os"), "posix_spawn") else __import__("os").spawnv(__import__("os").P_WAIT, sys.executable, [sys.executable, "-c", "pass"])', "tinh", None),
     ("M8a", "regex đăng ký buộc cặp ca", "mau_bo_1", r'(\1)', r'(\d+)', "dang_ky", None),
     ("M8b", "regex đăng ký buộc cặp đột biến", "mau_bo_3", r'(\3)', r'(\d+)', "dang_ky", None),
 ]

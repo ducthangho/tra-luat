@@ -1,0 +1,8 @@
+COMMAND: ['python3.13', '-B', '/home/user/rv773/ops/land_evidence_nguon.py', '--root', '/tmp/rv773-r3-history/c6e2401', '--tep', 'ops/land/pr765-wp743-land-evidence.yaml']
+RC: 1
+MẤT MIỄN TRỪ ops/land/pr765-wp743-land-evidence.yaml: băm lệch ảnh chụp cutover — kiểm đủ luật
+ĐỎ ops/land/pr765-wp743-land-evidence.yaml: 2 vi phạm
+  L1 $.spec.nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — sha256sum tren blob trong nhanh nay (vao master qua PR ghi so nay)'
+  L1 $.dieu_kien_truoc_merge.khong_xung_dot: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — mergeable_state clean. Master troi 9fddb1d -> 1101cd2 (11 commit cua #741, chi '
+land_evidence_nguon: 0 ĐẠT · 0/1 miễn trừ (băm khớp) · 2 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ

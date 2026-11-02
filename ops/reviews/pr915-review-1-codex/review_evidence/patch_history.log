@@ -1,0 +1,8 @@
+patch -p0 --fuzz=0 rc=0; patching file CLAUDE.md
+HINT_result_equals_3bc4244=True; equals_reviewed_HEAD=True
+hint_commit=3bc4244fe5533a71b197a0efb8f79e40175c1a3e
+pr870-review-2-codex: prior_P2_note=(a) Luot truoc: pr870-review-1-codex (changes_requested tren b38fce8; P2 da va o 06a50c5).
+pr889-review-2-codex: prior_P2_note=(a) Luot truoc: pr889-review-1-codex (changes_requested tren 8d5cccb; P2 da va o 094e8d1).
+pr896-review-1-codex: prior_P2_note=(a) Luot truoc: khong co cross-review CLI truoc; Codex connector P2 tren 0bb792b da va o 816f439.
+CHUA_REVIEW_LAI la loi khai trang thai luc ghi so; khong suy tu lich su Git rang khong he co review ngoai kho.
+rc=0

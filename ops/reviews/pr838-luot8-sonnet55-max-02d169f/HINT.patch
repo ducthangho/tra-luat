@@ -1,0 +1,65 @@
+HINT.patch — reviewer lượt 8 (advisory_review, Claude Sonnet 5.5) cho PR #690 / packet #671, áp lên 02d169f47e9c171d81b17447b93bb70c53f33dc1
+Nhãn §8 (nguyên văn): chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+Áp: từ GỐC cây làm việc, `patch -p0 --fuzz=0 < HINT.patch` (đường dẫn repo-relative, không tiền tố a/ b/). MỘT tệp: ops/cong_cu_test.py.
+MỌI hunk là mã TEST (`_k32_gia`, `t63`) hoặc chú thích/docstring — KHÔNG hunk nào chạm mã sản phẩm (`_ep_utf8`, `_phong_lai`, khối phóng lại, `main()`,
+`_main_gop()`, `_CUA`), `bash_nen.py`, `.github/workflows/**`. Executor phải khai `hint_provenance` theo hunk.
+  hunk 1 (@@ -3040)  DO-GIA-DOC-DIA-CHI-TUY-Y [P4, VÁ HỜ] — `dat` đòi con trỏ nằm TRONG [64 KiB, 2^48): handle giả ~2^60 (`job`) đưa nhầm vào chỗ con trỏ
+                     nay ra FALSE như nhân Windows thay vì SIGSEGV cả tiến trình (đo: đột biến `byref(gh)`→`job` rc=-11 trên 02d169f ⇒ `(w1)` trên cây áp).
+                     Trung hoà dòng.
+  hunk 2 (@@ -6450)  LOI-KHAI-VA8 [P4] — docstring `t63` khớp hành vi (đối chứng BỎ QUA vì staging ⇒ GIẾT (0); BỎ QUA vì tiền đề `t27` ⇒ KHÔNG ĐO ĐƯỢC).
+                     Trung hoà dòng.
+  hunk 3 (@@ -6476)  T63-DOI-CHUNG-0 [P1, VÁ SINH LỖI MỚI] — đối chứng (0) vẫn GIẾT khi staging ném (3 đột biến: tiền tố INDEX / tiền tố LẠ / `_add`), nhưng
+                     KHÔNG biến `BoQuaMoiTruong` của TIỀN ĐỀ `t27` ("cây có tệp cú pháp HỎNG mà cổng không fail-close") thành `giet_that` ⇒ đột biến
+                     `bn_quet_theo_chuoi` (đích t27) về bán kính 1/61 (02d169f: `ĐỎ giết THÊM ['t63_…'] 2/61`, mảnh 3/8 RC=1). Trung hoà dòng.
+  hunk 4 (@@ -6500)  T63-CO-CHI-DO-HIEN-DIEN [P4, VÁ HỜ] — chốt (cờ) chuyển vào vòng lặp, đo ĐÚNG vòng `bo_ten` (vòng duy nhất có lệnh update-index cho tên
+                     mang dấu chéo ngược) và đòi MỌI lệnh update-index mang cờ (tập boolean == {True}: cũng không rỗng). Đột biến "cờ có ở mọi lệnh TRỪ lệnh
+                     cho tên chéo" từ SỐNG thành `giet_that (cờ)`. Trung hoà dòng.
+TRẦN DÒNG (chủ kho ~420 so master 577d7b9): vá 8 = +420/−42 (myers); áp HINT này ⇒ +420/−42 (KHÔNG thêm dòng). Dòng >118 ký tự: cả tệp 369 → 369 (hunk 1: dòng `def dat` 123→114 ký tự, dòng `ok =` 110→120).
+Không có hunk cho NGHIEM-THU-WINDOWS-CON-THIEU [P2]: KHÔNG vá được bằng mã ở Linux (chủ kho: "Chỉ chạy tại máy").
+
+diff --git ops/cong_cu_test.py ops/cong_cu_test.py
+index 0b625c8..649aee8 100644
+--- ops/cong_cu_test.py
++++ ops/cong_cu_test.py
+@@ -3040,8 +3040,8 @@ def _k32_gia(hong=""):
+         k.giu.append(cb)       # SẢN PHẨM tự gán argtypes/restype như với WinDLL; `k.giu` giữ callback sống kẻo treo
+         setattr(k, ten, ctypes.CFUNCTYPE(i)(ctypes.cast(cb, vp).value))
+ 
+-    def dat(h, lop, p, n):     # `p` = ĐỊA CHỈ ctypes truyền; < 64 KiB (số đưa làm con trỏ) ⇒ FALSE như nhân, không SIGSEGV
+-        ok = h in k.job and lop == 9 and (p or 0) >= 1 << 16 and n == (144 if ctypes.sizeof(vp) == 8 else 112)
++    def dat(h, lop, p, n):     # `p` = ĐỊA CHỈ ctypes truyền; ngoài [64 KiB, 2^48) ⇒ FALSE như nhân, không SIGSEGV
++        ok = h in k.job and lop == 9 and 1 << 16 <= (p or 0) < 1 << 48 and n == (144 if ctypes.sizeof(vp) == 8 else 112)
+         if ok:
+             k.job[h].update(co=int.from_bytes(ctypes.string_at(p + 16, 4), "little"))
+         return int(bool(ok))
+@@ -6450,8 +6450,8 @@ def t63_t49_hong_STAGE_tung_buoc_phai_BO_QUA_dung_buoc():
+     (`Ignoring path`, rc=0) — `t49` phải đo xong (3) và hai chốt THUẦN (2d) rồi MỚI bỏ qua (stage đứng CUỐI), không
+     nuốt, không ném sớm; `bo_hong` bỏ riêng `hong_` (2b) — chỗ gọi mà mọi phép tráo khác dừng trước khi tới.
+     ĐỐI CHỨNG: `t49` KHÔNG tráo chạy trước. Nó XANH mà `t49` ĐỎ dưới phép tráo ⇒ ĐỎ OAN khi stage hỏng (spec §2B)
+-    ⇒ giết; nó ĐỎ ⇒ KHÔNG ĐO ĐƯỢC (đột biến đích `t49` giữ bán kính 1/N); nó BỎ QUA (nền không stage được) ⇒
+-    chiều ĐỎ oan không đo ở nền ấy. `t49` bỏ qua vì lý do KHÁC dưới phép tráo ⇒ KHÔNG ĐO ĐƯỢC."""
++    ⇒ giết; nó ĐỎ ⇒ KHÔNG ĐO ĐƯỢC (đột biến đích `t49` giữ bán kính 1/N); nó BỎ QUA vì staging (nền không nhận tên,
++    chốt ném bừa) ⇒ giết (0); BỎ QUA vì tiền đề `t27` (fail-close) hay lý do KHÁC dưới phép tráo ⇒ KHÔNG ĐO ĐƯỢC."""
+     nhat_ky = []
+ 
+     def trao(buoc, cach):
+@@ -6476,7 +6476,7 @@ def t63_t49_hong_STAGE_tung_buoc_phai_BO_QUA_dung_buoc():
+         t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC()
+         doi_chung_xanh = True
+     except BoQuaMoiTruong as ex:
+-        bang(False, f"(0) đối chứng t49 KHÔNG tráo mà đã BỎ QUA — chốt staging ném bừa thì che mọi tráo: {ex}")
++        doi_chung_xanh = False if "fail-close" in str(ex) else bang(False, f"(0) đối chứng t49 mà BỎ QUA: {ex}")
+     except TinHieuChotCa as ex:
+         raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: t49 ĐỎ cả khi KHÔNG tráo: {ex}") from ex
+     for buoc, cach, dau in (("hash-object", "rc", "rc=128/0"), ("update-index", "rc", "rc=0/128"),
+@@ -6500,8 +6500,8 @@ def t63_t49_hong_STAGE_tung_buoc_phai_BO_QUA_dung_buoc():
+              "(bo_ten) t49 BỎ QUA trước khi đo (3) — phần stage phải đứng CUỐI ca")
+         bang(cach != "bo_ten" or any(lenh[0] == "(2d)" for lenh in nhat_ky),
+              "(bo_ten) t49 BỎ QUA trước hai chốt THUẦN (2d) — phần stage phải đứng CUỐI ca")
+-    bang(any("core.protectNTFS=false" in lenh for lenh in nhat_ky if "update-index" in lenh),
+-         "(cờ) update-index thiếu -c core.protectNTFS=false — Windows bỏ tên có dấu chéo ngược (handoff §1/§2)")
++        bang(cach != "bo_ten" or {"core.protectNTFS=false" in l for l in nhat_ky if "update-index" in l} == {True},
++             "(cờ) MỌI update-index phải mang -c core.protectNTFS=false (Windows bỏ tên chéo ngược, handoff §1)")
+ 
+ 
+ @ca

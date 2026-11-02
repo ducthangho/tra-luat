@@ -1,0 +1,15 @@
+{"mutant": "n1-window-before", "old": "cua = dong_tep[max(0, j - 1):j + 2]", "new": "cua = dong_tep[j:j + 2]", "target": "c88"}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "giet_that", "message": "i-tu-khai: đòi rc=1, được 0: loi=[] chua=[]"}
+{"mutant": "n1-window-before", "control": [true, ""], "file": "/tmp/bnv2-dotbien-5dhs_fex/ops/bien_nhan_v2.py"}
+{"mutant": "n2-commit-case", "old": "_RE_SAU_COMMIT = re.compile(r\"\\bcommit\\s*\\Z\", re.IGNORECASE)", "new": "_RE_SAU_COMMIT = re.compile(r\"\\bcommit\\s*\\Z\")", "target": "c87"}
+{"case": "c87_B3_OID_khong_tra_duoc_theo_NGU_CANH", "state": "giet_that", "message": "sau-commit: đòi rc=2, được 0: loi=[] chua=[]"}
+{"mutant": "n2-commit-case", "control": [true, ""], "file": "/tmp/bnv2-dotbien-8ubj8ufc/ops/bien_nhan_v2.py"}
+{"mutant": "n3-review-round-order", "old": "lon = sorted(t for t, lu in sau if lu > luot_nay)", "new": "lon = sorted(t for t, lu in sau if lu < luot_nay)", "target": "c69"}
+{"case": "c69_A1_cau_chua_review_ma_luot_sau_DA_review_dung_SHA", "state": "giet_that", "message": "co-luot-sau: đòi rc=1, được 0: []"}
+{"mutant": "n3-review-round-order", "control": [true, ""], "file": "/tmp/bnv2-dotbien-6p6hm4ux/ops/bien_nhan_v2.py"}
+{"mutant": "n5-citation-line-digit", "old": "_RE_TRICH_DAN = re.compile(r\"[\\w./-]+\\.[A-Za-z0-9]+:\\d+\")", "new": "_RE_TRICH_DAN = re.compile(r\"[\\w./-]+\\.[A-Za-z0-9]+:\\d{2,}\")", "target": "c88"}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "giet_that", "message": "ii-trich-dan-ke: đòi rc=0, được 1: loi=[\"[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`\"] chua=[]"}
+{"mutant": "n5-citation-line-digit", "control": [true, ""], "file": "/tmp/bnv2-dotbien-dkk8oqgt/ops/bien_nhan_v2.py"}
+{"mutant": "n7-citation-current-only", "old": "any(_RE_TRICH_DAN.search(x) for x in cua)", "new": "_RE_TRICH_DAN.search(dong)", "target": "c88"}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "giet_that", "message": "ii-trich-dan-ke: đòi rc=0, được 1: loi=[\"[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`\"] chua=[]"}
+{"mutant": "n7-citation-current-only", "control": [true, ""], "file": "/tmp/bnv2-dotbien-aqhq8a2d/ops/bien_nhan_v2.py"}

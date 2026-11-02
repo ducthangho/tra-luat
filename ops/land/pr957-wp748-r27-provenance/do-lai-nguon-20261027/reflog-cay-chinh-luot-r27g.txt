@@ -1,0 +1,10 @@
+# trich reflog cay chinh /home/user/tra-luat (phien executor), do 2026-10-27T03:32:59Z. Lenh luot r27g goi /home/user/tra-luat/.claude/dev/launcher.py (verdicts/wp748-r27-r27g-run.json bat_dau 00:59:04Z, ket_thuc 01:10:44Z).
+$ git reflog -n 3 --date=iso   (HEAD)
+f577ab5 HEAD@{2026-10-27 02:42:11 +0000}: checkout: moving from agent/wp748-r27-claude to ccr-e425b16e-j9g9p7
+8d4638e HEAD@{2026-10-26 00:19:26 +0000}: checkout: moving from ccr-e425b16e-j9g9p7 to agent/wp748-r27-claude
+$ git reflog show agent/wp748-r27-claude --date=iso | head -2
+8575a16 agent/wp748-r27-claude@{2026-10-27 00:50:17 +0000}: merge origin/master: Merge made by the 'ort' strategy.
+9a50525 agent/wp748-r27-claude@{2026-10-27 00:50:17 +0000}: commit: launcher(#748 r27): sua finding cross-review r27f — doi chieu canh cha TRUOC return vi goc vang
+$ git rev-parse 8575a16:.claude/dev/launcher.py
+b81e78ba86b9cec7a9bced6cbedbc2da2507af24
+# gioi han: reflog khong chung minh cay lam viec SACH trong cua so 00:59–01:10Z; chi chung minh HEAD.

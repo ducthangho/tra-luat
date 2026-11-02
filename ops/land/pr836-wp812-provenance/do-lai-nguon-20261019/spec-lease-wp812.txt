@@ -1,0 +1,15 @@
+# 2026-10-18T23:59:11Z
+$ git rev-parse origin/ops/wp812-spec
+77816dd18e725ab70ae815704a95575eb74a25d6
+$ git show origin/ops/wp812-spec:ops/specs/wp812-r2.md | sha256sum
+d64987461d89429ca97230ec5e796bf987bb9383d765279543e6a7fc14513eef  -
+$ git rev-parse origin/ops/wp812-spec:ops/specs/wp812-r2.md
+d5b56893f457067a66eea0da60f411677a0ee3f2
+$ git show origin/ops/wp812-spec:ops/leases/wp812-r2-g3-claude.yaml | grep -E "^(lease_id|spec_hash|lease_until|lease_expires_at_utc|base_sha|granted_on_instruction|thay_the_cho|da_bi_thay_the):"
+lease_id: wp812-r2-g3-claude
+spec_hash: d64987461d89429ca97230ec5e796bf987bb9383d765279543e6a7fc14513eef
+base_sha: 4c7c29858220ae575bebc5e0a343842cd3db4546
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/812#issuecomment-6248507114
+lease_until: '2026-10-20T10:05:00Z'
+lease_expires_at_utc: '2026-10-20T10:05:00Z'
+thay_the_cho:

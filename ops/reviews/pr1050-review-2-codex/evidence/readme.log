@@ -1,0 +1,17 @@
+ROUND 1 TOC_COUNT 1
+TOC_ROW | [`wp1037-g1-codex-luot1-verdict.md`](wp1037-g1-codex-luot1-verdict.md) | [`.receipt.yaml`](wp1037-g1-codex-luot1-verdict.receipt.yaml) | `wp1037-r1-g1-claude` (gen **1**, revision **1**, spec_hash `253f12ae…`) | **`changes_requested`** · `cross_reviewed` · luot **1** cua packet **#1037** · 0/0/1/2 (P0/P1/P2/P3) · codex CLI `launcher.py run 4d0668e2`, `gpt-6-astra` do_may · thu muc goc [`wp1037-g1-codex-luot1/`](wp1037-g1-codex-luot1/) | `016852a` | 14251 |
+VERDICT_IN_ROW True ASSURANCE_IN_ROW True SHA_IN_ROW True BYTES_IN_ROW True
+LINK wp1037-g1-codex-luot1-verdict.md EXISTS True
+LINK wp1037-g1-codex-luot1-verdict.receipt.yaml EXISTS True
+LINK wp1037-g1-codex-luot1/ EXISTS True
+CAVEAT 1 CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY COUNT 1
+CAVEAT 1 SCRIPT-DO-DOC-DUONG-DAN-SANDBOX COUNT 1
+ROUND 2 TOC_COUNT 1
+TOC_ROW | [`wp1037-g1-codex-luot2-verdict.md`](wp1037-g1-codex-luot2-verdict.md) | [`.receipt.yaml`](wp1037-g1-codex-luot2-verdict.receipt.yaml) | `wp1037-r1-g1-claude` (gen **1**, revision **1**, spec_hash `253f12ae…`) | **`approve`** · `cross_approved` · luot **2** cua packet **#1037** · 0/0/0/0 (P0/P1/P2/P3) · codex CLI `launcher.py run e400a320`, `gpt-6-astra` do_may · head da duyet = head PR #1041 luc merge (`b29da0b`) · thu muc goc [`wp1037-g1-codex-luot2/`](wp1037-g1-codex-luot2/) | `9146632` | 10679 |
+VERDICT_IN_ROW True ASSURANCE_IN_ROW True SHA_IN_ROW True BYTES_IN_ROW True
+LINK wp1037-g1-codex-luot2-verdict.md EXISTS True
+LINK wp1037-g1-codex-luot2-verdict.receipt.yaml EXISTS True
+LINK wp1037-g1-codex-luot2/ EXISTS True
+CAVEAT 2 CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY COUNT 1
+CAVEAT 2 SCRIPT-DO-DOC-DUONG-DAN-SANDBOX COUNT 1
+NEW_TOP_LEVEL_ENTRIES ['ops/reviews/wp1037-g1-codex-luot1', 'ops/reviews/wp1037-g1-codex-luot1-verdict.md', 'ops/reviews/wp1037-g1-codex-luot1-verdict.receipt.yaml', 'ops/reviews/wp1037-g1-codex-luot2', 'ops/reviews/wp1037-g1-codex-luot2-verdict.md', 'ops/reviews/wp1037-g1-codex-luot2-verdict.receipt.yaml']

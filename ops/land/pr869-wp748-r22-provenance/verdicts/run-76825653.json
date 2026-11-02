@@ -1,0 +1,59 @@
+{
+  "version": "1.5.0",
+  "run_id": "768256536c964edc86f076dd64c608f8",
+  "short_id": "76825653",
+  "ten": "wp748-l22e-launcher",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 16,
+    "van_tay": "9d30a3a532e419d3"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-22T10:51:51.603961+00:00",
+  "ket_thuc_utc": "2026-10-22T11:06:35.453809+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 25807,
+  "khoa_danh_tinh": "linux:286421",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/90305cb1-2842-509b-9816-acb554eadd20/scratchpad/rvL/l22e/src",
+  "head": "b9318cc26101d2697be19ac44be5700534ba0256",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "3842bc9cc5159f1e76ad32c0faf2b838a900a34b322174c5e41ce797e86604b0",
+  "deadline_utc": "2026-10-22T12:41:51+00:00",
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "a7248d0aacfc46ce1b469609f132f00421ef08f11da751b81a3251e575de0e86",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/90305cb1-2842-509b-9816-acb554eadd20/scratchpad/rvL/runs/76825653/prompt.snapshot",
+  "prompt_kin_hoan_toan": false,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 883.85,
+  "stdout_byte": 734105,
+  "stdout_sha256": "e84150e2090bfd58515a1b62415bf7af8bcb8abd7cbf9c2a3d0bc4b71b96fa50",
+  "stderr_byte": 39,
+  "stderr_sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+}

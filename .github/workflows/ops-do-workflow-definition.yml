@@ -1,0 +1,49 @@
+name: ops — đo mốc Workflow definition (chỉ đọc)
+
+# CI-PROVENANCE-WD r1 (Issue #1094, ADR-0060 packet B): đo mốc Workflow definition §10.2.2 của MỘT run bằng GraphQL
+# `WorkflowRun.file`, thứ phiên Claude Code trên web không gọi được (403). Chỉ đọc: không ghi Issue, PR hay kho.
+# Ra artifact `workflow-definition-<run_id>` (`wd.json`); `thu --wd-run <id lượt này>` nhập và tự tính lại blob/sha256.
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "id workflow run cần đo mốc Workflow definition"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  do-wd:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          persist-credentials: false
+      - name: cài PyYAML
+        run: python3 -m pip install --quiet PyYAML==6.0.3
+      - name: đo Workflow definition
+        env:
+          RUN_ID: ${{ inputs.run_id }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          python3 ops/ci_provenance.py do-wd --repo "$REPO" --run "$RUN_ID" --out wd.json
+          rc=$?
+          if [ ! -f wd.json ]; then
+            printf '{"schema": "wd/1", "trang_thai": "not_measured", "ly_do": "collector_khong_ghi_rc_%s"}\n' "$rc" > wd.json
+          fi
+          cat wd.json
+          { echo '```json'; cat wd.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit "$rc"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workflow-definition-${{ inputs.run_id }}
+          path: wd.json

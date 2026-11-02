@@ -1,0 +1,19 @@
+HEAD: 4b3f07ed64e45e65cc4645b8601c666bafed8bd0
+210ab81:ops/vm tree: 3fe463ea420030e625990339e72a8219d3263486
+HEAD:ops/vm tree: 3fe463ea420030e625990339e72a8219d3263486
+ops/vm ls-tree byte equality: True
+ops/vm diff bytes: 0
+Changed paths vs origin/master: 125
+Counts: {'ops/land': 16, 'ops/reviews': 106, 'ops/vm': 3}
+Outside allowed paths: []
+Numstat: 19	4	ops/vm/README.md
+259	58	ops/vm/cap-nhat-cong-cu.ps1
+941	0	ops/vm/cap-nhat-cong-cu_test.ps1
+Merge 7aa7b8b vs master 1bc4684: rows master=1124, head=1124, missing=0, all nonempty lines missing=0
+Merge outside scoped paths: [] ; deleted master files: []
+Merge HEAD vs master 7b845f5: rows master=1140, head=1146, missing=0, all nonempty lines missing=0
+Merge outside scoped paths: [] ; deleted master files: []
+Initial checkout snapshot files (tracked/untracked/ignored, excluding .git): 9414
+Initial status including ignored: ''
+core.abbrev: 7
+SCOPE: PASS

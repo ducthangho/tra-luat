@@ -1,0 +1,25 @@
+{
+ "total_count": 2,
+ "jobs": [
+  {
+   "id": 124896936117,
+   "name": "launcher (windows-latest)",
+   "conclusion": "failure",
+   "labels": [
+    "windows-latest"
+   ],
+   "runner_id": 1000032677,
+   "head_sha": "c82047da4d6f9546ce1d68282c37acf9567b74bc"
+  },
+  {
+   "id": 124896936329,
+   "name": "launcher (ubuntu-latest)",
+   "conclusion": "success",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000032678,
+   "head_sha": "c82047da4d6f9546ce1d68282c37acf9567b74bc"
+  }
+ ]
+}

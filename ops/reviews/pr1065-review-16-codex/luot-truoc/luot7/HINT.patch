@@ -1,0 +1,31 @@
+--- ops/vm/cap-nhat-cong-cu_test.ps1
++++ ops/vm/cap-nhat-cong-cu_test.ps1
+@@ -306,6 +306,9 @@
+         foreach ($e in "$g/Tools/Python312/python.exe", "$g/Tools/npm/claude.cmd", "$g/Tools/npm/codex.cmd", "$g/PF/nodejs/npm.cmd", "$g/nlm/Scripts/python.exe", "$g/nlm/Scripts/nlm.exe", "$g/venv/Scripts/python.exe") {
+             [IO.File]::WriteAllText($e, $shim); & chmod +x $e
+         }
++        # Phản chứng thật: fixture đã tạo venv đầy đủ, rồi làm mất prerequisite trước khi chạy hàm sản phẩm.
++        if ($CheDo -eq 'nlm-thieu-python') { Remove-Item -LiteralPath "$g/nlm/Scripts/python.exe" -Force }
++        if ($CheDo -eq 'nlm-thieu-venv') { Remove-Item -LiteralPath "$g/nlm" -Recurse -Force }
+         $npmGia = "$g/PF/nodejs/npm.cmd"
+         # npm CÓ lúc Test-Path rồi BIẾN MẤT trước lúc gọi ⇒ `& $npm` ném CommandNotFoundException, không đặt $LASTEXITCODE.
+         function Test-Path { param($LiteralPath)
+@@ -352,6 +355,18 @@
+         # stdout có version hợp lệ vẫn không đủ khi chính --version exit9; pip và storage đều rc0.
+         $k = Invoke-NguoiDungGia 'nlm-version-hong'
+         -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'nlm')[0].hanh_dong -eq 'loi'
++    }
++    Ca 'nd_chikiem_nlm_thieu_python_phai_ghi_loi' {
++        $k = Invoke-NguoiDungGia 'nlm-thieu-python' -Kiem
++        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'nlm')[0].hanh_dong -eq 'loi'
++    }
++    Ca 'nd_chikiem_nlm_thieu_venv_phai_ghi_loi' {
++        $k = Invoke-NguoiDungGia 'nlm-thieu-venv' -Kiem
++        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'nlm')[0].hanh_dong -eq 'loi'
++    }
++    Ca 'nd_cai_that_nlm_thieu_venv_giu_hanh_vi_cu' {
++        $k = Invoke-NguoiDungGia 'nlm-thieu-venv'
++        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'nlm')[0].hanh_dong -eq 'bo_qua'
+     }
+     Ca 'nd_chikiem_doi_chung_khong_loi' {
+         # Đối chứng: chốt ChiKiem mới không được biến lượt kiểm lành thành lỗi.

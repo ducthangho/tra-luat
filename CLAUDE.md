@@ -53,7 +53,16 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   parity không phải nghi lễ, nó là thứ duy nhất bắt được.
 - **PowerShell — 3 bẫy đã trả giá** (r244; chú thích chi tiết nằm ngay tại code):
   · `$Args` là biến tự động (xem trên) → đặt tên khác, vd `$Argv`.
-  · `Get-Content -Raw` trên tệp **RỖNG** trả `$null` → `[regex]::Match` ném "Value cannot be null"; ép `[string]`.
+  · `Get-Content -Raw` trên tệp **RỖNG** (0 byte, **hoặc chỉ có BOM** `EF BB BF`) trả `$null` → `[regex]::Match`
+  ném "Value cannot be null", `.Trim()`/`.StartsWith()` ném "null-valued expression". **Ép kiểu một BIỂU THỨC
+  KHÔNG cứu được**: `[string](Get-Content -Raw …)` VẪN là `$null` (đo 30-10-2026 trên PS 5.1.26100 và 7.6.9, cả
+  hai loại tệp). Chỉ hai dạng ra `""`: khai BIẾN có kiểu `[string]$x = Get-Content -Raw …`, hoặc nối chuỗi
+  `'' + (Get-Content -Raw …)`. `deploy-package.ps1` an toàn là nhờ dòng `if ($null -eq $txt)` ngay sau phép ép,
+  không nhờ phép ép. Hậu quả tuỳ ngữ cảnh (đo 30-10-2026, cùng hai bản PS): gọi `.Trim()` trên `$null` trong điều
+  kiện `if`, NGOÀI `try`, dưới `ErrorActionPreference = 'Continue'` ⇒ nhánh bị BỎ QUA và script chạy tiếp (`rc=0`);
+  cùng ca dưới `'Stop'` ⇒ script dừng (`rc=1`); bọc trong `try` ⇒ nhảy vào `catch` ở cả hai chế độ. Đừng mở rộng
+  thành "mọi lỗi trong `if` đều bỏ qua": `throw` trong điều kiện dừng script kể cả dưới `'Continue'`. Ca thứ nhất đã
+  khiến script chờ `KHOA.txt` (ADR-0057) đứng chờ ~4 phút một khoá chỉ còn BOM.
   · `Get-Item`/`Get-ChildItem` **BỎ tệp ẩn khi thiếu `-Force`** (trên Unix: mọi tên bắt đầu bằng `.`) —
   `Test-Path` thấy có mà `Get-Item` báo not-found là dấu hiệu kinh điển.
 - **Câu mô tả VỊ TRÍ của một artefact phải đúng ở CẢ HAI phía của lần merge.** Prompt reviewer neo
@@ -155,21 +164,44 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   Hỏi `get_reviews`/`get_review_comments` thấy rỗng rồi đọc thành "chưa review" ⇒ đã báo sai rằng #103
   là chỗ mù, và đăng thêm một lời gọi review với cái cớ sai — trong khi kết luận sạch đã có từ 20 phút
   trước. **Muốn biết đã review chưa thì tìm dòng `Reviewed commit:` cho ĐÚNG commit đang xét.**
-  · **(c) Gate PR và gate master KHÔNG phải một thứ.** `ci.yml` cố ý chỉ chạy `ubuntu` cho PR thường,
-  còn master chạy CẢ `ubuntu` LẪN `windows` (Windows tốn gấp đôi phút, để dành cho lượt gác cổng phát
-  hành). Nên **"PR xanh" không hàm ý "master xanh"**: với một PR THƯỜNG — không gắn nhãn `windows`,
-  không ai gọi tay — lần merge chính là lần đo Windows ĐẦU TIÊN của mã đó. Nói CÓ ĐIỀU KIỆN vì ma
-  trận cũng kèm `windows-latest` cho PR gắn nhãn `windows` và cho `workflow_dispatch`; bỏ điều kiện
-  ấy là đánh lừa người đang xem đúng một PR như vậy (cross-review bắt được, P2 trên PR #109 — và
-  trớ trêu là đoạn ngay trên đã trích đúng điều kiện đó rồi vẫn viết câu quên nó).
-  **Muốn có Windows TRƯỚC khi merge thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó.**
+  · **(c) Nền nào chạy gate KHÔNG được chép vào đây — đọc nó từ `ci.yml` và từ NHÃN JOB, mỗi lần.**
+  Mục này từng chép ma trận `os` thành văn xuôi, và văn xuôi ấy đã lệch khỏi `ci.yml` BA lần: câu gốc
+  *"PR thường chỉ chạy `ubuntu`, còn master chạy CẢ `ubuntu` LẪN `windows`"* đã chết từ packet #548
+  (`CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND`, bỏ vế `github.ref == 'refs/heads/master'` khỏi output `os` của job
+  `chuan-bi`) mà vẫn nằm đây; sửa ở PR #870 xong thì #878 (`runner_set=windows-only`) và #879 (Windows chỉ còn
+  một phần gate) làm nó cũ tiếp, phải đo lại ở PR #889. Câu cũ đã kịp gây hại thật: biên bản land commit
+  `3f6c694` khai `jobs: '23/23 success (gom windows)'` cho run **39354156843** (push `3a3a3ca` lên master) trong
+  khi cả 23 job mang nhãn `ubuntu-latest` (`ops/land/pr848-wp744-provenance/readback-jobs-39354156843.json`) —
+  Codex connector bắt thành P1 trên PR #859 (comment `r4323607674`), sửa ở PR #865. Đúng bệnh mục này dạy:
+  tin một câu GẦN TAY thay vì đọc nhãn job.
+  **Nguồn sự thật, theo thứ tự hỏi:**
+  · ma trận dự kiến = output `os` của job `chuan-bi` trong `.github/workflows/ci.yml`, cộng `exclude:` và
+  `if:` mức job của TỪNG job `gate*` (một job có thể loại Windows dù `os` có Windows);
+  · riêng hành vi của output `os` được khoá bằng `t162_M4_evaluator_toi_gian_chuan_bi` trong `ops/lease_publish_test.py`
+  (đánh giá biểu thức thật bằng `_danh_gia_bieu_thuc_chuan_bi` cho push / PR thường / PR nhãn `windows` /
+  từng `runner_set`). Ca này không đọc `exclude:` hay `if:` mức job, nên vẫn phải đọc chúng trong `ci.yml`;
+  phần mảnh/gom của `gate-cong-cu*` có chốt riêng ở `loi_g5_workflow` trong `.claude/dev/ci_dang_ky_test.py`.
+  Ca liền trước, `t161_M3_chot_nguon_duy_nhat_ma_tran_ci`, chỉ khoá CẤU TRÚC (mọi job lấy `os` từ
+  `chuan-bi`, output không bọc `fromJSON`) — nó KHÔNG đánh giá biểu thức, nên đừng đọc nó thành ma trận;
+  · một lượt chạy CỤ THỂ đã đo nền nào = trường `labels` của từng job trong `actions/runs/<id>/jobs`
+  (kèm `runner_id` khác 0 — `runner_id 0` là job chưa từng chạy). Đừng suy từ tên sự kiện hay tên workflow.
+  Ảnh chụp để định hướng, KHÔNG phải nguồn (đo 23-10-2026 trên `e63961f`, có thể đã cũ khi bạn đọc): push
+  master và PR thường ⇒ chỉ Ubuntu; gọi tay `workflow_dispatch` ⇒ hai nền, hoặc chỉ Windows với
+  `runner_set=windows-only`; Windows tự động khi push master chỉ đến từ `launcher-windows.yml` (có `paths:`, chỉ
+  đo lane launcher, không phải gate).
+  **"Có job Windows" chưa phải "gate đã đo trên Windows".** Từ #879, `gate-cong-cu` trên Windows chỉ chạy mảnh 0,
+  duyệt ca nền rồi DỪNG — bán kính đột biến chỉ đo trên Ubuntu, và ca thiếu năng lực bị `BỎ QUA` rồi trừ khỏi mẫu
+  số (`so_ca = len(CA) - len(bo_qua)` ở `ops/cong_cu_test.py`); `gate-cong-cu-gop` loại hẳn Windows; nhiều bước
+  mang `if:` theo `runner.os`. Nên một lượt Windows xanh chỉ chứng minh **các ca KHÔNG bị bỏ qua đạt trên
+  Windows** — đọc riêng các dòng `BỎ QUA` trong log — còn bán kính đột biến phải lấy từ lượt Ubuntu của CÙNG head.
+  Muốn có Windows cho gate thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó (xem input
+  `runner_set` trong `ci.yml` để khỏi trả lại phút Ubuntu khi head đã có lượt PR Ubuntu).
   Gắn nhãn `windows` KHÔNG đủ cho một PR ĐANG MỞ, và đây là bẫy thật (cross-review bắt, P2 thứ hai
   trên PR #109): `ci.yml` khai `pull_request:` mà KHÔNG khai `types:`, nên mặc định chỉ bắn ở
   `opened`/`synchronize`/`reopened` — **`labeled` không nằm trong đó**. Gắn nhãn không tự sinh lượt
   chạy nào; ma trận chỉ đọc nhãn ở lượt bắn KẾ TIẾP. Người làm theo sẽ gắn nhãn, thấy vẫn đúng một
   check Ubuntu, rồi merge mà tưởng đã có Windows. Muốn dùng nhãn thì phải kèm một cò mới sau khi gắn
   (đẩy thêm commit, hoặc đóng rồi mở lại PR) — hoặc khai `types: [..., labeled]` cho workflow.
-  Đợt 14-08 không dùng đường nào, nên cả sáu lần merge của đợt đúng là sáu lần đo Windows đầu tiên.
   Kèm theo: trên lượt master, bước `PR head contains required EOL base` LUÔN `skipped` vì nó có
   `if: github.event_name == 'pull_request'` — nên tiêu chí "không bước nào `skipped`" chỉ đúng cho
   lượt PR; bê nguyên sang lượt master là tự báo động giả.
@@ -535,6 +567,37 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   từng cổng, và `mergeable_state` cho khả năng merge. Cùng họ *"hỏi chỗ TIỆN TAY thay vì hỏi chỗ KẾT
   LUẬN ĐƯỢC GHI"*, và lần này chính ghi chú của sự kiện đã cảnh báo sẵn (*"legacy commit statuses are
   not covered"*) mà vẫn suýt đọc nhầm.
+- **CẤM MỘT CHUỖI CON để nhận diện "đường kia" là cấp tín dụng cho MỌI thông báo lỗi chứa chuỗi ấy.**
+  Đo 23-10-2026, packet #892 (PR #895). Ca `cli_dn_tep_an` của `t52` muốn nói *"không được đi đường
+  nhanh"* nên đòi dòng đầu **không chứa** `KHÔNG ĐO` — chuỗi con của dòng đường nhanh
+  `GOM: KHÔNG ĐO — …`. Nhưng dưới cây đột biến (không có `.git`) gom thật ĐỎ đúng như phải đỏ, bằng
+  `[G-head] … KHÔNG ĐO ĐƯỢC` — **cũng chứa chuỗi ấy**. Kết quả: `t52` chết dưới **MỌI** đột biến, CI đỏ
+  8/8 mảnh (26 và 28 lỗi bán kính ở hai mảnh đọc được), và con số *"13/13 giết đúng `t52`"* tôi đã báo
+  một phần là **tín dụng giả**. Bộ phân hạng không cứu được: assertion ĐÚNG là của `t52`, chỉ có ĐIỀU
+  nó kiểm là sai. Chữa: neo vào **dấu riêng** của đường cần loại (`=duong_nhanh, 0 mảnh`), không vào một
+  từ chung mà thông báo lỗi khác cũng dùng. Cùng họ *"danh sách CẤM không bao giờ đủ"*, đổi đối tượng:
+  ở đây không phải tên kẻ gian mà là **văn bản của chính mã mình** trên một nhánh mình không nghĩ tới.
+  Dấu hiệu rẻ để bắt trước khi đẩy: chạy bán kính của **vài đột biến CŨ có đích khác** sau khi sửa ca —
+  nếu chúng bỗng giết thêm ca của bạn, ca của bạn đang chết vì giàn chứ không vì chốt.
+- **TRẦN LỜI GỌI CODEX ĐỌC TỪ ĐẶC TẢ VÀ LEASE, KHÔNG TỪ ADR MỚI NHẤT.** Đo 23-10-2026, packet #892.
+  `ADR-0052` nâng trần lên tám, nhưng **chỉ áp khi đặc tả có dòng** `tran_loi_goi_codex: ADR-0052@<oid>`;
+  `wp892-r2` không có ⇒ trần cũ `ADR-0036`/`0037` là **hai**, và chính lease ghi `M-4: tối đa 3`. Phiên
+  gọi **bốn** lần (một lượt bị container cắt giữa chừng sau khi đã sinh output — vẫn tính một lời gọi
+  theo cách đếm của `ADR-0052`) rồi mới đọc trần, khi chủ kho hỏi. Đúng ra sau lượt hai chưa approve
+  phải vào Review Rescue Checkpoint. Không cổng nào đếm lời gọi (`ADR-0052` tự khai **0 cổng**), nên
+  đây thuần là kỷ luật: **trước MỖI lời gọi Codex, đếm số đã dùng và đọc trần trong lease + dòng khai
+  của đặc tả**; vượt thì dừng và xin `nang_tran` TRƯỚC khi gọi, không phải sau.
+- **GATE HẬU MERGE XANH THEO REST CHỈ LÀ MỐC RUN — `landed: true` đòi đủ BỐN mốc §10.2.2.** Đo
+  24-10-2026: Codex connector P1 trên PR #900 bắt hồ sơ land #892 khai `landed: true` từ run/jobs/
+  check-run + `kiem-gate` rc=0, trong khi Checkout (SHA/tree thật chạy), Workflow definition (blob/băm
+  qua `WorkflowRun.file`) và Gate output (command/rc/marker dương) đều chưa đo. Bốn hồ sơ cùng phiên
+  ghi trước đó (PR #893) mang đúng lỗi ấy và phải hạ ở PR #902. Trong phiên Claude Code trên web, đường
+  đo mốc Workflow definition **bị chặn**: GraphQL trả **403** *"GitHub GraphQL is not available from
+  Claude Code sessions"* (đo trên 8 run, lưu ở `ops/land/pr8{72,77,80,83,95}-*-provenance/`). Nên từ phiên
+  này, mặc định là `landed: false` + liệt kê ba mốc `not_measured`; khuôn đúng là
+  `ops/land/pr882-wp748-r23-land-evidence.yaml`. `land_evidence_nguon` **không** bắt được lỗi này — nó chỉ
+  đòi mỗi lời khai `measured` có tệp nguồn, không đòi đủ mốc — nên đừng đọc `TỔNG: ĐẠT` của nó thành
+  "đủ điều kiện landed".
 
 ## Đẩy ref từ phiên Claude Code trên web (đo 16-08-2026)
 Phiên web **KHÔNG xoá được ref** và **KHÔNG đẩy được `refs/tags/*`**. Cùng một `POST /git-receive-pack`:
@@ -848,6 +911,54 @@ không tra được.
   `python .claude/hooks/pretooluse_guard.py`; khi cwd của shell trôi vào thư mục con thì
   MỌI lệnh Bash chết trước khi chạy, và không còn đường `cd` về. Luôn dùng
   `$CLAUDE_PROJECT_DIR`.
+- **`( eval … ) > tệp` KHÔNG tương đương `$( eval … )` — subshell `( )` KẾ THỪA `set -e`, command substitution
+  thì không** (bash, trừ khi bật `inherit_errexit`). Đo 22-10-2026, packet #868: đổi `KET_QUA_CAI="$(eval "$LENH")"`
+  sang `( eval "$LENH" ) > tệp` để khỏi chờ EOF stdout. Đổi xong, các `|| { …; return 1; }` tường minh trong
+  `chon_thu_muc_chay_duoc` thành THỪA: hàm đứng CUỐI chuỗi `&&` nên errexit vẫn áp vào thân nó. Hai mutant
+  wp858_sh_nuot_loi_cygpath_w · wp858_sh_nuot_loi_ghi_github_path (bảng đột biến của
+  `.claude/dev/launcher_test.py`) vì thế SỐNG, và bộ ca không nói gì.
+  Chữa: `( set +e; eval "$LENH" ) > tệp`, giữ đúng ngữ nghĩa cũ (mã thoát là của chuỗi `&&`, chốt là các `return 1`
+  tường minh). Đổi một dạng thực thi shell sang dạng "trông tương đương" là đổi NGỮ NGHĨA errexit. Không đọc
+  code mà thấy được: chỉ đột biến mới lộ, vì hành vi trên head vẫn đúng.
+- **Hàm bash EXPORT qua môi trường (`BASH_FUNC_<tên>%%`) che được BUILTIN — tiêm lỗi mà không sửa script.**
+  Bash nạp hàm từ biến `BASH_FUNC_printf%%` lúc khởi động, và hàm thắng builtin cùng tên. Packet #868 dùng cách
+  này cho ca r868_ghi_kenh_hong_thi_dung của `.claude/dev/launcher_test.py`: `printf` giả trả rc 74 đúng cho
+  payload kênh, ép đường "ghi kênh lỗi" vốn không dựng được bằng tệp/quyền (máy chạy root). Hai điều kèm theo. (a) `_wp802_bash_env` cố ý LỌC mọi
+  `BASH_FUNC_*` khỏi môi trường thừa kế để cô lập, nên fixture phải thêm lại TƯỜNG MINH. (b) Ca phải đòi DẤU HIỆU
+  của lỗi giả trong stderr ("ca có ĐO", không chỉ `rc != 0`): rc khác 0 vì một lý do khác thì không đo gì.
+- **`/tmp/.git` RỖNG do sandbox Codex để lại SAU khi lượt chạy KẾT THÚC vẫn làm đỏ 11 ca `r484_*`** (`Codex home
+  is inside a repository`). Đo 22-10-2026, packet #868: lượt Codex xong là mount gỡ, nhưng thư mục rỗng ở lại.
+  `launcher_test` ra 238/249 với đúng 11 ca ấy đỏ; `rmdir /tmp/.git` (CHỈ thư mục rỗng, của chính lượt mình gọi)
+  thì 4/4 ca thử lại xanh. Bản #858 chỉ ghi "đỏ KHI Codex chạy song song"; câu đúng rộng hơn: đỏ cả SAU khi Codex
+  thoát. Trước khi đo `launcher_test` sau một lượt cross-review, hỏi `ls -d /tmp/.git` trước. Còn thấy thì ghi
+  đo trong điều kiện ấy, đừng đọc 11 ca đỏ thành hồi quy. Gốc lỗi: chốt kho của credential
+  store coi một `.git` RỖNG ở thư mục tổ tiên là kho. Đây là nợ của packet khác, chưa vá.
+
+## Lệnh `gh api graphql` đưa cho chủ kho chạy — máy chủ kho là Windows `cmd` (đo 27-10-2026)
+GraphQL bị chặn trong phiên Claude Code trên web (403), nên mốc Workflow definition §10.2.2 phải nhờ chủ kho chạy
+`gh api graphql` trên máy mình rồi dán output. Chủ kho báo lần nào cũng phải chạy lại lần hai vì lệnh đầu sai cú pháp.
+Gốc lỗi: máy chủ kho chạy **`cmd` của Windows** (dấu nhắc `D:\Quốc hội\tra-luat>`), không phải PowerShell hay bash.
+`cmd` không coi nháy đơn là một khối, nên lệnh viết kiểu bash/PowerShell vỡ thành nhiều đối số
+(đo 27-10, hồ sơ #945: `accepts 1 arg(s), received 27`). Nháy kép lồng nhau có dấu chéo ngược đứng trước
+cũng là chỗ dễ vỡ thứ hai.
+
+Mẫu ĐÃ CHẠY ĐÚNG trên `cmd` (27-10-2026, run 40268583940): **một dòng**, node id truyền qua biến `-f id=`, nên câu
+truy vấn chỉ có đúng một cặp nháy kép ngoài cùng, không nháy đơn, không nháy lồng:
+
+```
+gh api graphql -f id=<NODE_ID> -f query="query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt file { path repositoryFileUrl } checkSuite { commit { oid } } } } }"
+```
+
+- `<NODE_ID>` (dạng `WFR_…`) phiên TỰ lấy từ REST `GET repos/<kho>/actions/runs/<id>`, trường `node_id`, rồi
+  điền sẵn. Đừng bắt chủ kho tra số run hay tra node id.
+- Đưa **đúng một** lệnh, viết cho `cmd`. Chỉ đưa bản khác khi chủ kho nói đang dùng shell khác.
+- Phiên không chạy thử được (GraphQL 403), nên trước khi đưa lệnh phải SOÁT CHUỖI: không có nháy đơn, không có dấu
+  chéo ngược, đúng một cặp nháy kép. `$id` trong `cmd` không bị shell thay thế; `gh` nhận nguyên văn.
+- Nhận output thì đối chiếu như tiền lệ `ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml`
+  (`moc_workflow_definition_20261026`): REST run (`head_sha`, `path`, `node_id`) và blob tại OID qua
+  `contents?ref=<OID>` so với `git rev-parse <OID>:<path>`.
+- Muốn chủ kho khỏi phải chạy tay: mở phiên Claude Code ngay trên máy chủ kho (Claude Desktop, hoặc
+  `claude remote-control` trong thư mục kho), hoặc chuyển phép đo vào một workflow Actions chỉ đọc (việc của P-B, #899).
 
 ## Cấm
 - Không tự chạy lệnh có `--apply` / `source-delete` / `reg-delete` / `--clear-stale` khi user chưa duyệt (hook sẽ hỏi).

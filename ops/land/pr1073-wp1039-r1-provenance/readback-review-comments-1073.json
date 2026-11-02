@@ -1,0 +1,149 @@
+[
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4431827772",
+    "pull_request_review_id": 5722860681,
+    "id": 4431827772,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABCChTPA",
+    "diff_hunk": "@@ -216,6 +216,29 @@ python scripts/tl.py ping ; python scripts/tl.py gws-ping --env cowork\n   → màn hình cấp quyền → đồng ý scope mới; (3) Deploy → Manage deployments → Edit → New version.\n   TẠM THỜI: đọc nguyên văn đã đi qua **gws** (`tl extract` ưu tiên transport→gws, cùng GDoc, nguyên văn 100%).\n \n+\n+**A0.4e — 1 secret cho phiên cloud (Claude Code web · Codex Cloud).** Credential agent (Codex `auth.json`, token Claude,\n+khoá Gemini cho `agy`) nằm trong bundle `.enc` trên Drive, mã hoá bằng MỘT khoá `TL_MASTER_KEY` — phiên cloud chỉ cần biến đó:\n+Claude Code web → *Environment variables* của môi trường; Codex Cloud → *Secrets* của môi trường (*Setup script*:\n+`bash ops/codex_cloud_setup.sh`). Không dán khoá vào kho/prompt/issue. Hook `.claude/hooks/session-start.sh` (chỉ khi\n+`CLAUDE_CODE_REMOTE=true`) gọi `ops/cloud_agent_creds.py` `nap` rồi `cai-agy`; setup Codex chỉ gọi `nap`. `nap` chạy\n+`tl bootstrap --env code --no-nlm` (hạn `TL_CLOUD_BOOTSTRAP_TIMEOUT_GIAY`, mặc định 180 s), che khoá, in ĐÚNG MỘT dòng\n+`agent_creds: <trạng thái> — <chi tiết>`. `cai-agy` cài `agy` 1.4.12 ghim (sha512) vào `~/.local/bin/agy`, đặt\n+`modelProvider = \"gemini\"`, thêm `AGY_CLI_DISABLE_AUTO_UPDATE=1` vào `CLAUDE_ENV_FILE`. Cả hai luôn rc 0.\n+\n+| trạng thái `agent_creds:` | nghĩa → việc phải làm |\n+|---|---|\n+| `ĐÃ NẠP` | credential agent đã ghi ra đĩa → không gì |\n+| `KHÔNG CẤU HÌNH` | chưa có fileId bundle agent (`TL_AGENT_CREDS_FILEID`/`AGENT_CREDS_FILEID`) → `agent-creds-set --new` ở máy có credential |\n+| `KHÔNG ĐO ĐƯỢC` | bootstrap thoát sớm/quá hạn/sai hợp đồng, sai khoá, mất mạng → đọc dòng `[bootstrap]` ngay trên, chạy tay `python scripts/tl.py bootstrap --env code --no-nlm` |\n+| `BỎ QUA` | thiếu `TL_MASTER_KEY` → đặt biến rồi mở phiên MỚI |\n+\n+Dùng: `python scripts/tl.py agent-creds-exec --gemini -- agy models` (`GEMINI_API_KEY` CHỈ cho tiến trình con; `--claude` ⇒\n+`CLAUDE_CODE_OAUTH_TOKEN`). Đổi khoá: `tl secrets-keygen` → `tl secrets-stage` (mã hoá lại) → `tl agent-creds-set --codex\n+--claude-token-env --antigravity-key-env` → cập nhật `TL_MASTER_KEY` ở cả hai nền. Giới hạn Codex Cloud: secret chỉ có lúc",
+    "path": "references/RUNBOOK.md",
+    "commit_id": "901644d8f7d24562ee666591f3917b094c5f1426",
+    "original_commit_id": "901644d8f7d24562ee666591f3917b094c5f1426",
+    "user": {
+      "login": "chatgpt-codex-connector[bot]",
+      "id": 199175422,
+      "node_id": "BOT_kgDOC98s_g",
+      "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+      "html_url": "https://github.com/apps/chatgpt-codex-connector",
+      "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Document a supported agent-bundle key rotation procedure**\n\nWhen rotating an existing installation to a new `TL_MASTER_KEY`, this `agent-creds-set` command cannot re-encrypt the existing agent bundle: `cmd_agent_creds_set` first decrypts it with the current key and returns rc 3 before uploading if decryption fails. An isolated old-key/new-key fixture reproduced rc 3 with zero uploads. Running the command before changing keys instead leaves the bundle encrypted under the old key, so updating the cloud environments still breaks credential loading. Correct this RUNBOOK recipe to recreate or migrate the agent bundle under the new key and configure its file ID/access; `agent-creds-set --help` describes `--new` as creating a new file, not rotating in place. Add an old-key→new-key round-trip regression test, including verification that neither cloud environment remains pointed at the old bundle.\n\nUseful? React with 👍 / 👎.\n\n<!-- codex-code-review-finding:v1 -->",
+    "created_at": "2026-10-31T13:17:31Z",
+    "updated_at": "2026-10-31T13:17:31Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/1073#discussion_r4431827772",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1073",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4431827772"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/1073#discussion_r4431827772"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1073"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4431827772/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": 237,
+    "start_side": "RIGHT",
+    "line": null,
+    "original_line": 238,
+    "side": "RIGHT",
+    "author_association": "NONE",
+    "original_position": 23,
+    "position": 1,
+    "subject_type": "line",
+    "is_copilot_code_review": false,
+    "copilot_code_review_sources": [
+
+    ]
+  },
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4431840395",
+    "pull_request_review_id": 5722876982,
+    "id": 4431840395,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABCCiEiw",
+    "diff_hunk": "@@ -216,6 +216,29 @@ python scripts/tl.py ping ; python scripts/tl.py gws-ping --env cowork\n   → màn hình cấp quyền → đồng ý scope mới; (3) Deploy → Manage deployments → Edit → New version.\n   TẠM THỜI: đọc nguyên văn đã đi qua **gws** (`tl extract` ưu tiên transport→gws, cùng GDoc, nguyên văn 100%).\n \n+\n+**A0.4e — 1 secret cho phiên cloud (Claude Code web · Codex Cloud).** Credential agent (Codex `auth.json`, token Claude,\n+khoá Gemini cho `agy`) nằm trong bundle `.enc` trên Drive, mã hoá bằng MỘT khoá `TL_MASTER_KEY` — phiên cloud chỉ cần biến đó:\n+Claude Code web → *Environment variables* của môi trường; Codex Cloud → *Secrets* của môi trường (*Setup script*:\n+`bash ops/codex_cloud_setup.sh`). Không dán khoá vào kho/prompt/issue. Hook `.claude/hooks/session-start.sh` (chỉ khi\n+`CLAUDE_CODE_REMOTE=true`) gọi `ops/cloud_agent_creds.py` `nap` rồi `cai-agy`; setup Codex chỉ gọi `nap`. `nap` chạy\n+`tl bootstrap --env code --no-nlm` (hạn `TL_CLOUD_BOOTSTRAP_TIMEOUT_GIAY`, mặc định 180 s), che khoá, in ĐÚNG MỘT dòng\n+`agent_creds: <trạng thái> — <chi tiết>`. `cai-agy` cài `agy` 1.4.12 ghim (sha512) vào `~/.local/bin/agy`, đặt\n+`modelProvider = \"gemini\"`, thêm `AGY_CLI_DISABLE_AUTO_UPDATE=1` vào `CLAUDE_ENV_FILE`. Cả hai luôn rc 0.\n+\n+| trạng thái `agent_creds:` | nghĩa → việc phải làm |\n+|---|---|\n+| `ĐÃ NẠP` | credential agent đã ghi ra đĩa → không gì |\n+| `KHÔNG CẤU HÌNH` | chưa có fileId bundle agent (`TL_AGENT_CREDS_FILEID`/`AGENT_CREDS_FILEID`) → `agent-creds-set --new` ở máy có credential |\n+| `KHÔNG ĐO ĐƯỢC` | bootstrap thoát sớm/quá hạn/sai hợp đồng, sai khoá, mất mạng → đọc dòng `[bootstrap]` ngay trên, chạy tay `python scripts/tl.py bootstrap --env code --no-nlm` |\n+| `BỎ QUA` | thiếu `TL_MASTER_KEY` → đặt biến rồi mở phiên MỚI |\n+\n+Dùng: `python scripts/tl.py agent-creds-exec --gemini -- agy models` (`GEMINI_API_KEY` CHỈ cho tiến trình con; `--claude` ⇒\n+`CLAUDE_CODE_OAUTH_TOKEN`). Đổi khoá: `tl secrets-keygen` → `tl secrets-stage` (mã hoá lại) → `tl agent-creds-set --codex\n+--claude-token-env --antigravity-key-env` → cập nhật `TL_MASTER_KEY` ở cả hai nền. Giới hạn Codex Cloud: secret chỉ có lúc",
+    "path": "references/RUNBOOK.md",
+    "commit_id": "901644d8f7d24562ee666591f3917b094c5f1426",
+    "original_commit_id": "901644d8f7d24562ee666591f3917b094c5f1426",
+    "user": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "Đã kiểm, finding đúng: `cmd_agent_creds_set` (`scripts/tl_gws.py`) khi chạy không có `--new` sẽ giải mã bản cũ bằng `TL_MASTER_KEY` hiện tại, nên sau khi đổi khoá thì trả rc 3 và upload 0 tệp.\n\nĐã sửa ở `9783b42`. Công thức trong RUNBOOK A0.4e nay là:\n1. Đặt khoá mới, chạy `tl secrets-stage`.\n2. Chạy `tl agent-creds-set --new …` để tạo bundle MỚI mã hoá bằng khoá mới.\n3. Bật anyone-with-link cho bundle mới.\n4. Đặt `TL_AGENT_CREDS_FILEID=<fileId mới>` cùng `TL_MASTER_KEY` mới ở cả hai nền.\n\n`bootstrap` và `agent-creds-exec` đều đọc `TL_AGENT_CREDS_FILEID` trước hằng `AGENT_CREDS_FILEID`, nên không còn nền nào trỏ về bundle cũ.\n\nPhần ca hồi quy khoá cũ → khoá mới chưa làm: nó phải kiểm `cmd_agent_creds_set`/`_bootstrap_agent_creds` trong `scripts/tl_gws.py`, mà tệp này nằm ngoài write set của packet #1039. Ca ấy cần một packet riêng.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+    "created_at": "2026-10-31T13:22:17Z",
+    "updated_at": "2026-10-31T13:22:17Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/1073#discussion_r4431840395",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1073",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4431840395"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/1073#discussion_r4431840395"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1073"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4431840395/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": 237,
+    "start_side": "RIGHT",
+    "line": null,
+    "original_line": 238,
+    "side": "RIGHT",
+    "in_reply_to_id": 4431827772,
+    "author_association": "OWNER",
+    "original_position": 23,
+    "position": 1,
+    "subject_type": "line",
+    "is_copilot_code_review": false,
+    "copilot_code_review_sources": [
+
+    ]
+  }
+]

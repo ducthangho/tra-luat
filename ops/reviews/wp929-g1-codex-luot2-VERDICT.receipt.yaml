@@ -1,0 +1,94 @@
+schema_version: 2
+receipt_id: wp929-g1-codex-luot2-40d42d53
+kind: review_delivery_receipt
+packet_id: wp929
+packet_issue: 929
+target_pull_request: 933
+land_merge_commit: ab94c4fb01d0d122d2f00a1f2c386c6a191349c5
+land_merge_commit_ghi_chu: '(a) merge commit cua PR #933 tren master (2026-10-26T00:29:09Z).'
+revision: 1
+generation: 1
+lease_id: wp929-r1-g1-claude
+lease_gan_theo: >-
+  (a) ops/leases/wp929-r1-g1-claude.yaml: cua so [2026-10-25T15:30:00Z, 2026-10-26T00:33:00Z) sau rut han.
+  Commit reviewed_sha 227dcde luc 2026-10-25T16:42:31Z va commit neo verdict 8d3f655 luc 2026-10-25T17:29:37Z (committer time,
+  UTC) deu nam trong cua so; thong diep commit neo mang 'handoff(#929)'.
+luot: 2
+role: reviewer
+provider: codex
+executor_provider: claude
+executor_ghi_chu: 'lease g1 (a, doc tep): provider claude, surface claude_code, model claude-opus-5-5 — TU KHAI trong lease'
+cross_provider: true
+review_class: sensitive
+assurance: cross_reviewed
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  Verdict approve, khac ho model theo khai bao, nhung run.json khong co model_phuc_vu nen ho model da phuc vu
+  KHONG DO DUOC; khong dat muc bang chung do_may/khai_co_audit ma ADR-0050 doi cho cross_approved. Head land
+  ab94c4f = 227dcde + merge master (f3b54d2), khong phai head da duyet.
+verdict: approve
+verdict_nguon: '(a) dong 1 tep verdict `Verdict: approve`'
+verdict_path: ops/reviews/wp929-g1-codex-luot2-VERDICT.md
+verdict_sha256: 40d42d53d7b30f7e703eced0376803907aa3b3a57d1d62dd697adcac25c30e49
+verdict_bytes: 12184
+reviewed_sha: 227dcdebc62c9275f9df09056f66e2124ed5f14c
+reviewed_sha_nguon: '(a) dong 2 tep verdict `Reviewed commit:`'
+reviewed_sha_to_tien: '(a) git merge-base --is-ancestor 227dcde ab94c4f: rc 0.'
+evidence_url: https://github.com/ducthangho/tra-luat/blob/8d3f6553b5b63dac9d8e79c8e017a0d5a4335cb5/ops/reviews/wp929-g1-codex-luot2-VERDICT.md
+evidence_url_ghi_chu: '(a) Neo BLOB ghim 8d3f655, commit duy nhat them tep; blob bam dung verdict_sha256.'
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 1
+so_dem_theo: finding
+so_dem_nguon: '(a) dem dong `- **[P3]` trong tep verdict; dong 7 tu tom tat "giu mot P3".'
+findings_ids:
+  - id: wp929-git-error-guards-unmeasured
+    hang: P3
+xu_ly_finding: '(b) THUAT LAI tu handoff: giu no P3 nhanh ls-tree, de xuat packet ke tiep cham packet_loop_test.py.'
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  surface_nguon: >-
+    (a) ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-run.json: launcher.py run, execution_surface subprocess (be mat cua LAUNCHER, khong phai chung nhan model);
+    lenh codex exec theo handoff ops/handoff/wp929-g1-claude.md (b).
+  surface_tu_khai_trong_verdict: 'verdict khong tu khai be mat'
+  session_run_id: 3536a415068645adab6cfed3e3de5f03
+  run_json: ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-run.json
+  run_json_ghi_chu: >-
+    (a) Do tu kho luc ghi so (hien vat vao kho o f46ddf5, 2026-10-26T01:25:13Z, to tien cua base 79dbaf4): run_id 3536a415068645adab6cfed3e3de5f03,
+    head 227dcdebc62c9275f9df09056f66e2124ed5f14c = reviewed_sha, trang_thai xong, ma_thoat 0, thoi_luong_giay 594.161, prompt_sha256 35f2eb79ff59... = sha256
+    ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-prompt.md. Ban sao verdict ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-verdict.md trung byte verdict_path.
+  prompt_path: ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-prompt.md
+  prompt_sha256: 35f2eb79ff5990b071239fe46c9464e5963ded6037768b396c5a98aea55733f5
+  stderr_header: ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-stderr-header.txt
+  model_yeu_cau: gpt-6-astra
+  model_yeu_cau_nguon: '(a) trich doan stderr-header (13 dong dau stderr.log): `model: gpt-6-astra`, `reasoning effort: xhigh` — LOI KHAI cua CLI, khong phai khung response cua may chu'
+  effort_thuat_lai: xhigh
+  effort_nguon: '(a) cung trich doan stderr-header; la cau hinh yeu cau, khong phai effort phuc vu da do'
+  model_da_chay: KHONG_DO_DUOC
+  KHONG_do_duoc: >-
+    run.json KHONG co truong model_phuc_vu (do: khoa vang; nguyen nhan KHONG DO), va kho chi
+    giu trich doan stderr chu khong giu toan stderr.log; nen model va effort THUC PHUC VU khong do duoc. Moi thu khac
+    cua runtime (run_id, head, ma thoat, thoi luong, prompt) DO DUOC tu run.json o tren.
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(b) THUAT LAI: tep verdict vao kho qua git push cua phien executor (credential chu kho); khong co ban chieu comment nguyen van.'
+  ghi_chu: 'ADR-0040: tai khoan van chuyen verdict khong phai merge authorization.'
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    (a) Blob verdict ghim o 8d3f655 (commit DUY NHAT cham tep: git log --diff-filter=A va git log tren tep tra dung
+    1 dong). Do luc ghi so 29-10-2026: 8d3f655 la to tien cua origin/master 79dbaf4 (vao qua merge fe46e7e, nhanh
+    ops/wp929-r1-g1-lease); blob bam dung verdict_sha256.
+verdict_usage_caveats:
+  - id: WP929-MODEL-PHUC-VU-KHONG-DO-DUOC
+    muc: P3
+    mo_ta: >-
+      Bien nhan ghi HAU KY o packet #1006 (29-10-2026). Hien vat runtime CO trong kho: ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-run.json, -prompt.md,
+      -stderr-header.txt (vao kho o f46ddf5). Do duoc tu do: run_id, head, ma thoat 0, thoi luong, prompt_sha256 khop
+      tep prompt. KHONG DO DUOC: model va effort thuc phuc vu — run.json khong co model_phuc_vu, stderr chi con trich doan
+      13 dong (model gpt-6-astra, effort xhigh la LOI KHAI cua CLI). Vi vay assurance dung o cross_reviewed. Ket qua
+      sandbox trong verdict la cua luot ay; chay lai phai do lai.
+nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256). Ten tep viet hoa VERDICT giu nguyen byte; t27 tu #1006 duyet khong phan biet hoa thuong.'

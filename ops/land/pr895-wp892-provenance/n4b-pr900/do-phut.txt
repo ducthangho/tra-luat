@@ -1,0 +1,2 @@
+ops/land/pr895-wp892-provenance/n4b-pr900/readback-jobs-40045105383.json: job=16 chay=15 tong=28.7 phut gate-cong-cu*=0.2 phut skipped=['gate-cong-cu']
+ops/land/pr895-wp892-provenance/readback-jobs-39995598909.json: job=23 chay=23 tong=376.4 phut gate-cong-cu*=280.6 phut skipped=[]

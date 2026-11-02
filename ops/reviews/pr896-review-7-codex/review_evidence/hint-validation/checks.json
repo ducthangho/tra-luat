@@ -1,0 +1,70 @@
+{
+  "t26": {
+    "rc": 0,
+    "summary": "\nlease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "command": [
+      "python3",
+      "ops/lease_publish_test.py",
+      "--chi-ca=t26_"
+    ]
+  },
+  "t27": {
+    "rc": 0,
+    "summary": "\nlease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "command": [
+      "python3",
+      "ops/lease_publish_test.py",
+      "--chi-ca=t27_"
+    ]
+  },
+  "t138": {
+    "rc": 0,
+    "summary": "\nlease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "command": [
+      "python3",
+      "ops/lease_publish_test.py",
+      "--chi-ca=t138_"
+    ]
+  },
+  "bien_nhan_v2": {
+    "rc": 0,
+    "summary": "bien_nhan_v2: 240 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 293\nTỔNG: ĐẠT",
+    "command": [
+      "python3",
+      "ops/bien_nhan_v2.py",
+      "--root",
+      "."
+    ]
+  },
+  "land": {
+    "rc": 0,
+    "summary": "land_evidence_nguon: 48 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 73\nTỔNG: ĐẠT",
+    "command": [
+      "python3",
+      "ops/land_evidence_nguon.py",
+      "--root",
+      "."
+    ]
+  },
+  "doctrine": {
+    "rc": 0,
+    "summary": "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine",
+    "command": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "."
+    ]
+  },
+  "doc_claims": {
+    "rc": 0,
+    "summary": "{\"ok\": true, \"strict\": false}",
+    "command": [
+      "python3",
+      "scripts/tl.py",
+      "doc-claims-check",
+      "--json"
+    ]
+  }
+}

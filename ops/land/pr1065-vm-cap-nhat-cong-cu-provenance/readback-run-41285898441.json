@@ -1,0 +1,13 @@
+{
+ "id": 41285898441,
+ "name": "gate",
+ "event": "push",
+ "path": ".github/workflows/ci.yml",
+ "head_sha": "4397ee616273a97c1503e8359452aef4e78cd75a",
+ "run_attempt": 1,
+ "status": "completed",
+ "conclusion": "cancelled",
+ "created_at": "2026-11-01T07:43:11Z",
+ "updated_at": "2026-11-01T09:07:12Z",
+ "node_id": "WFR_kwLOTNeRjc8AAAAJnNTQyQ"
+}

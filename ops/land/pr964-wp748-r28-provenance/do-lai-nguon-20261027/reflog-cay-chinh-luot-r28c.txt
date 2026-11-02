@@ -1,0 +1,10 @@
+# trich reflog cay chinh /home/user/tra-luat (phien executor), do 2026-10-27T07:03:27Z. Luot r28c goi /home/user/tra-luat/.claude/dev/launcher.py (verdicts/wp748-r28-r28c-run.json bat_dau 2026-10-27T03:31:42.317038+00:00).
+$ git reflog --date=iso | grep 2026-10-27
+b322a7b HEAD@{2026-10-27 03:52:18 +0000}: commit: ops(land): ho so land #748 wp748 r27 qua PR #957 (merge 0615234) — landed false
+f577ab5 HEAD@{2026-10-27 02:42:11 +0000}: checkout: moving from agent/wp748-r27-claude to ccr-e425b16e-j9g9p7
+8575a16 HEAD@{2026-10-27 00:50:17 +0000}: merge origin/master: Merge made by the 'ort' strategy.
+9a50525 HEAD@{2026-10-27 00:50:17 +0000}: commit: launcher(#748 r27): sua finding cross-review r27f — doi chieu canh cha TRUOC return vi goc vang
+$ git rev-parse f577ab5:.claude/dev/launcher.py 0615234:.claude/dev/launcher.py
+b81e78ba86b9cec7a9bced6cbedbc2da2507af24
+b81e78ba86b9cec7a9bced6cbedbc2da2507af24
+# launcher do la ban MASTER (r27 da merge), KHONG phai ma dang review (r28 chi sua launcher_test.py). Gioi han: reflog khong chung minh cay lam viec SACH.

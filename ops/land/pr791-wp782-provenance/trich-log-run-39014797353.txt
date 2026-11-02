@@ -1,0 +1,412 @@
+# trich log run 39014797353 (attempt 1) — tai qua GET /repos/ducthangho/tra-luat/actions/jobs/<id>/logs ngay 2026-10-18
+# phien session_017khPoiSXW9Yvefabg6MWaH; log day du KHONG luu (~0.7MB/job), ghi sha256 bytes log de doi chieu.
+# Moi job: sha256 log, runner, checkout (git log -1 sau checkout), cac buoc Run, dong marker duong, dong ##[error].
+
+== job 117349636977 | chuan-bi | conclusion success | run_attempt 1 | log sha256 d5dc1f1e3eff7dd697e3870cea1cb740951dcd6ac8dbadd182751becf21f0016 | 3519 byte
+  Version: 20261012.601
+  Image: ubuntu-24.04
+  Version: 20261012.334.1
+  Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+  buoc: Run echo "DUONG_NHANH: khong phan loai - su_kien=${SU_KIEN} khong phai pull_request, luon DAY_DU"
+
+== job 117349654506 | gate (ubuntu-latest) | conclusion success | run_attempt 1 | log sha256 2dc05c36b4dbbcd360b64ba648e914e236223f0c5d514d037a15024bba87425d | 687645 byte
+  Version: 20261012.601
+  Image: ubuntu-24.04
+  Version: 20261012.334.1
+  Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+  Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+  Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+  buoc: Run git config --global core.autocrlf false
+  buoc: Run actions/checkout@v4
+  checkout: [command]/usr/bin/git log -1 --format=%H -> 8ab100793df9831505f495543a74044b91c2c9ab
+  buoc: Run actions/setup-python@v5
+  buoc: Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+  buoc: Run bash ops/cai_actionlint.sh
+  buoc: Run bash ops/cai_cong_cu.sh shellcheck
+  buoc: Run bash ops/cai_cong_cu.sh rg
+  buoc: Run python ops/cong_cu.py kiem-tra --json
+  marker: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  buoc: Run python -m pip install --quiet ruff==0.15.15
+  buoc: Run python -m py_compile scripts/tl.py scripts/tl_boot.py scripts/gen_instructions.py scripts/tl_core/__init__.py scripts/tl_core/deterministic.py scripts/tl_core/jsonio.py scripts/tl_core/workflow.py
+  buoc: Run python .claude/dev/codex_cred_test.py
+  marker: nền: 13/13 đạt
+  marker: TỔNG: ĐẠT
+  buoc: Run python .claude/dev/idiom_py_test.py
+  marker: nền: 7/7 đạt · BỎ QUA: 0
+  marker: TỔNG: ĐẠT
+  buoc: Run python .githooks/eol_policy_test.py
+  marker: 30/30 dat
+  buoc: Run python .githooks/pre_push_test.py
+  marker: 9/9 dat
+  buoc: Run python .githooks/eol_policy.py --all --json
+  marker: "ok": true,
+  buoc: Run python .github/checks/bundle_fragment_check.py --json
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  buoc: Run python scripts/gen_instructions.py --selftest
+  buoc: Run python scripts/tl_core/command_registry_test.py
+  buoc: Run set -euo pipefail
+  marker: "ok": true,
+  buoc: Run actions/upload-artifact@v4
+  buoc: Run python scripts/tl.py workflow-audit --strict --json
+  marker: "ok": true,
+  marker: "ok": true,
+  buoc: Run python scripts/tl.py golden-test --json
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  buoc: Run python scripts/tl.py doc-claims-check --strict --json
+  marker: "ok": true,
+  buoc: Run python scripts/tl.py determinism-audit --strict --json
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  buoc: Run python .github/checks/ci_phamvi.py --kiem-bam
+  buoc: Run python .github/checks/ci_phamvi_test.py
+  buoc: Run python scripts/tl.py release-check --full --json
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  marker: "ok": true,
+  buoc: Run python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
+  marker: "ok": true,
+  buoc: Run python scripts/tl.py release-bundle --out dist/a.zip --json > /dev/null
+  buoc: Run python scripts/tl_boot.py --version
+
+== job 117349654538 | gate-cong-cu (ubuntu-latest, 0) | conclusion success | run_attempt 1 | log sha256 44c328375582bf460810553442962238b2bd5e88506bd8b2d6c925b682101050 | 118741 byte
+  Version: 20261012.601
+  Image: ubuntu-24.04
+  Version: 20261012.334.1
+  Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+  Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+  Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+  buoc: Run git config --global core.autocrlf false
+  buoc: Run actions/checkout@v4
+  checkout: [command]/usr/bin/git log -1 --format=%H -> 8ab100793df9831505f495543a74044b91c2c9ab
+  buoc: Run actions/setup-python@v5
+  buoc: Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+  buoc: Run bash ops/cai_actionlint.sh
+  buoc: Run bash ops/cai_cong_cu.sh shellcheck
+  buoc: Run bash ops/cai_cong_cu.sh rg
+  buoc: Run python ops/cong_cu.py kiem-tra --json
+  marker: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  buoc: Run actions/upload-artifact@v4
+
+== job 117349654614 | gate-cong-cu (ubuntu-latest, 1) | conclusion success | run_attempt 1 | log sha256 b2ffef4455fb0bf971eee48d5ef6c059d3d548e1a5e1587449f2f1587c34cc51 | 118545 byte
+  Version: 20261012.601
+  Image: ubuntu-24.04
+  Version: 20261012.334.1
+  Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+  Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+  Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+  buoc: Run git config --global core.autocrlf false
+  buoc: Run actions/checkout@v4
+  checkout: [command]/usr/bin/git log -1 --format=%H -> 8ab100793df9831505f495543a74044b91c2c9ab
+  buoc: Run actions/setup-python@v5
+  buoc: Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+  buoc: Run bash ops/cai_actionlint.sh
+  buoc: Run bash ops/cai_cong_cu.sh shellcheck
+  buoc: Run bash ops/cai_cong_cu.sh rg
+  buoc: Run python ops/cong_cu.py kiem-tra --json
+  marker: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  buoc: Run actions/upload-artifact@v4
+
+== job 117349654615 | gate-cong-cu (ubuntu-latest, 2) | conclusion success | run_attempt 1 | log sha256 d86a208b2a70d9b418616ca63fedaed41e6bd365b9749790bcf44c6cd7798f3d | 118592 byte
+  Version: 20261012.601
+  Image: ubuntu-24.04
+  Version: 20261012.334.1
+  Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+  Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+  Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+  buoc: Run git config --global core.autocrlf false
+  buoc: Run actions/checkout@v4
+  checkout: [command]/usr/bin/git log -1 --format=%H -> 8ab100793df9831505f495543a74044b91c2c9ab
+  buoc: Run actions/setup-python@v5
+  buoc: Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+  buoc: Run bash ops/cai_actionlint.sh
+  buoc: Run bash ops/cai_cong_cu.sh shellcheck
+  buoc: Run bash ops/cai_cong_cu.sh rg
+  buoc: Run python ops/cong_cu.py kiem-tra --json
+  marker: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  buoc: Run actions/upload-artifact@v4
+
+== job 117349654539 | gate-cong-cu (ubuntu-latest, 3) | conclusion success | run_attempt 1 | log sha256 a07b4c7de04ea8c6cf7661090a9c2ce3b54f4a307a09658decbf9b76cb31daf6 | 118556 byte
+  Version: 20261012.601
+  Image: ubuntu-24.04
+  Version: 20261012.334.1
+  Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+  Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+  Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+  buoc: Run git config --global core.autocrlf false
+  buoc: Run actions/checkout@v4
+  checkout: [command]/usr/bin/git log -1 --format=%H -> 8ab100793df9831505f495543a74044b91c2c9ab
+  buoc: Run actions/setup-python@v5
+  buoc: Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+  buoc: Run bash ops/cai_actionlint.sh
+  buoc: Run bash ops/cai_cong_cu.sh shellcheck
+  buoc: Run bash ops/cai_cong_cu.sh rg
+  buoc: Run python ops/cong_cu.py kiem-tra --json
+  marker: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  buoc: Run actions/upload-artifact@v4
+
+== job 117349654622 | gate-cong-cu (ubuntu-latest, 4) | conclusion success | run_attempt 1 | log sha256 22713c11b4506cd323d4af3d81f920314493f0a9a50c56ddd9023546d8053b0d | 118607 byte
+  Version: 20261012.601
+  Image: ubuntu-24.04
+  Version: 20261012.334.1
+  Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+  Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+  Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+  buoc: Run git config --global core.autocrlf false
+  buoc: Run actions/checkout@v4
+  checkout: [command]/usr/bin/git log -1 --format=%H -> 8ab100793df9831505f495543a74044b91c2c9ab
+  buoc: Run actions/setup-python@v5
+  buoc: Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+  buoc: Run bash ops/cai_actionlint.sh
+  buoc: Run bash ops/cai_cong_cu.sh shellcheck
+  buoc: Run bash ops/cai_cong_cu.sh rg
+  buoc: Run python ops/cong_cu.py kiem-tra --json
+  marker: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  buoc: Run actions/upload-artifact@v4
+
+== job 117349654733 | gate-cong-cu (ubuntu-latest, 5) | conclusion success | run_attempt 1 | log sha256 cade4fd86d02435aa689790459ce209c6caac90d8ff90b97187de7bef6b5fe92 | 118653 byte
+  Version: 20261012.601
+  Image: ubuntu-24.04
+  Version: 20261012.334.1
+  Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+  Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+  Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+  buoc: Run git config --global core.autocrlf false
+  buoc: Run actions/checkout@v4
+  checkout: [command]/usr/bin/git log -1 --format=%H -> 8ab100793df9831505f495543a74044b91c2c9ab
+  buoc: Run actions/setup-python@v5
+  buoc: Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+  buoc: Run bash ops/cai_actionlint.sh
+  buoc: Run bash ops/cai_cong_cu.sh shellcheck
+  buoc: Run bash ops/cai_cong_cu.sh rg
+  buoc: Run python ops/cong_cu.py kiem-tra --json
+  marker: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  buoc: Run actions/upload-artifact@v4
+
+== job 117349654571 | gate-cong-cu (ubuntu-latest, 6) | conclusion success | run_attempt 1 | log sha256 e63d4a5499b86e3f5bcc0b7285092a04f9ae9e14ed2d1197ab619cf6c683f687 | 118444 byte
+  Version: 20261012.601
+  Image: ubuntu-24.04
+  Version: 20261012.334.1
+  Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+  Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+  Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+  buoc: Run git config --global core.autocrlf false
+  buoc: Run actions/checkout@v4
+  checkout: [command]/usr/bin/git log -1 --format=%H -> 8ab100793df9831505f495543a74044b91c2c9ab
+  buoc: Run actions/setup-python@v5
+  buoc: Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+  buoc: Run bash ops/cai_actionlint.sh
+  buoc: Run bash ops/cai_cong_cu.sh shellcheck
+  buoc: Run bash ops/cai_cong_cu.sh rg
+  buoc: Run python ops/cong_cu.py kiem-tra --json
+  marker: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  buoc: Run actions/upload-artifact@v4
+
+== job 117349654570 | gate-cong-cu (ubuntu-latest, 7) | conclusion success | run_attempt 1 | log sha256 07bfadfb3de885b9b37ffed4565e90a87cd3ca2a8f398880deb9b73e4e9e54c9 | 118524 byte
+  Version: 20261012.601
+  Image: ubuntu-24.04
+  Version: 20261012.334.1
+  Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+  Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+  Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+  buoc: Run git config --global core.autocrlf false
+  buoc: Run actions/checkout@v4
+  checkout: [command]/usr/bin/git log -1 --format=%H -> 8ab100793df9831505f495543a74044b91c2c9ab
+  buoc: Run actions/setup-python@v5
+  buoc: Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+  buoc: Run bash ops/cai_actionlint.sh
+  buoc: Run bash ops/cai_cong_cu.sh shellcheck
+  buoc: Run bash ops/cai_cong_cu.sh rg
+  buoc: Run python ops/cong_cu.py kiem-tra --json
+  marker: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  buoc: Run actions/upload-artifact@v4
+
+== job 117354737295 | gate-cong-cu-gop (ubuntu-latest) | conclusion success | run_attempt 1 | log sha256 a1a9f9bca5642b8e47bf965fb7b6508532637f020664bd3c01db9fac3607ff6e | 95101 byte
+  Version: 20261012.601
+  Image: ubuntu-24.04
+  Version: 20261012.334.1
+  Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+  Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+  Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+  buoc: Run git config --global core.autocrlf false
+  buoc: Run actions/checkout@v4
+  checkout: [command]/usr/bin/git log -1 --format=%H -> 8ab100793df9831505f495543a74044b91c2c9ab
+  buoc: Run actions/setup-python@v5
+  buoc: Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+  buoc: Run actions/download-artifact@v4
+  buoc: Run python ops/cong_cu_test.py --gop manh
+  marker: SỐ LIỆU GOM: ca=56 · đột biến=470 · lỗi đột biến=0
+
+== job 117349654512 | gate-ops (ubuntu-latest) | conclusion success | run_attempt 1 | log sha256 77a6f4d4fe8ce4a3ad166ffc400d9587d94517a831a305edcfd1b10f71f010e4 | 354061 byte
+  Version: 20261012.601
+  Image: ubuntu-24.04
+  Version: 20261012.334.1
+  Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+  Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+  buoc: Run git config --global core.autocrlf false
+  buoc: Run actions/checkout@v4
+  checkout: [command]/usr/bin/git log -1 --format=%H -> 8ab100793df9831505f495543a74044b91c2c9ab
+  buoc: Run actions/setup-python@v5
+  buoc: Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+  buoc: Run bash ops/cai_cong_cu.sh shellcheck
+  buoc: Run bash ops/cai_cong_cu.sh rg
+  buoc: Run python ops/ci_duong_nhanh_test.py
+  marker: CA: 104/104 dat · 0 do · 0 hong
+  marker: TONG: DAT
+  buoc: Run python ops/bien_nhan_v2_test.py
+  marker: bien_nhan_v2_test: 68/68 ca đạt · 74/74 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 56/74 đột biến thường khai đối chứng
+  marker: TỔNG: ĐẠT
+  buoc: Run bash ops/chay_lease_publish_test.sh
+  marker: [B] lease_publish: 265/265 đạt; đã chạy=265, bỏ qua=0
+  marker: [A] lease_publish: 265/265 đạt; đã chạy=265, bỏ qua=0
+  marker: lease_publish: 265/265 đạt; đã chạy=265, bỏ qua=0
+  buoc: Run pwsh -NoProfile -File scripts/don-nhanh_test.ps1
+  marker: don-nhanh: 21/21 dat
+  buoc: Run set -euo pipefail
+
+== job 117349654524 | gate-packet-loop (ubuntu-latest) | conclusion success | run_attempt 1 | log sha256 f763b8f9337c3730805d8bd2bc26f59025c5af0d3ecf8c39fa95a06e63239725 | 122747 byte
+  Version: 20261012.601
+  Image: ubuntu-24.04
+  Version: 20261012.334.1
+  Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+  Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+  buoc: Run git config --global core.autocrlf false
+  buoc: Run actions/checkout@v4
+  checkout: [command]/usr/bin/git log -1 --format=%H -> 8ab100793df9831505f495543a74044b91c2c9ab
+  buoc: Run actions/setup-python@v5
+  buoc: Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+  buoc: Run bash ops/cai_actionlint.sh
+  buoc: Run bash ops/cai_cong_cu.sh shellcheck
+  buoc: Run bash ops/cai_cong_cu.sh rg
+  buoc: Run python ops/cong_cu.py kiem-tra --json
+  buoc: Run python -m pip install --quiet ruff==0.15.15
+  buoc: Run python .claude/dev/packet_loop_test.py
+  marker: nền: 343/343 đạt · BỎ QUA: 1
+  marker: TỔNG: ĐẠT
+
+== job 117349654555 | gate-registry (ubuntu-latest) | conclusion success | run_attempt 1 | log sha256 7429cc9c35152a3e378b05d47b820742fcc71e6ec748b293e4d71c7cb81f9582 | 258208 byte
+  Version: 20261012.601
+  Image: ubuntu-24.04
+  Version: 20261012.334.1
+  Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+  Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+  buoc: Run git config --global core.autocrlf false
+  buoc: Run actions/checkout@v4
+  checkout: [command]/usr/bin/git log -1 --format=%H -> 8ab100793df9831505f495543a74044b91c2c9ab
+  buoc: Run actions/setup-python@v5
+  buoc: Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+  buoc: Run bash ops/cai_actionlint.sh
+  buoc: Run bash ops/cai_cong_cu.sh shellcheck
+  buoc: Run bash ops/cai_cong_cu.sh rg
+  buoc: Run python ops/cong_cu.py kiem-tra --json
+  buoc: Run python -m pip install --quiet ruff==0.15.15
+  buoc: Run python .claude/dev/ci_dang_ky_test.py --chay
+  marker: nền: 28/28 đạt
+  marker: TỔNG: ĐẠT
+  marker: CA         : 42/42 đạt · 0 đỏ · ĐẠT
+  marker: ĐỘT BIẾN   : đã đo 65/65 tập giết · ĐẠT
+  marker: TỔNG: ĐẠT
+  marker: nền: 11/11 đạt
+  marker: TỔNG: ĐẠT
+  marker: TONG: CA 41/41 dat · DOT BIEN 34/34 bi giet
+  marker: TONG: DAT
+  marker: TONG: CA 45/45 dat · DOT BIEN 25/25 bi giet
+  marker: TONG: DAT
+  marker: TỔNG: ĐẠT

@@ -1,0 +1,303 @@
+{
+  "version": "1.5.0",
+  "run_id": "6c5f75a9b0ee4b3292bf232418a47eec",
+  "short_id": "6c5f75a9",
+  "ten": "wp835-g4-review-2-codex",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 11,
+    "van_tay": "c33672f91e6048a4"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-25T15:48:59.896996+00:00",
+  "ket_thuc_utc": "2026-10-25T16:04:31.984163+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 927,
+  "khoa_danh_tinh": "linux:17127",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/517f5400-8b95-5f05-af7f-37ed9798aefe/scratchpad/rv2",
+  "head": "87fd7611001ebffd20a87c934fcf578644984b4b",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "5009ec8a41b2f7e76a2856f2151736a62e3da49f",
+    "4504b80e67e4c3c8e967be92212842eb835c6e85",
+    "6986d6b2fe0c3f9ad9dd3dde0432cf2d981c2752",
+    "69cf086ad8e38b0986da2e024f172db480f7f655",
+    "4e88d335ce46977a6447f25346796c00f2c1d5e1",
+    "a0de1f9e3be9d4e63369346c58d77bdb7a1a04c1",
+    "ea2f3444e54ac16dcfc9595307bc5fc9fafcfa9a",
+    "bb0ba77bf7beafdb0d2d64e5e0009052f19a37f1",
+    "1b375dbab5f4fe2694c7e12bbf159dd1c7c53828",
+    "f0632bbb428328d16f070c8718d8f9f58848f182",
+    "f7b76c372b56e66ad4f6ea706a0c766c276bbd2d",
+    "bc57bca1cd7c01bb9627355c069c1fd6dd7a9285",
+    "a54b8259dd11a593f24cb9676fc7ae7e06a40264",
+    "3ddda026da41b0bb162a3785b93dbb953a298203",
+    "bd6ad5de4e071acc1047a4428611377338371ad9",
+    "bd401e8668f51cf147613da4f1dda7fe82f10ea1",
+    "71d2c3f247e1c7fb4c4a35ad9cae6d50eb6c3b26",
+    "bf27d822e99bf3366aebb689c9a369dd41f88693",
+    "aecdccd32b748fd5694231976193ade2e34ea10d",
+    "b2981a0c7a26c486ef5d1356186f9da609a8f6db",
+    "d46163d96fe8037f64e44578f7ec6e4156930cb8",
+    "60971e659d4ad9e837a4beee134fb90bc9bab730",
+    "f8a7829cc44f296c25faf1a6439b603ba840f70b",
+    "0a5de491f7a3f7f79f9d648be5d81f9bf06c5cb8",
+    "4c53c76d1955595a5659ab577d9dc1b64f9600ad"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "8ed771fb7875e7203222ecf52665fb6ff971bd8bfb0188dfa51121b531d7a87c",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "a3f931c56554914ce653a7332363e0f4644a8bfcfbb492a26d7cdc220a2d59a8",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/517f5400-8b95-5f05-af7f-37ed9798aefe/scratchpad/runs/6c5f75a9/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "model_phuc_vu": [
+    {
+      "response_id": "resp_0428e27932358d9d016ade24f100cc8196b1575ddcf24e6ce6",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade24f1da78819692661474acfc4ca9",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade24f6a8f481968b63ab583bed3fb2",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade24fd710c819697a1f627470f645b",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade250321d48196a570dc84596a3246",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade25062c7481968b5f4b23f825d6e2",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade2508d2f48196a83819377d1d6156",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade250b0bf08196878c9953936ee7dd",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade25100abc8196af420ffcf4160d93",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade25163be48196934adce492419fcb",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade251daa88819685483f79e5ee4885",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade2520f2288196a7d1e9cca71070f7",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade252554688196bc2187615eeeb6b1",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade2529f6f081968c0dfdf1fe658861",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade252f6394819690f2fb358f84ef26",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade253e1c848196b99044d5edabb47f",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade255087188196a5362eff983187eb",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade2562a5788196a5e7d0abe87bf364",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade2581d790819692b5df379ffb76f1",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade259de7a48196b723dc539f8716af",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade25a8796481969a3f87c628eff757",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade25ba0ecc81968ff3d620216d5ec1",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade25d508248196aa85b0154c8e4095",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade260f0bd881969a4416635d68ba78",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade262105648196be92f4fb8a38d44e",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade2627af888196b1bdc58cfac7f80a",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade262cf3488196a8f81fee495bd416",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade264767b08196bc6799f6095c8971",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade2663652c8196a3f96ba926e5a5af",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade2680309c8196a33d96aae10120d6",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade269a80888196b9ee036c462f5315",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade26c3c6fc81968955925324f3337b",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade26de31448196b4298b0ba1ff3e9a",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade26ebfbc88196a9a400e3254c7c75",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade26f62e8881969e056ebe515d0413",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade27093e4881968479dc93cf3782d1",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade275274e08196868cdf98b19aea3c",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade275e241c8196ac331b252dbdc385",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade27a449908196b74dc8f5a40648de",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade27b80df48196967e796a3af0dab9",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade27c12ae88196b383f79ac1769b9f",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade2838ae908196afac8aa52e98254a",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0428e27932358d9d016ade28883df88196b3f7718582cc8bfa",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    }
+  ],
+  "model_phuc_vu_trang_thai": "DO_DUOC",
+  "stderr_bo_dong": 319436,
+  "stderr_bo_byte": 32918858,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 932.087,
+  "stdout_byte": 294,
+  "stdout_sha256": "6adfe7cfaa0c8f7260f46babc30b65d0f400e1a9e23afa0db9f6d33aced37904",
+  "stderr_byte": 39,
+  "stderr_sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+}

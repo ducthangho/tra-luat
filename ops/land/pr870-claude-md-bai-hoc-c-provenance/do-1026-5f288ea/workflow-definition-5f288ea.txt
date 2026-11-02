@@ -1,0 +1,17 @@
+# Moc Workflow definition §10.2.2 — run 39752735359 attempt 1 (ci.yml push master, merge 5f288ea)
+# do 2026-10-26: (1) chu kho chay gh api graphql NGOAI phien Claude Code tren web (phien bi 403) tren may Windows (cmd) va dan
+#   output vao hoi thoai phien executor; ban chep nguyen van khoi `pr870`: graphql-output-chu-kho-dan-pr870.json. Bam byte output goc KHONG DO DUOC.
+# (2) phien executor xac minh URL, doi chieu REST run va tai blob tai DUNG OID qua REST contents?ref=<OID>.
+WorkflowRun.databaseId: 39752735359 · runNumber 3018 · createdAt 2026-10-22T09:05:37Z
+WorkflowRun.file.path: .github/workflows/ci.yml
+WorkflowRun.file.repositoryFileUrl: https://github.com/ducthangho/tra-luat/blob/5f288eaf7dd217e9057d2f864dc15278bfd4e597/.github/workflows/ci.yml
+  repo khop: ducthangho/tra-luat · path khop: .github/workflows/ci.yml · OID cu the (40 hex, khong phai ref troi): 5f288eaf7dd217e9057d2f864dc15278bfd4e597
+WorkflowRun.checkSuite.commit.oid: 5f288eaf7dd217e9057d2f864dc15278bfd4e597 (= OID trong URL)
+$ GET repos/ducthangho/tra-luat/actions/runs/39752735359
+  head_sha 5f288eaf7dd217e9057d2f864dc15278bfd4e597 · path .github/workflows/ci.yml · run_attempt 1 · conclusion success
+$ GET repos/ducthangho/tra-luat/contents/.github/workflows/ci.yml?ref=5f288eaf7dd217e9057d2f864dc15278bfd4e597
+  sha (blob OID): 55d06ab452a060b836fdf6fa45ba3408fc44c90c  size: 66029
+  sha256(bytes giai base64): b65940388af27074eb36d9874563482d3aa41ddcd625b1f07bf512e0a28936a0
+  bam git cua chinh bytes (sha1 cua 'blob <N>' + byte NUL + bytes): 55d06ab452a060b836fdf6fa45ba3408fc44c90c
+$ git rev-parse 5f288ea:.github/workflows/ci.yml -> 55d06ab452a060b836fdf6fa45ba3408fc44c90c
+KET LUAN: definition commit 5f288ea · blob 55d06ab452a060b836fdf6fa45ba3408fc44c90c · sha256 b65940388af27074eb36d9874563482d3aa41ddcd625b1f07bf512e0a28936a0 — khop moi nguon.

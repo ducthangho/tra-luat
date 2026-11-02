@@ -1,0 +1,6 @@
+31	34	CLAUDE.md
+27	0	ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml
+3	0	ops/land/pr889-claude-md-bai-hoc-c-provenance/SHA256SUMS.txt
+6	0	ops/land/pr889-claude-md-bai-hoc-c-provenance/readback-blob-claude-md-094e8d1-6ac385f.txt
+436	0	ops/land/pr889-claude-md-bai-hoc-c-provenance/readback-comments-889-sau-review-lai.json
+29	0	ops/land/pr889-claude-md-bai-hoc-c-provenance/readback-reactions-pr-889-sau-review-lai.json

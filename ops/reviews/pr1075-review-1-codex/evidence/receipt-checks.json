@@ -1,0 +1,472 @@
+[
+  {
+    "field": "verdict",
+    "actual": "approve",
+    "expected": "approve",
+    "ok": true
+  },
+  {
+    "field": "reviewed_sha",
+    "actual": "01044616f0258e41608feac5b01f80770beec7a5",
+    "expected": "01044616f0258e41608feac5b01f80770beec7a5",
+    "ok": true
+  },
+  {
+    "field": "reviewed_tree",
+    "actual": "eeca0a4c72f3995d462161d3572f8fb1769a9125",
+    "expected": "eeca0a4c72f3995d462161d3572f8fb1769a9125",
+    "ok": true
+  },
+  {
+    "field": "verdict_bytes",
+    "actual": 12716,
+    "expected": 12716,
+    "ok": true
+  },
+  {
+    "field": "verdict_sha256",
+    "actual": "8b8f3d9c709fcf7f9222c45c20440a47248ef38a24c2b3ae83a2ac552f720b78",
+    "expected": "8b8f3d9c709fcf7f9222c45c20440a47248ef38a24c2b3ae83a2ac552f720b78",
+    "ok": true
+  },
+  {
+    "field": "flat_verdict_bytewise",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "field": "archived_verdict_bytewise",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "field": "so_p0",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "field": "so_p1",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "field": "so_p2",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "field": "so_p3",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "field": "findings_ids",
+    "actual": [],
+    "expected": [],
+    "ok": true
+  },
+  {
+    "field": "verdict_nguon_line4",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "field": "receipt_id",
+    "actual": "pr1071-review-1-codex-8b8f3d9c",
+    "expected": "pr1071-review-1-codex-8b8f3d9c",
+    "ok": true
+  },
+  {
+    "field": "run_id",
+    "actual": "94bf04993a7d4189a78fe43a4b261cea",
+    "expected": "94bf04993a7d4189a78fe43a4b261cea",
+    "ok": true
+  },
+  {
+    "field": "short_id",
+    "actual": "94bf0499",
+    "expected": "94bf0499",
+    "ok": true
+  },
+  {
+    "field": "run_head",
+    "actual": "01044616f0258e41608feac5b01f80770beec7a5",
+    "expected": "01044616f0258e41608feac5b01f80770beec7a5",
+    "ok": true
+  },
+  {
+    "field": "run_json_path",
+    "actual": "5c1832b7537bf935d5fa7737f65ae8eff72035c6d9d9a7dce60e2a29a35cb07a",
+    "expected": "5c1832b7537bf935d5fa7737f65ae8eff72035c6d9d9a7dce60e2a29a35cb07a",
+    "ok": true
+  },
+  {
+    "field": "identity_provider",
+    "actual": "openai_codex",
+    "expected": "openai_codex",
+    "ok": true
+  },
+  {
+    "field": "identity_surface",
+    "actual": "codex_cli",
+    "expected": "codex_cli",
+    "ok": true
+  },
+  {
+    "field": "identity_transport",
+    "actual": "machine",
+    "expected": "machine",
+    "ok": true
+  },
+  {
+    "field": "ma_thoat",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "field": "trang_thai",
+    "actual": "xong",
+    "expected": "xong",
+    "ok": true
+  },
+  {
+    "field": "worktree_sach",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "field": "so_muc_ban",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "field": "duration_round",
+    "actual": 506.024,
+    "expected": 506.024,
+    "ok": true
+  },
+  {
+    "field": "receipt_duration",
+    "actual": 506.024,
+    "expected": 506.024,
+    "ok": true
+  },
+  {
+    "field": "prompt_sha256",
+    "actual": "96dd3f7144b7584f455221418a4050adb7d422be72eb4016bc28ef1dddf1cec9",
+    "expected": "96dd3f7144b7584f455221418a4050adb7d422be72eb4016bc28ef1dddf1cec9",
+    "ok": true
+  },
+  {
+    "field": "prompt_prefix_in_receipt",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "field": "launcher_json_equals_run_json",
+    "actual": "equal",
+    "expected": "equal",
+    "ok": true
+  },
+  {
+    "field": "model_status",
+    "actual": "DO_DUOC",
+    "expected": "DO_DUOC",
+    "ok": true
+  },
+  {
+    "field": "model",
+    "actual": [
+      "gpt-6-astra"
+    ],
+    "expected": [
+      "gpt-6-astra"
+    ],
+    "ok": true
+  },
+  {
+    "field": "model_da_chay",
+    "actual": [
+      "gpt-6-astra"
+    ],
+    "expected": [
+      "gpt-6-astra"
+    ],
+    "ok": true
+  },
+  {
+    "field": "event_count",
+    "actual": 27,
+    "expected": 27,
+    "ok": true
+  },
+  {
+    "field": "unique_event_count",
+    "actual": 27,
+    "expected": 27,
+    "ok": true
+  },
+  {
+    "field": "effort",
+    "actual": [
+      "xhigh"
+    ],
+    "expected": [
+      "xhigh"
+    ],
+    "ok": true
+  },
+  {
+    "field": "effort_status",
+    "actual": "DO_DUOC",
+    "expected": "DO_DUOC",
+    "ok": true
+  },
+  {
+    "field": "sandbox_status",
+    "actual": "DO_DUOC",
+    "expected": "DO_DUOC",
+    "ok": true
+  },
+  {
+    "field": "sandbox_status_in_receipt",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "field": "model_evidence_ref",
+    "actual": "ops/reviews/pr1071-review-1-codex/run/run.json#model_phuc_vu",
+    "expected": "ops/reviews/pr1071-review-1-codex/run/run.json#model_phuc_vu",
+    "ok": true
+  },
+  {
+    "field": "stdout_byte",
+    "actual": 324,
+    "expected": 324,
+    "ok": true
+  },
+  {
+    "field": "stdout_sha256",
+    "actual": "6e1e88f56a2fa9bf2134c678413121c5b35cc360a58a7ca35e5f324a1ce40beb",
+    "expected": "6e1e88f56a2fa9bf2134c678413121c5b35cc360a58a7ca35e5f324a1ce40beb",
+    "ok": true
+  },
+  {
+    "field": "stderr_byte",
+    "actual": 39,
+    "expected": 39,
+    "ok": true
+  },
+  {
+    "field": "stderr_sha256",
+    "actual": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+    "expected": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+    "ok": true
+  },
+  {
+    "field": "checkpoint_sha256",
+    "actual": "00f001a1327d063e5865bd370099a7c6c74cca1c996fb096d07032c652f61861",
+    "expected": "00f001a1327d063e5865bd370099a7c6c74cca1c996fb096d07032c652f61861",
+    "ok": true
+  },
+  {
+    "field": "checkpoint_run_id",
+    "actual": "94bf04993a7d4189a78fe43a4b261cea",
+    "expected": "94bf04993a7d4189a78fe43a4b261cea",
+    "ok": true
+  },
+  {
+    "field": "checkpoint_head",
+    "actual": "01044616f0258e41608feac5b01f80770beec7a5",
+    "expected": "01044616f0258e41608feac5b01f80770beec7a5",
+    "ok": true
+  },
+  {
+    "field": "checkpoint_prompt",
+    "actual": "96dd3f7144b7584f455221418a4050adb7d422be72eb4016bc28ef1dddf1cec9",
+    "expected": "96dd3f7144b7584f455221418a4050adb7d422be72eb4016bc28ef1dddf1cec9",
+    "ok": true
+  },
+  {
+    "field": "merge_parent_count",
+    "actual": 2,
+    "expected": 2,
+    "ok": true
+  },
+  {
+    "field": "merge_second_parent",
+    "actual": "01044616f0258e41608feac5b01f80770beec7a5",
+    "expected": "01044616f0258e41608feac5b01f80770beec7a5",
+    "ok": true
+  },
+  {
+    "field": "land_ancestor_HEAD",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "field": "land_ancestor_origin_master",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "field": "review_base",
+    "actual": "97120d3c76ebb7c3eda4b585ff46f1c51e30c91b",
+    "expected": "97120d3c76ebb7c3eda4b585ff46f1c51e30c91b",
+    "ok": true
+  },
+  {
+    "field": "evidence_url_shape",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "field": "evidence_path",
+    "actual": "ops/reviews/pr1071-review-1-codex-verdict.md",
+    "expected": "ops/reviews/pr1071-review-1-codex-verdict.md",
+    "ok": true
+  },
+  {
+    "field": "anchor_ancestor_HEAD",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "field": "anchor_sha256",
+    "actual": "8b8f3d9c709fcf7f9222c45c20440a47248ef38a24c2b3ae83a2ac552f720b78",
+    "expected": "8b8f3d9c709fcf7f9222c45c20440a47248ef38a24c2b3ae83a2ac552f720b78",
+    "ok": true
+  },
+  {
+    "field": "anchor_verdict_bytes",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "field": "anchor_ancestor_receipt_commit",
+    "actual": 0,
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "field": "artifact_anchor",
+    "actual": "629543d80388593df53e9bfbe181af2b52b007b1",
+    "expected": "629543d80388593df53e9bfbe181af2b52b007b1",
+    "ok": true
+  },
+  {
+    "field": "review_class",
+    "actual": "sensitive",
+    "expected": "sensitive",
+    "ok": true
+  },
+  {
+    "field": "effective_review_class",
+    "actual": "sensitive",
+    "expected": "sensitive",
+    "ok": true
+  },
+  {
+    "field": "classified_file_count",
+    "actual": 73,
+    "expected": 73,
+    "ok": true
+  },
+  {
+    "field": "classified_paths_within_reviews",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "field": "historical_patch_bytewise",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "field": "archived_data_unchanged_after_receipt",
+    "actual": "",
+    "expected": "",
+    "ok": true
+  },
+  {
+    "field": "ket_luan_copied",
+    "actual": 64,
+    "expected": 64,
+    "ok": true
+  },
+  {
+    "field": "ket_luan_omitted",
+    "actual": 3,
+    "expected": 3,
+    "ok": true
+  },
+  {
+    "field": "ket_luan_receipt_checks",
+    "actual": 116,
+    "expected": 116,
+    "ok": true
+  },
+  {
+    "field": "ket_luan_readme_rows",
+    "actual": 9,
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "field": "ket_luan_two_mutations",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "field": "ket_luan_matches_verdict_summary",
+    "actual": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "field": "approve_precedent_1058_fixed_fields",
+    "actual": {},
+    "expected": {},
+    "ok": true
+  },
+  {
+    "field": "approve_precedent_1050_fixed_fields",
+    "actual": {},
+    "expected": {},
+    "ok": true
+  },
+  {
+    "field": "approve_precedent_1058_caveats",
+    "actual": [
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      "TEP-LON-KHONG-VAO-KHO"
+    ],
+    "expected": [
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      "TEP-LON-KHONG-VAO-KHO"
+    ],
+    "ok": true
+  }
+]

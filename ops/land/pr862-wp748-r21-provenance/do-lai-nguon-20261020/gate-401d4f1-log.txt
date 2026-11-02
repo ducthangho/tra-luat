@@ -1,0 +1,69 @@
+# do luc 2026-10-20T07:23:33Z: log 23 job run 39380754094 (push master) qua GET actions/jobs/<id>/logs; ban tho o log-39380754094/
+# dinh nghia: run.path=.github/workflows/ci.yml; blob ci.yml @401d4f1 = 55d06ab452a060b836fdf6fa45ba3408fc44c90c
+# cot: sha256 | byte | so lan merge SHA 401d4f1 day du | dong dau duong
+== 118489085443-a1-chuan-bi.txt | 50ace693a7b8055dc2a46482eb3538102432db4ab08cf40ff6eb5709e8e8b0d9 | 3526 | sha=0
+== 118489113981-a1-gate-packet-loop_ubuntu-latest.txt | 6654e614097a97a60202631c1709384a2bdc77cc6f32dda32098ae91a98b4f12 | 167349 | sha=2
+    nền: 634/634 đạt · BỎ QUA: 1
+    TỔNG: ĐẠT
+== 118489114023-a1-gate_ubuntu-latest.txt | f5543f1cde922adeb9ec89c7f2e2d6efaca580ac4ff833e5871443dc5ae63b74 | 667164 | sha=4
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    nền: 18/18 đạt
+    TỔNG: ĐẠT
+    nền: 7/7 đạt · BỎ QUA: 0
+    TỔNG: ĐẠT
+== 118489114070-a1-gate-cong-cu_ubuntu-latest_0.txt | 4a96e306544b48b20b5188e8a1adc9e018d2b0ae9bc07371dee889494e5fbe8f | 107097 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 0/8 (59/470 đột biến; 2 tiến trình):
+    MẢNH 0/8: 59/59 đột biến bán kính 1 · ghi manh/manh-0.txt
+== 118489114071-a1-gate-cong-cu_ubuntu-latest_5.txt | 7c5a8b6bcb6b3864e25e03526ca9a2b21bad04c0e21a7cdfb170972644c458f4 | 107017 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 5/8 (59/470 đột biến; 2 tiến trình):
+    MẢNH 5/8: 59/59 đột biến bán kính 1 · ghi manh/manh-5.txt
+== 118489114081-a1-gate-ops_ubuntu-latest.txt | bda9a4cebc58d75c5513777a7123ed3432b67189686f771f23fdc6e88512a849 | 346558 | sha=2
+    DOT BIEN: 383/383 bi giet dung ly do
+    TONG: DAT
+    bien_nhan_v2_test: 68/68 ca đạt · 74/74 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 56/74 đột biến thường khai đối chứng
+    TỔNG: ĐẠT
+    [B] lease_publish: 267/267 đạt; đã chạy=267, bỏ qua=0
+    [A] lease_publish: 267/267 đạt; đã chạy=267, bỏ qua=0
+== 118489114085-a1-gate-cong-cu_ubuntu-latest_6.txt | 8e23a57980f9f5ebbc787fb052e33b62facd82a7b31ee5364a9b69b59e2b2654 | 106806 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 6/8 (58/470 đột biến; 2 tiến trình):
+    MẢNH 6/8: 58/58 đột biến bán kính 1 · ghi manh/manh-6.txt
+== 118489114088-a1-gate-nhanh-manh_ubuntu-latest_0.txt | 359ea9ceb42238e00853a90c8750977cca22b84f2f27662ea547ccb35b2c5424 | 95450 | sha=2
+== 118489114097-a1-gate-nhanh-manh_ubuntu-latest_2.txt | 6e83141f4c4f43d2f3d1048a08270914a8ec11308c0c20a6670ffaf12849473a | 96217 | sha=2
+== 118489114106-a1-gate-nhanh-manh_ubuntu-latest_7.txt | 82f1f6459e6f3ebb1a97d08eadab161ec9c5f05593c304a50aefb8185fa81da7 | 95723 | sha=2
+== 118489114116-a1-gate-cong-cu_ubuntu-latest_4.txt | 77b6ceb14b0c660bf6008c6dec8e0b453379eb3527034571ce7e2f2c174fcea5 | 108156 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 4/8 (59/470 đột biến; 2 tiến trình):
+    MẢNH 4/8: 59/59 đột biến bán kính 1 · ghi manh/manh-4.txt
+== 118489114123-a1-gate-cong-cu_ubuntu-latest_3.txt | 4fb7bbfea46d7d279f898d9102092b84ff64cd4234711838a8d4efedf546f719 | 106917 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 3/8 (59/470 đột biến; 2 tiến trình):
+    MẢNH 3/8: 59/59 đột biến bán kính 1 · ghi manh/manh-3.txt
+== 118489114167-a1-gate-nhanh-manh_ubuntu-latest_5.txt | 42fafda39ad0c1c8c602ffcf8f2c72859d2a567fe6499c87bceec3fa52566b03 | 95584 | sha=2
+== 118489114176-a1-gate-nhanh-manh_ubuntu-latest_3.txt | 7ce8d8699b79dc900c283bcfdf1bf60e5071f9b06161fd38d7631c2bfb6f0c47 | 95415 | sha=2
+== 118489114224-a1-gate-cong-cu_ubuntu-latest_1.txt | 001d4ff392eef2390b1e4c25ec5b8409a8bb185d75059f6a2622f1dd768b55d0 | 106901 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 1/8 (59/470 đột biến; 2 tiến trình):
+    MẢNH 1/8: 59/59 đột biến bán kính 1 · ghi manh/manh-1.txt
+== 118489114227-a1-gate-cong-cu_ubuntu-latest_2.txt | a28289304e4f6651bf1fcea07083f7a87af97259aa3a414308bc4379f65b97be | 106955 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 2/8 (59/470 đột biến; 2 tiến trình):
+    MẢNH 2/8: 59/59 đột biến bán kính 1 · ghi manh/manh-2.txt
+== 118489114245-a1-gate-nhanh-manh_ubuntu-latest_4.txt | 6a21355b1674032a2885937e19cf81a198eca99ab009b16565c431827765fce6 | 95805 | sha=2
+== 118489114283-a1-gate-nhanh-manh_ubuntu-latest_6.txt | 1356e816fd4ac2bd472427bcc616c554e113d70ac4913e2c2371fbbefb38616a | 95226 | sha=2
+== 118489114336-a1-gate-cong-cu_ubuntu-latest_7.txt | 10f7c4a932407e6d23477bd2889300ad6b8740b1ab9fb61923c08925df070cd0 | 106890 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 7/8 (58/470 đột biến; 2 tiến trình):
+    MẢNH 7/8: 58/58 đột biến bán kính 1 · ghi manh/manh-7.txt
+== 118489114361-a1-gate-nhanh-manh_ubuntu-latest_1.txt | 353f004e144d3c749ae01b3ad5340ecdac7e1fa938be81b41a8b1b051ae8c205 | 95223 | sha=2
+== 118489391421-a1-gate-nhanh-gop_ubuntu-latest.txt | 5de8c7c1949c0ec5badff0d16c90ae7d507b455f31e929faaec009f33d1bc2e3 | 91435 | sha=3
+== 118489480218-a1-gate-registry_ubuntu-latest.txt | 5bb24caf0fafb1a984e9d06945227f7e8a8a0f9eb73f475b26367bf2ae9445aa | 216089 | sha=3
+    doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET
+    nền: 28/28 đạt
+    TỔNG: ĐẠT
+    gh_readback tests: 8/8 ca QUA (hong 0)
+    CA         : 42/42 đạt · 0 đỏ · ĐẠT
+    TỔNG: ĐẠT
+== 118499102740-a1-gate-cong-cu-gop_ubuntu-latest.txt | 7924e0aead486e9221cb9383d8d261efbd6397d47dba6a64b4af8342e4b28631 | 94820 | sha=3

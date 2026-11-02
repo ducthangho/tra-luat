@@ -1,0 +1,14 @@
+job 119662759551 gate-packet-loop (windows-latest), run 39729983506 (workflow_dispatch) tren 9fcd49c — trich dong DO/nen/TONG tu log day du (get_job_logs):
+2026-10-22T06:34:00.7866607Z   ĐỎ  kg_r3_red_first_name_only_two_red: AssertionError: kiem-gate: rc đúng nhưng LÝ DO sai — đòi chứa "'gate2' id=2: status='completed' conclusion='cancelled' head_sha='abababababababababababababababababababab'\ngate KHÔNG xanh trên abababababababababababababababababababab: 2/2 tên bắt buộc đỏ", stderr="ĐỎ  'gate' id=1: status='completed' con
+2026-10-22T06:34:00.7876746Z   ĐỎ  kg_r3_red_count_constant_two_red: AssertionError: kiem-gate: rc đúng nhưng LÝ DO sai — đòi chứa "'gate2' id=2: status='completed' conclusion='cancelled' head_sha='abababababababababababababababababababab'\ngate KHÔNG xanh trên abababababababababababababababababababab: 2/2 tên bắt buộc đỏ", stderr="ĐỎ  'gate' id=1: status='completed' conc
+2026-10-22T06:34:00.7896332Z   ĐỎ  kg_t4_mau_do: AssertionError: kg_t4_mau_do/do_ca_nam: kiem-gate: rc đúng nhưng LÝ DO sai — đòi chứa "ĐỎ  'gate' id=1: status='completed' conclusion='cancelled' head_sha='abababababababababababababababababababab'\n  ĐỎ  'gate2' id=2: status='completed' conclusion='cancelled' head_sha='abababababababababababababababababababab'\n  ĐỎ  'gate3' i
+2026-10-22T06:34:00.7907836Z   ĐỎ  r812_r4_symlink_scope: AssertionError: r812 lease ['truoc_lease']: đòi rc=7, được rc=0; stderr=''
+2026-10-22T06:34:00.7910361Z nền: 858/862 đạt · BỎ QUA: 3
+2026-10-22T07:29:15.8433352Z   ĐỎ  đột biến r812_bo_dau_cheo_nguoc: ca ['r812_nguoi_giu_dau_cheo_nguoc'] VẪN XANH ⇒ ca đó không đo gì
+2026-10-22T07:35:37.2478413Z TỔNG: 5 lỗi
+
+job 118274789463 gate-packet-loop (windows-latest), run 39312038882 (workflow_dispatch) tren master 5618020 — nen Windows truoc #822/#856:
+2026-10-19T20:22:21.8923107Z   ĐỎ  r812_r4_symlink_scope: AssertionError: r812 lease ['truoc_lease']: đòi rc=7, được rc=0; stderr=''
+2026-10-19T20:22:21.8924546Z nền: 551/552 đạt · BỎ QUA: 3
+2026-10-19T20:44:19.7476256Z   ĐỎ  đột biến r812_bo_dau_cheo_nguoc: ca ['r812_nguoi_giu_dau_cheo_nguoc'] VẪN XANH ⇒ ca đó không đo gì
+2026-10-19T20:44:19.7542979Z TỔNG: 2 lỗi

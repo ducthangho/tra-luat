@@ -1,0 +1,50 @@
+--- ops/vm/cap-nhat-cong-cu_test.ps1
++++ ops/vm/cap-nhat-cong-cu_test.ps1
+@@ -271,7 +271,8 @@
+ # Chạy Invoke-TangNguoiDung THẬT; các "exe" là script Python có shebang nên CHỈ chạy được ngoài Windows — trên Windows các
+ # ca này KHÔNG có mặt (không đếm), phần ấy đo bằng luồng thật trên VM. Đồ giả đặt TRONG hàm nên không rò ra ca sau.
+ # Phỏng theo probes/user-errors.ps1 của reviewer lượt 4.
+-function Invoke-NguoiDungGia([string]$CheDo) {
++function Invoke-NguoiDungGia([string]$CheDo, [switch]$Kiem) {
++    $ChiKiem = [bool]$Kiem
+     $g = Join-Path ([IO.Path]::GetTempPath()) ("cncc-nd-" + [guid]::NewGuid().ToString('N'))
+     $cu = @{ pf = $env:ProgramFiles; tools = $ThuMucCongCu; nlm = $NlmVenv; venv = $VenvKho; home = $HomeCommander }
+     try {
+@@ -292,7 +293,10 @@
+         print('nlm version 0.5.0'); sys.exit(9)
+     print('Python 3.12.7' if ten == 'python.exe' else 'nlm version 0.5.0' if ten == 'nlm.exe' else '1.0.0')
+ elif a and a[0] == '-c':
+-    if 'importlib.metadata' in a[1]: print('25.0' if "'pip'" in a[1] else '6.0.3' if "'PyYAML'" in a[1] else '4.25.1')
++    if 'importlib.metadata' in a[1]:
++        print('25.0' if "'pip'" in a[1] else '6.0.3' if "'PyYAML'" in a[1] else '4.25.1')
++        if os.environ.get('CNCC_CHE_DO') == 'metadata-hong':
++            print('metadata-native-error', file=sys.stderr); sys.exit(6)
+     else: print(json.dumps({'PyYAML': '6.0.3', 'jsonschema': '4.25.1', 'actionlint': '1.7.7'}))
+ elif a and a[0] == 'auth':
+     print(json.dumps({'mode': 'file'}))
+@@ -348,6 +352,25 @@
+         # stdout có version hợp lệ vẫn không đủ khi chính --version exit9; pip và storage đều rc0.
+         $k = Invoke-NguoiDungGia 'nlm-version-hong'
+         -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'nlm')[0].hanh_dong -eq 'loi'
++    }
++    Ca 'nd_chikiem_cli_version_hong_phai_ghi_loi' {
++        $k = Invoke-NguoiDungGia 'cli-version-hong' -Kiem
++        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'claude')[0].hanh_dong -eq 'loi' -and
++            (& $hang $k 'codex')[0].hanh_dong -eq 'loi'
++    }
++    Ca 'nd_chikiem_nlm_version_hong_phai_ghi_loi' {
++        $k = Invoke-NguoiDungGia 'nlm-version-hong' -Kiem
++        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'nlm')[0].hanh_dong -eq 'loi'
++    }
++    Ca 'nd_metadata_rc_khac_0_phai_ghi_loi' {
++        $k = Invoke-NguoiDungGia 'metadata-hong'
++        -not $k.loi -and $k.kq.Count -eq 11 -and
++            @($k.kq | Where-Object { $_.cong_cu -in 'pip', 'PyYAML', 'jsonschema' -and $_.hanh_dong -eq 'loi' }).Count -eq 3
++    }
++    Ca 'nd_chikiem_metadata_rc_khac_0_phai_ghi_loi' {
++        $k = Invoke-NguoiDungGia 'metadata-hong' -Kiem
++        -not $k.loi -and $k.kq.Count -eq 11 -and
++            @($k.kq | Where-Object { $_.cong_cu -in 'pip', 'PyYAML', 'jsonschema' -and $_.hanh_dong -eq 'loi' }).Count -eq 3
+     }
+ }
+ Ca 'main_co_luoi_cuoi_ghi_nhat_ky' {

@@ -1,0 +1,44 @@
+[
+  {
+    "name": "t26",
+    "cmd": "python3 ops/lease_publish_test.py --chi-ca=t26_",
+    "rc": 0,
+    "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0\n  KHÔNG neo đầu dòng là `lease_publish: (\\d+)/(\\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ"
+  },
+  {
+    "name": "t27",
+    "cmd": "python3 ops/lease_publish_test.py --chi-ca=t27_",
+    "rc": 0,
+    "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0\n  KHÔNG neo đầu dòng là `lease_publish: (\\d+)/(\\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ"
+  },
+  {
+    "name": "t138",
+    "cmd": "python3 ops/lease_publish_test.py --chi-ca=t138_",
+    "rc": 0,
+    "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0\n  KHÔNG neo đầu dòng là `lease_publish: (\\d+)/(\\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ"
+  },
+  {
+    "name": "bien_nhan_v2",
+    "cmd": "python3 ops/bien_nhan_v2.py --root .",
+    "rc": 0,
+    "summary": "bien_nhan_v2: 241 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 294\nTỔNG: ĐẠT"
+  },
+  {
+    "name": "land",
+    "cmd": "python3 ops/land_evidence_nguon.py --root .",
+    "rc": 0,
+    "summary": "land_evidence_nguon: 48 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 73\nTỔNG: ĐẠT"
+  },
+  {
+    "name": "doctrine",
+    "cmd": "python3 .claude/dev/packet_loop.py doctrine-scan --root .",
+    "rc": 0,
+    "summary": "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine"
+  },
+  {
+    "name": "doc_claims",
+    "cmd": "python3 scripts/tl.py doc-claims-check --json",
+    "rc": 0,
+    "summary": "  \"ok\": true,\n  \"strict\": false"
+  }
+]

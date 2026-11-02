@@ -1,0 +1,46 @@
+land_operator_nguon, merge_method_nguon, merged_nguon, merge_commit.nguon: {"files": {"ops/vm/README.md": [47, 0], "ops/vm/cap-nhat-cong-cu.ps1": [515, 0], "ops/vm/cap-nhat-cong-cu_test.ps1": [135, 0]}, "head": "b0814f4a4c6dc4793b02865c6f7915b316224cdb", "merge": "3dfb9731ceda05afbcec4e803a919c4df5e2e5a2", "merged_by": "ducthangho", "parents": ["01ff65035c8b0833fa521b93239931772c14dffd", "b0814f4a4c6dc4793b02865c6f7915b316224cdb"], "tree": "ddb5ae9dc882d75b33bc6dfddcd3b4aba6dda6cc"}
+head_va_review.doi_chieu, codex_connector (review/comment/time facts): {"clean_comment": 6539133141, "created_at": "2026-10-31T04:41:52Z", "finding_id": 4430537534, "merged_at": "2026-10-31T05:35:57Z", "reply_id": 4430544980, "review_commits": ["6733d09558218c146b6c9475e6c0016d0b68d311", "b0814f4a4c6dc4793b02865c6f7915b316224cdb"], "review_request": 6539120935}
+MOC-WORKFLOW-DEFINITION: {"blob_oid": "82d9f239ff311bd1ba3d3021119b5a2f7f699ffc", "decoded_byte_equality": true, "definition_sha": "3dfb9731ceda05afbcec4e803a919c4df5e2e5a2", "node_id": "WFR_kwLOTNeRjc8AAAAJlh3b2w", "path": ".github/workflows/ci.yml", "run_id": 41173244891, "sha256": "ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb"}
+pre_merge_checks[0]: {"attempt": 1, "completed_success": true, "created_at": "2026-10-31T04:39:34Z", "event": "pull_request", "head_sha": "b0814f4a4c6dc4793b02865c6f7915b316224cdb", "id": 41169462631, "jobs": 23, "last_job_completed_at": "2026-10-31T05:35:10Z", "runner_id_zero": 0, "success": 23, "ubuntu_latest": 23, "updated_at": "2026-10-31T05:35:11Z"}
+post_merge_checks[0]: {"attempt": 1, "completed_success": true, "created_at": "2026-10-31T05:36:00Z", "event": "push", "head_sha": "3dfb9731ceda05afbcec4e803a919c4df5e2e5a2", "id": 41173244891, "jobs": 23, "last_job_completed_at": "2026-10-31T07:03:34Z", "runner_id_zero": 0, "success": 23, "ubuntu_latest": 23, "updated_at": "2026-10-31T07:03:35Z"}
+pre_merge_checks[0].check_runs: {"check_runs": 24, "completed_success": 24, "gate": 23, "thu_hoi": 1}
+cross_review luot 1: {"counts": [1, 3, 2, 0], "sha": "b0814f4a4c6dc4793b02865c6f7915b316224cdb"}
+cross_review luot 14: {"counts": [0, 0, 1, 0], "sha": "f3231c8262c732fdbbe7d0d218cecfd9238af3e0"}
+cross_review luot 15: {"counts": [0, 0, 1, 0], "sha": "c489c722db43623f1d9b2250420edce0005a96d5"}
+ASSURANCE-REVIEWER-81 + cross_review_ghi_chu: {"current_code_unchanged_from_round16": true, "historical_rounds": 15, "model": ["gpt-6.1-sol"], "round16_head": "210ab81c3f1af36243748458eb5e70180baeab71", "run_exit": 0, "run_id": "52f05f6568ee4ae8888d3e738f95158e"}
+Boundaries: {"CI_checkout_and_gate_output": "not_measured", "Windows_native": "thuat_lai", "human_merge_authorization": "thuat_lai, no durable SHA authorization retained", "landed": false, "new_head_CI": "not_measured in this offline review"}
+Actual merge Git numstat equals retained API file additions/deletions: True
+codex_connector resolved clause: {"is_resolved": true, "observed_at": "2026-10-31T14:07:20Z", "source": "extracted MCP fields, not raw response", "thread_id": "PRRT_kwDOTNeRjc6yN7uy"}
+MEASURED CHECK: $.land_operator_nguon => readback-pr-1065.json: merged_by only; actual MCP caller explicitly thuat_lai
+MEASURED CHECK: $.merge_method_nguon => readback-commit-3dfb973.json + Git parents
+MEASURED CHECK: $.trang_thai_packet.merged_nguon => readback-pr-1065.json: state, merged, merged_at, merge/head
+MEASURED CHECK: $.trang_thai_packet.merge_commit.nguon => readback-commit-3dfb973.json + Git parents/tree/numstat
+MEASURED CHECK: $.trang_thai_packet.head_va_review.doi_chieu => readback-comments-1065.json: 6539133141 reviewed b0814f4a4c
+MEASURED CHECK: $.trang_thai_packet.con_thieu_de_goi_landed[1].mo_ta => GraphQL run node + REST run/contents + Git workflow blob
+MEASURED CHECK: $.trang_thai_packet.con_thieu_de_goi_landed[3].mo_ta => round16 receipt + run + verdict + rounds1/14/15; approved PATCH at 210ab81 only
+MEASURED CHECK: $.review.cross_review_ghi_chu => round16 run + verdict; historical 15 verdict headers and summaries
+MEASURED CHECK: $.review.codex_connector.do_duoc => REST reviews/comments + thread extract; no live API authentication
+MEASURED CHECK: $.review.codex_connector.thu_tu_thoi_gian => comments 6539133141 timestamp < PR merged_at
+MEASURED CHECK: $.pre_merge_checks[0].trang_thai => pre-merge run and jobs readbacks
+MEASURED CHECK: $.pre_merge_checks[0].do_duoc => run 41169462631 + jobs: 23/23, all ubuntu-latest, runner_id nonzero
+MEASURED CHECK: $.pre_merge_checks[0].check_runs => checkruns b0814f4: 24/24, 23 + thu-hoi
+MEASURED CHECK: $.post_merge_checks[0].trang_thai => post-merge run and jobs readbacks
+MEASURED CHECK: $.post_merge_checks[0].do_duoc => run 41173244891 + jobs: 23/23; RUN marker only
+Coverage: 15 measured scalar fields; every retained numeric/identity claim above matched
+Historical cross-review summaries:
+round 1 counts (1, 3, 2, 0) ; HINT retained= False
+round 2 counts (1, 2, 2, 0) ; HINT retained= False
+round 3 counts (1, 0, 1, 0) ; HINT retained= True
+round 4 counts (0, 1, 1, 0) ; HINT retained= True
+round 5 counts (0, 1, 0, 0) ; HINT retained= True
+round 6 counts (0, 1, 0, 0) ; HINT retained= True
+round 7 counts (0, 1, 0, 0) ; HINT retained= True
+round 8 counts (0, 1, 0, 0) ; HINT retained= True
+round 9 counts (0, 1, 0, 0) ; HINT retained= True
+round 10 counts (0, 1, 0, 0) ; HINT retained= True
+round 11 counts (0, 1, 0, 0) ; HINT retained= True
+round 12 counts (0, 2, 0, 0) ; HINT retained= True
+round 13 counts (0, 1, 0, 0) ; HINT retained= True
+round 14 counts (0, 0, 1, 0) ; HINT retained= True
+round 15 counts (0, 0, 1, 0) ; HINT retained= True
+LAND SEMANTICS: PASS within retained readbacks; merged=true, landed=false; human authority and Windows execution remain explicitly thuat_lai/not_measured

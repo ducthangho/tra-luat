@@ -1,0 +1,24 @@
+# ops-publish-lease run 39358824666 (lease r21 grant 2bc0070): attempt 1 DO (master 3950a0f, truoc ban va), attempt 2 XANH (master 401d4f1, sau ban va #862). Log tho o log-39358824666/
+== 118419896465-a1-dang.txt | aba509aaa10aeb21a37b57c4f2722e66bd567512650f4e6543e3aec4a3f66d69 | 305870
+    bản ĐANG CHẠY — từ origin/master @ 3950a0f9:
+    [A] <<< ra t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat 0.559s DO
+    [A] !!! do t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat Error: [('/tmp/lp_mau_t133_4ul1nuds/kho/.git/objects/maintenance.lock', '/tmp/lp_y6t8p847/kho/.git/objects/maintenance.lock', "[Errno 2] No such fi
+    [B] <<< ra t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat 1.642s QUA
+    [A]   ĐỎ  t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat: Error: [('/tmp/lp_mau_t133_4ul1nuds/kho/.git/objects/maintenance.lock', '/tmp/lp_y6t8p847/kho/.git/objects/maintenance.lock', "[Errno 2] No such
+    [A] lease_publish: 265/266 đạt; đã chạy=266, bỏ qua=0
+    [B] lease_publish: 266/266 đạt; đã chạy=266, bỏ qua=0
+    <<< ra t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat 2.285s QUA
+      ĐỎ  t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor: LỆCH_CHƯA_RÕ_NGUYÊN_NHÂN: hai lượt TOÀN SUITE A/B khác nhau; không-actor=(rc=1, 265/266), có-actor=(rc=0, 266/266); ca lệch ĐỎ=['t133_M4_kiem_thu_h
+    lease_publish: 265/266 đạt; đã chạy=266, bỏ qua=0
+== 118489418865-a2-dang.txt | 979f893d6cd6abe137ab9b01461b4da92dfc680d26950f4991c136160d482557 | 315935
+    bản ĐANG CHẠY — từ origin/master @ 401d4f15:
+    [B] <<< ra t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat 2.131s QUA
+    [B] <<< ra t221_mau_t133_tat_auto_maintenance_truoc_commit_dau 0.004s QUA
+    [A] <<< ra t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat 2.095s QUA
+    [A] <<< ra t221_mau_t133_tat_auto_maintenance_truoc_commit_dau 0.004s QUA
+    [B] lease_publish: 267/267 đạt; đã chạy=267, bỏ qua=0
+    [A] lease_publish: 267/267 đạt; đã chạy=267, bỏ qua=0
+    <<< ra t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat 1.594s QUA
+    <<< ra t221_mau_t133_tat_auto_maintenance_truoc_commit_dau 0.003s QUA
+    lease_publish: 267/267 đạt; đã chạy=267, bỏ qua=0
+    đã đăng comment 6284998410 lên #748

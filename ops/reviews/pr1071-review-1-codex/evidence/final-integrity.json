@@ -1,0 +1,38 @@
+{
+  "head": "01044616f0258e41608feac5b01f80770beec7a5",
+  "tree": "eeca0a4c72f3995d462161d3572f8fb1769a9125",
+  "statuses": {
+    "cay-kho": "",
+    "base-copy": "",
+    "mutation-copy": ""
+  },
+  "gate_rc": {
+    "head": {
+      "bien-nhan": 0,
+      "land": 0,
+      "direct": 0,
+      "doctrine": 0,
+      "diff-check": 0
+    },
+    "base": {
+      "bien-nhan": 0,
+      "land": 0,
+      "direct": 0,
+      "doctrine": 0,
+      "diff-check": 0
+    }
+  },
+  "measurement_error_counts": {
+    "bytes": 0,
+    "receipts": 0,
+    "readme": 0,
+    "context": 0
+  },
+  "equal_gate_logs": {
+    "land": true,
+    "doctrine": true,
+    "diff-check": true
+  },
+  "mutation_rounds": 2,
+  "errors": []
+}

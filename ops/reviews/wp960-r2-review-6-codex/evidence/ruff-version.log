@@ -1,0 +1,4 @@
+$ ruff --version
+ruff 0.16.9
+
+rc=0

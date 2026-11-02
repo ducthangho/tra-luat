@@ -1,0 +1,6 @@
+Đã ghi [VERDICT.md](./VERDICT.md): **request_changes**, gồm **1 P2 và 2 P3**.
+
+- P2: `do()` dùng lại `print` cũ làm mất chi tiết lỗi nhưng toàn suite vẫn xanh.
+- P3: `c98` chưa khóa trần mặc định và số dòng ném.
+
+Head/base đều đạt; 139 dòng log đột biến xanh giống từng byte. Báo cáo có lệnh tái hiện, output và hướng vá. Không sửa mã trong `cay-kho/`.

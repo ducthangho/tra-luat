@@ -1,0 +1,50 @@
+RUN 41033737059 id 41033737059 attempt 1 event pull_request path .github/workflows/ci.yml head_sha 91466322f705658ed51b80c7c152f6b77f4f90c6 status completed conclusion success updated_at 2026-10-30T10:16:52Z
+JOBS 41033737059 total_count 23 array_size 23 conclusions {'success': 23} head_sha_all_match True run_attempts [1]
+RUNNER_LABELS 41033737059 {('ubuntu-latest',): 23}
+JOB 123990054963 gate-ops (ubuntu-latest) conclusion success labels ['ubuntu-latest'] runner_id 1000025788 started_at 2026-10-30T09:30:35Z completed_at 2026-10-30T09:41:30Z
+GATE_OPS_STEPS [('cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)', 'success'), ('DUONG_NHANH - liet ke buoc bo qua (job gate-ops)', 'skipped'), ('DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)', 'skipped'), ('ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)', 'success'), ('bien-nhan v2 selftest', 'success'), ('lease-publish selftest (đo lại setup sau G5)', 'success'), ('don-nhanh selftest (chốt xoá nhánh)', 'success')]
+RUN 41069257658-a1 id 41069257658 attempt 1 event workflow_dispatch path .github/workflows/ci.yml head_sha 91466322f705658ed51b80c7c152f6b77f4f90c6 status completed conclusion failure updated_at 2026-10-30T15:07:53Z
+JOBS 41069257658-a1 total_count 16 array_size 16 conclusions {'success': 13, 'failure': 2, 'skipped': 1} head_sha_all_match True run_attempts [1]
+RUNNER_LABELS 41069257658-a1 {('ubuntu-latest',): 1, ('windows-latest',): 14, (): 1}
+JOB 124108765783 gate-ops (windows-latest) conclusion success labels ['windows-latest'] runner_id 1000026073 started_at 2026-10-30T14:08:53Z completed_at 2026-10-30T14:41:04Z
+GATE_OPS_STEPS [('cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)', 'success'), ('DUONG_NHANH - liet ke buoc bo qua (job gate-ops)', 'skipped'), ('DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)', 'skipped'), ('ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)', 'skipped'), ('bien-nhan v2 selftest', 'success'), ('lease-publish selftest (đo lại setup sau G5)', 'success'), ('don-nhanh selftest (chốt xoá nhánh)', 'skipped')]
+JOB 124108765805 gate-cong-cu (windows-latest, 0) conclusion failure labels ['windows-latest'] runner_id 1000026071 started_at 2026-10-30T14:08:52Z completed_at 2026-10-30T14:09:56Z
+FAILED_STEPS [(9, 'G5 manh ban kinh dot bien (#668)', 'failure')]
+SHELLCHECK_STEPS [(7, 'cài shellcheck cho G5 (cài xong đo lại)', 'success')]
+JOB 124108766201 gate-packet-loop (windows-latest) conclusion failure labels ['windows-latest'] runner_id 1000026080 started_at 2026-10-30T14:08:53Z completed_at 2026-10-30T14:09:57Z
+FAILED_STEPS [(9, 'G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6', 'failure')]
+SHELLCHECK_STEPS [(7, 'cài shellcheck cho G5 (cài xong đo lại)', 'success')]
+JOB 124109330149 gate-cong-cu-gop conclusion skipped labels [] runner_id None started_at 2026-10-30T14:09:56Z completed_at 2026-10-30T14:09:56Z
+RUN 41069257658-a2 id 41069257658 attempt 2 event workflow_dispatch path .github/workflows/ci.yml head_sha 91466322f705658ed51b80c7c152f6b77f4f90c6 status completed conclusion success updated_at 2026-10-30T17:17:33Z
+JOBS 41069257658-a2 total_count 16 array_size 16 conclusions {'success': 15, 'skipped': 1} head_sha_all_match True run_attempts [2]
+RUNNER_LABELS 41069257658-a2 {('windows-latest',): 14, ('ubuntu-latest',): 1, (): 1}
+JOB 124149392588 gate-ops (windows-latest) conclusion success labels ['windows-latest'] runner_id 1000026073 started_at 2026-10-30T14:08:53Z completed_at 2026-10-30T14:41:04Z
+GATE_OPS_STEPS [('cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)', 'success'), ('DUONG_NHANH - liet ke buoc bo qua (job gate-ops)', 'skipped'), ('DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)', 'skipped'), ('ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)', 'skipped'), ('bien-nhan v2 selftest', 'success'), ('lease-publish selftest (đo lại setup sau G5)', 'success'), ('don-nhanh selftest (chốt xoá nhánh)', 'skipped')]
+JOB 124150752994 gate-cong-cu-gop conclusion skipped labels [] runner_id None started_at 2026-10-30T15:30:05Z completed_at 2026-10-30T15:30:05Z
+SOURCE_TOKEN 'runner thieu shellcheck' FILES []
+SOURCE_TOKEN 'cai_cong_cu.sh' FILES []
+SOURCE_TOKEN '1045' FILES []
+SOURCE_TOKEN '255/255' FILES []
+SOURCE_TOKEN 'runner_set' FILES []
+SOURCE_TOKEN 'windows-only' FILES []
+POST_MERGE {'id': 41099184556, 'run_attempt': 1, 'event': 'push', 'head_sha': 'b29da0bfe3bfb7a7be69136a1c5c40f82c088a93', 'status': 'pending', 'conclusion': None, 'updated_at': '2026-10-30T17:28:54Z'}
+PR 1041 True 2026-10-30T17:28:50Z ducthangho head 91466322f705658ed51b80c7c152f6b77f4f90c6 base 757bde561d09738858506aecf5de2f050a5f0d5e merge b29da0bfe3bfb7a7be69136a1c5c40f82c088a93
+MERGE_OBJECT b29da0bfe3bfb7a7be69136a1c5c40f82c088a93 24a37bebf90e5f8e2dd3d4a34e842f2e2f9c6a39 8cdb15a786304bab084b43c8b30c127ae87e2594 91466322f705658ed51b80c7c152f6b77f4f90c6
+HEAD_TREE c20eace3f4aacea3f33afc5861688cb94d64cf3d
+DIFF 757bde561d09738858506aecf5de2f050a5f0d5e 91466322f705658ed51b80c7c152f6b77f4f90c6 sha256 40b6d80f2c0140953cc8712362138de059503982cce0e736b9a196b892ad2198 numstat 120	4	ops/bien_nhan_v2_test.py
+DIFF b29da0bfe3bfb7a7be69136a1c5c40f82c088a93^1 b29da0bfe3bfb7a7be69136a1c5c40f82c088a93 sha256 40b6d80f2c0140953cc8712362138de059503982cce0e736b9a196b892ad2198 numstat 120	4	ops/bien_nhan_v2_test.py
+OWNER_COMMENT 6529010520 ducthangho OWNER 2026-10-30T17:25:09Z contains_authorized_head False
+PARENTS2_EQUALS_REVIEWED True
+LANDED False REVIEWER_ASSURANCE_81 DAT
+MEASURED_CLAIM $.authorization_ghi_chu measured — readback-pr-1041.json: merged_by ducthangho, merged_at 2026-10-30T17:28:50Z, head.sha 9146632; readback-comment-6529010520.json: author ducthangho (OWNER), 17:25:09Z — chi thi "#1041 di truoc ... chi cho phep merge neu da cross review het P1, P2, P3 va da test xanh tren Windows". Chi thi neu DIEU KIEN, KHONG neu SHA; uy quyen land la hanh dong merge cua chu kho, khong phai duyet ben neo 9146632.
+MEASURED_CLAIM $.pre_merge_checks[0].ghi_chu measured — readback-run-41033737059.json completed success; readback-jobs-41033737059.json 23/23 success, nhan ubuntu-latest.
+MEASURED_CLAIM $.pre_merge_checks[1].ghi_chu measured — readback-run-41069257658-a1.json / readback-jobs-41069257658-a1.json: attempt 1 13 success · 2 failure (gate-packet-loop, gate-cong-cu windows-latest 0, buoc G5 probe: runner thieu shellcheck — goc loi ops/cai_cong_cu.sh, tach packet #1045) · 1 skipped; readback-run-41069257658-a2.json / readback-jobs-41069257658-a2.json: attempt 2 (rerun_failed_jobs mot lan) 15 success · 1 skipped (gate-cong-cu-gop), run conclusion success. Job gate-ops (windows-latest) attempt 1: bien_nhan_v2_test 95/95 · 137/137 · 2/2 TONG DAT, lease_publish 255/255 (thuat_lai tu log job 124108765783, log khong luu trong kho).
+MEASURED_CLAIM $.pre_merge_checks[2].ghi_chu measured — ops/reviews/wp1037-g1-codex-luot2/run/run.json: trang_thai xong, ma_thoat 0, head 9146632, model_phuc_vu DO_DUOC 19/19 gpt-6-astra, effort_phuc_vu xhigh; VERDICT sha256 2f482565…49feaf (bien nhan ops/reviews/wp1037-g1-codex-luot2-verdict.receipt.yaml).
+MEASURED_CLAIM $.post_merge_checks[0].ghi_chu measured — readback-runs-b29da0b.json: run 41099184556 "gate" event push status pending luc 17:37Z. Ke ca khi xanh, moc Checkout / Workflow definition / Gate output cua §10.2.2 KHONG DO DUOC trong phien web (GraphQL 403, tien le pr882) — KHONG suy tu REST head_sha.
+MEASURED_CLAIM $.spec.nguon measured — git show origin/ops/wp1037-r1-g1-lease:ops/specs/wp1037.md | sha256sum = spec_hash cua lease (lease-wp1037-r1-g1.yaml.txt).
+MEASURED_CLAIM $.lease.thu_hoi_cuoi measured — lease-wp1037-r1-g1.yaml.txt (ban doc tai a34b9a3): DA NHA bang RUT HAN (khong bia mo — lease con han, khong co lease ke nhiem): lease_until/lease_expires_at_utc ve 2026-10-30T17:53:00Z, ly do trong khoi thu_hoi_bang_rut_han cua chinh tep lease. Han moi = luc sua + 20 phut de luot ops-publish-lease cua commit rut han doc lease CON HAN (rc=9), khong roi vao rc=8.
+MEASURED_CLAIM $.trang_thai_packet.merged_nguon measured — readback-pr-1041.json: merged true, merged_at 2026-10-30T17:28:50Z, merged_by ducthangho, merge_commit_sha b29da0b, head.sha 9146632, base.sha 757bde5; merge-va-diff.txt: cha thu nhat 8cdb15a, cha thu hai 9146632, tree 24a37be; diff 757bde5..9146632 va b29da0b^1..b29da0b cung sha256 40b6d80f… (1 tep ops/bien_nhan_v2_test.py, +120 -4).
+MEASURED_CLAIM $.assurance_81.ly_do measured — ops/reviews/wp1037-g1-codex-luot2/run/run.json: mot lan approve DOC LAP (tien trinh codex rieng qua launcher.py run, prompt tu chua) tren DUNG 9146632; model_phuc_vu DO_DUOC 19/19 gpt-6-astra (ho openai) — khac ho executor claude; muc bang chung do_may cho CHINH lan chay ay (khong suy tu luot khac).
+MEASURED_CLAIM $.assurance_81.thuc_thi.model measured — ops/reviews/wp1037-g1-codex-luot2/run/run.json model_phuc_vu: 19 su kien, moi su kien model gpt-6-astra; model_phuc_vu_trang_thai DO_DUOC.
+MEASURED_CLAIM $.assurance_81.thuc_thi.effort measured — ops/reviews/wp1037-g1-codex-luot2/run/run.json effort_phuc_vu [xhigh], effort_phuc_vu_trang_thai DO_DUOC.
+MEASURED_CLAIM $.assurance_81.thuc_thi.sandbox_mode measured — ops/reviews/wp1037-g1-codex-luot2/run/run.json sandbox_quan_sat: codex-linux-sandbox permission_profile file_system restricted, to_tien_workspace write, root read, network restricted (tuong duong workspace-write); sandbox_trang_thai DO_DUOC, gioi han lay mau ghi trong sandbox_gioi_han.

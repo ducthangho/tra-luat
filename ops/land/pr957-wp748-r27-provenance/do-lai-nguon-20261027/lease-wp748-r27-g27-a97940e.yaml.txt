@@ -1,0 +1,80 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 748
+packet_id: wp748
+mission_issue: 748
+revision: 27
+generation: 27
+lease_id: wp748-r27-g27-claude-remote-20261026
+revision_ghi_chu: spec r27 (ops/specs/wp748-r27-launcher-effort-sandbox.md); sua theo connector Codex P1 tren #934
+thay_the_cho: []
+thay_the_cho_ghi_chu: lease r26 g26 da rut han 2026-10-25T17:50:38Z (796a42f); khong viet bia mo vao lease da chet
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6405383674
+authority_url: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6405383674
+recorded_by: anthropic_claude_executor
+recorder_is_dispatcher: false
+leased_at_utc: '2026-10-26T00:18:51Z'
+heartbeat_at: '2026-10-26T00:18:51Z'
+lease_until: '2026-10-27T00:18:51Z'
+lease_expires_at_utc: '2026-10-27T00:18:51Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); may la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer: codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: fresh independent session, read-only exact head, qua launcher.py run
+spec_path: ops/specs/wp748-r27-launcher-effort-sandbox.md
+spec_ref: ops/wp748-r27-g27-lease
+spec_commit: 1f9376f7ce6a871b7d2f1309dec923aae64dc103
+spec_hash: 7b8b51ffc355540d70df3e897082a498a62d95d285482f2117192b29f19d6fcd
+spec_sha256: 7b8b51ffc355540d70df3e897082a498a62d95d285482f2117192b29f19d6fcd
+branch: agent/wp748-r27-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 8d4638eb8695c7f5628eda7d258f66067e141803
+start_from_sha: 8d4638eb8695c7f5628eda7d258f66067e141803
+reviewed_sha_required: 8d4638eb8695c7f5628eda7d258f66067e141803
+reviewed_sha_ghi_chu: 'neo base (master sau #934); moi luot review chay tren head cuc bo cua agent/wp748-r27-claude, neo dung SHA cua luot'
+write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+write_set_hash: 5c33c0baee65d520313deebb38ac17f941b92cd189e47fe70ec72a175f51cbc7
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: 'holder scan 2026-10-26T00:17:21Z tren ban sao bare: ls-remote 609 = guong 609 (thieu 0, thua 0); 2/2 duong dan NGUOI_GIU 0'
+nang_tran:
+- truc: kich_thuoc
+  ai_nang: ducthangho (#748 issuecomment-6405383674)
+  tran_cu: 'ADR-0053: <= 6 tep / <= 450 dong them'
+  tran_moi: '<= 2 tep / <= 600 dong them (git diff --numstat base..head)'
+  can_cu: 'sandbox can luong lay mau + danh sach cho phep + ca chong ro argv (spec r27 §5)'
+tran_loi_goi_codex: '10 theo dong khai ADR-0055@d2e3052 cua spec (gom luot connector khi danh dau ready)'
+cach_lam: 'review offline qua launcher.py run neo SHA cuc bo toi khi 0 P0-P3; KHONG push nhanh code, KHONG gate cho toi khi du dieu kien merge (chi thi chu kho)'
+coordination_paths:
+- ops/leases/wp748-r27-g27-claude-remote-20261026.yaml
+run_minutes: 1440
+heartbeat_required_minutes: 30
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- write_outside_effective_write_set
+land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate

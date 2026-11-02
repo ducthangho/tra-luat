@@ -1,0 +1,26 @@
+# merge 113e0d1: cha va tree
+commit 113e0d1beff2b037648681ee1fa59f678cef0eba
+parents 937162894e703dec9aa7c30163d913e2f83d276c b5b6aefa66a8ad037ff34430d0210f3b6873913f
+tree 8e711de88c677999503df407633317458af910ed
+committer 2026-10-25T09:45:09+07:00
+# head b5b6aef
+commit b5b6aefa66a8ad037ff34430d0210f3b6873913f
+parents aaad9ab95ab170df4083e0c8203a88b5bd3b35a9
+tree 6d47f211da364501e75ef4c622b577e619f2a7be
+committer 2026-10-24T10:57:52+00:00
+# commit tren nhanh (first-parent, committer time)
+b5b6aef 2026-10-24T10:57:52+00:00 launcher(#748 r25 vong 3): stderr codex chi ghi dong trong danh sach cho phep NGUYEN VAN
+aaad9ab 2026-10-24T10:17:10+00:00 launcher(#748 r25 vong 2): bo loc stderr codex thanh danh sach CHO PHEP
+83d305f 2026-10-24T09:51:15+00:00 launcher_test(#748 r25): con gia codex ghi stderr bang byte tho
+56263ec 2026-10-24T09:41:59+00:00 Merge origin/master vao agent/wp748-r25-claude (cong thu-hoi: S phai la to tien cua H)
+fea07f1 2026-10-24T09:38:39+00:00 launcher(#748 r25): run ghi model do may chu tra cho tung response cua luot codex
+# diff --stat e739ac1..b5b6aef (merge-base voi master)
+ 2 files changed, 498 insertions(+), 3 deletions(-)
+# diff --stat 113e0d1^1..113e0d1
+ 2 files changed, 498 insertions(+), 3 deletions(-)
+# numstat 113e0d1^1..113e0d1
+136	3	.claude/dev/launcher.py
+362	0	.claude/dev/launcher_test.py
+# sha256 patch e739ac1..head va merge^1..merge
+4ce19f40968f53821d19fdf9b03bc8a90a971e78e8114233902e4599d1882c7d  -
+4ce19f40968f53821d19fdf9b03bc8a90a971e78e8114233902e4599d1882c7d  -

@@ -1,0 +1,8 @@
+>>> vao t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc 2026-10-26T13:42:52Z
+<<< ra t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc 4.274s QUA
+
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+/tmp/pr896-r5-measure-453628b5/copy/ops/lease_publish_test.py:2961: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/pr896-r5-measure-453628b5/copy/ops/lease_publish_test.py:5104: SyntaxWarning: invalid escape sequence '\d'
+  KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ

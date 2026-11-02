@@ -1,0 +1,13 @@
+# do luc 2026-10-20T07:23:47Z
+$ git rev-list --parents -n1 401d4f1
+401d4f15362b3270d5dc8437ade3be5ab449eb22 3950a0f9fd0a9c29a36a599edc7a2d305619fc27 28e35fd9206cdc8b2b44a39999421934f8437192
+$ git rev-parse 28e35fd^{tree} 401d4f1^{tree}
+f886966025dde4e2a850658a5479abbdb5bd762f
+f886966025dde4e2a850658a5479abbdb5bd762f
+$ git diff --name-only 3950a0f 28e35fd
+ops/lease_publish_test.py
+$ git diff --stat 28e35fd 401d4f1  (phai rong: cha 1 = 3950a0f = base)
+rc=0
+$ sha256 ops/lease_publish_test.py @28e35fd vs @401d4f1
+cb407cff187ebb62b17284054370bfc80222fae821f91e5fab7f235253108cf0  -
+cb407cff187ebb62b17284054370bfc80222fae821f91e5fab7f235253108cf0  -

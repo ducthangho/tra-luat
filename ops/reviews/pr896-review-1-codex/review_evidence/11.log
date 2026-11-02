@@ -1,0 +1,82 @@
+$ python3 ../review_evidence/history_probe.py
+HISTORY a612c70 2026-09-17T21:13:08+07:00 Merge pull request #549 — packet #546 MOI-TRUONG-CONG-CU-DO-DUOC r1/g1
+before chuan-bi matrix: ${{ fromJSON( (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || contains(github.event.pull_request.labels.*.name, 'windows')) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]') }}
+CLAUDE.md (c) first lines:   · **(c) Gate PR và gate master KHÔNG phải một thứ.** `ci.yml` cố ý chỉ chạy `ubuntu` cho PR thường,
+  còn master chạy CẢ `ubuntu` LẪN `windows` (Windows tốn gấp đôi phút, để dành cho lượt gác cổng phát
+  hành). Nên **"PR xanh" không hàm ý "master xanh"**: với một PR THƯỜNG — không gắn nhãn `windows`,
+  không ai gọi tay — lần merge chính là lần đo Windows ĐẦU TIÊN của mã đó. Nói CÓ ĐIỀU KIỆN vì ma
+  trận cũng kèm `windows-latest` cho PR gắn nhãn `windows` và cho `workflow_dispatch`; bỏ điều kiện
+  ấy là đánh lừa người đang xem đúng một PR như vậy (cross-review bắt được, P2 trên PR #109 — và
+gate-cong-cu.exclude: None
+HISTORY d705623 2026-09-18T00:51:04+07:00 Merge pull request #550 — packet #548 CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND r2/g2
+chuan-bi.outputs.os: ${{ (github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'windows')) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]' }}
+CLAUDE.md (c) first lines:   · **(c) Gate PR và gate master KHÔNG phải một thứ.** `ci.yml` cố ý chỉ chạy `ubuntu` cho PR thường,
+  còn master chạy CẢ `ubuntu` LẪN `windows` (Windows tốn gấp đôi phút, để dành cho lượt gác cổng phát
+  hành). Nên **"PR xanh" không hàm ý "master xanh"**: với một PR THƯỜNG — không gắn nhãn `windows`,
+  không ai gọi tay — lần merge chính là lần đo Windows ĐẦU TIÊN của mã đó. Nói CÓ ĐIỀU KIỆN vì ma
+  trận cũng kèm `windows-latest` cho PR gắn nhãn `windows` và cho `workflow_dispatch`; bỏ điều kiện
+  ấy là đánh lừa người đang xem đúng một PR như vậy (cross-review bắt được, P2 trên PR #109 — và
+gate-cong-cu.exclude: None
+HISTORY 5f288ea 2026-10-22T16:05:33+07:00 Merge pull request #870 from ducthangho/claude/gallant-fermat-34kgb9
+chuan-bi.outputs.os: ${{ (github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'windows')) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]' }}
+CLAUDE.md (c) first lines:   · **(c) Ma trận `os` của `ci.yml` KHÔNG phân biệt PR với master — và câu ngược lại từng nằm ở đây.**
+  Bản cũ của mục này viết: *"PR thường chỉ chạy `ubuntu`, còn master chạy CẢ `ubuntu` LẪN `windows`"*.
+  Câu ấy **ĐÃ CHẾT** từ packet #548 (`CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND`, bỏ vế
+  `github.ref == 'refs/heads/master'` khỏi output `os` của job `chuan-bi`). **Đo 22-10-2026** trên
+  `9e9a74b`: `os` = `["ubuntu-latest","windows-latest"]` CHỈ KHI `github.event_name == 'workflow_dispatch'`
+  HOẶC PR mang nhãn `windows`; mọi trường hợp khác — **kể cả push lên master** — là `["ubuntu-latest"]`.
+gate-cong-cu.exclude: None
+HISTORY 747f983 2026-10-23T08:19:34+07:00 Merge pull request #880 from ducthangho/agent/wp878-g1-claude
+chuan-bi.outputs.os: ${{ (github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only') && '["windows-latest"]' || (github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'windows')) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]' }}
+CLAUDE.md (c) first lines:   · **(c) Ma trận `os` của `ci.yml` KHÔNG phân biệt PR với master — và câu ngược lại từng nằm ở đây.**
+  Bản cũ của mục này viết: *"PR thường chỉ chạy `ubuntu`, còn master chạy CẢ `ubuntu` LẪN `windows`"*.
+  Câu ấy **ĐÃ CHẾT** từ packet #548 (`CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND`, bỏ vế
+  `github.ref == 'refs/heads/master'` khỏi output `os` của job `chuan-bi`). **Đo 22-10-2026** trên
+  `9e9a74b`: `os` = `["ubuntu-latest","windows-latest"]` CHỈ KHI `github.event_name == 'workflow_dispatch'`
+  HOẶC PR mang nhãn `windows`; mọi trường hợp khác — **kể cả push lên master** — là `["ubuntu-latest"]`.
+gate-cong-cu.exclude: None
+HISTORY e63961f 2026-10-23T11:04:54+07:00 Merge pull request #883 from ducthangho/agent/wp879-g1-claude
+chuan-bi.outputs.os: ${{ (github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only') && '["windows-latest"]' || (github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'windows')) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]' }}
+CLAUDE.md (c) first lines:   · **(c) Ma trận `os` của `ci.yml` KHÔNG phân biệt PR với master — và câu ngược lại từng nằm ở đây.**
+  Bản cũ của mục này viết: *"PR thường chỉ chạy `ubuntu`, còn master chạy CẢ `ubuntu` LẪN `windows`"*.
+  Câu ấy **ĐÃ CHẾT** từ packet #548 (`CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND`, bỏ vế
+  `github.ref == 'refs/heads/master'` khỏi output `os` của job `chuan-bi`). **Đo 22-10-2026** trên
+  `9e9a74b`: `os` = `["ubuntu-latest","windows-latest"]` CHỈ KHI `github.event_name == 'workflow_dispatch'`
+  HOẶC PR mang nhãn `windows`; mọi trường hợp khác — **kể cả push lên master** — là `["ubuntu-latest"]`.
+gate-cong-cu.exclude: [{'os': 'windows-latest', 'manh': 1}, {'os': 'windows-latest', 'manh': 2}, {'os': 'windows-latest', 'manh': 3}, {'os': 'windows-latest', 'manh': 4}, {'os': 'windows-latest', 'manh': 5}, {'os': 'windows-latest', 'manh': 6}, {'os': 'windows-latest', 'manh': 7}]
+HISTORY 6ac385f 2026-10-23T14:59:59+07:00 Merge pull request #889 from ducthangho/claude/gallant-fermat-34kgb9
+chuan-bi.outputs.os: ${{ (github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only') && '["windows-latest"]' || (github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'windows')) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]' }}
+CLAUDE.md (c) first lines:   · **(c) Ma trận `os` của `ci.yml` KHÔNG phân biệt PR với master — và câu ngược lại từng nằm ở đây.**
+  Bản cũ của mục này viết: *"PR thường chỉ chạy `ubuntu`, còn master chạy CẢ `ubuntu` LẪN `windows`"*.
+  Câu ấy **ĐÃ CHẾT** từ packet #548 (`CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND`, bỏ vế
+  `github.ref == 'refs/heads/master'` khỏi output `os` của job `chuan-bi`). **Đo 22-10-2026** trên
+  `9e9a74b`: `os` = `["ubuntu-latest","windows-latest"]` CHỈ KHI `github.event_name == 'workflow_dispatch'`
+  HOẶC PR mang nhãn `windows`; mọi trường hợp khác — **kể cả push lên master** — là `["ubuntu-latest"]`.
+gate-cong-cu.exclude: [{'os': 'windows-latest', 'manh': 1}, {'os': 'windows-latest', 'manh': 2}, {'os': 'windows-latest', 'manh': 3}, {'os': 'windows-latest', 'manh': 4}, {'os': 'windows-latest', 'manh': 5}, {'os': 'windows-latest', 'manh': 6}, {'os': 'windows-latest', 'manh': 7}]
+three changes: #548 removed master; #878 added dispatch windows-only; #879 reduced Windows G5.
+git history for correction #865:
+fa362fd985b708190eb848bc0dbceeab44cfeb75
+6ac385fdd7325f532ac4b4b6eb861292bfa7e970 a15d04ed44b13e8b87306faab259239d3f43dedf
+Merge pull request #865 from ducthangho/claude/fix-859-ubuntu-only
+
+land(#744): đính chính gate post-merge 3a3a3ca — chỉ Ubuntu (connector P1 #859)
+correction 4ae43f0 relevant lines:
+    land(#744): dinh chinh gate post-merge 3a3a3ca — chi ubuntu, khong gom windows (connector P1 #859)
+-  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39354156843, sha: 3a3a3caca5de4934ff53851feb6994c2c7b84ad5, run_attempt: 1, conclusion: success, jobs: '23/23 success (gom windows)', luc: '2026-10-20T01:34:09Z -> 02:05:32Z', kiem_gate: 'measured — do-lai-nguon-20261020/kiem-gate-3a3a3ca.txt: packet_loop.py kiem-gate suite 106643757504, 23 ten, rc=0', nguon: [readback-run-39354156843.json, readback-jobs-39354156843.json, readback-check-runs-3a3a3ca-all.json]}
++  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39354156843, sha: 3a3a3caca5de4934ff53851feb6994c2c7b84ad5, run_attempt: 1, conclusion: success, jobs: '23/23 success, ca 23 job chi nhan ubuntu-latest (measured — readback-jobs-39354156843.json); Windows KHONG chay tren lan push nay', luc: '2026-10-20T01:34:09Z -> 02:05:32Z', kiem_gate: 'measured — do-lai-nguon-20261020/kiem-gate-3a3a3ca.txt: packet_loop.py kiem-gate suite 106643757504, 23 ten, rc=0', nguon: [readback-run-39354156843.json, readback-jobs-39354156843.json, readback-check-runs-3a3a3ca-all.json]}
++  - 'launcher-windows/Windows KHONG chay cho push 3a3a3ca: ci.yml chi chon windows-latest cho workflow_dispatch hoac PR gan nhan windows; Windows khong phai dieu kien cua lease (M-3 chi doi ci.yml). Ban dau ho so ghi sai "gom windows" — connector P1 #859 r4323607674, dinh chinh o PR sau.'
+3f6c694 original assertion:   - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39354156843, sha: 3a3a3caca5de4934ff53851feb6994c2c7b84ad5, run_attempt: 1, conclusion: success, jobs: '23/23 success (gom windows)', luc: '2026-10-20T01:34:09Z -> 02:05:32Z', kiem_gate: 'measured — do-lai-nguon-20261020/kiem-gate-3a3a3ca.txt: packet_loop.py kiem-gate suite 106643757504, 23 ten, rc=0', nguon: [readback-run-39354156843.json, readback-jobs-39354156843.json, readback-check-runs-3a3a3ca-all.json]}
+run 39354156843: {'id': 39354156843, 'path': '.github/workflows/ci.yml', 'event': 'push', 'head_branch': 'master', 'head_sha': '3a3a3caca5de4934ff53851feb6994c2c7b84ad5', 'status': 'completed', 'conclusion': 'success', 'created_at': '2026-10-20T01:34:09Z'}
+jobs count: 23 23 unique ids= 23
+labels: {('ubuntu-latest',): 23}
+conclusions: {'success': 23} runner_id0= 0
+readback-jobs-39745387589.json jobs= 46 runner_id0= 22 zero steps= Counter({0: 22}) zero conclusions= Counter({'failure': 22})
+readback-jobs-39752735359.json jobs= 23 runner_id0= 0 zero steps= Counter() zero conclusions= Counter()
+Raw GitHub comment r4323607674/P1 author: KHÔNG ĐO ĐƯỢC; committed correction attributes it, raw comment absent.
+PR #109 historical second-P2 claim (unchanged context):
+9796f67 Merge pull request #109 — ba lần đọc sai tín hiệu trong một phiên
+3736fc0 docs: gắn nhãn windows KHÔNG đủ cho PR đang mở — phải có cò mới
+05170b4 docs: nói CÓ ĐIỀU KIỆN câu về đo Windows — ma trận có nhãn windows và workflow_dispatch
+Measurement dates 22/23-10 are author timing declarations; file behavior independently re-evaluated, actual local execution time then not recoverable.
+
+rc=0

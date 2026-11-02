@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.36.68 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.36.69 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
@@ -288,6 +288,8 @@ python scripts/tl.py release-bundle --out ../tra-luat-release.zip --json
 python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --archive ../tra-luat-release.zip --json
 ```
 
+Test/build Windows qua Desktop Commander: đọc `references/windows-testing.md` trước.
+
 ## DANH MỤC REFERENCES
 
 | File | Nội dung |
@@ -300,6 +302,7 @@ python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --archive ../
 | `references/THE_THUC_TRINH_BAY.md` | Thể thức 5 hệ + NEO (`the-thuc-check`/`-normalize`) |
 | `references/DOCTRINE_APPENDIX.md` | Toàn bộ doctrine mở rộng + lý do thiết kế |
 | `references/RASOAT_HOSO_LOOP.md` | Vòng lặp rà hồ sơ (Loop A/B/C) + prompt agent `tl-rasoat`; state: `references/RASOAT_PLAN_SCHEMA.md` |
+| `references/windows-testing.md` | Chọn VM/ASUS, preflight Commander, test Windows và vòng đời GCP |
 | `references/workflows/*.json` | Workflow cards máy-đọc (schema, risk, idempotency) |
 | `references/golden/*.json` | Golden fixtures tất định |
 | `CONTEXT.md` (gốc repo) | Từ điển thuật ngữ chuẩn của dự án |

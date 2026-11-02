@@ -1,0 +1,3 @@
+# 2026-10-19T00:37:57Z — worktree tai origin/master f1979a5ddd5b04562e054cc87beb5f28c7a7e934, core.abbrev 7
+$ python3 scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json  (tren cay f1979a5)
+rc=2 ok=False expected=187 checked=187 failed=[] missing=[] extra_files=['changelog.d/wp-802.md']

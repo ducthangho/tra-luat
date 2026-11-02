@@ -1,0 +1,60 @@
+$ python3 ../review_evidence/workflow_probe.py
+COMMIT e63961f
+ci triggers: {'push': {'branches': ['master']}, 'pull_request': None, 'workflow_dispatch': {'inputs': {'runner_set': {'description': 'windows-and-ubuntu (mặc định) hoặc windows-only (bỏ các job ma trận Ubuntu)', 'required': False, 'default': 'windows-and-ubuntu', 'type': 'choice', 'options': ['windows-and-ubuntu', 'windows-only']}}}}
+gate* count: 8
+  gate: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=None; job-if=None
+  gate-cong-cu: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=[{'os': 'windows-latest', 'manh': 1}, {'os': 'windows-latest', 'manh': 2}, {'os': 'windows-latest', 'manh': 3}, {'os': 'windows-latest', 'manh': 4}, {'os': 'windows-latest', 'manh': 5}, {'os': 'windows-latest', 'manh': 6}, {'os': 'windows-latest', 'manh': 7}]; job-if=None
+  gate-cong-cu-gop: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=[{'os': 'windows-latest'}]; job-if=${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}
+  gate-ops: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=None; job-if=None
+  gate-nhanh-manh: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=None; job-if=None
+  gate-nhanh-gop: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=None; job-if=${{ !cancelled() }}
+  gate-registry: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=None; job-if=${{ !cancelled() }}
+  gate-packet-loop: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=None; job-if=None
+expanded gate-cong-cu: [{'os': 'ubuntu-latest', 'manh': 0}, {'os': 'ubuntu-latest', 'manh': 1}, {'os': 'ubuntu-latest', 'manh': 2}, {'os': 'ubuntu-latest', 'manh': 3}, {'os': 'ubuntu-latest', 'manh': 4}, {'os': 'ubuntu-latest', 'manh': 5}, {'os': 'ubuntu-latest', 'manh': 6}, {'os': 'ubuntu-latest', 'manh': 7}, {'os': 'windows-latest', 'manh': 0}]
+expanded gate-cong-cu-gop: [{'os': 'ubuntu-latest'}]
+step conditions using runner.os: 6 [('gate', 'ci-phamvi selftest (phan chung — cong co rang)', "runner.os != 'Windows'"), ('gate-cong-cu', 'actions/upload-artifact@v4', "runner.os != 'Windows'"), ('gate-ops', 'ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)', "runner.os == 'Linux'"), ('gate-ops', 'don-nhanh selftest (chốt xoá nhánh)', "runner.os != 'Windows'"), ('gate-ops', 'bo ca gate chay TRONG cgroup duoc uy quyen (Linux)', "${{ runner.os == 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"), ('gate-ops', 'gate lifecycle selftest (nen khong co cgroup)', "${{ runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}")]
+EOL step: ${{ github.event_name == 'pull_request' }}
+launcher triggers: {'workflow_dispatch': {'inputs': {'runner_set': {'description': 'Nền cần đo trong lượt gọi tay', 'required': True, 'default': 'windows-only', 'type': 'choice', 'options': ['windows-only', 'windows-and-ubuntu']}}}, 'push': {'branches': ['master'], 'paths': ['.claude/dev/**', '.github/workflows/launcher-windows.yml']}, 'pull_request': {'types': ['opened', 'synchronize', 'reopened', 'labeled'], 'paths': ['.claude/dev/**']}}
+launcher matrix: {'os': '${{ fromJSON(github.event_name == \'workflow_dispatch\' && inputs.runner_set == \'windows-only\' && \'["windows-latest"]\' || \'["windows-latest","ubuntu-latest"]\') }}'}
+launcher if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'windows')
+workflow .github/workflows/ci-dot-bien-du.yml: runs-on={'dot-bien-du': 'ubuntu-latest', 'dot-bien-manh': 'ubuntu-latest', 'dot-bien-gop': 'ubuntu-latest'}
+workflow .github/workflows/ci.yml: runs-on={'chuan-bi': 'ubuntu-latest', 'gate': '${{ matrix.os }}', 'gate-cong-cu': '${{ matrix.os }}', 'gate-cong-cu-gop': '${{ matrix.os }}', 'gate-ops': '${{ matrix.os }}', 'gate-nhanh-manh': '${{ matrix.os }}', 'gate-nhanh-gop': '${{ matrix.os }}', 'gate-registry': '${{ matrix.os }}', 'gate-packet-loop': '${{ matrix.os }}'}
+workflow .github/workflows/launcher-windows.yml: runs-on={'launcher': '${{ matrix.os }}'}
+workflow .github/workflows/ops-don-ref.yml: runs-on={'don': 'ubuntu-latest'}
+workflow .github/workflows/ops-open-pr.yml: runs-on={'mo': 'ubuntu-latest'}
+workflow .github/workflows/ops-publish-lease.yml: runs-on={'dang': 'ubuntu-latest'}
+workflow .github/workflows/ops-thu-hoi-admission.yml: runs-on={'thu-hoi': 'ubuntu-latest'}
+COMMIT 816f43988eb3012726120ad00166a989cc2b9af6
+ci triggers: {'push': {'branches': ['master']}, 'pull_request': None, 'workflow_dispatch': {'inputs': {'runner_set': {'description': 'windows-and-ubuntu (mặc định) hoặc windows-only (bỏ các job ma trận Ubuntu)', 'required': False, 'default': 'windows-and-ubuntu', 'type': 'choice', 'options': ['windows-and-ubuntu', 'windows-only']}}}}
+gate* count: 8
+  gate: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=None; job-if=None
+  gate-cong-cu: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=[{'os': 'windows-latest', 'manh': 1}, {'os': 'windows-latest', 'manh': 2}, {'os': 'windows-latest', 'manh': 3}, {'os': 'windows-latest', 'manh': 4}, {'os': 'windows-latest', 'manh': 5}, {'os': 'windows-latest', 'manh': 6}, {'os': 'windows-latest', 'manh': 7}]; job-if=None
+  gate-cong-cu-gop: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=[{'os': 'windows-latest'}]; job-if=${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}
+  gate-ops: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=None; job-if=None
+  gate-nhanh-manh: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=None; job-if=None
+  gate-nhanh-gop: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=None; job-if=${{ !cancelled() }}
+  gate-registry: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=None; job-if=${{ !cancelled() }}
+  gate-packet-loop: os=${{ fromJson(needs.chuan-bi.outputs.os) }}; exclude=None; job-if=None
+expanded gate-cong-cu: [{'os': 'ubuntu-latest', 'manh': 0}, {'os': 'ubuntu-latest', 'manh': 1}, {'os': 'ubuntu-latest', 'manh': 2}, {'os': 'ubuntu-latest', 'manh': 3}, {'os': 'ubuntu-latest', 'manh': 4}, {'os': 'ubuntu-latest', 'manh': 5}, {'os': 'ubuntu-latest', 'manh': 6}, {'os': 'ubuntu-latest', 'manh': 7}, {'os': 'windows-latest', 'manh': 0}]
+expanded gate-cong-cu-gop: [{'os': 'ubuntu-latest'}]
+step conditions using runner.os: 6 [('gate', 'ci-phamvi selftest (phan chung — cong co rang)', "runner.os != 'Windows'"), ('gate-cong-cu', 'actions/upload-artifact@v4', "runner.os != 'Windows'"), ('gate-ops', 'ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)', "runner.os == 'Linux'"), ('gate-ops', 'don-nhanh selftest (chốt xoá nhánh)', "runner.os != 'Windows'"), ('gate-ops', 'bo ca gate chay TRONG cgroup duoc uy quyen (Linux)', "${{ runner.os == 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"), ('gate-ops', 'gate lifecycle selftest (nen khong co cgroup)', "${{ runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}")]
+EOL step: ${{ github.event_name == 'pull_request' }}
+launcher triggers: {'workflow_dispatch': {'inputs': {'runner_set': {'description': 'Nền cần đo trong lượt gọi tay', 'required': True, 'default': 'windows-only', 'type': 'choice', 'options': ['windows-only', 'windows-and-ubuntu']}}}, 'push': {'branches': ['master'], 'paths': ['.claude/dev/**', '.github/workflows/launcher-windows.yml']}, 'pull_request': {'types': ['opened', 'synchronize', 'reopened', 'labeled'], 'paths': ['.claude/dev/**']}}
+launcher matrix: {'os': '${{ fromJSON(github.event_name == \'workflow_dispatch\' && inputs.runner_set == \'windows-only\' && \'["windows-latest"]\' || \'["windows-latest","ubuntu-latest"]\') }}'}
+launcher if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'windows')
+workflow .github/workflows/ci-dot-bien-du.yml: runs-on={'dot-bien-du': 'ubuntu-latest', 'dot-bien-manh': 'ubuntu-latest', 'dot-bien-gop': 'ubuntu-latest'}
+workflow .github/workflows/ci.yml: runs-on={'chuan-bi': 'ubuntu-latest', 'gate': '${{ matrix.os }}', 'gate-cong-cu': '${{ matrix.os }}', 'gate-cong-cu-gop': '${{ matrix.os }}', 'gate-ops': '${{ matrix.os }}', 'gate-nhanh-manh': '${{ matrix.os }}', 'gate-nhanh-gop': '${{ matrix.os }}', 'gate-registry': '${{ matrix.os }}', 'gate-packet-loop': '${{ matrix.os }}'}
+workflow .github/workflows/launcher-windows.yml: runs-on={'launcher': '${{ matrix.os }}'}
+workflow .github/workflows/ops-don-ref.yml: runs-on={'don': 'ubuntu-latest'}
+workflow .github/workflows/ops-open-pr.yml: runs-on={'mo': 'ubuntu-latest'}
+workflow .github/workflows/ops-publish-lease.yml: runs-on={'dang': 'ubuntu-latest'}
+workflow .github/workflows/ops-thu-hoi-admission.yml: runs-on={'thu-hoi': 'ubuntu-latest'}
+AST extracted: [('nen_bo_qua_dot_bien', 7900, 7902), ('dat_windows', 7905, 7911), ('dong_windows', 7914, 7918), ('main', 8880, 8974)]
+MAIN Windows simulated two pass + one skip: rc=0; BỎ QUA skipped: fixture: missing capability |  | cong_cu_test: 2/2 đạt; tổng=3, bỏ qua=1, tiền kiểm bỏ qua=0 |  | TỔNG: CA 2/2 đạt · ĐỘT BIẾN 1 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+MAIN Windows simulated one failure: rc=1; BỎ QUA skipped: fixture: missing capability |   ĐỎ  bad: fixture: baseline failed |  | cong_cu_test: 1/2 đạt; tổng=3, bỏ qua=1, tiền kiểm bỏ qua=0 |  | TỔNG: CA 1/2 đạt · ĐỘT BIẾN 1 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+MAIN Windows simulated all skipped: rc=1; BỎ QUA skipped: fixture: missing capability |   BỎ QUA skipped: fixture: missing capability |  | cong_cu_test: 0/0 đạt; tổng=2, bỏ qua=2, tiền kiểm bỏ qua=0 |  | TỔNG: CA 0/0 đạt · ĐỘT BIẾN 1 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+MAIN Windows simulated precheck skip: rc=1; BỎ QUA (TIỀN KIỂM) batch: fixture: unavailable |  | cong_cu_test: 2/2 đạt; tổng=2, bỏ qua=0, tiền kiểm bỏ qua=1 |  | TỔNG: CA 2/2 đạt · ĐỘT BIẾN 1 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+nen_bo_qua_dot_bien: {'nt': True, 'posix': False, 'java': False}
+Windows runner thật: KHÔNG ĐO ĐƯỢC (môi trường Linux, không gọi mạng).
+
+rc=0

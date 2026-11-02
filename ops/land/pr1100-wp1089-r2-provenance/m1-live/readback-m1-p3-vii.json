@@ -1,0 +1,33 @@
+{
+ "fileId": "1I0-p-FKSy3255OUNv7xkhRACy3k1zqWQ",
+ "t0": "2026-11-01T17:31:24Z",
+ "ping": "2.21.2q",
+ "meta_truoc": {
+  "headRevisionId": "0B6rMgRJQawK8ZmYvNm83YVYzNCtQb1RkWHFGS3JCYmVMV1hnPQ",
+  "md5Checksum": "c8d0bd739492cab85fa60c2873c8ab13",
+  "modifiedTime": "2026-10-30T15:48:03.437Z",
+  "size": "4725"
+ },
+ "md5_blob_truoc": "c8d0bd739492cab85fa60c2873c8ab13",
+ "phan_hoi": {
+  "ok": false,
+  "error": "CAS_CONFLICT",
+  "md5": "c8d0bd739492cab85fa60c2873c8ab13"
+ },
+ "phan_hoi_khoa": [
+  "_client_ms",
+  "action",
+  "elapsed_ms",
+  "error",
+  "md5",
+  "ok"
+ ],
+ "meta_sau": {
+  "headRevisionId": "0B6rMgRJQawK8ZmYvNm83YVYzNCtQb1RkWHFGS3JCYmVMV1hnPQ",
+  "md5Checksum": "c8d0bd739492cab85fa60c2873c8ab13",
+  "modifiedTime": "2026-10-30T15:48:03.437Z",
+  "size": "4725"
+ },
+ "md5_blob_sau": "c8d0bd739492cab85fa60c2873c8ab13",
+ "t1": "2026-11-01T17:31:35Z"
+}

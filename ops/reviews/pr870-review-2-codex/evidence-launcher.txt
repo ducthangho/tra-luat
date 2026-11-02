@@ -1,0 +1,22 @@
+launcher_events={"workflow_dispatch": {"inputs": {"runner_set": {"description": "Nền cần đo trong lượt gọi tay", "required": true, "default": "windows-only", "type": "choice", "options": ["windows-only", "windows-and-ubuntu"]}}}, "push": {"branches": ["master"], "paths": [".claude/dev/**", ".github/workflows/launcher-windows.yml"]}, "pull_request": {"types": ["opened", "synchronize", "reopened", "labeled"], "paths": [".claude/dev/**"]}}
+launcher_if=github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'windows')
+launcher_matrix=${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only' && '["windows-latest"]' || '["windows-latest","ubuntu-latest"]') }}
+launcher_runs_on=${{ matrix.os }}
+step=Checkout LF; run_first=git config --global core.autocrlf false
+step=Su that ve nen chay; run_first=python -c "import platform,sys;print('he:',platform.system(),'| python:',sys.version.split()[0])"
+step=Install tool manifest dependencies; run_first=python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+step=Install and verify test tools; run_first=set -euo pipefail
+step=Verify tool manifest and shellcheck canary; run_first=python ops/cong_cu.py kiem-tra --json
+step=doctor; run_first=python .claude/dev/launcher.py doctor
+step=Bo phan chung (day du, giu nguyen danh sach bo qua); run_first=python .claude/dev/launcher_test.py
+step=Tu dot bien; run_first=python .claude/dev/launcher_test.py --dot-bien
+step=Cay lam viec phai SACH sau khi chay test; run_first=$ban = git status --porcelain
+step=Probe: dut ong KHONG duoc nuot ma that; run_first=# Tren Linux da do: 0 khi du cong cu, 12 khi thieu, o CA BA kieu cat ong.
+step=Probe: console cp1258 + duong dan co dau tieng Viet; run_first=chcp 1258
+step=Probe: t62 chay rieng (ca CHUA TUNG chay o bat ky vong nao); run_first=python -c @"
+step=Probe: taskkill /T tren tien trinh do CHINH minh sinh; run_first=# Vong 2 ket luan "Access denied" la han che sandbox codex chu khong phai
+launcher push runner_set=None: ['windows-latest', 'ubuntu-latest']
+launcher pull_request runner_set=None: ['windows-latest', 'ubuntu-latest']
+launcher workflow_dispatch runner_set=windows-only: ['windows-latest']
+launcher workflow_dispatch runner_set=windows-and-ubuntu: ['windows-latest', 'ubuntu-latest']
+rc=0

@@ -1,0 +1,4 @@
+CLASS_ORDER {'routine': 0, 'systemic': 1, 'sensitive': 2}
+ROUND 1 paths 32 declared standard enum_valid False classifier_actual_diff sensitive effective_review_class ABSENT
+ROUND 2 paths 33 declared standard enum_valid False classifier_actual_diff sensitive effective_review_class ABSENT
+IMPORTANT: classifier is a lease classifier; called here as a measurement of existing fail-closed path rules, not as proof that receipt schema validates review_class.

@@ -1,0 +1,101 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 878
+packet_id: wp878
+revision: 1
+generation: 1
+lease_id: wp878-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: normal
+depends_on: []
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'executor ho claude, reviewer ho openai; verdict codex approve tren head cuoi (Q2 spec wp878).'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp878.md
+spec_sha256_required: 13abe7208cb50f08013937c4db9cb434d44dcb9dcd81c6920bb98fe017620124
+spec_hash: 13abe7208cb50f08013937c4db9cb434d44dcb9dcd81c6920bb98fe017620124
+spec_ref: refs/heads/ops/wp878-spec@3aabd8cbec7d04ffef7a939d32152fbb5887454d
+prompt_path: ops/specs/wp878.md
+prompt_sha256_required: 13abe7208cb50f08013937c4db9cb434d44dcb9dcd81c6920bb98fe017620124
+write_set:
+- .github/workflows/ci.yml
+- ops/lease_publish_test.py
+- .claude/dev/ci_dang_ky_test.py
+- ops/ci_duong_nhanh_test.py
+- CLAUDE.md
+write_set_hash: fe78ed99ae4171bded35716ca68d5c2a9c6bf38bc38fd6b31cd947288ae2bc59
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- .github/workflows/ci.yml
+- ops/lease_publish_test.py
+- .claude/dev/ci_dang_ky_test.py
+- ops/ci_duong_nhanh_test.py
+- CLAUDE.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'ci.yml XANH tren head cuoi doc bang check run'}
+- {id: M-2, dieu_kien: 'N4 spec: mot luot workflow_dispatch ci.yml runner_set=windows-only tren dung head; job ubuntu chi co chuan-bi'}
+- {id: M-3, dieu_kien: 'moi thread review (connector/nguoi) duoc tra loi'}
+- {id: M-4, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1/P2 mo; toi da 3 loi goi codex'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp878-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 4581cfa5124ef803bfda10ce4de499b0ed31380e
+start_from_sha: 4581cfa5124ef803bfda10ce4de499b0ed31380e
+start_from_ghi_chu: 'origin/master luc cap lease.'
+reviewed_sha_required: 4581cfa5124ef803bfda10ce4de499b0ed31380e
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/878#issuecomment-6344994466
+granted_on_instruction_readback: 'add_issue_comment (MCP) tra id 6344994466. Bam byte cua body KHONG DO DUOC (duong doc MCP chuan hoa thuc the HTML).'
+granted_on_instruction_note: >-
+  Chu kho chon "Me, #878 now (Recommended)" (phien session_01QFJQm8mNRrRmPUhkqciiC2, 22-10-2026).
+  Ghi ho qua GitHub App (yeu hon comment tu tay).
+recorded_by: claude-executor-session
+recorder_is_executor: true
+recorder_ghi_chu: 'cung phien la executor; chu kho duyet truc tiep trong phien qua AskUserQuestion.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-22T15:45:00Z'
+  goc_quet: 'master 4581cfa5124ef803bfda10ce4de499b0ed31380e, quet refs sau fetch day du (ls-remote <-> for-each-ref thieu 0)'
+  ket_qua: 'ca 5 duong dan cua write set: NGUOI_GIU 0.'
+da_bi_thay_the: wp879-r1-g1-claude
+ly_do_thu_hoi: 'packet #878 da LAND (PR #880, merge 747f983); lease wp879-r1-g1-claude cap cung ci.yml/ci_dang_ky_test.py/ci_duong_nhanh_test.py khai thay_the_cho.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'khong co lease song nao giu cac duong dan nay => khong viet bia mo vao tep da chet.'
+leased_at_utc: '2026-10-22T15:49:00Z'
+heartbeat_at: '2026-10-22T15:49:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+lease_until: '2026-10-23T15:49:00Z'
+lease_expires_at_utc: '2026-10-23T15:49:00Z'
+run_minutes: 120
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: 3
+budget:
+  codex_review_calls:
+    pr_wp878_g1: {used: 0, reserved: 0, limit: 3}
+  attempt:
+    packet_878_r1: {used: 0, reserved: 0, limit: 3}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'push nhanh agent/wp878-g1-claude va mo PR draft'

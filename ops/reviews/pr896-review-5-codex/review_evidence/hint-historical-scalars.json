@@ -1,0 +1,37 @@
+[
+  {
+    "receipt": "ci-windows-review-5-claude-verdict.receipt.yaml",
+    "anchor": "e32c5643111e001dc0c655c568b445c897ade450",
+    "scalar_matches_snapshot": true
+  },
+  {
+    "receipt": "doctrine-scan-review-1-claude-verdict.receipt.yaml",
+    "anchor": "86169c00beff045b0faed63e39d1a67b9acd1fc1",
+    "scalar_matches_snapshot": true
+  },
+  {
+    "receipt": "doctrine-scan-review-2-claude-verdict.receipt.yaml",
+    "anchor": "de0ecd0f912bb131b63ada866672af00129eefd0",
+    "scalar_matches_snapshot": true
+  },
+  {
+    "receipt": "doctrine-scan-review-3-claude-verdict.receipt.yaml",
+    "anchor": "6d59a4394f0e51ace4e02c8f4be13cb649e6871e",
+    "scalar_matches_snapshot": true
+  },
+  {
+    "receipt": "wp538-review-1-claude-verdict.receipt.yaml",
+    "anchor": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+    "scalar_matches_snapshot": true
+  },
+  {
+    "receipt": "wp538-review-2-claude-verdict.receipt.yaml",
+    "anchor": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+    "scalar_matches_snapshot": true
+  },
+  {
+    "receipt": "wp540-review-1-claude-verdict.receipt.yaml",
+    "anchor": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+    "scalar_matches_snapshot": true
+  }
+]

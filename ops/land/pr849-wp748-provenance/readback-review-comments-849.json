@@ -1,0 +1,280 @@
+[
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4317449413",
+    "pull_request_review_id": 5576043333,
+    "id": 4317449413,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABAVcMxQ",
+    "diff_hunk": "@@ -4862,15 +4868,133 @@ def _nap_launcher_thu_hoi():\n     return mod\n \n \n-def _giet_ca_cay(p, cho_giay: float = 5.0) -> str:\n+# WP748 r17/g17 (G6 rc1 trên 19683a0: t125 `ArgumentError ... expected LP__PROCESSENTRY32W instance\n+# instead of pointer to _PROCESSENTRY32W`) — hai waiter của t125 cùng quá hạn và cùng gọi `_giet_ca_cay`.\n+# `launcher._cac_pid_cha_windows` dựng LỚP struct MỚI mỗi lời gọi rồi gán `argtypes` lên\n+# `ctypes.windll.kernel32` dùng CHUNG toàn tiến trình ⇒ luồng kia ghi đè giữa chừng. Đo bằng probe hai\n+# luồng: không khoá 40/80 lời gọi ném; có khoá 0/80. Vá tận gốc nằm ở launcher.py (ngoài write set).\n+_KHOA_CHUP_CAY_WINDOWS = threading.Lock()\n+\n+\n+def _giu_hau_due_windows(p):\n+    \"\"\"Mở HANDLE tới mọi hậu duệ của `p` TRƯỚC khi giết. Trả (k32, [(pid, handle)], dòng nhật ký).\n+\n+    WP748 r8/g8 (t154 ĐỎ một lần ngoài sandbox 2026-10-14T18:37:33Z: `taskkill rc=0`, con rc=1, mà nhịp\n+    cháu 4->5 trong cửa sổ 1 s; chạy lại 18:38:04Z XANH) — `taskkill /T /F` chỉ GỌI `TerminateProcess`,\n+    mà hàm ấy BẤT ĐỒNG BỘ: trả về khi kết liễu mới được KHỞI ĐỘNG, chưa xong. Nhánh Windows cũ chỉ chờ\n+    CON (`p.wait`), không chờ CHÁU ⇒ một lần ghi đang dở của cháu hạ cánh sau mốc đo `a`. Cháu thật sự\n+    còn sống thì cửa sổ 1 s thấy ~20 nhịp, không phải 1. Chữa bằng BẰNG CHỨNG chứ không bằng ngủ: giữ\n+    handle (PID không bị tái dùng khi còn handle), rồi `WaitForSingleObject` tới khi đối tượng tiến\n+    trình được báo hiệu, tức mọi luồng đã thoát. `None` = KHÔNG ĐO ĐƯỢC, khai thẳng, không đọc thành rỗng.\n+    Dòng nhật ký nêu PID giữ/bỏ để ca gọi (t154) ĐÒI cháu nằm trong tập giữ, không chỉ đếm.\n+    Ngoại lệ SAU khi đã mở handle ⇒ đóng MỌI handle đang giữ rồi mới trả/ném (không rò handle).\n+    \"\"\"\n+    k32, mo = None, []                             # `mo`: mọi (pid, handle) đã mở mà chưa đóng\n+    try:\n+        import ctypes\n+        from ctypes import wintypes\n+        thu_hoi = _nap_launcher_thu_hoi()\n+        with _KHOA_CHUP_CAY_WINDOWS:\n+            anh = thu_hoi._chup_cay(p.pid)          # Toolhelp32 + khoá danh tính, đã bỏ PID của ta\n+        goc = (anh or {}).get(p.pid)\n+        if not anh or not goc:\n+            return None, None, f\"hau_due: KHONG chup duoc cay (anh={anh!r}) - CHAU KHONG DO DUOC\"\n+        k32 = ctypes.WinDLL(\"kernel32\", use_last_error=True)\n+        k32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]\n+        k32.OpenProcess.restype = wintypes.HANDLE\n+        k32.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]\n+        k32.WaitForSingleObject.restype = wintypes.DWORD\n+        k32.TerminateProcess.argtypes = [wintypes.HANDLE, wintypes.UINT]\n+        k32.TerminateProcess.restype = wintypes.BOOL\n+        k32.CloseHandle.argtypes = [wintypes.HANDLE]\n+        k32.CloseHandle.restype = wintypes.BOOL\n+        bo = []\n+        for q, khoa in anh.items():\n+            if q == p.pid:\n+                continue                           # con: `p` đã giữ handle, `p.wait` đo nó\n+            # Liên kết cha trong ảnh Toolhelp có thể trỏ tới PID ĐÃ tái dùng: hậu duệ thật sinh SAU gốc.\n+            if not khoa or int(khoa[4:]) < int(goc[4:]):\n+                bo.append(q)\n+                continue\n+            h = k32.OpenProcess(0x00100000 | 0x0001 | 0x1000, False, q)   # SYNCHRONIZE|TERMINATE|QUERY_LIMITED\n+            if not h:\n+                bo.append(q)                       # đã thoát giữa lúc chụp và lúc mở\n+                continue\n+            mo.append((q, h))                      # vào `mo` NGAY, trước mọi lời gọi có thể ném\n+            if thu_hoi._khoa_danh_tinh(q) != khoa:  # handle đã giữ ⇒ phép so này không còn khe tái dùng",
+    "path": "ops/lease_publish_test.py",
+    "commit_id": "4e89dd9734803c656057177f4ec9cabb518595cf",
+    "original_commit_id": "4e89dd9734803c656057177f4ec9cabb518595cf",
+    "user": {
+      "login": "chatgpt-codex-connector[bot]",
+      "id": 199175422,
+      "node_id": "BOT_kgDOC98s_g",
+      "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+      "html_url": "https://github.com/apps/chatgpt-codex-connector",
+      "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Serialize the Windows identity recheck with the snapshot**\n\nWhen both `t125` waiter threads time out on Windows, this identity recheck can run concurrently with the other thread's `_chup_cay`, despite the new snapshot lock. `launcher._khoa_danh_tinh` creates a fresh `_FILETIME` class and overwrites the shared `ctypes.windll.kernel32.GetProcessTimes.argtypes` on every call, so overlapping calls can raise `ctypes.ArgumentError`. A synchronized probe using the actual identity function and ctypes callbacks reproduced this mismatch. The exception escapes `_giu_hau_due_windows` before `taskkill`, aborting cleanup and potentially leaving descendants running. Protect this recheck with the same lock, without holding it across process waits, and add a two-thread regression covering a recheck overlapping a snapshot.\n\nUseful? React with 👍 / 👎.\n\n<!-- codex-code-review-finding:v1 -->",
+    "created_at": "2026-10-19T18:38:19Z",
+    "updated_at": "2026-10-19T18:38:19Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/849#discussion_r4317449413",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/849",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4317449413"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/849#discussion_r4317449413"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/849"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4317449413/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 4924,
+    "side": "RIGHT",
+    "author_association": "NONE",
+    "original_position": 78,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4317449425",
+    "pull_request_review_id": 5576043333,
+    "id": 4317449425,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABAVcM0Q",
+    "diff_hunk": "@@ -5468,7 +5486,480 @@ def gop(thu_muc) -> int:\n     return 0\n \n \n+# ---- WP748 r16 `targeted_mutant_gate` — cong PR, KHONG phai full_mutant_audit ----------------\n+# Hai muc (spec ops/specs/wp748-windows-gates-r16.md). Muc PR: 52 ca nen + 239 tu dot bien, MOI\n+# con chi chay CA DICH da khai, + 10 dot bien san pham; chia N manh can theo CHI PHI do duoc.\n+# Muc truoc merge/land/release: full_mutant_audit = `chay_manh`/`gop` cu (moi con chay du 52 ca),\n+# chay rieng (`ci-dot-bien-du.yml`). Bien nhan, dong in va UI cua muc PR KHONG BAO GIO duoc goi\n+# la full mutant audit: muc PR KHONG do ca ngoai dich con xanh duoi moi dot bien.\n+TU_KIEM_CHI_CA_ENV = \"NHANH_DON_DUOC_TU_KIEM_CHI_CA\"\n+DICH_ENV, DICH_RA_ENV, PHIEN_BAN_DICH = \"NHANH_DON_DUOC_DICH\", \"NHANH_DON_DUOC_DICH_RA\", 1\n+CHE_DO_DICH = \"targeted_mutant_gate\"\n+# full_mutant_audit qua CUNG bo bien nhan (head, rc that, tien do, RAM, thanh vien): `NHANH_DON_DUOC_DICH_DU=1`\n+# => moi tu dot bien chay DU 52 ca (`chi_dich=False`, nghia goc), KHONG ap tran duong gang.\n+CHE_DO_DU, DICH_DU_ENV, TRAN_GIAY_CON_DU = \"full_mutant_audit\", \"NHANH_DON_DUOC_DICH_DU\", 3600\n+_MAU_DICH = r\"[0-9]/[2-8]\"         # cung mien k/N voi `doc_manh`\n+TRAN_DUONG_GANG_GIAY = 540          # spec r16: duong gang DO DUOC, khong phai so ly thuyet\n+TRAN_GIAY_CON_DICH = 600            # mot con qua tran => rc 124 => manh DO\n+TRAN_NHAT_KY = 64 * 1024            # nhat ky manh co tran (ky tu), giu PHAN CUOI\n+TRANG_THAI_KQ = (\"passed\", \"failed\", \"skipped\", \"not_run\", \"not_measured\", \"inconclusive\")\n+# Giay moi ca nen — bien nhan ho so g12 (52 ca 274.8 s, rc0, JSON sha256 e74ad932...). Chi\n+# dung de CAN manh; sai so chi lam lech can bang, KHONG doi phan quyet. Thieu/thua ten => LOI.\n+GIAY_CA_HO_SO = {\n+    \"r501\": 5.61, \"r502\": 2.04, \"r503\": 0.03, \"r504\": 0.06, \"r505\": 0.65, \"r506\": 8.16,\n+    \"r507\": 0.18, \"r508\": 0.08, \"r509\": 1.43, \"r510\": 0.03, \"r511\": 0.03, \"r512\": 7.45,\n+    \"r513\": 10.66, \"r514\": 25.69, \"r515\": 0.15, \"r516\": 7.75, \"r517\": 1.08, \"r518\": 0.3,\n+    \"r519\": 12.21, \"r520\": 3.37, \"r521\": 8.06, \"r522\": 2.43, \"r523\": 1.43, \"r524\": 0.01,\n+    \"r525\": 0.57, \"r526\": 0.55, \"r527\": 0.4, \"r528\": 58.57, \"r529\": 1.47, \"r530\": 0.66,\n+    \"r531\": 0.92, \"r532\": 0.56, \"r533\": 0.47, \"r534\": 0.46, \"r535\": 0.44, \"r536\": 0.41,\n+    \"r537\": 0.42, \"r538\": 0.92, \"r539\": 9.77, \"r540\": 0.74, \"r541\": 0.39, \"r542\": 4.96,\n+    \"r543\": 0.65, \"r544\": 0.53, \"r545\": 0.49, \"r546\": 72.02, \"r547\": 1.12, \"r548\": 4.41,\n+    \"r549\": 0.58, \"r550\": 0.52, \"r551\": 5.72, \"r552\": 2.19,\n+}\n+GIAY_PHONG_CON, GIAY_DOT_BIEN_SP, GIAY_NEN_SP = 1.5, 30.0, 27.0\n+_KHOA_DICH = {\"phien_ban\", \"che_do\", \"manh\", \"so_manh\", \"head\", \"sha256_test\", \"sha256_tool\",\n+              \"rc\", \"bat_dau\", \"ket_thuc\", \"giay\", \"ram_dinh_mb\", \"pham_vi_ram\", \"so_lan_chay_lai\",\n+              \"tien_do\", \"ca_dich\", \"ket_qua\", \"nhat_ky_duoi\"}\n+\n+\n+def _loc_tu_kiem(chi_ca: str) -> list:\n+    \"\"\"Con: tap ca dich KHAC RONG, KHONG trung, MOI ten la ca co that; sai => ValueError.\"\"\"\n+    ten = chi_ca.split(\",\") if chi_ca else []\n+    co = {t for t, _, _ in TU_KIEM}\n+    if not ten or len(ten) != len(set(ten)) or not set(ten) <= co:\n+        raise ValueError(f\"{TU_KIEM_CHI_CA_ENV}={chi_ca!r}: rong, trung hoac ten la\")\n+    return [x for x in TU_KIEM if x[0] in set(ten)]\n+\n+\n+def doc_dich(gia_tri) -> tuple[int, int]:\n+    \"\"\"`k/N` khop DUNG `[0-9]/[2-8]` (fullmatch) va k < N.\"\"\"\n+    if not re.fullmatch(_MAU_DICH, gia_tri or \"\") or int(gia_tri[0]) >= int(gia_tri[2]):\n+        raise ValueError(f\"{DICH_ENV}={gia_tri!r} sai hinh k/N (k < N, N 2..8)\")\n+    return int(gia_tri[0]), int(gia_tri[2])\n+\n+\n+def _muc_dich(du=False):\n+    \"\"\"Moi muc: `(khoa, trong so, muc)`. `du` => trong so tu dot bien = DU 52 ca. Fail-closed khi lech.\"\"\"\n+    ten_tk = [t for t, _, _ in TU_KIEM]\n+    if set(GIAY_CA_HO_SO) != set(ten_tk) or len(ten_tk) != len(set(ten_tk)):\n+        raise ValueError(\"GIAY_CA_HO_SO lech TU_KIEM (thieu/thua/trung ten)\")\n+    muc = [(f\"ca:{t}\", GIAY_CA_HO_SO[t], x) for x in TU_KIEM for t in [x[0]]]\n+    for x in DOT_BIEN_TU_KIEM:\n+        if not x[1] or not set(x[1]) <= set(ten_tk):\n+            raise ValueError(f\"tu dot bien {x[0]}: tap dich rong hoac ten la\")\n+        ca_chay = GIAY_CA_HO_SO if du else sorted(set(x[1]))\n+        muc.append((f\"tk:{x[0]}\", GIAY_PHONG_CON + sum(GIAY_CA_HO_SO[c] for c in sorted(ca_chay)), x))\n+    muc += [(f\"db:{x[0]}\", GIAY_DOT_BIEN_SP, x) for x in DOT_BIEN]\n+    khoa = [k for k, _, _ in muc]\n+    if len(khoa) != len(set(khoa)):\n+        raise ValueError(\"khoa muc TRUNG (ten mutant lap)\")\n+    return muc\n+\n+\n+def phan_hoach_dich(n: int, du=False) -> list:\n+    \"\"\"LPT tat dinh: muc nang truoc (hoa: theo khoa), vao manh dang nhe nhat (hoa: chi so nho).\"\"\"\n+    tai, manh = [0.0] * n, [[] for _ in range(n)]\n+    for khoa, w, x in sorted(_muc_dich(du), key=lambda m: (-m[1], m[0])):\n+        i = min(range(n), key=lambda j: (tai[j], j))\n+        tai[i] += w\n+        manh[i].append((khoa, x))\n+    return manh\n+\n+\n+def _git_head():\n+    try:\n+        p = subprocess.run([\"git\", \"rev-parse\", \"HEAD\"], cwd=HERE, capture_output=True, text=True, timeout=60)\n+    except (OSError, subprocess.SubprocessError):\n+        return None\n+    h = p.stdout.strip()\n+    return h if p.returncode == 0 and re.fullmatch(r\"[0-9a-f]{40}\", h) else None\n+\n+\n+def _bat_dau_do_ram():\n+    \"\"\"Windows: dua manh vao Job Object de do dinh commit CA CAY tien trinh. Tra handle/None.\"\"\"\n+    if os.name != \"nt\":\n+        return None\n+    try:\n+        import ctypes\n+        k32 = ctypes.WinDLL(\"kernel32\", use_last_error=True)\n+        k32.CreateJobObjectW.restype = ctypes.c_void_p\n+        k32.GetCurrentProcess.restype = ctypes.c_void_p\n+        k32.AssignProcessToJobObject.argtypes = (ctypes.c_void_p, ctypes.c_void_p)\n+        job = k32.CreateJobObjectW(None, None)\n+        if job and k32.AssignProcessToJobObject(job, k32.GetCurrentProcess()):\n+            return job\n+    except (OSError, AttributeError):\n+        pass\n+    return None\n+\n+\n+def _ram_dinh_mb(job):\n+    \"\"\"`(MB, pham_vi)` — dinh RAM do duoc; `(None, ly do)` khi KHONG DO DUOC (gop se DO).\"\"\"\n+    if os.name != \"nt\":\n+        import resource\n+        kb = max(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,\n+                 resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)\n+        return round(kb / 1024, 1), \"posix ru_maxrss: max(manh, con lon nhat da thu hoi)\"\n+    import ctypes\n+    from ctypes import wintypes\n+\n+    class _IO(ctypes.Structure):\n+        _fields_ = [(f, ctypes.c_ulonglong) for f in (\"r\", \"w\", \"o\", \"rb\", \"wb\", \"ob\")]\n+\n+    class _CB(ctypes.Structure):\n+        _fields_ = [(\"a\", ctypes.c_longlong), (\"b\", ctypes.c_longlong), (\"c\", wintypes.DWORD),\n+                    (\"d\", ctypes.c_size_t), (\"e\", ctypes.c_size_t), (\"f\", wintypes.DWORD),\n+                    (\"g\", ctypes.c_size_t), (\"h\", wintypes.DWORD), (\"i\", wintypes.DWORD)]\n+\n+    class _EXT(ctypes.Structure):\n+        _fields_ = [(\"cb\", _CB), (\"io\", _IO), (\"pml\", ctypes.c_size_t), (\"jml\", ctypes.c_size_t),\n+                    (\"peak_p\", ctypes.c_size_t), (\"peak_j\", ctypes.c_size_t)]\n+\n+    class _PMC(ctypes.Structure):\n+        _fields_ = [(\"cb\", wintypes.DWORD), (\"pf\", wintypes.DWORD), (\"peak_ws\", ctypes.c_size_t)] + \\\n+                   [(f\"x{i}\", ctypes.c_size_t) for i in range(6)]",
+    "path": "ops/nhanh_don_duoc_test.py",
+    "commit_id": "4e89dd9734803c656057177f4ec9cabb518595cf",
+    "original_commit_id": "4e89dd9734803c656057177f4ec9cabb518595cf",
+    "user": {
+      "login": "chatgpt-codex-connector[bot]",
+      "id": 199175422,
+      "node_id": "BOT_kgDOC98s_g",
+      "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+      "html_url": "https://github.com/apps/chatgpt-codex-connector",
+      "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Allocate the complete Windows process-memory structure**\n\nWhen a Windows shard cannot join a Job Object or querying the job fails, its intended process-only RAM fallback is unusable. `_PMC` allocates seven `SIZE_T` fields, but [Microsoft's `PROCESS_MEMORY_COUNTERS` layout](https://learn.microsoft.com/en-us/windows/win32/api/psapi/ns-psapi-process_memory_counters) contains eight; on Win64 the supplied buffer is 64 bytes instead of 72. `GetProcessMemoryInfo` therefore fails, `_ram_dinh_mb` returns `None`, and `_loi_gop_dich` rejects an otherwise successful targeted/full audit. Include the missing `PeakPagefileUsage` slot and add a regression exercising `job=None` with the documented buffer size, retaining the explicit process-only measurement label.\n\nUseful? React with 👍 / 👎.\n\n<!-- codex-code-review-finding:v1 -->",
+    "created_at": "2026-10-19T18:38:19Z",
+    "updated_at": "2026-10-19T18:38:19Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/849#discussion_r4317449425",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/849",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4317449425"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/849#discussion_r4317449425"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/849"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4317449425/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": 5619,
+    "start_side": "RIGHT",
+    "line": null,
+    "original_line": 5620,
+    "side": "RIGHT",
+    "author_association": "NONE",
+    "original_position": 208,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4317487002",
+    "pull_request_review_id": 5576088638,
+    "id": 4317487002,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABAVefmg",
+    "diff_hunk": "@@ -4862,15 +4868,133 @@ def _nap_launcher_thu_hoi():\n     return mod\n \n \n-def _giet_ca_cay(p, cho_giay: float = 5.0) -> str:\n+# WP748 r17/g17 (G6 rc1 trên 19683a0: t125 `ArgumentError ... expected LP__PROCESSENTRY32W instance\n+# instead of pointer to _PROCESSENTRY32W`) — hai waiter của t125 cùng quá hạn và cùng gọi `_giet_ca_cay`.\n+# `launcher._cac_pid_cha_windows` dựng LỚP struct MỚI mỗi lời gọi rồi gán `argtypes` lên\n+# `ctypes.windll.kernel32` dùng CHUNG toàn tiến trình ⇒ luồng kia ghi đè giữa chừng. Đo bằng probe hai\n+# luồng: không khoá 40/80 lời gọi ném; có khoá 0/80. Vá tận gốc nằm ở launcher.py (ngoài write set).\n+_KHOA_CHUP_CAY_WINDOWS = threading.Lock()\n+\n+\n+def _giu_hau_due_windows(p):\n+    \"\"\"Mở HANDLE tới mọi hậu duệ của `p` TRƯỚC khi giết. Trả (k32, [(pid, handle)], dòng nhật ký).\n+\n+    WP748 r8/g8 (t154 ĐỎ một lần ngoài sandbox 2026-10-14T18:37:33Z: `taskkill rc=0`, con rc=1, mà nhịp\n+    cháu 4->5 trong cửa sổ 1 s; chạy lại 18:38:04Z XANH) — `taskkill /T /F` chỉ GỌI `TerminateProcess`,\n+    mà hàm ấy BẤT ĐỒNG BỘ: trả về khi kết liễu mới được KHỞI ĐỘNG, chưa xong. Nhánh Windows cũ chỉ chờ\n+    CON (`p.wait`), không chờ CHÁU ⇒ một lần ghi đang dở của cháu hạ cánh sau mốc đo `a`. Cháu thật sự\n+    còn sống thì cửa sổ 1 s thấy ~20 nhịp, không phải 1. Chữa bằng BẰNG CHỨNG chứ không bằng ngủ: giữ\n+    handle (PID không bị tái dùng khi còn handle), rồi `WaitForSingleObject` tới khi đối tượng tiến\n+    trình được báo hiệu, tức mọi luồng đã thoát. `None` = KHÔNG ĐO ĐƯỢC, khai thẳng, không đọc thành rỗng.\n+    Dòng nhật ký nêu PID giữ/bỏ để ca gọi (t154) ĐÒI cháu nằm trong tập giữ, không chỉ đếm.\n+    Ngoại lệ SAU khi đã mở handle ⇒ đóng MỌI handle đang giữ rồi mới trả/ném (không rò handle).\n+    \"\"\"\n+    k32, mo = None, []                             # `mo`: mọi (pid, handle) đã mở mà chưa đóng\n+    try:\n+        import ctypes\n+        from ctypes import wintypes\n+        thu_hoi = _nap_launcher_thu_hoi()\n+        with _KHOA_CHUP_CAY_WINDOWS:\n+            anh = thu_hoi._chup_cay(p.pid)          # Toolhelp32 + khoá danh tính, đã bỏ PID của ta\n+        goc = (anh or {}).get(p.pid)\n+        if not anh or not goc:\n+            return None, None, f\"hau_due: KHONG chup duoc cay (anh={anh!r}) - CHAU KHONG DO DUOC\"\n+        k32 = ctypes.WinDLL(\"kernel32\", use_last_error=True)\n+        k32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]\n+        k32.OpenProcess.restype = wintypes.HANDLE\n+        k32.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]\n+        k32.WaitForSingleObject.restype = wintypes.DWORD\n+        k32.TerminateProcess.argtypes = [wintypes.HANDLE, wintypes.UINT]\n+        k32.TerminateProcess.restype = wintypes.BOOL\n+        k32.CloseHandle.argtypes = [wintypes.HANDLE]\n+        k32.CloseHandle.restype = wintypes.BOOL\n+        bo = []\n+        for q, khoa in anh.items():\n+            if q == p.pid:\n+                continue                           # con: `p` đã giữ handle, `p.wait` đo nó\n+            # Liên kết cha trong ảnh Toolhelp có thể trỏ tới PID ĐÃ tái dùng: hậu duệ thật sinh SAU gốc.\n+            if not khoa or int(khoa[4:]) < int(goc[4:]):\n+                bo.append(q)\n+                continue\n+            h = k32.OpenProcess(0x00100000 | 0x0001 | 0x1000, False, q)   # SYNCHRONIZE|TERMINATE|QUERY_LIMITED\n+            if not h:\n+                bo.append(q)                       # đã thoát giữa lúc chụp và lúc mở\n+                continue\n+            mo.append((q, h))                      # vào `mo` NGAY, trước mọi lời gọi có thể ném\n+            if thu_hoi._khoa_danh_tinh(q) != khoa:  # handle đã giữ ⇒ phép so này không còn khe tái dùng",
+    "path": "ops/lease_publish_test.py",
+    "commit_id": "4e89dd9734803c656057177f4ec9cabb518595cf",
+    "original_commit_id": "4e89dd9734803c656057177f4ec9cabb518595cf",
+    "user": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "Đã vá ở `1e55223` (đã push), cùng finding với WP748-R3 của lượt Codex cục bộ. Lời gọi `_khoa_danh_tinh` nay nằm trong `_KHOA_CHUP_CAY_WINDOWS`, giống `_chup_cay`. Khoá chỉ bao lời gọi, không giữ qua lúc chờ tiến trình. Ca mới `t220`: launcher giả ghi `locked()` ở MỖI lời gọi. Có bản vá thì QUA. Gỡ khoá thì ĐỎ, và lỗi nêu đúng `_khoa_danh_tinh`. Lượt Codex cục bộ thứ hai trên `1e55223` đã tự dựng probe hai luồng: chồng recheck/recheck và recheck/snapshot đều 2/2 khi có khoá, mỗi cặp ra 1 `ArgumentError` khi không khoá.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+    "created_at": "2026-10-19T18:41:46Z",
+    "updated_at": "2026-10-19T18:41:47Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/849#discussion_r4317487002",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/849",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4317487002"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/849#discussion_r4317487002"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/849"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4317487002/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 4924,
+    "side": "RIGHT",
+    "in_reply_to_id": 4317449413,
+    "author_association": "OWNER",
+    "original_position": 78,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4317487613",
+    "pull_request_review_id": 5576089330,
+    "id": 4317487613,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABAVeh_Q",
+    "diff_hunk": "@@ -5468,7 +5486,480 @@ def gop(thu_muc) -> int:\n     return 0\n \n \n+# ---- WP748 r16 `targeted_mutant_gate` — cong PR, KHONG phai full_mutant_audit ----------------\n+# Hai muc (spec ops/specs/wp748-windows-gates-r16.md). Muc PR: 52 ca nen + 239 tu dot bien, MOI\n+# con chi chay CA DICH da khai, + 10 dot bien san pham; chia N manh can theo CHI PHI do duoc.\n+# Muc truoc merge/land/release: full_mutant_audit = `chay_manh`/`gop` cu (moi con chay du 52 ca),\n+# chay rieng (`ci-dot-bien-du.yml`). Bien nhan, dong in va UI cua muc PR KHONG BAO GIO duoc goi\n+# la full mutant audit: muc PR KHONG do ca ngoai dich con xanh duoi moi dot bien.\n+TU_KIEM_CHI_CA_ENV = \"NHANH_DON_DUOC_TU_KIEM_CHI_CA\"\n+DICH_ENV, DICH_RA_ENV, PHIEN_BAN_DICH = \"NHANH_DON_DUOC_DICH\", \"NHANH_DON_DUOC_DICH_RA\", 1\n+CHE_DO_DICH = \"targeted_mutant_gate\"\n+# full_mutant_audit qua CUNG bo bien nhan (head, rc that, tien do, RAM, thanh vien): `NHANH_DON_DUOC_DICH_DU=1`\n+# => moi tu dot bien chay DU 52 ca (`chi_dich=False`, nghia goc), KHONG ap tran duong gang.\n+CHE_DO_DU, DICH_DU_ENV, TRAN_GIAY_CON_DU = \"full_mutant_audit\", \"NHANH_DON_DUOC_DICH_DU\", 3600\n+_MAU_DICH = r\"[0-9]/[2-8]\"         # cung mien k/N voi `doc_manh`\n+TRAN_DUONG_GANG_GIAY = 540          # spec r16: duong gang DO DUOC, khong phai so ly thuyet\n+TRAN_GIAY_CON_DICH = 600            # mot con qua tran => rc 124 => manh DO\n+TRAN_NHAT_KY = 64 * 1024            # nhat ky manh co tran (ky tu), giu PHAN CUOI\n+TRANG_THAI_KQ = (\"passed\", \"failed\", \"skipped\", \"not_run\", \"not_measured\", \"inconclusive\")\n+# Giay moi ca nen — bien nhan ho so g12 (52 ca 274.8 s, rc0, JSON sha256 e74ad932...). Chi\n+# dung de CAN manh; sai so chi lam lech can bang, KHONG doi phan quyet. Thieu/thua ten => LOI.\n+GIAY_CA_HO_SO = {\n+    \"r501\": 5.61, \"r502\": 2.04, \"r503\": 0.03, \"r504\": 0.06, \"r505\": 0.65, \"r506\": 8.16,\n+    \"r507\": 0.18, \"r508\": 0.08, \"r509\": 1.43, \"r510\": 0.03, \"r511\": 0.03, \"r512\": 7.45,\n+    \"r513\": 10.66, \"r514\": 25.69, \"r515\": 0.15, \"r516\": 7.75, \"r517\": 1.08, \"r518\": 0.3,\n+    \"r519\": 12.21, \"r520\": 3.37, \"r521\": 8.06, \"r522\": 2.43, \"r523\": 1.43, \"r524\": 0.01,\n+    \"r525\": 0.57, \"r526\": 0.55, \"r527\": 0.4, \"r528\": 58.57, \"r529\": 1.47, \"r530\": 0.66,\n+    \"r531\": 0.92, \"r532\": 0.56, \"r533\": 0.47, \"r534\": 0.46, \"r535\": 0.44, \"r536\": 0.41,\n+    \"r537\": 0.42, \"r538\": 0.92, \"r539\": 9.77, \"r540\": 0.74, \"r541\": 0.39, \"r542\": 4.96,\n+    \"r543\": 0.65, \"r544\": 0.53, \"r545\": 0.49, \"r546\": 72.02, \"r547\": 1.12, \"r548\": 4.41,\n+    \"r549\": 0.58, \"r550\": 0.52, \"r551\": 5.72, \"r552\": 2.19,\n+}\n+GIAY_PHONG_CON, GIAY_DOT_BIEN_SP, GIAY_NEN_SP = 1.5, 30.0, 27.0\n+_KHOA_DICH = {\"phien_ban\", \"che_do\", \"manh\", \"so_manh\", \"head\", \"sha256_test\", \"sha256_tool\",\n+              \"rc\", \"bat_dau\", \"ket_thuc\", \"giay\", \"ram_dinh_mb\", \"pham_vi_ram\", \"so_lan_chay_lai\",\n+              \"tien_do\", \"ca_dich\", \"ket_qua\", \"nhat_ky_duoi\"}\n+\n+\n+def _loc_tu_kiem(chi_ca: str) -> list:\n+    \"\"\"Con: tap ca dich KHAC RONG, KHONG trung, MOI ten la ca co that; sai => ValueError.\"\"\"\n+    ten = chi_ca.split(\",\") if chi_ca else []\n+    co = {t for t, _, _ in TU_KIEM}\n+    if not ten or len(ten) != len(set(ten)) or not set(ten) <= co:\n+        raise ValueError(f\"{TU_KIEM_CHI_CA_ENV}={chi_ca!r}: rong, trung hoac ten la\")\n+    return [x for x in TU_KIEM if x[0] in set(ten)]\n+\n+\n+def doc_dich(gia_tri) -> tuple[int, int]:\n+    \"\"\"`k/N` khop DUNG `[0-9]/[2-8]` (fullmatch) va k < N.\"\"\"\n+    if not re.fullmatch(_MAU_DICH, gia_tri or \"\") or int(gia_tri[0]) >= int(gia_tri[2]):\n+        raise ValueError(f\"{DICH_ENV}={gia_tri!r} sai hinh k/N (k < N, N 2..8)\")\n+    return int(gia_tri[0]), int(gia_tri[2])\n+\n+\n+def _muc_dich(du=False):\n+    \"\"\"Moi muc: `(khoa, trong so, muc)`. `du` => trong so tu dot bien = DU 52 ca. Fail-closed khi lech.\"\"\"\n+    ten_tk = [t for t, _, _ in TU_KIEM]\n+    if set(GIAY_CA_HO_SO) != set(ten_tk) or len(ten_tk) != len(set(ten_tk)):\n+        raise ValueError(\"GIAY_CA_HO_SO lech TU_KIEM (thieu/thua/trung ten)\")\n+    muc = [(f\"ca:{t}\", GIAY_CA_HO_SO[t], x) for x in TU_KIEM for t in [x[0]]]\n+    for x in DOT_BIEN_TU_KIEM:\n+        if not x[1] or not set(x[1]) <= set(ten_tk):\n+            raise ValueError(f\"tu dot bien {x[0]}: tap dich rong hoac ten la\")\n+        ca_chay = GIAY_CA_HO_SO if du else sorted(set(x[1]))\n+        muc.append((f\"tk:{x[0]}\", GIAY_PHONG_CON + sum(GIAY_CA_HO_SO[c] for c in sorted(ca_chay)), x))\n+    muc += [(f\"db:{x[0]}\", GIAY_DOT_BIEN_SP, x) for x in DOT_BIEN]\n+    khoa = [k for k, _, _ in muc]\n+    if len(khoa) != len(set(khoa)):\n+        raise ValueError(\"khoa muc TRUNG (ten mutant lap)\")\n+    return muc\n+\n+\n+def phan_hoach_dich(n: int, du=False) -> list:\n+    \"\"\"LPT tat dinh: muc nang truoc (hoa: theo khoa), vao manh dang nhe nhat (hoa: chi so nho).\"\"\"\n+    tai, manh = [0.0] * n, [[] for _ in range(n)]\n+    for khoa, w, x in sorted(_muc_dich(du), key=lambda m: (-m[1], m[0])):\n+        i = min(range(n), key=lambda j: (tai[j], j))\n+        tai[i] += w\n+        manh[i].append((khoa, x))\n+    return manh\n+\n+\n+def _git_head():\n+    try:\n+        p = subprocess.run([\"git\", \"rev-parse\", \"HEAD\"], cwd=HERE, capture_output=True, text=True, timeout=60)\n+    except (OSError, subprocess.SubprocessError):\n+        return None\n+    h = p.stdout.strip()\n+    return h if p.returncode == 0 and re.fullmatch(r\"[0-9a-f]{40}\", h) else None\n+\n+\n+def _bat_dau_do_ram():\n+    \"\"\"Windows: dua manh vao Job Object de do dinh commit CA CAY tien trinh. Tra handle/None.\"\"\"\n+    if os.name != \"nt\":\n+        return None\n+    try:\n+        import ctypes\n+        k32 = ctypes.WinDLL(\"kernel32\", use_last_error=True)\n+        k32.CreateJobObjectW.restype = ctypes.c_void_p\n+        k32.GetCurrentProcess.restype = ctypes.c_void_p\n+        k32.AssignProcessToJobObject.argtypes = (ctypes.c_void_p, ctypes.c_void_p)\n+        job = k32.CreateJobObjectW(None, None)\n+        if job and k32.AssignProcessToJobObject(job, k32.GetCurrentProcess()):\n+            return job\n+    except (OSError, AttributeError):\n+        pass\n+    return None\n+\n+\n+def _ram_dinh_mb(job):\n+    \"\"\"`(MB, pham_vi)` — dinh RAM do duoc; `(None, ly do)` khi KHONG DO DUOC (gop se DO).\"\"\"\n+    if os.name != \"nt\":\n+        import resource\n+        kb = max(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,\n+                 resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)\n+        return round(kb / 1024, 1), \"posix ru_maxrss: max(manh, con lon nhat da thu hoi)\"\n+    import ctypes\n+    from ctypes import wintypes\n+\n+    class _IO(ctypes.Structure):\n+        _fields_ = [(f, ctypes.c_ulonglong) for f in (\"r\", \"w\", \"o\", \"rb\", \"wb\", \"ob\")]\n+\n+    class _CB(ctypes.Structure):\n+        _fields_ = [(\"a\", ctypes.c_longlong), (\"b\", ctypes.c_longlong), (\"c\", wintypes.DWORD),\n+                    (\"d\", ctypes.c_size_t), (\"e\", ctypes.c_size_t), (\"f\", wintypes.DWORD),\n+                    (\"g\", ctypes.c_size_t), (\"h\", wintypes.DWORD), (\"i\", wintypes.DWORD)]\n+\n+    class _EXT(ctypes.Structure):\n+        _fields_ = [(\"cb\", _CB), (\"io\", _IO), (\"pml\", ctypes.c_size_t), (\"jml\", ctypes.c_size_t),\n+                    (\"peak_p\", ctypes.c_size_t), (\"peak_j\", ctypes.c_size_t)]\n+\n+    class _PMC(ctypes.Structure):\n+        _fields_ = [(\"cb\", wintypes.DWORD), (\"pf\", wintypes.DWORD), (\"peak_ws\", ctypes.c_size_t)] + \\\n+                   [(f\"x{i}\", ctypes.c_size_t) for i in range(6)]",
+    "path": "ops/nhanh_don_duoc_test.py",
+    "commit_id": "4e89dd9734803c656057177f4ec9cabb518595cf",
+    "original_commit_id": "4e89dd9734803c656057177f4ec9cabb518595cf",
+    "user": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "Đúng, sẽ vá ở commit `9983615` (chưa push, đang chạy gate cục bộ). Thêm ô `SIZE_T` thứ 8 cho `PeakPagefileUsage`. Ca mới `r553` chạy đường `job=None` với psapi giả: API giả từ chối bộ đệm thiếu ô, như API thật. Ca đếm số ô `SIZE_T` tính từ `peak_ws`, không so kích thước tuyệt đối, vì `wintypes.DWORD` trên Linux là 8 byte nên so tuyệt đối không phân biệt được 7 với 8 ô. Ca giữ nguyên nhãn `windows PeakWorkingSet CHI tien trinh manh`. Đột biến riêng `ram-pmc-thieu-truong` (lùi về 7 ô) làm ca ĐỎ: 1/1 bị giết.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+    "created_at": "2026-10-19T18:41:50Z",
+    "updated_at": "2026-10-19T18:41:50Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/849#discussion_r4317487613",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/849",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4317487613"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/849#discussion_r4317487613"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/849"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4317487613/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": 5619,
+    "start_side": "RIGHT",
+    "line": null,
+    "original_line": 5620,
+    "side": "RIGHT",
+    "in_reply_to_id": 4317449425,
+    "author_association": "OWNER",
+    "original_position": 208,
+    "position": 1,
+    "subject_type": "line"
+  }
+]

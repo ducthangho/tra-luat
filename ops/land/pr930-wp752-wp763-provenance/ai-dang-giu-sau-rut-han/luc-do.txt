@@ -1,0 +1,27 @@
+# do 2026-10-26T01:36:15+00:00 tren clone du ref (fetch +refs/heads/* vao refs/heads va refs/remotes/origin ngay truoc khi do); master ab344da5
+ls-remote heads=613 for-each-ref=613 thieu=0 thua=0 (so TAP cap ten+OID)
+$ ai-dang-giu .claude/dev/ci_dang_ky_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp763-r2-g1-claude	refs/heads/ops/wp763-r2-g1-lease:ops/leases/wp763-r2-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+$ ai-dang-giu ops/kiem_ho_so_land.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp752-r4-g1-claude	refs/heads/ops/wp752-r4-g1-lease:ops/leases/wp752-r4-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+$ ai-dang-giu ops/kiem_ho_so_land_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp752-r4-g1-claude	refs/heads/ops/wp752-r4-g1-lease:ops/leases/wp752-r4-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+$ ai-dang-giu ops/kiem_nhan_hint.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp752-r4-g1-claude	refs/heads/ops/wp752-r4-g1-lease:ops/leases/wp752-r4-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+$ ai-dang-giu ops/kiem_nhan_hint_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp752-r4-g1-claude	refs/heads/ops/wp752-r4-g1-lease:ops/leases/wp752-r4-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

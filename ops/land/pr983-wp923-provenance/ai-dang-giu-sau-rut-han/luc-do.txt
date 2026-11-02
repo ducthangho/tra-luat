@@ -1,0 +1,11 @@
+do luc 2026-10-27T14:41:14Z
+ls-remote heads: 666, for-each-ref: 666, thieu: 0
+$ python ops/lease_publish.py ai-dang-giu --root . .claude/dev/ci_dang_ky_test.py
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp923-r2-g2-claude	refs/heads/ops/wp923-r2-g2-lease:ops/leases/wp923-r2-g2-claude.yaml
+CÒN_HẠN	wp923-r3-g3-claude	refs/heads/ops/wp923-r3-g3-lease:ops/leases/wp923-r3-g3-claude.yaml
+NGƯỜI_GIỮ 1: wp923-r3-g3-claude
+rc=11
+$ python ops/lease_publish.py ai-dang-giu --root . ops/handoff/wp923-g2-claude.md
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp923-r2-g2-claude	refs/heads/ops/wp923-r2-g2-lease:ops/leases/wp923-r2-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

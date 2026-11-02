@@ -1,0 +1,132 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 752
+packet_id: no-p3-cong-cu-ho-so
+revision: 4
+generation: 1
+lease_id: wp752-r4-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: []
+depends_on_ghi_chu: >-
+  Bon dieu kien depends_on cua dac ta, do luc cap 2026-10-25T01:33Z-01:35Z: (1) duong land A neo o comment cap lease
+  (issuecomment-6392021753); (2) holder scan 4/4 NGUOI_GIU 0 tren clone du ref (584 = 584 = 584, comm -3 = 0); (3) bon merge
+  #748 (9422054 401d4f1 7400df4 8223fd2) la to tien cua base 1797c32; (4) khoi nang_tran chep nguyen ben duoi, comment neo doc
+  nguoc con nguyen (ducthangho, OWNER).
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: >-
+  Dac ta: review thi hanh Codex cross_approved hoac human_audited; luot subagent Claude chi la review_deferred. Ho model
+  connector KHONG_DO_DUOC => land co the con landed false (§8.1). Reviewer thuc te co the la connector Codex GitHub tren PR
+  (bang capability khong co surface rieng cho connector); CLI codex can xac thuc lai (CODEX_AUTH_JSON vang trong container).
+access: read-write
+review_class: standard
+effective_review_class: sensitive
+effective_review_class_ghi_chu: 'Cong _BANG_LOP ep moi lease thanh sensitive (hang review_class cua dac ta).'
+spec_path: ops/specs/no-p3-cong-cu-ho-so-r4.md
+spec_sha256_required: a98d09e86e32ee249668aaa114aed43e8a982e8bd7f9ef81fe61aa6a2a168791
+spec_hash: a98d09e86e32ee249668aaa114aed43e8a982e8bd7f9ef81fe61aa6a2a168791
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+spec_source_oid: 1797c32530fba381afd4009340a3fa558b7e37b0
+spec_blob: 636e76064a546b1ccb95e723ba5cd5f1ec00c462
+prompt_path: ops/specs/no-p3-cong-cu-ho-so-r4.md
+prompt_sha256_required: a98d09e86e32ee249668aaa114aed43e8a982e8bd7f9ef81fe61aa6a2a168791
+write_set:
+- ops/kiem_ho_so_land.py
+- ops/kiem_ho_so_land_test.py
+- ops/kiem_nhan_hint.py
+- ops/kiem_nhan_hint_test.py
+write_set_hash: c157e2b1a3550dc72ec6a4864da8c2cf6a6340bc76ec3d254d9a837e8d7b3edf
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: '.claude/dev/ci_dang_ky_test.py KHONG thuoc write set (thuoc #763, dang bi wp910-r3-g3-claude giu toi 2026-10-26T10:10Z).'
+effective_write_set:
+- ops/kiem_ho_so_land.py
+- ops/kiem_ho_so_land_test.py
+- ops/kiem_nhan_hint.py
+- ops/kiem_nhan_hint_test.py
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+nang_tran:
+  ai_nang: ducthangho (chủ kho, thẩm quyền §2 protocol)
+  can_cu: >-
+    hai công cụ mới + hai bộ test tự đứng, ước ~950 dòng thêm trong 4 tệp; tách tiếp sẽ tách
+    công cụ khỏi phản chứng của chính nó. Bản tham chiếu gọn nhất của reviewer (4 tệp / ~350
+    dòng) cho thấy nằm dưới 450 là có thể nhưng không bắt buộc; trần mới là trần, không phải
+    mục tiêu.
+  tran_cu: ≤ 6 tệp / ≤ 450 dòng thêm (ADR-0053)
+  tran_moi: ≤ 4 tệp / ≤ 1.000 dòng thêm, đo bằng `git diff --numstat` base..head
+  neo: https://github.com/ducthangho/tra-luat/issues/752#issuecomment-6366519792
+merge_conditions:
+- {id: M-1, dieu_kien: 'connector Codex khong P0/P1/P2 tren head cuoi; moi thread duoc tra loi'}
+- {id: M-2, dieu_kien: 'duong land A: PR #752 KHONG merge mot minh; master nhan #752 + #763 trong MOT lan merge (head rieng #752 do co kiem soat o gate-registry)'}
+- {id: M-3, dieu_kien: 'numstat base..head <= 4 tep / <= 1.000 dong them (tran_moi); vuot => dung truoc review, soan revision'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp752-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 1797c32530fba381afd4009340a3fa558b7e37b0
+start_from_sha: 1797c32530fba381afd4009340a3fa558b7e37b0
+start_from_ghi_chu: 'origin/master luc cap lease.'
+reviewed_sha_required: 1797c32530fba381afd4009340a3fa558b7e37b0
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/752#issuecomment-6392021753
+granted_on_instruction_readback: 'chu kho trong phien session_01CSM7GNazhN6uGJb4v1TqBT (2026-10-25 ~01:30Z): "cấp lease và triển khai theo thứ tự đề xuất của bạn". Bam byte KHONG DO DUOC.'
+authority_caveat: >-
+  Comment neo do phien agent dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment chu kho tu viet (#566).
+recorded_by: claude-session
+recorder_is_executor: true
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-25T01:34:00Z'
+  goc_quet: 'master 1797c32, clone du ref (ls-remote vs refs/heads vs refs/remotes/origin: 584/584/584, comm -3 = 0), fetch lai ngay truoc tung duong dan'
+  ket_qua: '4/4 duong dan NGUOI_GIU 0, rc 0.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'Lease dau tien cua #752 r4.'
+leased_at_utc: '2026-10-25T01:40:00Z'
+heartbeat_at: '2026-10-25T01:40:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+lease_until: '2026-10-26T01:35:00Z'
+lease_expires_at_utc: '2026-10-26T01:35:00Z'
+rut_han:
+  han_cu: '2026-10-26T13:40:00Z'
+  han_moi: '2026-10-26T01:35:00Z'
+  rut_boi: claude-executor-session session_01CSM7GNazhN6uGJb4v1TqBT (chinh executor cua lease nay)
+  ly_do: 'packet #752 va #763 da merge qua PR #930 (merge 36057e8, cha 7009ab9 + b0fadc9; PR #918 tu dong merged cung commit); viec cua lease da xong.'
+  tham_quyen: 'executor TU NHA lease cua chinh minh sau khi packet land — chi thu hep quyen ghi, khong mo rong; KHONG co comment chu kho rieng cho viec rut han nay.'
+  vi_sao_khong_bia_mo: 'khong co lease ke nhiem tro nguoc bang thay_the_cho; viec da xong. Tien le a0d703c (wp835-r4-g4-claude), be6f91b (wp919-r3-g3).'
+run_minutes: 60
+heartbeat_minutes: 60
+attempts_used: 0
+attempts_limit: 2
+review_rounds_limit: 3
+budget:
+  codex_review_calls:
+    pr_wp752_g1: {used: 0, reserved: 0, limit: 2}
+  attempt:
+    packet_752_r4: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien (tru gate-registry do co kiem soat theo duong land A)
+push_policy: 'push nhanh agent/wp752-g1-claude MOT lan khi du dieu kien tai cho; mo PR (khong merge mot minh)'
+dieu_kien_dung:
+- 'S1 — cham duong ngoai write set. DUNG.'
+- 'S2 — numstat vuot tran_moi. DUNG truoc review.'
+- 'S3 — het han lease => ngung ghi, handoff §7.'
+- 'S4 — cung hinh dang finding >= 3 lan => hoi chu kho.'
+cam_tuyet_doi:
+- Khong sua dac ta; khong sua tep ngoai write set
+- Khong tu approve / merge / land
+- Khong workflow_dispatch, khong LIVE/deploy, khong VERSION/Package
+- Khong force-push
+- Khong viet chuoi bo-qua-CI nguyen van trong commit message

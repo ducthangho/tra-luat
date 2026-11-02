@@ -1,0 +1,93 @@
+# do 2026-10-18T18:30:06Z — phien session_017khPoiSXW9Yvefabg6MWaH; doi chieu §10.2.2 cho run 39014797353
+$ git rev-parse 8ab1007:.github/workflows/ci.yml
+2e3095bb4cadf77aa020f682dfd8e4125943ca5e
+$ git show 8ab1007:.github/workflows/ci.yml | sha256sum; | wc -c
+226495bd42feb7bf1098317a0164e0556fa99b42b9c23789a7825f7255a56ba0  -
+62825
+$ GraphQL WorkflowRun.file.repositoryFileUrl (POST /graphql) -> http 403: "GitHub GraphQL is not available from Claude Code sessions" => exact commit OID cua dinh nghia: not_measured
+# Doi chieu tung job (log tai ve, xem trich-log-run-39014797353.txt): checkout git log -1; dong lenh dau moi buoc Run co NGUYEN VAN trong ci.yml blob tren; marker duong
+ci.yml tai 8ab1007: blob 2e3095bb4cadf77aa020f682dfd8e4125943ca5e sha256 226495bd42feb7bf1098317a0164e0556fa99b42b9c23789a7825f7255a56ba0 bytes 62825
+-- job 117349636977 chuan-bi conclusion=success attempt=1 labels=['ubuntu-latest']
+   checkout git log -1: [] KHONG CO BUOC CHECKOUT (job chuan-bi khong checkout)
+   runner: ['Version: 20261012.601', 'Image: ubuntu-24.04']
+   buoc run (khong phai action): 1/1 dong lenh dau co nguyen van trong ci.yml; action uses: 0/0
+   ##[error]: 0; exit code lines: []
+   marker duong (0): 
+-- job 117349654506 gate (ubuntu-latest) conclusion=success attempt=1 labels=['ubuntu-latest']
+   checkout git log -1: ['8ab100793df9831505f495543a74044b91c2c9ab'] KHOP
+   runner: ['Version: 20261012.601', 'Image: ubuntu-24.04']
+   buoc run (khong phai action): 27/27 dong lenh dau co nguyen van trong ci.yml; action uses: 3/3
+   ##[error]: 0; exit code lines: []
+   marker duong (118): "ok": true, | "ok": true, | "ok": true, | "ok": true,
+-- job 117349654538 gate-cong-cu (ubuntu-latest, 0) conclusion=success attempt=1 labels=['ubuntu-latest']
+   checkout git log -1: ['8ab100793df9831505f495543a74044b91c2c9ab'] KHOP
+   runner: ['Version: 20261012.601', 'Image: ubuntu-24.04']
+   buoc run (khong phai action): 6/6 dong lenh dau co nguyen van trong ci.yml; action uses: 3/3
+   ##[error]: 0; exit code lines: []
+   marker duong (1): cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+-- job 117349654614 gate-cong-cu (ubuntu-latest, 1) conclusion=success attempt=1 labels=['ubuntu-latest']
+   checkout git log -1: ['8ab100793df9831505f495543a74044b91c2c9ab'] KHOP
+   runner: ['Version: 20261012.601', 'Image: ubuntu-24.04']
+   buoc run (khong phai action): 6/6 dong lenh dau co nguyen van trong ci.yml; action uses: 3/3
+   ##[error]: 0; exit code lines: []
+   marker duong (1): cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+-- job 117349654615 gate-cong-cu (ubuntu-latest, 2) conclusion=success attempt=1 labels=['ubuntu-latest']
+   checkout git log -1: ['8ab100793df9831505f495543a74044b91c2c9ab'] KHOP
+   runner: ['Version: 20261012.601', 'Image: ubuntu-24.04']
+   buoc run (khong phai action): 6/6 dong lenh dau co nguyen van trong ci.yml; action uses: 3/3
+   ##[error]: 0; exit code lines: []
+   marker duong (1): cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+-- job 117349654539 gate-cong-cu (ubuntu-latest, 3) conclusion=success attempt=1 labels=['ubuntu-latest']
+   checkout git log -1: ['8ab100793df9831505f495543a74044b91c2c9ab'] KHOP
+   runner: ['Version: 20261012.601', 'Image: ubuntu-24.04']
+   buoc run (khong phai action): 6/6 dong lenh dau co nguyen van trong ci.yml; action uses: 3/3
+   ##[error]: 0; exit code lines: []
+   marker duong (1): cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+-- job 117349654622 gate-cong-cu (ubuntu-latest, 4) conclusion=success attempt=1 labels=['ubuntu-latest']
+   checkout git log -1: ['8ab100793df9831505f495543a74044b91c2c9ab'] KHOP
+   runner: ['Version: 20261012.601', 'Image: ubuntu-24.04']
+   buoc run (khong phai action): 6/6 dong lenh dau co nguyen van trong ci.yml; action uses: 3/3
+   ##[error]: 0; exit code lines: []
+   marker duong (1): cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+-- job 117349654733 gate-cong-cu (ubuntu-latest, 5) conclusion=success attempt=1 labels=['ubuntu-latest']
+   checkout git log -1: ['8ab100793df9831505f495543a74044b91c2c9ab'] KHOP
+   runner: ['Version: 20261012.601', 'Image: ubuntu-24.04']
+   buoc run (khong phai action): 6/6 dong lenh dau co nguyen van trong ci.yml; action uses: 3/3
+   ##[error]: 0; exit code lines: []
+   marker duong (1): cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+-- job 117349654571 gate-cong-cu (ubuntu-latest, 6) conclusion=success attempt=1 labels=['ubuntu-latest']
+   checkout git log -1: ['8ab100793df9831505f495543a74044b91c2c9ab'] KHOP
+   runner: ['Version: 20261012.601', 'Image: ubuntu-24.04']
+   buoc run (khong phai action): 6/6 dong lenh dau co nguyen van trong ci.yml; action uses: 3/3
+   ##[error]: 0; exit code lines: []
+   marker duong (1): cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+-- job 117349654570 gate-cong-cu (ubuntu-latest, 7) conclusion=success attempt=1 labels=['ubuntu-latest']
+   checkout git log -1: ['8ab100793df9831505f495543a74044b91c2c9ab'] KHOP
+   runner: ['Version: 20261012.601', 'Image: ubuntu-24.04']
+   buoc run (khong phai action): 6/6 dong lenh dau co nguyen van trong ci.yml; action uses: 3/3
+   ##[error]: 0; exit code lines: []
+   marker duong (1): cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+-- job 117354737295 gate-cong-cu-gop (ubuntu-latest) conclusion=success attempt=1 labels=['ubuntu-latest']
+   checkout git log -1: ['8ab100793df9831505f495543a74044b91c2c9ab'] KHOP
+   runner: ['Version: 20261012.601', 'Image: ubuntu-24.04']
+   buoc run (khong phai action): 3/3 dong lenh dau co nguyen van trong ci.yml; action uses: 3/3
+   ##[error]: 0; exit code lines: []
+   marker duong (0): 
+-- job 117349654512 gate-ops (ubuntu-latest) conclusion=success attempt=1 labels=['ubuntu-latest']
+   checkout git log -1: ['8ab100793df9831505f495543a74044b91c2c9ab'] KHOP
+   runner: ['Version: 20261012.601', 'Image: ubuntu-24.04']
+   buoc run (khong phai action): 9/9 dong lenh dau co nguyen van trong ci.yml; action uses: 2/2
+   ##[error]: 0; exit code lines: []
+   marker duong (8): [B] lease_publish: 265/265 đạt; đã chạy=265, bỏ qua=0 | [A] lease_publish: 265/265 đạt; đã chạy=265, bỏ qua=0 | lease_publish: 265/265 đạt; đã chạy=265, bỏ qua=0 | don-nhanh: 21/21 dat
+-- job 117349654524 gate-packet-loop (ubuntu-latest) conclusion=success attempt=1 labels=['ubuntu-latest']
+   checkout git log -1: ['8ab100793df9831505f495543a74044b91c2c9ab'] KHOP
+   runner: ['Version: 20261012.601', 'Image: ubuntu-24.04']
+   buoc run (khong phai action): 8/8 dong lenh dau co nguyen van trong ci.yml; action uses: 2/2
+   ##[error]: 0; exit code lines: []
+   marker duong (2): nền: 343/343 đạt · BỎ QUA: 1 | TỔNG: ĐẠT
+-- job 117349654555 gate-registry (ubuntu-latest) conclusion=success attempt=1 labels=['ubuntu-latest']
+   checkout git log -1: ['8ab100793df9831505f495543a74044b91c2c9ab'] KHOP
+   runner: ['Version: 20261012.601', 'Image: ubuntu-24.04']
+   buoc run (khong phai action): 8/8 dong lenh dau co nguyen van trong ci.yml; action uses: 2/2
+   ##[error]: 0; exit code lines: []
+   marker duong (12): TONG: DAT | TONG: CA 45/45 dat · DOT BIEN 25/25 bi giet | TONG: DAT | TỔNG: ĐẠT

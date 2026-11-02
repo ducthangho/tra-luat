@@ -1,0 +1,128 @@
+[
+  {
+    "verdict": "phan-bien-quy-trinh-review-3-codex-verdict.md",
+    "line": 15,
+    "claim": "- Role: reviewer độc lập; provider `openai_codex`; model GPT-6 / Codex theo danh tính phiên; execution surface Codex service qua API và công cụ shell; transport `machine`. Không chạy qua launcher, không có launcher receipt xác minh danh tính; không tự cấp approval/land authority.",
+    "receipt_surface": "codex_cli",
+    "receipt_surface_line": 31,
+    "run_id": "4f5341d473c8442380dc2182f9cde013",
+    "surface_caveats": []
+  },
+  {
+    "verdict": "phan-bien-quy-trinh-review-4-codex-verdict.md",
+    "line": 13,
+    "claim": "- Vai trò reviewer; provider `openai_codex`; model GPT-6/Codex theo danh tính phiên; execution surface **Codex service qua API, công cụ shell**; transport `machine`. Không phải ChatGPT Web. Không có receipt độc lập xác minh model/session của lượt này; không tự cấp land authority.",
+    "receipt_surface": "codex_cli",
+    "receipt_surface_line": 31,
+    "run_id": "06ceaec97a1e454a970cda425836dcf1",
+    "surface_caveats": []
+  },
+  {
+    "verdict": "phan-bien-quy-trinh-review-5-codex-verdict.md",
+    "line": 12,
+    "claim": "- Role: reviewer độc lập; provider `openai_codex`; model GPT-6/Codex theo danh tính phiên; execution surface: **Codex service qua API, có công cụ shell**; transport `machine`. Không phải ChatGPT Web. Không có receipt độc lập chứng thực model/session của lượt này; không tự cấp approval/land authority.",
+    "receipt_surface": "codex_cli",
+    "receipt_surface_line": 35,
+    "run_id": "12574e98d66c4875b2333fa1adc0bf4c",
+    "surface_caveats": []
+  },
+  {
+    "verdict": "pr455-bien-nhan-v2-review-1-codex-verdict.md",
+    "line": 7,
+    "claim": "- Provider: `openai_codex`; execution surface: Codex service/API với công cụ shell trong container; transport: `machine`. Không phải ChatGPT Web/human-mediated. Model được chỉ thị hệ thống định danh là GPT-6; không có chứng thực độc lập backend/model version.",
+    "receipt_surface": "codex_cli",
+    "receipt_surface_line": 32,
+    "run_id": "ea42cb4174e54db8a581f4a66f43bd2f",
+    "surface_caveats": []
+  },
+  {
+    "verdict": "pr455-bien-nhan-v2-review-2-codex-verdict.md",
+    "line": 9,
+    "claim": "- Provider `openai_codex`; execution surface **Codex service/API, shell trong Linux container**; transport `machine`. Model được chỉ thị hệ thống định danh GPT-6; không có chứng thực độc lập backend/version. Không khai đây là ChatGPT Web hay một run Codex CLI được launcher chứng thực.",
+    "receipt_surface": "codex_cli",
+    "receipt_surface_line": 28,
+    "run_id": "0bc966b1409f4ca39f0f3707bdcb20d8",
+    "surface_caveats": []
+  },
+  {
+    "verdict": "pr455-bien-nhan-v2-review-3-codex-verdict.md",
+    "line": 9,
+    "claim": "- Provider `openai_codex`; execution surface Codex service/API với shell trong Linux container; transport `machine`. Chỉ thị phiên định danh GPT-6; không có chứng thực độc lập backend/model version. Không tự nhận là ChatGPT Web hay một Codex CLI run đã được launcher chứng thực.",
+    "receipt_surface": "codex_cli",
+    "receipt_surface_line": 27,
+    "run_id": "32fca3390491423c83e84d37f9904a3b",
+    "surface_caveats": []
+  },
+  {
+    "verdict": "pr455-bien-nhan-v2-review-4-codex-verdict.md",
+    "line": 9,
+    "claim": "- Provider `openai_codex`; execution surface **Codex service/API với shell trong Linux container**; transport `machine`. Chỉ thị định danh agent GPT-6; không có chứng thực độc lập backend/model version. Không tự khai là ChatGPT Web hoặc Codex CLI được launcher chứng thực.",
+    "receipt_surface": "codex_cli",
+    "receipt_surface_line": 27,
+    "run_id": "d0266c01c4a24dd8a55d02b4ffbdd6b2",
+    "surface_caveats": []
+  },
+  {
+    "verdict": "pr455-bien-nhan-v2-review-5-codex-verdict.md",
+    "line": 9,
+    "claim": "- Provider `openai_codex`; execution surface **Codex service/API với shell trong Linux container**; transport `machine`. Chỉ thị phiên định danh agent GPT-6; không có chứng thực độc lập backend/model version. Không tự nhận là ChatGPT Web hay Codex CLI run được launcher chứng thực.",
+    "receipt_surface": "codex_cli",
+    "receipt_surface_line": 27,
+    "run_id": "d86357ad0e4b4a6b96a7f5b2e3c1d9f4",
+    "surface_caveats": []
+  },
+  {
+    "verdict": "pr455-bien-nhan-v2-review-6-codex-verdict.md",
+    "line": 9,
+    "claim": "- Provider `openai_codex`; execution surface **Codex service/API với shell trong Linux container**; transport `machine`. Chỉ thị định danh agent GPT-6; không có chứng thực độc lập backend/model version. Không tự nhận ChatGPT Web hoặc một run CLI có launcher attestation.",
+    "receipt_surface": "codex_cli",
+    "receipt_surface_line": 31,
+    "run_id": "c7af46a4a1e34b0d9d3c86f5b0a2e7d1",
+    "surface_caveats": [
+      {
+        "id": "R6-02-DONG-THEO-KIEN-TRUC-khong-theo-ban-va",
+        "noi_dung": "R6-02 do tren head `5a78c15`. Tren head sau khi doi sang BANG CO CAU TRUC, chinh phep do ay cho 5 cap surface NGUYEN VEN — vi `AGENTS.md` thoi cap be mat, chi con doi chieu. Lop loi chet theo CAU TRUC chu khong theo mot ban va, nen KHONG co ca canh rieng cho no. Doc \"da dong\" o day nghia la \"duong ay khong con ton tai\", khong phai \"da them mot chot\"."
+      },
+      {
+        "id": "phan-cong-CAM-tu-soan-phan-chung",
+        "noi_dung": "Nhu cac luot truoc: cam reviewer tu soan chuoi tan cong. Reviewer luot nay noi ro \"dieu phoi can chuan bi du lieu receipt cho cac nhanh assurance/surface con thieu vi phien nay khong duoc tu soan chung\" — do phu hep hon mot luot khong rang buoc."
+      }
+    ]
+  },
+  {
+    "verdict": "pr455-bien-nhan-v2-review-7-gpt6astra-verdict.md",
+    "line": 9,
+    "claim": "- Reviewer: `openai_codex`, Codex service/API với shell trong Linux container, transport `machine`. Chỉ thị phiên định danh agent GPT-6; backend/model version không có chứng thực độc lập. Không khai một run CLI đã được launcher chứng thực. Context độc lập với Executor Claude.",
+    "receipt_surface": "codex_cli",
+    "receipt_surface_line": 29,
+    "run_id": "035d3cac9f2e4b7188d6a0c53e1b74af",
+    "surface_caveats": []
+  },
+  {
+    "verdict": "pr455-bien-nhan-v2-review-8-gpt6astra-verdict.md",
+    "line": 8,
+    "claim": "- Reviewer độc lập với Executor Claude; provider `openai_codex`, bề mặt Codex service/API có shell Linux, transport `machine`. Chỉ thị phiên định danh GPT-6; không có chứng thực độc lập backend/model version hay launcher run của phiên này.",
+    "receipt_surface": "codex_cli",
+    "receipt_surface_line": 28,
+    "run_id": "b7384eee92a045a1b145718ac5310081",
+    "surface_caveats": []
+  },
+  {
+    "verdict": "pr460-bien-nhan-v2-review-9-gpt6astra-verdict.md",
+    "line": 5,
+    "claim": "Reviewer: Codex, provider OpenAI, bề mặt service/API có shell Linux, transport `machine`; không có chứng thực độc lập model/backend hay launcher run của phiên này. Authority là chỉ thị review trực tiếp trong đề bài; không tự cấp Packet/lease/approval. **Verdict này không cấp quyền land.** Không có finding P1.",
+    "receipt_surface": "codex_cli",
+    "receipt_surface_line": 28,
+    "run_id": "3bfdc70ca03647139a3da914246acd20",
+    "surface_caveats": []
+  },
+  {
+    "verdict": "pr493-review-5-codex-verdict.md",
+    "line": 8,
+    "claim": "Reviewer: Codex/GPT-6 theo cấu hình phiên; provider OpenAI (`openai_codex`); execution surface API/Codex service có shell cục bộ; transport machine. Phiên reviewer độc lập với executor Claude theo hồ sơ được giao; không có chứng thực độc lập biến thể model/backend. Phân loại cặp provider theo §8 là cross-provider; không tự ghi state `cross_approved` hoặc biên nhận vào kho.",
+    "receipt_surface": "codex_cli",
+    "receipt_surface_line": 36,
+    "run_id": "5f5c24ba",
+    "surface_caveats": []
+  }
+]

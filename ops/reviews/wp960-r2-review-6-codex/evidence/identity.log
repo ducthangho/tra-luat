@@ -1,0 +1,5 @@
+$ git rev-parse HEAD HEAD^{tree}
+78c138f863696def68f88080b2b32057fe98f207
+609bc213c6cfca1195100ed3ebec357003f7ace7
+
+rc=0

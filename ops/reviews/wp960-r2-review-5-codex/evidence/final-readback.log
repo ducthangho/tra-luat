@@ -1,0 +1,8 @@
+{"command": ["git", "rev-parse", "HEAD"], "rc": 0, "out": "6dca85f463c6ce551eb8c27ff2d94b7a102e2fdf\n", "err": ""}
+{"command": ["git", "rev-parse", "HEAD^{tree}", "--is-shallow-repository"], "rc": 0, "out": "b95fb2108ab139c9a31f6f107797b00aa704ab34\nfalse\n", "err": ""}
+{"command": ["git", "status", "--short"], "rc": 0, "out": "", "err": ""}
+{"command": ["git", "diff", "--check", "44884446f71c89e25f9a72ac58e4f597db63c1ba", "HEAD"], "rc": 0, "out": "", "err": ""}
+{"command": ["git", "diff", "--numstat", "44884446f71c89e25f9a72ac58e4f597db63c1ba", "HEAD", "--", "ops/bien_nhan_v2.py", "ops/bien_nhan_v2_test.py"], "rc": 0, "out": "297\t193\tops/bien_nhan_v2.py\n665\t104\tops/bien_nhan_v2_test.py\n", "err": ""}
+{"path": "ops/bien_nhan_v2.py", "sha256": "82a667496adc4ebbe9516f484fc4d9da4e79570ac20006b122a7400d0be539f6", "matches_reviewed_blob": true, "baseline_copy_matches": true}
+{"path": "ops/bien_nhan_v2_test.py", "sha256": "ee105c55140147c8cadb59f158cc2188602cc1bccbba3a4190b2bf5d10244039", "matches_reviewed_blob": true, "baseline_copy_matches": true}
+{"path": "ops/specs/NO-CAU-LICH-SU-BIEN-NHAN-r2.md", "sha256": "9a155cb9995b225129dc11de03e2d6d9811a9c53321151e0389214a85d33b1ca", "matches_reviewed_blob": true, "baseline_copy_matches": true}

@@ -1,0 +1,4 @@
+17	0	ops/reviews/README.md
+112	0	ops/reviews/pr870-review-2-codex-verdict.receipt.yaml
+108	0	ops/reviews/pr889-review-2-codex-verdict.receipt.yaml
+112	0	ops/reviews/pr896-review-1-codex-verdict.receipt.yaml

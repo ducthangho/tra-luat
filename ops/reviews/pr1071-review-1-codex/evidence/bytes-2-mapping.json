@@ -1,0 +1,233 @@
+[
+  {
+    "dest": "VERDICT.md",
+    "source": "VERDICT.md",
+    "bytes": 13506,
+    "sha256": "00046bcde93988d97ddd02a9a0a57710d60ad2aa1a142781baecb0a8c7840c27",
+    "equal": true
+  },
+  {
+    "dest": "PROMPT.md",
+    "source": "PROMPT.md",
+    "bytes": 2645,
+    "sha256": "230fd3b21078dc4edf7952895f2d411e8cb507b2062f00ea302d15d90ef164e9",
+    "equal": true
+  },
+  {
+    "dest": "diff-tu-luot1.patch",
+    "source": "DIFF-LUOT2.patch",
+    "bytes": 5265,
+    "sha256": "79eb97e12edd426de0b2968d892dd81250c0f53f53d399caa424d2083519e1e9",
+    "equal": true
+  },
+  {
+    "dest": "launcher.out",
+    "source": "launcher.json",
+    "bytes": 6566,
+    "sha256": "3f0562240c972eb8a97c40b16cf27572ca2f66a216c55f1f6951f75446b47628",
+    "equal": true
+  },
+  {
+    "dest": "verdict-cu/luot1-VERDICT.md",
+    "source": "VERDICT-LUOT1.md",
+    "bytes": 13159,
+    "sha256": "f062f215087cab163ac378a5582002842c8a50312fd1fc748a8942a4115bee7e",
+    "equal": true
+  },
+  {
+    "dest": "run/checkpoint.json",
+    "source": "runs/488b7693/checkpoint.json",
+    "bytes": 212,
+    "sha256": "8342638243bde9d8859435b916d43975298d9324f1e65b517a37ab2967830826",
+    "equal": true
+  },
+  {
+    "dest": "run/run.json",
+    "source": "runs/488b7693/run.json",
+    "bytes": 9029,
+    "sha256": "2c4b73da326a4ad2d91ea6c7603f6520842af474bbe418a5dd19226ed69ff777",
+    "equal": true
+  },
+  {
+    "dest": "run/stdout.log",
+    "source": "runs/488b7693/stdout.log",
+    "bytes": 364,
+    "sha256": "d996cba8d4c776efc517da3e075edbc8931d3467e9b939d4a34c85644cd5d14d",
+    "equal": true
+  },
+  {
+    "dest": "run/stderr.log",
+    "source": "runs/488b7693/stderr.log",
+    "bytes": 39,
+    "sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+    "equal": true
+  },
+  {
+    "dest": "evidence/base-diff-check.log",
+    "source": "evidence/base-diff-check.log",
+    "bytes": 59,
+    "sha256": "a0ccf5bc517aaf3001488b379ed3da1c4c30697deb930b4c4c3ecfac045370fb",
+    "equal": true
+  },
+  {
+    "dest": "evidence/gates.py",
+    "source": "gates.py",
+    "bytes": 2188,
+    "sha256": "f0b5f43312dcd0f123a34d77d9aecdd39dc56502459cb07c3a92f3a1da0c5ad7",
+    "equal": true
+  },
+  {
+    "dest": "evidence/audit.jsonl",
+    "source": "evidence/audit.jsonl",
+    "bytes": 3739,
+    "sha256": "bd412a0658cf5270c3dca5876db96b8642848e7b7a9fca81a2d6a5ca5ada6065",
+    "equal": true
+  },
+  {
+    "dest": "evidence/head-range-check.log",
+    "source": "evidence/head-range-check.log",
+    "bytes": 111,
+    "sha256": "628b2834410141fd3c7c1aa87cf7f4b31f1e2bcbfebbeb97933577dfaf3b75a3",
+    "equal": true
+  },
+  {
+    "dest": "evidence/gates.json",
+    "source": "evidence/gates.json",
+    "bytes": 18646,
+    "sha256": "35b361c5a0b655c2f1bf6c7f8d2ed1b7febedc486c74f5c0661cbaf9438a9975",
+    "equal": true
+  },
+  {
+    "dest": "evidence/scope.jsonl",
+    "source": "evidence/scope.jsonl",
+    "bytes": 3346,
+    "sha256": "9c4318837c73487ac29fcea2e68206ca546833c2cddde914c241eb515ffbbe4d",
+    "equal": true
+  },
+  {
+    "dest": "evidence/head-land.log",
+    "source": "evidence/head-land.log",
+    "bytes": 6881,
+    "sha256": "4889c6e5a97e599f262acba1cc4abaaafb20f6072dcfedba4da897d03b5d0836",
+    "equal": true
+  },
+  {
+    "dest": "evidence/head-doctrine.log",
+    "source": "evidence/head-doctrine.log",
+    "bytes": 176,
+    "sha256": "41f89ff480400fc5b0a1ea0c7b07182876a1892c601b37a8535dabe1f2b166e5",
+    "equal": true
+  },
+  {
+    "dest": "evidence/head-diff-check.log",
+    "source": "evidence/head-diff-check.log",
+    "bytes": 59,
+    "sha256": "a0ccf5bc517aaf3001488b379ed3da1c4c30697deb930b4c4c3ecfac045370fb",
+    "equal": true
+  },
+  {
+    "dest": "evidence/final-state.jsonl",
+    "source": "evidence/final-state.jsonl",
+    "bytes": 260,
+    "sha256": "43d8c8b441f49a7651fa6baf88612b801c5b4ecf2d5992b47ae80e08c69bb243",
+    "equal": true
+  },
+  {
+    "dest": "evidence/head-direct.log",
+    "source": "evidence/head-direct.log",
+    "bytes": 964,
+    "sha256": "e3d03eef53f07b554d500da27fc90889b1f5bc17b6d94bc97fcaf9db55472ee3",
+    "equal": true
+  },
+  {
+    "dest": "evidence/base-land.log",
+    "source": "evidence/base-land.log",
+    "bytes": 6832,
+    "sha256": "04e9b260fa3fef2bbc6079e909a628180e10f6b4c15c85c2a1f68646c6ed47e8",
+    "equal": true
+  },
+  {
+    "dest": "evidence/audit-complete.jsonl",
+    "source": "evidence/audit-complete.jsonl",
+    "bytes": 13348,
+    "sha256": "1063f999b15d01865288257f14e43b141eda486fc6b426792441247367cd11f5",
+    "equal": true
+  },
+  {
+    "dest": "evidence/base-doctrine.log",
+    "source": "evidence/base-doctrine.log",
+    "bytes": 176,
+    "sha256": "41f89ff480400fc5b0a1ea0c7b07182876a1892c601b37a8535dabe1f2b166e5",
+    "equal": true
+  },
+  {
+    "dest": "evidence/closure.jsonl",
+    "source": "evidence/closure.jsonl",
+    "bytes": 3935,
+    "sha256": "6119be21cd4050543766cdca978b754fe9cb93fde013a56938c566010637af2b",
+    "equal": true
+  },
+  {
+    "dest": "evidence/base-bien-nhan.log",
+    "source": "evidence/base-bien-nhan.log",
+    "bytes": 341,
+    "sha256": "beda814155c8ac2a1d676cf037bb77c98162ba24ada7a1fa58f763a5fe713671",
+    "equal": true
+  },
+  {
+    "dest": "evidence/base-direct.log",
+    "source": "evidence/base-direct.log",
+    "bytes": 974,
+    "sha256": "dc60bace32d999fbb3ab0a9ffe5d23c3de9bcc18f430d3567d0573752aa84120",
+    "equal": true
+  },
+  {
+    "dest": "evidence/scope_audit.py",
+    "source": "scope_audit.py",
+    "bytes": 3004,
+    "sha256": "988fb25dc561b36b29e8a2f6e92816a94e57dbd79851b0dc1c46dfaaf6abd2ba",
+    "equal": true
+  },
+  {
+    "dest": "evidence/head-bien-nhan.log",
+    "source": "evidence/head-bien-nhan.log",
+    "bytes": 341,
+    "sha256": "a090d12c1a82e5066b66614e59f65b9f4ed90cc97590ab2e7ea1346def68c215",
+    "equal": true
+  },
+  {
+    "dest": "evidence/audit.py",
+    "source": "audit.py",
+    "bytes": 12871,
+    "sha256": "213de0a6717059bd8911278706ba77f60cf3ba578d1a7157a5dabf539bc47cf0",
+    "equal": true
+  },
+  {
+    "dest": "evidence/base-range-check.log",
+    "source": "evidence/base-range-check.log",
+    "bytes": 111,
+    "sha256": "628b2834410141fd3c7c1aa87cf7f4b31f1e2bcbfebbeb97933577dfaf3b75a3",
+    "equal": true
+  },
+  {
+    "dest": "evidence/direct_cases.py",
+    "source": "direct_cases.py",
+    "bytes": 474,
+    "sha256": "68dccfbc0dd4ae10faaa9a57d04663b749d10c258c507b15ed6f9423ab125f12",
+    "equal": true
+  },
+  {
+    "dest": "evidence/land-scalars.json",
+    "source": "evidence/land-scalars.json",
+    "bytes": 24167,
+    "sha256": "29bd762036ecc4ff7744fc3ae3f305269901d80784974643935b56b00f90b33f",
+    "equal": true
+  },
+  {
+    "dest": "evidence/sources.jsonl",
+    "source": "evidence/sources.jsonl",
+    "bytes": 9609,
+    "sha256": "9538e4acac9c3e9f110abe0811e7b4da757f2110c3fc028eec4cffb7ba6a3f49",
+    "equal": true
+  }
+]

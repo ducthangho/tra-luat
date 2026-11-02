@@ -1,0 +1,27 @@
+workflow_count=7
+.github/workflows/ci-dot-bien-du.yml: events=['schedule', 'workflow_dispatch']
+  dot-bien-du: runs-on=ubuntu-latest; uses=None; matrix={}
+  dot-bien-manh: runs-on=ubuntu-latest; uses=None; matrix={"manh": [0, 1, 2, 3, 4, 5, 6, 7]}
+  dot-bien-gop: runs-on=ubuntu-latest; uses=None; matrix={}
+.github/workflows/ci.yml: events=['push', 'pull_request', 'workflow_dispatch']
+  chuan-bi: runs-on=ubuntu-latest; uses=None; matrix={}
+  gate: runs-on=${{ matrix.os }}; uses=None; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}
+  gate-cong-cu: runs-on=${{ matrix.os }}; uses=None; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}", "manh": [0, 1, 2, 3, 4, 5, 6, 7]}
+  gate-cong-cu-gop: runs-on=${{ matrix.os }}; uses=None; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}
+  gate-ops: runs-on=${{ matrix.os }}; uses=None; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}
+  gate-nhanh-manh: runs-on=${{ matrix.os }}; uses=None; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}", "manh": [0, 1, 2, 3, 4, 5, 6, 7]}
+  gate-nhanh-gop: runs-on=${{ matrix.os }}; uses=None; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}
+  gate-registry: runs-on=${{ matrix.os }}; uses=None; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}
+  gate-packet-loop: runs-on=${{ matrix.os }}; uses=None; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}
+.github/workflows/launcher-windows.yml: events=['workflow_dispatch', 'push', 'pull_request']
+  launcher: runs-on=${{ matrix.os }}; uses=None; matrix={"os": "${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only' && '[\"windows-latest\"]' || '[\"windows-latest\",\"ubuntu-latest\"]') }}"}
+.github/workflows/ops-don-ref.yml: events=['workflow_dispatch']
+  don: runs-on=ubuntu-latest; uses=None; matrix={}
+.github/workflows/ops-open-pr.yml: events=['push']
+  mo: runs-on=ubuntu-latest; uses=None; matrix={}
+.github/workflows/ops-publish-lease.yml: events=['push']
+  dang: runs-on=ubuntu-latest; uses=None; matrix={}
+.github/workflows/ops-thu-hoi-admission.yml: events=['pull_request_target']
+  thu-hoi: runs-on=ubuntu-latest; uses=None; matrix={}
+other_workflows_all_ubuntu=7
+rc=0

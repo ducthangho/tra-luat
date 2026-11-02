@@ -13,9 +13,7 @@ mission_issue: 682
 revision_reviewed: 9
 spec_path: ops/specs/lease-id-ep-kieu-yaml-r9.md
 spec_sha256: 45c8d31441f027fb8e7d8425f2ca66770043edd4b958b0e6ad6c4e7a09e64b5a
-spec_ghi_chu: >-
-  (a) sha256 cua `git show 2469f3e:ops/specs/lease-id-ep-kieu-yaml-r9.md` = spec_sha256 dong 3 tep verdict = so
-  trong comment ban chieu. Dac ta r9 CHUA co tren master; chi o nhanh claude/spec-wp678-r7 (luc review: commit cuc bo; da day len origin 2026-10-07 17:49Z, head luc do 284a03f).
+spec_ghi_chu: "Anh chup lich su tai commit ghi bien nhan 62319d945fff81de6396aab6806a4ab349682aba: (a) sha256 cua `git show 2469f3e:ops/specs/lease-id-ep-kieu-yaml-r9.md` = spec_sha256 dong 3 tep verdict = so trong comment ban chieu. Dac ta r9 CHUA co tren master; chi o nhanh claude/spec-wp678-r7 (luc review: commit cuc bo; da day len origin 2026-10-07 17:49Z, head luc do 284a03f). Do lai tai 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0: git merge-base --is-ancestor 2469f3ebed51dc228319cf375d7912bf7dbc0947 101263f va voi 2e4183b deu rc=0. Cau phu nhan ancestry/chi-tren-nhanh cua moc cu khong con la trang thai hien hanh. Chi xac nhan quan he Git, khong tu nang assurance/cuong_do va khong suy Packet da landed."
 lease_id: khong-co-lease
 lease_ghi_chu: >-
   Luot review DAC TA truoc khi packet duoc giao; wp678 chua co lease. Bien nhan ghi so theo quyet dinh chu kho
@@ -94,8 +92,7 @@ anchor:
 verdict_usage_caveats:
   - id: REVIEWED-SHA-CHI-TREN-NHANH-SPEC
     muc: P2
-    mo_ta: >-
-      reviewed_sha 2469f3e chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 17:49Z (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do.
+    mo_ta: "Anh chup lich su tai commit ghi bien nhan 62319d945fff81de6396aab6806a4ab349682aba: reviewed_sha 2469f3e chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 17:49Z (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do. Do lai tai 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0: git merge-base --is-ancestor 2469f3ebed51dc228319cf375d7912bf7dbc0947 101263f va voi 2e4183b deu rc=0. Cau phu nhan ancestry/chi-tren-nhanh cua moc cu khong con la trang thai hien hanh. Chi xac nhan quan he Git, khong tu nang assurance/cuong_do va khong suy Packet da landed."
   - id: SUBAGENT-CUNG-HO-REVIEW-DEFERRED
     muc: P2
     mo_ta: >-

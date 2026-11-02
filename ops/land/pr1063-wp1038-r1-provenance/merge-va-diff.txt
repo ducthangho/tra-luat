@@ -1,0 +1,42 @@
+# Danh tinh merge va diff packet PR #1063. Phien dieu phoi do 2026-10-31T05:35:43Z tren clone fetch du refs/heads.
+$ git show -s --format='%H%n%T%n%P' 69dcfee9
+69dcfee9274aae12ca27dfecc22a980e560cc3bc
+53c59fac42e451d38e93d06f6a32fb6eca6a577f
+4afbe68c9a6b6326a04dd4c0bc419969d1426e2e 08baebb25b54ce343c9ad56df5f4c389a6241c7e
+$ git rev-parse 08baebb^{tree}
+fb949df97b295611d8c4403aaa42ea18137dc8fb
+$ git log --oneline -1 4afbe68c
+4afbe68c Merge pull request #1062 from ducthangho/claude/gallant-fermat-34kgb9
+$ git merge-base 4afbe68c 08baebb
+5a174b958a05e13f5c9a968a2596ca37267d0466
+$ git diff 5a174b9..08baebb --shortstat
+ 13 files changed, 524 insertions(+), 58 deletions(-)
+$ git diff 69dcfee9^1..69dcfee9 --shortstat
+ 13 files changed, 524 insertions(+), 58 deletions(-)
+$ git diff 5a174b9..08baebb | grep -v '^index' | sha256sum
+494dabcd94b429e025283df222d5292ff7f4094b47686d66ced3f81d630c7d17  -
+$ git diff 69dcfee9^1..69dcfee9 | grep -v '^index' | sha256sum
+494dabcd94b429e025283df222d5292ff7f4094b47686d66ced3f81d630c7d17  -
+$ git diff --name-only 5a174b9..08baebb
+.claude/hooks/pretooluse_guard.py
+.claude/hooks/pretooluse_guard_test.py
+RELEASE_MANIFEST.json
+changelog.d/wp-1038.md
+references/golden/parser_surface.json
+references/golden/tool_inventory_inventory_decision.json
+references/golden/workflow_audit.json
+scripts/tl.py
+scripts/tl_core/cli.py
+scripts/tl_core/command_registry.py
+scripts/tl_core/command_registry_test.py
+scripts/tl_gws.py
+scripts/tl_selftest.py
+$ git show origin/master:ops/specs/cloud-setup-p2a-exec-r1.md | sha256sum  (origin/master=01ff65035c8b0833fa521b93239931772c14dffd)
+1071797a1cf2016a9266a98ccece02ed6edd4e80ca33d3b91b2547f7ca0c13e1  -
+$ git rev-parse origin/master:ops/specs/cloud-setup-p2a-exec-r1.md
+d7d4e240a181c7b68dea72b0be0393e334544b75
+$ git log --oneline -4 origin/ops/cap-lease-1038-g1
+03d37dd4 lease(#1038): cap lease reviewer L9 (openai_codex, read-only) neo dung 08baebb cua PR #1063
+9828f470 lease(#1038): rut han wp1038-cloud-setup-p2a-r1-g1-claude — PR #1063 da merge (69dcfee9)
+3576b965 lease(#1038): cap lease executor CLOUD-SETUP-P2A-EXEC r1 g1 (claude) — spec r1 blob d7d4e240
+8cdb15a7 Merge pull request #1046: wp1030 pkg_secret_scan quét tệp đuôi lạ qua cùng phép lọc nhị phân

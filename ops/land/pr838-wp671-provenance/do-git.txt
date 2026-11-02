@@ -1,0 +1,15 @@
+$ git diff --numstat 577d7b9 ed02bf6 -- ops/bash_nen.py ops/cong_cu_test.py
+1	1	ops/bash_nen.py
+419	41	ops/cong_cu_test.py
+$ git diff --numstat f1979a5 72a1d64 -- ops/
+35	32	ops/cong_cu_test.py
+$ git cat-file -p 6b641ca | grep parent
+parent 577d7b95d257f6c376677e1ffb0131d12b74d24e
+parent abc03391224c186593e976760c20f2078eecff72
+$ git cat-file -p ed02bf6 | grep parent
+parent 6842a625f457843a21bd3a3b0422f13cb13de911
+parent 72a1d6419e320e9a5231dabc086d15a5f81586a0
+$ git merge-base --is-ancestor ed02bf6 062292b; echo rc
+rc=0
+$ git diff --stat ed02bf6 062292b -- ops/bash_nen.py ops/cong_cu_test.py | wc -l
+0

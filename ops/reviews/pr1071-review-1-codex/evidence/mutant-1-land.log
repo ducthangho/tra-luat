@@ -1,0 +1,104 @@
+MIỄN TRỪ ops/land/plat-x8-land-evidence.yaml (băm khớp ảnh chụp cutover)
+ĐẠT ops/land/pr1013-land-evidence-l7-r2-land-evidence.yaml
+ĐẠT ops/land/pr1022-windows-local-r1-land-evidence.yaml
+ĐẠT ops/land/pr1023-wp1009-r4-land-evidence.yaml
+  ghi chú ops/land/pr1029-windows-local-r2-land-evidence.yaml: L7 $.assurance_bo_sung_20261030.reviewer_assurance_81: khai DAT lồng bị bỏ qua — khối $.assurance_81 cấp gốc là nguồn duy nhất
+ĐẠT ops/land/pr1029-windows-local-r2-land-evidence.yaml
+ĐẠT ops/land/pr1041-wp1037-land-evidence.yaml
+ĐẠT ops/land/pr1046-wp1030-r6-land-evidence.yaml
+ĐẠT ops/land/pr1047-wp1045-land-evidence.yaml
+ĐẠT ops/land/pr1063-wp1038-r1-land-evidence.yaml
+MIỄN TRỪ ops/land/pr468-hoso-4-packet-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr477-dung-goi-review-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr478-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr480-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr487-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr489-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MẤT MIỄN TRỪ ops/land/pr491-r358-ghi-so-land-evidence.yaml: băm lệch ảnh chụp cutover — kiểm đủ luật
+  ghi chú ops/land/pr491-r358-ghi-so-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr491-r358-ghi-so-land-evidence.yaml
+MIỄN TRỪ ops/land/pr493-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr554-wp541-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr594-wp578-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr621-skill-bai-hoc-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr666-wp650-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MẤT MIỄN TRỪ ops/land/pr672-wp574-land-evidence.yaml: băm lệch ảnh chụp cutover — kiểm đủ luật
+  ghi chú ops/land/pr672-wp574-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr672-wp574-land-evidence.yaml
+MẤT MIỄN TRỪ ops/land/pr679-wp678-land-evidence.yaml: băm lệch ảnh chụp cutover — kiểm đủ luật
+  ghi chú ops/land/pr679-wp678-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr679-wp678-land-evidence.yaml
+MIỄN TRỪ ops/land/pr680-wp676-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr684-wp677-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr689-wp677-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr696-wp668-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr701-wp687-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr703-wp674-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr707-wp705-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr714-wp710-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr718-wp678-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr721-wp698-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr732-wp685-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr759-no-p3-ho-so-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr765-wp743-land-evidence.yaml (băm khớp ảnh chụp cutover)
+ĐẠT ops/land/pr772-wp766-land-evidence.yaml
+ĐẠT ops/land/pr778-wp773-land-evidence.yaml
+ĐẠT ops/land/pr779-wp775-land-evidence.yaml
+ĐẠT ops/land/pr791-wp782-land-evidence.yaml
+ĐẠT ops/land/pr792-wp484-land-evidence.yaml
+ĐẠT ops/land/pr793-wp784-land-evidence.yaml
+ĐẠT ops/land/pr800-wp794-land-evidence.yaml
+ĐẠT ops/land/pr801-wp795-land-evidence.yaml
+ĐẠT ops/land/pr818-wp788-land-evidence.yaml
+ĐẠT ops/land/pr823-wp802-land-evidence.yaml
+ĐẠT ops/land/pr832-wp831-land-evidence.yaml
+ĐẠT ops/land/pr836-wp812-land-evidence.yaml
+ĐẠT ops/land/pr838-wp671-land-evidence.yaml
+ĐẠT ops/land/pr846-wp845-land-evidence.yaml
+ĐẠT ops/land/pr848-wp744-land-evidence.yaml
+ĐẠT ops/land/pr849-wp748-land-evidence.yaml
+ĐẠT ops/land/pr851-wp822-land-evidence.yaml
+ĐẠT ops/land/pr862-wp748-r21-land-evidence.yaml
+ĐẠT ops/land/pr864-wp858-land-evidence.yaml
+ĐẠT ops/land/pr866-wp856-land-evidence.yaml
+ĐẠT ops/land/pr869-wp748-r22-land-evidence.yaml
+  ghi chú ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml: L7 $.cap_nhat_20261026.reviewer_assurance_81: khai DAT lồng bị bỏ qua — khối $.assurance_81 cấp gốc là nguồn duy nhất
+ĐẠT ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml
+ĐẠT ops/land/pr872-wp871-land-evidence.yaml
+ĐẠT ops/land/pr873-wp868-land-evidence.yaml
+ĐẠT ops/land/pr877-wp854-land-evidence.yaml
+ĐẠT ops/land/pr880-wp878-land-evidence.yaml
+ĐẠT ops/land/pr881-wp852-land-evidence.yaml
+ĐẠT ops/land/pr882-wp748-r23-land-evidence.yaml
+ĐẠT ops/land/pr883-wp879-land-evidence.yaml
+ĐẠT ops/land/pr888-wp886-land-evidence.yaml
+  ghi chú ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml: L7 $.cap_nhat_20261026.reviewer_assurance_81: khai DAT lồng bị bỏ qua — khối $.assurance_81 cấp gốc là nguồn duy nhất
+ĐẠT ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml
+ĐẠT ops/land/pr894-wp748-r24-land-evidence.yaml
+ĐẠT ops/land/pr895-wp892-land-evidence.yaml
+ĐẠT ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml
+ĐẠT ops/land/pr907-wp906-land-evidence.yaml
+ĐẠT ops/land/pr908-no-p3-spec-r4-land-evidence.yaml
+ĐẠT ops/land/pr909-wp748-r25-land-evidence.yaml
+ĐẠT ops/land/pr913-wp910-land-evidence.yaml
+ĐẠT ops/land/pr917-wp910-land-evidence.yaml
+ĐẠT ops/land/pr924-wp923-land-evidence.yaml
+ĐẠT ops/land/pr926-wp919-land-evidence.yaml
+ĐẠT ops/land/pr930-wp752-wp763-land-evidence.yaml
+ĐẠT ops/land/pr931-wp835-land-evidence.yaml
+ĐẠT ops/land/pr932-wp748-r26-land-evidence.yaml
+ĐẠT ops/land/pr933-wp929-land-evidence.yaml
+ĐẠT ops/land/pr945-wp899-land-evidence.yaml
+ĐẠT ops/land/pr950-wp834-land-evidence.yaml
+ĐẠT ops/land/pr957-wp748-r27-land-evidence.yaml
+ĐẠT ops/land/pr963-wp943-land-evidence.yaml
+ĐẠT ops/land/pr964-wp748-r28-land-evidence.yaml
+ĐẠT ops/land/pr969-wp813-land-evidence.yaml
+ĐẠT ops/land/pr983-wp923-land-evidence.yaml
+ĐẠT ops/land/pr990-wp981-land-evidence.yaml
+ĐẠT ops/land/pr991-wp987-land-evidence.yaml
+ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml
+ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml
+ĐẠT ops/land/pr995-wp960-land-evidence.yaml
+land_evidence_nguon: 68 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 93
+TỔNG: ĐẠT

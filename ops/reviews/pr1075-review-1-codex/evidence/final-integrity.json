@@ -1,0 +1,54 @@
+{
+  "repositories": {
+    "cay-kho": {
+      "head": "907c474e5dd22b2f389e8c342e7c79c6fbcb760e",
+      "tree": "d01f444ce113e812178093aab25ce3ea9d14aeed",
+      "status_including_ignored": ""
+    },
+    "work/head": {
+      "head": "907c474e5dd22b2f389e8c342e7c79c6fbcb760e",
+      "tree": "d01f444ce113e812178093aab25ce3ea9d14aeed",
+      "status_including_ignored": ""
+    },
+    "work/base": {
+      "head": "3574cb07dba8a8f7f32384ee3d1d3dfbf3a4f70e",
+      "tree": "4b92e5698b30b910998709df291136bd991ce3be",
+      "status_including_ignored": ""
+    },
+    "work/mutant": {
+      "head": "907c474e5dd22b2f389e8c342e7c79c6fbcb760e",
+      "tree": "d01f444ce113e812178093aab25ce3ea9d14aeed",
+      "status_including_ignored": ""
+    }
+  },
+  "reports_errors": {
+    "preflight": [],
+    "archive": [],
+    "receipt": [],
+    "readme-history": []
+  },
+  "gate_rc": {
+    "head": {
+      "bien-nhan": 0,
+      "land": 0,
+      "direct": 0,
+      "doctrine": 0,
+      "diff-check": 0
+    },
+    "base": {
+      "bien-nhan": 0,
+      "land": 0,
+      "direct": 0,
+      "doctrine": 0,
+      "diff-check": 0
+    }
+  },
+  "mutation_restored": true,
+  "identical_head_base_logs": {
+    "land": true,
+    "doctrine": true,
+    "diff-check": true
+  },
+  "syntax_warnings_equal": true,
+  "errors": []
+}

@@ -85,11 +85,14 @@ attempts_basis: 'mac dinh kho (tien le wp1045).'
 review_rounds_limit: 3
 budget:
   codex_review_calls:
-    pr_wp825_g1: {used: 0, reserved: 0, limit: 10}
+    pr_wp825_g1: {used: 3, reserved: 0, limit: 10}
   attempt:
     packet_825_r1: {used: 0, reserved: 0, limit: 2}
   khong_reset_theo_generation: true
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp825-g1-claude khi A1-A4 dat; mo PR draft.'
-codex_da_goi: []
+codex_da_goi:
+- {luot: 1, run_id: cd2bdaca80044adf9df8d63fdb172953, head: 46421d7e4365b3490124bef541e243289f4d2006, verdict: changes_requested, ket_qua: '0 P0, 1 P1, 1 P2, 0 P3'}
+- {luot: 2, run_id: 94d79755ffa7477a99386b0a45277601, head: df3e103b6b0c8ac9259c040a518c7baf99f46790, verdict: changes_requested, ket_qua: '0 P0, 0 P1, 1 P2, 0 P3'}
+- {luot: 3, run_id: 2f47926da5a74a45ad321ae45e2fb541, head: f46115b42220620bb681abcad6399542c9b7c7b0, verdict: approve, ket_qua: '0 P0, 0 P1, 0 P2, 0 P3; A4 nguyen trang va A5 do o handoff'}

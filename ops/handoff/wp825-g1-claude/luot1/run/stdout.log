@@ -1,0 +1,6 @@
+Đã ghi [VERDICT.md](VERDICT.md): **changes_requested — 1 P1, 1 P2**.
+
+- P1: khẳng định “luôn thêm đúng 1 probe” có phản ví dụ.
+- P2: phép đếm tên ADR chưa đủ chứng minh “0 cổng”.
+
+[HINT.patch](HINT.patch) đã áp thử trên bản sao. A1/A2 đạt; A4 vướng môi trường, A5 không đo được vì offline. `cay-kho/` không đổi.

@@ -1,0 +1,3 @@
+Đã hoàn tất review và ghi [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/cd602115-8e1f-5ec4-a848-91a69cdc11c5/scratchpad/cr825-l2/VERDICT.md), kèm [HINT.patch](/tmp/claude-0/-home-user-tra-luat/cd602115-8e1f-5ec4-a848-91a69cdc11c5/scratchpad/cr825-l2/HINT.patch).
+
+Kết luận: `changes_requested`, còn **1 P2** tại tiêu đề ADR. A1–A3 đạt; A4 bị giới hạn bởi `/tmp/.git`; A5 chưa đo vì offline. Không sửa `cay-kho/`.

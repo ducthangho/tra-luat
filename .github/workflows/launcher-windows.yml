@@ -36,7 +36,8 @@ on:
       - '.claude/dev/**'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # Master có group riêng theo SHA: một group chỉ giữ một lượt pending, lượt chờ bị thay chỗ là mất gate (#1132).
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || (github.ref == 'refs/heads/master' && github.sha) || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:

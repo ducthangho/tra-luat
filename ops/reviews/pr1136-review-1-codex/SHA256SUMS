@@ -3,6 +3,7 @@ a9f44d206e259c66d9c99d1ed9d0de97f5daac1eb36ea9c6ac8cc269f515416f  ./PROMPT.md
 03d6ed5d4e6de519a9adb30552c5bb29152300c8d3cfd190e67b283f76e776c7  ./VERDICT.md
 928fe6ad95265940012ecf4ef49db148aaae182692dd490a77d8ef370a579ef0  ./evidence/VERDICT.progress.md
 004c4ab578fad10ae0e085330fff52ebd4a7847ca249f3f5780a7b86af687b06  ./evidence/all-check-calls.txt
+bdd3f376bf330b2c97d7ef1edf77e5135ad40e2b54f571c794be2b273058be35  ./evidence/audit.gitconfig
 2594c9144fbf24a9b32203fdfda63793950afdfbe3e789ba848826dc90704a81  ./evidence/audit_bytes.py
 667cf5dd5048a023f6f8e2251c4a804c63b8aafbd7e6722ba7dd34dfe11ff81e  ./evidence/audit_ci-attempt1.py
 60dcb3b2f4934a7b5ce2ec4e689a21f1d1e7b5c9139eef59cb55468084ac9c9f  ./evidence/audit_ci.py

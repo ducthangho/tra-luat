@@ -1,0 +1,45 @@
+chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+Chỉ gồm ca test F01 và đổi ca đích hai mutant F02. Hướng sửa runner xem VERDICT.md.
+
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -10554,6 +10554,21 @@
+         dev = _dung_cay_harness(s / "tree", ma, LAUNCHER.read_text(encoding="utf-8"))
+         kq = cham_lap_ca(dev, "review_target")
+     bang(kq[0] == "loi", f"kenh gia roi thoat duoc tinh la ket qua: {kq}")
++
++
++@ca
++def r1117_runner_stdin_utf8_khi_tmpdir_co_dau():
++    """Kênh stdin luôn là UTF-8, kể cả khi stdio của con dùng ASCII/cp1258."""
++    from unittest.mock import patch
++    ten = "r1079_cham_mot_ca_chi_TinHieuChotCa_la_giet"
++    with San() as s:
++        for nhan in ("ascii", "tiếng-Việt"):
++            tmp = s / nhan
++            tmp.mkdir()
++            for ma_hoa in ("utf-8", "ascii", "cp1258"):
++                with patch.dict(os.environ, PYTHONIOENCODING=ma_hoa), patch.object(tempfile, "tempdir", str(tmp)):
++                    got = cham_lap_ca(Path(__file__).resolve().parent, ten)
++                bang(got == ("qua", ten), f"stdin sai encoding: {nhan!r}, {ma_hoa}: {got}")
+ 
+ 
+ @ca
+@@ -15003,7 +15018,7 @@
+        '            LOAI_HONG[fn.__name__] = type(e).__name__'),
+       ('            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"\n            ket = f"LOI',
+        '            LOAI_HONG[fn.__name__] = type(e).__name__\n            ket = f"LOI')],
+-     ["r1079_harness_trung_ten_loai_khong_cap_tin_dung"]),
++     ["r1122_nhat_ky_giu_loai_va_thong_diep_160"]),
+     # Codex lượt 2: F05 nguồn gốc chốt · F06 ca đích vắng · F01 tiền tố `khac:`.
+     ("wp1079_bo_kiem_ca_khac", ("        if tb.tb_frame.f_code in khac:\n            return True\n        tb = tb.tb_next\n    return False",
+                                 "        if False:\n            return True\n        tb = tb.tb_next\n    return False"),
+@@ -15026,7 +15041,7 @@
+                                  '                                      else type(e).__qualname__)'),
+                                 ('            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"\n            ket = f"LOI',
+                                  '            LOAI_HONG[fn.__name__] = type(e).__qualname__\n            ket = f"LOI')],
+-     ["r1079_review_lop_khac_cung_qualname_khong_la_chot"]),
++     ["r1122_nhat_ky_giu_loai_va_thong_diep_160"]),
+     ("wp1079_n13_do_bash_ngoai_env_sach",
+      ('        with patch.dict(os.environ, env, clear=True):\n            vo, chan_doan',
+       '        with patch.dict(os.environ, {}):\n            vo, chan_doan'),

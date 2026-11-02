@@ -1,0 +1,8 @@
+Đã hoàn tất review: **changes_requested — 2 lỗi P1**.
+
+- Runner đọc sai đường kênh có dấu khi stdin dùng ASCII/cp1258.
+- Hai đột biến #1079 sống sót trên HEAD, gây hồi quy gate.
+
+Bằng chứng A/B trong [VERDICT.md](VERDICT.md); gợi ý vá trong [HINT.patch](HINT.patch).
+
+`cay-kho/` không thay đổi. Windows chưa đo.

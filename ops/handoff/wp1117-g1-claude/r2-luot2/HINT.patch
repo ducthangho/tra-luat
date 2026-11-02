@@ -1,0 +1,28 @@
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -10326,7 +10326,13 @@
+             (s / k / RUNNER_TEN).write_text(
+                 "import json, sys\nk, n = sys.stdin.read().split()\n"
+                 f"open(k, 'w').write(json.dumps({rec}))\n", encoding="utf-8")
+-            kq[k] = cham_lap_ca(s / k, k)[0]
++            try:
++                kq[k] = cham_lap_ca(s / k, k)[0]
++            except AttributeError as e:
++                # Chỉ khóa đúng hồi quy JSON list -> gọi .get; lỗi vô can vẫn truyền ra ngoài.
++                if k != "danh_sach" or e.name != "get" or not isinstance(e.obj, list):
++                    raise
++                bang(False, "record JSON list phai tra loi, khong duoc goi .get tren list")
+     bang(kq == {"giet": "giet", "vocan": "loi", "gia": "loi", "loai_la": "loi", "vang": "loi",
+                 "bo": "bo_qua", "qua": "qua", "nonce_sai": "loi", "ten_sai": "loi", "danh_sach": "loi",
+                 "runner_dung": "giet"}, f"cham_lap_ca sai: {kq}")
+@@ -15104,6 +15110,10 @@
+      ('    shutil.copy2(Path(__file__).with_name(RUNNER_TEN), dev / RUNNER_TEN)',
+       '    (dev / RUNNER_TEN).write_text(Path(__file__).with_name(RUNNER_TEN).read_text(encoding="utf-8").replace(\'sys.stdin.buffer.read().decode("utf-8")\', \'sys.stdin.read()\'), encoding="utf-8")'),
+      ['r1117_runner_stdin_utf8_khi_tmpdir_co_dau']),
++    ('wp1117_lap_ca_bo_kiem_kieu_record',
++     ('    if not isinstance(kq, dict) or kq.get("nonce") != nonce or kq.get("ten") != ten_ca:',
++      '    if kq.get("nonce") != nonce or kq.get("ten") != ten_ca:'),
++     ['r1079_cham_lap_ca_doi_dung_TinHieuChotCa']),
+     ('wp1117_bo_kiem_loai',
+      ('    if loai not in ("qua", "bo_qua", "giet", "loi"):',
+       '    if False:'),

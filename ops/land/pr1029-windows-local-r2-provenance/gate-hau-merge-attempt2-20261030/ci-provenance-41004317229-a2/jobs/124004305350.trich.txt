@@ -1,0 +1,35 @@
+2026-10-30T10:06:07.2679778Z Image: ubuntu-24.04
+2026-10-30T10:06:08.0228822Z ##[group]Run git config --global core.autocrlf false
+2026-10-30T10:06:08.0910622Z ##[group]Run actions/checkout@v4
+2026-10-30T10:06:14.7706868Z [command]/usr/bin/git rev-parse refs/remotes/origin/master
+2026-10-30T10:06:14.7707348Z 757bde561d09738858506aecf5de2f050a5f0d5e
+2026-10-30T10:06:15.6430710Z [command]/usr/bin/git log -1 --format=%H
+2026-10-30T10:06:15.6459754Z eaf83fd78ad3a85a6758d0e81be233b5fedcdf6c
+2026-10-30T10:06:15.6686349Z ##[group]Run actions/setup-python@v5
+2026-10-30T10:06:15.8425778Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-10-30T10:06:17.6735424Z ##[group]Run bash ops/cai_actionlint.sh
+2026-10-30T10:06:17.8283398Z ##[group]Run bash ops/cai_cong_cu.sh shellcheck
+2026-10-30T10:06:21.4097545Z ##[group]Run bash ops/cai_cong_cu.sh rg
+2026-10-30T10:06:25.6370797Z ##[group]Run python ops/cong_cu.py kiem-tra --json
+2026-10-30T10:11:49.9300199Z ##[group]Run python -m pip install --quiet ruff==0.15.15
+2026-10-30T10:11:51.0575678Z ##[group]Run python -m py_compile scripts/tl.py scripts/tl_boot.py scripts/gen_instructions.py scripts/tl_core/__init__.py scripts/tl_core/deterministic.py scripts/tl_core/jsonio.py scripts/tl_core/workflow.py scripts/tl_core/release.py scripts/tl_core/live.py scripts/tl_core/zip_ingest.py scripts/tl_core/ocr.py scripts/tl_core/chunking.py scripts/tl_core/command_registry.py
+2026-10-30T10:11:51.2174459Z ##[group]Run python .claude/dev/codex_cred_test.py
+2026-10-30T10:11:53.9081975Z ##[group]Run python .claude/dev/idiom_py_test.py
+2026-10-30T10:12:07.0504745Z ##[group]Run python .githooks/eol_policy_test.py
+2026-10-30T10:12:37.6026320Z ##[group]Run python .githooks/pre_push_test.py
+2026-10-30T10:12:44.6463000Z ##[group]Run python .githooks/eol_policy.py --all --json
+2026-10-30T10:12:46.0389656Z ##[group]Run python .github/checks/bundle_fragment_check.py --json
+2026-10-30T10:12:52.1666439Z ##[group]Run python scripts/gen_instructions.py --selftest
+2026-10-30T10:12:52.2467103Z ##[group]Run python scripts/tl_core/command_registry_test.py
+2026-10-30T10:12:53.4774631Z ##[group]Run set -euo pipefail
+2026-10-30T10:16:42.4151544Z ##[group]Run actions/upload-artifact@v4
+2026-10-30T10:16:43.3591961Z ##[group]Run python scripts/tl.py workflow-audit --strict --json
+2026-10-30T10:16:44.1227167Z ##[group]Run python scripts/tl.py golden-test --json
+2026-10-30T10:17:10.9231881Z ##[group]Run python scripts/tl.py doc-claims-check --strict --json
+2026-10-30T10:17:14.6423633Z ##[group]Run python scripts/tl.py determinism-audit --strict --json
+2026-10-30T10:17:55.6543228Z ##[group]Run python .github/checks/ci_phamvi.py --kiem-bam
+2026-10-30T10:17:56.9241070Z ##[group]Run python .github/checks/ci_phamvi_test.py
+2026-10-30T10:18:14.3800794Z ##[group]Run python scripts/tl.py release-check --full --json
+2026-10-30T10:18:17.6565440Z ##[group]Run python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
+2026-10-30T10:18:19.4607327Z ##[group]Run python scripts/tl.py release-bundle --out dist/a.zip --json > /dev/null
+2026-10-30T10:18:25.4411400Z ##[group]Run python scripts/tl_boot.py --version

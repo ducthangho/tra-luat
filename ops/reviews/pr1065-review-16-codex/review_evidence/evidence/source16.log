@@ -1,0 +1,36 @@
+parse_errors=0; pwsh=7.6.9; os=Ubuntu 24.04.5 LTS
+FUNCTION Invoke-Icacls
+234: & "$env:SystemRoot\System32\icacls.exe" @DoiSo 2>&1
+FUNCTION New-ThuMucTai
+338: & "$env:SystemRoot\System32\icacls.exe" $d /inheritance:r /grant:r '*S-1-5-18:(OI)(CI)F' '*S-1-5-32-544:(OI)(CI)F' 2>&1
+FUNCTION Register-LichCapNhat
+608: Get-Acl -LiteralPath $d
+614: Invoke-Icacls @($Script:ThuMucCaiDat, '/setowner', '*S-1-5-32-544', '/T', '/C', '/L', '/Q')
+615: Invoke-Icacls @($Script:ThuMucCaiDat, '/inheritance:r', '/grant:r', '*S-1-5-18:(OI)(CI)F', '*S-1-5-32-544:(OI)(CI)F', '*S-1-5-32-545:(OI)(CI)RX', '/T', '/C', '/L', '/Q')
+624: Copy-Item -LiteralPath $nguon[$k] -Destination (Join-Path $Script:ThuMucCaiDat $k) -Force
+628: Invoke-Icacls @($Script:ThuMucCaiDat, '/setowner', '*S-1-5-32-544', '/T', '/C', '/L', '/Q')
+632: Get-Acl -LiteralPath $dich
+635: Get-FileHash -LiteralPath $dich
+635: Get-FileHash -LiteralPath $nguon[$k]
+639: New-ScheduledTaskSettingsSet -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Hours 2) -MultipleInstances IgnoreNew
+640: New-ScheduledTaskTrigger -Weekly -WeeksInterval 2 -DaysOfWeek Sunday -At '02:30'
+641: New-ScheduledTaskTrigger -Weekly -WeeksInterval 2 -DaysOfWeek Sunday -At '03:30'
+642: New-ScheduledTaskAction -Execute $pwsh -Argument (New-DoiSoTacVu $script 'HeThong')
+643: New-ScheduledTaskAction -Execute $pwsh -Argument (New-DoiSoTacVu $script 'NguoiDung')
+644: New-ScheduledTaskPrincipal -UserId 'NT AUTHORITY\SYSTEM' -LogonType ServiceAccount -RunLevel Highest
+647: Register-ScheduledTask -TaskName $Script:TenTacVuHeThong -Action $aHT -Trigger $tHT -Principal $pHT -Settings $caiDat -Force -ErrorAction Stop
+653: Register-ScheduledTask -TaskName $Script:TenTacVuNguoiDung -Action $aND -Trigger $tND -Settings $caiDat -Force -ErrorAction Stop `
+        -User $ten -Password $cred.GetNetworkCredential().Password -RunLevel Limited
+666: Get-ScheduledTask -TaskName $Script:TenTacVuHeThong, $Script:TenTacVuNguoiDung -ErrorAction Stop
+FUNCTION Invoke-TangHeThong
+540: Invoke-RestMethod -Uri 'https://nodejs.org/dist/index.json' -TimeoutSec 60
+550: ConvertTo-VanBan (Invoke-WebRequest -Uri "https://nodejs.org/dist/v$moi/SHASUMS256.txt" -TimeoutSec 60).Content
+550: Invoke-WebRequest -Uri "https://nodejs.org/dist/v$moi/SHASUMS256.txt" -TimeoutSec 60
+566: Save-CoKiemBam $url $bam $tai $tenTep
+571: Start-Process -FilePath $tep -ArgumentList @('/VERYSILENT', '/NORESTART', '/NOCANCEL', '/SP-', '/SUPPRESSMSGBOXES') -Wait -PassThru
+573: Install-Msi $tep $c.ten
+585: Stop-ScheduledTask -TaskName $TacVuCommander -ErrorAction SilentlyContinue
+586: Start-ScheduledTask -TaskName $TacVuCommander -ErrorAction Stop
+588: Get-ScheduledTask -TaskName $TacVuCommander -ErrorAction Stop
+FUNCTION Invoke-TangNguoiDung
+README_native_acl_commands=0

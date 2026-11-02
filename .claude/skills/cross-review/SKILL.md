@@ -9,6 +9,7 @@ argument-hint: "[so-issue-packet] [so-PR]"
 **Đọc trước:** `docs/PROTOCOL_DA_PHIEN.md` §8 (mức review, quyền của người review, xử lý quota) và
 §13 (trigger, hai trục, dạng verdict, nơi ghi verdict, định nghĩa hoàn tất) · §8.1–§8.3
 (bootstrap, receipt, cache và lịch sử lớp) · §10.2.1–§10.2.3 (CI plan/provenance).
+Packet áp `ADR-0060`: điều kiện severity, tìm theo lớp, phân loại Windows và cách gọi connector đọc ở ADR-0060 (M1–M3, M6).
 
 Tệp này **không tóm tắt** những mục trên — đợt đầu của chính adapter này chép §13 rồi ghi sai nơi
 đăng verdict. Chốt cơ học:

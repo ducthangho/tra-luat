@@ -1,0 +1,67 @@
+[
+  {
+    "name": "doctrine-scan",
+    "argv": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "stderr": "",
+    "stdout": "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine\n"
+  },
+  {
+    "name": "adr-song",
+    "argv": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "adr-song",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "stderr": "",
+    "stdout": "adr-song: sạch — 57 ADR trên đĩa, 57 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])\n"
+  },
+  {
+    "name": "doc-claims-check",
+    "argv": [
+      "python3",
+      "scripts/tl.py",
+      "doc-claims-check",
+      "--json"
+    ],
+    "rc": 0,
+    "stderr": "",
+    "result": {
+      "ok": true,
+      "files_scanned": 117,
+      "claims_flagged": 381,
+      "flags": [],
+      "advisory_count": 381,
+      "layers_skipped": {}
+    }
+  },
+  {
+    "name": "diff-check",
+    "argv": [
+      "git",
+      "diff",
+      "--check",
+      "5a174b958a05e13f5c9a968a2596ca37267d0466",
+      "6f23a4e68805b4af3e2efe77be6e10b513843e93"
+    ],
+    "rc": 0,
+    "stderr": "",
+    "stdout": ""
+  },
+  {
+    "checkout_unchanged": true,
+    "file_count": 8770,
+    "final_status": "",
+    "head": "6f23a4e68805b4af3e2efe77be6e10b513843e93",
+    "tree": "fd454a6a3121fead24d812b32de40c89f0a02e34"
+  }
+]

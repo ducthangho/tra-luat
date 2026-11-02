@@ -1,0 +1,23 @@
+{
+  "verdict": "approved",
+  "reviewed_sha": "6f23a4e68805b4af3e2efe77be6e10b513843e93",
+  "reviewed_tree": "fd454a6a3121fead24d812b32de40c89f0a02e34",
+  "checkout_unchanged_since_snapshot": true,
+  "final_status": "",
+  "verdict_bytes": 15820,
+  "verdict_sha256": "a91379cfbe7b77827110de905c95f39eb49368fac11d5d39fee995c7ee49640f",
+  "required_gates": [
+    {
+      "name": "doctrine-scan",
+      "rc": 0
+    },
+    {
+      "name": "adr-song",
+      "rc": 0
+    },
+    {
+      "name": "doc-claims-check",
+      "rc": 0
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+2026-10-31T07:58:49.8441335Z ##[group]Determining the checkout info
+2026-10-31T07:58:49.8441806Z ##[endgroup]
+2026-10-31T07:58:49.8442062Z [command]/usr/bin/git sparse-checkout disable
+2026-10-31T07:58:49.8442941Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-31T07:58:49.8443832Z ##[group]Checking out the ref
+2026-10-31T07:58:49.8444247Z [command]/usr/bin/git checkout --progress --force -B master refs/remotes/origin/master
+2026-10-31T07:58:50.4929321Z Reset branch 'master'
+2026-10-31T07:58:50.4936978Z branch 'master' set up to track 'origin/master'.
+2026-10-31T07:58:50.4972723Z ##[endgroup]
+2026-10-31T07:58:50.5015182Z [command]/usr/bin/git log -1 --format=%H
+2026-10-31T07:58:50.5036637Z c8ff9ed563403fffa3c49c84bfce42e9a66bc68b
+2026-10-31T07:58:50.5189413Z ##[group]Run actions/setup-python@v5

@@ -1,0 +1,17 @@
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g1-claude	refs/heads/claude/wp1039-cloud-setup-p2b-g1:ops/leases/ci-g5-cong-cu-chia-manh-r1-g1-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g2-claude	refs/heads/claude/wp1039-cloud-setup-p2b-g1:ops/leases/ci-g5-cong-cu-chia-manh-r1-g2-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g3-claude	refs/heads/claude/wp1039-cloud-setup-p2b-g1:ops/leases/ci-g5-cong-cu-chia-manh-r1-g3-claude.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g2	refs/heads/claude/wp1039-cloud-setup-p2b-g1:ops/leases/wp-codex-credential-refresh-exec-g2.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g3	refs/heads/claude/wp1039-cloud-setup-p2b-g1:ops/leases/wp-codex-credential-refresh-exec-g3.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g4	refs/heads/claude/wp1039-cloud-setup-p2b-g1:ops/leases/wp-codex-credential-refresh-exec-g4.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g1	refs/remotes/origin/agent/codex-credential-refresh-g1:ops/leases/wp-codex-credential-refresh-exec-g1.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g2	refs/remotes/origin/codex/wp484-g4-windows:ops/leases/wp-codex-credential-refresh-exec-g2.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g3	refs/remotes/origin/codex/wp484-g4-windows:ops/leases/wp-codex-credential-refresh-exec-g3.yaml
+HẾT_HẠN	wp1039-cloud-setup-p2b-r1-g1-claude	refs/remotes/origin/ops/cap-lease-1039-g1:ops/leases/wp1039-cloud-setup-p2b-r1-g1-claude.yaml
+HẾT_HẠN	moi-truong-r1-g1-antigravity	refs/remotes/origin/ops/cap-lease-546:ops/leases/moi-truong-r1-g1-antigravity.yaml
+HẾT_HẠN	wp484-r7-g7-claude	refs/remotes/origin/ops/wp484-r7-spec:ops/leases/wp484-r7-g7-claude.yaml
+HẾT_HẠN	wp484-r8-g7-claude	refs/remotes/origin/ops/wp484-r7-spec:ops/leases/wp484-r8-g7-claude.yaml
+HẾT_HẠN	wp802-r1-g1-claude	refs/remotes/origin/ops/wp802-r1-g1-lease:ops/leases/wp802-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

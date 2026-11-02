@@ -1,5 +1,7 @@
 {
   "commands_available": [
+    "agent-creds-exec",
+    "agent-creds-set",
     "backfill-hieuluc",
     "backfill-loai",
     "backfill-nlm-status",
@@ -158,6 +160,7 @@
     "review-queue",
     "rollback-plan",
     "route-task",
+    "secrets-keygen",
     "secrets-set",
     "secrets-stage",
     "shared-source-fix",
@@ -245,6 +248,26 @@
   "ok": true,
   "registry": {
     "commands": {
+      "agent-creds-exec": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
+      "agent-creds-set": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "drive"
+      },
       "backfill-hieuluc": {
         "generated": true,
         "idempotency_contract": null,
@@ -1895,6 +1918,16 @@
         "workflow_task": "workflow_audit",
         "write_scope": "none"
       },
+      "secrets-keygen": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
+      },
       "secrets-set": {
         "generated": false,
         "idempotency_contract": null,
@@ -2210,8 +2243,8 @@
       "generated_parsers": 154,
       "high_risk": 29,
       "nested": 9,
-      "total": 196,
-      "write_commands": 104
+      "total": 199,
+      "write_commands": 106
     },
     "schema": "command_registry.v1"
   },

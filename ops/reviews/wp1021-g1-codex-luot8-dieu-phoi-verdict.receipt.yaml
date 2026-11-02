@@ -1,0 +1,87 @@
+# BIEN NHAN GIAO HANG — cross-review LOI GOI 9 (thu muc luot8-dieu-phoi) cua packet #1021 BIEN-NHAN-V2-GLOB-HOA-THUONG revision 2,
+# KHAC NEN (reviewer codex CLI, executor claude). **`approve`** — 0/0/0/0 (P0/P1/P2/P3) theo finding.
+# Luot goi boi phien DIEU PHOI session_01WZT2MvvoQV8QGF1vX9STrJ (dung sandbox va goi codex; executor het dia). Ghi so boi phien dieu phoi session_01WZT2MvvoQV8QGF1vX9STrJ
+# theo chi thi chu kho 31-10-2026 "Merge di roi land phai ghi so". Nhan: (a) DO tu kho/run.json luc ghi so · (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: wp1021-g1-codex-luot8-dieu-phoi-27cea768
+kind: review_delivery_receipt
+packet_id: BIEN-NHAN-V2-GLOB-HOA-THUONG
+packet_issue: 1021
+target_pull_request: 1040
+land_merge_commit: c8ff9ed563403fffa3c49c84bfce42e9a66bc68b
+land_merge_commit_ghi_chu: '(a) merge commit PR #1040 tren master (2026-10-31T07:49:09Z, phien dieu phoi merge theo chi thi chu kho); cha thu hai = head a16932a (= 356a27e + merge master 3dfb973, hai tep packet giu nguyen byte).'
+revision: 2
+generation: 1
+lease_id: wp1021-r2-g1-claude
+lease_gan_theo: '(a) ops/leases/wp1021-r2-g1-claude.yaml tren nhanh ops/wp1021-r2-g1-lease; cua so [2026-10-30T08:57:00Z, 2026-10-31T08:10:00Z) sau rut han (goc 08:57Z); run.json bat_dau_utc 2026-10-31T03:18:41Z nam trong cua so.'
+luot: 9
+luot_nhan_ghi_chu: '(a) luot = thu tu loi goi Codex theo run.json bat_dau_utc. Ba loi goi tren 356a27e: luot8b 03:12:57Z (=8), luot8-dieu-phoi 03:18Z (=9), luot9 03:35:40Z (=10); ten thu muc giu nhan cua phien goi.'
+loi_goi_codex_thu: '9 / tran 9 (chu kho nang 4 -> 6 -> 7 -> 9, ghi o Issue #1021). Tong thuc te 10 loi goi tren packet (luot 8 dieu phoi + luot 8b/9 cua session_015GtxrbRjCRMMLRWHoUuZYj), vuot tran 1; chu kho chap nhan khi duyet merge 31-10-2026.'
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: '(a) lease wp1021-r2-g1-claude: ops/bien_nhan_v2.py la cong review/land authority (PROTOCOL §8, §20 dong ADR-0050) => sensitive.'
+assurance: cross_approved
+assurance_ghi_chu: >-
+  Verdict approve 0/0/0/0; reviewer gpt-6.1-sol do_may qua run.json model_phuc_vu, executor ho claude => khac ho. Head da duyet 356a27e; head land a16932a chi them merge master (hai tep packet giu nguyen byte; diff merge c8ff9ed cung sha256 6b0591b7… voi diff b29da0b..356a27e).
+verdict: approve
+verdict_nguon: '(a) dong 1 tep verdict: verdict: approve'
+verdict_path: ops/reviews/wp1021-g1-codex-luot8-dieu-phoi-verdict.md
+verdict_sha256: 27cea7682199927621304e505d0a74f99eb5575f162ad33f1555846f485fbffe
+verdict_bytes: 20114
+nguon_tep: ban_sao_nguyen_byte_cua_tep_goc_trong_kho
+verdict_ban_goc: '(a) ops/reviews/wp1021-g1-codex-luot8-dieu-phoi/VERDICT.md chep nguyen byte tu sandbox reviewer cua phien dieu phoi (rv1040-r8); ban phang cung sha256 (SHA256SUMS cua thu muc).'
+reviewed_sha: 356a27e1378b2162bbc0be2ec06ff08fdacbdead
+reviewed_tree: c1e160cfd5ddf1a053c2e8413e62f5881badd052
+reviewed_sha_nguon: '(a) run.json `head` = reviewed_sha; launcher chay voi --expected-head va --require-clean; `git rev-parse 356a27e^{tree}` = reviewed_tree.'
+reviewed_sha_to_tien: '(a) git merge-base --is-ancestor 356a27e c8ff9ed: rc 0.'
+base_sha: b29da0bfe3bfb7a7be69136a1c5c40f82c088a93
+base_sha_ghi_chu: '(a) merge-base sau khi nhanh merge master b29da0b (#1041) o 3883b60.'
+evidence_url: https://github.com/ducthangho/tra-luat/blob/16e2430eae063050d32bfafb693016d3a842a6fb/ops/reviews/wp1021-g1-codex-luot8-dieu-phoi-verdict.md
+evidence_url_ghi_chu: '(a) Neo BLOB ghim commit hien vat 16e2430 cua nhanh claude/pr1040-wp1021-ghi-so; bien nhan di o commit sau.'
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+so_dem_theo: finding
+so_dem_nguon: '(a) dem dong `- [P*]` / dong tong finding mo trong tep verdict.'
+findings_ids: []
+xu_ly_finding: >-
+  (a) Khong co finding; P3 luot 7 DONG (m153: c99 qua, c100 giet_that). So AST bo docstring c8a493c = 356a27e o hai tep.
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: e8bb597dcf5c44cca3228093286661ed
+  run_json: ops/reviews/wp1021-g1-codex-luot8-dieu-phoi/run/run.json
+  run_json_ghi_chu: >-
+    (a) ma_thoat 0, trang_thai xong, thoi_luong_giay 549.512, head 356a27e, worktree_sach true, execution_surface codex_cli,
+    prompt_sha256 55fa2adbd190… = sha256 ops/reviews/wp1021-g1-codex-luot8-dieu-phoi/PROMPT.md; sandbox_trang_thai DO_DUOC.
+  model: gpt-6.1-sol
+  model_da_chay: gpt-6.1-sol
+  model_evidence: do_may
+  muc_bang_chung_model: do_may
+  model_evidence_ref: ops/reviews/wp1021-g1-codex-luot8-dieu-phoi/run/run.json#model_phuc_vu
+  model_evidence_ghi_chu: '(a) run.json model_phuc_vu_trang_thai DO_DUOC; 28 su kien, moi su kien model gpt-6.1-sol; effort_phuc_vu xhigh.'
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(b) Tep trong kho la nguon duy nhat; PR ghi so dang qua git push bang credential cua phien.'
+  ghi_chu: 'ADR-0040: chi ghi AI VAN CHUYEN, khong cap tham quyen.'
+independent_from_executor_session: true
+independent_ghi_chu: 'Tien trinh codex rieng qua launcher, context rieng (prompt tu chua).'
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: '(a) Blob verdict ghim o commit hien vat 16e2430 cua PR ghi so; len trung_binh khi PR ghi so land bang merge commit.'
+verdict_usage_caveats:
+  - id: CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY
+    muc: P3
+    mo_ta: 'Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong.'
+  - id: SCRIPT-DO-DOC-DUONG-DAN-SANDBOX
+    muc: P3
+    mo_ta: 'Script/bang chung cua reviewer (evidence/*) tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai 356a27e.'
+nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256).'

@@ -1,0 +1,47 @@
+{
+  "head": "356a27e1378b2162bbc0be2ec06ff08fdacbdead",
+  "files": [
+    {
+      "path": "ops/bien_nhan_v2.py",
+      "source_sha256": "7f9a86f3fc07429877f2959ad2ecbe238ef145d08860b8f78197340a06e276a6",
+      "ast_equal_without_docstrings": true,
+      "ast_sha256": "8d2f6e76701e725887d7b2520bba32aff956115715de788f8eb8cdb16086efd0"
+    },
+    {
+      "path": "ops/bien_nhan_v2_test.py",
+      "source_sha256": "cac81d460abd280c461cf0acf938e412fc4b1c4cb477f36b55d2c5b1b0474b87",
+      "ast_equal_without_docstrings": true,
+      "ast_sha256": "adab78b4e83e8dc1ec2212a2ba66fdeff37d901a41d4eaea2677e6e92a1816c6"
+    }
+  ],
+  "changed_docs": [
+    {
+      "file": "ops/bien_nhan_v2.py",
+      "function": "_hoi_trang_thai",
+      "line": 88,
+      "old": "`hoi()` (vd `p.is_dir`, `p.exists`) nhưng `OSError` ⇒ `KhongDoDuoc` nêu `p` (rc=2), không traceback.\n    #1021 lượt 2: chỉ `OSError` — lỗi lập trình phải đi thẳng ra (`c99` chốt 7).",
+      "new": "`hoi()` (vd `p.is_dir`, `p.exists`) nhưng `OSError` ⇒ `KhongDoDuoc` nêu `p` (rc=2), không traceback.\n    #1021 lượt 2: chỉ `OSError` — lỗi lập trình phải đi thẳng ra (`c100` chốt 7)."
+    },
+    {
+      "file": "ops/bien_nhan_v2.py",
+      "function": "_chon_bien_nhan",
+      "line": 97,
+      "old": "Mọi mục trong `tm` có đuôi `.receipt.yaml`, so KHÔNG phân biệt hoa thường, sắp xếp.\n\n    #1021 (`BIEN-NHAN-V2-GLOB-HOA-THUONG` r2): `Path.glob` với mẫu `*.receipt.yaml` khớp theo luật hoa thường\n    của NỀN — Windows không phân biệt, POSIX có — nên cùng một cây hai nền đếm hai tập biên nhận: tệp\n    `X.RECEIPT.YAML` bị cổng bỏ qua LẶNG trên Linux mà bị kiểm trên Windows. Cùng chiều với\n    `_liet_ke_theo_duoi` của `t27` (#1006). KHÔNG lọc `is_file()`: thư mục mang tên `*.receipt.yaml`\n    phải tới được phép băm để ra rc=2 (`c89`). Thư mục vắng ⇒ rỗng, như `glob` cũ.\n\n    Cross-review Codex lượt 1 (`loi-do-liet-ke-thu-muc-thoat-traceback`, P2): `glob` cũ NUỐT lỗi liệt kê\n    (⇒ danh sách rỗng ⇒ `KhongDoDuoc` \"không có tệp\"), còn `iterdir()` NÉM — `EACCES` khi liệt kê từng ra\n    rc=1 + traceback ở cả `kiem` lẫn `--sinh-no`. Nay lỗi liệt kê là `KhongDoDuoc` nêu thư mục (rc=2); KHÔNG\n    trả rỗng (biến lỗi đo thành danh sách nợ rỗng) và KHÔNG bắt `Exception` (che lỗi lập trình).\n\n    Lượt 2 (cùng slug, P2): `Path.is_dir()` chỉ nuốt ENOENT/ENOTDIR/… — `EACCES` khi `stat` vẫn NÉM, nên phép hỏi\n    \"có phải thư mục\" cũng đi qua `_hoi_trang_thai` như phép liệt kê.",
+      "new": "Mọi mục trong `tm` có đuôi `.receipt.yaml`, so KHÔNG phân biệt hoa thường, sắp xếp.\n\n    #1021 (`BIEN-NHAN-V2-GLOB-HOA-THUONG` r2): `Path.glob` với mẫu `*.receipt.yaml` khớp theo luật hoa thường\n    của NỀN — Windows không phân biệt, POSIX có — nên cùng một cây hai nền đếm hai tập biên nhận: tệp\n    `X.RECEIPT.YAML` bị cổng bỏ qua LẶNG trên Linux mà bị kiểm trên Windows. Cùng chiều với\n    `_liet_ke_theo_duoi` của `t27` (#1006). KHÔNG lọc `is_file()`: thư mục mang tên `*.receipt.yaml`\n    phải tới được phép băm để ra rc=2 (`c89`). Thư mục vắng ⇒ rỗng, như `glob` cũ.\n\n    Cross-review Codex lượt 1 (`loi-do-liet-ke-thu-muc-thoat-traceback`, P2): `glob` cũ NUỐT lỗi liệt kê (⇒ danh\n    sách rỗng: `kiem` báo \"không có tệp\", `--sinh-no` ra `# 0 tệp`), còn `iterdir()` NÉM — `EACCES` khi liệt kê từng\n    ra rc=1 + traceback ở cả `kiem` lẫn `--sinh-no`. Nay lỗi liệt kê là `KhongDoDuoc` nêu thư mục (rc=2); KHÔNG\n    trả rỗng (biến lỗi đo thành danh sách nợ rỗng) và KHÔNG bắt `Exception` (che lỗi lập trình).\n\n    Lượt 2 (cùng slug, P2): `Path.is_dir()` chỉ nuốt ENOENT/ENOTDIR/… — `EACCES` khi `stat` vẫn NÉM, nên phép hỏi\n    \"có phải thư mục\" cũng đi qua `_hoi_trang_thai` như phép liệt kê."
+    },
+    {
+      "file": "ops/bien_nhan_v2_test.py",
+      "function": "c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE",
+      "line": 3673,
+      "old": "#1021, cross-review Codex lượt 1 (`bo-chon-ung-vien-thieu-rang-hai-duong-goi`, P2): ba đột biến phá bộ\n    chọn vẫn qua toàn suite vì `c101` (bản trước tên `c98`) chỉ đi đường `kiem`. Bốn chốt, mỗi chốt một đột biến riêng (m144–m147):\n    1. `--sinh-no` THẤY `X.RECEIPT.YAML` (rc=0, khối nợ nêu tên, `# 1 tệp`) — m144 lọc đuôi chính xác ở `_sinh_no`.\n    2. Thứ tự: `iterdir` bị ép trả NGƯỢC mà helper vẫn trả đã sắp xếp — m145 bỏ `sorted`. Tên toàn chữ thường nên\n       thứ tự `Path` giống nhau trên mọi nền (không so hai tên chỉ khác hoa thường).\n    3. Kho thật thiếu `ops/reviews`: `kiem` rc=2 (guard riêng), `--sinh-no` rc=0 + `# 0 tệp` — m146 bỏ nhánh thư mục\n       vắng của helper (khi ấy `--sinh-no` ra rc=2 vì lỗi liệt kê).\n    4. Liệt kê ném `PermissionError` ⇒ cả `kiem` lẫn `--sinh-no` rc=2 nêu \"không liệt kê được\", không traceback —\n       m147 bỏ phép bắt `OSError` (hồi quy `loi-do-liet-ke-thu-muc-thoat-traceback` mà Codex đo được).",
+      "new": "#1021, cross-review Codex lượt 1 (`bo-chon-ung-vien-thieu-rang-hai-duong-goi`, P2): ba đột biến phá bộ\n    chọn vẫn qua toàn suite vì `c101` (bản trước tên `c98`) chỉ đi đường `kiem`. Bốn chốt, mỗi chốt một đột biến riêng\n    (m144–m147; lượt 3 thêm m155 cho chốt 4):\n    1. `--sinh-no` THẤY `X.RECEIPT.YAML` (rc=0, khối nợ nêu tên, `# 1 tệp`) — m144 lọc đuôi chính xác ở `_sinh_no`.\n    2. Thứ tự: `iterdir` bị ép trả NGƯỢC mà helper vẫn trả đã sắp xếp — m145 bỏ `sorted`. Tên toàn chữ thường nên\n       thứ tự `Path` giống nhau trên mọi nền (không so hai tên chỉ khác hoa thường).\n    3. Kho thật thiếu `ops/reviews`: `kiem` rc=2 (guard riêng), `--sinh-no` rc=0 + `# 0 tệp` — m146 bỏ nhánh thư mục\n       vắng của helper (khi ấy `--sinh-no` ra rc=2 vì lỗi liệt kê).\n    4. Liệt kê ném `PermissionError` hoặc `OSError(EIO)` ⇒ cả `kiem` lẫn `--sinh-no` rc=2 nêu \"không liệt kê được\",\n       không traceback —\n       m147 bỏ phép bắt `OSError` (hồi quy `loi-do-liet-ke-thu-muc-thoat-traceback` mà Codex đo được)."
+    },
+    {
+      "file": "ops/bien_nhan_v2_test.py",
+      "function": "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang",
+      "line": 3760,
+      "old": "#1021, cross-review Codex lượt 2. Ba chốt, mỗi chốt một đột biến riêng (m148–m152):\n    5. `stat` của `ops/reviews` ném `PermissionError` (`is_dir()` chỉ nuốt ENOENT/ENOTDIR/…) ⇒ cả `kiem` lẫn\n       `--sinh-no` rc=2 nêu \"không đọc được trạng thái\", không traceback (P2 `loi-do-liet-ke-thu-muc-thoat-traceback`,\n       biểu hiện thứ hai) — m148 helper hỏi `is_dir()` trần, m149 guard của `kiem` hỏi trần, m150 bỏ bắt `OSError`.\n    6. Kho thiếu `ops/reviews` mà `stat` của `.git` ném ⇒ `kiem` rc=2 nêu `.git`, không traceback — m151.\n    7. Lỗi LẬP TRÌNH (`RuntimeError` mốc) ở phép liệt kê hoặc phép hỏi thư mục phải đi THẲNG ra khỏi `main`, đúng\n       đối tượng, trên cả hai đường (P3 `loi-do-thieu-chot-ngoai-le-lap-trinh`) — m152 nới bắt liệt kê thành\n       `Exception`, m153 nới `_hoi_trang_thai` thành `Exception`.",
+      "new": "#1021, cross-review Codex lượt 2. Ba chốt, đột biến riêng m148–m153 (lượt 3 thêm m154 cho chốt 5):\n    5. `stat` của `ops/reviews` ném `PermissionError`/`OSError(EIO)` (`is_dir()` chỉ nuốt ENOENT/ENOTDIR/…) ⇒ cả\n       `kiem` lẫn\n       `--sinh-no` rc=2 nêu \"không đọc được trạng thái\", không traceback (P2 `loi-do-liet-ke-thu-muc-thoat-traceback`,\n       biểu hiện thứ hai) — m148 helper hỏi `is_dir()` trần, m149 guard của `kiem` hỏi trần, m150 bỏ bắt `OSError`.\n    6. Kho thiếu `ops/reviews` mà `stat` của `.git` ném (cùng hai lớp) ⇒ `kiem` rc=2 nêu `.git`, không traceback —\n       m151.\n    7. Lỗi LẬP TRÌNH (`RuntimeError` mốc) ở phép liệt kê hoặc phép hỏi thư mục phải đi THẲNG ra khỏi `main`, đúng\n       đối tượng, trên cả hai đường (P3 `loi-do-thieu-chot-ngoai-le-lap-trinh`) — m152 nới bắt liệt kê thành\n       `Exception`, m153 nới `_hoi_trang_thai` thành `Exception`."
+    }
+  ]
+}

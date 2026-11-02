@@ -1,0 +1,36 @@
+ROUND 1 TOP_LEVEL_FIELDS 48 SCHEMA_GATE_ERRORS []
+KIND 2 review_delivery_receipt PACKET KHONG_AP_DUNG TARGET_PR 1050 ROLE reviewer ROUND 1
+RECEIPT_ID_SUFFIX_MATCH True
+COUNTS_FROM_FINDING_HEADINGS [0, 1, 1, 0] COUNTS_MATCH True FINDING_IDS [('nha-lease-truoc-khi-het-han', '1'), ('nguyen-nhan-windows-khai-do-thieu-log', '2')] IDS_MATCH True
+VERDICT_MATCH True HEAD_MATCH True
+HASH_MATCH True BYTES_MATCH True
+MODEL_IDENTITY_MATCH {'provider': True, 'surface': True, 'transport': True, 'session_run_id': True}
+MODEL gpt-6.1-sol gpt-6.1-sol SERVED_MODELS ['gpt-6.1-sol'] EVENTS 30 EVIDENCE do_may do_may
+MODEL_EVIDENCE_REF_VALID True
+CANONICAL_FAMILIES_REVIEWER ('gpt', 'do_may', True) EXECUTOR ('claude', '', False) ASSURANCE cross_reviewed
+CHECKPOINT_FIELDS_MATCH True CHECKPOINT_HASH_MATCH True
+DURATION_DELTA_SECONDS 0.000189 ACTUAL_RC 0 STATUS xong CLEAN_AT_LAUNCH True
+SANDBOX DO_DUOC OBSERVED_PROFILES ['null', '{"file_system": "restricted", "loai": "managed", "muc": [["root", "read"], ["to_tien_workspace", "write"], ["slash_tmp", "write"], ["tmpdir", "write"], ["khac", "read"], ["khac", "read"], ["khac", "read"], ["khac", "read"]], "network": "restricted"}']
+CLI_VERSION_FIELDS [] RAW_ARGV_PRESENT False
+VERSION_IN_STDOUT_STDERR False
+AUTHORSHIP_SESSION_AND_HUMAN_ACTOR_NOT_IN_RUN_JSON True
+USAGE_CAVEATS ['CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY', 'SCRIPT-DO-DOC-DUONG-DAN-SANDBOX', 'TEP-LON-KHONG-VAO-KHO']
+ANCHOR {'loai': 'canonical_ancestry', 'cuong_do': 'thap', 'mo_ta': '(a) Blob verdict ghim o commit hien vat 7333f97 cua PR ghi so; len trung_binh khi PR ghi so land bang merge commit.'} INDEPENDENCE_DECLARED True AXES ['spec', 'standards_security']
+ROUND 2 TOP_LEVEL_FIELDS 48 SCHEMA_GATE_ERRORS []
+KIND 2 review_delivery_receipt PACKET KHONG_AP_DUNG TARGET_PR 1050 ROLE reviewer ROUND 2
+RECEIPT_ID_SUFFIX_MATCH True
+COUNTS_FROM_FINDING_HEADINGS [0, 0, 0, 0] COUNTS_MATCH True FINDING_IDS [] IDS_MATCH True
+VERDICT_MATCH True HEAD_MATCH True
+HASH_MATCH True BYTES_MATCH True
+MODEL_IDENTITY_MATCH {'provider': True, 'surface': True, 'transport': True, 'session_run_id': True}
+MODEL gpt-6.1-sol gpt-6.1-sol SERVED_MODELS ['gpt-6.1-sol'] EVENTS 25 EVIDENCE do_may do_may
+MODEL_EVIDENCE_REF_VALID True
+CANONICAL_FAMILIES_REVIEWER ('gpt', 'do_may', True) EXECUTOR ('claude', '', False) ASSURANCE cross_approved
+CHECKPOINT_FIELDS_MATCH True CHECKPOINT_HASH_MATCH True
+DURATION_DELTA_SECONDS 0.000262 ACTUAL_RC 0 STATUS xong CLEAN_AT_LAUNCH True
+SANDBOX DO_DUOC OBSERVED_PROFILES ['null', '{"file_system": "restricted", "loai": "managed", "muc": [["root", "read"], ["to_tien_workspace", "write"], ["slash_tmp", "write"], ["tmpdir", "write"], ["khac", "read"], ["khac", "read"], ["khac", "read"], ["khac", "read"]], "network": "restricted"}']
+CLI_VERSION_FIELDS [] RAW_ARGV_PRESENT False
+VERSION_IN_STDOUT_STDERR False
+AUTHORSHIP_SESSION_AND_HUMAN_ACTOR_NOT_IN_RUN_JSON True
+USAGE_CAVEATS ['CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY', 'SCRIPT-DO-DOC-DUONG-DAN-SANDBOX', 'TEP-LON-KHONG-VAO-KHO']
+ANCHOR {'loai': 'canonical_ancestry', 'cuong_do': 'thap', 'mo_ta': '(a) Blob verdict ghim o commit hien vat 7333f97 cua PR ghi so; len trung_binh khi PR ghi so land bang merge commit.'} INDEPENDENCE_DECLARED True AXES ['spec', 'standards_security']

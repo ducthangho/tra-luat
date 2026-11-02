@@ -1,0 +1,15 @@
+# Moc Workflow definition §10.2.2 cho run 40528509595 — doi chieu 2026-10-27 (cach do theo tien le pr870 moc_workflow_definition_20261026)
+
+GraphQL (chu kho chay ngoai phien, ban chep: graphql-workflowrun-40528509595.json): databaseId 40528509595, runNumber 3337, createdAt 2026-10-27T15:11:30Z
+  file.path .github/workflows/ci.yml
+  file.repositoryFileUrl https://github.com/ducthangho/tra-luat/blob/2bcd8f31111d354e1e72934a3c22aba8b14675f0/.github/workflows/ci.yml (OID trong URL: 2bcd8f31111d354e1e72934a3c22aba8b14675f0)
+  checkSuite.commit.oid 2bcd8f31111d354e1e72934a3c22aba8b14675f0
+
+REST GET actions/runs/40528509595: head_sha 2bcd8f31111d354e1e72934a3c22aba8b14675f0, path .github/workflows/ci.yml, run_attempt 2, node_id WFR_kwLOTNeRjc8AAAAJb6_6mw (= gia tri -f id= trong lenh dua chu kho chay), conclusion success
+REST GET contents/.github/workflows/ci.yml?ref=2bcd8f31111d354e1e72934a3c22aba8b14675f0: blob 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc, sha256 bytes ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb
+$ git rev-parse 2bcd8f31111d354e1e72934a3c22aba8b14675f0:.github/workflows/ci.yml
+82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
+sha256 bytes git = ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb
+
+## Ket qua
+{"graphql_databaseId_khop_run": true, "graphql_url_neo_oid": true, "graphql_checksuite_oid": true, "rest_head_sha": true, "rest_path": true, "blob_rest_bang_git": true, "bytes_rest_bang_git": true}

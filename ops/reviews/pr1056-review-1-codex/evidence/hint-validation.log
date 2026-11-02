@@ -1,0 +1,15 @@
+$ patch --fuzz=0 -p0 -i ../HINT.patch
+rc=0
+patching file ops/reviews/pr1050-review-1-codex-verdict.receipt.yaml
+patching file ops/reviews/pr1050-review-2-codex-verdict.receipt.yaml
+
+ops/reviews/pr1050-review-1-codex-verdict.receipt.yaml changed_keys=['effective_review_class', 'review_class', 'review_class_ghi_chu']
+
+ops/reviews/pr1050-review-2-codex-verdict.receipt.yaml changed_keys=['effective_review_class', 'review_class', 'review_class_ghi_chu']
+
+$ PYTHONDONTWRITEBYTECODE=1 python3 ops/bien_nhan_v2.py --root .
+rc=0
+
+bien_nhan_v2: 257 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 310
+câu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0
+TỔNG: ĐẠT

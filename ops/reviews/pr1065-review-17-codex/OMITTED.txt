@@ -1,0 +1,4 @@
+# Tep KHONG vao kho: sha256  byte  duong_dan_tuong_doi (sandbox reviewer pr1065-review-17-codex; chi giu tep verdict nhac ten, <=500 KB).
+2a0efca9cf9030b24a66e927899305fdd288adb4208269ee1426d6186a4ac037  8899  review-evidence/changed-paths.txt
+6ff54b2df1e51c15968512b7d491eed0f349ef033b43ef08cbaaad1f3c27607e  1676404  review-evidence/checkout-before.json
+634a3bf3eff14eb70a73ec574b001292b77c1b7f2b814257b4ec3b55324a4ff2  1657597  diff-ghi-so.patch  (>500 KB; tai lap bang git diff theo PROMPT.md)

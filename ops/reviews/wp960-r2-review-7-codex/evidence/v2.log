@@ -1,0 +1,6 @@
+{"mutant": "v2", "old": " or ra[1] not in (\"commit\", \"tag\", \"tree\", \"blob\")", "new": "", "target": "c94"}
+{"case": "c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC", "state": "giet_that", "message": "batch-check-sai-loai: dạng lạ mà không ném KhongDoDuoc, trả None"}
+{"mutant": "v2", "control": [true, ""], "file": "/tmp/wp960-r7-review/whole-v2/ops/bien_nhan_v2.py"}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutant": "v2", "passed": 92, "total": 93, "red": [["c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC", "giet_that", "batch-check-sai-loai: dạng lạ mà không ném KhongDoDuoc, trả None"]]}
+{"mutant": "v2", "persisted_sha256": "acb9b19f88b5ecbd3e2f488e705efd4640ef4b9b23f245bfaa6e1c7130694588"}

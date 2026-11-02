@@ -1,0 +1,767 @@
+[
+  {
+    "line": 13,
+    "path": "$.schema_version",
+    "value": "1"
+  },
+  {
+    "line": 14,
+    "path": "$.mission_id",
+    "value": "gh-1045"
+  },
+  {
+    "line": 16,
+    "path": "$.provider",
+    "value": "claude"
+  },
+  {
+    "line": 17,
+    "path": "$.role",
+    "value": "land_operator"
+  },
+  {
+    "line": 18,
+    "path": "$.model_family",
+    "value": "claude"
+  },
+  {
+    "line": 19,
+    "path": "$.execution_surface",
+    "value": "claude_code"
+  },
+  {
+    "line": 20,
+    "path": "$.transport",
+    "value": "machine/local"
+  },
+  {
+    "line": 21,
+    "path": "$.session_id",
+    "value": "https://claude.ai/code/session_015GtxrYjGJtmjF3eT1nCSG9"
+  },
+  {
+    "line": 23,
+    "path": "$.input_packet_generations[0].packet_issue",
+    "value": "1045"
+  },
+  {
+    "line": 23,
+    "path": "$.input_packet_generations[0].packet_id",
+    "value": "CAI-CONG-CU-DAT-THEO-TRANG-THAI"
+  },
+  {
+    "line": 23,
+    "path": "$.input_packet_generations[0].revision",
+    "value": "1"
+  },
+  {
+    "line": 23,
+    "path": "$.input_packet_generations[0].generation",
+    "value": "1"
+  },
+  {
+    "line": 23,
+    "path": "$.input_packet_generations[0].lease_id",
+    "value": "wp1045-r1-g1-claude"
+  },
+  {
+    "line": 23,
+    "path": "$.input_packet_generations[0].ghi_chu",
+    "value": "da_bi_thay_the boi g2 luc 17:29Z; Codex luot 1-2 chay duoi g1"
+  },
+  {
+    "line": 24,
+    "path": "$.input_packet_generations[1].packet_issue",
+    "value": "1045"
+  },
+  {
+    "line": 24,
+    "path": "$.input_packet_generations[1].packet_id",
+    "value": "CAI-CONG-CU-DAT-THEO-TRANG-THAI"
+  },
+  {
+    "line": 24,
+    "path": "$.input_packet_generations[1].revision",
+    "value": "1"
+  },
+  {
+    "line": 24,
+    "path": "$.input_packet_generations[1].generation",
+    "value": "2"
+  },
+  {
+    "line": 24,
+    "path": "$.input_packet_generations[1].lease_id",
+    "value": "wp1045-r1-g2-claude"
+  },
+  {
+    "line": 24,
+    "path": "$.input_packet_generations[1].ghi_chu",
+    "value": "nang_tran codex 2->4; Codex luot 3 + head cuoi duoi g2"
+  },
+  {
+    "line": 25,
+    "path": "$.authorized_head_sha",
+    "value": "201460203f42485f589add150896f2febc00c027"
+  },
+  {
+    "line": 26,
+    "path": "$.authorized_head_tree",
+    "value": "332aed0f6d2efa3a4a75856c6d66800e0ca258cb"
+  },
+  {
+    "line": 27,
+    "path": "$.approver",
+    "value": "ducthangho"
+  },
+  {
+    "line": 28,
+    "path": "$.authorization_url",
+    "value": "https://github.com/ducthangho/tra-luat/pull/1047"
+  },
+  {
+    "line": 29,
+    "path": "$.authorization_lease_url",
+    "value": "https://github.com/ducthangho/tra-luat/issues/1045#issuecomment-6529094452"
+  },
+  {
+    "line": 30,
+    "path": "$.authorization_ghi_chu",
+    "value": "measured — readback-pr-1047.json: merged_by ducthangho, merged_at 2026-10-30T23:36:15Z, head.sha 2014602. loi_khai_co_neo — readback-comment-6529094452.json (author ducthangho, performed_via_github_app claude, 17:29:22Z): phien executor GHI HO chi thi chu kho \"Nang them 2 loi goi\" va dieu kien merge chung (#1037 issuecomment-6529010520: khong con P1/P2/P3 tren head cuoi, Windows xanh tren head cuoi, CI luot PR xanh). Chi thi neu DIEU KIEN, KHONG neu SHA. Readback chi chung minh THAO TAC merge (merged_by), khong phai duyet land; chua co nguon duyet land ben neo exact SHA 2014602 — khop dieu kien (5) CHUA DAT o landed_dieu_kien."
+  },
+  {
+    "line": 36,
+    "path": "$.land_operator",
+    "value": "loi_khai_co_neo — chu kho tu bam merge, executor khong merge; REST chi neo tai khoan merged_by=ducthangho, KHONG_DO_DUOC nguoi bam hay phien dung credential"
+  },
+  {
+    "line": 37,
+    "path": "$.merge_method",
+    "value": "merge"
+  },
+  {
+    "line": 38,
+    "path": "$.merge_commit",
+    "value": "b2d5f06c154331a6fc10c9e6f687f522196440a9"
+  },
+  {
+    "line": 39,
+    "path": "$.merge_commit_tree",
+    "value": "4687675e0237e49c6763f386da772721bf7024a4"
+  },
+  {
+    "line": 40,
+    "path": "$.merge_commit_parents[0]",
+    "value": "6db934145acf6e47d01db5b2dc8c9da417c2d8eb"
+  },
+  {
+    "line": 40,
+    "path": "$.merge_commit_parents[1]",
+    "value": "201460203f42485f589add150896f2febc00c027"
+  },
+  {
+    "line": 42,
+    "path": "$.pre_merge_checks[0].name",
+    "value": "ci.yml pull_request (ubuntu) tren head cuoi"
+  },
+  {
+    "line": 42,
+    "path": "$.pre_merge_checks[0].run_id",
+    "value": "41099144196"
+  },
+  {
+    "line": 42,
+    "path": "$.pre_merge_checks[0].run_attempt",
+    "value": "1"
+  },
+  {
+    "line": 42,
+    "path": "$.pre_merge_checks[0].sha",
+    "value": "201460203f42485f589add150896f2febc00c027"
+  },
+  {
+    "line": 42,
+    "path": "$.pre_merge_checks[0].conclusion",
+    "value": "success"
+  },
+  {
+    "line": 42,
+    "path": "$.pre_merge_checks[0].ghi_chu",
+    "value": "measured — readback-run-41099144196.json completed success; readback-jobs-41099144196.json 23/23 success, nhan ubuntu-latest."
+  },
+  {
+    "line": 42,
+    "path": "$.pre_merge_checks[0].nguon[0]",
+    "value": "readback-run-41099144196.json"
+  },
+  {
+    "line": 42,
+    "path": "$.pre_merge_checks[0].nguon[1]",
+    "value": "readback-jobs-41099144196.json"
+  },
+  {
+    "line": 43,
+    "path": "$.pre_merge_checks[1].name",
+    "value": "ci.yml workflow_dispatch (nhan windows-latest do tu jobs) tren head cuoi"
+  },
+  {
+    "line": 43,
+    "path": "$.pre_merge_checks[1].run_id",
+    "value": "41099486628"
+  },
+  {
+    "line": 43,
+    "path": "$.pre_merge_checks[1].run_attempt",
+    "value": "1"
+  },
+  {
+    "line": 43,
+    "path": "$.pre_merge_checks[1].sha",
+    "value": "201460203f42485f589add150896f2febc00c027"
+  },
+  {
+    "line": 43,
+    "path": "$.pre_merge_checks[1].conclusion",
+    "value": "success"
+  },
+  {
+    "line": 43,
+    "path": "$.pre_merge_checks[1].ghi_chu",
+    "value": "measured — readback-run-41099486628.json completed success attempt 1; readback-jobs-41099486628.json 15 success · 1 skipped (gate-cong-cu-gop); job chuan-bi nhan ubuntu-latest; 14 job gate* DA CHAY deu nhan windows-latest; gate-cong-cu-gop skipped, labels rong, runner_id null (khong chay, khong tinh la do tren Windows). Buoc \"cai shellcheck cho G5 (cai xong do lai)\" va buoc G5 cua gate-cong-cu (windows-latest, 0) va gate-packet-loop (windows-latest) conclusion success — measured tu steps trong readback-jobs. Thuat_lai — input runner_set=windows-only (khong co readback inputs)."
+  },
+  {
+    "line": 43,
+    "path": "$.pre_merge_checks[1].nguon[0]",
+    "value": "readback-run-41099486628.json"
+  },
+  {
+    "line": 43,
+    "path": "$.pre_merge_checks[1].nguon[1]",
+    "value": "readback-jobs-41099486628.json"
+  },
+  {
+    "line": 44,
+    "path": "$.pre_merge_checks[2].name",
+    "value": "launcher-windows.yml workflow_dispatch (windows-and-ubuntu) tren head cuoi — launcher_test.py"
+  },
+  {
+    "line": 44,
+    "path": "$.pre_merge_checks[2].run_id",
+    "value": "41110458965"
+  },
+  {
+    "line": 44,
+    "path": "$.pre_merge_checks[2].run_attempt",
+    "value": "1"
+  },
+  {
+    "line": 44,
+    "path": "$.pre_merge_checks[2].sha",
+    "value": "201460203f42485f589add150896f2febc00c027"
+  },
+  {
+    "line": 44,
+    "path": "$.pre_merge_checks[2].conclusion",
+    "value": "success"
+  },
+  {
+    "line": 44,
+    "path": "$.pre_merge_checks[2].ghi_chu",
+    "value": "measured — readback-run-41110458965.json success; readback-jobs-41110458965.json 2/2 success (launcher windows-latest, launcher ubuntu-latest). Thuat_lai tu log job (khong luu trong kho): ubuntu 312/312 ca (bo qua 2), DOT BIEN 502/502; windows 255/255 ca (bo qua 59), DOT BIEN 410/410 — 4 ca hanh vi r1045_* BO QUA shell POSIX tren Windows, chi ca hinh dang chay. Luot PR thuong KHONG chay tep nay (workflow chi chay PR co nhan windows) nen executor goi tay."
+  },
+  {
+    "line": 44,
+    "path": "$.pre_merge_checks[2].nguon[0]",
+    "value": "readback-run-41110458965.json"
+  },
+  {
+    "line": 44,
+    "path": "$.pre_merge_checks[2].nguon[1]",
+    "value": "readback-jobs-41110458965.json"
+  },
+  {
+    "line": 45,
+    "path": "$.pre_merge_checks[3].name",
+    "value": "executor cross-review Codex luot 3/4 tren head cuoi (launcher.py run 8381511e)"
+  },
+  {
+    "line": 45,
+    "path": "$.pre_merge_checks[3].sha",
+    "value": "201460203f42485f589add150896f2febc00c027"
+  },
+  {
+    "line": 45,
+    "path": "$.pre_merge_checks[3].conclusion",
+    "value": "approve; 0 P0-P3"
+  },
+  {
+    "line": 45,
+    "path": "$.pre_merge_checks[3].nguon[0]",
+    "value": "../reviews/wp1045-g1-codex-luot3/VERDICT.md"
+  },
+  {
+    "line": 45,
+    "path": "$.pre_merge_checks[3].nguon[1]",
+    "value": "../reviews/wp1045-g1-codex-luot3/run/run.json"
+  },
+  {
+    "line": 45,
+    "path": "$.pre_merge_checks[3].nguon[2]",
+    "value": "../reviews/wp1045-g1-codex-luot3-verdict.receipt.yaml"
+  },
+  {
+    "line": 45,
+    "path": "$.pre_merge_checks[3].ghi_chu",
+    "value": "measured — ops/reviews/wp1045-g1-codex-luot3/run/run.json: trang_thai xong, ma_thoat 0, head 2014602, model_phuc_vu DO_DUOC 43/43 gpt-6-astra, effort_phuc_vu xhigh, sandbox_trang_thai KHONG_DO_DUOC; VERDICT sha256 edf9683e…bd65f86."
+  },
+  {
+    "line": 46,
+    "path": "$.pre_merge_checks[4].name",
+    "value": "Codex connector"
+  },
+  {
+    "line": 46,
+    "path": "$.pre_merge_checks[4].sha",
+    "value": "201460203f42485f589add150896f2febc00c027"
+  },
+  {
+    "line": 46,
+    "path": "$.pre_merge_checks[4].conclusion",
+    "value": "completed; has_any_findings false"
+  },
+  {
+    "line": 46,
+    "path": "$.pre_merge_checks[4].ghi_chu",
+    "value": "measured — readback-comment-6531582115.json (chatgpt-codex-connector[bot], cap nhat 19:24:25Z): codex-review-state commit_sha 2014602, has_any_findings false, has_unresolved_findings false, status completed; kich hoat khi PR doi sang ready."
+  },
+  {
+    "line": 46,
+    "path": "$.pre_merge_checks[4].nguon",
+    "value": "readback-comment-6531582115.json"
+  },
+  {
+    "line": 48,
+    "path": "$.post_merge_checks[0].name",
+    "value": "ci.yml push master — DUNG merge SHA"
+  },
+  {
+    "line": 48,
+    "path": "$.post_merge_checks[0].run_id",
+    "value": "41145468254"
+  },
+  {
+    "line": 48,
+    "path": "$.post_merge_checks[0].sha",
+    "value": "b2d5f06c154331a6fc10c9e6f687f522196440a9"
+  },
+  {
+    "line": 48,
+    "path": "$.post_merge_checks[0].conclusion",
+    "value": "not_measured — in_progress luc ghi so"
+  },
+  {
+    "line": 48,
+    "path": "$.post_merge_checks[0].ghi_chu",
+    "value": "measured — readback-runs-b2d5f06.json: run 41145468254 \"gate\" event push status in_progress luc 23:40Z (cung run 41145468496 launcher Windows that). Ke ca khi xanh, moc Checkout / Workflow definition / Gate output cua §10.2.2 KHONG DO DUOC trong phien web (GraphQL 403, tien le pr882) — KHONG suy tu REST head_sha."
+  },
+  {
+    "line": 48,
+    "path": "$.post_merge_checks[0].nguon",
+    "value": "readback-runs-b2d5f06.json"
+  },
+  {
+    "line": 49,
+    "path": "$.post_merge_checks[1].name",
+    "value": "ci.yml push master — DUNG merge SHA (do lai sau khi xong)"
+  },
+  {
+    "line": 49,
+    "path": "$.post_merge_checks[1].run_id",
+    "value": "41145468254"
+  },
+  {
+    "line": 49,
+    "path": "$.post_merge_checks[1].run_attempt",
+    "value": "1"
+  },
+  {
+    "line": 49,
+    "path": "$.post_merge_checks[1].sha",
+    "value": "b2d5f06c154331a6fc10c9e6f687f522196440a9"
+  },
+  {
+    "line": 49,
+    "path": "$.post_merge_checks[1].conclusion",
+    "value": "success"
+  },
+  {
+    "line": 49,
+    "path": "$.post_merge_checks[1].ghi_chu",
+    "value": "measured — do 2026-10-31T04:05Z: readback-run-41145468254.json event push, head_sha b2d5f06, completed success, run_attempt 1, updated_at 2026-10-31T00:31:59Z; readback-jobs-41145468254.json 23/23 success, nhan ubuntu-latest, runner_id khac 0. Day chi la moc RUN cua §10.2.2; moc Checkout / Workflow definition / Gate output van KHONG DO DUOC (GraphQL 403). Dong tren giu nguyen lam moc ghi so 23:40Z."
+  },
+  {
+    "line": 49,
+    "path": "$.post_merge_checks[1].nguon[0]",
+    "value": "readback-run-41145468254.json"
+  },
+  {
+    "line": 49,
+    "path": "$.post_merge_checks[1].nguon[1]",
+    "value": "readback-jobs-41145468254.json"
+  },
+  {
+    "line": 49,
+    "path": "$.post_merge_checks[1].nguon[2]",
+    "value": "readback-runs-b2d5f06-sau.json"
+  },
+  {
+    "line": 50,
+    "path": "$.post_merge_checks[2].name",
+    "value": "launcher-windows.yml push master — DUNG merge SHA"
+  },
+  {
+    "line": 50,
+    "path": "$.post_merge_checks[2].run_id",
+    "value": "41145468496"
+  },
+  {
+    "line": 50,
+    "path": "$.post_merge_checks[2].run_attempt",
+    "value": "1"
+  },
+  {
+    "line": 50,
+    "path": "$.post_merge_checks[2].sha",
+    "value": "b2d5f06c154331a6fc10c9e6f687f522196440a9"
+  },
+  {
+    "line": 50,
+    "path": "$.post_merge_checks[2].conclusion",
+    "value": "success"
+  },
+  {
+    "line": 50,
+    "path": "$.post_merge_checks[2].ghi_chu",
+    "value": "measured — do 2026-10-31T04:05Z: readback-run-41145468496.json event push, head_sha b2d5f06, completed success; readback-jobs-41145468496.json 2/2 success (launcher windows-latest, launcher ubuntu-latest). Cung gioi han §10.2.2 nhu dong tren."
+  },
+  {
+    "line": 50,
+    "path": "$.post_merge_checks[2].nguon[0]",
+    "value": "readback-run-41145468496.json"
+  },
+  {
+    "line": 50,
+    "path": "$.post_merge_checks[2].nguon[1]",
+    "value": "readback-jobs-41145468496.json"
+  },
+  {
+    "line": 52,
+    "path": "$.bookkeeping[0].item",
+    "value": "bien nhan review ba luot Codex"
+  },
+  {
+    "line": 52,
+    "path": "$.bookkeeping[0].tep[0]",
+    "value": "ops/reviews/wp1045-g1-codex-luot1-verdict.receipt.yaml"
+  },
+  {
+    "line": 52,
+    "path": "$.bookkeeping[0].tep[1]",
+    "value": "ops/reviews/wp1045-g1-codex-luot2-verdict.receipt.yaml"
+  },
+  {
+    "line": 52,
+    "path": "$.bookkeeping[0].tep[2]",
+    "value": "ops/reviews/wp1045-g1-codex-luot3-verdict.receipt.yaml"
+  },
+  {
+    "line": 53,
+    "path": "$.bookkeeping[1].item",
+    "value": "handoff executor"
+  },
+  {
+    "line": 53,
+    "path": "$.bookkeeping[1].tep",
+    "value": "ops/handoff/wp1045-g1-claude.md (nhanh ops/wp1045-r1-g1-lease @ 4b4f37f)"
+  },
+  {
+    "line": 54,
+    "path": "$.bookkeeping[2].item",
+    "value": "PR ghi so"
+  },
+  {
+    "line": 54,
+    "path": "$.bookkeeping[2].nhanh",
+    "value": "claude/magical-clarke-gzvwbp"
+  },
+  {
+    "line": 55,
+    "path": "$.bookkeeping[3].item",
+    "value": "rut han lease wp1045-r1-g2-claude"
+  },
+  {
+    "line": 55,
+    "path": "$.bookkeeping[3].ket_qua",
+    "value": "CHUA LAM tai moc ghi so dau (b7c044f); LAM SAU theo chi thi rieng — xem lease.rut_han_20261031T0000Z va lease.do_lai_sau_han_20261031T0023Z"
+  },
+  {
+    "line": 57,
+    "path": "$.packet_id",
+    "value": "CAI-CONG-CU-DAT-THEO-TRANG-THAI"
+  },
+  {
+    "line": 58,
+    "path": "$.packet_issue",
+    "value": "1045"
+  },
+  {
+    "line": 59,
+    "path": "$.generation",
+    "value": "2"
+  },
+  {
+    "line": 60,
+    "path": "$.pham_vi_land",
+    "value": "cong_cu_ci"
+  },
+  {
+    "line": 61,
+    "path": "$.environment",
+    "value": "cloud"
+  },
+  {
+    "line": 62,
+    "path": "$.operating_system",
+    "value": "linux"
+  },
+  {
+    "line": 63,
+    "path": "$.recorded_by",
+    "value": "claude-session session_015GtxrYjGJtmjF3eT1nCSG9 — CUNG phien la executor cua packet #1045. Chu kho tu merge; phien nay ghi so theo chi thi trong phien 30-10-2026 \"Ghi bien nhan review va ho so land cho #1045 di\"."
+  },
+  {
+    "line": 68,
+    "path": "$.spec.path",
+    "value": "ops/specs/wp1045.md (nhanh ops/wp1045-r1-g1-lease)"
+  },
+  {
+    "line": 69,
+    "path": "$.spec.sha256",
+    "value": "8e187b9130e18a757f4f24dfcea6761f688a5f69e21d17356b198b8cc5bd508e"
+  },
+  {
+    "line": 70,
+    "path": "$.spec.nguon",
+    "value": "measured — git show origin/ops/wp1045-r1-g1-lease:ops/specs/wp1045.md | sha256sum = spec_hash cua ca hai lease (lease-wp1045-r1-g1.yaml.txt, lease-wp1045-r1-g2.yaml.txt)."
+  },
+  {
+    "line": 72,
+    "path": "$.lease.lease_id",
+    "value": "wp1045-r1-g2-claude"
+  },
+  {
+    "line": 73,
+    "path": "$.lease.path",
+    "value": "ops/leases/wp1045-r1-g2-claude.yaml (nhanh ops/wp1045-r1-g1-lease)"
+  },
+  {
+    "line": 74,
+    "path": "$.lease.lease_until",
+    "value": "2026-10-31T17:29:00Z"
+  },
+  {
+    "line": 75,
+    "path": "$.lease.write_set[0]",
+    "value": "ops/cai_cong_cu.sh"
+  },
+  {
+    "line": 75,
+    "path": "$.lease.write_set[1]",
+    "value": ".claude/dev/launcher_test.py"
+  },
+  {
+    "line": 75,
+    "path": "$.lease.write_set[2]",
+    "value": "ops/handoff/wp1045-g1-claude.md"
+  },
+  {
+    "line": 76,
+    "path": "$.lease.write_set_hash",
+    "value": "e16d7ca0a534633372e5a295ae6180084c57ac9e34cc3d057d252a4f90c85cef"
+  },
+  {
+    "line": 77,
+    "path": "$.lease.g1",
+    "value": "measured — lease-wp1045-r1-g1.yaml.txt: da_bi_thay_the wp1045-r1-g2-claude; g2 khai thay_the_cho [wp1045-r1-g1-claude] (bia mo hai chieu)."
+  },
+  {
+    "line": 78,
+    "path": "$.lease.trang_thai_luc_ghi_so",
+    "value": "measured — lease-wp1045-r1-g2.yaml.txt: lease_until 2026-10-31T17:29:00Z, khong co khoi thu_hoi_bang_rut_han. CHUA NHA tai moc ghi so 23:40Z: lease con giu write set sau khi packet da merge (cua so hai writer neu cap lease moi cho cung duong dan truoc 17:29Z mai)."
+  },
+  {
+    "line": 81,
+    "path": "$.lease.rut_han_20261031T0000Z",
+    "value": "measured — lease-wp1045-r1-g2-sau-rut-han-a430543.yaml.txt (ban doc tai a430543 tren ops/wp1045-r1-g1-lease): lease_until/lease_expires_at_utc ve 2026-10-31T00:20:00Z, ly do trong khoi thu_hoi_bang_rut_han cua chinh tep lease (chi thi chu kho \"Rut han lease wp1045-r1-g2 luon di\"). Han moi = luc sua + 20 phut; khong bia mo (lease con han, khong co lease ke nhiem); g1 khong sua (da mang da_bi_thay_the tu a7cd99e). Run ops-publish-lease 41147719416 (push a430543) completed success, log job \"da dang truoc do — bo qua\" (nhanh rc=9) — thuat_lai tu log job, log khong luu trong kho; readback-run-41147719416.json."
+  },
+  {
+    "line": 87,
+    "path": "$.lease.do_lai_sau_han_20261031T0023Z",
+    "value": "measured — ai-dang-giu-sau-rut-han/luc-do.txt (do 2026-10-31T00:23:19Z, SAU han moi 00:20Z): ls-remote 713 ten = for-each-ref 713 ten (thieu 0, thua 0); ai-dang-giu ops/cai_cong_cu.sh, .claude/dev/launcher_test.py, ops/handoff/wp1045-g1-claude.md: wp1045-r1-g2-claude HẾT_HẠN, wp1045-r1-g1-claude CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ; NGƯỜI_GIỮ 0 ca ba duong dan, rc 0. Lan do dau 00:23:09Z bi CHAN [12] (nhanh cuc bo master, ops/wp1045-r1-g1-lease tut sau origin, 0 commit rieng) — chua bang git branch -f roi do lai. Khoi nay THEM SAU, co moc rieng; cau 'CHUA NHA tai moc ghi so 23:40Z' o tren giu nguyen."
+  },
+  {
+    "line": 95,
+    "path": "$.trang_thai_packet.merged",
+    "value": "true"
+  },
+  {
+    "line": 96,
+    "path": "$.trang_thai_packet.merged_nguon",
+    "value": "measured — readback-pr-1047.json: merged true, merged_at 2026-10-30T23:36:15Z, merged_by ducthangho, merge_commit_sha b2d5f06, head.sha 2014602, base.sha 5e458f4; merge-va-diff.txt: cha thu nhat 6db9341, cha thu hai 2014602, tree 4687675; diff 5e458f4..2014602 va b2d5f06^1..b2d5f06 cung sha256 65b4fa2e… (2 tep .claude/dev/launcher_test.py, ops/cai_cong_cu.sh; +276 -10)."
+  },
+  {
+    "line": 100,
+    "path": "$.trang_thai_packet.landed",
+    "value": "false"
+  },
+  {
+    "line": 101,
+    "path": "$.trang_thai_packet.landed_dieu_kien",
+    "value": "PROTOCOL §10.2.4 — (1) gate tren merge SHA b2d5f06: CHUA DAT — run 41145468254 in_progress luc ghi so (do lai 04:05Z: completed success 23/23, xem post_merge_checks; chi la moc RUN), va moc Checkout / Workflow definition / Gate output cua §10.2.2 khong do duoc trong phien web; (2) lease CHUA NHA tai moc ghi so 23:40Z; da rut han ve 00:20Z va do lai 00:23Z: NGUOI_GIU 0 (xem lease.do_lai_sau_han_20261031T0023Z) — DAT; (3) bookkeeping: ho so nay + ba bien nhan review DAT; (4) review neo DUNG authorized_head_sha 2014602: Codex luot 3 approve 0 P0-P3 va Codex connector sach DAT; (5) uy quyen land neo SHA: CHUA DAT — chi thi neu dieu kien, khong neu SHA; (6) muc tieu packet: bo chon cai_cong_cu.sh quyet DAT theo trang_thai, runner Windows qua buoc cai shellcheck + G5 DAT; (7) reviewer assurance §8.1: CHUA_DAT (xem assurance_81). Mo lai — TAT CA: (1) do du bon moc provenance CI §10.2.2 cho DUNG run push master tren b2d5f06 (WorkflowRun.file qua GraphQL — nho chu kho chay lenh `gh api graphql` tren may, mau CLAUDE.md muc \"Lenh gh api graphql\"); VA (5) chu kho ghi duyet ben neo 2014602; VA §8.1 can sandbox do duoc."
+  },
+  {
+    "line": 112,
+    "path": "$.assurance_81.reviewer_assurance_81",
+    "value": "CHUA_DAT"
+  },
+  {
+    "line": 113,
+    "path": "$.assurance_81.review_exact_sha",
+    "value": "DAT"
+  },
+  {
+    "line": 114,
+    "path": "$.assurance_81.review_exact_sha_nguon",
+    "value": "measured — ops/reviews/wp1045-g1-codex-luot3/run/run.json: launcher.py run approve tren DUNG authorized_head_sha 2014602, ma_thoat 0 (ops/reviews/wp1045-g1-codex-luot3/VERDICT.md)."
+  },
+  {
+    "line": 116,
+    "path": "$.assurance_81.thuc_thi.model",
+    "value": "measured — ops/reviews/wp1045-g1-codex-luot3/run/run.json model_phuc_vu_trang_thai DO_DUOC, 43 su kien deu gpt-6-astra (ho openai, khac ho claude cua executor)."
+  },
+  {
+    "line": 117,
+    "path": "$.assurance_81.thuc_thi.effort",
+    "value": "measured — ops/reviews/wp1045-g1-codex-luot3/run/run.json effort_phuc_vu [xhigh], effort_phuc_vu_trang_thai DO_DUOC."
+  },
+  {
+    "line": 118,
+    "path": "$.assurance_81.thuc_thi.sandbox_mode",
+    "value": "not_measured — ops/reviews/wp1045-g1-codex-luot3/run/run.json sandbox_trang_thai KHONG_DO_DUOC, sandbox_ly_do \"luong lay mau sandbox hong (DanhTinhDoi)\"; sandbox_quan_sat chi la mau quan sat, launcher khong khai DO_DUOC."
+  },
+  {
+    "line": 119,
+    "path": "$.assurance_81.ly_do",
+    "value": "measured — ops/reviews/wp1045-g1-codex-luot3/run/run.json: model va effort do duoc tren luot approve exact-SHA; sandbox mode KHONG_DO_DUOC theo chinh launcher (ca ba luot) => §8.1/§8.2 chua du ba truong thuc thi."
+  },
+  {
+    "line": 124,
+    "path": "$.review.so_loi_goi_codex_cli",
+    "value": "3"
+  },
+  {
+    "line": 125,
+    "path": "$.review.tran",
+    "value": "4 (lease g2 sau nang_tran 2->4); 1 loi goi con lai khong dung"
+  },
+  {
+    "line": 127,
+    "path": "$.review.luot[0].luot",
+    "value": "1"
+  },
+  {
+    "line": 127,
+    "path": "$.review.luot[0].run_id",
+    "value": "d160eb1999444fcaa8e6c877deaedc6d"
+  },
+  {
+    "line": 127,
+    "path": "$.review.luot[0].head",
+    "value": "daedfb75e524fa6adc3d68db63b500c2d6c53730"
+  },
+  {
+    "line": 127,
+    "path": "$.review.luot[0].verdict",
+    "value": "changes_requested"
+  },
+  {
+    "line": 127,
+    "path": "$.review.luot[0].dem",
+    "value": "0/0/1/2"
+  },
+  {
+    "line": 127,
+    "path": "$.review.luot[0].bien_nhan",
+    "value": "ops/reviews/wp1045-g1-codex-luot1-verdict.receipt.yaml"
+  },
+  {
+    "line": 128,
+    "path": "$.review.luot[1].luot",
+    "value": "2"
+  },
+  {
+    "line": 128,
+    "path": "$.review.luot[1].run_id",
+    "value": "f71a2bfc8420410584d516e14afd3e61"
+  },
+  {
+    "line": 128,
+    "path": "$.review.luot[1].head",
+    "value": "b07adcc2c37215fcb152c94890b9c43f7032bd18"
+  },
+  {
+    "line": 128,
+    "path": "$.review.luot[1].verdict",
+    "value": "changes_requested"
+  },
+  {
+    "line": 128,
+    "path": "$.review.luot[1].dem",
+    "value": "0/0/0/1"
+  },
+  {
+    "line": 128,
+    "path": "$.review.luot[1].bien_nhan",
+    "value": "ops/reviews/wp1045-g1-codex-luot2-verdict.receipt.yaml"
+  },
+  {
+    "line": 129,
+    "path": "$.review.luot[2].luot",
+    "value": "3"
+  },
+  {
+    "line": 129,
+    "path": "$.review.luot[2].run_id",
+    "value": "8381511e234e453d876e4dee7204ee75"
+  },
+  {
+    "line": 129,
+    "path": "$.review.luot[2].head",
+    "value": "201460203f42485f589add150896f2febc00c027"
+  },
+  {
+    "line": 129,
+    "path": "$.review.luot[2].verdict",
+    "value": "approve"
+  },
+  {
+    "line": 129,
+    "path": "$.review.luot[2].dem",
+    "value": "0/0/0/0"
+  },
+  {
+    "line": 129,
+    "path": "$.review.luot[2].bien_nhan",
+    "value": "ops/reviews/wp1045-g1-codex-luot3-verdict.receipt.yaml"
+  }
+]

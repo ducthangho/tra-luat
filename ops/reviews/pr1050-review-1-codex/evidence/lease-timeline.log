@@ -1,0 +1,12 @@
+reviewed_commit_time 2026-10-30T17:41:02+00:00
+recording_snapshot_time 2026-10-30T17:37:30Z
+lease_sua_lan_cuoi 2026-10-30T17:33:00Z
+lease_until 2026-10-30T17:53:00Z lease_expires_at_utc 2026-10-30T17:53:00Z
+at_reviewed_commit_lease_expired False seconds_until_expiration 718
+da_bi_thay_the None bia_mo None
+lease_source_limitation Ref mang lease nay: nhanh ops/wp1037-r1-g1-lease. Nhanh ma agent/wp1037-g1-claude KHONG mang tep lease. Nghiem thu: sau han moi, ai-dang-giu ops/bien_nhan_v2_test.py khong con wp1037-r1-g1-claude trong NGUOI_GIU khi quet du ref.
+lease_source_reason Packet #1037 da LAND (PR #1041 merge b29da0bfe3bfb7a7be69136a1c5c40f82c088a93, 2026-10-30T17:28Z). Nha ops/bien_nhan_v2_test.py cho #1021 (wp1021-r2-g1-claude) merge master va giai xung dot.
+LAND_CLAIM measured — lease-wp1037-r1-g1.yaml.txt (ban doc tai a34b9a3): DA NHA bang RUT HAN (khong bia mo — lease con han, khong co lease ke nhiem): lease_until/lease_expires_at_utc ve 2026-10-30T17:53:00Z, ly do trong khoi thu_hoi_bang_rut_han cua chinh tep lease. Han moi = luc sua + 20 phut de luot ops-publish-lease cua commit rut han doc lease CON HAN (rc=9), khong roi vao rc=8.
+EXISTING_CLASSIFIER 2026-10-30T17:37:30+00:00 CÒN_HẠN
+EXISTING_CLASSIFIER 2026-10-30T17:41:02+00:00 CÒN_HẠN
+EXISTING_CLASSIFIER 2026-10-30T17:53:00+00:00 HẾT_HẠN

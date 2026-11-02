@@ -1,0 +1,100 @@
+# ADR-0059 — Máy Windows local: nhịp tim cho khoá, không tiếp nhận khoá còn tiến trình sống, ghi lượt bị ngắt
+
+- **Trạng thái:** Accepted (2026-10-31, chủ kho `ducthangho` duyệt `spec_hash` `f1a666a3…a973` của đặc tả
+  WINDOWS-LOCAL-MAY-CHU-KHO-r3.md trong ops/specs ở PR #1062 issuecomment-6537481455; thi hành bằng packet
+  `WINDOWS-LOCAL-MAY-CHU-KHO` revision 3 · generation 1, mission `gh-1035` — không phải một phiên tự đặt quy ước.
+  Thứ định danh đặc tả là băm, không phải tên nhánh: tìm tệp ở `master` trước, chưa thấy thì ở nhánh
+  `ops/windows-local-may-chu-kho-r3-lease`)
+
+ADR này **chỉ bổ sung** cho §3 *Hạn khoá* của `ADR-0058` và §3 *Khoá* của `ADR-0057`, theo cùng cách `ADR-0058`
+sửa `ADR-0057`. Mọi điểm khác của hai ADR giữ nguyên hiệu lực. Tệp `ADR-0057` và `ADR-0058` không bị sửa.
+
+## Vì sao — số đo 30→31-10-2026
+
+`ADR-0058` có hiệu lực từ 30-10-2026. Trong ngày đầu dùng nó, sổ đo `D:\tl-win\do-luong.csv` và khoá
+`D:\tl-win\KHOA.txt` trên ASUS-LAPTOP ghi được ba lỗ mà r2 không phủ. Số đo đọc lại qua Desktop Commander lúc
+~01:35Z ngày 31-10, chép từ §1 của đặc tả:
+
+| # | sự kiện | số đo | bài học |
+|---|---|---|---|
+| D10 | tiếp nhận một khoá còn sống | Dòng sổ đo `2026-10-30T13:58:02Z` của `session_015GtxrcrefBJpLr7fGUSPtB` ghi tiếp nhận khoá của `session_015GtxrbUPS7zGdffB8Sfo8Y` theo `ADR-0058` 3(b), với lý do "dạng cũ không có hạn, đã quá 2 giờ" (khoá ghi lúc 09:01:16Z). Dòng `13:59:37Z` của chính phiên tiếp nhận ghi "có PID 26296 `tl.py --selftest` của phiên khác đang chạy". Dòng của phiên giữ khoá ghi selftest ấy xong lúc 14:03:16Z, khoá bị ghi đè lúc 14:01:44Z, nên hai phiên chồng nhau khoảng 1,5 phút. | 3(a) và 3(b) chỉ xét đồng hồ. Một lượt chạy dài hơn 2 giờ, vì máy ngắt giữa chừng, vẫn bị coi là khoá bỏ rơi trong khi tiến trình của nó còn chạy |
+| D11 | máy ngắt giữa lượt chạy | Dòng `09:01:16Z` (`session_015GtxrbUPS7zGdffB8Sfo8Y`): `tl --selftest` 1758/1758 nhưng mất 18113 s; Desktop Commander không truy cập được từ ~09:06Z (Offline lúc 10:22Z và 11:25Z). Dòng `16:13:56Z` (`session_015GtxrZ1Tt93F4NLUUhKYQy`): lượt 1 lúc 14:05Z bị cắt khi máy offline ~14:16Z–15:25Z, phải chạy lại lượt 2 từ 15:26:48Z. | `ADR-0057` và `ADR-0058` không nói một lượt bị ngắt thì ghi sổ thế nào, và thời lượng của nó có được đếm không |
+| D12 | khoá quá hạn không được nhả | `KHOA.txt` lúc ~01:35Z ngày 31-10 còn dòng `session_015GtxrZ1Tt93F4NLUUhKYQy` `2026-10-30T19:17:25Z` hạn `2026-10-30T21:17:25Z` (`#1021 C7 head 356a27e`), tức đã quá hạn hơn 4 giờ. | 3(a) xử lý được (khoá hết hiệu lực), nhưng "xoá nội dung khi xong" của `ADR-0057` §3 không có cách nhả nào được định nghĩa rõ |
+
+## Quyết định
+
+1. **Nhịp tim.** Dòng khoá thêm trường thứ năm:
+   `<session_id>\t<UTC bắt đầu>\t<UTC hạn>\t<việc>\t<UTC nhịp tim>`.
+   - Phiên giữ khoá ghi lại dòng, với nhịp tim là giờ hiện tại, ít nhất 30 phút một lần trong lúc còn chạy.
+   - Mỗi lần ghi lại, `UTC bắt đầu` giữ nguyên giá trị lúc lấy khoá; hạn vẫn không quá 2 giờ kể từ lần ghi
+     (gia hạn như `ADR-0058` 3).
+   - Nhịp tim không thêm điều kiện hết hiệu lực nào ngoài 3(a)–(c) của `ADR-0058`. Dòng bốn trường của
+     `ADR-0058` vẫn được đọc như cũ.
+2. **Không tiếp nhận khoá còn tiến trình sống.** Trước khi tiếp nhận một khoá của phiên khác đã hết hiệu lực theo
+   3(a) hoặc 3(b) của `ADR-0058`, chạy bước kiểm tải (§4 của `ADR-0057`).
+   - Nếu thấy một tiến trình `python.exe` khởi động (`CreationDate`, đổi sang UTC) sau `UTC bắt đầu` của khoá cũ
+     và không phải tiến trình MCP, thì khoá được coi là **còn sống**: không tiếp nhận, ghi một dòng sổ đo nêu PID
+     và lệnh đã thấy, rồi đợi.
+   - Quy tắc này không áp dụng cho 3(c), vì ở đó phiên giữ khoá đã tuyên bố bỏ.
+   - Thứ tự ghi sổ đo rồi thay nội dung khoá của `ADR-0058` 3 giữ nguyên khi tiếp nhận được.
+3. **Lượt bị ngắt.** Nếu máy Offline hoặc Desktop Commander không truy cập được trong lúc một lượt đang chạy,
+   dòng sổ đo của lượt ấy ghi `ngat=co` trong `ghi_chu`, kèm khoảng thời gian không truy cập được nếu đo được.
+   Thời lượng của lượt bị ngắt không dùng cho rà soát ADR (§10 của `ADR-0057`). Không tự đổi chế độ nguồn hoặc
+   ngủ của máy (`docs/PROTOCOL_DA_PHIEN.md` §3.1); việc chống ngủ là của chủ kho.
+4. **Đọc lại trước mọi lần ghi lại dòng khoá** (nhịp tim, gia hạn, hay lúc kết nối lại sau khi bị ngắt).
+   - Phiên đọc `KHOA.txt` trước, và chỉ ghi lại khi dòng hiện có vẫn mang `session_id` của chính mình.
+   - Nếu dòng đã đổi sang phiên khác, hoặc tệp rỗng, thì phiên **không** còn giữ khoá. Khi ấy phải theo đúng luật
+     lấy khoá: khoá của phiên khác còn hiệu lực thì đợi; tệp rỗng, hoặc khoá của phiên khác hết hiệu lực, thì chạy
+     bước kiểm tải (và mục 2 với khoá của phiên khác) rồi mới lấy.
+   - Dòng vẫn là của chính mình dù đã quá hạn và chưa ai tiếp nhận thì phiên được gia hạn sau khi chạy bước kiểm
+     tải. Tiến trình trong thư mục riêng của chính phiên (§5 của `ADR-0057`) không chặn việc gia hạn; mục 2 chỉ xét
+     khoá của phiên khác.
+   - Đọc lại không làm khoá nguyên tử: khe giữa lần đọc và lần ghi vẫn còn, như `ADR-0058` đã khai.
+5. **Nhả khoá.** Nhả khoá là ghi tệp `KHOA.txt` rỗng (0 byte), sau khi đọc lại theo mục 4. Phiên giữ khoá nhả ngay
+   khi xong, kể cả khi lượt đỏ hoặc bị bỏ.
+
+## Ba ca phải xử lý đúng
+
+- **A ngắt, B tiếp nhận, A kết nối lại.** A bị ngắt tới khi khoá quá hạn, và tiến trình của A đã dừng. B kiểm tải,
+  không thấy tiến trình nào theo mục 2, nên tiếp nhận hợp lệ theo 3(a). A kết nối lại, đọc theo mục 4, thấy dòng
+  của B: A không ghi đè. Khoá của B còn hiệu lực nên A đợi.
+- **Quá hạn, chưa ai tiếp nhận.** A kết nối lại, đọc thấy dòng vẫn là của A: A chạy bước kiểm tải rồi gia hạn.
+- **D10.** Khoá dạng cũ ghi 09:01:16Z, quá 2 giờ nên hết hiệu lực theo 3(b). Phiên tiếp nhận kiểm tải và thấy PID
+  26296 `tl.py --selftest`, không phải MCP. Mục 2 so giờ tạo PID 26296 với 09:01:16Z. Sổ đo không ghi
+  `CreationDate`, giờ bắt đầu lượt suy từ 18113 s không phải giờ tạo tiến trình, và lần đọc lại không tìm thấy sự
+  kiện Security 4688 nào ngày 30-10, nên nguồn ấy không cho số đo giờ tạo tiến trình. Nguồn quyết định là cặp tệp
+  của chính phiên giữ khoá, đọc lại chỉ-đọc qua Desktop Commander ngày 31-10-2026:
+  - script `C:\Users\admin\tl-work\session_015GtxrbUPS7zGdffB8Sfo8Y\selftest.ps1` (sửa lần cuối 09:00:26Z) ghi
+    `BAT_DAU`, ghi khoá, ngủ 3 s, fetch và checkout, rồi lấy mẫu
+    `Get-CimInstance Win32_Process -Filter "Name='python.exe'"` không loại PID nào thành dòng `TAI_TRUOC`, và chỉ
+    sau đó mới gọi `cmd /c "python -u scripts/tl.py --selftest …"`;
+  - kết quả `D:\tl-win\session_015GtxrbUPS7zGdffB8Sfo8Y\selftest-ketqua.txt` ghi
+    `BAT_DAU=2026-10-30T09:01:16.5807497Z` và `TAI_TRUOC` gồm đúng bốn `python.exe`: 23252, 5772 (`browser-use`
+    `--cli-mcp`), 12720, 26716 (`-m proxima_agent.web`). Tệp `scripts/tl.py` của checkout ấy ghi lúc 09:01:22.77Z,
+    nên mẫu lấy sau mốc đó.
+
+  Mẫu phủ mọi `python.exe`, lấy sau 09:01:16Z, và **không có 26296**; sổ đo 13:59:37Z ghi PID 26296 chạy
+  `tl.py --selftest`, tức một tiến trình Python, đúng loại mục 2 xét. Vậy PID 26296 được tạo sau mẫu, tức sau giờ bắt đầu khoá. Khoá còn sống: **không tiếp nhận**, ghi sổ
+  đo, đợi. Đây là cận dưới suy từ một mẫu âm có nguồn, không phải `CreationDate` đo trực tiếp.
+
+## Những gì KHÔNG đổi
+
+- Mọi điểm của `ADR-0057` và `ADR-0058` không nêu ở trên giữ nguyên, gồm điều kiện hết hiệu lực 3(a)–(c), phạm vi
+  theo `list_devices`, khoá và sổ đo theo máy, và cột sổ đo.
+- Khoá vẫn là tệp văn bản không nguyên tử. Nhịp tim và đọc lại không làm nó nguyên tử.
+- Không có quyền dừng tiến trình của phiên khác, kể cả khi khoá còn sống chặn mình. Dọn máy là việc của chủ kho.
+- Không sửa hồi tố các dòng sổ đo hay khoá đã có.
+
+## Không cổng nào cưỡng chế ADR này
+
+**0 cổng**, như `ADR-0057` và `ADR-0058`. Không gì trong kho đọc `KHOA.txt`, đọc trường nhịp tim, đọc
+`CreationDate` của tiến trình, đọc `ngat=co` trong sổ đo, hay kiểm tệp khoá rỗng. `adr-song` chỉ canh ADR này có
+dòng trong §20 và có dòng `Trạng thái`; nó không đọc nội dung. Toàn bộ ADR là **kỷ luật executor**. Công cụ khoá
+nguyên tử, công cụ nhịp tim hay bộ đọc sổ đo nằm ngoài packet này.
+
+## Phương án bị loại
+
+- **Chỉ xét đồng hồ như 3(a)/3(b):** D10 đo được hai phiên chồng nhau khoảng 1,5 phút vì tiến trình còn chạy.
+- **Đếm thời lượng lượt bị ngắt như lượt thường:** D11 đo được 18113 s cho một selftest chạy qua quãng máy
+  không truy cập được từ ~09:06Z; con số ấy lẫn thời gian máy ngắt, không chỉ đo test.
+- **Nhả khoá bằng "xoá nội dung" không định nghĩa:** D12 đo được khoá quá hạn hơn 4 giờ còn nằm trong tệp.

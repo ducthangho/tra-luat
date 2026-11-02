@@ -1,0 +1,217 @@
+[
+ {
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4386084066",
+  "pull_request_review_id": 5663550478,
+  "id": 4386084066,
+  "node_id": "PRRC_kwDOTNeRjc8AAAABBW5U4g",
+  "diff_hunk": "@@ -2916,6 +2934,109 @@ def cmd_accept(a, state_dir: Path) -> int:\n     return RC_OK\n \n \n+# --- #813 MAY-ADR-0054-b (`ops/specs/wp813-r2.md` + phần chung): `mo-lai` (approved_pending → running | cho_chu_kho) · `chu-kho-duyet`.\n+NGUYEN_NHAN_MO_LAI, CI_DO_THAT, PHAM_VI_CHECKPOINT = (\"ci-do\", \"connector\"), (\"failure\", \"timed_out\", \"startup_failure\"), (\"cho_phep_va\", \"cho_phep_day\")\n+CUA_DI_TIEP = (\"begin-attempt\", \"mo-lai\", \"chu-kho-duyet\")  # I5: cửa đưa packet đi tiếp mà bộ đếm same-failure đã chạm phải chặn\n+KHOA_CHECKPOINT = {\"packet_issue\": int, \"generation\": int, \"spec_hash\": str, \"head_sha\": str, \"pham_vi\": list, \"nguoi_quyet\": str, \"neo\": str}\n+\n+\n+def _quyen_hop_le(q, khoa: str, mien) -> bool:\n+    \"\"\"I6: quyền phái sinh (`mo_lai_tu`, `checkpoint_day`) neo (nguyên nhân | sha256 hiện vật, generation, sha) — hoặc vắng.\"\"\"\n+    return q is None or (type(q) is dict and set(q) == {khoa, \"generation\", \"sha\"} and type(q[khoa]) is str and (mien is None or q[khoa] in mien)\n+                         and type(q[\"generation\"]) is int and type(q[\"sha\"]) is str and bool(SHA_RE.match(q[\"sha\"])))\n+\n+\n+def cmd_mo_lai(a, state_dir: Path) -> int:\n+    \"\"\"M2 — `ci-do`: từ approved_pending (head = pending_sha), mọi check khai trong biên nhận là check ĐỎ THẬT trên head và connector không\n+    còn P0–P2 ⇒ running. `connector`: (endpoint, id) của biên nhận phủ BẰNG ĐÚNG P0–P2 connector trên head ⇒ cho_chu_kho, từ approved_pending\n+    hoặc từ running khi quyền mở lại hiện hành là `ci-do` cùng generation, cùng head. Slug từ bảng lớp biên nhận H (I11), cộng bộ đếm\n+    same-failure; quyền `mo_lai_tu` bị THAY (I6). Mọi đầu vào xác thực TRƯỚC `_xet_dung` và lần ghi duy nhất (I4/I5).\"\"\"\n+    st = _load(state_dir, a.packet)\n+    nc, ml, connector = st.get(\"ngu_canh_lease\"), st.get(\"mo_lai_tu\"), a.nguyen_nhan == \"connector\"\n+    tu_ci = connector and st[\"state\"] == \"running\" and ml is not None and ml[\"nguyen_nhan\"] == \"ci-do\" and ml[\"generation\"] == (nc or {}).get(\"generation\")",
+  "path": ".claude/dev/packet_loop.py",
+  "commit_id": "25bd151727b5be2574594cf104658048816c4942",
+  "original_commit_id": "25bd151727b5be2574594cf104658048816c4942",
+  "user": {
+   "login": "chatgpt-codex-connector[bot]",
+   "id": 199175422,
+   "node_id": "BOT_kgDOC98s_g",
+   "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+   "html_url": "https://github.com/apps/chatgpt-codex-connector",
+   "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+   "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+   "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+   "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+   "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+   "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+   "type": "Bot",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Expire CI reopen authorization when the reviewed head changes**\n\nAfter `mo-lai ci-do` on head A, a subsequent attempt can review head B and receive `changes_requested`, returning to `running` without clearing `mo_lai_tu`. This condition then accepts connector evidence and a receipt for A, even though the latest review concerns B. I reproduced that sequence through the CLI: the stale connector reopening succeeded, and `chu-kho-duyet` accepted a checkpoint for A and returned the packet to `running`. Invalidate or supersede the CI reopening authorization when a later reviewed head replaces its context, rather than treating any retained `ci-do` entry in the same generation as current authority.\n\nAGENTS.md reference: [AGENTS.md:L127-L127](https://github.com/ducthangho/tra-luat/blob/25bd151727b5be2574594cf104658048816c4942/AGENTS.md#L127-L127)\n\nUseful? React with 👍 / 👎.\n\n<!-- codex-code-review-finding:v1 -->",
+  "created_at": "2026-10-27T07:28:39Z",
+  "updated_at": "2026-10-27T07:28:39Z",
+  "html_url": "https://github.com/ducthangho/tra-luat/pull/969#discussion_r4386084066",
+  "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/969",
+  "_links": {
+   "self": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4386084066"
+   },
+   "html": {
+    "href": "https://github.com/ducthangho/tra-luat/pull/969#discussion_r4386084066"
+   },
+   "pull_request": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/969"
+   }
+  },
+  "reactions": {
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4386084066/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "start_line": null,
+  "original_start_line": null,
+  "start_side": null,
+  "line": null,
+  "original_line": 2956,
+  "side": "RIGHT",
+  "author_association": "NONE",
+  "original_position": 144,
+  "position": 1,
+  "subject_type": "line",
+  "is_copilot_code_review": false,
+  "copilot_code_review_sources": []
+ },
+ {
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4386088060",
+  "pull_request_review_id": 5663555875,
+  "id": 4386088060,
+  "node_id": "PRRC_kwDOTNeRjc8AAAABBW5kfA",
+  "diff_hunk": "@@ -2916,6 +2934,109 @@ def cmd_accept(a, state_dir: Path) -> int:\n     return RC_OK\n \n \n+# --- #813 MAY-ADR-0054-b (`ops/specs/wp813-r2.md` + phần chung): `mo-lai` (approved_pending → running | cho_chu_kho) · `chu-kho-duyet`.\n+NGUYEN_NHAN_MO_LAI, CI_DO_THAT, PHAM_VI_CHECKPOINT = (\"ci-do\", \"connector\"), (\"failure\", \"timed_out\", \"startup_failure\"), (\"cho_phep_va\", \"cho_phep_day\")\n+CUA_DI_TIEP = (\"begin-attempt\", \"mo-lai\", \"chu-kho-duyet\")  # I5: cửa đưa packet đi tiếp mà bộ đếm same-failure đã chạm phải chặn\n+KHOA_CHECKPOINT = {\"packet_issue\": int, \"generation\": int, \"spec_hash\": str, \"head_sha\": str, \"pham_vi\": list, \"nguoi_quyet\": str, \"neo\": str}\n+\n+\n+def _quyen_hop_le(q, khoa: str, mien) -> bool:\n+    \"\"\"I6: quyền phái sinh (`mo_lai_tu`, `checkpoint_day`) neo (nguyên nhân | sha256 hiện vật, generation, sha) — hoặc vắng.\"\"\"\n+    return q is None or (type(q) is dict and set(q) == {khoa, \"generation\", \"sha\"} and type(q[khoa]) is str and (mien is None or q[khoa] in mien)\n+                         and type(q[\"generation\"]) is int and type(q[\"sha\"]) is str and bool(SHA_RE.match(q[\"sha\"])))\n+\n+\n+def cmd_mo_lai(a, state_dir: Path) -> int:\n+    \"\"\"M2 — `ci-do`: từ approved_pending (head = pending_sha), mọi check khai trong biên nhận là check ĐỎ THẬT trên head và connector không\n+    còn P0–P2 ⇒ running. `connector`: (endpoint, id) của biên nhận phủ BẰNG ĐÚNG P0–P2 connector trên head ⇒ cho_chu_kho, từ approved_pending\n+    hoặc từ running khi quyền mở lại hiện hành là `ci-do` cùng generation, cùng head. Slug từ bảng lớp biên nhận H (I11), cộng bộ đếm\n+    same-failure; quyền `mo_lai_tu` bị THAY (I6). Mọi đầu vào xác thực TRƯỚC `_xet_dung` và lần ghi duy nhất (I4/I5).\"\"\"\n+    st = _load(state_dir, a.packet)\n+    nc, ml, connector = st.get(\"ngu_canh_lease\"), st.get(\"mo_lai_tu\"), a.nguyen_nhan == \"connector\"\n+    tu_ci = connector and st[\"state\"] == \"running\" and ml is not None and ml[\"nguyen_nhan\"] == \"ci-do\" and ml[\"generation\"] == (nc or {}).get(\"generation\")",
+  "path": ".claude/dev/packet_loop.py",
+  "commit_id": "25bd151727b5be2574594cf104658048816c4942",
+  "original_commit_id": "25bd151727b5be2574594cf104658048816c4942",
+  "user": {
+   "login": "ducthangho",
+   "id": 12748935,
+   "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+   "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/ducthangho",
+   "html_url": "https://github.com/ducthangho",
+   "followers_url": "https://api.github.com/users/ducthangho/followers",
+   "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+   "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+   "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+   "repos_url": "https://api.github.com/users/ducthangho/repos",
+   "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "body": "Tái hiện được bằng CLI. Chuỗi bước: `mo-lai ci-do` trên A ⇒ `begin-attempt` + review B `changes_requested` ⇒ `running` mà `mo_lai_tu = (ci-do, 1, A)` còn nguyên ⇒ `mo-lai connector` trên A rc=0 ⇒ `cho_chu_kho`. Đây là P2 thật, mã ở head hiện hành `f8d7167` cũng giống hệt.\n\nHướng vá dự kiến: cửa `connector` từ `running` chỉ nhận khi **chưa có `begin_attempt` nào sau sự kiện `mo_lai` cuối**, tức chưa có công việc mới nào trên quyền mở lại ấy. Bản thân quyền `mo_lai_tu` vẫn giữ để #816 tiêu thụ ở cửa đẩy `va-ci`. Kèm một ca cho đúng chuỗi trên và một đột biến bỏ điều kiện.\n\nTheo lease, connector báo P2 thì executor phải dừng hỏi chủ kho, nên bản vá này **chưa** đẩy. Tôi đã hỏi trên #813.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+  "created_at": "2026-10-27T07:29:23Z",
+  "updated_at": "2026-10-27T07:29:23Z",
+  "html_url": "https://github.com/ducthangho/tra-luat/pull/969#discussion_r4386088060",
+  "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/969",
+  "_links": {
+   "self": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4386088060"
+   },
+   "html": {
+    "href": "https://github.com/ducthangho/tra-luat/pull/969#discussion_r4386088060"
+   },
+   "pull_request": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/969"
+   }
+  },
+  "reactions": {
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4386088060/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "start_line": null,
+  "original_start_line": null,
+  "start_side": null,
+  "line": null,
+  "original_line": 2956,
+  "side": "RIGHT",
+  "in_reply_to_id": 4386084066,
+  "author_association": "OWNER",
+  "original_position": 144,
+  "position": 1,
+  "subject_type": "line",
+  "is_copilot_code_review": false,
+  "copilot_code_review_sources": []
+ },
+ {
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4386332414",
+  "pull_request_review_id": 5663899064,
+  "id": 4386332414,
+  "node_id": "PRRC_kwDOTNeRjc8AAAABBXIe_g",
+  "diff_hunk": "@@ -2916,6 +2934,109 @@ def cmd_accept(a, state_dir: Path) -> int:\n     return RC_OK\n \n \n+# --- #813 MAY-ADR-0054-b (`ops/specs/wp813-r2.md` + phần chung): `mo-lai` (approved_pending → running | cho_chu_kho) · `chu-kho-duyet`.\n+NGUYEN_NHAN_MO_LAI, CI_DO_THAT, PHAM_VI_CHECKPOINT = (\"ci-do\", \"connector\"), (\"failure\", \"timed_out\", \"startup_failure\"), (\"cho_phep_va\", \"cho_phep_day\")\n+CUA_DI_TIEP = (\"begin-attempt\", \"mo-lai\", \"chu-kho-duyet\")  # I5: cửa đưa packet đi tiếp mà bộ đếm same-failure đã chạm phải chặn\n+KHOA_CHECKPOINT = {\"packet_issue\": int, \"generation\": int, \"spec_hash\": str, \"head_sha\": str, \"pham_vi\": list, \"nguoi_quyet\": str, \"neo\": str}\n+\n+\n+def _quyen_hop_le(q, khoa: str, mien) -> bool:\n+    \"\"\"I6: quyền phái sinh (`mo_lai_tu`, `checkpoint_day`) neo (nguyên nhân | sha256 hiện vật, generation, sha) — hoặc vắng.\"\"\"\n+    return q is None or (type(q) is dict and set(q) == {khoa, \"generation\", \"sha\"} and type(q[khoa]) is str and (mien is None or q[khoa] in mien)\n+                         and type(q[\"generation\"]) is int and type(q[\"sha\"]) is str and bool(SHA_RE.match(q[\"sha\"])))\n+\n+\n+def cmd_mo_lai(a, state_dir: Path) -> int:\n+    \"\"\"M2 — `ci-do`: từ approved_pending (head = pending_sha), mọi check khai trong biên nhận là check ĐỎ THẬT trên head và connector không\n+    còn P0–P2 ⇒ running. `connector`: (endpoint, id) của biên nhận phủ BẰNG ĐÚNG P0–P2 connector trên head ⇒ cho_chu_kho, từ approved_pending\n+    hoặc từ running khi quyền mở lại hiện hành là `ci-do` cùng generation, cùng head. Slug từ bảng lớp biên nhận H (I11), cộng bộ đếm\n+    same-failure; quyền `mo_lai_tu` bị THAY (I6). Mọi đầu vào xác thực TRƯỚC `_xet_dung` và lần ghi duy nhất (I4/I5).\"\"\"\n+    st = _load(state_dir, a.packet)\n+    nc, ml, connector = st.get(\"ngu_canh_lease\"), st.get(\"mo_lai_tu\"), a.nguyen_nhan == \"connector\"\n+    tu_ci = connector and st[\"state\"] == \"running\" and ml is not None and ml[\"nguyen_nhan\"] == \"ci-do\" and ml[\"generation\"] == (nc or {}).get(\"generation\")",
+  "path": ".claude/dev/packet_loop.py",
+  "commit_id": "25bd151727b5be2574594cf104658048816c4942",
+  "original_commit_id": "25bd151727b5be2574594cf104658048816c4942",
+  "user": {
+   "login": "ducthangho",
+   "id": 12748935,
+   "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+   "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/ducthangho",
+   "html_url": "https://github.com/ducthangho",
+   "followers_url": "https://api.github.com/users/ducthangho/followers",
+   "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+   "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+   "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+   "repos_url": "https://api.github.com/users/ducthangho/repos",
+   "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "body": "Đã vá ở `be88caf`: cửa `connector` từ `running` đòi chưa có `begin_attempt` sau `mo_lai` cuối. Có ca `r813_quyen_ci_sau_luot_moi` và đột biến `r813_quyen_ci_qua_luot_moi`. Codex offline lượt 6 đo lại đúng chuỗi CLI ở trên: candidate trả rc=8, state nguyên byte.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+  "created_at": "2026-10-27T08:11:50Z",
+  "updated_at": "2026-10-27T08:11:50Z",
+  "html_url": "https://github.com/ducthangho/tra-luat/pull/969#discussion_r4386332414",
+  "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/969",
+  "_links": {
+   "self": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4386332414"
+   },
+   "html": {
+    "href": "https://github.com/ducthangho/tra-luat/pull/969#discussion_r4386332414"
+   },
+   "pull_request": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/969"
+   }
+  },
+  "reactions": {
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4386332414/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "start_line": null,
+  "original_start_line": null,
+  "start_side": null,
+  "line": null,
+  "original_line": 2956,
+  "side": "RIGHT",
+  "in_reply_to_id": 4386084066,
+  "author_association": "OWNER",
+  "original_position": 144,
+  "position": 1,
+  "subject_type": "line",
+  "is_copilot_code_review": false,
+  "copilot_code_review_sources": []
+ }
+]

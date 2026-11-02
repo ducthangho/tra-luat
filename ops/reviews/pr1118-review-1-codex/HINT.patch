@@ -1,0 +1,25 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+# Gợi ý cho ba finding; chỉ thu hẹp lời khai, chưa bổ sung ba mốc CI còn thiếu.
+--- ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml
++++ ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml
+@@ -201,12 +201,14 @@
+     run_id: 41285898441
+     trang_thai: measured
+     do_duoc: >-
+-      measured — readback-run-41285898441.json: event push, head_sha 4397ee6, status completed, conclusion CANCELLED,
+-      readback-jobs-41285898441.json (filter=all) total_count 0: run bi thay the truoc khi co job nao (push master tiep theo
+-      cua #1108/#1112/#1109), KHONG phai test do. Run ke tiep da chay tron la 41290009265 tren 3bdd987 (merge #1109), ma 4397ee6
+-      la to tien (`git merge-base --is-ancestor`): readback-run-41290009265.json completed/success; readback-jobs-41290009265.json
+-      (filter=all) 23 job, 23 success, ca 23 nhan ubuntu-latest, runner_id khac 0. Run nay do CAY 3bdd987, khong phai rieng
+-      4397ee6; ba PR xen giua chi them spec/ops, khong dung tep ho so nay hay ops/vm/. Chi Ubuntu.
++      measured — readback-run-41285898441.json: event push, head_sha 4397ee6, run_attempt 1, status completed,
++      conclusion cancelled; readback-jobs-41285898441.json (filter=all) total_count 0. Khong co job test that bai duoc
++      ghi nhan; nguyen nhan huy: not_measured (REST run/jobs khong ghi ly do). Mot run thanh cong sau do la 41290009265:
++      readback-run-41290009265.json completed/success, run_attempt 1, REST head_sha 3bdd987 (merge #1109), ma 4397ee6 la
++      to tien (`git merge-base --is-ancestor`); readback-jobs-41290009265.json (filter=all) 23 job, 23 success, ca 23 nhan
++      ubuntu-latest, runner_id khac 0. Day la metadata Run; Checkout, Workflow definition va Gate output cua run nay
++      chua do (not_measured), nen chua khang dinh cay thuc chay. Ba PR xen giua #1108/#1112/#1109 chi them bon tep
++      ops/specs/, khong dung tep ho so nay hay ops/vm/. Chi Ubuntu.
+   - ten: full gate 8 buoc tren VM Windows tra-luat-win, merge 3dfb973 (theo yeu cau chu kho "do tren Windows")
+     trang_thai: thuat_lai
+     do_duoc: >-

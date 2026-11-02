@@ -40,8 +40,32 @@ cai_deb() {
   chmod +x "$BIN/$lenh"
 }
 
+# ghi_bashrc: các dòng shell của agent cần, mỗi dòng đúng MỘT lần (chạy lại setup không nhân bản).
+# Đo 27-10-2026: lúc agent chạy task, Codex Cloud gắn $HOME CHỈ ĐỌC — `_config_backup_dir()` mặc định là
+# `${LOCALAPPDATA:-$HOME}/tra-luat/_config_backups` nên mkdir ném EROFS và selftest đỏ đúng
+# r202_profile_delete_backup_ngoai_cay (1730/1731). Trỏ LOCALAPPDATA ra thư mục tạm GHI ĐƯỢC, NGOÀI cây kho
+# (luật r202 vẫn giữ); tái hiện tại chỗ với HOME chỉ đọc: thiếu dòng này 1730/1731, có thì 1731/1731.
+#
+# Các dòng đặt ĐẦU tệp, không nối cuối (finding P2 Codex trên PR #984, tái hiện được): ~/.bashrc mặc định
+# có `[ -z "$PS1" ] && return`, nên dòng nối cuối KHÔNG BAO GIỜ tới được với shell không tương tác của agent.
+# Bản cũ (đã nối cuối từ lượt setup trước) bị gỡ rồi đặt lại ở đầu; chạy lại cho ra đúng cùng một tệp.
+ghi_bashrc() {
+  local f="$HOME/.bashrc" tam rc=0
+  local khoi=('export PATH="$HOME/.local/bin:$PATH"'
+              'export LOCALAPPDATA="${LOCALAPPDATA:-${TMPDIR:-/tmp}/tra-luat-localappdata}"')
+  tam="$(mktemp "$HOME/.bashrc.tra-luat.XXXXXX")"
+  printf '%s\n' "${khoi[@]}" > "$tam"
+  if [ -f "$f" ]; then
+    # grep -v: rc 1 = không còn dòng nào khác (hợp lệ); rc 2 = KHÔNG ĐỌC ĐƯỢC ⇒ huỷ, đừng ghi đè mất nội dung.
+    grep -vxF -f <(printf '%s\n' "${khoi[@]}") "$f" >> "$tam" || rc=$?
+    [ "$rc" -le 1 ] || { rm -f "$tam"; echo "ghi_bashrc: không đọc được $f (rc=$rc)" >&2; return 1; }
+    chmod --reference="$f" "$tam"
+  fi
+  mv -f "$tam" "$f"
+}
+
 main() {
-  local PY d dong t GP
+  local PY d t GP
   PY="$(command -v python3 || command -v python)"
   mkdir -p "$BIN"
   export PATH="$BIN:$PATH"
@@ -51,6 +75,9 @@ main() {
   "$PY" -m pip install --quiet jsonschema==4.26.0 ruff==0.15.15 shellcheck-py
   d="$("$PY" -c 'import sysconfig; print(sysconfig.get_path("scripts"))')"
   [ -x "$d/shellcheck" ] && ln -sf "$d/shellcheck" "$BIN/shellcheck"
+
+  # 1b. Credential agent (wp1039): sau pip (bootstrap cần gói); luôn rc 0, đúng một dòng `agent_creds:`; không cài agy (Q5).
+  "$PY" ops/cloud_agent_creds.py nap || true
 
   # 2. Nhị phân hệ thống: pdftotext (BẮT BUỘC cho đường nạp PDF), rg (bắt buộc cho agent).
   cai_deb poppler-utils pdftotext
@@ -62,9 +89,9 @@ main() {
   while IFS= read -r d; do [ -x "$d/actionlint" ] && ln -sf "$d/actionlint" "$BIN/actionlint"; done < "$GP"
   rm -f "$GP"
 
-  # 4. PATH bền cho shell của agent + core.abbrev = 7 cho gate golden/determinism (CLAUDE.md, Quy ước deploy mục 6).
-  dong='export PATH="$HOME/.local/bin:$PATH"'
-  grep -qxF "$dong" "$HOME/.bashrc" 2>/dev/null || printf '%s\n' "$dong" >> "$HOME/.bashrc"
+  # 4. PATH + LOCALAPPDATA bền cho shell của agent + core.abbrev = 7 cho gate golden/determinism
+  #    (CLAUDE.md, Quy ước deploy mục 6).
+  ghi_bashrc
   git config --global core.abbrev 7
 
   # 5. Bằng chứng DƯƠNG — đừng tin rc của trình cài. Thiếu thứ nào thì script ĐỎ.

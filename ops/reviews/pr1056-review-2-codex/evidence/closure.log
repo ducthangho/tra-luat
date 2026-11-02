@@ -1,0 +1,23 @@
+$ git checkout --force --detach 1aae17b5534f78767856f93f7d6089adda224f21 rc 0
+(empty)
+HEAD is now at 1aae17b ops/reviews: bien nhan v2 + hang muc luc/canh bao README cho 2 luot cross-review PR #1050
+$ patch --dry-run --fuzz=0 -p0 -i /tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/rv1056-r2/verdict-cu/luot1-HINT.patch rc 0
+checking file ops/reviews/pr1050-review-1-codex-verdict.receipt.yaml
+checking file ops/reviews/pr1050-review-2-codex-verdict.receipt.yaml
+
+$ patch --fuzz=0 -p0 -i /tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/rv1056-r2/verdict-cu/luot1-HINT.patch rc 0
+patching file ops/reviews/pr1050-review-1-codex-verdict.receipt.yaml
+patching file ops/reviews/pr1050-review-2-codex-verdict.receipt.yaml
+
+$ git diff --exit-code 047eaa4d26a5bb1e702199c870f42480aebed673 -- rc 0
+(empty)
+$ git checkout --force --detach 047eaa4d26a5bb1e702199c870f42480aebed673 rc 0
+(empty)
+Previous HEAD position was 1aae17b ops/reviews: bien nhan v2 + hang muc luc/canh bao README cho 2 luot cross-review PR #1050
+HEAD is now at 047eaa4 ops/reviews: va cross-review #1056 luot 1 — review_class standard ngoai tu vung -> sensitive
+ROUND 1 DIFF_PATH_COUNT 32 OUTSIDE [] CLASSIFIER sensitive DECLARED sensitive EFFECTIVE sensitive
+CHANGED_KEYS ['review_class', 'effective_review_class', 'review_class_ghi_chu']
+ROUND 2 DIFF_PATH_COUNT 33 OUTSIDE [] CLASSIFIER sensitive DECLARED sensitive EFFECTIVE sensitive
+CHANGED_KEYS ['review_class', 'effective_review_class', 'review_class_ghi_chu']
+$ git diff --exit-code rc 0
+(empty)

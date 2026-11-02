@@ -1,0 +1,13 @@
+luc: 2026-10-31T15:05:08Z (lease wp1039 rut han con 2026-10-31T14:30:00Z, commit c4c03ef5 tren ops/cap-lease-1039-g1)
+so ref: ls-remote 726 / cuc bo 727; thieu cuc bo (comm -23) = 0; thua cuc bo = agent/windows-local-may-chu-kho-r1-claude (nhanh da xoa tren may chu, vo hai)
+chuan bi: git branch -f master refs/remotes/origin/master (lan chay dau rc=12 NHÁNH_CỤC_BỘ_TỤT_SAU master 0/114)
+lenh: python3 ops/lease_publish.py ai-dang-giu --root . <duong_dan>; dau ra day du tung duong dan o cac tep *.txt cung thu muc
+---
+.claude/hooks/session-start.sh | wp1039: 1 dong HẾT_HẠN | NGƯỜI_GIỮ 0: không có | rc=0
+ops/codex_cloud_setup.sh | wp1039: 1 dong HẾT_HẠN | NGƯỜI_GIỮ 0: không có | rc=0
+ops/cloud_agent_creds.py | wp1039: 1 dong HẾT_HẠN | NGƯỜI_GIỮ 0: không có | rc=0
+ops/cloud_agent_creds_test.py | wp1039: 1 dong HẾT_HẠN | NGƯỜI_GIỮ 0: không có | rc=0
+ops/codex_cloud_setup_test.py | wp1039: 1 dong HẾT_HẠN | NGƯỜI_GIỮ 0: không có | rc=0
+.claude/dev/ci_dang_ky_test.py | wp1039: 1 dong HẾT_HẠN | NGƯỜI_GIỮ 0: không có | rc=0
+references/RUNBOOK.md | wp1039: 1 dong HẾT_HẠN | NGƯỜI_GIỮ 0: không có | rc=0
+RELEASE_MANIFEST.json | wp1039: 1 dong HẾT_HẠN | NGƯỜI_GIỮ 1: wp1052-r5-g5-claude | rc=11

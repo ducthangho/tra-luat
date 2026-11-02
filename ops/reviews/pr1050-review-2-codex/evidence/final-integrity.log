@@ -1,0 +1,22 @@
+cay-kho git rev-parse HEAD HEAD^{tree} rc 0 stdout f37b5195978f1fe35b9cb55b6f79a2e09d165af0
+235444656cad85bd969f99907b1dbeb4007d961a stderr (empty)
+cay-kho git status --short --untracked-files=all --ignored=matching rc 0 stdout (empty) stderr (empty)
+cay-kho git diff --exit-code rc 0 stdout (empty) stderr (empty)
+cay-kho git diff --cached --exit-code rc 0 stdout (empty) stderr (empty)
+cay-kho git diff --check rc 0 stdout (empty) stderr (empty)
+cay-kho git config core.abbrev rc 0 stdout 7 stderr (empty)
+cay-kho ALL_PR_PATHS_EQUAL_EXACT_HEAD 33 / 33
+cay-kho SCOPE_ONLY_OPS_REVIEWS_LAND True
+cay-kho NUMSTAT 33 files changed, 11665 insertions(+)
+rv1050-r2-copy git rev-parse HEAD HEAD^{tree} rc 0 stdout f37b5195978f1fe35b9cb55b6f79a2e09d165af0
+235444656cad85bd969f99907b1dbeb4007d961a stderr (empty)
+rv1050-r2-copy git status --short --untracked-files=all --ignored=matching rc 0 stdout (empty) stderr (empty)
+rv1050-r2-copy git diff --exit-code rc 0 stdout (empty) stderr (empty)
+rv1050-r2-copy git diff --cached --exit-code rc 0 stdout (empty) stderr (empty)
+rv1050-r2-copy git diff --check rc 0 stdout (empty) stderr (empty)
+rv1050-r2-copy git config core.abbrev rc 0 stdout 7 stderr (empty)
+rv1050-r2-copy ALL_PR_PATHS_EQUAL_EXACT_HEAD 33 / 33
+rv1050-r2-copy SCOPE_ONLY_OPS_REVIEWS_LAND True
+rv1050-r2-copy NUMSTAT 33 files changed, 11665 insertions(+)
+PROMPT_SHA256 PROMPT.md 6762 23a3a3f8be4b87f91bf897b1656add36826168e7dd9253f8ef516bdeba7fd7a5
+PROMPT_SHA256 run/8c095c6b/prompt.snapshot 6762 23a3a3f8be4b87f91bf897b1656add36826168e7dd9253f8ef516bdeba7fd7a5

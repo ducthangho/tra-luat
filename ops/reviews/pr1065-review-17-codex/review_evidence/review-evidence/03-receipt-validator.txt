@@ -1,0 +1,7 @@
+  KHÔNG ĐO ĐƯỢC  lease-publish-windows-do-review-r1-codex.receipt.yaml: KHÔNG ĐO ĐƯỢC `reviewed_sha` 4bc94325e647… — object không tra được ở cây này (clone nông / chưa fetch), KHÔNG kết luận là bịa
+  KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] lease-publish-windows-do-review-r1-codex.receipt.yaml: `reviewed_sha_to_tien` — OID `4bc9432` không tra được commit, KHÔNG kết luận được quan hệ tổ tiên
+  KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] lease-publish-windows-do-review-r1-codex.receipt.yaml: `verdict_usage_caveats[1].mo_ta` — OID `4bc9432` không tra được commit, KHÔNG kết luận được quan hệ tổ tiên
+
+bien_nhan_v2: 268 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 3 KHÔNG ĐO ĐƯỢC · tổng 321
+câu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0
+TỔNG: KHÔNG ĐO ĐƯỢC

@@ -1,0 +1,6 @@
+{"name": "head_empty", "rc": 0, "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU", "tasks": 1, "nodes": 4, "bad_nodes": 0}
+{"name": "no_reset_empty", "rc": 0, "error": "Access to the path '/tmp/cncc-dk-399571b2b78849b595a71645bb2887f3/PF/tra-luat-ops/cong_cu.yaml' is denied.", "tasks": 0, "nodes": 4, "bad_nodes": 0}
+{"name": "after_copy_empty", "rc": 0, "error": "Access to the path '/tmp/cncc-dk-0f832ad51cb34b23b5ca1f807faa2598/PF/tra-luat-ops/requirements.txt' is denied.", "tasks": 0, "nodes": 4, "bad_nodes": 0}
+{"name": "head_nested", "rc": 0, "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU", "tasks": 1, "nodes": 9, "bad_nodes": 0}
+{"name": "no_T_nested_original_model", "rc": 0, "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU", "tasks": 1, "nodes": 9, "bad_nodes": 0}
+{"name": "no_T_nested_recursive_model", "rc": 0, "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU", "tasks": 1, "nodes": 9, "bad_nodes": 3}

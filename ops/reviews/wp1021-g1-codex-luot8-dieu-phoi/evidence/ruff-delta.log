@@ -1,0 +1,1 @@
+{"base_count": 1, "head_count": 1, "added": [], "removed": [], "diagnostics": [["ops/bien_nhan_v2_test.py", "F541", "f-string without any placeholders", "dung(lam, f\"KHÔNG ĐO ĐƯỢC: không có bề mặt nào của provider KHÁC để mượn thử\")"]]}

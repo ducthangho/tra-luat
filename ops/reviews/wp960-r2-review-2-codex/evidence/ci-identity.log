@@ -1,0 +1,6 @@
+parents=2618eb4e59ab296e5dd8d2bc8543fe8e7e966b40 ae0d06c23fb777545fd7547a07d9f368e4122f49
+merge=31a06857cf9adc3406c32c18da7357e18e3ec5da
+tree=7312e5d65f57740d8673b5491357532c2b09c9a9
+shallow=false
+refs=refs/remotes/origin/agent/wp960-g1-claude ae0d06c23fb777545fd7547a07d9f368e4122f49
+refs/remotes/origin/master 2618eb4e59ab296e5dd8d2bc8543fe8e7e966b40

@@ -1,0 +1,13 @@
+{
+  "cwd": "/tmp/claude-0/rv/pr1048-review-3/cay-kho",
+  "argv": [
+    "git",
+    "rev-parse",
+    "--is-shallow-repository"
+  ],
+  "rc": 0,
+  "stdout_file": "full-clone.stdout",
+  "stderr_file": "full-clone.stderr",
+  "stdout_bytes": 6,
+  "stderr_bytes": 0
+}

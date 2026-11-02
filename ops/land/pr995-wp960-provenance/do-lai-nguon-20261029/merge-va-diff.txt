@@ -1,0 +1,16 @@
+# do 2026-10-29 tren clone day du (khong nong); git 2.43.0
+merge 79dbaf443f90daece751d9ab2537796bbd6084bf tree b95fb2108ab139c9a31f6f107797b00aa704ab34
+cha1 ef34d88838bc125727670f494b15213b6c6f0c8d
+cha2 6dca85f463c6ce551eb8c27ff2d94b7a102e2fdf (= head 6dca85f463c6ce551eb8c27ff2d94b7a102e2fdf)
+merge-base(cha1, head) ef34d88838bc125727670f494b15213b6c6f0c8d
+diff cha1..merge == diff merge-base..head: BYTE KHOP (cmp rc=0)
+--numstat cha1..merge
+297	193	ops/bien_nhan_v2.py
+665	104	ops/bien_nhan_v2_test.py
+--numstat base lease 4488444..merge (toan bo r2 + master troi)
+297	193	ops/bien_nhan_v2.py
+665	104	ops/bien_nhan_v2_test.py
+blob ops/bien_nhan_v2.py merge=83ba1d37a902b7064f95e2efb2a2d0f197a81733 head=83ba1d37a902b7064f95e2efb2a2d0f197a81733
+blob ops/bien_nhan_v2_test.py merge=86959fff94a3351294e4e793ef5675f5cfa1c265 head=86959fff94a3351294e4e793ef5675f5cfa1c265
+blob ops/bien_nhan_v2.py tai 057abc8 (PR #1005) = 83ba1d37a902b7064f95e2efb2a2d0f197a81733
+tree 6dca85f = b95fb2108ab139c9a31f6f107797b00aa704ab34

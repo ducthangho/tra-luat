@@ -1,0 +1,17 @@
+# do 2026-10-30 17:37:30Z trong phien session_015GtxrYjGJtmjF3eT1nCSG9
+$ git cat-file -p b29da0b | head -4
+tree 24a37bebf90e5f8e2dd3d4a34e842f2e2f9c6a39
+parent 8cdb15a786304bab084b43c8b30c127ae87e2594
+parent 91466322f705658ed51b80c7c152f6b77f4f90c6
+author ducthangho <ducthangho@gmail.com> 1793381330 +0700
+$ git rev-parse 9146632^{tree}
+c20eace3f4aacea3f33afc5861688cb94d64cf3d
+$ git diff --name-only 757bde5 9146632
+ops/bien_nhan_v2_test.py
+$ git diff 757bde5 9146632 | sha256sum
+40b6d80f2c0140953cc8712362138de059503982cce0e736b9a196b892ad2198  -
+$ git diff b29da0b^1 b29da0b | sha256sum
+40b6d80f2c0140953cc8712362138de059503982cce0e736b9a196b892ad2198  -
+$ git diff --stat b29da0b^1 b29da0b
+ ops/bien_nhan_v2_test.py | 124 +++++++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 120 insertions(+), 4 deletions(-)

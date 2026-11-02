@@ -1,0 +1,13 @@
+diff --git a/docs/PROTOCOL_DA_PHIEN.md b/docs/PROTOCOL_DA_PHIEN.md
+index c51103f..e5c8b5d 100644
+--- a/docs/PROTOCOL_DA_PHIEN.md
++++ b/docs/PROTOCOL_DA_PHIEN.md
+@@ -1012,7 +1012,7 @@ chạy cùng legacy harness. Test-ID registry dùng chung phải lập chỉ m
+ `wp<issue>_<slug>` của fragment và ID trong bundled module; resolver tài liệu cùng duplicate gate đọc registry
+ này và có negative fixture cho tên bịa. Worker dùng đúng land generator để sinh bundled candidate trong thư mục
+ tạm ngoài repo, kiểm byte/topology nhưng không sửa module land-only trong diff.
+-Chạy test thêm trên máy Windows local của chủ kho, khi máy online, theo `ADR-0057`.
++Quy ước sử dụng máy Windows local của chủ kho nằm tại `ADR-0057`.
+ 
+ Các thuật ngữ trạng thái không dùng thay nhau:
+ 

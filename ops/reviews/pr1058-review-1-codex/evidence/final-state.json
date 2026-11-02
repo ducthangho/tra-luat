@@ -1,0 +1,49 @@
+{
+  "head": {
+    "command": "git rev-parse HEAD",
+    "rc": 0,
+    "stdout": "5dd347c67da680099e292acf02da7e363a0559bd\n",
+    "stderr": ""
+  },
+  "tree": {
+    "command": "git rev-parse HEAD^{tree}",
+    "rc": 0,
+    "stdout": "7176a9306859b0b772d49d6ddf9d5ddca0cf8167\n",
+    "stderr": ""
+  },
+  "base": {
+    "command": "git merge-base HEAD origin/master",
+    "rc": 0,
+    "stdout": "afc82f6d7447eb76fc8adbe46c1be90be88d331f\n",
+    "stderr": ""
+  },
+  "abbrev": {
+    "command": "git config core.abbrev",
+    "rc": 0,
+    "stdout": "7\n",
+    "stderr": ""
+  },
+  "status": {
+    "command": "git status --porcelain=v1 --untracked-files=all --ignored",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "working_diff": {
+    "command": "git diff --exit-code",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "index_diff": {
+    "command": "git diff --cached --exit-code",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "origin_branches_excluding_HEAD": 717,
+  "DIFF.patch_equal": true,
+  "DIFF.patch_sha256": "a8e3d2e479804d07751849d0dc4f74a2ae4c7d5613473833a8a3a9470a1ed8da",
+  "changed_count": 51,
+  "outside_scope": []
+}

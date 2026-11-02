@@ -1,0 +1,10 @@
+do luc 2026-10-29T14:47:07Z
+ls-remote heads: 696, for-each-ref: 696, thieu: 0
+$ python ops/lease_publish.py ai-dang-giu --root . ops/kiem_ho_so_land.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0
+$ python ops/lease_publish.py ai-dang-giu --root . ops/kiem_ho_so_land_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0

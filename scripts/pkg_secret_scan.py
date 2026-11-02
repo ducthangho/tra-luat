@@ -36,8 +36,9 @@ MAX_BYTES = 2 * 1024 * 1024   # secrets không nằm trong tệp khổng lồ; t
 def _is_scannable(f: pathlib.Path) -> bool:
     if f.suffix.lower() in TEXT_SUFFIXES:
         return True
-    if f.suffix != "":            # có mở rộng nhưng không thuộc danh sách text ⇒ bỏ
-        return False
+    # wp1030 (bơm GOCSPX-… vào a.log/b.patch/c.csv: bản cũ chỉ báo d.txt) — fix: đuôi LẠ đi cùng nhánh với
+    # tệp không đuôi. Mặc định là QUÉT; chỉ bỏ theo thuộc tính ĐO được (quá trần, có NUL ⇒ nhị phân), không
+    # bỏ theo tên đuôi — danh sách đuôi không bao giờ đủ, lần trước mù `.env`, lần này mù `.log` `.patch`.
     try:
         if f.stat().st_size > MAX_BYTES:
             return False

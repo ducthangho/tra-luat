@@ -1,0 +1,5 @@
+Đã ghi [VERDICT.md](/tmp/claude-0/rv/pr1048-review-3/VERDICT.md).
+
+Kết luận: **approved**, 0 finding P0–P3 trên đúng SHA `6f23a4e…`. Ba kiểm tra bắt buộc đều đạt. Không sửa `cay-kho/`.
+
+Hành vi PowerShell được ghi rõ **KHÔNG ĐO ĐƯỢC**.

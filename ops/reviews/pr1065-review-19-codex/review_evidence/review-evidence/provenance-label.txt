@@ -1,0 +1,10 @@
+ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml:9: # NHAN: measured = do lai trong phien ghi so tu readback tho (ten tep ghi kem); thuat_lai = loi khai cua phien, KHONG tai
+ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml:11: # Readback tho: ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/ (SHA256SUMS.txt). Moi phep do REST: GET
+Measured clause cites: readback-review-threads-1065.json
+Retained source declaration: Trich cac truong dinh danh/trang thai tu phan hoi MCP (than comment luoc bo); totalCount=1, hasNextPage=false.
+Retained source observed_at: 2026-10-31T14:07:20Z
+Thread resolved fact remains supported; raw MCP response is not retained by this extracted JSON
+Countercheck current global raw-source definition: CONTRADICTS retained extraction note
+Countercheck narrowed header in memory: no raw-source overclaim; YAML semantic fields unchanged
+Scope: comments/header were excluded by the 15-scalar YAML walk; this check reads the entire source text
+PROVENANCE FORMAT LABEL: 1 overclaim class; raw/extract distinction, not absence of thread evidence or an assertion that is_resolved is false

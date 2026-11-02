@@ -1,0 +1,112 @@
+STATIC CALLS (head):
+ops/cloud_agent_creds_test.py:51 subprocess.run ['git', '-C', str(HERE.parent), 'show', f'{base}:{path}']
+ops/cloud_agent_creds_test.py:73 subprocess.run [sys.executable, '-B', str(t / 'ops' / 'cloud_agent_creds.py'), *argv]
+ops/cloud_agent_creds_test.py:145 subprocess.Popen ['sh', '-c', 'sleep 30 & echo $!; sleep 30']
+ops/cloud_agent_creds_test.py:146 subprocess.Popen [sys.executable, '-c', 'raise SystemExit(7)']
+ops/cloud_agent_creds_test.py:151 subprocess.Popen ['sleep', '30']
+ops/cloud_agent_creds_test.py:317 subprocess.run [bash, '-c', 'set -euo pipefail; PY="$1"; GOC="$2"\n' + than, 'h2', str(py), t]
+ops/cloud_agent_creds_test.py:538 subprocess.run [_node(), str(js)]
+ops/cloud_agent_creds_test.py:570 subprocess.run [_node(), '--check']
+ops/cloud_agent_creds_test.py:587 subprocess.run [bash, '-c', _lenh_stop()['command']]
+ops/cloud_agent_creds_test.py:700 subprocess.run [sys.executable, '-B', str(Path(__file__).resolve()), '--mot-ca', ten_ca]
+TL_GIA:4 subprocess.Popen [sys.executable, '-c', CHAU, os.environ['CAC_NHAT_KY'] + '.chau']
+TL_GIA.CHAU:1 subprocess.Popen [sys.executable, '-c', 'import time; time.sleep(60)']
+ops/cloud_agent_creds.py:84 subprocess.Popen [sys.executable, str(tl), 'bootstrap', '--env', 'code', '--no-nlm']
+ops/cloud_agent_creds.py:106 subprocess.run ['ldd', '/bin/ls']
+ops/cloud_agent_creds.py:122 subprocess.Popen [str(agy), '--version']
+
+OBSERVED base rows=918 actual_spawns=595
+site | kind | count | max_UTF16_incl_NUL | max_arg_chars | max_input_bytes
+<string>:1:<module> | spawn | 14 | 50 | 27 | 0
+bash_nen.py:98:_chay | run | 24 | 252 | 186 | 0
+bash_nen.py:98:_chay | spawn | 24 | 252 | 186 | 0
+cloud_agent_creds.py:82:nap | spawn | 1 | 83 | 35 | 0
+cloud_agent_creds.py:84:nap | spawn | 69 | 105 | 35 | 0
+cloud_agent_creds.py:122:_ban_khop | spawn | 24 | 52 | 41 | 0
+cloud_agent_creds_test.py:51:_git_base | run | 12 | 190 | 105 | 0
+cloud_agent_creds_test.py:51:_git_base | spawn | 12 | 190 | 105 | 0
+cloud_agent_creds_test.py:73:chay_nap | run | 81 | 76 | 46 | 0
+cloud_agent_creds_test.py:73:chay_nap | spawn | 81 | 76 | 46 | 0
+cloud_agent_creds_test.py:145:a11_subreaper_va_esrch | spawn | 26 | 37 | 28 | 0
+cloud_agent_creds_test.py:146:a11_subreaper_va_esrch | spawn | 26 | 42 | 19 | 0
+cloud_agent_creds_test.py:151:a11_subreaper_va_esrch | spawn | 11 | 9 | 5 | 0
+cloud_agent_creds_test.py:317:h2_khoi_song_sot_set_e | run | 9 | 542 | 462 | 0
+cloud_agent_creds_test.py:317:h2_khoi_song_sot_set_e | spawn | 9 | 542 | 462 | 0
+cloud_agent_creds_test.py:537:chay_b | run | 28 | 87699 | 87545 | 0
+cloud_agent_creds_test.py:537:chay_b | spawn | 28 | 87699 | 87545 | 0
+cloud_agent_creds_test.py:569:p3b7_ban_va_nhanh_case | run | 2 | 111 | 102 | 226231
+cloud_agent_creds_test.py:569:p3b7_ban_va_nhanh_case | spawn | 2 | 111 | 102 | 0
+cloud_agent_creds_test.py:586:p3s2_stop_chay_that | run | 3 | 294 | 258 | 0
+cloud_agent_creds_test.py:586:p3s2_stop_chay_that | spawn | 3 | 294 | 258 | 0
+cloud_agent_creds_test.py:699:chay_dot_bien | run | 163 | 212 | 135 | 0
+cloud_agent_creds_test.py:699:chay_dot_bien | spawn | 163 | 212 | 135 | 0
+db_A9_bo_hau_kiem_nhom_cloud_agent_creds.py:84:nap | spawn | 1 | 78 | 30 | 0
+db_A9_mat_log_khi_khong_dung_duoc_cloud_agent_creds.py:84:nap | spawn | 1 | 78 | 30 | 0
+db_B1_khong_ghi_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+db_B2_bo_kiem_sha_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+db_B4_bien_chi_chan_so_cloud_agent_creds.py:122:_ban_khop | spawn | 6 | 52 | 41 | 0
+db_B4_loi_giai_ma_thoat_khoi_kiem_ban_cloud_agent_creds.py:122:_ban_khop | spawn | 4 | 52 | 41 | 0
+db_B4_qua_han_chi_giet_cha_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+db_B4_so_chuoi_con_cloud_agent_creds.py:122:_ban_khop | spawn | 5 | 52 | 41 | 0
+db_B5_roi_ve_linux_amd64_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+db_B6_extractall_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+db_B7_goi_agy_install_cloud_agent_creds.py:122:_ban_khop | spawn | 2 | 52 | 41 | 0
+db_B7_goi_agy_install_cloud_agent_creds.py:159:cai_dat_agy | run | 1 | 50 | 41 | 0
+db_B7_goi_agy_install_cloud_agent_creds.py:159:cai_dat_agy | spawn | 1 | 50 | 41 | 0
+db_C1_ghi_de_ca_tep_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+db_C2_ghi_de_khi_parse_loi_cloud_agent_creds.py:122:_ban_khop | spawn | 2 | 52 | 41 | 0
+db_C3_ghi_api_key_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+db_D1_noi_moi_luot_cloud_agent_creds.py:122:_ban_khop | spawn | 2 | 52 | 41 | 0
+db_D2_ghi_cwd_khi_khong_dat_bien_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+goc_cloud_agent_creds.py:84:nap | spawn | 2 | 78 | 30 | 0
+goc_cloud_agent_creds.py:122:_ban_khop | spawn | 54 | 52 | 41 | 0
+tl.py:4:<module> | spawn | 14 | 215 | 156 | 0
+
+OBSERVED head rows=934 actual_spawns=603
+site | kind | count | max_UTF16_incl_NUL | max_arg_chars | max_input_bytes
+<string>:1:<module> | spawn | 14 | 50 | 27 | 0
+bash_nen.py:98:_chay | run | 24 | 252 | 186 | 0
+bash_nen.py:98:_chay | spawn | 24 | 252 | 186 | 0
+cloud_agent_creds.py:82:nap | spawn | 1 | 83 | 35 | 0
+cloud_agent_creds.py:84:nap | spawn | 69 | 105 | 35 | 0
+cloud_agent_creds.py:122:_ban_khop | spawn | 24 | 52 | 41 | 0
+cloud_agent_creds_test.py:51:_git_base | run | 12 | 190 | 105 | 0
+cloud_agent_creds_test.py:51:_git_base | spawn | 12 | 190 | 105 | 0
+cloud_agent_creds_test.py:73:chay_nap | run | 81 | 76 | 46 | 0
+cloud_agent_creds_test.py:73:chay_nap | spawn | 81 | 76 | 46 | 0
+cloud_agent_creds_test.py:145:a11_subreaper_va_esrch | spawn | 26 | 37 | 28 | 0
+cloud_agent_creds_test.py:146:a11_subreaper_va_esrch | spawn | 26 | 42 | 19 | 0
+cloud_agent_creds_test.py:151:a11_subreaper_va_esrch | spawn | 11 | 9 | 5 | 0
+cloud_agent_creds_test.py:317:h2_khoi_song_sot_set_e | run | 9 | 542 | 462 | 0
+cloud_agent_creds_test.py:317:h2_khoi_song_sot_set_e | spawn | 9 | 542 | 462 | 0
+cloud_agent_creds_test.py:538:chay_b | run | 35 | 129 | 102 | 87545
+cloud_agent_creds_test.py:538:chay_b | spawn | 35 | 129 | 102 | 0
+cloud_agent_creds_test.py:570:p3b7_ban_va_nhanh_case | run | 2 | 111 | 102 | 226231
+cloud_agent_creds_test.py:570:p3b7_ban_va_nhanh_case | spawn | 2 | 111 | 102 | 0
+cloud_agent_creds_test.py:587:p3s2_stop_chay_that | run | 3 | 294 | 258 | 0
+cloud_agent_creds_test.py:587:p3s2_stop_chay_that | spawn | 3 | 294 | 258 | 0
+cloud_agent_creds_test.py:700:chay_dot_bien | run | 164 | 212 | 135 | 0
+cloud_agent_creds_test.py:700:chay_dot_bien | spawn | 164 | 212 | 135 | 0
+db_A9_bo_hau_kiem_nhom_cloud_agent_creds.py:84:nap | spawn | 1 | 78 | 30 | 0
+db_A9_mat_log_khi_khong_dung_duoc_cloud_agent_creds.py:84:nap | spawn | 1 | 78 | 30 | 0
+db_B1_khong_ghi_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+db_B2_bo_kiem_sha_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+db_B4_bien_chi_chan_so_cloud_agent_creds.py:122:_ban_khop | spawn | 6 | 52 | 41 | 0
+db_B4_loi_giai_ma_thoat_khoi_kiem_ban_cloud_agent_creds.py:122:_ban_khop | spawn | 4 | 52 | 41 | 0
+db_B4_qua_han_chi_giet_cha_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+db_B4_so_chuoi_con_cloud_agent_creds.py:122:_ban_khop | spawn | 5 | 52 | 41 | 0
+db_B5_roi_ve_linux_amd64_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+db_B6_extractall_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+db_B7_goi_agy_install_cloud_agent_creds.py:122:_ban_khop | spawn | 2 | 52 | 41 | 0
+db_B7_goi_agy_install_cloud_agent_creds.py:159:cai_dat_agy | run | 1 | 50 | 41 | 0
+db_B7_goi_agy_install_cloud_agent_creds.py:159:cai_dat_agy | spawn | 1 | 50 | 41 | 0
+db_C1_ghi_de_ca_tep_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+db_C2_ghi_de_khi_parse_loi_cloud_agent_creds.py:122:_ban_khop | spawn | 2 | 52 | 41 | 0
+db_C3_ghi_api_key_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+db_D1_noi_moi_luot_cloud_agent_creds.py:122:_ban_khop | spawn | 2 | 52 | 41 | 0
+db_D2_ghi_cwd_khi_khong_dat_bien_cloud_agent_creds.py:122:_ban_khop | spawn | 1 | 52 | 41 | 0
+goc_cloud_agent_creds.py:84:nap | spawn | 2 | 78 | 30 | 0
+goc_cloud_agent_creds.py:122:_ban_khop | spawn | 54 | 52 | 41 | 0
+tl.py:4:<module> | spawn | 14 | 215 | 156 | 0
+HEAD_NON_NODE_MAX 542 ['/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114a/copies/head/ops/cloud_agent_creds_test.py', 317, 'h2_khoi_song_sot_set_e']
+HEAD_CHAY_B_INPUT_MAX 87545

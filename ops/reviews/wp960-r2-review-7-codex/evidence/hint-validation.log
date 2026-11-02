@@ -1,0 +1,9 @@
+{"command": ["patch", "--dry-run", "--fuzz=0", "-p0", "-i", "/tmp/claude-0/rv/wp960-r2-review-7-codex/HINT.patch"], "cwd": "/tmp/wp960-r7-review/hint", "rc": 0, "stdout": "checking file ops/bien_nhan_v2_test.py\n", "stderr": ""}
+{"command": ["patch", "--fuzz=0", "-p0", "-i", "/tmp/claude-0/rv/wp960-r2-review-7-codex/HINT.patch"], "cwd": "/tmp/wp960-r7-review/hint", "rc": 0, "stdout": "patching file ops/bien_nhan_v2_test.py\n", "stderr": ""}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "qua", "message": null}
+{"direction": "before"}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "giet_that", "message": "vi-provider-truoc-hai-dong: đòi rc=0, được 1: loi=[\"[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`\"] chua=[]"}
+{"control": [true, ""]}
+{"direction": "after"}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "giet_that", "message": "vii-provider-sau-hai-dong: đòi rc=0, được 1: loi=[\"[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`\"] chua=[]"}
+{"control": [true, ""]}

@@ -1,0 +1,5 @@
+# do 2026-10-31T08:42:15Z trong phien session_01WZT2MvvoQV8QGF1vX9STrJ — bon moc §10.2.2 cho run 41182092305 attempt 1 (push master, c8ff9ed)
+Run: readback-run-41182092305.json status completed conclusion success run_attempt 1 head_sha c8ff9ed path .github/workflows/ci.yml event push; readback-jobs-41182092305.json 23/23 success ubuntu-latest, runner_id khac 0.
+Checkout: log-gate-124483186191-trich.txt (log job 'gate (ubuntu-latest)' dong 930-941): sau 'Checking out the ref', git log -1 --format=%H = c8ff9ed563403fffa3c49c84bfce42e9a66bc68b.
+Workflow definition: moc-workflow-definition.txt + graphql-workflowrun-41182092305.json (blob ci.yml 82d9f23).
+Gate output: artifact 13035698299 gate-evidence-ubuntu-latest-1, zip sha256 0f1dd175154548c86cf58e587c63fab7cf324b40a5e447cc97b51a8c94e85cd5 = digest REST (readback-artifacts-41182092305.json); giai nen: tl-selftest-Linux.json status pass, returncode 0, positive_verified true, positive_match '== tl selftest 1774/1774 ==', identity.head_sha c8ff9ed, identity.tree_sha 83dd5e0 = tree merge commit, output_sha256 7e249c29... = sha256 tl-selftest-Linux.out.

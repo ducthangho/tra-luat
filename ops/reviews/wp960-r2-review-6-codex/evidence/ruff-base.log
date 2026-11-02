@@ -1,0 +1,39 @@
+$ ruff check --select F --output-format json /tmp/wp960-r6-review/ruff-base/ops
+[
+  {
+    "cell": null,
+    "code": "F541",
+    "end_location": {
+      "column": 86,
+      "row": 1677
+    },
+    "filename": "/tmp/wp960-r6-review/ruff-base/ops/bien_nhan_v2_test.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"KHÔNG ĐO ĐƯỢC: không có bề mặt nào của provider KHÁC để mượn thử\"",
+          "end_location": {
+            "column": 86,
+            "row": 1677
+          },
+          "location": {
+            "column": 19,
+            "row": 1677
+          }
+        }
+      ],
+      "message": "Remove extraneous `f` prefix"
+    },
+    "location": {
+      "column": 19,
+      "row": 1677
+    },
+    "message": "f-string without any placeholders",
+    "name": "f-string-missing-placeholders",
+    "noqa_row": 1677,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/f-string-missing-placeholders"
+  }
+]
+rc=1

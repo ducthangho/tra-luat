@@ -1,0 +1,15 @@
+{
+  "cwd": "/tmp/claude-0/rv/pr1048-review-3/cay-kho",
+  "argv": [
+    "git",
+    "status",
+    "--porcelain=v1",
+    "--untracked-files=all",
+    "--ignored"
+  ],
+  "rc": 0,
+  "stdout_file": "final-git-status.stdout",
+  "stderr_file": "final-git-status.stderr",
+  "stdout_bytes": 0,
+  "stderr_bytes": 0
+}

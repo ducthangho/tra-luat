@@ -1,0 +1,185 @@
+{
+  "precedents": [
+    {
+      "round": 1,
+      "fixed_field_mismatches": {},
+      "anchor_class_equal": true,
+      "caveats_added": [
+        "SANDBOX-MODE-KHONG-DO-DUOC"
+      ],
+      "caveats_removed": [],
+      "added_caveat_evidence": "KHONG_DO_DUOC",
+      "model_evidence": "do_may",
+      "run_model_set": [
+        "gpt-6-astra"
+      ],
+      "executor_recording_context": "# Ghi so boi CHINH phien executor #1045/#1058 (session_015GtxrYjGJtmjF3eT1nCSG9) theo chi thi chu kho 31-10-2026 (\"Lam PR ghi so cho #1058 di\").",
+      "pr1056_same_executor_precedent": [
+        "# Ghi so boi phien DIEU PHOI session_01WZT2MvvoQV8QGF1vX9STrJ — phien nay CUNG la executor cua #1056 (viet bien nhan #1050) va la phien",
+        "# goi codex; KHONG viet verdict. Chu kho duyet 31-10-2026: \"dong y merge land va ghi so\".",
+        "# Nhan: (a) DO tu kho/run.json luc ghi so 2026-10-31 · (b) THUAT LAI · KHONG_DO_DUOC."
+      ]
+    },
+    {
+      "round": 2,
+      "fixed_field_mismatches": {},
+      "anchor_class_equal": true,
+      "caveats_added": [],
+      "caveats_removed": [],
+      "added_caveat_evidence": "DO_DUOC",
+      "model_evidence": "do_may",
+      "run_model_set": [
+        "gpt-6-astra"
+      ],
+      "executor_recording_context": "# Ghi so boi CHINH phien executor #1045/#1058 (session_015GtxrYjGJtmjF3eT1nCSG9) theo chi thi chu kho 31-10-2026 (\"Lam PR ghi so cho #1058 di\").",
+      "pr1056_same_executor_precedent": [
+        "# Ghi so boi phien DIEU PHOI session_01WZT2MvvoQV8QGF1vX9STrJ — phien nay CUNG la executor cua #1056 (viet bien nhan #1050) va la phien",
+        "# goi codex; KHONG viet verdict. Chu kho duyet 31-10-2026: \"dong y merge land va ghi so\".",
+        "# Nhan: (a) DO tu kho/run.json luc ghi so 2026-10-31 · (b) THUAT LAI · KHONG_DO_DUOC."
+      ]
+    }
+  ],
+  "closure": {
+    "changed_paths": [
+      "ops/land/pr1047-wp1045-land-evidence.yaml"
+    ],
+    "authorization_before": "measured — readback-pr-1047.json: merged_by ducthangho, merged_at 2026-10-30T23:36:15Z, head.sha 2014602. loi_khai_co_neo — readback-comment-6529094452.json (author ducthangho, performed_via_github_app claude, 17:29:22Z): phien executor GHI HO chi thi chu kho \"Nang them 2 loi goi\" va dieu kien merge chung (#1037 issuecomment-6529010520: khong con P1/P2/P3 tren head cuoi, Windows xanh tren head cuoi, CI luot PR xanh). Chi thi neu DIEU KIEN, KHONG neu SHA; uy quyen land la hanh dong merge cua chu kho.",
+    "authorization_after": "measured — readback-pr-1047.json: merged_by ducthangho, merged_at 2026-10-30T23:36:15Z, head.sha 2014602. loi_khai_co_neo — readback-comment-6529094452.json (author ducthangho, performed_via_github_app claude, 17:29:22Z): phien executor GHI HO chi thi chu kho \"Nang them 2 loi goi\" va dieu kien merge chung (#1037 issuecomment-6529010520: khong con P1/P2/P3 tren head cuoi, Windows xanh tren head cuoi, CI luot PR xanh). Chi thi neu DIEU KIEN, KHONG neu SHA. Readback chi chung minh THAO TAC merge (merged_by), khong phai duyet land; chua co nguon duyet land ben neo exact SHA 2014602 — khop dieu kien (5) CHUA DAT o landed_dieu_kien.",
+    "landed_before": false,
+    "landed_after": false,
+    "condition_after": "PROTOCOL §10.2.4 — (1) gate tren merge SHA b2d5f06: CHUA DAT — run 41145468254 in_progress luc ghi so (do lai 04:05Z: completed success 23/23, xem post_merge_checks; chi la moc RUN), va moc Checkout / Workflow definition / Gate output cua §10.2.2 khong do duoc trong phien web; (2) lease CHUA NHA tai moc ghi so 23:40Z; da rut han ve 00:20Z va do lai 00:23Z: NGUOI_GIU 0 (xem lease.do_lai_sau_han_20261031T0023Z) — DAT; (3) bookkeeping: ho so nay + ba bien nhan review DAT; (4) review neo DUNG authorized_head_sha 2014602: Codex luot 3 approve 0 P0-P3 va Codex connector sach DAT; (5) uy quyen land neo SHA: CHUA DAT — chi thi neu dieu kien, khong neu SHA; (6) muc tieu packet: bo chon cai_cong_cu.sh quyet DAT theo trang_thai, runner Windows qua buoc cai shellcheck + G5 DAT; (7) reviewer assurance §8.1: CHUA_DAT (xem assurance_81). Mo lai — TAT CA: (1) do du bon moc provenance CI §10.2.2 cho DUNG run push master tren b2d5f06 (WorkflowRun.file qua GraphQL — nho chu kho chay lenh `gh api graphql` tren may, mau CLAUDE.md muc \"Lenh gh api graphql\"); VA (5) chu kho ghi duyet ben neo 2014602; VA §8.1 can sandbox do duoc.",
+    "jobs_conclusions": {
+      "success": 15,
+      "skipped": 1
+    },
+    "executed_gate_count": 14,
+    "executed_gate_windows_count": 14,
+    "skipped_gate": [
+      {
+        "name": "gate-cong-cu-gop",
+        "conclusion": "skipped",
+        "labels": [],
+        "runner_id": null
+      }
+    ]
+  },
+  "history": {
+    "3145d82": {
+      "parents": [
+        "c8ff9ed563403fffa3c49c84bfce42e9a66bc68b"
+      ],
+      "changed_from_first_parent": [
+        "ops/reviews/pr1058-review-1-codex-verdict.md",
+        "ops/reviews/pr1058-review-1-codex/OMITTED.txt",
+        "ops/reviews/pr1058-review-1-codex/PROMPT.md",
+        "ops/reviews/pr1058-review-1-codex/SHA256SUMS",
+        "ops/reviews/pr1058-review-1-codex/VERDICT.md",
+        "ops/reviews/pr1058-review-1-codex/evidence/audit.log",
+        "ops/reviews/pr1058-review-1-codex/evidence/audit.py",
+        "ops/reviews/pr1058-review-1-codex/evidence/base-diff-check.log",
+        "ops/reviews/pr1058-review-1-codex/evidence/base-doctrine.log",
+        "ops/reviews/pr1058-review-1-codex/evidence/base-land.log",
+        "ops/reviews/pr1058-review-1-codex/evidence/base-receipts.log",
+        "ops/reviews/pr1058-review-1-codex/evidence/base-t26-t27.log",
+        "ops/reviews/pr1058-review-1-codex/evidence/changed-files.txt",
+        "ops/reviews/pr1058-review-1-codex/evidence/checksums.log",
+        "ops/reviews/pr1058-review-1-codex/evidence/diff-range-check.log",
+        "ops/reviews/pr1058-review-1-codex/evidence/direct_cases.py",
+        "ops/reviews/pr1058-review-1-codex/evidence/final-state.json",
+        "ops/reviews/pr1058-review-1-codex/evidence/finalize_verdict.py",
+        "ops/reviews/pr1058-review-1-codex/evidence/finding_checks.py",
+        "ops/reviews/pr1058-review-1-codex/evidence/findings.log",
+        "ops/reviews/pr1058-review-1-codex/evidence/gates.json",
+        "ops/reviews/pr1058-review-1-codex/evidence/gates.py",
+        "ops/reviews/pr1058-review-1-codex/evidence/head-diff-check.log",
+        "ops/reviews/pr1058-review-1-codex/evidence/head-doctrine.log",
+        "ops/reviews/pr1058-review-1-codex/evidence/head-land.log",
+        "ops/reviews/pr1058-review-1-codex/evidence/head-receipts.log",
+        "ops/reviews/pr1058-review-1-codex/evidence/head-t26-t27.log",
+        "ops/reviews/pr1058-review-1-codex/evidence/provenance.log",
+        "ops/reviews/pr1058-review-1-codex/evidence/provenance_audit.py",
+        "ops/reviews/pr1058-review-1-codex/launcher.out",
+        "ops/reviews/pr1058-review-1-codex/run/checkpoint.json",
+        "ops/reviews/pr1058-review-1-codex/run/run.json",
+        "ops/reviews/pr1058-review-1-codex/run/stderr.log",
+        "ops/reviews/pr1058-review-1-codex/run/stdout.log",
+        "ops/reviews/pr1058-review-2-codex-verdict.md",
+        "ops/reviews/pr1058-review-2-codex/OMITTED.txt",
+        "ops/reviews/pr1058-review-2-codex/PROMPT.md",
+        "ops/reviews/pr1058-review-2-codex/SHA256SUMS",
+        "ops/reviews/pr1058-review-2-codex/VERDICT.md",
+        "ops/reviews/pr1058-review-2-codex/diff-tu-luot1.patch",
+        "ops/reviews/pr1058-review-2-codex/evidence/audit-complete.jsonl",
+        "ops/reviews/pr1058-review-2-codex/evidence/audit.jsonl",
+        "ops/reviews/pr1058-review-2-codex/evidence/audit.py",
+        "ops/reviews/pr1058-review-2-codex/evidence/base-bien-nhan.log",
+        "ops/reviews/pr1058-review-2-codex/evidence/base-diff-check.log",
+        "ops/reviews/pr1058-review-2-codex/evidence/base-direct.log",
+        "ops/reviews/pr1058-review-2-codex/evidence/base-doctrine.log",
+        "ops/reviews/pr1058-review-2-codex/evidence/base-land.log",
+        "ops/reviews/pr1058-review-2-codex/evidence/base-range-check.log",
+        "ops/reviews/pr1058-review-2-codex/evidence/closure.jsonl",
+        "ops/reviews/pr1058-review-2-codex/evidence/direct_cases.py",
+        "ops/reviews/pr1058-review-2-codex/evidence/final-state.jsonl",
+        "ops/reviews/pr1058-review-2-codex/evidence/gates.json",
+        "ops/reviews/pr1058-review-2-codex/evidence/gates.py",
+        "ops/reviews/pr1058-review-2-codex/evidence/head-bien-nhan.log",
+        "ops/reviews/pr1058-review-2-codex/evidence/head-diff-check.log",
+        "ops/reviews/pr1058-review-2-codex/evidence/head-direct.log",
+        "ops/reviews/pr1058-review-2-codex/evidence/head-doctrine.log",
+        "ops/reviews/pr1058-review-2-codex/evidence/head-land.log",
+        "ops/reviews/pr1058-review-2-codex/evidence/head-range-check.log",
+        "ops/reviews/pr1058-review-2-codex/evidence/land-scalars.json",
+        "ops/reviews/pr1058-review-2-codex/evidence/scope.jsonl",
+        "ops/reviews/pr1058-review-2-codex/evidence/scope_audit.py",
+        "ops/reviews/pr1058-review-2-codex/evidence/sources.jsonl",
+        "ops/reviews/pr1058-review-2-codex/launcher.out",
+        "ops/reviews/pr1058-review-2-codex/run/checkpoint.json",
+        "ops/reviews/pr1058-review-2-codex/run/run.json",
+        "ops/reviews/pr1058-review-2-codex/run/stderr.log",
+        "ops/reviews/pr1058-review-2-codex/run/stdout.log",
+        "ops/reviews/pr1058-review-2-codex/verdict-cu/luot1-VERDICT.md"
+      ]
+    },
+    "c92c709": {
+      "parents": [
+        "3145d821aecc6689dd64f197859f9aa1f43b27a7"
+      ],
+      "changed_from_first_parent": [
+        "ops/reviews/README.md",
+        "ops/reviews/pr1058-review-1-codex-verdict.receipt.yaml",
+        "ops/reviews/pr1058-review-2-codex-verdict.receipt.yaml"
+      ]
+    },
+    "0104461": {
+      "parents": [
+        "c92c709f9c2c64ec3a287874496b67faedd1e6f9",
+        "97120d3c76ebb7c3eda4b585ff46f1c51e30c91b"
+      ],
+      "changed_from_first_parent": [
+        "ops/specs/cloud-setup-p2b-wire-r1.md"
+      ]
+    }
+  },
+  "gates_summary_trailing_whitespace_lines": [
+    3,
+    23,
+    31,
+    32,
+    33,
+    36,
+    56,
+    64,
+    65,
+    66
+  ],
+  "unmeasured_from_supplied_evidence": [
+    "GitHub current PR state, permissions and publication of evidence_url",
+    "GitHub merged_at 2026-10-31T07:39:59Z and merge request expectedHeadSha",
+    "codex-cli 0.164.0 binary version, full historical CLI arguments and requested-model flag",
+    "executor family/session and human authorization beyond recorded statements",
+    "absence of fork/context reuse beyond supplied prompt/run/checkpoint files",
+    "complete historical sandbox enforcement beyond sampled run.json telemetry"
+  ],
+  "errors": []
+}

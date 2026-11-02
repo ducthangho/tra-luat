@@ -1,0 +1,84 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 748
+packet_id: land-evidence-l7
+mission_issue: 748
+revision: 2
+generation: 1
+lease_id: land-evidence-l7-r2-g1-claude-remote-20261029
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease r1 (land-evidence-l7-r1-g1-claude-remote-20261027, nhanh ops/wp748-r28-l7-lease) thuoc revision khac va da het hieu luc; khong khai bia mo vao lease cu'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/pull/988#issuecomment-6445048464
+authority_url: https://github.com/ducthangho/tra-luat/pull/988#issuecomment-6445048464
+authority_ghi_chu: 'comment duyet spec_hash cho phep cap lease l7 r2 sau khi land-81-ha-cap r2 land; dieu kien da dat: PR #994 merge 0a8f4d78d30854247a7147e45f5586bf856925da. Chu kho chi thi cap trong phien dieu phoi 2026-10-29 ("Dong y ca hai, lam luon")'
+recorded_by: anthropic_claude_dispatcher
+recorder_is_dispatcher: true
+leased_at_utc: '2026-10-29T07:08:00Z'
+heartbeat_at: '2026-10-29T07:08:00Z'
+lease_until: '2026-10-29T08:28:37Z'
+lease_expires_at_utc: '2026-10-29T08:28:37Z'
+rut_han:
+  han_cu: '2026-10-30T07:08:00Z'
+  han_moi: '2026-10-29T08:28:37Z'
+  rut_boi: ducthangho
+  ly_do: 'packet land-evidence-l7 r2 da merge (PR #1013, head 07bea5f6568dd82fb18a9e7d8a779b6000f65bfd, merge e9967f07b95c6458afc63dabf4a5c0494e90eca7, 2026-10-29T08:28:06Z).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le land-81-ha-cap r1 (9b40bcc)'
+  ghi_boi: claude-dispatcher-session (theo chi thi chu kho trong phien)
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); may la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer: codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: fresh independent session, read-only exact head, qua launcher.py run
+spec_path: ops/specs/land-evidence-l7-r2-moi-do-sau.md
+spec_ref: master
+spec_commit: 02bdffa34d6475080a55308b3f45b9006be00712
+spec_hash: b43528c572e55bb29049fec44196550ddb5ff88ca356aa2d444473a823b9995a
+spec_sha256: b43528c572e55bb29049fec44196550ddb5ff88ca356aa2d444473a823b9995a
+depends_on: land-81-ha-cap r2
+depends_on_trang_thai: 'DA LAND — PR #994 merge 0a8f4d78d30854247a7147e45f5586bf856925da (2026-10-29); tren base: 0 ho so khai reviewer_assurance_81 DAT long ma thieu khoi $.assurance_81 cap goc; land_evidence_nguon TONG: DAT (53 DAT, 0 vi pham)'
+branch: agent/land-evidence-l7-r2-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 0a8f4d78d30854247a7147e45f5586bf856925da
+start_from_sha: 0a8f4d78d30854247a7147e45f5586bf856925da
+reviewed_sha_required: 0a8f4d78d30854247a7147e45f5586bf856925da
+reviewed_sha_ghi_chu: 'chua co head code luc cap lease; moi luot review neo dung SHA cua luot'
+write_set:
+- ops/land_evidence_nguon.py
+- ops/land_evidence_nguon_test.py
+write_set_hash: 16b061360dfd369f6b53b2a5eb3efe4cc483b5eb97020cb52d8904db0cef1a7f
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: 'holder scan 2026-10-29T07:08Z: ls-remote 683, thieu cuc bo 0; 2/2 duong dan NGUOI_GIU 0'
+tran_kich_thuoc: '<= 2 tep / <= 250 dong them (spec land-evidence-l7 r2 §4)'
+tran_loi_goi_codex: '10 theo dong khai ADR-0055@d2e3052 cua spec; da dung 0'
+coordination_paths:
+- ops/leases/land-evidence-l7-r2-g1-claude-remote-20261029.yaml
+run_minutes: 1440
+heartbeat_required_minutes: 30
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- edit_land_evidence
+- write_outside_effective_write_set
+land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate; khong sua ho so land nao (spec §5)

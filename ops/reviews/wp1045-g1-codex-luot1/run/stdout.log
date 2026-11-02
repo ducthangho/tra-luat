@@ -1,0 +1,5 @@
+Đã ghi [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1045a/VERDICT.md).
+
+**request_changes — 1 P2, 2 P3**: chốt M2 bị errexit bỏ qua; recipe bật lại errexit đổi hành vi; test thiếu kiểm dọn tạm và giữ mã lỗi.
+
+Đủ 10 đột biến đăng ký bị giết. Kho ứng viên giữ sạch.

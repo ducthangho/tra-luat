@@ -1,0 +1,463 @@
+{
+  "conclusion_checks": [
+    {
+      "check": "pr1110-review-1-codex.approve",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    },
+    {
+      "check": "pr1110-review-1-codex.no_finding",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "check": "pr1110-review-1-codex.launcher_equals_run",
+      "actual": "sha256:23c709e07791c9c03a53ac9ecd823d7a15681f8931ff31e226a0ef748ea5a689",
+      "expected": "sha256:ca7dba265795fe7629a2cd8b2b3b9fb84ebe682fdacf43cc7bc2f85a09446617",
+      "ok": true
+    },
+    {
+      "check": "pr1110-review-1-codex.checkpoint_head",
+      "actual": "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d",
+      "expected": "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d",
+      "ok": true
+    },
+    {
+      "check": "pr1110-review-1-codex.checkpoint_prompt",
+      "actual": "5425015212a4c670b5a772356939225f9efa4c858f69147f52297f8148721eb1",
+      "expected": "5425015212a4c670b5a772356939225f9efa4c858f69147f52297f8148721eb1",
+      "ok": true
+    },
+    {
+      "check": "pr1110-review-2-codex.approve",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    },
+    {
+      "check": "pr1110-review-2-codex.no_finding",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "check": "pr1110-review-2-codex.launcher_equals_run",
+      "actual": "sha256:a623d89a3b75a98764a3fbae23628abce10dbb211d4f197fc00340e26a3fffa0",
+      "expected": "sha256:19e8038d589c797ce36275402619e73757656f6a063dea5687c6f16bd2842262",
+      "ok": true
+    },
+    {
+      "check": "pr1110-review-2-codex.checkpoint_head",
+      "actual": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+      "expected": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+      "ok": true
+    },
+    {
+      "check": "pr1110-review-2-codex.checkpoint_prompt",
+      "actual": "dd6a7288ae8e82a04a43f633413fbda1a8f6cb279c57953c337e28d8db44ac98",
+      "expected": "dd6a7288ae8e82a04a43f633413fbda1a8f6cb279c57953c337e28d8db44ac98",
+      "ok": true
+    },
+    {
+      "check": "pr1114-review-1-codex.approve",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    },
+    {
+      "check": "pr1114-review-1-codex.no_finding",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "check": "pr1114-review-1-codex.launcher_equals_run",
+      "actual": "sha256:1ee65d36c51dc90c5a1906f6d48c6c6b2bf061afee0dbe3620fb95abb650c240",
+      "expected": "sha256:6afa57f06fe3b70e8f9877f3c14e91c71845a64e7a401735f2e4920f02f2c4ec",
+      "ok": true
+    },
+    {
+      "check": "pr1114-review-1-codex.checkpoint_head",
+      "actual": "e101b11e9586de3125f811ec4f42a89af69de8f2",
+      "expected": "e101b11e9586de3125f811ec4f42a89af69de8f2",
+      "ok": true
+    },
+    {
+      "check": "pr1114-review-1-codex.checkpoint_prompt",
+      "actual": "8ac1b4d1911e4e11073fa1b40465bff8624a5e6412e6481ee19b8c0e77838baf",
+      "expected": "8ac1b4d1911e4e11073fa1b40465bff8624a5e6412e6481ee19b8c0e77838baf",
+      "ok": true
+    },
+    {
+      "check": "pr1114-review-2-codex.approve",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    },
+    {
+      "check": "pr1114-review-2-codex.no_finding",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "check": "pr1114-review-2-codex.launcher_equals_run",
+      "actual": "sha256:e1952e1453445c84ed2c4d791ee6778ea0a2353152d6d44416434e152a0600a9",
+      "expected": "sha256:6a76f77e96705c2e6e291116c95467a9791d03aa87c8b42ab083ae9225553024",
+      "ok": true
+    },
+    {
+      "check": "pr1114-review-2-codex.checkpoint_head",
+      "actual": "51435a44659c4026539497a47ace971a71a64f40",
+      "expected": "51435a44659c4026539497a47ace971a71a64f40",
+      "ok": true
+    },
+    {
+      "check": "pr1114-review-2-codex.checkpoint_prompt",
+      "actual": "3ee29a7c3f91d7c021bd1eda88842c874870ce31262748c96a6e21b13ff2a13e",
+      "expected": "3ee29a7c3f91d7c021bd1eda88842c874870ce31262748c96a6e21b13ff2a13e",
+      "ok": true
+    },
+    {
+      "check": "1110r1.saved_mapping_count",
+      "actual": 41,
+      "expected": 41,
+      "ok": true
+    },
+    {
+      "check": "1110r1.saved_receipt_check_count",
+      "actual": 116,
+      "expected": 116,
+      "ok": true
+    },
+    {
+      "check": "1110r1.saved_omission_count",
+      "actual": 2,
+      "expected": 2,
+      "ok": true
+    },
+    {
+      "check": "pr1110-review-1-codex.historical_readme_added",
+      "actual": 4,
+      "expected": 4,
+      "ok": true
+    },
+    {
+      "check": "pr1110-review-1-codex.historical_readme_removed",
+      "actual": 0,
+      "expected": 0,
+      "ok": true
+    },
+    {
+      "check": "pr1110-review-2-codex.historical_readme_added",
+      "actual": 4,
+      "expected": 4,
+      "ok": true
+    },
+    {
+      "check": "pr1110-review-2-codex.historical_readme_removed",
+      "actual": 0,
+      "expected": 0,
+      "ok": true
+    },
+    {
+      "check": "1110r2.round1_diff_ops_reviews",
+      "actual": 0,
+      "expected": 0,
+      "ok": true
+    },
+    {
+      "check": "1110r2.saved_round1_diff",
+      "actual": "",
+      "expected": "",
+      "ok": true
+    },
+    {
+      "check": "1114r2.saved_round1_diff",
+      "actual": "b6c04a8a78945c77bf7abf27c1a481e9b71e5447cc39006f8161633375d319b0",
+      "expected": "b6c04a8a78945c77bf7abf27c1a481e9b71e5447cc39006f8161633375d319b0",
+      "ok": true
+    },
+    {
+      "check": "1114r1.base.suite",
+      "actual": [
+        "CA: 52/52 dat",
+        "DOT BIEN: 80/80 bi giet dung ly do",
+        "TONG: DAT"
+      ],
+      "expected": [
+        "CA: 52/52 dat",
+        "DOT BIEN: 80/80 bi giet dung ly do",
+        "TONG: DAT"
+      ],
+      "ok": true
+    },
+    {
+      "check": "1114r1.head.suite",
+      "actual": [
+        "CA: 52/52 dat",
+        "DOT BIEN: 80/80 bi giet dung ly do",
+        "TONG: DAT"
+      ],
+      "expected": [
+        "CA: 52/52 dat",
+        "DOT BIEN: 80/80 bi giet dung ly do",
+        "TONG: DAT"
+      ],
+      "ok": true
+    },
+    {
+      "check": "1114r2.base.suite",
+      "actual": [
+        "CA: 52/52 dat",
+        "DOT BIEN: 80/80 bi giet dung ly do",
+        "TONG: DAT"
+      ],
+      "expected": [
+        "CA: 52/52 dat",
+        "DOT BIEN: 80/80 bi giet dung ly do",
+        "TONG: DAT"
+      ],
+      "ok": true
+    },
+    {
+      "check": "1114r2.head.suite",
+      "actual": [
+        "CA: 52/52 dat",
+        "DOT BIEN: 80/80 bi giet dung ly do",
+        "TONG: DAT"
+      ],
+      "expected": [
+        "CA: 52/52 dat",
+        "DOT BIEN: 80/80 bi giet dung ly do",
+        "TONG: DAT"
+      ],
+      "ok": true
+    },
+    {
+      "check": "1114r1.wrapper_base",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "check": "1114r1.mutation-argv-read.log.rejects",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "check": "1114r1.mutation-no-input.log.rejects",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "check": "1114r2.repro_before.bad",
+      "actual": 26,
+      "expected": 26,
+      "ok": true
+    },
+    {
+      "check": "1114r2.repro_before.total",
+      "actual": 1800,
+      "expected": 1800,
+      "ok": true
+    },
+    {
+      "check": "1114r2.repro_after.bad",
+      "actual": 0,
+      "expected": 0,
+      "ok": true
+    },
+    {
+      "check": "1114r2.repro_after.total",
+      "actual": 1800,
+      "expected": 1800,
+      "ok": true
+    },
+    {
+      "check": "1114r2.R_to_Z_count",
+      "actual": 20,
+      "expected": 20,
+      "ok": true
+    },
+    {
+      "check": "1114r2.transition_total",
+      "actual": 1200,
+      "expected": 1200,
+      "ok": true
+    },
+    {
+      "check": "1114r2.suite_seconds_increase",
+      "actual": 15.017,
+      "expected": 15.017,
+      "ok": true
+    },
+    {
+      "check": "1114r2.suite_percent_increase",
+      "actual": 4.92,
+      "expected": 4.92,
+      "ok": true
+    }
+  ],
+  "omission_caveats": [
+    {
+      "receipt": "pr1110-review-1-codex",
+      "text": "Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt.",
+      "claims_DIFF_omitted": true,
+      "DIFF_present": false,
+      "DIFF_bytes": null,
+      "DIFF_in_manifest": false,
+      "DIFF_in_OMITTED": true
+    },
+    {
+      "receipt": "pr1110-review-2-codex",
+      "text": "Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt.",
+      "claims_DIFF_omitted": true,
+      "DIFF_present": false,
+      "DIFF_bytes": null,
+      "DIFF_in_manifest": false,
+      "DIFF_in_OMITTED": true
+    },
+    {
+      "receipt": "pr1114-review-1-codex",
+      "text": "Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt.",
+      "claims_DIFF_omitted": true,
+      "DIFF_present": true,
+      "DIFF_bytes": 1913,
+      "DIFF_in_manifest": true,
+      "DIFF_in_OMITTED": false
+    },
+    {
+      "receipt": "pr1114-review-2-codex",
+      "text": "Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt.",
+      "claims_DIFF_omitted": true,
+      "DIFF_present": true,
+      "DIFF_bytes": 4160,
+      "DIFF_in_manifest": true,
+      "DIFF_in_OMITTED": false
+    }
+  ],
+  "precedent": [
+    {
+      "receipt": "pr1110-review-1-codex",
+      "precedent": "pr1058-review-1-codex",
+      "fixed_fields_compared": 22,
+      "mismatches": {},
+      "new_top_level_keys": [
+        "ket_luan"
+      ],
+      "missing_top_level_keys": [
+        "assurance_KHONG_dat"
+      ]
+    },
+    {
+      "receipt": "pr1110-review-1-codex",
+      "precedent": "pr1058-review-2-codex",
+      "fixed_fields_compared": 22,
+      "mismatches": {},
+      "new_top_level_keys": [],
+      "missing_top_level_keys": []
+    },
+    {
+      "receipt": "pr1110-review-1-codex",
+      "precedent": "pr1075-review-1-codex",
+      "fixed_fields_compared": 22,
+      "mismatches": {},
+      "new_top_level_keys": [],
+      "missing_top_level_keys": []
+    },
+    {
+      "receipt": "pr1110-review-2-codex",
+      "precedent": "pr1058-review-1-codex",
+      "fixed_fields_compared": 22,
+      "mismatches": {},
+      "new_top_level_keys": [
+        "ket_luan"
+      ],
+      "missing_top_level_keys": [
+        "assurance_KHONG_dat"
+      ]
+    },
+    {
+      "receipt": "pr1110-review-2-codex",
+      "precedent": "pr1058-review-2-codex",
+      "fixed_fields_compared": 22,
+      "mismatches": {},
+      "new_top_level_keys": [],
+      "missing_top_level_keys": []
+    },
+    {
+      "receipt": "pr1110-review-2-codex",
+      "precedent": "pr1075-review-1-codex",
+      "fixed_fields_compared": 22,
+      "mismatches": {},
+      "new_top_level_keys": [],
+      "missing_top_level_keys": []
+    },
+    {
+      "receipt": "pr1114-review-1-codex",
+      "precedent": "pr1058-review-1-codex",
+      "fixed_fields_compared": 22,
+      "mismatches": {},
+      "new_top_level_keys": [
+        "ket_luan"
+      ],
+      "missing_top_level_keys": [
+        "assurance_KHONG_dat"
+      ]
+    },
+    {
+      "receipt": "pr1114-review-1-codex",
+      "precedent": "pr1058-review-2-codex",
+      "fixed_fields_compared": 22,
+      "mismatches": {},
+      "new_top_level_keys": [],
+      "missing_top_level_keys": []
+    },
+    {
+      "receipt": "pr1114-review-1-codex",
+      "precedent": "pr1075-review-1-codex",
+      "fixed_fields_compared": 22,
+      "mismatches": {},
+      "new_top_level_keys": [],
+      "missing_top_level_keys": []
+    },
+    {
+      "receipt": "pr1114-review-2-codex",
+      "precedent": "pr1058-review-1-codex",
+      "fixed_fields_compared": 22,
+      "mismatches": {},
+      "new_top_level_keys": [
+        "ket_luan"
+      ],
+      "missing_top_level_keys": [
+        "assurance_KHONG_dat"
+      ]
+    },
+    {
+      "receipt": "pr1114-review-2-codex",
+      "precedent": "pr1058-review-2-codex",
+      "fixed_fields_compared": 22,
+      "mismatches": {},
+      "new_top_level_keys": [],
+      "missing_top_level_keys": []
+    },
+    {
+      "receipt": "pr1114-review-2-codex",
+      "precedent": "pr1075-review-1-codex",
+      "fixed_fields_compared": 22,
+      "mismatches": {},
+      "new_top_level_keys": [],
+      "missing_top_level_keys": []
+    }
+  ],
+  "unmeasured": [
+    "GitHub CI/Windows jobs, current PR state, remote blob availability, expectedHeadSha API, submitter credential and owner instruction: KHÔNG ĐO ĐƯỢC offline.",
+    "Historical command argv/CLI version, full session independence and provider identity beyond supplied artifacts: KHÔNG ĐO ĐƯỢC; no new historical test run claimed."
+  ],
+  "conclusion_failures": []
+}

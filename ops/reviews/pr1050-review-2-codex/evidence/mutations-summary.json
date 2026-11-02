@@ -1,0 +1,26 @@
+{
+  "mutant-byte": {
+    "bien_nhan_v2": 0,
+    "land_evidence_nguon": 0,
+    "doctrine_scan": 0,
+    "t26": 1,
+    "t27": 0,
+    "t138": 0
+  },
+  "mutant-readme": {
+    "bien_nhan_v2": 0,
+    "land_evidence_nguon": 0,
+    "doctrine_scan": 0,
+    "t26": 0,
+    "t27": 1,
+    "t138": 0
+  },
+  "mutant-count": {
+    "bien_nhan_v2": 0,
+    "land_evidence_nguon": 0,
+    "doctrine_scan": 0,
+    "t26": 0,
+    "t27": 0,
+    "t138": 0
+  }
+}

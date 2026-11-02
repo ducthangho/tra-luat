@@ -1,0 +1,85 @@
+# reviewed_sha: f3231c8262c732fdbbe7d0d218cecfd9238af3e0
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- ops/vm/cap-nhat-cong-cu_test.ps1
++++ ops/vm/cap-nhat-cong-cu_test.ps1
+@@ -712,6 +712,80 @@
+     }
+ }
+ 
++# Test-only hint: native version output changes only when the modeled installer writes a marker.
++function Invoke-HeThongHauCaiGia([string]$Kieu = 'dich') {
++    $ChiKiem = $false
++    $g = Join-Path ([IO.Path]::GetTempPath()) ('cncc-ht-id-' + [guid]::NewGuid().ToString('N'))
++    $pfCuId = $env:ProgramFiles; $nodeCuId = $Script:DaCaiNode
++    try {
++        $env:ProgramFiles = "$g/PF"; $Script:DaCaiNode = $false
++        $before = @('git version 1.0.0', 'gh version 1.0.0', 'v24.1.0', '7.6.9')
++        $after = @('git version 2.0.0.windows.4', 'gh version 2.0.0', 'v24.2.0', '7.6.10')
++        if ($Kieu -eq 'zero') { $after = @('git version 02.0.0.windows.4', 'gh version 02.0.0', 'v024.2.0', '07.6.10') }
++        if ($Kieu -eq 'git-marker') { $after[0] = 'git version 2.0.0.4' }
++        $paths = @("$g/PF/Git/cmd/git.exe", "$g/PF/GitHub CLI/gh.exe", "$g/PF/nodejs/node.exe", "$g/PF/PowerShell/7/pwsh.exe")
++        for ($i = 0; $i -lt $paths.Count; $i++) {
++            New-Item -ItemType Directory -Force -Path (Split-Path -Parent $paths[$i]) | Out-Null
++            $body = "#!/bin/sh`nif [ -f `"`$0.installed`" ]; then`n  echo '$($after[$i])'`nelse`n  echo '$($before[$i])'`nfi`nexit 0`n"
++            [IO.File]::WriteAllText($paths[$i], $body); & chmod +x $paths[$i]
++        }
++        $payloadId = 'offline installer fixture'
++        $hashId = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($payloadId))).ToLowerInvariant()
++        $installsId = [Collections.Generic.List[string]]::new()
++        function Get-Release { param($Repo, $Tag)
++            $v = if ($Repo -eq 'git-for-windows/git') { '2.0.0.windows.4' } elseif ($Repo -eq 'PowerShell/PowerShell') { '7.6.10' } else { '2.0.0' }
++            $name = if ($Repo -eq 'git-for-windows/git') { 'Git-2.0.0-64-bit.exe' } elseif ($Repo -eq 'cli/cli') { 'gh_2.0.0_windows_amd64.msi' } else { 'PowerShell-7.6.10-win-x64.msi' }
++            [pscustomobject]@{tag_name="v$v"; assets=@([pscustomobject]@{name=$name; browser_download_url='OFFLINE'; digest="sha256:$hashId"})}
++        }
++        function Invoke-RestMethod { param($Uri, $TimeoutSec) [pscustomobject]@{version='v24.2.0'; lts='fixture'} }
++        function Invoke-WebRequest { param($Uri, $OutFile, $Headers, $TimeoutSec)
++            if ($OutFile) { [IO.File]::WriteAllText($OutFile, $payloadId) }
++            else { [pscustomobject]@{Content="$hashId  node-v24.2.0-x64.msi"} }
++        }
++        function New-ThuMucTai { param([switch]$ChiAdmin)
++            $d = Join-Path $g ([guid]::NewGuid().ToString('N')); New-Item -ItemType Directory -Path $d | Out-Null; $d
++        }
++        function Start-Process { param($FilePath, $ArgumentList, [switch]$Wait, [switch]$PassThru)
++            $p = if ($FilePath -match 'msiexec[.]exe$') { $ArgumentList[1].Trim('"') } else { $FilePath }
++            # Save-CoKiemBam, Assert-Bam and Install-Msi remain the real product functions.
++            Assert-Bam $p $hashId
++            $i = if ($p -match 'Git-') { 0 } elseif ($p -match 'gh_') { 1 } elseif ($p -match 'node-v') { 2 } elseif ($p -match 'PowerShell-') { 3 } else { throw "installer ngoài fixture: $p" }
++            $installsId.Add((Split-Path -Leaf $p)); [IO.File]::WriteAllText($paths[$i] + '.installed', 'installed')
++            [pscustomobject]@{ExitCode=0}
++        }
++        function Stop-ScheduledTask { param($TaskName, $ErrorAction) }
++        function Start-ScheduledTask { param($TaskName, $ErrorAction) }
++        function Start-Sleep { param($Seconds) }
++        function Get-ScheduledTask { param($TaskName, $ErrorAction) [pscustomobject]@{State='Running'} }
++        $Script:KetQua.Clear(); Invoke-TangHeThong *> $null
++        $directId = @(foreach ($p in $paths) {
++            $raw = & $p --version; $rcId = $LASTEXITCODE
++            [pscustomobject]@{raw="$raw"; rc=$rcId; installed=(Test-Path -LiteralPath ($p + '.installed'))}
++        })
++        [pscustomobject]@{rows=@($Script:KetQua); installs=@($installsId); direct=$directId}
++    } finally { $env:ProgramFiles = $pfCuId; $Script:DaCaiNode = $nodeCuId; Remove-Item -LiteralPath $g -Recurse -Force -ErrorAction SilentlyContinue }
++}
++if (-not $IsWindows) {
++    Ca 'he_thong_hau_cai_dinh_danh_dich_doi_chung' {
++        $k = Invoke-HeThongHauCaiGia
++        $tools = @($k.rows | Where-Object cong_cu -ne 'commander')
++        $k.installs.Count -eq 4 -and $tools.Count -eq 4 -and @($tools | Where-Object hanh_dong -ne 'nang_cap').Count -eq 0 -and
++            @($k.direct | Where-Object { $_.rc -ne 0 -or -not $_.installed }).Count -eq 0
++    }
++    Ca 'he_thong_hau_cai_zero_dau_phai_loi' {
++        $k = Invoke-HeThongHauCaiGia 'zero'
++        $tools = @($k.rows | Where-Object cong_cu -ne 'commander')
++        $k.installs.Count -eq 4 -and $tools.Count -eq 4 -and @($tools | Where-Object hanh_dong -ne 'loi').Count -eq 0 -and
++            @($k.direct | Where-Object { $_.rc -ne 0 -or -not $_.installed }).Count -eq 0 -and $k.direct[0].raw -ceq 'git version 02.0.0.windows.4'
++    }
++    Ca 'he_thong_hau_cai_git_windows_marker_phai_loi' {
++        $k = Invoke-HeThongHauCaiGia 'git-marker'
++        $git = @($k.rows | Where-Object cong_cu -eq 'git'); $rest = @($k.rows | Where-Object cong_cu -in 'gh','node','pwsh')
++        $k.installs.Count -eq 4 -and $git.Count -eq 1 -and $git[0].hanh_dong -eq 'loi' -and $rest.Count -eq 3 -and
++            @($rest | Where-Object hanh_dong -ne 'nang_cap').Count -eq 0 -and $k.direct[0].rc -eq 0 -and $k.direct[0].raw -ceq 'git version 2.0.0.4'
++    }
++}
++
+ Ca 'main_co_luoi_cuoi_ghi_nhat_ky' {
+     # Lưới cuối của luồng chạy (không gọi được ngoài Windows vì chốt nền): lệnh gọi tầng nằm trong try, catch ghi `loi`.
+     (Get-Content -LiteralPath $Script -Raw) -match "try \{ if \(\`$PhamVi -eq 'NguoiDung'\) \{ Invoke-TangNguoiDung \`$goc \} else \{ Invoke-TangHeThong \} \}\s*\r?\ncatch \{ Add-KetQua "

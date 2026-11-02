@@ -1,0 +1,5 @@
+Đã hoàn tất và ghi kết quả vào [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/ac777e2f-25ec-5e9f-9899-bae582f96c89/scratchpad/rv1021-l4/VERDICT.md).
+
+Kết luận: **approve**. F3 đã vá thật; F1/F2 vẫn đóng. Suite đạt **97/97 · 151/151 · 2/2**. Không còn finding P0–P3.
+
+Windows và CI: **KHÔNG ĐO ĐƯỢC**. Không cấp quyền merge/land.

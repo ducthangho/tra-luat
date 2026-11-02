@@ -1,0 +1,116 @@
+# Trich log run 41209445414 (push master, merge a253c169, run_attempt 1), tai qua REST actions/jobs/<id>/logs (curl -L) boi phien executor.
+# Moi job: runner_id, sha256 + so byte log day du (log goc KHONG luu trong kho; GitHub giu log co han), dong checkout
+# (dong ke tiep '[command]/usr/bin/git log -1 --format=%H' cua actions/checkout), so dong 'BỎ QUA', so '##[error]', dau hieu duong.
+
+== job 124566296063 | chuan-bi | runner_id 1000030267 | success | log sha256 da6f1373c7264bb540368cabbe21c5751fd768d1010d85f3a3f08512655f1828 | 3518 byte
+   checkout: KHONG CO BUOC CHECKOUT
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320400 | gate-packet-loop (ubuntu-latest) | runner_id 1000030268 | success | log sha256 ee96d29b03c1541603e9c3aea10b35f25a72f3d447c75773e16ede6211280b31 | 301146 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 3
+   ##[error]: 0
+   1x TỔNG: ĐẠT
+== job 124566320410 | gate (ubuntu-latest) | runner_id 1000030269 | success | log sha256 a6a8b7908f76e1a0fa6113dbd196f76fc0a16e2aa3339172f1513ca8d7eabe04 | 695459 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 1
+   ##[error]: 0
+   1x == tl selftest 1774/1774 ==
+   1x == transport selftest 12/12 ==
+   2x == gen_instructions selftest 44/44 ==
+   2x TỔNG: ĐẠT
+== job 124566320486 | gate-cong-cu (ubuntu-latest, 3) | runner_id 1000030271 | success | log sha256 8e2486097bd5cb80dbbc29bec26a84c3b1f6fb62e3353070305c9dc7c6d65012 | 131566 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320497 | gate-cong-cu (ubuntu-latest, 6) | runner_id 1000030272 | success | log sha256 7395ec6f7404991fe70e6ae1051bcc252cd85b1d85d463d6e42753a8adec5ca6 | 131490 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320506 | gate-cong-cu (ubuntu-latest, 4) | runner_id 1000030270 | success | log sha256 01dfa62cb30a91451a3d8bd4143379dd0a6641b0068cf022f6d5ce260a9abf50 | 131616 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320530 | gate-ops (ubuntu-latest) | runner_id 1000030275 | success | log sha256 5af275fc4279eeb4ce28875481f3a449d9689ce689a5f53d12b2ca64efd7dcfb | 391458 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+   1x TỔNG: ĐẠT
+   1x TONG: DAT
+   1x CA: 104/104 dat
+   1x DOT BIEN: 392/392 bi giet dung ly do
+== job 124566320533 | gate-cong-cu (ubuntu-latest, 5) | runner_id 1000030277 | success | log sha256 9ad7d481dbd25a32d647e0ea42ad6596606447c9b54df82cbc7d639ac6961b44 | 131465 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320534 | gate-nhanh-manh (ubuntu-latest, 0) | runner_id 1000030281 | success | log sha256 d2f35c5681ef88ed93facbcf90eb9e0ca259fbf46bc76a3378b68f0bdfbcf0e0 | 119709 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320552 | gate-cong-cu (ubuntu-latest, 2) | runner_id 1000030276 | success | log sha256 c06db262a9c538d5dfc4b5b41c5fe6c29258d88cc1c5b1d784998e284eccdf0d | 131635 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320569 | gate-cong-cu (ubuntu-latest, 7) | runner_id 1000030278 | success | log sha256 558fc93b1c87cdb3cbe62175e2c6a81f93154f43d8455c679d7a978af1c569d0 | 131590 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320570 | gate-cong-cu (ubuntu-latest, 1) | runner_id 1000030284 | success | log sha256 22cecbbed7b53d58f7335c8808e0a9cf05d02123b64f111c331f6cfe271b7705 | 131797 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320574 | gate-cong-cu (ubuntu-latest, 0) | runner_id 1000030285 | success | log sha256 638457dad3fe590d7a3c965bd713454531efb14271b4e13ebff6d771b7c3ee3b | 131800 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320583 | gate-nhanh-manh (ubuntu-latest, 7) | runner_id 1000030273 | success | log sha256 fc9cf78f0ed4a9befdcf00eee7f930581a77ff8d0e699ebf0fbc8d8741b80304 | 120828 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320592 | gate-nhanh-manh (ubuntu-latest, 4) | runner_id 1000030274 | success | log sha256 672adc2f8056b12f55741d59dfd1a3510df95518fd72c5490b2fb324b08ef9ba | 119837 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320603 | gate-nhanh-manh (ubuntu-latest, 2) | runner_id 1000030280 | success | log sha256 70ff8c57e47e3cdd635d267672fce3acaf5f5ba4cb9bc8396f7a2f69cffa4017 | 119926 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320609 | gate-nhanh-manh (ubuntu-latest, 3) | runner_id 1000030282 | success | log sha256 3d561c4f12c0e768922f19e079b2a16993c0f98b0c37a71d9d5a62d41383b9fe | 120131 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320637 | gate-nhanh-manh (ubuntu-latest, 5) | runner_id 1000030283 | success | log sha256 2361689ac38d37f3550096865e019ccd70279c4c24ebb39b8c63f1a4ffc6cf3f | 120586 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320638 | gate-nhanh-manh (ubuntu-latest, 6) | runner_id 1000030279 | success | log sha256 7ab7439206cfadebf0e0bc298e589a8d106b5ed944698bda9ead8a5b6437aeb9 | 120032 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124566320702 | gate-nhanh-manh (ubuntu-latest, 1) | runner_id 1000030286 | success | log sha256 93785ff7ec3283bea051244f5556a3debe3017c0a8eb7a088c1882194e0728e9 | 120443 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124567539507 | gate-nhanh-gop (ubuntu-latest) | runner_id 1000030287 | success | log sha256 70cc1e8eb5f3f58e321b0f1417bf4f75abea9c9d4472a13fc9dcf1a851d2ef07 | 115531 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+== job 124567594737 | gate-registry (ubuntu-latest) | runner_id 1000030288 | success | log sha256 60355a9d19c50f0c2de63540f5c4a5125257fe1714f838a36e444382fde7eae0 | 258690 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0
+   4x TỔNG: ĐẠT
+   5x TONG: DAT
+   1x TONG: CA 44/44 dat · DOT BIEN 43/43 bi giet
+   1x TONG: CA 45/45 dat · DOT BIEN 25/25 bi giet
+   1x CA: 22/22 dat
+   1x CA: 26/26 dat
+   1x CA: 52/52 dat
+   1x DOT BIEN: 106/106 bi giet dung ly do
+   1x DOT BIEN: 13/13 bi giet dung ly do
+   1x DOT BIEN: 292/292 bi giet dung ly do
+   1x DOT BIEN: 49/49 bi giet dung ly do
+== job 124572020110 | gate-cong-cu-gop (ubuntu-latest) | runner_id 1000030323 | success | log sha256 5b5731da769f6c39051fe49edc3a88109f0c28e63b9296e3dfb338b0952c5e60 | 98085 byte
+   checkout: ['a253c169ed79617b8d1a4754867c336ac72c72c5']
+   dong BỎ QUA: 0
+   ##[error]: 0

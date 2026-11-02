@@ -1,0 +1,7 @@
+Run ae2d0a62 (cung prompt sha256 0d3e08d4..., cung head 934a5b0) — DO DUOC tu run.json va log:
+- bat_dau_utc 2026-10-27T17:39:34Z, ma_thoat 1, thoi_luong_giay 463.183, trang_thai xong.
+- stdout 0 byte; stderr 39 byte, chi mot dong "Reading additional input from stdin...".
+- VERDICT.partial.md: dong dau "verdict: dang_lam", 69 dong, da ghi 3 finding P1 (2 loi-do, 1 bo-chon-ung-vien).
+NGUYEN NHAN: KHONG DO DUOC. Phien executor bi khoi dong lai (container) trong khoang ay; khong co transcript
+codex nao ghi ly do. KHONG tinh la verdict. Lan chay lai 40802fd7 (cung prompt, cung head) la lan duoc tinh;
+ca hai lan deu tieu mot loi goi codex (dem 3 va 4 tren tran 8).

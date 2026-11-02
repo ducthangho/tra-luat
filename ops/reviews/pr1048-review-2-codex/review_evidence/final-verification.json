@@ -1,0 +1,14 @@
+{
+  "checkout_unchanged": true,
+  "files_hashed": 8468,
+  "status": "",
+  "reviewed_sha": "48b54d89b152871063c7296df33a60308667599e",
+  "tree": "3c283128c5591ba2daaa8ec4830298d44587a042",
+  "verdict_bytes": 11871,
+  "verdict_sha256": "da5fe3262416997c598ef48a971ad3f3ce3e0556bcd0fb234bde6ea2a383e07d",
+  "verdict_header": [
+    "verdict: approved",
+    "reviewed_sha: 48b54d89b152871063c7296df33a60308667599e",
+    "Kết quả: 0 P0, 0 P1, 0 P2, 0 P3."
+  ]
+}

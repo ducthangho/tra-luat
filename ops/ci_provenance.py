@@ -10,7 +10,7 @@ bước của mỗi nhóm log được ĐỊNH DANH qua REST `steps[]` + vị tr
 Thoát: 0 không mốc nào `failed` · 12 có `failed` · 2 sai đối số · 3 REST khác 2xx (in nguyên mã). LUÔN in `NOT_MEASURED: <n>`;
 rc 2/3 không sinh provenance nên cả bốn mốc là chưa đo (`NOT_MEASURED: 4` kèm `PROVENANCE: khong_sinh`).
 """
-import argparse, datetime, hashlib, importlib.util, json, os, re, shutil, subprocess, sys, tempfile, urllib.error, urllib.request
+import argparse, base64, binascii, datetime, hashlib, importlib.util, io, json, os, re, shutil, subprocess, sys, tempfile, urllib.error, urllib.parse, urllib.request, zipfile
 from pathlib import Path
 
 import yaml
@@ -33,6 +33,15 @@ RE_HEX40 = re.compile(r"^[0-9a-f]{40}$")
 RE_OID_B = re.compile(rb"[0-9a-f]{40}|[0-9a-f]{64}")   # F13: OID SHA-1/SHA-256 dạng bytes (dòng tree/parent của commit)
 RE_REPO = re.compile(r"^[\w.-]+/[\w.-]+$")
 LY_DO_WD = "graphql_bi_chan_trong_phien_claude; cho P-B"
+# CI-PROVENANCE-WD r1 (Issue #1094): mốc Workflow definition đo bằng `do-wd` trong Actions, nhập bằng `thu --wd-run`.
+WF_WD = ".github/workflows/ops-do-workflow-definition.yml"
+RE_URL_WD = re.compile(r"^https://github\.com/([\w.-]+/[\w.-]+)/blob/([0-9a-f]{40})/(.+)$")
+KHOA_WD = {"schema", "repo", "run_id", "loi_graphql", "nguon", "trang_thai", "ly_do", "run_attempt_luc_do", "event", "node_id", "head_sha_rest",
+           "run_number", "created_at", "path", "repository_file_url", "check_suite_commit", "oid_dinh_nghia", "blob", "sha256"}   # schema `passed` cố định
+SU_KIEN_SO_OID = ("push", "workflow_dispatch", "schedule")   # chỉ các event này mới bắt OID định nghĩa = head_sha = check-suite
+RE_TOKEN = re.compile(r"(gh[pousr]_[A-Za-z0-9]{8,}|github_pat_[A-Za-z0-9_]{8,})")
+GQL_WD = ("query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt "
+          "file { path repositoryFileUrl } checkSuite { commit { oid } } } } }")
 KET_BUOC = ("success", "failure", "cancelled", "skipped", "neutral")
 LOI_JOB = ("failure", "cancelled", "timed_out", "action_required", "startup_failure", "stale")
 RE_CHECK_RUN = re.compile(r"^https://api\.github\.com/repos/[\w.-]+/[\w.-]+/check-runs/[1-9]\d*$")
@@ -85,6 +94,19 @@ def goi_that(url):
             yeu_cau, mo = loc, urllib.request.urlopen
         except (urllib.error.URLError, OSError) as e:
             raise LoiRest(f"khong_ket_noi ({e})", url)
+
+def gql_that(truy_van, bien):
+    """POST GraphQL; trả (mã HTTP, byte). Token như `goi_that`, không in."""
+    tk = next((os.environ[k] for k in ("GITHUB_PAT", "GH_TOKEN", "GITHUB_TOKEN") if os.environ.get(k)), None)
+    hd = {"Accept": "application/vnd.github+json", "Content-Type": "application/json"} | ({"Authorization": f"Bearer {tk}"} if tk else {})
+    yc = urllib.request.Request(f"{API}/graphql", data=json.dumps({"query": truy_van, "variables": bien}).encode(), headers=hd)
+    try:
+        with urllib.request.urlopen(yc, timeout=120) as r:
+            return r.status, r.read()
+    except urllib.error.HTTPError as e:
+        return e.code, b""
+    except (urllib.error.URLError, OSError):
+        return 0, b""
 
 def lay(goi, url):
     ma, byte = goi(url)
@@ -344,7 +366,7 @@ def moc_gate(job, dong, moi, xanh, wf=None, ly_do_wf=""):
         return r | {"trang_thai": "failed"}
     return r | {"trang_thai": "not_measured" if thieu or "passed" not in tt else "passed"}
 
-def thu(repo, run, attempt, goi, git, moi_tu=CI_DANG_KY, wf=git_blob):
+def thu(repo, run, attempt, goi, git, moi_tu=CI_DANG_KY, wf=git_blob, wd_run=None):
     goc = f"{API}/repos/{repo}/actions"
     r, byte_run = lay_json(goi, f"{goc}/runs/{run}")
     if type(r) is not dict:
@@ -383,8 +405,146 @@ def thu(repo, run, attempt, goi, git, moi_tu=CI_DANG_KY, wf=git_blob):
                         {k: a.get(k) for k in ("id", "name", "digest", "size_in_bytes", "expired")} for a in arts["artifacts"]]},
                     "workflow_definition": {"trang_thai": "not_measured", "ly_do": LY_DO_WD, "loi_khai_rest_path": r.get("path")}},
             "log_day_du": log}
+    if wd_run is not None:
+        prov["moc"]["workflow_definition"] = nhap_wd(goi, repo, run, r, wd_run)
     tep["provenance.yaml"] = yaml.safe_dump(prov, sort_keys=False, allow_unicode=True).encode()
     return prov, tep
+
+def blob_cua(b):
+    return hashlib.sha1(b"blob %d\0" % len(b) + b).hexdigest()
+
+def tai_noi_dung(goi, repo, path, oid):
+    """Bytes của `path` tại `oid` qua REST contents (base64). Lỗi HTTP ⇒ LoiRest; thân lạ ⇒ ValueError."""
+    c = lay_json(goi, f"{API}/repos/{repo}/contents/{urllib.parse.quote(path)}?ref={oid}")[0]
+    if type(c) is not dict or c.get("encoding") != "base64" or type(c.get("content")) is not str:
+        raise ValueError("contents_khong_phai_base64")
+    return base64.b64decode("".join(c["content"].split()), validate=True)
+
+def do_wd(repo, run, goi, gql):
+    """(JSON wd/1, rc). rc 0 passed · 12 failed · 3 not_measured. OID định nghĩa CHỈ lấy từ `repositoryFileUrl`."""
+    kq = {"schema": "wd/1", "repo": repo, "run_id": run, "loi_graphql": [], "nguon": "ops/ci_provenance.py do-wd"}
+    def ket(tt, ly_do=None, rc=0):
+        kq.update(trang_thai=tt, ly_do=ly_do)
+        return kq, rc
+    try:
+        r = lay_json(goi, f"{API}/repos/{repo}/actions/runs/{run}")[0]
+    except LoiRest as e:
+        return ket("not_measured", "phan_hoi_hong" if e.ma == "than_khong_phai_json" else f"rest_run_{e.ma}", 3)
+    if type(r) is not dict or not all(RUN_BAT_BUOC[k](r.get(k)) for k in ("id", "run_attempt", "path", "head_sha", "event")) or not _chuoi(r.get("node_id")):
+        return ket("not_measured", "phan_hoi_hong", 3)
+    kq.update(run_attempt_luc_do=r.get("run_attempt"), event=r["event"], node_id=r["node_id"], head_sha_rest=r["head_sha"])
+    ma, byte = gql(GQL_WD, {"id": r["node_id"]})
+    if not (isinstance(ma, int) and 200 <= ma < 300):
+        return ket("not_measured", f"graphql_http_{ma}", 3)
+    try:
+        d = json.loads(byte)
+    except ValueError:
+        return ket("not_measured", "phan_hoi_hong", 3)
+    if type(d) is not dict:
+        return ket("not_measured", "phan_hoi_hong", 3)
+    if type(d.get("errors", [])) is not list:   # kiểm KIỂU trước giá trị: `0`/`false`/`{}` sai kiểu mà falsy cũng là hỏng
+        return ket("not_measured", "phan_hoi_hong", 3)
+    if d.get("errors"):
+        kq["loi_graphql"] = [{"path": e.get("path"), "type": e.get("type"), "message": RE_TOKEN.sub("***", str(e.get("message", "")))[:300]}
+                             for e in d["errors"] if type(e) is dict]
+        return ket("not_measured", "graphql_errors", 3)
+    n = d["data"].get("node", ...) if type(d.get("data")) is dict else ...   # `...` = THIẾU khoá ≠ null ⇒ hỏng, không phải *_null
+    for khoa, ten in ((None, "node_null"), ("file", "file_null"), ("checkSuite", "checksuite_null")):
+        if (v := n if khoa is None else n.get(khoa, ...)) is None:
+            return ket("not_measured", ten, 3)
+        if type(v) is not dict:
+            return ket("not_measured", "phan_hoi_hong", 3)
+    url, fp, cm = n["file"].get("repositoryFileUrl"), n["file"].get("path"), n["checkSuite"].get("commit")
+    cso = cm.get("oid") if type(cm) is dict else None
+    if not (_chuoi(url) and _chuoi(fp) and type(cso) is str and bool(RE_HEX40.fullmatch(cso)) and _so(n.get("databaseId"), 1) and _so(n.get("runNumber"), 1) and _chuoi(n.get("createdAt"))):
+        return ket("not_measured", "phan_hoi_hong", 3)
+    kq.update(run_number=n.get("runNumber"), created_at=n.get("createdAt"), path=fp, repository_file_url=url, check_suite_commit=cso)
+    m = RE_URL_WD.fullmatch(url)
+    if not m:
+        return ket("not_measured", "url_khong_oid", 3)
+    kq["oid_dinh_nghia"] = oid = m[2]
+    so = [("databaseId", n.get("databaseId") == run), ("repo", m[1] == repo), ("url_path", m[3] == fp), ("file_path", fp == r["path"])]
+    if r["event"] in SU_KIEN_SO_OID:
+        so += [("oid_head_sha", oid == r["head_sha"]), ("oid_check_suite", cso == oid)]
+    for ten, ok in so:
+        if not ok:
+            return ket("failed", ten, 12)
+    try:
+        b = tai_noi_dung(goi, repo, fp, oid)
+    except LoiRest as e:
+        return ket("not_measured", "phan_hoi_hong" if e.ma == "than_khong_phai_json" else f"blob_http_{e.ma}", 3)
+    except (ValueError, binascii.Error):
+        return ket("not_measured", "phan_hoi_hong", 3)
+    kq.update(blob=blob_cua(b), sha256=hashlib.sha256(b).hexdigest())
+    return ket("passed")
+
+def nhap_wd(goi, repo, run, r, wd_run):
+    """Mốc Workflow definition từ artifact của CHÍNH lượt `WF_WD` trên nhánh mặc định; tính lại blob/sha256. Không tin tệp tay."""
+    def ko(buoc, truong):
+        return {"trang_thai": "not_measured", "ly_do": f"wd_khong_hop_le:{buoc}:{truong}", "wd_run_id": wd_run}
+    try:
+        kho = lay_json(goi, f"{API}/repos/{repo}")[0]
+        w = lay_json(goi, f"{API}/repos/{repo}/actions/runs/{wd_run}")[0]
+    except LoiRest as e:
+        return ko("a", f"rest_{e.ma}")
+    if type(kho) is not dict or type(w) is not dict:
+        return ko("a", "than_sai_dang")
+    try:   # nhánh mặc định đo bằng TỔ TIÊN trên OID của `refs/heads/<default>` — tên trần có thể trùng tag (#1102 P1, hai lượt)
+        ref = lay_json(goi, f"{API}/repos/{repo}/git/ref/heads/{urllib.parse.quote(kho['default_branch'])}")[0] if _chuoi(kho.get("default_branch")) else {}
+        o = ref.get("object") if type(ref) is dict and ref.get("ref") == f"refs/heads/{kho.get('default_branch')}" else None
+        dau = o.get("sha") if type(o) is dict and o.get("type") == "commit" else None
+        so = lay_json(goi, f"{API}/repos/{repo}/compare/{dau}...{w['head_sha']}")[0] if RUN_BAT_BUOC["head_sha"](dau) and RUN_BAT_BUOC["head_sha"](w.get("head_sha")) else {}
+    except LoiRest as e:
+        return ko("a", f"rest_{e.ma}")
+    for truong, ok in (("path", w.get("path") == WF_WD), ("head_sha", type(so) is dict and so.get("status") in ("identical", "behind")),
+                       ("event", w.get("event") == "workflow_dispatch"), ("conclusion", w.get("conclusion") == "success"),
+                       ("repo", type(w.get("repository")) is dict and w["repository"].get("full_name") == repo)):
+        if not ok:
+            return ko("a", truong)
+    try:
+        ds = lay_trang(goi, f"{API}/repos/{repo}/actions/runs/{wd_run}/artifacts", "artifacts")
+        arts = [a for a in ds["artifacts"] if a.get("name") == f"workflow-definition-{run}"]
+        if not ds["du"] or len(arts) != 1 or arts[0].get("expired") is not False:
+            return ko("b", "artifact")
+        z = lay(goi, f"{API}/repos/{repo}/actions/artifacts/{arts[0]['id']}/zip")
+    except LoiRest as e:
+        return ko("b", f"rest_{e.ma}")
+    sz = hashlib.sha256(z).hexdigest()
+    if arts[0].get("digest") != f"sha256:{sz}":
+        return ko("b", "digest")
+    try:
+        with zipfile.ZipFile(io.BytesIO(z)) as f:
+            if f.namelist() != ["wd.json"]:
+                return ko("c", "zip")
+            j = json.loads(f.read("wd.json"))
+    except (zipfile.BadZipFile, ValueError, KeyError):
+        return ko("c", "zip")
+    if type(j) is not dict:
+        return ko("c", "schema")
+    for truong, ok in (("schema", j.get("schema") == "wd/1"), ("repo", j.get("repo") == repo), ("run_id", _so(j.get("run_id"), 1) and j.get("run_id") == run),
+                       ("path", _chuoi(j.get("path")) and j.get("path") == r.get("path")), ("trang_thai", j.get("trang_thai") == "passed"),
+                       ("oid", type(j.get("oid_dinh_nghia")) is str and bool(RE_HEX40.fullmatch(j["oid_dinh_nghia"]))),
+                       ("blob", type(j.get("blob")) is str and bool(RE_HEX40.fullmatch(j["blob"]))),
+                       ("sha256", type(j.get("sha256")) is str and bool(re.fullmatch(r"[0-9a-f]{64}", j["sha256"]))),
+                       ("khoa", set(j) == KHOA_WD and j.get("ly_do") is None and j.get("loi_graphql") == [] and j.get("nguon") == "ops/ci_provenance.py do-wd"),
+                       ("meta", all(_so(j.get(k), 1) for k in ("run_attempt_luc_do", "run_number")) and all(_chuoi(j.get(k)) for k in ("event", "node_id", "created_at"))
+                        and all(type(j.get(k)) is str and bool(RE_HEX40.fullmatch(j[k])) for k in ("head_sha_rest", "check_suite_commit")))):
+        if not ok:
+            return ko("c", truong)
+    oid = j["oid_dinh_nghia"]
+    try:
+        b = tai_noi_dung(goi, repo, j["path"], oid)
+    except LoiRest as e:
+        return ko("d", f"rest_{e.ma}")
+    except (ValueError, binascii.Error):
+        return ko("d", "noi_dung")
+    for truong, ok in (("blob", blob_cua(b) == j["blob"]), ("sha256", hashlib.sha256(b).hexdigest() == j["sha256"]),
+                       ("url", j.get("repository_file_url") == f"https://github.com/{repo}/blob/{oid}/{j['path']}"),
+                       ("oid_head_sha", r.get("event") not in SU_KIEN_SO_OID or oid == r.get("head_sha"))):
+        if not ok:
+            return ko("d", truong)
+    return {"trang_thai": "passed", "path": j["path"], "oid": oid, "blob": j["blob"], "sha256": j["sha256"], "wd_run_id": wd_run,
+            "artifact_id": arts[0]["id"], "artifact_sha256": sz, "nguon": f"{API}/repos/{repo}/actions/runs/{wd_run}"}
 
 def ghi_tep(p, byte):
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -415,7 +575,39 @@ def cac_trang_thai(prov):
     return ([m["run"]["trang_thai"], m["workflow_definition"]["trang_thai"], g["tap_jobs"]["trang_thai"],
              g["tap_artifacts"]["trang_thai"]] + [x["trang_thai"] for x in m["checkout"]] + [x["trang_thai"] for x in g["jobs"]])
 
-def main(argv=None, goi=goi_that, git=git_cuc_bo, moi_tu=CI_DANG_KY, wf=git_blob):
+def main_do_wd(argv, goi, gql):
+    """`do-wd`: LUÔN ghi JSON khi `--out` đọc được (kể cả sai đối số); rc theo bảng §2.1 của đặc tả."""
+    po = argparse.ArgumentParser(add_help=False)
+    po.add_argument("--out")
+    try:   # cùng luật với parser chính (`--out=x`, lặp ⇒ cái cuối), để đích ghi khi sai đối số không lệch đích khi đúng
+        out = po.parse_known_args(argv)[0].out
+    except SystemExit:
+        out = None
+    p = argparse.ArgumentParser(prog="ci_provenance.py do-wd")
+    p.add_argument("--repo", required=True)
+    p.add_argument("--run", required=True)
+    p.add_argument("--out", required=True)
+    try:
+        a = p.parse_args(argv)
+        ok = bool(RE_REPO.fullmatch(a.repo)) and a.run.isascii() and a.run.isdigit() and int(a.run) > 0
+    except (SystemExit, ValueError):   # ValueError: `int()` vượt giới hạn chữ số của Python 3.11+
+        ok = False
+    if not ok:
+        kq, rc = {"schema": "wd/1", "trang_thai": "not_measured", "ly_do": "sai_doi_so"}, 2
+    else:
+        try:
+            kq, rc = do_wd(a.repo, int(a.run), goi, gql)
+        except (KeyError, TypeError, AttributeError, ValueError):   # dữ liệu lạ chưa lường ⇒ vẫn ghi JSON, không nâng mốc
+            kq, rc = {"schema": "wd/1", "trang_thai": "not_measured", "ly_do": "phan_hoi_hong"}, 3
+    if out:
+        Path(out).write_text(json.dumps(kq, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print(f"WORKFLOW_DEFINITION: {kq['trang_thai']} ({kq.get('ly_do') or '-'})")
+    return rc
+
+def main(argv=None, goi=goi_that, git=git_cuc_bo, moi_tu=CI_DANG_KY, wf=git_blob, gql=gql_that):
+    argv = sys.argv[1:] if argv is None else argv
+    if argv[:1] == ["do-wd"]:
+        return main_do_wd(argv[1:], goi, gql)
     p = argparse.ArgumentParser(prog="ci_provenance.py", description=__doc__.split("\n")[0])
     sub = p.add_subparsers(dest="lenh", required=True)
     t = sub.add_parser("thu", help="thu provenance của MỘT run/attempt bằng REST")
@@ -423,6 +615,7 @@ def main(argv=None, goi=goi_that, git=git_cuc_bo, moi_tu=CI_DANG_KY, wf=git_blob
     t.add_argument("--run", required=True, type=int, help="id workflow run")
     t.add_argument("--attempt", required=True, type=int, help="run_attempt phải đo")
     t.add_argument("--out", required=True, help="thư mục đầu ra (ghi nguyên tử)")
+    t.add_argument("--wd-run", type=int, default=None, help="id lượt ops-do-workflow-definition.yml có artifact cho run này")
     try:
         a = p.parse_args(argv)
     except SystemExit as e:
@@ -434,7 +627,7 @@ def main(argv=None, goi=goi_that, git=git_cuc_bo, moi_tu=CI_DANG_KY, wf=git_blob
         print(f"SAI_DOI_SO: --repo owner/repo, --run/--attempt nguyên dương (được {a.repo!r} {a.run} {a.attempt})\n{KHONG_SINH}")
         return 2
     try:
-        prov, tep = thu(a.repo, a.run, a.attempt, goi, git, moi_tu, wf)
+        prov, tep = thu(a.repo, a.run, a.attempt, goi, git, moi_tu, wf, a.wd_run)
     except LoiRest as e:
         print(f"REST_LOI: HTTP {e.ma} {e.url}\n{KHONG_SINH}")
         return 3
@@ -450,7 +643,7 @@ def main(argv=None, goi=goi_that, git=git_cuc_bo, moi_tu=CI_DANG_KY, wf=git_blob
     print(f"RUN: {m['run']['trang_thai']} (run_attempt {m['run']['run_attempt']}, yeu cau {a.attempt})")
     for c, g in zip(m["checkout"], m["gate_output"]["jobs"]):
         print(f"JOB {c['job_id']} {c['name']}: checkout={c['trang_thai']} {c.get('sha', '-')} gate={g['trang_thai']}")
-    print(f"WORKFLOW_DEFINITION: {m['workflow_definition']['trang_thai']} ({LY_DO_WD})")
+    print(f"WORKFLOW_DEFINITION: {m['workflow_definition']['trang_thai']} ({m['workflow_definition'].get('ly_do') or 'wd-run'})")
     tt = cac_trang_thai(prov)
     print(f"provenance.yaml sha256 {hashlib.sha256(tep['provenance.yaml']).hexdigest()}")
     print(f"NOT_MEASURED: {tt.count('not_measured')}")

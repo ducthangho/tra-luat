@@ -1,0 +1,2 @@
+8	1	ops/vm/cap-nhat-cong-cu.ps1
+33	5	ops/vm/cap-nhat-cong-cu_test.ps1

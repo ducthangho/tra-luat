@@ -1,0 +1,61 @@
+# Trich log run 41017062295 (push master, 09e05945), tai qua REST actions/jobs/<id>/logs 2026-10-30 ~08:15Z.
+# Moi job: sha256 + so byte cua log day du (log goc KHONG luu trong kho vi 3.7MB; GitHub giu log co han),
+# dong checkout (git log -1 --format=%H) va cac dau hieu duong/am cua gate output.
+
+== job 123937148715 | chuan-bi | log sha256 10cae5fb8599854713cc4a52a4cb9506e0462cc3d2d8636e48299a6592d49075 | 3519 byte
+   checkout: KHONG CO BUOC CHECKOUT
+== job 123937181448 | gate-ops (ubuntu-latest) | log sha256 8c99c3b29b6a59b6937630fc6e01e4ac04d93b91e69a397d56d974398d7def7e | 384209 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+   1x TONG: DAT
+   1x TỔNG: ĐẠT
+== job 123937181501 | gate-packet-loop (ubuntu-latest) | log sha256 5fc4f1653d7f505f3edf6cdebeae8669427375d5fc08f3f5f579fa20f3ec388b | 297838 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+   1x TỔNG: ĐẠT
+== job 123937181542 | gate (ubuntu-latest) | log sha256 6ab3bc8aaa1af6bc8b163ed520156428dcb7344751edf4300bea8c079c32441d | 690616 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+   2x TỔNG: ĐẠT
+   2x == gen_instructions selftest 44/44 ==
+   1x == transport selftest 12/12 ==
+   1x == tl selftest 1758/1758 ==
+== job 123937181566 | gate-nhanh-manh (ubuntu-latest, 5) | log sha256 1c8c0e4545b7a478ed853c59d1289bd0400afc3551e20f6e54f11f67649a3c20 | 117272 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937181568 | gate-nhanh-manh (ubuntu-latest, 1) | log sha256 de5739cc47bd29a6d37f733f652f0f791355261be59ad525a853b58359ea208a | 117137 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937181582 | gate-nhanh-manh (ubuntu-latest, 7) | log sha256 48f5ab6d795e4df84354daf2ad9581ffc3432c27f6192d866276a7f658d01046 | 117518 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937181602 | gate-nhanh-manh (ubuntu-latest, 6) | log sha256 e83cc0b7049b65748ccbf93cf4b8e10312212a01023049031328ddd1abd452e6 | 116719 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937181644 | gate-nhanh-manh (ubuntu-latest, 2) | log sha256 9006c0a3d71aff4bd59d2442d94af7fd0d1ded99e96ade53ea0dfa60e30dc66b | 116606 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937181647 | gate-nhanh-manh (ubuntu-latest, 4) | log sha256 4dc3ad40e30fb004fb25d133c86bf50004a32a2308ddd70a60de0b4cd46366ec | 116519 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937181655 | gate-cong-cu (ubuntu-latest, 1) | log sha256 e9b881cd9ae8961a670fdd4e205a0ef9c5ad7217acc7c4ff80cfa13cce5677fb | 128484 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937181689 | gate-cong-cu (ubuntu-latest, 2) | log sha256 016b0ef606538456f1a94e927c1aa9222cac3ec80b7075c927e281c9fa68027e | 128322 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937181697 | gate-cong-cu (ubuntu-latest, 0) | log sha256 a5a1f1d3735e289f4b05994268ea0c542ea4a20823479429c90e79f1e1895a8c | 128487 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937181704 | gate-cong-cu (ubuntu-latest, 3) | log sha256 074a697f525601b714d34804cc606f3eaa8891150c5247d94459f7dfaa2e9c35 | 128252 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937181720 | gate-nhanh-manh (ubuntu-latest, 0) | log sha256 e5e236cb48f3557564c6ee1009457e77b3e9973977cc9ba1cf7c842ba29075dc | 116401 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937181734 | gate-cong-cu (ubuntu-latest, 7) | log sha256 9fd7db0aedd64ed9e6ce7523b88358a725799bd778e063cb658468cb75fec67a | 128269 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937181768 | gate-cong-cu (ubuntu-latest, 6) | log sha256 88b4914c1d05112a95a3b3b98f511cc2ac68a36e1e766a7b703de0ef177bc544 | 128176 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937181795 | gate-cong-cu (ubuntu-latest, 5) | log sha256 9ad8761a16abefcbbd6f6eac310921505dd1a55009913fdcb1b74f524206e471 | 128149 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937181838 | gate-cong-cu (ubuntu-latest, 4) | log sha256 e07aad2332ddfe7a8c45adeaa23075c7603f098357b4cf50b5adf87f6caafdb0 | 128295 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937182170 | gate-nhanh-manh (ubuntu-latest, 3) | log sha256 e1194fcc94075cd72dd480f60d362ff8089b85b51bd07ca06e893d6730adcdfa | 116821 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937618724 | gate-nhanh-gop (ubuntu-latest) | log sha256 4597e96418477c0aab4080c694bb12f2a789131cc113adcfa70048281ecba441 | 112223 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+== job 123937698543 | gate-registry (ubuntu-latest) | log sha256 48946f4199b7763a2072a2680c679304179e9fa19d9005b1314e44f4edcfa374 | 253963 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']
+   4x TỔNG: ĐẠT
+   1x TONG: CA 42/42 dat · DOT BIEN 35/35 bi giet
+   4x TONG: DAT
+   1x TONG: CA 45/45 dat · DOT BIEN 25/25 bi giet
+== job 123944049011 | gate-cong-cu-gop (ubuntu-latest) | log sha256 99b416f19b8ee0ce0b05e40a6ab2d81f8591876ae73a8df60ee739b484779b3e | 98087 byte
+   checkout: ['09e059457a033de769f7cb789edc20810f4b95f5']

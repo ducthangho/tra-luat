@@ -1,0 +1,14 @@
+{
+  "label": "diff-check",
+  "cwd": "cay-kho",
+  "command": [
+    "git",
+    "diff",
+    "--check",
+    "3bdd987",
+    "HEAD"
+  ],
+  "rc": 0,
+  "seconds": 0.004338,
+  "output": ""
+}

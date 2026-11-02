@@ -1,0 +1,25 @@
+Stored diff.patch and numstat.txt match Git b0814f4 -> 210ab81 exactly; only 3 ops/vm files
+Receipt result counts, run version/duration, README entry and all 5 caveats match their retained sources
+MEASURED storage claim: (a) Luot 1–15 deu changes_requested (b0814f4 aedd620 bbc3430 e5e2430 ea5ccd5 28fdbdf 00dd9d4 8e67b70 e218901 d005cf4 d20a69e b667da8 e5838ff f3231c8 c489c72); verdict + HINT.patch tung luot o ops/reviews/pr1065-review-16-codex/luot-truoc/luotN/. Moi luot executor va roi chay luot moi tren head moi; luot 16 dong finding luot 15 va khong tim them.
+Actual historical artifacts: 28 files; verdicts=15; HINT.patch=13; missing HINT rounds= [1, 2]
+{"hint_disk": false, "hint_git_HEAD": false, "hint_manifest": false, "round": 1, "verdict_exists": true}
+{"hint_disk": false, "hint_git_HEAD": false, "hint_manifest": false, "round": 2, "verdict_exists": true}
+{"hint_disk": true, "hint_git_HEAD": true, "hint_manifest": true, "round": 3, "verdict_exists": true}
+{"hint_disk": true, "hint_git_HEAD": true, "hint_manifest": true, "round": 4, "verdict_exists": true}
+{"hint_disk": true, "hint_git_HEAD": true, "hint_manifest": true, "round": 5, "verdict_exists": true}
+{"hint_disk": true, "hint_git_HEAD": true, "hint_manifest": true, "round": 6, "verdict_exists": true}
+{"hint_disk": true, "hint_git_HEAD": true, "hint_manifest": true, "round": 7, "verdict_exists": true}
+{"hint_disk": true, "hint_git_HEAD": true, "hint_manifest": true, "round": 8, "verdict_exists": true}
+{"hint_disk": true, "hint_git_HEAD": true, "hint_manifest": true, "round": 9, "verdict_exists": true}
+{"hint_disk": true, "hint_git_HEAD": true, "hint_manifest": true, "round": 10, "verdict_exists": true}
+{"hint_disk": true, "hint_git_HEAD": true, "hint_manifest": true, "round": 11, "verdict_exists": true}
+{"hint_disk": true, "hint_git_HEAD": true, "hint_manifest": true, "round": 12, "verdict_exists": true}
+{"hint_disk": true, "hint_git_HEAD": true, "hint_manifest": true, "round": 13, "verdict_exists": true}
+{"hint_disk": true, "hint_git_HEAD": true, "hint_manifest": true, "round": 14, "verdict_exists": true}
+{"hint_disk": true, "hint_git_HEAD": true, "hint_manifest": true, "round": 15, "verdict_exists": true}
+HEAD historical artifact paths identical to pinned anchor cbe05f27b3bbad14063196e83d9c04d6d2848b54
+Missing HINT round 1 is referenced by historical verdict lines [38, 168, 169, 171]
+Missing HINT round 2 is referenced by historical verdict lines [108, 118, 120, 127]
+Storage claim verdict: ERROR: (a) claims per-round HINT retention, two are absent in disk/Git/manifest
+Countercheck: current per-round retention assertion FAIL; narrowed statement matches: 15 verdict; 13 HINT.patch cua luot 3–15. HINT.patch luot 1–2 KHONG luu trong kho.
+CLAIM AUDIT: completed; 1 class / 2 missing artifact instances; validator hash checks did not detect this prose overclaim

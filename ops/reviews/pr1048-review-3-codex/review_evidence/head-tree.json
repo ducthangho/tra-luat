@@ -1,0 +1,13 @@
+{
+  "cwd": "/tmp/claude-0/rv/pr1048-review-3/cay-kho",
+  "argv": [
+    "git",
+    "rev-parse",
+    "HEAD^{tree}"
+  ],
+  "rc": 0,
+  "stdout_file": "head-tree.stdout",
+  "stderr_file": "head-tree.stderr",
+  "stdout_bytes": 41,
+  "stderr_bytes": 0
+}

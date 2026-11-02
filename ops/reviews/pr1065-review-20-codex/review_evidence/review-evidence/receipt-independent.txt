@@ -1,0 +1,19 @@
+pr1065-review-16-codex/SHA256SUMS: entries=104, actual files=104, mismatches=[], unlisted=[], extra=[], duplicates=0
+pr1065-vm-cap-nhat-cong-cu-provenance/SHA256SUMS.txt: entries=15, actual files=15, mismatches=[], unlisted=[], extra=[], duplicates=0
+Verdict flat == original == supplied luot16: True
+Verdict SHA256: 342b33a0d5efeb7dc82f3610853507338804ceee72745efd6ddd13cae61bdf33 ; bytes: 26427
+Reviewed commit/tree: 210ab81c3f1af36243748458eb5e70180baeab71 40a4cbe161e513f202bd4681f9713e7f04fee741
+Measured merge-base: 3dfb9731ceda05afbcec4e803a919c4df5e2e5a2
+Blob at pinned commit equals verdict: True
+is-ancestor 210ab81c3f1af36243748458eb5e70180baeab71 cbe05f27b3bbad14063196e83d9c04d6d2848b54 rc= 0
+is-ancestor cbe05f27b3bbad14063196e83d9c04d6d2848b54 HEAD rc= 0
+Anchor commit delta paths: 104 ; only ops/reviews: True
+Launcher run: {'run_id': '52f05f6568ee4ae8888d3e738f95158e', 'head': '210ab81c3f1af36243748458eb5e70180baeab71', 'ma_thoat': 0, 'trang_thai': 'xong', 'worktree_sach': True, 'thoi_luong_giay': 889.793, 'provider': 'openai_codex', 'execution_surface': 'codex_cli', 'transport': 'machine', 'sandbox_trang_thai': 'KHONG_DO_DUOC'}
+Model events: 36 ; unique response IDs: 36 ; models: ['gpt-6.1-sol']
+Model/effort status: DO_DUOC ['xhigh'] DO_DUOC
+Prompt SHA256: 64421fa9a73ef83d354f75ba9b2a670bf7a00713f4a2a1999d0b5b7121983360 MATCH
+Not retained: stdout.log ; stdout/stderr metadata cannot be rehashed from retained artifacts
+Not retained: stderr.log ; stdout/stderr metadata cannot be rehashed from retained artifacts
+Current reviewer observed surface: {'run_id': 'f82c00f120854f8e870b0764c589b4a0', 'provider': 'openai_codex', 'execution_surface': 'codex_cli', 'transport': 'machine', 'head': 'dcb295a903f7e51eab84d3dbd1feb48832471827'}
+Surface is confirmed only from current launcher metadata; current run is still active, not a completed terminal receipt.
+RECEIPT AND MANIFESTS: PASS

@@ -1,0 +1,2 @@
+Final header: changes_requested; exact SHA matches; severity 0/0/1/0; actual finding headings: 1 P2; all 13 referenced output files exist
+Source finding: cay-kho/ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml:129

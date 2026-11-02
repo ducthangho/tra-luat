@@ -1,0 +1,9 @@
+$ git show -s --format='%H %P %T' 7eeb1d9a10aea8e1805b66fbf3d68549eb6778da
+7eeb1d9a10aea8e1805b66fbf3d68549eb6778da 53d670cf5bdeee1c5a5dcb5cefa6a0e7ff9a8b54 7f8be85a7cf9077400fc1747aa6e23128f087677 688ef268ee4e6a09ea4b92da971517baae614091
+$ git diff --numstat 90c101b8d1f8895b66607de8582a18c5e72d834c 7eeb1d9a10aea8e1805b66fbf3d68549eb6778da~0^2 --   # PR head so base packet
+103	5	.claude/dev/launcher_test.py
+10	7	ops/cai_cong_cu.sh
+$ git diff --stat 7eeb1d9a10aea8e1805b66fbf3d68549eb6778da^1 7eeb1d9a10aea8e1805b66fbf3d68549eb6778da
+ .claude/dev/launcher_test.py | 108 +++++++++++++++++++++++++++++++++++++++++--
+ ops/cai_cong_cu.sh           |  17 ++++---
+ 2 files changed, 113 insertions(+), 12 deletions(-)

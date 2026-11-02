@@ -1944,6 +1944,12 @@ COMMAND_META = {
     "gws-auth-stage":        dict(_m("medium", False, "drive", False, False, False, None, None, False, "gws"),
                                   builtin_gate="gws_auth_stage_gate"),
     "gws-auth-load":         _m("low", False, "local", False, False, False, None, None, False, "gws"),
+    "secrets-keygen":        _m("low", True, "none", False, False, False, None, None, False, "gws"),
+    "agent-creds-set":       dict(_m("medium", False, "drive", False, False, False, None, None, False, "gws"),
+                                  builtin_gate="secrets_master_key_gate"),
+    # WP1038: không ghi Drive nhưng chạy một tiến trình tuỳ ý mang credential ⇒ read_only=False, phạm vi local
+    "agent-creds-exec":      dict(_m("medium", False, "local", False, False, False, None, None, False, "gws"),
+                                  builtin_gate="secrets_master_key_gate"),
     "nlm-auth-stage":        dict(_m("medium", False, "drive", False, False, False, None, None, False, "gws"),
                                   builtin_gate="nlm_auth_stage_gate"),
     "nlm-auth-load":         _m("low", False, "local", False, False, False, None, None, False, "gws"),

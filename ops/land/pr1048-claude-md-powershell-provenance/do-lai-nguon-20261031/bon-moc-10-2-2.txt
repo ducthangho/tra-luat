@@ -1,0 +1,33 @@
+# 4 moc §10.2.2 cho ci.yml push master run 41161511121 attempt 1 tren merge b653574 — do 2026-10-31,
+# cach do theo ops/land/pr870-claude-md-bai-hoc-c-provenance/do-1026-5f288ea/bon-moc-10-2-2.txt.
+
+## Run
+REST run 41161511121 (readback-run-41161511121.json): event push, attempt 1, head b653574b117fa1496fbf58f09a22a8cbed5cc5dc,
+status completed, conclusion success, path .github/workflows/ci.yml, check_suite 111579425801, updated_at 2026-10-31T03:40:09Z.
+readback-jobs-41161511121.json (filter=all): 23 job, 23 success, moi job nhan ubuntu-latest, runner_id khac 0.
+kiem-gate-post-b653574.txt: suite 111579425801, 23 ten, rc=0.
+
+## Checkout
+$ git rev-parse b653574^{commit} b653574^{tree} b653574^1 b653574^2
+b653574b117fa1496fbf58f09a22a8cbed5cc5dc
+f68a6474aeda307bde60e1a11928ced22378684b
+ba1b10d899f29e73640376a2c2bd69341eb3a00a
+6f23a4e68805b4af3e2efe77be6e10b513843e93
+log job 124420002077 (log-gate-124420002077-trich.txt): `git log -1 --format=%H` sau checkout = b653574b117fa1496fbf58f09a22a8cbed5cc5dc;
+head_sha = base_sha = b653574b117fa1496fbf58f09a22a8cbed5cc5dc.
+
+## Gate output — artifact 13028021363 (gate-evidence-ubuntu-latest-1)
+sha256 zip tai tu REST /actions/artifacts/13028021363/zip = 543d23ea514c4999f28d2671fbb2a0f0f1c9dfb42e8f7fee0775d6c347234b64
+digest REST (readback-artifacts-41161511121.json) = sha256:543d23ea514c4999f28d2671fbb2a0f0f1c9dfb42e8f7fee0775d6c347234b64 => khop.
+zip KHONG kem; tep giai nen nguyen byte vao artifact-13028021363/ (tl-selftest-Linux.json, tl-selftest-Linux.out).
+tl-selftest-Linux.out sha256 d5a4db4212c678ea0f83611ba793052f5606c4cdf2d46a2239259dae94b31dc9 == output_sha256 trong json: True
+json: status pass, returncode 0, positive_verified true, positive_match '== tl selftest 1759/1759 ==', command [python, scripts/tl.py, --selftest]
+json.identity: head_sha b653574b117fa1496fbf58f09a22a8cbed5cc5dc, tree_sha f68a6474aeda307bde60e1a11928ced22378684b (= git rev-parse b653574^{tree}),
+  tracked_clean true, worktree_clean true, system Linux, python 3.12.15. identity_after == identity: True
+
+## Workflow definition
+measured — workflow-definition-b653574.txt (GraphQL WorkflowRun.file, chay tren may chu kho qua Desktop Commander): ci.yml @ b653574,
+blob 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc khop REST contents?ref va git rev-parse.
+
+## Ket qua
+4/4 measured.

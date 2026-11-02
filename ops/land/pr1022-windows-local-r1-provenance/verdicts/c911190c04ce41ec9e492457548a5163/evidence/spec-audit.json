@@ -1,0 +1,61 @@
+{
+  "head": "f4d15edcb5d0a9742182273e5950f76165060667",
+  "base": "96667715996d41bc45e70a64fbaa8996de20f6a0",
+  "spec_hash": "377ecea689043fcab4d007d65d9592bd28819fa37983796e0c1b75b2c154e715",
+  "authoritative_spec_hash_matches": true,
+  "supplied_full_diff_matches": true,
+  "supplied_r1_r2_diff_matches": true,
+  "files": 2,
+  "added_lines": 75,
+  "deleted_lines": 0,
+  "changed_paths": [
+    "docs/PROTOCOL_DA_PHIEN.md",
+    "docs/adr/0057-windows-local-may-chu-kho.md"
+  ],
+  "lease_write_set": [
+    "docs/PROTOCOL_DA_PHIEN.md",
+    "docs/adr/0057-windows-local-may-chu-kho.md"
+  ],
+  "write_set_hash": "2167022b190770a760c5c18c79e54e0a4a0859fcecd479f20bdf46d191b81f99",
+  "section20_row_count": 1,
+  "section20_row": "| `ADR-0057` | Máy Windows local của chủ kho dùng khi online theo chỉ thị chủ kho 29-10-2026; đã chạy local thì vá lỗi local do diff trước merge; cộng thêm, không thay check bắt buộc CI | Accepted | không cổng — kỷ luật executor |",
+  "pointer_line": 1015,
+  "protocol_added_lines": [
+    "Quy ước sử dụng máy Windows local của chủ kho nằm tại `ADR-0057`.",
+    "| `ADR-0057` | Máy Windows local của chủ kho dùng khi online theo chỉ thị chủ kho 29-10-2026; đã chạy local thì vá lỗi local do diff trước merge; cộng thêm, không thay check bắt buộc CI | Accepted | không cổng — kỷ luật executor |"
+  ],
+  "decision_count": 10,
+  "measurements": {
+    "D1": {
+      "adr": "| D1 | chạy song song selftest của `tl.py`, `lease_publish_test`, `packet_loop_test` trên `1cc847d` | `t192_S8` đỏ khi chạy song song; chạy riêng trên `e9967f0` lúc máy rảnh ra 3/3 ĐẠT (8 s) | chạy chồng sinh **đỏ giả** ⇒ cần khoá một-phiên-một-lúc |",
+      "spec": "| D1 | chạy song song `tl selftest`, `lease_publish_test`, `packet_loop_test` trên `1cc847d` | `t192_S8` đỏ khi chạy song song; chạy riêng trên `e9967f0` lúc máy rảnh ra 3/3 ĐẠT (8 s) | chạy chồng sinh **đỏ giả**, nên khoá một-phiên-một-lúc là cần, không phải nghi lễ |",
+      "numeric_tokens_equal": true
+    },
+    "D2": {
+      "adr": "| D2 | hai phiên chưa nhận quy ước | PID 17016 (`wp960-win`) và PID 22884 (`tl1014`, PR #1014 đã đóng) chạy `bien_nhan_v2_test` từ 09:06Z và 09:10Z, ngoài khoá, trong lúc phiên #1006 giữ khoá từ 09:24Z | quy ước gửi qua tin nhắn không tới mọi phiên ⇒ phải nằm ở **nơi mọi phiên đọc** |",
+      "spec": "| D2 | hai phiên chưa nhận quy ước | PID 17016 (`wp960-win`) và PID 22884 (`tl1014`, PR #1014 đã đóng) chạy `bien_nhan_v2_test` từ 09:06Z và 09:10Z, ngoài khoá, trong lúc phiên #1006 giữ khoá từ 09:24Z | quy ước gửi qua tin nhắn thì không tới được mọi phiên; phải nằm ở **nơi mọi phiên đọc** |",
+      "numeric_tokens_equal": true
+    },
+    "D3": {
+      "adr": "| D3 | `packet_loop_test` không in tiến độ (stdout đệm) | 65 phút với `pl.out` = 0 byte rồi phải dừng tay | lượt dài trên local phải in tiến độ |",
+      "spec": "| D3 | `packet_loop_test` không in tiến độ (stdout đệm) | 65 phút với `pl.out` = 0 byte rồi phải dừng tay | lượt chạy dài trên local phải in tiến độ (`python -u` hoặc nhật ký từng ca) |",
+      "numeric_tokens_equal": true
+    },
+    "D4": {
+      "adr": "| D4 | độ sẵn sàng | Desktop Commander trả `CONNECT_TIMEOUT` cho `session_015GtxrZ1Tt93F4NLUUhKYQy` lúc ~09:00Z và ~09:23Z; máy offline khoảng 3 giờ trước 07:48Z | local **có lúc có lúc không** ⇒ không làm điều kiện bắt buộc vô điều kiện |",
+      "spec": "| D4 | độ sẵn sàng | Desktop Commander trả `CONNECT_TIMEOUT` cho `session_015GtxrZ1Tt93F4NLUUhKYQy` lúc ~09:00Z và ~09:23Z; máy offline khoảng 3 giờ trước 07:48Z | local là năng lực **có lúc có lúc không**, nên không được làm điều kiện bắt buộc vô điều kiện |",
+      "numeric_tokens_equal": true
+    },
+    "D5": {
+      "adr": "| D5 | lợi ích | selftest của `tl.py` 1738/1738 local trong khoảng 10 phút; Windows CI qua `workflow_dispatch` ~40 phút cộng hàng đợi, hôm đó bị billing chặn nhiều giờ | máy sẵn sàng thì local nhanh hơn CI và không phụ thuộc billing |",
+      "spec": "| D5 | lợi ích | `tl selftest` 1738/1738 local trong khoảng 10 phút; Windows CI qua `workflow_dispatch` ~40 phút cộng hàng đợi, và hôm đó bị billing chặn nhiều giờ | khi máy sẵn sàng thì local nhanh hơn CI và không phụ thuộc billing |",
+      "numeric_tokens_equal": true
+    },
+    "D6": {
+      "adr": "| D6 | lỗi phát hiện | trên master: `t27` (Windows-only, packet #1006), `r929` (WinError 5, đã vá #1010), `bien_nhan_v2_test` c91/c93/c96 (#1017) | local tái hiện lỗi Windows thật mà CI Linux không thấy |",
+      "spec": "| D6 | lỗi phát hiện | trên master: `t27` (Windows-only, packet #1006), `r929` (WinError 5, đã vá #1010), `bien_nhan_v2_test` c91/c93/c96 (#1017) | local tái hiện đúng lỗi Windows thật mà CI Linux không thấy |",
+      "numeric_tokens_equal": true
+    }
+  },
+  "limitations": "Numeric equality supplements manual semantic review; does not validate the Windows logs or causal inference."
+}

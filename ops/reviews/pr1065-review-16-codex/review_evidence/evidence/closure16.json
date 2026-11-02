@@ -1,0 +1,68 @@
+[
+  {
+    "mode": "control",
+    "rc": 0,
+    "pin": "1.7.7",
+    "response": "1.7.7",
+    "action": "nang_cap",
+    "downloads": 1,
+    "direct": {
+      "rc": 0,
+      "stdout": "1.7.7"
+    },
+    "command": [
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr16-pr1065.1jbf/pwsh/pwsh",
+      "-NoProfile",
+      "-File",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr16-pr1065.1jbf/probes/pinned-release-round15.ps1",
+      "-Mode",
+      "control",
+      "-Log",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr16-pr1065.1jbf/evidence/closure16-control.json"
+    ]
+  },
+  {
+    "mode": "post-mismatch",
+    "rc": 0,
+    "pin": "1.7.7",
+    "response": "9.9.9",
+    "action": "loi",
+    "downloads": 0,
+    "direct": {
+      "rc": 0,
+      "stdout": "1.0.0"
+    },
+    "command": [
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr16-pr1065.1jbf/pwsh/pwsh",
+      "-NoProfile",
+      "-File",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr16-pr1065.1jbf/probes/pinned-release-round15.ps1",
+      "-Mode",
+      "post-mismatch",
+      "-Log",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr16-pr1065.1jbf/evidence/closure16-post-mismatch.json"
+    ]
+  },
+  {
+    "mode": "keep-mismatch",
+    "rc": 0,
+    "pin": "1.7.7",
+    "response": "9.9.9",
+    "action": "loi",
+    "downloads": 0,
+    "direct": {
+      "rc": 0,
+      "stdout": "9.9.9"
+    },
+    "command": [
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr16-pr1065.1jbf/pwsh/pwsh",
+      "-NoProfile",
+      "-File",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr16-pr1065.1jbf/probes/pinned-release-round15.ps1",
+      "-Mode",
+      "keep-mismatch",
+      "-Log",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr16-pr1065.1jbf/evidence/closure16-keep-mismatch.json"
+    ]
+  }
+]

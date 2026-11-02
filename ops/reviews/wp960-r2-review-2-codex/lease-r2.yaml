@@ -1,0 +1,99 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 960
+packet_id: NO-CAU-LICH-SU-BIEN-NHAN
+revision: 2
+generation: 1
+lease_id: wp960-r2-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: []
+depends_on_ghi_chu: 'doc lap; land_evidence_nguon.py va ci.yml NGOAI write set theo spec r2. Base origin/master 4488444.'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'spec r2: reviewer khac ho executor => cross_approved; executor ho claude, reviewer ho openai (Q9).'
+access: read-write
+review_class: systemic
+effective_review_class: sensitive
+effective_review_class_ghi_chu: 'spec khai systemic; cong lease_publish tinh lop tu write set ops/** = sensitive, lay max => sensitive.'
+spec_path: ops/specs/NO-CAU-LICH-SU-BIEN-NHAN-r2.md
+spec_sha256_required: 9a155cb9995b225129dc11de03e2d6d9811a9c53321151e0389214a85d33b1ca
+spec_hash: 9a155cb9995b225129dc11de03e2d6d9811a9c53321151e0389214a85d33b1ca
+spec_ref: refs/heads/master@44884446f71c89e25f9a72ac58e4f597db63c1ba
+prompt_path: ops/specs/NO-CAU-LICH-SU-BIEN-NHAN-r2.md
+prompt_sha256_required: 9a155cb9995b225129dc11de03e2d6d9811a9c53321151e0389214a85d33b1ca
+write_set:
+- ops/bien_nhan_v2.py
+- ops/bien_nhan_v2_test.py
+- ops/handoff/wp960-r2-g1-claude.md
+write_set_hash: b2a254d364766b0ddd030c58931bd07c0b8f35ac3d3aa5405815bba253c7081b
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'M1-M5 trong bien_nhan_v2.py; M5-M6 trong bien_nhan_v2_test.py; handoff chi tren nhanh lease; diff PR <= 2 tep. Kich thuoc uoc +250/-250 (spec), khai theo ADR-0044 neu vuot.'
+change_policy_sha: null
+effective_write_set:
+- ops/bien_nhan_v2.py
+- ops/bien_nhan_v2_test.py
+- ops/handoff/wp960-r2-g1-claude.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1/P2; tran loi goi codex theo dong khai ADR-0052 cua spec (toi da 8, dem lai tu 0 cho r2); commit run.json; moi thread connector duoc tra loi'}
+- {id: M-2, dieu_kien: 'ci.yml luot PR XANH tren head cuoi doc bang check run; bien_nhan_v2_test N/N hai so BANG NHAU tai cho tren dung commit day'}
+- {id: M-3, dieu_kien: 'B1-B8 cua spec r2: moi tieu chi co dot bien giet dung ca dich; B5 no rong ra rc=1; bien_nhan_v2 --root . rc=0 TONG: DAT; ruff F delta 0; doctrine-scan, git diff --check rc0'}
+- {id: M-4, dieu_kien: 'hinh dang loi cua spec r2 (ba hinh dang, moi cai da 3 luot) xuat hien o BAT KY luot review nao cua r2 => DUNG, hoi chu kho (Q8)'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp960-g1-claude
+branch_ownership: exclusive
+branch_ghi_chu: 'nhanh thi cong duoc chi dinh cho phien nay; khoi dong lai tu master luc bat tay (PR r1 #976 va ghi so #985 da merge).'
+target_branch_neu_land: master
+base_sha: 44884446f71c89e25f9a72ac58e4f597db63c1ba
+start_from_sha: 44884446f71c89e25f9a72ac58e4f597db63c1ba
+start_from_ghi_chu: 'origin/master luc cap lease (merge #989; spec r2 vao master tu 2044ee9 PR #985).'
+reviewed_sha_required: 44884446f71c89e25f9a72ac58e4f597db63c1ba
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/960#issuecomment-6444965500
+granted_on_instruction_readback: 'chu kho nhan trong phien session_015GtxrbeTfDyFKdj7rb72Uq: "Dong y cap list di." (tra loi de nghi cap lease r2); ghi ho tren Issue #960. Bam byte KHONG DO DUOC.'
+recorded_by: claude-executor-session
+recorder_is_executor: true
+recorder_ghi_chu: 'phien ghi lease (session_015GtxrbeTfDyFKdj7rb72Uq) CUNG LA phien executor r1 va se thi cong r2 — chu kho giao truc tiep; khai thang, khong phai tu cap: nguoi cap la chu kho.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-27T14:43:00Z'
+  goc_quet: 'master 4488444, fetch +refs/heads/* --prune, ls-remote so TAP ten voi for-each-ref'
+  ket_qua: 'ops/bien_nhan_v2.py va ops/bien_nhan_v2_test.py: NGUOI_GIU duy nhat la wp960-r1-g1-claude, do lease nay thay the (bia mo hai chieu).'
+thay_the_cho: wp960-r1-g1-claude
+thay_the_cho_ghi_chu: 'lease r1 con han toi 2026-10-29T07:22Z; bia mo da_bi_thay_the dat tren nhanh ops/wp960-r1-g1-lease (commit 6a4fdf2).'
+leased_at_utc: '2026-10-27T14:43:00Z'
+heartbeat_at: '2026-10-27T14:43:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+heartbeat_required_minutes: 360
+heartbeat_required_ghi_chu: 'ADR-0056 => 360 phut.'
+lease_until: '2026-10-29T14:43:00Z'
+lease_expires_at_utc: '2026-10-29T14:43:00Z'
+run_minutes: 60
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+attempts_basis: 'mac dinh kho (tien le wp929/wp943/r1).'
+review_rounds_limit: 8
+budget:
+  codex_review_calls:
+    pr_wp960_r2_g1: {used: 0, reserved: 0, limit: 8}
+  attempt:
+    packet_960_r2: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'day nhanh agent/wp960-g1-claude khi B1-B8 dat; mo PR draft. Hinh dang loi lap lan thu 4 => DUNG hoi chu kho (M-4).'

@@ -1,0 +1,12 @@
+{"label": "auxiliary", "flag": "--sinh-no", "result": {"rc": 2}, "stdout": "", "stderr": "KHÔNG ĐO ĐƯỢC: directory.receipt.yaml: không sinh được nợ (IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmpg4nhoin0/ops/reviews/directory.receipt.yaml')\n"}
+{"label": "auxiliary", "flag": "--sinh-no-cau-lich-su", "result": {"rc": 2}, "stdout": "", "stderr": "KHÔNG ĐO ĐƯỢC: directory.receipt.yaml: không đọc được (IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmpg4nhoin0/ops/reviews/directory.receipt.yaml')\n"}
+Traceback (most recent call last):
+  File "/tmp/claude-0/rv/wp960-r2-review-1-codex/probe_review.py", line 185, in <module>
+    globals()[sys.argv[1]]()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/tmp/claude-0/rv/wp960-r2-review-1-codex/probe_review.py", line 163, in auxiliary
+    emit('default-tree-fallback',canonical=tree,chosen=b._nhanh_mac_dinh(root),local_master=k['g']('rev-parse','master'),result=cli(root,al))
+                                                       ~~~~~~~~~~~~~~~~~^^^^^^
+  File "/tmp/wp960-r2-hint/ops/bien_nhan_v2.py", line 1128, in _nhanh_mac_dinh
+    raise KhongDoDuoc(f"ref mặc định `{ref}` có nhưng không trỏ commit")
+bnv2.KhongDoDuoc: ref mặc định `refs/remotes/origin/master` có nhưng không trỏ commit

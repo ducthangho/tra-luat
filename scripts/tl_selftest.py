@@ -4700,10 +4700,10 @@ def run() -> int:
     try:
         _os38.environ["TL_NOTEBOOK_ID"] = "NB-WP710-CANARY-0001"
         _os38.environ["TL_TOKEN"] = _o_env50c["TL_TOKEN"] or "selftest-token"
-        _tg50c._master_key = lambda: "mk50c"
-        _tg50c._secrets_fetch = lambda a, fid: (_store50c.encrypt(json.dumps({"token": "t", "webappUrl": "u"}).encode(), "mk50c"), "file")
+        _tg50c._master_key = lambda: "mk50c-wp1009-0123456789abcdefghij"
+        _tg50c._secrets_fetch = lambda a, fid: (_store50c.encrypt(json.dumps({"token": "t", "webappUrl": "u"}).encode(), "mk50c-wp1009-0123456789abcdefghij"), "file")
         _tg50c._secrets_upload = lambda blob, folder, fid: (
-            _log50c["bundle"].append(json.loads(_store50c.decrypt(blob, "mk50c").decode())) or (fid, True))
+            _log50c["bundle"].append(json.loads(_store50c.decrypt(blob, "mk50c-wp1009-0123456789abcdefghij").decode())) or (fid, True))
         _tg50c._refresh_nlm_auth = lambda: True
         _tg50c._nlm_auth_files = lambda: {"auth.json": "{}"}
         _tg50c._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_log50c["stage"].append(name) or (fid, True))
@@ -4754,16 +4754,16 @@ def run() -> int:
     try:
         import tempfile as _tf714a
         _os38.environ["TL_TOKEN"] = "offline-test-token"
-        _tg50._master_key = lambda: "offline-test-master"
+        _tg50._master_key = lambda: "offline-test-master-wp1009-0123456789abcdefghij"
         _tg50.load_creds = lambda *a, **k: None
         _tg50._nlm_auth_alive = _alive714a
         _tg50._nlm_auth_files = lambda: {}
         _tg50._refresh_nlm_auth = lambda: False
         _tg50._gws_export_cred = lambda: None
         _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(
-            json.dumps(_bundle714a).encode(), "offline-test-master"), "file")
+            json.dumps(_bundle714a).encode(), "offline-test-master-wp1009-0123456789abcdefghij"), "file")
         _tg50._secrets_upload = lambda blob, *a, **k: (_up714a.append(json.loads(
-            _store50d.decrypt(blob, "offline-test-master").decode())) or ("OFFLINE", True))
+            _store50d.decrypt(blob, "offline-test-master-wp1009-0123456789abcdefghij").decode())) or ("OFFLINE", True))
         with _tf714a.TemporaryDirectory() as _td714a:
             _cfg714a = _os38.path.join(_td714a, "config.json")
             with open(_cfg714a, "w", encoding="utf-8") as _f714a:
@@ -4843,8 +4843,8 @@ def run() -> int:
         import contextlib as _cx714b, io as _io714b
         _os38.environ["TL_TOKEN"] = "offline-test-token"
         _tg50.load_creds = lambda *a, **k: None
-        _tg50._master_key = lambda: "offline-test-master"
-        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps({"token": "offline-test-token"}).encode(), "offline-test-master"), "file")
+        _tg50._master_key = lambda: "offline-test-master-wp1009-0123456789abcdefghij"
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps({"token": "offline-test-token"}).encode(), "offline-test-master-wp1009-0123456789abcdefghij"), "file")
         _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
         _tg50._refresh_nlm_auth = lambda: False
         _tg50._stage_enc_upload = lambda *a, **k: (_up714b.append(True) or ("OFFLINE", True))
@@ -4890,10 +4890,10 @@ def run() -> int:
         _tg50._nlm_auth_files = lambda: {"auth.json": _st50d["jar"]}
         _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (
             _st50d["up"].append(json.loads(_store50d.decrypt(blob, "tok50d").decode())) or (fid, True))
-        _tg50._master_key = lambda: "mk50d"
-        _tg50._secrets_fetch = lambda a, fid: (_store50d.encrypt(json.dumps({"token": "tok50d"}).encode(), "mk50d"), "file")
+        _tg50._master_key = lambda: "mk50d-wp1009-0123456789abcdefghij"
+        _tg50._secrets_fetch = lambda a, fid: (_store50d.encrypt(json.dumps({"token": "tok50d"}).encode(), "mk50d-wp1009-0123456789abcdefghij"), "file")
         _tg50._secrets_upload = lambda blob, folder, fid: (
-            _st50d["up"].append(json.loads(_store50d.decrypt(blob, "mk50d").decode()).get("nlm_auth")) or (fid, True))
+            _st50d["up"].append(json.loads(_store50d.decrypt(blob, "mk50d-wp1009-0123456789abcdefghij").decode()).get("nlm_auth")) or (fid, True))
         _tg50._refresh_nlm_auth = lambda: True
         _tg50._gws_export_cred = lambda: None
         _tg50.load_creds = lambda *a, **k: None
@@ -5051,15 +5051,15 @@ def run() -> int:
     try:
         import tempfile as _tf714e
         _os38.environ["TL_TOKEN"] = "offline-test-token"
-        _tg50._master_key = lambda: "mk714e"
+        _tg50._master_key = lambda: "mk714e-wp1009-0123456789abcdefghij"
         _tg50.load_creds = lambda *a, **k: None
         _tg50._nlm_auth_alive = _alive714e
         _tg50._refresh_nlm_auth = lambda: False
         _tg50._gws_export_cred = lambda: None
         _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_st714e["up"].append(name) or (fid, True))
-        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps(_st714e["remote"]).encode(), "mk714e"), "file")
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps(_st714e["remote"]).encode(), "mk714e-wp1009-0123456789abcdefghij"), "file")
         _tg50._secrets_upload = lambda blob, *a, **k: (_st714e["up"].append(json.loads(
-            _store50d.decrypt(blob, "mk714e").decode())) or ("S714E", True))
+            _store50d.decrypt(blob, "mk714e-wp1009-0123456789abcdefghij").decode())) or ("S714E", True))
         with _tf714e.TemporaryDirectory() as _td714e:
             _cfg714e = _os38.path.join(_td714e, "cfg.json")
             with open(_cfg714e, "w", encoding="utf-8") as _fh714e:
@@ -5116,13 +5116,13 @@ def run() -> int:
     try:
         import contextlib as _cx714f, io as _io714f
         _os38.environ["TL_TOKEN"] = "offline-test-token"
-        _tg50._master_key = lambda: "mk714f"
+        _tg50._master_key = lambda: "mk714f-wp1009-0123456789abcdefghij"
         _tg50.load_creds = lambda *a, **k: None
         _tg50._refresh_nlm_auth = lambda: False
         _tg50._gws_export_cred = lambda: None
         _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
         _tg50._nlm_auth_alive = lambda nb, timeout=30, **kw: (True, "LIVE OK (test)")
-        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps({"token": "offline-test-token"}).encode(), "mk714f"), "file")
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps({"token": "offline-test-token"}).encode(), "mk714f-wp1009-0123456789abcdefghij"), "file")
 
         def _run714f(fn, ns):
             _cap = _io714f.StringIO()
@@ -21371,6 +21371,654 @@ def run() -> int:
         return _cay972(_f)
     _t110("r972_init_config_khong_di_theo_bi_danh_dich", _c972_init_config_khong_di_theo_bi_danh_dich)
 
+    # ═══ r973 — WP1009 CLOUD-SETUP-P1-BUNDLE: tl_agent_creds.enc · chốt khoá gốc ở đường GHI · bootstrap nạp ═══
+    # Hermetic: upload/tải công khai thay bằng đồ giả GIỮ TRẠNG THÁI (`drv` = {fileId: blob}) có đếm lời gọi.
+    import argparse as _ap973, secrets as _sec973, subprocess as _sp973, sys as _sys973
+    _tlm973, _os973 = globals()["_TL_MODULE"], globals()["os"]   # tên tĩnh cho ruff (như r972)
+    _tg973 = _tlm973._imp("tl_gws"); _tg973.bind(_tlm973)
+    _st973 = _tlm973._imp("gws_cred_store")
+    _K973 = "k973-abcdefghijklmnopqrstuvwxyz0123456789"
+    _AU973 = {"tokens": {"refresh_token": "SENT973-codex"}, "last_refresh": "2026-10-27T11:35:54.511153200Z"}
+
+    def _ns973(**kw):
+        d = dict(codex=False, claude_token_env=None, antigravity_key_env=None, new=False, file_id=None, folder="F973")
+        return _ap973.Namespace(**{**d, **kw})
+
+    def _dec973(blob, k=_K973):
+        return json.loads(_st973.decrypt(blob, k).decode("utf-8"))
+
+    def _set973(ns, env=None, drv=None, hong=False):
+        """agent-creds-set THẬT; trả (rc, stdout+stderr, [fileId đã upload], drv)."""
+        drv, ups = ({} if drv is None else drv), []
+        def _up(name, blob, folder, fid, force_new, g=None):
+            if hong:
+                raise RuntimeError("UPLOAD973 SENT973-codex SENT973-claude SENT973-gemini")   # lượt 3 F13
+            fid = f"FID973-{len(drv)}" if (force_new or not fid) else fid
+            ups.append(fid); drv[fid] = blob
+            return fid, not force_new
+        o = {k: getattr(_tg973, k) for k in ("_stage_enc_upload", "_public_curl_bytes")}
+        _tg973._stage_enc_upload, _tg973._public_curl_bytes = _up, lambda fid, timeout=120.0: drv.get(fid)
+        sav, b = _env110({"TL_MASTER_KEY": _K973, "TL_AGENT_CREDS_FILEID": None, **(env or {})}), _io110.StringIO()
+        try:
+            with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
+                rc = _tg973.cmd_agent_creds_set(ns)
+        finally:
+            for k, v in o.items():
+                setattr(_tg973, k, v)
+            _env110_restore(sav)
+        return rc, b.getvalue(), ups, drv
+
+    def _codex973(fn, auth=_AU973):
+        with _tf110.TemporaryDirectory() as d:
+            _P110(d, "auth.json").write_text(json.dumps(auth), encoding="utf-8")
+            return fn(d)
+
+    def _c973_a1(d):
+        # review F5: rev1 mang ĐỦ ba khoá; mỗi lần sau chỉ thay MỘT khoá ⇒ hai khoá kia phải còn nguyên
+        e = {"CODEX_HOME": d, "TOKC973": "SENT973-claude", "GEMK973": "SENT973-gemini"}
+        rc1, _, up1, drv = _set973(_ns973(new=True, codex=True, claude_token_env="TOKC973",
+                                          antigravity_key_env="GEMK973"), e)
+        if rc1 != 0 or len(up1) != 1 or b"SENT973-codex" in drv[up1[0]]:
+            return False
+        p1 = _dec973(drv[up1[0]])
+        rc2, _, up2, drv = _set973(_ns973(file_id=up1[0], claude_token_env="TOKC973"),
+                                   {**e, "TOKC973": "SENT973-claude2"}, drv)
+        p2 = _dec973(drv[up1[0]])
+        rc3, _, up3, drv = _set973(_ns973(file_id=up1[0], antigravity_key_env="GEMK973"),
+                                   {**e, "GEMK973": "SENT973-gemini2"}, drv)
+        p3 = _dec973(drv[up1[0]])
+        return (p1.get("schema") == 1 and p1.get("rev") == 1 and p1.get("codex_auth") == _AU973
+                and (rc2, rc3, up2, up3) == (0, 0, up1, up1) and (p2.get("rev"), p3.get("rev")) == (2, 3)
+                and p2.get("codex_auth") == p3.get("codex_auth") == _AU973
+                and (p2.get("claude_oauth_token"), p2.get("antigravity_api_key")) == ("SENT973-claude2", "SENT973-gemini")
+                and (p3.get("claude_oauth_token"), p3.get("antigravity_api_key")) == ("SENT973-claude2", "SENT973-gemini2"))
+    _t110("r973_agent_creds_set_ma_hoa_va_rev", lambda: _codex973(_c973_a1))
+
+    _OLD973 = {"OLD973": _st973.encrypt(json.dumps({"schema": 1, "rev": 5}).encode(), "khoa-KHAC-" + _K973)}
+
+    def _c973_a2(d):
+        rc, _, ups, _drv = _set973(_ns973(file_id="OLD973", codex=True), {"CODEX_HOME": d}, dict(_OLD973))
+        return rc not in (0, None) and ups == []
+    _t110("r973_agent_creds_tu_choi_ban_cu_khong_giai_ma_duoc", lambda: _codex973(_c973_a2))
+
+    def _c973_a3(d):
+        e = {"CODEX_HOME": d, "TOKC973": "SENT973-claude", "GEMK973": "SENT973-gemini"}
+        ns = dict(codex=True, claude_token_env="TOKC973", antigravity_key_env="GEMK973")
+        ra = [_set973(_ns973(new=True, **ns), e), _set973(_ns973(file_id="OLD973", **ns), e, dict(_OLD973)),
+              _set973(_ns973(new=True, **ns), e, hong=True)]
+        return (ra[0][0] == 0 and all(r[0] != 0 for r in ra[1:]) and "upload lỗi" in ra[2][1]
+                and all(s not in r[1] for r in ra for s in ("SENT973-codex", "SENT973-claude", "SENT973-gemini")))
+    _t110("r973_agent_creds_khong_in_gia_tri", lambda: _codex973(_c973_a3))
+
+    def _c973_a6():
+        e = {"MY_KEY973": "gem-973-val", "GEMINI_API_KEY": "KHAC973", "RONG973": ""}
+        rc1, _, up1, drv = _set973(_ns973(new=True, antigravity_key_env="MY_KEY973"), e)
+        rc2, _, up2, drv2 = _set973(_ns973(new=True, claude_token_env="MY_KEY973"), e)
+        rc3, _, up3, _d3 = _set973(_ns973(new=True, antigravity_key_env="RONG973"), e)
+        # review lượt 2 F7: biến token Claude được NÊU mà rỗng / chỉ khoảng trắng / chưa đặt ⇒ từ chối cả lệnh,
+        # kể cả khi cùng lượt có một khoá hợp lệ khác (không xanh nhờ nhánh "không có khoá nào"); bản cũ nguyên byte
+        cu, xau = drv[up1[0]], []
+        for bien in ("RONG973", "TRANG973", "THIEU973"):
+            for dich in ({"file_id": up1[0]}, {"new": True}):   # lượt 3 F7: CẢ nhánh --new
+                r = _set973(_ns973(antigravity_key_env="MY_KEY973", claude_token_env=bien, **dich),
+                            {**e, "TRANG973": "   ", "THIEU973": None}, drv)
+                xau.append(r[0] != 0 and r[2] == [] and drv[up1[0]] == cu and len(drv) == 1)
+        return (rc1 == 0 and _dec973(drv[up1[0]]).get("antigravity_api_key") == "gem-973-val" and rc2 == 0
+                and "antigravity_api_key" not in _dec973(drv2[up2[0]]) and rc3 != 0 and up3 == [] and all(xau))
+    _t110("r973_agent_creds_khoa_gemini_tu_bien", _c973_a6)
+
+    def _c973_a4(d):
+        rc, _, ups, _drv = _set973(_ns973(new=True, codex=True), {"CODEX_HOME": d})
+        return rc != 0 and ups == []
+    _t110("r973_agent_creds_tokens_phai_la_object", lambda: _codex973(_c973_a4, {"tokens": "chuoi"}))
+
+    def _c973_a5(d):
+        with _tf110.TemporaryDirectory() as h:
+            _P110(h, ".codex").mkdir()
+            _P110(h, ".codex", "auth.json").write_text(json.dumps({"tokens": {"o": "HOME973"}}), encoding="utf-8")
+            rc, _, ups, drv = _set973(_ns973(new=True, codex=True), {"CODEX_HOME": d, "HOME": h, "USERPROFILE": h})
+            return rc == 0 and _dec973(drv[ups[0]]).get("codex_auth") == _AU973
+    _t110("r973_agent_creds_ton_trong_CODEX_HOME", lambda: _codex973(_c973_a5))
+
+    def _c973_f11():
+        # lượt 3 F11: đích ghi --file-id > TL_AGENT_CREDS_FILEID > AGENT_CREDS_FILEID; --new thắng cả ba.
+        # Blob KHÔNG được chọn phải giữ nguyên byte.
+        cu = {f: _st973.encrypt(json.dumps({"schema": 1, "rev": r}).encode(), _K973)
+              for f, r in (("EXP973", 4), ("ENV973", 9), ("HANG973", 2))}
+        o, kq = _tg973.AGENT_CREDS_FILEID, []
+        _tg973.AGENT_CREDS_FILEID = "HANG973"
+        try:
+            for ns, env, dich in ((dict(file_id="EXP973"), {"TL_AGENT_CREDS_FILEID": "ENV973"}, "EXP973"),
+                                  ({}, {"TL_AGENT_CREDS_FILEID": "ENV973"}, "ENV973"), ({}, {}, "HANG973"),
+                                  (dict(new=True, file_id="EXP973"), {"TL_AGENT_CREDS_FILEID": "ENV973"}, None)):
+                drv = dict(cu)
+                rc, _, ups, drv = _set973(_ns973(claude_token_env="TOK973F", **ns), {"TOK973F": "x", **env}, drv)
+                moi = [f for f in drv if f not in cu]
+                kq.append(rc == 0 and ups == ([dich] if dich else moi) and len(ups) == 1
+                          and all(drv[f] == cu[f] for f in cu if f != dich)
+                          and _dec973(drv[ups[0]]).get("rev") == ({"EXP973": 5, "ENV973": 10, "HANG973": 3}.get(dich, 1)))
+        finally:
+            _tg973.AGENT_CREDS_FILEID = o
+        return len(kq) == 4 and all(kq)
+    _t110("r973_agent_creds_set_thu_tu_dich_ghi", _c973_f11)
+
+    def _c973_b1():
+        def _rc(fn, k):
+            ups, o = [], {n: getattr(_tg973, n) for n in ("_secrets_upload", "_stage_enc_upload", "load_creds")}
+            for n in o:
+                setattr(_tg973, n, lambda *a, **kw: ups.append(1) or ("X973", True))
+            cfg = []
+
+            def _khong_cfg(*a, **kw):   # lệnh cũ qua chốt rồi dừng ở đây (rc 5) — bằng chứng DƯƠNG đã qua chốt
+                cfg.append(1)
+                raise RuntimeError("CFG973")
+            _tg973.load_creds = _khong_cfg
+            sav, b = _env110({"TL_MASTER_KEY": k, "CODEX_HOME": None, "TOK973B": "x"}), _io110.StringIO()
+            try:
+                with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
+                    return fn(_ns973(claude_token_env="TOK973B", new=True, config=None, profile=None, secrets_id="S",
+                                     secrets_file=None, gas_token="g", webapp=None, gws=False, nlm=False,
+                                     no_gws=True, no_nlm=True, no_public=True)), len(ups), "TL_MASTER_KEY yếu" in b.getvalue(), bool(cfg)
+            finally:
+                for n, v in o.items():
+                    setattr(_tg973, n, v)
+                _env110_restore(sav)
+        lenh = (_tg973.cmd_secrets_stage, _tg973.cmd_secrets_set, _tg973.cmd_agent_creds_set)
+        yeu = ("abcdefghijklmnopqrstuvwxyz01234", ("abcdefghijk" * 3)[:32])   # 31 ký tự · 32 ký tự/11 khác nhau
+        bien = ("abcdefghijkl" * 3)[:32]   # review F4: ĐÚNG biên — 32 ký tự, đúng 12 ký tự khác nhau ⇒ phải QUA
+        # đòi thông điệp CỦA CHỐT: rc 2 vì lý do khác (vd. không tải được bundle) là tín dụng giả
+        # review lượt 2 (F4 vá hờ): vế dương lệnh cũ đòi rc 5 của ranh giới + load_creds ĐÃ được gọi
+        return (all(_rc(f, k) == (2, 0, True, False) for f in lenh for k in yeu)
+                and all(_rc(_tg973.cmd_agent_creds_set, k) == (0, 1, False, False) for k in (_sec973.token_urlsafe(32), bien))
+                and all(_rc(f, bien) == (5, 0, False, True) for f in lenh[:2]))
+    _t110("r973_khoa_yeu_bi_tu_choi_o_duong_ghi", _c973_b1)
+
+    def _boot973(env, drv, xem=lambda h: True, req=False):
+        """bootstrap THẬT với --env chat (bỏ nhánh gws/nlm), HOME tạm; trả (rc, stdout+stderr, xem(h))."""
+        with _tf110.TemporaryDirectory() as h:
+            sav = _env110({"HOME": h, "USERPROFILE": h, "CODEX_HOME": _os973.path.join(h, "cx"), "TL_TOKEN": None,
+                           "TL_WEBAPP": None, "TL_MASTER_KEY": _K973, "TL_AGENT_CREDS_FILEID": None,
+                           "CLAUDE_CODE_OAUTH_TOKEN": None, "GEMINI_API_KEY": None, **env})
+            o = {k: getattr(_tg973, k) for k in ("load_creds", "_secrets_fetch", "_public_curl_bytes")}
+            _tg973.load_creds = lambda *a, **k: None
+            _tg973._secrets_fetch = lambda a, fid: (drv.get("S973"), "file")
+            _tg973._public_curl_bytes = lambda fid, timeout=120.0: drv.get(fid)
+            b = _io110.StringIO()
+            try:
+                with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
+                    rc = _tg973.cmd_bootstrap(_ap973.Namespace(
+                        secrets_id="S973", secrets_file=None, env="chat", config=None, profile=None, no_gws=True,
+                        no_nlm=True, bindir=None, require_agent_creds=req))
+                return rc, b.getvalue(), xem(h)
+            finally:
+                for k, v in o.items():
+                    setattr(_tg973, k, v)
+                _env110_restore(sav)
+
+    _B973 = {"S973": _st973.encrypt(json.dumps({"token": "t973"}).encode(), _K973),
+             "AC973": _st973.encrypt(json.dumps({"schema": 1, "rev": 3, "codex_auth": _AU973,
+                                                 "claude_oauth_token": "SENT973-claude",
+                                                 "antigravity_api_key": "SENT973-gemini"}).encode(), _K973)}
+
+    def _trang_thai973(out):
+        return [ln.split("agent_creds:", 1)[1].split("—")[0].strip() for ln in out.splitlines() if "agent_creds:" in ln]
+
+    def _c973_b2():
+        # lượt 3 F10: CẢ bundle chính LẪN tl_agent_creds.enc mã hoá bằng khoá 8 ký tự, có --require-agent-creds
+        yeu = {"S973": _st973.encrypt(json.dumps({"token": "t"}).encode(), "kh8short"),
+               "AC973": _st973.encrypt(json.dumps({"schema": 1, "rev": 1, "codex_auth": _AU973}).encode(), "kh8short")}
+        rc, out, _ = _boot973({"TL_MASTER_KEY": "kh8short", "TL_AGENT_CREDS_FILEID": "AC973"}, yeu, req=True)
+        return rc == 0 and "giải mã OK" in out and _trang_thai973(out) == ["ĐÃ NẠP"]
+    _t110("r973_bootstrap_khong_kiem_khoa", _c973_b2)
+
+    def _c973_d1():
+        o, _tg973.AGENT_CREDS_FILEID = _tg973.AGENT_CREDS_FILEID, ""   # WP1038: hằng nay có fileId thật ⇒ ép rỗng
+        try:
+            ra = [_boot973({}, _B973)]
+        finally:
+            _tg973.AGENT_CREDS_FILEID = o
+        ra += [_boot973({"TL_AGENT_CREDS_FILEID": "MAT973"}, _B973), _boot973({"TL_AGENT_CREDS_FILEID": "AC973"}, _B973)]
+        return ([_trang_thai973(r[1]) for r in ra] == [["KHÔNG CẤU HÌNH"], ["KHÔNG ĐO ĐƯỢC"], ["ĐÃ NẠP"]]
+                and [r[0] for r in ra] == [0, 0, 0])
+    _t110("r973_bootstrap_ba_trang_thai", _c973_d1)
+
+    def _c973_d2():
+        rc = [_boot973(e, _B973, req=True)[0] for e in ({}, {"TL_AGENT_CREDS_FILEID": "MAT973"},
+                                                         {"TL_AGENT_CREDS_FILEID": "AC973"})]
+        return rc[0] != 0 and rc[1] != 0 and rc[2] == 0
+    _t110("r973_bootstrap_require_agent_creds", _c973_d2)
+
+    _THIEU973 = object()   # "không có khoá last_refresh" (khác với giá trị null)
+
+    def _lr973(lr, d):
+        return {k: v for k, v in d.items() if k != "last_refresh"} if lr is _THIEU973 else {**d, "last_refresh": lr}
+
+    def _goi_lr973(lr):
+        return _st973.encrypt(json.dumps({"schema": 1, "rev": 3, "codex_auth": _lr973(lr, _AU973)}).encode(), _K973)
+
+    def _mot973(disk_lr, goi_lr=_AU973["last_refresh"], thay=None):
+        """_bootstrap_agent_creds với CODEX_HOME tạm có auth.json `disk_lr`; `thay` thay os.replace tạm thời.
+        Trả (trạng thái, giữ nguyên byte/inode/mtime, quyền 0600, nội dung sau, tên tệp trong thư mục)."""
+        with _tf110.TemporaryDirectory() as d:
+            p = _P110(d, "auth.json")
+            p.write_bytes((json.dumps(_lr973(disk_lr, {"tokens": {}})) + "\n").encode())
+            s0, b0 = p.stat(), p.read_bytes()
+            sav, o = _env110({"CODEX_HOME": d, "TL_AGENT_CREDS_FILEID": "AC973"}), (_tg973._public_curl_bytes, _os973.replace)
+            _tg973._public_curl_bytes = lambda fid, timeout=120.0: _goi_lr973(goi_lr)
+            _os973.replace = thay(p, b0, o[1]) if thay else o[1]
+            try:
+                st = _tg973._bootstrap_agent_creds(_K973)[0]
+            finally:
+                _tg973._public_curl_bytes, _os973.replace = o
+                _env110_restore(sav)
+            s1 = p.stat()
+            giu = p.read_bytes() == b0 and (s1.st_mtime_ns, s1.st_ino) == (s0.st_mtime_ns, s0.st_ino)
+            # quyền 0600 không đo được bằng stat trên Windows (spec chua_do_duoc) ⇒ bỏ vế quyền ở đó
+            q = _os973.name == "nt" or (s1.st_mode & 0o777) == 0o600
+            return st, giu, q, json.loads(p.read_text(encoding="utf-8")), sorted(x.name for x in _P110(d).iterdir())
+
+    def _c973_d3():
+        # đĩa mới hơn / bằng ⇒ giữ; cũ hơn ⇒ ghi. Review F3: offset ≠ 0 để đảo dấu offset phải lộ
+        # (+07:00 12h = 05h Z cũ hơn 11h35 Z; -05:00 07h = 12h Z mới hơn; +07:00 18h35m54.5111532 = bằng).
+        # review lượt 2 F6: lệch ±1 nano giây so bundle (.511153200Z) — cắt về micro giây phải lộ
+        giu = [_mot973(x) for x in ("2026-10-28T00:00:00.5+00:00", "2026-10-27T11:35:54.5111532Z",
+                                    "2026-10-27T07:00:00-05:00", "2026-10-27T18:35:54.511153200+07:00",
+                                    "2026-10-27T11:35:54.511153201Z")]
+        ghi = [_mot973(x) for x in ("2026-10-27T11:35:54Z", "2026-10-27T12:00:00+07:00", "2026-10-27T11:35:54.511153199Z")]
+        # lượt 3 F9: last_refresh thiếu / null / không phải ngày ⇒ CŨ HƠN mọi bản có (cả phía đĩa lẫn phía bundle)
+        ghi += [_mot973(x) for x in (_THIEU973, None, "khong-phai-ngay")]
+        giu += [_mot973("2026-10-27T05:00:00Z", goi_lr=x) for x in (_THIEU973, None)]
+        return (all(r[:2] == ("ĐÃ NẠP", True) for r in giu)
+                and all(r[0] == "ĐÃ NẠP" and not r[1] and r[2] and r[3] == _AU973 for r in ghi))
+    _t110("r973_bootstrap_giu_auth_json_moi_hon", _c973_d3)
+
+    def _c973_f1():
+        # review F1: `last_refresh` khớp regex mà ngày/giờ không tồn tại ⇒ coi là CŨ HƠN, không ném;
+        # và lỗi bất ngờ ở nhánh agent không được phá đường chính của bootstrap (Q17)
+        dia_hong = _mot973("2026-02-30T12:00:00Z")
+        goi_hong = _mot973("2026-10-27T05:00:00Z", goi_lr="2026-10-27T25:00:00Z")
+
+        class _NemAC(dict):
+            def get(self, k, *a):
+                if k == "AC973":
+                    raise RuntimeError("TAI973")
+                return super().get(k, *a)
+        drv = _NemAC(_B973)
+        e = {"TL_AGENT_CREDS_FILEID": "AC973"}
+        rc0, out0, _ = _boot973(e, drv)
+        rc1 = _boot973(e, drv, req=True)[0]
+        return (dia_hong[0] == "ĐÃ NẠP" and not dia_hong[1] and dia_hong[3] == _AU973
+                and goi_hong[:2] == ("ĐÃ NẠP", True)
+                and (rc0, rc1) == (0, 4) and _trang_thai973(out0) == ["KHÔNG ĐO ĐƯỢC"] and "TAI973" not in out0)
+    _t110("r973_bootstrap_last_refresh_hong_khong_pha", _c973_f1)
+
+    def _c973_f2():
+        # review F2: ghi auth.json PHẢI qua tệp tạm cùng thư mục, 0600, rồi os.replace; lúc replace đích vẫn là
+        # bản cũ. replace lỗi ⇒ bản cũ còn nguyên byte, không sót tệp tạm, trạng thái KHÔNG ĐO ĐƯỢC.
+        seen = []
+
+        def _do(p, b0, that):
+            def _r(src, dst):
+                seen.append((_P110(src).parent == p.parent, _P110(dst) == p, p.read_bytes() == b0,
+                             _os973.name == "nt" or (_os973.stat(src).st_mode & 0o777) == 0o600))
+                return that(src, dst)
+            return _r
+
+        def _hong(p, b0, that):
+            def _r(src, dst):
+                raise OSError("REPLACE973")
+            return _r
+        ok = _mot973("2026-10-27T11:35:54Z", thay=_do)
+        loi = _mot973("2026-10-27T11:35:54Z", thay=_hong)
+        return (ok[0] == "ĐÃ NẠP" and ok[3] == _AU973 and seen == [(True, True, True, True)]
+                and ok[4] == ["auth.json"] and loi[:2] == ("KHÔNG ĐO ĐƯỢC", True) and loi[4] == ["auth.json"])
+    _t110("r973_bootstrap_auth_json_nguyen_tu", _c973_f2)
+
+    def _c973_f12():
+        # lượt 3 F12: giải mã ĐƯỢC mà sai định dạng ⇒ KHÔNG ĐO ĐƯỢC, không ghi auth.json; rc chỉ đổi theo cờ require
+        sai = ({"schema": 2, "rev": 1, "codex_auth": _AU973}, ["schema", 1],
+               {"schema": 1, "rev": 1, "codex_auth": {"tokens": "chuoi"}}, {"schema": 1, "rev": 1, "codex_auth": "x"})
+        kq = []
+        for p in sai:
+            drv = {**_B973, "AC973": _st973.encrypt(json.dumps(p).encode(), _K973)}
+            for req in (False, True):
+                rc, out, khong_ghi = _boot973({"TL_AGENT_CREDS_FILEID": "AC973"}, drv,
+                                              lambda h: not _P110(h, "cx", "auth.json").exists(), req=req)
+                kq.append(rc == (4 if req else 0) and khong_ghi and _trang_thai973(out) == ["KHÔNG ĐO ĐƯỢC"])
+        return len(kq) == 8 and all(kq)
+    _t110("r973_bootstrap_sai_dinh_dang_khong_nap", _c973_f12)
+
+    def _c973_d4():
+        hoi, o = [], (_tg973.AGENT_CREDS_FILEID, _tg973._public_curl_bytes)
+        _tg973.AGENT_CREDS_FILEID = "HANG973"
+        _tg973._public_curl_bytes = lambda fid, timeout=120.0: hoi.append(fid)
+        sav = _env110({"TL_AGENT_CREDS_FILEID": "ENV973"})
+        try:
+            _tg973._bootstrap_agent_creds(_K973)
+        finally:
+            _tg973.AGENT_CREDS_FILEID, _tg973._public_curl_bytes = o
+            _env110_restore(sav)
+        return hoi == ["ENV973"]
+    _t110("r973_bootstrap_env_thang_hang", _c973_d4)
+
+    def _c973_d5():
+        def _xem(h):
+            return ("CLAUDE_CODE_OAUTH_TOKEN" not in _os973.environ and "GEMINI_API_KEY" not in _os973.environ
+                    and not _P110(h, ".gemini").exists() and _P110(h, "cx", "auth.json").is_file())
+        rc, out, ok = _boot973({"TL_AGENT_CREDS_FILEID": "AC973"}, _B973, _xem)
+        return (ok and "claude_oauth_token" in out and "antigravity_api_key" in out
+                and "SENT973" not in out and _trang_thai973(out) == ["ĐÃ NẠP"])
+    _t110("r973_bootstrap_khong_export_khong_ghi_gemini", _c973_d5)
+
+    def _c973_e1():
+        ap, ra = _tlm973.build_parser(), {}
+        for c in ("agent-creds-set", "secrets-keygen", "bootstrap"):
+            b = _io110.StringIO()
+            try:
+                with _ctx110.redirect_stdout(b):
+                    ap.parse_args([c, "--help"])
+            except SystemExit as e:
+                ra[c] = (e.code, b.getvalue())
+        return (all(v[0] == 0 for v in ra.values()) and len(ra) == 3
+                and all(f in ra["agent-creds-set"][1] for f in ("--codex", "--claude-token-env",
+                                                                 "--antigravity-key-env", "--new", "--file-id"))
+                and "--require-agent-creds" in ra["bootstrap"][1])
+    _t110("r973_parser_lenh_moi", _c973_e1)
+
+    def _c973_e2():
+        # tiến trình con THẬT, HOME/cwd tạm, không TL_WEBAPP/TL_TOKEN/TL_MASTER_KEY
+        tl_py = _P110(_tlm973.__file__).resolve()
+        with _tf110.TemporaryDirectory() as h:
+            env = {k: v for k, v in _os973.environ.items()
+                   if k not in ("TL_WEBAPP", "TL_TOKEN", "TL_MASTER_KEY", "CODEX_HOME")}
+            env.update(HOME=h, USERPROFILE=h, PYTHONIOENCODING="utf-8")
+            def _chay(*argv):
+                r = _sp973.run([_sys973.executable, str(tl_py), *argv], cwd=h, env=env, capture_output=True,
+                               text=True, encoding="utf-8", errors="replace", timeout=120)
+                return r.returncode, r.stdout, r.stderr
+            kg, ac, ss = _chay("secrets-keygen"), _chay("agent-creds-set", "--codex"), _chay("secrets-set", "--gas-token", "x")
+            st = _chay("secrets-stage", "--no-gws", "--no-nlm")   # review lượt 2 F8: vế âm cho CẢ hai lệnh ghi cũ
+        dong = kg[1].splitlines()
+        ok_kg = kg[0] == 0 and len(dong) == 1 and re.fullmatch(r"[A-Za-z0-9_-]{43}", dong[0]) is not None
+        ok_ac = ac[0] == 2 and "[agent-creds-set]" in ac[2] and "TL_MASTER_KEY" in ac[2] and "TL_WEBAPP" not in ac[2]
+        # vế âm: secrets-set vẫn đi qua load_creds. Máy dev có config cạnh cây (B1 _config_candidates) thì
+        # load_creds QUA ⇒ đo vế âm bằng tập lệnh; CI clone sạch đo bằng tiến trình con.
+        ten = ("tra_luat_config.v2.json", "tra_luat_config.json")
+        cfg_gan = any(_P110(x, n).exists() for x in (tl_py.parent, tl_py.parent.parent) for n in ten) \
+            or _P110("/tmp/tra_luat_config.json").exists()
+        cam = {"secrets-set", "secrets-stage", "gws-auth-stage"}   # lệnh ghi credential cũ: vẫn qua load_creds
+        ok_ss = (not cam & _tlm973._CREDS_LAZY_CMDS
+                 and (cfg_gan or all(r[0] != 0 and "TL_WEBAPP" in r[2] and f"[{t}]" not in r[2]
+                                     for r, t in ((ss, "secrets-set"), (st, "secrets-stage")))))
+        return ok_kg and ok_ac and ok_ss
+    _t110("r973_lenh_moi_khong_can_creds_webapp", _c973_e2)
+
+    def _c973_c1():
+        with _tf110.TemporaryDirectory() as h:
+            sav, ra, cwd = _env110({"HOME": h, "USERPROFILE": h}), [], _os973.getcwd()
+            _os973.chdir(h)   # cwd = HOME tạm: đo được cả "không ghi vào thư mục làm việc"
+            try:
+                for _ in range(2):
+                    b = _io110.StringIO()
+                    with _ctx110.redirect_stdout(b):
+                        rc = _tg973.cmd_secrets_keygen(_ns973())
+                    ra.append((rc, b.getvalue()))
+            finally:
+                _os973.chdir(cwd)
+                _env110_restore(sav)
+            moi = list(_P110(h).iterdir())
+        dong = [r[1].splitlines() for r in ra]
+        return (all(r[0] == 0 and len(d) == 1 and re.fullmatch(r"[A-Za-z0-9_-]{43}", d[0]) for r, d in zip(ra, dong))
+                and dong[0] != dong[1] and not moi)
+    _t110("r973_secrets_keygen", _c973_c1)
+
+    # ═══ r1000 — WP1038 CLOUD-SETUP-P2A-EXEC: agent-creds-exec · biến CHỈ cho tiến trình con · fail-close ═══
+    # Hermetic: tải công khai = đồ giả GIỮ TRẠNG THÁI đếm lời gọi; khoá/fileId là fixture (ghi đè biến thật của máy).
+    import shutil as _sh1000, subprocess as _sp1000, builtins as _bi1000, io as _io1000, hashlib as _hl1000
+    _K1000 = "k1000-khoa-gia-fixture-0123456789abcdef"
+    _S1000 = {"claude_oauth_token": "SENT1000-claude", "antigravity_api_key": "SENT1000-gemini"}
+    _V1000 = ("CLAUDE_CODE_OAUTH_TOKEN", "GEMINI_API_KEY")
+    _CON1000 = ("import hashlib, json, os, sys\n"
+                "json.dump({'bien': {b: hashlib.sha256(os.environ[b].encode()).hexdigest() for b in %r if b in os.environ},"
+                " 'argv': sys.argv[3:]}, open(sys.argv[1], 'w'))\nsys.exit(int(sys.argv[2]))\n" % (_V1000,))
+    _h1000 = lambda s: _hl1000.sha256(s.encode()).hexdigest()   # noqa: E731
+
+    def _blob1000(p=None, k=_K1000):
+        return _st973.encrypt(json.dumps({"schema": 1, "rev": 1, **_S1000} if p is None else p).encode(), k)
+
+    def _exec1000(argv, env=None, drv=None, which=None, run=None, fid_hang=None, xem=None):
+        """agent-creds-exec THẬT (parser thật + handler) in-process ⇒ (rc, stdout+stderr, [fileId đã tải]);
+        `xem()` chạy NGAY sau lệnh, TRƯỚC khi khôi phục môi trường (đo env của chính tiến trình `tl`)."""
+        drv, tai = ({"AC1000": _blob1000()} if drv is None else drv), []
+        o = (_tg973._public_curl_bytes, _tg973.AGENT_CREDS_FILEID, _sh1000.which, _sp1000.run)
+        _tg973._public_curl_bytes = lambda fid, timeout=120.0: (tai.append(fid), drv.get(fid))[1]
+        _tg973.AGENT_CREDS_FILEID = o[1] if fid_hang is None else fid_hang
+        _sh1000.which, _sp1000.run = which or o[2], run or o[3]
+        sav = _env110({"TL_MASTER_KEY": _K1000, "TL_AGENT_CREDS_FILEID": "AC1000", **{v: None for v in _V1000},
+                       **(env or {})})
+        b = _io110.StringIO()
+        try:
+            with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
+                a = _tlm973.build_parser().parse_args(["agent-creds-exec", *argv])
+                rc = a.fn(a)
+            if xem:
+                xem()
+        finally:
+            _tg973._public_curl_bytes, _tg973.AGENT_CREDS_FILEID, _sh1000.which, _sp1000.run = o
+            _env110_restore(sav)
+        return rc, b.getvalue(), tai
+
+    def _con1000(fn):
+        """fn(d, chay) — chay(cờ, rc_con, *đối số) chạy con THẬT `sys.executable con.py out rc …` ⇒ (rc, out, kq con)."""
+        with _tf110.TemporaryDirectory() as d:
+            # KHÔNG đặt `con.py`: CON là tên thiết bị Windows ⇒ con đọc script từ console và TREO (đo 30-10, tra-luat-win)
+            con, ra = _P110(d, "tien_trinh_con.py"), _P110(d, "ra.json")
+            con.write_text(_CON1000, encoding="utf-8")
+            def chay(co, rc_con=0, *doi, **kw):
+                ra.unlink(missing_ok=True)
+                rc, out, _ = _exec1000([*co, "--", _sys973.executable, str(con), str(ra), str(rc_con), *doi], **kw)
+                return rc, out, (json.loads(ra.read_text(encoding="utf-8")) if ra.exists() else None)
+            return fn(d, chay)
+
+    def _c1000_a1(d, chay):
+        sau = []   # _exec1000 xoá hai biến khỏi os.environ TRƯỚC lệnh ⇒ "trước đó vắng" là điều kiện dựng sẵn
+        rc, _, kq = chay(["--claude", "--gemini"], xem=lambda: sau.extend(v in _os973.environ for v in _V1000))
+        return rc == 0 and sau == [False, False] and kq["bien"] == {
+            "CLAUDE_CODE_OAUTH_TOKEN": _h1000(_S1000["claude_oauth_token"]), "GEMINI_API_KEY": _h1000(_S1000["antigravity_api_key"])}
+    _t110("r1000_exec_dat_bien_chi_cho_con", lambda: _con1000(_c1000_a1))
+
+    def _c1000_a2(d, chay):
+        g, c = chay(["--gemini"])[2], chay(["--claude"])[2]
+        return (g["bien"] == {"GEMINI_API_KEY": _h1000(_S1000["antigravity_api_key"])}
+                and c["bien"] == {"CLAUDE_CODE_OAUTH_TOKEN": _h1000(_S1000["claude_oauth_token"])})
+    _t110("r1000_exec_chi_dat_khoa_duoc_yeu_cau", lambda: _con1000(_c1000_a2))
+
+    # nhánh fail-close: tải lỗi · thiếu khoá gốc · khoá sai · schema 2/true · thiếu khoá Claude/Gemini · khoá rỗng
+    _HONG1000 = (("tai_loi", {}, {}), ("thieu_master", {"TL_MASTER_KEY": None}, None),
+                 ("khoa_sai", {}, {"AC1000": _blob1000(k="khoa-KHAC-" + _K1000)}),
+                 ("schema_2", {}, {"AC1000": _blob1000({"schema": 2, **_S1000})}),
+                 ("schema_true", {}, {"AC1000": _blob1000({"schema": True, **_S1000})}),   # review F02: True == 1
+                 ("thieu_gemini", {}, {"AC1000": _blob1000({"schema": 1, "claude_oauth_token": "SENT1000-claude"})}),
+                 ("gemini_rong", {}, {"AC1000": _blob1000({"schema": 1, "claude_oauth_token": "SENT1000-claude",
+                                                           "antigravity_api_key": ""})}),
+                 ("thieu_khoa", {}, {"AC1000": _blob1000({"schema": 1, "antigravity_api_key": "SENT1000-gemini"})}),
+                 ("khoa_rong", {}, {"AC1000": _blob1000({"schema": 1, "claude_oauth_token": " ",
+                                                         "antigravity_api_key": "SENT1000-gemini"})}))
+
+    def _nhanh1000():
+        """MỌI nhánh fail-close + rc 127 + rc 126, mỗi nhánh ĐẾM con riêng ⇒ [(tên, rc, số lần chạy con, output)]."""
+        kq = []
+        for ten, env, drv in _HONG1000:
+            n = []
+            rc, out, _ = _exec1000(["--claude", "--gemini", "--", "con1000"], env, drv, which=lambda x: "/con1000",
+                                   run=lambda *a, **k: n.append(1) or _sp1000.CompletedProcess(a, 0))
+            kq.append((ten, rc, len(n), out))
+        n = []
+        rc, out, _ = _exec1000(["--claude", "--", "khong-co-1000"], which=lambda x: None,
+                               run=lambda *a, **k: n.append(1) or _sp1000.CompletedProcess(a, 0))
+        def _os_loi(*a, **k):
+            raise OSError("exec1000")
+        rc2, out2, _ = _exec1000(["--claude", "--gemini", "--", "con1000"], which=lambda x: "/con1000", run=_os_loi)
+        return kq + [("rc127", rc, len(n), out), ("rc126", rc2, 0, out2)]
+
+    def _c1000_a3():
+        kq = _nhanh1000()
+        return (len(kq) == 11 and all(rc == 4 and n == 0 for _, rc, n, _ in kq[:9])
+                and kq[9][1:3] == (127, 0) and kq[10][1] == 126)
+    _t110("r1000_exec_fail_close", _c1000_a3)
+
+    def _c1000_a4(d, chay):
+        return [chay(["--claude"], r)[0] for r in (0, 7)] == [0, 7]
+    _t110("r1000_exec_tra_nguyen_rc_con", lambda: _con1000(_c1000_a4))
+
+    def _c1000_a5(d, chay):
+        outs = [chay(["--claude", "--gemini"])[1]] + [x[3] for x in _nhanh1000()]
+        return len(outs) == 12 and all(s not in o for s in _S1000.values() for o in outs)
+    _t110("r1000_exec_khong_in_gia_tri", lambda: _con1000(_c1000_a5))
+
+    def _c1000_a6():
+        kq = [_exec1000(v) for v in (["--", "x"], ["--claude"], ["--claude", "--"], ["--gemini", "x"], ["--"])]
+        return [r[0] for r in kq] == [2] * 5 and sum(len(r[2]) for r in kq) == 0
+    _t110("r1000_exec_doi_so_sai", _c1000_a6)
+
+    def _c1000_a7(d, chay):
+        doi = ["a;b", "x && y", "$(echo 1000)", "`id`", "c | d"]
+        return chay(["--claude"], 0, *doi)[2]["argv"] == doi
+    _t110("r1000_exec_khong_shell", lambda: _con1000(_c1000_a7))
+
+    def _c1000_a8():
+        hoi, n = [], []
+        def _w(x):
+            hoi.append(x)
+            return {"con1000": "/duong/con1000"}.get(x)
+        rc1, _, _ = _exec1000(["--gemini", "--", "con1000", "-v"], which=_w,
+                              run=lambda a, **k: n.append(a) or _sp1000.CompletedProcess(a, 0))
+        rc2, _, _ = _exec1000(["--gemini", "--", "khong1000"], which=_w,
+                              run=lambda a, **k: n.append(a) or _sp1000.CompletedProcess(a, 0))
+        return (rc1, rc2) == (0, 127) and hoi == ["con1000", "khong1000"] and n == [["/duong/con1000", "-v"]]
+    _t110("r1000_exec_resolve_which", _c1000_a8)
+
+    def _c1000_a9():
+        rc, _, tai = _exec1000(["--claude", "--", "x"], {"TL_AGENT_CREDS_FILEID": "ENV1000"}, {"ENV1000": _blob1000()},
+                               which=lambda x: "/x", run=lambda a, **k: _sp1000.CompletedProcess(a, 0),
+                               fid_hang="HANG1000")
+        return rc == 0 and tai == ["ENV1000"]
+    _t110("r1000_exec_env_thang_hang", _c1000_a9)
+
+    def _c1000_a10():
+        drv, tai = {"AC1000": _blob1000()}, []
+        for _ in range(2):
+            tai += _exec1000(["--gemini", "--", "x"], drv=drv, which=lambda x: "/x",
+                             run=lambda a, **k: _sp1000.CompletedProcess(a, 0))[2]
+        return tai == ["AC1000", "AC1000"]
+    _t110("r1000_exec_tai_moi_lan", _c1000_a10)
+
+    def _c1000_a11():
+        """Đếm MỌI lời gọi mở-để-ghi/tạo-tệp-tạm trong suốt lời gọi + quét byte sentinel dưới HOME/cwd/TMPDIR tạm."""
+        import tempfile as _tp1000
+        ghi, envs, cwd = [], [], _os973.getcwd()
+        def _boc(f, la_ghi):
+            def g(*a, **k):
+                if la_ghi(a, k):
+                    ghi.append(f.__name__)
+                return f(*a, **k)
+            return g
+        def _mode(a, k):
+            m = k.get("mode", a[1] if len(a) > 1 else "r")
+            return isinstance(m, str) and any(c in m for c in "wax+")
+        _co = _os973.O_WRONLY | _os973.O_RDWR | _os973.O_CREAT
+        goc = {(_bi1000, "open"): _mode, (_io1000, "open"): _mode,
+               (_os973, "open"): lambda a, k: bool((a[1] if len(a) > 1 else k.get("flags", 0)) & _co),
+               **{(_tp1000, n): (lambda a, k: True) for n in ("mkstemp", "NamedTemporaryFile", "TemporaryFile", "mkdtemp")}}
+        with _tf110.TemporaryDirectory() as r:
+            dirs = [_P110(r, x) for x in ("home", "cwd", "tmp")]
+            for x in dirs:
+                x.mkdir()
+            sav, o = _env110({"HOME": dirs[0], "USERPROFILE": dirs[0], "TMPDIR": dirs[2], "TEMP": dirs[2],
+                              "TMP": dirs[2]}), {kk: getattr(*kk) for kk in goc}
+            otd, _tp1000.tempdir = _tp1000.tempdir, str(dirs[2])
+            _os973.chdir(dirs[1])
+            try:
+                for (m, n), la_ghi in goc.items():
+                    setattr(m, n, _boc(o[(m, n)], la_ghi))
+                rc = _exec1000(["--claude", "--gemini", "--", "x"], which=lambda x: "/x",
+                               run=lambda a, env=None, **k: envs.append(env) or _sp1000.CompletedProcess(a, 0))[0]
+            finally:
+                for (m, n), f in o.items():
+                    setattr(m, n, f)
+                _tp1000.tempdir = otd
+                _os973.chdir(cwd)
+                _env110_restore(sav)
+            byte = [p.read_bytes() for x in dirs for p in x.rglob("*") if p.is_file()]
+        return (rc == 0 and ghi == [] and len(envs) == 1 and envs[0]["GEMINI_API_KEY"] == _S1000["antigravity_api_key"]
+                and not any(s.encode() in b for s in _S1000.values() for b in byte))
+    _t110("r1000_exec_khong_ghi_dia", _c1000_a11)
+
+    _t110("r1000_agent_creds_fileid_that", lambda: _tg973.AGENT_CREDS_FILEID == "1I0-p-FKSy3255OUNv7xkhRACy3k1zqWQ")
+
+    def _c1000_c1():
+        b = _io110.StringIO()
+        try:
+            with _ctx110.redirect_stdout(b):
+                _tlm973.build_parser().parse_args(["agent-creds-exec", "--help"])
+        except SystemExit as e:
+            return e.code == 0 and "--claude" in b.getvalue() and "--gemini" in b.getvalue()
+        return False
+    _t110("r1000_parser_agent_creds_exec_help", _c1000_c1)
+
+    def _c1000_viet_tat():
+        # review F01: cờ gốc viết tắt nuốt tên lệnh ở guard ⇒ `tl` phải TỰ từ chối (rc 2); dạng đầy đủ vẫn nhận
+        ap, ra = _tlm973.build_parser(), []
+        for v in (["--det", "agent-creds-exec", "--claude", "--", "x"], ["--tim", "recat", "x"],
+                  ["--prof=vbqppl", "agent-creds-set", "--new"], ["--conf", "c.json", "agent-creds-exec", "--gemini", "--", "x"],
+                  ["hygiene", "--prof", "scan", "plan", "q"]):   # F09: cấp cha LONG cũng không nhận viết tắt
+            try:
+                with _ctx110.redirect_stderr(_io110.StringIO()):
+                    ap.parse_args(v)
+                ra.append(None)
+            except SystemExit as e:
+                ra.append(e.code)
+        du = ap.parse_args(["--deterministic", "--profile", "vbqppl", "agent-creds-exec", "--claude", "--", "x"])
+        long_ = ap.parse_args(["hygiene", "--profile", "scan", "plan", "q"])
+        return (ra == [2] * 5 and (du.cmd, du.deterministic, du.lenh) == ("agent-creds-exec", True, ["--", "x"])
+                and long_.profile == "scan")
+    _t110("r1000_tl_tu_choi_co_goc_viet_tat", _c1000_viet_tat)
+
+    def _c1000_c2():
+        # (a) main() in-process, `load_creds` (tên tra ở tl) = đồ giả đếm rồi ném
+        dem, o = [], _tlm973.load_creds
+        def _lc(*a, **k):
+            dem.append(1)
+            raise RuntimeError("LOAD_CREDS_1000")
+        _tlm973.load_creds, sav, b = _lc, _env110({"TL_MASTER_KEY": None}), _io110.StringIO()
+        try:
+            with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
+                rc_a = _tlm973.main(["agent-creds-exec", "--claude", "--", "x"])
+        finally:
+            _tlm973.load_creds = o
+            _env110_restore(sav)
+        ok_a = dem == [] and rc_a == 4 and "[agent-creds-exec]" in b.getvalue()
+        # (b) CLI THẬT trong bản sao tạm; tiền điều kiện: mọi đường của _config_candidates đều VẮNG
+        with _tf110.TemporaryDirectory() as r:
+            h, goc = _P110(r, "h"), _P110(r, "skill")
+            h.mkdir()
+            _sh1000.copytree(_P110(_tlm973.__file__).resolve().parent, goc / "scripts",
+                             ignore=_sh1000.ignore_patterns("__pycache__", ".tl_state"))
+            ten = ("tra_luat_config.v2.json", "tra_luat_config.json")
+            co = [str(p) for p in [x / n for x in (h, goc, goc / "scripts") for n in ten]
+                  + [h / ".tra_luat_config.json", _P110("/tmp/tra_luat_config.json")] if p.exists()]
+            if co:
+                print(f"  [r1000_c2b] ĐỎ: tiền điều kiện hỏng — config tồn tại: {co}", flush=True)
+                return False
+            env = {k: v for k, v in _os973.environ.items()
+                   if k not in ("TL_WEBAPP", "TL_TOKEN", "TL_MASTER_KEY", "TL_AGENT_CREDS_FILEID")}
+            env.update(HOME=str(h), USERPROFILE=str(h), PYTHONIOENCODING="utf-8")
+            p = _sp973.run([_sys973.executable, str(goc / "scripts" / "tl.py"), "agent-creds-exec", "--claude", "--", "x"],
+                           cwd=h, env=env, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
+        ok_b = p.returncode == 4 and "[agent-creds-exec]" in p.stderr and "TL_WEBAPP" not in p.stderr
+        return ok_a and ok_b
+    _t110("r1000_exec_khong_goi_load_creds", _c1000_c2)
+
     def _c208b_auth_fix_chain_dung_thu_tu():
         # r208b 3.2 (báo cáo 25-07 mục 3.2 — CA CHỈ-NÓ-CHẶN): cookie NLM chết, MỌI thông báo trong skill
         # chỉ hô `nlm login` — lệnh TƯƠNG TÁC, KHÔNG chạy được ở Cowork/headless; đường đúng
@@ -22117,7 +22765,12 @@ def run() -> int:
         # manifest) + `changelog.d/wp-831.md`. Trần Package 200 còn 10 khe.
         # KÊ KHAI SLOT (packet #868): 190 → **191** = + `changelog.d/wp-868.md`. Trần Package 200 còn 8 khe.
         # KÊ KHAI SLOT (packet #886): 191 → **192** = + `changelog.d/wp-886.md`. Trần Package 200 còn 7 khe.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 192
+        # KÊ KHAI SLOT (packet #1009): 192 → **193** = + `changelog.d/wp-1009.md`. Trần Package 200 còn 6 khe.
+        # KÊ KHAI SLOT (packet #1030): 193 → **194** = + `changelog.d/wp-1030.md`. Trần Package 200 còn 5 khe.
+        # KÊ KHAI SLOT (packet #1038): 194 → **195** = + `changelog.d/wp-1038.md`. Trần Package 200 còn 4 khe.
+        # KÊ KHAI SLOT (packet #1052): 195 → **197** = + `references/windows-testing.md` + `changelog.d/wp-1052.md`. Trần Package 200 còn 3 khe.
+        # KÊ KHAI SLOT (packet #1089): 197 → **198** = + `references/Code.2.21.2q.gs` (webapp agent_creds_put). Trần Package 200 còn 2 khe.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 198
         d = root / "docs"
         # chỉ TỆP thường VẬT LÝ dưới `docs/`: thư mục, symlink (hỏng hay trỏ tới tệp thật) và `docs/` là symlink
         # đều không được tính là còn docs (F1 review wp794 lượt 1–2).
@@ -22166,13 +22819,18 @@ def run() -> int:
             j = _j209.loads(mf.read_text(encoding="utf-8"))
             paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
             ok2 = not [p for p in paths if p.startswith(".agents/")]
-            # RATCHET: goi giu 192 (WP710 PR #714: 180 -> 183; land WP725-727 PR #729-#731: 183 -> 186, ba manh
+            # RATCHET: goi giu 194 (WP710 PR #714: 180 -> 183; land WP725-727 PR #729-#731: 183 -> 186, ba manh
             # changelog.d; land WP766 PR #772: 186 -> 187, manh changelog.d/wp-766.md — ke khai slot day du o
             # r291_docs_ngoai_goi; packet #831 spec r2: 187 -> 189, manh changelog.d/wp-802.md + wp-831.md;
             # packet #858: 189 -> 190, manh changelog.d/wp-858.md; packet #868: 190 -> 191, manh changelog.d/wp-868.md;
-            # packet #886: 191 -> 192, manh changelog.d/wp-886.md).
+            # packet #886: 191 -> 192, manh changelog.d/wp-886.md; packet #1009: 192 -> 193, manh changelog.d/wp-1009.md;
+            # packet #1030: 193 -> 194, manh changelog.d/wp-1030.md; packet #1038: 194 -> 195, manh changelog.d/wp-1038.md).
             # Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
-            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 192
+            # KÊ KHAI SLOT (packet #1030): 193 → **194** = + `changelog.d/wp-1030.md`. Trần Package 200 còn 5 khe.
+            # KÊ KHAI SLOT (packet #1038): 194 → **195** = + `changelog.d/wp-1038.md`. Trần Package 200 còn 4 khe.
+            # KÊ KHAI SLOT (packet #1052): 195 → **197** = + `references/windows-testing.md` + `changelog.d/wp-1052.md`. Trần Package 200 còn 3 khe.
+            # KÊ KHAI SLOT (packet #1089): 197 → **198** = + `references/Code.2.21.2q.gs` (webapp agent_creds_put). Trần Package 200 còn 2 khe.
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 198
         # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
         # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
         # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.

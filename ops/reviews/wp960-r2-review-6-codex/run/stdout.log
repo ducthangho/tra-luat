@@ -1,0 +1,3 @@
+Đã hoàn tất và cập nhật dần [VERDICT.md](/tmp/claude-0/rv/wp960-r2-review-6-codex/VERDICT.md): **changes_requested — 2 P1** về thiếu răng test. Hai finding lượt 5 đã đóng.
+
+[HINT.patch](/tmp/claude-0/rv/wp960-r2-review-6-codex/HINT.patch) đã qua dry-run không fuzz. Không sửa `cay-kho/`, không gọi mạng.

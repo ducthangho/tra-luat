@@ -1,0 +1,6 @@
+d1d75feb247d2e20d64c5cbceffb2dd50fdbed8efa65f5accff67c72c339a75d  ./PROMPT.md
+2f482565c235380145253d76ae51ab9606e8d7cfc8044d6efd113ff80049feaf  ./VERDICT.md
+3de5264de0ec49b3dabb086d963e1496171b106c878f0ddc4d2e87a8ce6ddb06  ./run/checkpoint.json
+21dfe28a8d9410c39cfe3c02e2ece250bad1ec75e134c38f7ae25ddaf74ac629  ./run/run.json
+1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721  ./run/stderr.log
+70631a4f0b341d86bfd9e4b50814b7ce737b4da9fc7bf5a036dd211ac7af98bb  ./run/stdout.log

@@ -1,0 +1,65 @@
+# log job cua run 41094993408 (push master 8cdb15a786304bab084b43c8b30c127ae87e2594), tai qua REST actions/jobs/<id>/logs (redirect tai khong kem Authorization) luc ~18:01Z 30-10-2026, phien dieu phoi session_015GtxrbRnRANivtXrA1edLB. checkout = dong log co SHA merge (buoc 'git log -1 --format=%H' cua actions/checkout). marker = dong tong ket gate.
+== chuan-bi id=124201456927 runner=['ubuntu-latest'] runner_id=1000026295 conclusion=success log_sha256=6b1b7566c518968c626d7621ecc332c5c248869c246d2ace86e29ca32f1771b9 so_dong=61 checkout_merge_sha=KHONG error=0
+== gate-packet-loop (ubuntu-latest) id=124201503040 runner=['ubuntu-latest'] runner_id=1000026296 conclusion=success log_sha256=721ac9d87b78afdb92f0392c4a27ba0ccf83f413bcdf050ec6fa471926f29470 so_dong=2645 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+   marker: TỔNG: ĐẠT
+== gate-ops (ubuntu-latest) id=124201503227 runner=['ubuntu-latest'] runner_id=1000026300 conclusion=success log_sha256=c47042de064de95b577ab4d587d3c4ab9887d7538e5173b0582457b40a6ba915 so_dong=3465 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+   marker: TONG: DAT
+   marker: TỔNG: ĐẠT
+== gate (ubuntu-latest) id=124201503309 runner=['ubuntu-latest'] runner_id=1000026309 conclusion=success log_sha256=32c2af345d87914f519a30e5aa4ec13ccff472eddd3283d5f924961b73ceb8d9 so_dong=10756 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+   marker: TỔNG: ĐẠT
+   marker: TỔNG: ĐẠT
+   marker: == gen_instructions selftest 44/44 ==
+   marker: == transport selftest 12/12 ==
+   marker: == tl selftest 1759/1759 ==
+   marker: == ci_phamvi_test 7/7 ==
+   marker:       "detail": "[OK] tier_full_audit_ok\n  [OK] tier_core_fails_full_audit\n  [OK] tier_full_litany_deduped\n  [OK] tier_core_size_budget\n  [OK] tier_nlm_unaffected_by_tier\n  [OK] style_template_separate_artifact\n  [
+== gate-nhanh-manh (ubuntu-latest, 0) id=124201503331 runner=['ubuntu-latest'] runner_id=1000026304 conclusion=success log_sha256=4318765fb40bd21cc448aaab624d4e1c77f82f47e678dd2b49a61717c0ebaf48 so_dong=1148 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-nhanh-manh (ubuntu-latest, 3) id=124201503365 runner=['ubuntu-latest'] runner_id=1000026299 conclusion=success log_sha256=7f8b3d8be2e5cf687ce1f76f2e044e4d0c8c78e7f4628f8c9eec45e0d690915a so_dong=1149 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-nhanh-manh (ubuntu-latest, 7) id=124201503384 runner=['ubuntu-latest'] runner_id=1000026306 conclusion=success log_sha256=c87f313fc9a005b3cc2d302c2ea1a42145e9778728b81224b524d07bf2a266bb so_dong=1158 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-nhanh-manh (ubuntu-latest, 1) id=124201503420 runner=['ubuntu-latest'] runner_id=1000026297 conclusion=success log_sha256=564651dc06930d224ec237677475e97f2dbac2bbcfe6db48cd206e437a9133c1 so_dong=1154 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-cong-cu (ubuntu-latest, 5) id=124201503432 runner=['ubuntu-latest'] runner_id=1000026298 conclusion=success log_sha256=31cc02ec920354a85648e5c4fe16379c36ccf6659c2f0cee8494594fc31fd526 so_dong=1292 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-cong-cu (ubuntu-latest, 2) id=124201503439 runner=['ubuntu-latest'] runner_id=1000026307 conclusion=success log_sha256=cbb43ef8573f2351624fdbc11a331b405e9c195d3b1bde5d1119e5483f1bc75c so_dong=1292 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-cong-cu (ubuntu-latest, 3) id=124201503444 runner=['ubuntu-latest'] runner_id=1000026302 conclusion=success log_sha256=b765c7781f2d75ecf7ca563f18d8f8862590cd9880d3ea95d0df7b61599c0523 so_dong=1292 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-nhanh-manh (ubuntu-latest, 6) id=124201503445 runner=['ubuntu-latest'] runner_id=1000026305 conclusion=success log_sha256=7d11e9ffa60a8751b1103c5aa1c34d4bd474dee55c640bc60d2583f4b2ec447d so_dong=1145 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-cong-cu (ubuntu-latest, 1) id=124201503454 runner=['ubuntu-latest'] runner_id=1000026301 conclusion=success log_sha256=f461ab622af0fe24d868c94e456f762d2a29cd0ba3e151a96da0ba4ab01925b3 so_dong=1293 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-cong-cu (ubuntu-latest, 0) id=124201503464 runner=['ubuntu-latest'] runner_id=1000026314 conclusion=success log_sha256=7cb767aaa2605663e9f16f866f6f75e5bebc9b5b2d4e0b58772278ed578f1182 so_dong=1293 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-nhanh-manh (ubuntu-latest, 5) id=124201503475 runner=['ubuntu-latest'] runner_id=1000026312 conclusion=success log_sha256=4aa9ba0674379217ccdb9dc60a085f524390bb275a97b6a0fde4de5b3c31507a so_dong=1152 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-cong-cu (ubuntu-latest, 6) id=124201503495 runner=['ubuntu-latest'] runner_id=1000026303 conclusion=success log_sha256=a9dc8bf17023152628a0a7d62fdff54746e10f53c703ade8bc6dcfd047cc2379 so_dong=1292 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-nhanh-manh (ubuntu-latest, 4) id=124201503502 runner=['ubuntu-latest'] runner_id=1000026310 conclusion=success log_sha256=bb7e7380112b3d38bf1a52749b3820a7fee88e5d86f9fc523f628803c4f95a17 so_dong=1145 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-nhanh-manh (ubuntu-latest, 2) id=124201503545 runner=['ubuntu-latest'] runner_id=1000026311 conclusion=success log_sha256=6790f9dd3970c9a1b6237b627fe416b157956d7c13dc3a443a52d831248b4a6b so_dong=1143 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-cong-cu (ubuntu-latest, 7) id=124201503634 runner=['ubuntu-latest'] runner_id=1000026308 conclusion=success log_sha256=352b503962f4a108922f8081ddd39b1279936dfa61acde8221fd5434b2dc55fa so_dong=1292 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-cong-cu (ubuntu-latest, 4) id=124201503651 runner=['ubuntu-latest'] runner_id=1000026313 conclusion=success log_sha256=4ce2be9f7a516c6d23cbdfbceb48008bbe23ae1daf31b3461b75e6cca9f1ee5c so_dong=1292 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-nhanh-gop (ubuntu-latest) id=124202350673 runner=['ubuntu-latest'] runner_id=1000026317 conclusion=success log_sha256=096b00cd0f1ad7ed56577373fff9b96728de18633af0c8619a9c70860369dbaa so_dong=1048 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+== gate-registry (ubuntu-latest) id=124202479237 runner=['ubuntu-latest'] runner_id=1000026318 conclusion=success log_sha256=b3af439580b339113ce5d01b82d1c52b6bf7e0910e765a5a1a415e7ba8a323a2 so_dong=2626 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+   marker: TỔNG: ĐẠT
+   marker: TỔNG: ĐẠT
+   marker: TỔNG: ĐẠT
+   marker: TONG: DAT
+   marker: TONG: DAT
+   marker: TONG: DAT
+   marker: TONG: DAT
+   marker: TỔNG: ĐẠT
+== gate-cong-cu-gop (ubuntu-latest) id=124212041027 runner=['ubuntu-latest'] runner_id=1000026392 conclusion=success log_sha256=ef06633e5bd8a2bb29d675741d2680a6a470d03cebf87532cb0c0d79bd710d25 so_dong=770 checkout_merge_sha=CO error=0
+   checkout: 8cdb15a786304bab084b43c8b30c127ae87e2594
+# TONG: 22/23 job co dong checkout = 8cdb15a786304bab084b43c8b30c127ae87e2594; ##[error] tong = 0

@@ -1,0 +1,34 @@
+$ git rev-parse HEAD HEAD^{tree}
+rc=0
+047eaa4d26a5bb1e702199c870f42480aebed673
+ac826681109d74ad18efc3120c79b65ddb8280a2
+
+
+$ git status --porcelain=v1 --untracked-files=all --ignored=matching
+rc=0
+(empty)
+
+
+$ git rev-parse --is-shallow-repository
+rc=0
+false
+
+
+$ git diff --numstat 6db934145acf6e47d01db5b2dc8c9da417c2d8eb HEAD
+rc=0
+files=180 additions=6716 deletions=0 outside_ops_reviews=[]
+
+
+$ git show -s --format=%H%n%P%n%cI%n%s 79400f3
+rc=0
+79400f3cdc6b780319b66f57c27e5772ad010101
+4f11b13c3d286a79dbe9a83547a800005cda0eda f37b5195978f1fe35b9cb55b6f79a2e09d165af0
+2026-10-31T01:55:24+07:00
+Merge pull request #1050 from ducthangho/claude/magical-clarke-gzvwbp
+
+
+$ git diff --name-only 1aae17b HEAD
+rc=0
+ops/reviews/pr1050-review-1-codex-verdict.receipt.yaml
+ops/reviews/pr1050-review-2-codex-verdict.receipt.yaml
+

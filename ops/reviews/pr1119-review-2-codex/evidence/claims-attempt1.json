@@ -1,0 +1,805 @@
+{
+  "checks": [
+    {
+      "name": "pr1110-review-1-codex historical mapped files",
+      "actual": 41,
+      "expected": 41,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex historical mapped all equal",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex historical omitted count",
+      "actual": 2,
+      "expected": 2,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex historical omitted correct",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex historical receipt count",
+      "actual": 116,
+      "expected": 116,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex historical receipt pass",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex historical README added",
+      "actual": 4,
+      "expected": 4,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex historical README removed",
+      "actual": 0,
+      "expected": 0,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex historical mutation bien-nhan",
+      "actual": false,
+      "expected": true,
+      "ok": false
+    },
+    {
+      "name": "pr1110-review-1-codex historical mutation direct",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex ket_luan 0 finding",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex verdict 41 tệp",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex verdict hai tệp",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex verdict 116 đối chiếu",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex verdict bốn hàng",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex receipt 41 tep",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex receipt 2 tep",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex receipt 116 doi chieu",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex receipt 4 hang",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex historical mapped files",
+      "actual": 41,
+      "expected": 41,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex historical mapped all equal",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex historical omitted count",
+      "actual": 2,
+      "expected": 2,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex historical omitted correct",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex historical receipt count",
+      "actual": 91,
+      "expected": 91,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex historical receipt pass",
+      "actual": false,
+      "expected": true,
+      "ok": false
+    },
+    {
+      "name": "pr1110-review-2-codex historical README added",
+      "actual": 4,
+      "expected": 4,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex historical README removed",
+      "actual": 0,
+      "expected": 0,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex historical mutation bien-nhan",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex historical mutation direct",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex ket_luan 0 finding",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex diff empty",
+      "actual": 0,
+      "expected": 0,
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex diff supplied empty",
+      "actual": 0,
+      "expected": 0,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-1-codex base CA: 52/52 dat",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-1-codex base DOT BIEN: 80/80 bi giet dung ly do",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-1-codex base TONG: DAT",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-1-codex head CA: 52/52 dat",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-1-codex head DOT BIEN: 80/80 bi giet dung ly do",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-1-codex head TONG: DAT",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-1-codex conclusion 52/52",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-1-codex conclusion 80/80",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-2-codex base CA: 52/52 dat",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-2-codex base DOT BIEN: 80/80 bi giet dung ly do",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-2-codex base TONG: DAT",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-2-codex head CA: 52/52 dat",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-2-codex head DOT BIEN: 80/80 bi giet dung ly do",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-2-codex head TONG: DAT",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-2-codex conclusion 52/52",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-2-codex conclusion 80/80",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114a old wrapper DO:p3b4_co_blob",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114a old wrapper 32767",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114a old wrapper TONG: DO",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114a new wrapper",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114a mutation-argv-read.log",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114a mutation-no-input.log",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114b before worker bad",
+      "actual": 26,
+      "expected": 26,
+      "ok": true
+    },
+    {
+      "name": "review1114b before worker total",
+      "actual": 1800,
+      "expected": 1800,
+      "ok": true
+    },
+    {
+      "name": "review1114b before worker rc",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114b after worker bad",
+      "actual": 0,
+      "expected": 0,
+      "ok": true
+    },
+    {
+      "name": "review1114b after worker total",
+      "actual": 1800,
+      "expected": 1800,
+      "ok": true
+    },
+    {
+      "name": "review1114b after worker rc",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114b transitions",
+      "actual": 20,
+      "expected": 20,
+      "ok": true
+    },
+    {
+      "name": "review1114b mechanism total",
+      "actual": 1200,
+      "expected": 1200,
+      "ok": true
+    },
+    {
+      "name": "review1114b R to Z",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114b no_kill cases",
+      "actual": 3,
+      "expected": 3,
+      "ok": true
+    },
+    {
+      "name": "review1114b no_kill red",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114b parent_only cases",
+      "actual": 3,
+      "expected": 3,
+      "ok": true
+    },
+    {
+      "name": "review1114b parent_only red",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114b seconds delta",
+      "actual": 15.017,
+      "expected": 15.017,
+      "ok": true
+    },
+    {
+      "name": "review1114b percent delta",
+      "actual": 4.92,
+      "expected": 4.92,
+      "ok": true
+    },
+    {
+      "name": "review1114b conclusion 26/1800",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114b conclusion 0/1800",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114b conclusion 20/1200",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114b conclusion 15,017",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "review1114b conclusion 4,92%",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "precedent pr1058-review-1-codex pr1110-review-1-codex",
+      "actual": [],
+      "expected": [],
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex assurance appropriate to approve",
+      "actual": "cross_approved",
+      "expected": "cross_approved",
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex original verdict approval",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    },
+    {
+      "name": "precedent pr1058-review-1-codex pr1110-review-2-codex",
+      "actual": [],
+      "expected": [],
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex assurance appropriate to approve",
+      "actual": "cross_approved",
+      "expected": "cross_approved",
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex original verdict approval",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    },
+    {
+      "name": "precedent pr1058-review-1-codex pr1114-review-1-codex",
+      "actual": [],
+      "expected": [],
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-1-codex assurance appropriate to approve",
+      "actual": "cross_approved",
+      "expected": "cross_approved",
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-1-codex original verdict approval",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    },
+    {
+      "name": "precedent pr1058-review-1-codex pr1114-review-2-codex",
+      "actual": [],
+      "expected": [],
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-2-codex assurance appropriate to approve",
+      "actual": "cross_approved",
+      "expected": "cross_approved",
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-2-codex original verdict approval",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    },
+    {
+      "name": "precedent pr1058-review-2-codex pr1110-review-1-codex",
+      "actual": [],
+      "expected": [],
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex assurance appropriate to approve",
+      "actual": "cross_approved",
+      "expected": "cross_approved",
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex original verdict approval",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    },
+    {
+      "name": "precedent pr1058-review-2-codex pr1110-review-2-codex",
+      "actual": [],
+      "expected": [],
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex assurance appropriate to approve",
+      "actual": "cross_approved",
+      "expected": "cross_approved",
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex original verdict approval",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    },
+    {
+      "name": "precedent pr1058-review-2-codex pr1114-review-1-codex",
+      "actual": [],
+      "expected": [],
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-1-codex assurance appropriate to approve",
+      "actual": "cross_approved",
+      "expected": "cross_approved",
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-1-codex original verdict approval",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    },
+    {
+      "name": "precedent pr1058-review-2-codex pr1114-review-2-codex",
+      "actual": [],
+      "expected": [],
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-2-codex assurance appropriate to approve",
+      "actual": "cross_approved",
+      "expected": "cross_approved",
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-2-codex original verdict approval",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    },
+    {
+      "name": "precedent pr1075-review-1-codex pr1110-review-1-codex",
+      "actual": [],
+      "expected": [],
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex assurance appropriate to approve",
+      "actual": "cross_approved",
+      "expected": "cross_approved",
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-1-codex original verdict approval",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    },
+    {
+      "name": "precedent pr1075-review-1-codex pr1110-review-2-codex",
+      "actual": [],
+      "expected": [],
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex assurance appropriate to approve",
+      "actual": "cross_approved",
+      "expected": "cross_approved",
+      "ok": true
+    },
+    {
+      "name": "pr1110-review-2-codex original verdict approval",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    },
+    {
+      "name": "precedent pr1075-review-1-codex pr1114-review-1-codex",
+      "actual": [],
+      "expected": [],
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-1-codex assurance appropriate to approve",
+      "actual": "cross_approved",
+      "expected": "cross_approved",
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-1-codex original verdict approval",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    },
+    {
+      "name": "precedent pr1075-review-1-codex pr1114-review-2-codex",
+      "actual": [],
+      "expected": [],
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-2-codex assurance appropriate to approve",
+      "actual": "cross_approved",
+      "expected": "cross_approved",
+      "ok": true
+    },
+    {
+      "name": "pr1114-review-2-codex original verdict approval",
+      "actual": "Verdict: approve",
+      "expected": "Verdict: approve",
+      "ok": true
+    }
+  ],
+  "failures": [
+    {
+      "name": "pr1110-review-1-codex historical mutation bien-nhan",
+      "actual": false,
+      "expected": true,
+      "ok": false
+    },
+    {
+      "name": "pr1110-review-2-codex historical receipt pass",
+      "actual": false,
+      "expected": true,
+      "ok": false
+    }
+  ],
+  "precedent": [
+    {
+      "old": "pr1058-review-1-codex",
+      "new": "pr1110-review-1-codex",
+      "differences": [],
+      "new_keys": [
+        "ket_luan"
+      ],
+      "old_keys": [
+        "assurance_KHONG_dat"
+      ]
+    },
+    {
+      "old": "pr1058-review-1-codex",
+      "new": "pr1110-review-2-codex",
+      "differences": [],
+      "new_keys": [
+        "ket_luan"
+      ],
+      "old_keys": [
+        "assurance_KHONG_dat"
+      ]
+    },
+    {
+      "old": "pr1058-review-1-codex",
+      "new": "pr1114-review-1-codex",
+      "differences": [],
+      "new_keys": [
+        "ket_luan"
+      ],
+      "old_keys": [
+        "assurance_KHONG_dat"
+      ]
+    },
+    {
+      "old": "pr1058-review-1-codex",
+      "new": "pr1114-review-2-codex",
+      "differences": [],
+      "new_keys": [
+        "ket_luan"
+      ],
+      "old_keys": [
+        "assurance_KHONG_dat"
+      ]
+    },
+    {
+      "old": "pr1058-review-2-codex",
+      "new": "pr1110-review-1-codex",
+      "differences": [],
+      "new_keys": [],
+      "old_keys": []
+    },
+    {
+      "old": "pr1058-review-2-codex",
+      "new": "pr1110-review-2-codex",
+      "differences": [],
+      "new_keys": [],
+      "old_keys": []
+    },
+    {
+      "old": "pr1058-review-2-codex",
+      "new": "pr1114-review-1-codex",
+      "differences": [],
+      "new_keys": [],
+      "old_keys": []
+    },
+    {
+      "old": "pr1058-review-2-codex",
+      "new": "pr1114-review-2-codex",
+      "differences": [],
+      "new_keys": [],
+      "old_keys": []
+    },
+    {
+      "old": "pr1075-review-1-codex",
+      "new": "pr1110-review-1-codex",
+      "differences": [],
+      "new_keys": [],
+      "old_keys": []
+    },
+    {
+      "old": "pr1075-review-1-codex",
+      "new": "pr1110-review-2-codex",
+      "differences": [],
+      "new_keys": [],
+      "old_keys": []
+    },
+    {
+      "old": "pr1075-review-1-codex",
+      "new": "pr1114-review-1-codex",
+      "differences": [],
+      "new_keys": [],
+      "old_keys": []
+    },
+    {
+      "old": "pr1075-review-1-codex",
+      "new": "pr1114-review-2-codex",
+      "differences": [],
+      "new_keys": [],
+      "old_keys": []
+    }
+  ],
+  "precedent_fields": [
+    "schema_version",
+    "kind",
+    "packet_id",
+    "role",
+    "provider",
+    "executor_provider",
+    "cross_provider",
+    "review_class",
+    "effective_review_class",
+    "nguon_tep",
+    "so_dem_theo",
+    "independent_from_executor_session",
+    "review_axes",
+    "nguon_co_tham_quyen",
+    "anchor.loai",
+    "anchor.cuong_do",
+    "model_reviewer_identity.provider",
+    "model_reviewer_identity.surface",
+    "model_reviewer_identity.transport",
+    "model_reviewer_identity.model_evidence",
+    "model_reviewer_identity.model",
+    "model_reviewer_identity.model_yeu_cau",
+    "model_reviewer_identity.model_da_chay"
+  ]
+}

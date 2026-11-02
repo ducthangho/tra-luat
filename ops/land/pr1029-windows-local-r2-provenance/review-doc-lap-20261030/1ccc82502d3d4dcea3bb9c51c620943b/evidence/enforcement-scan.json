@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "rg",
+    "-n",
+    "--glob",
+    "*.py",
+    "--glob",
+    "*.yaml",
+    "--glob",
+    "*.yml",
+    "--glob",
+    "*.json",
+    "--glob",
+    "*.ps1",
+    "--glob",
+    "*.sh",
+    "--glob",
+    "!**/golden/**",
+    "--glob",
+    "!**/fixtures/**",
+    "--glob",
+    "!**/parser_surface.json",
+    "KHOA[.]txt|do-luong[.]csv|list_devices|UTC hạn",
+    ".claude/dev",
+    "scripts",
+    ".github"
+  ],
+  "rc": 1,
+  "stdout": "",
+  "stderr": "",
+  "scope": "Tracked executable/config sources under .claude/dev, scripts, .github; excludes golden/fixtures/parser_surface."
+}

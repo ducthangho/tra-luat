@@ -1,0 +1,65 @@
+[
+  {
+    "branch": "C1a:",
+    "baseline": [
+      "qua",
+      null
+    ],
+    "baseline_observation": [
+      {
+        "condition": true,
+        "message": "C1a: đòi tổng 2 nêu x.RECEIPT.YAML, không ĐẠT; được rc=1 tổng=2: 'òi 2 · thiếu/rỗng `receipt_id` · thiếu/rỗng `reviewed_sha` · thiếu/rỗng `verdict_path` · thiếu/rỗng `verdict_sha256` · thiếu/rỗng `evidence_url` · thiếu/rỗng ánh xạ `model_reviewer_identity` · thiếu khoá `github_submitter_identity` (null hợp lệ, VẮNG thì không) · thiếu/rỗng ánh xạ `anchor`\\nTỔNG: ĐỎ\\n'"
+      }
+    ],
+    "result": [
+      "giet_that",
+      "C1a: đòi tổng 2 nêu x.RECEIPT.YAML, không ĐẠT; được rc=1 tổng=1: 'òi 2 · thiếu/rỗng `receipt_id` · thiếu/rỗng `reviewed_sha` · thiếu/rỗng `verdict_path` · thiếu/rỗng `verdict_sha256` · thiếu/rỗng `evidence_url` · thiếu/rỗng ánh xạ `model_reviewer_identity` · thiếu khoá `github_submitter_identity` (null hợp lệ, VẮNG thì không) · thiếu/rỗng ánh xạ `anchor`\\nTỔNG: ĐỎ\\n'"
+    ],
+    "observation": {
+      "condition": false,
+      "message": "C1a: đòi tổng 2 nêu x.RECEIPT.YAML, không ĐẠT; được rc=1 tổng=1: 'òi 2 · thiếu/rỗng `receipt_id` · thiếu/rỗng `reviewed_sha` · thiếu/rỗng `verdict_path` · thiếu/rỗng `verdict_sha256` · thiếu/rỗng `evidence_url` · thiếu/rỗng ánh xạ `model_reviewer_identity` · thiếu khoá `github_submitter_identity` (null hợp lệ, VẮNG thì không) · thiếu/rỗng ánh xạ `anchor`\\nTỔNG: ĐỎ\\n'"
+    }
+  },
+  {
+    "branch": "chỉ-x:",
+    "baseline": [
+      "qua",
+      null
+    ],
+    "baseline_observation": [
+      {
+        "condition": true,
+        "message": "chỉ-x: đòi tổng 1, không 'không có tệp'; được rc=1 tổng=1: 'òi 2 · thiếu/rỗng `receipt_id` · thiếu/rỗng `reviewed_sha` · thiếu/rỗng `verdict_path` · thiếu/rỗng `verdict_sha256` · thiếu/rỗng `evidence_url` · thiếu/rỗng ánh xạ `model_reviewer_identity` · thiếu khoá `github_submitter_identity` (null hợp lệ, VẮNG thì không) · thiếu/rỗng ánh xạ `anchor`\\nTỔNG: ĐỎ\\n'"
+      }
+    ],
+    "result": [
+      "giet_that",
+      "chỉ-x: đòi tổng 1, không 'không có tệp'; được rc=2 tổng=None: 'KHÔNG ĐO ĐƯỢC: /tmp/tmp3ve2l9mq/ops/reviews không có tệp `*.receipt.yaml` nào (so đuôi không phân biệt hoa thường) — mốc neo đã đổi?\\n'"
+    ],
+    "observation": {
+      "condition": false,
+      "message": "chỉ-x: đòi tổng 1, không 'không có tệp'; được rc=2 tổng=None: 'KHÔNG ĐO ĐƯỢC: /tmp/tmp3ve2l9mq/ops/reviews không có tệp `*.receipt.yaml` nào (so đuôi không phân biệt hoa thường) — mốc neo đã đổi?\\n'"
+    }
+  },
+  {
+    "branch": "C1b:",
+    "baseline": [
+      "qua",
+      null
+    ],
+    "baseline_observation": [
+      {
+        "condition": true,
+        "message": "C1b: đòi rc=2 nêu x.RECEIPT.YAML, không traceback; được rc=2: 'KHÔNG ĐO ĐƯỢC: x.RECEIPT.YAML: YAML hỏng (ParserError: while parsing a flow node\\nexpected the node content, but found \\'<stream end>\\'\\n  in \"<unicode string>\", line 2, column 1:\\n    \\n    ^)\\n'"
+      }
+    ],
+    "result": [
+      "giet_that",
+      "C1b: đòi rc=2 nêu x.RECEIPT.YAML, không traceback; được rc=1: 'òi 2 · thiếu/rỗng `receipt_id` · thiếu/rỗng `reviewed_sha` · thiếu/rỗng `verdict_path` · thiếu/rỗng `verdict_sha256` · thiếu/rỗng `evidence_url` · thiếu/rỗng ánh xạ `model_reviewer_identity` · thiếu khoá `github_submitter_identity` (null hợp lệ, VẮNG thì không) · thiếu/rỗng ánh xạ `anchor`\\nTỔNG: ĐỎ\\n'"
+    ],
+    "observation": {
+      "condition": false,
+      "message": "C1b: đòi rc=2 nêu x.RECEIPT.YAML, không traceback; được rc=1: 'òi 2 · thiếu/rỗng `receipt_id` · thiếu/rỗng `reviewed_sha` · thiếu/rỗng `verdict_path` · thiếu/rỗng `verdict_sha256` · thiếu/rỗng `evidence_url` · thiếu/rỗng ánh xạ `model_reviewer_identity` · thiếu khoá `github_submitter_identity` (null hợp lệ, VẮNG thì không) · thiếu/rỗng ánh xạ `anchor`\\nTỔNG: ĐỎ\\n'"
+    }
+  }
+]

@@ -1,0 +1,10 @@
+do luc 2026-10-30T00:53:57Z
+ls-remote heads: 697, for-each-ref: 697, thieu: 0
+$ python ops/lease_publish.py ai-dang-giu --root . .claude/dev/ci_dang_ky_test.py  (dong HET_HAN luoc)
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0
+$ python ops/lease_publish.py ai-dang-giu --root . ops/handoff/wp923-g3-claude.md  (dong HET_HAN luoc)
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0

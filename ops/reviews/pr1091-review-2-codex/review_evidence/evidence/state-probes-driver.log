@@ -1,0 +1,9 @@
+{"name": "head_empty", "rc": 0, "mode": "dacl-rong", "model": "head", "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU", "tasks": 1, "nodes": 4, "bad_nodes": 0}
+{"name": "no_reset_empty", "rc": 0, "mode": "dacl-rong", "model": "head", "error": "Access to the path '/tmp/cncc-dk-f58fda460beb444fb95e069848dbf127/PF/tra-luat-ops/cong_cu.yaml' is denied.", "tasks": 0, "nodes": 4, "bad_nodes": 0}
+{"name": "after_copy_empty", "rc": 0, "mode": "dacl-rong", "model": "head", "error": "Access to the path '/tmp/cncc-dk-c1809257d7fd4fcf8b27dcc7e023c5a2/PF/tra-luat-ops/cong_cu.yaml' is denied.", "tasks": 0, "nodes": 4, "bad_nodes": 0}
+{"name": "after_copy_cached_empty", "rc": 0, "mode": "dacl-rong", "model": "head", "error": "Access to the path '/tmp/cncc-dk-3af84d8cc6774d0d99b3c017cd8ece9f/PF/tra-luat-ops/cong_cu.yaml' is denied.", "tasks": 0, "nodes": 4, "bad_nodes": 0}
+{"name": "head_nested", "rc": 0, "mode": "cay-long", "model": "head", "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU", "tasks": 1, "nodes": 9, "bad_nodes": 0}
+{"name": "no_T_nested_head_model", "rc": 0, "mode": "cay-long", "model": "head", "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU", "tasks": 1, "nodes": 9, "bad_nodes": 3}
+{"name": "no_T_nested_original_model", "rc": 0, "mode": "cay-long", "model": "original", "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU", "tasks": 1, "nodes": 9, "bad_nodes": 0}
+{"name": "no_T_nested_recursive_model", "rc": 0, "mode": "cay-long", "model": "recursive", "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU", "tasks": 1, "nodes": 9, "bad_nodes": 3}
+{"name": "head_nested_previous_recursive", "rc": 0, "mode": "cay-long", "model": "recursive", "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU", "tasks": 1, "nodes": 9, "bad_nodes": 0}

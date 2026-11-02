@@ -1,0 +1,7 @@
+# Moc Workflow definition §10.2.2 cho run 41017062295 (push master, merge 09e05945).
+# Nguon: chu kho cho phep chay tren may cua chu kho (ASUS-LAPTOP, cmd, gh CLI cua chu kho) qua Remote Desktop Commander,
+# do phien executor session_015GtxrZE9sQqfnKV4jsABnr thuc hien ~08:25Z 2026-10-30, chuyen nguyen van ve phien dieu phoi.
+# Phien dieu phoi KHONG tu chay GraphQL (403 trong phien web); phan doi chieu REST + git ben duoi do phien dieu phoi do lai.
+lenh: gh api graphql -f id=WFR_kwLOTNeRjc8AAAAJjM6zlw -f query="query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt file { path repositoryFileUrl } checkSuite { commit { oid } } } } }"
+stdout:
+{"data":{"node":{"databaseId":41017062295,"runNumber":3469,"createdAt":"2026-10-30T06:56:47Z","file":{"path":".github/workflows/ci.yml","repositoryFileUrl":"https://github.com/ducthangho/tra-luat/blob/09e059457a033de769f7cb789edc20810f4b95f5/.github/workflows/ci.yml"},"checkSuite":{"commit":{"oid":"09e059457a033de769f7cb789edc20810f4b95f5"}}}}}

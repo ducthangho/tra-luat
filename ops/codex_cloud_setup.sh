@@ -76,6 +76,9 @@ main() {
   d="$("$PY" -c 'import sysconfig; print(sysconfig.get_path("scripts"))')"
   [ -x "$d/shellcheck" ] && ln -sf "$d/shellcheck" "$BIN/shellcheck"
 
+  # 1b. Credential agent (wp1039): sau pip (bootstrap cần gói); luôn rc 0, đúng một dòng `agent_creds:`; không cài agy (Q5).
+  "$PY" ops/cloud_agent_creds.py nap || true
+
   # 2. Nhị phân hệ thống: pdftotext (BẮT BUỘC cho đường nạp PDF), rg (bắt buộc cho agent).
   cai_deb poppler-utils pdftotext
   cai_deb ripgrep rg

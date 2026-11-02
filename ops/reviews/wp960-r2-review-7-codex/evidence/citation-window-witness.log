@@ -1,0 +1,8 @@
+{"variant": "HEAD", "direction": "before"}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "qua", "message": null}
+{"variant": "mutant", "direction": "before"}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "giet_that", "message": "viii-trich-dan-truoc-hai-dong: đòi rc=1, được 0: loi=[] chua=[]"}
+{"variant": "HEAD", "direction": "after"}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "qua", "message": null}
+{"variant": "mutant", "direction": "after"}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "giet_that", "message": "ix-trich-dan-sau-hai-dong: đòi rc=1, được 0: loi=[] chua=[]"}

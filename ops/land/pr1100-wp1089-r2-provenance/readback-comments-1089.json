@@ -1,0 +1,66 @@
+[
+ {
+  "id": 6551147799,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-11-01T00:25:52Z",
+  "body_sha256": "5a80473b3b251f06fafa079aaaeb331bbd2afb3a4ddc95cb62a68ab0ce8b6bcb",
+  "body_head": "**Đặc tả P3 r1 đã đóng băng, 01-11-2026 ~00:25Z.**\n\n- Đường dẫn: `ops/specs/cloud-setup-p3-writeback-r1.md`, nhánh `claude/wp1089-cloud-setup-p3-spec`, PR #1095 (draft).\n- Commit: `74031df1`. Blob: `b5bb73e8814f4f99eddc9ed645521401870fd363`.\n- `sha256`: `e4b0800a197ab22d57b2ee75e11673960c6f47d8e7ace"
+ },
+ {
+  "id": 6551500950,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-11-01T01:01:31Z",
+  "body_sha256": "f6202823e715a298c1fa36c8030ab95c85484f0a71afe2c89c174a292a7bf457",
+  "body_head": "**Đặc tả P3 r2 (errata) ĐÃ ĐÓNG BĂNG, 01-11-2026 ~01:00Z.**\n\n| | |\n|---|---|\n| Đường dẫn | `ops/specs/cloud-setup-p3-writeback-r2.md` |\n| Commit | `37d5965b30462ef2340a26dd19333873e14d84d5` (nhánh `claude/wp1089-cloud-setup-p3-spec`, PR #1095) |\n| Blob | `518d7488814e667805198b2d25a4be6162fcc73c` |\n"
+ },
+ {
+  "id": 6551710277,
+  "user": "github-actions[bot]",
+  "author_association": "NONE",
+  "created_at": "2026-11-01T01:21:59Z",
+  "body_sha256": "e590998b1affabffe3823b710c7bba068893e94daa5b56beb8daa7a532cc3b1d",
+  "body_head": "**Lease `wp1089-cloud-setup-p3-r2-g1-claude`** — đăng tự động từ `ops/leases/wp1089-cloud-setup-p3-r2-g1-claude.yaml`.\n\nNguồn sự thật là tệp trong kho, comment này chỉ là **bản chiếu**. Sửa lease thì sửa tệp rồi push; đừng sửa tay comment này.\n\n```yaml\nschema_version: 2\nevent: executor_lease_granted"
+ },
+ {
+  "id": 6552023930,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-11-01T01:55:23Z",
+  "body_sha256": "003fd48905737cf19cab2473324dc7850cfc831d0212fe830efa60af94880773",
+  "body_head": "**Đã mở phiên executor cho P3 lúc 01-11-2026 01:55Z:** `session_015GtxraHfEdeH72Xpd5nQCW`. Phiên chạy trên Claude Code remote (Linux).\n\nPhiên làm theo lease `wp1089-cloud-setup-p3-r2-g1-claude` (issuecomment-6551710277) và đặc tả r2 (`c12e0449…`), trên nhánh `claude/wp1089-cloud-setup-p3-g1`.\n\nChủ k"
+ },
+ {
+  "id": 6552277210,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-11-01T02:21:32Z",
+  "body_sha256": "bf2fe1e2306f6bf2e6bea0a0bb879a8f54eb38c78f009d192fc4a395e88ebcdf",
+  "body_head": "**Chủ kho quyết định nới write set của P3, ngày 01-11-2026 ~02:20Z.** Phiên điều phối `session_015GtxraXfMD1t2FJLzzGDr4` chép lại lựa chọn của chủ kho trong phiên.\n\n**Bối cảnh.** Executor `session_015GtxraHfEdeH72Xpd5nQCW` dừng ở điều kiện S1 trên PR #1100, head `3be07bff`. Code nằm gọn trong 5 tệp:"
+ },
+ {
+  "id": 6552335715,
+  "user": "github-actions[bot]",
+  "author_association": "NONE",
+  "created_at": "2026-11-01T02:28:09Z",
+  "body_sha256": "5775624caa5b104b0edac76cfd02c9908b6c4818d822c78f12388ed8f793f9f6",
+  "body_head": "**Lease `wp1089-cloud-setup-p3-r2-g2-claude`** — đăng tự động từ `ops/leases/wp1089-cloud-setup-p3-r2-g2-claude.yaml`.\n\nNguồn sự thật là tệp trong kho, comment này chỉ là **bản chiếu**. Sửa lease thì sửa tệp rồi push; đừng sửa tay comment này.\n\n```yaml\nschema_version: 2\nevent: executor_lease_granted"
+ },
+ {
+  "id": 6552453945,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-11-01T02:41:42Z",
+  "body_sha256": "bdba77d5c969d43413bca50256a19c31d37357b5d3095fb8f283f665984d663f",
+  "body_head": "**Chỉ thị land của chủ kho cho P3 (#1089), 01-11-2026 ~02:41Z.**\n\nPhiên điều phối `session_015GtxraXfMD1t2FJLzzGDr4` chép lại nguyên văn lời chủ kho trong phiên:\n\n> *\"Xanh thì merge, land và ghi sổ P3\"*\n\nPhiên điều phối hiểu \"xanh\" là đạt đủ các điều kiện merge sau, theo protocol và lease g2:\n- CI t"
+ },
+ {
+  "id": 6552702223,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-11-01T03:09:09Z",
+  "body_sha256": "22d031a105ce5619270582fc3bd5f504290040a0a3bf209e37831291c130030f",
+  "body_head": "**Chủ kho chấp nhận mức assurance của lượt review approve cho P3 (#1089), ngày 01-11-2026 ~03:10Z.** Phiên điều phối `session_015GtxraXfMD1t2FJLzzGDr4` chép lại lựa chọn của chủ kho.\n\n**Bối cảnh.**\n- PR #1100 được cross-review Codex **lượt 2/8 approve**: `launcher.py run c611c6b9`, head `6120ab88382"
+ }
+]

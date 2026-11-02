@@ -1,0 +1,5 @@
+  ĐỎ  pr1058-review-2-codex-verdict.receipt.yaml: KHÔNG đạt v2 và KHÔNG nằm trong danh sách nào — pr1058-review-2-codex-verdict.receipt.yaml: blob tại `evidence_url` băm 00046bcde939… nhưng biên nhận khai `verdict_sha256` ffffffffffff… — mỏ neo KHÔNG trỏ đúng thứ nó khai
+
+bien_nhan_v2: 263 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 317
+câu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0
+TỔNG: ĐỎ

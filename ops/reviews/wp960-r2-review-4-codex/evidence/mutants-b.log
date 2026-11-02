@@ -1,0 +1,6 @@
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutant": "u4-health-baseline-overwrite", "count": 93, "passed": 93, "red": [], "seconds": 260.711}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutant": "u5-prefix-boundary", "count": 93, "passed": 93, "red": [], "seconds": 242.759}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutant": "u6-newline-stderr", "count": 93, "passed": 93, "red": [], "seconds": 247.6}

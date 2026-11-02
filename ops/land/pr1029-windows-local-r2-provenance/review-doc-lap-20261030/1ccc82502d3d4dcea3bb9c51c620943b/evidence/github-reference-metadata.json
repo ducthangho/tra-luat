@@ -1,0 +1,66 @@
+[
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "mission-748",
+      "metadata": {
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/issues/748",
+        "number": 748,
+        "title": "Packet Windows gate recovery: G5 t23/t49, lease t217, registry full matrix",
+        "state": "closed",
+        "created_at": "2026-10-13T01:13:47Z"
+      }
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "pr-1007",
+      "metadata": {
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1007",
+        "number": 1007,
+        "title": "wp1006: t27 duyệt verdict không phụ thuộc nền (hoa/thường) + biên nhận wp929",
+        "state": "closed",
+        "created_at": "2026-10-29T06:51:34Z",
+        "merged_at": "2026-10-29T16:22:36Z",
+        "merge_commit_sha": "2de4c049d3a8aa949f8e7a0e300550b6d0ffc781",
+        "head_sha": "76b65936e9e83ad2711e20a158e552449b4c6d86",
+        "base_sha": "d31df1eb84c31514537d08f51ecb9a20b3cc07fc"
+      }
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "pr-1022",
+      "metadata": {
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1022",
+        "number": 1022,
+        "title": "docs: ADR-0057 máy Windows local của chủ kho (WINDOWS-LOCAL-MAY-CHU-KHO r1 g1, mission #748)",
+        "state": "closed",
+        "created_at": "2026-10-29T10:47:46Z",
+        "merged_at": "2026-10-29T11:42:58Z",
+        "merge_commit_sha": "d31df1eb84c31514537d08f51ecb9a20b3cc07fc",
+        "head_sha": "f4d15edcb5d0a9742182273e5950f76165060667",
+        "base_sha": "96667715996d41bc45e70a64fbaa8996de20f6a0"
+      }
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "pr-1025",
+      "metadata": {
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1025",
+        "number": 1025,
+        "title": "ops: đặc tả WINDOWS-LOCAL r2 + hồ sơ land #1022 + neo quyết định chủ kho vào #994/#1013",
+        "state": "closed",
+        "created_at": "2026-10-29T12:28:20Z",
+        "merged_at": "2026-10-30T03:56:24Z",
+        "merge_commit_sha": "5f3855eaf47e024b6c63f8923f64d8f80c5de707",
+        "head_sha": "6c1436af07704b20df2506bc05f3c726ef04e1e3",
+        "base_sha": "d31df1eb84c31514537d08f51ecb9a20b3cc07fc"
+      }
+    }
+  }
+]

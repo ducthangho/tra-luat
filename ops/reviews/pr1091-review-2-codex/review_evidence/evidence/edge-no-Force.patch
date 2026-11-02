@@ -1,0 +1,11 @@
+--- ops/vm/cap-nhat-cong-cu.ps1
++++ ops/vm/cap-nhat-cong-cu.ps1
+@@ -617,7 +617,7 @@
+     # cắt) ⇒ không ai đọc/ghi được, kể cả admin; `-DangKyLich` lần hai chết ở Copy-Item với rc=6 và tác vụ NguoiDung
+     # (tlcommander) không đọc nổi script. `icacls rc=0` vẫn báo 'Successfully processed', nên phép đo ACL sau cùng là chốt thật.
+     Invoke-Icacls @($Script:ThuMucCaiDat, '/inheritance:r', '/grant:r', '*S-1-5-18:(OI)(CI)F', '*S-1-5-32-544:(OI)(CI)F', '*S-1-5-32-545:(OI)(CI)RX', '/C', '/L', '/Q')
+-    if (@(Get-ChildItem -LiteralPath $Script:ThuMucCaiDat -Force).Count) {
++    if (@(Get-ChildItem -LiteralPath $Script:ThuMucCaiDat).Count) {
+         Invoke-Icacls @((Join-Path $Script:ThuMucCaiDat '*'), '/reset', '/T', '/C', '/L', '/Q')
+     }
+     $nguon = @{

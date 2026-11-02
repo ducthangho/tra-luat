@@ -1,0 +1,36 @@
+[
+  {
+    "variant": "base",
+    "rc": 3,
+    "output": "DO:p3b4_co_blob:node rc=206: b'REVIEW_LIMIT_32767'",
+    "calls": [
+      {
+        "argc": 3,
+        "units": 87617,
+        "input_bytes": 0
+      }
+    ]
+  },
+  {
+    "variant": "head",
+    "rc": 0,
+    "output": "",
+    "calls": [
+      {
+        "argc": 2,
+        "units": 47,
+        "input_bytes": 87545
+      },
+      {
+        "argc": 2,
+        "units": 47,
+        "input_bytes": 161
+      },
+      {
+        "argc": 2,
+        "units": 47,
+        "input_bytes": 87545
+      }
+    ]
+  }
+]

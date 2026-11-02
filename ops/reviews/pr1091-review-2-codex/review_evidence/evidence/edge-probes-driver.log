@@ -1,0 +1,5 @@
+{"name": "head_hidden_only", "rc": 0, "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU", "tasks": 1, "nodes": 5, "bad_nodes": 0, "copies": 3, "resets": 1}
+{"name": "no_Force_hidden_only", "rc": 0, "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU", "tasks": 1, "nodes": 5, "bad_nodes": 1, "copies": 3, "resets": 0}
+{"name": "reset_failure", "rc": 0, "error": "RESET-FAIL-INJECTED", "tasks": 0, "nodes": 4, "bad_nodes": 0, "copies": 0, "resets": 1}
+{"name": "enumeration_failure", "rc": 0, "error": "ENUM-FAIL-INJECTED", "tasks": 0, "nodes": 4, "bad_nodes": 0, "copies": 0, "resets": 0}
+{"name": "copy_sharing_failure", "rc": 0, "error": "SHARING-LOCK-INJECTED", "tasks": 0, "nodes": 1, "bad_nodes": 0, "copies": 1, "resets": 0}

@@ -490,7 +490,8 @@ successors:
 ```
 
 Executor đăng handoff/evidence lên Packet Issue và PR trước khi state rời `running` (packet áp `ADR-0054`: chưa có
-PR trước lần đẩy, nên chỉ Packet Issue; xem ánh xạ ở ADR ấy). Test evidence phải có lệnh,
+PR trước lần đẩy, nên chỉ Packet Issue; xem ánh xạ ở ADR ấy; packet áp `ADR-0060` đọc theo mục review offline
+trước push của ADR ấy). Test evidence phải có lệnh,
 rc đọc trực tiếp và bằng chứng dương (`N/N`, `ok=true`, số file/hash...), không chỉ “passed”. `changed_paths` phải
 khớp diff của exact `head_sha`; `tested_sha` phải bằng head được đề nghị review; test không chạy phải ghi
 `not_run` cùng lý do. Selector evidence phải ghi tier, policy/catalog identity, nhóm đã chọn và lý do fallback;
@@ -607,7 +608,8 @@ Packet cloud hợp lệ chạy ngay; packet local tự chạy khi host lên. H�
 `blocked`, quyền LIVE hoặc land/deploy.
 
 Với handoff Executor `status: done` HOẶC tổ hợp `status: needs_followup` VÀ `next_role: reviewer`, reconciler phải
-đọc lại PR head (packet áp `ADR-0054`, trước lần đẩy: SHA ứng viên cục bộ trong handoff và bundle) và so đồng thời mission revision, Packet revision/spec hash, generation, lease, `head_sha`,
+đọc lại PR head (packet áp `ADR-0054`, trước lần đẩy: SHA ứng viên cục bộ trong handoff và bundle; packet áp
+`ADR-0060`: mỏ neo theo mục review offline trước push của ADR ấy) và so đồng thời mission revision, Packet revision/spec hash, generation, lease, `head_sha`,
 `tested_sha`, changed paths và gate policy. Chỉ khi tất cả khớp,
 nó mới ghi transition `running → reviewing` idempotent rồi dispatch một Reviewer mới, context/worktree độc lập và
 read-only mặc định. Executor không tự tạo review có thẩm quyền; nếu chưa có automation, nó chỉ xuất prompt thủ
@@ -642,6 +644,7 @@ P0 chặn approval ở mọi class. Bảng không tự cho phép bỏ qua findin
 review/gate/exact-SHA/human audit. Packet hoặc chỉ thị có ngưỡng chặt hơn thì áp
 ngưỡng đó; ví dụ yêu cầu0P1/P2/P3 vẫn chặn dù ngưỡng mặc định cho phép ghi nợ.
 Reviewer ghi ngưỡng đã áp và assurance riêng; “đủ severity” chưa phải “approved”.
+Packet áp `ADR-0060` dùng điều kiện severity, Windows, mốc bỏ draft và sổ sách của ADR ấy thay cho bảng trên.
 
 Reviewer có `contents: read` và chỉ có quyền ghi review/comment PR. `changes_requested` trả về executor, không cho
 reviewer sửa branch. Lỗi quota/rate-limit không tiêu thụ attempt nội dung; circuit breaker ngừng gọi provider tới
@@ -1012,6 +1015,8 @@ chạy cùng legacy harness. Test-ID registry dùng chung phải lập chỉ m�
 `wp<issue>_<slug>` của fragment và ID trong bundled module; resolver tài liệu cùng duplicate gate đọc registry
 này và có negative fixture cho tên bịa. Worker dùng đúng land generator để sinh bundled candidate trong thư mục
 tạm ngoài repo, kiểm byte/topology nhưng không sửa module land-only trong diff.
+Quy ước sử dụng máy Windows local của chủ kho nằm tại `ADR-0057`, `ADR-0058` và `ADR-0059`; packet áp `ADR-0060` đọc
+thêm mục Windows và mục sổ sách của ADR ấy.
 
 Các thuật ngữ trạng thái không dùng thay nhau:
 
@@ -1179,18 +1184,21 @@ thứ ba bắt buộc xem lại có nên tiếp tục cách làm đó, không ch
 Trigger khi agent nhận Issue có lease hợp lệ. Trình tự bắt buộc: đọc protocol → preflight spec/lease/worktree →
 heartbeat → chỉ sửa effective write set → worker gate → PR → handoff (packet áp `ADR-0054`: worker gate → handoff →
 review → đẩy → PR, theo ánh xạ ở ADR ấy). Hoàn tất khi handoff hợp lệ đã được dispatcher nhận (packet áp `ADR-0054`:
-khi SHA đã approve được đẩy và PR đã mở; run kết thúc trước đó thì run kế nhiệm làm nốt, xem ADR ấy).
+khi SHA đã approve được đẩy và PR đã mở; run kết thúc trước đó thì run kế nhiệm làm nốt, xem ADR ấy). Packet áp
+`ADR-0060` đọc trình tự trước push theo mục review offline trước push của ADR ấy.
 Skill từ chối làm việc nếu lease/generation/spec hash sai, cần LIVE, closure thiếu hoặc security path chưa duyệt.
 Adapter chỉ trỏ các mục protocol và mô tả cú pháp/công cụ riêng của nền; không sao chép schema, stop condition hay
 completion criteria. Phiên `work-packet` không chuyển vai sang reviewer hoặc land trong cùng run.
 
 ### `cross-review` — model-invoked
 
-Trigger khi PR vào `reviewing` (packet áp `ADR-0054`: khi Packet vào `reviewing` với SHA ứng viên cục bộ). Đọc protocol/spec/diff/gate evidence; review hai trục `Spec` và `Standards/Security`;
+Trigger khi PR vào `reviewing` (packet áp `ADR-0054`: khi Packet vào `reviewing` với SHA ứng viên cục bộ; packet áp
+`ADR-0060`: theo mục review offline trước push của ADR ấy). Đọc protocol/spec/diff/gate evidence; review hai trục `Spec` và `Standards/Security`;
 không sửa file; xuất verdict `approve | changes_requested | blocked` có severity/evidence. Finding nên kèm
 *bằng chứng chạy được* và patch-as-hint (nếu dùng) phải theo đúng ràng buộc §8 — đính dạng artifact, không push
 ref. Hoàn tất khi verdict đã ghi vào PR và state nhận đúng review assurance (packet áp `ADR-0054`: ghi vào biên nhận
-và Packet Issue trước lần đẩy, chép sang PR sau đó; state nhận verdict theo yêu cầu máy trạng thái ở ADR ấy).
+và Packet Issue trước lần đẩy, chép sang PR sau đó; state nhận verdict theo yêu cầu máy trạng thái ở ADR ấy; packet
+áp `ADR-0060`: nơi ghi verdict trước push theo mục review offline trước push của ADR ấy).
 Reviewer dùng checkout/context độc lập, ghi exact `reviewed_sha`; nếu cùng provider thì phải là phiên mới và mang
 assurance theo §8 khi evidence đủ, không tự nhận `same_provider_approved` chỉ từ cấu hình
 cùng provider và không giả thành cross-provider.
@@ -1533,6 +1541,10 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` �
 | `ADR-0054` | Đẩy nhánh code packet khi đủ điều kiện merge, review offline neo SHA cục bộ, dừng vá khi hết P0/P1/P2 ở mọi class, review tìm theo lớp; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted — chưa kích hoạt, chờ packet máy `MAY-ADR-0054` | **0 cổng** — không bộ đếm số lần đẩy |
 | `ADR-0055` | Trần trục LỜI GỌI Codex mỗi PR nâng theo chỉ thị chủ kho 25-10-2026, thay số của `ADR-0052`; trục LỜI GỌI nay bằng trục VÒNG; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted | `packet_loop.py`: cùng bộ đếm trong state như `ADR-0052` — người khởi tạo tự truyền trần; không gì đọc dòng khai `tran_loi_goi_codex:` |
 | `ADR-0056` | Ngưỡng thu hồi lease vì không tiến triển nâng từ 30 lên 360 phút theo chỉ thị chủ kho 19-10-2026, thay đúng câu 30 phút của `ADR-0017`; chỉ áp lease mới, không hồi tố; `lease_until`, generation, bia mộ, exact head và heartbeat 15 phút sau `changes_requested` giữ nguyên | Accepted — đã kích hoạt vận hành (merge PR thi công wp943) | **0 cổng** — không controller trong kho mang hằng 30 phút; không có controller ngoài, phiên điều phối áp tay |
+| `ADR-0057` | Máy Windows local của chủ kho dùng khi online theo chỉ thị chủ kho 29-10-2026; đã chạy local thì vá lỗi local do diff trước merge; cộng thêm, không thay check bắt buộc CI; phạm vi và khoá sửa bởi `ADR-0058` | Accepted | không cổng — kỷ luật executor |
+| `ADR-0058` | Máy Windows local: sửa đúng §1 Phạm vi và §3 Khoá của `ADR-0057` theo chỉ thị chủ kho 30-10-2026 — phạm vi là mọi máy Windows của chủ kho `Online` trong `list_devices`; khoá và sổ đo theo từng máy; dòng khoá có hạn không quá 2 giờ, khoá hết hiệu lực khi quá hạn, khi dòng dạng cũ quá 2 giờ, hoặc khi phiên giữ khoá tuyên bố bỏ có bằng chứng; khoá bổ sung bởi `ADR-0059` | Accepted | không cổng — kỷ luật executor |
+| `ADR-0059` | Máy Windows local: chỉ bổ sung §3 Hạn khoá của `ADR-0058` và §3 Khoá của `ADR-0057` theo đặc tả chủ kho duyệt 31-10-2026 — nhịp tim của dòng khoá, tiếp nhận khoá khi còn tiến trình, lượt bị ngắt, đọc lại trước khi ghi lại, nhả khoá; luật nằm trong ADR | Accepted | không cổng — kỷ luật executor |
+| `ADR-0060` | Điều kiện merge, mốc bỏ draft và làn sổ sách cho packet có dòng khai `dieu_kien_merge` hợp lệ; luật chi tiết chỉ ở ADR ấy; độc lập với `ADR-0054`; không hồi tố | Accepted | `packet_loop.py` `kiem-merge` (K0–K6), `kiem-dong-wp` (D1–D4) |
 
 ### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
 

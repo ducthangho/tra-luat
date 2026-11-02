@@ -1,0 +1,20 @@
+/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1110a/work/mutant/ops/lease_publish_test.py:3062: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1110a/work/mutant/ops/lease_publish_test.py:5205: SyntaxWarning: invalid escape sequence '\d'
+  KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1110a/direct_gates.py", line 15, in <module>
+    getattr(module, name)()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1110a/work/mutant/ops/lease_publish_test.py", line 1688, in t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi
+    bang(thuc == sha,
+    ~~~~^^^^^^^^^^^^^
+         f"{p.name}: LỆCH BĂM — biên nhận khai {sha}, tệp {duong!r} thực {thuc}. "
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+         f"Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc "
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+         f"biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào.")
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1110a/work/mutant/ops/lease_publish_test.py", line 174, in bang
+    raise AssertionError(msg)
+AssertionError: pr1075-review-1-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, tệp 'ops/reviews/pr1075-review-1-codex-verdict.md' thực b823f2bc10297143977095eca1474d1fc73e2e98be0305173b2c486e9f8c38f6. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào.

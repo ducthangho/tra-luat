@@ -1,0 +1,15 @@
+$ git rev-parse e926bd9d765b2a5f6e50122776ba95e73f84e978^{tree} e926bd9d765b2a5f6e50122776ba95e73f84e978^1 e926bd9d765b2a5f6e50122776ba95e73f84e978^2
+5dcd2226aa245c41f83bc0ef392baab2561dd969
+b3decc512dd6e0247ec2439870bd06725d79f028
+0eb66e513f2736f0bfc342ddbcbc70b84f773b3b
+merge-base(cha1,head) = 44884446f71c89e25f9a72ac58e4f597db63c1ba
+cmp diff(cha1..merge) vs diff(merge-base..head) rc=0
+47	11	ops/kiem_ho_so_land.py
+137	3	ops/kiem_ho_so_land_test.py
+# blob write set tai 2c70821 (approve luot 2) / afd3a86 (approve luot 3) / 0eb66e5 (head merge, khong review)
+ops/kiem_ho_so_land.py 846f3697dc453f349852a613ed9a2ec7ab369569 846f3697dc453f349852a613ed9a2ec7ab369569 846f3697dc453f349852a613ed9a2ec7ab369569
+ops/kiem_ho_so_land_test.py 45874c6be6286406ea780ae9d9d489662da446bb 45874c6be6286406ea780ae9d9d489662da446bb 45874c6be6286406ea780ae9d9d489662da446bb
+$ git log --format='%H %P' -1 0eb66e513f2736f0bfc342ddbcbc70b84f773b3b
+0eb66e513f2736f0bfc342ddbcbc70b84f773b3b afd3a861bdaed63ada0f24ee8dbf2af166e86178 44884446f71c89e25f9a72ac58e4f597db63c1ba
+$ git diff --stat afd3a86 0eb66e513f2736f0bfc342ddbcbc70b84f773b3b | tail -1
+ 110 files changed, 9492 insertions(+), 27 deletions(-)

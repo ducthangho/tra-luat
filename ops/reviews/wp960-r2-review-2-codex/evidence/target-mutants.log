@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/rv/wp960-r2-review-2-codex/measure_target_mutants.py", line 14, in <module>
+    number=int(name.split('_')[0][1:])
+ValueError: invalid literal for int() with base 10: '2b'

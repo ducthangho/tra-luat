@@ -1,0 +1,190 @@
+{
+  "mode": "dacl-rong",
+  "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU",
+  "tasks": 1,
+  "files": [
+    "cap-nhat-cong-cu.ps1",
+    "cong_cu.yaml",
+    "requirements.txt"
+  ],
+  "states": [
+    {
+      "path": "/tmp/cncc-dk-ea9393773c29418bb47f133ffd15dc3a/PF/tra-luat-ops",
+      "owner": "BUILTIN\\Administrators",
+      "access": [
+        {
+          "IdentityReference": "NT AUTHORITY\\SYSTEM",
+          "FileSystemRights": "FullControl",
+          "AccessControlType": "Allow"
+        },
+        {
+          "IdentityReference": "BUILTIN\\Administrators",
+          "FileSystemRights": "FullControl",
+          "AccessControlType": "Allow"
+        },
+        {
+          "IdentityReference": "BUILTIN\\Users",
+          "FileSystemRights": "ReadAndExecute, Synchronize",
+          "AccessControlType": "Allow"
+        }
+      ],
+      "violations": []
+    },
+    {
+      "path": "/tmp/cncc-dk-ea9393773c29418bb47f133ffd15dc3a/PF/tra-luat-ops/cap-nhat-cong-cu.ps1",
+      "owner": "BUILTIN\\Administrators",
+      "access": [
+        {
+          "IdentityReference": "NT AUTHORITY\\SYSTEM",
+          "FileSystemRights": "FullControl",
+          "AccessControlType": "Allow"
+        },
+        {
+          "IdentityReference": "BUILTIN\\Administrators",
+          "FileSystemRights": "FullControl",
+          "AccessControlType": "Allow"
+        },
+        {
+          "IdentityReference": "BUILTIN\\Users",
+          "FileSystemRights": "ReadAndExecute, Synchronize",
+          "AccessControlType": "Allow"
+        }
+      ],
+      "violations": []
+    },
+    {
+      "path": "/tmp/cncc-dk-ea9393773c29418bb47f133ffd15dc3a/PF/tra-luat-ops/cong_cu.yaml",
+      "owner": "BUILTIN\\Administrators",
+      "access": [
+        {
+          "IdentityReference": "NT AUTHORITY\\SYSTEM",
+          "FileSystemRights": "FullControl",
+          "AccessControlType": "Allow"
+        },
+        {
+          "IdentityReference": "BUILTIN\\Administrators",
+          "FileSystemRights": "FullControl",
+          "AccessControlType": "Allow"
+        },
+        {
+          "IdentityReference": "BUILTIN\\Users",
+          "FileSystemRights": "ReadAndExecute, Synchronize",
+          "AccessControlType": "Allow"
+        }
+      ],
+      "violations": []
+    },
+    {
+      "path": "/tmp/cncc-dk-ea9393773c29418bb47f133ffd15dc3a/PF/tra-luat-ops/requirements.txt",
+      "owner": "BUILTIN\\Administrators",
+      "access": [
+        {
+          "IdentityReference": "NT AUTHORITY\\SYSTEM",
+          "FileSystemRights": "FullControl",
+          "AccessControlType": "Allow"
+        },
+        {
+          "IdentityReference": "BUILTIN\\Administrators",
+          "FileSystemRights": "FullControl",
+          "AccessControlType": "Allow"
+        },
+        {
+          "IdentityReference": "BUILTIN\\Users",
+          "FileSystemRights": "ReadAndExecute, Synchronize",
+          "AccessControlType": "Allow"
+        }
+      ],
+      "violations": []
+    }
+  ],
+  "events": [
+    {
+      "type": "icacls",
+      "target": null,
+      "argv": [
+        "/tmp/cncc-dk-ea9393773c29418bb47f133ffd15dc3a/PF/tra-luat-ops",
+        "/setowner",
+        "*S-1-5-32-544",
+        "/T",
+        "/C",
+        "/L",
+        "/Q"
+      ]
+    },
+    {
+      "type": "icacls",
+      "target": null,
+      "argv": [
+        "/tmp/cncc-dk-ea9393773c29418bb47f133ffd15dc3a/PF/tra-luat-ops",
+        "/inheritance:r",
+        "/grant:r",
+        "*S-1-5-18:(OI)(CI)F",
+        "*S-1-5-32-544:(OI)(CI)F",
+        "*S-1-5-32-545:(OI)(CI)RX",
+        "/C",
+        "/L",
+        "/Q"
+      ]
+    },
+    {
+      "type": "icacls",
+      "target": null,
+      "argv": [
+        "/tmp/cncc-dk-ea9393773c29418bb47f133ffd15dc3a/PF/tra-luat-ops/*",
+        "/reset",
+        "/T",
+        "/C",
+        "/L",
+        "/Q"
+      ]
+    },
+    {
+      "type": "chep",
+      "target": "/tmp/cncc-dk-ea9393773c29418bb47f133ffd15dc3a/PF/tra-luat-ops/cap-nhat-cong-cu.ps1",
+      "argv": null
+    },
+    {
+      "type": "chep",
+      "target": "/tmp/cncc-dk-ea9393773c29418bb47f133ffd15dc3a/PF/tra-luat-ops/cong_cu.yaml",
+      "argv": null
+    },
+    {
+      "type": "chep",
+      "target": "/tmp/cncc-dk-ea9393773c29418bb47f133ffd15dc3a/PF/tra-luat-ops/requirements.txt",
+      "argv": null
+    },
+    {
+      "type": "icacls",
+      "target": null,
+      "argv": [
+        "/tmp/cncc-dk-ea9393773c29418bb47f133ffd15dc3a/PF/tra-luat-ops",
+        "/setowner",
+        "*S-1-5-32-544",
+        "/T",
+        "/C",
+        "/L",
+        "/Q"
+      ]
+    },
+    {
+      "type": "do_acl",
+      "target": "/tmp/cncc-dk-ea9393773c29418bb47f133ffd15dc3a/PF/tra-luat-ops",
+      "argv": null
+    },
+    {
+      "type": "do_acl",
+      "target": "/tmp/cncc-dk-ea9393773c29418bb47f133ffd15dc3a/PF/tra-luat-ops/cap-nhat-cong-cu.ps1",
+      "argv": null
+    },
+    {
+      "type": "do_acl",
+      "target": "/tmp/cncc-dk-ea9393773c29418bb47f133ffd15dc3a/PF/tra-luat-ops/cong_cu.yaml",
+      "argv": null
+    },
+    {
+      "type": "do_acl",
+      "target": "/tmp/cncc-dk-ea9393773c29418bb47f133ffd15dc3a/PF/tra-luat-ops/requirements.txt",
+      "argv": null
+    }
+  ]
+}

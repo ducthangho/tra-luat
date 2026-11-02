@@ -1,0 +1,6 @@
+{"mutant": "v1", "old": " or ra[0] != oid40", "new": "", "target": "c94"}
+{"case": "c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC", "state": "giet_that", "message": "batch-check-sai-oid: dạng lạ mà không ném KhongDoDuoc, trả 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'"}
+{"mutant": "v1", "control": [true, ""], "file": "/tmp/wp960-r7-review/whole-v1/ops/bien_nhan_v2.py"}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutant": "v1", "passed": 92, "total": 93, "red": [["c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC", "giet_that", "batch-check-sai-oid: dạng lạ mà không ném KhongDoDuoc, trả 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'"]]}
+{"mutant": "v1", "persisted_sha256": "cc003c9c80f2705cb644c64fbab47c200e081f837a8aa9c326eb00ba2ebf697b"}

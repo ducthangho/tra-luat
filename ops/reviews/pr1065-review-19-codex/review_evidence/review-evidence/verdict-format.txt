@@ -1,0 +1,3 @@
+Final header/SHA/result MATCH; finding count: 0 P0 / 0 P1 / 1 P2 / 0 P3
+All 13 prior output references exist; scanner empty-output convention verified; receipt gate remains NOT_MEASURED; land gate has positive marker
+Finding has location/problem/experiment/confidence/remediation; both previous findings explicitly compared; no current-head CI/Windows pass claimed

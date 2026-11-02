@@ -1,0 +1,15 @@
+{
+  "cwd": "/tmp/claude-0/rv/pr1048-review-3/cay-kho",
+  "argv": [
+    "python3",
+    ".claude/dev/packet_loop.py",
+    "doctrine-scan",
+    "--root",
+    "."
+  ],
+  "rc": 0,
+  "stdout_file": "doctrine-scan.stdout",
+  "stderr_file": "doctrine-scan.stderr",
+  "stdout_bytes": 70,
+  "stderr_bytes": 0
+}

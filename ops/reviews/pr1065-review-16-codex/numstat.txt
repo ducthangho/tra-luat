@@ -1,0 +1,3 @@
+19	4	ops/vm/README.md
+259	58	ops/vm/cap-nhat-cong-cu.ps1
+941	0	ops/vm/cap-nhat-cong-cu_test.ps1

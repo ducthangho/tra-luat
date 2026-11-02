@@ -1,0 +1,7 @@
+All checkout files before/after: 9502 9502
+Added: [] ; removed: [] ; changed bytes/mode: []
+HEAD: 43372542cc2480f3b4f8228d824afd509b1054cc ; tree: ecebb7d55a972c13b9f58ed38d96eda55c5909d7 ; origin/master: a253c169ed79617b8d1a4754867c336ac72c72c5
+Index SHA256 unchanged: 78406676d779f9de5cdfa32a21a267e36e13d55c29fd458381e024067e2e5889 ; status tracked/untracked/ignored and index/worktree diffs empty
+Open findings: ['### khai-readback-tho-cho-ban-trich  [P2]  Định nghĩa nguồn measured nhận bản trích MCP thành readback thô']
+Classification: 0 P0, 0 P1, 1 P2, 0 P3; round17 and round18 findings closed; one new provenance-format class
+FINAL SNAPSHOT: PASS; no observed file/index/head delta. Endpoint snapshots cannot prove absence of transient write-and-restore; read-only was an instruction under workspace-write.

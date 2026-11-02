@@ -361,8 +361,12 @@ def t6_ci_kiem_ban_ke_truoc_moi_test_nang():
                      if x.strip() and not x.lstrip().startswith("#"))
         bang(lenh_setup.get(b.get("name")) == lenh,
              f"bước {i + 1} trước G5 không thuộc allowlist setup: '{b.get('name')}' / {lenh}")
+    # wp1113 (CI-LAN-LUU-TRU r1): bước cài/G5 hoặc KHÔNG có `if:`, hoặc có ĐÚNG `if:` bỏ ở đường nhanh hồ sơ — đường
+    # đầy đủ vẫn cài shellcheck vô điều kiện trên cả hai nền; nền khác (`runner.os` …) vẫn cấm.
+    nhanh = "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"
     sc_buoc = [b for b in buoc[:idx_kiem[0]] if str(b.get("name", "")).startswith("cài shellcheck")]
-    bang(len(sc_buoc) == 1 and "if" not in sc_buoc[0], "CI phải cài shellcheck vô điều kiện trên cả hai nền")
+    bang(len(sc_buoc) == 1 and sc_buoc[0].get("if", nhanh) == nhanh, "CI phải cài shellcheck vô điều kiện trên cả hai nền")
+    bang(buoc[idx_kiem[0]].get("if", nhanh) == nhanh, "G5 chỉ được bỏ ở đường nhanh hồ sơ")
     cai_sc = yaml.safe_load((GOC / "ops/cong_cu.yaml").read_text(encoding="utf-8"))["cong_cu"]["shellcheck"]["cai"]
     bang(all((cai_sc.get(n) or {}).get("lenh") for n in ("linux", "windows")), "thiếu công thức cài shellcheck Linux/Windows")
 
@@ -2700,7 +2704,10 @@ def _goi_ngoai(goc: Path, thu_muc=_THU_MUC_QUET) -> dict:
     lọt vào tầm mắt mà không ai phải nhớ cập nhật danh sách.
     """
     import ast
-    noi_bo = set()
+    # #1089: stem của `scripts/*.py` cũng là module NỘI BỘ — `ops/cloud_agent_creds.py` import thuần
+    # `gas`/`tl_gws`/`gws_cred_store` từ `scripts/` (spec CLOUD-SETUP-P3-WRITEBACK r2 mục tiêu 2). Chỉ
+    # thêm vào tập loại trừ, KHÔNG quét import của `scripts/` (ngoài phạm vi luật công cụ của ca này).
+    noi_bo = {q.stem for q in sorted((goc / "scripts").glob("*.py"))} if (goc / "scripts").is_dir() else set()
     tep = []
     for d in thu_muc:
         thu = goc / d
@@ -2780,10 +2787,15 @@ def t16_moi_goi_ben_thu_ba_phai_duoc_khai_trong_ban_ke():
         gia = Path(td)
         (gia / "ops").mkdir()
         (gia / "ops" / "mot_tep.py").write_text(
-            "import mot_goi_khong_ai_khai\n", encoding="utf-8")
+            "import mot_goi_khong_ai_khai\nimport mot_mo_dun_scripts\n", encoding="utf-8")
+        (gia / "scripts").mkdir()
+        (gia / "scripts" / "mot_mo_dun_scripts.py").write_text("import goi_trong_scripts\n", encoding="utf-8")
         thay = _goi_ngoai(gia, ("ops",))
         bang("mot_goi_khong_ai_khai" in thay,
              "bộ quét KHÔNG thấy import giả ⇒ nó không có răng, mọi cái xanh ở trên vô nghĩa")
+        # #1089: module của `scripts/` là nội bộ (vế âm), nhưng import BÊN TRONG `scripts/` không bị quét.
+        bang("mot_mo_dun_scripts" not in thay and "goi_trong_scripts" not in thay,
+             f"bộ quét coi module `scripts/` là gói bên thứ ba / quét import của scripts/: {sorted(thay)}")
 
 
 @ca

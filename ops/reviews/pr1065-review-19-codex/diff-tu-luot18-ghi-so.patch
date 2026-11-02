@@ -1,0 +1,295 @@
+diff --git a/ops/reviews/pr1065-review-16-codex/SHA256SUMS b/ops/reviews/pr1065-review-16-codex/SHA256SUMS
+index 2f0cb75..e6a3511 100644
+--- a/ops/reviews/pr1065-review-16-codex/SHA256SUMS
++++ b/ops/reviews/pr1065-review-16-codex/SHA256SUMS
+@@ -3,6 +3,7 @@
+ 342b33a0d5efeb7dc82f3610853507338804ceee72745efd6ddd13cae61bdf33  ./VERDICT.md
+ 173133fad7309c9ddd5204a7feb1d29c5387418b27e3a66b3dac482b57aa288a  ./diff-tu-luot15.patch
+ a6cd06d1838f515c2c32d72d6b3684f804e3ec10ecd057c30f76da0d33379ade  ./diff.patch
++0030e7526a59ff58b0db029d23dc19d0f9987e457dcf18c70cbe6c2c3328ae44  ./luot-truoc/luot1/HINT.patch
+ 45d9cb31128d3b0ed839d1a9c7443e5ccc4378eb2bc1c600ed6c4d0904fe7fb6  ./luot-truoc/luot1/VERDICT.md
+ 61c87b873ce8fa842309c4109df30e4a70d8c1a2014d4a20f036ac4053e49a58  ./luot-truoc/luot10/HINT.patch
+ 01ebb27d3d361e9a3651e54a1e38018ae2a3e6d398942dda822f745ff8cda3b5  ./luot-truoc/luot10/VERDICT.md
+@@ -16,6 +17,7 @@ f9f07fe04e1284775e5da25f584a69e4cc153942646aff3f31cf12637d6d3050  ./luot-truoc/l
+ 118fd9f718f81c81f1d50f487cdd426e10258fdd70dbc51cbd4f2162045c654a  ./luot-truoc/luot14/VERDICT.md
+ 8f6cb3af5ff654afc6f1b878a7845b708aed99bb1cd6bc2cdd78db4e685439b8  ./luot-truoc/luot15/HINT.patch
+ 36a01565a3a4a40faea20738dd86de8034c05d1d2fc25614d48fa6224e5e0d25  ./luot-truoc/luot15/VERDICT.md
++010a5d598b2db1130d192cff59b32064aa4de19fd9d18ddbad60eedb60220027  ./luot-truoc/luot2/HINT.patch
+ 7dceed3f172857864e36f708de026e7ea56d038d0305f04c3b5ed137c2084837  ./luot-truoc/luot2/VERDICT.md
+ 1e0947e58139c0b02dee0e86eb812e0e51a992e8b9e5a7f62c0248a3eb2bce27  ./luot-truoc/luot3/HINT.patch
+ a80995d95c2d0234b929f6d273644d7c4b6099a58912a2144fe6c63961ab4402  ./luot-truoc/luot3/VERDICT.md
+diff --git a/ops/reviews/pr1065-review-16-codex/luot-truoc/luot1/HINT.patch b/ops/reviews/pr1065-review-16-codex/luot-truoc/luot1/HINT.patch
+new file mode 100644
+index 0000000..362e61a
+--- /dev/null
++++ b/ops/reviews/pr1065-review-16-codex/luot-truoc/luot1/HINT.patch
+@@ -0,0 +1,105 @@
++# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
++# Test-only hint; expected RED on reviewed HEAD. Product fixes are described in VERDICT.md.
++--- /dev/null
+++++ ops/vm/cap-nhat-cong-cu_review_test.ps1
++@@ -0,0 +1,100 @@
+++# Gợi ý test của reviewer; không gọi mạng, installer hoặc Scheduled Task thật.
+++# Chạy: pwsh -NoProfile -File <test> -ProductPath <cap-nhat-cong-cu.ps1>
+++param([string]$ProductPath = (Join-Path $PSScriptRoot 'cap-nhat-cong-cu.ps1'))
+++$ErrorActionPreference='Stop'
+++. $ProductPath -NapHam
+++$script:reviewPassed=0; $script:reviewTotal=0
+++function Review-Ca([string]$Name,[scriptblock]$Body) {
+++    $script:reviewTotal++
+++    try {
+++        $values=@(& $Body)
+++        if ($values.Count -ne 1 -or $values[0] -isnot [bool] -or -not $values[0]) { throw 'expected exactly one true boolean' }
+++        $script:reviewPassed++; Write-Host "PASS $Name"
+++    } catch { Write-Host "FAIL $Name : $($_.Exception.Message)" }
+++}
+++function Review-Throws([scriptblock]$Body) { try { & $Body | Out-Null; return $false } catch { return $true } }
+++$script:reviewTemp=Join-Path ([IO.Path]::GetTempPath()) ('cncc-review-'+[guid]::NewGuid().ToString('N'))
+++New-Item -ItemType Directory $script:reviewTemp | Out-Null
+++try {
+++    $script:reviewPayload='offline-review-payload'
+++    $script:reviewText=''
+++    function Invoke-WebRequest { param($Uri,$Headers,$TimeoutSec,$OutFile)
+++        if ($OutFile) { [IO.File]::WriteAllText($OutFile,$script:reviewPayload); return }
+++        [pscustomobject]@{Content=$script:reviewText}
+++    }
+++    Review-Ca 'save-rejects-mismatch-and-removes-file' {
+++        $dest=Join-Path $script:reviewTemp 'bad.msi'
+++        (Review-Throws { Save-CoKiemBam 'OFFLINE:payload' ('0'*64) $script:reviewTemp 'bad.msi' }) -and -not (Test-Path $dest)
+++    }
+++    $script:reviewAsset=[pscustomobject]@{name='wanted.msi';digest=$null}
+++    $script:reviewRelease=[pscustomobject]@{assets=@($script:reviewAsset,[pscustomobject]@{name='wanted.msi.sha256';browser_download_url='OFFLINE:checksum'})}
+++    Review-Ca 'asset-sidecar-rejects-other-filename' {
+++        $script:reviewText=('a'*64)+'  other.msi'
+++        $null -eq (Get-BamTaiSan $script:reviewRelease $script:reviewAsset)
+++    }
+++    Review-Ca 'asset-sidecar-accepts-bare-hash' {
+++        $script:reviewText='a'*64
+++        (Get-BamTaiSan $script:reviewRelease $script:reviewAsset) -eq ('a'*64)
+++    }
+++    Review-Ca 'asset-sidecar-selects-named-line' {
+++        $script:reviewText=('a'*64)+"  other.msi`n"+('b'*64)+"  wanted.msi`n"
+++        (Get-BamTaiSan $script:reviewRelease $script:reviewAsset) -eq ('b'*64)
+++    }
+++    # Đây chỉ là chốt đối số; không chứng minh ACL hiệu lực trên Windows.
+++    Review-Ca 'admin-temp-explicitly-removes-inheritance' {
+++        $tokens=$null; $errors=$null
+++        $ast=[Management.Automation.Language.Parser]::ParseFile($ProductPath,[ref]$tokens,[ref]$errors)
+++        $func=$ast.FindAll({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'New-ThuMucTai'},$true)[0]
+++        $call=$func.FindAll({param($n) $n -is [Management.Automation.Language.CommandAst] -and $n.Extent.Text -match 'icacls\.exe'},$true)[0]
+++        $nativeArguments=@($call.CommandElements | Where-Object { $_ -is [Management.Automation.Language.StringConstantExpressionAst] } | ForEach-Object { $_.Value })
+++        [bool]($nativeArguments -contains '/inheritance:r')
+++    }
+++    $env:ProgramFiles=Join-Path $script:reviewTemp 'ProgramFiles'
+++    $node=Join-Path $env:ProgramFiles 'nodejs/node.exe'
+++    New-Item -ItemType Directory -Path (Split-Path $node -Parent) | Out-Null
+++    [IO.File]::WriteAllText($node,'fixture-exists-only-never-executed')
+++    $script:reviewMode=''; $script:reviewInstalled=$false; $script:reviewRestarted=$false; $script:reviewFlagAtInstall=$false
+++    function Get-PhienBanLenh($Exe,$DoiSo,$Mau) {
+++        if ($Exe -match 'git.exe$') { return '2.56.0.windows.4' }
+++        if ($Exe -match 'gh.exe$') { return '1.0.0' }
+++        if ($Exe -match 'pwsh.exe$') { return '7.6.9' }
+++        if ($script:reviewMode -eq 'unknown') { return $null }
+++        return '24.1.0'
+++    }
+++    function Get-Release($Repo) {
+++        $tag='7.6.9'; $file='PowerShell-7.6.9-win-x64.msi'
+++        if ($Repo -eq 'git-for-windows/git') { $tag='2.56.0.windows.4';$file='Git-2.56.0-64-bit.exe' }
+++        if ($Repo -eq 'cli/cli') { $tag='1.0.0';$file='gh_1.0.0_windows_amd64.msi' }
+++        [pscustomobject]@{tag_name="v$tag";assets=@([pscustomobject]@{name=$file;browser_download_url='OFFLINE:asset'})}
+++    }
+++    function Invoke-RestMethod { param($Uri,$TimeoutSec)
+++        @([pscustomobject]@{version='v26.2.0';lts='new'},[pscustomobject]@{version='v24.2.0';lts='old'})
+++    }
+++    function Save-CoKiemBam($Url,$Bam,$ThuMuc,$Ten) { return (Join-Path $script:reviewTemp $Ten) }
+++    function Install-Msi($Msi,$Ten) {
+++        $script:reviewInstalled=$true; $script:reviewFlagAtInstall=$Script:DaCaiNode
+++        throw 'offline-msi-failure-after-node-may-have-stopped'
+++    }
+++    function Stop-ScheduledTask { param($TaskName,$ErrorAction) }
+++    function Start-ScheduledTask { param($TaskName,$ErrorAction) $script:reviewRestarted=$true }
+++    function Get-ScheduledTask { param($TaskName,$ErrorAction) [pscustomobject]@{State='Running'} }
+++    function Start-Sleep { param($Seconds) }
+++    # Helpers gốc xoá temp trong finally. Không cho stub trỏ về thư mục chứa fixture.
+++    function New-ThuMucTai { param([switch]$ChiAdmin)
+++        $d=Join-Path $script:reviewTemp ([guid]::NewGuid().ToString('N')); New-Item -ItemType Directory $d | Out-Null; return $d
+++    }
+++    Review-Ca 'node-existing-unreadable-does-not-install-new-major' {
+++        $script:reviewMode='unknown'; $script:reviewInstalled=$false; $Script:DaCaiNode=$false; $Script:KetQua.Clear()
+++        $script:reviewText=('a'*64)+"  node-v26.2.0-x64.msi`n"+('a'*64)+"  node-v24.2.0-x64.msi`n"
+++        Invoke-TangHeThong | Out-Null
+++        -not $script:reviewInstalled
+++    }
+++    Review-Ca 'node-msi-failure-still-restarts-commander' {
+++        $script:reviewMode='msi-failure'; $script:reviewInstalled=$false; $script:reviewRestarted=$false; $script:reviewFlagAtInstall=$false
+++        $Script:DaCaiNode=$false; $Script:KetQua.Clear()
+++        Invoke-TangHeThong | Out-Null
+++        [bool]($script:reviewInstalled -and $script:reviewFlagAtInstall -and $script:reviewRestarted)
+++    }
+++} finally { Remove-Item -LiteralPath $script:reviewTemp -Recurse -Force -ErrorAction SilentlyContinue }
+++Write-Host "review regressions: $script:reviewPassed/$script:reviewTotal"
+++exit $(if ($script:reviewPassed -eq $script:reviewTotal) {0} else {1})
+diff --git a/ops/reviews/pr1065-review-16-codex/luot-truoc/luot2/HINT.patch b/ops/reviews/pr1065-review-16-codex/luot-truoc/luot2/HINT.patch
+new file mode 100644
+index 0000000..682ac2b
+--- /dev/null
++++ b/ops/reviews/pr1065-review-16-codex/luot-truoc/luot2/HINT.patch
+@@ -0,0 +1,158 @@
++# TEST-ONLY HINT; Linux offline control flow, not native Windows ACL evidence.
++# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
++--- /dev/null
+++++ ops/vm/cap-nhat-cong-cu_dang-ky_probe.ps1
++@@ -0,0 +1,73 @@
+++# Linux-only offline control-flow harness. Does not measure native ACL or Scheduler.
+++# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+++param([ValidateSet('clean','root-link','ancestor-link','swap-parent','owned','acl-reject','hash-reject')][string]$Mode='clean', [Parameter(Mandatory=$true)][string]$ProductScript)
+++$ErrorActionPreference='Stop'
+++. $ProductScript -NapHam
+++$root = Join-Path ([IO.Path]::GetTempPath()) ('r2-reg-' + [guid]::NewGuid().ToString('N'))
+++$env:ProgramFiles=Join-Path $root 'PF'
+++$env:SystemRoot=Join-Path $root 'OS'
+++$env:COMPUTERNAME='VM'
+++$env:R2_ICACLS_LOG=Join-Path $root 'icacls.jsonl'
+++$TaiKhoanNguoiDung='tlcommander';$MayDich='VM';$TacVuCommander='CMD-CUSTOM'
+++$NlmVenv='D:\custom nlm';$VenvKho='D:\custom venv';$HomeCommander='D:\custom profile'
+++$NhatKy='D:\custom logs\run.json';$ChiKiem=$true
+++$ThuMucCongCu=Join-Path $root 'Tools'
+++$victim=Join-Path $root 'victim'
+++New-Item -ItemType Directory "$env:SystemRoot/System32",$victim,$env:ProgramFiles -Force | Out-Null
+++foreach ($name in 'npm','Python312','bin') {New-Item -ItemType Directory (Join-Path $victim $name) -Force | Out-Null}
+++Copy-Item "$PSScriptRoot/cap-nhat-cong-cu_icacls_stub.py" "$env:SystemRoot/System32/icacls.exe"
+++& /bin/chmod +x "$env:SystemRoot/System32/icacls.exe"
+++$script:Captured=[Collections.Generic.List[object]]::new()
+++function Get-Acl { param($LiteralPath)
+++    $owner='BUILTIN\Administrators'
+++    if ($Mode -eq 'owned' -and $LiteralPath.StartsWith($ThuMucCongCu)) {$owner='VM\tlcommander'}
+++    $access=@([pscustomobject]@{IdentityReference='BUILTIN\Users';FileSystemRights='ReadAndExecute';AccessControlType='Allow'})
+++    if ($LiteralPath -match 'tra-luat-ops' -and (Test-Path $env:R2_ICACLS_LOG)) {
+++        $events=@(Get-Content $env:R2_ICACLS_LOG | ForEach-Object {$_ | ConvertFrom-Json})
+++        $lastCopy=-1; $lastOwner=-1; $resetInheritance=$false
+++        for ($i=0;$i -lt $events.Count;$i++) {
+++            $e=$events[$i]
+++            if ($e.event -eq 'copy' -and $e.destination -eq $LiteralPath) {$lastCopy=$i}
+++            if ($e.args -and $e.args[0] -match 'tra-luat-ops') {
+++                if ($e.args -contains '/setowner') {$lastOwner=$i}
+++                if ($e.args -contains '/inheritance:r') {$resetInheritance=$true}
+++            }
+++        }
+++        # Model: a freshly copied file can be owned by the running admin account.
+++        if ($lastCopy -gt $lastOwner) {$owner='VM\tladmin'}
+++        # Model: inherited Users Modify must be removed before protected copies are used.
+++        if (-not $resetInheritance) {
+++            $access+= [pscustomobject]@{IdentityReference='BUILTIN\Users';FileSystemRights='Modify';AccessControlType='Allow'}
+++        }
+++    }
+++    if ($Mode -eq 'acl-reject' -and $LiteralPath -match 'tra-luat-ops') {
+++        $access+= [pscustomobject]@{IdentityReference='VM\tlcommander';FileSystemRights='Modify';AccessControlType='Allow'}
+++    }
+++    [pscustomobject]@{Owner=$owner;Access=$access}
+++}
+++function New-ScheduledTaskSettingsSet {param([switch]$StartWhenAvailable,$ExecutionTimeLimit,$MultipleInstances) [pscustomobject]@{stub=$true}}
+++function New-ScheduledTaskTrigger {param([switch]$Weekly,$WeeksInterval,$DaysOfWeek,$At) [pscustomobject]@{At=$At}}
+++function New-ScheduledTaskAction {param($Execute,$Argument) [pscustomobject]@{Execute=$Execute;Argument=$Argument}}
+++function New-ScheduledTaskPrincipal {param($UserId,$LogonType,$RunLevel) [pscustomobject]@{UserId=$UserId}}
+++function Register-ScheduledTask {param($TaskName,$Action,$Trigger,$Principal,$Settings,[switch]$Force,$ErrorAction) $script:Captured.Add([pscustomobject]@{name=$TaskName;action=$Action;EA=$ErrorAction})}
+++function Get-Credential {param($UserName,$Message) throw 'OFFLINE-STOP-BEFORE-CREDENTIALS'}
+++try {
+++    if ($Mode -eq 'ancestor-link') {New-Item -ItemType SymbolicLink -Path $ThuMucCongCu -Target $victim | Out-Null}
+++    else {
+++        New-Item -ItemType Directory $ThuMucCongCu -Force | Out-Null
+++        if ($Mode -eq 'root-link') {New-Item -ItemType SymbolicLink -Path (Join-Path $ThuMucCongCu 'npm') -Target $victim | Out-Null}
+++    }
+++    if ($Mode -eq 'swap-parent') {$env:R2_SWAP_PARENT=$ThuMucCongCu;$env:R2_SWAP_TARGET=$victim}
+++    function Copy-Item {param($LiteralPath,$Destination,[switch]$Force)
+++        Microsoft.PowerShell.Management\Copy-Item -LiteralPath $LiteralPath -Destination $Destination -Force
+++        [pscustomobject]@{event='copy';destination=$Destination} | ConvertTo-Json -Compress | Add-Content $env:R2_ICACLS_LOG
+++        if ($Mode -eq 'hash-reject') {[IO.File]::AppendAllText($Destination,'CORRUPTED')}
+++    }
+++    $why=''
+++    try {Register-LichCapNhat (Split-Path (Split-Path (Split-Path $ProductScript -Parent) -Parent) -Parent)} catch {$why=$_.Exception.Message}
+++    $calls=@(); if(Test-Path $env:R2_ICACLS_LOG){$calls=@(Get-Content $env:R2_ICACLS_LOG | ForEach-Object {$_ | ConvertFrom-Json})}
+++    [pscustomobject]@{mode=$Mode;stopped=$why;icacls_count=$calls.Count;icacls=$calls;tasks=@($script:Captured);custom_log_preserved=(@($script:Captured | Where-Object {$_.action.Argument -match '-NhatKy'}).Count -gt 0);check_preserved=(@($script:Captured | Where-Object {$_.action.Argument -match '-ChiKiem'}).Count -gt 0);native_ACL_measured=$false} | ConvertTo-Json -Depth 6 -Compress | ForEach-Object { "R2_JSON:$_" }
+++} finally {
+++    Remove-Item Env:R2_SWAP_PARENT,Env:R2_SWAP_TARGET -ErrorAction SilentlyContinue
+++    Remove-Item $root -Recurse -Force
+++}
++--- /dev/null
+++++ ops/vm/cap-nhat-cong-cu_dang-ky_test.py
++@@ -0,0 +1,59 @@
+++#!/usr/bin/env python3
+++"""Linux offline Register tests; control flow only, not native Windows ACL evidence.
+++
+++Run: TL_TEST_PWSH=/path/to/pwsh python3 ops/vm/cap-nhat-cong-cu_dang-ky_test.py
+++Product override supports isolated mutation copies via --product /path/to/script.ps1.
+++chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+++"""
+++import argparse
+++import json
+++import os
+++from pathlib import Path
+++import shutil
+++import subprocess
+++import sys
+++
+++HERE = Path(__file__).resolve().parent
+++parser = argparse.ArgumentParser(description=__doc__)
+++parser.add_argument('--product', type=Path, default=HERE / 'cap-nhat-cong-cu.ps1')
+++ns = parser.parse_args()
+++if sys.platform != 'linux':
+++    sys.exit('NOT_RUN: this harness is Linux-only; Windows native tests remain required')
+++pwsh = os.environ.get('TL_TEST_PWSH') or shutil.which('pwsh')
+++if not pwsh:
+++    sys.exit('NOT_RUN: set TL_TEST_PWSH to the local pwsh executable')
+++
+++measurements = {}
+++for mode in ('clean', 'owned', 'acl-reject', 'hash-reject'):
+++    p = subprocess.run([pwsh, '-NoProfile', '-File', str(HERE / 'cap-nhat-cong-cu_dang-ky_probe.ps1'),
+++                        '-Mode', mode, '-ProductScript', str(ns.product.resolve())],
+++                       capture_output=True, text=True, timeout=30)
+++    lines = [line[len('R2_JSON:'):] for line in p.stdout.splitlines() if line.startswith('R2_JSON:')]
+++    if p.returncode or len(lines) != 1:
+++        sys.exit(f'HARNESS_ERROR {mode}: rc={p.returncode}\n{p.stdout}\n{p.stderr}')
+++    measurements[mode] = json.loads(lines[0])
+++
+++clean = measurements['clean']
+++actions = clean['tasks']
+++arguments = actions[0]['action']['Argument'] if actions else ''
+++owned = measurements['owned']
+++tests = {
+++    'action_preserves_supported_configuration': all(x in arguments for x in (
+++        '-MayDich "VM"', '-ThuMucCongCu "', '-NlmVenv "D:\\custom nlm"',
+++        '-VenvKho "D:\\custom venv"', '-HomeCommander "D:\\custom profile"',
+++        '-TaiKhoanNguoiDung "tlcommander"', '-TacVuCommander "CMD-CUSTOM"')),
+++    'bad_acl_prevents_task_registration': not measurements['acl-reject']['tasks'] and
+++        measurements['acl-reject']['stopped'].startswith('ACL '),
+++    'corrupt_copy_prevents_task_registration': not measurements['hash-reject']['tasks'] and
+++        'lệch băm nguồn' in measurements['hash-reject']['stopped'],
+++    'new_copy_owner_is_normalized_before_use': bool(actions) and
+++        clean['stopped'] == 'OFFLINE-STOP-BEFORE-CREDENTIALS',
+++    'inherited_write_is_removed': any('/inheritance:r' in e.get('args', []) and
+++        'tra-luat-ops' in e.get('args', [''])[0] for e in clean['icacls']),
+++    'already_owned_tree_is_not_provisioned_again': not any('/Tools/' in e.get('resolved', '')
+++        for e in owned['icacls']) and bool(owned['tasks']),
+++}
+++for name, passed in tests.items():
+++    print(('PASS' if passed else 'FAIL') + ' ' + name)
+++print(f'Register offline: {sum(tests.values())}/{len(tests)} PASS; native ACL NOT_MEASURED')
+++sys.exit(0 if all(tests.values()) else 1)
++--- /dev/null
+++++ ops/vm/cap-nhat-cong-cu_icacls_stub.py
++@@ -0,0 +1,15 @@
+++#!/usr/bin/python3
+++import json, os, sys
+++from pathlib import Path
+++args = sys.argv[1:]
+++target = args[0].replace('\\', '/')
+++entry = {'args': args, 'resolved': os.path.realpath(target), 'is_link': os.path.islink(target)}
+++with open(os.environ['R2_ICACLS_LOG'], 'a') as f:
+++    f.write(json.dumps(entry) + '\n')
+++# Only records calls. Does not emulate or modify any ACL/owner.
+++if os.environ.get('R2_SWAP_PARENT') and '/setowner' in args and '/tra-luat-ops' not in target:
+++    parent = Path(os.environ['R2_SWAP_PARENT'])
+++    if parent.exists() and not parent.is_symlink():
+++        parent.rename(str(parent) + '-before-swap')
+++        parent.symlink_to(os.environ['R2_SWAP_TARGET'], target_is_directory=True)
+++sys.exit(0)

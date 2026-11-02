@@ -1,0 +1,63 @@
+HEAD/tree 352d31e03bc846cae5b4ee7bc17bbea6830fb64d
+8d95d1d7baf35a4f3c8d7bc6ceb3995a0f77b3b4
+merge-base 3bdd9877cab2543adc413a32a47decbb585ded97
+core.abbrev 7
+diff.patch exact match True
+numstat exact match True
+merge4397ee6 git matches raw parents/tree/files: e92592f8f3b4523ac2787b60439b73ad520ecf20
+
+FIRST-PARENT
+165b27a4bfe02e81af7bc94bda1e71c10d8c38e4 4397ee616273a97c1503e8359452aef4e78cd75a 7ab15979f45d20cd0087b9d0fd39a0df19364684 Merge pull request #1108 from ducthangho/claude/pr-wp-merge-conditions-26j42i
+2cea62517d0bbc331afa4dcffabbc81f3b613a87 165b27a4bfe02e81af7bc94bda1e71c10d8c38e4 a8ff39ead613d46d802ecfd2e4cb96844bee5b7f Merge pull request #1112: spec(#1105) LAUNCHER-SANDBOX-LAY-MAU r1 + errata r2 (đóng băng)
+3bdd9877cab2543adc413a32a47decbb585ded97 2cea62517d0bbc331afa4dcffabbc81f3b613a87 1ac712b8652fa75f75b4c279cebbac9eac8709c0 Merge pull request #1109 from ducthangho/claude/ci-lan-luu-tru-spec
+DELTA 165b27a
+140	0	ops/specs/DIEU-KIEN-MERGE-CONG-r1.md
+DELTA 2cea625
+225	0	ops/specs/launcher-sandbox-lay-mau-r1.md
+242	0	ops/specs/launcher-sandbox-lay-mau-r2.md
+DELTA 3bdd987
+218	0	ops/specs/CI-LAN-LUU-TRU-r1.md
+protected paths delta ''
+ancestor 4397ee6 3bdd987 exit_code 0
+ancestor 3bdd987 180039c exit_code 0
+ancestor cb39aca 40609d4 exit_code 0
+
+COMMENTS
+comment 6555093642 created_at 2026-11-01T07:43:02Z head f783bee391ada131df8df195acfd3d4c4ae394c9
+head commit time 2026-11-01T07:03:13+00:00
+merged_at 2026-11-01T07:43:08Z
+
+MASTER RUN TIMELINE (raw list includes all 4 run IDs)
+41285898441 4397ee616273a97c1503e8359452aef4e78cd75a .github/workflows/ci.yml push completed cancelled 2026-11-01T07:43:11Z 2026-11-01T09:07:12Z
+41287486328 165b27a4bfe02e81af7bc94bda1e71c10d8c38e4 .github/workflows/ci.yml push completed success 2026-11-01T09:07:11Z 2026-11-01T09:23:36Z
+41289716885 2cea62517d0bbc331afa4dcffabbc81f3b613a87 .github/workflows/ci.yml push completed cancelled 2026-11-01T09:38:32Z 2026-11-01T09:42:55Z
+41290009265 3bdd9877cab2543adc413a32a47decbb585ded97 .github/workflows/ci.yml push completed success 2026-11-01T09:42:53Z 2026-11-01T10:22:24Z
+workflow concurrency at 4397ee6:
+concurrency:
+  # Agent đẩy nhiều lần lên cùng một PR; lượt cũ thành vô nghĩa ngay khi có lượt mới.
+  # KHÔNG huỷ trên master: đó là lượt gác cổng phát hành, phải chạy trọn.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+SOURCE TIME ANOMALY (not an inferred cause)
+run created_at/run_started_at 2026-11-01T09:42:53Z 2026-11-01T09:42:53Z
+jobs started before run.created_at 22 / 23
+jobs completed before run.created_at 15 / 23
+earliest job started_at 2026-11-01T09:23:37Z
+all raw job run_id correct True
+all raw job attempts match True
+job step conclusions {'success': 275, 'skipped': 10}
+
+VM STATIC HASHES (installed bytes not available)
+cb39aca:ops/vm/cap-nhat-cong-cu.ps1 8efc063a891916598e398f7e448c295c8a37e12cc1dace5534f1fbcfd26ba927 same at merge1091 True
+cb39aca:ops/cong_cu.yaml 71631bb6baf532deeb4847c5ff9c407a50bfdb4fc503621913eb42c719ee92fb same at merge1091 True
+cb39aca:requirements.txt 97733a880d95f8a900f39af2bcd1a59a3ecb357dfc928c01c7a06636b1b07657 same at merge1091 True
+script Sunday 02:30/2 weeks: $tHT = New-ScheduledTaskTrigger -Weekly -WeeksInterval 2 -DaysOfWeek Sunday -At '02:30'
+
+EXISTING FOUR ANCHORS (41173244891 only)
+workflow blob 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc git 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
+workflow bytes exact match True SHA256 ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb
+old jobs 23 success 23 steps {'success': 275, 'skipped': 10}
+old extracted logs 23 checkout SHA occurrences 22 Run steps 122
+new run files present ['readback-jobs-41290009265.json', 'readback-run-41290009265.json']
+new run GraphQL/log/checkout artifacts: none among changed files or provenance filenames; REST metadata only

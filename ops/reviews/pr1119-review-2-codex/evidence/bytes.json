@@ -1,0 +1,77 @@
+{
+  "results": [
+    {
+      "stem": "pr1110-review-1-codex",
+      "source_files": 61,
+      "copied": 58,
+      "absent": 3,
+      "declared_correct": 3,
+      "manifest_entries": 59,
+      "manifest_rc": 0,
+      "checks": {
+        "manifest_missing": [],
+        "manifest_extra": [],
+        "manifest_duplicates": 0,
+        "unmapped": [],
+        "false_omissions": [],
+        "flat_equal": true,
+        "git_diff_equal": true
+      }
+    },
+    {
+      "stem": "pr1110-review-2-codex",
+      "source_files": 46,
+      "copied": 44,
+      "absent": 2,
+      "declared_correct": 2,
+      "manifest_entries": 45,
+      "manifest_rc": 0,
+      "checks": {
+        "manifest_missing": [],
+        "manifest_extra": [],
+        "manifest_duplicates": 0,
+        "unmapped": [],
+        "false_omissions": [],
+        "flat_equal": true,
+        "git_diff_equal": true
+      }
+    },
+    {
+      "stem": "pr1114-review-1-codex",
+      "source_files": 50,
+      "copied": 44,
+      "absent": 6,
+      "declared_correct": 6,
+      "manifest_entries": 45,
+      "manifest_rc": 0,
+      "checks": {
+        "manifest_missing": [],
+        "manifest_extra": [],
+        "manifest_duplicates": 0,
+        "unmapped": [],
+        "false_omissions": [],
+        "flat_equal": true,
+        "git_diff_equal": true
+      }
+    },
+    {
+      "stem": "pr1114-review-2-codex",
+      "source_files": 93,
+      "copied": 91,
+      "absent": 2,
+      "declared_correct": 2,
+      "manifest_entries": 92,
+      "manifest_rc": 0,
+      "checks": {
+        "manifest_missing": [],
+        "manifest_extra": [],
+        "manifest_duplicates": 0,
+        "unmapped": [],
+        "false_omissions": [],
+        "flat_equal": true,
+        "git_diff_equal": true
+      }
+    }
+  ],
+  "failures": []
+}

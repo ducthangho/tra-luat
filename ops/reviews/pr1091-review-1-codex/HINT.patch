@@ -1,0 +1,87 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- ops/vm/cap-nhat-cong-cu_test.ps1
++++ ops/vm/cap-nhat-cong-cu_test.ps1
+@@ -945,11 +945,31 @@
+     }
+     $Script:AclGia = @{}
+     $Script:AclGia[(Join-Path $env:ProgramFiles 'tra-luat-ops')] = [pscustomobject]@{ Owner = "$env:COMPUTERNAME\tladmin"; Access = @(New-QuyenGia 'BUILTIN\Users' 'Modify') }
+-    if ($CheDo -eq 'ban-cu') {
++    if ($CheDo -in 'ban-cu', 'dacl-rong', 'cay-long') {
+         # Bản cài cũ có sẵn ba tệp, ACL thừa kế từ Program Files (đúng trạng thái VM trước lần đăng ký lại).
+         foreach ($t in 'cap-nhat-cong-cu.ps1', 'cong_cu.yaml', 'requirements.txt') {
+             $f = Join-Path (Join-Path $env:ProgramFiles 'tra-luat-ops') $t; [IO.File]::WriteAllText($f, 'cu')
+             $Script:AclGia[$f] = [pscustomobject]@{ Owner = 'BUILTIN\Administrators'; Access = @((New-QuyenGia 'NT AUTHORITY\SYSTEM' 'FullControl'), (New-QuyenGia 'BUILTIN\Administrators' 'FullControl'), (New-QuyenGia 'BUILTIN\Users' 'ReadAndExecute, Synchronize')) }
++        }
++    }
++
++    if ($CheDo -eq 'dacl-rong') {
++        foreach ($p in @($Script:AclGia.Keys)) {
++            if ($p -ne (Join-Path $env:ProgramFiles 'tra-luat-ops')) { $Script:AclGia[$p].Access = @() }
++        }
++    }
++    if ($CheDo -eq 'cay-long') {
++        $root = Join-Path $env:ProgramFiles 'tra-luat-ops'
++        foreach ($relative in 'long', 'long/sau') {
++            New-Item -ItemType Directory -Path (Join-Path $root $relative) | Out-Null
++        }
++        foreach ($relative in '.tep-an', 'long/sau/.tep-an', 'long/sau/khong-duoi') {
++            [IO.File]::WriteAllText((Join-Path $root $relative), 'cu')
++        }
++        foreach ($relative in 'long', 'long/sau', '.tep-an', 'long/sau/.tep-an', 'long/sau/khong-duoi') {
++            $Script:AclGia[(Join-Path $root $relative)] = [pscustomobject]@{
++                Owner = 'BUILTIN\Administrators'; Access = @(New-QuyenGia 'BUILTIN\Users' 'Modify')
++            }
+         }
+     }
+     $Script:GiaCheDo = $CheDo; $Script:SuKien = [Collections.Generic.List[object]]::new()
+@@ -959,7 +979,7 @@
+     $loi = $null
+     try { Register-LichCapNhat (Resolve-Path (Join-Path $Here '../..')).Path *> $null } catch { $loi = $_.Exception.Message }
+     $kq = [pscustomobject]@{
+-        loi = $loi; su_kien = @($Script:SuKien); hanh_dong = @($Script:HanhDong); tac_vu = @($Script:TacVu); cai_dat = $Script:ThuMucCaiDat
++        acl = $Script:AclGia; loi = $loi; su_kien = @($Script:SuKien); hanh_dong = @($Script:HanhDong); tac_vu = @($Script:TacVu); cai_dat = $Script:ThuMucCaiDat
+         tep = @(Get-ChildItem -LiteralPath (Join-Path $g 'PF/tra-luat-ops') -File -ErrorAction SilentlyContinue | ForEach-Object Name)
+     }
+     foreach ($l in "$g/PF", "$g/PF/tra-luat-ops", "$g/Tools") {
+@@ -989,12 +1009,12 @@
+         $dich = $DoiSo[0]; $chiCon = $dich -match '[\\/]\*$'
+         $goc = if ($chiCon) { $dich -replace '[\\/]\*$', '' } else { $dich }
+         $prefix = $goc.TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+-        foreach ($key in @($Script:AclGia.Keys)) {
++        foreach ($key in @($Script:AclGia.Keys | Sort-Object Length)) {
+             $laCon = $key.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)
+-            $khop = if ($chiCon) { $laCon } else { $key -eq $goc -or (($DoiSo -contains '/T') -and $laCon) }
++            $khop = if ($chiCon) { $laCon -and (($DoiSo -contains '/T') -or (Split-Path -Parent $key) -eq $goc) } else { $key -eq $goc -or (($DoiSo -contains '/T') -and $laCon) }
+             if (-not $khop) { continue }
+             $node = $Script:AclGia[$key]
+-            if ($DoiSo -contains '/reset') { $node.Access = @($Script:AclGia[$goc].Access); continue }
++            if ($DoiSo -contains '/reset') { $node.Access = @($Script:AclGia[(Split-Path -Parent $key)].Access); continue }
+             if ($DoiSo -contains '/setowner') {
+                 $i = [array]::IndexOf($DoiSo, '/setowner'); $node.Owner = Get-DanhTinhGia $DoiSo[$i + 1]
+             }
+@@ -1005,7 +1025,7 @@
+                     if ($DoiSo[$i] -notmatch '^([^:]+):(?:(?:\(OI\)|\(CI\))*)(F|RX|M)$') { throw "grant ngoài mô hình: $($DoiSo[$i])" }
+                     $id = Get-DanhTinhGia $Matches[1]
+                     $rights = switch ($Matches[2]) { 'F' { 'FullControl' } 'RX' { 'ReadAndExecute, Synchronize' } 'M' { 'Modify' } }
+-                    if (-not ($laCon -and $DoiSo[$i] -match '\((OI|CI)\)')) {
++                    if (-not ((Test-Path -LiteralPath $key -PathType Leaf) -and $DoiSo[$i] -match '\((OI|CI)\)')) {
+                         $node.Access = @($node.Access | Where-Object IdentityReference -ne $id) + @(New-QuyenGia $id $rights)
+                     }
+                     $i++
+@@ -1067,6 +1087,16 @@
+         $reset = @($k.su_kien | Where-Object { $_.loai -eq 'icacls' -and $_.doi_so -contains '/reset' })
+         (& $dungLaiDung $k) -and $reset.Count -eq 1 -and $reset[0].doi_so[0] -match '[\\/]\*$' -and $reset[0].doi_so -contains '/L'
+     }
++
++    Ca 'dk_chay_sua_tep_dacl_rong_truoc_khi_chep' {
++        $k = Invoke-DangKyGia 'dacl-rong'
++        (& $dungLaiDung $k)
++    }
++    Ca 'dk_chay_reset_ca_cay_long_va_tep_an' {
++        $k = Invoke-DangKyGia 'cay-long'
++        $bad = @($k.acl.Values | ForEach-Object { Test-AclChiAdminGhi $_.Owner $_.Access })
++        (& $dungLaiDung $k) -and $k.acl.Count -eq 9 -and $bad.Count -eq 0
++    }
+     Ca 'dk_chay_chep_du_ba_tep' { @($kSach.tep | Sort-Object) -join ',' -eq 'cap-nhat-cong-cu.ps1,cong_cu.yaml,requirements.txt' }
+     Ca 'dk_chay_do_acl_moi_tep_sau_khi_chep' {
+         # 1 thư mục + 3 tệp, và lần đo đầu tiên ĐỨNG SAU lần chép cuối cùng. (Bọc @(...).Count: `-not 0` là $true —

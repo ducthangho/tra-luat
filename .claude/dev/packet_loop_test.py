@@ -1798,6 +1798,10 @@ def _kich_ban_in(c: Ctx, codepage: str):
         if rc or not o.strip():
             raise AssertionError(f"[{codepage}] {ten} phải rc=0 và có stdout, được rc={rc}; stderr={_txt(e)!r}")
     da_phu = {"accept", "mo-lai", "chu-kho-duyet"}
+    for ten, (rc, o, e) in (("kiem-merge", _c1106(c2, env=env)), ("kiem-dong-wp", _d1106(c2, env=env))):  # #1106: in tiếng Việt lúc thành công
+        if rc or not o.strip():
+            raise AssertionError(f"[{codepage}] {ten} phải rc=0 và có stdout, được rc={rc}; stderr={_txt(e)!r}")
+        da_phu.add(ten)
     for args, state_dir in buoc:
         rc, o, e = run(c.script, args, state_dir, env_extra=env)
         ten = args[0]
@@ -9058,6 +9062,402 @@ def chay_suite(script: Path, tmp: Path, chi_chay=None):
             ket[ten] = (_TinDungGia if _co_sap_do(ex) else str)(f"{type(ex).__name__}: {ex}")
     return ket
 
+
+
+# --- #1106 ADR-0060 packet C: `kiem-merge` (K0–K6) · `kiem-dong-wp` (D1–D4). Kho thật: L đưa ADR-0060 vào master, L2 sau nó; H rẽ từ L2,
+# đẩy lên `refs/pull/55/head`. Mỗi ca đổi đúng một yếu tố, đòi rc + tên điều kiện; CLI sập ⇒ TÍN DỤNG GIẢ.
+def _rev_list_loi(script, args, sd, env=None):
+    """Chạy CLI TRONG tiến trình với `git rev-list` trả rc -15 mà stdout VẪN ĐÚNG (bị ngắt sau khi in) — review offline lượt 2."""
+    m = importlib.util.module_from_spec(sp := importlib.util.spec_from_file_location("pl1106g", script))
+    sys.path.insert(0, str(script.parent)), sp.loader.exec_module(m)
+    that, loi = m._git_do, __import__("io").StringIO()
+    m._git_do = lambda root, *x: (lambda r: (-15, r[1]) if x[0] == "rev-list" else r)(that(root, *x))
+    try:
+        with __import__("contextlib").redirect_stderr(loi), __import__("contextlib").redirect_stdout(__import__("io").StringIO()):
+            m.main(["--state-dir", str(sd), *map(str, args)])
+    except SystemExit as ex:
+        return ex.code, b"", loi.getvalue().encode()
+    return 0, b"", loi.getvalue().encode()
+
+
+def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None, env=None, git_loi=False, lien=None):
+    import yaml
+    goc = Path(tempfile.mkdtemp(prefix="c1106-", dir=c.tmp))
+    w = goc / "w"
+    _g(goc, "init", "-q", "--bare", "o.git"), _g(goc, "init", "-q", "-b", "master", "w"), _g(w, "remote", "add", "origin", "../o.git")
+
+    def ghi(nd, msg, lien=None):
+        # LF + UTF-8 TƯỜNG MINH: băm kỳ vọng tính trên chuỗi LF, mà `write_text` mặc định ra CRLF trên Windows (connector P2, #1116).
+        for p, b in nd.items():
+            (w / p).parent.mkdir(parents=True, exist_ok=True), (w / p).write_text(b, encoding="utf-8", newline="\n")
+        _g(w, "add", "-A")
+        for p, dich in (lien or {}).items():  # symlink đi thẳng vào index (120000) — khỏi cần quyền tạo symlink trên Windows
+            (goc / "lien").write_text(dich, encoding="utf-8", newline="\n")
+            _g(w, "update-index", "--add", "--cacheinfo", f"120000,{_g(w, 'hash-object', '-w', str(goc / 'lien'))},{p}")
+        return [_g(w, "commit", "-qm", msg), _g(w, "rev-parse", "HEAD")][-1]
+    ghi({"README.md": "a\n"}, "A")
+    L = ghi({"docs/adr/0060-dieu-kien-merge-va-moc-ready.md": "adr\n"}, "L")
+    L2 = ghi({"docs/z.md": "z\n"}, "L2")
+    x = {"spec": f"# spec\ndieu_kien_merge: ADR-0060@{L}\n", "L2": L2}
+    (doi or (lambda *_: None))(x, w, None)
+    _g(w, "push", "-q", "origin", "master"), _g(w, "checkout", "-qb", "pr")
+    h = ghi({spec_path: x["spec"], **(them or {})}, "H", lien)
+    _g(w, "push", "-q", "origin", "HEAD:refs/pull/55/head"), _g(w, "fetch", "-q", "origin")
+    out = "review\nKET_LUAN: approve\n"
+    x.update(runs=[{"id": 100, "path": ".github/workflows/ci.yml", "head_sha": h, "repository": {"full_name": "o/r"}, "run_attempt": 1,
+                    "status": "completed", "conclusion": "success", "check_suite_id": 500}],
+             jobs=[{"id": 200 + i, "run_id": 100, "run_attempt": 1, "name": j, "head_sha": h, "status": "completed", "conclusion": "success",
+                    "check_run_url": f"{_API834}check-runs/{300 + i}"} for i, j in enumerate(_J834)],
+             cr=[{"id": 300 + i, "name": j, "head_sha": h, "status": "completed", "conclusion": "success", "check_suite": {"id": 500},
+                  "app": {"slug": "github-actions"}, "url": f"{_API834}check-runs/{300 + i}"} for i, j in enumerate(_J834)],
+             reviews=[], review_comments=[], issue_comments=[{"id": 20, "user": {"login": _CN834}, "issue_url": f"{_API834}issues/55",
+                                                               "body": f"Codex Review: Didn't find any major issues.\n\n**Reviewed commit:** `{h[:10]}`"}],
+             out=out, run={"head": h, "trang_thai": "xong", "ma_thoat": 0, "stdout_sha256": hashlib.sha256(out.encode()).hexdigest()},
+             lease={"spec_hash": hashlib.sha256(x["spec"].encode()).hexdigest()}, cmt=None, win=None, p3off=[],
+             # #1120 K7: mặc định CÓ một run `ci-dot-bien-du` xanh đúng H ⇒ mọi ca `cong_c_*` cũ giữ nguyên kết luận
+             ddr=[{"id": 700, "path": ".github/workflows/ci-dot-bien-du.yml", "head_sha": h, "run_attempt": 1, "status": "completed", "conclusion": "success"}],
+             ddj=[{"id": 800 + i, "run_id": 700, "run_attempt": 1, "status": "completed", "conclusion": "success"} for i in range(2)])
+    (doi or (lambda *_: None))(x, w, h)
+    trang = lambda k, v: {"total_count": len({i["id"] for i in v}), k: v}  # noqa: E731
+    f = lambda ten, d: ((goc / ten).write_text(d if isinstance(d, str) else json.dumps(d), encoding="utf-8", newline="\n"), goc / ten)[1]  # noqa: E731
+    cn = {"repo": "o/r", "pr": 55, "head_sha": h, **{k: trang("items", x[k]) for k in ("reviews", "review_comments", "issue_comments")}}
+    args = ["kiem-merge", "--root", w, "--repo", "o/r", "--pr", 55, "--head", h, "--base", x.get("base", L2), "--spec", spec_path,
+            "--lease", f("l.yaml", x["lease"] if isinstance(x["lease"], str) else yaml.safe_dump(x["lease"])), "--workflow-runs", f("wr.json", trang("workflow_runs", x["runs"])),
+            "--workflow-jobs", f("wj.json", trang("jobs", x["jobs"])), "--check-runs", f("cr.json", trang("check_runs", x["cr"])),
+            "--connector", f("cn.json", cn), "--offline-run-json", f("run.json", x["run"]), "--offline-stdout", f("out.log", x["out"]),
+            *[a for k in x["p3off"] for a in ("--p3-offline", k)], *(("--chu-kho-comment", f("cmt.json", x["cmt"])) if x["cmt"] else ()),
+            *(("--windows-json", f("win.json", x["win"])) if x["win"] else ()),
+            *(("--dot-bien-du-runs", f("ddr.json", x.get("ddr_trang") or trang("workflow_runs", x["ddr"])),
+               "--dot-bien-du-jobs", f("ddj.json", x.get("ddj_trang") or trang("jobs", x["ddj"])),
+               *[a for i, v in enumerate(x.get("ddj_them", [])) for a in ("--dot-bien-du-jobs", f(f"ddj{i}.json", trang("jobs", v)))]) if x["ddr"] is not None else ())]
+    return (_rev_list_loi if git_loi else run)(c.script, args, c.sd(), env)
+
+
+def _c1106_ca(rc_doi, phai="", cam=None, **kw):
+    def ca(c):
+        rc, o, e = (_c1106 if "bb" not in kw else _d1106)(c, **{k: v for k, v in kw.items() if k != "bb"})
+        if _co_banner(o) or _co_banner(e):
+            raise CliSapDo(f"c1106 SẬP: rc={rc}; stderr={_txt(e)[-300:]!r}")
+        _doi(rc_doi, rc, e, "c1106")
+        if phai not in _txt(e) or (cam and cam in _txt(e)):
+            raise AssertionError(f"c1106: rc đúng mà lý do khác — đòi {phai!r}, cấm {cam!r}, stderr={_txt(e)!r}")
+    return ca
+
+
+def _d1106(c, doi=None, raw=None, raw_ls=None, env=None, git_loi=False):
+    import yaml
+    goc = Path(tempfile.mkdtemp(prefix="d1106-", dir=c.tmp))
+    w = goc / "w"
+    _g(goc, "init", "-q", "--bare", "o.git"), _g(goc, "init", "-q", "-b", "master", "w"), _g(w, "remote", "add", "origin", "../o.git")
+    (w / "a").write_text("a\n", encoding="utf-8", newline="\n"), _g(w, "add", "-A"), _g(w, "commit", "-qm", "A"), _g(w, "checkout", "-qb", "pr")
+    (w / "b").write_text("b\n", encoding="utf-8", newline="\n"), _g(w, "add", "-A"), _g(w, "commit", "-qm", "H"), _g(w, "checkout", "-q", "master")
+    h = _g(w, "rev-parse", "pr")
+    _g(w, "merge", "-q", "--no-ff", "-m", "M", "pr"), _g(w, "push", "-q", "origin", "master"), _g(w, "fetch", "-q", "origin")
+    m = _g(w, "rev-parse", "HEAD")
+    bb = {"packet": "P", "revision": 1, "generation": 1, "spec_hash": "a" * 64, "head_da_review": h, "tree_h": _g(w, "rev-parse", f"{h}^{{tree}}"),
+          "review": {"lop": []}, "windows": {"ci": "x"}, "duyet_chu_kho": "https://github.com/o/r/issues/1#issuecomment-1", "merge_commit": m,
+          "tree_m": _g(w, "rev-parse", f"{m}^{{tree}}"), "ci_master": {"run_id": 9, "conclusion": "success"}, "nghiem_thu": {"A1": "passed"},
+          "lease_cuoi": "l1", "landed": True, "moc_10_2_2": dict.fromkeys(("run", "checkout", "workflow_definition", "gate_output"), "passed")}
+    ls = {"lease_id": "l1", "packet_id": "P", "generation": 1, "lease_until": "2026-01-01T00:00:00Z"}
+    (doi or (lambda *_: None))(bb, ls)
+    (goc / "bb.yaml").write_text(raw or yaml.safe_dump(bb, allow_unicode=True), encoding="utf-8", newline="\n")
+    (goc / "ls.yaml").write_text(raw_ls or yaml.safe_dump(ls), encoding="utf-8", newline="\n")
+    return (_rev_list_loi if git_loi else run)(c.script, ["kiem-dong-wp", "--root", w, "--bien-ban", goc / "bb.yaml", "--lease", goc / "ls.yaml"], c.sd(), env)
+
+
+def _c1106_diff_loi(c):
+    """`git diff -U0` lỗi ⇒ K6 KHÔNG ĐO ĐƯỢC (ValueError), không được đọc thành `not_required` (review offline lượt 1, P1)."""
+    m = importlib.util.module_from_spec(sp := importlib.util.spec_from_file_location("pl1106", c.script))
+    sys.path.insert(0, str(c.script.parent)), sp.loader.exec_module(m)
+    m._git_do = lambda root, *x: (0, b":100644 100644 a b M\0docs/x.yml\0") if "--raw" in x else (-1, b"")
+    try:
+        loai = m._phan_loai_windows(Path("."), "a" * 40, "b" * 40, b"")
+    except ValueError:
+        return
+    raise AssertionError(f"git diff -U0 lỗi mà vẫn phân loại {loai!r}")
+
+
+def _c1106_crlf(c):
+    """Giả lập `write_text` của Windows (newline=None ⇒ CRLF): ca dương của fixture phải VẪN ĐẠT — connector P2 #1116."""
+    goc = Path.write_text
+    Path.write_text = lambda self, d, encoding=None, errors=None, newline=None: goc(self, d, encoding=encoding, errors=errors,
+                                                                                   newline="\r\n" if newline is None else newline)
+    try:
+        _c1106_ca(0)(c), _c1106_ca(0, bb=1)(c)
+    finally:
+        Path.write_text = goc
+
+
+_S1106 = lambda k, **v: lambda x, w, h: h and x[k].update(v)  # noqa: E731
+_CMT = lambda *dong: lambda x, w, h: h and x.update(cmt={"user": {"login": "ducthangho"}, "body": "\n".join(d.replace("H", h) for d in dong)})  # noqa: E731
+_WIN = lambda ts: lambda x, w, h: h and x.update(win={"sha": h, "os": "Windows", "tests": ts})  # noqa: E731
+_P3 = lambda x, w, h: h and x["review_comments"].append({"id": 11, "user": {"login": _CN834}, "body": "![P3 Badge] nit", "commit_id": h,  # noqa: E731
+                                                         "pull_request_url": f"{_API834}pulls/55"})
+_P3M = lambda *dong: lambda x, w, h: (_P3(x, w, h), _CMT(*dong)(x, w, h))  # noqa: E731
+_DEV = {".claude/dev/x.py": "a = 1\n"}
+CASES += [
+    ("cong_c_merge_du", _c1106_ca(0)),
+    ("cong_c_m6_hai_thieu", _c1106_ca(12, "K2 CI; K4 review offline", doi=lambda x, w, h: h and (x["jobs"][0].update(conclusion="failure"),
+                                                                                                x.update(out="KET_LUAN: changes_requested\n")))),
+    ("cong_c_k0_pr_head", _c1106_ca(12, "K0", doi=lambda x, w, h: h and (_g(w, "commit", "-q", "--allow-empty", "-m", "H2"),
+                                                                       _g(w, "push", "-q", "-f", "origin", "HEAD:refs/pull/55/head")))),
+    ("cong_c_k1_hash", _c1106_ca(12, "K1", doi=lambda x, w, h: h and x.update(lease={"spec_hash": "0" * 64}))),
+    ("cong_c_k1_l2", _c1106_ca(12, "K1", doi=lambda x, w, h: h is None and x.update(spec=f"dieu_kien_merge: ADR-0060@{x['L2']}\n"))),
+    ("cong_c_k1_hai_dong", _c1106_ca(12, "K1", doi=lambda x, w, h: h is None and x.update(spec=x["spec"] * 2))),
+    ("cong_c_k2_ci_do", _c1106_ca(12, "K2", doi=lambda x, w, h: h and x["jobs"][0].update(conclusion="failure"))),
+    ("cong_c_k3_p1", _c1106_ca(12, "K3", doi=lambda x, w, h: h and x["review_comments"].append(
+        {"id": 12, "user": {"login": _CN834}, "body": "![P1 Badge] bug", "commit_id": h, "pull_request_url": f"{_API834}pulls/55"}))),
+    ("cong_c_k4_head", _c1106_ca(12, "K4", doi=_S1106("run", head="0" * 40))),
+    ("cong_c_k4_ma_thoat", _c1106_ca(12, "K4", doi=_S1106("run", ma_thoat=True))),
+    ("cong_c_k4_stdout", _c1106_ca(12, "K4", doi=lambda x, w, h: h and x.update(out="khac\nKET_LUAN: approve\n"))),
+    ("cong_c_k4_changes", _c1106_ca(12, "K4", doi=lambda x, w, h: h and (x.update(out="KET_LUAN: changes_requested\n"),
+                                                                       x["run"].update(stdout_sha256=hashlib.sha256(b"KET_LUAN: changes_requested\n").hexdigest())))),
+    ("cong_c_k5_p3_khong_mien", _c1106_ca(12, "K5", doi=_P3)),
+    ("cong_c_k5_p3_mien", _c1106_ca(0, doi=_P3M("mien_p3: H review_comments:11"))),
+    ("cong_c_k5_thua", _c1106_ca(12, "K5", doi=_P3M("mien_p3: H review_comments:11,khac"))),
+    ("cong_c_k5_phu_dinh", _c1106_ca(12, "K5", doi=_P3M("không miễn: mien_p3: H review_comments:11"))),
+    ("cong_c_k5_sai_nguoi", _c1106_ca(12, "K5", doi=lambda x, w, h: (_P3M("mien_p3: H review_comments:11")(x, w, h), h and x["cmt"]["user"].update(login="evil")))),
+    ("cong_c_k5_offline", _c1106_ca(12, "K5", doi=lambda x, w, h: h and x.update(p3off=["lop-a"]))),
+    ("cong_c_k6_dev_thieu", _c1106_ca(12, "K6", them=_DEV)),
+    ("cong_c_k6_dev_xanh", _c1106_ca(0, them=_DEV, doi=_WIN([{"id": "a", "ket_qua": "passed"}]))),
+    ("cong_c_k6_rong", _c1106_ca(12, "K6", them=_DEV, doi=_WIN([]))),
+    ("cong_c_k6_skipped", _c1106_ca(12, "K6", them=_DEV, doi=_WIN([{"id": "a", "ket_qua": "skipped"}]))),
+    ("cong_c_k6_mien", _c1106_ca(0, them=_DEV, doi=_CMT("windows: H mien"))),
+    ("cong_c_k6_ps1_docs", _c1106_ca(12, "K6", them={"docs/x.ps1": "x\n"})),
+    ("cong_c_k6_md_chu_khoa", _c1106_ca(0, them={"README.md": "subprocess\n"})),
+    ("cong_c_k6_luu_tru", _c1106_ca(0, spec_path="ops/land/X.md", them={"ops/land/a.yaml": "a: 1\n"})),
+    ("cong_c_k6_land_py_unknown", _c1106_ca(12, "K6", spec_path="ops/land/X.md", them={"ops/land/x.py": "a = 1\n"})),
+    ("cong_c_k6_unknown_chot", _c1106_ca(0, spec_path="ops/land/X.md", them={"ops/land/x.py": "a = 1\n"}, doi=_CMT("windows: H not_required"))),
+    ("cong_c_k6_tu_khoa_py", _c1106_ca(12, "K6", spec_path="ops/land/X.md", them={"ops/land/x.py": "import subprocess\n"},
+                                       doi=_CMT("windows: H not_required"))),
+    ("cong_c_dong_du", _c1106_ca(0, bb=1)),
+    ("cong_c_d2_not_measured", _c1106_ca(12, "D2", bb=1, doi=lambda bb, ls: bb["moc_10_2_2"].update(run="not_measured"))),
+    ("cong_c_d2_landed_false", _c1106_ca(12, "D2", bb=1, doi=lambda bb, ls: bb.update(landed=False))),
+    ("cong_c_d2_nghiem_thu", _c1106_ca(12, "D2", bb=1, doi=lambda bb, ls: bb["nghiem_thu"].update(A9="failed"))),
+    ("cong_c_d2_ci_master", _c1106_ca(12, "D2", bb=1, doi=lambda bb, ls: bb["ci_master"].update(conclusion="failure"))),
+    ("cong_c_d1_generation_bool", _c1106_ca(12, "D1", bb=1, doi=lambda bb, ls: bb.update(generation=True))),
+    ("cong_c_d1_nghiem_thu_rong", _c1106_ca(12, "D1", bb=1, doi=lambda bb, ls: bb.update(nghiem_thu={}))),
+    ("cong_c_d3_cha", _c1106_ca(12, "D3", bb=1, doi=lambda bb, ls: bb.update(head_da_review=bb["merge_commit"]))),
+    ("cong_c_d4_tuong_lai", _c1106_ca(12, "D4", bb=1, doi=lambda bb, ls: ls.update(lease_until="2999-01-01T00:00:00Z"))),
+    ("cong_c_d1_khoa_trung", _c1106_ca(2, "khoá YAML trùng", bb=1, raw="packet: P\npacket: Q\n")),
+    ("cong_c_d4_khong_nhay", _c1106_ca(0, bb=1, raw_ls="lease_id: l1\npacket_id: P\ngeneration: 1\nlease_until: 2026-01-01T00:00:00Z\n")),
+    ("cong_c_k1_anchor", _c1106_ca(2, "anchor", doi=lambda x, w, h: h and x.update(lease=f"spec_hash: &s {x['lease']['spec_hash']}\n"))),
+    ("cong_c_k1_yaml_hong", _c1106_ca(2, "YAML hỏng", doi=lambda x, w, h: h and x.update(lease="spec_hash: [\n"))),
+    ("cong_c_k1_khoa_trung", _c1106_ca(2, "trùng", doi=lambda x, w, h: h and x.update(lease=f"spec_hash: a\nspec_hash: {x['lease']['spec_hash']}\n"))),
+    ("cong_c_k6_thieu_id", _c1106_ca(12, "K6", them=_DEV, doi=_WIN([{"ket_qua": "passed"}]))),
+    ("cong_c_k6_diff_loi", lambda c: _c1106_diff_loi(c)),
+    ("cong_c_k1_tag_hong", _c1106_ca(2, "YAML hỏng", doi=lambda x, w, h: h and x.update(lease="spec_hash: !!bool nope\n"))),
+    ("cong_c_d1_tag_hong", _c1106_ca(2, "YAML hỏng", bb=1, raw="packet: !!timestamp nope\n")),
+    ("cong_c_d3_git_loi", _c1106_ca(12, "D3", bb=1, git_loi=True)),
+    ("cong_c_k1_git_loi", _c1106_ca(12, "K1", git_loi=True)),
+    ("cong_c_fixture_crlf", _c1106_crlf),
+    # P2 viết trên head CŨ mà GitHub dời `commit_id` sang head mới (dòng không đổi) ⇒ đã cũ, không chặn K3 (PR #1116, comment 4435201341)
+    ("cong_c_k3_p2_commit_doi", _c1106_ca(0, doi=lambda x, w, h: h and x["review_comments"].append(
+        {"id": 13, "user": {"login": _CN834}, "body": "![P2 Badge] cũ", "commit_id": h, "original_commit_id": x["L2"],
+         "pull_request_url": f"{_API834}pulls/55"}))),
+    # `original_commit_id` CHUNG tiền tố 10 ký tự với head ⇒ `Reviewed commit:` 10 ký tự thành mơ hồ (review offline lượt 7, P2)
+    ("cong_c_k3_original_tien_to", _c1106_ca(12, "K3", doi=lambda x, w, h: h and x["review_comments"].append(
+        {"id": 15, "user": {"login": _CN834}, "body": "nit", "commit_id": h, "original_commit_id": h[:10] + ("0" if h[10] != "0" else "1") + h[11:],
+         "pull_request_url": f"{_API834}pulls/55"}))),
+    # ngược lại: viết TRÊN head (original = h) thì commit_id lệch cũng vẫn chặn
+    ("cong_c_k3_p2_original_head", _c1106_ca(12, "K3", doi=lambda x, w, h: h and x["review_comments"].append(
+        {"id": 14, "user": {"login": _CN834}, "body": "![P2 Badge] mới", "commit_id": x["L2"], "original_commit_id": h,
+         "pull_request_url": f"{_API834}pulls/55"}))),
+    # symlink 120000 trong ops/reviews/ không được bước 1 đọc thành hồ sơ thụ động; spec khai `windows: required` ⇒ K6 đòi bằng chứng (connector P2 #1116)
+    ("cong_c_k6_symlink", _c1106_ca(12, "K6", spec_path="ops/land/X.md", lien={"ops/reviews/a.log": "../../scripts/tl.py"},
+                                    doi=lambda x, w, h: h is None and x.update(spec=x["spec"] + "windows: required\n"))),
+]
+MUTANTS.update({
+    "c1106_k0_bo_pr_head": ("x[0] or x[1].split()[:1] != [h.encode()]", "x[0]", ["cong_c_k0_pr_head"]),
+    "c1106_k1_bo_spec_hash": ('rc or hashlib.sha256(spec).hexdigest() != lease.get("spec_hash")', "rc", ["cong_c_k1_hash"]),
+    "c1106_k6_bo_rc_diff": ('    if rc:\n        raise ValueError("không đo được dòng thêm', '    if False:\n        raise ValueError("không đo được dòng thêm', ["cong_c_k6_diff_loi"]),
+    "c1106_yaml_nhan_anchor": (' or getattr(e, "anchor", None)', "", ["cong_c_k1_anchor"]),
+    "c1106_k1_bo_rc_rev_list": ('(fp := _git_do(root, "rev-list", "--first-parent", "refs/remotes/origin/master"))[0] == 0 and ', '(fp := _git_do(root, "rev-list", "--first-parent", "refs/remotes/origin/master")) and ', ["cong_c_k1_git_loi"]),
+    "c1106_d3_bo_rc_git": ('if r[0] == 0 else ["<git lỗi>"]', 'if True else ["<git lỗi>"]', ["cong_c_d3_git_loi"]),
+    "c1106_k6_id_tuy_y": (' and type(x.get("id")) is str and x["id"]', "", ["cong_c_k6_thieu_id"]),
+    "c1106_k1_bo_l1": (' and _git_do(root, "cat-file", "-e", f"{oid}^1:{ADR0060_TEP}")[0] != 0', "", ["cong_c_k1_l2"]),
+    "c1106_k3_bo_connector": ("_doc_connector(a.connector, a.repo, a.pr, h)", "([], None)", ["cong_c_k3_p1"]),
+    "c1106_k4_bo_head": ('r.get("head") == h and r.get("trang_thai")', 'r.get("trang_thai")', ["cong_c_k4_head"]),
+    "c1106_k4_bo_stdout_sha": (' and r.get("stdout_sha256") == hashlib.sha256(out).hexdigest()', "", ["cong_c_k4_stdout"]),
+    "c1106_k5_bo_chu_kho": ('d["user"].get("login") != CHU_KHO or ', "", ["cong_c_k5_sai_nguoi"]),
+    "c1106_k5_tap_con": ('set(mien[0].split(",")) != mo', 'not mo <= set(mien[0].split(","))', ["cong_c_k5_thua"]),
+    "c1106_k6_rong_van_dat": ("isinstance(ts, list) and ts and ", "isinstance(ts, list) and ", ["cong_c_k6_rong"]),
+    "c1106_k6_buoc1_bo_duoi": (' and (duoi(p) in DUOI_THU_DONG or PurePosixPath(p).name == "SHA256SUMS")', "", ["cong_c_k6_land_py_unknown"]),
+    "c1106_d2_bo": ('elif not (bb["landed"] is True and', 'elif False and (bb["landed"] is True and', ["cong_c_d2_not_measured"]),
+    "c1106_d2_bo_nghiem_thu": (' and all(v in DAT_MOC for v in bb["nghiem_thu"].values())', "", ["cong_c_d2_nghiem_thu"]),
+    "c1106_d4_bo_han": ("het = datetime.strptime", "het = True or datetime.strptime", ["cong_c_d4_tuong_lai"]),
+    "c1106_k3_neo_commit_id": ('x["original_commit_id"] if k == "review_comments" and "original_commit_id" in x else ', "", ["cong_c_k3_p2_commit_doi", "cong_c_k3_p2_original_head"]),
+    "c1106_k3_biet_bo_original": (' x.get("original_commit_id"), *re.findall(', " *re.findall(", ["cong_c_k3_original_tien_to"]),
+    "c1106_k6_buoc1_bo_mode": (' and m == "100644"', "", ["cong_c_k6_symlink"]),
+    "c1106_d1_nhan_bool": ("so = lambda v: type(v) is int and v >= 1", "so = lambda v: isinstance(v, int) and v >= 1", ["cong_c_d1_generation_bool"]),
+})
+
+
+# --- #1120 KIEM-MERGE-M9 (`ops/specs/KIEM-MERGE-M9-r1.md`): K7 `full_mutant_audit` trên cùng fixture `_c1106`.
+def _m9_git_loi(c, raw=b""):
+    """git rc≠0 ⇒ K7 (và K6 khi stdout vẫn có bản ghi raw hợp lệ) KHÔNG ĐO ĐƯỢC, không phải "không chạm" (A3; lượt 2 F14)."""
+    m = importlib.util.module_from_spec(sp := importlib.util.spec_from_file_location("pl1120", c.script))
+    sys.path.insert(0, str(c.script.parent)), sp.loader.exec_module(m)
+    m._git_do = lambda root, *x: (128, raw)
+    for ten, fn in (("K7", lambda: m._cham_m9(Path("."), "a" * 40, "b" * 40)), ("K6", lambda: m._phan_loai_windows(Path("."), "a" * 40, "b" * 40, b""))):
+        try:
+            kq = fn()
+        except ValueError:
+            continue
+        raise AssertionError(f"{ten}: git rc=128 (raw={raw!r}) mà vẫn kết luận {kq!r}")
+
+
+def _m9_k6_diff_rong(c):
+    """Tách `_diff_raw` không được làm mất chốt K6: diff raw THÀNH CÔNG mà rỗng ⇒ vẫn ValueError (review offline lượt 1 F09)."""
+    m = importlib.util.module_from_spec(sp := importlib.util.spec_from_file_location("pl1120r", c.script))
+    sys.path.insert(0, str(c.script.parent)), sp.loader.exec_module(m)
+    m._git_do = lambda root, *x: (0, b"")
+    try:
+        loai = m._phan_loai_windows(Path("."), "a" * 40, "b" * 40, b"")
+    except ValueError:
+        return
+    raise AssertionError(f"diff rỗng mà K6 vẫn phân loại {loai!r}")
+
+
+def _m9_pham_vi_git(c):
+    """Phạm vi M9 trên lịch sử git THẬT, mỗi bước một commit (lượt 2 F15/F16, lượt 3 F22–F24): xoá · `.PY` · rename từ ngoài VÀO · symlink · chỉ đổi mode."""
+    m = importlib.util.module_from_spec(sp := importlib.util.spec_from_file_location("pl1120p", c.script))
+    sys.path.insert(0, str(c.script.parent)), sp.loader.exec_module(m)
+    w = Path(tempfile.mkdtemp(prefix="m9pv-", dir=c.tmp))
+    _g(w, "init", "-q", "-b", "master"), (w / ".claude/dev").mkdir(parents=True)
+    def buoc(*lenh, tep=()):
+        for p in tep:
+            (w / p).parent.mkdir(parents=True, exist_ok=True), (w / p).write_text("a\n", encoding="utf-8", newline="\n"), _g(w, "add", p)
+        _ = [_g(w, *x) for x in lenh]
+        return _g(w, "commit", "-qm", "b"), _g(w, "rev-parse", "HEAD")
+    sha = [buoc(tep=("ops/x.py", "docs/a.txt", ".github/workflows/w.yml"))[1], buoc(("rm", "-q", "ops/x.py"))[1], buoc(tep=("ops/y.PY",))[1],
+           buoc(("mv", "docs/a.txt", ".claude/dev/a.txt"))[1], buoc(("update-index", "--add", "--cacheinfo", f"120000,{_g(w, 'hash-object', '-w', '.claude/dev/a.txt')},ops/l.py"))[1],
+           buoc(("update-index", "--chmod=+x", ".github/workflows/w.yml"))[1]]
+    kq = tuple(m._cham_m9(w, a, b) for a, b in zip(sha, sha[1:]))
+    if kq != (True, False, True, True, True):
+        raise AssertionError(f"phạm vi M9 (xoá · .PY · rename vào · symlink ops/l.py · chỉ mode) phải là (True, False, True, True, True), được {kq!r}")
+
+
+_KHONG_DD = lambda x, w, h: h and x.update(ddr=None)  # noqa: E731
+_DD = lambda k, i=0, **v: lambda x, w, h: h and x[k][i].update(v)  # noqa: E731
+_GH = {".github/workflows/x.yml": "on: push\n"}
+CASES += [
+    ("cong_m9_docs_khong_readback", _c1106_ca(0, them={"docs/x.md": "x\n"}, doi=_KHONG_DD)),
+    ("cong_m9_ops_md_khong", _c1106_ca(0, them={"ops/x.md": "x\n"}, doi=_KHONG_DD)),
+    ("cong_m9_dev_khong_run", _c1106_ca(12, "K7 full_mutant_audit", them=_DEV, doi=lambda x, w, h: (_WIN([{"id": "a", "ket_qua": "passed"}])(x, w, h), _KHONG_DD(x, w, h)))),
+    ("cong_m9_dev_run_xanh", _c1106_ca(0, them=_DEV, doi=_WIN([{"id": "a", "ket_qua": "passed"}]))),
+    ("cong_m9_dev_mien", _c1106_ca(0, them=_DEV, doi=lambda x, w, h: (_CMT("windows: H mien", "full_mutant_audit: H mien")(x, w, h), _KHONG_DD(x, w, h)))),
+    ("cong_m9_pham_vi_ops_py", _c1106_ca(12, "K7 full_mutant_audit", them={"ops/a/b.py": "a = 1\n"}, doi=lambda x, w, h: (_CMT("windows: H not_required")(x, w, h), _KHONG_DD(x, w, h)))),
+    ("cong_m9_pham_vi_workflow", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _KHONG_DD(x, w, h)))),
+    ("cong_m9_run_head_khac", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddr", head_sha="0" * 40)(x, w, h)))),
+    ("cong_m9_run_do", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddr", conclusion="failure")(x, w, h)))),
+    ("cong_m9_run_sai_tep", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddr", path=".github/workflows/ci.yml")(x, w, h)))),
+    ("cong_m9_job_failure", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddj", 1, conclusion="failure")(x, w, h)))),
+    ("cong_m9_job_attempt_khac", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddr", run_attempt=2)(x, w, h)))),
+    ("cong_m9_job_rong", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and x.update(ddj=[])))),
+    ("cong_m9_trang_thieu", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and x.update(ddr_trang={"total_count": 2, "workflow_runs": x["ddr"]})))),
+    ("cong_m9_mien_sai_nguoi", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("full_mutant_audit: H mien")(x, w, h), _KHONG_DD(x, w, h), h and x["cmt"]["user"].update(login="evil")))),
+    ("cong_m9_mien_sha_khac", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien", f"full_mutant_audit: {'0' * 40} mien")(x, w, h), _KHONG_DD(x, w, h)))),
+    ("cong_m9_m6_hai_thieu", _c1106_ca(12, "K2 CI; K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _KHONG_DD(x, w, h), h and x["jobs"][0].update(conclusion="failure")))),
+    ("cong_m9_git_loi", _m9_git_loi),
+    # review offline lượt 1 (F01–F09): mỗi đường vào một ca, mỗi chốt một đột biến
+    ("cong_m9_hai_run_hai_tep", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and ( x["ddr"].append({**x["ddr"][0], "id": 701}), x.update(ddj_them=[[{"id": 900, "run_id": 701, "run_attempt": 1, "status": "completed", "conclusion": "success"}]]))))),
+    ("cong_m9_jobs_tron_run", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddj", 1, run_id=701)(x, w, h)))),
+    ("cong_m9_jobs_trung_tep", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and x.update(ddj_them=[[{**x["ddj"][0], "id": 901}]])))),
+    ("cong_m9_job_run_khac", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and [j.update(run_id=701) for j in x["ddj"]]))),
+    ("cong_m9_job_thieu_run_id", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and x["ddj"][1].pop("run_id")))),
+    ("cong_m9_job_attempt_float", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and [j.update(run_attempt=1.0) for j in x["ddj"]]))),
+    ("cong_m9_job_run_id_float", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and [j.update(run_id=700.0) for j in x["ddj"]]))),
+    ("cong_m9_run_attempt_float", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddr", run_attempt=1.0)(x, w, h)))),
+    ("cong_m9_run_dang_chay", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddr", status="in_progress")(x, w, h)))),
+    ("cong_m9_job_dang_chay", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddj", 1, status="in_progress")(x, w, h)))),
+    ("cong_m9_trang_jobs_thieu", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and x.update(ddj_trang={"total_count": 3, "jobs": x["ddj"]})))),
+    ("cong_m9_mien_dau_khoang_trang", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien", " full_mutant_audit: H mien")(x, w, h), _KHONG_DD(x, w, h)))),
+    ("cong_m9_mien_duoi_tab", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien", "full_mutant_audit: H mien\t")(x, w, h), _KHONG_DD(x, w, h)))),
+    ("cong_m9_k6_diff_rong", _m9_k6_diff_rong),
+    # review offline lượt 2 (F10–F16): bool ≠ int ở cả ba chốt kiểu · SHA rút gọn · git lỗi kèm output · biên phạm vi trên git thật
+    ("cong_m9_job_run_id_bool", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and ( x["ddr"][0].update(id=1), [j.update(run_id=True) for j in x["ddj"]])))),
+    ("cong_m9_job_attempt_bool", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and [j.update(run_attempt=True) for j in x["ddj"]]))),
+    ("cong_m9_run_attempt_bool", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddr", run_attempt=True)(x, w, h)))),
+    ("cong_m9_mien_sha_rut_gon", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_KHONG_DD(x, w, h), h and x.update( cmt={"user": {"login": "ducthangho"}, "body": f"windows: {h} mien\nfull_mutant_audit: {h[:7]} mien"})))),
+    ("cong_m9_git_loi_co_output", lambda c: _m9_git_loi(c, b":100644 100644 a b M\0docs/x.md\0")),
+    ("cong_m9_pham_vi_git", _m9_pham_vi_git),
+    # lượt 3: F03 mọi ký tự `splitlines` tách ở hai đầu · F17/F18 run đạt nằm GIỮA hai run không đạt · F19 attempt 2 · F20/F21 job SAU job đầu
+    ("cong_m9_mien_ky_tu_tach", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_KHONG_DD(x, w, h), h and x.update(cmt={"user": {"login": "ducthangho"}, "body": "\n".join([f"windows: {h} mien"] + [v for k in "\x0b\x0c\x1c\x1d\x1e\x85\u2028\u2029" for v in (f"full_mutant_audit: {h} mien{k}", f"{k}full_mutant_audit: {h} mien")])})))),
+    ("cong_m9_run_xanh_o_giua", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and x.update(ddr=[{**x["ddr"][0], "id": 699, "conclusion": "failure"}, x["ddr"][0], {**x["ddr"][0], "id": 702, "head_sha": "0" * 40}])))),
+    ("cong_m9_attempt_2", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddr", run_attempt=2)(x, w, h), h and [j.update(run_attempt=2) for j in x["ddj"]]))),
+    ("cong_m9_job_sau_float", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddj", 1, run_attempt=1.0)(x, w, h)))),
+    # lượt 4: F25 comment người khác + run xanh ⇒ K7 đạt (K6 vẫn đỏ vì comment) · F26 run_id float ở job sau · F27 nhóm jobs ĐÚNG run
+    # được chọn (nhóm đầu/cuối xanh, nhóm của run đạt đỏ) · F28 CRLF hợp lệ · F29 run không đạt thiếu run_attempt đứng trước run đạt
+    ("cong_m9_nguoi_khac_run_xanh", _c1106_ca(12, "K6", cam="K7", them=_GH, doi=lambda x, w, h: (_CMT("full_mutant_audit: H mien")(x, w, h), h and x["cmt"]["user"].update(login="evil")))),
+    ("cong_m9_job_sau_run_id_float", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddj", 1, run_id=700.0)(x, w, h)))),
+    ("cong_m9_nhom_jobs_dung_run", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and ( x.update(ddr=[x["ddr"][0], *({**x["ddr"][0], "id": i, "conclusion": "failure"} for i in (702, 703))], ddj=[{**x["ddj"][0], "run_id": 702}], ddj_them=[[{**j, "conclusion": "failure"} for j in x["ddj"]], [{**x["ddj"][0], "id": 903, "run_id": 703}]]))))),
+    ("cong_m9_mien_crlf", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_KHONG_DD(x, w, h), h and x.update(cmt={"user": {"login": "ducthangho"}, "body": f"windows: {h} mien\r\nfull_mutant_audit: {h} mien\r\n"})))),
+    ("cong_m9_run_thieu_attempt_truoc", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and x["ddr"].insert(0, {k: v for k, v in {**x["ddr"][0], "id": 698}.items() if k != "run_attempt"})))),
+    # lượt 5: F30 tệp M9 KHÔNG đứng đầu diff · F31 job ở GIỮA lô ba · F32 nhóm jobs của run khác đỏ vẫn đạt · F33 ranh giới prefix/đuôi
+    ("cong_m9_pham_vi_tep_sau", _c1106_ca(12, "K7 full_mutant_audit", them={".a.txt": "x\n", "ops/x.py": "a = 1\n"},
+                                          doi=lambda x, w, h: (_CMT("windows: H not_required")(x, w, h), _KHONG_DD(x, w, h)))),
+    ("cong_m9_job_giua_dang_chay", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (
+        _CMT("windows: H mien")(x, w, h), h and (x["ddj"].append({**x["ddj"][0], "id": 802}), x["ddj"][1].update(status="in_progress"))))),
+    ("cong_m9_job_giua_float", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (
+        _CMT("windows: H mien")(x, w, h), h and (x["ddj"].append({**x["ddj"][0], "id": 802}), x["ddj"][1].update(run_attempt=1.0))))),
+    ("cong_m9_nhom_khac_do_van_dat", _c1106_ca(0, them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), h and x.update(
+        ddr=[x["ddr"][0], {**x["ddr"][0], "id": 701, "conclusion": "failure"}],
+        ddj_them=[[{**x["ddj"][0], "id": 901, "run_id": 701, "conclusion": "failure"}]])))),
+    ("cong_m9_ranh_gioi_pham_vi", _c1106_ca(0, them=dict.fromkeys((".claude/developer/x.txt", ".github/workflows-old/x.txt", "ops-old/x.py", "ops/x.pyc"), "x\n"),
+                                            doi=lambda x, w, h: (_CMT("windows: H not_required")(x, w, h), _KHONG_DD(x, w, h)))),
+    ("cong_m9_job_dau_dang_chay", _c1106_ca(12, "K7 full_mutant_audit", them=_GH, doi=lambda x, w, h: (_CMT("windows: H mien")(x, w, h), _DD("ddj", 0, status="in_progress")(x, w, h)))),
+]
+MUTANTS.update({
+    "m9_bo_head_sha": (' and r.get("head_sha") == h and xanh(r)', " and xanh(r)", ["cong_m9_run_head_khac"]),
+    "m9_bo_kiem_job": (" and js and all(map(xanh, js))", "", ["cong_m9_job_failure", "cong_m9_job_rong"]),
+    "m9_nhan_attempt_khac": ('nhom.get((r["id"], r["run_attempt"]))', 'nhom.get((r["id"], next(iter(nhom), (0, 0))[1]))', ["cong_m9_job_attempt_khac"]),
+    "m9_bo_so_run_id": ('nhom.get((r["id"], r["run_attempt"]))', 'nhom.get((next(iter(nhom), (0, 0))[0], r["run_attempt"]))', ["cong_m9_job_run_khac"]),
+    "m9_nhan_tron_run": (" or len(khoa) > 1", "", ["cong_m9_jobs_tron_run"]),
+    "m9_nhan_trung_tep": (" or khoa & nhom.keys()", "", ["cong_m9_jobs_trung_tep"]),
+    "m9_bo_kieu_job_run_id": ('if not all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int for j in js)', 'if not all(type(j.get("run_attempt")) is int for j in js)', ["cong_m9_job_run_id_float"]),  # job thiếu run_id còn bị chốt một-run-mỗi-tệp chặn độc lập
+    "m9_bo_kieu_job_attempt": ('type(j.get("run_attempt")) is int for j in js)', 'True for j in js)', ["cong_m9_job_attempt_float"]),
+    "m9_bo_kieu_run_attempt": ('if type(r.get("run_attempt")) is int else None', 'if "run_attempt" in r else None', ["cong_m9_run_attempt_float"]),
+    "m9_bo_run_completed": (" and xanh(r) and js", ' and r.get("conclusion") == "success" and js', ["cong_m9_run_dang_chay"]),
+    "m9_bo_job_completed": ("and js and all(map(xanh, js))", 'and js and all(j.get("conclusion") == "success" for j in js)', ["cong_m9_job_dang_chay"]),
+    "m9_bo_trang_jobs": ('js = _trang_du(_doc_json(p, RC_GATE)[0], "jobs", f"--dot-bien-du-jobs {p}")', 'js = _doc_json(p, RC_GATE)[0]["jobs"]', ["cong_m9_trang_jobs_thieu"]),
+    "m9_mien_strip": ("_dong_chu_kho(a.chu_kho_comment, tho=True)", "_dong_chu_kho(a.chu_kho_comment)", ["cong_m9_mien_dau_khoang_trang", "cong_m9_mien_duoi_tab"]),
+    "m9_bool_job_run_id": ('all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int for j in js)', 'all(isinstance(j.get("run_id"), int) and type(j.get("run_attempt")) is int for j in js)', ["cong_m9_job_run_id_bool"]),
+    "m9_bool_job_attempt": ('all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int for j in js)', 'all(type(j.get("run_id")) is int and isinstance(j.get("run_attempt"), int) for j in js)', ["cong_m9_job_attempt_bool"]),
+    "m9_bool_run_attempt": ('if type(r.get("run_attempt")) is int else None', 'if isinstance(r.get("run_attempt"), int) else None', ["cong_m9_run_attempt_bool"]),
+    "m9_mien_tien_to_sha": ('f"full_mutant_audit: {h} mien" in _dong_chu_kho(a.chu_kho_comment, tho=True)', 'any(x in (f"full_mutant_audit: {h} mien", f"full_mutant_audit: {h[:7]} mien") for x in _dong_chu_kho(a.chu_kho_comment, tho=True))', ["cong_m9_mien_sha_rut_gon"]),
+    "m9_git_loi_co_output": ('    if rc:\n        raise ValueError("không đo được diff base..head")', '    if rc and not raw:\n        raise ValueError("không đo được diff base..head")', ["cong_m9_git_loi_co_output"]),
+    "m9_pham_vi_py_hoa": ('(p.startswith("ops/") and p.endswith(".py"))', '(p.startswith("ops/") and p.lower().endswith(".py"))', ["cong_m9_pham_vi_git"]),
+    "m9_pham_vi_bo_tep_xoa": ("for _, p in _diff_raw(root, b, h))", 'for _, p in _diff_raw(root, b, h) if _git_do(root, "cat-file", "-e", f"{h}:{p}")[0] == 0)', ["cong_m9_pham_vi_git"]),
+    "m9_mien_splitlines": ('re.split(r"\\r?\\n", d["body"]) if tho else ', "", ["cong_m9_mien_ky_tu_tach"]),
+    "m9_chi_run_dau": ("        for r in runs:\n", "        for r in runs[:1]:\n", ["cong_m9_run_xanh_o_giua"]),
+    "m9_chi_run_cuoi": ("        for r in runs:\n", "        for r in runs[-1:]:\n", ["cong_m9_run_xanh_o_giua"]),
+    "m9_ghim_attempt_1": ('nhom.get((r["id"], r["run_attempt"]))', 'nhom.get((r["id"], 1))', ["cong_m9_attempt_2"]),
+    "m9_kieu_chi_job_dau": ("is int for j in js) or len(khoa)", "is int for j in js[:1]) or len(khoa)", ["cong_m9_job_sau_float"]),
+    "m9_xanh_chi_job_cuoi": ("and js and all(map(xanh, js))", "and js and all(map(xanh, js[-1:]))", ["cong_m9_job_dau_dang_chay"]),
+    "m9_nhan_rename": ('"diff", "--raw", "--no-renames", "-z", b, h)', '"diff", "--raw", "-z", b, h)', ["cong_m9_pham_vi_git"]),
+    "m9_bo_symlink": ("for _, p in _diff_raw(root, b, h))", 'for m, p in _diff_raw(root, b, h) if m != "120000")', ["cong_m9_pham_vi_git"]),
+    "m9_bo_chi_doi_mode": ('for i in range(0, len(t) - 1, 2) if t[i].startswith(":")]', 'for i in range(0, len(t) - 1, 2) if t[i].startswith(":") and t[i].split()[2] != t[i].split()[3]]', ["cong_m9_pham_vi_git"]),
+    "m9_mien_phu_quyet_run": ("            mien = False\n", "            raise\n", ["cong_m9_nguoi_khac_run_xanh"]),
+    "m9_kieu_run_id_job_dau": ('all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int for j in js)', 'all(type(j.get("run_id")) is int for j in js[:1]) and all(type(j.get("run_attempt")) is int for j in js)', ["cong_m9_job_sau_run_id_float"]),
+    "m9_nhom_dau": ('nhom.get((r["id"], r["run_attempt"]))', '(list(nhom.values())[0] if (r["id"], r["run_attempt"]) in nhom else None)', ["cong_m9_nhom_jobs_dung_run"]),
+    "m9_nhom_cuoi": ('nhom.get((r["id"], r["run_attempt"]))', '(list(nhom.values())[-1] if (r["id"], r["run_attempt"]) in nhom else None)', ["cong_m9_nhom_jobs_dung_run"]),
+    "m9_mien_chi_lf": ('re.split(r"\\r?\\n", d["body"]) if tho', 'd["body"].split("\\n") if tho', ["cong_m9_mien_crlf"]),
+    "m9_doc_attempt_som": ('js = nhom.get((r["id"], r["run_attempt"])) if type(r.get("run_attempt")) is int else None', 'js = nhom.get((r["id"], r["run_attempt"])) if type(r["run_attempt"]) is int else None', ["cong_m9_run_thieu_attempt_truoc"]),
+    "m9_chi_tep_dau_diff": ("for _, p in _diff_raw(root, b, h))", "for _, p in _diff_raw(root, b, h)[:1])", ["cong_m9_pham_vi_tep_sau"]),
+    "m9_xanh_chi_hai_dau": ("and js and all(map(xanh, js))", "and js and all(map(xanh, js[:1] + js[-1:]))", ["cong_m9_job_giua_dang_chay"]),
+    "m9_kieu_chi_hai_dau": ("is int for j in js) or len(khoa)", "is int for j in js[:1] + js[-1:]) or len(khoa)", ["cong_m9_job_giua_float"]),
+    "m9_xanh_moi_nhom": ("and js and all(map(xanh, js))", "and js and all(xanh(j) for g in nhom.values() for j in g)", ["cong_m9_nhom_khac_do_van_dat"]),
+    "m9_dev_bo_gach": ('p.startswith((".claude/dev/", ".github/workflows/"))', 'p.startswith((".claude/dev", ".github/workflows/"))', ["cong_m9_ranh_gioi_pham_vi"]),
+    "m9_workflow_bo_gach": ('p.startswith((".claude/dev/", ".github/workflows/"))', 'p.startswith((".claude/dev/", ".github/workflows"))', ["cong_m9_ranh_gioi_pham_vi"]),
+    "m9_ops_bo_gach": ('(p.startswith("ops/") and p.endswith(".py"))', '(p.startswith("ops") and p.endswith(".py"))', ["cong_m9_ranh_gioi_pham_vi"]),
+    "m9_duoi_chuoi_con": ('(p.startswith("ops/") and p.endswith(".py"))', '(p.startswith("ops/") and ".py" in p)', ["cong_m9_ranh_gioi_pham_vi"]),
+    "m9_k6_nhan_diff_rong": ('    if not tep:\n        raise ValueError("không đo được diff base..head")', '    if False:\n        raise ValueError("không đo được diff base..head")', ["cong_m9_k6_diff_rong"]),
+    "m9_bo_kiem_nguoi_mien": ('d["user"].get("login") != CHU_KHO or ', "", ["cong_m9_mien_sai_nguoi"]),
+    "m9_bo_pham_vi_workflow": ('p.startswith((".claude/dev/", ".github/workflows/"))', 'p.startswith((".claude/dev/",))', ["cong_m9_pham_vi_workflow"]),
+    "m9_bo_pham_vi_ops_py": (' or (p.startswith("ops/") and p.endswith(".py"))', "", ["cong_m9_pham_vi_ops_py"]),
+    "m9_git_loi_la_khong_cham": ('    if rc:\n        raise ValueError("không đo được diff base..head")', '    if False:\n        raise ValueError("không đo được diff base..head")', ["cong_m9_git_loi"]),
+})
 
 
 def main() -> int:

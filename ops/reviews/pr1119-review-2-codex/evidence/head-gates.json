@@ -1,0 +1,63 @@
+[
+  {
+    "cmd": [
+      "python3",
+      "ops/bien_nhan_v2.py",
+      "--root",
+      "."
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/work/head",
+    "rc": 0,
+    "stdout": "head-bien-nhan.stdout",
+    "stderr": "head-bien-nhan.stderr"
+  },
+  {
+    "cmd": [
+      "python3",
+      "ops/land_evidence_nguon.py",
+      "--root",
+      "."
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/work/head",
+    "rc": 0,
+    "stdout": "head-land.stdout",
+    "stderr": "head-land.stderr"
+  },
+  {
+    "cmd": [
+      "python3",
+      "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/direct.py",
+      "."
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/work/head",
+    "rc": 0,
+    "stdout": "head-direct.stdout",
+    "stderr": "head-direct.stderr"
+  },
+  {
+    "cmd": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "."
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/work/head",
+    "rc": 0,
+    "stdout": "head-doctrine.stdout",
+    "stderr": "head-doctrine.stderr"
+  },
+  {
+    "cmd": [
+      "git",
+      "diff",
+      "--check",
+      "c82047da4d6f9546ce1d68282c37acf9567b74bc",
+      "HEAD"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/work/head",
+    "rc": 0,
+    "stdout": "head-diff-check.stdout",
+    "stderr": "head-diff-check.stderr"
+  }
+]

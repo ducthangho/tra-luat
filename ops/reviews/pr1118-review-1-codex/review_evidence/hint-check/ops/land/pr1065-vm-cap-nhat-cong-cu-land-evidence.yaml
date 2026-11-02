@@ -1,0 +1,248 @@
+# HO SO LAND — PR #1065 "ops/vm: script cai/nang cap cong cu cho VM Windows tra-luat-win (2 tuan/lan)". KHONG phai packet:
+# viec chu kho giao truc tiep trong phien Claude Code (khong Issue packet, khong lease, khong spec_hash).
+# Schema: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1; khuon: ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml.
+#
+# TRANG THAI: merged (3dfb973), `landed: true` (chu kho quyet trong phien 01-11-2026 "Land cả #1065"; comment neo head cuoi tren
+# PR ghi so). Bon moc §10.2.2 cua run hau merge 41173244891 deu da do (Run, Checkout, Gate output, Workflow definition). Assurance §8.1: cross_approved tren BAN VA 210ab81
+# (PR #1069), con ban merge b0814f4 bi cross-review luot 1 tra changes_requested (1 P0) — xem ASSURANCE-REVIEWER-81.
+# "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
+# NHAN: measured = do lai trong phien ghi so tu tep trong thu muc provenance (ten tep ghi kem); thuat_lai = loi khai cua phien,
+# KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Thu muc provenance: ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/ (SHA256SUMS.txt). Phan lon la phan hoi REST THO (GET
+# https://api.github.com/repos/ducthangho/tra-luat/<duong dan> bang curl, 2026-10-31, gio do khac nhau theo tep). NGOAI LE, khong
+# phai ban tho: readback-graphql-workflowrun-41173244891.json (output `gh api graphql` qua ASUS, luu nguyen van);
+# readback-review-threads-1065.json (BAN TRICH cac truong id/trang thai tu phan hoi MCP get_review_comments, than comment luoc
+# bo — tep tu ghi ro); thuatlai-gate-windows-3dfb973.json (chep tay tu VM, nhan thuat_lai); readback-pr-1111.json,
+# readback-commit-4397ee6.json, readback-run-41285898441.json, readback-run-41290009265.json, readback-jobs-41285898441.json va
+# readback-jobs-41290009265.json (BAN TRICH truong tu REST, 2026-11-01, ghi so bo sung sau khi PR #1111 merge).
+
+schema_version: 1
+mission_id: null
+packet_id: KHONG_AP_DUNG
+packet_issue: null
+pham_vi_land: cong_cu_dev
+pham_vi_land_ghi_chu: >-
+  Chi ops/vm/ (3 tep moi: cap-nhat-cong-cu.ps1, cap-nhat-cong-cu_test.ps1, README.md). ops/ nam trong
+  _RELEASE_EXCLUDE_DIRS: khong vao goi phat hanh, khong nam trong RELEASE_MANIFEST.json. Khong dung tl.py/VERSION/ci.yml.
+
+ghi_so:
+  provider: claude
+  model_family: claude
+  execution_surface: claude_code
+  transport: machine/local
+  environment: cloud
+  role: bookkeeping_recorder
+  session_id: https://claude.ai/code/session_015GtxrZLeJAkLFUg1SRa5G8
+  recorded_by: claude-session (chinh phien da soan, do tren VM va merge PR #1065)
+  mat_quan_sat_duoc_the_nao: >-
+    Loi khai co neo (session URL), khong phai phep do doc lap — mot phien Claude khong tu chung minh be mat chay cua
+    chinh no. model_family tu khai. Ben ghi so TRUNG ben thi cong va ben merge: khong co tach vai.
+
+authorized_head_sha: b0814f4a4c6dc4793b02865c6f7915b316224cdb
+approver: ducthangho
+authorization_url: KHONG_AP_DUNG
+authorization_ghi_chu: >-
+  thuat_lai — chu kho duyet bang loi trong phien Claude Code ("merge PR #1065", roi "Neu merge thanh cong thi land va ghi
+  so luon"), KHONG co comment duyet tren GitHub. Loi duyet khong neo SHA; phien ghi khai bao bang
+  `packet_loop.py ghi-uy-quyen --action merge --head-sha b0814f4…` (cong tu khai "LOI KHAI, khong phai bang chung") roi merge
+  bang `expectedHeadSha` b0814f4 sau khi doc 24/24 check run xanh, Codex connector sach tren b0814f4, mergeable_state clean.
+land_operator: claude-session (thay mat chu kho)
+land_operator_nguon: >-
+  measured — readback-pr-1065.json merged_by ducthangho: phien Claude goi MCP merge_pull_request bang credential cua chu kho,
+  nen GitHub ghi nguoi merge la chu kho. Nguoi BAM merge thuc te la phien (thuat_lai, khong do duoc tu GitHub).
+merge_method: merge
+merge_method_nguon: 'measured — readback-commit-3dfb973.json co hai cha (01ff650, b0814f4) => merge commit.'
+merge_commit: 3dfb9731ceda05afbcec4e803a919c4df5e2e5a2
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: >-
+    measured — readback-pr-1065.json: state closed, merged true, merged_at 2026-10-31T05:35:57Z, merge_commit_sha
+    3dfb9731ceda05afbcec4e803a919c4df5e2e5a2, head b0814f4a4c6dc4793b02865c6f7915b316224cdb (ccr-5249948c-9epnbs).
+  merge_commit:
+    sha: 3dfb9731ceda05afbcec4e803a919c4df5e2e5a2
+    parents: [01ff65035c8b, b0814f4a4c6dc4793b02865c6f7915b316224cdb]
+    tree: ddb5ae9dc882
+    nguon: >-
+      measured — readback-commit-3dfb973.json: parents, tree, files = [ops/vm/README.md +47/-0,
+      ops/vm/cap-nhat-cong-cu.ps1 +515/-0, ops/vm/cap-nhat-cong-cu_test.ps1 +135/-0]. Cha thu nhat 01ff650 la master luc
+      merge (base.sha trong PR la 4afbe68 vi master tien len sau lan merge master cuoi vao nhanh; GitHub tu tao merge commit).
+  head_va_review:
+    reviewed_sha_codex_connector: b0814f4a4c6dc4793b02865c6f7915b316224cdb
+    head_da_merge: b0814f4a4c6dc4793b02865c6f7915b316224cdb
+    doi_chieu: 'measured — readback-comments-1065.json comment 6539133141 "Reviewed commit: b0814f4a4c", khong finding.'
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 3dfb973: DAT — bon moc §10.2.2: Run (readback-run/-jobs-41173244891.json 23/23
+    success), Checkout (gate-output-41173244891.txt: 22/22 job co buoc checkout in 3dfb9731ceda05afbcec4e803a919c4df5e2e5a2,
+    tree ddb5ae9 = 3dfb973^{tree}), Gate output (cung tep: lenh + rc (step.conclusion) + trich output tung buoc `Run`;
+    0 dong ##[error] tren 23 log — xem MOC-CHECKOUT-VA-GATE-OUTPUT), Workflow definition (MOC-WORKFLOW-DEFINITION); (2) lease:
+    KHONG_AP_DUNG (khong phai packet); (3) bookkeeping: ho so nay; (4) review: cross_approved tren BAN VA — ban merge b0814f4
+    co finding P0/P1 o luot 1, da va o PR #1069 (approve luot 20 tren dcb295a, merge 634d5a2) va PR #1091 (approve luot 2
+    tren 90b3f1c, merge 40609d4); gate master xanh tren a284f8a chua ca hai (run 41271721309, thuat lai trong phien);
+    (5) uy quyen: chu kho quyet trong phien, caveat #566 (xem uy_quyen_head_cuoi). Chi Ubuntu o run hau merge; Windows do o
+    run 41263239790 cua #1091 va tren VM (thuat lai).
+  landed_hieu_luc_tu: 'merge commit cua PR ghi so mang ho so nay.'
+  landed_hieu_luc_tu_do_duoc: >-
+    measured (ghi so bo sung) — readback-pr-1111.json: PR #1111 merged 2026-11-01T07:43:08Z, merge_commit_sha
+    4397ee616273a97c1503e8359452aef4e78cd75a, head f783bee391ada131df8df195acfd3d4c4ae394c9 (dung head ma comment chot neo).
+    readback-commit-4397ee6.json: hai cha (c6dd7b3, f783bee), chi doi tep ho so nay + thu muc provenance.
+  quyet_dinh_chu_kho:
+    trang_thai: da_quyet
+    do_duoc: >-
+      thuat_lai — chu kho go trong phien Claude Code session_015GtxrZLeJAkLFUg1SRa5G8 ngay 2026-11-01: "Land cả #1065". Phien
+      ghi so chep loi ay vao comment tren PR ghi so, neo day du SHA head cuoi, truoc khi merge.
+  uy_quyen_head_cuoi:
+    trang_thai: da_quyet_caveat_566
+    caveat: >-
+      (tien le #566) comment do phien agent dang bang token chu kho, chep loi chu kho trong phien — author_association OWNER
+      khong tach chu kho khoi phien agent; yeu hon comment chu kho tu go.
+    quy_tac: >-
+      Theo tien le pr721/pr759/pr870: chu kho xac nhan `landed` bang mot comment tren PR ghi so, dang SAU commit cuoi cua
+      nhanh ghi so, ghi day du SHA head cuoi (40 hex). Commit nao den sau comment lam no het hieu luc.
+  con_thieu_de_goi_landed:
+    - id: GATE-HAU-MERGE-3DFB973
+      trang_thai: da_dong
+      mo_ta: 'Run 41173244891 (push master, ci.yml) completed/success — xem post_merge_checks[0].'
+    - id: MOC-WORKFLOW-DEFINITION
+      trang_thai: da_dong
+      mo_ta: >-
+        measured — readback-graphql-workflowrun-41173244891.json: WorkflowRun databaseId 41173244891, file.path
+        .github/workflows/ci.yml, repositoryFileUrl blob/3dfb9731ceda05afbcec4e803a919c4df5e2e5a2, checkSuite.commit.oid 3dfb973.
+        Khop readback-run-41173244891.json (id, path, head_sha 3dfb973, node_id WFR_kwLOTNeRjc8AAAAJlh3b2w).
+        readback-contents-ci-yml-3dfb973.json sha 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc = `git rev-parse
+        3dfb973:.github/workflows/ci.yml`; noi dung giai ma khop tung byte (sha256 ce9a3ec0f777a516…).
+        Cach do: GraphQL bi 403 trong phien web, nen phien goi `gh api graphql` qua Desktop Commander tren ASUS-LAPTOP
+        (gh dang nhap tai khoan ducthangho), theo yeu cau chu kho "lam luon thong qua Remote Desktop Commander"; output luu
+        nguyen van. Nguon GraphQL la tai khoan chu kho, khong phai mot client doc lap.
+    - id: MOC-CHECKOUT-VA-GATE-OUTPUT
+      trang_thai: da_dong
+      mo_ta: >-
+        measured — gate-output-41173244891.txt (log 23 job tai qua REST actions/jobs/<id>/logs ngay 2026-11-01, sha256 + so byte
+        tung log ghi kem; log goc khong vao kho). Checkout: 22/22 job co buoc checkout in `git log -1 --format=%H` =
+        3dfb9731ceda05afbcec4e803a919c4df5e2e5a2 (chuan-bi khong co checkout). Gate output: TUNG buoc `Run` cua tung job ghi
+        lenh + toi da 3 dong output cuoi + dong `"ok": …` neu buoc in JSON (122 buoc; 9 dong `"ok": true`, 0 `"ok": false`;
+        37 buoc cau hinh/cai dat khong in gi, ghi '(khong co output)'). rc tung buoc: step.conclusion trong
+        readback-jobs-41173244891.json — 275 success, 10 skipped (giu rieng); 0 dong ##[error] tren 23 log. Vi du duong:
+        `== tl selftest 1774/1774 ==`, `targeted_mutant_gate: DAT`, `GOM MẢNH 8/8`, `MẢNH k/8: …`. Codex connector P1 tren PR #1111
+        (comment 4434706400) chi ra ban dau chi co so dem marker — ban nay bo sung lenh/rc/trich output tung buoc.
+    - id: ASSURANCE-REVIEWER-81
+      trang_thai: dat_tren_ban_va
+      mo_ta: >-
+        measured — ops/reviews/pr1065-review-16-codex-verdict.receipt.yaml (schema v2, bien_nhan_v2 DAT): codex qua launcher.py
+        run 52f05f65, model gpt-6.1-sol do_may, `approve` 0/0/0/0 tren 210ab81 (nhanh PR #1069, pham vi ops/vm/). CHU Y: day la
+        phe duyet BAN VA, KHONG phai ban da merge b0814f4 — luot 1 tren b0814f4 tra changes_requested (1 P0 giao-acl-theo-junction,
+        3 P1); ban da merge chi "land dung" khi PR #1069 merge. Codex connector tren b0814f4 sach nhung khong lo ho model.
+    - id: QUYET-DINH-LANDED-CHU-KHO
+      trang_thai: da_quyet
+      mo_ta: 'Chu kho quyet trong phien 2026-11-01 "Land cả #1065" (caveat #566) — xem quyet_dinh_chu_kho.'
+
+review:
+  cross_review:
+    - luot: 1-15
+      reviewed_sha: 'b0814f4 aedd620 bbc3430 e5e2430 ea5ccd5 28fdbdf 00dd9d4 8e67b70 e218901 d005cf4 d20a69e b667da8 e5838ff f3231c8 c489c72'
+      verdict: changes_requested
+      nguon: ops/reviews/pr1065-review-16-codex/luot-truoc/luotN/VERDICT.md
+    - luot: 16
+      reviewed_sha: 210ab81c3f1af36243748458eb5e70180baeab71
+      verdict: approve
+      nguon: ops/reviews/pr1065-review-16-codex-verdict.receipt.yaml
+    - luot: 17-19
+      reviewed_sha: '4b3f07e 958ca60 4337254 (head PR #1069 sau ghi so + merge master)'
+      verdict: changes_requested
+      nguon: 'ops/reviews/pr1065-review-17-codex-verdict.receipt.yaml, -18-, -19- (moi luot 1 P2 ve cau chu ghi so)'
+    - luot: 20
+      reviewed_sha: dcb295a903f7e51eab84d3dbd1feb48832471827
+      verdict: approve
+      nguon: ops/reviews/pr1065-review-20-codex-verdict.receipt.yaml
+      ghi_chu: 'Head PR #1069 luc merge (634d5a2). Ban va tiep theo cho -DangKyLich (icacls /T DACL rong): PR #1091, xem ops/reviews/pr1091-review-2-codex-verdict.receipt.yaml.'
+  cross_review_ghi_chu: >-
+    measured — luot 16: ops/reviews/pr1065-review-16-codex/run/run.json (head 210ab81, ma_thoat 0) va
+    ops/reviews/pr1065-review-16-codex/VERDICT.md; luot 1–15: ops/reviews/pr1065-review-16-codex/luot-truoc/ (chi verdict + HINT,
+    run cua cac luot ay KHONG luu trong kho). Finding P0/P1 cua luot 1–13 deu sua tren nhanh PR #1069; luot 14–15 chi P2.
+  codex_connector:
+    do_duoc: >-
+      measured — readback-reviews-1065.json + readback-review-comments-1065.json: luot 1 tren 6733d09 (Draft marked ready)
+      co 1 finding P2 (comment 4430537534: khoi tao ProgramFiles truoc chot nen => mat ma 4, -NapHam khong nap duoc); sua o
+      b0814f4, tra loi 4430544980. Thread PRRT_kwDOTNeRjc6yN7uy (chua ca 4430537534 va 4430544980) is_resolved=true —
+      readback-review-threads-1065.json (MCP get_review_comments, do sau khi cross-review luot 17 chi ra loi khai cu thieu nguon). Luot 2 tren b0814f4 (yeu cau "@codex review", comment 6539120935):
+      comment 6539133141 "Didn't find any major issues", Reviewed commit b0814f4a4c.
+    thu_tu_thoi_gian: >-
+      measured — readback-comments-1065.json comment 6539133141 created 04:41:52Z, TRUOC readback-pr-1065.json merged_at
+      05:35:57Z.
+    gioi_han: 'Connector khac ho executor nhung chi la tin hieu "khong gop y"; khong co tep verdict, khong thay human_audited.'
+
+pre_merge_checks:
+  - ten: gate ci.yml tren head b0814f4 (pull_request)
+    run_id: 41169462631
+    trang_thai: measured
+    do_duoc: >-
+      measured — readback-run-41169462631.json: .github/workflows/ci.yml, event pull_request, head b0814f4, run_attempt 1,
+      completed/success, updated_at 2026-10-31T05:35:11Z. readback-jobs-41169462631.json (filter=all): 23 job, 23 success,
+      moi job ubuntu-latest, 0 job runner_id 0, job cuoi xong 05:35:10Z.
+    check_runs: 'measured — readback-checkruns-b0814f4.json: 24 check run, 24 completed/success (23 gate + thu-hoi).'
+  - ten: bo test ops/vm tren VM Windows tra-luat-win
+    trang_thai: thuat_lai
+    do_duoc: >-
+      thuat_lai — phien chay qua Desktop Commander tren TRA-LUAT-WIN (Windows Server 2022, pwsh 7.6.9): head b0814f4 =>
+      "cap-nhat-cong-cu tests: 38/38 ca QUA"; cung bo test voi script 6733d09 => 36/38, do dung 2 ca moi (co rang). Output
+      khong luu thanh tep trong kho. Bo test CHUA noi vao CI (no da khai trong PR).
+
+post_merge_checks:
+  - ten: gate ci.yml tren merge 3dfb973 (push master)
+    run_id: 41173244891
+    trang_thai: measured
+    do_duoc: >-
+      measured — readback-run-41173244891.json: event push, path .github/workflows/ci.yml, head_sha 3dfb973,
+      run_attempt 1, status completed, conclusion success (05:36:00Z -> 07:03:35Z). readback-jobs-41173244891.json
+      (filter=all): 23 job, 23 success, ca 23 nhan ubuntu-latest, khong job nao runner_id 0. Windows KHONG do o lan chay
+      nay. Moc Checkout va Gate output: gate-output-41173244891.txt (MOC-CHECKOUT-VA-GATE-OUTPUT).
+  - ten: gate ci.yml tren merge 4397ee6 cua PR ghi so #1111 (push master)
+    run_id: 41285898441
+    trang_thai: measured
+    do_duoc: >-
+      measured — readback-run-41285898441.json: event push, head_sha 4397ee6, run_attempt 1, status completed,
+      conclusion cancelled; readback-jobs-41285898441.json (filter=all) total_count 0. Khong co job test that bai duoc
+      ghi nhan; nguyen nhan huy: not_measured (REST run/jobs khong ghi ly do). Mot run thanh cong sau do la 41290009265:
+      readback-run-41290009265.json completed/success, run_attempt 1, REST head_sha 3bdd987 (merge #1109), ma 4397ee6 la
+      to tien (`git merge-base --is-ancestor`); readback-jobs-41290009265.json (filter=all) 23 job, 23 success, ca 23 nhan
+      ubuntu-latest, runner_id khac 0. Day la metadata Run; Checkout, Workflow definition va Gate output cua run nay
+      chua do (not_measured), nen chua khang dinh cay thuc chay. Ba PR xen giua #1108/#1112/#1109 chi them bon tep
+      ops/specs/, khong dung tep ho so nay hay ops/vm/. Chi Ubuntu.
+  - ten: full gate 8 buoc tren VM Windows tra-luat-win, merge 3dfb973 (theo yeu cau chu kho "do tren Windows")
+    trang_thai: thuat_lai
+    do_duoc: >-
+      thuat_lai — thuatlai-gate-windows-3dfb973.json: clone moi tu GitHub, checkout 3dfb973 (tree ddb5ae9), --require-clean,
+      gate_lifecycle.py run --kind heavy; 8/8 rc0 + marker duong (selftest 1774/1774, gen_instructions 44/44, 6 lenh
+      "ok": true). Tep evidence goc nam tren VM, khong trong kho; ban trong kho la chep tay kem sha256 bundle goc. Khong
+      thay the moc Checkout/Gate output cua run CI 41173244891 — do la run khac, may khac.
+
+van_hanh_tren_vm:
+  trang_thai: thuat_lai
+  mo_ta: >-
+    Ngoai pham vi land nhung lien quan. (Cu, 31-10) -DangKyLich chay tren VM (rc=0) tu ban 6733d09; hai tac vu chay theo yeu
+    cau 11:32 gio VM: HeThong 4/4, NguoiDung 11/11. (Cap nhat 01-11, ghi so bo sung) Ban sau PR #1069 chay -DangKyLich bi
+    rc=6 (icacls /T de lai DACL rong tren tep con) => va o PR #1091 (merge 40609d4); chu kho chay lai -DangKyLich tu nhanh
+    #1091 tren VM: rc=0. Ban cai trong C:\Program Files\tra-luat-ops nay khop bam cb39aca cua #1091 (cap-nhat-cong-cu.ps1
+    8EFC063A…, cong_cu.yaml 71631BB6…, requirements.txt 97733A88…); ACL tep con ke thua (Users RX, Administrators F,
+    SYSTEM F); tac vu NguoiDung LastTaskResult 0, 11/11 giu (log NguoiDung-20261101-070043.json tren VM). Tac vu HeThong
+    CHUA chay tay voi ban moi (lich Chu nhat 02:30, 2 tuan/lan). Moi so lieu trong doan nay la thuat_lai: doc tren VM qua
+    Desktop Commander, khong luu tep trong kho.
+    Su co: luot HeThong dau tien (truoc ban sua) nang Node 24.22.1 -> 26.13.0, Desktop Commander rot Offline den khi khoi
+    dong lai VM; chu kho quyet giu Node 26.
+
+no_con_mo:
+  - id: DUYET-CHI-TRONG-PHIEN
+    mo_ta: 'Loi duyet merge chi co trong phien (authorization_ghi_chu); khong co comment GitHub neo SHA truoc merge.'
+  - id: TEST-OPS-VM-CHUA-NOI-CI
+    mo_ta: 'cap-nhat-cong-cu_test.ps1 chi chay tren VM; chua co buoc ci.yml (can cross-review rieng §8).'
+  - id: KHOI-DONG-LAI-COMMANDER-CHUA-DO
+    mo_ta: >-
+      Duong tu khoi dong lai TraLuatRemoteCommander sau khi cai Node chua tung chay; admin bam Start tac vu ay bi
+      "Access is denied" (nguyen nhan chua ro).
+
+bookkeeping:
+  - {item: 'hien vat cross-review #1065/#1069/#1091', ket_qua: 'ops/reviews/pr1065-review-16..20-codex*, pr1091-review-1..2-codex* (PR #1069, #1104)'}
+  - {item: 'moc Checkout + Gate output run 41173244891', ket_qua: 'ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/gate-output-41173244891.txt'}
+  - {item: 'PR ghi so landed', nhanh: ccr-5249948c-9epnbs, pr: 1111}
+  - {item: 'ghi so bo sung: merge 4397ee6, gate hau merge, van hanh VM sau #1091', nhanh: ccr-5249948c-9epnbs, pr: 1118}

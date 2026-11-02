@@ -1,0 +1,102 @@
+# BIEN NHAN GIAO HANG — cross-review LUOT 1 cua PR #1119 (PR ghi so review cua PR #1110 va #1114), reviewer codex CLI KHAC HO executor (Claude).
+# **`changes_requested`** — 0/0/0/2 (P0/P1/P2/P3) theo finding, tren a8f7470 (KHONG phai head cuoi).
+# Ghi so boi CHINH phien executor (session_015GtxrYjGJtmjF3eT1nCSG9) theo chi thi chu kho 01-11-2026 ("1119 land va ghi so di").
+# Nhan: (a) DO tu kho/run.json luc ghi so 2026-11-01 · (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: pr1119-review-1-codex-a28c2594
+kind: review_delivery_receipt
+packet_id: KHONG_AP_DUNG
+packet_ghi_chu: >-
+  (b) PR ghi so review cua PR #1110 va #1114 (khong phai thi cong packet): khong Issue/lease rieng; chu kho giao truc tiep trong phien executor. Tien le pr1058-review-*, pr1075-review-*.
+target_pull_request: 1119
+land_merge_commit: 180039c4b791fba4c89991623151cbb7378fce53
+land_merge_commit_ghi_chu: '(a) merge commit PR #1119 tren master (2026-11-01, merge_method merge); cha thu hai = head cuoi, KHAC reviewed_sha cua luot nay.'
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: '(a) _tinh_lop_tu_write_set (ops/lease_publish.py) tren 254 tep cua diff f4b513d..a8f7470 tra sensitive (fail-closed cho path chua phan loai). (b) Khong co lease rieng; PR chi ghi so du lieu ops/reviews/**.'
+assurance: cross_reviewed
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  Khac ho model (reviewer gpt-6-astra do_may qua run.json model_phuc_vu, executor ho claude) nhung verdict request_changes nen KHONG len cross_approved.
+verdict: changes_requested
+verdict_nguon: '(a) dong 1 tep verdict `Verdict: request_changes`; dem dong `- [P*]` trong tep verdict (dong 10, 12).'
+verdict_path: ops/reviews/pr1119-review-1-codex-verdict.md
+verdict_sha256: a28c2594116bff50653a6486fa07fd97cb2ad5e6b440c43277ad644f2f014d65
+verdict_bytes: 15330
+nguon_tep: ban_sao_nguyen_byte_cua_tep_goc_trong_kho
+verdict_ban_goc: '(a) Tep goc ops/reviews/pr1119-review-1-codex/VERDICT.md chep nguyen byte tu sandbox reviewer; tep phang la ban sao `cp` (SHA256SUMS cua thu muc).'
+reviewed_sha: a8f74709578f3c68833d366ed80b66fc10fbf0a3
+reviewed_tree: 66458c331fca22ac5dd497e756f18a80179302f2
+reviewed_sha_nguon: '(a) dong 2 tep verdict; run.json `head` = reviewed_sha; launcher chay voi --expected-head va --require-clean; `git rev-parse a8f7470^{tree}` = reviewed_tree.'
+reviewed_sha_to_tien: '(a) git merge-base --is-ancestor a8f7470 180039c: rc 0 (luot nay KHONG tren head cuoi; head cuoi duoc luot 2 duyet).'
+base_sha: f4b513da5802d439aedbe58ae4a5cd38ff47d6ab
+base_sha_ghi_chu: '(a) merge-base cua nhanh PR #1119 voi master luc dung sandbox; DIFF.patch = git diff f4b513d a8f7470.'
+evidence_url: https://github.com/ducthangho/tra-luat/blob/9105a1a6f82915c0382edb2d3198c227c6d56d7b/ops/reviews/pr1119-review-1-codex-verdict.md
+evidence_url_ghi_chu: '(a) Neo BLOB ghim commit hien vat 9105a1a cua nhanh ghi so claude/magical-clarke-gzvwbp; bien nhan nay di o commit sau, tren cung nhanh.'
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 2
+so_dem_theo: finding
+so_dem_nguon: '(a) dem dong `- [P*]` trong tep verdict (dong 10, 12).'
+findings_ids:
+  - id: bo-sot-cache-khong-khai
+    hang: P3
+  - id: caveat-loai-diff-sai
+    hang: P3
+xu_ly_finding: >-
+  (a) Ca hai va o 6379bc5 (PR #1119): pr1114-review-1-codex/OMITTED.txt khai them 3 tep evidence/ruff-cache-created/* (khong dua vao kho vi
+  .gitignore cua cache chua "*"); caveat TEP-LON-KHONG-VAO-KHO cua hai bien nhan #1114 va hai hang README thoi khai DIFF.patch vang mat. Luot 2 do lai: hai finding DONG.
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: feeb867a075142f8af1b0823c7e2be79
+  run_json: ops/reviews/pr1119-review-1-codex/run/run.json
+  run_json_ghi_chu: >-
+    (a) ma_thoat 0, trang_thai xong, thoi_luong_giay 619.803, head a8f7470, worktree_sach true, execution_surface codex_cli,
+    sandbox_trang_thai DO_DUOC, prompt_sha256 b5bc5f43c50c… = sha256 ops/reviews/pr1119-review-1-codex/PROMPT.md.
+  cli: >-
+    codex-cli 0.164.0 qua `launcher.py run --workspace <sandbox>/cay-kho --expected-repo github.com/ducthangho/tra-luat
+    --expected-root-commit 394e934… --expected-head a8f7470… --require-clean --prompt-file … --expected-prompt-sha256 … --
+    codex exec -m gpt-6-astra -c model_reasoning_effort=xhigh --sandbox workspace-write -C <sandbox> --skip-git-repo-check "<PROMPT>"`
+  model_yeu_cau: gpt-6-astra
+  model: gpt-6-astra
+  model_da_chay: gpt-6-astra
+  model_evidence: do_may
+  model_evidence_ref: ops/reviews/pr1119-review-1-codex/run/run.json#model_phuc_vu
+  model_evidence_ghi_chu: '(a) run.json model_phuc_vu_trang_thai DO_DUOC; 22 su kien, moi su kien model gpt-6-astra; effort_phuc_vu xhigh.'
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(b) Chua dang ban chieu; tep trong kho la nguon duy nhat. PR ghi so dang qua git push bang credential cua phien.'
+  ghi_chu: 'ADR-0040: chi ghi AI VAN CHUYEN, khong cap tham quyen.'
+independent_from_executor_session: true
+independent_ghi_chu: 'Tien trinh codex rieng qua launcher, context rieng (prompt tu chua, khong fork context).'
+review_axes: [spec, standards_security]
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: '(a) Blob verdict ghim o commit hien vat 9105a1a cua PR ghi so; len trung_binh khi PR ghi so land bang merge commit (squash pha quan he to tien).'
+verdict_usage_caveats:
+  - id: LUOT-HONG-DIA-KHONG-TINH
+    muc: P3
+    mo_ta: 'Truoc luot nay co run e9bd8492 tren cung a8f7470 chet giua chung vi container het dia (VERDICT tam, chua do gi); KHONG tinh la mot luot review. Hien vat o pr1119-review-1-codex/luot-hong-dia/.'
+  - id: CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY
+    muc: P3
+    mo_ta: 'Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong.'
+  - id: SCRIPT-DO-DOC-DUONG-DAN-SANDBOX
+    muc: P3
+    mo_ta: 'Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai a8f7470.'
+  - id: TEP-LON-KHONG-VAO-KHO
+    muc: P3
+    mo_ta: 'Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt.'
+  - id: KHONG-PHAI-HEAD-CUOI
+    muc: P3
+    mo_ta: 'Luot nay duyet a8f7470, KHONG phai head luc merge; head cuoi do luot 2 duyet.'
+nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256).'

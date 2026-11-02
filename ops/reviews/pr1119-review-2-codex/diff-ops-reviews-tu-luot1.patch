@@ -1,0 +1,68 @@
+diff --git a/ops/reviews/README.md b/ops/reviews/README.md
+index 626740f..1945346 100644
+--- a/ops/reviews/README.md
++++ b/ops/reviews/README.md
+@@ -854,13 +854,13 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư
+ | `pr1110-review-2-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. |
+ | `pr1114-review-1-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong. |
+ | `pr1114-review-1-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai e101b11. |
+-| `pr1114-review-1-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. |
++| `pr1114-review-1-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | Tep >500 KB (evidence/{base,head}-argv.jsonl), cache ruff evidence/ruff-cache-created/ va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. DIFF.patch CO trong kho. |
+ | `pr1114-review-1-codex-verdict.md` | `SANDBOX-KHONG-DO-DUOC` | run.json sandbox_trang_thai KHONG_DO_DUOC: launcher khong quan sat duoc co che sandbox cua luot nay (khong chung minh lenh chay ngoai sandbox). |
+ | `pr1114-review-1-codex-verdict.md` | `KHONG-PHAI-HEAD-CUOI` | Luot nay duyet e101b11, KHONG phai head luc merge; head cuoi do luot 2 duyet. |
+ | `pr1114-review-1-codex-verdict.md` | `WINDOWS-THAT-KHONG-DO-TRONG-SANDBOX` | Reviewer chi mo phong tran dong lenh Windows tren Linux; Windows that do o CI ngoai luot review. |
+ | `pr1114-review-2-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong. |
+ | `pr1114-review-2-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai 51435a4. |
+-| `pr1114-review-2-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. |
++| `pr1114-review-2-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | Tep >500 KB (evidence/initial-hashes.json) va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. DIFF.patch CO trong kho. |
+ | `pr1114-review-2-codex-verdict.md` | `SANDBOX-KHONG-DO-DUOC` | run.json sandbox_trang_thai KHONG_DO_DUOC: launcher khong quan sat duoc co che sandbox cua luot nay (khong chung minh lenh chay ngoai sandbox). |
+ | `pr1114-review-2-codex-verdict.md` | `WINDOWS-THAT-KHONG-DO-TRONG-SANDBOX` | Reviewer chi mo phong tran dong lenh Windows tren Linux; Windows that do o CI ngoai luot review. |
+ | `pr1048-review-1-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong. |
+diff --git a/ops/reviews/pr1114-review-1-codex-verdict.receipt.yaml b/ops/reviews/pr1114-review-1-codex-verdict.receipt.yaml
+index 4b1d4d5..d128ca1 100644
+--- a/ops/reviews/pr1114-review-1-codex-verdict.receipt.yaml
++++ b/ops/reviews/pr1114-review-1-codex-verdict.receipt.yaml
+@@ -86,7 +86,7 @@ verdict_usage_caveats:
+     mo_ta: 'Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai e101b11.'
+   - id: TEP-LON-KHONG-VAO-KHO
+     muc: P3
+-    mo_ta: 'Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt.'
++    mo_ta: 'Tep >500 KB (evidence/{base,head}-argv.jsonl), cache ruff evidence/ruff-cache-created/ va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. DIFF.patch CO trong kho.'
+   - id: SANDBOX-KHONG-DO-DUOC
+     muc: P3
+     mo_ta: 'run.json sandbox_trang_thai KHONG_DO_DUOC: launcher khong quan sat duoc co che sandbox cua luot nay (khong chung minh lenh chay ngoai sandbox).'
+diff --git a/ops/reviews/pr1114-review-1-codex/OMITTED.txt b/ops/reviews/pr1114-review-1-codex/OMITTED.txt
+index 1341b96..d25707b 100644
+--- a/ops/reviews/pr1114-review-1-codex/OMITTED.txt
++++ b/ops/reviews/pr1114-review-1-codex/OMITTED.txt
+@@ -2,3 +2,6 @@ launcher.err	sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852
+ evidence/base-argv.jsonl	sha256 a7ea48fd223782d38d9e2e153e04fc95a8c438cfe640e74d6d45142c6880d728	bytes 822015	ly do: >500 KB (tien le TEP-LON-KHONG-VAO-KHO); giu tai sandbox reviewer
+ evidence/head-argv.jsonl	sha256 4325fd4e005d62065b1b8969cad71257259fc9f7f665c1a0f946380a490156f1	bytes 838749	ly do: >500 KB (tien le TEP-LON-KHONG-VAO-KHO); giu tai sandbox reviewer
+ cay-kho/ copies/	khong chep: ban sao kho/ban sao lam viec cua sandbox reviewer; tai lap bang clone tai reviewed_sha / base
++evidence/ruff-cache-created/.gitignore	sha256 9e3a60f1e6ec4ae60215c11d54b171392745ec25e9dded433d5bd921363af316	bytes 35	ly do: cache ruff do reviewer chuyen ra khoi cay (VERDICT goc dong 138); .gitignore cua no chua "*" nen chep vao kho se tu an thu muc
++evidence/ruff-cache-created/CACHEDIR.TAG	sha256 5953156d7e0c564a427251316eaf26f8870e6483ae2197f916b630e4f93e31ae	bytes 43	ly do: cache ruff do reviewer chuyen ra khoi cay (VERDICT goc dong 138); .gitignore cua no chua "*" nen chep vao kho se tu an thu muc
++evidence/ruff-cache-created/0.17.3/12591984194595340168	sha256 d001930daafa34484d4322965804766ba8b1fce65cd1999142048c4f36b41588	bytes 252	ly do: cache ruff do reviewer chuyen ra khoi cay (VERDICT goc dong 138); .gitignore cua no chua "*" nen chep vao kho se tu an thu muc
+diff --git a/ops/reviews/pr1114-review-1-codex/SHA256SUMS b/ops/reviews/pr1114-review-1-codex/SHA256SUMS
+index f522b86..1869312 100644
+--- a/ops/reviews/pr1114-review-1-codex/SHA256SUMS
++++ b/ops/reviews/pr1114-review-1-codex/SHA256SUMS
+@@ -1,5 +1,5 @@
+ 11c407a6c076de2f9326e05afdd4c246b7d70a2da951efcdaa4921dab5a8f06e  ./DIFF.patch
+-ca50aa15c79ea78d40fd8a1127cf4f6187b5111672222da9e59d1cc1dfd9b685  ./OMITTED.txt
++a291d6d2f624180fbe16ee3b36322ed789d0263ebb9c9b0fd4102f104c6dcf4b  ./OMITTED.txt
+ 8ac1b4d1911e4e11073fa1b40465bff8624a5e6412e6481ee19b8c0e77838baf  ./PROMPT.md
+ c4dd8f14224fad7b6d08009e83a027d20d8f8500e692ae78f1e5d2af8c01a41b  ./VERDICT.md
+ 238a4b1e5a4e1913889fe258f892754e778648438c2f0aca68f4f3e7f49529d7  ./bin/node
+diff --git a/ops/reviews/pr1114-review-2-codex-verdict.receipt.yaml b/ops/reviews/pr1114-review-2-codex-verdict.receipt.yaml
+index 279e89e..111eb29 100644
+--- a/ops/reviews/pr1114-review-2-codex-verdict.receipt.yaml
++++ b/ops/reviews/pr1114-review-2-codex-verdict.receipt.yaml
+@@ -86,7 +86,7 @@ verdict_usage_caveats:
+     mo_ta: 'Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai 51435a4.'
+   - id: TEP-LON-KHONG-VAO-KHO
+     muc: P3
+-    mo_ta: 'Tep >500 KB, DIFF.patch tai lap duoc va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt.'
++    mo_ta: 'Tep >500 KB (evidence/initial-hashes.json) va ban sao kho/lam viec cua sandbox KHONG vao kho; sha256/so byte o OMITTED.txt. DIFF.patch CO trong kho.'
+   - id: SANDBOX-KHONG-DO-DUOC
+     muc: P3
+     mo_ta: 'run.json sandbox_trang_thai KHONG_DO_DUOC: launcher khong quan sat duoc co che sandbox cua luot nay (khong chung minh lenh chay ngoai sandbox).'

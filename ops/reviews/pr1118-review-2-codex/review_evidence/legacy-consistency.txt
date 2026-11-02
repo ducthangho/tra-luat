@@ -1,0 +1,11 @@
+PR1065 merged/head/commit True b0814f4a4c6dc4793b02865c6f7915b316224cdb 3dfb9731ceda05afbcec4e803a919c4df5e2e5a2
+old Run 41173244891 1 push .github/workflows/ci.yml 3dfb9731ceda05afbcec4e803a919c4df5e2e5a2 completed success 2026-10-31T05:36:00Z 2026-10-31T07:03:35Z
+old jobs/success/ubuntu/nonzero 23 23 23 23
+old Workflow definition 41173244891 https://github.com/ducthangho/tra-luat/blob/3dfb9731ceda05afbcec4e803a919c4df5e2e5a2/.github/workflows/ci.yml blob 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc sha256 ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb
+old checkout/log/run-step/error markers 22 23 122 0
+old step conclusions {'success': 275, 'skipped': 10}
+receipt 16 approve 210ab81c3f1af36243748458eb5e70180baeab71 cross_approved
+receipt 20 approve dcb295a903f7e51eab84d3dbd1feb48832471827 cross_approved
+PR1091 receipt approve 90b3f1cd9ff8a3459285796da37dc96b8553690e cross_approved
+test wired strings in CI/registry []
+legacy assertions: PASS

@@ -1,0 +1,11 @@
+{
+  "label": "base",
+  "cwd": "work/base",
+  "command": [
+    "python3",
+    "ops/cloud_agent_creds_test.py"
+  ],
+  "rc": 0,
+  "seconds": 305.446757,
+  "output": "CA: 52/52 dat\nDOT BIEN: 80/80 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (4 dot bien)\nTONG: DAT\n"
+}

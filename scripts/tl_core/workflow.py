@@ -840,6 +840,14 @@ _DOC_CLAIMS_HISTORICAL = ("CHANGELOG.md", "references/changelog_archive/",
                           # sang `references/RASOAT_HOSO_LOOP.md` + `RASOAT_PLAN_SCHEMA.md` + thẻ rasoat_hoso.
                           "docs/WORKFLOW_RASOAT_TU_DONG.md")
 _DOC_CLAIMS_FIXTURES = "references/golden/fixtures/"
+
+
+def _doc_claims_is_historical(rel: str) -> bool:
+    """wp1121 (#1121 F2) — mục `_DOC_CLAIMS_HISTORICAL` kết thúc `/` là TIỀN TỐ THƯ MỤC, mục còn lại là TÊN
+    TỆP so BẰNG. Trước đây `rel.startswith(tuple)` nên `CHANGELOG.md.live.md` hay
+    `references/DOCTRINE_APPENDIX.md.live.md` cũng được miễn như tài liệu lịch sử ở MỌI lớp (L1/L2/L4/L8/L12 qua
+    `historical`, L9 qua nguồn trỏ). Đo trên `git ls-files` base `f4b513d`: 0 tệp đổi phân loại, 6 tệp lịch sử."""
+    return any(rel.startswith(h) if h.endswith("/") else rel == h for h in _DOC_CLAIMS_HISTORICAL)
 # §2.4 che nhiễu: token mang các ký tự này là GIÀN GIÁO/placeholder, không phải trích dẫn thật.
 _DOC_CLAIMS_NOISE_CHARS = "<>{}*$"
 _DOC_CLAIMS_NOISE_SUBSTR = ("path/to", "...", "…")
@@ -1138,7 +1146,8 @@ def _doc_claims_git(root: Path, args: list) -> tuple:
 
 
 def _doc_claims_deleted_set(ctx: dict) -> set:
-    """Tập đường dẫn TỪNG bị xoá — phân loại «đã xoá» (tài liệu lịch sử, hợp lệ) vs «sai» (§2.2).
+    """Tập đường dẫn TỪNG bị xoá — phân loại «đã xoá» vs «sai» (§2.2). Từ wp1121: chỉ tài liệu LỊCH SỬ được miễn
+    (`PATH_DELETED_IN_HISTORICAL_DOC`, advisory); tài liệu sống trích tệp đã xoá ⇒ cờ `PATH_DELETED`.
     MỘT lệnh git cho cả lượt, gọi lười (chỉ khi có ≥1 đường dẫn hụt)."""
     if ctx.get("_deleted") is None:
         rc, out = _doc_claims_git(ctx["root"], ["log", "--diff-filter=D", "--name-only",
@@ -1166,7 +1175,7 @@ def _doc_claims_scan_one(doc: Path, nofence: str, nospan: str, starts: list, *,
     --strict). Ranh giới cờ-vs-advisory là điều KHIẾN báo cáo dùng được: cái máy CHẮC CHẮN sai mới là cờ."""
     out = []
     rel = _doc_claims_rel(doc, root)
-    historical = rel.startswith(_DOC_CLAIMS_HISTORICAL)
+    historical = _doc_claims_is_historical(rel)
 
     def _add(layer, off, claim, reason, detail=None, advisory=False):
         d = {"layer": layer, "file": rel, "line": _doc_claims_lineno(starts, off),
@@ -1205,8 +1214,14 @@ def _doc_claims_scan_one(doc: Path, nofence: str, nospan: str, starts: list, *,
                 continue
             if (root / body).exists() or docrel.exists():
                 continue
+            # wp1121 (#1121, lỗ DO6: xoá tệp còn được trích mà đã COMMIT thì rc=0) — tệp từng bị xoá chỉ được
+            # miễn ở TÀI LIỆU LỊCH SỬ (§2.2: sổ được phép dẫn tệp đã chết). Tài liệu sống trích nó là con trỏ
+            # chết thật ⇒ CỜ. Đo base `f4b513d`: 3/3 phát hiện PATH_DELETED nằm ở tài liệu lịch sử ⇒ 0 cờ mới.
             if body in _doc_claims_deleted_set(ctx):
-                _add("L1", off, tok, "PATH_DELETED", advisory=True)
+                if historical:
+                    _add("L1", off, tok, "PATH_DELETED_IN_HISTORICAL_DOC", advisory=True)
+                else:
+                    _add("L1", off, tok, "PATH_DELETED")
             elif historical:
                 _add("L1", off, tok, "PATH_MISSING_IN_HISTORICAL_DOC", advisory=True)
             else:
@@ -1411,7 +1426,7 @@ def _doc_claims_orphans(scanned: dict, root: Path) -> list:
         for src, txt in list(scanned.items()) + list(extra.items()):
             if src == rel or (rel not in txt and base not in txt):
                 continue
-            if src.startswith(_DOC_CLAIMS_HISTORICAL):
+            if _doc_claims_is_historical(src):
                 hist += 1
             else:
                 live += 1

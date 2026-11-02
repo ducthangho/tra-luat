@@ -1,0 +1,5 @@
+Final verdict/header/SHA/count: MATCH; 0 P0, 0 P1, 0 P2, 0 P3
+All 16 prior output references exist; actual scan rc1 attempts preserved and explicitly corrected after baseline classification
+All 3 previous finding classes explicitly CLOSED; no new open finding
+Target receipt and land source gate PASS; whole-tree receipt gate remains NOT_MEASURED, not upgraded to PASS
+Current SHA and clean read-only checkout reconfirmed; CI/Windows/live state remain unmeasured

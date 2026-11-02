@@ -1,0 +1,19 @@
+{
+  "head": "d58d649ff061ff125bc004414ed4a0787de8e5f3",
+  "base": "90c101b8d1f8895b66607de8582a18c5e72d834c",
+  "tree": "78db0ce7aa198486b266a6e3d6eff7d822519109",
+  "branch": "",
+  "shallow": "false",
+  "abbrev": "7",
+  "status": "",
+  "platform": "Linux-6.18.44-fc-v185-x86_64-with-glibc2.39",
+  "files": {
+    "ops/vm/cap-nhat-cong-cu.ps1": "8efc063a891916598e398f7e448c295c8a37e12cc1dace5534f1fbcfd26ba927",
+    "ops/vm/cap-nhat-cong-cu_test.ps1": "e50142b0c1536278646683e6855882b5ed129f98a322d38e066442fd9f04f89a",
+    "ops/vm/README.md": "e450ff93992576a31b622ce6474c7158ba05f8fdf83c8f8e8267d80fdc95bb6e",
+    "ops/cong_cu.yaml": "71631bb6baf532deeb4847c5ff9c407a50bfdb4fc503621913eb42c719ee92fb",
+    "requirements.txt": "97733a880d95f8a900f39af2bcd1a59a3ecb357dfc928c01c7a06636b1b07657"
+  },
+  "prompt_equal": true,
+  "diff_matches": true
+}

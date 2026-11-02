@@ -1,0 +1,60 @@
+{
+  "version": "1.5.0",
+  "run_id": "981acca8a6a34512b9ab13a79d44e984",
+  "short_id": "981acca8",
+  "ten": "spec-pr1101",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 11,
+    "van_tay": "e396f02e12b67bf6"
+  },
+  "trang_thai": "dang_chay",
+  "bat_dau_utc": "2026-11-02T06:18:47.316011+00:00",
+  "ket_thuc_utc": null,
+  "ma_thoat": null,
+  "ly_do_dung": null,
+  "pid": 1988,
+  "khoa_danh_tinh": "linux:50915",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/6a3b6f5f-bf00-57b7-90fe-d16753199911/scratchpad/rv/pr1101/cay-kho",
+  "head": "c6e4388ae1fece11f735f4cbe234de04fea56b37",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "578fb4b69ba52b40516f971824d1080f87345d08",
+    "d5166b2b4d5f2427a7e29d3ab28005f90b52beab",
+    "22da28c738e651361274c1264e681a52461dad1e",
+    "80f75b1b186cff3b6f564c99df01c0b3e057d14f",
+    "632a967a443e20515b1fdb4019f86745bfe51e0f",
+    "8aca1f53eaffdae236c983f7b7a0315c85aadf5c",
+    "52082546818b812dd826ac23b198d0b5ebd784a4"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "c5c81b0684afc94d61d6633e11ab5278877f0a4f38948f9fc120253470461c27",
+  "deadline_utc": "2026-11-02T08:30:00+00:00",
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "e75a0a70db28c45cce32bf4a067b4c8f1222f1b3db5c1ce4228c17c3a411ccf9",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/6a3b6f5f-bf00-57b7-90fe-d16753199911/scratchpad/rv/runs/981acca8/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "failure_class": "unknown"
+}

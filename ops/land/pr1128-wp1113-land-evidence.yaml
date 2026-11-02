@@ -1,7 +1,8 @@
 # HO SO LAND — packet #1113 CI-LAN-LUU-TRU r1 (D1 cua ADR-0060 M11), lease g2, code qua PR #1128. Khuon: ops/land/pr1115-wp1079-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (c165a5d0), landed TRUE theo §10.2.4 — xem trang_thai_packet. Gate hau merge do tren DUNG merge SHA bang run
+# TRANG THAI: merged (c165a5d0), landed FALSE — canary A12 TRUOT tran runner-phut (19,3 > 12, PR #1140 run 41371625809); chu kho chon
+# ha landed va mo packet va (2026-11-02). Moi dieu kien khac cua §10.2.4 dat — xem trang_thai_packet. Gate hau merge do tren DUNG merge SHA bang run
 # workflow_dispatch 41361081437 (nhanh do claude/gate-hau-merge-c165a5d0 = c165a5d0), KHONG phai push master: run push 41356843718 bi
 # cancelled 0 job (concurrency master thay cho luot pending — Issue #1132). Rerun tren master se day luot pending cua #1133 ra.
 # NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nghia nhu khuon.
@@ -55,7 +56,7 @@ post_merge_checks:
       Nhanh do claude/gate-hau-merge-c165a5d0 tao rieng de co concurrency group rieng, khong day luot pending cua #1133.
 bookkeeping:
   - {item: 'rut han lease ci-lan-luu-tru-r1-g2', ket_qua: 'xem lease.thu_hoi_cuoi'}
-  - {item: 'PR ghi so (lan luu tru)', nhanh: claude/ghi-so-land-1113, ghi_chu: 'cung la canary A12 — chi cham ops/land/**.'}
+  - {item: 'PR ghi so (lan luu tru)', nhanh: claude/ghi-so-land-1113, ghi_chu: 'PR #1140, cung la canary A12 — chi cham ops/land/**; A12 TRUOT, xem canary_a12.'}
   - {item: 'ban ghi M8', ket_qua: 'dang len Issue #1113, doc lai khop.'}
   - {item: 'no tach', ket_qua: 'DO6 tren duong DAY DU (doc-claims-check PATH_DELETED advisory): packet rieng, phien session_015GtxraNWSWRDjqY58pqwAN; concurrency master: Issue #1132.'}
 # ---- het truong chuan
@@ -83,12 +84,12 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-1128.json merged true; merge-va-diff.txt cha c6bb7c14 + 0445b938, tree 849a8505.'
-  landed: true
+  landed: false
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA c165a5d0: DAT, du bon moc (post_merge_checks muc 1; dispatch thay push vi #1132);
     (2) lease nha: rut han g2; (3) bookkeeping: ho so nay + ban ghi M8 tren Issue #1113; (4) review neo DUNG authorized_head 0445b938:
     luot 6 approve 0/0/0/0, connector sach; (5) uy quyen land: chu kho tu merge (M7); (6) muc tieu packet: A1-A10 dat, A11 chu kho mien
-    (comment 6564772718, xem authorization_ghi_chu), A12 canary = PR ghi so nay; (7) §8.1: DAT — model/effort/sandbox DO_DUOC ca 6 luot.
+    (comment 6564772718, xem authorization_ghi_chu), A12 TRUOT (xem canary_a12); (7) §8.1: DAT — model/effort/sandbox DO_DUOC ca 6 luot.
 
 assurance_81:
   reviewer_assurance_81: DAT
@@ -104,6 +105,16 @@ review:
   ket_qua_theo_luot: 'P0/P1/P2/P3 — r1 4b391be 0/1/3/0 · r2 015093f 0/0/1/0 · r3 bb931ea 0/0/1/1 · r4 c76e38b 0/0/1/0 · r5 21a3e45 0/0/0/0 approve · r6 0445b93 0/0/0/0 approve.'
   hien_vat: 'provenance/review-offline/verdict-b1-r{1..6}.md + run/run-b1-r{1..6}.json (SHA256SUMS kem).'
   xu_ly_finding: 'F1 bash tran -> tim_bash; F2 DO6 ne sang day_du -> kiem-re do (kiem_xoa_bi_trich); F3 bang UY_NHIEM do du (bang-chung-dau-do-F3.md); F4 tran 650 -> lease g2 1000; F4(r3) cai_dat theo danh sach cho phep; connector P2 -> grep tren cay merge.'
+
+canary_a12:
+  pr: 1140
+  run_id: 41371625809
+  ket_qua: TRUOT
+  runner_giay: 'measured — readback-jobs-41371625809-canary-a12.json: tong completed_at-started_at 16 job = 1159 s (~19,3 phut) > tran 12 phut.'
+  cac_ve_khac: 'measured — readback-jobs-41371625809-canary-a12.json: 0 job windows-latest, moi job success; mergeable_state clean; log-trich-canary-a12-41371625809.txt: log chuan-bi che_do=duong_nhanh (59 tep khop allowlist); log gate-ops kiem-re DAT (59 tep doi, 0 loi).'
+  nguyen_nhan: 'measured — readback-jobs-41371625809-canary-a12.json: gate-ops 966 s: buoc ci-duong-nhanh selftest 636 s (113 ca + 419 dot bien), bien-nhan v2 selftest 303 s; 15 job con lai 10-19 s.'
+  quyet_dinh_chu_kho: 'ha landed, mo packet va (bo dot bien cua harness tren duong nhanh; uoc con ~8-9 phut) — AskUserQuestion trong phien session_015GtxrcRSrPnyeixJVDudWu, 2026-11-02.'
+  ve_chua_do: 'run push master cua merge PR #1140 — do sau merge.'
 
 lech_dac_ta:
   - 'DO6: §2.2 cho rang doc-claims-check bat DO6; do lai KHONG (PATH_DELETED advisory). Duong nhanh bat bang kiem-re; duong day du: packet rieng.'

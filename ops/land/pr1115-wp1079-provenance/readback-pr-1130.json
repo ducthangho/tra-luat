@@ -1,0 +1,12 @@
+{
+ "number": 1130,
+ "title": "launcher_test: chặn tín dụng giả chỉ-Windows + gốc t73 cp1252 (#1122)",
+ "state": "closed",
+ "merged": true,
+ "merged_at": "2026-11-02T00:08:55Z",
+ "merge_commit_sha": "c7174bfe03b3acd22cfa055b5fce176129d29542",
+ "html_url": "https://github.com/ducthangho/tra-luat/pull/1130",
+ "head_sha": "9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651",
+ "head_ref": "agent/wp1122-g1-claude",
+ "base_ref": "master"
+}

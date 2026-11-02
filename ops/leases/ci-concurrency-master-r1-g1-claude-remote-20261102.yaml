@@ -19,8 +19,8 @@ recorder_is_dispatcher: false
 recorder_ghi_chu: 'phien executor tu ghi theo chi thi truc tiep cua chu kho; tham quyen la comment authority_url, khong phai lease nay'
 leased_at_utc: '2026-11-02T01:29:00Z'
 heartbeat_at: '2026-11-02T01:29:00Z'
-lease_until: '2026-11-03T01:29:00Z'
-lease_expires_at_utc: '2026-11-03T01:29:00Z'
+lease_until: '2026-11-02T06:50:00Z'
+lease_expires_at_utc: '2026-11-02T06:50:00Z'
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude
@@ -85,3 +85,18 @@ prohibited_actions:
 - kill_other_session_process
 - write_outside_effective_write_set
 land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-03T01:29:00Z'
+  han_moi_utc: '2026-11-02T06:50:00Z'
+  chi_thi: >-
+    Chi thi truc tiep cua chu kho ngay 2026-11-02 trong phien session_015GtxrayCW1gNgN8F8GiVev:
+    "#1132 land, ghi so roi nha lease cho toi". Duyet merge neo head aad4865 o PR #1141 issuecomment-6569263109.
+  ly_do: >-
+    Packet #1132 (CI-CONCURRENCY-MASTER r1) da MERGE: PR #1141 (agent/wp1132-g1-claude, head aad4865c) merge bang merge commit
+    b3249c3e8a5a8f3af5691160493b8ab3d52db99c (cha 47ee1b20 + aad4865c), merged_by ducthangho luc 2026-11-02T05:58:25Z.
+    Lease khong tu chet khi land (CLAUDE.md). Packet #1143 (CI-DUONG-NHANH-BO-DOT-BIEN) can ci.yml va ops/ci_duong_nhanh_test.py.
+  vi_sao_khong_dung_bia_mo: >-
+    Tien le #1113 (d9171daf): rut han dung co che da cai. Han moi dat SAU luc push de luot dang lease con thay lease song,
+    tranh rc=8 che rc=9. Khong bia mo: lease ke nhiem cua #1143 la packet KHAC, khong thay the packet nay.
+  nguoi_rut: 'land operator theo chi thi chu kho, phien Claude Code session_015GtxrayCW1gNgN8F8GiVev (khong phai phien executor session_015GtxrcJvhJaXc7eNPaoNM4)'
+  nghiem_thu: 'ai-dang-giu cho bon duong dan write set sau 06:50Z phai ra NGUOI_GIU 0.'

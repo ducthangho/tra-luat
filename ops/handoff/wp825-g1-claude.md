@@ -1,7 +1,10 @@
 # Handoff #825 CODEX-REJECTED-STATE-KHONG-GHI-DUOC-ADR — lease wp825-r1-g1-claude
 
-Trạng thái lúc 01:30Z 02-11-2026: Codex lượt 3/10 cho **`approve`** trên `f46115b`, kết quả 0 P0 · 0 P1 · 0 P2 · 0 P3.
-A5 (CI trên đúng head) xem mục Nghiệm thu. Merge thuộc quyền chủ kho: `uy_quyen_merge: false`. Phiên này chưa merge.
+Trạng thái lúc 02:27Z 02-11-2026: **ĐỦ ĐIỀU KIỆN, chờ chủ kho duyệt merge.** Trên đúng head `f46115b` có:
+- Codex offline lượt 3/10: approve, 0 P0 · 0 P1 · 0 P2 · 0 P3;
+- connector Codex: sạch;
+- CI: 25/25 xanh.
+PR #1138 đã bỏ draft. Merge thuộc quyền chủ kho: `uy_quyen_merge: false`. Phiên này chưa merge.
 
 - PR: #1138 (draft). Nhánh `agent/wp825-g1-claude`, head `f46115b42220620bb681abcad6399542c9b7c7b0`, base `c7174bf`.
 - Diff: 2 tệp. ADR mới `docs/adr/0061-codex-trang-thai-tu-choi-khong-ghi-duoc.md` và đúng 1 dòng bảng §20 của
@@ -42,7 +45,9 @@ phải làm revision spec theo protocol.
   - `r484_g7_materializer_khong_ghi_duoc_trang_thai_noi_dung_ly_do`: `1/1 qua`;
   - `codex_cred_test.py`: `ca 18 · đột biến 18 · TỔNG: ĐẠT`.
   Sandbox reviewer không ghi được ngoài `/tmp`, nên A4 nguyên trạng là phép đo của executor.
-- **A5**: CI `ci.yml` trên `f46115b`, run 41371804862 — CHỜ (cập nhật khi xong).
+- **A5**: CI trên `f46115b` cho **25/25 check run success** (run `ci.yml` 41371804862 cùng `thu-hoi` 41371801831; đo lúc 02:26Z).
+- Connector Codex trên `f46115b`: `Reviewed commit: f46115b422`, "Didn't find any major issues" (comment 6567447621), summary `has_unresolved_findings: false`.
+- Windows: không bắt buộc, vì packet chỉ sửa tài liệu (`docs/`), không chạm mã hay test.
 - `doc-claims-check --strict --json`: `ok: true`, `flags: []` trên `f46115b`.
 
 ## Codex — 3/10 lời gọi (trần ADR-0055)

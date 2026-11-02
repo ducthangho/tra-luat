@@ -1,0 +1,10 @@
+2026-11-01T23:14:14.3092277Z Image: windows-2025-vs2026
+2026-11-01T23:14:15.4761341Z ##[group]Run git config --global core.autocrlf false
+2026-11-01T23:14:16.5255332Z ##[group]Run actions/checkout@v4
+2026-11-01T23:14:28.4367057Z [command]"C:\Program Files\Git\bin\git.exe" rev-parse refs/remotes/origin/claude/gate-hau-merge-c165a5d0
+2026-11-01T23:14:28.4767115Z c165a5d0d4048e10e7da875f2ba7524136fb5735
+2026-11-01T23:14:32.3420123Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-11-01T23:14:32.3809561Z c165a5d0d4048e10e7da875f2ba7524136fb5735
+2026-11-01T23:14:32.4234098Z ##[group]Run actions/setup-python@v5
+2026-11-01T23:14:32.6368441Z ##[group]Run python ops/nhanh_don_duoc_test.py
+2026-11-01T23:16:58.5395277Z ##[group]Run actions/upload-artifact@v4

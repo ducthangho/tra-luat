@@ -1545,6 +1545,7 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` �
 | `ADR-0058` | Máy Windows local: sửa đúng §1 Phạm vi và §3 Khoá của `ADR-0057` theo chỉ thị chủ kho 30-10-2026 — phạm vi là mọi máy Windows của chủ kho `Online` trong `list_devices`; khoá và sổ đo theo từng máy; dòng khoá có hạn không quá 2 giờ, khoá hết hiệu lực khi quá hạn, khi dòng dạng cũ quá 2 giờ, hoặc khi phiên giữ khoá tuyên bố bỏ có bằng chứng; khoá bổ sung bởi `ADR-0059` | Accepted | không cổng — kỷ luật executor |
 | `ADR-0059` | Máy Windows local: chỉ bổ sung §3 Hạn khoá của `ADR-0058` và §3 Khoá của `ADR-0057` theo đặc tả chủ kho duyệt 31-10-2026 — nhịp tim của dòng khoá, tiếp nhận khoá khi còn tiến trình, lượt bị ngắt, đọc lại trước khi ghi lại, nhả khoá; luật nằm trong ADR | Accepted | không cổng — kỷ luật executor |
 | `ADR-0060` | Điều kiện merge, mốc bỏ draft và làn sổ sách cho packet có dòng khai `dieu_kien_merge` hợp lệ; luật chi tiết chỉ ở ADR ấy; độc lập với `ADR-0054`; không hồi tố | Accepted | `packet_loop.py` `kiem-merge` (K0–K6), `kiem-dong-wp` (D1–D4) |
+| `ADR-0061` | Không ghi được trạng thái "credential Codex bị từ chối" thì lần gọi sau probe lại đúng credential ấy: chấp nhận vĩnh viễn (nợ #825); cả ba lối báo lỗi to, có lý do riêng; không dựng chỗ lưu dự phòng | Accepted | **0 cổng** — hành vi báo lỗi có ca/đột biến khoá (`r484_g7_*`, `t16_*`), việc chấp nhận chỉ sống bằng kỷ luật đọc |
 
 ### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
 

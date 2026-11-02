@@ -1,0 +1,101 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 978
+packet_id: wp978
+packet_alias: CI-PROVENANCE-COMMIT-ENCODING
+mission_issue: 899
+revision: 2
+generation: 2
+lease_id: wp978-r2-g2-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: [899]
+depends_on_ghi_chu: '#899 r4 da merge (PR #945, merge cebb5b2). r1 cua packet nay: lease wp978-r1-g1-claude HET_HAN 2026-10-29; Codex luot 8 approve 53ec046.'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'cong cu sinh bang chung provenance CI => sensitive; executor ho claude, reviewer ho openai; tran Codex theo dong khai ADR-0055 cua spec r2.'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp978-r2.md
+spec_sha256_required: 9fe94ad05cc1129e663cf77706db92685d6130c08c6a375454781a9aca188060
+spec_hash: 9fe94ad05cc1129e663cf77706db92685d6130c08c6a375454781a9aca188060
+spec_ref: refs/heads/ops/wp978-r1-g1-lease (commit chua spec r2 + lease nay)
+spec_nguon: 'P1 connector Codex r4438276217 tren e5ca45b cua PR #997: hai ca tien to c53_ sau khi merge master (don PR cu 02-11).'
+prompt_path: ops/specs/wp978-r2.md
+prompt_sha256_required: 9fe94ad05cc1129e663cf77706db92685d6130c08c6a375454781a9aca188060
+write_set:
+- ops/ci_provenance.py
+- ops/ci_provenance_test.py
+- ops/handoff/wp978-g1-claude.md
+write_set_hash: 369096095b73c0cae2bd7fa2000a921a3cfc9bea4a29b07a2a15c36b23f2f969
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'r2 chi doi ten ca c53_git_commit_khong_utf8 -> c62_ va ca dich 39 dot bien F13_* trong ops/ci_provenance_test.py; diff PR so master van dung 2 duong dan ops/ci_provenance*.py; handoff chi tren nhanh lease.'
+change_policy_sha: null
+effective_write_set:
+- ops/ci_provenance.py
+- ops/ci_provenance_test.py
+- ops/handoff/wp978-g1-claude.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1/P2; toi da 10 loi goi codex cho ca packet (spec r2 Q1p, ADR-0055; 8 da dung o r1); commit run.json; moi thread connector duoc tra loi va connector da xong tren head cuoi'}
+- {id: M-2, dieu_kien: 'ci.yml luot PR XANH tren head cuoi doc bang check run; ci_provenance_test N/N tai cho tren dung commit day'}
+- {id: M-3, dieu_kien: 'nghiem_thu spec wp978 r2 N1p-N3p va r1 N4-N7: c62 xanh tren head va DO tren reader base; dot bien F13_* GIET dung c62, B2_* GIET dung c53; ruff F delta 0; doctrine-scan, adr-song rc0; numstat dung 2 duong dan'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp978-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 9091cf52cf20ac197c1a356d6a33cac6bab0b318
+start_from_sha: e5ca45b71f3e2264943b6b44b164e47687671604
+start_from_ghi_chu: 'head PR #997 luc cap g2 van la e5ca45b; ban va doi ten c53->c62 cua g1 (chua review) o aebc808ea45408c827e753827b97f94689969db5 tren nhanh tam claude/handoff-wp978-aebc808, cha e5ca45b; g2 lay lai va TU DO lai N1p-N3p.'
+reviewed_sha_required: e5ca45b71f3e2264943b6b44b164e47687671604
+reviewed_sha_required_nghia: 'Head hien tai truoc khi va r2; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/978#issuecomment-6567553240
+granted_on_instruction_readback: 'chu kho xac nhan TRUC TIEP trong phien session_015Gtxra7iT6mwM1kqpdggt6 (02-11-2026): "Dedicated new session does it" => phien chuyen trach #997 (session_015GtxrcrL4cwJqpNqx2ptAa) nhan #997; phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq chuyen chi thi va chot phien nay giu #997 (phien session_015GtxrbiieKxwvmdwmajka5 da duoc lenh dung, comment 6567541714 cua no se rut). Spec/write set/ngan sach giu nguyen theo g1. Bam byte KHONG DO DUOC.'
+recorded_by: claude-session-015GtxrcrL4cwJqpNqx2ptAa
+recorder_is_executor: true
+recorder_ghi_chu: 'phien ghi lease g2 cung la executor theo chi thi chu kho chuyen qua phien dieu phoi; khong tu cap.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-02T02:28:00Z'
+  goc_quet: 'fetch +refs/heads/*, ls-remote so TAP ten voi for-each-ref: 767 tren may chu, thieu 0; khong co tep lease wp978-r2-g2* tren ref nao'
+  ket_qua: 'ops/ci_provenance.py, ops/ci_provenance_test.py, ops/handoff/wp978-g1-claude.md: NGUOI_GIU 1 = wp978-r2-g1-claude (CON_HAN), chinh lease duoc thay o day.'
+thay_the_cho: [wp978-r2-g1-claude]
+thay_the_cho_ghi_chu: 'lease g1 wp978-r2-g1-claude CON HAN (toi 2026-11-03T02:10Z) => bia mo hai chieu: tep g1 mang da_bi_thay_the: wp978-r2-g2-claude.'
+leased_at_utc: '2026-11-02T02:30:00Z'
+heartbeat_at: '2026-11-02T02:30:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+heartbeat_required_minutes: 360
+heartbeat_required_ghi_chu: 'ADR-0056 => lease moi cap khai 360 phut.'
+lease_until: '2026-11-03T02:30:00Z'
+lease_expires_at_utc: '2026-11-03T02:30:00Z'
+run_minutes: 120
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+attempts_basis: 'spec wp978 Q2 (r1); khong reset theo revision.'
+review_rounds_limit: 2
+budget:
+  codex_review_calls:
+    pr_wp978_g1: {used: 8, reserved: 0, limit: 10}
+  attempt:
+    packet_978_r1: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+nang_tran: ['r1: 2 -> 4 -> 8 (chu kho, #978 6441085134 / 6442791177, ADR-0052); r2: 8 -> 10 (spec r2, ADR-0055, chu kho 02-11-2026)']
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'day nhanh agent/wp978-g1-claude khi N1p-N3p dat; PR #997 da mo. Merge origin/master TRUOC luot Codex cuoi neu master tien va khong cham write set.'
+codex_da_goi_r1: 'luot 1-8 tren nhanh lease ops/reviews/wp978-g1-codex-luot{1..8}; luot 8 approve 53ec046.'
+codex_da_goi: []

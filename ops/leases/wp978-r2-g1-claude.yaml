@@ -99,3 +99,8 @@ ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp978-g1-claude khi N1p-N3p dat; PR #997 da mo. Merge origin/master TRUOC luot Codex cuoi neu master tien va khong cham write set.'
 codex_da_goi_r1: 'luot 1-8 tren nhanh lease ops/reviews/wp978-g1-codex-luot{1..8}; luot 8 approve 53ec046.'
 codex_da_goi: []
+da_bi_thay_the: wp978-r2-g2-claude
+da_bi_thay_the_ly_do: >-
+  Chu kho xac nhan 02-11-2026 ("Dedicated new session does it", phien session_015Gtxra7iT6mwM1kqpdggt6) giao #997 cho phien
+  chuyen trach session_015GtxrcrL4cwJqpNqx2ptAa; lease wp978-r2-g2-claude thay lease nay. Lease nay con han luc ghi bia mo,
+  nen bia mo hai chieu la duong thu hoi.

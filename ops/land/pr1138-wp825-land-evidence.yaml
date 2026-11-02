@@ -1,0 +1,98 @@
+# HO SO LAND — packet #825 CODEX-REJECTED-STATE-KHONG-GHI-DUOC-ADR r1 g1 (ADR-0061), docs qua PR #1138. Khuon: ops/land/pr1128-wp1113-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+#
+# TRANG THAI: merged (e007a318), landed TRUE — du bon moc §10.2.2 tren run push master 41389693283 (dung merge SHA, attempt 1).
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nghia nhu khuon.
+# Readback tho: ops/land/pr1138-wp825-provenance/ (SHA256SUMS kem). Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-11-02.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015Gtxra7iT6mwM1kqpdggt6
+input_packet_generations:
+  - {packet_issue: 825, packet_id: CODEX-REJECTED-STATE-KHONG-GHI-DUOC-ADR, revision: 1, generation: 1, lease_id: wp825-r1-g1-claude}
+authorized_head_sha: f46115b42220620bb681abcad6399542c9b7c7b0
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1138#issuecomment-6569194206
+authorization_ghi_chu: >-
+  Comment duyet SHA "Chu kho duyet merge PR #1138 tai head f46115b42220620bb681abcad6399542c9b7c7b0." (do phien dieu phoi dang ho) va chi thi
+  truc tiep trong phien session_015Gtxra7iT6mwM1kqpdggt6 qua AskUserQuestion: "Yes, merge #1138 now". Phien nay goi merge. CAVEAT #566: comment
+  dang bang token chu kho deu hien ducthangho. Bam byte cau tra loi KHONG DO DUOC.
+land_operator: 'measured — readback-pr-1138.json: merged true, merged_at 2026-11-02T04:39:34Z, merged_by ducthangho (token phien), merge_commit_sha e007a318.'
+merge_method: merge
+merge_commit: e007a318ffbd0079380a72d9f74df8a401028ae4
+merge_commit_tree: d7f713cce4bd9f8e7c0bf1b15aa53cfa7bbff83f
+merge_commit_parents: [9156fece51e50d9f39e8ae1644f583666013a289, f46115b42220620bb681abcad6399542c9b7c7b0]
+pre_merge_checks:
+  - {name: 'ci.yml pull_request + thu-hoi tren head cuoi', sha: f46115b42220620bb681abcad6399542c9b7c7b0, conclusion: success, ghi_chu: 'loi_khai_co_neo — 26/26 check run success doc qua REST commits/f46115b/check-runs luc ~04:12Z; mergeable_state clean.'}
+  - {name: 'Codex connector', sha: f46115b42220620bb681abcad6399542c9b7c7b0, conclusion: 'completed; khong finding', ghi_chu: 'loi_khai_co_neo — comment 6567447621 "Reviewed commit: f46115b422" khong finding; luot "Draft marked ready" cung has_unresolved_findings false (comment 6567428299).'}
+  - {name: 'review offline Codex luot 3/10', sha: f46115b42220620bb681abcad6399542c9b7c7b0, conclusion: 'approve; 0 P0, 0 P1, 0 P2, 0 P3', nguon: 'nhanh ops/wp825-r1-g1-lease: ops/handoff/wp825-g1-claude/luot3/{VERDICT.md,run/run.json,SHA256SUMS}', ghi_chu: 'loi_khai_co_neo — run 2f47926da5a74a45ad321ae45e2fb541, launcher.py run ma_thoat 0; luot 1 46421d7 0/1/1/0, luot 2 df3e103 0/0/1/0.'}
+  - {name: 'Windows', conclusion: not_required, ghi_chu: 'packet chi sua docs/ (ADR moi + 1 dong §20), khong cham ma hay test.'}
+  - {name: 'A4 cuc bo (TMPDIR co lap)', sha: f46115b42220620bb681abcad6399542c9b7c7b0, conclusion: 'r484_g7_* 1/1 x2; codex_cred_test 18 ca 18 dot bien TONG DAT', ghi_chu: 'thuat_lai — log phien 01:26Z; sandbox reviewer khong do duoc vi /tmp/.git.'}
+post_merge_checks:
+  - name: 'ci.yml push master tai DUNG merge SHA'
+    run_id: 41389693283
+    run_attempt: 1
+    sha: e007a318ffbd0079380a72d9f74df8a401028ae4
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, gate-output-41389693283.txt]
+    moc_run: 'measured — ci/provenance.yaml moc.run: event push, nhanh master, head_sha e007a318, run_attempt 1, passed.'
+    moc_checkout: 'measured — ci/provenance.yaml moc.checkout: 23/23 job passed tai e007a318ffbd0079380a72d9f74df8a401028ae4, cha 9156fece + f46115b4, tree d7f713cc (doi_chieu sha_bang_head_sha).'
+    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition: passed (wd-run 41399241341, artifact workflow-definition-41389693283), ci_provenance.py thu tu tinh lai blob/sha256.'
+    moc_gate_output: 'measured — gate-output-41389693283.txt (log REST tung job, sha256 + so byte): 23/23 success, ##[error] = 0; ci/provenance.yaml de gate=not_measured cho tung job (collector khong co marker dang ky) nen moc nay lay tu log, nhu khuon pr1128.'
+bookkeeping:
+  - {item: 'rut han lease wp825-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so (lan luu tru)', nhanh: claude/ghi-so-land-825, ghi_chu: 'chi cham ops/land/**'}
+  - {item: 'ban ghi M8', ket_qua: 'measured — issuecomment-6570676077 tren #825, doc lai khoi YAML khop tung byte; kiem-dong-wp rc 0 ("DONG DUOC WP ... merge e007a318"); #825 dong completed.'}
+# ---- het truong chuan
+packet_id: CODEX-REJECTED-STATE-KHONG-GHI-DUOC-ADR
+packet_issue: 825
+generation: 1
+pham_vi_land: docs
+environment: cloud
+operating_system: linux
+recorded_by: 'claude-session session_015Gtxra7iT6mwM1kqpdggt6 — CUNG la phien executor cua packet.'
+
+spec:
+  path: ops/specs/wp825.md (nhanh ops/wp825-r1-g1-lease)
+  sha256: dee36a1148bc1fe8a934a9dceb74dbe0eab7d3a2830908d7f15afb3293f0812e
+  nguon: 'loi_khai_co_neo — lease neo cung bam; lease_publish check khop bam.'
+
+lease:
+  lease_id: wp825-r1-g1-claude
+  path: ops/leases/wp825-r1-g1-claude.yaml (nhanh ops/wp825-r1-g1-lease)
+  thay_the_cho: '[]'
+  write_set_so_tep: 3
+  thu_hoi_cuoi: 'DA NHA bang RUT HAN sau merge: lease_until ve 2026-11-02T05:00:00Z (khoi thu_hoi_bang_rut_han, commit 96835bc); khong bia mo vi khong co lease ke nhiem.'
+  diff_do: 'measured — merge-va-diff.txt: git diff --stat e007a318^1 e007a318 = 2 tep +86/-0, dung write set (ADR-0061 + PROTOCOL §20).'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-1138.json merged true; merge-va-diff.txt cha 9156fece + f46115b4, tree d7f713cc.'
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA e007a318: DAT, du bon moc (post_merge_checks muc 1, push master); (2) lease nha: rut han;
+    (3) bookkeeping: ho so nay + ban ghi M8 tren Issue #825; (4) review neo DUNG authorized_head f46115b: luot 3 approve 0/0/0/0, connector
+    sach; (5) uy quyen land: chu kho duyet SHA + "Yes, merge #1138 now"; (6) muc tieu packet: A1-A5 dat; (7) §8.1: model/effort KHONG DO
+    DUOC tung response (xem assurance_81).
+
+assurance_81:
+  reviewer_assurance_81: 'loi_khai_co_neo — provider openai_codex, execution_surface codex_cli, transport machine theo run.json; model/effort phuc vu tung response KHONG DO DUOC (verdict tu ghi nhu vay).'
+
+review:
+  so_loi_goi_codex_cli: 3
+  tran: '10 (ADR-0055).'
+  ket_qua_theo_luot: 'P0/P1/P2/P3 — r1 46421d7 0/1/1/0 · r2 df3e103 0/0/1/0 · r3 f46115b 0/0/0/0 approve.'
+  hien_vat: 'nhanh ops/wp825-r1-g1-lease: ops/handoff/wp825-g1-claude/luot{1,2,3}/ (PROMPT, VERDICT, HINT, run/), SHA256SUMS moi thu muc.'
+  xu_ly_finding: 'F1 P1 loi khai dung 1 probe -> ADR thu hep dieu kien (fsync sau replace va state khong doc duoc cho 0 probe); F2 P2 nhan 0 cong -> co nhac launcher.py x4; P2 luot 2 tieu de -> doi tieu de. Ap nguyen HINT luot 1/2; 17d3606 bo backtick 3 con tro doc-claims-check (gate-ops do qua t56).'
+
+lech_dac_ta:
+  - 'Tien de "Su that da do" cua spec ("dung 1 probe, cung ly do") bi reviewer bac bang chen loi I/O; tieu chi A1-A5 khong doi "dung 1" nen khong sua spec dong bang; ghi trong handoff.'
+
+khong_do_duoc:
+  - 'Model/effort phuc vu tung response cua reviewer.'
+  - 'Bam byte cau tra loi cua chu kho trong phien.'

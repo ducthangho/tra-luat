@@ -1,0 +1,106 @@
+# HO SO LAND — packet #1122 LAUNCHER-TEST-WINDOWS-TIN-DUNG-GIA r1 g1, code qua PR #1130. Khuon: ops/land/pr1128-wp1113-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+#
+# TRANG THAI: merged (c7174bfe), landed TRUE — du bon moc §10.2.2 tren run push master 41365578445 (dung merge SHA, attempt 1); A6 (Windows
+# sau merge) dat o run push master 41365578430 (launcher-windows.yml, cung SHA).
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nghia nhu khuon.
+# Readback tho: ops/land/pr1130-wp1122-provenance/ (SHA256SUMS kem). Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-11-02.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015Gtxra7iT6mwM1kqpdggt6
+input_packet_generations:
+  - {packet_issue: 1122, packet_id: LAUNCHER-TEST-WINDOWS-TIN-DUNG-GIA, revision: 1, generation: 1, lease_id: wp1122-r1-g1-claude}
+authorized_head_sha: 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1130
+authorization_ghi_chu: >-
+  Chi thi truc tiep cua chu kho trong phien session_015Gtxra7iT6mwM1kqpdggt6 qua AskUserQuestion: "Có, merge #1130 rồi làm tiếp
+  (Recommended)", sau khi Codex luot 10/10 approve 0/0/0/0 tren 9d06bd1. Khong co comment duyet SHA tren PR (PR chi co 1 comment, cua
+  connector). Phien nay goi merge. Bam byte cau tra loi KHONG DO DUOC.
+land_operator: 'measured — readback-pr-1130.json: merged true, merged_at 2026-11-02T00:08:55Z, merged_by ducthangho (token phien), merge_commit_sha c7174bfe.'
+merge_method: merge
+merge_commit: c7174bfe03b3acd22cfa055b5fce176129d29542
+merge_commit_tree: 2b58328926438ecb9c6aa34cfed7d27bd8c41a03
+merge_commit_parents: [62e629156fd0729b743f15eed2f32487786b9adc, 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651]
+pre_merge_checks:
+  - {name: 'ci.yml pull_request tren head cuoi', sha: 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651, conclusion: success, ghi_chu: 'measured — REST commits/9d06bd1/check-runs: 28 check run, 27 success + 1 skipped (launcher PR theo nhan).'}
+  - {name: 'Windows A3 (launcher-windows.yml workflow_dispatch tren dung head)', run_id: 41361328113, sha: 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651, conclusion: success, ghi_chu: 'loi_khai_co_neo — handoff wp1122: DOT BIEN 461/461 (118 khong do duoc), suite 290/290 (bo qua 74, hong 0); master truoc va la 430/434.'}
+  - {name: 'Codex connector', sha: 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651, conclusion: 'completed; khong finding', ghi_chu: 'loi_khai_co_neo — comment tom tat 6565938874 (luot "Draft marked ready"). CAVEAT: merge goi luc 00:08:55Z khi luot connector CON DANG CHAY; ket qua ve sach sau do. Ghi lam bai hoc trong handoff.'}
+  - {name: 'review offline Codex luot 10/10', sha: 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651, conclusion: 'approve; 0 P0, 0 P1, 0 P2, 0 P3', nguon: 'nhanh ops/wp1122-r1-g1-lease: ops/handoff/wp1122-g1-claude/luot10/{VERDICT.md,run/run.json,SHA256SUMS}', ghi_chu: 'loi_khai_co_neo — run 2b394187972546eeab9af23a0298151e; 10 luot o lease.codex_da_goi (luot 7 bi bo loc noi dung cua nen chan, van tinh 1 loi goi).'}
+  - {name: 'Linux A/B (hai ve dung trong mot lenh, TMPDIR co lap)', conclusion: 'base 340/350 · 523/548; head 352/362 · 550/575; tap ca hong va dot bien SAI trung theo ten => delta 0', ghi_chu: 'thuat_lai — handoff wp1122; 10 ca duong launcher.py run do san tren base trong container (no ngoai pham vi).'}
+post_merge_checks:
+  - name: 'ci.yml push master tai DUNG merge SHA'
+    run_id: 41365578445
+    run_attempt: 1
+    sha: c7174bfe03b3acd22cfa055b5fce176129d29542
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, gate-output-41365578445.txt]
+    moc_run: 'measured — ci/provenance.yaml moc.run: event push, nhanh master, head_sha c7174bfe, run_attempt 1, passed.'
+    moc_checkout: 'measured — ci/provenance.yaml moc.checkout: 23/23 job passed tai c7174bfe03b3acd22cfa055b5fce176129d29542 (doi_chieu sha_bang_head_sha).'
+    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition: passed (wd-run 41399464496, artifact workflow-definition-41365578445), ci_provenance.py thu tu tinh lai blob/sha256.'
+    moc_gate_output: 'measured — gate-output-41365578445.txt (log REST tung job, sha256 + so byte): 23/23 success, ##[error] = 0; ci/provenance.yaml de gate=not_measured tung job (collector khong co marker dang ky) nen moc lay tu log, nhu khuon pr1128.'
+  - name: 'launcher-windows.yml push master tai DUNG merge SHA (A6 cua spec)'
+    run_id: 41365578430
+    run_attempt: 1
+    sha: c7174bfe03b3acd22cfa055b5fce176129d29542
+    conclusion: success
+    nguon: [gate-output-41365578430.txt]
+    ghi_chu: 'measured — gate-output-41365578430.txt: job ubuntu 362/362 ca (bo qua 2) + DOT BIEN 575/575; job windows-latest 290/290 ca (bo qua 74, hong 0) + DOT BIEN 461/461 (118 khong do duoc tren nen nay); ##[error] = 0.'
+bookkeeping:
+  - {item: 'rut han lease wp1122-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so (lan luu tru)', nhanh: claude/ghi-so-land-825, ghi_chu: 'chi cham ops/land/**'}
+  - {item: 'ban ghi M8', ket_qua: 'measured — issuecomment-6570713331 tren #1122, doc lai khoi YAML khop tung byte; kiem-dong-wp rc 0; #1122 dong completed.'}
+# ---- het truong chuan
+packet_id: LAUNCHER-TEST-WINDOWS-TIN-DUNG-GIA
+packet_issue: 1122
+generation: 1
+pham_vi_land: code
+environment: cloud
+operating_system: linux
+recorded_by: 'claude-session session_015Gtxra7iT6mwM1kqpdggt6 — CUNG la phien executor cua packet.'
+
+spec:
+  path: ops/specs/wp1122.md (nhanh ops/wp1122-r1-g1-lease)
+  sha256: 198e06f0f7ef6659fb711ef02ff3558ba5c4a63da1c7127b559c5fd8b0fdacb8
+  nguon: 'loi_khai_co_neo — lease neo cung bam.'
+
+lease:
+  lease_id: wp1122-r1-g1-claude
+  path: ops/leases/wp1122-r1-g1-claude.yaml (nhanh ops/wp1122-r1-g1-lease)
+  thay_the_cho: '[]'
+  write_set_so_tep: 2
+  thu_hoi_cuoi: 'DA NHA bang RUT HAN sau merge: lease_until ve 2026-11-02T00:29:00Z (khoi thu_hoi_bang_rut_han, commit afbfc65); khong bia mo — lease ke nhiem (wp1117-r2-g2) thuoc packet khac.'
+  diff_do: 'measured — merge-va-diff.txt: git diff --stat c7174bfe^1 c7174bfe = 1 tep .claude/dev/launcher_test.py +450/-93, dung tran 450 cua ADR-0053.'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-1130.json merged true; merge-va-diff.txt cha 62e62915 + 9d06bd10, tree 2b583289.'
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA c7174bfe: DAT, du bon moc (post_merge_checks muc 1, push master); (2) lease nha: rut han;
+    (3) bookkeeping: ho so nay + ban ghi M8 tren Issue #1122; (4) review neo DUNG authorized_head 9d06bd1: luot 10 approve 0/0/0/0,
+    connector sach (xem caveat thu tu); (5) uy quyen land: chu kho truc tiep "Có, merge #1130 rồi làm tiếp"; (6) muc tieu packet:
+    N0, N0p, A1-A5 dat tren exact head, A6 dat (post_merge_checks muc 2); (7) §8.1: model/effort KHONG DO DUOC tung response.
+
+assurance_81:
+  reviewer_assurance_81: 'loi_khai_co_neo — provider openai_codex, execution_surface codex_cli, transport machine theo run.json; model/effort phuc vu tung response KHONG DO DUOC.'
+
+review:
+  so_loi_goi_codex_cli: 10
+  tran: '10 (ADR-0055); chu kho chot "chay toi sach, dung o tran 10".'
+  ket_qua_theo_luot: 'xem lease.codex_da_goi va handoff wp1122: r1 0/1/1/0 · r2-r6 0/1/0/0 (F01 reporter-thong-diep lap 6 lan) · r7 bi bo loc nen chan · r8 0/0/1/0 · r9 0/0/0/0 (thieu bang chung exact head) · r10 9d06bd1 approve 0/0/0/0.'
+  hien_vat: 'nhanh ops/wp1122-r1-g1-lease: ops/handoff/wp1122-g1-claude/luot{1..10}/ (luot 7 o luot7-bi-chan/), SHA256SUMS moi thu muc.'
+  xu_ly_finding: 'F01 reporter-thong-diep (6 lan) -> chu kho chot go thong diep khoi kenh --lap-ca; goc dong han o #1117 (runner). F02 khoa encoding -> 14 loi goi con Python khai encoding utf-8 + ca khoa AST. P2 luot 8 -> ca khoa thu tu phu nhanh AssertionError.'
+
+lech_dac_ta:
+  - 'Pham vi mo rong da duyet: raise AssertionError tuong minh -> bang(False,...) + khoa AST chung; moi loi goi con Python text=True khai encoding utf-8 + khoa AST. Khong doi write set.'
+
+khong_do_duoc:
+  - 'Model/effort phuc vu tung response cua reviewer.'
+  - 'Bam byte cau tra loi cua chu kho trong phien.'

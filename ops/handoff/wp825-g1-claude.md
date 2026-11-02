@@ -1,6 +1,8 @@
 # Handoff #825 CODEX-REJECTED-STATE-KHONG-GHI-DUOC-ADR — lease wp825-r1-g1-claude
 
-Trạng thái lúc 02:27Z 02-11-2026: **ĐỦ ĐIỀU KIỆN, chờ chủ kho duyệt merge.** Trên đúng head `f46115b` có:
+Trạng thái lúc 04:40Z 02-11-2026: **ĐÃ MERGE.** PR #1138 vào master tại merge commit `e007a318ffbd0079380a72d9f74df8a401028ae4`. Chủ kho duyệt bằng comment SHA 6569194206 và câu trả lời "Yes, merge #1138 now". Lease đã rút hạn về 05:00Z.
+
+Trạng thái trước merge (02:27Z): ĐỦ ĐIỀU KIỆN. Trên đúng head `f46115b` có:
 - Codex offline lượt 3/10: approve, 0 P0 · 0 P1 · 0 P2 · 0 P3;
 - connector Codex: sạch;
 - CI: 25/25 xanh.

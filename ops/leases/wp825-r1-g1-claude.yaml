@@ -75,8 +75,8 @@ heartbeat_at: '2026-11-02T00:46:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
 heartbeat_required_minutes: 360
 heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
-lease_until: '2026-11-03T00:46:00Z'
-lease_expires_at_utc: '2026-11-03T00:46:00Z'
+lease_until: '2026-11-02T05:00:00Z'
+lease_expires_at_utc: '2026-11-02T05:00:00Z'
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 0
@@ -96,3 +96,11 @@ codex_da_goi:
 - {luot: 1, run_id: cd2bdaca80044adf9df8d63fdb172953, head: 46421d7e4365b3490124bef541e243289f4d2006, verdict: changes_requested, ket_qua: '0 P0, 1 P1, 1 P2, 0 P3'}
 - {luot: 2, run_id: 94d79755ffa7477a99386b0a45277601, head: df3e103b6b0c8ac9259c040a518c7baf99f46790, verdict: changes_requested, ket_qua: '0 P0, 0 P1, 1 P2, 0 P3'}
 - {luot: 3, run_id: 2f47926da5a74a45ad321ae45e2fb541, head: f46115b42220620bb681abcad6399542c9b7c7b0, verdict: approve, ket_qua: '0 P0, 0 P1, 0 P2, 0 P3; A4 nguyen trang va A5 do o handoff'}
+lease_sua_lan_cuoi: '2026-11-02T04:40:00Z'
+lease_sua_ghi_chu: 'Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch, budget.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-03T00:46:00Z'
+  han_moi_utc: '2026-11-02T05:00:00Z'
+  chi_thi: 'Chu kho chon "Yes, merge #1138 now" qua AskUserQuestion trong phien session_015Gtxra7iT6mwM1kqpdggt6 (02-11-2026, ~04:39Z), kem comment duyet SHA 6569194206 tren PR #1138; PR #1138 merge e007a318ffbd0079380a72d9f74df8a401028ae4. Bam byte KHONG DO DUOC.'
+  ly_do: 'Packet #825 da merge. Nha docs/adr/0061-*, docs/PROTOCOL_DA_PHIEN.md va ops/handoff/wp825-g1-claude.md.'
+  vi_sao_han_moi_khong_bang_luc_sua: 'Han moi = luc sua + 20 phut de luot ops-publish-lease cua commit nay doc lease CON HAN (rc=9 da dang), khong roi vao rc=8 (bai hoc CLAUDE.md 20-09-2026). Khong viet bia mo: chua co lease ke nhiem.'

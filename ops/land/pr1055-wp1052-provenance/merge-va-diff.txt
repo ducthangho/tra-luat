@@ -1,0 +1,33 @@
+merge=906b24fe23086e3ea47943e0311e8d75a6bbed6f
+cha1=4952cff3649cdd8fd3edd51830d3f8e749b72afe
+cha2=9d5588b6b5442b197a63764f002fae12ba6e4877
+merge_base=a253c169ed79617b8d1a4754867c336ac72c72c5
+tree=13ffbaf6f717a981cd62382daf2cea959cefa6a7
+--- git diff --stat cha1..merge
+ RELEASE_MANIFEST.json                 |  30 ++++++---
+ SKILL.md                              |   3 +
+ changelog.d/wp-1052.md                |  25 +++++++
+ ops/specs/wp1052-r2.md                |  50 ++++++++++++++
+ ops/specs/wp1052-r3.md                |  55 +++++++++++++++
+ ops/specs/wp1052-r4.md                | 122 ++++++++++++++++++++++++++++++++++
+ ops/specs/wp1052-r5.md                | 120 +++++++++++++++++++++++++++++++++
+ references/GOTCHAS.md                 |   2 +-
+ references/golden/workflow_audit.json |   4 +-
+ references/windows-testing.md         |  75 +++++++++++++++++++++
+ scripts/tl_selftest.py                |   6 +-
+ 11 files changed, 477 insertions(+), 15 deletions(-)
+--- git diff --stat merge_base..cha2
+ RELEASE_MANIFEST.json                 |  30 ++++++---
+ SKILL.md                              |   3 +
+ changelog.d/wp-1052.md                |  25 +++++++
+ ops/specs/wp1052-r2.md                |  50 ++++++++++++++
+ ops/specs/wp1052-r3.md                |  55 +++++++++++++++
+ ops/specs/wp1052-r4.md                | 122 ++++++++++++++++++++++++++++++++++
+ ops/specs/wp1052-r5.md                | 120 +++++++++++++++++++++++++++++++++
+ references/GOTCHAS.md                 |   2 +-
+ references/golden/workflow_audit.json |   4 +-
+ references/windows-testing.md         |  75 +++++++++++++++++++++
+ scripts/tl_selftest.py                |   6 +-
+ 11 files changed, 477 insertions(+), 15 deletions(-)
+cmp rc=0 (diff cha1..merge BANG BYTE diff merge_base..cha2)
+blob windows-testing @906b24f=4a403732688662c616acd9a45a471ff760ff5636 @9d5588b=4a403732688662c616acd9a45a471ff760ff5636

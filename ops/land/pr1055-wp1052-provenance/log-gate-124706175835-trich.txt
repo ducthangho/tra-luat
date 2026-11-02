@@ -1,0 +1,34 @@
+# Trich log job 124706175835 (gate (ubuntu-latest), run 41257563723), tai qua REST actions/jobs/124706175835/logs 2026-11-01.
+# Log day du sha256: ebc38298e7a9e768a7df3ed0752d533eadab608c3142398919658b02b4bb7d4c, 10793 dong.
+2026-11-01T00:48:20.9554117Z  * [new tag]         v1.33.8                     -> v1.33.8
+2026-11-01T00:48:20.9554415Z  * [new tag]         v1.33.9                     -> v1.33.9
+2026-11-01T00:48:20.9554744Z  * [new tag]         rescue/d0-2026-08-04        -> rescue/d0-2026-08-04
+2026-11-01T00:48:20.9555769Z [command]/usr/bin/git branch --list --remote origin/master
+2026-11-01T00:48:20.9556096Z   origin/master
+2026-11-01T00:48:20.9556667Z [command]/usr/bin/git rev-parse refs/remotes/origin/master
+2026-11-01T00:48:20.9556999Z 0b8d15610ee768224916a390269984baa4b1b8ce
+2026-11-01T00:48:20.9557693Z ##[endgroup]
+2026-11-01T00:48:20.9558237Z ##[group]Determining the checkout info
+2026-11-01T00:48:20.9558629Z ##[endgroup]
+2026-11-01T00:48:20.9558872Z [command]/usr/bin/git sparse-checkout disable
+2026-11-01T00:48:20.9559757Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-01T00:48:20.9560671Z ##[group]Checking out the ref
+2026-11-01T00:48:20.9561046Z [command]/usr/bin/git checkout --progress --force -B master refs/remotes/origin/master
+2026-11-01T00:48:21.7233332Z Reset branch 'master'
+2026-11-01T00:48:21.7236267Z branch 'master' set up to track 'origin/master'.
+2026-11-01T00:48:21.7324184Z ##[endgroup]
+2026-11-01T00:48:21.7376785Z [command]/usr/bin/git log -1 --format=%H
+2026-11-01T00:48:21.7406736Z 0b8d15610ee768224916a390269984baa4b1b8ce
+2026-11-01T00:48:21.7584099Z ##[group]Run actions/setup-python@v5
+2026-11-01T00:48:21.7584380Z with:
+2026-11-01T00:54:29.5017939Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T00:54:29.5018232Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T00:54:29.5018488Z ##[endgroup]
+2026-11-01T00:54:29.8835805Z From https://github.com/ducthangho/tra-luat
+2026-11-01T00:54:29.8836242Z  * branch            master     -> FETCH_HEAD
+2026-11-01T00:54:29.8902708Z head_sha = 0b8d15610ee768224916a390269984baa4b1b8ce
+2026-11-01T00:54:29.8903160Z base_sha = 0b8d15610ee768224916a390269984baa4b1b8ce
+2026-11-01T00:58:13.4521263Z [tl] ⚠ PROFILE_NOT_FOUND: 'khong_ton_tai_trong_config' không có trong config.profiles (p6, p6off, vbqppl) — KHÔNG dùng scope nền thay thế. Kiểm chính tả (nhận cả gõ không dấu nếu khớp DUY NHẤT) hoặc thêm block profiles vào config (xem SKILL.md corpus_profile).
+2026-11-01T00:58:13.4522556Z   [OK] pin_sync
+2026-11-01T00:58:13.4522819Z   [OK] op_group_complete
+2026-11-01T00:58:13.4523125Z   [OK] env_explicit

@@ -1,0 +1,159 @@
+# HO SO LAND — PR #1055 "wp1052: references/windows-testing.md + con tro trong SKILL.md" (Packet #1052).
+# Schema: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1; khuon gan nhat: ops/land/pr1048-claude-md-powershell-land-evidence.yaml.
+#
+# TRANG THAI: merged (906b24f), LANDED theo quyet dinh chu kho 02-11-2026 (khoi landed_20261102, kieu b) — 4/4 moc §10.2.2
+# measured tren run 41257563723 cua commit CON dau tien 0b8d156. trang_thai_packet.landed giu false la ban ghi luc truoc quyet dinh.
+# Gate hau merge cua CHINH 906b24f (run 41255939050) bi HUY o trang thai pending, 0 job: GitHub concurrency cua ci.yml
+# chi giu MOT luot pending moi nhom, nen luot cua 0b8d156 (#1093, tao 00:37:37Z) thay luot nay (huy 00:37:38Z).
+# Gate dau tien CHUA 906b24f la cua commit con 0b8d156 — run 41257563723 success 23/23 (do 2026-11-01T01:3xZ). "merged" KHONG dong nghia "landed"
+# (PROTOCOL §10.2.4).
+# NHAN: measured = do trong phien ghi so tu readback tho (ten tep ghi kem); thuat_lai = loi khai cua phien/luot khac,
+# KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr1055-wp1052-provenance/. Moi phep do REST: GET https://api.github.com/repos/ducthangho/tra-luat/<duong dan>
+# bang curl + GITHUB_PAT qua proxy phien, do 2026-11-01 ~00:2x–00:4xZ.
+
+schema_version: 1
+mission_id: gh-1035
+packet_id: wp1052
+packet_issue: 1052
+pham_vi_land: tai_lieu_skill_va_kiem_ke_goi
+pham_vi_land_ghi_chu: >-
+  references/windows-testing.md (moi, vao goi), SKILL.md (+1 cau tro +1 dong bang), references/GOTCHAS.md, changelog.d/wp-1052.md,
+  golden workflow_audit, RELEASE_MANIFEST.json (197 tep), scripts/tl_selftest.py (2 hang dem goi), ops/specs/wp1052-r2..r5.md.
+  Khong doi VERSION, khong deploy.
+
+ghi_so:
+  provider: claude
+  model_family: claude
+  execution_surface: claude_code
+  transport: machine/local
+  environment: cloud
+  role: bookkeeping_recorder
+  session_id: https://claude.ai/code/session_015GtxrcSEjPkSR4KLHEyEsm
+  recorded_by: claude-session (chinh phien executor cua wp1052)
+  mat_quan_sat_duoc_the_nao: >-
+    Loi khai co neo (session URL), khong phai phep do doc lap. Ben ghi so TRUNG ben thi cong: khong co tach vai.
+
+authorized_head_sha: 9d5588b6b5442b197a63764f002fae12ba6e4877
+approver: ducthangho
+authorization_url: KHONG_AP_DUNG
+authorization_ghi_chu: >-
+  thuat_lai — chu kho tu chuyen PR #1055 sang ready (00:10:43Z) roi merge (00:15:19Z) sau khi phien bao "du dieu kien de ban
+  merge". Khong co comment duyet neo SHA truoc merge.
+land_operator: ducthangho
+land_operator_nguon: 'measured — readback-pr-1055.json merged_by ducthangho, merged_at 2026-11-01T00:15:19Z.'
+merge_method: merge
+merge_commit: 906b24fe23086e3ea47943e0311e8d75a6bbed6f
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-1055.json: merged true, merge_commit_sha 906b24f, head.sha 9d5588b.'
+  merge_noi_dung: >-
+    measured — merge-va-diff.txt: diff cha1..merge BANG BYTE diff merge_base..cha2 (cmp rc=0); 11 tep +477/-15. Blob
+    references/windows-testing.md tai 906b24f = tai 9d5588b (4a403732…).
+  head_va_review:
+    head_da_merge: 9d5588b6b5442b197a63764f002fae12ba6e4877
+    codex_connector:
+      - {luot: 1, reviewed_sha: 235b7387ee99a428f5d41d748bc369602af392dd, ket_qua: 'khong finding'}
+      - {luot: 2, reviewed_sha: 815fa1b2e64c64c950bbeca47677c25c20b3b0e0, ket_qua: 'khong finding'}
+      - {luot: 3, reviewed_sha: 9d5588b6b5442b197a63764f002fae12ba6e4877, ket_qua: 'khong finding', ghi_chu: 'tu kich khi chu kho chuyen ready; vuot tran 2 luot cua dac ta, do chu kho kich'}
+    nguon: 'measured — readback-comments-1055.json (chatgpt-codex-connector[bot]: codex-review-receipt "Reviewed commit"); readback-reviews-1055.json = 0 review object.'
+  landed: false
+  landed_ghi_chu: >-
+    Bon moc §10.2.2 deu measured, nhung tren run 41257563723 cua commit CON 0b8d156 (run rieng cua 906b24f bi huy, 0 job).
+    Goi `landed` la quyet dinh cua chu kho; ho so nay KHONG tu goi.
+  con_thieu_de_goi_landed:
+    - id: GATE-HAU-MERGE-906B24F
+      trang_thai: not_measured
+      mo_ta: >-
+        measured — readback-run-41255939050.json: run gate (ci.yml, push master, head 906b24f) completed/cancelled, run_attempt 1;
+        readback-jobs-41255939050.json total_count 0. Gate rieng cho 906b24f KHONG ton tai.
+    - id: GATE-HAU-MERGE-CON-0B8D156
+      trang_thai: measured
+      mo_ta: >-
+        measured — readback-run-41257563723.json: run gate ci.yml, push master, head 0b8d156 (#1093; 906b24f la tien cua no,
+        `git merge-base --is-ancestor` rc 0), run_attempt 1, completed/success, updated_at 2026-11-01T01:26:44Z.
+        readback-jobs-41257563723.json (filter=all): 23 job, 23 success, moi job nhan ubuntu-latest, runner_id khac 0.
+      gioi_han: >-
+        Gate cua commit CON, khong cua chinh 906b24f: 906b24f..0b8d156 them 1 tep (ops/specs, +123 dong, tu #1093). Day la moc
+        Run cho noi dung wp1052 tren master; Checkout va Gate output cua run nay: xem MOC-10-2-2-CHECKOUT-GATE-OUTPUT.
+    - id: MOC-10-2-2-WORKFLOW-DEFINITION
+      trang_thai: measured
+      mo_ta: >-
+        measured — workflow-definition-0b8d156.txt: GraphQL WorkflowRun.file cua run 41257563723 do PHIEN chay tren may chu kho
+        (ASUS-LAPTOP) qua Desktop Commander, gh 2.95.0 tai khoan ducthangho, RC=0: file .github/workflows/ci.yml @ 0b8d156,
+        checkSuite.commit.oid 0b8d156; node_id khop REST run. Blob ci.yml @0b8d156 = 82d9f239… qua ca REST contents?ref va git.
+      gioi_han: 'Do tren commit CON 0b8d156, khong tren chinh 906b24f (run cua 906b24f bi huy, 0 job).'
+    - id: MOC-10-2-2-CHECKOUT-GATE-OUTPUT
+      trang_thai: measured
+      mo_ta: >-
+        measured tren run 41257563723 (head 0b8d156, commit con dau tien chua 906b24f). Checkout: log-gate-124706175835-trich.txt
+        (job gate (ubuntu-latest)) — `git log -1 --format=%H` sau checkout = 0b8d156, head_sha = base_sha = 0b8d156.
+        Gate output: artifact 13063189962 gate-evidence-ubuntu-latest-1, zip sha256 = digest REST (artifact-13063189962-zip-sha256.txt,
+        readback-artifacts-41257563723.json); giai nen nguyen byte vao artifact-13063189962/: tl-selftest status pass, returncode 0,
+        positive_verified true, `== tl selftest 1774/1774 ==`, output_sha256 70bde173… = sha256 tl-selftest-Linux.out,
+        identity va identity_after cung head 0b8d156 + tree 1a77872 (= tree commit), tracked_clean va worktree_clean true.
+      gioi_han: 'Do tren commit CON 0b8d156, khong tren chinh 906b24f (run cua 906b24f bi huy, 0 job).'
+    - id: QUYET-DINH-LANDED-CHU-KHO
+      trang_thai: da_duyet
+      mo_ta: 'Da quyet 02-11-2026: xem khoi landed_20261102 cuoi tep.'
+
+pre_merge_checks:
+  - ten: gate ci.yml tren head 9d5588b (pull_request)
+    trang_thai: measured
+    do_duoc: 'measured — readback-check-runs-9d5588b-all.json: 26 check run, 25 success, 1 skipped (mo, theo if: cua workflow).'
+  - ten: gate tai cho tren head 9d5588b (phien executor)
+    trang_thai: thuat_lai
+    do_duoc: >-
+      thuat_lai — PR #1055 issuecomment-6545981621: selftest 1774/1774, golden-test / determinism-audit / doc-claims-check /
+      workflow-audit rc 0, release-verify --strict lane LAND ok 197/197.
+  - ten: selftest Windows local (ADR-0057) tren head 815fa1b
+    trang_thai: thuat_lai
+    do_duoc: >-
+      thuat_lai — PR #1055 issuecomment-6545981621: VM tra-luat-win, HEAD 815fa1b, selftest 1774/1774 rc 0 (774 s, 1 BO QUA co y
+      wp726_script_nlm_canary), golden/workflow-audit/doc-claims/determinism/release-verify LAND rc 0. 815fa1b..9d5588b chi doi
+      changelog.d/wp-1052.md va RELEASE_MANIFEST.json.
+    gioi_han: 'Local KHONG phai check run CI va KHONG thay bang chung Windows cua CI (ADR-0057). ASUS-LAPTOP khong do (offline).'
+
+bookkeeping:
+  - viec: rut han lease wp1052-r5-g5-claude
+    trang_thai: da_xong
+    nguon: 'thuat_lai — commit cec84f1 tren ops/wp1052-r2-g1-lease, han moi 2026-11-01T00:31:00Z; run ops-publish-lease 41256068061 success.'
+  - viec: so do Windows local (ADR-0057 muc 8)
+    trang_thai: da_xong
+    nguon: 'thuat_lai — C:\tl-win\do-luong.csv tren VM: dong ad0cbb5 (11:10:00Z) va dong 815fa1b (16:07:07Z, kem dinh chinh BO QUA).'
+  - viec: dong Issue #1052
+    trang_thai: trong_luot_ghi_so
+
+no_con_mo:
+  - id: CI-CONCURRENCY-HUY-PENDING-TREN-MASTER
+    mo_ta: >-
+      Chu thich ci.yml dong 45 khai "KHONG huy tren master", nhung luot PENDING tren master van bi thay boi luot pending moi hon
+      cung nhom concurrency (do duoc o run 41255939050). Commit merge nao nam giua hai lan push lien tiep se khong co gate rieng.
+      Ngoai pham vi packet nay.
+
+khong_do_duoc:
+  - 'Bam byte cua chi thi chu kho trong hoi thoai: KHONG_DO_DUOC.'
+
+landed_20261102:
+  bo_canh: >-
+    Khoi nay ghi landed theo quyet dinh chu kho (kieu b, tien le pr1080/pr1100 landed_20261101). Khong sua lai cac loi khai o
+    tren: trang_thai_packet.landed false va GATE-HAU-MERGE-906B24F not_measured la ban ghi dung luc truoc quyet dinh.
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/pull/1096#issuecomment-6569229949
+    noi_dung: >-
+      Chu kho quyet ghi landed true cho ho so land #1052. Can cu ghi trong comment: du 4/4 moc §10.2.2 cung tren run 41257563723
+      (push master, head 0b8d156, commit con dau tien chua merge 906b24f); run rieng cua 906b24f (41255939050) bi concurrency
+      theo ref huy khi con pending, 0 job, nen khong co gi de do tren chinh merge commit; lo concurrency dang duoc va o #1132 / PR #1141.
+      Comment ghi ho chi thi truc tiep cua chu kho trong phien session_015GtxrYPjZCTZeRiazdssgq ngay 02-11-2026.
+    do_duoc: >-
+      measured — readback-comment-6569229949.json: comment 6569229949 (user ducthangho, author_association OWNER,
+      created_at 2026-11-02T04:41:11Z) tren PR #1096. CAVEAT #566: agent dang bang token chu kho; ban chep, khong phai chu ky.
+  landed: true
+  landed_dieu_kien: >-
+    (1) bon moc §10.2.2 measured tren run 41257563723 cua commit CON dau tien 0b8d156, KHONG tren chinh merge 906b24f (run cua
+    906b24f bi huy, 0 job; 906b24f..0b8d156 chi them 1 tep ops/specs tu #1093): xem GATE-HAU-MERGE-CON-0B8D156,
+    MOC-10-2-2-WORKFLOW-DEFINITION, MOC-10-2-2-CHECKOUT-GATE-OUTPUT. (2) lease wp1052-r5-g5-claude rut han cec84f1. (3) Issue #1052
+    da dong. (4) review Codex connector 3 luot khong finding, luot cuoi tren DUNG head da merge 9d5588b. (5) uy quyen land:
+    quyet_dinh_chu_kho tren, co caveat #566. Chu kho CHAP NHAN do tren commit con thay cho merge commit.

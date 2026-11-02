@@ -64,4 +64,3 @@ gi? nguy�n ownership/write set v� ki?m tra holder hi?n h�nh tr�?c c?p.
 Kh�ng ghi �� lease �ang ho?t �?ng c?a phi�n kh�c. Vi?c duy?t amendment kh�ng t? x�c nh?n test,
 kh�ng mi?n M3(a)/(b)/(c), kh�ng thay human audit ho?c quy?t �?nh merge neo SHA.
 Duy?t amendment kh�ng ch?ng minh ho?c mi?n y�u c?u reviewer cao h�n executor; thi?u b?ng ch?ng v?n ch?n routing.
-

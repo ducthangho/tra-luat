@@ -51,8 +51,11 @@ on:
 # Hai chốt dưới đây KHÔNG hạ tiêu chuẩn gate, chỉ bỏ phần lặp vô ích:
 concurrency:
   # Agent đẩy nhiều lần lên cùng một PR; lượt cũ thành vô nghĩa ngay khi có lượt mới.
-  # KHÔNG huỷ trên master: đó là lượt gác cổng phát hành, phải chạy trọn.
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # Master: GitHub giữ tối đa một lượt pending mỗi group, nên `cancel-in-progress: false` một mình
+  # KHÔNG đủ — push kế tiếp làm lượt đang chờ bị huỷ, 0 job, và merge commit ấy không bao giờ được
+  # gate (#1132, đo 01-11-2026: 5 commit). Vì vậy mỗi commit master có group riêng theo SHA; các lượt
+  # master chạy song song và chờ runner thay vì thay chỗ nhau.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || (github.ref == 'refs/heads/master' && github.sha) || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:

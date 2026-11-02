@@ -13,7 +13,7 @@
 - **Trần mount ~343KB/file** — `tl.py` từng bị **CẮT CỤT** khi vượt (Cowork mount); self-heal chỉ cứu
   NUL-pad, **KHÔNG cứu cắt cụt**. Guard sống ở `workflow-audit`: `py_size` WARN >280KB / FAIL --strict
   >320KB (waiver `tl_selftest.py` — không bước Cowork nào import; hỏng thì fail ỒN ÀO).
-- **Kernel SKILL.md: WARN >48.128B (G1a) · CỨNG 49.152B** — đo 07-08 (LF): **47.724B, đệm 404B** tới WARN.
+- **Kernel SKILL.md: WARN >48.128B (G1a) · CỨNG 49.152B** — đo 30-10 (LF): **47.925B, đệm 203B** tới WARN.
   Đổi kernel ⇒ re-import Capabilities. Thêm chữ: bớt chỗ khác TRƯỚC.
 - **Bundle import ≤200 file** — cây dev 212 từng FAIL; đóng gói CHỈ qua `tl release-bundle`.
 

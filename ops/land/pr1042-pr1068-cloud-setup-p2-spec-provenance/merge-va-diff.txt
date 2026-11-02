@@ -1,0 +1,35 @@
+# Danh tinh merge va diff hai PR spec cloud-setup P2. Phien dieu phoi do 2026-10-31T08:10:39Z.
+$ git show -s --format='%H%n%T%n%P' 01ff65035c8b0833fa521b93239931772c14dffd
+01ff65035c8b0833fa521b93239931772c14dffd
+4e242a823c35324666c8d3abbc864f85690501a2
+69dcfee9274aae12ca27dfecc22a980e560cc3bc eb7242561f5dd99071991cbc38528bdb3cb1cf52
+$ git diff 01ff65035c8b0833fa521b93239931772c14dffd^1..01ff65035c8b0833fa521b93239931772c14dffd --stat
+ ops/specs/cloud-setup-p2a-exec-r1.md | 203 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 203 insertions(+)
+$ git show -s --format='%H%n%T%n%P' 97120d3c76ebb7c3eda4b585ff46f1c51e30c91b
+97120d3c76ebb7c3eda4b585ff46f1c51e30c91b
+08cb9fbec2eefe56bc725033c3cbe38cdf34a018
+c8ff9ed563403fffa3c49c84bfce42e9a66bc68b 780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3
+$ git diff 97120d3c76ebb7c3eda4b585ff46f1c51e30c91b^1..97120d3c76ebb7c3eda4b585ff46f1c51e30c91b --stat
+ ops/specs/cloud-setup-p2b-wire-r1.md | 248 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 248 insertions(+)
+$ git rev-parse eb7242561f5dd99071991cbc38528bdb3cb1cf52^{tree}
+726ad3571166cf11709882e3c0e974bfe6acf328
+$ git rev-parse 780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3^{tree}
+ad751ea6429f162364a5675e54db834fc5aec082
+$ git merge-base 01ff6503^1 eb724256
+757bde561d09738858506aecf5de2f050a5f0d5e
+$ git diff $(git merge-base 01ff6503^1 eb724256)..eb724256 | grep -v ^index | sha256sum ; git diff 01ff6503^1..01ff6503 | grep -v ^index | sha256sum
+28e68ad014aa0f89f92dce4da3eb94f77c1e432840f0360f3944aa77c1a464af  -
+28e68ad014aa0f89f92dce4da3eb94f77c1e432840f0360f3944aa77c1a464af  -
+$ git merge-base 97120d3c^1 780b7ecc
+01ff65035c8b0833fa521b93239931772c14dffd
+$ git diff $(git merge-base 97120d3c^1 780b7ecc)..780b7ecc | grep -v ^index | sha256sum ; git diff 97120d3c^1..97120d3c | grep -v ^index | sha256sum
+b6cc48adebd6ef08855f7eefb85ee26c91ebd2bdb5810509769aa8f8e1032a46  -
+b6cc48adebd6ef08855f7eefb85ee26c91ebd2bdb5810509769aa8f8e1032a46  -
+$ git show origin/master:ops/specs/cloud-setup-p2a-exec-r1.md | sha256sum ; git rev-parse origin/master:ops/specs/cloud-setup-p2a-exec-r1.md
+1071797a1cf2016a9266a98ccece02ed6edd4e80ca33d3b91b2547f7ca0c13e1  -
+d7d4e240a181c7b68dea72b0be0393e334544b75
+$ git show origin/master:ops/specs/cloud-setup-p2b-wire-r1.md | sha256sum ; git rev-parse origin/master:ops/specs/cloud-setup-p2b-wire-r1.md
+67b448acc825fdd29f118c3b9082583773b4ad218a7c83ab4db496daa8f26d81  -
+3d17563ad81733a5b5e87ba207f87ca9fde3b0a2

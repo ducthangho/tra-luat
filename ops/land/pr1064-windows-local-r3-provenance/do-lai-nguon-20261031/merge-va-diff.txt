@@ -1,0 +1,20 @@
+merge 086f1b7343fc1d778e50797e6c9ca0964b11a755 tree fea96b539489d7aec0c81daf92113319325f0731 parents 0d7902229d3050bc58fa880abf267f0fafa335bf cb9bd240c269811f14331b827879b271498c6628
+head cb9bd240c269811f14331b827879b271498c6628 tree 0cbbc58aa8f6a6a887317029ed7511a83baa0b9b
+merge-base=b653574b117fa1496fbf58f09a22a8cbed5cc5dc
+diff P1..M sha256 9c9f273396d021349701a8b770b9674c1dbc431cb6d66568e3779b520db560f7
+ docs/PROTOCOL_DA_PHIEN.md                    |   5 +-
+ docs/adr/0059-windows-local-nhip-tim-khoa.md | 100 +++++++++++++++++++++++++++
+ 2 files changed, 103 insertions(+), 2 deletions(-)
+diff MB..H sha256 9c9f273396d021349701a8b770b9674c1dbc431cb6d66568e3779b520db560f7
+ docs/PROTOCOL_DA_PHIEN.md                    |   5 +-
+ docs/adr/0059-windows-local-nhip-tim-khoa.md | 100 +++++++++++++++++++++++++++
+ 2 files changed, 103 insertions(+), 2 deletions(-)
+# commit nhanh PR (first-parent):
+cb9bd240c269811f14331b827879b271498c6628 2026-10-31T03:06:20+00:00 merge origin/master vao nhanh packet r3 (cong thu-hoi doi master la to tien cua head)
+c13505a2c36a70c47f5c740146fd5ad6794a9882 2026-10-31T02:56:18+00:00 docs: ADR-0059 xuong dong doan D10
+6adcb081783193febdcc87336c0b8511b1ba0df8 2026-10-31T02:56:02+00:00 docs: ADR-0059 khai dung pham vi truy van 4688 rong (cross-review r3 luot 5: 1 P3)
+27b6effb633c11f268b6e66692d14458b6a647f4 2026-10-31T02:46:56+00:00 docs: ADR-0059 ca D10 neo vao nguon script sinh TAI_TRUOC (bo loc, thu tu lay mau) (cross-review r3 luot 4: 1 P2)
+ea9c0dc036120a0c0a07d2a61a56a8dc5520c7fa 2026-10-31T02:37:46+00:00 docs: ADR-0059 ca D10 neo vao chung cu goc TAI_TRUOC cua phien giu khoa (cross-review r3 luot 3: 1 P1)
+14795688f2ce2e24c3d4f3f467d862f6772f45fb 2026-10-31T02:27:33+00:00 docs: ADR-0059 ca D10 tach gio bat dau luot khoi CreationDate, khai thieu phep do (cross-review r3 luot 2: 1 P2)
+b4ccc45dd56284259fb996ac3b3227418bece911 2026-10-31T02:16:30+00:00 docs: ADR-0059 bo dieu kien ngoai spec, rut o §20 ve dinh tuyen (cross-review r3 luot 1: 2 P1)
+144c96ad15071d0d9c2061b34d17f2c13b647e70 2026-10-31T02:08:18+00:00 docs: ADR-0059 nhip tim khoa Windows local (WINDOWS-LOCAL-MAY-CHU-KHO r3 g1, mission gh-1035)

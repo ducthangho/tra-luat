@@ -12,7 +12,7 @@
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
 #
 # ------------------------------------------------------------------------------------
-# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that pip-bang-chung-import rg-windows-khong-tu-cai rg-co-chay-truoc-cargo
+# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that pip-bang-chung-import rg-windows-khong-tu-cai rg-co-chay-truoc-cargo agent-creds-bootstrap agy-ghim
 # ------------------------------------------------------------------------------------
 # DÒNG TRÊN LÀ HỢP ĐỒNG, KHÔNG PHẢI CHÚ THÍCH. `launcher.py doctor` (mục `hook-phien`)
 # đọc nó ở CẢ hook đang checkout LẪN hook trên `origin/master`, rồi báo động khi bản
@@ -508,6 +508,12 @@ PYEOF
     fi
   fi
 fi
+
+# >>> agent-creds (wp1039)
+# Spec CLOUD-SETUP-P2B-WIRE r1: SAU pip (bootstrap cần gói), TRƯỚC policy/doctor; `|| MA_AC=$?` để set -e không giết hook.
+MA_AC=0; "$PY" "$GOC/ops/cloud_agent_creds.py" nap 2>&1 | sed 's/^/[session-start] /' || MA_AC=$?; echo "[session-start] agent-creds-bootstrap: rc=$MA_AC"
+MA_AC=0; "$PY" "$GOC/ops/cloud_agent_creds.py" cai-agy 2>&1 | sed 's/^/[session-start] /' || MA_AC=$?; echo "[session-start] agy-ghim: rc=$MA_AC"
+# <<< agent-creds (wp1039)
 
 # --- Xác thực codex, để nó chạy được trên NHIỀU môi trường
 #

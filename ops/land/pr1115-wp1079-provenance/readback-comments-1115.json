@@ -1,0 +1,16 @@
+[
+ {
+  "id": 6555633438,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-11-01T09:38:59Z",
+  "body_dau": "`thu-hoi` đỏ trên `c73dff3` với `CHAN [12]: S 165b27a4bfe0 không phải tổ tiên của H c73dff39c0d5`.\n\nLỗi này không do diff của PR. Từ base `7eeb1d9`, master đã có thêm các commit #1107, #1108 và #1111, và không commit nào đụng tệp của packet. Cách sửa là merge `origin/master` vào nhánh.\n\nTôi tạm hoãn việc merge, vì cross-review Codex lượt 1/2 đang chạy trên đúng `c73dff3`. Bản merge sẽ đi cùng lần "
+ },
+ {
+  "id": 6559102548,
+  "user": "chatgpt-codex-connector[bot]",
+  "author_association": "NONE",
+  "created_at": "2026-11-01T14:12:41Z",
+  "body_dau": "<!-- codex-pull-request-review-summary -->\n<!-- codex-review-state:v1 {\"code_review\":{\"commit_sha\":\"af057e982ccc99b1f5eef2ae86dd129ccaa969b5\",\"has_any_findings\":false,\"has_unresolved_findings\":false,\"status\":\"completed\"},\"security_review\":{\"commit_sha\":null,\"has_any_findings\":null,\"has_unresolved_findings\":null,\"status\":null}} -->\n\n## Codex Review Summary\n\nThis comment shows the latest Codex revie"
+ }
+]

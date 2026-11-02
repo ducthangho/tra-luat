@@ -1179,10 +1179,10 @@
     }
   ],
   "kernel": {
-    "links_checked": 15,
+    "links_checked": 16,
     "links_missing": [],
     "links_ok": true,
-    "size_bytes": 47724,
+    "size_bytes": 47925,
     "size_limit": 49152,
     "size_ok": true,
     "size_warn": false,
@@ -1202,15 +1202,15 @@
     "warn_limit": 286720
   },
   "registry": {
-    "checked_commands": 198,
+    "checked_commands": 199,
     "coverage": {
       "container_commands": 2,
       "coverage_percent": 100.0,
       "high_risk_unregistered_count": 0,
-      "registered_leaf_commands": 198,
+      "registered_leaf_commands": 199,
       "registry_orphaned_commands": 0,
-      "total_leaf_commands": 198,
-      "total_nodes": 200,
+      "total_leaf_commands": 199,
+      "total_nodes": 201,
       "unregistered_leaf_commands": 0
     },
     "issues": [],
@@ -1220,7 +1220,7 @@
   },
   "schema": "workflow_audit.v2",
   "summary": {
-    "available_commands": 191,
+    "available_commands": 192,
     "cards": 26,
     "groups": 11,
     "tasks": 60

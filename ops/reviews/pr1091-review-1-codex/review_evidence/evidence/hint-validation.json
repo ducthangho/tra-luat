@@ -1,0 +1,57 @@
+[
+  {
+    "name": "control",
+    "rc": 0,
+    "summary": [
+      [
+        "118",
+        "118"
+      ]
+    ],
+    "failed": [],
+    "parser_error": false
+  },
+  {
+    "name": "reset_no_T",
+    "rc": 1,
+    "summary": [
+      [
+        "117",
+        "118"
+      ]
+    ],
+    "failed": [
+      "dk_chay_reset_ca_cay_long_va_tep_an"
+    ],
+    "parser_error": false
+  },
+  {
+    "name": "reset_after_copy_cached_condition",
+    "rc": 1,
+    "summary": [
+      [
+        "117",
+        "118"
+      ]
+    ],
+    "failed": [
+      "dk_chay_sua_tep_dacl_rong_truoc_khi_chep"
+    ],
+    "parser_error": false
+  },
+  {
+    "name": "model_reset_noop",
+    "rc": 1,
+    "summary": [
+      [
+        "116",
+        "118"
+      ]
+    ],
+    "failed": [
+      "dk_chay_sua_tep_dacl_rong_truoc_khi_chep",
+      "dk_chay_reset_ca_cay_long_va_tep_an"
+    ],
+    "parser_error": false
+  }
+]

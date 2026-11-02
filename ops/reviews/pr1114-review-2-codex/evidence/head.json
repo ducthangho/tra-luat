@@ -1,0 +1,11 @@
+{
+  "label": "head",
+  "cwd": "work/head",
+  "command": [
+    "python3",
+    "ops/cloud_agent_creds_test.py"
+  ],
+  "rc": 0,
+  "seconds": 320.464175,
+  "output": "CA: 52/52 dat\nDOT BIEN: 80/80 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (4 dot bien)\nTONG: DAT\n"
+}

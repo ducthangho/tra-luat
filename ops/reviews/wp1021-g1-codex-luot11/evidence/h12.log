@@ -1,0 +1,12 @@
+kiem: helper calls=1
+_sinh_no: helper calls=1
+helper definitions=1; iterdir/lower/endswith/sorted present; is_file absent
+rg -n 'glob\\("\\*\\.receipt\\.yaml"\\)' ops/bien_nhan_v2.py: rc=1; stdout=''
+C9 reverse probe (scratch copy): rc=0; stdout=1675:    Path(".").glob("*.receipt.yaml")
+AGENTS.md: HEAD==P1=True; HEAD==P2=True
+docs/PROTOCOL_DA_PHIEN.md: HEAD==P1=True; HEAD==P2=True
+.claude/dev/launcher.py: HEAD==P1=True; HEAD==P2=True
+local merge commit:
+c8ff9ed563403fffa3c49c84bfce42e9a66bc68b
+9c7dc1135d8fb392aecd69e94db2933fc25eab58 a16932aa09ce860a614f0bab4b2015699e7221bc
+HEAD ancestor of c8ff9ed: rc=0

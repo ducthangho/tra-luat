@@ -1,0 +1,83 @@
+ROUND 1 RECEIPT_KEY_SET ['anchor', 'assurance', 'assurance_KHONG_dat', 'assurance_ghi_chu', 'cross_provider', 'effective_review_class', 'evidence_url', 'evidence_url_ghi_chu', 'executor_provider', 'findings_ids', 'generation', 'github_submitter_identity', 'independent_from_executor_session', 'independent_ghi_chu', 'kind', 'land_merge_commit', 'land_merge_commit_ghi_chu', 'lease_gan_theo', 'lease_id', 'loi_goi_codex_thu', 'luot', 'model_reviewer_identity', 'nguon_co_tham_quyen', 'nguon_tep', 'packet_id', 'packet_issue', 'provider', 'receipt_id', 'review_class', 'reviewed_sha', 'reviewed_sha_nguon', 'reviewed_sha_to_tien', 'revision', 'role', 'schema_version', 'so_dem_nguon', 'so_dem_theo', 'so_p0', 'so_p1', 'so_p2', 'so_p3', 'target_pull_request', 'verdict', 'verdict_ban_goc', 'verdict_bytes', 'verdict_nguon', 'verdict_path', 'verdict_sha256', 'verdict_usage_caveats', 'xu_ly_finding']
+ROUND 1 FIELD schema_version 2 MATCH True
+ROUND 1 FIELD kind 'review_delivery_receipt' MATCH True
+ROUND 1 FIELD target_pull_request 1041 MATCH True
+ROUND 1 FIELD land_merge_commit 'b29da0bfe3bfb7a7be69136a1c5c40f82c088a93' MATCH True
+ROUND 1 FIELD role 'reviewer' MATCH True
+ROUND 1 FIELD provider 'codex' MATCH True
+ROUND 1 FIELD executor_provider 'claude' MATCH True
+ROUND 1 FIELD cross_provider True MATCH True
+ROUND 1 FIELD review_class 'sensitive' MATCH True
+ROUND 1 FIELD effective_review_class 'sensitive' MATCH True
+ROUND 1 FIELD independent_from_executor_session True MATCH True
+ROUND 1 FIELD so_dem_theo 'finding' MATCH True
+ROUND 1 FIELD nguon_tep 'ban_sao_nguyen_byte_cua_tep_goc_trong_kho' MATCH True
+ROUND 1 LEASE_FIELD packet_id 'BIEN-NHAN-V2-TEST-IN-CHI-TIET-TIN-DUNG-GIA' MATCH True
+ROUND 1 LEASE_FIELD packet_issue 1037 MATCH True
+ROUND 1 LEASE_FIELD revision 1 MATCH True
+ROUND 1 LEASE_FIELD generation 1 MATCH True
+ROUND 1 LEASE_FIELD lease_id 'wp1037-r1-g1-claude' MATCH True
+ROUND 1 VERDICT Verdict: request_changes NORMALIZED_MATCH True COUNTS {'P0': 0, 'P1': 0, 'P2': 1, 'P3': 2} COUNTS_MATCH True
+ROUND 1 FINDINGS_IDS [{'id': 'c98-khong-khoa-noi-in-that', 'hang': 'P2'}, {'id': 'c98-bo-sot-tran-mac-dinh', 'hang': 'P3'}, {'id': 'c98-bo-sot-so-dong-nem', 'hang': 'P3'}]
+ROUND 1 REVIEWED_SHA_MATCH True TREE 6907a286e95a2c6e86c7c08c0ec700dc2a75ef58 LEASE_BASE 757bde561d09738858506aecf5de2f050a5f0d5e
+ROUND 1 OPTIONAL_FIELDS {'reviewed_tree': 'ABSENT', 'base_sha': 'ABSENT', 'muc_bang_chung_model': 'ABSENT'}
+ROUND 1 VERDICT_HASH_MATCH True BYTES_MATCH True RECEIPT_ID_HASH_SUFFIX True
+ROUND 1 EVIDENCE_URL https://github.com/ducthangho/tra-luat/blob/e788a5d0d518f8a08ac13473a85197287fad4fcb/ops/reviews/wp1037-g1-codex-luot1-verdict.md BLOB_EQUAL True ANCHOR {'loai': 'canonical_ancestry', 'cuong_do': 'thap', 'mo_ta': '(a) Blob verdict ghim o commit hien vat e788a5d cua PR ghi so; len trung_binh/cao khi PR ghi so land bang merge commit (squash pha quan he to tien).'}
+ROUND 1 ANCESTRY e788a5d0d518f8a08ac13473a85197287fad4fcb f37b5195978f1fe35b9cb55b6f79a2e09d165af0 rc 0
+ROUND 1 ANCESTRY 016852ae7acc22a75bae9505febd1697a1ab79ba b29da0bfe3bfb7a7be69136a1c5c40f82c088a93 rc 0
+ROUND 1 ANCESTRY 757bde561d09738858506aecf5de2f050a5f0d5e 016852ae7acc22a75bae9505febd1697a1ab79ba rc 0
+ROUND 1 IDENTITY provider openai_codex RUN_MATCH True
+ROUND 1 IDENTITY surface codex_cli RUN_MATCH True
+ROUND 1 IDENTITY transport machine RUN_MATCH True
+ROUND 1 IDENTITY session_run_id 4d0668e2f3d045ef86354bea2a6afd29 RUN_MATCH True
+ROUND 1 MODEL_FIELDS {'model_yeu_cau': 'gpt-6-astra', 'model': 'gpt-6-astra', 'model_da_chay': 'gpt-6-astra', 'model_evidence': 'do_may', 'model_evidence_ref': 'ops/reviews/wp1037-g1-codex-luot1/run/run.json#model_phuc_vu'}
+ROUND 1 MEASURED_MODELS DO_DUOC 27 {'gpt-6-astra': 27} EFFORT DO_DUOC ['xhigh']
+ROUND 1 RUNTIME {'run_id': '4d0668e2f3d045ef86354bea2a6afd29', 'head': '016852ae7acc22a75bae9505febd1697a1ab79ba', 'trang_thai': 'xong', 'ma_thoat': 0, 'thoi_luong_giay': 934.249, 'worktree_sach': True, 'so_muc_ban': 0, 'prompt_sha256': 'ca20a3a06a82643b7d48fe3185600a35d00d4dc7d7e45c4dd7409c5b142d88dc', 'sandbox_trang_thai': 'KHONG_DO_DUOC', 'sandbox_gioi_han': 'lay mau /proc tu ben ngoai moi 0.2s: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. Moi lech danh tinh tien trinh (ke ca vong doi binh thuong nhu cha zombie) => KHONG_DO_DUOC: co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do'}
+ROUND 1 PROMPT_HASH_MATCH True
+ROUND 1 START_IN_LEASE True
+ROUND 1 LENH_METADATA {'chuong_trinh': 'codex', 'so_doi_so': 11, 'van_tay': '1a97beff1901d4c9'} CLI_VERSION_FIELDS []
+ROUND 1 ASSURANCE cross_reviewed EXECUTOR_MODEL claude-opus-5-5 claude
+ROUND 1 CAVEATS [{"id": "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY", "muc": "P3", "mo_ta": "Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong."}, {"id": "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX", "muc": "P3", "mo_ta": "Script/bang chung cua reviewer (evidence/*) KHONG vao kho va tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can dung lai clone tai 016852a."}]
+ROUND 2 RECEIPT_KEY_SET ['anchor', 'assurance', 'assurance_ghi_chu', 'cross_provider', 'effective_review_class', 'evidence_url', 'evidence_url_ghi_chu', 'executor_provider', 'findings_ids', 'generation', 'github_submitter_identity', 'independent_from_executor_session', 'independent_ghi_chu', 'kind', 'land_merge_commit', 'land_merge_commit_ghi_chu', 'lease_gan_theo', 'lease_id', 'loi_goi_codex_thu', 'luot', 'model_reviewer_identity', 'nguon_co_tham_quyen', 'nguon_tep', 'packet_id', 'packet_issue', 'provider', 'receipt_id', 'review_class', 'reviewed_sha', 'reviewed_sha_nguon', 'reviewed_sha_to_tien', 'revision', 'role', 'schema_version', 'so_dem_nguon', 'so_dem_theo', 'so_p0', 'so_p1', 'so_p2', 'so_p3', 'target_pull_request', 'verdict', 'verdict_ban_goc', 'verdict_bytes', 'verdict_nguon', 'verdict_path', 'verdict_sha256', 'verdict_usage_caveats', 'xu_ly_finding']
+ROUND 2 FIELD schema_version 2 MATCH True
+ROUND 2 FIELD kind 'review_delivery_receipt' MATCH True
+ROUND 2 FIELD target_pull_request 1041 MATCH True
+ROUND 2 FIELD land_merge_commit 'b29da0bfe3bfb7a7be69136a1c5c40f82c088a93' MATCH True
+ROUND 2 FIELD role 'reviewer' MATCH True
+ROUND 2 FIELD provider 'codex' MATCH True
+ROUND 2 FIELD executor_provider 'claude' MATCH True
+ROUND 2 FIELD cross_provider True MATCH True
+ROUND 2 FIELD review_class 'sensitive' MATCH True
+ROUND 2 FIELD effective_review_class 'sensitive' MATCH True
+ROUND 2 FIELD independent_from_executor_session True MATCH True
+ROUND 2 FIELD so_dem_theo 'finding' MATCH True
+ROUND 2 FIELD nguon_tep 'ban_sao_nguyen_byte_cua_tep_goc_trong_kho' MATCH True
+ROUND 2 LEASE_FIELD packet_id 'BIEN-NHAN-V2-TEST-IN-CHI-TIET-TIN-DUNG-GIA' MATCH True
+ROUND 2 LEASE_FIELD packet_issue 1037 MATCH True
+ROUND 2 LEASE_FIELD revision 1 MATCH True
+ROUND 2 LEASE_FIELD generation 1 MATCH True
+ROUND 2 LEASE_FIELD lease_id 'wp1037-r1-g1-claude' MATCH True
+ROUND 2 VERDICT Verdict: approve NORMALIZED_MATCH True COUNTS {'P0': 0, 'P1': 0, 'P2': 0, 'P3': 0} COUNTS_MATCH True
+ROUND 2 FINDINGS_IDS []
+ROUND 2 REVIEWED_SHA_MATCH True TREE c20eace3f4aacea3f33afc5861688cb94d64cf3d LEASE_BASE 757bde561d09738858506aecf5de2f050a5f0d5e
+ROUND 2 OPTIONAL_FIELDS {'reviewed_tree': 'ABSENT', 'base_sha': 'ABSENT', 'muc_bang_chung_model': 'ABSENT'}
+ROUND 2 VERDICT_HASH_MATCH True BYTES_MATCH True RECEIPT_ID_HASH_SUFFIX True
+ROUND 2 EVIDENCE_URL https://github.com/ducthangho/tra-luat/blob/e788a5d0d518f8a08ac13473a85197287fad4fcb/ops/reviews/wp1037-g1-codex-luot2-verdict.md BLOB_EQUAL True ANCHOR {'loai': 'canonical_ancestry', 'cuong_do': 'thap', 'mo_ta': '(a) Blob verdict ghim o commit hien vat e788a5d cua PR ghi so; len trung_binh/cao khi PR ghi so land bang merge commit (squash pha quan he to tien).'}
+ROUND 2 ANCESTRY e788a5d0d518f8a08ac13473a85197287fad4fcb f37b5195978f1fe35b9cb55b6f79a2e09d165af0 rc 0
+ROUND 2 ANCESTRY 91466322f705658ed51b80c7c152f6b77f4f90c6 b29da0bfe3bfb7a7be69136a1c5c40f82c088a93 rc 0
+ROUND 2 ANCESTRY 757bde561d09738858506aecf5de2f050a5f0d5e 91466322f705658ed51b80c7c152f6b77f4f90c6 rc 0
+ROUND 2 IDENTITY provider openai_codex RUN_MATCH True
+ROUND 2 IDENTITY surface codex_cli RUN_MATCH True
+ROUND 2 IDENTITY transport machine RUN_MATCH True
+ROUND 2 IDENTITY session_run_id e400a3206474480f827b771e59395389 RUN_MATCH True
+ROUND 2 MODEL_FIELDS {'model_yeu_cau': 'gpt-6-astra', 'model': 'gpt-6-astra', 'model_da_chay': 'gpt-6-astra', 'model_evidence': 'do_may', 'model_evidence_ref': 'ops/reviews/wp1037-g1-codex-luot2/run/run.json#model_phuc_vu'}
+ROUND 2 MEASURED_MODELS DO_DUOC 19 {'gpt-6-astra': 19} EFFORT DO_DUOC ['xhigh']
+ROUND 2 RUNTIME {'run_id': 'e400a3206474480f827b771e59395389', 'head': '91466322f705658ed51b80c7c152f6b77f4f90c6', 'trang_thai': 'xong', 'ma_thoat': 0, 'thoi_luong_giay': 567.318, 'worktree_sach': True, 'so_muc_ban': 0, 'prompt_sha256': 'd1d75feb247d2e20d64c5cbceffb2dd50fdbed8efa65f5accff67c72c339a75d', 'sandbox_trang_thai': 'DO_DUOC', 'sandbox_gioi_han': 'lay mau /proc tu ben ngoai moi 0.2s: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. Moi lech danh tinh tien trinh (ke ca vong doi binh thuong nhu cha zombie) => KHONG_DO_DUOC: co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do'}
+ROUND 2 PROMPT_HASH_MATCH True
+ROUND 2 START_IN_LEASE True
+ROUND 2 LENH_METADATA {'chuong_trinh': 'codex', 'so_doi_so': 11, 'van_tay': 'e499892440c95129'} CLI_VERSION_FIELDS []
+ROUND 2 ASSURANCE cross_approved EXECUTOR_MODEL claude-opus-5-5 claude
+ROUND 2 CAVEATS [{"id": "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY", "muc": "P3", "mo_ta": "Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong."}, {"id": "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX", "muc": "P3", "mo_ta": "Script/bang chung cua reviewer (evidence/*) KHONG vao kho va tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can dung lai clone tai 9146632."}]
+MERGE_HEAD_PARENT 91466322f705658ed51b80c7c152f6b77f4f90c6
+WRITE_SET_HASH d7872905e38bb8e57304520785c71c0562f88d84f60946af2cfb41e4f2cd792a EXPECTED d7872905e38bb8e57304520785c71c0562f88d84f60946af2cfb41e4f2cd792a
+BOOKKEEPING_HEAD_IN_MASTER_RC 1

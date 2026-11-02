@@ -1,0 +1,200 @@
+[
+  {
+    "name": "head_empty",
+    "rc": 0,
+    "mode": "dacl-rong",
+    "model": "head",
+    "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU",
+    "tasks": 1,
+    "nodes": 4,
+    "bad_nodes": 0,
+    "command": [
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/pwsh/pwsh",
+      "-NoProfile",
+      "-File",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/probes/state-head-model.ps1",
+      "-Product",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/copies/control/ops/vm/cap-nhat-cong-cu.ps1",
+      "-Mode",
+      "dacl-rong",
+      "-OutFile",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/evidence/head_empty.json"
+    ]
+  },
+  {
+    "name": "no_reset_empty",
+    "rc": 0,
+    "mode": "dacl-rong",
+    "model": "head",
+    "error": "Access to the path '/tmp/cncc-dk-f58fda460beb444fb95e069848dbf127/PF/tra-luat-ops/cong_cu.yaml' is denied.",
+    "tasks": 0,
+    "nodes": 4,
+    "bad_nodes": 0,
+    "command": [
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/pwsh/pwsh",
+      "-NoProfile",
+      "-File",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/probes/state-head-model.ps1",
+      "-Product",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/copies/no_reset/ops/vm/cap-nhat-cong-cu.ps1",
+      "-Mode",
+      "dacl-rong",
+      "-OutFile",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/evidence/no_reset_empty.json"
+    ]
+  },
+  {
+    "name": "after_copy_empty",
+    "rc": 0,
+    "mode": "dacl-rong",
+    "model": "head",
+    "error": "Access to the path '/tmp/cncc-dk-c1809257d7fd4fcf8b27dcc7e023c5a2/PF/tra-luat-ops/cong_cu.yaml' is denied.",
+    "tasks": 0,
+    "nodes": 4,
+    "bad_nodes": 0,
+    "command": [
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/pwsh/pwsh",
+      "-NoProfile",
+      "-File",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/probes/state-head-model.ps1",
+      "-Product",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/copies/reset_after_copy/ops/vm/cap-nhat-cong-cu.ps1",
+      "-Mode",
+      "dacl-rong",
+      "-OutFile",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/evidence/after_copy_empty.json"
+    ]
+  },
+  {
+    "name": "after_copy_cached_empty",
+    "rc": 0,
+    "mode": "dacl-rong",
+    "model": "head",
+    "error": "Access to the path '/tmp/cncc-dk-3af84d8cc6774d0d99b3c017cd8ece9f/PF/tra-luat-ops/cong_cu.yaml' is denied.",
+    "tasks": 0,
+    "nodes": 4,
+    "bad_nodes": 0,
+    "command": [
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/pwsh/pwsh",
+      "-NoProfile",
+      "-File",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/probes/state-head-model.ps1",
+      "-Product",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/copies/reset_after_copy_cached_condition/ops/vm/cap-nhat-cong-cu.ps1",
+      "-Mode",
+      "dacl-rong",
+      "-OutFile",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/evidence/after_copy_cached_empty.json"
+    ]
+  },
+  {
+    "name": "head_nested",
+    "rc": 0,
+    "mode": "cay-long",
+    "model": "head",
+    "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU",
+    "tasks": 1,
+    "nodes": 9,
+    "bad_nodes": 0,
+    "command": [
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/pwsh/pwsh",
+      "-NoProfile",
+      "-File",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/probes/state-head-model.ps1",
+      "-Product",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/copies/control/ops/vm/cap-nhat-cong-cu.ps1",
+      "-Mode",
+      "cay-long",
+      "-OutFile",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/evidence/head_nested.json"
+    ]
+  },
+  {
+    "name": "no_T_nested_head_model",
+    "rc": 0,
+    "mode": "cay-long",
+    "model": "head",
+    "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU",
+    "tasks": 1,
+    "nodes": 9,
+    "bad_nodes": 3,
+    "command": [
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/pwsh/pwsh",
+      "-NoProfile",
+      "-File",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/probes/state-head-model.ps1",
+      "-Product",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/copies/reset_no_T/ops/vm/cap-nhat-cong-cu.ps1",
+      "-Mode",
+      "cay-long",
+      "-OutFile",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/evidence/no_T_nested_head_model.json"
+    ]
+  },
+  {
+    "name": "no_T_nested_original_model",
+    "rc": 0,
+    "mode": "cay-long",
+    "model": "original",
+    "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU",
+    "tasks": 1,
+    "nodes": 9,
+    "bad_nodes": 0,
+    "command": [
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/pwsh/pwsh",
+      "-NoProfile",
+      "-File",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/luot1/probes/state-original-model.ps1",
+      "-Product",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/copies/reset_no_T/ops/vm/cap-nhat-cong-cu.ps1",
+      "-Mode",
+      "cay-long",
+      "-OutFile",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/evidence/no_T_nested_original_model.json"
+    ]
+  },
+  {
+    "name": "no_T_nested_recursive_model",
+    "rc": 0,
+    "mode": "cay-long",
+    "model": "recursive",
+    "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU",
+    "tasks": 1,
+    "nodes": 9,
+    "bad_nodes": 3,
+    "command": [
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/pwsh/pwsh",
+      "-NoProfile",
+      "-File",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/luot1/probes/state-recursive-model.ps1",
+      "-Product",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/copies/reset_no_T/ops/vm/cap-nhat-cong-cu.ps1",
+      "-Mode",
+      "cay-long",
+      "-OutFile",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/evidence/no_T_nested_recursive_model.json"
+    ]
+  },
+  {
+    "name": "head_nested_previous_recursive",
+    "rc": 0,
+    "mode": "cay-long",
+    "model": "recursive",
+    "error": "OFFLINE-DUNG-TRUOC-MAT-KHAU",
+    "tasks": 1,
+    "nodes": 9,
+    "bad_nodes": 0,
+    "command": [
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/pwsh/pwsh",
+      "-NoProfile",
+      "-File",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/luot1/probes/state-recursive-model.ps1",
+      "-Product",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/copies/control/ops/vm/cap-nhat-cong-cu.ps1",
+      "-Mode",
+      "cay-long",
+      "-OutFile",
+      "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr1091r2.61jU/evidence/head_nested_previous_recursive.json"
+    ]
+  }
+]

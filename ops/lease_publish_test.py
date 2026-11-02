@@ -8566,6 +8566,9 @@ def _danh_gia_bieu_thuc_chuan_bi(expr_str: str, ctx: dict) -> list[str]:
         if (m := re.fullmatch(r"contains\s*\(\s*github\.event\.pull_request\.labels\.\*\.name\s*,\s*'([^']+)'\s*\)", nt)):
             return lambda c, v=m.group(1): v in (c.get("labels") or [])
         # P3 review Codex #878: tên input theo ngữ pháp định danh của Actions (không bắt đầu bằng số, cho phép `-`).
+        # wp1113: che_do do buoc phan-loai xuat (ctx["che_do"]; vang = rong) — duong nhanh ep chi Ubuntu.
+        if (m := re.fullmatch(r"steps\.phan-loai\.outputs\.che_do\s*==\s*'([^']+)'", nt)):
+            return lambda c, v=m.group(1): c.get("che_do", "") == v
         if (m := re.fullmatch(r"inputs\.([A-Za-z_][A-Za-z0-9_-]*)\s*==\s*'([^']+)'", nt)):
             return lambda c, k=m.group(1), v=m.group(2): (c.get("inputs") or {}).get(k, "") == v
         _khong_do_duoc(f"vế điều kiện không nằm trong tập tối giản hỗ trợ: {nt!r}")
@@ -8715,6 +8718,20 @@ def t162_M4_evaluator_toi_gian_chuan_bi():
         bang(bt != raw_expr, f"đột biến #878 {ten} không đổi được biểu thức (neo trôi)")
         r = _danh_gia_bieu_thuc_chuan_bi(bt, _disp("windows-only"))
         bang(r != ["windows-latest"], f"đột biến #878 {ten} SỐNG: windows-only vẫn chỉ ra {r}")
+
+    # wp1113 (CI-LAN-LUU-TRU r1, A6): che_do == duong_nhanh ⇒ chỉ Ubuntu ở MỌI sự kiện, kể cả windows-only và nhãn windows;
+    # day_du / vắng ⇒ giữ nguyên kết quả cũ. Đột biến: gỡ nhánh ép, hoặc ép cả khi day_du ⇒ ca ĐỎ.
+    neo_ep = "(steps.phan-loai.outputs.che_do == 'duong_nhanh') && '[\"ubuntu-latest\"]' || "
+    bang(raw_expr.count(neo_ep) == 1, f"wp1113: nhánh ép Ubuntu phải xuất hiện đúng một lần ở đầu: {raw_expr!r}")
+    cac_ctx = (c_push_master, c_pr_thuong, c_pr_windows, _disp("windows-only"), _disp(None))
+    def _ep_dung(bt):
+        return all(_danh_gia_bieu_thuc_chuan_bi(bt, dict(c, che_do="duong_nhanh")) == ["ubuntu-latest"] for c in cac_ctx) and all(
+            _danh_gia_bieu_thuc_chuan_bi(bt, dict(c, che_do=cd)) == _danh_gia_bieu_thuc_chuan_bi(bt.replace(neo_ep, ""), c)
+            for c in cac_ctx for cd in ("day_du", ""))
+    bang(_ep_dung(raw_expr), "wp1113: ép Ubuntu sai trên biểu thức thật")
+    for ten, bt in (("go_nhanh_ep", raw_expr.replace(neo_ep, "")),
+                    ("ep_ca_khi_day_du", raw_expr.replace("== 'duong_nhanh')", "== 'day_du')"))):
+        bang(not _ep_dung(bt), f"wp1113: đột biến {ten} SỐNG")
 
     # Review Codex #878 (P2, P3): toán tử NẰM TRONG literal không được tách; tên input theo ngữ pháp Actions.
     # Bản `split` thô làm các ca "nhận" dưới đây thành KHÔNG ĐO ĐƯỢC — chính chúng là đột biến của bộ tách.

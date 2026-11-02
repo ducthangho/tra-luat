@@ -1,0 +1,68 @@
+claim	source	measured	expected	result
+HEAD	git rev-parse HEAD	"""352d31e03bc846cae5b4ee7bc17bbea6830fb64d"""	"""352d31e03bc846cae5b4ee7bc17bbea6830fb64d"""	KHOP
+PR1111 number	pull-1111.json:number	1111	1111	KHOP
+PR1111 merged	pull-1111.json:merged	true	true	KHOP
+PR1111 merged_at	pull-1111.json:merged_at	"""2026-11-01T07:43:08Z"""	"""2026-11-01T07:43:08Z"""	KHOP
+PR1111 merge_commit_sha	pull-1111.json:merge_commit_sha	"""4397ee616273a97c1503e8359452aef4e78cd75a"""	"""4397ee616273a97c1503e8359452aef4e78cd75a"""	KHOP
+PR1111 head	pull-1111.json:head.sha	"""f783bee391ada131df8df195acfd3d4c4ae394c9"""	"""f783bee391ada131df8df195acfd3d4c4ae394c9"""	KHOP
+comment anchors exact head	comments-1111.json:6555093642.body	true	true	KHOP
+head < comment < merge	git commit time + comments-1111.json + pull-1111.json	true	true	KHOP
+ancestor 4397ee6 -> 165b27a	git merge-base --is-ancestor	0	0	KHOP
+ancestor 4397ee6 -> 3bdd987	git merge-base --is-ancestor	0	0	KHOP
+ancestor 3bdd987 -> 180039c	git merge-base --is-ancestor	0	0	KHOP
+ancestor cb39aca -> 40609d4	git merge-base --is-ancestor	0	0	KHOP
+merge parents	git show 4397ee6 %P	"[""c6dd7b33b4f215809bf281ee1533bc1e8fa6920c"", ""f783bee391ada131df8df195acfd3d4c4ae394c9""]"	"[""c6dd7b33b4f215809bf281ee1533bc1e8fa6920c"", ""f783bee391ada131df8df195acfd3d4c4ae394c9""]"	KHOP
+merge files	git diff --name-only 4397ee6^1 4397ee6	"[""ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml"", ""ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/SHA256SUMS.txt"", ""ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/gate-output-41173244891.txt""]"	"[""ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml"", ""ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/SHA256SUMS.txt"", ""ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/gate-output-41173244891.txt""]"	KHOP
+3 intervening merges	git log --first-parent --reverse 4397ee6..3bdd987	"[""165b27a"", ""2cea625"", ""3bdd987""]"	"[""165b27a"", ""2cea625"", ""3bdd987""]"	KHOP
+4 added specs	git diff --name-status 4397ee6 3bdd987	"[""A\tops/specs/CI-LAN-LUU-TRU-r1.md"", ""A\tops/specs/DIEU-KIEN-MERGE-CONG-r1.md"", ""A\tops/specs/launcher-sandbox-lay-mau-r1.md"", ""A\tops/specs/launcher-sandbox-lay-mau-r2.md""]"	"[""A\tops/specs/CI-LAN-LUU-TRU-r1.md"", ""A\tops/specs/DIEU-KIEN-MERGE-CONG-r1.md"", ""A\tops/specs/launcher-sandbox-lay-mau-r1.md"", ""A\tops/specs/launcher-sandbox-lay-mau-r2.md""]"	KHOP
+no change in dossier or VM	git diff --name-status 4397ee6 3bdd987 -- <paths>	""""""	""""""	KHOP
+run 41285898441 id	run-41285898441.json:id	41285898441	41285898441	KHOP
+run 41285898441 event	run-41285898441.json:event	"""push"""	"""push"""	KHOP
+run 41285898441 path	run-41285898441.json:path	""".github/workflows/ci.yml"""	""".github/workflows/ci.yml"""	KHOP
+run 41285898441 run_attempt	run-41285898441.json:run_attempt	1	1	KHOP
+run 41285898441 head_sha	run-41285898441.json:head_sha	"""4397ee616273a97c1503e8359452aef4e78cd75a"""	"""4397ee616273a97c1503e8359452aef4e78cd75a"""	KHOP
+run 41285898441 status	run-41285898441.json:status	"""completed"""	"""completed"""	KHOP
+run 41285898441 conclusion	run-41285898441.json:conclusion	"""cancelled"""	"""cancelled"""	KHOP
+run 41285898441 created_at	run-41285898441.json:created_at	"""2026-11-01T07:43:11Z"""	"""2026-11-01T07:43:11Z"""	KHOP
+run 41285898441 updated_at	run-41285898441.json:updated_at	"""2026-11-01T09:07:12Z"""	"""2026-11-01T09:07:12Z"""	KHOP
+run 41285898441 repository	run-41285898441.json:repository.full_name	"""ducthangho/tra-luat"""	"""ducthangho/tra-luat"""	KHOP
+run 41287486328 id	run-41287486328.json:id	41287486328	41287486328	KHOP
+run 41287486328 event	run-41287486328.json:event	"""push"""	"""push"""	KHOP
+run 41287486328 path	run-41287486328.json:path	""".github/workflows/ci.yml"""	""".github/workflows/ci.yml"""	KHOP
+run 41287486328 run_attempt	run-41287486328.json:run_attempt	1	1	KHOP
+run 41287486328 head_sha	run-41287486328.json:head_sha	"""165b27a4bfe02e81af7bc94bda1e71c10d8c38e4"""	"""165b27a4bfe02e81af7bc94bda1e71c10d8c38e4"""	KHOP
+run 41287486328 status	run-41287486328.json:status	"""completed"""	"""completed"""	KHOP
+run 41287486328 conclusion	run-41287486328.json:conclusion	"""success"""	"""success"""	KHOP
+run 41287486328 created_at	run-41287486328.json:created_at	"""2026-11-01T09:07:11Z"""	"""2026-11-01T09:07:11Z"""	KHOP
+run 41287486328 updated_at	run-41287486328.json:updated_at	"""2026-11-01T09:23:36Z"""	"""2026-11-01T09:23:36Z"""	KHOP
+run 41287486328 repository	run-41287486328.json:repository.full_name	"""ducthangho/tra-luat"""	"""ducthangho/tra-luat"""	KHOP
+run 41290009265 id	run-41290009265.json:id	41290009265	41290009265	KHOP
+run 41290009265 event	run-41290009265.json:event	"""push"""	"""push"""	KHOP
+run 41290009265 path	run-41290009265.json:path	""".github/workflows/ci.yml"""	""".github/workflows/ci.yml"""	KHOP
+run 41290009265 run_attempt	run-41290009265.json:run_attempt	1	1	KHOP
+run 41290009265 head_sha	run-41290009265.json:head_sha	"""3bdd9877cab2543adc413a32a47decbb585ded97"""	"""3bdd9877cab2543adc413a32a47decbb585ded97"""	KHOP
+run 41290009265 status	run-41290009265.json:status	"""completed"""	"""completed"""	KHOP
+run 41290009265 conclusion	run-41290009265.json:conclusion	"""success"""	"""success"""	KHOP
+run 41290009265 created_at	run-41290009265.json:created_at	"""2026-11-01T09:42:53Z"""	"""2026-11-01T09:42:53Z"""	KHOP
+run 41290009265 updated_at	run-41290009265.json:updated_at	"""2026-11-01T10:22:24Z"""	"""2026-11-01T10:22:24Z"""	KHOP
+run 41290009265 repository	run-41290009265.json:repository.full_name	"""ducthangho/tra-luat"""	"""ducthangho/tra-luat"""	KHOP
+cancelled run total_count / jobs	jobs-41285898441.json	[0, []]	[0, []]	KHOP
+returned / total_count	jobs-41290009265-r2.json + run-41290009265.json	[23, 23]	[23, 23]	KHOP
+success	jobs-41290009265-r2.json + run-41290009265.json	23	23	KHOP
+ubuntu-latest	jobs-41290009265-r2.json + run-41290009265.json	23	23	KHOP
+runner_id != 0	jobs-41290009265-r2.json + run-41290009265.json	23	23	KHOP
+started_at < run.created_at	jobs-41290009265-r2.json + run-41290009265.json	22	22	KHOP
+completed_at < run.created_at	jobs-41290009265-r2.json + run-41290009265.json	15	15	KHOP
+min started_at	jobs-41290009265-r2.json + run-41290009265.json	"""2026-11-01T09:23:37Z"""	"""2026-11-01T09:23:37Z"""	KHOP
+all job run_id/attempt/head match	jobs-41290009265-r2.json + run-41290009265.json	true	true	KHOP
+successful run order in supplied window	runs-master-push.json	[41287486328, 41290009265]	[41287486328, 41290009265]	KHOP
+static hash ops/vm/cap-nhat-cong-cu.ps1	git show cb39aca:ops/vm/cap-nhat-cong-cu.ps1	"""8efc063a"""	"""8efc063a"""	KHOP
+static bytes same at merge ops/vm/cap-nhat-cong-cu.ps1	git show cb39aca/40609d4:ops/vm/cap-nhat-cong-cu.ps1	true	true	KHOP
+static hash ops/cong_cu.yaml	git show cb39aca:ops/cong_cu.yaml	"""71631bb6"""	"""71631bb6"""	KHOP
+static bytes same at merge ops/cong_cu.yaml	git show cb39aca/40609d4:ops/cong_cu.yaml	true	true	KHOP
+static hash requirements.txt	git show cb39aca:requirements.txt	"""97733a88"""	"""97733a88"""	KHOP
+static bytes same at merge requirements.txt	git show cb39aca/40609d4:requirements.txt	true	true	KHOP
+static schedule	cb39aca:ops/vm/cap-nhat-cong-cu.ps1	true	true	KHOP
+landed bool	YAML trang_thai_packet.landed	true	true	KHOP
+VM label	YAML van_hanh_tren_vm.trang_thai	"""thuat_lai"""	"""thuat_lai"""	KHOP
+post_merge labels	YAML post_merge_checks	"[""measured"", ""measured"", ""thuat_lai""]"	"[""measured"", ""measured"", ""thuat_lai""]"	KHOP

@@ -1,0 +1,15 @@
+prompt.snapshot == PROMPT.md: True
+$ git rev-parse --show-toplevel HEAD HEAD^{tree} origin/master 210ab81^{commit}
+/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr17-pr1065.CMv7/cay-kho
+4b3f07ed64e45e65cc4645b8601c666bafed8bd0
+5a5b6631dcb1108173323f0bd58fe8a4c471512c
+7b845f59e150047ca44582331fb9207860297e24
+210ab81c3f1af36243748458eb5e70180baeab71
+rc= 0
+$ git status --porcelain=v1
+rc= 0
+$ git rev-parse --is-shallow-repository
+false
+rc= 0
+$ git symbolic-ref -q HEAD
+rc= 1

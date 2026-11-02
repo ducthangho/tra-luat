@@ -1,0 +1,17 @@
+{
+  "cwd": "/tmp/claude-0/rv/pr1048-review-3/cay-kho",
+  "argv": [
+    "rg",
+    "-l",
+    "--hidden",
+    "-g",
+    "!**/.git/**",
+    "KHOA\\.txt",
+    "."
+  ],
+  "rc": 0,
+  "stdout_file": "lock-refs.stdout",
+  "stderr_file": "lock-refs.stderr",
+  "stdout_bytes": 1960,
+  "stderr_bytes": 0
+}

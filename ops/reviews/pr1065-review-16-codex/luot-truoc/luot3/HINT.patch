@@ -1,0 +1,179 @@
+--- /dev/null
++++ ops/vm/cap-nhat-cong-cu_register_probe.ps1
+@@ -0,0 +1,91 @@
++param([string]$Mode = 'clean', [string]$Product = "$PSScriptRoot/cap-nhat-cong-cu.ps1")
++. $Product -NapHam
++$Product = (Resolve-Path -LiteralPath $Product).Path
++$base = Join-Path ([IO.Path]::GetTempPath()) ('review-register-' + [guid]::NewGuid().ToString('N'))
++New-Item -ItemType Directory -Path $base | Out-Null
++$env:ProgramFiles = Join-Path $base 'PF'; $env:SystemRoot = Join-Path $base 'Windows'; $env:COMPUTERNAME = 'REVIEW-VM'
++$MayDich = 'REVIEW-VM'; $ThuMucCongCu = Join-Path $base 'Tools'; $NlmVenv='D:\nlm venv\'; $VenvKho='D:\repo venv\\'
++$HomeCommander='D:\profile custom'; $TaiKhoanNguoiDung='tlcommander'; $TacVuCommander='CMD-CUSTOM'
++New-Item -ItemType Directory -Path "$env:SystemRoot/System32", "$env:ProgramFiles/tra-luat-ops", "$ThuMucCongCu/npm", "$ThuMucCongCu/Python312", "$ThuMucCongCu/bin", "$base/victim/npm", "$base/victim/Python312", "$base/victim/bin" | Out-Null
++if ($Mode -eq 'root-link') {
++    Remove-Item -LiteralPath "$ThuMucCongCu/npm" -Recurse
++    New-Item -ItemType SymbolicLink -Path "$ThuMucCongCu/npm" -Target "$base/victim/npm" | Out-Null
++}
++if ($Mode -eq 'ancestor-link') {
++    Remove-Item -LiteralPath $ThuMucCongCu -Recurse
++    New-Item -ItemType SymbolicLink -Path $ThuMucCongCu -Target "$base/victim" | Out-Null
++}
++if ($Mode -eq 'install-root-link') {
++    Remove-Item -LiteralPath "$env:ProgramFiles/tra-luat-ops" -Recurse
++    New-Item -ItemType SymbolicLink -Path "$env:ProgramFiles/tra-luat-ops" -Target "$base/victim" | Out-Null
++}
++if ($Mode -eq 'install-ancestor-link') {
++    Remove-Item -LiteralPath $env:ProgramFiles -Recurse
++    New-Item -ItemType Directory -Path "$base/pf-victim/tra-luat-ops" | Out-Null
++    New-Item -ItemType SymbolicLink -Path $env:ProgramFiles -Target "$base/pf-victim" | Out-Null
++}
++if ($Mode -eq 'install-child-link') {
++    New-Item -ItemType SymbolicLink -Path "$env:ProgramFiles/tra-luat-ops/link" -Target "$base/victim" | Out-Null
++}
++$shim = @'
++#!/usr/bin/python3
++import json, os, sys
++with open(os.environ['REVIEW_IC_LOG'],'a') as f:
++    f.write(json.dumps({'event':'icacls', 'argv':sys.argv[1:], 'resolved':os.path.realpath(sys.argv[1])})+'\n')
++sys.exit(0)
++'@
++$icacls = "$env:SystemRoot/System32/icacls.exe"
++[IO.File]::WriteAllText($icacls,$shim)
++& /bin/chmod +x $icacls
++$env:REVIEW_IC_LOG = "$base/icacls.jsonl"
++$Script:Tasks = [Collections.Generic.List[object]]::new(); $Script:Actions=[Collections.Generic.List[object]]::new()
++$Script:AuditReads = 0
++function Copy-Item {
++    param($LiteralPath,$Destination,[switch]$Force)
++    @{event='copy';source=$LiteralPath;destination=$Destination}|ConvertTo-Json -Compress|Add-Content -LiteralPath $env:REVIEW_IC_LOG
++    Microsoft.PowerShell.Management\Copy-Item -LiteralPath $LiteralPath -Destination $Destination -Force:$Force
++}
++function Get-Acl {
++    param($LiteralPath)
++    $isInstall = "$LiteralPath".StartsWith($env:ProgramFiles)
++    if ($isInstall) { $Script:AuditReads++ }
++    $owner = if ($isInstall) {'BUILTIN\Administrators'} else {"$env:COMPUTERNAME\tlcommander"}
++    $rights = if ($isInstall -and $Mode -eq 'acl-reject') {'Modify'} else {'ReadAndExecute, Synchronize'}
++    if ($isInstall -and $Mode -in 'stateful-owner','stateful-inheritance') {
++        $events=@(Get-Content -LiteralPath $env:REVIEW_IC_LOG|ConvertFrom-Json)
++        if ($Mode -eq 'stateful-owner') {
++            # Explicit model: a new copy is owned by the copying account, until a later recursive setowner.
++            $lastCopy=-1; $lastOwner=-1
++            for ($i=0;$i -lt $events.Count;$i++) {
++                if ($events[$i].event -eq 'copy' -and $events[$i].destination -eq $LiteralPath) {$lastCopy=$i}
++                if ($events[$i].event -eq 'icacls' -and $events[$i].argv -contains '/setowner') {$lastOwner=$i}
++            }
++            if ($lastCopy -gt $lastOwner) {$owner='REVIEW-VM\tladmin'}
++        }
++        if ($Mode -eq 'stateful-inheritance' -and -not ($events|Where-Object {$_.event -eq 'icacls' -and $_.argv -contains '/inheritance:r'})) {
++            $rights='Modify'
++        }
++    }
++    [pscustomobject]@{ Owner=$owner; Access=@([pscustomobject]@{IdentityReference='REVIEW-VM\tlcommander';FileSystemRights=$rights;AccessControlType='Allow'}) }
++}
++function Get-FileHash {
++    param($LiteralPath)
++    if ($Mode -eq 'hash-reject' -and "$LiteralPath".StartsWith($env:ProgramFiles)) { return [pscustomobject]@{ Hash='BAD-HASH' } }
++    Microsoft.PowerShell.Utility\Get-FileHash -LiteralPath $LiteralPath
++}
++function New-ScheduledTaskSettingsSet { param([switch]$StartWhenAvailable,$ExecutionTimeLimit,$MultipleInstances) [pscustomobject]@{ settings=$true } }
++function New-ScheduledTaskTrigger { param([switch]$Weekly,$WeeksInterval,$DaysOfWeek,$At) [pscustomobject]@{ At=$At; WeeksInterval=$WeeksInterval } }
++function New-ScheduledTaskAction { param($Execute,$Argument)
++    $a=[pscustomobject]@{ Execute=$Execute; Argument=$Argument }; $Script:Actions.Add($a); $a
++}
++function New-ScheduledTaskPrincipal { param($UserId,$LogonType,$RunLevel) [pscustomobject]@{UserId=$UserId} }
++function Register-ScheduledTask { param($TaskName,$Action,$Trigger,$Principal,$Settings,[switch]$Force,$ErrorAction) $Script:Tasks.Add([pscustomobject]@{Name=$TaskName;Action=$Action;ErrorAction=$ErrorAction}) }
++function Get-Credential { param($UserName,$Message) throw 'OFFLINE-STOP-BEFORE-CREDENTIALS' }
++$errorText=$null
++try { Register-LichCapNhat (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Product))) } catch { $errorText=$_.Exception.Message }
++$events = if (Test-Path -LiteralPath $env:REVIEW_IC_LOG) { @(Get-Content -LiteralPath $env:REVIEW_IC_LOG | ConvertFrom-Json) } else { @() }
++$icCalls = @($events|Where-Object {$_.event -eq 'icacls'})
++$target = Join-Path $env:ProgramFiles 'tra-luat-ops'
++$files = @(Get-ChildItem -LiteralPath $target -File -ErrorAction SilentlyContinue | ForEach-Object {$_.Name})
++[ordered]@{mode=$Mode; error=$errorText; icacls_count=$icCalls.Count; icacls=@($icCalls); events=$events; tool_acl_calls=@($icCalls|Where-Object {$_.argv[0] -notlike '*/tra-luat-ops'}).Count; actions=@($Script:Actions); tasks=@($Script:Tasks); audit_reads=$Script:AuditReads; copied_files=$files; note='Linux paths real; native icacls/Get-Acl/ScheduledTasks stubbed; stateful-* are explicit fake owner/inheritance models; stop before password/COM'} | ConvertTo-Json -Depth 9 -Compress
++Remove-Item -LiteralPath $base -Recurse -Force
+--- /dev/null
++++ ops/vm/cap-nhat-cong-cu_register_review_test.py
+@@ -0,0 +1,82 @@
++"""Linux-only offline Register probes. Does not measure native Windows ACL/Tasks.
++
++Usage: TL_TEST_PWSH=/absolute/pwsh python3 this_file.py [--product /path/to/product.ps1]
++Each test invokes Register itself with real scratch paths/copies and explicit native stubs.
++"""
++import argparse
++import json
++import os
++from pathlib import Path
++import shutil
++import subprocess
++
++parser = argparse.ArgumentParser()
++parser.add_argument('--product', type=Path, default=Path(__file__).with_name('cap-nhat-cong-cu.ps1'))
++options = parser.parse_args()
++pwsh = os.environ.get('TL_TEST_PWSH') or shutil.which('pwsh')
++if not pwsh:
++    raise SystemExit('Missing pwsh: set TL_TEST_PWSH')
++probe = Path(__file__).with_name('cap-nhat-cong-cu_register_probe.ps1')
++results = {}
++def measure(mode):
++    if mode not in results:
++        p = subprocess.run([pwsh, '-NoProfile', '-File', str(probe), '-Product', str(options.product.resolve()), '-Mode', mode], capture_output=True, text=True, timeout=30)
++        if p.returncode:
++            raise RuntimeError(f'probe {mode} rc={p.returncode}: {p.stdout}\n{p.stderr}')
++        data = json.loads(p.stdout.splitlines()[-1])
++        results[mode] = data
++    return results[mode]
++
++def successful(j):
++    return len(j['tasks']) == 1 and j['error'] == 'OFFLINE-STOP-BEFORE-CREDENTIALS'
++
++def no_tools_acl():
++    j = measure('ancestor-link')
++    return successful(j) and j['tool_acl_calls'] == 0 and j['icacls_count'] == 3
++
++def refuses_ancestor():
++    j = measure('install-ancestor-link')
++    return not j['tasks'] and j['icacls_count'] == 0 and 'reparse point' in (j['error'] or '')
++
++def refuses_acl():
++    j = measure('acl-reject')
++    return not j['tasks'] and (j['error'] or '').startswith('ACL ')
++
++def refuses_hash():
++    j = measure('hash-reject')
++    return not j['tasks'] and 'lệch băm nguồn' in (j['error'] or '')
++
++def owner_after_copy():
++    j = measure('stateful-owner')
++    copies = [i for i, e in enumerate(j['events']) if e['event'] == 'copy']
++    owners = [i for i, e in enumerate(j['events']) if e['event'] == 'icacls' and '/setowner' in e['argv']]
++    return successful(j) and bool(copies) and bool(owners) and max(owners) > max(copies)
++
++def reset_before_copy():
++    j = measure('stateful-inheritance')
++    copies = [i for i, e in enumerate(j['events']) if e['event'] == 'copy']
++    resets = [i for i, e in enumerate(j['events']) if e['event'] == 'icacls' and '/inheritance:r' in e['argv'] and '/grant:r' in e['argv']]
++    return successful(j) and bool(copies) and bool(resets) and min(resets) < min(copies)
++
++def full_task_configuration():
++    j = measure('clean')
++    if not successful(j) or len(j['actions']) != 2:
++        return False
++    for action, scope in zip(j['actions'], ['HeThong', 'NguoiDung']):
++        arg = action['Argument']
++        if any(s not in arg for s in ['-File "', f'-PhamVi "{scope}"', '-MayDich "REVIEW-VM"', '-ThuMucCongCu "', '-NlmVenv "D:\\nlm venv\\\\"', '-VenvKho "D:\\repo venv\\\\\\\\"', '-HomeCommander "D:\\profile custom"', '-TaiKhoanNguoiDung "tlcommander"', '-TacVuCommander "CMD-CUSTOM"']):
++            return False
++    return True
++
++tests = [no_tools_acl, refuses_ancestor, refuses_acl, refuses_hash, owner_after_copy, reset_before_copy, full_task_configuration]
++passed = 0
++for test in tests:
++    try:
++        ok = bool(test())
++    except Exception as exc:
++        ok = False
++        print(f'HARNESS_ERROR {test.__name__}: {exc}')
++    passed += ok
++    print(('PASS ' if ok else 'FAIL ') + test.__name__)
++print(f'Register offline: {passed}/{len(tests)} PASS; native ACL NOT_MEASURED')
++raise SystemExit(0 if passed == len(tests) else 1)

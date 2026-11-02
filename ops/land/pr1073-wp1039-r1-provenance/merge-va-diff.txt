@@ -1,0 +1,20 @@
+# do trong phien ghi so 2026-10-31, core.abbrev 7
+$ git rev-parse a253c169^{tree} a253c169^1 a253c169^2 9783b42^{tree}
+d0fa9509a6e1dab62e5d91e8c5528f5c6186df36
+713694ba6b9ab0bdce49b416f1b1faed938f1875
+9783b421ecb74636311501e7c0d712e2aa73a5c0
+17900666c586ce782a42a958f5224de354d57c54
+$ git rev-parse 97120d3c:ops/specs/cloud-setup-p2b-wire-r1.md
+3d17563ad81733a5b5e87ba207f87ca9fde3b0a2
+$ git diff --stat 97120d3c 9783b42
+ .claude/dev/ci_dang_ky_test.py |   1 +
+ .claude/hooks/session-start.sh |   8 +-
+ RELEASE_MANIFEST.json          |  10 +-
+ ops/cloud_agent_creds.py       | 194 +++++++++++++++++++
+ ops/cloud_agent_creds_test.py  | 431 +++++++++++++++++++++++++++++++++++++++++
+ ops/codex_cloud_setup.sh       |   3 +
+ ops/codex_cloud_setup_test.py  |  37 +++-
+ references/RUNBOOK.md          |  23 +++
+ 8 files changed, 700 insertions(+), 7 deletions(-)
+$ git show 97120d3c:ops/specs/cloud-setup-p2b-wire-r1.md | sha256sum
+67b448acc825fdd29f118c3b9082583773b4ad218a7c83ab4db496daa8f26d81  -

@@ -1,0 +1,30 @@
+# Moc §10.2.2 Workflow definition cho ci.yml push master run 41161511121 attempt 1 tren merge b653574 — do 2026-10-31.
+# Cach do: theo ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml (moc_workflow_definition_20261026) va CLAUDE.md muc
+# "Lenh `gh api graphql` dua cho chu kho chay". Khac tien le: lenh do PHIEN chay tren may chu kho ASUS-LAPTOP qua Desktop
+# Commander (deviceId 7404cfba-9034-4787-b46b-7c358126a411, shell cmd), gh dang nhap tai khoan ducthangho (keyring), theo chi
+# thi chu kho "Ban chay lenh gh api graphql di qua Remote DC" (31-10-2026). Phien web van bi GraphQL 403.
+
+## Lenh (mot dong, cmd)
+gh api graphql -f id=WFR_kwLOTNeRjc8AAAAJlWrQ0Q -f query="query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt file { path repositoryFileUrl } checkSuite { commit { oid } } } } }" > graphql-run-41161511121.json
+node_id WFR_kwLOTNeRjc8AAAAJlWrQ0Q lay tu REST GET actions/runs/41161511121 (truong node_id) trong phien.
+
+## Output
+Tep tren laptop: C:\Users\admin\tl-work\session_015GtxrbUPS7zGdffB8Sfo8Y\graphql-run-41161511121.json
+sha256 do TREN laptop (certutil) = 7c09f8f7a62684079050627d4baa5a2e44cbec7cf98a292019c21f32a9882547
+Ban trong kho graphql-output-run-41161511121.json dung lai tu `type`, khong dong moi cuoi; sha256 trong kho = cung gia tri (khop byte).
+databaseId 41161511121, runNumber 3575, createdAt 2026-10-31T02:46:51Z
+file.path .github/workflows/ci.yml
+file.repositoryFileUrl https://github.com/ducthangho/tra-luat/blob/b653574b117fa1496fbf58f09a22a8cbed5cc5dc/.github/workflows/ci.yml
+checkSuite.commit.oid b653574b117fa1496fbf58f09a22a8cbed5cc5dc
+Ma thoat gh: KHONG_DO_DUOC chinh xac (cmd mo rong %errorlevel% luc parse dong lenh); output la JSON hop le co `data`, khong co `errors`.
+
+## Doi chieu doc lap trong phien
+REST run 41161511121: head_sha b653574b117fa1496fbf58f09a22a8cbed5cc5dc, path .github/workflows/ci.yml, run_attempt 1, node_id khop.
+REST contents/.github/workflows/ci.yml?ref=b653574: sha 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc, 69161 byte,
+  sha256 ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb
+git rev-parse b653574:.github/workflows/ci.yml = 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc (khop REST)
+git cat-file -p b653574:.github/workflows/ci.yml | sha256sum = ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb (khop REST)
+blob ci.yml tai ba1b10d (cha 1) va 6f23a4e (cha 2) cung 82d9f239… — PR khong doi workflow.
+
+## Ket qua
+measured — exact definition: .github/workflows/ci.yml @ b653574, blob 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc.

@@ -32,6 +32,7 @@ import hashlib
 import hmac
 import html
 import importlib.util
+import io
 import json
 import os
 import platform
@@ -2787,7 +2788,9 @@ def _neo_connector(k: str, x: dict, head: str, biet: set):
     Issue comment (dạng connector `**Reviewed commit:** `sha``): phần còn lại của DÒNG sau MỖI nhãn phải đúng một SHA 7–40 hex (backtick
     đủ cặp hoặc không), mọi khai cùng một phía; tiền tố chỉ là head khi không SHA nào khác đã biết trong readback (`biet`) cùng tiền tố."""
     if k != "issue_comments":
-        c = x.get("commit_id")
+        # v1.x #1106 (PR #1116: P2 4435201341 viết trên b2f318e mà commit_id bị GitHub DỜI sang head mới vì push không đổi dòng nó bám) —
+        # review comment neo theo `original_commit_id` (commit nơi finding được VIẾT); `commit_id` chỉ là chỗ nó còn áp được.
+        c = x["original_commit_id"] if k == "review_comments" and "original_commit_id" in x else x.get("commit_id")
         return "hien" if c == head else "cu" if type(c) is str and SHA_RE.fullmatch(c) else "hong"
     khai = [re.fullmatch(r"(`?)([0-9a-f]{7,40})\1", t.strip()) for t in re.findall(r"Reviewed commit:(?:\*\*)?([^\n]*)", x["body"])]
     if not khai:
@@ -2812,7 +2815,7 @@ def _doc_connector(duong: str, repo: str, pr: int, head: str, p0p2: list | None 
         url, dung = ("issue_url", f"{API_GH}{repo}/issues/{pr}") if k == "issue_comments" else ("pull_request_url", f"{API_GH}{repo}/pulls/{pr}")
         if not all(x.get(url) == dung and isinstance(x.get("user"), dict) and type(x.get("body")) is str for x in v):
             _die(RC_GATE, f"connector {k}: phần tử không thuộc {repo} PR {pr} hoặc thiếu user/body")
-    biet = {c for v in ep.values() for x in v for c in [x.get("commit_id"), *re.findall(r"\b[0-9a-f]{40}\b", x["body"])] if type(c) is str and SHA_RE.fullmatch(c)}
+    biet = {c for v in ep.values() for x in v for c in [x.get("commit_id"), x.get("original_commit_id"), *re.findall(r"\b[0-9a-f]{40}\b", x["body"])] if type(c) is str and SHA_RE.fullmatch(c)}
     cua = {k: [(x, _neo_connector(k, x, head, biet)) for x in v if x["user"].get("login") == BOT_CONNECTOR] for k, v in ep.items()}
     if hong := [(k, x["id"]) for k, v in cua.items() for x, n in v if n == "hong"]:
         _die(RC_GATE, f"connector: mục của {BOT_CONNECTOR} có neo head thiếu/sai/mơ hồ {hong}")
@@ -3078,6 +3081,244 @@ def cmd_where(a, state_dir: Path) -> int:
     return RC_OK
 
 
+# --- #1106 ADR-0060 packet C (`ops/specs/DIEU-KIEN-MERGE-CONG-r1.md`): `kiem-merge`, `kiem-dong-wp` — KHÔNG đọc/ghi state, độc lập ADR-0054.
+# Mỗi điều kiện đo riêng; mọi điều kiện thiếu được liệt kê (M6), không dừng ở cái đầu tiên.
+ADR0060_TEP = "docs/adr/0060-dieu-kien-merge-va-moc-ready.md"
+LUAT_0060_RE = re.compile(rb"^dieu_kien_merge: ADR-0060@([0-9a-f]{40})$", re.M)
+CHU_KHO, MOC_10_2_2, DAT_MOC = "ducthangho", ("run", "checkout", "workflow_definition", "gate_output"), ("passed", "owner_waived")
+WIN_TU_KHOA = ("os.name", "sys.platform", "platform.system", "subprocess", "encoding=", "os.sep", "pathlib")
+DUOI_MA, DUOI_THU_DONG = (".py", ".ps1", ".sh", ".cmd", ".bat"), (".md", ".yaml", ".yml", ".json", ".txt", ".log")
+DOT_BIEN_DU_TEP = ".github/workflows/ci-dot-bien-du.yml"  # #1120 K7: nguồn `full_mutant_audit` của ADR-0060 M9
+
+
+def _yaml_cay(b: bytes):
+    """Kiểm trên CÂY NODE trước khi dựng dict: khoá phải là scalar chuỗi, không trùng trong một mapping, không alias."""
+    import yaml
+    class Nap(yaml.SafeLoader):  # timestamp giữ nguyên CHUỖI: so `lease_until` theo đúng chữ, không theo datetime đã chuẩn hoá
+        yaml_implicit_resolvers = {k: [r for r in v if r[0] != "tag:yaml.org,2002:timestamp"] for k, v in yaml.SafeLoader.yaml_implicit_resolvers.items()}
+    s = b.decode("utf-8")
+    try:
+        if any(isinstance(e, yaml.AliasEvent) or getattr(e, "anchor", None) for e in yaml.parse(s)):
+            raise ValueError("YAML có anchor/alias")
+        cho = [yaml.compose(s)]
+    except yaml.YAMLError as ex:
+        raise ValueError(f"YAML hỏng: {type(ex).__name__}") from None
+    while cho:
+        n = cho.pop()
+        if isinstance(n, yaml.MappingNode):
+            khoa = [k.value if isinstance(k, yaml.ScalarNode) and k.tag == "tag:yaml.org,2002:str" else None for k, _ in n.value]
+            if None in khoa or len(set(khoa)) != len(khoa):
+                raise ValueError(f"khoá YAML trùng hoặc không phải chuỗi: {khoa}")
+            cho += [v for _, v in n.value]
+        elif isinstance(n, yaml.SequenceNode):
+            cho += n.value
+    try:  # chỉ dựng giá trị SAU khi cây sạch; tag hỏng (`!!bool nope`) ném lỗi constructor ⇒ lỗi đầu vào, không traceback
+        return yaml.load(s, Loader=Nap)
+    except (yaml.YAMLError, KeyError, AttributeError, TypeError, ValueError) as ex:
+        raise ValueError(f"YAML hỏng: {type(ex).__name__}") from None
+
+
+def _dk(ten: str, fn, thieu: list):
+    """Chạy một điều kiện; `_die` bên trong (vd `_kiem_ci`) bị bắt thành một dòng thiếu thay vì kết thúc lệnh."""
+    loi = io.StringIO()
+    try:
+        with contextlib.redirect_stderr(loi), contextlib.redirect_stdout(io.StringIO()):
+            return fn()
+    except SystemExit:
+        thieu.append(f"{ten}: {' '.join(loi.getvalue().split())[:400] or 'đỏ'}")
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as ex:
+        thieu.append(f"{ten}: KHÔNG ĐO ĐƯỢC ({type(ex).__name__}: {ex})"[:400])
+
+
+def _diff_raw(root: Path, b: str, h: str) -> list:
+    """`git diff --raw --no-renames -z B..H` ⇒ [(mode, đường dẫn)]; git lỗi ⇒ ValueError (KHÔNG ĐO ĐƯỢC, không phải "không chạm")."""
+    rc, raw = _git_do(root, "diff", "--raw", "--no-renames", "-z", b, h)
+    if rc:
+        raise ValueError("không đo được diff base..head")
+    t = raw.decode("utf-8", "surrogateescape").split("\0")
+    return [(t[i].split()[1] if t[i].split()[1] != "000000" else t[i].split()[0][1:], t[i + 1]) for i in range(0, len(t) - 1, 2) if t[i].startswith(":")]
+
+
+def _cham_m9(root: Path, b: str, h: str) -> bool:
+    """#1120 ADR-0060 M9: diff chạm `.claude/dev/**`, `ops/**/*.py` hoặc `.github/workflows/**`."""
+    return any(p.startswith((".claude/dev/", ".github/workflows/")) or (p.startswith("ops/") and p.endswith(".py")) for _, p in _diff_raw(root, b, h))
+
+
+def _phan_loai_windows(root: Path, b: str, h: str, spec: bytes) -> str:
+    """ADR-0060 M3, đúng thứ tự, dừng ở bước đầu khớp."""
+    tep = _diff_raw(root, b, h)
+    if not tep:
+        raise ValueError("không đo được diff base..head")
+    duoi = lambda p: PurePosixPath(p).suffix.lower()  # noqa: E731
+    if all(p.startswith(("ops/reviews/", "ops/land/")) and m == "100644" and (duoi(p) in DUOI_THU_DONG or PurePosixPath(p).name == "SHA256SUMS") for m, p in tep):
+        return "not_required"
+    ma = [p for _, p in tep if duoi(p) in (".py", ".ps1", ".sh", ".yml")]
+    rc, d = _git_do(root, "diff", "-U0", b, h, "--", *ma) if ma else (0, b"")
+    if rc:
+        raise ValueError("không đo được dòng thêm (git diff -U0)")
+    them = [x for x in d.decode("utf-8", "replace").splitlines() if x.startswith("+") and not x.startswith("+++")]
+    if (any(duoi(p) in (".ps1", ".cmd", ".bat", ".sh") or p.startswith(("scripts/deploy-", ".claude/dev/", ".github/workflows/")) for _, p in tep)
+            or any(k in x for x in them for k in WIN_TU_KHOA) or re.search(rb"^windows: required$", spec, re.M)):
+        return "required"
+    if all(duoi(p) == ".md" or (p.startswith(("docs/", "ops/land/", "ops/reviews/", "ops/specs/")) and duoi(p) not in DUOI_MA) for _, p in tep):
+        return "not_required"
+    return "unknown"
+
+
+def _dong_chu_kho(duong, tho=False) -> list[str]:
+    """Các dòng của MỘT comment readback chỉ khi tác giả là `CHU_KHO` (hằng trong mã, không có cờ đổi). `tho`: giữ nguyên dòng (#1120 K7
+    khớp `^full_mutant_audit: H mien$` đúng chữ, chỉ tách ở LF/CRLF — review offline lượt 1+3 F03: `strip()`/`splitlines()` sửa dòng)."""
+    if not duong:
+        return []
+    d = _doc_json(duong, RC_GATE)[0]
+    if not isinstance(d, dict) or not isinstance(d.get("user"), dict) or d["user"].get("login") != CHU_KHO or type(d.get("body")) is not str:
+        raise ValueError(f"comment không phải của chủ kho {CHU_KHO}")
+    return [x if tho else x.strip() for x in (re.split(r"\r?\n", d["body"]) if tho else d["body"].splitlines())]  # lượt 3 F03: splitlines tách cả \v \f \x85 \u2028…
+
+
+def cmd_kiem_merge(a, state_dir: Path) -> int:
+    if not (all(SHA_RE.fullmatch(x) for x in (a.head, a.base)) and re.fullmatch(r"[^/\s]+/[^/\s]+", a.repo)):
+        _die(RC_ARG, "--head/--base phải là SHA 40 hex, --repo dạng chủ/kho")
+    root, h, thieu, p3 = Path(a.root), a.head, [], []
+    try:  # đầu vào YAML hỏng là lỗi ĐỐI SỐ, không phải một điều kiện đỏ
+        lease = _yaml_cay(Path(a.lease).read_bytes())
+    except (OSError, ValueError, UnicodeDecodeError) as ex:
+        _die(RC_ARG, f"không đọc được --lease: {ex}")
+    if not isinstance(lease, dict):
+        _die(RC_ARG, "--lease phải là mapping")
+
+    def k0():
+        if a.base == h or _git_do(root, "merge-base", "--is-ancestor", a.base, h)[0] or _git_do(root, "merge-base", "--is-ancestor", a.base, "refs/remotes/origin/master")[0]:
+            _die(RC_GATE, "base không phải tổ tiên của head và của origin/master, hoặc base = head")
+        x = _git_do(root, "ls-remote", "origin", f"refs/pull/{a.pr}/head")
+        if x[0] or x[1].split()[:1] != [h.encode()]:
+            _die(RC_GATE, f"PR head hiện hành ≠ {h}")
+
+    def k1():
+        rc, spec = _git_do(root, "show", f"{h}:{a.spec}")
+        if rc or hashlib.sha256(spec).hexdigest() != lease.get("spec_hash"):
+            _die(RC_GATE, "blob --spec tại head không khớp spec_hash của lease")
+        khai = LUAT_0060_RE.findall(spec)
+        oid = khai[0].decode() if len(khai) == 1 else None
+        if not (oid and _git_do(root, *("rev-parse", "--is-shallow-repository")) == (0, b"false\n")
+                and _git_do(root, "cat-file", "-e", f"{oid}:{ADR0060_TEP}")[0] == 0 and _git_do(root, "cat-file", "-e", f"{oid}^1:{ADR0060_TEP}")[0] != 0
+                and (fp := _git_do(root, "rev-list", "--first-parent", "refs/remotes/origin/master"))[0] == 0 and oid.encode() in fp[1].split()):
+            _die(RC_GATE, "dòng khai dieu_kien_merge không hợp lệ (đúng một dòng, OID land ADR-0060 trên first-parent master)")
+        return spec
+
+    def k4():
+        r = _doc_json(a.offline_run_json, RC_GATE)[0]
+        out = Path(a.offline_stdout).read_bytes()
+        dong = [x for x in out.decode("utf-8").splitlines() if x.strip()]
+        if not (isinstance(r, dict) and r.get("head") == h and r.get("trang_thai") == "xong" and type(r.get("ma_thoat")) is int and r["ma_thoat"] == 0
+                and r.get("stdout_sha256") == hashlib.sha256(out).hexdigest() and dong and dong[-1].strip() == "KET_LUAN: approve"):
+            _die(RC_GATE, "review offline chưa approve đúng head (run.json head/trang_thai/ma_thoat/stdout_sha256 hoặc dòng KET_LUAN)")
+
+    def k5():
+        mo = {f"{k}:{i}" for k, i in p3} | set(a.p3_offline or [])
+        mien = [m[1] for x in _dong_chu_kho(a.chu_kho_comment) for m in [re.fullmatch(rf"mien_p3: {h} (\S+)", x)] if m]
+        if mo and (len(mien) != 1 or set(mien[0].split(",")) != mo):
+            _die(RC_GATE, f"P3 còn mở {sorted(mo)} chưa có đúng một dòng `mien_p3: {h} …` của chủ kho phủ ĐÚNG tập ấy")
+
+    def k6(spec):
+        loai = _phan_loai_windows(root, a.base, h, spec)
+        dong = _dong_chu_kho(a.chu_kho_comment) if loai != "not_required" else []
+        if loai == "unknown" and f"windows: {h} not_required" not in dong:
+            _die(RC_GATE, "Windows `unknown` chưa được chủ kho chốt")
+        if loai == "required" and f"windows: {h} mien" not in dong:
+            w = _doc_json(a.windows_json, RC_GATE)[0] if a.windows_json else {}
+            ts = w.get("tests") if isinstance(w, dict) else None
+            if not (w.get("sha") == h and w.get("os") == "Windows" and isinstance(ts, list) and ts and all(isinstance(x, dict) and type(x.get("id")) is str and x["id"] for x in ts)
+                    and len({x.get("id") for x in ts}) == len(ts) and all(x.get("ket_qua") == "passed" for x in ts)):
+                _die(RC_GATE, "Windows `required`: thiếu lượt ứng viên xanh (sha = head, os Windows, tests khác rỗng, mọi ca passed) hoặc dòng miễn")
+
+    def k7():  # #1120 ADR-0060 M9: run `ci-dot-bien-du.yml` success ĐÚNG H với mọi job của đúng run_id/run_attempt, hoặc dòng miễn của chủ kho
+        try:
+            mien = bool(a.chu_kho_comment) and f"full_mutant_audit: {h} mien" in _dong_chu_kho(a.chu_kho_comment, tho=True)
+        except ValueError:  # lượt 4 F25: comment KHÔNG của chủ kho không cấp miễn, cũng không phủ quyết nhánh (b) run xanh
+            mien = False
+        if not _cham_m9(root, a.base, h) or mien:
+            return
+        if not (a.dot_bien_du_runs and a.dot_bien_du_jobs):
+            _die(RC_GATE, "diff chạm vùng M9 mà thiếu --dot-bien-du-runs/--dot-bien-du-jobs và dòng miễn `full_mutant_audit: H mien` của chủ kho")
+        runs = _trang_du(_doc_json(a.dot_bien_du_runs, RC_GATE)[0], "workflow_runs", "--dot-bien-du-runs")
+        # review offline lượt 1 F01/F02: MỖI tệp jobs là một lần lấy của MỘT (run_id, run_attempt) — trang đủ đo trên ĐÚNG tập dùng để quyết
+        # định; định danh phải đúng kiểu int ở cả hai phía (bool/float bằng nhau với int dưới `==`); một run/attempt không được ở hai tệp.
+        nhom = {}
+        for p in a.dot_bien_du_jobs:
+            js = _trang_du(_doc_json(p, RC_GATE)[0], "jobs", f"--dot-bien-du-jobs {p}")
+            khoa = {(j.get("run_id"), j.get("run_attempt")) for j in js}
+            if not all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int for j in js) or len(khoa) > 1 or khoa & nhom.keys():
+                _die(RC_GATE, f"--dot-bien-du-jobs {p}: phải là jobs của đúng MỘT run_id + run_attempt (int), không lặp ở tệp khác")
+            nhom.update(dict.fromkeys(khoa, js))
+        xanh = lambda x: x.get("status") == "completed" and x.get("conclusion") == "success"  # noqa: E731
+        for r in runs:
+            js = nhom.get((r["id"], r["run_attempt"])) if type(r.get("run_attempt")) is int else None
+            if r.get("path") == DOT_BIEN_DU_TEP and r.get("head_sha") == h and xanh(r) and js and all(map(xanh, js)):
+                return
+        _die(RC_GATE, f"không run `{DOT_BIEN_DU_TEP}` nào success tại {h} với mọi job (đúng run_id + run_attempt) success")
+
+    _dk("K0 đầu vào neo", k0, thieu)
+    spec = _dk("K1 hiệu lực M10", k1, thieu)
+    _dk("K2 CI", lambda: _kiem_ci(a, {"required_checks": [list(x) for x in CHECK_BAT_BUOC], "repo": a.repo}, h, state_dir), thieu)
+    p3 += (_dk("K3 connector", lambda: _doc_connector(a.connector, a.repo, a.pr, h), thieu) or ([], None))[0]
+    _dk("K4 review offline", k4, thieu)
+    if not any(x.startswith("K3") for x in thieu):
+        _dk("K5 P3", k5, thieu)
+    if spec is not None:
+        _dk("K6 Windows", lambda: k6(spec), thieu)
+    _dk("K7 full_mutant_audit", k7, thieu)
+    if thieu:
+        for x in thieu:
+            print(f"  THIẾU  {x}", file=sys.stderr)
+        _die(RC_GATE, "CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu " + "; ".join(x.split(":")[0] for x in thieu))
+    print(f"ĐỦ ĐIỀU KIỆN MERGE trên {h}")
+    return RC_OK
+
+
+def cmd_kiem_dong_wp(a, state_dir: Path) -> int:
+    root, thieu = Path(a.root), []
+    hex64, url = re.compile(r"[0-9a-f]{64}\Z"), re.compile(r"https://github\.com/\S+\Z")
+    so = lambda v: type(v) is int and v >= 1  # noqa: E731
+    try:
+        bb, ls = _yaml_cay(Path(a.bien_ban).read_bytes()), _yaml_cay(Path(a.lease).read_bytes())
+    except (OSError, ValueError, UnicodeDecodeError) as ex:
+        _die(RC_ARG, f"không đọc được biên bản/lease: {type(ex).__name__}: {ex}")
+    if not (isinstance(bb, dict) and isinstance(ls, dict)):
+        _die(RC_ARG, "biên bản và lease phải là mapping")
+    chuoi = lambda v, r=None: type(v) is str and bool(v.strip()) and (r is None or bool(r.fullmatch(v)))  # noqa: E731
+    luat = {"packet": chuoi, "revision": so, "generation": so, "spec_hash": lambda v: chuoi(v, hex64), "head_da_review": lambda v: chuoi(v, SHA_RE),
+            "tree_h": lambda v: chuoi(v, SHA_RE), "review": lambda v: isinstance(v, dict), "windows": lambda v: isinstance(v, dict),
+            "duyet_chu_kho": lambda v: chuoi(v, url), "merge_commit": lambda v: chuoi(v, SHA_RE), "tree_m": lambda v: chuoi(v, SHA_RE),
+            "ci_master": lambda v: isinstance(v, dict) and so(v.get("run_id")) and chuoi(v.get("conclusion")),
+            "nghiem_thu": lambda v: isinstance(v, dict) and bool(v), "lease_cuoi": chuoi, "landed": lambda v: type(v) is bool,
+            "moc_10_2_2": lambda v: isinstance(v, dict) and sorted(v) == sorted(MOC_10_2_2)}
+    if sai := [k for k, f in luat.items() if not f(bb.get(k))]:
+        thieu.append(f"D1 trường M8: thiếu hoặc sai kiểu {sai}")
+    elif not (bb["landed"] is True and all(v in DAT_MOC for v in bb["moc_10_2_2"].values())
+              and all(v in DAT_MOC for v in bb["nghiem_thu"].values()) and bb["ci_master"]["conclusion"] == "success"):
+        thieu.append("D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt")
+    if not sai:
+        m, hh = bb["merge_commit"], bb["head_da_review"]
+        g = lambda *x: (lambda r: r[1].decode().split() if r[0] == 0 else ["<git lỗi>"])(_git_do(root, *x))  # noqa: E731 — rc ≠ 0 ⇒ không khớp
+        if (g("rev-parse", f"{m}^2") != [hh] or g("rev-parse", f"{hh}^{{tree}}") != [bb["tree_h"]] or g("rev-parse", f"{m}^{{tree}}") != [bb["tree_m"]]
+                or m not in g("rev-list", "--first-parent", "refs/remotes/origin/master")):
+            thieu.append("D3 git: merge_commit^2/tree_h/tree_m/first-parent master không khớp")
+        try:
+            het = datetime.strptime(str(ls.get("lease_until")), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc)
+        except (ValueError, OverflowError):
+            het = False
+        if not (ls.get("lease_id") == bb["lease_cuoi"] and ls.get("packet_id") == bb["packet"] and ls.get("generation") == bb["generation"]
+                and type(ls.get("generation")) is int and het):
+            thieu.append("D4 lease: không khớp lease_cuoi/packet/generation hoặc lease_until chưa qua")
+    if thieu:
+        for x in thieu:
+            print(f"  THIẾU  {x}", file=sys.stderr)
+        _die(RC_GATE, "CHƯA ĐÓNG ĐƯỢC WP: thiếu " + "; ".join(x.split(" ")[0] for x in thieu))
+    print(f"ĐÓNG ĐƯỢC WP {bb['packet']} — merge {bb['merge_commit']}")
+    return RC_OK
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="packet_loop.py",
@@ -3290,6 +3531,24 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--root", default=".")
     q.add_argument("--checkpoint-path", required=True, help="ops/checkpoints/<tên>.yaml, đọc tại origin/master sau khi máy tự fetch")
     q.set_defaults(fn=cmd_chu_kho_duyet)
+
+    q = sub.add_parser("kiem-merge", help="#1106 ADR-0060: đủ điều kiện bỏ draft/merge trên head H? (K0–K7, không state)")
+    for x in ("--root", "--repo", "--head", "--base", "--spec", "--lease", "--workflow-runs", "--check-runs", "--connector", "--offline-run-json", "--offline-stdout"):
+        q.add_argument(x, required=x != "--root", default="." if x == "--root" else None)
+    q.add_argument("--pr", type=int, required=True)
+    q.add_argument("--workflow-jobs", required=True, action="append")
+    q.add_argument("--p3-offline", action="append", help="khoá P3 còn mở từ review offline; lặp")
+    q.add_argument("--chu-kho-comment", help="readback JSON một comment của chủ kho (dòng `mien_p3:` / `windows:` / `full_mutant_audit:`)")
+    q.add_argument("--windows-json", help="{sha, os: Windows, tests: [{id, ket_qua}]} của lượt ứng viên")
+    q.add_argument("--dot-bien-du-runs", help="#1120 K7: readback trang `actions/workflows/ci-dot-bien-du.yml/runs?head_sha=H`")
+    q.add_argument("--dot-bien-du-jobs", action="append", help="#1120 K7: readback trang `actions/runs/<id>/jobs`; lặp")
+    q.set_defaults(fn=cmd_kiem_merge)
+
+    q = sub.add_parser("kiem-dong-wp", help="#1106 ADR-0060 M8: biên bản sổ sách + lease đủ để đóng WP? (D1–D4, không state)")
+    q.add_argument("--root", default=".")
+    q.add_argument("--bien-ban", required=True, help="khối YAML của biên bản M8")
+    q.add_argument("--lease", required=True, help="tệp lease cuối của packet")
+    q.set_defaults(fn=cmd_kiem_dong_wp)
 
     q = sub.add_parser("bien-nhan",
                        help="đếm biên nhận review; ĐỎ khi packet có 0 biên nhận reviewer")

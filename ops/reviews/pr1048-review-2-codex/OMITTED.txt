@@ -1,0 +1,4 @@
+# Tep KHONG vao kho (>500 KB): sha256  byte  duong_dan_tuong_doi. Anh chup cay sandbox cua reviewer, tai lap duoc tu clone tai reviewed_sha.
+b0dc623805a9283a0487ba4ad3684bd69482b2d0c4b79d8d60d27d171d46bc59  2556550  review_evidence/snapshot-after.json
+b0dc623805a9283a0487ba4ad3684bd69482b2d0c4b79d8d60d27d171d46bc59  2556550  review_evidence/snapshot-before.json
+1f61a1402a750f6780e03482075d19935cdb7199be9d65eea00e906935c49048  2556550  review_evidence/snapshot-final.json

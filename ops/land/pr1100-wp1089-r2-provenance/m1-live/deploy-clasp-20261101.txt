@@ -1,0 +1,43 @@
+# Deploy webapp 2.21.2q — chay boi phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 qua Desktop Commander
+# tren may chu kho ASUS-LAPTOP (theo chi thi chu kho trong phien: "Ban tu deploy cho toi tren may thong qua desktop commander di").
+# Chep nguyen van output cac lenh (clasp 3.4.1 qua npx, cwd D:\Quoc hoi\gas-project).
+
+$ git -C <kho> rev-parse origin/master origin/master:references/Code.2.21.2q.gs
+c82047da4d6f9546ce1d68282c37acf9567b74bc
+7bc2b8691c996b21274ae1d4f152aff36848110a
+$ git show origin/master:references/Code.2.21.2q.gs > gas-project\Code.gs   (qua cmd, byte-exact)
+sha256(Code.gs) = 8fabb594c534247da6bc25fce191d2391da68f4e1ced3eaad3938055f5a8f957 ; size 226231 ; APP_VERSION 2.21.2q
+sao luu ban cu: gas-project\Code.gs.bak-2.21.2p-20261101 sha256 3f4d0c8200e4eea1eff9168f514da3647d60b413a2dcdfd6d0356bc0c70ae2cb
+
+$ clasp deployments   (TRUOC)
+Found 2 deployments.
+- AKfycby0o7Mp34Gjxn2CXZIH813rD8OgYHsEV6_vZcyIiG8 @HEAD
+- AKfycbzNrsxGYjFkzT-Gq8NB_AiUS4zTOua8NwQtXqa_Dj51GEWOpUZ2Zq7PVBOu2YpAIeAU @80 - 2.21.2p ATOMIC registry RMW (KI-25/26/27) — va goc su co 1313->2
+
+$ clasp status
+Tracked files:
+└─ appsscript.json
+└─ Code.gs
+
+$ clasp push -f
+Pushed 2 files at 12:21:22 am.   (gio may UTC+7 = 2026-11-01T17:21:22Z)
+└─ appsscript.json
+└─ Code.gs
+
+$ clasp create-version "2.21.2q agent_creds_put CAS md5 (#1089)"
+Created version 81
+
+$ clasp update-deployment AKfycbzNrsxGYjFkzT-Gq8NB_AiUS4zTOua8NwQtXqa_Dj51GEWOpUZ2Zq7PVBOu2YpAIeAU -V 81 -d "2.21.2q agent_creds_put CAS md5 (#1089)"
+Redeployed AKfycbzNrsxGYjFkzT-Gq8NB_AiUS4zTOua8NwQtXqa_Dj51GEWOpUZ2Zq7PVBOu2YpAIeAU @81
+
+$ clasp deployments   (SAU)
+Found 2 deployments.
+- AKfycby0o7Mp34Gjxn2CXZIH813rD8OgYHsEV6_vZcyIiG8 @HEAD
+- AKfycbzNrsxGYjFkzT-Gq8NB_AiUS4zTOua8NwQtXqa_Dj51GEWOpUZ2Zq7PVBOu2YpAIeAU @81 - 2.21.2q agent_creds_put CAS md5 (#1089)
+
+# webappUrl trong config client chua dung deployment id tren (kiem bang so khop chuoi, khong in URL/token).
+$ python3 scripts/tl.py ping --json   (tu phien cloud)
+{"ok": false, "version": "2.21.2q", "expect": "2.21.2p", "match": false}   # match false = du kien toi P3c (EXPECT_VERSION con 2.21.2p)
+
+# Script Property TL_AGENT_CREDS_FILEID: chu kho tu dat trong editor (clasp khong co lenh dat Script Property).
+# Quay lui: clasp update-deployment AKfycbzNrsx... -V 80

@@ -1,0 +1,125 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1021
+packet_id: BIEN-NHAN-V2-GLOB-HOA-THUONG
+revision: 2
+generation: 1
+lease_id: wp1021-r2-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: [1017, 1006]
+depends_on_ghi_chu: 'ca hai da land: #1007 (2de4c04) va #1018 (dbbabf9) tren master. Windows dispatch run 41003661984 tren dbbabf9: bien_nhan_v2_test 94/94, lease_publish 255/255 (bo qua 13), t27 QUA.'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'ops/bien_nhan_v2.py la cong review/land authority (PROTOCOL §8, §20 dong ADR-0050) => sensitive; executor ho claude, reviewer ho openai; tran ADR-0052, toi da 4 loi goi Codex (spec r2).'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/BIEN-NHAN-V2-GLOB-HOA-THUONG-r2.md
+spec_sha256_required: d5dd5a5df5a2dd8ce799a30442ed974fa3a0d669728446fafdbc2267a59b5b1d
+spec_hash: d5dd5a5df5a2dd8ce799a30442ed974fa3a0d669728446fafdbc2267a59b5b1d
+spec_ref: refs/heads/master@757bde561d09738858506aecf5de2f050a5f0d5e
+spec_ref_ghi_chu: 'spec vao master qua PR #1019 (merge 308145a); commit cuoi cham tep la 169bb7f.'
+prompt_path: ops/specs/BIEN-NHAN-V2-GLOB-HOA-THUONG-r2.md
+prompt_sha256_required: d5dd5a5df5a2dd8ce799a30442ed974fa3a0d669728446fafdbc2267a59b5b1d
+write_set:
+- ops/bien_nhan_v2.py
+- ops/bien_nhan_v2_test.py
+- ops/handoff/wp1021-g1-claude.md
+write_set_hash: 7e4a509cc451bd43f7e7a7f6d6c7b1b650b2337290dbfcac8ba5f1a75eaf3776
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'bien_nhan_v2.py CHI helper chon bien nhan (M1) + thong bao khong-co-tep (M2) o hai cho glob (dong 1442, 1601 tren 09e0594); bien_nhan_v2_test.py CHI ca rXX_ C1a/C1b + dot bien (M3); handoff chi tren nhanh lease.'
+change_policy_sha: null
+effective_write_set:
+- ops/bien_nhan_v2.py
+- ops/bien_nhan_v2_test.py
+- ops/handoff/wp1021-g1-claude.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+nghiem_thu_ghi_chu:
+  C6_nen_moi: 'spec r2 ghi nen tong 304 (735b181); do lai 07:00Z 30-10 tren 09e0594: 253 DAT v2, 0 vi pham, 0 KHONG DO DUOC, tong 306, TONG: DAT; 306 khop duoi chinh xac = 306 khong phan biet hoa thuong. Nen C6 cua lease = 306.'
+  C7_thi_hanh_theo: 'C7 (Windows local) thi hanh theo ADR-0057 cung ADR-0058 (pham vi theo list_devices, khoa theo tung may, han khoa 2 gio), THAY cho quy uoc may dung chung do phien dieu phoi chuyen ma spec r2 trich. Chu kho chot 30-10-2026 trong phien session_015GtxrZ1Tt93F4NLUUhKYQy: ghi dong C7 vao lease, khong soan r3.'
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi (reviewed_sha 40 ky tu), khong con P0/P1/P2/P3 mo; toi da 4 loi goi codex; moi thread connector duoc tra loi'}
+- {id: M-2, dieu_kien: 'ci.yml luot PR XANH tren head cuoi (doc check run, nhan ubuntu-latest); workflow_dispatch runner_set=windows-only tren head cuoi: gate-ops (windows-latest) bien_nhan_v2_test N/N va lease_publish N/N hai so bang nhau (doc nhan job + runner_id)'}
+- {id: M-3, dieu_kien: 'C1a C1b C2 C3 C6 C9 cua spec r2; dot bien so duoi chinh xac lam rXX_ DO tren ca hai nen; dot bien them is_file lam c89 DO; ruff F delta 0; doctrine-scan, git diff --check rc0'}
+- {id: M-4, dieu_kien: 'C7: neu Windows local da chay (theo ADR-0057/0058) thi da va het loi local'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land do chu kho.'
+branch: agent/wp1021-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 757bde561d09738858506aecf5de2f050a5f0d5e
+start_from_sha: 757bde561d09738858506aecf5de2f050a5f0d5e
+start_from_ghi_chu: 'origin/master luc cap lease.'
+reviewed_sha_required: 757bde561d09738858506aecf5de2f050a5f0d5e
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1021
+granted_on_instruction_readback: 'chu kho tra loi "Ghi dong C7 vao lease, phien nay lam executor" trong phien session_015GtxrZ1Tt93F4NLUUhKYQy (30-10-2026); Issue #1021 do chinh phien nay mo theo chi thi chu kho 29-10. Bam byte KHONG DO DUOC.'
+granted_on_instruction_note: >-
+  Chu kho chi dinh phien soan dac ta lam executor sau khi #1017 va #1006 land; cap sau khi lease wp1017-r1-g1-claude het han (08:56Z 30-10).
+recorded_by: claude-executor-session
+recorder_is_executor: true
+recorder_ghi_chu: 'phien ghi lease (session_015GtxrZ1Tt93F4NLUUhKYQy) CUNG la executor, theo chi thi chu kho trong chinh phien; tien le wp1017-r1-g1-claude.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-30T08:56:17Z'
+  goc_quet: 'master 757bde5, fetch +refs/heads/*, ls-remote so TAP ten voi for-each-ref: 704 may chu, thieu 0; master cuc bo = origin/master'
+  ket_qua: 'ca 3 duong dan (ops/bien_nhan_v2.py, ops/bien_nhan_v2_test.py, ops/handoff/wp1021-g1-claude.md): NGUOI_GIU 0. wp1017-r1-g1-claude (giu bien_nhan_v2_test.py) het han tu nhien 08:56:00Z.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'packet moi; lease wp1017-r1-g1-claude (giu bien_nhan_v2_test.py) da HET HAN tu nhien luc 08:56Z, khong khai bia mo vi lease da chet (CLAUDE.md muc bia mo hai chieu).'
+leased_at_utc: '2026-10-30T08:57:00Z'
+heartbeat_at: '2026-10-30T08:57:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+heartbeat_required_minutes: 360
+heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
+lease_until: '2026-10-31T08:10:00Z'
+lease_expires_at_utc: '2026-10-31T08:10:00Z'
+han_ghi_chu: >-
+  Goc 24 gio (2026-10-31T08:57:00Z). RUT NGAN ve 2026-10-31T08:10:00Z — xem thu_hoi_bang_rut_han.
+run_minutes: 60
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+attempts_basis: 'mac dinh kho (tien le wp929/wp960/wp1017).'
+review_rounds_limit: 4
+budget:
+  codex_review_calls:
+    pr_wp1021_g1: {used: 0, reserved: 0, limit: 4}
+  attempt:
+    packet_1021_r2: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'day nhanh agent/wp1021-g1-claude khi C1a/C1b/C2/C3 dat tren Linux; mo PR draft; dispatch Windows tren head.'
+lease_sua_lan_cuoi: '2026-10-31T07:50:00Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-31T08:57:00Z'
+  han_moi_utc: '2026-10-31T08:10:00Z'
+  chi_thi: >-
+    Phien dieu phoi session_01WZT2MvvoQV8QGF1vX9STrJ nho rut han sau khi chu kho duyet va dieu phoi merge #1040
+    (07:49Z 31-10-2026); chu kho truoc do chi thi phien executor "Thuc hien buoc tiep theo khuyen nghi".
+  ly_do: 'Packet #1021 da LAND: PR #1040 merge c8ff9ed563403fffa3c49c84bfce42e9a66bc68b (head a16932aa09ce860a614f0bab4b2015699e7221bc), 2026-10-31T07:49:09Z. Nha write set.'
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660 va wp1037 (a34b9a3): so ops/thu-hoi/ chua kich hoat; rut han chi dung co che DA CAI
+    (phan loai lease theo han).
+  vi_sao_han_moi_khong_bang_luc_sua: >-
+    Han moi = luc sua + 20 phut de luot ops-publish-lease cua chinh commit nay doc lease CON HAN (rc=9 da dang, xanh),
+    khong roi vao rc=8 het han che rc=9 (bai hoc CLAUDE.md 20-09-2026). Khong viet bia mo: lease CON HAN va khong co
+    lease ke nhiem.
+  gioi_han: >-
+    Ref mang lease nay: nhanh ops/wp1021-r2-g1-lease. Nhanh ma agent/wp1021-g1-claude KHONG mang tep lease. Nghiem thu:
+    sau han moi, ai-dang-giu ops/bien_nhan_v2.py va ops/bien_nhan_v2_test.py khong con wp1021-r2-g1-claude.

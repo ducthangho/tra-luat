@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114a/probes/semantics.py", line 45, in <module>
+    assert k.ra == expected, (name, k.ra)
+           ^^^^^^^^^^^^^^^^
+AssertionError: ('p_none', {'ok': False, 'error': 'AGENT_CREDS_FILEID_MISMATCH'})

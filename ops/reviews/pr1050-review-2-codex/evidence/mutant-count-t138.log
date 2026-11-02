@@ -1,0 +1,8 @@
+/tmp/rv1050-r2-copy/ops/lease_publish_test.py:3062: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/rv1050-r2-copy/ops/lease_publish_test.py:5205: SyntaxWarning: invalid escape sequence '\d'
+  KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ
+>>> vao t138_A12_bien_nhan_receipt_du_truong_va_neo_doc_lap_cay_PR 2026-10-30T18:15:36Z
+<<< ra t138_A12_bien_nhan_receipt_du_truong_va_neo_doc_lap_cay_PR 0.160s QUA
+
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0

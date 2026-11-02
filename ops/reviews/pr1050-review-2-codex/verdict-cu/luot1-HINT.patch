@@ -1,0 +1,38 @@
+--- ops/land/pr1041-wp1037-land-evidence.yaml
++++ ops/land/pr1041-wp1037-land-evidence.yaml
+@@ -36,7 +36,7 @@
+ merge_commit_parents: [8cdb15a786304bab084b43c8b30c127ae87e2594, 91466322f705658ed51b80c7c152f6b77f4f90c6]
+ pre_merge_checks:
+   - {name: 'ci.yml pull_request (ubuntu) tren head cuoi', run_id: 41033737059, run_attempt: 1, sha: 91466322f705658ed51b80c7c152f6b77f4f90c6, conclusion: success, ghi_chu: 'measured — readback-run-41033737059.json completed success; readback-jobs-41033737059.json 23/23 success, nhan ubuntu-latest.', nguon: [readback-run-41033737059.json, readback-jobs-41033737059.json]}
+-  - {name: 'ci.yml workflow_dispatch runner_set=windows-only tren head cuoi', run_id: 41069257658, sha: 91466322f705658ed51b80c7c152f6b77f4f90c6, conclusion: success, ghi_chu: 'measured — readback-run-41069257658-a1.json / readback-jobs-41069257658-a1.json: attempt 1 13 success · 2 failure (gate-packet-loop, gate-cong-cu windows-latest 0, buoc G5 probe: runner thieu shellcheck — goc loi ops/cai_cong_cu.sh, tach packet #1045) · 1 skipped; readback-run-41069257658-a2.json / readback-jobs-41069257658-a2.json: attempt 2 (rerun_failed_jobs mot lan) 15 success · 1 skipped (gate-cong-cu-gop), run conclusion success. Job gate-ops (windows-latest) attempt 1: bien_nhan_v2_test 95/95 · 137/137 · 2/2 TONG DAT, lease_publish 255/255 (thuat_lai tu log job 124108765783, log khong luu trong kho).', nguon: [readback-run-41069257658-a1.json, readback-jobs-41069257658-a1.json, readback-run-41069257658-a2.json, readback-jobs-41069257658-a2.json]}
++  - {name: 'ci.yml workflow_dispatch (nhan windows-latest do tu jobs) tren head cuoi', run_id: 41069257658, sha: 91466322f705658ed51b80c7c152f6b77f4f90c6, conclusion: success, ghi_chu: 'measured — readback-run-41069257658-a1.json / readback-jobs-41069257658-a1.json: attempt 1 13 success · 2 failure (gate-packet-loop: G5 probe ban ke cong cu; gate-cong-cu windows-latest 0: G5 manh ban kinh dot bien) · 1 skipped; readback-run-41069257658-a2.json / readback-jobs-41069257658-a2.json: attempt 2 (rerun_failed_jobs mot lan) 15 success · 1 skipped (gate-cong-cu-gop), run conclusion success. Job gate-ops (windows-latest) attempt 1: bien_nhan_v2_test 95/95 · 137/137 · 2/2 TONG DAT, lease_publish 255/255 (thuat_lai tu log job 124108765783, log khong luu trong kho). Thuat_lai — executor khai input runner_set=windows-only va nguyen nhan runner thieu shellcheck, goc loi ops/cai_cong_cu.sh, tach packet #1045; KHONG_DO_DUOC tu readback run/jobs da luu, khong co log chan doan hoac readback inputs trong provenance.', nguon: [readback-run-41069257658-a1.json, readback-jobs-41069257658-a1.json, readback-run-41069257658-a2.json, readback-jobs-41069257658-a2.json]}
+   - {name: 'executor cross-review Codex luot 2/2 tren head cuoi (launcher.py run e400a320)', sha: 91466322f705658ed51b80c7c152f6b77f4f90c6, conclusion: 'approve; 0 P0-P3', nguon: [../reviews/wp1037-g1-codex-luot2/VERDICT.md, ../reviews/wp1037-g1-codex-luot2/run/run.json, ../reviews/wp1037-g1-codex-luot2-verdict.receipt.yaml], ghi_chu: 'measured — ops/reviews/wp1037-g1-codex-luot2/run/run.json: trang_thai xong, ma_thoat 0, head 9146632, model_phuc_vu DO_DUOC 19/19 gpt-6-astra, effort_phuc_vu xhigh; VERDICT sha256 2f482565…49feaf (bien nhan ops/reviews/wp1037-g1-codex-luot2-verdict.receipt.yaml).'}
+   - {name: 'Codex connector', sha: 91466322f705658ed51b80c7c152f6b77f4f90c6, conclusion: 'not_measured — chay khi PR doi sang ready for review (17:28:26Z), merge 17:28:50Z truoc khi co ket qua', ghi_chu: 'thuat_lai — su kien issue_comment cua chatgpt-codex-connector (comment 6529077259) trang thai running; khong luu readback.'}
+ post_merge_checks:
+@@ -67,9 +67,9 @@
+   write_set: ['ops/bien_nhan_v2_test.py', 'ops/handoff/wp1037-g1-claude.md']
+   write_set_hash: d7872905e38bb8e57304520785c71c0562f88d84f60946af2cfb41e4f2cd792a
+   thu_hoi_cuoi: >-
+-    measured — lease-wp1037-r1-g1.yaml.txt (ban doc tai a34b9a3): DA NHA bang RUT HAN (khong bia mo — lease con han, khong co lease ke
++    measured — lease-wp1037-r1-g1.yaml.txt (ban doc tai a34b9a3): DA RUT HAN; CHUA NHA tai moc ghi so 17:37Z (khong bia mo — lease con han, khong co lease ke
+     nhiem): lease_until/lease_expires_at_utc ve 2026-10-30T17:53:00Z, ly do trong khoi thu_hoi_bang_rut_han cua chinh tep lease.
+-    Han moi = luc sua + 20 phut de luot ops-publish-lease cua commit rut han doc lease CON HAN (rc=9), khong roi vao rc=8.
++    Han moi = luc sua + 20 phut de luot ops-publish-lease cua commit rut han doc lease CON HAN (rc=9), khong roi vao rc=8. Chi sau 17:53Z moi do lai ai-dang-giu tren du ref de xac nhan da nha; chua co phep do ay trong ho so nay.
+ 
+ trang_thai_packet:
+   merged: true
+@@ -80,12 +80,12 @@
+   landed: false
+   landed_dieu_kien: >-
+     PROTOCOL §10.2.4 — (1) gate tren merge SHA b29da0b: CHUA DAT — run 41099184556 pending luc ghi so, va moc Checkout / Workflow
+-    definition / Gate output cua §10.2.2 khong do duoc trong phien web; (2) lease da nha bang rut han (17:53Z); (3) bookkeeping: ho so nay
++    definition / Gate output cua §10.2.2 khong do duoc trong phien web; (2) lease CHUA nha tai moc ghi so 17:37Z, da rut han ve 17:53Z, can do lai ai-dang-giu sau han; (3) bookkeeping: ho so nay
+     + hai bien nhan review; (4) review neo DUNG authorized_head_sha 9146632: Codex luot 2 approve 0 P0-P3 DAT; Codex connector chua co ket
+     qua (not_measured); (5) uy quyen land neo SHA: CHUA DAT — chi thi ben neu dieu kien, khong neu SHA; (6) muc tieu packet: tep test
+     in du ngoai le + vi tri nem vao master DAT; (7) reviewer assurance §8.1: xem assurance_81.
+     Mo lai — TAT CA: (1) do du bon moc provenance CI §10.2.2 cho DUNG run push master tren b29da0b (WorkflowRun.file qua GraphQL — nho
+-    chu kho chay lenh `gh api graphql` tren may, mau CLAUDE.md muc "Lenh gh api graphql"); VA (5) chu kho ghi duyet ben neo 9146632.
++    chu kho chay lenh `gh api graphql` tren may, mau CLAUDE.md muc "Lenh gh api graphql"); VA (2) do ai-dang-giu sau 17:53Z tren du ref, khong con wp1037-r1-g1-claude; VA (5) chu kho ghi duyet ben neo 9146632.
+ 
+ assurance_81:
+   reviewer_assurance_81: DAT

@@ -1,0 +1,14 @@
+{
+  "cwd": "/tmp/claude-0/rv/pr1048-review-3/cay-kho",
+  "argv": [
+    "git",
+    "config",
+    "--get",
+    "core.abbrev"
+  ],
+  "rc": 0,
+  "stdout_file": "git-abbrev.stdout",
+  "stderr_file": "git-abbrev.stderr",
+  "stdout_bytes": 2,
+  "stderr_bytes": 0
+}

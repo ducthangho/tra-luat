@@ -1,0 +1,30 @@
+ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml:5: # TRANG THAI: merged (3dfb973), `landed: false` — cho chu kho quyet o PR ghi so (PR #1069). Moc §10.2.2 Workflow definition da
+ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml:6: # dong (gh graphql qua ASUS); moc Checkout/Gate output van not_measured. Assurance §8.1: cross_approved tren BAN VA 210ab81
+ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml:7: # (PR #1069), con ban merge b0814f4 bi cross-review luot 1 tra changes_requested (1 P0) — xem ASSURANCE-REVIEWER-81.
+ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml:8: # "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
+ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml:9: # NHAN: measured = do lai trong phien ghi so tu tep trong thu muc provenance (ten tep ghi kem); thuat_lai = loi khai cua phien,
+ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml:10: # KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml:11: # Thu muc provenance: ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/ (SHA256SUMS.txt). Phan lon la phan hoi REST THO (GET
+ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml:12: # https://api.github.com/repos/ducthangho/tra-luat/<duong dan> bang curl, 2026-10-31, gio do khac nhau theo tep). NGOAI LE, khong
+ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml:13: # phai ban tho: readback-graphql-workflowrun-41173244891.json (output `gh api graphql` qua ASUS, luu nguyen van);
+ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml:14: # readback-review-threads-1065.json (BAN TRICH cac truong id/trang thai tu phan hoi MCP get_review_comments, than comment luoc
+ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml:15: # bo — tep tu ghi ro); thuatlai-gate-windows-3dfb973.json (chep tay tu VM, nhan thuat_lai).
+readback-checkruns-b0814f4.json: retained REST JSON; no extraction/transcription wrapper; Git/disk/SHA256 MATCH
+readback-comments-1065.json: retained REST JSON; no extraction/transcription wrapper; Git/disk/SHA256 MATCH
+readback-commit-3dfb973.json: retained REST JSON; no extraction/transcription wrapper; Git/disk/SHA256 MATCH
+readback-contents-ci-yml-3dfb973.json: retained REST JSON; no extraction/transcription wrapper; Git/disk/SHA256 MATCH
+readback-graphql-workflowrun-41173244891.json: output gh api graphql retained verbatim; raw transport unavailable; Git/disk/SHA256 MATCH
+readback-jobs-41169462631.json: retained REST JSON; no extraction/transcription wrapper; Git/disk/SHA256 MATCH
+readback-jobs-41173244891.json: retained REST JSON; no extraction/transcription wrapper; Git/disk/SHA256 MATCH
+readback-pr-1065.json: retained REST JSON; no extraction/transcription wrapper; Git/disk/SHA256 MATCH
+readback-review-comments-1065.json: retained REST JSON; no extraction/transcription wrapper; Git/disk/SHA256 MATCH
+readback-review-threads-1065.json: extracted MCP fields; original comment bodies/raw response unavailable; Git/disk/SHA256 MATCH
+readback-reviews-1065.json: retained REST JSON; no extraction/transcription wrapper; Git/disk/SHA256 MATCH
+readback-run-41169462631.json: retained REST JSON; no extraction/transcription wrapper; Git/disk/SHA256 MATCH
+readback-run-41173244891.json: retained REST JSON; no extraction/transcription wrapper; Git/disk/SHA256 MATCH
+readback-runs-3dfb973.json: retained REST JSON; no extraction/transcription wrapper; Git/disk/SHA256 MATCH
+thuatlai-gate-windows-3dfb973.json: manually transcribed VM report; original bundle unavailable; Git/disk/SHA256 MATCH
+Classified 15 source files: 12 REST JSON + 1 verbatim gh output + 1 MCP extract + 1 VM transcription
+Round19 label finding: CLOSED; old header and extraction-label omission both rejected in memory
+YAML fields unchanged by header correction; RUN/Checkout/Gate-output distinction explicit; landed remains false
+Limits: source format and retained bytes measured offline; original REST/gh/MCP transport and VM bundle not authenticated

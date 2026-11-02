@@ -1,0 +1,14 @@
+{
+  "cwd": "/tmp/claude-0/rv/pr1048-review-3/cay-kho",
+  "argv": [
+    "git",
+    "merge-base",
+    "48b54d89b152871063c7296df33a60308667599e",
+    "5a174b958a05e13f5c9a968a2596ca37267d0466"
+  ],
+  "rc": 0,
+  "stdout_file": "previous-master-merge-base.stdout",
+  "stderr_file": "previous-master-merge-base.stderr",
+  "stdout_bytes": 41,
+  "stderr_bytes": 0
+}

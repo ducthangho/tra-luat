@@ -1,0 +1,50 @@
+[
+  {
+    "name": "doctrine-scan",
+    "command": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "."
+    ],
+    "cwd": "/tmp/claude-0/rv/pr1048-review-1/cay-kho",
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine\n",
+    "stderr": ""
+  },
+  {
+    "name": "adr-song",
+    "command": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "adr-song",
+      "--root",
+      "."
+    ],
+    "cwd": "/tmp/claude-0/rv/pr1048-review-1/cay-kho",
+    "rc": 0,
+    "stdout": "adr-song: sạch — 57 ADR trên đĩa, 57 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])\n",
+    "stderr": ""
+  },
+  {
+    "name": "doc-claims-check",
+    "command": [
+      "python3",
+      "scripts/tl.py",
+      "doc-claims-check",
+      "--json"
+    ],
+    "cwd": "/tmp/claude-0/rv/pr1048-review-1/cay-kho",
+    "rc": 0,
+    "result": {
+      "ok": true,
+      "files_scanned": 117,
+      "claims_flagged": 381,
+      "flags": [],
+      "advisory_count": 381,
+      "layers_skipped": {}
+    },
+    "stderr": ""
+  }
+]

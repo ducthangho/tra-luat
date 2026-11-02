@@ -1,0 +1,18 @@
+{
+  "head": "8715ac9f591b27d9b176e9d656437ef4b71b54dc",
+  "tree": "ad90d9046a4367e0649a2f812daccdb2b0622af7",
+  "merge_base": "c82047da4d6f9546ce1d68282c37acf9567b74bc",
+  "status": "",
+  "changed_count": 254,
+  "out_of_scope": [],
+  "input_diff_equal": true,
+  "round2_diff_equal": true,
+  "round2_changed": [
+    "ops/reviews/README.md",
+    "ops/reviews/pr1114-review-1-codex-verdict.receipt.yaml",
+    "ops/reviews/pr1114-review-1-codex/OMITTED.txt",
+    "ops/reviews/pr1114-review-1-codex/SHA256SUMS",
+    "ops/reviews/pr1114-review-2-codex-verdict.receipt.yaml"
+  ],
+  "original_file_count": 13334
+}

@@ -30,7 +30,9 @@ def bind(tl_module) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(prog="tl", description="CLI hợp nhất tra-luat (webapp target 2.21.2i)")
+    # WP1038 (review F01, chủ kho duyệt): KHÔNG nhận cờ gốc viết tắt (`--det`/`--tim`) — guard PreToolUse không biết
+    # dạng viết tắt nên coi nó là cờ ăn giá trị, nuốt luôn TÊN LỆNH ⇒ subagent chạy được lệnh ghi; nay `tl` tự từ chối rc 2.
+    ap = argparse.ArgumentParser(prog="tl", description="CLI hợp nhất tra-luat (webapp target 2.21.2i)", allow_abbrev=False)
     # F (v1.33.6 — log rà: `tl --version` in usage-error thay vì version): flag chuẩn, nguồn = hằng VERSION.
     ap.add_argument("--version", action="version",
                     version=f"tl {VERSION} (webapp target {globals().get('EXPECT_VERSION', '2.21.2i')})")
@@ -148,6 +150,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--file-id", dest="file_id", help="ghi đè tại chỗ fileId này (mặc định TL_AGENT_CREDS_FILEID > AGENT_CREDS_FILEID)")
     p.add_argument("--folder", help="folderId khi --new (mặc định _HOP_NAP)")
     p.set_defaults(fn=tlg.cmd_agent_creds_set)
+    p = sub.add_parser("agent-creds-exec", help="(WP1038) chạy MỘT lệnh với token Claude/khoá Gemini từ tl_agent_creds.enc đặt CHỈ cho tiến trình con: agent-creds-exec [--claude] [--gemini] -- <lệnh> …")
+    p.add_argument("--claude", action="store_true", help="đặt CLAUDE_CODE_OAUTH_TOKEN cho tiến trình con")
+    p.add_argument("--gemini", action="store_true", help="đặt GEMINI_API_KEY cho tiến trình con")
+    p.add_argument("lenh", nargs=argparse.REMAINDER, help="`--` rồi lệnh và đối số (chạy không qua shell)")
+    p.set_defaults(fn=tlg.cmd_agent_creds_exec)
     p = sub.add_parser("gws-auth-stage", help="[CODE] export gws cred → mã hoá (khoá=webapp token) → v1.33.1: GHI ĐÈ TẠI CHỖ GWS_CRED_FILEID (fileId giữ nguyên, không bake lại); --new tạo file mới")
     p.add_argument("--folder", help="folderId đích (mặc định _HOP_NAP; chỉ dùng khi --new)")
     p.add_argument("--cred-file-id", dest="cred_file_id", help="fileId đích ghi đè tại chỗ (mặc định GWS_CRED_FILEID baked)")
@@ -547,6 +554,8 @@ def build_parser() -> argparse.ArgumentParser:
         return out
     for _sp in _walk_subparsers(sub):
         _opts = {o for _act in _sp._actions for o in _act.option_strings}
+        if any(isinstance(_a, argparse._SubParsersAction) for _a in _sp._actions):
+            _sp.allow_abbrev = False   # WP1038 review F09: `hygiene --prof scan plan` = lá `plan`, guard đọc ra `scan`
         if "--profile" not in _opts:
             _sp.add_argument("--profile", default=argparse.SUPPRESS, help="corpus profile (nhận cả trước lẫn sau subcommand)")
         if "--config" not in _opts:

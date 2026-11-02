@@ -1,0 +1,14 @@
+{
+  "cwd": "/tmp/claude-0/rv/pr1048-review-3/cay-kho",
+  "argv": [
+    "python3",
+    "scripts/tl.py",
+    "doc-claims-check",
+    "--json"
+  ],
+  "rc": 0,
+  "stdout_file": "doc-claims-check.stdout",
+  "stderr_file": "doc-claims-check.stderr",
+  "stdout_bytes": 73381,
+  "stderr_bytes": 0
+}

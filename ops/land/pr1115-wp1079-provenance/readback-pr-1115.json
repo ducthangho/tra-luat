@@ -1,0 +1,15 @@
+{
+ "number": 1115,
+ "state": "closed",
+ "merged": true,
+ "merged_at": "2026-11-01T15:47:15Z",
+ "merge_commit_sha": "c82047da4d6f9546ce1d68282c37acf9567b74bc",
+ "draft": false,
+ "additions": 834,
+ "deletions": 118,
+ "changed_files": 2,
+ "title": "launcher_test/codex_cred_test: bộ chấm đột biến chỉ tính TinHieuChotCa + neutral; fixture N13 không gọi installer (#1079)",
+ "head_sha": "af057e982ccc99b1f5eef2ae86dd129ccaa969b5",
+ "base_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+ "merged_by": "ducthangho"
+}

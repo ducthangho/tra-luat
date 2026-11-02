@@ -1,0 +1,3 @@
+Đã ghi [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/cd602115-8e1f-5ec4-a848-91a69cdc11c5/scratchpad/cr1117-l4/VERDICT.md): **approve — 0 P0/P1/P2/P3**.
+
+38/38 ca tập trung và 7/7 đột biến đạt; A/B không phát hiện lỗi mới. `cay-kho/` không đổi byte. Windows trên exact HEAD chưa kiểm chứng; `HINT.patch` rỗng.

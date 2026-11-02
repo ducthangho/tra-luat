@@ -7,14 +7,15 @@ Trạng thái lúc 01:40Z 02-11-2026: Codex lượt 3/10 cho **`approve`** trên
 - Diff: 2 tệp, +326/−85 (trần 450 của ADR-0053). Spec r2 `ops/specs/wp1117-r2.md` (sha256 `c34d5066…`).
 - Lệch spec đã duyệt từ r1 vẫn áp dụng (xem mục r1 bên dưới): runner chạy từ cây harness do `_dung_cay_harness` chép.
 
-## Codex r2 — 3/10 lời gọi (trần ADR-0055)
+## Codex r2 — 4/10 lời gọi (trần ADR-0055)
 | lượt | head | verdict (P0/P1/P2/P3) | finding |
 |---|---|---|---|
 | 1 | `b6fe853` | changes_requested 0/2/0/0 | F01 `runner-stdin-khong-ghim-utf8`: runner đọc stdin theo codec của tiến trình con, nên đường kênh có dấu bị hỏng khi dùng ascii/cp1258. F02 `dot-bien-map-van-nham-ca-qua-runner`: 2 đột biến #1079 nhắm ca đã chuyển sang runner, mà ca đó không đọc map |
 | 2 | `b9f010b` | changes_requested 0/0/1/0 | F03 `chot-kieu-record-chua-co-dot-bien-dung-tin-hieu` |
-| 3 | `4a0d45d` | **approve 0/0/0/0** | — |
+| 3 | `4a0d45d` | approve 0/0/0/0 | — |
+| 4 | `6f4b889` | **approve 0/0/0/0** | head cuối, merge master `9091cf5`; `.claude/` trùng byte với `4a0d45d` |
 
-Hiện vật nằm ở `wp1117-g1-claude/r2-luot{1,2,3}/`, mỗi thư mục có `SHA256SUMS`. `HINT.patch` của lượt 3 rỗng.
+Hiện vật nằm ở `wp1117-g1-claude/r2-luot{1,2,3,4}/`, mỗi thư mục có `SHA256SUMS`. `HINT.patch` của lượt 3 rỗng.
 
 hint_provenance:
 - `b9f010b`: F01 do executor tự vá (runner đọc `sys.stdin.buffer` rồi giải mã UTF-8). Ca kiểm lấy từ HINT lượt 1, có sửa
@@ -25,11 +26,12 @@ hint_provenance:
 ## Bằng chứng r2
 - Linux A/B, hai vế dựng trong một lệnh, TMPDIR là `/var/tmp`, so tập theo tên:
   - `b9f010b`: suite hỏng 10 = 10; đột biến base 550/575, head 558/583; tập SAI trùng nhau (delta 0).
-  - `4a0d45d`: ĐANG ĐO.
+  - `4a0d45d`: suite có 10 ca HỎNG ở cả hai vế, cùng tên (352/362 vs 356/366); đột biến 550/575 vs 559/584, tập SAI cùng tên ⇒ delta 0.
 - Windows `workflow_dispatch`:
   - `b6fe853`: 466/468, 2 SAI = F02 (run 41368402146);
   - `b9f010b`: **469/469** (run 41370605227, job `windows-latest`);
-  - `4a0d45d`: ĐANG ĐO (run 41372451716).
+  - `4a0d45d`: success (run 41372451716).
+  - `ci.yml` `windows-only` trên `6f4b889`: run 41376440756 — CHỜ.
 - CI `ci.yml` trên PR #1142: ĐANG CHẠY. Ruff F 5 = nền.
 
 ## Lịch sử r1 (tạm dừng 01-11)

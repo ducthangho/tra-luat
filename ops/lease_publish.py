@@ -1900,7 +1900,7 @@ class KhoObject:
         """Đọc MỘT object: framing → kiểm size (object VÀ tổng) trước khi nhận body → băm bằng OID → so type.
         Deadline áp ở MỌI cửa: cache-hit, trước spawn, sau khi child hoàn tất, trước khi trả (F04). Child bị
         kill/reap trong `finally` ở mọi đường thoát; rc≠0 của cat-file ⇒ 12 (F05)."""
-        import threading
+        import time
         if not SHA40.match(oid or ""):
             raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: OID không hợp lệ {oid!r}")
         khoa = (loai_mong_doi, oid)
@@ -1911,85 +1911,59 @@ class KhoObject:
             raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: OID {oid[:12]} bị yêu cầu hai type khác nhau")
         if self.so_object + 1 > self.ngan_sach["max_unique_objects"]:
             raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: > {self.ngan_sach['max_unique_objects']} object phân biệt")
-        con = self._con_thoi_gian(f"trước spawn cat-file {oid[:12]}")
+        con = self._con_thoi_gian(f"trước spawn cat-file {oid[:12]}"); hard_stop = time.monotonic() + con
         # session riêng để kill được CẢ NHÓM (một helper con giữ pipe sẽ làm close() treo tới khi nó tự thoát);
         # `start_new_session` là API POSIX — nền không có thì bỏ qua, chỉ còn kill tiến trình trực tiếp.
         p = subprocess.Popen([self.git_exe, "--no-replace-objects", "cat-file", "--batch"],
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self.env,
                              start_new_session=hasattr(os, "killpg"))
-        ket_qua: dict = {}
-        tong_truoc = self.tong_bytes; dung_doc = threading.Event(); reader = None
+        fd = p.stdout.fileno(); xong = False
+        def _lay(so: int, header: bool = False) -> bytes:
+            # One byte at a time until the header ends: size guards precede any body read.
+            got = bytearray()
+            while len(got) < so:
+                if time.monotonic() >= hard_stop: raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: hết deadline reader {oid[:12]} (đã kill cat-file)")
+                self._con_thoi_gian(f"đọc cat-file {oid[:12]}")
+                try: chunk = os.read(fd, 1 if header else min(65536, so - len(got)))
+                except BlockingIOError:
+                    time.sleep(min(0.005, self._con_thoi_gian(f"chờ pipe {oid[:12]}")))
+                    continue
+                if not chunk: break
+                got.extend(chunk)
+                if header and chunk == b"\n": break
+            return bytes(got)
 
-        def _doc_thuc():
+        try:
             try:
+                os.set_blocking(fd, False)
                 p.stdin.write((oid + "\n").encode("ascii")); p.stdin.close()
-                if dung_doc.is_set(): return
-                dau = reader.readline().decode("ascii", "replace").rstrip("\n")
-                if dung_doc.is_set(): return
-                ket_qua["dau"] = dau
+                raw_header = _lay(256, header=True)
+                dau = raw_header.decode("ascii", "replace").rstrip("\n")
                 cot = dau.split()
+                if not raw_header.endswith(b"\n"):
+                    raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: cat-file header thiếu newline {oid[:12]}")
                 if len(cot) == 3 and cot[2].isdigit():
                     kich = int(cot[2])
                     if kich > self.ngan_sach["max_object_bytes"]:
-                        ket_qua["qua_lon"] = kich
-                        return
-                    if tong_truoc + kich > self.ngan_sach["max_total_object_bytes"]:
-                        ket_qua["qua_tong"] = kich      # F05: kiểm TỔNG từ header, trước khi cấp phát body
-                        return
-                    pause = getattr(self, "_truoc_doc_than", None)
-                    if pause: pause()  # test seam: scheduler can stop here after the cancellation check
-                    ket_qua["than"] = reader.read(kich + 1)
-            except Exception as e:  # noqa: BLE001
-                ket_qua["loi"] = repr(e)
-            finally:
-                for luong in (p.stdin, reader):
-                    if luong is not None and not luong.closed:
-                        try: luong.close()
-                        except OSError: pass
-
-        def _huy_doc_win():
-            # CancelSynchronousIo is asynchronous; only the worker may close its stream.
-            if os.name != "nt" or not t.is_alive() or t.native_id is None: return
-            try:
-                import ctypes
-                dll = ctypes.WinDLL("kernel32", use_last_error=True)
-                dll.OpenThread.argtypes = (ctypes.c_uint32, ctypes.c_int, ctypes.c_uint32); dll.OpenThread.restype = ctypes.c_void_p
-                dll.CancelSynchronousIo.argtypes = (ctypes.c_void_p,); dll.CancelSynchronousIo.restype = ctypes.c_int
-                dll.CloseHandle.argtypes = (ctypes.c_void_p,); dll.CloseHandle.restype = ctypes.c_int
-                h = dll.OpenThread(0x0001, 0, t.native_id)  # THREAD_TERMINATE
-                if h:
-                    try: dll.CancelSynchronousIo(h)
-                    finally: dll.CloseHandle(h)
-            except (OSError, ValueError):
-                pass
-
-        t = threading.Thread(target=_doc_thuc, daemon=True)
-        try:
-            fd = os.dup(p.stdout.fileno())
-            try: reader = os.fdopen(fd, "rb")
-            except BaseException: os.close(fd); raise
-            t.start(); t.join(timeout=con)
-            if t.is_alive():
-                raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: hết deadline reader khi đọc {oid[:12]} (đã kill cat-file)")
-            if "qua_lon" in ket_qua:
-                raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: object {oid[:12]} {ket_qua['qua_lon']} B > max_object_bytes")
-            if "qua_tong" in ket_qua:
-                raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: vượt max_total_object_bytes")
-            if "loi" in ket_qua:
-                raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: cat-file lỗi I/O: {ket_qua['loi'][:120]}")
-            con2 = self._con_thoi_gian(f"chờ cat-file {oid[:12]} kết thúc")
+                        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: object {oid[:12]} {kich} B > max_object_bytes")
+                    if self.tong_bytes + kich > self.ngan_sach["max_total_object_bytes"]:
+                        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: vượt max_total_object_bytes")
+                    than = _lay(kich + 1)
+                else:
+                    than = b""
+            except (OSError, ValueError) as e:
+                raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: cat-file lỗi I/O: {e!r}") from e
+            con2 = min(self._con_thoi_gian(f"chờ cat-file {oid[:12]} kết thúc"), max(0, hard_stop - time.monotonic()))
             try:
                 rc = p.wait(timeout=con2)
             except subprocess.TimeoutExpired:
                 raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: hết deadline reader chờ cat-file {oid[:12]} kết thúc") from None
             if rc != 0:
                 raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: cat-file rc={rc} cho {oid[:12]} — không dùng bytes của tiến trình lỗi")
-            cot = (ket_qua.get("dau") or "").split()
             if len(cot) != 3 or cot[0] != oid or not cot[2].isdigit():
                 raise Chan(RC_KHONG_XAC_DINH,
-                           f"KHÔNG_XÁC_ĐỊNH: object {oid[:12]} `{ket_qua.get('dau', '')}` — `missing` là 12, không phải 'vắng'")
+                           f"KHÔNG_XÁC_ĐỊNH: object {oid[:12]} `{dau}` — `missing` là 12, không phải 'vắng'")
             loai_that, kich = cot[1], int(cot[2])
-            than = ket_qua.get("than", b"")
             if len(than) != kich + 1:
                 raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: object {oid[:12]} framing ngắn ({len(than)}/{kich + 1})")
             than = than[:kich]
@@ -2000,28 +1974,21 @@ class KhoObject:
                 raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: bytes của {oid[:12]} băm ra {bam[:12]} — cache không tin cậy")
             if loai_that != loai_mong_doi:
                 raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {oid[:12]} là {loai_that}, mong đợi {loai_mong_doi}")
+            if time.monotonic() >= hard_stop: raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: hết deadline reader {oid[:12]} (đã kill cat-file)")
             self._con_thoi_gian(f"trước khi trả {oid[:12]}")
             self.so_object += 1
             self.tong_bytes += kich
             self.memo[khoa] = than
+            xong = True
             return than
         finally:
-            dung_doc.set()
-            if p.poll() is None or (t.is_alive() and hasattr(os, "killpg")):
+            if p.poll() is None or (not xong and hasattr(os, "killpg")):
                 try:
                     getattr(os, "killpg")(p.pid, 9)
                 except Exception:  # noqa: BLE001 — không có killpg / nhóm đã chết: kill trực tiếp
                     if p.poll() is None: p.kill()
                 if p.poll() is None: p.wait()
-            if t.is_alive():
-                _huy_doc_win()
-                t.join(timeout=0.05)
-            if t.is_alive() and os.name == "nt":
-                def watchdog():
-                    while t.is_alive():
-                        _huy_doc_win(); t.join(timeout=0.01)
-                threading.Thread(target=watchdog, daemon=True).start()
-            for luong in ((p.stdin, reader, p.stdout, p.stderr) if t.ident is None else (p.stdout, p.stderr)):
+            for luong in (p.stdin, p.stdout, p.stderr):
                 if luong is None or luong.closed:
                     continue
                 try:

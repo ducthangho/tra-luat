@@ -7352,22 +7352,14 @@ def t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file():
         cay, (_, _, H) = _kho_do_thi(s)
         oid = _g_a0(cay, "rev-parse", H + ":README.md")
         kho = mod.KhoObject(cay, ngan_sach={"max_total_object_bytes": 1})
-        reads, popen = [], mod.subprocess.Popen
-        class TheoDoiDoc:
-            def __init__(self, real):
-                self.real = real
-            def readline(self, *a):
-                return self.real.readline(*a)
-            def read(self, n):
-                reads.append(n)
-                return self.real.read(n)
-            def __getattr__(self, name):
-                return getattr(self.real, name)
+        reads, popen, raw_read, seen = [], mod.subprocess.Popen, mod.os.read, []
         def theo_doi(*a, **kw):
-            p = popen(*a, **kw); p.stdout = TheoDoiDoc(p.stdout)
-            return p
+            p = popen(*a, **kw); seen.append(p); return p
+        def read(fd, n):
+            if seen and fd == seen[-1].stdout.fileno() and n > 1: reads.append(n)
+            return raw_read(fd, n)
         try:
-            with mock.patch.object(mod.subprocess, "Popen", theo_doi):
+            with mock.patch.object(mod.subprocess, "Popen", theo_doi), mock.patch.object(mod.os, "read", read):
                 rc, td = _ma_chan(mod, kho.doc, oid, "blob")
             chot(rc == 12 and not reads, f"total byte budget phải chặn trước body: {rc}, reads={reads}, {td}")
         finally:
@@ -14137,10 +14129,9 @@ def t226_a1a_default_tree_CHE_dedup_and_legacy_invariance():
         chot((rb, rc, rf) == (11, 11, 11) and eb == ec == ef and plain(ob) == plain(oc) == plain(of)
              and "NGƯỜI_GIỮ 1: L" in of and of.splitlines().count(marker) == 1,
              f"A19 legacy drift or CHE absent: rc={(rb,rc,rf)}, marker={of.count(marker)}, err={(eb,ec,ef)}")
+        first = next(x for x in mod._quet_lease_toan_kho(cay) if x["lease"].get("da_bi_thay_the") == "N"); chot(first["ref"] == "refs/heads/master", f"A19 actual all-ref scanner boundary changed: {first['ref']}")
         out = mod._du_bao_check({"lease_id": "N", "thay_the_cho": ["L"]}, cay, "master")
         chot(mod.BIA_MO_LICH_SU == () and any("rc dự báo 8" in x for x in out), f"A7b: {out}")
-        # A21: the same tombstone blob is first seen on a side ref, yet the
-        # independent canonical-tree lookup still returns CHE.
         g(cay, "branch", "a-first", "master")
         records = mod._quet_lease_toan_kho(cay)
         tomb = next(x for x in records if x["lease"].get("lease_id") == "L"
@@ -14243,7 +14234,7 @@ def t229_a1a_blob_raw_bytes_and_read_failures():
     mod = _nap_cong()
     with San() as s:
         cay, g = _kho_thu(s)
-        g(cay, "config", "core.autocrlf", "false")  # preserve CRLF in the blob, not just in the worktree
+        g(cay, "config", "core.autocrlf", "false")
         raw = b"{\r\n  \"schema\": 1\r\n}\r\n"
         (cay / "ops/policy.json").write_bytes(raw)
         g(cay, "add", "-A"); g(cay, "commit", "-qm", "raw policy")
@@ -14323,8 +14314,7 @@ def t231_a1a_A4_mutant_to_case_matrix():
 
 @ca
 def t232_a1a_M14_mutant_to_case_matrix_and_tree_pin():
-    from types import SimpleNamespace
-    from unittest import mock; import yaml
+    from types import SimpleNamespace; from unittest import mock; import yaml
     mod = _nap_cong()
     canon, oid = "refs/remotes/origin/master", "a" * 40
     current = {}
@@ -14346,8 +14336,9 @@ def t232_a1a_M14_mutant_to_case_matrix_and_tree_pin():
         "A22ivL_unit": ([("L.yaml", tomb), ("N.yaml", reverse), ("L-copy.yml", live)], [record(tomb), record(reverse), record(live, canon, "ops/leases/L-copy.yml")], "KHONG_XAC_DINH", "unit"),
         "A22ivN_unit": ([("L.yaml", tomb), ("N.yaml", reverse), ("N-copy.yml", lease("N"))], [record(tomb), record(reverse), record(lease("N"), canon, "ops/leases/N-copy.yml")], "KHONG_XAC_DINH", "unit"),
     }
+    # Matrix CLI seam admits only the remote canonical ref; t226 separately locks the real all-ref scanner.
     chot(scenarios["A19_cli"][1][0]["ref"] == canon and scenarios["A21_unit"][1][0]["ref"] != canon,
-         "A21 representative-ref trap was not constructed")
+         "A21 representative-ref trap or remote-only matrix boundary was not constructed")
     def git(*args, **kw):
         current["ref_moved"] = True  # a later lookup by ref now sees a different tree
         return SimpleNamespace(returncode=1 if current["missing"] else 0, stdout=oid + "\n")
@@ -14389,10 +14380,20 @@ def t232_a1a_M14_mutant_to_case_matrix_and_tree_pin():
         return {k: ("KHONG" if v == "KHONG_XAC_DINH" else v) for k, v in original_reader(root, ref, ids).items()}
     def omitted(*args, **kwargs):
         return [x for x in original_forecast(*args, **kwargs) if "BIA_MỘ_MẶC_ĐỊNH=" not in x]
+    def dropped(filename):
+        def mutate(root, ref, ids):
+            saved = current["entries"]; current["entries"] = [x for x in saved if x[0] != filename]
+            try: return original_reader(root, ref, ids)
+            finally: current["entries"] = saved
+        return mutate
+    def absent_raises(root, ref, ids):
+        if current["missing"]: raise RuntimeError("canonical ref absent")
+        return original_reader(root, ref, ids)
     targets = {"all_refs": {"A20_unit", "A22i_cli"}, "representative": {"A21_unit"},
                "round_unknown": {"A22i_cli", "A22ii_cli", "A22iii_unit", "A22ivL_unit", "A22ivN_unit"},
-               "omit_line": {"A19_cli", "A22i_cli", "A22ii_cli"}}
-    def observe():
+               "omit_line": {"A19_cli", "A22i_cli", "A22ii_cli"},
+               "drop_L": {"A22ivL_unit"}, "drop_N": {"A22ivN_unit"}, "absent_raises": {"A22ii_cli"}}
+    def observe(caught=()):
         failures = set()
         for name, (entries, records, expected, kind) in scenarios.items():
             current.update(entries=entries, records=records, missing=kind == "missing",
@@ -14416,7 +14417,9 @@ def t232_a1a_M14_mutant_to_case_matrix_and_tree_pin():
                 elif mod._doc_bia_mo_mac_dinh(Path("."), canon, {"L"})["L"] != expected:
                     raise Signal(f"{name}: state differs from {expected}")
             except Signal as e: failures.add(name); print(f"MUTANT_CASE {name} {type(e).__name__}")
-            except Exception as e: raise AssertionError(f"{name}: unrelated {type(e).__name__}: {e}") from e
+            except Exception as e:
+                if not isinstance(e, caught): raise AssertionError(f"{name}: unrelated {type(e).__name__}: {e}") from e
+                failures.add(name); print(f"MUTANT_CASE {name} {type(e).__name__}")
         return failures
     with mock.patch.object(mod, "GOI_GIT", git), mock.patch.object(mod, "_ls_tree_z", tree), \
             mock.patch.object(mod, "_doc_blob_text_12", blob):
@@ -14428,45 +14431,34 @@ def t232_a1a_M14_mutant_to_case_matrix_and_tree_pin():
         for mutant, expected in targets.items():
             attr, changed = ("_du_bao_ai_dang_giu", omitted) if mutant == "omit_line" else (
                 "_doc_bia_mo_mac_dinh", {"all_refs": all_refs, "representative": representative,
-                                          "round_unknown": rounded}[mutant])
-            with mock.patch.object(mod, attr, changed): observed = observe()
+                                          "round_unknown": rounded, "drop_L": dropped("L-copy.yml"),
+                                          "drop_N": dropped("N-copy.yml"), "absent_raises": absent_raises}[mutant])
+            with mock.patch.object(mod, attr, changed): observed = observe((RuntimeError,) if mutant == "absent_raises" else ())
             chot(observed == expected, f"M14 {mutant}: expected {expected}, observed {observed}")
 
 @ca
 def t233_a1a_descendant_stdout_cancel_closes_owners():
     from unittest import mock; mod = _nap_cong()
+    def fds():
+        found = set()
+        for fd in range(64):
+            try: os.fstat(fd); found.add(fd)
+            except OSError: pass
+        return found
     with San() as s:
         cay, (_, _, H) = _kho_do_thi(s); oid = _g_a0(cay, "rev-parse", H + ":README.md")
-        kho = mod.KhoObject(cay, ngan_sach={"max_reader_wall_seconds": 0.15}); kho.deadline = time.monotonic() + 0.15
-        entered, release = threading.Event(), threading.Event(); kho._truoc_doc_than = lambda: (entered.set(), release.wait())
+        kho = mod.KhoObject(cay, ngan_sach={"max_reader_wall_seconds": 0.2}); kho.deadline = time.monotonic() + 0.2
         child = "import subprocess,sys; sys.stdin.readline(); sys.stdout.buffer.write((sys.argv[2]+' blob 4\\n').encode()); sys.stdout.flush(); subprocess.Popen([sys.executable,'-c','import time; time.sleep(0.8)'],stdout=sys.stdout,stderr=subprocess.DEVNULL); open(sys.argv[1],'w').write('ready')"
-        popen, seen, marker, owner_fds, worker_fds = mod.subprocess.Popen, [], s / "descendant-ready", [], []
-        def held(*a, **kw):
-            p = popen([sys.executable, "-c", child, str(marker), oid], **kw); seen.append(p); owner_fds.append(p.stdout.fileno()); return p
-        original_dup = os.dup
-        def tracked_dup(fd):
-            new = original_dup(fd)
-            if owner_fds and fd == owner_fds[0]: worker_fds.append(new)
-            return new
-        def closed(fd):
-            try: os.fstat(fd); return False
-            except OSError: return True
+        popen, seen, marker = mod.subprocess.Popen, [], s / "descendant-ready"
+        def held(*a, **kw): p = popen([sys.executable, "-c", child, str(marker), oid], **kw); seen.append(p); return p
         try:
-            with mock.patch.object(mod.subprocess, "Popen", held), mock.patch.object(mod.os, "dup", tracked_dup):
+            before, threads = fds(), threading.active_count()
+            with mock.patch.object(mod.subprocess, "Popen", held):
                 started = time.monotonic(); rc, _ = _ma_chan(mod, kho.doc, oid, "blob"); elapsed = time.monotonic() - started
-            chot(rc == 12 and marker.exists() and entered.is_set() and elapsed < 0.5, f"held stdout exceeded deadline: {rc} {elapsed:.3f}s")
-            chot(seen[0].stdout.closed and len(worker_fds) == 1 and not closed(worker_fds[0]), "stdout owner/worker duplicate split failed")
-            reused = [os.open(os.devnull, os.O_RDONLY) for _ in range(16)]
-            chot(owner_fds[0] in reused, "test did not reuse the released stdout fd")
-            release.set(); until = time.monotonic() + 0.4
-            while not closed(worker_fds[0]) and time.monotonic() < until: time.sleep(0.01)
-            chot(closed(worker_fds[0]) and all(x.closed for x in (seen[0].stdin, seen[0].stdout, seen[0].stderr)), "worker duplicate and all three owners must close")
-            os.fstat(owner_fds[0])  # worker must never close a newly reused caller descriptor
-        finally:
-            release.set()
-            for fd in locals().get("reused", []): os.close(fd)
-            kho.dong()
-
+            chot(rc == 12 and marker.exists() and elapsed < 0.5, f"held stdout exceeded deadline: {rc} {elapsed:.3f}s")
+            chot(fds() == before and threading.active_count() == threads and seen and
+                 all(x.closed for x in (seen[0].stdin, seen[0].stdout, seen[0].stderr)), "A11 leaked fd/thread at return")
+        finally: kho.dong()
 @ca
 def t234_a1a_recursive_yaml_duplicate_unknown_and_cli_invariance():
     mod = _nap_cong()
@@ -14475,8 +14467,7 @@ def t234_a1a_recursive_yaml_duplicate_unknown_and_cli_invariance():
         import yaml; raw = yaml.safe_dump(_a1a_lease("L")) + "extra: &cycle\n  self: *cycle\n"
         for name in ("L.yaml", "L-copy.yml"): (folder / name).write_text(raw, encoding="utf-8")
         g(cay, "add", "-A"); g(cay, "commit", "-qm", "recursive duplicates"); g(cay, "push", "-q", "origin", "master")
-        state = mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})
-        chot(state == {"L": "KHONG_XAC_DINH"}, f"recursive duplicate classified {state}")
+        state = mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"}); chot(state == {"L": "KHONG_XAC_DINH"}, f"recursive duplicate classified {state}")
         args = ("ai-dang-giu", "ops/x.md", "--root", str(cay)); plain, forecast = _goi_main(mod, *args), _goi_main(mod, *args, "--du-bao")
         chot(plain[0] == forecast[0] and plain[2] == forecast[2] and
              plain[1].splitlines() == [x for x in forecast[1].splitlines() if not x.startswith("DU_BAO:")] and

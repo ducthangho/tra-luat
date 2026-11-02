@@ -3148,14 +3148,14 @@ def t94_main_in_dong_kiem_ke_that():
 
 @ca_tu_kiem
 def t94a_che_do_harness_chi_nhan_chuoi_chinh_xac():
-    bang({"wp1143_m1_strip", "wp1143_m2_missing_fast"} <= {x[0] for x in DOT_BIEN},
-         "c1 phai co dot bien kiem dung chuoi")
     for value in (None, "", "day_du", "Duong_nhanh", "duong_nhanh ", " duong_nhanh",
                   "duong_nhanh\n", "tu_dong", 1, True, b"duong_nhanh"):
         with mock.patch.object(os.environ, "get", return_value=value):
             bang(che_do_harness() == "day_du", f"che_do_harness nhan sai {value!r}")
     with mock.patch.object(os.environ, "get", return_value="duong_nhanh"):
         bang(che_do_harness() == "chi_ca", "duong_nhanh chinh xac phai chi chay ca")
+    bang({"wp1143_m1_strip", "wp1143_m2_missing_fast"} <= {x[0] for x in DOT_BIEN},
+         "c1 phai co dot bien kiem dung chuoi")
 
 
 @ca_tu_kiem
@@ -3230,14 +3230,14 @@ def t94c_main_go_env_o_ca_va_con_va_khoi_phuc_ca_ngoai_le():
 
 @ca_tu_kiem
 def t94d_harness_step_doc_dung_env_che_do():
-    bang({"wp1143_m6_constant_yaml", "wp1143_m7_missing_yaml"} <= {x[0] for x in DOT_BIEN},
-         "c4 phai co dot bien cau truc YAML")
     name = "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)"
     expected = {"CI_DUONG_NHANH_CHE_DO": "${{ needs.chuan-bi.outputs.che_do }}"}
     step = next(b for b in doc_wf()["jobs"]["gate-ops"]["steps"] if b.get("name") == name)
     bang(step.get("env") == expected and step.get("run") == "python ops/ci_duong_nhanh_test.py"
          and step.get("if") == "runner.os == 'Linux'", f"harness step drift: {step}")
     bang(Y04_ENV_BUOC_CHE_DO[("gate-ops", name)] == expected, "Y04 allowlist phai ghi dung env")
+    bang({"wp1143_m6_constant_yaml", "wp1143_m7_missing_yaml"} <= {x[0] for x in DOT_BIEN},
+         "c4 phai co dot bien cau truc YAML")
 
 
 @ca_tu_kiem

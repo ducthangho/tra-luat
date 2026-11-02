@@ -1,0 +1,32 @@
+ops/reviews/pr1131-review-1-codex/evidence/gates-progress.txt:2: trailing whitespace.
++ stderr 
+ops/reviews/pr1131-review-1-codex/evidence/gates-progress.txt:3: trailing whitespace.
++base-diff-default rc 0 stdout  stderr 
+ops/reviews/pr1131-review-1-codex/evidence/gates-progress.txt:4: trailing whitespace.
++base-diff-ci rc 0 stdout  stderr 
+ops/reviews/pr1131-review-1-codex/evidence/gates-progress.txt:6: trailing whitespace.
++ stderr 
+ops/reviews/pr1131-review-1-codex/evidence/gates-progress.txt:28: trailing whitespace.
++MIỄN TRỪ ops/land/pr487-land stderr 
+ops/reviews/pr1131-review-1-codex/evidence/gates-progress.txt:50: trailing whitespace.
++MIỄN TRỪ ops/land/pr487-land stderr 
+ops/reviews/pr1131-review-1-codex/evidence/gates-progress.txt:58: trailing whitespace.
++ stderr 
+ops/reviews/pr1131-review-1-codex/evidence/gates-progress.txt:61: trailing whitespace.
++ stderr 
+ops/reviews/pr1131-review-1-codex/evidence/gates-progress.txt:62: trailing whitespace.
++head-diff-ci rc 0 stdout  stderr 
+ops/reviews/pr1131-review-1-codex/evidence/gates-progress.txt:64: trailing whitespace.
++ stderr 
+ops/reviews/pr1131-review-1-codex/evidence/gates-progress.txt:71: trailing whitespace.
++base-bien-nhan rc 0 stdout 
+ops/reviews/pr1131-review-1-codex/evidence/gates-progress.txt:75: trailing whitespace.
++ stderr 
+ops/reviews/pr1131-review-1-codex/evidence/gates-progress.txt:76: trailing whitespace.
++head-bien-nhan rc 0 stdout 
+ops/reviews/pr1131-review-1-codex/evidence/gates-progress.txt:80: trailing whitespace.
++ stderr 
+ops/reviews/pr1131-review-1-codex/evidence/mutations-progress.txt:1: trailing whitespace.
++mutant-1-bien-nhan rc 1 only_expected True 
+ops/reviews/pr1131-review-1-codex/evidence/mutations-progress.txt:16: trailing whitespace.
++mutant-2-bien-nhan rc 1 only_expected True 

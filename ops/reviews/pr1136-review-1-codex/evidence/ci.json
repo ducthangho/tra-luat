@@ -1,0 +1,209 @@
+{
+  "base_function": [],
+  "head_function": [],
+  "classification": [
+    [
+      "ops/reviews/README.md",
+      "ops/reviews/pr1131-review-1-codex-verdict.md",
+      "ops/reviews/pr1131-review-1-codex-verdict.receipt.yaml",
+      "ops/reviews/pr1131-review-1-codex/OMITTED.txt",
+      "ops/reviews/pr1131-review-1-codex/PROMPT.md",
+      "ops/reviews/pr1131-review-1-codex/SHA256SUMS",
+      "ops/reviews/pr1131-review-1-codex/VERDICT.md",
+      "ops/reviews/pr1131-review-1-codex/evidence/all-check-calls.txt",
+      "ops/reviews/pr1131-review-1-codex/evidence/audit.gitconfig",
+      "ops/reviews/pr1131-review-1-codex/evidence/audit_bytes.py",
+      "ops/reviews/pr1131-review-1-codex/evidence/audit_ci.py",
+      "ops/reviews/pr1131-review-1-codex/evidence/audit_history.py",
+      "ops/reviews/pr1131-review-1-codex/evidence/audit_receipts.py",
+      "ops/reviews/pr1131-review-1-codex/evidence/base-bien-nhan.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/base-bien-nhan.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/base-ci-function.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/base-ci-function.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/base-diff-ci.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/base-diff-ci.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/base-diff-default.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/base-diff-default.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/base-direct.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/base-direct.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/base-doctrine.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/base-doctrine.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/base-land.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/base-land.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/bytes-a-sha256sum.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/bytes-a-sha256sum.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/bytes-b-sha256sum.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/bytes-b-sha256sum.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/bytes-c-sha256sum.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/bytes-c-sha256sum.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/bytes-progress.txt",
+      "ops/reviews/pr1131-review-1-codex/evidence/bytes.json",
+      "ops/reviews/pr1131-review-1-codex/evidence/check-search.txt",
+      "ops/reviews/pr1131-review-1-codex/evidence/ci-local-kiem-re.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/ci-progress.txt",
+      "ops/reviews/pr1131-review-1-codex/evidence/ci-t20d.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/ci.json",
+      "ops/reviews/pr1131-review-1-codex/evidence/direct_tests.py",
+      "ops/reviews/pr1131-review-1-codex/evidence/final-integrity.json",
+      "ops/reviews/pr1131-review-1-codex/evidence/final-integrity.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/final_integrity.py",
+      "ops/reviews/pr1131-review-1-codex/evidence/finish_report.py",
+      "ops/reviews/pr1131-review-1-codex/evidence/gates-progress.txt",
+      "ops/reviews/pr1131-review-1-codex/evidence/gates.json",
+      "ops/reviews/pr1131-review-1-codex/evidence/head-bien-nhan.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/head-bien-nhan.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/head-ci-function.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/head-ci-function.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/head-diff-ci.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/head-diff-ci.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/head-diff-default.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/head-diff-default.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/head-direct.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/head-direct.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/head-doctrine.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/head-doctrine.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/head-land.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/head-land.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/history-attempt1.py",
+      "ops/reviews/pr1131-review-1-codex/evidence/history-progress.txt",
+      "ops/reviews/pr1131-review-1-codex/evidence/measure_gates.py",
+      "ops/reviews/pr1131-review-1-codex/evidence/mutant-1-bien-nhan.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/mutant-1-bien-nhan.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/mutant-1-direct.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/mutant-1-direct.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/mutant-2-bien-nhan.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/mutant-2-bien-nhan.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/mutant-2-direct.stderr",
+      "ops/reviews/pr1131-review-1-codex/evidence/mutant-2-direct.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/mutate_receipts.py",
+      "ops/reviews/pr1131-review-1-codex/evidence/mutations-progress.txt",
+      "ops/reviews/pr1131-review-1-codex/evidence/mutations.json",
+      "ops/reviews/pr1131-review-1-codex/evidence/preflight.json",
+      "ops/reviews/pr1131-review-1-codex/evidence/receipts-attempt1.json",
+      "ops/reviews/pr1131-review-1-codex/evidence/receipts-attempt1.py",
+      "ops/reviews/pr1131-review-1-codex/evidence/receipts-attempt1.stdout",
+      "ops/reviews/pr1131-review-1-codex/evidence/receipts-progress.txt",
+      "ops/reviews/pr1131-review-1-codex/evidence/receipts.json",
+      "ops/reviews/pr1131-review-1-codex/launcher.out",
+      "ops/reviews/pr1131-review-1-codex/luot-hong-xac-thuc/OMITTED.txt",
+      "ops/reviews/pr1131-review-1-codex/luot-hong-xac-thuc/PROMPT.md",
+      "ops/reviews/pr1131-review-1-codex/luot-hong-xac-thuc/launcher.out",
+      "ops/reviews/pr1131-review-1-codex/luot-hong-xac-thuc/run/checkpoint.json",
+      "ops/reviews/pr1131-review-1-codex/luot-hong-xac-thuc/run/run.json",
+      "ops/reviews/pr1131-review-1-codex/luot-hong-xac-thuc/run/stderr.log",
+      "ops/reviews/pr1131-review-1-codex/luot-hong-xac-thuc/run/stdout.log",
+      "ops/reviews/pr1131-review-1-codex/run/checkpoint.json",
+      "ops/reviews/pr1131-review-1-codex/run/run.json",
+      "ops/reviews/pr1131-review-1-codex/run/stderr.log",
+      "ops/reviews/pr1131-review-1-codex/run/stdout.log"
+    ],
+    "duong_nhanh",
+    "DUONG_NHANH: toan bo 93 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh"
+  ],
+  "local_kiem_re_rc": 0,
+  "local_kiem_re_stdout": "DUONG_NHANH: toan bo 93 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh\nDUONG_NHANH: kiem-re DAT (93 tep doi, 0 loi)\n",
+  "simulated_merge": "cef1ab0a3cec53b34abf01c157f0b4b29090f459",
+  "merge_tree_matches_head": true,
+  "check_calls": [
+    {
+      "command": [
+        "git",
+        "--attr-source=62e629156fd0729b743f15eed2f32487786b9adc",
+        "-c",
+        "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab",
+        "diff",
+        "--check",
+        "--no-renames",
+        "62e629156fd0729b743f15eed2f32487786b9adc...62e629156fd0729b743f15eed2f32487786b9adc"
+      ],
+      "rc": 0,
+      "stdout": "b''",
+      "stderr": "b''"
+    },
+    {
+      "command": [
+        "git",
+        "--attr-source=62e629156fd0729b743f15eed2f32487786b9adc",
+        "-c",
+        "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab",
+        "diff",
+        "--check",
+        "--no-renames",
+        "62e629156fd0729b743f15eed2f32487786b9adc...1a87a863174ef104b2df8bc98b77724fb6796d9b"
+      ],
+      "rc": 0,
+      "stdout": "b''",
+      "stderr": "b''"
+    },
+    {
+      "command": [
+        "git",
+        "--attr-source=62e629156fd0729b743f15eed2f32487786b9adc",
+        "-c",
+        "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab",
+        "diff",
+        "--check",
+        "--no-renames",
+        "62e629156fd0729b743f15eed2f32487786b9adc...1a87a863174ef104b2df8bc98b77724fb6796d9b"
+      ],
+      "rc": 0,
+      "stdout": "b''",
+      "stderr": "b''"
+    }
+  ],
+  "t20d": "PASS",
+  "ast_scan_files": 154,
+  "ast_parse_errors": [],
+  "diff_check_call_sites": [
+    {
+      "path": "ops/ci_duong_nhanh.py",
+      "line": 621,
+      "expression": "chay([\"git\", \"--attr-source=\" + goc, \"-c\", CAU_HINH_WHITESPACE, \"diff\", \"--check\", \"--no-renames\", f\"{goc}...{dau}\"],\n                 cwd=kho, capture_output=True)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 898,
+      "expression": "git(kho, \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 989,
+      "expression": "bang(git(kho, \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False).returncode == 0,\n             \"fixture vo hieu: `--check` phai BO QUA tep nhi phan (khong thi ca nay khong do gi)\")"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 903,
+      "expression": "git(kho, \"-c\", \"core.whitespace=-\" + \",-\".join(\n                x for x in (\"blank-at-eol\", \"blank-at-eof\", \"space-before-tab\") if x != loai),\n                \"diff\", \"--check\", f\"{goc}...{dau}\", \"--\", tep, kiem=False)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 969,
+      "expression": "git(kho, \"-c\", \"core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab\",\n                      \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 1016,
+      "expression": "bang(git(kho, f\"--attr-source={goc}\", \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False).returncode == 0,\n                 f\"fixture vo hieu ({thu_muc}): `--check` doc thuoc tinh goc phai BO QUA tep nhi phan\")"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 1091,
+      "expression": "bang(m.kiem_yaml({duong}, kho) == [] and m.kiem_loai_tep({duong}, kho) == []\n                 and m.kiem_nhi_phan(env_pr(goc=goc, dau=dau2), chay_that, kho) == []\n                 and git(kho, f\"--attr-source={goc}\", \"diff\", \"--check\", f\"{goc}...{dau2}\", kiem=False).returncode == 0,\n                 f\"fixture vo hieu ({duong}): moi chot doc dia/noi dung phai cung KHONG thay gitlink (khong thi ca nay khong do gi)\")"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 989,
+      "expression": "git(kho, \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 1016,
+      "expression": "git(kho, f\"--attr-source={goc}\", \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 1093,
+      "expression": "git(kho, f\"--attr-source={goc}\", \"diff\", \"--check\", f\"{goc}...{dau2}\", kiem=False)"
+    }
+  ]
+}

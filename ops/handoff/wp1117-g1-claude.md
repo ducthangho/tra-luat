@@ -1,25 +1,27 @@
 # Handoff #1117 HARNESS-KET-QUA-NGOAI-MA-DOT-BIEN — lease wp1117-r2-g2-claude (r2)
 
-Trạng thái lúc 04:15Z 02-11-2026: **ĐỦ ĐIỀU KIỆN, chờ chủ kho duyệt merge.** Trên đúng head `6f4b889` có:
-- Codex offline lượt 4/10: approve 0/0/0/0;
-- connector Codex: sạch;
-- CI: xanh;
-- `ci.yml` `windows-only`: xanh.
-PR #1142 đã bỏ draft. Phiên này không tự merge.
+Trạng thái lúc 04:55Z 02-11-2026: head cuối `8f0dfcf`. Lượt bỏ draft trên `6f4b889` có connector báo P2 `r4438879478`; đã vá, trả lời và resolve thread.
+Trên `8f0dfcf`:
+- Codex offline lượt 5/10: approve 0/0/0/0;
+- connector: sạch;
+- `launcher-windows.yml`: 41388160869 success;
+- `ci.yml` `windows-only`: 41388158239 — CHỜ.
+Phiên này không tự merge.
 
 - Nhánh `agent/wp1117-g1-claude`, head `4a0d45d3c689600f749866f7b27e83b9d6039c00`, base `c7174bf` (master sau #1122).
 - Diff: 2 tệp, +326/−85 (trần 450 của ADR-0053). Spec r2 `ops/specs/wp1117-r2.md` (sha256 `c34d5066…`).
 - Lệch spec đã duyệt từ r1 vẫn áp dụng (xem mục r1 bên dưới): runner chạy từ cây harness do `_dung_cay_harness` chép.
 
-## Codex r2 — 4/10 lời gọi (trần ADR-0055)
+## Codex r2 — 5/10 lời gọi (trần ADR-0055)
 | lượt | head | verdict (P0/P1/P2/P3) | finding |
 |---|---|---|---|
 | 1 | `b6fe853` | changes_requested 0/2/0/0 | F01 `runner-stdin-khong-ghim-utf8`: runner đọc stdin theo codec của tiến trình con, nên đường kênh có dấu bị hỏng khi dùng ascii/cp1258. F02 `dot-bien-map-van-nham-ca-qua-runner`: 2 đột biến #1079 nhắm ca đã chuyển sang runner, mà ca đó không đọc map |
 | 2 | `b9f010b` | changes_requested 0/0/1/0 | F03 `chot-kieu-record-chua-co-dot-bien-dung-tin-hieu` |
 | 3 | `4a0d45d` | approve 0/0/0/0 | — |
-| 4 | `6f4b889` | **approve 0/0/0/0** | head cuối, merge master `9091cf5`; `.claude/` trùng byte với `4a0d45d` |
+| 4 | `6f4b889` | approve 0/0/0/0 | merge master `9091cf5`; `.claude/` trùng byte với `4a0d45d` |
+| 5 | `8f0dfcf` | **approve 0/0/0/0** | head cuối, sau bản vá P2 connector `r4438879478` (runner giả tách stdin bằng `.split()`) |
 
-Hiện vật nằm ở `wp1117-g1-claude/r2-luot{1,2,3,4}/`, mỗi thư mục có `SHA256SUMS`. `HINT.patch` của lượt 3 rỗng.
+Hiện vật nằm ở `wp1117-g1-claude/r2-luot{1,2,3,4,5}/`, mỗi thư mục có `SHA256SUMS`. `HINT.patch` của lượt 3 rỗng.
 
 hint_provenance:
 - `b9f010b`: F01 do executor tự vá (runner đọc `sys.stdin.buffer` rồi giải mã UTF-8). Ca kiểm lấy từ HINT lượt 1, có sửa

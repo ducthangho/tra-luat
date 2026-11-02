@@ -85,7 +85,7 @@ attempts_basis: 'mac dinh kho (tien le wp1045).'
 review_rounds_limit: 3
 budget:
   codex_review_calls:
-    pr_wp1117_g1: {used: 4, reserved: 0, limit: 10}
+    pr_wp1117_g1: {used: 5, reserved: 0, limit: 10}
   attempt:
     packet_1117_r2: {used: 0, reserved: 0, limit: 2}
   khong_reset_theo_generation: true
@@ -97,3 +97,4 @@ codex_da_goi:
 - {luot: 2, run_id: 510b309c99c64c0282ba5ae98acf56c4, head: b9f010b3e5ef521d2980f12a5a3d4317e1e78724, verdict: changes_requested, ket_qua: '0 P0, 0 P1, 1 P2, 0 P3'}
 - {luot: 3, run_id: 5fb23c4595394de9b1941e672f35ad4f, head: 4a0d45d3c689600f749866f7b27e83b9d6039c00, verdict: approve, ket_qua: '0 P0, 0 P1, 0 P2, 0 P3; Windows/CI/A-B exact head do o handoff'}
 - {luot: 4, run_id: e9dab4183a284a51b142651b401617bf, head: 6f4b88991b14f1a15ceafdf4b4b3b564039449a1, verdict: approve, ket_qua: '0 P0, 0 P1, 0 P2, 0 P3 tren dung head cuoi (merge master 9091cf5; .claude trung byte 4a0d45d)'}
+- {luot: 5, run_id: e7296898c1a4450c83d9775d085f2ede, head: 8f0dfcf35c8ee92a9a754bde82846eb11430bd0e, verdict: approve, ket_qua: '0 P0, 0 P1, 0 P2, 0 P3 tren head cuoi sau va P2 connector r4438879478'}

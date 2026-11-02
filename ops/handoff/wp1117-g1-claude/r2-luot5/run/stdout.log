@@ -1,0 +1,5 @@
+Đã ghi [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/cd602115-8e1f-5ec4-a848-91a69cdc11c5/scratchpad/cr1117-l5/VERDICT.md): **approve — 0 P0/P1/P2/P3**.
+
+P2 connector đã đóng; F01/F02/F03 giữ đóng. A/B giữ nguyên tập lỗi nền. Không sửa `cay-kho/`.
+
+Windows/CI trên HEAD và TMPDIR ngoài `/tmp` chưa đo được, đã ghi rõ trong báo cáo.

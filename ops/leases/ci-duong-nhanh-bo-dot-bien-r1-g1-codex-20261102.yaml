@@ -21,8 +21,8 @@ recorder_is_dispatcher: false
 recorder_ghi_chu: Executor ghi lai chi thi truc tiep cua chu kho trong phien Codex; khong tu khai reviewer verdict.
 leased_at_utc: '2026-11-02T07:46:12Z'
 heartbeat_at: '2026-11-02T07:46:12Z'
-lease_until: '2026-11-03T07:46:12Z'
-lease_expires_at_utc: '2026-11-03T07:46:12Z'
+lease_until: '2026-11-02T11:00:00Z'
+lease_expires_at_utc: '2026-11-02T11:00:00Z'
 role: executor
 provider: codex
 executor: codex
@@ -94,3 +94,10 @@ land_authority_note: User da uy quyen merge/land/ghi so trong phien Codex sau kh
   lease thanh verdict.
 reviewer_execution_surface: antigravity
 reviewer_transport: machine/local
+
+lease_sua_lan_cuoi: '2026-11-02T11:00:00Z'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-03T07:46:12Z'
+  han_moi_utc: '2026-11-02T11:00:00Z'
+  chi_thi: 'Chủ kho ủy quyền điều phối lease và land cho packet #1143 trong phiên Codex ngày 2026-11-02.'
+  ly_do: 'PR mã #1155 merged bae0c966; PR hồ sơ A11 #1157 merged 5202d3d; cả ba A11 và CI hậu merge mã đã đạt.'

@@ -1,0 +1,13 @@
+2026-11-01T23:14:13.3756129Z Image: windows-2025-vs2026
+2026-11-01T23:14:14.3315566Z ##[group]Run git config --global core.autocrlf false
+2026-11-01T23:14:15.2729781Z ##[group]Run actions/checkout@v4
+2026-11-01T23:14:24.8972005Z [command]"C:\Program Files\Git\bin\git.exe" rev-parse refs/remotes/origin/claude/gate-hau-merge-c165a5d0
+2026-11-01T23:14:24.9304168Z c165a5d0d4048e10e7da875f2ba7524136fb5735
+2026-11-01T23:14:28.3571142Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-11-01T23:14:28.3860271Z c165a5d0d4048e10e7da875f2ba7524136fb5735
+2026-11-01T23:14:28.4245156Z ##[group]Run actions/setup-python@v5
+2026-11-01T23:14:28.5928727Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-11-01T23:14:37.5263525Z ##[group]Run bash ops/cai_actionlint.sh
+2026-11-01T23:14:38.6133076Z ##[group]Run bash ops/cai_cong_cu.sh shellcheck
+2026-11-01T23:15:10.0950109Z ##[group]Run bash ops/cai_cong_cu.sh rg
+2026-11-01T23:15:16.4619951Z ##[group]Run python ops/cong_cu.py kiem-tra --json

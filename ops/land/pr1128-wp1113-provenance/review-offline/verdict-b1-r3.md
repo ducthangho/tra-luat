@@ -1,0 +1,18 @@
+VERDICT: changes_requested — P0/P1/P2/P3 = 0/0/1/1
+
+| id | lớp | mức | tệp:dòng | mô tả | sửa |
+|---|---|---|---|---|---|
+| F3 | bằng chứng phép đo ủy nhiệm | P2, giữ từ lượt 2 | `ops/ci_duong_nhanh_test.py:2277` | **KHÔNG ĐO ĐƯỢC** việc đóng F3. Bảng đủ 49 dòng, không còn `chua_do`; ba dòng G5 đã đổi đúng nhãn. Nhưng kết quả A/B chỉ có lời khai; không có log và `git cat-file -t 2a8d20db` trả **128**. `t58` kiểm cấu trúc bảng, không xác minh phép đo. | Cung cấp bằng chứng sẵn có của lượt đo, neo hai OID đầy đủ, lệnh/env, rc và đầu ra dương. Không cần chạy lại bộ dài. |
+| F4 | nhận dạng `cai_dat` bằng chuỗi | P3 | `ops/ci_duong_nhanh_test.py:2357` | Phản chứng trong bộ nhớ: đổi riêng nhãn `golden-test`, `workflow-audit strict` hoặc `py_compile` thành `cai_dat` ⇒ `t58` vẫn **rc=0**. Chiều ngược lại, thêm comment `# selftest is executed in a later step` sau lệnh cài actionlint ⇒ **rc=3**, dù lệnh thực thi không đổi. | Dùng tập lệnh setup/`uses` được phép, thay việc tìm từ khóa trong toàn bộ `run:`; khóa hai chiều bằng ca nhỏ. |
+
+Bằng chứng đã chạy trên Linux, Python 3.13.18:
+
+- **passed:** `python3 ops/ci_duong_nhanh_test.py --mot-ca t58_bang_uy_nhiem_phu_dung_buoc_bi_bo` — rc=0. Gọi kiểm bổ sung ghi nhận **3/3 assertion đúng**, bảng đủ **49 dòng**.
+- **passed:** áp riêng ba đột biến `wp1113_uy_nhiem_{thieu_dong,g5_cai_dat,gia_tri_la}` trong bộ nhớ; cả ba trả **rc=3 đúng ca và đúng lý do**. Đột biến G5 không sai đích.
+- Không thấy nhãn `cai_dat` hiện tại gán nhầm cho bước kiểm cây. F4 là giới hạn của chốt mới, chưa làm cây hiện tại đỏ.
+- **not_run:** bộ dài và toàn bộ đột biến. Phép đo A/B của Executor: **KHÔNG ĐO ĐƯỢC** độc lập.
+
+Reviewed SHA: `bb931eaa95f927b14b1270e5707a7e406287e8ab`  
+Tree: `f79d1ff75b228a32da2a28a2c5c8fa931e6acb2f`
+
+Base và SHA-256 spec khớp chỉ thị. Không sửa tệp; snapshot cuối sạch cả tracked, untracked và ignored. Reviewer: `openai_codex / codex_cli / machine`, sandbox read-only; model/effort thực phục vụ: **KHÔNG ĐO ĐƯỢC** từ receipt runtime.

@@ -10557,6 +10557,24 @@ _r1117_gia_kenh()
 
 
 @ca
+def r1117_runner_stdin_utf8_khi_tmpdir_co_dau():
+    """Kênh stdin luôn là UTF-8, kể cả khi stdio của con dùng ASCII/cp1258 (Codex #1117 F01). Chạy runner
+    của một cây harness LỒNG để đột biến runner trong `_dung_cay_harness` chạm được ca này."""
+    from unittest.mock import patch
+    ten = "r1079_cham_mot_ca_chi_TinHieuChotCa_la_giet"
+    with San() as s:
+        dev = _dung_cay_harness(s / "tree", Path(__file__).read_text(encoding="utf-8"),
+                                LAUNCHER.read_text(encoding="utf-8"))
+        for nhan in ("ascii", "tiếng-Việt"):
+            tmp = s / nhan
+            tmp.mkdir()
+            for ma_hoa in ("utf-8", "ascii", "cp1258"):
+                with patch.dict(os.environ, PYTHONIOENCODING=ma_hoa), patch.object(tempfile, "tempdir", str(tmp)):
+                    got = cham_lap_ca(dev, ten)
+                bang(got == ("qua", ten), f"stdin sai encoding: {nhan!r}, {ma_hoa}: {got}")
+
+
+@ca
 def r1117_cay_harness_chep_runner_that():
     """#1117 spec A2: cây đột biến phải mang runner THẬT, giống từng byte. Runner không lấy từ `ma_test`, nên
     đột biến chỉ sửa được tệp test chứ không sửa được runner."""
@@ -15003,7 +15021,7 @@ DOT_BIEN_HARNESS = [
        '            LOAI_HONG[fn.__name__] = type(e).__name__'),
       ('            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"\n            ket = f"LOI',
        '            LOAI_HONG[fn.__name__] = type(e).__name__\n            ket = f"LOI')],
-     ["r1079_harness_trung_ten_loai_khong_cap_tin_dung"]),
+     ["r1122_nhat_ky_giu_loai_va_thong_diep_160"]),
     # Codex lượt 2: F05 nguồn gốc chốt · F06 ca đích vắng · F01 tiền tố `khac:`.
     ("wp1079_bo_kiem_ca_khac", ("        if tb.tb_frame.f_code in khac:\n            return True\n        tb = tb.tb_next\n    return False",
                                 "        if False:\n            return True\n        tb = tb.tb_next\n    return False"),
@@ -15026,7 +15044,7 @@ DOT_BIEN_HARNESS = [
                                  '                                      else type(e).__qualname__)'),
                                 ('            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"\n            ket = f"LOI',
                                  '            LOAI_HONG[fn.__name__] = type(e).__qualname__\n            ket = f"LOI')],
-     ["r1079_review_lop_khac_cung_qualname_khong_la_chot"]),
+     ["r1122_nhat_ky_giu_loai_va_thong_diep_160"]),
     ("wp1079_n13_do_bash_ngoai_env_sach",
      ('        with patch.dict(os.environ, env, clear=True):\n            vo, chan_doan',
       '        with patch.dict(os.environ, {}):\n            vo, chan_doan'),
@@ -15082,6 +15100,10 @@ DOT_BIEN_HARNESS = [
      ('    shutil.copy2(Path(__file__).with_name(RUNNER_TEN), dev / RUNNER_TEN)',
       '    (dev / RUNNER_TEN).write_text(Path(__file__).with_name(RUNNER_TEN).read_text(encoding="utf-8").replace(\'    spec.loader.exec_module(mod)\', \'    open(kenh, "w", encoding="utf-8").write(json.dumps({"nonce": nonce, "ten": ten, "loai": "giet", "chi_tiet": ten}))\\n    spec.loader.exec_module(mod)\'), encoding="utf-8")'),
      ['r1117_khoi_tao_module_gia_kenh_roi_thoat_la_loi']),
+    ('wp1117_runner_doc_stdin_theo_codec_moi_truong',
+     ('    shutil.copy2(Path(__file__).with_name(RUNNER_TEN), dev / RUNNER_TEN)',
+      '    (dev / RUNNER_TEN).write_text(Path(__file__).with_name(RUNNER_TEN).read_text(encoding="utf-8").replace(\'sys.stdin.buffer.read().decode("utf-8")\', \'sys.stdin.read()\'), encoding="utf-8")'),
+     ['r1117_runner_stdin_utf8_khi_tmpdir_co_dau']),
     ('wp1117_bo_kiem_loai',
      ('    if loai not in ("qua", "bo_qua", "giet", "loi"):',
       '    if False:'),

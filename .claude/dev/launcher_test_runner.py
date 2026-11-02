@@ -38,8 +38,12 @@ LOAI_HOP_LE = ("qua", "bo_qua", "giet", "loi")
 
 def _doc_kenh_roi_bit_stdin():
     """(i): đọc hết stdin, rồi để fd 0 trỏ /dev/null. Mã cấp module đọc `sys.stdin` hay `os.read(0)` chỉ
-    thấy EOF."""
-    dong = sys.stdin.read().splitlines()
+    thấy EOF. Đọc BYTE rồi giải UTF-8 theo hợp đồng bên gửi (`cham_lap_ca` mã hoá UTF-8): codec mặc định của
+    con (ascii/cp1258) làm đường kênh có dấu thành lỗi giải mã hoặc thành một đường khác (Codex #1117 F01)."""
+    try:
+        dong = sys.stdin.buffer.read().decode("utf-8").splitlines()
+    except UnicodeDecodeError:
+        dong = []
     rong = os.open(os.devnull, os.O_RDONLY)
     os.dup2(rong, 0)
     os.close(rong)

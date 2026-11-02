@@ -1,0 +1,96 @@
+HINT.patch — reviewer lượt 7 (advisory_review, Claude Opus 5.5) cho PR #690 / packet #671, áp lên 302a15dd56c58918a4ca9e4965eb54907204a9f9
+Nhãn §8 (nguyên văn): chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+Áp: từ GỐC cây làm việc, `patch -p0 --fuzz=0 < HINT.patch` (đường dẫn repo-relative, không tiền tố a/ b/). MỘT tệp: ops/cong_cu_test.py.
+MỌI hunk là mã TEST (`_k32_gia`, `t64`) hoặc CHÚ THÍCH/DOCSTRING — KHÔNG hunk nào chạm mã sản phẩm (`_ep_utf8`, `_phong_lai`, khối phóng lại,
+`main()`, `_main_gop()`, `_CUA`), `bash_nen.py`, `.github/workflows/**`. Executor phải khai `hint_provenance` theo hunk.
+  hunk 1 (@@ -12)   LOI-KHAI-RONG-HON-PHEP-DO [P4] chú thích: danh sách DẠNG giá trị `env=` thiếu dạng `dict({k: v … os.environ.items() …}, …)`
+                    của `t64` (:3017). Trung hoà dòng. Bỏ "(trôi mỗi lượt)" cho vừa dòng (ý giữ: CỐ Ý không ghi số đếm).
+  hunk 2 (@@ -2972) LOI-KHAI-RONG-HON-PHEP-DO [P4] docstring `_k32_gia`: "thiếu/lệch `byref` thì lỗi ở BIÊN" — đo: lệch byref (N_H) QUA biên
+                    ctypes (stderr rỗng), bị bắt bởi TRẠNG THÁI (cờ đọc sai chỗ = 0). Trung hoà dòng.
+  hunk 3 (@@ -2984) mã TEST, `_k32_gia`, hai lớp trong cùng khối:
+                    DO-GIA-DOC-DIA-CHI-TUY-Y [P4] — `dat` không đọc địa chỉ < 64 KiB (số đưa nhầm làm con trỏ) ⇒ trả FALSE như nhân Windows
+                    (ERROR_NOACCESS) thay vì SIGSEGV cả tiến trình test. Trung hoà dòng.
+                    CA-KHOA-T64-TREO-THAY-VI-DO (đường 2) [P4] — `popen` giả cho con `stdin=DEVNULL`: hồi quy nhánh nt làm con đọc stdin
+                    (vd. mất đối số ⇒ REPL) nay nhận EOF ⇒ (w2) ĐỎ, không treo `t64:3061 → _phong_lai:71 wait()` khi stdin là terminal. Trung hoà.
+  hunk 4 (@@ -3018) mã TEST, `t64`, hai lớp:
+                    TU-PHONG-LAI-KHONG-TRONG-SUOT (e) [P3] — `dau.py` in dấu `PID=… U8=… PL=…` ra luồng CÒN MỞ (`file=sys.stdout or
+                    sys.stderr`) để (k4) đọc được; k1–k3 không đổi (stdout mở ⇒ vẫn ra stdout). Trung hoà dòng.
+                    CA-KHOA-T64-TREO-THAY-VI-DO (đường 3) [P4] — Timer hạn chót giết bao VÀ đóng stdin của nó: khi bản phóng lại là tiến trình
+                    RIÊNG (Windows Job hỏng ⇒ CANH_BAO; ≙ POSIX M1) mà treo đọc stdin, giết bao không đủ (cháu giữ ống) ⇒ nay EOF ⇒ ĐỎ có tên.
+                    Trung hoà dòng.
+  hunk 5 (@@ -3041) TU-PHONG-LAI-KHONG-TRONG-SUOT (e) [P3] mã TEST, chốt (k4): đòi `rc == 0` VÀ dấu `U8=1 PL=1` (bằng chứng DƯƠNG đã
+                    phóng lại tới bộ ca), không chỉ rc. +1 dòng.
+TRẦN DÒNG (quyết định chủ kho ~420 so fc852ff; head +417): áp đủ ⇒ +418/−42 (≤ 420). Dòng thêm dài nhất 142 ký tự (dòng gốc `:3021` đã
+142 — chỉ đổi `)` thành `,`); compile `-W error` sạch trên 3.11.15/3.12.3/3.13.12.
+Không có hunk cho NGHIEM-THU-WINDOWS-CON-THIEU [P2]: KHÔNG vá được bằng mã ở Linux (chủ kho: "Chỉ chạy tại máy").
+
+diff --git ops/cong_cu_test.py ops/cong_cu_test.py
+index 03439a5..e5e1085 100644
+--- ops/cong_cu_test.py
++++ ops/cong_cu_test.py
+@@ -12,8 +12,8 @@ from pathlib import Path
+ # cho MỌI tiến trình con/cháu. Đo 27-09-2026 (Linux, `PYTHONIOENCODING=ascii` cho con): `t29`, `t42`,
+ # `t45` chết `tin_dung_gia` vì cháu in chữ Việt ra stdout ASCII; chạy tay trên Windows (cp1252/cp1258)
+ # ĐỎ oan, còn CI che mất vì tự đặt hai biến này. Đặt vào `os.environ` chứ không vá từng lời gọi. Phạm vi
+-# ĐÃ ĐO (AST, mọi Call có `env=`): giá trị là `moi_truong(…)`, `dict(os.environ, …)`, `{**os.environ, …}`, hoặc
+-# biến/`dict(biến, …)` truy tay về các dạng ấy hay `None` (= thừa kế) — CỐ Ý không ghi số đếm (trôi mỗi lượt); lời
++# ĐÃ ĐO (AST, mọi Call có `env=`): giá trị là `moi_truong(…)`, `dict(os.environ, …)`, `{**os.environ, …}`, `dict({k: v
++# … os.environ.items() …}, …)`, hoặc biến/`dict(biến, …)` truy về chúng hay `None` (= thừa kế) — CỐ Ý không ghi số đếm; lời
+ # gọi không `env=` thì thừa kế. Điểm phóng viết SAU phải tự giữ điều đó — chưa ca nào khoá.
+ # `t61` đo từng vế trong một tiến trình con CỐ Ý ép ASCII, nên nó có răng cả khi CI đã đặt sẵn.
+ _BIEN_UTF8 = (("PYTHONIOENCODING", "utf-8"), ("PYTHONUTF8", "1"))
+@@ -2972,7 +2972,7 @@ def _k32_gia(hong=""):
+     """kernel32 GIẢ cho `t64` — giữ TRẠNG THÁI (bảng job, cờ đọc từ BYTE cấu trúc, thành viên, kế thừa lúc phóng),
+     KHÔNG diễn kịch bản: `cha_chet()` giết ai là do trạng thái `_phong_lai` đã dựng. Mỗi API là HÀM C thật
+     (`CFUNCTYPE`, chữ ký Win32) nên ctypes CHUYỂN KIỂU theo argtypes/restype SẢN PHẨM khai — handle giả > 32 bit
+-    (restype sai thì bị cắt), thiếu/lệch `byref` thì lỗi ở BIÊN, không lọt. `hong` = tên API bị bắt trả 0."""
++    (restype sai thì bị cắt), thiếu `byref` lỗi ở BIÊN, lệch `byref` đọc cờ sai chỗ — không lọt. `hong` = API bị bắt trả 0."""
+     import ctypes, threading, types
+     vp, i = ctypes.c_void_p, ctypes.c_int
+     H = 1 << (8 * ctypes.sizeof(vp) - 4)       # handle nền > 32 bit: restype mặc định `c_int` cắt còn 32 là HỎNG THẬT
+@@ -2984,15 +2984,15 @@ def _k32_gia(hong=""):
+         k.giu.append(cb)       # SẢN PHẨM tự gán argtypes/restype như với WinDLL; `k.giu` giữ callback sống kẻo treo
+         setattr(k, ten, ctypes.CFUNCTYPE(i)(ctypes.cast(cb, vp).value))
+ 
+-    def dat(h, lop, p, n):     # `p` = ĐỊA CHỈ ctypes thật truyền sang; đọc cờ LimitFlags tại p+16 (4 byte)
+-        ok = h in k.job and lop == 9 and p and n == (144 if ctypes.sizeof(vp) == 8 else 112)
++    def dat(h, lop, p, n):     # `p` = ĐỊA CHỈ ctypes truyền; < 64 KiB (số đưa làm con trỏ) ⇒ FALSE như nhân, không SIGSEGV
++        ok = h in k.job and lop == 9 and (p or 0) >= 1 << 16 and n == (144 if ctypes.sizeof(vp) == 8 else 112)
+         if ok:
+             k.job[h].update(co=int.from_bytes(ctypes.string_at(p + 16, 4), "little"))
+         return int(bool(ok))
+ 
+     def popen(lenh, **kw):
+-        k.con.append(subprocess.Popen(lenh, **kw))  # phóng từ thành viên ⇒ con thuộc job, trừ khi job cho thoát lặng
+-        [j["tv"].add(k.con[-1]) for j in k.job.values() if "cha" in j["tv"] and not j["co"] & 0x1000]
++        k.con.append(subprocess.Popen(lenh, **{"stdin": subprocess.DEVNULL, **kw}))  # đọc stdin ⇒ EOF, (w2) đỏ không treo
++        [j["tv"].add(k.con[-1]) for j in k.job.values() if "cha" in j["tv"] and not j["co"] & 0x1000]  # thuộc job trừ thoát lặng
+         return k.co.set() or k.con[-1]  # báo hiệu SAU khi đã ghi thành viên — trước thì `cha_chet` đua với dòng trên
+     api("CreateJobObjectW", lambda *_: k.job.setdefault(H + len(k.job) + 1, dict(co=0, tv=set())) and max(k.job), vp, vp, vp)
+     api("SetInformationJobObject", dat, i, vp, i, vp, ctypes.c_uint32)
+@@ -3018,12 +3018,12 @@ def t64_phong_lai_KHONG_de_MO_COI_khi_bi_giet_va_ma_thoat_giu_TIN_HIEU():
+     mac_dinh = (lambda: [signal.signal(s, signal.SIG_DFL) for s in (signal.SIGINT, signal.SIGTERM)]) if os.name == "posix" else None
+     with tempfile.TemporaryDirectory(prefix="t64-") as td:
+         (tep := Path(td) / "dau.py").write_text(nguon.split(cat)[0] + "\nimport signal\nprint(f'PID={os.getpid()} U8={sys.flags.utf8_mode} PL="
+-                                                "{int(_DA_PHONG_LAI)} INT={signal.getsignal(2) is signal.default_int_handler:d}', flush=True)"
+-                                                "\nsys.stdin.read()\n", encoding="utf-8")
++                                                "{int(_DA_PHONG_LAI)} INT={signal.getsignal(2) is signal.default_int_handler:d}', flush=True,"
++                                                " file=sys.stdout or sys.stderr)\nsys.stdin.read()\n", encoding="utf-8")
+         for sig in (None,) + ((signal.SIGTERM,) if os.name == "posix" else ()):
+             with subprocess.Popen([sys.executable, str(tep)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, env=env, preexec_fn=mac_dinh) as p:
+-                (hen := threading.Timer(120, p.kill)).start()  # treo không in ⇒ giết ⇒ `dung` dưới ĐỎ, không treo tới trần job
++                (hen := threading.Timer(120, lambda: p.kill() or p.stdin.close())).start()  # treo ⇒ giết + EOF ⇒ `dung` ĐỎ
+                 dau, rc = p.stdout.readline().decode("utf-8", "replace"), None
+                 hen.cancel()
+                 dung("U8=1 PL=1" in dau, f"giàn giáo: phần đầu không phóng lại sang UTF-8 — không đo gì: {dau!r}")
+@@ -3041,7 +3041,8 @@ def t64_phong_lai_KHONG_de_MO_COI_khi_bi_giet_va_ma_thoat_giu_TIN_HIEU():
+         for fd in (1, 2) if os.name == "posix" else ():  # (k4) fd ĐÓNG lúc gọi ⇒ sys.stdout/stderr None: phần đầu VẪN phóng
+             r = subprocess.run([sys.executable, str(tep)], input=b"", capture_output=True, env=env, timeout=120,
+                                preexec_fn=lambda: os.close(fd))
+-            bang(r.returncode == 0, f"(k4) fd {fd} đóng ⇒ nổ trước khi phóng lại: rc={r.returncode} {r.stderr[-99:]!r}")
++            bang(r.returncode == 0 and b"U8=1 PL=1" in r.stdout + r.stderr,  # rc=0 TRẦN lọt "thoát 0 không phóng/chạy"
++                 f"(k4) fd {fd} đóng ⇒ không phóng lại tới bộ ca: rc={r.returncode} {(r.stdout + r.stderr)[-99:]!r}")
+ 
+     def phong(k, lenh, gia=True):
+         with contextlib.redirect_stderr(loi := io.StringIO()):

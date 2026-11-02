@@ -1,0 +1,702 @@
+name: gate
+true:
+  push:
+    branches:
+    - master
+  pull_request: null
+  workflow_dispatch:
+    inputs:
+      runner_set:
+        description: "windows-and-ubuntu (m\u1EB7c \u0111\u1ECBnh) ho\u1EB7c windows-only\
+          \ (b\u1ECF c\xE1c job ma tr\u1EADn Ubuntu)"
+        required: false
+        default: windows-and-ubuntu
+        type: choice
+        options:
+        - windows-and-ubuntu
+        - windows-only
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref
+    }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+jobs:
+  chuan-bi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      os: ${{ (github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name,
+        'windows')) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]'
+        }}
+      che_do: ${{ github.event_name == 'pull_request' && steps.phan-loai.outputs.che_do
+        || 'day_du' }}
+    steps:
+    - uses: actions/checkout@v4
+      if: ${{ github.event_name == 'pull_request' }}
+      continue-on-error: true
+      timeout-minutes: 10
+      with:
+        fetch-depth: 0
+    - name: phan loai diff (duong nhanh ho so - chi pull_request)
+      id: phan-loai
+      if: ${{ github.event_name == 'pull_request' }}
+      continue-on-error: true
+      timeout-minutes: 5
+      env:
+        CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}
+        CI_DUONG_NHANH_GOC: ${{ github.event.pull_request.base.sha }}
+        CI_DUONG_NHANH_DAU: ${{ github.event.pull_request.head.sha }}
+        CI_DUONG_NHANH_MERGE: ${{ github.sha }}
+      run: python3 ops/ci_duong_nhanh.py
+    - name: che do (push / workflow_dispatch luon day du)
+      if: ${{ github.event_name != 'pull_request' }}
+      env:
+        SU_KIEN: ${{ github.event_name }}
+      run: 'echo "DUONG_NHANH: khong phan loai - su_kien=${SU_KIEN} khong phai pull_request,
+        luon DAY_DU"
+
+        '
+  gate:
+    needs: chuan-bi
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 150
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - name: "Force LF checkout (hash parity v\u1EDBi manifest)"
+      run: "git config --global core.autocrlf false\ngit config --global core.eol\
+        \ lf\n# r226 \u2014 NG\u01AF\u1EE0NG L2 C\u1EE6A doc-claims-check PH\u1EA2\
+        I T\u1EA4T \u0110\u1ECANH. `sha_lens` l\u1EA5y t\u1EEB `git rev-parse --short`,\n\
+        # m\xE0 git t\u1EF1 n\u1EDBi \u0111\u1ED9 d\xE0i vi\u1EBFt t\u1EAFt theo S\u1ED0\
+        \ OBJECT c\u1EE7a kho. \u0110O tr\xEAn ch\xEDnh kho n\xE0y: clone `--depth\
+        \ 1`\n# \u2192 7 \xB7 clone \u0111\u1EE7 l\u1ECBch s\u1EED (281 commit, 17.783\
+        \ object) \u2192 8. M\xE0 8 \u0111\xFAng b\u1EB1ng \u0111\u1ED9 d\xE0i ti\u1EC1\
+        n t\u1ED1 UUID\n# notebook (743ed200, 45739ff7, dbe706a0\u2026) \u21D2 ng\u01B0\
+        \u1EE1ng tr\xF4i l\xEAn 8 th\xEC 18 ti\u1EC1n t\u1ED1 UUID b\u1ECB h\xF4\n\
+        # SHA_NOT_A_COMMIT v\xE0 ca r218_docclaims_l2_sha_khong_ton_tai (m\u1ED3i\
+        \ `deadbee`, 7 k\xFD t\u1EF1) c\u0169ng \u0111\u1ECF\n# theo. Ghim 7 = gi\u1EEF\
+        \ \u0110\xDANG ng\u01B0\u1EE1ng m\u1ECDi ph\xE9p \u0111o c\u1EE7a r218 d\u1EF1\
+        a v\xE0o, KH\xD4NG ph\u1EA3i n\u1EDBi l\u1ECFng guard.\ngit config --global\
+        \ core.abbrev 7\n"
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: "c\xE0i PyYAML + jsonschema (c\u1ED5ng \u0111\u0103ng lease + validator\
+        \ verdict c\u1EA7n)"
+      run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    - name: "c\xE0i actionlint cho G5"
+      shell: bash
+      env:
+        AL_VER: 1.7.7
+      run: bash ops/cai_actionlint.sh
+    - name: "c\xE0i shellcheck cho G5 (c\xE0i xong \u0111o l\u1EA1i)"
+      shell: bash
+      run: bash ops/cai_cong_cu.sh shellcheck
+    - name: "c\xE0i rg cho G5 (c\xE0i xong \u0111o l\u1EA1i)"
+      shell: bash
+      run: bash ops/cai_cong_cu.sh rg
+    - name: G5 kiem ban ke cong cu + T1..T8 (packet
+      shell: bash
+      env:
+        CONG_CU_TEST_BAN_KINH: manh
+      run: 'python ops/cong_cu.py kiem-tra --json
+
+        python ops/cong_cu_test.py
+
+        '
+    - name: "c\xE0i Ruff 0.15.15 v\xE0 in probe d\u01B0\u01A1ng"
+      run: 'python -m pip install --quiet ruff==0.15.15
+
+        ruff --version
+
+        '
+    - name: DUONG_NHANH - liet ke buoc bo qua (job gate)
+      if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+      run: "echo \"DUONG_NHANH: bo qua tl selftest (luot PR \u2014 khong sinh bang\
+        \ chung) vi diff chi gom ops/{land,leases,reviews,specs}/**\"\necho \"DUONG_NHANH:\
+        \ bo qua golden-test vi diff chi gom ops/{land,leases,reviews,specs}/**\"\n\
+        echo \"DUONG_NHANH: bo qua determinism-audit strict vi diff chi gom ops/{land,leases,reviews,specs}/**\"\
+        \necho \"DUONG_NHANH: bo qua release-check full vi diff chi gom ops/{land,leases,reviews,specs}/**\"\
+        \necho \"DUONG_NHANH: bo qua release-bundle x2 c\xF9ng SHA-256 vi diff chi\
+        \ gom ops/{land,leases,reviews,specs}/**\"\n"
+    - name: PR head contains required EOL base
+      if: ${{ github.event_name == 'pull_request' }}
+      shell: bash
+      env:
+        PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        EOL_BASE_SHA: 1880346d2be3c0be9a93de7624ee108d99b6c88c
+      run: 'set -eu
+
+        test -n "$PR_HEAD_SHA"
+
+        git cat-file -e "${PR_HEAD_SHA}^{commit}"
+
+        git cat-file -e "${EOL_BASE_SHA}^{commit}"
+
+        git merge-base --is-ancestor "$EOL_BASE_SHA" "$PR_HEAD_SHA"
+
+        '
+    - name: py_compile
+      run: python -m py_compile scripts/tl.py scripts/tl_boot.py scripts/gen_instructions.py
+        scripts/tl_core/__init__.py scripts/tl_core/deterministic.py scripts/tl_core/jsonio.py
+        scripts/tl_core/workflow.py scripts/tl_core/release.py scripts/tl_core/live.py
+        scripts/tl_core/zip_ingest.py scripts/tl_core/ocr.py scripts/tl_core/chunking.py
+        scripts/tl_core/command_registry.py
+    - name: 'codex credential selftest (packet #300)'
+      run: python .claude/dev/codex_cred_test.py
+    - name: idiom-ba-ten selftest
+      run: python .claude/dev/idiom_py_test.py
+    - name: eol-policy selftest
+      run: python .githooks/eol_policy_test.py
+    - name: pre-push selftest
+      run: python .githooks/pre_push_test.py
+    - name: eol-policy survey
+      run: python .githooks/eol_policy.py --all --json
+    - name: "bundled-fragment check (topology g\xF3i)"
+      run: python .github/checks/bundle_fragment_check.py --json
+    - name: gen_instructions selftest
+      run: python scripts/gen_instructions.py --selftest
+    - name: command-registry unit test (AG-T0-03)
+      run: python scripts/tl_core/command_registry_test.py
+    - name: "tl selftest (luot PR \u2014 khong sinh bang chung)"
+      if: ${{ github.event_name == 'pull_request' && needs.chuan-bi.outputs.che_do
+        != 'duong_nhanh' }}
+      run: python scripts/tl.py --selftest
+    - name: tl selftest (co bang chung exact-identity)
+      if: ${{ github.event_name != 'pull_request' }}
+      shell: bash
+      run: "set -euo pipefail\nmkdir -p scripts/.tl_state/gate\n# KH\xD4NG d\xF9ng\
+        \ `--depth`: checkout \u1EDF tr\xEAn c\u1ED1 \xFD \u0111\u1EB7t `fetch-depth:\
+        \ 0` cho\n# `doc-claims` L2 (`cat-file -e` tr\u01B0\u1EE3t m\u1ECDi SHA c\u0169\
+        \ tr\xEAn clone n\xF4ng). M\u1ED9t\n# `--depth=50` \u1EDF \u0111\xE2y c\xF3\
+        \ th\u1EC3 l\xE0m n\xF4ng l\u1EA1i ch\xEDnh th\u1EE9 b\u01B0\u1EDBc kia c\u1EA7\
+        n, v\xE0 t\u1EC7 h\u01A1n\n# l\xE0 `merge-base` s\u1EBD tr\u01B0\u1EE3t khi\
+        \ nh\xE1nh r\u1EBD xa h\u01A1n 50 commit (P2 review \"#141\").\n# FAIL-CLOSE:\
+        \ `base_sha` sai l\xE0m b\u1EB1ng ch\u1EE9ng v\xF4 d\u1EE5ng m\u1ED9t c\xE1\
+        ch IM L\u1EB6NG.\ngit fetch --no-tags origin master\n# HEAD \u0110\xDANG L\xC0\
+        \ HEAD C\u1EE6A PR, kh\xF4ng ph\u1EA3i `$GITHUB_SHA`. Tr\xEAn `pull_request`,\n\
+        # `$GITHUB_SHA` l\xE0 commit MERGE T\u1ED4NG H\u1EE2P do GitHub d\u1EF1ng\
+        \ \u2014 d\xF2ng 73 c\u1EE7a ch\xEDnh\n# t\u1EC7p n\xE0y \u0111\xE3 c\u1EA3\
+        nh b\xE1o \u0111\xFAng \u0111i\u1EC1u \u0111\xF3, v\xE0 t\xF4i v\u1EABn vi\u1EBF\
+        t sai \u1EDF \u0111\xE2y (P2 review\n# \"#141\"). Evidence neo v\xE0o commit\
+        \ t\u1ED5ng h\u1EE3p th\xEC kh\xF4ng ai validate l\u1EA1i \u0111\u01B0\u1EE3\
+        c\n# v\xEC commit \u1EA5y kh\xF4ng c\xF3 trong l\u1ECBch s\u1EED nh\xE1nh.\n\
+        # `HEAD` c\u1EE7a c\xE2y, kh\xF4ng ph\u1EA3i bi\u1EBFn n\xE0o c\u1EA3: b\u1EB1\
+        ng ch\u1EE9ng ph\u1EA3i khai \u0110\xDANG\n# th\u1EE9 v\u1EEBa \u0111o. B\u01B0\
+        \u1EDBc n\xE0y ch\u1EC9 ch\u1EA1y khi HEAD l\xE0 commit th\u1EADt (xem `if:`\
+        \ tr\xEAn).\nHEAD_SHA=\"$(git rev-parse HEAD)\"\nBASE_SHA=\"$(git merge-base\
+        \ FETCH_HEAD \"$HEAD_SHA\")\"\necho \"head_sha = $HEAD_SHA\"\necho \"base_sha\
+        \ = $BASE_SHA\"\nNEN=\"${RUNNER_OS}\"\npython .claude/dev/gate_lifecycle.py\
+        \ run \\\n  --kind heavy --name tl-selftest --repo . \\\n  --evidence \"scripts/.tl_state/gate/tl-selftest-${NEN}.json\"\
+        \ \\\n  --output \"scripts/.tl_state/gate/tl-selftest-${NEN}.out\" \\\n  --expected-head\
+        \ \"$HEAD_SHA\" --base-sha \"$BASE_SHA\" --require-clean \\\n  --selected-test\
+        \ full-selftest \\\n  --wait-seconds 60 --timeout-seconds 2400 \\\n  --positive-regex\
+        \ '(?m)^.*\\b([1-9][0-9]*)/\\1\\b[^\\r\\n]*\\r?\\n?\\Z' \\\n  -- python scripts/tl.py\
+        \ --selftest\n"
+    - name: tai len gate-evidence
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: gate-evidence-${{ matrix.os }}-${{ github.run_attempt }}
+        path: scripts/.tl_state/gate/
+        if-no-files-found: warn
+    - name: workflow-audit strict
+      run: python scripts/tl.py workflow-audit --strict --json
+    - name: golden-test
+      if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+      run: python scripts/tl.py golden-test --json
+    - name: doc-claims-check strict
+      run: python scripts/tl.py doc-claims-check --strict --json
+    - name: determinism-audit strict
+      if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+      run: python scripts/tl.py determinism-audit --strict --json
+    - name: ci-phamvi guard (bang phu thuoc khop ma)
+      run: python .github/checks/ci_phamvi.py --kiem-bam
+    - name: "ci-phamvi selftest (phan chung \u2014 cong co rang)"
+      if: runner.os != 'Windows'
+      run: python .github/checks/ci_phamvi_test.py
+    - name: release-check full
+      if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+      run: python scripts/tl.py release-check --full --json
+    - name: "release-verify strict (lane LAND \u2014 manifest committed)"
+      if: github.ref == 'refs/heads/master'
+      run: python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
+    - name: "release-verify strict (lane WORKER \u2014 manifest T\u1EA0M ngo\xE0i\
+        \ repo)"
+      if: github.ref != 'refs/heads/master'
+      shell: bash
+      run: "set -euo pipefail\nTAM=\"$RUNNER_TEMP/tl-manifest-tam.json\"\nNKY=\"$RUNNER_TEMP/tl-manifest-tam.log\"\
+        \n# C\u1EA3 hai l\u1EC7nh in ~900 d\xF2ng JSON, n\xEAn \u0111\u1EA9y ra t\u1EC7\
+        p \u2014 nh\u01B0ng IM L\u1EB6NG l\xFAc \u0110\u1ECE l\xE0 m\u1EA5t ch\u1EA9\
+        n\n# \u0111o\xE1n \u0111\xFAng l\xFAc c\u1EA7n nh\u1EA5t, n\xEAn h\u1ECFng\
+        \ th\xEC `cat` ra log. \u0110\xE3 \u0111o: redirect ch\u1EA1y \u0111\u01B0\
+        \u1EE3c c\u1EA3 khi\n# `RUNNER_TEMP` mang d\u1EA1ng Windows (\u1ED5 \u0111\
+        \u0129a + d\u1EA5u ch\xE9o ng\u01B0\u1EE3c) d\u01B0\u1EDBi Git Bash.\npython\
+        \ scripts/tl.py release-manifest --root . --out \"$TAM\" --json > \"$NKY\"\
+        \ || { cat \"$NKY\"; exit 1; }\npython scripts/tl.py release-verify \"$TAM\"\
+        \ --root . --strict --json > \"$NKY\" || { cat \"$NKY\"; exit 1; }\npython\
+        \ - \"$TAM\" <<'PY'\nimport json, subprocess, sys\nra = subprocess.run([\"\
+        git\", \"ls-files\", \"-z\"], capture_output=True, check=True).stdout\ntheo_doi\
+        \ = set(ra.decode(\"utf-8\").split(chr(0))) - {\"\"}\nduong = [f[\"path\"\
+        ] for f in json.load(open(sys.argv[1], encoding=\"utf-8\"))[\"files\"]]\n\
+        thua = sorted(p for p in duong if p not in theo_doi)\nfor p in thua:\n   \
+        \ print(\"TEP THUA trong cay, git khong theo doi:\", p)\nif thua:\n    sys.exit(1)\n\
+        print(\"manifest tam:\", len(duong), \"tep, tat ca deu duoc git theo doi\"\
+        )\nPY\n"
+    - name: "release-bundle x2 c\xF9ng SHA-256"
+      if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+      shell: bash
+      run: "python scripts/tl.py release-bundle --out dist/a.zip --json > /dev/null\n\
+        python scripts/tl.py release-bundle --out dist/b.zip --json > /dev/null\n\
+        python - <<'PY'\nimport hashlib\nh = [hashlib.sha256(open(f, \"rb\").read()).hexdigest()\
+        \ for f in (\"dist/a.zip\", \"dist/b.zip\")]\nassert h[0] == h[1], f\"bundle\
+        \ kh\xF4ng t\u1EA5t \u0111\u1ECBnh: {h}\"\nprint(\"bundle sha256 =\", h[0])\n\
+        PY\n"
+    - name: tl_boot smoke
+      run: python scripts/tl_boot.py --version
+  gate-cong-cu:
+    needs: chuan-bi
+    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+        manh:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+        exclude:
+        - os: windows-latest
+          manh: 1
+        - os: windows-latest
+          manh: 2
+        - os: windows-latest
+          manh: 3
+        - os: windows-latest
+          manh: 4
+        - os: windows-latest
+          manh: 5
+        - os: windows-latest
+          manh: 6
+        - os: windows-latest
+          manh: 7
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 150
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - name: "Force LF checkout (hash parity v\u1EDBi manifest)"
+      run: "git config --global core.autocrlf false\ngit config --global core.eol\
+        \ lf\n# r226 \u2014 v\xEC sao ghim `core.abbrev 7`: xem ch\xFA th\xEDch c\xF9\
+        ng b\u01B0\u1EDBc \u1EDF job `gate`.\ngit config --global core.abbrev 7\n"
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: "c\xE0i PyYAML + jsonschema (c\u1ED5ng \u0111\u0103ng lease + validator\
+        \ verdict c\u1EA7n)"
+      run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    - name: "c\xE0i actionlint cho G5"
+      shell: bash
+      env:
+        AL_VER: 1.7.7
+      run: bash ops/cai_actionlint.sh
+    - name: "c\xE0i shellcheck cho G5 (c\xE0i xong \u0111o l\u1EA1i)"
+      shell: bash
+      run: bash ops/cai_cong_cu.sh shellcheck
+    - name: "c\xE0i rg cho G5 (c\xE0i xong \u0111o l\u1EA1i)"
+      shell: bash
+      run: bash ops/cai_cong_cu.sh rg
+    - name: G5 manh ban kinh dot bien (#668)
+      shell: bash
+      env:
+        CONG_CU_TEST_MANH: ${{ matrix.manh }}/8
+        CONG_CU_TEST_MANH_RA: manh/manh-${{ matrix.manh }}.txt
+      run: 'python ops/cong_cu.py kiem-tra --json
+
+        python ops/cong_cu_test.py
+
+        '
+    - if: runner.os != 'Windows'
+      uses: actions/upload-artifact@v4
+      with:
+        name: gate-cong-cu-manh-${{ matrix.os }}-${{ matrix.manh }}
+        path: manh/manh-${{ matrix.manh }}.txt
+        if-no-files-found: error
+  gate-cong-cu-gop:
+    needs:
+    - chuan-bi
+    - gate-cong-cu
+    if: ${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest')
+      }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+        exclude:
+        - os: windows-latest
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - name: "Force LF checkout (hash parity v\u1EDBi manifest)"
+      run: 'git config --global core.autocrlf false
+
+        git config --global core.eol lf
+
+        git config --global core.abbrev 7
+
+        '
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: "c\xE0i PyYAML + jsonschema (c\u1ED5ng \u0111\u0103ng lease + validator\
+        \ verdict c\u1EA7n)"
+      run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: gate-cong-cu-manh-${{ matrix.os }}-*
+        path: manh
+        merge-multiple: true
+    - name: G5 gom manh ban kinh dot bien (#668)
+      shell: bash
+      env:
+        CONG_CU_TEST_GOP_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}
+      run: python ops/cong_cu_test.py --gop manh
+  gate-ops:
+    needs: chuan-bi
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 150
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - name: "Force LF checkout (hash parity v\u1EDBi manifest)"
+      run: "git config --global core.autocrlf false\ngit config --global core.eol\
+        \ lf\n# r226 \u2014 NG\u01AF\u1EE0NG L2 C\u1EE6A doc-claims-check PH\u1EA2\
+        I T\u1EA4T \u0110\u1ECANH. `sha_lens` l\u1EA5y t\u1EEB `git rev-parse --short`,\n\
+        # m\xE0 git t\u1EF1 n\u1EDBi \u0111\u1ED9 d\xE0i vi\u1EBFt t\u1EAFt theo S\u1ED0\
+        \ OBJECT c\u1EE7a kho. \u0110O tr\xEAn ch\xEDnh kho n\xE0y: clone `--depth\
+        \ 1`\n# \u2192 7 \xB7 clone \u0111\u1EE7 l\u1ECBch s\u1EED (281 commit, 17.783\
+        \ object) \u2192 8. M\xE0 8 \u0111\xFAng b\u1EB1ng \u0111\u1ED9 d\xE0i ti\u1EC1\
+        n t\u1ED1 UUID\n# notebook (743ed200, 45739ff7, dbe706a0\u2026) \u21D2 ng\u01B0\
+        \u1EE1ng tr\xF4i l\xEAn 8 th\xEC 18 ti\u1EC1n t\u1ED1 UUID b\u1ECB h\xF4\n\
+        # SHA_NOT_A_COMMIT v\xE0 ca r218_docclaims_l2_sha_khong_ton_tai (m\u1ED3i\
+        \ `deadbee`, 7 k\xFD t\u1EF1) c\u0169ng \u0111\u1ECF\n# theo. Ghim 7 = gi\u1EEF\
+        \ \u0110\xDANG ng\u01B0\u1EE1ng m\u1ECDi ph\xE9p \u0111o c\u1EE7a r218 d\u1EF1\
+        a v\xE0o, KH\xD4NG ph\u1EA3i n\u1EDBi l\u1ECFng guard.\ngit config --global\
+        \ core.abbrev 7\n"
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: "c\xE0i PyYAML + jsonschema (c\u1ED5ng \u0111\u0103ng lease + validator\
+        \ verdict c\u1EA7n)"
+      run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    - name: "c\xE0i shellcheck cho G5 (c\xE0i xong \u0111o l\u1EA1i)"
+      shell: bash
+      run: bash ops/cai_cong_cu.sh shellcheck
+    - name: "c\xE0i rg cho G5 (c\xE0i xong \u0111o l\u1EA1i)"
+      shell: bash
+      run: bash ops/cai_cong_cu.sh rg
+    - name: DUONG_NHANH - liet ke buoc bo qua (job gate-ops)
+      if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+      run: "echo \"DUONG_NHANH: bo qua lease-publish selftest (\u0111o l\u1EA1i setup\
+        \ sau G5) vi diff chi gom ops/{land,leases,reviews,specs}/**\"\necho \"DUONG_NHANH:\
+        \ bo qua bo ca gate chay TRONG cgroup duoc uy quyen (Linux) vi diff chi gom\
+        \ ops/{land,leases,reviews,specs}/**\"\necho \"DUONG_NHANH: bo qua gate lifecycle\
+        \ selftest (nen khong co cgroup) vi diff chi gom ops/{land,leases,reviews,specs}/**\"\
+        \n"
+    - name: DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check,
+        lease check)
+      if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+      shell: bash
+      env:
+        CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}
+        CI_DUONG_NHANH_GOC: ${{ github.event.pull_request.base.sha }}
+        CI_DUONG_NHANH_DAU: ${{ github.event.pull_request.head.sha }}
+        CI_DUONG_NHANH_MERGE: ${{ github.sha }}
+      run: 'set -euo pipefail
+
+        python .claude/dev/packet_loop.py doctrine-scan --root .
+
+        python ops/ci_duong_nhanh.py kiem-re
+
+        '
+    - name: ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)
+      if: runner.os == 'Linux'
+      run: python ops/ci_duong_nhanh_test.py
+    - name: bien-nhan v2 selftest
+      run: python ops/bien_nhan_v2_test.py
+    - name: "lease-publish selftest (\u0111o l\u1EA1i setup sau G5)"
+      if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+      shell: bash
+      env:
+        AL_VER: 1.7.7
+      run: bash ops/chay_lease_publish_test.sh
+    - name: "don-nhanh selftest (ch\u1ED1t xo\xE1 nh\xE1nh)"
+      if: runner.os != 'Windows'
+      shell: pwsh
+      run: pwsh -NoProfile -File scripts/don-nhanh_test.ps1
+    - name: bo ca gate chay TRONG cgroup duoc uy quyen (Linux)
+      if: ${{ runner.os == 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh'
+        }}
+      run: "set -euo pipefail\nMOUNT=\"$(awk '{for(i=1;i<=NF;i++) if($i==\"-\" &&\
+        \ $(i+1)==\"cgroup2\"){print $5; exit}}' /proc/self/mountinfo)\"\nGOC=\"$(awk\
+        \ -F: '$1==\"0\"{print $3}' /proc/self/cgroup)\"\necho \"mount cgroup2 = ${MOUNT:-KHONG\
+        \ CO} | cgroup cua ta = ${GOC:-KHONG CO}\"\nif [ -z \"$MOUNT\" ] || [ -z \"\
+        $GOC\" ] || [ \"$GOC\" = \"/\" ]; then\n  echo \"KHONG uy quyen duoc (khong\
+        \ co cgroup2, hoac ta dang o GOC diem gan)\"\n  exit 1\nfi\nCHA=\"${MOUNT}${GOC}\"\
+        \nRIENG=\"${CHA}/tl-gate-ci\"\nsudo mkdir -p \"$RIENG\"\n# Ch\u1EC9 hai t\u1EC7\
+        p, KH\xD4NG \u0111\u1EC7 quy: th\u01B0 m\u1EE5c (\u0111\u1EC3 `mkdir` cgroup\
+        \ con) v\xE0\n# `cgroup.procs` c\u1EE7a n\xF3. KH\xD4NG \u0111\u1EE5ng `cgroup.subtree_control`,\
+        \ KH\xD4NG \u0111\u1EE5ng\n# cgroup con n\xE0o \u0111ang c\xF3 d\u01B0\u1EDB\
+        i service.\nsudo chown \"$(id -u):$(id -g)\" \"$RIENG\" \"$RIENG/cgroup.procs\"\
+        \n# M\u1EDF t\u1EA1m \u1EDF CHA \u0111\xFAng \u0111\u1EC3 b\u01B0\u1EDBc v\xE0\
+        o...\nsudo chown \"$(id -u):$(id -g)\" \"$CHA/cgroup.procs\"\necho $$ > \"\
+        $RIENG/cgroup.procs\"\n# ...r\u1ED3i TR\u1EA2 L\u1EA0I root ngay. Vi\u1EC7\
+        c n\xE0y \u0111\xF3ng \u0111\xFAng M\u1ED8T \u0111\u01B0\u1EDDng: ghi th\u1EB3\
+        ng v\xE0o\n# `CHA/cgroup.procs`. Con ch\xE1u v\u1EABn ghi ng\u01B0\u1EE3c\
+        \ l\xEAn `RIENG` \u0111\u01B0\u1EE3c v\xEC\n# `RIENG/cgroup.procs` ph\u1EA3\
+        i thu\u1ED9c UID runner m\u1EDBi chuy\u1EC3n v\xE0o \u0111\u01B0\u1EE3c \u2014\
+        \ xem\n# kh\u1ED1i tr\xEAn. \u0110\u1EEANG \u0111\u1ECDc d\xF2ng n\xE0y th\xE0\
+        nh \"\u0111\xE3 h\u1EBFt \u0111\u01B0\u1EDDng ra\".\nsudo chown root:root\
+        \ \"$CHA/cgroup.procs\"\necho \"da vao $(awk -F: '$1==\"0\"{print $3}' /proc/self/cgroup)\"\
+        \n# FAIL-CLOSE CHO CH\xCDNH PH\xC9P \u0110O: Linux m\xE0 kh\xF4ng c\u1EA5\
+        p \u0111\u01B0\u1EE3c cgroup th\xEC l\u01B0\u1EE3t\n# n\xE0y KH\xD4NG \u0111\
+        o l\u1EDBp v\xF9ng ch\u1EE9a, v\xE0 m\u1ED9t l\u01B0\u1EE3t xanh nh\u01B0\
+        \ th\u1EBF l\xE0 l\u1EDDi khai sai\n# v\u1EC1 \u0111\u1ED9 ph\u1EE7. Th\xE0\
+        \ \u0111\u1ECF \u1EDF \u0111\xE2y \u2014 \u0111\u1ECF th\xEC c\xF3 ng\u01B0\
+        \u1EDDi \u0111\u1ECDc.\npython - <<'PY'\nimport sys\nsys.path.insert(0, \"\
+        .claude/dev\")\nimport gate_lifecycle as gl\ncg = gl._tao_cgroup_gate()\n\
+        print(\"cap cgroup:\", \"DUOC\" if cg is not None else \"KHONG DUOC\")\nif\
+        \ cg is None:\n    sys.exit(1)\ngl._don_cgroup(cg)\nPY\npython .claude/dev/gate_lifecycle_test.py\n"
+    - name: gate lifecycle selftest (nen khong co cgroup)
+      if: ${{ runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh'
+        }}
+      run: python .claude/dev/gate_lifecycle_test.py
+  gate-nhanh-manh:
+    needs: chuan-bi
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+        manh:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - name: "Force LF checkout (hash parity v\u1EDBi manifest)"
+      run: 'git config --global core.autocrlf false
+
+        git config --global core.eol lf
+
+        git config --global core.abbrev 7
+
+        '
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: "ch\u1EA1y m\u1EA3nh nhanh_don_duoc (targeted_mutant_gate)"
+      env:
+        NHANH_DON_DUOC_DICH: ${{ matrix.manh }}/8
+        NHANH_DON_DUOC_DICH_RA: manh/manh-${{ matrix.manh }}.json
+      run: python ops/nhanh_don_duoc_test.py
+    - uses: actions/upload-artifact@v4
+      with:
+        name: gate-nhanh-${{ matrix.os }}-${{ matrix.manh }}
+        path: manh/manh-${{ matrix.manh }}.json
+        if-no-files-found: error
+  gate-nhanh-gop:
+    needs:
+    - chuan-bi
+    - gate-nhanh-manh
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - name: "Force LF checkout (hash parity v\u1EDBi manifest)"
+      run: 'git config --global core.autocrlf false
+
+        git config --global core.eol lf
+
+        git config --global core.abbrev 7
+
+        '
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: gate-nhanh-${{ matrix.os }}-*
+        path: manh
+        merge-multiple: true
+    - name: "g\u1ED9p m\u1EA3nh nhanh_don_duoc (targeted_mutant_gate)"
+      run: python ops/nhanh_don_duoc_test.py --gop-dich manh
+  gate-registry:
+    needs:
+    - chuan-bi
+    - gate-nhanh-gop
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 105
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - name: "Force LF checkout (hash parity v\u1EDBi manifest)"
+      run: "git config --global core.autocrlf false\ngit config --global core.eol\
+        \ lf\n# r226 \u2014 v\xEC sao ghim `core.abbrev 7`: xem ch\xFA th\xEDch c\xF9\
+        ng b\u01B0\u1EDBc \u1EDF job `gate`.\ngit config --global core.abbrev 7\n"
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: "c\xE0i PyYAML + jsonschema (c\u1ED5ng \u0111\u0103ng lease + validator\
+        \ verdict c\u1EA7n)"
+      run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    - name: "c\xE0i actionlint cho G5"
+      shell: bash
+      env:
+        AL_VER: 1.7.7
+      run: bash ops/cai_actionlint.sh
+    - name: "c\xE0i shellcheck cho G5 (c\xE0i xong \u0111o l\u1EA1i)"
+      shell: bash
+      run: bash ops/cai_cong_cu.sh shellcheck
+    - name: "c\xE0i rg cho G5 (c\xE0i xong \u0111o l\u1EA1i)"
+      shell: bash
+      run: bash ops/cai_cong_cu.sh rg
+    - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6
+      shell: bash
+      run: python ops/cong_cu.py kiem-tra --json
+    - name: "c\xE0i Ruff 0.15.15 v\xE0 in probe d\u01B0\u01A1ng"
+      run: 'python -m pip install --quiet ruff==0.15.15
+
+        ruff --version
+
+        '
+    - name: "test registry (ph\u1EA1m vi + c\xE1c b\u1ED9 ch\u01B0a \u0111\u01B0\u1EE3\
+        c n\u1ED1i)"
+      env:
+        CI_DANG_KY_WORKERS: '2'
+        CI_DANG_KY_SU_KIEN: ${{ github.event_name }}
+        CI_DANG_KY_GOC: ${{ github.event.pull_request.base.sha || github.event.before
+          }}
+        CI_DANG_KY_DAU: ${{ github.event.pull_request.head.sha || github.sha }}
+        CI_DANG_KY_DOT_BIEN_MANH: ops/nhanh_don_duoc_test.py
+        CI_DANG_KY_GOP_KQ: ${{ needs.gate-nhanh-gop.result }}
+      run: python .claude/dev/ci_dang_ky_test.py --chay
+  gate-packet-loop:
+    needs: chuan-bi
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 150
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - name: "Force LF checkout (hash parity v\u1EDBi manifest)"
+      run: "git config --global core.autocrlf false\ngit config --global core.eol\
+        \ lf\n# r226 \u2014 v\xEC sao ghim `core.abbrev 7`: xem ch\xFA th\xEDch c\xF9\
+        ng b\u01B0\u1EDBc \u1EDF job `gate`.\ngit config --global core.abbrev 7\n"
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: "c\xE0i PyYAML + jsonschema (c\u1ED5ng \u0111\u0103ng lease + validator\
+        \ verdict c\u1EA7n)"
+      run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    - name: "c\xE0i actionlint cho G5"
+      shell: bash
+      env:
+        AL_VER: 1.7.7
+      run: bash ops/cai_actionlint.sh
+    - name: "c\xE0i shellcheck cho G5 (c\xE0i xong \u0111o l\u1EA1i)"
+      shell: bash
+      run: bash ops/cai_cong_cu.sh shellcheck
+    - name: "c\xE0i rg cho G5 (c\xE0i xong \u0111o l\u1EA1i)"
+      shell: bash
+      run: bash ops/cai_cong_cu.sh rg
+    - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6
+      shell: bash
+      run: python ops/cong_cu.py kiem-tra --json
+    - name: "c\xE0i Ruff 0.15.15 v\xE0 in probe d\u01B0\u01A1ng"
+      run: 'python -m pip install --quiet ruff==0.15.15
+
+        ruff --version
+
+        '
+    - name: DUONG_NHANH - liet ke buoc bo qua (job gate-packet-loop)
+      if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+      run: 'echo "DUONG_NHANH: bo qua packet-loop selftest vi diff chi gom ops/{land,leases,reviews,specs}/**"
+
+        '
+    - name: packet-loop selftest
+      if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+      run: python .claude/dev/packet_loop_test.py

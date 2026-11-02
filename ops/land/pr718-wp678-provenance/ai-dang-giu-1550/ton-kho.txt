@@ -1,0 +1,1 @@
+ls-remote --heads 485 = refs/remotes/origin 485 = refs/heads 485; comm -23 ten 0, comm -13 ten 0; lech (ten,SHA) 0; origin/ops/wp678-r17-g1-lease ee55165; origin/master a671920 (do 2026-10-08T15:50:56Z, kho quet bk678/kq checkout --detach a671920)

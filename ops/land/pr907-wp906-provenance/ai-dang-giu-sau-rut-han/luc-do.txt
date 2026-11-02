@@ -1,0 +1,21 @@
+# do luc 2026-10-24T10:07:56Z, repo https://github.com/ducthangho/tra-luat
+ls-remote heads=577 for-each-ref=577 thieu_cuc_bo=0
+== ops/cong_cu.yaml
+HẾT_HẠN	ci-cai-jsonschema-exec-1-claude-20260829	refs/heads/agent/wp886-g1-claude:ops/leases/ci-cai-jsonschema-exec-1-claude-20260829.yaml
+HẾT_HẠN	ci-cai-jsonschema-exec-1r2-claude-20260829	refs/heads/agent/wp886-g1-claude:ops/leases/ci-cai-jsonschema-exec-1r2-claude-20260829.yaml
+HẾT_HẠN	ci-cai-jsonschema-exec-1r3-claude-20260829	refs/heads/agent/wp886-g1-claude:ops/leases/ci-cai-jsonschema-exec-1r3-claude-20260829.yaml
+HẾT_HẠN	wp802-r1-g1-claude	refs/remotes/origin/ops/wp802-r1-g1-lease:ops/leases/wp802-r1-g1-claude.yaml
+HẾT_HẠN	wp831-r1-g1-claude	refs/remotes/origin/ops/wp831-r1-g1-lease:ops/leases/wp831-r1-g1-claude.yaml
+HẾT_HẠN	wp831-r2-g2-claude	refs/remotes/origin/ops/wp831-r2-g2-lease:ops/leases/wp831-r2-g2-claude.yaml
+HẾT_HẠN	wp831-r3-g3-claude	refs/remotes/origin/ops/wp831-r3-g3-lease:ops/leases/wp831-r3-g3-claude.yaml
+HẾT_HẠN	wp831-r4-g4-claude	refs/remotes/origin/ops/wp831-r4-g4-lease:ops/leases/wp831-r4-g4-claude.yaml
+HẾT_HẠN	wp858-r1-g1-claude	refs/remotes/origin/ops/wp858-r1-g1-lease:ops/leases/wp858-r1-g1-claude.yaml
+HẾT_HẠN	wp858-r1-g2-claude	refs/remotes/origin/ops/wp858-r1-g2-lease:ops/leases/wp858-r1-g2-claude.yaml
+HẾT_HẠN	wp868-r1-g1-claude	refs/remotes/origin/ops/wp868-r1-g1-lease:ops/leases/wp868-r1-g1-claude.yaml
+HẾT_HẠN	wp906-r1-g1-claude	refs/remotes/origin/ops/wp906-r1-g1-lease:ops/leases/wp906-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/handoff/wp906-g1-claude.md
+HẾT_HẠN	wp906-r1-g1-claude	refs/remotes/origin/ops/wp906-r1-g1-lease:ops/leases/wp906-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

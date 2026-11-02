@@ -1,0 +1,14 @@
+{"variant": "HEAD"}
+{"rc": 1, "errors": ["[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`"], "unknown": []}
+{"rc": 0, "errors": [], "unknown": []}
+{"fixture_mutation": "provider only two lines after execution_surface", "verdict": "verdict: approve\n\nBang do: thay dong verdict thanh `execution_surface: codex_service`.\n\nprovider: openai_codex\n"}
+{"rc": 0, "errors": [], "unknown": []}
+{"rc": 0, "errors": [], "unknown": []}
+{"rc": 1, "errors": ["[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`"], "unknown": []}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "qua", "message": null}
+{"variant": "mutant"}
+{"rc": 1, "errors": ["[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`"], "unknown": []}
+{"rc": 0, "errors": [], "unknown": []}
+{"fixture_mutation": "provider only two lines after execution_surface", "verdict": "verdict: approve\n\nBang do: thay dong verdict thanh `execution_surface: codex_service`.\n\nprovider: openai_codex\n"}
+{"rc": 1, "errors": ["[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`"], "unknown": []}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "giet_that", "message": "iii-khong-provider: đòi rc=0, được 1: loi=[\"[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`\"] chua=[]"}

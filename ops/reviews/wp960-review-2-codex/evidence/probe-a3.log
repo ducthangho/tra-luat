@@ -1,0 +1,2 @@
+m78-fields {"fields": ["co_dau", "khoi_gap", "khong_dau"], "rc": 1}
+m78-c72 {"result": ["giet_that", "biến thể khối `|` gãy dòng (`khoi_lit`) không bị nhận: ['co_dau', 'khoi_gap', 'khong_dau']"]}

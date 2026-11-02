@@ -1,0 +1,111 @@
+# BIEN NHAN GIAO HANG — cross-review luot 3 cua PR #870, cham HEAD DA MERGE 06a50c5 (merge 5f288ea).
+# Reviewer Codex CLI KHAC HO executor (Claude), chay qua `launcher.py run 94125115` (launcher moi, ghi model_phuc_vu). `approve` 0/0/0/0.
+# Tep verdict la BAN SAO NGUYEN BYTE cua ops/reviews/pr870-review-3-codex/VERDICT.md. Chu kho yeu cau "Chay 3 cross-review voi launcher moi" trong phien 26-10-2026.
+# Ghi so boi CHINH phien executor session_01V2PEqhkb91vD5PCBM5yXbm — phien ay KHONG viet verdict, chi dung sandbox va goi CLI.
+# Nhan: (a) DO tu kho/tep luc ghi so 2026-10-26 · (b) THUAT LAI · KHONG_DO_DUOC.
+# Khuon: ops/reviews/pr889-review-2-codex-verdict.receipt.yaml.
+
+schema_version: 2
+receipt_id: pr870-review-3-codex-0021b5b2
+kind: review_delivery_receipt
+packet_id: KHONG_AP_DUNG
+packet_ghi_chu: >-
+  (b) Viec chu kho giao truc tiep trong phien, KHONG phai work packet: khong Issue packet, khong lease, khong spec_hash.
+target_pull_request: 870
+land_merge_commit: 5f288eaf7dd217e9057d2f864dc15278bfd4e597
+luot: 3
+luot_ghi_chu: '(a) Luot truoc: pr870-review-2-codex (approve tren 06a50c5, model khong_do_duoc). Luot nay doc lap, prompt dan khong doc verdict cu.'
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+review_class: standard
+review_class_ghi_chu: '(b) Khong co lease/Issue khai Review Class; diff tai reviewed_sha: CLAUDE.md +21/-9 (numstat.txt trong thu muc).'
+assurance: cross_approved
+assurance_ghi_chu: >-
+  Khac ho (reviewer gpt do_may qua model_phuc_vu cua run.json, executor claude theo provider), verdict `approve` tren DUNG head
+  da merge 06a50c5, run.json launcher co session_run_id. Day KHONG phai phe duyet land/merge cua chu kho.
+verdict: approve
+verdict_nguon: '(a) dong 1 `verdict: approve`; dong 3 `Kết quả: 0 P0, 0 P1, 0 P2, 0 P3.`'
+verdict_path: ops/reviews/pr870-review-3-codex-verdict.md
+verdict_sha256: 0021b5b2f90e0da39a92c11041c3236980acfbbd0b22f46d0044ac8334f16e81
+verdict_bytes: 45798
+nguon_tep: ban_sao_nguyen_byte_cua_tep_goc_trong_kho
+verdict_ban_goc: >-
+  (a) Tep goc ops/reviews/pr870-review-3-codex/VERDICT.md, chep nguyen byte tu sandbox reviewer; tep phang la ban sao `cp`, cmp khop, cung sha256 (SHA256SUMS cua thu muc).
+reviewed_sha: 06a50c5feea77c2654f31edd26efeed7eeee62f5
+reviewed_tree: 0fa694daf17e10c37fc3e61690531ade4bd528bf
+reviewed_sha_nguon: >-
+  (a) dong 2 tep verdict; run.json `head` = reviewed_sha; `git rev-parse 06a50c5^{tree}` = reviewed_tree; 06a50c5 la cha thu hai cua merge 5f288ea tren master.
+base_sha: 9e9a74b2a396ef458d25c51a5563efafbb45ba0c
+evidence_url: https://github.com/ducthangho/tra-luat/blob/cc0a3c98ff8fee7aefa0e64982fa3532da2877d8/ops/reviews/pr870-review-3-codex-verdict.md
+evidence_url_ghi_chu: >-
+  (a) Neo BLOB ghim commit cc0a3c9 cua nhanh claude/gallant-fermat-34kgb9 — commit CHI mang hien vat verdict; bien nhan di o commit sau.
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+so_dem_theo: finding
+so_dem_nguon: '(a) dong 3 tep verdict.'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: 941251157e4b4a35be82d6daefb390b2
+  run_json: ops/reviews/pr870-review-3-codex/run/run.json
+  run_json_ghi_chu: >-
+    (a) launcher 1.5.0, ma_thoat 0, trang_thai xong, thoi_luong_giay 741.994, head 06a50c5,
+    worktree_sach true, prompt_sha256 5e69b5fe… = sha256 PROMPT.md trong thu muc.
+  cli: >-
+    codex-cli 0.163.0, `launcher.py run ... -- codex exec -c model_reasoning_effort=xhigh --cd <sandbox> --sandbox
+    workspace-write --skip-git-repo-check "<chi thi tro {PROMPT_FILE}>"`
+  model_yeu_cau: 'KHONG_DO_DUOC (khong truyen -m; mac dinh tai khoan)'
+  model: gpt-6.1-sol
+  model_da_chay: gpt-6.1-sol
+  model_evidence: do_may
+  muc_bang_chung_model: do_may
+  model_evidence_ref: ops/reviews/pr870-review-3-codex/run/run.json#model_phuc_vu
+  model_evidence_ghi_chu: >-
+    (a) run.json model_phuc_vu_trang_thai DO_DUOC; 21 su kien, 21 response_id khac nhau, moi su kien model `gpt-6.1-sol`
+    (launcher ghi tu trace websocket cua chinh lan chay). Effort `xhigh` la doi so yeu cau, KHONG do duoc phia may chu.
+
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(b) Chua dang ban chieu; tep trong kho la nguon duy nhat. PR ghi so dang qua MCP github bang tai khoan chu kho.'
+  ghi_chu: 'ADR-0040: chi ghi AI VAN CHUYEN, khong cap tham quyen.'
+
+independent_from_executor_session: true
+independent_ghi_chu: >-
+  Tien trinh codex rieng qua launcher, context rieng (prompt tu chua, khong fork context executor); KHONG phai phien Claude Code rieng.
+review_axes: [spec, standards_security]
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    (a) 06a50c5 la cha thu hai cua merge 5f288ea tren master. Tep verdict/bien nhan nam tren nhanh claude/gallant-fermat-34kgb9,
+    CHUA la to tien master luc ghi so; len trung_binh khi PR ghi so merge bang merge commit.
+
+verdict_usage_caveats:
+  - id: VERDICT-KHAI-SAI-EXECUTION-SURFACE
+    muc: P2
+    mo_ta: >-
+      Verdict dong 444 tu khai execution surface `codex_service`, nhung run.json 94125115 ghi lenh.chuong_trinh=codex va execution_surface=codex_cli (launcher.py run -- codex exec). Cung loi pr915-review-1-codex bat o luot 2; dinh chinh be mat thanh codex_cli, giu nguyen byte verdict. Khong anh huong ho model: model_phuc_vu do_may.
+  - id: HO-MODEL-EXECUTOR-THEO-PROVIDER
+    muc: P3
+    mo_ta: >-
+      Ho model executor (claude) suy tu executor_provider theo HO_MODEL_MAC_DINH cua ops/bien_nhan_v2.py, KHONG do_may; chi ho model REVIEWER duoc do bang model_phuc_vu. Phien executor la Claude Code session_01V2PEqhkb91vD5PCBM5yXbm.
+  - id: CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY
+    muc: P3
+    mo_ta: >-
+      Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong.
+  - id: SCRIPT-DO-DOC-DUONG-DAN-SANDBOX
+    muc: P3
+    mo_ta: >-
+      Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien; tai lap can dung lai mirror tai 06a50c5.
+  - id: TEP-LON-KHONG-VAO-KHO
+    muc: P3
+    mo_ta: >-
+      Tep >500 KB cua thu muc reviewer KHONG vao kho; sha256 va so byte liet ke o OMITTED.txt (do luc ghi so).
+nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256).'

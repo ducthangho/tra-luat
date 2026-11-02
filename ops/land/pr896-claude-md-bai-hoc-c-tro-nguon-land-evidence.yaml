@@ -1,0 +1,574 @@
+# HO SO LAND — PR #896 "docs(CLAUDE.md) bai hoc (c) tro nguon + ops(land) pr889 ghi luot connector sach". KHONG phai
+# packet: viec chu kho giao truc tiep trong phien Claude Code (khong Issue packet, khong lease, khong spec_hash).
+# Schema: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1; khuon: ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml (cung chuoi viec)
+# va ops/land/pr894-wp748-r24-land-evidence.yaml (cach ghi §8.1 + §10.2.2 sau r24).
+#
+# TRANG THAI: merged (27dcc3b), `landed: false`. Ly do, cung luat ma r24 (#748) da ap cho 14 ho so: (1) reviewer DUY NHAT tren
+# head da merge la Codex connector — ho model reviewer `khong_do_duoc` => assurance §8.1 CHUA DAT; (2) khong co duyet ben neo
+# DUNG authorized_head_sha; (3) provenance CI §10.2.2 chi co moc Run. Gate hau merge tren DUNG 27dcc3b: run 39983914661 XANH
+# 23/23, kiem-gate rc=0. "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
+# NHAN: measured = do trong phien ghi so tu readback tho (ten tep ghi kem); loi_khai_co_neo = loi khai co neo; thuat_lai = loi
+# khai cua phien/luot khac, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/ (SHA256SUMS.txt). Moi phep do REST: GET
+# https://api.github.com/repos/ducthangho/tra-luat/<duong dan> bang curl qua proxy phien (GITHUB_PAT), do 2026-10-24 01:14Z.
+
+schema_version: 1
+mission_id: null
+packet_id: KHONG_AP_DUNG
+packet_issue: null
+pham_vi_land: tai_lieu_dev
+pham_vi_land_ghi_chu: >-
+  CLAUDE.md (dev-side, khong vao goi phat hanh, khong nam trong RELEASE_MANIFEST.json) + ho so land
+  ops/land/pr889-claude-md-bai-hoc-c-* (chi THEM khoi bo_sung_sau_landed va 3 readback).
+
+ghi_so:
+  provider: claude
+  model_family: claude
+  execution_surface: claude_code
+  transport: machine/local
+  environment: cloud
+  role: bookkeeping_recorder
+  session_id: https://claude.ai/code/session_01V2PEqhkb91vD5PCBM5yXbm
+  recorded_by: claude-session (chinh phien da soan PR #896; KHONG merge — chu kho tu merge)
+  mat_quan_sat_duoc_the_nao: >-
+    Loi khai co neo (session URL), khong phai phep do doc lap — mot phien Claude khong tu chung minh be mat chay cua
+    chinh no. model_family tu khai. Ben ghi so TRUNG ben thi cong: khong co tach vai.
+
+authorized_head_sha: 816f43988eb3012726120ad00166a989cc2b9af6
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/896
+authorization_ghi_chu: >-
+  measured — readback-events-896.json: ready_for_review 2026-10-23T15:56:02Z va merged 16:05:54Z, ca hai actor ducthangho;
+  readback-pr-896.json: merged_by ducthangho, head.sha 816f439. Ghi THANG: KHONG co ban ghi ben "duyet tren SHA 816f439";
+  trong phien, phien hoi "gate xanh thi merge hay doi?" va chu kho KHONG tra loi bang loi — uy quyen bang hanh dong merge.
+land_operator: >-
+  loi_khai_co_neo — chu kho tu bam merge, phien KHONG goi merge_pull_request cho #896; REST chi neo tai khoan
+  merged_by=ducthangho (readback-pr-896.json), KHONG_DO_DUOC nguoi bam.
+merge_method: merge
+merge_method_nguon: 'measured — readback-commit-27dcc3b.json co hai cha (b27c729, 816f439) => merge commit, khong squash/rebase.'
+merge_commit: 27dcc3bb67f6115608688a265bd8dcd3aa2a6ecc
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: >-
+    measured — readback-pr-896.json: state closed, merged true, merged_at 2026-10-23T16:05:54Z, merge_commit_sha
+    27dcc3bb67f6115608688a265bd8dcd3aa2a6ecc, head 816f43988eb3012726120ad00166a989cc2b9af6 (claude/gallant-fermat-34kgb9),
+    base.sha 1ccc31498b7d37c12305e8f1b5bf2d1fc217b92e, 3 commit, 6 tep +532/-34.
+  merge_commit:
+    sha: 27dcc3bb67f6115608688a265bd8dcd3aa2a6ecc
+    parents: [b27c729dde77736f3509221b8a8622d0d92fe975, 816f43988eb3012726120ad00166a989cc2b9af6]
+    tree: e3ddbe87b8c58b5c193d296a4eadcb7321e37bed
+    nguon: >-
+      measured — readback-commit-27dcc3b.json: parents, tree, files = CLAUDE.md +31/-34 va 5 tep ops/land/pr889-claude-md-bai-hoc-c-*.
+      Cha thu nhat b27c729 khac base.sha 1ccc314: master da tien them luc merge; `git merge-base --is-ancestor 1ccc314 b27c729`
+      rc 0 (do trong phien ghi so).
+  head_va_review:
+    commits_pr: >-
+      measured — readback-commits-pr-896.json: 90c1cb1 (CLAUDE.md (c) tro nguon), 0bb792b (pr889 bo sung), 816f439 (va P2
+      connector: t161 -> t162).
+    reviewed_sha_codex_connector: 816f43988eb3012726120ad00166a989cc2b9af6
+    head_da_merge: 816f43988eb3012726120ad00166a989cc2b9af6
+    doi_chieu: >-
+      measured — readback-comments-896.json comment 6368266586: codex-review-state commit_sha 816f439, status completed,
+      has_any_findings false, updated_at 15:57:04Z (trigger "Draft marked ready"); readback-reactions-pr-896.json: +1 cua
+      connector 15:57:06Z. Connector cham DUNG head da merge, TRUOC merge 16:05:54Z.
+  landed: false
+  landed_ly_do: >-
+    Cung tieu chi r24 (#748 issuecomment-6365380273, khoi dinh_chinh_r24 o ops/land/pr848-wp744-land-evidence.yaml):
+    reviewer_assurance_81 CHUA DAT — xem review.assurance_81.
+  quyet_dinh_chu_kho:
+    trang_thai: cho_chu_kho
+  con_thieu_de_goi_landed:
+    - id: GATE-HAU-MERGE-27DCC3B
+      trang_thai: da_dong
+      mo_ta: 'measured — readback-run-39983914661.json + readback-jobs-39983914661.json + kiem-gate-27dcc3b.txt; chi tiet post_merge_checks[0].'
+    - id: REVIEWER-ASSURANCE-81
+      trang_thai: mo
+      mo_ta: 'Xem review.assurance_81.dieu_kien_mo_lai.'
+    - id: DUYET-BEN-NEO-SHA
+      trang_thai: mo
+      mo_ta: 'Khong co comment duyet neo 816f439 truoc merge; chi co hanh dong ready_for_review + merge (authorization_ghi_chu).'
+    - id: PROVENANCE-CI-10-2-2
+      trang_thai: mo
+      mo_ta: 'Chi co moc Run; ba moc con lai not_measured (post_merge_checks[0].provenance_10_2_2).'
+
+review:
+  cross_review: []
+  cross_review_ghi_chu: 'Khong co luot cross-review (launcher/CLI) nao cho #896; chi Codex connector.'
+  codex_connector:
+    - luot: 1
+      reviewed_sha: 0bb792b75847e1a5b48eccfec10e7a0c99acd0c1
+      ket_qua: >-
+        measured — readback-reviews-896.json review 5630477370 (COMMENTED, commit 0bb792b, 15:22:50Z) +
+        readback-review-comments-896.json comment 4361172684: 1 finding P2 "Point the matrix-behavior reference to t162
+        instead of t161". Phien kiem lai (t161 chi goi _kiem_tra_nguon_duy_nhat_os_ci; _danh_gia_bieu_thuc_chuan_bi chi
+        trong t162), tra loi o 4361180757, va bang commit 816f439.
+    - luot: 2
+      reviewed_sha: 816f43988eb3012726120ad00166a989cc2b9af6
+      ket_qua: 'measured — readback-comments-896.json comment 6368266586: completed, has_any_findings false (xem head_va_review.doi_chieu).'
+  assurance_81:
+    trang_thai: CHUA DAT
+    ly_do: >-
+      doi_chieu — reviewer duy nhat tren head da merge la Codex connector; connector KHONG lo model phuc vu => ho model
+      reviewer `khong_do_duoc` (PROTOCOL §8, §8.1 "Evidence fallback hoac khong du nhan dang thi chua nhan assurance"). Day
+      dung lo A cua r24 (ops/land/pr848-wp744-land-evidence.yaml khoi dinh_chinh_r24).
+    dieu_kien_mo_lai: >-
+      (A) `cross_approved`: mot lan approve DOC LAP hoan tat tren DUNG 816f43988eb3012726120ad00166a989cc2b9af6, voi ho model
+      reviewer phuc vu cua CHINH lan chay ay duoc xac lap KHAC claude (do_may, hoac khai_co_audit kem auditor co ten).
+      HOAC (B) `human_audited` §8 muc 2 — auditor doc lap tu doc diff, evidence + verdict ben neo DUNG 816f439; voi comment
+      cua chu kho thi theo phan quyet #566: dang truoc merge, co cau tu doc diff, ban luu day du trong kho.
+
+pre_merge_checks:
+  - ten: gate ci.yml tren head 816f439 (pull_request)
+    run_id: 39977921739
+    run_attempt: 1
+    trang_thai: measured
+    do_duoc: >-
+      measured — readback-run-39977921739.json: .github/workflows/ci.yml, event pull_request, head 816f439, run_attempt 1,
+      completed/success, updated_at 2026-10-23T15:58:39Z (truoc merge 16:05:54Z). readback-jobs-39977921739.json: 23 job,
+      23 success, moi job ubuntu-latest, 0 job runner_id 0. kiem-gate-816f439.txt: suite 108360066527, 23 ten bat buoc, rc=0.
+    check_runs: >-
+      measured — readback-check-runs-816f439-all.json (filter=all): 27 check run = 23 gate success + chuan-bi success +
+      3 thu-hoi (2 success, 1 failure) + 1 mo skipped. thu-hoi failure (run 39977916744): fetch refs/pull/896/head tra 0bb792b
+      != head.sha 816f439, exit 12 truoc moi ca test — ref PR chua cap nhat sau push; phien ghi o readback-comments-896.json
+      comment 6368383663. Hai luot thu-hoi khac tren cung 816f439 (readback-runs-816f439.json: 39977984678, 39982506054) success.
+
+post_merge_checks:
+  - ten: gate ci.yml tren merge 27dcc3b (push master)
+    run_id: 39983914661
+    run_attempt: 1
+    trang_thai: measured
+    do_duoc: >-
+      measured — readback-run-39983914661.json: .github/workflows/ci.yml, event push, head_branch master, head_sha 27dcc3b,
+      run_attempt 1, completed/success, created 2026-10-23T16:05:57Z, updated 16:58:57Z. readback-jobs-39983914661.json:
+      23 job, 23 success, moi job ubuntu-latest, 0 job runner_id 0. readback-check-runs-27dcc3b-all.json: 23/23 success.
+      kiem-gate-27dcc3b.txt: suite 108376914607, 23 ten bat buoc lay tu readback-jobs-39983914661.json, rc=0.
+    provenance_10_2_2: >-
+      Chi moc Run (repository, run ID, attempt, event, head SHA tu readback-run-39983914661.json). Moc Checkout, Workflow
+      definition, Gate output: not_measured — log job va artifact khong luu; GraphQL WorkflowRun.file tra HTTP 403
+      (graphql-workflowrun-file-39983914661.txt, graphql-workflowrun-file-39977921739.txt). KHONG suy cac moc ay tu REST head_sha.
+      Chi do Ubuntu, khong co luot Windows.
+
+bookkeeping:
+  - viec: ho so land nay
+    trang_thai: trong_pr_ghi_so
+    nguon: 'PR ghi so tu nhanh claude/gallant-fermat-34kgb9 (chua merge luc soan).'
+
+no_con_mo:
+  - id: DUYET-CHI-BANG-HANH-DONG
+    mo_ta: 'Uy quyen chi bang ready_for_review + merge cua chu kho; khong co comment duyet neo SHA (authorization_ghi_chu).'
+  - id: REVIEWER-CHI-CONNECTOR
+    mo_ta: 'review.assurance_81 CHUA DAT; khong co verdict tep, chi tin hieu connector "khong gop y".'
+  - id: THU-HOI-DO-REF-PR-CHUA-CAP-NHAT
+    mo_ta: >-
+      Mot check thu-hoi do tren 816f439 vi su kien pull_request_target ban truoc khi refs/pull/896/head cap nhat (fail-close
+      dung thiet ke); khong chay lai, co hai luot thu-hoi khac success tren cung head (pre_merge_checks[0].check_runs).
+
+ghi_chu: >-
+  Chuoi viec cung doan (c): ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml, ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml.
+
+cap_nhat_20261026:
+  bo_canh: 'Chu kho yeu cau "Chay 3 cross-review voi launcher moi" (phien 26-10-2026). Khoi nay KHONG sua dong nao o tren.'
+  dinh_chinh_cross_review_ghi_chu: >-
+    measured — review.cross_review `[]` da cu: PR #915 (merge 9371628) them ops/reviews/pr896-review-1-codex-verdict.md,
+    cross-review codex qua launcher tren DUNG 816f439, `changes_requested` 0/0/1/0 (P2: CLAUDE.md mo ta t162 rong hon pham
+    vi do). Ban va P2 la commit 3bc4244, vao master qua #915 — KHONG qua #896.
+  cross_review_moi:
+    luot: 1
+    pull_request: 915
+    provider: codex
+    verdict: changes_requested
+    reviewed_sha: 2789cbb6a0c7ded65fc4e448de7f24b7fe4b425f
+    so_lop: 'P0 0 / P1 1 / P2 0 / P3 0'
+    hien_vat: ops/reviews/pr915-review-1-codex-verdict.md
+    bien_nhan: ops/reviews/pr915-review-1-codex-verdict.receipt.yaml
+    assurance: cross_reviewed
+    do_duoc: >-
+      measured — run.json 0f8ecb85: head 2789cbb (head da merge cua #915, chua 3bc4244), model_phuc_vu DO_DUOC `gpt-6.1-sol`.
+      Bang do cua verdict khop cau CLAUDE.md da sua voi t162/loi_g5_workflow (hang "t162 doc tu workflow" ... "Chot G5 kiem
+      needs/if" deu "Co"). P1 duy nhat nam o bien nhan luot 2 #870/#889 (surface tu khai `codex_service`), KHONG o CLAUDE.md;
+      HINT.patch da ap trong PR ghi so nay, CHUA review lai.
+  reviewer_assurance_81: CHUA DAT
+  reviewer_assurance_81_ly_do: >-
+    doi_chieu — (1) tren authorized_head_sha 816f439 lan cross-review duy nhat la `changes_requested` (P2 co that, da va o
+    3bc4244), nen dieu kien (A) "approve tren DUNG 816f439" khong the dat nhu da viet; (2) lan review cua trang thai da sua
+    (2789cbb) la `changes_requested` vi P1 ngoai CLAUDE.md. Chua co approve sach nao cho noi dung CLAUDE.md cuoi cung.
+  de_xuat_cho_chu_kho: >-
+    Hai loi ra: (i) review lai PR ghi so nay (mang HINT P1) — neu approve, chu kho quyet co chap nhan don vi land la
+    "816f439 + 3bc4244" (master tai 9371628) thay cho 816f439 hay khong; (ii) `human_audited` §8 muc 2 theo phan quyet #566.
+    Ho so nay KHONG tu chon.
+  bon_moc_10_2_2:
+    nguon: ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/do-1026-27dcc3b/bon-moc-10-2-2.txt
+    run: 'measured — run 39983914661 attempt 1, push master, head 27dcc3b, success, path .github/workflows/ci.yml.'
+    checkout: 'measured — log job 120524600728 (log-gate-120524600728-trich.txt): git log -1 sau checkout = merge 27dcc3b.'
+    gate_output: >-
+      measured — artifact 12515154206 (zip sha256 = digest REST trong readback-artifacts-39983914661.json), giai nen nguyen
+      byte: tl-selftest status pass, returncode 0, positive_verified true, identity head = 27dcc3b, output_sha256 khop.
+    workflow_definition: >-
+      not_measured — GraphQL WorkflowRun.file tra 403 trong phien Claude Code tren web; can chu kho chay `gh api graphql`
+      ngoai phien va dan output.
+  provenance_ci_10_2_2_trang_thai: 'mo — 3/4 moc measured (truoc: chi moc Run); con Workflow definition.'
+  landed: false
+
+cap_nhat_20261026_luot2:
+  bo_canh: >-
+    Chu kho giao "cross-review lai phan va cua #896" (26-10-2026). Ghi so boi phien dieu phoi review
+    session_01WZT2MvvoQV8QGF1vX9STrJ, KHONG phai phien executor. Khoi nay KHONG sua dong nao o tren.
+  cross_review_moi:
+    luot: 2
+    target_pull_request: 896
+    provider: codex
+    verdict: changes_requested
+    reviewed_sha: 8d56009a09af7b3ef93801df105f9483de212cc7
+    reviewed_sha_ghi_chu: 'measured — ops/reviews/pr896-review-2-codex/run/run.json `head`; la head da merge cua #946 (merge 21fe565), mang ca 3bc4244 lan a9bc934.'
+    so_lop: 'P0 0 / P1 1 / P2 0 / P3 0'
+    hien_vat: ops/reviews/pr896-review-2-codex-verdict.md
+    bien_nhan: ops/reviews/pr896-review-2-codex-verdict.receipt.yaml
+    assurance: cross_reviewed
+    do_duoc: >-
+      measured — run.json b3269a02: ma_thoat 0, head 8d56009, worktree_sach true, model_phuc_vu DO_DUOC (25 su kien,
+      25 response_id, moi su kien `gpt-6.1-sol`). P2 cua pr896-review-1 (t162) DA DONG theo verdict (dot bien
+      exclude/if/needs/output os). P1 cua pr915-review-1 DONG MOT PHAN: ops/reviews/pr889-review-1-codex-verdict.md dong 7
+      tu khai `codex_service` (run.json 9f946d71 ghi codex_cli) nhung receipt va README chua co caveat
+      VERDICT-KHAI-SAI-EXECUTION-SURFACE. Finding nay nam o so review, KHONG o CLAUDE.md.
+    hint: 'ops/reviews/pr896-review-2-codex/HINT.patch — CHUA ap.'
+  reviewer_assurance_81: CHUA DAT
+  reviewer_assurance_81_ly_do: >-
+    doi_chieu — chua co approve nao cho trang thai da va. Noi dung CLAUDE.md cuoi cung (3bc4244) khong con finding, nhung
+    verdict cua luot nay la changes_requested vi P1 o so review; ho so nay KHONG tach verdict de tu nang assurance.
+  don_vi_land_de_xuat: >-
+    De xuat (CAN chu kho chap nhan, ho so nay KHONG tu chon): don vi land = `816f439` (head #896) + `3bc4244` (ban va P2,
+    vao master qua #915), kem caveat VERDICT-KHAI-SAI-EXECUTION-SURFACE cua `a9bc934` (vao master qua #946) va caveat con
+    thieu cho pr889-review-1 neu HINT.patch luot nay duoc ap va review lai.
+  landed: false
+
+cap_nhat_20261026_luot3:
+  bo_canh: >-
+    Chu kho giao "ap HINT.patch roi chay review lai" (26-10-2026). Ghi so boi phien dieu phoi review
+    session_01WZT2MvvoQV8QGF1vX9STrJ. Khoi nay KHONG sua dong nao o tren; khoi cap_nhat_20261026_luot2 la anh luc 765ae89.
+  hint_luot2:
+    trang_thai: 'measured — ops/reviews/pr896-review-3-codex/diff.patch (578fb4b..82359c4): ap nguyen HINT.patch luot 2 tai commit 82359c4.'
+    ghi_chu: 'Cau "HINT.patch CHUA ap" trong khoi luot 2 dung tai 765ae89, KHONG con dung tu 82359c4.'
+  cross_review_moi:
+    luot: 3
+    target_pull_request: 947
+    provider: codex
+    verdict: changes_requested
+    reviewed_sha: 82359c4deec90edebbaebf9ab9d094902120b567
+    so_lop: 'P0 0 / P1 2 / P2 1 / P3 0'
+    hien_vat: ops/reviews/pr896-review-3-codex-verdict.md
+    bien_nhan: ops/reviews/pr896-review-3-codex-verdict.receipt.yaml
+    assurance: cross_reviewed
+    do_duoc: >-
+      measured — run.json ops/reviews/pr896-review-3-codex/run/run.json (513131e0): ma_thoat 0, head 82359c4, model_phuc_vu DO_DUOC
+      (29 su kien, 29 response_id, `gpt-6.1-sol`). P1 cua luot 2 DA DONG. Finding moi deu o so review, KHONG o CLAUDE.md:
+      P1 wp766 tu khai `codex_service` chua caveat; P1 ho so luot 2 van khai HINT chua ap; P2 13 verdict service/API lech receipt CLI.
+    hint: 'ops/reviews/pr896-review-3-codex/HINT.patch — CHUA ap (17 tep).'
+  reviewer_assurance_81: CHUA DAT
+  reviewer_assurance_81_ly_do: >-
+    doi_chieu — chua co approve nao. Noi dung CLAUDE.md cuoi cung (3bc4244) khong con finding qua luot 2 va 3, nhung ca hai luot
+    deu changes_requested vi finding o so review; ho so nay KHONG tach verdict de tu nang assurance.
+  tran_loi_goi_codex: 'measured — 2/2 da dung: ops/reviews/pr896-review-2-codex/run/run.json (b3269a02) va ops/reviews/pr896-review-3-codex/run/run.json (513131e0). Goi them can chu kho cho phep.'
+  don_vi_land_de_xuat: >-
+    Giu nguyen de xuat cua khoi luot 2 (816f439 + 3bc4244, kem caveat cua a9bc934 va 82359c4); CAN chu kho chap nhan.
+  landed: false
+
+cap_nhat_20261026_sau_82359c4:
+  moc_lich_su: >-
+    Khoi cap_nhat_20261026_luot2 o tren la anh chup tai moc ghi so 765ae89, chua co ban va 82359c4.
+    Cac cau "receipt va README chua co caveat", "HINT.patch ... CHUA ap" va "caveat con thieu ... neu ... duoc ap"
+    trong khoi do chi dung tai moc lich su ay, khong phai trang thai sau 82359c4.
+  hint_da_ap_commit: 82359c4deec90edebbaebf9ab9d094902120b567
+  do_duoc: >-
+    Diff 578fb4b..82359c4 them 4 dong vao receipt pr889-review-1 va 1 hang README:
+    caveat VERDICT-KHAI-SAI-EXECUTION-SURFACE cho verdict dong 7, run 9f946d71 ghi codex_cli.
+    Byte verdict lich su giu nguyen. Viec ap patch khong tu tao verdict approve tren SHA ung vien moi.
+  can_verdict_moi_tren_exact_sha: true
+  reviewer_assurance_81: CHUA DAT
+  don_vi_land_de_xuat: >-
+    De xuat (CAN chu kho chap nhan, ho so nay KHONG tu chon): don vi land = 816f439 (head #896) +
+    3bc4244 (ban va P2 qua #915), kem caveat cua a9bc934 (qua #946) va caveat pr889-review-1 da them o 82359c4;
+    van can doi chieu verdict moi va dieu kien land tren exact SHA ung vien.
+  landed: false
+  ghi_chu_luot3: >-
+    Khoi cap_nhat_20261026_luot3 o tren (ghi tai 8879165) noi HINT.patch luot 3 "CHUA ap"; cau ay dung tai 8879165 va c8c1ee0.
+    HINT.patch luot 3 duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896-review-2-codex (xem git log), theo yeu cau
+    chu kho "va cho toi khi het P1, P2, P3".
+
+cap_nhat_20261026_luot4:
+  bo_canh: >-
+    Chu kho giao "va cho toi khi het P1, P2, P3" (26-10-2026). Ghi so boi phien dieu phoi review
+    session_01WZT2MvvoQV8QGF1vX9STrJ. Khoi nay KHONG sua dong nao o tren.
+  cross_review_moi:
+    luot: 4
+    target_pull_request: 947
+    provider: codex
+    verdict: changes_requested
+    reviewed_sha: 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0
+    so_lop: 'P0 0 / P1 3 / P2 1 / P3 0'
+    hien_vat: ops/reviews/pr896-review-4-codex-verdict.md
+    bien_nhan: ops/reviews/pr896-review-4-codex-verdict.receipt.yaml
+    assurance: cross_reviewed
+    do_duoc: >-
+      measured — ops/reviews/pr896-review-4-codex/run/run.json (9b8d9a76): ma_thoat 0, head 2e4183b, model_phuc_vu DO_DUOC
+      (49 su kien, 49 response_id, `gpt-6.1-sol`). Ba finding luot 3 DA DONG. Finding moi deu o so review, KHONG o CLAUDE.md;
+      trong chuoi #896 chi co: hang muc luc luot 3 con khai HINT chua ap, va receipt pr896-review-1/pr915-review-1 con noi "chua review".
+      Con lai (6 receipt pr455, 23 receipt phu nhan ancestry, pr526-review-3, slice-b-c-review-2) co tu truoc, ngoai chuoi #896.
+    hint: 'ops/reviews/pr896-review-4-codex/HINT.patch — tai moc ghi so CHUA ap (34 tep).'
+  reviewer_assurance_81: CHUA DAT
+  landed: false
+
+cap_nhat_review_4_moc_lich_su:
+  measured_at_sha: 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0
+  ghi_chu: 'Cau CHUA review lai trong cap_nhat_20261026.cross_review_moi.do_duoc la
+    anh chup luc ghi so truoc luot 2, khong phai trang thai tai 2e4183b. pr896-review-2
+    da review ban va P2 3bc4244 va caveat a9bc934 tai 8d56009; P2 t162 va hai the
+    hien P1 luot 2 #870/#889 DA DONG. Luot 3 tai 82359c4 kiem them caveat pr889 luot
+    1. Ket qua cac verdict van changes_requested; khong suy approve/land hay thay
+    don vi land de xuat.'
+  ghi_chu_luot4: >-
+    Khoi cap_nhat_20261026_luot4 o tren (ghi tai ff4ab57) noi HINT.patch luot 4 "CHUA ap"; cau ay dung tai ff4ab57 va 77a0a45.
+    HINT.patch luot 4 duoc ap o commit ke tiep sau 77a0a45 tren nhanh claude/pr896-review-2-codex (xem git log), theo lua chon
+    cua chu kho "Ap nguyen HINT luot 4".
+
+cap_nhat_20261026_luot5:
+  bo_canh: 'Chu kho giao "va cho toi khi het P1, P2, P3". Khoi nay KHONG sua dong nao o tren.'
+  cross_review_moi:
+    luot: 5
+    target_pull_request: 947
+    provider: codex
+    verdict: changes_requested
+    reviewed_sha: 1a276a15192013fdb1e472db409133b53ac57944
+    so_lop: 'P0 0 / P1 2 / P2 0 / P3 0'
+    hien_vat: ops/reviews/pr896-review-5-codex-verdict.md
+    bien_nhan: ops/reviews/pr896-review-5-codex-verdict.receipt.yaml
+    assurance: cross_reviewed
+    do_duoc: >-
+      measured — ops/reviews/pr896-review-5-codex/run/run.json (453628b5): ma_thoat 0, head 1a276a1, model_phuc_vu DO_DUOC
+      (36 su kien, 36 response_id, `gpt-6.1-sol`). Muc luc luot 3 va P2 surface DA DONG; con 2 P1 cung lop trang thai cu
+      (7 truong ancestry; pr870/pr889-review-1 "khong duoc review lai"). Khong finding nao o CLAUDE.md.
+    hint: 'ops/reviews/pr896-review-5-codex/HINT.patch — ap nguyen trong CHINH commit ghi so khoi nay.'
+  reviewer_assurance_81: CHUA DAT
+  landed: false
+
+cap_nhat_20261026_luot6:
+  bo_canh: 'Chu kho giao "va cho toi khi het P1, P2, P3". Khoi nay KHONG sua dong nao o tren.'
+  cross_review_moi:
+    luot: 6
+    target_pull_request: 947
+    provider: codex
+    verdict: changes_requested
+    reviewed_sha: 22382d8c800bed7b995d093cdcfdc206360d7fd4
+    so_lop: 'P0 0 / P1 2 / P2 0 / P3 0'
+    hien_vat: ops/reviews/pr896-review-6-codex-verdict.md
+    bien_nhan: ops/reviews/pr896-review-6-codex-verdict.receipt.yaml
+    assurance: cross_reviewed
+    do_duoc: >-
+      measured — ops/reviews/pr896-review-6-codex/run/run.json (7a86ed4f): ma_thoat 0, head 22382d8, model_phuc_vu DO_DUOC
+      (39 su kien, 39 response_id, `gpt-6.1-sol`). Lan dau ops/reviews/pr896-review-6-codex/luot-hong-c0fa33fa/run/run.json
+      ma_thoat 1 vi may chu qua tai. Hai finding luot 5 DA DONG; con 2 P1 (7 truong ancestry o 5 receipt khac; 3 verdict
+      provenance land tu khai codex_service). Khong finding nao o CLAUDE.md.
+    hint: 'ops/reviews/pr896-review-6-codex/HINT.patch — ap nguyen trong CHINH commit ghi so khoi nay.'
+  reviewer_assurance_81: CHUA DAT
+  landed: false
+
+cap_nhat_20261026_luot7:
+  bo_canh: 'Chu kho giao "va cho toi khi het P1, P2, P3". Khoi nay KHONG sua dong nao o tren.'
+  cross_review_moi:
+    luot: 7
+    target_pull_request: 947
+    provider: codex
+    verdict: changes_requested
+    reviewed_sha: 05bc12e2b9008071ca28edbd4574e58644d48220
+    so_lop: 'P0 0 / P1 2 / P2 1 / P3 0'
+    hien_vat: ops/reviews/pr896-review-7-codex-verdict.md
+    bien_nhan: ops/reviews/pr896-review-7-codex-verdict.receipt.yaml
+    assurance: cross_reviewed
+    do_duoc: >-
+      measured — ops/reviews/pr896-review-7-codex/run/run.json (2ca2785d): ma_thoat 0, head 05bc12e, model_phuc_vu DO_DUOC
+      (48 su kien, 48 response_id, `gpt-6.1-sol`). Lan dau ops/reviews/pr896-review-7-codex/luot-hong-577bb136/run/run.json
+      ma_thoat 1 vi may chu qua tai. Hai finding luot 6 DA DONG; con P1 #491 khai #490 chua merge, P1 mo ta partial luot 6 sai
+      (loi phien ghi so), P2 #823/#877 tu khai codex_service. Khong finding nao o CLAUDE.md.
+    hint: 'ops/reviews/pr896-review-7-codex/HINT.patch — ap nguyen trong CHINH commit ghi so khoi nay.'
+  reviewer_assurance_81: CHUA DAT
+  landed: false
+
+cap_nhat_20261026_luot8:
+  bo_canh: 'Chu kho giao "va cho toi khi het P1, P2, P3". Khoi nay KHONG sua dong nao o tren.'
+  cross_review_moi:
+    luot: 8
+    target_pull_request: 947
+    provider: codex
+    verdict: approve
+    reviewed_sha: fb87110cfab832406984f893e6a4c79fbb932aef
+    so_lop: 'P0 0 / P1 0 / P2 0 / P3 0'
+    hien_vat: ops/reviews/pr896-review-8-codex-verdict.md
+    bien_nhan: ops/reviews/pr896-review-8-codex-verdict.receipt.yaml
+    assurance: cross_approved
+    do_duoc: >-
+      measured — ops/reviews/pr896-review-8-codex/run/run.json (1d140267): ma_thoat 0, head fb87110, model_phuc_vu DO_DUOC
+      (38 su kien, 38 response_id, `gpt-6.1-sol`, ho khac executor claude). Ba finding luot 7 DA DONG; khong finding moi.
+      Chuoi luot 2..8 khong co finding nao o CLAUDE.md; CLAUDE.md khong doi tu 3bc4244.
+  reviewer_assurance_81: >-
+    doi_chieu — CO verdict approve khac ho, model do_may, tren fb87110 (head PR ghi so #947). fb87110 KHONG phai 816f439
+    (authorized_head cua #896); viec dung verdict nay cho land #896 phu thuoc chu kho chap nhan don vi land ben duoi.
+  don_vi_land_de_xuat: >-
+    De xuat (CAN chu kho chap nhan, ho so nay KHONG tu chon): 816f439 (head #896) + 3bc4244 (ban va P2 qua #915), kem caveat
+    cua a9bc934 (#946), 7a01b3e (#951) va chuoi HINT luot 2..7 tren nhanh claude/pr896-review-2-codex (#947).
+  landed: false
+
+pr_ghi_so_duyet_landed_20261027:
+  bo_canh: >-
+    Chu kho yeu cau "Xu ly ho so LAN 896" (phien session_01WZT2MvvoQV8QGF1vX9STrJ, 27-10-2026), sau khi merge #947
+    (7471f95). Khoi nay KHONG sua dong nao o tren.
+  dieu_kien_da_dat:
+    - >-
+      §8.1 reviewer: cap_nhat_20261026_luot8 — approve 0/0/0/0, cross_approved, model do_may (ops/reviews/pr896-review-8-codex/run/run.json
+      model_phuc_vu DO_DUOC), tren fb87110 (head #947, nay la to tien master qua merge 7471f95).
+    - '§10.2.2 Run, Checkout, Gate output: measured o cap_nhat_20261026.bon_moc_10_2_2 (merge 27dcc3b, run 39983914661).'
+  dieu_kien_con_lai:
+    - id: MOC-WORKFLOW-DEFINITION
+      trang_thai: cho_chu_kho
+      do_duoc_mot_phan: >-
+        measured — ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/do-1027-27dcc3b/workflow-definition-rest-27dcc3b.txt:
+        REST run 39983914661 (head 27dcc3b, path ci.yml, attempt 1, success); blob ci.yml tai 27dcc3b = f618cdb469016ac585724d286b498b7e1dcc80ea,
+        sha256 b630260ce676292ced82da65f4cb54ec1dc0f66109901e7c1d61746d21baab06, khop git rev-parse.
+      con_thieu: >-
+        WorkflowRun.file (path + repositoryFileUrl neo OID) qua GraphQL; phien Claude Code bi 403. Can chu kho chay ngoai phien:
+        gh api graphql -f query='query{node(id:"WFR_kwLOTNeRjc8AAAAJTzoepQ"){... on WorkflowRun{databaseId runNumber createdAt
+        file{path repositoryFileUrl} checkSuite{commit{oid}}}}}' roi dan output (tien le pr870: moc_workflow_definition_20261026).
+    - id: CHAP-NHAN-DON-VI-LAND
+      trang_thai: cho_chu_kho
+      mo_ta: >-
+        authorized_head_sha cua #896 la 816f439; verdict approve nam tren fb87110 (chuoi ban va sau do). Don vi land de xuat:
+        816f439 + 3bc4244 (ban va P2, #915) kem caveat cua a9bc934 (#946), 7a01b3e (#951) va chuoi HINT luot 2..7 (#947).
+        Chu kho chap nhan hoac tu choi; ho so nay KHONG tu chon.
+    - id: QUYET-DINH-LANDED-CHU-KHO
+      trang_thai: cho_chu_kho
+      quy_tac: >-
+        Theo tien le pr721/pr759/pr870: chu kho duyet `landed` cho #896 bang mot comment tren PR ghi so CHUA khoi nay, dang SAU
+        commit cuoi cua nhanh ghi so va TRUOC merge, ghi day du SHA head cuoi (40 hex) va chap nhan don vi land. Commit nao den
+        sau comment lam no het hieu luc.
+  landed: false
+  landed_hieu_luc_tu: 'merge commit cua PR ghi so chua khoi nay — CHI KHI ca ba dieu kien con lai dong truoc merge.'
+
+moc_workflow_definition_20261027:
+  bo_canh: 'Chu kho chay gh api graphql ngoai phien (Windows cmd) va dan output vao hoi thoai phien 27-10-2026. Khoi nay KHONG sua dong nao o tren.'
+  workflow_definition: >-
+    measured — WorkflowRun.file cua run 39983914661 (chu kho doc ngoai phien): path .github/workflows/ci.yml, repositoryFileUrl
+    neo OID 27dcc3b (40 hex trong URL), checkSuite.commit.oid cung OID, runNumber 3105 va createdAt khop REST. Phien doi chieu
+    REST run 39983914661 (head_sha, path, attempt 1) va tai blob qua contents?ref=OID: blob f618cdb469016ac585724d286b498b7e1dcc80ea,
+    sha256 b630260ce676292ced82da65f4cb54ec1dc0f66109901e7c1d61746d21baab06, khop `git rev-parse 27dcc3b:.github/workflows/ci.yml`.
+  nguon:
+    - ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/do-1027-27dcc3b/workflow-definition-27dcc3b.txt
+    - ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/do-1027-27dcc3b/graphql-output-chu-kho-dan-pr896.json
+    - ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/do-1027-27dcc3b/workflow-definition-rest-27dcc3b.txt
+  gioi_han: >-
+    Bam byte output goc cua chu kho KHONG_DO_DUOC — chi co ban chep nguyen van tu hoi thoai. URL va blob tai OID da duoc phien
+    doi chieu doc lap qua REST.
+  bon_moc_10_2_2: '4/4 measured (Run, Checkout, Gate output o cap_nhat_20261026; Workflow definition o khoi nay).'
+  con_thieu_de_goi_landed:
+    - id: MOC-WORKFLOW-DEFINITION
+      trang_thai: da_dong
+    - id: CHAP-NHAN-DON-VI-LAND
+      trang_thai: cho_chu_kho
+    - id: QUYET-DINH-LANDED-CHU-KHO
+      trang_thai: cho_chu_kho
+      mo_ta: >-
+        Chu kho duyet `landed` cho #896 bang comment tren PR ghi so nay, ghi du SHA head cuoi (40 hex) va chap nhan don vi land,
+        dang SAU commit cuoi va TRUOC merge.
+  landed: false
+
+landed_20261027:
+  bo_canh: 'Chu kho yeu cau ghi nhan landed sau khi merge #956 (phien 27-10-2026). Khoi nay KHONG sua dong nao o tren.'
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/pull/956#issuecomment-6431407190
+    do_duoc: >-
+      measured — ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/do-1027-157241c/readback-comment-956-6431407190.json:
+      ducthangho, author_association OWNER, created_at = updated_at 2026-10-27T01:25:05Z; than chap nhan don vi land
+      "816f439 + 3bc4244 (kem caveat)" va ghi "Head PR ghi so: 3e62ac5a3b3333d6bcc3d21d828ee7a4cd3022be".
+      readback-commit-3e62ac5.json: commit cuoi cua nhanh ghi so luc 2026-10-27T01:14:10Z (truoc comment).
+      readback-pr-956.json: head.sha 3e62ac5 (= SHA trong comment), merged_at 2026-10-27T02:10:54Z (sau comment),
+      merge_commit 157241c350e85d2b59959b7ea7d636672da19d8d, merged_by ducthangho.
+  don_vi_land: >-
+    816f43988eb3012726120ad00166a989cc2b9af6 (head #896, cha thu hai cua merge 27dcc3b) + 3bc4244fe5533a71b197a0efb8f79e40175c1a3e
+    (ban va P2, qua #915), kem caveat cua a9bc934 (#946), 7a01b3e (#951) va chuoi HINT luot 2..7 (#947). Chu kho chap nhan
+    trong comment tren.
+  landed: true
+  landed_hieu_luc_tu: 157241c350e85d2b59959b7ea7d636672da19d8d
+  landed_dieu_kien: >-
+    (1) gate tren merge 27dcc3b: DAT — 4/4 moc §10.2.2 (cap_nhat_20261026.bon_moc_10_2_2 + moc_workflow_definition_20261027).
+    (2) lease: KHONG_AP_DUNG — viec chu kho giao truc tiep, khong packet/lease. (3) review: DAT theo don vi land chu kho chap nhan —
+    pr896-review-8-codex approve 0 P0–P3, cross_approved, model_phuc_vu DO_DUOC, tren fb87110 (chuoi ban va sau 816f439);
+    noi dung CLAUDE.md cuoi cung = 3bc4244, khong doi toi fb87110. (4) noi dung merge = diff da review: 816f439 la cha thu hai
+    cua 27dcc3b; 3bc4244 va chuoi ban va deu la to tien master. (5) duyet chu kho neo dung head PR ghi so, dang sau commit cuoi
+    va truoc merge: DAT.
+  gioi_han: >-
+    Verdict approve KHONG nam tren dung authorized_head_sha 816f439 — chi hop le qua quyet dinh chap nhan don vi land cua chu kho.
+    Ho model executor (claude) suy theo provider, KHONG do_may. Tai khoan chu kho khong tach khoi phien agent (#566) — comment
+    la duyet landed, KHONG phai human_audited. Bam byte output GraphQL cua moc Workflow definition KHONG_DO_DUOC (ban chep tu hoi thoai).
+
+no_con_mo_20261027:
+  bo_canh: 'Chu kho yeu cau "Ghi no vao ho so land #896" (phien 27-10-2026). Khoi nay KHONG sua dong nao o tren va KHONG doi landed_20261027.'
+  no:
+    - id: NO-CAU-LICH-SU-BIEN-NHAN
+      trang_thai: mo
+      issue: https://github.com/ducthangho/tra-luat/issues/960
+      issue_trang_thai: 'thuat_lai — de_xuat, chua dac ta dong bang, chua spec_hash, chua lease (than Issue #960).'
+      mo_ta: >-
+        Cau trong bien nhan/caveat/ho so land dung luc ghi so nhung cu sau do (tu khai be mat chay; "chua review lai";
+        "chi la mot nhanh"/"khong phai to tien master"/"chua merge"), nam o PR/packet KHAC #896. Khong co cong nao bat:
+        bien_nhan_v2, land_evidence_nguon, t26/t27/t138 deu xanh khi cau ay con sai.
+      da_va_trong_chuoi_review_896: >-
+        thuat_lai — theo verdict ops/reviews/pr896-review-3-codex-verdict.md .. pr896-review-7-codex-verdict.md, va bang HINT ap
+        trong #947: caveat surface cho wp766, 13 verdict service/API, pr526-review-3, slice-b-c-review-2 (dinh chinh v1),
+        3 verdict provenance land (#832/#848/#862) va #823/#877; neo moc ancestry o 23 + 7 + 7 truong; neo moc "chua review"
+        o 8 + 2 receipt; neo moc "#490 chua merge" o ho so land #491. Luot 8 (ops/reviews/pr896-review-8-codex-verdict.md)
+        approve 0/0/0/0 tren fb87110 voi pham vi hai lop nay.
+      con_lai: >-
+        KHONG_DO_DUOC day du — luot 8 khong tim them, nhung moi luot 3..7 deu tim duoc the hien moi khi mo rong cach quet,
+        nen "khong con" chua duoc chung minh. Loi giai de xuat (Issue #960): cong quet doi moc thoi diem cho khang dinh phu
+        thuoc trang thai, doi chieu bang merge-base/su ton tai verdict, kem dot bien.
+      ghi_chu_issue: >-
+        Than Issue #960 (luc ghi khoi nay) mo ta chuoi review #896 nhu "5 luot deu changes_requested"; chuoi thuc te da toi
+        luot 8 approve va #947 da merge (7471f95). Cac so 8/23/7 trong Issue la cua luot 3..5; cac luot 5..7 da va them.
+      khong_anh_huong_landed: 'No nay o so review cua PR khac; KHONG phai dieu kien land #896 va khong doi landed_20261027.'
+
+assurance_81:
+  reviewer_assurance_81: CHUA_DAT
+  review_exact_sha: CHUA_DAT
+  review_exact_sha_nguon: >-
+    measured — ops/reviews/pr896-review-8-codex/run/run.json: luot launcher.py run 1d140267, ma_thoat 0, head fb87110
+    (KHAC authorized_head_sha 816f439); verdict approve 0 P0–P3 (ops/reviews/pr896-review-8-codex-verdict.md). Luot approve chay tren fb87110, KHONG phai
+    816f439. Chu kho da chap nhan don vi land 816f439 + 3bc4244 bang comment 6431407190 tren PR #956; do la can cu
+    cua landed, KHONG phai cua review_exact_sha.
+  thuc_thi:
+    model: >-
+      measured — ops/reviews/pr896-review-8-codex/run/run.json model_phuc_vu_trang_thai DO_DUOC, 38/38 su kien model_phuc_vu
+      deu `gpt-6.1-sol`.
+    effort: >-
+      not_measured — ops/reviews/pr896-review-8-codex/run/run.json khong co truong effort nao; `lenh` chi ghi chuong_trinh codex,
+      so_doi_so 9, van_tay (khong luu doi so). Cau hinh yeu cau khong phai runtime evidence (§8.1).
+    sandbox_mode: >-
+      not_measured — ops/reviews/pr896-review-8-codex/run/run.json khong co truong sandbox nao; cau hinh yeu cau khong thay phep do (§8.2).
+  lich_su: >-
+    Ha §8.1 (DAT/cross_approved) -> CHUA_DAT (27-10-2026, packet land-81-ha-cap r2, ops/specs/land-81-ha-cap-r2-pr870-889-896.md (master @ 02bdffa, sha256 ba96df80…), lease land-81-ha-cap-r2-g1-claude-remote-20261027 (#748 issuecomment-6445221939)). Ban truoc khai §8.1 o
+    $.pr_ghi_so_duyet_landed_20261027.dieu_kien_da_dat (van xuoi "§8.1 reviewer: … cross_approved, model do_may"), trong khi bien nhan chi do model, thieu effort va sandbox mode thuc te ma §8.1/§8.2
+    doi — cung loi connector Codex P1 tren PR #934 (review comment 4372912640). Viec ha thuoc packet nay.
+
+ha_cap_assurance_81_20261027:
+  bo_canh: >-
+    Packet land-81-ha-cap r2 (ops/specs/land-81-ha-cap-r2-pr870-889-896.md (master @ 02bdffa, sha256 ba96df80…), lease land-81-ha-cap-r2-g1-claude-remote-20261027 (#748 issuecomment-6445221939)). Khoi nay va khoi assurance_81 cap goc la hai cho DUY NHAT them;
+    moi dong khac giu nguyen byte lam lich su.
+  thay_the:
+    - '$.cap_nhat_20261026_luot8.cross_review_moi.assurance: cross_approved'
+    - '$.cap_nhat_20261026_luot8.reviewer_assurance_81 (approve khac ho, model do_may)'
+    - '$.pr_ghi_so_duyet_landed_20261027.dieu_kien_da_dat[0] (§8.1 reviewer … cross_approved)'
+    - '$.landed_20261027.landed_dieu_kien muc (3) (review DAT theo don vi land, cross_approved)'
+  thay_the_ghi_chu: >-
+    Moi duong dan tren dang khai §8.1 DAT hoac cross_approved; khoi assurance_81 cap goc da thay the chung: nay
+    reviewer_assurance_81 CHUA_DAT (thieu do effort va sandbox mode thuc te).
+  landed_ghi_chu: >-
+    GIU NGUYEN landed. Ghi nhan: comment duyet landed 6431407190 cua chu kho tren PR #956 dan assurance §8.1 ay
+    lam dieu kien (muc (3) review cua landed_dieu_kien). Rut landed la quyet dinh rieng cua chu kho; packet nay khong tu lam.

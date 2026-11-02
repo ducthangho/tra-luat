@@ -1,0 +1,24 @@
+# packet_loop_test.py day du tai cho, clone thuong (.git la thu muc, khong nong, core.abbrev 7), HEAD detached = ab94c4fb01d0d122d2f00a1f2c386c6a191349c5, git status sach
+# lenh: PYTHONDONTWRITEBYTECODE=1 python -W ignore .claude/dev/packet_loop_test.py ; log goc 122869 byte, sha256 9b80c3a6caa68cffb4f7a4f359201dfa96cd4c75d654138d11bb157a90256f6a (khong dua vao kho; trich dong tong)
+  BỎ QUA  luong_canonical_chay_that: chỉ đo lệnh pwsh trên Windows
+nền: 875/875 đạt · BỎ QUA: 1
+  BỎ QUA  đột biến luong_canonical_chay_that_dao_os_name: ca ['luong_canonical_chay_that'] không được tính là đã giết
+  ca               : 876
+  đột biến         : 1249
+  lớp lách         : 78
+  ca bắt-oan       : 35
+  ngoại lệ AC 18   : 0
+TỔNG: ĐẠT
+real	43m20.702s
+rc=0
+dong 'ok ... → giết' (dot bien giet dung ca dich, doi chung khac ho con song): 1248 = 1249 dot bien - 1 BO QUA (luong_canonical_chay_that_dao_os_name); them 2 dong 'ok' tong AC19/AC18
+  ok  r929_bo_loai_tru_adr0054 → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r929_mot_tro_len → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r929_hai_chuoi_roi → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r929_duong_dan_co_dinh_0055 → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r929_bo_kiem_loai_doi_tuong → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  r929_nhan_symlink → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r929_so_chu_so_tuy_y → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r929_bo_duoi_md → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r929_bo_nfc → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r929_bo_rc_show → giết 1 ca đích · 3 đối chứng khác họ còn sống

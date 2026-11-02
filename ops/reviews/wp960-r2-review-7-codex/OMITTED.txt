@@ -1,0 +1,4 @@
+# Tep KHONG vao kho: sha256  byte  duong_dan_tuong_doi.
+# Cung KHONG vao kho (khong chep, khong bam): cay-kho/ va mirror.git/ (ban sao kho git tai reviewed_sha,
+# tai lap duoc tu kho) va cac thu muc mount rong cua sandbox codex (.git .codex .aws .agents), .ruff_cache.
+12fe961422091380e220fd6fcd2448d782bfb7895e56e236145032d3e2af9448  6648  run/prompt.snapshot  (ban chup launcher, byte-identical PROMPT.md)

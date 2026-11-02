@@ -1,0 +1,87 @@
+step if runner.os count = 6
+["gate", 29, 429, "ci-phamvi selftest (phan chung — cong co rang)", "runner.os != 'Windows'"]
+["gate-cong-cu", 9, 575, "actions/upload-artifact@v4", "runner.os != 'Windows'"]
+["gate-ops", 9, 696, "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)", "runner.os == 'Linux'"]
+["gate-ops", 12, 785, "don-nhanh selftest (chốt xoá nhánh)", "runner.os != 'Windows'"]
+["gate-ops", 13, 818, "bo ca gate chay TRONG cgroup duoc uy quyen (Linux)", "${{ runner.os == 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"]
+["gate-ops", 14, 859, "gate lifecycle selftest (nen khong co cgroup)", "${{ runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"]
+step if matrix.os = []
+shell census = {'(runner default)': 71, 'bash': 25, 'pwsh': 1}
+continue-on-error = [['chuan-bi', 1, True, "${{ github.event_name == 'pull_request' }}"], ['chuan-bi', 2, True, "${{ github.event_name == 'pull_request' }}"]]
+all step OS references (including script/env/name) =
+["gate", 22, 293, "tl selftest (co bang chung exact-identity)", "${{ github.event_name != 'pull_request' }}"]
+["gate", 23, 327, "tai len gate-evidence", "always()"]
+["gate", 29, 429, "ci-phamvi selftest (phan chung — cong co rang)", "runner.os != 'Windows'"]
+["gate", 32, 470, "release-verify strict (lane WORKER — manifest TẠM ngoài repo)", "github.ref != 'refs/heads/master'"]
+["gate-cong-cu", 8, 565, "G5 manh ban kinh dot bien (#668)", ""]
+["gate-cong-cu", 9, 575, "actions/upload-artifact@v4", "runner.os != 'Windows'"]
+["gate-cong-cu-gop", 5, 617, "actions/download-artifact@v4", ""]
+["gate-ops", 9, 696, "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)", "runner.os == 'Linux'"]
+["gate-ops", 12, 785, "don-nhanh selftest (chốt xoá nhánh)", "runner.os != 'Windows'"]
+["gate-ops", 13, 818, "bo ca gate chay TRONG cgroup duoc uy quyen (Linux)", "${{ runner.os == 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"]
+["gate-ops", 14, 859, "gate lifecycle selftest (nen khong co cgroup)", "${{ runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"]
+["gate-nhanh-manh", 4, 893, "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)", ""]
+["gate-nhanh-manh", 5, 898, "actions/upload-artifact@v4", ""]
+["gate-nhanh-gop", 4, 929, "actions/download-artifact@v4", ""]
+raw OS/alternate-syntax references:
+73:       # `continue-on-error` o HAI buoc phan loai la CO CHU DICH, khong phai nuot loi: khong phan loai duoc thi phai roi
+77:       # ⇒ buoc that bai ⇒ `continue-on-error` giu job xanh ⇒ `che_do` vang ⇒ `day_du`.
+80:         continue-on-error: true
+88:         continue-on-error: true
+110:     runs-on: ${{ matrix.os }}
+156:         shell: bash
+161:         shell: bash
+164:         shell: bash
+167:         shell: bash
+193:         shell: bash
+231:       # CHẶN NGAY TỪ F2-A, KHÔNG `continue-on-error`: đây là CI policy, thuộc commit policy.
+295:         shell: bash
+316:           NEN="${RUNNER_OS}"
+331:           name: gate-evidence-${{ matrix.os }}-${{ github.run_attempt }}
+430:         if: runner.os != 'Windows'
+447:       # thứ hai: biểu thức này đã dùng nguyên văn ở `concurrency` và ở `matrix.os` phía trên.
+472:         shell: bash
+496:         shell: bash
+513:   # (`.claude/dev/ci_dang_ky_test.py`) ghim hình dạng hai job này; `N` trong `CONG_CU_TEST_MANH` phải khớp matrix.
+531:     runs-on: ${{ matrix.os }}
+555:         shell: bash
+560:         shell: bash
+563:         shell: bash
+566:         shell: bash
+569:           CONG_CU_TEST_MANH: ${{ matrix.manh }}/8
+570:           CONG_CU_TEST_MANH_RA: manh/manh-${{ matrix.manh }}.txt
+575:       - if: runner.os != 'Windows'
+578:           name: gate-cong-cu-manh-${{ matrix.os }}-${{ matrix.manh }}
+579:           path: manh/manh-${{ matrix.manh }}.txt
+598:     runs-on: ${{ matrix.os }}
+619:           pattern: gate-cong-cu-manh-${{ matrix.os }}-*
+623:         shell: bash
+640:     runs-on: ${{ matrix.os }}
+668:         shell: bash
+671:         shell: bash
+684:         shell: bash
+697:         if: runner.os == 'Linux'
+744:         shell: bash
+786:         if: runner.os != 'Windows'
+787:         shell: pwsh
+819:         if: ${{ runner.os == 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+860:         if: ${{ runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+875:     runs-on: ${{ matrix.os }}
+895:           NHANH_DON_DUOC_DICH: ${{ matrix.manh }}/8
+896:           NHANH_DON_DUOC_DICH_RA: manh/manh-${{ matrix.manh }}.json
+900:           name: gate-nhanh-${{ matrix.os }}-${{ matrix.manh }}
+901:           path: manh/manh-${{ matrix.manh }}.json
+911:     runs-on: ${{ matrix.os }}
+931:           pattern: gate-nhanh-${{ matrix.os }}-*
+955:     runs-on: ${{ matrix.os }}
+979:         shell: bash
+984:         shell: bash
+987:         shell: bash
+990:         shell: bash
+1021:     runs-on: ${{ matrix.os }}
+1047:         shell: bash
+1052:         shell: bash
+1055:         shell: bash
+1058:         shell: bash
+Explicit bash/pwsh chooses interpreter; no implicit Windows skip inferred from shell choice.
+probe_rc=0

@@ -1,0 +1,4 @@
+ref quet: 461 · cap (blob, duong) duoi ops/leases: 579 · ban mang lease_id lease-publish-windows-do-r3-g3-claude: 2 · YAML hong: 0
+  blob 976915a ops/leases/lease-publish-windows-do-r3-g3-claude.yaml han 2026-10-01T05:55:00Z => tai moc 2026-10-02T01:12:00Z: HET_HAN · 1 ref: claude/cap-lease-687-g3
+  blob 372cbfd ops/leases/lease-publish-windows-do-r3-g3-claude.yaml han 2026-10-02T01:12:00Z => tai moc 2026-10-02T01:12:00Z: HET_HAN · 2 ref: claude/lease-publish-windows-do, master
+KET LUAN: ban g3 con han SAU moc tren ref quet duoc: 0; han muon nhat: 2026-10-02T01:12:00Z

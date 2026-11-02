@@ -1,0 +1,4 @@
+DIFF.patch	sha256 29910d47cde0b30c4f0b3d6436a0c38d92dfa58d256a4f33aea8a5a19c934203	bytes 710702	ly do: tai lap bang git diff f4b513d a8f7470; giong DIFF.patch cua luot 1
+launcher.err	sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	bytes 0	ly do: tep rong
+cay-kho/ work/ nguon/	khong chep: ban sao kho/lam viec/nguon cua sandbox
+evidence/original-snapshot.json	sha256 a3a084f625b714faac94b61f1d8b968350a860d3a2efaa242f1a22da0ba255f9	bytes 1455295	ly do: >500 KB (tien le TEP-LON-KHONG-VAO-KHO); giu tai sandbox reviewer

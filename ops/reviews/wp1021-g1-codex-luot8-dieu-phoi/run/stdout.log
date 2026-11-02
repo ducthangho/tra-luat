@@ -1,0 +1,7 @@
+Đã hoàn tất và ghi [VERDICT.md](./VERDICT.md): **approve**, 0 P0/P1/P2/P3.
+
+- P3 lượt 7 đã đóng.
+- Suite đạt **98/98 · 153/153 · 2/2**.
+- Hai cổng rc=0; Ruff delta=0.
+- Cây nguồn không thay đổi.
+- CI Ubuntu/Windows và Windows local: **KHÔNG ĐO ĐƯỢC**.

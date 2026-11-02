@@ -1,0 +1,10 @@
+changed_files=10; verified_verdict_hashes=291
+hint-dry-run rc=0 checking file ops/reviews/wp538-review-2-claude-verdict.receipt.yaml / checking file ops/reviews/wp540-review-1-claude-verdict.receipt.yaml
+hint-apply rc=0 patching file ops/reviews/wp538-review-2-claude-verdict.receipt.yaml / patching file ops/reviews/wp540-review-1-claude-verdict.receipt.yaml
+hint-t26_ rc=0  / lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+hint-t27_ rc=0  / lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+hint-t138_ rc=0  / lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+hint-bien-nhan-v2 rc=0 bien_nhan_v2: 238 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 291 / TỔNG: ĐẠT
+hint-land rc=0 land_evidence_nguon: 47 ĐẠT · 26/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 73 / TỔNG: ĐẠT
+hint-doctrine rc=0 doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine
+hint-doc-claims rc=0 JSON ok=True

@@ -164,9 +164,7 @@ anchor:
   loai: canonical_ancestry
   cuong_do: thap
   mo_ta: 'Blob verdict ghim tren nhanh claude/review-541-luot2-20260918, commit 820aebc.'
-  gioi_han: >-
-    cuong_do THAP vi tep verdict CHUA land: quan he to tien voi master chua co. Manh len khi luot
-    nay land hoac khi co tag luu-tru/*.
+  gioi_han: "Anh chup lich su tai commit ghi bien nhan 517f6a8041a128220cae094cbb28bc33e3209075: cuong_do THAP vi tep verdict CHUA land: quan he to tien voi master chua co. Manh len khi luot nay land hoac khi co tag luu-tru/*. Do lai tai 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0: git merge-base --is-ancestor 820aebc767e20f00ff2ef86d0a4d09d9e680c31d 101263f va voi 2e4183b deu rc=0. Cau phu nhan ancestry/chi-tren-nhanh cua moc cu khong con la trang thai hien hanh. Chi xac nhan quan he Git, khong tu nang assurance/cuong_do va khong suy Packet da landed."
 
 pham_vi_changes_requested: >-
   2 LOP MO, va CA HAI deu bat nguon tu ban giao luot 1 chu khong tu executor:

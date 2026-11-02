@@ -1,0 +1,4 @@
+pr870-review-2-codex: sha256sum -c SHA256SUMS rc=0; OK=31; manifest=31; files=31; unlisted=[]; missing_files=[]
+pr889-review-2-codex: sha256sum -c SHA256SUMS rc=0; OK=22; manifest=22; files=22; unlisted=[]; missing_files=[]
+pr896-review-1-codex: sha256sum -c SHA256SUMS rc=0; OK=32; manifest=32; files=32; unlisted=[]; missing_files=[]
+rc=0

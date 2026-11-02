@@ -1,0 +1,6 @@
+.claude/dev/launcher.py:365:            return f"linux:{sau[19]}"  # trường 22 tính từ 1 = starttime
+.claude/dev/launcher.py:499:                tt[int(p.name)] = (int(sau[1]), int(sau[2]), f"linux:{sau[19]}")
+33	5	.claude/dev/launcher.py
+1096	2	.claude/dev/launcher_test.py
+ M .claude/dev/launcher.py
+ M .claude/dev/launcher_test.py

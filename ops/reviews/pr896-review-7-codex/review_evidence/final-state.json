@@ -1,0 +1,47 @@
+{
+  "reviewed_tree_unchanged": {
+    "rev-parse HEAD HEAD^{tree}": {
+      "rc": 0,
+      "stdout": "05bc12e2b9008071ca28edbd4574e58644d48220\n3412a314b129d1ee1473e528a5ec438378ccebe5\n",
+      "stderr": ""
+    },
+    "status --porcelain=v1 --untracked-files=all --ignored": {
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "diff --exit-code": {
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "rev-parse --is-shallow-repository": {
+      "rc": 0,
+      "stdout": "false\n",
+      "stderr": ""
+    },
+    "config core.abbrev": {
+      "rc": 0,
+      "stdout": "7\n",
+      "stderr": ""
+    }
+  },
+  "clone_changed_paths": [
+    "ops/land/pr491-r358-ghi-so-land-evidence.yaml",
+    "ops/land/pr823-wp802-land-evidence.yaml",
+    "ops/land/pr877-wp854-land-evidence.yaml",
+    "ops/reviews/README.md",
+    "ops/reviews/pr896-review-6-codex-verdict.receipt.yaml"
+  ],
+  "hint_yaml_parsed_unique_ids": 4,
+  "hint_receipt_readme_description_match": true,
+  "hint_modified_verdicts": [],
+  "hint_frozen_v1_unchanged": 53,
+  "manifest_summary": {
+    "manifest_verdict_entries": 137,
+    "all_match": true,
+    "missing": [],
+    "mismatches": []
+  },
+  "hint_sha256": "65e791768d947ee83be72e846274b0ce59ad6e230a20cb67fb6b5b43255bdff6"
+}

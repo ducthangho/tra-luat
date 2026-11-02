@@ -1,3 +1,14 @@
+# ★ v1.36.69 — r376: backup config không bao giờ rơi vào cây skill (#972) (2026-10-27)
+
+`r202_profile_delete_backup_ngoai_cay` đỏ trên máy chủ kho (`HOME=/home/agent`): `_config_backup_dir()` lùi về
+`Path.home()/tra-luat/_config_backups`, mà kho clone ở `~/tra-luat` thì đích ấy NẰM TRONG cây skill — backup chứa token.
+
+- Đích mặc định POSIX: `$XDG_STATE_HOME` hoặc `~/.local/state` + `/tra-luat/_config_backups`; Windows giữ `LOCALAPPDATA`.
+- Chốt `BackupTrongCaySkill` cho MỌI nguồn kể cả env, TRƯỚC `mkdir`: đích trong cây theo đường dẫn HOẶC danh tính hệ tệp
+  (`samestat`, l972a) ⇒ `profile-delete --apply`/`init-config` dừng trước mọi mutation, rc 2, `CONFIG_BACKUP_TRONG_CAY_SKILL`.
+- Backup `init-config`: tệp tạm + `os.replace` (không đi theo bí danh ở tên đích), lỗi thì dọn `.tmp` và đóng descriptor.
+- Lớp ngoại lệ re-export trực tiếp trong `tl.py` (bẫy I11). Ngoài phạm vi: nợ `NO-972-BACKUP-NUOT-LOI`.
+
 # ★ dev-side — r375: land packet #543 (doctrine-scan đảo sang danh sách CHO PHÉP) và ghi sổ ba lượt review (2026-09-16)
 
 Nối tiếp r374 (ghi sổ #540 và #538). Mục này là vế bookkeeping ADR-0034 của packet **#543**

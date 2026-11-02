@@ -1,0 +1,7 @@
+  CÓ RĂNG    m156_B4_bo_chan_bien_dau_tep           → c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan = giet_that  (dòng đầu bị mất cửa sổ)
+  CÓ RĂNG    m157_B4_trich_dan_bo_dong_sau          → c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan = giet_that  (trích dẫn ở dòng sau bị bỏ qua)
+  CÓ RĂNG    m142_chon_bien_nhan_so_duoi_CHINH_XAC  → c101_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen = giet_that  (đuôi hoa lại bị bỏ qua lặng)
+  CÓ RĂNG    m147_bo_chon_bo_bat_OSError            → c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE = giet_that  (lỗi liệt kê thoát thành traceback (Codex lượt 1))
+  CÓ RĂNG    m153_hoi_trang_thai_bat_Exception      → c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang = giet_that  (lỗi lập trình ở phép hỏi thư mục bị đổi thành KHÔNG ĐO ĐƯỢC)
+
+5/5 đúng ca đích; 5/5 giet_that; 5/5 đối chứng sạch; 5/5 tệp đột biến ngoài cay-kho; còn bản sao tạm=0

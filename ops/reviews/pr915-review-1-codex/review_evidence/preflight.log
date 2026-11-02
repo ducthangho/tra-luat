@@ -1,0 +1,13 @@
+HEAD=2789cbb6a0c7ded65fc4e448de7f24b7fe4b425f
+tree=6f299d7f70269ec32522fc4ea28c9d2d70c5424b
+is_shallow=false
+core.abbrev=7
+status=''
+base_sha=50a59a945026a2ab2f97dc0e7ef7b5a540e17652
+provided_diff_byte_match=True
+provided_numstat_byte_match=True
+commits=3bc4244fe5533a71b197a0efb8f79e40175c1a3e
+7cfe06212cb43f92d5753940116079e671d9c385
+2789cbb6a0c7ded65fc4e448de7f24b7fe4b425f
+snapshot_before_files=6211
+rc=0

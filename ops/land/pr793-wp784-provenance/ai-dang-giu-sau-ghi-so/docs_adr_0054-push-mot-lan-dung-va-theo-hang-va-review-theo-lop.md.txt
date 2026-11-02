@@ -1,0 +1,5 @@
+$ python ops/lease_publish.py ai-dang-giu docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp784-r2-g2-claude-20261017	refs/heads/ops/cap-lease-784:ops/leases/wp784-r2-g2-claude-20261017.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

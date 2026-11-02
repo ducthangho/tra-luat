@@ -1,0 +1,6 @@
+base OSError 9 True stat 0 read 1 kill 0
+base OSError 40 True stat 0 read 1 kill 0
+base ValueError None True stat 0 read 1 kill 0
+head OSError 9 True stat 1 read 1 kill 0
+head OSError 40 True stat 1 read 1 kill 0
+head ValueError None ValueError stat 1 read 0 kill 0

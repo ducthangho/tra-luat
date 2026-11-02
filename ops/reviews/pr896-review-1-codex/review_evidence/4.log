@@ -1,0 +1,48 @@
+$ python3 ../review_evidence/matrix_probe.py
+/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr2-pr896.9C93/cay-kho/ops/lease_publish_test.py:2961: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr2-pr896.9C93/cay-kho/ops/lease_publish_test.py:5104: SyntaxWarning: invalid escape sequence '\d'
+  KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+t161_M3_chot_nguon_duy_nhat_ma_tran_ci: lines 7927-7981; direct evaluator calls=0; assertions bang=7
+t162_M4_evaluator_toi_gian_chuan_bi: lines 7985-8086; direct evaluator calls=14; assertions bang=15
+COMMIT e63961f expression=${{ (github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only') && '["windows-latest"]' || (github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'windows')) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]' }}
+  push master: ['ubuntu-latest']
+  PR thường: ['ubuntu-latest']
+  PR windows: ['ubuntu-latest', 'windows-latest']
+  dispatch absent: ['ubuntu-latest', 'windows-latest']
+  dispatch default: ['ubuntu-latest', 'windows-latest']
+  dispatch windows-only: ['windows-latest']
+COMMIT 816f43988eb3012726120ad00166a989cc2b9af6 expression=${{ (github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only') && '["windows-latest"]' || (github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'windows')) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]' }}
+  push master: ['ubuntu-latest']
+  PR thường: ['ubuntu-latest']
+  PR windows: ['ubuntu-latest', 'windows-latest']
+  dispatch absent: ['ubuntu-latest', 'windows-latest']
+  dispatch default: ['ubuntu-latest', 'windows-latest']
+  dispatch windows-only: ['windows-latest']
+TRACE t162 actual expression calls: 13
+  {"event_name": "push", "labels": [], "ref": "refs/heads/master"} => ["ubuntu-latest"]
+  {"event_name": "pull_request", "labels": ["docs"], "ref": "refs/pull/1/merge"} => ["ubuntu-latest"]
+  {"event_name": "pull_request", "labels": ["windows"], "ref": "refs/pull/1/merge"} => ["ubuntu-latest", "windows-latest"]
+  {"event_name": "workflow_dispatch", "labels": [], "ref": "refs/heads/master"} => ["ubuntu-latest", "windows-latest"]
+  {"event_name": "workflow_dispatch", "inputs": {"runner_set": "windows-only"}, "labels": [], "ref": "refs/heads/master"} => ["windows-latest"]
+  {"event_name": "workflow_dispatch", "inputs": {"runner_set": "windows-and-ubuntu"}, "labels": [], "ref": "refs/heads/master"} => ["ubuntu-latest", "windows-latest"]
+  {"event_name": "workflow_dispatch", "inputs": {}, "labels": [], "ref": "refs/heads/master"} => ["ubuntu-latest", "windows-latest"]
+  {"event_name": "push", "inputs": {"runner_set": "windows-only"}, "labels": [], "ref": "refs/heads/master"} => ["ubuntu-latest"]
+  {"event_name": "push", "labels": [], "ref": "refs/heads/master"} => ["ubuntu-latest"]
+  {"event_name": "pull_request", "inputs": {"runner_set": "windows-only"}, "labels": ["docs"], "ref": "refs/pull/1/merge"} => ["ubuntu-latest"]
+  {"event_name": "pull_request", "labels": ["docs"], "ref": "refs/pull/1/merge"} => ["ubuntu-latest"]
+  {"event_name": "pull_request", "inputs": {"runner_set": "windows-only"}, "labels": ["windows"], "ref": "refs/pull/1/merge"} => ["ubuntu-latest", "windows-latest"]
+  {"event_name": "pull_request", "labels": ["windows"], "ref": "refs/pull/1/merge"} => ["ubuntu-latest", "windows-latest"]
+MUTATION baseline: t161=PASS; t162=PASS
+MUTATION push_master_gets_windows: t161=PASS; t162=FAIL AssertionError: push master phải chỉ chạy ubuntu-latest, nhận được: ['ubuntu-latest', 'windows-latest']
+MUTATION remove_windows_only_branch: t161=PASS; t162=FAIL AssertionError: dispatch windows-only phải chỉ chạy windows-latest, nhận được: ['ubuntu-latest', 'windows-latest']
+MUTATION PR_windows_becomes_linux: t161=PASS; t162=FAIL AssertionError: PR nhãn windows phải chạy hai nền, nhận được: ['ubuntu-latest']
+MUTATION dispatch_windows_only_becomes_both: t161=PASS; t162=FAIL AssertionError: dispatch windows-only phải chỉ chạy windows-latest, nhận được: ['ubuntu-latest', 'windows-latest']
+MUTATION output_wrapped_fromJSON: t161=FAIL AssertionError: ci.yml thật có output bọc fromJson: ['job \'chuan-bi\' output \'os\' bọc fromJson/fromJSON: \'${{ fromJSON(\\\'["ubuntu-latest"]\\\') }}\' (outputs chỉ nhận chuỗi)']; t162=FAIL ValueError: KHÔNG ĐO ĐƯỢC: biểu thức không khớp hình chuẩn tối giản của chuan-bi: 'fromJSON(\'["ubuntu-latest"]\')'
+MUTATION independent_job_os: t161=FAIL AssertionError: ci.yml thật có job lén khai os: riêng: ["job 'gate' khai 'os:' riêng bằng danh sách tĩnh: ['ubuntu-latest'] (không tham chiếu needs.chuan-bi.outputs.os)"]; t162=PASS
+MUTATION remove_Windows_shard1_exclusion: t161=PASS; t162=PASS
+MUTATION remove_gop_if: t161=PASS; t162=PASS
+
+rc=0

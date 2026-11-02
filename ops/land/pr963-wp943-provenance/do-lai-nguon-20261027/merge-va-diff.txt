@@ -1,0 +1,14 @@
+# do 2026-10-27: noi dung merge PR #963 = diff PR
+606b010ddad57fd26690fb02e79520b507e10c13
+a917673114ae03ba4f7ab19d308de0a4ed6d8341
+fb2bbcbf5ba456756df28701f97eb2ce67cd574c
+merge-base(cha1, head) = a268bcc0e956f010eb4e06633676aafe1f386c37
+$ git diff --numstat 7129f7de204a6f92db8e29e8a5a79383d4907029^1 7129f7de204a6f92db8e29e8a5a79383d4907029
+1	1	docs/PROTOCOL_DA_PHIEN.md
+11	4	docs/adr/0056-lease-no-progress-six-hours.md
+$ git diff --numstat a268bcc0e956f010eb4e06633676aafe1f386c37 fb2bbcbf5ba456756df28701f97eb2ce67cd574c
+1	1	docs/PROTOCOL_DA_PHIEN.md
+11	4	docs/adr/0056-lease-no-progress-six-hours.md
+cmp byte rc=0
+$ git diff --stat eb5e5bf fb2bbcbf5ba456756df28701f97eb2ce67cd574c -- docs/adr/0056-lease-no-progress-six-hours.md docs/PROTOCOL_DA_PHIEN.md (write set giong tung byte ban da review luot 2)
+(rong = giong)

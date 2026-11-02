@@ -1,0 +1,125 @@
+{
+  "reviewed_sha": "210ab81c3f1af36243748458eb5e70180baeab71",
+  "git": [
+    {
+      "command": [
+        "git",
+        "-C",
+        "cay-kho",
+        "rev-parse",
+        "HEAD"
+      ],
+      "rc": 0,
+      "output": "210ab81c3f1af36243748458eb5e70180baeab71\n"
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "cay-kho",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "rc": 0,
+      "output": "40a4cbe161e513f202bd4681f9713e7f04fee741\n"
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "cay-kho",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all",
+        "--ignored"
+      ],
+      "rc": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "cay-kho",
+        "rev-parse",
+        "--is-shallow-repository"
+      ],
+      "rc": 0,
+      "output": "false\n"
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "cay-kho",
+        "config",
+        "core.abbrev"
+      ],
+      "rc": 0,
+      "output": "7\n"
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "cay-kho",
+        "symbolic-ref",
+        "-q",
+        "HEAD"
+      ],
+      "rc": 1,
+      "output": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "cay-kho",
+        "diff",
+        "HEAD",
+        "--"
+      ],
+      "rc": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "cay-kho",
+        "diff",
+        "--cached",
+        "--"
+      ],
+      "rc": 0,
+      "output": ""
+    }
+  ],
+  "files": [
+    {
+      "path": "ops/vm/cap-nhat-cong-cu.ps1",
+      "sha256": "1db46f9177f11a6c4b306c9e653816bc814d8fa334910171a4f893a9070727f4",
+      "bytes": 51865
+    },
+    {
+      "path": "ops/vm/cap-nhat-cong-cu_test.ps1",
+      "sha256": "7246595255806364cefbcce4d41e2e7fab78ffed1fc11f9f4b85bd5f48f602d1",
+      "bytes": 72792
+    },
+    {
+      "path": "ops/vm/README.md",
+      "sha256": "e450ff93992576a31b622ce6474c7158ba05f8fdf83c8f8e8267d80fdc95bb6e",
+      "bytes": 4751
+    },
+    {
+      "path": "ops/cong_cu.yaml",
+      "sha256": "71631bb6baf532deeb4847c5ff9c407a50bfdb4fc503621913eb42c719ee92fb",
+      "bytes": 8904
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "97733a880d95f8a900f39af2bcd1a59a3ecb357dfc928c01c7a06636b1b07657",
+      "bytes": 4553
+    }
+  ]
+}

@@ -1,0 +1,2094 @@
+[
+  {
+    "receipt": "pr1110-review-1-codex-verdict.receipt.yaml",
+    "checks": [
+      {
+        "field": "target_pull_request",
+        "actual": 1110,
+        "expected": 1110,
+        "ok": true
+      },
+      {
+        "field": "luot",
+        "actual": 1,
+        "expected": 1,
+        "ok": true
+      },
+      {
+        "field": "schema_version",
+        "actual": 2,
+        "expected": 2,
+        "ok": true
+      },
+      {
+        "field": "kind",
+        "actual": "review_delivery_receipt",
+        "expected": "review_delivery_receipt",
+        "ok": true
+      },
+      {
+        "field": "verdict",
+        "actual": "approve",
+        "expected": "approve",
+        "ok": true
+      },
+      {
+        "field": "so_p0",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "so_p1",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "so_p2",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "so_p3",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "findings_ids",
+        "actual": [],
+        "expected": [],
+        "ok": true
+      },
+      {
+        "field": "so_dem_theo",
+        "actual": "finding",
+        "expected": "finding",
+        "ok": true
+      },
+      {
+        "field": "verdict_path",
+        "actual": "ops/reviews/pr1110-review-1-codex-verdict.md",
+        "expected": "ops/reviews/pr1110-review-1-codex-verdict.md",
+        "ok": true
+      },
+      {
+        "field": "verdict_sha256",
+        "actual": "74409dde8964145eb9e4cfd3fcb07a31a7dfabe0a50facb992bb316e012cc686",
+        "expected": "74409dde8964145eb9e4cfd3fcb07a31a7dfabe0a50facb992bb316e012cc686",
+        "ok": true
+      },
+      {
+        "field": "verdict_bytes",
+        "actual": 14628,
+        "expected": 14628,
+        "ok": true
+      },
+      {
+        "field": "reviewed_sha.verdict",
+        "actual": "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d",
+        "expected": "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d",
+        "ok": true
+      },
+      {
+        "field": "reviewed_sha.run",
+        "actual": "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d",
+        "expected": "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d",
+        "ok": true
+      },
+      {
+        "field": "reviewed_sha.table",
+        "actual": "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d",
+        "expected": "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d",
+        "ok": true
+      },
+      {
+        "field": "reviewed_tree",
+        "actual": "49821da8bbf5787a4e10ffcc854354e6c72f9cf8",
+        "expected": "49821da8bbf5787a4e10ffcc854354e6c72f9cf8",
+        "ok": true
+      },
+      {
+        "field": "land_merge_commit",
+        "actual": "f4b513da5802d439aedbe58ae4a5cd38ff47d6ab",
+        "expected": "f4b513da5802d439aedbe58ae4a5cd38ff47d6ab",
+        "ok": true
+      },
+      {
+        "field": "merge_parent_count",
+        "actual": 2,
+        "expected": 2,
+        "ok": true
+      },
+      {
+        "field": "merge_second_parent",
+        "actual": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+        "expected": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+        "ok": true
+      },
+      {
+        "field": "reviewed_is_ancestor_merge",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "reviewed_equals_merge_second_parent",
+        "actual": false,
+        "expected": false,
+        "ok": true
+      },
+      {
+        "field": "merge_is_ancestor_master",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "merge_date",
+        "actual": "2026-11-01",
+        "expected": "2026-11-01",
+        "ok": true
+      },
+      {
+        "field": "merge_PR_message",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "base_is_ancestor_reviewed",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "base_is_ancestor_merge_first_parent",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "base_in_source_prompt",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "review_class",
+        "actual": "sensitive",
+        "expected": "sensitive",
+        "ok": true
+      },
+      {
+        "field": "effective_review_class",
+        "actual": "sensitive",
+        "expected": "sensitive",
+        "ok": true
+      },
+      {
+        "field": "review_class_file_count",
+        "actual": 46,
+        "expected": 46,
+        "ok": true
+      },
+      {
+        "field": "evidence_url_format",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "evidence_url_commit",
+        "actual": "cf5acfa7282ec42ef282015fa27fc642a4515588",
+        "expected": "cf5acfa7282ec42ef282015fa27fc642a4515588",
+        "ok": true
+      },
+      {
+        "field": "evidence_url_path",
+        "actual": "ops/reviews/pr1110-review-1-codex-verdict.md",
+        "expected": "ops/reviews/pr1110-review-1-codex-verdict.md",
+        "ok": true
+      },
+      {
+        "field": "anchor_is_ancestor_HEAD",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "anchor_blob_hash",
+        "actual": "74409dde8964145eb9e4cfd3fcb07a31a7dfabe0a50facb992bb316e012cc686",
+        "expected": "74409dde8964145eb9e4cfd3fcb07a31a7dfabe0a50facb992bb316e012cc686",
+        "ok": true
+      },
+      {
+        "field": "anchor_blob_equal",
+        "actual": {
+          "bytes": 14628,
+          "sha256": "74409dde8964145eb9e4cfd3fcb07a31a7dfabe0a50facb992bb316e012cc686"
+        },
+        "expected": {
+          "bytes": 14628,
+          "sha256": "74409dde8964145eb9e4cfd3fcb07a31a7dfabe0a50facb992bb316e012cc686"
+        },
+        "ok": true
+      },
+      {
+        "field": "anchor.loai",
+        "actual": "canonical_ancestry",
+        "expected": "canonical_ancestry",
+        "ok": true
+      },
+      {
+        "field": "anchor.cuong_do",
+        "actual": "thap",
+        "expected": "thap",
+        "ok": true
+      },
+      {
+        "field": "run_json",
+        "actual": "ops/reviews/pr1110-review-1-codex/run/run.json",
+        "expected": "ops/reviews/pr1110-review-1-codex/run/run.json",
+        "ok": true
+      },
+      {
+        "field": "session_run_id",
+        "actual": "0f91d66df4fd4d16bfeeabfc8246333c",
+        "expected": "0f91d66df4fd4d16bfeeabfc8246333c",
+        "ok": true
+      },
+      {
+        "field": "launcher.run_id",
+        "actual": "0f91d66df4fd4d16bfeeabfc8246333c",
+        "expected": "0f91d66df4fd4d16bfeeabfc8246333c",
+        "ok": true
+      },
+      {
+        "field": "launcher.ma_thoat",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "launcher.head",
+        "actual": "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d",
+        "expected": "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d",
+        "ok": true
+      },
+      {
+        "field": "launcher.prompt_sha256",
+        "actual": "5425015212a4c670b5a772356939225f9efa4c858f69147f52297f8148721eb1",
+        "expected": "5425015212a4c670b5a772356939225f9efa4c858f69147f52297f8148721eb1",
+        "ok": true
+      },
+      {
+        "field": "launcher.trang_thai",
+        "actual": "xong",
+        "expected": "xong",
+        "ok": true
+      },
+      {
+        "field": "launcher.thoi_luong_giay",
+        "actual": 420.462,
+        "expected": 420.462,
+        "ok": true
+      },
+      {
+        "field": "identity.provider",
+        "actual": "openai_codex",
+        "expected": "openai_codex",
+        "ok": true
+      },
+      {
+        "field": "identity.transport",
+        "actual": "machine",
+        "expected": "machine",
+        "ok": true
+      },
+      {
+        "field": "identity.surface",
+        "actual": "codex_cli",
+        "expected": "codex_cli",
+        "ok": true
+      },
+      {
+        "field": "identity.model_yeu_cau",
+        "actual": "gpt-6-astra",
+        "expected": "gpt-6-astra",
+        "ok": true
+      },
+      {
+        "field": "identity.model_evidence",
+        "actual": "do_may",
+        "expected": "do_may",
+        "ok": true
+      },
+      {
+        "field": "identity.model_evidence_ref",
+        "actual": "ops/reviews/pr1110-review-1-codex/run/run.json#model_phuc_vu",
+        "expected": "ops/reviews/pr1110-review-1-codex/run/run.json#model_phuc_vu",
+        "ok": true
+      },
+      {
+        "field": "identity.model",
+        "actual": [
+          "gpt-6-astra"
+        ],
+        "expected": [
+          "gpt-6-astra"
+        ],
+        "ok": true
+      },
+      {
+        "field": "identity.model_da_chay",
+        "actual": [
+          "gpt-6-astra"
+        ],
+        "expected": [
+          "gpt-6-astra"
+        ],
+        "ok": true
+      },
+      {
+        "field": "model_phuc_vu_trang_thai",
+        "actual": "DO_DUOC",
+        "expected": "DO_DUOC",
+        "ok": true
+      },
+      {
+        "field": "model_event_count",
+        "actual": 21,
+        "expected": 21,
+        "ok": true
+      },
+      {
+        "field": "model_unique_response_ids",
+        "actual": 21,
+        "expected": 21,
+        "ok": true
+      },
+      {
+        "field": "model_event_kind",
+        "actual": [
+          "response.created"
+        ],
+        "expected": [
+          "response.created"
+        ],
+        "ok": true
+      },
+      {
+        "field": "effort_phuc_vu",
+        "actual": [
+          "xhigh"
+        ],
+        "expected": [
+          "xhigh"
+        ],
+        "ok": true
+      },
+      {
+        "field": "effort_phuc_vu_trang_thai",
+        "actual": "DO_DUOC",
+        "expected": "DO_DUOC",
+        "ok": true
+      },
+      {
+        "field": "note.ma_thoat",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "note.thoi_luong_giay",
+        "actual": 420.462,
+        "expected": 420.462,
+        "ok": true
+      },
+      {
+        "field": "note.trang_thai",
+        "actual": "xong",
+        "expected": "xong",
+        "ok": true
+      },
+      {
+        "field": "note.head",
+        "actual": "e137f8c",
+        "expected": "e137f8c",
+        "ok": true
+      },
+      {
+        "field": "note.worktree_sach",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "note.execution_surface",
+        "actual": "codex_cli",
+        "expected": "codex_cli",
+        "ok": true
+      },
+      {
+        "field": "note.sandbox_trang_thai",
+        "actual": "KHONG_DO_DUOC",
+        "expected": "KHONG_DO_DUOC",
+        "ok": true
+      },
+      {
+        "field": "note.prompt_sha256",
+        "actual": "5425015212a4",
+        "expected": "5425015212a4",
+        "ok": true
+      },
+      {
+        "field": "run.prompt_sha256",
+        "actual": "5425015212a4c670b5a772356939225f9efa4c858f69147f52297f8148721eb1",
+        "expected": "5425015212a4c670b5a772356939225f9efa4c858f69147f52297f8148721eb1",
+        "ok": true
+      },
+      {
+        "field": "run.duration_timestamps",
+        "actual": 420.462,
+        "expected": 420.462,
+        "ok": true
+      },
+      {
+        "field": "run.stdout_byte",
+        "actual": 367,
+        "expected": 367,
+        "ok": true
+      },
+      {
+        "field": "run.stdout_sha256",
+        "actual": "3b57112307633588bf4099885dd93d6c91004c3459e7ee7380444e7929d43d77",
+        "expected": "3b57112307633588bf4099885dd93d6c91004c3459e7ee7380444e7929d43d77",
+        "ok": true
+      },
+      {
+        "field": "run.stderr_byte",
+        "actual": 39,
+        "expected": 39,
+        "ok": true
+      },
+      {
+        "field": "run.stderr_sha256",
+        "actual": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+        "expected": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+        "ok": true
+      },
+      {
+        "field": "run.checkpoint_sha256",
+        "actual": "7a9c9a76034279973436d275749e95f431819fc0d544fbf36539de1d6281d4e8",
+        "expected": "7a9c9a76034279973436d275749e95f431819fc0d544fbf36539de1d6281d4e8",
+        "ok": true
+      },
+      {
+        "field": "SANDBOX-KHONG-DO-DUOC",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "KHONG-PHAI-HEAD-CUOI",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "WINDOWS-THAT-KHONG-DO-TRONG-SANDBOX",
+        "actual": false,
+        "expected": false,
+        "ok": true
+      },
+      {
+        "field": "caveat_ids_unique",
+        "actual": 5,
+        "expected": 5,
+        "ok": true
+      },
+      {
+        "field": "caveat_muc",
+        "actual": [
+          "P3"
+        ],
+        "expected": [
+          "P3"
+        ],
+        "ok": true
+      }
+    ]
+  },
+  {
+    "receipt": "pr1110-review-2-codex-verdict.receipt.yaml",
+    "checks": [
+      {
+        "field": "target_pull_request",
+        "actual": 1110,
+        "expected": 1110,
+        "ok": true
+      },
+      {
+        "field": "luot",
+        "actual": 2,
+        "expected": 2,
+        "ok": true
+      },
+      {
+        "field": "schema_version",
+        "actual": 2,
+        "expected": 2,
+        "ok": true
+      },
+      {
+        "field": "kind",
+        "actual": "review_delivery_receipt",
+        "expected": "review_delivery_receipt",
+        "ok": true
+      },
+      {
+        "field": "verdict",
+        "actual": "approve",
+        "expected": "approve",
+        "ok": true
+      },
+      {
+        "field": "so_p0",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "so_p1",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "so_p2",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "so_p3",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "findings_ids",
+        "actual": [],
+        "expected": [],
+        "ok": true
+      },
+      {
+        "field": "so_dem_theo",
+        "actual": "finding",
+        "expected": "finding",
+        "ok": true
+      },
+      {
+        "field": "verdict_path",
+        "actual": "ops/reviews/pr1110-review-2-codex-verdict.md",
+        "expected": "ops/reviews/pr1110-review-2-codex-verdict.md",
+        "ok": true
+      },
+      {
+        "field": "verdict_sha256",
+        "actual": "a7a69903810e5ee6198c5d0f1a3a243fc777b8e1ecdd25a3e4515801f7dc6b31",
+        "expected": "a7a69903810e5ee6198c5d0f1a3a243fc777b8e1ecdd25a3e4515801f7dc6b31",
+        "ok": true
+      },
+      {
+        "field": "verdict_bytes",
+        "actual": 10919,
+        "expected": 10919,
+        "ok": true
+      },
+      {
+        "field": "reviewed_sha.verdict",
+        "actual": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+        "expected": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+        "ok": true
+      },
+      {
+        "field": "reviewed_sha.run",
+        "actual": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+        "expected": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+        "ok": true
+      },
+      {
+        "field": "reviewed_sha.table",
+        "actual": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+        "expected": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+        "ok": true
+      },
+      {
+        "field": "reviewed_tree",
+        "actual": "2fc9c77d7fb38e2b09b755bb125cb1dff4a33562",
+        "expected": "2fc9c77d7fb38e2b09b755bb125cb1dff4a33562",
+        "ok": true
+      },
+      {
+        "field": "land_merge_commit",
+        "actual": "f4b513da5802d439aedbe58ae4a5cd38ff47d6ab",
+        "expected": "f4b513da5802d439aedbe58ae4a5cd38ff47d6ab",
+        "ok": true
+      },
+      {
+        "field": "merge_parent_count",
+        "actual": 2,
+        "expected": 2,
+        "ok": true
+      },
+      {
+        "field": "merge_second_parent",
+        "actual": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+        "expected": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+        "ok": true
+      },
+      {
+        "field": "reviewed_is_ancestor_merge",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "reviewed_equals_merge_second_parent",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "merge_is_ancestor_master",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "merge_date",
+        "actual": "2026-11-01",
+        "expected": "2026-11-01",
+        "ok": true
+      },
+      {
+        "field": "merge_PR_message",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "base_is_ancestor_reviewed",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "base_is_ancestor_merge_first_parent",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "base_in_source_prompt",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "review_class",
+        "actual": "sensitive",
+        "expected": "sensitive",
+        "ok": true
+      },
+      {
+        "field": "effective_review_class",
+        "actual": "sensitive",
+        "expected": "sensitive",
+        "ok": true
+      },
+      {
+        "field": "review_class_file_count",
+        "actual": 46,
+        "expected": 46,
+        "ok": true
+      },
+      {
+        "field": "evidence_url_format",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "evidence_url_commit",
+        "actual": "cf5acfa7282ec42ef282015fa27fc642a4515588",
+        "expected": "cf5acfa7282ec42ef282015fa27fc642a4515588",
+        "ok": true
+      },
+      {
+        "field": "evidence_url_path",
+        "actual": "ops/reviews/pr1110-review-2-codex-verdict.md",
+        "expected": "ops/reviews/pr1110-review-2-codex-verdict.md",
+        "ok": true
+      },
+      {
+        "field": "anchor_is_ancestor_HEAD",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "anchor_blob_hash",
+        "actual": "a7a69903810e5ee6198c5d0f1a3a243fc777b8e1ecdd25a3e4515801f7dc6b31",
+        "expected": "a7a69903810e5ee6198c5d0f1a3a243fc777b8e1ecdd25a3e4515801f7dc6b31",
+        "ok": true
+      },
+      {
+        "field": "anchor_blob_equal",
+        "actual": {
+          "bytes": 10919,
+          "sha256": "a7a69903810e5ee6198c5d0f1a3a243fc777b8e1ecdd25a3e4515801f7dc6b31"
+        },
+        "expected": {
+          "bytes": 10919,
+          "sha256": "a7a69903810e5ee6198c5d0f1a3a243fc777b8e1ecdd25a3e4515801f7dc6b31"
+        },
+        "ok": true
+      },
+      {
+        "field": "anchor.loai",
+        "actual": "canonical_ancestry",
+        "expected": "canonical_ancestry",
+        "ok": true
+      },
+      {
+        "field": "anchor.cuong_do",
+        "actual": "thap",
+        "expected": "thap",
+        "ok": true
+      },
+      {
+        "field": "run_json",
+        "actual": "ops/reviews/pr1110-review-2-codex/run/run.json",
+        "expected": "ops/reviews/pr1110-review-2-codex/run/run.json",
+        "ok": true
+      },
+      {
+        "field": "session_run_id",
+        "actual": "cac7c0b6484f455e985fd7bc40a44fb8",
+        "expected": "cac7c0b6484f455e985fd7bc40a44fb8",
+        "ok": true
+      },
+      {
+        "field": "launcher.run_id",
+        "actual": "cac7c0b6484f455e985fd7bc40a44fb8",
+        "expected": "cac7c0b6484f455e985fd7bc40a44fb8",
+        "ok": true
+      },
+      {
+        "field": "launcher.ma_thoat",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "launcher.head",
+        "actual": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+        "expected": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+        "ok": true
+      },
+      {
+        "field": "launcher.prompt_sha256",
+        "actual": "dd6a7288ae8e82a04a43f633413fbda1a8f6cb279c57953c337e28d8db44ac98",
+        "expected": "dd6a7288ae8e82a04a43f633413fbda1a8f6cb279c57953c337e28d8db44ac98",
+        "ok": true
+      },
+      {
+        "field": "launcher.trang_thai",
+        "actual": "xong",
+        "expected": "xong",
+        "ok": true
+      },
+      {
+        "field": "launcher.thoi_luong_giay",
+        "actual": 374.648,
+        "expected": 374.648,
+        "ok": true
+      },
+      {
+        "field": "identity.provider",
+        "actual": "openai_codex",
+        "expected": "openai_codex",
+        "ok": true
+      },
+      {
+        "field": "identity.transport",
+        "actual": "machine",
+        "expected": "machine",
+        "ok": true
+      },
+      {
+        "field": "identity.surface",
+        "actual": "codex_cli",
+        "expected": "codex_cli",
+        "ok": true
+      },
+      {
+        "field": "identity.model_yeu_cau",
+        "actual": "gpt-6-astra",
+        "expected": "gpt-6-astra",
+        "ok": true
+      },
+      {
+        "field": "identity.model_evidence",
+        "actual": "do_may",
+        "expected": "do_may",
+        "ok": true
+      },
+      {
+        "field": "identity.model_evidence_ref",
+        "actual": "ops/reviews/pr1110-review-2-codex/run/run.json#model_phuc_vu",
+        "expected": "ops/reviews/pr1110-review-2-codex/run/run.json#model_phuc_vu",
+        "ok": true
+      },
+      {
+        "field": "identity.model",
+        "actual": [
+          "gpt-6-astra"
+        ],
+        "expected": [
+          "gpt-6-astra"
+        ],
+        "ok": true
+      },
+      {
+        "field": "identity.model_da_chay",
+        "actual": [
+          "gpt-6-astra"
+        ],
+        "expected": [
+          "gpt-6-astra"
+        ],
+        "ok": true
+      },
+      {
+        "field": "model_phuc_vu_trang_thai",
+        "actual": "DO_DUOC",
+        "expected": "DO_DUOC",
+        "ok": true
+      },
+      {
+        "field": "model_event_count",
+        "actual": 23,
+        "expected": 23,
+        "ok": true
+      },
+      {
+        "field": "model_unique_response_ids",
+        "actual": 23,
+        "expected": 23,
+        "ok": true
+      },
+      {
+        "field": "model_event_kind",
+        "actual": [
+          "response.created"
+        ],
+        "expected": [
+          "response.created"
+        ],
+        "ok": true
+      },
+      {
+        "field": "effort_phuc_vu",
+        "actual": [
+          "xhigh"
+        ],
+        "expected": [
+          "xhigh"
+        ],
+        "ok": true
+      },
+      {
+        "field": "effort_phuc_vu_trang_thai",
+        "actual": "DO_DUOC",
+        "expected": "DO_DUOC",
+        "ok": true
+      },
+      {
+        "field": "note.ma_thoat",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "note.thoi_luong_giay",
+        "actual": 374.648,
+        "expected": 374.648,
+        "ok": true
+      },
+      {
+        "field": "note.trang_thai",
+        "actual": "xong",
+        "expected": "xong",
+        "ok": true
+      },
+      {
+        "field": "note.head",
+        "actual": "3a3aac5",
+        "expected": "3a3aac5",
+        "ok": true
+      },
+      {
+        "field": "note.worktree_sach",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "note.execution_surface",
+        "actual": "codex_cli",
+        "expected": "codex_cli",
+        "ok": true
+      },
+      {
+        "field": "note.sandbox_trang_thai",
+        "actual": "DO_DUOC",
+        "expected": "DO_DUOC",
+        "ok": true
+      },
+      {
+        "field": "note.prompt_sha256",
+        "actual": "dd6a7288ae8e",
+        "expected": "dd6a7288ae8e",
+        "ok": true
+      },
+      {
+        "field": "run.prompt_sha256",
+        "actual": "dd6a7288ae8e82a04a43f633413fbda1a8f6cb279c57953c337e28d8db44ac98",
+        "expected": "dd6a7288ae8e82a04a43f633413fbda1a8f6cb279c57953c337e28d8db44ac98",
+        "ok": true
+      },
+      {
+        "field": "run.duration_timestamps",
+        "actual": 374.648,
+        "expected": 374.648,
+        "ok": true
+      },
+      {
+        "field": "run.stdout_byte",
+        "actual": 388,
+        "expected": 388,
+        "ok": true
+      },
+      {
+        "field": "run.stdout_sha256",
+        "actual": "6dabbd8eac60137c876c9e92334b52113187e4a59dbb9b39b31d629f860dbb9e",
+        "expected": "6dabbd8eac60137c876c9e92334b52113187e4a59dbb9b39b31d629f860dbb9e",
+        "ok": true
+      },
+      {
+        "field": "run.stderr_byte",
+        "actual": 39,
+        "expected": 39,
+        "ok": true
+      },
+      {
+        "field": "run.stderr_sha256",
+        "actual": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+        "expected": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+        "ok": true
+      },
+      {
+        "field": "run.checkpoint_sha256",
+        "actual": "a6eed55e3d9be43e2ac61b2c7d822589b5d1eee38bd1fee29941e46576fda9b4",
+        "expected": "a6eed55e3d9be43e2ac61b2c7d822589b5d1eee38bd1fee29941e46576fda9b4",
+        "ok": true
+      },
+      {
+        "field": "SANDBOX-KHONG-DO-DUOC",
+        "actual": false,
+        "expected": false,
+        "ok": true
+      },
+      {
+        "field": "KHONG-PHAI-HEAD-CUOI",
+        "actual": false,
+        "expected": false,
+        "ok": true
+      },
+      {
+        "field": "WINDOWS-THAT-KHONG-DO-TRONG-SANDBOX",
+        "actual": false,
+        "expected": false,
+        "ok": true
+      },
+      {
+        "field": "caveat_ids_unique",
+        "actual": 3,
+        "expected": 3,
+        "ok": true
+      },
+      {
+        "field": "caveat_muc",
+        "actual": [
+          "P3"
+        ],
+        "expected": [
+          "P3"
+        ],
+        "ok": true
+      }
+    ]
+  },
+  {
+    "receipt": "pr1114-review-1-codex-verdict.receipt.yaml",
+    "checks": [
+      {
+        "field": "target_pull_request",
+        "actual": 1114,
+        "expected": 1114,
+        "ok": true
+      },
+      {
+        "field": "luot",
+        "actual": 1,
+        "expected": 1,
+        "ok": true
+      },
+      {
+        "field": "schema_version",
+        "actual": 2,
+        "expected": 2,
+        "ok": true
+      },
+      {
+        "field": "kind",
+        "actual": "review_delivery_receipt",
+        "expected": "review_delivery_receipt",
+        "ok": true
+      },
+      {
+        "field": "verdict",
+        "actual": "approve",
+        "expected": "approve",
+        "ok": true
+      },
+      {
+        "field": "so_p0",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "so_p1",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "so_p2",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "so_p3",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "findings_ids",
+        "actual": [],
+        "expected": [],
+        "ok": true
+      },
+      {
+        "field": "so_dem_theo",
+        "actual": "finding",
+        "expected": "finding",
+        "ok": true
+      },
+      {
+        "field": "verdict_path",
+        "actual": "ops/reviews/pr1114-review-1-codex-verdict.md",
+        "expected": "ops/reviews/pr1114-review-1-codex-verdict.md",
+        "ok": true
+      },
+      {
+        "field": "verdict_sha256",
+        "actual": "c4dd8f14224fad7b6d08009e83a027d20d8f8500e692ae78f1e5d2af8c01a41b",
+        "expected": "c4dd8f14224fad7b6d08009e83a027d20d8f8500e692ae78f1e5d2af8c01a41b",
+        "ok": true
+      },
+      {
+        "field": "verdict_bytes",
+        "actual": 17095,
+        "expected": 17095,
+        "ok": true
+      },
+      {
+        "field": "reviewed_sha.verdict",
+        "actual": "e101b11e9586de3125f811ec4f42a89af69de8f2",
+        "expected": "e101b11e9586de3125f811ec4f42a89af69de8f2",
+        "ok": true
+      },
+      {
+        "field": "reviewed_sha.run",
+        "actual": "e101b11e9586de3125f811ec4f42a89af69de8f2",
+        "expected": "e101b11e9586de3125f811ec4f42a89af69de8f2",
+        "ok": true
+      },
+      {
+        "field": "reviewed_sha.table",
+        "actual": "e101b11e9586de3125f811ec4f42a89af69de8f2",
+        "expected": "e101b11e9586de3125f811ec4f42a89af69de8f2",
+        "ok": true
+      },
+      {
+        "field": "reviewed_tree",
+        "actual": "b2c8cab562f146cafd255fe8942c158b8c6c0f7d",
+        "expected": "b2c8cab562f146cafd255fe8942c158b8c6c0f7d",
+        "ok": true
+      },
+      {
+        "field": "land_merge_commit",
+        "actual": "fb74c6eca742205acc0af9bb7ea89da94f15aa21",
+        "expected": "fb74c6eca742205acc0af9bb7ea89da94f15aa21",
+        "ok": true
+      },
+      {
+        "field": "merge_parent_count",
+        "actual": 2,
+        "expected": 2,
+        "ok": true
+      },
+      {
+        "field": "merge_second_parent",
+        "actual": "51435a44659c4026539497a47ace971a71a64f40",
+        "expected": "51435a44659c4026539497a47ace971a71a64f40",
+        "ok": true
+      },
+      {
+        "field": "reviewed_is_ancestor_merge",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "reviewed_equals_merge_second_parent",
+        "actual": false,
+        "expected": false,
+        "ok": true
+      },
+      {
+        "field": "merge_is_ancestor_master",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "merge_date",
+        "actual": "2026-11-01",
+        "expected": "2026-11-01",
+        "ok": true
+      },
+      {
+        "field": "merge_PR_message",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "base_is_ancestor_reviewed",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "base_is_ancestor_merge_first_parent",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "base_in_source_prompt",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "review_class",
+        "actual": "sensitive",
+        "expected": "sensitive",
+        "ok": true
+      },
+      {
+        "field": "effective_review_class",
+        "actual": "sensitive",
+        "expected": "sensitive",
+        "ok": true
+      },
+      {
+        "field": "review_class_file_count",
+        "actual": 1,
+        "expected": 1,
+        "ok": true
+      },
+      {
+        "field": "evidence_url_format",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "evidence_url_commit",
+        "actual": "cf5acfa7282ec42ef282015fa27fc642a4515588",
+        "expected": "cf5acfa7282ec42ef282015fa27fc642a4515588",
+        "ok": true
+      },
+      {
+        "field": "evidence_url_path",
+        "actual": "ops/reviews/pr1114-review-1-codex-verdict.md",
+        "expected": "ops/reviews/pr1114-review-1-codex-verdict.md",
+        "ok": true
+      },
+      {
+        "field": "anchor_is_ancestor_HEAD",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "anchor_blob_hash",
+        "actual": "c4dd8f14224fad7b6d08009e83a027d20d8f8500e692ae78f1e5d2af8c01a41b",
+        "expected": "c4dd8f14224fad7b6d08009e83a027d20d8f8500e692ae78f1e5d2af8c01a41b",
+        "ok": true
+      },
+      {
+        "field": "anchor_blob_equal",
+        "actual": {
+          "bytes": 17095,
+          "sha256": "c4dd8f14224fad7b6d08009e83a027d20d8f8500e692ae78f1e5d2af8c01a41b"
+        },
+        "expected": {
+          "bytes": 17095,
+          "sha256": "c4dd8f14224fad7b6d08009e83a027d20d8f8500e692ae78f1e5d2af8c01a41b"
+        },
+        "ok": true
+      },
+      {
+        "field": "anchor.loai",
+        "actual": "canonical_ancestry",
+        "expected": "canonical_ancestry",
+        "ok": true
+      },
+      {
+        "field": "anchor.cuong_do",
+        "actual": "thap",
+        "expected": "thap",
+        "ok": true
+      },
+      {
+        "field": "run_json",
+        "actual": "ops/reviews/pr1114-review-1-codex/run/run.json",
+        "expected": "ops/reviews/pr1114-review-1-codex/run/run.json",
+        "ok": true
+      },
+      {
+        "field": "session_run_id",
+        "actual": "df61ed4f35124a258437eef00af715aa",
+        "expected": "df61ed4f35124a258437eef00af715aa",
+        "ok": true
+      },
+      {
+        "field": "launcher.run_id",
+        "actual": "df61ed4f35124a258437eef00af715aa",
+        "expected": "df61ed4f35124a258437eef00af715aa",
+        "ok": true
+      },
+      {
+        "field": "launcher.ma_thoat",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "launcher.head",
+        "actual": "e101b11e9586de3125f811ec4f42a89af69de8f2",
+        "expected": "e101b11e9586de3125f811ec4f42a89af69de8f2",
+        "ok": true
+      },
+      {
+        "field": "launcher.prompt_sha256",
+        "actual": "8ac1b4d1911e4e11073fa1b40465bff8624a5e6412e6481ee19b8c0e77838baf",
+        "expected": "8ac1b4d1911e4e11073fa1b40465bff8624a5e6412e6481ee19b8c0e77838baf",
+        "ok": true
+      },
+      {
+        "field": "launcher.trang_thai",
+        "actual": "xong",
+        "expected": "xong",
+        "ok": true
+      },
+      {
+        "field": "launcher.thoi_luong_giay",
+        "actual": 613.423,
+        "expected": 613.423,
+        "ok": true
+      },
+      {
+        "field": "identity.provider",
+        "actual": "openai_codex",
+        "expected": "openai_codex",
+        "ok": true
+      },
+      {
+        "field": "identity.transport",
+        "actual": "machine",
+        "expected": "machine",
+        "ok": true
+      },
+      {
+        "field": "identity.surface",
+        "actual": "codex_cli",
+        "expected": "codex_cli",
+        "ok": true
+      },
+      {
+        "field": "identity.model_yeu_cau",
+        "actual": "gpt-6-astra",
+        "expected": "gpt-6-astra",
+        "ok": true
+      },
+      {
+        "field": "identity.model_evidence",
+        "actual": "do_may",
+        "expected": "do_may",
+        "ok": true
+      },
+      {
+        "field": "identity.model_evidence_ref",
+        "actual": "ops/reviews/pr1114-review-1-codex/run/run.json#model_phuc_vu",
+        "expected": "ops/reviews/pr1114-review-1-codex/run/run.json#model_phuc_vu",
+        "ok": true
+      },
+      {
+        "field": "identity.model",
+        "actual": [
+          "gpt-6-astra"
+        ],
+        "expected": [
+          "gpt-6-astra"
+        ],
+        "ok": true
+      },
+      {
+        "field": "identity.model_da_chay",
+        "actual": [
+          "gpt-6-astra"
+        ],
+        "expected": [
+          "gpt-6-astra"
+        ],
+        "ok": true
+      },
+      {
+        "field": "model_phuc_vu_trang_thai",
+        "actual": "DO_DUOC",
+        "expected": "DO_DUOC",
+        "ok": true
+      },
+      {
+        "field": "model_event_count",
+        "actual": 32,
+        "expected": 32,
+        "ok": true
+      },
+      {
+        "field": "model_unique_response_ids",
+        "actual": 32,
+        "expected": 32,
+        "ok": true
+      },
+      {
+        "field": "model_event_kind",
+        "actual": [
+          "response.created"
+        ],
+        "expected": [
+          "response.created"
+        ],
+        "ok": true
+      },
+      {
+        "field": "effort_phuc_vu",
+        "actual": [
+          "xhigh"
+        ],
+        "expected": [
+          "xhigh"
+        ],
+        "ok": true
+      },
+      {
+        "field": "effort_phuc_vu_trang_thai",
+        "actual": "DO_DUOC",
+        "expected": "DO_DUOC",
+        "ok": true
+      },
+      {
+        "field": "note.ma_thoat",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "note.thoi_luong_giay",
+        "actual": 613.423,
+        "expected": 613.423,
+        "ok": true
+      },
+      {
+        "field": "note.trang_thai",
+        "actual": "xong",
+        "expected": "xong",
+        "ok": true
+      },
+      {
+        "field": "note.head",
+        "actual": "e101b11",
+        "expected": "e101b11",
+        "ok": true
+      },
+      {
+        "field": "note.worktree_sach",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "note.execution_surface",
+        "actual": "codex_cli",
+        "expected": "codex_cli",
+        "ok": true
+      },
+      {
+        "field": "note.sandbox_trang_thai",
+        "actual": "KHONG_DO_DUOC",
+        "expected": "KHONG_DO_DUOC",
+        "ok": true
+      },
+      {
+        "field": "note.prompt_sha256",
+        "actual": "8ac1b4d1911e",
+        "expected": "8ac1b4d1911e",
+        "ok": true
+      },
+      {
+        "field": "run.prompt_sha256",
+        "actual": "8ac1b4d1911e4e11073fa1b40465bff8624a5e6412e6481ee19b8c0e77838baf",
+        "expected": "8ac1b4d1911e4e11073fa1b40465bff8624a5e6412e6481ee19b8c0e77838baf",
+        "ok": true
+      },
+      {
+        "field": "run.duration_timestamps",
+        "actual": 613.423,
+        "expected": 613.423,
+        "ok": true
+      },
+      {
+        "field": "run.stdout_byte",
+        "actual": 442,
+        "expected": 442,
+        "ok": true
+      },
+      {
+        "field": "run.stdout_sha256",
+        "actual": "429266d6a0a8baa32bb9733d37a225da1bb5448f115892667d4a8df345649593",
+        "expected": "429266d6a0a8baa32bb9733d37a225da1bb5448f115892667d4a8df345649593",
+        "ok": true
+      },
+      {
+        "field": "run.stderr_byte",
+        "actual": 39,
+        "expected": 39,
+        "ok": true
+      },
+      {
+        "field": "run.stderr_sha256",
+        "actual": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+        "expected": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+        "ok": true
+      },
+      {
+        "field": "run.checkpoint_sha256",
+        "actual": "7081c5cc40b6cf28b5e000519f565bfd4a9e3da33fe78f0626fa534997248b94",
+        "expected": "7081c5cc40b6cf28b5e000519f565bfd4a9e3da33fe78f0626fa534997248b94",
+        "ok": true
+      },
+      {
+        "field": "SANDBOX-KHONG-DO-DUOC",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "KHONG-PHAI-HEAD-CUOI",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "WINDOWS-THAT-KHONG-DO-TRONG-SANDBOX",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "caveat_ids_unique",
+        "actual": 6,
+        "expected": 6,
+        "ok": true
+      },
+      {
+        "field": "caveat_muc",
+        "actual": [
+          "P3"
+        ],
+        "expected": [
+          "P3"
+        ],
+        "ok": true
+      }
+    ]
+  },
+  {
+    "receipt": "pr1114-review-2-codex-verdict.receipt.yaml",
+    "checks": [
+      {
+        "field": "target_pull_request",
+        "actual": 1114,
+        "expected": 1114,
+        "ok": true
+      },
+      {
+        "field": "luot",
+        "actual": 2,
+        "expected": 2,
+        "ok": true
+      },
+      {
+        "field": "schema_version",
+        "actual": 2,
+        "expected": 2,
+        "ok": true
+      },
+      {
+        "field": "kind",
+        "actual": "review_delivery_receipt",
+        "expected": "review_delivery_receipt",
+        "ok": true
+      },
+      {
+        "field": "verdict",
+        "actual": "approve",
+        "expected": "approve",
+        "ok": true
+      },
+      {
+        "field": "so_p0",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "so_p1",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "so_p2",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "so_p3",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "findings_ids",
+        "actual": [],
+        "expected": [],
+        "ok": true
+      },
+      {
+        "field": "so_dem_theo",
+        "actual": "finding",
+        "expected": "finding",
+        "ok": true
+      },
+      {
+        "field": "verdict_path",
+        "actual": "ops/reviews/pr1114-review-2-codex-verdict.md",
+        "expected": "ops/reviews/pr1114-review-2-codex-verdict.md",
+        "ok": true
+      },
+      {
+        "field": "verdict_sha256",
+        "actual": "51eec0ee8a1fba84451e5a626046c07511a91db2e99224ff232c459b987ec8ce",
+        "expected": "51eec0ee8a1fba84451e5a626046c07511a91db2e99224ff232c459b987ec8ce",
+        "ok": true
+      },
+      {
+        "field": "verdict_bytes",
+        "actual": 14674,
+        "expected": 14674,
+        "ok": true
+      },
+      {
+        "field": "reviewed_sha.verdict",
+        "actual": "51435a44659c4026539497a47ace971a71a64f40",
+        "expected": "51435a44659c4026539497a47ace971a71a64f40",
+        "ok": true
+      },
+      {
+        "field": "reviewed_sha.run",
+        "actual": "51435a44659c4026539497a47ace971a71a64f40",
+        "expected": "51435a44659c4026539497a47ace971a71a64f40",
+        "ok": true
+      },
+      {
+        "field": "reviewed_sha.table",
+        "actual": "51435a44659c4026539497a47ace971a71a64f40",
+        "expected": "51435a44659c4026539497a47ace971a71a64f40",
+        "ok": true
+      },
+      {
+        "field": "reviewed_tree",
+        "actual": "7c160ae144195d4f22089ec49d39e45033030381",
+        "expected": "7c160ae144195d4f22089ec49d39e45033030381",
+        "ok": true
+      },
+      {
+        "field": "land_merge_commit",
+        "actual": "fb74c6eca742205acc0af9bb7ea89da94f15aa21",
+        "expected": "fb74c6eca742205acc0af9bb7ea89da94f15aa21",
+        "ok": true
+      },
+      {
+        "field": "merge_parent_count",
+        "actual": 2,
+        "expected": 2,
+        "ok": true
+      },
+      {
+        "field": "merge_second_parent",
+        "actual": "51435a44659c4026539497a47ace971a71a64f40",
+        "expected": "51435a44659c4026539497a47ace971a71a64f40",
+        "ok": true
+      },
+      {
+        "field": "reviewed_is_ancestor_merge",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "reviewed_equals_merge_second_parent",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "merge_is_ancestor_master",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "merge_date",
+        "actual": "2026-11-01",
+        "expected": "2026-11-01",
+        "ok": true
+      },
+      {
+        "field": "merge_PR_message",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "base_is_ancestor_reviewed",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "base_is_ancestor_merge_first_parent",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "base_in_source_prompt",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "review_class",
+        "actual": "sensitive",
+        "expected": "sensitive",
+        "ok": true
+      },
+      {
+        "field": "effective_review_class",
+        "actual": "sensitive",
+        "expected": "sensitive",
+        "ok": true
+      },
+      {
+        "field": "review_class_file_count",
+        "actual": 1,
+        "expected": 1,
+        "ok": true
+      },
+      {
+        "field": "evidence_url_format",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "evidence_url_commit",
+        "actual": "cf5acfa7282ec42ef282015fa27fc642a4515588",
+        "expected": "cf5acfa7282ec42ef282015fa27fc642a4515588",
+        "ok": true
+      },
+      {
+        "field": "evidence_url_path",
+        "actual": "ops/reviews/pr1114-review-2-codex-verdict.md",
+        "expected": "ops/reviews/pr1114-review-2-codex-verdict.md",
+        "ok": true
+      },
+      {
+        "field": "anchor_is_ancestor_HEAD",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "anchor_blob_hash",
+        "actual": "51eec0ee8a1fba84451e5a626046c07511a91db2e99224ff232c459b987ec8ce",
+        "expected": "51eec0ee8a1fba84451e5a626046c07511a91db2e99224ff232c459b987ec8ce",
+        "ok": true
+      },
+      {
+        "field": "anchor_blob_equal",
+        "actual": {
+          "bytes": 14674,
+          "sha256": "51eec0ee8a1fba84451e5a626046c07511a91db2e99224ff232c459b987ec8ce"
+        },
+        "expected": {
+          "bytes": 14674,
+          "sha256": "51eec0ee8a1fba84451e5a626046c07511a91db2e99224ff232c459b987ec8ce"
+        },
+        "ok": true
+      },
+      {
+        "field": "anchor.loai",
+        "actual": "canonical_ancestry",
+        "expected": "canonical_ancestry",
+        "ok": true
+      },
+      {
+        "field": "anchor.cuong_do",
+        "actual": "thap",
+        "expected": "thap",
+        "ok": true
+      },
+      {
+        "field": "run_json",
+        "actual": "ops/reviews/pr1114-review-2-codex/run/run.json",
+        "expected": "ops/reviews/pr1114-review-2-codex/run/run.json",
+        "ok": true
+      },
+      {
+        "field": "session_run_id",
+        "actual": "a545a3bc36754793a48a3e2d8dccd599",
+        "expected": "a545a3bc36754793a48a3e2d8dccd599",
+        "ok": true
+      },
+      {
+        "field": "launcher.run_id",
+        "actual": "a545a3bc36754793a48a3e2d8dccd599",
+        "expected": "a545a3bc36754793a48a3e2d8dccd599",
+        "ok": true
+      },
+      {
+        "field": "launcher.ma_thoat",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "launcher.head",
+        "actual": "51435a44659c4026539497a47ace971a71a64f40",
+        "expected": "51435a44659c4026539497a47ace971a71a64f40",
+        "ok": true
+      },
+      {
+        "field": "launcher.prompt_sha256",
+        "actual": "3ee29a7c3f91d7c021bd1eda88842c874870ce31262748c96a6e21b13ff2a13e",
+        "expected": "3ee29a7c3f91d7c021bd1eda88842c874870ce31262748c96a6e21b13ff2a13e",
+        "ok": true
+      },
+      {
+        "field": "launcher.trang_thai",
+        "actual": "xong",
+        "expected": "xong",
+        "ok": true
+      },
+      {
+        "field": "launcher.thoi_luong_giay",
+        "actual": 745.124,
+        "expected": 745.124,
+        "ok": true
+      },
+      {
+        "field": "identity.provider",
+        "actual": "openai_codex",
+        "expected": "openai_codex",
+        "ok": true
+      },
+      {
+        "field": "identity.transport",
+        "actual": "machine",
+        "expected": "machine",
+        "ok": true
+      },
+      {
+        "field": "identity.surface",
+        "actual": "codex_cli",
+        "expected": "codex_cli",
+        "ok": true
+      },
+      {
+        "field": "identity.model_yeu_cau",
+        "actual": "gpt-6-astra",
+        "expected": "gpt-6-astra",
+        "ok": true
+      },
+      {
+        "field": "identity.model_evidence",
+        "actual": "do_may",
+        "expected": "do_may",
+        "ok": true
+      },
+      {
+        "field": "identity.model_evidence_ref",
+        "actual": "ops/reviews/pr1114-review-2-codex/run/run.json#model_phuc_vu",
+        "expected": "ops/reviews/pr1114-review-2-codex/run/run.json#model_phuc_vu",
+        "ok": true
+      },
+      {
+        "field": "identity.model",
+        "actual": [
+          "gpt-6-astra"
+        ],
+        "expected": [
+          "gpt-6-astra"
+        ],
+        "ok": true
+      },
+      {
+        "field": "identity.model_da_chay",
+        "actual": [
+          "gpt-6-astra"
+        ],
+        "expected": [
+          "gpt-6-astra"
+        ],
+        "ok": true
+      },
+      {
+        "field": "model_phuc_vu_trang_thai",
+        "actual": "DO_DUOC",
+        "expected": "DO_DUOC",
+        "ok": true
+      },
+      {
+        "field": "model_event_count",
+        "actual": 33,
+        "expected": 33,
+        "ok": true
+      },
+      {
+        "field": "model_unique_response_ids",
+        "actual": 33,
+        "expected": 33,
+        "ok": true
+      },
+      {
+        "field": "model_event_kind",
+        "actual": [
+          "response.created"
+        ],
+        "expected": [
+          "response.created"
+        ],
+        "ok": true
+      },
+      {
+        "field": "effort_phuc_vu",
+        "actual": [
+          "xhigh"
+        ],
+        "expected": [
+          "xhigh"
+        ],
+        "ok": true
+      },
+      {
+        "field": "effort_phuc_vu_trang_thai",
+        "actual": "DO_DUOC",
+        "expected": "DO_DUOC",
+        "ok": true
+      },
+      {
+        "field": "note.ma_thoat",
+        "actual": 0,
+        "expected": 0,
+        "ok": true
+      },
+      {
+        "field": "note.thoi_luong_giay",
+        "actual": 745.124,
+        "expected": 745.124,
+        "ok": true
+      },
+      {
+        "field": "note.trang_thai",
+        "actual": "xong",
+        "expected": "xong",
+        "ok": true
+      },
+      {
+        "field": "note.head",
+        "actual": "51435a4",
+        "expected": "51435a4",
+        "ok": true
+      },
+      {
+        "field": "note.worktree_sach",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "note.execution_surface",
+        "actual": "codex_cli",
+        "expected": "codex_cli",
+        "ok": true
+      },
+      {
+        "field": "note.sandbox_trang_thai",
+        "actual": "KHONG_DO_DUOC",
+        "expected": "KHONG_DO_DUOC",
+        "ok": true
+      },
+      {
+        "field": "note.prompt_sha256",
+        "actual": "3ee29a7c3f91",
+        "expected": "3ee29a7c3f91",
+        "ok": true
+      },
+      {
+        "field": "run.prompt_sha256",
+        "actual": "3ee29a7c3f91d7c021bd1eda88842c874870ce31262748c96a6e21b13ff2a13e",
+        "expected": "3ee29a7c3f91d7c021bd1eda88842c874870ce31262748c96a6e21b13ff2a13e",
+        "ok": true
+      },
+      {
+        "field": "run.duration_timestamps",
+        "actual": 745.124,
+        "expected": 745.124,
+        "ok": true
+      },
+      {
+        "field": "run.stdout_byte",
+        "actual": 403,
+        "expected": 403,
+        "ok": true
+      },
+      {
+        "field": "run.stdout_sha256",
+        "actual": "03e3923e176ee13d61905aad0074a7460b0f6674971c59bdf6a9269b6aabaa48",
+        "expected": "03e3923e176ee13d61905aad0074a7460b0f6674971c59bdf6a9269b6aabaa48",
+        "ok": true
+      },
+      {
+        "field": "run.stderr_byte",
+        "actual": 39,
+        "expected": 39,
+        "ok": true
+      },
+      {
+        "field": "run.stderr_sha256",
+        "actual": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+        "expected": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+        "ok": true
+      },
+      {
+        "field": "run.checkpoint_sha256",
+        "actual": "ccf39eb48c7ab0515a27764ce858ce1fa91f7462e7afaebdff836e979aa7dbde",
+        "expected": "ccf39eb48c7ab0515a27764ce858ce1fa91f7462e7afaebdff836e979aa7dbde",
+        "ok": true
+      },
+      {
+        "field": "SANDBOX-KHONG-DO-DUOC",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "KHONG-PHAI-HEAD-CUOI",
+        "actual": false,
+        "expected": false,
+        "ok": true
+      },
+      {
+        "field": "WINDOWS-THAT-KHONG-DO-TRONG-SANDBOX",
+        "actual": true,
+        "expected": true,
+        "ok": true
+      },
+      {
+        "field": "caveat_ids_unique",
+        "actual": 5,
+        "expected": 5,
+        "ok": true
+      },
+      {
+        "field": "caveat_muc",
+        "actual": [
+          "P3"
+        ],
+        "expected": [
+          "P3"
+        ],
+        "ok": true
+      }
+    ]
+  }
+]

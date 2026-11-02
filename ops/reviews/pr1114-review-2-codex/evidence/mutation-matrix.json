@@ -1,0 +1,252 @@
+{
+  "seconds": 72.229263,
+  "rows": [
+    {
+      "variant": "head",
+      "case": "a4_qua_han_giet_ca_nhom",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/cloud_agent_creds_test.py",
+        "--mot-ca",
+        "a4_qua_han_giet_ca_nhom"
+      ],
+      "cac_ma": null,
+      "rc": 0,
+      "seconds": 2.382169,
+      "output": "\n",
+      "cleanup_pids": []
+    },
+    {
+      "variant": "head",
+      "case": "a9_loi_gui_tin_hieu_khong_bao_da_dung",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/cloud_agent_creds_test.py",
+        "--mot-ca",
+        "a9_loi_gui_tin_hieu_khong_bao_da_dung"
+      ],
+      "cac_ma": null,
+      "rc": 0,
+      "seconds": 3.28552,
+      "output": "\n",
+      "cleanup_pids": []
+    },
+    {
+      "variant": "head",
+      "case": "a11_subreaper_va_esrch",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/cloud_agent_creds_test.py",
+        "--mot-ca",
+        "a11_subreaper_va_esrch"
+      ],
+      "cac_ma": null,
+      "rc": 0,
+      "seconds": 0.968871,
+      "output": "\n",
+      "cleanup_pids": []
+    },
+    {
+      "variant": "head",
+      "case": "b10_version_treo_giet_ca_nhom",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/cloud_agent_creds_test.py",
+        "--mot-ca",
+        "b10_version_treo_giet_ca_nhom"
+      ],
+      "cac_ma": null,
+      "rc": 0,
+      "seconds": 15.281701,
+      "output": "\n",
+      "cleanup_pids": []
+    },
+    {
+      "variant": "parent_only",
+      "case": "a4_qua_han_giet_ca_nhom",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/cloud_agent_creds_test.py",
+        "--mot-ca",
+        "a4_qua_han_giet_ca_nhom"
+      ],
+      "cac_ma": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/mutations/parent_only.py",
+      "rc": 3,
+      "seconds": 27.368387,
+      "output": "DO:a4_qua_han_giet_ca_nhom:nap mất 22.1 s\n",
+      "cleanup_pids": []
+    },
+    {
+      "variant": "parent_only",
+      "case": "a9_loi_gui_tin_hieu_khong_bao_da_dung",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/cloud_agent_creds_test.py",
+        "--mot-ca",
+        "a9_loi_gui_tin_hieu_khong_bao_da_dung"
+      ],
+      "cac_ma": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/mutations/parent_only.py",
+      "rc": 0,
+      "seconds": 3.277488,
+      "output": "\n",
+      "cleanup_pids": []
+    },
+    {
+      "variant": "parent_only",
+      "case": "a11_subreaper_va_esrch",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/cloud_agent_creds_test.py",
+        "--mot-ca",
+        "a11_subreaper_va_esrch"
+      ],
+      "cac_ma": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/mutations/parent_only.py",
+      "rc": 3,
+      "seconds": 25.553823,
+      "output": "DO:a11_subreaper_va_esrch:sr=True: dừng=False, sống [49], q=None\n",
+      "cleanup_pids": [
+        50
+      ]
+    },
+    {
+      "variant": "parent_only",
+      "case": "b10_version_treo_giet_ca_nhom",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/cloud_agent_creds_test.py",
+        "--mot-ca",
+        "b10_version_treo_giet_ca_nhom"
+      ],
+      "cac_ma": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/mutations/parent_only.py",
+      "rc": 3,
+      "seconds": 40.301534,
+      "output": "DO:b10_version_treo_giet_ca_nhom:PID [53, 54] của `agy --version`: còn sống [54]\n",
+      "cleanup_pids": []
+    },
+    {
+      "variant": "no_kill",
+      "case": "a4_qua_han_giet_ca_nhom",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/cloud_agent_creds_test.py",
+        "--mot-ca",
+        "a4_qua_han_giet_ca_nhom"
+      ],
+      "cac_ma": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/mutations/no_kill.py",
+      "rc": 3,
+      "seconds": 27.364551,
+      "output": "DO:a4_qua_han_giet_ca_nhom:nap mất 22.2 s\n",
+      "cleanup_pids": []
+    },
+    {
+      "variant": "no_kill",
+      "case": "a9_loi_gui_tin_hieu_khong_bao_da_dung",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/cloud_agent_creds_test.py",
+        "--mot-ca",
+        "a9_loi_gui_tin_hieu_khong_bao_da_dung"
+      ],
+      "cac_ma": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/mutations/no_kill.py",
+      "rc": 0,
+      "seconds": 3.274359,
+      "output": "\n",
+      "cleanup_pids": [
+        63
+      ]
+    },
+    {
+      "variant": "no_kill",
+      "case": "a11_subreaper_va_esrch",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/cloud_agent_creds_test.py",
+        "--mot-ca",
+        "a11_subreaper_va_esrch"
+      ],
+      "cac_ma": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/mutations/no_kill.py",
+      "rc": 3,
+      "seconds": 25.603538,
+      "output": "DO:a11_subreaper_va_esrch:sr=True: dừng=False, sống [70], q=None\n",
+      "cleanup_pids": [
+        68,
+        71
+      ]
+    },
+    {
+      "variant": "no_kill",
+      "case": "b10_version_treo_giet_ca_nhom",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/cloud_agent_creds_test.py",
+        "--mot-ca",
+        "b10_version_treo_giet_ca_nhom"
+      ],
+      "cac_ma": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/mutations/no_kill.py",
+      "rc": 3,
+      "seconds": 40.310051,
+      "output": "DO:b10_version_treo_giet_ca_nhom:PID [74, 75] của `agy --version`: còn sống [74, 75]\n",
+      "cleanup_pids": []
+    },
+    {
+      "variant": "a9_default",
+      "case": "a4_qua_han_giet_ca_nhom",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/review_a9_default.py",
+        "--mot-ca",
+        "a4_qua_han_giet_ca_nhom"
+      ],
+      "cac_ma": null,
+      "rc": 0,
+      "seconds": 2.275116,
+      "output": "\n",
+      "cleanup_pids": []
+    },
+    {
+      "variant": "a9_default",
+      "case": "a9_loi_gui_tin_hieu_khong_bao_da_dung",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/review_a9_default.py",
+        "--mot-ca",
+        "a9_loi_gui_tin_hieu_khong_bao_da_dung"
+      ],
+      "cac_ma": null,
+      "rc": 0,
+      "seconds": 8.241579,
+      "output": "\n",
+      "cleanup_pids": []
+    },
+    {
+      "variant": "a9_default",
+      "case": "a11_subreaper_va_esrch",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/review_a9_default.py",
+        "--mot-ca",
+        "a11_subreaper_va_esrch"
+      ],
+      "cac_ma": null,
+      "rc": 0,
+      "seconds": 0.821687,
+      "output": "\n",
+      "cleanup_pids": []
+    },
+    {
+      "variant": "a9_default",
+      "case": "b10_version_treo_giet_ca_nhom",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114b/work/head/ops/review_a9_default.py",
+        "--mot-ca",
+        "b10_version_treo_giet_ca_nhom"
+      ],
+      "cac_ma": null,
+      "rc": 0,
+      "seconds": 15.213665,
+      "output": "\n",
+      "cleanup_pids": []
+    }
+  ]
+}

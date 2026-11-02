@@ -1,0 +1,61 @@
+{
+  "native_ntfs": "KHONG_DO_DUOC",
+  "checks": [
+    {
+      "name": "enumeration_linux",
+      "ordinary": 3,
+      "forced": 4,
+      "names": [
+        "nested",
+        ".hidden",
+        "noextension",
+        "normal.txt"
+      ]
+    },
+    {
+      "name": "native_wrapper",
+      "requested_rc": 0,
+      "argv": [
+        "/tmp/review-1091-6dc85b17da5741d7b11facec7d591d71/install [x]/*",
+        "/reset",
+        "/T",
+        "/C",
+        "/L",
+        "/Q"
+      ],
+      "exact_argv": true,
+      "threw": false,
+      "error": null
+    },
+    {
+      "name": "native_wrapper",
+      "requested_rc": 1,
+      "argv": [
+        "/tmp/review-1091-6dc85b17da5741d7b11facec7d591d71/install [x]/*",
+        "/reset",
+        "/T",
+        "/C",
+        "/L",
+        "/Q"
+      ],
+      "exact_argv": true,
+      "threw": true,
+      "error": "icacls /tmp/review-1091-6dc85b17da5741d7b11facec7d591d71/install [x]/* /reset /T /C /L /Q rc=1: injected-native-rc"
+    },
+    {
+      "name": "native_wrapper",
+      "requested_rc": 5,
+      "argv": [
+        "/tmp/review-1091-6dc85b17da5741d7b11facec7d591d71/install [x]/*",
+        "/reset",
+        "/T",
+        "/C",
+        "/L",
+        "/Q"
+      ],
+      "exact_argv": true,
+      "threw": true,
+      "error": "icacls /tmp/review-1091-6dc85b17da5741d7b11facec7d591d71/install [x]/* /reset /T /C /L /Q rc=5: injected-native-rc"
+    }
+  ]
+}

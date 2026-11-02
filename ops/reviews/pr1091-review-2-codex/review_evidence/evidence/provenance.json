@@ -1,0 +1,6 @@
+{
+  "hint_applies_rc": 0,
+  "head_test_equals_old_plus_hint": true,
+  "product_equals_round1": true,
+  "round1_delta_matches": true
+}

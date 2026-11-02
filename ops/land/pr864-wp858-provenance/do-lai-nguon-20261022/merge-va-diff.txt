@@ -1,0 +1,8 @@
+9e9a74b2a396ef458d25c51a5563efafbb45ba0c 637f78029f5a5fe56d35199dd0f75c50274f2c0f 521efebab226fe3a92b2ccce4a59c27dd638edff 9fc05c9986f711d1961e040dc7345850d0133294
+368	5	.claude/dev/launcher_test.py
+11	6	RELEASE_MANIFEST.json
+12	0	changelog.d/wp-858.md
+33	0	ops/cai_cong_cu.sh
+15	12	ops/cong_cu.yaml
+11	7	scripts/tl_selftest.py
+9fc05c9986f711d1961e040dc7345850d0133294

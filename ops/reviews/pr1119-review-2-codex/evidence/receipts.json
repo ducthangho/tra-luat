@@ -1,0 +1,62 @@
+{
+  "check_count": 326,
+  "failures": [],
+  "summary": [
+    {
+      "stem": "pr1110-review-1-codex",
+      "sha": "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d",
+      "tree": "49821da8bbf5787a4e10ffcc854354e6c72f9cf8",
+      "base": "c6dd7b33b4f215809bf281ee1533bc1e8fa6920c",
+      "run_id": "0f91d66df4fd4d16bfeeabfc8246333c",
+      "duration": 420.462,
+      "events": 21,
+      "sandbox": "KHONG_DO_DUOC",
+      "paths": 46,
+      "review_class": "sensitive",
+      "merge_parent2": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+      "ket_luan": "(a) 0 finding; 41 tep chep khop byte nguon, 2 tep loai khai dung o OMITTED.txt, 116 doi chieu bien nhan khop, README giu du hang cu va them dung 4 hang; dot bien bam bi cong chan dung bien nhan moi."
+    },
+    {
+      "stem": "pr1110-review-2-codex",
+      "sha": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+      "tree": "2fc9c77d7fb38e2b09b755bb125cb1dff4a33562",
+      "base": "fb74c6eca742205acc0af9bb7ea89da94f15aa21",
+      "run_id": "cac7c0b6484f455e985fd7bc40a44fb8",
+      "duration": 374.648,
+      "events": 23,
+      "sandbox": "DO_DUOC",
+      "paths": 46,
+      "review_class": "sensitive",
+      "merge_parent2": "3a3aac561ba359c08dfe92d95584b56494fc12d4",
+      "ket_luan": "(a) 0 finding; hien vat khop byte nguon, bien nhan khop cac truong do duoc, README giu du hang base va them dung 4 hang; diff ops/reviews tu luot 1 (e137f8c) RONG — hai merge master khong doi hien vat cua PR; dot bien bam bi cong chan dung tep."
+    },
+    {
+      "stem": "pr1114-review-1-codex",
+      "sha": "e101b11e9586de3125f811ec4f42a89af69de8f2",
+      "tree": "b2c8cab562f146cafd255fe8942c158b8c6c0f7d",
+      "base": "165b27a4bfe02e81af7bc94bda1e71c10d8c38e4",
+      "run_id": "df61ed4f35124a258437eef00af715aa",
+      "duration": 613.423,
+      "events": 32,
+      "sandbox": "KHONG_DO_DUOC",
+      "paths": 1,
+      "review_class": "sensitive",
+      "merge_parent2": "51435a44659c4026539497a47ace971a71a64f40",
+      "ket_luan": "(a) 0 finding; base/head 52/52 CA, 80/80 DOT BIEN; wrapper mo phong tran 32767 ky tu lam base DO dung p3b4_co_blob va head xanh; hai dot bien dao ban va deu DO. Windows that: KHONG DO DUOC trong sandbox."
+    },
+    {
+      "stem": "pr1114-review-2-codex",
+      "sha": "51435a44659c4026539497a47ace971a71a64f40",
+      "tree": "7c160ae144195d4f22089ec49d39e45033030381",
+      "base": "3bdd9877cab2543adc413a32a47decbb585ded97",
+      "run_id": "a545a3bc36754793a48a3e2d8dccd599",
+      "duration": 745.124,
+      "events": 33,
+      "sandbox": "KHONG_DO_DUOC",
+      "paths": 1,
+      "review_class": "sensitive",
+      "merge_parent2": "51435a44659c4026539497a47ace971a71a64f40",
+      "ket_luan": "(a) 0 finding; base/head 52/52 CA, 80/80 DOT BIEN; repro truoc/sau cho 26/1800 -> 0/1800; quan sat rieng 20/1200 luot R->Z sau _giet_nhom; dot bien bo giet van lam a4/a11/b10 DO; suite cham them 15,017 s (4,92%)."
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+diff --git a/ops/lease_publish_test.py b/ops/lease_publish_test.py
+index 22320d7..8807956 100644
+--- a/ops/lease_publish_test.py
++++ b/ops/lease_publish_test.py
+@@ -10742,7 +10742,8 @@ def t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai():
+     (luôn ném ⇒ S1/S3 · gỡ guard ⇒ S2 · chỉ xét `os.name` ⇒ S3 · guard chỉ khi bật điểm dò ⇒ S2 tắt · thêm nhánh
+     `nt` khi tắt điểm dò ⇒ S3 tắt). Mô phỏng `os.name` KHÔNG phải đã chạy Windows thật (Q6); không chạy I/O thật.
+     Sentinel chỉ bắt thao tác SAU guard; thao tác đứng TRƯỚC guard (lượt 3 L3, NA11) đo bằng `ast`: guard rồi điểm dò
+-    phải là HAI câu lệnh đầu tiên (chỉ bỏ docstring — KHÔNG tha `import`) và hàm không có decorator.
++    phải là HAI câu lệnh đầu tiên (chỉ bỏ docstring — KHÔNG tha `import`) và hàm không có decorator, không bị gán lại
++    bằng wrapper (lượt 4: `__wrapped__`, `__code__.co_name`).
+     """
+     from unittest import mock
+     mod, that = sys.modules[__name__], WORKFLOW_DANG
+@@ -10791,6 +10792,9 @@ def t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai():
+                                           'if do_qua_guard:\n    return "QUA_GUARD"\n').body]
+     if not isinstance(nut, ast.FunctionDef) or nut.decorator_list or cau != mau:
+         sai.append("M1: guard rồi điểm dò phải là HAI câu lệnh ĐẦU TIÊN của helper, không decorator (có thao tác đứng TRƯỚC)")
++    f = _chay_buoc_dang_that   # lượt 4 L2: `getsource` tự `unwrap`, nên gán lại bằng wrapper `functools.wraps` lọt chốt AST
++    if inspect.unwrap(f) is not f or f.__code__.co_name != "_chay_buoc_dang_that":
++        sai.append("M1: helper bị BỌC/gán lại (`__wrapped__` hoặc `__code__` không phải hàm gốc): thao tác TRƯỚC guard không thấy")
+     chot(not sai, "A9 guard nền: " + "; ".join(sai))
+ 
+ 
+@@ -10871,6 +10875,8 @@ def t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng():
+     của tiền tố (rút tiền tố tới bất kỳ độ dài nào đều lọt một phản chứng, NA7); rồi gọi CHÍNH `t195`–`t198` với helper
+     GIẢ trả nền của ca + ĐÚNG MỘT chiều sai: viết đè quan sát ở consumer phải đỏ ở chốt QUYẾT ĐỊNH của ca đó, còn chiều
+     ca không đọc (M3: `rc=2`, dãy gọi — Q9) phải xanh; VAI (PR, hết hạn) mà `t196`/`t197` truyền ghim bằng literal (R2-F3).
++    Lượt 4: thêm VECTƠ QUAN SÁT THẬT của `L` và A3. GIỚI HẠN (đo, không khai rộng hơn): viết đè có điều kiện theo đặc
++    điểm NẰM NGOÀI các vectơ này thì ca này không thấy — việc `L` chết thật do A1/A2 (đột biến lúc review) bảo chứng.
+     """
+     sai, ep = [], "repos/o/r/issues/55/comments"
+     GOI_M4 = [("GET", ep), ("GET", "repos/o/r/issues/55"), ("GET", ep), ("POST", ep)]
+@@ -10936,6 +10942,15 @@ def t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng():
+     bang_noi += [(t198, {}, ""), (t198, {"out": "x"}, ""), (t198, {"rc": 1}, "M4:"), (t198, {"rc": 2}, "M4:"),
+                  (t198, {"dang": []}, "M4:"), (t198, {"dang": [dau, dau]}, "M4:"), (t198, {"goi": []}, "M4:"),
+                  (t198, {"dang": ["**Lease `wrong`** — x"]}, "M4:"), (t198, {"dang": ["**Lease `wp-ok-10`** — x"]}, "M4:")]
++    # Lượt 4 L1: VECTƠ QUAN SÁT THẬT của `L` (M2, M3) và của A3 (M4), chép từ helper thật trên 85124dc — consumer viết đè
++    # CÓ ĐIỀU KIỆN theo đặc điểm chỉ lượt chạy thật mới có (`goi` có `comments`, `out` có `::group::`) phải đỏ.
++    g8 = "::group::ops/leases/x.yaml\n::error file=ops/leases/x.yaml::hai lớp GitHub chặn (rc=8)\n::endgroup::\nCHAN [8]: "
++    vl3 = {"rc": 0, "goi": [("GET", ep)], "out": "::group::ops/leases/x.yaml\n" + _DA_DANG_BO_QUA + "\n::endgroup::\n"
++           "CHAN [9]: lease 'True' đã có comment 1 trên issue #55 — bỏ qua\n"}
++    bang_noi += [(t195, {"goi": [("GET", ep)], "out": g8 + "thiếu trường bắt buộc: lease_id\n"}, "M2 tập (i)"),
++                 (t196, vl3, "M3a: PR"), (t197, vl3, "M3b: Issue"),
++                 (t198, {"rc": 1, "dang": [], "goi": [], "out": g8 + "KHÔNG ĐO ĐƯỢC loại số hiệu: không gọi được `gh api`\n"},
++                  "M4:")]
+     for ca, sua, mong in bang_noi:
+         do = qua_consumer(ca, sua)
+         if (not mong and do) or (mong and not do.startswith(mong)):

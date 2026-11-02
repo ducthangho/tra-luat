@@ -1,0 +1,28 @@
+diff --git a/ops/cloud_agent_creds_test.py b/ops/cloud_agent_creds_test.py
+index 100118c..21d3f0a 100644
+--- a/ops/cloud_agent_creds_test.py
++++ b/ops/cloud_agent_creds_test.py
+@@ -81,8 +81,12 @@ def _con_song(pid):   # zombie tính là chết (CLAUDE.md)
+         return os.kill(pid, 0) is None and Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()[0] != "Z"
+     except (ProcessLookupError, FileNotFoundError):
+         return False
+-def _song_roi_don(pids):   # PID còn sống TRƯỚC khi dọn, rồi giết hết để ca không để rác
+-    song = [x for x in pids if x is not None and _con_song(x)]
++def _song_roi_don(pids, cho_chet=5.0):   # PID còn sống TRƯỚC khi dọn, rồi giết hết để ca không để rác
++    # v1.36.69 (#1114: a11 sr=False đỏ trên CI — cháu đã nhận SIGKILL vẫn ở trạng thái R khi ống đã đóng, ~1,9% dưới tải,
++    # tái hiện 34/1800) — chờ có hạn cho tiến trình đang thoát; ca CẦN còn sống (a9) gọi cho_chet=0
++    het = time.monotonic() + cho_chet
++    while (song := [x for x in pids if x is not None and _con_song(x)]) and time.monotonic() < het:
++        time.sleep(0.02)
+     for x in song:   # dọn bằng syscall, không dựa tiện ích ngoài (F15)
+         with contextlib.suppress(OSError):
+             os.kill(x, 9)
+@@ -130,7 +134,7 @@ def a9_loi_gui_tin_hieu_khong_bao_da_dung():   # F11: killpg lỗi (TIÊM), ch
+         with mock.patch.dict(os.environ, moi), mock.patch.object(m.os, "killpg", gia), contextlib.redirect_stdout(buf):
+             m.nap({"TL_MASTER_KEY": "SENTINEL-a9", "TL_CLOUD_BOOTSTRAP_TIMEOUT_GIAY": "1"})
+         nk = json.loads((t / "nk").read_text(encoding="utf-8")) if (t / "nk").exists() else {}
+-        song = _song_roi_don([nk.get("con"), *([int((t / "nk.chau").read_text())] if (t / "nk.chau").exists() else [])])
++        song = _song_roi_don([nk.get("con"), *([int((t / "nk.chau").read_text())] if (t / "nk.chau").exists() else [])], cho_chet=0)
+     bang(song, "fixture hỏng: con/cháu phải còn sống khi chỉ cha bị giết")
+     bang("KHÔNG xác minh được việc dừng" in buf.getvalue() and "đã dừng" not in buf.getvalue(), f"báo dừng khi nhóm còn sống: {buf.getvalue()!r}")
+     ra = buf.getvalue()   # F12: nhóm KHÔNG dừng được vẫn chuyển tiếp log đã nhận, đúng một lần, đã che, bỏ dòng agent cũ

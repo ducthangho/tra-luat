@@ -1,0 +1,139 @@
+diff --git a/ops/vm/cap-nhat-cong-cu.ps1 b/ops/vm/cap-nhat-cong-cu.ps1
+index 36e5bab..d289d9c 100644
+--- a/ops/vm/cap-nhat-cong-cu.ps1
++++ b/ops/vm/cap-nhat-cong-cu.ps1
+@@ -612,7 +612,14 @@ function Register-LichCapNhat([string]$GocKho) {
+     New-Item -ItemType Directory -Force -Path $Script:ThuMucCaiDat | Out-Null
+     Assert-KhongReparse $Script:ThuMucCaiDat
+     Invoke-Icacls @($Script:ThuMucCaiDat, '/setowner', '*S-1-5-32-544', '/T', '/C', '/L', '/Q')
+-    Invoke-Icacls @($Script:ThuMucCaiDat, '/inheritance:r', '/grant:r', '*S-1-5-18:(OI)(CI)F', '*S-1-5-32-544:(OI)(CI)F', '*S-1-5-32-545:(OI)(CI)RX', '/T', '/C', '/L', '/Q')
++    # ACL đặt cho RIÊNG thư mục (KHÔNG /T), rồi cho mọi thứ bên trong THỪA KẾ lại bằng `/reset`. Đo trên VM 31-10-2026: cùng lệnh
++    # `/inheritance:r /grant:r <SID>:(OI)(CI)… /T` để lại tệp con với DACL RỖNG (`(OI)(CI)` không áp lên tệp, mà thừa kế đã bị
++    # cắt) ⇒ không ai đọc/ghi được, kể cả admin; `-DangKyLich` lần hai chết ở Copy-Item với rc=6 và tác vụ NguoiDung
++    # (tlcommander) không đọc nổi script. `icacls rc=0` vẫn báo 'Successfully processed', nên phép đo ACL sau cùng là chốt thật.
++    Invoke-Icacls @($Script:ThuMucCaiDat, '/inheritance:r', '/grant:r', '*S-1-5-18:(OI)(CI)F', '*S-1-5-32-544:(OI)(CI)F', '*S-1-5-32-545:(OI)(CI)RX', '/C', '/L', '/Q')
++    if (@(Get-ChildItem -LiteralPath $Script:ThuMucCaiDat -Force).Count) {
++        Invoke-Icacls @((Join-Path $Script:ThuMucCaiDat '*'), '/reset', '/T', '/C', '/L', '/Q')
++    }
+     $nguon = @{
+         'cap-nhat-cong-cu.ps1' = $PSCommandPath
+         'cong_cu.yaml'         = @((Join-Path $GocKho 'ops\cong_cu.yaml'), (Join-Path $GocKho 'cong_cu.yaml')) | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+diff --git a/ops/vm/cap-nhat-cong-cu_test.ps1 b/ops/vm/cap-nhat-cong-cu_test.ps1
+index beb93ae..bd6b112 100644
+--- a/ops/vm/cap-nhat-cong-cu_test.ps1
++++ b/ops/vm/cap-nhat-cong-cu_test.ps1
+@@ -945,6 +945,33 @@ function Invoke-DangKyGia([string]$CheDo) {
+     }
+     $Script:AclGia = @{}
+     $Script:AclGia[(Join-Path $env:ProgramFiles 'tra-luat-ops')] = [pscustomobject]@{ Owner = "$env:COMPUTERNAME\tladmin"; Access = @(New-QuyenGia 'BUILTIN\Users' 'Modify') }
++    if ($CheDo -in 'ban-cu', 'dacl-rong', 'cay-long') {
++        # Bản cài cũ có sẵn ba tệp, ACL thừa kế từ Program Files (đúng trạng thái VM trước lần đăng ký lại).
++        foreach ($t in 'cap-nhat-cong-cu.ps1', 'cong_cu.yaml', 'requirements.txt') {
++            $f = Join-Path (Join-Path $env:ProgramFiles 'tra-luat-ops') $t; [IO.File]::WriteAllText($f, 'cu')
++            $Script:AclGia[$f] = [pscustomobject]@{ Owner = 'BUILTIN\Administrators'; Access = @((New-QuyenGia 'NT AUTHORITY\SYSTEM' 'FullControl'), (New-QuyenGia 'BUILTIN\Administrators' 'FullControl'), (New-QuyenGia 'BUILTIN\Users' 'ReadAndExecute, Synchronize')) }
++        }
++    }
++
++    if ($CheDo -eq 'dacl-rong') {
++        foreach ($p in @($Script:AclGia.Keys)) {
++            if ($p -ne (Join-Path $env:ProgramFiles 'tra-luat-ops')) { $Script:AclGia[$p].Access = @() }
++        }
++    }
++    if ($CheDo -eq 'cay-long') {
++        $root = Join-Path $env:ProgramFiles 'tra-luat-ops'
++        foreach ($relative in 'long', 'long/sau') {
++            New-Item -ItemType Directory -Path (Join-Path $root $relative) | Out-Null
++        }
++        foreach ($relative in '.tep-an', 'long/sau/.tep-an', 'long/sau/khong-duoi') {
++            [IO.File]::WriteAllText((Join-Path $root $relative), 'cu')
++        }
++        foreach ($relative in 'long', 'long/sau', '.tep-an', 'long/sau/.tep-an', 'long/sau/khong-duoi') {
++            $Script:AclGia[(Join-Path $root $relative)] = [pscustomobject]@{
++                Owner = 'BUILTIN\Administrators'; Access = @(New-QuyenGia 'BUILTIN\Users' 'Modify')
++            }
++        }
++    }
+     $Script:GiaCheDo = $CheDo; $Script:SuKien = [Collections.Generic.List[object]]::new()
+     $Script:HanhDong = [Collections.Generic.List[object]]::new(); $Script:TacVu = [Collections.Generic.List[object]]::new()
+     $Script:NlmVenv = 'D:\nlm venv\'; $Script:VenvKho = 'D:\repo venv\\'; $Script:HomeCommander = 'D:\profile rieng'
+@@ -952,7 +979,7 @@ function Invoke-DangKyGia([string]$CheDo) {
+     $loi = $null
+     try { Register-LichCapNhat (Resolve-Path (Join-Path $Here '../..')).Path *> $null } catch { $loi = $_.Exception.Message }
+     $kq = [pscustomobject]@{
+-        loi = $loi; su_kien = @($Script:SuKien); hanh_dong = @($Script:HanhDong); tac_vu = @($Script:TacVu); cai_dat = $Script:ThuMucCaiDat
++        acl = $Script:AclGia; loi = $loi; su_kien = @($Script:SuKien); hanh_dong = @($Script:HanhDong); tac_vu = @($Script:TacVu); cai_dat = $Script:ThuMucCaiDat
+         tep = @(Get-ChildItem -LiteralPath (Join-Path $g 'PF/tra-luat-ops') -File -ErrorAction SilentlyContinue | ForEach-Object Name)
+     }
+     foreach ($l in "$g/PF", "$g/PF/tra-luat-ops", "$g/Tools") {
+@@ -976,10 +1003,18 @@ try {
+     }
+     function Invoke-Icacls([string[]]$DoiSo) {
+         $Script:SuKien.Add([pscustomobject]@{ loai = 'icacls'; doi_so = $DoiSo })
+-        $prefix = $DoiSo[0].TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+-        foreach ($key in @($Script:AclGia.Keys)) {
+-            if ($key -ne $DoiSo[0] -and -not (($DoiSo -contains '/T') -and $key.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase))) { continue }
++        # Mô hình theo HÀNH VI THẬT đo trên VM 31-10-2026 (không theo tài liệu): đích `<thư mục>/*` = chỉ các nút con; trên TỆP,
++        # ACE mang cờ (OI)/(CI) KHÔNG được áp (nên `/inheritance:r /grant:r (OI)(CI) /T` để tệp với DACL rỗng); `/reset` = tệp thừa
++        # kế lại ACE của thư mục cha.
++        $dich = $DoiSo[0]; $chiCon = $dich -match '[\\/]\*$'
++        $goc = if ($chiCon) { $dich -replace '[\\/]\*$', '' } else { $dich }
++        $prefix = $goc.TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
++        foreach ($key in @($Script:AclGia.Keys | Sort-Object Length)) {
++            $laCon = $key.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)
++            $khop = if ($chiCon) { $laCon -and (($DoiSo -contains '/T') -or (Split-Path -Parent $key) -eq $goc) } else { $key -eq $goc -or (($DoiSo -contains '/T') -and $laCon) }
++            if (-not $khop) { continue }
+             $node = $Script:AclGia[$key]
++            if ($DoiSo -contains '/reset') { $node.Access = @($Script:AclGia[(Split-Path -Parent $key)].Access); continue }
+             if ($DoiSo -contains '/setowner') {
+                 $i = [array]::IndexOf($DoiSo, '/setowner'); $node.Owner = Get-DanhTinhGia $DoiSo[$i + 1]
+             }
+@@ -990,7 +1025,9 @@ try {
+                     if ($DoiSo[$i] -notmatch '^([^:]+):(?:(?:\(OI\)|\(CI\))*)(F|RX|M)$') { throw "grant ngoài mô hình: $($DoiSo[$i])" }
+                     $id = Get-DanhTinhGia $Matches[1]
+                     $rights = switch ($Matches[2]) { 'F' { 'FullControl' } 'RX' { 'ReadAndExecute, Synchronize' } 'M' { 'Modify' } }
+-                    $node.Access = @($node.Access | Where-Object IdentityReference -ne $id) + @(New-QuyenGia $id $rights)
++                    if (-not ((Test-Path -LiteralPath $key -PathType Leaf) -and $DoiSo[$i] -match '\((OI|CI)\)')) {
++                        $node.Access = @($node.Access | Where-Object IdentityReference -ne $id) + @(New-QuyenGia $id $rights)
++                    }
+                     $i++
+                 }
+             }
+@@ -998,6 +1035,11 @@ try {
+     }
+     function Copy-Item { param($LiteralPath, $Destination, [switch]$Force)
+         $Script:SuKien.Add([pscustomobject]@{ loai = 'chep'; dich = "$Destination" })
++        # Ghi đè tệp có sẵn cần Administrators có quyền ghi trên CHÍNH tệp ấy (DACL rỗng ⇒ bị từ chối, như trên VM).
++        $cu = $Script:AclGia["$Destination"]
++        if ($cu -and -not @($cu.Access | Where-Object { $_.IdentityReference -eq 'BUILTIN\Administrators' -and $_.FileSystemRights -eq 'FullControl' }).Count) {
++            throw [UnauthorizedAccessException]::new("Access to the path '$Destination' is denied.")
++        }
+         Microsoft.PowerShell.Management\Copy-Item -LiteralPath $LiteralPath -Destination $Destination -Force:$Force
+         $parent = Split-Path -Parent $Destination
+         $Script:AclGia["$Destination"] = [pscustomobject]@{ Owner = "$env:COMPUTERNAME\tladmin"; Access = @($Script:AclGia[$parent].Access) } }
+@@ -1036,8 +1078,24 @@ try {
+         $owners.Count -eq 2 -and @($owners | Where-Object {
+             $i = [array]::IndexOf($_.doi_so, '/setowner')
+             $_.doi_so[$i + 1] -ne '*S-1-5-32-544' -or $_.doi_so -notcontains '/T'
+-        }).Count -eq 0 -and $grants.Count -eq 1 -and
+-            @('*S-1-5-18:(OI)(CI)F', '*S-1-5-32-544:(OI)(CI)F', '*S-1-5-32-545:(OI)(CI)RX', '/T', '/inheritance:r' | Where-Object { $grants[0].doi_so -notcontains $_ }).Count -eq 0
++        }).Count -eq 0 -and $grants.Count -eq 1 -and $grants[0].doi_so -notcontains '/T' -and
++            @('*S-1-5-18:(OI)(CI)F', '*S-1-5-32-544:(OI)(CI)F', '*S-1-5-32-545:(OI)(CI)RX', '/inheritance:r' | Where-Object { $grants[0].doi_so -notcontains $_ }).Count -eq 0
++    }
++    Ca 'dk_chay_dang_ky_lai_tren_ban_cai_cu' {
++        # Đúng ca đã chết trên VM 31-10-2026 (rc=6 'Access to the path …requirements.txt is denied'): đăng ký lại khi đã có bản cài.
++        $k = Invoke-DangKyGia 'ban-cu'
++        $reset = @($k.su_kien | Where-Object { $_.loai -eq 'icacls' -and $_.doi_so -contains '/reset' })
++        (& $dungLaiDung $k) -and $reset.Count -eq 1 -and $reset[0].doi_so[0] -match '[\\/]\*$' -and $reset[0].doi_so -contains '/L'
++    }
++
++    Ca 'dk_chay_sua_tep_dacl_rong_truoc_khi_chep' {
++        $k = Invoke-DangKyGia 'dacl-rong'
++        (& $dungLaiDung $k)
++    }
++    Ca 'dk_chay_reset_ca_cay_long_va_tep_an' {
++        $k = Invoke-DangKyGia 'cay-long'
++        $bad = @($k.acl.Values | ForEach-Object { Test-AclChiAdminGhi $_.Owner $_.Access })
++        (& $dungLaiDung $k) -and $k.acl.Count -eq 9 -and $bad.Count -eq 0
+     }
+     Ca 'dk_chay_chep_du_ba_tep' { @($kSach.tep | Sort-Object) -join ',' -eq 'cap-nhat-cong-cu.ps1,cong_cu.yaml,requirements.txt' }
+     Ca 'dk_chay_do_acl_moi_tep_sau_khi_chep' {

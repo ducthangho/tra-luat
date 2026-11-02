@@ -1,0 +1,10 @@
+{
+  "head": "ae0d06c23fb777545fd7547a07d9f368e4122f49",
+  "tree": "7312e5d65f57740d8673b5491357532c2b09c9a9",
+  "status": "",
+  "files": {
+    "ops/bien_nhan_v2.py": "62fba57035122b23a04233c34c34a03c2438ec2a7365e6bb13f7acf8861c2619",
+    "ops/bien_nhan_v2_test.py": "f8ba288c1a13e576f30be83f158021f66cfd29ff56cd7667c563120a52d3d189"
+  },
+  "diff_check": 0
+}

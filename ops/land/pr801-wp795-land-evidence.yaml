@@ -1,0 +1,94 @@
+# HO SO LAND — packet #795 wp795 r1 (lease g1), ma qua PR #801. Khuon: ops/land/pr793-wp784-land-evidence.yaml.
+# DINH CHINH 23-10-2026 — packet wp748 r24/g24 (chu kho #748 issuecomment-6365380273): `landed: true` -> `landed: false`.
+# Ly do va dieu kien mo lai: khoi `dinh_chinh_r24` cuoi tep. Moi cau khai `landed: true` ben duoi la LICH SU, khong con hieu luc.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7. TRANG THAI: merged (d347d426334bbe1bbb1161184ab0acffee9be054). `landed: true` theo quyet dinh chu kho
+# o PR ghi so nay (18-10-2026). NHAN: measured · loi_khai_co_neo · thuat_lai · not_measured. Readback: ops/land/pr801-wp795-provenance/.
+
+schema_version: 1
+mission_id: gh-795
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_01XaeBSkW4R49AEWj6x4uqff
+input_packet_generations:
+  - {packet_issue: 795, packet_id: wp795, revision: 1, generation: 1, lease_id: wp795-r1-g1-claude-20261017}
+authorized_head_sha: 76014ce0e76df70d8d3655b8f130747ae4d2cc14
+authorized_head_tree: d42e01b0b05776229d8bdd997fbac85d9ca0d1dd
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/801
+land_operator: 'ducthangho (chu kho tu merge; readback-pr-801.json merged_by ducthangho). Phien nay KHONG merge.'
+merge_method: merge
+merge_commit: d347d426334bbe1bbb1161184ab0acffee9be054
+merge_commit_tree: 15993b21d9864404f42fdf4b543e72cbf664ecbd
+merge_commit_parents: [d8b15cb0730c85e7019aee627c3bfa645a6d3eaf, 76014ce0e76df70d8d3655b8f130747ae4d2cc14]
+pre_merge_checks:
+  - {name: 'moi check-run tren head (16)', sha: 76014ce0e76df70d8d3655b8f130747ae4d2cc14, conclusion: success, nguon: readback-check-runs-76014ce.json}
+  - {name: 'Codex connector review', sha: 76014ce0e76df70d8d3655b8f130747ae4d2cc14, conclusion: 'completed, has_any_findings false', nguon: readback-comments-801.json}
+post_merge_checks:
+  - {name: gate (ci.yml, push master), run_id: 39053830242, sha: d347d426334bbe1bbb1161184ab0acffee9be054, conclusion: success, ghi_chu: 'luc ghi so dau tien con in_progress; doc lai 18-10-2026 qua actions_get: completed/success'}
+bookkeeping:
+  - {item: 'rut han lease wp795-r1-g1-claude-20261017', nhanh: ops/cap-lease-p3-dot}
+  - {item: 'PR ghi so', nhanh: claude/bookkeeping-800-801-land}
+# ---- het truong chuan
+packet_id: wp795
+packet_issue: 795
+generation: 1
+pham_vi_land: ma
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session session_01XaeBSkW4R49AEWj6x4uqff — phien dieu phoi (ghi lease, KHONG la executor). Executor la phien
+  session_01TWAhPi9PeV7V2txRZxP1tR do phien nay tao.
+spec:
+  path: ops/specs/wp795.md
+  sha256: af55b5220d86b8994be98d085a542ab88ef19190f3eaf464be1fcfbc4123c82e
+  vi_tri: >-
+    loi_khai_co_neo — dac ta r1 nam tren nhanh claude/spec-p3-dot (PR #798, chua merge luc ghi so); vao master khi #798
+    merge. Ban r2 (ops/specs/wp795-r2.md) KHONG thi hanh: chu kho chon "Nhan r1 cho dot nay".
+lease:
+  lease_id: wp795-r1-g1-claude-20261017
+  path: ops/leases/wp795-r1-g1-claude-20261017.yaml
+  nhanh: ops/cap-lease-p3-dot
+  thu_hoi: 'rut han ve gan thoi diem ghi so (khoi thu_hoi_bang_rut_han trong lease), packet da merge.'
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-801.json: merged true, merged_at 2026-10-17T17:27:20Z, merged_by ducthangho.'
+  landed: false
+  landed_hieu_luc_tu: 'merge commit cua PR ghi so #817 mang tep nay vao master (tep chi co tren master sau thoi diem ay).'
+  landed_ghi_chu: >-
+    PROTOCOL §10: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va BOOKKEEPING XONG.
+    (1) PR #801 merge tai d347d42. (2) hau-merge gate: run 39053830242 tren d347d42 (push master) conclusion success
+    (doc lai 18-10-2026 qua actions_get) — xem post_merge_checks. (3) bookkeeping: lease g1 rut han ve 18:05Z
+    (ops/cap-lease-p3-dot 7e8b6f1) + PR ghi so #817. Ban dau tep ghi `landed: false`; chu kho quyet doi
+    sang true o #817 ngay 18-10-2026.
+so_lan_day: >-
+  thuat_lai — nhanh code day 4 lan (301356c, a69f2c7, 6b3b4f3, 76014ce); lan 2 chu kho duyet (comment 6235613390);
+  lan 3 va 4 co bien nhan cua executor (comment 6236563063, 6237152105). Connector bat 2 P2 (4303133321 tren 301356c,
+  4303469931 tren 6b3b4f3), ca hai da va; head cuoi khong finding.
+review:
+  codex_connector: 'measured — readback-comments-801.json: summary codex-review-state completed, has_any_findings false, tren 76014ce.'
+  codex_cli: 'thuat_lai — cac luot Codex CLI offline cua executor (comment PR #801); bien nhan v2 KHONG nam trong ops/reviews/ (no).'
+khong_do_duoc:
+  - 'Bien nhan v2 cho cac luot Codex CLI cua wp795 chua ghi vao ops/reviews/; ghi la no, khong chan land.'
+  - 'Log day du cac job CI KHONG luu.'
+
+# ---- wp748 r24/g24: dinh chinh assurance §8.1 (them vao, khong sua du kien da do o tren)
+dinh_chinh_r24:
+  packet: {packet_issue: 748, packet_id: wp748, revision: 24, generation: 24, lease_id: wp748-r24-g24-claude-remote-20261023}
+  uy_quyen: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6365380273
+  landed_truoc: true
+  landed_sau: false
+  lo: 'A — ho model reviewer khong_do_duoc (§8, §8.1)'
+  authorized_head_sha: 76014ce0e76df70d8d3655b8f130747ae4d2cc14
+  reviewer_assurance_81: CHUA DAT
+  ly_do: 'doi_chieu — review duy nhat la Codex connector (khong lo model), khong co bien nhan Codex CLI nao => ho model reviewer `khong_do_duoc`.'
+  bang_chung:
+    - 'ops/land/pr801-wp795-land-evidence.yaml:28'
+    - 'ops/land/pr801-wp795-land-evidence.yaml:71'
+  can_cu: 'PROTOCOL §8 (dinh nghia cross_approved/human_audited), §8.1 "Evidence fallback hoac khong du nhan dang thi chua nhan assurance"; AGENTS.md §4: assurance khong gan theo ten cong cu; tien le pr846 (r23) va pr882.'
+  lo_ghi_them_khong_mo_rong_pham_vi:
+    - 'thieu bien nhan Codex CLI'
+  dieu_kien_mo_lai: '(A) `cross_approved`: dieu kien CHUNG — mot lan approve DOC LAP da hoan tat tren DUNG 76014ce0e76df70d8d3655b8f130747ae4d2cc14, va voi CHINH lan chay approve ay ho model reviewer phuc vu duoc xac lap KHAC ho model executor (claude); bang chung ho model o mot trong hai muc: (i) `do_may` — may do cho chinh lan chay ay (nang cap launcher ve sau KHONG do nguoc cac luot cu; do o luot/SHA khac KHONG du), hoac (ii) `khai_co_audit` — loi khai ho model cua chinh lan chay ay KEM xac nhan ben cua mot auditor co ten, tu khai yeu hon `do_may` ngay tai cho dung (loi khai khong kem auditor KHONG du). Cung ho, du co auditor, KHONG thanh `cross_approved`. HOAC (B) `human_audited` day du §8 muc 2 — auditor doc lap, danh tinh ben, tu doc spec/diff, evidence + verdict ben neo DUNG 76014ce0e76df70d8d3655b8f130747ae4d2cc14; voi comment cua chu kho thi theo phan quyet #566 trong uy quyen r24: dang truoc merge, co cau tu doc diff, ban luu day du trong kho. Kem theo: moi lo trong lo_ghi_them_khong_mo_rong_pham_vi phai duoc dong bang bang chung duong rieng.'
+  lich_su: 'ket luan `landed: true` truoc day va can cu cua no giu nguyen o tren de doi chieu; khoi nay chi doi ket luan.'

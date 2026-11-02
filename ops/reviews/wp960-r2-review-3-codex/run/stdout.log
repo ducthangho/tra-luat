@@ -1,0 +1,3 @@
+Đã hoàn tất [VERDICT.md](/tmp/claude-0/rv/wp960-r2-review-3-codex/VERDICT.md), ghi tăng dần theo yêu cầu.
+
+Kết luận: `changes_requested` — **6 P1, 1 P2**. Đã đo 13 hướng, chạy lại phản chứng cũ và 5 đột biến riêng. Không sửa `cay-kho/`, không gọi mạng.

@@ -1,0 +1,14 @@
+# trich log job 121236721787 'gate (ubuntu-latest)' run 40215856274 attempt 1 (tai qua REST /actions/jobs/121236721787/logs, redirect blob khong kem token)
+# log day du: 677715 byte, sha256 62a3f562553156501b4f2e84bc186a54621ce3085f22cb3b17e3e4de51cc58fc (khong kem — qua lon; tai lai duoc toi khi het han luu log)
+2:2026-10-25T17:18:59.3935612Z ##[group]Runner Image Provisioner
+4:2026-10-25T17:18:59.3936622Z Version: 20261021.618
+11:2026-10-25T17:18:59.3939944Z ##[group]Operating System
+12:2026-10-25T17:18:59.3940307Z Ubuntu
+13:2026-10-25T17:18:59.3940720Z 24.04.5
+17:2026-10-25T17:18:59.3942072Z Image: ubuntu-24.04
+18:2026-10-25T17:18:59.3942468Z Version: 20261012.334.1
+822:2026-10-25T17:19:07.8770846Z [command]/usr/bin/git log -1 --format=%H
+L: 2026-10-25T17:19:07.8796428Z 7009ab94f814fa19d3dc148f1ce074f40fd9031b
+L: 2026-10-25T17:24:03.0727874Z head_sha = 7009ab94f814fa19d3dc148f1ce074f40fd9031b
+L: 2026-10-25T17:24:03.0728362Z base_sha = 7009ab94f814fa19d3dc148f1ce074f40fd9031b
+L: 2026-10-25T17:26:43.8956955Z == tl selftest 1731/1731 ==

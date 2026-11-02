@@ -1,0 +1,16 @@
+do luc 2026-10-27T07:10:17Z
+ls-remote heads: 635, for-each-ref: 635, thieu (comm -23): 0, thua: 0; nhanh cuc bo master va ops/wp943-r1-g1-lease da fast-forward (0 commit rieng) truoc khi quet
+$ python ops/lease_publish.py ai-dang-giu --root . docs/adr/0056-lease-no-progress-six-hours.md
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp835-r3-g3-claude	refs/heads/ops/wp835-r3-g3-lease:ops/leases/wp835-r3-g3-claude.yaml
+HẾT_HẠN	wp943-r1-g1-claude	refs/heads/ops/wp943-r1-g1-lease:ops/leases/wp943-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+$ python ops/lease_publish.py ai-dang-giu --root . docs/PROTOCOL_DA_PHIEN.md
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp835-r3-g3-claude	refs/heads/ops/wp835-r3-g3-lease:ops/leases/wp835-r3-g3-claude.yaml
+HẾT_HẠN	wp943-r1-g1-claude	refs/heads/ops/wp943-r1-g1-lease:ops/leases/wp943-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+$ python ops/lease_publish.py ai-dang-giu --root . ops/handoff/wp943-g1-claude.md
+HẾT_HẠN	wp943-r1-g1-claude	refs/heads/ops/wp943-r1-g1-lease:ops/leases/wp943-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

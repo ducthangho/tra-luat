@@ -14,6 +14,7 @@ chế điều §13 quy định — đừng gỡ.
 là cổng riêng) · §8 (mức review được chấp nhận) · §10.2 (các thuật ngữ trạng thái, không dùng thay
 nhau) · §12 (khi nào mission được đóng) · §13.1–§13.2 (fence, hạn quyền và ruleset)
 · §7 (receipt vận chuyển). Quy ước deploy của kho: `CLAUDE.md`.
+Packet áp `ADR-0060`: một lần duyệt và sổ sách trên Issue WP đọc ở ADR-0060 (M7, M8).
 
 Tệp này **không tóm tắt** những mục trên. Chốt cơ học:
 
@@ -53,6 +54,14 @@ PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: 
 
 Lệnh này không có cờ nới, và không được thêm. Uỷ quyền cho một exact head SHA sống trên GitHub, không
 sống trong ngữ cảnh phiên — đọc §13 để biết cái gì được coi là uỷ quyền hợp lệ.
+
+## Mốc Workflow definition khi phiên không gọi được GraphQL
+
+Phiên Claude Code trên web nhận 403 cho GraphQL, nên `WorkflowRun.file` phải do chủ kho chạy rồi dán output.
+Cú pháp lệnh đưa cho chủ kho và cách đối chiếu: mục *"Lệnh `gh api graphql` đưa cho chủ kho chạy"* của `CLAUDE.md`.
+Đọc mục ấy từ `origin/master` ngay trước khi soạn lệnh — phiên mở từ trước có thể đang giữ bản cũ.
+Đường chính, không cần chủ kho: gọi `ops-do-workflow-definition.yml` (input `run_id`) qua MCP `actions_run_trigger`, rồi `python3 ops/ci_provenance.py thu ... --wd-run <id lượt ấy>` nhập artifact `workflow-definition-<run_id>` và tự tính lại blob/sha256; đường `gh api graphql` trên giữ làm dự phòng.
+Packet áp ADR-0060: trước khi bỏ draft chạy `python3 .claude/dev/packet_loop.py kiem-merge …` (K0–K7; K7 = M9 `full_mutant_audit`: `--dot-bien-du-runs` + `--dot-bien-du-jobs` của lượt `ci-dot-bien-du.yml` đúng head, hoặc dòng `full_mutant_audit: <head> mien` của chủ kho); trước khi đóng WP chạy `kiem-dong-wp --bien-ban <YAML M8> --lease <lease cuối>` (D1–D4).
 
 ## Full ref fence và merge evidence
 

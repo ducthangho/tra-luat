@@ -1,0 +1,7 @@
+# do luc 2026-10-24T12:05:54Z
+e91a68ac238588d14b1b1ab9ea17df3a5a46215a 1c579e79c6504860878c650a4d83731ec0709ff0 6e09f4b013629ae3d8d6e75f1a1c8e10aaa960b4 f8938481a061ab73d9fabde1e0b9254edc26a5f5
+head 6e09f4b tree: ada1abd0e19f41751c5407b7bb0ecc251113316a
+cmp(git diff cha1..merge, git diff merge-base..head) rc=0
+3	3	.github/workflows/ci.yml
+1	1	.github/workflows/launcher-windows.yml
+4	4	ops/ci_duong_nhanh_test.py

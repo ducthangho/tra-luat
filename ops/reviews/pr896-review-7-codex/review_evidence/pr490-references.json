@@ -1,0 +1,337 @@
+[
+  [
+    "ops/reviews/pr497-review-10-codex-verdict.receipt.yaml",
+    9,
+    "# cross-review**, vì không còn lượt nào sau lượt 11 để soi chúng. Cùng tình huống #490/#495 mà kho"
+  ],
+  [
+    "ops/reviews/pr497-review-6-codex-verdict.receipt.yaml",
+    9,
+    "# cross-review**, vì không còn lượt nào sau lượt 11 để soi chúng. Cùng tình huống #490/#495 mà kho"
+  ],
+  [
+    "ops/reviews/pr510-review-1-codex-verdict.receipt.yaml",
+    4,
+    "# theo tiền lệ r364 (#500) / #495 (#490)."
+  ],
+  [
+    "ops/reviews/pr490-review-3-codex-verdict.receipt.yaml",
+    1,
+    "# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 3 của PR #490, KHÁC NỀN (codex)."
+  ],
+  [
+    "ops/reviews/pr500-review-1-codex-verdict.receipt.yaml",
+    8,
+    "# PR hồ sơ, như #495 với #490. ĐỪNG đọc verdict này thành trạng thái cuối của #500: head cuối là `aad3d01`."
+  ],
+  [
+    "ops/reviews/pr490-review-7-codex-verdict.receipt.yaml",
+    1,
+    "# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 7 (LƯỢT CUỐI) của PR #490, KHÁC NỀN (codex)."
+  ],
+  [
+    "ops/reviews/pr490-review-7-codex-verdict.receipt.yaml",
+    9,
+    "# Biên nhận này viết SAU khi PR #490 đã merge (`8cee941`) — nó là TRẢ NỢ, không phải tiền kiểm."
+  ],
+  [
+    "ops/reviews/pr490-review-7-codex-verdict.receipt.yaml",
+    10,
+    "# Verdict lượt 7 neo `01e7f77`, đúng head đã merge; nhưng nó KHÔNG được đọc thành \"PR #490 đã qua"
+  ],
+  [
+    "ops/reviews/pr490-review-7-codex-verdict.receipt.yaml",
+    105,
+    "  thoi_diem: 'Vá SAU khi #490 merge. Đây là trả nợ, và hồ sơ ghi đúng như vậy.'"
+  ],
+  [
+    "ops/reviews/pr490-review-7-codex-verdict.receipt.yaml",
+    168,
+    "  - 'Lượt CI nào ĐÃ chạy thật trên các head của PR #490 — không đọc, không giữ run JSON.'"
+  ],
+  [
+    "ops/reviews/pr490-review-6-codex-verdict.receipt.yaml",
+    1,
+    "# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 6 của PR #490, KHÁC NỀN (codex)."
+  ],
+  [
+    "ops/reviews/pr497-review-1-codex-verdict.receipt.yaml",
+    45,
+    "  bài học `van-xuoi-do-duoc-van-vuot-nguon` của PR #490 sinh ra vì đếm theo lời tóm tắt."
+  ],
+  [
+    "ops/reviews/pr490-review-5-codex-verdict.receipt.yaml",
+    1,
+    "# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 5 của PR #490, KHÁC NỀN (codex)."
+  ],
+  [
+    "ops/reviews/pr490-review-1-codex-verdict.receipt.yaml",
+    1,
+    "# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 1 của PR #490, KHÁC NỀN (codex)."
+  ],
+  [
+    "ops/reviews/pr500-review-2-codex-verdict.receipt.yaml",
+    8,
+    "# danh tính thứ hai CÓ, chỉ là chưa được dùng lúc merge #500.) Biên nhận viết SAU khi merge — trả nợ ADR-0034 cho chính PR hồ sơ, như #495 với #490."
+  ],
+  [
+    "ops/reviews/pr497-review-9-codex-verdict.receipt.yaml",
+    9,
+    "# cross-review**, vì không còn lượt nào sau lượt 11 để soi chúng. Cùng tình huống #490/#495 mà kho"
+  ],
+  [
+    "ops/reviews/pr490-review-2-codex-verdict.receipt.yaml",
+    1,
+    "# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 2 của PR #490, KHÁC NỀN (codex)."
+  ],
+  [
+    "ops/reviews/pr490-review-4-codex-verdict.receipt.yaml",
+    1,
+    "# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 4 của PR #490, KHÁC NỀN (codex)."
+  ],
+  [
+    "ops/reviews/pr497-review-8-codex-verdict.receipt.yaml",
+    9,
+    "# cross-review**, vì không còn lượt nào sau lượt 11 để soi chúng. Cùng tình huống #490/#495 mà kho"
+  ],
+  [
+    "ops/reviews/pr491-review-2-codex-verdict.receipt.yaml",
+    132,
+    "    - {slug: chuoi-dong-o-490-khong-giai-thich, moi: true, do_lai: 'PR #490 CÓ THẬT, đang `open`, tiêu đề \"ops/land: land evidence cho PR #489 — mắt xích CUỐI\". Tiền đề của bot (\"không có tham chiếu #490 nào khác\") sai về sự tồn tại; phần đúng còn lại là người đọc offline không tự kiểm được.', ket_luan: 'ĐÚNG MỘT PHẦN — hạ xuống P3 khi vá'}"
+  ],
+  [
+    "ops/reviews/pr491-review-2-codex-verdict.receipt.yaml",
+    218,
+    "      (`package_hash` `bcde19d5…`→`d47be343…`, `total_bytes` 8075509→8089302) · \"chuỗi đóng ở #490\""
+  ],
+  [
+    "ops/reviews/pr491-review-2-codex-verdict.receipt.yaml",
+    220,
+    "      ĐÚNG MỘT PHẦN (#490 CÓ THẬT, đang `open`)."
+  ],
+  [
+    "ops/reviews/pr497-review-11-codex-verdict.receipt.yaml",
+    9,
+    "# cross-review**, vì không còn lượt nào sau lượt 11 để soi chúng. Cùng tình huống #490/#495 mà kho"
+  ],
+  [
+    "ops/reviews/pr497-review-7-codex-verdict.receipt.yaml",
+    9,
+    "# cross-review**, vì không còn lượt nào sau lượt 11 để soi chúng. Cùng tình huống #490/#495 mà kho"
+  ],
+  [
+    "ops/land/pr493-land-evidence.yaml",
+    330,
+    "    Tiền lệ #495/#490 và `r364`: verdict của PR hồ sơ vào kho ở PR hồ sơ KẾ TIẾP, và PR hồ sơ kế"
+  ],
+  [
+    "ops/land/pr491-r358-ghi-so-land-evidence.yaml",
+    244,
+    "    `ADR-0034`) chờ quyết định chủ kho · Issue #463–#467 còn `open` · PR #479 và #490 chưa merge."
+  ],
+  [
+    "ops/land/pr489-land-evidence.yaml",
+    417,
+    "  chuoi_day_du: '#468 → #478 → #486 → #487 → #489 → #490 (CHÍNH TỆP NÀY) — DỪNG'"
+  ],
+  [
+    "ops/land/pr489-land-evidence.yaml",
+    436,
+    "    nguyen_van: 'merge #490, tôi cho phép land mà không cần CI, đóng chuỗi'"
+  ],
+  [
+    "ops/land/pr489-land-evidence.yaml",
+    439,
+    "      Hệ quả của nó — merge commit của #490 và sự VẮNG MẶT của một PR land evidence cho #490 — sẽ"
+  ],
+  [
+    "ops/land/pr489-land-evidence.yaml",
+    441,
+    "      merge commit nào của #490 để định danh. Bản trước viết nó ở thì đã-đo — SAI, và đó là lời"
+  ],
+  [
+    "ops/land/pr489-land-evidence.yaml",
+    442,
+    "      khai về TƯƠNG LAI đội lốt phép đo. Ai đọc lại tệp này sau khi #490 merge thì ĐO được cả"
+  ],
+  [
+    "ops/land/pr489-land-evidence.yaml",
+    445,
+    "    - muc: 'CI cho bước land của #490'"
+  ],
+  [
+    "ops/land/pr489-land-evidence.yaml",
+    448,
+    "        định đã có từ trước trong phiên (bỏ chờ CI hậu-merge), nay áp cả cho tiền kiểm của #490."
+  ],
+  [
+    "ops/land/pr489-land-evidence.yaml",
+    449,
+    "    - muc: 'PR land evidence cho chính #490'"
+  ],
+  [
+    "ops/land/pr489-land-evidence.yaml",
+    451,
+    "        MIỄN. Chuỗi dừng tại đây; #490 KHÔNG sinh mắt xích thứ 7. `merged` của #490 là kết cục"
+  ],
+  [
+    "ops/reviews/README.md",
+    306,
+    "| `pr491-review-2-codex-verdict.md` | `NAM-FINDING-BOT-la-duong-THU-BA-ba-cai-MOI` | Ngoài hai lượt `launcher.py run`, **Codex connector bot** review độc lập cùng head `2ec6171` (review `5157660335`, kích hoạt bởi *Draft marked ready*) và ra **5 P2**, **BA là MỚI**: `bd32d11` **không phải tổ tiên** của commit được review (`merge-base --is-ancestor` ⇒ SAI) nên nó **không được bảo đảm tồn tại trong một clone tương lai chỉ lấy lịch sử canonical** — KHÔNG nói mạnh hơn thế: `git for-each-ref --contains` vẫn trả ref trỏ tới OID ấy · *\"gói skill không đổi\"* lẫn **payload `ops/`** với **gói mà chính r358 đổi** (`package_hash` `bcde19d5…`→`d47be343…`, `total_bytes` **8075509→8089302**) · *\"chuỗi đóng ở #490\"* không tự kiểm được offline. Hai cái còn lại **trùng** lượt 2. Điều phối tự đo lại cả năm: **bốn ĐÚNG, một ĐÚNG MỘT PHẦN** (PR #490 **CÓ THẬT**, đang `open`, nên tiền đề *\"không có tham chiếu nào\"* của bot sai). |"
+  ],
+  [
+    "ops/reviews/README.md",
+    853,
+    "| [`pr493-review-17-codex-verdict.md`](pr493-review-17-codex-verdict.md) | [`.receipt.yaml`](pr493-review-17-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **17/17** của PR #493, head `61b4c249`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **679 s**; `v0.154.0`). **P1 0 · P2 0 · P3 4** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `61b4c249` | 26623 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    854,
+    "| [`pr493-review-16-codex-verdict.md`](pr493-review-16-codex-verdict.md) | [`.receipt.yaml`](pr493-review-16-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **16/17** của PR #493, head `95071a19`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **556 s**; `v0.154.0`). **P1 0 · P2 0 · P3 3** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `95071a19` | 24212 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    855,
+    "| [`pr493-review-15-codex-verdict.md`](pr493-review-15-codex-verdict.md) | [`.receipt.yaml`](pr493-review-15-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **15/17** của PR #493, head `d47ea594`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **766 s**; `v0.154.0`). **P1 0 · P2 0 · P3 5** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `d47ea594` | 23369 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    856,
+    "| [`pr493-review-14-codex-verdict.md`](pr493-review-14-codex-verdict.md) | [`.receipt.yaml`](pr493-review-14-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **14/17** của PR #493, head `f618e019`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **735 s**; `v0.154.0`). **P1 0 · P2 0 · P3 4** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `f618e019` | 29134 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    857,
+    "| [`pr493-review-13-codex-verdict.md`](pr493-review-13-codex-verdict.md) | [`.receipt.yaml`](pr493-review-13-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **13/17** của PR #493, head `89d938ef`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **823 s**; `v0.154.0`). **P1 0 · P2 0 · P3 2** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `89d938ef` | 22387 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    858,
+    "| [`pr493-review-12-codex-verdict.md`](pr493-review-12-codex-verdict.md) | [`.receipt.yaml`](pr493-review-12-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **12/17** của PR #493, head `e9211317`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **660 s**; `v0.154.0`). **P1 0 · P2 0 · P3 3** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `e9211317` | 26042 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    859,
+    "| [`pr493-review-11-codex-verdict.md`](pr493-review-11-codex-verdict.md) | [`.receipt.yaml`](pr493-review-11-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **11/17** của PR #493, head `b43d4ab1`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **476 s**; `v0.154.0`). **P1 0 · P2 0 · P3 2** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `b43d4ab1` | 23790 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    860,
+    "| [`pr493-review-10-codex-verdict.md`](pr493-review-10-codex-verdict.md) | [`.receipt.yaml`](pr493-review-10-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **10/17** của PR #493, head `9e78e19e`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **848 s**; `v0.154.0`). **P1 0 · P2 0 · P3 3** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `9e78e19e` | 25154 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    861,
+    "| [`pr493-review-9-codex-verdict.md`](pr493-review-9-codex-verdict.md) | [`.receipt.yaml`](pr493-review-9-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **9/17** của PR #493, head `dd4a3ae8`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **546 s**; `v0.154.0`). **P1 0 · P2 0 · P3 5** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `dd4a3ae8` | 26596 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    862,
+    "| [`pr493-review-8-codex-verdict.md`](pr493-review-8-codex-verdict.md) | [`.receipt.yaml`](pr493-review-8-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **8/17** của PR #493, head `025c6b2d`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **749 s**; `v0.153.4`). **P1 0 · P2 0 · P3 10** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `025c6b2d` | 32223 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    863,
+    "| [`pr493-review-7-codex-verdict.md`](pr493-review-7-codex-verdict.md) | [`.receipt.yaml`](pr493-review-7-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **7/17** của PR #493, head `a4bc01dc`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **671 s**; `v0.153.4`). **P1 0 · P2 0 · P3 9** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `a4bc01dc` | 28668 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    864,
+    "| [`pr493-review-6-codex-verdict.md`](pr493-review-6-codex-verdict.md) | [`.receipt.yaml`](pr493-review-6-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **6/17** của PR #493, head `2c57e99a`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **555 s**; `v0.153.4`). **P1 0 · P2 0 · P3 10** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `2c57e99a` | 26029 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    865,
+    "| [`pr493-review-5-codex-verdict.md`](pr493-review-5-codex-verdict.md) | [`.receipt.yaml`](pr493-review-5-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`approve`** · lượt **5/17** của PR #493, head `f5098dd6`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **665 s**; `v0.153.4`). **P1 0 · P2 0 · P3 14** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `f5098dd6` | 35621 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    866,
+    "| [`pr493-review-4-codex-verdict.md`](pr493-review-4-codex-verdict.md) | [`.receipt.yaml`](pr493-review-4-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **4/17** của PR #493, head `b004da99`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **708 s**; `v0.153.4`). **P1 0 · P2 1 · P3 15** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `b004da99` | 37130 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    867,
+    "| [`pr493-review-3-codex-verdict.md`](pr493-review-3-codex-verdict.md) | [`.receipt.yaml`](pr493-review-3-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **3/17** của PR #493, head `fae2fb77`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **665 s**; `v0.153.4`). **P1 0 · P2 2 · P3 15** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `fae2fb77` | 34195 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    868,
+    "| [`pr493-review-2-codex-verdict.md`](pr493-review-2-codex-verdict.md) | [`.receipt.yaml`](pr493-review-2-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **2/17** của PR #493, head `9484970f`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **667 s**; `v0.153.4`). **P1 1 · P2 4 · P3 15** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `9484970f` | 40811 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    869,
+    "| [`pr493-review-1-codex-verdict.md`](pr493-review-1-codex-verdict.md) | [`.receipt.yaml`](pr493-review-1-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **1/17** của PR #493, head `4af7e290`, khác nền (`codex`; `model_khai_boi_cong_cu` **`gpt-6-astra`** — đo được từ header phiên, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **566 s**; `v0.153.4`). **P1 1 · P2 4 · P3 12** — đếm bằng HEADING `[P1]/[P2]/[P3]`, không lấy số ở văn xuôi reviewer. **`reasoning effort: none`** ở 17/17 lượt (đo được) — đừng đọc chuỗi này thành một lượt review effort cao. **KHÔNG lượt nào review head đã merge `99aef14`**; lượt 17 dừng ở `61b4c24` và hai commit sau đó chưa qua review nào. **HỒ SƠ ĐÓNG BĂNG:** cả 17 verdict + biên nhận vào kho SAU khi vòng lặp kết thúc, nên **chúng CHƯA qua cross-review** — cùng tình huống #490/#495/#497 mà kho đã chấp nhận. **ATTESTATION — khối runtime đọc từ `run.json`/`stderr.log` NGOÀI kho.** | `4af7e290` | 27889 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    889,
+    "| [`pr497-review-11-codex-verdict.md`](pr497-review-11-codex-verdict.md) | [`.receipt.yaml`](pr497-review-11-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`approve`** · lượt **11** của PR #497, head `5271e997`, khác nền (`codex`; `model_yeu_cau` **`gpt-6-astra`**, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **600 s**). **P1 0 · P2 0 · P3 0.** **APPROVE — 0 P1 · 0 P2 · 0 P3**, lượt kết thúc vòng lặp. Bảng đo đối chiếu lại cây giao review, cấu hình gói, ba số `mirror_vs_raw_*`, byte/băm tệp ref thô, phạm vi diff (`14 tệp · +3 004/−5 · 24 commit` trên base `27c413c`) — tất cả **khớp**. Reviewer khai rõ hai giới hạn: đây là kết luận review **OFFLINE** trên SHA ấy, **không** xác nhận trạng thái GitHub hay quyền land; và **không tái dựng hồ sơ lượt 6–10 đã đóng băng**. **HỒ SƠ ĐÓNG BĂNG:** verdict và biên nhận lượt 6–11 vào kho **sau khi vòng lặp kết thúc**, nên **chúng CHƯA qua cross-review** — không còn lượt nào sau lượt 11 để soi. Cùng tình huống #490/#495 mà kho đã chấp nhận; nói ra để không ai nhận nhầm. **ATTESTATION — khối runtime, `tuan_thu_cam_cua_reviewer` và `github_submitter_identity`.** | `5271e997` | 13991 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    890,
+    "| [`pr497-review-10-codex-verdict.md`](pr497-review-10-codex-verdict.md) | [`.receipt.yaml`](pr497-review-10-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **10** của PR #497, head `a6dcdbe5`, khác nền (`codex`; `model_yeu_cau` **`gpt-6-astra`**, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **810 s**). **P1 0 · P2 1 · P3 0.** Một finding, và **nguyên nhân của nó đáng ghi hơn bản vá**: §3 còn câu *\"head hiện tại ⇒ **57/110**\"* trong khi bảng ngay dưới đã `59/112`. Reviewer định vị bằng `git diff HEAD^ HEAD -- CHANGELOG.md` — chỉ dòng bảng đổi. Nguyên nhân: **bản sửa đoạn ấy nằm trong một lệnh bị TỪ CHỐI nên chưa bao giờ chạy**; lần commit kế chỉ mang thay đổi của lần sửa trước. Vá theo đúng cảnh báo kèm theo (*\"thay bằng một số head hiện tại khác lại tiếp tục trôi\"*): chuỗi ghim SHA **dừng ở `e27d839`**, không nối thêm ô nào. Đây là ô **thứ ba** cùng loại bị bỏ hẳn — số dòng biên nhận, số hàng README của PR khác, và ô bộ đếm. **HỒ SƠ ĐÓNG BĂNG:** verdict và biên nhận lượt 6–11 vào kho **sau khi vòng lặp kết thúc**, nên **chúng CHƯA qua cross-review** — không còn lượt nào sau lượt 11 để soi. Cùng tình huống #490/#495 mà kho đã chấp nhận; nói ra để không ai nhận nhầm. **ATTESTATION — khối runtime, `tuan_thu_cam_cua_reviewer` và `github_submitter_identity`.** | `a6dcdbe5` | 15811 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    891,
+    "| [`pr497-review-9-codex-verdict.md`](pr497-review-9-codex-verdict.md) | [`.receipt.yaml`](pr497-review-9-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **9** của PR #497, head `8de21bee`, khác nền (`codex`; `model_yeu_cau` **`gpt-6-astra`**, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **717 s**). **P1 0 · P2 2 · P3 0.** Hai finding, **cả hai là lời khai của điều phối rộng hơn phép đo**. (a) Bản vá lượt 8 viết *\"khối dài **50** dòng\"* rồi **ngay dòng kế** kết luận *\"bỏ số, không thay số mới\"* — tự mâu thuẫn hai dòng liền nhau; reviewer nói rõ **50 hiện đúng**, sai là khai đã loại phép đếm trong khi vừa đưa một số thay thế vào. (b) `EVIDENCE` khai ref sao lưu *\"không kích hoạt lượt CI nào\"* suy từ cấu hình; `ci.yml` còn khai **`workflow_dispatch`**, nên đọc cấu hình chỉ chứng minh **đẩy trực tiếp** không khớp `push.branches` — không chứng minh ref ấy chưa từng chạy tay. **HỒ SƠ ĐÓNG BĂNG:** verdict và biên nhận lượt 6–11 vào kho **sau khi vòng lặp kết thúc**, nên **chúng CHƯA qua cross-review** — không còn lượt nào sau lượt 11 để soi. Cùng tình huống #490/#495 mà kho đã chấp nhận; nói ra để không ai nhận nhầm. **ATTESTATION — khối runtime, `tuan_thu_cam_cua_reviewer` và `github_submitter_identity`.** | `8de21bee` | 17747 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    892,
+    "| [`pr497-review-8-codex-verdict.md`](pr497-review-8-codex-verdict.md) | [`.receipt.yaml`](pr497-review-8-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **8** của PR #497, head `c912945c`, khác nền (`codex`; `model_yeu_cau` **`gpt-6-astra`**, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **824 s**). **P1 0 · P2 2 · P3 0.** **Nội dung gốc §1/§2, chú thích `tong_hop` và manifest KHÔNG có sai mới** — lần đầu reviewer khai thẳng điều đó. Hai finding đều ở hồ sơ và gói. (a) Chú thích biên nhận lượt 4 còn khai `nam_finding` *\"chiếm 45 dòng\"*, đo thật **50** — và nó **sống sót qua lượt 7 vì phép quét của điều phối dùng mẫu chỉ bắt số BA CHỮ SỐ**. (b) Gói khai *\"sau fetch mù = 0\"* trong khi **mirror dựng TRƯỚC lần fetch**: thiếu `claude/land-500-bookkeeping`, thừa `pr487-merge`, một ref chung **lệch OID** — gói tự mâu thuẫn với tệp ref thô giao kèm nó. Vá ở **script dựng gói**, không ở `EVIDENCE`: nay fetch trước → fail-close `rc=3` nếu còn ref mù → mới dựng mirror → tự xuất ba số `mirror_vs_raw_THIEU/THUA/LECH_OID`. **HỒ SƠ ĐÓNG BĂNG:** verdict và biên nhận lượt 6–11 vào kho **sau khi vòng lặp kết thúc**, nên **chúng CHƯA qua cross-review** — không còn lượt nào sau lượt 11 để soi. Cùng tình huống #490/#495 mà kho đã chấp nhận; nói ra để không ai nhận nhầm. **ATTESTATION — khối runtime, `tuan_thu_cam_cua_reviewer` và `github_submitter_identity`.** | `c912945c` | 17847 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    893,
+    "| [`pr497-review-7-codex-verdict.md`](pr497-review-7-codex-verdict.md) | [`.receipt.yaml`](pr497-review-7-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **7** của PR #497, head `df09f3ee`, khác nền (`codex`; `model_yeu_cau` **`gpt-6-astra`**, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **698 s**). **P1 0 · P2 1 · P3 0.** Một finding: §3 ghi *\"biên nhận lượt 5 … NGẮN, **143** dòng\"* trong khi tệp có **149**. Reviewer thêm một chỗ sắc hơn: neo `3c82ae3` là neo blob của **verdict**, mà tại commit đó biên nhận lượt 5 **chưa tồn tại** — nên cái neo ấy không biến `143` thành phép đo hợp lệ của biên nhận. Vá bằng **xoá** cụm số, đúng chính sách đã áp sau lượt 6. **HỒ SƠ ĐÓNG BĂNG:** verdict và biên nhận lượt 6–11 vào kho **sau khi vòng lặp kết thúc**, nên **chúng CHƯA qua cross-review** — không còn lượt nào sau lượt 11 để soi. Cùng tình huống #490/#495 mà kho đã chấp nhận; nói ra để không ai nhận nhầm. **ATTESTATION — khối runtime, `tuan_thu_cam_cua_reviewer` và `github_submitter_identity`.** | `df09f3ee` | 15483 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    894,
+    "| [`pr497-review-6-codex-verdict.md`](pr497-review-6-codex-verdict.md) | [`.receipt.yaml`](pr497-review-6-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **6** của PR #497, head `e27d8396`, khác nền (`codex`; `model_yeu_cau` **`gpt-6-astra`**, `model_da_chay` **KHÔNG ĐO ĐƯỢC**; **853 s**). **P1 0 · P2 3 · P3 0.** **LƯỢT ĐẦU TIÊN SAU KHI ĐÓNG BĂNG HỒ SƠ** — số finding rơi **8 → 3**, và **không cái nào là lời khai mới**: cả ba là *bản sao còn sót* sau khi bản gốc đã sửa. (1) `EVIDENCE` gộp `golden-test` vào cụm *\"(đều `--strict`)\"* trong khi lệnh ấy **không nhận** cờ đó (`rc=2`, *unrecognized arguments*). (2) Bảng `0/2 · 5/7 · 4/6 · 5/5` còn sống ở chú thích biên nhận lượt 4 và hàng mục lục **sau khi §4 đã xoá bản gốc**. (3) Phép so số dòng biên nhận và câu *\"cả lớp rủi ro chết theo kiến trúc\"* vẫn còn ở §4 — **xoá hẳn**, vì con số ấy trôi theo từng commit (`253/149` → `260/149` → `273/165`, ba lần viết ba cặp số). **HỒ SƠ ĐÓNG BĂNG:** verdict và biên nhận lượt 6–11 vào kho **sau khi vòng lặp kết thúc**, nên **chúng CHƯA qua cross-review** — không còn lượt nào sau lượt 11 để soi. Cùng tình huống #490/#495 mà kho đã chấp nhận; nói ra để không ai nhận nhầm. **ATTESTATION — khối runtime, `tuan_thu_cam_cua_reviewer` và `github_submitter_identity`.** | `e27d8396` | 23791 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    899,
+    "| [`pr497-review-1-codex-verdict.md`](pr497-review-1-codex-verdict.md) | [`.receipt.yaml`](pr497-review-1-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **1** của PR #497, head `e8267301`, khác nền (`codex`; `model_yeu_cau` **`gpt-6-astra`**, `model_da_chay` **KHÔNG ĐO ĐƯỢC** — `codex` không phát `modelUsage`; **878 s**, chết **1** lần vì websocket rồi chạy trọn ở lần hai). *(**ĐÍNH CHÍNH:** bản đầu của hàng này liệt `gpt-6-astra` như danh tính LƯỢT CHẠY, trong khi biên nhận chỉ biết model ĐƯỢC YÊU CẦU — cross-review lượt 2 chấm đúng chỗ đó (P2). Cùng cảnh báo `MODEL-YEU-CAU-khac-MODEL-DA-PHUC-VU` đã có ở hai hàng khác của bảng này.)* **P1 0 · P2 1 · P3 1** — đếm bằng `grep -cE '^### .*\\[Pn\\]'` trên chính tệp verdict, KHÔNG đọc lời tóm tắt. **LƯỢT TIỀN KIỂM, không phải trả nợ:** cả hai finding đã vá TRƯỚC khi PR land, khác hẳn lượt 7 của #490. Reviewer chấm ba bản vá của lượt trước và **KHÔNG cho cả ba đều đạt**: `chu-packet-sai-tham-quyen` và `quet-so-hieu-r-doc-bo-dem-cuc-bo` **ĐÃ VÁ THẬT**, còn `hai-loi-khai-thieu-nhan-va-sai-co-trang` **VÁ HỜ** — các số MỚI thay vào (`128` Issue mở, `total_count: 101`, *bốn Issue*, `#498`) vẫn đứng như sự thật trần, trái chính lời hứa dán nhãn mọi số GitHub tại chỗ. **Định danh CÂY khớp — và CHỈ thế:** verdict khai `tree 67df2efa…`, đo lại `git rev-parse e826730^{tree}` ⇒ **cùng OID**. **KHÔNG** xác thực hành vi đọc — xem hàng lượt 2. **13 ca đột biến, báo cả hai chiều:** `if chi is None` → `if False` làm `t13` `rc=0 → rc=1` (cổng CÓ răng), còn **5/5** đột biến LỜI KHAI (128→129, 37→36, đổi cha merge, *xuất xứ*→*chủ*, mù 1→0) đều `rc=0` ở doc-claims lẫn release-verify sau khi tái sinh manifest (cổng KHÔNG có răng với ngữ nghĩa) — và reviewer nói thẳng **không** biến sự sống sót ấy thành yêu cầu xây cổng mới. **28** hàng bảng đo chứa nguyên văn nhãn KHÔNG ĐO ĐƯỢC — đếm CƠ HỌC (cắt từ `## BẢNG ĐO` tới `**Đột biến và phép thử`, đếm dòng bắt đầu bằng `|` có chứa chuỗi ấy), và con số này gồm CẢ giới hạn ngoài GitHub. *(**ĐÍNH CHÍNH:** bản đầu ghi **17** *\"cho phía GitHub\"* mà không kèm danh sách hàng lẫn tiêu chí chọn, nên không ai suy lại được đã loại những hàng nào; cross-review lượt 2 chấm đúng chỗ đó (P2). Một con số phân loại không kèm quy tắc phân loại thì không phải phép đo — nó chỉ trông giống.)* Reviewer KHÔNG tự chứng nhận `landed`. **ATTESTATION — toàn bộ khối runtime** (878 s, số lần chết, mã thoát, băm stdout/stderr) đọc từ `run.json` **ngoài kho**; chỉ băm/byte/dòng tệp verdict, `reviewed_sha`, `tree`, số tiêu đề finding và `evidence_url` là ĐO ĐƯỢC. | `e8267301` | 28955 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    906,
+    "| [`pr490-review-7-codex-verdict.md`](pr490-review-7-codex-verdict.md) | [`.receipt.yaml`](pr490-review-7-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **7**, LƯỢT CUỐI của PR #490, head `01e7f77d`, khác nền (`codex`, `gpt-6-astra`, xhigh, **1 336 s**, chạy trọn ngay lần đầu). **P1 0 · P2 0 · P3 1.** **LƯỢT ĐÓNG LỚP LỖI LẶP NĂM LƯỢT** — nguyên văn: *\"Hai vế P3 lượt 6 đã đóng thật. Các kết quả của **8/8 lệnh** được khai đều tái chạy khớp.\"* Slug `van-xuoi-do-duoc-van-vuot-nguon` — bị chấm ở **năm** lượt **1 · 2 · 3 · 4 · 6** — không còn. (**ĐÍNH CHÍNH:** bản đầu của hàng này và của biên nhận ghi *\"từ lượt 2 tới lượt 6\"*, **sai ở CẢ HAI đầu**: bỏ sót lượt 1, thêm nhầm lượt 5 — lượt 5 ghi `ĐÃ VÁ THẬT`, **0/0** tiêu đề finding. Tổng *\"năm lượt\"* đúng ở cả hai bản nên câu văn tự nhất quán và không lộ ra khi đọc; chỉ phép đếm tiêu đề từng tệp mới thấy. Verdict lượt 7 đã đính chính ở dòng 27 và điều phối vẫn chép lại phạm vi cũ từ prompt của chính mình.) Thứ thoát khỏi vòng lặp là **đổi cách giao việc ở lượt 4** — kiểm kê vét cạn thay vì tìm finding — chứ không phải một bản vá nào. **Ba câu điều phối TỰ ĐẶT đều có đáp án, một câu bác luận điểm của chính điều phối**: chốt *\"8 và 31 trả lời hai câu khác nhau\"* **không** phải cách né tỉ lệ độ phủ (reviewer tự đọc **40/40** bước YAML, chạy lại **8/8** lệnh); vá **9/9** hàng mục lục thay vì 5 **không** phải scope creep (*\"sửa đầy đủ các bản lặp của finding\"*, **9/9** verdict lịch sử giữ nguyên hash); và **0** giá trị đo sai mới trong 1 858 dòng thêm (**27/27** nhóm ngữ nghĩa, **1 858/1 858** dòng ánh xạ, **35/35** phép đối chiếu trường JSON khớp). **P3 còn lại là lỗi MỚI và HẸP của điều phối** — `script-do-luot6-khong-co-duong-tai-lap-trong-kho` — **đã vá**, xem hàng lượt 6. **Verdict và biên nhận này vào kho SAU khi #490 merge: đây là TRẢ NỢ, không phải tiền kiểm.** **ATTESTATION — toàn bộ khối runtime**: thời lượng, *chạy trọn ngay lần đầu*, model và effort đều đọc từ `run.json` **ngoài kho**; không có log gốc để xác thực. Chỉ số Git, băm, byte và số tiêu đề đếm được là ĐO ĐƯỢC. | `01e7f77d` | 26348 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    907,
+    "| [`pr490-review-6-codex-verdict.md`](pr490-review-6-codex-verdict.md) | [`.receipt.yaml`](pr490-review-6-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **6** của PR #490, head `13ba87d8`, khác nền (`codex`, `gpt-6-astra`, xhigh, **1 442 s**, chạy trọn ngay lần đầu). **P1 0 · P2 0 · P3 1.** **NĂM BIÊN NHẬN SINH BẰNG SCRIPT — mọi trường neo ĐÚNG**: reviewer đọc byte verdict từ cây, đếm tiêu đề bằng regex, tra `git log --all --diff-filter=A` từng đường dẫn ⇒ **1/1 commit** thêm tệp mỗi cái, **5/5 blob** nguyên byte tại head, URL khớp cả SHA lẫn đường dẫn. Bản vá `t27` hoạt động thật. **P3 còn lại trả lời đúng câu điều phối tự đặt** — *chẩn đoán \"tập cổng tại chỗ thiếu `lease_publish`\" có đủ không?* — và câu trả lời BẤT LỢI: **không đủ**, điều phối lặp lại chính lỗi ấy ở commit kế khi khai *\"Cổng tại chỗ, ĐỦ BỘ\"*. Reviewer phân loại **40 bước = 8 setup + 31 cổng + 1 upload**, commit message nêu **2/31**. Vế thứ hai: các hàng mục lục đưa thời lượng ra chỗ người đọc tra cứu mà bỏ mất giới hạn nguồn — **đã vá ở 9/9 hàng**. Reviewer nói rõ vì sao không nâng mức: trường neo/hash/severity đều đúng, `t27` chạy được, và *\"không phải một lỗi kỹ thuật nặng hơn bị hạ mức để đạt approve\"*. **ĐÍNH CHÍNH (lượt 7 chấm P3):** commit `2f783bc` giới thiệu `do-static.py` trong [`pr490-review-6-phep-do/`](pr490-review-6-phep-do/) là *\"chạy lại được\"* — **SAI ở ba vế độc lập**: đường dẫn (`R = P.parent/'cay-kho'` giải ra `ops/reviews/cay-kho`, không tồn tại) · đầu vào (đòi manifest/ref TSV của gói lượt 6 + hai tệp không nhập kho) · đầu ra (chỉ sinh `ci-steps.json`, **không** sinh `ci-comparison.json`). Reviewer chạy bản **nguyên byte** ⇒ `rc=1`, `FileNotFoundError` **trước phép đo đầu tiên**. Hai tệp JSON vẫn **đối chiếu độc lập được** (đọc `ci.yml` + commit message) nên con số **40 = 8 + 31 + 1** đứng vững; nhưng **đừng cố chạy script**. Chi tiết: khoá `DINH_CHINH_do_static_py_KHONG_chay_lai_duoc_tu_kho` trong biên nhận. **ATTESTATION — toàn bộ khối runtime**: thời lượng, *chạy trọn ngay lần đầu*, model và effort đều đọc từ `run.json` **ngoài kho**; không có log gốc để xác thực. Chỉ số Git, băm, byte và số tiêu đề đếm được là ĐO ĐƯỢC. | `13ba87d8` | 31520 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    908,
+    "| [`pr490-review-5-codex-verdict.md`](pr490-review-5-codex-verdict.md) | [`.receipt.yaml`](pr490-review-5-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`approve`** · lượt **5** của PR #490 (land evidence cho #489), head `dccce0a5`, khác nền (`codex`, `gpt-6-astra`, xhigh, **895 s**, chạy trọn ngay lần đầu). **P1 0 · P2 0 · P3 0** — verdict SẠCH đầu tiên sau năm lượt. **LỚP LỖI LẶP 4 LƯỢT ĐÃ ĐÓNG**: slug `van-xuoi-do-duoc-van-vuot-nguon` nhận nhãn **ĐÃ VÁ THẬT** cho cả lớp, kiểm đủ **3/3 vị trí** cùng mọi bản lặp trong ledger. Phép kiểm quyết định của reviewer: so **ĐỐI TƯỢNG** của trạng thái tiền/hậu kiểm · đếm lại **đúng đầu vào** của bảng · kiểm tập **literal/AST** · rà lại **95/95 hàng audit**. Nó cũng trả lời câu hỏi tôi đặt thẳng — *đổi đối tượng của `trang_thai` là đóng lỗi hay đổi nhãn để né?*: **đóng lỗi**, vì tên mục, trường giải thích đối tượng và lời đính chính **cùng đổi**, và tiền đề nhãn/dispatch chỉ còn trong phần trích lời đã rút. Và *`he_qua_do_duoc` sau khi thu hẹp có thành câu rỗng không?*: **không** — nó vẫn cho một kết quả **tái lập và có thể bị bác** (**2/2** tệp Markdown khớp literal, **17/17** lệnh con AST, **2/2** chuỗi mô tả chứa `landed`). Câu đáng nhớ nhất của lượt: *\"việc làm theo gợi ý reviewer cũ TỰ NÓ không được dùng làm bằng chứng đúng\"*. **`approve` KHÔNG phủ head hiện tại** — xem `khong_phu_head_hien_tai` trong biên nhận. **ĐÍNH CHÍNH:** commit `13ba87d` khai *\"Cổng tại chỗ, ĐỦ BỘ\"* rồi liệt kê 6 cổng — SAI. Reviewer phân loại từng bước: **40 bước = 8 setup + 31 CỔNG + 1 upload**, và commit message chỉ nêu **2/31** bước cổng. Danh sách hai chiều (có bằng chứng / chưa có) ở `dinh_chinh_loi_khai_DU_BO_trong_commit_13ba87d` trong biên nhận — *chưa có bằng chứng đã chạy* KHÔNG phải *đã không chạy*. **ATTESTATION — toàn bộ khối runtime**: thời lượng, *chạy trọn ngay lần đầu*, model và effort đều đọc từ `run.json` **ngoài kho**; không có log gốc để xác thực. Chỉ số Git, băm, byte và số tiêu đề đếm được là ĐO ĐƯỢC. | `dccce0a5` | 23633 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    909,
+    "| [`pr490-review-4-codex-verdict.md`](pr490-review-4-codex-verdict.md) | [`.receipt.yaml`](pr490-review-4-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **4** của PR #490 (land evidence cho #489), head `c42fc74c`, khác nền (`codex`, `gpt-6-astra`, xhigh, **1243 s**, chạy trọn ngay lần đầu). **P1 0 · P2 0 · P3 1.** **KIỂM KÊ VÉT CẠN** thay vì tìm thêm finding — đổi cách giao việc sau BA lượt cùng một slug. Bảng 95 hàng nay ở [`pr490-review-4-phep-do/`](pr490-review-4-phep-do/): mỗi mệnh đề kèm nguồn tái lập hoặc *KHÔNG CÓ*; `coverage.json` chứng minh bao phủ **214/214** scalar · **225/225** khoá · **27/27** comment · **0** bỏ sót. Phương pháp VÀ giới hạn do reviewer tự khai (`yaml.compose` đệ quy; span `ScalarToken` tách comment thật khỏi `#489` trong prose; bao phủ CÚ PHÁP thì bảo đảm, tách/hiểu mệnh đề là audit ngữ nghĩa). XÁC NHẬN hai bản vá lượt 3 đúng: **8/8** tổ hợp boolean của `matrix.os`, và **3/5 neo** ngoài base tái đo khớp. Ba chỗ còn lại: (1) MÂU THUẪN NỘI BỘ — mục `CI Windows` đặt `not_run` dựng trên chính lời khai lịch sử mà khối bên cạnh khai KHÔNG ĐO ĐƯỢC, và biến *chưa biết* thành *không chạy*; (2) *0 lá cắt* không tái lập được vì thiếu TSV gốc; (3) *KHÔNG cổng nào đỏ* rộng hơn phép quét literal. **ATTESTATION — toàn bộ khối runtime**: thời lượng, *chạy trọn ngay lần đầu*, model và effort đều đọc từ `run.json` **ngoài kho**; không có log gốc để xác thực. Chỉ số Git, băm, byte và số tiêu đề đếm được là ĐO ĐƯỢC. | `c42fc74c` | 56281 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    910,
+    "| [`pr490-review-3-codex-verdict.md`](pr490-review-3-codex-verdict.md) | [`.receipt.yaml`](pr490-review-3-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **3** của PR #490 (land evidence cho #489), head `f7872ac6`, khác nền (`codex`, `gpt-6-astra`, xhigh, **1128 s**, chạy trọn ngay lần đầu). **P1 0 · P2 0 · P3 1.** Tìm ra bằng cách quét TOÀN TỆP: `vi_sao_MERGE_chu_khong_SQUASH` khai *squash phá cả năm neo* — SAI. `merge-base --is-ancestor` trên cả 5: **2/5** neo ĐÃ là tổ tiên của base `f4d74fe`, **3/5** chưa. Squash commit vẫn có base làm cha nên giữ mọi tổ tiên của cha ⇒ hai neo đầu không thể mất. Lỗi là ĐẾM SAI ĐỐI TƯỢNG: lấy số receipt ĐỔI thay cho số neo MỚI. Kèm vế Windows: đổi *đo* thành *lên lịch* KHÔNG đủ — câu vẫn khẳng định thứ tự ĐẦU TIÊN và vẫn khai nhãn/dispatch như sự kiện đã biết, ngay sau chữ ĐO ĐƯỢC. **ATTESTATION — toàn bộ khối runtime**: thời lượng, *chạy trọn ngay lần đầu*, model và effort đều đọc từ `run.json` **ngoài kho**; không có log gốc để xác thực. Chỉ số Git, băm, byte và số tiêu đề đếm được là ĐO ĐƯỢC. | `f7872ac6` | 31388 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    911,
+    "| [`pr490-review-2-codex-verdict.md`](pr490-review-2-codex-verdict.md) | [`.receipt.yaml`](pr490-review-2-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **2** của PR #490 (land evidence cho #489), head `63c639ac`, khác nền (`codex`, `gpt-6-astra`, xhigh, **954 s**, chạy trọn ngay lần đầu). **P1 0 · P2 0 · P3 1.** **17/17 mapping** từng thiếu `trang_thai` nay đều có; reviewer đo lại và tách rõ các tập đếm (21/21 mục cổng cấp ngoài · 18/18 mapping kết quả · 22/22 nếu tính cả mục chỉ có lý do) — trộn chúng vào một số là cách một câu đúng thành câu sai. **Câu hỏi ngược có đáp án ĐO ĐƯỢC**: **10/10** mục `DAT_DO_LAI_CUC_BO` và **4/4** mục `DAT_DO_GIT` đều có phép đo dương độc lập; không mục nào gán quá mạnh, cũng không mục nào hạ quá tay. Finding còn lại có HAI vế và bản vá chỉ đóng một. **ATTESTATION — toàn bộ khối runtime**: thời lượng, *chạy trọn ngay lần đầu*, model và effort đều đọc từ `run.json` **ngoài kho**; không có log gốc để xác thực. Chỉ số Git, băm, byte và số tiêu đề đếm được là ĐO ĐƯỢC. | `63c639ac` | 26633 |"
+  ],
+  [
+    "ops/reviews/README.md",
+    912,
+    "| [`pr490-review-1-codex-verdict.md`](pr490-review-1-codex-verdict.md) | [`.receipt.yaml`](pr490-review-1-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **1** của PR #490 (land evidence cho #489), head `9238606b`, khác nền (`codex`, `gpt-6-astra`, xhigh, **1213 s**, chạy trọn ngay lần đầu). **P1 0 · P2 1 · P3 3.** Lượt kiểm chính **5 finding của Codex connector** mà điều phối đã chấp nhận: **3 ĐÃ VÁ THẬT · 1 VÁ SINH LỖI MỚI · 1 VÁ HỜ**. P2 `ket-qua-con-thieu-trang-thai` là lỗi TỰ MÂU THUẪN: công bố quy ước *mục mang `ket_qua` bị đọc thành cổng đã đạt* rồi chỉ đặt `trang_thai` cho ĐÚNG HAI mục bị chấm, để **17** mục còn lại mang `ket_qua` trần. **Reviewer TỰ QUÉT DOCTRINE — 76/76 tệp dưới `docs/`** — và xác nhận KHÔNG câu nào buộc hồ sơ evidence sinh PR kế nhiệm; nó phân biệt đúng `ADR-0027:15` (draft land PR **của Mission**) với PR kế nhiệm **cho bản ghi evidence**. **ATTESTATION — toàn bộ khối runtime**: thời lượng, *chạy trọn ngay lần đầu*, model và effort đều đọc từ `run.json` **ngoài kho**; không có log gốc để xác thực. Chỉ số Git, băm, byte và số tiêu đề đếm được là ĐO ĐƯỢC. | `9238606b` | 29710 |"
+  ]
+]

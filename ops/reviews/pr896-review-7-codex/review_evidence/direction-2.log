@@ -1,0 +1,30 @@
+diff.patch: byte_match=True
+numstat.txt: byte_match=True
+diff-pr947.patch: byte_match=True
+numstat-pr947.txt: byte_match=True
+hint_paths=7 apply_rc=0
+patching file ops/land/pr832-wp831-land-evidence.yaml
+patching file ops/land/pr848-wp744-land-evidence.yaml
+patching file ops/land/pr862-wp748-r21-land-evidence.yaml
+patching file ops/reviews/README.md
+patching file ops/reviews/pr896-review-6-legacy-caveats.yaml
+patching file ops/reviews/wp461-review-1-codex-verdict.receipt.yaml
+patching file ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml
+byte_for_byte_matches=6/7
+ops/land/pr832-wp831-land-evidence.yaml
+ops/land/pr848-wp744-land-evidence.yaml
+ops/land/pr862-wp748-r21-land-evidence.yaml
+ops/reviews/pr896-review-6-legacy-caveats.yaml
+ops/reviews/wp461-review-1-codex-verdict.receipt.yaml
+ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml
+README delta beyond hint: 6 added/removed lines
++| `pr896-review-6-codex-verdict.md` | `HINT-LUOT6-AP-CUNG-COMMIT-GHI-SO` | Verdict lich su tren 22382d8 la changes_requested 2 P1. HINT.patch luot 6 (7 tep) duoc ap NGUYEN (--fuzz=0) trong CHINH commit ghi so bien nhan nay, theo yeu cau chu kho "va cho toi khi het P1, P2, P3". Can verdict moi tren exact SHA ung vien; khong doi ket qua hay byte verdict lich su. |
++| `pr896-review-6-codex-verdict.md` | `LAN-CHAY-DAU-CHET-VI-MAY-CHU-QUA-TAI` | Run c0fa33fa (cung prompt, cung head) ma_thoat 1 sau 349.795 s: transcript codex ghi server_overloaded "Selected model is at capacity". VERDICT.partial.md chi co dong dang_lam + mot phep do t26; KHONG duoc tinh la verdict. Hien vat o luot-hong-c0fa33fa/. |
++| `pr896-review-6-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong; phien ghi so do sau luot: HEAD 22382d8, git status rong. |
++| `pr896-review-6-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | Script/bang chung cua reviewer (review_evidence/) tham chieu duong dan tuyet doi cua sandbox phien; tai lap can dung lai mirror tai 22382d8. |
++| `pr896-review-6-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | diff.patch, diff-pr947.patch va review_evidence/status-inventory.json (>500 KB) KHONG vao kho; sha256/so byte o OMITTED.txt. |
++| [`pr896-review-6-codex-verdict.md`](pr896-review-6-codex-verdict.md) | [`.receipt.yaml`](pr896-review-6-codex-verdict.receipt.yaml) | KHONG_AP_DUNG (viec chu kho giao truc tiep, khong packet/lease) | `changes_requested` 0/2/0/0 tren `22382d8` (head PR #947, mang HINT luot 5) · `cross_reviewed` (codex CLI khac ho executor, `launcher.py run 7a86ed4f`, lan dau c0fa33fa chet vi may chu qua tai; model_phuc_vu DO_DUOC `gpt-6.1-sol` = do_may) · hai finding luot 5 DA DONG; con: P1 7 truong ancestry o 5 receipt khac, P1 3 verdict trong provenance land tu khai codex_service — HINT.patch luot 6 ap trong chinh commit ghi so bien nhan nay · ban phang nguyen byte cua `pr896-review-6-codex/VERDICT.md`. Chua merge. | `22382d8c` | 32324 |
+outside_hint_non_artifact=['ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml', 'ops/reviews/README.md']
+825dab1_paths=122 only_round6_artifacts=True
+verdict-cu/pr896-review-6-codex-VERDICT.md: stored_byte_match=True
+verdict-cu/pr896-review-6-codex-HINT.patch: stored_byte_match=True

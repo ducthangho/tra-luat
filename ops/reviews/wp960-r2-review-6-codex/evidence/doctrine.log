@@ -1,0 +1,4 @@
+$ /usr/bin/python3 -B .claude/dev/packet_loop.py doctrine-scan --root .
+doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine
+
+rc=0

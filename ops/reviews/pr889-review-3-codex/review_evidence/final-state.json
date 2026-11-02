@@ -1,0 +1,38 @@
+[
+  {
+    "command": "git rev-parse HEAD",
+    "rc": 0,
+    "stdout": "094e8d17ae4dfcf21dca63702c9262267bdc072c\n",
+    "stderr": ""
+  },
+  {
+    "command": "git rev-parse HEAD^{tree}",
+    "rc": 0,
+    "stdout": "55f5edf2f8601c976f390e8994193129a71203a1\n",
+    "stderr": ""
+  },
+  {
+    "command": "git status --porcelain=v1 --untracked-files=all",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": "git diff --exit-code",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": "git diff --cached --exit-code",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": "git diff --check e63961f 094e8d17ae4dfcf21dca63702c9262267bdc072c -- CLAUDE.md",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,120 @@
+{
+  "mode": "after",
+  "workers": 12,
+  "loops": 150,
+  "seconds": 45.541786,
+  "bad": 0,
+  "total": 1800,
+  "empty": 0,
+  "all_rc_zero": true,
+  "rows": [
+    {
+      "worker": 0,
+      "rc": 0,
+      "seconds": 45.344962,
+      "bad": 0,
+      "total": 150,
+      "empty": 0,
+      "states": []
+    },
+    {
+      "worker": 1,
+      "rc": 0,
+      "seconds": 45.493921,
+      "bad": 0,
+      "total": 150,
+      "empty": 0,
+      "states": []
+    },
+    {
+      "worker": 2,
+      "rc": 0,
+      "seconds": 45.445978,
+      "bad": 0,
+      "total": 150,
+      "empty": 0,
+      "states": []
+    },
+    {
+      "worker": 3,
+      "rc": 0,
+      "seconds": 45.459918,
+      "bad": 0,
+      "total": 150,
+      "empty": 0,
+      "states": []
+    },
+    {
+      "worker": 4,
+      "rc": 0,
+      "seconds": 45.423857,
+      "bad": 0,
+      "total": 150,
+      "empty": 0,
+      "states": []
+    },
+    {
+      "worker": 5,
+      "rc": 0,
+      "seconds": 45.495125,
+      "bad": 0,
+      "total": 150,
+      "empty": 0,
+      "states": []
+    },
+    {
+      "worker": 6,
+      "rc": 0,
+      "seconds": 45.50067,
+      "bad": 0,
+      "total": 150,
+      "empty": 0,
+      "states": []
+    },
+    {
+      "worker": 7,
+      "rc": 0,
+      "seconds": 45.51304,
+      "bad": 0,
+      "total": 150,
+      "empty": 0,
+      "states": []
+    },
+    {
+      "worker": 8,
+      "rc": 0,
+      "seconds": 45.500895,
+      "bad": 0,
+      "total": 150,
+      "empty": 0,
+      "states": []
+    },
+    {
+      "worker": 9,
+      "rc": 0,
+      "seconds": 45.450293,
+      "bad": 0,
+      "total": 150,
+      "empty": 0,
+      "states": []
+    },
+    {
+      "worker": 10,
+      "rc": 0,
+      "seconds": 45.380343,
+      "bad": 0,
+      "total": 150,
+      "empty": 0,
+      "states": []
+    },
+    {
+      "worker": 11,
+      "rc": 0,
+      "seconds": 45.490988,
+      "bad": 0,
+      "total": 150,
+      "empty": 0,
+      "states": []
+    }
+  ]
+}

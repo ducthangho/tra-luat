@@ -1,0 +1,14 @@
+$ python3 ../review_evidence/final_integrity_probe.py
+HEAD: 816f43988eb3012726120ad00166a989cc2b9af6
+tree: 3da0ce24590dfcf2e60805b2bef76687cdd64405
+git status --porcelain=v1 --untracked-files=all --ignored: rc=0; output=''; stderr=''
+git diff --exit-code: rc=0; output=''; stderr=''
+git diff --cached --exit-code: rc=0; output=''; stderr=''
+tracked blob content compared to HEAD: 5203 ; mismatches= ['scripts/deploy-package.cmd', 'scripts/don-nhanh.cmd', 'tl-setup.cmd']
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr2-pr896.9C93/cay-kho/../review_evidence/final_integrity_probe.py", line 35, in <module>
+    assert not failures
+           ^^^^^^^^^^^^
+AssertionError
+
+rc=1

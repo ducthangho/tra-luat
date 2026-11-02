@@ -1,0 +1,14 @@
+unresolved_land_surface_disagreements=2
+ops/land/pr823-wp802-provenance/verdict-luot5/wp802-g1-luot5-codex-verdict.md:6
+SELF: Reviewer OpenAI Codex; provider `openai_codex`, execution surface `codex_service` (API agent có shell), transport `machine`. Model ID/effort/session ID và danh tính executor thực chạy chưa có receipt độc lập: **KHÔNG ĐO ĐƯỢC**. Không suy surface từ lease, không tự cấp assurance hoặc quyền merge/land. Áp ngưỡng assignment: hết P0/P1 và mọi P2 đóng; P3 mở cần quyết định chủ kho.
+head=5c6c7a8ac0dc1b968cfda9d11065e5f3e8713456 hash=b6ee86d0c9e523dfbe87718d12b4d646464e7a8720e9789f071f4aa04d6e3f01 same_master=True same_prev=True
+LAND review.so_loi_goi_codex_cli=5; luot_cuoi.reviewer=codex qua launcher.py run, run b3d8a108 (thuat_lai — comment 6247520447: 1092s, ma_thoat 0; commit c25d0f8 ghi nham id run).; ket_qua=thuat_lai — approve, P0=0 P1=0 P2=0 P3=0 tren 5c6c7a8 = head merge.; saved_comment_round_and_head_match=True
+matching_run_records=0 surface_caveats=[]
+LIMITS: ['Log day du cac job CI KHONG luu; chi readback run/job/check-run.', 'gate-registry (ubuntu-latest) cua run 39112158391 chua xong luc ghi (ban dau); 19-10 da doc lai: xanh (readback-jobs-39112158391-cuoi.json).', 'stderr/transcript luot review Codex KHONG luu; model thuc chay KHONG_DO_DUOC.']
+ops/land/pr877-wp854-provenance/verdicts/wp854-g1-luot2-codex-verdict.md:11
+SELF: Provider: OpenAI/Codex, model_family=openai; công cụ shell Linux trong phiên agent (`codex_service`, transport=machine). Không tự xác nhận served-model, launcher attestation, GitHub submitter hoặc cấp receipt/assurance. Review theo hai trục spec và standards/security, lớp sensitive; không merge, push, deploy hoặc gọi LIVE.
+head=b952c106ba6bbf94699bda5fe5fb2f6d7f7256fb hash=612e86d854f4a7aad84a5f8e8d5986f58677e1b789d6ad3f176fefd1435cf277 same_master=True same_prev=True
+LAND khong_do_duoc.0=Model thuc phuc vu cac luot review KHONG_DO_DUOC (chi co header CLI gpt-6.1-sol xhigh).
+matching_run_records=0 surface_caveats=[]
+LIMITS: ['Model thuc phuc vu cac luot review KHONG_DO_DUOC (chi co header CLI gpt-6.1-sol xhigh).', 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).']
+No actual execution surface selected: CLI references are secondary declarations without matching run.json/transcript. The measured defect is missing qualification of contradictory surface declarations, not proved runtime falsity.

@@ -1,0 +1,50 @@
+$ (cd ops/reviews/wp1045-g1-codex-luot1 && sha256sum -c SHA256SUMS)
+./PROMPT.md: OK
+./VERDICT.md: OK
+./run/checkpoint.json: OK
+./run/run.json: OK
+./run/stderr.log: OK
+./run/stdout.log: OK
+EXIT=0
+
+$ (cd ops/reviews/wp1045-g1-codex-luot2 && sha256sum -c SHA256SUMS)
+./PROMPT.md: OK
+./VERDICT.md: OK
+./run/checkpoint.json: OK
+./run/run.json: OK
+./run/stderr.log: OK
+./run/stdout.log: OK
+EXIT=0
+
+$ (cd ops/reviews/wp1045-g1-codex-luot3 && sha256sum -c SHA256SUMS)
+./PROMPT.md: OK
+./VERDICT.md: OK
+./run/checkpoint.json: OK
+./run/run.json: OK
+./run/stderr.log: OK
+./run/stdout.log: OK
+EXIT=0
+
+$ (cd ops/land/pr1047-wp1045-provenance && sha256sum -c SHA256SUMS)
+./ai-dang-giu-sau-rut-han/luc-do.txt: OK
+./lease-wp1045-r1-g1.yaml.txt: OK
+./lease-wp1045-r1-g2-sau-rut-han-a430543.yaml.txt: OK
+./lease-wp1045-r1-g2.yaml.txt: OK
+./merge-va-diff.txt: OK
+./readback-comment-6529094452.json: OK
+./readback-comment-6531582115.json: OK
+./readback-jobs-41099144196.json: OK
+./readback-jobs-41099486628.json: OK
+./readback-jobs-41110458965.json: OK
+./readback-jobs-41145468254.json: OK
+./readback-jobs-41145468496.json: OK
+./readback-pr-1047.json: OK
+./readback-run-41099144196.json: OK
+./readback-run-41099486628.json: OK
+./readback-run-41110458965.json: OK
+./readback-run-41145468254.json: OK
+./readback-run-41145468496.json: OK
+./readback-run-41147719416.json: OK
+./readback-runs-b2d5f06-sau.json: OK
+./readback-runs-b2d5f06.json: OK
+EXIT=0

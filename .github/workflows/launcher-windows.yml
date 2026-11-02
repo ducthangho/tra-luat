@@ -51,7 +51,7 @@ jobs:
     if: >-
       github.event_name != 'pull_request'
       || contains(github.event.pull_request.labels.*.name, 'windows')
-    timeout-minutes: 40
+    timeout-minutes: 150
     steps:
       - name: Checkout LF
         run: |
@@ -82,20 +82,18 @@ jobs:
       # DA DO tren chinh PR nay: ca hai nen do o buoc `doctor` voi "KET LUAN: THIEU rg".
       # Do la chot MOI lam dung viec cua no, khong phai chot hong — nen chua bang cach
       # CAP DU CONG CU cho runner, dung bang cach ha chuan `doctor`.
-      - name: Cai ripgrep
+      - name: Install tool manifest dependencies
+        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+      - name: Install and verify test tools
         shell: bash
         run: |
           set -euo pipefail
-          if command -v rg >/dev/null 2>&1; then rg --version | head -1; exit 0; fi
-          if [ "${RUNNER_OS:-}" = "Windows" ]; then
-            choco install ripgrep -y --no-progress >/dev/null
-          else
-            sudo apt-get update -qq >/dev/null
-            sudo apt-get install -y -qq ripgrep >/dev/null
-          fi
-          # BANG CHUNG DUONG, khong tin "da cai xong": `command -v` la CO MAT,
-          # `rg --version` la CHAY DUOC.
-          rg --version | head -1
+          if [ "${RUNNER_OS:-}" = "Linux" ]; then sudo apt-get update -qq; fi
+          for tool in shellcheck rg actionlint; do
+            bash ops/cai_cong_cu.sh "$tool"
+          done
+      - name: Verify tool manifest and shellcheck canary
+        run: python ops/cong_cu.py kiem-tra --json
 
       - name: doctor
         run: python .claude/dev/launcher.py doctor

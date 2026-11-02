@@ -1,0 +1,25 @@
+# WP484 r4/g4 executor handoff — candidate ready for independent review
+
+Authority: issue #484 comments 5613270248, 5613357281; grant5613377652; successful admission receipt5613501112. Spec SHA25658612c42232678762ef76552bc3b004d398654ae94dfc303f2ecaee2dbd27b5b. Entry625ea2a2cbe37626970550c8c2b4800af214b5fb/treecb8161ee4a4fb36403db19514455332a916f24dd; product basec0a5cbe89a90588115262e1a2c3ac84cbd98be9e. Final head/tree are bound in the external review bundle after commit, avoiding self-reference.
+
+## Change and reason
+- Normalize Windows SDDL owner/ACE aliases through native SID conversion before comparing identities. RID500->LA was measured with native APIs. This fixes equivalent-identity rejection while retaining denial of Everyone, other users, unsupported ACEs and unsafe owners. Native fixture tests simulate token/descriptor contexts explicitly; no impersonation or real credentials.
+- Rename twelve new regression functions to the existing rNN naming contract; retain t116's independent registration count. Make the Windows POSIX-hook skip reason ASCII-safe, preventing cp1258 reporting from counting one case as both skip and failure.
+- Generate positive machine-void fixtures through the real launcher's pre-spawn OSError path, with a narrowly injected Popen denial after the executable probe. No post-spawn record is rewritten/re-signed to fake infrastructure evidence. The unknown-post-spawn negative control verifies no refund. Consumer implementation unchanged.
+- CI launcher installs/probes shellcheck, rg and pinned actionlint via existing repository scripts. Manifest dependencies are installed first; final manifest/canary probe runs in the next Actions step so GITHUB_PATH is effective. No test selection, skip rules, job permissions or runner matrix changed.
+
+## Measured evidence (external pr485-r3/G4_* files)
+- Official eight-tool manifest and blocking actionlint-shellcheck canary DAT on Windows and WSL. WSL uses /opt/tra-luat-test-venv/bin on PATH, not its older system jsonschema.
+- Targeted launcher CLI: Windows23 passed/4 skipped/0 failed, Linux26 passed/1 skipped/0 failed; both rc0. Includes credential storage/native Windows pin, malformed data, environment scrub, refresh/rollback/resume, registration, and native SID identity.
+- Additional SID neutral after adding the safe boolean runner identity marker:1/1 passed,rc0. Explicit cp1258 hook reporting:0 passed/1 intended skip/0 failures,rc0; POSIX hook behavior separately measured on Linux.
+- Related launcher mutants: Windows7/7 killed,rc0, intended assertion failures recorded. Linux4/4 measured killed,3 native-Windows mutants not measured,rc0. Two inherited anchor mutants2/2 killed on Windows,rc0.
+- Packet nonce:7/7 neutral cases passed on Windows and Linux; both surviving mutants void_bo_dot_nonce and void_bo_khop_nonce now killed, with different-family controls passing,rc0. Unknown post-spawn negative retains the content count.
+- Credential selftest on Windows portable Python3.12.10:14/14 neutral and14/14 mutants,rc0. Local3.13.1 baseline also passed before patch; this does not prove the runner identity, which remains for CI. Real symlink/O_NOFOLLOW kernel gaps are disclosed by the harness and not counted as native proof.
+- All packet-loop mutant anchors still apply; three changed Python files parse; actionlint and git diff --check passed. Existing SyntaxWarning in an unchanged mutation literal is not a test failure.
+
+## Boundaries and remaining work
+Current master advanced to072181157a27804e69deb35bb792a88c70ac31e3 during admission. Its A0 lease consumer retains two-way semantics and adds an empty-ledger guard; that exact canonical tool was used, all13 paths scanned, G4 sole holder, schema and GitHub layers passed. No rebase/merge of master. Administrative G3 closure preserves every old field and its accepted journal/history.
+
+Global content used3/3 (this is G4's only attempt). One Claude call remains, at most20 minutes, >=claude-fable-5/max. The lease's counters are a pre-review snapshot; actual review run/receipt/journal records consumption afterwards. Run deadline2026-09-10T06:20:00Z; lease expiry2026-09-10T08:53:24Z. Independent review NOT_RUN at handoff creation. Full final CI NOT_RUN; old G3 CI remains failed. No cross_approved/green gate/merge claim. Reviewer source read-only, prepared scratch and inert tests only. No merge, land, deploy, LIVE, guard bypass, credential disclosure, counter reset or further review call without owner rescue.
+
+Continuation authority https://github.com/ducthangho/tra-luat/issues/484#issuecomment-5614142416. New run deadline2026-09-10T07:52:58Z; lease expiry unchanged. New spec SHA256 e86a6a8cb5e2165d368be71d6a41b6a2bbdc0f9b1f653cafd627adf8c69072ef. Fresh ownership scan all13paths passed with soleG4 holder. PR500 subsequent delta is bookkeeping only; master and G4 entry head unchanged. Owner has conditionally authorized merge/land after independent approve and exact-SHA green gates; earlier prohibitions remain historical, superseded only to this extent. Counters unchanged; review/CI still NOT_RUN before freeze.

@@ -1,0 +1,24 @@
+# do 2026-10-20T02:06:36Z sau git fetch --prune '+refs/heads/*:refs/remotes/origin/*' + git branch -f master origin/master
+# ls-remote --heads 517 ten; for-each-ref 517 ten; thieu 0 thua 0
+# origin/ops/wp744-r3-g3-lease = f85a4f77716a85cdcf3ac28c8ece2e8f5233027a
+== ops/specs/wp725-nlm-huong-dan-tai-lieu-r2.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp744-r1-g1-claude-windows-20261012	refs/remotes/origin/ops/wp744-r1-g1-lease:ops/leases/wp744-r1-g1-claude-windows.yaml
+HẾT_HẠN	wp744-r2-g2-antigravity-20261013	refs/remotes/origin/ops/wp744-r2-g2-lease:ops/leases/wp744-r2-g2-antigravity-windows.yaml
+HẾT_HẠN	wp744-r3-g3-claude	refs/remotes/origin/ops/wp744-r3-g3-lease:ops/leases/wp744-r3-g3-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/specs/wp726-nlm-script-phan-quyet-canary-r2.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp744-r1-g1-claude-windows-20261012	refs/remotes/origin/ops/wp744-r1-g1-lease:ops/leases/wp744-r1-g1-claude-windows.yaml
+HẾT_HẠN	wp744-r2-g2-antigravity-20261013	refs/remotes/origin/ops/wp744-r2-g2-lease:ops/leases/wp744-r2-g2-antigravity-windows.yaml
+HẾT_HẠN	wp744-r3-g3-claude	refs/remotes/origin/ops/wp744-r3-g3-lease:ops/leases/wp744-r3-g3-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/specs/wp727-nlm-refresh-va-goi-y-tl-gws-r2.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp744-r1-g1-claude-windows-20261012	refs/remotes/origin/ops/wp744-r1-g1-lease:ops/leases/wp744-r1-g1-claude-windows.yaml
+HẾT_HẠN	wp744-r2-g2-antigravity-20261013	refs/remotes/origin/ops/wp744-r2-g2-lease:ops/leases/wp744-r2-g2-antigravity-windows.yaml
+HẾT_HẠN	wp744-r3-g3-claude	refs/remotes/origin/ops/wp744-r3-g3-lease:ops/leases/wp744-r3-g3-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

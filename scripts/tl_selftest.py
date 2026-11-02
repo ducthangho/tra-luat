@@ -3978,8 +3978,11 @@ def run() -> int:
                       {"nlm_notebook_id": "", "nlm_status": "pushed", "nlm_source_id": "s5"},
                   ]) == {"NB-A": 2, "NB-B": 1}))
     # ───── KH1 III.2 — edit-skill: cổng assert-đếm (DRY, an toàn), offline ─────
+    import shutil as _shx
     import tempfile as _tfx
-    _esf = Path(_tfx.gettempdir()) / "_selftest_editskill.py"
+    # wp858 (L3): tên tệp CỐ ĐỊNH trong temp chung ⇒ hai selftest song song đỏ giả (#831) — thư mục riêng từng lượt.
+    _esd = Path(_tfx.mkdtemp(prefix="_selftest_editskill_"))
+    _esf = _esd / "_selftest_editskill.py"
     _editskill = False
     try:
         _esf.write_text("x = 1\ny = 2\n", encoding="utf-8")
@@ -3995,8 +3998,7 @@ def run() -> int:
     except Exception:
         _editskill = False
     finally:
-        try: _esf.unlink()
-        except Exception: pass
+        _shx.rmtree(_esd, ignore_errors=True)
     cases.append(("edit_skill_assert_count_gate_dry", _editskill))
     # ───── KH1 1.23.2 — nlm-orphans: pure _classify_nlm_sources (active / mismatch-live / unregistered), offline ─────
     _orph = _classify_nlm_sources(
@@ -4640,7 +4642,7 @@ def run() -> int:
     # ═══ v1.33.39 (log Cowork: stage cookie 'mới' [extracted_at tiến] mà NLM từ chối MỌI endpoint — cookie hết
     # hạn NHANH, chết cả local; stage cookie chết = Cowork kẹt vòng lặp) — r50_* ═══
     # cmd_nlm_auth_stage VERIFY LIVE (canary notebook_get, KHÔNG tin nlm login --check) TRƯỚC stage:
-    # dead+không-force → rc=4 TỪ CHỐI (KHÔNG upload); dead+--force → bỏ qua cổng, upload chạy; alive → stage.
+    # Every negative or uncertain canary blocks upload, including --force.
     _tg50 = _need_base("tl_gws")
     _o_files50, _o_alive50, _o_up50 = _tg50._nlm_auth_files, _tg50._nlm_auth_alive, _tg50._stage_enc_upload
     _o_tok50 = _os38.environ.get("TL_TOKEN")
@@ -4651,15 +4653,23 @@ def run() -> int:
         _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_uploaded50.append(fid) or (fid, True))
         _mkns50 = lambda force: argparse.Namespace(config=None, profile=None, refresh=False, folder=None,
                                                    cred_file_id="F50", new=False, force=force)
-        _tg50._nlm_auth_alive = lambda nb, timeout=30: (False, "AUTH_EXPIRED (test)")
+        _blocked50 = []
+        for _result50, _force50 in [((False, "AUTH_EXPIRED"), False),
+                                      ((False, "AUTH_EXPIRED"), True),
+                                      ((None, "NETWORK_FAILURE"), False),
+                                      ((None, "TIMEOUT"), False),
+                                      ((None, "INCONCLUSIVE"), False)]:
+            _tg50._nlm_auth_alive = lambda nb, timeout=30, result=_result50, **_kw50: result
+            with _hush():
+                _rc50 = _tg50.cmd_nlm_auth_stage(_mkns50(_force50))
+            _blocked50.append(_rc50 == 4 and len(_uploaded50) == 0)
+        def _raise50(nb, timeout=30, **_kw50):
+            raise TimeoutError("test")
+        _tg50._nlm_auth_alive = _raise50
         with _hush():
-            _rc50_dead = _tg50.cmd_nlm_auth_stage(_mkns50(False))
-        _refused = (_rc50_dead == 4 and _uploaded50 == [])
-        with _hush():
-            _rc50_force = _tg50.cmd_nlm_auth_stage(_mkns50(True))
-        _forced = (_rc50_force == 0 and _uploaded50 == ["F50"])
-        _uploaded50.clear()
-        _tg50._nlm_auth_alive = lambda nb, timeout=30: (True, "LIVE OK (test)")
+            _rc50_exception = _tg50.cmd_nlm_auth_stage(_mkns50(True))
+        _blocked50.append(_rc50_exception == 4 and len(_uploaded50) == 0)
+        _tg50._nlm_auth_alive = lambda nb, timeout=30, **_kw50: (True, "LIVE OK (test)")
         with _hush():
             _rc50_alive = _tg50.cmd_nlm_auth_stage(_mkns50(False))
         _allowed = (_rc50_alive == 0 and _uploaded50 == ["F50"])
@@ -4669,7 +4679,598 @@ def run() -> int:
             _os38.environ.pop("TL_TOKEN", None)
         else:
             _os38.environ["TL_TOKEN"] = _o_tok50
-    cases.append(("r50_nlm_stage_refuses_dead_cookie", _refused and _forced and _allowed))
+    cases.append(("wp710_nlm_stage_true_only_upload_count", all(_blocked50) and _allowed))
+
+    # [HINT reviewer — CHUA chay tren cay that; executor tu ap, tu do, tu chiu trach nhiem] lop: stage-nlm-ngoai-nlm-auth-stage-khong-qua-canary
+    # `secrets-set --nlm` (nlm_cred.enc public + bundle) va `secrets-stage` (bundle co nlm_auth) la DUONG stage cung artefact:
+    # canary chet / khong ket luan -> KHONG duoc dua nlm credential len Drive; canary song -> van stage (doi chung duong).
+    # Chi `nlm_cli._run` (subprocess) bi thay, canary THAT chay.
+    import argparse as _ap50
+    _tg50c = _tg50
+    import time as _tm50c
+    _nc50c = _tg50._imp("nlm_cli")      # đúng module mà `_nlm_auth_alive` gọi
+    _names50c = ("_master_key", "_secrets_fetch", "_secrets_upload", "_refresh_nlm_auth", "_nlm_auth_files",
+                 "_stage_enc_upload", "_gws_export_cred", "load_creds")
+    _o50c = {k: getattr(_tg50c, k) for k in _names50c}
+    _o50c_nc = (_nc50c._run, _nc50c.nlm_available, _tm50c.sleep)
+    _o_env50c = {k: _os38.environ.get(k) for k in ("TL_NOTEBOOK_ID", "TL_TOKEN")}
+    _store50c = _tg50c._imp("gws_cred_store")
+    _log50c = {"stage": [], "bundle": []}
+    _res50c = {}
+    try:
+        _os38.environ["TL_NOTEBOOK_ID"] = "NB-WP710-CANARY-0001"
+        _os38.environ["TL_TOKEN"] = _o_env50c["TL_TOKEN"] or "selftest-token"
+        _tg50c._master_key = lambda: "mk50c-wp1009-0123456789abcdefghij"
+        _tg50c._secrets_fetch = lambda a, fid: (_store50c.encrypt(json.dumps({"token": "t", "webappUrl": "u"}).encode(), "mk50c-wp1009-0123456789abcdefghij"), "file")
+        _tg50c._secrets_upload = lambda blob, folder, fid: (
+            _log50c["bundle"].append(json.loads(_store50c.decrypt(blob, "mk50c-wp1009-0123456789abcdefghij").decode())) or (fid, True))
+        _tg50c._refresh_nlm_auth = lambda: True
+        _tg50c._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50c._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_log50c["stage"].append(name) or (fid, True))
+        _tg50c._gws_export_cred = lambda: None
+        _tg50c.load_creds = lambda *a, **k: None
+        _nc50c.nlm_available = lambda: True
+        _tm50c.sleep = lambda s: None          # `_nlm_auth_alive` backoff 1.5s/3s: khong ngu that trong test
+        for _lab50c, _run50c, _want50c in [
+                ("chet", (1, "", "Error: Authentication expired"), False),
+                ("khong_ket_luan", (1, "", "Error: network connection failed"), False),
+                ("body_sai", (0, "{}", ""), False),
+                ("song", (0, json.dumps({"id": "NB-WP710-CANARY-0001", "title": "Canary", "sources": []}), ""), True)]:
+            _nc50c._run = lambda args, timeout=120, r=_run50c: r
+            for _cmd50c in ("secrets-set", "secrets-stage"):
+                _log50c["stage"].clear(); _log50c["bundle"].clear()
+                with _hush():
+                    if _cmd50c == "secrets-set":
+                        _tg50c.cmd_secrets_set(_ap50.Namespace(
+                            secrets_id="S50C", nlm=True, gas_token=None, webapp=None, gws=False, no_public=False,
+                            folder=None, config=None, profile=None, secrets_file=None, env=None))
+                    else:
+                        _tg50c.cmd_secrets_stage(_ap50.Namespace(
+                            config=None, profile=None, no_gws=True, no_nlm=False, folder=None, secrets_id=None))
+                _staged50c = ("nlm_cred.enc" in _log50c["stage"]) or any("nlm_auth" in b for b in _log50c["bundle"])
+                _res50c[(_lab50c, _cmd50c)] = (_staged50c == _want50c)
+    finally:
+        for _k50c, _v50c in _o50c.items():
+            setattr(_tg50c, _k50c, _v50c)
+        _nc50c._run, _nc50c.nlm_available, _tm50c.sleep = _o50c_nc
+        for _k50c, _v50c in _o_env50c.items():
+            if _v50c is None:
+                _os38.environ.pop(_k50c, None)
+            else:
+                _os38.environ[_k50c] = _v50c
+    cases.append(("wp710_nlm_secrets_set_stage_can_canary", bool(_res50c) and all(_res50c.values())))
+
+    # lop: stage-nlm-ngoai-nlm-auth-stage-khong-qua-canary
+    _store50d = _tg50._imp("gws_cred_store")
+    _o714a = {k: getattr(_tg50, k) for k in (
+        "_master_key", "load_creds", "_secrets_fetch", "_secrets_upload", "_nlm_auth_alive",
+        "_nlm_auth_files", "_refresh_nlm_auth", "_gws_export_cred")}
+    _env714a = dict(_os38.environ)
+    _up714a, _probe714a, _res714a = [], [], []
+    _bundle714a = {"webappUrl": "offline", "token": "offline-test-token", "nlm_auth": {"auth.json": "old-offline-jar"}}
+    def _alive714a(*a, **k):
+        _probe714a.append(True)
+        return None, "OFFLINE_INCONCLUSIVE"
+    try:
+        import tempfile as _tf714a
+        _os38.environ["TL_TOKEN"] = "offline-test-token"
+        _tg50._master_key = lambda: "offline-test-master-wp1009-0123456789abcdefghij"
+        _tg50.load_creds = lambda *a, **k: None
+        _tg50._nlm_auth_alive = _alive714a
+        _tg50._nlm_auth_files = lambda: {}
+        _tg50._refresh_nlm_auth = lambda: False
+        _tg50._gws_export_cred = lambda: None
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(
+            json.dumps(_bundle714a).encode(), "offline-test-master-wp1009-0123456789abcdefghij"), "file")
+        _tg50._secrets_upload = lambda blob, *a, **k: (_up714a.append(json.loads(
+            _store50d.decrypt(blob, "offline-test-master-wp1009-0123456789abcdefghij").decode())) or ("OFFLINE", True))
+        with _tf714a.TemporaryDirectory() as _td714a:
+            _cfg714a = _os38.path.join(_td714a, "config.json")
+            with open(_cfg714a, "w", encoding="utf-8") as _f714a:
+                json.dump(_bundle714a, _f714a)
+            for _route714a in ("preserved_remote", "config_nojar", "config_no_nlm", "default_nojar"):
+                _up714a.clear(); _probe714a.clear()
+                with _hush():
+                    if _route714a == "preserved_remote":
+                        _rc714a = _tg50.cmd_secrets_set(_ap50.Namespace(config=None, profile=None,
+                            secrets_id="OFFLINE", nlm=False, gas_token=None, webapp="offline-new", gws=False,
+                            no_public=True, folder=None, secrets_file=None, env=None))
+                    else:
+                        _rc714a = _tg50.cmd_secrets_stage(_ap50.Namespace(
+                            config=None if _route714a == "default_nojar" else _cfg714a, profile=None,
+                            no_gws=True, no_nlm=(_route714a == "config_no_nlm"), folder=None, secrets_id="OFFLINE"))
+                # --no-nlm may upload only after actually removing nlm_auth from the payload.
+                if _route714a == "config_no_nlm":
+                    _res714a.append(not any("nlm_auth" in b for b in _up714a) or bool(_probe714a))
+                else:
+                    _res714a.append(_rc714a != 0 and not _up714a)
+    finally:
+        for _k714a, _v714a in _o714a.items(): setattr(_tg50, _k714a, _v714a)
+        _os38.environ.clear(); _os38.environ.update(_env714a)
+    cases.append(("wp714_nlm_bundle_payload_has_no_unguarded_route", all(_res714a) and len(_res714a) == 4))
+
+    # [HINT reviewer — CHUA chay tren cay that; executor tu ap, tu do, tu chiu trach nhiem] lop: stage-canary-true-khi-than-rong-hoac-sai-id
+    # Canary THAT: `_nlm_auth_alive` + `nlm_cli.notebook_get` + `_run_json` chay NGUYEN BAN; chi lop subprocess `nlm_cli._run`
+    # bi thay. rc=0 nhung than khong-JSON / rong / sai-ID / khong tieu de KHONG duoc stage (Spec r4 #2); than dung -> stage 1 lan.
+    _nc50b = _tg50._imp("nlm_cli")
+    _o50b = (_nc50b._run, _nc50b.nlm_available, _tg50._nlm_auth_files, _tg50._stage_enc_upload)
+    _o_env50b = {k: _os38.environ.get(k) for k in ("TL_NOTEBOOK_ID", "TL_TOKEN")}
+    _up50b, _res50b = [], {}
+    _NB50B = "NB-WP710-CANARY-0001"
+    try:
+        _os38.environ["TL_NOTEBOOK_ID"] = _NB50B
+        _os38.environ["TL_TOKEN"] = _o_env50b["TL_TOKEN"] or "selftest-token"
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_up50b.append(fid) or (fid, True))
+        _nc50b.nlm_available = lambda: True
+        for _n50b, _out50b, _want50b in [
+                ("body_dung", json.dumps({"id": _NB50B, "title": "Canary", "sources": []}), 1),
+                ("mang_nhieu_notebook", json.dumps([
+                    {"id": _NB50B, "title": "Canary"}, {"id": "NB-OTHER-9999", "title": "Other"}]), 0),
+                ("mang_hai_notebook_dung", json.dumps([
+                    {"id": _NB50B, "title": "Canary"}, {"id": _NB50B, "title": "Canary"}]), 0),
+                ("hai_id_mau_thuan", json.dumps({"id": "NB-OTHER-9999", "notebook_id": _NB50B, "title": "Other"}), 0),
+                ("khong_phai_json", "not json at all", 0),
+                ("obj_rong", "{}", 0),
+                ("list_rong", "[]", 0),
+                ("stdout_rong", "", 0),
+                ("sai_id", json.dumps({"id": "NB-OTHER-9999", "title": "Other", "sources": []}), 0),
+                ("khong_tieu_de", json.dumps({"id": _NB50B}), 0)]:
+            _up50b.clear()
+            _nc50b._run = lambda args, timeout=120, out=_out50b: (0, out, "")
+            with _hush():
+                _rc50b = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(
+                    config=None, profile=None, refresh=False, folder=None, cred_file_id="F50B", new=False, force=False))
+            _res50b[_n50b] = (len(_up50b) == _want50b and (_rc50b == 0) == bool(_want50b))
+    finally:
+        _nc50b._run, _nc50b.nlm_available, _tg50._nlm_auth_files, _tg50._stage_enc_upload = _o50b
+        for _k50b, _v50b in _o_env50b.items():
+            if _v50b is None:
+                _os38.environ.pop(_k50b, None)
+            else:
+                _os38.environ[_k50b] = _v50b
+    cases.append(("wp710_nlm_stage_canary_doi_chieu_id_va_than", bool(_res50b) and all(_res50b.values())))
+
+    # lop: stage-error-output-leaks-credential
+    _store50d = _tg50._imp("gws_cred_store")
+    _nc714b = _tg50._imp("nlm_cli")
+    _o714b = {k: getattr(_tg50, k) for k in ("load_creds", "_nlm_auth_files", "_refresh_nlm_auth", "_master_key", "_stage_enc_upload", "_secrets_upload", "_secrets_fetch")}
+    _saved714b = (_nc714b._run, _nc714b.nlm_available, _tm50c.sleep)
+    _env714b = dict(_os38.environ)
+    _res714b, _up714b = [], []
+    _sentinel714b = "OFFLINE" + "_SECRET_SENTINEL_714"
+    try:
+        import contextlib as _cx714b, io as _io714b
+        _os38.environ["TL_TOKEN"] = "offline-test-token"
+        _tg50.load_creds = lambda *a, **k: None
+        _tg50._master_key = lambda: "offline-test-master-wp1009-0123456789abcdefghij"
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps({"token": "offline-test-token"}).encode(), "offline-test-master-wp1009-0123456789abcdefghij"), "file")
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._refresh_nlm_auth = lambda: False
+        _tg50._stage_enc_upload = lambda *a, **k: (_up714b.append(True) or ("OFFLINE", True))
+        _tg50._secrets_upload = lambda *a, **k: (_up714b.append(True) or ("OFFLINE", True))
+        _nc714b.nlm_available = lambda: True
+        _tm50c.sleep = lambda s: None
+        for _error714b in ("network connection failed ", "unknown error "):
+            _nc714b._run = lambda *a, e=_error714b, **k: (1, "", e + _sentinel714b)
+            for _fn714b in (_tg50.cmd_nlm_auth_stage, _tg50.cmd_secrets_set, _tg50.cmd_secrets_stage):
+                _up714b.clear(); _cap714b = _io714b.StringIO()
+                _ns714b = _ap50.Namespace(config=None, profile=None, refresh=False, folder=None,
+                    cred_file_id="OFFLINE", new=False, force=True, secrets_id="OFFLINE", nlm=True,
+                    gas_token=None, webapp=None, gws=False, no_public=False, no_gws=True, no_nlm=False,
+                    secrets_file=None, env=None)
+                with _cx714b.redirect_stdout(_cap714b), _cx714b.redirect_stderr(_cap714b):
+                    _rc714b = _fn714b(_ns714b)
+                _res714b.append(_rc714b == 4 and not _up714b and _sentinel714b not in _cap714b.getvalue())
+    finally:
+        for _k714b, _v714b in _o714b.items(): setattr(_tg50, _k714b, _v714b)
+        _nc714b._run, _nc714b.nlm_available, _tm50c.sleep = _saved714b
+        _os38.environ.clear(); _os38.environ.update(_env714b)
+    cases.append(("wp714_nlm_stage_refusal_does_not_print_child_secret", len(_res714b) == 6 and all(_res714b)))
+
+    # WP710 r4/g3 (cross-review PR #713, lớp P3 `ban-chup-credential-doc-truoc-canary`): ở 52f32db jar được đọc
+    # TRƯỚC canary nên bytes đem stage là trạng thái CHƯA được xác nhận. Ca này cho canary "ghi lại" jar (v2) rồi
+    # đòi bytes đã upload — giải mã ngược — ĐÚNG là v2, ở CẢ BA đường stage; kèm: cổng phải xin thân notebook
+    # (`require_notebook_body=True`) ở cả ba, không chỉ rc. Đột biến đọc-trước-canary hoặc bỏ cờ ⇒ ĐỎ.
+    _store50d = _tg50._imp("gws_cred_store")
+    _names50d = ("_nlm_auth_alive", "_nlm_auth_files", "_stage_enc_upload", "_master_key", "_secrets_fetch",
+                 "_secrets_upload", "_refresh_nlm_auth", "_gws_export_cred", "load_creds")
+    _o50d = {k: getattr(_tg50, k) for k in _names50d}
+    _o_env50d = {k: _os38.environ.get(k) for k in ("TL_TOKEN",)}
+    _st50d = {"jar": "v1-truoc-canary", "kw": [], "up": []}
+    _res50d = {}
+
+    def _alive50d(nb, timeout=30, **kw):
+        _st50d["kw"].append(kw.get("require_notebook_body") is True)
+        _st50d["jar"] = "v2-sau-canary"
+        return True, "LIVE OK (test)"
+    try:
+        _os38.environ["TL_TOKEN"] = "tok50d"
+        _tg50._nlm_auth_alive = _alive50d
+        _tg50._nlm_auth_files = lambda: {"auth.json": _st50d["jar"]}
+        _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (
+            _st50d["up"].append(json.loads(_store50d.decrypt(blob, "tok50d").decode())) or (fid, True))
+        _tg50._master_key = lambda: "mk50d-wp1009-0123456789abcdefghij"
+        _tg50._secrets_fetch = lambda a, fid: (_store50d.encrypt(json.dumps({"token": "tok50d"}).encode(), "mk50d-wp1009-0123456789abcdefghij"), "file")
+        _tg50._secrets_upload = lambda blob, folder, fid: (
+            _st50d["up"].append(json.loads(_store50d.decrypt(blob, "mk50d-wp1009-0123456789abcdefghij").decode()).get("nlm_auth")) or (fid, True))
+        _tg50._refresh_nlm_auth = lambda: True
+        _tg50._gws_export_cred = lambda: None
+        _tg50.load_creds = lambda *a, **k: None
+        for _cmd50d in ("nlm-auth-stage", "secrets-set", "secrets-stage"):
+            _st50d.update(jar="v1-truoc-canary", kw=[], up=[])
+            with _hush():
+                if _cmd50d == "nlm-auth-stage":
+                    _rc50d = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(
+                        config=None, profile=None, refresh=False, folder=None, cred_file_id="F50D", new=False, force=True))
+                elif _cmd50d == "secrets-set":
+                    _rc50d = _tg50.cmd_secrets_set(_ap50.Namespace(
+                        secrets_id="S50D", nlm=True, gas_token=None, webapp=None, gws=False, no_public=False,
+                        folder=None, config=None, profile=None, secrets_file=None, env=None))
+                else:
+                    _rc50d = _tg50.cmd_secrets_stage(_ap50.Namespace(
+                        config=None, profile=None, no_gws=True, no_nlm=False, folder=None, secrets_id="S50D"))
+            _res50d[_cmd50d] = (_rc50d == 0 and _st50d["kw"] == [True] and bool(_st50d["up"])
+                                and all(u == {"auth.json": "v2-sau-canary"} for u in _st50d["up"]))
+    finally:
+        for _k50d, _v50d in _o50d.items():
+            setattr(_tg50, _k50d, _v50d)
+        for _k50d, _v50d in _o_env50d.items():
+            if _v50d is None:
+                _os38.environ.pop(_k50d, None)
+            else:
+                _os38.environ[_k50d] = _v50d
+    cases.append(("wp710_nlm_stage_doc_credential_sau_canary_ca_ba_duong",
+                  len(_res50d) == 3 and all(_res50d.values())))
+
+    # lop: trusted-notebook-overwritten-by-stage-config
+    _o714c = {k: getattr(_tg50, k) for k in ("load_creds", "_nlm_auth_files", "_stage_enc_upload")}
+    _nc714c = _tg50._imp("nlm_cli")
+    _saved714c = (_nc714c._run, _nc714c.nlm_available)
+    _env714c = dict(_os38.environ)
+    _seen714c, _up714c = [], []
+    _trusted714c = "NB-PINNED-WRAPPER-0001"
+    def _run714c(argv, timeout=120):
+        _seen714c.append(argv[2])
+        return 0, json.dumps({"id": argv[2], "title": "Offline canary"}), ""
+    try:
+        with _tf714a.TemporaryDirectory() as _td714c:
+            _cfg714c = _os38.path.join(_td714c, "tl-config.json")
+            with open(_cfg714c, "w", encoding="utf-8") as _f714c:
+                json.dump({"webappUrl": "offline", "token": "offline-test-token",
+                    "profiles": {"vbqppl": {"notebookId": "NB-CONFIG-OTHER-0001"}}}, _f714c)
+            for _key714c in ("TL_TOKEN", "TL_PROFILE", "TL_PROFILE_ENV_OVERLAY"):
+                _os38.environ.pop(_key714c, None)
+            _os38.environ["TL_NOTEBOOK_ID"] = _trusted714c
+            _tg50.load_creds = _o714c["load_creds"]      # loader THAT (khong stub), tranh F821 cua _TL_MODULE
+            _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+            _tg50._stage_enc_upload = lambda *a, **k: (_up714c.append(True) or ("OFFLINE", True))
+            _nc714c._run = _run714c; _nc714c.nlm_available = lambda: True
+            with _hush():
+                _rc714c = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(config=_cfg714c, profile=None,
+                    refresh=False, folder=None, cred_file_id="OFFLINE", new=False, force=False))
+            _ok714c = (_rc714c != 0 and not _up714c) or (_seen714c == [_trusted714c] and len(_up714c) == 1)
+    finally:
+        for _k714c, _v714c in _o714c.items(): setattr(_tg50, _k714c, _v714c)
+        _nc714c._run, _nc714c.nlm_available = _saved714c
+        _os38.environ.clear(); _os38.environ.update(_env714c)
+    cases.append(("wp714_nlm_stage_keeps_wrapper_notebook_with_config_token", _ok714c))
+
+    # WP714 (cross-review PR #714 vòng 1, executor Claude): các ca dưới đây khoá TỪNG chốt mới bằng một ca riêng,
+    # kèm ĐỐI CHỨNG DƯƠNG (allow-list không được biến thành "chặn tất cả"). Canary THẬT — chỉ subprocess
+    # `nlm_cli._run` và các sink Drive bị thay; không chạm mạng/Drive.
+    # (1) lớp `stage-canary-true-khi-than-rong-hoac-sai-id`: ĐÚNG MỘT đối tượng notebook, phán xét trên stdout THÔ.
+    _nc714d = _tg50._imp("nlm_cli")
+    _o714d = (_nc714d._run, _nc714d.nlm_available, _tg50._nlm_auth_files, _tg50._stage_enc_upload, _tm50c.sleep)
+    _env714d = dict(_os38.environ)
+    _NB714d = "NB-WP714-CANARY-0001"
+    _good714d = {"id": _NB714d, "title": "Canary"}
+    _other714d = {"id": "NB-OTHER-9999", "title": "Other"}
+    _mat714d = [
+        ("mot_doi_tuong", json.dumps(_good714d), 1), ("bọc_data", json.dumps({"data": _good714d}), 1),
+        ("mang_mot", json.dumps([_good714d]), 1), ("name_notebook_id", json.dumps({"notebook_id": _NB714d, "name": "C"}), 1),
+        ("tieu_de_dang_ngay", json.dumps({"id": _NB714d, "title": "2026-01-01T00:00:00"}), 1),
+        ("mang_dung_sai", json.dumps([_good714d, _other714d]), 0), ("mang_sai_dung", json.dumps([_other714d, _good714d]), 0),
+        ("mang_dung_rong", json.dumps([_good714d, {}]), 0), ("mang_dung_dung", json.dumps([_good714d, _good714d]), 0),
+        ("hai_id_mau_thuan", json.dumps({"id": "NB-OTHER-9999", "notebook_id": _NB714d, "title": "C"}), 0),
+        ("khoa_trung", '{"id":"NB-OTHER-9999","id":"' + _NB714d + '","title":"C"}', 0),
+        ("khoa_khac_hoa", json.dumps({"id": _NB714d, "ID": "NB-OTHER-9999", "title": "C"}), 0),
+        ("ok_false", json.dumps(dict(_good714d, ok=False)), 0), ("error_co", json.dumps(dict(_good714d, error="x")), 0),
+        ("error_so_0", json.dumps(dict(_good714d, error=0)), 0),
+        ("title_bool", json.dumps({"id": _NB714d, "title": True}), 0), ("title_mang", json.dumps({"id": _NB714d, "title": ["C"]}), 0),
+        ("title_trang", json.dumps({"id": _NB714d, "title": "  "}), 0),
+        ("title_dung_name_rong", json.dumps({"id": _NB714d, "title": "C", "name": ""}), 0),
+        ("id_mang", json.dumps({"id": [_NB714d], "title": "C"}), 0), ("data_mang", json.dumps({"data": [_good714d]}), 0),
+        ("null", "null", 0), ("so", "42", 0), ("chuoi", '"x"', 0), ("mang_null", "[null]", 0), ("rong", "", 0),
+        # WP714 review: Python json.loads accepts these non-JSON constants by default.
+        ("json_nan", '{"id":"' + _NB714d + '","title":"C","source_count":NaN}', 0),
+        ("json_infinity", '{"id":"' + _NB714d + '","title":"C","source_count":Infinity}', 0),
+        ("json_negative_infinity", '{"id":"' + _NB714d + '","title":"C","source_count":-Infinity}', 0),
+        # WP714 vòng 3 (executor Claude): cùng cơ chế "bộ đọc Python nhận thứ bộ đọc PS từ chối" — đo song song
+        # cùng đầu vào trên pwsh 7.4.6. Số TRÀN double (Python ra inf/int khổng lồ, PS ra ±∞), surrogate LẺ dạng
+        # thoát (PS ném khi đọc chuỗi/tên khoá), lồng > 64 mức (PS ném). Kèm ĐỐI CHỨNG DƯƠNG ngay biên.
+        ("so_tran_double", '{"id":"' + _NB714d + '","title":"C","n":1e400}', 0),
+        ("so_tran_am", '{"id":"' + _NB714d + '","title":"C","n":-1e400}', 0),
+        ("so_nguyen_400_chu_so", '{"id":"' + _NB714d + '","title":"C","n":1' + "0" * 400 + '}', 0),
+        ("surrogate_le_gia_tri", '{"id":"' + _NB714d + '","title":"C","n":"\\ud800"}', 0),
+        ("surrogate_le_khoa", '{"id":"' + _NB714d + '","title":"C","\\udc00":1}', 0),
+        ("long_65_muc", '{"id":"' + _NB714d + '","title":"C","n":' + "[" * 64 + "]" * 64 + '}', 0),
+        ("bom_dau", "\ufeff" + json.dumps(_good714d), 0), ("phay_thua", json.dumps(_good714d)[:-1] + ",}", 0),
+        ("chu_thich", json.dumps(_good714d)[:-1] + "/*x*/}", 0),
+        ("dc_so_nguyen_300_chu_so", '{"id":"' + _NB714d + '","title":"C","n":1' + "0" * 300 + '}', 1),
+        ("dc_cap_surrogate_hop_le", '{"id":"' + _NB714d + '","title":"\\ud83d\\ude00"}', 1),
+        ("dc_long_64_muc", '{"id":"' + _NB714d + '","title":"C","n":' + "[" * 63 + "]" * 63 + '}', 1),
+        # WP714 vòng 4 (Codex lượt 3, cùng lớp): "trắng" theo MỘT bảng tường minh (`_NLM_CANARY_BLANK_CODEPOINTS`),
+        # không theo `strip()` — U+001C–U+001F từng Python=âm/PS=dương; ký tự độ rộng 0 nay cũng là trắng. Kèm đối
+        # chứng dương: ký tự trong bảng nằm GIỮA chữ thật vẫn là tên.
+        *[("title_trang_%04x" % _cp714d, json.dumps({"id": _NB714d, "title": chr(_cp714d)}), 0)
+          for _cp714d in (0x1C, 0x1D, 0x1E, 0x1F, 0x85, 0xA0, 0x180E, 0x200B, 0x2060, 0x3000, 0xFEFF)],
+        *[("name_trang_%04x" % _cp714d, json.dumps({"notebook_id": _NB714d, "name": " " + chr(_cp714d) + "\t"}), 0)
+          for _cp714d in (0x1C, 0x1F, 0x200B, 0xFEFF)],
+        ("dc_title_co_chu_giua_trang", json.dumps({"id": _NB714d, "title": "\u200bC\u001c"}), 1),
+    ]
+    _res714d = {}
+    try:
+        _os38.environ["TL_NOTEBOOK_ID"] = _NB714d
+        _os38.environ.pop("TL_CANARY_NOTEBOOK_ID", None)
+        _os38.environ["TL_TOKEN"] = _env714d.get("TL_TOKEN") or "selftest-token"
+        _up714d = []
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_up714d.append(fid) or (fid, True))
+        _nc714d.nlm_available = lambda: True
+        _tm50c.sleep = lambda s: None
+        for _n714d, _out714d, _want714d in _mat714d:
+            _nc714d._run = lambda args, timeout=120, out=_out714d: (0, out, "")
+            for _f714d in (False, True):
+                _up714d.clear()
+                with _hush():
+                    _rc714d = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(config=None, profile=None, refresh=False,
+                        folder=None, cred_file_id="F714D", new=False, force=_f714d))
+                _res714d[(_n714d, _f714d)] = (len(_up714d) == _want714d and (_rc714d == 0) == bool(_want714d))
+    finally:
+        _nc714d._run, _nc714d.nlm_available, _tg50._nlm_auth_files, _tg50._stage_enc_upload, _tm50c.sleep = _o714d
+        _os38.environ.clear(); _os38.environ.update(_env714d)
+    cases.append(("wp714_nlm_canary_dung_mot_doi_tuong_notebook",
+                  len(_res714d) == 2 * len(_mat714d) and all(_res714d.values())))
+
+    # (2) lớp `stage-nlm-ngoai-nlm-auth-stage-khong-qua-canary` — phần payload: mỗi chốt một vế, có đối chứng dương.
+    #   a. secrets-stage --no-nlm, config mang nlm_auth ⇒ rc0, ĐÚNG 1 upload, bundle KHÔNG còn nlm_auth, 0 probe.
+    #   b. secrets-stage thiếu jar, config KHÔNG có nlm_auth ⇒ rc3, 0 upload (không âm thầm xoá NLM trên Drive).
+    #   c. secrets-set không --nlm, bundle Drive mang nlm_auth ⇒ rc4, 0 upload (không gửi lại credential chưa canary).
+    #   d. secrets-set --nlm, bundle Drive mang nlm_auth CŨ, canary sống ⇒ rc0, bundle mang jar MỚI (guard không chặn oan).
+    #   e. guard trực tiếp: nlm_auth bằng NỘI DUNG nhưng KHÁC đối tượng với bản đã canary ⇒ 4; đúng đối tượng ⇒ 0.
+    _o714e = {k: getattr(_tg50, k) for k in ("_master_key", "load_creds", "_secrets_fetch", "_secrets_upload",
+              "_nlm_auth_alive", "_nlm_auth_files", "_refresh_nlm_auth", "_gws_export_cred", "_stage_enc_upload")}
+    _env714e = dict(_os38.environ)
+    _st714e = {"up": [], "probe": 0, "remote": {}}
+    _res714e = {}
+
+    def _alive714e(nb, timeout=30, **kw):
+        _st714e["probe"] += 1
+        return True, "LIVE OK (test)"
+    try:
+        import tempfile as _tf714e
+        _os38.environ["TL_TOKEN"] = "offline-test-token"
+        _tg50._master_key = lambda: "mk714e-wp1009-0123456789abcdefghij"
+        _tg50.load_creds = lambda *a, **k: None
+        _tg50._nlm_auth_alive = _alive714e
+        _tg50._refresh_nlm_auth = lambda: False
+        _tg50._gws_export_cred = lambda: None
+        _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_st714e["up"].append(name) or (fid, True))
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps(_st714e["remote"]).encode(), "mk714e-wp1009-0123456789abcdefghij"), "file")
+        _tg50._secrets_upload = lambda blob, *a, **k: (_st714e["up"].append(json.loads(
+            _store50d.decrypt(blob, "mk714e-wp1009-0123456789abcdefghij").decode())) or ("S714E", True))
+        with _tf714e.TemporaryDirectory() as _td714e:
+            _cfg714e = _os38.path.join(_td714e, "cfg.json")
+            with open(_cfg714e, "w", encoding="utf-8") as _fh714e:
+                json.dump({"webappUrl": "offline", "token": "offline-test-token", "nlm_auth": {"auth.json": "cu"}}, _fh714e)
+            _cfg714e_sach = _os38.path.join(_td714e, "cfg-sach.json")
+            with open(_cfg714e_sach, "w", encoding="utf-8") as _fh714e:
+                json.dump({"webappUrl": "offline", "token": "offline-test-token"}, _fh714e)
+            for _v714e in "abcd":
+                _st714e.update(up=[], probe=0)
+                _tg50._nlm_auth_files = (lambda: {}) if _v714e == "b" else (lambda: {"auth.json": "moi"})
+                _st714e["remote"] = {"token": "offline-test-token", "nlm_auth": {"auth.json": "cu"}}
+                with _hush():
+                    if _v714e in "ab":
+                        _rc714e = _tg50.cmd_secrets_stage(_ap50.Namespace(
+                            config=_cfg714e if _v714e == "a" else _cfg714e_sach, profile=None, no_gws=True,
+                            no_nlm=(_v714e == "a"), folder=None, secrets_id="S714E"))
+                    else:
+                        _rc714e = _tg50.cmd_secrets_set(_ap50.Namespace(config=None, profile=None, secrets_id="S714E",
+                            nlm=(_v714e == "d"), gas_token=None, webapp="offline-new", gws=False, no_public=True,
+                            folder=None, secrets_file=None, env=None))
+                _b714e = [u for u in _st714e["up"] if isinstance(u, dict)]
+                if _v714e == "a":
+                    _res714e[_v714e] = (_rc714e == 0 and len(_st714e["up"]) == 1 and len(_b714e) == 1
+                                        and "nlm_auth" not in _b714e[0] and _st714e["probe"] == 0)
+                elif _v714e in "bc":
+                    _res714e[_v714e] = (_rc714e == (3 if _v714e == "b" else 4) and not _st714e["up"])
+                else:
+                    _res714e[_v714e] = (_rc714e == 0 and _st714e["probe"] == 1 and len(_b714e) == 1
+                                        and _b714e[0].get("nlm_auth") == {"auth.json": "moi"})
+        _ok714e = {"auth.json": "x"}
+        with _hush():
+            _res714e["e"] = (_tg50._nlm_bundle_guard("t", {"nlm_auth": dict(_ok714e)}, _ok714e) == 4
+                             and _tg50._nlm_bundle_guard("t", {"nlm_auth": _ok714e}, _ok714e) == 0
+                             and _tg50._nlm_bundle_guard("t", {"nlm_auth": _ok714e}, None) == 4
+                             and _tg50._nlm_bundle_guard("t", {"token": "x"}, None) == 0)
+    finally:
+        for _k714e, _v714e in _o714e.items():
+            setattr(_tg50, _k714e, _v714e)
+        _os38.environ.clear(); _os38.environ.update(_env714e)
+    cases.append(("wp714_nlm_bundle_moi_chot_mot_ve", len(_res714e) == 5 and all(_res714e.values())))
+
+    # (3) lớp `stage-error-output-leaks-credential` — các nhánh lỗi NGOÀI canary: lỗi upload (cả ba lệnh, rc5),
+    #     lỗi đồng bộ public (secrets-set, giữ rc0 cảnh báo), lỗi giải mã, lỗi trong `_stage_enc_upload` (gws + gcloud),
+    #     ngoại lệ ném từ chính probe. Mọi output không được chứa sentinel.
+    _o714f = {k: getattr(_tg50, k) for k in ("_master_key", "load_creds", "_secrets_fetch", "_secrets_upload",
+              "_nlm_auth_alive", "_nlm_auth_files", "_refresh_nlm_auth", "_gws_export_cred", "_stage_enc_upload",
+              "_gcloud_access_token", "_gcloud_drive_update")}
+    _env714f = dict(_os38.environ)
+    _sen714f = "OFFLINE" + "_SENTINEL_714F"
+    _res714f = {}
+
+    def _boom714f(*a, **k):
+        raise RuntimeError(_sen714f)
+    try:
+        import contextlib as _cx714f, io as _io714f
+        _os38.environ["TL_TOKEN"] = "offline-test-token"
+        _tg50._master_key = lambda: "mk714f-wp1009-0123456789abcdefghij"
+        _tg50.load_creds = lambda *a, **k: None
+        _tg50._refresh_nlm_auth = lambda: False
+        _tg50._gws_export_cred = lambda: None
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._nlm_auth_alive = lambda nb, timeout=30, **kw: (True, "LIVE OK (test)")
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps({"token": "offline-test-token"}).encode(), "mk714f-wp1009-0123456789abcdefghij"), "file")
+
+        def _run714f(fn, ns):
+            _cap = _io714f.StringIO()
+            with _cx714f.redirect_stdout(_cap), _cx714f.redirect_stderr(_cap):
+                try:
+                    _rc = fn(ns)
+                except Exception:   # noqa: BLE001 — một ngoại lệ thoát ra là ca ĐỎ (tl.main sẽ in traceback)
+                    _rc = "exc"
+            return _rc, _sen714f in _cap.getvalue()
+        _ns714f = _ap50.Namespace(config=None, profile=None, refresh=False, folder=None, cred_file_id="OFFLINE",
+            new=False, force=False, secrets_id="OFFLINE", nlm=True, gas_token=None, webapp=None, gws=False,
+            no_public=False, no_gws=True, no_nlm=False, secrets_file=None, env=None)
+        _tg50._stage_enc_upload, _tg50._secrets_upload = _boom714f, _boom714f
+        for _nm714f, _fn714f in (("nlm-auth-stage", _tg50.cmd_nlm_auth_stage), ("secrets-set", _tg50.cmd_secrets_set),
+                                 ("secrets-stage", _tg50.cmd_secrets_stage)):
+            _rc714f, _leak714f = _run714f(_fn714f, _ns714f)
+            _res714f["upload:" + _nm714f] = (_rc714f == 5 and not _leak714f)
+        _tg50._secrets_upload = lambda *a, **k: ("OFFLINE", True)       # bundle ok, chỉ public lỗi ⇒ cảnh báo rc0
+        _rc714f, _leak714f = _run714f(_tg50.cmd_secrets_set, _ns714f)
+        _res714f["public"] = (_rc714f == 0 and not _leak714f)
+        _dec714f = _store50d.decrypt                                       # lỗi giải mã MANG sentinel trong thông điệp
+        _store50d.decrypt = _boom714f
+        try:
+            _rc714f, _leak714f = _run714f(_tg50.cmd_secrets_set, _ns714f)
+        finally:
+            _store50d.decrypt = _dec714f
+        _res714f["giai_ma"] = (_rc714f == 3 and not _leak714f)
+        _tg50._nlm_auth_alive = _boom714f
+        _rc714f, _leak714f = _run714f(_tg50.cmd_nlm_auth_stage, _ns714f)
+        _res714f["probe_exc"] = (_rc714f == 4 and not _leak714f)
+        _tg50._stage_enc_upload = _o714f["_stage_enc_upload"]               # helper THẬT, chỉ gws/gcloud giả
+        _g714f = type("G714F", (), {"update_content": staticmethod(_boom714f)})()
+        for _mode714f in ("khong_gcloud", "gcloud_loi"):
+            _tg50._gcloud_access_token = ((lambda: (None, _sen714f)) if _mode714f == "khong_gcloud"
+                                          else (lambda: ("tok", None)))
+            _tg50._gcloud_drive_update = lambda *a, **k: {"ok": False, "error": _sen714f, "fix": _sen714f}
+            _cap714f = _io714f.StringIO()
+            with _cx714f.redirect_stdout(_cap714f), _cx714f.redirect_stderr(_cap714f):
+                try:
+                    _tg50._stage_enc_upload("nlm_cred.enc", b"x", "F", "FID", False, g=_g714f)
+                    _msg714f = "khong_nem"
+                except RuntimeError as _e714f:
+                    _msg714f = str(_e714f) + repr(_e714f.__cause__) + repr(_e714f.__context__ if not _e714f.__suppress_context__ else None)
+            _res714f["stage_enc:" + _mode714f] = (_msg714f != "khong_nem" and _sen714f not in _msg714f
+                                                  and _sen714f not in _cap714f.getvalue())
+    finally:
+        for _k714f, _v714f in _o714f.items():
+            setattr(_tg50, _k714f, _v714f)
+        _os38.environ.clear(); _os38.environ.update(_env714f)
+    cases.append(("wp714_nlm_stage_moi_nhanh_loi_khong_ro_chuoi_tho", len(_res714f) == 8 and all(_res714f.values())))
+
+    # (4) lớp `trusted-notebook-overwritten-by-stage-config` — thứ tự tin cậy: TL_CANARY_NOTEBOOK_ID > TL_NOTEBOOK_ID ở
+    #     lối vào > nền. Đo bằng HAI profile thật trong config (loader THẬT): --profile khác + token chỉ ở config, và
+    #     đường `tl.main` đã overlay TL_NOTEBOOK_ID trước khi vào lệnh (giả lập: env đã mang ID của config).
+    _o714g = {k: getattr(_tg50, k) for k in ("load_creds", "_nlm_auth_files", "_stage_enc_upload")}
+    _nc714g = _tg50._imp("nlm_cli")
+    _saved714g = (_nc714g._run, _nc714g.nlm_available)
+    _env714g = dict(_os38.environ)
+    _seen714g, _res714g = [], {}
+    _PIN714g = "NB-PINNED-WRAPPER-0714"
+    try:
+        import tempfile as _tf714g
+        _nc714g._run = lambda argv, timeout=120: (_seen714g.append(argv[2]) or
+                                                  (0, json.dumps({"id": argv[2], "title": "Offline canary"}), ""))
+        _nc714g.nlm_available = lambda: True
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._stage_enc_upload = lambda *a, **k: ("OFFLINE", True)
+        _tg50.load_creds = _o714g["load_creds"]
+        with _tf714g.TemporaryDirectory() as _td714g:
+            _cfg714g = _os38.path.join(_td714g, "tl-config.json")
+            with open(_cfg714g, "w", encoding="utf-8") as _fh714g:
+                json.dump({"webappUrl": "offline", "token": "offline-test-token", "profiles": {
+                    "vbqppl": {"notebookId": "NB-CONFIG-BASE-0714"},
+                    "duan714": {"notebookId": "NB-CONFIG-DUAN-0714"}}}, _fh714g)
+            for _lab714g, _envset714g, _prof714g, _want714g in (
+                    ("profile_khac_token_config", {"TL_NOTEBOOK_ID": _PIN714g}, "duan714", _PIN714g),
+                    ("pin_thang_overlay", {"TL_NOTEBOOK_ID": "NB-CONFIG-DUAN-0714", "TL_CANARY_NOTEBOOK_ID": _PIN714g},
+                     "duan714", _PIN714g),
+                    ("khong_ghim_theo_profile", {}, "duan714", "NB-CONFIG-DUAN-0714")):
+                _os38.environ.clear(); _os38.environ.update(_env714g)
+                for _k714g in ("TL_TOKEN", "TL_WEBAPP", "TL_PROFILE", "TL_PROFILE_ENV_OVERLAY", "TL_NOTEBOOK_ID",
+                               "TL_CANARY_NOTEBOOK_ID"):
+                    _os38.environ.pop(_k714g, None)
+                _os38.environ.update(_envset714g)
+                _seen714g.clear()
+                with _hush():
+                    _rc714g = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(config=_cfg714g, profile=_prof714g, refresh=False,
+                        folder=None, cred_file_id="OFFLINE", new=False, force=False))
+                _res714g[_lab714g] = (_rc714g == 0 and _seen714g == [_want714g])
+    finally:
+        for _k714g, _v714g in _o714g.items():
+            setattr(_tg50, _k714g, _v714g)
+        _nc714g._run, _nc714g.nlm_available = _saved714g
+        _os38.environ.clear(); _os38.environ.update(_env714g)
+    cases.append(("wp714_nlm_canary_ghim_notebook_qua_hai_profile", len(_res714g) == 3 and all(_res714g.values())))
+
+    # (6) WP714 vòng 3 (Codex lượt 2, lớp P3 `khai-rong-hon-phep-do-trong-changelog-runbook`): chốt payload làm
+    # `secrets-set` thiếu `--nlm` trả mã 4 khi bundle mang nlm_auth, nên MỌI lệnh mẫu xoay token/webapp/GWS (một
+    # đoạn trong dấu backtick) ở RUNBOOK và trong tl_gws (lời khắc phục GWS in ra) phải mang `--nlm` NGAY TRONG lệnh
+    # — chỉ dẫn cũ đưa người vận hành thẳng vào mã 4. Đếm số lệnh mẫu để ca không xanh rỗng khi chuỗi đổi dạng.
+    import re as _re714h
+    _pat714h = _re714h.compile(r"`[^`\n]*secrets-set --(?:gas-token|webapp|gws)[^`\n]*`")
+    _dir714h = _os38.path.dirname(_os38.path.dirname(_os38.path.abspath(_tg50.__file__)))
+    _cmd714h = {}
+    for _rel714h in (("references", "RUNBOOK.md"), ("scripts", "tl_gws.py")):
+        with open(_os38.path.join(_dir714h, *_rel714h), encoding="utf-8") as _f714h:
+            _cmd714h[_rel714h[-1]] = _pat714h.findall(_f714h.read())
+    cases.append(("wp714_huong_dan_secrets_set_kem_nlm",
+                  len(_cmd714h["RUNBOOK.md"]) >= 3 and len(_cmd714h["tl_gws.py"]) >= 4
+                  and all("--nlm" in _c for _v in _cmd714h.values() for _c in _v)))
+
+    # (7) WP714 vòng 4 (Codex lượt 3, lớp `stage-canary-true-khi-than-rong-hoac-sai-id`): wrapper PS và lệnh stage
+    # Python phải phán xét CÙNG một văn bản bằng CÙNG một luật. CI không có pwsh, nên ở đây khoá các BẢNG mà wrapper
+    # chép lại — đọc thẳng từ tệp .ps1, so với nguồn Python — để sửa một bên mà quên bên kia thì ĐỎ:
+    #   a. bảng ký tự "trắng": `$CanaryBlankCodePoints` == `_NLM_CANARY_BLANK_CODEPOINTS`, và Test-CanaryBody không
+    #      còn dùng `IsNullOrWhiteSpace` (tập .NET khác tập Python ở U+001C–U+001F, đo);
+    #   b. lớp ký tự ngắt dòng của `ConvertTo-StageText` (+ `\r`, đã đổi trước) == tập ký tự `str.splitlines` ngắt
+    #      (đo trên BMP) — `nlm_cli._strip_keyring` cắt dòng bằng `splitlines`;
+    #   c. mẫu nhiễu keyring của wrapper, biên dịch bằng `re` KHÔNG cờ, trả CÙNG kết quả `search` với
+    #      `nlm_cli._KEYRING_NOISE_RE` trên một bộ dòng thay từng ký tự bằng mọi biến thể hoa/thường Python nhận
+    #      (gồm U+017F, U+212A, U+0130, U+0131) và mọi ký tự `isspace`. Đếm số dòng để ca không xanh rỗng.
+    _ps714j = open(_os38.path.join(_dir714h, "scripts", "nlm-credential-refresh.ps1"), encoding="utf-8").read()
+    _m714j = _re714h.search(r"\$CanaryBlankCodePoints = @\(([^)]*)\)", _ps714j)
+    _blank714j = [int(_x, 16) for _x in _re714h.findall(r"0x[0-9A-Fa-f]+", _m714j.group(1))] if _m714j else []
+    _body714j = _ps714j.split("function Test-CanaryBody", 1)[-1].split("function Classify", 1)[0]
+    cases.append(("wp714_canary_bang_trang_khop_ps",
+                  _blank714j == list(_tg50._NLM_CANARY_BLANK_CODEPOINTS) and len(_blank714j) >= 30
+                  and "Test-CanaryBlank" in _body714j and "IsNullOrWhiteSpace" not in _body714j))
+    _nc714j = _tg50._imp("nlm_cli")
+    _split714j = _re714h.search(r"\[regex\]::Split\(\$text, '(\[[^']*\])'\)", _ps714j)
+    _want714j = {_c for _c in range(0x10000) if len(("a" + chr(_c) + "b").splitlines()) == 2}
+    _got714j = ({_c for _c in range(0x10000) if _re714h.fullmatch(_split714j.group(1), chr(_c))} | {0x0D}) if _split714j else set()
+    _kr714j = _re714h.search(r"\$KeyringNoise = '([^']*)' -f '([^']*)'", _ps714j)
+    _same714j, _n714j = False, 0
+    if _kr714j:
+        _psre714j = _re714h.compile(_kr714j.group(1).replace("{0}", _kr714j.group(2)))
+        _cand714j = ([chr(_c) for _c in range(0x21, 0x7F)] + ["\u017f", "\u212a", "\u0130", "\u0131", "\u00e9"]
+                     + [chr(_c) for _c in range(0x10000) if chr(_c).isspace()])
+        _same714j = True
+        for _base714j in ("using keyring backend", "keyring.backends", "keyring.backend", "no recommended backend"):
+            for _i714j in range(len(_base714j)):
+                for _ch714j in _cand714j:
+                    _line714j = "x " + _base714j[:_i714j] + _ch714j + _base714j[_i714j + 1:] + " y"
+                    _n714j += 1
+                    if bool(_psre714j.search(_line714j)) != bool(_nc714j._KEYRING_NOISE_RE.search(_line714j)):
+                        _same714j = False
+    cases.append(("wp714_canary_van_chuyen_khop_nlm_cli",
+                  bool(_want714j) and _got714j == _want714j and _same714j and _n714j > 5000))
 
     # ═══ v1.33.40 (MERGE bundle-15 'complete': source-delete (a) KHÔNG trash Drive dù docstring nói, (b) reg_delete
     # SAI shape g.get(fileId,force) — GAS đòi POST+drive_ids[]+confirm=yes) — r51_* ═══
@@ -20623,6 +21224,801 @@ def run() -> int:
             _env110_restore(_sav_env)
     _t110("r202_profile_delete_backup_ngoai_cay", _c202_profile_delete_backup_ngoai_cay)
 
+    # v1.36.69 (#972): backup config KHÔNG rơi vào cây skill (kho ở ~/tra-luat). Cây GIẢ qua `_goc_cay_skill`.
+    _tlm972, _os972 = globals()["_TL_MODULE"], globals()["os"]   # review l972a F03: tên tĩnh cho ruff
+    def _cay972(fn):
+        _sav_goc = _tlm972._goc_cay_skill
+        _sav_env = _env110({k: None for k in ("TL_CONFIG_BACKUP_DIR", "LOCALAPPDATA", "XDG_STATE_HOME", "HOME", "USERPROFILE", "HOMEDRIVE", "HOMEPATH")})
+        try:
+            with _tf110.TemporaryDirectory() as _d:
+                _t = _P110(_d).resolve()
+                (_goc := _t / "tra-luat").mkdir()
+                (_goc / "SKILL.md").write_text("x", encoding="utf-8")
+                _os972.environ["HOME"] = _os972.environ["USERPROFILE"] = str(_t)   # PR #989 P2: Windows Path.home() đọc USERPROFILE
+                _tlm972._goc_cay_skill = lambda: _goc
+                return fn(_t, _goc)
+        finally:
+            _tlm972._goc_cay_skill = _sav_goc
+            _env110_restore(_sav_env)
+
+    _MAY_CHUAN972 = _P110("D:/Quốc hội/_config_backups").is_dir()   # máy chuẩn Windows: nhánh ấy thắng
+
+    def _c972_mac_dinh_ngoai_cay():
+        def _f(t, goc):
+            d = _P110(str(_tlm972._config_backup_dir())).resolve()
+            mong = (_P110("D:/Quốc hội/_config_backups").resolve() if _MAY_CHUAN972
+                    else t / ".local" / "state" / "tra-luat" / "_config_backups")
+            return d == mong and goc not in d.parents and not (goc / "_config_backups").exists()
+        return _cay972(_f)
+    _t110("r972_mac_dinh_ngoai_cay_khi_kho_o_home_tra_luat", _c972_mac_dinh_ngoai_cay)
+
+    def _c972_xdg_state_home():
+        def _f(t, goc):
+            _os972.environ["XDG_STATE_HOME"] = str(t / "xdg")
+            d = _P110(str(_tlm972._config_backup_dir())).resolve()
+            return _MAY_CHUAN972 or d == t / "xdg" / "tra-luat" / "_config_backups"
+        return _cay972(_f)
+    _t110("r972_ton_trong_xdg_state_home", _c972_xdg_state_home)
+
+    def _c972_env_trong_cay_bi_tu_choi():
+        def _f(t, goc):
+            ok = []
+            for dich in (goc / "bk", goc):
+                _os972.environ["TL_CONFIG_BACKUP_DIR"] = str(dich)
+                try:
+                    _tlm972._config_backup_dir()
+                    ok.append(False)
+                except _tlm972.BackupTrongCaySkill:
+                    ok.append(not (goc / "bk").exists())
+            return all(ok) and len(ok) == 2
+        return _cay972(_f)
+    _t110("r972_env_trong_cay_bi_tu_choi_khong_dung_thu_muc", _c972_env_trong_cay_bi_tu_choi)
+
+    def _c972_profile_delete_dung_truoc_mutation():
+        import types as _ty972
+        def _f(t, goc):
+            _cfgp = goc / "tra_luat_config.v2.json"
+            _cfgp.write_text(json.dumps({"defaultProfile": "vbqppl", "profiles": {"vbqppl": {"rootFolderId": "r0"},
+                "XoaThu": {"rootFolderId": "r1", "notebookId": "nb1"}}}), encoding="utf-8")
+            _truoc = _cfgp.read_bytes()
+            _os972.environ["TL_CONFIG_BACKUP_DIR"] = str(goc / "bk")
+            _sav_pme = _tlm972._profile_manifest_entries_for
+            _tlm972._profile_manifest_entries_for = lambda *a, **k: ([], None)
+            try:
+                _ns = _ty972.SimpleNamespace(name="XoaThu", config=str(_cfgp), refresh=False, apply=True,
+                                             confirm="yes", delete_nlm_sources=False, trash_assets=False)
+                _be, _bo = _io110.StringIO(), _io110.StringIO()
+                with _ctx110.redirect_stderr(_be), _ctx110.redirect_stdout(_bo):
+                    _rc = _tlm972.cmd_profile_delete(_ns)
+            finally:
+                _tlm972._profile_manifest_entries_for = _sav_pme
+            return (_rc == 2 and "CONFIG_BACKUP_TRONG_CAY_SKILL" in _be.getvalue()
+                    and _cfgp.read_bytes() == _truoc and not (goc / "bk").exists())
+        return _cay972(_f)
+    _t110("r972_profile_delete_dung_truoc_mutation", _c972_profile_delete_dung_truoc_mutation)
+
+    def _c972_init_config_dung_truoc_ghi():
+        import types as _ty972
+        def _f(t, goc):
+            _cfgp = goc / "tra_luat_config.json"
+            _cfgp.write_text(json.dumps({"webappUrl": "https://cu", "token": "cu"}), encoding="utf-8")
+            _truoc = _cfgp.read_bytes()
+            _os972.environ["TL_CONFIG_BACKUP_DIR"] = str(goc / "bk")
+            _ns = _ty972.SimpleNamespace(config_json=json.dumps({"webappUrl": "https://moi", "token": "moi"}),
+                                         from_public=False, file=None, from_drive=False, webapp=None, token=None,
+                                         manifest_id=None, out=str(_cfgp), replace=False, no_gws=True)
+            _be, _bo = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stderr(_be), _ctx110.redirect_stdout(_bo):
+                _rc = _tlm972.cmd_init_config(_ns)
+            return (_rc == 2 and "CONFIG_BACKUP_TRONG_CAY_SKILL" in _be.getvalue()
+                    and _cfgp.read_bytes() == _truoc and not (goc / "bk").exists())
+        return _cay972(_f)
+    _t110("r972_init_config_dung_truoc_ghi", _c972_init_config_dung_truoc_ghi)
+
+    def _c972_bi_danh_cung_danh_tinh_he_tep():
+        # l972a F01: volume không phân biệt hoa thường — Linux không dựng được ⇒ giả lập "cùng danh tính" qua samestat.
+        def _f(t, goc):
+            (bi_danh := t / "PACKAGE-ALIAS").mkdir()
+            ino_bd, ino_goc = bi_danh.stat().st_ino, goc.stat().st_ino
+            _goc_ss = _os972.path.samestat
+            _os972.path.samestat = lambda a, b: {a.st_ino, b.st_ino} <= {ino_bd, ino_goc} or _goc_ss(a, b)
+            try:
+                _os972.environ["TL_CONFIG_BACKUP_DIR"] = str(bi_danh / "bk")
+                try:
+                    _tlm972._config_backup_dir()
+                    return False
+                except _tlm972.BackupTrongCaySkill:
+                    return not (bi_danh / "bk").exists()
+            finally:
+                _os972.path.samestat = _goc_ss
+        return _cay972(_f)
+    _t110("r972_bi_danh_cung_danh_tinh_he_tep_bi_tu_choi", _c972_bi_danh_cung_danh_tinh_he_tep)
+
+    def _c972_init_config_khong_di_theo_bi_danh_dich():
+        # l972a F02 tên backup là hard link vào cây (l972b F04: không cần quyền symlink) · l972b F05 đích là thư mục · l972c F06
+        import types as _ty972
+        def _fd_mo972(fd):
+            try: return bool(_os972.fstat(fd))
+            except OSError: return False
+        def _f(t, goc):
+            ngoai, _cfgp, ten = t / "ngoai", t / "cfg.json", "cfg.json.init-config.20261027T000000.bak.json"
+            ngoai.mkdir()
+            _os972.environ["TL_CONFIG_BACKUP_DIR"], _sav_time, kq = str(ngoai), _tlm972.time, []
+            try:
+                _tlm972.time = _ty972.SimpleNamespace(**{k: getattr(_sav_time, k) for k in dir(_sav_time) if not k.startswith("_")})
+                _tlm972.time.strftime = lambda *a, **k: "20261027T000000"
+                for dung in ("hardlink", "thu_muc", "fdopen_loi"):
+                    _cfgp.write_text(json.dumps({"webappUrl": "https://cu", "token": "cu"}), encoding="utf-8")
+                    _cu, moc = _cfgp.read_bytes(), goc / "moc.json"
+                    moc.write_text("moc", encoding="utf-8")
+                    _os972.link(moc, ngoai / ten) if dung == "hardlink" else (ngoai / ten).mkdir() if dung == "thu_muc" else None
+                    fd_thay, _sav_fdopen = [], _os972.fdopen   # l972c F06: fdopen ĐẦU TIÊN lỗi ⇒ descriptor thô phải được đóng
+                    def _fdopen_loi(fd, *a, **k):
+                        if fd_thay or dung != "fdopen_loi": return _sav_fdopen(fd, *a, **k)
+                        fd_thay.append(fd); raise OSError("fdopen gia")
+                    _os972.fdopen = _fdopen_loi
+                    try:
+                        _tlm972.save_local_config(json.dumps({"webappUrl": "https://moi", "token": "moi"}), out=str(_cfgp))
+                    finally:
+                        _os972.fdopen = _sav_fdopen
+                    kq.append(moc.read_text(encoding="utf-8") == "moc" and not list(ngoai.glob("*.tmp"))
+                              and not any(_fd_mo972(f) for f in fd_thay)
+                              and (dung != "hardlink" or (ngoai / ten).read_bytes() == _cu) and (dung != "fdopen_loi" or bool(fd_thay)))
+                    (ngoai / ten).rmdir() if dung == "thu_muc" else (ngoai / ten).unlink() if dung == "hardlink" else None
+            finally:
+                _tlm972.time = _sav_time
+            return kq == [True, True, True]
+        return _cay972(_f)
+    _t110("r972_init_config_khong_di_theo_bi_danh_dich", _c972_init_config_khong_di_theo_bi_danh_dich)
+
+    # ═══ r973 — WP1009 CLOUD-SETUP-P1-BUNDLE: tl_agent_creds.enc · chốt khoá gốc ở đường GHI · bootstrap nạp ═══
+    # Hermetic: upload/tải công khai thay bằng đồ giả GIỮ TRẠNG THÁI (`drv` = {fileId: blob}) có đếm lời gọi.
+    import argparse as _ap973, secrets as _sec973, subprocess as _sp973, sys as _sys973
+    _tlm973, _os973 = globals()["_TL_MODULE"], globals()["os"]   # tên tĩnh cho ruff (như r972)
+    _tg973 = _tlm973._imp("tl_gws"); _tg973.bind(_tlm973)
+    _st973 = _tlm973._imp("gws_cred_store")
+    _K973 = "k973-abcdefghijklmnopqrstuvwxyz0123456789"
+    _AU973 = {"tokens": {"refresh_token": "SENT973-codex"}, "last_refresh": "2026-10-27T11:35:54.511153200Z"}
+
+    def _ns973(**kw):
+        d = dict(codex=False, claude_token_env=None, antigravity_key_env=None, new=False, file_id=None, folder="F973")
+        return _ap973.Namespace(**{**d, **kw})
+
+    def _dec973(blob, k=_K973):
+        return json.loads(_st973.decrypt(blob, k).decode("utf-8"))
+
+    def _set973(ns, env=None, drv=None, hong=False):
+        """agent-creds-set THẬT; trả (rc, stdout+stderr, [fileId đã upload], drv)."""
+        drv, ups = ({} if drv is None else drv), []
+        def _up(name, blob, folder, fid, force_new, g=None):
+            if hong:
+                raise RuntimeError("UPLOAD973 SENT973-codex SENT973-claude SENT973-gemini")   # lượt 3 F13
+            fid = f"FID973-{len(drv)}" if (force_new or not fid) else fid
+            ups.append(fid); drv[fid] = blob
+            return fid, not force_new
+        o = {k: getattr(_tg973, k) for k in ("_stage_enc_upload", "_public_curl_bytes")}
+        _tg973._stage_enc_upload, _tg973._public_curl_bytes = _up, lambda fid, timeout=120.0: drv.get(fid)
+        sav, b = _env110({"TL_MASTER_KEY": _K973, "TL_AGENT_CREDS_FILEID": None, **(env or {})}), _io110.StringIO()
+        try:
+            with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
+                rc = _tg973.cmd_agent_creds_set(ns)
+        finally:
+            for k, v in o.items():
+                setattr(_tg973, k, v)
+            _env110_restore(sav)
+        return rc, b.getvalue(), ups, drv
+
+    def _codex973(fn, auth=_AU973):
+        with _tf110.TemporaryDirectory() as d:
+            _P110(d, "auth.json").write_text(json.dumps(auth), encoding="utf-8")
+            return fn(d)
+
+    def _c973_a1(d):
+        # review F5: rev1 mang ĐỦ ba khoá; mỗi lần sau chỉ thay MỘT khoá ⇒ hai khoá kia phải còn nguyên
+        e = {"CODEX_HOME": d, "TOKC973": "SENT973-claude", "GEMK973": "SENT973-gemini"}
+        rc1, _, up1, drv = _set973(_ns973(new=True, codex=True, claude_token_env="TOKC973",
+                                          antigravity_key_env="GEMK973"), e)
+        if rc1 != 0 or len(up1) != 1 or b"SENT973-codex" in drv[up1[0]]:
+            return False
+        p1 = _dec973(drv[up1[0]])
+        rc2, _, up2, drv = _set973(_ns973(file_id=up1[0], claude_token_env="TOKC973"),
+                                   {**e, "TOKC973": "SENT973-claude2"}, drv)
+        p2 = _dec973(drv[up1[0]])
+        rc3, _, up3, drv = _set973(_ns973(file_id=up1[0], antigravity_key_env="GEMK973"),
+                                   {**e, "GEMK973": "SENT973-gemini2"}, drv)
+        p3 = _dec973(drv[up1[0]])
+        return (p1.get("schema") == 1 and p1.get("rev") == 1 and p1.get("codex_auth") == _AU973
+                and (rc2, rc3, up2, up3) == (0, 0, up1, up1) and (p2.get("rev"), p3.get("rev")) == (2, 3)
+                and p2.get("codex_auth") == p3.get("codex_auth") == _AU973
+                and (p2.get("claude_oauth_token"), p2.get("antigravity_api_key")) == ("SENT973-claude2", "SENT973-gemini")
+                and (p3.get("claude_oauth_token"), p3.get("antigravity_api_key")) == ("SENT973-claude2", "SENT973-gemini2"))
+    _t110("r973_agent_creds_set_ma_hoa_va_rev", lambda: _codex973(_c973_a1))
+
+    _OLD973 = {"OLD973": _st973.encrypt(json.dumps({"schema": 1, "rev": 5}).encode(), "khoa-KHAC-" + _K973)}
+
+    def _c973_a2(d):
+        rc, _, ups, _drv = _set973(_ns973(file_id="OLD973", codex=True), {"CODEX_HOME": d}, dict(_OLD973))
+        return rc not in (0, None) and ups == []
+    _t110("r973_agent_creds_tu_choi_ban_cu_khong_giai_ma_duoc", lambda: _codex973(_c973_a2))
+
+    def _c973_a3(d):
+        e = {"CODEX_HOME": d, "TOKC973": "SENT973-claude", "GEMK973": "SENT973-gemini"}
+        ns = dict(codex=True, claude_token_env="TOKC973", antigravity_key_env="GEMK973")
+        ra = [_set973(_ns973(new=True, **ns), e), _set973(_ns973(file_id="OLD973", **ns), e, dict(_OLD973)),
+              _set973(_ns973(new=True, **ns), e, hong=True)]
+        return (ra[0][0] == 0 and all(r[0] != 0 for r in ra[1:]) and "upload lỗi" in ra[2][1]
+                and all(s not in r[1] for r in ra for s in ("SENT973-codex", "SENT973-claude", "SENT973-gemini")))
+    _t110("r973_agent_creds_khong_in_gia_tri", lambda: _codex973(_c973_a3))
+
+    def _c973_a6():
+        e = {"MY_KEY973": "gem-973-val", "GEMINI_API_KEY": "KHAC973", "RONG973": ""}
+        rc1, _, up1, drv = _set973(_ns973(new=True, antigravity_key_env="MY_KEY973"), e)
+        rc2, _, up2, drv2 = _set973(_ns973(new=True, claude_token_env="MY_KEY973"), e)
+        rc3, _, up3, _d3 = _set973(_ns973(new=True, antigravity_key_env="RONG973"), e)
+        # review lượt 2 F7: biến token Claude được NÊU mà rỗng / chỉ khoảng trắng / chưa đặt ⇒ từ chối cả lệnh,
+        # kể cả khi cùng lượt có một khoá hợp lệ khác (không xanh nhờ nhánh "không có khoá nào"); bản cũ nguyên byte
+        cu, xau = drv[up1[0]], []
+        for bien in ("RONG973", "TRANG973", "THIEU973"):
+            for dich in ({"file_id": up1[0]}, {"new": True}):   # lượt 3 F7: CẢ nhánh --new
+                r = _set973(_ns973(antigravity_key_env="MY_KEY973", claude_token_env=bien, **dich),
+                            {**e, "TRANG973": "   ", "THIEU973": None}, drv)
+                xau.append(r[0] != 0 and r[2] == [] and drv[up1[0]] == cu and len(drv) == 1)
+        return (rc1 == 0 and _dec973(drv[up1[0]]).get("antigravity_api_key") == "gem-973-val" and rc2 == 0
+                and "antigravity_api_key" not in _dec973(drv2[up2[0]]) and rc3 != 0 and up3 == [] and all(xau))
+    _t110("r973_agent_creds_khoa_gemini_tu_bien", _c973_a6)
+
+    def _c973_a4(d):
+        rc, _, ups, _drv = _set973(_ns973(new=True, codex=True), {"CODEX_HOME": d})
+        return rc != 0 and ups == []
+    _t110("r973_agent_creds_tokens_phai_la_object", lambda: _codex973(_c973_a4, {"tokens": "chuoi"}))
+
+    def _c973_a5(d):
+        with _tf110.TemporaryDirectory() as h:
+            _P110(h, ".codex").mkdir()
+            _P110(h, ".codex", "auth.json").write_text(json.dumps({"tokens": {"o": "HOME973"}}), encoding="utf-8")
+            rc, _, ups, drv = _set973(_ns973(new=True, codex=True), {"CODEX_HOME": d, "HOME": h, "USERPROFILE": h})
+            return rc == 0 and _dec973(drv[ups[0]]).get("codex_auth") == _AU973
+    _t110("r973_agent_creds_ton_trong_CODEX_HOME", lambda: _codex973(_c973_a5))
+
+    def _c973_f11():
+        # lượt 3 F11: đích ghi --file-id > TL_AGENT_CREDS_FILEID > AGENT_CREDS_FILEID; --new thắng cả ba.
+        # Blob KHÔNG được chọn phải giữ nguyên byte.
+        cu = {f: _st973.encrypt(json.dumps({"schema": 1, "rev": r}).encode(), _K973)
+              for f, r in (("EXP973", 4), ("ENV973", 9), ("HANG973", 2))}
+        o, kq = _tg973.AGENT_CREDS_FILEID, []
+        _tg973.AGENT_CREDS_FILEID = "HANG973"
+        try:
+            for ns, env, dich in ((dict(file_id="EXP973"), {"TL_AGENT_CREDS_FILEID": "ENV973"}, "EXP973"),
+                                  ({}, {"TL_AGENT_CREDS_FILEID": "ENV973"}, "ENV973"), ({}, {}, "HANG973"),
+                                  (dict(new=True, file_id="EXP973"), {"TL_AGENT_CREDS_FILEID": "ENV973"}, None)):
+                drv = dict(cu)
+                rc, _, ups, drv = _set973(_ns973(claude_token_env="TOK973F", **ns), {"TOK973F": "x", **env}, drv)
+                moi = [f for f in drv if f not in cu]
+                kq.append(rc == 0 and ups == ([dich] if dich else moi) and len(ups) == 1
+                          and all(drv[f] == cu[f] for f in cu if f != dich)
+                          and _dec973(drv[ups[0]]).get("rev") == ({"EXP973": 5, "ENV973": 10, "HANG973": 3}.get(dich, 1)))
+        finally:
+            _tg973.AGENT_CREDS_FILEID = o
+        return len(kq) == 4 and all(kq)
+    _t110("r973_agent_creds_set_thu_tu_dich_ghi", _c973_f11)
+
+    def _c973_b1():
+        def _rc(fn, k):
+            ups, o = [], {n: getattr(_tg973, n) for n in ("_secrets_upload", "_stage_enc_upload", "load_creds")}
+            for n in o:
+                setattr(_tg973, n, lambda *a, **kw: ups.append(1) or ("X973", True))
+            cfg = []
+
+            def _khong_cfg(*a, **kw):   # lệnh cũ qua chốt rồi dừng ở đây (rc 5) — bằng chứng DƯƠNG đã qua chốt
+                cfg.append(1)
+                raise RuntimeError("CFG973")
+            _tg973.load_creds = _khong_cfg
+            sav, b = _env110({"TL_MASTER_KEY": k, "CODEX_HOME": None, "TOK973B": "x"}), _io110.StringIO()
+            try:
+                with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
+                    return fn(_ns973(claude_token_env="TOK973B", new=True, config=None, profile=None, secrets_id="S",
+                                     secrets_file=None, gas_token="g", webapp=None, gws=False, nlm=False,
+                                     no_gws=True, no_nlm=True, no_public=True)), len(ups), "TL_MASTER_KEY yếu" in b.getvalue(), bool(cfg)
+            finally:
+                for n, v in o.items():
+                    setattr(_tg973, n, v)
+                _env110_restore(sav)
+        lenh = (_tg973.cmd_secrets_stage, _tg973.cmd_secrets_set, _tg973.cmd_agent_creds_set)
+        yeu = ("abcdefghijklmnopqrstuvwxyz01234", ("abcdefghijk" * 3)[:32])   # 31 ký tự · 32 ký tự/11 khác nhau
+        bien = ("abcdefghijkl" * 3)[:32]   # review F4: ĐÚNG biên — 32 ký tự, đúng 12 ký tự khác nhau ⇒ phải QUA
+        # đòi thông điệp CỦA CHỐT: rc 2 vì lý do khác (vd. không tải được bundle) là tín dụng giả
+        # review lượt 2 (F4 vá hờ): vế dương lệnh cũ đòi rc 5 của ranh giới + load_creds ĐÃ được gọi
+        return (all(_rc(f, k) == (2, 0, True, False) for f in lenh for k in yeu)
+                and all(_rc(_tg973.cmd_agent_creds_set, k) == (0, 1, False, False) for k in (_sec973.token_urlsafe(32), bien))
+                and all(_rc(f, bien) == (5, 0, False, True) for f in lenh[:2]))
+    _t110("r973_khoa_yeu_bi_tu_choi_o_duong_ghi", _c973_b1)
+
+    def _boot973(env, drv, xem=lambda h: True, req=False):
+        """bootstrap THẬT với --env chat (bỏ nhánh gws/nlm), HOME tạm; trả (rc, stdout+stderr, xem(h))."""
+        with _tf110.TemporaryDirectory() as h:
+            sav = _env110({"HOME": h, "USERPROFILE": h, "CODEX_HOME": _os973.path.join(h, "cx"), "TL_TOKEN": None,
+                           "TL_WEBAPP": None, "TL_MASTER_KEY": _K973, "TL_AGENT_CREDS_FILEID": None,
+                           "CLAUDE_CODE_OAUTH_TOKEN": None, "GEMINI_API_KEY": None, **env})
+            o = {k: getattr(_tg973, k) for k in ("load_creds", "_secrets_fetch", "_public_curl_bytes")}
+            _tg973.load_creds = lambda *a, **k: None
+            _tg973._secrets_fetch = lambda a, fid: (drv.get("S973"), "file")
+            _tg973._public_curl_bytes = lambda fid, timeout=120.0: drv.get(fid)
+            b = _io110.StringIO()
+            try:
+                with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
+                    rc = _tg973.cmd_bootstrap(_ap973.Namespace(
+                        secrets_id="S973", secrets_file=None, env="chat", config=None, profile=None, no_gws=True,
+                        no_nlm=True, bindir=None, require_agent_creds=req))
+                return rc, b.getvalue(), xem(h)
+            finally:
+                for k, v in o.items():
+                    setattr(_tg973, k, v)
+                _env110_restore(sav)
+
+    _B973 = {"S973": _st973.encrypt(json.dumps({"token": "t973"}).encode(), _K973),
+             "AC973": _st973.encrypt(json.dumps({"schema": 1, "rev": 3, "codex_auth": _AU973,
+                                                 "claude_oauth_token": "SENT973-claude",
+                                                 "antigravity_api_key": "SENT973-gemini"}).encode(), _K973)}
+
+    def _trang_thai973(out):
+        return [ln.split("agent_creds:", 1)[1].split("—")[0].strip() for ln in out.splitlines() if "agent_creds:" in ln]
+
+    def _c973_b2():
+        # lượt 3 F10: CẢ bundle chính LẪN tl_agent_creds.enc mã hoá bằng khoá 8 ký tự, có --require-agent-creds
+        yeu = {"S973": _st973.encrypt(json.dumps({"token": "t"}).encode(), "kh8short"),
+               "AC973": _st973.encrypt(json.dumps({"schema": 1, "rev": 1, "codex_auth": _AU973}).encode(), "kh8short")}
+        rc, out, _ = _boot973({"TL_MASTER_KEY": "kh8short", "TL_AGENT_CREDS_FILEID": "AC973"}, yeu, req=True)
+        return rc == 0 and "giải mã OK" in out and _trang_thai973(out) == ["ĐÃ NẠP"]
+    _t110("r973_bootstrap_khong_kiem_khoa", _c973_b2)
+
+    def _c973_d1():
+        o, _tg973.AGENT_CREDS_FILEID = _tg973.AGENT_CREDS_FILEID, ""   # WP1038: hằng nay có fileId thật ⇒ ép rỗng
+        try:
+            ra = [_boot973({}, _B973)]
+        finally:
+            _tg973.AGENT_CREDS_FILEID = o
+        ra += [_boot973({"TL_AGENT_CREDS_FILEID": "MAT973"}, _B973), _boot973({"TL_AGENT_CREDS_FILEID": "AC973"}, _B973)]
+        return ([_trang_thai973(r[1]) for r in ra] == [["KHÔNG CẤU HÌNH"], ["KHÔNG ĐO ĐƯỢC"], ["ĐÃ NẠP"]]
+                and [r[0] for r in ra] == [0, 0, 0])
+    _t110("r973_bootstrap_ba_trang_thai", _c973_d1)
+
+    def _c973_d2():
+        rc = [_boot973(e, _B973, req=True)[0] for e in ({}, {"TL_AGENT_CREDS_FILEID": "MAT973"},
+                                                         {"TL_AGENT_CREDS_FILEID": "AC973"})]
+        return rc[0] != 0 and rc[1] != 0 and rc[2] == 0
+    _t110("r973_bootstrap_require_agent_creds", _c973_d2)
+
+    _THIEU973 = object()   # "không có khoá last_refresh" (khác với giá trị null)
+
+    def _lr973(lr, d):
+        return {k: v for k, v in d.items() if k != "last_refresh"} if lr is _THIEU973 else {**d, "last_refresh": lr}
+
+    def _goi_lr973(lr):
+        return _st973.encrypt(json.dumps({"schema": 1, "rev": 3, "codex_auth": _lr973(lr, _AU973)}).encode(), _K973)
+
+    def _mot973(disk_lr, goi_lr=_AU973["last_refresh"], thay=None):
+        """_bootstrap_agent_creds với CODEX_HOME tạm có auth.json `disk_lr`; `thay` thay os.replace tạm thời.
+        Trả (trạng thái, giữ nguyên byte/inode/mtime, quyền 0600, nội dung sau, tên tệp trong thư mục)."""
+        with _tf110.TemporaryDirectory() as d:
+            p = _P110(d, "auth.json")
+            p.write_bytes((json.dumps(_lr973(disk_lr, {"tokens": {}})) + "\n").encode())
+            s0, b0 = p.stat(), p.read_bytes()
+            sav, o = _env110({"CODEX_HOME": d, "TL_AGENT_CREDS_FILEID": "AC973"}), (_tg973._public_curl_bytes, _os973.replace)
+            _tg973._public_curl_bytes = lambda fid, timeout=120.0: _goi_lr973(goi_lr)
+            _os973.replace = thay(p, b0, o[1]) if thay else o[1]
+            try:
+                st = _tg973._bootstrap_agent_creds(_K973)[0]
+            finally:
+                _tg973._public_curl_bytes, _os973.replace = o
+                _env110_restore(sav)
+            s1 = p.stat()
+            giu = p.read_bytes() == b0 and (s1.st_mtime_ns, s1.st_ino) == (s0.st_mtime_ns, s0.st_ino)
+            # quyền 0600 không đo được bằng stat trên Windows (spec chua_do_duoc) ⇒ bỏ vế quyền ở đó
+            q = _os973.name == "nt" or (s1.st_mode & 0o777) == 0o600
+            return st, giu, q, json.loads(p.read_text(encoding="utf-8")), sorted(x.name for x in _P110(d).iterdir())
+
+    def _c973_d3():
+        # đĩa mới hơn / bằng ⇒ giữ; cũ hơn ⇒ ghi. Review F3: offset ≠ 0 để đảo dấu offset phải lộ
+        # (+07:00 12h = 05h Z cũ hơn 11h35 Z; -05:00 07h = 12h Z mới hơn; +07:00 18h35m54.5111532 = bằng).
+        # review lượt 2 F6: lệch ±1 nano giây so bundle (.511153200Z) — cắt về micro giây phải lộ
+        giu = [_mot973(x) for x in ("2026-10-28T00:00:00.5+00:00", "2026-10-27T11:35:54.5111532Z",
+                                    "2026-10-27T07:00:00-05:00", "2026-10-27T18:35:54.511153200+07:00",
+                                    "2026-10-27T11:35:54.511153201Z")]
+        ghi = [_mot973(x) for x in ("2026-10-27T11:35:54Z", "2026-10-27T12:00:00+07:00", "2026-10-27T11:35:54.511153199Z")]
+        # lượt 3 F9: last_refresh thiếu / null / không phải ngày ⇒ CŨ HƠN mọi bản có (cả phía đĩa lẫn phía bundle)
+        ghi += [_mot973(x) for x in (_THIEU973, None, "khong-phai-ngay")]
+        giu += [_mot973("2026-10-27T05:00:00Z", goi_lr=x) for x in (_THIEU973, None)]
+        return (all(r[:2] == ("ĐÃ NẠP", True) for r in giu)
+                and all(r[0] == "ĐÃ NẠP" and not r[1] and r[2] and r[3] == _AU973 for r in ghi))
+    _t110("r973_bootstrap_giu_auth_json_moi_hon", _c973_d3)
+
+    def _c973_f1():
+        # review F1: `last_refresh` khớp regex mà ngày/giờ không tồn tại ⇒ coi là CŨ HƠN, không ném;
+        # và lỗi bất ngờ ở nhánh agent không được phá đường chính của bootstrap (Q17)
+        dia_hong = _mot973("2026-02-30T12:00:00Z")
+        goi_hong = _mot973("2026-10-27T05:00:00Z", goi_lr="2026-10-27T25:00:00Z")
+
+        class _NemAC(dict):
+            def get(self, k, *a):
+                if k == "AC973":
+                    raise RuntimeError("TAI973")
+                return super().get(k, *a)
+        drv = _NemAC(_B973)
+        e = {"TL_AGENT_CREDS_FILEID": "AC973"}
+        rc0, out0, _ = _boot973(e, drv)
+        rc1 = _boot973(e, drv, req=True)[0]
+        return (dia_hong[0] == "ĐÃ NẠP" and not dia_hong[1] and dia_hong[3] == _AU973
+                and goi_hong[:2] == ("ĐÃ NẠP", True)
+                and (rc0, rc1) == (0, 4) and _trang_thai973(out0) == ["KHÔNG ĐO ĐƯỢC"] and "TAI973" not in out0)
+    _t110("r973_bootstrap_last_refresh_hong_khong_pha", _c973_f1)
+
+    def _c973_f2():
+        # review F2: ghi auth.json PHẢI qua tệp tạm cùng thư mục, 0600, rồi os.replace; lúc replace đích vẫn là
+        # bản cũ. replace lỗi ⇒ bản cũ còn nguyên byte, không sót tệp tạm, trạng thái KHÔNG ĐO ĐƯỢC.
+        seen = []
+
+        def _do(p, b0, that):
+            def _r(src, dst):
+                seen.append((_P110(src).parent == p.parent, _P110(dst) == p, p.read_bytes() == b0,
+                             _os973.name == "nt" or (_os973.stat(src).st_mode & 0o777) == 0o600))
+                return that(src, dst)
+            return _r
+
+        def _hong(p, b0, that):
+            def _r(src, dst):
+                raise OSError("REPLACE973")
+            return _r
+        ok = _mot973("2026-10-27T11:35:54Z", thay=_do)
+        loi = _mot973("2026-10-27T11:35:54Z", thay=_hong)
+        return (ok[0] == "ĐÃ NẠP" and ok[3] == _AU973 and seen == [(True, True, True, True)]
+                and ok[4] == ["auth.json"] and loi[:2] == ("KHÔNG ĐO ĐƯỢC", True) and loi[4] == ["auth.json"])
+    _t110("r973_bootstrap_auth_json_nguyen_tu", _c973_f2)
+
+    def _c973_f12():
+        # lượt 3 F12: giải mã ĐƯỢC mà sai định dạng ⇒ KHÔNG ĐO ĐƯỢC, không ghi auth.json; rc chỉ đổi theo cờ require
+        sai = ({"schema": 2, "rev": 1, "codex_auth": _AU973}, ["schema", 1],
+               {"schema": 1, "rev": 1, "codex_auth": {"tokens": "chuoi"}}, {"schema": 1, "rev": 1, "codex_auth": "x"})
+        kq = []
+        for p in sai:
+            drv = {**_B973, "AC973": _st973.encrypt(json.dumps(p).encode(), _K973)}
+            for req in (False, True):
+                rc, out, khong_ghi = _boot973({"TL_AGENT_CREDS_FILEID": "AC973"}, drv,
+                                              lambda h: not _P110(h, "cx", "auth.json").exists(), req=req)
+                kq.append(rc == (4 if req else 0) and khong_ghi and _trang_thai973(out) == ["KHÔNG ĐO ĐƯỢC"])
+        return len(kq) == 8 and all(kq)
+    _t110("r973_bootstrap_sai_dinh_dang_khong_nap", _c973_f12)
+
+    def _c973_d4():
+        hoi, o = [], (_tg973.AGENT_CREDS_FILEID, _tg973._public_curl_bytes)
+        _tg973.AGENT_CREDS_FILEID = "HANG973"
+        _tg973._public_curl_bytes = lambda fid, timeout=120.0: hoi.append(fid)
+        sav = _env110({"TL_AGENT_CREDS_FILEID": "ENV973"})
+        try:
+            _tg973._bootstrap_agent_creds(_K973)
+        finally:
+            _tg973.AGENT_CREDS_FILEID, _tg973._public_curl_bytes = o
+            _env110_restore(sav)
+        return hoi == ["ENV973"]
+    _t110("r973_bootstrap_env_thang_hang", _c973_d4)
+
+    def _c973_d5():
+        def _xem(h):
+            return ("CLAUDE_CODE_OAUTH_TOKEN" not in _os973.environ and "GEMINI_API_KEY" not in _os973.environ
+                    and not _P110(h, ".gemini").exists() and _P110(h, "cx", "auth.json").is_file())
+        rc, out, ok = _boot973({"TL_AGENT_CREDS_FILEID": "AC973"}, _B973, _xem)
+        return (ok and "claude_oauth_token" in out and "antigravity_api_key" in out
+                and "SENT973" not in out and _trang_thai973(out) == ["ĐÃ NẠP"])
+    _t110("r973_bootstrap_khong_export_khong_ghi_gemini", _c973_d5)
+
+    def _c973_e1():
+        ap, ra = _tlm973.build_parser(), {}
+        for c in ("agent-creds-set", "secrets-keygen", "bootstrap"):
+            b = _io110.StringIO()
+            try:
+                with _ctx110.redirect_stdout(b):
+                    ap.parse_args([c, "--help"])
+            except SystemExit as e:
+                ra[c] = (e.code, b.getvalue())
+        return (all(v[0] == 0 for v in ra.values()) and len(ra) == 3
+                and all(f in ra["agent-creds-set"][1] for f in ("--codex", "--claude-token-env",
+                                                                 "--antigravity-key-env", "--new", "--file-id"))
+                and "--require-agent-creds" in ra["bootstrap"][1])
+    _t110("r973_parser_lenh_moi", _c973_e1)
+
+    def _c973_e2():
+        # tiến trình con THẬT, HOME/cwd tạm, không TL_WEBAPP/TL_TOKEN/TL_MASTER_KEY
+        tl_py = _P110(_tlm973.__file__).resolve()
+        with _tf110.TemporaryDirectory() as h:
+            env = {k: v for k, v in _os973.environ.items()
+                   if k not in ("TL_WEBAPP", "TL_TOKEN", "TL_MASTER_KEY", "CODEX_HOME")}
+            env.update(HOME=h, USERPROFILE=h, PYTHONIOENCODING="utf-8")
+            def _chay(*argv):
+                r = _sp973.run([_sys973.executable, str(tl_py), *argv], cwd=h, env=env, capture_output=True,
+                               text=True, encoding="utf-8", errors="replace", timeout=120)
+                return r.returncode, r.stdout, r.stderr
+            kg, ac, ss = _chay("secrets-keygen"), _chay("agent-creds-set", "--codex"), _chay("secrets-set", "--gas-token", "x")
+            st = _chay("secrets-stage", "--no-gws", "--no-nlm")   # review lượt 2 F8: vế âm cho CẢ hai lệnh ghi cũ
+        dong = kg[1].splitlines()
+        ok_kg = kg[0] == 0 and len(dong) == 1 and re.fullmatch(r"[A-Za-z0-9_-]{43}", dong[0]) is not None
+        ok_ac = ac[0] == 2 and "[agent-creds-set]" in ac[2] and "TL_MASTER_KEY" in ac[2] and "TL_WEBAPP" not in ac[2]
+        # vế âm: secrets-set vẫn đi qua load_creds. Máy dev có config cạnh cây (B1 _config_candidates) thì
+        # load_creds QUA ⇒ đo vế âm bằng tập lệnh; CI clone sạch đo bằng tiến trình con.
+        ten = ("tra_luat_config.v2.json", "tra_luat_config.json")
+        cfg_gan = any(_P110(x, n).exists() for x in (tl_py.parent, tl_py.parent.parent) for n in ten) \
+            or _P110("/tmp/tra_luat_config.json").exists()
+        cam = {"secrets-set", "secrets-stage", "gws-auth-stage"}   # lệnh ghi credential cũ: vẫn qua load_creds
+        ok_ss = (not cam & _tlm973._CREDS_LAZY_CMDS
+                 and (cfg_gan or all(r[0] != 0 and "TL_WEBAPP" in r[2] and f"[{t}]" not in r[2]
+                                     for r, t in ((ss, "secrets-set"), (st, "secrets-stage")))))
+        return ok_kg and ok_ac and ok_ss
+    _t110("r973_lenh_moi_khong_can_creds_webapp", _c973_e2)
+
+    def _c973_c1():
+        with _tf110.TemporaryDirectory() as h:
+            sav, ra, cwd = _env110({"HOME": h, "USERPROFILE": h}), [], _os973.getcwd()
+            _os973.chdir(h)   # cwd = HOME tạm: đo được cả "không ghi vào thư mục làm việc"
+            try:
+                for _ in range(2):
+                    b = _io110.StringIO()
+                    with _ctx110.redirect_stdout(b):
+                        rc = _tg973.cmd_secrets_keygen(_ns973())
+                    ra.append((rc, b.getvalue()))
+            finally:
+                _os973.chdir(cwd)
+                _env110_restore(sav)
+            moi = list(_P110(h).iterdir())
+        dong = [r[1].splitlines() for r in ra]
+        return (all(r[0] == 0 and len(d) == 1 and re.fullmatch(r"[A-Za-z0-9_-]{43}", d[0]) for r, d in zip(ra, dong))
+                and dong[0] != dong[1] and not moi)
+    _t110("r973_secrets_keygen", _c973_c1)
+
+    # ═══ r1000 — WP1038 CLOUD-SETUP-P2A-EXEC: agent-creds-exec · biến CHỈ cho tiến trình con · fail-close ═══
+    # Hermetic: tải công khai = đồ giả GIỮ TRẠNG THÁI đếm lời gọi; khoá/fileId là fixture (ghi đè biến thật của máy).
+    import shutil as _sh1000, subprocess as _sp1000, builtins as _bi1000, io as _io1000, hashlib as _hl1000
+    _K1000 = "k1000-khoa-gia-fixture-0123456789abcdef"
+    _S1000 = {"claude_oauth_token": "SENT1000-claude", "antigravity_api_key": "SENT1000-gemini"}
+    _V1000 = ("CLAUDE_CODE_OAUTH_TOKEN", "GEMINI_API_KEY")
+    _CON1000 = ("import hashlib, json, os, sys\n"
+                "json.dump({'bien': {b: hashlib.sha256(os.environ[b].encode()).hexdigest() for b in %r if b in os.environ},"
+                " 'argv': sys.argv[3:]}, open(sys.argv[1], 'w'))\nsys.exit(int(sys.argv[2]))\n" % (_V1000,))
+    _h1000 = lambda s: _hl1000.sha256(s.encode()).hexdigest()   # noqa: E731
+
+    def _blob1000(p=None, k=_K1000):
+        return _st973.encrypt(json.dumps({"schema": 1, "rev": 1, **_S1000} if p is None else p).encode(), k)
+
+    def _exec1000(argv, env=None, drv=None, which=None, run=None, fid_hang=None, xem=None):
+        """agent-creds-exec THẬT (parser thật + handler) in-process ⇒ (rc, stdout+stderr, [fileId đã tải]);
+        `xem()` chạy NGAY sau lệnh, TRƯỚC khi khôi phục môi trường (đo env của chính tiến trình `tl`)."""
+        drv, tai = ({"AC1000": _blob1000()} if drv is None else drv), []
+        o = (_tg973._public_curl_bytes, _tg973.AGENT_CREDS_FILEID, _sh1000.which, _sp1000.run)
+        _tg973._public_curl_bytes = lambda fid, timeout=120.0: (tai.append(fid), drv.get(fid))[1]
+        _tg973.AGENT_CREDS_FILEID = o[1] if fid_hang is None else fid_hang
+        _sh1000.which, _sp1000.run = which or o[2], run or o[3]
+        sav = _env110({"TL_MASTER_KEY": _K1000, "TL_AGENT_CREDS_FILEID": "AC1000", **{v: None for v in _V1000},
+                       **(env or {})})
+        b = _io110.StringIO()
+        try:
+            with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
+                a = _tlm973.build_parser().parse_args(["agent-creds-exec", *argv])
+                rc = a.fn(a)
+            if xem:
+                xem()
+        finally:
+            _tg973._public_curl_bytes, _tg973.AGENT_CREDS_FILEID, _sh1000.which, _sp1000.run = o
+            _env110_restore(sav)
+        return rc, b.getvalue(), tai
+
+    def _con1000(fn):
+        """fn(d, chay) — chay(cờ, rc_con, *đối số) chạy con THẬT `sys.executable con.py out rc …` ⇒ (rc, out, kq con)."""
+        with _tf110.TemporaryDirectory() as d:
+            # KHÔNG đặt `con.py`: CON là tên thiết bị Windows ⇒ con đọc script từ console và TREO (đo 30-10, tra-luat-win)
+            con, ra = _P110(d, "tien_trinh_con.py"), _P110(d, "ra.json")
+            con.write_text(_CON1000, encoding="utf-8")
+            def chay(co, rc_con=0, *doi, **kw):
+                ra.unlink(missing_ok=True)
+                rc, out, _ = _exec1000([*co, "--", _sys973.executable, str(con), str(ra), str(rc_con), *doi], **kw)
+                return rc, out, (json.loads(ra.read_text(encoding="utf-8")) if ra.exists() else None)
+            return fn(d, chay)
+
+    def _c1000_a1(d, chay):
+        sau = []   # _exec1000 xoá hai biến khỏi os.environ TRƯỚC lệnh ⇒ "trước đó vắng" là điều kiện dựng sẵn
+        rc, _, kq = chay(["--claude", "--gemini"], xem=lambda: sau.extend(v in _os973.environ for v in _V1000))
+        return rc == 0 and sau == [False, False] and kq["bien"] == {
+            "CLAUDE_CODE_OAUTH_TOKEN": _h1000(_S1000["claude_oauth_token"]), "GEMINI_API_KEY": _h1000(_S1000["antigravity_api_key"])}
+    _t110("r1000_exec_dat_bien_chi_cho_con", lambda: _con1000(_c1000_a1))
+
+    def _c1000_a2(d, chay):
+        g, c = chay(["--gemini"])[2], chay(["--claude"])[2]
+        return (g["bien"] == {"GEMINI_API_KEY": _h1000(_S1000["antigravity_api_key"])}
+                and c["bien"] == {"CLAUDE_CODE_OAUTH_TOKEN": _h1000(_S1000["claude_oauth_token"])})
+    _t110("r1000_exec_chi_dat_khoa_duoc_yeu_cau", lambda: _con1000(_c1000_a2))
+
+    # nhánh fail-close: tải lỗi · thiếu khoá gốc · khoá sai · schema 2/true · thiếu khoá Claude/Gemini · khoá rỗng
+    _HONG1000 = (("tai_loi", {}, {}), ("thieu_master", {"TL_MASTER_KEY": None}, None),
+                 ("khoa_sai", {}, {"AC1000": _blob1000(k="khoa-KHAC-" + _K1000)}),
+                 ("schema_2", {}, {"AC1000": _blob1000({"schema": 2, **_S1000})}),
+                 ("schema_true", {}, {"AC1000": _blob1000({"schema": True, **_S1000})}),   # review F02: True == 1
+                 ("thieu_gemini", {}, {"AC1000": _blob1000({"schema": 1, "claude_oauth_token": "SENT1000-claude"})}),
+                 ("gemini_rong", {}, {"AC1000": _blob1000({"schema": 1, "claude_oauth_token": "SENT1000-claude",
+                                                           "antigravity_api_key": ""})}),
+                 ("thieu_khoa", {}, {"AC1000": _blob1000({"schema": 1, "antigravity_api_key": "SENT1000-gemini"})}),
+                 ("khoa_rong", {}, {"AC1000": _blob1000({"schema": 1, "claude_oauth_token": " ",
+                                                         "antigravity_api_key": "SENT1000-gemini"})}))
+
+    def _nhanh1000():
+        """MỌI nhánh fail-close + rc 127 + rc 126, mỗi nhánh ĐẾM con riêng ⇒ [(tên, rc, số lần chạy con, output)]."""
+        kq = []
+        for ten, env, drv in _HONG1000:
+            n = []
+            rc, out, _ = _exec1000(["--claude", "--gemini", "--", "con1000"], env, drv, which=lambda x: "/con1000",
+                                   run=lambda *a, **k: n.append(1) or _sp1000.CompletedProcess(a, 0))
+            kq.append((ten, rc, len(n), out))
+        n = []
+        rc, out, _ = _exec1000(["--claude", "--", "khong-co-1000"], which=lambda x: None,
+                               run=lambda *a, **k: n.append(1) or _sp1000.CompletedProcess(a, 0))
+        def _os_loi(*a, **k):
+            raise OSError("exec1000")
+        rc2, out2, _ = _exec1000(["--claude", "--gemini", "--", "con1000"], which=lambda x: "/con1000", run=_os_loi)
+        return kq + [("rc127", rc, len(n), out), ("rc126", rc2, 0, out2)]
+
+    def _c1000_a3():
+        kq = _nhanh1000()
+        return (len(kq) == 11 and all(rc == 4 and n == 0 for _, rc, n, _ in kq[:9])
+                and kq[9][1:3] == (127, 0) and kq[10][1] == 126)
+    _t110("r1000_exec_fail_close", _c1000_a3)
+
+    def _c1000_a4(d, chay):
+        return [chay(["--claude"], r)[0] for r in (0, 7)] == [0, 7]
+    _t110("r1000_exec_tra_nguyen_rc_con", lambda: _con1000(_c1000_a4))
+
+    def _c1000_a5(d, chay):
+        outs = [chay(["--claude", "--gemini"])[1]] + [x[3] for x in _nhanh1000()]
+        return len(outs) == 12 and all(s not in o for s in _S1000.values() for o in outs)
+    _t110("r1000_exec_khong_in_gia_tri", lambda: _con1000(_c1000_a5))
+
+    def _c1000_a6():
+        kq = [_exec1000(v) for v in (["--", "x"], ["--claude"], ["--claude", "--"], ["--gemini", "x"], ["--"])]
+        return [r[0] for r in kq] == [2] * 5 and sum(len(r[2]) for r in kq) == 0
+    _t110("r1000_exec_doi_so_sai", _c1000_a6)
+
+    def _c1000_a7(d, chay):
+        doi = ["a;b", "x && y", "$(echo 1000)", "`id`", "c | d"]
+        return chay(["--claude"], 0, *doi)[2]["argv"] == doi
+    _t110("r1000_exec_khong_shell", lambda: _con1000(_c1000_a7))
+
+    def _c1000_a8():
+        hoi, n = [], []
+        def _w(x):
+            hoi.append(x)
+            return {"con1000": "/duong/con1000"}.get(x)
+        rc1, _, _ = _exec1000(["--gemini", "--", "con1000", "-v"], which=_w,
+                              run=lambda a, **k: n.append(a) or _sp1000.CompletedProcess(a, 0))
+        rc2, _, _ = _exec1000(["--gemini", "--", "khong1000"], which=_w,
+                              run=lambda a, **k: n.append(a) or _sp1000.CompletedProcess(a, 0))
+        return (rc1, rc2) == (0, 127) and hoi == ["con1000", "khong1000"] and n == [["/duong/con1000", "-v"]]
+    _t110("r1000_exec_resolve_which", _c1000_a8)
+
+    def _c1000_a9():
+        rc, _, tai = _exec1000(["--claude", "--", "x"], {"TL_AGENT_CREDS_FILEID": "ENV1000"}, {"ENV1000": _blob1000()},
+                               which=lambda x: "/x", run=lambda a, **k: _sp1000.CompletedProcess(a, 0),
+                               fid_hang="HANG1000")
+        return rc == 0 and tai == ["ENV1000"]
+    _t110("r1000_exec_env_thang_hang", _c1000_a9)
+
+    def _c1000_a10():
+        drv, tai = {"AC1000": _blob1000()}, []
+        for _ in range(2):
+            tai += _exec1000(["--gemini", "--", "x"], drv=drv, which=lambda x: "/x",
+                             run=lambda a, **k: _sp1000.CompletedProcess(a, 0))[2]
+        return tai == ["AC1000", "AC1000"]
+    _t110("r1000_exec_tai_moi_lan", _c1000_a10)
+
+    def _c1000_a11():
+        """Đếm MỌI lời gọi mở-để-ghi/tạo-tệp-tạm trong suốt lời gọi + quét byte sentinel dưới HOME/cwd/TMPDIR tạm."""
+        import tempfile as _tp1000
+        ghi, envs, cwd = [], [], _os973.getcwd()
+        def _boc(f, la_ghi):
+            def g(*a, **k):
+                if la_ghi(a, k):
+                    ghi.append(f.__name__)
+                return f(*a, **k)
+            return g
+        def _mode(a, k):
+            m = k.get("mode", a[1] if len(a) > 1 else "r")
+            return isinstance(m, str) and any(c in m for c in "wax+")
+        _co = _os973.O_WRONLY | _os973.O_RDWR | _os973.O_CREAT
+        goc = {(_bi1000, "open"): _mode, (_io1000, "open"): _mode,
+               (_os973, "open"): lambda a, k: bool((a[1] if len(a) > 1 else k.get("flags", 0)) & _co),
+               **{(_tp1000, n): (lambda a, k: True) for n in ("mkstemp", "NamedTemporaryFile", "TemporaryFile", "mkdtemp")}}
+        with _tf110.TemporaryDirectory() as r:
+            dirs = [_P110(r, x) for x in ("home", "cwd", "tmp")]
+            for x in dirs:
+                x.mkdir()
+            sav, o = _env110({"HOME": dirs[0], "USERPROFILE": dirs[0], "TMPDIR": dirs[2], "TEMP": dirs[2],
+                              "TMP": dirs[2]}), {kk: getattr(*kk) for kk in goc}
+            otd, _tp1000.tempdir = _tp1000.tempdir, str(dirs[2])
+            _os973.chdir(dirs[1])
+            try:
+                for (m, n), la_ghi in goc.items():
+                    setattr(m, n, _boc(o[(m, n)], la_ghi))
+                rc = _exec1000(["--claude", "--gemini", "--", "x"], which=lambda x: "/x",
+                               run=lambda a, env=None, **k: envs.append(env) or _sp1000.CompletedProcess(a, 0))[0]
+            finally:
+                for (m, n), f in o.items():
+                    setattr(m, n, f)
+                _tp1000.tempdir = otd
+                _os973.chdir(cwd)
+                _env110_restore(sav)
+            byte = [p.read_bytes() for x in dirs for p in x.rglob("*") if p.is_file()]
+        return (rc == 0 and ghi == [] and len(envs) == 1 and envs[0]["GEMINI_API_KEY"] == _S1000["antigravity_api_key"]
+                and not any(s.encode() in b for s in _S1000.values() for b in byte))
+    _t110("r1000_exec_khong_ghi_dia", _c1000_a11)
+
+    _t110("r1000_agent_creds_fileid_that", lambda: _tg973.AGENT_CREDS_FILEID == "1I0-p-FKSy3255OUNv7xkhRACy3k1zqWQ")
+
+    def _c1000_c1():
+        b = _io110.StringIO()
+        try:
+            with _ctx110.redirect_stdout(b):
+                _tlm973.build_parser().parse_args(["agent-creds-exec", "--help"])
+        except SystemExit as e:
+            return e.code == 0 and "--claude" in b.getvalue() and "--gemini" in b.getvalue()
+        return False
+    _t110("r1000_parser_agent_creds_exec_help", _c1000_c1)
+
+    def _c1000_viet_tat():
+        # review F01: cờ gốc viết tắt nuốt tên lệnh ở guard ⇒ `tl` phải TỰ từ chối (rc 2); dạng đầy đủ vẫn nhận
+        ap, ra = _tlm973.build_parser(), []
+        for v in (["--det", "agent-creds-exec", "--claude", "--", "x"], ["--tim", "recat", "x"],
+                  ["--prof=vbqppl", "agent-creds-set", "--new"], ["--conf", "c.json", "agent-creds-exec", "--gemini", "--", "x"],
+                  ["hygiene", "--prof", "scan", "plan", "q"]):   # F09: cấp cha LONG cũng không nhận viết tắt
+            try:
+                with _ctx110.redirect_stderr(_io110.StringIO()):
+                    ap.parse_args(v)
+                ra.append(None)
+            except SystemExit as e:
+                ra.append(e.code)
+        du = ap.parse_args(["--deterministic", "--profile", "vbqppl", "agent-creds-exec", "--claude", "--", "x"])
+        long_ = ap.parse_args(["hygiene", "--profile", "scan", "plan", "q"])
+        return (ra == [2] * 5 and (du.cmd, du.deterministic, du.lenh) == ("agent-creds-exec", True, ["--", "x"])
+                and long_.profile == "scan")
+    _t110("r1000_tl_tu_choi_co_goc_viet_tat", _c1000_viet_tat)
+
+    def _c1000_c2():
+        # (a) main() in-process, `load_creds` (tên tra ở tl) = đồ giả đếm rồi ném
+        dem, o = [], _tlm973.load_creds
+        def _lc(*a, **k):
+            dem.append(1)
+            raise RuntimeError("LOAD_CREDS_1000")
+        _tlm973.load_creds, sav, b = _lc, _env110({"TL_MASTER_KEY": None}), _io110.StringIO()
+        try:
+            with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
+                rc_a = _tlm973.main(["agent-creds-exec", "--claude", "--", "x"])
+        finally:
+            _tlm973.load_creds = o
+            _env110_restore(sav)
+        ok_a = dem == [] and rc_a == 4 and "[agent-creds-exec]" in b.getvalue()
+        # (b) CLI THẬT trong bản sao tạm; tiền điều kiện: mọi đường của _config_candidates đều VẮNG
+        with _tf110.TemporaryDirectory() as r:
+            h, goc = _P110(r, "h"), _P110(r, "skill")
+            h.mkdir()
+            _sh1000.copytree(_P110(_tlm973.__file__).resolve().parent, goc / "scripts",
+                             ignore=_sh1000.ignore_patterns("__pycache__", ".tl_state"))
+            ten = ("tra_luat_config.v2.json", "tra_luat_config.json")
+            co = [str(p) for p in [x / n for x in (h, goc, goc / "scripts") for n in ten]
+                  + [h / ".tra_luat_config.json", _P110("/tmp/tra_luat_config.json")] if p.exists()]
+            if co:
+                print(f"  [r1000_c2b] ĐỎ: tiền điều kiện hỏng — config tồn tại: {co}", flush=True)
+                return False
+            env = {k: v for k, v in _os973.environ.items()
+                   if k not in ("TL_WEBAPP", "TL_TOKEN", "TL_MASTER_KEY", "TL_AGENT_CREDS_FILEID")}
+            env.update(HOME=str(h), USERPROFILE=str(h), PYTHONIOENCODING="utf-8")
+            p = _sp973.run([_sys973.executable, str(goc / "scripts" / "tl.py"), "agent-creds-exec", "--claude", "--", "x"],
+                           cwd=h, env=env, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
+        ok_b = p.returncode == 4 and "[agent-creds-exec]" in p.stderr and "TL_WEBAPP" not in p.stderr
+        return ok_a and ok_b
+    _t110("r1000_exec_khong_goi_load_creds", _c1000_c2)
+
     def _c208b_auth_fix_chain_dung_thu_tu():
         # r208b 3.2 (báo cáo 25-07 mục 3.2 — CA CHỈ-NÓ-CHẶN): cookie NLM chết, MỌI thông báo trong skill
         # chỉ hô `nlm login` — lệnh TƯƠNG TÁC, KHÔNG chạy được ở Cowork/headless; đường đúng
@@ -21011,15 +22407,12 @@ def run() -> int:
         #
         # r308 (T0-F/GATE-05): ca này TỪNG dựng package-set bằng `rglob` trên ĐĨA — sai nguồn. Cây dev
         # rộng hơn gói, nên con trỏ tới tệp CÓ-trên-đĩa-nhưng-NGOÀI-gói lọt test mà ĐỎ ở `release-verify`
-        # (đúng thứ guard sinh ra để chặn). Nay đọc `RELEASE_MANIFEST.json` như khuôn r289, và doc-set
-        # lấy MỌI *.md trong manifest để khớp guard sản xuất sau r308. Vế (e)-(g) dưới là phép đo
+        # (đúng thứ guard sinh ra để chặn). Dựng manifest tạm của cây ứng viên bằng helper release,
+        # rồi lấy MỌI *.md trong manifest để khớp guard sản xuất sau r308. Vế (e)-(g) dưới là phép đo
         # FALSIFY được: cùng một tài liệu, nguồn-manifest ĐỎ mà nguồn-đĩa XANH ⇒ lỗ có thật, đã bịt.
         root = _ROOT209
-        mf = root / "RELEASE_MANIFEST.json"
-        if not mf.exists():
-            return True
         paths = sorted(str(x.get("path") or "") for x in
-                       (_j209.loads(mf.read_text(encoding="utf-8")).get("files") or []))
+                       (_rel209._build_release_manifest(root).get("files") or []))
         pset = set(paths)
         docs = {}
         for rel in sorted(p for p in paths if p.lower().endswith(".md")):
@@ -21333,10 +22726,59 @@ def run() -> int:
         # `docs/PROTOCOL_DA_PHIEN.md` (dòng §20) là sửa, không thêm. `RELEASE_MANIFEST.json` có đổi
         # trong cùng packet, nhưng CHỈ vì băm của CHÍNH TỆP NÀY đổi — không tệp runtime nào được thêm
         # nên `file_count` giữ **180** và trần Package 200 không nhúc nhích; cây thật = 180 + 75 = **255**.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 75 == 255
+        # KÊ KHAI SLOT (WP710 — land PR #714, Spec r4 mục 7 đã nêu ứng viên 183 tệp): gói 180 → **183**.
+        # Thêm đúng BA tệp vào gói, không tệp `docs/` nào đổi (vẫn 75):
+        #   + `scripts/nlm-credential-refresh.ps1`       — wrapper refresh → canary → stage (RUNTIME trên máy giữ hồ sơ gốc;
+        #     `references/RUNBOOK.md` trỏ tới nó nên nó PHẢI có trong gói, nếu không `release-verify --strict` đỏ).
+        #   + `scripts/nlm-credential-refresh.Tests.ps1` — bộ test hành vi của wrapper.
+        #   + `changelog.d/wp-710.md`                    — mảnh changelog của packet.
+        # Hai tệp sau là dev-side theo nghĩa hẹp; chúng vào gói vì bộ lọc gói hiện không loại chúng, không vì runtime
+        # cần. Cây thật = 183 + 75 = **258**; trần Package 200 còn 17 khe.
+        # KÊ KHAI SLOT (bookkeeping land WP725/WP726/WP727 — PR #729/#730/#731): gói 183 → **186**. Thêm đúng BA
+        # mảnh changelog, không tệp `docs/` nào đổi (vẫn 75), không tệp runtime mới:
+        #   + `changelog.d/wp-725.md` · `changelog.d/wp-726.md` · `changelog.d/wp-727.md`
+        # Fragment `scripts/test_fragments/wp72{5,6,7}_*.py` KHÔNG vào gói (bộ lọc loại đúng tiền tố); bundle
+        # `scripts/tl_test_fragments_bundled.py` đã có sẵn trong gói, chỉ đổi băm. Ba PR worker được merge riêng
+        # lẻ nên master đỏ `release-verify --strict` giữa chừng — đúng lý do protocol §9 để manifest cho phiên land.
+        # Cây thật = 186 + 75 = **261**; trần Package 200 còn 14 khe.
+        # KÊ KHAI SLOT (bookkeeping land WP766 — PR #772, merge e03d4bf): gói 186 → **187**. Thêm đúng MỘT mảnh
+        # changelog `changelog.d/wp-766.md`, không tệp `docs/` nào đổi (vẫn 75), không tệp runtime mới. PR worker
+        # thêm mảnh mà không kê manifest nên master đỏ `release-verify --strict` (gate 38861735146) — cùng hình dạng WP725-727.
+        # Cây thật = 187 + 75 = **262**; trần Package 200 còn 13 khe.
+        # KÊ KHAI SLOT (packet #782 r2 — ADR-0052 + ADR-0053, PR #789): 75 → **77** Markdown dưới `docs/`.
+        # Thêm ĐÚNG HAI tệp dev-side/ngoài gói:
+        #   + `docs/adr/0052-tran-loi-goi-codex-len-tam.md`
+        #   + `docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md`
+        # `docs/PROTOCOL_DA_PHIEN.md` (§20) là sửa, không thêm. `RELEASE_MANIFEST.json` đổi CHỈ vì băm của chính
+        # tệp này đổi ⇒ `file_count` giữ **187**; cây thật = 187 + 77 = **264**; trần Package 200 còn 12 khe (ZIP mang thêm entry manifest: 188).
+        # R291-DAM-SO-CUNG = **4** (#522, #548, #551, #782). Lần này lại đúng hình dạng "cổng tài liệu xanh, không
+        # chạy `tl selftest`": executor push `4711e874` sau `adr-song` + `doctrine-scan` + `git diff --check`, CI đỏ
+        # `1730/1731` (run 38945289558). Chủ kho chọn kê khai slot cho packet này; chữa nợ gốc là packet riêng.
+        # KÊ KHAI SLOT (packet #784 r2 — ADR-0054): 77 → **78** Markdown dưới `docs/`. Thêm ĐÚNG MỘT tệp
+        # dev-side/ngoài gói: + `docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md`.
+        # `docs/PROTOCOL_DA_PHIEN.md` là sửa, không thêm. Manifest đổi CHỈ vì băm tệp này ⇒ `file_count` giữ **187**;
+        # cây thật = 187 + 78 = **265**; trần Package 200 vẫn còn 12 khe (gói không đổi; ZIP 188 entry).
+        # R291-DAM-SO-CUNG = **5** (#522, #548, #551, #782, #784). Lần này chạy selftest TRƯỚC lần đẩy duy nhất.
+        # ĐÓNG NỢ R291-DAM-SO-CUNG (packet #794): số `docs/*.md` nay TÍNH từ cây (ok4 đòi ≥ 1 và mọi tệp bị loại
+        # đúng vì khoá `docs`); chỉ số tệp GÓI còn ratchet (ok3). Thêm docs KHÔNG kê khai slot ở đây nữa.
+        # KÊ KHAI SLOT (packet #831 spec r2): gói 187 → **189** = + `changelog.d/wp-802.md` (#802 land không sinh lại
+        # manifest) + `changelog.d/wp-831.md`. Trần Package 200 còn 10 khe.
+        # KÊ KHAI SLOT (packet #868): 190 → **191** = + `changelog.d/wp-868.md`. Trần Package 200 còn 8 khe.
+        # KÊ KHAI SLOT (packet #886): 191 → **192** = + `changelog.d/wp-886.md`. Trần Package 200 còn 7 khe.
+        # KÊ KHAI SLOT (packet #1009): 192 → **193** = + `changelog.d/wp-1009.md`. Trần Package 200 còn 6 khe.
+        # KÊ KHAI SLOT (packet #1030): 193 → **194** = + `changelog.d/wp-1030.md`. Trần Package 200 còn 5 khe.
+        # KÊ KHAI SLOT (packet #1038): 194 → **195** = + `changelog.d/wp-1038.md`. Trần Package 200 còn 4 khe.
+        # KÊ KHAI SLOT (packet #1052): 195 → **197** = + `references/windows-testing.md` + `changelog.d/wp-1052.md`. Trần Package 200 còn 3 khe.
+        # KÊ KHAI SLOT (packet #1089): 197 → **198** = + `references/Code.2.21.2q.gs` (webapp agent_creds_put). Trần Package 200 còn 2 khe.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 198
         d = root / "docs"
-        tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 75
+        # chỉ TỆP thường VẬT LÝ dưới `docs/`: thư mục, symlink (hỏng hay trỏ tới tệp thật) và `docs/` là symlink
+        # đều không được tính là còn docs (F1 review wp794 lượt 1–2).
+        goc_docs = d.resolve()
+        tren_dia = (sorted(q for q in d.rglob("*.md")
+                           if q.is_file() and not q.is_symlink() and q.resolve().is_relative_to(goc_docs))
+                    if d.is_dir() and not d.is_symlink() else [])
+        ok4 = (len(tren_dia) >= 1
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))
@@ -21377,8 +22819,18 @@ def run() -> int:
             j = _j209.loads(mf.read_text(encoding="utf-8"))
             paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
             ok2 = not [p for p in paths if p.startswith(".agents/")]
-            # RATCHET: goi giu 180. Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
-            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 180
+            # RATCHET: goi giu 194 (WP710 PR #714: 180 -> 183; land WP725-727 PR #729-#731: 183 -> 186, ba manh
+            # changelog.d; land WP766 PR #772: 186 -> 187, manh changelog.d/wp-766.md — ke khai slot day du o
+            # r291_docs_ngoai_goi; packet #831 spec r2: 187 -> 189, manh changelog.d/wp-802.md + wp-831.md;
+            # packet #858: 189 -> 190, manh changelog.d/wp-858.md; packet #868: 190 -> 191, manh changelog.d/wp-868.md;
+            # packet #886: 191 -> 192, manh changelog.d/wp-886.md; packet #1009: 192 -> 193, manh changelog.d/wp-1009.md;
+            # packet #1030: 193 -> 194, manh changelog.d/wp-1030.md; packet #1038: 194 -> 195, manh changelog.d/wp-1038.md).
+            # Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
+            # KÊ KHAI SLOT (packet #1030): 193 → **194** = + `changelog.d/wp-1030.md`. Trần Package 200 còn 5 khe.
+            # KÊ KHAI SLOT (packet #1038): 194 → **195** = + `changelog.d/wp-1038.md`. Trần Package 200 còn 4 khe.
+            # KÊ KHAI SLOT (packet #1052): 195 → **197** = + `references/windows-testing.md` + `changelog.d/wp-1052.md`. Trần Package 200 còn 3 khe.
+            # KÊ KHAI SLOT (packet #1089): 197 → **198** = + `references/Code.2.21.2q.gs` (webapp agent_creds_put). Trần Package 200 còn 2 khe.
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 198
         # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
         # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
         # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.

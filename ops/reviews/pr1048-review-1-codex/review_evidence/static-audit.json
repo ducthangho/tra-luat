@@ -1,0 +1,45 @@
+{
+  "head": "16e992a01c0a4ec8cfcc793dac9c1def5e288ae8",
+  "tree": "da846f35658795cf61c910ea4524e36888e8d0b0",
+  "tracked_ps1_count": 15,
+  "cast_get_content_matches": [
+    {
+      "path": "scripts/deploy-package.ps1",
+      "line": 195,
+      "expression": "[string](Get-Content $f -Raw -Encoding utf8)"
+    },
+    {
+      "path": "scripts/nlm-credential-refresh.ps1",
+      "line": 563,
+      "expression": "[string](Get-Content -LiteralPath $OperationRecord -Raw)"
+    },
+    {
+      "path": "scripts/nlm-credential-refresh.ps1",
+      "line": 965,
+      "expression": "[string](Get-Content -LiteralPath $configFull -Raw)"
+    }
+  ],
+  "powershell_executables": {
+    "pwsh": null,
+    "powershell": null
+  },
+  "diff_patch_matches_git": true,
+  "changed_bullet_lines": {
+    "54": "- **PowerShell — 3 bẫy đã trả giá** (r244; chú thích chi tiết nằm ngay tại code):",
+    "55": "  · `$Args` là biến tự động (xem trên) → đặt tên khác, vd `$Argv`.",
+    "56": "  · `Get-Content -Raw` trên tệp **RỖNG** (0 byte, **hoặc chỉ có BOM** `EF BB BF`) trả `$null` → `[regex]::Match`",
+    "57": "  ném \"Value cannot be null\", `.Trim()`/`.StartsWith()` ném \"null-valued expression\". **Ép kiểu một BIỂU THỨC",
+    "58": "  KHÔNG cứu được**: `[string](Get-Content -Raw …)` VẪN là `$null` (đo 30-10-2026 trên PS 5.1.26100 và 7.6.9, cả",
+    "59": "  hai loại tệp). Chỉ hai dạng ra `\"\"`: khai BIẾN có kiểu `[string]$x = Get-Content -Raw …`, hoặc nối chuỗi",
+    "60": "  `'' + (Get-Content -Raw …)`. `deploy-package.ps1` an toàn là nhờ dòng `if ($null -eq $txt)` ngay sau phép ép,",
+    "61": "  không nhờ phép ép. Dưới `ErrorActionPreference = 'Continue'`, điều kiện `if` ném lỗi thì nhánh bị BỎ QUA và",
+    "62": "  script chạy tiếp: script chờ `KHOA.txt` (ADR-0057) đã đứng chờ ~4 phút một khoá chỉ còn BOM vì lỗi này.",
+    "63": "  · `Get-Item`/`Get-ChildItem` **BỎ tệp ẩn khi thiếu `-Force`** (trên Unix: mọi tên bắt đầu bằng `.`) —",
+    "64": "  `Test-Path` thấy có mà `Get-Item` báo not-found là dấu hiệu kinh điển."
+  },
+  "git_status_rc": 0,
+  "git_status_stdout": "",
+  "git_diff_check_rc": 0,
+  "git_diff_check_stdout": "",
+  "khoa_tracked_files": []
+}

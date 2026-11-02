@@ -1,0 +1,11 @@
+# Moc Workflow definition cho run Windows L1 41004664516 (workflow_dispatch runner_set=windows-only, head 5b76266d).
+# GraphQL tra 403 trong phien web, nen chay tren may chu kho ASUS-LAPTOP (gh CLI cua chu kho) qua Remote Desktop Commander.
+# Do HAI lan doc lap, cung output tung byte:
+#   (1) phien executor session_015GtxrZE9sQqfnKV4jsABnr, cmd, ~14:06Z 30-10-2026, exit 0;
+#   (2) phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4, PowerShell (nhay don), ~14:09Z 30-10-2026, RC=0.
+# Lenh (PowerShell):
+#   gh api graphql -f id=WFR_kwLOTNeRjc8AAAAJjBGGxA -f 'query=query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt file { path repositoryFileUrl } checkSuite { commit { oid } } } } }'
+# Doi chieu: readback-run-41004664516.json (id 41004664516, node_id WFR_kwLOTNeRjc8AAAAJjBGGxA, head_sha 5b76266d, path
+# .github/workflows/ci.yml) va readback-contents-ci-yml-5b76266d.json (blob 82d9f239 = git rev-parse 5b76266d:.github/workflows/ci.yml).
+# Output nguyen van:
+{"data":{"node":{"databaseId":41004664516,"runNumber":3459,"createdAt":"2026-10-30T04:45:34Z","file":{"path":".github/workflows/ci.yml","repositoryFileUrl":"https://github.com/ducthangho/tra-luat/blob/5b76266d391695940c449497bfbf0acbdfb7d499/.github/workflows/ci.yml"},"checkSuite":{"commit":{"oid":"5b76266d391695940c449497bfbf0acbdfb7d499"}}}}}

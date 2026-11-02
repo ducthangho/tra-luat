@@ -1,0 +1,106 @@
+{
+  "sha": "b653574b117fa1496fbf58f09a22a8cbed5cc5dc",
+  "node_id": "C_kwDOTNeRjdoAKGI2NTM1NzRiMTE3ZmExNDk2ZmJmNThmMDlhMjJhOGNiZWQ1Y2M1ZGM",
+  "commit": {
+    "author": {
+      "name": "ducthangho",
+      "email": "ducthangho@gmail.com",
+      "date": "2026-10-31T02:46:48Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-10-31T02:46:48Z"
+    },
+    "message": "Merge PR #1048: CLAUDE.md bài học PowerShell — ép kiểu [string](biểu thức) không cứu được Get-Content -Raw rỗng\n\nCross-review Codex lượt 2 approved (0 P0-P3). CI 24/24 success trên 6f23a4e. Selftest Windows local (VM tra-luat-win) 1759/1759, rc 0.",
+    "tree": {
+      "sha": "f68a6474aeda307bde60e1a11928ced22378684b",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/f68a6474aeda307bde60e1a11928ced22378684b"
+    },
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/b653574b117fa1496fbf58f09a22a8cbed5cc5dc",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq5VaYCRC1aQ7uu5UhlAAAx6YQACQK0CSX+zxpA4zye/8wyCt9\n1KYKubKU6K7wdbNBg5Vx0JOoMULEBSUG8SRdE5BtTtEE/794tbtp5Ig5LiCcv0Xi\nngtbg1S+PKiW16IstXKvdKZIcr9NPsf56gU9p/afBymVDcA8OhT//zd+lGeckKYe\ngaKbvVMHmZwchCNLVr3GmzwsZF+Jf9aktaCZC5PAqm8rAmKFVTqbjsqkb4ciXJBQ\ntLwlCtw01Ny8P3GsvdPAQKYUU6zyN4uph1uObdWG7BCe9+EbMCvOoXzHmAIipkJn\nhXqBzl4MmDpiM/awCw+U1OH6GUHW7EO7z8QpqiGNbmBgaVoP30c7j7x8C8VYYE5A\nU1VvleUCrCb6w06VLE6gTTIzFgo4JGynsBgG6B8dxt0lz/FKg/qPyeatCS6yduLp\nCnnTptoFLnQaBatbDrFlJv3jIfI185xI/e+Pr/vPbCQqg7W/vTeQht83REx4Ugrz\nEF1gJgkhckSRXdX4Wn8NDhLGjofMm6dJ0kL8xqCVCphwgX+gJ0IBQEPajFnuooXO\nP313i9UR+KG/PR5mygE3ezDvDx5S+IpV7C2QvMMQKyKPywGamADNBfY3fKCjIze0\nvTKW/Ek6qu/qIbISbMQXW6YpbUPN3n5eTJ6TQZSUpwPgkeeHzvryJJS5gOzvgD+X\n68CA7jidtSz4FgOUSqxn\n=YaN+\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree f68a6474aeda307bde60e1a11928ced22378684b\nparent ba1b10d899f29e73640376a2c2bd69341eb3a00a\nparent 6f23a4e68805b4af3e2efe77be6e10b513843e93\nauthor ducthangho <ducthangho@gmail.com> 1793414808 +0700\ncommitter GitHub <noreply@github.com> 1793414808 +0700\n\nMerge PR #1048: CLAUDE.md bài học PowerShell — ép kiểu [string](biểu thức) không cứu được Get-Content -Raw rỗng\n\nCross-review Codex lượt 2 approved (0 P0-P3). CI 24/24 success trên 6f23a4e. Selftest Windows local (VM tra-luat-win) 1759/1759, rc 0.",
+      "verified_at": "2026-10-31T02:46:49Z"
+    }
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/b653574b117fa1496fbf58f09a22a8cbed5cc5dc",
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/b653574b117fa1496fbf58f09a22a8cbed5cc5dc",
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/b653574b117fa1496fbf58f09a22a8cbed5cc5dc/comments",
+  "author": {
+    "login": "ducthangho",
+    "id": 12748935,
+    "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+    "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/ducthangho",
+    "html_url": "https://github.com/ducthangho",
+    "followers_url": "https://api.github.com/users/ducthangho/followers",
+    "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+    "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+    "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+    "repos_url": "https://api.github.com/users/ducthangho/repos",
+    "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 19864447,
+    "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "ba1b10d899f29e73640376a2c2bd69341eb3a00a",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ba1b10d899f29e73640376a2c2bd69341eb3a00a",
+      "html_url": "https://github.com/ducthangho/tra-luat/commit/ba1b10d899f29e73640376a2c2bd69341eb3a00a"
+    },
+    {
+      "sha": "6f23a4e68805b4af3e2efe77be6e10b513843e93",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/6f23a4e68805b4af3e2efe77be6e10b513843e93",
+      "html_url": "https://github.com/ducthangho/tra-luat/commit/6f23a4e68805b4af3e2efe77be6e10b513843e93"
+    }
+  ],
+  "stats": {
+    "total": 11,
+    "additions": 10,
+    "deletions": 1
+  },
+  "files": [
+    {
+      "sha": "becd2ecc5fcb06f2ae018e4105357ed245c1dc57",
+      "filename": "CLAUDE.md",
+      "status": "modified",
+      "additions": 10,
+      "deletions": 1,
+      "changes": 11,
+      "blob_url": "https://github.com/ducthangho/tra-luat/blob/b653574b117fa1496fbf58f09a22a8cbed5cc5dc/CLAUDE.md",
+      "raw_url": "https://github.com/ducthangho/tra-luat/raw/b653574b117fa1496fbf58f09a22a8cbed5cc5dc/CLAUDE.md",
+      "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/CLAUDE.md?ref=b653574b117fa1496fbf58f09a22a8cbed5cc5dc",
+      "patch": "@@ -53,7 +53,16 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package \n   parity không phải nghi lễ, nó là thứ duy nhất bắt được.\n - **PowerShell — 3 bẫy đã trả giá** (r244; chú thích chi tiết nằm ngay tại code):\n   · `$Args` là biến tự động (xem trên) → đặt tên khác, vd `$Argv`.\n-  · `Get-Content -Raw` trên tệp **RỖNG** trả `$null` → `[regex]::Match` ném \"Value cannot be null\"; ép `[string]`.\n+  · `Get-Content -Raw` trên tệp **RỖNG** (0 byte, **hoặc chỉ có BOM** `EF BB BF`) trả `$null` → `[regex]::Match`\n+  ném \"Value cannot be null\", `.Trim()`/`.StartsWith()` ném \"null-valued expression\". **Ép kiểu một BIỂU THỨC\n+  KHÔNG cứu được**: `[string](Get-Content -Raw …)` VẪN là `$null` (đo 30-10-2026 trên PS 5.1.26100 và 7.6.9, cả\n+  hai loại tệp). Chỉ hai dạng ra `\"\"`: khai BIẾN có kiểu `[string]$x = Get-Content -Raw …`, hoặc nối chuỗi\n+  `'' + (Get-Content -Raw …)`. `deploy-package.ps1` an toàn là nhờ dòng `if ($null -eq $txt)` ngay sau phép ép,\n+  không nhờ phép ép. Hậu quả tuỳ ngữ cảnh (đo 30-10-2026, cùng hai bản PS): gọi `.Trim()` trên `$null` trong điều\n+  kiện `if`, NGOÀI `try`, dưới `ErrorActionPreference = 'Continue'` ⇒ nhánh bị BỎ QUA và script chạy tiếp (`rc=0`);\n+  cùng ca dưới `'Stop'` ⇒ script dừng (`rc=1`); bọc trong `try` ⇒ nhảy vào `catch` ở cả hai chế độ. Đừng mở rộng\n+  thành \"mọi lỗi trong `if` đều bỏ qua\": `throw` trong điều kiện dừng script kể cả dưới `'Continue'`. Ca thứ nhất đã\n+  khiến script chờ `KHOA.txt` (ADR-0057) đứng chờ ~4 phút một khoá chỉ còn BOM.\n   · `Get-Item`/`Get-ChildItem` **BỎ tệp ẩn khi thiếu `-Force`** (trên Unix: mọi tên bắt đầu bằng `.`) —\n   `Test-Path` thấy có mà `Get-Item` báo not-found là dấu hiệu kinh điển.\n - **Câu mô tả VỊ TRÍ của một artefact phải đúng ở CẢ HAI phía của lần merge.** Prompt reviewer neo"
+    }
+  ]
+}

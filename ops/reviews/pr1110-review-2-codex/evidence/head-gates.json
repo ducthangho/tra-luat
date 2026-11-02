@@ -1,0 +1,73 @@
+[
+  {
+    "label": "bien-nhan",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1110b/work/head",
+    "command": [
+      "python3",
+      "ops/bien_nhan_v2.py",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "seconds": 29.161,
+    "log": "evidence/head-bien-nhan.log",
+    "sha256": "d4799f5ea73ab76e20791c4b07e9183c53cf4df885a46e8641667ef010363456"
+  },
+  {
+    "label": "land",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1110b/work/head",
+    "command": [
+      "python3",
+      "ops/land_evidence_nguon.py",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "seconds": 1.424,
+    "log": "evidence/head-land.log",
+    "sha256": "52ca0dad914ca2095d9334780c20831c04cf2f58b25cb6ef2b9447506dbccbd2"
+  },
+  {
+    "label": "direct",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1110b/work/head",
+    "command": [
+      "python3",
+      "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1110b/direct_checks.py",
+      "."
+    ],
+    "rc": 0,
+    "seconds": 7.158,
+    "log": "evidence/head-direct.log",
+    "sha256": "3c004d9691963b3533fb426a8f03e1e25da58cda5d84cf8bd579c4e4feb7113b"
+  },
+  {
+    "label": "doctrine",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1110b/work/head",
+    "command": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "seconds": 0.367,
+    "log": "evidence/head-doctrine.log",
+    "sha256": "5dc320d098e17eea22fc3d940e41b58774b648394253380eeb99bf85aacdba83"
+  },
+  {
+    "label": "diff-check",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1110b/work/head",
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "fb74c6e",
+      "HEAD"
+    ],
+    "rc": 0,
+    "seconds": 0.014,
+    "log": "evidence/head-diff-check.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

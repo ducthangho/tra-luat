@@ -1,0 +1,32 @@
+{
+  "source": "/root/.codex/sessions/2026/10/27/rollout-2026-10-27T01-49-53-01a17b0c-b9b3-7dd2-a7c3-00d6491b58a4.jsonl",
+  "observations": [
+    {
+      "type": "session_meta",
+      "payload": {
+        "id": "01a17b0c-b9b3-7dd2-a7c3-00d6491b58a4",
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/478a1184-1d56-5267-9225-61e30ad186af/scratchpad/review-A/ws",
+        "originator": "codex_exec",
+        "cli_version": "0.164.0",
+        "model_provider": "openai",
+        "source": "exec"
+      }
+    },
+    {
+      "type": "turn_context",
+      "payload": {
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/478a1184-1d56-5267-9225-61e30ad186af/scratchpad/review-A/ws",
+        "model": "gpt-6.1-sol",
+        "effort": "xhigh",
+        "approval_policy": "never",
+        "sandbox_policy": {
+          "type": "workspace-write",
+          "network_access": false,
+          "exclude_tmpdir_env_var": false,
+          "exclude_slash_tmp": false
+        }
+      }
+    }
+  ],
+  "limitation": "CLI-published model/effort; no per-request served-model telemetry"
+}

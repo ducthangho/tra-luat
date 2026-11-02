@@ -1,0 +1,11 @@
+.github/workflows/ci.yml: base-equals-reviewed=True; sha256=b630260ce676292ced82da65f4cb54ec1dc0f66109901e7c1d61746d21baab06
+ops/cong_cu_test.py: base-equals-reviewed=True; sha256=23dbdeada416cfa960ff4d2d4a85d7cb4bf29d84240a3fe6274edde7b1b5cf76
+ab25106 2026-10-23 wp879: t54 khoá hai biên số không của nhánh Windows (Codex lượt 1) (#879)
+be00ef7 2026-10-23 wp879: gate-cong-cu Windows chỉ chạy ca nền (một job), bán kính đột biến đo trên Ubuntu (#879)
+52e1f0b 2026-10-22 wp878(#878): ghim topo ci.yml (y13) theo input runner_set; chu thich ra khoi outputs de giu neo dot bien chuan-bi
+5585abe 2026-10-22 wp878(#878): ci.yml workflow_dispatch nhan runner_set=windows-only — bo cac job ma tran Ubuntu khi chi can do Windows
+5585abe (#878) ancestor_of_reviewed: rc=0
+be00ef7 (#879) ancestor_of_reviewed: rc=0
+ab25106 (#879) ancestor_of_reviewed: rc=0
+9e9a74b historical windows-only dispatch=["ubuntu-latest", "windows-latest"]
+PASS: claims dated e63961f still hold at reviewed SHA; #878/#879 ancestry verified

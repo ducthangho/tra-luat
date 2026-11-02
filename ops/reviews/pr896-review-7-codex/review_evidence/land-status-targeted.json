@@ -1,0 +1,888 @@
+[
+  {
+    "path": "ops/land/plat-x8-land-evidence.yaml",
+    "field": "post_merge_checks.2.ket_qua",
+    "line": 99,
+    "text": "**XANH CẢ HAI NỀN.** Run 32596660559 trên merge commit `647cfead`, đo THEO JOB: `gate (ubuntu-latest)` = `success` · `gate (windows-latest)` = `success` · **0 bước hỏng**. Đây là phép đo MỚI, KHÔNG phải A12: A12 neo `28f32f7c`, còn `647cfead` là SHA khác — merge commit chưa từng được đo trước lúc merge, và với một PR thường thì lượt master CHÍNH LÀ lần đo Windows đầu tiên của merge commit ấy.",
+    "snippets": [
+      "7cfead` là SHA khác — merge commit chưa từng được đo trước lúc merge, và với một PR thường thì lượt master CHÍNH LÀ lần đo Windows đầu tiên của merge commit ấy."
+    ]
+  },
+  {
+    "path": "ops/land/plat-x8-land-evidence.yaml",
+    "field": "bookkeeping.2",
+    "line": 113,
+    "text": "Verdict + biên nhận cả bốn lượt được SOẠN trên nhánh handoff trong lúc #248 land; chúng vào master cùng lượt merge PR #264. Phép tra đúng ở CẢ HAI phía: tìm trên `master` trước, chưa thấy thì fetch nhánh handoff của #264. Bản đầu của dòng này viết \"CHƯA vào master\" — câu ấy đúng lúc #248 land nhưng tự phủ định chính nó ngay khi #264 merge, vì chính tệp này nằm trong #264. Cross-review #264 bắt được (finding P3).",
+    "snippets": [
+      "a #264. Bản đầu của dòng này viết \"CHƯA vào master\" — câu ấy đúng lúc #248 land nhưng tự phủ định chính nó ngay khi #264 merge, vì chính tệp này nằm t"
+    ]
+  },
+  {
+    "path": "ops/land/pr468-hoso-4-packet-land-evidence.yaml",
+    "field": "post_merge_checks.0.canh_bao_doc_ket_qua",
+    "line": 238,
+    "text": "Lượt `pull_request` chỉ có **MỘT job** (ubuntu) — đúng cái bẫy `plat-x8-land-evidence.yaml` đã ghi. Windows chỉ xuất hiện trên lượt `push` của merge commit, tức SAU khi merge. CI xanh **KHÔNG** đóng nợ \"head `17f4a1b` chưa qua cross-review\".",
+    "snippets": [
+      " **KHÔNG** đóng nợ \"head `17f4a1b` chưa qua cross-review\"."
+    ]
+  },
+  {
+    "path": "ops/land/pr468-hoso-4-packet-land-evidence.yaml",
+    "field": "khong_do_duoc.1.muc",
+    "line": 298,
+    "text": "Head `17f4a1b` chưa qua cross-review",
+    "snippets": [
+      "Head `17f4a1b` chưa qua cross-review"
+    ]
+  },
+  {
+    "path": "ops/land/pr478-land-evidence.yaml",
+    "field": "authorization_ghi_chu",
+    "line": 27,
+    "text": "Duyệt KHÁC DANH TÍNH có vết bền: `notebyme88` (≠ tác giả PR `ducthangho`), `author_association: COLLABORATOR`, trên ĐÚNG head `ff3431f` — cùng SHA mà cross-review lượt 6 đã review và cho `approve`. Có HAI review `APPROVED` trên cùng head ấy: `#pullrequestreview-5137106684` lúc `03:47:22Z` và `#pullrequestreview-5137165112` lúc `03:59:25Z`; trường này neo cái SAU. KHÁC #468 ở một điểm quan trọng: lần đó lượt cuối review `745d888` còn head merge là `17f4a1b`, để lại nợ \"head đã merge chưa qua cross-review\". **Lần này KHÔNG có nợ ấy** — head được duyệt và head được merge và head được review là CÙNG MỘT SHA. GIỚI HẠN NGUỒN: danh tính người duyệt, hai mốc, `commit_id` của từng review đều ĐỌC TỪ GitHub PR API qua phiên điều phối. Gói không kèm JSON thô, nên reviewer offline không đối chứng lại được. Đây là ATTESTATION, không phải bằng chứng đã đối chứng độc lập. Câu \"Lần này KHÔNG có nợ ấy\" chỉ nói về head PR #478 và verdict lượt 6; KHÔNG áp cho PR #486 vận chuyển hồ sơ này. Nợ merge trước khi có verdict của PR #486 được ghi riêng ở `ops/reviews/pr486-hau-kiem-no-review.yaml`.",
+    "snippets": [
+      "17f4a1b`, để lại nợ \"head đã merge chưa qua cross-review\". **Lần này KHÔNG có nợ ấy** — head được duyệt và head được merge và head được review là CÙNG MỘT S"
+    ]
+  },
+  {
+    "path": "ops/land/pr478-land-evidence.yaml",
+    "field": "cross_review.ba_P1_cua_luot_5",
+    "line": 112,
+    "text": "Cả ba đều là LỜI KHAI SAI, không phải lỗi mã, và lượt 6 xác nhận ĐÃ VÁ THẬT cả ba: (1) `chot-nguyen-nhan-chua-quan-sat` — khối `4-vs-6` chốt NGUYÊN NHÂN (\"điều phối đo giữa chừng\") trong khi phép loại không đứng. Phản ví dụ reviewer chạy được: `(44,4)+(−1,0)=(43,4)`, tức đọc Ubuntu `44/4` rồi GHI NHẦM 44 thành 43 cũng sinh đúng cặp đang xét; bản trước lấy chính số `43` ĐANG TRANH CÃI làm chuẩn chắc chắn. Vá bằng cách đổi CẢ TÊN TRƯỜNG (tên trường chính là lời khẳng định) và thêm `nguyen_nhan_that_su: CHƯA XÁC ĐỊNH` với bốn giả thuyết còn sống. (2) `pr477-chua-merge-trai-nguon-moi` — bookkeeping còn khai #477 \"chưa merge\" trong khi cùng tệp đã dùng `585c7d5` làm merge commit của #477. (3) `khai-dong-p3-khi-con-sot` — khai `17f4a1b` \"vá nốt P3 duy nhất còn lại\" trong khi câu mà verdict 15 nêu đích danh còn NGUYÊN TỪNG CHỮ ở `full-gate-pr468-20260907/README.md:57`.",
+    "snippets": [
+      "ịnh) và thêm `nguyen_nhan_that_su: CHƯA XÁC ĐỊNH` với bốn giả thuyết còn sống. (2) `pr477-chua-merge-trai-nguon-moi` — bookkeeping còn khai #477 \"chưa merge\" trong khi cùng tệp đã dùng `585c7d5` làm m",
+      "-moi` — bookkeeping còn khai #477 \"chưa merge\" trong khi cùng tệp đã dùng `585c7d5` làm merge commit của #477. (3) `khai-dong-p3-khi-con-sot` — khai `17f4a1b` \"vá nốt P3 duy nhất còn lại\" trong"
+    ]
+  },
+  {
+    "path": "ops/land/pr480-land-evidence.yaml",
+    "field": "cross_review.ghi_chu_head",
+    "line": 88,
+    "text": "Lượt cuối review ĐÚNG head được duyệt và được merge (`5b96ddc`). KHÔNG có nợ \"head đã merge chưa qua cross-review\" — nợ mà PR #468 để lại (lượt cuối review `745d888`, head merge `17f4a1b`).",
+    "snippets": [
+      "6ddc`). KHÔNG có nợ \"head đã merge chưa qua cross-review\" — nợ mà PR #468 để lại (lượt cuối review `745d888`, head merge `17f4a1b`)."
+    ]
+  },
+  {
+    "path": "ops/land/pr480-land-evidence.yaml",
+    "field": "pre_merge_checks.8.ly_do",
+    "line": 153,
+    "text": "Không chạy trên PR thường: PR không gắn nhãn `windows` và không ai gọi `workflow_dispatch`. Ghi thành `not_run` chứ KHÔNG ghi thành `passed` hay bỏ trống — phân biệt \"đạt\", \"hỏng\", \"bỏ qua\" và \"chưa chạy\" là đúng thứ mà cross-review #489 đòi ở P2 này.",
+    "snippets": [
+      "n biệt \"đạt\", \"hỏng\", \"bỏ qua\" và \"chưa chạy\" là đúng thứ mà cross-review #489 đòi ở P2 này."
+    ]
+  },
+  {
+    "path": "ops/land/pr480-land-evidence.yaml",
+    "field": "post_merge_checks.8.DINH_CHINH_TOAN_KHOI",
+    "line": 183,
+    "text": "Rút lời khai \"master ĐỎ, 4 vi phạm, đỏ sẵn\" và cách dùng nó làm căn cứ bác reviewer. Đo lại trong kho đầy đủ cho 0 vi phạm ở các commit được nêu. Chênh lệch số vi phạm giữa các commit cùng sạch vẫn là 0 vi phạm; không dùng câu \"cả bốn vế đều sai\". Điều phối khai đã đo kho nông với `is-shallow=true`, 417 commit kể cả HEAD; sau `--unshallow` thành `false`, 1870 commit. Gói review không có kho nông/log gốc và không neo exact HEAD của cặp số này, nên phần lịch sử ấy là ATTESTATION, KHÔNG ĐO ĐƯỢC độc lập. CƠ CHẾ đọc được trong mã: dòng 805 gọi `cat-file -e <neo>^{commit}`; dòng 818 gọi `merge-base --is-ancestor <neo> HEAD`. Nếu object còn nhưng shallow boundary cắt đường tổ tiên, mã thoát 1 bị diễn giải thành vi phạm ancestry. Trong kho đầy đủ của gói, các neo được kiểm đều với tới được. Điều đó hỗ trợ cơ chế kho nông; không xác nhận mọi yếu tố của hai môi trường lịch sử giống nhau. A/B do điều phối thuật lại tại `3873173`: mirror không nông có 1858 commit, 38 biên nhận v2 đạt, 0 vi phạm; kho nông có 405 commit, 34 biên nhận v2 đạt, 4 vi phạm. Reviewer chỉ tái đo được vế mirror: 91/91 biên nhận phân loại, 0 vi phạm, `TỔNG: ĐẠT`. Không gọi đây là phép thử độc lập đã chứng minh \"chỉ khác đúng một biến\" hoặc nguyên nhân duy nhất. Không dùng vế kho nông chưa đối chứng để phán môi trường connector. AI TÌM RA: cross-review HẬU KIỂM trên head `3873173`. Nó chạy CLI thật trong mirror và báo `91/91 biên nhận, TỔNG: ĐẠT` — ngược hẳn con số điều phối khai. Chính chỗ ngược ấy buộc phải đo A/B; nếu reviewer chép lại con số của điều phối thì lỗi này còn nguyên.",
+    "snippets": [
+      "n duy nhất. Không dùng vế kho nông chưa đối chứng để phán môi trường connector. AI TÌM RA: cross-review HẬU KIỂM trên head `3873173`. Nó chạy CLI thật trong mirror và báo `91/91 biên nhận, TỔNG: ĐẠT` — n"
+    ]
+  },
+  {
+    "path": "ops/land/pr487-land-evidence.yaml",
+    "field": "head_da_cross_review_khac_head_merge.no_review_head_da_merge.dieu_kien_con_lai",
+    "line": 88,
+    "text": "Giữ finding chưa đóng và tiếp tục cross-review PR #489 tới `approve` theo chỉ thị chủ kho. `0 P1` không thay verdict hoặc tự tạo thẩm quyền merge. Nợ lịch sử merge trước review vẫn có vết; không cần viết lại lịch sử để tạo tiền kiểm.",
+    "snippets": [
+      "Giữ finding chưa đóng và tiếp tục cross-review PR #489 tới `approve` theo chỉ thị chủ kho. `0 P1` không thay verdict hoặc tự tạo thẩm quyền merge."
+    ]
+  },
+  {
+    "path": "ops/land/pr489-land-evidence.yaml",
+    "field": "head_da_cross_review_khac_head_merge.no_review_head_da_merge.mo_ta",
+    "line": 158,
+    "text": "Head `efa397e` CHƯA có lượt cross-review exact head. Đây là cùng một nợ mà #468 và #487 đã mắc; #487 trả bằng một lượt hậu kiểm trong phiên này, PR này thì CHƯA.",
+    "snippets": [
+      "Head `efa397e` CHƯA có lượt cross-review exact head. Đây là cùng một nợ mà #468 và #487 đã mắc; #487 trả bằng một lượt hậu kiểm trong phiên "
+    ]
+  },
+  {
+    "path": "ops/land/pr489-land-evidence.yaml",
+    "field": "head_da_cross_review_khac_head_merge.no_review_head_da_merge.khong_duoc_doc_la_da_thoa",
+    "line": 180,
+    "text": "`PROTOCOL:29` ghi thẳng *\"Head đổi làm bằng chứng và ủy quyền cũ hết hiệu lực\"*, và `PROTOCOL:43` cấm Land Operator *\"tự nới điều kiện\"*. Verdict `approve` neo `98ef1f1` vì vậy KHÔNG thoả điều kiện cross-review cho head `efa397e` — nó là bằng chứng CHO MỘT SHA KHÁC, không phải bằng chứng yếu cho SHA này. Mọi bảng tóm tắt của #489 phải ghi điều kiện cross-review là CHƯA THOẢ, không được đánh dấu đã đạt rồi ghi chú ở chỗ khác. Codex connector chấm đúng chỗ này (P1 `Do not count the stale cross-review toward landing`) trên `a48f576`, và nó ĐÚNG. Đây là LẦN THỨ TƯ trong phiên bản TÓM TẮT khai rộng hơn bản CHI TIẾT — cùng một hình dạng lỗi, bốn nạn nhân khác nhau.",
+    "snippets": [
+      "onnector chấm đúng chỗ này (P1 `Do not count the stale cross-review toward landing`) trên `a48f576`, và nó ĐÚNG. Đây là LẦN THỨ TƯ trong phiên bản TÓM TẮT khai rộng hơ"
+    ]
+  },
+  {
+    "path": "ops/land/pr489-land-evidence.yaml",
+    "field": "post_merge_checks.10.ma_tran_windows_CHI_la_cau_hinh.khong_do_duoc",
+    "line": 335,
+    "text": "PR này có gắn nhãn `windows` hay không · có ai gọi `workflow_dispatch` hay không · runner Windows đã chạy lần nào cho mã này hay chưa · lượt push master có phải lần ĐẦU TIÊN hay không. Bốn mệnh đề ấy đều nói về LỊCH SỬ SỰ KIỆN; YAML chỉ chứa ĐIỀU KIỆN xét sự kiện, không chứa sự kiện. Hồ sơ này không đọc run nào, không giữ run JSON, không quét lịch sử.",
+    "snippets": [
+      "ows đã chạy lần nào cho mã này hay chưa · lượt push master có phải lần ĐẦU TIÊN hay không. Bốn mệnh đề ấy đều nói về LỊCH SỬ SỰ KIỆN; YAML chỉ chứa ĐIỀU KIỆN "
+    ]
+  },
+  {
+    "path": "ops/land/pr489-land-evidence.yaml",
+    "field": "no_con_lai.2.ghi_chu",
+    "line": 414,
+    "text": "Head `efa397e` chưa có cross-review exact head. Xem `no_review_head_da_merge`.",
+    "snippets": [
+      "Head `efa397e` chưa có cross-review exact head. Xem `no_review_head_da_merge`."
+    ]
+  },
+  {
+    "path": "ops/land/pr489-land-evidence.yaml",
+    "field": "chuoi_land_evidence_DA_DONG_THEO_QUYET_DINH_CHU_KHO.he_qua_do_duoc_cua_viec_dong_chuoi.pham_vi_cua_ket_luan",
+    "line": 465,
+    "text": "Kết luận đúng CHO TẬP ẤY: trong các tệp đã quét, tại SHA này, không cổng nào đọc `ops/land/`. KHÔNG mở rộng thành \"không cổng nào đỏ\" nói chung — phép quét literal KHÔNG thấy consumer dựng đường dẫn ĐỘNG, consumer ngoài kho, hay CI/API (vốn đã khai là chưa đo). Bản trước viết câu bao trùm ấy; cross-review lượt 4 chấm đúng, và nó ĐÚNG.",
+    "snippets": [
+      "ài kho, hay CI/API (vốn đã khai là chưa đo). Bản trước viết câu bao trùm ấy; cross-review lượt 4 chấm đúng, và nó ĐÚNG."
+    ]
+  },
+  {
+    "path": "ops/land/pr491-r358-ghi-so-land-evidence.yaml",
+    "field": "bookkeeping.2",
+    "line": 232,
+    "text": "MƯỜI P3 của lượt 2 và NĂM P2 của Codex connector bot chưa vá lúc merge. Năm thread review của bot KHÔNG được resolve — điều phối chỉ resolve thread đã thật sự xử lý.",
+    "snippets": [
+      " và NĂM P2 của Codex connector bot chưa vá lúc merge. Năm thread review của bot KHÔNG được resolve — điều phối chỉ resolve thread đã thật sự xử lý."
+    ]
+  },
+  {
+    "path": "ops/land/pr491-r358-ghi-so-land-evidence.yaml",
+    "field": "bookkeeping.4",
+    "line": 241,
+    "text": "NỢ CŨ KHÔNG ĐỘNG TỚI: `_kiem_bia_mo` dùng `any(...)` trong `ops/lease_publish.py:606` vẫn nguyên trên master · nợ A9 (bốn lease GATE cấp trước hạn #456, `generation` giữ 1, lệch `ADR-0034`) chờ quyết định chủ kho · Issue #463–#467 còn `open` · PR #479 và #490 chưa merge. Bốn câu này là THUẬT LẠI theo hồ sơ chuỗi #468→#489, trừ câu về `any(...)` đã đo lại trên `origin/master`; trạng thái Issue/PR chưa hỏi lại API trong đợt này.",
+    "snippets": [
+      "–#467 còn `open` · PR #479 và #490 chưa merge. Bốn câu này là THUẬT LẠI theo hồ sơ chuỗi #468→#489, trừ câu về `any(...)` đã đo lại trên `origin/"
+    ]
+  },
+  {
+    "path": "ops/land/pr493-land-evidence.yaml",
+    "field": "cross_review.ghi_chu_head",
+    "line": 107,
+    "text": "KHÔNG lượt nào review head đã merge. Lượt 17 neo `61b4c24`; sau nó còn HAI commit đi vào `99aef14` — `6da8291` (vá 2 P3 của chính lượt 17) và `99aef14` (khối đóng vòng lặp). Cả hai CHƯA qua cross-review nào.",
+    "snippets": [
+      "ef14` (khối đóng vòng lặp). Cả hai CHƯA qua cross-review nào."
+    ]
+  },
+  {
+    "path": "ops/land/pr493-land-evidence.yaml",
+    "field": "pre_merge_checks.2.trang_thai_cua_check",
+    "line": 180,
+    "text": "CHƯA KÍCH HOẠT, chưa là required check — `mergeable_state: unstable`",
+    "snippets": [
+      "CHƯA KÍCH HOẠT, chưa là required check — `mergeable_state: unstable`"
+    ]
+  },
+  {
+    "path": "ops/land/pr493-land-evidence.yaml",
+    "field": "no_ky_thuat.1.slug",
+    "line": 288,
+    "text": "cong-receipt-chua-dinh-nghia-cay-dang-merge",
+    "snippets": [
+      "cong-receipt-chua-dinh-nghia-cay-dang-merge"
+    ]
+  },
+  {
+    "path": "ops/land/pr554-wp541-land-evidence.yaml",
+    "field": "KHONG_DUOC_GOI_LA_LANDED_ban_truoc_khi_chot",
+    "line": 162,
+    "text": "PROTOCOL:1079 nguyen van: \"Het han hoac thieu quyen cho buoc con lai thi dung buoc ay va handoff; khong goi `landed`/Packet complete/Mission complete khi thieu bang chung tuong ung.\" `gate-registry` DO tren master sau merge. Du co bang chung manh rang no khong den tu ban va #541, mot cong DO van la mot cong DO: bang chung hau-merge gate CHUA DU. Packet #541 CHUA duoc goi la landed. Merge xong KHAC land xong. Chu kho quyet: hoac mo packet cho gate-registry, hoac khai tuong minh rang land nay di kem mot cong do da duoc dinh danh. KHONG duoc im lang coi nhu no xanh.",
+    "snippets": [
+      "cong DO: bang chung hau-merge gate CHUA DU. Packet #541 CHUA duoc goi la landed. Merge xong KHAC land xong. Chu kho quyet: hoac mo packet cho gate-registry, hoac khai tuong minh rang lan"
+    ]
+  },
+  {
+    "path": "ops/land/pr554-wp541-land-evidence.yaml",
+    "field": "CAP_NHAT_1.viec_cua_541_con_treo_luc_cap_nhat.0",
+    "line": 294,
+    "text": "Ho so land nay chua vao master — PR dang mo la buoc dau.",
+    "snippets": [
+      "Ho so land nay chua vao master — PR dang mo la buoc dau."
+    ]
+  },
+  {
+    "path": "ops/land/pr594-wp578-land-evidence.yaml",
+    "field": "VI_PHAM_VAI_TRO.merged_van_dung_khong",
+    "line": 109,
+    "text": "`merged`: CO — su that da xay ra (PR #594 vao master, 714f36e6). `LANDED`: CHUA — xem TRANG_THAI; khong vi vi pham nay ma vi bookkeeping chua xong va gate hau merge chua xac lap theo §10.2.3. Vi pham nam o AI THUC HIEN thao tac merge, khong o hien vat. Ban ghi khai vi pham ngay canh trang thai, de nguoi doc sau can lai. Chu kho quyet co can lam gi them khong. (Ban truoc cua muc nay con noi \"Ban ghi giu LANDED: CO\" — viet tu truoc ban va vong 1 va sot lai; codex vong 2 G1 + ra soat doc lap #1 bat duoc.)",
+    "snippets": [
+      "g vi vi pham nay ma vi bookkeeping chua xong va gate hau merge chua xac lap theo §10.2.3. Vi pham nam o AI THUC HIEN thao tac merge, khong o hien vat. Ban ghi kha",
+      "eeping chua xong va gate hau merge chua xac lap theo §10.2.3. Vi pham nam o AI THUC HIEN thao tac merge, khong o hien vat. Ban ghi khai vi pham ngay canh trang thai, de nguoi doc sau can lai. Chu kho quy"
+    ]
+  },
+  {
+    "path": "ops/land/pr594-wp578-land-evidence.yaml",
+    "field": "VI_PHAM_2_CHONG_LAN_WRITE_SET.so_do_duoc",
+    "line": 129,
+    "text": "#579 g4 dang-lease-dau-truoc-kiem-sau-r6-g4-claude tren origin/ops/cap-lease-579-g4 (head 4e75ca7f315debb04c048161299210d0c2eb8e47, 2026-09-21T15:59:37Z; g4 cap o d5e473b 15:59:18Z, TRUOC commit 7becd26 16:13:00Z cua tep nay): lease_expires_at_utc 2026-09-22T06:00:00Z, write_set d.113 con ops/lease_publish_test.py, g3 mang da_bi_thay_the -> g4, va chinh g4 d.55 khai KHAI_CHONG_LAN_CON_LAI: \"windows-fixture-posix-r1-g1-claude VAN giu ops/lease_publish_test.py toi 22:30:00Z\". Cua so hai writer DAI HON chu khong ngan hon (#578 toi 22:30Z, #579 keo toi 06:00Z hom sau). HIEU LUC DO DUOC bang chinh cong cu ma DINH_CHINH_2 cua lease #578 dung lam tieu chi: `python3 ops/lease_publish.py ai-dang-giu ops/lease_publish_test.py` (chi ls-remote, khong ghi) luc 2026-09-21T16:53:05Z va 17:04:25Z deu ra rc=11, NGƯỜI_GIỮ 3: dang-lease-dau-truoc-kiem-sau-r2-g3-claude, dang-lease-dau-truoc-kiem-sau-r6-g4-claude, windows-fixture-posix-r1-g1-claude — BA nguoi giu mot duong, khong phai hai: bia mo cua g3 chi nam tren nhanh g4 (4e75ca7f), con cac ref ops/cap-lease-579, -g2, -g3 (cung fbb8dd1b) van mang g3 khong bia mo nen bo quet van thay. Bot cung da chieu g4 len #579 (comment 5763534966, 16:03:01Z) — cung co che chieu ma lease g1 cua #578 duoc dang (5749190951). Ban truoc ghi \"Nhanh g4 CHUA len master: hieu luc thuc te KHÔNG ĐO ĐƯỢC\" — tieu chi \"len master\" tu mau thuan: lease g1 cua chinh #578 cung khong co tren master (`git show origin/master:ops/leases/windows-fixture-posix-r1-g1-claude.yaml` -> does not exist) ma tep nay van coi la hieu luc. Ra soat Fable vong 3 (#3) bat duoc.",
+    "snippets": [
+      "49190951). Ban truoc ghi \"Nhanh g4 CHUA len master: hieu luc thuc te KHÔNG ĐO ĐƯỢC\" — tieu chi \"len master\" tu mau thuan: lease g1 cua chinh #578 cung"
+    ]
+  },
+  {
+    "path": "ops/land/pr594-wp578-land-evidence.yaml",
+    "field": "SU_CO_CHUOI_KICH_HOAT_TRONG_LOI_KHAI.ai_phat_hien",
+    "line": 286,
+    "text": "Lan thu BA: ra soat Fable 5.1 vong 6 (cung phien land, subagent), do REST luc 18:45Z; phien chinh tu kiem lai va xac nhan (mot dong chua chuoi; 6 review; +59s). Lan thu TU: ra soat Fable 5.1 vong 7 (#5), phien chinh do lai (REST ~19:05Z) va xac nhan. Muc he_qua/ai_phat_hien nay den vong 7 van chi ke lan thu BA — Fable vong 8 (#4) bat, bo sung o ban nay.",
+    "snippets": [
+      " tu kiem lai va xac nhan (mot dong chua chuoi; 6 review; +59s). Lan thu TU: ra soat Fable 5.1 vong 7 (#5), phien chinh do lai (REST ~19:05Z) va xac nhan. M"
+    ]
+  },
+  {
+    "path": "ops/land/pr594-wp578-land-evidence.yaml",
+    "field": "TRANG_THAI_chi_tiet.landed",
+    "line": 815,
+    "text": "CHUA. Con thieu bookkeeping VA gate hau merge moi GAN DU (1 du + 2 mot phan + 1 thieu) theo §10.2.3.",
+    "snippets": [
+      "CHUA. Con thieu bookkeeping VA gate hau merge moi GAN DU (1 du + 2 mot phan + 1 thieu) theo §10.2.3."
+    ]
+  },
+  {
+    "path": "ops/land/pr594-wp578-land-evidence.yaml",
+    "field": "DINH_CHINH_SAU_REVIEW_VONG_16.P2_A_pham_vi_CHUA_DONG_phan_loi_khai.con_sot_va_da_sua.3",
+    "line": 1273,
+    "text": "Cau \"hinh dang do khong tai xuat hien trong 35 commit\" suy rong tu 5 phep do sang 35 doi tuong chua do. Da thu ve \"5 luot gate da doc tren master\".",
+    "snippets": [
+      "ong tu 5 phep do sang 35 doi tuong chua do. Da thu ve \"5 luot gate da doc tren master\"."
+    ]
+  },
+  {
+    "path": "ops/land/pr594-wp578-land-evidence.yaml",
+    "field": "DINH_CHINH_SAU_REVIEW_VONG_16.P2_C_neo_dong_no_DA_TRA.vong_15_tu_khai_no",
+    "line": 1293,
+    "text": "Vong 15 gioi han luat ve neo protocol va khai thang rang neo CLAUDE.md/ADR \"CHUA duoc khai, do la no con lai\". Reviewer luot 9 xac nhan thua nhan no la trung thuc nhung lop van CHUA DONG — dung.",
+    "snippets": [
+      "khai thang rang neo CLAUDE.md/ADR \"CHUA duoc khai, do la no con lai\". Reviewer luot 9 xac nhan thua nhan no la trung thuc nhung lop van CHUA DONG — dung."
+    ]
+  },
+  {
+    "path": "ops/land/pr594-wp578-land-evidence.yaml",
+    "field": "DINH_CHINH_SAU_REVIEW_VONG_6.KHONG_mat_gi",
+    "line": 1631,
+    "text": "LANDED_KHONG_XAC_LAP tang tu 14 len 16 dong; CON_THIEU_DE_GOI_LANDED tang tu 8 len 9 (them VI_PHAM_3). LANDED van CHUA. Khong nang muc bao dam nao; identity hau merge van 1 du + 2 mot phan + 1 thieu; identity tien merge (ci.yml) ha ro thanh Checkout MOT PHAN. Ba vi pham da khai. Vong lap DUNG.",
+    "snippets": [
+      "len 9 (them VI_PHAM_3). LANDED van CHUA. Khong nang muc bao dam nao; identity hau merge van 1 du + 2 mot phan + 1 thieu; identity tien merge (ci.yml) ha ro thanh Checkout MOT PHAN. Ba vi "
+    ]
+  },
+  {
+    "path": "ops/land/pr594-wp578-land-evidence.yaml",
+    "field": "DINH_CHINH_SAU_REVIEW_VONG_5.B_codex_vong_4",
+    "line": 1660,
+    "text": "I1 (P1): CHAP NHAN LOI, lop C — danh dau tranh chap NGAY TAI input_packet_generations, khong chon ben; BAC MOT VE, lop E — \"candidate from a retired lease\" sai vi 5f91846 (05:35:35Z) co TRUOC grant g2 (05:41:48Z) 6m13s; fixture hoi quy -> lop F, ghi no. I2 (P2): CHAP NHAN, lop B — claude-code -> claude_code, cloud -> machine/local theo KE_HOACH §2 d.32; provider giu; fixture -> lop F. I3 (P1): CHAP NHAN phan o schema, lop C — tach authorization_url thanh phe chuan hau kiem + khai nguon ben truoc thao tac chua co hien vat; phan \"classify the merge as unauthorized\" KHONG tu lam — ghi hai cach doc, chu kho phan xu; validator -> lop F.",
+    "snippets": [
+      "em + khai nguon ben truoc thao tac chua co hien vat; phan \"classify the merge as unauthorized\" KHONG tu lam — ghi hai cach doc, chu kho phan xu; validator -> lop F."
+    ]
+  },
+  {
+    "path": "ops/land/pr594-wp578-land-evidence.yaml",
+    "field": "DINH_CHINH_SAU_REVIEW_VONG_5.KHONG_mat_gi",
+    "line": 1672,
+    "text": "LANDED_KHONG_XAC_LAP tang tu 12 len 14 dong; CON_THIEU_DE_GOI_LANDED tang tu 7 len 8 (them uy quyen). LANDED van CHUA. Khong nang muc bao dam nao; hau_merge_gate van GAN DU nhung con so ha tu \"3/4\" xuong \"1 du + 2 mot phan + 1 thieu\" — lan dau trong vong lap mot con so di XUONG.",
+    "snippets": [
+      " len 8 (them uy quyen). LANDED van CHUA. Khong nang muc bao dam nao; hau_merge_gate van GAN DU nhung con so ha tu \"3/4\" xuong \"1 du + 2 mot phan + 1 thieu\" — lan dau trong vong l"
+    ]
+  },
+  {
+    "path": "ops/land/pr594-wp578-land-evidence.yaml",
+    "field": "DINH_CHINH_SAU_REVIEW_VONG_4.KHONG_mat_gi",
+    "line": 1726,
+    "text": "LANDED_KHONG_XAC_LAP tang tu 9 len 12 dong; CON_THIEU_DE_GOI_LANDED giu 7 (hai muc thu hep, khong xoa). LANDED van CHUA. Khong nang muc bao dam nao; hau_merge_gate chi tu KHONG XAC LAP len GAN DU.",
+    "snippets": [
+      "uc thu hep, khong xoa). LANDED van CHUA. Khong nang muc bao dam nao; hau_merge_gate chi tu KHONG XAC LAP len GAN DU."
+    ]
+  },
+  {
+    "path": "ops/land/pr666-wp650-land-evidence.yaml",
+    "field": "dinh_chinh_lease.dinh_chinh",
+    "line": 184,
+    "text": "Luc 06:40Z packet chi o trang thai `merged` (merge 06:35:57Z); hau-merge gate va bookkeeping chua co bang chung (doc lai CI master 07:31Z/07:43Z, quet lease 07:42Z, va PR bookkeeping chua merge). Tu \"DA LAND\" trong lease la SAI thuat ngu; trang thai dung ghi o trang_thai_packet cua tep nay. Tep lease KHONG sua: no phai giu nguyen byte voi ops/cap-lease-650 4fe61ac, va lease da het han 06:55Z (sua lease het han lam ops-publish-lease rc=8 — CLAUDE.md).",
+    "snippets": [
+      "7Z); hau-merge gate va bookkeeping chua co bang chung (doc lai CI master 07:31Z/07:43Z, quet lease 07:42Z, va PR bookkeeping chua merge). Tu \"DA LAND\" trong lease la SAI th",
+      "et lease 07:42Z, va PR bookkeeping chua merge). Tu \"DA LAND\" trong lease la SAI thuat ngu; trang thai dung ghi o trang_thai_packet cua tep nay. T"
+    ]
+  },
+  {
+    "path": "ops/land/pr679-wp678-land-evidence.yaml",
+    "field": "generation_lich_su",
+    "line": 27,
+    "text": "Ba ban truoc cua tep nay (79d9840, 252f3a9, va 947fd1f — merge, cha 252f3a9 + 44620e8, KHONG doi tep: `git diff --quiet 252f3a9 947fd1f -- <tep>` rc=0) KHONG co khoa `generation` cap cao nhat (do lai 2026-09-30: `git show <c>:ops/land/pr679-wp678-land-evidence.yaml | grep -c '^generation'` => 0 ca ba); khoa them o bcd65d3 (`git log --format=%h -G'^generation: 1$' -- <tep>` => bcd65d3; ban truoc dung -S, ma -S dem so lan xuat hien chuoi nen chinh cau trich lenh o day lam lenh tra them commit chua no), theo finding `land-attempt-thieu-dinh-danh` cua cross-review #691 luot 1 codex (comment 5895373260). Luot 1 co HAI ket qua, ca hai tu khai codex, ca hai (b) — xem bookkeeping muc ghi_chu_hai_ket_qua_luot1_pr691. Khong muon `generation: 0` cua packet.",
+    "snippets": [
+      "enh o day lam lenh tra them commit chua no), theo finding `land-attempt-thieu-dinh-danh` cua cross-review #691 luot 1 codex (comment 5895373260). Luot 1 co HAI ket qua, ca hai tu khai codex, ca hai (b) — x"
+    ]
+  },
+  {
+    "path": "ops/land/pr679-wp678-land-evidence.yaml",
+    "field": "trang_thai_packet.lich_su_landed",
+    "line": 99,
+    "text": "79d9840..d1661f7 ghi `landed: false` (dung o thoi diem ay: thieu quyet dinh chu kho cho hai moc va do thu tu uy quyen). fa22ad0 len `true` nho quyet_dinh_chu_kho (hai moc o (2)) khi TU CACH uy quyen o (4) chua duoc xet; review 5904916304 (lop R3-UY-QUYEN-TU-CACH) bat. Chu kho quyet lop ay luc 2026-09-30T06:14:01Z, TRUOC khi `landed` co hieu luc (merge #691); ban nay giu `true` va ghi them can cu ay. Hai moc (2) va tu cach (4) deu dong theo quyet dinh, khong vi da duoc do. Tu cach cua CHINH quyet dinh o (2): chu kho xac nhan luc 07:01:30Z la quyet dinh 06:14 phu ca hai — xem authorization.tu_cach_uy_quyen.pham_vi_voi_quyet_dinh_0533. KHOANG HO THU HAI, cung hinh dang voi (4): fa22ad0 (0 cau ve tu cach) va 25b02af (neo_ben_ghi_chu cua 5904784660 ghi \"Cung tu cach voi uy quyen merge\" trong khi khong_tai_su_dung cua quyet dinh 06:14 ghi \"CHI cho uy quyen 5889749874\") deu giu `true` khi tu cach cua CHINH quyet dinh hai moc (2) chua duoc chu kho xet — theo nguyen tac o landed_ly_do_giu_true, ca hai ban ay le ra phai `false`. Review luot 4 cua PR #691 (5905936797, lop tu-cach-quyet-dinh-0533-ngoai-pham-vi-da-ghi) bat; tu 9baaef8 (07:02:18Z, sau xac nhan 07:01:30Z) moi du can cu. `landed` chua co hieu luc o ban nao trong so ay (chi co hieu luc tu merge #691).",
+    "snippets": [
+      " o (2)) khi TU CACH uy quyen o (4) chua duoc xet; review 5904916304 (lop R3-UY-QUYEN-TU-CACH) bat. Chu kho quyet lop ay luc 2026-09-30T06:14:01Z, TRUOC khi ",
+      "07:01:30Z) moi du can cu. `landed` chua co hieu luc o ban nao trong so ay (chi co hieu luc tu merge #691)."
+    ]
+  },
+  {
+    "path": "ops/land/pr679-wp678-land-evidence.yaml",
+    "field": "authorization.assurance_ghi_chu",
+    "line": 177,
+    "text": "Cross-review codex luot 6 approve 0/0/0 tren dung 03a7219 (ops/reviews/wp678-spec-review-6-codex-verdict.md). Executor ho Claude, reviewer ho Codex. KHONG co verdict human_audited: ho so audit da soan (pull/679#issuecomment-5889555584) nhung chu kho chua dang verdict audit; chi thi merge KHONG thay cho no va KHONG duoc ghi la human_audited.",
+    "snippets": [
+      "ecomment-5889555584) nhung chu kho chua dang verdict audit; chi thi merge KHONG thay cho no va KHONG duoc ghi la human_audited."
+    ]
+  },
+  {
+    "path": "ops/land/pr684-wp677-land-evidence.yaml",
+    "field": "post_merge_checks.0.moc_workflow_definition.he_qua",
+    "line": 191,
+    "text": "KHONG anh huong trang thai packet o tep nay (packet_landed: false vi ma chua merge). Khi land PR #689, ho so land cua packet phai do moc nay rieng hoac xin waiver cua chu kho.",
+    "snippets": [
+      "ep nay (packet_landed: false vi ma chua merge). Khi land PR #689, ho so land cua packet phai do moc nay rieng hoac xin waiver cua chu kho."
+    ]
+  },
+  {
+    "path": "ops/land/pr684-wp677-land-evidence.yaml",
+    "field": "bookkeeping.1",
+    "line": 226,
+    "text": "Nhanh claude/spec-dot-bien-l-bien-cong-khai-20260929 (head 212da2f) la TO TIEN cua master 44620e8: git rev-list --left-right --count 212da2f...44620e8 = 0 / 9 (ahead 0, behind 9) — khong con commit rieng chua vao master; don bang ops-don-ref.yml khi chu kho muon.",
+    "snippets": [
+      "behind 9) — khong con commit rieng chua vao master; don bang ops-don-ref.yml khi chu kho muon."
+    ]
+  },
+  {
+    "path": "ops/land/pr689-wp677-land-evidence.yaml",
+    "field": "trang_thai_packet.lich_su_landed",
+    "line": 65,
+    "text": "Ban dau cua tep nay (soan 2026-10-01 01:36Z..01:58Z) ghi `landed: false`: ba moc chua co quyet dinh chu kho cho run 36798575727, bookkeeping chua xong. Len `true` sau quyet dinh chu kho ~03:29Z (neo 5924153402) — dong theo quyet dinh, khong vi da do du. `landed` chua co hieu luc o ban nao truoc merge PR #699.",
+    "snippets": [
+      " dinh, khong vi da do du. `landed` chua co hieu luc o ban nao truoc merge PR #699."
+    ]
+  },
+  {
+    "path": "ops/land/pr689-wp677-land-evidence.yaml",
+    "field": "trang_thai_packet.quyet_dinh_chu_kho_ba_moc.cau_hoi_nguyen_van",
+    "line": 83,
+    "text": "PR ghi sổ #699 khai `landed: false` cho #677 vì còn 3 mục chưa đo được trên run hậu-merge 36798575727. Anh quyết thế nào?",
+    "snippets": [
+      "nded: false` cho #677 vì còn 3 mục chưa đo được trên run hậu-merge 36798575727. Anh quyết thế nào?"
+    ]
+  },
+  {
+    "path": "ops/land/pr689-wp677-land-evidence.yaml",
+    "field": "base_luc_merge.noi_dung",
+    "line": 232,
+    "text": "Head duyet 0614f7f = merge origin/master fc852ff vao adad5f5 (cha 0614f7f: adad5f5 + fc852ff). Luc merge, master la 91eb8fb, KHAC fc852ff: git rev-list fc852ff..91eb8fb = 7 commit (PR #692), git diff --name-status fc852ff 91eb8fb = dung 1 tep A ops/land/pr684-wp677-land-evidence.yaml — khong cham write set. Human audit dang 00:22:42Z (master luc ay chua co #692); #692 merge 00:54:17Z; #689 merge 00:55:21Z.",
+    "snippets": [
+      "udit dang 00:22:42Z (master luc ay chua co #692); #692 merge 00:54:17Z; #689 merge 00:55:21Z."
+    ]
+  },
+  {
+    "path": "ops/land/pr696-wp668-land-evidence.yaml",
+    "field": "trang_thai_packet.landed_ghi_chu",
+    "line": 59,
+    "text": "PROTOCOL §10.2.4: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va bookkeeping Packet xong; §13.1: khong goi landed khi thieu bang chung tuong ung. (1) Merge: cha thu hai cua 423b4ba = 3ddda02 (measured); 3ddda02 KHAC head human audit cc78b33 — uy quyen cho 3ddda02 co tu cach loi_khai_co_neo (authorization.head_moi), chu kho XAC NHAN luc 11:36:14Z (quyet_dinh_chu_kho_ba_moc.uy_quyen_head_3ddda02). (2) Hau-merge gate: run 36696528580 conclusion FAILURE — 13/14 job success, gate-registry failure (het gio 4500 s o ops/nhanh_don_duoc_test.py); moi required context success. Chu kho CHAP NHAN required xanh cho RIENG gate-registry do (quyet_dinh_chu_kho_gate_registry) — dong theo QUYET DINH, khong phai vi gate xanh; gate-registry do van la no. Moc Run, Checkout measured. Moc Workflow definition: commit nguon not_measured, BYTES do bang nguon thay the — chu kho CHAP NHAN nguon thay the cho RIENG run nay (11:36:14Z). rc so chi co o gate (0) va gate-registry (1); cac job con lai rc not_measured, chi step_conclusion — chu kho CHAP NHAN step_conclusion thay rc cho RIENG run nay (11:36:14Z). Cac moc ay DONG THEO QUYET DINH CHU KHO, KHONG phai do du; quyet dinh 11:27:13Z KHONG phu hai moc ay, quyet dinh 11:36:14Z moi phu. (3) Bookkeeping: PR bookkeeping chua merge; 16 receipt (cho 16 tep *-verdict.md) co trong nhanh bookkeeping, 5 tep luot cat/ngat khong co receipt (xem bookkeeping.receipt). Dieu kien con lai DUY NHAT: merge PR bookkeeping (landed co hieu luc tu merge commit ay); dong Issue #668 la buoc sau do. Land operator KHONG tu dong muc nao bang quyet dinh cu (pr666, #691 — ca hai ghi khong_tai_su_dung).",
+    "snippets": [
+      "u. (3) Bookkeeping: PR bookkeeping chua merge; 16 receipt (cho 16 tep *-verdict.md) co trong nhanh bookkeeping, 5 tep luot cat/ngat khong co rece"
+    ]
+  },
+  {
+    "path": "ops/land/pr696-wp668-land-evidence.yaml",
+    "field": "trang_thai_packet.lich_su_landed",
+    "line": 81,
+    "text": "Ban dau cua tep nay (soan 2026-09-30 ~11:24Z..11:30Z, chua commit) ghi `landed: false`: gate-registry do (11:14:14Z), moc Workflow definition va rc chua co quyet dinh chu kho cho run nay, uy quyen 3ddda02 chi co loi_khai_co_neo chua duoc xac nhan, bookkeeping chua xong. Sau quyet dinh 11:27:13Z (chi gate-registry) van `false`. Len `true` sau quyet dinh 11:36:14Z (ba moc con lai) — dong theo quyet dinh, khong vi da do du. `landed` chua co hieu luc o ban nao truoc merge PR bookkeeping.",
+    "snippets": [
+      " dinh, khong vi da do du. `landed` chua co hieu luc o ban nao truoc merge PR bookkeeping."
+    ]
+  },
+  {
+    "path": "ops/land/pr696-wp668-land-evidence.yaml",
+    "field": "trang_thai_packet.con_thieu_de_goi_landed.4.mo_ta",
+    "line": 211,
+    "text": "Nhanh claude/bookkeeping-668 (bc57bca) mang spec + 3 lease + 21 verdict + 1 patch, CHUA merge vao master. 16 receipt + hang README cho 16 tep *-verdict.md co trong cung nhanh (bookkeeping.receipt). Issue #668 open (readback 11:23:37Z).",
+    "snippets": [
+      " + 3 lease + 21 verdict + 1 patch, CHUA merge vao master. 16 receipt + hang README cho 16 tep *-verdict.md co trong cung nhanh (bookkeeping.receipt). Issue "
+    ]
+  },
+  {
+    "path": "ops/land/pr696-wp668-land-evidence.yaml",
+    "field": "bookkeeping.1.noi_dung",
+    "line": 529,
+    "text": "Nhanh claude/bookkeeping-668 @ bc57bca so origin/master 423b4ba: 26 tep them (1 spec, 3 lease, 21 verdict, 1 patch). CHUA merge.",
+    "snippets": [
+      "ec, 3 lease, 21 verdict, 1 patch). CHUA merge."
+    ]
+  },
+  {
+    "path": "ops/land/pr701-wp687-land-evidence.yaml",
+    "field": "trang_thai_packet.landed_hieu_luc_tu",
+    "line": 57,
+    "text": "MOC MUON HON trong hai moc (cau 2 cua quyet dinh chu kho — trang_thai_packet.quyet_dinh_chu_kho.cau_2): (a) thoi diem merge commit cua PR ghi so dua tep nay vao master (committer date cua merge commit ay; do bang `git log --first-parent --diff-filter=A --format='%H %cI' origin/master -- ops/land/pr701-wp687-land-evidence.yaml`); (b) 2026-10-02T01:12:00Z, han goc cua lease g3 — han MUON NHAT cua moi ban g3 tren moi ref quet duoc (trang_thai_packet.landed_hieu_luc_dieu_kien). Truoc moc ay `landed: true` trong tep nay CHUA co hieu luc, ke ca khi tep da nam tren master.",
+    "snippets": [
+      "oc ay `landed: true` trong tep nay CHUA co hieu luc, ke ca khi tep da nam tren master."
+    ]
+  },
+  {
+    "path": "ops/land/pr701-wp687-land-evidence.yaml",
+    "field": "nghiem_thu_spec_r3.human_audit_neu_ten",
+    "line": 485,
+    "text": "measured (regex tren than readback-comment-5925449076.json): human audit KHONG neu ten muc nao cua spec (A1-A5, B1-B4, C1, M1-M4: 0 lan moi ten). No neu theo NOI DUNG — L1/L2/L4 (lop finding), t193, t194, t160, t203, t125, t195-t202, _chay_buoc_dang + t51-t68 giong byte 89fc4fa, so BO QUA 12 ca, mutant L, CI, hai ve, S5″, ruff, diff --check, doctrine-scan, review r3 luot 2 — duoi dong \"Bằng chứng máy tôi đối chiếu, không tự chạy lại\" (doi chieu, KHONG chay lai). Doan \"Những điều tôi chấp nhận TƯỜNG MINH khi ký\" chi gom: head cuoi chua qua nha cung cap thu hai (chu ky thay cross-review), Windows KHONG DO DUOC, hai P4 (L-A ma long, L-B anh() chup id()), phep quet moi ca nam ngoai cong va ca tuong lai dang ky thu cong, doi cach do tran. Ho so nay KHONG gan muc nao khac cho chu kho.",
+    "snippets": [
+      "NG MINH khi ký\" chi gom: head cuoi chua qua nha cung cap thu hai (chu ky thay cross-review), Windows KHONG DO DUOC, hai P4 (L-A ma long, L-B anh() chup id()), phep quet moi ca nam ngoai cong"
+    ]
+  },
+  {
+    "path": "ops/land/pr701-wp687-land-evidence.yaml",
+    "field": "nghiem_thu_spec_r3.r3_muc_3.M1_merge_union.phep_do",
+    "line": 568,
+    "text": "59ce2d5 la merge (cha eca94d1 + 20ec8d5), khong rebase. 9d7a523 chua 20ec8d5 (merge-base). grep -c '^@ca': 89fc4fa 187, 20ec8d5 195, 9d7a523 198 (+ t193 t194 t203). Cat AST (kem decorator) t195..t202 + _chay_buoc_dang_that o 20ec8d5 va 9d7a523: 9 = 9 khoi, ten bang, lech [] (giong byte).",
+    "snippets": [
+      " + 20ec8d5), khong rebase. 9d7a523 chua 20ec8d5 (merge-base). grep -c '^@ca': 89fc4fa 187, 20ec8d5 195, 9d7a523 198 (+ t193 t194 t203). Cat AST (kem decor"
+    ]
+  },
+  {
+    "path": "ops/land/pr703-wp674-land-evidence.yaml",
+    "field": "pre_merge_checks.0.run_luc_merge",
+    "line": 224,
+    "text": "in_progress (gate-registry chua xong luc merge 09:52:59Z)",
+    "snippets": [
+      "in_progress (gate-registry chua xong luc merge 09:52:59Z)"
+    ]
+  },
+  {
+    "path": "ops/land/pr714-wp710-land-evidence.yaml",
+    "field": "trang_thai_packet.con_thieu_de_goi_landed.1.mo_ta",
+    "line": 94,
+    "text": "measured — `git log 6a8c8b5..888c0d9`: 7f7ae2c (merge master b4402f0 vao nhanh, \"chu kho cho phep trong phien\") va 888c0d9 (tai sinh RELEASE_MANIFEST.json 180->183; hai chot dem r291_docs_ngoai_goi / r357_agents_ngoai_goi trong scripts/tl_selftest.py). `git diff --stat 6a8c8b5 888c0d9 -- <sau tep write set>` = chi scripts/tl_selftest.py +12/-3. RELEASE_MANIFEST.json nam NGOAI write set va trai cau \"không sửa RELEASE_MANIFEST.json\" cua cap quyen g5 (prohibited_actions edit_RELEASE_MANIFEST_json trong lease g5). Message 888c0d9 tu khai \"chưa được reviewer nào xem\". Bot Codex connector review 888c0d9 hoan tat 11:09:19Z (SAU merge), 0 review object, 0 review comment, reaction +1 luc 11:09:22Z (readback-reactions-714.json) — bot khac ho, khong co VERDICT/bien nhan, KHONG tinh la cross review.",
+    "snippets": [
+      "ease g5). Message 888c0d9 tu khai \"chưa được reviewer nào xem\". Bot Codex connector review 888c0d9 hoan tat 11:09:19Z (SAU merge), 0 review object, 0 review comment, reaction +1 luc 11:09:22"
+    ]
+  },
+  {
+    "path": "ops/land/pr714-wp710-land-evidence.yaml",
+    "field": "pre_merge_checks.1.ghi_chu",
+    "line": 236,
+    "text": "Head khac head merge; delta xem DELTA-888C0D9-CHUA-REVIEW.",
+    "snippets": [
+      "ead merge; delta xem DELTA-888C0D9-CHUA-REVIEW."
+    ]
+  },
+  {
+    "path": "ops/land/pr714-wp710-land-evidence.yaml",
+    "field": "lech_protocol_khai.1.mo_ta",
+    "line": 305,
+    "text": "Approve Codex o 6a8c8b5; head merge 888c0d9 (+7f7ae2c, +888c0d9) chua review.",
+    "snippets": [
+      "merge 888c0d9 (+7f7ae2c, +888c0d9) chua review."
+    ]
+  },
+  {
+    "path": "ops/land/pr718-wp678-land-evidence.yaml",
+    "field": "pre_merge_checks.0.giai_thich",
+    "line": 216,
+    "text": "pull/718#issuecomment-6062549562 (phien agent): \"CHAN [12]: KHÔNG_XÁC_ĐỊNH: S 8de47bcebc2e không phải tổ tiên của H 6195fe776956\" — loi cau truc nhanh (re tu ab457c6), khong phai ma. Chua: merge commit 57bb4b3.",
+    "snippets": [
+      "nh (re tu ab457c6), khong phai ma. Chua: merge commit 57bb4b3."
+    ]
+  },
+  {
+    "path": "ops/land/pr721-wp698-land-evidence.yaml",
+    "field": "no_con_mo.muc.6.neo",
+    "line": 368,
+    "text": "spec r14 Q8 + human audit 6103886840 (\"Windows thật chưa chạy\") — no khai, khong phai P3 cua review.",
+    "snippets": [
+      "an audit 6103886840 (\"Windows thật chưa chạy\") — no khai, khong phai P3 cua review."
+    ]
+  },
+  {
+    "path": "ops/land/pr765-wp743-land-evidence.yaml",
+    "field": "lease.nghiem_thu_nha",
+    "line": 81,
+    "text": "measured — 2026-10-16T04:01Z, sau fetch +refs/heads/* (ls-remote 549 = for-each-ref 549, thieu 0): `ai-dang-giu` cho ca hai duong dan write set rc=0, \"NGƯỜI_GIỮ 0: không có\"; wp743-r1-g1-claude-20261016 ra HẾT_HẠN. Lan do dau rc=12 (NHÁNH_CỤC_BỘ_TỤT_SAU master, fail-close dung) — chua bang git branch -f master refs/remotes/origin/master roi do lai. Tho: ops/land/pr765-wp743-provenance/ai-dang-giu-sau-04/.",
+    "snippets": [
+      "TỤT_SAU master, fail-close dung) — chua bang git branch -f master refs/remotes/origin/master roi do lai. Tho: ops/land/pr765-wp743-provenance/ai-dang-giu-sau-04/."
+    ]
+  },
+  {
+    "path": "ops/land/pr779-wp775-land-evidence.yaml",
+    "field": "pre_merge_checks.2.conclusion",
+    "line": 38,
+    "text": "completed — receipt 'Didn't find any major issues' neo f9d84d70fb; state cung head van has_any_findings=true va has_unresolved_findings=true; CHUA ket luan merge-4 dat",
+    "snippets": [
+      "e va has_unresolved_findings=true; CHUA ket luan merge-4 dat"
+    ]
+  },
+  {
+    "path": "ops/land/pr779-wp775-land-evidence.yaml",
+    "field": "spec.nguon",
+    "line": 65,
+    "text": "measured — do-lai-nguon-20261018/spec-wp775.txt: git show origin/ops/wp775-spec:ops/specs/wp775.md | sha256sum; spec CHUA vao master (nam tren nhanh ops/wp775-spec).",
+    "snippets": [
+      "s/specs/wp775.md | sha256sum; spec CHUA vao master (nam tren nhanh ops/wp775-spec)."
+    ]
+  },
+  {
+    "path": "ops/land/pr779-wp775-land-evidence.yaml",
+    "field": "dieu_kien_merge_spec.merge_4",
+    "line": 127,
+    "text": "not_measured — receipt 6236575036 neo f9d84d70fb va noi khong co major issue, nhung state 6221748292 cung head ghi has_any_findings=true, has_unresolved_findings=true. CHUA chung minh merge-4 dat; can doi chieu finding/thread va thoi diem giai quyet.",
+    "snippets": [
+      "rue, has_unresolved_findings=true. CHUA chung minh merge-4 dat; can doi chieu finding/thread va thoi diem giai quyet."
+    ]
+  },
+  {
+    "path": "ops/land/pr791-wp782-land-evidence.yaml",
+    "field": "khong_do_duoc.1",
+    "line": 142,
+    "text": "Bien nhan v2 cho cac luot Codex CLI cua wp782 chua duoc ghi vao ops/reviews/; ghi la no, khong chan land.",
+    "snippets": [
+      "2 cho cac luot Codex CLI cua wp782 chua duoc ghi vao ops/reviews/; ghi la no, khong chan land."
+    ]
+  },
+  {
+    "path": "ops/land/pr792-wp484-land-evidence.yaml",
+    "field": "spec.nguon",
+    "line": 69,
+    "text": "measured — do-lai-nguon-20261018/spec-wp484-r8.txt: git show origin/ops/wp484-r7-spec:ops/specs/wp484-r8.md | sha256sum (ref 0a45383e); khop spec_sha256_required cua lease. Spec CHUA vao master (nam tren nhanh ops/wp484-r7-spec).",
+    "snippets": [
+      "ec_sha256_required cua lease. Spec CHUA vao master (nam tren nhanh ops/wp484-r7-spec)."
+    ]
+  },
+  {
+    "path": "ops/land/pr792-wp484-land-evidence.yaml",
+    "field": "lease.thu_hoi_cuoi",
+    "line": 76,
+    "text": "DA THU HOI bang bia mo hai chieu: commit 0a45383e tren ops/wp484-r7-spec ghi `da_bi_thay_the: wp802-r1-g1-claude` theo chu kho #802 issuecomment-6244971063 (readback-comment-6244971063.json; cap lease wp802 giu 3/7 tep). measured — 2026-10-18T04:14:35Z sau `git fetch --prune +refs/heads/*`: ls-remote 599 ten = for-each-ref 599 ten, dict ten->OID BANG NHAU (0 thieu, 0 thua, 0 OID lech; ai-dang-giu-sau-bia-mo/luc-do.txt). Tren dung bo ref ay `ai-dang-giu`: launcher.py, launcher_test.py, session-start.sh rc=11 \"NGƯỜI_GIỮ 1: wp802-r1-g1-claude\"; codex_cred.py, codex_cred_test.py, session_start.py, ops/handoff/wp484-g7-claude.md rc=0 \"NGƯỜI_GIỮ 0\". wp484-r8-g7-claude ra \"CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ\" o ca 7 (khong con la nguoi giu). Lan do dau (truoc-xoa-tmp-r7/) bao nham wp484-r8 la nguoi giu: nguon la nhanh CUC BO `tmp-r7` (f4c10bf9) cua chinh phien nay — chua tung push, la to tien cua origin/ops/wp484-r7-spec, ban CU chua bia mo. Da xoa nhanh cuc bo do roi do lai; khong ref nao tren may chu bi dong toi.",
+    "snippets": [
+      "` (f4c10bf9) cua chinh phien nay — chua tung push, la to tien cua origin/ops/wp484-r7-spec, ban CU chua bia mo. Da xoa nhanh cuc bo do roi do lai; khong ref nao "
+    ]
+  },
+  {
+    "path": "ops/land/pr792-wp484-land-evidence.yaml",
+    "field": "trang_thai_packet.landed_dieu_kien",
+    "line": 100,
+    "text": "PROTOCOL §10.2.4 — (1) gate tren DUNG merge SHA xanh: DAT cho tap push-gate (ubuntu 14/14, kiem-gate rc=0, run 39096585920); windows cung run do san theo #748, ngoai tap push-gate; (2) lease da nha: DAT (xem lease.thu_hoi_cuoi); (3) bookkeeping: 3 no #824–#826 open DAT, #484 closed/completed DAT. Chu kho ghi landed voi cac ghi chu ay (windows do san #748; bf10fab/288ad3e chua Codex review).",
+    "snippets": [
+      "ndows do san #748; bf10fab/288ad3e chua Codex review)."
+    ]
+  },
+  {
+    "path": "ops/land/pr792-wp484-land-evidence.yaml",
+    "field": "dinh_chinh_r24.lo_ghi_them_khong_mo_rong_pham_vi.0",
+    "line": 169,
+    "text": "approve Codex neo 907214d; merged head 288ad3e mang delta launcher_test.py CHUA duoc Codex review (:133-136)",
+    "snippets": [
+      "88ad3e mang delta launcher_test.py CHUA duoc Codex review (:133-136)"
+    ]
+  },
+  {
+    "path": "ops/land/pr793-wp784-land-evidence.yaml",
+    "field": "khong_do_duoc.1",
+    "line": 138,
+    "text": "Bien nhan v2 cho cac luot Codex CLI cua wp784 chua ghi vao ops/reviews/; ghi la no, khong chan land.",
+    "snippets": [
+      "2 cho cac luot Codex CLI cua wp784 chua ghi vao ops/reviews/; ghi la no, khong chan land."
+    ]
+  },
+  {
+    "path": "ops/land/pr800-wp794-land-evidence.yaml",
+    "field": "khong_do_duoc.0",
+    "line": 70,
+    "text": "Bien nhan v2 cho cac luot Codex CLI cua wp794 chua ghi vao ops/reviews/; ghi la no, khong chan land.",
+    "snippets": [
+      "2 cho cac luot Codex CLI cua wp794 chua ghi vao ops/reviews/; ghi la no, khong chan land."
+    ]
+  },
+  {
+    "path": "ops/land/pr801-wp795-land-evidence.yaml",
+    "field": "khong_do_duoc.0",
+    "line": 74,
+    "text": "Bien nhan v2 cho cac luot Codex CLI cua wp795 chua ghi vao ops/reviews/; ghi la no, khong chan land.",
+    "snippets": [
+      "2 cho cac luot Codex CLI cua wp795 chua ghi vao ops/reviews/; ghi la no, khong chan land."
+    ]
+  },
+  {
+    "path": "ops/land/pr818-wp788-land-evidence.yaml",
+    "field": "pre_merge_checks.2.ghi_chu",
+    "line": 37,
+    "text": "VERDICT.md sha256 baa93ac2… = ban chieu PR #818 issuecomment-6244369249; reviewed_sha = head merge (khong commit nao chua review).",
+    "snippets": [
+      "sha = head merge (khong commit nao chua review)."
+    ]
+  },
+  {
+    "path": "ops/land/pr823-wp802-land-evidence.yaml",
+    "field": "pre_merge_checks.3.ghi_chu",
+    "line": 38,
+    "text": "measured — do-lai-nguon-20261018/lease-verdict-wp802.txt: sha256 b6ee86d0… tren origin/ops/wp802-r1-g1-lease; reviewed_sha = head merge 5c6c7a8 (KHONG co commit nao chua review).",
+    "snippets": [
+      "merge 5c6c7a8 (KHONG co commit nao chua review)."
+    ]
+  },
+  {
+    "path": "ops/land/pr832-wp831-land-evidence.yaml",
+    "field": "pre_merge_checks.2.ghi_chu",
+    "line": 41,
+    "text": "measured — do-lai-nguon-20261019/lease-verdict-wp831.txt: verdict sha256 1e27ba6b… = tep tren origin/ops/wp831-r4-g4-lease commit 6b02bf7; reviewed_sha = head merge 51ae5c0 (khong commit nao chua review). verdict-luot7/run.json head = 51ae5c0.",
+    "snippets": [
+      "ad merge 51ae5c0 (khong commit nao chua review). verdict-luot7/run.json head = 51ae5c0."
+    ]
+  },
+  {
+    "path": "ops/land/pr836-wp812-land-evidence.yaml",
+    "field": "uy_quyen_land.khong_xung_dot",
+    "line": 103,
+    "text": "measured — do-lai-nguon-20261019/merge-f1979a5.txt: merge tree f6aae9a = tree cua head d7b42d2 (head da chua master 2d33a0c qua merge e869e512).",
+    "snippets": [
+      "a = tree cua head d7b42d2 (head da chua master 2d33a0c qua merge e869e512)."
+    ]
+  },
+  {
+    "path": "ops/land/pr838-wp671-land-evidence.yaml",
+    "field": "review_chain_ghi_chu",
+    "line": 102,
+    "text": "Luot 1-3 da luu tu truoc (codex luot 1 trong comment; ops/reviews/pr690-luot3-opus55-max/, pr690-advisory-opus55/). Luot 6-7 chay Opus 5.5 trai chi thi chu kho 2026-10-01 (Sonnet 5.5); chu kho chap nhan lech trong human_audited. Executor vong 7-8: fallback sang claude-opus-4-8 do bo loc an toan (283/285, 153/167 luot) — chu kho chon giu ban va. Bien nhan v2 (*.receipt.yaml) cho cac VERDICT nay: CHUA lap — no co ten BIEN-NHAN-WP671 (thieu run.json executor/reviewer dang chuan; transcript va modelUsage chi co trong container phien).",
+    "snippets": [
+      "receipt.yaml) cho cac VERDICT nay: CHUA lap — no co ten BIEN-NHAN-WP671 (thieu run.json executor/reviewer dang chuan; transcript va modelUsage chi co trong container phien)."
+    ]
+  },
+  {
+    "path": "ops/land/pr849-wp748-land-evidence.yaml",
+    "field": "trang_thai_packet.landed_dieu_kien",
+    "line": 92,
+    "text": "PROTOCOL §10.2.4 — (1) gate tren merge SHA 9422054: ci.yml 23/23 XANH (post_merge_checks) DAT; (2) lease da nha: rut han, 12/12 duong dan NGƯỜI_GIỮ 0 DAT; (3) bookkeeping: #748 closed/completed DAT, do Windows san co tach #852-#855, R1 o #850. (4) review neo DUNG authorized_head_sha 3818bd4: Codex luot 5 approve (luot 4 khong finding, blocked vi moi truong) — noi dung; assurance xem (6); 10/10 tep PR trung byte giua 3818bd4 va 9422054 (do-lai-nguon-20261020/merge-va-diff.txt). Windows full matrix tren head cuoi DO o cac bo do san/bi che; chu kho chap nhan bang ban ghi ben #748 issuecomment-6281831890. (5) uy quyen land neo DUNG 3818bd4: DAT — #748 issuecomment-6281831890 (readback-comment-6281831890.json), dang sau merge (xem authorization_ghi_chu). (6) reviewer assurance §8.1 (lop sensitive doi cross_approved/human_audited): CHUA DAT — luot review la codex exec TRUC TIEP, KHONG co bien nhan launcher (run.json), model THUC phuc vu KHONG_DO_DUOC; header CLI chi chung minh model CLI cong bo (§8.1). Duyet land cua chu kho khong phai audit hay ghi de assurance. Connector P1 #863 r4323596458; tien le #822 (cc26c8e). Luot 6 qua launcher.py run 03c4f6be (verdicts/run-03c4f6be.json: xong, ma_thoat 0, head 3818bd4, codex_cli) tra CHANGES_REQUESTED voi 2 P2 MOI (verdicts/wp748-r20-luot6-launcher-verdict.md): F01 timing-receipt-validation (ops/nhanh_don_duoc_test.py:5849/5870 — bat_dau/ket_thuc chuoi tuy y, dao nguoc, lech 900 s voi giay=0 van DAT) va F02 timeout-descendant-containment (:405-411 — subprocess.run timeout chi giet con truc tiep, chau song tiep; Windows co the treo). landed false toi khi hai P2 duoc va trong packet moi va co review co bien nhan approve.",
+    "snippets": [
+      "doi cross_approved/human_audited): CHUA DAT — luot review la codex exec TRUC TIEP, KHONG co bien nhan launcher (run.json), model THUC phuc vu KHONG_DO_DUOC; "
+    ]
+  },
+  {
+    "path": "ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml",
+    "field": "bookkeeping.1.nguon",
+    "line": 137,
+    "text": "PR ghi so #891 (chua merge luc soan).",
+    "snippets": [
+      "PR ghi so #891 (chua merge luc soan)."
+    ]
+  },
+  {
+    "path": "ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml",
+    "field": "pr_ghi_so_duyet_landed_20261026.landed_hieu_luc_tu",
+    "line": 260,
+    "text": "merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge.",
+    "snippets": [
+      "merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge."
+    ]
+  },
+  {
+    "path": "ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml",
+    "field": "pr_ghi_so_duyet_landed_lan2_20261026.dieu_kien_con_lai.quy_tac",
+    "line": 272,
+    "text": "Chu kho duyet `landed` cho #870 (authorized_head_sha 06a50c5feea77c2654f31edd26efeed7eeee62f5) bang mot comment tren PR ghi so CHUA khoi nay, dang SAU commit cuoi va TRUOC merge, ghi day du SHA head cuoi (40 hex). Commit nao den sau comment lam no het hieu luc.",
+    "snippets": [
+      "5) bang mot comment tren PR ghi so CHUA khoi nay, dang SAU commit cuoi va TRUOC merge, ghi day du SHA head cuoi (40 hex). Commit nao den sau comment lam no het hieu luc."
+    ]
+  },
+  {
+    "path": "ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml",
+    "field": "pr_ghi_so_duyet_landed_lan2_20261026.landed_hieu_luc_tu",
+    "line": 276,
+    "text": "merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge.",
+    "snippets": [
+      "merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge."
+    ]
+  },
+  {
+    "path": "ops/land/pr888-wp886-land-evidence.yaml",
+    "field": "trang_thai_packet.landed_dieu_kien",
+    "line": 92,
+    "text": "PROTOCOL §10.2.4 — (1) gate tren merge SHA 42143ad: CHUA DAT day du — 3/4 moc §10.2.2 measured (Run, Checkout, Gate output — do-1026-42143ad/, do 2026-10-26); Workflow definition not_measured (GraphQL 403). (2) lease da nha: rut han c629a62, 7/7 duong dan NGƯỜI_GIỮ 0 DAT. (3) bookkeeping: ho so nay + comment tren #886 DAT. (4) review approve neo DUNG 99b354c: Codex luot 3 approve, nhung assurance §8.1 CHUA DAT (xem assurance_81). (5) noi dung merge = diff PR DAT (cmp rc=0). (6) merge boi tai khoan chu kho DAT.",
+    "snippets": [
+      "ot 3 approve, nhung assurance §8.1 CHUA DAT (xem assurance_81). (5) noi dung merge = diff PR DAT (cmp rc=0). (6) merge boi tai khoan chu kho DAT."
+    ]
+  },
+  {
+    "path": "ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml",
+    "field": "bookkeeping.0.nguon",
+    "line": 131,
+    "text": "ops/reviews/pr889-review-1-codex-verdict.receipt.yaml — cung PR ghi so #891 (chua merge luc soan).",
+    "snippets": [
+      "eceipt.yaml — cung PR ghi so #891 (chua merge luc soan)."
+    ]
+  },
+  {
+    "path": "ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml",
+    "field": "bookkeeping.1.nguon",
+    "line": 134,
+    "text": "PR ghi so #891 (chua merge luc soan).",
+    "snippets": [
+      "PR ghi so #891 (chua merge luc soan)."
+    ]
+  },
+  {
+    "path": "ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml",
+    "field": "pr_ghi_so_duyet_landed_20261026.landed_hieu_luc_tu",
+    "line": 286,
+    "text": "merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge.",
+    "snippets": [
+      "merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge."
+    ]
+  },
+  {
+    "path": "ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml",
+    "field": "pr_ghi_so_duyet_landed_lan2_20261026.dieu_kien_con_lai.quy_tac",
+    "line": 298,
+    "text": "Chu kho duyet `landed` cho #889 (authorized_head_sha 094e8d17ae4dfcf21dca63702c9262267bdc072c) bang mot comment tren PR ghi so CHUA khoi nay, dang SAU commit cuoi va TRUOC merge, ghi day du SHA head cuoi (40 hex). Commit nao den sau comment lam no het hieu luc.",
+    "snippets": [
+      "c) bang mot comment tren PR ghi so CHUA khoi nay, dang SAU commit cuoi va TRUOC merge, ghi day du SHA head cuoi (40 hex). Commit nao den sau comment lam no het hieu luc."
+    ]
+  },
+  {
+    "path": "ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml",
+    "field": "pr_ghi_so_duyet_landed_lan2_20261026.landed_hieu_luc_tu",
+    "line": 302,
+    "text": "merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge.",
+    "snippets": [
+      "merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge."
+    ]
+  },
+  {
+    "path": "ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+    "field": "trang_thai_packet.landed_ly_do",
+    "line": 76,
+    "text": "Cung tieu chi r24 (#748 issuecomment-6365380273, khoi dinh_chinh_r24 o ops/land/pr848-wp744-land-evidence.yaml): reviewer_assurance_81 CHUA DAT — xem review.assurance_81.",
+    "snippets": [
+      "dence.yaml): reviewer_assurance_81 CHUA DAT — xem review.assurance_81."
+    ]
+  },
+  {
+    "path": "ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+    "field": "bookkeeping.0.nguon",
+    "line": 155,
+    "text": "PR ghi so tu nhanh claude/gallant-fermat-34kgb9 (chua merge luc soan).",
+    "snippets": [
+      "hanh claude/gallant-fermat-34kgb9 (chua merge luc soan)."
+    ]
+  },
+  {
+    "path": "ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+    "field": "cap_nhat_20261026.cross_review_moi.do_duoc",
+    "line": 186,
+    "text": "measured — run.json 0f8ecb85: head 2789cbb (head da merge cua #915, chua 3bc4244), model_phuc_vu DO_DUOC `gpt-6.1-sol`. Bang do cua verdict khop cau CLAUDE.md da sua voi t162/loi_g5_workflow (hang \"t162 doc tu workflow\" ... \"Chot G5 kiem needs/if\" deu \"Co\"). P1 duy nhat nam o bien nhan luot 2 #870/#889 (surface tu khai `codex_service`), KHONG o CLAUDE.md; HINT.patch da ap trong PR ghi so nay, CHUA review lai.",
+    "snippets": [
+      "T.patch da ap trong PR ghi so nay, CHUA review lai."
+    ]
+  },
+  {
+    "path": "ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+    "field": "cap_nhat_20261026_luot2.cross_review_moi.hint",
+    "line": 234,
+    "text": "ops/reviews/pr896-review-2-codex/HINT.patch — CHUA ap.",
+    "snippets": [
+      "/pr896-review-2-codex/HINT.patch — CHUA ap."
+    ]
+  },
+  {
+    "path": "ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+    "field": "cap_nhat_20261026_luot3.cross_review_moi.do_duoc",
+    "line": 262,
+    "text": "measured — run.json ops/reviews/pr896-review-3-codex/run/run.json (513131e0): ma_thoat 0, head 82359c4, model_phuc_vu DO_DUOC (29 su kien, 29 response_id, `gpt-6.1-sol`). P1 cua luot 2 DA DONG. Finding moi deu o so review, KHONG o CLAUDE.md: P1 wp766 tu khai `codex_service` chua caveat; P1 ho so luot 2 van khai HINT chua ap; P2 13 verdict service/API lech receipt CLI.",
+    "snippets": [
+      ": P1 wp766 tu khai `codex_service` chua caveat; P1 ho so luot 2 van khai HINT chua ap; P2 13 verdict service/API lech receipt CLI."
+    ]
+  },
+  {
+    "path": "ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+    "field": "cap_nhat_20261026_luot3.cross_review_moi.hint",
+    "line": 266,
+    "text": "ops/reviews/pr896-review-3-codex/HINT.patch — CHUA ap (17 tep).",
+    "snippets": [
+      "/pr896-review-3-codex/HINT.patch — CHUA ap (17 tep)."
+    ]
+  },
+  {
+    "path": "ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+    "field": "cap_nhat_20261026_luot4.cross_review_moi.do_duoc",
+    "line": 312,
+    "text": "measured — ops/reviews/pr896-review-4-codex/run/run.json (9b8d9a76): ma_thoat 0, head 2e4183b, model_phuc_vu DO_DUOC (49 su kien, 49 response_id, `gpt-6.1-sol`). Ba finding luot 3 DA DONG. Finding moi deu o so review, KHONG o CLAUDE.md; trong chuoi #896 chi co: hang muc luc luot 3 con khai HINT chua ap, va receipt pr896-review-1/pr915-review-1 con noi \"chua review\". Con lai (6 receipt pr455, 23 receipt phu nhan ancestry, pr526-review-3, slice-b-c-review-2) co tu truoc, ngoai chuoi #896.",
+    "snippets": [
+      " hang muc luc luot 3 con khai HINT chua ap, va receipt pr896-review-1/pr915-review-1 con noi \"chua review\". Con lai (6 receipt pr455, 23 receipt phu nhan ancestry, pr526-review-3, slice-b-c-review-2) co tu"
+    ]
+  },
+  {
+    "path": "ops/land/pr907-wp906-land-evidence.yaml",
+    "field": "merge_noi_dung",
+    "line": 35,
+    "text": "measured — do-lai-nguon-20261024/merge-va-diff.txt: `git diff 1c20f3b dc65714` bang BYTE `git diff 1c20f3b 35d87eb` (cmp rc=0, 1 tep, 2 them 2 xoa); tree merge = tree head (d9aaf7d) vi master chua tien khi merge.",
+    "snippets": [
+      "ge = tree head (d9aaf7d) vi master chua tien khi merge."
+    ]
+  },
+  {
+    "path": "ops/land/pr907-wp906-land-evidence.yaml",
+    "field": "trang_thai_packet.landed_dieu_kien",
+    "line": 84,
+    "text": "PROTOCOL §10.2.4 — (1) gate tren merge SHA dc65714: CHUA DAT day du — 3/4 moc §10.2.2 measured (Run, Checkout, Gate output — do-1026-dc65714/, do 2026-10-26); Workflow definition not_measured (GraphQL 403). (2) lease da nha: rut han 50709c1, 2/2 duong dan NGƯỜI_GIỮ 0 DAT. (3) bookkeeping: ho so nay + comment tren #906 DAT. (4) review approve neo DUNG 35d87eb: Codex luot 1 approve, connector sach, nhung assurance §8.1 CHUA DAT (xem assurance_81). (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT.",
+    "snippets": [
+      "nnector sach, nhung assurance §8.1 CHUA DAT (xem assurance_81). (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT."
+    ]
+  },
+  {
+    "path": "ops/land/pr908-no-p3-spec-r4-land-evidence.yaml",
+    "field": "pre_merge_checks.3.ghi_chu",
+    "line": 47,
+    "text": "measured — readback-comment-6382772266.json chua dong Reviewed commit 77d4e0aa84; readback-comment-6382356439.json ghi has_any_findings false cho 77d4e0a.",
+    "snippets": [
+      "— readback-comment-6382772266.json chua dong Reviewed commit 77d4e0aa84; readback-comment-6382356439.json ghi has_any_findings false cho 77d4e0a."
+    ]
+  },
+  {
+    "path": "ops/land/pr908-no-p3-spec-r4-land-evidence.yaml",
+    "field": "trang_thai_packet.landed_dieu_kien",
+    "line": 80,
+    "text": "PROTOCOL §10.2.4 — (1) gate tren merge SHA 50a59a9: CHUA DAT day du — REST/kiem-gate chi la moc Run; Checkout, Workflow definition, Gate output cua §10.2.2 not_measured. (2) lease: khong ap dung (khong lease). (3) bookkeeping: ho so nay DAT. (4) review approve neo DUNG 77d4e0a: connector Codex khong finding; review offline same_provider; assurance §8.1 CHUA DAT. (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT.",
+    "snippets": [
+      "line same_provider; assurance §8.1 CHUA DAT. (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT."
+    ]
+  },
+  {
+    "path": "ops/land/pr909-wp748-r25-land-evidence.yaml",
+    "field": "no_ngoai_pham_vi.0.ghi_chu",
+    "line": 153,
+    "text": "loi_khai_co_neo — ban va vong 3 (b5b6aef) cho R25-SEC-01/EVID-05/RACE-06/TEST-03/CONTRACT-07 chua duoc reviewer launcher nao do lai.",
+    "snippets": [
+      "VID-05/RACE-06/TEST-03/CONTRACT-07 chua duoc reviewer launcher nao do lai."
+    ]
+  },
+  {
+    "path": "ops/land/pr913-wp910-land-evidence.yaml",
+    "field": "trang_thai_packet.landed_dieu_kien",
+    "line": 91,
+    "text": "PROTOCOL §10.2.4 — (1) gate tren merge SHA e91a68a: CHUA DAT day du — 3/4 moc §10.2.2 measured (Run, Checkout, Gate output — do-1026-e91a68a/, do 2026-10-26); Workflow definition not_measured (GraphQL 403). (2) lease: CHUA nha, co chu dich (pha B) — packet chua dong. (3) bookkeeping: ho so nay + comment tren #910 DAT. (4) review approve neo DUNG 6e09f4b: Codex luot 1 approve, nhung assurance §8.1 CHUA DAT; connector GitHub CHUA ket luan. (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT.",
+    "snippets": [
+      "ot 1 approve, nhung assurance §8.1 CHUA DAT; connector GitHub CHUA ket luan. (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT."
+    ]
+  },
+  {
+    "path": "ops/land/pr917-wp910-land-evidence.yaml",
+    "field": "merge_noi_dung",
+    "line": 35,
+    "text": "measured — do-lai-nguon-20261025/merge-va-diff.txt: diff cha1 (1797c32) .. merge bang BYTE diff merge-base .. head a7da463 (cmp rc=0, 4 tep: ci_dang_ky_test.py 3/3, ci-dot-bien-du.yml 1/1, ci.yml 2/2, ci_duong_nhanh_test.py 2/2); tree merge = tree head (f26533b) vi master chua tien khi merge.",
+    "snippets": [
+      "ge = tree head (f26533b) vi master chua tien khi merge."
+    ]
+  },
+  {
+    "path": "ops/land/pr917-wp910-land-evidence.yaml",
+    "field": "trang_thai_packet.landed_dieu_kien",
+    "line": 89,
+    "text": "PROTOCOL §10.2.4 — (1) gate tren merge SHA ba222ff: CHUA DAT day du — 3/4 moc §10.2.2 measured (Run, Checkout, Gate output — do-1026-ba222ff/, do 2026-10-26); Workflow definition not_measured (GraphQL 403). (2) lease da nha: rut han 45b5b42, wp910-r3 khong con giu duong dan nao DAT. (3) bookkeeping: ho so nay + comment tren #910 DAT. (4) review approve neo DUNG a7da463: Codex luot 1 approve, connector sach, nhung assurance §8.1 CHUA DAT. (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT.",
+    "snippets": [
+      "nnector sach, nhung assurance §8.1 CHUA DAT. (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT."
+    ]
+  },
+  {
+    "path": "ops/land/pr933-wp929-land-evidence.yaml",
+    "field": "no_co_ten.2.ghi_chu",
+    "line": 122,
+    "text": "ci.yml: cancel-in-progress false tren master nhung nhom concurrency chi giu MOT run CHO; merge SHA nao vao hang cho khi run truoc chua xong ma lai co push moi thi run cua no bi huy, 0 job => merge SHA khong co gate rieng. Gap o #933 (ab94c4f). Khong va trong ho so nay.",
+    "snippets": [
+      "SHA nao vao hang cho khi run truoc chua xong ma lai co push moi thi run cua no bi huy, 0 job => merge SHA khong co gate rieng. Gap o #933 (ab94c4f). Khong va trong ho so nay."
+    ]
+  }
+]

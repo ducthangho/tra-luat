@@ -1,0 +1,33 @@
+NO_EXEMPT rc 1 ['land_evidence_nguon: 16 ĐẠT · 0/0 miễn trừ (băm khớp) · 82 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 28', 'TỔNG: ĐỎ']
+L1 82 L2 0 L3 0
+GIT_SNAPSHOT 28 5311e7557cd75ef2f3b06371c66a4830d4970613c1e98a8fd4af732d7dab2257
+DICT_CONTROL (1, 'ĐỎ ops/land/pr9001-thu-land-evidence.yaml: 1 vi phạm\n  L3 $.pre_merge_checks[0].2026-10-16T02:59:00Z<khoa>: mốc 2026-10-16T02:59:00Z không trước merged_at 2026-10-16T02:58:26Z\nland_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐỎ\n')
+DICT_CONTROL (1, 'ĐỎ ops/land/pr9001-thu-land-evidence.yaml: 1 vi phạm\n  L3 $.pre_merge_checks[0].luc: mốc 2026-10-16T02:59:00Z không trước merged_at 2026-10-16T02:58:26Z\nland_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐỎ\n')
+SYMLINK_INTERNAL (0, 'ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n')
+INVALID_DATE_CLI 1  Traceback (most recent call last):
+  File "/home/user/rv773/ops/land_evidence_nguon.py", line 279, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/home/user/rv773/ops/land_evidence_nguon.py", line 260, in main
+    vp, ghi = kiem_ho_so(tep, goc, yaml)
+              ~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/user/rv773/ops/land_evidence_nguon.py", line 226, in kiem_ho_so
+    if _thoi_diem(x) >= moc_merge:
+       ~~~~~~~~~~^^^
+  File "/home/user/rv773/ops/land_evidence_nguon.py", line 137, in _thoi_diem
+    return datetime.datetime.fromisoformat(x.replace("Z", "+00:00"))
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: month must be in 1..12
+
+DICT_MUT_ALL c01_l1_luot1_mergeable_clean_khong_nguon 0 
+DICT_MUT_ALL c02_l1_glob_va_thu_muc 0 
+DICT_MUT_ALL c03_l1_token_khong_duoc_thoat_goc 0 
+DICT_MUT_ALL c04_l1_measured_hoa_thuong_va_khong_phai_khai 0 
+DICT_MUT_ALL c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van 0 
+DICT_MUT_ALL c06_l3_luot2_moc_sau_merged_at 0 
+DICT_MUT_ALL c07_l3_chi_doc_readback_cua_chinh_pr 0 
+DICT_MUT_ALL c08_l4_khong_do_duoc_khong_bao_gio_dat 0 
+DICT_MUT_ALL c09_l5_mien_tru_theo_bam 0 
+DICT_MUT_ALL c10_l5_danh_sach_dong_bang 0 
+DICT_MUT_ALL c11_cay_that_dat_va_mien_tru_du 0 
+DICT_MUT_ALL c12_dong_cuoi_dung_dinh_dang 0 

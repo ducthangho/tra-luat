@@ -1,0 +1,90 @@
+diff --git a/ops/lease_publish_test.py b/ops/lease_publish_test.py
+index 5f9d2f0..2eba10a 100644
+--- a/ops/lease_publish_test.py
++++ b/ops/lease_publish_test.py
+@@ -3054,6 +3054,25 @@ def t70_W6_matrix_co_Windows_phai_chay_lai_bay_ca():
+          f"matrix có Windows vẫn bỏ qua hoặc kiểm kê ca đọc thân bước lệch tập mong đợi: {ly_do!r}, {doc_than}")
+ 
+ 
++def _ca_ung_vien_gian_tiep(cac_ca, g=None) -> list:
++    """r3-L-A: ứng viên ném `BoQuaNen` kể cả GIÁN TIẾP — đóng bao theo tên hàm cấp module (`g`, mặc định `globals()`).
++    `_ca_doc_than_buoc` chỉ nhìn `co_names` TRỰC TIẾP nên ca gọi helper bọc `_chay_buoc_dang*` vô hình với `t193`."""
++    g, dich = globals() if g is None else g, {"_chay_buoc_dang", "_chay_buoc_dang_that"}
++
++    def toi(f):
++        thay, ngan = set(), [f]
++        while ngan:
++            for n in ngan.pop().__code__.co_names:
++                if n in dich:
++                    return True
++                h = g.get(n)
++                if hasattr(h, "__code__") and n not in thay:
++                    thay.add(n)
++                    ngan.append(h)
++        return False
++    return [f.__name__ for f in cac_ca if toi(f)]
++
++
+ def _ca_gia(ten: str, tep, job: str):
+     """Ca giả mang TÊN `ten` (sổ tra theo tên) và ném `BoQuaNen(tep, job)`."""
+     def fn(): raise BoQuaNen(tep, job)
+@@ -10620,7 +10639,11 @@ def t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky():
+             except Exception:  # noqa: BLE001 — ca đỏ/hỏng dưới `nt` KHÔNG phải "ném BoQuaNen"
+                 pass
+         return None
+-    uv = set(_ca_doc_than_buoc(CA))
++    gia = {}
++    exec("def _a(): _chay_buoc_dang\ndef _h(): _a()\ndef _k(): _h()\ndef _c(): pass", gia)
++    chot(_ca_ung_vien_gian_tiep([gia["_k"], gia["_c"]], gia) == ["_k"],
++         "ứng viên phải tính cả ca gọi helper BỌC `_chay_buoc_dang*` (gián tiếp, nhiều tầng), không tính ca không gọi")
++    uv = set(_ca_ung_vien_gian_tiep(CA))
+     do_duoc = {f.__name__: c for f in CA if f.__name__ in uv and (c := nem_nt(f))}
+     so_that = {k: (Path(v[0]).resolve(), v[1]) for k, v in SO_BO_QUA.items()}
+     chot(so_that == do_duoc and sorted(k.split("_")[0] for k in so_that)
+@@ -10772,8 +10795,12 @@ def t194_AB_phai_du_bang_chung_truoc_khi_so():
+         chot(any(tu_khoa in x for x in loi), f"vế ĐỎ {mo_ta!r}: chờ lý do chứa {tu_khoa!r}, nhận {loi!r}")
+     for mo_ta, kq, rc in (("đủ ca", q, 0), ("bỏ qua trong sổ", [q[0], ("tb", "BO_QUA"), q[2]], 0),
+                           ("ĐỎ nhất quán", [q[0], ("tb", "DO"), q[2]], 1),
+-                          ("CRLF + dòng chẩn đoán xen giữa marker", "x", 0)):
+-        out = dd(q).replace("<<< ra ", "chẩn đoán: x\n<<< ra ").replace("\n", "\r\n") if kq == "x" else dd(kq)
++                          ("CRLF + dòng chẩn đoán xen giữa marker", "x", 0),
++                          ("dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)", "y", 0)):
++        out = dd(q).replace("<<< ra ", "chẩn đoán: x\n<<< ra ").replace("\n", "\r\n") if kq == "x" else dd(kq) if kq != "y" else ""
++        if kq == "y":
++            out = dd(q).replace("<<< ra tb", "chẩn đoán: >>> vao tc ·   ĐỎ  tb: q · lease_publish: 3/3 đạt; đã chạy=3, bỏ qua=0\n"
++                                "chẩn đoán: <<< ra tc 0.001s QUA\n<<< ra tb")
+         chot(_xac_minh_transcript_ab(out, ca3, so, rc=rc) == [], f"vế QUA {mo_ta!r} bị chặn oan")
+ 
+     def qua_t125(noi_dung, rc=0):     # CHỖ NỐI: hai con giả cùng in `noi_dung`; verifier và classifier THẬT
+@@ -11376,7 +11403,9 @@ def t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi():
+     ten, ro, nem = next(iter(SO_BO_QUA)), [], []
+ 
+     def anh():
+-        return {"CA": list(CA), "SO_BO_QUA": dict(SO_BO_QUA), "os.name": os.name, "sys.argv": list(sys.argv)}
++        return {"CA": list(CA), "SO_BO_QUA": dict(SO_BO_QUA), "os.name": os.name, "sys.argv": list(sys.argv),
++                "os.environ": dict(os.environ), "cwd": os.getcwd(), "sys.path": list(sys.path),
++                "globals": {k: id(v) for k, v in list(globals().items()) if not k.startswith("__")}}
+ 
+     def no():
+         raise RuntimeError("fixture ném lỗi")
+@@ -11384,7 +11413,8 @@ def t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi():
+         truoc = anh()
+         for chon, nen, so in (([_ca_gia(ten, WORKFLOW_DANG, "dang")], "nt", None), ([no], "posix", {}),
+                               ([_ca_gia("t_c1", WORKFLOW_DANG, "dang"), no], "nt", {"t_c1": (WORKFLOW_DANG, "dang")}),
+-                              ([lambda: None], "posix", {"t_c1x": (WORKFLOW_DANG, "dang")})):
++                              ([lambda: None], "posix", {"t_c1x": (WORKFLOW_DANG, "dang")}),
++                              ([lambda: None], "nt" if os.name != "nt" else "posix", {})):   # lượt CUỐI ≠ nền thật
+             with contextlib.redirect_stdout(io.StringIO()):
+                 try:   # main NỔ (vd. Path() sau khi os.name bị ghi) vẫn phải ĐO trạng thái — chốt "rò" là chốt nói trước
+                     main(chon=chon, nen=nen, so=so)
+@@ -11393,6 +11423,10 @@ def t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi():
+             sau = anh()
+             ro += [f"{k} (nen={nen})" for k in truoc if sau[k] != truoc[k]]
+             CA[:], os.name, sys.argv[:] = truoc["CA"], truoc["os.name"], truoc["sys.argv"]   # gỡ rò: lượt sau đo sạch
++            os.environ.clear()
++            os.environ.update(truoc["os.environ"])
++            os.chdir(truoc["cwd"])
++            sys.path[:] = truoc["sys.path"]
+             SO_BO_QUA.clear()
+             SO_BO_QUA.update(truoc["SO_BO_QUA"])
+     chot(not ro, f"seam của main() RÒ trạng thái toàn cục: {ro}")

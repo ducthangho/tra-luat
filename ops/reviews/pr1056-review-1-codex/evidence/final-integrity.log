@@ -1,0 +1,17 @@
+cay-kho git rev-parse HEAD HEAD^{tree} rc 0 output 1aae17b5534f78767856f93f7d6089adda224f21
+2d0cdcab508a07dd124356fd69635c36efa1d766 stderr (empty)
+cay-kho git status --short --untracked-files=all --ignored=matching rc 0 output (empty) stderr (empty)
+cay-kho git diff --exit-code rc 0 output (empty) stderr (empty)
+cay-kho git diff --cached --exit-code rc 0 output (empty) stderr (empty)
+cay-kho git diff --check rc 0 output (empty) stderr (empty)
+cay-kho git config core.abbrev rc 0 output 7 stderr (empty)
+cay-kho ALL_CHANGED_FILES_EQUAL_EXACT_HEAD 180 / 180
+review-copy git rev-parse HEAD HEAD^{tree} rc 0 output 1aae17b5534f78767856f93f7d6089adda224f21
+2d0cdcab508a07dd124356fd69635c36efa1d766 stderr (empty)
+review-copy git status --short --untracked-files=all --ignored=matching rc 0 output (empty) stderr (empty)
+review-copy git diff --exit-code rc 0 output (empty) stderr (empty)
+review-copy git diff --cached --exit-code rc 0 output (empty) stderr (empty)
+review-copy git diff --check rc 0 output (empty) stderr (empty)
+review-copy git config core.abbrev rc 0 output 7 stderr (empty)
+review-copy ALL_CHANGED_FILES_EQUAL_EXACT_HEAD 180 / 180
+7333f97_is_ancestor_of_frozen_master rc 1

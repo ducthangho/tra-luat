@@ -1,0 +1,8 @@
+moi truong: pid=6945 pgid=6944 sid=6925 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: da tach sang session moi (pgid=6945)
+  BO QUA t62_qua_han_ma_khong_giet_het_cay_phai_tra_125: fixture nay danh cho Windows; ban POSIX la t63 (chay duoc, khong bo qua)
+  HONG r09_run_json_giu_ba_trang_thai_probe: run.json khong giu ba trang thai: {'KHONG_DO_DUOC', 'DO', 'DAT'}
+  HONG r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh: luot 0 rc=1: 
+  HONG r351_KHONG_co_chi_thi_thi_van_phai_dat_moc: khong co chi thi ma cung khong dat moc — hook se chay pip moi luot
+
+185/188 ca DA CHAY QUA (tong 189, bo qua 1, hong 3) - KHONG DU: 1 ca BO QUA, chua do gi

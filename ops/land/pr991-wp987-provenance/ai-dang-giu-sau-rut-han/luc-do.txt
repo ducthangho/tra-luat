@@ -1,0 +1,70 @@
+do luc 2026-10-29T11:45:51Z (sau khi fast-forward 3 nhanh cuc bo tut sau theo CHAN [12])
+ls-remote heads: 694, for-each-ref: 694, thieu: 0
+$ python ops/lease_publish.py ai-dang-giu --root . .claude/skills/cross-review/SKILL.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp538-r1-g1-codex-windows	refs/heads/agent/wp886-g1-claude:ops/leases/wp538-r1-g1-codex-windows.yaml
+HẾT_HẠN	wp538-r2-g2-codex-windows	refs/heads/agent/wp886-g1-claude:ops/leases/wp538-r2-g2-codex-windows.yaml
+HẾT_HẠN	wp55-r4-exec-1-claude-20260816	refs/heads/agent/wp886-g1-claude:ops/leases/wp55-r4-exec-1-claude-20260816.yaml
+HẾT_HẠN	wp55-r4-exec-2-claude-20260816	refs/heads/agent/wp886-g1-claude:ops/leases/wp55-r4-exec-2-claude-20260816.yaml
+HẾT_HẠN	wp987-r1-g1-claude	refs/heads/ops/wp987-r1-g1-lease:ops/leases/wp987-r1-g1-claude.yaml
+HẾT_HẠN	wp538-r2-g2-codex-windows	refs/remotes/origin/claude/bia-mo-wp538-g2-20260916:ops/leases/wp538-r2-g2-codex-windows.yaml
+HẾT_HẠN	wp538-r3-g3-claude-review	refs/remotes/origin/claude/bia-mo-wp538-g2-20260916:ops/leases/wp538-r3-g3-claude-review.yaml
+HẾT_HẠN	wp538-r3-g3-claude-review	refs/remotes/origin/claude/bia-mo-wp538-g3-20260916:ops/leases/wp538-r3-g3-claude-review.yaml
+HẾT_HẠN	quy-trinh-lap-review-r13-g13-codex	refs/remotes/origin/codex/wp523-r13-authority:ops/leases/quy-trinh-lap-review-r13-g13-codex.yaml
+HẾT_HẠN	quy-trinh-lap-review-r14-g14-codex	refs/remotes/origin/codex/wp523-r14-authority:ops/leases/quy-trinh-lap-review-r14-g14-codex.yaml
+HẾT_HẠN	skill-goi-python-ba-ten-exec-1-claude-20260826	refs/remotes/origin/ops/cap-lease-4-packet-20260826:ops/leases/skill-goi-python-ba-ten-exec-1-claude-20260826.yaml
+HẾT_HẠN	quy-trinh-lap-review-r10-exec-9-claude-20260913	refs/remotes/origin/ops/cap-lease-522-523:ops/leases/quy-trinh-lap-review-r10-exec-9-claude-20260913.yaml
+HẾT_HẠN	quy-trinh-lap-review-r11-exec-10-codex-20260913	refs/remotes/origin/ops/cap-lease-522-523:ops/leases/quy-trinh-lap-review-r11-exec-10-codex-20260913.yaml
+HẾT_HẠN	quy-trinh-lap-review-r2-exec-1-claude-20260912	refs/remotes/origin/ops/cap-lease-522-523:ops/leases/quy-trinh-lap-review-r2-exec-1-claude-20260912.yaml
+HẾT_HẠN	quy-trinh-lap-review-r2-exec-2-claude-20260912	refs/remotes/origin/ops/cap-lease-522-523:ops/leases/quy-trinh-lap-review-r2-exec-2-claude-20260912.yaml
+HẾT_HẠN	quy-trinh-lap-review-r4-exec-3-claude-20260912	refs/remotes/origin/ops/cap-lease-522-523:ops/leases/quy-trinh-lap-review-r4-exec-3-claude-20260912.yaml
+HẾT_HẠN	quy-trinh-lap-review-r5-exec-4-claude-20260912	refs/remotes/origin/ops/cap-lease-522-523:ops/leases/quy-trinh-lap-review-r5-exec-4-claude-20260912.yaml
+HẾT_HẠN	quy-trinh-lap-review-r6-exec-5-claude-20260912	refs/remotes/origin/ops/cap-lease-522-523:ops/leases/quy-trinh-lap-review-r6-exec-5-claude-20260912.yaml
+HẾT_HẠN	quy-trinh-lap-review-r7-exec-6-claude-20260912	refs/remotes/origin/ops/cap-lease-522-523:ops/leases/quy-trinh-lap-review-r7-exec-6-claude-20260912.yaml
+HẾT_HẠN	quy-trinh-lap-review-r8-exec-7-claude-20260913	refs/remotes/origin/ops/cap-lease-522-523:ops/leases/quy-trinh-lap-review-r8-exec-7-claude-20260913.yaml
+HẾT_HẠN	quy-trinh-lap-review-r9-exec-8-claude-20260913	refs/remotes/origin/ops/cap-lease-522-523:ops/leases/quy-trinh-lap-review-r9-exec-8-claude-20260913.yaml
+HẾT_HẠN	quy-trinh-lap-review-r12-exec-11-claude-20260920	refs/remotes/origin/ops/cap-lease-523-r12:ops/leases/quy-trinh-lap-review-r12-exec-11-claude-20260920.yaml
+HẾT_HẠN	quy-trinh-lap-review-r12-exec-12-claude-20260921	refs/remotes/origin/ops/cap-lease-523-r12:ops/leases/quy-trinh-lap-review-r12-exec-12-claude-20260921.yaml
+HẾT_HẠN	wp538-r3-g3-claude-review	refs/remotes/origin/ops/cap-lease-538-r3:ops/leases/wp538-r3-g3-claude-review.yaml
+HẾT_HẠN	wp538-r4-g4-antigravity	refs/remotes/origin/ops/cap-lease-538-r4:ops/leases/wp538-r4-g4-antigravity.yaml
+HẾT_HẠN	skill-goi-python3-exec-1-claude-20260826	refs/remotes/origin/ops/cap-lease-agent-quyen-a1:ops/leases/skill-goi-python3-exec-1-claude-20260826.yaml
+HẾT_HẠN	skill-goi-python3-exec-1r2-claude-20260826	refs/remotes/origin/ops/cap-lease-agent-quyen-a1:ops/leases/skill-goi-python3-exec-1r2-claude-20260826.yaml
+HẾT_HẠN	chon-reviewer-exec-1-codex-20260827	refs/remotes/origin/ops/cap-lease-chon-reviewer-20260827:ops/leases/chon-reviewer-exec-1-codex-20260827.yaml
+HẾT_HẠN	chon-reviewer-exec-1r2-codex-20260827	refs/remotes/origin/ops/cap-lease-chon-reviewer-20260827:ops/leases/chon-reviewer-exec-1r2-codex-20260827.yaml
+HẾT_HẠN	chon-reviewer-exec-1r3-codex-20260827	refs/remotes/origin/ops/cap-lease-chon-reviewer-20260827:ops/leases/chon-reviewer-exec-1r3-codex-20260827.yaml
+HẾT_HẠN	chon-reviewer-exec-1r4-codex-20260827	refs/remotes/origin/ops/cap-lease-chon-reviewer-20260827:ops/leases/chon-reviewer-exec-1r4-codex-20260827.yaml
+HẾT_HẠN	chon-reviewer-exec-1r5-codex-20260827	refs/remotes/origin/ops/cap-lease-chon-reviewer-20260827:ops/leases/chon-reviewer-exec-1r5-codex-20260827.yaml
+HẾT_HẠN	chon-reviewer-exec-1r6-codex-20260827	refs/remotes/origin/ops/cap-lease-chon-reviewer-20260827:ops/leases/chon-reviewer-exec-1r6-codex-20260827.yaml
+HẾT_HẠN	chon-reviewer-exec-1r7-codex-20260828	refs/remotes/origin/ops/cap-lease-chon-reviewer-20260827:ops/leases/chon-reviewer-exec-1r7-codex-20260828.yaml
+HẾT_HẠN	chon-reviewer-exec-1r8-codex-20260828	refs/remotes/origin/ops/cap-lease-chon-reviewer-20260827:ops/leases/chon-reviewer-exec-1r8-codex-20260828.yaml
+HẾT_HẠN	verdict-khong-boc-hoi-exec-1-claude-20260908	refs/remotes/origin/ops/cap-lease-mu-ref-va-verdict:ops/leases/verdict-khong-boc-hoi-exec-1-claude-20260908.yaml
+HẾT_HẠN	n8-review-kem-patch-exec-1-claude-20260830	refs/remotes/origin/ops/cap-lease-n8-review-kem-patch:ops/leases/n8-review-kem-patch-exec-1-claude-20260830.yaml
+HẾT_HẠN	n8-review-kem-patch-exec-1r2-claude-20260830	refs/remotes/origin/ops/cap-lease-n8-review-kem-patch:ops/leases/n8-review-kem-patch-exec-1r2-claude-20260830.yaml
+HẾT_HẠN	n8-review-kem-patch-exec-1r3-claude-20260831	refs/remotes/origin/ops/cap-lease-n8-review-kem-patch:ops/leases/n8-review-kem-patch-exec-1r3-claude-20260831.yaml
+HẾT_HẠN	n8-review-kem-patch-exec-1r4-claude-20260830	refs/remotes/origin/ops/cap-lease-n8-review-kem-patch:ops/leases/n8-review-kem-patch-exec-1r4-claude-20260830.yaml
+HẾT_HẠN	n8-review-kem-patch-exec-1r5-claude-20260830	refs/remotes/origin/ops/cap-lease-n8-review-kem-patch:ops/leases/n8-review-kem-patch-exec-1r5-claude-20260830.yaml
+HẾT_HẠN	wp421-n8-review-kem-patch-g2-claude-20260831	refs/remotes/origin/ops/cap-lease-n8-review-kem-patch:ops/leases/wp421-n8-review-kem-patch-g2-claude-20260831.yaml
+HẾT_HẠN	doctrine-rig-va-reviewer-exec-1-claude-20260824	refs/remotes/origin/ops/cap-lease-t33-doi-shellcheck:ops/leases/doctrine-rig-va-reviewer-exec-1-claude-20260824.yaml
+HẾT_HẠN	wp55-r2-exec-3-claude-20260814	refs/remotes/origin/ops/wp55-lease-exec-3:ops/leases/wp55-r2-exec-3-claude-20260814.yaml
+HẾT_HẠN	wp55-r3-exec-4-claude-20260814	refs/remotes/origin/ops/wp55-r3-exec-4:ops/leases/wp55-r3-exec-4-claude-20260814.yaml
+HẾT_HẠN	wp55-r3-exec-5-claude-20260815	refs/remotes/origin/ops/wp55-r3-exec-5:ops/leases/wp55-r3-exec-5-claude-20260815.yaml
+HẾT_HẠN	wp55-r3-exec-9-claude-20260815	refs/remotes/origin/ops/wp55-r3-exec-9:ops/leases/wp55-r3-exec-9-claude-20260815.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+$ python ops/lease_publish.py ai-dang-giu --root . .agents/skills/cross-review/SKILL.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp538-r1-g1-codex-windows	refs/heads/agent/wp886-g1-claude:ops/leases/wp538-r1-g1-codex-windows.yaml
+HẾT_HẠN	wp538-r2-g2-codex-windows	refs/heads/agent/wp886-g1-claude:ops/leases/wp538-r2-g2-codex-windows.yaml
+HẾT_HẠN	wp987-r1-g1-claude	refs/heads/ops/wp987-r1-g1-lease:ops/leases/wp987-r1-g1-claude.yaml
+HẾT_HẠN	wp538-r2-g2-codex-windows	refs/remotes/origin/claude/bia-mo-wp538-g2-20260916:ops/leases/wp538-r2-g2-codex-windows.yaml
+HẾT_HẠN	wp538-r3-g3-claude-review	refs/remotes/origin/claude/bia-mo-wp538-g2-20260916:ops/leases/wp538-r3-g3-claude-review.yaml
+HẾT_HẠN	wp538-r3-g3-claude-review	refs/remotes/origin/claude/bia-mo-wp538-g3-20260916:ops/leases/wp538-r3-g3-claude-review.yaml
+HẾT_HẠN	wp538-r3-g3-claude-review	refs/remotes/origin/ops/cap-lease-538-r3:ops/leases/wp538-r3-g3-claude-review.yaml
+HẾT_HẠN	wp538-r4-g4-antigravity	refs/remotes/origin/ops/cap-lease-538-r4:ops/leases/wp538-r4-g4-antigravity.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+$ python ops/lease_publish.py ai-dang-giu --root . ops/handoff/wp987-g1-claude.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp987-r1-g1-claude	refs/heads/ops/wp987-r1-g1-lease:ops/leases/wp987-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

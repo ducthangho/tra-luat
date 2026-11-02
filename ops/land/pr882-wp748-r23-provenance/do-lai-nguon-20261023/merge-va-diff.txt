@@ -1,0 +1,25 @@
+# merge 8223fd2: cha va tree
+commit 8223fd236f50013ce60b145ab46a8cabcfe38dee
+parents 53acca148f47b937b53d2f16197d84d36d6b338f bab8702692f1d723ac1a84b865660597aa6291e6
+tree 4779fe862206484082bb00db689cbc55e91a2090
+committer 2026-10-23T09:51:57+07:00
+# head bab8702
+commit bab8702692f1d723ac1a84b865660597aa6291e6
+tree 8568aa04e0dfa1dbd014e7b4a3ebd215cb40b522
+committer 2026-10-23T01:53:58+00:00
+# commit tren nhanh 747f983..bab8702 (committer time)
+bab8702 2026-10-23T01:53:58+00:00 land(#748 r23): va Codex luot 2 3bbda050 F01 — khac ho model la dieu kien CHUNG cho ca do_may lan khai_co_audit
+682c888 2026-10-23T01:43:52+00:00 land(#748 r23): va Codex luot 1 c053c5b4 — dieu kien mo lai dung dinh nghia §8, gate merge khong thay bang ma tuong duong, moc thoi gian/nguyen nhan huy
+8f12e02 2026-10-23T01:30:12+00:00 land(#748): ho so land PR #869 (r22, merge 7400df4) — landed false, wp748 r23/g23
+5cd6d6d 2026-10-23T01:26:28+00:00 land(#845): pr846 ve landed false — ho model reviewer khong_do_duoc (§8.1), wp748 r23/g23
+# diff --stat 747f983..bab8702
+ .../verdicts/wp748-r22-luot5-launcher-prompt.md    |    18 +
+ .../verdicts/wp748-r22-luot5-launcher-verdict.md   |   144 +
+ 33 files changed, 24907 insertions(+), 4 deletions(-)
+# diff --stat 8223fd2^1..8223fd2
+ .../verdicts/wp748-r22-luot5-launcher-prompt.md    |    18 +
+ .../verdicts/wp748-r22-luot5-launcher-verdict.md   |   144 +
+ 33 files changed, 24907 insertions(+), 4 deletions(-)
+# sha256 patch
+f538eef480eb52985bb5f6da1ac8d911aea7a0763a74fa95b5966696ddcf7ca5  -
+f538eef480eb52985bb5f6da1ac8d911aea7a0763a74fa95b5966696ddcf7ca5  -

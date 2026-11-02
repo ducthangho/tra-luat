@@ -1,0 +1,4 @@
+do_luc 2026-10-01T10:05:38Z
+HTTP 403
+x-github headers: []
+b'{"message":"GitHub GraphQL is not available from Claude Code sessions; use the REST API (gh api repos/{owner}/{repo}/...). For review threads, auto-merge, and draft/ready-for-review use the CCR routes on api.github.com: GET /repos/{owner}/{repo}/pulls/{n}/ccr/review_threads, POST /repos/{owner}/{rep'

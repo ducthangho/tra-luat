@@ -1,0 +1,2 @@
+nguon	chep nguyen byte tu ops/handoff/wp1021-g1-claude/luot1/ tren nhanh ops/wp1021-r2-g1-lease commit b2a5dd5 (executor session_015GtxrZ1Tt93F4NLUUhKYQy)
+cay-kho/ mirror.git evidence/ HINT.patch	khong co trong handoff: sandbox reviewer cua executor, khong duoc luu (handoff wp1021-g1-claude.md: "Bang chung phu cua reviewer KHONG duoc luu")

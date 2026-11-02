@@ -1,0 +1,15 @@
+{"witness": "json-invalid"}
+{"debt": false, "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"debt": true, "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"witness": "utf8-invalid"}
+{"debt": false, "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"debt": true, "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"witness": "array"}
+{"debt": false, "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"debt": true, "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"witness": "null"}
+{"debt": false, "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"debt": true, "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"witness": "empty-surface"}
+{"debt": false, "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"debt": true, "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}

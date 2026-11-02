@@ -1,0 +1,72 @@
+[
+  {
+    "round": 1,
+    "mutation": "verdict_sha256 -> 64 f characters (valid YAML string/hash shape)",
+    "results": {
+      "bien-nhan": {
+        "rc": 1,
+        "names_target": true,
+        "target_lines": [
+          "  ĐỎ  pr1058-review-1-codex-verdict.receipt.yaml: KHÔNG đạt v2 và KHÔNG nằm trong danh sách nào — pr1058-review-1-codex-verdict.receipt.yaml: blob tại `evidence_url` băm f062f215087c… nhưng biên nhận khai `verdict_sha256` ffffffffffff… — mỏ neo KHÔNG trỏ đúng thứ nó khai"
+        ]
+      },
+      "land": {
+        "rc": 0,
+        "names_target": false,
+        "target_lines": []
+      },
+      "direct": {
+        "rc": 1,
+        "names_target": true,
+        "target_lines": [
+          "FAIL t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi AssertionError pr1058-review-1-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, tệp 'ops/reviews/pr1058-review-1-codex-verdict.md' thực f062f215087cab163ac378a5582002842c8a50312fd1fc748a8942a4115bee7e. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào."
+        ]
+      },
+      "doctrine": {
+        "rc": 0,
+        "names_target": false,
+        "target_lines": []
+      },
+      "diff-check": {
+        "rc": 0,
+        "names_target": false,
+        "target_lines": []
+      }
+    }
+  },
+  {
+    "round": 2,
+    "mutation": "verdict_sha256 -> 64 f characters (valid YAML string/hash shape)",
+    "results": {
+      "bien-nhan": {
+        "rc": 1,
+        "names_target": true,
+        "target_lines": [
+          "  ĐỎ  pr1058-review-2-codex-verdict.receipt.yaml: KHÔNG đạt v2 và KHÔNG nằm trong danh sách nào — pr1058-review-2-codex-verdict.receipt.yaml: blob tại `evidence_url` băm 00046bcde939… nhưng biên nhận khai `verdict_sha256` ffffffffffff… — mỏ neo KHÔNG trỏ đúng thứ nó khai"
+        ]
+      },
+      "land": {
+        "rc": 0,
+        "names_target": false,
+        "target_lines": []
+      },
+      "direct": {
+        "rc": 1,
+        "names_target": true,
+        "target_lines": [
+          "FAIL t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi AssertionError pr1058-review-2-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, tệp 'ops/reviews/pr1058-review-2-codex-verdict.md' thực 00046bcde93988d97ddd02a9a0a57710d60ad2aa1a142781baecb0a8c7840c27. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào."
+        ]
+      },
+      "doctrine": {
+        "rc": 0,
+        "names_target": false,
+        "target_lines": []
+      },
+      "diff-check": {
+        "rc": 0,
+        "names_target": false,
+        "target_lines": []
+      }
+    }
+  }
+]

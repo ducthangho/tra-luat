@@ -1,0 +1,13 @@
+# merge 7400df4: cha va tree
+commit 7400df47cf626a92d34af5bf58b4862b49742fdd
+parents 807859b210e3e82376d23a61cfd2a9d8594fd05a b9318cc26101d2697be19ac44be5700534ba0256
+tree a7f86f0085d67460ca889c4a78ca99fde72e30df
+# head b9318cc tree
+commit b9318cc26101d2697be19ac44be5700534ba0256
+tree e499945931af024dbd3b2144c5a30c3788e095ab
+# diff --stat 9e9a74b..b9318cc
+ ops/nhanh_don_duoc_test.py | 548 ++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 537 insertions(+), 11 deletions(-)
+# diff tree merge vs master-cha-1 (chi tep cua PR)
+ ops/nhanh_don_duoc_test.py | 548 ++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 537 insertions(+), 11 deletions(-)

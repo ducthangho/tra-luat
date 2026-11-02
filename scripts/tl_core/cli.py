@@ -30,7 +30,9 @@ def bind(tl_module) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(prog="tl", description="CLI hợp nhất tra-luat (webapp target 2.21.2i)")
+    # WP1038 (review F01, chủ kho duyệt): KHÔNG nhận cờ gốc viết tắt (`--det`/`--tim`) — guard PreToolUse không biết
+    # dạng viết tắt nên coi nó là cờ ăn giá trị, nuốt luôn TÊN LỆNH ⇒ subagent chạy được lệnh ghi; nay `tl` tự từ chối rc 2.
+    ap = argparse.ArgumentParser(prog="tl", description="CLI hợp nhất tra-luat (webapp target 2.21.2i)", allow_abbrev=False)
     # F (v1.33.6 — log rà: `tl --version` in usage-error thay vì version): flag chuẩn, nguồn = hằng VERSION.
     ap.add_argument("--version", action="version",
                     version=f"tl {VERSION} (webapp target {globals().get('EXPECT_VERSION', '2.21.2i')})")
@@ -95,6 +97,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-gws", dest="no_gws", action="store_true", help="chỉ nạp GAS token, bỏ qua gws")
     p.add_argument("--no-nlm", dest="no_nlm", action="store_true", help="bỏ qua pip install nlm (notebooklm-mcp-cli)")
     p.add_argument("--env", choices=["code", "cowork", "chat"], help="ép runtime env")
+    p.add_argument("--require-agent-creds", dest="require_agent_creds", action="store_true",
+                   help="(WP1009) rc 4 khi credential agent (tl_agent_creds.enc) KHÔNG CẤU HÌNH / KHÔNG ĐO ĐƯỢC")
     p.set_defaults(fn=tlg.cmd_bootstrap)
     p = sub.add_parser("nlm-install", help="Cài nlm: mặc định tải Python 3.11 từ Drive (Cowork CHẶN astral). `--uv`: egress mở → uv tự cài Python 3.11 (dùng python hệ thống nếu đã ≥3.11) → KHÔNG tải 31MB từ Drive. ★Cowork 45s/lệnh: LẶP `--resume` tới rc=0 (mỗi lần 1 bước fetch→extract→install; rc=3=PARTIAL còn bước)")
     p.add_argument("--py-file-id", dest="py_file_id", help="fileId tarball Python 3.11 (mặc định PY311_FILEID)")
@@ -134,6 +138,23 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--secrets-file", dest="secrets_file", help="dùng .enc local thay vì tải")
     p.add_argument("--folder", help="folderId (khi cần tạo lại)")
     p.set_defaults(fn=tlg.cmd_secrets_set)
+    p = sub.add_parser("secrets-keygen", help="(WP1009) in MỘT khoá TL_MASTER_KEY mạnh (token_urlsafe 32 = 43 ký tự), không ghi đĩa")
+    p.set_defaults(fn=tlg.cmd_secrets_keygen)
+    p = sub.add_parser("agent-creds-set", help="(WP1009) ghi credential agent (Codex auth.json/token Claude/khoá Gemini) → tl_agent_creds.enc mã hoá (TL_MASTER_KEY)")
+    p.add_argument("--codex", action="store_true", help="gói <CODEX_HOME>/auth.json (thiếu CODEX_HOME ⇒ ~/.codex/auth.json)")
+    p.add_argument("--claude-token-env", dest="claude_token_env", nargs="?", const="CLAUDE_CODE_OAUTH_TOKEN",
+                   metavar="VAR", help="đọc token Claude từ BIẾN VAR (mặc định CLAUDE_CODE_OAUTH_TOKEN), không từ argv")
+    p.add_argument("--antigravity-key-env", dest="antigravity_key_env", nargs="?", const="GEMINI_API_KEY",
+                   metavar="VAR", help="đọc khoá Gemini cho `agy` từ BIẾN VAR (mặc định GEMINI_API_KEY), không từ argv")
+    p.add_argument("--new", action="store_true", help="tạo tệp MỚI (rev=1) và in fileId")
+    p.add_argument("--file-id", dest="file_id", help="ghi đè tại chỗ fileId này (mặc định TL_AGENT_CREDS_FILEID > AGENT_CREDS_FILEID)")
+    p.add_argument("--folder", help="folderId khi --new (mặc định _HOP_NAP)")
+    p.set_defaults(fn=tlg.cmd_agent_creds_set)
+    p = sub.add_parser("agent-creds-exec", help="(WP1038) chạy MỘT lệnh với token Claude/khoá Gemini từ tl_agent_creds.enc đặt CHỈ cho tiến trình con: agent-creds-exec [--claude] [--gemini] -- <lệnh> …")
+    p.add_argument("--claude", action="store_true", help="đặt CLAUDE_CODE_OAUTH_TOKEN cho tiến trình con")
+    p.add_argument("--gemini", action="store_true", help="đặt GEMINI_API_KEY cho tiến trình con")
+    p.add_argument("lenh", nargs=argparse.REMAINDER, help="`--` rồi lệnh và đối số (chạy không qua shell)")
+    p.set_defaults(fn=tlg.cmd_agent_creds_exec)
     p = sub.add_parser("gws-auth-stage", help="[CODE] export gws cred → mã hoá (khoá=webapp token) → v1.33.1: GHI ĐÈ TẠI CHỖ GWS_CRED_FILEID (fileId giữ nguyên, không bake lại); --new tạo file mới")
     p.add_argument("--folder", help="folderId đích (mặc định _HOP_NAP; chỉ dùng khi --new)")
     p.add_argument("--cred-file-id", dest="cred_file_id", help="fileId đích ghi đè tại chỗ (mặc định GWS_CRED_FILEID baked)")
@@ -142,12 +163,12 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("gws-auth-load", help="[COWORK] tải cred mã hoá từ Drive → giải mã → ~/.config/gws/credentials.json (zero-setup)")
     p.add_argument("--cred-file-id", dest="cred_file_id", help="fileId cred mã hoá (mặc định GWS_CRED_FILEID)")
     p.set_defaults(fn=tlg.cmd_gws_auth_load)
-    p = sub.add_parser("nlm-auth-stage", help="[CODE, sau `nlm login`] gói cookie nlm → mã hoá (khoá=webapp token) → v1.33.1: GHI ĐÈ TẠI CHỖ NLM_CRED_FILEID (fileId giữ nguyên); --new tạo file mới")
+    p = sub.add_parser("nlm-auth-stage", help="[CODE, máy giữ hồ sơ trình duyệt gốc] gói cookie nlm → mã hoá (khoá=webapp token) → GHI ĐÈ TẠI CHỖ NLM_CRED_FILEID (fileId giữ nguyên); --new tạo file mới. Chỉ upload sau canary LIVE dương (đúng notebook); quy trình đầy đủ: RUNBOOK mục WP710")
     p.add_argument("--folder", help="folderId đích (mặc định _HOP_NAP; chỉ dùng khi --new)")
-    p.add_argument("--refresh", action="store_true", help="ép nlm tái sinh cookie từ browser profile trước khi gói")
+    p.add_argument("--refresh", action="store_true", help="làm tươi cookie best-effort trước khi gói; KHÔNG thay cổng canary LIVE")
     p.add_argument("--cred-file-id", dest="cred_file_id", help="fileId đích ghi đè tại chỗ (mặc định NLM_CRED_FILEID / env TL_NLM_CRED_FILEID)")
     p.add_argument("--new", action="store_true", help="tạo file MỚI thay vì ghi đè tại chỗ (hành vi cũ — nhớ bake fileId in ra)")
-    p.add_argument("--force", action="store_true", help="(v1.33.39) bỏ qua cổng verify-LIVE — ép stage DÙ cookie đang chết (mặc định TỪ CHỐI cookie chết để không kẹt vòng lặp Cowork)")
+    p.add_argument("--force", action="store_true", help="(v1.33.39; WP710) KHÔNG bỏ qua được cổng canary LIVE — cookie không qua canary thì vẫn TỪ CHỐI, 0 upload")
     p.set_defaults(fn=tlg.cmd_nlm_auth_stage)
     p = sub.add_parser("nlm-auth-load", help="[COWORK] tải nlm cookie mã hoá từ Drive → giải mã (webapp token) → ~/.notebooklm-mcp-cli (HEADLESS, KHÔNG cần master key/`nlm login`)")
     p.add_argument("--cred-file-id", dest="cred_file_id", help="fileId nlm cred mã hoá (mặc định NLM_CRED_FILEID / env TL_NLM_CRED_FILEID)")
@@ -533,6 +554,8 @@ def build_parser() -> argparse.ArgumentParser:
         return out
     for _sp in _walk_subparsers(sub):
         _opts = {o for _act in _sp._actions for o in _act.option_strings}
+        if any(isinstance(_a, argparse._SubParsersAction) for _a in _sp._actions):
+            _sp.allow_abbrev = False   # WP1038 review F09: `hygiene --prof scan plan` = lá `plan`, guard đọc ra `scan`
         if "--profile" not in _opts:
             _sp.add_argument("--profile", default=argparse.SUPPRESS, help="corpus profile (nhận cả trước lẫn sau subcommand)")
         if "--config" not in _opts:

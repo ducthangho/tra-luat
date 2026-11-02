@@ -1,0 +1,174 @@
+[
+  {
+    "receipt": "pr1110-review-1-codex-verdict.receipt.yaml",
+    "field": "verdict_sha256",
+    "before": "74409dde8964145eb9e4cfd3fcb07a31a7dfabe0a50facb992bb316e012cc686",
+    "after": "04409dde8964145eb9e4cfd3fcb07a31a7dfabe0a50facb992bb316e012cc686",
+    "changed": [
+      "ops/reviews/pr1110-review-1-codex-verdict.receipt.yaml"
+    ],
+    "gates": [
+      {
+        "cmd": [
+          "python3",
+          "ops/bien_nhan_v2.py",
+          "--root",
+          "."
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/work/mutant",
+        "rc": 1,
+        "stdout": "mutant-pr1110-review-1-codex-bien-nhan.stdout",
+        "stderr": "mutant-pr1110-review-1-codex-bien-nhan.stderr",
+        "target_named": true,
+        "foreign_new_receipts": [],
+        "failure_lines": []
+      },
+      {
+        "cmd": [
+          "python3",
+          "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/direct.py",
+          "."
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/work/mutant",
+        "rc": 1,
+        "stdout": "mutant-pr1110-review-1-codex-direct.stdout",
+        "stderr": "mutant-pr1110-review-1-codex-direct.stderr",
+        "target_named": true,
+        "foreign_new_receipts": [],
+        "failure_lines": [
+          "         f\"{p.name}: LỆCH BĂM — biên nhận khai {sha}, tệp {duong!r} thực {thuc}. \"",
+          "AssertionError: pr1110-review-1-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai 04409dde8964145eb9e4cfd3fcb07a31a7dfabe0a50facb992bb316e012cc686, tệp 'ops/reviews/pr1110-review-1-codex-verdict.md' thực 74409dde8964145eb9e4cfd3fcb07a31a7dfabe0a50facb992bb316e012cc686. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào."
+        ]
+      }
+    ]
+  },
+  {
+    "receipt": "pr1110-review-2-codex-verdict.receipt.yaml",
+    "field": "verdict_sha256",
+    "before": "a7a69903810e5ee6198c5d0f1a3a243fc777b8e1ecdd25a3e4515801f7dc6b31",
+    "after": "07a69903810e5ee6198c5d0f1a3a243fc777b8e1ecdd25a3e4515801f7dc6b31",
+    "changed": [
+      "ops/reviews/pr1110-review-2-codex-verdict.receipt.yaml"
+    ],
+    "gates": [
+      {
+        "cmd": [
+          "python3",
+          "ops/bien_nhan_v2.py",
+          "--root",
+          "."
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/work/mutant",
+        "rc": 1,
+        "stdout": "mutant-pr1110-review-2-codex-bien-nhan.stdout",
+        "stderr": "mutant-pr1110-review-2-codex-bien-nhan.stderr",
+        "target_named": true,
+        "foreign_new_receipts": [],
+        "failure_lines": []
+      },
+      {
+        "cmd": [
+          "python3",
+          "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/direct.py",
+          "."
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/work/mutant",
+        "rc": 1,
+        "stdout": "mutant-pr1110-review-2-codex-direct.stdout",
+        "stderr": "mutant-pr1110-review-2-codex-direct.stderr",
+        "target_named": true,
+        "foreign_new_receipts": [],
+        "failure_lines": [
+          "         f\"{p.name}: LỆCH BĂM — biên nhận khai {sha}, tệp {duong!r} thực {thuc}. \"",
+          "AssertionError: pr1110-review-2-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai 07a69903810e5ee6198c5d0f1a3a243fc777b8e1ecdd25a3e4515801f7dc6b31, tệp 'ops/reviews/pr1110-review-2-codex-verdict.md' thực a7a69903810e5ee6198c5d0f1a3a243fc777b8e1ecdd25a3e4515801f7dc6b31. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào."
+        ]
+      }
+    ]
+  },
+  {
+    "receipt": "pr1114-review-1-codex-verdict.receipt.yaml",
+    "field": "verdict_sha256",
+    "before": "c4dd8f14224fad7b6d08009e83a027d20d8f8500e692ae78f1e5d2af8c01a41b",
+    "after": "04dd8f14224fad7b6d08009e83a027d20d8f8500e692ae78f1e5d2af8c01a41b",
+    "changed": [
+      "ops/reviews/pr1114-review-1-codex-verdict.receipt.yaml"
+    ],
+    "gates": [
+      {
+        "cmd": [
+          "python3",
+          "ops/bien_nhan_v2.py",
+          "--root",
+          "."
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/work/mutant",
+        "rc": 1,
+        "stdout": "mutant-pr1114-review-1-codex-bien-nhan.stdout",
+        "stderr": "mutant-pr1114-review-1-codex-bien-nhan.stderr",
+        "target_named": true,
+        "foreign_new_receipts": [],
+        "failure_lines": []
+      },
+      {
+        "cmd": [
+          "python3",
+          "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/direct.py",
+          "."
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/work/mutant",
+        "rc": 1,
+        "stdout": "mutant-pr1114-review-1-codex-direct.stdout",
+        "stderr": "mutant-pr1114-review-1-codex-direct.stderr",
+        "target_named": true,
+        "foreign_new_receipts": [],
+        "failure_lines": [
+          "         f\"{p.name}: LỆCH BĂM — biên nhận khai {sha}, tệp {duong!r} thực {thuc}. \"",
+          "AssertionError: pr1114-review-1-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai 04dd8f14224fad7b6d08009e83a027d20d8f8500e692ae78f1e5d2af8c01a41b, tệp 'ops/reviews/pr1114-review-1-codex-verdict.md' thực c4dd8f14224fad7b6d08009e83a027d20d8f8500e692ae78f1e5d2af8c01a41b. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào."
+        ]
+      }
+    ]
+  },
+  {
+    "receipt": "pr1114-review-2-codex-verdict.receipt.yaml",
+    "field": "verdict_sha256",
+    "before": "51eec0ee8a1fba84451e5a626046c07511a91db2e99224ff232c459b987ec8ce",
+    "after": "01eec0ee8a1fba84451e5a626046c07511a91db2e99224ff232c459b987ec8ce",
+    "changed": [
+      "ops/reviews/pr1114-review-2-codex-verdict.receipt.yaml"
+    ],
+    "gates": [
+      {
+        "cmd": [
+          "python3",
+          "ops/bien_nhan_v2.py",
+          "--root",
+          "."
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/work/mutant",
+        "rc": 1,
+        "stdout": "mutant-pr1114-review-2-codex-bien-nhan.stdout",
+        "stderr": "mutant-pr1114-review-2-codex-bien-nhan.stderr",
+        "target_named": true,
+        "foreign_new_receipts": [],
+        "failure_lines": []
+      },
+      {
+        "cmd": [
+          "python3",
+          "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/direct.py",
+          "."
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119c/work/mutant",
+        "rc": 1,
+        "stdout": "mutant-pr1114-review-2-codex-direct.stdout",
+        "stderr": "mutant-pr1114-review-2-codex-direct.stderr",
+        "target_named": true,
+        "foreign_new_receipts": [],
+        "failure_lines": [
+          "         f\"{p.name}: LỆCH BĂM — biên nhận khai {sha}, tệp {duong!r} thực {thuc}. \"",
+          "AssertionError: pr1114-review-2-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai 01eec0ee8a1fba84451e5a626046c07511a91db2e99224ff232c459b987ec8ce, tệp 'ops/reviews/pr1114-review-2-codex-verdict.md' thực 51eec0ee8a1fba84451e5a626046c07511a91db2e99224ff232c459b987ec8ce. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào."
+        ]
+      }
+    ]
+  }
+]

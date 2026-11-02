@@ -1,0 +1,8 @@
+from pathlib import Path
+import json,hashlib,re,yaml
+from audit import ROOT,OUT,SHA,record
+p=ROOT/'ops/reviews/pr896-review-6-codex/luot-hong-c0fa33fa';run=json.loads((p/'run/run.json').read_text());main=json.loads((ROOT/'ops/reviews/pr896-review-6-codex/run/run.json').read_text());partial=(p/'VERDICT.partial.md').read_bytes();heads=re.findall(r'^### (.*)$',partial.decode(),re.M)
+d=yaml.safe_load((ROOT/'ops/reviews/pr896-review-6-codex-verdict.receipt.yaml').read_text());c=next(c for c in d['verdict_usage_caveats'] if c['id']=='LAN-CHAY-DAU-CHET-VI-MAY-CHU-QUA-TAI')
+r={'failed_run_id':run['run_id'],'same_head_as_counted_run':run['head']==main['head'],'same_prompt_as_counted_run':run['prompt_sha256']==main['prompt_sha256'],'rc':run['ma_thoat'],'duration':run['thoi_luong_giay'],'partial_first_line':partial.decode().splitlines()[0],'partial_bytes':len(partial),'partial_sha256':hashlib.sha256(partial).hexdigest(),'partial_h3_count':len(heads),'partial_h3_titles':heads,'error_excerpt':(p/'loi-may-chu.txt').read_text(),'receipt_description':c['mo_ta'],'readme_lines':[i for i,l in enumerate((ROOT/'ops/reviews/README.md').read_text().splitlines(),1) if c['id'] in l]}
+(OUT/'failed-run-claims.json').write_text(json.dumps(r,ensure_ascii=False,indent=2))
+record(16,'Lời khai mới về hiện vật của lần chạy hỏng','PYTHONDONTWRITEBYTECODE=1 python3 review_evidence/failed_run_claims.py; wc -c <VERDICT.partial.md>; rg -n "^### |^verdict:" <VERDICT.partial.md>; compare failed/counting run JSON',json.dumps(r,ensure_ascii=False,indent=2),'LỖI P1 mo-ta-partial-luot6-khong-khop-hien-vat: receipt và README mới khai chỉ một phép đo t26, trong khi tệp có 14 mục; vẫn dang_lam và không phải verdict hoàn tất')

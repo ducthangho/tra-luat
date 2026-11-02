@@ -1,0 +1,10 @@
+gate step=29 ci-phamvi selftest (phan chung — cong co rang): runner.os != 'Windows'
+gate-cong-cu step=9 actions/upload-artifact@v4: runner.os != 'Windows'
+gate-ops step=9 ci-duong-nhanh selftest (phan loai diff + khoa cau truc if): runner.os == 'Linux'
+gate-ops step=12 don-nhanh selftest (chốt xoá nhánh): runner.os != 'Windows'
+gate-ops step=13 bo ca gate chay TRONG cgroup duoc uy quyen (Linux): ${{ runner.os == 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+gate-ops step=14 gate lifecycle selftest (nen khong co cgroup): ${{ runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+total: 6
+with runner.os: 6
+with matrix.os: 0
+raw source lines: [[430, "if: runner.os != 'Windows'"], [575, "- if: runner.os != 'Windows'"], [697, "if: runner.os == 'Linux'"], [786, "if: runner.os != 'Windows'"], [819, "if: ${{ runner.os == 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"], [860, "if: ${{ runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"]]

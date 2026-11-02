@@ -1,0 +1,119 @@
+chua chay tren cay that — executor tu ap, tu do, tu chiu trach nhiem commit
+(HINT luot 8, reviewer Claude Opus 5.5 subagent; CHI tep test ops/ci_duong_nhanh_test.py. Phan san pham ops/ci_duong_nhanh.py nam trong khoi diff cua finding trong VERDICT.md — ap CA HAI; ban da do: CA 75/75, DOT BIEN 174/174, TONG DAT.)
+--- ops/ci_duong_nhanh_test.py
++++ ops/ci_duong_nhanh_test.py
+@@ -130,10 +130,14 @@
+     return b"".join(x.encode("utf-8", "surrogateescape") + b"\0" for x in duong)
+ 
+ 
+-def chay_gia(out=b"", rc=0, nem=None, log=None):
++def chay_gia(out=b"", rc=0, nem=None, log=None, merge_base=(GOC_A + "\n").encode()):
+     def chay(argv, **kw):
+         if log is not None:
+             log.append(list(argv))
++        if list(argv[:3]) == ["git", "merge-base", "--all"]:
++            if isinstance(merge_base, BaseException):
++                raise merge_base
++            return KQ(0 if merge_base else 1, merge_base or b"")
+         if nem is not None:
+             raise nem
+         return KQ(rc, out)
+@@ -382,6 +386,38 @@
+ 
+ 
+ @ca
++def t11b_nhieu_merge_base_la_khong_do_duoc():
++    """Cross-review luot 8 (`phan-loai-ba-cham-mu-voi-nhieu-merge-base`): criss-cross => ba cham giau thay doi ma."""
++    m = nap_module()
++    ho_so = nul("ops/land/x.yaml")
++    for ten, mb in (("hai merge-base", f"{GOC_A}\n{GOC_B}\n".encode()), ("khong merge-base", b""),
++                    ("merge-base nem", SuDoGia("git no")), ("merge-base lac dang", b"xyz\n")):
++        bang(m.phan_loai(env_pr(), chay_gia(ho_so, merge_base=mb))[0] == "day_du", f"{ten}: phai la day_du (fail-close)")
++    bang(m.phan_loai(env_pr(), chay_gia(ho_so))[0] == "duong_nhanh", "doi chung: mot merge-base + ho so phai duong nhanh")
++    with kho_that(nhanh_pr={"ops/land/x1.yaml": "a: 1\n"}, nen={"README.md": "x\n", "scripts/tl.py": "v1\n"}) as (kho, a, x1):
++        git(kho, "checkout", "-q", "main")
++        viet(kho, "scripts/tl.py", "v2\n")
++        git(kho, "commit", "-q", "-am", "m1")
++        m1 = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
++        git(kho, "merge", "-q", "--no-ff", x1, "-m", "m2")
++        goc = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
++        git(kho, "checkout", "-q", "pr")
++        git(kho, "merge", "-q", "--no-ff", m1, "-m", "x2")
++        viet(kho, "scripts/tl.py", "v1\n")
++        viet(kho, "ops/land/y.yaml", "b: 1\n")
++        git(kho, "add", "-A")
++        git(kho, "commit", "-q", "-m", "x3 dao ma + ho so")
++        dau = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
++        bang(len(git(kho, "merge-base", "--all", goc, dau).stdout.split()) == 2, "fixture vo hieu: phai co hai merge-base")
++        git(kho, "checkout", "-q", "--detach", goc)
++        git(kho, "merge", "-q", "--no-ff", dau, "-m", "merge that")
++        doi_that = git(kho, "diff", "--name-only", goc, "HEAD").stdout.decode().split()
++        bang("scripts/tl.py" in doi_that, f"fixture vo hieu: merge that phai doi scripts/tl.py, duoc {doi_that}")
++        che_do, ly_do = phan_loai_that(m, kho, goc, dau)
++        bang(che_do == "day_du", f"criss-cross (merge that doi scripts/tl.py) phai la day_du, duoc {che_do!r}: {ly_do}")
++
++
++@ca
+ def t12_doi_ten_ra_khoi_vung_ma_day_du():
+     m = nap_module()
+     noi = "def f():\n    return 1\n" * 20
+@@ -641,6 +677,46 @@
+ 
+ 
+ @ca
++def t20p_kiem_re_gitattributes_trong_ho_so_do():
++    """Cross-review luot 8: `.gitattributes` duoi allowlist (`conflict-marker-size`) tat bao dau xung dot cua diff --check."""
++    m = nap_module()
++    pr = {"ops/land/.gitattributes": "* conflict-marker-size=40\n",
++          "ops/land/x.md": "a\n<<<<<<< HEAD\nb\n=======\nc\n>>>>>>> nhanh\n"}
++    with kho_that(nhanh_pr=pr) as (kho, goc, dau):
++        bang(m.kiem_diff_check(env_pr(goc=goc, dau=dau), chay_that, kho) == [],
++             "fixture vo hieu: thuoc tinh phai TAT duoc bao dau xung dot cua kiem_diff_check")
++        rc, log = kiem_re(m, kho, goc, dau)
++        bang(rc == 1 and ".gitattributes" in log, f".gitattributes trong ho so phai DO kiem-re: rc={rc}: {log}")
++
++
++@ca
++def t20q_kiem_re_symlink_hop_le_moi_duoi_do():
++    """Cross-review luot 8: docstring khai chan MOI symlink "treo hay khong"; t20n chi co symlink TREO duoi `.md`."""
++    m = nap_module()
++    for ten, duong in (("hop le .md", "ops/reviews/hop-le.md"), ("hop le .yaml", "ops/land/l.yaml")):
++        with kho_that(nhanh_pr={"ops/specs/S.md": "# s\n"}) as (kho, goc, dau):
++            (kho / duong).parent.mkdir(parents=True, exist_ok=True)
++            (kho / duong).symlink_to("../../README.md")
++            bang((kho / duong).exists(), f"fixture vo hieu: {duong} phai la symlink HOP LE")
++            git(kho, "add", "-A")
++            git(kho, "commit", "-q", "-m", "symlink")
++            dau2 = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
++            rc, log = kiem_re(m, kho, goc, dau2)
++            bang(rc == 1 and "symlink" in log, f"{ten}: symlink phai DO kiem-re: rc={rc}: {log}")
++
++
++@ca
++def t20r_kiem_re_dau_xung_dot_moi_duoi_tep_do():
++    """Cross-review luot 8: t20c chi co dau xung dot trong `.md`; `--check` thu hep ve `*.md` van xanh. Tep KHONG phai
++    YAML (kiem_yaml khong bat ho) phai tu DO qua diff --check."""
++    m = nap_module()
++    for duong in ("ops/reviews/goi-y.patch", "ops/land/ghi.json", "ops/specs/ghi.txt"):
++        with kho_that(nhanh_pr={duong: "a\n<<<<<<< HEAD\nb\n=======\nc\n>>>>>>> nhanh\n"}) as (kho, goc, dau):
++            rc, log = kiem_re(m, kho, goc, dau)
++            bang(rc == 1 and "diff --check" in log and duong in log, f"{duong}: dau xung dot phai DO qua diff --check: rc={rc}: {log}")
++
++
++@ca
+ def t20o_kiem_re_yaml_nhieu_tai_lieu_hong_o_sau_do():
+     """Cross-review luot 7 (P2 `kiem-re-cua-fail-close-chua-co-ca`): tai lieu DAU hop le, tai lieu SAU hong — kiem_yaml
+     phai tieu thu HET `safe_load_all`, khong chi lay tai lieu dau."""
+@@ -1844,6 +1920,12 @@
+     ("dk_go_muc_da_noi_kiem_dem_so", (DK, lambda vb: thay_mot(vb, f'    "{DA_NOI_MUC}",\n', "")), ("k02_da_noi_dung_mot_lan_va_test_song_khop_tep",)),
+     # ---- cross-review luot 7: loai tep ho so (symlink)
+     ("kiem_re_bo_loai_tep", _ma("kiem_yaml(doi, kho) + kiem_loai_tep(doi, kho) + ", "kiem_yaml(doi, kho) + "), ("t20n_kiem_re_symlink_ho_so_do",)),
++    ("mot_merge_base_bo_chot_dang", _ma('            or not re.fullmatch(rb"[0-9a-f]{40}\\n", bytes(ra_mb)):', '            or False:'), ("t11b_nhieu_merge_base_la_khong_do_duoc",)),
++    ("mot_merge_base_bo_goi", _ma('        mb = chay(["git", "merge-base", "--all", goc, dau], cwd=kho, capture_output=True)', '        mb = type("K", (), {"returncode": 0, "stdout": (goc + "\\n").encode()})()'), ("t11b_nhieu_merge_base_la_khong_do_duoc",)),
++    ("loai_tep_bo_gitattributes", _ma('if duong.rsplit("/", 1)[-1] == ".gitattributes"]', "if False]"), ("t20p_kiem_re_gitattributes_trong_ho_so_do",)),
++    ("loai_tep_chi_chan_treo", _ma("for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]", "for duong in sorted(doi) if (Path(kho) / duong).is_symlink() and not (Path(kho) / duong).exists()]"), ("t20q_kiem_re_symlink_hop_le_moi_duoi_do",)),
++    ("loai_tep_chi_md", _ma("for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]", "for duong in sorted(doi) if (Path(kho) / duong).is_symlink() and duong.endswith('.md')]"), ("t20q_kiem_re_symlink_hop_le_moi_duoi_do",)),
++    ("diff_check_chi_md", _ma('diff", "--check", "--no-renames", f"{goc}...{dau}"]', 'diff", "--check", "--no-renames", f"{goc}...{dau}", "--", "*.md"]'), ("t20r_kiem_re_dau_xung_dot_moi_duoi_tep_do",)),
+     ("kiem_yaml_chi_tai_lieu_dau", _ma("list(yaml.safe_load_all(f))", "next(yaml.safe_load_all(f), None)"), ("t20o_kiem_re_yaml_nhieu_tai_lieu_hong_o_sau_do",)),
+     ("loai_tep_cho_symlink_qua", _ma("for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]", "for duong in sorted(doi) if False]"), ("t20n_kiem_re_symlink_ho_so_do",)),
+ ]

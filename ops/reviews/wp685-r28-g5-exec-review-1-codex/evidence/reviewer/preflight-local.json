@@ -1,0 +1,67 @@
+[
+  {
+    "argv": [
+      "git",
+      "diff",
+      "--check",
+      "ab457c651eb4428705f0492163080b661c858b72",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "diff",
+      "--quiet",
+      "423b4ba14078701859b9e6ac101a68a3fc4ddef4",
+      "ab457c651eb4428705f0492163080b661c858b72",
+      "--",
+      ".claude/dev/launcher.py",
+      ".claude/dev/launcher_test.py"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "diff",
+      "--name-only",
+      "HEAD^",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": ".claude/dev/launcher.py\n.claude/dev/launcher_test.py\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "diff",
+      "--numstat",
+      "HEAD^",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "33\t5\t.claude/dev/launcher.py\n1096\t2\t.claude/dev/launcher_test.py\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "grep",
+      "-n",
+      "linux:",
+      "HEAD",
+      "--",
+      ".claude/dev/launcher.py"
+    ],
+    "rc": 0,
+    "stdout": "HEAD:.claude/dev/launcher.py:365:            return f\"linux:{sau[19]}\"  # trường 22 tính từ 1 = starttime\nHEAD:.claude/dev/launcher.py:499:                tt[int(p.name)] = (int(sau[1]), int(sau[2]), f\"linux:{sau[19]}\")\n",
+    "stderr": ""
+  }
+]

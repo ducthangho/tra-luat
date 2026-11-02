@@ -1,0 +1,20 @@
+# do 2026-10-25 trong phien ghi so (git, core.abbrev 7)
+$ git rev-parse 7009ab94f814fa19d3dc148f1ce074f40fd9031b^{tree} 7009ab94f814fa19d3dc148f1ce074f40fd9031b^1 7009ab94f814fa19d3dc148f1ce074f40fd9031b^2
+11f0c80b6ca510bcf6d0d6fce6c2afdd531842f2
+5775864b04a18c5afe1aafcbb23e54525ce8a3d8
+3e46a4b790b770e513ab05b0b3faf0dc88796903
+$ git rev-parse 3e46a4b790b770e513ab05b0b3faf0dc88796903^{tree}
+11f0c80b6ca510bcf6d0d6fce6c2afdd531842f2
+$ git diff --numstat 7009ab94f814fa19d3dc148f1ce074f40fd9031b^1 7009ab94f814fa19d3dc148f1ce074f40fd9031b
+11	3	docs/PROTOCOL_DA_PHIEN.md
+51	0	docs/adr/0056-lease-no-progress-six-hours.md
+$ cmp <(git diff 7009ab94f814fa19d3dc148f1ce074f40fd9031b^1 7009ab94f814fa19d3dc148f1ce074f40fd9031b) <(git diff 7009ab94f814fa19d3dc148f1ce074f40fd9031b^1 3e46a4b790b770e513ab05b0b3faf0dc88796903)
+cmp rc=0
+$ cmp <(git diff d2e3052 87fd7611001ebffd20a87c934fcf578644984b4b) <(git diff 7009ab94f814fa19d3dc148f1ce074f40fd9031b^1 7009ab94f814fa19d3dc148f1ce074f40fd9031b)   (diff da review vs noi dung merge)
+cmp rc=0
+$ blob tai 87fd7611001ebffd20a87c934fcf578644984b4b (sha da review) vs merge
+docs/PROTOCOL_DA_PHIEN.md 76a8a3ea2e9d612310663dcf1e49c3861c7d7144 76a8a3ea2e9d612310663dcf1e49c3861c7d7144
+docs/adr/0056-lease-no-progress-six-hours.md 97712ce344a5ea42ee89ca9c8a472a09f2d82159 97712ce344a5ea42ee89ca9c8a472a09f2d82159
+$ hai tep r4 E1 giu nguyen byte (base d2e3052 vs merge)
+scripts/tl_selftest.py a1c861d8b148a4cbb713ed380553d892c8c25cca a1c861d8b148a4cbb713ed380553d892c8c25cca
+RELEASE_MANIFEST.json 3dddd00f6b45dd27c5f307e9f289be8599f6af6a 3dddd00f6b45dd27c5f307e9f289be8599f6af6a

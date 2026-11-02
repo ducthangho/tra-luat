@@ -1,0 +1,7 @@
+1. ci.yml:430 gate / ci-phamvi selftest (phan chung — cong co rang): runner.os != 'Windows'
+2. ci.yml:575 gate-cong-cu / actions/upload-artifact@v4: runner.os != 'Windows'
+3. ci.yml:697 gate-ops / ci-duong-nhanh selftest (phan loai diff + khoa cau truc if): runner.os == 'Linux'
+4. ci.yml:786 gate-ops / don-nhanh selftest (chốt xoá nhánh): runner.os != 'Windows'
+5. ci.yml:819 gate-ops / bo ca gate chay TRONG cgroup duoc uy quyen (Linux): ${{ runner.os == 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+6. ci.yml:860 gate-ops / gate lifecycle selftest (nen khong co cgroup): ${{ runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+COUNT=6 (runner.os OR matrix.os in step if; comments/runs-on excluded)

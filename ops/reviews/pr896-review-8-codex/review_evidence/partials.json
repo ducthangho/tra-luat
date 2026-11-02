@@ -1,0 +1,30 @@
+[
+  {
+    "round": 6,
+    "bytes": 28214,
+    "lines": 306,
+    "headings": 14,
+    "measurement_sections": 0,
+    "first": "verdict: dang_lam",
+    "run_id": "c0fa33fa91f34a3db8450d2e75dd6071",
+    "rc": 1,
+    "duration": 349.795,
+    "same_head": true,
+    "same_prompt": true,
+    "readme_description_match": true
+  },
+  {
+    "round": 7,
+    "bytes": 361,
+    "lines": 13,
+    "headings": 3,
+    "measurement_sections": 0,
+    "first": "verdict: dang_lam",
+    "run_id": "577bb13646ce4d458fa5ca650dc6c1af",
+    "rc": 1,
+    "duration": 44.945,
+    "same_head": true,
+    "same_prompt": true,
+    "readme_description_match": true
+  }
+]

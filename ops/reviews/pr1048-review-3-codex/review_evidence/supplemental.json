@@ -1,0 +1,121 @@
+{
+  "commands": [
+    {
+      "name": "head-identity",
+      "rc": 0,
+      "stdout_bytes": 41,
+      "stderr_bytes": 0,
+      "stdout": "6f23a4e68805b4af3e2efe77be6e10b513843e93\n"
+    },
+    {
+      "name": "head-tree",
+      "rc": 0,
+      "stdout_bytes": 41,
+      "stderr_bytes": 0,
+      "stdout": "fd454a6a3121fead24d812b32de40c89f0a02e34\n"
+    },
+    {
+      "name": "head-parents",
+      "rc": 0,
+      "stdout_bytes": 164,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "full-clone",
+      "rc": 0,
+      "stdout_bytes": 6,
+      "stderr_bytes": 0,
+      "stdout": "false\n"
+    },
+    {
+      "name": "git-abbrev",
+      "rc": 0,
+      "stdout_bytes": 2,
+      "stderr_bytes": 0,
+      "stdout": "7\n"
+    },
+    {
+      "name": "merge-base",
+      "rc": 0,
+      "stdout_bytes": 41,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "previous-master-merge-base",
+      "rc": 0,
+      "stdout_bytes": 41,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "head-numstat",
+      "rc": 0,
+      "stdout_bytes": 15,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "master-relevant-changes",
+      "rc": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "stdout": ""
+    },
+    {
+      "name": "previous-relevant-changes",
+      "rc": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "stdout": ""
+    },
+    {
+      "name": "ps1-files",
+      "rc": 0,
+      "stdout_bytes": 527,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "powershell-search",
+      "rc": 0,
+      "stdout_bytes": 11560,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "docs-search",
+      "rc": 0,
+      "stdout_bytes": 3078,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "lock-refs",
+      "rc": 0,
+      "stdout_bytes": 1960,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "lock-tracked",
+      "rc": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "stdout": ""
+    },
+    {
+      "name": "final-git-status",
+      "rc": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "stdout": ""
+    }
+  ],
+  "layout": {
+    "line_start": 54,
+    "line_end": 67,
+    "middot_lines": [
+      55,
+      56,
+      66
+    ],
+    "all_child_lines_indented": true,
+    "blank_lines": 0,
+    "code_fences": 0,
+    "same_as_previous": true
+  }
+}

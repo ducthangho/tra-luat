@@ -1,0 +1,49 @@
+# HINT.patch — review thi hanh wp698 r14 g2 (luot 2, bản vá Windows), reviewer Claude Sonnet 5.5 (subagent, tu khai).
+# CHI MO TA huong sua (Q14): moi hunk chi them DONG CHU THICH vao ops/cong_cu_test.py @ 5d889bab (blob f0fc96c1);
+# ast.dump truoc/sau bang nhau. Ap thu: patch -p0 --fuzz=0 --dry-run  (tu goc cay, hoac chi dinh tep).
+# Nhom theo lop: moi nhom bat dau bang dong `# lop: <slug>` (trong chu thich them vao).
+--- ops/cong_cu_test.py
++++ ops/cong_cu_test.py
+@@ -6898,11 +6898,24 @@
+                     f"([rc/lỗi, số ok, số ĐỎ, SỐ LIỆU(, dòng đầu)], mong {f16}): {sai16}")
+     # #698 M2b T4/T5: bộ ghi THẬT trên mọi ô (> 60: 60 đường + khúc tên tệp) — tập mục, hai dòng in, HOME rỗng.
+     # PR #721: trên Windows khối không chạy (tên Windows cấm) ⇒ đúng [0, [], 0].
++    # lop: chot-nen-nt-ba-cua-noi-chi-song-tren-linux   (HINT — chi MO TA huong, khong ma; P3)
++    # Quyet dinh "nen nao" duoc doc o BA cho doc lap: mac dinh `ten_nen=os.name` cua `_ghi698` (luc `def`), loi goi
++    # `_ghi698(d, n, vt, cac[:1])` trong `_in_tu_kiem_gom`, va nhanh `os.name == "nt"` cua cau `bang` ngay duoi. Kiem
++    # mo phong duoi day chi do CHOT ben trong `_ghi698`. Doi mac dinh thanh "posix"/None, ghim `ten_nen="posix"` o loi goi,
++    # hay lam chet nhanh `nt` cua `bang` — ca nam deu SONG tren Linux (da do), ma moi cai tai mo dung loi P1 tren Windows.
++    # Huong: dua quyet dinh ve MOT nguon do chinh tep test nam (cha va con cung doc) va cho kiem mo phong di qua DUNG
++    # nguon ay, de ba cua tren moi cai co dot bien rieng chet duoc tren Linux; neu chua lam duoc thi khai thang rang
++    # "chi do chot, khong do day noi" trong BAO CAO va trong no `windows-chua-do-o-moi-wp698`.
+     bang(kq["ghi698"] == [0, [], 0] if os.name == "nt" else kq["ghi698"][0] > 60 and kq["ghi698"][1:] == [[], 0],
+          f"bộ ghi #698 [số ô, ô lệch đầu, tổng lệch]: {kq['ghi698']}")
+     # Chốt nền của khối, đo không cần Windows: `ten_nen="nt"` ⇒ KHÔNG lời gọi bộ ghi nào mang ký tự Windows cấm.
+     goi, g = [], globals()
+     cu, g["_ket_thuc_manh"] = g["_ket_thuc_manh"], lambda *a: (goi.append(a[2]), [["x"], 0])[1]
++    # lop: khoi-phuc-ket-thuc-manh-sau-mo-phong-nt-khong-co-chot   (HINT — chi MO TA huong, khong ma; P3)
++    # `finally` ben duoi tra `_ket_thuc_manh` ve ham that. Bo no (da do): 56/56 ca van QUA, nhung sau `t52` ten toan cuc
++    # `_ket_thuc_manh` con la `<lambda>`; `main()` o che do manh (job `gate-cong-cu`) goi chinh ten ay de ghi tep manh,
++    # nen tep manh khong duoc ghi va job gom DO — chi lo ra o CI. Huong: them mot chot rieng NGAY SAU khoi (ten toan cuc
++    # `_ket_thuc_manh` van la ham that), hoac khong tray ten toan cuc: truyen ham ghi gia vao `_ghi698` qua tham so.
+     try:
+         with tempfile.TemporaryDirectory(prefix="t52nt_") as d:
+             ra_nt = _ghi698(Path(d), 3, {}, list(DOT_BIEN)[:1], ten_nen="nt")
+@@ -7511,6 +7524,17 @@
+         return False
+ 
+ 
++# lop: windows-hai-canh-t52-khong-do-duoc-nhung-bao-van-xanh   (HINT — chi MO TA huong, khong ma; P3)
++# Tren `nt` khoi #698 M2b T4/T5 khong chay (`_ghi698` tra [0, [], 0]) nhung hai canh dich `t52_` cua no —
++# `w698_x_wr_ra_nfkc` (manh 6/8) va `w698_x3_wr5_nfkc` (manh 7/8) — van dang ky vo dieu kien, trong khi khong ca nao
++# con giet duoc chung (da do tren cay mo phong quyet dinh `nt`: `t52` QUA duoi ca hai; cay Linux: giet dung `t52_`,
++# ban kinh 1/56). Neu lane Windows cua `gate-cong-cu` chay, manh 6 va 7 DO voi dong "dich van XANH" — doc thanh "kiem mat
++# rang" trong khi that ra la "kich ban khong chay tren nen nay" (so sanh `t48`: cung loai, nhung noi dung "BO QUA").
++# Huong (chu kho chon mot): (a) dang ky hai canh CHI o nen chay khoi, theo idiom `_CO_SYMLINK`/F24-F41, cung MOT nguon
++# nen voi `_ghi698`, kem mo rong oracle nang luc cua `t52` va dot bien rieng cho tung ten dieu kien; (b) khong bo qua
++# tren `nt` ma chay cac o chi gom ten HOP LE cua Windows — KHONG DO DUOC tai day, can mot lan chay Windows that (Q8);
++# (c) giu bo qua, khai vao no `windows-chua-do-o-moi-wp698` rang tren `nt` hai canh nay la "khong do duoc" (lane Windows
++# DO o manh 6, 7 va gom, cung ho voi hai muc `t48_`), va khong bat lane ay cho PR nay.
+ _TRUOC_NANG_LUC = dict(DOT_BIEN)   # F43/F45: ảnh DOT_BIEN (tên VÀ định nghĩa) TRƯỚC mọi đăng ký theo năng lực
+ _CO_SYMLINK = _do_co_symlink()
+ if _CO_SYMLINK:   # F24: chỉ đo được ở nền có symlink (xem `_do_co_symlink`)

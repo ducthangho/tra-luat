@@ -1,0 +1,59 @@
+# lop: kich-hoat-do-suy-tu-mo-neo-khong-do-tren-o
+# Điều kiện kích hoạt của dò J/K/L và độ rộng phép đo trong các câu do HINT lượt 6 thêm được suy từ họ mỏ neo, không đo trên từng ô: (1) §5 M6 viết "không dò nào ... ném" mà ba dò J (x4_t2_resolve_ra, x4_t5_mkdir_normpath_ra, x4_t5_unlink_strip_ra) ném FileNotFoundError trên ô thuần ASCII; (2) §1.12 và §5 M6 gán lý do "ba hàng cũ ngoài ASCII" cho cả bốn dò J-NEM của main, trong khi x4_t2_resolve_ra vẫn KHÁC trên nền bỏ ba hàng ấy; (3) "qua cả 419 dò" khi chỉ đo 28; (4) "+38/-7" là cây không có vòng bk riêng, cây có vòng ấy +50/-7; (5) danh sách ô thiếu ô head của M1 có thành viên trong BMP. Sửa chữ cho khớp phép đo; KHÔNG thêm dò, KHÔNG đổi tập đóng 419.
+--- ops/specs/ci-g5-cong-cu-va-tiep-r7.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r7.md
+@@ -1614,5 +1614,8 @@
+ - **Nền `fc852ff`, năm dò của Phụ lục L:** `x6_t1_ra`, `x6_t4_ra`, `x6_head`, `x6_luoi_git` SỐNG (ca đích qua; mỗi dò chỉ
+   ném trên giá trị mà ô cũ của nền không có); `x6_t2_ra` KHÁC — `tin_dung_gia` ở `t54_`, cùng lý do với hai dò `y4_t2_*`
+-  và bốn dò J-NEM của `main` (ba hàng cũ của `_luoi_noi_main` có ký tự ngoài ASCII, hai đường ra khác nhau, §5 M6). `so_neo` = 1 ở cả năm; `t2`
++  và ba trong bốn dò J-NEM của `main` (`x4_t2_thoat_ra`, `x4_t3a_thoat_ra`, `x4_t3b_thoat_ra`; ba hàng cũ của `_luoi_noi_main` có ký tự
++  ngoài ASCII, hai đường ra khác nhau, §5 M6). Dò thứ tư, `x4_t2_resolve_ra`, ra KHÁC vì lý do khác: `Path(ra).resolve(strict=True)` ném
++  `FileNotFoundError` với mọi đường ra chưa tồn tại, kể cả đường ra thuần ASCII `d con/manh 3.txt` của kịch bản `manh` đầu tiên (đo lượt 7 bằng `pool.py`:
++  trên nền, 7 dò của `main` đều KHÁC; trên nền bỏ ba hàng ngoài ASCII, 6 dò SỐNG và chỉ `x4_t2_resolve_ra` vẫn KHÁC). `so_neo` = 1 ở cả năm; `t2`
+   bỏ qua ở cả năm.
+ - **Lý do của K trên `v6_t4`, đọc nguyên văn (ba lượt chẩn đoán):** `x6_t1_ra` và `x6_luoi_git` — ca đích `t53_` ra
+@@ -2042,11 +2045,17 @@
+    `_luoi_noi_main` (`noi-path-3`, `noi-nen-2`, `noi-nen-do`) có ký tự ngoài ASCII, trên hai đường ra khác nhau (`dir/Sub Dir/Mảnh.TXT`
+    ở hai hàng đầu, ` Đỏ Sub/Mixed.TXT ` ở hàng cuối), nên trên nền chúng ra KHÁC (vòng
+-   kịch bản của nền không bắt) và chỉ GIẾT khi vòng ấy bắt — đó là đúng chỗ gọi mà M6 thêm. Không đổi thân sáu hàm của
++   kịch bản của nền không bắt) và chỉ GIẾT khi vòng ấy bắt — đó là đúng chỗ gọi mà M6 thêm. Ngoại lệ: `x4_t2_resolve_ra` ném `FileNotFoundError`
++   với mọi đường ra chưa tồn tại, kể cả đường ra thuần ASCII, nên ra KHÁC trên nền dù không có ba hàng ấy (§1.12). Không đổi thân sáu hàm của
+    A4-d: các khối bọc nằm ở cửa con và ô, không trong mã bị đo.
+-   Dò răng chỉ ném trên những ô mà chúng kích hoạt (đoạn trên), nên khối bắt của một chỗ gọi chỉ được đo ở các ô ấy: không dò nào của J, K
+-   hay L ném trên ô `bk` và `mh` của M1, ô nhiều thẻ của M1b (stdout chỉ trong BMP), kịch bản tích biên của M3 (đường ra thuần ASCII)
+-   hay ô `ra` thuần ASCII của M2. Ô mới của M1–M3 vì thế phải đi qua CHÍNH khối bắt của chỗ gọi tương ứng trong bảng trên (`doc`, bộ đọc
+-   quét `head`, vòng kịch bản của `main`, bộ ghi T4/T5; câu mở của M6 nói "lưới mới đi qua"), không dựng vòng riêng mang khối bắt riêng: một
+-   vòng riêng bắt hẹp hơn `BaseException` qua cả 419 dò (đo ở lượt 6, §10). Điều này được giữ bằng chữ và bằng review (A6), không bằng dò.
++   Dò răng chỉ ném lớp ngoài `Exception` trên những ô mà chúng kích hoạt (đoạn trên), nên khối bắt của một chỗ gọi chỉ được đo ở các ô ấy:
++   không dò nào của J, K hay L ném lớp ngoài `Exception` trên ô `bk` và `mh` của M1, ô `head` của M1 có thành viên trong BMP (10 984 trên 19 798
++   thành viên `D698` ở Python 3.12.3; 10 982 trên 19 588 ở 3.11.15), ô nhiều thẻ của M1b (stdout chỉ trong BMP), kịch bản tích biên của M3
++   (đường ra thuần ASCII) hay ô `ra` thuần ASCII của M2 (đo lượt 7: từng dò của J, K, L chạy trên từng nhóm ô cùng kiểu của nền, vì ô của M1–M3 chưa
++   có mã; danh sách này không đủ theo cấu tạo, luật dưới áp cho MỌI ô mới). Ba dò của J vẫn ném `FileNotFoundError`, lớp con của `Exception`, trên vài
++   ô thuần ASCII: `x4_t2_resolve_ra` với mọi đường ra chưa tồn tại ở `main` (kể cả `d con/manh 3.txt`), `x4_t5_mkdir_normpath_ra` ở ô bộ ghi `a/../b`,
++   `x4_t5_unlink_strip_ra` ở tên tệp ASCII kết thúc bằng khoảng trắng. Ô mới của M1–M3 vì thế phải đi qua CHÍNH khối bắt của chỗ gọi tương ứng trong bảng trên (`doc`, bộ đọc quét `head`, vòng kịch bản của
++   `main`, bộ ghi T4/T5; câu mở của M6 nói "lưới mới đi qua"), không dựng vòng riêng mang khối bắt riêng: một vòng `bk` riêng bắt `Exception` qua
++   28/28 dò đo được (5 dò L, 13 dò K, 10 dò J-NEM; lượt 6, §10); 391 dò còn lại của tập đóng, và vòng riêng cho ô `mh`, M1b, M3, M2, KHÔNG ĐO ĐƯỢC
++   trên ứng viên rút gọn. Điều này được giữ bằng chữ và bằng review (A6), không bằng dò (nợ `o-khong-do-nem-wp698`, §10).
+ 
+ **Bảng canh `DOT_BIEN`.** Thêm đúng **54** mục canh: 16 mục của r1 (M1–M3 cũ), 27 mục r2 và 11 mục r3. Mỗi
+@@ -2675,11 +2684,15 @@
+   `j-chua-co-canh-wp698` mở rộng cho Phụ lục L; (c) vế "không có tín dụng giả" trong phép đo bắt buộc của bản ghi
+   `6052503775` không đạt nếu đọc theo hạng của từng dò; r6 đọc nó ở mức nghiệm thu (§0 mục 5, §11.1 (F) điểm 31).
+-- **r6 (review lượt 6):** dò răng của năm chỗ chỉ ném trên những ô mà chúng kích hoạt (mục (a) ở trên), nên mọi ô còn lại của một chỗ gọi — ô
+-  `bk` và `mh` của M1, ô nhiều thẻ của M1b, kịch bản tích biên của M3, ô `ra` thuần ASCII của M2 — không có dò nào ném lớp ngoài `Exception`.
+-  Đo trên một ứng viên rút gọn của reviewer lượt 6 (không công bố; nền `fc852ff`, +38/−7 so nền; `t52`, `t53`, `t54` qua trên cây chưa đột biến)
+-  có khối bắt `BaseException` ở cả năm chỗ cộng MỘT vòng quét `bk` riêng bắt `Exception`: cả năm dò L, mười ba dò K và mười dò J-NEM (28 dò)
++- **r6 (review lượt 6):** dò răng của năm chỗ chỉ ném lớp ngoài `Exception` trên những ô mà chúng kích hoạt (mục (a) ở trên), nên mọi ô còn lại của một
++  chỗ gọi — ô `bk` và `mh` của M1, ô `head` của M1 có thành viên trong BMP, ô nhiều thẻ của M1b, kịch bản tích biên của M3, ô `ra` thuần ASCII của
++  M2, và có thể còn ô khác — không có dò nào ném lớp ngoài `Exception` (lượt 7 đo lại: từng dò của J, K, L chạy trên từng nhóm ô, 0 dò ném lớp ngoài
++  `Exception` trên các nhóm ấy; ba dò của J ném `FileNotFoundError`, lớp con của `Exception`, trên vài ô thuần ASCII, §5 M6).
++  Đo trên một ứng viên rút gọn của reviewer lượt 6 (không công bố; nền `fc852ff`; +38/−7 so nền khi chưa có vòng quét `bk` riêng, +50/−7 khi có;
++  `t52`, `t53`, `t54` qua trên cả hai cây chưa đột biến) có khối bắt `BaseException` ở cả năm chỗ cộng MỘT vòng quét `bk` riêng bắt `Exception`:
++  cả năm dò L, mười ba dò K và mười dò J-NEM (28 dò)
+   GIẾT 28/28, bán kính 1/56, y hệt cây không có vòng riêng. Một dò ngoài tập đóng, ném `SystemExit` trong `_doc_che_do` khi `bk` ngoài ASCII,
+   ra KHÁC (`tin_dung_gia`) trên cây có vòng riêng và GIẾT trên cây bắt `BaseException` ở vòng ấy. Nợ `o-khong-do-nem-wp698`. Không thêm dò ở đây:
+-  dò mới đổi băm tập đóng và cần quyết định chủ kho, như Phụ lục L.
++  dò mới đổi băm tập đóng và cần quyết định chủ kho, như Phụ lục L. Chỉ vòng `bk` được dựng và đo; ô `mh`, M1b, M3 và M2 không có vòng riêng đo (chỉ đo
++  rằng không dò nào ném lớp ngoài `Exception` ở đó), và 391 dò còn lại của tập đóng không chạy trên ứng viên rút gọn.
+ - **r6:** trên các cây `v6_*` chỉ chạy hai lượt `nen`, 13 dò K, 36 dò J và năm dò của Phụ lục L, cộng năm dò ấy trên nền,
+   ba lượt chẩn đoán và Phụ lục F với bản ghép của r6 (§1.12); 365 dò còn lại của tập đóng 419, Phụ lục A, A4 và A5 tám

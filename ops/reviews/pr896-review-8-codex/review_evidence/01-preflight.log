@@ -1,0 +1,26 @@
+$ git rev-parse HEAD
+rc=0
+fb87110cfab832406984f893e6a4c79fbb932aef
+
+$ git rev-parse HEAD^{tree}
+rc=0
+a653c501d218f3b72590dc28433c8f78d00643c1
+
+$ git status --porcelain=v1
+rc=0
+
+$ git rev-parse --is-shallow-repository
+rc=0
+false
+
+$ git symbolic-ref -q HEAD
+rc=1
+
+$ git rev-parse refs/remotes/origin/master
+rc=0
+3e973a03b151e37cd402e0a723816eeaa8247193
+
+$ git log --format="%H %s" 05bc12e..fb87110
+rc=0
+fb87110cfab832406984f893e6a4c79fbb932aef ops: bien nhan cross-review luot 7 #896 + ap HINT luot 7 + khoi luot 7 ho so land
+54021fb0a92eae606076606fc83431c486013bdd ops/reviews: hien vat cross-review luot 7 #896 (codex, cham 05bc12e)

@@ -1,0 +1,100 @@
+# lop: a5-bang-noi-khong-ghim-tap-54-do
+--- ops/specs/ci-g5-cong-cu-va-tiep-r4.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r4.md
+@@ -1605,7 +1605,15 @@
+ fullwidth cho `mh`, đã giết nó — §1.8.2). Mỗi mục có **cùng mỏ neo và cùng phép thay** với dò ghi ở
+ cột "dò" (Phụ lục A, C hoặc H), cùng ca đích, và được đăng ký **vô điều kiện** trong một bảng
+ có sẵn nằm **trước** `_TRUOC_NANG_LUC`. Tên mục do executor đặt; handoff phải kèm bảng nối
+-`tên dò ↔ tên mục DOT_BIEN` đủ 54 dòng, đúng định dạng Phụ lục F đọc (A5). r3 thêm đúng một canh cho mỗi
++`tên dò ↔ tên mục DOT_BIEN` đủ 54 dòng, đúng định dạng Phụ lục F đọc (A5). **Cột dò của bảng nối phải bằng ĐÚNG tập 54
++tên dò ở cột "dò (phụ lục)" của bảng dưới** (16 của r1, 27 của r2, 11 của r3; không tên thừa, không tên thay). Phụ lục F
++bản r4 chỉ đòi mỗi tên ở cột trái là MỘT dò có thật trong các phụ lục và bộ của mục bằng bộ của dò ấy; nó không đòi dò ấy
++là dò của bảng này. Đo ở review lượt 4: ứng viên có 54 canh là 35 dò của Phụ lục J cộng 19 dò T-C (cả 54 đều GIẾT
++đúng ca đích; không canh nào trong số này thuộc bảng dưới) ra Phụ lục F `rc=0`, `dem_neo` 0/470 lệch, `so_loi = 0`;
++cùng kết quả với 54 dò đầu của tập đóng ngoài bảng dưới (41 T-B, 7 T-C, 4 T-D, 2 T-E). Mười sáu dò của r1 chỉ có ở
++Phụ lục A, ngoài tập đóng 401 (giao rỗng, đo), nên bảng nối là bảo vệ duy nhất của chúng. Bản Phụ lục F kế tiếp (băm
++đổi) so tập cột trái của bảng nối với tập 54 tên đóng băng và trả mã 1 với thẻ lỗi `tap-do` khi lệch; phản chứng:
++thay một tên ⇒ `tap-do`. r3 thêm đúng một canh cho mỗi
+ đường vào mới đo được ở §1.9 — mỗi tầng `ra`, mỗi loại ký tự tách của `head`, mỗi loại lớp ngoại lệ — để một
+ bản vá gỡ riêng một đường thì đúng canh của đường ấy ĐỎ.
+ 
+@@ -1816,7 +1824,8 @@
+   trên cây ứng viên đúng 1 lần nếu tệp đích là `ops/cong_cu_test.py` hay mục là mục thêm, và đúng bằng số lần trên nền
+   nếu không (§5, đoạn mỏ neo). Bản r3 của Phụ lục F chỉ so bộ theo giá trị nên không bắt tự va chạm — đo ở review lượt
+   3 và lại ở §1.10.2 (`so_loi = 0` trên `v4_lit` và `v4_tq`).
+-  **ĐỎ KHI** có lượt rc ≠ 0, có dòng không `ok`, số lệch, hoặc Phụ lục F bản r4 ra mã 1. Phản chứng của Phụ lục F bản r4
++  **ĐỎ KHI** có lượt rc ≠ 0, có dòng không `ok`, số lệch, hoặc Phụ lục F bản r4 ra mã 1; hoặc cột dò của bảng nối khác tập 54 tên
++  của bảng canh §5 (`tap-do`, bản Phụ lục F kế tiếp). Phản chứng của Phụ lục F bản r4
+   đã chạy lúc soạn r4 (§1.10.2): một canh cùng tên mà phép thay yếu hơn dò ⇒ `lech-bo`; một bộ cũ bị đổi ⇒ `bo-cu`;
+   bảng nối thiếu một dòng ⇒ `tap-ten`; mỏ neo một dòng viết bằng `repr` (`v4_lit`) ⇒ `dem-neo` 1 mục; mỏ neo viết bằng
+   chuỗi ba nháy (`v4_tq`) ⇒ `dem-neo` 55 mục, trong đó 20 mục cũ; một dòng chú thích trích nguyên văn mỏ neo của một mục
+# lop: m2b-o-bo-ghi-de-ngoai-le-thoat-thanh-tin-dung-gia
+--- ops/specs/ci-g5-cong-cu-va-tiep-r4.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r4.md
+@@ -1576,7 +1576,8 @@
+    - Không đổi thân `_van_tay` (A4-d). Muốn `_van_tay` bắt thêm kiểu nào là đổi mã, ngoài phạm vi (S1).
+ 6. **M6 (r4) — ngoại lệ do mã bị đo ném là DỮ LIỆU, ở MỌI chỗ gọi của ô mới.** Một đột biến làm mã bị đo ném ngoại lệ
+    trên một ô mới phải chết bằng **chốt của ca đích**, không bằng cái chết của cửa con (*"đột biến bị giết không phải
+-   đột biến bị giết đúng lý do"*). Liệt kê bằng cách đọc mã: các ô mới của r2–r4 gọi mã bị đo ở đúng năm chỗ, và mỗi
++   đột biến bị giết đúng lý do"*). Liệt kê bằng cách đọc mã: các ô mới của r2–r4 gọi mã bị đo ở sáu chỗ (năm chỗ ở bảng dưới và vòng `_luoi_git` của `--tu-kiem-che-do`, nơi ba ô M5
++   của r2 gọi `_van_tay()` dưới một mệnh đề `except Exception` của nền), và mỗi
+    chỗ phải bọc lời gọi trong một khối bắt **mọi `BaseException`**, đổi nó thành một giá trị so được, rồi so như mọi kết
+    quả khác với kỳ vọng dựng độc lập (kỳ vọng không bao giờ là giá trị `NEM`):
+ 
+@@ -1587,12 +1588,13 @@
+    | `main()` trong vòng kịch bản | `--tu-kiem-main` (`t54`) | M2b T2/T3a/T3b, M3 tích biên (và mọi kịch bản cũ, vì cùng vòng) | mã thoát `"NEM:<tên kiểu>"` | không bắt |
+    | `_ket_thuc_manh(…)` hai lần | `--tu-kiem-gom` (`t52`) | M2b T4/T5 | `["NEM:<tên kiểu>"]` | ô `ghi_duong` của nền bắt `Exception`; ô mới thì tuỳ người viết |
+    | `_van_tay()` dưới `subprocess.run` ném | `--tu-kiem-che-do` (`t53`) | M5b | `"NEM:<tên kiểu>"` | đã có trong chữ M5b từ r3 |
++   | `_van_tay()` trong vòng `_luoi_git` | `--tu-kiem-che-do` (`t53`) | M5 (ba ô `ValueError`, `UnicodeDecodeError`, `RuntimeError`) | `"NEM:<tên kiểu>"` | vòng của nền bắt `Exception`; phải đổi thành `BaseException` |
+ 
+    Bọc vòng kịch bản của `--tu-kiem-main` đổi hành vi của cả các kịch bản cũ, nhưng chỉ khi `main()` ném — điều không
+    xảy ra trên nền (`t54` xanh) — nên không có ô cũ nào đổi kết quả. Vì sao `BaseException` chứ không `Exception`:
+    `SystemExit`, `KeyboardInterrupt`, `GeneratorExit` không là lớp con của `Exception`, và một `SystemExit` lọt ra làm
+    cửa con thoát với mã của nó y như một `OSError` lọt ra (đo ở §1.10.3: biến thể chỉ bắt `Exception` để mọi dò răng
+-   `x4_*_thoat*` ra KHÁC). Dò răng của mỗi chỗ gọi là nhóm J-NEM của Phụ lục J. Dò răng của T1, `head` và T4 chỉ ném
++   `x4_*_thoat*` ra KHÁC). Dò răng của mỗi chỗ gọi là nhóm J-NEM của Phụ lục J, **cộng** hai họ dò mà nhóm ấy chưa có (review lượt 4, `evidence/`): (a) dò ném một `BaseException` KHÁC `SystemExit` — `KeyboardInterrupt` hoặc `GeneratorExit` — ở mỗi trong bốn chỗ gọi: mọi dò ném của nhóm J-NEM chỉ ném `SystemExit` hoặc một lớp con của `Exception`, nên một bản bắt `(Exception, SystemExit)` qua 11/11 dò J-NEM (GIẾT, giống bản bắt `BaseException`) dù trái chữ "mọi `BaseException`"; tám dò mẫu `y4_*_kbint*`, `y4_*_genexit*` GIẾT trên bản bắt `BaseException` và ra KHÁC trên bản `(Exception, SystemExit)`; (b) dò ném `SystemExit` khi `_van_tay` gặp đúng kiểu ngoại lệ của một ô M5 (`y4_luoi_git_*_exit`, ba dò): SỐNG trên nền, KHÁC trên ứng viên làm đúng chữ r4 vì vòng `_luoi_git` chưa bắt `BaseException`. Phụ lục J kế tiếp thêm hai họ ấy vào J-NEM (băm đổi) và tập đóng thành 401 + n dò; nếu chủ kho không muốn thêm, §10 phải nêu giới hạn bằng chữ. Dò răng của T1, `head` và T4 chỉ ném
+    trên giá trị mà ô **cũ** của nền không có (ký tự ngoài ASCII ở `ra` của `_doc_che_do` và của bộ ghi, ký tự ngoài BMP ở
+    stdout của `git`), nên SỐNG trên nền và chỉ đo chỗ gọi của ô mới. Dò răng của T2/T3 ném cả trên hai hàng **cũ** của
+    `_luoi_noi_main` có ký tự ngoài ASCII (`dir/Sub Dir/Mảnh.TXT`, ` Đỏ Sub/Mixed.TXT `), nên trên nền chúng ra KHÁC (vòng
+# lop: r3-khai-ve-hint-va-ten-canh-khong-khop-hien-vat
+--- ops/specs/ci-g5-cong-cu-va-tiep-r4.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r4.md
+@@ -115,7 +115,7 @@
+    mục; và "== 1 cho mọi mục" thì đỏ ngay trên nền, vì ba mục `bn_*` của `ops/bash_nen.py` (ngoài write set) có mỏ
+    neo xuất hiện 2, 2, 3 lần — r4 so mục có tệp đích khác với số lần trên nền. HINT cũng viết "ghi mỏ neo nhiều dòng
+    bằng chuỗi ba nháy nguyên văn thì cả 54 canh tự va chạm" và "tệp tạm lỗi cú pháp, canh ra KHÁC": đo trên `v4_tq`,
+-   va chạm **vượt** khỏi hàng được viết (24 canh r2, vốn viết bằng chuỗi thoát, cũng lệch) và tệp tạm vẫn biên dịch
++   va chạm **vượt** khỏi hàng được viết (24 canh cũ — 9 canh r1 và 15 canh r2 theo bảng §5, vốn viết bằng chuỗi thoát — cũng lệch) và tệp tạm vẫn biên dịch
+    được, nên cái chết là SỐNG câm chứ không phải KHÁC ồn.
+ 2. **`m2b-o-bo-ghi-de-ngoai-le-thoat-thanh-tin-dung-gia`** — HINT chỉ nói ô bộ ghi và "mọi ngoại lệ". Đo: cùng cơ chế ở
+    ba chỗ gọi khác (mỗi chỗ một dò răng ra KHÁC khi gỡ khối bắt ở đúng chỗ ấy), và "mọi ngoại lệ" đọc thành `Exception`
+@@ -1032,7 +1032,7 @@
+   |---|---|---|---|
+   | `v4_all` | 0 · 0 | 0 · 0 / 470 | — |
+   | `v4_lit` | 0 · 0 | 1 · 1 / 470 | `["dem-neo", "r3_x3_wr5_nfkc", 2, 1]` |
+-  | `v4_tq` | 0 · 0 | 1 · 55 / 470 | 11 canh r3, 24 canh r2, 20 mục cũ (vd `f34_head_no_oserror` 4, `f44_nen_ra_lower` 2, `f18_manh_n_co_dinh` 3) |
++  | `v4_tq` | 0 · 0 | 1 · 55 / 470 | 11 canh r3, 24 canh cũ (9 r1 + 15 r2), 20 mục cũ (vd `f34_head_no_oserror` 4, `f44_nen_ra_lower` 2, `f18_manh_n_co_dinh` 3) |
+   | `v4_cu` | 0 · 0 | 1 · 1 / 470 | `["dem-neo", "f35_writer_parents", 2, 1]`; bản chỉ đếm 54 mục thêm: rc=0 |
+ 
+   Răng của chính phép đếm: bản r4 với dòng `if so != mong:` đổi thành `if False:` cho `v4_lit` rc=0, 0 lỗi. Ba phản
+@@ -1629,7 +1629,7 @@
+ biến thể đo của r4 (§1.10.2), chỉ khác nhau ở **cách viết** bảng hay một dòng chú thích:
+ - `repr` từng mỏ neo (`v4_lit`): đúng 1 mục lệch — `x3_wr5_nfkc`, mỏ neo một dòng `    tep.write_bytes((` có mặt 2 lần;
+   dò `x3_wr5_nfkc` ra KHÁC, 9 ca `tin_dung_gia` (lỗi cú pháp trong tệp tạm) — khớp review lượt 3;
+-- chuỗi ba nháy nguyên văn **chỉ** cho 11 hàng r3 (`v4_tq`): **55** mục lệch — 11 canh r3, 24 canh r2 và **20 mục cũ**
++- chuỗi ba nháy nguyên văn **chỉ** cho 11 hàng r3 (`v4_tq`): **55** mục lệch — 11 canh r3, 24 canh cũ (9 canh r1 và 15 canh r2; trong các cây đo của r4 cả hai họ mang tên `r2_<dò>`, nên nhãn "r2" ở đây KHÔNG phải họ 27 canh r2 của bảng §5) và **20 mục cũ**
+   trong 416 (vd `f34_head_no_oserror` = 4, `f44_nen_ra_lower` = 2), vì mỏ neo của chúng trùng hoặc nằm trong mỏ neo của
+   hàng r3 viết nguyên văn; lần xuất hiện đầu của cả 55 đều nằm trong vùng bảng. Ở dạng này tệp tạm vẫn biên dịch được,
+   nên cái chết là **câm**: dò `x3_wr5_nfkc` và hai mục cũ trên đều SỐNG ("đích vẫn XANH");
+# lop: muc-tieu-moi-duong-vao-co-canh-mau-thuan-no-j
+--- ops/specs/ci-g5-cong-cu-va-tiep-r4.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r4.md
+@@ -12,7 +12,7 @@
+ | `packet_issue` | **#698** (object ID `5646961843`, tạo 2026-09-30T13:09:12Z). Issue và hai comment quyết định (`5912199805`, `5914438647`) đều do **phiên agent đăng hộ chủ kho** bằng credential chủ kho. Vì vậy `author_association: OWNER` không chứng minh chủ kho tự gõ; tư cách của chúng là lời khai có neo (#566). |
+ | `mission_issue` | RỖNG. #698 không khai Mission. Packet mẹ #668 cũng không khai (đặc tả `ops/specs/CI-G5-CONG-CU-CHIA-MANH-r1.md`). Thẩm quyền của closure do đó đi qua quyết định Q10 (§11). |
+ | `nguon_cap_viec` | Chỉ thị chủ kho, nguyên văn: *"#668: mở packet tiếp nối cho F48–F50"*, neo ở #668 comment `5911957306` và thân #698. Nguồn phát hiện: verdict cross-review **lượt 22** của phiên `session_01VYtkBy…`, #668 comment `5911284002` (12:27:04Z 30-09). Verdict này mang nhãn `advisory_review`, kết luận `changes_requested` với 0 P1 · 2 P2 · 1 P3, `reviewed_sha` là `8d7faef`, và commit ấy **chưa được đẩy** lên GitHub. Executor và reviewer: #698 comment `5912199805`, nguyên văn *"Chọn opus 5.5 executor. Reviewer để sonnet 5.5 xem"*. **Quyết định chủ kho cho r1:** #698 comment `5914438647`, tạo 2026-09-30T15:30:26Z, gồm hai lượt trả lời trong phiên lúc 15:28:25Z và 15:30:09Z (§11). **r2:** phiên điều phối giao soạn revision 2 theo verdict lượt 1; những chỗ r2 tự quyết thay cho chủ kho được liệt ở §11.1 và chỉ có hiệu lực khi comment Q10 xác nhận closure của r2. **r3:** phiên điều phối giao soạn revision 3 theo verdict lượt 2 (chỉ thị trong phiên; phiên soạn r3 không đọc GitHub); những chỗ r3 tự quyết được liệt ở §11.1 (B) và (C). **r4:** phiên điều phối giao soạn revision 4 theo verdict lượt 3 (chỉ thị trong phiên, 07-10); những chỗ r4 tự quyết được liệt ở §11.1 (D). Mọi điểm của §11.1 (A)–(D) cùng một điều kiện: chỉ có hiệu lực khi comment Q10 xác nhận closure của **r4**. |
+-| `objective` | Đóng các khe đo trong `ops/cong_cu_test.py` mà phép đo trên nền `fc852ff` tái hiện được (§1, §1.8, §1.9). **(B)** Bốn bộ đọc giá trị ngoài của lớp B — `bk`, `mh`, `ra` của `_doc_che_do` và `head` của `_van_tay` — không có ô bắt các phép chuẩn hoá trước khi nhận: NFKC, bỏ Cf, bỏ TAB, bỏ Zs ngoài ASCII, bỏ Cc, bỏ dấu kết hợp. Với `bk`, `mh`, `ra`: **mọi vị trí** × **mọi thành viên** của tập điểm mã `D698` (định nghĩa bằng thuộc tính Unicode, không liệt kê; §5 M1), so với oracle độc lập. Với `head`: `D698` ở ba vị trí neo cộng đại diện `R698`/`N698` ở mọi vị trí — tổ hợp "thành viên ngoài `R698` × vị trí ngoài ba neo" **không** được đo, và ba dò `x_head_cf2063_at17`, `x_head_cfk_mid_only`, `x_head_sm_mid_only` được khai SỐNG (tập KHAI, §6); cộng ô **nhiều dòng** (r3, M1b): nhiễu, rồi MỖI ký tự mà `str.strip()` bỏ (tập `str.isspace`, dẫn xuất), rồi mã băm, theo cả hai thứ tự. **(C)** `ra` không có ô cho các phép đường dẫn (`normpath`, `expanduser`, `expandvars`, bỏ `./` đầu, bỏ `/` cuối…) ở `_doc_che_do` (M2), và — r3 — ở **mọi tầng hạ nguồn** mà `ra` đi qua: giải gói và hai lời gọi bộ ghi trong `main`, rồi bộ ghi `_ket_thuc_manh` (M2b). **(D)** Nhánh mảnh của `main` không có điểm lực lượng cho vị từ đếm một biến lẫn nhiều biến: trục trọn cộng lưới **tích biên** (M3). **(E)** Tập ngoại lệ mà `_van_tay` bắt phải được đo **chính xác** từ hai phía trên một miền kiểu **dẫn xuất** — r3, M5b: bao đóng bắc cầu của `BaseException.__subclasses__()` lúc chạy — không phải vài kiểu chọn tay. Mỗi đường vào có ít nhất một đột biến canh trong `DOT_BIEN`, chỉ đúng ca đích giết nó bằng `TinHieuChotCa`, bán kính 1; và **mọi** dò của tập dò đóng (Phụ lục C, Phụ lục H và — r4 — Phụ lục J) thuộc A1–A3, A8 phải bị giết khi nghiệm thu, trừ đối chứng, dò tương đương và dò KHAI nêu đích danh ở §2/§6. Lớp (A), tức registry năng lực ngoài cửa sổ (F48), **không** thuộc packet: nợ `registry-nang-luc-ngoai-cua-so` (Q1). Bộ đọc ngoài lớp B — đầu tệp mảnh của `_gom_manh`, `CONG_CU_TEST_TIEN_TRINH`, và (r3) hai bộ đọc `argv`: thư mục `--gop` và cửa ở `argv[1]` — được đo và ghi nợ, không vào mục tiêu (§2, §11.1). **(r4)** Mọi ô mới gọi mã bị đo phải biến **mọi** `BaseException` mà mã ấy ném thành dữ liệu so được với kỳ vọng, ở cả bốn chỗ gọi — `doc` của T1, quét `head`, `main` của T2/T3, bộ ghi T4/T5 (M6); T5 có ô gặp tệp cũ và ô so dòng in (M2b); và mỏ neo của **mọi** mục `DOT_BIEN` có tệp đích `ops/cong_cu_test.py` xuất hiện đúng một lần trong tệp ấy sau khi bảng đã ghi (A5, Phụ lục F bản r4). |
++| `objective` | Đóng các khe đo trong `ops/cong_cu_test.py` mà phép đo trên nền `fc852ff` tái hiện được (§1, §1.8, §1.9). **(B)** Bốn bộ đọc giá trị ngoài của lớp B — `bk`, `mh`, `ra` của `_doc_che_do` và `head` của `_van_tay` — không có ô bắt các phép chuẩn hoá trước khi nhận: NFKC, bỏ Cf, bỏ TAB, bỏ Zs ngoài ASCII, bỏ Cc, bỏ dấu kết hợp. Với `bk`, `mh`, `ra`: **mọi vị trí** × **mọi thành viên** của tập điểm mã `D698` (định nghĩa bằng thuộc tính Unicode, không liệt kê; §5 M1), so với oracle độc lập. Với `head`: `D698` ở ba vị trí neo cộng đại diện `R698`/`N698` ở mọi vị trí — tổ hợp "thành viên ngoài `R698` × vị trí ngoài ba neo" **không** được đo, và ba dò `x_head_cf2063_at17`, `x_head_cfk_mid_only`, `x_head_sm_mid_only` được khai SỐNG (tập KHAI, §6); cộng ô **nhiều dòng** (r3, M1b): nhiễu, rồi MỖI ký tự mà `str.strip()` bỏ (tập `str.isspace`, dẫn xuất), rồi mã băm, theo cả hai thứ tự. **(C)** `ra` không có ô cho các phép đường dẫn (`normpath`, `expanduser`, `expandvars`, bỏ `./` đầu, bỏ `/` cuối…) ở `_doc_che_do` (M2), và — r3 — ở **mọi tầng hạ nguồn** mà `ra` đi qua: giải gói và hai lời gọi bộ ghi trong `main`, rồi bộ ghi `_ket_thuc_manh` (M2b). **(D)** Nhánh mảnh của `main` không có điểm lực lượng cho vị từ đếm một biến lẫn nhiều biến: trục trọn cộng lưới **tích biên** (M3). **(E)** Tập ngoại lệ mà `_van_tay` bắt phải được đo **chính xác** từ hai phía trên một miền kiểu **dẫn xuất** — r3, M5b: bao đóng bắc cầu của `BaseException.__subclasses__()` lúc chạy — không phải vài kiểu chọn tay. Mỗi đường vào **của r1–r3** có ít nhất một đột biến canh trong `DOT_BIEN`, chỉ đúng ca đích giết nó bằng `TinHieuChotCa`, bán kính 1 (đường vào của r4 — bốn chỗ gọi của M6, lần gọi thứ hai và phép so dòng in của T5, thành viên ở tầng hạ nguồn — chỉ có dò ở Phụ lục J, không có canh: nợ `j-chua-co-canh-wp698`, §10, §11.1 (D) điểm 22); và **mọi** dò của tập dò đóng (Phụ lục C, Phụ lục H và — r4 — Phụ lục J) thuộc A1–A3, A8 phải bị giết khi nghiệm thu, trừ đối chứng, dò tương đương và dò KHAI nêu đích danh ở §2/§6. Lớp (A), tức registry năng lực ngoài cửa sổ (F48), **không** thuộc packet: nợ `registry-nang-luc-ngoai-cua-so` (Q1). Bộ đọc ngoài lớp B — đầu tệp mảnh của `_gom_manh`, `CONG_CU_TEST_TIEN_TRINH`, và (r3) hai bộ đọc `argv`: thư mục `--gop` và cửa ở `argv[1]` — được đo và ghi nợ, không vào mục tiêu (§2, §11.1). **(r4)** Mọi ô mới gọi mã bị đo phải biến **mọi** `BaseException` mà mã ấy ném thành dữ liệu so được với kỳ vọng, ở cả bốn chỗ gọi — `doc` của T1, quét `head`, `main` của T2/T3, bộ ghi T4/T5 (M6); T5 có ô gặp tệp cũ và ô so dòng in (M2b); và mỏ neo của **mọi** mục `DOT_BIEN` có tệp đích `ops/cong_cu_test.py` xuất hiện đúng một lần trong tệp ấy sau khi bảng đã ghi (A5, Phụ lục F bản r4). |
+ | `review_class` | **`sensitive`**: bộ test gate G5 có vòng đột biến tự kiểm, cùng lớp với #668. Fail-closed theo protocol §8. |
+ | `risk` | **`sensitive`**: cùng lý do trên. |
+ | `executor` | `claude`, model Claude Opus 5.5 (`claude-opus-5-5`), theo comment `5912199805`. Effort do phiên tự khai; từ ngoài là **KHÔNG ĐO ĐƯỢC**. |

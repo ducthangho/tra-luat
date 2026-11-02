@@ -1,0 +1,77 @@
+# lop: a10-v-cua-gom-khong-cay-do-va-phu-khai-cha-tu-do, a10-v-chua-chot-cach-tinh-khi-g2-thieu-duong-hay-doi-kieu
+--- ops/specs/ci-g5-cong-cu-va-tiep-r13.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r13.md
+# lop: a10-v-cua-gom-khong-cay-do-va-phu-khai-cha-tu-do
+@@ -167,8 +167,13 @@
+ worker) — không lưới nào khác chỉ được tóm thành số. `bang_env` (25 khoá đầu của cửa che-do) có kỳ vọng liệt kê tay ở `mong`
+ của `t53`; cả 72 khoá của cửa gom đều được `t52` nêu tên (tìm chuỗi trong thân `t52` trên g1), và trừ `ghi698` (cha chỉ đòi
+ `> 60`; r12 (v) ghim số) cha so chúng với kỳ vọng liệt kê tay (`mong`, `f16`, `cli`) hay tự tính (`phan_hoach`, bằng
+-`range(2, 17)`). Bỏ các ô ấy thì cha tự đỏ (đọc mã: khoá thiếu cho `kq.get` trả `None`, không qua phép so nào ở trên; không dựng
+-cây) — không cùng cơ chế; vì vậy r13 không dựng cây bỏ ô ở cửa gom. `B1` là cây ở cửa thứ hai mà review lượt 12 chưa dựng
++`range(2, 17)`). Bỏ các ô ấy thì cha tự đỏ **chỉ khi con bỏ ô mà cha giữ nguyên kỳ vọng** (đo ở review lượt 13: bỏ MỖI lần một khoá khỏi `KQ` đã ghi của g1 rồi
++chạy chính cha — `t52` đỏ ở 71 trên 72 khoá, `t53` ở 32/32, `t54` ở 508/508; ngoại lệ `ghi_gay`: `t52` đọc nó bằng `kq.get("ghi_gay", [False])`,
++nên con bỏ khối ấy mà cha vẫn xanh, cây `Ga`, 56/56). Khi executor sửa cả kỳ vọng liệt kê tay của cha cùng chỗ với con — đúng cơ chế "sửa cả hai
++phía" của §5 M8 "Cấm" — cha xanh: `Gb` (ba giá trị `gt` thay cho sáu ở con, `range(3)` thay cho `range(6)` ở `mong` của `t52`), `Gc` (`range(2, 16)`
++thay cho `range(2, 17)` ở con và ở `lech` của `t52`), `Gd` (bỏ biên `(17, None)` ở con và hàng `bien_17_None` ở `mong`) đều 56/56; còn `GbCon`
++(chỉ sửa con) thì `t52` đỏ, 55/56. Cả bốn cây xanh ấy ĐỀU ĐỎ ở phép so khoá, và trên `Gb` 67/67 đột biến đích `t52` vẫn GIẾT đúng ca đích. Cửa gom
++vì vậy CÙNG cơ chế với các lưới dùng chung, chỉ đắt hơn một chỗ sửa; r13 viết "không cùng cơ chế" và vì thế không dựng cây ở cửa gom. `B1` là cây ở cửa thứ hai mà review lượt 12 chưa dựng
+ (Giới hạn 1 của VERDICT): `_luoi_byte` là lưới cha–con dùng chung, cha dựng kỳ vọng từ CHÍNH hàm ấy (dòng 6952 của g1), r12 (v)
+ không ghim nó, và chỉ phép so khoá bắt.
+ 
+# lop: a10-v-cua-gom-khong-cay-do-va-phu-khai-cha-tu-do
+@@ -2626,7 +2631,8 @@
+      có, trên đúng miền ấy); đổi cách cung cấp `TEP_TEST` hay `subprocess` giả cho phép quét `head`, miễn là chỉ đổi môi
+      trường mà giàn vốn đã kiểm soát (như `subprocess` giả của nền) và không đổi thân `_van_tay`.
+    - **Cấm:** bỏ ô — kể cả ô CÓ SẴN từ #668 của một lưới mà cha và cửa con cùng dựng từ một hàm (vd các hàng `noi-…` của `_luoi_noi_main`); thu hẹp `D698`, `R698`, `N698`, `T698`, `E698`, tập vị trí (kể cả giữ `D698` chỉ ở ba neo như quét `head`), tập giá trị
+-     chuẩn, tập đường dẫn, tập lớp ngoại lệ — công thức S1/S2 của cha không phải chốt chống việc này (sửa cả hai phía thì `t53` xanh); chốt là A10 (iv) cho miền M1/M1b và (r12) A10 (v) cho các lưới mà cha và cửa con cùng dựng từ một hàm (M2, M2b, M3, M5) và miền `E698` (M5b), và (r13) phép so khoá và hình dạng của `KQ` ba cửa con ở A10 (v) cho mọi ô còn lại; giảm số canh
++     chuẩn, tập đường dẫn, tập lớp ngoại lệ — công thức S1/S2 của cha không phải chốt chống việc này (sửa cả hai phía thì `t53` xanh); chốt là A10 (iv) cho miền M1/M1b và (r12) A10 (v) cho các lưới mà cha và cửa con cùng dựng từ một hàm (M2, M2b, M3, M5) và miền `E698` (M5b), và (r13) phép so khoá và hình dạng của `KQ` ba cửa con ở A10 (v) cho mọi ô còn lại HIỆN TRONG `KQ` (ô chỉ có ở cha, như khối F28 của `t54`,
++     không hiện trong `KQ` nào và phép so này không phủ); giảm số canh
+      (54) hay số mục `DOT_BIEN` (470); nới bất kỳ tiêu chí nào; cho cha của `t53` (công thức S1/S2, tập `B698`) và cửa con dùng
+      chung MỘT lần dẫn xuất — khi ấy một đột biến thu hẹp miền ở chỗ dẫn xuất chung đổi cả số ô của con lẫn công thức của cha,
+      nên phép so của hợp đồng đếm M1/M5b không còn bắt được nó (chưa đo dò nào khác có bắt hay không); dẫn xuất `E698` ngoài cửa con, hay trước lúc quét (M5b); mang kết quả
+# lop: a10-v-chua-chot-cach-tinh-khi-g2-thieu-duong-hay-doi-kieu
+@@ -3014,6 +3020,19 @@
+   `kq["m5b"][0]`, đã có phép chứa riêng ở trên. Số đo trên g1 (`19a2d96`, cây `git archive`): 32 · 508 · 72 khoá ở `--tu-kiem-che-do`,
+   `--tu-kiem-main`, `--tu-kiem-gom`. Thiếu một khoá, hay một độ dài nhỏ hơn ⇒ (v) ĐỎ. Phép này chặn việc BỎ ô; nó không chặn việc thêm ô giả
+   cho đủ số (cùng giới hạn đã khai ở dưới).
++  (r14) **Cách tính, chốt** (review lượt 13 đo hai cách đọc cho kết luận KHÁC nhau; M8 "Cấm" gọi phép này là so "khoá và hình dạng" của `KQ`): đường
++  khoá là dãy khoá từ điển và chỉ số danh sách đi từ gốc `KQ`. Với MỌI đường mà `KQ` của g1 có một danh sách hay một từ điển — kể cả chính `KQ`, trừ
++  `kq["m5b"][0]` —, `KQ` của g2 phải có CÙNG đường ấy, CÙNG loại (danh sách với danh sách, từ điển với từ điển), độ dài không nhỏ hơn. **Thiếu đường, hay
++  đổi loại (sang chuỗi, số, `null`…), ⇒ (v) ĐỎ**: không bỏ qua với lý do "g2 không có danh sách ở đó", và không lấy `len()` của một chuỗi thay cho độ dài
++  danh sách. Danh sách so THEO CHỈ SỐ: chèn hay đổi chỗ phần tử ở giữa một danh sách làm lệch chỉ số và có thể làm (v) ĐỎ — giữ thứ tự của g1, thêm
++  ô ở CUỐI (riêng năm số đã ghim BẰNG ở trên thì không thêm cũng không bớt; đo: `Nap`, thêm một ô cuối `_luoi_byte`, 1 thêm/1 xoá, 56/56, XANH ở mọi cách đọc).
++  Đổi hình dạng `KQ` (đổi tên, đổi loại, dời một đường) không nằm trong những gì §5 M8 "Được" cho phép: executor thấy phải đổi để đạt đích thì DỪNG
++  theo S11 và hỏi, không tự đổi. **PHẢI ĐỎ Ở** (cùng cách dựng và ba phiên bản Python như ở PHẢI ĐỎ Ở dưới; cả ba cây `W1c`, `VE`, `Wpad`
++  đều 56/56): `W1c` — `B1` cộng hai dòng đổi `kq["byte"]["luoi"]` thành chuỗi nối các băm ở con và dòng đọc của cha (3 thêm/2 xoá): `kq["m1"]`, (iv) và (v) của r12
++  xanh; xanh nếu chỉ xét danh sách của g2 hay đọc bằng `len()`; ĐỎ ở đúng một đường (`("byte", "luoi")`: danh sách → chuỗi) khi xét loại. **Đỏ theo chữ trên:**
++  `VE` (đổi chỗ khối `so` lên đầu `_luoi_che_do`, 1 thêm/1 xoá, 56/56) xanh nếu chỉ xét danh sách của g2 và ĐỎ ở 27 đường `("luoi", i, 1)` khi xét loại,
++  vì chỉ số lệch — đúng điều "giữ thứ tự" ở trên. **Không bắt (đã khai):** `Wpad` — `B1` cộng 5 phần tử rỗng thêm vào `kq["byte"]["luoi"]` ở con và ở cha
++  (3 thêm/2 xoá, 56/56) — xanh ở mọi cách đọc, đúng giới hạn "thêm ô giả cho đủ số" ở trên.
+   (iv) đọc được trên cùng cặp lượt này: `kq["m1"]` của cây `bfb4ca3` và của cây `19a2d96` bằng nhau (đo). (v) đếm số, không so
+   nội dung từng ô: bớt một ô rồi thêm một ô khác cho cùng số thì (v) không bắt; như (iv), nó không chống một cửa con in số giả.
+   **PHẢI ĐỎ Ở:** g1 đặt vào chỗ g2 (tỷ lệ Δ = 1,00 > 0,85); và, cho (iv), ứng viên đo `N68` của review lượt 11 (g1 cộng 8 dòng
+# lop: a10-v-cua-gom-khong-cay-do-va-phu-khai-cha-tu-do
+@@ -3034,6 +3053,12 @@
+   thành `for n in (2, 16) for k in (0, n - 1)` ở hàng `noi-k{k}-n{n}` — bỏ 131 trong 508 khoá của `--tu-kiem-main`, mà `t52`, `t53`, `t54` 56/56, (iv),
+   mọi số của (v) liệt kê ở trên, A4-b và A4-d đều như g1; 101/101 đột biến đích `t54` (gồm 12 canh) vẫn GIẾT đúng ca đích, bán kính 1/56, 63/63 dò đích `t54` đúng hạng đã khai (59 GIẾT; 4 SỐNG là `t_cf`, `t_tab`, `x_f50_tk_and_bq_ne3`, `x_f50_h_and_bq_ne3`) và ba dò KHÁC vẫn KHÁC; Phụ lục I (g1, P1a, g1, P1a) cho Δ 6,91 · 6,95 so 8,33 · 9,32 s, tức 0,830 ở (i) và `ty_le` 1,29 · 1,31 ở (iii);
+   CPU của cửa `--tu-kiem-main` giảm từ 3,40–3,88 xuống 2,09–2,32 s. Chỉ phép so khoá làm nó ĐỎ.
++  (r14) Cho phép so khoá ở hai cửa còn lại (review lượt 13; mỗi cây là g1 `19a2d96` cộng đúng thay đổi nêu, dựng bằng `cp -al` rồi thay
++  `ops/cong_cu_test.py`; Python 3.11.15, 3.12.3 và 3.13.12 cho cùng kết luận; suite `manh` 56/56): `B1` (che-do: `_luoi_byte` còn `(64, 4096)`;
++  `kq["byte"]["luoi"]` 12 < 17; 90/90 đột biến đích `t53` GIẾT đúng ca đích) ĐỎ; `Ga` (gom: bỏ khối `ghi_gay` của con, 0 thêm/5 xoá; cha `t52` vẫn xanh vì
++  đọc `kq.get("ghi_gay", [False])`; 71 < 72 khoá) ĐỎ; `Gb` (gom: sáu giá trị `gt` thành ba ở con và `range(6)` thành `range(3)` ở `mong` của `t52`;
++  63 < 72 khoá; 67/67 đột biến đích `t52` GIẾT đúng ca đích) ĐỎ. Một phép so chỉ đọc cửa `main` đã ĐỎ ở `P1a` (cây PHẢI ĐỎ Ở duy nhất của r13) mà vẫn XANH ở
++  cả ba cây trên (đo); ba cây ấy cho "CẢ BA cửa con" một phản chứng riêng từng cửa.
+ 
+ ## 7. `ci_budget`
+ 
+# lop: a10-v-chua-chot-cach-tinh-khi-g2-thieu-duong-hay-doi-kieu
+@@ -3522,7 +3547,8 @@
+   cửa con, phép so khoá và suite; dò, đột biến, Phụ lục I: không chạy. Phép so khoá của A10 (v) chỉ đo trên Python 3.12.3, POSIX,
+   trên các cây dựng từ `git archive 19a2d96` (bốn cây của r13, mười hai bộ `KQ` của review lượt 12); chưa chạy trên exact head g2
+   nào (chưa có g2). Chữ HINT không nói cách tính khi g1 có danh sách hay từ điển ở một đường lồng mà g2 thiếu đường ấy hay đổi
+-  kiểu ở đó; hai cách đọc cho cùng kết luận ở 19 phép so đã chạy (§0), còn một g2 đổi kiểu như thế: KHÔNG ĐO. `ai-dang-giu`
++  kiểu ở đó; hai cách đọc cho cùng kết luận ở 19 phép so đã chạy (§0) nhưng KHÁC nhau ở một g2 đổi kiểu (đo ở review lượt 13, cây `W1c`,
++  §6 A10 (v)); r14 chốt cách đọc nghiêm. `ai-dang-giu`
+   không chạy.
+ 
+ ## 11. QUYẾT ĐỊNH CHỦ KHO

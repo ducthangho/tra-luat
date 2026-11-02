@@ -1,0 +1,11 @@
+{"command": ["git", "symbolic-ref", "--delete", "refs/remotes/origin/HEAD"], "cwd": "/tmp/wp960-r7-review/ci", "rc": 0, "stdout": "", "stderr": ""}
+{"command": ["git", "rev-parse", "refs/remotes/origin/master"], "cwd": "/tmp/wp960-r7-review/ci", "rc": 0, "stdout": "79dbaf443f90daece751d9ab2537796bbd6084bf\n", "stderr": ""}
+{"command": ["git", "rev-parse", "057abc816169688e894f64bbe637ea63d6bd9791^{tree}"], "cwd": "/tmp/wp960-r7-review/ci", "rc": 0, "stdout": "936b717ecf0afb264b0801fb0a969c9e97bf93bc\n", "stderr": ""}
+{"command": ["git", "commit-tree", "936b717ecf0afb264b0801fb0a969c9e97bf93bc", "-p", "79dbaf443f90daece751d9ab2537796bbd6084bf", "-p", "057abc816169688e894f64bbe637ea63d6bd9791", "-m", "local pull_request simulation"], "cwd": "/tmp/wp960-r7-review/ci", "rc": 0, "stdout": "42e2cc7a68c4c450f5e6640659064f9cd7167211\n", "stderr": ""}
+{"command": ["git", "checkout", "-q", "--detach", "42e2cc7a68c4c450f5e6640659064f9cd7167211"], "cwd": "/tmp/wp960-r7-review/ci", "rc": 0, "stdout": "", "stderr": ""}
+{"command": ["git", "rev-list", "--parents", "-n", "1", "HEAD"], "cwd": "/tmp/wp960-r7-review/ci", "rc": 0, "stdout": "42e2cc7a68c4c450f5e6640659064f9cd7167211 79dbaf443f90daece751d9ab2537796bbd6084bf 057abc816169688e894f64bbe637ea63d6bd9791\n", "stderr": ""}
+{"command": ["git", "rev-parse", "HEAD^{tree}"], "cwd": "/tmp/wp960-r7-review/ci", "rc": 0, "stdout": "936b717ecf0afb264b0801fb0a969c9e97bf93bc\n", "stderr": ""}
+{"command": ["git", "rev-parse", "--is-shallow-repository"], "cwd": "/tmp/wp960-r7-review/ci", "rc": 0, "stdout": "false\n", "stderr": ""}
+{"command": ["git", "symbolic-ref", "-q", "refs/remotes/origin/HEAD"], "cwd": "/tmp/wp960-r7-review/ci", "rc": 1, "stdout": "", "stderr": ""}
+{"command": ["git", "for-each-ref", "--format=%(refname) %(objectname)", "refs/remotes/origin/master"], "cwd": "/tmp/wp960-r7-review/ci", "rc": 0, "stdout": "refs/remotes/origin/master 79dbaf443f90daece751d9ab2537796bbd6084bf\n", "stderr": ""}
+{"command": ["/usr/bin/python3", "-B", "ops/bien_nhan_v2.py", "--root", "."], "cwd": "/tmp/wp960-r7-review/ci", "rc": 0, "stdout": "\nbien_nhan_v2: 244 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 297\ncâu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0\nTỔNG: ĐẠT\n", "stderr": ""}

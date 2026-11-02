@@ -1,0 +1,5 @@
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp484-r7-g7-claude	refs/heads/ops/wp484-r7-spec:ops/leases/wp484-r7-g7-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp484-r8-g7-claude	refs/heads/ops/wp484-r7-spec:ops/leases/wp484-r8-g7-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

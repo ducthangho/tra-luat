@@ -1,0 +1,631 @@
+TOTAL_VERDICTS 267
+
+VERDICT cai-cong-cu-sigpipe-r1-review-1-codex-verdict.md
+SELF 8 provider: OpenAI; execution_surface: Codex qua API với shell cục bộ; transport: công cụ trực tiếp.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,HEAD-LUOT-1-KHONG-PHAI-HEAD-CUOI
+
+VERDICT cai-cong-cu-sigpipe-r2-review-2-codex-verdict.md
+SELF 7 Reviewer độc lập, provider OpenAI; execution surface: Codex qua API với shell cục bộ; transport: machine/tool trực tiếp. Không sửa hai cây nguồn, không push, không đăng GitHub. Bản sao và phép đo nằm trong `tam/tmp.dcbYQp7XH2/`; log và mã tái lập được giữ làm bằng chứng, thư mục tạm do test sinh được dọn riêng.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,HEAD-LUOT-2-KHONG-PHAI-HEAD-CUOI
+
+VERDICT cai-cong-cu-sigpipe-r2-review-3-codex-verdict.md
+SELF 9 Provider: OpenAI. Bề mặt quan sát: Codex qua API với công cụ shell cục bộ; transport: machine/tool trực tiếp. Model: GPT-6 theo chỉ dẫn phiên (tự khai); biến thể/effort/attestation runtime độc lập: **KHÔNG ĐO ĐƯỢC**. Không suy danh tính từ actor GitHub. Executor theo vật liệu: Claude Sonnet 5.5; chưa có attestation độc lập của executor.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,HEAD-LUOT-3-KHONG-PHAI-HEAD-CUOI
+
+VERDICT cai-cong-cu-sigpipe-r2-review-4-codex-verdict.md
+SELF 7 Provider OpenAI; execution surface Codex qua API với công cụ shell cục bộ; transport machine/tool trực tiếp. Model GPT-6 theo chỉ dẫn phiên (tự khai); effort/biến thể và attestation runtime độc lập: **KHÔNG ĐO ĐƯỢC**. Executor theo vật liệu: Claude Sonnet 5.5; không suy model từ actor GitHub.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,HEAD-LUOT-4-KHONG-PHAI-HEAD-CUOI
+
+VERDICT cai-cong-cu-sigpipe-r2-review-5-codex-verdict.md
+SELF 7 Provider OpenAI; execution surface Codex qua API, công cụ shell cục bộ; transport trực tiếp. Model GPT-6 theo chỉ dẫn phiên (tự khai); effort/biến thể và attestation runtime độc lập: **KHÔNG ĐO ĐƯỢC**. Executor được khai trong vật liệu là Claude Sonnet 5.5. Vai trò reviewer độc lập, hai trục Spec và Standards/Security.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,J1-GIOI-HAN-KHAI-BAO-KHONG-PHAI-DONG-LOP
+
+VERDICT ci-g5-cong-cu-chia-manh-r1-review-2-codex-verdict.md
+SELF 130 - Reviewer: OpenAI Codex, họ GPT-6 theo cấu hình phiên; execution_surface=codex_service (API + công cụ terminal),
+RECEIPT_SURFACE codex_cli TU_KHAI codex_service (API + cong cu terminal)
+RUNTIME_FOUND False
+CAVEATS KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC
+CAVEAT_TEXT {'id': 'KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC', 'muc': 'P3', 'mo_ta': '(a) DO DUOC tu kho luc ghi so: verdict_sha256/verdict_bytes, reviewed_sha va quan he to tien, blob neo c8b5c4e, so P1/P2/P3 dem tu bang finding cuoi, comment tom tat khai dung bam + commit. (b) THUAT LAI: be mat Codex CLI va model gpt-6-astra (lease, thong diep commit neo, comment executor), effort high (comment executor). (c) KHONG DO DUOC: run_id, prompt_sha256, thoi luong, ma thoat, byte stdout/stderr, model/effort thuc phuc vu — phien ghi so khong co run.json cua luot. Chinh verdict tu mo ta be mat: codex_service (API + cong cu terminal). Ket qua sandbox trong verdict la cua luot review luc ay, khong phai phep chay lai luc ghi so.'}
+
+VERDICT ci-g5-cong-cu-chia-manh-r1-review-4-codex-verdict.md
+SELF 194 - Reviewer OpenAI Codex, họ GPT-6 theo cấu hình phiên; execution_surface=codex_service qua API/công cụ terminal,
+RECEIPT_SURFACE codex_cli TU_KHAI codex_service qua API/cong cu terminal
+RUNTIME_FOUND False
+CAVEATS KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC
+CAVEAT_TEXT {'id': 'KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC', 'muc': 'P3', 'mo_ta': '(a) DO DUOC tu kho luc ghi so: verdict_sha256/verdict_bytes, reviewed_sha va quan he to tien, blob neo 59aeafc, so P1/P2/P3 dem tu bang finding cuoi, comment tom tat khai dung bam + commit. (b) THUAT LAI: be mat Codex CLI va model gpt-6-astra (lease, thong diep commit neo, comment executor), effort high (comment executor). (c) KHONG DO DUOC: run_id, prompt_sha256, thoi luong, ma thoat, byte stdout/stderr, model/effort thuc phuc vu — phien ghi so khong co run.json cua luot. Chinh verdict tu mo ta be mat: codex_service qua API/cong cu terminal. Ket qua sandbox trong verdict la cua luot review luc ay, khong phai phep chay lai luc ghi so.'}
+
+VERDICT ci-g5-cong-cu-chia-manh-r1-review-5-codex-verdict.md
+SELF 131 - Reviewer: OpenAI Codex, họ GPT-6 theo cấu hình phiên; execution surface là dịch vụ Codex qua API và terminal tools, transport machine/local. Không có chứng cứ độc lập để khai model ID/effort thực tế hoặc tự nhận đây là Codex CLI gpt-6-astra. Không tạo human_audited hay quyền land.
+RECEIPT_SURFACE codex_cli TU_KHAI dich vu Codex qua API va terminal tools
+RUNTIME_FOUND False
+CAVEATS KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC
+CAVEAT_TEXT {'id': 'KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC', 'muc': 'P3', 'mo_ta': '(a) DO DUOC tu kho luc ghi so: verdict_sha256/verdict_bytes, reviewed_sha va quan he to tien, blob neo 007af12, so P1/P2/P3 dem tu bang finding cuoi, comment tom tat khai dung bam + commit. (b) THUAT LAI: be mat Codex CLI va model gpt-6-astra (lease, thong diep commit neo, comment executor), effort high (comment executor). (c) KHONG DO DUOC: run_id, prompt_sha256, thoi luong, ma thoat, byte stdout/stderr, model/effort thuc phuc vu — phien ghi so khong co run.json cua luot. Chinh verdict tu mo ta be mat: dich vu Codex qua API va terminal tools. Ket qua sandbox trong verdict la cua luot review luc ay, khong phai phep chay lai luc ghi so.'}
+
+VERDICT ci-g5-cong-cu-chia-manh-r1-review-6-codex-verdict.md
+SELF 125 - Reviewer OpenAI Codex, họ GPT-6 theo cấu hình phiên; bề mặt dịch vụ/API + terminal tools (`codex_service`), transport machine/local. Không có bằng chứng độc lập về exact model ID/effort đã phục vụ, không tự nhận Codex CLI gpt-6-astra hay human_audited. Verdict không cấp quyền land.
+RECEIPT_SURFACE codex_cli TU_KHAI codex_service (dich vu/API + terminal tools)
+RUNTIME_FOUND False
+CAVEATS KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC
+CAVEAT_TEXT {'id': 'KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC', 'muc': 'P3', 'mo_ta': '(a) DO DUOC tu kho luc ghi so: verdict_sha256/verdict_bytes, reviewed_sha va quan he to tien, blob neo 4152bf4, so P1/P2/P3 dem tu bang finding cuoi, comment tom tat khai dung bam + commit. (b) THUAT LAI: be mat Codex CLI va model gpt-6-astra (lease, thong diep commit neo, comment executor), effort high (comment executor). (c) KHONG DO DUOC: run_id, prompt_sha256, thoi luong, ma thoat, byte stdout/stderr, model/effort thuc phuc vu — phien ghi so khong co run.json cua luot. Chinh verdict tu mo ta be mat: codex_service (dich vu/API + terminal tools). Ket qua sandbox trong verdict la cua luot review luc ay, khong phai phep chay lai luc ghi so.'}
+
+VERDICT ci-g5-cong-cu-chia-manh-r1-review-7-codex-verdict.md
+SELF 140 - Reviewer OpenAI Codex, họ GPT-6 theo cấu hình phiên; bề mặt API + terminal tools, transport machine/local. Không có phép xác minh độc lập exact model ID/effort thực sự phục vụ; không tự nhận human_audited hay quyền land.
+RECEIPT_SURFACE codex_cli TU_KHAI API + terminal tools, transport machine/local
+RUNTIME_FOUND False
+CAVEATS KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC
+CAVEAT_TEXT {'id': 'KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC', 'muc': 'P3', 'mo_ta': '(a) DO DUOC tu kho luc ghi so: verdict_sha256/verdict_bytes, reviewed_sha va quan he to tien, blob neo c5fda22, so P1/P2/P3 dem tu bang finding cuoi, comment tom tat khai dung bam + commit. (b) THUAT LAI: be mat Codex CLI va model gpt-6-astra (lease, thong diep commit neo, comment executor), effort high (comment executor). (c) KHONG DO DUOC: run_id, prompt_sha256, thoi luong, ma thoat, byte stdout/stderr, model/effort thuc phuc vu — phien ghi so khong co run.json cua luot. Chinh verdict tu mo ta be mat: API + terminal tools, transport machine/local. Ket qua sandbox trong verdict la cua luot review luc ay, khong phai phep chay lai luc ghi so.'}
+
+VERDICT ci-g5-cong-cu-chia-manh-r1-review-8-codex-verdict.md
+SELF 14 Reviewer: OpenAI Codex, họ GPT-6 theo cấu hình phiên; công cụ terminal qua dịch vụ/API (`codex_service`, machine/local), không tự khai CLI hay exact model ID/effort đã đo được. Verdict này không cấp human_audited/quyền land.
+RECEIPT_SURFACE codex_cli TU_KHAI codex_service (terminal qua dich vu/API)
+RUNTIME_FOUND False
+CAVEATS KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC
+CAVEAT_TEXT {'id': 'KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC', 'muc': 'P3', 'mo_ta': '(a) DO DUOC tu kho luc ghi so: verdict_sha256/verdict_bytes, reviewed_sha va quan he to tien, blob neo 0987403, so P1/P2/P3 dem tu bang finding cuoi, comment tom tat khai dung bam + commit. (b) THUAT LAI: be mat Codex CLI va model gpt-6-astra (lease, thong diep commit neo, comment executor), effort high (comment executor). (c) KHONG DO DUOC: run_id, prompt_sha256, thoi luong, ma thoat, byte stdout/stderr, model/effort thuc phuc vu — phien ghi so khong co run.json cua luot. Chinh verdict tu mo ta be mat: codex_service (terminal qua dich vu/API). Ket qua sandbox trong verdict la cua luot review luc ay, khong phai phep chay lai luc ghi so.'}
+
+VERDICT don-nhanh-kien-truc-gh-1-claude-verdict.md
+SELF 20 **4. Ranh giới credential** — hiện `don-nhanh.ps1` KHÔNG cầm token nào; dựa vào `gh auth login` (out-of-band, lưu trong credential manager của hệ điều hành, không đi qua biến môi trường của script). B và C đều đòi đưa một PAT phạm vi phù hợp cho listing PR/branch vào môi trường của một script XOÁ NHÁNH. Đo hôm nay cho thấy token "tiện tay nhất" trong container này KHÔNG đủ phạm vi cho đúng việc đó (mục 6) — nghĩa là "đưa PAT vào script" không phải một bước rẻ, nó đòi cấp phát MỘT token MỚI, đúng scope, và giữ nó sống — thêm một bề mặt rủi ro cho công cụ xoá ref, đúng thứ CLAUDE.md cảnh báo ở bài học `inherit="all"`.
+RECEIPT_SURFACE None TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS mcp-do-duoc-roi-mat
+
+VERDICT no-p3-ho-so-exec-review-1-claude-verdict.md
+SELF 6 execution_surface: claude_code_subagent
+RECEIPT_SURFACE claude_code TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS SUBAGENT-CUNG-HO-REVIEW-DEFERRED,P3-NEO-PHU-566-CON-MO,HEAD-REVIEW-6616026-KHAC-HEAD-MERGE,N3D-VA-CAP-LEASE-KHONG-DO-TRONG-LUOT
+CAVEAT_TEXT {'id': 'SUBAGENT-CUNG-HO-REVIEW-DEFERRED', 'muc': 'P2', 'mo_ta': 'Reviewer Claude Sonnet 5.5 chay bang SUBAGENT trong phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT, CUNG ho Claude voi executor; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred: dung doc luot nay thanh cross_approved hay same_provider_approved.'}
+
+VERDICT no-p3-ho-so-spec-review-1-claude-verdict.md
+SELF 6 execution_surface: claude_code_subagent
+RECEIPT_SURFACE claude_code TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS SUBAGENT-CUNG-HO-REVIEW-DEFERRED
+CAVEAT_TEXT {'id': 'SUBAGENT-CUNG-HO-REVIEW-DEFERRED', 'muc': 'P2', 'mo_ta': 'Reviewer Claude Sonnet 5.5 chay bang SUBAGENT trong phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT, CUNG ho Claude voi phien soan dac ta; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred: dung doc luot nay thanh cross_approved hay same_provider_approved.'}
+
+VERDICT no-p3-ho-so-spec-review-2-claude-verdict.md
+SELF 6 execution_surface: claude_code_subagent
+RECEIPT_SURFACE claude_code TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS SUBAGENT-CUNG-HO-REVIEW-DEFERRED,P3-LUOT-2-XU-LY-KHI-THI-HANH
+CAVEAT_TEXT {'id': 'SUBAGENT-CUNG-HO-REVIEW-DEFERRED', 'muc': 'P2', 'mo_ta': 'Reviewer Claude Sonnet 5.5 chay bang SUBAGENT trong phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT, CUNG ho Claude voi phien soan dac ta; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred: dung doc luot nay thanh cross_approved hay same_provider_approved.'}
+
+VERDICT phan-bien-quy-trinh-review-3-codex-verdict.md
+SELF 15 - Role: reviewer độc lập; provider `openai_codex`; model GPT-6 / Codex theo danh tính phiên; execution surface Codex service qua API và công cụ shell; transport `machine`. Không chạy qua launcher, không có launcher receipt xác minh danh tính; không tự cấp approval/land authority.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS cross-approved-KHONG-phai-da-duyet-noi-dung,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT phan-bien-quy-trinh-review-4-codex-verdict.md
+SELF 13 - Vai trò reviewer; provider `openai_codex`; model GPT-6/Codex theo danh tính phiên; execution surface **Codex service qua API, công cụ shell**; transport `machine`. Không phải ChatGPT Web. Không có receipt độc lập xác minh model/session của lượt này; không tự cấp land authority.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS M6-DA-BI-LAT-dung-doc-ban-4-nhu-ket-luan,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT phan-bien-quy-trinh-review-5-codex-verdict.md
+SELF 12 - Role: reviewer độc lập; provider `openai_codex`; model GPT-6/Codex theo danh tính phiên; execution surface: **Codex service qua API, có công cụ shell**; transport `machine`. Không phải ChatGPT Web. Không có receipt độc lập chứng thực model/session của lượt này; không tự cấp approval/land authority.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS REVIEW-SAU-MERGE-khong-phai-cong-tien-merge,R4-04-moi-VA-DUOC-PHAN-CHUNG-chua-va-duoc-LOP,chot-kiem-trang-quyet-dinh-CO-DUONG-BAO-SACH-KHI-HONG,phan-cong-CAM-tu-soan-phan-chung,cross_approved-dua-tren-PROVIDER-khong-phai-MODEL,luot-connector-tren-bbf05ea-KHONG-DO-DUOC
+
+VERDICT pr455-bien-nhan-v2-review-1-codex-verdict.md
+SELF 7 - Provider: `openai_codex`; execution surface: Codex service/API với công cụ shell trong container; transport: `machine`. Không phải ChatGPT Web/human-mediated. Model được chỉ thị hệ thống định danh là GPT-6; không có chứng thực độc lập backend/model version.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS BON-FINDING-DA-VA-nhung-VA-CAN-REVIEW-LAI,cross_approved-dua-tren-PROVIDER-khong-phai-MODEL,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr455-bien-nhan-v2-review-2-codex-verdict.md
+SELF 9 - Provider `openai_codex`; execution surface **Codex service/API, shell trong Linux container**; transport `machine`. Model được chỉ thị hệ thống định danh GPT-6; không có chứng thực độc lập backend/version. Không khai đây là ChatGPT Web hay một run Codex CLI được launcher chứng thực.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS BON-FINDING-VONG-2-DA-VA-nhung-VA-CAN-REVIEW-LAI,cross_approved-dua-tren-PROVIDER-khong-phai-MODEL,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr455-bien-nhan-v2-review-3-codex-verdict.md
+SELF 9 - Provider `openai_codex`; execution surface Codex service/API với shell trong Linux container; transport `machine`. Chỉ thị phiên định danh GPT-6; không có chứng thực độc lập backend/model version. Không tự nhận là ChatGPT Web hay một Codex CLI run đã được launcher chứng thực.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HAI-P2-VONG-3-DA-VA-nhung-VA-CAN-REVIEW-LAI,approve_with_findings-KHONG-phai-du-dieu-kien-LAND,cross_approved-dua-tren-PROVIDER-khong-phai-MODEL,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr455-bien-nhan-v2-review-4-codex-verdict.md
+SELF 9 - Provider `openai_codex`; execution surface **Codex service/API với shell trong Linux container**; transport `machine`. Chỉ thị định danh agent GPT-6; không có chứng thực độc lập backend/model version. Không tự khai là ChatGPT Web hoặc Codex CLI được launcher chứng thực.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS BA-PHAT-HIEN-VONG-4-DA-VA-nhung-VA-CAN-REVIEW-LAI,R4-01-la-DO-PHU-TEST-khong-phai-chot-san-pham-bi-bo,approve_with_findings-KHONG-phai-du-dieu-kien-LAND,cross_approved-dua-tren-PROVIDER-khong-phai-MODEL,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr455-bien-nhan-v2-review-5-codex-verdict.md
+SELF 9 - Provider `openai_codex`; execution surface **Codex service/API với shell trong Linux container**; transport `machine`. Chỉ thị phiên định danh agent GPT-6; không có chứng thực độc lập backend/model version. Không tự nhận là ChatGPT Web hay Codex CLI run được launcher chứng thực.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS NAM-PHAT-HIEN-VONG-5-DA-VA-nhung-VA-CAN-REVIEW-LAI,MOT-MUTANT-CON-SONG-da-khai-khong-nang-thanh-finding,approve_with_findings-KHONG-phai-du-dieu-kien-LAND,cross_approved-dua-tren-PROVIDER-khong-phai-MODEL,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr455-bien-nhan-v2-review-6-codex-verdict.md
+SELF 9 - Provider `openai_codex`; execution surface **Codex service/API với shell trong Linux container**; transport `machine`. Chỉ thị định danh agent GPT-6; không có chứng thực độc lập backend/model version. Không tự nhận ChatGPT Web hoặc một run CLI có launcher attestation.
+SELF 12 Preflight tự đo: origin `https://github.com/ducthangho/tra-luat`; detached (`git symbolic-ref -q HEAD`: rc=1, stdout rỗng); `is-shallow-repository=false`; `git rev-list --count HEAD` = **1740**; worktree ban đầu sạch. Đã đọc CONTEXT, protocol, CLAUDE, kế hoạch đa provider và verdict vòng 5 trước khi soi bản vá; đối chiếu các finding lịch sử vòng 1–4. Không dùng provider AG/ChatGPT Web nên không áp hợp đồng thực thi của hai bề mặt ấy. Phạm vi này không thay pháp luật/corpus hoặc runtime skill.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS R6-02-DONG-THEO-KIEN-TRUC-khong-theo-ban-va,HAI-P2-VONG-6-DA-VA-nhung-VA-CAN-REVIEW-LAI,48-48-la-so-mutant-DUOC-CHON-khong-phai-khong-gian-loi,approve_with_findings-KHONG-phai-du-dieu-kien-LAND,cross_approved-dua-tren-PROVIDER-khong-phai-MODEL,phan-cong-CAM-tu-soan-phan-chung
+CAVEAT_TEXT {'id': 'R6-02-DONG-THEO-KIEN-TRUC-khong-theo-ban-va', 'noi_dung': 'R6-02 do tren head `5a78c15`. Tren head sau khi doi sang BANG CO CAU TRUC, chinh phep do ay cho 5 cap surface NGUYEN VEN — vi `AGENTS.md` thoi cap be mat, chi con doi chieu. Lop loi chet theo CAU TRUC chu khong theo mot ban va, nen KHONG co ca canh rieng cho no. Doc "da dong" o day nghia la "duong ay khong con ton tai", khong phai "da them mot chot".'}
+CAVEAT_TEXT {'id': 'phan-cong-CAM-tu-soan-phan-chung', 'noi_dung': 'Nhu cac luot truoc: cam reviewer tu soan chuoi tan cong. Reviewer luot nay noi ro "dieu phoi can chuan bi du lieu receipt cho cac nhanh assurance/surface con thieu vi phien nay khong duoc tu soan chung" — do phu hep hon mot luot khong rang buoc.'}
+
+VERDICT pr455-bien-nhan-v2-review-7-gpt6astra-verdict.md
+SELF 12 Preflight đã tự đo: origin `https://github.com/ducthangho/tra-luat`; detached; `is-shallow-repository=false`; **1.748 commit**; worktree ban đầu sạch; `core.abbrev=7`. Đã đọc CONTEXT, protocol, CLAUDE, kế hoạch đa provider, sáu verdict lịch sử và diff hiện tại. Phạm vi không thay legal/corpus/runtime skill; không dùng execution surface AG hoặc ChatGPT Web.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS R7-02-la-CHAN-QUA-RONG-khong-phai-lo-bao-mat,R7-02-CHUA-DO-DUOC-end-to-end,MODEL-YEU-CAU-khac-MODEL-DA-PHUC-VU,NAM-PHAT-HIEN-VONG-7-CHUA-VA-luc-ghi-bien-nhan,approve_with_findings-KHONG-phai-du-dieu-kien-LAND,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr455-bien-nhan-v2-review-8-gpt6astra-verdict.md
+SELF 8 - Reviewer độc lập với Executor Claude; provider `openai_codex`, bề mặt Codex service/API có shell Linux, transport `machine`. Chỉ thị phiên định danh GPT-6; không có chứng thực độc lập backend/model version hay launcher run của phiên này.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS 
+
+VERDICT pr460-bien-nhan-v2-review-9-gpt6astra-verdict.md
+SELF 5 Reviewer: Codex, provider OpenAI, bề mặt service/API có shell Linux, transport `machine`; không có chứng thực độc lập model/backend hay launcher run của phiên này. Authority là chỉ thị review trực tiếp trong đề bài; không tự cấp Packet/lease/approval. **Verdict này không cấp quyền land.** Không có finding P1.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS 
+
+VERDICT pr468-hoso-4-packet-review-7-codex-verdict.md
+SELF 20 - `hint-provenance-bon-hunk-khong-co-de-kiem` [P1]: **ĐÃ VÁ THẬT bằng cách rút lời khai không có căn cứ**, không phải đã kiểm được bốn lý do. LO:261–271 rút rõ 40 hunk/4 hunk bị bác và lời khai tái dẫn xuất từng hunk; không còn dùng chúng làm chứng cứ hiện hành. Bề mặt nguồn còn dùng là hai khối H, tự trích và băm khớp nguyên bản gói reviewer (**c23bcd01…**, **bde441a0…**). Mã thi công tương lai vẫn phải khai provenance riêng theo §7. Bốn lý do lịch sử **KHÔNG ĐO ĐƯỢC**, không xác nhận chúng đúng.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS 
+
+VERDICT pr489-review-2-codex-verdict.md
+SELF 9 Reviewer: Codex/OpenAI, bề mặt agent API có công cụ shell cục bộ, transport machine; độc lập với executor Claude theo nhiệm vụ được giao. Không suy danh tính model thực phục vụ từ tài khoản đăng GitHub hoặc metadata runtime do điều phối thuật lại. Quan sát **0 lần** chết/phóng lại reviewer.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS 
+
+VERDICT pr490-review-2-codex-verdict.md
+SELF 10 Reviewer: Codex/OpenAI, model GPT-6 theo cấu hình phiên; execution surface: agent API có shell cục bộ; transport: `machine`; phiên review độc lập với executor Claude. Không suy identity từ tài khoản GitHub. Phạm vi/authority là `PROMPT.md` của gói: review offline, kho chỉ đọc, đầu ra ngoài `cay-kho/`. Tree đã review: `9a0c02809425c9ba44b7e70fb660d3387a3e194c`. Không phải phiên land.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS 
+
+VERDICT pr490-review-3-codex-verdict.md
+SELF 10 Reviewer: Codex/OpenAI, GPT-6 theo cấu hình phiên; execution surface: agent API có shell cục bộ; transport: `machine`; phiên độc lập với executor Claude. Authority/phạm vi là `PROMPT.md`: review offline, chỉ đọc `cay-kho/`, ghi verdict và hiện vật đo ngoài cây. Tree: `68b98d1174918994be8646d721d5dadff23f1176`. Không phải phiên land.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS 
+
+VERDICT pr490-review-4-codex-verdict.md
+SELF 8 Reviewer: Codex/OpenAI, GPT-6 theo cấu hình phiên; provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`; phiên độc lập với executor Claude. Authority và phạm vi là `PROMPT.md` của gói: review offline, chỉ đọc `cay-kho/`, ghi verdict/hiện vật ngoài cây. Không cấp quyền merge hoặc land. Head đã xác minh như trên, tree `980317c9c01b5d5b46844000de14f78fd12425c5`.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS 
+
+VERDICT pr490-review-5-codex-verdict.md
+SELF 8 Reviewer: Codex/OpenAI, GPT-6 theo cấu hình phiên; provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`. Phiên độc lập với executor Claude; không có GitHub submitter vì không đăng gì lên mạng. Authority là yêu cầu đọc `PROMPT.md` và thực hiện review offline của gói này. Phạm vi ghi chỉ là `VERDICT.md` và `phep-do/` ngoài cây được review; không commit hoặc cấp quyền land. Tree được review: `c57aaf5a2e19271d128c005cbfab8c3f44d11590`.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS 
+
+VERDICT pr490-review-6-codex-verdict.md
+SELF 10 Reviewer: Codex/OpenAI, GPT-6 theo cấu hình phiên; provider `openai_codex`, execution surface agent API có shell Linux, transport `machine`. Phiên độc lập với executor Claude. Authority/phạm vi là `PROMPT.md`: review offline, chỉ ghi đầu ra ngoài `cay-kho/`. Tree được review: `de63dea60cf89f105078644639b6130e62539b43`. Không có GitHub submitter trong lượt này.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS 
+
+VERDICT pr490-review-7-codex-verdict.md
+SELF 10 Reviewer: Codex/OpenAI, GPT-6 theo cấu hình phiên; provider `openai_codex`, bề mặt agent API có shell Linux, transport `machine`, phiên độc lập với executor Claude. Không suy thêm model/effort từ tên gói. Authority/phạm vi: `PROMPT.md` do người dùng giao. Tree: `d9d4cc1f2edae522463899a86ebdbf0891531622`. Không có GitHub submitter trong lượt này.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS LIEN-KET-TUONG-DOI-TRONG-VERDICT-TRO-RA-NGOAI-KHO,NEO-453c6bc-CHUA-CO-TREN-MASTER-SQUASH-SE-PHA
+
+VERDICT pr491-review-1-codex-verdict.md
+SELF 6 Reviewer độc lập theo chỉ thị lượt 1; tự khai model GPT-6, provider OpenAI, bề mặt Codex/API có shell cục bộ, transport machine. Không có chứng thực độc lập model/build. Không truy cập mạng, không thao tác kho thật. Tree đã đo: `a80a73d6b0af958878e96187508a2edd614f22a2`. Mọi đường dẫn dưới đây tính từ thư mục làm việc; đường dẫn `ops/...`, `CHANGELOG.md` và `CLAUDE.md` trong finding tính trong `cay-kho/` nếu không nói khác.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-1-KHONG-PHAI-HEAD-DA-MERGE,SAU-P3-KHONG-DEU-MOT-LOAI-5-cong-1,MODEL-YEU-CAU-khac-MODEL-DA-PHUC-VU,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr491-review-2-codex-verdict.md
+SELF 6 Reviewer: GPT-6/Codex theo danh tính được cấp trong phiên; provider OpenAI, execution_surface Codex/API có shell cục bộ, transport machine; không có chứng thực độc lập variant/build/effort. Reviewer độc lập với executor, loại đối chiếu khác provider theo chỉ thị người dùng/§8; không tự tạo receipt hoặc transition `cross_approved`. Tree tự đo: `5b8c1bed8b754f7b6fdf1004743368b5fcdba85f`.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS changes_requested-KHONG-phai-chua-dat-dieu-kien-dung,HET-P1-khong-phai-HET-FINDING-11-con-song-luc-merge,NAM-FINDING-BOT-la-duong-THU-BA-ba-cai-MOI,MODEL-YEU-CAU-khac-MODEL-DA-PHUC-VU,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr492-review-1-codex-verdict.md
+SELF 9 execution_surface: codex_agent_with_local_tools
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS LUOT-1-KHONG-IN-XONG-VERDICT-reviewer-mat-ket-noi,F07-F08-CON-MO-sau-khi-vá-la-viec-chu-kho-A1
+
+VERDICT pr493-review-10-codex-verdict.md
+SELF 6 Reviewer: Codex/GPT-6 theo cấu hình phiên, provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`. Phiên độc lập với executor Claude theo hồ sơ được giao; không có chứng thực độc lập backend/model thực phục vụ. Review khác nền theo §8 và chỉ thị trực tiếp lượt 10; không tự ghi state `cross_approved`, không cấp quyền merge. Hai trục đã xét: yêu cầu/phạm vi và tính đúng/nhất quán của hồ sơ cùng các cổng liên quan.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-10-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr493-review-11-codex-verdict.md
+SELF 6 Reviewer: Codex/GPT-6 theo cấu hình phiên; provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`. Review độc lập với executor Claude theo chỉ thị người dùng; không có chứng thực độc lập model/backend phục vụ. Không tự ghi transition `cross_approved` hoặc cấp quyền merge. Đã xét tính đúng/phạm vi yêu cầu và tính nhất quán của hồ sơ/cổng.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-11-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr493-review-12-codex-verdict.md
+SELF 6 Reviewer: Codex/GPT-6 theo cấu hình phiên; provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`. Review độc lập với executor Claude theo chỉ thị được giao; không có chứng thực độc lập backend/model thực phục vụ. Không tự ghi transition `cross_approved` hoặc cấp quyền merge.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-12-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr493-review-13-codex-verdict.md
+SELF 6 Reviewer: Codex/GPT-6 theo cấu hình phiên, provider OpenAI, execution surface agent API có shell, transport machine; khác provider executor Claude theo chỉ thị giao việc. Không chứng thực độc lập model backend, không tự ghi transition `cross_approved`, không cấp quyền merge.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-13-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr493-review-14-codex-verdict.md
+SELF 6 Reviewer: Codex/GPT-6 theo cấu hình phiên, provider OpenAI, execution surface agent API có shell, transport machine; khác provider executor Claude theo giao việc. Không chứng thực độc lập backend/model đã phục vụ, không ghi transition `cross_approved`, không cấp quyền merge.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-14-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr493-review-15-codex-verdict.md
+SELF 6 Reviewer: Codex/GPT-6 theo cấu hình phiên, provider OpenAI, execution surface agent API có shell, transport machine; khác provider executor Claude theo chỉ thị giao việc. Không chứng thực độc lập backend/model phục vụ; không ghi transition `cross_approved`, không cấp quyền merge.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-15-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr493-review-16-codex-verdict.md
+SELF 6 Reviewer: Codex/GPT-6 theo cấu hình phiên; provider OpenAI, execution surface agent API có shell cục bộ, transport machine; khác provider executor Claude theo chỉ thị giao việc. Không chứng thực độc lập backend/model phục vụ; không ghi transition `cross_approved` hoặc cấp quyền merge. Authority là chỉ thị trực tiếp cho lượt 16, điều kiện dừng tới P3 và ngoại lệ hai nợ D.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-16-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr493-review-17-codex-verdict.md
+SELF 6 Reviewer: Codex/GPT-6 theo cấu hình phiên; provider OpenAI, execution surface agent API có shell cục bộ, transport machine; khác provider executor Claude theo chỉ thị giao việc. Không chứng thực độc lập backend/model phục vụ, không tự ghi transition `cross_approved` hoặc cấp quyền merge. Chỉ thị trực tiếp lượt 17 là authority cho phạm vi và điều kiện dừng này.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-17-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung,KHONG-LUOT-NAO-REVIEW-HEAD-CUOI
+
+VERDICT pr493-review-2-codex-verdict.md
+SELF 6 Reviewer: GPT-6/Codex theo chỉ dẫn phiên; provider OpenAI; execution surface API có shell cục bộ; transport machine. Khác provider executor Claude theo hồ sơ được giao; không có chứng thực độc lập biến thể model/backend. Review trên exact SHA nhánh nháp được người dùng chỉ định; không giả nhận đây đã là head nhánh PR thật. Tree: `5ada023a62738ab69026ccb1ce521b377ab1a5d7`. Không mạng, không push/commit/merge, không tự soạn payload đường dẫn. `cay-kho/` giữ sạch; cổng và đột biến chạy ở `review-current/`, `review-before/`, tệp tạm trong workspace. `actionlint 1.7.7` được thêm bằng THƯ MỤC vào CUỐI PATH; `core.abbrev=7` trên hai bản sao.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-2-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr493-review-3-codex-verdict.md
+SELF 6 Reviewer: Codex/GPT-6 theo chỉ dẫn phiên; provider OpenAI; execution surface API với shell cục bộ; transport machine. Khác provider executor Claude theo hồ sơ được giao; không có chứng thực độc lập model/backend. Authority review và write set là chỉ thị trực tiếp của người dùng: review exact SHA nhánh nháp, ghi kết quả trong workspace. Không tự chuyển trạng thái kho thành `cross_approved`.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-3-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr493-review-4-codex-verdict.md
+SELF 6 Reviewer: Codex/GPT-6 theo chỉ dẫn phiên; provider OpenAI; execution surface API có shell cục bộ; transport machine. Khác provider executor Claude theo hồ sơ được giao; không có chứng thực độc lập biến thể model/backend. Authority và phạm vi là chỉ thị trực tiếp của người dùng cho lượt 4 này. Không tự ghi trạng thái `cross_approved` vào kho.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-4-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr493-review-5-codex-verdict.md
+SELF 8 Reviewer: Codex/GPT-6 theo cấu hình phiên; provider OpenAI (`openai_codex`); execution surface API/Codex service có shell cục bộ; transport machine. Phiên reviewer độc lập với executor Claude theo hồ sơ được giao; không có chứng thực độc lập biến thể model/backend. Phân loại cặp provider theo §8 là cross-provider; không tự ghi state `cross_approved` hoặc biên nhận vào kho.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-5-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung,APPROVE-KHONG-PHAI-KHONG-CON-FINDING
+
+VERDICT pr493-review-6-codex-verdict.md
+SELF 6 Reviewer: Codex/GPT-6 theo cấu hình phiên, provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`; độc lập với executor Claude theo hồ sơ được giao. Không chứng thực độc lập model/backend. Đây là cross-provider review theo §8, không tự ghi state `cross_approved`, không cấp quyền merge. Authority và điều kiện dừng lấy từ chỉ thị trực tiếp của người dùng lượt 6.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-6-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr493-review-7-codex-verdict.md
+SELF 6 Reviewer: Codex/GPT-6 theo cấu hình phiên, provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`; khác executor Claude theo hồ sơ được giao. Không chứng thực độc lập model/backend. Authority và điều kiện dừng lấy từ chỉ thị trực tiếp lượt 7. Đây là cross-provider review theo §8, không tự ghi state `cross_approved`, không cấp quyền merge.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-7-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr493-review-8-codex-verdict.md
+SELF 6 Reviewer: Codex theo cấu hình phiên; provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`. Khác executor Claude theo hồ sơ được giao; không chứng thực độc lập backend/model. Review theo §8 và chỉ thị trực tiếp lượt 8, không tự ghi state `cross_approved`, không cấp quyền merge.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-8-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung
+
+VERDICT pr493-review-9-codex-verdict.md
+SELF 6 Reviewer: Codex, provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`; độc lập với executor Claude theo hồ sơ được giao. Không có chứng cứ độc lập về backend/model thực phục vụ. Review khác nền theo §8 và chỉ thị trực tiếp lượt 9; không tự ghi state `cross_approved`, không cấp quyền merge. Hai trục đã kiểm: phạm vi/yêu cầu và tính đúng/nhất quán của hồ sơ cùng hành vi các cổng liên quan.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-LUOT-9-KHONG-PHAI-HEAD-DA-MERGE,MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU,REASONING-EFFORT-DO-DUOC-LA-none,phan-cong-CAM-tu-soan-phan-chung,LUOT-9-CO-MOT-RUN-CHET-TRUOC,PHIEN-BAN-CONG-CU-DOI-GIUA-CHUOI
+CAVEAT_TEXT {'id': 'LUOT-9-CO-MOT-RUN-CHET-TRUOC', 'canh_bao': 'Trên cùng head `dd4a3ae` có HAI `run.json`: `93507a43` (tên `l9`) dừng ở `trang_thai: dang_chay`, không `ket_thuc_utc`, không mã thoát — lượt chạy CHẾT; `48070d51` (tên `l9b`) mới chạy trọn. Biên nhận này neo `48070d51`. Ai đếm `run.json` để suy số lượt sẽ ra 18 chứ không phải 17.'}
+
+VERDICT pr497-review-1-codex-verdict.md
+SELF 4 Review độc lập bằng Codex/GPT-6, provider OpenAI, execution surface API với công cụ shell tại sandbox, transport trực tiếp trong phiên này. Không dùng connector GitHub. Tree đã đo: `67df2efa7e6f6c7b23bedfb43da647b395800a37`. Kết luận có **1 P2 còn tồn tại và 1 P3**; không phát hiện hồi quy runtime trong thay đổi chỉ thêm chú thích.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS GOI-LUOT-1-KHAI-ORIGIN-TRO-MIRROR-THUC-TE-TRO-GITHUB
+
+VERDICT pr497-review-10-codex-verdict.md
+SELF 8 Reviewer: Codex/OpenAI, bề mặt API có công cụ shell, transport machine. Tree tự đo: `6f841f69861e50798e6b92c7566358d16f746cec`. Mọi phép chạy và đột biến thực hiện trên bản sao trong sandbox; `cay-kho/` chỉ đọc. Môi trường chạy: Linux, Python 3.11.15, PyYAML 6.0.1, actionlint 1.7.7, shellcheck 0.9.0, jsonschema 4.26.0. Không cài thêm công cụ.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS 
+
+VERDICT pr497-review-3-codex-verdict.md
+SELF 4 Review lượt 3 bằng OpenAI Codex, bề mặt API với công cụ shell trực tiếp trong sandbox; không dùng connector GitHub. Tree tự đo: `115b1835be0a14c63669357a4c8e05a0ad542c4a`. **0 P1 / 6 P2 / 0 P3.** Cả 12 lệnh trong EVIDENCE chạy lại đều đạt. Các finding dưới đây thuộc lời khai và giới hạn bằng chứng; không phát hiện thay đổi runtime trong 16 dòng chú thích được thêm vào `ops/cong_cu.py`.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS 
+
+VERDICT pr497-review-5-codex-verdict.md
+SELF 10 - `dem-finding-doi-mau-va-bo-sot-phan-moi`: **ĐÃ VÁ THẬT** — README:275 đã sửa cả hai số: P2 **1→7**, tổng **2→7**, bề mặt phát sinh sau lượt 1 **6/7**. Đếm tiêu đề V1/V2 được `0/1/1` và `0/7/0`; `git log -S 'Không cổng nào' f6ec9c0 -- CHANGELOG.md` xác nhận câu của finding thứ bảy được thêm tại `52b36d1`, sau `e826730`. Tiêu chí “phát sinh sau lượt 1” ở đây khác tiêu chí đường dẫn của bảng mới §4; không dùng hai mẫu số thay nhau.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS 
+
+VERDICT pr508-review-3-codex-verdict.md
+SELF 4 Reviewer: Codex, OpenAI; bề mặt API, transport machine, shell cục bộ; khác nền với executor Claude. Tree: `4bb6d2cfe506331de14ade7bc3872e666c538fc8`. Chỉ đọc/ghi trong thư mục được giao, không mạng, không sửa `cay-kho/`, không dựng payload hay đường thoát cây. Chỉ xuất tệp này; không soạn cây vá thay executor.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS T125-RA-JOB-RIENG-DA-RUT-bi-504-thay-the
+
+VERDICT pr508-review-4-codex-verdict.md
+SELF 5 Reviewer: Codex / OpenAI, bề mặt API, transport machine, shell cục bộ; khác nền với executor Claude theo phân công trong PROMPT.md. `reviewed_sha`: `41e83b54fffc0672268b9512aef1afd4fff57cc7`; tree: `77accc7530e5b920cf379f130d94d9e9c419b2e9`.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS BAM-DA-DANG-TREN-PR-LA-CUA-TEP-CHUA-VIET-XONG
+CAVEAT_TEXT {'id': 'BAM-DA-DANG-TREN-PR-LA-CUA-TEP-CHUA-VIET-XONG', 'muc': 'P1', 'mo_ta': 'Comment lượt 4 trên PR #508 (issuecomment-5634418060) đăng `sha256 bb005aad…` / `46 637` B / 287 dòng. SAI — đó là tệp lúc còn đang ghi. Bản cuối: `eab84221…` / 47 218 B / 298 dòng; `run.json` báo `trang_thai: xong` lúc 12:27:04Z, băm lúc ~12:23. Kết luận và số đếm KHÔNG đổi.', 'phai_lam_gi_khi_chay_lai': 'Tin băm trong biên nhận, đừng tin băm trong comment. Khi băm hiện vật do tiến trình khác sinh: chờ `trang_thai: xong`, đừng chờ tệp xuất hiện.'}
+
+VERDICT pr521-review-5-codex-verdict.md
+SELF 6 Reviewer: Codex, dựa trên GPT-6 theo chỉ thị phiên; provider OpenAI (`openai_codex`), execution surface agent Codex có shell sandbox, transport `machine`. Không có chứng cứ độc lập về backend model/effort viết verdict. CLI Codex 0.154.0 và Claude Code 2.1.269 là công cụ đã thử, không chứng nhận danh tính reviewer.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS LIEN-KET-NOI-BO-GOI-KHONG-TRA-DUOC-gom-ca-HINT-patch-va-duong-cay-kho,SO-60-MENH-DE-la-DANH-GIA-NGHIA-khong-phai-ket-qua-cong
+
+VERDICT pr521-review-6-codex-verdict.md
+SELF 6 Reviewer: Codex, dựa trên GPT-6 theo chỉ thị phiên; provider OpenAI (`openai_codex`), execution surface agent Codex có shell sandbox qua API, transport `machine`. Không có chứng cứ độc lập về backend model/effort viết verdict. Các phiên bản CLI được thử là Codex 0.154.0 và Claude Code 2.1.269; chúng không chứng nhận danh tính reviewer.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS LIEN-KET-NOI-BO-GOI-KHONG-TRA-DUOC-gom-ca-HINT-patch-va-duong-cay-kho,LOP-doctrine-DUOC-KHAI-DONG-o-luot-nay-nhung-bang-PHEP-DOC
+
+VERDICT pr521-review-7-codex-verdict.md
+SELF 6 Reviewer: Codex, dựa trên GPT-6 theo chỉ thị phiên; provider OpenAI (`openai_codex`), execution surface agent có shell sandbox qua API, transport `machine`. Không có bằng chứng độc lập về backend model/effort tạo verdict. CLI cục bộ Codex 0.154.0 và Claude Code 2.1.269 là công cụ được thử, không chứng nhận danh tính reviewer.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS LIEN-KET-NOI-BO-GOI-KHONG-TRA-DUOC-gom-ca-HINT-patch-va-duong-cay-kho,BA-LOP-CU-VAN-CON-THE-HIEN-SONG-sau-HINT-luot-6
+
+VERDICT pr521-review-8-codex-verdict.md
+SELF 6 Reviewer: Codex, dựa trên GPT-6 theo chỉ thị phiên; provider OpenAI (`openai_codex`), execution surface agent qua API có shell sandbox, transport `machine`. Không có attestation độc lập về backend model/effort thực thi verdict. CLI Codex/Claude cục bộ là công cụ được thử, không chứng nhận danh tính reviewer. Không dùng sub-agent hoặc context Executor.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS TRAN-LOI-GOI-CODEX-NANG-2-LEN-10-HAU-KY-so-do-phien-dat-khong-phai-chu-kho,LIEN-KET-NOI-BO-GOI-KHONG-TRA-DUOC-gom-ca-HINT-patch-va-duong-cay-kho,APPROVE-la-dieu-kien-DUNG-khong-phai-merge-authorization,HEAD-DA-DOI-SAU-APPROVE-merge-master-85fcbf8,WINDOWS-tren-merge-commit-KHONG-DO-DUOC
+
+VERDICT pr870-review-1-codex-verdict.md
+SELF 7 execution_surface: Codex agent + local shell tools
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS HEAD-MERGE-CHUA-REVIEW-LAI,CODEX-EXEC-TRAN-KHONG-RUN-JSON,STDERR-CHI-GIU-HEADER,CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY,SCRIPT-DO-DOC-DUONG-DAN-SANDBOX
+CAVEAT_TEXT {'id': 'CODEX-EXEC-TRAN-KHONG-RUN-JSON', 'muc': 'P2', 'mo_ta': 'Luot goi `codex exec` truc tiep, KHONG qua `launcher.py run`: khong run.json, khong neo prompt_sha256 boi launcher, khong khoa danh tinh tien trinh. sha256 PROMPT.md (83c27e94…) chi do boi phien dieu phoi ngay truoc khi phong.'}
+
+VERDICT pr870-review-2-codex-verdict.md
+SELF 9 execution_surface: codex_service (agent có công cụ shell; không phải ChatGPT Web)
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUN ops/reviews/pr870-review-2-codex/run/run.json id 2699e2d8b1a54b8e86bfa3efb9a4b61b surface codex_cli program codex
+RUNTIME_FOUND True
+CAVEATS VERDICT-KHAI-SAI-EXECUTION-SURFACE,HO-MODEL-REVIEWER-KHONG-DO-DUOC,STDERR-CHI-GIU-HEADER,CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY,SCRIPT-DO-DOC-DUONG-DAN-SANDBOX,SNAPSHOT-CAY-KHONG-VAO-KHO
+CAVEAT_TEXT {'id': 'VERDICT-KHAI-SAI-EXECUTION-SURFACE', 'muc': 'P1', 'mo_ta': 'Verdict dong 9 tu khai `codex_service`, nhung run.json 2699e2d8 ghi lenh.chuong_trinh=codex va execution_surface=codex_cli; header CLI cung ghi OpenAI Codex v0.163.0. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Day khong phai chung thuc model/effort da phuc vu.'}
+CAVEAT_TEXT {'id': 'HO-MODEL-REVIEWER-KHONG-DO-DUOC', 'muc': 'P2', 'mo_ta': 'run.json 2699e2d8 khong co khoa model; header CLI (run/stderr-header.txt) khai `gpt-6.1-sol`/`xhigh` la LOI KHAI cua CLI, khong phai do_may. Assurance chi len cross_approved khi chu ko ghi xac nhan ben `khai_co_audit` cho CHINH lan chay 2699e2d8, tu khai yeu hon do_may tai cho dung.'}
+CAVEAT_TEXT {'id': 'STDERR-CHI-GIU-HEADER', 'muc': 'P3', 'mo_ta': 'Chi luu 14 dong dau stderr.log; ban day du 1287629 byte (sha256 trong run/run.json) KHONG vao kho — output trong VERDICT.md la reviewer tu chep.'}
+CAVEAT_TEXT {'id': 'CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY', 'muc': 'P3', 'mo_ta': 'Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong; reviewer tu do sau luot — khong loai tru ghi-roi-hoan-nguyen.'}
+
+VERDICT pr870-review-3-codex-verdict.md
+SELF 444 Approve về nội dung diff tại exact SHA đã nêu, với 10 hướng săn và bảng đo; không phải merge/land authorization hoặc xác nhận assurance danh tính model của launcher. Provider `openai_codex`, execution surface `codex_service` (agent dùng shell tool trong môi trường cloud, không suy thành codex CLI/Desktop), transport `machine`. Model/effort thực phục vụ từng request và cặp danh tính executor–reviewer không được đo từ công cụ trong checkout này; launcher/chủ thể vận chuyển tự giữ bằng chứng runtime của lượt này.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUN ops/reviews/pr870-review-3-codex/run/run.json id 941251157e4b4a35be82d6daefb390b2 surface codex_cli program codex
+RUNTIME_FOUND True
+CAVEATS VERDICT-KHAI-SAI-EXECUTION-SURFACE,HO-MODEL-EXECUTOR-THEO-PROVIDER,CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY,SCRIPT-DO-DOC-DUONG-DAN-SANDBOX,TEP-LON-KHONG-VAO-KHO
+CAVEAT_TEXT {'id': 'VERDICT-KHAI-SAI-EXECUTION-SURFACE', 'muc': 'P2', 'mo_ta': 'Verdict dong 444 tu khai execution surface `codex_service`, nhung run.json 94125115 ghi lenh.chuong_trinh=codex va execution_surface=codex_cli (launcher.py run -- codex exec). Cung loi pr915-review-1-codex bat o luot 2; dinh chinh be mat thanh codex_cli, giu nguyen byte verdict. Khong anh huong ho model: model_phuc_vu do_may.'}
+CAVEAT_TEXT {'id': 'CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY', 'muc': 'P3', 'mo_ta': 'Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong.'}
+
+VERDICT pr889-review-1-codex-verdict.md
+SELF 7 Phạm vi: chỉ đọc/đo `cay-kho/`; không mạng, không push, không sửa cây reviewed. Các script và evidence đều ở thư mục cha. Provider `openai_codex`, model family `openai`; phiên Codex có shell cục bộ, không đi qua `codex exec` hay Desktop nên theo phân loại của kho là `execution_surface: codex_service`, `transport: machine`. Không có runtime receipt để machine-verify model/effort/session identity; không tự cấp assurance/approval land. Authority cho review và artifact là chỉ thị trực tiếp trong `runs/9f946d71/prompt.snapshot`.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUN ops/reviews/pr889-review-1-codex/run/run.json id 9f946d714c2344fa9691c3d7d4f1b2d9 surface codex_cli program codex
+RUNTIME_FOUND True
+CAVEATS VERDICT-KHAI-SAI-EXECUTION-SURFACE,HEAD-MERGE-CHUA-REVIEW-LAI,STDERR-CHI-GIU-HEADER,CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY,SCRIPT-DO-DOC-DUONG-DAN-SANDBOX
+CAVEAT_TEXT {'id': 'VERDICT-KHAI-SAI-EXECUTION-SURFACE', 'muc': 'P1', 'mo_ta': 'Verdict dong 7 tu khai `execution_surface: codex_service` va phu nhan di qua `codex exec`, nhung run.json 9f946d71 dong 47 ghi execution_surface=codex_cli, lenh.chuong_trinh=codex; run/stderr-header.txt ghi OpenAI Codex v0.163.0. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Dinh chinh nay KHONG chung thuc model/effort da phuc vu va KHONG doi assurance cross_reviewed.'}
+CAVEAT_TEXT {'id': 'STDERR-CHI-GIU-HEADER', 'muc': 'P3', 'mo_ta': 'Chi luu 13 dong dau stderr.log (header CLI); ban day du 763083 byte (sha256 4b41efc8… trong run.json) KHONG vao kho. Moi output trong VERDICT.md la reviewer tu chep; evidence/*.txt la ban reviewer tu ghi, doi chieu duoc mot phan.'}
+CAVEAT_TEXT {'id': 'CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY', 'muc': 'P3', 'mo_ta': 'Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); "read-only" chi la CHI THI. run.json ghi worktree_sach true luc phong va reviewer tu do sau luot: sach — khong loai tru ghi-roi-hoan-nguyen.'}
+
+VERDICT pr889-review-2-codex-verdict.md
+SELF 9 Quyền và phạm vi theo chỉ thị trực tiếp `runs/d955f9ef/prompt.snapshot`. Reviewer: Codex, họ model OpenAI/GPT-6; provider `openai_codex`, execution surface `codex_service`, transport `machine` theo phân loại repository cho agent có shell không chạy qua `codex exec`/Desktop. Không có receipt máy để chứng nhận biến thể model/effort hoặc assurance. Không gọi mạng, không push, không sửa `cay-kho/`; chỉ ghi artifact ở thư mục cha.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUN ops/reviews/pr889-review-2-codex/run/run.json id d955f9efb3624041b86dcf97f2624175 surface codex_cli program codex
+RUNTIME_FOUND True
+CAVEATS VERDICT-KHAI-SAI-EXECUTION-SURFACE,HO-MODEL-REVIEWER-KHONG-DO-DUOC,STDERR-CHI-GIU-HEADER,CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY,SCRIPT-DO-DOC-DUONG-DAN-SANDBOX
+CAVEAT_TEXT {'id': 'VERDICT-KHAI-SAI-EXECUTION-SURFACE', 'muc': 'P1', 'mo_ta': 'Verdict dong 9 tu khai `codex_service`, nhung run.json d955f9ef ghi lenh.chuong_trinh=codex va execution_surface=codex_cli; header CLI cung ghi OpenAI Codex v0.163.0. Cau "khong chay qua codex exec/Desktop" trong verdict khong khop hien vat launcher. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Day khong phai chung thuc model/effort da phuc vu.'}
+CAVEAT_TEXT {'id': 'HO-MODEL-REVIEWER-KHONG-DO-DUOC', 'muc': 'P2', 'mo_ta': 'run.json d955f9ef khong co khoa model; header CLI (run/stderr-header.txt) khai `gpt-6.1-sol`/`xhigh` la LOI KHAI cua CLI, khong phai do_may. Assurance chi len cross_approved khi chu ko ghi xac nhan ben `khai_co_audit` cho CHINH lan chay d955f9ef, tu khai yeu hon do_may tai cho dung.'}
+CAVEAT_TEXT {'id': 'STDERR-CHI-GIU-HEADER', 'muc': 'P3', 'mo_ta': 'Chi luu 14 dong dau stderr.log; ban day du 2085807 byte (sha256 trong run/run.json) KHONG vao kho — output trong VERDICT.md la reviewer tu chep.'}
+CAVEAT_TEXT {'id': 'CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY', 'muc': 'P3', 'mo_ta': 'Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong; reviewer tu do sau luot — khong loai tru ghi-roi-hoan-nguyen.'}
+
+VERDICT pr889-review-3-codex-verdict.md
+SELF 309 Định danh: reviewer Codex; provider `openai_codex`; execution_surface `codex_service` (có công cụ shell trực tiếp, không phải ChatGPT Web human-mediated); transport `machine`. Không suy model thực tế từ tác giả commit hoặc tên launcher; định danh model máy chủ trả không được kiểm độc lập trong phép đo repo này. Không tự cấp assurance/approval cho state machine hay thao tác land.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUN ops/reviews/pr889-review-3-codex/run/run.json id 4764bd6fee0645728143c3eb4f1a417b surface codex_cli program codex
+RUNTIME_FOUND True
+CAVEATS VERDICT-KHAI-SAI-EXECUTION-SURFACE,HO-MODEL-EXECUTOR-THEO-PROVIDER,CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY,SCRIPT-DO-DOC-DUONG-DAN-SANDBOX
+CAVEAT_TEXT {'id': 'VERDICT-KHAI-SAI-EXECUTION-SURFACE', 'muc': 'P2', 'mo_ta': 'Verdict dong 309 tu khai execution surface `codex_service`, nhung run.json 4764bd6f ghi lenh.chuong_trinh=codex va execution_surface=codex_cli (launcher.py run -- codex exec). Cung loi pr915-review-1-codex bat o luot 2; dinh chinh be mat thanh codex_cli, giu nguyen byte verdict. Khong anh huong ho model: model_phuc_vu do_may.'}
+CAVEAT_TEXT {'id': 'CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY', 'muc': 'P3', 'mo_ta': 'Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong.'}
+
+VERDICT pr896-review-1-codex-verdict.md
+SELF 7 Reviewer `codex`; provider `openai_codex`; execution_surface `codex_cli`; transport `machine`. Run `64761d8e6164462d870c3d534d325dd2`; header CLI khai `gpt-6.1-sol`, effort `xhigh`, session `01a16ec6-03c0-72c0-ac25-dccfeef0cd62` (đọc `runs/64761d8e/run.json` và đầu `stderr.log`; header không chứng minh model phục vụ ở máy chủ). Không có GitHub submitter vì không đăng/push. Sandbox khai `workspace-write`; read-only đối với `cay-kho/` được giữ bằng phạm vi lệnh, bytecode bị tắt. Không gọi mạng, không dùng subagent, không sửa nguồn review.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUN ops/reviews/pr896-review-1-codex/run/run.json id 64761d8e6164462d870c3d534d325dd2 surface codex_cli program codex
+RUNTIME_FOUND True
+CAVEATS HO-MODEL-REVIEWER-KHONG-DO-DUOC,STDERR-CHI-GIU-HEADER,CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY,SCRIPT-DO-DOC-DUONG-DAN-SANDBOX,P2-DA-VA-CHUA-REVIEW-LAI
+CAVEAT_TEXT {'id': 'HO-MODEL-REVIEWER-KHONG-DO-DUOC', 'muc': 'P2', 'mo_ta': 'run.json 64761d8e khong co khoa model; header CLI (run/stderr-header.txt) khai `gpt-6.1-sol`/`xhigh` la LOI KHAI cua CLI, khong phai do_may. Assurance chi len cross_approved khi chu ko ghi xac nhan ben `khai_co_audit` cho CHINH lan chay 64761d8e, tu khai yeu hon do_may tai cho dung.'}
+CAVEAT_TEXT {'id': 'STDERR-CHI-GIU-HEADER', 'muc': 'P3', 'mo_ta': 'Chi luu 14 dong dau stderr.log; ban day du 1076780 byte (sha256 trong run/run.json) KHONG vao kho — output trong VERDICT.md la reviewer tu chep.'}
+CAVEAT_TEXT {'id': 'CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY', 'muc': 'P3', 'mo_ta': 'Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong; reviewer tu do sau luot — khong loai tru ghi-roi-hoan-nguyen.'}
+
+VERDICT pr896-review-2-codex-verdict.md
+SELF 10 Cây đã đo có tree `e93305541ae7d7f87fa5c57dd610fa1be829b0f7`. Phạm vi ghi chỉ là thư mục giao việc và scratch `/tmp/pr896-r2-audit-b3269a02/`; mọi mutant/hint áp trên clone local từ `mirror.git`, checkout đúng reviewed SHA. Không gọi mạng/push. Các phép đo dùng Python với `PYTHONDONTWRITEBYTECODE=1`; lệnh git trong harness kế thừa `GIT_OPTIONAL_LOCKS=0`. Không tự đặt tên execution surface cho phiên này.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUN ops/reviews/pr896-review-2-codex/run/run.json id b3269a02045c4e178b1c5c328b671273 surface codex_cli program codex
+RUNTIME_FOUND True
+CAVEATS HINT-P1-CHUA-AP,CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY,SCRIPT-DO-DOC-DUONG-DAN-SANDBOX,TEP-LON-KHONG-VAO-KHO
+CAVEAT_TEXT {'id': 'HINT-P1-CHUA-AP', 'muc': 'P1', 'mo_ta': 'changes_requested 1 P1 (verdict-surface-bo-sot-pr889-luot1: receipt pr889-review-1 thieu caveat VERDICT-KHAI-SAI-EXECUTION-SURFACE). HINT.patch trong thu muc CHUA ap; phien dieu phoi khong va, cho chu kho quyet.'}
+CAVEAT_TEXT {'id': 'CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY', 'muc': 'P3', 'mo_ta': 'Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong; phien ghi so do sau luot: HEAD 8d56009, git status rong.'}
+
+VERDICT pr915-review-1-codex-verdict.md
+SELF 5 Đã đo độc lập tại exact SHA chỉ định, tree `6f299d7f70269ec32522fc4ea28c9d2d70c5424b`; base `50a59a945026a2ab2f97dc0e7ef7b5a540e17652`. Một lớp P1, hai hiện vật review: tự khai sai bề mặt chạy trong verdict #870/#889, chưa đính chính qua caveat. Câu sửa CLAUDE.md, byte/băm/OID/số P của ba biên nhận và mọi cổng được yêu cầu đều khớp.
+SELF 7 Reviewer: codex; provider: openai_codex; transport: machine/tool-mediated. Execution surface/model của chính lượt này: KHÔNG ĐO ĐƯỢC độc lập từ hiện vật launcher được giao; phiên có công cụ shell, không suy danh tính backend từ tên agent. Review theo chỉ thị trực tiếp của chủ kho, không packet/lease, chỉ đọc cay-kho/. Không tự cấp assurance/approval/land. Các blob lịch sử chỉ dùng đối chiếu nguồn mà receipt đang khai; workflow hiện hành luôn lấy ở HEAD được giao.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUN ops/reviews/pr915-review-1-codex/run/run.json id 0f8ecb8517184aaf8b685a46b29f9fe6 surface codex_cli program codex
+RUNTIME_FOUND True
+CAVEATS HEAD-CHUA-SACH-CAN-REVIEW-LAI,CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY,SCRIPT-DO-DOC-DUONG-DAN-SANDBOX,TEP-LON-KHONG-VAO-KHO
+CAVEAT_TEXT {'id': 'HEAD-CHUA-SACH-CAN-REVIEW-LAI', 'muc': 'P1', 'mo_ta': 'changes_requested 1 P1 (VERDICT-KHAI-SAI-EXECUTION-SURFACE tren bien nhan pr870/pr889 luot 2). Da ap HINT.patch o commit ghi so sau; ban va CHUA duoc review lai, nen 3bc4244 (sua P2 cua #896) chua co lan review sach nao.'}
+CAVEAT_TEXT {'id': 'CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY', 'muc': 'P3', 'mo_ta': 'Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong.'}
+
+VERDICT slice-b-c-review-2-codex-verdict.md
+SELF 19 - Execution surface: Codex service; transport: machine.
+RECEIPT_SURFACE None TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS luot-nay-dan-toi-QUYET-DINH-BO-khong-phai-mot-ban-va,F4-la-bang-chung-sach-nhat,ca-tran-da-can
+
+VERDICT wp523-r14-review-1-codex-verdict.md
+SELF 14 execution_surface: codex_desktop
+RECEIPT_SURFACE codex_desktop TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS 
+
+VERDICT wp678-exec-review-1-claude-verdict.md
+SELF 6 execution_surface: claude_code_subagent
+RECEIPT_SURFACE claude_code TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS SUBAGENT-CUNG-HO-REVIEW-DEFERRED
+CAVEAT_TEXT {'id': 'SUBAGENT-CUNG-HO-REVIEW-DEFERRED', 'muc': 'P2', 'mo_ta': 'Reviewer Claude Opus 5.5 chay bang SUBAGENT review-opus-max trong phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT, CUNG ho Claude voi phien executor g1; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred: dung doc luot nay thanh cross_approved hay same_provider_approved.'}
+
+VERDICT wp678-exec-review-2-claude-verdict.md
+SELF 6 execution_surface: claude_code_subagent
+RECEIPT_SURFACE claude_code TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS SUBAGENT-CUNG-HO-REVIEW-DEFERRED
+CAVEAT_TEXT {'id': 'SUBAGENT-CUNG-HO-REVIEW-DEFERRED', 'muc': 'P2', 'mo_ta': 'Reviewer Claude Opus 5.5 chay bang SUBAGENT review-opus-max trong phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT, CUNG ho Claude voi phien executor g1; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred: dung doc luot nay thanh cross_approved hay same_provider_approved.'}
+
+VERDICT wp678-exec-review-3-claude-verdict.md
+SELF 6 execution_surface: claude_code_subagent
+RECEIPT_SURFACE claude_code TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS SUBAGENT-CUNG-HO-REVIEW-DEFERRED
+CAVEAT_TEXT {'id': 'SUBAGENT-CUNG-HO-REVIEW-DEFERRED', 'muc': 'P2', 'mo_ta': 'Reviewer Claude Opus 5.5 chay bang SUBAGENT review-opus-max trong phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT, CUNG ho Claude voi phien executor g1; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred: dung doc luot nay thanh cross_approved hay same_provider_approved.'}
+
+VERDICT wp678-exec-review-4-claude-verdict.md
+SELF 6 execution_surface: claude_code_subagent
+RECEIPT_SURFACE claude_code TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS SUBAGENT-CUNG-HO-REVIEW-DEFERRED,VONG-5-KHONG-REVIEW,LUOT-VUOT-GIOI-HAN
+CAVEAT_TEXT {'id': 'SUBAGENT-CUNG-HO-REVIEW-DEFERRED', 'muc': 'P2', 'mo_ta': 'Reviewer Claude Opus 5.5 chay bang SUBAGENT review-opus-max trong phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT, CUNG ho Claude voi phien executor g1; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred: dung doc luot nay thanh cross_approved hay same_provider_approved.'}
+
+VERDICT wp678-spec-review-1-codex-verdict.md
+SELF 6 execution_surface: API agent có công cụ shell cục bộ; không tự nhận đã đo Codex CLI/Desktop
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS NGUON-LAUNCHER-THUAT-LAI
+
+VERDICT wp678-spec-review-17-codex-verdict.md
+SELF 6 execution_surface: codex_cli
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS KHONG-CO-run.json-LOG-CODEX-NGOAI-KHO,REVIEW-HEP-THEO-Q16
+CAVEAT_TEXT {'id': 'KHONG-CO-run.json-LOG-CODEX-NGOAI-KHO', 'muc': 'P3', 'mo_ta': 'Luot codex goi truc tiep (khong launcher.py, khong run.json). Header CLI la loi tu in, khong phai do may model da phuc vu.'}
+
+VERDICT wp678-spec-review-2-codex-verdict.md
+SELF 6 execution_surface: API agent có shell cục bộ (không tự nhận Codex CLI/Desktop)
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS NGUON-LAUNCHER-THUAT-LAI
+
+VERDICT wp678-spec-review-3-codex-verdict.md
+SELF 9 execution_surface: API agent với shell cục bộ
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS NGUON-LAUNCHER-THUAT-LAI
+
+VERDICT wp678-spec-review-4-codex-verdict.md
+SELF 9 execution_surface: API agent có công cụ shell cục bộ (không phải ChatGPT Web)
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS NGUON-LAUNCHER-THUAT-LAI
+
+VERDICT wp678-spec-review-5-codex-verdict.md
+SELF 16 execution_surface: API agent có công cụ shell cục bộ
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS NGUON-LAUNCHER-THUAT-LAI
+
+VERDICT wp678-spec-review-6-codex-verdict.md
+SELF 6 execution_surface: API agent có shell cục bộ
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS NGUON-LAUNCHER-THUAT-LAI
+
+VERDICT wp698-exec-review-g2-1-claude-verdict.md
+SELF 6 execution_surface: claude_code_subagent
+RECEIPT_SURFACE claude_code TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS SUBAGENT-CUNG-HO-REVIEW-DEFERRED,N1-DOT-BIEN-SONG
+CAVEAT_TEXT {'id': 'SUBAGENT-CUNG-HO-REVIEW-DEFERRED', 'muc': 'P2', 'mo_ta': 'Reviewer Claude Sonnet 5.5 chay bang SUBAGENT trong phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT, CUNG ho Claude voi executor; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred: dung doc luot nay thanh cross_approved hay same_provider_approved.'}
+
+VERDICT wp698-exec-review-g2-2-claude-verdict.md
+SELF 6 execution_surface: claude_code_subagent
+RECEIPT_SURFACE claude_code TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS SUBAGENT-CUNG-HO-REVIEW-DEFERRED,P3-CON-MO-SO-NO,HEAD-REVIEW-5D889BA-KHAC-HEAD-MERGE
+CAVEAT_TEXT {'id': 'SUBAGENT-CUNG-HO-REVIEW-DEFERRED', 'muc': 'P2', 'mo_ta': 'Reviewer Claude Sonnet 5.5 chay bang SUBAGENT trong phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT, CUNG ho Claude voi executor; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred: dung doc luot nay thanh cross_approved hay same_provider_approved.'}
+
+VERDICT wp698-spec-review-13-claude-verdict.md
+SELF 14 - **Điểm mơ hồ có thành lỗ không (Q3): có một cây sai-nhưng-thoả-chữ, nhưng xếp P3, không phải P2.** `W1c` (g1 cộng 3 thêm/2 xoá: `_luoi_byte` còn 12 trong 17 ô, `kq["byte"]["luoi"]` thành chuỗi nối các băm, cha đọc chuỗi ấy) cho suite 56/56, `kq["m1"]`, (iv), (v) của r12 xanh, 13/13 đột biến đích `t53` GIẾT đúng, và phép so khoá XANH nếu đọc theo "danh sách của g2" hay `len()`, ĐỎ nếu xét loại. Lý do không P2: cây lọt phải sửa hình dạng `KQ` ở cả con và cha, cùng bậc và cùng chi phí với `Wpad` (thêm 5 phần tử rỗng cho đủ số, 3 thêm/2 xoá, 56/56) — cây này XANH ở MỌI cách đọc và chính là giới hạn "thêm ô giả cho đủ số" mà r13 đã khai; chốt cách đọc nghiêm thu hẹp bề mặt (bỏ lối "đổi hình dạng trông vô tội") chứ không thêm bảo đảm chống giả. Mọi cây thu hẹp tự nhiên đo được (`P1a`, `B1`, `Ga`, `Gb`, `Gc`, `Gd`, `T1b`, `T2`, `T3`) ĐỎ ở cả ba cách đọc. Câu chữ đóng nằm ở HINT.
+RECEIPT_SURFACE claude_code TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS SUBAGENT-CUNG-HO-REVIEW-DEFERRED
+CAVEAT_TEXT {'id': 'SUBAGENT-CUNG-HO-REVIEW-DEFERRED', 'muc': 'P2', 'mo_ta': 'Reviewer Claude Sonnet 5.5 (CAU HINH yeu cau theo Q6: subagent trong phien dieu phoi); be mat chay that (subagent hay phien rieng, phien nao) KHONG_DO_DUOC tu tep (xem che_do_nguon). CUNG ho Claude voi phien soan dac ta; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred: dung doc luot nay thanh cross_approved hay same_provider_approved.'}
+
+VERDICT wp710-exec-review-1-codex-verdict.md
+SELF 6 execution_surface: codex_cli
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS KHONG-CO-run.json-LOG-CODEX-NGOAI-KHO,LUOT-G3-KHONG-PHAI-HEAD-DA-LAND
+CAVEAT_TEXT {'id': 'KHONG-CO-run.json-LOG-CODEX-NGOAI-KHO', 'muc': 'P3', 'mo_ta': 'Luot codex goi truc tiep (khong launcher.py, khong run.json). Header CLI la loi tu in, khong phai do may model da phuc vu.'}
+
+VERDICT wp710-exec-review-2-codex-verdict.md
+SELF 6 execution_surface: codex_cli
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS KHONG-CO-run.json-LOG-CODEX-NGOAI-KHO,LUOT-G3-KHONG-PHAI-HEAD-DA-LAND
+CAVEAT_TEXT {'id': 'KHONG-CO-run.json-LOG-CODEX-NGOAI-KHO', 'muc': 'P3', 'mo_ta': 'Luot codex goi truc tiep (khong launcher.py, khong run.json). Header CLI la loi tu in, khong phai do may model da phuc vu.'}
+
+VERDICT wp710-exec-review-3-codex-verdict.md
+SELF 6 execution_surface: codex_cli
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS KHONG-CO-run.json-LOG-CODEX-NGOAI-KHO,LUOT-G3-KHONG-PHAI-HEAD-DA-LAND,HINT-LUOT-3-THIEU-NHAN-PATCH-AS-HINT
+CAVEAT_TEXT {'id': 'KHONG-CO-run.json-LOG-CODEX-NGOAI-KHO', 'muc': 'P3', 'mo_ta': 'Luot codex goi truc tiep (khong launcher.py, khong run.json). Header CLI la loi tu in, khong phai do may model da phuc vu.'}
+
+VERDICT wp710-exec-review-9-codex-verdict.md
+SELF 7 reviewer_execution_surface: Codex local sandbox (tự khai)
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUNTIME_FOUND False
+CAVEATS TEP-DUNG-LAI-TU-BAN-CHIEU,KHONG-CO-run.json-TRONG-KHO,LUOT-9-KHONG-PHAI-HEAD-DA-LAND,P3-NGOAI-WRITE-SET-CON-MO,LUOT-4-8-THIEU-HIEN-VAT
+CAVEAT_TEXT {'id': 'KHONG-CO-run.json-TRONG-KHO', 'muc': 'P3', 'mo_ta': 'launcher.py run 059b4f51 chi THUAT LAI tu ban chieu; run.json/log khong co trong kho. Model thuc chay KHONG_DO_DUOC.'}
+
+VERDICT wp766-r1-g1-exec-review-1-codex-verdict.md
+SELF 12 - Reviewer độc lập với executor theo chỉ thị phiên: Codex, họ GPT-6 theo thông tin hệ thống; provider `openai_codex`, execution surface `codex_service`, transport `machine`. Không có phép đo độc lập exact serving model/effort hoặc receipt xác thực họ model. Không tự nhận Human Audit hay đã hoàn tất assurance `human_audited`.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUN ops/reviews/wp766-r1-g1-exec-review-1-codex/run.json id 5d4f7321d9a04ee1a87934e41fcf45c8 surface codex_cli program codex
+RUNTIME_FOUND True
+CAVEATS CHECKOUT-GHI-DUOC-KHONG-CUONG-CHE-READ-ONLY,DRIVER-DO-DOC-CAY-TAM
+
+VERDICT wp773-r1-g1-exec-review-9-codex-verdict.md
+SELF 6 Reviewer: Codex, họ model OpenAI, provider `openai_codex`; execution surface coding-agent sandbox, transport shell/tool trực tiếp (`machine`). Phiên độc lập với executor Claude. Không tự chứng nhận launcher, receipt hoặc assurance `human_audited`. Tree: `a7269e1451ab25b3236ba8874fc95eccbb02ac3f`. Review g1, lượt 9, trên exact head nêu trên; KHO chỉ đọc.
+RECEIPT_SURFACE codex_cli TU_KHAI None
+RUN ops/reviews/wp773-r1-g1-exec-review-9-codex/run.json id 66dbfee5b2e843ada735d93369fe05b2 surface codex_cli program codex
+RUNTIME_FOUND True
+CAVEATS CHECKOUT-GHI-DUOC-KHONG-CUONG-CHE-READ-ONLY,DRIVER-DO-DOC-CAY-TAM

@@ -1,0 +1,38 @@
+[
+  {
+    "cmd": [
+      "python3.11",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py"
+    ],
+    "rc": 0,
+    "output": "CA: 13/13 dat\nDOT BIEN: 29/29 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT\n"
+  },
+  {
+    "cmd": [
+      "python3.12",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py"
+    ],
+    "rc": 0,
+    "output": "CA: 13/13 dat\nDOT BIEN: 29/29 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT\n"
+  },
+  {
+    "cmd": [
+      "python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py"
+    ],
+    "rc": 0,
+    "output": "CA: 13/13 dat\nDOT BIEN: 29/29 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT\n"
+  },
+  {
+    "cmd": [
+      "python3.14",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py"
+    ],
+    "rc": 0,
+    "output": "CA: 13/13 dat\nDOT BIEN: 29/29 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT\n"
+  }
+]

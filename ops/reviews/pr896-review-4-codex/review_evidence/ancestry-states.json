@@ -1,0 +1,454 @@
+[
+  {
+    "receipt": "assurance-ho-model-review-1-claude-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "7d7f12249696e80238967c9ae2a8f360337db80e",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "cuong_do THAP vi tep verdict CHUA land: quan he to tien voi master chua co. Manh len khi luot nay land hoac khi co tag luu-tru/*."
+      ]
+    ]
+  },
+  {
+    "receipt": "assurance-ho-model-review-2-claude-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "c8a652e3bbc25ae86f654818428095defa5fcac3",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "cuong_do THAP vi tep verdict CHUA land. Manh len khi luot nay land hoac khi co tag luu-tru/*."
+      ]
+    ]
+  },
+  {
+    "receipt": "assurance-ho-model-review-3-claude-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "2fb92b45c126da8fbd47bee6823f9fb4e0b0da11",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "cuong_do THAP vi tep verdict CHUA land."
+      ]
+    ]
+  },
+  {
+    "receipt": "cai-cong-cu-sigpipe-r2-human-audit-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "ad868deff20bdecc7c3791f89fffd1f30e598239",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "cuong_do THAP vi chua land. Chi song neu PR bookkeeping land bang MERGE COMMIT hoac FAST-FORWARD — squash lam mo neo khong con la to tien (lop khuyet tat da ghi trong CLAUDE.md va bien nhan #523)."
+      ]
+    ]
+  },
+  {
+    "receipt": "ci-duong-nhanh-ho-so-human-audit-ducthangho-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "09abc1bfe722598e06948fe542a3fbdaaa3452bf",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "cuong_do THAP vi chua land. Chi song neu PR bookkeeping land bang MERGE COMMIT hoac FAST-FORWARD."
+      ]
+    ]
+  },
+  {
+    "receipt": "ci-registry-nang-tran-bo-day-du-human-audit-ducthangho-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "233a8195443a83b10911edc8bf245d1b7d2fb4b8",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "cuong_do THAP vi chua land. Chi song neu nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE COMMIT hoac FAST-FORWARD."
+      ]
+    ]
+  },
+  {
+    "receipt": "ci-windows-review-5-claude-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "c2f68987b3f298de12b84cf29a934c7b844c8558",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "cuong_do THAP vi chinh tep verdict CHUA land: `merge-base --is-ancestor c2f6898 origin/master` tra KHONG. San pham cua packet DA land (d705623) nhung ho so review thi chua — hai chuyen khac nhau, khong duoc doc lan. Manh len khi nam verdict nay land, hoac khi co tag luu-tru/*."
+      ]
+    ]
+  },
+  {
+    "receipt": "doctrine-scan-review-1-claude-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "bc5d0c6e4d3d5b3cc5d6f8c08ba1c005dd9bdadc",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.mo_ta",
+        "Blob verdict ghim tren nhanh claude/review-543-luot1-20260916, commit bc5d0c6 — to tien cua HEAD dang kiem. Quan he to tien voi master CHUA CO: #543 chua land."
+      ]
+    ]
+  },
+  {
+    "receipt": "doctrine-scan-review-2-claude-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "80d816130fda69af75dc1d9ae76f3fc83b837773",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.mo_ta",
+        "Blob verdict ghim tren nhanh claude/review-543-luot2-20260916, commit 80d8161 — to tien cua HEAD dang kiem. Quan he to tien voi master CHUA CO: #543 chua land."
+      ]
+    ]
+  },
+  {
+    "receipt": "doctrine-scan-review-3-claude-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "7d8bb69ac02b54075d63a9915e12e6d2bf28b513",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.mo_ta",
+        "Blob verdict ghim tren nhanh claude/review-543-luot3-20260916, commit 7d8bb69 — to tien cua HEAD dang kiem. Quan he to tien voi master CHUA CO: #543 chua land."
+      ]
+    ]
+  },
+  {
+    "receipt": "don-nhanh-base-review-1-codex-verdict.receipt.yaml",
+    "schema": 1,
+    "evidence_commit": "e872e98e7b3612baf71fc177b54ce8b3bafd033d",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "truy_xuat_ghi_chu",
+        "#150 CHƯA land. Commit công bố hiện chỉ được nhánh `ops/**` giữ. Bền khi #150 merge bằng MERGE COMMIT, hoặc khi tạo tag `luu-tru/*` trỏ `e872e98`. Chưa làm cái nào."
+      ]
+    ]
+  },
+  {
+    "receipt": "don-nhanh-base-review-2-codex-verdict.receipt.yaml",
+    "schema": 1,
+    "evidence_commit": "e872e98e7b3612baf71fc177b54ce8b3bafd033d",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "truy_xuat_ghi_chu",
+        "#150 CHƯA land, chưa có tag. Xem biên nhận lượt 1."
+      ]
+    ]
+  },
+  {
+    "receipt": "don-nhanh-base-review-3-claude-verdict.receipt.yaml",
+    "schema": 1,
+    "evidence_commit": "e872e98e7b3612baf71fc177b54ce8b3bafd033d",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "truy_xuat_ghi_chu",
+        "#150 CHƯA land, chưa có tag."
+      ]
+    ]
+  },
+  {
+    "receipt": "don-nhanh-base-review-6-claude-verdict.receipt.yaml",
+    "schema": 1,
+    "evidence_commit": "ef0f9067899f56d9efcc41d248b94c7aa34d3277",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "truy_xuat_ghi_chu",
+        "#150 CHƯA land, chưa có tag."
+      ]
+    ]
+  },
+  {
+    "receipt": "don-nhanh-base-review-7-claude-verdict.receipt.yaml",
+    "schema": 1,
+    "evidence_commit": "a8c1d1dfe1eb5f493951d82a135bcfac82fa370a",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "truy_xuat_ghi_chu",
+        "#150 CHƯA land, chưa có tag."
+      ]
+    ]
+  },
+  {
+    "receipt": "dot-bien-l-bien-cong-khai-human-audit-ducthangho-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "0eb7a3121c64591eb0a9341714335fb06dfc4171",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "cuong_do THAP vi chua land. Chi song neu PR bookkeeping land bang MERGE COMMIT hoac FAST-FORWARD."
+      ]
+    ]
+  },
+  {
+    "receipt": "lease-publish-windows-do-human-audit-ducthangho-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "ff98b0f6957e98ac14d585a58f87d43edbe0c663",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "cuong_do THAP vi chua land. Chi song neu PR bookkeeping land bang MERGE COMMIT hoac FAST-FORWARD."
+      ]
+    ]
+  },
+  {
+    "receipt": "plat-m4-review-2-codex-verdict.receipt.yaml",
+    "schema": 1,
+    "evidence_commit": "d27337b48e3748225a12d18432d8c1bd8295882d",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "truy_xuat_ghi_chu",
+        "PR \"#204\" CHUA land, chua co tag luu-tru/*."
+      ]
+    ]
+  },
+  {
+    "receipt": "plat-m4-review-3-claude-verdict.receipt.yaml",
+    "schema": 1,
+    "evidence_commit": "392bdbd35d9919ae9226a11a76a78537654f354e",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "truy_xuat_ghi_chu",
+        "PR \"#204\" CHƯA land, chưa có tag `luu-tru/*`."
+      ]
+    ]
+  },
+  {
+    "receipt": "plat-x5-review-1-claude-verdict.receipt.yaml",
+    "schema": 1,
+    "evidence_commit": "76272812942c9f96c024f96956239300574d3b94",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "truy_xuat_ghi_chu",
+        "#207 CHƯA land, chưa có tag `luu-tru/*`."
+      ]
+    ]
+  },
+  {
+    "receipt": "plat-x5-review-2-claude-verdict.receipt.yaml",
+    "schema": 1,
+    "evidence_commit": "601143b26ea6fd459d82798388414f46950a705b",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "truy_xuat_ghi_chu",
+        "#207 CHƯA land, chưa có tag `luu-tru/*`."
+      ]
+    ]
+  },
+  {
+    "receipt": "plat-x5-review-3-claude-verdict.receipt.yaml",
+    "schema": 1,
+    "evidence_commit": "253ee58e645c56d8fd0d22c2e1df2fcd4f3bdf61",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "truy_xuat_ghi_chu",
+        "#207 CHƯA land, chưa có tag `luu-tru/*`."
+      ]
+    ]
+  },
+  {
+    "receipt": "plat-x8-review-1-claude-verdict.receipt.yaml",
+    "schema": 1,
+    "evidence_commit": "cd81649c267f753345f9daa4e024c6bace906dff",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "truy_xuat_ghi_chu",
+        "PR #248 CHƯA land, chưa có tag `luu-tru/*`."
+      ]
+    ]
+  },
+  {
+    "receipt": "pr490-review-7-codex-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "453c6bcdf8ce34bd1751a8442936a201d51a2495",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "verdict_usage_caveats[1].phep_do_BA_LOI_LAND.cong_tren_ban_squash",
+        "`python3 ops/bien_nhan_v2.py --root <cây squash>` ⇒ rc=1, `TỔNG: ĐỎ`, `1 vi phạm`, nguyên văn \"commit `453c6bcdf8ce…` CÓ THẬT nhưng KHÔNG phải tổ tiên của HEAD\". Trên cây thật (chưa land) cùng lệnh cho rc=0, `48 ĐẠT v2`, `0 vi phạm`, `TỔNG: ĐẠT`."
+      ]
+    ]
+  },
+  {
+    "receipt": "pr508-review-1-codex-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách."
+      ]
+    ]
+  },
+  {
+    "receipt": "pr508-review-2-codex-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách."
+      ]
+    ]
+  },
+  {
+    "receipt": "pr508-review-3-codex-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách."
+      ]
+    ]
+  },
+  {
+    "receipt": "pr508-review-4-codex-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách."
+      ]
+    ]
+  },
+  {
+    "receipt": "pr508-review-5-codex-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách."
+      ],
+      [
+        "verdict_usage_caveats[0].mo_ta",
+        "Năm biên nhận khai `anchor.cuong_do: trung_binh`, yếu hơn các biên nhận `cao` cùng thư mục: PR #508 chưa merge nên quan hệ tổ tiên mới ở trong NHÁNH."
+      ]
+    ]
+  },
+  {
+    "receipt": "r330-rig-quyet-mau-audit-nguoi-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "5c713298c49c1dde5c550112d6bc4daf6b876735",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "Mỏ neo này trỏ vào BẢN CHIẾU, KHÔNG vào nguồn có thẩm quyền (comment 5747352008). Lược đồ v2 có đúng loại cho nó — `protected_evidence_ref` — nhưng cổng `bien_nhan_v2` trên master CHƯA có đường đo cho loại ấy nên nó rơi vào trạng thái thứ ba và làm cổng ĐỎ. Bản vá cho đúng khe này đang nằm ở packet #566 (`claude/human-audited-khai-ai-dang-r1`, `604b8d9`) và CHƯA land. Nên lượt này neo `canonical_ancestry` cho ĐO ĐƯỢC, và khai thẳng rằng thứ được neo yếu hơn thứ có thẩm quyền. Thêm: commit 5c71329 CHƯA phải tổ tiên của master, nên `cuong_do: thap`."
+      ],
+      [
+        "verdict_usage_caveats[4].noi_dung",
+        "Biên nhận này phải neo `canonical_ancestry` cho ĐO ĐƯỢC trong khi thứ có thẩm quyền là comment — đúng khe mà #566 sinh ra để vá, và #566 CHƯA land. Lần thứ HAI một biên nhận human_audited phải đi vòng như vậy."
+      ]
+    ]
+  },
+  {
+    "receipt": "wp538-review-1-claude-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.mo_ta",
+        "Blob verdict ghim tren nhanh `claude/review-wp538-20260916`, tao tu `f2aa1f9f` — dung head da review. Quan he to tien voi `master` CHUA CO: WP538 chua land."
+      ]
+    ]
+  },
+  {
+    "receipt": "wp538-review-2-claude-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.mo_ta",
+        "Blob verdict ghim tren nhanh claude/review-wp538-luot2-20260916, tao tu 7c21bf60 — dung head da review. Quan he to tien voi master CHUA CO: WP538 chua land."
+      ]
+    ]
+  },
+  {
+    "receipt": "wp540-review-1-claude-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.mo_ta",
+        "Blob verdict ghim tren nhanh claude/review-wp540-20260916, tao tu 7c7ad450 — dung head da review. Quan he to tien voi master CHUA CO: WP540 chua land."
+      ]
+    ]
+  },
+  {
+    "receipt": "wp541-review-1-claude-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "34ebd10850d407b4cb1c1575284cc191e6f11bc5",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "cuong_do THAP vi tep verdict CHUA land: quan he to tien voi master chua co. Manh len khi luot nay land hoac khi co tag luu-tru/*."
+      ]
+    ]
+  },
+  {
+    "receipt": "wp541-review-2-claude-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "820aebc767e20f00ff2ef86d0a4d09d9e680c31d",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "cuong_do THAP vi tep verdict CHUA land: quan he to tien voi master chua co. Manh len khi luot nay land hoac khi co tag luu-tru/*."
+      ]
+    ]
+  },
+  {
+    "receipt": "wp541-review-4-claude-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "074fd016e51282c3339e5566f33b4204b421c1f5",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "cuong_do THAP vi tep verdict CHUA land. Manh len khi luot nay land hoac khi co tag luu-tru/*."
+      ]
+    ]
+  },
+  {
+    "receipt": "wp678-exec-human-audit-ducthangho-verdict.receipt.yaml",
+    "schema": 2,
+    "evidence_commit": "9e5da35b0cb96d2d3f3ddcc01ac5fc434c7f8ed1",
+    "ancestor_master_rc": 0,
+    "fields": [
+      [
+        "anchor.gioi_han",
+        "cuong_do THAP vi chua land. Chi song neu nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE COMMIT hoac FAST-FORWARD."
+      ]
+    ]
+  }
+]

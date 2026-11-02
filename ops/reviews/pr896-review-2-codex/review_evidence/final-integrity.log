@@ -1,0 +1,7 @@
+snapshot_before_files=7425; after_files=7425
+added=[]; removed=[]; changed_content_or_mode=[]
+$ git -C cay-kho rev-parse HEAD HEAD^{tree}; rc=0; output='8d56009a09af7b3ef93801df105f9483de212cc7\ne93305541ae7d7f87fa5c57dd610fa1be829b0f7\n'
+$ git -C cay-kho status --short --untracked-files=all --ignored; rc=0; output=''
+$ git -C cay-kho rev-parse --is-shallow-repository; rc=0; output='false\n'
+$ git -C cay-kho diff --exit-code 3bc4244 8d56009 -- CLAUDE.md; rc=0; output=''
+$ rg -n đọc ca ấy là đọc ma trận HIỆN HÀNH|đổi ma trận mà quên ca ấy cay-kho/CLAUDE.md; rc=1; output=''

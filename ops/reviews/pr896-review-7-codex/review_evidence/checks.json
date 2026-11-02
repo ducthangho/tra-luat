@@ -1,0 +1,80 @@
+{
+  "t26": {
+    "command": [
+      "python3",
+      "ops/lease_publish_test.py",
+      "--chi-ca=t26_"
+    ],
+    "rc": 0,
+    "summary": ">>> vao t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi 2026-10-26T14:40:28Z\n<<< ra t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi 3.739s QUA\n\nlease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0\n",
+    "stderr": "229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r7/cay-kho/ops/lease_publish_test.py:2961: SyntaxWarning: invalid escape sequence '\\s'\n  2. **Nhận nhầm văn xuôi.** `^\\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một\n/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r7/cay-kho/ops/lease_publish_test.py:5104: SyntaxWarning: invalid escape sequence '\\d'\n  KHÔNG neo đầu dòng là `lease_publish: (\\d+)/(\\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ\n"
+  },
+  "t27": {
+    "command": [
+      "python3",
+      "ops/lease_publish_test.py",
+      "--chi-ca=t27_"
+    ],
+    "rc": 0,
+    "summary": ">>> vao t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc 2026-10-26T14:40:28Z\n<<< ra t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc 6.141s QUA\n\nlease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0\n",
+    "stderr": "229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r7/cay-kho/ops/lease_publish_test.py:2961: SyntaxWarning: invalid escape sequence '\\s'\n  2. **Nhận nhầm văn xuôi.** `^\\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một\n/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r7/cay-kho/ops/lease_publish_test.py:5104: SyntaxWarning: invalid escape sequence '\\d'\n  KHÔNG neo đầu dòng là `lease_publish: (\\d+)/(\\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ\n"
+  },
+  "t138": {
+    "command": [
+      "python3",
+      "ops/lease_publish_test.py",
+      "--chi-ca=t138_"
+    ],
+    "rc": 0,
+    "summary": ">>> vao t138_A12_bien_nhan_receipt_du_truong_va_neo_doc_lap_cay_PR 2026-10-26T14:40:28Z\n<<< ra t138_A12_bien_nhan_receipt_du_truong_va_neo_doc_lap_cay_PR 0.404s QUA\n\nlease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0\n",
+    "stderr": "229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r7/cay-kho/ops/lease_publish_test.py:2961: SyntaxWarning: invalid escape sequence '\\s'\n  2. **Nhận nhầm văn xuôi.** `^\\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một\n/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r7/cay-kho/ops/lease_publish_test.py:5104: SyntaxWarning: invalid escape sequence '\\d'\n  KHÔNG neo đầu dòng là `lease_publish: (\\d+)/(\\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ\n"
+  },
+  "bien_nhan_v2": {
+    "command": [
+      "python3",
+      "ops/bien_nhan_v2.py",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "summary": "\nbien_nhan_v2: 240 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 293\nTỔNG: ĐẠT\n",
+    "stderr": ""
+  },
+  "land": {
+    "command": [
+      "python3",
+      "ops/land_evidence_nguon.py",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "summary": "ops/land/pr846-wp845-land-evidence.yaml\nĐẠT ops/land/pr848-wp744-land-evidence.yaml\nĐẠT ops/land/pr849-wp748-land-evidence.yaml\nĐẠT ops/land/pr851-wp822-land-evidence.yaml\nĐẠT ops/land/pr862-wp748-r21-land-evidence.yaml\nĐẠT ops/land/pr864-wp858-land-evidence.yaml\nĐẠT ops/land/pr866-wp856-land-evidence.yaml\nĐẠT ops/land/pr869-wp748-r22-land-evidence.yaml\nĐẠT ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml\nĐẠT ops/land/pr872-wp871-land-evidence.yaml\nĐẠT ops/land/pr873-wp868-land-evidence.yaml\nĐẠT ops/land/pr877-wp854-land-evidence.yaml\nĐẠT ops/land/pr880-wp878-land-evidence.yaml\nĐẠT ops/land/pr881-wp852-land-evidence.yaml\nĐẠT ops/land/pr882-wp748-r23-land-evidence.yaml\nĐẠT ops/land/pr883-wp879-land-evidence.yaml\nĐẠT ops/land/pr888-wp886-land-evidence.yaml\nĐẠT ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml\nĐẠT ops/land/pr894-wp748-r24-land-evidence.yaml\nĐẠT ops/land/pr895-wp892-land-evidence.yaml\nĐẠT ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml\nĐẠT ops/land/pr907-wp906-land-evidence.yaml\nĐẠT ops/land/pr908-no-p3-spec-r4-land-evidence.yaml\nĐẠT ops/land/pr909-wp748-r25-land-evidence.yaml\nĐẠT ops/land/pr913-wp910-land-evidence.yaml\nĐẠT ops/land/pr917-wp910-land-evidence.yaml\nĐẠT ops/land/pr924-wp923-land-evidence.yaml\nĐẠT ops/land/pr926-wp919-land-evidence.yaml\nĐẠT ops/land/pr930-wp752-wp763-land-evidence.yaml\nĐẠT ops/land/pr931-wp835-land-evidence.yaml\nĐẠT ops/land/pr932-wp748-r26-land-evidence.yaml\nĐẠT ops/land/pr933-wp929-land-evidence.yaml\nland_evidence_nguon: 47 ĐẠT · 26/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 73\nTỔNG: ĐẠT\n",
+    "stderr": ""
+  },
+  "doctrine": {
+    "command": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "summary": "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine\n",
+    "stderr": ""
+  },
+  "doc_claims": {
+    "command": [
+      "python3",
+      "scripts/tl.py",
+      "doc-claims-check",
+      "--json"
+    ],
+    "rc": 0,
+    "summary": {
+      "ok": true,
+      "strict": false
+    },
+    "stderr": ""
+  }
+}

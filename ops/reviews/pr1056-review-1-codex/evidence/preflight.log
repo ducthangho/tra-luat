@@ -1,0 +1,200 @@
+$ git rev-parse HEAD HEAD^{tree}
+rc=0
+1aae17b5534f78767856f93f7d6089adda224f21
+2d0cdcab508a07dd124356fd69635c36efa1d766
+
+$ git status --porcelain
+rc=0
+
+$ git rev-parse --is-shallow-repository
+rc=0
+false
+
+$ git diff --numstat 6db934145acf6e47d01db5b2dc8c9da417c2d8eb HEAD
+rc=0
+8	0	ops/reviews/README.md
+334	0	ops/reviews/pr1050-review-1-codex-verdict.md
+90	0	ops/reviews/pr1050-review-1-codex-verdict.receipt.yaml
+38	0	ops/reviews/pr1050-review-1-codex/HINT.patch
+2	0	ops/reviews/pr1050-review-1-codex/OMITTED.txt
+62	0	ops/reviews/pr1050-review-1-codex/PROMPT.md
+92	0	ops/reviews/pr1050-review-1-codex/SHA256SUMS
+334	0	ops/reviews/pr1050-review-1-codex/VERDICT.md
+45	0	ops/reviews/pr1050-review-1-codex/evidence/artifacts.log
+4	0	ops/reviews/pr1050-review-1-codex/evidence/baseline-bien_nhan_v2.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/baseline-bien_nhan_v2.rc
+1	0	ops/reviews/pr1050-review-1-codex/evidence/baseline-doctrine_scan.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/baseline-doctrine_scan.rc
+100	0	ops/reviews/pr1050-review-1-codex/evidence/baseline-land_evidence_nguon.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/baseline-land_evidence_nguon.rc
+8	0	ops/reviews/pr1050-review-1-codex/evidence/baseline-t138.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/baseline-t138.rc
+8	0	ops/reviews/pr1050-review-1-codex/evidence/baseline-t26.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/baseline-t26.rc
+10	0	ops/reviews/pr1050-review-1-codex/evidence/baseline-t27.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/baseline-t27.rc
+50	0	ops/reviews/pr1050-review-1-codex/evidence/ci.log
+3	0	ops/reviews/pr1050-review-1-codex/evidence/clone.log
+18	0	ops/reviews/pr1050-review-1-codex/evidence/final-integrity.log
+58	0	ops/reviews/pr1050-review-1-codex/evidence/finalize_verdict.py
+1	0	ops/reviews/pr1050-review-1-codex/evidence/hint-apply.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/hint-dry-run.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/hint-dry-run.rc
+105	0	ops/reviews/pr1050-review-1-codex/evidence/hint-land-evidence.yaml
+3	0	ops/reviews/pr1050-review-1-codex/evidence/hint-land-gate.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/hint-land-gate.rc
+12	0	ops/reviews/pr1050-review-1-codex/evidence/lease-timeline.log
+17	0	ops/reviews/pr1050-review-1-codex/evidence/make_hint.py
+31	0	ops/reviews/pr1050-review-1-codex/evidence/measure_artifacts.py
+40	0	ops/reviews/pr1050-review-1-codex/evidence/measure_ci.py
+18	0	ops/reviews/pr1050-review-1-codex/evidence/measure_lease.py
+37	0	ops/reviews/pr1050-review-1-codex/evidence/measure_mutations.py
+33	0	ops/reviews/pr1050-review-1-codex/evidence/measure_receipts.py
+4	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-caveat-bien_nhan_v2.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-caveat-bien_nhan_v2.rc
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-caveat-doctrine_scan.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-caveat-doctrine_scan.rc
+100	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-caveat-land_evidence_nguon.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-caveat-land_evidence_nguon.rc
+8	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-caveat-t138.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-caveat-t138.rc
+8	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-caveat-t26.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-caveat-t26.rc
+12	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-caveat-t27.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-caveat-t27.rc
+4	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-toc-bien_nhan_v2.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-toc-bien_nhan_v2.rc
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-toc-doctrine_scan.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-toc-doctrine_scan.rc
+100	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-toc-land_evidence_nguon.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-toc-land_evidence_nguon.rc
+8	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-toc-t138.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-toc-t138.rc
+8	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-toc-t26.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-toc-t26.rc
+12	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-toc-t27.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-readme-delete-toc-t27.rc
+4	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-receipt-so-p1-bien_nhan_v2.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-receipt-so-p1-bien_nhan_v2.rc
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-receipt-so-p1-doctrine_scan.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-receipt-so-p1-doctrine_scan.rc
+100	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-receipt-so-p1-land_evidence_nguon.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-receipt-so-p1-land_evidence_nguon.rc
+8	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-receipt-so-p1-t138.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-receipt-so-p1-t138.rc
+8	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-receipt-so-p1-t26.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-receipt-so-p1-t26.rc
+10	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-receipt-so-p1-t27.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-receipt-so-p1-t27.rc
+4	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-verdict-one-byte-bien_nhan_v2.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-verdict-one-byte-bien_nhan_v2.rc
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-verdict-one-byte-doctrine_scan.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-verdict-one-byte-doctrine_scan.rc
+100	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-verdict-one-byte-land_evidence_nguon.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-verdict-one-byte-land_evidence_nguon.rc
+8	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-verdict-one-byte-t138.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-verdict-one-byte-t138.rc
+10	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-verdict-one-byte-t26.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-verdict-one-byte-t26.rc
+10	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-verdict-one-byte-t27.log
+1	0	ops/reviews/pr1050-review-1-codex/evidence/mutant-verdict-one-byte-t27.rc
+212	0	ops/reviews/pr1050-review-1-codex/evidence/mutations.json
+4	0	ops/reviews/pr1050-review-1-codex/evidence/mutations.log
+8	0	ops/reviews/pr1050-review-1-codex/evidence/readme.log
+60	0	ops/reviews/pr1050-review-1-codex/evidence/receipts.log
+5	0	ops/reviews/pr1050-review-1-codex/launcher.out
+32	0	ops/reviews/pr1050-review-1-codex/numstat.txt
+1	0	ops/reviews/pr1050-review-1-codex/run/checkpoint.json
+581	0	ops/reviews/pr1050-review-1-codex/run/run.json
+1	0	ops/reviews/pr1050-review-1-codex/run/stderr.log
+3	0	ops/reviews/pr1050-review-1-codex/run/stdout.log
+365	0	ops/reviews/pr1050-review-2-codex-verdict.md
+90	0	ops/reviews/pr1050-review-2-codex-verdict.receipt.yaml
+2	0	ops/reviews/pr1050-review-2-codex/OMITTED.txt
+69	0	ops/reviews/pr1050-review-2-codex/PROMPT.md
+81	0	ops/reviews/pr1050-review-2-codex/SHA256SUMS
+365	0	ops/reviews/pr1050-review-2-codex/VERDICT.md
+88	0	ops/reviews/pr1050-review-2-codex/diff-tu-luot1.patch
+50	0	ops/reviews/pr1050-review-2-codex/evidence/artifacts.log
+4	0	ops/reviews/pr1050-review-2-codex/evidence/baseline-bien_nhan_v2.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/baseline-bien_nhan_v2.rc
+1	0	ops/reviews/pr1050-review-2-codex/evidence/baseline-doctrine_scan.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/baseline-doctrine_scan.rc
+95	0	ops/reviews/pr1050-review-2-codex/evidence/baseline-gates.json
+100	0	ops/reviews/pr1050-review-2-codex/evidence/baseline-land_evidence_nguon.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/baseline-land_evidence_nguon.rc
+8	0	ops/reviews/pr1050-review-2-codex/evidence/baseline-t138.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/baseline-t138.rc
+8	0	ops/reviews/pr1050-review-2-codex/evidence/baseline-t26.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/baseline-t26.rc
+10	0	ops/reviews/pr1050-review-2-codex/evidence/baseline-t27.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/baseline-t27.rc
+56	0	ops/reviews/pr1050-review-2-codex/evidence/ci.log
+22	0	ops/reviews/pr1050-review-2-codex/evidence/final-integrity.log
+28	0	ops/reviews/pr1050-review-2-codex/evidence/final_integrity.py
+3	0	ops/reviews/pr1050-review-2-codex/evidence/lease-current-offline.log
+43	0	ops/reviews/pr1050-review-2-codex/evidence/lease.log
+49	0	ops/reviews/pr1050-review-2-codex/evidence/measure_artifacts.py
+64	0	ops/reviews/pr1050-review-2-codex/evidence/measure_ci.py
+35	0	ops/reviews/pr1050-review-2-codex/evidence/measure_lease.py
+24	0	ops/reviews/pr1050-review-2-codex/evidence/measure_readme.py
+56	0	ops/reviews/pr1050-review-2-codex/evidence/measure_receipts.py
+4	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-byte-bien_nhan_v2.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-byte-bien_nhan_v2.rc
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-byte-doctrine_scan.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-byte-doctrine_scan.rc
+95	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-byte-gates.json
+100	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-byte-land_evidence_nguon.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-byte-land_evidence_nguon.rc
+8	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-byte-t138.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-byte-t138.rc
+10	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-byte-t26.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-byte-t26.rc
+10	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-byte-t27.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-byte-t27.rc
+4	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-count-bien_nhan_v2.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-count-bien_nhan_v2.rc
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-count-doctrine_scan.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-count-doctrine_scan.rc
+95	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-count-gates.json
+100	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-count-land_evidence_nguon.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-count-land_evidence_nguon.rc
+8	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-count-t138.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-count-t138.rc
+8	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-count-t26.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-count-t26.rc
+10	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-count-t27.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-count-t27.rc
+4	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-readme-bien_nhan_v2.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-readme-bien_nhan_v2.rc
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-readme-doctrine_scan.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-readme-doctrine_scan.rc
+95	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-readme-gates.json
+100	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-readme-land_evidence_nguon.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-readme-land_evidence_nguon.rc
+8	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-readme-t138.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-readme-t138.rc
+8	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-readme-t26.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-readme-t26.rc
+12	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-readme-t27.log
+1	0	ops/reviews/pr1050-review-2-codex/evidence/mutant-readme-t27.rc
+26	0	ops/reviews/pr1050-review-2-codex/evidence/mutations-summary.json
+115	0	ops/reviews/pr1050-review-2-codex/evidence/mutations.log
+17	0	ops/reviews/pr1050-review-2-codex/evidence/readme.log
+83	0	ops/reviews/pr1050-review-2-codex/evidence/receipts.log
+16	0	ops/reviews/pr1050-review-2-codex/evidence/rerun-comparison.log
+29	0	ops/reviews/pr1050-review-2-codex/evidence/run_gates.py
+34	0	ops/reviews/pr1050-review-2-codex/evidence/run_mutations.py
+5	0	ops/reviews/pr1050-review-2-codex/launcher.out
+1	0	ops/reviews/pr1050-review-2-codex/run/checkpoint.json
+556	0	ops/reviews/pr1050-review-2-codex/run/run.json
+1	0	ops/reviews/pr1050-review-2-codex/run/stderr.log
+5	0	ops/reviews/pr1050-review-2-codex/run/stdout.log
+38	0	ops/reviews/pr1050-review-2-codex/verdict-cu/luot1-HINT.patch
+334	0	ops/reviews/pr1050-review-2-codex/verdict-cu/luot1-VERDICT.md
+
+$ git show -s --format=%H%n%P%n%s 79400f3
+rc=0
+79400f3cdc6b780319b66f57c27e5772ad010101
+4f11b13c3d286a79dbe9a83547a800005cda0eda f37b5195978f1fe35b9cb55b6f79a2e09d165af0
+Merge pull request #1050 from ducthangho/claude/magical-clarke-gzvwbp

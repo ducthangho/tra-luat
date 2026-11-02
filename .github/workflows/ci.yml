@@ -16,7 +16,31 @@ on:
   # từng chạy lần nào. `workflow_dispatch` cho phép soi gate theo yêu cầu trên BẤT KỲ ref nào, không
   # phải mở PR mới biết. (GitHub đòi workflow có mặt ở nhánh mặc định thì nút này mới dùng được ⇒ chỉ
   # hiệu lực SAU khi bản này lên master.)
+  #
+  # packet #878 (CI-DISPATCH-CHI-WINDOWS): dispatch hầu như luôn được gọi để đo WINDOWS cho một head ĐÃ có lượt PR
+  # Ubuntu, nên phần Ubuntu (250–330 phút/lượt, đo 19→22-10-2026) là lặp. `windows-only` bỏ phần ấy; mặc định
+  # GIỮ hành vi cũ (hai nền). Cùng từ vựng với `launcher-windows.yml` — ghim ở `.claude/dev/ci_dang_ky_test.py`.
+  # Biểu thức `os` của `chuan-bi`: vế đầu chỉ đúng khi dispatch CHỌN `windows-only`; dispatch không input (API cũ)
+  # rơi xuống vế hai như cũ.
   workflow_dispatch:
+    inputs:
+      runner_set:
+        description: "windows-and-ubuntu (mặc định) hoặc windows-only (bỏ các job ma trận Ubuntu)"
+        required: false
+        default: windows-and-ubuntu
+        type: choice
+        options:
+          - windows-and-ubuntu
+          - windows-only
+      # wp1113 (CI-LAN-LUU-TRU r1): `tu_dong` phan loai diff merge-base(nhanh mac dinh, sha)..sha nhu PR; `day_du` chay du.
+      che_do:
+        description: "tu_dong (mac dinh: diff thuan ho so thi duong nhanh) hoac day_du (chay du, ke ca Windows)"
+        required: false
+        default: tu_dong
+        type: choice
+        options:
+          - tu_dong
+          - day_du
 
 # r245 — CẮT PHÚT ACTIONS. Đo ngày 13-08: gate chạy 6,6 phút tường, nhân hệ số
 # Windows x2 thành ~20 phút TÍNH TIỀN mỗi lượt, x13,6 lượt/ngày = ~8.100 phút/tháng.
@@ -35,14 +59,56 @@ jobs:
   chuan-bi:
     # packet #548 (CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND): nguon duy nhat cho ma tran os.
     # Chi ubuntu-latest, khong checkout ma nguon; bo github.ref == 'refs/heads/master'.
+    #
+    # packet #674 (CI-DUONG-NHANH-HO-SO r2): nguon duy nhat cho `che_do`. PR chi doi ho so
+    # (ops/{land,leases,reviews,specs}/**) => `duong_nhanh`: ba job bat buoc VAN KHOI DONG va bao ket qua,
+    # chi cac buoc nang bi `if:` muc buoc bo qua. KHONG dung `paths:` / `paths-ignore:` — workflow khong chay
+    # thi required check VANG MAT va PR ket `blocked`. Logic phan loai o `ops/ci_duong_nhanh.py` (co phan
+    # chung), khong o bieu thuc YAML. wp1113: ca ba su kien (pull_request, push, workflow_dispatch) deu duoc phan loai;
+    # duong nhanh thi ep chi Ubuntu (`os`) va xuat cap goc/dau/hop cho `kiem-re`.
+    # Fail-close: chi dung chuoi `duong_nhanh` moi bo buoc; rong/la/vang => day du (phia job: `!= 'duong_nhanh'`).
     runs-on: ubuntu-latest
+    # Tran ngoai: het gio CAP JOB thi `chuan-bi` DO (ba context bat buoc khong duoc tao => PR bi chan, khong mo) — chi
+    # ngan thoi gian chan tu 360 phut mac dinh xuong day. Tran trong o hai buoc phan loai ben duoi (het gio => roi day_du).
+    timeout-minutes: 20
     outputs:
-      os: ${{ (github.event_name == 'workflow_dispatch'
+      os: ${{ (steps.phan-loai.outputs.che_do == 'duong_nhanh') && '["ubuntu-latest"]'
+              || (github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only')
+              && '["windows-latest"]'
+              || (github.event_name == 'workflow_dispatch'
                || contains(github.event.pull_request.labels.*.name, 'windows'))
               && '["ubuntu-latest","windows-latest"]'
               || '["ubuntu-latest"]' }}
+      che_do: ${{ steps.phan-loai.outputs.che_do || 'day_du' }}
+      goc: ${{ steps.phan-loai.outputs.goc }}
+      dau: ${{ steps.phan-loai.outputs.dau }}
+      hop: ${{ steps.phan-loai.outputs.hop }}
     steps:
-      - run: 'true'
+      # `continue-on-error` o HAI buoc phan loai la CO CHU DICH, khong phai nuot loi: khong phan loai duoc thi phai roi
+      # ve `day_du` (chay day du), khong lam `chuan-bi` do. Do 29-09 (Issue #674 comment 5889459132, 4 luot that):
+      # `chuan-bi` do thi job phu thuoc `skipped` mang ten TRAN, context bat buoc `(ubuntu-latest)` khong duoc tao ⇒ PR bi
+      # CHAN (dong), khong mo — nhung chan toi 360 phut neu buoc treo. Nen hai buoc co `timeout-minutes` rieng: het gio
+      # ⇒ buoc that bai ⇒ `continue-on-error` giu job xanh ⇒ `che_do` vang ⇒ `day_du`.
+      - uses: actions/checkout@v4
+        continue-on-error: true
+        timeout-minutes: 10
+        with:
+          # Diff `base...head` can lich su du de tinh merge-base; thieu object => `git diff` loi => day_du.
+          fetch-depth: 0
+      - name: phan loai diff (duong nhanh ho so)
+        id: phan-loai
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}
+          # push: `before` (to tien phai do lai bang OID trong ops/ci_duong_nhanh.py); dispatch: tinh tu nhanh mac dinh.
+          CI_DUONG_NHANH_GOC: ${{ github.event.pull_request.base.sha || github.event.before }}
+          CI_DUONG_NHANH_DAU: ${{ github.event.pull_request.head.sha }}
+          # Commit merge THAT ma moi job checkout va test; phan loai hop them diff base -> no (vang/hong => day_du).
+          CI_DUONG_NHANH_MERGE: ${{ github.sha }}
+          CI_DUONG_NHANH_CHE_DO_VAO: ${{ inputs.che_do }}
+          CI_DUONG_NHANH_NHANH_MAC_DINH: ${{ github.event.repository.default_branch }}
+        run: python3 ops/ci_duong_nhanh.py
 
   gate:
     needs: chuan-bi
@@ -65,7 +131,7 @@ jobs:
     # công cụ hiện có (`get_job_logs` trả `failed_jobs: 0` vì job bị huỷ không tính là
     # "failed"); quy cho `windows-latest` là SUY LUẬN từ chỗ ubuntu-only về đích.
     # NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN: gate 22 phút và đang lớn dần là nợ riêng.
-    timeout-minutes: 60
+    timeout-minutes: 150
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -96,29 +162,70 @@ jobs:
       - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
         run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
       - name: cài actionlint cho G5
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         env:
           AL_VER: 1.7.7
         run: bash ops/cai_actionlint.sh
       - name: cài shellcheck cho G5 (cài xong đo lại)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: bash ops/cai_cong_cu.sh shellcheck
       - name: cài rg cho G5 (cài xong đo lại)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: bash ops/cai_cong_cu.sh rg
       - name: G5 kiem ban ke cong cu + T1..T8 (packet #290)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
+        # #668: vòng bán kính đột biến (~93 % bước này, ~43 phút) giao cho `gate-cong-cu` (8 mảnh) + `gate-cong-cu-gop`.
+        # Ở đây vẫn chạy mọi ca + cổng cây thật + tự kiểm. Giá trị khác `manh` ⇒ `cong_cu_test` ĐỎ trước mọi ca.
+        env:
+          CONG_CU_TEST_BAN_KINH: manh
         run: |
           python ops/cong_cu.py kiem-tra --json
           python ops/cong_cu_test.py
       - name: cài Ruff 0.15.15 và in probe dương
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: |
           python -m pip install --quiet ruff==0.15.15
           ruff --version
+      # packet #674: bước bị `if:` bỏ ở đường nhanh PHẢI tự nói lý do trong log, không để `skipped` trơn.
+      # Danh sách dưới KHỚP TỪNG CHỮ tên bước mang `if:` theo `che_do` của job này (ops/ci_duong_nhanh_test.py đo).
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate)
+        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+        run: |
+          echo "DUONG_NHANH: bo qua cài actionlint cho G5 vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua cài shellcheck cho G5 (cài xong đo lại) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua cài rg cho G5 (cài xong đo lại) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua G5 kiem ban ke cong cu + T1..T8 (packet vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua cài Ruff 0.15.15 và in probe dương vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua PR head contains required EOL base vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua py_compile vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua codex credential selftest (packet #300) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua idiom-ba-ten selftest vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua eol-policy selftest vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua pre-push selftest vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua bundled-fragment check (topology gói) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua gen_instructions selftest vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua command-registry unit test (AG-T0-03) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua tl selftest (luot PR — khong sinh bang chung) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua tl selftest (co bang chung exact-identity) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua tai len gate-evidence vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua workflow-audit strict vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua golden-test vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua determinism-audit strict vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua ci-phamvi guard (bang phu thuoc khop ma) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua ci-phamvi selftest (phan chung — cong co rang) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua release-check full vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua release-verify strict (lane LAND — manifest committed) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua release-verify strict (lane WORKER — manifest TẠM ngoài repo) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua release-bundle x2 cùng SHA-256 vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua tl_boot smoke vi diff chi gom ops/{land,leases,reviews,specs}/**"
       # Kiểm CHÍNH head của PR, không dùng GITHUB_SHA vì trên pull_request đó là synthetic merge.
       # `cat-file` và `merge-base` đều không có nhánh bỏ qua: thiếu object/fetch/lỗi git phải đỏ.
       - name: PR head contains required EOL base
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         env:
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -130,8 +237,10 @@ jobs:
           git cat-file -e "${EOL_BASE_SHA}^{commit}"
           git merge-base --is-ancestor "$EOL_BASE_SHA" "$PR_HEAD_SHA"
       - name: py_compile
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python -m py_compile scripts/tl.py scripts/tl_boot.py scripts/gen_instructions.py scripts/tl_core/__init__.py scripts/tl_core/deterministic.py scripts/tl_core/jsonio.py scripts/tl_core/workflow.py scripts/tl_core/release.py scripts/tl_core/live.py scripts/tl_core/zip_ingest.py scripts/tl_core/ocr.py scripts/tl_core/chunking.py scripts/tl_core/command_registry.py
       - name: "codex credential selftest (packet #300)"
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python .claude/dev/codex_cred_test.py
       # HOP DONG IDIOM BA TEN (packet #345, ke nhiem #337). Cung doctrine voi hai buoc
       # duoi: guard khong noi vao duong TU DONG thi guard chi la tai lieu (bai hoc r225).
@@ -145,14 +254,17 @@ jobs:
       # tren Windows la ly do packet #337 ton tai — nen bo qua Windows la bo qua dung nen
       # dang duoc bao ve.
       - name: idiom-ba-ten selftest
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python .claude/dev/idiom_py_test.py
       # F2-A (ADR-0018): validator EOL dùng CHUNG với `.githooks/pre-commit`. Hook chỉ phủ máy
       # dev đã bật `core.hooksPath`; CI là đường TỰ ĐỘNG, và guard không nối vào đường tự động
       # thì guard chỉ là tài liệu (bài học r225). Chạy trên CẢ ubuntu lẫn windows vì cả lớp hỏng
       # này là lớp hỏng theo NỀN TẢNG.
       - name: eol-policy selftest
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python .githooks/eol_policy_test.py
       - name: pre-push selftest
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python .githooks/pre_push_test.py
       # `--all` soi TOÀN BỘ index, không chỉ tệp đang stage — đây là thứ duy nhất bắt được nợ
       # CRLF có sẵn (hook cũ so với HEAD nên mù hoàn toàn với nó).
@@ -175,8 +287,10 @@ jobs:
       # sinh, thuộc F2-C, nên ở A nó chưa mang `wp49`. Cùng hạng với hai bước eol ở trên — A/B/C
       # là MỘT đơn vị land, đo ở HEAD cuối mới là phép đo thật.
       - name: bundled-fragment check (topology gói)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python .github/checks/bundle_fragment_check.py --json
       - name: gen_instructions selftest
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python scripts/gen_instructions.py --selftest
       # AG-T0-03: bộ unit test của packet KHÔNG nằm trong `scripts/test_fragments/` nên
       # `tl.py --selftest` KHÔNG khám phá ra nó — đo được ở lượt land: cùng một lượt, selftest đếm
@@ -185,6 +299,7 @@ jobs:
       # làm hỏng `compute_parser_coverage`. Giữ bước riêng (thay vì chuyển tệp sang
       # `test_fragments/`) để không đụng vào topology gói đang sát trần 200.
       - name: command-registry unit test (AG-T0-03)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python scripts/tl_core/command_registry_test.py
       # BỌC selftest qua `gate_lifecycle.py run` thay vì gọi thẳng — KHÔNG thêm lượt
       # chạy nào, chỉ thêm bằng chứng. Vì sao cần: `.claude/commands/gate-targeted.md`
@@ -217,10 +332,10 @@ jobs:
       # push/handoff: chờ CI tạo full evidence exact-head"). Lượt PR vẫn chạy
       # selftest, chỉ không giả vờ sinh ra chứng cho một commit không có trong lịch sử.
       - name: tl selftest (luot PR — khong sinh bang chung)
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python scripts/tl.py --selftest
       - name: tl selftest (co bang chung exact-identity)
-        if: ${{ github.event_name != 'pull_request' }}
+        if: ${{ github.event_name != 'pull_request' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -254,7 +369,7 @@ jobs:
             -- python scripts/tl.py --selftest
       # `if: always()` — bằng chứng của một lượt ĐỎ còn đáng tải hơn của lượt xanh.
       - name: tai len gate-evidence
-        if: always()
+        if: ${{ always() && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         uses: actions/upload-artifact@v4
         with:
           name: gate-evidence-${{ matrix.os }}-${{ github.run_attempt }}
@@ -262,14 +377,17 @@ jobs:
           path: scripts/.tl_state/gate/
           if-no-files-found: warn
       - name: workflow-audit strict
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python scripts/tl.py workflow-audit --strict --json
       - name: golden-test
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python scripts/tl.py golden-test --json
       # r225: r218 dựng cổng kiểm trích dẫn, r219 nối vào `/gate` (đường TAY) mà QUÊN CI (đường TỰ ĐỘNG)
       # — đúng loại hỏng r219 tự mô tả: "guard không nối vào đường chạy tự động thì guard chỉ là tài liệu".
       - name: doc-claims-check strict
         run: python scripts/tl.py doc-claims-check --strict --json
       - name: determinism-audit strict
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python scripts/tl.py determinism-audit --strict --json
       # r246 — NOI BANG PHU THUOC VAO DUONG CHAY TU DONG (M7, Issue #254).
       # Hai tep `.github/checks/ci_phamvi*.py` land 22-08 (#251, master 26856f9) ma
@@ -352,11 +470,13 @@ jobs:
       # Nguoi giu kho (@ducthangho) DA DUYET cho lech nay tai Issue #254.
       # `-r2` van BAT BUOC cho cong tac fast-path, khong phai cho buoc nay.
       - name: ci-phamvi guard (bang phu thuoc khop ma)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python .github/checks/ci_phamvi.py --kiem-bam
       - name: ci-phamvi selftest (phan chung — cong co rang)
-        if: runner.os != 'Windows'
+        if: ${{ runner.os != 'Windows' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python .github/checks/ci_phamvi_test.py
       - name: release-check full
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python scripts/tl.py release-check --full --json
       # ── LANE LAND vs LANE WORKER — chia theo REF ĐANG ĐƯỢC GÁC, không theo cò (packet #427) ──
       # `PROTOCOL:652` cấm worker sửa `RELEASE_MANIFEST.json`; `PROTOCOL:710` cấm worker CI so
@@ -374,7 +494,7 @@ jobs:
       # (CLAUDE.md: đúng chỗ này đã hỏng hai lần vì logic điều kiện — đừng mở bề mặt mới.)
       # --strict: file THỪA trong cây mà manifest không có ⇒ ĐỎ (bản cũ chỉ cảnh báo rồi trôi qua)
       - name: release-verify strict (lane LAND — manifest committed)
-        if: github.ref == 'refs/heads/master'
+        if: ${{ github.ref == 'refs/heads/master' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
       # LANE WORKER. `PROTOCOL:711-715` nêu đường thay thế: sinh manifest TẠM ngoài repo rồi
       # verify trên đó. NHƯNG PHẢI ĐO — làm đúng NGUYÊN VĂN hai dòng ấy thôi thì được một phép
@@ -394,7 +514,7 @@ jobs:
       # committed vẫn bắt (đo: rc=2, `extra_files`). Tái sinh manifest là việc của phiên land
       # (CLAUDE.md §Quy ước deploy mục 5) — đúng phân công `PROTOCOL:652`.
       - name: release-verify strict (lane WORKER — manifest TẠM ngoài repo)
-        if: github.ref != 'refs/heads/master'
+        if: ${{ github.ref != 'refs/heads/master' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -418,6 +538,7 @@ jobs:
           print("manifest tam:", len(duong), "tep, tat ca deu duoc git theo doi")
           PY
       - name: release-bundle x2 cùng SHA-256
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: |
           python scripts/tl.py release-bundle --out dist/a.zip --json > /dev/null
@@ -429,7 +550,131 @@ jobs:
           print("bundle sha256 =", h[0])
           PY
       - name: tl_boot smoke
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python scripts/tl_boot.py --version
+
+  # #668 CI-G5-CONG-CU-CHIA-MANH — bán kính đột biến của `ops/cong_cu_test.py` chia 8 mảnh chạy song song. Đo
+  # 28-09-2026: G5 45m56s (run 36362558889) mà ~93 % là vòng bán kính (mỗi đột biến chạy lại trọn bộ ca, runner 2 lõi),
+  # nên chỉ nhiều RUNNER mới rút được thời gian tường. Mỗi mảnh chạy lại ĐÚNG phần thiết lập G5 của `gate` (ca của
+  # mảnh cần đủ công cụ, thiếu thì ca đích bị BỎ QUA và bán kính KHÔNG ĐO ĐƯỢC). `loi_g5_workflow`
+  # (`.claude/dev/ci_dang_ky_test.py`) ghim hình dạng hai job này; `N` trong `CONG_CU_TEST_MANH` phải khớp matrix.
+  # wp879 (#879): Windows chỉ còn MỘT job (mảnh 0) và `cong_cu_test.py` ở đó chạy ĐỦ ca nền rồi dừng (`nen_bo_qua_dot_bien`)
+  # — 111/118 lượt mảnh Windows không xanh vì lý do của nền (#853), mỗi lượt 570–650 phút. Bán kính đo trên ubuntu-latest.
+  # wp892 (#892): PR chỉ đổi hồ sơ (`che_do == duong_nhanh`, #674) thì 8 mảnh `skipped` (0 phút runner). Chỉ ĐÚNG chuỗi ấy
+  # mới bỏ — rỗng/vắng/lạ ⇒ chạy; push master và `workflow_dispatch` luôn `day_du` ⇒ bán kính đủ trên master không đổi.
+  gate-cong-cu:
+    needs: chuan-bi
+    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+        manh: [0, 1, 2, 3, 4, 5, 6, 7]
+        exclude:
+          - {os: windows-latest, manh: 1}
+          - {os: windows-latest, manh: 2}
+          - {os: windows-latest, manh: 3}
+          - {os: windows-latest, manh: 4}
+          - {os: windows-latest, manh: 5}
+          - {os: windows-latest, manh: 6}
+          - {os: windows-latest, manh: 7}
+    runs-on: ${{ matrix.os }}
+    # WP748 r20 (chu kho, PR #849): 45 -> 150. Do run 39304938900 tren 9983615: CA 8 manh Windows bi huy
+    # o dung phut 45 (18:45:15 -> 19:29:33), khong mot assertion nao do; Ubuntu cung dot xong trong 18-32 phut.
+    timeout-minutes: 150
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          # r226 — vì sao ghim `core.abbrev 7`: xem chú thích cùng bước ở job `gate`.
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+      - name: cài actionlint cho G5
+        shell: bash
+        env:
+          AL_VER: 1.7.7
+        run: bash ops/cai_actionlint.sh
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh shellcheck
+      - name: cài rg cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh rg
+      - name: G5 manh ban kinh dot bien (#668)
+        shell: bash
+        # Biểu thức chỉ nằm trong `env`, không bao giờ trong `run` (`loi_ruff_ci` ngoài miền `${{ }}`).
+        env:
+          CONG_CU_TEST_MANH: ${{ matrix.manh }}/8
+          CONG_CU_TEST_MANH_RA: manh/manh-${{ matrix.manh }}.txt
+        run: |
+          python ops/cong_cu.py kiem-tra --json
+          python ops/cong_cu_test.py
+      # wp879: Windows không ghi tệp mảnh (không đo bán kính) và không có job gom ⇒ không tải gì lên.
+      - if: runner.os != 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-cong-cu-manh-${{ matrix.os }}-${{ matrix.manh }}
+          path: manh/manh-${{ matrix.manh }}.txt
+          if-no-files-found: error
+
+  # Job GOM: KHÔNG tin phán quyết của mảnh — dựng lại phân hoạch từ `DOT_BIEN` của chính nó, kiểm từng bản ghi bằng
+  # cùng bộ nhận của đường song song, ĐỎ khi thiếu/trùng mảnh, lệch băm/HEAD, lệch tổng. `!cancelled()`: mảnh đỏ thì
+  # gom VẪN chạy và ĐỎ vì thiếu mảnh — `needs` mặc định sẽ cho nó `skipped`, mà `skipped` đọc như xanh ở check bắt buộc.
+  # Sau land: chủ kho thêm context `gate-cong-cu-gop (ubuntu-latest)` vào ruleset (spec #668 §7).
+  # wp879: gom CHỈ trên ubuntu-latest (Windows không còn mảnh để gom). `os` vẫn lấy từ `chuan-bi` (chốt nguồn duy nhất,
+  # `t161`) và loại `windows-latest`; `if` theo cùng output ⇒ lượt `runner_set=windows-only` (#878) thì job này `skipped`
+  # trước khi ma trận rỗng, không đỏ oan vì "thiếu mảnh 0..7".
+  gate-cong-cu-gop:
+    needs: [chuan-bi, gate-cong-cu]
+    if: ${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+        exclude:
+          - {os: windows-latest}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      # BẮT BUỘC cả ở gom: `sha256_test` của mảnh đo trên checkout LF; Windows mặc định autocrlf thì băm lệch ⇒ ĐỎ oan.
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: gate-cong-cu-manh-${{ matrix.os }}-*
+          path: manh
+          merge-multiple: true
+      - name: G5 gom manh ban kinh dot bien (#668)
+        shell: bash
+        # wp892: gom là context BẮT BUỘC — với `duong_nhanh` + 0 mảnh nó in "KHÔNG ĐO" và XANH, không `skipped`.
+        env:
+          CONG_CU_TEST_GOP_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}
+        run: python ops/cong_cu_test.py --gop manh
 
   gate-ops:
     # packet #660 (CI-GATE-TACH-GATE-OPS r1): tách khỏi `gate` để cắt thời gian tường của PR, cùng hình dạng
@@ -438,15 +683,15 @@ jobs:
     # don-nhanh, cgroup + gate_lifecycle, lifecycle nền không cgroup. KHÔNG bỏ bước nào.
     # CỔNG BẮT BUỘC: các bước này chỉ chặn merge khi ruleset `bao-ve-cong-dang-lease` có context
     # `gate-ops (ubuntu-latest)` — chú thích `PLAT-X5` bên dưới nói "job `gate`" là lời viết TRƯỚC lần tách.
-    # Cố ý KHÔNG có: bước chạm `ops/cong_cu` (không vào `JOB_G5`), bước cài actionlint (t152 đếm 4 dòng
-    # `AL_VER:`; wrapper lease-publish tự cài), Ruff (`loi_ruff_ci`). Ma trận/`timeout`/`env` bằng đúng `gate`.
+    # Cố ý KHÔNG có: bước chạm `ops/cong_cu` (không vào `JOB_G5`), bước cài actionlint (t152 đếm 5 dòng
+    # `AL_VER:` từ #668; wrapper lease-publish tự cài), Ruff (`loi_ruff_ci`). Ma trận/`timeout`/`env` bằng đúng `gate`.
     needs: chuan-bi
     strategy:
       fail-fast: false
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    timeout-minutes: 150
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -473,11 +718,43 @@ jobs:
       - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
         run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
       - name: cài shellcheck cho G5 (cài xong đo lại)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: bash ops/cai_cong_cu.sh shellcheck
       - name: cài rg cho G5 (cài xong đo lại)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: bash ops/cai_cong_cu.sh rg
+      # packet #674: khối này chỉ có ở đường nhanh (che_do == duong_nhanh). Danh sách bước bỏ KHỚP TỪNG CHỮ tên bước
+      # mang `if:` theo `che_do` của job này; bước kiểm rẻ bù ngay dưới. Bước gọi test của chính packet KHÔNG có `if:`
+      # theo `che_do` — đó là cổng DUY NHẤT canh các `if:` cấp job/bước sau G5 (nợ Q6-i, xem ops/ci_duong_nhanh_test.py).
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-ops)
+        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+        run: |
+          echo "DUONG_NHANH: bo qua cài shellcheck cho G5 (cài xong đo lại) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua cài rg cho G5 (cài xong đo lại) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua lease-publish selftest (đo lại setup sau G5) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua don-nhanh selftest (chốt xoá nhánh) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua bo ca gate chay TRONG cgroup duoc uy quyen (Linux) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua gate lifecycle selftest (nen khong co cgroup) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+      - name: DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)
+        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+        shell: bash
+        env:
+          CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}
+          # wp1113: DUNG cap ma `chuan-bi` da phan loai, o moi su kien; vang thi kiem-re DO (fail-close).
+          CI_DUONG_NHANH_GOC: ${{ needs.chuan-bi.outputs.goc }}
+          CI_DUONG_NHANH_DAU: ${{ needs.chuan-bi.outputs.dau }}
+          CI_DUONG_NHANH_MERGE: ${{ needs.chuan-bi.outputs.hop }}
+        run: |
+          set -euo pipefail
+          python .claude/dev/packet_loop.py doctrine-scan --root .
+          python ops/ci_duong_nhanh.py kiem-re
+      # Phản chứng của bộ phân loại + của chính các `if:` ở trên (đột biến trên bản sao tạm). Chỉ Linux: bộ phân
+      # loại chạy ở `chuan-bi` (ubuntu-latest); test dựng kho git tạm và chạy tiến trình con. KHÔNG có `if:` theo `che_do`.
+      - name: ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)
+        if: runner.os == 'Linux'
+        run: python ops/ci_duong_nhanh_test.py
       # CONG LUOC DO v2 CHO BIEN NHAN REVIEW (PROTOCOL §8, dong 453-458). Dac ta co tu
       # `2f84531` (18-08-2026) va KHONG AI THI CONG: do tren `3bc2895`, 62 bien nhan / 10
       # khai v2 / chi 4 du truong, va `t26` chi kiem verdict path + bam. Chinh hai bien nhan
@@ -507,7 +784,7 @@ jobs:
       #
       # Chạy trên CẢ hai nền: bộ này gọi lệnh qua `sys.executable` nên thuần Python;
       # `t19` (symlink) tự bỏ qua khi nền không cho tạo symlink. Đo 16-08: 3,4 giây,
-      # không đáng kể so với trần 25 phút của job.
+      # không đáng kể so với trần job lúc đo (25 phút; #910 pha A, PR #913: `gate-ops` 60 → 150).
       # PyYAML đã được cài ở vùng setup trước G5. GHIM EXACT, không để spec trần.
       # Cross-review PR "#134" (codex) nêu
       # `unpinned-pyyaml-ci-dependency`: spec trần làm CÙNG MỘT SHA có thể xanh hôm nay
@@ -522,6 +799,7 @@ jobs:
       # này thật sự được GitHub gọi. Branch protection phải require status của job `gate`;
       # t34 chỉ còn canh lời gọi thẳng tệp `.py`, không giả làm bộ phân tích shell.
       - name: lease-publish selftest (đo lại setup sau G5)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         env:
           AL_VER: 1.7.7
@@ -564,7 +842,7 @@ jobs:
       # vốn là script CHO Windows (có `don-nhanh.cmd` đi kèm) — tức hiện tại thứ duy nhất
       # KHÔNG được đo lại chính là nền nó chạy thật.
       - name: don-nhanh selftest (chốt xoá nhánh)
-        if: runner.os != 'Windows'
+        if: ${{ runner.os != 'Windows' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: pwsh
         run: pwsh -NoProfile -File scripts/don-nhanh_test.ps1
       # Cùng doctrine với bước ngay trên và với hai bước eol/pre-push: guard không nối
@@ -597,7 +875,7 @@ jobs:
       # "PHẠM VI CỦA CHÍNH LỚP CGROUP" trong `gate_lifecycle.py` và
       # `ops/NO_KY_THUAT.md` mục 1. Bước này chặn thoát VÔ TÌNH, không chặn cố ý.
       - name: bo ca gate chay TRONG cgroup duoc uy quyen (Linux)
-        if: runner.os == 'Linux'
+        if: ${{ runner.os == 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: |
           set -euo pipefail
           MOUNT="$(awk '{for(i=1;i<=NF;i++) if($i=="-" && $(i+1)=="cgroup2"){print $5; exit}}' /proc/self/mountinfo)"
@@ -638,8 +916,100 @@ jobs:
           PY
           python .claude/dev/gate_lifecycle_test.py
       - name: gate lifecycle selftest (nen khong co cgroup)
-        if: runner.os != 'Linux'
+        if: ${{ runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python .claude/dev/gate_lifecycle_test.py
+
+  # WP748 r16 — `targeted_mutant_gate` (cổng PR, KHÔNG phải full mutant audit): 52 ca nền + 239 tự đột biến
+  # (MỖI con chỉ chạy CA ĐÍCH đã khai) + 10 đột biến sản phẩm, chia 8 mảnh cân theo chi phí đo được; mỗi mảnh
+  # ghi biên nhận (head, sha256, rc, mốc giờ, tiến độ, nhật ký có trần, RAM đỉnh, số lần chạy lại). Gom đòi đủ
+  # thành viên + đúng head + đường găng <= 540 s. full_mutant_audit (52 ca dưới MỖI đột biến) chạy riêng ở
+  # `ci-dot-bien-du.yml` trên đúng SHA ứng viên, BẮT BUỘC trước merge/land/release.
+  gate-nhanh-manh:
+    needs: chuan-bi
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+        manh: [0, 1, 2, 3, 4, 5, 6, 7]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 150
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)
+        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+        run: |
+          echo "DUONG_NHANH: bo qua chạy mảnh nhanh_don_duoc (targeted_mutant_gate) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua actions/upload-artifact@v4 vi diff chi gom ops/{land,leases,reviews,specs}/**"
+      - name: chạy mảnh nhanh_don_duoc (targeted_mutant_gate)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+        env:
+          NHANH_DON_DUOC_DICH: ${{ matrix.manh }}/8
+          NHANH_DON_DUOC_DICH_RA: manh/manh-${{ matrix.manh }}.json
+        run: python ops/nhanh_don_duoc_test.py
+      - uses: actions/upload-artifact@v4
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+        with:
+          name: gate-nhanh-${{ matrix.os }}-${{ matrix.manh }}
+          path: manh/manh-${{ matrix.manh }}.json
+          if-no-files-found: error
+
+  gate-nhanh-gop:
+    needs: [chuan-bi, gate-nhanh-manh]
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: DUONG_NHANH - gom KHONG DO (job gate-nhanh-gop)
+        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+        run: |
+          echo "GOM: KHONG DO — duong_nhanh, 0 manh (khong manh nao chay)"
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-gop)
+        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+        run: |
+          echo "DUONG_NHANH: bo qua actions/download-artifact@v4 vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua gộp mảnh nhanh_don_duoc (targeted_mutant_gate) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+      - uses: actions/download-artifact@v4
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+        with:
+          pattern: gate-nhanh-${{ matrix.os }}-*
+          path: manh
+          merge-multiple: true
+      - name: gộp mảnh nhanh_don_duoc (targeted_mutant_gate)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+        run: python ops/nhanh_don_duoc_test.py --gop-dich manh
 
   gate-registry:
     # packet #463 (GATE-TACH-JOB-CAT-CHI-PHI): tách khỏi `gate` để cắt wall-clock của job dài nhất
@@ -650,14 +1020,18 @@ jobs:
     # #593 r2-g4 (đo 25-09-2026, ubuntu): trần 60 cắt job 107895998908 — `test registry` chạy TUẦN TỰ;
     # bước ấy 32,65 phút trên master (run 36076793429) → 52,15 phút với #593 (job 107910512895) ⇒ 60 → 90.
     # 90 cỡ theo UBUNTU: windows-latest đã chạm trần 60 từ run 35637741169 (trước #593) — 90 KHÔNG đủ Windows.
-    # Timeout KHÁC `gate`/`gate-packet-loop` (vẫn 60) có chủ đích; tiền tố 9 bước và ma trận vẫn chung.
-    needs: chuan-bi
+    # #705 (CI-REGISTRY-NANG-TRAN-BO-DAY-DU, chủ kho Q4): 90 → 105 cùng trần một bộ 4500 → 5400 s — số đo và lý do ở
+    # `GIAY_TOI_DA_MOT_BO` (.claude/dev/ci_dang_ky_test.py). 105 vẫn cỡ theo UBUNTU, KHÔNG bảo đảm Windows.
+    # #910 pha B (PR #917, a7da463): 105 → 150. Trước #910 timeout KHÁC `gate` (60) và `gate-packet-loop` (120) có
+    # chủ đích; #910 (PR #913 + #917) đưa cả ba lên 150. Tiền tố 9 bước và ma trận vẫn chung.
+    needs: [chuan-bi, gate-nhanh-gop]
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 90
+    timeout-minutes: 150
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -676,24 +1050,38 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-registry)
+        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+        run: |
+          echo "DUONG_NHANH: bo qua cài actionlint cho G5 vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua cài shellcheck cho G5 (cài xong đo lại) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua cài rg cho G5 (cài xong đo lại) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6 vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua cài Ruff 0.15.15 và in probe dương vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua test registry (phạm vi + các bộ chưa được nối) vi diff chi gom ops/{land,leases,reviews,specs}/**"
       # Vì sao cài trước phép test đầu tiên (G5/T6): xem job `gate`.
       - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
         run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
       - name: cài actionlint cho G5
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         env:
           AL_VER: 1.7.7
         run: bash ops/cai_actionlint.sh
       - name: cài shellcheck cho G5 (cài xong đo lại)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: bash ops/cai_cong_cu.sh shellcheck
       - name: cài rg cho G5 (cài xong đo lại)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: bash ops/cai_cong_cu.sh rg
       - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6 #637)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: python ops/cong_cu.py kiem-tra --json
       - name: cài Ruff 0.15.15 và in probe dương
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: |
           python -m pip install --quiet ruff==0.15.15
           ruff --version
@@ -702,17 +1090,20 @@ jobs:
       # #643 (CI-REGISTRY-DOT-BIEN-THEO-DIFF): N=2; ba biến sự kiện/diff cho kế hoạch chế độ (vòng đột biến
       # `nhanh_don_duoc` chỉ chạy khi diff chạm vùng của nó). Qua `env:`, KHÔNG nội suy vào `run`; chốt M4 so từng chữ.
       - name: test registry (phạm vi + các bộ chưa được nối)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         env:
           CI_DANG_KY_WORKERS: "2"
           CI_DANG_KY_SU_KIEN: ${{ github.event_name }}
           CI_DANG_KY_GOC: ${{ github.event.pull_request.base.sha || github.event.before }}
           CI_DANG_KY_DAU: ${{ github.event.pull_request.head.sha || github.sha }}
+          CI_DANG_KY_DOT_BIEN_MANH: ops/nhanh_don_duoc_test.py
+          CI_DANG_KY_GOP_KQ: ${{ needs.gate-nhanh-gop.result }}
         run: python .claude/dev/ci_dang_ky_test.py --chay
 
   gate-packet-loop:
     # packet #463 (GATE-TACH-JOB-CAT-CHI-PHI): tách khỏi `gate` để cắt wall-clock của job dài nhất
     # (đo 06-09-2026, run 34045664423: Windows 43,20 phút, hai bước nặng = 63,5 % tổng bước). Cùng
-    # ma trận/`timeout-minutes`/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
+    # ma trận/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
     # TIỀN tăng vì trả tiền thiết lập ba lần. Consumer `loi_ruff_ci` đọc MỌI job, không chỉ `gate`.
     # Bước `packet-loop selftest` (22,5 % tổng bước Windows) sống ở đây.
     needs: chuan-bi
@@ -721,7 +1112,9 @@ jobs:
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    # WP856 (chu kho, PR #866): 60 -> 120. Run 39722546630: Ubuntu 40,4 phut (truoc 22,4) sau khi
+    # #856 them ma tran T1-T6; Windows van chay o phut ~46, sat tran 60.
+    timeout-minutes: 150
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -744,22 +1137,37 @@ jobs:
       - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
         run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
       - name: cài actionlint cho G5
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         env:
           AL_VER: 1.7.7
         run: bash ops/cai_actionlint.sh
       - name: cài shellcheck cho G5 (cài xong đo lại)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: bash ops/cai_cong_cu.sh shellcheck
       - name: cài rg cho G5 (cài xong đo lại)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: bash ops/cai_cong_cu.sh rg
       - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6 #637)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: python ops/cong_cu.py kiem-tra --json
       - name: cài Ruff 0.15.15 và in probe dương
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: |
           python -m pip install --quiet ruff==0.15.15
           ruff --version
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-packet-loop)
+        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+        run: |
+          echo "DUONG_NHANH: bo qua cài actionlint cho G5 vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua cài shellcheck cho G5 (cài xong đo lại) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua cài rg cho G5 (cài xong đo lại) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6 vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua cài Ruff 0.15.15 và in probe dương vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua packet-loop selftest vi diff chi gom ops/{land,leases,reviews,specs}/**"
       - name: packet-loop selftest
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python .claude/dev/packet_loop_test.py

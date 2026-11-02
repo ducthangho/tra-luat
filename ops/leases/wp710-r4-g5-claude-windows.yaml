@@ -1,0 +1,112 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 710
+packet_id: wp710
+mission_issue: 710
+revision: 4
+generation: 5
+lease_id: wp710-r4-g5-claude-windows
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/710
+granted_on_instruction_note: 'chu kho chi thi trong phien Claude Code tren may Windows cua chinh chu kho, nguyen
+  van hai cau: "Lặp vá, cross review (có hint patch) theo phân lớp tới hết P1, P2, P3. Executor opus 5.5" va "Bạn
+  cấp lease và làm luôn đi". Tep nay do CHINH phien executor soan theo chi thi do, khong do dispatcher; chu kho
+  chua dang comment cap quyen rieng tren issue 710 cho g5 luc tep duoc viet.'
+recorded_by: claude_executor_windows_theo_chi_thi_chu_kho
+recorder_is_dispatcher: false
+leased_at_utc: '2026-10-08T23:55:00Z'
+heartbeat_at: '2026-10-08T23:55:00Z'
+lease_until: '2026-10-09T15:00:00Z'
+lease_expires_at_utc: '2026-10-09T15:00:00Z'
+han_ghi_chu: >-
+  Goc 2026-10-09T23:55:00Z (ca lease_until lan lease_expires_at_utc). RUT NGAN ve 2026-10-09T15:00:00Z — xem
+  thu_hoi_bang_rut_han.
+role: executor
+provider: anthropic_claude
+executor: claude
+execution_surface: claude_code
+transport: machine/local
+environment: local
+operating_system: Windows
+shell: pwsh
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer_independence: fresh independent session and read-only source; reviewer provider must differ from executor
+  (Codex/OpenAI or Antigravity) or an independent human audit on the exact head
+spec_path: ops/specs/wp710-nlm-credential-refresh-r4.md
+spec_ref: packet/wp710-spec-r4
+spec_hash: a51164cf4bb0b3f41d4c01ef56a522c339caac008f2d855b3819a3ebb642bc0b
+spec_sha256: a51164cf4bb0b3f41d4c01ef56a522c339caac008f2d855b3819a3ebb642bc0b
+prompt_path: ops/specs/wp710-nlm-credential-refresh-r4.md
+prompt_sha256_required: a51164cf4bb0b3f41d4c01ef56a522c339caac008f2d855b3819a3ebb642bc0b
+branch: claude/wp710-g3
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 8c98afacb9285aa71e5200739236284f7a190d4f
+start_from_sha: 186e6d504d4e0648554b2a3de2705e7541207691
+immutable_acceptance_baseline: 8c98afacb9285aa71e5200739236284f7a190d4f
+reviewed_sha_required: 186e6d504d4e0648554b2a3de2705e7541207691
+write_set:
+- scripts/nlm-credential-refresh.ps1
+- scripts/nlm-credential-refresh.Tests.ps1
+- scripts/tl_gws.py
+- scripts/tl_selftest.py
+- references/RUNBOOK.md
+- changelog.d/wp-710.md
+write_set_hash: f48907b7cda0570d0aa479ce53ead7b3bf2d226e64a311eda4c6d9826d88d836
+write_set_hash_scope: sorted NFC casefold exact manual product paths encoded as compact UTF-8 JSON; not a computed
+  policy closure
+coordination_paths:
+- ops/leases/wp710-r4-g5-claude-windows.yaml
+- ops/reviews/wp710/
+closure_status: 'Owner-approved renewed bounded manual six-path write set under policy debt #473 (same six paths
+  as r4/g2); no computed dispatcher closure claimed'
+run_minutes: 90
+heartbeat_required_minutes: 30
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- deploy
+- self_review
+- self_approve
+- merge
+- land
+- edit_untracked_scripts_nlm_auth_ps1
+- edit_RELEASE_MANIFEST_json
+land_authority_note: Separate exact-candidate approval is required before any merge or land
+fix_scope: 'Vong lap va + cross-review theo lop tren PR 714 tu head 186e6d5 (merge master vao ed12889; sau tep write
+  set khong doi so voi ed12889). Lop mo theo verdict Codex luot 4 tren ed12889 (sha256 30849ac51d0f1906169fff741f065aa4ddfef28e1626aedda7e31807e09d7547,
+  verdict blocked, 0 P1, 4 P2, 2 P3): ban ghi mat khi con ngoai job chua xac nhan chet; inconclusive sau khi stage
+  da chay; hai lop thieu phep do Linux; loi khai rong hon phep do. Lop huong-dan-cu-con-lech-sau-va-ngoai-write-set
+  nam NGOAI sau tep: chi bao cao, khong sua.'
+validation_lane: Windows native (may chu kho), pwsh 7.x va Python Windows; Linux qua WSL Ubuntu-Clean (pwsh 7.4.6)
+  chi de chay test offline; dot bien tren ban sao tam; khong LIVE, khong credential that, khong nlm login
+review_rounds_note: chu kho chi thi lap review toi het finding; so luot Codex tren PR 714 da vuot tran hai luot
+  cua protocol muc 8 truoc lease nay (bon luot)
+lease_sua_lan_cuoi: '2026-10-09T11:53Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_until va lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-09T23:55:00Z'
+  han_moi_utc: '2026-10-09T15:00:00Z'
+  chi_thi: >-
+    Phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT giao subagent bookkeeping ghi so land #710 / PR #714 va thu hoi lease
+    g5 bang rut han theo tien le #678 g1 (62962c7) va #705 g3 (c5881a0). Chi thi giao viec trong phien (loi_khai_co_neo,
+    khong phai comment GitHub).
+  ly_do: >-
+    Packet #710 da MERGE: PR #714 (claude/wp710-g3) merge bang merge commit 8b59185975a938504de5963d2310e574dd4858b2
+    (cha b4402f0 + 888c0d9, ~2026-10-09T11:08Z). Lease khong tu chet khi land (CLAUDE.md); de nguyen thi g5 giu sau duong
+    dan write set toi 23:55Z.
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660/#661/#668/#677/#687/#674/#705/#678: so ops/thu-hoi/ chua kich hoat; rut han dung co che DA CAI.
+    Han moi dat SAU luc push du kien de luot dang lease (neu chay) con thay lease song, tranh rc=8 che rc=9 (bai hoc
+    20-09). Neu nhanh chua push truoc 2026-10-09T14:50Z thi phai doi han_moi_utc (va hai truong han) ve sau luc push
+    TRUOC khi push. Khong bia mo: khong co lease ke nhiem (bia mo chi dung khi co lease moi thay_the_cho).
+  nguoi_rut: 'subagent bookkeeping cua phien session_01CSM7GNazhN6uGJb4v1TqBT'
+  gioi_han: >-
+    Commit rut han chi o CUC BO luc ghi (nhanh bk710-rut-han-g5, tien len tu origin/ops/wp710-r4-g5-lease a797078); phien
+    chinh push no thanh ops/wp710-r4-g5-lease (fast-forward). Nghiem thu: ai-dang-giu cho sau duong dan write set khong
+    con wp710-r4-g5-claude-windows trong NGUOI_GIU sau 15:00Z — CHUA DO.

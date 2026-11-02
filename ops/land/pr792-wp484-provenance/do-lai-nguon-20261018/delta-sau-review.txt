@@ -1,0 +1,9 @@
+$ git log --format="%H %P %s" 907214d..288ad3ea --first-parent
+288ad3ea79ef94e061b649effe7bee2c7e2a0a9b bf10fab792473bc69dd377c7445978950c4d77a0 wp484 g7 (attempt 6): runner dot bien harness nhan ca dich tu bo qua la KHONG DO DUOC (#484)
+bf10fab792473bc69dd377c7445978950c4d77a0 907214d2cd0b67ff444b3adf734811eab39bfc71 d347d426334bbe1bbb1161184ab0acffee9be054 Merge origin/master (d347d42, land #779 wp775 + #800 + #801) vao agent/wp484-g7-claude (M-4)
+$ git diff --stat 907214d bf10fab7 -- (7 tep write set r8)
+(rong = khong doi)
+$ git diff --stat bf10fab7 288ad3ea
+ .claude/dev/launcher_test.py   | 21 ++++++++++++++++++---
+ ops/handoff/wp484-g7-claude.md | 17 ++++++++++++++++-
+ 2 files changed, 34 insertions(+), 4 deletions(-)

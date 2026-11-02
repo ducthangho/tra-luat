@@ -1,0 +1,21 @@
+# do 2026-10-30T23:37:52Z trong phien session_015GtxrYjGJtmjF3eT1nCSG9
+$ git cat-file -p b2d5f06 | head -4
+tree 4687675e0237e49c6763f386da772721bf7024a4
+parent 6db934145acf6e47d01db5b2dc8c9da417c2d8eb
+parent 201460203f42485f589add150896f2febc00c027
+author ducthangho <ducthangho@gmail.com> 1793403375 +0700
+$ git rev-parse 2014602^{tree}
+332aed0f6d2efa3a4a75856c6d66800e0ca258cb
+$ git diff --name-only 5e458f4 2014602
+.claude/dev/launcher_test.py
+ops/cai_cong_cu.sh
+$ git diff 5e458f4 2014602 | sha256sum
+65b4fa2e33f4c39fec5d4a287d3b1c94decdcde532141d25ab0bd82b046a69d7  -
+$ git diff b2d5f06^1 b2d5f06 | sha256sum
+65b4fa2e33f4c39fec5d4a287d3b1c94decdcde532141d25ab0bd82b046a69d7  -
+$ git diff --stat b2d5f06^1 b2d5f06
+ .claude/dev/launcher_test.py | 237 +++++++++++++++++++++++++++++++++++++++++--
+ ops/cai_cong_cu.sh           |  49 ++++++++-
+ 2 files changed, 276 insertions(+), 10 deletions(-)
+$ git merge-base --is-ancestor 5e458f4 b2d5f06^1; echo rc=$?
+rc=0

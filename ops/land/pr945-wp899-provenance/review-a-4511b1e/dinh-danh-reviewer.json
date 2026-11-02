@@ -1,0 +1,28 @@
+{
+ "thread_id_tu_stdout_json": "01a17b0c-b9b3-7dd2-a7c3-00d6491b58a4",
+ "rollout": {
+  "ten": "rollout-2026-10-27T01-49-53-01a17b0c-b9b3-7dd2-a7c3-00d6491b58a4.jsonl",
+  "bytes": 2956981,
+  "sha256": "8f3f2ef7c05535f63dff93a0c96c8c88518b0a4f542d8a6991af58b026c4e869",
+  "luu_trong_kho": false
+ },
+ "session_meta_id": "01a17b0c-b9b3-7dd2-a7c3-00d6491b58a4",
+ "khop_thread_id": true,
+ "cli_version": "0.164.0",
+ "originator": "codex_exec",
+ "model_cli_cong_bo": [
+  "gpt-6.1-sol"
+ ],
+ "effort_cli_cong_bo": [
+  "xhigh"
+ ],
+ "model_phuc_vu_trang_thai": "DO_DUOC",
+ "model_phuc_vu": [
+  "gpt-6.1-sol"
+ ],
+ "so_su_kien_model_phuc_vu": 62,
+ "launcher_version": "1.5.0",
+ "run_json_sha256": "194fdfecd1a1a83fabbea75faf6e08726cd464dca872e7a8daf359492356ef51",
+ "stdout_sha256": "0a29c7009e415bcf01aa3e808f96757dea3e358f81ffa8b6b038bceb8c1eb167",
+ "reviewed_commit": "4511b1eb6168904da117791cea178aa0c80e0e47"
+}

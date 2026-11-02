@@ -1,0 +1,12 @@
+FETCH note (no digest; not counted as hash verification): 2026-11-01T18:34:27Z GET runs/41287486328 + jobs-41290009265-r2 (luot 2)
+JOBS 41285898441 total_count= 0 returned= 0 conclusions= {} labels= {} runner_id=0: 0 head_sha= []
+JOBS 41290009265 total_count= 23 returned= 23 conclusions= {'success': 23} labels= {('ubuntu-latest',): 23} runner_id=0: 0 head_sha= ['3bdd9877cab2543adc413a32a47decbb585ded97']
+CHECKS 313 KHOP 313 LECH 0
+FETCH-LOG.txt 9 checks; 0 mismatches
+readback-commit-4397ee6.json 4 checks; 0 mismatches
+readback-jobs-41285898441.json 3 checks; 0 mismatches
+readback-jobs-41290009265.json 256 checks; 0 mismatches
+readback-pr-1111.json 8 checks; 0 mismatches
+readback-run-41285898441.json 11 checks; 0 mismatches
+readback-run-41287486328.json 11 checks; 0 mismatches
+readback-run-41290009265.json 11 checks; 0 mismatches

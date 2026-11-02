@@ -1,0 +1,24 @@
+{
+  "name": "linux-gen-instructions",
+  "command": "python3.12 -B scripts/gen_instructions.py --selftest",
+  "cwd": "/home/user/wp685-r28-g5-review/goi/scratch/candidate",
+  "started_utc": "2026-10-10T07:02:43.357061+00:00",
+  "head": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d",
+  "tree": "952d7c3092e02886150bb9c936dec7b5fc779aec",
+  "base": "ab457c651eb4428705f0492163080b661c858b72",
+  "os": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39",
+  "uname": [
+    "Linux",
+    "vm",
+    "6.18.44-fc-v114",
+    "#1 SMP PREEMPT_DYNAMIC @0",
+    "x86_64",
+    "x86_64"
+  ],
+  "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+  "python": "Python 3.12.3",
+  "rc": 0,
+  "duration_seconds": 0.215,
+  "ended_utc": "2026-10-10T07:02:43.594232+00:00",
+  "output_sha256": "fbe435c495ad76abb0451c319fc41e9843435dbe91536c2415a693b6ad9f0cf7"
+}

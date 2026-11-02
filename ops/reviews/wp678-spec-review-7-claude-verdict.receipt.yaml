@@ -1,0 +1,105 @@
+# BIEN NHAN GIAO HANG — review LUOT 7 dac ta wp678 (Issue #678), CUNG HO (Claude Opus 5.5, subagent).
+# Doi tuong review: DAC TA ops/specs/lease-id-ep-kieu-yaml-r7.md tai commit tren nhanh spec claude/spec-wp678-r7 (luc review: CUC BO) 088511f (khong phai ma).
+# GHI SO HAU KY theo quyet dinh chu kho 2026-10-07 "Co ghi bien nhan cho luot 7-12 cua wp678" (chi thi trong phien,
+# phien dieu phoi thuat lai). Nhan: (a) DO tu kho/REST/tep luc ghi so 2026-10-07 · (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: wp678-spec-review-7-claude-992eb9f0
+kind: review_delivery_receipt
+packet_id: wp678
+packet_slug: LEASE-ID-EP-KIEU-YAML
+packet_issue: 678
+mission_issue: 682
+revision_reviewed: 7
+spec_path: ops/specs/lease-id-ep-kieu-yaml-r7.md
+spec_sha256: 8cb024367ef99886eaba9d9f6af5100601780ac990fd81c8d718cf1695adb707
+spec_ghi_chu: "Anh chup lich su tai commit ghi bien nhan 62319d945fff81de6396aab6806a4ab349682aba: (a) sha256 cua `git show 088511f:ops/specs/lease-id-ep-kieu-yaml-r7.md` = spec_sha256 dong 3 tep verdict = so trong comment ban chieu. Dac ta r7 CHUA co tren master; chi o nhanh claude/spec-wp678-r7 (luc review: commit cuc bo; da day len origin 2026-10-07 17:49Z, head luc do 284a03f). Do lai tai 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0: git merge-base --is-ancestor 088511f1fd75faf9bf01f0cf8da037a14fa6d22d 101263f va voi 2e4183b deu rc=0. Cau phu nhan ancestry/chi-tren-nhanh cua moc cu khong con la trang thai hien hanh. Chi xac nhan quan he Git, khong tu nang assurance/cuong_do va khong suy Packet da landed."
+lease_id: khong-co-lease
+lease_ghi_chu: >-
+  Luot review DAC TA truoc khi packet duoc giao; wp678 chua co lease. Bien nhan ghi so theo quyet dinh chu kho
+  2026-10-07 "Co ghi bien nhan cho luot 7-12 cua wp678" (b: thuat lai, chua co neo GitHub rieng), khong co lease ghi bien nhan.
+luot: 7
+role: reviewer
+provider: claude
+executor_provider: claude
+executor_ghi_chu: '(b) r7 do phien dieu phoi Claude soan truc tiep; cung ho voi reviewer'
+cross_provider: false
+assurance: review_deferred
+assurance_ghi_chu: >-
+  Subagent trong phien dieu phoi, cung ho Claude voi phien soan. Comment ban chieu luot 7 dan nhan advisory_review (truoc Q12); bien nhan ghi review_deferred theo luat subagent ma cac verdict luot 8-11 neu — ca hai deu KHONG phai muc approval. Khong co bang chung phien doc lap.
+verdict: changes_requested
+verdict_nguon: '(a) dong 1 tep `verdict: changes_requested`; tep co DUNG 1 dong bat dau bang `verdict:`'
+so_p0: 0
+so_p1: 0
+so_p2: 2
+so_p3: 3
+so_dem_theo: lop
+so_dem_nguon: '(a) dong "Ket luan noi dung" cua tep verdict; khop tieu de comment ban chieu (0 P1 · 2 P2 · 3 P3 theo lop)'
+verdict_path: ops/reviews/wp678-spec-review-7-claude-verdict.md
+verdict_sha256: 992eb9f004c390295b7d37a37f59c8eafc18043e4cf9aab576eb371f3cf5794c
+verdict_bytes: 49377
+verdict_ban_goc: >-
+  DUNG LAI tu transcript subagent agent-adf978c7b6763a7e4.jsonl (phat lai 1 Write + 3 Edit thanh cong tren cr678-r7/goi/VERDICT.md, dong 434-477); thu muc cr678-r7 KHONG con tren dia luc ghi so. Ban dung lai khop NGUYEN 64 hex verdict_sha256 va 49377 byte ma comment ban chieu khai — do do bang bam, khong bang doc mat.
+hint_patch_sha256: 72289e06e44dda8f6d7059e3ebdbd53103ba19ac9e9c6af1b56d5ff1ef6db445
+hint_patch_bytes: KHONG_DO_DUOC
+hint_patch_ghi_chu: HINT.patch KHONG luu vao kho va tep goc luot 7 KHONG con tren dia; bam chi THUAT LAI tu comment ban chieu, byte KHONG DO DUOC.
+reviewed_sha: 088511f1fd75faf9bf01f0cf8da037a14fa6d22d
+reviewed_sha_nguon: '(a) dong 2 tep verdict; `git cat-file -t` = commit trong kho cuc bo, nhanh claude/spec-wp678-r7'
+reviewed_sha_trang_thai: tren nhanh claude/spec-wp678-r7, DA DAY 2026-10-07 truoc commit bien nhan (xem caveat REVIEWED-SHA-CHI-TREN-NHANH-SPEC)
+evidence_url: https://github.com/ducthangho/tra-luat/blob/8e822ba71dabea50f54926dec8d8903827e5090d/ops/reviews/wp678-spec-review-7-claude-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim commit chi mang tep verdict cua nhanh bookkeeping claude/bookkeeping-678-bien-nhan-7-12; bien nhan
+  di o commit sau, nen mo neo la to tien cua HEAD nhanh. Dien SHA SAU KHI day thanh cong (bai hoc rebase lease-dang-review-1).
+evidence_ban_chieu: https://github.com/ducthangho/tra-luat/issues/678#issuecomment-5912542067
+evidence_ban_chieu_created_at: '2026-09-30T13:43:58Z'
+evidence_ban_chieu_doi_chieu: >-
+  (a) Doc lai qua REST GET issues/678/comments (2026-10-07): user ducthangho, app
+  claude, author_association OWNER, than 2574 byte,
+  sha256 e0745ae5d2f26f0ae57e86e76c1036e0bdd421dcb01b1566a2a47ff2f2f927ee. verdict_sha256, spec_sha256, hint_patch_sha256 va reviewed_sha co mat NGUYEN chuoi hex trong than.
+  Comment la BAN TOM TAT, khong phai nguyen van tep.
+
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  che_do: 'subagent review-opus-max (Claude Opus 5.5) trong phien dieu phoi, khong qua launcher.py'
+  che_do_nguon: '(a) Agent tool_use subagent_type=review-opus-max, mo ta "Review wp678 r7 luot 7", trong transcript phien dieu phoi'
+  model_yeu_cau: claude-opus-5-5
+  effort_yeu_cau: max
+  model_tu_khai: '(a) dong 4 tep verdict: "model/effort tu khai" Claude Opus 5.5, effort max — CAU HINH duoc giao'
+  model_da_chay: KHONG_DO_DUOC
+  KHONG_do_duoc: >-
+    Khong co session_run_id/run.json: luot la subagent trong phien, khong qua launcher.py. Model thuc chay, effort,
+    thoi luong, ma thoat va tinh doc lap cua reviewer so voi phien soan KHONG tai kiem duoc; tep verdict tu khai
+    model/effort la cau hinh, khong phai runtime evidence.
+
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(a) user.login cua comment 5912542067 doc qua REST luc ghi so'
+  ghi_chu: >-
+    Comment do PHIEN AGENT dang bang credential chu kho (performed_via_github_app.slug claude); ADR-0040: khong cap
+    tham quyen, chi ghi AI VAN CHUYEN.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    Blob verdict ghim o commit ban chieu cua nhanh claude/bookkeeping-678-bien-nhan-7-12; to tien cua HEAD nhanh ay;
+    CHUA la to tien cua master luc ghi so.
+  gioi_han: >-
+    Len trung_binh chi khi PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH pha quan he to tien.
+
+verdict_usage_caveats:
+  - id: REVIEWED-SHA-CHI-TREN-NHANH-SPEC
+    muc: P2
+    mo_ta: "Anh chup lich su tai commit ghi bien nhan 62319d945fff81de6396aab6806a4ab349682aba: reviewed_sha 088511f chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 17:49Z (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do. Do lai tai 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0: git merge-base --is-ancestor 088511f1fd75faf9bf01f0cf8da037a14fa6d22d 101263f va voi 2e4183b deu rc=0. Cau phu nhan ancestry/chi-tren-nhanh cua moc cu khong con la trang thai hien hanh. Chi xac nhan quan he Git, khong tu nang assurance/cuong_do va khong suy Packet da landed."
+  - id: SUBAGENT-CUNG-HO-REVIEW-DEFERRED
+    muc: P2
+    mo_ta: >-
+      Reviewer Claude Opus 5.5 chay bang SUBAGENT review-opus-max trong phien dieu phoi, CUNG ho Claude voi phien soan r7; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred: dung doc luot nay thanh cross_approved hay same_provider_approved.
+  - id: VERDICT-DUNG-LAI-TU-TRANSCRIPT
+    muc: P3
+    mo_ta: >-
+      Tep verdict luot 7 KHONG con o dia; ban trong kho duoc DUNG LAI bang cach phat lai Write/Edit trong transcript subagent. Bam va byte khop dung so comment ban chieu 5912542067 da khai TRUOC (30-09), nen noi dung la ban reviewer da chot; HINT.patch luot 7 thi KHONG dung lai, chi co bam.
+nguon_co_tham_quyen: >-
+  TEP CO BAM trong kho (verdict_path + verdict_sha256). Comment tren #678 chi la BAN CHIEU. Hai ban lech thi tin blob.

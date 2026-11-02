@@ -1,0 +1,51 @@
+{
+  "original_snapshot_files": 12730,
+  "original_snapshot_equal": true,
+  "states": {
+    "cay-kho": {
+      "status": "",
+      "head": "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d",
+      "tree": "49821da8bbf5787a4e10ffcc854354e6c72f9cf8"
+    },
+    "head": {
+      "status": "",
+      "head": "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d",
+      "tree": "49821da8bbf5787a4e10ffcc854354e6c72f9cf8"
+    },
+    "base": {
+      "status": "",
+      "head": "c6dd7b33b4f215809bf281ee1533bc1e8fa6920c",
+      "tree": "5141d5161ec4042be24e008e7da34ef84757868c"
+    },
+    "mutant": {
+      "status": "",
+      "head": "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d",
+      "tree": "49821da8bbf5787a4e10ffcc854354e6c72f9cf8"
+    }
+  },
+  "gate_rcs": {
+    "head": {
+      "bien-nhan": 0,
+      "land": 0,
+      "direct": 0,
+      "doctrine": 0,
+      "diff-check": 0
+    },
+    "base": {
+      "bien-nhan": 0,
+      "land": 0,
+      "direct": 0,
+      "doctrine": 0,
+      "diff-check": 0
+    }
+  },
+  "stdout_equal": {
+    "land": true,
+    "direct": true,
+    "doctrine": true,
+    "diff-check": true
+  },
+  "syntax_warnings_equal": true,
+  "mutation_restored": true,
+  "errors": []
+}

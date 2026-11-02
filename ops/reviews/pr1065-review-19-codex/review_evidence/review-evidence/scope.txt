@@ -1,0 +1,21 @@
+HEAD: 43372542cc2480f3b4f8228d824afd509b1054cc ; tree: ecebb7d55a972c13b9f58ed38d96eda55c5909d7 ; origin/master: a253c169ed79617b8d1a4754867c336ac72c72c5
+detached=true; shallow=false; core.abbrev=7; status including ignored/untracked empty; index/worktree diffs empty
+Initial all-file snapshot: 9502 files; index SHA256: 78406676d779f9de5cdfa32a21a267e36e13d55c29fd458381e024067e2e5889
+Current reviewer launcher: {'run_id': 'c5d9680afe3a43b18ad2364c5b803632', 'provider': 'openai_codex', 'execution_surface': 'codex_cli', 'transport': 'machine', 'head': '43372542cc2480f3b4f8228d824afd509b1054cc', 'trang_thai': 'dang_chay'}
+210ab81:ops/vm tree: 3fe463ea420030e625990339e72a8219d3263486
+43372542cc2480f3b4f8228d824afd509b1054cc:ops/vm tree: 3fe463ea420030e625990339e72a8219d3263486
+ops/vm ls-tree identical: True ; diff bytes: 0
+VM blob: ops/vm/README.md b9df0fac27b9af045969955c4de390bedf198f15
+VM blob: ops/vm/cap-nhat-cong-cu.ps1 36e5bab0b6864745a62f442ec23004551e84b168
+VM blob: ops/vm/cap-nhat-cong-cu_test.ps1 beb93ae4d6dd6c6ae67582cb0e5487237f547d8d
+Changed paths vs origin/master: 128 ; counts: {'ops/land': 17, 'ops/reviews': 108, 'ops/vm': 3}
+Outside allowed paths: []
+VM numstat vs master:
+19	4	ops/vm/README.md
+259	58	ops/vm/cap-nhat-cong-cu.ps1
+941	0	ops/vm/cap-nhat-cong-cu_test.ps1
+Merge 7aa7b8b vs master 1bc4684 : rows 1124 -> 1124 ; missing rows= 0 ; missing nonempty lines= 0 ; outside scope= [] ; deleted files= []
+Merge 4b3f07e vs master 7b845f5 : rows 1140 -> 1146 ; missing rows= 0 ; missing nonempty lines= 0 ; outside scope= [] ; deleted files= []
+Merge 958ca60 vs master 713694b : rows 1140 -> 1146 ; missing rows= 0 ; missing nonempty lines= 0 ; outside scope= [] ; deleted files= []
+Merge 43372542cc2480f3b4f8228d824afd509b1054cc vs master a253c16 : rows 1140 -> 1146 ; missing rows= 0 ; missing nonempty lines= 0 ; outside scope= [] ; deleted files= []
+SCOPE + MASTER PRESERVATION: PASS (all four merges, including final 43372542)

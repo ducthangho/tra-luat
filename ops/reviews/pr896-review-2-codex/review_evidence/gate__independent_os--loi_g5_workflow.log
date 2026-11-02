@@ -1,0 +1,2 @@
+loi_g5_workflow errors=1
+gate: env/runs-on/strategy cấp job lệch hình dạng ghim

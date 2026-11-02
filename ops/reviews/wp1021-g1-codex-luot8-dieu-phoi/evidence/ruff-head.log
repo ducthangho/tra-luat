@@ -1,0 +1,20 @@
+F541 [*] f-string without any placeholders
+    --> ops/bien_nhan_v2_test.py:1681:19
+     |
+1679 |         lam = sorted(set().union(*[v["be_mat"] for v in bnv2.PROVIDER_HOP_DONG.values()])
+1680 |                      - set(hd["be_mat"]))
+1681 |         dung(lam, f"KHÔNG ĐO ĐƯỢC: không có bề mặt nào của provider KHÁC để mượn thử")
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1682 |         for be_mat, vi_sao in (("banana", "bề mặt BỊA"), (lam[0], f"bề mặt MƯỢN {lam[0]!r}")):
+1683 |             with tempfile.TemporaryDirectory() as t:
+     |
+help: Remove extraneous `f` prefix
+     |
+1680 |                      - set(hd["be_mat"]))
+     -         dung(lam, f"KHÔNG ĐO ĐƯỢC: không có bề mặt nào của provider KHÁC để mượn thử")
+1681 +         dung(lam, "KHÔNG ĐO ĐƯỢC: không có bề mặt nào của provider KHÁC để mượn thử")
+1682 |         for be_mat, vi_sao in (("banana", "bề mặt BỊA"), (lam[0], f"bề mặt MƯỢN {lam[0]!r}")):
+     |
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.

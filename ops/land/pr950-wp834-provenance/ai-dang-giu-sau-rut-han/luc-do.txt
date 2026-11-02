@@ -1,0 +1,19 @@
+do luc 2026-10-26T12:58:25Z
+ls-remote heads: 622, for-each-ref: 622, thieu (comm -23): 0, thua: 0
+$ python ops/lease_publish.py ai-dang-giu --root . .claude/dev/packet_loop.py
+HẾT_HẠN	wp834-r1-g1-claude	refs/heads/ops/wp834-r1-g1-lease:ops/leases/wp834-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+$ python ops/lease_publish.py ai-dang-giu --root . .claude/dev/packet_loop_test.py
+HẾT_HẠN	wp834-r1-g1-claude	refs/heads/ops/wp834-r1-g1-lease:ops/leases/wp834-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+$ python ops/lease_publish.py ai-dang-giu --root . docs/PROTOCOL_DA_PHIEN.md
+HẾT_HẠN	wp834-r1-g1-claude	refs/heads/ops/wp834-r1-g1-lease:ops/leases/wp834-r1-g1-claude.yaml
+CÒN_HẠN	wp943-r1-g1-claude	refs/heads/ops/wp943-r1-g1-lease:ops/leases/wp943-r1-g1-claude.yaml
+NGƯỜI_GIỮ 1: wp943-r1-g1-claude
+rc=11
+$ python ops/lease_publish.py ai-dang-giu --root . ops/handoff/wp834-g1-claude.md
+HẾT_HẠN	wp834-r1-g1-claude	refs/heads/ops/wp834-r1-g1-lease:ops/leases/wp834-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

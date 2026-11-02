@@ -1,0 +1,156 @@
+[
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "rg",
+      "-n",
+      "--glob",
+      "*.py",
+      "--glob",
+      "*.yaml",
+      "--glob",
+      "*.yml",
+      "--glob",
+      "*.json",
+      "--glob",
+      "*.ps1",
+      "--glob",
+      "*.sh",
+      "--glob",
+      "!**/golden/**",
+      "--glob",
+      "!**/fixtures/**",
+      "--glob",
+      "!**/parser_surface.json",
+      "KHOA\\.txt|do-luong\\.csv|list_devices|UTC hạn",
+      ".claude/dev",
+      "scripts",
+      ".github"
+    ],
+    "command": "rg -n --glob '*.py' --glob '*.yaml' --glob '*.yml' --glob '*.json' --glob '*.ps1' --glob '*.sh' --glob '!**/golden/**' --glob '!**/fixtures/**' --glob '!**/parser_surface.json' 'KHOA\\.txt|do-luong\\.csv|list_devices|UTC hạn' .claude/dev scripts .github",
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "merge-base",
+      "--is-ancestor",
+      "10446ffa400725b23189ad9c4902932d5eb969bc",
+      "76b65936e9e83ad2711e20a158e552449b4c6d86"
+    ],
+    "command": "git merge-base --is-ancestor 10446ffa400725b23189ad9c4902932d5eb969bc 76b65936e9e83ad2711e20a158e552449b4c6d86",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "show",
+      "-s",
+      "--format=%H %aI %s",
+      "10446ff",
+      "76b6593",
+      "f4d15ed",
+      "9666771"
+    ],
+    "command": "git show -s '--format=%H %aI %s' 10446ff 76b6593 f4d15ed 9666771",
+    "rc": 0,
+    "stdout": "10446ffa400725b23189ad9c4902932d5eb969bc 2026-10-29T09:44:34+00:00 Merge origin/master (735b181) vao claude/magical-clarke-gzvwbp — giai conflict ops/reviews/README.md\n76b65936e9e83ad2711e20a158e552449b4c6d86 2026-10-29T11:43:59+00:00 Merge origin/master (9666771) vao claude/magical-clarke-gzvwbp — khong cham write set\nf4d15edcb5d0a9742182273e5950f76165060667 2026-10-29T10:56:35+00:00 docs(protocol): cau con tro §10.2 ve ADR-0057 viet trung tinh, khong tao nghia vu (review luot 1, P1 con-tro-tao-them-nghia-vu)\n96667715996d41bc45e70a64fbaa8996de20f6a0 2026-10-29T17:41:46+07:00 Merge pull request #1020 from ducthangho/claude/gallant-fermat-34kgb9\n",
+    "stderr": ""
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "status",
+      "--porcelain=v1",
+      "--untracked-files=all",
+      "--ignored=matching"
+    ],
+    "command": "git status --porcelain=v1 --untracked-files=all --ignored=matching",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "diff",
+      "--binary"
+    ],
+    "command": "git diff --binary",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "diff",
+      "--cached",
+      "--binary"
+    ],
+    "command": "git diff --cached --binary",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "ls-files",
+      "--others",
+      "--exclude-standard"
+    ],
+    "command": "git ls-files --others --exclude-standard",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "ls-files",
+      "--others",
+      "--ignored",
+      "--exclude-standard"
+    ],
+    "command": "git ls-files --others --ignored --exclude-standard",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD",
+      "HEAD^{tree}"
+    ],
+    "command": "git rev-parse HEAD 'HEAD^{tree}'",
+    "rc": 0,
+    "stdout": "9aa725c72b6b38263de366ce34a80fb384a522a0\na5820b68a689c8a07bc4c53ccb3ba927e56f6033\n",
+    "stderr": ""
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "sha256sum",
+      "ops/specs/WINDOWS-LOCAL-MAY-CHU-KHO-r2.md"
+    ],
+    "command": "sha256sum ops/specs/WINDOWS-LOCAL-MAY-CHU-KHO-r2.md",
+    "rc": 0,
+    "stdout": "4c92ecbf38fb7f5f97ddea64ed4a43f1cbc9e7a826e87fd8c234dc7e25677c2b  ops/specs/WINDOWS-LOCAL-MAY-CHU-KHO-r2.md\n",
+    "stderr": ""
+  }
+]

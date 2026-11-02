@@ -73,8 +73,8 @@ heartbeat_at: '2026-11-01T16:48:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
 heartbeat_required_minutes: 360
 heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
-lease_until: '2026-11-02T16:48:00Z'
-lease_expires_at_utc: '2026-11-02T16:48:00Z'
+lease_until: '2026-11-02T00:29:00Z'
+lease_expires_at_utc: '2026-11-02T00:29:00Z'
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 0
@@ -102,3 +102,12 @@ codex_da_goi:
 - {luot: 9, run_id: 5377d42f9b444a9ea66b07f929a4339d, head: 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651, verdict: changes_requested, ket_qua: '0 P0, 0 P1, 0 P2, 0 P3 — chi thieu bang chung Windows/CI exact head trong bundle offline'}
 - {luot: 10, run_id: 2b394187972546eeab9af23a0298151e, head: 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651, verdict: approve, ket_qua: '0 P0, 0 P1, 0 P2, 0 P3; N0, N0p, A1-A5 DAT tren bang chung exact head; A6 sau land'}
 pham_vi_mo_rong_da_duyet: 'chu kho duyet qua AskUserQuestion (01-11-2026): raise AssertionError tuong minh trong ca -> bang(False,...) va khoa AST chung ("Co: doi sang bang(False, ...) + khoa AST chung"); moi loi goi con Python text=True khai encoding utf-8 + khoa AST ("Va moi loi goi con python/launcher + ca khoa AST"). Khong doi write set.'
+lease_sua_lan_cuoi: '2026-11-02T00:09:00Z'
+lease_sua_ghi_chu: 'Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch, budget.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-02T16:48:00Z'
+  han_moi_utc: '2026-11-02T00:29:00Z'
+  chi_thi: 'Chu kho chon "Co, merge #1130 roi lam tiep (Recommended)" qua AskUserQuestion trong phien session_015Gtxra7iT6mwM1kqpdggt6 (02-11-2026); PR #1130 merge c7174bfe03b3acd22cfa055b5fce176129d29542. Bam byte KHONG DO DUOC.'
+  ly_do: 'Packet #1122 da merge. Nha .claude/dev/launcher_test.py va ops/handoff/wp1122-g1-claude.md cho #1117 (lease g2).'
+  vi_sao_han_moi_khong_bang_luc_sua: 'Han moi = luc sua + 20 phut de luot ops-publish-lease cua commit nay doc lease CON HAN (rc=9 da dang), khong roi vao rc=8 (bai hoc CLAUDE.md 20-09-2026). Khong viet bia mo: lease ke nhiem thuoc packet khac.'
+  tien_le: 'wp1079-r1-g10-claude, wp1117-r1-g1-claude.'

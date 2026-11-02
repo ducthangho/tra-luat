@@ -1,0 +1,631 @@
+{
+  "counted": {
+    "source_count": 86,
+    "stored_count": 81,
+    "matched": [
+      {
+        "repo": "VERDICT.md",
+        "source": "VERDICT.md",
+        "bytes": 20188,
+        "sha256": "c601112323513db31e0aefc40340672d69fba39567e3f8639b3ebdd53fd321e6"
+      },
+      {
+        "repo": "PROMPT.md",
+        "source": "PROMPT.md",
+        "bytes": 5507,
+        "sha256": "542e7e873bbbb595ebbe9e60a92223e71e4c8872ed4e5601eae874d361cb0f22"
+      },
+      {
+        "repo": "launcher.out",
+        "source": "launcher.json",
+        "bytes": 6818,
+        "sha256": "011550f75d3032d340583049d9abe09c89691247fa3fe7cae64fa53248cdfe3c"
+      },
+      {
+        "repo": "run/checkpoint.json",
+        "source": "runs/260f271e/checkpoint.json",
+        "bytes": 212,
+        "sha256": "967b06a51233548587ac3b88358dc00227c8c69ed4df1a44168d19460f07ccc8"
+      },
+      {
+        "repo": "run/run.json",
+        "source": "runs/260f271e/run.json",
+        "bytes": 8945,
+        "sha256": "f612e6bcf9ee6a553c84c312ccc5a82625d5a1b22be8afa0b0cc943481cc630a"
+      },
+      {
+        "repo": "run/stdout.log",
+        "source": "runs/260f271e/stdout.log",
+        "bytes": 344,
+        "sha256": "621e6dd4e7b91d0c1a0a0e429ba2d3d8a9ecb4688fb1e69ebd9bea4f3572e79d"
+      },
+      {
+        "repo": "run/stderr.log",
+        "source": "runs/260f271e/stderr.log",
+        "bytes": 39,
+        "sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+      },
+      {
+        "repo": "evidence/mutant-2-direct.stdout",
+        "source": "evidence/mutant-2-direct.stdout",
+        "bytes": 675,
+        "sha256": "3c0691094bfc870bf4edc4c83a152327fb8fdb1b0a7ca72244a09b7243430f51"
+      },
+      {
+        "repo": "evidence/mutant-2-direct.stderr",
+        "source": "evidence/mutant-2-direct.stderr",
+        "bytes": 2304,
+        "sha256": "604e1b8857c881235d4d4c9e2fbc0de7e832539da9460b67d6f11bbea8b60c1b"
+      },
+      {
+        "repo": "evidence/head-direct.stdout",
+        "source": "evidence/head-direct.stdout",
+        "bytes": 192,
+        "sha256": "183729c46bac7f6d207fc6097be2f731edab62ef22bee0d3493b7620a42bb079"
+      },
+      {
+        "repo": "evidence/head-diff-default.stdout",
+        "source": "evidence/head-diff-default.stdout",
+        "bytes": 146,
+        "sha256": "c14f7647249e943c3e9b381febfa7fac91487b973c105febc97faddc59ef5972"
+      },
+      {
+        "repo": "evidence/head-bien-nhan.stdout",
+        "source": "evidence/head-bien-nhan.stdout",
+        "bytes": 259,
+        "sha256": "c9453f30415c7502b2c23f4f8f7f894276a07988231cb776934cd9f68322ec2f"
+      },
+      {
+        "repo": "evidence/base-diff-default.stderr",
+        "source": "evidence/base-diff-default.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/head-ci-function.stdout",
+        "source": "evidence/head-ci-function.stdout",
+        "bytes": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "repo": "evidence/bytes-b-sha256sum.stderr",
+        "source": "evidence/bytes-b-sha256sum.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/bytes-a-sha256sum.stderr",
+        "source": "evidence/bytes-a-sha256sum.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/ci.json",
+        "source": "evidence/ci.json",
+        "bytes": 3491,
+        "sha256": "5ae40fb18d98cdeccf383f277b0358c87a79305b9bd9abef054e34c10f064ad1"
+      },
+      {
+        "repo": "evidence/bytes-c-sha256sum.stderr",
+        "source": "evidence/bytes-c-sha256sum.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/head-diff-ci.stderr",
+        "source": "evidence/head-diff-ci.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/receipts-progress.txt",
+        "source": "evidence/receipts-progress.txt",
+        "bytes": 1613,
+        "sha256": "93f7c14728e473b250a1ac0ebcad4bb9ab5c5dada31614f157b7dadd0e7f807a"
+      },
+      {
+        "repo": "evidence/head-land.stderr",
+        "source": "evidence/head-land.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/mutations.json",
+        "source": "evidence/mutations.json",
+        "bytes": 9218,
+        "sha256": "99df629a9aae2461f369df1a9628e92d1d807231ed887ef7af55d4e62f705341"
+      },
+      {
+        "repo": "evidence/bytes-a-sha256sum.stdout",
+        "source": "evidence/bytes-a-sha256sum.stdout",
+        "bytes": 3248,
+        "sha256": "8c442c0b76952178946dace5f325a64e6173cb46290aa9d8f67f7ecb57f6e0e8"
+      },
+      {
+        "repo": "evidence/ci-progress.txt",
+        "source": "evidence/ci-progress.txt",
+        "bytes": 1462,
+        "sha256": "21d8afac9f3482a2dbad2284f39d02c702c85a2dd210cba0cf030e591d9a81d4"
+      },
+      {
+        "repo": "evidence/gates.json",
+        "source": "evidence/gates.json",
+        "bytes": 22604,
+        "sha256": "0ec819766455d0f8f4d6aed3d3d5ae9b6c31b8cf2688dd4bb1782c049800748d"
+      },
+      {
+        "repo": "evidence/head-doctrine.stdout",
+        "source": "evidence/head-doctrine.stdout",
+        "bytes": 70,
+        "sha256": "5dc320d098e17eea22fc3d940e41b58774b648394253380eeb99bf85aacdba83"
+      },
+      {
+        "repo": "evidence/final-integrity.json",
+        "source": "evidence/final-integrity.json",
+        "bytes": 1228,
+        "sha256": "cfdac57c4d271f636b31b1ebf90bb80c04858c906f82db6bce533ebc66242da2"
+      },
+      {
+        "repo": "evidence/base-land.stderr",
+        "source": "evidence/base-land.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/receipts-attempt1.py",
+        "source": "evidence/receipts-attempt1.py",
+        "bytes": 11560,
+        "sha256": "19198e9d46d5065a716c236b3abd8973553033c419c389fb780732f6e87691a1"
+      },
+      {
+        "repo": "evidence/head-ci-function.stderr",
+        "source": "evidence/head-ci-function.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/receipts-attempt1.stdout",
+        "source": "evidence/receipts-attempt1.stdout",
+        "bytes": 2170,
+        "sha256": "659f1d3da62ff1ad27ac20e8d80156b0fbf937622d2c9d8079533b1c1cff540b"
+      },
+      {
+        "repo": "evidence/bytes-progress.txt",
+        "source": "evidence/bytes-progress.txt",
+        "bytes": 1572,
+        "sha256": "61d54dc422856ae28b00c400a802cc3af27502febfd7c4a417e18f65ad5d5a86"
+      },
+      {
+        "repo": "evidence/mutate_receipts.py",
+        "source": "mutate_receipts.py",
+        "bytes": 2031,
+        "sha256": "1f7ee383a6f108756dcdd70ff416e4cba07c75122a3ca902eca2ddb84f5e19d8"
+      },
+      {
+        "repo": "evidence/mutant-2-bien-nhan.stderr",
+        "source": "evidence/mutant-2-bien-nhan.stderr",
+        "bytes": 324,
+        "sha256": "4fd00d21346b3e31206d26e767eb77a6eb069e5b473d812841cdfbf2f17c16c4"
+      },
+      {
+        "repo": "evidence/head-bien-nhan.stderr",
+        "source": "evidence/head-bien-nhan.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/mutant-2-bien-nhan.stdout",
+        "source": "evidence/mutant-2-bien-nhan.stdout",
+        "bytes": 244,
+        "sha256": "fb2d7d67b66f2bd125dc3dce5abeac5791bfc5775f1eb0771402c18557ee192d"
+      },
+      {
+        "repo": "evidence/base-ci-function.stdout",
+        "source": "evidence/base-ci-function.stdout",
+        "bytes": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "repo": "evidence/base-doctrine.stderr",
+        "source": "evidence/base-doctrine.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/base-land.stdout",
+        "source": "evidence/base-land.stdout",
+        "bytes": 7461,
+        "sha256": "52ca0dad914ca2095d9334780c20831c04cf2f58b25cb6ef2b9447506dbccbd2"
+      },
+      {
+        "repo": "evidence/audit_receipts.py",
+        "source": "audit_receipts.py",
+        "bytes": 11860,
+        "sha256": "e385dfc7ce9e570671f8e75e2e6307fdd75a5fc19684181f64d6af9f58c91329"
+      },
+      {
+        "repo": "evidence/final-integrity.stdout",
+        "source": "evidence/final-integrity.stdout",
+        "bytes": 1229,
+        "sha256": "368cf15dc3e9b6e7966e23a25902d4282cec001f7fffd0f890fc3e3ef5cea3a0"
+      },
+      {
+        "repo": "evidence/audit_ci.py",
+        "source": "audit_ci.py",
+        "bytes": 4511,
+        "sha256": "9c7f077f3b11c8094f718003d5cb796acee5c9f96192fcb7b618cb95e4c1577f"
+      },
+      {
+        "repo": "evidence/mutant-1-direct.stdout",
+        "source": "evidence/mutant-1-direct.stdout",
+        "bytes": 675,
+        "sha256": "3bf6c656241a85b1e8b77491125731257c6dd06248bc3f02492b63ec48e6963a"
+      },
+      {
+        "repo": "evidence/audit_history.py",
+        "source": "audit_history.py",
+        "bytes": 6358,
+        "sha256": "e1d539b1987341c4c71c2ed5a305f1a00017d2277724909216f17db82e8beca7"
+      },
+      {
+        "repo": "evidence/preflight.json",
+        "source": "evidence/preflight.json",
+        "bytes": 13595,
+        "sha256": "8b1f20a47e1ba728a7b55a3a6e0fae1071c12ea441d992df99d9300081bc5eda"
+      },
+      {
+        "repo": "evidence/audit_bytes.py",
+        "source": "audit_bytes.py",
+        "bytes": 5876,
+        "sha256": "7edd3d9523560723f5d0ebc59d97aa4f3e0c07bf51fbf099403cf9342c3ac92e"
+      },
+      {
+        "repo": "evidence/bytes-b-sha256sum.stdout",
+        "source": "evidence/bytes-b-sha256sum.stdout",
+        "bytes": 3248,
+        "sha256": "8c442c0b76952178946dace5f325a64e6173cb46290aa9d8f67f7ecb57f6e0e8"
+      },
+      {
+        "repo": "evidence/base-direct.stderr",
+        "source": "evidence/base-direct.stderr",
+        "bytes": 588,
+        "sha256": "afddcf410c4b06616ddf4830ce5f4c851a169c349a8d153e531122f668825211"
+      },
+      {
+        "repo": "evidence/head-doctrine.stderr",
+        "source": "evidence/head-doctrine.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/history-progress.txt",
+        "source": "evidence/history-progress.txt",
+        "bytes": 22,
+        "sha256": "8fd2e46ddaf7ddee383177f2e6be8280c177207f8d58784dfeebafd051f6ff8a"
+      },
+      {
+        "repo": "evidence/head-diff-ci.stdout",
+        "source": "evidence/head-diff-ci.stdout",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/receipts.json",
+        "source": "evidence/receipts.json",
+        "bytes": 114428,
+        "sha256": "14602e23f83f77502fb428c361bd7f4e3de211d748625bc2ca70fd637546c1ea"
+      },
+      {
+        "repo": "evidence/all-check-calls.txt",
+        "source": "evidence/all-check-calls.txt",
+        "bytes": 121794,
+        "sha256": "706bd17b4647cc68433f83a3bbb90982852a4870210d7414dd78617fa0a91b03"
+      },
+      {
+        "repo": "evidence/history-attempt1.py",
+        "source": "evidence/history-attempt1.py",
+        "bytes": 6239,
+        "sha256": "442dbe861b02b3fc2c8c8d981cb6d6d356d2f1b985244f9bbcfcf8e73478f592"
+      },
+      {
+        "repo": "evidence/base-diff-default.stdout",
+        "source": "evidence/base-diff-default.stdout",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/gates-progress.txt",
+        "source": "evidence/gates-progress.txt",
+        "bytes": 5382,
+        "sha256": "5f3cdf640f3de69333ac6364b42cdf52a6bc5bad5873f8386b1ab85b56e667bb"
+      },
+      {
+        "repo": "evidence/base-direct.stdout",
+        "source": "evidence/base-direct.stdout",
+        "bytes": 192,
+        "sha256": "183729c46bac7f6d207fc6097be2f731edab62ef22bee0d3493b7620a42bb079"
+      },
+      {
+        "repo": "evidence/base-bien-nhan.stdout",
+        "source": "evidence/base-bien-nhan.stdout",
+        "bytes": 259,
+        "sha256": "0014e8fb90e19e9245a15a7995c672575adc88e8918cbfb6bec68f87912678c6"
+      },
+      {
+        "repo": "evidence/ci-t20d.stdout",
+        "source": "evidence/ci-t20d.stdout",
+        "bytes": 206,
+        "sha256": "e288c43ea71ea549da840f0796f83b5983d1c1ab109feda1101c61dba8263b28"
+      },
+      {
+        "repo": "evidence/ci-local-kiem-re.stdout",
+        "source": "evidence/ci-local-kiem-re.stdout",
+        "bytes": 148,
+        "sha256": "014fcb730f0bb7741f88e2a2c9e156b1d5f7abfd2750dedc0612c65dc5014b5f"
+      },
+      {
+        "repo": "evidence/base-bien-nhan.stderr",
+        "source": "evidence/base-bien-nhan.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/head-diff-default.stderr",
+        "source": "evidence/head-diff-default.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/bytes.json",
+        "source": "evidence/bytes.json",
+        "bytes": 51551,
+        "sha256": "ae1bdbd87257dcea02eb068ab26e5a2ef161f19c3c1cff833a86fd31496c0bdf"
+      },
+      {
+        "repo": "evidence/direct_tests.py",
+        "source": "direct_tests.py",
+        "bytes": 482,
+        "sha256": "c21fa1807fd81d3b6758d8bce4cc4e369ed7677c532101fda4371be777476414"
+      },
+      {
+        "repo": "evidence/mutant-1-bien-nhan.stdout",
+        "source": "evidence/mutant-1-bien-nhan.stdout",
+        "bytes": 244,
+        "sha256": "fb2d7d67b66f2bd125dc3dce5abeac5791bfc5775f1eb0771402c18557ee192d"
+      },
+      {
+        "repo": "evidence/measure_gates.py",
+        "source": "measure_gates.py",
+        "bytes": 2179,
+        "sha256": "c66960145889a3ca6583ac8edb6f7365ee8856ac28a2c7df1d0288f54afbeb6f"
+      },
+      {
+        "repo": "evidence/receipts-attempt1.json",
+        "source": "evidence/receipts-attempt1.json",
+        "bytes": 114486,
+        "sha256": "163885f212495671f45ac54bbd1e0f6c6d6ab898fee2e80906b18b681446bd78"
+      },
+      {
+        "repo": "evidence/audit.gitconfig",
+        "source": "audit.gitconfig",
+        "bytes": 19,
+        "sha256": "bdd3f376bf330b2c97d7ef1edf77e5135ad40e2b54f571c794be2b273058be35"
+      },
+      {
+        "repo": "evidence/base-doctrine.stdout",
+        "source": "evidence/base-doctrine.stdout",
+        "bytes": 70,
+        "sha256": "5dc320d098e17eea22fc3d940e41b58774b648394253380eeb99bf85aacdba83"
+      },
+      {
+        "repo": "evidence/base-diff-ci.stderr",
+        "source": "evidence/base-diff-ci.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/mutations-progress.txt",
+        "source": "evidence/mutations-progress.txt",
+        "bytes": 4131,
+        "sha256": "e70f590d55a3451418db6f5e23c2973065dcdce34e8b0613de46ec8bf78e455f"
+      },
+      {
+        "repo": "evidence/finish_report.py",
+        "source": "finish_report.py",
+        "bytes": 14901,
+        "sha256": "c002e51442d1230342194fd535de3ba0c8a5345c6fdbee71f325ec46c6686a53"
+      },
+      {
+        "repo": "evidence/bytes-c-sha256sum.stdout",
+        "source": "evidence/bytes-c-sha256sum.stdout",
+        "bytes": 3350,
+        "sha256": "9259ccfe5a5f8b0888f3f2f5829da01c46518072f819e205df98ba736fd64f90"
+      },
+      {
+        "repo": "evidence/final_integrity.py",
+        "source": "final_integrity.py",
+        "bytes": 1886,
+        "sha256": "9a3ef5c9fac781b025f9b8544d5cc13055f63675ff178d02da5463b2a741e9da"
+      },
+      {
+        "repo": "evidence/head-direct.stderr",
+        "source": "evidence/head-direct.stderr",
+        "bytes": 588,
+        "sha256": "adcdb0eaa47f87b66f48eed21ebd0b5febdbbecaccf0ecb1a87d000bfbb91ebf"
+      },
+      {
+        "repo": "evidence/mutant-1-direct.stderr",
+        "source": "evidence/mutant-1-direct.stderr",
+        "bytes": 2304,
+        "sha256": "c55d5b6ad6953357d4c58e7e392be60fbd49ad33bf2f637bdf9f8e5a25236e84"
+      },
+      {
+        "repo": "evidence/check-search.txt",
+        "source": "evidence/check-search.txt",
+        "bytes": 8537,
+        "sha256": "3d8f91f7f157ee528afbd67e8472c7a36be453d424e426f27298605ba76f4f19"
+      },
+      {
+        "repo": "evidence/head-land.stdout",
+        "source": "evidence/head-land.stdout",
+        "bytes": 7461,
+        "sha256": "52ca0dad914ca2095d9334780c20831c04cf2f58b25cb6ef2b9447506dbccbd2"
+      },
+      {
+        "repo": "evidence/base-ci-function.stderr",
+        "source": "evidence/base-ci-function.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/base-diff-ci.stdout",
+        "source": "evidence/base-diff-ci.stdout",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "evidence/mutant-1-bien-nhan.stderr",
+        "source": "evidence/mutant-1-bien-nhan.stderr",
+        "bytes": 324,
+        "sha256": "1fbfafb0eed26f953c793f70ad80f84ec0cc99739ac4d81bc3233d1c0ac6c22b"
+      }
+    ],
+    "mismatch": [],
+    "generated_or_unknown": [],
+    "missing_source": [
+      "DIFF.patch",
+      "evidence/history-attempt1.json",
+      "evidence/history.json",
+      "evidence/original-before.json",
+      "launcher.err"
+    ],
+    "omitted_metadata": {
+      "DIFF.patch": {
+        "sha256": "b3cd603ebe29f46e0d614306e3d050f77fa3a653eadd31cf12c6dc3c1fe760d2",
+        "bytes": 946152
+      },
+      "launcher.err": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "evidence/history-attempt1.json": {
+        "sha256": "318d8e68a6e97e7ab983e1f0c10ac3305d0095366f164727c1122bc78efe76ad",
+        "bytes": 4571741
+      },
+      "evidence/history.json": {
+        "sha256": "39851f7bf7ec729c8c7e9d6f0dc816067e50d23f0b5293818705259d0a302065",
+        "bytes": 4571479
+      },
+      "evidence/original-before.json": {
+        "sha256": "159add78252847591edbfbe914273cac266ae9d966444b83269f520b876bfb4d",
+        "bytes": 1458580
+      }
+    },
+    "undeclared_missing": [],
+    "omitted_mismatch": [],
+    "declared_but_not_missing": [],
+    "sha256sum_rc": 0,
+    "manifest_count": 89,
+    "manifest_uncovered": [],
+    "manifest_extra": [],
+    "manifest_duplicates": []
+  },
+  "failed": {
+    "source_count": 8,
+    "stored_count": 6,
+    "matched": [
+      {
+        "repo": "PROMPT.md",
+        "source": "PROMPT.md",
+        "bytes": 5507,
+        "sha256": "542e7e873bbbb595ebbe9e60a92223e71e4c8872ed4e5601eae874d361cb0f22"
+      },
+      {
+        "repo": "launcher.out",
+        "source": "launcher.json",
+        "bytes": 2766,
+        "sha256": "5e74ed4040266e5546fb075340936fea8f4047493b6916f574860ad0d08e7d85"
+      },
+      {
+        "repo": "run/checkpoint.json",
+        "source": "runs/ee42b27f/checkpoint.json",
+        "bytes": 212,
+        "sha256": "a8a85e5df31785710a80171b29572c33d0856cd7ce53c0b7a565cbb396f5a6a0"
+      },
+      {
+        "repo": "run/run.json",
+        "source": "runs/ee42b27f/run.json",
+        "bytes": 2967,
+        "sha256": "5c3e84a993f857e82cf2d0156c2c6580354c9712c50bf1ffeb0c3756e539ab81"
+      },
+      {
+        "repo": "run/stdout.log",
+        "source": "runs/ee42b27f/stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "repo": "run/stderr.log",
+        "source": "runs/ee42b27f/stderr.log",
+        "bytes": 39,
+        "sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+      }
+    ],
+    "mismatch": [],
+    "generated_or_unknown": [],
+    "missing_source": [
+      "DIFF.patch",
+      "launcher.err"
+    ],
+    "omitted_metadata": {
+      "DIFF.patch": {
+        "sha256": "b3cd603ebe29f46e0d614306e3d050f77fa3a653eadd31cf12c6dc3c1fe760d2",
+        "bytes": 946152
+      },
+      "launcher.err": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    },
+    "undeclared_missing": [],
+    "omitted_mismatch": [],
+    "declared_but_not_missing": [],
+    "sha256sum_rc": 0,
+    "manifest_count": 7,
+    "manifest_uncovered": [],
+    "manifest_extra": [],
+    "manifest_duplicates": []
+  },
+  "flat": {
+    "matches": true,
+    "sha256": "c601112323513db31e0aefc40340672d69fba39567e3f8639b3ebdd53fd321e6",
+    "bytes": 20188
+  },
+  "diff_reproduction": {
+    "bytes": 946152,
+    "sha256": "b3cd603ebe29f46e0d614306e3d050f77fa3a653eadd31cf12c6dc3c1fe760d2",
+    "matches_a": true,
+    "matches_b": true
+  },
+  "whitespace": {
+    "sha256": "5f3cdf640f3de69333ac6364b42cdf52a6bc5bad5873f8386b1ab85b56e667bb",
+    "bytes": 5382,
+    "source_matches": true,
+    "trailing_whitespace_lines": [
+      2,
+      3,
+      4,
+      6,
+      28,
+      50,
+      58,
+      61,
+      62,
+      64,
+      71,
+      75,
+      76,
+      80
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "head": "1a87a863174ef104b2df8bc98b77724fb6796d9b",
+  "tree": "5888c2e34c8e35ae13dd5eb017370186e1b17d7a",
+  "status": "",
+  "abbrev": "7",
+  "base": "62e629156fd0729b743f15eed2f32487786b9adc",
+  "merge_base_origin_master": "62e629156fd0729b743f15eed2f32487786b9adc",
+  "changed_count": 93,
+  "outside_reviews": [],
+  "patch_matches": true,
+  "patch_sha256": "2704197fbfa4c55216789f6a30e993d1af665a95ea4d7184386f2c8a8d925474",
+  "commits": "1a87a863174ef104b2df8bc98b77724fb6796d9b ops/reviews: biên nhận v2 + mục lục README cho cross-review lượt 1 của PR #1131\n62a30b1d7a153cedc19ca711b0c60c77baf142e6 ops/reviews: hiện vật cross-review Codex lượt 1 của PR #1131 (+ 1 lượt hỏng xác thực)\n"
+}

@@ -1,0 +1,87 @@
+{
+  "legacy_shell_ci_references_rc": 1,
+  "legacy_shell_ci_references_stdout": "",
+  "legacy_shell_path": "ops/evidence/wp685-r28-g5-attempt-2/chay_b1_b5.sh:17",
+  "legacy_shell_fixed_base": "ab457c651eb4428705f0492163080b661c858b72",
+  "work_packet_example": "git diff --check (không truyền base/head; ví dụ chọn theo Packet/§10.1, dòng 88-92)",
+  "test_fixture_context": [
+    {
+      "call_line": 898,
+      "context": [
+        [
+          891,
+          "def t20d_kiem_re_khoang_trang_cuoi_dong_khong_do():"
+        ],
+        [
+          897,
+          "    with kho_that(nhanh_pr=pr, sao_lease_publish=True) as (kho, goc, dau):"
+        ]
+      ]
+    },
+    {
+      "call_line": 903,
+      "context": [
+        [
+          891,
+          "def t20d_kiem_re_khoang_trang_cuoi_dong_khong_do():"
+        ],
+        [
+          897,
+          "    with kho_that(nhanh_pr=pr, sao_lease_publish=True) as (kho, goc, dau):"
+        ]
+      ]
+    },
+    {
+      "call_line": 969,
+      "context": [
+        [
+          957,
+          "def t20p_kiem_re_gitattributes_trong_ho_so_khong_cau_hinh_duoc_diff_check():"
+        ],
+        [
+          968,
+          "        with kho_that(nhanh_pr=pr) as (kho, goc, dau):"
+        ]
+      ]
+    },
+    {
+      "call_line": 989,
+      "context": [
+        [
+          983,
+          "def t20s_kiem_re_tep_nhi_phan_la_khong_do_duoc():"
+        ],
+        [
+          988,
+          "    with kho_that(nhanh_pr={\"ops/land/x.md\": b\"a\\0\\n<<<<<<< HEAD\\nb\\n=======\\nc\\n>>>>>>> nhanh\\n\"}) as (kho, goc, dau):"
+        ]
+      ]
+    },
+    {
+      "call_line": 1016,
+      "context": [
+        [
+          1006,
+          "def t20t_kiem_re_thuoc_tinh_diff_cua_pr_khong_bien_nhi_phan_thanh_van_ban():"
+        ],
+        [
+          1012,
+          "        with kho_that(nhanh_pr={f\"{thu_muc}/.gitattributes\": attr, f\"{thu_muc}/x.md\": noi}) as (kho, goc, dau):"
+        ]
+      ]
+    },
+    {
+      "call_line": 1093,
+      "context": [
+        [
+          1077,
+          "def t20v_kiem_re_gitlink_ho_so_do():"
+        ],
+        [
+          1087,
+          "        with kho_that(nhanh_pr={\"ops/specs/S.md\": \"# s\\n\"}) as (kho, goc, dau):"
+        ]
+      ]
+    }
+  ]
+}

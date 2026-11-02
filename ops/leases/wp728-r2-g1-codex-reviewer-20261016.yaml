@@ -1,0 +1,94 @@
+# Lease REVIEWER wp728 r2 g1 — đo Linux ĐỘC LẬP cho mã WP710 đã land.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #728 chỉ là bản chiếu.
+# Đây là lượt ĐO/AUDIT, không có mã sản phẩm. Reviewer (codex) read-only và offline;
+# write_set dưới đây là của PHIÊN ĐIỀU PHỐI (dựng rig, chép VERDICT nguyên byte, run.json,
+# SHA256SUMS), đúng bảng §write_set của spec.
+
+schema_version: 2
+event: review_lease_granted
+packet_issue: 728
+packet_id: wp728
+mission_issue: 710
+revision: 2
+generation: 1
+lease_id: wp728-r2-g1-codex-reviewer-20261016
+role: reviewer
+provider: openai_codex
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+executor: claude
+executor_note: >-
+  Executor g5 của WP710 khai `anthropic_claude` (ops/leases/wp710-r4-g5-claude-windows.yaml)
+  ⇒ bên đo khác nhà cung cấp, đúng §8.
+environment: cloud
+operating_system: Linux
+access: read-only
+branch_ownership: none
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+assurance_note: >-
+  Theo ops/bien_nhan_v2.py:727–750: cross_approved chỉ hợp lệ khi cả reviewer lẫn executor có
+  khai_co_audit kèm người audit được ghi tên. Chủ kho (ducthangho) cam kết audit và ghi tên cho
+  cả hai danh tính; không đủ điều kiện thì lượt đo đi đường human_audited.
+spec_path: ops/specs/wp728-do-linux-doc-lap-wp710-r2.md
+spec_hash: daecd8b216663d8a275700adb7f572afeb020a3e34d976460fb5c4f55dc06a40
+spec_sha256: daecd8b216663d8a275700adb7f572afeb020a3e34d976460fb5c4f55dc06a40
+spec_sha256_required: daecd8b216663d8a275700adb7f572afeb020a3e34d976460fb5c4f55dc06a40
+prompt_path: ops/specs/wp728-do-linux-doc-lap-wp710-r2.md
+prompt_sha256_required: daecd8b216663d8a275700adb7f572afeb020a3e34d976460fb5c4f55dc06a40
+reviewed_sha_required: 9fddb1d19e8e5b753bb687673846d484fb710182
+base_sha: 9fddb1d19e8e5b753bb687673846d484fb710182
+land_commit_ancestor: 8b59185975a938504de5963d2310e574dd4858b2
+anchored_blobs:
+  scripts/nlm-credential-refresh.ps1: 24240a31be4d51332f748d3fdadf3307cb6f1a88
+  scripts/nlm-credential-refresh.Tests.ps1: 4dc5994c363245219419fc0e2a20350761d6f7f1
+anchored_blobs_measured: >-
+  2026-10-15T23:5xZ trên origin/master 9fddb1d, checkout đủ lịch sử (is-shallow=false): hai blob
+  khớp; 8b59185 là tổ tiên; 0 commit trong 8b59185..9fddb1d chạm hai tệp.
+branch: ops/wp728-r2-do-linux
+target_branch_neu_land: master
+write_set:
+- ops/reviews/wp728-do-linux/rig/zombie_rig.py
+- ops/reviews/wp728-do-linux/rig/mutate.py
+- ops/reviews/wp728-do-linux/rig/REPLAY.md
+- ops/reviews/wp728-do-linux/VERDICT.md
+- ops/reviews/wp728-do-linux/run.json
+- ops/reviews/wp728-do-linux/SHA256SUMS.txt
+- ops/reviews/wp728-do-linux/.gitattributes
+effective_write_set:
+- ops/reviews/wp728-do-linux/rig/zombie_rig.py
+- ops/reviews/wp728-do-linux/rig/mutate.py
+- ops/reviews/wp728-do-linux/rig/REPLAY.md
+- ops/reviews/wp728-do-linux/VERDICT.md
+- ops/reviews/wp728-do-linux/run.json
+- ops/reviews/wp728-do-linux/SHA256SUMS.txt
+- ops/reviews/wp728-do-linux/.gitattributes
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/728#issuecomment-6204784204
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+recorder_is_dispatcher: true
+leased_at_utc: '2026-10-16T00:00:41Z'
+lease_expires_at_utc: '2026-10-17T00:00:41Z'
+prohibited_actions:
+- LIVE
+- nlm_login_or_real_nlm
+- real_credential
+- stage_credential_to_Drive
+- deploy
+- merge
+- land
+- edit_product_code
+- self_review
+- self_approve
+- force_push
+- delete_ref
+thay_the_cho: []
+xung_dot_write_set_do_luc: >-
+  2026-10-15T23:59Z ai-dang-giu trên mirror 541/541 nhánh (ls-remote so for-each-ref: thiếu 0):
+  NGƯỜI_GIỮ 0 cho cả 7 đường dẫn. Đối chứng dương: ops/land/pr621-skill-bai-hoc-provenance/kiem_ho_so.py
+  ⇒ NGƯỜI_GIỮ 2 (wp741), đúng như biết trước.

@@ -1,0 +1,181 @@
+**changes_requested: còn 1 P1 và 3 P2 thuộc 4 lớp; thêm 1 P3 riêng.**
+
+Review `KIEM-MERGE-M9` r1/g1 trên:
+
+- Head: `856f3d3959b148c00a9fd27993af0b7071f47f4a`
+- Tree: `e681a9f00b15e22425a3afcef082151569f59147`
+- Base: `f4b513da5802d439aedbe58ae4a5cd38ff47d6ab`
+- SHA-256 đặc tả khớp `d18820c854af40a4e0d6ca58f6b8812296a3057b0e7b063f704f5a4cdd7ca442`.
+- Provider/surface/transport: `openai_codex / codex_cli / machine`; run `ba00bc919e1b45cda70f46577f6e303c`. Model/effort thực phục vụ chưa đo được từ receipt hiện có.
+
+Không sửa checkout, không commit/push, không gọi GitHub. Mọi test và mutant chạy ngoài checkout tại `/tmp/m9-review4-59ls6vz7`.
+
+**Bằng chứng chạy**
+
+| Phép đo | Kết quả |
+|---|---|
+| Bộ chọn `cong_m9_*`, `cong_c_*` theo snapshot | rc=0, **97/97** |
+| 34 mutant `m9_*` có sẵn | **36/36** lượt đích đỏ bằng assertion đúng ca; không tín dụng giả |
+| M6: K7 thiếu cùng từng K0–K6 | **7/7** nêu cả hai |
+| Phạm vi Git bổ sung: tab, LF, `.yaml`, tên/đuôi/hoa thường | **10/10** đúng |
+| Ma trận vị trí × trường × bool/float của jobs | **8/8** bị chặn trên candidate |
+| `doctrine-scan` | rc=0, 10 tệp, 0 vi phạm |
+| `adr-song` | rc=0, 59/59 |
+| `doc-claims-check --strict --json` | rc=0, `ok=true`, 120 tệp, 0 flags |
+| Ruff pin/probe contract | rc=0, `RUFF_CONTRACT 3 []` |
+| Phạm vi diff | đúng 5 tệp, **288/300** dòng thêm; `diff --check` rc=0 |
+
+`not_run`: toàn bộ suite A1, Windows A8, canary GitHub A9 và bare Ruff lint. Ruff module không có trong runtime; A8/A9 chưa được chứng nhận bởi lượt offline này.
+
+Các lệnh phản chứng đã chạy, đều có rc tiến trình đo bằng 0; rc CLI và assertion được lưu riêng:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/m9-review4-59ls6vz7/audit.py
+PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/m9-review4-59ls6vz7/probes.py
+PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/m9-review4-59ls6vz7/probes.py mutants
+PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/m9-review4-59ls6vz7/locks.py
+```
+
+[Script phản chứng và cặp neo/thay chính xác](/tmp/m9-review4-59ls6vz7/probes.py), [kết quả mutant bổ sung](/tmp/m9-review4-59ls6vz7/extra-mutants.json), [assertion của ca bổ sung](/tmp/m9-review4-59ls6vz7/locks.json), [manifest hash hiện vật](/tmp/m9-review4-59ls6vz7/artifact-manifest.json).
+
+**F25 — P1 — `mien-khong-hop-le-chan-nhanh-da-dat`**
+
+Vị trí: [packet_loop.py:3236](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop.py:3236), qua `_dong_chu_kho` tại dòng 3174.
+
+K7 đọc nhánh miễn trước nhánh run. Comment hợp lệ về cấu trúc nhưng không thuộc chủ kho làm helper ném `ValueError`; vì thế K7 không xét run/jobs xanh, trái điều kiện **(a) hoặc (b)** của §2.1.
+
+Đã đo hai body của người khác: comment thường và dòng miễn đúng H. Cả hai dùng run/jobs xanh, Windows xanh, không P3:
+
+```text
+non_owner_comment_green rc=12 expected=0 K7=True
+THIẾU  K7 full_mutant_audit: KHÔNG ĐO ĐƯỢC
+(ValueError: comment không phải của chủ kho ducthangho)
+```
+
+Cùng helper cũng làm K5 và K6 đỏ trong phép đo này. Hai đường ấy đã tồn tại trước diff; K7 mới kế thừa cùng cơ chế chặn oan.
+
+Gợi ý vá:
+
+- Xử lý tại nhánh miễn K7/helper: comment không thuộc chủ kho không cung cấp miễn, nhưng không được phủ quyết bằng chứng run đạt.
+- Quét cùng lớp tại K5 khi tập P3 rỗng và K6 khi đã có Windows JSON xanh.
+- Khóa bằng hai chiều: người khác + run xanh ⇒ K7 đạt; người khác + không run ⇒ K7 thiếu. Mutant bỏ kiểm tác giả vẫn phải chết.
+- Tránh sửa theo hướng chấp nhận miễn của người khác hoặc nuốt mọi lỗi readback.
+
+**F26 — P2 — `kieu-job-chua-khoa-moi-truong-moi-vi-tri`**
+
+Vị trí: [packet_loop_test.py:9393](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop_test.py:9393); chốt runtime tại dòng 3247. Nối lớp F20 lượt trước.
+
+Ca mới khóa `run_attempt` sai kiểu ở job sau, nhưng chưa khóa đường tương ứng của `run_id`. Mutant chỉ kiểm kiểu `run_id` trên `js[:1]`, vẫn kiểm `run_attempt` trên mọi job, **sống 97/97**.
+
+Phản chứng: job đầu có `run_id=700`, job sau có `run_id=700.0`. Tập khóa không phân biệt hai giá trị bằng nhau của Python:
+
+```text
+candidate: rc=12
+mutant:    rc=0
+AssertionError: c1106: đòi rc=12, được rc=0
+```
+
+Gợi ý vá:
+
+- Bổ sung ca tại nhóm `cong_m9_job_*`, vì runtime hiện đúng và khoảng trống nằm ở fixture chỉ đổi một trường.
+- Tham số hóa cả `run_id`/`run_attempt`, bool/float, vị trí đầu/sau; giữ các trường còn lại hợp lệ.
+- Thêm mutant chỉ thu hẹp từng phép kiểm kiểu để mỗi ca chứng minh đúng trường.
+- Không chỉ đổi mọi job cùng lúc: cách đó tiếp tục che lỗi bỏ sót vị trí.
+
+**F27 — P2 — `jobs-dung-khoa-nhung-sai-gia-tri`**
+
+Vị trí: [packet_loop_test.py:9364](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop_test.py:9364); phép lấy nhóm tại dòng 3252.
+
+Ca hai run/hai tệp hiện cho cả hai nhóm jobs xanh. Nó không phân biệt nhóm được chọn với nhóm khác.
+
+Hai mutant giữ kiểm tra khóa `(run_id, run_attempt)` có mặt, nhưng lấy **giá trị nhóm đầu** hoặc **nhóm cuối** của `nhom`, đều **sống 97/97**.
+
+Đã đo cả hai hướng:
+
+```text
+Chỉ nhóm được chọn xanh:
+candidate rc=0; mutant rc=12
+AssertionError: c1106: đòi rc=0, được rc=12
+
+Nhóm được chọn đỏ, nhóm của run không đạt xanh:
+candidate rc=12; mutant rc=0
+AssertionError: c1106: đòi rc=12, được rc=0
+```
+
+Gợi ý vá:
+
+- Sửa fixture đa tệp để trạng thái các nhóm khác nhau, thử cả thứ tự tệp đầu/cuối.
+- Khóa cả chặn oan và cho lọt; bổ sung biến thể cùng run ID nhưng khác attempt.
+- Hai mutant lấy nhóm đầu/cuối phải chết bằng assertion của chính các ca ấy.
+- Tránh yêu cầu mọi nhóm của mọi run đều xanh: đặc tả chỉ đòi ít nhất một run đủ điều kiện.
+
+**F28 — P2 — `dong-mien-thieu-do-chieu-hop-le-crlf`**
+
+Vị trí: [packet_loop_test.py:9389](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop_test.py:9389); parser tại dòng 3176. Nối phần kiểm thử của F03.
+
+Các ca mới bắt tốt ký tự phân dòng bị cấm, nhưng thiếu chiều hợp lệ CRLF. Mutant đổi bộ tách raw thành `body.split("\n")` **sống 97/97**.
+
+Với comment chủ kho `full_mutant_audit: H mien\r\n`, không readback audit:
+
+```text
+candidate: rc=0
+mutant:    rc=12, thiếu K7
+AssertionError: c1106: đòi rc=0, được rc=12
+```
+
+Gợi ý vá:
+
+- Thêm ca miễn hợp lệ với LF và CRLF tại nhóm miễn K7.
+- Giữ các ca âm về khoảng trắng, SHA ngắn và tám ký tự phân dòng đã có.
+- Mutant LF-only phải chết trên ca CRLF.
+- Không khôi phục `strip()` hoặc `splitlines()` để làm chiều dương xanh.
+
+**P3 riêng — F29 — `run-khong-dat-thieu-attempt`**
+
+Vị trí: [packet_loop_test.py:9391](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop_test.py:9391); consumer tại dòng 3252.
+
+Mutant đọc sớm `attempt = r["run_attempt"]` trước kiểm kiểu vẫn sống **97/97**. Thêm một run không đạt, thiếu `run_attempt`, trước run hợp lệ cho:
+
+```text
+candidate rc=0
+mutant rc=12, K7: KeyError: 'run_attempt'
+```
+
+[Phép đo mutant dùng biến cục bộ](/tmp/m9-review4-59ls6vz7/local-attempt.json).
+
+Xếp **P3**, vì đây là hàng run thiếu trường trong readback REST, ngoài trường hợp hợp lệ được đặc tả đòi rõ; không tính thành P2. Nếu chọn khóa hành vi này, thêm ca run không đạt thiếu trường ở trước/sau run hợp lệ, giữ cách đọc an toàn bằng `.get`. Cần tránh vô tình nới các chốt bắt buộc của run được chọn.
+
+**ĐỐI CHIẾU LƯỢT TRƯỚC**
+
+Trạng thái dưới đây áp cho từng biểu hiện cũ; không tuyên bố đóng những lớp còn F25–F28.
+
+| Finding | Kết quả tự đo |
+|---|---|
+| F01 | ĐÃ VÁ THẬT: trang jobs riêng từng tệp; trộn/trùng nhóm bị chặn |
+| F02 | ĐÃ VÁ THẬT: các kiểu bool/float đã nêu bị chặn |
+| F03 | ĐÃ VÁ THẬT ở runtime: khoảng trắng và tám ký tự phân dòng tại cả hai đầu không tạo miễn |
+| F04 | ĐÃ VÁ THẬT: bỏ join run ID làm ca đích đỏ |
+| F05 | ĐÃ VÁ THẬT: bỏ run `completed` làm ca đích đỏ |
+| F06 | ĐÃ VÁ THẬT: bỏ job `completed` làm ca đích đỏ |
+| F07 | ĐÃ VÁ THẬT: bỏ kiểm trang jobs làm ca đích đỏ |
+| F08 | ĐÃ VÁ THẬT: run attempt float bị chặn; mutant bị giết |
+| F09 | ĐÃ VÁ THẬT: K6 diff rỗng vẫn `ValueError` |
+| F10 | ĐÃ VÁ THẬT: job run ID bool |
+| F11 | ĐÃ VÁ THẬT: job attempt bool |
+| F12 | ĐÃ VÁ THẬT: run attempt bool |
+| F13 | ĐÃ VÁ THẬT: SHA miễn rút gọn |
+| F14 | ĐÃ VÁ THẬT: git lỗi kèm output; K6/K7 đều từ chối |
+| F15 | ĐÃ VÁ THẬT: `.PY` không thuộc phạm vi `.py` |
+| F16 | ĐÃ VÁ THẬT: tệp bị xóa vẫn được xét |
+| F17 | ĐÃ VÁ THẬT: mutant chỉ xét run đầu bị giết |
+| F18 | ĐÃ VÁ THẬT: mutant chỉ xét run cuối bị giết |
+| F19 | ĐÃ VÁ THẬT: attempt 2 đạt; mutant ghim attempt 1 bị giết |
+| F20 | VÁ HỜ ở lớp độ phủ: đường `run_attempt` đã khóa, đường `run_id` còn F26 |
+| F21 | ĐÃ VÁ THẬT: bỏ kiểm job đầu làm ca đích đỏ |
+| F22 | ĐÃ VÁ THẬT: rename vào M9, đo Git thật |
+| F23 | ĐÃ VÁ THẬT: symlink, đo index mode thật |
+| F24 | ĐÃ VÁ THẬT: chỉ đổi mode vẫn chạm M9 |
+
+Cuối lượt, HEAD/tree không đổi; diff working tree/index rỗng. So hash 10.202 tệp thuộc phạm vi kiểm cho kết quả không đổi; ignored `.codex/` rỗng. Phép so hai mốc chỉ chứng minh không có delta quan sát được.
+
+KET_LUAN: changes_requested

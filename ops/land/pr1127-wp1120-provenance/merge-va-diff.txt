@@ -1,0 +1,17 @@
+merge f2102fc388a884d994f7bfeb29ef6863b9972b66
+parents 180039c4b791fba4c89991623151cbb7378fce53 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897
+tree 4c134d1b317c879f8c6c18a8510fd1c6baff86a2
+author ducthangho 2026-11-02T01:26:35+07:00
+--- git diff --stat f2102fc^1 f2102fc
+ .claude/dev/packet_loop.py                    |  61 +++++++--
+ .claude/dev/packet_loop_test.py               | 183 +++++++++++++++++++++++++-
+ .claude/skills/land-packets/SKILL.md          |   2 +-
+ docs/adr/0060-dieu-kien-merge-va-moc-ready.md |   8 +-
+ ops/specs/KIEM-MERGE-M9-r1.md                 |  82 ++++++++++++
+ 5 files changed, 318 insertions(+), 18 deletions(-)
+--- git diff --numstat f4b513d 06a5a40 (write set so voi base lease; 06a5a40 la merge origin/master c82047d)
+52	9	.claude/dev/packet_loop.py
+178	5	.claude/dev/packet_loop_test.py
+1	1	.claude/skills/land-packets/SKILL.md
+5	3	docs/adr/0060-dieu-kien-merge-va-moc-ready.md
+82	0	ops/specs/KIEM-MERGE-M9-r1.md

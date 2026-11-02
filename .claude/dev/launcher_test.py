@@ -10298,7 +10298,9 @@ def r1079_cham_lap_ca_doi_dung_TinHieuChotCa():
     #1117: tệp giả nay là MODULE mà runner thật nạp (`CA` + `cham_mot_ca`), không còn tự ghi kênh từ env.
     Module không thấy nonce, nên các chốt nonce/tên/kiểu của `cham_lap_ca` được đo bằng RUNNER GIẢ
     (`nonce_sai` · `ten_sai` · `danh_sach`, cùng đối chứng `runner_dung`). Thêm `loai_la` (chốt kiểm loại)
-    và `vang` (tên ca không có trong `CA`)."""
+    và `vang` (tên ca không có trong `CA`). Runner giả đọc đúng khung hai dòng UTF-8 của runner thật; kênh
+    nằm dưới thư mục tạm CÓ DẤU CÁCH (connector #1142 P2: `.split()` tách đường kênh có dấu cách)."""
+    from unittest.mock import patch
     def tep(ten, tra=None, dau=""):
         than = "    pass\n" if tra is None else f"    return {tra!r}\n"
         return (f"{dau}def {ten}():\n    pass\nCA = [{ten}]\n"
@@ -10314,7 +10316,8 @@ def r1079_cham_lap_ca_doi_dung_TinHieuChotCa():
                   "ten_sai": "{'nonce': n, 'ten': 'khac', 'loai': 'giet'}",
                   "danh_sach": "[n, 'danh_sach', 'giet']",
                   "runner_dung": "{'nonce': n, 'ten': 'runner_dung', 'loai': 'giet'}"}
-    with San() as s:
+    with San() as s, patch.object(tempfile, "tempdir", str(s / "co dau cach")):
+        (s / "co dau cach").mkdir()
         kq = {}
         for k, ma in vi_du.items():
             (s / k).mkdir()
@@ -10324,7 +10327,7 @@ def r1079_cham_lap_ca_doi_dung_TinHieuChotCa():
         for k, rec in runner_gia.items():   # runner GIẢ: đo chốt của chính `cham_lap_ca`
             (s / k).mkdir()
             (s / k / RUNNER_TEN).write_text(
-                "import json, sys\nk, n = sys.stdin.read().split()\n"
+                "import json, sys\nk, n = sys.stdin.buffer.read().decode('utf-8').splitlines()\n"
                 f"open(k, 'w').write(json.dumps({rec}))\n", encoding="utf-8")
             try:
                 kq[k] = cham_lap_ca(s / k, k)[0]

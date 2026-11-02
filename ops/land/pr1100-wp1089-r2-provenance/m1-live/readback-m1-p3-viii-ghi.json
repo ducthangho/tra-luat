@@ -1,0 +1,26 @@
+{
+ "t0": "2026-11-01T17:39:14Z",
+ "disk_last_refresh": "2026-11-01T17:38:37.577351528Z",
+ "meta_truoc": {
+  "headRevisionId": "0B6rMgRJQawK8ZmYvNm83YVYzNCtQb1RkWHFGS3JCYmVMV1hnPQ",
+  "md5Checksum": "c8d0bd739492cab85fa60c2873c8ab13",
+  "modifiedTime": "2026-10-30T15:48:03.437Z",
+  "size": "4725"
+ },
+ "ghi_nguoc_rc": 0,
+ "ghi_nguoc_out": [
+  "agent_creds_ghi_nguoc: ĐÃ GHI — rev=2"
+ ],
+ "meta_sau": {
+  "headRevisionId": "0B6rMgRJQawK8dU5SQ1RNMGNxVVBSbFZYWmNFZzd1aGFDWHJnPQ",
+  "md5Checksum": "e764ada32c15ab809dbdfd8e980c6fad",
+  "modifiedTime": "2026-11-01T17:39:21.708Z",
+  "size": "4894"
+ },
+ "md5_blob_sau": "e764ada32c15ab809dbdfd8e980c6fad",
+ "dau_sau": {
+  "last_refresh": "2026-11-01T17:38:37.577351528Z",
+  "md5": "e764ada32c15ab809dbdfd8e980c6fad"
+ },
+ "t1": "2026-11-01T17:39:28Z"
+}

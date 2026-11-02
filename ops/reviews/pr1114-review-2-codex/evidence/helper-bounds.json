@@ -1,0 +1,20 @@
+[
+  {
+    "label": "default_live_30s",
+    "seconds": 5.001956,
+    "reported_alive": true,
+    "returncode": -9
+  },
+  {
+    "label": "zero_live_30s",
+    "seconds": 9.7e-05,
+    "reported_alive": true,
+    "returncode": -9
+  },
+  {
+    "label": "default_self_exit_1s",
+    "seconds": 1.01828,
+    "reported_alive": false,
+    "returncode": 0
+  }
+]

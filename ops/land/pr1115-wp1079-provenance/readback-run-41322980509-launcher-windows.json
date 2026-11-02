@@ -1,0 +1,13 @@
+{
+ "id": 41322980509,
+ "name": "launcher (Windows that)",
+ "path": ".github/workflows/launcher-windows.yml",
+ "event": "push",
+ "head_sha": "c82047da4d6f9546ce1d68282c37acf9567b74bc",
+ "run_attempt": 1,
+ "status": "completed",
+ "conclusion": "failure",
+ "run_started_at": "2026-11-01T15:47:17Z",
+ "updated_at": "2026-11-01T15:58:52Z",
+ "created_at": "2026-11-01T15:47:17Z"
+}

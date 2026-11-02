@@ -1,0 +1,8 @@
+Thread readback SHA256: a5fcd47d1a743d866094fa0e453836d692726a282a44dfc80ae99a161c4b2939 ; bytes: 1110 ; manifest MATCH
+Source: MCP github pull_request_read method=get_review_comments owner=ducthangho repo=tra-luat pullNumber=1065 ; observed: 2026-10-31T14:07:20Z
+Retained format: Trich cac truong dinh danh/trang thai tu phan hoi MCP (than comment luoc bo); totalCount=1, hasNextPage=false.
+Thread: PRRT_kwDOTNeRjc6yN7uy ; is_resolved: True ; comment IDs: [4430537534, 4430544980] ; totalCount: 1 ; hasNextPage: False
+Both comment URLs/author/timestamp/path/original_line match old REST readback; reply in_reply_to_id links to finding 4430537534
+Evidence predicate controls: complete thread ACCEPT; omit is_resolved REJECT; omit finding binding REJECT
+Round17 remediation delta: 3 files (claim, new extracted readback, manifest)
+Closure khai-resolved-khong-co-readback: PASS against retained extracted readback. No raw MCP response retained or independently authenticated; no live GitHub state or historical resolution time asserted.

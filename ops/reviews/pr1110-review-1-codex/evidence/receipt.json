@@ -1,0 +1,80 @@
+{
+  "check_count": 116,
+  "errors": [],
+  "reviewed_sha": "907c474e5dd22b2f389e8c342e7c79c6fbcb760e",
+  "reviewed_tree": "d01f444ce113e812178093aab25ce3ea9d14aeed",
+  "land_merge_commit": "53d670cf5bdeee1c5a5dcb5cefa6a0e7ff9a8b54",
+  "land_parents": [
+    "a284f8a5d5f980cc155dfb939253fc84c7901ea3",
+    "907c474e5dd22b2f389e8c342e7c79c6fbcb760e"
+  ],
+  "land_commit_date": "2026-11-01T12:53:47+07:00",
+  "anchor": "f0c4ed69e5901bd2122f51cf96c7c7d6a7af8606",
+  "verdict_bytes": 13376,
+  "verdict_sha256": "b823f2bc10297143977095eca1474d1fc73e2e98be0305173b2c486e9f8c38f6",
+  "finding_counts": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "run_id": "71490d5a710944e395c81836182f3c99",
+  "ma_thoat": 0,
+  "duration": 412.567,
+  "duration_from_timestamps": 412.566729,
+  "model_events": 19,
+  "models": [
+    "gpt-6-astra"
+  ],
+  "effort": [
+    "xhigh"
+  ],
+  "prompt_sha256": "766febde02127566e8ab3b4b0248c5ecc95bc6794fee912fcee60e9dd9854550",
+  "sandbox_status": "DO_DUOC",
+  "review_class": "sensitive",
+  "changed_count": 58,
+  "ket_luan_saved_source_counts": {
+    "copied": 53,
+    "omitted": 2,
+    "receipt_checks": 75,
+    "readme_added": 4,
+    "readme_removed": 0,
+    "mutation_rc": 1,
+    "mutation_red_receipts": [
+      "pr1071-review-1-codex-verdict.receipt.yaml"
+    ]
+  },
+  "precedent_fixed_fields": 22,
+  "precedent_fixed_differences": {},
+  "precedent_changed_fields": [
+    "anchor",
+    "base_sha",
+    "base_sha_ghi_chu",
+    "evidence_url",
+    "evidence_url_ghi_chu",
+    "ket_luan",
+    "land_merge_commit",
+    "land_merge_commit_ghi_chu",
+    "model_reviewer_identity",
+    "packet_ghi_chu",
+    "receipt_id",
+    "review_class_ghi_chu",
+    "reviewed_sha",
+    "reviewed_sha_nguon",
+    "reviewed_sha_to_tien",
+    "reviewed_tree",
+    "target_pull_request",
+    "verdict_ban_goc",
+    "verdict_bytes",
+    "verdict_path",
+    "verdict_sha256",
+    "verdict_usage_caveats"
+  ],
+  "unmeasured": {
+    "github": "KHÔNG ĐO ĐƯỢC: live PR/CI, URL public serving, actor/credentials, actual API merge_method/expectedHeadSha; local graph only establishes a two-parent merge and its second parent.",
+    "cli": "KHÔNG ĐO ĐƯỢC: binary version 0.164.0, complete historical launcher argv/flags, requested model/effort; run.json records program/argument-count/fingerprint and served telemetry, not full argv.",
+    "independence": "KHÔNG ĐO ĐƯỢC: executor identity/family, owner instruction, absence of context reuse/fork beyond supplied run/prompt/checkpoint. No re-certification of cross_approved.",
+    "sandbox": "KHÔNG ĐO ĐƯỢC: enforcement for every historical command; saved sandbox_gioi_han explicitly limits DO_DUOC to samples.",
+    "omitted_directories": "KHÔNG ĐO ĐƯỢC: contents of original cay-kho/, work/, nguon/ excluded from supplied source; individual files in those directories are not inventoried here."
+  }
+}

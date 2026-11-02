@@ -1,0 +1,63 @@
+{
+  "bien-nhan": {
+    "command": [
+      "python3",
+      "ops/bien_nhan_v2.py",
+      "--root",
+      "."
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119b/work/head",
+    "rc": 0,
+    "stdout_bytes": 259,
+    "stderr_bytes": 0
+  },
+  "land": {
+    "command": [
+      "python3",
+      "ops/land_evidence_nguon.py",
+      "--root",
+      "."
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119b/work/head",
+    "rc": 0,
+    "stdout_bytes": 7461,
+    "stderr_bytes": 0
+  },
+  "direct": {
+    "command": [
+      "python3",
+      "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119b/direct_gates.py",
+      "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119b/work/head"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119b/work/head",
+    "rc": 0,
+    "stdout_bytes": 192,
+    "stderr_bytes": 588
+  },
+  "doctrine": {
+    "command": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "."
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119b/work/head",
+    "rc": 0,
+    "stdout_bytes": 70,
+    "stderr_bytes": 0
+  },
+  "diff-check": {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "f4b513da5802d439aedbe58ae4a5cd38ff47d6ab",
+      "HEAD"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1119b/work/head",
+    "rc": 0,
+    "stdout_bytes": 0,
+    "stderr_bytes": 0
+  }
+}

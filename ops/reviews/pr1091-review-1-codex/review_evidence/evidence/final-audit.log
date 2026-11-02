@@ -1,0 +1,25 @@
+{
+  "head": "d58d649ff061ff125bc004414ed4a0787de8e5f3",
+  "tree": "78db0ce7aa198486b266a6e3d6eff7d822519109",
+  "base": "90c101b8d1f8895b66607de8582a18c5e72d834c",
+  "status": "",
+  "head_tests": "116/116 rc0",
+  "mutations": {
+    "total": 13,
+    "killed": 9,
+    "survived": [
+      "reset_no_T",
+      "model_reset_noop",
+      "model_copy_no_denial",
+      "reset_after_copy_cached_condition"
+    ]
+  },
+  "hint_tests": "118/118 rc0; 3/3 target mutants killed",
+  "state_oracles": "7/7 expected outcomes; abstract ACL only",
+  "native_wrapper": "3/3 argv/rc; enumeration Linux 1/1; Windows not measured",
+  "hint_paths": [
+    "ops/vm/cap-nhat-cong-cu_test.ps1"
+  ],
+  "hint_sha256": "ca0c2ea4e81b3dfe86b8741360ef98d037408d9bfa5b9423e0db786ba212cfbe"
+}
+Final audit: PASS; reviewed tree unchanged; exact head/base/diff and recorded oracles agree.

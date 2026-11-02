@@ -2918,6 +2918,54 @@ def _ten_tran_giai_ra(ten: str, moi_truong: dict[str, str], kieu_bash: bool = Tr
     return None
 
 
+def _chay_probe_nhu_shell(lenh: list[str], **kw):
+    """`subprocess.run(lenh, **kw)` nhưng CHỌN TỆP theo `execvpe` glibc, kể cả fallback ENOEXEC → `/bin/sh`.
+
+    wp1077 (review độc lập #823 F1): tệp KHÔNG shebang làm kernel trả ENOEXEC; glibc chạy lại bằng `/bin/sh`,
+    còn `subprocess` ném OSError (tên có `/`) hoặc THỬ TIẾP bản sau trên PATH — `doctor` gắn BI_CHE oan hoặc đo
+    NHẦM công cụ. Hợp đồng là glibc (spec M1); bash chạy lại bằng chính bash nên có thể khác với wrapper bash.
+    Tên trần (Codex lượt 2–6): ứng viên là chuỗi glibc `<phần tử>/<tên>` (giữ `/` cuối, tương đối, `..`,
+    symlink; phần tử rỗng ⇒ `<tên>`; phần tử quá dài ⇒ như phần tử rỗng, trừ phần tử cuối thì bỏ), theo thứ tự; execve qua `./<tên>` khi chuỗi
+    không có `/`. Chỉ EACCES/ENOENT/ESTALE/ENOTDIR/ENODEV/ETIMEDOUT sang ứng viên sau; ENOEXEC ⇒ `/bin/sh`
+    chạy CHÍNH chuỗi ấy; lỗi khác (ETXTBSY, ELOOP…) ném ngay; hết ⇒ EACCES nếu từng gặp, không thì lỗi cuối.
+    MIỄN TRỪ W-1077-1 (chủ kho, lease g5–g6): shebang qua ứng viên cwd (phần tử rỗng hoặc quá dài) thấy `$0`=`./<tên>`.
+    Windows giữ nguyên. PHẠM VI (chủ kho thu hẹp
+    31-10-2026): probe CLI của `CONG_CU`/`KHA_NANG`; CHƯA phủ `_git`, `_do_codex_song` — nợ #1083.
+    """
+    import errno
+    if os.name == "nt":
+        return subprocess.run(lenh, **kw)
+    ten = lenh[0]
+    if os.sep in ten:
+        ung_vien = [ten]
+    else:
+        duong = (kw["env"] if kw.get("env") is not None else os.environ).get("PATH", os.defpath)
+        tran = min(len(os.fsencode(duong)), 4095) + 1
+        phan = duong.split(os.pathsep)   # glibc: phần tử quá dài ⇒ con trỏ dừng ở `:` ⇒ thành phần tử RỖNG (cwd); cuối thì bỏ
+        phan = [d if len(os.fsencode(d)) < tran else "" for d in phan[:-1]] + [d for d in phan[-1:] if len(os.fsencode(d)) < tran]
+        ung_vien = [f"{d}/{ten}" if d else ten for d in phan]
+    tiep = {errno.EACCES, errno.ENOENT, errno.ESTALE, errno.ENOTDIR, errno.ENODEV, errno.ETIMEDOUT}
+    eacces = loi = None
+    for tep in ung_vien:
+        try:
+            return subprocess.run(lenh, executable=tep if os.sep in tep else os.curdir + os.sep + tep, **kw)
+        except OSError as e:
+            if e.errno == errno.ENOEXEC and os.path.isfile("/bin/sh"):
+                return subprocess.run(["/bin/sh", tep, *lenh[1:]], **kw)
+            if os.sep in ten or e.errno not in tiep:
+                raise
+            loi, eacces = e, (e if e.errno == errno.EACCES else eacces)
+    raise eacces or loi or FileNotFoundError(errno.ENOENT, "khong tim thay", ten)
+
+def _chay_probe_llm(lenh: list[str], *, env=None, timeout: float = 30.0) -> subprocess.CompletedProcess:
+    """Y hệt `_chay_van_ban_an_toan` (utf-8/replace, stdin=DEVNULL) nhưng qua `_chay_probe_nhu_shell`.
+
+    wp1077: `_chay_van_ban_an_toan` còn phục vụ đường ngoài `doctor`, nên không đổi nó; chỉ probe
+    `llm` của `doctor` đi đường này."""
+    return _chay_probe_nhu_shell(lenh, capture_output=True, text=True, encoding="utf-8",
+                                 errors="replace", env=env, stdin=subprocess.DEVNULL, timeout=timeout)
+
+
 def _phien_ban(duong_dan: str, *, env=None,
                timeout=PROBE_TIMEOUT_GIAY) -> tuple[bool, str, bool]:
     """Chạy thử `--version`. Trả (chay_duoc, dong_dau, qua_han).
@@ -2939,7 +2987,7 @@ def _phien_ban(duong_dan: str, *, env=None,
     bản tự do); nên cờ này phải là phần tử trả về riêng.
     """
     try:
-        p = subprocess.run([duong_dan, "--version"], capture_output=True, text=True,
+        p = _chay_probe_nhu_shell([duong_dan, "--version"], capture_output=True, text=True,
                            stdin=subprocess.DEVNULL, env=env, timeout=max(0.1, timeout),
                            encoding="utf-8", errors="replace")
     except subprocess.TimeoutExpired:
@@ -2991,7 +3039,7 @@ def _xac_thuc_kem_dau_ra(duong_dan: str, doi_so: list[str], *, env=None,
     khớp đúng một chỗ (chốt `moi mau dot bien phai khop DUNG MOT cho`).
     """
     try:
-        p = subprocess.run([duong_dan, *doi_so], capture_output=True, text=True,
+        p = _chay_probe_nhu_shell([duong_dan, *doi_so], capture_output=True, text=True,
                            stdin=subprocess.DEVNULL, env=env, timeout=max(0.1, timeout),
                            encoding="utf-8", errors="replace")
     except subprocess.TimeoutExpired:
@@ -3886,7 +3934,7 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
         # Một `doctor` mà hai probe của nó phân giải cùng một tên ra hai kết quả
         # ngược nhau là doctor tự mâu thuẫn; mọi spawn CLI agent (.cmd shim của
         # npm) phải đi qua đường dẫn resolve.
-        p = subprocess.run([duong_codex, "login", "status"], capture_output=True,
+        p = _chay_probe_nhu_shell([duong_codex, "login", "status"], capture_output=True,
                            text=True, timeout=30, encoding="utf-8", errors="replace")
         ra = ((p.stdout or "") + (p.stderr or ""))
         rc = p.returncode
@@ -3992,7 +4040,7 @@ def _do_openai_llm(moi_truong: dict[str, str] | None = None,
     if not shutil.which("llm"):
         return ("THIEU", "chua cai llm CLI — pip install llm")
 
-    p_ver = _chay_van_ban_an_toan(["llm", "--version"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
+    p_ver = _chay_probe_llm(["llm", "--version"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
     ver = p_ver.stdout.strip() if p_ver.returncode == 0 else "llm"
 
     # Kiểm tra OPENAI_API_KEY trong môi trường hoặc keys.json của llm
@@ -4000,7 +4048,7 @@ def _do_openai_llm(moi_truong: dict[str, str] | None = None,
     co_key_file = False
     if not tok:
         try:
-            p_k = _chay_van_ban_an_toan(["llm", "keys", "list"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
+            p_k = _chay_probe_llm(["llm", "keys", "list"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
             if p_k.returncode == 0 and "openai" in p_k.stdout.lower():
                 co_key_file = True
         except (OSError, subprocess.SubprocessError):
@@ -4014,7 +4062,7 @@ def _do_openai_llm(moi_truong: dict[str, str] | None = None,
 
     # Kiểm sống: gọi probe qua prompt không lưu log (--no-log)
     try:
-        p_song = _chay_van_ban_an_toan(
+        p_song = _chay_probe_llm(
             ["llm", "prompt", "in ra: ok", "-m", "gpt-4o-mini", "--no-log"],
             env=mt, timeout=30)
     except (OSError, subprocess.SubprocessError) as e:
@@ -4325,7 +4373,7 @@ def _suc_khoe_mcp_github(ten: str = "github",
     # trường thô lọt xuống.
     moi_truong = _env_da_chuan(moi_truong)
     try:
-        r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True, text=True,
+        r = _chay_probe_nhu_shell(["claude", "mcp", "get", ten], capture_output=True, text=True,
                            encoding="utf-8", errors="replace",
                            env=moi_truong, stdin=subprocess.DEVNULL,
                            timeout=PROBE_TIMEOUT_GIAY)
@@ -4523,7 +4571,7 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     # GitHub được gắn `DUNG_DUOC` mà không có lấy một đường đã xác thực nào.
     if shutil.which("gh"):
         try:
-            pg = subprocess.run(["gh", "auth", "status"], capture_output=True, text=True,
+            pg = _chay_probe_nhu_shell(["gh", "auth", "status"], capture_output=True, text=True,
                                 encoding="utf-8", errors="replace",
                                 env=mt, stdin=subprocess.DEVNULL, timeout=20)
             duong.append(("gh-cli", pg.returncode == 0,
@@ -4584,7 +4632,7 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     # vào một thao tác kho ĐÃ THÀNH CÔNG, không neo vào probe.
     if shutil.which("gh") and slug:
         try:
-            pk = subprocess.run(["gh", "api", f"repos/{slug}", "--jq", ".full_name"],
+            pk = _chay_probe_nhu_shell(["gh", "api", f"repos/{slug}", "--jq", ".full_name"],
                                 capture_output=True, text=True,
                                 encoding="utf-8", errors="replace", env=mt,
                                 stdin=subprocess.DEVNULL, timeout=PROBE_TIMEOUT_GIAY)

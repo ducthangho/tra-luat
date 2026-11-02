@@ -22769,7 +22769,8 @@ def run() -> int:
         # KÊ KHAI SLOT (packet #1030): 193 → **194** = + `changelog.d/wp-1030.md`. Trần Package 200 còn 5 khe.
         # KÊ KHAI SLOT (packet #1038): 194 → **195** = + `changelog.d/wp-1038.md`. Trần Package 200 còn 4 khe.
         # KÊ KHAI SLOT (packet #1052): 195 → **197** = + `references/windows-testing.md` + `changelog.d/wp-1052.md`. Trần Package 200 còn 3 khe.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 197
+        # KÊ KHAI SLOT (packet #1089): 197 → **198** = + `references/Code.2.21.2q.gs` (webapp agent_creds_put). Trần Package 200 còn 2 khe.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 198
         d = root / "docs"
         # chỉ TỆP thường VẬT LÝ dưới `docs/`: thư mục, symlink (hỏng hay trỏ tới tệp thật) và `docs/` là symlink
         # đều không được tính là còn docs (F1 review wp794 lượt 1–2).
@@ -22828,7 +22829,8 @@ def run() -> int:
             # KÊ KHAI SLOT (packet #1030): 193 → **194** = + `changelog.d/wp-1030.md`. Trần Package 200 còn 5 khe.
             # KÊ KHAI SLOT (packet #1038): 194 → **195** = + `changelog.d/wp-1038.md`. Trần Package 200 còn 4 khe.
             # KÊ KHAI SLOT (packet #1052): 195 → **197** = + `references/windows-testing.md` + `changelog.d/wp-1052.md`. Trần Package 200 còn 3 khe.
-            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 197
+            # KÊ KHAI SLOT (packet #1089): 197 → **198** = + `references/Code.2.21.2q.gs` (webapp agent_creds_put). Trần Package 200 còn 2 khe.
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 198
         # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
         # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
         # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.

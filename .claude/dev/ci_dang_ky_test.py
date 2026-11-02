@@ -499,8 +499,32 @@ def _phan_loai_cai_ruff(run):
     return _doc_run_ruff(run)[:2]
 
 
+# wp1113 (CI-LAN-LUU-TRU r1): `if:` DUY NHAT duoc coi la khong dieu kien — bo buoc o duong nhanh ho so. Tren duong day du
+# moi buoc ay deu chay; tren duong nhanh ca buoc cai Ruff/G5 lan buoc registry cung bi bo, nen thu tu "cai truoc dung" giu.
+IF_DUONG_NHANH = "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"
+MAU_DONG_DUONG_NHANH = re.compile(r'echo "(?:DUONG_NHANH: bo qua .+ vi diff chi gom ops/\{land,leases,reviews,specs\}/\*\*'
+                                  r'|GOM: KHONG DO — duong_nhanh, 0 manh \(khong manh nao chay\))"')
+
+
+def _bo_che_do_job(job):
+    """Ban sao `job` khong con lop duong nhanh: bo buoc `DUONG_NHANH - …` (chi gom dong echo dung mau, khong thi GIU de
+    chot khac do) va bo `if:` == IF_DUONG_NHANH. Dung de so voi workflow khong co `chuan-bi` (ci-dot-bien-du)."""
+    job = json.loads(json.dumps(job or {}))
+    giu = []
+    for b in job.get("steps") or []:
+        if (str(b.get("name", "")).startswith("DUONG_NHANH - ") and isinstance(b.get("run"), str)
+                and all(MAU_DONG_DUONG_NHANH.fullmatch(d.strip()) for d in b["run"].splitlines() if d.strip())):
+            continue
+        if b.get("if") == IF_DUONG_NHANH:
+            b.pop("if")
+        giu.append(b)
+    if "steps" in job:
+        job["steps"] = giu
+    return job
+
+
 def _buoc_co_dieu_kien(step):
-    return step.get("if") is not None
+    return step.get("if") not in (None, IF_DUONG_NHANH)
 
 
 def _shell_trong_mien(data, job, step):
@@ -629,7 +653,8 @@ def loi_ci_dispatch_windows(source=None):
          "ci.yml sai hợp đồng workflow_dispatch.runner_set"),
         ("github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only'" in compact,
          "ci.yml: os của chuan-bi không đọc inputs.runner_set == 'windows-only' trong nhánh dispatch"),
-        (arrays == [["windows-latest"], ["ubuntu-latest", "windows-latest"], ["ubuntu-latest"]],
+        # wp1113: nhanh DAU ep chi Ubuntu khi duong nhanh ho so, roi ba mang cu.
+        (arrays == [["ubuntu-latest"], ["windows-latest"], ["ubuntu-latest", "windows-latest"], ["ubuntu-latest"]],
          f"ci.yml: os của chuan-bi sai ba mảng chỉ-Windows · hai nền · chỉ-Ubuntu (thấy {arrays})"),
     ]
     return [message for ok, message in checks if not ok], len(checks)
@@ -805,10 +830,12 @@ LENH_REGISTRY = frozenset({"git config --global core.autocrlf false", "git confi
                            "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg",
                            "python ops/cong_cu.py kiem-tra --json", "python -m pip install --quiet ruff==0.15.15",
                            "ruff --version", "python .claude/dev/ci_dang_ky_test.py --chay"})
-BAM_GATE_REGISTRY = "89516cf77c3ce734feadf348bfea8180254c67e8e8ec62a48e2f6ea1dc038452"
+# wp1113: gan `if:` duong nhanh + buoc liet ke buoc bo (rà vung: chi echo dung mau, xem _bo_che_do_job).
+BAM_GATE_REGISTRY = "3a7d54b26d667dab3d3dbc10cb98eb6697d42e12e903b65252736b55ab90abe2"
 # WP748 r16: hai job nay la `targeted_mutant_gate` (NHANH_DON_DUOC_DICH, gom `--gop-dich`, tran 30 phut).
 # #910 pha B (PR #917, a7da463): tran job manh 30 -> 150; job gom van 10.
-BAM_GATE_NHANH = "fe061a50668af83b6c9b6939f881ba37a30083bc72a27b52c2e02350835d626b"
+# wp1113: hai job mang `if:` duong nhanh o buoc + buoc liet ke / gom KHONG DO.
+BAM_GATE_NHANH = "00fcbf572255b6279934b41cc7982054a318873277133c0f6fe927225937a912"
 GOC_TAI_LIEU = frozenset({"AGENTS.md", "CHANGELOG.md", "CLAUDE.md", "CONTEXT.md", "INSTALL.md", "README.md", "SKILL.md"})
 
 
@@ -902,7 +929,7 @@ def loi_vung_thiet_lap(data):
     """Bước của `gate-registry` theo danh sách CHO PHÉP từng chữ, VÀ cả job đóng băng bằng băm. Ba lượt Codex CLI liên
     tiếp vá một lối lại lọt lối khác (regex → `cd`/`working-directory` → `env.BASH_ENV`): liệt kê lối vào là thua từ
     thiết kế, nên mọi đổi của job (env, shell, defaults…) ⇒ ĐỎ cho tới khi ai đó cập nhật `BAM_GATE_REGISTRY` + vùng."""
-    buoc = ((((data or {}).get("jobs") or {}).get("gate-registry") or {}).get("steps") or [])
+    buoc = _bo_che_do_job((((data or {}).get("jobs") or {}).get("gate-registry") or {})).get("steps") or []
     loi = [] if bam_gate_registry(data) == BAM_GATE_REGISTRY else [
         f"gate-registry đổi (băm {bam_gate_registry(data)}): rà vùng đột biến rồi cập nhật BAM_GATE_REGISTRY"]
     loi += [f"gate-registry: bước có working-directory: {b.get('name')}" for b in buoc if "working-directory" in b]
@@ -948,7 +975,7 @@ def loi_workflow_dot_bien_du(data, ci):
         loi.append(f"schedule phải đúng [{{cron: {CRON_DOT_BIEN_DU!r}}}] (hằng tuần): {lich!r}")
     if d.get("permissions") != {"contents": "read"}:
         loi.append(f"permissions phải đúng contents: read: {d.get('permissions')!r}")
-    jobs, goc = d.get("jobs") or {}, (((ci or {}).get("jobs") or {}).get("gate-registry") or {})
+    jobs, goc = d.get("jobs") or {}, _bo_che_do_job((((ci or {}).get("jobs") or {}).get("gate-registry") or {}))
     if set(jobs) != {JOB_DU, JOB_MANH, JOB_GOP} or not isinstance(jobs[JOB_DU], dict):
         return loi + [f"phải đúng ba job {JOB_DU}/{JOB_MANH}/{JOB_GOP}, thấy {sorted(map(str, jobs))}"]
     job = jobs[JOB_DU]
@@ -1262,6 +1289,7 @@ def loi_g5_workflow(data):
     loi = [f"thiếu job {j}" for j in JOB_G5 if j not in jobs]
     loi += [f"workflow có khoá `{k}` cấp workflow — kế thừa vào mọi job G5" for k in ("defaults", "env") if k in (data or {})]
     for j, v in jobs.items():
+        v = _bo_che_do_job(v)   # wp1113: lop duong nhanh khong phai dieu kien cua G5 (duong day du chay du)
         buoc = (v or {}).get("steps") or []
         cham = [i for i, b in enumerate(buoc) if re.search(r"(?<![A-Za-z0-9_])cong_cu", str(b.get("run", "")))]
         if j not in JOB_G5 or len(cham) != 1:
@@ -1274,7 +1302,8 @@ def loi_g5_workflow(data):
         # thoát của lệnh CUỐI, nên probe đỏ + selftest xanh có thể thành bước xanh. Bước G5 phải KHAI RÕ `shell: bash`.
         elif buoc[cham[0]].get("shell") != "bash":
             loi.append(f"{j}: bước G5 phải khai rõ `shell: bash` (thấy {buoc[cham[0]].get('shell')!r})")
-        elif {"if", "continue-on-error"} & (set(buoc[cham[0]]) | (set(v) - {"if"}
+        elif {"if", "continue-on-error"} & ((set(buoc[cham[0]]) - ({"if"} if buoc[cham[0]].get("if") == IF_DUONG_NHANH else set()))
+                                            | (set(v) - {"if"}
               if j == JOB_G5_GOP or (j == JOB_G5_MANH and v.get("if") == G5_MANH_IF)
               or (j == "gate-registry" and v.get("if") == "${{ !cancelled() }}"
                                          and v.get("needs") == ["chuan-bi", "gate-nhanh-gop"]) else set(v))):
@@ -2370,7 +2399,9 @@ def phan_chung():
         ("thieu-manh", lambda w: w["jobs"].pop("gate-nhanh-manh")),
         ("thieu-gop", lambda w: w["jobs"].pop("gate-nhanh-gop")),
         ("thieu-phan-hoach", lambda w: w["jobs"]["gate-nhanh-manh"]["strategy"]["matrix"].update(manh=[0, 1, 2, 3, 4, 5, 6])),
-        ("bo-bien-manh", lambda w: w["jobs"]["gate-nhanh-manh"]["steps"][3]["env"].pop("NHANH_DON_DUOC_DICH")),
+        # wp1113: tim buoc manh theo NOI DUNG, khong theo vi tri (buoc liet ke duong nhanh chen truoc no).
+        ("bo-bien-manh", lambda w: next(b for b in w["jobs"]["gate-nhanh-manh"]["steps"]
+                                        if "nhanh_don_duoc_test" in str(b.get("run", "")))["env"].pop("NHANH_DON_DUOC_DICH")),
         ("bo-gop-khoi-needs", lambda w: w["jobs"]["gate-registry"].update(needs="chuan-bi")),
     ):
         w = json.loads(json.dumps(_wf0))

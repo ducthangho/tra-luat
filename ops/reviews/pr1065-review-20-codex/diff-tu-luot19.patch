@@ -1,0 +1,56 @@
+diff --git a/ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml b/ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml
+index 8c11cb6..28c0ab4 100644
+--- a/ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml
++++ b/ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml
+@@ -2,14 +2,17 @@
+ # viec chu kho giao truc tiep trong phien Claude Code (khong Issue packet, khong lease, khong spec_hash).
+ # Schema: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1; khuon: ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml.
+ #
+-# TRANG THAI: merged (3dfb973), `landed: false` — cho chu kho quyet o PR ghi so; mot moc §10.2.2 (Workflow definition)
+-# Workflow definition da dong qua ASUS (gh graphql); assurance §8.1: cross_approved tren BAN VA 210ab81 (PR #1069), con ban
+-# merge b0814f4 bi cross-review luot 1 tra changes_requested (1 P0) — xem ASSURANCE-REVIEWER-81 va review.cross_review.
++# TRANG THAI: merged (3dfb973), `landed: false` — cho chu kho quyet o PR ghi so (PR #1069). Moc §10.2.2 Workflow definition da
++# dong (gh graphql qua ASUS); moc Checkout/Gate output van not_measured. Assurance §8.1: cross_approved tren BAN VA 210ab81
++# (PR #1069), con ban merge b0814f4 bi cross-review luot 1 tra changes_requested (1 P0) — xem ASSURANCE-REVIEWER-81.
+ # "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
+-# NHAN: measured = do lai trong phien ghi so tu readback tho (ten tep ghi kem); thuat_lai = loi khai cua phien, KHONG tai
+-# chay; not_measured = khong do duoc, ghi ly do.
+-# Readback tho: ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/ (SHA256SUMS.txt). Moi phep do REST: GET
+-# https://api.github.com/repos/ducthangho/tra-luat/<duong dan> bang curl, do 2026-10-31 ~05:40Z.
++# NHAN: measured = do lai trong phien ghi so tu tep trong thu muc provenance (ten tep ghi kem); thuat_lai = loi khai cua phien,
++# KHONG tai chay; not_measured = khong do duoc, ghi ly do.
++# Thu muc provenance: ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/ (SHA256SUMS.txt). Phan lon la phan hoi REST THO (GET
++# https://api.github.com/repos/ducthangho/tra-luat/<duong dan> bang curl, 2026-10-31, gio do khac nhau theo tep). NGOAI LE, khong
++# phai ban tho: readback-graphql-workflowrun-41173244891.json (output `gh api graphql` qua ASUS, luu nguyen van);
++# readback-review-threads-1065.json (BAN TRICH cac truong id/trang thai tu phan hoi MCP get_review_comments, than comment luoc
++# bo — tep tu ghi ro); thuatlai-gate-windows-3dfb973.json (chep tay tu VM, nhan thuat_lai).
+ 
+ schema_version: 1
+ mission_id: null
+diff --git a/ops/reviews/README.md b/ops/reviews/README.md
+index babdf20..efda1a3 100644
+--- a/ops/reviews/README.md
++++ b/ops/reviews/README.md
+@@ -853,7 +853,7 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư
+ | `pr1048-review-3-codex-verdict.md` | `BA-ANH-CHUP-CAY-KHONG-VAO-KHO` | (a) review_evidence/{before,after,final}.json (moi tep 1457718 byte) va ps1-files.stdout (527 byte, nhi phan vi co NUL) KHONG vao kho; sha256 o OMITTED.txt. |
+ | `pr1065-review-16-codex-verdict.md` | `VERDICT-KHAI-SAI-EXECUTION-SURFACE` | Verdict tu khai execution surface `codex_service`, nhung run.json 52f05f65 ghi execution_surface=codex_cli (launcher.py run -- codex exec). Dinh chinh be mat thanh codex_cli, giu nguyen byte verdict. Verdict cung ghi model "KHONG DO DUOC tu cong cu phien" — run.json do duoc. |
+ | `pr1065-review-16-codex-verdict.md` | `HO-MODEL-EXECUTOR-THEO-PROVIDER` | Ho model executor (claude) suy tu executor_provider, KHONG do_may; chi ho model REVIEWER duoc do bang model_phuc_vu. |
+-| `pr1065-review-16-codex-verdict.md` | `WINDOWS-NATIVE-KHONG-DO-TRONG-REVIEW` | Reviewer chi co pwsh Linux: ACL NTFS, icacls, Scheduled Task, msiexec la KHONG DO DUOC trong review. Executor do rieng tren VM tra-luat-win (thuat lai trong phien, khong la bang chung reviewer): bo test 71/71 rc0 o head luot 13–16, va chay THAT tang NguoiDung 11/11 giu rc0 o d005cf4 va f3231c8. -DangKyLich tren VM CHUA chay lai voi ban sau PR #1069. |
++| `pr1065-review-16-codex-verdict.md` | `WINDOWS-NATIVE-KHONG-DO-TRONG-REVIEW` | Reviewer chi co pwsh Linux: ACL NTFS, icacls, Scheduled Task, msiexec la KHONG DO DUOC trong review. Executor do rieng tren VM tra-luat-win (thuat lai trong phien, khong la bang chung reviewer): bo test 71/71 rc0 o f3231c8, c489c72, 210ab81 (head cham o luot 14–16; head luot 13 e5838ff la 70/70), va chay THAT tang NguoiDung 11/11 giu rc0 o d005cf4 va f3231c8. -DangKyLich tren VM CHUA chay lai voi ban sau PR #1069. |
+ | `pr1065-review-16-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong. |
+ | `pr1065-review-16-codex-verdict.md` | `TEP-REVIEWER-CHON-LOC` | Chi giu trong review_evidence/ cac tep verdict luot 16 nhac ten (<=500 KB); cac tep con lai cua sandbox liet ke sha256/byte o OMITTED.txt. |
+ 
+diff --git a/ops/reviews/pr1065-review-16-codex-verdict.receipt.yaml b/ops/reviews/pr1065-review-16-codex-verdict.receipt.yaml
+index 939c912..8056cb7 100644
+--- a/ops/reviews/pr1065-review-16-codex-verdict.receipt.yaml
++++ b/ops/reviews/pr1065-review-16-codex-verdict.receipt.yaml
+@@ -106,7 +106,8 @@ verdict_usage_caveats:
+     muc: P2
+     mo_ta: >-
+       Reviewer chi co pwsh Linux: ACL NTFS, icacls, Scheduled Task, msiexec la KHONG DO DUOC trong review. Executor do rieng tren VM
+-      tra-luat-win (thuat lai trong phien, khong la bang chung reviewer): bo test 71/71 rc0 o head luot 13–16, va chay THAT tang
++      tra-luat-win (thuat lai trong phien, khong la bang chung reviewer): bo test 71/71 rc0 o f3231c8, c489c72, 210ab81 (head
++      cham o luot 14–16; head luot 13 e5838ff la 70/70), va chay THAT tang
+       NguoiDung 11/11 giu rc0 o d005cf4 va f3231c8. -DangKyLich tren VM CHUA chay lai voi ban sau PR #1069.
+   - id: CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY
+     muc: P3

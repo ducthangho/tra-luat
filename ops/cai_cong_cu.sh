@@ -18,15 +18,18 @@ TEN="${1:-}"
 # khong du) => bo dau ay truoc khi xet; PY vo huong tu moi truong khong bao gio duoc dung lai.
 case "$(declare -p CAI_CONG_CU_PY_CUA 2>/dev/null)" in "declare -x"*) unset CAI_CONG_CU_PY_CUA ;; esac
 if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ] && [[ "$(declare -p PY 2>/dev/null)" == "declare -a"* ]]; then :
-elif command -v python >/dev/null 2>&1; then PY=(python)
-elif command -v python3 >/dev/null 2>&1; then PY=(python3)
-elif command -v py >/dev/null 2>&1; then PY=(py -3)
+# wp1078 (review doc lap #832 F03 tai mo): chon bang `type -P` — CHI tep tren PATH. `command -v` thanh cong voi HAM
+# (vd `BASH_FUNC_python%%` ke thua) va in TEN TRAN, nen phep ghim ben duoi tung khong ghim gi.
+elif _PY_TEP="$(type -P python)"; then PY=("$_PY_TEP")
+elif _PY_TEP="$(type -P python3)"; then PY=("$_PY_TEP")
+elif _PY_TEP="$(type -P py)"; then PY=("$_PY_TEP" -3)
 else echo "cai_cong_cu: khong tim thay python, python3 hay py" >&2; exit 4
 fi
-# wp831 (Codex luot 2 F03): ghim PY[0] thanh duong dan tuyet doi NGAY tai day. Cong thuc `rg.cai` goi checker duoi
-# `PATH="$RG_D:$PATH"`, va dong kiem cuoi chay sau `export PATH="$DICH:$PATH"`: ten tran se doi sang Python cua thu muc
-# ung vien (vd thieu PyYAML). Giu nguyen doi so con lai cua mang (`py -3`).
-PY[0]="$(command -v "${PY[0]}")"
+unset _PY_TEP
+# wp831 (Codex luot 2 F03): PY[0] phai la duong dan tuyet doi. Cong thuc `rg.cai` goi checker duoi `PATH="$RG_D:$PATH"`,
+# va dong kiem cuoi chay sau `export PATH="$DICH:$PATH"`: ten tran se doi sang Python cua thu muc ung vien (vd thieu
+# PyYAML). wp1078: khong tuyet doi => DUNG (fail-close), ke ca PY dung lai tu luot cha; khong chay tiep voi ten tran.
+case "${PY[0]}" in /*) ;; *) echo "cai_cong_cu: PY[0] khong phai duong dan tuyet doi: '${PY[0]}'" >&2; exit 4 ;; esac
 
 # wp858 (L1, Q1): MOT bo chon thu muc cho cong thuc `cai` (duoc `eval` duoi day). `dirname "$(command -v X)"` in thu
 # muc ban DAU PATH, ke ca ban HONG. Chuan DUY NHAT: CHINH `cong_cu.py kiem-tra --chi <ten>` bang PY da ghim (wp831 F03),

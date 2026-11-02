@@ -1,0 +1,18 @@
+{
+  "head": "90b3f1cd9ff8a3459285796da37dc96b8553690e",
+  "base": "90c101b8d1f8895b66607de8582a18c5e72d834c",
+  "tree": "b077af062b784383994a556f165e54abb947fcf2",
+  "branch": "HEAD",
+  "shallow": "false",
+  "abbrev": "7",
+  "status": "",
+  "files": {
+    "ops/vm/cap-nhat-cong-cu.ps1": "8efc063a891916598e398f7e448c295c8a37e12cc1dace5534f1fbcfd26ba927",
+    "ops/vm/cap-nhat-cong-cu_test.ps1": "bb24042ad0c00f1537f0f9b7d69c7c96c5f3b61d132e427d08f568c34ecf63f6",
+    "ops/vm/README.md": "e450ff93992576a31b622ce6474c7158ba05f8fdf83c8f8e8267d80fdc95bb6e",
+    "ops/cong_cu.yaml": "71631bb6baf532deeb4847c5ff9c407a50bfdb4fc503621913eb42c719ee92fb",
+    "requirements.txt": "97733a880d95f8a900f39af2bcd1a59a3ecb357dfc928c01c7a06636b1b07657"
+  },
+  "diff_matches": true,
+  "prompt_matches": true
+}

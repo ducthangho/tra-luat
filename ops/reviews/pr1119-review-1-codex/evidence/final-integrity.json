@@ -1,0 +1,28 @@
+{
+  "head": "a8f74709578f3c68833d366ed80b66fc10fbf0a3",
+  "tree": "66458c331fca22ac5dd497e756f18a80179302f2",
+  "status": "",
+  "changed_files": [],
+  "added_files": [],
+  "removed_files": [],
+  "file_count_before": 10459,
+  "file_count_after": 10459,
+  "diff_check_rc": 0,
+  "diff_check_output": "",
+  "input_diff_matches": true,
+  "mutant_status": "",
+  "mutations": 4,
+  "mutation_rejections": 8,
+  "classifier_blob_ids": {
+    "a8f74709578f3c68833d366ed80b66fc10fbf0a3": "ca480114ae7a893bef985f29dbbd962dc156212b",
+    "e137f8ce1215e0e6a6c8fbc1aa949b31fa2e4e7d": "ca480114ae7a893bef985f29dbbd962dc156212b",
+    "3a3aac561ba359c08dfe92d95584b56494fc12d4": "ca480114ae7a893bef985f29dbbd962dc156212b",
+    "e101b11e9586de3125f811ec4f42a89af69de8f2": "ca480114ae7a893bef985f29dbbd962dc156212b",
+    "51435a44659c4026539497a47ace971a71a64f40": "ca480114ae7a893bef985f29dbbd962dc156212b"
+  },
+  "classifier_same_at_all_reviewed": true,
+  "commits": [
+    "a8f74709578f3c68833d366ed80b66fc10fbf0a3 ops/reviews: biên nhận v2 + mục lục README cho 4 lượt cross-review của PR #1110 và #1114",
+    "cf5acfa7282ec42ef282015fa27fc642a4515588 ops/reviews: hiện vật cross-review Codex của PR #1110 (2 lượt) và PR #1114 (2 lượt)"
+  ]
+}

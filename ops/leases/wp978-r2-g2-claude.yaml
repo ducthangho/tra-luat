@@ -111,3 +111,8 @@ mien_p3:
   con_mo: 'xoa object fixture am #25 sau batch-check (dung vi tri luot 10) rc0; go assertion ton tai rieng rc0'
 mien_p3_tham_quyen: 'chu kho chon "Mien P3, giu 516a334 (Recommended)" qua AskUserQuestion trong phien session_015GtxrcrL4cwJqpNqx2ptAa 02-11-2026 ~04:12Z; bam byte KHONG DO DUOC'
 mien_p3_no: {ten: wp978-git-reader-differential-fuzz, owner: ducthangho, huong: 'so dinh danh muc oracle doc lap; kiem ton tai sat ranh gioi reader; meta-test tiem loi cho cac chot cua c62'}
+da_bi_thay_the: wp1147-r1-g1-claude
+da_bi_thay_the_ly_do: >-
+  PR #997 (packet #978) da merge 02-11-2026 05:49Z (02ddeb4). Lease nay con han toi 2026-11-03T02:30Z va van giu
+  ops/ci_provenance_test.py; packet tiep theo wp1147 (Issue #1147, chu kho "Dong y, lam di") thay no. Bia mo hai chieu
+  la duong thu hoi.

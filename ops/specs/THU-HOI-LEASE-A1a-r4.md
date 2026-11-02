@@ -1,10 +1,10 @@
-# THU-HOI-LEASE-A1a � revision 4
+# THU-HOI-LEASE-A1a - revision 4
 
 ## Authority and scope
 
 This revision supersedes revision 3 only for execution and review routing. The owner authorized Codex to act as executor and as an independent reviewer, with a human audit before merge, on 2026-11-02. It does not activate the revocation ledger, enlarge the write set, or waive any technical acceptance criterion.
 
-The authoritative technical contract remains `ops/specs/THU-HOI-LEASE-A1a-r3.md`, blob `401804bacea92ae5305bb5c3a36cc3821f973227`, SHA-256 `ac7e0129b281b517c69e9a2512a05b47d55ad99f0ac964462c061ea511f70bc1`. All objectives M1�M14, tests A1�A22, measurement scripts and hashes, limits, negative controls, and stop conditions in that exact blob are incorporated into this revision without change. The parent slice A1 in `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` r9 is incorporated for technical scope; its `executor: claude` and `assurance_target: cross_approved` are superseded by the routing below.
+The authoritative technical contract remains `ops/specs/THU-HOI-LEASE-A1a-r3.md`, blob `401804bacea92ae5305bb5c3a36cc3821f973227`, SHA-256 `ac7e0129b281b517c69e9a2512a05b47d55ad99f0ac964462c061ea511f70bc1`. All objectives M1-M14, tests A1-A22, measurement scripts and hashes, limits, negative controls, and stop conditions in that exact blob are incorporated into this revision without change. The parent slice A1 in `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` r9 is incorporated for technical scope; its `executor: claude` and `assurance_target: cross_approved` are superseded by the routing below.
 
 ## Packet
 
@@ -42,5 +42,5 @@ The lease may additionally list a handoff path outside the product PR diff. No o
 
 ## Admission
 
-Before granting generation 1, the dispatcher must verify the exact r3 blob and SHA-256 above, confirm #579 landed, reconcile the complete remote-head ref set, and run `ai-dang-giu` on each of the three product paths. Each must return `NG�?I_GI? 0` with a directly observed return code. An uncertain or occupied path blocks the lease. A later material change requires a new revision and generation.
+Before granting generation 1, the dispatcher must verify the exact r3 blob and SHA-256 above, confirm #579 landed, reconcile the complete remote-head ref set, and run `ai-dang-giu` on each of the three product paths. Each must return `NGƯỜI_GIỮ 0` with a directly observed return code. An uncertain or occupied path blocks the lease. A later material change requires a new revision and generation.
 

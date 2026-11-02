@@ -1,4 +1,4 @@
-# ADR-0061 — Không ghi được trạng thái "credential Codex bị từ chối" thì lần gọi sau probe lại: chấp nhận vĩnh viễn
+# ADR-0061 — Chấp nhận vĩnh viễn khả năng probe lặp khi không ghi được trạng thái từ chối Codex
 
 - **Trạng thái:** Accepted (2026-11-02). Chủ kho `ducthangho` chọn "ADR chấp nhận (Recommended)" cho Issue #825 qua
   AskUserQuestion trong phiên `session_015Gtxra7iT6mwM1kqpdggt6` ngày 01-11-2026, rồi bảo làm ngay ("Đồng ý làm đi",

@@ -1,0 +1,1375 @@
+[
+ {
+  "id": 125043121246,
+  "name": "chuan-bi",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T01:16:37Z",
+  "completed_at": "2026-11-02T01:16:49Z",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033981,
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:38Z",
+    "completed_at": "2026-11-02T01:16:38Z"
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:38Z",
+    "completed_at": "2026-11-02T01:16:47Z"
+   },
+   {
+    "name": "phan loai diff (duong nhanh ho so)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:47Z",
+    "completed_at": "2026-11-02T01:16:47Z"
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:47Z",
+    "completed_at": "2026-11-02T01:16:47Z"
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:47Z",
+    "completed_at": "2026-11-02T01:16:47Z"
+   }
+  ]
+ },
+ {
+  "id": 125043184489,
+  "name": "gate-packet-loop (ubuntu-latest)",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T01:16:51Z",
+  "completed_at": "2026-11-02T01:17:05Z",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033986,
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:16:52Z"
+   },
+   {
+    "name": "Force LF checkout (hash parity với manifest)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:16:52Z"
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:17:00Z"
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:00Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "cài actionlint cho G5",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "cài shellcheck cho G5 (cài xong đo lại)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "cài rg cho G5 (cài xong đo lại)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "cài Ruff 0.15.15 và in probe dương",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-packet-loop)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "packet-loop selftest",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   }
+  ]
+ },
+ {
+  "id": 125043184525,
+  "name": "gate (ubuntu-latest)",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T01:16:51Z",
+  "completed_at": "2026-11-02T01:17:10Z",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033987,
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:16:52Z"
+   },
+   {
+    "name": "Force LF checkout (hash parity với manifest)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:16:52Z"
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:17:00Z"
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:00Z",
+    "completed_at": "2026-11-02T01:17:00Z"
+   },
+   {
+    "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:00Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "cài actionlint cho G5",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "cài shellcheck cho G5 (cài xong đo lại)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "cài rg cho G5 (cài xong đo lại)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "G5 kiem ban ke cong cu + T1..T8 (packet",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "cài Ruff 0.15.15 và in probe dương",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "DUONG_NHANH - liet ke buoc bo qua (job gate)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "PR head contains required EOL base",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "py_compile",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "codex credential selftest (packet #300)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "idiom-ba-ten selftest",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "eol-policy selftest",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "pre-push selftest",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "eol-policy survey",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:04Z"
+   },
+   {
+    "name": "bundled-fragment check (topology gói)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:04Z",
+    "completed_at": "2026-11-02T01:17:04Z"
+   },
+   {
+    "name": "gen_instructions selftest",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:04Z",
+    "completed_at": "2026-11-02T01:17:04Z"
+   },
+   {
+    "name": "command-registry unit test (AG-T0-03)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:04Z",
+    "completed_at": "2026-11-02T01:17:04Z"
+   },
+   {
+    "name": "tl selftest (luot PR — khong sinh bang chung)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:04Z",
+    "completed_at": "2026-11-02T01:17:04Z"
+   },
+   {
+    "name": "tl selftest (co bang chung exact-identity)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:04Z",
+    "completed_at": "2026-11-02T01:17:04Z"
+   },
+   {
+    "name": "tai len gate-evidence",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:04Z",
+    "completed_at": "2026-11-02T01:17:04Z"
+   },
+   {
+    "name": "workflow-audit strict",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:04Z",
+    "completed_at": "2026-11-02T01:17:04Z"
+   },
+   {
+    "name": "golden-test",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:04Z",
+    "completed_at": "2026-11-02T01:17:04Z"
+   },
+   {
+    "name": "doc-claims-check strict",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:04Z",
+    "completed_at": "2026-11-02T01:17:07Z"
+   },
+   {
+    "name": "determinism-audit strict",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:07Z",
+    "completed_at": "2026-11-02T01:17:07Z"
+   },
+   {
+    "name": "ci-phamvi guard (bang phu thuoc khop ma)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:07Z",
+    "completed_at": "2026-11-02T01:17:07Z"
+   },
+   {
+    "name": "ci-phamvi selftest (phan chung — cong co rang)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:07Z",
+    "completed_at": "2026-11-02T01:17:07Z"
+   },
+   {
+    "name": "release-check full",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:07Z",
+    "completed_at": "2026-11-02T01:17:07Z"
+   },
+   {
+    "name": "release-verify strict (lane LAND — manifest committed)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:07Z",
+    "completed_at": "2026-11-02T01:17:07Z"
+   },
+   {
+    "name": "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:07Z",
+    "completed_at": "2026-11-02T01:17:07Z"
+   },
+   {
+    "name": "release-bundle x2 cùng SHA-256",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:07Z",
+    "completed_at": "2026-11-02T01:17:07Z"
+   },
+   {
+    "name": "tl_boot smoke",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:07Z",
+    "completed_at": "2026-11-02T01:17:07Z"
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:07Z",
+    "completed_at": "2026-11-02T01:17:08Z"
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:08Z",
+    "completed_at": "2026-11-02T01:17:08Z"
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:08Z",
+    "completed_at": "2026-11-02T01:17:08Z"
+   }
+  ]
+ },
+ {
+  "id": 125043184538,
+  "name": "gate-nhanh-manh (ubuntu-latest, 3)",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T01:16:51Z",
+  "completed_at": "2026-11-02T01:17:04Z",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033984,
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:16:52Z"
+   },
+   {
+    "name": "Force LF checkout (hash parity với manifest)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:16:52Z"
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Run actions/upload-artifact@v4",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:02Z"
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:02Z",
+    "completed_at": "2026-11-02T01:17:02Z"
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:02Z",
+    "completed_at": "2026-11-02T01:17:02Z"
+   }
+  ]
+ },
+ {
+  "id": 125043184551,
+  "name": "gate-ops (ubuntu-latest)",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T01:16:51Z",
+  "completed_at": "2026-11-02T01:32:57Z",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033988,
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:16:52Z"
+   },
+   {
+    "name": "Force LF checkout (hash parity với manifest)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:16:53Z"
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:53Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "cài shellcheck cho G5 (cài xong đo lại)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "cài rg cho G5 (cài xong đo lại)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-ops)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:03Z"
+   },
+   {
+    "name": "DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:03Z",
+    "completed_at": "2026-11-02T01:17:15Z"
+   },
+   {
+    "name": "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:15Z",
+    "completed_at": "2026-11-02T01:27:51Z"
+   },
+   {
+    "name": "bien-nhan v2 selftest",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:27:51Z",
+    "completed_at": "2026-11-02T01:32:54Z"
+   },
+   {
+    "name": "lease-publish selftest (đo lại setup sau G5)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:32:54Z",
+    "completed_at": "2026-11-02T01:32:54Z"
+   },
+   {
+    "name": "don-nhanh selftest (chốt xoá nhánh)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:32:54Z",
+    "completed_at": "2026-11-02T01:32:54Z"
+   },
+   {
+    "name": "bo ca gate chay TRONG cgroup duoc uy quyen (Linux)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:32:54Z",
+    "completed_at": "2026-11-02T01:32:54Z"
+   },
+   {
+    "name": "gate lifecycle selftest (nen khong co cgroup)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:32:54Z",
+    "completed_at": "2026-11-02T01:32:54Z"
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:32:54Z",
+    "completed_at": "2026-11-02T01:32:55Z"
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:32:55Z",
+    "completed_at": "2026-11-02T01:32:55Z"
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:32:55Z",
+    "completed_at": "2026-11-02T01:32:55Z"
+   }
+  ]
+ },
+ {
+  "id": 125043184601,
+  "name": "gate-nhanh-manh (ubuntu-latest, 0)",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T01:16:51Z",
+  "completed_at": "2026-11-02T01:17:04Z",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033983,
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:16:52Z"
+   },
+   {
+    "name": "Force LF checkout (hash parity với manifest)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:16:52Z"
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Run actions/upload-artifact@v4",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   }
+  ]
+ },
+ {
+  "id": 125043184609,
+  "name": "gate-nhanh-manh (ubuntu-latest, 6)",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T01:16:51Z",
+  "completed_at": "2026-11-02T01:17:04Z",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033985,
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:16:53Z"
+   },
+   {
+    "name": "Force LF checkout (hash parity với manifest)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:53Z",
+    "completed_at": "2026-11-02T01:16:53Z"
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:53Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Run actions/upload-artifact@v4",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   }
+  ]
+ },
+ {
+  "id": 125043184643,
+  "name": "gate-nhanh-manh (ubuntu-latest, 5)",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T01:16:51Z",
+  "completed_at": "2026-11-02T01:17:02Z",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033990,
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:51Z",
+    "completed_at": "2026-11-02T01:16:52Z"
+   },
+   {
+    "name": "Force LF checkout (hash parity với manifest)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:16:52Z"
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:17:00Z"
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:00Z",
+    "completed_at": "2026-11-02T01:17:00Z"
+   },
+   {
+    "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:00Z",
+    "completed_at": "2026-11-02T01:17:00Z"
+   },
+   {
+    "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:00Z",
+    "completed_at": "2026-11-02T01:17:00Z"
+   },
+   {
+    "name": "Run actions/upload-artifact@v4",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:00Z",
+    "completed_at": "2026-11-02T01:17:00Z"
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:00Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   }
+  ]
+ },
+ {
+  "id": 125043184647,
+  "name": "gate-nhanh-manh (ubuntu-latest, 1)",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T01:16:51Z",
+  "completed_at": "2026-11-02T01:17:03Z",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033989,
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:16:52Z"
+   },
+   {
+    "name": "Force LF checkout (hash parity với manifest)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:16:52Z"
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:52Z",
+    "completed_at": "2026-11-02T01:17:00Z"
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:00Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Run actions/upload-artifact@v4",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:01Z",
+    "completed_at": "2026-11-02T01:17:01Z"
+   }
+  ]
+ },
+ {
+  "id": 125043184681,
+  "name": "gate-nhanh-manh (ubuntu-latest, 7)",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T01:17:04Z",
+  "completed_at": "2026-11-02T01:17:19Z",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033993,
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:05Z",
+    "completed_at": "2026-11-02T01:17:06Z"
+   },
+   {
+    "name": "Force LF checkout (hash parity với manifest)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:06Z",
+    "completed_at": "2026-11-02T01:17:06Z"
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:06Z",
+    "completed_at": "2026-11-02T01:17:15Z"
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:15Z",
+    "completed_at": "2026-11-02T01:17:15Z"
+   },
+   {
+    "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:15Z",
+    "completed_at": "2026-11-02T01:17:15Z"
+   },
+   {
+    "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:15Z",
+    "completed_at": "2026-11-02T01:17:15Z"
+   },
+   {
+    "name": "Run actions/upload-artifact@v4",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:15Z",
+    "completed_at": "2026-11-02T01:17:15Z"
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:15Z",
+    "completed_at": "2026-11-02T01:17:16Z"
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:16Z",
+    "completed_at": "2026-11-02T01:17:16Z"
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:16Z",
+    "completed_at": "2026-11-02T01:17:16Z"
+   }
+  ]
+ },
+ {
+  "id": 125043184690,
+  "name": "gate-nhanh-manh (ubuntu-latest, 4)",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T01:17:05Z",
+  "completed_at": "2026-11-02T01:17:23Z",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033992,
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:06Z",
+    "completed_at": "2026-11-02T01:17:07Z"
+   },
+   {
+    "name": "Force LF checkout (hash parity với manifest)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:07Z",
+    "completed_at": "2026-11-02T01:17:07Z"
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:07Z",
+    "completed_at": "2026-11-02T01:17:20Z"
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:20Z",
+    "completed_at": "2026-11-02T01:17:20Z"
+   },
+   {
+    "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:20Z",
+    "completed_at": "2026-11-02T01:17:20Z"
+   },
+   {
+    "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:20Z",
+    "completed_at": "2026-11-02T01:17:20Z"
+   },
+   {
+    "name": "Run actions/upload-artifact@v4",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:20Z",
+    "completed_at": "2026-11-02T01:17:20Z"
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:20Z",
+    "completed_at": "2026-11-02T01:17:20Z"
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:20Z",
+    "completed_at": "2026-11-02T01:17:21Z"
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:21Z",
+    "completed_at": "2026-11-02T01:17:21Z"
+   }
+  ]
+ },
+ {
+  "id": 125043184714,
+  "name": "gate-nhanh-manh (ubuntu-latest, 2)",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T01:17:05Z",
+  "completed_at": "2026-11-02T01:17:18Z",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033994,
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:06Z",
+    "completed_at": "2026-11-02T01:17:07Z"
+   },
+   {
+    "name": "Force LF checkout (hash parity với manifest)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:07Z",
+    "completed_at": "2026-11-02T01:17:07Z"
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:07Z",
+    "completed_at": "2026-11-02T01:17:15Z"
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:15Z",
+    "completed_at": "2026-11-02T01:17:15Z"
+   },
+   {
+    "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:15Z",
+    "completed_at": "2026-11-02T01:17:15Z"
+   },
+   {
+    "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:15Z",
+    "completed_at": "2026-11-02T01:17:15Z"
+   },
+   {
+    "name": "Run actions/upload-artifact@v4",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:15Z",
+    "completed_at": "2026-11-02T01:17:15Z"
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:15Z",
+    "completed_at": "2026-11-02T01:17:15Z"
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:15Z",
+    "completed_at": "2026-11-02T01:17:16Z"
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:16Z",
+    "completed_at": "2026-11-02T01:17:16Z"
+   }
+  ]
+ },
+ {
+  "id": 125043184975,
+  "name": "gate-cong-cu-gop (ubuntu-latest)",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T01:16:57Z",
+  "completed_at": "2026-11-02T01:17:11Z",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033991,
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:58Z",
+    "completed_at": "2026-11-02T01:16:59Z"
+   },
+   {
+    "name": "Force LF checkout (hash parity với manifest)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:59Z",
+    "completed_at": "2026-11-02T01:16:59Z"
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:16:59Z",
+    "completed_at": "2026-11-02T01:17:04Z"
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:04Z",
+    "completed_at": "2026-11-02T01:17:04Z"
+   },
+   {
+    "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:04Z",
+    "completed_at": "2026-11-02T01:17:08Z"
+   },
+   {
+    "name": "Run actions/download-artifact@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:08Z",
+    "completed_at": "2026-11-02T01:17:09Z"
+   },
+   {
+    "name": "G5 gom manh ban kinh dot bien (#668)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:09Z",
+    "completed_at": "2026-11-02T01:17:09Z"
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:09Z",
+    "completed_at": "2026-11-02T01:17:09Z"
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:09Z",
+    "completed_at": "2026-11-02T01:17:10Z"
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:10Z",
+    "completed_at": "2026-11-02T01:17:10Z"
+   }
+  ]
+ },
+ {
+  "id": 125043185706,
+  "name": "gate-cong-cu",
+  "status": "completed",
+  "conclusion": "skipped",
+  "started_at": "2026-11-02T01:16:49Z",
+  "completed_at": "2026-11-02T01:16:49Z",
+  "labels": [],
+  "runner_id": null,
+  "steps": []
+ },
+ {
+  "id": 125043343803,
+  "name": "gate-nhanh-gop (ubuntu-latest)",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T01:17:26Z",
+  "completed_at": "2026-11-02T01:17:40Z",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033995,
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:27Z",
+    "completed_at": "2026-11-02T01:17:28Z"
+   },
+   {
+    "name": "Force LF checkout (hash parity với manifest)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:28Z",
+    "completed_at": "2026-11-02T01:17:28Z"
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:28Z",
+    "completed_at": "2026-11-02T01:17:37Z"
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:37Z",
+    "completed_at": "2026-11-02T01:17:37Z"
+   },
+   {
+    "name": "DUONG_NHANH - gom KHONG DO (job gate-nhanh-gop)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:37Z",
+    "completed_at": "2026-11-02T01:17:37Z"
+   },
+   {
+    "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-gop)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:37Z",
+    "completed_at": "2026-11-02T01:17:37Z"
+   },
+   {
+    "name": "Run actions/download-artifact@v4",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:37Z",
+    "completed_at": "2026-11-02T01:17:37Z"
+   },
+   {
+    "name": "gộp mảnh nhanh_don_duoc (targeted_mutant_gate)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:37Z",
+    "completed_at": "2026-11-02T01:17:37Z"
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:37Z",
+    "completed_at": "2026-11-02T01:17:37Z"
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:37Z",
+    "completed_at": "2026-11-02T01:17:37Z"
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:37Z",
+    "completed_at": "2026-11-02T01:17:37Z"
+   }
+  ]
+ },
+ {
+  "id": 125043422140,
+  "name": "gate-registry (ubuntu-latest)",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T01:17:42Z",
+  "completed_at": "2026-11-02T01:17:54Z",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033996,
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:43Z",
+    "completed_at": "2026-11-02T01:17:43Z"
+   },
+   {
+    "name": "Force LF checkout (hash parity với manifest)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:43Z",
+    "completed_at": "2026-11-02T01:17:43Z"
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:43Z",
+    "completed_at": "2026-11-02T01:17:49Z"
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:49Z",
+    "completed_at": "2026-11-02T01:17:50Z"
+   },
+   {
+    "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-registry)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:50Z",
+    "completed_at": "2026-11-02T01:17:50Z"
+   },
+   {
+    "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:50Z",
+    "completed_at": "2026-11-02T01:17:52Z"
+   },
+   {
+    "name": "cài actionlint cho G5",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:52Z",
+    "completed_at": "2026-11-02T01:17:52Z"
+   },
+   {
+    "name": "cài shellcheck cho G5 (cài xong đo lại)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:52Z",
+    "completed_at": "2026-11-02T01:17:52Z"
+   },
+   {
+    "name": "cài rg cho G5 (cài xong đo lại)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:52Z",
+    "completed_at": "2026-11-02T01:17:52Z"
+   },
+   {
+    "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:52Z",
+    "completed_at": "2026-11-02T01:17:52Z"
+   },
+   {
+    "name": "cài Ruff 0.15.15 và in probe dương",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:52Z",
+    "completed_at": "2026-11-02T01:17:52Z"
+   },
+   {
+    "name": "test registry (phạm vi + các bộ chưa được nối)",
+    "conclusion": "skipped",
+    "started_at": "2026-11-02T01:17:52Z",
+    "completed_at": "2026-11-02T01:17:52Z"
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:52Z",
+    "completed_at": "2026-11-02T01:17:52Z"
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:52Z",
+    "completed_at": "2026-11-02T01:17:52Z"
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "started_at": "2026-11-02T01:17:52Z",
+    "completed_at": "2026-11-02T01:17:52Z"
+   }
+  ]
+ }
+]

@@ -1,0 +1,3 @@
+# kiem-gate offline, chi 5 ten trong CHECK_BAT_BUOC (.claude/dev/packet_loop.py), suite 109702911935
+gate XANH trên ab94c4fb01d0d122d2f00a1f2c386c6a191349c5 (suite 109702911935): gate (ubuntu-latest) id=122094872555 · gate-cong-cu-gop (ubuntu-latest) id=122113041758 · gate-ops (ubuntu-latest) id=122094872418 · gate-packet-loop (ubuntu-latest) id=122094872536 · gate-registry (ubuntu-latest) id=122098158660
+rc=0

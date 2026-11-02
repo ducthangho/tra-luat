@@ -1,0 +1,39 @@
+# Trich log job 122094872443 gate-packet-loop (windows-latest), run 40476173630 (ci.yml workflow_dispatch, head ab94c4f).
+# Log goc tai qua GET actions/jobs/122094872443/logs (redirect blob): 287496 byte, sha256 9ae1b51ec8a35fda440c241246e710f02e515e74c3abe16dd9e1fc8f1b40f6d4 (CRLF, KHONG dua vao kho).
+# Ban trich: giu nguyen noi dung dong khop mau, doi CRLF->LF va bo khoang trang cuoi dong (git diff --check). So dong goc: 2528.
+L1: ﻿2026-10-27T08:49:18.2194217Z Current runner version: '2.338.0'
+L2: 2026-10-27T08:49:18.2233083Z ##[group]Runner Image Provisioner
+L11: 2026-10-27T08:49:18.2244846Z ##[group]Operating System
+L16: 2026-10-27T08:49:18.2249764Z ##[group]Runner Image
+L19: 2026-10-27T08:49:18.2254359Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20261021.278/images/windows/Windows2025-VS2026-Readme.md
+L20: 2026-10-27T08:49:18.2257400Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20261021.278
+L90: 2026-10-27T08:49:21.5397825Z Copying 'C:\Users\runneradmin\.gitconfig' to 'D:\a\_temp\345d975e-ef7d-45c3-89f0-46d727421a0e\.gitconfig'
+L908: 2026-10-27T08:49:40.5030920Z HEAD is now at ab94c4f Merge pull request #933 from ducthangho/agent/wp929-g1-claude
+L1189: 2026-10-27T09:31:32.6738251Z   BỎ QUA  bien_nhan_sha256_root_xuong_dong_dem_MOT: nền từ chối tên thư mục có xuống dòng: [WinError 123] The filename, directory name, or volume label syntax is incorrect: 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\packet_loop_test_ofo74hpn\\baseline\\bien_nhan_sha256_root_xuong_dong_dem_MOT\\bnsha256\nroot'
+L1190: 2026-10-27T09:31:32.6740007Z   BỎ QUA  bien_nhan_git_gia_duong_dan_nul_giu_fallback: nền từ chối thi hành git giả: [WinError 193] %1 is not a valid Win32 application
+L1191: 2026-10-27T09:31:32.6740916Z   BỎ QUA  r812_nguoi_giu_dau_cheo_nguoc: đột biến bỏ thay dấu chéo ngược tương đương trên Windows
+L1192: 2026-10-27T09:31:32.6741639Z   BỎ QUA  r812_r6_receipt_native: tên tệp byte native (surrogateescape) chỉ có trên POSIX
+L1193: 2026-10-27T09:31:32.6742966Z   ĐỎ  r929_show_loi_la_false: PermissionError: [WinError 5] Access is denied: 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\packet_loop_test_ofo74hpn\\baseline\\r929_show_loi_la_false\\kho\\w\\.git\\objects\\56\\5656b85a2ca1758ccd6cf6feaff364416f5c96'
+L1194: 2026-10-27T09:31:32.6744148Z nền: 871/872 đạt · BỎ QUA: 4
+L1199: 2026-10-27T09:31:32.6745842Z tự chứng minh suite KHÔNG RỖNG (ca đích ĐỎ · đối chứng khác họ XANH):
+L1227: 2026-10-27T09:31:32.6771118Z   BỎ QUA  đột biến bien_nhan_root_xuong_dong_tach_tu_trai: ca ['bien_nhan_sha256_root_xuong_dong_dem_MOT'] không được tính là đã giết
+L1237: 2026-10-27T09:31:32.6787483Z   BỎ QUA  đột biến bien_nhan_bo_nhanh_valueerror: ca ['bien_nhan_git_gia_duong_dan_nul_giu_fallback'] không được tính là đã giết
+L1238: 2026-10-27T09:31:32.6789403Z   BỎ QUA  đột biến bien_nhan_valueerror_tai_indexing_phai_noi: ca ['bien_nhan_git_gia_duong_dan_nul_giu_fallback'] không được tính là đã giết
+L2424: 2026-10-27T10:17:18.3301358Z   BỎ QUA  đột biến r812_bo_dau_cheo_nguoc: ca ['r812_nguoi_giu_dau_cheo_nguoc'] không được tính là đã giết
+L2479: 2026-10-27T10:17:18.3364335Z   ok  r929_bo_loai_tru_adr0054 → giết 1 ca đích · 3 đối chứng khác họ còn sống
+L2480: 2026-10-27T10:17:18.3366327Z   ok  r929_mot_tro_len → giết 1 ca đích · 3 đối chứng khác họ còn sống
+L2481: 2026-10-27T10:17:18.3367434Z   ok  r929_hai_chuoi_roi → giết 1 ca đích · 3 đối chứng khác họ còn sống
+L2482: 2026-10-27T10:17:18.3368891Z   ok  r929_duong_dan_co_dinh_0055 → giết 1 ca đích · 3 đối chứng khác họ còn sống
+L2483: 2026-10-27T10:17:18.3370476Z   ok  r929_bo_kiem_loai_doi_tuong → giết 2 ca đích · 3 đối chứng khác họ còn sống
+L2484: 2026-10-27T10:17:18.3371664Z   ok  r929_nhan_symlink → giết 1 ca đích · 3 đối chứng khác họ còn sống
+L2485: 2026-10-27T10:17:18.3373088Z   ok  r929_so_chu_so_tuy_y → giết 1 ca đích · 3 đối chứng khác họ còn sống
+L2486: 2026-10-27T10:17:18.3374864Z   ok  r929_bo_duoi_md → giết 1 ca đích · 3 đối chứng khác họ còn sống
+L2487: 2026-10-27T10:17:18.3376208Z   ok  r929_bo_nfc → giết 1 ca đích · 3 đối chứng khác họ còn sống
+L2488: 2026-10-27T10:17:18.3377119Z   ok  r929_bo_rc_show → giết 1 ca đích · 3 đối chứng khác họ còn sống
+L2502: 2026-10-27T10:18:56.3393870Z SỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):
+L2503: 2026-10-27T10:18:56.3394687Z   ca               : 876
+L2504: 2026-10-27T10:18:56.3395352Z   đột biến         : 1249
+L2509: 2026-10-27T10:18:56.3398200Z TỔNG: 1 lỗi
+L2510: 2026-10-27T10:18:56.5795091Z ##[error]Process completed with exit code 1.
+L2514: 2026-10-27T10:18:57.4740362Z Copying 'C:\Users\runneradmin\.gitconfig' to 'D:\a\_temp\00fa0d1f-fc6a-4945-b1c9-b230360f24e2\.gitconfig'
+L2527: 2026-10-27T10:18:59.2017091Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

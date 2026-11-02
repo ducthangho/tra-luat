@@ -1,0 +1,15 @@
+2026-11-01T23:14:14.0796395Z Image: ubuntu-24.04
+2026-11-01T23:14:14.8449188Z ##[group]Run git config --global core.autocrlf false
+2026-11-01T23:14:14.8988123Z ##[group]Run actions/checkout@v4
+2026-11-01T23:14:22.0142965Z [command]/usr/bin/git rev-parse refs/remotes/origin/claude/gate-hau-merge-c165a5d0
+2026-11-01T23:14:22.0143474Z c165a5d0d4048e10e7da875f2ba7524136fb5735
+2026-11-01T23:14:23.0319953Z [command]/usr/bin/git log -1 --format=%H
+2026-11-01T23:14:23.0356066Z c165a5d0d4048e10e7da875f2ba7524136fb5735
+2026-11-01T23:14:23.0570241Z ##[group]Run actions/setup-python@v5
+2026-11-01T23:14:23.2248032Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-11-01T23:14:25.2543968Z ##[group]Run bash ops/cai_actionlint.sh
+2026-11-01T23:14:25.4305708Z ##[group]Run bash ops/cai_cong_cu.sh shellcheck
+2026-11-01T23:14:29.4717294Z ##[group]Run bash ops/cai_cong_cu.sh rg
+2026-11-01T23:14:34.0726965Z ##[group]Run python ops/cong_cu.py kiem-tra --json
+2026-11-01T23:14:34.4376873Z ##[group]Run python -m pip install --quiet ruff==0.15.15
+2026-11-01T23:14:35.8523656Z ##[group]Run python .claude/dev/packet_loop_test.py

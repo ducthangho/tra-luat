@@ -1,0 +1,9 @@
+# doi chieu verdict (-o) va stdout launcher voi run.json — 2026-11-02
+# stdout-b1-rN.log = byte launcher ghi (run_dir/stdout.log); verdict-b1-rN.md = tep -o cua codex exec, KHONG co LF cuoi.
+r1 run 8adbdd76: stdout.log khop sha256+byte=True · stdout == verdict+LF: True · kiem AM (verdict tran != stdout_sha256): True
+r2 run 075953e6: stdout.log khop sha256+byte=True · stdout == verdict+LF: True · kiem AM (verdict tran != stdout_sha256): True
+r3 run a2f3fc20: stdout.log khop sha256+byte=True · stdout == verdict+LF: True · kiem AM (verdict tran != stdout_sha256): True
+r4 run 4d80c778: stdout.log khop sha256+byte=True · stdout == verdict+LF: True · kiem AM (verdict tran != stdout_sha256): True
+r5 run c452288b: stdout.log khop sha256+byte=True · stdout == verdict+LF: True · kiem AM (verdict tran != stdout_sha256): True
+r6 run d127a9d6: stdout.log khop sha256+byte=True · stdout == verdict+LF: True · kiem AM (verdict tran != stdout_sha256): True
+TONG: DAT

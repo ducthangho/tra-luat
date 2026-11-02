@@ -1,6 +1,8 @@
 # Handoff #1122 LAUNCHER-TEST-WINDOWS-TIN-DUNG-GIA — lease wp1122-r1-g1-claude
 
-Trạng thái lúc 00:05Z 02-11-2026: **ĐỦ ĐIỀU KIỆN MERGE THEO LEASE (M-1 đến M-3), CHƯA MERGE.** Codex lượt 10/10 cho
+Trạng thái lúc 00:35Z 02-11-2026: **ĐÃ MERGE** — PR #1130, merge commit `c7174bfe03b3acd22cfa055b5fce176129d29542`, chủ kho duyệt ("Có, merge #1130 rồi làm tiếp"). **A6 ĐẠT:** `launcher-windows.yml` push master run 41365578430, job `windows-latest` (runner 1000033788): `DOT BIEN: 461/461 dat`, suite `290/290` (hong 0). Connector Codex review `9d06bd1` lúc bỏ draft: `has_any_findings: false` (comment 6565938874). Ghi chú: merge được gọi khi lượt connector còn đang chạy — kết quả về sạch, nhưng thứ tự đúng là chờ connector xong rồi mới merge.
+
+Trạng thái trước merge (lúc 00:05Z): **ĐỦ ĐIỀU KIỆN MERGE THEO LEASE (M-1 đến M-3).** Codex lượt 10/10 cho
 `approve` trên `9d06bd1`, kết quả 0 P0 · 0 P1 · 0 P2 · 0 P3. Merge thuộc quyền chủ kho; `uy_quyen_merge: false`.
 
 - PR: #1130 (draft). Nhánh `agent/wp1122-g1-claude`, head `9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651`, base `c82047d`.

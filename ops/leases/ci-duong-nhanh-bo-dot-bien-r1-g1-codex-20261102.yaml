@@ -1,0 +1,94 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1143
+packet_id: CI-DUONG-NHANH-BO-DOT-BIEN
+mission_issue: 1113
+mission_id: gh-1113
+mission_ghi_chu: 'Remediation A12 cua packet #1113, PR #1128 merged; issue #1143 la packet thi cong.'
+revision: 1
+generation: 1
+lease_id: ci-duong-nhanh-bo-dot-bien-r1-g1-codex-20261102
+thay_the_cho: []
+thay_the_cho_ghi_chu: lease dau tien cua packet
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1143#issuecomment-6571828431
+authority_url: https://github.com/ducthangho/tra-luat/issues/1143#issuecomment-6571828431
+authority_ghi_chu: 'Chu kho uy quyen trong phien Codex 2026-11-02: Codex executor, Antigravity reviewer; tu dieu
+  phoi lease va test Windows/Actions trong pham vi #1143. Comment authority_url la ban ghi cua executor, khong phai
+  reviewer verdict.'
+recorded_by: openai_codex_executor
+recorder_is_dispatcher: false
+recorder_ghi_chu: Executor ghi lai chi thi truc tiep cua chu kho trong phien Codex; khong tu khai reviewer verdict.
+leased_at_utc: '2026-11-02T07:46:12Z'
+heartbeat_at: '2026-11-02T07:46:12Z'
+lease_until: '2026-11-03T07:46:12Z'
+lease_expires_at_utc: '2026-11-03T07:46:12Z'
+role: executor
+provider: codex
+executor: codex
+model: gpt-6
+model_family: openai
+execution_surface: codex_desktop
+transport: machine/local
+transport_ghi_chu: Codex Desktop trong workspace co lap tren Windows.
+environment: local
+operating_system: Windows
+shell: powershell
+risk: systemic
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer: google_antigravity
+reviewer_provider: google_antigravity
+reviewer_model_family: gemini
+reviewer_independence: agy CLI tren ASUS, fresh independent session, model gemini-4-argon-high, review read-only
+  exact SHA; khong submit GitHub approval thay verdict
+spec_path: ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md
+spec_ref: refs/heads/ops/ci-duong-nhanh-bo-dot-bien-r1-lease
+spec_ref_ghi_chu: Spec da merge master, byte-identical approved sha256; user override executor/reviewer recorded
+  in authority_url.
+spec_hash: 38e478eac8ea89f52db917c673fa9a17d583605acbd94ede62920e39a41a05ab
+spec_sha256: 38e478eac8ea89f52db917c673fa9a17d583605acbd94ede62920e39a41a05ab
+spec_blob: bfebc12d049ce1960b9f2ecca361e62e5e5d1261
+branch: agent/wp1143-g1-codex
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 279a39e34c26027ad792008962859aa79c16e35c
+start_from_sha: 279a39e34c26027ad792008962859aa79c16e35c
+reviewed_sha_required: 279a39e34c26027ad792008962859aa79c16e35c
+reviewed_sha_ghi_chu: Chua co code head; review exact SHA sau moi lan sua.
+write_set:
+- .github/workflows/ci.yml
+- ops/ci_duong_nhanh_test.py
+- .claude/dev/chay-cong-windows.ps1
+- ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md
+write_set_planned: []
+write_set_hash: 894fe6ec61d1302f207c8fcfd69f4cfe5930e5791debb1636c92ba1cfcad5d8c
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+ref_ngoai_write_set: []
+ref_ngoai_write_set_ghi_chu: Khong co ref ngoai write set duoc cap khi tao lease.
+closure_status: '2026-11-02: ls-remote = for-each-ref 783/783; ai-dang-giu cho 3 tep code deu NGUOI_GIU 0; #1132
+  lease rut han 06:50Z.'
+tran_kich_thuoc: 'Spec #1143: <= 300 dong them tren 3 tep code; ADR-0053 <= 6 tep / <= 450 dong tong ke ca spec.'
+tran_loi_goi_codex: Spec cu gioi han 10 loi goi Codex review; chu kho doi reviewer sang Antigravity; review moi
+  doc lap, khong dung Codex tu review.
+dieu_kien_merge_bo_sung: 'Spec #1143 A1-A10 va pre-canary A6 dat, cross review exact head sach P1/P2/P3, Windows
+  neu can, CI/A11 sau land theo spec; Actions duoc chu kho cho phep.'
+coordination_paths:
+- ops/leases/ci-duong-nhanh-bo-dot-bien-r1-g1-codex-20261102.yaml
+- ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md
+run_minutes: 1440
+heartbeat_required_minutes: 360
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- kill_other_session_process
+- write_outside_effective_write_set
+land_authority_note: User da uy quyen merge/land/ghi so trong phien Codex sau khi gate va review dat; khong bien
+  lease thanh verdict.
+reviewer_execution_surface: antigravity
+reviewer_transport: machine/local

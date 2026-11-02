@@ -1,0 +1,83 @@
+# Gate output — run 41322980582 attempt 1; log REST tung job (GET .../actions/jobs/<id>/logs), 23 job.
+# Moi job: ten | conclusion | so dong '##[error]' | sha256 + so byte cua log day du | cac dong khop mau so lieu.
+
+== chuan-bi | job 124896936528 | success | ##[error]=0 | sha256 35660ab155542811230a58acdf7f2f7e6f8f7af29ccad7b62375b3158ecf916c | 3519 byte
+== gate (ubuntu-latest) | job 124896958887 | success | ##[error]=0 | sha256 eec1c6bc43d28c9efad167d6e3fd2b156f0aa7c8ff171480a41323421a02de5d | 698032 byte
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+   nền: 18/18 đạt
+   TỔNG: ĐẠT
+   nền: 7/7 đạt · BỎ QUA: 0
+   TỔNG: ĐẠT
+   30/30 dat
+   9/9 dat
+   == gen_instructions selftest 44/44 ==
+   == transport selftest 12/12 ==
+   == tl selftest 1774/1774 ==
+         "detail": "[OK] tier_full_audit_ok\n  [OK] tier_core_fails_full_audit\n  [OK] tier_full_litany_deduped\n  [OK] tier_core_size_budget\n  [OK] tier_nlm_unaffected_by_tier\n  [OK] style_template_separate_artifact\n  [OK] profile_block_binds_marker_meta\n  [OK] profile_block_no_fabrication_guard\n  [OK] profile_block_unified_env_target_split\n  [OK] profile_block_vbqppl_base_variant\n  [OK] profile_block_default_style_when_empty\n  [OK] profile_block_templates_conditional\n  [OK] audit_bad_project_instruction_fails\n  [OK] audit_bad_nlm_prompt_fails\n  [OK] version_fail_closed_missing_raises\n  [OK] version_fail_closed_empty_raises\n  [OK] version_fail_closed_invalid_raises\n  [OK] version_valid_returns_exact\n  [OK] version_allow_unversioned_dev\n  [OK] no_historical_fallback_literal\n== gen_instructions selftest 44/44 ==\n"
+== gate-cong-cu (ubuntu-latest, 0) | job 124896959014 | success | ##[error]=0 | sha256 a4ea467d4c8bb9f9f2414d34298bfdb0a273fb262a29f6091bcf54f495435293 | 133799 byte
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 1) | job 124896959064 | success | ##[error]=0 | sha256 9462667d83934864eb9fa01c025d09266b6ec5ea9edc7e246eb97e73957e2dbc | 133794 byte
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 2) | job 124896959067 | success | ##[error]=0 | sha256 4b3579535143f117d91f6c57a00ffa834cb6374c0fe3ee4283027e21c8bbb146 | 133636 byte
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 3) | job 124896959137 | success | ##[error]=0 | sha256 b6928ec2451aed33da8ae938a0154da124ae919f197701791d452a0992bda1b1 | 133563 byte
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 4) | job 124896959173 | success | ##[error]=0 | sha256 8758a9587eddd000f1a858c7dcf78e892aad574d923097df825005fef5a057eb | 133812 byte
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 5) | job 124896958974 | success | ##[error]=0 | sha256 293fc996eca1c1b62c62b8a4834b9bd2162b5849226014fa43f9b3238b8eaddd | 133461 byte
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 6) | job 124896958986 | success | ##[error]=0 | sha256 36af6a290eff01a26c9fe52bdfc13984a2563716b4a63058097721c4f112b2a1 | 133686 byte
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 7) | job 124896959060 | success | ##[error]=0 | sha256 2764242a30be83191f56aa7372f0510b5ebaecbc724fcd2b24ffa463fb075b70 | 133581 byte
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu-gop (ubuntu-latest) | job 124902285110 | success | ##[error]=0 | sha256 4db068954b55b3150b070c889437b4cb062f51ed0d9b5c45abd315e099f86721 | 98100 byte
+== gate-nhanh-gop (ubuntu-latest) | job 124897365559 | success | ##[error]=0 | sha256 4ecd303bc3468e3a1f59e4ffda9c656e80278a20d518884081a99a7927373ab3 | 117534 byte
+== gate-nhanh-manh (ubuntu-latest, 0) | job 124896959022 | success | ##[error]=0 | sha256 cbe8a8665dc39664040aaf95177546c6ab84f5d0922a20c1b9c33ffaa77adc3b | 121709 byte
+== gate-nhanh-manh (ubuntu-latest, 1) | job 124896959040 | success | ##[error]=0 | sha256 35c77c0073268fb114597ff16e7e44056a1a19896bdc942d4b134b5be7379f58 | 122648 byte
+== gate-nhanh-manh (ubuntu-latest, 2) | job 124896958984 | success | ##[error]=0 | sha256 afee16bca3d7d833fe42f8b10e869db59f99b6b6ef5e129948956bcf61cdbf85 | 121923 byte
+== gate-nhanh-manh (ubuntu-latest, 3) | job 124896959051 | success | ##[error]=0 | sha256 3a180e15cc3430193deb6636ec43a12fc3b8fc5b39db7acd45c0fcdc90f69f7b | 122130 byte
+== gate-nhanh-manh (ubuntu-latest, 4) | job 124896959016 | success | ##[error]=0 | sha256 842ca4ffb4c249a14c0d33a42c852e05dad02be53a22aaa417919c816375f71e | 121834 byte
+== gate-nhanh-manh (ubuntu-latest, 5) | job 124896959020 | success | ##[error]=0 | sha256 17ee34393c29434ddbf81689eb2b160ab65a712dff9bd11f25fd5461737117ff | 122584 byte
+== gate-nhanh-manh (ubuntu-latest, 6) | job 124896959201 | success | ##[error]=0 | sha256 e46e6d7e1d135ef04240b4034cc5c71bed37c3251713f4f80489e02541f4272c | 122023 byte
+== gate-nhanh-manh (ubuntu-latest, 7) | job 124896959045 | success | ##[error]=0 | sha256 1a15548e1918acb9028508b78b8b4d6abb07ce90cae05c68e937c15f9f6f660c | 122829 byte
+== gate-ops (ubuntu-latest) | job 124896958907 | success | ##[error]=0 | sha256 26e481243b6896ee3cb339a4c94caaa53d2bccb9ecd5b65289e2f96423db0ea5 | 393457 byte
+   CA: 104/104 dat · 0 do · 0 hong
+   DOT BIEN: 392/392 bi giet dung ly do
+   TONG: DAT
+   bien_nhan_v2_test: 98/98 ca đạt · 153/153 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 135/153 đột biến thường khai đối chứng
+   TỔNG: ĐẠT
+   [A] lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
+   [B] lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
+   lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
+   don-nhanh: 21/21 dat
+   gate lifecycle tests: 28/28 ca QUA (bo qua 0, hong 0)
+== gate-packet-loop (ubuntu-latest) | job 124896958930 | success | ##[error]=0 | sha256 7bc94d226627020c5b58ef0f5e9b80f4b544333d6763ddab8618067c878c66e8 | 305821 byte
+   nền: 1035/1035 đạt · BỎ QUA: 1
+   TỔNG: ĐẠT
+== gate-registry (ubuntu-latest) | job 124897440060 | success | ##[error]=0 | sha256 7be6852873ada6e07ad70524c08febd62cc7441a487b5679c27ecd58c3004a94 | 246054 byte
+   doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET
+   nền: 28/28 đạt
+   TỔNG: ĐẠT
+   gh_readback tests: 8/8 ca QUA (hong 0)
+   CA         : 42/42 đạt · 0 đỏ · ĐẠT
+   TỔNG: ĐẠT
+   mcp_github_doc tests: 17/17 ca QUA (hong 0, bo qua 0)
+   nền: 11/11 đạt
+   TỔNG: ĐẠT
+   TONG: CA 44/44 dat · DOT BIEN 43 muc CHE DO NHE — do khi diff cham vung
+   TONG: DAT
+   TONG: CA 45/45 dat · DOT BIEN 25 muc CHE DO NHE — do khi diff cham vung
+   TONG: DAT
+   DOT BIEN: 13/13 bi giet dung ly do
+   CA: 22/22 dat
+   DOT BIEN: 106/106 bi giet dung ly do
+   TONG: DAT
+   CA: 61/61 dat
+   DOT BIEN: 343/343 bi giet dung ly do
+   TONG: DAT
+   CA: 52/52 dat
+   DOT BIEN: 80/80 bi giet dung ly do
+   TONG: DAT
+   TỔNG: ĐẠT
+
+TONG ##[error] tren 23 job: 0

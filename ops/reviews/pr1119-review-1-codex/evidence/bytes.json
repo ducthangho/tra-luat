@@ -1,0 +1,194 @@
+[
+  {
+    "archive": "pr1110-review-1-codex",
+    "source": "review1110a",
+    "source_files": 61,
+    "archived_source_files": 58,
+    "mapping_failures": [],
+    "flat_equal": true,
+    "omissions": [
+      {
+        "source": "DIFF.patch",
+        "sha256": "79c3d941cbfbc0cb32301c73d00237885aaf275bfef3aef347c1a5ded42968b6",
+        "bytes": 261239,
+        "declared": true,
+        "matches_declaration": true,
+        "reason_supported": true,
+        "reproduction": {
+          "command": "git diff c6dd7b3 e137f8c",
+          "equal": true,
+          "bytes": 261239,
+          "sha256": "79c3d941cbfbc0cb32301c73d00237885aaf275bfef3aef347c1a5ded42968b6"
+        }
+      },
+      {
+        "source": "evidence/original-snapshot.json",
+        "sha256": "3780878a4fd69ee68326df37ba5a299a57d02655b0dd1ec283e309e4d3b78fbc",
+        "bytes": 2043534,
+        "declared": true,
+        "matches_declaration": true,
+        "reason_supported": true
+      },
+      {
+        "source": "launcher.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "declared": true,
+        "matches_declaration": true,
+        "reason_supported": true
+      }
+    ],
+    "unexpected_omission_declarations": [],
+    "manifest_rc": 0,
+    "manifest_entries": 59,
+    "manifest_missing": [],
+    "manifest_extra": [],
+    "manifest_duplicates": [],
+    "original_diff_equal": true,
+    "original_diff_sha256": "79c3d941cbfbc0cb32301c73d00237885aaf275bfef3aef347c1a5ded42968b6",
+    "original_diff_bytes": 261239
+  },
+  {
+    "archive": "pr1110-review-2-codex",
+    "source": "review1110b",
+    "source_files": 46,
+    "archived_source_files": 44,
+    "mapping_failures": [],
+    "flat_equal": true,
+    "omissions": [
+      {
+        "source": "DIFF.patch",
+        "sha256": "79c3d941cbfbc0cb32301c73d00237885aaf275bfef3aef347c1a5ded42968b6",
+        "bytes": 261239,
+        "declared": true,
+        "matches_declaration": true,
+        "reason_supported": true,
+        "reproduction": {
+          "command": "git diff fb74c6e 3a3aac5",
+          "equal": true,
+          "bytes": 261239,
+          "sha256": "79c3d941cbfbc0cb32301c73d00237885aaf275bfef3aef347c1a5ded42968b6"
+        }
+      },
+      {
+        "source": "launcher.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "declared": true,
+        "matches_declaration": true,
+        "reason_supported": true
+      }
+    ],
+    "unexpected_omission_declarations": [],
+    "manifest_rc": 0,
+    "manifest_entries": 45,
+    "manifest_missing": [],
+    "manifest_extra": [],
+    "manifest_duplicates": [],
+    "original_diff_equal": true,
+    "original_diff_sha256": "79c3d941cbfbc0cb32301c73d00237885aaf275bfef3aef347c1a5ded42968b6",
+    "original_diff_bytes": 261239
+  },
+  {
+    "archive": "pr1114-review-1-codex",
+    "source": "review1114a",
+    "source_files": 50,
+    "archived_source_files": 44,
+    "mapping_failures": [],
+    "flat_equal": true,
+    "omissions": [
+      {
+        "source": "evidence/base-argv.jsonl",
+        "sha256": "a7ea48fd223782d38d9e2e153e04fc95a8c438cfe640e74d6d45142c6880d728",
+        "bytes": 822015,
+        "declared": true,
+        "matches_declaration": true,
+        "reason_supported": true
+      },
+      {
+        "source": "evidence/head-argv.jsonl",
+        "sha256": "4325fd4e005d62065b1b8969cad71257259fc9f7f665c1a0f946380a490156f1",
+        "bytes": 838749,
+        "declared": true,
+        "matches_declaration": true,
+        "reason_supported": true
+      },
+      {
+        "source": "evidence/ruff-cache-created/.gitignore",
+        "sha256": "9e3a60f1e6ec4ae60215c11d54b171392745ec25e9dded433d5bd921363af316",
+        "bytes": 35,
+        "declared": false,
+        "matches_declaration": false,
+        "reason_supported": false
+      },
+      {
+        "source": "evidence/ruff-cache-created/0.17.3/12591984194595340168",
+        "sha256": "d001930daafa34484d4322965804766ba8b1fce65cd1999142048c4f36b41588",
+        "bytes": 252,
+        "declared": false,
+        "matches_declaration": false,
+        "reason_supported": false
+      },
+      {
+        "source": "evidence/ruff-cache-created/CACHEDIR.TAG",
+        "sha256": "5953156d7e0c564a427251316eaf26f8870e6483ae2197f916b630e4f93e31ae",
+        "bytes": 43,
+        "declared": false,
+        "matches_declaration": false,
+        "reason_supported": false
+      },
+      {
+        "source": "launcher.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "declared": true,
+        "matches_declaration": true,
+        "reason_supported": true
+      }
+    ],
+    "unexpected_omission_declarations": [],
+    "manifest_rc": 0,
+    "manifest_entries": 45,
+    "manifest_missing": [],
+    "manifest_extra": [],
+    "manifest_duplicates": [],
+    "original_diff_equal": true,
+    "original_diff_sha256": "11c407a6c076de2f9326e05afdd4c246b7d70a2da951efcdaa4921dab5a8f06e",
+    "original_diff_bytes": 1913
+  },
+  {
+    "archive": "pr1114-review-2-codex",
+    "source": "review1114b",
+    "source_files": 93,
+    "archived_source_files": 91,
+    "mapping_failures": [],
+    "flat_equal": true,
+    "omissions": [
+      {
+        "source": "evidence/initial-hashes.json",
+        "sha256": "c9a1abb30bf9e1538f1aac2f956f6cc44d2b621a98617553c28a190cd4727c98",
+        "bytes": 1415498,
+        "declared": true,
+        "matches_declaration": true,
+        "reason_supported": true
+      },
+      {
+        "source": "launcher.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "declared": true,
+        "matches_declaration": true,
+        "reason_supported": true
+      }
+    ],
+    "unexpected_omission_declarations": [],
+    "manifest_rc": 0,
+    "manifest_entries": 92,
+    "manifest_missing": [],
+    "manifest_extra": [],
+    "manifest_duplicates": [],
+    "original_diff_equal": true,
+    "original_diff_sha256": "c0d31ead491e166215d5a894bc41d861b1df72443b0e951478beccc828532042",
+    "original_diff_bytes": 4160
+  }
+]

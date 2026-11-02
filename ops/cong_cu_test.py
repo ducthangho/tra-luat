@@ -361,8 +361,12 @@ def t6_ci_kiem_ban_ke_truoc_moi_test_nang():
                      if x.strip() and not x.lstrip().startswith("#"))
         bang(lenh_setup.get(b.get("name")) == lenh,
              f"bước {i + 1} trước G5 không thuộc allowlist setup: '{b.get('name')}' / {lenh}")
+    # wp1113 (CI-LAN-LUU-TRU r1): bước cài/G5 hoặc KHÔNG có `if:`, hoặc có ĐÚNG `if:` bỏ ở đường nhanh hồ sơ — đường
+    # đầy đủ vẫn cài shellcheck vô điều kiện trên cả hai nền; nền khác (`runner.os` …) vẫn cấm.
+    nhanh = "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"
     sc_buoc = [b for b in buoc[:idx_kiem[0]] if str(b.get("name", "")).startswith("cài shellcheck")]
-    bang(len(sc_buoc) == 1 and "if" not in sc_buoc[0], "CI phải cài shellcheck vô điều kiện trên cả hai nền")
+    bang(len(sc_buoc) == 1 and sc_buoc[0].get("if", nhanh) == nhanh, "CI phải cài shellcheck vô điều kiện trên cả hai nền")
+    bang(buoc[idx_kiem[0]].get("if", nhanh) == nhanh, "G5 chỉ được bỏ ở đường nhanh hồ sơ")
     cai_sc = yaml.safe_load((GOC / "ops/cong_cu.yaml").read_text(encoding="utf-8"))["cong_cu"]["shellcheck"]["cai"]
     bang(all((cai_sc.get(n) or {}).get("lenh") for n in ("linux", "windows")), "thiếu công thức cài shellcheck Linux/Windows")
 

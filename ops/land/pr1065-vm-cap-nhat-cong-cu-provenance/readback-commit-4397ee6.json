@@ -1,0 +1,25 @@
+{
+ "sha": "4397ee616273a97c1503e8359452aef4e78cd75a",
+ "parents": [
+  "c6dd7b33b4f215809bf281ee1533bc1e8fa6920c",
+  "f783bee391ada131df8df195acfd3d4c4ae394c9"
+ ],
+ "tree": "e92592f8f3b4523ac2787b60439b73ad520ecf20",
+ "files": [
+  [
+   "ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml",
+   39,
+   14
+  ],
+  [
+   "ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/SHA256SUMS.txt",
+   1,
+   0
+  ],
+  [
+   "ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/gate-output-41173244891.txt",
+   474,
+   0
+  ]
+ ]
+}

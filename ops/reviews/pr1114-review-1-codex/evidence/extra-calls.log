@@ -1,0 +1,11 @@
+CO_MUSL argv=['ldd', '/bin/ls'] units=12 rc=0
+CO_MUSL_RESULT False
+MOCKED_PRE_SPAWN ['/usr/bin/python3', '/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1114a/copies/head/scripts/tl.py', 'bootstrap', '--env', 'code', '--no-nlm'] units=167
+MOCKED_PRE_SPAWN ['/khong-co-agy', '--version'] units=24
+HELPER_AST scripts/tl_gws.py:400 _public_curl_bytes subprocess_calls=[]
+HELPER_AST scripts/tl_gws.py:1119 _last_refresh_key subprocess_calls=[]
+HELPER_AST scripts/gws_cred_store.py:32 encrypt subprocess_calls=[]
+HELPER_AST scripts/gws_cred_store.py:42 decrypt subprocess_calls=[]
+HELPER_AST scripts/_fallback/gas.py:140 get subprocess_calls=[]
+HELPER_AST scripts/_fallback/gas.py:155 post subprocess_calls=[]
+EXTRA_CALLS=PASS

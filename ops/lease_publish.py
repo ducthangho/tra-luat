@@ -1918,12 +1918,14 @@ class KhoObject:
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self.env,
                              start_new_session=hasattr(os, "killpg"))
         ket_qua: dict = {}
-        tong_truoc = self.tong_bytes
+        tong_truoc = self.tong_bytes; dung_doc = threading.Event()
 
         def _doc_thuc():
             try:
                 p.stdin.write((oid + "\n").encode("ascii")); p.stdin.close()
+                if dung_doc.is_set(): return
                 dau = p.stdout.readline().decode("ascii", "replace").rstrip("\n")
+                if dung_doc.is_set(): return
                 ket_qua["dau"] = dau
                 cot = dau.split()
                 if len(cot) == 3 and cot[2].isdigit():
@@ -1937,6 +1939,27 @@ class KhoObject:
                     ket_qua["than"] = p.stdout.read(kich + 1)
             except Exception as e:  # noqa: BLE001
                 ket_qua["loi"] = repr(e)
+            finally:
+                for luong in (p.stdin, p.stdout):
+                    if luong is not None and not luong.closed:
+                        try: luong.close()
+                        except OSError: pass
+
+        def _huy_doc_win():
+            # CancelSynchronousIo is asynchronous; only the worker may close its stream.
+            if os.name != "nt" or not t.is_alive() or t.native_id is None: return
+            try:
+                import ctypes
+                dll = ctypes.WinDLL("kernel32", use_last_error=True)
+                dll.OpenThread.argtypes = (ctypes.c_uint32, ctypes.c_int, ctypes.c_uint32); dll.OpenThread.restype = ctypes.c_void_p
+                dll.CancelSynchronousIo.argtypes = (ctypes.c_void_p,); dll.CancelSynchronousIo.restype = ctypes.c_int
+                dll.CloseHandle.argtypes = (ctypes.c_void_p,); dll.CloseHandle.restype = ctypes.c_int
+                h = dll.OpenThread(0x0001, 0, t.native_id)  # THREAD_TERMINATE
+                if h:
+                    try: dll.CancelSynchronousIo(h)
+                    finally: dll.CloseHandle(h)
+            except (OSError, ValueError):
+                pass
 
         t = threading.Thread(target=_doc_thuc, daemon=True)
         try:
@@ -1978,24 +2001,22 @@ class KhoObject:
             self.memo[khoa] = than
             return than
         finally:
+            dung_doc.set()
             if p.poll() is None:
                 try:
                     getattr(os, "killpg")(p.pid, 9)
                 except Exception:  # noqa: BLE001 — không có killpg / nhóm đã chết: kill trực tiếp
                     p.kill()
                 p.wait()
-            t.join(timeout=0.05)
-            for luong in (p.stdin, p.stdout, p.stderr):
+            if t.is_alive():
+                _huy_doc_win()
+                t.join(timeout=0.05)
+            if t.is_alive(): _huy_doc_win()
+            for luong in ((p.stdin, p.stdout, p.stderr) if t.ident is None else (p.stderr,)):
                 if luong is None or luong.closed:
                     continue
                 try:
-                    if luong is p.stdout and t.is_alive():
-                        # A reader thread may still be blocked in read() by a
-                        # descendant holding the pipe. Close the OS descriptor
-                        # without waiting on BufferedReader's lock.
-                        os.close(luong.fileno())
-                    else:
-                        luong.close()
+                    luong.close()
                 except (OSError, ValueError):
                     pass
 
@@ -2274,10 +2295,14 @@ def _doc_bia_mo_mac_dinh(goc: Path, ref: str, ids: set[str]) -> dict[str, str]:
             theo_id.setdefault(lid, []).append(d)
     except Exception:  # noqa: BLE001 — forecast must not change the legacy verdict
         return khong_ro
+    def mau_thuan(ban):
+        try: return any(x != ban[0] for x in ban[1:])
+        except RecursionError: return True  # recursive YAML aliases make this forecast unknown
+
     ket = {}
     for lid in ids:
         ban = theo_id.get(lid, [])
-        if len(ban) > 1 and any(x != ban[0] for x in ban[1:]):
+        if len(ban) > 1 and mau_thuan(ban):
             ket[lid] = "KHONG_XAC_DINH"
             continue
         if not ban or "da_bi_thay_the" not in ban[0]:
@@ -2285,7 +2310,7 @@ def _doc_bia_mo_mac_dinh(goc: Path, ref: str, ids: set[str]) -> dict[str, str]:
             continue
         moi = ban[0]["da_bi_thay_the"]
         ban_moi = theo_id.get(moi, [])
-        if not ban_moi or any(x != ban_moi[0] for x in ban_moi[1:]):
+        if not ban_moi or mau_thuan(ban_moi):
             ket[lid] = "KHONG_XAC_DINH"
             continue
         ket[lid] = ("CHE" if lid in _danh_sach_thay_the_cho(ban_moi[0].get("thay_the_cho"))

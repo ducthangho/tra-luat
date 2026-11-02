@@ -14401,8 +14401,6 @@ def t232_a1a_M14_mutant_to_case_matrix_and_tree_pin():
         for item in parsed: by_id.setdefault(item.get("lease_id"), []).append(item)
         if any(any(x != copies[0] for x in copies[1:]) for copies in by_id.values()): return baseline
         for lid in ids:
-            same = [x for x in parsed if x.get("lease_id") == lid]
-            if len(same) > 1 and any(x != same[0] for x in same[1:]): return baseline
             next_ids = [x["lease"].get("da_bi_thay_the") for x in current["records"] if x["lease"].get("lease_id") == lid]
             if any(n and any(y["lease"].get("lease_id") == n and lid in (y["lease"].get("thay_the_cho") or [])
                              for y in current["records"]) for n in next_ids): baseline[lid] = "CHE"
@@ -14460,6 +14458,43 @@ def t232_a1a_M14_mutant_to_case_matrix_and_tree_pin():
             with mock.patch.object(mod, attr, changed): observed = observe()
             chot(observed == expected, f"M14 {mutant}: expected {expected}, observed {observed}")
 
+
+@ca
+def t233_a1a_windows_descendant_stdout_cancel_closes_owners():
+    if os.name != "nt": return
+    from unittest import mock
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, H) = _kho_do_thi(s); oid = _g_a0(cay, "rev-parse", H + ":README.md")
+        kho = mod.KhoObject(cay, ngan_sach={"max_reader_wall_seconds": 0.1}); kho.deadline = time.monotonic() + 0.1
+        child = "import subprocess,sys,time; sys.stdin.readline(); subprocess.Popen([sys.executable,'-c','import time; time.sleep(0.8)'],stdout=sys.stdout,stderr=subprocess.DEVNULL); open(sys.argv[1],'w').write('ready')"
+        popen, seen, marker = mod.subprocess.Popen, [], s / "descendant-ready"
+        def held(*a, **kw):
+            p = popen([sys.executable, "-c", child, str(marker)], **kw); seen.append(p); return p
+        try:
+            with mock.patch.object(mod.subprocess, "Popen", held):
+                started = time.monotonic(); rc, _ = _ma_chan(mod, kho.doc, oid, "blob"); elapsed = time.monotonic() - started
+            chot(rc == 12 and marker.exists() and elapsed < 0.5, f"Windows held stdout exceeded deadline: {rc} {elapsed:.3f}s")
+            until = time.monotonic() + 0.4
+            while seen and not all(x.closed for x in (seen[0].stdin, seen[0].stdout, seen[0].stderr)) and time.monotonic() < until: time.sleep(0.01)
+            chot(seen and all(x.closed for x in (seen[0].stdin, seen[0].stdout, seen[0].stderr)), "all three pipe owners must close")
+        finally: kho.dong()
+
+@ca
+def t234_a1a_recursive_yaml_duplicate_unknown_and_cli_invariance():
+    mod = _nap_cong()
+    with San() as s:
+        cay, g = _kho_thu(s); folder = cay / "ops/leases"; folder.mkdir(parents=True, exist_ok=True)
+        import yaml
+        raw = yaml.safe_dump(_a1a_lease("L")) + "extra: &cycle\n  self: *cycle\n"
+        for name in ("L.yaml", "L-copy.yml"): (folder / name).write_text(raw, encoding="utf-8")
+        g(cay, "add", "-A"); g(cay, "commit", "-qm", "recursive duplicates"); g(cay, "push", "-q", "origin", "master")
+        state = mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})
+        chot(state == {"L": "KHONG_XAC_DINH"}, f"recursive duplicate classified {state}")
+        args = ("ai-dang-giu", "ops/x.md", "--root", str(cay)); plain, forecast = _goi_main(mod, *args), _goi_main(mod, *args, "--du-bao")
+        chot(plain[0] == forecast[0] and plain[2] == forecast[2] and
+             plain[1].splitlines() == [x for x in forecast[1].splitlines() if not x.startswith("DU_BAO:")] and
+             "DU_BAO: L · BIA_MỘ_MẶC_ĐỊNH=KHONG_XAC_DINH" in forecast[1], f"recursive CLI: {plain!r} {forecast!r}")
 
 def main(chon=None, nen=None, so=None) -> int:
     """`chon`/`nen`/`so` là SEAM của ca meta (`_chay_main_meta`): danh sách ca, nền, sổ bỏ ca — không vá

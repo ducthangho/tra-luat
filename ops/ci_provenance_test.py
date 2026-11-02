@@ -1090,12 +1090,12 @@ def c62_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
         cay = g("mktree", i=f"100644 blob {g('hash-object', '-w', '--stdin', i=b'x')}\tf\n".encode())
         dau = f"tree {cay}\nparent {P1}\nparent {P2}\n".encode()
         ai = lambda ten: b"author " + ten + b" <a@b> 1700000000 +0000\ncommitter " + ten + b" <a@b> 1700000000 +0000\n"  # noqa: E731
-        cho = []   # r2 (Windows thật, tra-luat-win): ~600 lời gọi `hash-object` lẻ + oracle từng commit đẩy ca này quá timeout 300 s
+        cho, so_dung = [], []   # r2 (Windows thật, tra-luat-win): ~600 lời gọi `hash-object` lẻ + oracle từng commit đẩy ca này quá timeout 300 s
         def cm(b, lit=()):   # của `chay_con` ⇒ commit hợp lệ GHI MỘT LƯỢT (`--stdin-paths`); OID tính trước, đối chiếu với OID Git trả về
-            if lit:
-                return g("hash-object", "-t", "commit", "-w", *lit, "--stdin", i=b)
-            cho.append(b)
-            return hashlib.sha1(b"commit %d\0" % len(b) + b).hexdigest()
+            o = g("hash-object", "-t", "commit", "-w", *lit, "--stdin", i=b) if lit else hashlib.sha1(b"commit %d\0" % len(b) + b).hexdigest()
+            cho.extend([] if lit else [b])
+            so_dung.append((o, len(b)))   # sổ (OID, cỡ) LÚC DỰNG: chốt tồn tại ở dưới đọc sổ này, không đọc lại `cho`
+            return o
         dung, goc = {"tree": cay, "parents": [P1, P2]}, {"tree": cay, "parents": []}
         hop_le = [cm(dau + x) for x in (ai("Nguyễn".encode()) + "\nthông điệp UTF-8\n".encode(), ai(b"A") + b"encoding ISO-8859-1\n\nm\xe9ssage\n",
                                          ai(b"Jos\xe9") + b"encoding ISO-8859-1\n\nm\xe9ssage\n",
@@ -1147,6 +1147,8 @@ def c62_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
             tep.append(str(Path(thu) / f"c{i}"))
         ghi = g("hash-object", "-t", "commit", "-w", "--stdin-paths", i="\n".join(tep).encode() + b"\n").split("\n")
         bang(ghi == [hashlib.sha1(b"commit %d\0" % len(b) + b).hexdigest() for b in cho], f"OID tính trước ≠ OID Git ghi ({len(ghi)}/{len(cho)})")
+        ton = g("cat-file", "--batch-check", i="".join(f"{o}\n" for o, _ in so_dung).encode()).split("\n")   # lượt 10 P3: MỌI commit dựng, kể cả
+        bang(ton == [f"{o} commit {n}" for o, n in so_dung], f"commit dựng thiếu/sai loại/cỡ: {[x for x in ton if not x.endswith(tuple(f' {n}' for _, n in so_dung))][:3]}")   # fixture âm
         ca += [(g("hash-object", "-w", "--stdin", i=v), None) for v in (b"\xff\n", b"tree zz\n", dau + ai(b"A") + b"\nblob\n")]   # blob, kể cả dạng commit
         the = g("hash-object", "-t", "tag", "-w", "--stdin",   # tag annotated dựng đúng byte: `git tag -a` đòi danh tính (runner CI không có)
                 i=f"object {hop_le[0]}\ntype commit\ntag the\ntagger A <a@b> 1700000000 +0000\n\nt\n".encode())
@@ -1165,8 +1167,11 @@ def c62_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
             for dong in gg("log", "--no-walk=unsorted", "--stdin", "--format=%H%x00%T%x00%P", i="\n".join(xs).encode() + b"\n").split("\n"):
                 h, t, p = dong.split("\0")
                 nat[h] = {"tree": t, "parents": p.split()}
+        da_so = 0
         for x, a in [(ca[i][0], kq[i]) for i in hop] + [(c2, kq[-1])]:   # `kq` là đầu ra reader đã đo ở trên, không gọi lại
             bang(a == nat.get(x), f"lệch Git native ở {x}: {a} ≠ {nat.get(x)}")
+            da_so += 1
+        bang(da_so == sum(type(k) is dict for _, k in ca) + 1, f"oracle chỉ so {da_so} mục")   # lượt 10 P3: đếm ĐỘC LẬP từ `ca`, không từ `hop`
         with mock.patch.dict(os.environ, {"PATH": thu}):
             bang(doc(hop_le[0], d1) is None, "không có git trên PATH ⇒ None")
         ra_that = subprocess.run(["git", "-C", d1, "cat-file", "--batch"], input=hop_le[0].encode() + b"\n", capture_output=True, check=True).stdout

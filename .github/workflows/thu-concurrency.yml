@@ -5,7 +5,7 @@ on:
   push:
     branches: [ops/thu-concurrency-1132]
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || (github.ref == 'refs/heads/ops/thu-concurrency-1132' && github.sha) || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/ops/thu-concurrency-1132' }}
 permissions: {}
 jobs:

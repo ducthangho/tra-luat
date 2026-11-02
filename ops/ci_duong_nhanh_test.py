@@ -2701,7 +2701,12 @@ IF_BUOC_CHUAN = {
 
 # LUAT (khoa topology): moi thu KHAC thân `run:` cua ci.yml. `run:` cua buoc co san ngoai pham vi packet nay (do cong khac + review canh);
 # `run:` cua buoc do packet them thi duoc khoa nguyen van o y08/y09. Doi bat ky muc nao duoi day => y13 do => cap nhat CUNG review.
-KHUNG_TOP = {'name': 'gate', True: {'push': {'branches': ['master']}, 'pull_request': None, 'workflow_dispatch': {'inputs': {'runner_set': {'description': 'windows-and-ubuntu (mặc định) hoặc windows-only (bỏ các job ma trận Ubuntu)', 'required': False, 'default': 'windows-and-ubuntu', 'type': 'choice', 'options': ['windows-and-ubuntu', 'windows-only']}, 'che_do': {'description': 'tu_dong (mac dinh: diff thuan ho so thi duong nhanh) hoac day_du (chay du, ke ca Windows)', 'required': False, 'default': 'tu_dong', 'type': 'choice', 'options': ['tu_dong', 'day_du']}}}}, 'concurrency': {'group': '${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}', 'cancel-in-progress': "${{ github.ref != 'refs/heads/master' }}"}}
+# #1132 (spec CI-CONCURRENCY-MASTER r1): moi commit master mot group concurrency rieng theo SHA, ly do o chu thich ci.yml.
+GROUP_CU = "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
+GROUP_MOI = ("${{ github.workflow }}-${{ github.event.pull_request.number || "
+             "(github.ref == 'refs/heads/master' && github.sha) || github.ref }}")
+HUY_CHUAN = "${{ github.ref != 'refs/heads/master' }}"
+KHUNG_TOP = {'name': 'gate', True: {'push': {'branches': ['master']}, 'pull_request': None, 'workflow_dispatch': {'inputs': {'runner_set': {'description': 'windows-and-ubuntu (mặc định) hoặc windows-only (bỏ các job ma trận Ubuntu)', 'required': False, 'default': 'windows-and-ubuntu', 'type': 'choice', 'options': ['windows-and-ubuntu', 'windows-only']}, 'che_do': {'description': 'tu_dong (mac dinh: diff thuan ho so thi duong nhanh) hoac day_du (chay du, ke ca Windows)', 'required': False, 'default': 'tu_dong', 'type': 'choice', 'options': ['tu_dong', 'day_du']}}}}, 'concurrency': {'group': GROUP_MOI, 'cancel-in-progress': "${{ github.ref != 'refs/heads/master' }}"}}
 KHUNG_JOB = {
     'chuan-bi': {'runs-on': 'ubuntu-latest', 'timeout-minutes': 20, 'outputs': {'os': '${{ (steps.phan-loai.outputs.che_do == \'duong_nhanh\') && \'["ubuntu-latest"]\' || (github.event_name == \'workflow_dispatch\' && inputs.runner_set == \'windows-only\') && \'["windows-latest"]\' || (github.event_name == \'workflow_dispatch\' || contains(github.event.pull_request.labels.*.name, \'windows\')) && \'["ubuntu-latest","windows-latest"]\' || \'["ubuntu-latest"]\' }}', 'che_do': "${{ steps.phan-loai.outputs.che_do || 'day_du' }}", 'goc': '${{ steps.phan-loai.outputs.goc }}', 'dau': '${{ steps.phan-loai.outputs.dau }}', 'hop': '${{ steps.phan-loai.outputs.hop }}'}},
     'gate': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 150, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
@@ -2907,6 +2912,19 @@ RUN_BUOC_PACKET = {
     ('gate-packet-loop', 'DUONG_NHANH - liet ke buoc bo qua (job gate-packet-loop)'): 'echo "DUONG_NHANH: bo qua cài actionlint cho G5 vi diff chi gom ops/{land,leases,reviews,specs}/**"\necho "DUONG_NHANH: bo qua cài shellcheck cho G5 (cài xong đo lại) vi diff chi gom ops/{land,leases,reviews,specs}/**"\necho "DUONG_NHANH: bo qua cài rg cho G5 (cài xong đo lại) vi diff chi gom ops/{land,leases,reviews,specs}/**"\necho "DUONG_NHANH: bo qua G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6 vi diff chi gom ops/{land,leases,reviews,specs}/**"\necho "DUONG_NHANH: bo qua cài Ruff 0.15.15 và in probe dương vi diff chi gom ops/{land,leases,reviews,specs}/**"\necho "DUONG_NHANH: bo qua packet-loop selftest vi diff chi gom ops/{land,leases,reviews,specs}/**"\n',
 }
 
+
+
+@ca
+def y13b_concurrency_master_theo_sha():
+    """#1132 (spec CI-CONCURRENCY-MASTER r1): CA HAI workflow gac master (`ci.yml`, `launcher-windows.yml`) phai co
+    `concurrency.group` BANG DUNG chuoi GROUP_MOI (so nguyen chuoi, khong chuoi con) va giu `cancel-in-progress` = HUY_CHUAN
+    (chan 'va' bang cach tat huy tren PR)."""
+    for ten in ("ci.yml", "launcher-windows.yml"):
+        wf = doc_wf_tu((CAY / ".github" / "workflows" / ten).read_text(encoding="utf-8"))
+        cc = wf.get("concurrency") or {}
+        bang(cc.get("group") == GROUP_MOI, f"{ten}: concurrency.group = {cc.get('group')!r}, phai = {GROUP_MOI!r}")
+        bang(cc.get("cancel-in-progress") == HUY_CHUAN,
+             f"{ten}: cancel-in-progress = {cc.get('cancel-in-progress')!r}, phai = {HUY_CHUAN!r}")
 
 @ca
 def y14_than_run_cua_buoc_packet_them_khop_nguyen_van():
@@ -3550,6 +3568,7 @@ def thay_regex(vb, mau, moi, co=re.S):
 
 MA, YML, DK = "ops/ci_duong_nhanh.py", ".github/workflows/ci.yml", ".claude/dev/ci_dang_ky_test.py"
 TEST = "ops/ci_duong_nhanh_test.py"
+LW = ".github/workflows/launcher-windows.yml"   # #1132: chi dot bien khoi concurrency
 LP = "ops/lease_publish.py"   # chi dot bien PHAM VI bia mo ma docstring D2 khai (t21b), tren ban sao tam
 
 
@@ -3567,6 +3586,10 @@ def _lp(cu, moi):
 
 def _yml(cu, moi):
     return (YML, lambda vb: thay_mot(vb, cu, moi))
+
+
+def _lw(cu, moi):
+    return (LW, lambda vb: thay_mot(vb, cu, moi))
 
 
 _NEO_TREN = "        tren = frozenset({danh_tinh(goc)}) if goc == goc_cay else to_tien.pop(goc)\n"
@@ -3728,6 +3751,10 @@ DOT_BIEN = [
     ("yml_gate_checkout_nong", (YML, lambda vb: thay_regex(vb, r"(\n  gate:\n.*?\n          fetch-depth: )0\n", r"\g<1>1\n")), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
     ("yml_go_buoc_giu_py_compile", (YML, lambda vb: thay_regex(vb, r"      - name: py_compile\n        if: [^\n]*\n        run: [^\n]*\n", "")), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
     ("yml_concurrency_luon_huy", _yml("  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}\n", "  cancel-in-progress: true\n"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_concurrency_group_ve_ref", _yml("  group: " + GROUP_MOI + "\n", "  group: " + GROUP_CU + "\n"),
+     ("y13_khoa_topology_cua_ci_yml_ngoai_than_run", "y13b_concurrency_master_theo_sha")),
+    ("launcher_concurrency_group_ve_ref", _lw("  group: " + GROUP_MOI + "\n", "  group: " + GROUP_CU + "\n"),
+     ("y13b_concurrency_master_theo_sha",)),
     ("yml_them_permissions_cap_workflow", _yml("\njobs:\n  chuan-bi:", "\npermissions: {}\njobs:\n  chuan-bi:"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
     ("yml_doi_thu_tu_job", (YML, lambda vb: thay_regex(vb, r"(\n  gate-packet-loop:\n.*)$", "") + "\n  zz-job-them:\n    runs-on: ubuntu-latest\n    steps:\n      - run: 'true'\n"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
     # ---- t96: phan hoach ca cho bang kiem ke

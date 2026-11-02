@@ -89,13 +89,16 @@ attempts_basis: 'spec wp978 Q2 (r1); khong reset theo revision.'
 review_rounds_limit: 2
 budget:
   codex_review_calls:
-    pr_wp978_g1: {used: 8, reserved: 0, limit: 10}
+    pr_wp978_g1: {used: 10, reserved: 1, limit: 11}
   attempt:
     packet_978_r1: {used: 0, reserved: 0, limit: 2}
   khong_reset_theo_generation: true
-nang_tran: ['r1: 2 -> 4 -> 8 (chu kho, #978 6441085134 / 6442791177, ADR-0052); r2: 8 -> 10 (spec r2, ADR-0055, chu kho 02-11-2026)']
+nang_tran: ['r1: 2 -> 4 -> 8 (chu kho, #978 6441085134 / 6442791177, ADR-0052); r2: 8 -> 10 (spec r2, ADR-0055, chu kho 02-11-2026); g2: 10 -> 11 (chu kho chon "Nang tran len 11" qua AskUserQuestion trong phien session_015GtxrcrL4cwJqpNqx2ptAa 02-11-2026 ~03:50Z, de xac minh 516a334 sau ban va 3 P3 cua luot 10; bam byte KHONG DO DUOC)']
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp978-g1-claude khi N1p-N3p dat; PR #997 da mo. Merge origin/master TRUOC luot Codex cuoi neu master tien va khong cham write set.'
 codex_da_goi_r1: 'luot 1-8 tren nhanh lease ops/reviews/wp978-g1-codex-luot{1..8}; luot 8 approve 53ec046.'
-codex_da_goi: []
+codex_da_goi:
+- {luot: 9, head: aebc808ea45408c827e753827b97f94689969db5, run: 676c6847, verdict: approve, p: '0/0/0/0', hien_vat: ops/reviews/wp978-g2-codex-luot9}
+- {luot: 10, head: db2c1f50bee7c866ad9bea01a3895842bd85cb69, run: 3fdb471c, verdict: approve, p: '0/0/0/3', hien_vat: ops/reviews/wp978-g2-codex-luot10, ghi_chu: 'tree 3676c40e = b659eae tren nhanh PR'}
+- {luot: 11, head: 516a33467b1212a90153bb25ed44f28b16d5fac9, run: 33a99dc0, verdict: dang_chay}

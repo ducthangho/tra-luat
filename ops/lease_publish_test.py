@@ -6783,6 +6783,7 @@ def t136_A2_adapter_nguon_ghim_danh_tinh_profile_duyet_va_khong_doc_config_kho()
     """A2/ADR-0047: discovery qua endpoint tường minh với env con TỪ RỖNG; profile chưa duyệt ⇒ 12 (mỏ neo A0
     rỗng); symref máy chủ vắng ⇒ 12 không fallback; config kho/global không đổi được nguồn; so map cục bộ."""
     from unittest import mock
+    from io import StringIO
     mod = _nap_cong()
     chot(mod.PROFILE_ADAPTER_DA_DUYET == frozenset() and mod.SO_THU_HOI_KICH_HOAT is False
          and mod.KHO_CANONICAL == KHO_CANONICAL_A0, "hằng A0 trôi")
@@ -6803,6 +6804,14 @@ def t136_A2_adapter_nguon_ghim_danh_tinh_profile_duyet_va_khong_doc_config_kho()
         # fixture duyệt đúng digest ⇒ control xanh
         rc, kq = _ma_chan(mod, mod.kham_pha_nguon, ep, hoso=hoso, da_duyet=[digest], giao_thuc_cho_phep=("file",))
         chot(rc == 0 and kq[0] == "master" and kq[1]["master"] == sha and kq[2] == digest, f"discovery control: {rc} {kq}")
+        for audit_hash, warned in (("bad-hash", True), (hoso["git_sha256"], False)):
+            with mock.patch.object(mod.sys, "stderr", StringIO()) as warnings_out:
+                rc, result = _ma_chan(mod, mod.kham_pha_nguon, ep, hoso=dict(hoso, git_sha256=audit_hash),
+                                      da_duyet=[digest], giao_thuc_cho_phep=("file",))
+            chot(rc == 0 and result == kq and ("audit-only" in warnings_out.getvalue()) == warned,
+                 f"audit-only hash affected admission/reporting: {audit_hash!r} rc={rc} {warnings_out.getvalue()!r}")
+        rc, _ = _ma_chan(mod, mod.kham_pha_nguon, ep, hoso=dict(hoso, tls_thu_vien="OpenSSL 99"), da_duyet=[digest], giao_thuc_cho_phep=("file",))
+        chot(rc == 12, f"required TLS change must deny discovery: {rc}")
         # hồ sơ TRONG MIỀN nhưng khác bản đã duyệt (đổi proxy) ⇒ digest khác ⇒ 12
         khac = dict(hoso, proxy="http://proxy.noi-bo:3128")
         rc, td = _ma_chan(mod, mod.kham_pha_nguon, ep, hoso=khac, da_duyet=[digest], giao_thuc_cho_phep=("file",))
@@ -7140,7 +7149,7 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
          t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat, "GIET", "KhoObject.doc cache-hit"),
         ("F04-bo-deadline-truoc-tra", "            self._con_thoi_gian(f\"trước khi trả {oid[:12]}\")\n", "",
          t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat, "GIET", "KhoObject.doc sau wait"),
-        ("F05-bo-tong-tu-header", "                    if tong_truoc + kich > self.ngan_sach[\"max_total_object_bytes\"]:\n", "                    if False:\n",
+        ("F05-bo-tong-tu-header", "                    if self.tong_bytes + kich > self.ngan_sach[\"max_total_object_bytes\"]:\n", "                    if False:\n",
          t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file, "GIET", "KhoObject.doc header"),
         ("F05-bo-rc-cat-file", "            if rc != 0:\n                raise Chan(RC_KHONG_XAC_DINH, f\"KHÔNG_XÁC_ĐỊNH: cat-file rc={rc}", "            if False:\n                raise Chan(RC_KHONG_XAC_DINH, f\"KHÔNG_XÁC_ĐỊNH: cat-file rc={rc}",
          t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file, "GIET", "KhoObject.doc rc"),
@@ -14049,12 +14058,10 @@ def t222_a1a_profile_v2_required_vs_audit_and_runner_tristate():
         missing = dict(control); del missing[key]
         rc, _ = _ma_chan(mod, mod.kiem_mien_ho_so, missing)
         chot(rc == 12, f"A4 missing {key} must be 12: {rc}")
-
 @ca
 def t223_a1a_q6_ancestor_and_fixed_history():
     mod = _nap_cong(); q6 = "072181157a27804e69deb35bb792a88c70ac31e3"
-    chot(mod.MOC_BIA_MO_LICH_SU == q6 and re.fullmatch(r"[0-9a-f]{40}", q6) is not None,
-         "A6 Q6 anchor differs from the independently pinned test value")
+    chot(mod.MOC_BIA_MO_LICH_SU == q6 and re.fullmatch(r"[0-9a-f]{40}", q6) is not None, "A6 Q6 anchor differs from the independently pinned test value")
     chot(mod.BIA_MO_LICH_SU == (), "A7b historical pairs must stay frozen empty")
     root = HERE.parent
     if not (root / ".git").exists():
@@ -14062,7 +14069,6 @@ def t223_a1a_q6_ancestor_and_fixed_history():
     p = subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor", q6, "HEAD"],
                        capture_output=True, text=True)
     chot(p.returncode == 0, f"A6 Q6 ancestry not established: rc={p.returncode} {p.stderr[:160]!r}")
-
 @ca
 def t224_a1a_historical_pair_both_ends():
     from unittest import mock
@@ -14075,13 +14081,11 @@ def t224_a1a_historical_pair_both_ends():
                                    ("other", "new", "rc dự báo 8")):
             out = mod._du_bao_check({"lease_id": new, "thay_the_cho": [old]}, HERE.parent, "master")
             chot(any(expected in x for x in out), f"A7 pair ({old},{new}) failed: {out}")
-
 @ca
 def t225_a1a_upload_artifact_exact_pin():
     pin = "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02"; wf = (HERE.parent / ".github/workflows/ops-thu-hoi-admission.yml").read_text(encoding="utf-8")
     uses = re.findall(r"(?m)^\s*-?\s*uses:\s*(actions/upload-artifact@\S+)", wf)
     chot(uses == [pin], f"A17 upload-artifact must occur once at pinned OID: {uses}")
-
 def _a1a_lease(lid, *, tomb=None, reverse=None, path="ops/x.md"):
     d = {"lease_id": lid, "lease_expires_at_utc": mai_sau(24), "write_set": [path]}
     if tomb is not None:
@@ -14089,7 +14093,6 @@ def _a1a_lease(lid, *, tomb=None, reverse=None, path="ops/x.md"):
     if reverse is not None:
         d["thay_the_cho"] = [reverse]
     return d
-
 def _a1a_commit_leases(cay, g, label, entries):
     import yaml
     folder = cay / "ops/leases"
@@ -14098,10 +14101,18 @@ def _a1a_commit_leases(cay, g, label, entries):
         (folder / filename).write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
     g(cay, "add", "-A"); g(cay, "commit", "-qm", label)
     return g(cay, "rev-parse", "HEAD").stdout.strip()
-
+def _a1a_representative_mutant(mod, records):
+    reader = mod._doc_bia_mo_mac_dinh
+    def wrong(root, ref, ids):
+        result = reader(root, ref, ids)
+        for lid in ids:
+            reps = [x for x in records() if x["lease"].get("lease_id") == lid and x["lease"].get("da_bi_thay_the")]
+            if result[lid] == "CHE" and reps and reps[0]["ref"] != ref: result[lid] = "KHONG"
+        return result
+    return wrong
 @ca
 def t226_a1a_default_tree_CHE_dedup_and_legacy_invariance():
-    import importlib.util; mod = _nap_cong()
+    import importlib.util; from unittest import mock; mod = _nap_cong()
     with San() as s:
         cay, g = _kho_thu(s)
         base = g(cay, "rev-parse", "HEAD").stdout.strip()
@@ -14112,7 +14123,8 @@ def t226_a1a_default_tree_CHE_dedup_and_legacy_invariance():
         g(cay, "checkout", "-q", "-b", "z-landed", base)
         _a1a_commit_leases(cay, g, "old holder", {"L.yaml": _a1a_lease("L")})
         g(cay, "push", "-q", "origin", "z-landed")
-        g(cay, "checkout", "-q", "master"); g(cay, "fetch", "-q", "origin")
+        g(cay, "fetch", "-q", "origin"); g(cay, "checkout", "-q", "--detach", base)
+        g(cay, "branch", "-D", "master")
         baseline_path = s / "lease_publish_base.py"
         old = subprocess.run(["git", "-C", str(HERE.parent), "show",
                               "7f65476afdac57023be1b83ddec0df36a5e8d4b8:ops/lease_publish.py"],
@@ -14129,21 +14141,33 @@ def t226_a1a_default_tree_CHE_dedup_and_legacy_invariance():
         chot((rb, rc, rf) == (11, 11, 11) and eb == ec == ef and plain(ob) == plain(oc) == plain(of)
              and "NGƯỜI_GIỮ 1: L" in of and of.splitlines().count(marker) == 1,
              f"A19 legacy drift or CHE absent: rc={(rb,rc,rf)}, marker={of.count(marker)}, err={(eb,ec,ef)}")
-        first = next(x for x in mod._quet_lease_toan_kho(cay) if x["lease"].get("da_bi_thay_the") == "N"); chot(first["ref"] == "refs/heads/master", f"A19 actual all-ref scanner boundary changed: {first['ref']}")
+        def mutant_case(name, control):
+            with mock.patch.object(mod, "_doc_bia_mo_mac_dinh",
+                                   _a1a_representative_mutant(mod, lambda: mod._quet_lease_toan_kho(cay))):
+                trial = _goi_main(mod, *args, "--du-bao")
+            chot(trial[0] == control[0] and trial[2] == control[2] and plain(trial[1]) == plain(control[1]),
+                 f"{name} representative mutant changed legacy verdict/output: {trial!r}")
+            if trial != control: real_failures.add(name)
+        real_failures = set()
+        first = next(x for x in mod._quet_lease_toan_kho(cay) if x["lease"].get("da_bi_thay_the") == "N"); chot(first["ref"] == "refs/remotes/origin/master", f"A19 first tombstone is not canonical remote: {first['ref']}")
+        mutant_case("A19", (rf, of, ef))
         out = mod._du_bao_check({"lease_id": "N", "thay_the_cho": ["L"]}, cay, "master")
         chot(mod.BIA_MO_LICH_SU == () and any("rc dự báo 8" in x for x in out), f"A7b: {out}")
-        g(cay, "branch", "a-first", "master")
+        g(cay, "branch", "a-first", "origin/master")
         records = mod._quet_lease_toan_kho(cay)
         tomb = next(x for x in records if x["lease"].get("lease_id") == "L"
                     and x["lease"].get("da_bi_thay_the") == "N")
         chot(tomb["ref"] != "refs/remotes/origin/master", f"A21 fixture did not expose dedup trap: {tomb['ref']}")
         state = mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})
         chot(state == {"L": "CHE"}, f"A21 default tree overridden by representative ref: {state}")
+        mutant_case("A21", _goi_main(mod, *args, "--du-bao"))
+        chot(real_failures == {"A21"}, f"real A19/A21 representative mutant failures: {real_failures}")
         rc2, oc2, ec2 = _goi_main(mod, *args)
         rf2, of2, ef2 = _goi_main(mod, *args, "--du-bao", "--nhanh-mac-dinh", "absent")
         chot(rf2 == rc2 and ef2 == ec2 and plain(of2) == plain(oc2)
              and "DU_BAO: L · BIA_MỘ_MẶC_ĐỊNH=KHONG_XAC_DINH" in of2
              and "KHÔNG ĐO ĐƯỢC" in of2, f"A22 missing canonical ref: {rf2} {of2!r} {ef2!r}")
+        g(cay, "checkout", "-q", "-b", "master", "origin/master")
         _a1a_commit_leases(cay, g, "conflicting L", {"L-copy.yml": _a1a_lease("L")})
         g(cay, "push", "-q", "origin", "master"); g(cay, "fetch", "-q", "origin")
         chot(mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})["L"] == "KHONG_XAC_DINH",
@@ -14153,7 +14177,6 @@ def t226_a1a_default_tree_CHE_dedup_and_legacy_invariance():
         g(cay, "push", "-q", "origin", "master"); g(cay, "fetch", "-q", "origin")
         chot(mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})["L"] == "KHONG_XAC_DINH",
              "A22 conflict at N was accepted")
-
 @ca
 def t227_a1a_side_tombstone_and_missing_reverse_are_unknown():
     mod = _nap_cong()
@@ -14189,7 +14212,6 @@ def t227_a1a_side_tombstone_and_missing_reverse_are_unknown():
         chot(noflag[0] == flagged[0] == 12 and noflag[2] == flagged[2]
              and not any(x.startswith("DU_BAO:") for x in flagged[1].splitlines()),
              f"A22 malformed YAML CLI bypassed legacy gate: {noflag!r} {flagged!r}")
-
 @ca
 def t228_a1a_q13_descriptor_exact_and_other_bindings():
     import hashlib, json, shutil
@@ -14227,7 +14249,6 @@ def t228_a1a_q13_descriptor_exact_and_other_bindings():
                                  ("missing policy", h["H_meta_khong_policy"], S)):
             rc, _, err = m4(head, base)
             chot(rc == 12, f"A18 {name} gate bypassed: {rc} {err!r}")
-
 @ca
 def t229_a1a_blob_raw_bytes_and_read_failures():
     from unittest import mock
@@ -14251,7 +14272,6 @@ def t229_a1a_blob_raw_bytes_and_read_failures():
                 mock.patch.object(mod, "GOI_GIT", side_effect=UnicodeDecodeError("utf-8", b"\xff", 0, 1, "bad")):
             out = mod._du_bao_check({"lease_id": "new", "thay_the_cho": ["old"]}, cay, "master")
             chot(any("rc dự báo 12" in x for x in out), f"A8 forecast did not catch decode failure: {out}")
-
 @ca
 def t230_a1a_m4_one_clock_snapshot():
     import shutil; from unittest import mock
@@ -14266,7 +14286,6 @@ def t230_a1a_m4_one_clock_snapshot():
                                      "--root", str(cay))
         chot(rc == 0 and clock.now.call_count == 1,
              f"A12 M4 must use exactly one UTC clock snapshot: rc={rc} calls={clock.now.call_count} {err!r}")
-
 @ca
 def t231_a1a_A4_mutant_to_case_matrix():
     from unittest import mock; mod = _nap_cong()
@@ -14311,7 +14330,6 @@ def t231_a1a_A4_mutant_to_case_matrix():
             patch = mock.patch.object(mod, "bam_ho_so", changed_digest)
         with patch: observed = observe()
         chot(observed == expected, f"A4 {mutant}: expected {expected}, observed {observed}")
-
 @ca
 def t232_a1a_M14_mutant_to_case_matrix_and_tree_pin():
     from types import SimpleNamespace; from unittest import mock; import yaml
@@ -14320,11 +14338,9 @@ def t232_a1a_M14_mutant_to_case_matrix_and_tree_pin():
     current = {}
     original_reader, original_forecast = mod._doc_bia_mo_mac_dinh, mod._du_bao_ai_dang_giu
     class Signal(AssertionError): pass
-    def lease(lid, **fields):
-        return dict(_a1a_lease(lid), **fields)
+    def lease(lid, **fields): return dict(_a1a_lease(lid), **fields)
     live, tomb, reverse = lease("L"), lease("L", da_bi_thay_the="N"), lease("N", thay_the_cho=["L"])
-    def record(d, ref=canon, path=None):
-        return {"lease": d, "ref": ref, "path": path or f"ops/leases/{d['lease_id']}.yaml", "blob": "b" * 40}
+    def record(d, ref=canon, path=None): return {"lease": d, "ref": ref, "path": path or f"ops/leases/{d['lease_id']}.yaml", "blob": "b" * 40}
     side = "refs/heads/z-side"
     scenarios = {
         "A19_cli": ([("L.yaml", tomb), ("N.yaml", reverse)], [record(tomb), record(reverse), record(live, side)], "CHE", "cli"),
@@ -14336,26 +14352,20 @@ def t232_a1a_M14_mutant_to_case_matrix_and_tree_pin():
         "A22ivL_unit": ([("L.yaml", tomb), ("N.yaml", reverse), ("L-copy.yml", live)], [record(tomb), record(reverse), record(live, canon, "ops/leases/L-copy.yml")], "KHONG_XAC_DINH", "unit"),
         "A22ivN_unit": ([("L.yaml", tomb), ("N.yaml", reverse), ("N-copy.yml", lease("N"))], [record(tomb), record(reverse), record(lease("N"), canon, "ops/leases/N-copy.yml")], "KHONG_XAC_DINH", "unit"),
     }
-    # Matrix CLI seam admits only the remote canonical ref; t226 separately locks the real all-ref scanner.
-    chot(scenarios["A19_cli"][1][0]["ref"] == canon and scenarios["A21_unit"][1][0]["ref"] != canon,
-         "A21 representative-ref trap or remote-only matrix boundary was not constructed")
+    chot(scenarios["A19_cli"][1][0]["ref"] == canon and scenarios["A21_unit"][1][0]["ref"] != canon, "A21 representative-ref trap was not constructed")
     def git(*args, **kw):
-        current["ref_moved"] = True  # a later lookup by ref now sees a different tree
-        return SimpleNamespace(returncode=1 if current["missing"] else 0, stdout=oid + "\n")
+        current["ref_moved"] = True; return SimpleNamespace(returncode=1 if current["missing"] else 0, stdout=oid + "\n")
     def tree(_root, ref, path, de_quy=True):
         if ref == canon and current.get("ref_moved") and path == "ops/leases": return []
         if path == "ops": return [("040000", "tree", oid, "ops")]
         if path == "ops/leases" and not de_quy:
-            return [("120000" if current.get("bad_namespace") else "040000",
-                     "blob" if current.get("bad_namespace") else "tree", oid, path)]
+            return [("120000" if current.get("bad_namespace") else "040000", "blob" if current.get("bad_namespace") else "tree", oid, path)]
         if path == "ops/leases":
             return [("100644", "blob", oid, "ops/leases/" + name) for name, _ in current["entries"]]
         return []
     def blob(_root, ref, path):
         chot(ref == oid, f"M14 mixed a moving ref with pinned tree: {ref}")
-        name = path.rsplit("/", 1)[-1]
-        d = dict(current["entries"])[name]
-        return d.encode() if isinstance(d, str) else yaml.safe_dump(d).encode()
+        d = dict(current["entries"])[path.rsplit("/", 1)[-1]]; return d.encode() if isinstance(d, str) else yaml.safe_dump(d).encode()
     def all_refs(root, ref, ids):
         baseline = original_reader(root, ref, ids)
         if current["missing"]: return baseline
@@ -14370,16 +14380,9 @@ def t232_a1a_M14_mutant_to_case_matrix_and_tree_pin():
             if any(n and any(y["lease"].get("lease_id") == n and lid in (y["lease"].get("thay_the_cho") or [])
                              for y in current["records"]) for n in next_ids): baseline[lid] = "CHE"
         return baseline
-    def representative(root, ref, ids):
-        result = original_reader(root, ref, ids)
-        for lid in ids:
-            reps = [x for x in current["records"] if x["lease"].get("lease_id") == lid and x["lease"].get("da_bi_thay_the")]
-            if result[lid] == "CHE" and reps and reps[0]["ref"] != ref: result[lid] = "KHONG"
-        return result
-    def rounded(root, ref, ids):
-        return {k: ("KHONG" if v == "KHONG_XAC_DINH" else v) for k, v in original_reader(root, ref, ids).items()}
-    def omitted(*args, **kwargs):
-        return [x for x in original_forecast(*args, **kwargs) if "BIA_MỘ_MẶC_ĐỊNH=" not in x]
+    representative = _a1a_representative_mutant(mod, lambda: current["records"])
+    def rounded(root, ref, ids): return {k: ("KHONG" if v == "KHONG_XAC_DINH" else v) for k, v in original_reader(root, ref, ids).items()}
+    def omitted(*args, **kwargs): return [x for x in original_forecast(*args, **kwargs) if "BIA_MỘ_MẶC_ĐỊNH=" not in x]
     def dropped(filename):
         def mutate(root, ref, ids):
             saved = current["entries"]; current["entries"] = [x for x in saved if x[0] != filename]
@@ -14391,13 +14394,11 @@ def t232_a1a_M14_mutant_to_case_matrix_and_tree_pin():
         return original_reader(root, ref, ids)
     targets = {"all_refs": {"A20_unit", "A22i_cli"}, "representative": {"A21_unit"},
                "round_unknown": {"A22i_cli", "A22ii_cli", "A22iii_unit", "A22ivL_unit", "A22ivN_unit"},
-               "omit_line": {"A19_cli", "A22i_cli", "A22ii_cli"},
-               "drop_L": {"A22ivL_unit"}, "drop_N": {"A22ivN_unit"}, "absent_raises": {"A22ii_cli"}}
+               "omit_line": {"A19_cli", "A22i_cli", "A22ii_cli"}, "drop_L": {"A22ivL_unit"}, "drop_N": {"A22ivN_unit"}, "absent_raises": {"A22ii_cli"}}
     def observe(caught=()):
         failures = set()
         for name, (entries, records, expected, kind) in scenarios.items():
-            current.update(entries=entries, records=records, missing=kind == "missing",
-                           bad_namespace=False, ref_moved=False)
+            current.update(entries=entries, records=records, missing=kind == "missing", bad_namespace=False, ref_moved=False)
             try:
                 if kind in ("cli", "missing"):
                     with mock.patch.object(mod, "_quet_lease_toan_kho", return_value=records), \
@@ -14424,10 +14425,8 @@ def t232_a1a_M14_mutant_to_case_matrix_and_tree_pin():
     with mock.patch.object(mod, "GOI_GIT", git), mock.patch.object(mod, "_ls_tree_z", tree), \
             mock.patch.object(mod, "_doc_blob_text_12", blob):
         chot(observe() == set(), "M14 baseline matrix cases failed")
-        current.update(entries=[("L.yaml", live)], records=[record(live)], missing=False,
-                       bad_namespace=True, ref_moved=False)
-        chot(original_reader(Path("."), canon, {"L"})["L"] == "KHONG_XAC_DINH",
-             "M14 non-tree lease namespace was rounded to KHONG")
+        current.update(entries=[("L.yaml", live)], records=[record(live)], missing=False, bad_namespace=True, ref_moved=False)
+        chot(original_reader(Path("."), canon, {"L"})["L"] == "KHONG_XAC_DINH", "M14 non-tree lease namespace was rounded to KHONG")
         for mutant, expected in targets.items():
             attr, changed = ("_du_bao_ai_dang_giu", omitted) if mutant == "omit_line" else (
                 "_doc_bia_mo_mac_dinh", {"all_refs": all_refs, "representative": representative,
@@ -14435,7 +14434,6 @@ def t232_a1a_M14_mutant_to_case_matrix_and_tree_pin():
                                           "drop_N": dropped("N-copy.yml"), "absent_raises": absent_raises}[mutant])
             with mock.patch.object(mod, attr, changed): observed = observe((RuntimeError,) if mutant == "absent_raises" else ())
             chot(observed == expected, f"M14 {mutant}: expected {expected}, observed {observed}")
-
 @ca
 def t233_a1a_descendant_stdout_cancel_closes_owners():
     from unittest import mock; mod = _nap_cong()

@@ -1708,9 +1708,7 @@ _HOSO_KHOA_BAM = tuple(k for k in _HOSO_KHOA if k != "git_sha256")
 
 
 def kiem_mien_ho_so(hoso) -> None:
-    """Schema HỮU HẠN của hồ sơ adapter (F08): đúng tập khoá, đúng kiểu/miền từng giá trị. Đứng TRƯỚC phép so
-    digest — mỏ neo chỉ được so trên một hồ sơ đã nằm trong miền, nên khoá lạ hay giá trị ngoài miền ⇒ 12 kể cả
-    khi ai đó băm đúng dict ấy đưa vào mỏ neo."""
+    """Validate required v2 fields before admission; report malformed audit-only data without denying it."""
     if not isinstance(hoso, dict) or tuple(sorted(hoso)) != tuple(sorted(_HOSO_KHOA)):
         raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: hồ sơ adapter phải có đúng khoá {list(_HOSO_KHOA)}")
     if type(hoso["schema_version"]) is not int or hoso["schema_version"] != 2:
@@ -1719,7 +1717,7 @@ def kiem_mien_ho_so(hoso) -> None:
     if not isinstance(gp, str) or not Path(gp).is_absolute():
         raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: hồ sơ adapter git_path phải là đường tuyệt đối")
     if not isinstance(hoso["git_sha256"], str) or not SHA256.match(hoso["git_sha256"]):
-        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: hồ sơ adapter git_sha256 phải là sha256 hex")
+        print("CẢNH_BÁO: hồ sơ adapter git_sha256 không phải sha256 hex (audit-only)", file=sys.stderr)
     if not isinstance(hoso["git_version"], str) or not hoso["git_version"].startswith("git version "):
         raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: hồ sơ adapter git_version phải là đầu ra `git --version`")
     if hoso["credential_helper"] != "":
@@ -2244,8 +2242,7 @@ def _doc_bia_mo_mac_dinh(goc: Path, ref: str, ids: set[str]) -> dict[str, str]:
             return khong_ro
         tree = pinned.stdout.strip()  # all subsequent reads use this immutable tree, never the moving ref
         _kiem_to_tien_la_tree(goc, tree, "ops/leases")
-        entry = [x for x in _ls_tree_z(goc, tree, "ops/leases", de_quy=False)
-                 if x[3] == "ops/leases"]
+        entry = [x for x in _ls_tree_z(goc, tree, "ops/leases", de_quy=False) if x[3] == "ops/leases"]
         if any(loai != "tree" for _mode, loai, _oid, _path in entry):
             return khong_ro
         theo_id: dict[str, list[dict]] = {}
@@ -2486,14 +2483,14 @@ def lenh_ai_dang_giu(a) -> int:
         print(f"{trang_thai}{nhan}\t{lease_id}\t{muc['ref']}:{muc['path']}")
         if trang_thai == "CÒN_HẠN" and not da_chet:
             nguoi_giu[lease_id] = None
-    if sai_kieu:
-        raise Chan(RC_KHONG_XAC_DINH,
-                   f"KHÔNG_XÁC_ĐỊNH: {sai_kieu} lease chạm {a.duong_dan} mang lease_id không hợp lệ (sai kiểu hoặc sai dạng) — "
-                   "không kết luận được ai đang giữ (wp678 Q3)")
     if getattr(a, "du_bao", False):
         for dong in _du_bao_ai_dang_giu(root, refs_a0, cac_lease, getattr(a, "nhanh_mac_dinh", None) or "master",
                                           a.duong_dan, active_ids):
             print(dong)
+    if sai_kieu:
+        raise Chan(RC_KHONG_XAC_DINH,
+                   f"KHÔNG_XÁC_ĐỊNH: {sai_kieu} lease chạm {a.duong_dan} mang lease_id không hợp lệ (sai kiểu hoặc sai dạng) — "
+                   "không kết luận được ai đang giữ (wp678 Q3)")
     print(f"NGƯỜI_GIỮ {len(nguoi_giu)}: " + (", ".join(sorted(nguoi_giu)) or "không có"))
     return RC_DANG_GIU if nguoi_giu else RC_OK
 

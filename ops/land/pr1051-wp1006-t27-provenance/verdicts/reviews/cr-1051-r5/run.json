@@ -1,0 +1,66 @@
+{
+  "version": "1.5.0",
+  "run_id": "d4a1f14a4e544d11b2593da4f1d1daf5",
+  "short_id": "d4a1f14a",
+  "ten": "pr1051-review-5-codex",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 11,
+    "van_tay": "b72c5b43dfc6dc75"
+  },
+  "trang_thai": "dang_chay",
+  "bat_dau_utc": "2026-10-30T23:34:45.756998+00:00",
+  "ket_thuc_utc": null,
+  "ma_thoat": null,
+  "ly_do_dung": null,
+  "pid": 743,
+  "khoa_danh_tinh": "linux:26091",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/2af77617-43ba-51a0-8774-d51918fef7d3/scratchpad/cr-1051-r5/cay-kho",
+  "head": "877d3e0c85ada161ee560bb0db2f3c1a9d69c66d",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "d7d75d84b3e906549fedd7add7b14d954582758f",
+    "518fa0c5e37d9b10ab17df1e0eff7ab565a78d6e",
+    "7b0ce5954a54e360a4c618d74299b53426c01d02",
+    "ab8833cfac98b48edde2446a1586ab0f2e01fff1",
+    "88dc1a92d8af8ec7072897921ef3960250d3a660",
+    "6e96fefa2353158ba4b9eb405923c044922b56c6",
+    "4fb1c31aa5b387e4d0e347a221b141b7707309aa",
+    "0bfc73d6f7a810dc3716bb40f0193eae9cd3f888",
+    "a5316900fbf7c84af5ab22f90573635f12dd912f",
+    "a789dc8db0785f4c3a9066288356b884aee54501",
+    "cb84f390ba913703ec78523c4b3c295195f82629",
+    "2c96f2d205c41af624f0b44f6ac63ac45e2cc83d",
+    "db8e0cdab925bfe65b91a67414522f71ff2e45a7"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "e76decbac892b9fbf1fabf4561134879ce1fdc918db478e73f5b7a797b5a697a",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "8f1d226d7371403de9497b4754e7698956330781dc28b863e417ddae732c2785",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/2af77617-43ba-51a0-8774-d51918fef7d3/scratchpad/cr-1051-r5/run/d4a1f14a/prompt.snapshot",
+  "prompt_kin_hoan_toan": false,
+  "failure_class": "unknown"
+}

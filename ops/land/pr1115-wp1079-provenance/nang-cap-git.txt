@@ -1,0 +1,9 @@
+# Quan he git giua merge #1079 va merge ban va #1122 (do 2026-11-02 trong clone phien, sau fetch day du).
+$ git show -s --format='%H %P %T' c7174bfe03b3acd22cfa055b5fce176129d29542
+c7174bfe03b3acd22cfa055b5fce176129d29542 62e629156fd0729b743f15eed2f32487786b9adc 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651 2b58328926438ecb9c6aa34cfed7d27bd8c41a03
+$ git merge-base --is-ancestor c82047da4d6f9546ce1d68282c37acf9567b74bc c7174bfe03b3acd22cfa055b5fce176129d29542; echo rc=$?
+rc=0
+$ git diff --numstat c82047da4d6f9546ce1d68282c37acf9567b74bc c7174bfe03b3acd22cfa055b5fce176129d29542 -- .claude/dev/launcher_test.py .claude/dev/codex_cred_test.py
+450	93	.claude/dev/launcher_test.py
+$ git diff --numstat c7174bfe03b3acd22cfa055b5fce176129d29542^1 c7174bfe03b3acd22cfa055b5fce176129d29542   # diff do PR #1130 mang vao
+450	93	.claude/dev/launcher_test.py

@@ -1,0 +1,18 @@
+2026-11-02T00:09:01.3880736Z Image: windows-2025-vs2026
+2026-11-02T00:09:02.1473663Z ##[group]Run git config --global core.autocrlf false
+2026-11-02T00:09:03.0465288Z ##[group]Run actions/checkout@v4
+2026-11-02T00:09:13.5667030Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-11-02T00:09:13.6002990Z c7174bfe03b3acd22cfa055b5fce176129d29542
+2026-11-02T00:09:13.6417282Z ##[group]Run actions/setup-python@v5
+2026-11-02T00:09:13.8456750Z ##[group]Run python -c "import platform,sys;print('he:',platform.system(),'| python:',sys.version.split()[0])"
+2026-11-02T00:09:15.0044982Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-11-02T00:09:20.9518934Z ##[group]Run set -euo pipefail
+2026-11-02T00:09:44.7627358Z ##[group]Run python ops/cong_cu.py kiem-tra --json
+2026-11-02T00:09:45.7739649Z ##[group]Run python .claude/dev/launcher.py doctor
+2026-11-02T00:09:53.1894412Z ##[group]Run python .claude/dev/launcher_test.py
+2026-11-02T00:15:34.2591450Z ##[group]Run python .claude/dev/launcher_test.py --dot-bien
+2026-11-02T00:21:27.6756763Z ##[group]Run $ban = git status --porcelain
+2026-11-02T00:21:28.9996438Z ##[group]Run # Tren Linux da do: 0 khi du cong cu, 12 khi thieu, o CA BA kieu cat ong.
+2026-11-02T00:21:34.0821705Z ##[group]Run chcp 1258
+2026-11-02T00:21:34.7125019Z ##[group]Run python -c @"
+2026-11-02T00:21:40.0925917Z ##[group]Run # Vong 2 ket luan "Access denied" la han che sandbox codex chu khong phai

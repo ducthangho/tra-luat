@@ -89,7 +89,7 @@ attempts_basis: 'spec wp978 Q2 (r1); khong reset theo revision.'
 review_rounds_limit: 2
 budget:
   codex_review_calls:
-    pr_wp978_g1: {used: 10, reserved: 1, limit: 11}
+    pr_wp978_g1: {used: 11, reserved: 0, limit: 11}
   attempt:
     packet_978_r1: {used: 0, reserved: 0, limit: 2}
   khong_reset_theo_generation: true
@@ -101,4 +101,13 @@ codex_da_goi_r1: 'luot 1-8 tren nhanh lease ops/reviews/wp978-g1-codex-luot{1..8
 codex_da_goi:
 - {luot: 9, head: aebc808ea45408c827e753827b97f94689969db5, run: 676c6847, verdict: approve, p: '0/0/0/0', hien_vat: ops/reviews/wp978-g2-codex-luot9}
 - {luot: 10, head: db2c1f50bee7c866ad9bea01a3895842bd85cb69, run: 3fdb471c, verdict: approve, p: '0/0/0/3', hien_vat: ops/reviews/wp978-g2-codex-luot10, ghi_chu: 'tree 3676c40e = b659eae tren nhanh PR'}
-- {luot: 11, head: 516a33467b1212a90153bb25ed44f28b16d5fac9, run: 33a99dc0, verdict: dang_chay}
+- {luot: 11, head: 516a33467b1212a90153bb25ed44f28b16d5fac9, run: 33a99dc0, verdict: approve, p: '0/0/0/3 (mo mot phan)', hien_vat: ops/reviews/wp978-g2-codex-luot11}
+mien_p3:
+- slug: git-reader-oracle-coverage-unlocked
+  con_mo: 'thay muc oracle dau bang muc thu hai van rc0 (dem du, sai tap muc); go assertion dem rieng rc0'
+- slug: git-reader-write-receipt-assertion-unlocked
+  con_mo: 'go rieng assertion OID rc0; tiem ghi=[] cung go assertion rc0'
+- slug: git-reader-negative-fixture-existence-unchecked
+  con_mo: 'xoa object fixture am #25 sau batch-check (dung vi tri luot 10) rc0; go assertion ton tai rieng rc0'
+mien_p3_tham_quyen: 'chu kho chon "Mien P3, giu 516a334 (Recommended)" qua AskUserQuestion trong phien session_015GtxrcrL4cwJqpNqx2ptAa 02-11-2026 ~04:12Z; bam byte KHONG DO DUOC'
+mien_p3_no: {ten: wp978-git-reader-differential-fuzz, owner: ducthangho, huong: 'so dinh danh muc oracle doc lap; kiem ton tai sat ranh gioi reader; meta-test tiem loi cho cac chot cua c62'}

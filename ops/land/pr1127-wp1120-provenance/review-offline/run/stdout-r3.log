@@ -1,0 +1,123 @@
+Còn **1 P1 tái diễn và 8 P2 về kiểm thử**, thuộc 6 lớp. Chưa đủ điều kiện approve.
+
+Review độc lập, chỉ đọc; identity: `openai_codex / codex_cli / machine`, họ model OpenAI. Không gọi GitHub, không sửa checkout.
+
+- `reviewed_sha`: `18af003212c7a2510fd4a90732e432014e54f3d7`
+- Tree: `c8eb6a3caf1fb1a469a729862be9a4ffcd1b6cd4`
+- Base: `f4b513da5802d439aedbe58ae4a5cd38ff47d6ab`
+- Packet r1/g1; SHA-256 đặc tả khớp `d18820c854af40a4e0d6ca58f6b8812296a3057b0e7b063f704f5a4cdd7ca442`.
+- Diff đúng 5 tệp, 284 dòng thêm.
+
+Các phản chứng và đột biến nằm trong [review_probe.py](/tmp/review-m9-r3-6hmkjlw7/review_probe.py), ngoài checkout. Các lệnh dưới dùng:
+
+```bash
+export PYTHONDONTWRITEBYTECODE=1
+P=/tmp/review-m9-r3-6hmkjlw7/review_probe.py
+```
+
+**F03 — P1 — lớp `mien-dung-nguyen-dong`: `splitlines()` vẫn biến dòng miễn không hợp lệ thành hợp lệ.**
+
+Vị trí: [packet_loop.py:3176](.claude/dev/packet_loop.py:3176), được K7 dùng tại dòng 3236.
+
+Bỏ `strip()` chưa giữ nguyên dòng: `splitlines()` vẫn loại vertical tab, form feed và các dấu phân cách Unicode. Với diff chạm M9, không có readback audit, comment đúng chủ kho chứa dòng sau vẫn cho qua:
+
+```python
+"full_mutant_audit: <H> mien\v"
+```
+
+Dòng gốc không khớp `^full_mutant_audit: H mien$`, nhưng cổng trả rc 0.
+
+```bash
+python3 -B "$P" waiver
+```
+
+Đo được, **rc=1 của script phản chứng**:
+
+```text
+WAIVER '\x0b' suffix regex= False rc= 0 expected=12
+WAIVER_REJECTED 0 / 16
+```
+
+Đã quét cả đầu và cuối dòng với **mọi dấu phân cách ngoài LF/CR mà `splitlines()` nhận**: `\x0b`, `\x0c`, `\x1c`, `\x1d`, `\x1e`, `\x85`, `\u2028`, `\u2029`. Cả 16 ca đều lọt.
+
+Đề xuất: sửa đường đọc miễn thô tại `_dong_chu_kho`/K7 để đối chiếu đúng ranh giới dòng của đặc tả; quy định riêng cách nhận CRLF. Khóa cả đầu/cuối dòng bằng ma trận ký tự trên. Tránh đổi ngữ nghĩa K5/K6 đang dùng chế độ chuẩn hóa.
+
+**F17–F24 — P2 — tám đột biến bổ sung sống qua toàn bộ 92 ca chọn lọc.**
+
+Đây là khoảng trống kiểm thử: runtime hiện tại xử lý đúng các phản chứng bổ sung, nhưng bộ ca trong candidate không phát hiện những hồi quy dưới đây.
+
+Mỗi hàng được chạy bằng `python3 -B "$P" custom <tên>`; **mọi lệnh đều rc=0, output `92 / 92 {}`**.
+
+| ID | Lớp | Vị trí cần bổ sung test | Đột biến sống và hành vi sai |
+|---|---|---|---|
+| F17 | `duyet-du-run-hop-le` | `packet_loop_test.py:9376` | `first_run_only`: chỉ xét run đầu; chặn oan khi run đỏ đứng trước run xanh. |
+| F18 | `duyet-du-run-hop-le` | `packet_loop_test.py:9376` | `last_run_only`: chỉ xét run cuối; chặn oan khi run xanh đứng trước run đỏ. |
+| F19 | `join-dung-attempt-bat-ky` | `packet_loop_test.py:9368` | `attempt_one_only`: chỉ nhận attempt 1; chặn oan run/ jobs xanh cùng attempt 2. |
+| F20 | `kieu-dinh-danh-moi-job` | `packet_loop_test.py:9382`, dòng 9392–9394 | `type_first_job_only`: chỉ kiểm kiểu job đầu; nhận job sau có `run_id`/`run_attempt` float hoặc bool bằng int. |
+| F21 | `xanh-moi-job` | `packet_loop_test.py:9367`, dòng 9386 | `green_last_job_only`: chỉ kiểm job cuối; nhận job đầu `failure` hoặc chưa `completed`. |
+| F22 | `pham-vi-moi-kieu-thay-doi-git` | `packet_loop_test.py:9334` | `allow_renames`: bỏ `--no-renames` ở runtime dòng 3135; rename từ ngoài vào M9 bị đọc thành không chạm. |
+| F23 | `pham-vi-moi-kieu-thay-doi-git` | `packet_loop_test.py:9334` | `ignore_symlink`: loại mode `120000` khỏi `_cham_m9`; bỏ lọt symlink trong M9. |
+| F24 | `pham-vi-moi-kieu-thay-doi-git` | `packet_loop_test.py:9334` | `ignore_mode_only`: bỏ tệp có numstat `0 0`; bỏ lọt thay đổi chỉ executable bit trong M9. |
+
+Bằng chứng rằng các mutant sai thực sự và có thể bị giết đúng lý do:
+
+```bash
+python3 -B "$P" proofs
+```
+
+**Rc=0**: 12 ca bổ sung xanh trên candidate; trên tám mutant, cả 12 ca đỏ bằng AssertionError của ca đích. Ví dụ:
+
+```text
+first_run_only:
+  baseline: null
+  mutant: AssertionError: c1106: đòi rc=0, được rc=12
+
+type_first_job_only:
+  baseline: null
+  mutant: AssertionError: c1106: đòi rc=12, được rc=0
+
+allow_renames:
+  baseline: null
+  mutant: AssertionError: proof rename_into: M9 must be True, got False
+```
+
+Đề xuất đóng từng lớp:
+
+- **F17/F18:** thêm ma trận run hợp lệ đứng trước/sau run không đạt. Đã đo cả bảy lý do loại run: sai SHA, sai workflow, chưa completed, conclusion đỏ, thiếu jobs, job chưa completed, job đỏ. Candidate đạt **14/14**, rc 0. Giết riêng mutant chọn đầu và chọn cuối; giữ nguyên tiêu chí “ít nhất một run”.
+- **F19:** thêm ca dương run và jobs cùng attempt 2, rồi attempt mới hơn. Giết mutant ghim attempt 1; vẫn phải giữ ca âm lệch attempt.
+- **F20:** chỉ làm hỏng **một job sau job đầu**, lần lượt hai trường × float/bool. Cả bốn ca hiện rc 12, mutant rc 0. Không đổi tất cả job cùng lúc vì cách đó không phân biệt `all(...)` với kiểm phần tử đầu.
+- **F21:** đặt job đỏ/chưa completed ở đầu, giữa và cuối. Hai phản chứng ở đầu hiện rc 12, mutant rc 0. Giữ phép kiểm đồng thời cả status và conclusion.
+- **F22–F24:** mở rộng fixture Git thật thành ma trận loại thay đổi. Đã đo rename vào/ra, xóa, mode và symlink ở cả `.claude/dev/`, `.github/workflows/`, `ops/a/`: candidate đều nhận đúng; ba mutant bỏ lọt các ô tương ứng. Tránh chỉ kiểm tệp còn tồn tại hoặc chỉ dựa trên số dòng đổi.
+
+Ma trận chạy được nằm trong [matrix.py](/tmp/review-m9-r3-6hmkjlw7/matrix.py); lệnh `python3 -B /tmp/review-m9-r3-6hmkjlw7/matrix.py` trả **rc=0**.
+
+**Đối chiếu lượt trước**
+
+| Finding cũ | Kết quả trên candidate |
+|---|---|
+| F01 | **ĐÃ VÁ THẬT:** tách trang jobs theo từng tệp; hai run/hai tệp hợp lệ được nhận; trộn run và trùng nhóm bị chặn. |
+| F02 | **ĐÃ VÁ THẬT về runtime:** float/bool bị chặn ở từng job; còn khoảng trống kiểm thử F20. |
+| F03 | **VÁ HỜ:** space/tab đã khóa, còn 16 đường nêu trên. |
+| F04 | **ĐÃ VÁ THẬT:** mutant bỏ join run_id bị ca đích bắt. |
+| F05 | **ĐÃ VÁ THẬT:** mutant bỏ run completed bị bắt. |
+| F06 | Biểu hiện cũ đã khóa; **lớp kiểm mọi job chưa đóng**, F21. |
+| F07 | **ĐÃ VÁ THẬT:** mutant bỏ kiểm trang jobs bị bắt. |
+| F08 | **ĐÃ VÁ THẬT:** mutant nhận run_attempt float bị bắt. |
+| F09 | **ĐÃ VÁ THẬT:** mutant nhận diff rỗng ở K6 bị bắt. |
+| F10/F11 | Biểu hiện bool cũ đã khóa; **lớp kiểm kiểu mọi job chưa đóng**, F20. |
+| F12 | **ĐÃ VÁ THẬT:** mutant nhận run_attempt bool bị bắt. |
+| F13 | **ĐÃ VÁ THẬT:** mutant nhận SHA miễn rút gọn bị bắt. |
+| F14 | **ĐÃ VÁ THẬT:** git lỗi kèm raw hợp lệ vẫn bị K6/K7 từ chối. |
+| F15/F16 | Biểu hiện `.PY` và tệp xóa đã khóa; **lớp phạm vi Git chưa đóng**, F22–F24. |
+
+**Các phép đo còn lại**
+
+- `passed`: bộ chọn lọc **92/92**, không skipped; **25/25 mutant khai báo** chết bằng AssertionError của ca đích. Lệnh `python3 -B "$P" declared`, rc 0.
+- `passed`: `doctrine-scan` rc 0, quét 10 tệp; `adr-song` rc 0, **59/59**; `doc-claims-check --strict --json` rc 0, `ok=true`, `flags=[]`; Ruff contract rc 0, `RUFF_CONTRACT 3 []`.
+- Phạm vi tên có space, tab, newline: đã đo bằng Git thật, candidate nhận đúng.
+- Comment sai người cùng run xanh: đo được rc 12 với K5/K6/K7; K7 dừng ở comment trước khi đọc run. K5/K6 cũng chặn cùng đầu vào, nên không dùng phép này để khẳng định hồi quy mới về rc toàn cổng.
+- `not_run`: full suite, Windows A8, canary GitHub A9. Bare Ruff chưa chạy được: môi trường thiếu module `ruff`. Không suy các mục này thành pass.
+- Snapshot HEAD/tree, diff/index và danh sách untracked/ignored đầu–cuối khớp; nội dung thư mục ignored `.codex/` không được băm trước–sau. Năm tệp trên bản sao vẫn khớp byte với checkout.
+- Không có P3. Model/effort cụ thể đã phục vụ lượt chạy chưa đo độc lập.
+
+KET_LUAN: changes_requested

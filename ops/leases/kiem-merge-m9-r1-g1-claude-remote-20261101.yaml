@@ -17,9 +17,9 @@ authority_ghi_chu: 'chu kho duyet spec_hash d18820c8...a442 va cho cap lease wri
 recorded_by: anthropic_claude_dispatcher
 recorder_is_dispatcher: true
 leased_at_utc: '2026-11-01T15:38:08Z'
-heartbeat_at: '2026-11-01T15:38:08Z'
-lease_until: '2026-11-02T15:38:08Z'
-lease_expires_at_utc: '2026-11-02T15:38:08Z'
+heartbeat_at: '2026-11-02T00:38:48Z'
+lease_until: '2026-11-02T00:53:48Z'
+lease_expires_at_utc: '2026-11-02T00:53:48Z'
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude
@@ -82,3 +82,10 @@ prohibited_actions:
 - kill_other_session_process
 - write_outside_effective_write_set
 land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate
+rut_han:
+  han_cu: '2026-11-02T15:38:08Z'
+  han_moi: '2026-11-02T00:53:48Z'
+  rut_boi: ducthangho
+  ly_do: 'packet KIEM-MERGE-M9 r1 da merge (PR #1127, head 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897, merge f2102fc388a884d994f7bfeb29ef6863b9972b66, 2026-11-01T18:26:37Z, merged_by ducthangho); CI cua merge commit: ci.yml workflow_dispatch 41356691133 tren nhanh tam ops/ci-f2102fc success 37/37 (luot push 41336643336 bi huy 2 lan, lo concurrency #1132); bien ban M8 dang len #1120 sau khi han moi qua (D4 cua kiem-dong-wp doi lease_until <= now).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; han moi dat 15 phut sau de luot ops-publish-lease khong do rc=8 vi sua lease da het han (CLAUDE.md)'
+  ghi_boi: claude-session session_015GtxrYGXxgQmPpt72URCK1

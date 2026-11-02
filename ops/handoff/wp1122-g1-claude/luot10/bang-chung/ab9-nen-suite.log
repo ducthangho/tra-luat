@@ -1,0 +1,32 @@
+23:17Z
+moi truong: pid=1234 pgid=1086 sid=1085 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: da tach sang session moi (pgid=1234)
+  BO QUA t62_qua_han_ma_khong_giet_het_cay_phai_tra_125: fixture nay danh cho Windows; ban POSIX la t63 (chay duoc, khong bo qua)
+short_id  : 06c4af65
+run_id    : 06c4af6554d349b0bd246054ba096b38
+so        : /var/tmp/ab9/lt_7f9mjbn8/runs/06c4af65
+trang thai: xong  ma_thoat=1
+thoi luong: 10.011s  stdout=0B  stderr=0B
+  BO QUA r484_g4_windows_sid_alias_identity: BO QUA native Windows SID conversion
+  r1079_a                      SAI - KHONG DO DUOC (neutral do: review_do_san)
+  r1079_thieu                  SAI - ca dich khong tim thay/trung: ['review_ca_vang']
+  r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+  review_missing               SAI - ca dich khong tim thay/trung: ['review_missing_case']
+  r1079_a                      OK  giet 1/1: review_do_san
+  r1079_thieu                  SAI - ca dich khong tim thay/trung: ['review_ca_vang']
+  r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+Could not find platform dependent libraries <exec_prefix>
+  HONG r09_run_json_giu_ba_trang_thai_probe: run.json khong giu ba trang thai: {'KHONG_DO_DUOC', 'DAT', 'DO'}
+  HONG r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh: luot 0 rc=1: 
+  HONG r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat: launcher rc=1: 
+  HONG r926_lenh_run_khung_mat_thi_run_json_KHONG_DO_DUOC: launcher rc=1: 
+  HONG r926_dot_bien_tu_sinh_moi_thanh_phan_regex: danh sach tuong duong co dong khong con song/khong con sinh ra: [('_DAU_NHAN', '\\d{4}-\\d\\d-\\d\\dT\\S+\\s+TRACE\\s+tungstenite::protocol: Received message '), ('_RE_KHOANG_TRANG_B', '\\s'), ('_RE_KHOANG_TRANG_B', '\\s*'), ('_RE_KHOANG_TRANG_B', '\\s?'), ('_RE_KHUNG', '(\\{.*\\})\\s+$'), ('_RE_LOAI_DAU', '.\\s*"type"\\s*:\\s*"([^"\\\\]*)"'), ('_RE_LOAI_DAU', '\\{?\\s*"type"\\s*:\\s*"([^"\\\\]*)"')]
+  HONG r925_rust_log_thua_ke_bi_GHI_DE_khong_noi: launcher rc=1: 
+  HONG r925_codex_khong_co_khung_thi_KHONG_DO_DUOC_khong_suy_tu_m: launcher rc=1: 
+  HONG r925_codex_qua_han_van_124_va_giu_khung_da_den: mong doi 124, duoc 1: 
+  HONG r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC: launcher treo theo chau giu ong: rc=1 0.2s
+  HONG r927_lenh_run_ghi_effort_va_sandbox_vao_run_json: effort:  {'version': '1.5.0', 'run_id': '258b96f57ab54accae9ac20c269336bb', 'short_id': '258b96f5', 'ten': '', 'lenh': {'chuong_trinh': 'codex', 'so_doi_so': 4, 'van_tay': '1114e8582138dc78'}, 'trang_thai': 'xong', 'bat_dau_utc': '2026-11-01T23:22:31.267517+00:00', 'ket_thuc_utc': '2026-11-01T23:22:31.280471+00:00', 'ma_thoat': 1, 'ly_do_dung': None, 'pid': 17868, 'khoa_danh_tinh': 'linux:41242', 'workspace': '/var/tmp/ab9/lt_0gigto1f/repo', 'head': 'd10ce0991e92769916561f1d1384ac6d0aea5aa2', 'ref': 'main', 'remotes': [], 'commit_goc': ['d10ce0991e92769916561f1d1384ac6d0aea5aa2'], 'worktree_sach': True, 'so_muc_ban': 0, 'prompt_sha256': None, 'deadline_utc': None, 'probe': {'workspace': {'trang_thai': 'DAT', 'chi_tiet': '.git la thu muc'}, 'ghi': {'trang_thai': 'DAT', 'chi_tiet': 'ghi-readback-xoa thanh cong'}, 'spawn': {'trang_thai': 'DAT', 'chi_tiet': 'rc=0; output=15B'}}, 'bo_qua_probe_ly_do': None, 'provider': 'openai_codex', 'execution_surface': 'codex_cli', 'transport': 'machine', 'transport_sha256': '5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6', 'failure_class': 'unknown', 'model_phuc_vu': [], 'model_phuc_vu_trang_thai': 'KHONG_DO_DUOC', 'model_phuc_vu_ly_do': 'khong thay khung response.created/response.completed nao mang model trong stderr cua con; KHONG suy tu -m hay cau hinh', 'stderr_bo_dong': 32, 'stderr_bo_byte': 1022, 'effort_phuc_vu': [], 'effort_phuc_vu_trang_thai': 'KHONG_DO_DUOC', 'effort_phuc_vu_ly_do': 'model phuc vu khong do duoc nen effort khong neo duoc vao khung nao', 'sandbox_quan_sat': [], 'sandbox_trang_thai': 'KHONG_DO_DUOC', 'sandbox_ly_do': 'stdout khong co su kien --json nao: khong biet co lenh hay khong', 'sandbox_gioi_han': 'lay mau /proc tu ben ngoai moi 0.2s: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. Moi lech danh tinh tien trinh (ke ca vong doi binh thuong nhu cha zombie) => KHONG_DO_DUOC: co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do', 'thoi_luong_giay': 0.013, 'stdout_byte': 0, 'stdout_sha256': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'stderr_byte': 0, 'stderr_sha256': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'}
+
+340/350 ca DA CHAY QUA (tong 352, bo qua 2, hong 10) - KHONG DU: 2 ca BO QUA, chua do gi
+RC_SUITE=1
+23:22Z

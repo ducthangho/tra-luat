@@ -1,53 +1,67 @@
 # Handoff #1122 LAUNCHER-TEST-WINDOWS-TIN-DUNG-GIA — lease wp1122-r1-g1-claude
 
-Nhánh thi công là `agent/wp1122-g1-claude`, base `c82047d`, diff gồm 1 tệp (`.claude/dev/launcher_test.py`). Spec
-`ops/specs/wp1122.md`, sha256 `198e06f0…`. Đã gọi Codex **1/10** lượt.
+Trạng thái lúc 00:05Z 02-11-2026: **ĐỦ ĐIỀU KIỆN MERGE THEO LEASE (M-1 đến M-3), CHƯA MERGE.** Codex lượt 10/10 cho
+`approve` trên `9d06bd1`, kết quả 0 P0 · 0 P1 · 0 P2 · 0 P3. Merge thuộc quyền chủ kho; `uy_quyen_merge: false`.
+
+- PR: #1130 (draft). Nhánh `agent/wp1122-g1-claude`, head `9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651`, base `c82047d`.
+- Diff: 1 tệp, `.claude/dev/launcher_test.py` **+450/−93**, đúng trần 450 dòng thêm của `ADR-0053`. Để giữ trần, ở lượt 8
+  đã bỏ 20 dòng trống trong khối test mới của packet; không bỏ ca, chốt, comment hay docstring nào.
+- Spec `ops/specs/wp1122.md`, sha256 `198e06f0…`.
 
 ## Phạm vi đã thi công
-Gồm các mục của spec cộng hai mở rộng mà chủ kho duyệt qua AskUserQuestion, write set không đổi:
-- **Mục tiêu 1:** đổi 57 câu `assert` trần trong 11 ca sang `bang`. Mở rộng: 8 câu `raise AssertionError` làm tín
-  hiệu của ca (`t33` và 7 câu trong `r484_g2_storage_kernel_guardrails`) đổi sang `bang(False, …)`. Ba ca cố ý ném
-  AssertionError trần nằm trong `ASSERT_TRAN_CHO_PHEP`.
-- **Mục tiêu 2:** ca khoá `r1122_khong_assert_tran_trong_ca` (AST, bắt cả `assert` lẫn `raise AssertionError`;
-  danh sách cho phép phải khớp đúng). Ba đột biến: chèn lại `assert`, chèn lại `raise`, nới danh sách.
-- **Mục tiêu 3:** `mo_ta_loi` cắt thông điệp còn 160 ký tự trong `cham_mot_ca`, nhánh hook, `chay_bo_ca`,
-  transport và kênh của `cham_lap_ca`. Ca khoá: `r1122_loi_mang_thong_diep_cat_160` và
-  `r1122_reporter_giu_loai_va_cat_dung_thong_diep` (lấy từ HINT Codex lượt 1).
-- **Mục tiêu 4: gốc của `t73` ĐÃ ĐO.** Run 41328709141 có `UnicodeDecodeError: 'charmap' codec can't decode byte
-  0x90` trong `_readerthread`: `chay()` gọi `text=True` mà không truyền `encoding`, nên Windows giải mã bằng cp1252,
-  `r.stdout` ra `None`, và `json.loads` ném `TypeError`. Vá: 14 lời gọi con Python khai
-  `encoding="utf-8", errors="replace"`. Ca khoá `r1122_con_python_giai_ma_utf8` đòi đúng giá trị literal (HINT
-  lượt 1, F02). Ba đột biến: bỏ encoding, cp1252, None.
+Gồm spec cộng ba quyết định chủ kho chốt qua AskUserQuestion; write set không đổi:
+1. 57 câu `assert` trần và 8 câu `raise AssertionError` đóng vai tín hiệu đổi sang `bang`. Ca khoá AST
+   `r1122_khong_assert_tran_trong_ca` có danh sách cho phép đúng 3 ca.
+2. Gốc `t73` đã đo được (run 41328709141): `chay()` gọi `text=True` mà không truyền `encoding`, nên Windows giải mã
+   bằng cp1252, `_readerthread` chết, `r.stdout` ra `None`. Vá: 14 lời gọi con Python khai
+   `encoding="utf-8", errors="replace"`; ca khoá AST đòi đúng giá trị literal.
+3. Thông điệp ngoại lệ cắt 160 ký tự (`mo_ta_loi`) ở mọi reporter. stdout/stderr được chuẩn hoá UTF-8. Có biên bắt
+   lỗi ở điểm vào CLI.
+4. **Quyết định của chủ kho sau Codex lượt 5:** kênh `--lap-ca` KHÔNG mang thông điệp (bỏ `CHI_TIET_HONG`, `ten_loai`,
+   `thong_diep`). Trường `loai` là ảnh chụp lấy từ lần lặp NGOÀI có hỏng. `chay_bo_ca` định dạng lỗi một lần, rồi mới
+   ghi `LOAI_HONG` (lượt 6), để ca lồng hay `__str__` lồng không đổi được `loai`. Trước đây có tín dụng giết giả ở đúng
+   chỗ này, và lỗi đó có sẵn từ base. Chi tiết `loi` của nhánh harness sẽ do #1117 mang qua runner.
 
-## Nghiệm thu
-- **N0 (Windows):** run 41328709141, head `4423d18`, mới có mục tiêu 3. Kết quả `432/436`; dòng của t73 là
-  `t73_doctor_phai_do_bash_va_npm(TypeError: the JSON object must be str, bytes or bytearray, not NoneType)`.
-  Đã tái hiện được lỗi.
-- **N0' + A4 (Linux, A/B dựng cả hai vế trong cùng một lệnh, môi trường sau khi đã cài shellcheck/llm/ruff):**
-  - base `c82047d`: suite `340/350` (hỏng 10), `--dot-bien 523/548`;
-  - head `30ee4ae`: suite `343/353` (hỏng 10), `--dot-bien 529/554`.
-  - Tập 10 ca hỏng và tập 25 dòng SAI TRÙNG KHÍT giữa hai vế, tức delta = 0. Mười ca này đều là ca đường
-    `launcher.py run` (`r09`, `r15`, `r925_*`, `r926_*`, `r927_*`, `rc=1`) và đỏ sẵn trong container. Gọi
-    `launcher.py run` trực tiếp thì vẫn rc=0. Đây là nợ ngoài phạm vi, chưa có Issue.
-  - Head `fd1f82e` (sau F01/F02): ĐANG ĐO, sẽ ghi bổ sung.
-- **A3 (Windows):** run 41330126129, head `30ee4ae`, job `windows-latest`, runner_id 1000032894. Kết quả
-  `DOT BIEN: 440/440 dat (118 khong do duoc)`, suite `281/281` (bỏ qua 74, hỏng 0). Head `fd1f82e`: đã gọi lượt mới.
-- **A5:** ruff F base 5 / head 5, `doctrine-scan` rc=0, `git diff --check` rc=0. CI PR: chưa có PR.
-- **A6:** chỉ đo được sau land.
+## Nghiệm thu (Codex lượt 10 đối chiếu từng mục trên log của đúng SHA)
+- **N0 (Windows):** run 41328709141 trên `4423d18` cho `432/436` với dòng `t73…(TypeError: the JSON object must be str…)`.
+- **N0′ + A4 (Linux, A/B dựng hai vế trong một lệnh, TMPDIR cô lập):**
+  - base `340/350` (hỏng 10), `--dot-bien 523/548`;
+  - head `9d06bd1`: `352/362` (hỏng 10), `550/575`.
+  - Tập ca hỏng và tập dòng SAI trùng khít giữa hai vế, tức delta = 0. Mười ca đỏ sẵn là ca đường `launcher.py run`
+    (`r09`, `r15`, `r925_*`, `r926_*`, `r927_*`) trong container. Đây là nợ ngoài phạm vi, chưa có Issue.
+- **A3 (Windows, đúng head):** run 41361328113, job `windows-latest`. Kết quả `DOT BIEN: 461/461 dat` (118 không đo
+  được), suite `290/290` (bỏ qua 74, hong 0). Trước bản vá, master ra 430/434.
+- **A5:** ruff F base 5 / head 5 (delta 0); `doctrine-scan` rc=0; `git diff --check` rc=0. CI `ci.yml` trên `9d06bd1`:
+  26 check run, gồm 25 success và 1 skipped (`launcher` PR, vì chạy bằng nhãn); đủ 23 job CI đều success.
+- **A6 (CHƯA ĐO ĐƯỢC):** lượt push master sau merge phải cho `launcher-windows.yml` ra `M/M`. Phiên land đọc log job
+  `windows-latest` của merge SHA.
 
-## Codex
-| lượt | run_id | head | thời lượng | model | verdict |
-|---|---|---|---|---|---|
-| 1 | `e03d300896404d949c69ef6a9a0e4a92` | `30ee4ae` | 834.9 s | `gpt-6.1-sol` theo danh sách khung (trạng thái KHONG_DO_DUOC) | changes_requested (0/1/1/0) |
+## Codex — 10/10 lời gọi (trần ADR-0055; chủ kho chốt "chạy tới sạch, dừng ở trần 10")
+| lượt | head | verdict (P0/P1/P2/P3) | ghi chú |
+|---|---|---|---|
+| 1 | `30ee4ae` | changes_requested 0/1/1/0 | F01 reporter, F02 khoá encoding |
+| 2 | `6cf0cc5` | changes_requested 0/1/0/0 | F01: 4 đường |
+| 3 | `4c6f933` | changes_requested 0/1/0/0 | F01: Unicode trên console + reporter mà executor liệt kê sót |
+| 4 | `93a9afe` | changes_requested 0/1/0/0 | F01: kênh phát lại chi tiết cũ, lỗi I/O ra traceback |
+| 5 | `365c751` | changes_requested 0/1/0/0 | F01: ca lồng ghi đè map; HINT +455 vượt trần ⇒ chủ kho chốt gỡ thông điệp khỏi kênh |
+| 6 | `5d21d55` | changes_requested 0/1/0/0 | F01: `__str__` lồng ⇒ tín dụng giả |
+| 7 | `cccc5eb` | KHÔNG CÓ | bộ lọc nội dung của nền chặn sau 78 s; vẫn tính 1 lời gọi |
+| 8 | `cccc5eb` | changes_requested 0/0/1/0 | P2: ca khoá thứ tự chưa phủ nhánh AssertionError |
+| 9 | `9d06bd1` | changes_requested 0/0/0/0 | chỉ thiếu bằng chứng của đúng head trong bundle offline |
+| 10 | `9d06bd1` | **approve 0/0/0/0** | bằng chứng Windows/CI/A-B đã đưa vào `luot10/bang-chung/` |
 
-Lượt 1 có hai finding:
-- F01 (P1): reporter chưa cắt đúng 160 ký tự, và kênh lặp tên loại.
-- F02 (P2): khoá encoding chỉ kiểm có khoá, không kiểm giá trị.
+Hiện vật của từng lượt nằm ở `luot{1..10}/` (riêng lượt 7 ở `luot7-bi-chan/`). Mỗi thư mục có PROMPT, VERDICT, HINT và
+`run/` kèm `SHA256SUMS`.
 
-Cả hai đã vá ở `fd1f82e` bằng HINT.patch áp nguyên văn. Hiện vật nằm ở `luot1/` kèm `SHA256SUMS`. Thư mục
-`evidence/` (427M) của reviewer KHÔNG chép vào kho, chỉ giữ trong scratchpad của phiên.
+## Hình dạng lỗi lặp (L4) — cho packet sau
+F01 `reporter-thong-diep` mở lại **6 lần** (lượt 1–6). Lượt 3 lộ ra vì phép liệt kê của executor chỉ quét theo vùng
+dòng; lượt 4–6 là hệ quả của map toàn cục `LOAI_HONG`/`CHI_TIET_HONG` dùng làm authority. Gốc của lớp này chỉ đóng hẳn
+khi #1117 bỏ kênh `--lap-ca` và chuyển sang runner. Spec r2 của #1117 phải chép số đếm này sang.
 
-## Ghi chú môi trường
-Ruff chưa được cài lúc đo lần đầu. Lệnh `python3 -m ruff` khi đó trả "No module named ruff", và số "1/1" trong
-handoff #1117 đã được đính chính (`a9c866d`). Chủ kho yêu cầu cài đủ công cụ: đã cài shellcheck 0.9.0, llm 0.36 và
-ruff; `doctor --kiem-song` cho thấy Codex sống.
+## Bài học môi trường (đo được trong phiên này)
+- Codex chạy song song với A/B ⇒ sandbox tạo `/tmp/.git` ⇒ 11 ca `r484_*` đỏ giả. Đặt `TMPDIR` riêng cho phép đo (ngoài
+  `/tmp`) thì loại được nhiễu này.
+- Lúc đo đầu, ruff chưa được cài, nên "1/1" ở handoff #1117 là sai và đã đính chính. Đã cài shellcheck, llm, ruff
+  theo yêu cầu của chủ kho.
+- Codex CLI 0.166 lấy `flock(LOCK_EX)` trên `CODEX_HOME/auth.lock` khi ghi `auth.json` (strace bằng khoá API giả). Đây là
+  căn cứ cho #824 làm CAS thật.

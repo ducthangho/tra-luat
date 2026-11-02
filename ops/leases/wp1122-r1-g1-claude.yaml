@@ -83,7 +83,7 @@ attempts_basis: 'mac dinh kho (tien le wp1045).'
 review_rounds_limit: 3
 budget:
   codex_review_calls:
-    pr_wp1122_g1: {used: 9, reserved: 0, limit: 10}
+    pr_wp1122_g1: {used: 10, reserved: 0, limit: 10}
   attempt:
     packet_1122_r1: {used: 0, reserved: 0, limit: 2}
   khong_reset_theo_generation: true
@@ -100,4 +100,5 @@ codex_da_goi:
 - {luot: 7, run_id: d4f4b44a584847baa1ab78786a3cab73, head: cccc5eb31425f78c23a7dadf826034715831fcf5, verdict: KHONG_CO, ket_qua: 'bo loc noi dung nen chan (flagged for possible cybersecurity risk) sau 78.76 s; tinh 1 loi goi'}
 - {luot: 8, run_id: dd0ce07599a149159181119c9d837aaa, head: cccc5eb31425f78c23a7dadf826034715831fcf5, verdict: changes_requested ('0 P0, 0 P1, 1 P2, 0 P3'), ket_qua: 'goi lai sau khi doi phan cong: reviewer chi CHAY ca co san + dot bien ban va, huong nhay cam mo ta bang loi'}
 - {luot: 9, run_id: 5377d42f9b444a9ea66b07f929a4339d, head: 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651, verdict: changes_requested, ket_qua: '0 P0, 0 P1, 0 P2, 0 P3 — chi thieu bang chung Windows/CI exact head trong bundle offline'}
+- {luot: 10, run_id: 2b394187972546eeab9af23a0298151e, head: 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651, verdict: approve, ket_qua: '0 P0, 0 P1, 0 P2, 0 P3; N0, N0p, A1-A5 DAT tren bang chung exact head; A6 sau land'}
 pham_vi_mo_rong_da_duyet: 'chu kho duyet qua AskUserQuestion (01-11-2026): raise AssertionError tuong minh trong ca -> bang(False,...) va khoa AST chung ("Co: doi sang bang(False, ...) + khoa AST chung"); moi loi goi con Python text=True khai encoding utf-8 + khoa AST ("Va moi loi goi con python/launcher + ca khoa AST"). Khong doi write set.'

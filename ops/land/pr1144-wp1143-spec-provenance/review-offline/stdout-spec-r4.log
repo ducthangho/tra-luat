@@ -1,0 +1,52 @@
+[P2] Số dấu vân Windows đổi không khớp nền đã neo — `ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md:70` — Chạy lại thuật toán Python của `Doc-DauVanCi`, đối chiếu `$DauVanCi` trên cả `9091cf5`, HEAD và nhánh #1132 đều cho **6 job cũ đổi dấu vân**, không phải 7: `gate`, `gate-cong-cu`, `gate-cong-cu-gop`, `gate-ops`, `gate-packet-loop`, `gate-registry`. `<workflow>` vẫn là `44136fa355b3`; hai job mới là `gate-nhanh-manh` và `gate-nhanh-gop`. Đây là số liệu nền sai theo L1/L5 — Sửa **7 → 6**, ghi kèm danh sách job và lệnh tái tính; giữ riêng hai job mới. Không ghim lại `$DauVanCi` chỉ để sửa lời khai. Phép kiểm đóng finding: đối chiếu từng tên/băm, không chỉ tổng số.
+
+Đã review exact HEAD `e4b1d788925f664f325795f8b2c536827369809b`, tree `7acdc980d0209d421ccba4e03b82e88aa94a0f54`; SHA-256 đặc tả khớp assignment. Checkout sạch, kho không nông, `core.abbrev=7`. Môi trường Linux, Python 3.13.18; `openai_codex / codex_cli / machine`, sandbox chỉ đọc. Không xác minh độc lập model/effort phục vụ lượt chạy.
+
+Các lớp đã kiểm:
+
+1. **Số liệu — có finding trên.** Nạp định nghĩa, không chạy suite: **113 ca, 419 đột biến, 84 đột biến `ci.yml`, 5 mẫu rc, 3 đột biến tự kiểm** đều khớp. Nhánh #1132 có **114/421**. JSON canary cho 16 job, tổng **1159 s**; `gate-ops` **966 s**, harness **636 s**, biên nhận **303 s**, phần còn lại **27 s**, các job khác **193 s**. Năm khóa Windows thiếu và hai bước `nhanh_don_duoc` thiếu gương khớp mã. Có **36** khai báo ca PowerShell; không có `pwsh`, nên **chưa tái xác nhận runtime 34/36** hoặc số đo thời gian tại chỗ S4.
+
+2. **Write set và toàn bộ bộ đọc `ci.yml` — chưa thấy lần thứ ba của lớp bỏ sót ghim.** Quét `rg -l --hidden`, mọi đuôi tệp, loại riêng `.git`: **2.334 tệp** tham chiếu. Phân biệt mã sống với hồ sơ, fixture và tài liệu lịch sử. Kết quả từng bộ đọc liên quan:
+
+   | Bộ đọc | Tác động khi thêm `env:` vào bước harness |
+   |---|---|
+   | `ops/ci_duong_nhanh_test.py` | `y04` và `y13` cần cập nhật như §2.2; nằm trong write set. `RUN_BUOC_PACKET`, `TAP_CHO_PHEP`, `BUOC_HARNESS` giữ được. |
+   | `.claude/dev/ci_dang_ky_test.py` | Không đổi các miền được `BAM_GATE_*` băm; các kiểm G5, Ruff, dispatch, registry không ghim env của bước harness. |
+   | `ops/cong_cu_test.py` | Kiểm setup trước G5, package và phiên bản; env mới không đổi các phép chiếu này. |
+   | `ops/lease_publish_test.py` | Kiểm marker nợ, ma trận OS và output `chuan-bi`; không bị env mới tác động. |
+   | `.claude/dev/chay-cong-windows_test.ps1` | `t30` thấy khóa mới; script đã được đưa vào write set để xử lý. `t32` đổi riêng dấu vân `gate-ops`, đúng ngoại lệ A8b. |
+   | `.claude/dev/launcher_test.py` | `t152` kiểm năm pin `AL_VER`; không đổi. |
+   | `scripts/tl_selftest.py` | Kiểm thứ tự pin Git/fetch-depth trước doc-claims; không đổi. |
+   | `.claude/dev/gate_lifecycle.py` | Identity chính sách đổi theo blob mới; evidence cũ hết hiệu lực, không cần sửa bảng ghim ngoài write set. |
+   | Packet-loop và bộ provenance | Đọc danh tính workflow/job hoặc fixture; env mới không đổi danh tính được kiểm. |
+
+   Những tham chiếu còn lại trong launcher, hook, shell, workflow và tài liệu không phải bảng ghim bổ sung cho bước này. Không workflow nào gọi hai script `chay-cong-windows*.ps1` (`rg` trả rc 1, không kết quả). Cơ chế đột biến YAML hiện có đủ để triển khai M6/M7.
+
+3. **Khả năng làm đỏ A1–A11 — chưa thấy tiêu chí xanh rỗng mới.**
+
+   | Tiêu chí | Phép làm đỏ đã đối chiếu |
+   |---|---|
+   | A1 | Thiếu tên nền, sai N/M, thiếu kết quả đầy đủ. C2/M3 bổ sung kiểm lời gọi thật, nên chỉ giữ số lượng không đủ để che việc tắt đột biến. |
+   | A2 | Cùng các chốt A1 dưới env `day_du`. |
+   | A3 | Đòi `CA`, `BO QUA`, `TONG`, rc 0; cấm dòng `bi giet`. |
+   | A4 | C1–C3 thất bại trên base thiếu hàm; C4 đỏ vì thiếu env. |
+   | A5 | Đòi `GIET` đúng ca đích; sống hoặc tín dụng giả đều đỏ. |
+   | A6 | Thiếu runner/check/log, ca đỏ hoặc vượt thời lượng đều không đạt. |
+   | A7 | Finding mới hoặc thiếu actionlint đều đỏ. |
+   | A8 | Sai tập bốn tệp hoặc vượt 300 dòng mã thêm đều đỏ. |
+   | A8b | So **tập lỗi**, không chỉ màu đỏ nền; bỏ khóa mới làm tập thiếu tăng. |
+   | A9 | Delta mới hoặc registry test đỏ đều chặn. |
+   | A10 | Đòi run đúng head, kết quả đầy đủ và `kiem-merge`. |
+   | A11 | Ba sự kiện đo riêng; không lấy dispatch thay push bị hủy. |
+
+   **Không ghim lại `$DauVanCi` không làm A8b xanh rỗng**: dòng lỗi mới ngoài dấu vân `gate-ops` vẫn bị chặn. Tuy nhiên, do `t30` ném ngay ở năm khóa thiếu nền, A8b chưa chứng minh phần thử rò env động của `t30` đã chạy; nó đo delta đã khai.
+
+4. **An toàn đường nhanh — chưa thấy khe mới trong thiết kế.** Phép phân loại thuần trả `day_du` cho classifier, harness, `ci.yml` và đường traversal; hồ sơ hợp lệ trả `duong_nhanh`. C1 yêu cầu đúng kiểu/đúng chuỗi; output workflow có fallback `day_du`. Ngoài ba cửa subprocess được §2.2 nhấn mạnh, mã còn có `git`, `chay_that`, `t20ze`, `t20zm`, `t56`; việc gỡ biến ở `os.environ` bao phủ cả các cửa ấy và `main` lồng nhau. Đây vẫn là chốt phân loại diff với mã phân loại được tin cậy; mã hiện tại đã khai giới hạn đối với PR cố ý sửa chính classifier/workflow.
+
+5. **A6 — khả thi theo mã.** Nhánh `pull_request` giữ nguyên cặp SHA, không yêu cầu base là master. Vì vậy PR chỉ thêm hồ sơ trên nhánh ứng viên có thể đi đường nhanh. Cần dùng tệp hồ sơ hợp lệ, không mã cấp nông hoặc executable. Chưa chạy tiền-canary thật trong phiên offline này.
+
+6. **Thứ tự #1132 — chưa thấy xung đột còn bỏ ngỏ.** Diff #1132 đổi concurrency, thêm một ca và hai đột biến. A1 đã lấy số nền động; §3 yêu cầu base chứa merge #1132 và hết giao lease. Thuật toán dấu vân Windows bỏ qua concurrency, nên #1132 không đổi các dấu vân vừa đo.
+
+Các phép đo chốt bằng `python -B` đều rc 0. **Passed:** 15 ca cấu trúc `y*` không tạo tệp tạm và các hàm kiểm registry/G5/Ruff contract/dispatch được gọi riêng. **Not run:** `y15`, toàn suite, đột biến, PowerShell, bare Ruff, actionlint và CI/canary. Không sửa tệp hoặc truy cập mạng.
+
+VERDICT: request_changes P0=0 P1=0 P2=1 P3=0

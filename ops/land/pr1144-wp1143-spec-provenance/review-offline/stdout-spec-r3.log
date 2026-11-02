@@ -1,0 +1,83 @@
+Không có finding P0–P3 cần mở ở lượt này. Hai finding lượt 2 **ĐÃ ĐÓNG ở cấp đặc tả**; chưa phát hiện lỗi mới do C3(d), M9b, ΔM ≥ 10 hoặc việc bỏ M5.
+
+Review neo tại `4a508277b3c8c04e2c62ee6e229aa6d33039be9d`, tree `31a01ef191135dae00e310d0c7cc543ef8d01b93`. SHA-256 đặc tả khớp `a6a78fdeb6a625e4469e1b9f8d69662dedcc5fb53a04040a722a962552a73e2c`. Vai trò reviewer offline, `openai_codex / codex_cli / machine`; sandbox chỉ đọc, không truy cập mạng.
+
+**Đối chiếu lượt 2**
+
+| Finding | Kết luận | Bằng chứng |
+|---|---|---|
+| C3 chưa đo ngoại lệ cần `finally` | **ĐÃ ĐÓNG** — dòng 52, 64 | Probe trên `main` hiện tại: ca ném `TinHieuChotCa` hoặc `RuntimeError` đều dẫn tới trả rc 1; helper `tu_kiem_phan_hang` ném ngoại lệ riêng thì ngoại lệ thoát thật. C3(d) nay nhắm helper này, yêu cầu bắt đúng ngoại lệ, số lời gọi dương và kiểm env sau đó. M9b phân biệt khôi phục trên đường bình thường với khôi phục khi ném. |
+| Cho giữ M5 tương đương nhưng A5 bắt buộc giết | **ĐÃ ĐÓNG** — dòng 59, 78, 82 | Probe gọi `chay_con` thật với spy: **1 lời gọi**; khi biến đã vắng ở cha, mapping env trước/sau thao tác gỡ riêng bằng nhau. Đặc tả nay loại M5 khỏi `DOT_BIEN` và ΔM; A5 vẫn từ chối đột biến sống. |
+
+**Đã kiểm sáu lớp**
+
+1. **Số liệu — L1/L5.** Đo lại ngày 02-11-2026, khoảng 02:19 UTC:
+
+   | Đại lượng | Kết quả |
+   |---|---:|
+   | HEAD và `9091cf5`: ca / đột biến | **113 / 419** |
+   | Mẫu rc / đột biến tự kiểm | **5 / 3** |
+   | Đột biến `ci.yml` tại HEAD | **84** |
+   | Nhánh #1132, `024212c1f565858788edc0b3e48fdf8a356ac8b4` | **114 / 421** |
+   | Canary: tổng 16 job | **1159 s** |
+   | `gate-ops` | **966 s** |
+   | Harness / biên nhận / phần còn lại của `gate-ops` | **636 / 303 / 27 s** |
+   | 15 job còn lại | **193 s** |
+
+   JSON ghi `gate-cong-cu` **skipped**, 0 giây, không có runner; không tính nó là đã chạy. S5 cộng đúng **610 giây**, vẫn chỉ là ước tính. Thời lượng local S4 **chưa tái đo**.
+
+2. **Write set — L2.** Không thấy yêu cầu bắt buộc ghi ngoài ba tệp. `KHUNG_BUOC` và `Y04_ENV_BUOC_CHE_DO` đều nằm trong tệp test được phép sửa. `RUN_BUOC_PACKET`, `TAP_CHO_PHEP`, `BUOC_HARNESS` giữ được vì tên/run không đổi. Hai `BAM_GATE_*` đo lại khớp; chúng băm các job khác. Đã đọc các cửa kiểm workflow trong `cong_cu_test.py` và `lease_publish_test.py`, chưa thấy env mới làm lệch ghim ngoài phạm vi. Cơ chế `_yml` hỗ trợ M6/M7. Các neo đột biến cũ chứa stanza harness cần được giữ hợp lệ khi triển khai, và nằm trong write set.
+
+3. **Tiêu chí có thể đỏ — L3/L6.**
+
+   | Tiêu chí | Phép làm đỏ / khả năng xanh rỗng |
+   |---|---|
+   | A1 | Thiếu kết quả đầy đủ, sai N/M, mất tên base hoặc ca đỏ làm đỏ. C2 đếm lời gọi thực chặn việc bỏ mutation nhưng vẫn in tổng đẹp. |
+   | A2 | Phải đạt toàn bộ A1 với env `day_du`. |
+   | A3 | Có vế dương `CA`, `BO QUA`, M, `TONG: DAT`, rc 0; vế âm cấm `bi giet`. |
+   | A4 | Ca mới xanh trên base làm đỏ; chỉ chấp nhận `HONG` do thiếu hàm như đã giới hạn. |
+   | A5 | Đích không bị giết, đột biến sống hoặc tín dụng giả làm đỏ. |
+   | A6 | Thiếu check/log dương, kết luận không success, sai N/M hoặc quá 11 phút làm đỏ. Thoát sớm không được tính đạt. |
+   | A7 | Finding actionlint mới hoặc thiếu công cụ làm đỏ. |
+   | A8 | Sai tập tệp hoặc vượt 150 dòng thêm làm đỏ. |
+   | A9 | Delta mới, registry đỏ hoặc băm lệch làm đỏ. |
+   | A10 | Audit/CI không success hoặc thiếu kết quả mutation đầy đủ làm đỏ. |
+   | A11 | Đo riêng ba run; thiếu check/log, Windows chạy thật hoặc vượt thời lượng làm đỏ. Push bị hủy giữ `not_measured`. |
+
+4. **An toàn đường nhanh.** Probe bộ phân loại với Git giả: diff đổi harness, bộ phân loại hoặc `ci.yml` đều ra **`day_du`**. C1 yêu cầu đúng kiểu và đúng chuỗi; khoảng trắng, sai hoa/thường, vắng và giá trị lạ đều về đầy đủ. Quét AST thấy **10 vị trí gọi `subprocess.run`**, gồm cả helper Git, fixture Windows, phép đo vòng symlink và đầu dò `t56`; các cửa này lấy env hiện hành hoặc kế thừa nó. Yêu cầu gỡ biến suốt lượt `main` bao phủ chúng. Push/dispatch đều đi qua phân loại; workflow có fallback output `day_du`. Probe diff rỗng cho cả hai trả **`day_du`**.
+
+5. **Khả thi A6.** Nhánh `pull_request` giữ cặp SHA được cấp, không ép base thành master. Probe PR chỉ thêm `ops/land/probe.md`, base không phải master: **`duong_nhanh`**, 9 lời gọi Git giả, không truy vấn `origin/master`. Mô hình tiền-canary khả thi về bộ phân loại; Actions thật **chưa đo**.
+
+6. **Thứ tự #1132 và mâu thuẫn nội tại.** Diff #1132 đổi concurrency và thêm một ca/hai đột biến; không xung đột về hành vi với env harness. Công thức theo exact base xử lý tăng nền. M1–M4, M6–M10 và M9b là **10 đột biến**; với nền nhánh #1132 hiện có, mức tối thiểu là **118 ca / 431 đột biến**. Điều kiện đợi lease và lấy base chứa #1132 vẫn cần thực hiện khi cấp việc.
+
+**Đối chiếu đường thực thi của toàn bộ C/M**
+
+Đây là kiểm thiết kế phản chứng; C1–C4 và các mutation mới chưa có bản triển khai để chạy.
+
+| Ca | Cửa phải đi qua |
+|---|---|
+| C1 | Gọi trực tiếp `che_do_harness` với từng giá trị trong bảng. |
+| C2 | `main` thật, thay công việc nặng bằng runner/spy; đo nhánh chọn mutation và kết luận cuối. |
+| C3(a–b) | Ca giả chạy trong `main`; (b) gọi `chay_con` thật, chỉ thay `subprocess.run`. Có đếm lời gọi nên không đạt trống. |
+| C3(c–d) | Kiểm env sau trả bình thường và sau ngoại lệ helper thoát thật; hai đường khác nhau. |
+| C4 | Đọc bước harness trong workflow dưới đo, so toàn bộ env cùng run/if. |
+
+| Mutation | Đích và quan hệ với mã bị đổi |
+|---|---|
+| M1 | C1 đi qua so sánh chuỗi; mẫu khoảng trắng/hoa thường phân biệt việc chuẩn hóa. |
+| M2 | C1/C2 đi qua trường hợp biến vắng. |
+| M3 | C2 đi qua cả hai chế độ, đếm lời gọi mutation. |
+| M4 | C2 đưa ca `DO` vào nhánh nhanh, kiểm rc và `TONG`. |
+| M5 | Đã loại; không nhận tín dụng giết. |
+| M6 | C4 đọc chính giá trị env YAML bị đổi. |
+| M7 | C4 đọc chính mapping YAML bị xóa. |
+| M8 | C3(a) quan sát env trong cùng tiến trình; gỡ riêng ở con không che được lỗi. |
+| M9 | C3(c/d) quan sát trạng thái sau khi mất khôi phục. |
+| M9b | C3(d) đi qua helper ném; khôi phục chỉ trên đường bình thường không được chạy. C3(c) vẫn phải xanh. |
+| M10 | **`y04` là đích đã xác minh đọc bảng bị đổi.** C4 chỉ kiểm YAML độc lập thì không tự bắt được mutation bảng; không được ghi tín dụng cho C4 nếu chưa có đường đọc bảng. Nhánh `y04` đáp ứng lựa chọn và A5 hiện tại. |
+
+Các lệnh `python -B -` kiểm kê, đọc JSON, probe ngoại lệ/env/phân loại và chạy chọn lọc đều **rc 0**. **12 ca chọn lọc passed**, hai băm ghim khớp; không có phép đo đã chạy bị failed hoặc skipped. Toàn suite, mutation suite, Ruff, actionlint và CI **not_run**. Thời lượng bản triển khai và trần 150 dòng **chưa đo được**.
+
+HEAD/tree/hash không đổi; snapshot cuối sạch cả tracked, untracked và ignored. Verdict này phê duyệt **đặc tả**, không xác nhận bản triển khai đã đạt A1–A11.
+
+VERDICT: approve P0=0 P1=0 P2=0 P3=0

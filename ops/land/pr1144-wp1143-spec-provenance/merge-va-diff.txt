@@ -1,0 +1,7 @@
+merge f23530be725dac42dda16ae823a5b3dcbd846fce
+parents 68fa6a1c6a629d0a623661ae1032532280598e58 2bb297dcd4aeb74bc076096b2e567ac55c58f000
+tree ba8d5bd169e0b51dc557f814f6c2ae43a37d0530
+merge-base 9091cf52cf20ac197c1a356d6a33cac6bab0b318
+125	0	ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md
+cmp rc=0
+spec@merge 38e478eac8ea89f52db917c673fa9a17d583605acbd94ede62920e39a41a05ab

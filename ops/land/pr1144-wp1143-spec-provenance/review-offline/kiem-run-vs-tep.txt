@@ -1,0 +1,4 @@
+r1 head=caa22e5903a5 ma_thoat=0 model=DO_DUOC:['gpt-6-astra'] effort=DO_DUOC:['high'] sandbox=DO_DUOC stdout_khop=True prompt_khop=True giay=307.482
+r2 head=53c65791e544 ma_thoat=0 model=DO_DUOC:['gpt-6-astra'] effort=DO_DUOC:['high'] sandbox=KHONG_DO_DUOC stdout_khop=True prompt_khop=True giay=319.345
+r3 head=4a508277b3c8 ma_thoat=0 model=DO_DUOC:['gpt-6-astra'] effort=DO_DUOC:['high'] sandbox=DO_DUOC stdout_khop=True prompt_khop=True giay=304.944
+r4 head=e4b1d788925f ma_thoat=0 model=DO_DUOC:['gpt-6-astra'] effort=DO_DUOC:['high'] sandbox=DO_DUOC stdout_khop=True prompt_khop=True giay=383.218

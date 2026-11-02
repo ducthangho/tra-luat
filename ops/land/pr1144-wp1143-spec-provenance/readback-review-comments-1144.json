@@ -1,0 +1,223 @@
+[
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4438415890",
+    "pull_request_review_id": 5731496322,
+    "id": 4438415890,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABCIzaEg",
+    "diff_hunk": "@@ -0,0 +1,116 @@\n+# Đặc tả packet `CI-DUONG-NHANH-BO-DOT-BIEN` r1: đường nhanh chỉ chạy ca của harness, không chạy 419 đột biến (vá A12 của #1113)\n+\n+tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544\n+tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab\n+dieu_kien_merge: ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587\n+\n+| trường | giá trị |\n+|---|---|\n+| packet_id | `CI-DUONG-NHANH-BO-DOT-BIEN`, revision 1, generation 1 |\n+| packet_issue | ghi ở comment đầu của Issue mở cùng đặc tả này |\n+| nguon_cap_viec | packet khắc phục của #1113 (`CI-LAN-LUU-TRU` r1, merge `c165a5d0` qua PR #1128). Hồ sơ `ops/land/pr1128-wp1113-land-evidence.yaml` mục `canary_a12`: `ket_qua: TRUOT`, `quyet_dinh_chu_kho: 'ha landed, mo packet va (bo dot bien cua harness tren duong nhanh …)'`. Chủ kho chốt Q1–Q6 qua hai vòng hỏi ngày 02-11-2026 trong phiên `session_015GtxrayCW1gNgN8F8GiVev` |\n+| review_class | `sensitive`: chạm `.github/workflows/ci.yml` (§8, *workflow/CI authority*) |\n+| base | `origin/master` lúc cấp lease, và **phải chứa merge của #1132** (§3). Đo khi soạn, 02-11 ~02:00Z: `9091cf5`, #1132 chưa land |\n+| executor / reviewer | `anthropic_claude`, chính phiên soạn spec / `openai_codex` qua `launcher.py run` trên clone độc lập, và connector `@codex review` trên PR draft |\n+| windows | `not_required`, **do chủ kho quyết** (Q4). Lý do: bước bị sửa có `if: runner.os == 'Linux'`, không chạy trên Windows |\n+| full_mutant_audit | bắt buộc (M9: diff chạm `.github/workflows/**` và `ops/**/*.py`) |\n+\n+## 1. Vì sao: số đo\n+\n+| # | sự kiện | số đo |\n+|---|---|---|\n+| S1 | canary A12 của #1113: PR #1140, run `41371625809` (`pull_request`, `che_do=duong_nhanh`) | tổng `completed_at − started_at` của 16 job = **1159 s** (≈ 19,3 phút) > trần 12 phút. Nguồn: `ops/land/pr1128-wp1113-provenance/readback-jobs-41371625809-canary-a12.json` (nhánh `claude/ghi-so-land-1113`) |\n+| S2 | phân rã S1 (cùng tệp) | `gate-ops` **966 s**: bước `ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)` **636 s**, bước `bien-nhan v2 selftest` **303 s**, phần còn lại của job 27 s. 15 job kia cộng lại **193 s** (mỗi job 10–19 s; `gate-cong-cu` 0 s) |\n+| S3 | `ops/ci_duong_nhanh_test.py` trên `9091cf5` | **113** ca (`CA`) · **419** đột biến (`DOT_BIEN`) · tự kiểm phân hạng 5 mẫu rc + 3 đột biến thật. `main` không có cờ chỉ-chạy-ca (chỉ có `--mot-ca`, `--nguon-test`) |\n+| S4 | đo tại chỗ, container Linux 4 nhân, kho đã mở sâu, 02-11 ~01:55Z | 113 ca chạy tuần tự qua `chay_ca_trong_tien_trinh`: **104 s**, 113/113 đạt; riêng `t56_dau_do_bi_bat_tren_duong_nhanh` **72 s**; `t22` 9 s; còn lại ≤ 6 s mỗi ca. `tu_kiem_phan_hang()`: **1,8 s**. `ops/bien_nhan_v2_test.py`: **373 s**, `98/98 ca · 153/153 đột biến`, `TỔNG: ĐẠT` |\n+| S5 | ước tính sau vá (suy, chưa đo) | hệ số CI/tại chỗ ≈ 303/373 ≈ 0,8 (đo trên `bien_nhan_v2_test`) ⇒ 113 ca ≈ 85 s trên CI. Tổng ≈ 193 + 27 + 85 + 2 + 303 ≈ **610 s ≈ 10,2 phút**, dư ≈ 1,8 phút dưới trần. Biên mỏng ⇒ A6 đo tiền-canary trước merge |\n+| S6 | trạng thái cục bộ dễ đọc nhầm | trên clone **nông**, `t56` đỏ (`doc-claims-check strict: 2`) và `bien_nhan_v2_test` ra 94/98 (`kho nông … không đo được quan hệ tổ tiên`). Mở sâu kho thì cả hai xanh. Đo các bộ này phải trên kho đầy đủ |\n+\n+**Vì sao bỏ đột biến ở đường nhanh là an toàn:** `che_do=duong_nhanh` chỉ được cấp khi mọi tệp đổi nằm dưới bốn tiền tố hồ sơ (`ops/{land,leases,reviews,specs}/**`), nên diff ấy **không đổi được** `ops/ci_duong_nhanh.py`, `ops/ci_duong_nhanh_test.py` hay `ci.yml`. 419 đột biến đo răng của MÃ bộ phân loại và của các `if:`; mã ấy đã được đo đủ ở lượt PR đã đổi nó (đường đầy đủ). Các **ca** thì vẫn phải chạy: `t56` chính là phép đo A7c (đầu dò DO1–DO6 trên dữ liệu thật của cây).\n+\n+## 2. Thay đổi\n+\n+### 2.1 `.github/workflows/ci.yml`\n+\n+Bước `ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)` của job `gate-ops`: **giữ** tên, `if: runner.os == 'Linux'` và `run: python ops/ci_duong_nhanh_test.py`. Chỉ thêm:\n+\n+```\n+        env:\n+          CI_DUONG_NHANH_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n+```\n+\n+Chú thích phía trên bước viết lại cho đúng hành vi mới: đường nhanh chạy đủ ca, bỏ đột biến; mọi giá trị khác chạy đủ. Chú thích **không** chứa cú pháp biểu thức Actions (bài học `ops-don-ref.yml`, run `31971137920`). Bước vẫn **không** có `if:` theo `che_do`.\n+\n+### 2.2 `ops/ci_duong_nhanh_test.py`\n+\n+1. Hàm thuần `che_do_harness(env) -> str`: trả `\"chi_ca\"` **chỉ khi** `env.get(\"CI_DUONG_NHANH_CHE_DO\")` là `str` và **bằng đúng** `\"duong_nhanh\"` (không strip, không lower); mọi trường hợp khác — vắng, rỗng, `\"day_du\"`, `\"Duong_nhanh\"`, `\"duong_nhanh \"`, giá trị lạ — trả `\"day_du\"` (fail-close về đường đầy đủ).\n+2. `main([])`: gọi `che_do_harness(os.environ)` **đúng một lần** ở đầu, rồi gỡ `CI_DUONG_NHANH_CHE_DO` khỏi `os.environ` cho tới khi `main` trả về (khôi phục giá trị cũ trong `finally`, kể cả khi ném). Nhánh `\"day_du\"` giữ nguyên hành vi hiện tại từng dòng. Nhánh `\"chi_ca\"`: chạy đủ mọi ca của `CA` và `tu_kiem_phan_hang()`; KHÔNG gọi `chay_tap_dot_bien`; in đúng dòng `DOT BIEN: BO QUA {len(DOT_BIEN)} (che_do=duong_nhanh)` thay cho dòng `DOT BIEN: m/n …`; `TONG: DAT` (rc 0) khi và chỉ khi mọi ca đạt, `len(CA) > 0`, tự kiểm đạt, và không tên đột biến trùng. Dòng `CA:` và `KIEM KE:` in như cũ.\n+3. **Cô lập chế độ khỏi mọi ca** (review offline lượt 1, P1): đo trên `caa22e5`, `chay_ca_trong_tien_trinh` chạy ca **trong cùng tiến trình** (0 lời gọi subprocess), còn các cửa subprocess thật là `chay_con` (dòng 3499, đường của đột biến), lời gọi trong `t91` (dòng 3043) và `t93` (dòng 3107); `t93` còn gọi `main([])` **cùng tiến trình** (dòng 3091) và đòi dòng `DOT BIEN: M/M`. Vì vậy cô lập phải ở mức `os.environ` của tiến trình (mục 2), không chỉ ở tham số `env=` của con: mọi ca, mọi `main` lồng nhau, mọi tiến trình con đều thấy biến **vắng** ⇒ chạy đường đầy đủ; chỉ `main` ngoài cùng giữ chế độ đã đọc.\n+4. Ca mới (tên đặt khi thi công, tiền tố `t`; khai đích trong `DOT_BIEN` như mọi ca):\n+   - **C1** bảng giá trị của `che_do_harness`: đúng `\"duong_nhanh\"` ⇒ `chi_ca`; vắng, `\"\"`, `\"day_du\"`, `\"Duong_nhanh\"`, `\"duong_nhanh \"`, `\" duong_nhanh\"`, `\"duong_nhanh\\n\"`, `\"tu_dong\"`, và một mapping giả trả giá trị không phải `str` (vd. `1`, `True`, `b\"duong_nhanh\"`) ⇒ `day_du`.\n+   - **C2** `main` với runner giả (theo khuôn `t91`/`t92`): env vắng và env `day_du` ⇒ `chay_tap_dot_bien` được gọi **đúng một lần** với đối số có `len == len(DOT_BIEN)`, và đầu ra có dòng `DOT BIEN: {len}/{len}`; env `duong_nhanh` ⇒ **không** gọi, có dòng `DOT BIEN: BO QUA {len(DOT_BIEN)} (che_do=duong_nhanh)`, `rc == 0` khi ca giả đều đạt; một ca giả `DO` ⇒ `rc == 1` và `TONG: DO`; tự kiểm giả trả lỗi ⇒ `rc == 1`.\n+   - **C3** cô lập, ba vế, mỗi vế có gián điệp chứng minh cửa **thực sự được gọi** (đếm ≥ 1 lời gọi; danh sách lời gọi rỗng ⇒ ca ĐỎ, không phải đạt trống): (a) chạy `main([])` với `os.environ` mang `CI_DUONG_NHANH_CHE_DO=duong_nhanh` và một ca giả ghi lại `os.environ.get(...)` lúc chạy ⇒ ca giả thấy **vắng**, còn `main` vẫn in `BO QUA` (chế độ của lượt ngoài được giữ); (b) cũng trong lượt ấy, một ca giả gọi `chay_con` thật với `subprocess.run` bị gián điệp ⇒ `env` truyền cho con không có khoá; (c) sau khi `main` trả về bình thường, `os.environ[\"CI_DUONG_NHANH_CHE_DO\"] == \"duong_nhanh\"` (khôi phục); (d) **đường ngoại lệ** (review lượt 2, P2: ca giả ném thì `chay_ca_trong_tien_trinh` đã bắt, `main` vẫn trả rc 1, nên vế (c) không chạm `finally`): thay `tu_kiem_phan_hang` bằng hàm giả ném một ngoại lệ riêng của ca ⇒ ngoại lệ ấy thoát khỏi `main`, ca bắt **đúng lớp đó** ở ngoài, gián điệp xác nhận hàm giả được gọi ≥ 1 lần, và `os.environ[\"CI_DUONG_NHANH_CHE_DO\"] == \"duong_nhanh\"` sau đó. `t93` dưới chế độ nhanh **không** đo bằng cách gọi thẳng thân `t93`: nó được đo qua cửa thật — A3 chạy cả bộ với env `duong_nhanh`, nên `CA: N/N` ở A3 bao gồm `t93` đạt.\n+   - **C4** (cấu trúc `ci.yml`, tiền tố `y`): bước harness của `gate-ops` có `env` **bằng đúng** `{\"CI_DUONG_NHANH_CHE_DO\": \"${{ needs.chuan-bi.outputs.che_do }}\"}`, `run` bằng đúng `python ops/ci_duong_nhanh_test.py`, `if` bằng đúng `runner.os == 'Linux'`. Cập nhật `KHUNG_BUOC` cho khớp, và thêm **đúng một** mục `(\"gate-ops\", \"ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)\"): {\"CI_DUONG_NHANH_CHE_DO\": \"${{ needs.chuan-bi.outputs.che_do }}\"}` vào bảng ngoại lệ `Y04_ENV_BUOC_CHE_DO` (dòng 2511; review lượt 1, P2: thiếu mục này thì `y04_tap_buoc_mang_if_che_do_khop_dung` đỏ vì env chứa `che_do`). Giữ phép so **toàn bộ** mapping của `y04`, không nới thành \"env nào chứa `che_do` cũng được\". `RUN_BUOC_PACKET`, `TAP_CHO_PHEP`, `BUOC_HARNESS` **không** đổi.\n+5. Đột biến mới trong `DOT_BIEN` (mỗi cái một đích, phải bị giết đúng lý do theo bộ phân hạng hiện có):\n+   - `M1` nới so sánh thành `.strip()` (hoặc `.lower()`) ⇒ C1 đỏ;\n+   - `M2` mặc định khi vắng biến là `\"duong_nhanh\"` ⇒ C1 và C2 đỏ;\n+   - `M3` nhánh `chi_ca` vẫn gọi `chay_tap_dot_bien` hoặc nhánh `day_du` không gọi ⇒ C2 đỏ;\n+   - `M4` nhánh `chi_ca` bỏ điều kiện \"mọi ca đạt\" khỏi `TONG` ⇒ C2 đỏ;\n+   - (không có `M5`: gỡ riêng biến ở `env=` của `chay_con` là **tương đương** khi `os.environ` đã gỡ ở mục 2 — review lượt 2 đo hai mapping bằng nhau. Không đưa vào `DOT_BIEN`, không tính ΔM, và không thêm thao tác gỡ riêng ấy vào mã. Chỉ được đưa lại khi có cửa thực thi riêng và phản chứng chứng minh không tương đương; A5 không nới để chấp nhận đột biến sống);\n+   - `M6` (đột biến `ci.yml`) giá trị `env` thành chuỗi hằng `duong_nhanh` ⇒ C4 đỏ;\n+   - `M7` (đột biến `ci.yml`) xoá khối `env` ⇒ C4 đỏ;\n+   - `M8` bỏ việc gỡ biến khỏi `os.environ` (chỉ giữ gỡ ở `env=` của con) ⇒ C3(a) đỏ;\n+   - `M9` bỏ hẳn khôi phục ⇒ C3(c) và C3(d) đỏ;\n+   - `M9b` chuyển khôi phục khỏi `finally` sang đường trả về bình thường ⇒ C3(d) đỏ, C3(c) vẫn xanh (đột biến này chứng minh (d) đo đúng thứ (c) không đo);\n+   - `M10` (đột biến bảng) `Y04_ENV_BUOC_CHE_DO` mục mới mang chuỗi hằng `duong_nhanh` ⇒ `y04` đỏ (đích là `y04`: C4 đọc YAML, không đọc bảng, nên không được ghi tín dụng cho C4).\n+   Bộ đột biến hiện có đã có **84** đột biến `ci.yml` (đếm của review lượt 1), nên M6/M7 dùng cơ chế sẵn có.\n+\n+## 3. Write set\n+\n+`.github/workflows/ci.yml` · `ops/ci_duong_nhanh_test.py` · `ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md` (chép **nguyên byte** từ nhánh lease vào commit đầu của nhánh thực thi). **Ba tệp**, đếm theo `git diff --numstat <base> <H>`. Trần (chủ kho, Q4 rồi nâng ở Q7 sau review lượt 2, khi Codex ước 140–190 dòng): **≤ 300 dòng thêm trên hai tệp mã** (`ci.yml` + `ops/ci_duong_nhanh_test.py`); tệp đặc tả không tính vào 300 vì nó chép nguyên byte. Trong trần `ADR-0053` (6 tệp / 450 dòng thêm) kể cả khi cộng tệp đặc tả.",
+    "path": "ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md",
+    "commit_id": "35a395bce970c9833b805607fa9355b1676caead",
+    "original_commit_id": "35a395bce970c9833b805607fa9355b1676caead",
+    "user": {
+      "login": "chatgpt-codex-connector[bot]",
+      "id": 199175422,
+      "node_id": "BOT_kgDOC98s_g",
+      "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+      "html_url": "https://github.com/apps/chatgpt-codex-connector",
+      "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Mở rộng write set để cập nhật các chốt của gương Windows**\n\nKhi thêm `CI_DUONG_NHANH_CHE_DO` vào bước harness, ca `t30` trong `.claude/dev/chay-cong-windows_test.ps1:856–871` sẽ phát hiện một khóa env mới của `gate*` không có trong `.claude/dev/chay-cong-windows.ps1` và báo đỏ; ca này đọc cả bước chỉ chạy Linux, nên quyết định `windows: not_required` không loại được ảnh hưởng. Ngoài ra, `Doc-DauVanCi` cũng tính env bước này vào dấu vân `gate-ops` của `t32`. Kiểm tra A/B bằng chính mã Python của producer xác nhận env mới đổi dấu vân, và khóa mới hiện vắng trong script gương. Hai tệp PowerShell đều ngoài write set ba tệp, trong khi `AGENTS.md` cấm sửa artifact ngoài write set. Cần bổ sung phạm vi cập nhật danh sách cô lập env và rà/ghim dấu vân, hoặc giao successor packet có thứ tự rõ ràng; nghiệm thu bằng `t30`/`t32` trên base và head để phân biệt lỗi nền với delta mới, không nới các phép so để làm xanh.\n\nAGENTS.md reference: [AGENTS.md:L107-L108](https://github.com/ducthangho/tra-luat/blob/35a395bce970c9833b805607fa9355b1676caead/AGENTS.md#L107-L108)\n\nUseful? React with 👍 / 👎.\n\n<!-- codex-code-review-finding:v1 -->",
+    "created_at": "2026-11-02T02:26:32Z",
+    "updated_at": "2026-11-02T02:26:32Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/1144#discussion_r4438415890",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1144",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4438415890"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/1144#discussion_r4438415890"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1144"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4438415890/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 70,
+    "side": "RIGHT",
+    "author_association": "NONE",
+    "original_position": 70,
+    "position": 1,
+    "subject_type": "line",
+    "is_copilot_code_review": false,
+    "copilot_code_review_sources": [
+
+    ]
+  },
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4438439463",
+    "pull_request_review_id": 5731524446,
+    "id": 4438439463,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABCI02Jw",
+    "diff_hunk": "@@ -0,0 +1,116 @@\n+# Đặc tả packet `CI-DUONG-NHANH-BO-DOT-BIEN` r1: đường nhanh chỉ chạy ca của harness, không chạy 419 đột biến (vá A12 của #1113)\n+\n+tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544\n+tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab\n+dieu_kien_merge: ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587\n+\n+| trường | giá trị |\n+|---|---|\n+| packet_id | `CI-DUONG-NHANH-BO-DOT-BIEN`, revision 1, generation 1 |\n+| packet_issue | ghi ở comment đầu của Issue mở cùng đặc tả này |\n+| nguon_cap_viec | packet khắc phục của #1113 (`CI-LAN-LUU-TRU` r1, merge `c165a5d0` qua PR #1128). Hồ sơ `ops/land/pr1128-wp1113-land-evidence.yaml` mục `canary_a12`: `ket_qua: TRUOT`, `quyet_dinh_chu_kho: 'ha landed, mo packet va (bo dot bien cua harness tren duong nhanh …)'`. Chủ kho chốt Q1–Q6 qua hai vòng hỏi ngày 02-11-2026 trong phiên `session_015GtxrayCW1gNgN8F8GiVev` |\n+| review_class | `sensitive`: chạm `.github/workflows/ci.yml` (§8, *workflow/CI authority*) |\n+| base | `origin/master` lúc cấp lease, và **phải chứa merge của #1132** (§3). Đo khi soạn, 02-11 ~02:00Z: `9091cf5`, #1132 chưa land |\n+| executor / reviewer | `anthropic_claude`, chính phiên soạn spec / `openai_codex` qua `launcher.py run` trên clone độc lập, và connector `@codex review` trên PR draft |\n+| windows | `not_required`, **do chủ kho quyết** (Q4). Lý do: bước bị sửa có `if: runner.os == 'Linux'`, không chạy trên Windows |\n+| full_mutant_audit | bắt buộc (M9: diff chạm `.github/workflows/**` và `ops/**/*.py`) |\n+\n+## 1. Vì sao: số đo\n+\n+| # | sự kiện | số đo |\n+|---|---|---|\n+| S1 | canary A12 của #1113: PR #1140, run `41371625809` (`pull_request`, `che_do=duong_nhanh`) | tổng `completed_at − started_at` của 16 job = **1159 s** (≈ 19,3 phút) > trần 12 phút. Nguồn: `ops/land/pr1128-wp1113-provenance/readback-jobs-41371625809-canary-a12.json` (nhánh `claude/ghi-so-land-1113`) |\n+| S2 | phân rã S1 (cùng tệp) | `gate-ops` **966 s**: bước `ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)` **636 s**, bước `bien-nhan v2 selftest` **303 s**, phần còn lại của job 27 s. 15 job kia cộng lại **193 s** (mỗi job 10–19 s; `gate-cong-cu` 0 s) |\n+| S3 | `ops/ci_duong_nhanh_test.py` trên `9091cf5` | **113** ca (`CA`) · **419** đột biến (`DOT_BIEN`) · tự kiểm phân hạng 5 mẫu rc + 3 đột biến thật. `main` không có cờ chỉ-chạy-ca (chỉ có `--mot-ca`, `--nguon-test`) |\n+| S4 | đo tại chỗ, container Linux 4 nhân, kho đã mở sâu, 02-11 ~01:55Z | 113 ca chạy tuần tự qua `chay_ca_trong_tien_trinh`: **104 s**, 113/113 đạt; riêng `t56_dau_do_bi_bat_tren_duong_nhanh` **72 s**; `t22` 9 s; còn lại ≤ 6 s mỗi ca. `tu_kiem_phan_hang()`: **1,8 s**. `ops/bien_nhan_v2_test.py`: **373 s**, `98/98 ca · 153/153 đột biến`, `TỔNG: ĐẠT` |\n+| S5 | ước tính sau vá (suy, chưa đo) | hệ số CI/tại chỗ ≈ 303/373 ≈ 0,8 (đo trên `bien_nhan_v2_test`) ⇒ 113 ca ≈ 85 s trên CI. Tổng ≈ 193 + 27 + 85 + 2 + 303 ≈ **610 s ≈ 10,2 phút**, dư ≈ 1,8 phút dưới trần. Biên mỏng ⇒ A6 đo tiền-canary trước merge |\n+| S6 | trạng thái cục bộ dễ đọc nhầm | trên clone **nông**, `t56` đỏ (`doc-claims-check strict: 2`) và `bien_nhan_v2_test` ra 94/98 (`kho nông … không đo được quan hệ tổ tiên`). Mở sâu kho thì cả hai xanh. Đo các bộ này phải trên kho đầy đủ |\n+\n+**Vì sao bỏ đột biến ở đường nhanh là an toàn:** `che_do=duong_nhanh` chỉ được cấp khi mọi tệp đổi nằm dưới bốn tiền tố hồ sơ (`ops/{land,leases,reviews,specs}/**`), nên diff ấy **không đổi được** `ops/ci_duong_nhanh.py`, `ops/ci_duong_nhanh_test.py` hay `ci.yml`. 419 đột biến đo răng của MÃ bộ phân loại và của các `if:`; mã ấy đã được đo đủ ở lượt PR đã đổi nó (đường đầy đủ). Các **ca** thì vẫn phải chạy: `t56` chính là phép đo A7c (đầu dò DO1–DO6 trên dữ liệu thật của cây).\n+\n+## 2. Thay đổi\n+\n+### 2.1 `.github/workflows/ci.yml`\n+\n+Bước `ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)` của job `gate-ops`: **giữ** tên, `if: runner.os == 'Linux'` và `run: python ops/ci_duong_nhanh_test.py`. Chỉ thêm:\n+\n+```\n+        env:\n+          CI_DUONG_NHANH_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n+```\n+\n+Chú thích phía trên bước viết lại cho đúng hành vi mới: đường nhanh chạy đủ ca, bỏ đột biến; mọi giá trị khác chạy đủ. Chú thích **không** chứa cú pháp biểu thức Actions (bài học `ops-don-ref.yml`, run `31971137920`). Bước vẫn **không** có `if:` theo `che_do`.\n+\n+### 2.2 `ops/ci_duong_nhanh_test.py`\n+\n+1. Hàm thuần `che_do_harness(env) -> str`: trả `\"chi_ca\"` **chỉ khi** `env.get(\"CI_DUONG_NHANH_CHE_DO\")` là `str` và **bằng đúng** `\"duong_nhanh\"` (không strip, không lower); mọi trường hợp khác — vắng, rỗng, `\"day_du\"`, `\"Duong_nhanh\"`, `\"duong_nhanh \"`, giá trị lạ — trả `\"day_du\"` (fail-close về đường đầy đủ).\n+2. `main([])`: gọi `che_do_harness(os.environ)` **đúng một lần** ở đầu, rồi gỡ `CI_DUONG_NHANH_CHE_DO` khỏi `os.environ` cho tới khi `main` trả về (khôi phục giá trị cũ trong `finally`, kể cả khi ném). Nhánh `\"day_du\"` giữ nguyên hành vi hiện tại từng dòng. Nhánh `\"chi_ca\"`: chạy đủ mọi ca của `CA` và `tu_kiem_phan_hang()`; KHÔNG gọi `chay_tap_dot_bien`; in đúng dòng `DOT BIEN: BO QUA {len(DOT_BIEN)} (che_do=duong_nhanh)` thay cho dòng `DOT BIEN: m/n …`; `TONG: DAT` (rc 0) khi và chỉ khi mọi ca đạt, `len(CA) > 0`, tự kiểm đạt, và không tên đột biến trùng. Dòng `CA:` và `KIEM KE:` in như cũ.\n+3. **Cô lập chế độ khỏi mọi ca** (review offline lượt 1, P1): đo trên `caa22e5`, `chay_ca_trong_tien_trinh` chạy ca **trong cùng tiến trình** (0 lời gọi subprocess), còn các cửa subprocess thật là `chay_con` (dòng 3499, đường của đột biến), lời gọi trong `t91` (dòng 3043) và `t93` (dòng 3107); `t93` còn gọi `main([])` **cùng tiến trình** (dòng 3091) và đòi dòng `DOT BIEN: M/M`. Vì vậy cô lập phải ở mức `os.environ` của tiến trình (mục 2), không chỉ ở tham số `env=` của con: mọi ca, mọi `main` lồng nhau, mọi tiến trình con đều thấy biến **vắng** ⇒ chạy đường đầy đủ; chỉ `main` ngoài cùng giữ chế độ đã đọc.\n+4. Ca mới (tên đặt khi thi công, tiền tố `t`; khai đích trong `DOT_BIEN` như mọi ca):\n+   - **C1** bảng giá trị của `che_do_harness`: đúng `\"duong_nhanh\"` ⇒ `chi_ca`; vắng, `\"\"`, `\"day_du\"`, `\"Duong_nhanh\"`, `\"duong_nhanh \"`, `\" duong_nhanh\"`, `\"duong_nhanh\\n\"`, `\"tu_dong\"`, và một mapping giả trả giá trị không phải `str` (vd. `1`, `True`, `b\"duong_nhanh\"`) ⇒ `day_du`.\n+   - **C2** `main` với runner giả (theo khuôn `t91`/`t92`): env vắng và env `day_du` ⇒ `chay_tap_dot_bien` được gọi **đúng một lần** với đối số có `len == len(DOT_BIEN)`, và đầu ra có dòng `DOT BIEN: {len}/{len}`; env `duong_nhanh` ⇒ **không** gọi, có dòng `DOT BIEN: BO QUA {len(DOT_BIEN)} (che_do=duong_nhanh)`, `rc == 0` khi ca giả đều đạt; một ca giả `DO` ⇒ `rc == 1` và `TONG: DO`; tự kiểm giả trả lỗi ⇒ `rc == 1`.\n+   - **C3** cô lập, ba vế, mỗi vế có gián điệp chứng minh cửa **thực sự được gọi** (đếm ≥ 1 lời gọi; danh sách lời gọi rỗng ⇒ ca ĐỎ, không phải đạt trống): (a) chạy `main([])` với `os.environ` mang `CI_DUONG_NHANH_CHE_DO=duong_nhanh` và một ca giả ghi lại `os.environ.get(...)` lúc chạy ⇒ ca giả thấy **vắng**, còn `main` vẫn in `BO QUA` (chế độ của lượt ngoài được giữ); (b) cũng trong lượt ấy, một ca giả gọi `chay_con` thật với `subprocess.run` bị gián điệp ⇒ `env` truyền cho con không có khoá; (c) sau khi `main` trả về bình thường, `os.environ[\"CI_DUONG_NHANH_CHE_DO\"] == \"duong_nhanh\"` (khôi phục); (d) **đường ngoại lệ** (review lượt 2, P2: ca giả ném thì `chay_ca_trong_tien_trinh` đã bắt, `main` vẫn trả rc 1, nên vế (c) không chạm `finally`): thay `tu_kiem_phan_hang` bằng hàm giả ném một ngoại lệ riêng của ca ⇒ ngoại lệ ấy thoát khỏi `main`, ca bắt **đúng lớp đó** ở ngoài, gián điệp xác nhận hàm giả được gọi ≥ 1 lần, và `os.environ[\"CI_DUONG_NHANH_CHE_DO\"] == \"duong_nhanh\"` sau đó. `t93` dưới chế độ nhanh **không** đo bằng cách gọi thẳng thân `t93`: nó được đo qua cửa thật — A3 chạy cả bộ với env `duong_nhanh`, nên `CA: N/N` ở A3 bao gồm `t93` đạt.\n+   - **C4** (cấu trúc `ci.yml`, tiền tố `y`): bước harness của `gate-ops` có `env` **bằng đúng** `{\"CI_DUONG_NHANH_CHE_DO\": \"${{ needs.chuan-bi.outputs.che_do }}\"}`, `run` bằng đúng `python ops/ci_duong_nhanh_test.py`, `if` bằng đúng `runner.os == 'Linux'`. Cập nhật `KHUNG_BUOC` cho khớp, và thêm **đúng một** mục `(\"gate-ops\", \"ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)\"): {\"CI_DUONG_NHANH_CHE_DO\": \"${{ needs.chuan-bi.outputs.che_do }}\"}` vào bảng ngoại lệ `Y04_ENV_BUOC_CHE_DO` (dòng 2511; review lượt 1, P2: thiếu mục này thì `y04_tap_buoc_mang_if_che_do_khop_dung` đỏ vì env chứa `che_do`). Giữ phép so **toàn bộ** mapping của `y04`, không nới thành \"env nào chứa `che_do` cũng được\". `RUN_BUOC_PACKET`, `TAP_CHO_PHEP`, `BUOC_HARNESS` **không** đổi.\n+5. Đột biến mới trong `DOT_BIEN` (mỗi cái một đích, phải bị giết đúng lý do theo bộ phân hạng hiện có):\n+   - `M1` nới so sánh thành `.strip()` (hoặc `.lower()`) ⇒ C1 đỏ;\n+   - `M2` mặc định khi vắng biến là `\"duong_nhanh\"` ⇒ C1 và C2 đỏ;\n+   - `M3` nhánh `chi_ca` vẫn gọi `chay_tap_dot_bien` hoặc nhánh `day_du` không gọi ⇒ C2 đỏ;\n+   - `M4` nhánh `chi_ca` bỏ điều kiện \"mọi ca đạt\" khỏi `TONG` ⇒ C2 đỏ;\n+   - (không có `M5`: gỡ riêng biến ở `env=` của `chay_con` là **tương đương** khi `os.environ` đã gỡ ở mục 2 — review lượt 2 đo hai mapping bằng nhau. Không đưa vào `DOT_BIEN`, không tính ΔM, và không thêm thao tác gỡ riêng ấy vào mã. Chỉ được đưa lại khi có cửa thực thi riêng và phản chứng chứng minh không tương đương; A5 không nới để chấp nhận đột biến sống);\n+   - `M6` (đột biến `ci.yml`) giá trị `env` thành chuỗi hằng `duong_nhanh` ⇒ C4 đỏ;\n+   - `M7` (đột biến `ci.yml`) xoá khối `env` ⇒ C4 đỏ;\n+   - `M8` bỏ việc gỡ biến khỏi `os.environ` (chỉ giữ gỡ ở `env=` của con) ⇒ C3(a) đỏ;\n+   - `M9` bỏ hẳn khôi phục ⇒ C3(c) và C3(d) đỏ;\n+   - `M9b` chuyển khôi phục khỏi `finally` sang đường trả về bình thường ⇒ C3(d) đỏ, C3(c) vẫn xanh (đột biến này chứng minh (d) đo đúng thứ (c) không đo);\n+   - `M10` (đột biến bảng) `Y04_ENV_BUOC_CHE_DO` mục mới mang chuỗi hằng `duong_nhanh` ⇒ `y04` đỏ (đích là `y04`: C4 đọc YAML, không đọc bảng, nên không được ghi tín dụng cho C4).\n+   Bộ đột biến hiện có đã có **84** đột biến `ci.yml` (đếm của review lượt 1), nên M6/M7 dùng cơ chế sẵn có.\n+\n+## 3. Write set\n+\n+`.github/workflows/ci.yml` · `ops/ci_duong_nhanh_test.py` · `ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md` (chép **nguyên byte** từ nhánh lease vào commit đầu của nhánh thực thi). **Ba tệp**, đếm theo `git diff --numstat <base> <H>`. Trần (chủ kho, Q4 rồi nâng ở Q7 sau review lượt 2, khi Codex ước 140–190 dòng): **≤ 300 dòng thêm trên hai tệp mã** (`ci.yml` + `ops/ci_duong_nhanh_test.py`); tệp đặc tả không tính vào 300 vì nó chép nguyên byte. Trong trần `ADR-0053` (6 tệp / 450 dòng thêm) kể cả khi cộng tệp đặc tả.",
+    "path": "ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md",
+    "commit_id": "35a395bce970c9833b805607fa9355b1676caead",
+    "original_commit_id": "35a395bce970c9833b805607fa9355b1676caead",
+    "user": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "Đã xác nhận finding là đúng, và đã sửa ở `e4b1d78` (đặc tả §2.3 và A8b).\n\nKết quả kiểm:\n- `t30` đòi mọi khoá `env` của job `gate*` phải có trong `.claude/dev/chay-cong-windows.ps1`. Khoá mới `CI_DUONG_NHANH_CHE_DO` chưa có, nên `t30` sẽ thiếu thêm khoá này.\n- Đo nền bằng chạy thật: tải pwsh 7.4.6 vào container, chạy trên cây `9091cf5` cộng tệp đặc tả, ra `chay-cong-windows: 34/36 dat`. Cả `t30` lẫn `t32` **đã đỏ sẵn** trên master:\n  - `t30` thiếu sẵn 5 khoá;\n  - `t32` có 7 dấu vân job đã đổi, kể cả `gate-ops` (`7bc725418208 → 50f66a341482`), 2 job mới chưa ghim và 2 bước thiếu gương.\n\nCách xử, theo quyết định của chủ kho:\n- Write set thêm `.claude/dev/chay-cong-windows.ps1`, thành 4 tệp. Khoá mới được đưa vào danh sách xoá, nên tập khoá mà `t30` báo thiếu giữ nguyên.\n- **Không** ghim lại `$DauVanCi`. Gương đang trôi trên mọi job, nên ghim lại riêng `gate-ops` sẽ thành khai rằng gương đã được rà trong khi chưa ai rà. Việc này ghi thành nợ có tên `GUONG-WINDOWS-TROI-TOAN-JOB`.\n- Nghiệm thu A8b chạy thật bộ `.ps1` trên base và head, so **tập** dòng của `t30`/`t32` để đòi delta = 0. Đột biến bỏ dòng thêm khoá phải làm A8b đỏ.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+    "created_at": "2026-11-02T02:33:03Z",
+    "updated_at": "2026-11-02T02:33:03Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/1144#discussion_r4438439463",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1144",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4438439463"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/1144#discussion_r4438439463"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1144"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4438439463/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 70,
+    "side": "RIGHT",
+    "in_reply_to_id": 4438415890,
+    "author_association": "OWNER",
+    "original_position": 70,
+    "position": 1,
+    "subject_type": "line",
+    "is_copilot_code_review": false,
+    "copilot_code_review_sources": [
+
+    ]
+  },
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4438468287",
+    "pull_request_review_id": 5731558939,
+    "id": 4438468287,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABCI2mvw",
+    "diff_hunk": "@@ -0,0 +1,116 @@\n+# Đặc tả packet `CI-DUONG-NHANH-BO-DOT-BIEN` r1: đường nhanh chỉ chạy ca của harness, không chạy 419 đột biến (vá A12 của #1113)\n+\n+tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544\n+tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab\n+dieu_kien_merge: ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587\n+\n+| trường | giá trị |\n+|---|---|\n+| packet_id | `CI-DUONG-NHANH-BO-DOT-BIEN`, revision 1, generation 1 |\n+| packet_issue | ghi ở comment đầu của Issue mở cùng đặc tả này |\n+| nguon_cap_viec | packet khắc phục của #1113 (`CI-LAN-LUU-TRU` r1, merge `c165a5d0` qua PR #1128). Hồ sơ `ops/land/pr1128-wp1113-land-evidence.yaml` mục `canary_a12`: `ket_qua: TRUOT`, `quyet_dinh_chu_kho: 'ha landed, mo packet va (bo dot bien cua harness tren duong nhanh …)'`. Chủ kho chốt Q1–Q6 qua hai vòng hỏi ngày 02-11-2026 trong phiên `session_015GtxrayCW1gNgN8F8GiVev` |\n+| review_class | `sensitive`: chạm `.github/workflows/ci.yml` (§8, *workflow/CI authority*) |\n+| base | `origin/master` lúc cấp lease, và **phải chứa merge của #1132** (§3). Đo khi soạn, 02-11 ~02:00Z: `9091cf5`, #1132 chưa land |\n+| executor / reviewer | `anthropic_claude`, chính phiên soạn spec / `openai_codex` qua `launcher.py run` trên clone độc lập, và connector `@codex review` trên PR draft |\n+| windows | `not_required`, **do chủ kho quyết** (Q4). Lý do: bước bị sửa có `if: runner.os == 'Linux'`, không chạy trên Windows |\n+| full_mutant_audit | bắt buộc (M9: diff chạm `.github/workflows/**` và `ops/**/*.py`) |\n+\n+## 1. Vì sao: số đo\n+\n+| # | sự kiện | số đo |\n+|---|---|---|\n+| S1 | canary A12 của #1113: PR #1140, run `41371625809` (`pull_request`, `che_do=duong_nhanh`) | tổng `completed_at − started_at` của 16 job = **1159 s** (≈ 19,3 phút) > trần 12 phút. Nguồn: `ops/land/pr1128-wp1113-provenance/readback-jobs-41371625809-canary-a12.json` (nhánh `claude/ghi-so-land-1113`) |\n+| S2 | phân rã S1 (cùng tệp) | `gate-ops` **966 s**: bước `ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)` **636 s**, bước `bien-nhan v2 selftest` **303 s**, phần còn lại của job 27 s. 15 job kia cộng lại **193 s** (mỗi job 10–19 s; `gate-cong-cu` 0 s) |\n+| S3 | `ops/ci_duong_nhanh_test.py` trên `9091cf5` | **113** ca (`CA`) · **419** đột biến (`DOT_BIEN`) · tự kiểm phân hạng 5 mẫu rc + 3 đột biến thật. `main` không có cờ chỉ-chạy-ca (chỉ có `--mot-ca`, `--nguon-test`) |\n+| S4 | đo tại chỗ, container Linux 4 nhân, kho đã mở sâu, 02-11 ~01:55Z | 113 ca chạy tuần tự qua `chay_ca_trong_tien_trinh`: **104 s**, 113/113 đạt; riêng `t56_dau_do_bi_bat_tren_duong_nhanh` **72 s**; `t22` 9 s; còn lại ≤ 6 s mỗi ca. `tu_kiem_phan_hang()`: **1,8 s**. `ops/bien_nhan_v2_test.py`: **373 s**, `98/98 ca · 153/153 đột biến`, `TỔNG: ĐẠT` |\n+| S5 | ước tính sau vá (suy, chưa đo) | hệ số CI/tại chỗ ≈ 303/373 ≈ 0,8 (đo trên `bien_nhan_v2_test`) ⇒ 113 ca ≈ 85 s trên CI. Tổng ≈ 193 + 27 + 85 + 2 + 303 ≈ **610 s ≈ 10,2 phút**, dư ≈ 1,8 phút dưới trần. Biên mỏng ⇒ A6 đo tiền-canary trước merge |\n+| S6 | trạng thái cục bộ dễ đọc nhầm | trên clone **nông**, `t56` đỏ (`doc-claims-check strict: 2`) và `bien_nhan_v2_test` ra 94/98 (`kho nông … không đo được quan hệ tổ tiên`). Mở sâu kho thì cả hai xanh. Đo các bộ này phải trên kho đầy đủ |\n+\n+**Vì sao bỏ đột biến ở đường nhanh là an toàn:** `che_do=duong_nhanh` chỉ được cấp khi mọi tệp đổi nằm dưới bốn tiền tố hồ sơ (`ops/{land,leases,reviews,specs}/**`), nên diff ấy **không đổi được** `ops/ci_duong_nhanh.py`, `ops/ci_duong_nhanh_test.py` hay `ci.yml`. 419 đột biến đo răng của MÃ bộ phân loại và của các `if:`; mã ấy đã được đo đủ ở lượt PR đã đổi nó (đường đầy đủ). Các **ca** thì vẫn phải chạy: `t56` chính là phép đo A7c (đầu dò DO1–DO6 trên dữ liệu thật của cây).\n+\n+## 2. Thay đổi\n+\n+### 2.1 `.github/workflows/ci.yml`\n+\n+Bước `ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)` của job `gate-ops`: **giữ** tên, `if: runner.os == 'Linux'` và `run: python ops/ci_duong_nhanh_test.py`. Chỉ thêm:\n+\n+```\n+        env:\n+          CI_DUONG_NHANH_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n+```\n+\n+Chú thích phía trên bước viết lại cho đúng hành vi mới: đường nhanh chạy đủ ca, bỏ đột biến; mọi giá trị khác chạy đủ. Chú thích **không** chứa cú pháp biểu thức Actions (bài học `ops-don-ref.yml`, run `31971137920`). Bước vẫn **không** có `if:` theo `che_do`.\n+\n+### 2.2 `ops/ci_duong_nhanh_test.py`\n+\n+1. Hàm thuần `che_do_harness(env) -> str`: trả `\"chi_ca\"` **chỉ khi** `env.get(\"CI_DUONG_NHANH_CHE_DO\")` là `str` và **bằng đúng** `\"duong_nhanh\"` (không strip, không lower); mọi trường hợp khác — vắng, rỗng, `\"day_du\"`, `\"Duong_nhanh\"`, `\"duong_nhanh \"`, giá trị lạ — trả `\"day_du\"` (fail-close về đường đầy đủ).\n+2. `main([])`: gọi `che_do_harness(os.environ)` **đúng một lần** ở đầu, rồi gỡ `CI_DUONG_NHANH_CHE_DO` khỏi `os.environ` cho tới khi `main` trả về (khôi phục giá trị cũ trong `finally`, kể cả khi ném). Nhánh `\"day_du\"` giữ nguyên hành vi hiện tại từng dòng. Nhánh `\"chi_ca\"`: chạy đủ mọi ca của `CA` và `tu_kiem_phan_hang()`; KHÔNG gọi `chay_tap_dot_bien`; in đúng dòng `DOT BIEN: BO QUA {len(DOT_BIEN)} (che_do=duong_nhanh)` thay cho dòng `DOT BIEN: m/n …`; `TONG: DAT` (rc 0) khi và chỉ khi mọi ca đạt, `len(CA) > 0`, tự kiểm đạt, và không tên đột biến trùng. Dòng `CA:` và `KIEM KE:` in như cũ.\n+3. **Cô lập chế độ khỏi mọi ca** (review offline lượt 1, P1): đo trên `caa22e5`, `chay_ca_trong_tien_trinh` chạy ca **trong cùng tiến trình** (0 lời gọi subprocess), còn các cửa subprocess thật là `chay_con` (dòng 3499, đường của đột biến), lời gọi trong `t91` (dòng 3043) và `t93` (dòng 3107); `t93` còn gọi `main([])` **cùng tiến trình** (dòng 3091) và đòi dòng `DOT BIEN: M/M`. Vì vậy cô lập phải ở mức `os.environ` của tiến trình (mục 2), không chỉ ở tham số `env=` của con: mọi ca, mọi `main` lồng nhau, mọi tiến trình con đều thấy biến **vắng** ⇒ chạy đường đầy đủ; chỉ `main` ngoài cùng giữ chế độ đã đọc.\n+4. Ca mới (tên đặt khi thi công, tiền tố `t`; khai đích trong `DOT_BIEN` như mọi ca):\n+   - **C1** bảng giá trị của `che_do_harness`: đúng `\"duong_nhanh\"` ⇒ `chi_ca`; vắng, `\"\"`, `\"day_du\"`, `\"Duong_nhanh\"`, `\"duong_nhanh \"`, `\" duong_nhanh\"`, `\"duong_nhanh\\n\"`, `\"tu_dong\"`, và một mapping giả trả giá trị không phải `str` (vd. `1`, `True`, `b\"duong_nhanh\"`) ⇒ `day_du`.\n+   - **C2** `main` với runner giả (theo khuôn `t91`/`t92`): env vắng và env `day_du` ⇒ `chay_tap_dot_bien` được gọi **đúng một lần** với đối số có `len == len(DOT_BIEN)`, và đầu ra có dòng `DOT BIEN: {len}/{len}`; env `duong_nhanh` ⇒ **không** gọi, có dòng `DOT BIEN: BO QUA {len(DOT_BIEN)} (che_do=duong_nhanh)`, `rc == 0` khi ca giả đều đạt; một ca giả `DO` ⇒ `rc == 1` và `TONG: DO`; tự kiểm giả trả lỗi ⇒ `rc == 1`.\n+   - **C3** cô lập, ba vế, mỗi vế có gián điệp chứng minh cửa **thực sự được gọi** (đếm ≥ 1 lời gọi; danh sách lời gọi rỗng ⇒ ca ĐỎ, không phải đạt trống): (a) chạy `main([])` với `os.environ` mang `CI_DUONG_NHANH_CHE_DO=duong_nhanh` và một ca giả ghi lại `os.environ.get(...)` lúc chạy ⇒ ca giả thấy **vắng**, còn `main` vẫn in `BO QUA` (chế độ của lượt ngoài được giữ); (b) cũng trong lượt ấy, một ca giả gọi `chay_con` thật với `subprocess.run` bị gián điệp ⇒ `env` truyền cho con không có khoá; (c) sau khi `main` trả về bình thường, `os.environ[\"CI_DUONG_NHANH_CHE_DO\"] == \"duong_nhanh\"` (khôi phục); (d) **đường ngoại lệ** (review lượt 2, P2: ca giả ném thì `chay_ca_trong_tien_trinh` đã bắt, `main` vẫn trả rc 1, nên vế (c) không chạm `finally`): thay `tu_kiem_phan_hang` bằng hàm giả ném một ngoại lệ riêng của ca ⇒ ngoại lệ ấy thoát khỏi `main`, ca bắt **đúng lớp đó** ở ngoài, gián điệp xác nhận hàm giả được gọi ≥ 1 lần, và `os.environ[\"CI_DUONG_NHANH_CHE_DO\"] == \"duong_nhanh\"` sau đó. `t93` dưới chế độ nhanh **không** đo bằng cách gọi thẳng thân `t93`: nó được đo qua cửa thật — A3 chạy cả bộ với env `duong_nhanh`, nên `CA: N/N` ở A3 bao gồm `t93` đạt.\n+   - **C4** (cấu trúc `ci.yml`, tiền tố `y`): bước harness của `gate-ops` có `env` **bằng đúng** `{\"CI_DUONG_NHANH_CHE_DO\": \"${{ needs.chuan-bi.outputs.che_do }}\"}`, `run` bằng đúng `python ops/ci_duong_nhanh_test.py`, `if` bằng đúng `runner.os == 'Linux'`. Cập nhật `KHUNG_BUOC` cho khớp, và thêm **đúng một** mục `(\"gate-ops\", \"ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)\"): {\"CI_DUONG_NHANH_CHE_DO\": \"${{ needs.chuan-bi.outputs.che_do }}\"}` vào bảng ngoại lệ `Y04_ENV_BUOC_CHE_DO` (dòng 2511; review lượt 1, P2: thiếu mục này thì `y04_tap_buoc_mang_if_che_do_khop_dung` đỏ vì env chứa `che_do`). Giữ phép so **toàn bộ** mapping của `y04`, không nới thành \"env nào chứa `che_do` cũng được\". `RUN_BUOC_PACKET`, `TAP_CHO_PHEP`, `BUOC_HARNESS` **không** đổi.\n+5. Đột biến mới trong `DOT_BIEN` (mỗi cái một đích, phải bị giết đúng lý do theo bộ phân hạng hiện có):\n+   - `M1` nới so sánh thành `.strip()` (hoặc `.lower()`) ⇒ C1 đỏ;\n+   - `M2` mặc định khi vắng biến là `\"duong_nhanh\"` ⇒ C1 và C2 đỏ;\n+   - `M3` nhánh `chi_ca` vẫn gọi `chay_tap_dot_bien` hoặc nhánh `day_du` không gọi ⇒ C2 đỏ;\n+   - `M4` nhánh `chi_ca` bỏ điều kiện \"mọi ca đạt\" khỏi `TONG` ⇒ C2 đỏ;\n+   - (không có `M5`: gỡ riêng biến ở `env=` của `chay_con` là **tương đương** khi `os.environ` đã gỡ ở mục 2 — review lượt 2 đo hai mapping bằng nhau. Không đưa vào `DOT_BIEN`, không tính ΔM, và không thêm thao tác gỡ riêng ấy vào mã. Chỉ được đưa lại khi có cửa thực thi riêng và phản chứng chứng minh không tương đương; A5 không nới để chấp nhận đột biến sống);\n+   - `M6` (đột biến `ci.yml`) giá trị `env` thành chuỗi hằng `duong_nhanh` ⇒ C4 đỏ;\n+   - `M7` (đột biến `ci.yml`) xoá khối `env` ⇒ C4 đỏ;\n+   - `M8` bỏ việc gỡ biến khỏi `os.environ` (chỉ giữ gỡ ở `env=` của con) ⇒ C3(a) đỏ;\n+   - `M9` bỏ hẳn khôi phục ⇒ C3(c) và C3(d) đỏ;\n+   - `M9b` chuyển khôi phục khỏi `finally` sang đường trả về bình thường ⇒ C3(d) đỏ, C3(c) vẫn xanh (đột biến này chứng minh (d) đo đúng thứ (c) không đo);\n+   - `M10` (đột biến bảng) `Y04_ENV_BUOC_CHE_DO` mục mới mang chuỗi hằng `duong_nhanh` ⇒ `y04` đỏ (đích là `y04`: C4 đọc YAML, không đọc bảng, nên không được ghi tín dụng cho C4).\n+   Bộ đột biến hiện có đã có **84** đột biến `ci.yml` (đếm của review lượt 1), nên M6/M7 dùng cơ chế sẵn có.\n+\n+## 3. Write set\n+\n+`.github/workflows/ci.yml` · `ops/ci_duong_nhanh_test.py` · `ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md` (chép **nguyên byte** từ nhánh lease vào commit đầu của nhánh thực thi). **Ba tệp**, đếm theo `git diff --numstat <base> <H>`. Trần (chủ kho, Q4 rồi nâng ở Q7 sau review lượt 2, khi Codex ước 140–190 dòng): **≤ 300 dòng thêm trên hai tệp mã** (`ci.yml` + `ops/ci_duong_nhanh_test.py`); tệp đặc tả không tính vào 300 vì nó chép nguyên byte. Trong trần `ADR-0053` (6 tệp / 450 dòng thêm) kể cả khi cộng tệp đặc tả.",
+    "path": "ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md",
+    "commit_id": "35a395bce970c9833b805607fa9355b1676caead",
+    "original_commit_id": "35a395bce970c9833b805607fa9355b1676caead",
+    "user": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "Đính chính câu trả lời trước của tôi: số dấu vân job cũ đã đổi là **6**, không phải 7. Review offline lượt 4 tái tính và bắt được chỗ sai này. Sáu job đó là `gate`, `gate-cong-cu`, `gate-cong-cu-gop`, `gate-ops`, `gate-packet-loop`, `gate-registry`; dấu vân `<workflow>` không đổi. Ngoài ra có 2 job mới chưa ghim. Đã sửa trong đặc tả ở `2bb297d`.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+    "created_at": "2026-11-02T02:40:37Z",
+    "updated_at": "2026-11-02T02:40:37Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/1144#discussion_r4438468287",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1144",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4438468287"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/1144#discussion_r4438468287"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1144"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4438468287/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 70,
+    "side": "RIGHT",
+    "in_reply_to_id": 4438415890,
+    "author_association": "OWNER",
+    "original_position": 70,
+    "position": 1,
+    "subject_type": "line",
+    "is_copilot_code_review": false,
+    "copilot_code_review_sources": [
+
+    ]
+  }
+]

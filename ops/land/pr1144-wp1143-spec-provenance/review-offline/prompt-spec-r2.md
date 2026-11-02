@@ -1,0 +1,86 @@
+# Review offline ĐẶC TẢ packet — lượt 2
+
+Bạn là reviewer độc lập. Thư mục làm việc là một clone của kho `ducthangho/tra-luat` ở commit
+`53c65791e544e931fe6b8dce8760ffd6bcf97677`. Thứ định danh tệp là BĂM, không phải tên nhánh.
+Đối tượng review: `ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md`
+(sha256 `a9c8b6073ff4134498b3624e8e13a8b5a004a1a0adf4e11dda2f5412e660eaaa`).
+Bối cảnh: `ops/specs/CI-LAN-LUU-TRU-r1.md` (packet tiền nhiệm #1113, tiêu chí A12),
+`ops/ci_duong_nhanh.py`, `ops/ci_duong_nhanh_test.py`, `.github/workflows/ci.yml`,
+`.claude/dev/ci_dang_ky_test.py`, `docs/PROTOCOL_DA_PHIEN.md`, `.claude/skills/soan-spec/SKILL.md`
+(luật L1–L6). Nguồn số canary: `git show origin/claude/ghi-so-land-1113:ops/land/pr1128-wp1113-provenance/readback-jobs-41371625809-canary-a12.json`
+và `...:ops/land/pr1128-wp1113-land-evidence.yaml`. Các ref `origin/*` đã có cục bộ; KHÔNG có mạng.
+
+Sandbox chỉ đọc: được chạy lệnh đọc (`git show`, `grep`, `python -c` không ghi tệp), không sửa gì.
+Đừng chạy cả bộ `ops/ci_duong_nhanh_test.py` (dài, cần ghi tệp tạm). Hướng thử nào cần dựng nội dung
+nhạy cảm thì mô tả bằng lời.
+
+Soi theo LỚP lỗi, mỗi lớp ghi rõ đã kiểm gì (kể cả khi không thấy lỗi):
+
+1. **Số liệu (L1/L5).** Đo lại mọi con số kiểm được từ kho: 113 ca, 419 đột biến, 5 mẫu rc + 3 đột biến tự kiểm,
+   1159 s / 966 / 636 / 303 / 193 / 27 s từ JSON canary. Kiểm SỐ HẠNG, không chỉ quan hệ.
+2. **Write set (L2).** Mọi mục §2 có thực hiện được chỉ trong ba tệp §3 không? Đặc biệt: bảng ghim
+   `KHUNG_BUOC`, `RUN_BUOC_PACKET`, `TAP_CHO_PHEP`, `BUOC_HARNESS`, các ca `y*`, `BAM_GATE_*` trong
+   `.claude/dev/ci_dang_ky_test.py`, `ops/cong_cu_test.py`, `ops/lease_publish_test.py` — thêm khối `env:`
+   vào bước harness có làm lệch ghim/băm nào nằm NGOÀI write set không? Bộ đột biến hiện có có đột biến
+   được `ci.yml` không (M6/M7)?
+3. **Tiêu chí có thể đỏ (L3/L6).** Với từng A1–A11: phép đo nào làm nó đỏ, có cách nào xanh mà không đo gì?
+   Tiêu chí khớp chuỗi có vế dương + vế âm chưa? A1 có thật sự chặn bản vá tắt đột biến ở đường đầy đủ không?
+4. **An toàn của đường nhanh.** Có đường nào `che_do=duong_nhanh` mà diff đổi được mã harness/bộ phân loại/
+   `ci.yml`? Giá trị env có fail-close đủ chưa? Tiến trình con thừa kế biến (C3) — còn chỗ gọi con nào bị sót?
+   Push master và `workflow_dispatch`: output `che_do` có luôn được đặt không?
+5. **Khả thi của A6 (tiền-canary).** PR có base là một nhánh KHÔNG phải master: `chuan-bi`/`ops/ci_duong_nhanh.py`
+   có phân loại nó thành `duong_nhanh` không, hay luôn `day_du`? Nếu không khả thi, đề xuất cách đo thay thế.
+6. **Mâu thuẫn nội tại / thứ tự với #1132** (lease `ci-concurrency-master`, nhánh `origin/agent/wp1132-g1-claude`
+   sửa cùng hai tệp): đặc tả có chỗ nào sẽ gãy sau khi #1132 land không?
+
+Đầu ra (stdout): danh sách finding, mỗi finding `[Pn] tiêu đề — tệp:dòng — bằng chứng đo được — đề xuất`.
+Dòng cuối cùng đúng dạng: `VERDICT: approve|request_changes P0=a P1=b P2=c P3=d`.
+
+## Lượt 2 — thêm
+Lượt 1 (commit `caa22e5`) ra `request_changes P0=0 P1=1 P2=4 P3=0`; nguyên văn verdict lượt 1 dán dưới đây.
+Diff đặc tả giữa hai lượt: `git diff caa22e5 53c6579 -- ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md`.
+Việc: (1) với TỪNG finding lượt 1, kết luận ĐÃ ĐÓNG / CHƯA ĐÓNG kèm bằng chứng; (2) soi lỗi MỚI do chính bản
+sửa sinh ra — đặc biệt: cô lập bằng gỡ `os.environ` trong `main` có phá ca nào hiện có (`t91`, `t93`, `t97`,
+`--nguon-test`, `--mot-ca`, đột biến chạy `chay_con`) không; M5 "tương đương" có hợp lý không; công thức
+N/M theo base có thể đỏ oan không; ΔM ≥ 9 có khớp danh sách M không; trần 150 dòng thêm cho hai tệp mã có
+còn khả thi với C1–C4 + M1–M10 không (ước bằng cách xem kích thước ca/đột biến tương tự trong tệp).
+
+### Verdict lượt 1 (nguyên văn)
+Review neo tại `caa22e5903a5639c20c81320a0baf8c47b8f6f36`, tree `559a1a335c3b7e3d0351b4137e7c4d3ab9d06437`; băm đặc tả khớp `f3b7eb71012fe73c6882f37f51a30423e203cc06be61adc7f2194d75ab03641a`. Vai trò: reviewer offline, `openai_codex / codex_cli / machine`, sandbox chỉ đọc.
+
+1. **[P1] C3 đo sai cửa thực thi, để môi trường đường nhanh lọt vào tự kiểm `main`** — `ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md:48–52` — Đo bằng sentinel và spy: `chay_ca_trong_tien_trinh` gọi ca ngay trong tiến trình cha, **0 lời gọi subprocess**, ca vẫn thấy `CI_DUONG_NHANH_CHE_DO=duong_nhanh`. `chay_mot_dot_bien` cũng không gọi subprocess trực tiếp; cửa thật là `chay_con` tại dòng 3499. Ngoài ra còn lời gọi trực tiếp tại dòng 3043 (`t91`) và 3107 (`t93`). Quan trọng hơn, `t93` gọi `main([])` **cùng tiến trình** tại dòng 3091 và đòi dòng `DOT BIEN: M/M`; chỉ gỡ env của con sẽ không ngăn nó chạy nhánh `chi_ca`, khiến A3 đỏ. **Đề xuất:** sửa §2.2/C3 để cô lập môi trường cho cả ca chạy cùng tiến trình lẫn các cửa subprocess; giữ chế độ đã chọn của lượt ngoài. Spy phải chứng minh cửa thực sự được gọi, không chỉ kiểm mọi lời gọi trên danh sách rỗng. Thêm phản chứng riêng cho từng cửa và kiểm env cha được khôi phục, tránh vô tình làm lượt ngoài quay về chạy đủ.
+
+2. **[P2] Chỉ cập nhật `KHUNG_BUOC` vẫn làm `y04` đỏ** — `ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md:53` — `y04_tap_buoc_mang_if_che_do_khop_dung` kiểm riêng mọi `env` chứa `che_do` bằng bảng `Y04_ENV_BUOC_CHE_DO` tại `ops/ci_duong_nhanh_test.py:2511–2536`. Đo membership của bước harness trong bảng này trả **False**. Env mới vì vậy bị từ chối dù C4 và `KHUNG_BUOC` đã đúng. **Đề xuất:** bổ sung cập nhật đúng một mục vào bảng ngoại lệ này, vẫn trong write set; giữ phép so toàn bộ mapping. Khóa bằng đối chứng env chuẩn đạt, env hằng/thiếu/thừa khóa đỏ; không nới thành cho phép mọi env chứa `che_do`.
+
+3. **[P2] Nền nghiệm thu bỏ sót ca và đột biến mà #1132 sẽ đưa vào** — `ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md:73–77` — Đếm trực tiếp khi nạp định nghĩa, không chạy suite: HEAD và `9091cf52cf20ac197c1a356d6a33cac6bab0b318` có **113 ca/419 đột biến**; nhánh #1132 tại `024212c1f565858788edc0b3e48fdf8a356ac8b4` có **114/421**. Trong khi base bắt buộc chứa #1132, A1/A5 vẫn neo 113/419. Với bốn ca và bảy đột biến mới, nền hiện biết phải cho **118/428**, không phải 117/426. Ngưỡng 426 cũng không bảo vệ hai đột biến concurrency mới. **Đề xuất:** đo lại trên exact base sau #1132, đặt `N=N_base+ΔN`, `M=M_base+ΔM`, đồng thời đòi bảo toàn tập tên ca/đột biến của base. Chỉ sửa ngưỡng tổng vẫn có thể che việc xóa mục cũ rồi thêm mục khác bù số lượng.
+
+4. **[P2] Dispatch cùng merge SHA không thay được canary push đường nhanh** — `ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md:83` — Theo `chuan_hoa_cap`, dispatch lấy `merge-base(origin/master, SHA)`. Khi SHA đã nằm trên master, merge-base chính là SHA, nên diff rỗng. Phép kiểm độc lập của nhánh diff rỗng trả **`day_du`** tại `ops/ci_duong_nhanh.py:370–371`. Đổi tên nhánh đo không đổi quan hệ tổ tiên; phương án thay run (b) vì vậy không thể đạt yêu cầu `duong_nhanh`/`BO QUA`. Run (c) cũng cần được gọi trước khi head PR trở thành tổ tiên master. **Đề xuất:** quy định thứ tự đo dispatch trước merge PR canary; nếu push bị hủy, giữ `not_measured` và yêu cầu phép đo push thay thế được phê duyệt. Không đổi luật diff rỗng chỉ để làm canary xanh.
+
+5. **[P2] A6 có thể đạt dù chính lượt tiền-canary thất bại** — `ops/specs/CI-DUONG-NHANH-BO-DOT-BIEN-r1.md:78` — A6 chỉ đòi chế độ nhanh, dòng `BO QUA`, thời lượng và không chạy Windows. Theo §2.2, lượt có ca đỏ vẫn có thể in `BO QUA`, rồi `TONG: DO`, rc 1; lượt thất bại sớm còn dễ nằm dưới 11 phút. A10 đo đường đầy đủ của PR ứng viên không thay bằng chứng đường nhanh này. **Đề xuất:** yêu cầu run tiền-canary thành công, ba check bắt buộc `success`, `CA: N/N`, `TONG: DAT`, số đột biến bỏ qua khớp A1 và log đầy đủ. Phản chứng: giữ nguyên marker nhưng làm một ca đỏ phải khiến A6 đỏ; không chấp nhận tổng thời lượng thấp do job thiếu/bị hủy.
+
+Đã kiểm đủ sáu lớp:
+
+- **Số liệu L1/L5:** đo lại ngày 02-11-2026, khoảng 02:07 UTC. Khớp **113/419**, **5 mẫu rc + 3 đột biến tự kiểm**. JSON có **16 job, 1159 s**; `gate-ops` **966 s**, harness **636 s**, biên nhận **303 s**, phần còn lại **27 s**; các job khác **193 s**. Tổng ước tính S5 đúng **610 s**. S4 là số đo lịch sử, chưa tái đo.
+- **Write set L2:** phát hiện số 2 sửa được trong ba tệp. `RUN_BUOC_PACKET`, `TAP_CHO_PHEP`, `BUOC_HARNESS` không cần đổi vì tên/run giữ nguyên. Hai `BAM_GATE_*` khớp và băm các job khác; không thấy yêu cầu sửa ghim ngoài write set trong các bộ được chỉ định. Harness hiện có **84 đột biến `ci.yml`**, nên M6/M7 dùng được cơ chế sẵn có.
+- **Nghiệm thu L3/L6:** đối chiếu từng A ở bảng dưới.
+- **An toàn:** ba diff thêm mã harness/bộ phân loại/`ci.yml` đều trả `day_du` trong phép thử dùng Git giả. Không thấy đường vượt allowlist trong phạm vi kiểm. So chuỗi env chính xác là fail-close; C1 nên bổ sung giá trị lạ và không phải chuỗi. Output workflow có fallback `day_du`; bước phân loại chạy cả push và dispatch. Vấn đề cô lập env nằm ở finding 1.
+- **A6 trước merge:** **khả thi về bộ phân loại**. PR base khác master với một tệp hồ sơ trả `duong_nhanh`, không truy vấn `origin/master`; chưa đo Actions thật. Không cần đổi mô hình PR lồng vì lý do tên base.
+- **Thứ tự #1132:** đã đối chiếu diff local; thay đổi concurrency không trực tiếp phá env harness, nhưng làm trôi nền nghiệm thu như finding 3. Phương án dispatch thay push có lỗi riêng ở finding 4.
+
+| Tiêu chí | Phép làm đỏ và kết luận |
+|---|---|
+| A1 | Ca đỏ, thiếu dòng đầy đủ hoặc sai số đếm; chặn bản vá chỉ in `BO QUA` ở đường đầy đủ. Cần sửa nền đếm theo finding 3. |
+| A2 | Phải thỏa toàn bộ A1 với env `day_du`; chỉ so M riêng lẻ chưa đủ. |
+| A3 | Có vế dương `BO QUA`, vế âm `bi giet`, N/M và rc; finding 1 cản thực thi. |
+| A4 | Đòi ca mới đỏ trên base; `HONG` chỉ được chấp nhận đúng nguyên nhân thiếu hàm đã nêu. |
+| A5 | Đòi `GIET` đúng ca, loại tín dụng giả; cần bảo toàn cả tập sau #1132. |
+| A6 | Thiếu bằng chứng thành công: finding 5. |
+| A7 | Finding mới hoặc thiếu actionlint làm đỏ; cần neo baseline bằng OID. |
+| A8 | Tệp ngoài danh sách hoặc vượt 150 dòng làm đỏ. |
+| A9 | Delta mới hoặc bộ đăng ký đỏ làm đỏ; hai băm hiện khớp. |
+| A10 | Audit/CI thất bại hoặc thiếu output đầy đủ làm đỏ; chưa đo offline. |
+| A11 | Có yêu cầu check thành công và log dương; nhánh dự phòng không khả thi: finding 4. |
+
+Các probe đọc bằng `python -B` cho kiểm kê, phân loại và sáu ca cấu trúc được chọn hoàn tất **rc 0**. Một lượt chọn ca rộng hơn gặp `y15` cần thư mục tạm, thoát **rc 1 do sandbox**; không tính là lỗi sản phẩm hay pass. Toàn suite, mutation suite và CI **not_run**. HEAD/tree và trạng thái sạch giữ nguyên khi kết thúc.
+
+VERDICT: request_changes P0=0 P1=1 P2=4 P3=0

@@ -1,0 +1,56 @@
+# Packet #1143, PR #1155. Hồ sơ A11 được cập nhật sau ba run; trạng thái hiện tại là merged, chưa landed.
+schema_version: 1
+packet: CI-DUONG-NHANH-BO-DOT-BIEN
+packet_issue: 1143
+mission_issue: 1113
+revision: 1
+generation: 1
+spec_hash: 38e478eac8ea89f52db917c673fa9a17d583605acbd94ede62920e39a41a05ab
+head_da_review: 1039f0d71eec0c863a50a342a4753f9982768611
+tree_h: 9adb6ab24cefec57899e69bee94335b6918fce30
+review:
+  provider: google_antigravity
+  model: gemini-4-argon-high
+  execution_surface: antigravity
+  transport: machine/local
+  verdict: approve
+  p1: 0
+  p2: 0
+  p3: 0
+  stdout_sha256: c67acf3a13daa1f62e6ffe40c63f667caf0881b455ea970799d2dcf65121e59b
+  receipt: https://github.com/ducthangho/tra-luat/pull/1155#issuecomment-6574367543
+  scope: Diff và các đoạn ngữ cảnh; reviewer không tự chạy test.
+windows:
+  test: A8b_delta
+  os: Windows
+  base_sha: 279a39e34c26027ad792008962859aa79c16e35c
+  head_sha: 1039f0d71eec0c863a50a342a4753f9982768611
+  result: passed
+  base_full_suite: 15/36, exit 1
+  head_full_suite: 15/36, exit 1
+  note: t30 thiếu cùng năm khóa; t32 chỉ đổi dấu vân gate-ops; mọi ca khác giữ màu. Lỗi Git dựng kho giả có ở hai vế.
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1143#issuecomment-6571828431
+merge_commit: bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+tree_m: 38271ee1dee8a475674f9eddd43fb248b693b2d6
+ci_master:
+  run_id: 41425851232
+  conclusion: pending
+nghiem_thu:
+  A1_A10: passed
+  A11_archive_pr: pending
+  A11_dispatch_before_merge: pending
+  A11_push_master: pending
+lease_cuoi: ci-duong-nhanh-bo-dot-bien-r1-g1-codex-20261102
+landed: false
+moc_10_2_2:
+  run: pending
+  checkout: pending
+  workflow_definition: pending
+  gate_output: pending
+evidence:
+  code_pr: https://github.com/ducthangho/tra-luat/pull/1155
+  ci_pr: https://github.com/ducthangho/tra-luat/actions/runs/41413466192
+  m9: https://github.com/ducthangho/tra-luat/actions/runs/41420415501
+  pre_canary_a6: https://github.com/ducthangho/tra-luat/actions/runs/41414412379
+  kiem_merge: 'K0-K7 exit 0 trên head_da_review, 2026-11-02'
+  archive_canary: Chưa đo; PR hồ sơ này chỉ thay ops/land/**.

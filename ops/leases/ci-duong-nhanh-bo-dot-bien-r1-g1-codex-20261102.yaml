@@ -65,8 +65,10 @@ write_set:
 write_set_planned: []
 write_set_hash: 894fe6ec61d1302f207c8fcfd69f4cfe5930e5791debb1636c92ba1cfcad5d8c
 write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
-ref_ngoai_write_set: []
-ref_ngoai_write_set_ghi_chu: Khong co ref ngoai write set duoc cap khi tao lease.
+ref_ngoai_write_set:
+- refs/heads/ops/thu-canary-1143
+ref_ngoai_write_set_ghi_chu: 'Nhanh probe A6 theo spec §4: base la head executor, head chi them mot tep ops/land/**;
+  khong merge vao master; don sau phep do.'
 closure_status: '2026-11-02: ls-remote = for-each-ref 783/783; ai-dang-giu cho 3 tep code deu NGUOI_GIU 0; #1132
   lease rut han 06:50Z.'
 tran_kich_thuoc: 'Spec #1143: <= 300 dong them tren 3 tep code; ADR-0053 <= 6 tep / <= 450 dong tong ke ca spec.'

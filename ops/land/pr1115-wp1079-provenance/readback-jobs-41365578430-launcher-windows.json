@@ -1,0 +1,224 @@
+[
+ {
+  "id": 125024913403,
+  "name": "launcher (ubuntu-latest)",
+  "labels": [
+   "ubuntu-latest"
+  ],
+  "runner_id": 1000033787,
+  "runner_name": "GitHub Actions 1000033787",
+  "head_sha": "c7174bfe03b3acd22cfa055b5fce176129d29542",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T00:09:00Z",
+  "completed_at": "2026-11-02T00:21:00Z",
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "number": 1
+   },
+   {
+    "name": "Checkout LF",
+    "conclusion": "success",
+    "number": 2
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "number": 3
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "number": 4
+   },
+   {
+    "name": "Su that ve nen chay",
+    "conclusion": "success",
+    "number": 5
+   },
+   {
+    "name": "Install tool manifest dependencies",
+    "conclusion": "success",
+    "number": 6
+   },
+   {
+    "name": "Install and verify test tools",
+    "conclusion": "success",
+    "number": 7
+   },
+   {
+    "name": "Verify tool manifest and shellcheck canary",
+    "conclusion": "success",
+    "number": 8
+   },
+   {
+    "name": "doctor",
+    "conclusion": "success",
+    "number": 9
+   },
+   {
+    "name": "Bo phan chung (day du, giu nguyen danh sach bo qua)",
+    "conclusion": "success",
+    "number": 10
+   },
+   {
+    "name": "Tu dot bien",
+    "conclusion": "success",
+    "number": 11
+   },
+   {
+    "name": "Cay lam viec phai SACH sau khi chay test",
+    "conclusion": "success",
+    "number": 12
+   },
+   {
+    "name": "Probe: dut ong KHONG duoc nuot ma that",
+    "conclusion": "skipped",
+    "number": 13
+   },
+   {
+    "name": "Probe: console cp1258 + duong dan co dau tieng Viet",
+    "conclusion": "skipped",
+    "number": 14
+   },
+   {
+    "name": "Probe: t62 chay rieng (ca CHUA TUNG chay o bat ky vong nao)",
+    "conclusion": "skipped",
+    "number": 15
+   },
+   {
+    "name": "Probe: taskkill /T tren tien trinh do CHINH minh sinh",
+    "conclusion": "skipped",
+    "number": 16
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "number": 31
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "number": 32
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "number": 33
+   }
+  ]
+ },
+ {
+  "id": 125024913633,
+  "name": "launcher (windows-latest)",
+  "labels": [
+   "windows-latest"
+  ],
+  "runner_id": 1000033788,
+  "runner_name": "GitHub Actions 1000033788",
+  "head_sha": "c7174bfe03b3acd22cfa055b5fce176129d29542",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-11-02T00:09:00Z",
+  "completed_at": "2026-11-02T00:21:46Z",
+  "steps": [
+   {
+    "name": "Set up job",
+    "conclusion": "success",
+    "number": 1
+   },
+   {
+    "name": "Checkout LF",
+    "conclusion": "success",
+    "number": 2
+   },
+   {
+    "name": "Run actions/checkout@v4",
+    "conclusion": "success",
+    "number": 3
+   },
+   {
+    "name": "Run actions/setup-python@v5",
+    "conclusion": "success",
+    "number": 4
+   },
+   {
+    "name": "Su that ve nen chay",
+    "conclusion": "success",
+    "number": 5
+   },
+   {
+    "name": "Install tool manifest dependencies",
+    "conclusion": "success",
+    "number": 6
+   },
+   {
+    "name": "Install and verify test tools",
+    "conclusion": "success",
+    "number": 7
+   },
+   {
+    "name": "Verify tool manifest and shellcheck canary",
+    "conclusion": "success",
+    "number": 8
+   },
+   {
+    "name": "doctor",
+    "conclusion": "success",
+    "number": 9
+   },
+   {
+    "name": "Bo phan chung (day du, giu nguyen danh sach bo qua)",
+    "conclusion": "success",
+    "number": 10
+   },
+   {
+    "name": "Tu dot bien",
+    "conclusion": "success",
+    "number": 11
+   },
+   {
+    "name": "Cay lam viec phai SACH sau khi chay test",
+    "conclusion": "success",
+    "number": 12
+   },
+   {
+    "name": "Probe: dut ong KHONG duoc nuot ma that",
+    "conclusion": "success",
+    "number": 13
+   },
+   {
+    "name": "Probe: console cp1258 + duong dan co dau tieng Viet",
+    "conclusion": "success",
+    "number": 14
+   },
+   {
+    "name": "Probe: t62 chay rieng (ca CHUA TUNG chay o bat ky vong nao)",
+    "conclusion": "success",
+    "number": 15
+   },
+   {
+    "name": "Probe: taskkill /T tren tien trinh do CHINH minh sinh",
+    "conclusion": "success",
+    "number": 16
+   },
+   {
+    "name": "Post Run actions/setup-python@v5",
+    "conclusion": "success",
+    "number": 31
+   },
+   {
+    "name": "Post Run actions/checkout@v4",
+    "conclusion": "success",
+    "number": 32
+   },
+   {
+    "name": "Complete job",
+    "conclusion": "success",
+    "number": 33
+   }
+  ]
+ }
+]

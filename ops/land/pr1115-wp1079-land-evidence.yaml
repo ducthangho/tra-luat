@@ -1,13 +1,15 @@
 # HO SO LAND — packet #1079 LAUNCHER-TEST-ORACLE-VA-FIXTURE r1 (lease g10), code qua PR #1115. Khuon: ops/land/pr1100-wp1089-r2-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (c82047da), landed FALSE — lane launcher-windows DO sau merge (#1122). Truoc do landed = false vi (4) KHONG co verdict approve tren head cuoi (luot 8:
+# TRANG THAI: merged (c82047da), landed TRUE tu 02-11-2026 (khoi landed_20261102) — lane launcher-windows DO tren c82047da (#1122),
+# xanh tren merge ban va c7174bfe (PR #1130, run 41365578430). Lich su: 01-11 ha ve false vi lane Windows do. Truoc do landed = false vi (4) KHONG co verdict approve tren head cuoi (luot 8:
 # changes_requested 0 P0-P3, ly do: reviewer khong do duoc A1 va CI trong sandbox) va (7) §8.1 CHUA_DAT (sandbox mode KHONG_DO_DUOC,
 # DanhTinhDoi, #1105).
 # Bon moc §10.2.2 cho gate hau merge run 41322980582 attempt 1: Run + Checkout + Workflow definition bang ops/ci_provenance.py thu
 # (--wd-run 41327945916); Gate output trich log REST tung job.
 # NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nghia nhu khuon.
-# Readback tho: ops/land/pr1115-wp1079-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-11-01.
+# Readback tho: ops/land/pr1115-wp1079-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT —
+# 2026-11-01 cho moi nguon co tu truoc; 2026-11-02 cho cac nguon cua khoi landed_20261102 (run 41365578430, wd-run 41376105695, PR #1130, comment 6567244450).
 
 schema_version: 1
 # ---- TRUONG CHUAN PROTOCOL §7
@@ -51,7 +53,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1079-r1-g10-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: claude/ghi-so-land-1077-1078-1079}
-  - {item: 'packet va sau merge', ket_qua: 'Issue #1122 — lane launcher-windows DO 430/434 tren c82047d; landed ha ve false.'}
+  - {item: 'packet va sau merge', ket_qua: 'Issue #1122 — lane launcher-windows DO 430/434 tren c82047d; landed ha ve false (01-11). Va bang PR #1130 (merge c7174bfe), lane Windows xanh 461/461 => nang landed true (02-11, khoi landed_20261102).'}
   - {item: 'no tach', ket_qua: 'Issue #1117 (F04 kenh ket qua gia truoc main); phien xu ly no session_015Gtxra7iT6mwM1kqpdggt6 mo theo chi thi chu kho.'}
 # ---- het truong chuan
 packet_id: LAUNCHER-TEST-ORACLE-VA-FIXTURE
@@ -134,3 +136,37 @@ landed_20261101:
   landed_dieu_kien: >-
     (1) bon moc §10.2.2 tren merge c82047da: xem post_merge_checks. (2) lease g10 rut han sau merge. (4) review neo DUNG authorized_head af057e9: CHUA_DAT theo nghia den (khong approve) — chu kho CHAP NHAN luot 8 0 P0-P3. (3) bookkeeping: ho so nay. (5) uy quyen land: DAT co caveat #566.
     (6) muc tieu packet: DAT theo gate + review. (7) §8.1: CHUA_DAT ve sandbox — chu kho CHAP NHAN bang quyet_dinh_chu_kho tren.
+
+landed_20261102:
+  bo_canh: >-
+    Khoi nay NANG landed sau khi packet va #1122 merge; khong sua khoi landed_20261101 (giu lich su ha cap) va khong viet lai
+    post_merge_checks muc 2 (run 41322980509 tren c82047da van DO). landed dua tren ban va KE TIEP c7174bfe, khong tren c82047da.
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/issues/1079#issuecomment-6567244450
+    noi_dung: >-
+      Chu kho chon "Nang landed true" (AskUserQuestion, phien session_01J7EgTVGTrNi4xqh7MeBFQv, 02-11-2026), thay phan ha cap o
+      comment 6560564188; caveat: c82047da van do tren Windows, §8.1 van CHUA_DAT (#1105), danh tinh nguoi ky #566.
+    do_duoc: 'measured — readback-comments-1079.json: comment 6567244450 (user ducthangho, OWNER, 2026-11-02T01:57:30Z), co body day du + body_sha256. CAVEAT #566: agent dang bang token chu kho; ban chep, khong phai chu ky.'
+  ban_va:
+    packet: 'Issue #1122'
+    pr: 1130
+    merge_commit: c7174bfe03b3acd22cfa055b5fce176129d29542
+    nguon: [readback-pr-1130.json, nang-cap-git.txt]
+    do_duoc: 'measured — readback-pr-1130.json: PR #1130 merged 2026-11-02T00:08:55Z, merge_commit_sha c7174bfe, base master. nang-cap-git.txt: merge-base --is-ancestor c82047da c7174bfe rc=0; diff c7174bfe^1..c7174bfe chi .claude/dev/launcher_test.py +450/-93.'
+  windows_sau_va:
+    name: 'launcher-windows.yml push master — DUNG merge SHA ban va c7174bfe'
+    run_id: 41365578430
+    sha: c7174bfe03b3acd22cfa055b5fce176129d29542
+    conclusion: success
+    nguon: [readback-run-41365578430-launcher-windows.json, readback-jobs-41365578430-launcher-windows.json, log-trich-125024913633-windows.txt, windows-41365578430/provenance.yaml, windows-41365578430/run.json, windows-41365578430/jobs.json, gate-output-41365578430-launcher-windows.txt]
+    do_duoc: 'measured — readback-run/jobs: event push, head c7174bfe, run success; job launcher (ubuntu-latest) success, job launcher (windows-latest) 125024913633 success, labels windows-latest, runner_id 1000033788. log-trich-125024913633-windows.txt: 290/290 ca DA CHAY QUA (bo qua 74, hong 0), DOT BIEN: 461/461 dat (118 khong do duoc tren nen nay), ##[error] = 0; 4 dot bien tung SAI tren c82047da nay OK giet 1/1 dung ca dich (r484_g4_windows_sid_alias_identity x2, r484_g2_storage_kernel_guardrails, t73_doctor_phai_do_bash_va_npm).'
+    moc_run: 'measured — windows-41365578430/provenance.yaml moc.run: event push, head_sha c7174bfe, run_attempt 1 (yeu cau 1), trang_thai passed; windows-41365578430/run.json.'
+    moc_checkout: 'measured — windows-41365578430/provenance.yaml moc.checkout: job 125024913633 launcher (windows-latest) va job 125024913403 launcher (ubuntu-latest) checkout passed c7174bfe03b3acd22cfa055b5fce176129d29542; windows-41365578430/jobs.json.'
+    moc_workflow_definition: 'measured — windows-41365578430/provenance.yaml workflow_definition: passed, path .github/workflows/launcher-windows.yml, oid c7174bfe, blob 308f0e0d7939fc873a587c12aa738789250a6c07, sha256 b8d0345f7e3e364423ccc03cf4b7e2c1c26ce6904356c711d9c22a1577716e8b, wd-run 41376105695, artifact 13110889241 (artifact_sha256 612f88cf…); ci_provenance.py thu tu tinh lai blob/sha256.'
+    moc_gate_output: 'measured — gate-output-41365578430-launcher-windows.txt (log REST tung job, sha256 + so byte): job windows 125024913633 success, ##[error] = 0, 290/290 ca DA CHAY QUA (bo qua 74), DOT BIEN: 461/461 (118 khong do duoc tren nen); buoc 10 python .claude/dev/launcher_test.py success 00:09:53Z->00:15:34Z, buoc 11 python .claude/dev/launcher_test.py --dot-bien success 00:15:34Z->00:21:27Z (rc suy tu ket luan buoc, workflow khong co continue-on-error). Collector ghi gate_output.jobs[].trang_thai = not_measured voi ly_do khong_co_trong_MOI (launcher_test.py chua co trong registry MOI cua ops/ci_provenance.py nen collector chua xac nhan marker gate nay, du no co doc log); moc nay do bang tep trich gate-output, khong bang collector.'
+  landed: true
+  landed_dieu_kien: >-
+    Nhu landed_20261101.landed_dieu_kien, cong: lane launcher-windows XANH tren merge ban va c7174bfe, du bon moc §10.2.2 cho
+    run 41365578430 attempt 1 (windows_sau_va). (7) §8.1
+    van CHUA_DAT ve sandbox — chu kho chap nhan (quyet_dinh_chu_kho o khoi nay va o landed_20261101).

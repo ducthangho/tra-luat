@@ -1,0 +1,15 @@
+{
+ "id": 41365578430,
+ "name": "launcher (Windows that)",
+ "path": ".github/workflows/launcher-windows.yml",
+ "event": "push",
+ "head_branch": "master",
+ "head_sha": "c7174bfe03b3acd22cfa055b5fce176129d29542",
+ "run_attempt": 1,
+ "status": "completed",
+ "conclusion": "success",
+ "created_at": "2026-11-02T00:08:58Z",
+ "run_started_at": "2026-11-02T00:08:58Z",
+ "updated_at": "2026-11-02T00:21:47Z",
+ "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/41365578430"
+}

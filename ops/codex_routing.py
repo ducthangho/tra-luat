@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Read-only Codex routing foundation; no gate, dispatch or approval is performed.
 
-CLI trust starts at live origin/master: fetch, read back, pin the OID, execute
+CLI trust starts at the fixed canonical HTTPS URL in a fresh bare Git store:
+fetch, read back, pin the OID, execute
 that snapshot's verifier in an isolated Python subprocess, then independently
 recheck the live OID before reading fixed canonical records. Candidate records
-and candidate verifier changes cannot enable production admission.
+and candidate verifier changes cannot enable production admission. Platform PATH
+and non-Git proxy/CA environment are runtime trust roots.
 
 The pure API accepts an explicitly trusted Snapshot. Constructing that object
 is the caller's trust responsibility; a dict or a successful schema check is
@@ -29,6 +31,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 
 SCHEMA = 1
+_GIT_BINARY = None  # Pinned by CLI before creating its isolated transport store.
 VERIFIER_PATH = "ops/codex_routing.py"
 REGISTRY_PATH = "ops/codex-routing/registry.json"
 REPOSITORY = "ducthangho/tra-luat"
@@ -351,10 +354,36 @@ def verify(snapshot, request, *, now, output=b"", report=b""):
         raise Blocked(f"malformed trust-boundary value: {type(exc).__name__}") from exc
 
 
+def _git_executable(root):
+    """Resolve an absolute native executable without Windows cwd lookup."""
+    cwd, source = Path.cwd().resolve(), Path(root).resolve()
+    excluded = [source]
+    if cwd != Path(cwd.anchor):
+        excluded.append(cwd)
+    module = Path(__file__).resolve()
+    if module.parent.name == "ops":
+        excluded.append(module.parent.parent)
+    name = "git.exe" if os.name == "nt" else "git"
+    for entry in os.get_exec_path():
+        directory = Path(entry)
+        if not directory.is_absolute():
+            continue
+        candidate = (directory / name).resolve()
+        if any(candidate.is_relative_to(path) for path in excluded):
+            continue
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return str(candidate)
+    raise Blocked("trusted absolute Git executable unavailable outside checkout/cwd")
+
+
 def _git(root, *args):
     try:
-        env = {**os.environ, "GIT_NO_REPLACE_OBJECTS": "1"}
-        p = subprocess.run(["git", "-C", str(root), *args], env=env, capture_output=True, timeout=60)
+        # Git configuration environments are caller claims. Retain platform
+        # HTTP(S)_PROXY and non-Git CA trust variables, never Git TLS/config overrides.
+        env = {k: v for k, v in os.environ.items() if not k.upper().startswith("GIT_")}
+        env.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_SYSTEM=os.devnull,
+                   GIT_CONFIG_NOSYSTEM="1", GIT_NO_REPLACE_OBJECTS="1", GIT_TERMINAL_PROMPT="0", GIT_NO_LAZY_FETCH="1")
+        p = subprocess.run([_GIT_BINARY or _git_executable(root), "-C", str(root), *args], env=env, capture_output=True, timeout=60)
     except (OSError, subprocess.SubprocessError) as exc:
         raise Blocked(f"Git unavailable: {type(exc).__name__}") from exc
     require(p.returncode == 0, f"Git {args[0]} failed (rc={p.returncode})")
@@ -398,15 +427,18 @@ def _raw_ancestor(root, base, head):
 
 
 def _live_oid(root, fixture):
-    origin = _git(root, "remote", "get-url", "origin").decode("utf-8").strip()
+    """Transport only in a fresh trusted store, never the source checkout."""
+    origin = f"https://github.com/{REPOSITORY}.git"
     if fixture:
+        origin = _git(root, "config", "--local", "--get", "remote.origin.url").decode("utf-8").strip()
         require(origin.startswith("/") or bool(re.match(r"[A-Za-z]:[/\\]", origin)), "fixture requires local absolute Git remote")
-    else:
-        require(origin in (f"https://github.com/{REPOSITORY}.git", f"https://github.com/{REPOSITORY}"), "production origin must be canonical HTTPS repository")
-    _git(root, "fetch", "--quiet", "--no-tags", "origin", "+refs/heads/master:refs/remotes/origin/master")
+    transport = ("-c", "http.sslVerify=true", "-c", "http.followRedirects=false",
+                 "-c", "credential.helper=", "-c", "protocol.allow=never",
+                 "-c", "protocol.https.allow=always", "-c", f"protocol.file.allow={'always' if fixture else 'never'}")
+    _git(root, *transport, "fetch", "--quiet", "--no-tags", origin, "+refs/heads/master:refs/remotes/origin/master")
     oid = _git(root, "rev-parse", "refs/remotes/origin/master^{commit}").decode("ascii").strip()
     digest(oid, "live OID", True)
-    require(_git(root, "ls-remote", "--exit-code", "origin", "refs/heads/master").split() == [oid.encode(), b"refs/heads/master"], "live master differs from fetched canonical OID")
+    require(_git(root, *transport, "ls-remote", "--exit-code", origin, "refs/heads/master").split() == [oid.encode(), b"refs/heads/master"], "live master differs from fetched canonical OID")
     return oid
 
 
@@ -424,7 +456,7 @@ def _blob(root, oid, path):
     return _git(root, "show", f"{oid}:{path}")
 
 
-def verify_live(root, expected_oid, request, now, fixture, output, report):
+def verify_live(root, expected_oid, request, now, fixture, output, report, source_root):
     """Run only from a trusted canonical copy; caller-supplied API data is not trust."""
     require(type(fixture) is bool, "fixture flag must be bool")
     oid = _live_oid(root, fixture)
@@ -433,10 +465,10 @@ def verify_live(root, expected_oid, request, now, fixture, output, report):
     snap = Snapshot(oid, sha256(verifier), _blob(root, oid, REGISTRY_PATH), fixture)
     result = verify(snap, request, now=now, output=output, report=report)
     b = request["binding"]
-    require(_raw_commit(root, b["head_sha"])[0] == b["tree_sha"], "source H/tree mismatch")
-    require(_raw_ancestor(root, b["base_sha"], b["head_sha"]), "source base is not a raw-object ancestor of head")
+    require(_raw_commit(source_root, b["head_sha"])[0] == b["tree_sha"], "source H/tree mismatch")
+    require(_raw_ancestor(source_root, b["base_sha"], b["head_sha"]), "source base is not a raw-object ancestor of head")
     p = one(parse_json(snap.registry_raw)["policies"], lambda x: x["grant_id"] == b["grant_id"], "policy")
-    require(sha256(_blob(root, b["head_sha"], p["spec_path"])) == b["spec_hash"], "source spec hash mismatch")
+    require(sha256(_blob(source_root, b["head_sha"], p["spec_path"])) == b["spec_hash"], "source spec hash mismatch")
     result["positive_evidence"].append("Git source base/head/tree/spec bytes")
     return result
 
@@ -449,8 +481,9 @@ def _local_file(path):
 
 
 def main(argv=None):
+    global _GIT_BINARY
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", required=True, help="Git checkout with canonical origin")
+    parser.add_argument("--root", required=True, help="source Git checkout; canonical transport is isolated")
     parser.add_argument("--request", required=True, help="JSON claims; never a policy path")
     parser.add_argument("--raw-output")
     parser.add_argument("--report")
@@ -458,24 +491,31 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         root = Path(args.root).resolve(strict=True)
+        _GIT_BINARY = _git_executable(root)
         request = parse_json(_local_file(args.request))
         output = _local_file(args.raw_output) if args.raw_output else b""
         report = _local_file(args.report) if args.report else b""
-        oid = _live_oid(root, args.fixture)
-        verifier = _blob(root, oid, VERIFIER_PATH)
         # No candidate imports or PYTHONPATH: execute the live pinned implementation.
         # Canonical verifier independently fetches/readbacks OID and fixed records.
         with tempfile.TemporaryDirectory(prefix="codex-routing-canon-") as td:
+            store = Path(td) / "canonical.git"
+            _git(td, "init", "--quiet", "--bare", "--template=", str(store))
+            if args.fixture:
+                fixture_origin = _git(root, "config", "--local", "--get", "remote.origin.url").decode("utf-8").strip()
+                _git(store, "remote", "add", "origin", fixture_origin)
+            oid = _live_oid(store, args.fixture)
+            verifier = _blob(store, oid, VERIFIER_PATH)
             module = Path(td) / "codex_routing.py"
             module.write_bytes(verifier)
-            payload = {"root": str(root), "oid": oid, "request": request, "now": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "fixture": args.fixture,
+            payload = {"root": str(store), "source_root": str(root), "oid": oid, "request": request, "now": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "fixture": args.fixture,
                        "output": output.hex(), "report": report.hex()}
             script = ("import importlib.util,json,sys; s=importlib.util.spec_from_file_location('canonical_routing',sys.argv[1]); "
                       "m=importlib.util.module_from_spec(s); sys.modules[s.name]=m; s.loader.exec_module(m); "
                       "p=json.load(sys.stdin); "
-                      "r=m.verify_live(p['root'],p['oid'],p['request'],p['now'],p['fixture'],bytes.fromhex(p['output']),bytes.fromhex(p['report'])); "
+                      "r=m.verify_live(p['root'],p['oid'],p['request'],p['now'],p['fixture'],bytes.fromhex(p['output']),bytes.fromhex(p['report']),p['source_root']); "
                       "print(json.dumps(r,sort_keys=True))")
-            run = subprocess.run([sys.executable, "-I", "-B", "-c", script, str(module)], input=canonical_bytes(payload), capture_output=True, timeout=180)
+            run = subprocess.run([sys.executable, "-I", "-B", "-c", script, str(module)], input=canonical_bytes(payload), capture_output=True, timeout=180,
+                                 env={**os.environ, "PATH": str(Path(_GIT_BINARY).parent)})
             require(run.returncode == 0, f"canonical verifier blocked/unavailable (rc={run.returncode}): {run.stderr.decode('utf-8', 'replace')[-1600:]}")
             result = parse_json(run.stdout)
             require(type(result) is dict and result.get("status") == "validated" and result.get("canonical_oid") == oid

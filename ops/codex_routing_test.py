@@ -366,7 +366,7 @@ class GitCliTests(unittest.TestCase):
         self.git("reset", "--hard", self.clean_oid)
         self.git("push", "-q", "--force", "origin", "master")
 
-    def run_cli(self, request=None, state_name="one", extra=None, fixture_mode=True):
+    def run_cli(self, request=None, state_name="one", extra=None, fixture_mode=True, cwd=None):
         # Different input directories cannot change the canonical allowance.
         folder = self.files / state_name
         folder.mkdir(exist_ok=True)
@@ -377,7 +377,7 @@ class GitCliTests(unittest.TestCase):
         if fixture_mode:
             cmd.append("--fixture")
         cmd += extra or []
-        p = subprocess.run(cmd, env=self.env, capture_output=True, text=True, timeout=60)
+        p = subprocess.run(cmd, cwd=cwd, env=self.env, capture_output=True, text=True, timeout=60)
         self.assertTrue(p.stdout.strip(), p.stderr)
         out = json.loads(p.stdout)
         self.assertIn("status", out)
@@ -443,10 +443,75 @@ class GitCliTests(unittest.TestCase):
         self.assertEqual(rc, 12, out)
         self.assertIn("budget exhausted", out["reason"])
 
+    def test_cli_current_directory_git_executable_cannot_shadow_platform_git(self):
+        fake = self.root / ("git.exe" if os.name == "nt" else "git")
+        fake.write_bytes(b"TEST ONLY invalid executable, must never run\n")
+        fake.chmod(0o755)
+        saved_path = self.env.get("PATH", "")
+        self.env["PATH"] = str(self.root) + os.pathsep + saved_path
+        try:
+            rc, out = self.run_cli(cwd=self.root)
+            self.assertEqual(rc, 0, out)
+            self.assertEqual(out["status"], "validated")
+        finally:
+            self.env["PATH"] = saved_path
+            fake.unlink()
+
+    def production_offline(self, request=None):
+        # Real HTTPS cannot leave this test: only a rewrite to the synthetic file
+        # remote could succeed. A refused localhost proxy does not disable TLS.
+        saved = self.env.copy()
+        self.env.update(HTTP_PROXY="http://127.0.0.1:1", HTTPS_PROXY="http://127.0.0.1:1",
+                        ALL_PROXY="http://127.0.0.1:1", NO_PROXY="", no_proxy="",
+                        http_proxy="http://127.0.0.1:1", https_proxy="http://127.0.0.1:1")
+        try:
+            return self.run_cli(request, fixture_mode=False)
+        finally:
+            self.env.clear()
+            self.env.update(saved)
+
     def test_cli_rejects_local_origin_in_production(self):
-        rc, out = self.run_cli(fixture_mode=False)
+        rc, out = self.production_offline()
         self.assertEqual(rc, 12, out)
         self.assertFalse(out["test_only"])
+
+    def test_production_transport_excludes_checkout_global_and_injected_git_config(self):
+        reg, q = copy.deepcopy(self.registry), copy.deepcopy(self.request)
+        reg["test_only"] = False
+        for role in ("executor", "reviewer"):
+            q["technical"][role].update(requested_model="gpt-6.1-sol", observed_model="gpt-6.1-sol")
+            reg["policies"][0][f"{role}_config"]["model"] = "gpt-6.1-sol"
+        reseal(reg, q)
+        self.publish_registry(reg)
+        # The synthetic assertions have valid production schema. Only provenance
+        # must prevent their acceptance; they are not real production receipts.
+        snap = r.Snapshot("f" * 40, "a" * 64, r.canonical_bytes(reg), False)
+        self.assertEqual(r.verify(snap, q, now=NOW, output=OUTPUT, report=REPORT)["status"], "validated")
+        canonical = f"https://github.com/{r.REPOSITORY}.git"
+        key = f"url.{self.remote.as_uri()}.insteadOf"
+        global_config = self.files / "untrusted-git-config"
+        self.git("config", "--file", str(global_config), key, canonical)
+        self.git("config", "--file", str(global_config), "http.sslVerify", "false")
+        saved_env = self.env.copy()
+        try:
+            for mode in ("checkout-include", "global", "injected"):
+                with self.subTest(configuration=mode):
+                    if mode == "checkout-include":
+                        self.git("config", "include.path", str(global_config))
+                    elif mode == "global":
+                        self.git("config", "--unset", "include.path")
+                        self.env["GIT_CONFIG_GLOBAL"] = str(global_config)
+                    else:
+                        self.env["GIT_CONFIG_GLOBAL"] = os.devnull
+                        self.env.update(GIT_CONFIG_COUNT="2", GIT_CONFIG_KEY_0=key, GIT_CONFIG_VALUE_0=canonical,
+                                        GIT_CONFIG_KEY_1="http.sslVerify", GIT_CONFIG_VALUE_1="false")
+                    rc, out = self.production_offline(q)
+                    self.assertEqual(rc, 12, out)
+                    self.assertEqual(out["status"], "blocked")
+                    self.assertFalse(out["test_only"])
+        finally:
+            self.env.clear()
+            self.env.update(saved_env)
 
     def test_cli_duplicate_json_and_unknown_input(self):
         self.registry_path.write_bytes(b'{"schema_version":1,"schema_version":1}')

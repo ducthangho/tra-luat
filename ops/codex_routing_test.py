@@ -239,6 +239,33 @@ class SemanticTests(unittest.TestCase):
         self.registry["schema_version"] = True
         self.blocked()
 
+    def test_admission_checks_configured_model_and_higher_effort(self):
+        for key, value in (("effort", "medium"), ("effort", "low"), ("model", "different-model"), ("surface", "codex_service")):
+            reg = copy.deepcopy(self.registry)
+            reg["policies"][0]["reviewer_config"][key] = value
+            q = {"operation": "admission", "binding": self.request["binding"]}
+            self.blocked(registry=reg, request=q)
+        for order in (["medium", "low", "high"], ["high", "medium"], ["medium", "high", "unknown"]):
+            reg = copy.deepcopy(self.registry)
+            reg["policies"][0]["effort_order"] = order
+            self.blocked(registry=reg)
+
+    def test_cross_ledger_dispatch_and_cross_role_run_replay(self):
+        for field in ("dispatch_id", "executor_run_id", "reviewer_run_id"):
+            reg = copy.deepcopy(self.registry)
+            second = copy.deepcopy(reg["ledgers"][0])
+            second["mission"] = 999
+            row = second["reservations"][0]
+            row["binding"].update(mission=999, dispatch_id="other-dispatch")
+            row.update(executor_run_id="other-executor", reviewer_run_id="other-reviewer")
+            if field == "dispatch_id":
+                row["binding"][field] = self.request["binding"][field]
+            else:
+                # Reuse the opposite role's run to test global identity namespace.
+                row[field] = self.request["technical"]["reviewer" if field == "executor_run_id" else "executor"]["run_id"]
+            reg["ledgers"].append(second)
+            self.blocked(registry=reg)
+
     def test_nested_malformed_values_block_cleanly(self):
         for field in ("actor", "effort_order", "executor_config", "reviewer_config", "spec_path"):
             for malformed in (None, True, [], {"unexpected": 1}):
@@ -453,6 +480,53 @@ class GitCliTests(unittest.TestCase):
         self.assertEqual(rc, 12, out)
         self.assertIn("source spec hash mismatch", out["reason"])
 
+    def test_cli_admission_config_and_cross_ledger_regressions(self):
+        reg = copy.deepcopy(self.registry)
+        reg["policies"][0]["reviewer_config"]["effort"] = "medium"
+        self.publish_registry(reg)
+        q = {"operation": "admission", "binding": self.request["binding"]}
+        self.assertEqual(self.run_cli(q)[0], 12)
+        reg = copy.deepcopy(self.registry)
+        second = copy.deepcopy(reg["ledgers"][0])
+        second["mission"] = 999
+        second["reservations"][0]["binding"]["mission"] = 999
+        reg["ledgers"].append(second)
+        self.publish_registry(reg)
+        self.assertEqual(self.run_cli()[0], 12)
+
+    def test_cli_grafts_cannot_create_ancestry(self):
+        reg, q = copy.deepcopy(self.registry), copy.deepcopy(self.request)
+        unrelated = self.git("commit-tree", q["binding"]["tree_sha"], "-m", "TEST ONLY unrelated root").strip()
+        q["binding"]["head_sha"] = unrelated
+        reseal(reg, q)
+        self.publish_registry(reg)
+        baseline = subprocess.run(["git", "merge-base", "--is-ancestor", q["binding"]["base_sha"], unrelated], cwd=self.root, env=self.env, capture_output=True)
+        self.assertEqual(baseline.returncode, 1)
+        common = Path(self.git("rev-parse", "--path-format=absolute", "--git-common-dir").strip())
+        graft = common / "info/grafts"
+        graft.parent.mkdir(exist_ok=True)
+        graft.write_text(f"{unrelated} {q['binding']['base_sha']}\n", encoding="ascii")
+        try:
+            bypassed = subprocess.run(["git", "merge-base", "--is-ancestor", q["binding"]["base_sha"], unrelated], cwd=self.root, env=self.env, capture_output=True)
+            self.assertEqual(bypassed.returncode, 0)
+            rc, out = self.run_cli(q)
+            self.assertEqual(rc, 12, out)
+            self.assertIn("not a raw-object ancestor", out["reason"])
+            linked = self.home / "linked-graft-checkout"
+            self.git("worktree", "add", "--detach", str(linked), "HEAD")
+            try:
+                rc, out = self.run_cli(q, extra=["--root", str(linked)])
+                self.assertEqual(rc, 12, out)
+                self.assertIn("not a raw-object ancestor", out["reason"])
+                self.env["GIT_GRAFT_FILE"] = str(graft)
+                rc, out = self.run_cli(q)
+                self.assertEqual(rc, 12, out)
+            finally:
+                self.env.pop("GIT_GRAFT_FILE", None)
+                self.git("worktree", "remove", "--force", str(linked))
+        finally:
+            graft.unlink()
+
     def test_cli_rejects_canonical_traversal_spec_path(self):
         reg = copy.deepcopy(self.registry)
         reg["policies"][0]["spec_path"] = "ops/specs/../../outside.md"
@@ -489,7 +563,7 @@ class MutationTests(unittest.TestCase):
         replacements = [
             ('all(p[key] == b[key] for key in ("mission", "revision", "plan_hash", "packet", "spec_hash", "generation", "base_sha"))', 'True', "test_scope_guard"),
             ('all(ledger["usage"][k] + reserved[k] <= ledger["allowance"][k] for k in UNITS)', 'True', "test_budget_guard"),
-            ('order.index(reviewer["observed_effort"]) > order.index(executor["observed_effort"])', 'True', "test_effort_guard"),
+            ('EFFORT[reviewer["observed_effort"]] > EFFORT[executor["observed_effort"]]', 'True', "test_effort_guard"),
             ('(a["provider"], a["surface"], a["transport"]) == ("human", "manual_audit", "human")', 'True', "test_human_guard"),
         ]
         source = MODULE.read_text(encoding="utf-8")

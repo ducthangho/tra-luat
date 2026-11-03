@@ -33,7 +33,9 @@ VERIFIER_PATH = "ops/codex_routing.py"
 REGISTRY_PATH = "ops/codex-routing/registry.json"
 REPOSITORY = "ducthangho/tra-luat"
 AUTHORITY_ACTORS = frozenset({"ducthangho"})
-EFFORT = {"low": 0, "medium": 1, "high": 2, "xhigh": 3, "max": 4, "ultra": 5}
+# Scoped foundation supports this model and its low/medium/high effort contract.
+EFFORT = {"low": 0, "medium": 1, "high": 2}
+SUPPORTED_MODELS = frozenset({"gpt-6.1-sol"})
 UNSUPPORTED = frozenset({"adr0054", "k3", "k4", "accept", "record-review"})
 LIMITATIONS = [
     "Foundation only: packet-loop, ADR-0054, K3/K4 and acceptance are not integrated.",
@@ -195,12 +197,19 @@ def _admission(registry, b, now):
             require(config["surface"] in ("codex_cli", "codex_service", "codex_desktop"), "configuration surface")
             token(config["model"], "configured model")
             require(config["effort"] in EFFORT, "configured effort")
+        executor, reviewer = p["executor_config"], p["reviewer_config"]
+        supported = SUPPORTED_MODELS | ({"test-model"} if registry["test_only"] else set())
+        require(executor["model"] == reviewer["model"] and executor["model"] in supported, "same supported configured model required")
+        require(EFFORT[reviewer["effort"]] > EFFORT[executor["effort"]], "reviewer configured effort must be higher")
+        require(reviewer["surface"] == "codex_cli", "admission requires native CLI reviewer; service remains advisory")
         require(type(p["effort_order"]) is list and len(p["effort_order"]) >= 2
                 and len(p["effort_order"]) == len(set(p["effort_order"]))
-                and all(type(e) is str and e in EFFORT for e in p["effort_order"]), "canonical model effort order required")
+                and all(type(e) is str and e in EFFORT for e in p["effort_order"])
+                and p["effort_order"] == sorted(p["effort_order"], key=EFFORT.__getitem__), "fixed supported model effort order required")
     p = one(registry["policies"], lambda x: x["grant_id"] == b["grant_id"], "policy")
     require(all(p[key] == b[key] for key in ("mission", "revision", "plan_hash", "packet", "spec_hash", "generation", "base_sha")), "policy scope/revision mismatch")
     require(not p["revoked"] and timestamp(p["valid_from"]) <= now < timestamp(p["expires_at"]), "policy expired/revoked/not yet valid")
+    seen = set()  # Dispatch/run identities are global across every ledger and role.
     for ledger in registry["ledgers"]:
         shape(ledger, {"mission", "revision", "plan_hash", "allowance", "usage", "history", "reservations"}, "ledger")
         number(ledger["mission"], "ledger mission")
@@ -209,7 +218,7 @@ def _admission(registry, b, now):
         units(ledger["allowance"])
         units(ledger["usage"])
         require(type(ledger["history"]) is list and type(ledger["reservations"]) is list, "ledger history/reservations required")
-        seen, totals, reserved = set(), dict.fromkeys(UNITS, 0), dict.fromkeys(UNITS, 0)
+        totals, reserved = dict.fromkeys(UNITS, 0), dict.fromkeys(UNITS, 0)
         for collection, sum_into in ((ledger["history"], totals), (ledger["reservations"], reserved)):
             for row in collection:
                 shape(row, {"binding", "units", "executor_run_id", "reviewer_run_id"}, "dispatch row")
@@ -251,7 +260,7 @@ def _technical(registry, b, policy, reservation, t, output, report):
     require(reviewer["observed_model"] == executor["observed_model"] == reviewer["requested_model"] == executor["requested_model"], "same observed/configured model required")
     order = policy["effort_order"]
     require(executor["observed_effort"] in order and reviewer["observed_effort"] in order
-            and order.index(reviewer["observed_effort"]) > order.index(executor["observed_effort"]), "reviewer observed effort must be higher")
+            and EFFORT[reviewer["observed_effort"]] > EFFORT[executor["observed_effort"]], "reviewer observed effort must be higher")
     require(t["run_id"] == reviewer["run_id"], "technical run mismatch")
     for key in ("output_sha256", "report_sha256"):
         digest(t[key], key)
@@ -352,6 +361,42 @@ def _git(root, *args):
     return p.stdout
 
 
+def _raw_commit(root, oid):
+    """Read stored parent edges, ignoring grafts, shallow boundaries and graphs."""
+    digest(oid, "raw commit OID", True)
+    header = _git(root, "cat-file", "commit", oid).split(b"\n\n", 1)[0].splitlines()
+    require(header and header[0].startswith(b"tree "), "raw commit missing tree")
+    tree = header[0][5:].decode("ascii")
+    digest(tree, "raw commit tree", True)
+    parents, parent_section = [], True
+    for line in header[1:]:
+        if line.startswith(b"parent "):
+            require(parent_section, "raw parent outside contiguous parent header")
+            parent = line[7:].decode("ascii")
+            digest(parent, "raw commit parent", True)
+            parents.append(parent)
+        else:
+            parent_section = False
+    return tree, parents
+
+
+def _raw_ancestor(root, base, head):
+    # No merge-base/rev-list: their history can be rewritten by info/grafts,
+    # including a common-dir graft in a linked worktree. cat-file reads bytes.
+    _raw_commit(root, base)
+    pending, visited = [head], set()
+    while pending:
+        oid = pending.pop()
+        if oid == base:
+            return True
+        if oid in visited:
+            continue
+        visited.add(oid)
+        require(len(visited) <= 100000, "raw ancestry proof exceeds bounded inventory")
+        pending.extend(_raw_commit(root, oid)[1])
+    return False
+
+
 def _live_oid(root, fixture):
     origin = _git(root, "remote", "get-url", "origin").decode("utf-8").strip()
     if fixture:
@@ -388,8 +433,8 @@ def verify_live(root, expected_oid, request, now, fixture, output, report):
     snap = Snapshot(oid, sha256(verifier), _blob(root, oid, REGISTRY_PATH), fixture)
     result = verify(snap, request, now=now, output=output, report=report)
     b = request["binding"]
-    require(_git(root, "rev-parse", f"{b['head_sha']}^{{tree}}").decode("ascii").strip() == b["tree_sha"], "source H/tree mismatch")
-    _git(root, "merge-base", "--is-ancestor", b["base_sha"], b["head_sha"])
+    require(_raw_commit(root, b["head_sha"])[0] == b["tree_sha"], "source H/tree mismatch")
+    require(_raw_ancestor(root, b["base_sha"], b["head_sha"]), "source base is not a raw-object ancestor of head")
     p = one(parse_json(snap.registry_raw)["policies"], lambda x: x["grant_id"] == b["grant_id"], "policy")
     require(sha256(_blob(root, b["head_sha"], p["spec_path"])) == b["spec_hash"], "source spec hash mismatch")
     result["positive_evidence"].append("Git source base/head/tree/spec bytes")

@@ -1,0 +1,165 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1124
+packet_id: ADR-0060-MAC-DINH
+mission_issue: 1124
+mission_id: gh-1124
+mission_ghi_chu: 'packet don le theo issue #1124'
+revision: 6
+generation: 1
+lease_id: adr-0060-mac-dinh-r6-g1-codex-20261103
+thay_the_cho:
+- adr-0060-mac-dinh-r4-g1-codex-20261102
+thay_the_cho_ghi_chu: r6 owner-approved upstream attribution; fence r4 before publication
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1124#issuecomment-6596827237
+authority_url: https://github.com/ducthangho/tra-luat/issues/1124#issuecomment-6596827237
+authority_ghi_chu: Owner approved r6 hash and exact spec human audit/merge; prior
+  lease coordination authority retained; final code audit separate
+recorded_by: openai_codex_dispatcher
+recorder_is_dispatcher: true
+leased_at_utc: '2026-11-03T07:09:24Z'
+heartbeat_at: '2026-11-03T07:09:24Z'
+lease_until: '2026-11-04T07:09:24Z'
+lease_expires_at_utc: '2026-11-04T07:09:24Z'
+role: executor
+provider: openai_codex
+executor: openai_codex
+model: gpt-6
+model_family: openai
+execution_surface: codex_service
+transport: machine
+environment: local
+operating_system: Windows
+shell: pwsh
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: same_provider_approved
+reviewer: openai_codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: fresh independent native Codex CLI session in isolated read-only
+  exact-H worktree; genuine launcher subprocess receipt; requested gpt-6-astra/high;
+  existing service review is historical, not relabeled
+spec_path: ops/specs/ADR-0060-MAC-DINH-r6-upstream-attribution.md
+spec_ref: refs/heads/master
+spec_ref_ghi_chu: r6 PR1169 merged3c2def28; bytes independently verified
+spec_hash: 85bf91905b1c28efcfde8b9938de47237a0ab091297d63208b6e2e21c7318af0
+spec_sha256: 85bf91905b1c28efcfde8b9938de47237a0ab091297d63208b6e2e21c7318af0
+spec_blob: 8e2a52e7d50dfa28aa9028ae09ad8dda5835adc7
+branch: agent/wp1124-r6-g1-codex
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
+start_from_sha: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
+reviewed_sha_required: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
+reviewed_sha_ghi_chu: no successor code H yet; review must bind final constructed
+  H, sourceH8 approval not reused
+write_set:
+- docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md
+- docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md
+- docs/PROTOCOL_DA_PHIEN.md
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+write_set_planned: []
+write_set_hash: 03b22dc99e5d22f12463b9bd25ce031d98d72250dac854b5788de5fc23165adf
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: historical five holder checks rc0 plus reviewed exact equivalence
+  bridge; fresh canonical validator and publication pending
+tran_kich_thuoc: <= 5 tep / <= 450 dong them (ADR-0053 sensitive 6/450)
+tran_loi_goi_codex: 10 theo ADR-0055; Codex executor and independent Codex reviewer;
+  configured evidence accepted
+dieu_kien_merge_bo_sung: 'r6 inherits r4/r3: P0-P3 zero; A7/A9/A11 required; full
+  Windows owner_waived exactH, targeted Windows allowed; human audit finalH'
+coordination_paths:
+- ops/leases/adr-0060-mac-dinh-r6-g1-codex-20261103.yaml
+run_minutes: 240
+heartbeat_required_minutes: 360
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- kill_other_session_process
+- write_outside_effective_write_set
+land_authority_note: Executor lease does not itself authorize land; require all gates,
+  human audit and owner authorization on exact candidate HEAD under r4 before merge/land.
+spec_authority_url: https://github.com/ducthangho/tra-luat/pull/1169#issuecomment-6596671286
+routing_authority_url: https://github.com/ducthangho/tra-luat/issues/1124#issuecomment-6582501739
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+reviewer_model_requested: gpt-6-astra
+reviewer_reasoning_effort_requested: high
+reviewer_served_model_attestation: khong_do_duoc
+source_candidate_sha: ca876c62cb2a4b4d043662ddecda31c8069af40c
+historical_base_sha: 6c9079c2e6ef51bc2be27f1588958937e11cc261
+acceptance_diff_base_sha: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
+windows_classification: required
+windows_disposition: owner_waived
+windows_waiver_authority: https://github.com/ducthangho/tra-luat/issues/1124#issuecomment-6596280445
+windows_waiver_note: bind machine-readable owner comment to final H before K6; targeted
+  diagnostics are not full acceptance
+runtime_lanes:
+- Windows Desktop Commander targeted only
+- Linux Ubuntu-Clean WSL for required non-Windows gates
+holder_evidence:
+- path: docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md
+  rc: 0
+  log_sha256: 7f8e0200f42d8dd710dd3bdcb411cfc1ca60b3b0733662ceacfe4dea6a698f1f
+- path: docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md
+  rc: 0
+  log_sha256: 4c6b8c880b39b0ca811c969c29cb2f90014eb806e5d84a89cbfa86d32871ab96
+- path: docs/PROTOCOL_DA_PHIEN.md
+  rc: 0
+  log_sha256: 9c258ef6859f5f2f25ad0aae0e3a2a8214f46fd8cfe52f5857fe4d7ac8417bc4
+- path: .claude/dev/packet_loop.py
+  rc: 0
+  log_sha256: 7703f7b6ab5f25aabcb532dd9a37f3814214417f633cf5efeaa055ccf0aab312
+- path: .claude/dev/packet_loop_test.py
+  rc: 0
+  log_sha256: 79d9914e0efd6d62b8bf7847b8852582a4fff917e597fa6e6a40c72d2b3fe4a1
+holder_final_refs_sha256: d8bb6f88d5fc0b62c6cceadb04819329658e97c70406bb3c2b502047eeb08494
+holder_checker_sha256: d8079330007ab6ba53d328ba2d4abb1d4eb2737e2b5466b702ce9152958014f6
+holder_canonical_sha: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
+holder_snapshot_note: five actual rc0 results on checked snapshot; final holder state
+  derived equivalent by exact expired-predecessor pointer-only bridge, not new CLI
+  runs
+tree_base: a5b51b71e89bd6b5fb3689f8cd7b25900c7b0d49
+upstream_paths:
+- ops/specs/ADR-0060-MAC-DINH-r6-upstream-attribution.md
+- ops/specs/THU-HOI-LEASE-A1a-r5.md
+- ops/specs/THU-HOI-LEASE-A1a-r6.md
+upstream_full_diff_sha256: a44b9c3724bbb1956bd3a3c8d3fd77a0f8d2e9fd28066a2d13e1064672e7f630
+run_minutes_reason: Owner-authorized technical lease cap90->240 for required Linux
+  full A7 and validation; observed old Windows full exceeded14h. No acceptance/billing/workflow
+  limit changed.
+reviewer_cli_probe:
+  version: codex-cli 0.155.1
+  binary: D:\Program Files\nodejs\node_modules\@openai\codex\node_modules\@openai\codex-win32-x64\vendor\x86_64-pc-windows-msvc\bin\codex.exe
+  auth_status: existing_authenticated_chatgpt
+  catalog_sha256: 16b1d24a84ef71dc6cab53dcfb2eacde8a8f7a196a96931959f6ebeaab8d9f7f
+  model_listed: gpt-6-astra
+  effort_listed: high
+  inference_access: not_yet_measured
+  served_identity: khong_do_duoc
+holder_checked_refs_sha256: c8bbe4437f98e02d1952f65eda1f10e25a08a6885993f9c576fc73ba700f36de
+holder_snapshot_bridge:
+  kind: derived_holder_state_equivalence_not_rerun
+  utc: '2026-11-03T07:45:04.517291+00:00'
+  checked_refs_sha256: c8bbe4437f98e02d1952f65eda1f10e25a08a6885993f9c576fc73ba700f36de
+  final_refs_sha256: d8bb6f88d5fc0b62c6cceadb04819329658e97c70406bb3c2b502047eeb08494
+  complete_ref_delta:
+    refs/remotes/origin/ops/wp1124-r4-g1-lease:
+      old: da847b84aea508e89a64813513266ba641fa820b
+      new: c4e5f4957ec42eff2e3f7c3fcd5a7de5a1c212f0
+  path: ops/leases/adr-0060-mac-dinh-r4-g1-codex-20261102.yaml
+  old_blob_sha256: 93acab5ce44792f3a3d15da2d508722ce891f32f173d803e71aff5975c655e31
+  new_blob_sha256: 71bd90f47b39920c88382d29330506b56874fadecb5dc8ba4ab5e2dc4d91a420
+  unchanged_expiry: '2026-11-03T06:20:56Z'
+  unchanged_fields: all except added da_bi_thay_the; lease_id/write_set/expiry unchanged
+  reason: expired predecessor cannot become active from pointer-only change; canonical
+    classifier and holder symmetry branch unchanged
+  canonical_validator: fresh final artifact rc0 required before publication

@@ -14487,6 +14487,30 @@ def t234_a1a_recursive_yaml_duplicate_unknown_and_cli_invariance():
         print(f"M14 alias DAG conflicting depth=28 after={time.monotonic() - started:.3f}s")
         chot(state == {"L": "KHONG_XAC_DINH"}, f"conflicting alias DAG classified {state}")
 
+        for tag in ("omap", "pairs"):
+            for label, left, right, expected in (
+                    ("cycle", "&cycle [{self: *cycle}]", "&cycle [{self: *cycle}]", "KHONG_XAC_DINH"),
+                    ("equal DAG", "[{a: &leaf [1, 2]}, {b: *leaf}]", "[{a: &leaf [1, 2]}, {b: *leaf}]", "KHONG"),
+                    ("conflicting DAG", "[{a: &leaf [1, 2]}, {b: *leaf}]", "[{a: &leaf [1, 3]}, {b: *leaf}]", "KHONG_XAC_DINH")):
+                base = yaml.safe_dump(_a1a_lease("L"))
+                for name, value in (("L.yaml", left), ("L-copy.yml", right)):
+                    (folder / name).write_text(base + f"extra: !!{tag} {value}\n", encoding="utf-8")
+                g(cay, "add", "-A"); g(cay, "commit", "-qm", f"{tag} {label}"); g(cay, "push", "-q", "origin", "master")
+                state = mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})
+                chot(state == {"L": expected}, f"{tag} {label}: {state}")
+                plain, forecast = _goi_main(mod, *args), _goi_main(mod, *args, "--du-bao")
+                chot(plain[0] == forecast[0] and plain[2] == forecast[2] and
+                     plain[1].splitlines() == [x for x in forecast[1].splitlines() if not x.startswith("DU_BAO:")] and
+                     f"DU_BAO: L · BIA_MỘ_MẶC_ĐỊNH={expected}" in forecast[1],
+                     f"{tag} {label} CLI: {plain!r} {forecast!r}")
+        from unittest import mock
+        class BadEq:
+            def __eq__(self, other): raise ValueError("comparison failed")
+        duplicate = dict(_a1a_lease("L"), extra=BadEq())
+        with mock.patch.object(yaml, "safe_load", side_effect=[duplicate, dict(duplicate, extra=BadEq())]):
+            state = mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})
+        chot(state == {"L": "KHONG_XAC_DINH"}, f"comparison exception classified {state}")
+
 @ca
 def t235_a1a_audit_presence_does_not_control_discovery():
     from io import StringIO; from types import SimpleNamespace; from unittest import mock

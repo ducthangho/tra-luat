@@ -2276,7 +2276,7 @@ def _doc_bia_mo_mac_dinh(goc: Path, ref: str, ids: set[str]) -> dict[str, str]:
                 if leaving:
                     active_a.remove(id(x)); active_b.remove(id(y)); done.add(pair)
                     continue
-                if isinstance(x, (dict, list)) or isinstance(y, (dict, list)):
+                if isinstance(x, (dict, list, tuple)) or isinstance(y, (dict, list, tuple)):
                     if type(x) is not type(y): return True
                     if pair in done: continue
                     if id(x) in active_a or id(y) in active_b: return True
@@ -2289,7 +2289,10 @@ def _doc_bia_mo_mac_dinh(goc: Path, ref: str, ids: set[str]) -> dict[str, str]:
                     active_a.add(id(x)); active_b.add(id(y)); todo.append((x, y, True)); todo.extend(children)
                 elif x != y: return True
             return False
-        return any(khac(x, ban[0]) for x in ban[1:])
+        try:
+            return any(khac(x, ban[0]) for x in ban[1:])
+        except Exception:  # noqa: BLE001 — comparison failure is an unknown forecast
+            return True
 
     ket = {}
     for lid in ids:

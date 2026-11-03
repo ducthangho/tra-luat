@@ -1,0 +1,60 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 564
+packet_id: THU-HOI-LEASE-A1a
+revision: 6
+generation: 2
+lease_id: wp564-a1a-r6-g2-codex-20261103
+role: executor
+provider: openai_codex
+executor: openai_codex
+model_family: openai
+execution_surface: codex_cli
+transport: machine
+reviewer: openai_codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: same_provider_approved
+environment: local
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+access: read-write
+spec_path: ops/specs/THU-HOI-LEASE-A1a-r6.md
+spec_ref: refs/heads/master
+spec_blob: f4f6f3566478397cedf3f92753c52db8e8d0d37c
+spec_hash: c71321250c63be1ddbae08b25ca6e1c00d95c99338d3f94f8d8c75386fee89e5
+spec_sha256_required: c71321250c63be1ddbae08b25ca6e1c00d95c99338d3f94f8d8c75386fee89e5
+prompt_path: ops/specs/THU-HOI-LEASE-A1a-r6.md
+prompt_sha256_required: c71321250c63be1ddbae08b25ca6e1c00d95c99338d3f94f8d8c75386fee89e5
+write_set:
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+- .github/workflows/ops-thu-hoi-admission.yml
+effective_write_set:
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+- .github/workflows/ops-thu-hoi-admission.yml
+branch: agent/wp564-a1a-r6-g2-codex-20261103
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 75feff232a5182aa2436e08228c5d864d866f0ec
+start_from_sha: 75feff232a5182aa2436e08228c5d864d866f0ec
+reviewed_sha_required: 75feff232a5182aa2436e08228c5d864d866f0ec
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/pull/1165
+granted_on_instruction_note: 'R6 successor under owner-approved contract; G1 handoff: https://github.com/ducthangho/tra-luat/issues/564#issuecomment-6592792469. Historical B0 7f65476afdac57023be1b83ddec0df36a5e8d4b8; H1 e6772d84def91d664d38ba8a3df59652a404008d tree cfc797d50ba2a2ad28393a0bd5970d03dd7f0f87; uncommitted patch SHA256 9f638215d104b0d00eef9d0de73aafde37800deff342f50e2419e4fd1922f9bc. G2 starts from S 75feff232a5182aa2436e08228c5d864d866f0ec tree e87c6585733459185be1cbc40c4a5fecb7a5b63c; no G1 test/review verdict carried to final H.'
+recorded_by: codex-dispatcher-session
+recorder_is_executor: false
+recorder_is_dispatcher: true
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-03T03:03:34Z'
+  goc_quet: '797/797 remote heads on tra-luat-win; bridge 3 new heads checked separately; master S 75feff232a5182aa2436e08228c5d864d866f0ec'
+  ket_qua: 'All three paths: ai-dang-giu rc=11, sole holder G1 wp564-a1a-r4-g1-codex-20261102; reciprocal tombstone before G2 grant.'
+thay_the_cho:
+- wp564-a1a-r4-g1-codex-20261102
+leased_at_utc: '2026-11-03T03:03:34Z'
+heartbeat_at: '2026-11-03T03:03:34Z'
+lease_until: '2026-11-04T03:03:34Z'
+lease_expires_at_utc: '2026-11-04T03:03:34Z'

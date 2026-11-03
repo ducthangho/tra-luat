@@ -57,3 +57,4 @@ lease_expires_at_utc: '2026-11-04T01:20:20Z'
 heartbeat_required_minutes: 360
 run_minutes: 90
 depends_on: []
+da_bi_thay_the: wp1178-r2-g2-claude

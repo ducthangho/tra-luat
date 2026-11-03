@@ -30,9 +30,17 @@ start_from_sha: 75feff232a5182aa2436e08228c5d864d866f0ec
 branch: agent/wp1166-g1-codex
 leased_at_utc: '2026-11-03T05:43:34Z'
 heartbeat_at: '2026-11-03T05:43:34Z'
-lease_until: '2026-11-04T05:43:34Z'
-lease_expires_at_utc: '2026-11-04T05:43:34Z'
+lease_until: '2026-11-03T16:33:14.302402Z'
+lease_expires_at_utc: '2026-11-03T16:33:14.302402Z'
 reviewed_sha_required: 75feff232a5182aa2436e08228c5d864d866f0ec
 effective_review_class: sensitive
 thay_the_cho:
 - wp1166-r2-g2-codex
+rut_han:
+  han_moi: '2026-11-03T16:33:14.302402Z'
+  rut_boi: ducthangho
+  ghi_boi: OpenAI Codex coordinator acting under delegation
+  authority_url: https://github.com/ducthangho/tra-luat/issues/1166#issuecomment-6609654460
+  ly_do: Executor handed off; pause WP1166 writes while routing gates blocked. Retire
+    own lease before registry transfer to WP1173; no code, acceptance or audit result
+    changed.

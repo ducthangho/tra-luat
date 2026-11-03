@@ -12,3 +12,5 @@ jobs:
     timeout-minutes: 2
     steps:
     - run: sleep 25
+
+# Second source snapshot for cross-SHA concurrency probe.

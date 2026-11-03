@@ -4,9 +4,9 @@ packet_issue: 1173
 packet_id: wp1173
 mission_issue: 1172
 mission_id: gh-1172
-revision: 3
-generation: 2
-lease_id: wp1173-r3-g2-codex
+revision: 4
+generation: 3
+lease_id: wp1173-r4-g3-codex
 role: executor
 provider: codex
 executor: codex
@@ -33,9 +33,9 @@ assurance_note: Future acceptance target only. Technical same-provider review re
   machine evidence. Actual human audit, runtime higher-effort evidence and final authorization
   are separate and not asserted by this lease.
 spec_path: ops/specs/wp1173.md
-spec_ref: refs/heads/agent/wp1173-r3-g2-codex
-spec_hash: 68648575ec8b663f6922d30db2dc36be2ba7e76eb6aeb168e43908733943b3aa
-spec_authority_url: https://github.com/ducthangho/tra-luat/issues/1173#issuecomment-6610010100
+spec_ref: refs/heads/agent/wp1173-r4-g3-codex
+spec_hash: dbd1ca791e8f2cf00e88c89f79c000953c45b247a2013b9834273b72a8092daa
+spec_authority_url: https://github.com/ducthangho/tra-luat/issues/1173#issuecomment-6610452688
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1173#issuecomment-6608698436
 recorded_by: OpenAI Codex coordinator acting under delegation
@@ -56,17 +56,17 @@ effective_write_set:
 - ops/specs/wp1173.md
 - ops/leases/wp1173-r1-g1-codex.yaml
 - ops/leases/wp1173-r3-g2-codex.yaml
-branch: agent/wp1173-r3-g2-codex
+branch: agent/wp1173-r4-g3-codex
 branch_ownership: exclusive
 base_sha: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
-start_from_sha: b0be7ef1d3eebb78582d892ed30b5bb8cb2d263f
+start_from_sha: 7d695c095fbb4e2ee20c2b6cef8969db7ecedc35
 reviewed_sha_required: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
 reviewed_sha_note: Baseline only; all final review/test evidence must bind the constructed
   exact H, not this base.
-leased_at_utc: '2026-11-03T16:48:33.662178Z'
-heartbeat_at: '2026-11-03T16:48:33.662178Z'
-lease_until: '2026-11-03T17:05:51.736220Z'
-lease_expires_at_utc: '2026-11-03T17:05:51.736220Z'
+leased_at_utc: '2026-11-03T17:07:25.962121Z'
+heartbeat_at: '2026-11-03T17:07:25.962121Z'
+lease_until: '2026-11-03T17:36:00Z'
+lease_expires_at_utc: '2026-11-03T17:36:00Z'
 run_minutes: 90
 run_deadline_note: Includes prior planning run begun around16:06UTC; no extension
   of the logical90minute cap.
@@ -95,7 +95,7 @@ holder_evidence:
     rc: 0
     holders_per_path: 0
 thay_the_cho:
-- wp1173-r2-g1-codex
+- wp1173-r3-g2-codex
 prohibited_actions:
 - write_packet_loop_or_protocol_or_other_packet
 - activate_canonical_policy_grant
@@ -104,24 +104,26 @@ prohibited_actions:
 - formal_GitHub_Approve_merge_land_deploy
 nang_tran:
   ai_nang: ducthangho; OpenAI Codex coordinator records under implementation delegation
-    at comment6609722990
-  tran_cu: sensitive fallback3files/300addedlines
-  tran_moi: wp1173 only6files/1400addedlines including coordination/spec
-  ly_do: Canonical/provenance verifier with negative fixtures and required one-entry
-    registry connection; no additional calls/spend/land authority.
+    at comment6610322853
+  tran_cu: wp1173 scoped6files/1400addedlines
+  tran_moi: wp1173 only6files/1600addedlines including coordination/spec
+  ly_do: Close proven P1 canonical transport spoof with isolated Gitstate/config and
+    portable regressions; no Mission allowance/spend/deadline increase.
 source_continuation_history:
 - f557645847935ad7397ef8a273ebc2781568e05d
 - 434713a9c8fa0ba21128e0361637e18c27eb0970
 - b0be7ef1d3eebb78582d892ed30b5bb8cb2d263f
-review_calls_used: 1
-review_calls_remaining_initial: 1
-attempts_used_author_handoff: 2
+- d2bd2a38edc64afd8dbf90fe4ca9cf8d0077ef16
+- 2e02370a898bd197436921753d8d6cc7c1bb895e
+- 7d695c095fbb4e2ee20c2b6cef8969db7ecedc35
+review_calls_used: 2
+review_calls_remaining_initial: 0
+attempts_used_author_handoff: 3
 history_note: New generation retains original budget/deadline and all findings; no
   state-dir/counter reset.
-da_bi_thay_the: wp1173-r4-g3-codex
-rut_han:
-  han_moi: '2026-11-03T17:05:51.736220Z'
-  ghi_boi: OpenAI Codex coordinator acting under owner delegation
-  ly_do: Transport P1 remediation handed off; successor revision4 carries explicit6files/1600cap
-    and preserved call3 reservation. Keep oldrecord on this generation branch, publish
-    reciprocal successor atomically.
+lease_path_note: Stable coordination path keeps historical filename; effective ID/revision/generation
+  are wp1173-r4-g3-codex/4/3. Retired g2 record remains on oldgeneration branch at
+  continuation commit, reciprocal replacement pointers.
+additional_review_calls_reserved: 1
+additional_review_authority: https://github.com/ducthangho/tra-luat/issues/1173#issuecomment-6610266290
+replacement_previous_source: agent/wp1173-r3-g2-codex@7d695c095fbb4e2ee20c2b6cef8969db7ecedc35:ops/leases/wp1173-r3-g2-codex.yaml

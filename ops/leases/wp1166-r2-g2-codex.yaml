@@ -30,9 +30,10 @@ start_from_sha: 75feff232a5182aa2436e08228c5d864d866f0ec
 branch: agent/wp1166-g1-codex
 leased_at_utc: '2026-11-03T02:27:15Z'
 heartbeat_at: '2026-11-03T02:27:15Z'
-lease_until: '2026-11-04T02:27:15Z'
-lease_expires_at_utc: '2026-11-04T02:27:15Z'
+lease_until: '2026-11-03T05:43:34Z'
+lease_expires_at_utc: '2026-11-03T05:43:34Z'
 reviewed_sha_required: 75feff232a5182aa2436e08228c5d864d866f0ec
 effective_review_class: sensitive
 thay_the_cho:
 - wp1166-r1-g1-codex
+da_bi_thay_the: wp1166-r3-g3-codex

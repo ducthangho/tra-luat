@@ -1,0 +1,38 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1166
+packet_id: wp1166
+revision: 3
+generation: 3
+lease_id: wp1166-r3-g3-codex
+role: executor
+provider: openai_codex
+executor: openai_codex
+model: configured_model_not_attested
+execution_surface: codex_service
+transport: machine
+environment: cloud
+risk: sensitive
+review_class: sensitive
+granted_by: ducthangho
+recorded_by: openai_codex acting under delegation
+recorder_ghi_chu: User delegated packet and lease decisions in current session; no
+  human audit asserted.
+spec_path: ops/specs/wp1166.md
+spec_hash: da73d71612635e4ebb521fdc59728980d907278482fb21bf1590365c878df6a4
+spec_ref: refs/heads/agent/wp1166-g1-codex
+write_set:
+- .github/workflows/ci-dot-bien-du.yml
+- .claude/dev/ci_dang_ky_test.py
+- ops/specs/wp1166.md
+base_sha: 75feff232a5182aa2436e08228c5d864d866f0ec
+start_from_sha: 75feff232a5182aa2436e08228c5d864d866f0ec
+branch: agent/wp1166-g1-codex
+leased_at_utc: '2026-11-03T05:43:34Z'
+heartbeat_at: '2026-11-03T05:43:34Z'
+lease_until: '2026-11-04T05:43:34Z'
+lease_expires_at_utc: '2026-11-04T05:43:34Z'
+reviewed_sha_required: 75feff232a5182aa2436e08228c5d864d866f0ec
+effective_review_class: sensitive
+thay_the_cho:
+- wp1166-r2-g2-codex

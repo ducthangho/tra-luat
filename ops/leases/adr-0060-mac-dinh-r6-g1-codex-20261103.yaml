@@ -51,11 +51,11 @@ spec_blob: 8e2a52e7d50dfa28aa9028ae09ad8dda5835adc7
 branch: agent/wp1124-r6-g1-codex
 branch_ownership: exclusive
 target_branch_neu_land: master
-base_sha: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
-start_from_sha: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
-reviewed_sha_required: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
-reviewed_sha_ghi_chu: no successor code H yet; review must bind final constructed
-  H, sourceH8 approval not reused
+base_sha: ec1b18a2a007fc2e697249c727a2ca8391ab209e
+start_from_sha: ec1b18a2a007fc2e697249c727a2ca8391ab209e
+reviewed_sha_required: ec1b18a2a007fc2e697249c727a2ca8391ab209e
+reviewed_sha_ghi_chu: Pending newly integrated candidate; old-H verdict is not new-H
+  approval
 write_set:
 - docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md
 - docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md
@@ -65,8 +65,8 @@ write_set:
 write_set_planned: []
 write_set_hash: 03b22dc99e5d22f12463b9bd25ce031d98d72250dac854b5788de5fc23165adf
 write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
-closure_status: historical five holder checks rc0 plus reviewed exact equivalence
-  bridge; fresh canonical validator and publication pending
+closure_status: canonical pure check rc0 on approved base amendment; current holder
+  reconciliation complete; remote publication/readback required for activation
 tran_kich_thuoc: <= 5 tep / <= 450 dong them (ADR-0053 sensitive 6/450)
 tran_loi_goi_codex: 10 theo ADR-0055; Codex executor and independent Codex reviewer;
   configured evidence accepted
@@ -94,9 +94,9 @@ reviewer_transport: machine
 reviewer_model_requested: gpt-6-astra
 reviewer_reasoning_effort_requested: high
 reviewer_served_model_attestation: khong_do_duoc
-source_candidate_sha: ca876c62cb2a4b4d043662ddecda31c8069af40c
+source_candidate_sha: 596b8270d2ac4d4c843e9b3a550350fe7d718fb1
 historical_base_sha: 6c9079c2e6ef51bc2be27f1588958937e11cc261
-acceptance_diff_base_sha: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
+acceptance_diff_base_sha: ec1b18a2a007fc2e697249c727a2ca8391ab209e
 windows_classification: required
 windows_disposition: owner_waived
 windows_waiver_authority: https://github.com/ducthangho/tra-luat/issues/1124#issuecomment-6596280445
@@ -105,34 +105,15 @@ windows_waiver_note: bind machine-readable owner comment to final H before K6; t
 runtime_lanes:
 - Windows Desktop Commander targeted only
 - Linux Ubuntu-Clean WSL for required non-Windows gates
-holder_evidence:
-- path: docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md
-  rc: 0
-  log_sha256: 7f8e0200f42d8dd710dd3bdcb411cfc1ca60b3b0733662ceacfe4dea6a698f1f
-- path: docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md
-  rc: 0
-  log_sha256: 4c6b8c880b39b0ca811c969c29cb2f90014eb806e5d84a89cbfa86d32871ab96
-- path: docs/PROTOCOL_DA_PHIEN.md
-  rc: 0
-  log_sha256: 9c258ef6859f5f2f25ad0aae0e3a2a8214f46fd8cfe52f5857fe4d7ac8417bc4
-- path: .claude/dev/packet_loop.py
-  rc: 0
-  log_sha256: 7703f7b6ab5f25aabcb532dd9a37f3814214417f633cf5efeaa055ccf0aab312
-- path: .claude/dev/packet_loop_test.py
-  rc: 0
-  log_sha256: 79d9914e0efd6d62b8bf7847b8852582a4fff917e597fa6e6a40c72d2b3fe4a1
-holder_final_refs_sha256: d8bb6f88d5fc0b62c6cceadb04819329658e97c70406bb3c2b502047eeb08494
-holder_checker_sha256: d8079330007ab6ba53d328ba2d4abb1d4eb2737e2b5466b702ce9152958014f6
-holder_canonical_sha: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
-holder_snapshot_note: five actual rc0 results on checked snapshot; final holder state
-  derived equivalent by exact expired-predecessor pointer-only bridge, not new CLI
-  runs
-tree_base: a5b51b71e89bd6b5fb3689f8cd7b25900c7b0d49
+tree_base: a8dc7f5fc314275131027aae2c0c4878b659b28d
 upstream_paths:
+- .github/workflows/ops-thu-hoi-admission.yml
+- ops/lease_publish.py
+- ops/lease_publish_test.py
 - ops/specs/ADR-0060-MAC-DINH-r6-upstream-attribution.md
 - ops/specs/THU-HOI-LEASE-A1a-r5.md
 - ops/specs/THU-HOI-LEASE-A1a-r6.md
-upstream_full_diff_sha256: a44b9c3724bbb1956bd3a3c8d3fd77a0f8d2e9fd28066a2d13e1064672e7f630
+upstream_full_diff_sha256: 5169b784276df73a4754cdd7e3042b95509dbd0bdf90cea56921ece57403c029
 run_minutes_reason: Owner-authorized technical lease cap90->240 for required Linux
   full A7 and validation; observed old Windows full exceeded14h. No acceptance/billing/workflow
   limit changed.
@@ -145,21 +126,95 @@ reviewer_cli_probe:
   effort_listed: high
   inference_access: not_yet_measured
   served_identity: khong_do_duoc
-holder_checked_refs_sha256: c8bbe4437f98e02d1952f65eda1f10e25a08a6885993f9c576fc73ba700f36de
-holder_snapshot_bridge:
-  kind: derived_holder_state_equivalence_not_rerun
-  utc: '2026-11-03T07:45:04.517291+00:00'
-  checked_refs_sha256: c8bbe4437f98e02d1952f65eda1f10e25a08a6885993f9c576fc73ba700f36de
-  final_refs_sha256: d8bb6f88d5fc0b62c6cceadb04819329658e97c70406bb3c2b502047eeb08494
-  complete_ref_delta:
-    refs/remotes/origin/ops/wp1124-r4-g1-lease:
-      old: da847b84aea508e89a64813513266ba641fa820b
-      new: c4e5f4957ec42eff2e3f7c3fcd5a7de5a1c212f0
-  path: ops/leases/adr-0060-mac-dinh-r4-g1-codex-20261102.yaml
-  old_blob_sha256: 93acab5ce44792f3a3d15da2d508722ce891f32f173d803e71aff5975c655e31
-  new_blob_sha256: 71bd90f47b39920c88382d29330506b56874fadecb5dc8ba4ab5e2dc4d91a420
-  unchanged_expiry: '2026-11-03T06:20:56Z'
-  unchanged_fields: all except added da_bi_thay_the; lease_id/write_set/expiry unchanged
-  reason: expired predecessor cannot become active from pointer-only change; canonical
-    classifier and holder symmetry branch unchanged
-  canonical_validator: fresh final artifact rc0 required before publication
+  historical_only: true
+integration_amendment:
+  utc: '2026-11-03T18:50:41.326537+00:00'
+  prior_base: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
+  prior_tested_head: 596b8270d2ac4d4c843e9b3a550350fe7d718fb1
+  new_base: ec1b18a2a007fc2e697249c727a2ca8391ab209e
+  reason: PR1171 master drift outside W; source unchanged but admission/workflow changed
+  status: approved_base_amendment_for_remote_publication
+  prior_receipts_preserved: true
+  holder_current_reconciliation: completed; own unchanged lease sole active holder;
+    remote/local fence stable
+  candidate: 82adc57d1829bcac6aef6e8aae0b7f474054db94
+  canonical_checker_sha256: a4bf95b539e077edbb706afee6fc37b157815c0c246ca1bb01b307106d7be480
+  reviewed_metadata_draft_sha256: b06b1411ff3fa3c528169fde6d6586b56357d4d21db078302a128fc35eb4ad0c
+historical_holder_evidence:
+  holder_evidence:
+  - path: docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md
+    rc: 0
+    log_sha256: 7f8e0200f42d8dd710dd3bdcb411cfc1ca60b3b0733662ceacfe4dea6a698f1f
+  - path: docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md
+    rc: 0
+    log_sha256: 4c6b8c880b39b0ca811c969c29cb2f90014eb806e5d84a89cbfa86d32871ab96
+  - path: docs/PROTOCOL_DA_PHIEN.md
+    rc: 0
+    log_sha256: 9c258ef6859f5f2f25ad0aae0e3a2a8214f46fd8cfe52f5857fe4d7ac8417bc4
+  - path: .claude/dev/packet_loop.py
+    rc: 0
+    log_sha256: 7703f7b6ab5f25aabcb532dd9a37f3814214417f633cf5efeaa055ccf0aab312
+  - path: .claude/dev/packet_loop_test.py
+    rc: 0
+    log_sha256: 79d9914e0efd6d62b8bf7847b8852582a4fff917e597fa6e6a40c72d2b3fe4a1
+  holder_final_refs_sha256: d8bb6f88d5fc0b62c6cceadb04819329658e97c70406bb3c2b502047eeb08494
+  holder_checker_sha256: d8079330007ab6ba53d328ba2d4abb1d4eb2737e2b5466b702ce9152958014f6
+  holder_canonical_sha: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
+  holder_snapshot_note: five actual rc0 results on checked snapshot; final holder
+    state derived equivalent by exact expired-predecessor pointer-only bridge, not
+    new CLI runs
+  holder_checked_refs_sha256: c8bbe4437f98e02d1952f65eda1f10e25a08a6885993f9c576fc73ba700f36de
+  holder_snapshot_bridge:
+    kind: derived_holder_state_equivalence_not_rerun
+    utc: '2026-11-03T07:45:04.517291+00:00'
+    checked_refs_sha256: c8bbe4437f98e02d1952f65eda1f10e25a08a6885993f9c576fc73ba700f36de
+    final_refs_sha256: d8bb6f88d5fc0b62c6cceadb04819329658e97c70406bb3c2b502047eeb08494
+    complete_ref_delta:
+      refs/remotes/origin/ops/wp1124-r4-g1-lease:
+        old: da847b84aea508e89a64813513266ba641fa820b
+        new: c4e5f4957ec42eff2e3f7c3fcd5a7de5a1c212f0
+    path: ops/leases/adr-0060-mac-dinh-r4-g1-codex-20261102.yaml
+    old_blob_sha256: 93acab5ce44792f3a3d15da2d508722ce891f32f173d803e71aff5975c655e31
+    new_blob_sha256: 71bd90f47b39920c88382d29330506b56874fadecb5dc8ba4ab5e2dc4d91a420
+    unchanged_expiry: '2026-11-03T06:20:56Z'
+    unchanged_fields: all except added da_bi_thay_the; lease_id/write_set/expiry unchanged
+    reason: expired predecessor cannot become active from pointer-only change; canonical
+      classifier and holder symmetry branch unchanged
+    canonical_validator: fresh final artifact rc0 required before publication
+historical_upstream_full_diff_sha256: a44b9c3724bbb1956bd3a3c8d3fd77a0f8d2e9fd28066a2d13e1064672e7f630
+current_holder_reconciliation:
+  canonical: ec1b18a2a007fc2e697249c727a2ca8391ab209e
+  checker_sha256: a4bf95b539e077edbb706afee6fc37b157815c0c246ca1bb01b307106d7be480
+  local_refs_sha256: 1a3bf50d4b469bab5f4d74e78120cbb9763095022d3189062ed8982d3a1e0f85
+  remote_refs_sha256: 165a5050ffabf21add78220b56f35c7330337a3f792c29f990c4216808f91d4d
+  evidence_sha256: 7c94dc838a55e8b6b3c2002d3f6e2671a3fe8dd27989edfde07701eaa4dbac9a
+  remote_oid_reconciliation:
+  - snapshot: before
+    remote_heads: 814
+    exact_name_oid_match: true
+  - snapshot: after
+    remote_heads: 814
+    exact_name_oid_match: true
+  observed_holders:
+  - path: docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md
+    holders:
+    - adr-0060-mac-dinh-r6-g1-codex-20261103
+    canonical_rc: 11
+  - path: docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md
+    holders:
+    - adr-0060-mac-dinh-r6-g1-codex-20261103
+    canonical_rc: 11
+  - path: docs/PROTOCOL_DA_PHIEN.md
+    holders:
+    - adr-0060-mac-dinh-r6-g1-codex-20261103
+    canonical_rc: 11
+  - path: .claude/dev/packet_loop.py
+    holders:
+    - adr-0060-mac-dinh-r6-g1-codex-20261103
+    canonical_rc: 11
+  - path: .claude/dev/packet_loop_test.py
+    holders:
+    - adr-0060-mac-dinh-r6-g1-codex-20261103
+    canonical_rc: 11
+  note: One canonical API namespace scan; own lease is sole active holder for every
+    path; not five CLI rc0 results

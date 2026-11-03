@@ -1,0 +1,83 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1173
+packet_id: wp1173
+mission_issue: 1172
+mission_id: gh-1172
+revision: 2
+generation: 1
+lease_id: wp1173-r2-g1-codex
+lease_path_note: Stored at prepared and ownership-checked wp1173-r1-g1-codex.yaml; effective revision is 2, generation is 1. No r1 lease was granted.
+role: executor
+provider: codex
+executor: codex
+model: configured_model_not_attested
+model_requested: gpt-6.1-sol
+reasoning_effort_requested: medium
+model_family: openai
+execution_surface: codex_service
+transport: machine
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_service
+reviewer_transport: machine
+reviewer_model_requested: gpt-6.1-sol
+reviewer_reasoning_effort_requested: high
+reviewer_independence: Separate session/context and read-only exact-H checkout; no executor context fork
+assurance_target: human_audited
+assurance_note: Future acceptance target only. Technical same-provider review remains machine evidence. Actual human audit, runtime higher-effort evidence and final authorization are separate and not asserted by this lease.
+spec_path: ops/specs/wp1173.md
+spec_ref: refs/heads/agent/wp1173-r2-g1-codex
+spec_hash: 97e3f92cac44723f28af9c8a95ad84047efb4c7bdc9dc642e6af2c4045d82ddb
+spec_authority_url: https://github.com/ducthangho/tra-luat/issues/1173#issuecomment-6609415684
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1173#issuecomment-6608698436
+recorded_by: OpenAI Codex coordinator acting under delegation
+recorder_is_executor: false
+recorder_note: Owner directed packet creation, lease grant and implementation; coordinator grants to a separate Codex executor. No human audit or signature impersonation.
+write_set:
+- ops/codex_routing.py
+- ops/codex_routing_test.py
+- ops/specs/wp1173.md
+- ops/leases/wp1173-r1-g1-codex.yaml
+effective_write_set:
+- ops/codex_routing.py
+- ops/codex_routing_test.py
+- ops/specs/wp1173.md
+- ops/leases/wp1173-r1-g1-codex.yaml
+branch: agent/wp1173-r2-g1-codex
+branch_ownership: exclusive
+base_sha: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
+start_from_sha: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
+reviewed_sha_required: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
+reviewed_sha_note: Baseline only; all final review/test evidence must bind the constructed exact H, not this base.
+leased_at_utc: '2026-11-03T16:23:52Z'
+heartbeat_at: '2026-11-03T16:23:52Z'
+lease_until: '2026-11-03T17:36:00Z'
+lease_expires_at_utc: '2026-11-03T17:36:00Z'
+run_minutes: 90
+run_deadline_note: Includes prior planning run begun around16:06UTC; no extension of the logical90minute cap.
+review_calls_initial_limit: 2
+attempts_limit: 3
+same_failure_limit: 2
+paid_credit_purchase_allowed: false
+holder_evidence:
+  snapshot_sha256: d90c3ac30e973b968759a2608d4a9b2e37c25aeebfdda545c1bbe7d78177e9e1
+  source: canonical lease predicates on tra-luat-win own clone after full ref fetch
+  lease_instances: 803
+  refs_unchanged: true
+  selected_paths_rc: 0
+  holders_per_selected_path: 0
+  full_original_scope_rc: 12
+  note: Original r1 also contained three paths held by wp1124; r2 excludes all three. Read-only in-process memoization was bound to unchanged snapshot; no canonical source was changed.
+thay_the_cho: []
+prohibited_actions:
+- write_packet_loop_or_protocol_or_other_packet
+- activate_canonical_policy_grant
+- edit_real_credentials_or_security_settings
+- self_review_or_claim_machine_as_human
+- formal_GitHub_Approve_merge_land_deploy

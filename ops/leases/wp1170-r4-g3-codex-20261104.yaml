@@ -1,0 +1,60 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1170
+packet_id: wp1170
+mission_issue: 1035
+mission_id: gh-1035
+revision: 4
+generation: 3
+lease_id: wp1170-r4-g3-codex-20261104
+role: executor
+provider: codex
+executor: codex
+model: gpt-6.1-sol
+effort: medium
+model_family: openai
+execution_surface: codex_cli
+transport: machine/local
+environment: local
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine/local
+assurance_target: human_audited
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1170-r4.md
+spec_sha256_required: d54d2daa4b5723a28608356e0d6afd24d677b0e7a6901c720aacaae187af0f3d
+spec_hash: d9566298cb8544a88e28653795d7295232073ec4ae6e08c2673fd7daa157ccdb
+prompt_path: ops/prompts/wp1170-r4-g3-codex.md
+prompt_sha256_required: 5f1ab0a92582746922920a70aa6e805083f8864db503289b1ac695d3ba65889c
+write_set:
+  - scripts/tl_gws.py
+  - scripts/tl.py
+  - scripts/tl_core/cli.py
+  - scripts/tl_core/command_registry.py
+  - scripts/tl_core/command_registry_test.py
+  - references/RUNBOOK.md
+  - ops/agent_creds_windows_test.py
+effective_write_set:
+  - scripts/tl_gws.py
+  - scripts/tl.py
+  - scripts/tl_core/cli.py
+  - scripts/tl_core/command_registry.py
+  - scripts/tl_core/command_registry_test.py
+  - references/RUNBOOK.md
+  - ops/agent_creds_windows_test.py
+write_set_hash: 20e127032932d03b3cc25fc565e68d50bf35768852bce07ab552a8ec8d0b2fcd
+branch: agent/wp1170-g3-codex
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
+start_from_sha: fbf7b1f89cd8d7d701a858ca53fd24addb15212c
+reviewed_sha_required: fbf7b1f89cd8d7d701a858ca53fd24addb15212c
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1170#issuecomment-6614131117
+authority_basis: owner approved #1170 r4 and budget7; MCR #1035 r2 approved at issuecomment-6618404613; owner delegated lease and work
+lease_expires_at_utc: '2026-11-04T03:30:00Z'
+heartbeat_at: '2026-11-03T23:55:00Z'
+heartbeat_required_minutes: 360

@@ -1,0 +1,148 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1124
+packet_id: ADR-0060-MAC-DINH
+mission_issue: 1124
+mission_id: gh-1124
+mission_ghi_chu: 'packet don le theo issue #1124'
+revision: 4
+generation: 1
+lease_id: adr-0060-mac-dinh-r4-g1-codex-20261102
+thay_the_cho:
+- adr-0060-mac-dinh-r3-g1-codex-20261102
+thay_the_cho_ghi_chu: successor routing approved by owner; old lease superseded
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1124#issuecomment-6582501739
+authority_url: https://github.com/ducthangho/tra-luat/issues/1124#issuecomment-6582501739
+authority_ghi_chu: Owner approved r4 spec and configured reviewer evidence; human
+  audit before merge.
+recorded_by: openai_codex_dispatcher
+recorder_is_dispatcher: true
+leased_at_utc: '2026-11-03T01:24:54Z'
+heartbeat_at: '2026-11-03T01:24:54Z'
+lease_until: '2026-11-04T01:24:54Z'
+lease_expires_at_utc: '2026-11-04T01:24:54Z'
+role: executor
+provider: openai_codex
+executor: openai_codex
+model: gpt-6
+model_family: openai
+execution_surface: codex_service
+transport: machine
+environment: local
+operating_system: Windows
+shell: pwsh
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: same_provider_approved
+reviewer: openai_codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: fresh independent Codex session read-only exact SHA; configured
+  gpt-6-astra/high accepted by owner, runtime attestation not measured
+spec_path: ops/specs/ADR-0060-MAC-DINH-r4-reviewer-route.md
+spec_ref: refs/heads/master
+spec_ref_ghi_chu: r4 spec landed PR1162; approved bytes unchanged
+spec_hash: fd64b142defef4edf047b408847312d8c32847523909948ce9de7e3030789154
+spec_sha256: fd64b142defef4edf047b408847312d8c32847523909948ce9de7e3030789154
+spec_blob: a5dbc45535ace1819ceeefc2c0e2b785ecfb9ded
+branch: agent/wp1124-r4-g1-codex
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 6c9079c2e6ef51bc2be27f1588958937e11cc261
+start_from_sha: 6c9079c2e6ef51bc2be27f1588958937e11cc261
+reviewed_sha_required: 6c9079c2e6ef51bc2be27f1588958937e11cc261
+reviewed_sha_ghi_chu: chua co head code luc cap lease; review phai neo SHA ung vien
+write_set:
+- docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md
+- docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md
+- docs/PROTOCOL_DA_PHIEN.md
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+write_set_planned: []
+write_set_hash: 03b22dc99e5d22f12463b9bd25ce031d98d72250dac854b5788de5fc23165adf
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: four holder checks on earlier refs; fifth on final refs; empty ops/leases
+  deltas bridge snapshots; final fifth refs unchanged through artifact finalization
+tran_kich_thuoc: <= 5 tep / <= 450 dong them (ADR-0053 sensitive 6/450)
+tran_loi_goi_codex: 10 theo ADR-0055; Codex executor and independent Codex reviewer;
+  configured evidence accepted
+dieu_kien_merge_bo_sung: ADR-0060 va spec r4 inherits r3 A1-A13; het P0/P1/P2/P3,
+  Windows required A10, full_mutant_audit success A11
+coordination_paths:
+- ops/leases/adr-0060-mac-dinh-r4-g1-codex-20261102.yaml
+run_minutes: 90
+heartbeat_required_minutes: 360
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- kill_other_session_process
+- write_outside_effective_write_set
+land_authority_note: Executor lease does not itself authorize land; require all gates,
+  human audit and owner authorization on exact candidate HEAD under r4 before merge/land.
+spec_authority_url: https://github.com/ducthangho/tra-luat/issues/1124#issuecomment-6581622446
+routing_authority_url: https://github.com/ducthangho/tra-luat/issues/1124#issuecomment-6582501739
+reviewer_execution_surface: codex_service
+reviewer_transport: machine
+reviewer_model_requested: gpt-6-astra
+reviewer_reasoning_effort_requested: high
+reviewer_served_model_attestation: khong_do_duoc
+source_candidate_sha: c905714f408df0982438b435d7de0871f66eea77
+holder_evidence:
+- path: docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md
+  rc: 0
+  log_sha256: c99c3e87a6323f18f550f0b37dfb94020887248c248652d0c56fa3a279f54b95
+- path: docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md
+  rc: 0
+  log_sha256: 745ef3530221c2344b294fbbedd579e453a78a40c846ea35c3c505f872222086
+- path: docs/PROTOCOL_DA_PHIEN.md
+  rc: 0
+  log_sha256: f0b59d0f9fb3c510b584c009103c95c2dd9b2022c074d9548a54732bfd91147c
+- path: .claude/dev/packet_loop.py
+  rc: 0
+  log_sha256: 576608cd38fd630fcecda314ece19cbd64e4e26231193e3ece673df0970fa87d
+- path: .claude/dev/packet_loop_test.py
+  rc: 0
+  log_sha256: 3cf4a06486eca680468c18369a0345bde99819850e662e666faec6aed050f5c4
+holder_snapshot_note: 'first four checks on earlier snapshot; fifth after fetching
+  new #564 refs; no concurrent holder'
+holder_final_refs_sha256: 27755aa4c6f12d301ce29ee1b97e5b71be03ea3648cd7cb6aef910a0bd5d0754
+holder_snapshot_bridge:
+  scope: ops/leases
+  changes:
+  - ref: refs/remotes/origin/master
+    prior_tip: 6c9079c2e6ef51bc2be27f1588958937e11cc261
+    comparison_base: 6c9079c2e6ef51bc2be27f1588958937e11cc261
+    new_tip: 75feff232a5182aa2436e08228c5d864d866f0ec
+    delta_empty: true
+    delta_sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - ref: refs/remotes/origin/agent/wp564-a1a-r4-g1-codex-20261102
+    prior_tip: 4aab640d9cf542c838fc3d1e0bdd72375747aaff
+    comparison_base: 4aab640d9cf542c838fc3d1e0bdd72375747aaff
+    new_tip: a51debdca3f40f85958db0c0469fe3755be9bb95
+    delta_empty: true
+    delta_sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - ref: refs/remotes/origin/ops/wp564-a1a-r5-cap-continuation-20261102
+    prior_tip: null
+    comparison_base: 6c9079c2e6ef51bc2be27f1588958937e11cc261
+    new_tip: a265a413978585cc40cf5b5216f452cf93ab862d
+    delta_empty: true
+    delta_sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - ref: refs/remotes/origin/ops/wp564-a1a-r6-upstream-attribution-20261103
+    prior_tip: null
+    comparison_base: 6c9079c2e6ef51bc2be27f1588958937e11cc261
+    new_tip: 82cd8a570c52c135a772671b474e073d2a007d25
+    delta_empty: true
+    delta_sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  fetch_log_sha256: 546f04dd3cd2c504d155b310e412cf05c0cfd8a130d943e52ac93af7e94d5b9f
+  note: New refs compared with prior canonical base; updated refs compared with exact
+    previous tip from fetch output. Local master and approved-spec worktrees fast-forwarded
+    to same new master; H4 worktree unchanged.
+  checker_sha256: d8079330007ab6ba53d328ba2d4abb1d4eb2737e2b5466b702ce9152958014f6
+  final_refs_sha256: 27755aa4c6f12d301ce29ee1b97e5b71be03ea3648cd7cb6aef910a0bd5d0754
+holder_snapshot_bridge_sha256: 67c4d10af4f2959c259873d51f84cd1c71abe9e0a524dcde2f01e9c588b52f29

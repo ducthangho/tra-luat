@@ -56,5 +56,12 @@ thay_the_cho:
 - wp564-a1a-r4-g1-codex-20261102
 leased_at_utc: '2026-11-03T03:03:34Z'
 heartbeat_at: '2026-11-03T03:03:34Z'
-lease_until: '2026-11-04T03:03:34Z'
-lease_expires_at_utc: '2026-11-04T03:03:34Z'
+lease_until: '2026-11-03T19:36:00Z'
+lease_expires_at_utc: '2026-11-03T19:36:00Z'
+rut_han:
+  han_cu: '2026-11-04T03:03:34Z'
+  han_moi: '2026-11-03T19:36:00Z'
+  rut_boi: ducthangho
+  ly_do: 'WP564 A1a PR #1171 merged at ec1b18a2a007fc2e697249c727a2ca8391ab209e; postmerge CI run 41693658396 attempt 1 success. Owner authorized lease release in PR #1171 issuecomment-6611841855.'
+  vi_sao_khong_bia_mo: 'No successor lease; release after packet merge by shortening expiry, preserving lease history.'
+  ghi_boi: codex-land-operator-session

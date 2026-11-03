@@ -30,7 +30,14 @@ start_from_sha: 75feff232a5182aa2436e08228c5d864d866f0ec
 branch: agent/wp1166-g1-codex
 leased_at_utc: '2026-11-03T02:05:42Z'
 heartbeat_at: '2026-11-03T02:05:42Z'
-lease_until: '2026-11-04T02:05:42Z'
-lease_expires_at_utc: '2026-11-04T02:05:42Z'
+lease_until: '2026-11-03T16:39:15.167893Z'
+lease_expires_at_utc: '2026-11-03T16:39:15.167893Z'
 reviewed_sha_required: 75feff232a5182aa2436e08228c5d864d866f0ec
 effective_review_class: sensitive
+rut_han:
+  han_moi: '2026-11-03T16:39:15.167893Z'
+  rut_boi: ducthangho
+  ghi_boi: OpenAI Codex coordinator acting under delegation
+  ly_do: Completed concurrency canary retained stale r1 lease copy; retire own copy
+    before registry transfer to WP1173. Historical run receipts remain bound to old
+    head; no process stopped.

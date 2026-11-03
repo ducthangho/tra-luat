@@ -1,0 +1,56 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1170
+packet_id: wp1170
+mission_issue: 1035
+mission_id: gh-1035
+revision: 3
+generation: 2
+lease_id: wp1170-r3-g2-codex-20261104
+role: executor
+provider: codex
+executor: codex
+model: gpt-6.1-sol
+effort: medium
+model_family: openai
+execution_surface: codex_cli
+transport: machine/local
+environment: local
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine/local
+assurance_target: human_audited
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1170-r3.md
+spec_sha256_required: f074469aec4cd955d7aa60f1428fc4a5f997108322052c9bdba39d32ecbf36e5
+spec_hash: 29eb5c0536983aa5dab3c1141ac3085bbe115446acc827819aaf564afc9ff5f0
+prompt_path: ops/prompts/wp1170-r3-g2-codex.md
+prompt_sha256_required: acbc94040563630c031669e8297acc9b37c6e6a285ad299d0e6ffd1feac864d5
+write_set:
+  - scripts/tl_gws.py
+  - scripts/tl.py
+  - scripts/tl_core/cli.py
+  - references/RUNBOOK.md
+  - ops/agent_creds_windows_test.py
+effective_write_set:
+  - scripts/tl_gws.py
+  - scripts/tl.py
+  - scripts/tl_core/cli.py
+  - references/RUNBOOK.md
+  - ops/agent_creds_windows_test.py
+write_set_hash: 46093de80c34151e23ad2865657160a6ec5604ae0bd73a6a7531c45877221ac4
+branch: agent/wp1170-g2-codex
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
+start_from_sha: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
+reviewed_sha_required: 3c2def2807e5acca9763d9d6c350c78c8bbe90e6
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1170#issuecomment-6612765882
+authority_basis: owner approved #1170 r3, scoped bootstrap and wp1170-budget-02 g2; user delegated lease and work
+lease_expires_at_utc: '2026-11-03T20:40:00Z'
+heartbeat_at: '2026-11-03T18:58:00Z'
+heartbeat_required_minutes: 360

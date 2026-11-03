@@ -170,7 +170,7 @@ jobs:
       # Tên artifact KHÔNG phải danh tính (consumer dùng artifact ID + metadata run sau readback);
       # `if-no-files-found: error` để "không có receipt" là job ĐỎ chứ không phải job xanh rỗng.
       - name: tải receipt lên artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: thu-hoi-receipt-${{ github.event.pull_request.head.sha }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/thu-hoi-receipt/receipt.json

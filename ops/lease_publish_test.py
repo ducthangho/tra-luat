@@ -6474,7 +6474,7 @@ def t132_shallow_va_object_thieu_la_12_khong_phai_vang():
 
 _MAU_T133: dict = {}
 _POL_BYTES_T133 = b'{"schema": 1}\n'
-_DESC_T133 = "c" * 64
+_DESC_T133 = "f974b6dba1bfccd4f6ec4315c00ece7868a045487ffbf6ae3d4df86fb4315153"  # Q3, independent test pin
 
 
 def _mau_t133() -> dict:
@@ -6500,7 +6500,8 @@ def _mau_t133() -> dict:
     h["H_sach"] = _them_commit(cay, "h-sach", S, {"docs/b.md": b"b\n"})
     h["H_thu_hoi"] = _them_commit(cay, "h-thu-hoi", S, {"ops/thu-hoi/wp1-exec-1-codex-20260901.yaml": _yaml_bytes(_ban_ghi_thu_hoi())})
     h["H_meta_policy"] = _them_commit(cay, "h-meta", S, {RET: _yaml_bytes(_metadata_retired()), POL: b"{}\n"})
-    h["H_meta_khong_policy"] = _them_commit(cay, "h-meta-0", S, {RET: _yaml_bytes(_metadata_retired())})
+    h["H_meta_khong_policy"] = _them_commit(cay, "h-meta-0", S, {RET: _yaml_bytes(_metadata_retired(
+        descriptor_sha256=_DESC_T133, first_policy_sha256=_h.sha256(_POL_BYTES_T133).hexdigest(), base_sha_before_add=S))})
     h["H_meta_hong"] = _them_commit(cay, "h-meta-hong", S, {RET: b"a: [\n", POL: b"{}\n"})
     h["H_symlink"] = _them_commit(cay, "h-symlink", S, {}, symlink=("ops/thu-hoi/x.yaml", "../leases/x.yaml"))
     h["H_thu_muc_con"] = _them_commit(cay, "h-sub", S, {"ops/thu-hoi/sub/x.yaml": b"a: 1\n"})
@@ -7140,7 +7141,7 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
          t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat, "GIET", "KhoObject.doc cache-hit"),
         ("F04-bo-deadline-truoc-tra", "            self._con_thoi_gian(f\"trước khi trả {oid[:12]}\")\n", "",
          t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat, "GIET", "KhoObject.doc sau wait"),
-        ("F05-bo-tong-tu-header", "                    if tong_truoc + kich > self.ngan_sach[\"max_total_object_bytes\"]:\n", "                    if False:\n",
+        ("F05-bo-tong-tu-header", "                    if self.tong_bytes + kich > self.ngan_sach[\"max_total_object_bytes\"]:\n", "                    if False:\n",
          t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file, "GIET", "KhoObject.doc header"),
         ("F05-bo-rc-cat-file", "            if rc != 0:\n                raise Chan(RC_KHONG_XAC_DINH, f\"KHÔNG_XÁC_ĐỊNH: cat-file rc={rc}", "            if False:\n                raise Chan(RC_KHONG_XAC_DINH, f\"KHÔNG_XÁC_ĐỊNH: cat-file rc={rc}",
          t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file, "GIET", "KhoObject.doc rc"),
@@ -7289,9 +7290,9 @@ def t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat():
             kho.dong()
         clock[0] = 100.0
         kho = mod.KhoObject(cay, bay_gio=lambda: clock[0], deadline=101.0)
-        popen = mod.subprocess.Popen
+        popen, children = mod.subprocess.Popen, []
         def theo_doi(*a, **kw):
-            p = popen(*a, **kw); poll, wait = p.poll, p.wait
+            p = popen(*a, **kw); children.append(p); poll, wait = p.poll, p.wait
             def poll_sau(*a, **kw):
                 rc = poll(*a, **kw)
                 if rc is not None:
@@ -7306,6 +7307,8 @@ def t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat():
             with mock.patch.object(mod.subprocess, "Popen", theo_doi):
                 rc, td = _ma_chan(mod, kho.doc, oid, "blob")
             chot(rc == 12, f"cat-file thật hoàn tất sau deadline phải 12: {rc} {td!r}")
+            chot(children and all(all(stream.closed for stream in (p.stdin, p.stdout, p.stderr)) for p in children),
+                 "A11 deadline must close all three cat-file pipes")
         finally:
             kho.dong()
 
@@ -7350,22 +7353,14 @@ def t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file():
         cay, (_, _, H) = _kho_do_thi(s)
         oid = _g_a0(cay, "rev-parse", H + ":README.md")
         kho = mod.KhoObject(cay, ngan_sach={"max_total_object_bytes": 1})
-        reads, popen = [], mod.subprocess.Popen
-        class TheoDoiDoc:
-            def __init__(self, real):
-                self.real = real
-            def readline(self, *a):
-                return self.real.readline(*a)
-            def read(self, n):
-                reads.append(n)
-                return self.real.read(n)
-            def __getattr__(self, name):
-                return getattr(self.real, name)
+        reads, popen, raw_read, seen = [], mod.subprocess.Popen, mod.os.read, []
         def theo_doi(*a, **kw):
-            p = popen(*a, **kw); p.stdout = TheoDoiDoc(p.stdout)
-            return p
+            p = popen(*a, **kw); seen.append(p); return p
+        def read(fd, n):
+            if seen and fd == seen[-1].stdout.fileno() and n > 1: reads.append(n)
+            return raw_read(fd, n)
         try:
-            with mock.patch.object(mod.subprocess, "Popen", theo_doi):
+            with mock.patch.object(mod.subprocess, "Popen", theo_doi), mock.patch.object(mod.os, "read", read):
                 rc, td = _ma_chan(mod, kho.doc, oid, "blob")
             chot(rc == 12 and not reads, f"total byte budget phải chặn trước body: {rc}, reads={reads}, {td}")
         finally:
@@ -14021,6 +14016,543 @@ def t217_a9_regex_dong_bo_LEASE_ID_san_pham():
     chot(A9_LEASE_ID.pattern == mod.LEASE_ID.pattern,
          f"A9: regex helper {A9_LEASE_ID.pattern!r} lệch LEASE_ID sản phẩm {mod.LEASE_ID.pattern!r}")
 
+
+@ca
+def t222_a1a_profile_v2_required_vs_audit_and_runner_tristate():
+    mod = _nap_cong(); h = mod.hoso_adapter_do()
+    required = {"schema_version", "git_path", "git_version", "credential_helper", "tls_thu_vien", "http_sslCAInfo", "http_sslCAPath", "proxy", "endpoint", "image_os", "image_version"}
+    chot(h["schema_version"] == 2 and set(h) == required | {"git_sha256"}, f"A1 keys: {sorted(h)}")
+    chot(isinstance(h["tls_thu_vien"], str) and len(h["tls_thu_vien"].split()) >= 2, f"A1 TLS must have name/version: {h['tls_thu_vien']!r}")
+    for bad in ("OpenSSL", "OpenSSL ", " 3.0", "OpenSSL\n3.0", "OpenSSL unknown"):
+        rc, _ = _ma_chan(mod, mod.kiem_mien_ho_so, dict(h, tls_thu_vien=bad))
+        chot(rc == 12, f"A1 TLS name/version domain accepted {bad!r}: {rc}")
+    base = mod.bam_ho_so(h)
+    audit = dict(h, git_sha256="0" * 64 if h["git_sha256"] != "0" * 64 else "1" * 64)
+    chot(mod.bam_ho_so(audit) == base, "A2 audit-only binary hash changed the digest")
+    alternatives = {"schema_version": 3, "git_path": str(HERE / "another-git"), "git_version": "git version 99", "credential_helper": "helper.exe",
+                    "tls_thu_vien": "OpenSSL 99", "http_sslCAInfo": "C:/ca.pem", "http_sslCAPath": "C:/certs", "proxy": "https://proxy.invalid",
+                    "endpoint": "https://example.invalid", "image_os": "runner-os", "image_version": "runner-v"}
+    for key, value in alternatives.items():
+        changed = dict(h, **{key: value})
+        if changed[key] == h[key]: changed[key] = str(value) + "-other"
+        chot(mod.bam_ho_so(changed) != base, f"A3 required key {key} absent from digest")
+    for key in ("image_os", "image_version"):
+        control = dict(h, image_os="runner-os", image_version="runner-v"); mod.kiem_mien_ho_so(control)
+        none = dict(control, **{key: None}); mod.kiem_mien_ho_so(none)
+        chot(mod.bam_ho_so(none) != mod.bam_ho_so(control), f"A4 {key}=None matched runner anchor")
+        missing = dict(control); del missing[key]
+        rc, _ = _ma_chan(mod, mod.kiem_mien_ho_so, missing)
+        chot(rc == 12, f"A4 missing {key} must be 12: {rc}")
+@ca
+def t223_a1a_q6_ancestor_and_fixed_history():
+    mod = _nap_cong(); q6 = "072181157a27804e69deb35bb792a88c70ac31e3"
+    chot(mod.MOC_BIA_MO_LICH_SU == q6 and re.fullmatch(r"[0-9a-f]{40}", q6) is not None, "A6 Q6 anchor differs from the independently pinned test value")
+    chot(mod.BIA_MO_LICH_SU == (), "A7b historical pairs must stay frozen empty")
+    root = HERE.parent
+    if not (root / ".git").exists():
+        return  # detached source archive has no Git ancestry to measure
+    p = subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor", q6, "HEAD"], capture_output=True, text=True)
+    chot(p.returncode == 0, f"A6 Q6 ancestry not established: rc={p.returncode} {p.stderr[:160]!r}")
+@ca
+def t224_a1a_historical_pair_both_ends():
+    from unittest import mock
+    mod = _nap_cong()
+    with mock.patch.object(mod, "_ref_ton_tai", return_value=True), mock.patch.object(mod, "_quet_so_thu_hoi_moi_ref", return_value=[]):
+        mod.BIA_MO_LICH_SU = (("old", "new", "a" * 40, "b" * 40),)
+        for old, new, expected in (("old", "new", "rc dự báo 0"), ("old", "other", "rc dự báo 8"), ("other", "new", "rc dự báo 8")):
+            out = mod._du_bao_check({"lease_id": new, "thay_the_cho": [old]}, HERE.parent, "master")
+            chot(any(expected in x for x in out), f"A7 pair ({old},{new}) failed: {out}")
+@ca
+def t225_a1a_upload_artifact_exact_pin():
+    pin = "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02"; wf = (HERE.parent / ".github/workflows/ops-thu-hoi-admission.yml").read_text(encoding="utf-8")
+    uses = re.findall(r"(?m)^\s*-?\s*uses:\s*(actions/upload-artifact@\S+)", wf)
+    chot(uses == [pin], f"A17 upload-artifact must occur once at pinned OID: {uses}")
+def _a1a_lease(lid, *, tomb=None, reverse=None, path="ops/x.md"):
+    d = {"lease_id": lid, "lease_expires_at_utc": mai_sau(24), "write_set": [path]}
+    if tomb is not None: d["da_bi_thay_the"] = tomb
+    if reverse is not None: d["thay_the_cho"] = [reverse]
+    return d
+def _a1a_commit_leases(cay, g, label, entries):
+    import yaml
+    folder = cay / "ops/leases"; folder.mkdir(parents=True, exist_ok=True)
+    for filename, data in entries.items(): (folder / filename).write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+    g(cay, "add", "-A"); g(cay, "commit", "-qm", label)
+    return g(cay, "rev-parse", "HEAD").stdout.strip()
+def _a1a_representative_mutant(mod, records):
+    reader = mod._doc_bia_mo_mac_dinh
+    def wrong(root, ref, ids):
+        result = reader(root, ref, ids)
+        for lid in ids:
+            reps = [x for x in records() if x["lease"].get("lease_id") == lid and x["lease"].get("da_bi_thay_the")]
+            if result[lid] == "CHE" and reps and reps[0]["ref"] != ref: result[lid] = "KHONG"
+        return result
+    return wrong
+@ca
+def t226_a1a_default_tree_CHE_dedup_and_legacy_invariance():
+    import importlib.util; from unittest import mock; mod = _nap_cong()
+    with San() as s:
+        cay, g = _kho_thu(s)
+        base = g(cay, "rev-parse", "HEAD").stdout.strip()
+        _a1a_commit_leases(cay, g, "canonical pair", {
+            "L.yaml": _a1a_lease("L", tomb="N"),
+            "N.yaml": _a1a_lease("N", reverse="L", path="ops/other.md")})
+        g(cay, "push", "-q", "origin", "master")
+        g(cay, "checkout", "-q", "-b", "z-landed", base)
+        _a1a_commit_leases(cay, g, "old holder", {"L.yaml": _a1a_lease("L")})
+        g(cay, "push", "-q", "origin", "z-landed")
+        g(cay, "fetch", "-q", "origin"); g(cay, "checkout", "-q", "--detach", base)
+        g(cay, "branch", "-D", "master")
+        baseline_path = s / "lease_publish_base.py"
+        old = subprocess.run(["git", "-C", str(HERE.parent), "show", "7f65476afdac57023be1b83ddec0df36a5e8d4b8:ops/lease_publish.py"], capture_output=True, check=True).stdout
+        baseline_path.write_bytes(old)
+        spec = importlib.util.spec_from_file_location("lease_publish_base_a1a", baseline_path)
+        baseline = importlib.util.module_from_spec(spec); spec.loader.exec_module(baseline)
+        args = ("ai-dang-giu", "ops/x.md", "--root", str(cay))
+        rb, ob, eb = _goi_main(baseline, *args)
+        rc, oc, ec = _goi_main(mod, *args)
+        rf, of, ef = _goi_main(mod, *args, "--du-bao")
+        plain = lambda x: [line for line in x.splitlines() if not line.startswith("DU_BAO:")]
+        marker = "DU_BAO: L · BIA_MỘ_MẶC_ĐỊNH=CHE"
+        chot((rb, rc, rf) == (11, 11, 11) and eb == ec == ef and plain(ob) == plain(oc) == plain(of) and
+             "NGƯỜI_GIỮ 1: L" in of and of.splitlines().count(marker) == 1, f"A19 legacy drift or CHE absent: rc={(rb,rc,rf)}, marker={of.count(marker)}, err={(eb,ec,ef)}")
+        def mutant_case(name, control):
+            with mock.patch.object(mod, "_doc_bia_mo_mac_dinh", _a1a_representative_mutant(mod, lambda: mod._quet_lease_toan_kho(cay))):
+                trial = _goi_main(mod, *args, "--du-bao")
+            chot(trial[0] == control[0] and trial[2] == control[2] and plain(trial[1]) == plain(control[1]), f"{name} representative mutant changed legacy verdict/output: {trial!r}")
+            if trial != control: real_failures.add(name)
+        real_failures = set()
+        first = next(x for x in mod._quet_lease_toan_kho(cay) if x["lease"].get("da_bi_thay_the") == "N"); chot(first["ref"] == "refs/remotes/origin/master", f"A19 first tombstone is not canonical remote: {first['ref']}")
+        mutant_case("A19", (rf, of, ef))
+        out = mod._du_bao_check({"lease_id": "N", "thay_the_cho": ["L"]}, cay, "master")
+        chot(mod.BIA_MO_LICH_SU == () and any("rc dự báo 8" in x for x in out), f"A7b: {out}")
+        g(cay, "branch", "a-first", "origin/master")
+        records = mod._quet_lease_toan_kho(cay)
+        tomb = next(x for x in records if x["lease"].get("lease_id") == "L" and x["lease"].get("da_bi_thay_the") == "N")
+        chot(tomb["ref"] != "refs/remotes/origin/master", f"A21 fixture did not expose dedup trap: {tomb['ref']}")
+        state = mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})
+        chot(state == {"L": "CHE"}, f"A21 default tree overridden by representative ref: {state}")
+        mutant_case("A21", _goi_main(mod, *args, "--du-bao"))
+        chot(real_failures == {"A21"}, f"real A19/A21 representative mutant failures: {real_failures}")
+        rc2, oc2, ec2 = _goi_main(mod, *args)
+        rf2, of2, ef2 = _goi_main(mod, *args, "--du-bao", "--nhanh-mac-dinh", "absent")
+        chot(rf2 == rc2 and ef2 == ec2 and plain(of2) == plain(oc2)
+             and "DU_BAO: L · BIA_MỘ_MẶC_ĐỊNH=KHONG_XAC_DINH" in of2
+             and "KHÔNG ĐO ĐƯỢC" in of2, f"A22 missing canonical ref: {rf2} {of2!r} {ef2!r}")
+        g(cay, "checkout", "-q", "-b", "master", "origin/master")
+        _a1a_commit_leases(cay, g, "conflicting L", {"L-copy.yml": _a1a_lease("L")})
+        g(cay, "push", "-q", "origin", "master"); g(cay, "fetch", "-q", "origin")
+        chot(mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})["L"] == "KHONG_XAC_DINH", "A22 conflict at L was accepted")
+        g(cay, "rm", "-q", "ops/leases/L-copy.yml"); g(cay, "commit", "-qm", "remove L duplicate")
+        _a1a_commit_leases(cay, g, "conflicting N", {"N-copy.yml": _a1a_lease("N")})
+        g(cay, "push", "-q", "origin", "master"); g(cay, "fetch", "-q", "origin")
+        chot(mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})["L"] == "KHONG_XAC_DINH", "A22 conflict at N was accepted")
+@ca
+def t227_a1a_side_tombstone_and_missing_reverse_are_unknown():
+    mod = _nap_cong()
+    with San() as s:
+        cay, g = _kho_thu(s)
+        base = g(cay, "rev-parse", "HEAD").stdout.strip()
+        _a1a_commit_leases(cay, g, "canonical live", {"L.yaml": _a1a_lease("L")})
+        g(cay, "push", "-q", "origin", "master")
+        g(cay, "checkout", "-q", "-b", "z-side", base)
+        _a1a_commit_leases(cay, g, "side tombstone", {"L.yaml": _a1a_lease("L", tomb="N"),
+                                                        "N.yaml": _a1a_lease("N", reverse="L", path="ops/other.md")})
+        g(cay, "push", "-q", "origin", "z-side"); g(cay, "fetch", "-q", "origin")
+        state = mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})
+        chot(state == {"L": "KHONG"}, f"A20 side tombstone leaked into canonical forecast: {state}")
+        g(cay, "checkout", "-q", "master")
+        _a1a_commit_leases(cay, g, "one-way canonical", {"L.yaml": _a1a_lease("L", tomb="N")})
+        g(cay, "push", "-q", "origin", "master"); g(cay, "fetch", "-q", "origin")
+        state = mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})
+        chot(state == {"L": "KHONG_XAC_DINH"}, f"A22 reverse only on side must be unknown: {state}")
+        rc0, out0, err0 = _goi_main(mod, "ai-dang-giu", "ops/x.md", "--root", str(cay))
+        rc, out, err = _goi_main(mod, "ai-dang-giu", "ops/x.md", "--root", str(cay), "--du-bao")
+        chot(rc == rc0 and err == err0
+             and [x for x in out.splitlines() if not x.startswith("DU_BAO:")] == out0.splitlines()
+             and "DU_BAO: L · BIA_MỘ_MẶC_ĐỊNH=KHONG_XAC_DINH" in out,
+             f"A22 CLI one-way canonical: {rc} {out!r} {err!r}")
+        (cay / "ops/leases/bad.yaml").write_text("a: [\n", encoding="utf-8")
+        g(cay, "add", "-A"); g(cay, "commit", "-qm", "malformed canonical")
+        g(cay, "push", "-q", "origin", "master"); g(cay, "fetch", "-q", "origin")
+        chot(mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})["L"] == "KHONG_XAC_DINH",
+             "A22 malformed YAML unit path was rounded")
+        noflag = _goi_main(mod, "ai-dang-giu", "ops/x.md", "--root", str(cay))
+        flagged = _goi_main(mod, "ai-dang-giu", "ops/x.md", "--root", str(cay), "--du-bao")
+        chot(noflag[0] == flagged[0] == 12 and noflag[2] == flagged[2]
+             and not any(x.startswith("DU_BAO:") for x in flagged[1].splitlines()),
+             f"A22 malformed YAML CLI bypassed legacy gate: {noflag!r} {flagged!r}")
+@ca
+def t228_a1a_q13_descriptor_exact_and_other_bindings():
+    import hashlib, json, shutil
+    mod = _nap_cong()
+    q3 = "f974b6dba1bfccd4f6ec4315c00ece7868a045487ffbf6ae3d4df86fb4315153"
+    newline = "df81f47b50624d13faeb7a756b6f3573c999aef485ee8d741dbcd3d13ae2a7a8"
+    chot(mod.DESCRIPTOR_Q13_SHA256 == q3 and re.fullmatch(r"[0-9a-f]{64}", q3) is not None,
+         "A18 descriptor constant differs from Q3 raw-body digest")
+    sample = _mau_t133()
+    with San() as s:
+        cay = s / "cay"; shutil.copytree(sample["cay"], cay)
+        h = sample["h"]; S = h["S"]
+        RET = "ops/thu-hoi/_ngoai-le-closure.retired.yaml"
+        POL = ".github/coordination/change-impact.v1.json"
+        receipt = s / "q13-receipt.json"
+        def m4(head, base=S):
+            return _goi_main(mod, "kiem-thu-hoi-github", head, "--canonical-base", base,
+                             "--nhanh-mac-dinh", "master", "--root", str(cay), "--receipt", str(receipt))
+        rc, out, err = m4(h["H_bind_ok"])
+        chot(rc == 0 and "THU_HOI_ADMISSION TAP_THU_HOI_RONG" in out and receipt.is_file()
+             and json.loads(receipt.read_text(encoding="utf-8"))["descriptor_q13_ghim"] == q3,
+             f"A18 positive all-gates marker: {rc} {out!r} {err!r}")
+        policy_sha = hashlib.sha256(_POL_BYTES_T133).hexdigest()
+        for name, bad in (("trailing newline", newline), ("one character", "0" + q3[1:])):
+            marker = _metadata_retired(descriptor_sha256=bad, first_policy_sha256=policy_sha,
+                                       base_sha_before_add=S)
+            head = _them_commit(cay, "q13-" + name.replace(" ", "-"), S,
+                                {RET: _yaml_bytes(marker), POL: _POL_BYTES_T133})
+            rc, _, err = m4(head)
+            chot(rc == 12 and "descriptor_sha256" in err,
+                 f"A18 {name} must fail at descriptor gate: {rc} {err!r}")
+        for name, head, base in (("policy hash", h["H_bind_hash"], S),
+                                 ("base SHA", h["H_bind_base"], S),
+                                 ("existing policy", h["H_bind_S_co_policy"], h["S_pol"]),
+                                 ("missing policy", h["H_meta_khong_policy"], S)):
+            rc, _, err = m4(head, base)
+            chot(rc == 12 and (name != "missing policy" or "policy" in err and "vắng/hỏng" in err),
+                 f"A18 {name} gate bypassed: {rc} {err!r}")
+@ca
+def t229_a1a_blob_raw_bytes_and_read_failures():
+    from unittest import mock
+    mod = _nap_cong()
+    with San() as s:
+        cay, g = _kho_thu(s)
+        g(cay, "config", "core.autocrlf", "false")
+        raw = b"{\r\n  \"schema\": 1\r\n}\r\n"
+        (cay / "ops/policy.json").write_bytes(raw)
+        g(cay, "add", "-A"); g(cay, "commit", "-qm", "raw policy")
+        got = mod._doc_blob_text_12(cay, "HEAD", "ops/policy.json")
+        chot(got == raw and mod.GOI_GIT("cat-file", "blob", "HEAD:ops/policy.json", cwd=cay).stdout_bytes == raw,
+             f"A10 raw Git bytes changed across text decoding: {got!r}")
+        with mock.patch.object(mod, "GOI_GIT", side_effect=OSError("read failed")):
+            rc, _ = _ma_chan(mod, mod._doc_blob_text_12, cay, "HEAD", "ops/policy.json")
+            chot(rc == 12, f"A9 OSError must be Chan(12), got {rc}")
+        entry = {"path": "ops/thu-hoi/old.yaml", "ref": "refs/remotes/origin/master",
+                 "mode": "100644", "type": "blob"}
+        with mock.patch.object(mod, "_ref_ton_tai", return_value=True), \
+                mock.patch.object(mod, "_quet_so_thu_hoi_moi_ref", return_value=[entry]), \
+                mock.patch.object(mod, "GOI_GIT", side_effect=UnicodeDecodeError("utf-8", b"\xff", 0, 1, "bad")):
+            out = mod._du_bao_check({"lease_id": "new", "thay_the_cho": ["old"]}, cay, "master")
+            chot(any("rc dự báo 12" in x for x in out), f"A8 forecast did not catch decode failure: {out}")
+@ca
+def t230_a1a_m4_one_clock_snapshot():
+    import shutil; from unittest import mock
+    mod = _nap_cong()
+    sample = _mau_t133()
+    with San() as s:
+        cay = s / "cay"; shutil.copytree(sample["cay"], cay)
+        h = sample["h"]
+        with mock.patch.object(mod, "datetime", wraps=datetime) as clock:
+            rc, out, err = _goi_main(mod, "kiem-thu-hoi-github", h["H_bind_ok"],
+                                     "--canonical-base", h["S"], "--nhanh-mac-dinh", "master",
+                                     "--root", str(cay))
+        chot(rc == 0 and clock.now.call_count == 1,
+             f"A12 M4 must use exactly one UTC clock snapshot: rc={rc} calls={clock.now.call_count} {err!r}")
+@ca
+def t231_a1a_A4_mutant_to_case_matrix():
+    from unittest import mock; mod = _nap_cong()
+    h = dict(mod.hoso_adapter_do(), image_os="runner-os", image_version="runner-v")
+    original_domain, original_digest = mod.kiem_mien_ho_so, mod.bam_ho_so
+    class Signal(AssertionError): pass
+    cases = {}
+    for key in ("image_os", "image_version"):
+        def missing(k=key):
+            candidate = dict(h); del candidate[k]
+            try: mod.kiem_mien_ho_so(candidate)
+            except mod.Chan as e:
+                if e.ma != 12: raise Signal(f"{k}: wrong rc {e.ma}")
+            else: raise Signal(f"{k}: missing key accepted")
+        def none(k=key):
+            candidate = dict(h, **{k: None})
+            mod.kiem_mien_ho_so(candidate)
+            if mod.bam_ho_so(candidate) == mod.bam_ho_so(h):
+                raise Signal(f"{k}: None matched runner anchor")
+        cases[f"A4_missing_{key}"] = missing
+        cases[f"A4_none_{key}"] = none
+    targets = {f"merge_missing_{k}": {f"A4_missing_{k}"} for k in ("image_os", "image_version")}
+    targets.update({f"match_none_{k}": {f"A4_none_{k}"} for k in ("image_os", "image_version")})
+    def observe():
+        failures = set()
+        for name, fn in cases.items():
+            try: fn()
+            except Signal as e: failures.add(name); print(f"MUTANT_CASE {name} {type(e).__name__}")
+            except Exception as e: raise AssertionError(f"{name}: unrelated {type(e).__name__}: {e}") from e
+        return failures
+    chot(observe() == set(), "A4 baseline cases failed")
+    for mutant, expected in targets.items():
+        key = mutant.rsplit("_", 2)[-2] + "_" + mutant.rsplit("_", 1)[-1]
+        if mutant.startswith("merge_missing"):
+            def changed_domain(profile, k=key):
+                if k not in profile: profile = dict(profile, **{k: None})
+                return original_domain(profile)
+            patch = mock.patch.object(mod, "kiem_mien_ho_so", changed_domain)
+        else:
+            def changed_digest(profile, k=key):
+                return original_digest(dict(profile, **{k: "runner-v" if k == "image_version" else "runner-os"}))
+            patch = mock.patch.object(mod, "bam_ho_so", changed_digest)
+        with patch: observed = observe()
+        chot(observed == expected, f"A4 {mutant}: expected {expected}, observed {observed}")
+@ca
+def t232_a1a_M14_mutant_to_case_matrix_and_tree_pin():
+    from types import SimpleNamespace; from unittest import mock; import yaml
+    mod = _nap_cong()
+    canon, oid = "refs/remotes/origin/master", "a" * 40
+    current = {}
+    original_reader, original_forecast = mod._doc_bia_mo_mac_dinh, mod._du_bao_ai_dang_giu
+    class Signal(AssertionError): pass
+    def lease(lid, **fields): return dict(_a1a_lease(lid), **fields)
+    live, tomb, reverse = lease("L"), lease("L", da_bi_thay_the="N"), lease("N", thay_the_cho=["L"])
+    def record(d, ref=canon, path=None): return {"lease": d, "ref": ref, "path": path or f"ops/leases/{d['lease_id']}.yaml", "blob": "b" * 40}
+    side = "refs/heads/z-side"
+    scenarios = {
+        "A19_cli": ([("L.yaml", tomb), ("N.yaml", reverse)], [record(tomb), record(reverse), record(live, side)], "CHE", "cli"),
+        "A20_unit": ([("L.yaml", live)], [record(live), record(tomb, side), record(reverse, side)], "KHONG", "unit"),
+        "A21_unit": ([("L.yaml", tomb), ("N.yaml", reverse)], [record(tomb, "refs/heads/a-first"), record(reverse), record(live, side)], "CHE", "unit"),
+        "A22i_cli": ([("L.yaml", tomb)], [record(tomb), record(reverse, side), record(live, side)], "KHONG_XAC_DINH", "cli"),
+        "A22ii_cli": ([("L.yaml", live)], [record(live)], "KHONG_XAC_DINH", "missing"),
+        "A22iii_unit": ([("bad.yaml", "a: [\n")], [record(live)], "KHONG_XAC_DINH", "unit"),
+        "A22ivL_unit": ([("L.yaml", tomb), ("N.yaml", reverse), ("L-copy.yml", live)], [record(tomb), record(reverse), record(live, canon, "ops/leases/L-copy.yml")], "KHONG_XAC_DINH", "unit"),
+        "A22ivN_unit": ([("L.yaml", tomb), ("N.yaml", reverse), ("N-copy.yml", lease("N"))], [record(tomb), record(reverse), record(lease("N"), canon, "ops/leases/N-copy.yml")], "KHONG_XAC_DINH", "unit"),
+    }
+    chot(scenarios["A19_cli"][1][0]["ref"] == canon and scenarios["A21_unit"][1][0]["ref"] != canon, "A21 representative-ref trap was not constructed")
+    def git(*args, **kw):
+        current["ref_moved"] = True; return SimpleNamespace(returncode=1 if current["missing"] else 0, stdout=oid + "\n")
+    def tree(_root, ref, path, de_quy=True):
+        if ref == canon and current.get("ref_moved") and path == "ops/leases": return []
+        if path == "ops": return [("040000", "tree", oid, "ops")]
+        if path == "ops/leases" and not de_quy:
+            return [("120000" if current.get("bad_namespace") else "040000", "blob" if current.get("bad_namespace") else "tree", oid, path)]
+        if path == "ops/leases":
+            return [("100644", "blob", oid, "ops/leases/" + name) for name, _ in current["entries"]]
+        return []
+    def blob(_root, ref, path):
+        chot(ref == oid, f"M14 mixed a moving ref with pinned tree: {ref}")
+        d = dict(current["entries"])[path.rsplit("/", 1)[-1]]; return d.encode() if isinstance(d, str) else yaml.safe_dump(d).encode()
+    def all_refs(root, ref, ids):
+        baseline = original_reader(root, ref, ids)
+        if current["missing"]: return baseline
+        try: parsed = [yaml.safe_load(x) if isinstance(x, str) else x for _, x in current["entries"]]
+        except yaml.YAMLError: return baseline
+        if any(not isinstance(x, dict) for x in parsed): return baseline
+        by_id = {}
+        for item in parsed: by_id.setdefault(item.get("lease_id"), []).append(item)
+        if any(any(x != copies[0] for x in copies[1:]) for copies in by_id.values()): return baseline
+        for lid in ids:
+            next_ids = [x["lease"].get("da_bi_thay_the") for x in current["records"] if x["lease"].get("lease_id") == lid]
+            if any(n and any(y["lease"].get("lease_id") == n and lid in (y["lease"].get("thay_the_cho") or [])
+                             for y in current["records"]) for n in next_ids): baseline[lid] = "CHE"
+        return baseline
+    representative = _a1a_representative_mutant(mod, lambda: current["records"])
+    def rounded(root, ref, ids): return {k: ("KHONG" if v == "KHONG_XAC_DINH" else v) for k, v in original_reader(root, ref, ids).items()}
+    def omitted(*args, **kwargs): return [x for x in original_forecast(*args, **kwargs) if "BIA_MỘ_MẶC_ĐỊNH=" not in x]
+    def dropped(filename):
+        def mutate(root, ref, ids):
+            saved = current["entries"]; current["entries"] = [x for x in saved if x[0] != filename]
+            try: return original_reader(root, ref, ids)
+            finally: current["entries"] = saved
+        return mutate
+    def absent_raises(root, ref, ids):
+        if current["missing"]: raise RuntimeError("canonical ref absent")
+        return original_reader(root, ref, ids)
+    targets = {"all_refs": {"A20_unit", "A22i_cli"}, "representative": {"A21_unit"},
+               "round_unknown": {"A22i_cli", "A22ii_cli", "A22iii_unit", "A22ivL_unit", "A22ivN_unit"},
+               "omit_line": {"A19_cli", "A22i_cli", "A22ii_cli"}, "drop_L": {"A22ivL_unit"}, "drop_N": {"A22ivN_unit"}, "absent_raises": {"A22ii_cli"}}
+    def observe(caught=()):
+        failures = set()
+        for name, (entries, records, expected, kind) in scenarios.items():
+            current.update(entries=entries, records=records, missing=kind == "missing", bad_namespace=False, ref_moved=False)
+            try:
+                if kind in ("cli", "missing"):
+                    with mock.patch.object(mod, "_quet_lease_toan_kho", return_value=records), \
+                            mock.patch.object(mod, "_cac_ref_cuc_bo", return_value=(set(), [canon])), \
+                            mock.patch.object(mod, "_kiem_so_rong_khi_chua_kich_hoat"), \
+                            mock.patch.object(mod, "_ref_ton_tai", return_value=kind != "missing"), \
+                            mock.patch.object(mod, "_quet_so_thu_hoi_moi_ref", return_value=[]):
+                        args = ("ai-dang-giu", "ops/x.md", "--root", str(HERE.parent))
+                        rb, ob, eb = _goi_main(mod, *args)
+                        with mock.patch.object(mod, "_phan_loai_lease", wraps=mod._phan_loai_lease) as classify:
+                            rc, out, err = _goi_main(mod, *args, "--du-bao", "--nhanh-mac-dinh", "master")
+                        count = sum(mod._lease_cham_duong(x["lease"], "ops/x.md") for x in records)
+                    plain = [x for x in out.splitlines() if not x.startswith("DU_BAO:")]
+                    if rc != rb or err != eb or plain != ob.splitlines() or classify.call_count != count \
+                            or f"DU_BAO: L · BIA_MỘ_MẶC_ĐỊNH={expected}" not in out:
+                        raise Signal(f"{name}: rc={rc} state={expected} absent")
+                elif mod._doc_bia_mo_mac_dinh(Path("."), canon, {"L"})["L"] != expected:
+                    raise Signal(f"{name}: state differs from {expected}")
+            except Signal as e: failures.add(name); print(f"MUTANT_CASE {name} {type(e).__name__}")
+            except Exception as e:
+                if not isinstance(e, caught): raise AssertionError(f"{name}: unrelated {type(e).__name__}: {e}") from e
+                failures.add(name); print(f"MUTANT_CASE {name} {type(e).__name__}")
+        return failures
+    with mock.patch.object(mod, "GOI_GIT", git), mock.patch.object(mod, "_ls_tree_z", tree), \
+            mock.patch.object(mod, "_doc_blob_text_12", blob):
+        chot(observe() == set(), "M14 baseline matrix cases failed")
+        current.update(entries=[("L.yaml", live)], records=[record(live)], missing=False, bad_namespace=True, ref_moved=False)
+        chot(original_reader(Path("."), canon, {"L"})["L"] == "KHONG_XAC_DINH", "M14 non-tree lease namespace was rounded to KHONG")
+        for mutant, expected in targets.items():
+            attr, changed = ("_du_bao_ai_dang_giu", omitted) if mutant == "omit_line" else (
+                "_doc_bia_mo_mac_dinh", {"all_refs": all_refs, "representative": representative,
+                                          "round_unknown": rounded, "drop_L": dropped("L-copy.yml"),
+                                          "drop_N": dropped("N-copy.yml"), "absent_raises": absent_raises}[mutant])
+            with mock.patch.object(mod, attr, changed): observed = observe((RuntimeError,) if mutant == "absent_raises" else ())
+            chot(observed == expected, f"M14 {mutant}: expected {expected}, observed {observed}")
+@ca
+def t233_a1a_descendant_stdout_cancel_closes_owners():
+    from unittest import mock; mod = _nap_cong()
+    def fds():
+        found = set()
+        for fd in range(64):
+            try: os.fstat(fd); found.add(fd)
+            except OSError: pass
+        return found
+    with San() as s:
+        cay, (_, _, H) = _kho_do_thi(s); oid = _g_a0(cay, "rev-parse", H + ":README.md")
+        kho = mod.KhoObject(cay, ngan_sach={"max_reader_wall_seconds": 0.2})
+        child = "import subprocess,sys; subprocess.Popen([sys.executable,'-c','import time; time.sleep(5)'],stdout=sys.stdout,stderr=subprocess.DEVNULL); open(sys.argv[1],'w').write('ready'); sys.stdin.readline(); sys.stdout.buffer.write((sys.argv[2]+' blob 4\\n').encode()); sys.stdout.flush()"
+        marker = s / "descendant-ready"; before, threads = fds(), threading.active_count()
+        try:
+            with mod.subprocess.Popen([sys.executable, "-c", child, str(marker), oid], stdin=subprocess.PIPE,
+                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=hasattr(os, "killpg")) as p:
+                ready_by = time.monotonic() + 5
+                while not marker.exists() and time.monotonic() < ready_by and p.poll() is None: time.sleep(0.01)
+                chot(marker.exists() and p.poll() is None, "descendant fixture did not stay ready within 5s")
+                with mock.patch.object(mod.subprocess, "Popen", return_value=p):
+                    started = time.monotonic(); kho.deadline = started + 0.2; rc, reason = _ma_chan(mod, kho.doc, oid, "blob"); elapsed = time.monotonic() - started
+                chot(rc == 12 and "deadline reader" in reason and marker.exists() and elapsed < 0.5, f"held stdout did not reach bounded reader deadline: {rc} {elapsed:.3f}s {reason!r}")
+                chot(fds() == before and threading.active_count() == threads and all(x.closed for x in (p.stdin, p.stdout, p.stderr)), "A11 leaked fd/thread at return")
+        finally: kho.dong()
+@ca
+def t234_a1a_recursive_yaml_duplicate_unknown_and_cli_invariance():
+    mod = _nap_cong()
+    with San() as s:
+        cay, g = _kho_thu(s); folder = cay / "ops/leases"; folder.mkdir(parents=True, exist_ok=True)
+        import yaml; raw = yaml.safe_dump(_a1a_lease("L")) + "extra: &cycle\n  self: *cycle\n"
+        for name in ("L.yaml", "L-copy.yml"): (folder / name).write_text(raw, encoding="utf-8")
+        g(cay, "add", "-A"); g(cay, "commit", "-qm", "recursive duplicates"); g(cay, "push", "-q", "origin", "master")
+        started = time.monotonic(); state = mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})
+        print(f"M14 alias cycle after={time.monotonic() - started:.3f}s")
+        chot(state == {"L": "KHONG_XAC_DINH"}, f"recursive duplicate classified {state}")
+        args = ("ai-dang-giu", "ops/x.md", "--root", str(cay)); plain, forecast = _goi_main(mod, *args), _goi_main(mod, *args, "--du-bao")
+        chot(plain[0] == forecast[0] and plain[2] == forecast[2] and
+             plain[1].splitlines() == [x for x in forecast[1].splitlines() if not x.startswith("DU_BAO:")] and
+             "DU_BAO: L · BIA_MỘ_MẶC_ĐỊNH=KHONG_XAC_DINH" in forecast[1], f"recursive CLI: {plain!r} {forecast!r}")
+
+        dag = {"leaf": 1}
+        for _ in range(28): dag = {"left": dag, "right": dag}
+        raw = yaml.safe_dump(dict(_a1a_lease("L"), graph=dag))
+        for name in ("L.yaml", "L-copy.yml"): (folder / name).write_text(raw, encoding="utf-8")
+        g(cay, "add", "-A"); g(cay, "commit", "-qm", "shared acyclic aliases"); g(cay, "push", "-q", "origin", "master")
+        started = time.monotonic(); state = mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})
+        equal_elapsed = time.monotonic() - started
+        print(f"M14 alias DAG equal depth=28 after={equal_elapsed:.3f}s")
+        chot(state == {"L": "KHONG"} and equal_elapsed < 5,
+             f"shared acyclic aliases took too long or changed state: {state}")
+
+        # Measure the pre-fix comparator on this same committed tree in a bounded child.
+        source = SCRIPT.read_text(encoding="utf-8")
+        start = source.index("    def mau_thuan(ban):\n")
+        end = source.index("\n    ket = {}", start)
+        old = ("    def mau_thuan(ban):\n"
+               "        try: return any(x != ban[0] for x in ban[1:])\n"
+               "        except RecursionError: return True\n")
+        old_path = s / "lease_publish_old_comparator.py"
+        old_path.write_text(source[:start] + old + source[end:], encoding="utf-8")
+        script = ("import importlib.util,sys,pathlib; "
+                  "p=importlib.util.spec_from_file_location('old',sys.argv[1]); "
+                  "m=importlib.util.module_from_spec(p); p.loader.exec_module(m); "
+                  "print(m._doc_bia_mo_mac_dinh(pathlib.Path(sys.argv[2]),'refs/remotes/origin/master',{'L'}))")
+        started = time.monotonic()
+        try:
+            before = subprocess.run([sys.executable, "-B", "-c", script, str(old_path), str(cay)],
+                                    capture_output=True, text=True, timeout=5)
+            chot(before.returncode == 0 and "'L': 'KHONG'" in before.stdout,
+                 f"old comparator failed outside the timing bound: {before.returncode} {before.stderr[-200:]!r}")
+            print(f"M14 alias DAG equal depth=28 before={time.monotonic() - started:.3f}s")
+        except subprocess.TimeoutExpired:
+            print("M14 alias DAG equal depth=28 before=>5.000s (bounded timeout)")
+
+        different = dict(dag, right={"leaf": 2})
+        (folder / "L.yaml").write_text(raw, encoding="utf-8")
+        (folder / "L-copy.yml").write_text(yaml.safe_dump(dict(_a1a_lease("L"), graph=different)), encoding="utf-8")
+        g(cay, "add", "-A"); g(cay, "commit", "-qm", "conflicting aliases"); g(cay, "push", "-q", "origin", "master")
+        started = time.monotonic(); state = mod._doc_bia_mo_mac_dinh(cay, "refs/remotes/origin/master", {"L"})
+        print(f"M14 alias DAG conflicting depth=28 after={time.monotonic() - started:.3f}s")
+        chot(state == {"L": "KHONG_XAC_DINH"}, f"conflicting alias DAG classified {state}")
+
+@ca
+def t235_a1a_audit_presence_does_not_control_discovery():
+    from io import StringIO; from types import SimpleNamespace; from unittest import mock
+    mod = _nap_cong(); h = mod.hoso_adapter_do(); digest = mod.bam_ho_so(h); omitted = {k: v for k, v in h.items() if k != "git_sha256"}
+    answer = SimpleNamespace(returncode=0, stdout="ref: refs/heads/master\tHEAD\n" + "a" * 40 + "\trefs/heads/master\n", stderr="")
+    with mock.patch.object(mod, "_git_exe_toi_thieu", return_value=h["git_path"]), mock.patch.object(mod, "_repo_tam_co_lap", return_value=HERE), \
+            mock.patch.object(mod, "_env_rong", return_value={}), mock.patch.object(mod.subprocess, "run", return_value=answer) as discovery:
+        def check(name, profile, approved, want_rc, warned, calls):
+            discovery.reset_mock()
+            with mock.patch.object(mod.sys, "stderr", StringIO()) as warning:
+                rc, value = _ma_chan(mod, mod.kham_pha_nguon, "https://example.test", hoso=profile, da_duyet=approved)
+            chot(rc == want_rc and discovery.call_count == calls and ("audit-only" in warning.getvalue()) == warned and
+                 (rc != 0 or value == ("master", {"master": "a" * 40}, digest)), f"{name}: rc={rc} discovery={discovery.call_count} warning={warning.getvalue()!r} value={value!r}")
+        for name, profile, approved, rc, warned, calls in (
+                ("valid", h, [digest], 0, False, 1), ("omitted", omitted, [digest], 0, True, 1),
+                ("malformed", dict(h, git_sha256="bad-hash"), [digest], 0, True, 1), ("trailing-newline", dict(h, git_sha256=h["git_sha256"] + "\n"), [digest], 0, True, 1),
+                ("missing-required", {k: v for k, v in h.items() if k != "image_os"}, [digest], 12, False, 0),
+                ("unknown-key", dict(h, extra="x"), [digest], 12, False, 0), ("changed-TLS", dict(h, tls_thu_vien="OpenSSL 99"), [digest], 12, False, 0),
+                ("empty-anchor", h, [], 12, False, 0)):
+            check(name, profile, approved, rc, warned, calls)
+        domain = mod.kiem_mien_ho_so
+        def presence_mutant(profile):
+            if "git_sha256" not in profile: raise mod.Chan(12, "audit key absent")
+            return domain(profile)
+        with mock.patch.object(mod, "kiem_mien_ho_so", presence_mutant):
+            try: check("omitted", omitted, [digest], 0, True, 1)
+            except TinHieuChotCa as e: chot("omitted" in str(e), f"presence mutant failed unrelated case: {e}")
+            else: raise TinHieuChotCa("presence mutant survived omitted-key case")
+
+@ca
+def t236_a1a_old_marker_policy_removed_guard_mutant():
+    """An existing valid marker still requires policy at T; isolate the missing-policy guard."""
+    import importlib.util
+    import shutil
+
+    sample = _mau_t133()
+    with San() as s:
+        cay = s / "cay"
+        shutil.copytree(sample["cay"], cay)
+        base = sample["h"]["H_bind_ok"]  # valid marker and policy already exist at S
+        positive = sample["h"]["H_old_marker"]
+        removed = _them_commit(cay, "h-remove-old-policy", base, {},
+                               xoa=(".github/coordination/change-impact.v1.json",))
+        args = ("--canonical-base", base, "--nhanh-mac-dinh", "master", "--root", str(cay))
+
+        def verdict(mod, head):
+            mod.DESCRIPTOR_Q13_SHA256 = _DESC_T133
+            return _goi_main(mod, "kiem-thu-hoi-github", head, *args)
+
+        original = _nap_cong()
+        rc, _, err = verdict(original, positive)
+        chot(rc == 0, f"old marker and valid policy control must pass: {rc} {err!r}")
+        rc, _, err = verdict(original, removed)
+        chot(rc == 12 and "policy" in err and "vắng/hỏng" in err,
+             f"removing only policy from old marker must fail closed: {rc} {err!r}")
+
+        source = SCRIPT.read_text(encoding="utf-8")
+        guard = "                if policy_T is None:\n"
+        chot(source.count(guard) == 1, "missing-policy mutant anchor is not unique")
+        mutant_path = s / "lease_publish_without_policy_guard.py"
+        mutant_path.write_text(source.replace(guard, "                if False:\n"), encoding="utf-8")
+        spec = importlib.util.spec_from_file_location("lp_missing_policy_mutant", mutant_path)
+        mutant = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mutant)
+        rc, _, err = verdict(mutant, removed)
+        chot(rc == 0, f"guard-removal mutant must expose the isolated gap: {rc} {err!r}")
 
 def main(chon=None, nen=None, so=None) -> int:
     """`chon`/`nen`/`so` là SEAM của ca meta (`_chay_main_meta`): danh sách ca, nền, sổ bỏ ca — không vá

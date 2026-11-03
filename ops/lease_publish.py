@@ -74,6 +74,9 @@ def GOI_GIT(*doi_so, cwd=None):
     # Decode synchronously: Windows reader-thread exceptions otherwise escape
     # the consumer's UnicodeError handler and print an unrelated traceback.
     p = subprocess.run(["git", *doi_so], cwd=cwd, capture_output=True)
+    # Keep the exact bytes for consumers that hash a blob. Text normalization is
+    # retained for the older callers and must not silently change a policy hash.
+    p.stdout_bytes = p.stdout
     p.stdout = p.stdout.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
     p.stderr = p.stderr.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
     return p
@@ -1324,12 +1327,14 @@ PATH_BO_KIEM = "ops/lease_publish.py"
 # chủ kho duyệt một manifest (ADR-0047 lớp 2). Test tiêm neo qua tham số `da_duyet=` của API nội bộ;
 # KHÔNG có cờ CLI hay biến môi trường nào đổi được tập này (A2: "không có cờ production đổi authority").
 PROFILE_ADAPTER_DA_DUYET: frozenset = frozenset()
-# Danh sách lịch sử bia mộ — A1 ghim từ receipt A0 (Q6). Rỗng ở A0.
+# A1a/Q6: merge A0 #492 precedes the lease base. Its 11 symmetric pairs hash to
+# 8f372ccd2ceab70901868a58d3380acbd89dce25c7127d4d514bc959270fef48;
+# latest expiry 2026-09-08T10:17:12Z precedes its clock. Entries are (old ID, new ID, old blob OID, new blob OID); never derive from HEAD.
+MOC_BIA_MO_LICH_SU = "072181157a27804e69deb35bb792a88c70ac31e3"
 BIA_MO_LICH_SU: tuple = ()
-# Descriptor ngoại lệ closure Q13 (S6): sha256 thân comment `5575587924` trên PR #475, A1 readback rồi ghim —
-# KHÔNG bịa. Chừng nào còn `None`, mọi marker MỚI ở T đều 12 (A0 không tạo marker; policy có mà không marker
-# cũng 12 — không grandfather).
-DESCRIPTOR_Q13_SHA256 = None
+# Q3, owner instruction #499 comment 5825988768: sha256 of the raw UTF-8
+# `body` of PR #475 comment 5575587924, without a trailing newline.
+DESCRIPTOR_Q13_SHA256 = "f974b6dba1bfccd4f6ec4315c00ece7868a045487ffbf6ae3d4df86fb4315153"
 # Ngân sách reader — ĐỀ XUẤT của reviewer lượt 6 (spec Q4.5), CHƯA đo trên roots production.
 # Đơn vị: objects = số `(actual_type, OID)` phân biệt; bytes = bytes thô sau giải nén; edges = số cạnh
 # trên MỘT đường (parent: mỗi đường parent; tree/alias: một lần resolve tại một occurrence); seconds =
@@ -1639,46 +1644,84 @@ def _repo_tam_co_lap(git_exe: str, thu_muc: Path) -> str:
     return str(git_dir)
 
 
+def _tls_tu_git_https_linux(git_exe: str, env: dict[str, str]) -> str | None:
+    """Measure the TLS library linked by *Git's* HTTPS helper, not the curl CLI."""
+    if not sys.platform.startswith("linux"):
+        return None
+    try:
+        import ctypes
+        p = subprocess.run([git_exe, "--exec-path"], capture_output=True, text=True, env=env)
+        if p.returncode != 0:
+            return None
+        helper = Path(p.stdout.strip()) / "git-remote-https"
+        linked = subprocess.run(["/usr/bin/ldd", str(helper)], capture_output=True, text=True, env=env)
+        if linked.returncode != 0:
+            return None
+        libraries = re.findall(r"^\s*libcurl\S*\s+=>\s+(/\S+)", linked.stdout, re.MULTILINE)
+        if len(libraries) != 1:
+            return None
+        curl = ctypes.CDLL(libraries[0])
+        curl.curl_version.restype = ctypes.c_char_p
+        version = curl.curl_version().decode("ascii")
+        tls = re.search(r"\b(OpenSSL|GnuTLS|mbedTLS)/([^\s]+)", version)
+        return f"{tls[1]} {tls[2]}" if tls else None
+    except (OSError, ValueError, UnicodeError):
+        return None
+
+
 def hoso_adapter_do(git_exe: str | None = None) -> dict:
     """Hồ sơ nền thực thi đo được từ deployment hiện tại (KHÔNG bí mật). Chỉ là INPUT để so với mỏ neo;
     đo rồi tự đưa vào `PROFILE_ADAPTER_DA_DUYET` là tự khai — bị cấm (ADR-0047 lớp 2)."""
     git_exe = git_exe or _git_exe_toi_thieu()
-    p = subprocess.run([git_exe, "--version"], capture_output=True, text=True,
-                       env={"PATH": str(Path(git_exe).parent), "LC_ALL": "C"})
+    env = {"PATH": str(Path(git_exe).parent), "LC_ALL": "C"}
+    p = subprocess.run([git_exe, "version", "--build-options"], capture_output=True, text=True, env=env)
+    if p.returncode != 0:
+        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: không đo được Git build/TLS version")
+    tls = next((line.split(":", 1)[1].strip() for line in p.stdout.splitlines()
+                if line.startswith(("OpenSSL:", "GnuTLS:", "mbedTLS:"))), None)
+    if not tls:
+        tls = _tls_tu_git_https_linux(git_exe, env)
+    if not tls:
+        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: Git không báo tên và phiên bản TLS")
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "git_path": git_exe,
         "git_sha256": hashlib.sha256(Path(git_exe).read_bytes()).hexdigest(),
-        "git_version": p.stdout.strip() if p.returncode == 0 else "",
+        "git_version": p.stdout.splitlines()[0].strip(),
         "credential_helper": "",   # không dùng
+        "tls_thu_vien": tls,
         "http_sslCAInfo": None,
         "http_sslCAPath": None,
         "proxy": None,
         "endpoint": "https://" + KHO_CANONICAL,
+        "image_os": os.environ.get("ImageOS") or None,
+        "image_version": os.environ.get("ImageVersion") or None,
     }
 
 
 _HOSO_KHOA = ("schema_version", "git_path", "git_sha256", "git_version", "credential_helper",
-              "http_sslCAInfo", "http_sslCAPath", "proxy", "endpoint")
+               "tls_thu_vien", "http_sslCAInfo", "http_sslCAPath", "proxy", "endpoint",
+               "image_os", "image_version")
+_HOSO_KHOA_BAM = tuple(k for k in _HOSO_KHOA if k != "git_sha256")
 
 
 def kiem_mien_ho_so(hoso) -> None:
-    """Schema HỮU HẠN của hồ sơ adapter (F08): đúng tập khoá, đúng kiểu/miền từng giá trị. Đứng TRƯỚC phép so
-    digest — mỏ neo chỉ được so trên một hồ sơ đã nằm trong miền, nên khoá lạ hay giá trị ngoài miền ⇒ 12 kể cả
-    khi ai đó băm đúng dict ấy đưa vào mỏ neo."""
-    if not isinstance(hoso, dict) or tuple(sorted(hoso)) != tuple(sorted(_HOSO_KHOA)):
-        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: hồ sơ adapter phải có đúng khoá {list(_HOSO_KHOA)}")
-    if type(hoso["schema_version"]) is not int or hoso["schema_version"] != 1:
-        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: hồ sơ adapter schema_version phải là integer 1")
+    """Validate required v2 fields before admission; report malformed audit-only data without denying it."""
+    if not isinstance(hoso, dict) or not set(_HOSO_KHOA_BAM) <= hoso.keys() or set(hoso) - set(_HOSO_KHOA):
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: hồ sơ adapter thiếu khoá bắt buộc hoặc có khoá lạ; cho phép {list(_HOSO_KHOA)}")
+    if type(hoso["schema_version"]) is not int or hoso["schema_version"] != 2:
+        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: hồ sơ adapter schema_version phải là integer 2")
     gp = hoso["git_path"]
     if not isinstance(gp, str) or not Path(gp).is_absolute():
         raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: hồ sơ adapter git_path phải là đường tuyệt đối")
-    if not isinstance(hoso["git_sha256"], str) or not SHA256.match(hoso["git_sha256"]):
-        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: hồ sơ adapter git_sha256 phải là sha256 hex")
+    if not isinstance(hoso.get("git_sha256"), str) or not SHA256.fullmatch(hoso["git_sha256"]):
+        print("CẢNH_BÁO: hồ sơ adapter git_sha256 vắng hoặc không phải sha256 hex (audit-only)", file=sys.stderr)
     if not isinstance(hoso["git_version"], str) or not hoso["git_version"].startswith("git version "):
         raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: hồ sơ adapter git_version phải là đầu ra `git --version`")
     if hoso["credential_helper"] != "":
         raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: adapter không dùng credential helper — phải là chuỗi rỗng")
+    if not isinstance(hoso["tls_thu_vien"], str) or not re.fullmatch(r"\S+ +\d\S*(?: +\S+)*", hoso["tls_thu_vien"]):
+        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: hồ sơ adapter thiếu tên/phiên bản TLS")
     for k in ("http_sslCAInfo", "http_sslCAPath", "proxy"):
         v = hoso[k]
         if v is not None and (not isinstance(v, str) or not v.strip()):
@@ -1686,11 +1729,15 @@ def kiem_mien_ho_so(hoso) -> None:
     ep = hoso["endpoint"]
     if not isinstance(ep, str) or not re.fullmatch(r"(https|file)://[^\s]+", ep):
         raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: hồ sơ adapter endpoint phải là URL https:// (file:// chỉ cho fixture)")
+    for k in ("image_os", "image_version"):
+        v = hoso[k]
+        if v is not None and (not isinstance(v, str) or not v.strip()):
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: hồ sơ adapter {k} phải là None hoặc chuỗi không rỗng")
 
 
 def bam_ho_so(hoso: dict) -> str:
-    """Digest = sha256(JSON UTF-8, sort_keys, separators `,`/`:`) — MỘT phép so duy nhất với mỏ neo."""
-    return hashlib.sha256(json.dumps(hoso, sort_keys=True, separators=(",", ":"),
+    """Digest only the required v2 layer; the binary fingerprint is audit-only."""
+    return hashlib.sha256(json.dumps({k: hoso[k] for k in _HOSO_KHOA_BAM}, sort_keys=True, separators=(",", ":"),
                                      ensure_ascii=False).encode("utf-8")).hexdigest()
 
 
@@ -1849,7 +1896,7 @@ class KhoObject:
         """Đọc MỘT object: framing → kiểm size (object VÀ tổng) trước khi nhận body → băm bằng OID → so type.
         Deadline áp ở MỌI cửa: cache-hit, trước spawn, sau khi child hoàn tất, trước khi trả (F04). Child bị
         kill/reap trong `finally` ở mọi đường thoát; rc≠0 của cat-file ⇒ 12 (F05)."""
-        import threading
+        import time
         if not SHA40.match(oid or ""):
             raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: OID không hợp lệ {oid!r}")
         khoa = (loai_mong_doi, oid)
@@ -1860,57 +1907,59 @@ class KhoObject:
             raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: OID {oid[:12]} bị yêu cầu hai type khác nhau")
         if self.so_object + 1 > self.ngan_sach["max_unique_objects"]:
             raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: > {self.ngan_sach['max_unique_objects']} object phân biệt")
-        con = self._con_thoi_gian(f"trước spawn cat-file {oid[:12]}")
+        con = self._con_thoi_gian(f"trước spawn cat-file {oid[:12]}"); hard_stop = time.monotonic() + con
         # session riêng để kill được CẢ NHÓM (một helper con giữ pipe sẽ làm close() treo tới khi nó tự thoát);
         # `start_new_session` là API POSIX — nền không có thì bỏ qua, chỉ còn kill tiến trình trực tiếp.
         p = subprocess.Popen([self.git_exe, "--no-replace-objects", "cat-file", "--batch"],
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self.env,
                              start_new_session=hasattr(os, "killpg"))
-        ket_qua: dict = {}
-        tong_truoc = self.tong_bytes
+        fd = p.stdout.fileno(); xong = False
+        def _lay(so: int, header: bool = False) -> bytes:
+            # One byte at a time until the header ends: size guards precede any body read.
+            got = bytearray()
+            while len(got) < so:
+                if time.monotonic() >= hard_stop: raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: hết deadline reader {oid[:12]} (đã kill cat-file)")
+                self._con_thoi_gian(f"đọc cat-file {oid[:12]}")
+                try: chunk = os.read(fd, 1 if header else min(65536, so - len(got)))
+                except BlockingIOError:
+                    time.sleep(min(0.005, self._con_thoi_gian(f"chờ pipe {oid[:12]}")))
+                    continue
+                if not chunk: break
+                got.extend(chunk)
+                if header and chunk == b"\n": break
+            return bytes(got)
 
-        def _doc_thuc():
+        try:
             try:
+                os.set_blocking(fd, False)
                 p.stdin.write((oid + "\n").encode("ascii")); p.stdin.close()
-                dau = p.stdout.readline().decode("ascii", "replace").rstrip("\n")
-                ket_qua["dau"] = dau
+                raw_header = _lay(256, header=True)
+                dau = raw_header.decode("ascii", "replace").rstrip("\n")
                 cot = dau.split()
+                if not raw_header.endswith(b"\n"):
+                    raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: cat-file header thiếu newline {oid[:12]}")
                 if len(cot) == 3 and cot[2].isdigit():
                     kich = int(cot[2])
                     if kich > self.ngan_sach["max_object_bytes"]:
-                        ket_qua["qua_lon"] = kich
-                        return
-                    if tong_truoc + kich > self.ngan_sach["max_total_object_bytes"]:
-                        ket_qua["qua_tong"] = kich      # F05: kiểm TỔNG từ header, trước khi cấp phát body
-                        return
-                    ket_qua["than"] = p.stdout.read(kich + 1)
-            except Exception as e:  # noqa: BLE001
-                ket_qua["loi"] = repr(e)
-
-        t = threading.Thread(target=_doc_thuc, daemon=True)
-        try:
-            t.start(); t.join(timeout=con)
-            if t.is_alive():
-                raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: hết deadline reader khi đọc {oid[:12]} (đã kill cat-file)")
-            if "qua_lon" in ket_qua:
-                raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: object {oid[:12]} {ket_qua['qua_lon']} B > max_object_bytes")
-            if "qua_tong" in ket_qua:
-                raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: vượt max_total_object_bytes")
-            if "loi" in ket_qua:
-                raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: cat-file lỗi I/O: {ket_qua['loi'][:120]}")
-            con2 = self._con_thoi_gian(f"chờ cat-file {oid[:12]} kết thúc")
+                        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: object {oid[:12]} {kich} B > max_object_bytes")
+                    if self.tong_bytes + kich > self.ngan_sach["max_total_object_bytes"]:
+                        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: vượt max_total_object_bytes")
+                    than = _lay(kich + 1)
+                else:
+                    than = b""
+            except (OSError, ValueError) as e:
+                raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: cat-file lỗi I/O: {e!r}") from e
+            con2 = min(self._con_thoi_gian(f"chờ cat-file {oid[:12]} kết thúc"), max(0, hard_stop - time.monotonic()))
             try:
                 rc = p.wait(timeout=con2)
             except subprocess.TimeoutExpired:
                 raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: hết deadline reader chờ cat-file {oid[:12]} kết thúc") from None
             if rc != 0:
                 raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: cat-file rc={rc} cho {oid[:12]} — không dùng bytes của tiến trình lỗi")
-            cot = (ket_qua.get("dau") or "").split()
             if len(cot) != 3 or cot[0] != oid or not cot[2].isdigit():
                 raise Chan(RC_KHONG_XAC_DINH,
-                           f"KHÔNG_XÁC_ĐỊNH: object {oid[:12]} `{ket_qua.get('dau', '')}` — `missing` là 12, không phải 'vắng'")
+                           f"KHÔNG_XÁC_ĐỊNH: object {oid[:12]} `{dau}` — `missing` là 12, không phải 'vắng'")
             loai_that, kich = cot[1], int(cot[2])
-            than = ket_qua.get("than", b"")
             if len(than) != kich + 1:
                 raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: object {oid[:12]} framing ngắn ({len(than)}/{kich + 1})")
             than = than[:kich]
@@ -1921,24 +1970,27 @@ class KhoObject:
                 raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: bytes của {oid[:12]} băm ra {bam[:12]} — cache không tin cậy")
             if loai_that != loai_mong_doi:
                 raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {oid[:12]} là {loai_that}, mong đợi {loai_mong_doi}")
+            if time.monotonic() >= hard_stop: raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: hết deadline reader {oid[:12]} (đã kill cat-file)")
             self._con_thoi_gian(f"trước khi trả {oid[:12]}")
             self.so_object += 1
             self.tong_bytes += kich
             self.memo[khoa] = than
+            xong = True
             return than
         finally:
-            if p.poll() is None:
+            if p.poll() is None or (not xong and hasattr(os, "killpg")):
                 try:
                     getattr(os, "killpg")(p.pid, 9)
                 except Exception:  # noqa: BLE001 — không có killpg / nhóm đã chết: kill trực tiếp
-                    p.kill()
-                p.wait()
-            if not t.is_alive():   # thread còn kẹt trong read() thì close() sẽ treo — nó là daemon, để nó chết cùng tiến trình
-                for luong in (p.stdin, p.stdout, p.stderr):
-                    try:
-                        luong.close()
-                    except Exception:  # noqa: BLE001
-                        pass
+                    if p.poll() is None: p.kill()
+                if p.poll() is None: p.wait()
+            for luong in (p.stdin, p.stdout, p.stderr):
+                if luong is None or luong.closed:
+                    continue
+                try:
+                    luong.close()
+                except (OSError, ValueError):
+                    pass
 
     def commit(self, oid: str) -> tuple:
         """Trả ``(tree, [parents])`` từ header của bytes đã băm."""
@@ -2104,14 +2156,14 @@ def _kiem_to_tien_la_tree(goc: Path, ref: str, thu_muc: str) -> None:
 
 
 def _doc_blob_text_12(goc: Path, ref: str, duong: str):
-    """Đọc blob `ref:duong` qua `GOI_GIT` (text). Vắng/rc≠0 ⇒ ``None``; không giải mã được ⇒ 12 (F10 lượt 2)."""
+    """Read exact blob bytes via GOI_GIT; absence returns None, I/O and encoding errors close."""
     try:
         p = GOI_GIT("cat-file", "blob", f"{ref}:{duong}", cwd=goc)
-    except UnicodeDecodeError:   # nguồn không phải UTF-8 là 12, không traceback
+    except (UnicodeDecodeError, OSError):
         raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {duong} tại {ref} không phải UTF-8") from None
     if p is None or p.returncode != 0:
         return None
-    return (p.stdout or "").encode("utf-8")
+    return getattr(p, "stdout_bytes", (p.stdout or "").encode("utf-8"))
 
 
 def _kiem_so_rong_khi_chua_kich_hoat(goc: Path, refs: list[str]) -> None:
@@ -2159,8 +2211,11 @@ def _du_bao_check(lease: dict, goc: Path, nhanh_mac_dinh: str) -> list[str]:
         muc = so.get(f"{THU_MUC_SO}/{x}.yaml")
         if muc:
             try:
+                noi_dung = _doc_blob_text_12(goc, muc["ref"], muc["path"])
+                if noi_dung is None:
+                    raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: blob dự báo vắng")
                 d = kiem_ban_ghi_thu_hoi(muc["path"], muc["mode"], muc["type"],
-                                         GOI_GIT("cat-file", "-p", muc["oid"], cwd=goc).stdout.encode("utf-8"))
+                                         noi_dung)
                 dich = d["cap_lai_cho"]
                 rc = 0 if dich in (None, lease_id) else 8
                 dong.append(f"DU_BAO: sổ có {x}: cap_lai_cho={dich!r} ⇒ rc dự báo {rc}")
@@ -2175,7 +2230,88 @@ def _du_bao_check(lease: dict, goc: Path, nhanh_mac_dinh: str) -> list[str]:
     return dong
 
 
-def _du_bao_ai_dang_giu(goc: Path, refs: list[str], cac_lease: list[dict], nhanh_mac_dinh: str) -> list[str]:
+def _doc_bia_mo_mac_dinh(goc: Path, ref: str, ids: set[str]) -> dict[str, str]:
+    """Classify only the selected local canonical tree; never use a deduplicated ref label."""
+    import yaml
+    khong_ro = {lid: "KHONG_XAC_DINH" for lid in ids}
+    try:
+        pinned = GOI_GIT("rev-parse", "--verify", f"{ref}^{{tree}}", cwd=goc)
+        if pinned.returncode != 0 or not SHA40.fullmatch(pinned.stdout.strip()):
+            return khong_ro
+        tree = pinned.stdout.strip()  # all subsequent reads use this immutable tree, never the moving ref
+        _kiem_to_tien_la_tree(goc, tree, "ops/leases")
+        entry = [x for x in _ls_tree_z(goc, tree, "ops/leases", de_quy=False) if x[3] == "ops/leases"]
+        if any(loai != "tree" for _mode, loai, _oid, _path in entry):
+            return khong_ro
+        theo_id: dict[str, list[dict]] = {}
+        for mode, loai, _oid, duong in _ls_tree_z(goc, tree, "ops/leases"):
+            if not duong.endswith((".yaml", ".yml")):
+                continue
+            if loai != "blob" or mode != "100644":
+                return khong_ro
+            raw = _doc_blob_text_12(goc, tree, duong)
+            if raw is None:
+                return khong_ro
+            d = yaml.safe_load(raw)
+            if not isinstance(d, dict):
+                return khong_ro
+            lid = _lease_id_quet(d.get("lease_id"))
+            if lid is None:
+                return khong_ro
+            if "da_bi_thay_the" in d and _lease_id_quet(d["da_bi_thay_the"]) is None:
+                return khong_ro
+            refs_moi = _danh_sach_thay_the_cho(d.get("thay_the_cho"))
+            if refs_moi is None or any(_lease_id_quet(x) is None for x in refs_moi):
+                return khong_ro
+            theo_id.setdefault(lid, []).append(d)
+    except Exception:  # noqa: BLE001 — forecast must not change the legacy verdict
+        return khong_ro
+    def mau_thuan(ban):
+        def khac(a, b):
+            # A cycle is unknown; shared acyclic subtrees are compared only once.
+            todo, active_a, active_b, done = [(a, b, False)], set(), set(), set()
+            while todo:
+                x, y, leaving = todo.pop()
+                pair = (id(x), id(y))
+                if leaving:
+                    active_a.remove(id(x)); active_b.remove(id(y)); done.add(pair)
+                    continue
+                if isinstance(x, (dict, list)) or isinstance(y, (dict, list)):
+                    if type(x) is not type(y): return True
+                    if pair in done: continue
+                    if id(x) in active_a or id(y) in active_b: return True
+                    if isinstance(x, dict):
+                        if x.keys() != y.keys(): return True
+                        children = ((x[k], y[k], False) for k in x)
+                    else:
+                        if len(x) != len(y): return True
+                        children = ((u, v, False) for u, v in zip(x, y))
+                    active_a.add(id(x)); active_b.add(id(y)); todo.append((x, y, True)); todo.extend(children)
+                elif x != y: return True
+            return False
+        return any(khac(x, ban[0]) for x in ban[1:])
+
+    ket = {}
+    for lid in ids:
+        ban = theo_id.get(lid, [])
+        if len(ban) > 1 and mau_thuan(ban):
+            ket[lid] = "KHONG_XAC_DINH"
+            continue
+        if not ban or "da_bi_thay_the" not in ban[0]:
+            ket[lid] = "KHONG"
+            continue
+        moi = ban[0]["da_bi_thay_the"]
+        ban_moi = theo_id.get(moi, [])
+        if not ban_moi or mau_thuan(ban_moi):
+            ket[lid] = "KHONG_XAC_DINH"
+            continue
+        ket[lid] = ("CHE" if lid in _danh_sach_thay_the_cho(ban_moi[0].get("thay_the_cho"))
+                    else "KHONG_XAC_DINH")
+    return ket
+
+
+def _du_bao_ai_dang_giu(goc: Path, refs: list[str], cac_lease: list[dict], nhanh_mac_dinh: str,
+                        duong_dan: str | None = None, active_ids: set[str] | None = None) -> list[str]:
     """M2 dự báo: MAP_REF theo cặp (blob, path) và áp sổ canonical cục bộ theo lease_id — không đổi rc."""
     dong = [f"DU_BAO: chế độ CHƯA KÍCH HOẠT (SO_THU_HOI_KICH_HOAT={SO_THU_HOI_KICH_HOAT}); verdict sản phẩm = luật cũ"]
     ref = f"refs/remotes/origin/{nhanh_mac_dinh}"
@@ -2199,6 +2335,10 @@ def _du_bao_ai_dang_giu(goc: Path, refs: list[str], cac_lease: list[dict], nhanh
             continue
         nhan = " · ĐÃ_THU_HỒI" if lid in so_ids else ""
         dong.append(f"DU_BAO: {lid}{nhan}\tMAP_REF {len(map_ref.get((muc['blob'], muc['path']), []))} ref")
+    ids = set(active_ids or ())  # one classification by the legacy CLI loop; no second expiry clock
+    trang_thai = _doc_bia_mo_mac_dinh(goc, ref, ids)
+    for lid in sorted(ids):
+        dong.append(f"DU_BAO: {lid} · BIA_MỘ_MẶC_ĐỊNH={trang_thai[lid]}")
     dong.append(f"DU_BAO: MÙ 0 · {len(refs)} ref")
     return dong
 
@@ -2211,6 +2351,7 @@ def lenh_kiem_thu_hoi_github(a) -> int:
         raise Chan(RC_THAM_SO, "S và H phải là SHA40 hex thường")
     if not a.nhanh_mac_dinh or "/" in a.nhanh_mac_dinh:
         raise Chan(RC_THAM_SO, "--nhanh-mac-dinh bắt buộc, là TÊN nhánh do workflow truyền")
+    bay_gio = datetime.now(timezone.utc)  # one snapshot for every M4 validation in this run
     goc = Path(a.goc or ".").resolve()
     kho = KhoObject(goc)
     try:
@@ -2239,7 +2380,7 @@ def lenh_kiem_thu_hoi_github(a) -> int:
         for duong, (mode, loai, oid) in sorted(map_T.items()):
             tuyen = phan_tuyen_so(duong)
             if tuyen == "metadata":
-                d_meta = kiem_metadata_retired(duong, mode, loai, kho.doc(oid, "blob") if loai == "blob" else b"")
+                d_meta = kiem_metadata_retired(duong, mode, loai, kho.doc(oid, "blob") if loai == "blob" else b"", bay_gio=bay_gio)
                 if policy_T is None:
                     raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {duong} có mà policy {PATH_POLICY_CLOSURE} vắng/hỏng ở T (Q13)")
                 if duong not in map_S:
@@ -2257,7 +2398,7 @@ def lenh_kiem_thu_hoi_github(a) -> int:
                         raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {duong}: S đã có policy mà marker mới xuất hiện — không grandfather")
                 metadata_T.append(duong)
             else:
-                kiem_ban_ghi_thu_hoi(duong, mode, loai, kho.doc(oid, "blob") if loai == "blob" else b"")
+                kiem_ban_ghi_thu_hoi(duong, mode, loai, kho.doc(oid, "blob") if loai == "blob" else b"", bay_gio=bay_gio)
                 thu_hoi_T.append(duong)
         if policy_T is not None and not metadata_T:
             raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: T có policy {PATH_POLICY_CLOSURE} mà thiếu marker {PATH_NGOAI_LE_RETIRED} (Q13) — không grandfather")
@@ -2278,7 +2419,7 @@ def lenh_kiem_thu_hoi_github(a) -> int:
             "profile_digest": None,
             "discovery": "KHONG_CHAY: A0 chưa kích hoạt; PROFILE_ADAPTER_DA_DUYET rỗng (quyết định chủ kho)",
             "ngan_sach": kho.ngan_sach, "so_object_da_doc": kho.so_object, "tong_bytes": kho.tong_bytes,
-            "ket_luan": "TAP_THU_HOI_RONG", "thoi_diem_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "ket_luan": "TAP_THU_HOI_RONG", "thoi_diem_utc": bay_gio.strftime("%Y-%m-%dT%H:%M:%SZ"),
         }
     finally:
         kho.dong()
@@ -2330,10 +2471,8 @@ def lenh_ai_dang_giu(a) -> int:
     # và luật mới CHỈ in ở `--du-bao`; verdict sản phẩm bên dưới vẫn là luật cũ (bia mộ hai chiều).
     _, refs_a0 = _cac_ref_cuc_bo(root)
     _kiem_so_rong_khi_chua_kich_hoat(root, refs_a0)
-    if getattr(a, "du_bao", False):
-        for dong in _du_bao_ai_dang_giu(root, refs_a0, cac_lease, getattr(a, "nhanh_mac_dinh", None) or "master"):
-            print(dong)
     nguoi_giu = {}
+    active_ids = set()
     sai_kieu = 0
     for muc in cac_lease:
         lease = muc["lease"]
@@ -2348,6 +2487,8 @@ def lenh_ai_dang_giu(a) -> int:
             print(f"KHÔNG_XÁC_ĐỊNH\tlease_id {_nhan_lease_id_sai(lease.get('lease_id'))}\t{muc['ref']}:{muc['path']}")
             continue
         trang_thai = _phan_loai_lease(lease)
+        if trang_thai == "CÒN_HẠN":
+            active_ids.add(lease_id)
         bia_mo = (_bia_mo_doi_xung(lease, cac_lease)
                   if trang_thai == "CÒN_HẠN" else None)
         if bia_mo is False:
@@ -2361,6 +2502,10 @@ def lenh_ai_dang_giu(a) -> int:
         print(f"{trang_thai}{nhan}\t{lease_id}\t{muc['ref']}:{muc['path']}")
         if trang_thai == "CÒN_HẠN" and not da_chet:
             nguoi_giu[lease_id] = None
+    if getattr(a, "du_bao", False):
+        for dong in _du_bao_ai_dang_giu(root, refs_a0, cac_lease, getattr(a, "nhanh_mac_dinh", None) or "master",
+                                          a.duong_dan, active_ids):
+            print(dong)
     if sai_kieu:
         raise Chan(RC_KHONG_XAC_DINH,
                    f"KHÔNG_XÁC_ĐỊNH: {sai_kieu} lease chạm {a.duong_dan} mang lease_id không hợp lệ (sai kiểu hoặc sai dạng) — "

@@ -8032,7 +8032,7 @@ def t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY():
     import threading
     nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
     with tempfile.TemporaryDirectory() as td:
-        log = Path(td) / "con.out"
+        log = Path(td) / "child.out"
         log.write_text("", encoding="utf-8")
         ma = ("import sys,time\n"
               "f = open(sys.argv[1], 'a', encoding='utf-8')\n"

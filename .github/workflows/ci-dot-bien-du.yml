@@ -6,9 +6,9 @@ name: đột biến đủ (hằng tuần)
 # `ci.yml` (trích từ chính hai tệp) trừ `env` bước registry. Sửa `gate-registry` mà quên tệp này ⇒ registry ĐỎ trên PR.
 # Chỉ ubuntu: Windows vốn bỏ đột biến của `pretooluse_guard_test`.
 # #661: đột biến ĐỦ của `ops/nhanh_don_duoc_test.py` chia job mảnh + job gom; registry chạy bộ ấy NHẸ (M4/M5 ở W2).
-# WP748 r16: đây là `full_mutant_audit` — 52 ca dưới MỖI 239 tự đột biến + 10 đột biến sản phẩm, KHÔNG thu hẹp ma trận.
-# Bắt buộc trên ĐÚNG SHA ứng viên (workflow_dispatch trên ref ấy) trước merge/land/release; biên nhận targeted của
-# `ci.yml` KHÔNG thay được. Ước tính g12: ~73 800 s nối tiếp ⇒ 8 mảnh ≈ 2,6 h/mảnh ⇒ trần 360 phút (trần job GitHub).
+# Full audit: giữ toàn bộ ma trận tự mutant và mutant sản phẩm.
+# Run 41420415501 tại 1039f0d: 1812 s wall, 15274 runner s; đây là mốc đo, không phải ngân sách.
+# #1166: mọi job checkout event SHA bất biến; run ID riêng bảo vệ cả lượt pending.
 
 on:
   schedule:
@@ -17,6 +17,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: full-mutant-audit-${{ github.run_id }}
+  cancel-in-progress: false
 
 jobs:
   dot-bien-du:
@@ -36,6 +40,23 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.sha }}
+      - name: Verify full audit source SHA
+        env:
+          AUDIT_EVENT_SHA: ${{ github.sha }}
+          AUDIT_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          AUDIT_RUN_ID: ${{ github.run_id }}
+          AUDIT_RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          python - <<'PYCODE'
+          import json, os, re, subprocess
+          expected = os.environ["AUDIT_EVENT_SHA"]
+          assert re.fullmatch(r"[0-9a-f]{40}", expected), "invalid event SHA"
+          actual = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          assert actual == expected, f"checkout {actual} != event {expected}"
+          tree = subprocess.check_output(["git", "rev-parse", "HEAD^{tree}"], text=True).strip()
+          print(json.dumps(dict(source_sha=actual, tree=tree, workflow_sha=os.environ["AUDIT_WORKFLOW_SHA"], run_id=os.environ["AUDIT_RUN_ID"], run_attempt=os.environ["AUDIT_RUN_ATTEMPT"])))
+          PYCODE
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -79,6 +100,24 @@ jobs:
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Verify full audit source SHA
+        env:
+          AUDIT_EVENT_SHA: ${{ github.sha }}
+          AUDIT_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          AUDIT_RUN_ID: ${{ github.run_id }}
+          AUDIT_RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          python - <<'PYCODE'
+          import json, os, re, subprocess
+          expected = os.environ["AUDIT_EVENT_SHA"]
+          assert re.fullmatch(r"[0-9a-f]{40}", expected), "invalid event SHA"
+          actual = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          assert actual == expected, f"checkout {actual} != event {expected}"
+          tree = subprocess.check_output(["git", "rev-parse", "HEAD^{tree}"], text=True).strip()
+          print(json.dumps(dict(source_sha=actual, tree=tree, workflow_sha=os.environ["AUDIT_WORKFLOW_SHA"], run_id=os.environ["AUDIT_RUN_ID"], run_attempt=os.environ["AUDIT_RUN_ATTEMPT"])))
+          PYCODE
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -100,6 +139,24 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Verify full audit source SHA
+        env:
+          AUDIT_EVENT_SHA: ${{ github.sha }}
+          AUDIT_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          AUDIT_RUN_ID: ${{ github.run_id }}
+          AUDIT_RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          python - <<'PYCODE'
+          import json, os, re, subprocess
+          expected = os.environ["AUDIT_EVENT_SHA"]
+          assert re.fullmatch(r"[0-9a-f]{40}", expected), "invalid event SHA"
+          actual = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          assert actual == expected, f"checkout {actual} != event {expected}"
+          tree = subprocess.check_output(["git", "rev-parse", "HEAD^{tree}"], text=True).strip()
+          print(json.dumps(dict(source_sha=actual, tree=tree, workflow_sha=os.environ["AUDIT_WORKFLOW_SHA"], run_id=os.environ["AUDIT_RUN_ID"], run_attempt=os.environ["AUDIT_RUN_ATTEMPT"])))
+          PYCODE
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

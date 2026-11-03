@@ -961,12 +961,32 @@ def loi_actionlint(tep, tim=shutil.which, chay=subprocess.run):
     return [] if r.returncode == 0 else [f"actionlint rc={r.returncode}: " + " | ".join((r.stdout + r.stderr).splitlines()[:3])]
 
 
+# #1166: expected checkout and provenance step for every full audit job.
+AUDIT_CONCURRENCY = {"group": "full-mutant-audit-${{ github.run_id }}", "cancel-in-progress": False}
+AUDIT_VERIFY = {'name': 'Verify full audit source SHA', 'env': {'AUDIT_EVENT_SHA': '${{ github.sha }}', 'AUDIT_WORKFLOW_SHA': '${{ github.workflow_sha }}', 'AUDIT_RUN_ID': '${{ github.run_id }}', 'AUDIT_RUN_ATTEMPT': '${{ github.run_attempt }}'}, 'run': 'python - <<\'PYCODE\'\nimport json, os, re, subprocess\nexpected = os.environ["AUDIT_EVENT_SHA"]\nassert re.fullmatch(r"[0-9a-f]{40}", expected), "invalid event SHA"\nactual = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()\nassert actual == expected, f"checkout {actual} != event {expected}"\ntree = subprocess.check_output(["git", "rev-parse", "HEAD^{tree}"], text=True).strip()\nprint(json.dumps(dict(source_sha=actual, tree=tree, workflow_sha=os.environ["AUDIT_WORKFLOW_SHA"], run_id=os.environ["AUDIT_RUN_ID"], run_attempt=os.environ["AUDIT_RUN_ATTEMPT"])))\nPYCODE'}
+
+AUDIT_VERIFY["run"] += "\n"
+
+
+def _audit_pin_steps(steps):
+    result = []
+    for step in json.loads(json.dumps(steps)):
+        if step.get("uses") == "actions/checkout@v4":
+            step.setdefault("with", {})["ref"] = "${{ github.sha }}"
+            result.extend([step, json.loads(json.dumps(AUDIT_VERIFY))])
+        else:
+            result.append(step)
+    return result
+
+
 def loi_workflow_dot_bien_du(data, ci):
     """#651 M4: lượt ĐỦ hằng tuần. Danh sách CHO PHÉP ở mọi tầng; bước so BẰNG ĐÚNG `gate-registry` của `ci.yml` (trích từ
     CHÍNH hai tệp, không chép) trừ `env` bước registry = chỉ `CI_DANG_KY_WORKERS` ⇒ vắng biến diff ⇒ `ke_hoach` ĐỦ."""
     d, loi = data or {}, []
-    if set(map(str, d)) - {"name", "on", "True", "permissions", "jobs"} or d.get("name") != TEN_WF_DU:
+    if set(map(str, d)) - {"name", "on", "True", "permissions", "jobs", "concurrency"} or d.get("name") != TEN_WF_DU:
         loi.append(f"khoá cấp workflow ngoài danh sách cho phép: {sorted(map(str, d))}")
+    if not _bang_kieu(d.get("concurrency"), AUDIT_CONCURRENCY):
+        loi.append("full audit concurrency phải riêng theo run_id, không huỷ")
     on = d.get("on", d.get(True))  # PyYAML đọc khoá trần `on` thành True
     lich = on.get("schedule") if isinstance(on, dict) else None
     if not isinstance(on, dict) or set(on) != {"schedule", "workflow_dispatch"} or on["workflow_dispatch"] is not None:
@@ -987,7 +1007,7 @@ def loi_workflow_dot_bien_du(data, ci):
     if len(reg) != 1:
         return loi + [f"gate-registry của ci.yml có {len(reg)} bước registry, cần đúng một"]
     reg[0]["env"] = {BIEN_WORKERS: "2", BIEN_MANH: BO_MANH}
-    loi += [] if _bang_kieu(job.get("steps"), ky_vong) else [f"bước lệch gate-registry của ci.yml (env registry chỉ được {reg[0]['env']})"]
+    loi += [] if _bang_kieu(job.get("steps"), _audit_pin_steps(ky_vong)) else [f"bước lệch gate-registry của ci.yml (env registry chỉ được {reg[0]['env']})"]
     return loi + [f"job {j} lệch hình GHIM (#661 M5)" for j, v in zip((JOB_MANH, JOB_GOP), _job_manh_gop(goc)) if not _bang_kieu(jobs[j], v)]
 
 
@@ -1016,6 +1036,8 @@ def _job_manh_gop(goc):
            "steps": dau + [{"uses": "actions/download-artifact@v4",
                             "with": {"pattern": "dot-bien-manh-*", "path": "manh", "merge-multiple": True}},
                            {"name": "gom mảnh", "run": "python ops/nhanh_don_duoc_test.py --gop-du manh"}]}
+    for job in (manh, gop):
+        job["steps"] = _audit_pin_steps(job["steps"])
     return manh, gop
 
 
@@ -2270,6 +2292,19 @@ def phan_chung():
         w = json.loads(json.dumps(_wd0, default=str).replace('"true":', '"on":'))
         f(w, next(iter(w["jobs"].values())))
         return bool(loi_workflow_dot_bien_du(w, _wf0))
+    for job_id in (JOB_DU, JOB_MANH, JOB_GOP):
+        for label, change in (
+            ("missing-ref", lambda job: next(b for b in job["steps"] if b.get("uses") == "actions/checkout@v4")["with"].pop("ref")),
+            ("moving-ref", lambda job: next(b for b in job["steps"] if b.get("uses") == "actions/checkout@v4")["with"].update(ref="${{ github.ref }}")),
+            ("missing-verify", lambda job: job["steps"].remove(next(b for b in job["steps"] if b.get("name") == AUDIT_VERIFY["name"]))),
+            ("noop-verify", lambda job: next(b for b in job["steps"] if b.get("name") == AUDIT_VERIFY["name"]).update(run="true")),
+            ("wrong-event", lambda job: next(b for b in job["steps"] if b.get("name") == AUDIT_VERIFY["name"])["env"].update(AUDIT_EVENT_SHA="${{ github.ref }}")),
+        ):
+            _them(f"p1166-{job_id}-{label}", _hong_du(lambda w, j: change(w["jobs"][job_id])))
+    for label, config in (("missing", None), ("by-ref", dict(AUDIT_CONCURRENCY, group="${{ github.ref }}")),
+                          ("by-sha", dict(AUDIT_CONCURRENCY, group="${{ github.sha }}")),
+                          ("cancel", dict(AUDIT_CONCURRENCY, **{"cancel-in-progress": True}))):
+        _them(f"p1166-concurrency-{label}", _hong_du(lambda w, j: w.update(concurrency=config)))
     _them("p651-M4-ban-json-van-dat", not _hong_du(lambda w, j: None))  # khoá `on` dạng chuỗi cũng nhận
 
     def _buoc_reg(j): return next(b for b in j["steps"] if "ci_dang_ky_test.py --chay" in str(b.get("run", "")))
@@ -2284,7 +2319,7 @@ def phan_chung():
                    ("env-reg-su-kien", lambda w, j: _buoc_reg(j)["env"].update({BIEN_SU_KIEN: "push"})),
                    ("env-reg-co-nhe", lambda w, j: _buoc_reg(j)["env"].update(SUBAGENT_GHI_DETECT_KHONG_DOT_BIEN="1")),
                    ("env-reg-N-1", lambda w, j: _buoc_reg(j)["env"].update({BIEN_WORKERS: "1"})),
-                   ("troi-ghim-pip", lambda w, j: j["steps"][3].update(run=j["steps"][3]["run"].replace("6.0.3", "6.0.2"))),
+                   ("troi-ghim-pip", lambda w, j: next(b for b in j["steps"] if "PyYAML==" in b.get("run", "")).update(run="python -m pip install PyYAML==6.0.2")),
                    ("them-buoc", lambda w, j: j["steps"].insert(0, {"run": "true"})),
                    ("buoc-continue-on-error", lambda w, j: _buoc_reg(j).update({"continue-on-error": True})),
                    ("job-if", lambda w, j: j.update({"if": "false"})), ("job-windows", lambda w, j: j.update({"runs-on": "windows-latest"})),
@@ -2299,8 +2334,8 @@ def phan_chung():
     def _j(w, ten): return w["jobs"][ten]
     for _t, _f in (("thieu-gop", lambda w, j: w["jobs"].pop(JOB_GOP)), ("gop-khong-needs", lambda w, j: _j(w, JOB_GOP).pop("needs")),
                    ("matrix-3", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[0, 1, 2])),
-                   ("manh-sai-N", lambda w, j: _j(w, JOB_MANH)["steps"][2]["env"].update(NHANH_DON_DUOC_DICH="${{ matrix.manh }}/3")),
-                   ("manh-bo-co-du", lambda w, j: _j(w, JOB_MANH)["steps"][2]["env"].pop("NHANH_DON_DUOC_DICH_DU")),
+                   ("manh-sai-N", lambda w, j: next(b for b in _j(w, JOB_MANH)["steps"] if b.get("name") == "đột biến một mảnh")["env"].update(NHANH_DON_DUOC_DICH="${{ matrix.manh }}/3")),
+                   ("manh-bo-co-du", lambda w, j: next(b for b in _j(w, JOB_MANH)["steps"] if b.get("name") == "đột biến một mảnh")["env"].pop("NHANH_DON_DUOC_DICH_DU")),
                    ("gop-targeted", lambda w, j: _j(w, JOB_GOP)["steps"][-1].update(run="python ops/nhanh_don_duoc_test.py --gop-dich manh")),
                    ("manh-if", lambda w, j: _j(w, JOB_MANH).update({"if": "false"})),
                    ("manh-continue-on-error", lambda w, j: _j(w, JOB_MANH).update({"continue-on-error": True})),

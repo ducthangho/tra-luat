@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        ref: c59aeb97f247241538cc374b2436da9350b152e8
+        ref: 783d7081df4eddefad39c9e2d607cb7e330d28be
     - uses: actions/setup-python@v5
       with:
         python-version: '3.12'
@@ -28,6 +28,6 @@ jobs:
         \ if s.get('uses') == 'actions/checkout@v4')['with']['ref'] = '${{ github.ref\
         \ }}'\n    assert check(bad, ci), job\nbad = copy.deepcopy(w)\nbad['concurrency']['cancel-in-progress']\
         \ = True\nassert check(bad, ci)\nactual = subprocess.check_output(['git',\
-        \ 'rev-parse', 'HEAD'], text=True).strip()\nassert actual == 'c59aeb97f247241538cc374b2436da9350b152e8'\n\
+        \ 'rev-parse', 'HEAD'], text=True).strip()\nassert actual == '783d7081df4eddefad39c9e2d607cb7e330d28be'\n\
         print(json.dumps(dict(sha=actual, platform=os.name, positive=1, negative=4)))\n\
         PYCODE\n"

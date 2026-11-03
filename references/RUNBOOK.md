@@ -239,6 +239,46 @@ Dùng: `python scripts/tl.py agent-creds-exec --gemini -- agy models` (`GEMINI_A
 `TL_AGENT_CREDS_FILEID=<fileId mới>` cùng `TL_MASTER_KEY` mới ở cả hai nền. Giới hạn Codex Cloud: secret chỉ có lúc *setup script*; lúc agent
 chạy `$HOME` chỉ đọc, thường không mạng ⇒ `agent-creds-exec` gần như chắc không chạy được ở đó, và `agy` không cài ở Codex Cloud.
 
+**A0.4f — Windows: phục hồi riêng Codex khi chưa có auth.json (WP1170).**
+Python 3.11+ trên ổ NTFS cục bộ; đặt `TL_MASTER_KEY` qua môi trường bí mật, không qua argv.
+Đích là `CODEX_HOME/auth.json`, thiếu `CODEX_HOME` thì dùng `~/.codex/auth.json`.
+
+```powershell
+python scripts/tl.py agent-creds-restore --codex
+python scripts/tl.py agent-creds-restore --codex --apply --confirm yes
+```
+
+Mặc định dry-run: kiểm bundle và đường dẫn, không tạo thư mục/tệp. Có thể thêm
+`--bundle-file <tl_agent_creds.enc>` để dùng bundle mã hoá cục bộ; mặc định chỉ tải
+bundle agent công khai (`TL_AGENT_CREDS_FILEID` hoặc ID agent đã ghim), không cần
+GAS/GWS/NLM/config. Chỉ trường `codex_auth` được chọn, giải mã trong bộ nhớ.
+Không gọi bootstrap; không sửa auth của provider khác hoặc cấu hình.
+
+Nếu `auth.json` đã có (kể cả thư mục/link), lệnh báo `exists; unchanged`, không đọc
+nội dung, không tải bundle, không so tuổi, không backup/force/overwrite. Nếu vắng,
+apply tạo staging với DACL bảo vệ chỉ cho SID người chạy, kiểm owner/ACE và effective
+access bằng Windows `AccessCheck`, ghi/flush/readback rồi rename không thay thế.
+Nếu một tiến trình khác tạo đích trước, bản đó được giữ và lệnh trả 4; staging của
+lệnh được xoá bằng handle. Apply thiếu xác nhận trả 2; lỗi nền/đường dẫn/DACL/bundle
+trả 4 với thông báo cố định không chứa dữ liệu nhạy cảm.
+
+Cha của `CODEX_HOME` phải đã tồn tại; lệnh chỉ có thể tạo thư mục home cuối cùng.
+Home đã tồn tại nhưng chưa có auth phải có DACL bảo vệ, owner là SID người chạy và
+đúng một ACE full-control cho SID ấy; không tự sửa ACL thư mục có sẵn. Từ chối
+UNC/device/SUBST, đường tương đối, ADS, tên Win32 dành riêng, reparse point tại
+home hoặc bất kỳ thư mục cha, volume ngoài NTFS và đường dài hơn 220 ký tự.
+Handle thư mục giữ list access, không share delete để chặn đổi namespace. Các thư mục
+cha còn không share write để chặn sửa reparse; home cho share write (NTFS cần khi
+rename vào thư mục), nhưng DACL chỉ cho SID người chạy. Ranh giới này không chống tiến trình ác ý cùng SID hoặc
+administrator có quyền chiếm ownership. Kiểm thử chỉ dùng fixture giả ngoài checkout:
+
+```powershell
+python -B ops/agent_creds_windows_test.py --scratch C:\outside-checkout\test-artifacts
+```
+
+Trên Linux/CI dùng cùng lệnh với `--logic-only` để đo parser/payload; kết quả ấy không
+chứng minh Windows NTFS. Không chạy thử bằng credential thật.
+
 **A0.5 — BÍ MẬT.** `credentials.json` chứa refresh_token/client_secret = SECRET.
 - KHÔNG echo/commit/upload; KHÔNG để vương trong cây skill hay gói INSTALL.zip. Mỗi phiên Cowork nạp lại qua env, hết phiên dọn file.
 - secret_guard (v1.22) chặn `GOCSPX-` / `1//<refresh>` / khối PEM / SA-key + redirect/pipe của lệnh export.

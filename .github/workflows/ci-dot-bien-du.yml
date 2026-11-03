@@ -1,4 +1,4 @@
-name: WP1166 isolated concurrency probe
+name: WP1166 Windows source validation probe
 'on':
   workflow_dispatch: null
 permissions:
@@ -7,10 +7,27 @@ concurrency:
   group: full-mutant-audit-${{ github.run_id }}
   cancel-in-progress: false
 jobs:
-  probe:
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
+  windows-probe:
+    runs-on: windows-latest
+    timeout-minutes: 10
     steps:
-    - run: sleep 25
-
-# Second source snapshot for cross-SHA concurrency probe.
+    - uses: actions/checkout@v4
+      with:
+        ref: c59aeb97f247241538cc374b2436da9350b152e8
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - run: python -m pip install PyYAML==6.0.3
+    - shell: bash
+      run: "python - <<'PYCODE'\nimport copy, json, os, runpy, subprocess\nfrom pathlib\
+        \ import Path\nimport yaml\nm = runpy.run_path('.claude/dev/ci_dang_ky_test.py')\n\
+        w = yaml.safe_load(Path('.github/workflows/ci-dot-bien-du.yml').read_text(encoding='utf-8'))\n\
+        ci = yaml.safe_load(Path('.github/workflows/ci.yml').read_text(encoding='utf-8'))\n\
+        check = m['loi_workflow_dot_bien_du']\nassert not check(w, ci), check(w, ci)\n\
+        for job in w['jobs']:\n    bad = copy.deepcopy(w)\n    next(s for s in bad['jobs'][job]['steps']\
+        \ if s.get('uses') == 'actions/checkout@v4')['with']['ref'] = '${{ github.ref\
+        \ }}'\n    assert check(bad, ci), job\nbad = copy.deepcopy(w)\nbad['concurrency']['cancel-in-progress']\
+        \ = True\nassert check(bad, ci)\nactual = subprocess.check_output(['git',\
+        \ 'rev-parse', 'HEAD'], text=True).strip()\nassert actual == 'c59aeb97f247241538cc374b2436da9350b152e8'\n\
+        print(json.dumps(dict(sha=actual, platform=os.name, positive=1, negative=4)))\n\
+        PYCODE\n"

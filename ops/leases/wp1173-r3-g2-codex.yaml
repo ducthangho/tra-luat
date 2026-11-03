@@ -65,8 +65,8 @@ reviewed_sha_note: Baseline only; all final review/test evidence must bind the c
   exact H, not this base.
 leased_at_utc: '2026-11-03T16:48:33.662178Z'
 heartbeat_at: '2026-11-03T16:48:33.662178Z'
-lease_until: '2026-11-03T17:36:00Z'
-lease_expires_at_utc: '2026-11-03T17:36:00Z'
+lease_until: '2026-11-03T17:05:51.736220Z'
+lease_expires_at_utc: '2026-11-03T17:05:51.736220Z'
 run_minutes: 90
 run_deadline_note: Includes prior planning run begun around16:06UTC; no extension
   of the logical90minute cap.
@@ -118,3 +118,10 @@ review_calls_remaining_initial: 1
 attempts_used_author_handoff: 2
 history_note: New generation retains original budget/deadline and all findings; no
   state-dir/counter reset.
+da_bi_thay_the: wp1173-r4-g3-codex
+rut_han:
+  han_moi: '2026-11-03T17:05:51.736220Z'
+  ghi_boi: OpenAI Codex coordinator acting under owner delegation
+  ly_do: Transport P1 remediation handed off; successor revision4 carries explicit6files/1600cap
+    and preserved call3 reservation. Keep oldrecord on this generation branch, publish
+    reciprocal successor atomically.

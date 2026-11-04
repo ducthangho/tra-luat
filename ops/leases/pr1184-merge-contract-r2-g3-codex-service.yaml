@@ -47,8 +47,7 @@ effective_write_set:
 - ops/specs/PR1184-MERGE-CONTRACT-r1.md
 - ops/specs/PR1184-MERGE-CONTRACT-r2.md
 granted_by: ducthangho
-granted_on_instruction: 'owner chat approval 2026-11-04: Đồng ý duyệt; durable recording
-  in ops/receipts/pr1187-cold-recovery-g3-authority.yaml'
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6635721215
 leased_at_utc: '2026-11-04T16:12:22Z'
 heartbeat_at: '2026-11-04T16:12:22Z'
 lease_until: '2026-11-04T18:42:17Z'
@@ -58,7 +57,7 @@ run_minutes: 90
 depends_on: []
 recorded_by: codex-service-controller
 recorder_is_executor: false
-reviewed_sha_required: 28202eb23104b9207232cbf7500bacc6087357a3
+reviewed_sha_required: 29ee9ca74d61544fbddd56c39dabbe194d26408e
 authority_notes:
 - Owner approved the concrete r2 scope/lease request with amended cap1000 in chat;
   linked Issue1187 comment records the verbatim directive and exact resulting hash.
@@ -112,12 +111,13 @@ review_budget_override:
   new_limit: 4
   calls_used_before_next: 3
   authorized_additional_calls: 1
-  scope_head: 28202eb23104b9207232cbf7500bacc6087357a3
+  scope_head: 29ee9ca74d61544fbddd56c39dabbe194d26408e
   no_reset: true
   no_code_audit_or_land_authority: true
-  binding_status: await_exact_repaired_commit; no call until exact binding recorded
+  binding_status: exact_repaired_commit_rebound_before_review
   rebind_authority: owner approved cold recovery successor and review rebinding in
     current chat
+  source_rebinding: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6635721215
 nang_tran_review_budget:
   ai_nang: ducthangho via explicitownerresponse
   can_cu: one fresh verification after owner required all4P3fixed; three actualreviewsused;
@@ -149,6 +149,8 @@ execution_runs:
   run_minutes: 90
   continuation_sha: 28202eb23104b9207232cbf7500bacc6087357a3
   authority_source: ops/receipts/pr1187-cold-recovery-g3-authority.yaml
+  frozen_head: 29ee9ca74d61544fbddd56c39dabbe194d26408e
+  frozen_tree: 996c6af444aeb22d69587ed7852b78f35102eb9b
 review_budget_override_history:
 - approved_by: ducthangho
   recorded_by: codex-desktop-dispatcher

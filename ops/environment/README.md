@@ -1,0 +1,65 @@
+# tra-luat executor/reviewer environment
+
+Both update scripts use `ops/cong_cu.yaml` and `ops/cong_cu.py` for the shared baseline: git, Python, PyYAML, jsonschema, actionlint, shellcheck, ripgrep and Bash. System mode uses `ops/cai_cong_cu.sh --bat-buoc`; Linux `--user-only` installs pinned Python dependencies in an isolated venv and runs the same checker. `actionlint` is intentionally pinned to 1.7.7 by the repository manifest; the canary checks its ShellCheck integration. `--latest`/`-Latest` upgrades only the tools named in `--tools`/`-Tools` (default `claude,codex,agy,nlm,gws`); a tool already at the target version is not reinstalled. System tools use the configured OS package manager, so "latest" for those means the newest version in that repository, not necessarily the upstream release. Python and Node major updates can affect existing environments and are never selected by default.
+
+Run the scripts without `--apply`/`-Apply` to inspect. Check mode installs nothing and exits with the checker's exit code. The apply mode refuses to proceed while related tool/runtime processes are active (Claude, Codex, AGY, nlm, gws, uv, Node, Python; on Windows also WSL); on Linux it also refuses when `pgrep` is unavailable. An unknown `--tools` entry is rejected before any installation. `--persist-path`/`-PersistPath` is opt-in and adds user CLI directories idempotently: on Windows it edits the raw `HKCU\Environment\Path` value so existing `%VAR%` entries are preserved; on Linux it appends one marked, POSIX-compatible block to `~/.profile` and `~/.bashrc` that also sets `NPM_CONFIG_PREFIX=$HOME/.local` (do not use it together with nvm). Reopen terminals after changing persistent PATH.
+
+The updater reports only whether `TL_MASTER_KEY`, `TL_SECRETS_FILEID`, `TL_AGENT_CREDS_FILEID`, `TL_WEBAPP`, `TL_TOKEN` and `TL_PROFILE` have nonempty values. It never prints values, generates keys, copies credentials between Windows and WSL, runs `secrets-stage`, or runs `tl bootstrap`. The tra-luat config load order is environment `TL_WEBAPP`/`TL_TOKEN`, explicit `--config`, `~/.tra_luat_config.json`, then `/tmp/tra_luat_config.json`. WSL has its own HOME and must be bootstrapped separately with the repository's documented secret flow once the operator has securely supplied its key.
+
+On Ubuntu/WSL, `--user-only` never calls sudo or apt. It checks its prerequisites before any change and requires preinstalled git, python3, python3-venv (`ensurepip`), Bash, ripgrep, ShellCheck, actionlint and PowerShell; use system mode (which needs root or passwordless `sudo -n`) for a minimal Ubuntu installation. System mode supports Ubuntu only. Node (latest LTS, only when missing) and gh are installed user-local from the official archives with SHA256 verification. CLIs that resolve to Windows binaries under `/mnt/*` are treated as missing and replaced with native Linux installs.
+
+AGY is the `google-antigravity/antigravity-cli` project; its CLI states that it is not an officially supported Google product. On Linux the updater installs or upgrades it only from the GitHub release asset after checking the published SHA256 digest. On Windows the updater does not install AGY; `-Latest -Tools agy` runs AGY's own `agy update`, which is not SHA256-verified by this script.
+
+Do not use the legacy `tl-setup.ps1` to create plaintext `COWORK-paste.txt` as part of generic updates. The updater does not read or change secret values.
+
+## Verification status
+
+Measured for this candidate on 2026-11-04 (ASUS, Windows 11):
+
+- PowerShell 7.6.9 and Windows PowerShell 5.1 parse both `.ps1` files without errors; `bash -n` passes for both `.sh` files under Git Bash and WSL Debian 13; ShellCheck reports no findings.
+- Windows check mode exited 0: shared checker `trang_thai_tong=DAT`, actionlint/ShellCheck canary `DAT`. A stub checker exiting 7 makes check mode exit 7.
+- Login scripts: dot-sourcing/sourcing twice leaves PATH unchanged after the first time and sets `TL_REPO` (pwsh 7, PowerShell 5.1, Git Bash, WSL Debian); running them without dot-sourcing/sourcing refuses and changes nothing.
+- WSL Debian 13 (no Python) check mode exits 5 with "Python is required"; a stub checker exiting 7 makes it exit 7; an unknown `--tools` entry exits 2.
+- Not measured for this candidate: any apply mode (active Codex/Python/Node/Claude jobs on the host), Linux check mode with a real checker (the WSL Ubuntu distributions on the host did not start), Windows VM system scope.
+
+Earlier measurement of the pre-review scripts on 2026-11-04 (before the fixes in this candidate): WSL Ubuntu 24.04 `--apply --user-only --persist-path --latest` exited 0 with checker `DAT` and no sudo/system package changes; Windows `-Apply -Latest -Tools codex` stopped before mutation because Codex, Python and WSL processes were active; Windows VM `-ChiKiem -PhamVi NguoiDung` with the VM's own updater reported 11/11, system scope not run. WSL live `tl ping --json` reached the webapp but exited 1 because the deployed API version differed from the checkout's expected version; resolve that against the authoritative repo and deployment, do not edit a contract constant to silence it.
+
+## Dùng trực tiếp từ repository
+
+Từ thư mục gốc của `tra-luat`:
+
+```powershell
+pwsh -File ops/environment/update-windows.ps1 -Repo .
+pwsh -File ops/environment/update-windows.ps1 -Repo . -Apply -PersistPath
+pwsh -File ops/environment/update-windows.ps1 -Repo . -Apply -Latest -Tools claude,codex,agy,nlm,gws
+. ./ops/environment/login-windows.ps1
+python scripts/tl.py doctor --offline
+```
+
+```bash
+bash ops/environment/update-linux.sh --repo .
+bash ops/environment/update-linux.sh --repo . --apply --user-only --persist-path
+bash ops/environment/update-linux.sh --repo . --apply --user-only --latest --tools claude,codex,agy,nlm,gws
+source ops/environment/login-linux.sh
+python scripts/tl.py doctor --offline
+```
+
+Trên Ubuntu tối giản, bỏ `--user-only` và chạy với root hoặc `sudo` không cần mật khẩu (`sudo -n`). `--user-only` không bao giờ gọi sudo/apt và dừng trước mọi thay đổi nếu thiếu tiền điều kiện. Chạy chế độ kiểm tra trước, chỉ dùng `--apply` khi các công việc đang dùng CLI đã kết thúc.
+
+### Nạp PATH mỗi lần mở shell (opt-in)
+
+Script login không tự sửa profile. Muốn nạp mỗi lần mở shell thì tự thêm một dòng, thay đường dẫn theo checkout.
+
+PowerShell — thêm vào `$PROFILE`:
+
+```powershell
+Add-Content -LiteralPath $PROFILE -Value ". 'D:\Quốc hội\tra-luat\ops\environment\login-windows.ps1'"
+```
+
+Bash/WSL — thêm vào `~/.bashrc` (script cần Bash, đừng đặt vào `~/.profile` vì profile đó có thể chạy dưới `sh`):
+
+```bash
+printf '%s\n' "source '/mnt/d/Quốc hội/tra-luat/ops/environment/login-linux.sh'" >> ~/.bashrc
+```
+
+Các script login chỉ thêm các thư mục CLI người dùng đang có vào PATH của phiên hiện tại, đặt `TL_REPO` và in lệnh kiểm tra; nạp nhiều lần không nhân đôi PATH. Chúng không cài phần mềm, không sửa profile, không đăng nhập và không đọc/lưu `TL_MASTER_KEY`. Sau khi nạp, chạy `python scripts/tl.py doctor --offline` trong thư mục repo. Nếu cần khởi tạo xác thực, dùng quy trình `python scripts/tl.py bootstrap --env code` của repo bằng biến `TL_*` được cung cấp an toàn trong phiên hiện tại; không lưu `TL_MASTER_KEY` vào profile.

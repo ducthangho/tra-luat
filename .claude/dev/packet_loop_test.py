@@ -9762,6 +9762,24 @@ MUTANTS.update({
     "r1187_drop_milestone_file": ('or _git_do(root, "cat-file", "-e", f"{ADR0062_OID}:docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md")[0]', '', ["r1187_milestone_missing"]),
 })
 
+
+def _docs1187(c):
+    import shutil
+    m = importlib.util.module_from_spec(sp := importlib.util.spec_from_file_location("docs1187", c.script)); sp.loader.exec_module(m)
+    w=Path(tempfile.mkdtemp(prefix="docs1187-", dir=c.tmp)); shutil.copytree(ROOT/"docs/adr", w/"docs/adr")
+    (w/"docs/PROTOCOL_DA_PHIEN.md").write_bytes((ROOT/"docs/PROTOCOL_DA_PHIEN.md").read_bytes())
+    p=w/m.ADR0063_TEP; original=p.read_text(encoding="utf-8")
+    rc,_,e=run(c.script,["adr-song","--root",w],c.sd()); _doi(0,rc,e,"ADR0063 positive")
+    for anchor in ("spec_ref", "spec_sha256_required", "human_exact_head_audit.v1", "human_audit_transition.v1", "M5/M12", "first-parent", "2026-11-04T08:36:24Z", "K0/K2/K3/K5/K6/K7", "thời hạn review"):
+        p.write_text(original.replace(anchor,"REMOVED"), encoding="utf-8", newline="\n")
+        rc,_,e=run(c.script,["adr-song","--root",w],c.sd()); _doi(9,rc,e,"ADR0063 missing anchor")
+        assert b"ADR-0063" in e, "wrong guard failure"
+    p.write_text(original,encoding="utf-8",newline="\n")
+
+
+CASES.append(("r1187_doc_anchors", _docs1187))
+MUTANTS["r1187_drop_doc_guard"] = ('        if s == "0063":', '        if False:', ["r1187_doc_anchors"])
+
 def main() -> int:
     _ = [s.reconfigure(encoding="utf-8", errors="backslashreplace")
          for s in (sys.stdout, sys.stderr) if hasattr(s, "reconfigure")]

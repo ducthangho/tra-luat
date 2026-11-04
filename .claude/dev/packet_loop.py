@@ -1987,6 +1987,10 @@ def cmd_adr_song(a, state_dir: Path) -> int:
         if vd:
             loi.append(f"ADR-{s}: `{f.name}` — {vd[0]}; không đo được")
             continue
+        if s == "0063":
+            for anchor in ADR0063_ANCHORS:
+                if anchor not in than_adr:
+                    loi.append(f"ADR-0063: thiếu contract anchor {anchor}")
         if _ADR_TRANG_THAI.search(than_adr):
             continue
         if s in _ADR_THA_THIEU_TRANG_THAI:
@@ -3180,6 +3184,7 @@ def _dong_chu_kho(duong, tho=False) -> list[str]:
 ADR0062_OID = "1f0941e9bba1d1d517eda4174167b81963c06bd5"
 ADR0062_TIME = "2026-11-04T08:36:24Z"
 ADR0063_TEP = "docs/adr/0063-merge-spec-ref-va-human-audit.md"
+ADR0063_ANCHORS = ("spec_ref", "spec_sha256_required", "human_exact_head_audit.v1", "human_audit_transition.v1", "M5/M12", "first-parent", "2026-11-04T08:36:24Z", "K0/K2/K3/K5/K6/K7", "thời hạn review")
 
 
 def _spec_merge(root, h, path, lease):

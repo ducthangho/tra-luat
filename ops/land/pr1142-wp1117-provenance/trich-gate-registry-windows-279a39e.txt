@@ -1,0 +1,28 @@
+# Trich log job 125171864782 gate-registry (windows-latest), run 41401509813 (workflow_dispatch ci.yml, head 279a39e), log sha256 633d8148af49288239bfc051f82c3f790847227e57982bfdb3c35d18307f3466
+# Doi chieu job 125097386064 gate-registry (windows-latest), run 41388158239 (head 8f0dfcf): ci_provenance_test.py DAT trong 3446.67 giay
+## 279a39e:
+CI_DANG_KY ops/ci_provenance_test.py: ĐỎ — LỖI HẠ TẦNG: hết giờ 5400 giây; KHÔNG xác nhận được cả cây tiến trình đã dừng, rc=1
+TỔNG: ĐỎ
+{"duong_dan": "ops/ci_provenance_test.py", "rc": 1, "giay": 5400.138, "bat_dau_utc": "2026-11-02T08:59:08.450Z", "ket_thuc_utc": "2026-11-02T10:29:08.588Z", "che_do": "day_du"}
+## 8f0dfcf:
+CI_DANG_KY ops/ci_provenance_test.py: ĐẠT rc=0
+{"duong_dan": "ops/ci_provenance_test.py", "rc": 0, "giay": 3446.67, "bat_dau_utc": "2026-11-02T05:03:57.490Z", "ket_thuc_utc": "2026-11-02T06:01:24.160Z", "che_do": "day_du"}
+## Thay doi ops/ci_provenance*.py giua 8f0dfcf va 279a39e (git log 8f0dfcf..279a39e -- ops/ci_provenance_test.py ops/ci_provenance.py):
+516a334 test(#978 r2): dong 3 P3 Codex luot 10 - dem muc oracle doc lap, chot ton tai moi commit dung
+b659eae test(#978 r2): c62 ghi commit mot luot + oracle Git native mot loi goi (Windows that: --mot-ca c62 qua timeout 300 s)
+ad0d3a1 test(#978): ca F13 doi tien to c53 -> c62 (Codex P1 tren e5ca45b)
+e5ca45b Merge origin/master vào agent/wp978-g1-claude (dọn PR cũ 02-11: chạy lại CI trên master mới)
+28b542a test(#978): dong P3 do phu — S01/S02 cua review luot 8 + vi sai ngau nhien (seed 978, 150 commit)
+8cfc2a0 test(#978): c53 dung tag annotated bang hash-object (co dong tagger) — gate-registry do vi 'git tag -a' doi danh tinh
+53ec046 test(#978): c53 them gap dong CRLF/TAB, TAB truoc SP, cha trung ABA/AAA — review Codex luot 7
+bf8ef91 test(#978): c53 ma tran parent x dong mo rong x than (150 commit, ky vong M1/Git native) — review Codex luot 6
+2c907a4 test(#978): c53 phu ca lop chuan hoa dong header — review Codex luot 5 (V3)
+afcadd5 test(#978): c53 them commit mergetag nhieu dong (dong tiep noi giu dau cach) — review Codex luot 4
+aa2a1f3 fix(#978): git_cuc_bo doc parent theo ngu phap Git (day lien sau tree dau) — review Codex luot 3
+fdf1f05 test(#978): c53 tiem dau ra git (rong, thua truong, than cut, qua han), sha khong ma hoa duoc; bo boc NEM chi nhan loi noi tu khung git_cuc_bo
+7fcfe18 fix(#978): git_cuc_bo kiem loai object qua cat-file --batch, tach header theo LF — review Codex luot 1
+bef1403 fix(#978): git_cuc_bo doc metadata commit bang bytes — no F13 cua #899
+## Diff cua merge 279a39e so cha 1 (git diff --stat 279a39e^1 279a39e):
+ .claude/dev/launcher_test.py        | 330 ++++++++++++++++++++++++++----------
+ .claude/dev/launcher_test_runner.py |  84 +++++++++
+ 2 files changed, 329 insertions(+), 85 deletions(-)

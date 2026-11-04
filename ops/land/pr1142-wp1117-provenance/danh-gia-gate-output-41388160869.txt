@@ -1,0 +1,5 @@
+# Danh gia Gate output run 41388160869 attempt 1 head 8f0dfcf35c8ee92a9a754bde82846eb11430bd0e — luat dau hieu duong tung loai job (danh_gia_gate.py sha256 70d42a0ff05aa5977e6b614b10d4b1e83f732d94e6c43cb6e7579ad483a2a184)
+
+JOB 125093497495 launcher (windows-latest) [windows-latest] conclusion=success log_sha256=1e0477809aa0c24c1b359f4ce5d8d2e236e5eef059d1d38d3d227e603ed13989 -> passed: 294/294 ca DA CHAY QUA (tong 368, bo qua 74, hong 0) - KHONG DU: 74 ca BO QUA, chua do gi | DOT BIEN: 470/470 dat  (118 khong do duoc tren nen nay)
+
+MOC_GATE_OUTPUT: passed (1/1 job co dau hieu duong)

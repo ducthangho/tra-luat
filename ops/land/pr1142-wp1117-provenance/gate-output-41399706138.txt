@@ -1,0 +1,4 @@
+# Gate output run 41399706138 attempt 1 (push, .github/workflows/launcher-windows.yml, nhanh master, head 279a39e34c26027ad792008962859aa79c16e35c) — log REST tung job, doc 2026-11-04
+
+JOB 125128650365 launcher (ubuntu-latest) ['ubuntu-latest'] conclusion=success runner_id=1000034980 bytes=114675 sha256=2ce00a39d78feb5a03066bfff2fa6017689883073771bf92f409749deba4e25c ##[error]=0
+JOB 125128650016 launcher (windows-latest) ['windows-latest'] conclusion=success runner_id=1000034956 bytes=145026 sha256=57b42dbe2c4fe399adba8a8334eeb248cdcfd14a9c48b44ba59b8d137dd827f3 ##[error]=0

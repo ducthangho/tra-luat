@@ -1,0 +1,14 @@
+2026-11-02T06:23:04.3068473Z Image: windows-2025-vs2026
+2026-11-02T06:23:05.1899792Z ##[group]Run git config --global core.autocrlf false
+2026-11-02T06:23:06.3881083Z ##[group]Run actions/checkout@v4
+2026-11-02T06:23:18.5128931Z [command]"C:\Program Files\Git\bin\git.exe" rev-parse refs/remotes/origin/claude/gate-hau-merge-8f123b27
+2026-11-02T06:23:18.5535591Z 8f123b27b338e5e173a668209eb4904f49dd611b
+2026-11-02T06:23:22.5193103Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-11-02T06:23:22.5639198Z 8f123b27b338e5e173a668209eb4904f49dd611b
+2026-11-02T06:23:22.6263019Z ##[group]Run actions/setup-python@v5
+2026-11-02T06:23:22.8941470Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-11-02T06:23:33.5022718Z ##[group]Run bash ops/cai_cong_cu.sh shellcheck
+2026-11-02T06:23:53.5981298Z ##[group]Run bash ops/cai_cong_cu.sh rg
+2026-11-02T06:24:00.3934786Z ##[group]Run python ops/bien_nhan_v2_test.py
+2026-11-02T06:55:58.9325315Z ##[group]Run bash ops/chay_lease_publish_test.sh
+2026-11-02T07:10:48.8128076Z ##[group]Run python .claude/dev/gate_lifecycle_test.py

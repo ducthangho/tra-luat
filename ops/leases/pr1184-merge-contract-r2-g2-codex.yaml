@@ -30,7 +30,7 @@ prompt_sha256_required: 975c5d31be6ec4f26145f14893b5c8f7063e5921d1c6dafdca020f50
 branch: agent/pr1184-merge-contract-r2-g2-codex
 branch_ownership: exclusive
 base_sha: 1f0941e9bba1d1d517eda4174167b81963c06bd5
-start_from_sha: abc6bdab035b14bf24f55ea5d557233c927ad951
+start_from_sha: db9c665db5610d9bd81a8fd6f345248cde83aa00
 target_branch_neu_land: master
 write_set:
 - .claude/dev/packet_loop.py
@@ -49,7 +49,7 @@ effective_write_set:
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6630877365
 leased_at_utc: '2026-11-04T12:42:17Z'
-heartbeat_at: '2026-11-04T12:42:17Z'
+heartbeat_at: '2026-11-04T14:30:54Z'
 lease_until: '2026-11-04T18:42:17Z'
 lease_expires_at_utc: '2026-11-04T18:42:17Z'
 heartbeat_required_minutes: 360
@@ -57,7 +57,7 @@ run_minutes: 90
 depends_on: []
 recorded_by: codex-desktop-dispatcher
 recorder_is_executor: false
-reviewed_sha_required: abc6bdab035b14bf24f55ea5d557233c927ad951
+reviewed_sha_required: db9c665db5610d9bd81a8fd6f345248cde83aa00
 authority_notes:
 - Owner approved the concrete r2 scope/lease request with amended cap1000 in chat;
   linked Issue1187 comment records the verbatim directive and exact resulting hash.
@@ -109,3 +109,19 @@ nang_tran_review_budget:
     https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6632609191
   tran_cu: customPacket1187 modelcalls withoutput2
   tran_moi: customPacket1187 modelcalls withoutput3; exactlyoneadditional, nofourth
+initial_start_from_sha: abc6bdab035b14bf24f55ea5d557233c927ad951
+execution_runs:
+- run: 1
+  executor_task: /root/pr1187_r2_executor
+  started_at_utc: '2026-11-04T12:45:14Z'
+  deadline_utc: '2026-11-04T14:15:14Z'
+  completed_at_utc: '2026-11-04T13:24:00Z'
+  outcome: handoff_db9_not_pushed
+- run: 2
+  executor_task: /root/pr1187_r2_executor
+  started_at_utc: '2026-11-04T14:30:54Z'
+  deadline_utc: '2026-11-04T16:00:54Z'
+  run_minutes: 90
+  continuation_sha: db9c665db5610d9bd81a8fd6f345248cde83aa00
+  authority_source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6633294277
+  scope: ownerrequiresall4P3fixedwithincurrentcontract;no fourthmodelcall

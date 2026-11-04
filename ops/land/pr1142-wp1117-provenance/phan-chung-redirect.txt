@@ -1,0 +1,13 @@
+# Phan chung connector P2 r4469672182 (PR #1153) — redirect cross-host khong duoc mang Authorization (04-11)
+== cu_danh_gia_gate.py sha256 70d42a0ff05aa5977e6b614b10d4b1e83f732d94e6c43cb6e7579ad483a2a184
+DO than= b'LOG-OK' B nhan Authorization= Bearer TOKEN-GIA-PHAN-CHUNG
+rc=1
+== danh_gia_gate.py sha256 ea18fd47bb840a1fd9655d1b6219b789d0013229cbf7cea3c940a32e0ef137b0
+DAT than= b'LOG-OK' B nhan Authorization= None
+rc=0
+== cu_gate_output.py sha256 f817f1cc20f05e2fb1b85a861084f10666632dd772258739ad360523cbfe34e3
+DO than= b'LOG-OK' B nhan Authorization= Bearer TOKEN-GIA-PHAN-CHUNG
+rc=1
+== gate_output.py sha256 a716486bed88780621dd2a2f4d47dc958abbfee58369667841d80937e0bca9f9
+DAT than= b'LOG-OK' B nhan Authorization= None
+rc=0

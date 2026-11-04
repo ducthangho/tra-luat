@@ -1,4 +1,4 @@
-# Danh gia Gate output run 41401509813 attempt 1 head 279a39e34c26027ad792008962859aa79c16e35c — luat dau hieu duong tung loai job (danh_gia_gate.py sha256 70d42a0ff05aa5977e6b614b10d4b1e83f732d94e6c43cb6e7579ad483a2a184)
+# Danh gia Gate output run 41401509813 attempt 1 head 279a39e34c26027ad792008962859aa79c16e35c — luat dau hieu duong tung loai job (danh_gia_gate.py sha256 ea18fd47bb840a1fd9655d1b6219b789d0013229cbf7cea3c940a32e0ef137b0)
 
 JOB 125170167331 chuan-bi [ubuntu-latest] conclusion=success log_sha256=1a2093e8e933c25dc2bf50ec7712be807517a9680a324e348fe9f72adcd0a2a2 -> passed: che_do=day_du
 JOB 125170251504 gate (windows-latest) [windows-latest] conclusion=success log_sha256=7c401c76fb856ec029bec2e06ea628a55fcc60abdf7c81bf972e0bb9ff4e65ea -> passed: TỔNG: ĐẠT

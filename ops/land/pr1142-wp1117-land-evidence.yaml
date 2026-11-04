@@ -1,7 +1,9 @@
 # HO SO LAND — packet #1117 HARNESS-KET-QUA-NGOAI-MA-DOT-BIEN r2 g2, code qua PR #1142. Khuon: ops/land/pr1130-wp1122-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (279a39e3), landed TRUE — du bon moc §10.2.2 tren run push master 41399706045 (dung merge SHA, attempt 1).
+# TRANG THAI: merged (279a39e3), landed FALSE — du bon moc §10.2.2 tren run push master 41399706045 (dung merge SHA, attempt 1), nhung
+# (7) reviewer assurance §8.1 CHUA_DAT: sandbox mode cua luot approve KHONG_DO_DUOC (DanhTinhDoi, #1105). Tien le pr1080-wp1077:
+# chi nang landed khi chu kho chap nhan (kieu b).
 # NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nghia nhu khuon.
 # Readback tho: ops/land/pr1142-wp1117-provenance/ (SHA256SUMS kem). Readback truoc merge do phien session_015GtxrcSEjPkSR4KLHEyEsm
 # ghi (commit 3cccf98, 02-11); phep do hau merge do phien session_015Gtxra7iT6mwM1kqpdggt6 ghi (04-11), REST GET qua proxy bang GITHUB_PAT.
@@ -23,7 +25,7 @@ authorization_ghi_chu: >-
   Comment "Uy quyen merge #1142 tren head 8f0dfcf…" (readback-comments-1142.json, id 6570603441, 06:24:06Z) do phien
   session_015GtxrcSEjPkSR4KLHEyEsm ghi ho chi thi truc tiep cua chu kho "Merge cac pr, wp da san sang…". CAVEAT #566: dang bang
   token chu kho nen hien ducthangho. Bam byte cau tra loi KHONG DO DUOC. Ho so land nay giao lai cho phien
-  session_015Gtxra7iT6mwM1kqpdggt6 qua phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq (04-11), theo chi thi chu kho "land, ghi so tat ca".
+  session_015Gtxra7iT6mwM1kqpdggt6 qua phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq (04-11), theo chi thi chu kho "land, ghi so tat ca". Phien ay bao: luot 5 sandbox KHONG_DO_DUOC, ghi dung, khong nang.
 land_operator: 'measured — readback-pr-1142.json: merged true, merged_at 2026-11-02T06:24:26Z, merged_by ducthangho, merge_commit_sha 279a39e3, head 8f0dfcf3.'
 merge_method: merge
 merge_commit: 279a39e34c26027ad792008962859aa79c16e35c
@@ -44,7 +46,7 @@ post_merge_checks:
     moc_run: 'measured — ci/provenance.yaml moc.run: event push, head_sha 279a39e3, run_attempt 1, passed.'
     moc_checkout: 'measured — ci/provenance.yaml moc.checkout: 23/23 job passed tai 279a39e34c26027ad792008962859aa79c16e35c.'
     moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition: passed (wd-run 41859872200, artifact workflow-definition-41399706045), blob 6ce8a5fa, sha256 e77a9620 = git rev-parse 279a39e:.github/workflows/ci.yml.'
-    moc_gate_output: 'measured — danh-gia-gate-output-41399706045.txt (danh_gia_gate.py, luat dau hieu duong tung loai job, thieu => not_measured): 23/23 job passed. gate-output-41399706045.txt giu sha256 + so byte log tung job, ##[error]=0 ca 23.'
+    moc_gate_output: 'measured — danh-gia-gate-output-41399706045.txt (danh_gia_gate.py da va P2 r4469672182 cua PR #1153, phan-chung-redirect.txt; luat dau hieu duong tung loai job, thieu => not_measured): 23/23 job passed. gate-output-41399706045.txt giu sha256 + so byte log tung job, ##[error]=0 ca 23.'
   - name: 'ci.yml workflow_dispatch runner_set=windows-only tren head cuoi (dieu kien truoc merge, ket qua ve SAU merge)'
     run_id: 41388158239
     sha: 8f0dfcf35c8ee92a9a754bde82846eb11430bd0e
@@ -74,7 +76,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1117-r2-g2-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so (lan luu tru)', nhanh: claude/epic-ritchie-quvrz1, ghi_chu: 'PR #1151; chi cham ops/land/**'}
-  - {item: 'ban ghi M8', ket_qua: 'xem readback-m8 trong provenance sau khi dang.'}
+  - {item: 'ban ghi M8', ket_qua: 'CHUA DANG — cho chu kho quyet §8.1 (landed false); #1117 con mo.'}
 # ---- het truong chuan
 packet_id: HARNESS-KET-QUA-NGOAI-MA-DOT-BIEN
 packet_issue: 1117
@@ -100,16 +102,22 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-1142.json merged true; readback-commit-279a39e.json cha 8983e1bb + 8f0dfcf3.'
-  landed: true
+  landed: false
+  reviewer_assurance_81: CHUA_DAT
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 279a39e: DAT, du bon moc (post_merge_checks muc 1, push master) + launcher-windows push
     master xanh; (2) lease nha: rut han 06:47Z; (3) bookkeeping: ho so nay + ban ghi M8 tren Issue #1117; (4) review neo DUNG
     authorized_head 8f0dfcf: luot 5 approve 0/0/0/0, connector sach; (5) uy quyen land: chi thi chu kho ghi ho tai comment 6570603441;
-    (6) muc tieu packet: N0, A1-A6 theo handoff, Windows windows-only tren head xanh (ket qua cuoi sau merge); (7) §8.1: model/effort
-    KHONG DO DUOC tung response. Ngoai le ghi ro: luot windows-only tren merge SHA do vi ci_provenance_test.py het gio, ngoai write set.
+    (6) muc tieu packet: N0, A1-A8 theo handoff, Windows windows-only tren head xanh (ket qua cuoi sau merge); (7) §8.1: CHUA_DAT —
+    sandbox mode KHONG_DO_DUOC (DanhTinhDoi, #1105); model gpt-6.1-sol va effort xhigh DO_DUOC. Cho chu kho quyet nhu pr1080. Ngoai le ghi ro: luot windows-only tren merge SHA do vi ci_provenance_test.py het gio, ngoai write set.
 
 assurance_81:
-  reviewer_assurance_81: 'loi_khai_co_neo — provider openai_codex, execution_surface codex_cli, transport machine theo run.json; model/effort phuc vu tung response KHONG DO DUOC.'
+  reviewer_assurance_81: CHUA_DAT
+  review_exact_sha: 'DAT — luot 5 head 8f0dfcf = authorized_head_sha, ma_thoat 0, VERDICT approve.'
+  thuc_thi:
+    model: 'thuat_lai — readback-codex-luot5-run.json model_phuc_vu_trang_thai DO_DUOC, gpt-6.1-sol (ho openai).'
+    effort: 'thuat_lai — readback-codex-luot5-run.json effort_phuc_vu [xhigh] DO_DUOC.'
+    sandbox_mode: 'not_measured — readback-codex-luot5-run.json sandbox_trang_thai KHONG_DO_DUOC (luong lay mau sandbox hong, DanhTinhDoi); Issue #1105.'
 
 review:
   so_loi_goi_codex_cli: 5
@@ -122,5 +130,5 @@ lech_dac_ta:
   - 'Ke thua tu r1 (da duyet): runner chay tu cay harness do _dung_cay_harness chep.'
 
 khong_do_duoc:
-  - 'Model/effort phuc vu tung response cua reviewer.'
+  - 'Sandbox mode cua luot approve: KHONG_DO_DUOC (DanhTinhDoi, #1105) => §8.1 CHUA_DAT.'
   - 'Bam byte cau tra loi cua chu kho trong phien merge.'

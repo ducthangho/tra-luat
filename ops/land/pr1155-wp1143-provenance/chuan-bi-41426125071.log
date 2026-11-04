@@ -1,0 +1,1038 @@
+chuan-bi	Set up job	﻿2026-11-02T10:06:54.3913627Z Current runner version: '2.338.2'
+chuan-bi	Set up job	2026-11-02T10:06:54.3937826Z ##[group]Runner Image Provisioner
+chuan-bi	Set up job	2026-11-02T10:06:54.3938587Z Hosted Compute Agent
+chuan-bi	Set up job	2026-11-02T10:06:54.3939076Z Version: 20261021.618
+chuan-bi	Set up job	2026-11-02T10:06:54.3939708Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+chuan-bi	Set up job	2026-11-02T10:06:54.3940364Z Build Date: 2026-10-21T00:45:21Z
+chuan-bi	Set up job	2026-11-02T10:06:54.3941006Z Worker ID: {f8de1bfd-7843-4e20-9436-534c702f4e9d}
+chuan-bi	Set up job	2026-11-02T10:06:54.3941606Z Region: westus3
+chuan-bi	Set up job	2026-11-02T10:06:54.3942072Z Cloud: Azure
+chuan-bi	Set up job	2026-11-02T10:06:54.3942623Z ##[endgroup]
+chuan-bi	Set up job	2026-11-02T10:06:54.3943744Z ##[group]Operating System
+chuan-bi	Set up job	2026-11-02T10:06:54.3944324Z Ubuntu
+chuan-bi	Set up job	2026-11-02T10:06:54.3944798Z 24.04.5
+chuan-bi	Set up job	2026-11-02T10:06:54.3945249Z LTS
+chuan-bi	Set up job	2026-11-02T10:06:54.3945757Z ##[endgroup]
+chuan-bi	Set up job	2026-11-02T10:06:54.3946277Z ##[group]Runner Image
+chuan-bi	Set up job	2026-11-02T10:06:54.3946939Z Image: ubuntu-24.04
+chuan-bi	Set up job	2026-11-02T10:06:54.3947440Z Version: 20261025.353.1
+chuan-bi	Set up job	2026-11-02T10:06:54.3948331Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261025.353/images/ubuntu/Ubuntu2404-Readme.md
+chuan-bi	Set up job	2026-11-02T10:06:54.3949874Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261025.353
+chuan-bi	Set up job	2026-11-02T10:06:54.3950694Z ##[endgroup]
+chuan-bi	Set up job	2026-11-02T10:06:54.3953139Z ##[group]GITHUB_TOKEN Permissions
+chuan-bi	Set up job	2026-11-02T10:06:54.3955055Z Actions: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3955610Z ArtifactMetadata: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3956162Z Attestations: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3956874Z Checks: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3957361Z CodeQuality: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3957901Z Contents: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3958398Z CopilotRequests: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3958904Z Deployments: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3959409Z Discussions: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3959891Z Drives: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3960361Z Issues: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3960988Z Metadata: read
+chuan-bi	Set up job	2026-11-02T10:06:54.3961463Z Models: read
+chuan-bi	Set up job	2026-11-02T10:06:54.3961967Z Packages: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3962450Z Pages: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3962933Z PullRequests: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3963504Z RepositoryProjects: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3964076Z SecurityEvents: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3964619Z Statuses: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3965128Z VulnerabilityAlerts: read
+chuan-bi	Set up job	2026-11-02T10:06:54.3965670Z ##[endgroup]
+chuan-bi	Set up job	2026-11-02T10:06:54.3967696Z Secret source: Actions
+chuan-bi	Set up job	2026-11-02T10:06:54.3968477Z Cache mode: write
+chuan-bi	Set up job	2026-11-02T10:06:54.3969144Z Prepare workflow directory
+chuan-bi	Set up job	2026-11-02T10:06:54.4253367Z Prepare all required actions
+chuan-bi	Set up job	2026-11-02T10:06:54.4296333Z Getting action download info
+chuan-bi	Set up job	2026-11-02T10:06:54.7051134Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+chuan-bi	Set up job	2026-11-02T10:06:54.9748424Z Complete job name: chuan-bi
+chuan-bi	Run actions/checkout@v4	﻿2026-11-02T10:06:55.0464052Z ##[group]Run actions/checkout@v4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0464770Z with:
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0465125Z   fetch-depth: 0
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0465520Z   repository: ducthangho/tra-luat
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0468745Z   token: ***
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0469111Z   ssh-strict: true
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0469478Z   ssh-user: git
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0469884Z   persist-credentials: true
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0470294Z   clean: true
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0470667Z   sparse-checkout-cone-mode: true
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0471103Z   fetch-tags: false
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0471474Z   show-progress: true
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0471844Z   lfs: false
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0472190Z   submodules: false
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0472568Z   set-safe-directory: true
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0472990Z   allow-unsafe-pr-checkout: false
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.0473594Z ##[endgroup]
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.2868411Z Syncing repository: ducthangho/tra-luat
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.2870806Z ##[group]Getting Git version info
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.2871628Z Working directory is '/home/runner/work/tra-luat/tra-luat'
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.2873123Z [command]/usr/bin/git version
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.2918801Z git version 2.56.0
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.2944670Z ##[endgroup]
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.2956478Z Temporarily overriding HOME='/home/runner/work/_temp/7064cf2c-b880-4b63-9bae-ad7e73df37de' before making global git config changes
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.2965524Z Adding repository directory to the temporary git global config as a safe directory
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.2968073Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/tra-luat/tra-luat
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3001527Z Deleting the contents of '/home/runner/work/tra-luat/tra-luat'
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3008253Z ##[group]Initializing the repository
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3010418Z [command]/usr/bin/git init /home/runner/work/tra-luat/tra-luat
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3304863Z hint: Using 'master' as the name for the initial branch. This default branch name
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3306520Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3308076Z hint: to use in all of your new repositories, which will suppress this warning,
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3309159Z hint: call:
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3309724Z hint:
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3310444Z hint: 	git config --global init.defaultBranch <name>
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3311336Z hint:
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3312158Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3313429Z hint: 'development'. The just-created branch can be renamed via this command:
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3314446Z hint:
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3315032Z hint: 	git branch -m <name>
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3315690Z hint:
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3316668Z hint: Disable this message with "git config set advice.defaultBranchName false"
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3318072Z Initialized empty Git repository in /home/runner/work/tra-luat/tra-luat/.git/
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3320555Z [command]/usr/bin/git remote add origin https://github.com/ducthangho/tra-luat
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3366261Z ##[endgroup]
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3367549Z ##[group]Disabling automatic garbage collection
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3368639Z [command]/usr/bin/git config --local gc.auto 0
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3410315Z ##[endgroup]
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3411366Z ##[group]Setting up auth
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3412061Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3448235Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3759449Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.3797554Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.4005159Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.4043949Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.4254239Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.4299643Z ##[endgroup]
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.4300450Z ##[group]Fetching the repository
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:06:55.4310829Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +f18bb528bf86b3e891432d01024aa10fee07e12c:refs/remotes/pull/1157/merge
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9384643Z From https://github.com/ducthangho/tra-luat
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9387469Z  * [new branch]          agent/ag-packet3-launcher-windows-plan -> origin/agent/ag-packet3-launcher-windows-plan
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9389743Z  * [new branch]          agent/ag-t0-05-registry-ratchet -> origin/agent/ag-t0-05-registry-ratchet
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9391944Z  * [new branch]          agent/codex-credential-refresh-g1 -> origin/agent/codex-credential-refresh-g1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9394011Z  * [new branch]          agent/land-81-ha-cap-claude -> origin/agent/land-81-ha-cap-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9395691Z  * [new branch]          agent/land-81-ha-cap-r2-claude -> origin/agent/land-81-ha-cap-r2-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9398160Z  * [new branch]          agent/land-81-pr963-claude  -> origin/agent/land-81-pr963-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9399857Z  * [new branch]          agent/land-evidence-l7-claude -> origin/agent/land-evidence-l7-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9402078Z  * [new branch]          agent/local-gates-no-actions -> origin/agent/local-gates-no-actions
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9404328Z  * [new branch]          agent/ra04a-envelope-g1-claude -> origin/agent/ra04a-envelope-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9407543Z  * [new branch]          agent/windows-local-may-chu-kho-r2-claude -> origin/agent/windows-local-may-chu-kho-r2-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9411113Z  * [new branch]          agent/windows-local-may-chu-kho-r3-bien-nhan -> origin/agent/windows-local-may-chu-kho-r3-bien-nhan
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9414734Z  * [new branch]          agent/windows-local-may-chu-kho-r3-claude -> origin/agent/windows-local-may-chu-kho-r3-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9418051Z  * [new branch]          agent/wp1021-g1-claude      -> origin/agent/wp1021-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9420800Z  * [new branch]          agent/wp1030-nul-windows-claude -> origin/agent/wp1030-nul-windows-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9423559Z  * [new branch]          agent/wp1077-g1-claude      -> origin/agent/wp1077-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9425630Z  * [new branch]          agent/wp1078-g1-claude      -> origin/agent/wp1078-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9427817Z  * [new branch]          agent/wp1079-g1-claude      -> origin/agent/wp1079-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9429839Z  * [new branch]          agent/wp1085-g1-claude      -> origin/agent/wp1085-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9431660Z  * [new branch]          agent/wp1094-g1-claude      -> origin/agent/wp1094-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9433683Z  * [new branch]          agent/wp1106-g1-claude      -> origin/agent/wp1106-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9435398Z  * [new branch]          agent/wp1113-g1-claude      -> origin/agent/wp1113-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9437619Z  * [new branch]          agent/wp1117-g1-claude      -> origin/agent/wp1117-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9439446Z  * [new branch]          agent/wp1120-g1-claude      -> origin/agent/wp1120-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9441253Z  * [new branch]          agent/wp1121-g1-claude      -> origin/agent/wp1121-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9443090Z  * [new branch]          agent/wp1122-g1-claude      -> origin/agent/wp1122-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9444928Z  * [new branch]          agent/wp1132-g1-claude      -> origin/agent/wp1132-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9446998Z  * [new branch]          agent/wp1134-g1-claude      -> origin/agent/wp1134-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9449152Z  * [new branch]          agent/wp1143-g1-codex       -> origin/agent/wp1143-g1-codex
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9451019Z  * [new branch]          agent/wp122-g1-codex        -> origin/agent/wp122-g1-codex
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9453234Z  * [new branch]          agent/wp125-g1-claude       -> origin/agent/wp125-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9455078Z  * [new branch]          agent/wp125-g2-claude       -> origin/agent/wp125-g2-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9457077Z  * [new branch]          agent/wp430-g1-codex        -> origin/agent/wp430-g1-codex
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9458883Z  * [new branch]          agent/wp710-g1-codex        -> origin/agent/wp710-g1-codex
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9460744Z  * [new branch]          agent/wp744-g2-antigravity  -> origin/agent/wp744-g2-antigravity
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9462611Z  * [new branch]          agent/wp744-g3-claude       -> origin/agent/wp744-g3-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9464413Z  * [new branch]          agent/wp748-g19-claude      -> origin/agent/wp748-g19-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9466228Z  * [new branch]          agent/wp748-g9-claude       -> origin/agent/wp748-g9-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9468210Z  * [new branch]          agent/wp748-r21-claude      -> origin/agent/wp748-r21-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9470061Z  * [new branch]          agent/wp748-r22-claude      -> origin/agent/wp748-r22-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9472067Z  * [new branch]          agent/wp748-r23-claude      -> origin/agent/wp748-r23-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9474139Z  * [new branch]          agent/wp748-r24-claude      -> origin/agent/wp748-r24-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9476466Z  * [new branch]          agent/wp748-r25-claude      -> origin/agent/wp748-r25-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9478863Z  * [new branch]          agent/wp748-r26-claude      -> origin/agent/wp748-r26-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9481529Z  * [new branch]          agent/wp748-r27-claude      -> origin/agent/wp748-r27-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9483817Z  * [new branch]          agent/wp748-r28-claude      -> origin/agent/wp748-r28-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9485608Z  * [new branch]          agent/wp752-g1-claude       -> origin/agent/wp752-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9487600Z  * [new branch]          agent/wp763-g1-claude       -> origin/agent/wp763-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9489374Z  * [new branch]          agent/wp77-g1-claude        -> origin/agent/wp77-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9491135Z  * [new branch]          agent/wp77-g2-claude        -> origin/agent/wp77-g2-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9492904Z  * [new branch]          agent/wp77-g3-claude        -> origin/agent/wp77-g3-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9494694Z  * [new branch]          agent/wp813-g1-claude       -> origin/agent/wp813-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9496527Z  * [new branch]          agent/wp814-g2-claude       -> origin/agent/wp814-g2-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9498537Z  * [new branch]          agent/wp822-g1-claude       -> origin/agent/wp822-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9500370Z  * [new branch]          agent/wp825-g1-claude       -> origin/agent/wp825-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9502208Z  * [new branch]          agent/wp834-g1-claude       -> origin/agent/wp834-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9504029Z  * [new branch]          agent/wp835-g2-claude       -> origin/agent/wp835-g2-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9505843Z  * [new branch]          agent/wp835-g4-claude       -> origin/agent/wp835-g4-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9507882Z  * [new branch]          agent/wp854-g1-claude       -> origin/agent/wp854-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9509692Z  * [new branch]          agent/wp856-g1-claude       -> origin/agent/wp856-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9511475Z  * [new branch]          agent/wp858-g1-claude       -> origin/agent/wp858-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9513257Z  * [new branch]          agent/wp868-g1-claude       -> origin/agent/wp868-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9515046Z  * [new branch]          agent/wp878-g1-claude       -> origin/agent/wp878-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9516923Z  * [new branch]          agent/wp879-g1-claude       -> origin/agent/wp879-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9518927Z  * [new branch]          agent/wp886-g1-claude       -> origin/agent/wp886-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9520687Z  * [new branch]          agent/wp892-g1-claude       -> origin/agent/wp892-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9523106Z  * [new branch]          agent/wp899-g3-claude       -> origin/agent/wp899-g3-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9525518Z  * [new branch]          agent/wp906-g1-claude       -> origin/agent/wp906-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9528247Z  * [new branch]          agent/wp910-g1-claude       -> origin/agent/wp910-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9530827Z  * [new branch]          agent/wp910-g3-claude       -> origin/agent/wp910-g3-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9534133Z  * [new branch]          agent/wp919-g1-claude       -> origin/agent/wp919-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9535921Z  * [new branch]          agent/wp923-g1-claude       -> origin/agent/wp923-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9537877Z  * [new branch]          agent/wp923-g2-claude       -> origin/agent/wp923-g2-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9539678Z  * [new branch]          agent/wp923-g3-claude       -> origin/agent/wp923-g3-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9541461Z  * [new branch]          agent/wp943-g1-claude       -> origin/agent/wp943-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9543256Z  * [new branch]          agent/wp960-g1-claude       -> origin/agent/wp960-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9545489Z  * [new branch]          agent/wp960-r2-ghi-so       -> origin/agent/wp960-r2-ghi-so
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9547445Z  * [new branch]          agent/wp972-claude          -> origin/agent/wp972-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9549186Z  * [new branch]          agent/wp977-g1-claude       -> origin/agent/wp977-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9550981Z  * [new branch]          agent/wp978-g1-claude       -> origin/agent/wp978-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9552776Z  * [new branch]          agent/wp981-g1-claude       -> origin/agent/wp981-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9554552Z  * [new branch]          agent/wp987-g1-claude       -> origin/agent/wp987-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9556415Z  * [new branch]          agent/wp99-g2-codex         -> origin/agent/wp99-g2-codex
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9558726Z  * [new branch]          agent/wp99-g3-claude        -> origin/agent/wp99-g3-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9560521Z  * [new branch]          agent/wp99-g4-claude        -> origin/agent/wp99-g4-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9562277Z  * [new branch]          ccr-004fa546-sde2w7         -> origin/ccr-004fa546-sde2w7
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9563966Z  * [new branch]          ccr-159d006d-0lnl5s         -> origin/ccr-159d006d-0lnl5s
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9565685Z  * [new branch]          ccr-5249948c-9epnbs         -> origin/ccr-5249948c-9epnbs
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9567547Z  * [new branch]          ccr-dc7b39c2-supdr6         -> origin/ccr-dc7b39c2-supdr6
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9569270Z  * [new branch]          ccr-e425b16e-j9g9p7         -> origin/ccr-e425b16e-j9g9p7
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9571730Z  * [new branch]          claude/audit-errors-patch-plan-56x4rq -> origin/claude/audit-errors-patch-plan-56x4rq
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9574183Z  * [new branch]          claude/awesome-carson-rlu4k3 -> origin/claude/awesome-carson-rlu4k3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9576977Z  * [new branch]          claude/bai-hoc-do-luong-20260822 -> origin/claude/bai-hoc-do-luong-20260822
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9579171Z  * [new branch]          claude/bia-mo-wp538-g2-20260916 -> origin/claude/bia-mo-wp538-g2-20260916
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9581304Z  * [new branch]          claude/bia-mo-wp538-g3-20260916 -> origin/claude/bia-mo-wp538-g3-20260916
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9583425Z  * [new branch]          claude/bia-mo-wp540-g1-20260916 -> origin/claude/bia-mo-wp540-g1-20260916
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9585779Z  * [new branch]          claude/bn-523-human-audit-20260921 -> origin/claude/bn-523-human-audit-20260921
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9588191Z  * [new branch]          claude/bookkeeping-4moc-20261026 -> origin/claude/bookkeeping-4moc-20261026
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9590315Z  * [new branch]          claude/bookkeeping-677-pr689 -> origin/claude/bookkeeping-677-pr689
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9592529Z  * [new branch]          claude/bookkeeping-744-land -> origin/claude/bookkeeping-744-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9594481Z  * [new branch]          claude/bookkeeping-822-land -> origin/claude/bookkeeping-822-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9596422Z  * [new branch]          claude/bookkeeping-831-land -> origin/claude/bookkeeping-831-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9598578Z  * [new branch]          claude/bookkeeping-856-land -> origin/claude/bookkeeping-856-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9601398Z  * [new branch]          claude/bookkeeping-858-land -> origin/claude/bookkeeping-858-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9603811Z  * [new branch]          claude/bookkeeping-868-land -> origin/claude/bookkeeping-868-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9606037Z  * [new branch]          claude/bookkeeping-871-854-878-879-land -> origin/claude/bookkeeping-871-854-878-879-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9608517Z  * [new branch]          claude/bookkeeping-886-land -> origin/claude/bookkeeping-886-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9610555Z  * [new branch]          claude/bookkeeping-906-land -> origin/claude/bookkeeping-906-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9612478Z  * [new branch]          claude/bookkeeping-908-land -> origin/claude/bookkeeping-908-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9614382Z  * [new branch]          claude/bookkeeping-910-land -> origin/claude/bookkeeping-910-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9616472Z  * [new branch]          claude/bookkeeping-917-land -> origin/claude/bookkeeping-917-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9618550Z  * [new branch]          claude/bookkeeping-924-land -> origin/claude/bookkeeping-924-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9620469Z  * [new branch]          claude/bookkeeping-926-land -> origin/claude/bookkeeping-926-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9622471Z  * [new branch]          claude/bookkeeping-926-land-sua -> origin/claude/bookkeeping-926-land-sua
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9624468Z  * [new branch]          claude/bookkeeping-930-land -> origin/claude/bookkeeping-930-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9626387Z  * [new branch]          claude/bookkeeping-931-land -> origin/claude/bookkeeping-931-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9628559Z  * [new branch]          claude/bookkeeping-931-land-81 -> origin/claude/bookkeeping-931-land-81
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9630582Z  * [new branch]          claude/bookkeeping-931-landed -> origin/claude/bookkeeping-931-landed
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9632588Z  * [new branch]          claude/bookkeeping-933-land-2 -> origin/claude/bookkeeping-933-land-2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9634572Z  * [new branch]          claude/bookkeeping-945-land -> origin/claude/bookkeeping-945-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9636459Z  * [new branch]          claude/bookkeeping-950-land -> origin/claude/bookkeeping-950-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9638514Z  * [new branch]          claude/bookkeeping-963-land -> origin/claude/bookkeeping-963-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9640412Z  * [new branch]          claude/bookkeeping-969-land -> origin/claude/bookkeeping-969-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9642293Z  * [new branch]          claude/bookkeeping-983-land -> origin/claude/bookkeeping-983-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9644186Z  * [new branch]          claude/bookkeeping-990-land -> origin/claude/bookkeeping-990-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9646065Z  * [new branch]          claude/bookkeeping-991-land -> origin/claude/bookkeeping-991-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9648081Z  * [new branch]          claude/bookkeeping-992-land -> origin/claude/bookkeeping-992-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9650243Z  * [new branch]          claude/bookkeeping-r24-review-doc-lap -> origin/claude/bookkeeping-r24-review-doc-lap
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9652303Z  * [new branch]          claude/cap-lease-704-g2     -> origin/claude/cap-lease-704-g2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9654519Z  * [new branch]          claude/cham-dot-bien-mien-nhiem-lease-suite -> origin/claude/cham-dot-bien-mien-nhiem-lease-suite
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9656916Z  * [new branch]          claude/changelog-d-spec     -> origin/claude/changelog-d-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9658703Z  * [new branch]          claude/ci-bang-phu-thuoc-1  -> origin/claude/ci-bang-phu-thuoc-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9660782Z  * [new branch]          claude/ci-bang-phu-thuoc-exec-3v3kco -> origin/claude/ci-bang-phu-thuoc-exec-3v3kco
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9663127Z  * [new branch]          claude/ci-lan-luu-tru-spec  -> origin/claude/ci-lan-luu-tru-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9665092Z  * [new branch]          claude/claude-md-gh-graphql-cmd -> origin/claude/claude-md-gh-graphql-cmd
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9667412Z  * [new branch]          claude/code-task-assignment-7e4a5b -> origin/claude/code-task-assignment-7e4a5b
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9669842Z  * [new branch]          claude/codegraph-github-evaluation-749y38 -> origin/claude/codegraph-github-evaluation-749y38
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9672247Z  * [new branch]          claude/cong-ci-packet-loop-exec-1 -> origin/claude/cong-ci-packet-loop-exec-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9674351Z  * [new branch]          claude/cong-same-failure-exec-1 -> origin/claude/cong-same-failure-exec-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9676401Z  * [new branch]          claude/cuu-viec-treo-2026-08-03 -> origin/claude/cuu-viec-treo-2026-08-03
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9678609Z  * [new branch]          claude/determined-euler-rw6l8i -> origin/claude/determined-euler-rw6l8i
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9680528Z  * [new branch]          claude/doc-claims-xoa-spec  -> origin/claude/doc-claims-xoa-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9682735Z  * [new branch]          claude/doctrine-allowlist-reviewer-exec-1 -> origin/claude/doctrine-allowlist-reviewer-exec-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9685325Z  * [new branch]          claude/doctrine-rest-do-lai-20260925 -> origin/claude/doctrine-rest-do-lai-20260925
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9687512Z  * [new branch]          claude/elegant-bun-cd554f   -> origin/claude/elegant-bun-cd554f
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9689313Z  * [new branch]          claude/epic-ritchie-quvrz1  -> origin/claude/epic-ritchie-quvrz1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9691094Z  * [new branch]          claude/fix-859-ubuntu-only  -> origin/claude/fix-859-ubuntu-only
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9692917Z  * [new branch]          claude/fix-p3b4-windows-argv -> origin/claude/fix-p3b4-windows-argv
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9694836Z  * [new branch]          claude/focused-feynman-tu0fma -> origin/claude/focused-feynman-tu0fma
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9696942Z  * [new branch]          claude/gallant-fermat-34kgb9 -> origin/claude/gallant-fermat-34kgb9
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9698883Z  * [new branch]          claude/gate-hau-merge-3574cb07 -> origin/claude/gate-hau-merge-3574cb07
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9700890Z  * [new branch]          claude/gate-hau-merge-40609d42 -> origin/claude/gate-hau-merge-40609d42
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9702842Z  * [new branch]          claude/gate-hau-merge-4397ee61 -> origin/claude/gate-hau-merge-4397ee61
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9704810Z  * [new branch]          claude/gate-hau-merge-47ee1b20 -> origin/claude/gate-hau-merge-47ee1b20
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9706927Z  * [new branch]          claude/gate-hau-merge-8f123b27 -> origin/claude/gate-hau-merge-8f123b27
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9708905Z  * [new branch]          claude/gate-hau-merge-c165a5d0 -> origin/claude/gate-hau-merge-c165a5d0
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9710753Z  * [new branch]          claude/gate-pr983-7f19424   -> origin/claude/gate-pr983-7f19424
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9712641Z  * [new branch]          claude/ghi-so-land-1077-1078-1079 -> origin/claude/ghi-so-land-1077-1078-1079
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9714569Z  * [new branch]          claude/ghi-so-land-1079-nang -> origin/claude/ghi-so-land-1079-nang
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9716329Z  * [new branch]          claude/ghi-so-land-1113     -> origin/claude/ghi-so-land-1113
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9718189Z  * [new branch]          claude/ghi-so-land-1113-b   -> origin/claude/ghi-so-land-1113-b
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9719893Z  * [new branch]          claude/ghi-so-land-1120     -> origin/claude/ghi-so-land-1120
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9721578Z  * [new branch]          claude/ghi-so-land-1132     -> origin/claude/ghi-so-land-1132
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9723250Z  * [new branch]          claude/ghi-so-land-1144     -> origin/claude/ghi-so-land-1144
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9724906Z  * [new branch]          claude/ghi-so-land-825      -> origin/claude/ghi-so-land-825
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9727075Z  * [new branch]          claude/handoff-land-81-r2-c00561c -> origin/claude/handoff-land-81-r2-c00561c
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9729051Z  * [new branch]          claude/handoff-wp1132-aad4865 -> origin/claude/handoff-wp1132-aad4865
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9730936Z  * [new branch]          claude/handoff-wp978-aebc808 -> origin/claude/handoff-wp978-aebc808
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9732833Z  * [new branch]          claude/handoff-wp978-cebf7ac -> origin/claude/handoff-wp978-cebf7ac
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9734747Z  * [new branch]          claude/ho-so-audit-551-20260919 -> origin/claude/ho-so-audit-551-20260919
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9736997Z  * [new branch]          claude/human-audited-khai-ai-dang-r1 -> origin/claude/human-audited-khai-ai-dang-r1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9738931Z  * [new branch]          claude/land-318-334         -> origin/claude/land-318-334
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9740616Z  * [new branch]          claude/land-858-phe-chuan   -> origin/claude/land-858-phe-chuan
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9742339Z  * [new branch]          claude/land-881-812-671     -> origin/claude/land-881-812-671
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9744131Z  * [new branch]          claude/land-899-ghi-quyet-dinh -> origin/claude/land-899-ghi-quyet-dinh
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9746085Z  * [new branch]          claude/land-pr1095-pr1101-spec -> origin/claude/land-pr1095-pr1101-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9748145Z  * [new branch]          claude/land-wd-950-924      -> origin/claude/land-wd-950-924
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9749822Z  * [new branch]          claude/landed-950-924       -> origin/claude/landed-950-924
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9751408Z  * [new branch]          claude/landed-963           -> origin/claude/landed-963
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9753040Z  * [new branch]          claude/landed-990-991-992   -> origin/claude/landed-990-991-992
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9754839Z  * [new branch]          claude/launcher-chot-cong-cu -> origin/claude/launcher-chot-cong-cu
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9756862Z  * [new branch]          claude/lease-publish-windows-do -> origin/claude/lease-publish-windows-do
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9758842Z  * [new branch]          claude/magical-clarke-gzvwbp -> origin/claude/magical-clarke-gzvwbp
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9760855Z  * [new branch]          claude/n8-review-kem-patch-exec-1 -> origin/claude/n8-review-kem-patch-exec-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9762854Z  * [new branch]          claude/new-session-i0kv8e   -> origin/claude/new-session-i0kv8e
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9764838Z  * [new branch]          claude/nhap-dinh-chinh-578-20260920 -> origin/claude/nhap-dinh-chinh-578-20260920
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9767029Z  * [new branch]          claude/nhap-gia-han-578-20260921 -> origin/claude/nhap-gia-han-578-20260921
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9769055Z  * [new branch]          claude/nhap-lease-541-g2-20260918 -> origin/claude/nhap-lease-541-g2-20260918
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9771083Z  * [new branch]          claude/nhap-lease-541-g3-20260919 -> origin/claude/nhap-lease-541-g3-20260919
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9773042Z  * [new branch]          claude/nhap-lease-552-20260917 -> origin/claude/nhap-lease-552-20260917
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9845598Z  * [new branch]          claude/nhap-lease-562-20260918 -> origin/claude/nhap-lease-562-20260918
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9848232Z  * [new branch]          claude/nhap-thu-hep-579-20260921 -> origin/claude/nhap-thu-hep-579-20260921
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9850182Z  * [new branch]          claude/nice-hopper-x86d1g   -> origin/claude/nice-hopper-x86d1g
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9852272Z  * [new branch]          claude/nlm-registry-sheet-dup-s22fk7 -> origin/claude/nlm-registry-sheet-dup-s22fk7
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9854203Z  * [new branch]          claude/no-ton-677-687       -> origin/claude/no-ton-677-687
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9856249Z  * [new branch]          claude/plan-protocol-refinement-9qrcua -> origin/claude/plan-protocol-refinement-9qrcua
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9858789Z  * [new branch]          claude/pr-wp-merge-conditions-26j42i -> origin/claude/pr-wp-merge-conditions-26j42i
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9860846Z  * [new branch]          claude/pr1040-wp1021-ghi-so -> origin/claude/pr1040-wp1021-ghi-so
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9862865Z  * [new branch]          claude/pr1050-review-ghi-so -> origin/claude/pr1050-review-ghi-so
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9864634Z  * [new branch]          claude/pr1056-review-ghi-so -> origin/claude/pr1056-review-ghi-so
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9866351Z  * [new branch]          claude/pr963-l7-thuc-thi    -> origin/claude/pr963-l7-thuc-thi
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9868461Z  * [new branch]          claude/prompt-541-exec-1-20260918 -> origin/claude/prompt-541-exec-1-20260918
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9870480Z  * [new branch]          claude/prompt-541-exec-2-20260918 -> origin/claude/prompt-541-exec-2-20260918
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9872440Z  * [new branch]          claude/quy-trinh-lap-review-r2 -> origin/claude/quy-trinh-lap-review-r2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9874536Z  * [new branch]          claude/ras-17-data-pr13-windows-bjovq2 -> origin/claude/ras-17-data-pr13-windows-bjovq2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9877119Z  * [new branch]          claude/read-handoff-phien-dieu-phoi-oqbsz4 -> origin/claude/read-handoff-phien-dieu-phoi-oqbsz4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9879397Z  * [new branch]          claude/review-541-luot3-20260918 -> origin/claude/review-541-luot3-20260918
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9881351Z  * [new branch]          claude/review-546-luot1-20260916 -> origin/claude/review-546-luot1-20260916
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9883473Z  * [new branch]          claude/review-546-luot2-20260917 -> origin/claude/review-546-luot2-20260917
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9885426Z  * [new branch]          claude/review-546-luot3-20260917 -> origin/claude/review-546-luot3-20260917
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9887566Z  * [new branch]          claude/review-546-luot4-20260917 -> origin/claude/review-546-luot4-20260917
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9889538Z  * [new branch]          claude/review-546-luot5-20260917 -> origin/claude/review-546-luot5-20260917
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9891493Z  * [new branch]          claude/review-548-luot1-20260917 -> origin/claude/review-548-luot1-20260917
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9893435Z  * [new branch]          claude/review-548-luot2-20260917 -> origin/claude/review-548-luot2-20260917
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9895397Z  * [new branch]          claude/review-548-luot3-20260917 -> origin/claude/review-548-luot3-20260917
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9897494Z  * [new branch]          claude/review-548-luot4-20260917 -> origin/claude/review-548-luot4-20260917
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9899370Z  * [new branch]          claude/review-wp538-20260916 -> origin/claude/review-wp538-20260916
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9901310Z  * [new branch]          claude/review-wp538-luot2-20260916 -> origin/claude/review-wp538-luot2-20260916
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9903334Z  * [new branch]          claude/skill-graphql-cmd-pointer -> origin/claude/skill-graphql-cmd-pointer
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9905313Z  * [new branch]          claude/slice-523-skills-20260920 -> origin/claude/slice-523-skills-20260920
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9907471Z  * [new branch]          claude/spec-1105-launcher-sandbox -> origin/claude/spec-1105-launcher-sandbox
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9909344Z  * [new branch]          claude/spec-541-r1-20260917 -> origin/claude/spec-541-r1-20260917
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9911081Z  * [new branch]          claude/spec-541-r2-20260917 -> origin/claude/spec-541-r2-20260917
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9912786Z  * [new branch]          claude/spec-541-r3-20260918 -> origin/claude/spec-541-r3-20260918
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9914482Z  * [new branch]          claude/spec-548-r1-20260916 -> origin/claude/spec-548-r1-20260916
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9917392Z  * [new branch]          claude/spec-548-r2-20260917 -> origin/claude/spec-548-r2-20260917
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9919095Z  * [new branch]          claude/spec-551-r2-20260918 -> origin/claude/spec-551-r2-20260918
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9921968Z  * [new branch]          claude/spec-551-r3-20260918 -> origin/claude/spec-551-r3-20260918
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9923672Z  * [new branch]          claude/spec-552-r1-20260917 -> origin/claude/spec-552-r1-20260917
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9925365Z  * [new branch]          claude/spec-552-r2-20260917 -> origin/claude/spec-552-r2-20260917
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9927320Z  * [new branch]          claude/spec-562-r1-20260918 -> origin/claude/spec-562-r1-20260918
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9929001Z  * [new branch]          claude/spec-565-r1-20260919 -> origin/claude/spec-565-r1-20260919
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9930696Z  * [new branch]          claude/spec-566-r1-20260919 -> origin/claude/spec-566-r1-20260919
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9932384Z  * [new branch]          claude/spec-568-r1-20260919 -> origin/claude/spec-568-r1-20260919
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9934112Z  * [new branch]          claude/spec-570-r1-20260919 -> origin/claude/spec-570-r1-20260919
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9935791Z  * [new branch]          claude/spec-570-r2-20260920 -> origin/claude/spec-570-r2-20260920
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9937551Z  * [new branch]          claude/spec-570-r3-20260920 -> origin/claude/spec-570-r3-20260920
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9939244Z  * [new branch]          claude/spec-570-r4-20260920 -> origin/claude/spec-570-r4-20260920
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9940918Z  * [new branch]          claude/spec-570-r6-20260921 -> origin/claude/spec-570-r6-20260921
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9942596Z  * [new branch]          claude/spec-578-r1-20260920 -> origin/claude/spec-578-r1-20260920
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9944450Z  * [new branch]          claude/spec-assurance-ho-model-r1 -> origin/claude/spec-assurance-ho-model-r1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9946803Z  * [new branch]          claude/spec-ci-duong-nhanh-bo-dot-bien -> origin/claude/spec-ci-duong-nhanh-bo-dot-bien
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9949034Z  * [new branch]          claude/spec-doctrine-scan-r1-20260916 -> origin/claude/spec-doctrine-scan-r1-20260916
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9951163Z  * [new branch]          claude/spec-moi-truong-r1-20260916 -> origin/claude/spec-moi-truong-r1-20260916
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9953051Z  * [new branch]          claude/spec-no-cau-lich-su  -> origin/claude/spec-no-cau-lich-su
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9954703Z  * [new branch]          claude/spec-no-p3-r3        -> origin/claude/spec-no-p3-r3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9956277Z  * [new branch]          claude/spec-no-p3-r5        -> origin/claude/spec-no-p3-r5
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9957947Z  * [new branch]          claude/spec-no-p3-r6        -> origin/claude/spec-no-p3-r6
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9959771Z  * [new branch]          claude/spec-quy-trinh-r10-20260913 -> origin/claude/spec-quy-trinh-r10-20260913
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9961818Z  * [new branch]          claude/spec-quy-trinh-r11-20260913 -> origin/claude/spec-quy-trinh-r11-20260913
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9963875Z  * [new branch]          claude/spec-quy-trinh-r12-20260920 -> origin/claude/spec-quy-trinh-r12-20260920
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9965932Z  * [new branch]          claude/spec-quy-trinh-r13-20260921 -> origin/claude/spec-quy-trinh-r13-20260921
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9968056Z  * [new branch]          claude/spec-quy-trinh-r3-20260912 -> origin/claude/spec-quy-trinh-r3-20260912
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9970053Z  * [new branch]          claude/spec-quy-trinh-r4-20260912 -> origin/claude/spec-quy-trinh-r4-20260912
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9972075Z  * [new branch]          claude/spec-quy-trinh-r5-20260912 -> origin/claude/spec-quy-trinh-r5-20260912
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9974090Z  * [new branch]          claude/spec-quy-trinh-r6-20260912 -> origin/claude/spec-quy-trinh-r6-20260912
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9976083Z  * [new branch]          claude/spec-quy-trinh-r7-20260912 -> origin/claude/spec-quy-trinh-r7-20260912
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9978169Z  * [new branch]          claude/spec-quy-trinh-r8-20260913 -> origin/claude/spec-quy-trinh-r8-20260913
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9980167Z  * [new branch]          claude/spec-quy-trinh-r9-20260913 -> origin/claude/spec-quy-trinh-r9-20260913
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9982343Z  * [new branch]          claude/spec-quy-trinh-review-r2-20260912 -> origin/claude/spec-quy-trinh-review-r2-20260912
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9984500Z  * [new branch]          claude/spec-r5-overclaim-exec-1 -> origin/claude/spec-r5-overclaim-exec-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9986465Z  * [new branch]          claude/spec-tran-vong-r3-20260912 -> origin/claude/spec-tran-vong-r3-20260912
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9988676Z  * [new branch]          claude/spec-wp538-r3-20260916 -> origin/claude/spec-wp538-r3-20260916
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9990460Z  * [new branch]          claude/spec-wp538-r4-20260916 -> origin/claude/spec-wp538-r4-20260916
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9992259Z  * [new branch]          claude/spec-wp540-r2-20260916 -> origin/claude/spec-wp540-r2-20260916
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9993944Z  * [new branch]          claude/sua-l6-pr881         -> origin/claude/sua-l6-pr881
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9995698Z  * [new branch]          claude/tai-sinh-manifest-725-727 -> origin/claude/tai-sinh-manifest-725-727
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:01.9998013Z  * [new branch]          claude/tra-luat-deployment-d1-d2-otcxau -> origin/claude/tra-luat-deployment-d1-d2-otcxau
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0000195Z  * [new branch]          claude/vong-8-va-4-khe-ho-launcher -> origin/claude/vong-8-va-4-khe-ho-launcher
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0001933Z  * [new branch]          claude/win-lanes            -> origin/claude/win-lanes
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0003615Z  * [new branch]          claude/wizardly-noether-zqqoae -> origin/claude/wizardly-noether-zqqoae
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0005475Z  * [new branch]          claude/wonderful-ride-03x6oh -> origin/claude/wonderful-ride-03x6oh
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0007371Z  * [new branch]          claude/wp-f3-03-release-nested -> origin/claude/wp-f3-03-release-nested
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0009413Z  * [new branch]          claude/wp1009-cloud-setup-p1-g1 -> origin/claude/wp1009-cloud-setup-p1-g1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0011437Z  * [new branch]          claude/wp1038-cloud-setup-p2a-g1 -> origin/claude/wp1038-cloud-setup-p2a-g1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0013472Z  * [new branch]          claude/wp1038-cloud-setup-p2a-spec -> origin/claude/wp1038-cloud-setup-p2a-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0015334Z  * [new branch]          claude/wp1038-spec-p2a-r2   -> origin/claude/wp1038-spec-p2a-r2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0017272Z  * [new branch]          claude/wp1039-cloud-setup-p2b-g1 -> origin/claude/wp1039-cloud-setup-p2b-g1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0019310Z  * [new branch]          claude/wp1039-cloud-setup-p2b-spec -> origin/claude/wp1039-cloud-setup-p2b-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0021124Z  * [new branch]          claude/wp1039-land          -> origin/claude/wp1039-land
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0022831Z  * [new branch]          claude/wp1089-cloud-setup-p3-g1 -> origin/claude/wp1089-cloud-setup-p3-g1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0024803Z  * [new branch]          claude/wp1089-cloud-setup-p3-spec -> origin/claude/wp1089-cloud-setup-p3-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0027074Z  * [new branch]          claude/wp1099-cloud-setup-p3b-spec -> origin/claude/wp1099-cloud-setup-p3b-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0028853Z  * [new branch]          claude/wp55-f3-03           -> origin/claude/wp55-f3-03
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0030726Z  * [new branch]          claude/wp55-r2-review-codex-bang-chung -> origin/claude/wp55-r2-review-codex-bang-chung
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0032856Z  * [new branch]          claude/wp60-g1-f3-01-github-schema -> origin/claude/wp60-g1-f3-01-github-schema
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0034861Z  * [new branch]          claude/wp60-g2-f3-01-github-schema -> origin/claude/wp60-g2-f3-01-github-schema
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0036832Z  * [new branch]          claude/wp685-r22-de-xuat    -> origin/claude/wp685-r22-de-xuat
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0038851Z  * [new branch]          claude/wp86-cloud-linux-migration-ix5keq -> origin/claude/wp86-cloud-linux-migration-ix5keq
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0040979Z  * [new branch]          claude/wp868-bai-hoc-claude-md -> origin/claude/wp868-bai-hoc-claude-md
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0042715Z  * [new branch]          codex/f2-d-reopen-writer    -> origin/codex/f2-d-reopen-writer
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0044355Z  * [new branch]          codex/f3-02-impact-policy   -> origin/codex/f3-02-impact-policy
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0046123Z  * [new branch]          codex/gate-463-g4-lease-20260914 -> origin/codex/gate-463-g4-lease-20260914
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0048134Z  * [new branch]          codex/gate-463-g5-lease-20260914 -> origin/codex/gate-463-g5-lease-20260914
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0050030Z  * [new branch]          codex/gate-463-g6-lease-20260914 -> origin/codex/gate-463-g6-lease-20260914
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0052020Z  * [new branch]          codex/gate-463-lease-20260913 -> origin/codex/gate-463-lease-20260913
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0053864Z  * [new branch]          codex/gate-463-r22-lease-20260913 -> origin/codex/gate-463-r22-lease-20260913
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0055971Z  * [new branch]          codex/gate-463-review-evidence-20260913 -> origin/codex/gate-463-review-evidence-20260913
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0058017Z  * [new branch]          codex/khoa-neo-luot3-wip    -> origin/codex/khoa-neo-luot3-wip
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0059725Z  * [new branch]          codex/mission-686-versioned -> origin/codex/mission-686-versioned
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0061449Z  * [new branch]          codex/probe-agent-r2-exec-1 -> origin/codex/probe-agent-r2-exec-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0063366Z  * [new branch]          codex/session-credential-bootstrap -> origin/codex/session-credential-bootstrap
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0065538Z  * [new branch]          codex/session-credential-bootstrap-r4 -> origin/codex/session-credential-bootstrap-r4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0067869Z  * [new branch]          codex/session-credential-bootstrap-r5 -> origin/codex/session-credential-bootstrap-r5
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0069832Z  * [new branch]          codex/thu-hoi-lease-exec-1  -> origin/codex/thu-hoi-lease-exec-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0071886Z  * [new branch]          codex/w1-p1-van-chuyen-prompt-exec-3 -> origin/codex/w1-p1-van-chuyen-prompt-exec-3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0073769Z  * [new branch]          codex/wp422-authority-r1    -> origin/codex/wp422-authority-r1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0075999Z  * [new branch]          codex/wp433-g1-credential-destination-remediation -> origin/codex/wp433-g1-credential-destination-remediation
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0078644Z  * [new branch]          codex/wp433-r10-cleanup-claude-evidence -> origin/codex/wp433-r10-cleanup-claude-evidence
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0080938Z  * [new branch]          codex/wp433-r11-provider-exec-tl-cleanup -> origin/codex/wp433-r11-provider-exec-tl-cleanup
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0083041Z  * [new branch]          codex/wp433-r13-runtime-closure -> origin/codex/wp433-r13-runtime-closure
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0085248Z  * [new branch]          codex/wp433-r4-unified-credential-boundaries -> origin/codex/wp433-r4-unified-credential-boundaries
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0087718Z  * [new branch]          codex/wp433-r5-final-review-remediation -> origin/codex/wp433-r5-final-review-remediation
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0089878Z  * [new branch]          codex/wp433-r6-provider-boundaries -> origin/codex/wp433-r6-provider-boundaries
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0092117Z  * [new branch]          codex/wp433-r7-provider-identity-live-check -> origin/codex/wp433-r7-provider-identity-live-check
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0094277Z  * [new branch]          codex/wp433-r8-final-boundaries -> origin/codex/wp433-r8-final-boundaries
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0096189Z  * [new branch]          codex/wp433-r9-capability-status -> origin/codex/wp433-r9-capability-status
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0098027Z  * [new branch]          codex/wp484-g4-windows      -> origin/codex/wp484-g4-windows
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0099633Z  * [new branch]          codex/wp498-authority-r1    -> origin/codex/wp498-authority-r1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0101254Z  * [new branch]          codex/wp523-r13-authority   -> origin/codex/wp523-r13-authority
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0102895Z  * [new branch]          codex/wp523-r14-authority   -> origin/codex/wp523-r14-authority
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0104525Z  * [new branch]          codex/wp568-r7-authority    -> origin/codex/wp568-r7-authority
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0106311Z  * [new branch]          codex/wp60-g7-f3-01-github-schema -> origin/codex/wp60-g7-f3-01-github-schema
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0108201Z  * [new branch]          codex/wp607-authority       -> origin/codex/wp607-authority
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0109786Z  * [new branch]          codex/wp610-authority       -> origin/codex/wp610-authority
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0111447Z  * [new branch]          codex/wp68-g8-release-nested -> origin/codex/wp68-g8-release-nested
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0113237Z  * [new branch]          codex/wp709-bootstrap       -> origin/codex/wp709-bootstrap
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0114784Z  * [new branch]          codex/wp744-spec-r2         -> origin/codex/wp744-spec-r2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0116801Z  * [new branch]          codex/wp84-r3-g3-protocol-hash-hardening -> origin/codex/wp84-r3-g3-protocol-hash-hardening
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0119126Z  * [new branch]          codex/wp84-r5-g5-protocol-hash-hardening -> origin/codex/wp84-r5-g5-protocol-hash-hardening
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0121157Z  * [new branch]          codex/wp86-g4-sandbox-oracle -> origin/codex/wp86-g4-sandbox-oracle
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0123167Z  * [new branch]          dispatcher/wp99-r3-target-schema-632401a -> origin/dispatcher/wp99-r3-target-schema-632401a
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0125023Z  * [new branch]          do-windows/vong-8           -> origin/do-windows/vong-8
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0129195Z  * [new branch]          do-windows/vong-8-do        -> origin/do-windows/vong-8-do
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0132895Z  * [new branch]          docs/goi-claude-cli         -> origin/docs/goi-claude-cli
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0135810Z  * [new branch]          ducthangho-patch-1          -> origin/ducthangho-patch-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0139267Z  * [new branch]          luu-tru/238-ho-so-cross-review -> origin/luu-tru/238-ho-so-cross-review
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0141922Z  * [new branch]          master                      -> origin/master
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0143358Z  * [new branch]          mission/744/integration     -> origin/mission/744/integration
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0144935Z  * [new branch]          mission/76/integration      -> origin/mission/76/integration
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0146434Z  * [new branch]          nhap/wp802-n9-do            -> origin/nhap/wp802-n9-do
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0148619Z  * [new branch]          ops/adr-0060-mac-dinh-r1-lease -> origin/ops/adr-0060-mac-dinh-r1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0151336Z  * [new branch]          ops/adr-0060-mac-dinh-r3-spec -> origin/ops/adr-0060-mac-dinh-r3-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0153048Z  * [new branch]          ops/bai-hoc-cong-cu-da-nen  -> origin/ops/bai-hoc-cong-cu-da-nen
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0154669Z  * [new branch]          ops/bai-hoc-github-mcp      -> origin/ops/bai-hoc-github-mcp
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0156207Z  * [new branch]          ops/ban-giao-cap-nhat       -> origin/ops/ban-giao-cap-nhat
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0157868Z  * [new branch]          ops/cap-lease-1009-g1       -> origin/ops/cap-lease-1009-g1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0159382Z  * [new branch]          ops/cap-lease-1038-g1       -> origin/ops/cap-lease-1038-g1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0160915Z  * [new branch]          ops/cap-lease-1039-g1       -> origin/ops/cap-lease-1039-g1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0162427Z  * [new branch]          ops/cap-lease-1089-g1       -> origin/ops/cap-lease-1089-g1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0164123Z  * [new branch]          ops/cap-lease-4-packet-20260826 -> origin/ops/cap-lease-4-packet-20260826
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0165800Z  * [new branch]          ops/cap-lease-461-g4        -> origin/ops/cap-lease-461-g4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0167362Z  * [new branch]          ops/cap-lease-463           -> origin/ops/cap-lease-463
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0168829Z  * [new branch]          ops/cap-lease-488           -> origin/ops/cap-lease-488
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0170284Z  * [new branch]          ops/cap-lease-502           -> origin/ops/cap-lease-502
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0171743Z  * [new branch]          ops/cap-lease-503           -> origin/ops/cap-lease-503
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0173222Z  * [new branch]          ops/cap-lease-504           -> origin/ops/cap-lease-504
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0174674Z  * [new branch]          ops/cap-lease-513           -> origin/ops/cap-lease-513
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0176152Z  * [new branch]          ops/cap-lease-522-523       -> origin/ops/cap-lease-522-523
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0177778Z  * [new branch]          ops/cap-lease-523-g19       -> origin/ops/cap-lease-523-g19
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0179306Z  * [new branch]          ops/cap-lease-523-g20       -> origin/ops/cap-lease-523-g20
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0180988Z  * [new branch]          ops/cap-lease-523-r12       -> origin/ops/cap-lease-523-r12
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0182496Z  * [new branch]          ops/cap-lease-523-r17       -> origin/ops/cap-lease-523-r17
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0184010Z  * [new branch]          ops/cap-lease-523-r18       -> origin/ops/cap-lease-523-r18
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0185492Z  * [new branch]          ops/cap-lease-530           -> origin/ops/cap-lease-530
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0187061Z  * [new branch]          ops/cap-lease-538-r3        -> origin/ops/cap-lease-538-r3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0188561Z  * [new branch]          ops/cap-lease-538-r4        -> origin/ops/cap-lease-538-r4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0190062Z  * [new branch]          ops/cap-lease-540-r2        -> origin/ops/cap-lease-540-r2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0191526Z  * [new branch]          ops/cap-lease-541           -> origin/ops/cap-lease-541
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0192989Z  * [new branch]          ops/cap-lease-541-g2        -> origin/ops/cap-lease-541-g2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0194492Z  * [new branch]          ops/cap-lease-541-g3        -> origin/ops/cap-lease-541-g3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0195978Z  * [new branch]          ops/cap-lease-541-g4        -> origin/ops/cap-lease-541-g4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0197544Z  * [new branch]          ops/cap-lease-543           -> origin/ops/cap-lease-543
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0199112Z  * [new branch]          ops/cap-lease-546           -> origin/ops/cap-lease-546
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0200531Z  * [new branch]          ops/cap-lease-548           -> origin/ops/cap-lease-548
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0201992Z  * [new branch]          ops/cap-lease-548-r2        -> origin/ops/cap-lease-548-r2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0203448Z  * [new branch]          ops/cap-lease-551           -> origin/ops/cap-lease-551
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0204887Z  * [new branch]          ops/cap-lease-552           -> origin/ops/cap-lease-552
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0206316Z  * [new branch]          ops/cap-lease-562           -> origin/ops/cap-lease-562
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0207841Z  * [new branch]          ops/cap-lease-565           -> origin/ops/cap-lease-565
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0209274Z  * [new branch]          ops/cap-lease-566           -> origin/ops/cap-lease-566
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0210691Z  * [new branch]          ops/cap-lease-568           -> origin/ops/cap-lease-568
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0212124Z  * [new branch]          ops/cap-lease-570           -> origin/ops/cap-lease-570
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0213577Z  * [new branch]          ops/cap-lease-570-g10       -> origin/ops/cap-lease-570-g10
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0215082Z  * [new branch]          ops/cap-lease-570-g11       -> origin/ops/cap-lease-570-g11
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0216679Z  * [new branch]          ops/cap-lease-570-g12       -> origin/ops/cap-lease-570-g12
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0218206Z  * [new branch]          ops/cap-lease-570-g13       -> origin/ops/cap-lease-570-g13
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0219732Z  * [new branch]          ops/cap-lease-570-g14       -> origin/ops/cap-lease-570-g14
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0221261Z  * [new branch]          ops/cap-lease-570-g15       -> origin/ops/cap-lease-570-g15
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0222793Z  * [new branch]          ops/cap-lease-570-g16       -> origin/ops/cap-lease-570-g16
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0224334Z  * [new branch]          ops/cap-lease-570-g17       -> origin/ops/cap-lease-570-g17
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0225873Z  * [new branch]          ops/cap-lease-570-g18       -> origin/ops/cap-lease-570-g18
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0227477Z  * [new branch]          ops/cap-lease-570-g19       -> origin/ops/cap-lease-570-g19
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0228970Z  * [new branch]          ops/cap-lease-570-g2        -> origin/ops/cap-lease-570-g2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0230456Z  * [new branch]          ops/cap-lease-570-g20       -> origin/ops/cap-lease-570-g20
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0231947Z  * [new branch]          ops/cap-lease-570-g21       -> origin/ops/cap-lease-570-g21
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0233440Z  * [new branch]          ops/cap-lease-570-g22       -> origin/ops/cap-lease-570-g22
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0234927Z  * [new branch]          ops/cap-lease-570-g23       -> origin/ops/cap-lease-570-g23
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0236668Z  * [new branch]          ops/cap-lease-570-g24       -> origin/ops/cap-lease-570-g24
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0238164Z  * [new branch]          ops/cap-lease-570-g25       -> origin/ops/cap-lease-570-g25
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0239665Z  * [new branch]          ops/cap-lease-570-g26       -> origin/ops/cap-lease-570-g26
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0241163Z  * [new branch]          ops/cap-lease-570-g27       -> origin/ops/cap-lease-570-g27
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0242647Z  * [new branch]          ops/cap-lease-570-g28       -> origin/ops/cap-lease-570-g28
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0244135Z  * [new branch]          ops/cap-lease-570-g29       -> origin/ops/cap-lease-570-g29
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0245614Z  * [new branch]          ops/cap-lease-570-g3        -> origin/ops/cap-lease-570-g3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0247178Z  * [new branch]          ops/cap-lease-570-g30       -> origin/ops/cap-lease-570-g30
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0248669Z  * [new branch]          ops/cap-lease-570-g31       -> origin/ops/cap-lease-570-g31
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0250157Z  * [new branch]          ops/cap-lease-570-g32       -> origin/ops/cap-lease-570-g32
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0251649Z  * [new branch]          ops/cap-lease-570-g33       -> origin/ops/cap-lease-570-g33
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0253272Z  * [new branch]          ops/cap-lease-570-g34       -> origin/ops/cap-lease-570-g34
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0254766Z  * [new branch]          ops/cap-lease-570-g35       -> origin/ops/cap-lease-570-g35
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0256262Z  * [new branch]          ops/cap-lease-570-g36       -> origin/ops/cap-lease-570-g36
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0257845Z  * [new branch]          ops/cap-lease-570-g37       -> origin/ops/cap-lease-570-g37
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0259345Z  * [new branch]          ops/cap-lease-570-g38       -> origin/ops/cap-lease-570-g38
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0260846Z  * [new branch]          ops/cap-lease-570-g39       -> origin/ops/cap-lease-570-g39
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0262339Z  * [new branch]          ops/cap-lease-570-g4        -> origin/ops/cap-lease-570-g4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0263856Z  * [new branch]          ops/cap-lease-570-g40       -> origin/ops/cap-lease-570-g40
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0265339Z  * [new branch]          ops/cap-lease-570-g41       -> origin/ops/cap-lease-570-g41
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0266955Z  * [new branch]          ops/cap-lease-570-g42       -> origin/ops/cap-lease-570-g42
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0268444Z  * [new branch]          ops/cap-lease-570-g43       -> origin/ops/cap-lease-570-g43
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0269944Z  * [new branch]          ops/cap-lease-570-g44       -> origin/ops/cap-lease-570-g44
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0271434Z  * [new branch]          ops/cap-lease-570-g45       -> origin/ops/cap-lease-570-g45
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0272939Z  * [new branch]          ops/cap-lease-570-g46       -> origin/ops/cap-lease-570-g46
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0274430Z  * [new branch]          ops/cap-lease-570-g5        -> origin/ops/cap-lease-570-g5
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0275914Z  * [new branch]          ops/cap-lease-570-g6        -> origin/ops/cap-lease-570-g6
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0277509Z  * [new branch]          ops/cap-lease-570-g7        -> origin/ops/cap-lease-570-g7
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0278995Z  * [new branch]          ops/cap-lease-570-g8        -> origin/ops/cap-lease-570-g8
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0280504Z  * [new branch]          ops/cap-lease-570-g9        -> origin/ops/cap-lease-570-g9
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0281978Z  * [new branch]          ops/cap-lease-574           -> origin/ops/cap-lease-574
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0283427Z  * [new branch]          ops/cap-lease-574-g10       -> origin/ops/cap-lease-574-g10
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0284931Z  * [new branch]          ops/cap-lease-574-g11       -> origin/ops/cap-lease-574-g11
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0286424Z  * [new branch]          ops/cap-lease-574-g12       -> origin/ops/cap-lease-574-g12
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0288006Z  * [new branch]          ops/cap-lease-574-g13       -> origin/ops/cap-lease-574-g13
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0289514Z  * [new branch]          ops/cap-lease-574-g14       -> origin/ops/cap-lease-574-g14
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0291142Z  * [new branch]          ops/cap-lease-574-g15       -> origin/ops/cap-lease-574-g15
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0292641Z  * [new branch]          ops/cap-lease-574-g16       -> origin/ops/cap-lease-574-g16
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0294155Z  * [new branch]          ops/cap-lease-574-g17       -> origin/ops/cap-lease-574-g17
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0295662Z  * [new branch]          ops/cap-lease-574-g18       -> origin/ops/cap-lease-574-g18
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0297260Z  * [new branch]          ops/cap-lease-574-g19       -> origin/ops/cap-lease-574-g19
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0298766Z  * [new branch]          ops/cap-lease-574-g20       -> origin/ops/cap-lease-574-g20
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0300264Z  * [new branch]          ops/cap-lease-574-g21       -> origin/ops/cap-lease-574-g21
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0301757Z  * [new branch]          ops/cap-lease-574-g22       -> origin/ops/cap-lease-574-g22
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0303261Z  * [new branch]          ops/cap-lease-574-g23       -> origin/ops/cap-lease-574-g23
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0304767Z  * [new branch]          ops/cap-lease-574-g24       -> origin/ops/cap-lease-574-g24
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0306267Z  * [new branch]          ops/cap-lease-574-g25       -> origin/ops/cap-lease-574-g25
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0308059Z  * [new branch]          ops/cap-lease-574-g26       -> origin/ops/cap-lease-574-g26
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0309558Z  * [new branch]          ops/cap-lease-574-g27       -> origin/ops/cap-lease-574-g27
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0311057Z  * [new branch]          ops/cap-lease-574-g28       -> origin/ops/cap-lease-574-g28
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0312555Z  * [new branch]          ops/cap-lease-574-g29       -> origin/ops/cap-lease-574-g29
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0314055Z  * [new branch]          ops/cap-lease-574-g30       -> origin/ops/cap-lease-574-g30
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0315545Z  * [new branch]          ops/cap-lease-574-g31       -> origin/ops/cap-lease-574-g31
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0317125Z  * [new branch]          ops/cap-lease-574-g32       -> origin/ops/cap-lease-574-g32
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0318653Z  * [new branch]          ops/cap-lease-574-g33       -> origin/ops/cap-lease-574-g33
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0320158Z  * [new branch]          ops/cap-lease-574-g34       -> origin/ops/cap-lease-574-g34
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0321677Z  * [new branch]          ops/cap-lease-574-g35       -> origin/ops/cap-lease-574-g35
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0323174Z  * [new branch]          ops/cap-lease-574-g36       -> origin/ops/cap-lease-574-g36
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0324718Z  * [new branch]          ops/cap-lease-574-g37       -> origin/ops/cap-lease-574-g37
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0326222Z  * [new branch]          ops/cap-lease-574-g38       -> origin/ops/cap-lease-574-g38
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0327796Z  * [new branch]          ops/cap-lease-574-g39       -> origin/ops/cap-lease-574-g39
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0329289Z  * [new branch]          ops/cap-lease-574-g4        -> origin/ops/cap-lease-574-g4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0330783Z  * [new branch]          ops/cap-lease-574-g40       -> origin/ops/cap-lease-574-g40
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0332296Z  * [new branch]          ops/cap-lease-574-g41       -> origin/ops/cap-lease-574-g41
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0333800Z  * [new branch]          ops/cap-lease-574-g42       -> origin/ops/cap-lease-574-g42
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0335298Z  * [new branch]          ops/cap-lease-574-g43       -> origin/ops/cap-lease-574-g43
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0336870Z  * [new branch]          ops/cap-lease-574-g5        -> origin/ops/cap-lease-574-g5
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0338358Z  * [new branch]          ops/cap-lease-574-g6        -> origin/ops/cap-lease-574-g6
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0339835Z  * [new branch]          ops/cap-lease-574-g7        -> origin/ops/cap-lease-574-g7
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0341319Z  * [new branch]          ops/cap-lease-574-g8        -> origin/ops/cap-lease-574-g8
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0342800Z  * [new branch]          ops/cap-lease-574-g9        -> origin/ops/cap-lease-574-g9
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0344280Z  * [new branch]          ops/cap-lease-574-r3        -> origin/ops/cap-lease-574-r3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0345894Z  * [new branch]          ops/cap-lease-574-r4        -> origin/ops/cap-lease-574-r4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0347458Z  * [new branch]          ops/cap-lease-578           -> origin/ops/cap-lease-578
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0350834Z  * [new branch]          ops/cap-lease-578-g2        -> origin/ops/cap-lease-578-g2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0352417Z  * [new branch]          ops/cap-lease-578-g3        -> origin/ops/cap-lease-578-g3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0353908Z  * [new branch]          ops/cap-lease-578-g4        -> origin/ops/cap-lease-578-g4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0355398Z  * [new branch]          ops/cap-lease-579           -> origin/ops/cap-lease-579
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0356965Z  * [new branch]          ops/cap-lease-579-g10       -> origin/ops/cap-lease-579-g10
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0358499Z  * [new branch]          ops/cap-lease-579-g11       -> origin/ops/cap-lease-579-g11
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0360000Z  * [new branch]          ops/cap-lease-579-g12       -> origin/ops/cap-lease-579-g12
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0361513Z  * [new branch]          ops/cap-lease-579-g13       -> origin/ops/cap-lease-579-g13
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0363011Z  * [new branch]          ops/cap-lease-579-g14       -> origin/ops/cap-lease-579-g14
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0364511Z  * [new branch]          ops/cap-lease-579-g15       -> origin/ops/cap-lease-579-g15
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0366134Z  * [new branch]          ops/cap-lease-579-g16       -> origin/ops/cap-lease-579-g16
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0367737Z  * [new branch]          ops/cap-lease-579-g17       -> origin/ops/cap-lease-579-g17
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0369282Z  * [new branch]          ops/cap-lease-579-g18       -> origin/ops/cap-lease-579-g18
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0370797Z  * [new branch]          ops/cap-lease-579-g19       -> origin/ops/cap-lease-579-g19
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0372315Z  * [new branch]          ops/cap-lease-579-g2        -> origin/ops/cap-lease-579-g2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0373802Z  * [new branch]          ops/cap-lease-579-g20       -> origin/ops/cap-lease-579-g20
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0375310Z  * [new branch]          ops/cap-lease-579-g21       -> origin/ops/cap-lease-579-g21
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0376888Z  * [new branch]          ops/cap-lease-579-g22       -> origin/ops/cap-lease-579-g22
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0378433Z  * [new branch]          ops/cap-lease-579-g23       -> origin/ops/cap-lease-579-g23
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0379932Z  * [new branch]          ops/cap-lease-579-g24       -> origin/ops/cap-lease-579-g24
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0381434Z  * [new branch]          ops/cap-lease-579-g25       -> origin/ops/cap-lease-579-g25
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0382931Z  * [new branch]          ops/cap-lease-579-g26       -> origin/ops/cap-lease-579-g26
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0384417Z  * [new branch]          ops/cap-lease-579-g27       -> origin/ops/cap-lease-579-g27
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0385910Z  * [new branch]          ops/cap-lease-579-g28       -> origin/ops/cap-lease-579-g28
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0387491Z  * [new branch]          ops/cap-lease-579-g29       -> origin/ops/cap-lease-579-g29
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0388990Z  * [new branch]          ops/cap-lease-579-g3        -> origin/ops/cap-lease-579-g3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0390477Z  * [new branch]          ops/cap-lease-579-g4        -> origin/ops/cap-lease-579-g4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0391956Z  * [new branch]          ops/cap-lease-579-g5        -> origin/ops/cap-lease-579-g5
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0393439Z  * [new branch]          ops/cap-lease-579-g6        -> origin/ops/cap-lease-579-g6
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0394935Z  * [new branch]          ops/cap-lease-579-g7        -> origin/ops/cap-lease-579-g7
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0396418Z  * [new branch]          ops/cap-lease-579-g8        -> origin/ops/cap-lease-579-g8
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0398001Z  * [new branch]          ops/cap-lease-579-g9        -> origin/ops/cap-lease-579-g9
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0399452Z  * [new branch]          ops/cap-lease-593           -> origin/ops/cap-lease-593
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0400873Z  * [new branch]          ops/cap-lease-618           -> origin/ops/cap-lease-618
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0402429Z  * [new branch]          ops/cap-lease-650           -> origin/ops/cap-lease-650
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0403848Z  * [new branch]          ops/cap-lease-676           -> origin/ops/cap-lease-676
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0405303Z  * [new branch]          ops/cap-lease-782           -> origin/ops/cap-lease-782
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0406839Z  * [new branch]          ops/cap-lease-784           -> origin/ops/cap-lease-784
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0408412Z  * [new branch]          ops/cap-lease-agent-quyen-a1 -> origin/ops/cap-lease-agent-quyen-a1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0410174Z  * [new branch]          ops/cap-lease-bia-mo-mot-chieu -> origin/ops/cap-lease-bia-mo-mot-chieu
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0412150Z  * [new branch]          ops/cap-lease-chon-reviewer-20260827 -> origin/ops/cap-lease-chon-reviewer-20260827
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0415918Z  * [new branch]          ops/cap-lease-ci-dot-bien-chia-manh -> origin/ops/cap-lease-ci-dot-bien-chia-manh
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0421636Z  * [new branch]          ops/cap-lease-ci-idiom-20260827 -> origin/ops/cap-lease-ci-idiom-20260827
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0427433Z  * [new branch]          ops/cap-lease-doctrine-allowlist -> origin/ops/cap-lease-doctrine-allowlist
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0431487Z  * [new branch]          ops/cap-lease-l7-trich-dan  -> origin/ops/cap-lease-l7-trich-dan
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0436964Z  * [new branch]          ops/cap-lease-launcher-r3-va -> origin/ops/cap-lease-launcher-r3-va
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0442352Z  * [new branch]          ops/cap-lease-mcp-github-doc -> origin/ops/cap-lease-mcp-github-doc
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0446218Z  * [new branch]          ops/cap-lease-mu-ref-va-verdict -> origin/ops/cap-lease-mu-ref-va-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0452009Z  * [new branch]          ops/cap-lease-n6-hook-giai-ma-utf8 -> origin/ops/cap-lease-n6-hook-giai-ma-utf8
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0455558Z  * [new branch]          ops/cap-lease-n8-review-kem-patch -> origin/ops/cap-lease-n8-review-kem-patch
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0460622Z  * [new branch]          ops/cap-lease-n9-ci-manifest-lane -> origin/ops/cap-lease-n9-ci-manifest-lane
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0463622Z  * [new branch]          ops/cap-lease-no-p3-20260828 -> origin/ops/cap-lease-no-p3-20260828
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0467318Z  * [new branch]          ops/cap-lease-p3-dot        -> origin/ops/cap-lease-p3-dot
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0469693Z  * [new branch]          ops/cap-lease-plat-x8-2     -> origin/ops/cap-lease-plat-x8-2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0473292Z  * [new branch]          ops/cap-lease-probe-agent-20260828 -> origin/ops/cap-lease-probe-agent-20260828
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0477536Z  * [new branch]          ops/cap-lease-probe-agent-r2-20260829 -> origin/ops/cap-lease-probe-agent-r2-20260829
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0480781Z  * [new branch]          ops/cap-lease-t33-doi-shellcheck -> origin/ops/cap-lease-t33-doi-shellcheck
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0483571Z  * [new branch]          ops/cap-lease-tach-314      -> origin/ops/cap-lease-tach-314
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0486886Z  * [new branch]          ops/cap-lease-tach-danh-tinh-20260827 -> origin/ops/cap-lease-tach-danh-tinh-20260827
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0490423Z  * [new branch]          ops/cap-lease-w1-p1         -> origin/ops/cap-lease-w1-p1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0492012Z  * [new branch]          ops/ci-bang-phu-thuoc       -> origin/ops/ci-bang-phu-thuoc
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0495689Z  * [new branch]          ops/ci-concurrency-master-r1-lease -> origin/ops/ci-concurrency-master-r1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0501392Z  * [new branch]          ops/ci-duong-nhanh-bo-dot-bien-r1-lease -> origin/ops/ci-duong-nhanh-bo-dot-bien-r1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0505011Z  * [new branch]          ops/ci-lan-luu-tru-r1-lease -> origin/ops/ci-lan-luu-tru-r1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0508041Z  * [new branch]          ops/ci-noi-bang-vao-gate    -> origin/ops/ci-noi-bang-vao-gate
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0512007Z  * [new branch]          ops/ci-provenance-wd-r1-lease -> origin/ops/ci-provenance-wd-r1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0516015Z  * [new branch]          ops/cong-duyet-tham-quyen-386 -> origin/ops/cong-duyet-tham-quyen-386
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0521431Z  * [new branch]          ops/dac-ta-n6-loi-khai      -> origin/ops/dac-ta-n6-loi-khai
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0524138Z  * [new branch]          ops/danh-sach-don-nhanh     -> origin/ops/danh-sach-don-nhanh
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0530014Z  * [new branch]          ops/de-xuat-cho-luong-moi-truong -> origin/ops/de-xuat-cho-luong-moi-truong
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0534173Z  * [new branch]          ops/de-xuat-lease-8-superseded -> origin/ops/de-xuat-lease-8-superseded
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0538165Z  * [new branch]          ops/dieu-kien-merge-cong-r1-lease -> origin/ops/dieu-kien-merge-cong-r1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0541297Z  * [new branch]          ops/dieu-kien-merge-r1-lease -> origin/ops/dieu-kien-merge-r1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0544474Z  * [new branch]          ops/do-lease-publish-windows-150 -> origin/ops/do-lease-publish-windows-150
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0546463Z  * [new branch]          ops/evidence-local-gates-no-actions -> origin/ops/evidence-local-gates-no-actions
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0548338Z  * [new branch]          ops/handoff-512-luot6       -> origin/ops/handoff-512-luot6
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0549845Z  * [new branch]          ops/handoff-512-luot7       -> origin/ops/handoff-512-luot7
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0551280Z  * [new branch]          ops/handoff-530             -> origin/ops/handoff-530
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0552858Z  * [new branch]          ops/ke-hoach-tham-dinh      -> origin/ops/ke-hoach-tham-dinh
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0554429Z  * [new branch]          ops/kiem-merge-m9-r1-lease  -> origin/ops/kiem-merge-m9-r1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0555971Z  * [new branch]          ops/l7-symbol-aware         -> origin/ops/l7-symbol-aware
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0558435Z  * [new branch]          ops/land-574-nen-windows    -> origin/ops/land-574-nen-windows
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0561163Z  * [new branch]          ops/land-574-tich-hop       -> origin/ops/land-574-tich-hop
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0563713Z  * [new branch]          ops/land-574-tich-hop-2     -> origin/ops/land-574-tich-hop-2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0567338Z  * [new branch]          ops/land-574-tich-hop-3     -> origin/ops/land-574-tich-hop-3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0570222Z  * [new branch]          ops/land-574-tich-hop-4     -> origin/ops/land-574-tich-hop-4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0572766Z  * [new branch]          ops/land-81-ha-cap-lease    -> origin/ops/land-81-ha-cap-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0575889Z  * [new branch]          ops/land-81-ha-cap-r2-lease -> origin/ops/land-81-ha-cap-r2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0577677Z  * [new branch]          ops/land-81-pr963-lease     -> origin/ops/land-81-pr963-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0579226Z  * [new branch]          ops/land-wp1143-20261102    -> origin/ops/land-wp1143-20261102
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0580724Z  * [new branch]          ops/lease-ag-t0-01b         -> origin/ops/lease-ag-t0-01b
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0582191Z  * [new branch]          ops/lease-ag-t0-01b-r2      -> origin/ops/lease-ag-t0-01b-r2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0583745Z  * [new branch]          ops/lease-dong-so-20260820  -> origin/ops/lease-dong-so-20260820
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0585351Z  * [new branch]          ops/lease-donref-exec-r2    -> origin/ops/lease-donref-exec-r2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0587044Z  * [new branch]          ops/lease-donref-review-1   -> origin/ops/lease-donref-review-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0588680Z  * [new branch]          ops/lease-donref-review-2   -> origin/ops/lease-donref-review-2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0590295Z  * [new branch]          ops/lease-donref-review-2b  -> origin/ops/lease-donref-review-2b
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0592010Z  * [new branch]          ops/lease-donref-review-exec1 -> origin/ops/lease-donref-review-exec1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0593749Z  * [new branch]          ops/lease-donref-xoa-an-toan -> origin/ops/lease-donref-xoa-an-toan
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0595349Z  * [new branch]          ops/lease-m4-review-2       -> origin/ops/lease-m4-review-2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0596874Z  * [new branch]          ops/lease-m4-v0             -> origin/ops/lease-m4-v0
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0598486Z  * [new branch]          ops/lease-plat-m4-exec-1    -> origin/ops/lease-plat-m4-exec-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0599989Z  * [new branch]          ops/lease-plat-x2           -> origin/ops/lease-plat-x2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0601467Z  * [new branch]          ops/lease-review-m4-x4      -> origin/ops/lease-review-m4-x4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0602979Z  * [new branch]          ops/lease-slice-b-c         -> origin/ops/lease-slice-b-c
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0604456Z  * [new branch]          ops/lease-x5-exec-r4        -> origin/ops/lease-x5-exec-r4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0605943Z  * [new branch]          ops/lease-x5-review-2       -> origin/ops/lease-x5-review-2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0607545Z  * [new branch]          ops/lease-x5-review-3       -> origin/ops/lease-x5-review-3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0609120Z  * [new branch]          ops/manifest-725-727-lease  -> origin/ops/manifest-725-727-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0610818Z  * [new branch]          ops/master-ac19-evidence-block -> origin/ops/master-ac19-evidence-block
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0612518Z  * [new branch]          ops/master-ac19-viet-lai    -> origin/ops/master-ac19-viet-lai
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0614225Z  * [new branch]          ops/moi-truong-review-1-verdict -> origin/ops/moi-truong-review-1-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0615945Z  * [new branch]          ops/moi-truong-review-10    -> origin/ops/moi-truong-review-10
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0617909Z  * [new branch]          ops/moi-truong-review-10-verdict -> origin/ops/moi-truong-review-10-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0619625Z  * [new branch]          ops/moi-truong-review-2     -> origin/ops/moi-truong-review-2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0621320Z  * [new branch]          ops/moi-truong-review-2-verdict -> origin/ops/moi-truong-review-2-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0623012Z  * [new branch]          ops/moi-truong-review-3     -> origin/ops/moi-truong-review-3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0624707Z  * [new branch]          ops/moi-truong-review-3-verdict -> origin/ops/moi-truong-review-3-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0626427Z  * [new branch]          ops/moi-truong-review-4     -> origin/ops/moi-truong-review-4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0628225Z  * [new branch]          ops/moi-truong-review-4-verdict -> origin/ops/moi-truong-review-4-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0629922Z  * [new branch]          ops/moi-truong-review-5     -> origin/ops/moi-truong-review-5
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0631494Z  * [new branch]          ops/moi-truong-review-6     -> origin/ops/moi-truong-review-6
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0633183Z  * [new branch]          ops/moi-truong-review-6-verdict -> origin/ops/moi-truong-review-6-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0634873Z  * [new branch]          ops/moi-truong-review-7     -> origin/ops/moi-truong-review-7
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0636664Z  * [new branch]          ops/moi-truong-review-7-verdict -> origin/ops/moi-truong-review-7-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0638363Z  * [new branch]          ops/moi-truong-review-8     -> origin/ops/moi-truong-review-8
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0640052Z  * [new branch]          ops/moi-truong-review-8-verdict -> origin/ops/moi-truong-review-8-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0641750Z  * [new branch]          ops/moi-truong-review-9     -> origin/ops/moi-truong-review-9
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0643433Z  * [new branch]          ops/moi-truong-review-9-verdict -> origin/ops/moi-truong-review-9-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0645267Z  * [new branch]          ops/nghien-cuu-tat-dinh-cong-cu -> origin/ops/nghien-cuu-tat-dinh-cong-cu
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0647047Z  * [new branch]          ops/no-ky-thuat-muc6        -> origin/ops/no-ky-thuat-muc6
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0648516Z  * [new branch]          ops/pkg-windows             -> origin/ops/pkg-windows
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0650068Z  * [new branch]          ops/review-674-ci-duong-nhanh -> origin/ops/review-674-ci-duong-nhanh
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0651629Z  * [new branch]          ops/so-sach-18-08           -> origin/ops/so-sach-18-08
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0653095Z  * [new branch]          ops/soan-w0m4-20260828      -> origin/ops/soan-w0m4-20260828
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0654816Z  * [new branch]          ops/song-song-write-set-exclusion -> origin/ops/song-song-write-set-exclusion
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0656819Z  * [new branch]          ops/spec-donref-xoa-an-toan -> origin/ops/spec-donref-xoa-an-toan
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0658510Z  * [new branch]          ops/spec-harness-tu-kiem-694 -> origin/ops/spec-harness-tu-kiem-694
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0660322Z  * [new branch]          ops/spec-launcher-con-song-esrch -> origin/ops/spec-launcher-con-song-esrch
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0662047Z  * [new branch]          ops/spec-probe-agent-r2     -> origin/ops/spec-probe-agent-r2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0663627Z  * [new branch]          ops/spec-thua-huong-actor   -> origin/ops/spec-thua-huong-actor
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0667613Z  * [new branch]          ops/spec-w1-p1              -> origin/ops/spec-w1-p1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0671206Z  * [new branch]          ops/successor-packet-session-mutex -> origin/ops/successor-packet-session-mutex
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0673728Z  * [new branch]          ops/thu-canary-1143         -> origin/ops/thu-canary-1143
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0676458Z  * [new branch]          ops/thu-concurrency-1132    -> origin/ops/thu-concurrency-1132
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0680178Z  * [new branch]          ops/thu-hoi-lease-538       -> origin/ops/thu-hoi-lease-538
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0683886Z  * [new branch]          ops/verdict-donref          -> origin/ops/verdict-donref
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0686881Z  * [new branch]          ops/verdict-m4-review-2     -> origin/ops/verdict-m4-review-2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0689878Z  * [new branch]          ops/windows-local-may-chu-kho-r1-lease -> origin/ops/windows-local-may-chu-kho-r1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0694845Z  * [new branch]          ops/windows-local-may-chu-kho-r2-lease -> origin/ops/windows-local-may-chu-kho-r2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0699237Z  * [new branch]          ops/windows-local-may-chu-kho-r3-lease -> origin/ops/windows-local-may-chu-kho-r3-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0702571Z  * [new branch]          ops/wp1006-r1-g1-lease      -> origin/ops/wp1006-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0705328Z  * [new branch]          ops/wp1017-r1-g1-lease      -> origin/ops/wp1017-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0708145Z  * [new branch]          ops/wp1021-r2-g1-lease      -> origin/ops/wp1021-r2-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0710761Z  * [new branch]          ops/wp1030-r4-g1-lease      -> origin/ops/wp1030-r4-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0713750Z  * [new branch]          ops/wp1037-r1-g1-lease      -> origin/ops/wp1037-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0717940Z  * [new branch]          ops/wp1045-r1-g1-lease      -> origin/ops/wp1045-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0721793Z  * [new branch]          ops/wp1052-r2-g1-lease      -> origin/ops/wp1052-r2-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0724499Z  * [new branch]          ops/wp1077-r1-g1-lease      -> origin/ops/wp1077-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0728064Z  * [new branch]          ops/wp1078-r1-g1-lease      -> origin/ops/wp1078-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0730716Z  * [new branch]          ops/wp1079-r1-g1-lease      -> origin/ops/wp1079-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0733259Z  * [new branch]          ops/wp1117-r1-g1-lease      -> origin/ops/wp1117-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0736524Z  * [new branch]          ops/wp1121-r4-g1-lease      -> origin/ops/wp1121-r4-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0739698Z  * [new branch]          ops/wp1122-r1-g1-lease      -> origin/ops/wp1122-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0743223Z  * [new branch]          ops/wp1124-r3-g1-lease      -> origin/ops/wp1124-r3-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0745439Z  * [new branch]          ops/wp1134-r2-g1-lease      -> origin/ops/wp1134-r2-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0751514Z  * [new branch]          ops/wp1147-r1-g1-lease      -> origin/ops/wp1147-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0755992Z  * [new branch]          ops/wp484-r7-spec           -> origin/ops/wp484-r7-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0758988Z  * [new branch]          ops/wp55-lease-exec-3       -> origin/ops/wp55-lease-exec-3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0762885Z  * [new branch]          ops/wp55-lease-review-5     -> origin/ops/wp55-lease-review-5
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0766195Z  * [new branch]          ops/wp55-r2-review-5-verdict -> origin/ops/wp55-r2-review-5-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0770620Z  * [new branch]          ops/wp55-r3-exec-4          -> origin/ops/wp55-r3-exec-4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0774150Z  * [new branch]          ops/wp55-r3-exec-5          -> origin/ops/wp55-r3-exec-5
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0778096Z  * [new branch]          ops/wp55-r3-exec-9          -> origin/ops/wp55-r3-exec-9
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0783116Z  * [new branch]          ops/wp55-r3-fix-html-table-token -> origin/ops/wp55-r3-fix-html-table-token
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0786476Z  * [new branch]          ops/wp55-r3-review-10       -> origin/ops/wp55-r3-review-10
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0791129Z  * [new branch]          ops/wp55-r3-review-10-verdict -> origin/ops/wp55-r3-review-10-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0793956Z  * [new branch]          ops/wp55-r3-review-11       -> origin/ops/wp55-r3-review-11
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0797944Z  * [new branch]          ops/wp55-r3-review-11-verdict -> origin/ops/wp55-r3-review-11-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0800299Z  * [new branch]          ops/wp55-r3-review-12       -> origin/ops/wp55-r3-review-12
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0802448Z  * [new branch]          ops/wp55-r3-review-6        -> origin/ops/wp55-r3-review-6
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0805417Z  * [new branch]          ops/wp55-r3-review-7        -> origin/ops/wp55-r3-review-7
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0809982Z  * [new branch]          ops/wp55-r3-review-8        -> origin/ops/wp55-r3-review-8
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0813151Z  * [new branch]          ops/wp55-r3-review-8-ngoai-lease -> origin/ops/wp55-r3-review-8-ngoai-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0817573Z  * [new branch]          ops/wp55-r3-review-9        -> origin/ops/wp55-r3-review-9
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0820335Z  * [new branch]          ops/wp55-r3-review-9-verdict -> origin/ops/wp55-r3-review-9-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0824096Z  * [new branch]          ops/wp55-r3-spec            -> origin/ops/wp55-r3-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0828523Z  * [new branch]          ops/wp55-r3g4-exec-4-evidence -> origin/ops/wp55-r3g4-exec-4-evidence
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0832163Z  * [new branch]          ops/wp55-r3g5-exec-5-evidence -> origin/ops/wp55-r3g5-exec-5-evidence
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0837628Z  * [new branch]          ops/wp55-r3g9-exec-9-an-ninh -> origin/ops/wp55-r3g9-exec-9-an-ninh
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0840257Z  * [new branch]          ops/wp55-r3g9-handoff       -> origin/ops/wp55-r3g9-handoff
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0844331Z  * [new branch]          ops/wp55-verdict-6          -> origin/ops/wp55-verdict-6
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0848590Z  * [new branch]          ops/wp685-r18-g1-lease      -> origin/ops/wp685-r18-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0851891Z  * [new branch]          ops/wp685-r19-g2-metadata   -> origin/ops/wp685-r19-g2-metadata
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0854969Z  * [new branch]          ops/wp685-r20-g3-metadata   -> origin/ops/wp685-r20-g3-metadata
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0859645Z  * [new branch]          ops/wp685-r28-g5-su-kien-review-1 -> origin/ops/wp685-r28-g5-su-kien-review-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0863775Z  * [new branch]          ops/wp710-g5-hien-vat-review -> origin/ops/wp710-g5-hien-vat-review
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0867496Z  * [new branch]          ops/wp728-r2-do-linux       -> origin/ops/wp728-r2-do-linux
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0871229Z  * [new branch]          ops/wp744-r1-g1-lease       -> origin/ops/wp744-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0875367Z  * [new branch]          ops/wp744-r2-g2-lease       -> origin/ops/wp744-r2-g2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0880083Z  * [new branch]          ops/wp744-r3-g3-lease       -> origin/ops/wp744-r3-g3-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0883375Z  * [new branch]          ops/wp748-r1-g1-lease       -> origin/ops/wp748-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0886047Z  * [new branch]          ops/wp748-r10-g10-lease     -> origin/ops/wp748-r10-g10-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0889106Z  * [new branch]          ops/wp748-r11-g11-lease     -> origin/ops/wp748-r11-g11-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0891350Z  * [new branch]          ops/wp748-r12-g12-lease     -> origin/ops/wp748-r12-g12-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0895516Z  * [new branch]          ops/wp748-r13-g13-lease     -> origin/ops/wp748-r13-g13-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0899855Z  * [new branch]          ops/wp748-r14-g14-lease     -> origin/ops/wp748-r14-g14-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0903563Z  * [new branch]          ops/wp748-r15-g15-lease     -> origin/ops/wp748-r15-g15-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0908624Z  * [new branch]          ops/wp748-r16-g16-lease     -> origin/ops/wp748-r16-g16-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0911240Z  * [new branch]          ops/wp748-r17-g17-lease     -> origin/ops/wp748-r17-g17-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0915058Z  * [new branch]          ops/wp748-r18-g18-lease     -> origin/ops/wp748-r18-g18-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0919284Z  * [new branch]          ops/wp748-r19-g19-lease     -> origin/ops/wp748-r19-g19-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0921877Z  * [new branch]          ops/wp748-r2-g2-lease       -> origin/ops/wp748-r2-g2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0925490Z  * [new branch]          ops/wp748-r20-g20-lease     -> origin/ops/wp748-r20-g20-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0928636Z  * [new branch]          ops/wp748-r21-g21-lease     -> origin/ops/wp748-r21-g21-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0932690Z  * [new branch]          ops/wp748-r22-g22-lease     -> origin/ops/wp748-r22-g22-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0936067Z  * [new branch]          ops/wp748-r23-g23-lease     -> origin/ops/wp748-r23-g23-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0941611Z  * [new branch]          ops/wp748-r24-g24-lease     -> origin/ops/wp748-r24-g24-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0944330Z  * [new branch]          ops/wp748-r25-g25-lease     -> origin/ops/wp748-r25-g25-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0948263Z  * [new branch]          ops/wp748-r27-g27-lease     -> origin/ops/wp748-r27-g27-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0952882Z  * [new branch]          ops/wp748-r28-l7-lease      -> origin/ops/wp748-r28-l7-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0955869Z  * [new branch]          ops/wp748-r3-g3-lease       -> origin/ops/wp748-r3-g3-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0959541Z  * [new branch]          ops/wp748-r4-g4-lease       -> origin/ops/wp748-r4-g4-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0961663Z  * [new branch]          ops/wp748-r5-g5-lease       -> origin/ops/wp748-r5-g5-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0964572Z  * [new branch]          ops/wp748-r6-g6-lease       -> origin/ops/wp748-r6-g6-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0968617Z  * [new branch]          ops/wp748-r7-g7-lease       -> origin/ops/wp748-r7-g7-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0972488Z  * [new branch]          ops/wp748-r8-g8-lease       -> origin/ops/wp748-r8-g8-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0974989Z  * [new branch]          ops/wp748-r9-g9-lease       -> origin/ops/wp748-r9-g9-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0976455Z  * [new branch]          ops/wp752-r4-g1-lease       -> origin/ops/wp752-r4-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0977945Z  * [new branch]          ops/wp760-spec              -> origin/ops/wp760-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0979341Z  * [new branch]          ops/wp763-r2-g1-lease       -> origin/ops/wp763-r2-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0980741Z  * [new branch]          ops/wp768-spec              -> origin/ops/wp768-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0982111Z  * [new branch]          ops/wp769-spec              -> origin/ops/wp769-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0983480Z  * [new branch]          ops/wp770-spec              -> origin/ops/wp770-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0984836Z  * [new branch]          ops/wp775-spec              -> origin/ops/wp775-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0986182Z  * [new branch]          ops/wp780-spec              -> origin/ops/wp780-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0987648Z  * [new branch]          ops/wp788-spec              -> origin/ops/wp788-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0989050Z  * [new branch]          ops/wp802-r1-g1-lease       -> origin/ops/wp802-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0990522Z  * [new branch]          ops/wp812-g2-reviews        -> origin/ops/wp812-g2-reviews
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0991927Z  * [new branch]          ops/wp812-spec              -> origin/ops/wp812-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0993334Z  * [new branch]          ops/wp813-r2-g1-lease       -> origin/ops/wp813-r2-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0994987Z  * [new branch]          ops/wp813-r2-spec           -> origin/ops/wp813-r2-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0996403Z  * [new branch]          ops/wp814-r2-g1-lease       -> origin/ops/wp814-r2-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0997958Z  * [new branch]          ops/wp814-r2-spec           -> origin/ops/wp814-r2-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.0999383Z  * [new branch]          ops/wp814-r3-g2-lease       -> origin/ops/wp814-r3-g2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1000826Z  * [new branch]          ops/wp814-r3-spec           -> origin/ops/wp814-r3-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1002236Z  * [new branch]          ops/wp822-g1-reviews        -> origin/ops/wp822-g1-reviews
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1003630Z  * [new branch]          ops/wp822-spec              -> origin/ops/wp822-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1005035Z  * [new branch]          ops/wp825-r1-g1-lease       -> origin/ops/wp825-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1006504Z  * [new branch]          ops/wp831-r1-g1-lease       -> origin/ops/wp831-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1008138Z  * [new branch]          ops/wp831-r2-g2-lease       -> origin/ops/wp831-r2-g2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1009665Z  * [new branch]          ops/wp831-r3-g3-lease       -> origin/ops/wp831-r3-g3-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1011142Z  * [new branch]          ops/wp831-r4-g4-lease       -> origin/ops/wp831-r4-g4-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1012780Z  * [new branch]          ops/wp831-spec              -> origin/ops/wp831-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1014178Z  * [new branch]          ops/wp834-r1-g1-lease       -> origin/ops/wp834-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1015633Z  * [new branch]          ops/wp835-r1-g1-lease       -> origin/ops/wp835-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1017208Z  * [new branch]          ops/wp835-r2-g2-lease       -> origin/ops/wp835-r2-g2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1018689Z  * [new branch]          ops/wp835-r3-g3-lease       -> origin/ops/wp835-r3-g3-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1020158Z  * [new branch]          ops/wp835-r4-g4-lease       -> origin/ops/wp835-r4-g4-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1021645Z  * [new branch]          ops/wp845-r1-g1-lease       -> origin/ops/wp845-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1023112Z  * [new branch]          ops/wp854-r1-g1-lease       -> origin/ops/wp854-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1024516Z  * [new branch]          ops/wp854-spec              -> origin/ops/wp854-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1025918Z  * [new branch]          ops/wp856-g1-reviews        -> origin/ops/wp856-g1-reviews
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1027453Z  * [new branch]          ops/wp856-spec              -> origin/ops/wp856-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1028857Z  * [new branch]          ops/wp858-r1-g1-lease       -> origin/ops/wp858-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1030306Z  * [new branch]          ops/wp858-r1-g2-lease       -> origin/ops/wp858-r1-g2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1031701Z  * [new branch]          ops/wp858-spec              -> origin/ops/wp858-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1033102Z  * [new branch]          ops/wp868-r1-g1-lease       -> origin/ops/wp868-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1034502Z  * [new branch]          ops/wp868-spec              -> origin/ops/wp868-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1035916Z  * [new branch]          ops/wp871-r1-g1-lease       -> origin/ops/wp871-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1037427Z  * [new branch]          ops/wp871-spec              -> origin/ops/wp871-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1038822Z  * [new branch]          ops/wp878-r1-g1-lease       -> origin/ops/wp878-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1040243Z  * [new branch]          ops/wp878-spec              -> origin/ops/wp878-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1041641Z  * [new branch]          ops/wp879-r1-g1-lease       -> origin/ops/wp879-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1043053Z  * [new branch]          ops/wp879-spec              -> origin/ops/wp879-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1044447Z  * [new branch]          ops/wp886-r1-g1-lease       -> origin/ops/wp886-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1045918Z  * [new branch]          ops/wp886-r2-g2-lease       -> origin/ops/wp886-r2-g2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1047403Z  * [new branch]          ops/wp886-spec              -> origin/ops/wp886-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1048882Z  * [new branch]          ops/wp890-spec              -> origin/ops/wp890-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1050290Z  * [new branch]          ops/wp892-r1-g1-lease       -> origin/ops/wp892-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1051737Z  * [new branch]          ops/wp892-r2-g2-lease       -> origin/ops/wp892-r2-g2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1053157Z  * [new branch]          ops/wp892-spec              -> origin/ops/wp892-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1054550Z  * [new branch]          ops/wp899-g1-luu-tru        -> origin/ops/wp899-g1-luu-tru
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1056002Z  * [new branch]          ops/wp899-g2-luu-tru        -> origin/ops/wp899-g2-luu-tru
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1057576Z  * [new branch]          ops/wp899-g3-luu-tru        -> origin/ops/wp899-g3-luu-tru
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1059039Z  * [new branch]          ops/wp899-g4-luu-tru        -> origin/ops/wp899-g4-luu-tru
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1060548Z  * [new branch]          ops/wp899-r3-g2-lease       -> origin/ops/wp899-r3-g2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1062048Z  * [new branch]          ops/wp899-r4-g3-lease       -> origin/ops/wp899-r4-g3-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1063507Z  * [new branch]          ops/wp899-r4-g4-lease       -> origin/ops/wp899-r4-g4-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1064967Z  * [new branch]          ops/wp899-r4-g5-lease       -> origin/ops/wp899-r4-g5-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1066497Z  * [new branch]          ops/wp899-spec              -> origin/ops/wp899-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1068022Z  * [new branch]          ops/wp906-r1-g1-lease       -> origin/ops/wp906-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1069427Z  * [new branch]          ops/wp906-spec              -> origin/ops/wp906-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1070823Z  * [new branch]          ops/wp910-r1-g1-lease       -> origin/ops/wp910-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1072304Z  * [new branch]          ops/wp910-r2-g2-lease       -> origin/ops/wp910-r2-g2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1073756Z  * [new branch]          ops/wp910-r3-g3-lease       -> origin/ops/wp910-r3-g3-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1075167Z  * [new branch]          ops/wp910-spec              -> origin/ops/wp910-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1076663Z  * [new branch]          ops/wp919-r1-g1-lease       -> origin/ops/wp919-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1078113Z  * [new branch]          ops/wp923-r1-g1-lease       -> origin/ops/wp923-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1079570Z  * [new branch]          ops/wp923-r2-g2-lease       -> origin/ops/wp923-r2-g2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1080998Z  * [new branch]          ops/wp923-r2-spec           -> origin/ops/wp923-r2-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1082527Z  * [new branch]          ops/wp923-r3-g3-lease       -> origin/ops/wp923-r3-g3-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1083948Z  * [new branch]          ops/wp923-spec              -> origin/ops/wp923-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1085340Z  * [new branch]          ops/wp943-r1-g1-lease       -> origin/ops/wp943-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1086830Z  * [new branch]          ops/wp943-spec              -> origin/ops/wp943-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1088245Z  * [new branch]          ops/wp960-r1-g1-lease       -> origin/ops/wp960-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1089709Z  * [new branch]          ops/wp960-r2-g1-lease       -> origin/ops/wp960-r2-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1091170Z  * [new branch]          ops/wp960-r2-g2-lease       -> origin/ops/wp960-r2-g2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1092675Z  * [new branch]          ops/wp972-r1-lease          -> origin/ops/wp972-r1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1094109Z  * [new branch]          ops/wp977-r1-g1-lease       -> origin/ops/wp977-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1095513Z  * [new branch]          ops/wp977-spec              -> origin/ops/wp977-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1096983Z  * [new branch]          ops/wp978-r1-g1-lease       -> origin/ops/wp978-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1098441Z  * [new branch]          ops/wp981-r1-g1-lease       -> origin/ops/wp981-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1099899Z  * [new branch]          ops/wp981-r2-g2-lease       -> origin/ops/wp981-r2-g2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1101497Z  * [new branch]          ops/wp981-r2-review-4       -> origin/ops/wp981-r2-review-4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1102949Z  * [new branch]          ops/wp987-r1-g1-lease       -> origin/ops/wp987-r1-g1-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1104350Z  * [new branch]          ops/wp999-spec              -> origin/ops/wp999-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1105766Z  * [new branch]          packet/wp710-spec-r4        -> origin/packet/wp710-spec-r4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1107568Z  * [new tag]             archive/codex-gate-lifecycle-ec8d08c -> archive/codex-gate-lifecycle-ec8d08c
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1109248Z  * [new tag]             archive/dlbrut-ke-hoach-dau -> archive/dlbrut-ke-hoach-dau
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1110909Z  * [new tag]             archive/rasoat-design-docs-2026-07-26 -> archive/rasoat-design-docs-2026-07-26
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1112461Z  * [new tag]             bak/pre-renumber            -> bak/pre-renumber
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1113721Z  * [new tag]             luu-tru/238-verdict-1       -> luu-tru/238-verdict-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1115031Z  * [new tag]             luu-tru/238-verdict-2       -> luu-tru/238-verdict-2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1116336Z  * [new tag]             luu-tru/238-verdict-3       -> luu-tru/238-verdict-3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1117999Z  * [new tag]             luu-tru/bookkeeping-831-land-79045a0 -> luu-tru/bookkeeping-831-land-79045a0
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1119919Z  * [new tag]             luu-tru/doctor-github-mcp-verdict-6 -> luu-tru/doctor-github-mcp-verdict-6
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1121719Z  * [new tag]             luu-tru/doctor-github-mcp-verdict-9 -> luu-tru/doctor-github-mcp-verdict-9
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1123469Z  * [new tag]             luu-tru/land-81-ha-cap-r2-bien-nhan -> luu-tru/land-81-ha-cap-r2-bien-nhan
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1125265Z  * [new tag]             luu-tru/land-evidence-l7-r2-bien-nhan -> luu-tru/land-evidence-l7-r2-bien-nhan
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1127151Z  * [new tag]             luu-tru/land-evidence-l7-r2-lease -> luu-tru/land-evidence-l7-r2-lease
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1129088Z  * [new tag]             luu-tru/lease-publish-windows-do-r1-verdict -> luu-tru/lease-publish-windows-do-r1-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1131007Z  * [new tag]             luu-tru/nhanh/wp55-r4-lease-di-tru -> luu-tru/nhanh/wp55-r4-lease-di-tru
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1132683Z  * [new tag]             luu-tru/nhanh/wp55-r4-lease-exec-1 -> luu-tru/nhanh/wp55-r4-lease-exec-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1134358Z  * [new tag]             luu-tru/nhanh/wp55-r4-lease-exec-2 -> luu-tru/nhanh/wp55-r4-lease-exec-2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1136023Z  * [new tag]             luu-tru/nhanh/wp55-r4-lease-rebase -> luu-tru/nhanh/wp55-r4-lease-rebase
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1137839Z  * [new tag]             luu-tru/nhanh/wp55-r4-lease-review-1 -> luu-tru/nhanh/wp55-r4-lease-review-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1139621Z  * [new tag]             luu-tru/nhanh/wp55-r4-lease-review-2 -> luu-tru/nhanh/wp55-r4-lease-review-2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1141382Z  * [new tag]             luu-tru/nhanh/wp55-r4-lease-viet-lai -> luu-tru/nhanh/wp55-r4-lease-viet-lai
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1143327Z  * [new tag]             luu-tru/nhanh/wp55-r4-review-1-codex-verdict -> luu-tru/nhanh/wp55-r4-review-1-codex-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1145447Z  * [new tag]             luu-tru/nhanh/wp55-r4-review-2-codex-verdict -> luu-tru/nhanh/wp55-r4-review-2-codex-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1147462Z  * [new tag]             luu-tru/nhanh/wp55-r4-spec-draft -> luu-tru/nhanh/wp55-r4-spec-draft
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1149177Z  * [new tag]             luu-tru/nhanh/wp55-r4-verdict-di-tru -> luu-tru/nhanh/wp55-r4-verdict-di-tru
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1150986Z  * [new tag]             luu-tru/nhanh/wp55-r4-verdict-viet-lai -> luu-tru/nhanh/wp55-r4-verdict-viet-lai
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1152679Z  * [new tag]             luu-tru/nhanh/wp55-r4g1-handoff -> luu-tru/nhanh/wp55-r4g1-handoff
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1154158Z  * [new tag]             luu-tru/nhanh/wp55-r4g1-wip -> luu-tru/nhanh/wp55-r4g1-wip
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1155682Z  * [new tag]             luu-tru/tao-tag-luu-tru-verdict-1 -> luu-tru/tao-tag-luu-tru-verdict-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1157807Z  * [new tag]             luu-tru/verdict/moi-truong-review-1-verdict -> luu-tru/verdict/moi-truong-review-1-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1159943Z  * [new tag]             luu-tru/verdict/moi-truong-review-10-verdict -> luu-tru/verdict/moi-truong-review-10-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1162063Z  * [new tag]             luu-tru/verdict/moi-truong-review-2-verdict -> luu-tru/verdict/moi-truong-review-2-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1164168Z  * [new tag]             luu-tru/verdict/moi-truong-review-3-verdict -> luu-tru/verdict/moi-truong-review-3-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1166259Z  * [new tag]             luu-tru/verdict/moi-truong-review-4-verdict -> luu-tru/verdict/moi-truong-review-4-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1168429Z  * [new tag]             luu-tru/verdict/moi-truong-review-6-verdict -> luu-tru/verdict/moi-truong-review-6-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1170515Z  * [new tag]             luu-tru/verdict/moi-truong-review-7-verdict -> luu-tru/verdict/moi-truong-review-7-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1172606Z  * [new tag]             luu-tru/verdict/moi-truong-review-8-verdict -> luu-tru/verdict/moi-truong-review-8-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1174684Z  * [new tag]             luu-tru/verdict/moi-truong-review-9-verdict -> luu-tru/verdict/moi-truong-review-9-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1176812Z  * [new tag]             luu-tru/verdict/plat-x4-ho-so-review-1-2-3 -> luu-tru/verdict/plat-x4-ho-so-review-1-2-3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1178908Z  * [new tag]             luu-tru/verdict/wp55-r2-review-5-verdict -> luu-tru/verdict/wp55-r2-review-5-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1180862Z  * [new tag]             luu-tru/verdict/wp55-r3-review-10-verdict -> luu-tru/verdict/wp55-r3-review-10-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1182809Z  * [new tag]             luu-tru/verdict/wp55-r3-review-11-verdict -> luu-tru/verdict/wp55-r3-review-11-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1184737Z  * [new tag]             luu-tru/verdict/wp55-r3-review-9-verdict -> luu-tru/verdict/wp55-r3-review-9-verdict
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1186449Z  * [new tag]             luu-tru/verdict/wp55-verdict-6 -> luu-tru/verdict/wp55-verdict-6
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1188466Z  * [new tag]             luu-tru/windows-local-may-chu-kho-r1-bien-nhan -> luu-tru/windows-local-may-chu-kho-r1-bien-nhan
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1190711Z  * [new tag]             luu-tru/windows-local-may-chu-kho-r2-bien-nhan -> luu-tru/windows-local-may-chu-kho-r2-bien-nhan
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1192520Z  * [new tag]             luu-tru/wp1021-g1-claude    -> luu-tru/wp1021-g1-claude
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1193958Z  * [new tag]             luu-tru/wp523-r12-human-audited -> luu-tru/wp523-r12-human-audited
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1195425Z  * [new tag]             luu-tru/wp523-spec-r11      -> luu-tru/wp523-spec-r11
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1197078Z  * [new tag]             luu-tru/wp55-r4-verdict-di-tru -> luu-tru/wp55-r4-verdict-di-tru
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1215712Z  * [new tag]             luu-tru/wp55-r4-verdict-rebase -> luu-tru/wp55-r4-verdict-rebase
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1217519Z  * [new tag]             luu-tru/wp55-r4-verdict-review-1 -> luu-tru/wp55-r4-verdict-review-1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1219364Z  * [new tag]             luu-tru/wp55-r4-verdict-review-1-ban-dau -> luu-tru/wp55-r4-verdict-review-1-ban-dau
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1221173Z  * [new tag]             luu-tru/wp55-r4-verdict-review-2 -> luu-tru/wp55-r4-verdict-review-2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1222827Z  * [new tag]             luu-tru/wp55-r4-verdict-viet-lai -> luu-tru/wp55-r4-verdict-viet-lai
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1224306Z  * [new tag]             luu-tru/wp812-g2-reviews    -> luu-tru/wp812-g2-reviews
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1225594Z  * [new tag]             luu-tru/wp812-spec          -> luu-tru/wp812-spec
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1227063Z  * [new tag]             luu-tru/wp929-merge-ab94c4f -> luu-tru/wp929-merge-ab94c4f
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1228311Z  * [new tag]             v1.29.7                     -> v1.29.7
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1229368Z  * [new tag]             v1.33.0                     -> v1.33.0
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1230418Z  * [new tag]             v1.33.1                     -> v1.33.1
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1231693Z  * [new tag]             v1.33.10                    -> v1.33.10
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1232770Z  * [new tag]             v1.33.11                    -> v1.33.11
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1233878Z  * [new tag]             v1.33.12                    -> v1.33.12
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1234973Z  * [new tag]             v1.33.13                    -> v1.33.13
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1236041Z  * [new tag]             v1.33.14                    -> v1.33.14
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1237219Z  * [new tag]             v1.33.2                     -> v1.33.2
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1238276Z  * [new tag]             v1.33.3                     -> v1.33.3
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1239330Z  * [new tag]             v1.33.4                     -> v1.33.4
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1240378Z  * [new tag]             v1.33.5                     -> v1.33.5
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1241435Z  * [new tag]             v1.33.6                     -> v1.33.6
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1242488Z  * [new tag]             v1.33.7                     -> v1.33.7
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1243552Z  * [new tag]             v1.33.8                     -> v1.33.8
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1244603Z  * [new tag]             v1.33.9                     -> v1.33.9
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1245881Z  * [new ref]             f18bb528bf86b3e891432d01024aa10fee07e12c -> pull/1157/merge
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1247456Z  * [new tag]             rescue/d0-2026-08-04        -> rescue/d0-2026-08-04
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1250397Z ##[endgroup]
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1251530Z ##[group]Determining the checkout info
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1252792Z ##[endgroup]
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1253545Z [command]/usr/bin/git sparse-checkout disable
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1255707Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1258291Z ##[group]Checking out the ref
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.1259424Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/1157/merge
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8467774Z Note: switching to 'refs/remotes/pull/1157/merge'.
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8468179Z 
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8468362Z You are in 'detached HEAD' state. You can look around, make experimental
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8468739Z changes and commit them, and you can discard any commits you make in this
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8469104Z state without impacting any branches by switching back to a branch.
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8469326Z 
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8469654Z If you want to create a new branch to retain commits you create, you may
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8470141Z do so (now or later) by using -c with the switch command. Example:
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8470429Z 
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8470539Z   git switch -c <new-branch-name>
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8470732Z 
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8470846Z Or undo this operation with:
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8471032Z 
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8471136Z   git switch -
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8471272Z 
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8471518Z Turn off this advice by setting config variable advice.detachedHead to false
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8471885Z 
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8472314Z HEAD is now at f18bb528b Merge c3731ea665c77050d2f9c9d65b626f808614200e into bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8547973Z ##[endgroup]
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8601295Z [command]/usr/bin/git log -1 --format=%H
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:07:02.8628767Z f18bb528bf86b3e891432d01024aa10fee07e12c
+chuan-bi	phan loai diff (duong nhanh ho so)	﻿2026-11-02T10:07:02.8846069Z ##[group]Run python3 ops/ci_duong_nhanh.py
+chuan-bi	phan loai diff (duong nhanh ho so)	2026-11-02T10:07:02.8846421Z [36;1mpython3 ops/ci_duong_nhanh.py[0m
+chuan-bi	phan loai diff (duong nhanh ho so)	2026-11-02T10:07:02.8867097Z shell: /usr/bin/bash -e {0}
+chuan-bi	phan loai diff (duong nhanh ho so)	2026-11-02T10:07:02.8867317Z env:
+chuan-bi	phan loai diff (duong nhanh ho so)	2026-11-02T10:07:02.8867498Z   CI_DUONG_NHANH_SU_KIEN: pull_request
+chuan-bi	phan loai diff (duong nhanh ho so)	2026-11-02T10:07:02.8867784Z   CI_DUONG_NHANH_GOC: bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+chuan-bi	phan loai diff (duong nhanh ho so)	2026-11-02T10:07:02.8868097Z   CI_DUONG_NHANH_DAU: c3731ea665c77050d2f9c9d65b626f808614200e
+chuan-bi	phan loai diff (duong nhanh ho so)	2026-11-02T10:07:02.8868408Z   CI_DUONG_NHANH_MERGE: f18bb528bf86b3e891432d01024aa10fee07e12c
+chuan-bi	phan loai diff (duong nhanh ho so)	2026-11-02T10:07:02.8868670Z   CI_DUONG_NHANH_CHE_DO_VAO: 
+chuan-bi	phan loai diff (duong nhanh ho so)	2026-11-02T10:07:02.8868875Z   CI_DUONG_NHANH_NHANH_MAC_DINH: master
+chuan-bi	phan loai diff (duong nhanh ho so)	2026-11-02T10:07:02.8869080Z ##[endgroup]
+chuan-bi	phan loai diff (duong nhanh ho so)	2026-11-02T10:07:02.9382133Z DUONG_NHANH: toan bo 1 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh
+chuan-bi	phan loai diff (duong nhanh ho so)	2026-11-02T10:07:02.9382616Z che_do=duong_nhanh
+chuan-bi	Post Run actions/checkout@v4	﻿2026-11-02T10:07:02.9552582Z Post job cleanup.
+chuan-bi	Post Run actions/checkout@v4	2026-11-02T10:07:03.0271897Z [command]/usr/bin/git version
+chuan-bi	Post Run actions/checkout@v4	2026-11-02T10:07:03.0309840Z git version 2.56.0
+chuan-bi	Post Run actions/checkout@v4	2026-11-02T10:07:03.0340363Z Temporarily overriding HOME='/home/runner/work/_temp/4316026d-8103-452b-8a8e-215ed02d83cf' before making global git config changes
+chuan-bi	Post Run actions/checkout@v4	2026-11-02T10:07:03.0341584Z Adding repository directory to the temporary git global config as a safe directory
+chuan-bi	Post Run actions/checkout@v4	2026-11-02T10:07:03.0345015Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/tra-luat/tra-luat
+chuan-bi	Post Run actions/checkout@v4	2026-11-02T10:07:03.0383643Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+chuan-bi	Post Run actions/checkout@v4	2026-11-02T10:07:03.0420183Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+chuan-bi	Post Run actions/checkout@v4	2026-11-02T10:07:03.0679492Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+chuan-bi	Post Run actions/checkout@v4	2026-11-02T10:07:03.0692741Z http.https://github.com/.extraheader
+chuan-bi	Post Run actions/checkout@v4	2026-11-02T10:07:03.0707157Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+chuan-bi	Post Run actions/checkout@v4	2026-11-02T10:07:03.0753995Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+chuan-bi	Post Run actions/checkout@v4	2026-11-02T10:07:03.1079694Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+chuan-bi	Post Run actions/checkout@v4	2026-11-02T10:07:03.1124986Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+chuan-bi	Complete job	﻿2026-11-02T10:07:03.1520251Z Evaluate and set job outputs
+chuan-bi	Complete job	2026-11-02T10:07:03.1541174Z Set output 'os'
+chuan-bi	Complete job	2026-11-02T10:07:03.1542406Z Set output 'che_do'
+chuan-bi	Complete job	2026-11-02T10:07:03.1542780Z Set output 'goc'
+chuan-bi	Complete job	2026-11-02T10:07:03.1543035Z Set output 'dau'
+chuan-bi	Complete job	2026-11-02T10:07:03.1543293Z Set output 'hop'
+chuan-bi	Complete job	2026-11-02T10:07:03.1543864Z Cleaning up orphan processes
+chuan-bi	Complete job	2026-11-02T10:07:03.1880119Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

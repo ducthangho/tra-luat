@@ -1,0 +1,23 @@
+Không phát hiện P0–P2 mới do merge hoặc hồi quy phá kết luận lượt 6/7.
+
+- `reviewed_sha`: `06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897`
+- Tree: `7ef171a95cb5c3f6c1e6a1292ea01d0a481a1b79`
+- Đặc tả r1/generation 1 khớp hash được giao.
+- Cả 5 tệp packet giữ nguyên so với parent đã approve; diff so với parent master chỉ gồm đúng 5 tệp ấy.
+- Hai tệp test từ master không tạo tương tác mới với `packet_loop*.py`; các dependency runtime giữ nguyên.
+
+Chạy trên bản sao tạm bằng `python3 -B`, qua `chay_suite(..., chi_chay=...)`, **rc=0**:
+
+| Phép kiểm | Kết quả |
+|---|---|
+| `cong_m9_*` | 53/53 đạt |
+| `cong_c_*` | 54/54 đạt |
+| `moc_dot_bien_phai_khop_DUNG_MOT_CHO` | Đạt |
+
+Tổng **108/108**, không bỏ qua. Snapshot Git đầu/cuối không đổi; không sửa checkout hoặc gọi GitHub.
+
+Reviewer: `openai_codex / codex_cli / machine`; model/effort phục vụ chưa đo độc lập. Full suite, Windows và CI thật: `not_run`; verdict giới hạn ở review offline lượt 8.
+
+[Bằng chứng chi tiết](/tmp/review-kiem-m9-r8-hnl4q2xt/review-evidence.json).
+
+KET_LUAN: approve

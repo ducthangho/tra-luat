@@ -1,0 +1,111 @@
+# HO SO LAND — packet #1120 KIEM-MERGE-M9 r1 (kiem-merge K7 doi full_mutant_audit, ADR-0060 M9), lease g1, code qua PR #1127.
+# Khuon: ops/land/pr1128-wp1113-land-evidence.yaml. Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7.
+#
+# TRANG THAI: merged (f2102fc3), landed TRUE. Gate hau merge do tren DUNG merge SHA bang run workflow_dispatch 41356691133 (nhanh tam
+# ops/ci-f2102fc = f2102fc3, da xoa sau khi do), KHONG phai push master: run push 41336643336 bi cancelled 0 job o CA attempt 1 lan 2
+# (concurrency master thay cho luot pending — Issue #1132, da va qua PR #1141). Chu kho chon cach do nay (AskUserQuestion, 2026-11-01).
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nghia nhu khuon.
+# Readback tho: ops/land/pr1127-wp1120-provenance/ (SHA256SUMS kem). Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-11-02.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrYGXxgQmPpt72URCK1
+input_packet_generations:
+  - {packet_issue: 1120, packet_id: KIEM-MERGE-M9, revision: 1, generation: 1, lease_id: kiem-merge-m9-r1-g1-claude-remote-20261101}
+authorized_head_sha: 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1127
+authorization_ghi_chu: >-
+  ADR-0060 M7: mot lan duyet = chu kho tu merge PR #1127 (merged_by ducthangho, 2026-11-01T18:26:35Z) sau khi executor bao
+  kiem-merge rc=0 tren 06a5a40 va bo draft. Khong co comment duyet rieng tren PR. Nang tran 300 -> 400 dong va duyet buoc 8:
+  ghi ho tai #1120 issuecomment-6562300240. CAVEAT #566: comment dang bang token chu kho deu hien ducthangho.
+land_operator: 'measured — readback-pr-1127.json: merged true, merged_at 2026-11-01T18:26:35Z, merged_by ducthangho, merge_commit_sha f2102fc3.'
+merge_method: merge
+merge_commit: f2102fc388a884d994f7bfeb29ef6863b9972b66
+merge_commit_tree: 4c134d1b317c879f8c6c18a8510fd1c6baff86a2
+merge_commit_parents: [180039c4b791fba4c89991623151cbb7378fce53, 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897]
+pre_merge_checks:
+  - {name: 'ci.yml pull_request (ubuntu) tren head cuoi', run_id: 41331816683, sha: 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897, conclusion: success, nguon: kiem-merge/wr.json, ghi_chu: 'measured — kiem-merge/wr.json + kiem-merge/wj.json + kiem-merge/cr.json; kiem-merge K2 dat.'}
+  - {name: 'Codex connector', sha: 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897, conclusion: 'sach', nguon: kiem-merge/cn.json, ghi_chu: 'measured — kiem-merge/cn.json: issue comment "Reviewed commit: 06a5a40735", 0 review, 0 review comment; luot tu chay khi bo draft cung has_any_findings false (loi_khai_co_neo, comment tom tat 6561319073).'}
+  - {name: 'review offline Codex (ADR-0060 M12) luot 8/10', sha: 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897, conclusion: approve, nguon: 'review-offline/run/run-r8.json + review-offline/run/stdout-r8.log', ghi_chu: 'measured — review-offline/run/run-r8.json head 06a5a40, trang_thai xong, ma_thoat 0; dong cuoi stdout KET_LUAN: approve. Pham vi luot 8: commit merge origin/master; luot 7 approve 5f62761 (5 tep packet trung byte).'}
+  - {name: 'Windows A8 (tra-luat-win, local)', sha: 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897, conclusion: '107/107 passed, 0 skipped', nguon: kiem-merge/win.json, ghi_chu: 'measured — kiem-merge/win.json (ban gon {sha, os, tests}); ban day du nam o C:\tl-win tren may tra-luat-win; kiem-merge K6 dat.'}
+  - {name: 'A9 ci-dot-bien-du.yml workflow_dispatch', run_id: 41331813517, sha: 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897, conclusion: success, nguon: 'kiem-merge/ddr.json + kiem-merge/ddj.json', ghi_chu: 'measured — kiem-merge/ddr.json run 41331813517 completed success + kiem-merge/ddj.json 10/10 job success; kiem-merge K7 dat (canary du lieu that cua K7).'}
+  - {name: 'kiem-merge K0-K7', sha: 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897, conclusion: 'rc=0', nguon: 'kiem-merge/lenh.sh + kiem-merge/output-rc0.txt', ghi_chu: 'measured — chay lai 2026-11-02 tren dung readback trong thu muc nay: rc=0; ve am (bo --dot-bien-du-*) rc=12 thieu K7 (kiem-merge/output-am-bo-dot-bien-du.txt).'}
+post_merge_checks:
+  - name: 'ci.yml workflow_dispatch tren nhanh tam = DUNG merge SHA (runner_set windows-and-ubuntu)'
+    run_id: 41356691133
+    run_attempt: 1
+    sha: f2102fc388a884d994f7bfeb29ef6863b9972b66
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, ci/kiem-gate-output.txt]
+    moc_run: 'measured — ci/provenance.yaml moc.run: event workflow_dispatch, head_sha f2102fc3, run_attempt 1, path .github/workflows/ci.yml, passed; 37 job success.'
+    moc_checkout: 'measured — ci/provenance.yaml moc.checkout: 36/36 job co buoc checkout passed f2102fc3, tree 4c134d1b; chuan-bi not_measured theo thiet ke (khong checkout).'
+    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition: passed (wd-run 41368107476, artifact 13108295728), blob 82d9f239ff31, sha256 ce9a3ec0f777; git rev-parse f2102fc:.github/workflows/ci.yml cho cung blob.'
+    moc_gate_output: 'measured — ci/kiem-gate-output.txt: packet_loop.py kiem-gate rc=0, 37/37 ten bat buoc xanh trong suite 112082061848 (ci/check-runs-f2102fc-filter-all.json).'
+    ghi_chu: >-
+      Vi sao dispatch: run push master 41336643336 (f2102fc3) cancelled 0 job o attempt 1 (thay cho boi de06112) va attempt 2
+      (thay cho boi b01c0ac) — ci/readback-run-41336643336-push-cancelled.json; dung Issue #1132. Nhanh tam ops/ci-f2102fc co
+      concurrency group rieng; da xoa qua ops-don-ref.yml (thu kho 41369710548, xoa that 41369759292, do lai: ref khong con).
+bookkeeping:
+  - {item: 'rut han lease kiem-merge-m9-r1-g1', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'ban ghi M8', ket_qua: 'measured — m8/bien-ban-m8.yaml (sha256 050ca222...); dang len #1120 issuecomment-6566496567, doc lai khoi YAML cung sha256; kiem-dong-wp rc=0 luc 2026-11-02T00:54Z.'}
+  - {item: 'dong Issue #1120', ket_qua: 'loi_khai_co_neo — dong completed 2026-11-02.'}
+  - {item: 'PR ghi so (lan luu tru)', nhanh: claude/ghi-so-land-1120, ghi_chu: 'chi cham ops/land/**.'}
+  - {item: 'no tach', ket_qua: 'concurrency master: Issue #1132 (va qua PR #1141, ghi so PR #1148); commit master chua gate: b01c0ac, 2609cd8 (#1132); de06112 da gate lai 41336765681 attempt 2 success.'}
+# ---- het truong chuan
+packet_id: KIEM-MERGE-M9
+packet_issue: 1120
+generation: 1
+pham_vi_land: code
+environment: cloud
+operating_system: linux
+recorded_by: 'claude-session session_015GtxrYGXxgQmPpt72URCK1 — CUNG la phien executor cua packet.'
+
+spec:
+  path: ops/specs/KIEM-MERGE-M9-r1.md
+  sha256: d18820c854af40a4e0d6ca58f6b8812296a3057b0e7b063f704f5a4cdd7ca442
+  nguon: 'loi_khai_co_neo — chep nguyen byte vao commit dau cua nhanh thuc thi (099a7b3); kiem-merge K1 doc blob tai head va so spec_hash cua lease.'
+
+lease:
+  lease_id: kiem-merge-m9-r1-g1-claude-remote-20261101
+  path: ops/leases/kiem-merge-m9-r1-g1-claude-remote-20261101.yaml (nhanh ops/kiem-merge-m9-r1-lease)
+  thay_the_cho: 'khong — lease dau tien cua packet.'
+  write_set_so_tep: 5
+  thu_hoi_cuoi: 'DA NHA bang RUT HAN sau merge: lease_until ve 2026-11-02T00:53:48Z (khoi rut_han, commit 1061502 tren ops/kiem-merge-m9-r1-lease); ops-publish-lease run 41368279484 success; khong bia mo vi khong co lease ke nhiem.'
+  diff_do: 'measured — merge-va-diff.txt: git diff --numstat c82047d 06a5a40 = dung 5 tep write set, 318 dong them; tran 400 sau nang_tran cua chu kho (ban dau 300).'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-1127.json merged true; merge-va-diff.txt cha 180039c4 + 06a5a407, tree 4c134d1b.'
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA f2102fc3: DAT, du bon moc (post_merge_checks muc 1; dispatch thay push vi #1132);
+    (2) lease nha: rut han g1; (3) bookkeeping: ho so nay + ban ghi M8 tren Issue #1120 (kiem-dong-wp rc=0) + dong Issue;
+    (4) review neo DUNG authorized_head 06a5a40: luot 8 approve, connector sach; (5) uy quyen land: chu kho tu merge (M7);
+    (6) muc tieu packet: A1-A9 dat (m8/bien-ban-m8.yaml nghiem_thu); (7) §8.1: xem assurance_81 (sandbox luot 8 KHONG_DO_DUOC).
+
+assurance_81:
+  reviewer_assurance_81: 'DAT mot phan — model va effort DO_DUOC ca 8 luot; sandbox DO_DUOC o luot 1, 3, 7, KHONG_DO_DUOC o luot 2, 4, 5, 6, 8.'
+  review_exact_sha: 'DAT — luot 8 head 06a5a407 = authorized_head_sha, ma_thoat 0, KET_LUAN approve.'
+  thuc_thi:
+    model: 'measured — review-offline/run/run-r8.json model_phuc_vu_trang_thai DO_DUOC, gpt-6.1-sol.'
+    effort: 'measured — review-offline/run/run-r8.json effort_phuc_vu [xhigh] DO_DUOC.'
+    sandbox_mode: 'not_measured — review-offline/run/run-r8.json sandbox_trang_thai KHONG_DO_DUOC, ly do "luong lay mau sandbox hong (DanhTinhDoi)"; sandbox_quan_sat van co mau codex-linux-sandbox, file_system restricted, workspace write. Luot 7 (5f62761, cung 5 tep packet) DO_DUOC.'
+
+review:
+  so_loi_goi_codex_cli: 8
+  tran: '10 theo dong khai ADR-0055@d2e3052 cua spec.'
+  ket_qua_theo_luot: 'P0/P1/P2/P3 — r1 268c665 0/3/6/0 · r2 91d4653 0/0/7/0 · r3 18af003 0/1/8/0 · r4 856f3d3 0/1/3/1 · r5 d6a7404 0/0/8/0 · r6 6c965dc approve · r7 5f62761 approve · r8 06a5a40 approve.'
+  hien_vat: 'review-offline/run/run-r{1..8}.json + stdout-r{1..8}.log = byte launcher ghi; review-offline/prompt/prompt-r{1..8}.md = prompt tung luot (sha256 khop truong prompt_sha256 trong run.json, 8/8).'
+  xu_ly_finding: 'P1 that da va: trang jobs gop sai (F01), join bool/float (F02), dong mien bi chuan hoa hai lan (F03 strip, F03 splitlines), comment nguoi khac phu quyet run xanh (F25). Moi P2/P3 la khoang trong kiem thu, dong bang ca + dot bien (48 dot bien m9_*).'
+  hoi_quy_tu_gay: 'moc dot bien bien_nhan_bo_nhanh_valueerror khop 2 cho do ban va F25 — full suite bat (1082/1083 tren d6a7404), va o 5f62761.'
+
+khong_do_duoc:
+  - 'Push master tai merge SHA: KHONG CO — run 41336643336 cancelled 0 job ca hai attempt (#1132); thay bang dispatch cung SHA.'
+  - 'Sandbox cua luot review offline 8: KHONG_DO_DUOC (xem assurance_81).'
+  - 'Ban day du JSON A8 nam tren may tra-luat-win (C:\tl-win), khong chep vao kho; ban gon kiem-merge/win.json la dau vao cua kiem-merge K6.'

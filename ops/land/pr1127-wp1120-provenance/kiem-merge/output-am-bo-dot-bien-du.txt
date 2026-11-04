@@ -1,0 +1,3 @@
+  THIẾU  K7 full_mutant_audit: diff chạm vùng M9 mà thiếu --dot-bien-du-runs/--dot-bien-du-jobs và dòng miễn `full_mutant_audit: H mien` của chủ kho
+CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu K7 full_mutant_audit
+rc=12

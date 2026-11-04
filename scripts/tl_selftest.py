@@ -5957,12 +5957,20 @@ def run() -> int:
                              "register", "drive-push", "nlm-reconcile", "push-overflow",
                              "shared-source-fix", "source-update-corpus",
                              "profile-rebuild-registry", "ingest-missing", "manifest",
-                             "dedup-corpus"}
+                             "dedup-corpus", "agent-creds-restore"}
                   and all(_reg65.COMMAND_META[n]["idempotency_contract"] in _w65._IDEMPOTENCY_CONTRACTS for n in _six65)))
     # drift-lock: KHÔNG còn lệnh ghi high-risk nào thiếu contract (lệnh MỚI quên contract → set ≠ rỗng → fail)
     _adv65 = {n for n, m in _reg65.COMMAND_META.items()
               if m["risk"] == "high" and not m["read_only"] and not m["idempotency_contract"] and n not in _six65}
     cases.append(("r65_grandfather_advisory_exact_set", _adv65 == set()))
+    _restore65 = _reg65.COMMAND_META["agent-creds-restore"]
+    cases.append(("r65_wp1170_restore_contract_and_safety",
+                  _restore65["risk"] == "high" and not _restore65["read_only"]
+                  and _restore65["requires_confirm"] and _restore65["supports_dry_run"]
+                  and _restore65["idempotency_contract"] == "agent_creds_restore"
+                  and set(_w65._IDEMPOTENCY_CONTRACTS["agent_creds_restore"]) == {
+                      "schema", "idempotency_key", "journal_key", "resume_behavior", "duplicate_guard",
+                      "readback_command", "resume_command", "rollback_hint"}))
     # siết-6 (v1.34.1): 6 contract mới đúng key meta ↔ _IDEMPOTENCY_CONTRACTS và ĐỦ 8 field chuẩn v1
     _new68 = {"register": "register", "push-overflow": "push_overflow", "nlm-reconcile": "nlm_reconcile",
               "drive-push": "drive_push", "shared-source-fix": "shared_source_fix",

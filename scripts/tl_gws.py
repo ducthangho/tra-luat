@@ -1116,6 +1116,302 @@ def _codex_auth_path() -> str:
     return os.path.join(os.environ.get("CODEX_HOME") or os.path.expanduser("~/.codex"), "auth.json")
 
 
+def _codex_restore_payload(blob: bytes, master: str) -> bytes:
+    """WP1170: decrypt in memory; select only Codex, never report untrusted values."""
+    import gws_cred_store
+    def unique(pairs):
+        d = {}
+        for k, v in pairs:
+            if k in d:
+                raise ValueError("duplicate key")
+            d[k] = v
+        return d
+    p = json.loads(gws_cred_store.decrypt(blob, master).decode("utf-8"), object_pairs_hook=unique)
+    if not isinstance(p, dict) or type(p.get("schema")) is not int or p["schema"] != 1:
+        raise ValueError("schema")
+    auth = p.get("codex_auth")
+    if not isinstance(auth, dict) or not isinstance(auth.get("tokens"), dict) or not auth["tokens"]:
+        raise ValueError("codex auth")
+    if any(not isinstance(auth["tokens"].get(k), str) or not auth["tokens"][k].strip()
+           for k in ("access_token", "refresh_token", "id_token")):
+        raise ValueError("codex tokens")
+    return (json.dumps(auth, ensure_ascii=False, allow_nan=False) + "\n").encode("utf-8")
+
+
+def _codex_restore_home(raw: str) -> Path:
+    """Reject Win32 aliases BEFORE normalization (UNC/device/ADS/relative/dot paths)."""
+    from pathlib import PureWindowsPath
+    p = PureWindowsPath(raw)
+    if (not re.match(r"^[A-Za-z]:[\\/]", raw) or not p.is_absolute()
+            or raw.startswith(("\\\\", "//")) or len(raw) > 220):
+        raise ValueError("local absolute path required")
+    parts = re.split(r"[\\/]", raw[3:])
+    for part in parts:
+        if (not part or part in (".", "..") or part[-1:] in (".", " ")
+                or re.search(r'[<>:"|?*\x00-\x1f]', part)
+                or PureWindowsPath(part).is_reserved()
+                or re.fullmatch(r"(?i)(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\..*)?", part)):
+            raise ValueError("unsafe path component")
+    return Path(str(p))
+
+
+class _CodexRestoreWindows:
+    """WP1170 native NTFS writer. Pins ancestors without write/delete sharing.
+
+    New objects get a protected owner-only DACL at creation, before any secret is
+    written. Existing home must already satisfy that policy; never repair its ACL.
+    Threat boundary: other users/reparse races, not a malicious process of this SID
+    or an administrator who can take ownership. No chmod/replace/bootstrap fallback.
+    """
+    def __init__(self):
+        if os.name != "nt" or sys.version_info < (3, 11):
+            raise OSError("Windows Python 3.11+ required")
+        import ctypes as c
+        from ctypes import wintypes as w
+        self.c, self.w = c, w
+        self.k = c.WinDLL("kernel32", use_last_error=True)
+        self.a = c.WinDLL("advapi32", use_last_error=True)
+        self.nt = c.WinDLL("ntdll")
+        self.handles = []
+        self.sd = c.c_void_p()
+        self.sid = None
+        def api(lib, name, result, args):
+            f = getattr(lib, name); f.restype = result; f.argtypes = args
+            return f
+        P = c.c_void_p; D = w.DWORD; H = w.HANDLE; B = w.BOOL; S = w.LPCWSTR
+        self.open = api(self.k, "CreateFileW", H, [S, D, D, P, D, D, H])
+        self.close = api(self.k, "CloseHandle", B, [H])
+        self.local_free = api(self.k, "LocalFree", P, [P])
+        self.mkdir = api(self.k, "CreateDirectoryW", B, [S, P])
+        self.info = api(self.k, "GetFileInformationByHandle", B, [H, P])
+        self.volume = api(self.k, "GetVolumeInformationW", B, [S, P, D, P, P, P, P, D])
+        self.drive_type = api(self.k, "GetDriveTypeW", w.UINT, [S])
+        self.device = api(self.k, "QueryDosDeviceW", D, [S, P, D])
+        self.write = api(self.k, "WriteFile", B, [H, P, D, P, P])
+        self.read = api(self.k, "ReadFile", B, [H, P, D, P, P])
+        self.seek = api(self.k, "SetFilePointerEx", B, [H, c.c_longlong, P, D])
+        self.flush = api(self.k, "FlushFileBuffers", B, [H])
+        self.set_info = api(self.k, "SetFileInformationByHandle", B, [H, c.c_int, P, D])
+        self.link_info = api(self.nt, "NtSetInformationFile", c.c_long, [H, P, P, D, c.c_int])
+        self.nt_error = api(self.nt, "RtlNtStatusToDosError", D, [c.c_long])
+        self.get_security = api(self.a, "GetSecurityInfo", D, [H, c.c_int, D, P, P, P, P, P])
+        self.control = api(self.a, "GetSecurityDescriptorControl", B, [P, P, P])
+        self.get_ace = api(self.a, "GetAce", B, [P, D, P])
+        self.equal_sid = api(self.a, "EqualSid", B, [P, P])
+        self.sid_text = api(self.a, "ConvertSidToStringSidW", B, [P, P])
+        self.from_sddl = api(self.a, "ConvertStringSecurityDescriptorToSecurityDescriptorW", B, [S, D, P, P])
+        self.access_check = api(self.a, "AccessCheck", B, [P, H, D, P, P, P, P, P])
+        duplicate = api(self.a, "DuplicateToken", B, [H, c.c_int, P])
+        get_process = api(self.k, "GetCurrentProcess", H, [])
+        open_token = api(self.a, "OpenProcessToken", B, [H, D, P])
+        token_info = api(self.a, "GetTokenInformation", B, [H, c.c_int, P, D, P])
+        token = H()
+        self.check(open_token(get_process(), 10, c.byref(token)))
+        try:
+            impersonation = H()
+            self.check(duplicate(token, 2, c.byref(impersonation)))
+            self.handles.append(impersonation)
+            needed = D()
+            token_info(token, 1, None, 0, c.byref(needed))
+            self.token_user = c.create_string_buffer(needed.value)
+            self.check(token_info(token, 1, self.token_user, needed, c.byref(needed)))
+            self.sid = c.cast(self.token_user, c.POINTER(P))[0]
+            s = w.LPWSTR()
+            self.check(self.sid_text(self.sid, c.byref(s)))
+            try:
+                sddl = f"O:{s.value}D:P(A;OICI;FA;;;{s.value})"
+                self.check(self.from_sddl(sddl, 1, c.byref(self.sd), None))
+            finally:
+                self.local_free(s)
+        except BaseException:
+            self.__exit__()
+            raise
+        finally:
+            self.close(token)
+        class SA(c.Structure):
+            _fields_ = [("length", D), ("descriptor", P), ("inherit", B)]
+        self.sa = SA(c.sizeof(SA), self.sd, False)
+
+    def check(self, ok):
+        if not ok:
+            raise self.c.WinError(self.c.get_last_error())
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        for h in reversed(self.handles):
+            self.close(h)
+        if self.sd:
+            self.local_free(self.sd)
+
+    def directory(self, path, *, private_home=False):
+        # LIST_DIRECTORY is intentional: metadata-only handles do not fence all
+        # NTFS rename/share checks. Ancestors deny write/delete sharing. The
+        # private home allows write sharing for NTFS's destination-directory
+        # open during link publication; its checked owner-only DACL excludes other SIDs.
+        h = self.open(str(path), 0x20081, 3 if private_home else 1, None, 3, 0x02200000, None)
+        if h == self.c.c_void_p(-1).value:
+            raise self.c.WinError(self.c.get_last_error())
+        self.handles.append(h)
+        info = self.c.create_string_buffer(52)
+        self.check(self.info(h, info))
+        attrs = self.w.DWORD.from_buffer(info).value
+        if attrs & 0x400 or not attrs & 0x10:
+            raise ValueError("reparse or non-directory")
+        return h
+
+    def private(self, handle):
+        """Inspect actual owner/DACL from the kernel handle, not an icacls exit code."""
+        c, w = self.c, self.w
+        owner, acl, sd = c.c_void_p(), c.c_void_p(), c.c_void_p()
+        # AccessCheck requires both owner AND primary group in the returned SD.
+        rc = self.get_security(handle, 1, 7, c.byref(owner), None, c.byref(acl), None, c.byref(sd))
+        if rc:
+            raise OSError(rc, "security unavailable")
+        try:
+            ctrl, rev = w.WORD(), w.DWORD()
+            self.check(self.control(sd, c.byref(ctrl), c.byref(rev)))
+            if not ctrl.value & 0x1000 or not acl or not self.equal_sid(owner, self.sid):
+                raise ValueError("unprotected DACL or wrong owner")
+            # ACL header: BYTE revision, BYTE spare, WORD size, WORD aceCount.
+            if c.cast(acl, c.POINTER(w.WORD))[2] != 1:
+                raise ValueError("DACL must contain only owner allow ACE")
+            ace = c.c_void_p()
+            self.check(self.get_ace(acl, 0, c.byref(ace)))
+            kind = c.cast(ace, c.POINTER(c.c_ubyte))[0]
+            flags = c.cast(ace, c.POINTER(c.c_ubyte))[1]
+            mask = w.DWORD.from_address(ace.value + 4).value
+            if kind != 0 or flags & 0x18 or mask != 0x1f01ff or not self.equal_sid(ace.value + 8, self.sid):
+                raise ValueError("unexpected ACE")
+            class Mapping(c.Structure):
+                _fields_ = [("read", w.DWORD), ("write", w.DWORD),
+                            ("execute", w.DWORD), ("all", w.DWORD)]
+            mapping = Mapping(0x120089, 0x120116, 0x1200a0, 0x1f01ff)
+            privileges = c.create_string_buffer(1024)
+            size, granted, allowed = w.DWORD(1024), w.DWORD(), w.BOOL()
+            self.check(self.access_check(sd, self.handles[0], 0x1f01ff, c.byref(mapping),
+                                        privileges, c.byref(size), c.byref(granted), c.byref(allowed)))
+            if not allowed.value or granted.value != 0x1f01ff:
+                raise ValueError("effective access denied")
+        finally:
+            self.local_free(sd)
+
+    def prepare(self, home, apply):
+        c = self.c
+        root = str(home.anchor)
+        device = c.create_unicode_buffer(1024)
+        self.check(self.device(home.drive, device, len(device)))
+        if not re.fullmatch(r"\\Device\\HarddiskVolume[0-9]+", device.value):
+            raise ValueError("drive alias or unsupported device")
+        fs = c.create_unicode_buffer(32)
+        if self.drive_type(root) != 3:
+            raise ValueError("fixed local drive required")
+        self.check(self.volume(root, None, 0, None, None, None, fs, len(fs)))
+        if fs.value != "NTFS":
+            raise ValueError("NTFS required")
+        parents = list(reversed(home.parents))
+        for parent in parents:
+            self.directory(parent)
+        try:
+            h = self.directory(home, private_home=True)
+        except OSError as e:
+            if e.winerror != 2:
+                raise
+            if not apply:
+                return False
+            self.check(self.mkdir(str(home), c.byref(self.sa)))
+            h = self.directory(home, private_home=True)
+        # Existing auth is a no-op WITHOUT opening/reading it, even if it is a link.
+        if os.path.lexists(home / "auth.json"):
+            return True
+        self.private(h)
+        return False
+
+    def publish(self, home, data):
+        """Kernel-owned staging lifetime + no-replace hard-link publication.
+
+        FILE_FLAG_DELETE_ON_CLOSE stays armed from creation through final close,
+        including TerminateProcess. Publish a separate auth.json link to the same
+        verified object BY HANDLE; closing removes only the temporary link. Never
+        clear cleanup, rename the delete-on-close link, or reopen staging by path.
+        """
+        import secrets
+        c, w = self.c, self.w
+        directory = self.directory(home, private_home=True)
+        self.private(directory)
+        tmp = home / (".codex-restore-" + secrets.token_hex(16) + ".tmp")
+        h = self.open(str(tmp), 0xC0010000 | 0x20000, 0, c.byref(self.sa), 1, 0x04200000, None)
+        if h == c.c_void_p(-1).value:
+            raise c.WinError(c.get_last_error())
+        try:
+            self.private(h)
+            n = w.DWORD()
+            self.check(self.write(h, data, len(data), c.byref(n), None))
+            if n.value != len(data):
+                raise OSError("short write")
+            self.check(self.flush(h))
+            self.check(self.seek(h, 0, None, 0))
+            readback = c.create_string_buffer(len(data) + 1)
+            self.check(self.read(h, readback, len(data) + 1, c.byref(n), None))
+            if n.value != len(data) or readback.raw[:n.value] != data:
+                raise OSError("readback mismatch")
+            # Native FileLinkInformation (11), not a Win32 information-class ID.
+            # Root is the checked/pinned home handle; the only name is auth.json.
+            # https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_file_link_information
+            name = "auth.json".encode("utf-16-le")
+            class Link(c.Structure):
+                _fields_ = [("replace", c.c_ubyte), ("root", w.HANDLE),
+                            ("length", w.DWORD), ("name", w.WCHAR * (len(name) // 2 + 1))]
+            class IOStatus(c.Structure):
+                _fields_ = [("status", c.c_void_p), ("information", c.c_size_t)]
+            info = Link(False, directory, len(name), "auth.json")
+            status = IOStatus()
+            rc = self.link_info(h, c.byref(status), c.byref(info), c.sizeof(info), 11)
+            if rc < 0:
+                raise c.WinError(self.nt_error(rc))
+        finally:
+            self.close(h)
+
+
+def cmd_agent_creds_restore(a) -> int:
+    """WP1170: dedicated Codex-only path. No config, bootstrap or other auth loader."""
+    tag = "agent-creds-restore"
+    if not getattr(a, "codex", False) or (getattr(a, "apply", False) and getattr(a, "confirm", None) != "yes"):
+        print(f"[{tag}] requires --codex; apply requires --confirm yes", file=sys.stderr)
+        return 2
+    try:
+        home = _codex_restore_home(os.environ.get("CODEX_HOME") or os.path.expanduser("~/.codex"))
+        with _CodexRestoreWindows() as fs:
+            if fs.prepare(home, False):
+                print(f"[{tag}] exists; unchanged")
+                return 0
+            master = _master_key()
+            if not master:
+                raise ValueError("missing master")
+            source = getattr(a, "bundle_file", None)
+            if source:
+                with open(source, "rb") as f:
+                    blob = f.read(4 * 1024 * 1024 + 1)
+            else:
+                blob = _public_curl_bytes(os.environ.get("TL_AGENT_CREDS_FILEID") or AGENT_CREDS_FILEID)
+            if not isinstance(blob, bytes) or len(blob) > 4 * 1024 * 1024:
+                raise ValueError("bundle unavailable")
+            data = _codex_restore_payload(blob, master)
+            if not getattr(a, "apply", False):
+                print(f"[{tag}] dry-run; Codex payload valid; no writes")
+                return 0
+            if fs.prepare(home, True):
+                print(f"[{tag}] exists; unchanged")
+                return 0
+            fs.publish(home, data)
+        print(f"[{tag}] created; protected owner-only DACL; no replacement")
+        return 0
+    except Exception:  # NEVER print exception text, paths, key, plaintext or bundle content.
+        print(f"[{tag}] refused; Windows NTFS/path/DACL/bundle requirements not met", file=sys.stderr)
+        return 4
+
+
 def _last_refresh_key(d):
     """`last_refresh` ISO-8601 → (giây epoch, nano) — so được chuỗi có số chữ số phần giây khác nhau (container đo
     9 chữ số). Thiếu/không đọc được ⇒ (-inf, 0): CŨ HƠN mọi bản có (spec mục chua_do_duoc)."""

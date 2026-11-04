@@ -1950,6 +1950,8 @@ COMMAND_META = {
     # WP1038: không ghi Drive nhưng chạy một tiến trình tuỳ ý mang credential ⇒ read_only=False, phạm vi local
     "agent-creds-exec":      dict(_m("medium", False, "local", False, False, False, None, None, False, "gws"),
                                   builtin_gate="secrets_master_key_gate"),
+    # WP1170 r4: local Codex-only credential writer; explicit apply + confirmation.
+    "agent-creds-restore":   _m("high", False, "local", True, True, False, None, "agent_creds_restore", False, "gws"),
     "nlm-auth-stage":        dict(_m("medium", False, "drive", False, False, False, None, None, False, "gws"),
                                   builtin_gate="nlm_auth_stage_gate"),
     "nlm-auth-load":         _m("low", False, "local", False, False, False, None, None, False, "gws"),
@@ -2016,6 +2018,7 @@ def registry_summary() -> dict:
 
 # v1.34.1: siết TOÀN BỘ lệnh ghi high-risk legacy — hết grandfather (deadline r65 'trước v1.34.1' đúng hạn).
 _CONTRACT_REQUIRED = {"ingest", "nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan",
+                      "agent-creds-restore",  # WP1170: local credential writes require a real contract
                       "profile-rebuild-registry", "ingest-missing", "manifest",   # Pha-E-hoàn-thiện v1.34.16
                       "register", "drive-push", "nlm-reconcile", "push-overflow",
                       "shared-source-fix", "source-update-corpus",

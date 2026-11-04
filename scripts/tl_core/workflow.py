@@ -165,6 +165,16 @@ _TASK_TO_WORKFLOW = {
 
 
 _IDEMPOTENCY_CONTRACTS = {
+    "agent_creds_restore": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "validated CODEX_HOME/auth.json destination (create-if-absent, independent of bundle age)",
+        "journal_key": "no plaintext journal or backup; kernel DELETE_ON_CLOSE owns staging lifetime",
+        "resume_behavior": "rerun same command; existing auth is an unchanged no-op without opening it; pre-publication failure leaves no staging",
+        "duplicate_guard": "Windows CREATE_NEW staging + handle-relative FileLinkInformation ReplaceIfExists=FALSE; concurrent destination wins without replacement",
+        "readback_command": "same command without --apply reports exists; publication verifies bytes and owner-only DACL by handle before linking (not a login-status claim)",
+        "resume_command": "agent-creds-restore --codex --apply --confirm yes (same CODEX_HOME and fake or authorized bundle)",
+        "rollback_hint": "no automatic rollback or auth deletion; before publish DELETE_ON_CLOSE removes staging, after publish only complete new auth remains; never overwrite/backup existing auth",
+    },
     # ── Pha-E-hoàn-thiện (v1.34.16): 3 lệnh NGUY HIỂM — contract THẬT phản ánh gate/journal có sẵn, KHÔNG đổi CLI ──
     "profile_rebuild_registry": {
         "schema": "idempotency_contract.v1",

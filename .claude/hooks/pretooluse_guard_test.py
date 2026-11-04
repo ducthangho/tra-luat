@@ -927,7 +927,19 @@ def t52_ten_lenh_tl_phai_KHOP_danh_sach_DOC(g):
     return (not xau, "danh sach lenh DOC -> dung %d/%d" % (tong - len(xau), tong) + ("; %s" % xau if xau else ""))
 
 
-CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
+def t53_wp1170_restore_writer_never_read_only(g):
+    bad = []
+    for agent in AGENT:
+        for path in ("scripts/tl.py", "./scripts/tl.py", "scripts\\tl.py", ".\\scripts\\tl.py"):
+            for args in ("--codex", "--codex --apply --confirm yes", "--codex --bundle-file fake.enc"):
+                cmd = 'python "%s" agent-creds-restore %s' % (path, args)
+                if hoi(g, cmd, agent)[0] != "deny":
+                    bad.append(cmd)
+    return not bad, "WP1170 restore denied for both read-only agents: %s" % bad
+
+
+CA = [t53_wp1170_restore_writer_never_read_only,
+      t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
       t3_khong_chan_oan_lenh_doc, t4_phien_chinh_khop_packet_base,
       t5_doi_chung_van_ask, t6_agent_la_khong_bi_ap_luat,
       t7_nhom_mutate_tra_luat_bi_chan, t8_ghi_giau_qua_tach_lenh_va_thay_the,
@@ -968,6 +980,8 @@ CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
 DOT_BIEN = [
+    ("m_wp1170_remove_restore_writer", '    "agent-creds-restore",  # WP1170:',
+     '    # WP1170:'),
     # m1/m5 phai noi CA HAI bang. Noi mot bang thi bang KIA van chan, va dot bien don le
     # SONG — do duoc: `_kiem_co` fail-close voi chuong trinh khong co trong `_CO_CHO_PHEP`,
     # nen them `sed` vao danh sach chuong trinh KHONG du de mo duong. Do la phong thu nhieu

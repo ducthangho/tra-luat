@@ -36,6 +36,7 @@ MOI_TRUONG_DA_BIET = frozenset({MOI_TRUONG_CI, MOI_TRUONG_WINDOWS})
 LAUNCHER_WORKFLOW = ROOT / ".github/workflows/launcher-windows.yml"
 CI_WORKFLOW = ROOT / ".github/workflows/ci.yml"
 MOI = {
+    "ops/agent_creds_windows_test.py": r"(?m)^WP1170 LOGIC: ([1-9]\d*)/\1; ok=True$",
     ".claude/dev/doc_receipt_thu_hoi_test.py": r'^doc_receipt_thu_hoi tests: ([1-9]\d*)/(\1) ca QUA · ([1-9]\d*)/(\3) dot bien GIET$',
     ".claude/dev/chon_reviewer_test.py": r"(?s)nền: (\d+)/(\d+) đạt.*TỔNG: ĐẠT",
     ".claude/dev/gh_readback_test.py": r"gh_readback tests: (\d+)/(\d+) ca QUA \(hong 0\)",
@@ -65,6 +66,7 @@ MOI = {
 # `DOT BIEN 0/0 bi giet`). Dat o DAY chu khong o `MOI` vi dot bien ay bieu hien tren
 # WINDOWS; siet `MOI` se doi hanh vi Linux, trai M4 (finding P2 cross-review luot 1).
 MOI_WINDOWS = {
+    "ops/agent_creds_windows_test.py": (r"(?m)^WP1170 WINDOWS_NTFS: ([1-9]\d*)/\1; ok=True$",),
     ".claude/hooks/pretooluse_guard_test.py": (
         r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN [1-9]\d* muc KHONG DO TREN WINDOWS"
         r".*TONG: DAT",
@@ -1082,6 +1084,13 @@ def _chay_co_lap(argv, cwd=ROOT, goc_tam=None, gioi_han=GIAY_TOI_DA_MOT_BO, env_
 
 
 def _chay_that(path, goc_tam=None, che_do=DAY_DU):
+    if path == "ops/agent_creds_windows_test.py":
+        # Dedicated fake home outside checkout; native Windows must run NTFS tests.
+        with tempfile.TemporaryDirectory(prefix="wp1170-ci-", dir=goc_tam) as scratch:
+            argv = [sys.executable, path, "--scratch", scratch]
+            if os.name != "nt":
+                argv.append("--logic-only")
+            return _chay_co_lap(argv, goc_tam=goc_tam, env_doi=env_theo_che_do(path, che_do))
     return _chay_co_lap([sys.executable, path], goc_tam=goc_tam, env_doi=env_theo_che_do(path, che_do))
 
 
@@ -1328,6 +1337,15 @@ def phan_chung():
         if any(t == ten for t, _ in KQ):
             raise AssertionError(f"trung ten ca phan chung: {ten}")
         KQ.append((ten, bool(ok)))
+    _p1170 = "ops/agent_creds_windows_test.py"
+    _them("wp1170-logic-positive", bang_chung_xanh("WP1170 LOGIC: 6/6; ok=True\n", MOI[_p1170]))
+    _them("wp1170-reject-empty-partial-false-and-wrong-platform",
+          all(not bang_chung_xanh(s, MOI[_p1170]) for s in (
+              "", "WP1170 LOGIC: 0/0; ok=True\n", "WP1170 LOGIC: 5/6; ok=True\n",
+              "WP1170 LOGIC: 6/6; ok=False\n", "WP1170 WINDOWS_NTFS: 18/18; ok=True\n")))
+    _them("wp1170-ntfs-positive-and-no-logic-substitution",
+          bang_chung_xanh("WP1170 WINDOWS_NTFS: 18/18; ok=True\n", MOI_WINDOWS[_p1170][0])
+          and not bang_chung_xanh("WP1170 LOGIC: 6/6; ok=True\n", MOI_WINDOWS[_p1170][0]))
     with tempfile.TemporaryDirectory(prefix="ci-dang-ky-") as d:
         base = pathlib.Path(d)
         for i, kind in enumerate(("thieu", "mat_tep", "mat_loi_goi", "vi_tri_la")):

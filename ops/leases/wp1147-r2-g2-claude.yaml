@@ -87,7 +87,7 @@ attempts_basis: 'mac dinh packet moi.'
 review_rounds_limit: 2
 budget:
   codex_review_calls:
-    pr_wp1147_g1: {used: 1, reserved: 0, limit: 10}
+    pr_wp1147_g1: {used: 2, reserved: 0, limit: 10}
   attempt:
     packet_1147_r1: {used: 0, reserved: 0, limit: 2}
   khong_reset_theo_generation: true
@@ -97,3 +97,4 @@ ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp1147-g1-claude khi N1, N2, N4 dat va review approve; mo PR draft.'
 codex_da_goi:
 - {luot: 1, head: 7295d5c7171267c8abf13b711108c315fe697b73, run: be6f3bad, verdict: approve, p: '0/0/0/1', hien_vat: ops/reviews/wp1147-codex-luot1}
+- {luot: 2, head: 2344011617fa753adceef0be3306374cb3a096a1, run: 83e3a368, verdict: approve, p: '0/0/0/0', hien_vat: ops/reviews/wp1147-codex-luot2}

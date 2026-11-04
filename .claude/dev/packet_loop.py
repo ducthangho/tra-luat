@@ -3191,7 +3191,7 @@ def _adr0063_landed(root):
     """Use committed first-parent introduction, with readable complete history."""
     master = "refs/remotes/origin/master"
     rc, fp = _git_do(root, "rev-list", "--first-parent", master)
-    born_rc, born = _git_do(root, "log", "--first-parent", "--diff-filter=A", "--format=%H", master, "--", ADR0063_TEP)
+    born_rc, born = _git_do(root, "log", "--first-parent", "--diff-merges=first-parent", "--no-patch", "--no-renames", "--diff-filter=A", "--format=%H", master, "--", ADR0063_TEP)
     if rc or born_rc or _git_do(root, "rev-parse", "--is-shallow-repository") != (0, b"false\n"):
         raise ValueError("ADR0063 first-parent history không đo được")
     for oid in born.decode().split():
@@ -3224,6 +3224,18 @@ def _spec_merge(root, h, path, lease):
     spec = blob(m[1])
     visible, errors = _che_khong_render(spec.decode("utf-8"))
     if errors: raise ValueError("spec Markdown không đóng rào/comment")
+    declaration = r'''(?:- )?(?:packet_id: [^\s;'"](?:[^;\r\n]*[^\s;'"])?|revision: [1-9][0-9]*)'''
+    inline = r'''- packet_id: [^\s;'"](?:[^;\r\n]*[^\s;'"])?; revision: [1-9][0-9]*;(?: [^\r\n]*\S)?'''
+    heading = r"# [A-Za-z0-9_-]+ r[1-9][0-9]* (?:—|–|-) \S(?:.*\S)?"
+    if b"\r" in spec:
+        raise ValueError("spec identity cần LF")
+    for line in visible.split("\n"):
+        if re.match(r"(?i)\s*(?:-\s*)?(?:packet_id|revision)\s*:", line) and not (re.fullmatch(declaration, line) or re.fullmatch(inline, line)):
+            raise ValueError("spec identity declaration sai grammar")
+        if len(re.findall(r"\b(?:packet_id|revision)\s*:", line)) > 2 and re.fullmatch(inline, line):
+            raise ValueError("spec identity declaration lặp trong inline")
+        if re.match(r"(?i)\s*# .* r\S+", line) and not re.fullmatch(heading, line):
+            raise ValueError("spec identity H1 sai grammar")
     for key in ("packet_id", "revision"):
         values = re.findall(rf"(?m)^(?:- )?{key}: ([^;\n]+)", visible)
         if key == "revision":

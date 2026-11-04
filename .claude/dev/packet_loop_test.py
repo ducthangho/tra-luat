@@ -9604,7 +9604,7 @@ MUTANTS.update({
 
 
 # #1187: real Git blobs/history; independent negative cases and binding-removal mutants.
-def _r1187(c, kind="human", change=None, red=False):
+def _setup1187(c, kind, change):
     import yaml
     from argparse import Namespace
     m = importlib.util.module_from_spec(sp := importlib.util.spec_from_file_location("pl1187", c.script))
@@ -9648,16 +9648,29 @@ def _r1187(c, kind="human", change=None, red=False):
         if value is raw: value["body"] = ctx.get("body", yaml.safe_dump(audit))
         if value is tr_raw: value["body"] = yaml.safe_dump(tr)
         f = w / (attr + ".json"); f.write_text(json.dumps(value), encoding="utf-8"); setattr(a, attr, str(f))
+    return m, w, a, ls, ctx, ctx["spec"], audit
+
+
+def _r1187(c, kind="human", change=None, red=False):
+    try:
+        m, w, a, ls, ctx, spec, audit = _setup1187(c, kind, change)
+    except (Exception, SystemExit) as ex:
+        raise CliSapDo("r1187 setup crashed") from ex
+    rejection = None
     try:
         if kind in ("spec", "title", "title_conflict", "markdown", "legacy"):
             actual = m._spec_merge(w, a.head, "ops/specs/X.md", ls)
         else:
             p3 = []; m._human_merge(a, w, ls, ctx["spec"], p3)
-    except ValueError:
-        if red: return
-        raise
+    except ValueError as ex:
+        if type(ex) is not ValueError:
+            raise CliSapDo("r1187 ValueError subclass crashed") from ex
+        rejection = ex
     except (Exception, SystemExit) as ex:
         raise CliSapDo("r1187 target crashed") from ex
+    if rejection is not None:
+        if red: return
+        raise AssertionError("positive evidence rejected") from rejection
     if kind in ("spec", "title", "title_conflict", "markdown", "legacy"):
         assert actual == spec, "positive spec bytes changed"
     else:
@@ -10017,17 +10030,33 @@ MUTANTS.update({
 })
 
 # Independent advisory r2: crashes are infrastructure, never semantic kills.
-def _crash_credit1187(c):
-    def crash(x):
-        def target(*args): raise TypeError("injected target failure")
-        x["m"]._spec_merge = target
+def _crash_credit1187(c, kind="spec", error=TypeError, stage="target", red=True):
+    def fault(*args):
+        raise (UnicodeDecodeError("utf8", b"\xff", 0, 1, "injected") if error is UnicodeDecodeError else subprocess.TimeoutExpired("fixture", 1) if error is subprocess.TimeoutExpired else error("injected failure"))
+    def change(x):
+        if stage == "change": fault()
+        setattr(x["m"], "_spec_merge" if kind == "spec" else "_human_merge", fault)
     saved = globals()["CASES"]
+    loader = importlib.machinery.SourceFileLoader
+    original = loader.exec_module
     try:
-        globals()["CASES"] = [("injected-r1187", _ca1187("spec", crash))]
-        result = chay_suite(c.script, c.tmp / "crash-probe")
+        if stage == "import":
+            loader.exec_module = lambda self, module: fault() if module.__name__ == "pl1187" else original(self, module)
+        script = c.script
+        if stage == "oldguard":
+            script = c.tmp / "packet_loop.py"
+            script.write_text(c.script.read_text().replace('type(lease.get("revision")) is not int', 'False', 1), encoding="utf-8")
+            (c.tmp / "launcher.py").write_bytes((HERE / "launcher.py").read_bytes())
+            change = lambda x: x["ls"].update(revision="1")
+        globals()["CASES"] = [("injected-r1187", _ca1187(kind, change, red))]
+        try:
+            result = chay_suite(script, c.tmp / "crash-probe")
+        except SystemExit:
+            result = {"injected-r1187": "leaked SystemExit"}
     finally:
+        loader.exec_module = original
         globals()["CASES"] = saved
-    assert isinstance(result["injected-r1187"], _TinDungGia), "target crash received semantic kill credit"
+    assert isinstance(result["injected-r1187"], _TinDungGia), "failure received semantic kill credit"
 
 
 def _intro1187(x):
@@ -10107,6 +10136,79 @@ def _actual_milestone1187(c):
 
 
 CASES.append(("r1187_actual_milestone",_actual_milestone1187))
+
+# Run2: committed diagnostics exercise both consumers and each exception boundary.
+for stage in ("target", "change", "import"):
+    for kind in ("spec", "human"):
+        for error in (TypeError, KeyError, AttributeError, SystemExit, UnicodeDecodeError, subprocess.TimeoutExpired):
+            CASES.append((f"r1187_failure_{stage}_{kind}_{error.__name__}", lambda c,k=kind,e=error,s=stage: _crash_credit1187(c,k,e,s)))
+for kind in ("spec", "human"):
+    CASES.append((f"r1187_failure_positive_{kind}", lambda c,k=kind: _crash_credit1187(c,k,UnicodeDecodeError,red=False)))
+CASES.append(("r1187_failure_oldguard", lambda c: _crash_credit1187(c,stage="oldguard")))
+for branch, replacement, targets in [
+    ("target_family", '(TypeError, SystemExit)', ["r1187_failure_target_spec_KeyError", "r1187_failure_target_human_AttributeError"]),
+    ("target_exit", 'Exception', ["r1187_failure_target_spec_SystemExit", "r1187_failure_target_human_SystemExit"]),
+    ("setup_exit", 'Exception', ["r1187_failure_import_spec_SystemExit", "r1187_failure_change_human_SystemExit"]),
+]:
+    label = "setup" if branch == "setup_exit" else "target"
+    name = "r1187_failure_" + branch
+    MUTANTS[name] = (f'    except (Exception, SystemExit) as ex:\n        raise CliSapDo("r1187 {label} crashed") from ex', f'    except {replacement} as ex:\n        raise CliSapDo("r1187 {label} crashed") from ex', targets)
+    MUTANTS_NHAM_TEST = MUTANTS_NHAM_TEST | {name}
+for name, old, new, targets in [
+    ("setup", '    except (Exception, SystemExit) as ex:\n        raise CliSapDo("r1187 setup crashed") from ex', '    except (Exception, SystemExit):\n        raise', ["r1187_failure_import_spec_KeyError", "r1187_failure_change_human_AttributeError"]),
+    ("subclass", '        if type(ex) is not ValueError:', '        if False:', ["r1187_failure_positive_spec", "r1187_failure_positive_human", "r1187_failure_target_spec_UnicodeDecodeError"]),
+]:
+    key="r1187_failure_"+name; MUTANTS[key]=(old,new,targets); MUTANTS_NHAM_TEST=MUTANTS_NHAM_TEST|{key}
+
+
+def _format1187(x, text):
+    w=x["w"]; p="ops/specs/X.md"; (w/p).write_bytes(text)
+    _g(w,"add",p); _g(w,"commit","-qm","format fixture"); oid=_g(w,"rev-parse","HEAD")
+    sha=hashlib.sha256(text).hexdigest(); x["ls"].update(spec_ref="refs/heads/ops/spec@"+oid,spec_hash=sha,spec_sha256_required=sha)
+    x["a"].head=oid; x["spec"]=text
+
+
+for label, declaration in {
+    "quoted": "- packet_id: wp1187; revision: '2';", "trailing": "- packet_id: wp1187; revision: 2 ;",
+    "no_semicolon": "- packet_id: wp1187; revision: 2", "indent": "  revision: 2", "uppercase": "Revision: 2",
+    "standalone_quote": "revision: '2'", "standalone_trailing": "revision: 2 ", "repeat": "- packet_id: wp1187; revision: 1; revision: 2;",
+}.items():
+    CASES.append(("r1187_format_"+label,_ca1187("spec",lambda x,d=declaration:_format1187(x,("# wp1187 r1 - valid\n"+d+"\n").encode()))))
+CASES += [("r1187_format_crlf",_ca1187("spec",lambda x:_format1187(x,b"# wp1187 r1 - valid\r\n"))),
+          ("r1187_format_title_space",_ca1187("spec",lambda x:_format1187(x,b"# wp1187 r1 - valid \n")))]
+for label, heading in {"quote":"# 'wp1187' r1 - valid", "indent":" # wp1187 r2 - wrong", "upper":"# wp1187 R2 - wrong"}.items():
+    CASES.append(("r1187_format_heading_"+label,_ca1187("spec",lambda x,h=heading:_format1187(x,("packet_id: wp1187\nrevision: 1\n"+h+"\n").encode()))))
+MUTANTS["r1187_format_ignore_heading"] = ('if re.match(r"(?i)\\s*# .* r\\S+", line) and not re.fullmatch(heading, line):', 'if False:', ["r1187_format_heading_quote", "r1187_format_heading_indent", "r1187_format_title_space"])
+for packet in ("gói-1187", "packet with spaces"):
+    CASES.append(("r1187_format_unquoted_"+packet,_ca1187("spec",lambda x,p=packet:(_format1187(x,("packet_id: "+p+"\nrevision: 1\n").encode()),x["ls"].update(packet_id=p)),False)))
+MUTANTS["r1187_format_ignore_invalid"] = ('and not (re.fullmatch(declaration, line) or re.fullmatch(inline, line)):', 'and False:', ["r1187_format_quoted", "r1187_format_no_semicolon", "r1187_format_indent"])
+
+
+def _git_compat1187(x, rename=False):
+    w=x["w"]; p=x["m"].ADR0063_TEP
+    if rename:
+        _g(w,"checkout","-qb","rename-policy",_g(w,"rev-list","--max-parents=0","HEAD"))
+        old=w/"old-policy.md"; old.write_text("\n".join(x["m"].ADR0063_ANCHORS),encoding="utf-8")
+        _g(w,"add",old.name); _g(w,"commit","-qm","old policy path"); (w/p).parent.mkdir(parents=True,exist_ok=True)
+        _g(w,"mv",old.name,p); _g(w,"commit","-qm","rename into policy"); _g(w,"config","diff.renames","true")
+        _g(w,"update-ref","refs/remotes/origin/master",_g(w,"rev-parse","HEAD"))
+    else: _landing1187(x)
+    original=x["m"]._git_do; flag="--no-renames" if rename else "--diff-merges=first-parent"
+    def git(root,*args):
+        # Replay actual Git under the counterfactual merge/rename semantics.
+        if args[0]=="log" and flag not in args:
+            args=(args[0],*(('--find-renames','--follow') if rename else ('--no-diff-merges',)),*args[1:])
+        return original(root,*args)
+    x["m"]._git_do=git
+
+
+CASES += [("r1187_git_explicit_merge",_ca1187("spec",_git_compat1187,False)),
+          ("r1187_git_explicit_rename",_ca1187("spec",lambda x:_git_compat1187(x,True),False))]
+MUTANTS.update({
+    "r1187_git_default_merge": ('"--diff-merges=first-parent", ', '', ["r1187_git_explicit_merge"]),
+    "r1187_git_default_rename": ('"--no-renames", "--diff-filter=A"', '"--diff-filter=A"', ["r1187_git_explicit_rename"]),
+})
+
 
 def main() -> int:
     _ = [s.reconfigure(encoding="utf-8", errors="backslashreplace")

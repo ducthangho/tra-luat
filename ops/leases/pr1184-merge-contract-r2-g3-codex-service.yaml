@@ -1,0 +1,182 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1187
+packet_id: PR1184-MERGE-CONTRACT
+mission_issue: 1177
+revision: 2
+generation: 3
+lease_id: pr1184-merge-contract-r2-g3-codex-service
+role: executor
+provider: codex
+executor: codex
+model_family: openai
+execution_surface: codex_service
+transport: machine
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+reviewer: human
+reviewer_execution_surface: manual_audit
+reviewer_transport: human
+assurance_target: human_audited
+access: read-write
+spec_path: ops/specs/PR1184-MERGE-CONTRACT-r2.md
+spec_hash: 975c5d31be6ec4f26145f14893b5c8f7063e5921d1c6dafdca020f50e795299d
+spec_sha256_required: 975c5d31be6ec4f26145f14893b5c8f7063e5921d1c6dafdca020f50e795299d
+spec_ref: refs/heads/ops/pr1187-r2-g2-lease@74a0abdb2631ae38f9f76b7426b5e47a3c82ce8f
+prompt_path: ops/specs/PR1184-MERGE-CONTRACT-r2.md
+prompt_sha256_required: 975c5d31be6ec4f26145f14893b5c8f7063e5921d1c6dafdca020f50e795299d
+branch: agent/pr1184-merge-contract-r2-g3-codex-service
+branch_ownership: exclusive
+base_sha: 1f0941e9bba1d1d517eda4174167b81963c06bd5
+start_from_sha: 28202eb23104b9207232cbf7500bacc6087357a3
+target_branch_neu_land: master
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0063-merge-spec-ref-va-human-audit.md
+- ops/specs/PR1184-MERGE-CONTRACT-r1.md
+- ops/specs/PR1184-MERGE-CONTRACT-r2.md
+effective_write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0063-merge-spec-ref-va-human-audit.md
+- ops/specs/PR1184-MERGE-CONTRACT-r1.md
+- ops/specs/PR1184-MERGE-CONTRACT-r2.md
+granted_by: ducthangho
+granted_on_instruction: 'owner chat approval 2026-11-04: Đồng ý duyệt; durable recording
+  in ops/receipts/pr1187-cold-recovery-g3-authority.yaml'
+leased_at_utc: '2026-11-04T16:12:22Z'
+heartbeat_at: '2026-11-04T16:12:22Z'
+lease_until: '2026-11-04T18:42:17Z'
+lease_expires_at_utc: '2026-11-04T18:42:17Z'
+heartbeat_required_minutes: 360
+run_minutes: 90
+depends_on: []
+recorded_by: codex-service-controller
+recorder_is_executor: false
+reviewed_sha_required: 28202eb23104b9207232cbf7500bacc6087357a3
+authority_notes:
+- Owner approved the concrete r2 scope/lease request with amended cap1000 in chat;
+  linked Issue1187 comment records the verbatim directive and exact resulting hash.
+- Spec preapproval wording is historical; appended owner decision and this lease establish
+  current approved state.
+- Old r1 Executor stopped; two-way supersession fences generation1. R1 spec metadata/history/abc6
+  product head remain immutable.
+- Fresh Executor begins at explicitly authorized continuationabc6, new branch/generation2,90-minute
+  run; lease expiry does not extend run.
+- No self audit/approval/merge/land/deploy; independent human audit and required local
+  gates before code push; primary human assurance remains mandatory.
+- Review/push budgets remain cumulative, no reset of Packet1187 or originalPR1184
+  history.
+- Final head/tree/spec must be measured and audited anew; prior proposal evidence
+  is historical diagnostics.
+- Owner explicitly approved transfer from codex_desktop to codex_service, a new execution
+  run and rebinding the one remaining review to the repaired candidate. This operational
+  addendum supersedes only frozen-spec surface/fresh-Desktop-session wording. Executor
+  provider, cloud environment, revision2 acceptance, immutable base, six write paths
+  and cap1000 unchanged.
+- 'No run2 extension or reset: run3 has its own absolute clock. Existing lease expiry18:42:17Z
+  retained. No human code audit, product push, land or deploy authorization.'
+- Restored head282 plus exact saved anchor patch sha2567da046e1420c0123374ed1624c37c0c6f27efca2b9653b637aff99cedf8394d1;
+  expected staged test sha256d6923bc0de00dc75a534433a429e7d126c8f7d94b77a55e18278d6a531cc7db2.
+  Commit permitted only after validation; rebind fourth review to full resulting OID
+  before launch.
+supersedes_lease_id: pr1184-merge-contract-r2-g2-codex
+nang_tran:
+  ai_nang: Chủ kho ducthangho theo protocol §2 — ĐỀ NGHỊ, CHƯA ĐƯỢC DUYỆT
+  can_cu: K1/spec identity/hash là input K4, cùng rollout ADR0063 và test consumer.
+    Có thể tách thành nhiều Packet/ADR/lease nhưng tăng coordination và trạng thái
+    trung gian; đề nghị review cùng một contract. Bỏ productcopy spec r1 đã supersede,
+    giữ frozen metadata/history; net base diff năm tệp, effective write set sáu paths.
+    Số đo exact numstat kèm proposal; cap dư có giới hạn cho sửa review, không bảo
+    đảm gói lớn dễ review.
+  tran_cu: 'ADR0053: 6 tệp/450 dòng thêm; approved r1: 5 tệp/450 dòng thêm'
+  tran_moi: 6 effective paths, tối đa 5 net tệp/1000 dòng thêm — đề nghị, chỉ áp dụng
+    khi chủ kho duyệt exact spec và lease r2g2
+thay_the_cho:
+- pr1184-merge-contract-r2-g2-codex
+size_limit:
+  effective_write_paths: 6
+  net_product_files: 5
+  added_lines: 1000
+review_budget_override:
+  approved_by: ducthangho
+  recorded_by: codex-desktop-dispatcher
+  source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6634287639
+  recorded_at_utc: '2026-11-04T15:13:49.540195+00:00'
+  old_limit: 3
+  new_limit: 4
+  calls_used_before_next: 3
+  authorized_additional_calls: 1
+  scope_head: 28202eb23104b9207232cbf7500bacc6087357a3
+  no_reset: true
+  no_code_audit_or_land_authority: true
+  binding_status: await_exact_repaired_commit; no call until exact binding recorded
+  rebind_authority: owner approved cold recovery successor and review rebinding in
+    current chat
+nang_tran_review_budget:
+  ai_nang: ducthangho via explicitownerresponse
+  can_cu: one fresh verification after owner required all4P3fixed; three actualreviewsused;
+    https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6634287639
+  tran_cu: customPacket1187 modelcalls withoutput3
+  tran_moi: customPacket1187 modelcalls withoutput4; exactlyoneadditional, nofifth
+initial_start_from_sha: abc6bdab035b14bf24f55ea5d557233c927ad951
+execution_runs:
+- run: 1
+  executor_task: /root/pr1187_r2_executor
+  started_at_utc: '2026-11-04T12:45:14Z'
+  deadline_utc: '2026-11-04T14:15:14Z'
+  completed_at_utc: '2026-11-04T13:24:00Z'
+  outcome: handoff_db9_not_pushed
+- run: 2
+  executor_task: /root/pr1187_r2_executor
+  started_at_utc: '2026-11-04T14:30:54Z'
+  deadline_utc: '2026-11-04T16:00:54Z'
+  run_minutes: 90
+  continuation_sha: db9c665db5610d9bd81a8fd6f345248cde83aa00
+  authority_source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6633294277
+  scope: ownerrequiresall4P3fixedwithincurrentcontract;no fourthmodelcall
+  completed_at_utc: '2026-11-04T15:09:12Z'
+  outcome: sealed_handoff_282_not_pushed
+- run: 3
+  executor_task: current codex_service continuation
+  started_at_utc: '2026-11-04T16:12:22Z'
+  deadline_utc: '2026-11-04T17:42:22Z'
+  run_minutes: 90
+  continuation_sha: 28202eb23104b9207232cbf7500bacc6087357a3
+  authority_source: ops/receipts/pr1187-cold-recovery-g3-authority.yaml
+review_budget_override_history:
+- approved_by: ducthangho
+  recorded_by: codex-desktop-dispatcher
+  source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6632609191
+  recorded_at_utc: '2026-11-04T14:01:27.696989+00:00'
+  old_limit: 2
+  new_limit: 3
+  calls_used_before_next: 2
+  authorized_additional_calls: 1
+  scope_head: db9c665db5610d9bd81a8fd6f345248cde83aa00
+  no_reset: true
+  no_code_audit_or_land_authority: true
+- approved_by: ducthangho
+  recorded_by: codex-desktop-dispatcher
+  source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6634287639
+  recorded_at_utc: '2026-11-04T15:13:49.540195+00:00'
+  old_limit: 3
+  new_limit: 4
+  calls_used_before_next: 3
+  authorized_additional_calls: 1
+  scope_head: 28202eb23104b9207232cbf7500bacc6087357a3
+  no_reset: true
+  no_code_audit_or_land_authority: true
+reviewed_sha_required_history:
+- sha: db9c665db5610d9bd81a8fd6f345248cde83aa00
+  disposition: advisory3 historical after owner required all4P3repairs
+  source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6633294277
+- sha: 28202eb23104b9207232cbf7500bacc6087357a3
+  disposition: historical282; anchor repaired after checkpoint; remaining review must
+    target resulting exact commit
+  source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6635295968

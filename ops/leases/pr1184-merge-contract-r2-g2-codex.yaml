@@ -143,3 +143,4 @@ reviewed_sha_required_history:
 - sha: db9c665db5610d9bd81a8fd6f345248cde83aa00
   disposition: advisory3 historical after owner required all4P3repairs
   source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6633294277
+da_bi_thay_the: pr1184-merge-contract-r2-g3-codex-service

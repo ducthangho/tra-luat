@@ -1,0 +1,35 @@
+schema: owner_operational_authority.v1
+packet_issue: 1187
+packet_id: PR1184-MERGE-CONTRACT
+revision: 2
+generation: 3
+recorded_at_utc: '2026-11-04T16:12:22Z'
+owner_response_verbatim: Đồng ý duyệt
+proposal_approved: Transfer to codex_service, grant new execution run, update remaining
+  model review binding to candidate after commit
+recorded_by: openai_codex / codex_service / machine; controller recording user instruction,
+  not human auditor
+predecessor_lease: pr1184-merge-contract-r2-g2-codex
+successor_lease: pr1184-merge-contract-r2-g3-codex-service
+surface_override:
+  from: codex_desktop
+  to: codex_service
+spec_bytes_unchanged: 975c5d31be6ec4f26145f14893b5c8f7063e5921d1c6dafdca020f50e795299d
+spec_source: refs/heads/ops/pr1187-r2-g2-lease@74a0abdb2631ae38f9f76b7426b5e47a3c82ce8f
+run3_deadline_utc: '2026-11-04T17:42:22Z'
+lease_expiry_unchanged: '2026-11-04T18:42:17Z'
+budget:
+  used_completed_output: 3
+  reserved_max: 1
+  limit: 4
+  fifth_authorized: false
+  historical_failed_attempts: preserved separately; token cost unknown
+allowed: restore exact source, validate, create local repair commit, run gates, rebind
+  single remaining advisory review to resulting exact SHA
+not_granted:
+- independent human code audit
+- product code push
+- merge/land
+- deploy/LIVE
+- new acceptance baseline or write paths
+- reset run2 or review history

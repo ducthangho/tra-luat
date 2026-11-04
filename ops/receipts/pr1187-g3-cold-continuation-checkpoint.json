@@ -40,5 +40,23 @@
     "one_new_writer_run_minutes": 90,
     "separate_read_only_gate_minutes": 180
   },
-  "recorded_at": "2026-11-04T17:10:13.112098+00:00"
+  "recorded_at": "2026-11-04T17:10:13.112098+00:00",
+  "fullstandard_execution": {
+    "classification": "interrupted by canonical stop at review checkpoint; not a product failure or pass",
+    "stop_command_rc": 0,
+    "launcher_terminal_state": "da_dung",
+    "launcher_rc": null,
+    "launcher_real_rc": null,
+    "suite_real_rc": "not independently captured before process tree termination",
+    "positive_baseline_or_mutant_completion": false
+  },
+  "master_readback": {
+    "latest_master": "358451e80b573d148807717bece3fd973915fbad",
+    "acceptance_base_unchanged": "1f0941e9bba1d1d517eda4174167b81963c06bd5",
+    "changed_paths": 195,
+    "all_under_ops_land": true,
+    "original_protocol_and_gate_sources_changed": false,
+    "observed_at": "2026-11-04T17:13:51.058192+00:00"
+  },
+  "metadata_publication": "blocked by automatic approval review; requires explicit owner approval of payload and destinations"
 }

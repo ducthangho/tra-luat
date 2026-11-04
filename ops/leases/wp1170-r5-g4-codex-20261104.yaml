@@ -55,7 +55,7 @@ granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1170#issuecomment-6620539655
 authority_basis: Owner approved r5 spec, wp1170-budget-04 and wp1170-bootstrap-02;
   dispatcher delegated lease; predecessor g3 retired
-lease_expires_at_utc: '2026-11-04T05:30:00Z'
+lease_expires_at_utc: '2026-11-04T03:56:48Z'
 heartbeat_at: '2026-11-04T02:08:00Z'
 heartbeat_required_minutes: 360
 mission_revision: 3
@@ -64,3 +64,11 @@ policy_exception_url: https://github.com/ducthangho/tra-luat/issues/1170#issueco
 predecessor_lease_id: wp1170-r4-g3-codex-20261104
 predecessor_retired_ref: 9fcf52a9aa9a2e753beb50d03946bdb86b3e171a
 budget_decision_url: https://github.com/ducthangho/tra-luat/issues/1170#issuecomment-6620488414
+da_bi_thay_the: wp1170-r6-g5-codex-20261104
+rut_han:
+  han_cu: '2026-11-04T05:30:00Z'
+  han_moi: '2026-11-04T03:56:48Z'
+  rut_boi: ducthangho
+  ly_do: 'Owner approved MCR-03 and bootstrap-03; r5/g4 CI golden scope finding requires r6/g5.'
+  can_cu: 'https://github.com/ducthangho/tra-luat/issues/1170#issuecomment-6622125963'
+  ghi_boi: codex-dispatcher-session

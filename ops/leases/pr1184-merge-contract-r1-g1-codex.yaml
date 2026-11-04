@@ -1,0 +1,69 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1187
+packet_id: PR1184-MERGE-CONTRACT
+mission_issue: 1177
+revision: 1
+generation: 1
+lease_id: pr1184-merge-contract-r1-g1-codex
+role: executor
+provider: codex
+executor: codex
+model_family: openai
+execution_surface: codex_desktop
+transport: machine
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+reviewer: human
+reviewer_execution_surface: manual_audit
+reviewer_transport: human
+assurance_target: human_audited
+access: read-write
+spec_path: ops/specs/PR1184-MERGE-CONTRACT-r1.md
+spec_hash: 056804c42c3ae5fe867257b12ce99fe8a4a9045e4716b2e675769f7bb052fe71
+spec_sha256_required: 056804c42c3ae5fe867257b12ce99fe8a4a9045e4716b2e675769f7bb052fe71
+spec_ref: refs/heads/ops/pr1187-r1-g1-lease@36b040e40503a810be20dced6dcd5f73d57110c8
+prompt_path: ops/specs/PR1184-MERGE-CONTRACT-r1.md
+prompt_sha256_required: 056804c42c3ae5fe867257b12ce99fe8a4a9045e4716b2e675769f7bb052fe71
+branch: agent/pr1184-merge-contract-r1-g1-codex
+branch_ownership: exclusive
+base_sha: 1f0941e9bba1d1d517eda4174167b81963c06bd5
+start_from_sha: 1f0941e9bba1d1d517eda4174167b81963c06bd5
+target_branch_neu_land: master
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0063-merge-spec-ref-va-human-audit.md
+- ops/specs/PR1184-MERGE-CONTRACT-r1.md
+effective_write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0063-merge-spec-ref-va-human-audit.md
+- ops/specs/PR1184-MERGE-CONTRACT-r1.md
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1187
+leased_at_utc: '2026-11-04T10:50:42Z'
+heartbeat_at: '2026-11-04T10:50:42Z'
+lease_until: '2026-11-04T16:50:42Z'
+lease_expires_at_utc: '2026-11-04T16:50:42Z'
+heartbeat_required_minutes: 360
+run_minutes: 90
+depends_on: []
+recorded_by: codex-desktop-dispatcher
+recorder_is_executor: false
+reviewed_sha_required: 1f0941e9bba1d1d517eda4174167b81963c06bd5
+authority_notes:
+- 'Owner explicitly approved exact spec and instructed grant/development in Codex
+  chat; issue #1187 records the verbatim directive.'
+- 'Mission #1177 is the related goal; this infrastructure dependency is tracked independently
+  and does not change plan_hash or close either mission/packet.'
+- A fresh executor context must own code; dispatcher does not act as code reviewer/approver.
+- Human audit/land authorization for the implementation are not granted by this executor
+  lease.
+- 'Approved spec text is retained byte-for-byte despite its preapproval draft labels;
+  authority/state are determined by this durable grant and #1187 owner instruction
+  receipt.'

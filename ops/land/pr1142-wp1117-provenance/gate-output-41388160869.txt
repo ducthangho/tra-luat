@@ -1,0 +1,3 @@
+# Gate output run 41388160869 attempt 1 (workflow_dispatch, .github/workflows/launcher-windows.yml, nhanh agent/wp1117-g1-claude, head 8f0dfcf35c8ee92a9a754bde82846eb11430bd0e) — log REST tung job, doc 2026-11-04
+
+JOB 125093497495 launcher (windows-latest) ['windows-latest'] conclusion=success runner_id=1000034626 bytes=145476 sha256=1e0477809aa0c24c1b359f4ce5d8d2e236e5eef059d1d38d3d227e603ed13989 ##[error]=0

@@ -1,0 +1,20 @@
+# Danh gia Gate output run 41397205258 attempt 1 head 8983e1bbf00c91d8def101a97a4d32509ae630cc — luat dau hieu duong THEO BUOC (danh_gia_gate.py sha256 b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd)
+
+JOB 125121001411 chuan-bi [ubuntu-latest] conclusion=success log_sha256=a20e2253e64d11f9384dbaaf6dfff7b1fd71d7ff64a615c93d8d88059dd5a71f -> passed: [ops/ci_duong_nhanh.py] che_do=duong_nhanh
+JOB 125123982350 gate (ubuntu-latest) [ubuntu-latest] conclusion=success log_sha256=b21ea5fc718764b87cad79da74543e51719571e5a5759d591a56989b31320e3a -> not_measured: thieu buoc [.claude/dev/codex_cred_test.py]
+JOB 125123983359 gate-cong-cu: skipped (khong tinh)
+JOB 125123982584 gate-cong-cu-gop (ubuntu-latest) [ubuntu-latest] conclusion=success log_sha256=fb58292bece628747b60dc5c8010c7d34341f1a92115714f6875858e58967f12 -> not_measured: buoc [ops/cong_cu_test.py --gop] thieu dau hieu duong /^SỐ LIỆU GOM: ca=(\d+) · đột biến=(\d+) · lỗi đột biến=0$/
+JOB 125150552534 gate-nhanh-gop (ubuntu-latest) [ubuntu-latest] conclusion=success log_sha256=aced9250196ab8f96acf534977648204206d7cf3f8f9d09f183f1461fd0e8e92 -> not_measured: thieu buoc [--gop-dich]
+JOB 125123982316 gate-nhanh-manh (ubuntu-latest, 0) [ubuntu-latest] conclusion=success log_sha256=26702a184e937ccd0453c65eeea4cd3d63136eb15efe5a8957c3a2a8af194138 -> not_measured: thieu buoc [ops/nhanh_don_duoc_test.py]
+JOB 125123982378 gate-nhanh-manh (ubuntu-latest, 1) [ubuntu-latest] conclusion=success log_sha256=acc72fc9bbccb1d8e1f6a0881ec2cc04cf6c8a8b7ca9fab9242affc8a80beee4 -> not_measured: thieu buoc [ops/nhanh_don_duoc_test.py]
+JOB 125123982264 gate-nhanh-manh (ubuntu-latest, 2) [ubuntu-latest] conclusion=success log_sha256=ef0de5bc4af810f24149cebce98e008dad1842ed495a8863b414988e722a0087 -> not_measured: thieu buoc [ops/nhanh_don_duoc_test.py]
+JOB 125123982385 gate-nhanh-manh (ubuntu-latest, 3) [ubuntu-latest] conclusion=success log_sha256=d24a79d0f49cb1859be0ea7b7ffec39864e58f5973359396a763f030ff3736b6 -> not_measured: thieu buoc [ops/nhanh_don_duoc_test.py]
+JOB 125123982381 gate-nhanh-manh (ubuntu-latest, 4) [ubuntu-latest] conclusion=success log_sha256=35e914e51e13dd65e80da4964e9da2f1953324d3617b8cb43ee717a00b5f74f7 -> not_measured: thieu buoc [ops/nhanh_don_duoc_test.py]
+JOB 125123982386 gate-nhanh-manh (ubuntu-latest, 5) [ubuntu-latest] conclusion=success log_sha256=496aa8572787b99209dba4021aef73be0d4ec7c7e39b2faae4ba7afbca512167 -> not_measured: thieu buoc [ops/nhanh_don_duoc_test.py]
+JOB 125123982352 gate-nhanh-manh (ubuntu-latest, 6) [ubuntu-latest] conclusion=success log_sha256=40193780f0e5f9b55795e5b373ba8f35a69b7298dcd0a628e8b5c3313715b867 -> not_measured: thieu buoc [ops/nhanh_don_duoc_test.py]
+JOB 125123982307 gate-nhanh-manh (ubuntu-latest, 7) [ubuntu-latest] conclusion=success log_sha256=8bcf96ff46d717a737c9552b56ed96d3ffaf2ac58bd0e369e408adf536e35054 -> not_measured: thieu buoc [ops/nhanh_don_duoc_test.py]
+JOB 125123982218 gate-ops (ubuntu-latest) [ubuntu-latest] conclusion=success log_sha256=1bc9942e01d88b5462da3987aff54e579e3ec8c639a485797dc96e2898257580 -> not_measured: thieu buoc [ops/chay_lease_publish_test.sh]
+JOB 125123982255 gate-packet-loop (ubuntu-latest) [ubuntu-latest] conclusion=success log_sha256=c6dcfc29c7384b8aaf1641b82054813e117efdbe532e8c077f8958cf95292495 -> not_measured: thieu buoc [.claude/dev/packet_loop_test.py]
+JOB 125151029828 gate-registry (ubuntu-latest) [ubuntu-latest] conclusion=success log_sha256=031e902002c3c88273ccdd84d807f520f64e60db61e84b56b76d8c6429c6627d -> not_measured: thieu buoc [.claude/dev/ci_dang_ky_test.py --chay]
+
+MOC_GATE_OUTPUT: not_measured (1/15 job co dau hieu duong)

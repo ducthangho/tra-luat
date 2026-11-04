@@ -58,7 +58,7 @@ granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1170#issuecomment-6622708203
 authority_basis: Owner approved exact r6 spec and budget-07; Mission r4 and bootstrap-03 installed; g4 retired;
   remote overlap scan clear
-lease_expires_at_utc: '2026-11-04T10:42:00Z'
+lease_expires_at_utc: '2026-11-04T09:15:28Z'
 heartbeat_at: '2026-11-04T04:42:00Z'
 heartbeat_required_minutes: 360
 spec_authority_ref: 0fee208bb0c1783dfcd91b42d913a0b95c54f9a7:ops/specs/wp1170-r6.md
@@ -67,3 +67,11 @@ policy_exception_url: https://github.com/ducthangho/tra-luat/issues/1170#issueco
 predecessor_lease_id: wp1170-r5-g4-codex-20261104
 predecessor_retired_ref: 2a237d5badc7c7cb8158e890b2ebfed3a9ba5532
 budget_decision_url: https://github.com/ducthangho/tra-luat/issues/1170#issuecomment-6622708203
+rut_han:
+  han_cu: '2026-11-04T10:42:00Z'
+  han_moi: '2026-11-04T09:15:28Z'
+  rut_boi: ducthangho (prior lease-shortening delegation via dispatcher)
+  ly_do: ADR-0062 landed on master and applies to all unmerged packets; r6/g5 admission and push obligations drifted;
+    ASUS run reconciled clean, budget-10 invocation used
+  can_cu: https://github.com/ducthangho/tra-luat/issues/1170#issuecomment-6627157336
+  ghi_boi: codex-dispatcher-session

@@ -1,4 +1,0 @@
-# 2026-11-04T15:35:11Z — khoi YAML trich tu readback-m8-issuecomment-6570713331.json; cmp voi ban nhap m8-1122.yaml: byte khop
-# lenh: python3 .claude/dev/packet_loop.py kiem-dong-wp --root . --bien-ban <khoi YAML doc lai> --lease <lease cuoi wp1122>
-ĐÓNG ĐƯỢC WP LAUNCHER-TEST-WINDOWS-TIN-DUNG-GIA — merge c7174bfe03b3acd22cfa055b5fce176129d29542
-rc=0

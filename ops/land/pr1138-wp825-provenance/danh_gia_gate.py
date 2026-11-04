@@ -4,15 +4,28 @@ Thieu dau hieu duong => job `not_measured` => moc `not_measured` (khong bao gio 
 Cach goi: python3 danh_gia_gate.py <run_id> <thu_muc_ra> [--am TEN_JOB_CON]
 --am: phan chung — xoa dong dau hieu duong khoi log cua job co ten bat dau bang TEN_JOB_CON roi danh gia lai; phai ra not_measured.
 """
-import hashlib, json, os, re, sys, urllib.request
+import hashlib, json, os, re, sys, urllib.error, urllib.request
 
 TOK = os.environ["GITHUB_PAT"]
 API = "https://api.github.com/repos/ducthangho/tra-luat/"
 
 
+class _KhongChuyenHuong(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *a, **k):
+        return None
+
+
 def raw(u):
+    """GET REST. Log job tra 302 sang kho blob: theo TAY, KHONG mang token sang host khac (nhu ops/ci_provenance.py:goi_that;
+    connector P2 r4469672182 — urlopen mac dinh chuyen ca header Authorization theo redirect)."""
     req = urllib.request.Request(API + u, headers={"Authorization": "Bearer " + TOK, "Accept": "application/vnd.github+json"})
-    return urllib.request.urlopen(req, timeout=120).read()
+    try:
+        return urllib.request.build_opener(_KhongChuyenHuong).open(req, timeout=120).read()
+    except urllib.error.HTTPError as e:
+        loc = e.headers.get("Location") if e.code in (301, 302, 303, 307, 308) else None
+        if not loc:
+            raise
+    return urllib.request.urlopen(urllib.request.Request(loc), timeout=120).read()   # chuoi tran: khong header token
 
 
 # (tien to ten job, regex dau hieu duong BAT BUOC — tat ca phai co mat)

@@ -46,7 +46,7 @@ post_merge_checks:
     moc_run: 'measured — ci/provenance.yaml moc.run: event push, head_sha 279a39e3, run_attempt 1, passed.'
     moc_checkout: 'measured — ci/provenance.yaml moc.checkout: 23/23 job passed tai 279a39e34c26027ad792008962859aa79c16e35c.'
     moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition: passed (wd-run 41859872200, artifact workflow-definition-41399706045), blob 6ce8a5fa, sha256 e77a9620 = git rev-parse 279a39e:.github/workflows/ci.yml.'
-    moc_gate_output: 'measured — danh-gia-gate-output-41399706045.txt (danh_gia_gate.py da va P2 r4469672182 cua PR #1153, phan-chung-redirect.txt; luat dau hieu duong tung loai job, thieu => not_measured): 23/23 job passed. gate-output-41399706045.txt giu sha256 + so byte log tung job, ##[error]=0 ca 23.'
+    moc_gate_output: 'measured — danh-gia-gate-output-41399706045.txt (danh_gia_gate.py THEO BUOC: moi job phai co DU cac buoc bat buoc, moi buoc phai co dau hieu duong trong CHINH output cua no; dong TỔNG CUOI cua buoc phai DAT; thieu => not_measured): 23/23 job passed. Phan chung phan-chung-buoc-41399706045.txt: xoa dau hieu cua TUNG buoc => not_measured, SAI 0; ca connector P1 r4469885562 (PR #1190) => not_measured, luat cu cho passed. gate-output-41399706045.txt giu sha256 + so byte log tung job, ##[error]=0 ca 23. P2 r4469672182 (PR #1153): redirect khong mang token (phan-chung-redirect.txt).'
   - name: 'ci.yml workflow_dispatch runner_set=windows-only tren head cuoi (dieu kien truoc merge, ket qua ve SAU merge)'
     run_id: 41388158239
     sha: 8f0dfcf35c8ee92a9a754bde82846eb11430bd0e
@@ -54,8 +54,10 @@ post_merge_checks:
     ghi_chu: >-
       measured — readback-run-41388158239.json: completed success, updated_at 2026-11-02T06:29:24Z, tuc SAU merge (06:24:26Z); luc merge
       job gate-packet-loop (windows-latest) con chay. Ket qua cuoi: gate-output-41388158239.txt 15 job chay (labels windows-latest tru
-      chuan-bi, runner_id khac 0) + 1 skipped, ##[error]=0. danh-gia-gate-output-41388158239.txt: 14/15 co dau hieu duong; gate-cong-cu
-      (windows-latest, 0) not_measured vi Windows chi chay manh 0 khong in dong ban kinh dot bien (thiet ke ci.yml), ban kinh do o lane Ubuntu.
+      chuan-bi, runner_id khac 0) + 1 skipped, ##[error]=0. danh-gia-gate-output-41388158239.txt (luat THEO BUOC): 12/15 job co du dau hieu
+      duong; 3 job not_measured vi buoc bat buoc khong chay tren Windows (if: theo runner.os, thiet ke ci.yml): gate-cong-cu (windows-latest, 0)
+      chi manh 0 khong ban kinh dot bien; gate (windows-latest) thieu buoc ci_phamvi_test; gate-ops (windows-latest) thieu buoc
+      ci_duong_nhanh_test. Cac buoc ay do o lane Ubuntu cua push master 41399706045. Day la lan WINDOWS BO SUNG, khong phai moc §10.2.2.
   - name: 'launcher-windows.yml push master tai DUNG merge SHA'
     run_id: 41399706138
     run_attempt: 1
@@ -69,7 +71,7 @@ post_merge_checks:
     conclusion: failure
     nguon: [readback-run-41401509813.json, gate-output-41401509813.txt, danh-gia-gate-output-41401509813.txt, trich-gate-registry-windows-279a39e.txt]
     ghi_chu: >-
-      measured — 14/16 job success; gate-registry (windows-latest) failure vi ops/ci_provenance_test.py HET GIO 5400 giay (LOI HA TANG,
+      measured — 14/16 job success (danh-gia-gate-output-41401509813.txt theo buoc: 11/15 co du dau hieu, 3 not_measured cung ly do lane Windows nhu muc tren); gate-registry (windows-latest) failure vi ops/ci_provenance_test.py HET GIO 5400 giay (LOI HA TANG,
       rc=1), cac bo khac trong job DAT. KHONG thuoc #1117: merge 279a39e chi doi 2 tep launcher_test*.py so cha 1; ci_provenance_test.py
       doi tren master qua 14 commit #978 (trich-gate-registry-windows-279a39e.txt), va tren 8f0dfcf (truoc cac commit ay) no DAT trong
       3446.67 giay. Khong chan land: dieu kien M-1..M-3 cua lease khong doi luot nay; ghi de packet #978/#997 biet.

@@ -130,7 +130,7 @@ bookkeeping:
       measured — readback-pr-1096.json: merged true, merged_at 2026-11-02T05:59:47Z, merge_commit_sha 8983e1bb, head ffc3d5d4.
       diff-pr1096-thu-muc.txt: diff 8983e1b^1..8983e1b chi cham ops/land/**. readback-run-41397205258.json: push master tai
       8983e1bb, attempt 1, success; readback-jobs-41397205258.json 15 success + 1 skipped. Gate chay DUONG NHANH (diff chi gom
-      ops/land): danh-gia-gate-output-41397205258.txt 2/15 job co dau hieu duong cua gate DAY DU, 13 job con lai in
+      ops/land): danh-gia-gate-output-41397205258.txt (luat THEO BUOC) 1/15 job co du dau hieu duong cua gate DAY DU (chuan-bi che_do=duong_nhanh), 14 job con lai in
       "DUONG_NHANH: bo qua ..." thay cho ket qua — dung thiet ke cho PR ghi so, KHONG phai do gate day du. gate-output-41397205258.txt
       giu sha256 log tung job. Ghi 04-11 boi phien session_015Gtxra7iT6mwM1kqpdggt6 (nhan PR #1151 tu phien …cSEj).
 

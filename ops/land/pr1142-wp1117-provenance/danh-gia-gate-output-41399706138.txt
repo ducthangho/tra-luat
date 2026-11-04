@@ -1,6 +1,6 @@
-# Danh gia Gate output run 41399706138 attempt 1 head 279a39e34c26027ad792008962859aa79c16e35c — luat dau hieu duong tung loai job (danh_gia_gate.py sha256 ea18fd47bb840a1fd9655d1b6219b789d0013229cbf7cea3c940a32e0ef137b0)
+# Danh gia Gate output run 41399706138 attempt 1 head 279a39e34c26027ad792008962859aa79c16e35c — luat dau hieu duong THEO BUOC (danh_gia_gate.py sha256 b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd)
 
-JOB 125128650365 launcher (ubuntu-latest) [ubuntu-latest] conclusion=success log_sha256=2ce00a39d78feb5a03066bfff2fa6017689883073771bf92f409749deba4e25c -> passed: 366/366 ca DA CHAY QUA (tong 368, bo qua 2, hong 0) - KHONG DU: 2 ca BO QUA, chua do gi | DOT BIEN: 584/584 dat  (4 khong do duoc tren nen nay)
-JOB 125128650016 launcher (windows-latest) [windows-latest] conclusion=success log_sha256=57b42dbe2c4fe399adba8a8334eeb248cdcfd14a9c48b44ba59b8d137dd827f3 -> passed: 294/294 ca DA CHAY QUA (tong 368, bo qua 74, hong 0) - KHONG DU: 74 ca BO QUA, chua do gi | DOT BIEN: 470/470 dat  (118 khong do duoc tren nen nay)
+JOB 125128650365 launcher (ubuntu-latest) [ubuntu-latest] conclusion=success log_sha256=2ce00a39d78feb5a03066bfff2fa6017689883073771bf92f409749deba4e25c -> passed: [launcher_test.py] 366/366 ca DA CHAY QUA (tong 368, bo qua 2, hong 0) - KHONG DU: 2 ca BO QUA, chua do gi | [launcher_test.py] DOT BIEN: 584/584 dat  (4 khong do duoc tren nen nay)
+JOB 125128650016 launcher (windows-latest) [windows-latest] conclusion=success log_sha256=57b42dbe2c4fe399adba8a8334eeb248cdcfd14a9c48b44ba59b8d137dd827f3 -> passed: [launcher_test.py] 294/294 ca DA CHAY QUA (tong 368, bo qua 74, hong 0) - KHONG DU: 74 ca BO QUA, chua do gi | [launcher_test.py] DOT BIEN: 470/470 dat  (118 khong do duoc tren nen nay)
 
 MOC_GATE_OUTPUT: passed (2/2 job co dau hieu duong)

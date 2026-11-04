@@ -1,20 +1,20 @@
-# Danh gia Gate output run 41401509813 attempt 1 head 279a39e34c26027ad792008962859aa79c16e35c — luat dau hieu duong tung loai job (danh_gia_gate.py sha256 ea18fd47bb840a1fd9655d1b6219b789d0013229cbf7cea3c940a32e0ef137b0)
+# Danh gia Gate output run 41401509813 attempt 1 head 279a39e34c26027ad792008962859aa79c16e35c — luat dau hieu duong THEO BUOC (danh_gia_gate.py sha256 b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd)
 
-JOB 125170167331 chuan-bi [ubuntu-latest] conclusion=success log_sha256=1a2093e8e933c25dc2bf50ec7712be807517a9680a324e348fe9f72adcd0a2a2 -> passed: che_do=day_du
-JOB 125170251504 gate (windows-latest) [windows-latest] conclusion=success log_sha256=7c401c76fb856ec029bec2e06ea628a55fcc60abdf7c81bf972e0bb9ff4e65ea -> passed: TỔNG: ĐẠT
-JOB 125170251498 gate-cong-cu (windows-latest, 0) [windows-latest] conclusion=success log_sha256=6ddde28922fd0ccd09ab3714222dfd896055d4b7daf0403deef6b4cc90044b4a -> not_measured: thieu dau hieu duong /^MẢNH \d+/\d+: (\d+)/\1 đột biến bán kính 1/
+JOB 125170167331 chuan-bi [ubuntu-latest] conclusion=success log_sha256=1a2093e8e933c25dc2bf50ec7712be807517a9680a324e348fe9f72adcd0a2a2 -> passed: [ops/ci_duong_nhanh.py] che_do=day_du
+JOB 125170251504 gate (windows-latest) [windows-latest] conclusion=success log_sha256=7c401c76fb856ec029bec2e06ea628a55fcc60abdf7c81bf972e0bb9ff4e65ea -> not_measured: thieu buoc [.github/checks/ci_phamvi_test.py]
+JOB 125170251498 gate-cong-cu (windows-latest, 0) [windows-latest] conclusion=success log_sha256=6ddde28922fd0ccd09ab3714222dfd896055d4b7daf0403deef6b4cc90044b4a -> not_measured: buoc [ops/cong_cu.py kiem-tra] thieu dau hieu duong /^MẢNH \d+/\d+: (\d+)/\1 đột biến bán kính 1/
 JOB 125171495868 gate-cong-cu-gop: skipped (khong tinh)
-JOB 125171514673 gate-nhanh-gop (windows-latest) [windows-latest] conclusion=success log_sha256=29701240354407ced26d5a9f351d67fcb0a0998976196ac6e8006dfad5c17f6f -> passed: targeted_mutant_gate: DAT — KHONG phai full mutant audit; full_mutant_audit van BAT BUOC truoc merge/land/release
-JOB 125170251741 gate-nhanh-manh (windows-latest, 0) [windows-latest] conclusion=success log_sha256=dccb812153be9c71119979f7d82a3cd7c45adc2197000c377c865dae418472a6 -> passed: targeted_mutant_gate MANH 0/8: rc=0 · passed 39/39
-JOB 125170251712 gate-nhanh-manh (windows-latest, 1) [windows-latest] conclusion=success log_sha256=6eb86f6d2cee716bcde594433b101d7d5def946626487e803431106a97ef9bba -> passed: targeted_mutant_gate MANH 1/8: rc=0 · passed 41/41
-JOB 125170251906 gate-nhanh-manh (windows-latest, 2) [windows-latest] conclusion=success log_sha256=e7cf0ae31b2f0ad691474cfe6bf09791d968ccc3816a8914127e0226af26dad8 -> passed: targeted_mutant_gate MANH 2/8: rc=0 · passed 40/40
-JOB 125170251830 gate-nhanh-manh (windows-latest, 3) [windows-latest] conclusion=success log_sha256=8a2d6d46b6145edb34b53ac04df1f35aff999f5421e54d068f6c087af4429013 -> passed: targeted_mutant_gate MANH 3/8: rc=0 · passed 40/40
-JOB 125170251694 gate-nhanh-manh (windows-latest, 4) [windows-latest] conclusion=success log_sha256=ea046fd671bf3291fcf7e7a46a4e0028f41e4bd369c3e2918f973309bff65b32 -> passed: targeted_mutant_gate MANH 4/8: rc=0 · passed 39/39
-JOB 125170251785 gate-nhanh-manh (windows-latest, 5) [windows-latest] conclusion=success log_sha256=e8615a1cb364890413523dc871e705c96f34899e928336bc576fa104229f33aa -> passed: targeted_mutant_gate MANH 5/8: rc=0 · passed 41/41
-JOB 125170251658 gate-nhanh-manh (windows-latest, 6) [windows-latest] conclusion=success log_sha256=30849574125696c86027f81bf48770ceeb9b3c0209b06d7eb3ac92a271ee3203 -> passed: targeted_mutant_gate MANH 6/8: rc=0 · passed 39/39
-JOB 125170251764 gate-nhanh-manh (windows-latest, 7) [windows-latest] conclusion=success log_sha256=c1729bd6c6d72c0f7fd9e426746a0e1a629416eafd25240d4c4a7437b9c83f31 -> passed: targeted_mutant_gate MANH 7/8: rc=0 · passed 42/42
-JOB 125170251569 gate-ops (windows-latest) [windows-latest] conclusion=success log_sha256=56bcdf3c56d6a27cb3eb87ad06e28ce7a038cbc52c4956387647897651858c5f -> passed: TỔNG: ĐẠT
-JOB 125170251606 gate-packet-loop (windows-latest) [windows-latest] conclusion=success log_sha256=fccc51cddb711c849d43ca398021bba54a3233885064bed2a5d7d6a25f89b213 -> passed: TỔNG: ĐẠT
+JOB 125171514673 gate-nhanh-gop (windows-latest) [windows-latest] conclusion=success log_sha256=29701240354407ced26d5a9f351d67fcb0a0998976196ac6e8006dfad5c17f6f -> passed: [--gop-dich] targeted_mutant_gate: DAT — KHONG phai full mutant audit; full_mutant_audit van BAT BUOC t
+JOB 125170251741 gate-nhanh-manh (windows-latest, 0) [windows-latest] conclusion=success log_sha256=dccb812153be9c71119979f7d82a3cd7c45adc2197000c377c865dae418472a6 -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 0/8: rc=0 · passed 39/39
+JOB 125170251712 gate-nhanh-manh (windows-latest, 1) [windows-latest] conclusion=success log_sha256=6eb86f6d2cee716bcde594433b101d7d5def946626487e803431106a97ef9bba -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 1/8: rc=0 · passed 41/41
+JOB 125170251906 gate-nhanh-manh (windows-latest, 2) [windows-latest] conclusion=success log_sha256=e7cf0ae31b2f0ad691474cfe6bf09791d968ccc3816a8914127e0226af26dad8 -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 2/8: rc=0 · passed 40/40
+JOB 125170251830 gate-nhanh-manh (windows-latest, 3) [windows-latest] conclusion=success log_sha256=8a2d6d46b6145edb34b53ac04df1f35aff999f5421e54d068f6c087af4429013 -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 3/8: rc=0 · passed 40/40
+JOB 125170251694 gate-nhanh-manh (windows-latest, 4) [windows-latest] conclusion=success log_sha256=ea046fd671bf3291fcf7e7a46a4e0028f41e4bd369c3e2918f973309bff65b32 -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 4/8: rc=0 · passed 39/39
+JOB 125170251785 gate-nhanh-manh (windows-latest, 5) [windows-latest] conclusion=success log_sha256=e8615a1cb364890413523dc871e705c96f34899e928336bc576fa104229f33aa -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 5/8: rc=0 · passed 41/41
+JOB 125170251658 gate-nhanh-manh (windows-latest, 6) [windows-latest] conclusion=success log_sha256=30849574125696c86027f81bf48770ceeb9b3c0209b06d7eb3ac92a271ee3203 -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 6/8: rc=0 · passed 39/39
+JOB 125170251764 gate-nhanh-manh (windows-latest, 7) [windows-latest] conclusion=success log_sha256=c1729bd6c6d72c0f7fd9e426746a0e1a629416eafd25240d4c4a7437b9c83f31 -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 7/8: rc=0 · passed 42/42
+JOB 125170251569 gate-ops (windows-latest) [windows-latest] conclusion=success log_sha256=56bcdf3c56d6a27cb3eb87ad06e28ce7a038cbc52c4956387647897651858c5f -> not_measured: thieu buoc [ops/ci_duong_nhanh_test.py]
+JOB 125170251606 gate-packet-loop (windows-latest) [windows-latest] conclusion=success log_sha256=fccc51cddb711c849d43ca398021bba54a3233885064bed2a5d7d6a25f89b213 -> passed: [.claude/dev/packet_loop_test.py] TỔNG: ĐẠT
 JOB 125171864782 gate-registry (windows-latest) [windows-latest] conclusion=failure log_sha256=633d8148af49288239bfc051f82c3f790847227e57982bfdb3c35d18307f3466 -> failed: conclusion=failure
 
-MOC_GATE_OUTPUT: failed (13/15 job co dau hieu duong)
+MOC_GATE_OUTPUT: failed (11/15 job co dau hieu duong)

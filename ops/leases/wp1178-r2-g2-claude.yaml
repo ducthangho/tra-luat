@@ -58,3 +58,4 @@ heartbeat_required_minutes: 360
 run_minutes: 90
 depends_on: []
 thay_the_cho: [wp1178-r1-g1-codex]
+da_bi_thay_the: wp1178-r3-g3-codex

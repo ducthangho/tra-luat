@@ -1,0 +1,125 @@
+Có **3 finding P1 và 6 finding P2**, thuộc **5 lớp nguyên nhân**. Cần sửa trước khi approve.
+
+Review `KIEM-MERGE-M9` r1/g1, class `sensitive`, trên checkout detached HEAD:
+
+```text
+base:         f4b513da5802d439aedbe58ae4a5cd38ff47d6ab
+reviewed_sha: 268c6659193aeed985ea5bc73af51164f0bccd6f
+tree:         26046620ec638902f2756051189150a60253140f
+spec_sha256:  d18820c854af40a4e0d6ca58f6b8812296a3057b0e7b063f704f5a4cdd7ca442
+```
+
+Identity: `openai_codex / codex_cli / machine`, họ model `openai`. Chưa có biên nhận để xác minh độc lập model/effort của hai phía. Môi trường đo: Linux, Python 3.13.18, Git 2.43.0.
+
+Các script và log phản chứng nằm tại [thư mục scratch](/tmp/review-20df19ba-npk1comb). Tái lập từng ca bên dưới bằng:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/review-20df19ba-npk1comb/m9_checks.py TEN_CA
+```
+
+**F01 — P1 — `jobs-trang-khong-neo-endpoint`**  
+Vị trí: [.claude/dev/packet_loop.py:3240](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop.py:3240).
+
+K7 gộp mọi tệp jobs vào một `_trang_du`, rồi lọc theo run/attempt. Vì vậy, tập được chứng minh đủ trang khác tập dùng để quyết định đạt.
+
+| Ca đã chạy | Kết quả đo |
+|---|---|
+| `two_complete_run_job_files`: hai run xanh, mỗi tệp jobs đầy đủ với `total_count=2` | `rc=12`, thiếu K7: gộp thành 4 ID rồi so với 2; chặn oan |
+| `mixed_run_page_hides_failure`: một job xanh đúng run, một job đỏ mang run khác trong cùng trang | `rc=0` |
+| `missing_job_run_id_hides_failure`: job đỏ thiếu `run_id` | `rc=0` |
+| `missing_job_attempt_hides_failure`: job đỏ thiếu `run_attempt` | `rc=0` |
+| `jobs_mixed_count_covers_missing`: `total_count=3`, chỉ hai job đúng run và một job ngoại lai | `rc=0` |
+
+Các ca lọt đều in `ĐỦ ĐIỀU KIỆN MERGE` trong fixture, dù chưa chứng minh đủ jobs của run được nhận.
+
+Đề xuất sửa tại K7: giữ ranh giới trang và từng lần lấy của từng run; xác thực định danh job trước khi lọc; kiểm đủ trang riêng cho đúng nguồn readback. Khóa bằng cả ca hai run hợp lệ và bốn ca thiếu/trộn định danh trên. Khi sửa, cần giữ khả năng nhận nhiều trang hợp lệ và nhận **ít nhất một** run đạt theo đặc tả.
+
+**F02 — P1 — `jobs-join-nhan-so-sai-kieu`**  
+Vị trí: [.claude/dev/packet_loop.py:3243](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop.py:3243).
+
+Chỉ `run.run_attempt` được kiểm kiểu chính xác. Phía job dùng `==`, nên Python đồng nhất bool/float với int:
+
+| Ca đã chạy | Kết quả đo |
+|---|---|
+| `job_attempt_bool_true`: `job.run_attempt=True`, run attempt 1 | `rc=0` |
+| `job_attempt_float_1`: `job.run_attempt=1.0`, run attempt 1 | `rc=0` |
+| `job_run_id_float`: `job.run_id=700.0`, run ID 700 | `rc=0` |
+| `job_run_id_bool_true`: `job.run_id=True`, run ID 1 | `rc=0` |
+
+Đối chứng: run attempt là bool, float, string hoặc thiếu trường đều bị chặn bằng `rc=12`. Lỗ nằm ở kiểm kiểu bất đối xứng khi join.
+
+Đề xuất xác thực kiểu và miền hợp lệ của định danh ở cả hai phía trước phép so. Thêm bảng ca cho từng trường và từng kiểu; mutant bỏ từng kiểm kiểu phải chết tại assertion K7. Tránh ép `int()` vì có thể biến đầu vào sai thành định danh hợp lệ.
+
+**F03 — P1 — `waiver-bi-chuan-hoa-truoc-khi-khop`**  
+Vị trí: [.claude/dev/packet_loop.py:3235](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop.py:3235), qua `_dong_chu_kho` dòng 3175.
+
+Đặc tả đòi dòng khớp `^full_mutant_audit: H mien$`, nhưng helper gọi `strip()` trước khi kiểm. Khi không có readback audit:
+
+| Ca đã chạy | Kết quả đo |
+|---|---|
+| `owner_waiver_leading_spaces` | `rc=0` |
+| `owner_waiver_trailing_spaces` | `rc=0` |
+| `owner_waiver_tabs` | `rc=0` |
+
+Cùng cơ chế áp dụng cho mọi khoảng trắng đầu/cuối mà `str.strip()` loại bỏ. Đối chứng `owner_waiver_sha_short` bị chặn, `rc=12`.
+
+Đề xuất K7 khớp trên dòng còn nguyên nội dung sau khi xác minh tác giả. Thêm ca dương đúng mẫu và ca âm cho khoảng trắng đầu, cuối, tab; mutant chuẩn hóa dòng phải bị bắt. Cần giữ semantics hiện có của K5/K6 khi chỉnh helper dùng chung.
+
+**F04–F09 — P2 — sáu đột biến bổ sung sống**
+
+Lệnh đã chạy để đo suite, đột biến và các ca đích:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/review-20df19ba-npk1comb/m9_checks.py
+```
+
+Cả sáu mutant dưới đây đều cho **`72 / 72 {}`**: toàn bộ ca `cong_m9_*` và `cong_c_*` vẫn xanh.
+
+| Finding | Vị trí test | Mutant sống | Ca cần bổ sung |
+|---|---|---|---|
+| F04, P2 | `.claude/dev/packet_loop_test.py:9323` | `extra_m9_drop_run_id`: bỏ so `job.run_id` | Mọi job thuộc run khác phải đỏ K7 |
+| F05, P2 | `.claude/dev/packet_loop_test.py:9320` | `extra_m9_drop_run_status`: bỏ kiểm run `completed` | Run `in_progress`, conclusion `success` phải đỏ |
+| F06, P2 | `.claude/dev/packet_loop_test.py:9322` | `extra_m9_drop_job_status`: bỏ kiểm job `completed` | Job `in_progress`, conclusion `success` phải đỏ |
+| F07, P2 | `.claude/dev/packet_loop_test.py:9325` | `extra_m9_drop_job_page_check`: bỏ `_trang_du` riêng cho jobs | Jobs thiếu trang phải đỏ; ca hiện tại chỉ làm thiếu trang runs |
+| F08, P2 | `.claude/dev/packet_loop_test.py:9323` | `extra_m9_drop_attempt_type`: nới kiểm kiểu run attempt | Run attempt `1.0` phải đỏ |
+| F09, P2 | `.claude/dev/packet_loop_test.py:9167` | `extra_k6_accept_empty_diff`: bỏ chốt diff rỗng của K6 | Diff raw thành công nhưng rỗng phải ném `ValueError` |
+
+F04–F08 thuộc lớp `ma-tran-test-k7-thieu-bat-bien`; F09 thuộc lớp `kiem-thu-k6-thieu-diff-rong`.
+
+Tôi đã đối chứng từng mutant bằng ca mới:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/review-20df19ba-npk1comb/verify_survivors.py
+```
+
+Output đo được:
+
+```text
+extra_m9_drop_run_id:         baseline_rc=12, mutant_rc=0
+extra_m9_drop_run_status:     baseline_rc=12, mutant_rc=0
+extra_m9_drop_job_status:     baseline_rc=12, mutant_rc=0
+extra_m9_drop_job_page_check: baseline_rc=12, mutant_rc=0
+extra_m9_drop_attempt_type:   baseline_rc=12, mutant_rc=0
+extra_k6_accept_empty_diff:  baseline=ValueError, mutant=not_required
+```
+
+Năm ca K7 mới đều phát `AssertionError` do đòi `rc=12` nhưng nhận `rc=0`. F09 phân biệt đúng ngoại lệ với kết quả `not_required`.
+
+Đề xuất cho từng finding: thêm ca tương ứng vào test và thêm mutant đó vào bảng `MUTANTS`; yêu cầu assertion của chính ca đích. F09 chỉ cần khóa hành vi đang đúng. Khi viết ca, giữ các điều kiện khác hợp lệ để lỗi setup hoặc gate khác không giết mutant thay cho tính chất cần đo.
+
+**Các phép kiểm còn lại**
+
+- **Passed:** 72/72 ca chọn lọc, gồm 54 `cong_c_*` và 18 `cong_m9_*`; không ca skipped.
+- **Passed:** 7/7 mutant `m9_*` có sẵn bị giết bởi 8 assertion của đúng ca đích, không chết do traceback vô can.
+- **Passed:** `doctrine-scan` rc 0, 10 tệp/0 vi phạm; `adr-song` rc 0, 59/59; `doc-claims-check --strict --json` rc 0, `ok=true`.
+- **Passed:** đúng 5 tệp, 178 dòng thêm; `git diff --check` rc 0.
+- **Passed:** 18/18 phép đo phạm vi: tên có khoảng trắng, Unicode, tab/newline; rename ra ngoài vùng, xóa, mode-only và symlink. Các biến thể hoa/thường được đo theo mẫu literal của đặc tả.
+- **Passed:** M6 đồng thời liệt kê K2, K4, K6 và K7 khi cả bốn thiếu.
+- **Passed:** đối chứng base/candidate xác nhận K6 vẫn ném `ValueError` cho cả git lỗi và diff rỗng; chưa thấy hồi quy hành vi từ việc tách `_diff_raw`.
+- Comment không phải owner dù audit xanh bị chặn ở cả base và candidate; base đã thiếu K5/K6, nên không tính thành hồi quy mới.
+- **Not run:** toàn bộ suite, Windows local, CI và canary dữ liệu GitHub thật. Đây là review offline chọn lọc.
+- Snapshot đầu/cuối khớp trên 10.207 path, HEAD/tree/status/diff/index; `FILE_DELTAS=[]`. Snapshot không chứng minh lịch sử ghi rồi hoàn nguyên. Tệp có tên nhạy cảm chỉ được so metadata.
+
+P3: không ghi nhận.
+
+KET_LUAN: changes_requested

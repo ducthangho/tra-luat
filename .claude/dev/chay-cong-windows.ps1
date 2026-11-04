@@ -138,10 +138,11 @@ $env:PYTHONDONTWRITEBYTECODE = '1'
 # chạy MẢNH, registry ĐỎ vì máy) và `CONG_CU_TEST_MANH` rò (đo: `cong_cu_test` rc=0, 26/416 đột biến, bỏ cổng cây thật).
 # `CI_DUONG_NHANH_*`: env bước `kiem re` của `gate-ops` (master 7e5958e, packet #674) — script không chạy bước ấy (chỉ có ở chế độ
 # `duong_nhanh`), nên xoá như mọi khoá khác (đo: cây merge 7e5958e với ad4e724 ⇒ t30 vế tĩnh ĐỎ, thiếu đúng bốn khoá này).
+# CI_DUONG_NHANH_CHE_DO belongs to the Linux harness step; this Windows gate does not run that step.
 foreach ($n in 'AL_VER', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CONG_CU_TEST_BAN_KINH', 'CONG_CU_TEST_MANH', 'CONG_CU_TEST_MANH_RA',
                'CI_DANG_KY_WORKERS', 'CI_DANG_KY_SU_KIEN', 'CI_DANG_KY_GOC', 'CI_DANG_KY_DAU', 'CI_DANG_KY_DOT_BIEN_MANH',
                'NHANH_DON_DUOC_MANH', 'NHANH_DON_DUOC_MANH_RA', 'CI_DUONG_NHANH_SU_KIEN', 'CI_DUONG_NHANH_GOC',
-               'CI_DUONG_NHANH_DAU', 'CI_DUONG_NHANH_MERGE') {
+               'CI_DUONG_NHANH_DAU', 'CI_DUONG_NHANH_MERGE', 'CI_DUONG_NHANH_CHE_DO') {
     [Environment]::SetEnvironmentVariable($n, $null)
 }
 # Biến git CỤC BỘ CỦA KHO (đúng tập `git rev-parse --local-env-vars` in ra, trừ `GIT_CONFIG*` — nếp git đọc giá trị CÓ HIỆU LỰC, t13)

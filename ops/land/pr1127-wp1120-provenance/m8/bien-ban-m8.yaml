@@ -1,0 +1,44 @@
+packet: KIEM-MERGE-M9
+revision: 1
+generation: 1
+spec_hash: d18820c854af40a4e0d6ca58f6b8812296a3057b0e7b063f704f5a4cdd7ca442
+lease_cuoi: kiem-merge-m9-r1-g1-claude-remote-20261101
+pr_thuc_thi: 1127
+head_da_review: 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897
+tree_h: 7ef171a95cb5c3f6c1e6a1292ea01d0a481a1b79
+merge_commit: f2102fc388a884d994f7bfeb29ef6863b9972b66
+tree_m: 4c134d1b317c879f8c6c18a8510fd1c6baff86a2
+merged_at: '2026-11-01T18:26:35Z'
+merged_by: ducthangho
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1127
+duyet_chu_kho_ghi_chu: 'chủ kho tự merge PR #1127 trên head 06a5a40 sau khi executor báo kiem-merge rc=0; duyệt bước 8 và cách đo CI merge commit trong phiên thực thi (ghi hộ ở #1120 issuecomment-6562300240)'
+write_set_thuc_te: '5 tệp, +318/-9 (trần 400 sau nang_tran của chủ kho; ban đầu 300)'
+landed: true
+ci_master:
+  run_id: 41356691133
+  conclusion: success
+  ghi_chu: 'ci.yml workflow_dispatch trên nhánh tạm ops/ci-f2102fc trỏ đúng f2102fc, runner_set windows-and-ubuntu, attempt 1, 37/37 job success. Lượt push 41336643336 bị huỷ 0 job ở cả attempt 1 và 2 vì lỗ concurrency #1132; chủ kho chọn đo bằng dispatch.'
+moc_10_2_2:
+  run: passed   # run 41356691133 attempt 1, head_sha f2102fc, path .github/workflows/ci.yml, check_suite 112082061848
+  checkout: passed   # 36/36 job có checkout cùng SHA f2102fc, tree 4c134d1b; job chuan-bi theo thiết kế không checkout
+  workflow_definition: passed   # lượt ops-do-workflow-definition.yml 41368107476, artifact 13108295728; blob 82d9f239ff31, sha256 ce9a3ec0f777; git xác nhận độc lập
+  gate_output: passed   # packet_loop.py kiem-gate rc=0, 37/37 tên bắt buộc xanh trong suite 112082061848
+nghiem_thu:
+  A1: passed   # full suite packet_loop_test trên 5f62761 (5 tệp packet trùng byte 06a5a40) TỔNG ĐẠT, nền 1088/1088; gate-packet-loop CI xanh trên head và merge commit
+  A2: passed   # 53 ca cong_m9_* (phạm vi, run đúng H, miễn, các chiều dương)
+  A3: passed   # các ca đỏ K7: head khác, conclusion, job failure, attempt khác, job rỗng, trang thiếu, người miễn, SHA miễn, git lỗi
+  A4: passed   # 48/48 đột biến m9_* bị giết bằng AssertionError của ca đích
+  A5: passed   # cong_m9_m6_hai_thieu
+  A6: passed   # đúng 5 tệp, 318 dòng thêm, trần 400
+  A7: passed   # doctrine-scan rc 0, adr-song rc 0, doc-claims-check ok; ADR-0060 và skill ghi K0–K7
+  A8: passed   # tra-luat-win 107/107 cong_m9_* + cong_c_* trên 06a5a40, 0 skipped, 562 s
+  A9: passed   # ci-dot-bien-du 41331813517 success 10/10 job tại 06a5a40; kiem-merge rc=0 với readback ấy trước khi bỏ draft
+review:
+  offline_codex: '8/10 lời gọi (trần ADR-0055); lượt 6 approve 6c965dc, lượt 7 approve 5f62761, lượt 8 approve 06a5a40 (run 12859b10)'
+  offline_finding: '4 P1 thật đã vá (trang jobs, join bool/float, dòng miễn bị chuẩn hoá hai lần, comment người khác phủ quyết run xanh); mọi P2/P3 đã đóng'
+  connector: 'sạch trên 5f62761 và 06a5a40 (lượt gọi tay và lượt tự chạy khi bỏ draft, has_any_findings false)'
+  kiem_merge: 'rc=0 ĐỦ ĐIỀU KIỆN MERGE trên 06a5a40, chạy trước khi bỏ draft; vế âm bỏ --dot-bien-du-* cho rc=12 thiếu K7'
+  push: '1 lần chính (5f62761), 1 lần thêm (06a5a40, merge origin/master cho cổng thu-hoi); ADR-0060 M5 cho tối đa 2'
+windows:
+  phan_loai: required
+  luot: 'tra-luat-win 107/107 trên 06a5a40 (lượt thăm dò 5f62761 cũng 107/107); lượt nền Windows chủ kho miễn theo đặc tả A8'

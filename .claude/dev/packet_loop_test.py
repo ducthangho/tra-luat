@@ -9605,6 +9605,9 @@ def _r1187(c, kind="human", change=None, red=False):
     commit({"README.md": "base\n"})
     milestone = commit({"docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md": "accepted\n", m.ADR0063_TEP: "accepted\n"})
     spec = b"packet_id: wp1187\nrevision: 1\n"
+    if kind == "title": spec = b"# wp1187 r1 - frozen spec\n"
+    if kind == "title_conflict": spec += b"# wrong r2 - conflicting title\n"
+    if kind == "markdown": spec = b"# wp1187 r1 - frozen\n- packet_id: wp1187; revision: 1;\n```yaml\nrevision: 3\n```\n"
     oid = commit({"ops/specs/X.md": spec.decode()}); _g(w, "update-ref", "refs/remotes/origin/master", oid)
     h = commit({"product.txt": "candidate\n"})
     m.ADR0062_OID = milestone
@@ -9630,7 +9633,7 @@ def _r1187(c, kind="human", change=None, red=False):
         if value is tr_raw: value["body"] = yaml.safe_dump(tr)
         f = w / (attr + ".json"); f.write_text(json.dumps(value), encoding="utf-8"); setattr(a, attr, str(f))
     try:
-        if kind == "spec":
+        if kind in ("spec", "title", "title_conflict", "markdown"):
             actual = m._spec_merge(w, a.head, "ops/specs/X.md", ls)
             assert actual == spec, "positive spec bytes changed"
         else:
@@ -9659,7 +9662,7 @@ for group, fields in (("tr", ("packet", "revision", "generation", "pr", "reviewe
                       ("raw", ("id", "html_url", "issue_url", "author_association")), ("run", ("head_sha", "html_url", "event"))):
     for field in fields:
         name = f"r1187_{group}_{field}"
-        CASES.append((name, _ca1187("human", lambda x, g=group, k=field: x[g].update({k: "wrong"}))))
+        CASES.append((name, _ca1187("human", lambda x, g=group, k=field: x[g].update({k: None if k == "event" else "wrong"}))))
         if group == "tr":
             MUTANTS["r1187_drop_tr_" + field] = ('tr[k] != v for k, v in expected_tr.items()', f'tr[k] != v for k, v in expected_tr.items() if k != "{field}"', [name])
 for name, group, key, value in (("actor", "raw", "user", dict(login="codex", type="User")), ("bot", "raw", "user", dict(login="ducthangho", type="Bot")),
@@ -9714,7 +9717,7 @@ for name, old, new, target in [
     ("run_repo", 'run.get("repository", {}).get("full_name") == a.repo', 'True', "repo"),
     ("run_head", 'run.get("head_sha") == a.head', 'True', "run_head_sha"),
     ("run_url", 'run.get("html_url") == run_url', 'True', "run_html_url"),
-    ("run_event", 'run.get("event") == "push"', 'True', "run_event"),
+    ("run_event", 'type(run.get("event")) is str and bool(run["event"])', 'True', "run_event"),
     ("required_hash", 'lease["spec_sha256_required"] != lease["spec_hash"]', 'False', "spec_required_hash"),
     ("spec_path", 'lease.get("spec_path") != path', 'False', "spec_path"),
     ("spec_packet", 'values != [str(lease.get(key))]', 'key != "packet_id" and values != [str(lease.get(key))]', "spec_packet"),
@@ -9780,6 +9783,14 @@ def _docs1187(c):
 CASES.append(("r1187_doc_anchors", _docs1187))
 MUTANTS["r1187_drop_doc_guard"] = ('        if s == "0063":', '        if False:', ["r1187_doc_anchors"])
 
+CASES += [("r1187_markdown_example", _ca1187("markdown", red=False)), ("r1187_title_positive", _ca1187("title", red=False)), ("r1187_title_conflict", _ca1187("title_conflict")),
+          ("r1187_title_packet", _ca1187("title", lambda x: x["ls"].update(packet_id="wrong"))), ("r1187_title_revision", _ca1187("title", lambda x: x["ls"].update(revision=2)))]
+
+MUTANTS["r1187_drop_heading_identity"] = ('        headings = re.findall(r"(?m)^# ([A-Za-z0-9_-]+) r([1-9][0-9]*) (?:—|–|-) .+$", visible)', '        headings = []', ["r1187_title_positive"])
+MUTANTS["r1187_ignore_heading_conflict"] = ('values + [t[0 if key == "packet_id" else 1] for t in headings]', 'values or [t[0 if key == "packet_id" else 1] for t in headings]', ["r1187_title_conflict"])
+MUTANTS["r1187_read_fenced_example"] = ('visible, errors = _che_khong_render(spec.decode("utf-8"))', 'visible, errors = spec.decode("utf-8"), []', ["r1187_markdown_example"])
+
+CASES += [("r1187_event_pr", _ca1187("human", lambda x: x["run"].update(event="pull_request"), False)), ("r1187_event_pr_target", _ca1187("human", lambda x: x["run"].update(event="pull_request_target"), False))]
 def main() -> int:
     _ = [s.reconfigure(encoding="utf-8", errors="backslashreplace")
          for s in (sys.stdout, sys.stderr) if hasattr(s, "reconfigure")]

@@ -3202,10 +3202,14 @@ def _spec_merge(root, h, path, lease):
     if not m or _git_do(root, "check-ref-format", ref.split("@")[0])[0] or lease.get("spec_path") != path or not path or PurePosixPath(path).is_absolute() or ".." in PurePosixPath(path).parts:
         raise ValueError("spec_ref phải ghim OID40 và spec_path đúng nguồn")
     spec = blob(m[1])
+    visible, errors = _che_khong_render(spec.decode("utf-8"))
+    if errors: raise ValueError("spec Markdown không đóng rào/comment")
     for key in ("packet_id", "revision"):
-        values = re.findall(rf"(?m)^(?:- )?{key}: ([^;\n]+)", spec.decode("utf-8"))
+        values = re.findall(rf"(?m)^(?:- )?{key}: ([^;\n]+)", visible)
         if key == "revision" and not values:
-            values = re.findall(r"(?m)^- packet_id: [^;\n]+; revision: ([0-9]+);", spec.decode("utf-8"))
+            values = re.findall(r"(?m)^- packet_id: [^;\n]+; revision: ([0-9]+);", visible)
+        headings = re.findall(r"(?m)^# ([A-Za-z0-9_-]+) r([1-9][0-9]*) (?:—|–|-) .+$", visible)
+        values = list(dict.fromkeys(values + [t[0 if key == "packet_id" else 1] for t in headings]))
         if values != [str(lease.get(key))]:
             raise ValueError(f"spec {key} không khớp lease")
     if _git_do(root, "cat-file", "-e", f"{h}:{path}")[0] == 0 and blob(h) != spec:
@@ -3252,7 +3256,7 @@ def _human_merge(a, root, lease, spec, p3):
     run = _doc_json(a.human_remote_run, RC_GATE)[0]
     run_url = f"https://github.com/{a.repo}/actions/runs/{run.get('id')}"
     if not (type(run.get("id")) is int and run["id"] > 0 and run.get("repository", {}).get("full_name") == a.repo
-            and run.get("head_sha") == a.head and run.get("html_url") == run_url and run.get("event") == "push"):
+            and run.get("head_sha") == a.head and run.get("html_url") == run_url and type(run.get("event")) is str and bool(run["event"])):
         raise ValueError("human remote run repo/head/origin sai")
     remote_time = _doc_han_utc(run["created_at"])
     if remote_time >= _doc_han_utc(ADR0062_TIME):

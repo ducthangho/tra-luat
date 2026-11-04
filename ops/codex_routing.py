@@ -286,13 +286,15 @@ def _admission(registry, b, now):
 
 def _dispatch(dispatch, policy, row):
     shape(dispatch, {"executor", "reviewer"}, "pre-run dispatch")
+    # Revocation invalidates admission, while retaining the original dispatch hash.
+    granted = {**policy, "revoked": False, "c1_authority": {**policy["c1_authority"], "revoked": False}}
     for role in ("executor", "reviewer"):
         assigned = dispatch[role]
         shape(assigned, {"role", "scope", "policy_sha256", "recorded_at", "config", "run_id", "session_id"}, "dispatch role")
         # Executor cannot know its final H. Reviewer must receive that exact H.
         scope = {k: v for k, v in row["binding"].items() if role == "reviewer" or k not in ("head_sha", "tree_sha")}
         require(assigned["role"] == role and assigned["scope"] == scope
-                and assigned["policy_sha256"] == sha256(canonical_bytes(policy)), "dispatch scope/policy mismatch")
+                and assigned["policy_sha256"] == sha256(canonical_bytes(granted)), "dispatch scope/policy mismatch")
         require(timestamp(policy["valid_from"]) <= timestamp(assigned["recorded_at"]) < timestamp(policy["expires_at"]), "dispatch outside policy interval")
         require(assigned["config"] == policy[f"{role}_config"] and assigned["run_id"] == row[f"{role}_run_id"], "dispatch configuration/run mismatch")
         token(assigned["session_id"], "dispatch session")

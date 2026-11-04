@@ -322,6 +322,28 @@ class C1Tests(unittest.TestCase):
         reg["policies"].append(revoked)
         self.assertEqual(check(reg, q)["status"], "validated")
 
+    def test_strict_route_retains_revoked_c1_history(self):
+        reg, q = fixture()
+        q["binding"].update(grant_id="strict-grant", dispatch_id="strict-dispatch")
+        reg["policies"][0]["grant_id"] = "strict-grant"
+        for role in ("executor", "reviewer"):
+            machine = q["technical"][role]
+            machine.update(run_id=f"strict-{role}-run", session_id=f"strict-{role}-session")
+            reg["ledgers"][0]["reservations"][0][f"{role}_run_id"] = machine["run_id"]
+        q["technical"].update(run_id=q["technical"]["reviewer"]["run_id"], provenance_id="strict-producer")
+        q["audit"]["technical_run_id"] = q["technical"]["run_id"]
+        reg["producers"][0]["producer_id"] = "strict-producer"
+        reseal(reg, q)
+        retained = copy.deepcopy(self.reg)
+        p = retained["policies"][0]
+        p["revoked"] = p["c1_authority"]["revoked"] = True
+        row = retained["ledgers"][0]["reservations"].pop()
+        retained["ledgers"][0]["history"].append(row)
+        retained["ledgers"][0]["usage"] = copy.deepcopy(row["units"])
+        for section in ("policies", "ledgers", "producers"):
+            reg[section] += retained[section]
+        self.assertEqual(check(reg, q)["status"], "validated")
+
 
 class SemanticTests(unittest.TestCase):
     def setUp(self):

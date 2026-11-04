@@ -57,7 +57,7 @@ run_minutes: 90
 depends_on: []
 recorded_by: codex-desktop-dispatcher
 recorder_is_executor: false
-reviewed_sha_required: db9c665db5610d9bd81a8fd6f345248cde83aa00
+reviewed_sha_required: 28202eb23104b9207232cbf7500bacc6087357a3
 authority_notes:
 - Owner approved the concrete r2 scope/lease request with amended cap1000 in chat;
   linked Issue1187 comment records the verbatim directive and exact resulting hash.
@@ -94,21 +94,21 @@ size_limit:
 review_budget_override:
   approved_by: ducthangho
   recorded_by: codex-desktop-dispatcher
-  source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6632609191
-  recorded_at_utc: '2026-11-04T14:01:27.696989+00:00'
-  old_limit: 2
-  new_limit: 3
-  calls_used_before_next: 2
+  source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6634287639
+  recorded_at_utc: '2026-11-04T15:13:49.540195+00:00'
+  old_limit: 3
+  new_limit: 4
+  calls_used_before_next: 3
   authorized_additional_calls: 1
-  scope_head: db9c665db5610d9bd81a8fd6f345248cde83aa00
+  scope_head: 28202eb23104b9207232cbf7500bacc6087357a3
   no_reset: true
   no_code_audit_or_land_authority: true
 nang_tran_review_budget:
   ai_nang: ducthangho via explicitownerresponse
-  can_cu: one fresh verification of concrete P2crashcredit+P3remediation; two actualreviewsused;
-    https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6632609191
-  tran_cu: customPacket1187 modelcalls withoutput2
-  tran_moi: customPacket1187 modelcalls withoutput3; exactlyoneadditional, nofourth
+  can_cu: one fresh verification after owner required all4P3fixed; three actualreviewsused;
+    https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6634287639
+  tran_cu: customPacket1187 modelcalls withoutput3
+  tran_moi: customPacket1187 modelcalls withoutput4; exactlyoneadditional, nofifth
 initial_start_from_sha: abc6bdab035b14bf24f55ea5d557233c927ad951
 execution_runs:
 - run: 1
@@ -125,3 +125,21 @@ execution_runs:
   continuation_sha: db9c665db5610d9bd81a8fd6f345248cde83aa00
   authority_source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6633294277
   scope: ownerrequiresall4P3fixedwithincurrentcontract;no fourthmodelcall
+  completed_at_utc: '2026-11-04T15:09:12Z'
+  outcome: sealed_handoff_282_not_pushed
+review_budget_override_history:
+- approved_by: ducthangho
+  recorded_by: codex-desktop-dispatcher
+  source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6632609191
+  recorded_at_utc: '2026-11-04T14:01:27.696989+00:00'
+  old_limit: 2
+  new_limit: 3
+  calls_used_before_next: 2
+  authorized_additional_calls: 1
+  scope_head: db9c665db5610d9bd81a8fd6f345248cde83aa00
+  no_reset: true
+  no_code_audit_or_land_authority: true
+reviewed_sha_required_history:
+- sha: db9c665db5610d9bd81a8fd6f345248cde83aa00
+  disposition: advisory3 historical after owner required all4P3repairs
+  source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6633294277

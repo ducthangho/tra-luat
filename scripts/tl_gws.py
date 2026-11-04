@@ -1171,6 +1171,7 @@ class _CodexRestoreWindows:
         self.c, self.w = c, w
         self.k = c.WinDLL("kernel32", use_last_error=True)
         self.a = c.WinDLL("advapi32", use_last_error=True)
+        self.nt = c.WinDLL("ntdll")
         self.handles = []
         self.sd = c.c_void_p()
         self.sid = None
@@ -1191,6 +1192,8 @@ class _CodexRestoreWindows:
         self.seek = api(self.k, "SetFilePointerEx", B, [H, c.c_longlong, P, D])
         self.flush = api(self.k, "FlushFileBuffers", B, [H])
         self.set_info = api(self.k, "SetFileInformationByHandle", B, [H, c.c_int, P, D])
+        self.link_info = api(self.nt, "NtSetInformationFile", c.c_long, [H, P, P, D, c.c_int])
+        self.nt_error = api(self.nt, "RtlNtStatusToDosError", D, [c.c_long])
         self.get_security = api(self.a, "GetSecurityInfo", D, [H, c.c_int, D, P, P, P, P, P])
         self.control = api(self.a, "GetSecurityDescriptorControl", B, [P, P, P])
         self.get_ace = api(self.a, "GetAce", B, [P, D, P])
@@ -1246,7 +1249,7 @@ class _CodexRestoreWindows:
         # LIST_DIRECTORY is intentional: metadata-only handles do not fence all
         # NTFS rename/share checks. Ancestors deny write/delete sharing. The
         # private home allows write sharing for NTFS's destination-directory
-        # open during rename; its checked owner-only DACL excludes other SIDs.
+        # open during link publication; its checked owner-only DACL excludes other SIDs.
         h = self.open(str(path), 0x20081, 3 if private_home else 1, None, 3, 0x02200000, None)
         if h == self.c.c_void_p(-1).value:
             raise self.c.WinError(self.c.get_last_error())
@@ -1326,14 +1329,21 @@ class _CodexRestoreWindows:
         return False
 
     def publish(self, home, data):
-        """CREATE_NEW staging + handle rename ReplaceIfExists=FALSE. No path replace."""
+        """Kernel-owned staging lifetime + no-replace hard-link publication.
+
+        FILE_FLAG_DELETE_ON_CLOSE stays armed from creation through final close,
+        including TerminateProcess. Publish a separate auth.json link to the same
+        verified object BY HANDLE; closing removes only the temporary link. Never
+        clear cleanup, rename the delete-on-close link, or reopen staging by path.
+        """
         import secrets
         c, w = self.c, self.w
+        directory = self.directory(home, private_home=True)
+        self.private(directory)
         tmp = home / (".codex-restore-" + secrets.token_hex(16) + ".tmp")
-        h = self.open(str(tmp), 0xC0010000 | 0x20000, 0, c.byref(self.sa), 1, 0x00200000, None)
+        h = self.open(str(tmp), 0xC0010000 | 0x20000, 0, c.byref(self.sa), 1, 0x04200000, None)
         if h == c.c_void_p(-1).value:
             raise c.WinError(c.get_last_error())
-        published = False
         try:
             self.private(h)
             n = w.DWORD()
@@ -1346,19 +1356,21 @@ class _CodexRestoreWindows:
             self.check(self.read(h, readback, len(data) + 1, c.byref(n), None))
             if n.value != len(data) or readback.raw[:n.value] != data:
                 raise OSError("readback mismatch")
-            name = str(home / "auth.json").encode("utf-16-le")
-            class Rename(c.Structure):
-                _fields_ = [("replace", w.BOOL), ("root", w.HANDLE),
+            # Native FileLinkInformation (11), not a Win32 information-class ID.
+            # Root is the checked/pinned home handle; the only name is auth.json.
+            # https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_file_link_information
+            name = "auth.json".encode("utf-16-le")
+            class Link(c.Structure):
+                _fields_ = [("replace", c.c_ubyte), ("root", w.HANDLE),
                             ("length", w.DWORD), ("name", w.WCHAR * (len(name) // 2 + 1))]
-            info = Rename(False, None, len(name), str(home / "auth.json"))
-            self.check(self.set_info(h, 3, c.byref(info), c.sizeof(info)))
-            published = True
-            self.private(h)
+            class IOStatus(c.Structure):
+                _fields_ = [("status", c.c_void_p), ("information", c.c_size_t)]
+            info = Link(False, directory, len(name), "auth.json")
+            status = IOStatus()
+            rc = self.link_info(h, c.byref(status), c.byref(info), c.sizeof(info), 11)
+            if rc < 0:
+                raise c.WinError(self.nt_error(rc))
         finally:
-            if not published:
-                # Delete our own staging object BY HANDLE, never a competitor's path.
-                delete = w.BOOL(True)
-                self.set_info(h, 4, c.byref(delete), c.sizeof(delete))
             self.close(h)
 
 

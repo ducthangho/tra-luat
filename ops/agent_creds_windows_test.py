@@ -13,6 +13,7 @@ import io
 import json
 import os
 from pathlib import Path
+import queue
 import subprocess
 import sys
 import tempfile
@@ -29,6 +30,8 @@ import gws_cred_store as store  # noqa: E402
 CANARY = "wp1170_FAKE_ONLY_never_print_this_7c9f"
 MASTER = "wp1170_fake_master_0123456789abcdef"
 SCRATCH = None
+KILL_POINTS = ("created", "partial_write", "after_write", "after_flush",
+               "after_readback", "before_publish", "after_publish", "before_close", "after_close")
 
 
 def payload():
@@ -192,6 +195,84 @@ class Windows(unittest.TestCase):
         self.assertTrue((self.home / "auth.json").read_bytes() in (b"FAKE_A", b"FAKE_B"))
         self.assertEqual(sorted(p.name for p in self.home.iterdir()), ["auth.json"])
 
+    def test_wp1170_abrupt_termination_kernel_cleans_staging(self):
+        # Parent really invokes TerminateProcess via Popen.kill; child cannot run
+        # Python finally/atexit. Checkpoints wrap native calls, not product hooks.
+        for point in KILL_POINTS:
+            with self.subTest(point=point):
+                home = self.root / point
+                env = {k: os.environ[k] for k in ("SystemRoot", "WINDIR", "COMSPEC", "PATH") if k in os.environ}
+                env.update({"USERPROFILE": str(self.root), "HOME": str(self.root),
+                            "CODEX_HOME": str(home), "TEMP": str(SCRATCH), "TMP": str(SCRATCH),
+                            "APPDATA": str(self.root / "appdata"), "LOCALAPPDATA": str(self.root / "local"),
+                            "PYTHONUTF8": "1", "PYTHONDONTWRITEBYTECODE": "1"})
+                cmd = [sys.executable, "-B", str(Path(__file__).resolve()), "--scratch", str(SCRATCH),
+                       "--kill-child", point, "--child-home", str(home)]
+                p = subprocess.Popen(cmd, cwd=self.root, env=env, stdin=subprocess.PIPE,
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                line = queue.Queue()
+                reader = threading.Thread(target=lambda: line.put(p.stdout.readline()), daemon=True)
+                reader.start()
+                try:
+                    try:
+                        marker = line.get(timeout=30)
+                    except queue.Empty:
+                        self.fail("fake child did not reach kill checkpoint: " + point)
+                    self.assertEqual(marker, ("WP1170_KILL:" + point + "\n").encode())
+                    self.assertIsNone(p.poll(), "child must still be inside native-operation checkpoint")
+                    p.kill()
+                    out, err = p.communicate(timeout=30)
+                    self.assertNotEqual(p.returncode, 0)
+                    self.assertNotIn(CANARY.encode(), marker + out + err)
+                    self.assertNotIn(MASTER.encode(), marker + out + err)
+                    self.assertEqual(list(home.glob(".codex-restore-*")), [], "orphaned plaintext staging")
+                    committed = point in ("after_publish", "before_close", "after_close")
+                    self.assertEqual((home / "auth.json").exists(), committed)
+                    if committed:
+                        self.assertEqual((home / "auth.json").read_bytes(),
+                                         g._codex_restore_payload(encrypted(), MASTER))
+                        self.assertEqual(sorted(p.name for p in home.iterdir()), ["auth.json"])
+                    else:
+                        self.assertEqual(list(home.iterdir()), [])
+                    print(f"WP1170_KILL {point}: child_rc={p.returncode}; staging=0; auth={committed}", flush=True)
+                finally:
+                    if p.poll() is None:
+                        p.kill()
+                    p.communicate(timeout=30)
+                    reader.join(timeout=5)
+
+    def test_wp1170_short_write_and_failed_link_cleanup(self):
+        self.make_home()
+        with g._CodexRestoreWindows() as fs:
+            fs.prepare(self.home, True)
+            original = fs.write
+            def short(handle, data, size, written, overlapped):
+                return original(handle, data, min(size, 7), written, overlapped)
+            fs.write = short
+            with self.assertRaises(OSError):
+                fs.publish(self.home, CANARY.encode())
+        self.assertEqual(list(self.home.iterdir()), [])
+        with g._CodexRestoreWindows() as fs:
+            fs.prepare(self.home, True)
+            fs.link_info = lambda *args: -1073741790  # STATUS_ACCESS_DENIED
+            with self.assertRaises(OSError):
+                fs.publish(self.home, CANARY.encode())
+        self.assertEqual(list(self.home.iterdir()), [])
+
+    def test_wp1170_destination_created_at_publication_never_replaced(self):
+        self.make_home()
+        with g._CodexRestoreWindows() as fs:
+            fs.prepare(self.home, True)
+            original = fs.link_info
+            def race(*args):
+                (self.home / "auth.json").write_bytes(b"FAKE_LATE_RACE_WINNER")
+                return original(*args)
+            fs.link_info = race
+            with self.assertRaises(OSError):
+                fs.publish(self.home, CANARY.encode())
+        self.assertEqual((self.home / "auth.json").read_bytes(), b"FAKE_LATE_RACE_WINNER")
+        self.assertEqual(sorted(p.name for p in self.home.iterdir()), ["auth.json"])
+
     def test_real_junction_parent_home_and_existing_leaf(self):
         other = self.root / "other"
         other.mkdir()
@@ -275,15 +356,87 @@ class Windows(unittest.TestCase):
         self.assertTrue(all(after[k] == v for k, v in before.items()))
 
 
+def kill_child(point, home):
+    """Only fake plaintext, in the caller's external scratch; no credentials read."""
+    if os.name != "nt" or home.parent != SCRATCH and SCRATCH not in home.parents:
+        raise ValueError("Windows child home must be below scratch")
+    def checkpoint(name):
+        if point == name:
+            sys.stdout.buffer.write(("WP1170_KILL:" + name + "\n").encode())
+            sys.stdout.buffer.flush()
+            sys.stdin.buffer.read(1)  # parent kills us here; no finally is allowed
+            raise RuntimeError("checkpoint unexpectedly resumed")
+    with g._CodexRestoreWindows() as fs:
+        fs.prepare(home, True)
+        original_open, original_write = fs.open, fs.write
+        original_flush, original_read = fs.flush, fs.read
+        original_link, original_close = fs.link_info, fs.close
+        staging = None
+        def open_file(*args):
+            nonlocal staging
+            h = original_open(*args)
+            if h != fs.c.c_void_p(-1).value and args[5] & 0x04000000:
+                staging = h
+                checkpoint("created")
+            return h
+        def write(handle, data, size, written, overlapped):
+            if point == "partial_write":
+                ok = original_write(handle, data, min(size, 17), written, overlapped)
+                fs.check(ok)
+                if fs.w.DWORD.from_address(fs.c.cast(written, fs.c.c_void_p).value).value != 17:
+                    raise RuntimeError("partial write did not happen")
+                checkpoint("partial_write")
+            ok = original_write(handle, data, size, written, overlapped)
+            fs.check(ok)
+            checkpoint("after_write")
+            return ok
+        def flush(*args):
+            ok = original_flush(*args)
+            fs.check(ok)
+            checkpoint("after_flush")
+            return ok
+        def read(*args):
+            ok = original_read(*args)
+            fs.check(ok)
+            checkpoint("after_readback")
+            return ok
+        def link(*args):
+            checkpoint("before_publish")
+            rc = original_link(*args)
+            if rc < 0:
+                raise fs.c.WinError(fs.nt_error(rc))
+            checkpoint("after_publish")
+            return rc
+        def close(handle):
+            if handle == staging:
+                checkpoint("before_close")
+            ok = original_close(handle)
+            if handle == staging:
+                fs.check(ok)
+                checkpoint("after_close")
+            return ok
+        fs.open, fs.write, fs.flush, fs.read = open_file, write, flush, read
+        fs.link_info, fs.close = link, close
+        data = (json.dumps(payload()["codex_auth"], ensure_ascii=False, allow_nan=False) + "\n").encode()
+        fs.publish(home, data)
+    raise RuntimeError("checkpoint was not reached")
+
+
 def main():
     global SCRATCH
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--scratch", required=True)
     ap.add_argument("--logic-only", action="store_true")
+    ap.add_argument("--kill-child", choices=KILL_POINTS, help=argparse.SUPPRESS)
+    ap.add_argument("--child-home", help=argparse.SUPPRESS)
     args = ap.parse_args()
     SCRATCH = Path(args.scratch).resolve(strict=True)
     if SCRATCH == ROOT or ROOT in SCRATCH.parents:
         ap.error("scratch must be outside repository")
+    if args.kill_child:
+        if not args.child_home:
+            ap.error("child home required")
+        return kill_child(args.kill_child, Path(args.child_home).resolve())
     if not args.logic_only and os.name != "nt":
         ap.error("Windows NTFS required; use --logic-only for Linux logic evidence")
     suite = unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromTestCase(Logic))

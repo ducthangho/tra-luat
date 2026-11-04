@@ -5,7 +5,7 @@ Kiểm thử toàn diện:
 - Duyệt đệ quy cây lệnh Argparse (collect_parser_tree)
 - Báo cáo độ phủ hai chiều cây lệnh ↔ metadata (compute_parser_coverage)
 - Kiểm tra tính tất định, schema parser_tree_coverage.v1, cờ --strict và --unregistered-only
-- Ratchet 100.0% coverage (199/199 lệnh lá), 0 unregistered, 0 high-risk unregistered
+- Ratchet 100.0% coverage (200/200 lệnh lá), 0 unregistered, 0 high-risk unregistered
 - Kiểm thử các lệnh mới đăng ký và ratchet fail-closed trong validate_registry & compute_parser_coverage
 """
 import argparse
@@ -78,10 +78,10 @@ class CommandRegistryCoverageTest(unittest.TestCase):
         self.assertTrue(report["ok"])
 
         summary = report["summary"]
-        self.assertEqual(summary["total_nodes"], 201)
+        self.assertEqual(summary["total_nodes"], 202)
         self.assertEqual(summary["container_commands"], 2)
-        self.assertEqual(summary["total_leaf_commands"], 199)
-        self.assertEqual(summary["registered_leaf_commands"], 199)
+        self.assertEqual(summary["total_leaf_commands"], 200)
+        self.assertEqual(summary["registered_leaf_commands"], 200)
         self.assertEqual(summary["unregistered_leaf_commands"], 0)
         self.assertEqual(summary["high_risk_unregistered_count"], 0)
         self.assertEqual(summary["registry_orphaned_commands"], 0)
@@ -102,7 +102,7 @@ class CommandRegistryCoverageTest(unittest.TestCase):
         report_all = compute_parser_coverage(self.parser, unregistered_only=False)
         report_unreg = compute_parser_coverage(self.parser, unregistered_only=True)
 
-        self.assertEqual(len(report_all["commands"]), 199)
+        self.assertEqual(len(report_all["commands"]), 200)
         self.assertEqual(len(report_unreg["commands"]), 0)
 
     def test_registry_coverage_command_registered(self):
@@ -168,6 +168,20 @@ class CommandRegistryCoverageTest(unittest.TestCase):
         self.assertEqual(rv["issues"], [])
         self.assertEqual(rv["coverage"]["coverage_percent"], 100.0)
         self.assertEqual(rv["coverage"]["unregistered_leaf_commands"], 0)
+
+    def test_wp1170_restore_writer_registered_with_matching_safety_flags(self):
+        meta = COMMAND_META["agent-creds-restore"]
+        self.assertFalse(meta["read_only"])
+        self.assertEqual(meta["risk"], "high")
+        self.assertEqual(meta["write_scope"], "local")
+        self.assertEqual(meta["module"], "gws")
+        self.assertTrue(meta["supports_dry_run"])
+        self.assertTrue(meta["requires_confirm"])
+        leaf = next(n for n in collect_parser_tree(self.parser) if n["path"] == "agent-creds-restore")
+        self.assertFalse(leaf["is_container"])
+        for option in ("--codex", "--apply", "--confirm", "--bundle-file"):
+            self.assertIn(option, leaf["options"])
+        self.assertTrue(compute_parser_coverage(self.parser, strict=True)["ok"])
 
     def test_validate_registry_ratchet_fail_closed(self):
         # Mock parser có lệnh cmd_unreg không nằm trong registry => validate_registry PHẢI fail-closed

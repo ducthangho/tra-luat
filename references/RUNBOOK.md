@@ -257,9 +257,18 @@ Không gọi bootstrap; không sửa auth của provider khác hoặc cấu hìn
 Nếu `auth.json` đã có (kể cả thư mục/link), lệnh báo `exists; unchanged`, không đọc
 nội dung, không tải bundle, không so tuổi, không backup/force/overwrite. Nếu vắng,
 apply tạo staging với DACL bảo vệ chỉ cho SID người chạy, kiểm owner/ACE và effective
-access bằng Windows `AccessCheck`, ghi/flush/readback rồi rename không thay thế.
+access bằng Windows `AccessCheck`. Staging được tạo với `FILE_FLAG_DELETE_ON_CLOSE`
+ngay từ đầu; ghi/flush/readback rồi publish hard link `auth.json` từ chính handle
+bằng `NtSetInformationFile(FileLinkInformation, ReplaceIfExists=FALSE)`, tương đối
+với handle home đã kiểm/pin. Link đích cùng object nên giữ nguyên DACL và nội dung.
+Không mở lại staging theo tên; không tắt delete-on-close hoặc rename link tạm.
 Nếu một tiến trình khác tạo đích trước, bản đó được giữ và lệnh trả 4; staging của
-lệnh được xoá bằng handle. Apply thiếu xác nhận trả 2; lỗi nền/đường dẫn/DACL/bundle
+lệnh được xoá khi đóng handle. Nếu bị kết thúc đột ngột, Windows vẫn đóng handle và
+xoá link staging: trước publish không còn auth; sau publish chỉ auth hoàn chỉnh tồn
+tại. Có thể chạy lại khi đích còn vắng. DACL không được coi là giải pháp cho plaintext
+tồn dư. Cơ chế này xử lý
+process termination, không khẳng định chịu mất điện hay xoá an toàn dữ liệu trên đĩa.
+Apply thiếu xác nhận trả 2; lỗi nền/đường dẫn/DACL/bundle
 trả 4 với thông báo cố định không chứa dữ liệu nhạy cảm.
 
 Cha của `CODEX_HOME` phải đã tồn tại; lệnh chỉ có thể tạo thư mục home cuối cùng.
@@ -269,7 +278,7 @@ UNC/device/SUBST, đường tương đối, ADS, tên Win32 dành riêng, repars
 home hoặc bất kỳ thư mục cha, volume ngoài NTFS và đường dài hơn 220 ký tự.
 Handle thư mục giữ list access, không share delete để chặn đổi namespace. Các thư mục
 cha còn không share write để chặn sửa reparse; home cho share write (NTFS cần khi
-rename vào thư mục), nhưng DACL chỉ cho SID người chạy. Ranh giới này không chống tiến trình ác ý cùng SID hoặc
+publish link vào thư mục), nhưng DACL chỉ cho SID người chạy. Ranh giới này không chống tiến trình ác ý cùng SID hoặc
 administrator có quyền chiếm ownership. Kiểm thử chỉ dùng fixture giả ngoài checkout:
 
 ```powershell

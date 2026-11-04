@@ -1,0 +1,27 @@
+{
+  "schema": "machine_advisory_receipt.v1",
+  "head": "db9c665db5610d9bd81a8fd6f345248cde83aa00",
+  "tree": "b3f2773c8ef63e818ea17467f8c37c93032d954f",
+  "verdict": "approve",
+  "assurance": "advisory_review",
+  "primary_human_audit": "pending",
+  "owner_P3_disposition": "pending4slugs",
+  "model_review_call_number": 3,
+  "approved_limit": 3,
+  "owner_budget_source": "https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6632609191",
+  "provider": "anthropic_claude",
+  "surface": "claude_code",
+  "transport": "machine",
+  "model_reported": "claude-sonnet-5-5",
+  "fullstandard": "running_retry1_notpassed",
+  "CI_M9": "not_run",
+  "code_pushed": false,
+  "files": {
+    "run.json": "c9f5efcfccb996a7b8dff1fb96c8f993d4090ecde9ae27d3dd31f4fcdf4a78f8",
+    "stdout.log": "c57efd4c6d1ec6377c4ab56dfb7f4af5e87190544e8e202e71554f864a022814",
+    "delivery.json": "b6c7d55c9607879c189721fa669feeb28fa3dba1959cb8cc2c79e44a715e0478",
+    "prompt.txt": "f36c7bcc4c9ff462f8f475ec12d953266709b9152641ee7694a9246b412ec584",
+    "findings-inventory.json": "1963c4e26cb4bf792ef0a086863b2f98c23779df62dfa3d4f8ca0d3e83b93d2a",
+    "canonical-k4-k5-subchecks.json": "3ee16e79cbc2281977cab0e0b8358bf13617b4328db37889b5cf4e31288b8e54"
+  }
+}

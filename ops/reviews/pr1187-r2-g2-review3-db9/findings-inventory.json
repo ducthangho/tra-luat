@@ -1,0 +1,23 @@
+{
+  "head": "db9c665db5610d9bd81a8fd6f345248cde83aa00",
+  "tree": "b3f2773c8ef63e818ea17467f8c37c93032d954f",
+  "assurance": "advisory_review",
+  "verdict": "approve",
+  "open_P0_P1_P2": [],
+  "open_P3": [
+    "crash-diagnostics-not-in-tree",
+    "r1187-setup-and-valuerror-subclass-credit",
+    "strict-identity-format-fail-closed",
+    "first-parent-intro-git-version-dependence"
+  ],
+  "gate_keys": [
+    "offline:crash-diagnostics-not-in-tree",
+    "offline:r1187-setup-and-valuerror-subclass-credit",
+    "offline:strict-identity-format-fail-closed",
+    "offline:first-parent-intro-git-version-dependence"
+  ],
+  "owner_disposition": "pending",
+  "human_audit": "pending",
+  "run_json": "/workspace/scratch/pr1187/advisory-r3/runs/0753e286/run.json",
+  "stdout": "/workspace/scratch/pr1187/advisory-r3/runs/0753e286/stdout.log"
+}

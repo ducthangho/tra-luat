@@ -1,0 +1,31 @@
+{
+  "provider": "anthropic_claude",
+  "execution_surface": "claude_code",
+  "transport": "machine",
+  "assurance": "advisory_review",
+  "cli_rc": 0,
+  "subtype": "success",
+  "is_error": false,
+  "requested_model": "CLI configured default; no override",
+  "model_usage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 24,
+      "outputTokens": 21396,
+      "cacheReadInputTokens": 1598279,
+      "cacheCreationInputTokens": 184989,
+      "webSearchRequests": 0,
+      "costUSD": 1.1137918999999998,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 15157,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 184989,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "raw_json_sha256": "cbb68a08422e464d81f168a6d6e52c38e65a2ff3357fc48115176afc068d3725",
+  "verdict_synthesized": false,
+  "tools": "Read,Glob,Grep only; no mutation or execution tools"
+}

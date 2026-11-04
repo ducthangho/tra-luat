@@ -1,0 +1,69 @@
+**Reviewed H=db9c665db5610d9bd81a8fd6f345248cde83aa00, TREE=b3f2773c8ef63e818ea17467f8c37c93032d954f, BASE=1f0941e9bba1d1d517eda4174167b81963c06bd5.** I took H, TREE and BASE from your brief and did not check them. This is machine advisory only, not human or cross assurance, and gives no authority to land.
+
+## What I measured and did not
+- I used Read, Glob and Grep only. I ran no git, hash, test, mutant or suite command, and I did not recompute the spec SHA256.
+- I read the frozen diff first, then the approved r2 spec, ADR-0063, the prior review and the remediation patch.
+- I read the changed code in the checkout. That covers `_adr0063_landed`, `_spec_merge`, `_owner_record`, `_human_merge`, the K1/K4/K5 wiring in `cmd_kiem_merge`, `_yaml_cay`, `_dk`, `_che_khong_render`, `_trang_du`, `_doc_han_utc` and `_git_do`.
+- On the test side I read `_r1187`, the CASES and MUTANTS tables, `chay_suite`, `CliSapDo`, `_co_sap_do` and `_phan_loai_giet`. I also read the mutant runner's phase 3, `_crash_credit1187` and the `r1187_drop_crash_classification` mutant.
+- From the bundle I only read `evidence/metachecks.py` and grepped the mutation logs. Your pass counts (118/118, 56, 80+400, 1776, 236/236, Windows 1/1) are receipts I did not reproduce.
+- The checkout diff and the frozen diff match for the parts I compared.
+
+## Closure of earlier classes
+- **P1 selected later rerun: closed, no regression.**
+  - `_human_merge` takes every same-repo, same-H run from the K2 `--workflow-runs` page.
+  - It requires the supplied run to be field-identical to one of them and to have the minimum `created_at`.
+  - A same-H run with a missing or malformed `repository` now fails closed.
+  - `r1187_rerun_bypass`, `r1187_drop_earliest` and `r1187_samehead_repo_*` cover it.
+- **P2 rollout: closed for both consumers.**
+  - `_adr0063_landed` runs first in the external `spec_ref` path and in every human K4.
+  - It checks non-shallow history, an introduction commit on the first-parent chain, the path absent from `oid^1`, and the anchors in both the introduction blob and the current master blob.
+  - The `rev-list` rc, `log` rc and `ls-tree` rc each have a case and a mutant.
+  - The empty-introduction, `--no-ff` merge and squash fixtures exist.
+- **P2 spec identity: closed.**
+  - Standalone, inline and H1 declarations are all collected and must equal one value that matches the lease.
+  - `revision` must be an `int` (bool and string rejected) and `packet_id` a non-empty `str`.
+  - Fenced blocks and HTML comments are masked, and an unclosed one is an error.
+  - By reading the code, the r2 spec's own identity lines resolve to PR1184-MERGE-CONTRACT / 2.
+- **Review2 P2 crash credit: closed at the harness level**, with the P3 residue below.
+  - The semantic assertions now sit outside the target-call `try`.
+  - `ValueError` is the only expected red result.
+  - Any other `Exception` or `SystemExit` becomes `CliSapDo`, which `_co_sap_do` turns into `_TinDungGia`.
+  - `_phan_loai_giet` returns `TIN_DUNG_GIA` for it, and phase 3 prints it as a red false credit.
+  - The old drop-type-guard mutant is replaced by `r1187_coerce_spec_lease_type`. That mutant leaves the guard in place and coerces the value, so the red case is accepted and dies on a real `AssertionError`.
+- **Review2 P3 items:**
+  - Listed as fixed in the code: the isolated intro anchors, the rev-list/read-rc injections, the merge/squash fixtures, the hash-consistent CLI model conflict with a consumer mutant, the missing-input CLI cases, the finding slug/user/body type checks, the malformed same-H repo, and ADR0062 using real constants and the first-parent milestone.
+  - Not read in the code: the H blob presence check via `ls-tree` with rc fail-closed, which I did not inspect.
+  - No regression found in the changed paths. I found no fallback to H after a failed pinned read, no new write path, and both-paths-must-pass is preserved.
+
+## Findings
+There are no P0, P1 or P2 findings. All four open items below are P3.
+
+**1. P3 `crash-diagnostics-not-in-tree`** — `packet_loop_test.py:10020-10030` and `10086-10088`.
+- Your brief says the self-checks classify TypeError, KeyError, AttributeError and the old invalid drop-guard as `TIN_DUNG_GIA`. In the tree there is only one probe: `_crash_credit1187`, which injects a `TypeError` into `_spec_merge` (spec kind).
+- The KeyError, AttributeError and old-drop-guard probes exist only in `evidence/metachecks.py` in the review bundle. That file is not in the product diff, and no committed case locks them.
+- Nothing locks the human path (`_human_merge`) or the `SystemExit` branch. The one classification mutant removes the whole `except` clause. A narrower mutant, such as dropping `SystemExit` or narrowing `Exception`, is not covered by any case I could find.
+- Fix: add committed probes for `KeyError`, `AttributeError` and `SystemExit`, including one on a human-kind case, plus a mutant per branch.
+- Remedy risk: low.
+
+**2. P3 `r1187-setup-and-valuerror-subclass-credit`** — `packet_loop_test.py:9610-9650` and `9656-9658`.
+- The module import (`exec_module`) and `change(ctx)` run outside the `try`. A mutant that breaks import or setup raises a plain exception, which `chay_suite` counts as a kill. I found no current mutant that does this.
+- `except ValueError` also catches subclasses such as `UnicodeDecodeError`. In a positive control (`red=False`) that would be counted as a semantic kill. In a red case it only lets the mutant survive, which is flagged.
+- Fix: wrap setup so a non-`ValueError` failure becomes `CliSapDo`. Reject ValueError subclasses whose type is not exactly `ValueError` in positive controls.
+- Remedy risk: low.
+
+**3. P3 `strict-identity-format-fail-closed`** (carried, informational) — `packet_loop.py:3228-3232`.
+- The identity patterns reject CRLF specs, quoted values, trailing spaces, and an inline `revision` without a trailing `;`. This is fail-closed and the intended direction, but a legitimate spec in another style would be blocked. No test pins that policy.
+
+**4. P3 `first-parent-intro-git-version-dependence`** — `packet_loop.py:3190-3207`.
+- Detecting a merge-commit introduction relies on `git log --first-parent --diff-filter=A` showing a diff for merges.
+- Older git, or an introduction that git reports as a rename (R, not A), yields no introduction commit, so it fails closed.
+- The `--no-ff` merge fixture covers only the git version in the test environment. The behaviour on other git versions is not measured.
+
+## Limits
+- Raw files prove the supplied readbacks are consistent with each other. They are not transport provenance, not proof of the first push, and not proof that a person audited the code. The earliest available run may come after the real push, and retention may drop earlier runs.
+- The four non-passing items that remain pending are the full standard run, CI/M9, primary human audit and the canonical publisher t191/283/284. Real PR1184 must stay blocked until ADR-0063 lands and the owner posts structured records.
+- No merge readiness is claimed.
+
+**Verdict:** I found no remaining P0–P2 false credit or setup death in the changed paths. The four open P3s (`crash-diagnostics-not-in-tree`, `r1187-setup-and-valuerror-subclass-credit`, `strict-identity-format-fail-closed`, `first-parent-intro-git-version-dependence`) need a disposition from the caller. This is an advisory code-review result only, not human or cross assurance.
+
+KET_LUAN: approve

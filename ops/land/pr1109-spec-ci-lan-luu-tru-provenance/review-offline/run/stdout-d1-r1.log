@@ -1,0 +1,27 @@
+VERDICT: changes_requested — P0/P1/P2/P3 = 0/0/5/0
+
+Đếm theo **5 lớp có biểu hiện**, không đếm từng dòng. Dòng dẫn dưới đây thuộc [đặc tả CI-LAN-LUU-TRU-r1.md](/tmp/claude-0/-home-user-tra-luat/5c67d48b-5184-57a4-9f0f-4851929521d8/scratchpad/rv-d1-1/ops/specs/CI-LAN-LUU-TRU-r1.md).
+
+| ID | Lớp | Mức | Dòng | Mô tả | Sửa đề xuất |
+|---|---|---|---|---|---|
+| — | 1. Fail-open phân loại | — | 34–54, 116–118 | Chưa xác nhận đường cho thay đổi mã đi nhanh trái chính sách đã chốt. Push có kiểm tổ tiên; dispatch rỗng/không đo được về `day_du`; input lạ được A5 chặn. Cho phép mã nằm sâu là quyết định tường minh của chủ kho. | Giữ các điều kiện này. Không mở finding chỉ vì chính sách cho phép bản sao mã nằm sâu. |
+| `gom-nham-consumer` | 2. Kết quả check | P2 | 63–65 | Đường “0 mảnh ⇒ KHÔNG ĐO” của `wp892` thuộc **`gate-cong-cu-gop`**, không thuộc `gate-nhanh-gop`. Consumer thật `ops/nhanh_don_duoc_test.py::_loi_gop_dich` trả lỗi `khong co bien nhan manh nao`; `gop_dich` trả 1. Bỏ chạy mảnh theo đặc tả sẽ không tạo kết quả gộp đã hứa. | Chốt cách xử lý trong đặc tả: nhánh mức bước trong YAML, hoặc mở phạm vi consumer. Chỉ nhận đường không đo khi chế độ đúng `duong_nhanh` và không có mảnh; chế độ đầy đủ/vắng/lạ vẫn phải từ chối thiếu mảnh. Thêm đối chứng các trường hợp ấy, tránh biến mất artifact thành thành công chung. |
+| `write-set-thieu-t6` | 3. Write set không đủ | P2 | 66–77, 79–86 | Bỏ cài shellcheck trên đường nhanh làm **T6 của `ops/cong_cu_test.py` đỏ**: ca này đòi bước cài shellcheck vô điều kiện. Đã thử thay đổi YAML trong bộ nhớ và consumer từ chối đúng chốt ấy. Tệp này ngoài §3; sửa `.claude/dev/ci_dang_ky_test.py` không sửa được T6. | Thêm `ops/cong_cu_test.py` vào write set thi công, giới hạn sửa T6 và phản chứng liên quan. Kiểm đường nhanh được bỏ, đường đầy đủ vẫn cài; không bỏ toàn bộ chốt thứ tự G5. Không thấy mục tiêu hiện tại bắt buộc ghi vào write set C; §6 đã hoãn phần đó. |
+| `nghiem-thu-thieu-doi-chung` | 4. Tiêu chí không đủ khả năng phát hiện lỗi | P2 | 114, 120, 125 | **A2:** bỏ luật “đổi mode” vẫn không làm ca `100644→100755` đỏ, vì luật “mode mới là 100755” đã bắt nó. **A7b:** chưa đòi đối chứng `kiem-re` thành công với cặp hợp lệ ở từng sự kiện; luôn trả lỗi riêng dispatch vẫn đáp ứng vế thiếu output. **A12:** chỉ đo PR/push; thời lượng và ba check xanh không chứng minh dispatch đã đi đường nhanh. | Thêm ca đổi `100755→100644` để cô lập luật đổi mode; sửa nội dung tệp đang giữ `100755` để cô lập luật mode mới. A7b đòi cặp hợp lệ ⇒ rc=0, thiếu/sai ⇒ rc≠0 cho cả push/dispatch. A12 đọc thêm log chế độ và kết quả `kiem-re`; ghi rõ dispatch được đo ở đâu. Đây là bổ sung đối chứng, không cần job mới. |
+| `so-do-khong-tai-lap` | 5. Số đo | P2 | 27, 98–106 | Trên **đúng base đã ghim**, 200 merge first-parent cho **95** merge thuần `reviews/land`, **26** merge chỉ thuộc bốn tiền tố và có `specs/leases`, **38/95** merge thuần lưu trữ có đuôi `.py/.sh/.ps1/.yml`; khác **59/22/29**. “53 merge có mã” thiếu định nghĩa mã để tái lập cùng phép đếm. Khối `nang_tran` mới có ước lượng, chưa phải numstat thi công. | Thay S4 bằng kết quả kèm OID, lệnh, quy tắc phân nhóm và thời điểm. Giữ 650 là trần xin phép, không trình bày ước lượng như bằng chứng đã đo; đo numstat thật trước công bố ứng viên. Quyết định nâng trần của chủ kho **KHÔNG ĐO ĐƯỢC** từ clone này. |
+| `luat-noi-bo-mau-thuan` | 6. Mâu thuẫn đặc tả | P2 | 40–42, 113–114, 127, 138–139 | “Mode cũ ≠ mới” không loại trạng thái thêm/xóa. Git biểu diễn thêm tệp thường là `000000→100644`, nên đọc đúng chữ sẽ đưa cả tệp hồ sơ mới về `day_du`, trái A1. Ngoài ra dòng 127 nói miễn review model là luật M6, trong khi §6 còn hoãn miễn này; M6 hiện vẫn đòi connector. | Chốt luật đổi mode áp cho đường dẫn tồn tại ở cả hai phía; quy định thêm/xóa riêng và kiểm cả hai. Sửa dòng 127 nhất quán với §6, phân biệt miễn cross-review của M8 với điều kiện connector của M6. Không sửa ADR/protocol trong D1. |
+
+Các phép đo chạy trên Linux, Python 3.13.18, lúc **06:48–06:50Z 01-11-2026**:
+
+- `git log --first-parent --merges -200 --format=%H origin/master`, rồi `git diff --name-only --no-renames -z <M>^1 <M>`: rc=0; kết quả S4 như bảng.
+- Phản chứng Python qua stdin, trích consumer bằng AST và đổi fixture **trong bộ nhớ**: rc=0; xác nhận consumer gộp từ chối thiếu mảnh và T6 bắt điều kiện shellcheck. Đây là phép đo hẹp, không phải chạy toàn suite.
+- `git diff --raw --no-abbrev origin/master HEAD`: rc=0; xác nhận tệp đặc tả mới có mode `000000→100644`.
+- Kiểm cuối `git status` gồm tracked/untracked/ignored, diff và index: rc=0, sạch. Không sửa tệp.
+
+`reviewed_sha`: `9dcc0cbd560e8e44d7fa9a09180b79d9ca875648`  
+`tree`: `6af7963e82990520c71295659b1cf607c50d0e6a`  
+`base`: `7eeb1d9a10aea8e1805b66fbf3d68549eb6778da`
+
+Hash prompt và đặc tả đều khớp giá trị được giao. Provider/surface/transport: `openai_codex / codex_cli / machine`; sandbox chỉ đọc. Model/effort thực tế chưa có receipt để xác minh độc lập.
+
+**KHÔNG ĐO ĐƯỢC:** ruleset hiện hành, các run GitHub, authority nâng trần và canary A12. **`not_run`:** toàn suite, Windows, actionlint, full mutant audit. Không coi các phần này là pass.

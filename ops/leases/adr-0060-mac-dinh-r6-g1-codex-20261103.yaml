@@ -19,9 +19,9 @@ authority_ghi_chu: Owner approved r6 hash and exact spec human audit/merge; prio
 recorded_by: openai_codex_dispatcher
 recorder_is_dispatcher: true
 leased_at_utc: '2026-11-03T07:09:24Z'
-heartbeat_at: '2026-11-04T04:18:17Z'
-lease_until: '2026-11-04T07:09:24Z'
-lease_expires_at_utc: '2026-11-04T07:09:24Z'
+heartbeat_at: '2026-11-04T05:53:55Z'
+lease_until: '2026-11-04T12:09:24Z'
+lease_expires_at_utc: '2026-11-04T12:09:24Z'
 role: executor
 provider: openai_codex
 executor: openai_codex
@@ -103,10 +103,12 @@ windows_waiver_authority: https://github.com/ducthangho/tra-luat/issues/1124#iss
 windows_waiver_note: bind machine-readable owner comment to final H before K6; targeted
   diagnostics are not full acceptance
 runtime_lanes:
-- Windows Desktop Commander targeted only (existing H82 pass retained)
-- 'Linux Debian WSL on C: A7 and supporting admission/probes using isolated Python3.12.16'
-- Linux Ubuntu-Clean historical completed H82 A9/light evidence only; no new work
-  while filesystem unhealthy
+- Windows DESKTOP-T9R33P2 native full A7 via Desktop Commander; user-authorized retry
+  on exact H82
+- Existing H82 native K4/A9/A8/focused Windows evidence retained with original runtimes;
+  not relabeled
+- ASUS Debian A7 aborted evidence only; no concurrent full retry; full A10 remains
+  required/owner_waived
 tree_base: a8dc7f5fc314275131027aae2c0c4878b659b28d
 upstream_paths:
 - .github/workflows/ops-thu-hoi-admission.yml
@@ -238,3 +240,26 @@ runtime_recovery:
   full_windows: false
   authority: Standing owner authority over leases/runtime execution; current instruction
     continue safely; no acceptance waiver or model/access/budget change
+  desktop_attempt:
+    recorded_at: '2026-11-04T05:53:55Z'
+    machine: DESKTOP-T9R33P2
+    device_id: a5f7076e-a491-4f84-829b-8d1fbcc1c767
+    runtime: native Windows 11, no WSL/BIOS/feature/restart changes
+    task_root: F:/tl1124
+    head: 82adc57d1829bcac6aef6e8aae0b7f474054db94
+    base: ec1b18a2a007fc2e697249c727a2ca8391ab209e
+    toolchain: Python3.12.16 portable, Git2.56.0.windows.4 portable, PyYAML6.0.3,jsonschema4.26.0,Ruff0.15.15,PowerShell7.6.9
+    bundle_sha256: ca5d0cf8699ee7480c8412bd134102bf06183794d986f5fb031fe114331c45f3
+    runner_sha256: 44f4caac8acede57433bab26d4b4d4aa307c8aed2913bfa37bb646e895d6eaba
+    smoke: smoke3 process exit0, root+grandchild in owned Job, retained handle waits[0,0],
+      QueryActive0, sourceclean exactH/tree and lock released
+    authority_verbatim: xác định nguyên nhân hỏng A7. có thể sử dụng máy Windows Desktop
+      để test lại A7. trước đó cần cài đặt đủ công cụ và môi trường cho máy Desktop.
+    reaffirmed_verbatim: Chạy lại full a7
+    authority_source: direct owner chat; standing authority to coordinate/extend leases
+      retained
+    scope: execute unchanged A7 acceptance on Desktop; no A10/M3 passed claim or waiver
+      expansion
+    extension_reason: New machine bootstrap and reviewed native containment require
+      time beyond old07:09expiry; extend5h, keep240min run cap and all source/spec/gate
+      limits unchanged

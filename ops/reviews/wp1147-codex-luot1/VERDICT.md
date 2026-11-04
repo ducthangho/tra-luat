@@ -1,0 +1,43 @@
+Verdict: approve
+Reviewed commit: 7295d5c7171267c8abf13b711108c315fe697b73
+Spec sha256: 983d5490e6dadcb61c664c7dde8af44adb5f440161cbef37292f61bffd46e0ba
+
+Rà soát độc lập Packet #1147, revision 1, generation 1, lease `wp1147-r1-g1-claude`, review class `sensitive`. **P0 = 0, P1 = 0, P2 = 0; P3 = 1 lớp thiếu độ phủ.** Approve theo ngưỡng nội dung P0/P1/P2 trong prompt giao review. Không xác nhận đã hoàn tất mọi nghiệm thu: Windows/CI chưa đo; Q1 đặc tả yêu cầu vá hoặc `mien_p3` cho P3 và gói hiện tại chưa có bằng chứng miễn đó.
+
+Base/cha: `02ddeb4e9ea9c130d935adc4d5bce4f11db7d6a0`; `origin/master` cục bộ cùng SHA. Tree ứng viên: `52a5d6cfe776f6a1ff104cb4cacd1c29ad13a543`. Diff đúng một tệp `ops/ci_provenance_test.py`, +42/-7; cây `src/` sạch khi kiểm đầu và cuối. Băm đặc tả khớp; hai bản sao thử được xuất bằng `git archive` từ exact commits, byte của test và sản phẩm được đối chiếu lại với Git. Xem [identity_verification.json](identity_verification.json).
+
+Reviewer: Codex, họ OpenAI; executor Claude theo packet. Thực thi bằng công cụ shell trong sandbox Linux, transport `machine`; tên model/effort thực tế và receipt đo danh tính: `not_measured`. `assurance_target: cross_approved` theo chỉ thị giao review; báo cáo này không tự chuyển state hay tạo receipt assurance. Không mạng, GitHub, push, merge hoặc land. Chỉ ghi dưới `out/`; mọi chương trình thử chạy trên bản sao riêng. Một lượt review này không tạo thêm lượt gọi reviewer.
+
+| slug | hạng | file:dòng | phép đo | hướng vá |
+|---|---|---|---|---|
+| c63-thieu-phan-biet-hai-thanh-phan-khoa | P3 | `ops/ci_provenance_test.py:1446`, `:1869` | Bỏ `ten_ca` hoặc bỏ SHA-256 khỏi khóa: cả hai bản đột biến vẫn chạy `--mot-ca c63_ban_goc_mot_lan_moi_ca` rc 0. Probe phân biệt ba cặp đầu vào chỉ thấy hai lần chạy và kết quả bị dùng nhầm. Head nguyên bản phân biệt đúng cả ba. | Bổ sung vào c63 ca cùng nội dung/khác ca và cùng ca/khác nội dung; kiểm số lần gọi và kết quả riêng; chi tiết bên dưới. |
+| tuong-duong-phan-hang | đạt, không finding | `ops/ci_provenance_test.py:1877`, `:2065` | 398 DOT_BIEN và 2 TU_KIEM giống base; log tổng suy ra hạng từng mục không đổi. Mẫu độc lập 93/93 bằng base và đúng kỳ vọng. | Không cần vá. |
+| cache-ban-goc-va-trang-thai | đạt, không finding | `ops/ci_provenance_test.py:1868`, `:1892` | 5 yêu cầu/3 cặp khóa chỉ gọi 3 lần, output đúng; file nền tồn tại khi gọi, đã xóa sau đó nhưng tuple cache còn dùng được. Bản gốc đỏ: 400/400 HONG, 57 lần chạy nền/57 ca. | Không cần vá mã hiện tại. |
+| timeout-khong-cap-tin-dung | đạt, không finding | `ops/ci_provenance_test.py:1858`, `:1877` | TimeoutExpired được đổi thành 124/QUA_HAN; 124 luôn HONG kể cả output có DO đúng ca. Quá hạn ở nền và ở đột biến đều HONG, không traceback. | Không cần vá. |
+| c63-co-rang-va-duong-goi | đạt trong M3, trừ P3 trên | `ops/ci_provenance_test.py:1440`, `:1901`, `:2043` | 5 đột biến hành vi đều rc 3/DO:c63_; chạy CLI, dispatch và nhánh main mặc định rút gọn đều đúng. Đảo thứ tự DOT_BIEN/c34 không đổi kết quả; cache có sẵn được phục hồi. | Giữ kiểm các đường gọi khi bổ sung độ phủ khóa. |
+
+Bằng chứng tương đương: hai log executor chỉ có tổng, không có dòng riêng từng đột biến. Tuy nhiên `main` tính tử số bằng số mục trừ số hạng khác GIET; 398/398 vì vậy chứng minh mọi mục trong bảng đều GIET nếu chấp nhận tính xác thực của log. `TU KIEM PHAN HANG: DAT (2 dot bien)` chứng minh hai hạng kỳ vọng `TIN_DUNG_GIA` và `SONG_SOT`. Bảng và logic tổng không đổi giữa hai commit. [all_items_log_equivalence.tsv](all_items_log_equivalence.tsv) liệt kê đủ 400 mục và ghi rõ nguồn suy luận là log executor; đây không phải 400 lần chạy độc lập. Log không có SHA/command bên trong, nên neo commit của phép đo đầy đủ vẫn dựa trên tên tệp và lời khai executor.
+
+Đo độc lập chọn mục đầu và cuối mỗi ca đích khi có nhiều mục, cộng cả hai TU_KIEM: **91 DOT_BIEN trên toàn bộ 56 ca đích + 2 TU_KIEM = 93 mục**, phủ 57 ca đích tính cả controls. Mỗi mục chạy engine base rồi head bằng tiến trình con thật; tất cả bằng nhau và đúng kỳ vọng: 91 GIET, 1 TIN_DUNG_GIA, 1 SONG_SOT. Tổng thời gian các lượt mẫu: base 211.866 s, head 156.212 s; đây là thời gian mẫu, không dùng thay N3 bộ đầy đủ. Cache xanh trong cha không che đột biến khi gọi `--mot-ca`: probe con vẫn rc 3/DO của c34.
+
+Cache lưu `(rc, ra)` thuần giá trị, không lưu Path đang sống; thông báo HONG giữ output nền sau khi thư mục tạm đã bị xóa. Đo bản gốc đỏ trên cả DOT_BIEN lẫn TU_KIEM xác nhận không mục nào được GIET/SONG_SOT, không chạy bản đột biến sau nền đỏ. Ma trận 18 tổ hợp rc/output ở base và head khớp toàn bộ. Phép quá hạn dùng mock TimeoutExpired, không chờ thực 300 giây.
+
+`c63` lọc c34 trước khi lấy hai mục; hiện có đúng hai mục c34. Đảo toàn bảng và hoán vị hai mục vẫn đạt, không phụ thuộc chúng đứng đầu DOT_BIEN. Thiếu một mục sẽ bị chốt bằng kiểm `len(nhom)`, không âm thầm cho xanh. Mock `__name__ + ".chay_con"` hoạt động ở CLI `__main__` và module import đăng ký đúng tên. Nhánh `main([])` đã chạy thực với tập rút gọn c34/c63 và hai đột biến c34 (CA 2/2, DOT BIEN 2/2, rc 0); không coi đây là chạy bộ mặc định đầy đủ.
+
+P3 có phản chứng không tương đương: với `(case_a, x)`, `(case_a, y)`, `(case_b, x)`, bỏ ca khỏi khóa làm kết quả thứ ba thành `case_a:x`; bỏ nội dung khỏi khóa làm kết quả thứ hai thành `case_a:x`. Hai mutant vẫn cho c63 rc 0; chi tiết ở [extra_results.json](extra_results.json), mã mutant dưới `mutants/`. Đây là thiếu độ phủ của ca mới, không phải khóa sai trong head.
+
+Hướng vá P3 tại `c63_ban_goc_mot_lan_moi_ca`, nơi đang kiểm hợp đồng cache: thêm mock trả các output phân biệt, gọi lại cùng cặp để chứng minh hit, đổi riêng ca và đổi riêng nội dung để chứng minh miss; kỳ vọng tổng 3 lần chạy cho 3 cặp. Khóa test bằng việc hai mutant `drop_case_from_key`/`drop_content_from_key` phải đổi từ rc 0 sang rc 3/DO:c63_, còn head xanh. Giữ `mock.patch.dict(_NEN, clear=True)` để không làm bẩn cache giữa ca; tránh neo kiểm mới vào thứ tự/tên DOT_BIEN hoặc byte cố định của mã sản phẩm. Rủi ro của vá test là làm rò mock/cache hoặc ràng buộc quá mức biểu diễn khóa; nên kiểm hành vi và phục hồi state. Đề nghị executor wp1147 xử lý lớp này hoặc trình `mien_p3`; reviewer không tự cấp miễn và không sửa SRC.
+
+| Nghiệm thu | Trạng thái reviewer | rc | Bằng chứng dương / giới hạn |
+|---|---|---|---|
+| N1 c63 và 3 đột biến bắt buộc | passed | head 0; từng mutant 3 | CLI head xanh; bỏ cache, bỏ bắt timeout, cho nền đỏ đi tiếp đều DO:c63_. Hai mutant thêm (timeout thành GIET, bỏ chạy bản đột biến) cũng rc 3 đúng ca. [extra_results.json](extra_results.json), [n1_c63.log](n1_c63.log). |
+| N2 bộ mặc định Linux | not_run độc lập; executor reported passed | reviewer —; logs base/head 0/0 | Base CA 62/62, head 63/63; cả hai DOT BIEN 398/398, TU KIEM DAT (2), TONG DAT. Không chạy lại suite đầy đủ theo prompt. Mẫu 93/93 có bằng chứng riêng. |
+| N3 thời gian Linux | not_measured độc lập; executor reported passed | logs base/head 0/0 | Log base 2269 s, head 1152 s; head nhanh hơn theo số đo executor. Không có command hoặc SHA nhúng trong log để xác minh độc lập mệnh đề “cùng một lệnh”. |
+| N3 thời gian Windows <5400 s | not_measured | — | Không có phép đo Windows trong gói được cấp; không khai đạt. |
+| N4 ruff F, delta và diff-check | passed | base 0, head 0, diff 0 | Cả hai ruff “All checks passed!”, delta=0; git diff --check không có diagnostic. [ruff_base.log](ruff_base.log), [ruff_head.log](ruff_head.log), [diff_check.log](diff_check.log). |
+| N5 doctrine-scan, adr-song | passed | 0, 0 | “đã quét 10 tệp, 0 chỗ chép doctrine”; “60 ADR trên đĩa, 60 dòng trong §20, khớp 1–1”. [doctrine-scan.log](doctrine-scan.log), [adr-song.log](adr-song.log). |
+| N6 ci.yml xanh hai nền trên exact head | not_run / not_measured | — | Không truy cập GitHub theo chỉ thị offline; không có check-run receipt trong gói. Không suy CI xanh từ test local. |
+
+Lệnh tái lập probe: `PYTHONDONTWRITEBYTECODE=1 TMPDIR="$PWD/out/tmp" GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null python3 -B out/review_probe.py`; probe xuất [probe_results.json](probe_results.json) và log khi redirect vào [review_probe.log](review_probe.log). Lệnh bổ sung: `PYTHONDONTWRITEBYTECODE=1 python3 -B out/extra_probe.py`, rc 0. Bản đầu script reviewer từng dừng ở assertion vì neo `except TimeoutExpired` khớp hai vị trí; đã giới hạn neo vào chay_con rồi chạy lại toàn bộ probe, không tính lỗi harness đó là lỗi ứng viên.
+
+Không soạn thêm payload dạng đường dẫn thoát cây và không mở rộng sang sản phẩm, workflow, registry test hoặc nợ wp978. Approval chỉ neo exact commit dòng 2, không cấp quyền push, merge, land hoặc tuyên bố N3 Windows/N6 đã đạt.

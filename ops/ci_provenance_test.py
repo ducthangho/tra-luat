@@ -1158,9 +1158,12 @@ def c62_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
         ba2 = ["f" * 64, "0" * 63 + "1", "a" * 64]
         c2 = g2("hash-object", "-t", "commit", "-w", "--stdin", i=f"tree {cay2}\n".encode() + b"".join(f"parent {x}\n".encode() for x in ba2)
                 + ai(b"Jos\xe9") + b"\nm\xe9ssage\n")
-        kq = [doc(x, d1) for x, _ in ca] + [doc(c2, d2)]
         mong = [k for _, k in ca] + [{"tree": cay2, "parents": ba2}]
-        bang(kq == mong, f"git_cuc_bo lệch ở {[(i, a) for i, (a, b) in enumerate(zip(kq, mong)) if a != b]}")
+        kq = []   # #1147 r2: so TỪNG mục ngay khi đọc ⇒ bản đột biến dừng ở mục lệch ĐẦU TIÊN, không đọc hết ~617 commit (Windows)
+        for i, (x, d) in enumerate([(x, d1) for x, _ in ca] + [(c2, d2)]):
+            kq.append(doc(x, d))
+            bang(kq[i] == mong[i], f"git_cuc_bo lệch ở {i}: {kq[i]!r} ≠ {mong[i]!r}")
+        bang(len(kq) == len(mong) == len(ca) + 1, f"chỉ so {len(kq)}/{len(mong)} mục")
         hop = [i for i, (_, k) in enumerate(ca) if type(k) is dict]   # oracle Git NATIVE cho mọi commit hợp lệ, MỘT lời gọi mỗi kho
         nat = {}
         for gg, xs in ((g, [ca[i][0] for i in hop]), (g2, [c2])):
@@ -1452,6 +1455,10 @@ def c63_ban_goc_mot_lan_moi_ca():   # #997 hậu merge: bản gốc chạy MỘT
     with mock.patch.dict(_NEN, clear=True), mock.patch(__name__ + ".chay_con", return_value=(3, "DO:c34_git_blob_that: goc do")) as cc:
         hang = [chay_dot_bien(*d)[0] for d in nhom]
     bang(hang == ["HONG", "HONG"] and cc.call_count == 1, f"bản gốc đỏ ⇒ MỌI mục HONG, chạy gốc 1 lần: {hang} {cc.call_count}")
+    with mock.patch.dict(_NEN, clear=True), mock.patch(__name__ + ".chay_con",   # Codex lượt 1 P3: KHOÁ gồm CẢ ca lẫn nội dung bản gốc
+                                                       side_effect=lambda t, ma: (0, f"{t}:{Path(ma).read_text(encoding='utf-8')}")) as cc:
+        kq = [nen_cua(t, g)[1] for t, g in (("ca_a", "x"), ("ca_a", "y"), ("ca_b", "x"), ("ca_a", "x"), ("ca_b", "x"))]
+    bang(kq == ["ca_a:x", "ca_a:y", "ca_b:x", "ca_a:x", "ca_b:x"] and cc.call_count == 3, f"khoá cache (ca, nội dung): {kq} {cc.call_count}")
     with mock.patch.object(subprocess, "run", side_effect=subprocess.TimeoutExpired("python", 300)):
         try:
             rc, ra = chay_con("c34_git_blob_that", HERE / "ci_provenance.py")

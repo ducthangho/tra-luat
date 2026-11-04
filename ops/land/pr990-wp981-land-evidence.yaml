@@ -138,3 +138,22 @@ moc_workflow_definition_20261029:
     path; repositoryFileUrl neo OID e926bd9; checkSuite.commit.oid e926bd9 = REST head_sha; blob REST contents?ref=e926bd9 =
     git rev-parse e926bd9:.github/workflows/ci.yml = 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc, sha256 bytes
     ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb, byte REST = byte git. 7/7 phep so khop.
+
+landed_20261030:
+  bo_canh: >-
+    Khoi xin duyet landed #981 (PR #990). Ho so ghi so #1027 (head f20561e) da merge f9e24f8 ngay 30-10 theo chi thi chu kho
+    "neu du dieu kien thi bo draft va merge"; connector Codex tren #1027: completed, has_any_findings false tren DUNG head
+    f20561e. Khoi nay KHONG sua dong nao o tren.
+  quyet_dinh_chu_kho:
+    trang_thai: cho_duyet
+    ghi_chu: >-
+      Chua co comment duyet landed cua chu kho. Can comment cua ducthangho tren PR chua khoi nay, neo DU 40 ky tu SHA head
+      cua PR ay, dang sau commit cuoi va truoc merge. Co comment thi mot commit sau doi trang_thai -> da_duyet, them
+      comment URL va landed: true.
+  landed: false
+  landed_hieu_luc_tu_du_kien: e926bd9d765b2a5f6e50122776ba95e73f84e978
+  landed_dieu_kien: >-
+    (1) gate tren merge e926bd9: DAT — 4/4 moc §10.2.2, lane LAND success (post_merge_checks + moc_workflow_definition_20261029).
+    (2) lease da nha: DAT (lease.thu_hoi_cuoi). (3) review: DAT — Codex luot 5/5 approve 0eb66e5, 29/29 gpt-6-astra DO_DUOC (assurance_81). (4) noi dung merge = diff da review:
+    DAT (merge_noi_dung). (5) duyet chu kho neo dung head PR ghi so: CHUA.
+

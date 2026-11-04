@@ -1,0 +1,9 @@
+# log trich run 41371625809 (PR #1140, canary A12) — REST tung job, 2026-11-02
+## job 125043121246 chuan-bi bytes=110899 sha256=a5e3ae9cf430e1854eda25dfb37c3896b71a5bc46efa6f4dbc55208f0c5edc71
+DUONG_NHANH: toan bo 59 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh
+che_do=duong_nhanh
+## job 125043184551 gate-ops (ubuntu-latest) bytes=166581 sha256=236e37d20e3a486eeb24101d244420398fdcd7bb59325d34b3c08dc210d09562
+DUONG_NHANH: toan bo 59 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh
+DUONG_NHANH: kiem-re DAT (59 tep doi, 0 loi)
+CA: 113/113 dat · 0 do · 0 hong
+DOT BIEN: 419/419 bi giet dung ly do

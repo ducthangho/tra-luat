@@ -1,0 +1,100 @@
+Còn **4 lớp P2, với 8 đột biến sống** trên bộ test hiện có. Mã hiện tại xử lý đúng 14 phản chứng bổ sung; các finding dưới đây là khoảng trống kiểm thử đối với điều đặc tả §2.1 yêu cầu.
+
+Review chỉ đọc, `openai_codex / codex_cli / machine`, packet `KIEM-MERGE-M9 r1/g1`:
+
+```text
+reviewed_sha:  d6a74044e9eb403d5c94a842b5f205463a1d138e
+reviewed_tree: 2faa28d35f6af19c404c9911b069a24295cbc206
+base_sha:      f4b513da5802d439aedbe58ae4a5cd38ff47d6ab
+spec_sha256:  d18820c854af40a4e0d6ca58f6b8812296a3057b0e7b063f704f5a4cdd7ca442
+```
+
+Spec trong Git và trên đĩa khớp băm. Diff đúng 5 tệp, **298 dòng thêm**. Snapshot đầu/cuối khớp HEAD, tree, diff, index, danh sách untracked và ignored.
+
+**Kết quả đo**
+
+| Phép kiểm | Kết quả |
+|---|---|
+| Test chọn lọc | **102/102**, gồm 54 `cong_c_*`, 48 `cong_m9_*`; rc=0 |
+| Đột biến `m9_*` đã khai | **40/40** bị giết bằng AssertionError của ca đích; rc=0 |
+| Đột biến bổ sung | **8 sống**, mỗi bản vẫn đạt **102/102** |
+| Phản chứng bổ sung | Nền **14/14**; giết đúng **8/8** đột biến sống bằng AssertionError |
+| Tên đường dẫn trên Git thật | **9/9**: Unicode, tab, LF, ký tự đặc biệt, chữ hoa và tiền tố gần giống |
+| M6 | rc=12, liệt kê đồng thời **K2, K4, K5, K6, K7** |
+| `doctrine-scan` | rc=0, 10 tệp, 0 vi phạm |
+| `adr-song` | rc=0, 59 ADR khớp 59 dòng |
+| `doc-claims-check --strict --json` | rc=0, `ok=true`, 120 tệp, 0 flags, không lớp skipped |
+| Ruff contract | rc=0, `RUFF_CONTRACT 3 []` |
+
+**F30 — P2 — Lớp `pham-vi-duyet-du-diff`: chưa khóa việc xét mọi tệp.** Vị trí: [packet_loop_test.py:9350](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop_test.py:9350).
+
+Đột biến `first_diff_path` giới hạn `_cham_m9` vào `_diff_raw(... )[:1]` vẫn đạt **102/102**. Khi có một tệp ngoài M9 đứng trước tệp thuộc M9, nền trả **rc=12, thiếu K7**, nhưng mutant trả **rc=0**. Đã đo riêng cả ba đường vào: `.claude/dev/x.py`, `ops/x.py`, `.github/workflows/x.yml`.
+
+Bổ sung ma trận test tại nhóm `cong_m9_*`, đặt tệp M9 sau tệp ngoài phạm vi; đột biến chỉ xét tệp đầu phải chết. Fixture cần cung cấp bằng chứng Windows phù hợp để K6 không che kết quả K7. Đây là P2 vì §2.1 yêu cầu “một tệp” khớp là đủ bắt buộc audit.
+
+**F31 — P2 — Lớp `duyet-du-moi-job`, nối F20/F21/F26: chưa khóa job ở giữa lô.** Vị trí: [packet_loop_test.py:9389](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop_test.py:9389).
+
+Hai mutant chỉ kiểm hai đầu danh sách vẫn đạt **102/102**:
+
+- `jobs_endpoints_only`: kiểm trạng thái bằng `js[:1] + js[-1:]`.
+- `job_types_endpoints_only`: kiểm kiểu `run_id/run_attempt` trên cùng lát cắt.
+
+Với ba job, hai đầu hợp lệ, nền chặn **rc=12/K7** còn mutant cho qua **rc=0** khi job giữa có một trong sáu lỗi: `status=in_progress`, `conclusion=failure`, `run_id` float/bool, `run_attempt` float/bool.
+
+Bổ sung ma trận sáu trường hợp giữa lô và hai mutant tương ứng. Dùng float/bool **bằng giá trị số nguyên** để chốt nhóm không chặn thay chốt kiểu; nếu đổi sang một ID khác hẳn thì có nguy cơ cấp tín dụng giết sai lý do.
+
+**F32 — P2 — Lớp `tach-jobs-theo-run`, nối F27: chưa khóa chiều chấp nhận khi nhóm không liên quan đỏ.** Vị trí: [packet_loop_test.py:9394](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop_test.py:9394).
+
+Mutant `all_job_groups` giữ chốt tồn tại khóa run/attempt, nhưng lấy job từ **mọi nhóm** để xét xanh; vẫn đạt **102/102**.
+
+Phản chứng gồm run đạt với job xanh và một run khác có nhóm job đỏ, mỗi tệp đều đủ trang: nền **rc=0**, mutant **rc=12/K7**. Mutant vi phạm yêu cầu “ít nhất một run” cùng job của **đúng run/attempt ấy**.
+
+Thêm ca dương này cạnh ca F27 hiện có và khóa bằng mutant trên. Nhóm không liên quan phải có schema, ID và pagination hợp lệ; dữ liệu hỏng sẽ khiến test đo chốt readback thay cho việc tách nhóm.
+
+**F33 — P2 — Lớp `ranh-gioi-pham-vi-m9`: chưa khóa ranh giới prefix và đuôi tệp.** Vị trí: [packet_loop_test.py:9345](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop_test.py:9345).
+
+Bốn mutant đều đạt **102/102**:
+
+| Mutant | Phản chứng ngoài M9 |
+|---|---|
+| `scope_dev_slash` — bỏ `/` cuối prefix | `.claude/developer/x.txt` |
+| `scope_workflow_slash` — bỏ `/` cuối prefix | `.github/workflows-old/x.txt` |
+| `scope_ops_slash` — bỏ `/` sau `ops` | `ops-old/x.py` |
+| `scope_suffix_substring` — đổi `endswith(".py")` thành tìm chuỗi con | `ops/x.pyc` |
+
+Cả bốn trường hợp: nền **rc=0**, mutant **rc=12/K7**. Đây thuộc điều đặc tả đòi: “không tệp nào khớp ⇒ đạt ngay”, nên là P2.
+
+Thêm ma trận âm cho ba prefix và suffix, kèm bốn mutant. Cấp phân loại Windows hợp lệ cho fixture để kết quả âm không bị K6 che.
+
+**ĐỐI CHIẾU LƯỢT TRƯỚC**
+
+| Finding lượt 4 | Kết luận trên candidate hiện tại |
+|---|---|
+| F25 | **ĐÃ VÁ THẬT**: comment người khác không làm K7 phủ quyết run xanh; mutant tái lỗi bị giết |
+| F26 | **ĐÃ VÁ THẬT** cho biểu hiện job sau trong lô hai; lớp tái mở bởi F31 |
+| F27 | **ĐÃ VÁ THẬT** cho chọn nhầm nhóm đầu/cuối; lớp tái mở bởi F32 |
+| F28 | **ĐÃ VÁ THẬT**: miễn CRLF hợp lệ đạt; mutant chỉ tách LF bị giết |
+| F29 | **ĐÃ VÁ THẬT**: run thiếu attempt đứng trước run đạt không chặn; mutant đọc trường sớm bị giết |
+
+Các phản chứng lịch sử còn lại trong bộ chọn lọc đều xanh; 40 mutant khai báo đều chết đúng assertion. Phần Git thật cũng xác nhận xóa, rename vào M9, symlink và chỉ đổi mode.
+
+Các lệnh đo bổ sung, đều rc=0:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/kiem-m9-review-d1e1c694/extra_mutants_process.py
+PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/kiem-m9-review-d1e1c694/extra_mutants_added.py
+PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/kiem-m9-review-d1e1c694/countercases.py
+```
+
+Output chính của lệnh cuối:
+
+```text
+COUNTERCASE_BASELINE 14 / 14
+COUNTERCASE_MUTANTS 8 / 8
+```
+
+Mã phản chứng tại [countercases.py](/tmp/kiem-m9-review-d1e1c694/countercases.py); kết quả từng assertion tại [countercases.json](/tmp/kiem-m9-review-d1e1c694/countercases.json). Tất cả test và mutant nằm ngoài checkout.
+
+Full suite, Windows và CI/audit thật: **not_run** trong lượt offline này. Bare Ruff: **not_measured**, vì runtime thiếu module `ruff`. Không gọi mạng GitHub. Snapshot chỉ chứng minh không có delta quan sát được ở hai mốc; chưa đo model/effort phục vụ từng request.
+
+KET_LUAN: changes_requested

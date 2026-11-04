@@ -1,0 +1,42 @@
+[
+  {
+    "name": "bien-nhan",
+    "command": [
+      "python3",
+      "ops/bien_nhan_v2.py",
+      "--root",
+      "."
+    ],
+    "rc": 1,
+    "errors": [
+      "  ĐỎ  pr1131-review-1-codex-verdict.receipt.yaml: KHÔNG đạt v2 và KHÔNG nằm trong danh sách nào — pr1131-review-1-codex-verdict.receipt.yaml: blob tại `evidence_url` băm c60111232351… nhưng biên nhận khai `verdict_sha256` d60111232351… — mỏ neo KHÔNG trỏ đúng thứ nó khai"
+    ],
+    "tail": [
+      "",
+      "bien_nhan_v2: 295 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 349",
+      "câu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0"
+    ],
+    "stderr": "  ĐỎ  pr1131-review-1-codex-verdict.receipt.yaml: KHÔNG đạt v2 và KHÔNG nằm trong danh sách nào — pr1131-review-1-codex-verdict.receipt.yaml: blob tại `evidence_url` băm c60111232351… nhưng biên nhận khai `verdict_sha256` d60111232351… — mỏ neo KHÔNG trỏ đúng thứ nó khai\nTỔNG: ĐỎ\n",
+    "only_new_receipt_failed": true
+  },
+  {
+    "name": "direct",
+    "command": [
+      "python3",
+      "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1136a/direct_gates.py",
+      "."
+    ],
+    "rc": 1,
+    "errors": [
+      "t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi FAIL pr1131-review-1-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai d601112323513db31e0aefc40340672d69fba39567e3f8639b3ebdd53fd321e6, tệp 'ops/reviews/pr1131-review-1-codex-verdict.md' thực c601112323513db31e0aefc40340672d69fba39567e3f8639b3ebdd53fd321e6. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào."
+    ],
+    "tail": [
+      "t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi FAIL pr1131-review-1-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai d601112323513db31e0aefc40340672d69fba39567e3f8639b3ebdd53fd321e6, tệp 'ops/reviews/pr1131-review-1-codex-verdict.md' thực c601112323513db31e0aefc40340672d69fba39567e3f8639b3ebdd53fd321e6. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào.",
+      "t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc PASS",
+      "t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen PASS",
+      "DIRECT total=3 failed=1"
+    ],
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1136a/work/mutant/ops/lease_publish_test.py:3062: SyntaxWarning: invalid escape sequence '\\s'\n  2. **Nhận nhầm văn xuôi.** `^\\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một\n/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1136a/work/mutant/ops/lease_publish_test.py:5205: SyntaxWarning: invalid escape sequence '\\d'\n  KHÔNG neo đầu dòng là `lease_publish: (\\d+)/(\\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ\n",
+    "only_new_receipt_failed": true
+  }
+]

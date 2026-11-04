@@ -226,7 +226,25 @@ PY
   python -m pip install --disable-pip-version-check "jsonschema==$jsonschema_pin" -r requirements.txt
   python ops/cong_cu.py kiem-tra --json
 else
-  bash ops/cai_cong_cu.sh --bat-buoc
+  if (( EUID == 0 )); then
+    # Manifest OS recipes say "sudo apt-get". A root-only, child-scoped adapter
+    # handles exactly that command, including on minimal images without sudo.
+    # No wrapper file, global sudo function or manifest modification is needed.
+    bash -c '
+      sudo() {
+        if (( EUID != 0 )) || [[ "$#" -lt 1 || "$1" != apt-get ]]; then
+          echo "root installer adapter permits only sudo apt-get" >&2
+          return 5
+        fi
+        shift
+        command apt-get "$@"
+      }
+      export -f sudo
+      exec bash "$1" --bat-buoc
+    ' tra-luat-root-installer "$repo/ops/cai_cong_cu.sh"
+  else
+    bash ops/cai_cong_cu.sh --bat-buoc
+  fi
 fi
 if (( persist_path )); then
   marker='# tra-luat CLI PATH'

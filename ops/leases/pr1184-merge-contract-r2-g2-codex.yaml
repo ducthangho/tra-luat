@@ -91,3 +91,21 @@ size_limit:
   effective_write_paths: 6
   net_product_files: 5
   added_lines: 1000
+review_budget_override:
+  approved_by: ducthangho
+  recorded_by: codex-desktop-dispatcher
+  source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6632609191
+  recorded_at_utc: '2026-11-04T14:01:27.696989+00:00'
+  old_limit: 2
+  new_limit: 3
+  calls_used_before_next: 2
+  authorized_additional_calls: 1
+  scope_head: db9c665db5610d9bd81a8fd6f345248cde83aa00
+  no_reset: true
+  no_code_audit_or_land_authority: true
+nang_tran_review_budget:
+  ai_nang: ducthangho via explicitownerresponse
+  can_cu: one fresh verification of concrete P2crashcredit+P3remediation; two actualreviewsused;
+    https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6632609191
+  tran_cu: customPacket1187 modelcalls withoutput2
+  tran_moi: customPacket1187 modelcalls withoutput3; exactlyoneadditional, nofourth

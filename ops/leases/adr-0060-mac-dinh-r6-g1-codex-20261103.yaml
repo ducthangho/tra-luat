@@ -20,8 +20,8 @@ recorded_by: openai_codex_dispatcher
 recorder_is_dispatcher: true
 leased_at_utc: '2026-11-03T07:09:24Z'
 heartbeat_at: '2026-11-04T05:53:55Z'
-lease_until: '2026-11-04T12:09:24Z'
-lease_expires_at_utc: '2026-11-04T12:09:24Z'
+lease_until: '2026-11-04T08:40:56Z'
+lease_expires_at_utc: '2026-11-04T08:40:56Z'
 role: executor
 provider: openai_codex
 executor: openai_codex
@@ -65,8 +65,8 @@ write_set:
 write_set_planned: []
 write_set_hash: 03b22dc99e5d22f12463b9bd25ce031d98d72250dac854b5788de5fc23165adf
 write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
-closure_status: canonical pure check rc0 on approved base amendment; current holder
-  reconciliation complete; remote publication/readback required for activation
+closure_status: 'executor finished: exact H merged in PR1186; no further code writes;
+  awaiting master CI for land ledger'
 tran_kich_thuoc: <= 5 tep / <= 450 dong them (ADR-0053 sensitive 6/450)
 tran_loi_goi_codex: 10 theo ADR-0055; Codex executor and independent Codex reviewer;
   configured evidence accepted
@@ -263,3 +263,8 @@ runtime_recovery:
     extension_reason: New machine bootstrap and reviewed native containment require
       time beyond old07:09expiry; extend5h, keep240min run cap and all source/spec/gate
       limits unchanged
+closed_at_utc: '2026-11-04T08:40:56Z'
+closure_authority: https://github.com/ducthangho/tra-luat/issues/1124#issuecomment-6626353503
+closure_recorded_by: openai_codex_dispatcher
+merged_head: 82adc57d1829bcac6aef6e8aae0b7f474054db94
+merge_commit: 1f0941e9bba1d1d517eda4174167b81963c06bd5

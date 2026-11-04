@@ -9257,7 +9257,8 @@ def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None, env=None, git_loi
             "--workflow-jobs", f("wj.json", trang("jobs", x["jobs"])), "--check-runs", f("cr.json", trang("check_runs", x["cr"])),
             "--connector", f("cn.json", cn),
             *(("--offline-run-json", f("run.json", x["run"]), "--offline-stdout", f("out.log", x["out"])) if not x.get("no_model") else ()),
-            *(("--human-audit-comment", f("audit.json", x["audit"]), "--human-remote-run", f("remote.json", x["remote"])) if x.get("audit") else ()),
+            *(("--human-audit-comment", f("audit.json", x["audit"])) if x.get("audit") else ()),
+            *(("--human-remote-run", f("remote.json", x["remote"])) if x.get("audit") and not x.get("missing_remote") else ()),
             *(("--human-transition-comment", f("transition.json", x["transition"])) if x.get("transition") else ()),
             *[a for k in x["p3off"] for a in ("--p3-offline", k)], *(("--chu-kho-comment", f("cmt.json", x["cmt"])) if x["cmt"] else ()),
             *(("--windows-json", f("win.json", x["win"])) if x["win"] else ()),
@@ -9649,13 +9650,17 @@ def _r1187(c, kind="human", change=None, red=False):
     try:
         if kind in ("spec", "title", "title_conflict", "markdown", "legacy"):
             actual = m._spec_merge(w, a.head, "ops/specs/X.md", ls)
-            assert actual == spec, "positive spec bytes changed"
         else:
             p3 = []; m._human_merge(a, w, ls, ctx["spec"], p3)
-            assert p3 == [("human", f["slug"]) for f in audit["open_findings"]], "P3 lost before K5"
     except ValueError:
         if red: return
         raise
+    except (Exception, SystemExit) as ex:
+        raise CliSapDo("r1187 target crashed") from ex
+    if kind in ("spec", "title", "title_conflict", "markdown", "legacy"):
+        assert actual == spec, "positive spec bytes changed"
+    else:
+        assert p3 == [("human", f["slug"]) for f in audit["open_findings"]], "P3 lost before K5"
     if red:
         raise AssertionError("malformed evidence accepted")
 
@@ -9723,8 +9728,8 @@ CASES += [("r1187_spec_external_only", _ca1187("spec", lambda x: _spec1187_head(
           ("r1187_tr_actor", _ca1187("human", lambda x: x["tr_raw"].update(user=dict(login="agent", type="User"))))]
 # Target individual checks, with unchanged setup/import and positive controls in every mutant run.
 for name, old, new, target in [
-    ("actor", 'd.get("user", {}).get("login") == CHU_KHO', 'True', "actor"),
-    ("bot", 'd.get("user", {}).get("type") == "User"', 'True', "bot"),
+    ("actor", 'd["user"].get("login") == CHU_KHO', 'True', "actor"),
+    ("bot", 'd["user"].get("type") == "User"', 'True', "bot"),
     ("association", 'd.get("author_association") == "OWNER"', 'True', "raw_author_association"),
     ("issue_url", 'd.get("issue_url") == f"https://api.github.com/repos/{repo}/issues/{pr}"', 'True', "raw_issue_url"),
     ("comment_url", 'd.get("html_url") == url', 'True', "raw_html_url"),
@@ -9737,7 +9742,7 @@ for name, old, new, target in [
     ("spec_packet", 'values != [str(lease.get(key))]', 'key != "packet_id" and values != [str(lease.get(key))]', "spec_packet"),
     ("spec_revision", 'values != [str(lease.get(key))]', 'key != "revision" and values != [str(lease.get(key))]', "spec_revision"),
     ("tr_reason", 'not tr["reason"].strip()', 'False', "tr_reason"),
-    ("finding_slug", 'not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", f.get("slug", ""))', 'False', "finding"),
+    ("finding_slug", 'not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", f["slug"])', 'False', "finding"),
     ("unknown", 'set(r) != set(expected)', 'False', "unknown"),
 ]:
     MUTANTS["r1187_drop_" + name] = (old, new, ["r1187_" + target])
@@ -9763,13 +9768,25 @@ def _cli1187(x, w, h):
     x["runs"][0].update(x["remote"])
 
 
+def _conflict1187(x, w, h):
+    _cli1187(x, w, h)
+    if h:
+        x.update(no_model=False, out="KET_LUAN: changes_requested\n")
+        x["run"]["stdout_sha256"] = hashlib.sha256(x["out"].encode()).hexdigest()
+
+
 CASES += [("r1187_cli_human", _c1106_ca(0, doi=_cli1187, repo="ducthangho/tra-luat")),
-          ("r1187_cli_conflict", _c1106_ca(12, "K4", doi=lambda x,w,h: (_cli1187(x,w,h), h and x.update(no_model=False, out="KET_LUAN: changes_requested\n")), repo="ducthangho/tra-luat"))]
+          ("r1187_cli_conflict", _c1106_ca(12, "K4", doi=_conflict1187, repo="ducthangho/tra-luat"))]
 MUTANTS["r1187_drop_human_call"] = ('            _human_merge(a, root, lease, spec, p3)', '            raise ValueError("human disabled")', ["r1187_cli_human"])
 
 
 def _milestone1187(x, root=False):
-    oid = _g(x["w"], "rev-list", "--max-parents=0", "HEAD") if root else _g(x["w"], "rev-parse", "HEAD^1")
+    w=x["w"]; oid=_g(w,"rev-parse","HEAD^1")
+    if root:
+        first=_g(w,"rev-list","--max-parents=0","HEAD")
+        oid=_g(w,"commit-tree",first+"^{tree}","-p",first,"-m","missing milestone with readable parent")
+        tip=_g(w,"commit-tree","refs/remotes/origin/master^{tree}","-p",oid,"-m","land policy")
+        _g(w,"update-ref","refs/remotes/origin/master",tip)
     x["m"].ADR0062_OID=oid; x["tr"]["adr0062_oid"]=oid
 
 
@@ -9781,7 +9798,7 @@ MUTANTS.update({
     "r1187_fallback_metadata": ('    spec = blob(m[1])', '    spec = blob(h)', ["r1187_spec_missing_object"]),
     "r1187_ignore_metadata": ('    if "spec_ref" not in lease:', '    if True:', ["r1187_spec_floating"]),
     "r1187_drop_policy": ('    _adr0063_landed(root)\n    if spec is None', '    if spec is None', ["r1187_no_policy"]),
-    "r1187_drop_milestone_birth": ('or _git_do(root, "cat-file", "-e", f"{ADR0062_OID}^1:docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md")[0] == 0', '', ["r1187_milestone_not_birth"]),
+    "r1187_drop_milestone_birth": ('or parent_rc or parent_file', 'or parent_rc', ["r1187_milestone_not_birth"]),
     "r1187_drop_milestone_file": ('or _git_do(root, "cat-file", "-e", f"{ADR0062_OID}:docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md")[0]', '', ["r1187_milestone_missing"]),
 })
 
@@ -9872,7 +9889,7 @@ MUTANTS.update({
     "r1187_drop_human_rollout": ('    _adr0063_landed(root)\n    if spec is None', '    if spec is None', ["r1187_new_policy_absent"]),
     "r1187_drop_rollout_content": ('all(anchor.encode() in intro and anchor.encode() in current for anchor in ADR0063_ANCHORS)', 'True', ["r1187_spec_policy_empty"]),
     "r1187_drop_inline_agreement": ('if key == "revision":', 'if key == "revision" and not values:', ["r1187_inline_conflict"]),
-    "r1187_drop_spec_lease_type": ('type(lease.get("revision")) is not int', 'False', ["r1187_spec_lease_type"]),
+    "r1187_coerce_spec_lease_type": ('    if type(lease.get("packet_id")) is not str', '    lease = dict(lease, revision=int(lease["revision"]))\n    if type(lease.get("packet_id")) is not str', ["r1187_spec_lease_type", "r1187_spec_lease_bool"]),
     "r1187_drop_raw_id": ('type(d.get("id")) is int and d["id"] > 0', 'True', ["r1187_raw_id_zero"]),
     "r1187_drop_audit_order": ('_doc_han_utc(comment["updated_at"]) >= remote_time', 'False', ["r1187_new_late"]),
     "r1187_drop_lease_int": ('any(type(bound[k]) is not int or bound[k] < 1 for k in ("revision", "generation", "pr"))', 'False', ["r1187_lease_bool"]),
@@ -9997,6 +10014,96 @@ MUTANTS.update({
     "r1187_drop_rollout_shallow": ('_git_do(root, "rev-parse", "--is-shallow-repository") != (0, b"false\\n")', 'False', ["r1187_rollout_shallow"]),
     "r1187_drop_neither": ('raise ValueError("thiếu review model hoặc human độc lập")', 'return', ["r1187_cli_neither"]),
 })
+
+# Independent advisory r2: crashes are infrastructure, never semantic kills.
+def _crash_credit1187(c):
+    def crash(x):
+        def target(*args): raise TypeError("injected target failure")
+        x["m"]._spec_merge = target
+    saved = globals()["CASES"]
+    try:
+        globals()["CASES"] = [("injected-r1187", _ca1187("spec", crash))]
+        result = chay_suite(c.script, c.tmp / "crash-probe")
+    finally:
+        globals()["CASES"] = saved
+    assert isinstance(result["injected-r1187"], _TinDungGia), "target crash received semantic kill credit"
+
+
+def _intro1187(x):
+    w=x["w"]; p=x["m"].ADR0063_TEP; born=_g(w,"rev-parse","HEAD~2")
+    # Rebuild the introduction empty while preserving a complete current blob.
+    _g(w,"checkout","-q","--detach",born+"^1")
+    (w/p).parent.mkdir(parents=True,exist_ok=True); (w/p).write_text("",encoding="utf-8"); _g(w,"add",p); _g(w,"commit","-qm","empty introduction")
+    (w/p).write_text("\n".join(x["m"].ADR0063_ANCHORS),encoding="utf-8"); _g(w,"add",p); _g(w,"commit","-qm","amend policy")
+    _g(w,"update-ref","refs/remotes/origin/master",_g(w,"rev-parse","HEAD"))
+
+
+def _landing1187(x, squash=False):
+    w=x["w"]; p=x["m"].ADR0063_TEP; base=_g(w,"rev-list","--max-parents=0","HEAD")
+    _g(w,"checkout","-qb","landing",base); _g(w,"checkout","-qb","topic")
+    (w/p).parent.mkdir(parents=True,exist_ok=True); (w/p).write_text("\n".join(x["m"].ADR0063_ANCHORS),encoding="utf-8")
+    _g(w,"add",p); _g(w,"commit","-qm","topic policy"); _g(w,"checkout","-q","landing")
+    (w/"parallel.txt").write_text("parallel",encoding="utf-8"); _g(w,"add","parallel.txt"); _g(w,"commit","-qm","parallel")
+    if squash:
+        _g(w,"merge","-q","--squash","topic"); _g(w,"commit","-qm","squash policy")
+    else: _g(w,"merge","-q","--no-ff","-m","merge policy","topic")
+    _g(w,"update-ref","refs/remotes/origin/master",_g(w,"rev-parse","HEAD"))
+
+
+def _malformed_repo1187(x, repository):
+    early=dict(x["run"],id=4,html_url=f"https://github.com/{x['a'].repo}/actions/runs/4",repository=repository)
+    x["run"].update(created_at="2026-11-04T09:01:00Z")
+    x["runs"]=[early,x["run"]]
+
+
+def _missing_cli1187(x,w,h,transition=False):
+    (_transition_cli1187 if transition else _cli1187)(x,w,h)
+    if h:
+        if transition: x.pop("transition")
+        else: x["missing_remote"]=True
+
+
+CASES += [
+    ("r1187_crash_credit", _crash_credit1187),
+    ("r1187_spec_lease_bool", _ca1187("spec", lambda x: x["ls"].update(revision=True))),
+    ("r1187_rollout_intro_empty", _ca1187("spec", _intro1187)),
+    ("r1187_rollout_revlist_rc", _ca1187("human", lambda x: _rollout_git1187(x,"rev-list",lambda r:(1,r[1])))),
+    ("r1187_rollout_merge", _ca1187("spec", _landing1187, False)),
+    ("r1187_rollout_squash", _ca1187("spec", lambda x:_landing1187(x,True), False)),
+    ("r1187_slug_type", _ca1187("human", lambda x:x["audit"].update(open_findings=[dict(slug=1,severity="P3")]))),
+    ("r1187_user_type", _ca1187("human", lambda x:x["raw"].update(user=None))),
+    ("r1187_body_type", _ca1187("human", lambda x:x.update(body=None))),
+    ("r1187_samehead_repo_missing", _ca1187("human", lambda x:_malformed_repo1187(x,None))),
+    ("r1187_samehead_repo_name", _ca1187("human", lambda x:_malformed_repo1187(x,dict(full_name=1)))),
+    ("r1187_h_presence_rc", _ca1187("spec", lambda x:_git_status1187(x,"ls-tree",2))),
+    ("r1187_milestone_parent_rc", _ca1187("human", lambda x:_git_status1187(x,"ls-tree",2))),
+    ("r1187_cli_missing_remote", _c1106_ca(12,"thiếu human remote run",doi=_missing_cli1187,repo="ducthangho/tra-luat")),
+    ("r1187_cli_missing_transition", _c1106_ca(12,"thiếu owner comment",doi=lambda x,w,h:_missing_cli1187(x,w,h,True),repo="ducthangho/tra-luat")),
+]
+MUTANTS_NHAM_TEST = MUTANTS_NHAM_TEST | {"r1187_drop_crash_classification"}
+MUTANTS.update({
+    "r1187_drop_crash_classification": ('    except (Exception, SystemExit) as ex:\n        raise CliSapDo("r1187 target crashed") from ex', '    except (Exception, SystemExit):\n        raise', ["r1187_crash_credit"]),
+    "r1187_drop_intro_anchors": ('anchor.encode() in intro and anchor.encode() in current', 'anchor.encode() in current', ["r1187_rollout_intro_empty"]),
+    "r1187_drop_rollout_revlist_rc": ('if rc or born_rc or ', 'if born_rc or ', ["r1187_rollout_revlist_rc"]),
+    "r1187_ignore_model_conflict": ('            _human_merge(a, root, lease, spec, p3)', '            _human_merge(a, root, lease, spec, p3)\n            return', ["r1187_cli_conflict"]),
+    "r1187_drop_samehead_repo_guard": ('    if any(not isinstance(r.get("repository"), dict)', '    if False and any(not isinstance(r.get("repository"), dict)', ["r1187_samehead_repo_name"]),
+    "r1187_drop_h_presence_rc": ('    if present_rc:', '    if False:', ["r1187_h_presence_rc"]),
+    "r1187_drop_transition_parent_rc": ('or parent_rc or parent_file', 'or parent_file', ["r1187_milestone_parent_rc"]),
+})
+
+
+def _actual_milestone1187(c):
+    m=importlib.util.module_from_spec(sp:=importlib.util.spec_from_file_location("actual_milestone",c.script)); sp.loader.exec_module(m)
+    assert m.ADR0062_OID == "1f0941e9bba1d1d517eda4174167b81963c06bd5"
+    assert m.ADR0062_TIME == "2026-11-04T08:36:24Z"
+    path="docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md"
+    assert m._git_do(ROOT,"show",m.ADR0062_OID+":"+path)[0] == 0
+    assert m._git_do(ROOT,"ls-tree","-r",m.ADR0062_OID+"^1","--",path) == (0,b"")
+    rc,fp=m._git_do(ROOT,"rev-list","--first-parent","refs/remotes/origin/master")
+    assert rc == 0 and m.ADR0062_OID.encode() in fp.split()
+
+
+CASES.append(("r1187_actual_milestone",_actual_milestone1187))
 
 def main() -> int:
     _ = [s.reconfigure(encoding="utf-8", errors="backslashreplace")

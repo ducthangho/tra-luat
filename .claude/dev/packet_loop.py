@@ -3232,7 +3232,10 @@ def _spec_merge(root, h, path, lease):
         values = list(dict.fromkeys(values + [t[0 if key == "packet_id" else 1] for t in headings]))
         if values != [str(lease.get(key))]:
             raise ValueError(f"spec {key} không khớp lease")
-    if _git_do(root, "cat-file", "-e", f"{h}:{path}")[0] == 0 and blob(h) != spec:
+    present_rc, present = _git_do(root, "ls-tree", "-r", h, "--", path)
+    if present_rc:
+        raise ValueError("spec H presence không đo được")
+    if present and blob(h) != spec:
         raise ValueError("hai nguồn spec khác bytes")
     return spec
 
@@ -3245,7 +3248,7 @@ def _owner_record(path, repo, pr, schema):
         raise ValueError("owner comment phải là object")
     url = f"https://github.com/{repo}/pull/{pr}#issuecomment-{d.get('id')}"
     if not (repo == "ducthangho/tra-luat" and type(d.get("id")) is int and d["id"] > 0
-            and d.get("user", {}).get("login") == CHU_KHO and d.get("user", {}).get("type") == "User"
+            and isinstance(d.get("user"), dict) and d["user"].get("login") == CHU_KHO and d["user"].get("type") == "User"
             and d.get("author_association") == "OWNER" and d.get("issue_url") == f"https://api.github.com/repos/{repo}/issues/{pr}"
             and d.get("html_url") == url):
         raise ValueError("owner comment origin/identity không hợp lệ")
@@ -3253,6 +3256,8 @@ def _owner_record(path, repo, pr, schema):
         if not isinstance(d.get(key), str) or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z", d[key]):
             raise ValueError("comment timestamp sai")
         datetime.strptime(d[key], "%Y-%m-%dT%H:%M:%SZ")
+    if not isinstance(d.get("body"), str):
+        raise ValueError("owner body phải là string")
     record = _yaml_cay(d["body"].encode("utf-8"))
     if not isinstance(record, dict) or record.get("schema") != schema:
         raise ValueError("owner record schema không hợp lệ")
@@ -3275,7 +3280,7 @@ def _human_merge(a, root, lease, spec, p3):
     if not isinstance(findings, list):
         raise ValueError("open_findings phải là list")
     for f in findings:
-        if not isinstance(f, dict) or set(f) != {"slug", "severity"} or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", f.get("slug", "")) or f.get("severity") not in ("P0", "P1", "P2", "P3"):
+        if not isinstance(f, dict) or set(f) != {"slug", "severity"} or not isinstance(f.get("slug"), str) or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", f["slug"]) or f.get("severity") not in ("P0", "P1", "P2", "P3"):
             raise ValueError("finding schema sai")
         if f["severity"] != "P3":
             raise ValueError("human audit còn P0–P2")
@@ -3283,11 +3288,16 @@ def _human_merge(a, root, lease, spec, p3):
     if not a.human_remote_run:
         raise ValueError("thiếu human remote run")
     run = _doc_json(a.human_remote_run, RC_GATE)[0]
+    if not isinstance(run, dict):
+        raise ValueError("human remote run phải là object")
     run_url = f"https://github.com/{a.repo}/actions/runs/{run.get('id')}"
     if not (type(run.get("id")) is int and run["id"] > 0 and run.get("repository", {}).get("full_name") == a.repo
             and run.get("head_sha") == a.head and run.get("html_url") == run_url and type(run.get("event")) is str and bool(run["event"])):
         raise ValueError("human remote run repo/head/origin sai")
     runs = _trang_du(_doc_json(a.workflow_runs, RC_GATE)[0], "workflow_runs", "human workflow_runs")
+    if any(not isinstance(r.get("repository"), dict) or type(r["repository"].get("full_name")) is not str or not r["repository"]["full_name"]
+           for r in runs if r.get("head_sha") == a.head):
+        raise ValueError("human same-head K2 run thiếu repository identity")
     same_head = [r for r in runs if r.get("head_sha") == a.head and r.get("repository", {}).get("full_name") == a.repo]
     if not same_head:
         raise ValueError("human run không có trong tập K2 đầy đủ")
@@ -3308,10 +3318,11 @@ def _human_merge(a, root, lease, spec, p3):
     expected_tr = dict(schema="human_audit_transition.v1", **bound, adr0062_oid=ADR0062_OID, remote_run=run_url,
                        disposition="accept_post_push_audit", reason=tr.get("reason"), transition_source=tr_url)
     fp_rc, fp = _git_do(root, "rev-list", "--first-parent", "refs/remotes/origin/master")
+    parent_rc, parent_file = _git_do(root, "ls-tree", "-r", f"{ADR0062_OID}^1", "--", "docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md")
     if (set(tr) != set(expected_tr) or any(type(tr[k]) is not type(v) or tr[k] != v for k, v in expected_tr.items())
             or not isinstance(tr["reason"], str) or not tr["reason"].strip() or fp_rc or ADR0062_OID.encode() not in fp.split()
             or _git_do(root, "cat-file", "-e", f"{ADR0062_OID}:docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md")[0]
-            or _git_do(root, "cat-file", "-e", f"{ADR0062_OID}^1:docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md")[0] == 0
+            or parent_rc or parent_file
 ):
         raise ValueError("transition owner/bindings/mốc first-parent/ADR0063 chưa land")
 

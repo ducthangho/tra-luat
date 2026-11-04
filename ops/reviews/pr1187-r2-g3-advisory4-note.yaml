@@ -1,0 +1,423 @@
+# packet1187 advisory review note.
+# MODEL ADVISORY ONLY. Not human_audited, not an approval, not an authorization, not land authority.
+# Verdict basis: I found no P0, P1 or P2. All four prior P3 classes are fixed at source level; class 3 carries a minor P3 side effect.
+# Six P3 items stay open (one evidence gap, two regression-lock gaps, harness uniformity, one K4 diagnostics/robustness item, and the class-3 side effect).
+# Per protocol section 8 and ADR-0060 M1, each open P3 needs reviewer-confirmed closure or an exact-SHA owner waiver. None is a demonstrated unsafe accept.
+# Requested model claude-sonnet-5-5, effort max. The controller reads the actual model from raw modelUsage; this note does not assert it.
+schema: packet1187_advisory_review.v1
+reviewed_sha: 29ee9ca74d61544fbddd56c39dabbe194d26408e
+reviewed_tree: 996c6af444aeb22d69587ed7852b78f35102eb9b
+provider: anthropic_claude
+execution_surface: claude_code
+transport: machine/local
+verdict: changes_requested
+assurance: advisory_review
+review_axes: [spec, standards_security]
+prior_findings:
+  - slug: crash-diagnostics-not-in-tree
+    status: DA_VA_THAT
+    evidence: |-
+      Classified from the slug summary only; the previous raw verdict was not recovered.
+      On the reviewed tree the diagnostics are committed test code, not scratch.
+      - .claude/dev/packet_loop_test.py:10033-10059 _crash_credit1187 injects TypeError, KeyError, AttributeError, SystemExit, UnicodeDecodeError and subprocess.TimeoutExpired.
+        It injects them at three stages: target, change (setup), and import.
+        The import stage patches SourceFileLoader.exec_module for module pl1187 and restores it in finally.
+        Both consumers (_spec_merge, _human_merge) are covered.
+        It asserts the inner chay_suite result is _TinDungGia, i.e. no semantic kill credit. A leaked SystemExit is caught and fails the assertion.
+      - Lines 10141-10147 expand this into 36 matrix cases (3 stages x 2 consumers x 6 error families).
+        They add r1187_failure_positive_spec and r1187_failure_positive_human (red=False).
+        They add r1187_failure_oldguard, which removes the revision type guard so '1' < 1 raises TypeError that must still map to _TinDungGia.
+        r1187_crash_credit is the case at line 10097.
+      - The classification branches are bound to mutants r1187_failure_target_family, _target_exit, _setup_exit, _setup and _subclass (10148-10161), plus r1187_drop_crash_classification (10116-10117).
+        Each has target cases that flip to a plain str (a kill) only when its branch is removed.
+      - I grepped every anchor. The two-line except/raise text occurs once (9657-9658 setup, 9669-9670 target).
+        The table literals store the newline escaped, so they cannot self-match.
+        The controller's anchor-guards.log reports the exact-one guard passing for all 1506 mutants. I did not reproduce it.
+      Residual: this is harness code and its execution is not_run here.
+      See finding r1187-crash-classification-and-mutant-controls-not-uniform for sibling consumers.
+  - slug: r1187-setup-and-valuerror-subclass-credit
+    status: DA_VA_THAT
+    evidence: |-
+      Classified from the slug summary only.
+      .claude/dev/packet_loop_test.py:9654-9679 _r1187:
+      - Setup is wrapped in except (Exception, SystemExit) -> CliSapDo('r1187 setup crashed') (9657-9658).
+      - The target call separates a product rejection from a crash.
+        'except ValueError as ex: if type(ex) is not ValueError' raises CliSapDo('r1187 ValueError subclass crashed') (9665-9667).
+        So UnicodeDecodeError and other subclasses never count as a rejection.
+      - Any other Exception or SystemExit raises CliSapDo('r1187 target crashed') (9669-9670).
+      - chay_suite (9165-9186) maps a CliSapDo anywhere in the __cause__/__context__ chain to _TinDungGia (_co_sap_do 5452-5464).
+        The runner reports that as false credit, not a kill (10308-10314).
+      Followup defect from old282 (non-unique mutant anchor), checked independently at 29ee9ca:
+      - r1187_failure_subclass (line 10159) anchors on the two-line text:
+        'if type(ex) is not ValueError:' + newline + 'raise CliSapDo("r1187 ValueError subclass crashed") from ex'.
+      - The first line alone occurs twice in the test file: 9666 (real code) and 10159 (inside the table literal).
+      - The two-line string with a real newline occurs exactly once (9666-9667), because the literal stores the newline as an escape.
+      - There is no occurrence in the product file, and MUTANTS_NHAM_TEST routes this mutant to the test text (10161).
+      - The replacement 'if False:' is valid Python and leaves the raise as dead code.
+      - Its targets are r1187_failure_positive_spec, r1187_failure_positive_human and r1187_failure_target_spec_UnicodeDecodeError.
+        Under the mutant they become a plain AssertionError ('positive evidence rejected') or a silent pass.
+        The outer assertion isinstance(result, _TinDungGia) then fails, so the kill is property-specific and not an import, setup or crash kill.
+      - The intended consumer is the harness function _r1187, which is correct.
+      Residual: the same classification is not applied to sibling consumers; see the crash-classification finding.
+  - slug: strict-identity-format-fail-closed
+    status: VA_SINH_LOI_MOI
+    evidence: |-
+      Classified from the slug summary only.
+      The fail-open behavior is closed in packet_loop.py:3227-3246 (_spec_merge):
+      - Every visible line that looks like an identity declaration must fullmatch the declaration or inline grammar (3233-3234).
+        "Looks like" means case-insensitive packet_id/revision, optional leading whitespace or dash, optional space before the colon.
+      - A third identity key inside an inline line is rejected (3235-3236).
+      - Any CR byte in the spec is rejected (3230-3231).
+      - H1 lookalikes must fullmatch '# <id> r<N> <dash> <title>' (3237-3238).
+      - The collection regexes (3240-3244) can therefore only see grammar-valid lines, and the de-duplicated value list must equal exactly [lease value].
+      - Fences and HTML comments are masked first by _che_khong_render (3225-3226), and unclosed ones are rejected.
+      Tests are r1187_format_* (10171-10185) with mutants r1187_format_ignore_invalid and r1187_format_ignore_heading.
+      I checked the anchors by grep; the heading anchor is written with doubled backslashes and evaluates to the product text at 3237.
+      Static hand-trace of the real own specs: r1 (control copy) and r2 (head) satisfy the grammar.
+      Both have the inline identity line at line 7 and the H1 at line 3, and the fenced 'revision: 3' sample is masked.
+      Side effect of the same change: the H1 trigger '(?i)\s*# .* r\S+' is over-broad and false-rejects benign titles.
+      See finding identity-h1-trigger-overbroad-false-reject.
+      It stays fail-closed with no security regression, so I use VA_SINH_LOI_MOI rather than DA_VA_THAT. The severity is P3.
+  - slug: first-parent-intro-git-version-dependence
+    status: DA_VA_THAT
+    evidence: |-
+      Classified from the slug summary only. This is a source-level classification; real Git execution is not_run.
+      packet_loop.py:3190-3204 _adr0063_landed no longer relies on Git defaults.
+      - Line 3194 runs: git log --first-parent --diff-merges=first-parent --no-patch --no-renames --diff-filter=A --format=%H refs/remotes/origin/master -- docs/adr/0063-merge-spec-ref-va-human-audit.md.
+        A merge-commit landing therefore counts as an addition against the first parent, and a rename into the path counts as an addition.
+      - A non-zero rc from rev-list or log raises ValueError. So does 'rev-parse --is-shallow-repository' != (0, b'false\n') (3195-3196).
+      - For each candidate introduction commit (3198-3203):
+        - The parent must be readable and must not contain the path.
+        - The commit must be on the first-parent list.
+        - Both the introduction blob and the current master blob must contain every ADR0063_ANCHORS entry.
+      - A Git lacking --diff-merges returns rc != 0 and fails closed. There is intentionally no runtime version gate.
+      Tests:
+      - Real merge and squash topologies r1187_rollout_merge and r1187_rollout_squash (_landing1187, 10071-10080).
+      - r1187_rollout_intro_empty (_intro1187, 10062-10068).
+      - Counterfactual replays r1187_git_explicit_merge and r1187_git_explicit_rename (_git_compat1187, 10187-10206), with mutants that delete each flag (10207-10210).
+      The ADR says support starts at Git 2.43 and that the replays only measure option selection.
+      Unverified here: how '--no-patch' combines with '--diff-filter=A' on a real Git.
+      My reading of Git's log-tree code is that the filter still gates commit display, but I did not run it.
+findings:
+  - slug: a2-actual-wp1178-r3-and-frozen-own-spec-blobs-not-exercised
+    severity: P3
+    axis: spec
+    kind: acceptance_evidence_gap
+    counterexample: not_run
+    path: ops/specs/PR1184-MERGE-CONTRACT-r2.md
+    line: 84
+    evidence: |-
+      Spec A2 (line 84) requires running the actual wp1178 r3 blob and the actual frozen own specs through the pinned external K1 path.
+      The own specs carry a fenced sample receipt.
+      grep finds no 'wp1178' anywhere in .claude/dev/packet_loop_test.py.
+      Every _spec_merge case uses synthetic fixtures built by _setup1187 (9607-9651; kinds spec, title, title_conflict, markdown, legacy).
+      The wp1178 r3 spec is not in the checkout or the control workspace, and no receipt of such a run was supplied.
+      My static trace says the own specs r1 and r2 pass the identity grammar. That is reasoning, not execution.
+    impact: |-
+      The strict grammar is the kind of rule that can false-reject a real frozen spec (see identity-h1-trigger-overbroad-false-reject).
+      Until the real wp1178 r3 blob is run, there is no evidence the tool can certify the PR it was written for.
+      This fails closed, so it is not an unsafe-merge risk. It is an A2 acceptance gap that must be evidenced or waived before the human audit.
+    fix: |-
+      No product change if the run passes.
+      Before the primary human audit, run _spec_merge (or kiem-merge K1) on 'git show <spec_ref OID>:<spec_path>' for the real wp1178 r3 lease and for the r1 and r2 own specs.
+      Record the rc and sha256 of each blob in the handoff.
+      If the wp1178 r3 blob is rejected, narrow the grammar (see finding 2) instead of editing a frozen spec.
+    locking_test: |-
+      Add an in-tree case r1187_actual_own_spec.
+      It builds a lease from the real ops/specs/PR1184-MERGE-CONTRACT-r2.md (packet_id PR1184-MERGE-CONTRACT, revision 2, the file's sha256) in a temp repo.
+      It asserts _spec_merge returns the exact bytes.
+      Keep wp1178 r3 as receipt evidence (sha256 + rc) rather than a test, because that frozen blob is not part of the product tree.
+    repair_risk: |-
+      Reading the real r2 spec couples the test to a frozen file, which is acceptable because it is immutable.
+      A wp1178 check that goes RED when the object is absent would break shallow or partial clones; use receipt evidence for it.
+  - slug: identity-h1-trigger-overbroad-false-reject
+    severity: P3
+    axis: spec
+    kind: demonstrated_by_regex_semantics
+    counterexample: not_run
+    path: .claude/dev/packet_loop.py
+    line: "3237-3238"
+    evidence: |-
+      The check is: if re.match(r"(?i)\s*# .* r\S+", line) and not re.fullmatch(heading, line): raise ValueError('spec identity H1 sai grammar').
+      It treats any H1 that contains a later word beginning with r or R as an identity declaration.
+      Hand evaluation of '# Design report': '.*' = 'Design', then ' r', then '\S+' = 'eport', so it matches.
+      The line cannot fullmatch '# <id> r<N> <dash> <title>', so _spec_merge raises.
+      That happens even when canonical packet_id: and revision: lines elsewhere in the spec agree with the lease.
+      The corpus in ops/specs has many H1 styles that would be rejected on this path. Examples: '# WP484 r6/g6 - ...', '# DAC TA - ... revision 12 ...', '# Dac ta packet `x` r2 - ...'.
+      Execution of the counterexample is not_run.
+    impact: |-
+      Unintended false rejection introduced by the strict-identity repair. It fails closed and is not a security regression.
+      It makes the A2 acceptance gap sharper, because the real wp1178 r3 H1 style is unknown.
+    fix: |-
+      Narrow the trigger to revision-like tokens, e.g. r'(?i)\s*#\s(?:.*\s)?r[0-9]' (an r or R immediately followed by a digit).
+      Keep the fullmatch requirement and all existing negatives.
+      Define "looks like identity" for H1 explicitly in docs/adr/0063-merge-spec-ref-va-human-audit.md.
+    locking_test: |-
+      Add r1187_format_h1_benign, positive.
+      The spec bytes are 'packet_id: wp1187\nrevision: 1\n# Design report\n', and it must be accepted.
+      Add a mutant that widens the trigger back to 'r\S+' and targets this case.
+      Keep r1187_format_heading_quote, _indent, _upper and _title_space as negatives.
+    repair_risk: |-
+      A narrower trigger lets non-digit forms such as 'rev2' through. They are not recognized identity forms, so this is acceptable.
+      ' r6/g6' and ' R2' must still be rejected, and they still match.
+      Re-run the corpus check before relying on it.
+  - slug: k4-owner-record-negative-locks-missing
+    severity: P3
+    axis: spec
+    kind: demonstrated_source_gap
+    counterexample: not_run
+    path: .claude/dev/packet_loop_test.py
+    line: "9688-9744 (case block); product guards at packet_loop.py:3262, 3099-3105, 3373-3381"
+    evidence: |-
+      Three spec-listed properties of the K4 consumer have no locking case or mutant.
+      (a) A4 and K4 require rejecting an alias in the owner body.
+          The r1187 cases cover missing, unknown, duplicate, free_text, actor, bot, time, format and type. None feeds an anchor or alias to --human-audit-comment.
+          The only anchor test is cong_c_k1_anchor (line 9384, lease YAML) with mutant c1106_yaml_nhan_anchor (9417), which is a different consumer.
+      (b) _owner_record hard-codes 'repo == "ducthangho/tra-luat"' (packet_loop.py:3262).
+          Every r1187 case uses the canonical repo.
+          No case passes another --repo with an otherwise self-consistent owner comment, and no mutant drops the clause.
+      (c) The spec requires that when model and human inputs are both passed, both must be valid.
+          Human valid + model invalid is tested (r1187_cli_conflict, mutant r1187_ignore_model_conflict).
+          Human invalid + model valid is not tested.
+          It is correct by construction, because _human_merge raises before the model block (3377), but a swallow-the-error regression would go unnoticed.
+    impact: |-
+      No product defect demonstrated; the guards exist and read correctly.
+      Regression locks are missing for an owner-authority property (canonical repo), for A4 alias, and for one half of the conflict rule.
+    fix: |-
+      Tests only, no product change.
+    locking_test: |-
+      (a) Add r1187_anchor.
+          The body is a valid audit with 'schema: &s human_exact_head_audit.v1', so only the anchor guard can reject it.
+          Extend the existing mutant c1106_yaml_nhan_anchor to also target r1187_anchor.
+          The AliasEvent branch is redundant with the anchor-attribute branch. Document that instead of faking a mutant for it.
+      (b) Add r1187_repo_noncanonical.
+          It is a direct _owner_record call with repo 'ducthangho/other' and a fully self-consistent comment, expecting ValueError.
+          Include a canonical-repo positive twin.
+          Add a mutant that replaces 'repo == "ducthangho/tra-luat" and' with 'True and' (the anchor occurs once, at 3262).
+      (c) Add the CLI case r1187_cli_human_invalid_model_valid: a wrong-actor audit plus a valid model run/stdout, expecting rc 12 and 'K4'.
+          Add a mutant that wraps '            _human_merge(a, root, lease, spec, p3)' in try/except ValueError: pass.
+    repair_risk: |-
+      An alias fixture that is invalid YAML for another reason would make the case pass for the wrong reason.
+      Keep the positive twin identical except for the anchor.
+      The _human_merge call anchor is shared with two existing mutants; each mutant needs its own replacement text.
+  - slug: k1-lease-packet-id-type-and-spec-ref-oid40-strictness-unlocked
+    severity: P3
+    axis: spec
+    kind: demonstrated_source_gap
+    counterexample: not_run
+    path: .claude/dev/packet_loop.py
+    line: "3216, 3221-3223, 3281"
+    evidence: |-
+      K1 requires "Packet_id lease la nonempty str" and "refs/heads/...@OID40". A2 lists "type".
+      The guards exist: 3216 (_spec_merge), 3281 (_human_merge) and the ref regex at 3221.
+      The tests only vary the revision type (r1187_spec_lease_type, r1187_spec_lease_bool) and a mismatching packet string.
+      They also cover a floating ref, a missing object and a bad ref name.
+      The floating-ref case is killed only by r1187_ignore_metadata, which bypasses the whole external path, not by the regex.
+      Untested:
+      - A non-str lease packet_id whose str() equals the declared id (YAML 'packet_id: 1187' with a spec declaring 1187).
+      - An empty or None packet_id.
+      - An abbreviated OID (@abc1234).
+      - An uppercase OID.
+      - A non-refs/heads prefix (refs/tags/x@oid).
+      A mutant that widens {40} to {7,40}, or drops either packet_id clause, would survive.
+    impact: |-
+      No defect demonstrated.
+      The OID40 pin and the string packet id are the authority anchors of the external path, and nothing locks their strictness.
+    fix: |-
+      Tests only, no product change.
+    locking_test: |-
+      Add r1187_spec_packet_int and r1187_human_packet_int (lease packet_id=1187 as an int, with the spec or audit declaring 1187).
+      Add r1187_spec_ref_abbrev, _upper and _tag. Each needs a positive twin with the full OID.
+      Add mutants that drop the packet_id clause in each consumer.
+      The clause 'type(lease.get("packet_id")) is not str or not lease["packet_id"]' occurs twice (3216, 3281), so each anchor needs distinguishing context.
+      Use 'if type(lease.get("packet_id")) is not str or not lease["packet_id"] or type(' for the spec consumer, and 'if spec is None or type(lease.get("packet_id")) is not str' for the human consumer.
+      Add a mutant that widens the regex.
+    repair_risk: |-
+      The abbreviated-OID fixture must use a real abbreviation of the existing spec commit.
+      Then the only reason for rejection is regex strictness, and the positive twin shows the fixture itself is valid.
+      Anchors without distinguishing context would hit the exact-one gate, which is the same class as the old282 followup defect.
+  - slug: r1187-crash-classification-and-mutant-controls-not-uniform
+    severity: P3
+    axis: standards_security
+    kind: demonstrated_source_gap
+    counterexample: not_run
+    path: .claude/dev/packet_loop_test.py
+    line: "9820-9831, 9913-9925, 9743, 9947-9948, 10301-10302, 10040"
+    evidence: |-
+      The spec says import, setup, crash and timeout never count as a kill, and every mutant needs actual positive controls.
+      (a) _r1187 (9654-9679) and _c1106_ca (9274-9282, via _co_banner) classify crashes as CliSapDo.
+          _docs1187 (9820-9831) calls run() and then a bare _doi (244-246).
+          A product traceback with rc=1 becomes a plain AssertionError, which is a semantic kill.
+          _transition_run1187 (9913-9925) catches only SystemExit, so any other exception also becomes a plain failure.
+          Today the only mutant on _docs1187 (r1187_drop_doc_guard) is semantic and does not crash, so no false credit exists yet.
+      (b) A4b asks for "Test CLI transition va mutant cu the".
+          r1187_cli_transition, r1187_cli_transition_bad and r1187_cli_missing_transition (9947-9948, 10111) appear only in CASES.
+          No MUTANTS entry targets them. The transition mutants all target the direct-call cases.
+      (c) The comment at 9743 claims "positive controls in every mutant run".
+          The runner executes only phai_chet plus doi_chung (10301-10302).
+          For r1187 mutants, doi_chung is the doctrine-family trio DOI_CHUNG_DOCTRINE (4282-4283, 4328-4336).
+          No r1187 positive control runs under mutation. Only r1187_failure_subclass lists positive cases.
+      (d) _crash_credit1187 uses importlib.machinery (10040) but the module imports only importlib.util (line 23).
+          It works because launcher.py imports runpy at top level, which is brittle.
+    impact: |-
+      No wrong result demonstrated. The kill-classification guarantee required by the spec is applied unevenly.
+      A future mutant that crashes in the docs or transition consumers would earn false credit, and a comment overstates what the runner does.
+    fix: |-
+      - In _docs1187, raise CliSapDo when _co_banner(o) or _co_banner(e) is true, as _c1106_ca does.
+        Wrap its module load in the same except (Exception, SystemExit) -> CliSapDo.
+      - Make _transition_run1187 convert non-SystemExit exceptions to CliSapDo.
+      - Bind a mutant to the CLI transition cases.
+        For example, replace a.human_transition_comment with None in the _owner_record call (it breaks r1187_cli_transition).
+        Also add a drop of the reason check that targets r1187_cli_transition_bad.
+      - Either extend _doi_chung_khac_ho to return ("r1187_human_positive", "r1187_spec_positive") when every target name starts with r1187_, or correct the comment.
+      - Add 'import importlib.machinery'.
+    locking_test: |-
+      Add r1187_docs_crash_credit. It injects a crash into adr-song, or into the module load, and asserts the result is _TinDungGia.
+      Add an equivalent for the in-process transition CLI.
+      Add the CLI-transition-bound mutants above.
+    repair_risk: |-
+      Family positive controls under mutation can turn a currently green mutant red.
+      Run the full mutant table once to check which mutants legitimately affect the positives.
+      Runtime also grows.
+      Broadening the in-process exception capture must not swallow assertion failures from the case itself.
+  - slug: k4-fail-closed-diagnostics-incidental-typeerror-and-overflow
+    severity: P3
+    axis: standards_security
+    kind: source_inspection_plus_hypothetical
+    counterexample: not_run
+    path: .claude/dev/packet_loop.py
+    line: "3373-3387, 834-848, 3125-3134, 3321-3326"
+    evidence: |-
+      (a) Demonstrated by source: in k4 (3373-3387), if only one of --offline-run-json and --offline-stdout is passed, control passes the 'if not (A or B)' block.
+          It then reaches _doc_json(None, ...) or Path(None), which raises TypeError.
+          _doc_json does not catch TypeError (2771), but _dk does.
+          The result is rc 12 and 'K4', which is correct, but the diagnostic is "KHAN DO DUOC (TypeError: argument should be a str or an os.PathLike ...)".
+          The spec says "Thieu input tra loi ro".
+          r1187_cli_missing_model_run and r1187_cli_missing_model_stdout (10112-10113) assert only the substring 'K4', so they pass for any K4 failure.
+      (b) Hypothetical, not_run: _doc_han_utc calls d.astimezone(timezone.utc).
+          For an aware datetime near datetime.min with a positive offset (for example '0001-01-01T00:00:00+14:00') this raises OverflowError.
+          _dk catches only SystemExit, OSError, ValueError, KeyError, TypeError and AttributeError.
+          The human path feeds API-supplied created_at and updated_at strings into _doc_han_utc (3321, 3322, 3326).
+          A crafted readback would end kiem-merge with a traceback (rc 1) instead of a K4 THIEU line with rc 12.
+          The same file already catches (ValueError, OverflowError) elsewhere (cmd_kiem_dong_wp, 3481).
+          Malformed timestamps are also reported as '--expires-utc ...', which names the wrong input.
+    impact: |-
+      Both outcomes are still non-zero and fail closed. There is no unsafe accept.
+      (a) is a clarity gap against the spec's "clear error" wording.
+      (b) is a contract drift from the documented rc 12 and loses the per-condition THIEU report.
+    fix: |-
+      (a) In k4, test 'bool(a.offline_run_json) != bool(a.offline_stdout)' explicitly.
+          Raise ValueError('thieu mot input model') before any file access.
+      (b) Convert OverflowError to a rejection inside _doc_han_utc, via _die or ValueError.
+          Do not broaden _dk generically.
+          Optionally label the input being parsed in the error text.
+    locking_test: |-
+      (a) Make the two missing-model CLI cases assert the deliberate message and the absence of 'TypeError'.
+          Add a mutant that deletes the explicit check; it must go red.
+      (b) Add a CLI case with a same-head run whose created_at is '0001-01-01T00:00:00+14:00'.
+          Expect rc 12 and no Traceback (_co_banner false).
+          A direct-call _r1187 case cannot see a _die-based rejection, because SystemExit is classified as a crash.
+    repair_risk: |-
+      A broader _dk catch could turn genuine programming errors in other conditions into THIEU lines.
+      Prefer the narrow conversion in _doc_han_utc.
+      Changing the message text can break callers that match on it; only K4/rc12 are asserted today.
+tests:
+  independently_run: false
+  evidence_reviewed:
+    - |-
+      /workspace/scratch/pr1187-recovery/review-output/diff.patch and numstat.txt, read in full.
+      +936/-9 over 5 files (packet_loop.py 175/4, packet_loop_test.py 627/5, PROTOCOL 4/0, ADR-0063 24/0, spec r2 106/0).
+      The sums reconcile with the numstat, stay within the 1000-line ceiling, and the 5 paths are inside the six-path write set.
+      ops/specs/PR1184-MERGE-CONTRACT-r1.md is absent from the head, as A9 requires.
+    - |-
+      The checkout files at the exact head. .git/HEAD in the checkout reads 29ee9ca74d61544fbddd56c39dabbe194d26408e.
+      I read AGENTS.md, CLAUDE.md (lines 1-402 plus targeted sections: mutation-credit lessons and the delivery rules), and docs/PROTOCOL_DA_PHIEN.md (sections 3, 8, the severity table, and the section 20 row at 1523).
+      I read ops/specs/PR1184-MERGE-CONTRACT-r2.md in full (106 lines).
+      It has no CR bytes and no trailing whitespace, and its headings and anchors line up with the control copy.
+      Its SHA256 was not recomputed.
+    - |-
+      packet_loop.py ranges read: 834-848, 1930-2012 (adr-song guard at 1990-1993), 2408-2414, 2767-2787, 3098-3134, 3137-3341, 3342-3448, 3707-3719.
+      packet_loop_test.py ranges read: 640-727, 5425-5470, 9150-9290, 9607-10210, 10205-10380, and the helper definitions at 129, 173-187, 240-246, 276, 4254-4336.
+      I read the added docs/adr/0063-merge-spec-ref-va-human-audit.md in the diff; all nine ADR0063_ANCHORS appear in visible prose, and its status line matches the _ADR_TRANG_THAI regex.
+    - |-
+      /workspace/scratch/pr1187-recovery/control/ops/receipts/pr1187-cold-recovery-g3-authority.yaml and pr1187-g3-review-start.yaml.
+      They are consistent with the assignment: run3, surface continuation codex_desktop to codex_service, spec bytes unchanged, limit 4, fifth_authorized false.
+      They grant no human audit, push, merge or deploy.
+      The review-start receipt records the Read/Glob/Grep-only tools and requested_model claude-sonnet-5-5.
+    - |-
+      gates-29ee9ca/results.json and anchor-guards.log. These are controller-run, supplied evidence that I did not reproduce.
+      rc 0. The log reports 'ANCHOR_GUARDS 3/3; MUTANTS 1506' and the three guard cases returned null.
+      My manual byte count of the log is 384, which matches log_bytes; I did not recompute the SHA256.
+      The command ran in the 'candidate' checkout path, not in this 'reviewer' path.
+      It covers only the exact-one anchor guard, the guard's self-test, and the product/test anchor classification case. It is not the full suite.
+    - |-
+      gates-29ee9ca/fullstandard.log contains only two compile warnings about an invalid escape sequence at packet_loop_test.py line 3748.
+      That literal is existing code outside this diff.
+      There is no result, so completion and pass are not_observed.
+      local-admission-29ee9ca.json was also read: H, S and T match the assignment, mode chua_kich_hoat, empty revocation set.
+    - |-
+      earlier class typeerror-crash-false-mutation-credit: DA_VA_THAT (static).
+      Evidence: r1187_failure_oldguard and r1187_coerce_spec_lease_type exercise the TypeError path.
+      The CLI cases use the _co_banner guard (9277-9278).
+      The gap for sibling consumers is in finding r1187-crash-classification-and-mutant-controls-not-uniform.
+    - |-
+      earlier class p3-forwarding: DA_VA_THAT (static).
+      _human_merge appends ('human', slug) for each P3 (packet_loop.py:3299); k5 (3389-3393) requires exactly one 'mien_p3: <H> human:<slug>' line covering the same set.
+      Cases: r1187_p3, r1187_cli_p3_block (rc 12, K5), r1187_cli_p3_waive (rc 0).
+      Mutants: r1187_drop_p3_forwarding and r1187_drop_cli_p3. The anchor is unique at 3299.
+    - |-
+      earlier class rollout-timing-bypass: DA_VA_THAT (static).
+      - A later rerun cannot move the earliest run (3322-3324; r1187_rerun_bypass, r1187_drop_earliest).
+      - For a new candidate, the audit updated_at must precede the earliest run (3325-3328; r1187_new_late, r1187_drop_audit_order).
+      - The historical branch needs a valid owner transition plus milestone checks (3329-3339): on the first-parent list, birth commit, readable parent, file present.
+        Mutants exist for these checks.
+      - The rollout is required for external K1 (3215) and for every human K4 (3280).
+      - A malformed same-head repository identity cannot hide an earlier run (3310-3312; r1187_samehead_repo_name, r1187_drop_samehead_repo_guard).
+      The spec-accepted residual is documented: the raw JSON only proves readback consistency, and origin/master freshness is the dispatcher's duty.
+    - |-
+      earlier class spec-identity: DA_VA_THAT for conflict detection, type strictness, pinned OID/path/hash, H-versus-pinned bytes, and fence masking.
+      Cases: r1187_spec_*, r1187_title_*, r1187_inline_conflict, r1187_markdown_example, with their mutants.
+      Remaining items are in findings k1-lease-packet-id-type-and-spec-ref-oid40-strictness-unlocked and identity-h1-trigger-overbroad-false-reject.
+    - |-
+      earlier class human-model-conflicts: DA_VA_THAT for human valid + model invalid (r1187_cli_conflict, r1187_ignore_model_conflict) and for neither input (r1187_cli_neither, r1187_drop_neither).
+      Partial model input fails closed at K4 rc 12.
+      The reverse direction (human invalid + model valid) is correct by construction but unlocked; see finding k4-owner-record-negative-locks-missing.
+limitations:
+  - static_only
+  - previous_raw_verdict_unavailable
+  - primary_human_audit_still_required
+  - |-
+    static_only detail: I used only Read, Glob and Grep. There was no shell, network or subagent.
+    I executed no test, mutant or gate, and independently_run is false.
+    Nothing in this note claims that any test ran.
+    Controller-run logs are described only as supplied evidence.
+  - |-
+    previous_raw_verdict_unavailable detail: the earlier primary-human prose was not recovered in this workspace.
+    The four prior classes were judged on their slug names and summaries, and I did not invent old evidence.
+  - |-
+    primary_human_audit_still_required detail: this note is advisory_review.
+    It is not human_audited, not cross_approved, and not an approval, authorization, push or land authority.
+    The fourth and final model advisory per the g3 authority receipt (limit 4, fifth_authorized false) does not substitute for the mandatory independent human audit.
+  - |-
+    fullstandard_not_observed: gates-29ee9ca/fullstandard.log has no result.
+    I made no claim about full-suite completion or pass, and the earlier EAGAIN and 482-baseline-failure history is neither waived nor attributed here.
+    A7 (the complete packet-loop suite plus the doctrine, ADR and doc-claims checks) is unverified for this head.
+  - |-
+    other_gates_not_asserted: Windows M3 for this head (K6 requires it for .claude/dev), GitHub PR CI, M9 full_mutant_audit and the merge gate are not asserted.
+    The old282 Windows 292/292 and native mutant 1/1 results are historical and are not used for this head.
+  - |-
+    anchor_guard_evidence_scope: the supplied anchor-guard run was executed in the candidate checkout path and I did not reproduce it.
+    My independent anchor evidence is limited to grep counts for the r1187_failure_* anchors and spot checks of the product anchors, not all 1506 mutants.
+  - |-
+    real_git_not_run: the behaviour of the exact 'git log' invocation in _adr0063_landed on a real Git, and its Git-version range, is unexecuted here.
+    I did not see the receipts the ADR refers to.
+  - |-
+    identity_not_recomputed: the SHA256 of the r2 spec was not recomputed. I compared structure and line numbers against the control copy.
+    The tree OID comes from the assignment and from 'T' in local-admission-29ee9ca.json. The head OID was corroborated from .git/HEAD.
+  - |-
+    spec_a2_blob_unavailable: the wp1178 r3 spec was not available to me, so the A2 actual-blob run could not be evaluated.
+  - |-
+    style_not_assessed: the spec's "do not compress code to meet the cap" was checked only by observing dense multi-statement helpers in the added tests at +936/1000.
+    This is consistent with the file's existing style, and I raise no finding for it.
+  - |-
+    model_identity: this note does not assert the model. The controller must read the actual model from raw modelUsage.

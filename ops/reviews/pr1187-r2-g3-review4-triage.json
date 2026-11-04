@@ -1,0 +1,98 @@
+{
+  "head": "29ee9ca74d61544fbddd56c39dabbe194d26408e",
+  "timestamp": "2026-11-04T17:05:10.012736+00:00",
+  "scope": "diagnostics in scratch; no remediation or new review call; synthetic rollout is not canonical authority",
+  "probes": [
+    {
+      "name": "identity-h1-benign-positive-false-reject",
+      "probe_completed": true,
+      "result": {
+        "accepted": false,
+        "error": "spec identity H1 sai grammar",
+        "bytes_sha256": "4a1cd834e32f4421e6583a877d62b45251f15a53d1e0b454adb5f546e859b773",
+        "finding_reproduced": true
+      }
+    },
+    {
+      "name": "actual-wp1178-r3-pinned-K1",
+      "probe_completed": true,
+      "result": {
+        "accepted": true,
+        "rc": 0,
+        "bytes_sha256": "4fe4cc94da39fff575b3c0c60d3d2795af3afd948f08359a3e8a5b9d94ff67bf",
+        "source_oid": "8f8cf8e1f28bf970d6c68179dac7a74b5b8f1c8e",
+        "source_path": "ops/specs/wp1178-r3.md",
+        "policy_graph": "synthetic first-parent rollout fixture; actual original source OID/blob bytes imported intact",
+        "canonical_rollout_certified": false
+      }
+    },
+    {
+      "name": "actual-own-r1-pinned-K1",
+      "probe_completed": true,
+      "result": {
+        "accepted": true,
+        "rc": 0,
+        "bytes_sha256": "056804c42c3ae5fe867257b12ce99fe8a4a9045e4716b2e675769f7bb052fe71",
+        "source_oid": "36b040e40503a810be20dced6dcd5f73d57110c8",
+        "source_path": "ops/specs/PR1184-MERGE-CONTRACT-r1.md",
+        "policy_graph": "synthetic first-parent rollout fixture; actual original source OID/blob bytes imported intact",
+        "canonical_rollout_certified": false
+      }
+    },
+    {
+      "name": "actual-own-r2-pinned-K1",
+      "probe_completed": true,
+      "result": {
+        "accepted": true,
+        "rc": 0,
+        "bytes_sha256": "975c5d31be6ec4f26145f14893b5c8f7063e5921d1c6dafdca020f50e795299d",
+        "source_oid": "74a0abdb2631ae38f9f76b7426b5e47a3c82ce8f",
+        "source_path": "ops/specs/PR1184-MERGE-CONTRACT-r2.md",
+        "policy_graph": "synthetic first-parent rollout fixture; actual original source OID/blob bytes imported intact",
+        "canonical_rollout_certified": false
+      }
+    },
+    {
+      "name": "datetime-offset-underflow",
+      "probe_completed": true,
+      "result": {
+        "accepted": false,
+        "error_type": "OverflowError",
+        "error": "date value out of range",
+        "input": "0001-01-01T00:00:00+14:00",
+        "overflow_reproduced": true
+      }
+    },
+    {
+      "name": "r1187_cli_missing_model_run",
+      "probe_completed": true,
+      "result": {
+        "case_still_passes": true,
+        "actual_rc": 12,
+        "incidental_TypeError_in_error": true,
+        "stderr": "  THIẾU  K4 review offline: KHÔNG ĐO ĐƯỢC (TypeError: argument should be a str or an os.PathLike object where __fspath__ returns a str, not 'NoneType')\nCHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu K4 review offline\n"
+      }
+    },
+    {
+      "name": "r1187_cli_missing_model_stdout",
+      "probe_completed": true,
+      "result": {
+        "case_still_passes": true,
+        "actual_rc": 12,
+        "incidental_TypeError_in_error": true,
+        "stderr": "  THIẾU  K4 review offline: KHÔNG ĐO ĐƯỢC (TypeError: argument should be a str or an os.PathLike object where __fspath__ returns a str, not 'NoneType')\nCHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu K4 review offline\n"
+      }
+    },
+    {
+      "name": "docs-consumer-credits-injected-crash",
+      "probe_completed": true,
+      "result": {
+        "caught_type": "AssertionError",
+        "classification": "GIET",
+        "contains_traceback": true,
+        "finding_reproduced": true,
+        "error": "ADR0063 positive: đòi rc=0, được rc=1; stderr='Traceback (most recent call last):\\n  File \"/workspace/scratch/pr1187-recovery/review4-triage/docs-crash/crashed-product/packet_loop.py\", line 3751, in <module>\\n    sys.exit(main())\\n             ^^^^^^\\n  File \"/workspace/scratch/pr1187-recovery/review4-triage/docs-crash/crashed-product/packet_loop.py\", line 3747, in main\\n    return a.fn(a, Path(a.state_dir))\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \"/workspace/scratch/pr1187-recovery/review4-triage/docs-crash/crashed-product/packet_loop.py\", line 1918, in cmd_adr_song\\n    raise RuntimeError(\"diagnostic injected crash\")\\nRuntimeError: diagnostic injected crash'"
+      }
+    }
+  ]
+}

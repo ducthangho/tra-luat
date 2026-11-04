@@ -1,0 +1,44 @@
+{
+  "reviewed_sha": "29ee9ca74d61544fbddd56c39dabbe194d26408e",
+  "model_verdict": "changes_requested",
+  "model_findings": 6,
+  "all_severity": "P3",
+  "original_four_classes": {
+    "closed_static": 3,
+    "strict_identity": "VA_SINH_LOI_MOI; benign H1 false reject reproduced"
+  },
+  "triage": "8 probes completed: benign-H1 false rejection; three real pinned source blobs accepted; datetime helper overflow; two missing-input CLI TypeErrors; docs crash counted GIET",
+  "a2_acceptance_evidence_gap": "supplemented with exact OID/path/hash/rc for actual wp1178 r3, ownr1/r2; synthetic policy rollout only; independent primary human confirmation pending",
+  "remaining_finding_groups": 5,
+  "no_product_edits_after_review": true,
+  "model_budget": {
+    "used": 4,
+    "limit": 4,
+    "remaining": 0
+  },
+  "fullstandard": "stopped at review rescue checkpoint 2026-11-04T17:02:45.052871+00:00; canonical stop verified own process tree clean; no complete baseline or mutant result; interrupted not_pass",
+  "local_passed": [
+    "canonical local admission S/H/T",
+    "anchor guards3/3 and1506unique anchors",
+    "tl.py --selftest1776/1776 rc0",
+    "Windows paired292/292 rc0",
+    "native Windows semantic mutant1/1, controls pass, zero false credit",
+    "doctrine10files/0copies",
+    "ADR62/62",
+    "docclaims strictoktrue",
+    "git diff --check"
+  ],
+  "no_code_push_merge_land_deploy": true,
+  "proposal_file": "PR1184-MERGE-CONTRACT-r3-PROPOSED.md",
+  "proposal_sha256": "219a5b95c1af770495d0848f8581bffcd1eb83a4e0154454634b02f7f2acaabd",
+  "proposal_status": "UNAPPROVED; no leaseg4",
+  "proposal_caps": {
+    "added_lines": 1250,
+    "effective_paths": 6,
+    "net_product_files": 5,
+    "new_model_calls": 0,
+    "one_new_writer_run_minutes": 90,
+    "separate_read_only_gate_minutes": 180
+  },
+  "recorded_at": "2026-11-04T17:10:13.112098+00:00"
+}

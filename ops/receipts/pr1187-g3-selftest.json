@@ -1,0 +1,22 @@
+{
+  "head": "29ee9ca74d61544fbddd56c39dabbe194d26408e",
+  "tree": "996c6af444aeb22d69587ed7852b78f35102eb9b",
+  "command": [
+    "python",
+    "-B",
+    "-u",
+    "scripts/tl.py",
+    "--selftest"
+  ],
+  "rc": 0,
+  "run_id": "57ab4ddf69be4aba99b498089724afb3",
+  "markers": [
+    "== tl selftest 1776/1776 =="
+  ],
+  "stdout_sha256": "41438cdaacef9dbfa6d38f4a26b2c3db205f875f0ded6d38e0f6a225b77fa574",
+  "stderr_sha256": "ba50802f8392d37b8858592e6a5e0822eb24550f038479b3e87001d98989bac4",
+  "limitations": [
+    "No GitHub CI or M9 implied"
+  ],
+  "ended_at": "2026-11-04T16:51:26.319340+00:00"
+}

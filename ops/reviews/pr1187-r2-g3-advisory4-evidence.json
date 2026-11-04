@@ -1,0 +1,73 @@
+{
+  "status": "terminal validated advisory changes_requested; not primary approval",
+  "reviewed_sha": "29ee9ca74d61544fbddd56c39dabbe194d26408e",
+  "reviewed_tree": "996c6af444aeb22d69587ed7852b78f35102eb9b",
+  "run_id": "8e8d61b1d5514398907e89fba232f790",
+  "launcher_status": "xong",
+  "real_rc": 0,
+  "cli_is_error": false,
+  "actual_modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 118,
+      "outputTokens": 260709,
+      "cacheReadInputTokens": 13487633,
+      "cacheCreationInputTokens": 436165,
+      "webSearchRequests": 0,
+      "costUSD": 5.700749299999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 231587,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 436165,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "requested_effort": "max",
+  "served_effort": "not independently measured",
+  "raw_stdout_sha256": "e394be8580bee77976563c8b3c812bf86c62fbbbb21db8e1138467c6cfc7f6f0",
+  "note_sha256": "548c0604e80b256c359f0199345cf1fea9c463a19e4dff97aaf376e0aa074e67",
+  "tools": [
+    "Read",
+    "Glob",
+    "Grep"
+  ],
+  "independent_tests_run": false,
+  "head_tree_snapshot_clean": true,
+  "assurance": "advisory_review",
+  "findings": [
+    {
+      "slug": "a2-actual-wp1178-r3-and-frozen-own-spec-blobs-not-exercised",
+      "severity": "P3"
+    },
+    {
+      "slug": "identity-h1-trigger-overbroad-false-reject",
+      "severity": "P3"
+    },
+    {
+      "slug": "k4-owner-record-negative-locks-missing",
+      "severity": "P3"
+    },
+    {
+      "slug": "k1-lease-packet-id-type-and-spec-ref-oid40-strictness-unlocked",
+      "severity": "P3"
+    },
+    {
+      "slug": "r1187-crash-classification-and-mutant-controls-not-uniform",
+      "severity": "P3"
+    },
+    {
+      "slug": "k4-fail-closed-diagnostics-incidental-typeerror-and-overflow",
+      "severity": "P3"
+    }
+  ],
+  "budget": {
+    "used": 4,
+    "limit": 4,
+    "remaining": 0,
+    "fifth_call_authorized": false
+  },
+  "prior_failed_transport_cost": "unknown; not reset",
+  "recorded_at": "2026-11-04T17:08:57.499949+00:00"
+}

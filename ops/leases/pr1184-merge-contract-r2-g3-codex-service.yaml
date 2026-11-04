@@ -49,7 +49,7 @@ effective_write_set:
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6635721215
 leased_at_utc: '2026-11-04T16:12:22Z'
-heartbeat_at: '2026-11-04T16:30:21.642334Z'
+heartbeat_at: '2026-11-04T17:11:46.616448+00:00'
 lease_until: '2026-11-04T18:42:17Z'
 lease_expires_at_utc: '2026-11-04T18:42:17Z'
 heartbeat_required_minutes: 360
@@ -119,13 +119,16 @@ review_budget_override:
     current chat
   source_rebinding: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6635721215
   calls_started_with_output: 4
-  completed_verdicts: 3
+  completed_verdicts: 4
   remaining_calls: 0
   active_review_run_id: 8e8d61b1d5514398907e89fba232f790
   active_review_head: 29ee9ca74d61544fbddd56c39dabbe194d26408e
   output_evidence: Fresh Claude session cd1bb32e-8bc1-4438-bc75-5d60e60192bd; observed53
     assistant messages on claude-sonnet-5-5; raw JSONL outside product; final verdict
     pending
+  active_review_status: terminal_changes_requested
+  last_verdict_path: ops/reviews/pr1187-r2-g3-advisory4-note.yaml
+  last_verdict_sha256: 548c0604e80b256c359f0199345cf1fea9c463a19e4dff97aaf376e0aa074e67
 nang_tran_review_budget:
   ai_nang: ducthangho via explicitownerresponse
   can_cu: one fresh verification after owner required all4P3fixed; three actualreviewsused;
@@ -159,6 +162,8 @@ execution_runs:
   authority_source: ops/receipts/pr1187-cold-recovery-g3-authority.yaml
   frozen_head: 29ee9ca74d61544fbddd56c39dabbe194d26408e
   frozen_tree: 996c6af444aeb22d69587ed7852b78f35102eb9b
+  completed_at_utc: '2026-11-04T17:11:46.616448+00:00'
+  outcome: handoff_29ee9ca_not_pushed; advisory4_changes_requested; fullstandard_interrupted_at_budget_checkpoint
 review_budget_override_history:
 - approved_by: ducthangho
   recorded_by: codex-desktop-dispatcher
@@ -190,3 +195,4 @@ reviewed_sha_required_history:
   disposition: historical282; anchor repaired after checkpoint; remaining review must
     target resulting exact commit
   source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6635295968
+operational_state: paused_review_budget_checkpoint

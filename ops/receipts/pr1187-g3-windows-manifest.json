@@ -1,0 +1,99 @@
+{
+  "head": "29ee9ca74d61544fbddd56c39dabbe194d26408e",
+  "tree": "996c6af444aeb22d69587ed7852b78f35102eb9b",
+  "paired_passed": 292,
+  "paired_total": 292,
+  "native_mutants_passed": 1,
+  "native_mutants_total": 1,
+  "lock_released_bytes": 0,
+  "machine": "TRA-LUAT-WIN",
+  "ngat": "khong; all observed setup errors preserved separately",
+  "not_GitHub_CI_or_M9": true,
+  "files": [
+    {
+      "path": "paired-evidence.json",
+      "size": 99883,
+      "sha256": "922f1d26486c7aa43c3e15c406225669407e20f3c0f1dbff5bbaf3a8a9b220b6"
+    },
+    {
+      "path": "paired.log",
+      "size": 12008,
+      "sha256": "e68429e5717174ae2588302421504ba477f94f09ec540fe37ed74d02c464bba1"
+    },
+    {
+      "path": "paired.stderr.log",
+      "size": 896,
+      "sha256": "38f8b5f59dd6615fbe5eec735d57fd9d2fdac67aafcd7873d6219ca00cac6b8b"
+    },
+    {
+      "path": "windows.json",
+      "size": 61321,
+      "sha256": "31ef4e6dba61c67e02254ec193d997629aeec78c19684073a06d0fb9f9bdc672"
+    },
+    {
+      "path": "native-supervisor.json",
+      "size": 243,
+      "sha256": "6e4d3a329f41840a7e35bfdc7d14971326bc667459e89197904d740d43d2fd7c"
+    },
+    {
+      "path": "native.stdout.log",
+      "size": 1480,
+      "sha256": "bc5242b0445d60f324502141ef8804feea96abe0a579ceb09631ba5b92fd92c5"
+    },
+    {
+      "path": "native.stderr.log",
+      "size": 466,
+      "sha256": "dbc4f0628f29b1246d25cd7f7f0c20d8eb97c49a198604ed9470a668d0fa77d9"
+    },
+    {
+      "path": "windows-only-new/windows-only-mutant.json",
+      "size": 1456,
+      "sha256": "d57d95fbb05ae34080bb1689b65445825c08ca5a7af929d55f6c74d1985dfb04"
+    },
+    {
+      "path": "run_paired_native.py",
+      "size": 7305,
+      "sha256": "24e1f17dfa5b6d8e5bf405ff8ccd1d6fdf03486744572483a85b1571dd4e319d"
+    },
+    {
+      "path": "native-mutant-29ee9ca.py",
+      "size": 3840,
+      "sha256": "c7e911b80614f94cabf34264c9dda0235da5ac5ea8e3d51d1063711a544360b4"
+    },
+    {
+      "path": "own-measurement-rows.json",
+      "size": 1040,
+      "sha256": "dca48d61223b281f96aacb92abef41a9f96d89ff41b2e42b607478baa19da3a2"
+    },
+    {
+      "path": "paired-evidence-lock-denied.json",
+      "size": 1205,
+      "sha256": "c97ae4511ee97554151e7af706f242ffdbb1e056bb6592cb8c0a4e68c03357b6"
+    },
+    {
+      "path": "paired-lock-denied.log",
+      "size": 531,
+      "sha256": "af86f453e43e2d2b05a67eca92445ec35f4b047136a818aa7ea84539255ddeef"
+    },
+    {
+      "path": "paired-evidence-bundle-ref-setup-failed.json",
+      "size": 1785,
+      "sha256": "cb4725d449a8ba44073e0ad8ee971a4364740da3872c5b6cd99547e40517c1ea"
+    },
+    {
+      "path": "paired-bundle-ref-setup-failed.log",
+      "size": 1654,
+      "sha256": "fa46bb688895deeaddc6de42a0a7315af213b50ba9e999f2432d67963c6aa939"
+    },
+    {
+      "path": "paired-evidence-powershell-stderr-interrupted.json",
+      "size": 995,
+      "sha256": "a6a93a3a0c35fab1e7a5bc58563684f4aa7eb1126efb5305e10735a030ca8bf3"
+    },
+    {
+      "path": "paired-powershell-stderr-interrupted.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

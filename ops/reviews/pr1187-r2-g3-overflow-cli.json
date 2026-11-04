@@ -1,0 +1,9 @@
+{
+  "name": "datetime-overflow-through-full-K4-CLI",
+  "head": "29ee9ca74d61544fbddd56c39dabbe194d26408e",
+  "actual_rc": 1,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"/workspace/scratch/pr1187-recovery/candidate/.claude/dev/packet_loop.py\", line 3750, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/workspace/scratch/pr1187-recovery/candidate/.claude/dev/packet_loop.py\", line 3746, in main\n    return a.fn(a, Path(a.state_dir))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/scratch/pr1187-recovery/candidate/.claude/dev/packet_loop.py\", line 3437, in cmd_kiem_merge\n    _dk(\"K4 review offline\", k4, thieu)\n  File \"/workspace/scratch/pr1187-recovery/candidate/.claude/dev/packet_loop.py\", line 3130, in _dk\n    return fn()\n           ^^^^\n  File \"/workspace/scratch/pr1187-recovery/candidate/.claude/dev/packet_loop.py\", line 3377, in k4\n    _human_merge(a, root, lease, spec, p3)\n  File \"/workspace/scratch/pr1187-recovery/candidate/.claude/dev/packet_loop.py\", line 3321, in _human_merge\n    times.append(_doc_han_utc(candidate[\"created_at\"]))\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/scratch/pr1187-recovery/candidate/.claude/dev/packet_loop.py\", line 848, in _doc_han_utc\n    return d.astimezone(timezone.utc)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\nOverflowError: date value out of range\n",
+  "traceback": true,
+  "overflow_reproduced": true
+}

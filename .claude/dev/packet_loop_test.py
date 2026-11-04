@@ -10156,7 +10156,7 @@ for branch, replacement, targets in [
     MUTANTS_NHAM_TEST = MUTANTS_NHAM_TEST | {name}
 for name, old, new, targets in [
     ("setup", '    except (Exception, SystemExit) as ex:\n        raise CliSapDo("r1187 setup crashed") from ex', '    except (Exception, SystemExit):\n        raise', ["r1187_failure_import_spec_KeyError", "r1187_failure_change_human_AttributeError"]),
-    ("subclass", '        if type(ex) is not ValueError:', '        if False:', ["r1187_failure_positive_spec", "r1187_failure_positive_human", "r1187_failure_target_spec_UnicodeDecodeError"]),
+    ("subclass", '        if type(ex) is not ValueError:\n            raise CliSapDo("r1187 ValueError subclass crashed") from ex', '        if False:\n            raise CliSapDo("r1187 ValueError subclass crashed") from ex', ["r1187_failure_positive_spec", "r1187_failure_positive_human", "r1187_failure_target_spec_UnicodeDecodeError"]),
 ]:
     key="r1187_failure_"+name; MUTANTS[key]=(old,new,targets); MUTANTS_NHAM_TEST=MUTANTS_NHAM_TEST|{key}
 

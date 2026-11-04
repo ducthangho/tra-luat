@@ -67,3 +67,6 @@ authority_notes:
 - 'Approved spec text is retained byte-for-byte despite its preapproval draft labels;
   authority/state are determined by this durable grant and #1187 owner instruction
   receipt.'
+da_bi_thay_the: pr1184-merge-contract-r2-g2-codex
+superseded_at_utc: '2026-11-04T12:42:17Z'
+superseded_on_instruction: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6630877365

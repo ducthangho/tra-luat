@@ -1,0 +1,93 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1187
+packet_id: PR1184-MERGE-CONTRACT
+mission_issue: 1177
+revision: 2
+generation: 2
+lease_id: pr1184-merge-contract-r2-g2-codex
+role: executor
+provider: codex
+executor: codex
+model_family: openai
+execution_surface: codex_desktop
+transport: machine
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+reviewer: human
+reviewer_execution_surface: manual_audit
+reviewer_transport: human
+assurance_target: human_audited
+access: read-write
+spec_path: ops/specs/PR1184-MERGE-CONTRACT-r2.md
+spec_hash: 975c5d31be6ec4f26145f14893b5c8f7063e5921d1c6dafdca020f50e795299d
+spec_sha256_required: 975c5d31be6ec4f26145f14893b5c8f7063e5921d1c6dafdca020f50e795299d
+spec_ref: refs/heads/ops/pr1187-r2-g2-lease@74a0abdb2631ae38f9f76b7426b5e47a3c82ce8f
+prompt_path: ops/specs/PR1184-MERGE-CONTRACT-r2.md
+prompt_sha256_required: 975c5d31be6ec4f26145f14893b5c8f7063e5921d1c6dafdca020f50e795299d
+branch: agent/pr1184-merge-contract-r2-g2-codex
+branch_ownership: exclusive
+base_sha: 1f0941e9bba1d1d517eda4174167b81963c06bd5
+start_from_sha: abc6bdab035b14bf24f55ea5d557233c927ad951
+target_branch_neu_land: master
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0063-merge-spec-ref-va-human-audit.md
+- ops/specs/PR1184-MERGE-CONTRACT-r1.md
+- ops/specs/PR1184-MERGE-CONTRACT-r2.md
+effective_write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0063-merge-spec-ref-va-human-audit.md
+- ops/specs/PR1184-MERGE-CONTRACT-r1.md
+- ops/specs/PR1184-MERGE-CONTRACT-r2.md
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6630877365
+leased_at_utc: '2026-11-04T12:42:17Z'
+heartbeat_at: '2026-11-04T12:42:17Z'
+lease_until: '2026-11-04T18:42:17Z'
+lease_expires_at_utc: '2026-11-04T18:42:17Z'
+heartbeat_required_minutes: 360
+run_minutes: 90
+depends_on: []
+recorded_by: codex-desktop-dispatcher
+recorder_is_executor: false
+reviewed_sha_required: abc6bdab035b14bf24f55ea5d557233c927ad951
+authority_notes:
+- Owner approved the concrete r2 scope/lease request with amended cap1000 in chat;
+  linked Issue1187 comment records the verbatim directive and exact resulting hash.
+- Spec preapproval wording is historical; appended owner decision and this lease establish
+  current approved state.
+- Old r1 Executor stopped; two-way supersession fences generation1. R1 spec metadata/history/abc6
+  product head remain immutable.
+- Fresh Executor begins at explicitly authorized continuationabc6, new branch/generation2,90-minute
+  run; lease expiry does not extend run.
+- No self audit/approval/merge/land/deploy; independent human audit and required local
+  gates before code push; primary human assurance remains mandatory.
+- Review/push budgets remain cumulative, no reset of Packet1187 or originalPR1184
+  history.
+- Final head/tree/spec must be measured and audited anew; prior proposal evidence
+  is historical diagnostics.
+supersedes_lease_id: pr1184-merge-contract-r1-g1-codex
+nang_tran:
+  ai_nang: Chủ kho ducthangho theo protocol §2 — ĐỀ NGHỊ, CHƯA ĐƯỢC DUYỆT
+  can_cu: K1/spec identity/hash là input K4, cùng rollout ADR0063 và test consumer.
+    Có thể tách thành nhiều Packet/ADR/lease nhưng tăng coordination và trạng thái
+    trung gian; đề nghị review cùng một contract. Bỏ productcopy spec r1 đã supersede,
+    giữ frozen metadata/history; net base diff năm tệp, effective write set sáu paths.
+    Số đo exact numstat kèm proposal; cap dư có giới hạn cho sửa review, không bảo
+    đảm gói lớn dễ review.
+  tran_cu: 'ADR0053: 6 tệp/450 dòng thêm; approved r1: 5 tệp/450 dòng thêm'
+  tran_moi: 6 effective paths, tối đa 5 net tệp/1000 dòng thêm — đề nghị, chỉ áp dụng
+    khi chủ kho duyệt exact spec và lease r2g2
+thay_the_cho:
+- pr1184-merge-contract-r1-g1-codex
+size_limit:
+  effective_write_paths: 6
+  net_product_files: 5
+  added_lines: 1000

@@ -55,6 +55,14 @@ reviewed_sha_required: fbf7b1f89cd8d7d701a858ca53fd24addb15212c
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1170#issuecomment-6614131117
 authority_basis: owner approved #1170 r4 and budget7; MCR #1035 r2 approved at issuecomment-6618404613; owner delegated lease and work
-lease_expires_at_utc: '2026-11-04T03:30:00Z'
+lease_expires_at_utc: '2026-11-04T02:06:22Z'
 heartbeat_at: '2026-11-03T23:55:00Z'
 heartbeat_required_minutes: 360
+da_bi_thay_the: wp1170-r5-g4-codex-20261104
+rut_han:
+  han_cu: '2026-11-04T03:30:00Z'
+  han_moi: '2026-11-04T02:06:22Z'
+  rut_boi: ducthangho
+  ly_do: 'Owner approved r5 and g4 budget; r4/g3 work ended and CI failed; generation 3 fenced before g4.'
+  can_cu: 'https://github.com/ducthangho/tra-luat/issues/1170#issuecomment-6620582367'
+  ghi_boi: codex-dispatcher-session

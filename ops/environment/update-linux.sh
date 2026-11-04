@@ -226,25 +226,58 @@ PY
   python -m pip install --disable-pip-version-check "jsonschema==$jsonschema_pin" -r requirements.txt
   python ops/cong_cu.py kiem-tra --json
 else
-  if (( EUID == 0 )); then
-    # Manifest OS recipes say "sudo apt-get". A root-only, child-scoped adapter
-    # handles exactly that command, including on minimal images without sudo.
-    # No wrapper file, global sudo function or manifest modification is needed.
-    bash -c '
-      sudo() {
-        if (( EUID != 0 )) || [[ "$#" -lt 1 || "$1" != apt-get ]]; then
-          echo "root installer adapter permits only sudo apt-get" >&2
-          return 5
-        fi
-        shift
-        command apt-get "$@"
-      }
-      export -f sudo
-      exec bash "$1" --bat-buoc
-    ' tra-luat-root-installer "$repo/ops/cai_cong_cu.sh"
-  else
-    bash ops/cai_cong_cu.sh --bat-buoc
+  # The checker imports yaml before probing any tool; bootstrap only if absent.
+  if ! python -c 'import yaml' >/dev/null 2>&1; then
+    python -m pip install --disable-pip-version-check 'PyYAML==6.0.3'
   fi
+  baseline_dat() {
+    local result probe_rc=0
+    # Missing/broken tools are expected here; do not let errexit abort repair.
+    result="$(python ops/cong_cu.py kiem-tra --chi "$1" --json)" || probe_rc=$?
+    (( probe_rc == 0 )) || return 1
+    printf '%s' "$result" | python -c 'import json,sys
+entries=json.load(sys.stdin).get("cong_cu") or []
+sys.exit(0 if len(entries)==1 and entries[0].get("ten")==sys.argv[1] and entries[0].get("trang_thai")=="DAT" else 1)' "$1"
+  }
+  baseline_tools="$(python - <<'PY'
+import yaml
+tools=yaml.safe_load(open('ops/cong_cu.yaml',encoding='utf-8'))['cong_cu']
+names=[name for name,entry in tools.items() if entry['bat_buoc'] or entry.get('chuan_bi')]
+# Prepare ShellCheck before actionlint; the final full checker runs its canary.
+print('\n'.join(sorted(names,key=lambda name: name != 'shellcheck')))
+PY
+)"
+  [[ -n "$baseline_tools" ]] || { echo 'Shared baseline is empty' >&2; exit 5; }
+  while IFS= read -r baseline_tool; do
+    if baseline_dat "$baseline_tool"; then continue; fi
+    if (( EUID == 0 )); then
+      # Manifest OS recipes say "sudo apt-get". Keep this adapter child-scoped.
+      bash -c '
+        sudo() {
+          if (( EUID != 0 )) || [[ "$#" -lt 1 || "$1" != apt-get ]]; then
+            echo "root installer adapter permits only sudo apt-get" >&2
+            return 5
+          fi
+          shift
+          command apt-get "$@"
+        }
+        export -f sudo
+        if [[ "$2" == actionlint ]]; then export AL_DICH="$HOME/.local/bin"; fi
+        exec bash "$1" "$2"
+      ' tra-luat-root-installer "$repo/ops/cai_cong_cu.sh" "$baseline_tool"
+    elif [[ "$baseline_tool" == actionlint ]]; then
+      AL_DICH="$HOME/.local/bin" bash ops/cai_cong_cu.sh "$baseline_tool"
+    else
+      bash ops/cai_cong_cu.sh "$baseline_tool"
+    fi
+    # Child PATH changes cannot reach this parent. Known install directories
+    # are already on PATH; clear cached lookups and require this exact tool DAT.
+    hash -r
+    baseline_dat "$baseline_tool" || {
+      echo "Baseline tool $baseline_tool is not DAT in the parent after repair (check PATH shadowing)" >&2
+      exit 6
+    }
+  done <<< "$baseline_tools"
 fi
 if (( persist_path )); then
   marker='# tra-luat CLI PATH'

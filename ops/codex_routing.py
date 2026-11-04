@@ -39,6 +39,10 @@ AUTHORITY_ACTORS = frozenset({"ducthangho"})
 # Scoped foundation supports this model and its low/medium/high effort contract.
 EFFORT = {"low": 0, "medium": 1, "high": 2}
 SUPPORTED_MODELS = frozenset({"gpt-6.1-sol"})
+C1 = "configured_c1"
+C1_AUTHORITY = "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6612730723"
+C1_PLAN = "a54e24a0473d93dd312c461d274f56876b83fb9a8aca9ced0d6e91ef9ab9ac71"
+C1_DEADLINE = "2026-11-17T18:53:00Z"
 UNSUPPORTED = frozenset({"adr0054", "k3", "k4", "accept", "record-review"})
 LIMITATIONS = [
     "Foundation only: packet-loop, ADR-0054, K3/K4 and acceptance are not integrated.",
@@ -138,14 +142,20 @@ def units(value):
         number(value[key], key, 0)
 
 
-def identity(value):
+def identity(value, configured=False):
     shape(value, IDENTITY, "machine identity")
     require(value["provider"] == "openai_codex" and value["transport"] == "machine", "Codex machine identity required")
     require(value["surface"] in ("codex_cli", "codex_service", "codex_desktop"), "invalid Codex surface")
     for key in ("run_id", "session_id", "requested_model", "observed_model"):
         token(value[key], key)
-    require(value["observed_model"] not in ("unknown", "KHONG_do_duoc"), "observed model unknown")
-    require(value["requested_effort"] in EFFORT and value["observed_effort"] in EFFORT, "observed/requested effort unknown")
+    if configured:
+        require(value["surface"] == "codex_service", "C1 requires honest service identity")
+        require(value["observed_model"] in ("unknown", value["requested_model"]), "contradictory observed model")
+        require(value["observed_effort"] in ("unknown", value["requested_effort"]), "contradictory observed effort")
+    else:
+        require(value["observed_model"] not in ("unknown", "KHONG_do_duoc"), "observed model unknown")
+        require(value["observed_effort"] in EFFORT, "observed effort unknown")
+    require(value["requested_effort"] in EFFORT, "requested effort unknown")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -155,6 +165,8 @@ class Snapshot:
     verifier_sha256: str
     registry_raw: bytes
     test_only: bool = False
+    # Trusted canonical ancestor registries, independently read by the CLI.
+    dispatch_registries: dict = dataclasses.field(default_factory=dict)
 
 
 def _registry(snapshot):
@@ -164,11 +176,14 @@ def _registry(snapshot):
     digest(snapshot.verifier_sha256, "verifier hash")
     require(type(snapshot.test_only) is bool, "test_only must be bool")
     registry = parse_json(snapshot.registry_raw)
-    shape(registry, {"schema_version", "repository", "test_only", "policies", "ledgers", "producers", "audits"}, "registry")
+    shape(registry, {"schema_version", "repository", "test_only", "policies", "ledgers", "producers", "audits"}
+          | ({"dispatches"} if "dispatches" in registry else set()), "registry")
     require(type(registry["schema_version"]) is int and registry["schema_version"] == SCHEMA, "unsupported registry schema")
     require(registry["repository"] == REPOSITORY and registry["test_only"] is snapshot.test_only, "repository/test fixture mismatch")
     for key in ("policies", "ledgers", "producers", "audits"):
         require(type(registry[key]) is list, f"registry {key}: list required")
+    if "dispatches" in registry:
+        require(type(registry["dispatches"]) is list, "canonical dispatches list required")
     return registry
 
 
@@ -181,7 +196,20 @@ def one(rows, predicate, label):
 def _admission(registry, b, now):
     pkeys = {"schema_version", "grant_id", "mission", "revision", "plan_hash", "packet", "spec_hash", "generation", "base_sha", "actor", "source", "decision", "valid_from", "expires_at", "revoked", "executor_config", "reviewer_config", "effort_order", "spec_path"}
     for p in registry["policies"]:
-        shape(p, pkeys, "policy")
+        require(type(p) is dict, "policy object required")
+        configured = p.get("evidence_mode") == C1
+        shape(p, pkeys | ({"evidence_mode", "c1_authority"} if configured else set()), "policy")
+        if configured:
+            authority = p["c1_authority"]
+            shape(authority, {"actor", "source", "decision", "mission", "revision", "plan_hash", "packet", "spec_hash", "generation", "base_sha", "expires_at", "revoked"}, "C1 authority")
+            require(authority["actor"] in AUTHORITY_ACTORS and authority["source"] == C1_AUTHORITY
+                    and authority["decision"] == "approve" and type(authority["revoked"]) is bool, "C1 owner authority missing/malformed")
+            for key in ("mission", "revision", "packet", "generation"):
+                number(authority[key], f"C1 authority {key}")
+            require(p["revision"] == 3 and p["plan_hash"] == C1_PLAN, "C1 approved Mission revision/plan required")
+            require(p["mission"] == authority["mission"] == 1172 and all(authority[k] == p[k] for k in
+                    ("revision", "plan_hash", "packet", "spec_hash", "generation", "base_sha")), "C1 authority scope mismatch")
+            require(timestamp(p["expires_at"]) <= timestamp(authority["expires_at"]) <= timestamp(C1_DEADLINE), "C1 expiry exceeds owner ceiling")
         require(type(p["schema_version"]) is int and p["schema_version"] == SCHEMA, "policy schema")
         for key in ("mission", "revision", "packet", "generation"):
             number(p[key], f"policy {key}")
@@ -204,14 +232,21 @@ def _admission(registry, b, now):
         supported = SUPPORTED_MODELS | ({"test-model"} if registry["test_only"] else set())
         require(executor["model"] == reviewer["model"] and executor["model"] in supported, "same supported configured model required")
         require(EFFORT[reviewer["effort"]] > EFFORT[executor["effort"]], "reviewer configured effort must be higher")
-        require(reviewer["surface"] == "codex_cli", "admission requires native CLI reviewer; service remains advisory")
+        if configured:
+            require(executor["surface"] == reviewer["surface"] == "codex_service", "C1 requires service configurations")
+        else:
+            require(reviewer["surface"] == "codex_cli", "admission requires native CLI reviewer; service remains advisory")
         require(type(p["effort_order"]) is list and len(p["effort_order"]) >= 2
                 and len(p["effort_order"]) == len(set(p["effort_order"]))
                 and all(type(e) is str and e in EFFORT for e in p["effort_order"])
                 and p["effort_order"] == sorted(p["effort_order"], key=EFFORT.__getitem__), "fixed supported model effort order required")
+        if configured:
+            require(all(p[f"{role}_config"]["effort"] in p["effort_order"] for role in ("executor", "reviewer")), "C1 configuration outside supported effort order")
     p = one(registry["policies"], lambda x: x["grant_id"] == b["grant_id"], "policy")
     require(all(p[key] == b[key] for key in ("mission", "revision", "plan_hash", "packet", "spec_hash", "generation", "base_sha")), "policy scope/revision mismatch")
     require(not p["revoked"] and timestamp(p["valid_from"]) <= now < timestamp(p["expires_at"]), "policy expired/revoked/not yet valid")
+    if p.get("evidence_mode") == C1:
+        require(not p["c1_authority"]["revoked"], "C1 owner authority revoked")
     seen = set()  # Dispatch/run identities are global across every ledger and role.
     for ledger in registry["ledgers"]:
         shape(ledger, {"mission", "revision", "plan_hash", "allowance", "usage", "history", "reservations"}, "ledger")
@@ -224,7 +259,11 @@ def _admission(registry, b, now):
         totals, reserved = dict.fromkeys(UNITS, 0), dict.fromkeys(UNITS, 0)
         for collection, sum_into in ((ledger["history"], totals), (ledger["reservations"], reserved)):
             for row in collection:
-                shape(row, {"binding", "units", "executor_run_id", "reviewer_run_id"}, "dispatch row")
+                row_policies = [x for x in registry["policies"] if x["grant_id"] == row["binding"]["grant_id"]]
+                configured = any(x.get("evidence_mode") == C1 for x in row_policies)
+                shape(row, {"binding", "units", "executor_run_id", "reviewer_run_id"} | ({"dispatch"} if configured else set()), "dispatch row")
+                if configured:
+                    _dispatch(row["dispatch"], one(row_policies, lambda x: True, "dispatch policy"), row)
                 binding(row["binding"])
                 require(all(row["binding"][k] == ledger[k] for k in ("mission", "revision", "plan_hash")), "ledger row scope")
                 units(row["units"])
@@ -245,25 +284,82 @@ def _admission(registry, b, now):
     return p, reservation
 
 
-def _technical(registry, b, policy, reservation, t, output, report):
-    shape(t, {"schema_version", "kind", "binding", "executor", "reviewer", "run_id", "provenance_id", "completion", "exit_code", "verdict", "findings", "output_sha256", "report_sha256"}, "technical receipt")
+def _dispatch(dispatch, policy, row):
+    shape(dispatch, {"executor", "reviewer"}, "pre-run dispatch")
+    # Revocation invalidates admission, while retaining the original dispatch hash.
+    granted = {**policy, "revoked": False, "c1_authority": {**policy["c1_authority"], "revoked": False}}
+    for role in ("executor", "reviewer"):
+        assigned = dispatch[role]
+        shape(assigned, {"role", "scope", "policy_sha256", "recorded_at", "config", "run_id", "session_id"}, "dispatch role")
+        # Executor cannot know its final H. Reviewer must receive that exact H.
+        scope = {k: v for k, v in row["binding"].items() if role == "reviewer" or k not in ("head_sha", "tree_sha")}
+        require(assigned["role"] == role and assigned["scope"] == scope
+                and assigned["policy_sha256"] == sha256(canonical_bytes(granted)), "dispatch scope/policy mismatch")
+        require(timestamp(policy["valid_from"]) <= timestamp(assigned["recorded_at"]) < timestamp(policy["expires_at"]), "dispatch outside policy interval")
+        require(assigned["config"] == policy[f"{role}_config"] and assigned["run_id"] == row[f"{role}_run_id"], "dispatch configuration/run mismatch")
+        token(assigned["session_id"], "dispatch session")
+    require(dispatch["executor"]["session_id"] != dispatch["reviewer"]["session_id"], "dispatch contexts must be distinct")
+
+
+def _dispatch_anchor(snapshot, registry, producer, policy, now):
+    """A canonical ancestor must contain each role's dispatch before its output.
+
+    The API caller supplies trusted ancestor bytes; CLI proves raw Git ancestry.
+    Canonical ordering/timestamps are assertions, not proof of serving time.
+    """
+    b = producer["binding"]
+    current = one([row for ledger in registry["ledgers"] for row in ledger["reservations"]], lambda x: x["binding"] == b, "current reservation")
+    _dispatch(current["dispatch"], policy, current)
+    require(producer["dispatch_sha256"] == sha256(canonical_bytes(current["dispatch"])), "dispatch hash mismatch")
+    for key in ("dispatch_oids", "started_at", "completed_at"):
+        shape(producer[key], {"executor", "reviewer"}, key)
+    for role in ("executor", "reviewer"):
+        assigned = current["dispatch"][role]
+        oid = producer["dispatch_oids"][role]
+        digest(oid, "pre-run canonical OID", True)
+        require(oid != snapshot.oid, "dispatch anchor must precede terminal registry")
+        require(type(snapshot.dispatch_registries) is dict and oid in snapshot.dispatch_registries, "pre-run canonical registry missing")
+        prior = _registry(dataclasses.replace(snapshot, registry_raw=snapshot.dispatch_registries[oid]))
+        require(one(prior["policies"], lambda x: x["grant_id"] == b["grant_id"], "pre-run policy") == policy, "pre-run policy changed")
+        require(one(prior.get("dispatches", []), lambda x: x["run_id"] == assigned["run_id"], "pre-run role dispatch") == assigned, "pre-run dispatch changed")
+        require(all(p[r]["run_id"] != assigned["run_id"] for p in prior["producers"] for r in ("executor", "reviewer")), "dispatch anchor already contains run output")
+        require(timestamp(assigned["recorded_at"]) <= timestamp(producer["started_at"][role])
+                <= timestamp(producer["completed_at"][role]) <= now
+                and timestamp(producer["completed_at"][role]) < timestamp(policy["expires_at"]), "dispatch/run ordering or expiry mismatch")
+        require(all(producer[role][k] == assigned[k] for k in ("run_id", "session_id")), "producer differs from pre-run context")
+        require(producer[role]["requested_model"] == assigned["config"]["model"]
+                and producer[role]["requested_effort"] == assigned["config"]["effort"], "producer differs from dispatch configuration")
+    require(timestamp(producer["completed_at"]["executor"]) <= timestamp(producer["started_at"]["reviewer"]), "review precedes executor completion")
+
+
+def _technical(snapshot, registry, b, policy, reservation, t, output, report, now):
+    configured = policy.get("evidence_mode") == C1
+    status_keys = {"evidence_mode", "dispatch_sha256", "started_at", "completed_at", "terminal"} if configured else {"exit_code"}
+    shape(t, {"schema_version", "kind", "binding", "executor", "reviewer", "run_id", "provenance_id", "completion", "verdict", "findings", "output_sha256", "report_sha256"} | status_keys, "technical receipt")
     require(type(t["schema_version"]) is int and t["schema_version"] == SCHEMA and t["kind"] == "technical", "technical schema/kind")
     binding(t["binding"])
     require(t["binding"] == b, "technical binding mismatch")
-    require(type(t["exit_code"]) is int and t["exit_code"] == 0 and t["completion"] == "completed" and t["verdict"] == "approve", "technical not successfully approved")
+    if configured:
+        require(t["evidence_mode"] == C1 and t["terminal"] is True, "C1 terminal service evidence required")
+        digest(t["dispatch_sha256"], "dispatch hash")
+    else:
+        require(type(t["exit_code"]) is int and t["exit_code"] == 0, "technical native exit unsuccessful")
+    require(t["completion"] == "completed" and t["verdict"] == "approve", "technical not successfully approved")
     require(type(t["findings"]) is list and not t["findings"], "technical findings remain (P0-P3)")
     for role in ("executor", "reviewer"):
         machine, config = t[role], policy[f"{role}_config"]
-        identity(machine)
+        identity(machine, configured)
         require(all(machine[k] == config[c] for k, c in (("provider", "provider"), ("surface", "surface"), ("transport", "transport"), ("requested_model", "model"), ("requested_effort", "effort"))), "identity/config mismatch")
         require(machine["run_id"] == reservation[f"{role}_run_id"], "reservation run mismatch")
     executor, reviewer = t["executor"], t["reviewer"]
-    require(reviewer["surface"] == "codex_cli", "native CLI review required; service remains advisory")
+    require(reviewer["surface"] == ("codex_service" if configured else "codex_cli"), "review surface mismatch")
     require(executor["run_id"] != reviewer["run_id"] and executor["session_id"] != reviewer["session_id"], "independent run/session required")
-    require(reviewer["observed_model"] == executor["observed_model"] == reviewer["requested_model"] == executor["requested_model"], "same observed/configured model required")
+    if not configured:
+        require(reviewer["observed_model"] == executor["observed_model"] == reviewer["requested_model"] == executor["requested_model"], "same observed/configured model required")
     order = policy["effort_order"]
-    require(executor["observed_effort"] in order and reviewer["observed_effort"] in order
-            and EFFORT[reviewer["observed_effort"]] > EFFORT[executor["observed_effort"]], "reviewer observed effort must be higher")
+    if not configured:
+        require(executor["observed_effort"] in order and reviewer["observed_effort"] in order
+                and EFFORT[reviewer["observed_effort"]] > EFFORT[executor["observed_effort"]], "reviewer observed effort must be higher")
     require(t["run_id"] == reviewer["run_id"], "technical run mismatch")
     for key in ("output_sha256", "report_sha256"):
         digest(t[key], key)
@@ -273,25 +369,43 @@ def _technical(registry, b, policy, reservation, t, output, report):
         lines = [line.strip() for line in output.decode("utf-8").splitlines() if line.strip()]
     except UnicodeError as exc:
         raise Blocked("output must be UTF-8") from exc
-    require(lines and lines[-1] == "KET_LUAN: approve", "final CLI verdict missing")
+    require(lines and lines[-1] == "KET_LUAN: approve", "final verdict missing")
     token(t["provenance_id"], "provenance id")
-    keys = {"producer_id", "binding", "technical_sha256", "executor", "reviewer", "output_sha256", "report_sha256", "completion", "exit_code", "verdict", "telemetry_source"}
-    seen_runs = set()
+    keys = {"producer_id", "binding", "technical_sha256", "executor", "reviewer", "output_sha256", "report_sha256", "completion", "verdict", "telemetry_source"}
+    seen_runs, seen_sessions = set(), set()
     for producer in registry["producers"]:
-        shape(producer, keys, "producer")
+        producer_policy = one(registry["policies"], lambda x: x["grant_id"] == producer["binding"]["grant_id"], "producer policy")
+        producer_c1 = producer_policy.get("evidence_mode") == C1
+        producer_keys = {"evidence_mode", "dispatch_sha256", "started_at", "completed_at", "terminal", "dispatch_oids"} if producer_c1 else {"exit_code"}
+        shape(producer, keys | producer_keys, "producer")
         binding(producer["binding"])
         token(producer["producer_id"], "producer id")
         for key in ("technical_sha256", "output_sha256", "report_sha256"):
             digest(producer[key], key)
         source(producer["telemetry_source"], producer["binding"]["packet"])
         for role in ("executor", "reviewer"):
-            identity(producer[role])
+            identity(producer[role], producer_c1)
             require(producer[role]["run_id"] not in seen_runs, "producer run replay")
             seen_runs.add(producer[role]["run_id"])
-        require(type(producer["exit_code"]) is int, "producer exit code must be integer")
+            require(producer[role]["session_id"] not in seen_sessions, "producer session replay")
+            seen_sessions.add(producer[role]["session_id"])
+        if producer_c1:
+            require(producer["evidence_mode"] == C1 and type(producer["terminal"]) is bool
+                    and producer["completion"] in ("completed", "partial", "running", "cancelled", "timeout", "infra_error", "failed", "not_run", "unassessed")
+                    and producer["verdict"] in ("approve", "changes_requested", "blocked", "unassessed"), "producer service outcome malformed")
+            digest(producer["dispatch_sha256"], "producer dispatch hash")
+            for key in ("started_at", "completed_at"):
+                shape(producer[key], {"executor", "reviewer"}, key)
+            for role in ("executor", "reviewer"):
+                start, end = timestamp(producer["started_at"][role]), producer["completed_at"][role]
+                require((not producer["terminal"]) if end is None else start <= timestamp(end), "producer service chronology malformed")
+        else:
+            require(type(producer["exit_code"]) is int, "producer exit code must be integer")
     producer = one(registry["producers"], lambda x: x["producer_id"] == t["provenance_id"], "producer")
+    if configured:
+        _dispatch_anchor(snapshot, registry, producer, policy, now)
     require(producer["technical_sha256"] == sha256(canonical_bytes(t)), "producer technical hash mismatch")
-    require(all(producer[k] == t[k] for k in ("binding", "executor", "reviewer", "output_sha256", "report_sha256", "completion", "exit_code", "verdict")), "producer evidence mismatch")
+    require(all(producer[k] == t[k] for k in ({"binding", "executor", "reviewer", "output_sha256", "report_sha256", "completion", "verdict"} | status_keys)), "producer evidence mismatch")
     return sha256(canonical_bytes(t))
 
 
@@ -333,11 +447,19 @@ def _verify(snapshot, request, *, now, output=b"", report=b""):
               "policy_sha256": sha256(canonical_bytes(policy)), "binding": b, "reservation_id": b["dispatch_id"],
               "positive_evidence": ["canonical policy scope and decision", "canonical allowance/history/reservation"],
               "limitations": LIMITATIONS, "lifecycle_integrated": False, "authorizes_dispatch": False}
+    if policy.get("evidence_mode") == C1:
+        result.update(evidence_mode=C1, serving_measurement="not_assessed")
+        result["positive_evidence"].append("C1 configured model/higher reviewer effort; actual higher effort not established")
     if operation != "admission":
         t = request["technical"]
-        technical_hash = _technical(registry, b, policy, reservation, t, output, report)
+        technical_hash = _technical(snapshot, registry, b, policy, reservation, t, output, report, timestamp(now))
         result.update(technical_sha256=technical_hash, model_reviewer_identity=t["reviewer"], technical_status="approved")
-        result["positive_evidence"].append("canonical native CLI producer, hashes, observed model/effort and independent session")
+        if policy.get("evidence_mode") == C1:
+            result["serving_measurement"] = "unknown" if any(t[role][key] == "unknown" for role in ("executor", "reviewer")
+                                                            for key in ("observed_model", "observed_effort")) else "canonical_assertion_only"
+            result["positive_evidence"].append("C1 configured model/higher reviewer effort; canonical pre-run dispatch and service terminal producer; actual higher effort not established")
+        else:
+            result["positive_evidence"].append("canonical native CLI producer, hashes, observed model/effort and independent session")
         if operation in ("human", "composite"):
             result["audit_sha256"] = _audit(registry, b, technical_hash, t, request["audit"])
             result["positive_evidence"].append("canonical human decision binds exact technical receipt")
@@ -463,6 +585,13 @@ def verify_live(root, expected_oid, request, now, fixture, output, report, sourc
     require(oid == expected_oid, "canonical moved during verifier bootstrap; retry from fresh snapshot")
     verifier = _blob(root, oid, VERIFIER_PATH)
     snap = Snapshot(oid, sha256(verifier), _blob(root, oid, REGISTRY_PATH), fixture)
+    for producer in parse_json(snap.registry_raw)["producers"]:
+        if producer.get("evidence_mode") == C1:
+            shape(producer["dispatch_oids"], {"executor", "reviewer"}, "dispatch anchors")
+            for anchor in producer["dispatch_oids"].values():
+                digest(anchor, "dispatch anchor OID", True)
+                require(anchor != oid and _raw_ancestor(root, anchor, oid), "dispatch anchor must be a prior canonical ancestor")
+                snap.dispatch_registries[anchor] = _blob(root, anchor, REGISTRY_PATH)
     result = verify(snap, request, now=now, output=output, report=report)
     b = request["binding"]
     require(_raw_commit(source_root, b["head_sha"])[0] == b["tree_sha"], "source H/tree mismatch")

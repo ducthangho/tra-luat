@@ -26,6 +26,7 @@ sys.modules[spec.name] = r
 spec.loader.exec_module(r)
 NOW = "2026-11-03T16:30:00Z"
 OUTPUT = b"TEST ONLY synthetic native CLI telemetry\nKET_LUAN: approve\n"
+SERVICE_OUTPUT = b"TEST ONLY synthetic service terminal output\nKET_LUAN: approve\n"
 REPORT = b"TEST ONLY synthetic report, no real human audit\n"
 MUTANTS_KILLED = 0
 
@@ -75,6 +76,295 @@ def reseal(registry, request):
 def check(registry, request, output=OUTPUT, report=REPORT):
     snap = r.Snapshot("f" * 40, "a" * 64, r.canonical_bytes(registry), True)
     return r.verify(snap, request, now=NOW, output=output, report=report)
+
+
+def c1_seal(registry, request):
+    """Coherent synthetic producer/A; never rewrite independent dispatch anchors."""
+    t, a = request["technical"], request["audit"]
+    t["binding"] = copy.deepcopy(request["binding"])
+    a.update(binding=copy.deepcopy(request["binding"]), technical_sha256=r.sha256(r.canonical_bytes(t)), technical_run_id=t["run_id"])
+    producer = registry["producers"][0]
+    producer.update({k: copy.deepcopy(t[k]) for k in t if k not in ("schema_version", "kind", "run_id", "provenance_id", "findings")})
+    producer.update(technical_sha256=a["technical_sha256"], telemetry_source=a["source"])
+    registry["audits"] = [copy.deepcopy(a)]
+
+
+def c1_anchors(registry):
+    prior = copy.deepcopy(registry)
+    prior.update(producers=[], audits=[], ledgers=[])
+    prior["dispatches"] = list(copy.deepcopy(registry["ledgers"][0]["reservations"][0]["dispatch"]).values())
+    return {oid: r.canonical_bytes(prior) for oid in ("1" * 40, "2" * 40)}
+
+
+def c1_fixture(registry=None, request=None):
+    reg, q = copy.deepcopy((registry, request)) if registry is not None else fixture()
+    b, t, a = q["binding"], q["technical"], q["audit"]
+    b.update(packet=1176, revision=3, plan_hash=r.C1_PLAN)
+    a["source"] = "https://github.com/ducthangho/tra-luat/issues/1176#issuecomment-111"
+    p, ledger = reg["policies"][0], reg["ledgers"][0]
+    p.update({k: b[k] for k in ("mission", "revision", "plan_hash", "packet", "spec_hash", "generation", "base_sha")})
+    p.update(evidence_mode=r.C1, expires_at=r.C1_DEADLINE, source=a["source"])
+    p["c1_authority"] = {k: p[k] for k in ("actor", "decision", "mission", "revision", "plan_hash", "packet", "spec_hash", "generation", "base_sha", "expires_at", "revoked")}
+    p["c1_authority"]["source"] = r.C1_AUTHORITY
+    for role in ("executor", "reviewer"):
+        t[role].update(surface="codex_service", observed_model="unknown", observed_effort="unknown")
+        p[f"{role}_config"]["surface"] = "codex_service"
+    ledger.update(revision=b["revision"], plan_hash=b["plan_hash"])
+    row = ledger["reservations"][0]
+    row["binding"] = copy.deepcopy(b)
+    row["dispatch"] = {role: dict(role=role, scope={k: v for k, v in b.items() if role == "reviewer" or k not in ("head_sha", "tree_sha")},
+                                 policy_sha256=r.sha256(r.canonical_bytes(p)), recorded_at=f"2026-11-03T16:0{minute}:00Z",
+                                 config=copy.deepcopy(p[f"{role}_config"]), run_id=t[role]["run_id"], session_id=t[role]["session_id"])
+                       for role, minute in (("executor", 0), ("reviewer", 9))}
+    del t["exit_code"]
+    del reg["producers"][0]["exit_code"]
+    t.update(evidence_mode=r.C1, terminal=True, output_sha256=r.sha256(SERVICE_OUTPUT), dispatch_sha256=r.sha256(r.canonical_bytes(row["dispatch"])),
+             started_at=dict(executor="2026-11-03T16:01:00Z", reviewer="2026-11-03T16:10:00Z"),
+             completed_at=dict(executor="2026-11-03T16:05:00Z", reviewer="2026-11-03T16:20:00Z"))
+    reg["producers"][0]["dispatch_oids"] = dict(executor="1" * 40, reviewer="2" * 40)
+    reg["dispatches"] = list(copy.deepcopy(row["dispatch"]).values())
+    c1_seal(reg, q)
+    return reg, q, c1_anchors(reg)
+
+
+def c1_check(registry, request, anchors, output=SERVICE_OUTPUT, report=REPORT):
+    snap = r.Snapshot("f" * 40, "a" * 64, r.canonical_bytes(registry), True, anchors)
+    return r.verify(snap, request, now=NOW, output=output, report=report)
+
+
+class C1Tests(unittest.TestCase):
+    def setUp(self):
+        self.reg, self.q, self.anchors = c1_fixture()
+
+    def blocked(self, reg=None, q=None, anchors=None, **kw):
+        with self.assertRaises(r.Blocked):
+            c1_check(self.reg if reg is None else reg, self.q if q is None else q,
+                     self.anchors if anchors is None else anchors, **kw)
+
+    def test_positive_configured_service_all_operations(self):
+        for operation in ("admission", "technical", "human", "composite"):
+            q = copy.deepcopy(self.q)
+            q["operation"] = operation
+            if operation == "admission":
+                del q["technical"]
+            if operation in ("admission", "technical"):
+                del q["audit"]
+            out = c1_check(self.reg, q, self.anchors)
+            self.assertTrue(out["test_only"])
+            self.assertFalse(out["authorizes_dispatch"])
+            self.assertEqual(out.get("assurance"), "human_audited" if operation == "composite" else None)
+            self.assertEqual(out["evidence_mode"], "configured_c1")
+            self.assertEqual(out["serving_measurement"], "not_assessed" if operation == "admission" else "unknown")
+            if operation != "admission":
+                self.assertEqual(out["model_reviewer_identity"]["observed_effort"], "unknown")
+                self.assertIn("actual higher effort not established", out["positive_evidence"][-1 if operation == "technical" else -2])
+
+    def test_authority_scope_expiry_and_opt_in(self):
+        for key, value in (("actor", "agent"), ("source", self.q["audit"]["source"]), ("decision", "proposed"),
+                           ("mission", 90), ("revision", 2), ("plan_hash", "0" * 64), ("packet", 1173),
+                           ("spec_hash", "0" * 64), ("generation", True), ("base_sha", "0" * 40),
+                           ("expires_at", NOW), ("expires_at", "2099-01-01T00:00:00Z"), ("revoked", True)):
+            reg = copy.deepcopy(self.reg)
+            reg["policies"][0]["c1_authority"][key] = value
+            self.blocked(reg=reg)
+        for field in ("c1_authority", "evidence_mode"):
+            reg = copy.deepcopy(self.reg)
+            del reg["policies"][0][field]
+            self.blocked(reg=reg)
+        for value in (None, [], {}, "owner said yes"):
+            reg = copy.deepcopy(self.reg)
+            reg["policies"][0]["c1_authority"] = value
+            self.blocked(reg=reg)
+        for key, value in (("expires_at", NOW), ("revoked", True)):
+            reg = copy.deepcopy(self.reg)
+            reg["policies"][0][key] = value
+            self.blocked(reg=reg)
+
+    def test_config_model_effort_and_telemetry_contradictions(self):
+        for key, value in (("effort", "medium"), ("effort", "low"), ("effort", "ultra"),
+                           ("model", "other-model"), ("surface", "codex_cli")):
+            reg = copy.deepcopy(self.reg)
+            reg["policies"][0]["reviewer_config"][key] = value
+            self.blocked(reg=reg)
+        for role in ("executor", "reviewer"):
+            for key, value in (("observed_model", "different"), ("observed_effort", "low"), ("surface", "codex_cli")):
+                reg, q = copy.deepcopy(self.reg), copy.deepcopy(self.q)
+                q["technical"][role][key] = value
+                c1_seal(reg, q)
+                self.blocked(reg=reg, q=q)
+        reg, q = copy.deepcopy(self.reg), copy.deepcopy(self.q)
+        for role in ("executor", "reviewer"):
+            q["technical"][role].update(observed_model="test-model", observed_effort=q["technical"][role]["requested_effort"])
+        c1_seal(reg, q)
+        self.assertEqual(c1_check(reg, q, self.anchors)["serving_measurement"], "canonical_assertion_only")
+
+    def test_terminal_findings_output_and_no_fake_cli_exit(self):
+        for key, values in (("completion", ("partial", "cancelled", "timeout", "infra_error", "failed")),
+                            ("terminal", (False, 1, None)), ("verdict", ("blocked", "changes_requested", "unassessed")),
+                            ("exit_code", (0, None)), ("findings", ([{"severity": s}] for s in ("P0", "P1", "P2", "P3")))):
+            for value in values:
+                reg, q = copy.deepcopy(self.reg), copy.deepcopy(self.q)
+                q["technical"][key] = value
+                c1_seal(reg, q)
+                self.blocked(reg=reg, q=q)
+        for kw in (dict(output=b""), dict(report=b""), dict(output=OUTPUT + b"swap"), dict(report=REPORT + b"swap")):
+            self.blocked(**kw)
+        reg, q = copy.deepcopy(self.reg), copy.deepcopy(self.q)
+        raw = b"KET_LUAN: approve\nTEST ONLY still running\n"
+        q["technical"]["output_sha256"] = r.sha256(raw)
+        c1_seal(reg, q)
+        self.blocked(reg=reg, q=q, output=raw)
+
+    def test_dispatch_is_independent_pre_run_and_bound(self):
+        self.blocked(anchors={})
+        for role in ("executor", "reviewer"):
+            for key, value in (("scope", {}), ("config", {}), ("session_id", "swapped"), ("run_id", "swapped"),
+                               ("policy_sha256", "0" * 64), ("recorded_at", "2026-11-03T16:29:00Z")):
+                reg, q = copy.deepcopy(self.reg), copy.deepcopy(self.q)
+                dispatch = reg["ledgers"][0]["reservations"][0]["dispatch"]
+                dispatch[role][key] = value
+                q["technical"]["dispatch_sha256"] = r.sha256(r.canonical_bytes(dispatch))
+                c1_seal(reg, q)
+                # Original canonical ancestor is kept: coherent new claims cannot replace it.
+                self.blocked(reg=reg, q=q)
+            reg = copy.deepcopy(self.reg)
+            reg["producers"][0]["dispatch_oids"][role] = "0" * 40
+            self.blocked(reg=reg)
+        for section in ("producers", "policies"):
+            reg = copy.deepcopy(self.reg)
+            reg[section] = []
+            self.blocked(reg=reg)
+        for field in ("output_sha256", "report_sha256", "technical_sha256", "dispatch_sha256"):
+            reg = copy.deepcopy(self.reg)
+            reg["producers"][0][field] = "0" * 64
+            self.blocked(reg=reg)
+        prior = copy.deepcopy(self.reg)
+        self.blocked(anchors={k: r.canonical_bytes(prior) for k in self.anchors})
+
+    def test_replay_independence_human_and_strict_mixture(self):
+        for key in ("session_id", "run_id"):
+            reg, q = copy.deepcopy(self.reg), copy.deepcopy(self.q)
+            q["technical"]["reviewer"][key] = q["technical"]["executor"][key]
+            c1_seal(reg, q)
+            self.blocked(reg=reg, q=q)
+        reg = copy.deepcopy(self.reg)
+        reg["producers"].append(copy.deepcopy(reg["producers"][0]))
+        self.blocked(reg=reg)
+        for key, value in (("provider", "openai_codex"), ("surface", "codex_service"), ("decision", "proposed"),
+                           ("technical_sha256", "0" * 64), ("technical_run_id", "stale")):
+            q = copy.deepcopy(self.q)
+            q["audit"][key] = value
+            self.blocked(q=q)
+        reg = copy.deepcopy(self.reg)
+        reg["audits"] = []
+        self.blocked(reg=reg)
+        for key in ("head_sha", "tree_sha", "spec_hash"):
+            q = copy.deepcopy(self.q)
+            q["audit"]["binding"][key] = "0" * len(q["binding"][key])
+            self.blocked(q=q)
+        for key, value in (("observed_effort", "unknown"), ("observed_model", "unknown"), ("surface", "codex_service")):
+            reg, q = fixture()
+            c1_policy = copy.deepcopy(self.reg["policies"][0])
+            c1_policy["grant_id"] = "unrelated-c1"
+            reg["policies"].append(c1_policy)
+            q["technical"]["reviewer"][key] = value
+            reseal(reg, q)
+            with self.assertRaises(r.Blocked):
+                check(reg, q)
+        q = copy.deepcopy(self.q)
+        q["evidence_mode"] = r.C1
+        self.blocked(q=q)
+
+    def test_coherent_dispatch_chronology_and_scope_controls(self):
+        for role in ("executor", "reviewer"):
+            for field, value in (("started_at", "2026-11-03T15:59:00Z"),
+                                 ("completed_at", "2026-11-03T16:31:00Z"),
+                                 ("completed_at", "2026-11-03T15:59:00Z")):
+                reg, q = copy.deepcopy(self.reg), copy.deepcopy(self.q)
+                q["technical"][field][role] = value
+                c1_seal(reg, q)
+                self.blocked(reg=reg, q=q)
+        reg, q = copy.deepcopy(self.reg), copy.deepcopy(self.q)
+        dispatch = reg["ledgers"][0]["reservations"][0]["dispatch"]
+        # Both current and prior assertions agree; temporal guard must reject.
+        dispatch["reviewer"]["recorded_at"] = "2026-11-03T16:11:00Z"
+        q["technical"]["dispatch_sha256"] = r.sha256(r.canonical_bytes(dispatch))
+        c1_seal(reg, q)
+        self.blocked(reg=reg, q=q, anchors=c1_anchors(reg))
+        for role in ("executor", "reviewer"):
+            reg, q = copy.deepcopy(self.reg), copy.deepcopy(self.q)
+            dispatch = reg["ledgers"][0]["reservations"][0]["dispatch"]
+            if role == "executor":
+                dispatch[role]["scope"]["head_sha"] = q["binding"]["head_sha"]
+            else:
+                del dispatch[role]["scope"]["tree_sha"]
+            q["technical"]["dispatch_sha256"] = r.sha256(r.canonical_bytes(dispatch))
+            c1_seal(reg, q)
+            self.blocked(reg=reg, q=q, anchors=c1_anchors(reg))
+        reg = copy.deepcopy(self.reg)
+        for role in ("executor", "reviewer"):
+            reg["policies"][0][f"{role}_config"]["model"] = "unsupported-model"
+        self.blocked(reg=reg)
+        reg = copy.deepcopy(self.reg)
+        reg["policies"][0]["effort_order"] = ["low", "high"]
+        self.blocked(reg=reg)
+        for key in ("mission", "revision", "plan_hash"):
+            reg = copy.deepcopy(self.reg)
+            p = reg["policies"][0]
+            value = "0" * 64 if key == "plan_hash" else 999
+            p[key] = p["c1_authority"][key] = value
+            self.blocked(reg=reg)
+        # Revoking the exception permits a separately authorized strict route.
+        reg, q = fixture()
+        revoked = copy.deepcopy(self.reg["policies"][0])
+        revoked.update(grant_id="revoked-c1", revoked=True)
+        revoked["c1_authority"]["revoked"] = True
+        reg["policies"].append(revoked)
+        self.assertEqual(check(reg, q)["status"], "validated")
+
+    def test_strict_route_retains_revoked_or_expired_c1_history(self):
+        reg, q = fixture()
+        q["binding"].update(grant_id="strict-grant", dispatch_id="strict-dispatch")
+        reg["policies"][0]["grant_id"] = "strict-grant"
+        for role in ("executor", "reviewer"):
+            machine = q["technical"][role]
+            machine.update(run_id=f"strict-{role}-run", session_id=f"strict-{role}-session")
+            reg["ledgers"][0]["reservations"][0][f"{role}_run_id"] = machine["run_id"]
+        q["technical"].update(run_id=q["technical"]["reviewer"]["run_id"], provenance_id="strict-producer")
+        q["audit"]["technical_run_id"] = q["technical"]["run_id"]
+        reg["producers"][0]["producer_id"] = "strict-producer"
+        reseal(reg, q)
+        outcomes = [("completed", "approve", True), ("completed", "changes_requested", True), ("failed", "blocked", True),
+                    ("cancelled", "unassessed", True), ("timeout", "blocked", True), ("partial", "unassessed", False), ("running", "unassessed", False)]
+        for condition, outcome in ((c, o) for c in ("revoked", "expired") for o in outcomes):
+            with self.subTest(condition=condition, outcome=outcome):
+                retained, c1_q, mixed = copy.deepcopy(self.reg), copy.deepcopy(self.q), copy.deepcopy(reg)
+                p = retained["policies"][0]
+                row = retained["ledgers"][0]["reservations"][0]
+                if condition == "revoked":
+                    p["revoked"] = p["c1_authority"]["revoked"] = True
+                else:
+                    p["expires_at"] = NOW
+                    for dispatch in row["dispatch"].values():
+                        dispatch["policy_sha256"] = r.sha256(r.canonical_bytes(p))
+                    c1_q["technical"]["dispatch_sha256"] = r.sha256(r.canonical_bytes(row["dispatch"]))
+                c1_q["technical"].update(completion=outcome[0], verdict=outcome[1], terminal=outcome[2])
+                if outcome[0] == "running":
+                    c1_q["technical"]["completed_at"]["reviewer"] = None
+                c1_seal(retained, c1_q)
+                with self.assertRaisesRegex(r.Blocked, "expired|revoked"):
+                    c1_check(retained, c1_q, self.anchors)
+                retained["ledgers"][0]["reservations"].clear()
+                retained["ledgers"][0]["history"].append(row)
+                retained["ledgers"][0]["usage"] = copy.deepcopy(row["units"])
+                for section in ("policies", "ledgers", "producers"):
+                    mixed[section] += retained[section]
+                self.assertEqual(check(mixed, q)["status"], "validated")
+                for field, malformed in (("terminal", "false"), ("completion", {}), ("dispatch_sha256", "bad"), ("started_at", {})):
+                    bad = copy.deepcopy(mixed)
+                    bad["producers"][-1][field] = malformed
+                    with self.assertRaises(r.Blocked):
+                        check(bad, q)
 
 
 class SemanticTests(unittest.TestCase):
@@ -365,6 +655,7 @@ class GitCliTests(unittest.TestCase):
     def setUp(self):
         self.git("reset", "--hard", self.clean_oid)
         self.git("push", "-q", "--force", "origin", "master")
+        (self.files / "stdout.txt").write_bytes(OUTPUT)
 
     def run_cli(self, request=None, state_name="one", extra=None, fixture_mode=True, cwd=None):
         # Different input directories cannot change the canonical allowance.
@@ -388,6 +679,75 @@ class GitCliTests(unittest.TestCase):
         self.git("add", r.REGISTRY_PATH)
         self.git("commit", "-qm", "TEST ONLY registry negative control")
         self.git("push", "-q", "origin", "master")
+
+    def publish_c1(self):
+        reg, q, anchors = c1_fixture(self.registry, self.request)
+        (self.files / "stdout.txt").write_bytes(SERVICE_OUTPUT)
+        prior = r.parse_json(next(iter(anchors.values())))
+        reviewer_dispatch = prior["dispatches"].pop()
+        self.publish_registry(prior)
+        executor_oid = self.git("rev-parse", "HEAD").strip()
+        prior["dispatches"].append(reviewer_dispatch)
+        self.publish_registry(prior)
+        reviewer_oid = self.git("rev-parse", "HEAD").strip()
+        reg["producers"][0]["dispatch_oids"] = dict(executor=executor_oid, reviewer=reviewer_oid)
+        self.publish_registry(reg)
+        return reg, q
+
+    def test_cli_c1_positive_all_operations(self):
+        reg, q = self.publish_c1()
+        for operation in ("admission", "technical", "human", "composite"):
+            request = copy.deepcopy(q)
+            request["operation"] = operation
+            if operation == "admission":
+                del request["technical"]
+            if operation in ("admission", "technical"):
+                del request["audit"]
+            rc, out = self.run_cli(request)
+            self.assertEqual(rc, 0, out)
+            self.assertTrue(out["test_only"])
+            self.assertFalse(out["authorizes_dispatch"])
+            self.assertIn("Git source base/head/tree/spec bytes", out["positive_evidence"])
+            self.assertEqual(out["evidence_mode"], "configured_c1")
+            self.assertEqual(out["serving_measurement"], "not_assessed" if operation == "admission" else "unknown")
+            if operation != "admission":
+                self.assertIn("actual higher effort not established", " ".join(out["positive_evidence"]))
+
+    def test_cli_c1_canonical_authority_dispatch_producer_and_audit_controls(self):
+        original, q = self.publish_c1()
+        mutations = [
+            lambda reg: reg["policies"][0].pop("c1_authority"),
+            lambda reg: reg["policies"][0]["c1_authority"].update(revoked=True),
+            lambda reg: reg["policies"][0].update(expires_at=NOW),
+            lambda reg: reg["policies"][0]["reviewer_config"].update(effort="medium"),
+            lambda reg: reg["producers"][0].update(exit_code=0),
+            lambda reg: reg["producers"][0].update(terminal=False),
+            lambda reg: reg["producers"].clear(),
+            lambda reg: reg["producers"][0].update(output_sha256="0" * 64),
+            lambda reg: reg["producers"][0]["dispatch_oids"].update(executor="0" * 40),
+            lambda reg: reg["producers"][0]["dispatch_oids"].update(reviewer=self.clean_oid),
+            lambda reg: reg["producers"][0]["dispatch_oids"].update(executor=original["producers"][0]["dispatch_oids"]["reviewer"], reviewer=original["producers"][0]["dispatch_oids"]["executor"]),
+            lambda reg: reg["ledgers"][0]["reservations"][0].pop("dispatch"),
+            lambda reg: reg["audits"].clear(),
+            lambda reg: reg["audits"][0].update(provider="openai_codex"),
+        ]
+        for index, mutate in enumerate(mutations):
+            with self.subTest(control=index):
+                reg = copy.deepcopy(original)
+                mutate(reg)
+                self.publish_registry(reg)
+                rc, out = self.run_cli(q)
+                self.assertEqual(rc, 12, out)
+                self.assertEqual(out["status"], "blocked")
+
+    def test_cli_c1_candidate_self_activation_and_request_downgrade(self):
+        reg, q, _ = c1_fixture(self.registry, self.request)
+        self.registry_path.write_bytes(r.canonical_bytes(reg))
+        (self.root / r.VERIFIER_PATH).write_text("raise RuntimeError('candidate C1 must not activate')\n", encoding="utf-8")
+        self.assertEqual(self.run_cli(q)[0], 12)
+        strict = copy.deepcopy(self.request)
+        strict["evidence_mode"] = r.C1
+        self.assertEqual(self.run_cli(strict)[0], 12)
 
     def test_cli_positive_all_operations(self):
         for operation in ("admission", "technical", "human", "composite"):

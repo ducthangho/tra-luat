@@ -54,6 +54,80 @@ function Add-UserPath([string]$directory) {
     } finally { $key.Dispose() }
     if (-not (Test-PathListContains $env:Path $directory)) { $env:Path = "$env:Path;$directory" }
 }
+function Get-AgyVersion([string]$executable) {
+    $lines = @(& $executable --version 2>$null)
+    if ($LASTEXITCODE -ne 0) { return $null }
+    $versions = @($lines | ForEach-Object {
+        if ([string]$_ -cmatch '^\s*(?:version:\s*|agy\s+|antigravity\s+)?v?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)\s*$') { $Matches[1] }
+    })
+    if ($versions.Count -eq 1) { return $versions[0] }
+    return $null
+}
+function Install-AgyVerified {
+    $arch = switch ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()) {
+        'X64' { 'x64' }
+        'Arm64' { 'arm64' }
+        default { throw 'Unsupported AGY CPU architecture' }
+    }
+    $release = Invoke-RestMethod -Uri 'https://api.github.com/repos/google-antigravity/antigravity-cli/releases/latest' -Headers @{ 'User-Agent'='tra-luat-env-setup' } -TimeoutSec 30
+    $tag = [string]$release.tag_name
+    if ($tag -cnotmatch '^v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$') { throw 'Invalid AGY release tag' }
+    $target = $tag -creplace '^v',''
+    $assets = @($release.assets | Where-Object { $_.name -ceq "agy_cli_windows_$arch.zip" })
+    if ($assets.Count -ne 1) { throw 'Expected exactly one AGY Windows release asset' }
+    $asset = $assets[0]
+    if ([string]$asset.digest -cnotmatch '^sha256:[0-9a-f]{64}$') { throw 'AGY release has no valid SHA256 digest' }
+    $expectedUrl = "https://github.com/google-antigravity/antigravity-cli/releases/download/$tag/$($asset.name)"
+    if ([string]$asset.browser_download_url -cne $expectedUrl) { throw 'Unexpected AGY asset URL' }
+    $bin = Join-Path $env:LOCALAPPDATA 'agy\bin'
+    $destination = Join-Path $bin 'agy.exe'
+    $current = Get-Command agy -ErrorAction SilentlyContinue
+    if ($current -and (Get-AgyVersion $current.Source) -ceq $target) { return }
+    # Refuse reparse points in the installation path rather than following a redirected user bin.
+    for ($parent = $destination; $parent; $parent = Split-Path $parent -Parent) {
+        if ((Test-Path -LiteralPath $parent) -and
+            ((Get-Item -LiteralPath $parent -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            throw "AGY install path contains a reparse point: $parent"
+        }
+    }
+    $tmp = Join-Path ([IO.Path]::GetTempPath()) ("tra-luat-agy-" + [guid]::NewGuid().ToString('N'))
+    $staged = $null
+    New-Item -ItemType Directory -Path $tmp | Out-Null
+    try {
+        $archive = Join-Path $tmp 'release.zip'
+        Invoke-WebRequest -Uri $expectedUrl -OutFile $archive -TimeoutSec 120
+        if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant() -cne ([string]$asset.digest).Substring(7)) {
+            throw 'AGY SHA256 mismatch'
+        }
+        $zip = [IO.Compression.ZipFile]::OpenRead($archive)
+        try {
+            # Only one regular root executable is accepted; no paths, duplicates, links or extra files.
+            if ($zip.Entries.Count -ne 1) { throw 'Unexpected AGY archive layout' }
+            $entry = $zip.Entries[0]
+            $unixType = ($entry.ExternalAttributes -shr 16) -band 0xF000
+            if ($entry.FullName -cne 'antigravity.exe' -or $entry.Length -le 0 -or
+                $unixType -notin @(0, 0x8000) -or ($entry.ExternalAttributes -band 0x410)) {
+                throw 'Unexpected AGY archive entry'
+            }
+            $candidate = Join-Path $tmp 'agy.exe'
+            [IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $candidate, $false)
+        } finally { $zip.Dispose() }
+        if ((Get-AgyVersion $candidate) -cne $target) { throw "AGY archive binary did not report $target" }
+        New-Item -ItemType Directory -Path $bin -Force | Out-Null
+        # Stage on the destination volume; Replace/Move publish a complete binary atomically.
+        $staged = Join-Path $bin ('.agy-' + [guid]::NewGuid().ToString('N') + '.exe')
+        [IO.File]::Copy($candidate, $staged, $false)
+        if (Test-Path -LiteralPath $destination) { [IO.File]::Replace($staged, $destination, $null) }
+        else { [IO.File]::Move($staged, $destination) }
+        if (-not (Test-PathListContains $env:Path $bin)) { $env:Path = "$bin;$env:Path" }
+        $resolved = Get-Command agy -ErrorAction Stop
+        if ($resolved.Source -ine $destination) { throw 'AGY is shadowed on PATH' }
+        if ((Get-AgyVersion $destination) -cne $target) { throw "AGY did not reach $target" }
+    } finally {
+        if ($staged -and (Test-Path -LiteralPath $staged)) { Remove-Item -LiteralPath $staged -Force }
+        Remove-Item -LiteralPath $tmp -Recurse -Force
+    }
+}
 function Resolve-GitTool([string]$gitExe, [string]$relative) {
     # git.exe may live in <GitRoot>\cmd, <GitRoot>\bin or <GitRoot>\mingw64\bin.
     $dir = Split-Path $gitExe -Parent
@@ -125,6 +199,7 @@ try {
             $(if ($npmCommand) { Split-Path $npmCommand.Source -Parent }),
             (Split-Path $gitExe -Parent))) { Add-UserPath $directory }
     }
+    if (-not (Get-Command agy -ErrorAction SilentlyContinue)) { Install-AgyVerified }
     if ($Latest) {
         foreach ($item in $Tools) {
             switch ($item) {
@@ -149,10 +224,7 @@ try {
                     $target = ((Invoke-RestMethod -Uri 'https://api.github.com/repos/anthropics/claude-code/releases/latest' -TimeoutSec 20).tag_name -replace '^v','')
                     if (((Version 'claude' @('--version')) -split '\s+')[0] -cne $target) { throw "Claude did not reach $target" }
                 }
-                'agy' {
-                    Run 'agy' @('update')
-                    if ((Version 'agy' @('--version')) -notmatch '^\d+\.\d+\.\d+$') { throw 'AGY version could not be verified' }
-                }
+                'agy' { Install-AgyVerified }
                 'nlm' {
                     Run 'uv' @('tool', 'upgrade', 'notebooklm-mcp-cli')
                     $target = (Invoke-RestMethod -Uri 'https://pypi.org/pypi/notebooklm-mcp-cli/json' -TimeoutSec 20).info.version

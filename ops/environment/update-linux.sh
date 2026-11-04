@@ -41,21 +41,31 @@ native_command() {
 }
 # `python3 -m venv --help` succeeds even without python3-venv on Ubuntu; only ensurepip proves venv creation works.
 venv_available() { python3 -c 'import ensurepip, venv' >/dev/null 2>&1; }
+agy_version() {
+  local output
+  output="$(agy --version 2>/dev/null)" || return 1
+  # AGY may print a banner and a separate version: line. Reject ambiguous/no version output.
+  printf '%s\n' "$output" | "$py" -c 'import re,sys
+pattern=r"\s*(?:version:\s*|agy\s+|antigravity\s+)?v?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)\s*"
+versions=[m.group(1) for line in sys.stdin.read().splitlines() if (m:=re.fullmatch(pattern,line))]
+if len(versions)!=1: sys.exit(1)
+print(versions[0])'
+}
 install_agy_verified() {
   local release asset url digest tag archive tmp found
   case "$(uname -m)" in x86_64) asset=agy_cli_linux_x64.tar.gz ;; aarch64) asset=agy_cli_linux_arm64.tar.gz ;;
     *) echo 'Unsupported AGY CPU architecture' >&2; return 5 ;; esac
-  release="$(python - <<'PY'
+  release="$("$py" - <<'PY'
 import json, urllib.request
 req = urllib.request.Request('https://api.github.com/repos/google-antigravity/antigravity-cli/releases/latest', headers={'User-Agent':'tra-luat-env-setup'})
 print(json.dumps(json.load(urllib.request.urlopen(req, timeout=30))))
 PY
 )"
-  read -r tag url digest < <(printf '%s' "$release" | python -c 'import json,sys; d=json.load(sys.stdin); a=[x for x in d["assets"] if x["name"]==sys.argv[1]]; assert len(a)==1; print(d["tag_name"],a[0]["browser_download_url"],a[0]["digest"])' "$asset")
+  read -r tag url digest < <(printf '%s' "$release" | "$py" -c 'import json,sys; d=json.load(sys.stdin); a=[x for x in d["assets"] if x["name"]==sys.argv[1]]; assert len(a)==1; print(d["tag_name"],a[0]["browser_download_url"],a[0]["digest"])' "$asset")
   [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo 'AGY release has no valid SHA256 digest' >&2; return 5; }
   # Already at the release tag: nothing to do. Otherwise always reinstall from the verified asset;
   # `agy update` would bypass the SHA256 check.
-  if native_command agy && [[ "$(agy --version 2>/dev/null | awk '{print $NF}')" == "${tag#v}" ]]; then return 0; fi
+  if native_command agy && [[ "$(agy_version || true)" == "${tag#v}" ]]; then return 0; fi
   tmp="$(mktemp -d)"; archive="$tmp/$asset"
   curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 "$url" --output "$archive" ||
     { rm -rf -- "$tmp"; echo 'AGY download failed' >&2; return 5; }
@@ -68,7 +78,7 @@ PY
   rm -rf -- "$tmp"
   hash -r
   [[ "$(command -v agy)" == "$HOME/.local/bin/agy" ]] || { echo 'AGY is shadowed on PATH' >&2; return 6; }
-  [[ "$(agy --version | awk '{print $NF}')" == "${tag#v}" ]] || { echo "AGY did not reach $tag" >&2; return 6; }
+  [[ "$(agy_version)" == "${tag#v}" ]] || { echo "AGY did not reach $tag" >&2; return 6; }
 }
 if grep -qi microsoft /proc/version 2>/dev/null; then echo 'platform: WSL'; else echo 'platform: Linux'; fi
 cd -- "$repo"

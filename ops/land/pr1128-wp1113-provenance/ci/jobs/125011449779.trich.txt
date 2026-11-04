@@ -1,0 +1,10 @@
+2026-11-01T23:14:13.3049841Z Image: ubuntu-24.04
+2026-11-01T23:14:14.0314663Z ##[group]Run git config --global core.autocrlf false
+2026-11-01T23:14:14.0737575Z ##[group]Run actions/checkout@v4
+2026-11-01T23:14:20.1421832Z [command]/usr/bin/git rev-parse refs/remotes/origin/claude/gate-hau-merge-c165a5d0
+2026-11-01T23:14:20.1422583Z c165a5d0d4048e10e7da875f2ba7524136fb5735
+2026-11-01T23:14:20.8031656Z [command]/usr/bin/git log -1 --format=%H
+2026-11-01T23:14:20.8054523Z c165a5d0d4048e10e7da875f2ba7524136fb5735
+2026-11-01T23:14:20.8214483Z ##[group]Run actions/setup-python@v5
+2026-11-01T23:14:20.9390302Z ##[group]Run python ops/nhanh_don_duoc_test.py
+2026-11-01T23:14:59.9418414Z ##[group]Run actions/upload-artifact@v4

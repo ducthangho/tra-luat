@@ -1,0 +1,7 @@
+# Tai hien F1-shell-enoexec tren master 2bcd8f3 (phien ghi so, 27-10-2026). Duong dan scratch rut gon thanh <tam>.
+$ printf 'echo "ripgrep 14.1.0"\n' > <tam>/bin/rg; chmod +x <tam>/bin/rg   (khong shebang)
+$ PATH=<tam>/bin:$PATH bash -c "rg --version"  -> ripgrep 14.1.0
+$ PATH=<tam>/bin:$PATH python3 .claude/dev/launcher.py doctor  -> rc=12
+  BI_CHE   rg       ripgrep 14.1.0
+        ten tran `rg` goi <tam>/bin/rg - KHONG chay duoc: [Errno 8] Exec format error: '<tam>/
+KET LUAN  : THIEU rg (BI_CHE: co cai, ban ten tran hong)

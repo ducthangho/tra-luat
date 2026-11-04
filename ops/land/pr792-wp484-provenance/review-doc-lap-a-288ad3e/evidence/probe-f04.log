@@ -1,0 +1,10 @@
+/tmp/claude-0/-home-user-tra-luat/f5ea9c29-b7bf-59b1-89c5-898536fe68e2/scratchpad/rr/pr792/evidence/head-copy/ops/bash_nen.py:900: SyntaxWarning: invalid escape sequence '\('
+  N118 (r34, chủ kho — ngân sách `%` lần NĂM, codex vòng 28): bản r33 tách bằng regex `%(?:\([^)]*\))?…`,
+F04 fixture result: None (None means pass)
+AMBIENT installer calls: 6
+apt-get install -y -qq ripgrep
+sudo apt-get install -y -qq ripgrep
+apt-get update -qq
+sudo apt-get update -qq
+apt-get install -y -qq ripgrep
+sudo apt-get install -y -qq ripgrep

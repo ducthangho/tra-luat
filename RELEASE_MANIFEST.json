@@ -5,10 +5,10 @@
   "skill_version": "1.36.69",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 198,
-  "total_bytes": 9110550,
-  "package_hash": "ebcfc74a196ed49fd0a39a16ed338eeb34ea153504737eb24474a2b9a618f9b4",
-  "content_hash": "ebcfc74a196ed49fd0a39a16ed338eeb34ea153504737eb24474a2b9a618f9b4",
+  "file_count": 184,
+  "total_bytes": 9085767,
+  "package_hash": "68f513692332e0fca3a86871389106a66149cee0409dd79c43083df8f24bd920",
+  "content_hash": "68f513692332e0fca3a86871389106a66149cee0409dd79c43083df8f24bd920",
   "required_missing": [],
   "files": [
     {
@@ -55,76 +55,6 @@
       "path": "agents/openai.yaml",
       "size": 224,
       "sha256": "37a33538a5cc2d9cf31089b74cb6f8a9f64b7ce08e9bc3880cf49ec3b8474843"
-    },
-    {
-      "path": "changelog.d/wp-1009.md",
-      "size": 1406,
-      "sha256": "02907556e39bc99aab122f2435333c9dbfa249c2bff3a71f5741ca34e35c5d10"
-    },
-    {
-      "path": "changelog.d/wp-1030.md",
-      "size": 1765,
-      "sha256": "8f86c0987da38f68394b3697fae0e8993644eedb01e27bfd3f112d2561f95b45"
-    },
-    {
-      "path": "changelog.d/wp-1038.md",
-      "size": 1234,
-      "sha256": "6028003711a9c9b59323f5476760c3f8cd80dc439c257c9260e426c38ada3d94"
-    },
-    {
-      "path": "changelog.d/wp-1052.md",
-      "size": 2517,
-      "sha256": "0fb54cad0e9961f6f55053c6914b64825cd4c4c9460480869c3fb02b7d2d5f93"
-    },
-    {
-      "path": "changelog.d/wp-710.md",
-      "size": 7560,
-      "sha256": "1efc3dbee8f3549e53bf73656914cfa80a55c4a452aeff19a6d7b381cdfa8cf8"
-    },
-    {
-      "path": "changelog.d/wp-725.md",
-      "size": 1954,
-      "sha256": "141f4a2c1ffa73ea0ae29583f4f9431896f161b6ecdddb805a9a98efc4ee4ebe"
-    },
-    {
-      "path": "changelog.d/wp-726.md",
-      "size": 3103,
-      "sha256": "5e50a98d1d70a79265a861a5c8dd69f24a577299530af19aff9d82d035af8869"
-    },
-    {
-      "path": "changelog.d/wp-727.md",
-      "size": 1037,
-      "sha256": "b662efcc3b0e807507a4021ae29d474d2563033435267f55a37b5b8b161b2b45"
-    },
-    {
-      "path": "changelog.d/wp-766.md",
-      "size": 1250,
-      "sha256": "e15e736659a6c9dd08bbf51693a35171530ab7023b28c6342151b2fcaaa91f28"
-    },
-    {
-      "path": "changelog.d/wp-802.md",
-      "size": 1023,
-      "sha256": "76d574ee8240d1dcc6f9ab5f90070e6d9ff64cc60a209f44e877ff94f5d6a31c"
-    },
-    {
-      "path": "changelog.d/wp-831.md",
-      "size": 2222,
-      "sha256": "b1c18da5232a0da61618b0f74baebcb9045703933faa39ab4951d50d450c2287"
-    },
-    {
-      "path": "changelog.d/wp-858.md",
-      "size": 1352,
-      "sha256": "29c421d927c9d691bbe0f836bb2a818ab0ea810aca531f8debe1faebb46b7546"
-    },
-    {
-      "path": "changelog.d/wp-868.md",
-      "size": 915,
-      "sha256": "be06bc58c3ad45af7c328f571d9e80b5ce571f74402edd3878f2e13f27891f12"
-    },
-    {
-      "path": "changelog.d/wp-886.md",
-      "size": 958,
-      "sha256": "5b29279d96839e2548799a0cd89e3c55d2ea8a853895ec6da73da511c33e6012"
     },
     {
       "path": "references/API_CONTRACT.md",
@@ -898,8 +828,8 @@
     },
     {
       "path": "scripts/tl_core/release.py",
-      "size": 83993,
-      "sha256": "ef0e7ef8a5b68b93d5f4a7c9ebbf9156b7be72baa449f981e9d0073a4239640b"
+      "size": 84540,
+      "sha256": "8f96a21b0f192c52ab7799481378cc5e6cffe06401400138dc17d8c6c20c40b3"
     },
     {
       "path": "scripts/tl_core/resolve.py",
@@ -948,13 +878,13 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 2276029,
-      "sha256": "4865f80aa7eb97742d2c022b608d53625bcdbd9aebe2d98643edd072b7a988e0"
+      "size": 2276379,
+      "sha256": "892595e041a8f1b3b9c5f8e28dce279f374b936c7cc732648c4bd2337a25879a"
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",
-      "size": 71047,
-      "sha256": "11de6efaa6ee3f5d835bd0049c2a1cd736e33e44247dedab75707042adcec9d9"
+      "size": 73663,
+      "sha256": "27e1d5dff02187e9dc39078695d8fb3a13ad0dfb2078a5e1cf460a54442afdf1"
     },
     {
       "path": "scripts/tra_cuu.py",

@@ -169,3 +169,35 @@ dinh_chinh_r24:
     - 'approve Codex neo 907214d; merged head 288ad3e mang delta launcher_test.py CHUA duoc Codex review (:133-136)'
   dieu_kien_mo_lai: '(A) `cross_approved`: dieu kien CHUNG — mot lan approve DOC LAP da hoan tat tren DUNG 288ad3ea79ef94e061b649effe7bee2c7e2a0a9b, va voi CHINH lan chay approve ay ho model reviewer phuc vu duoc xac lap KHAC ho model executor (claude); bang chung ho model o mot trong hai muc: (i) `do_may` — may do cho chinh lan chay ay (nang cap launcher ve sau KHONG do nguoc cac luot cu; do o luot/SHA khac KHONG du), hoac (ii) `khai_co_audit` — loi khai ho model cua chinh lan chay ay KEM xac nhan ben cua mot auditor co ten, tu khai yeu hon `do_may` ngay tai cho dung (loi khai khong kem auditor KHONG du). Cung ho, du co auditor, KHONG thanh `cross_approved`. HOAC (B) `human_audited` day du §8 muc 2 — auditor doc lap, danh tinh ben, tu doc spec/diff, evidence + verdict ben neo DUNG 288ad3ea79ef94e061b649effe7bee2c7e2a0a9b; voi comment cua chu kho thi theo phan quyet #566 trong uy quyen r24: dang truoc merge, co cau tu doc diff, ban luu day du trong kho. Kem theo: moi lo trong lo_ghi_them_khong_mo_rong_pham_vi phai duoc dong bang bang chung duong rieng.'
   lich_su: 'ket luan `landed: true` truoc day va can cu cua no giu nguyen o tren de doi chieu; khoi nay chi doi ket luan.'
+
+review_doc_lap_a_20261027:
+  bo_canh: >-
+    Chu kho yeu cau (phien session_01J7EgTVGTrNi4xqh7MeBFQv 27-10-2026, "chay 1 roi 2 va 3" va "Dong y de xuat") thu dieu
+    kien (A) cua dinh_chinh_r24.dieu_kien_mo_lai: mot luot Codex DOC LAP tren DUNG head da merge qua launcher co do model
+    phuc vu. Khoi nay KHONG sua dong nao o tren.
+  reviewed_commit: 288ad3ea79ef94e061b649effe7bee2c7e2a0a9b
+  pham_vi_diff: 'git diff d347d426334bbe1bbb1161184ab0acffee9be054 288ad3ea79ef94e061b649effe7bee2c7e2a0a9b (merge-base cua head voi cha thu nhat cua merge commit).'
+  spec: 'measured — ops/land/pr792-wp484-provenance/review-doc-lap-a-288ad3e/PROMPT.md ghi spec sha256 4a512dd38721c3c4eec7978489ba06485feab32f94a0c5637a085d6c694ba38c (khop spec_sha256 cua lease); ops/land/pr792-wp484-provenance/review-doc-lap-a-288ad3e/VERDICT.md dong 3 la gia tri reviewer tu do. Prompt sha256 972d807c6d07bd62fdfc9f09aa161008b5b6d10247768e620d97c42782b0117a.'
+  launcher: >-
+    measured — ops/land/pr792-wp484-provenance/review-doc-lap-a-288ad3e/run.json: launcher 1.5.0 (master co model_phuc_vu tu 97bb4c5), run cb596c90, trang_thai xong, ma_thoat 0, 1636.919 giay.
+  model_phuc_vu: >-
+    measured — ops/land/pr792-wp484-provenance/review-doc-lap-a-288ad3e/run.json model_phuc_vu_trang_thai DO_DUOC, 47 su kien, tap model {gpt-6.1-sol} => ho openai, khac ho executor (claude).
+  verdict: changes_requested
+  dem: 'P0=0 P1=2 P2=0 P3=0'
+  phat_hien:
+    - {id: F01-mutation-oracle-unrelated-exception, hang: P1, tep: '.claude/dev/launcher_test.py:10246-10257, :10316-10333; .claude/dev/codex_cred_test.py:568-572, :610-611', bieu_hien: 'bo cham dot bien tinh mutant chet vi loi vo can (RuntimeError/OSError/AttributeError) la giet; khong chay ca goc truoc nen nen do van bao dat', tai_hien: evidence/probe-runner.log}
+    - {id: F02-f04-fixture-ambient-installers, hang: P1, tep: '.claude/dev/launcher_test.py:7815-7842 (r484_g7_hook_vang_codex_cai_cli_truoc_materialize)', bieu_hien: 'khi rg hong, ca goi 6 installer cua may chay (apt-get/sudo/cargo) ngoai fixture', tai_hien: evidence/probe-f04.log}
+  nguon:
+    - ops/land/pr792-wp484-provenance/review-doc-lap-a-288ad3e/VERDICT.md
+    - ops/land/pr792-wp484-provenance/review-doc-lap-a-288ad3e/run.json
+    - ops/land/pr792-wp484-provenance/review-doc-lap-a-288ad3e/PROMPT.md
+    - ops/land/pr792-wp484-provenance/review-doc-lap-a-288ad3e/SHA256SUMS
+  gioi_han: >-
+    Bang chung phu (log, ban sao dot bien, cay tam) KHONG vao kho; ops/land/pr792-wp484-provenance/review-doc-lap-a-288ad3e/OMITTED.txt giu sha256 + byte cua tep cap 1-2.
+    Workspace la clone day du khong nong tai head, core.abbrev 7; reviewer khong mang, khong credential that.
+  ket_luan_assurance_81: >-
+    CHUA DAT. Model phuc vu DO DUOC, nhung verdict changes_requested voi hai P1 (ca hai trong ma test), nen khong co approve doc lap tren 288ad3e. Khong gi o day cap quyen landed hay cross_approved.
+  lua_chon_cho_chu_kho:
+    - 'Mo packet va loi con song tren master (xem phat_hien); approve tren head cu KHONG con dat duoc vi chinh luot doc lap da doi sua.'
+    - 'Hoac (B) human_audited day du §8 muc 2 do chu kho, neo DUNG 288ad3ea79ef94e061b649effe7bee2c7e2a0a9b.'
+  landed: false

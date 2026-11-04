@@ -3198,12 +3198,15 @@ def cmd_kiem_merge(a, state_dir: Path) -> int:
         rc, spec = _git_do(root, "show", f"{h}:{a.spec}")
         if rc or hashlib.sha256(spec).hexdigest() != lease.get("spec_hash"):
             _die(RC_GATE, "blob --spec tại head không khớp spec_hash của lease")
-        khai = LUAT_0060_RE.findall(spec)
-        oid = khai[0].decode() if len(khai) == 1 else None
+        khai = re.findall(rb"^dieu_kien_merge:[^\n]*$", spec, re.M)
+        if not khai:
+            return spec
+        oid_khop = LUAT_0060_RE.fullmatch(khai[0]) if len(khai) == 1 else None
+        oid = oid_khop.group(1).decode() if oid_khop else None
         if not (oid and _git_do(root, *("rev-parse", "--is-shallow-repository")) == (0, b"false\n")
                 and _git_do(root, "cat-file", "-e", f"{oid}:{ADR0060_TEP}")[0] == 0 and _git_do(root, "cat-file", "-e", f"{oid}^1:{ADR0060_TEP}")[0] != 0
                 and (fp := _git_do(root, "rev-list", "--first-parent", "refs/remotes/origin/master"))[0] == 0 and oid.encode() in fp[1].split()):
-            _die(RC_GATE, "dòng khai dieu_kien_merge không hợp lệ (đúng một dòng, OID land ADR-0060 trên first-parent master)")
+            _die(RC_GATE, f"K1: {len(khai)} dòng khai dieu_kien_merge; cần 0 hoặc đúng 1 dòng hợp lệ với OID land ADR-0060 trên first-parent master")
         return spec
 
     def k4():

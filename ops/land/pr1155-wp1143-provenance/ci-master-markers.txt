@@ -1,0 +1,30 @@
+chuan-bi	Run actions/checkout@v4	2026-11-02T10:05:05.3999698Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-packet-loop (ubuntu-latest)	Run actions/checkout@v4	2026-11-02T10:05:29.2199952Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-ops (ubuntu-latest)	Run actions/checkout@v4	2026-11-02T10:05:38.9783763Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-cong-cu (ubuntu-latest, 4)	Run actions/checkout@v4	2026-11-02T10:05:29.0606850Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-cong-cu (ubuntu-latest, 1)	Run actions/checkout@v4	2026-11-02T10:05:29.6121926Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-cong-cu (ubuntu-latest, 6)	Run actions/checkout@v4	2026-11-02T10:05:28.3870764Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-nhanh-manh (ubuntu-latest, 3)	Run actions/checkout@v4	2026-11-02T10:05:30.0260803Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-cong-cu (ubuntu-latest, 3)	Run actions/checkout@v4	2026-11-02T10:05:48.0587411Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-nhanh-manh (ubuntu-latest, 5)	Run actions/checkout@v4	2026-11-02T10:05:31.4916199Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-nhanh-manh (ubuntu-latest, 2)	Run actions/checkout@v4	2026-11-02T10:05:48.2835258Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-cong-cu (ubuntu-latest, 0)	Run actions/checkout@v4	2026-11-02T10:05:41.0335109Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-nhanh-manh (ubuntu-latest, 1)	Run actions/checkout@v4	2026-11-02T10:05:30.4324093Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-cong-cu (ubuntu-latest, 7)	Run actions/checkout@v4	2026-11-02T10:05:33.3106304Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-cong-cu (ubuntu-latest, 2)	Run actions/checkout@v4	2026-11-02T10:05:29.6432240Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-nhanh-manh (ubuntu-latest, 4)	Run actions/checkout@v4	2026-11-02T10:05:40.1486591Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-nhanh-manh (ubuntu-latest, 7)	Run actions/checkout@v4	2026-11-02T10:05:40.3132707Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-nhanh-manh (ubuntu-latest, 6)	Run actions/checkout@v4	2026-11-02T10:05:50.0323904Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate (ubuntu-latest)	Run actions/checkout@v4	2026-11-02T10:05:36.6628236Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-nhanh-manh (ubuntu-latest, 0)	Run actions/checkout@v4	2026-11-02T10:05:32.1249127Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-cong-cu (ubuntu-latest, 5)	Run actions/checkout@v4	2026-11-02T10:05:29.4647907Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-nhanh-gop (ubuntu-latest)	Run actions/checkout@v4	2026-11-02T10:07:29.8736807Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-registry (ubuntu-latest)	Run actions/checkout@v4	2026-11-02T10:07:56.8019301Z bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+gate-cong-cu-gop (ubuntu-latest)	Run actions/checkout@v4	2026-11-02T10:26:32.7446153Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca:refs/remotes/origin/master
+gate-ops (ubuntu-latest)	ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)	2026-11-02T10:07:50.7569440Z CA: 118/118 dat · 0 do · 0 hong
+gate-ops (ubuntu-latest)	ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)	2026-11-02T10:17:10.2182882Z DOT BIEN: 431/431 bi giet dung ly do
+gate-ops (ubuntu-latest)	ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)	2026-11-02T10:17:12.7652698Z TONG: DAT
+gate-registry (ubuntu-latest)	test registry (phạm vi + các bộ chưa được nối)	2026-11-02T10:08:26.2074576Z TỔNG: ĐẠT
+gate-registry (ubuntu-latest)	test registry (phạm vi + các bộ chưa được nối)	2026-11-02T10:29:23.1557290Z TỔNG: ĐẠT
+gate-registry (ubuntu-latest)	test registry (phạm vi + các bộ chưa được nối)	2026-11-02T10:29:23.1566074Z TỔNG: ĐẠT
+gate-registry (ubuntu-latest)	test registry (phạm vi + các bộ chưa được nối)	2026-11-02T10:57:30.5097507Z TỔNG: ĐẠT

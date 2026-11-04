@@ -1,0 +1,116 @@
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+<unknown>:3724: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3062: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5205: SyntaxWarning: invalid escape sequence '\d'
+{
+  "base_function": [],
+  "head_function": [],
+  "local_kiem_re_rc": 0,
+  "local_kiem_re_stdout": "DUONG_NHANH: toan bo 93 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh\nDUONG_NHANH: kiem-re DAT (93 tep doi, 0 loi)\n",
+  "simulated_merge": "cef1ab0a3cec53b34abf01c157f0b4b29090f459",
+  "merge_tree_matches_head": true,
+  "check_calls": [
+    {
+      "command": [
+        "git",
+        "--attr-source=62e629156fd0729b743f15eed2f32487786b9adc",
+        "-c",
+        "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab",
+        "diff",
+        "--check",
+        "--no-renames",
+        "62e629156fd0729b743f15eed2f32487786b9adc...62e629156fd0729b743f15eed2f32487786b9adc"
+      ],
+      "rc": 0,
+      "stdout": "b''",
+      "stderr": "b''"
+    },
+    {
+      "command": [
+        "git",
+        "--attr-source=62e629156fd0729b743f15eed2f32487786b9adc",
+        "-c",
+        "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab",
+        "diff",
+        "--check",
+        "--no-renames",
+        "62e629156fd0729b743f15eed2f32487786b9adc...1a87a863174ef104b2df8bc98b77724fb6796d9b"
+      ],
+      "rc": 0,
+      "stdout": "b''",
+      "stderr": "b''"
+    },
+    {
+      "command": [
+        "git",
+        "--attr-source=62e629156fd0729b743f15eed2f32487786b9adc",
+        "-c",
+        "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab",
+        "diff",
+        "--check",
+        "--no-renames",
+        "62e629156fd0729b743f15eed2f32487786b9adc...1a87a863174ef104b2df8bc98b77724fb6796d9b"
+      ],
+      "rc": 0,
+      "stdout": "b''",
+      "stderr": "b''"
+    }
+  ],
+  "t20d": "PASS",
+  "ast_scan_files": 154,
+  "ast_parse_errors": [],
+  "diff_check_call_sites": [
+    {
+      "path": "ops/ci_duong_nhanh.py",
+      "line": 621,
+      "expression": "chay([\"git\", \"--attr-source=\" + goc, \"-c\", CAU_HINH_WHITESPACE, \"diff\", \"--check\", \"--no-renames\", f\"{goc}...{dau}\"],\n                 cwd=kho, capture_output=True)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 898,
+      "expression": "git(kho, \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 989,
+      "expression": "bang(git(kho, \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False).returncode == 0,\n             \"fixture vo hieu: `--check` phai BO QUA tep nhi phan (khong thi ca nay khong do gi)\")"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 903,
+      "expression": "git(kho, \"-c\", \"core.whitespace=-\" + \",-\".join(\n                x for x in (\"blank-at-eol\", \"blank-at-eof\", \"space-before-tab\") if x != loai),\n                \"diff\", \"--check\", f\"{goc}...{dau}\", \"--\", tep, kiem=False)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 969,
+      "expression": "git(kho, \"-c\", \"core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab\",\n                      \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 1016,
+      "expression": "bang(git(kho, f\"--attr-source={goc}\", \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False).returncode == 0,\n                 f\"fixture vo hieu ({thu_muc}): `--check` doc thuoc tinh goc phai BO QUA tep nhi phan\")"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 1091,
+      "expression": "bang(m.kiem_yaml({duong}, kho) == [] and m.kiem_loai_tep({duong}, kho) == []\n                 and m.kiem_nhi_phan(env_pr(goc=goc, dau=dau2), chay_that, kho) == []\n                 and git(kho, f\"--attr-source={goc}\", \"diff\", \"--check\", f\"{goc}...{dau2}\", kiem=False).returncode == 0,\n                 f\"fixture vo hieu ({duong}): moi chot doc dia/noi dung phai cung KHONG thay gitlink (khong thi ca nay khong do gi)\")"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 989,
+      "expression": "git(kho, \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 1016,
+      "expression": "git(kho, f\"--attr-source={goc}\", \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 1093,
+      "expression": "git(kho, f\"--attr-source={goc}\", \"diff\", \"--check\", f\"{goc}...{dau2}\", kiem=False)"
+    }
+  ]
+}
+classification ['duong_nhanh', 'DUONG_NHANH: toan bo 93 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh']

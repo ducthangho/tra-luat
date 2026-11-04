@@ -1,0 +1,35 @@
+.claude/hooks/pretooluse_guard.py:265:    "sha256sum": frozenset({"-b", "-t", "-c", "-z", "--binary", "--text", "--check",
+.claude/hooks/pretooluse_guard.py:267:    "md5sum":    frozenset({"-b", "-t", "-c", "-z", "--binary", "--text", "--check",
+.github/workflows/ci.yml:740:      - name: DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)
+ops/ci_duong_nhanh.py:49:  YAML parse được · `git diff --check` · lease đổi phải qua `lease_publish` · ba ca kiểm DỮ LIỆU của lease_publish_test ·
+ops/ci_duong_nhanh.py:58:  · D1 — `git diff --check` chạy với `core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab`. Trên TOÀN
+ops/ci_duong_nhanh.py:616:    """`git diff --check` trên ba chấm, mọi đuôi tệp. Thuộc tính đọc từ cây GỐC (`--attr-source`), không từ cây làm
+ops/ci_duong_nhanh.py:621:        r = chay(["git", "--attr-source=" + goc, "-c", CAU_HINH_WHITESPACE, "diff", "--check", "--no-renames", f"{goc}...{dau}"],
+ops/ci_duong_nhanh.py:624:        return [f"KHONG DO DUOC: git diff --check nem {type(e).__name__}"]
+ops/ci_duong_nhanh.py:628:    return [f"git diff --check rc={getattr(r, 'returncode', None)}: " + " | ".join(dong)]
+ops/ci_duong_nhanh.py:632:    """`git diff --check` BỎ QUA tệp git coi là nhị phân (NUL trong nội dung) — dấu xung đột trong đó lọt êm (đo
+ops/ci_duong_nhanh_test.py:898:        tho = git(kho, "diff", "--check", f"{goc}...{dau}", kiem=False)
+ops/ci_duong_nhanh_test.py:899:        bang(tho.returncode != 0, "fixture vo hieu: `git diff --check` nguyen ban phai bat cac tep nay")
+ops/ci_duong_nhanh_test.py:905:                "diff", "--check", f"{goc}...{dau}", "--", tep, kiem=False)
+ops/ci_duong_nhanh_test.py:970:                      "diff", "--check", f"{goc}...{dau}", kiem=False)
+ops/ci_duong_nhanh_test.py:989:        bang(git(kho, "diff", "--check", f"{goc}...{dau}", kiem=False).returncode == 0,
+ops/ci_duong_nhanh_test.py:1016:            bang(git(kho, f"--attr-source={goc}", "diff", "--check", f"{goc}...{dau}", kiem=False).returncode == 0,
+ops/ci_duong_nhanh_test.py:1031:    "diff --check": lambda a: "--check" in a,
+ops/ci_duong_nhanh_test.py:1093:                 and git(kho, f"--attr-source={goc}", "diff", "--check", f"{goc}...{dau2}", kiem=False).returncode == 0,
+ops/ci_duong_nhanh_test.py:2071:    bang(len(loi) == 1 and "KHONG DO DUOC" in loi[0], f"git diff --check NEM phai thanh loi, duoc {loi}")
+ops/ci_duong_nhanh_test.py:2073:    bang(len(loi) == 1 and "rc=128" in loi[0], f"git diff --check rc=128 phai thanh loi, duoc {loi}")
+ops/ci_duong_nhanh_test.py:3609:    ("diff_check_bo_tinh_chinh_whitespace", _ma('"-c", CAU_HINH_WHITESPACE, "diff", "--check"', '"diff", "--check"'), ("t20d_kiem_re_khoang_trang_cuoi_dong_khong_do",)),
+ops/ci_duong_nhanh_test.py:3610:    ("diff_check_bo_check", _ma('"diff", "--check", "--no-renames"', '"diff", "--no-renames"'), ("t20c_kiem_re_dau_xung_dot_do",)),
+ops/ci_duong_nhanh_test.py:3818:    ("diff_check_nem_thanh_dat", _ma('        return [f"KHONG DO DUOC: git diff --check nem {type(e).__name__}"]', "        return []"), ("t20m_diff_check_nem_hoac_git_loi_do",)),
+ops/ci_duong_nhanh_test.py:3869:    ("diff_check_chi_md", _ma('diff", "--check", "--no-renames", f"{goc}...{dau}"]', 'diff", "--check", "--no-renames", f"{goc}...{dau}", "--", "*.md"]'), ("t20r_kiem_re_dau_xung_dot_moi_duoi_tep_do",)),
+ops/cloud_agent_creds_test.py:574:    bang(subprocess.run([_node(), "--check"], input=GS.read_bytes(), capture_output=True, timeout=60).returncode == 0, "node --check 2q đỏ")
+scripts/apply_gs_patches.py:504:        ["node", "--check", "-"],
+scripts/standardize_name.py:161:    ap.add_argument("--check", default="", help="Tên hiện có để kiểm tra đúng chuẩn không")
+scripts/test_fragments/wp726_script_nlm_canary.py:207:        for ten, tham in (("env_thieu_nlm", []), ("env_thieu_nlm_check", ["--check"])):
+scripts/tl_core/cli.py:407:    p.add_argument("--check", action="store_true", help="chỉ kiểm output có đủ block bắt buộc")
+scripts/tl_core/command_registry.py:980:         {"flags": ['--check'], "action": 'store_true', "help": 'r216: ĐỐI CHIẾU bảng master đang có với kết quả merge, KHÔNG ghi đè; lệch ⇒ rc=2 kèm danh sách'},
+scripts/tl_core/command_registry.py:1469:          {"flags": ['--check'], "action": 'store_true', "help": 'ép chạy QT-2 dù không gắn cờ amendment/vbhn'},
+scripts/tl_selftest.py:22705:        # thi công r2 chạy `adr-song` + `doctrine-scan` + `doc-claims-check --strict` + `git diff --check`
+scripts/tl_selftest.py:22755:        # chạy `tl selftest`": executor push `4711e874` sau `adr-song` + `doctrine-scan` + `git diff --check`, CI đỏ
+scripts/tl_selftest.py:25376:            _r4 = _run("--check")
+scripts/tl_selftest.py:25390:            _r5 = _run("--check")

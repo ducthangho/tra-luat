@@ -1,0 +1,15 @@
+# merge c165a5d0 — do 2026-11-02 trong phien session_015GtxrcRSrPnyeixJVDudWu
+commit c165a5d0d4048e10e7da875f2ba7524136fb5735
+parents c6bb7c142623267a1b270fdb2492a89089b58d27 0445b93839e843e5f712b2055eebeef7e99280b0
+tree 849a850520ead039bc11844df9cc441154a5a287
+author ducthangho 2026-11-02T05:22:50+07:00
+tree(H 0445b938) 3770cf57c1014f7a5e89b00435487991ddbf750e
+
+## git diff --stat c165a5d0^1 c165a5d0 (dong gop cua PR so voi cha master)
+ .claude/dev/ci_dang_ky_test.py |  47 ++-
+ .github/workflows/ci.yml       | 142 ++++++--
+ ops/ci_duong_nhanh.py          | 219 +++++++++++-
+ ops/ci_duong_nhanh_test.py     | 758 ++++++++++++++++++++++++++++++++---------
+ ops/cong_cu_test.py            |   6 +-
+ ops/lease_publish_test.py      |  17 +
+ 6 files changed, 984 insertions(+), 205 deletions(-)

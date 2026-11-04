@@ -1,0 +1,78 @@
+# Gate output run 41361081437 attempt 1 (workflow_dispatch, nhanh claude/gate-hau-merge-c165a5d0, head c165a5d0) — log REST tung job, 2026-11-02
+
+JOB 125011388797 chuan-bi [ubuntu-latest] conclusion=success bytes=109335 sha256=e327fbc8e875485b47373e5ea8ab835ef0971cb3d86616e3c9c6d06d2cbd1a0a ##[error]=0
+JOB 125011449646 gate (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=650683 sha256=1aa4935738d61d8533c2ee4c5f0a7759a5b05aceca167248725949339e47b646 ##[error]=0
+    == ci_phamvi_test 7/7 ==
+    == gen_instructions selftest 44/44 ==
+    == tl selftest 1774/1774 ==
+    == transport selftest 12/12 ==
+    TỔNG: ĐẠT
+JOB 125011449691 gate (windows-latest) [windows-latest] conclusion=success bytes=662878 sha256=bc0e16597c6c502ee184d2ece8c6da41e8dae1b1bb3fe8562a391046cd97eb28 ##[error]=0
+    == gen_instructions selftest 44/44 ==
+    == tl selftest 1774/1774 ==
+    == transport selftest 12/12 ==
+    TỔNG: ĐẠT
+JOB 125011449730 gate-cong-cu (ubuntu-latest, 0) [ubuntu-latest] conclusion=success bytes=135599 sha256=a27812f85c817ce864c7efe59460730a1d42dc382d7b03c081cd132284a24dd8 ##[error]=0
+JOB 125011449769 gate-cong-cu (ubuntu-latest, 1) [ubuntu-latest] conclusion=success bytes=135591 sha256=138b4f4f4bc3de11811ab7050c604f95597614106c24e20a26c9d5a9fe1561be ##[error]=0
+JOB 125011449780 gate-cong-cu (ubuntu-latest, 2) [ubuntu-latest] conclusion=success bytes=135430 sha256=915123021751ab2eb7b7cb381d79fef3aaa0cfcd8a2bf60e9947531b3d72d5e0 ##[error]=0
+JOB 125011449767 gate-cong-cu (ubuntu-latest, 3) [ubuntu-latest] conclusion=success bytes=135557 sha256=572dfe6f0dc7baa88e01ed52e2a112811443281d6f76a237683010ec51b3b3b4 ##[error]=0
+JOB 125011449758 gate-cong-cu (ubuntu-latest, 4) [ubuntu-latest] conclusion=success bytes=135401 sha256=011001cd03a11c731f8a5bbc5ae2c1e119ccfab698e981eecf7da7c3d5f72c9d ##[error]=0
+JOB 125011449734 gate-cong-cu (ubuntu-latest, 5) [ubuntu-latest] conclusion=success bytes=135255 sha256=e1a620b8f3124ad9ff355a78fe3bb994700880775109574c98c33861b197a84a ##[error]=0
+JOB 125011449770 gate-cong-cu (ubuntu-latest, 6) [ubuntu-latest] conclusion=success bytes=135282 sha256=03d683a79d3f34c013f6ca3aa5085784b8b429fd56223f71f5fae736358a8706 ##[error]=0
+JOB 125011449753 gate-cong-cu (ubuntu-latest, 7) [ubuntu-latest] conclusion=success bytes=135374 sha256=20301c1d5b4e0b744083dea319d54b0193e1eb719fd680e9aae45b9f4481d37e ##[error]=0
+JOB 125011449774 gate-cong-cu (windows-latest, 0) [windows-latest] conclusion=success bytes=128500 sha256=4b44e780808ff0ee2243494474ace5db71e2535edb0cb8b4ca60185baa430468 ##[error]=0
+JOB 125016658285 gate-cong-cu-gop (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=98264 sha256=e130ffb00465b1d19aec2715ccf6718d9cbcc9bfe829bc73d92353467aa115dd ##[error]=0
+JOB 125012182841 gate-nhanh-gop (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=119324 sha256=b1d8eccd04e83a260eb9bf70af6e868352275fec09d8ae72d428c2826ad64ff2 ##[error]=0
+    targeted_mutant_gate: DAT — KHONG phai full mutant audit; full_mutant_audit van BAT BUOC truoc merge/land/release
+JOB 125012182889 gate-nhanh-gop (windows-latest) [windows-latest] conclusion=success bytes=124841 sha256=6abf7138bbc6d0b7b1fdb38f36e06d328836a5d13f5fb061b54863c0ab802354 ##[error]=0
+    targeted_mutant_gate: DAT — KHONG phai full mutant audit; full_mutant_audit van BAT BUOC truoc merge/land/release
+JOB 125011449779 gate-nhanh-manh (ubuntu-latest, 0) [ubuntu-latest] conclusion=success bytes=123506 sha256=2aa75385e1fc7fd45a766ee20bff459d9292d2326e6c99a8f28a849187447117 ##[error]=0
+JOB 125011449826 gate-nhanh-manh (ubuntu-latest, 1) [ubuntu-latest] conclusion=success bytes=124236 sha256=f55562f36b0199565b4b56216f14f99449373f215f9601a808689f03270a2912 ##[error]=0
+JOB 125011449840 gate-nhanh-manh (ubuntu-latest, 2) [ubuntu-latest] conclusion=success bytes=123910 sha256=3edb88a6ef55cdbccf506e3e61e279300665eed5c3380d465b0a44b1fce1a583 ##[error]=0
+JOB 125011449873 gate-nhanh-manh (ubuntu-latest, 3) [ubuntu-latest] conclusion=success bytes=124123 sha256=4df479e2648783cbf69451be41ed218f526c1a4d1f10330e5fbd6c032a3a88f4 ##[error]=0
+JOB 125011449816 gate-nhanh-manh (ubuntu-latest, 4) [ubuntu-latest] conclusion=success bytes=123827 sha256=a609d908ba6e05a381081177d3ba61d0d72fd0dd12cc2941f33beb170aa150d4 ##[error]=0
+JOB 125011449775 gate-nhanh-manh (ubuntu-latest, 5) [ubuntu-latest] conclusion=success bytes=124378 sha256=d5aa7c162274a3815203239aaedc19406e7f2240e3f9b48c3bcc6900af82ca71 ##[error]=0
+JOB 125011449869 gate-nhanh-manh (ubuntu-latest, 6) [ubuntu-latest] conclusion=success bytes=124079 sha256=ae46f40b2e09cd86e8a2fe92ddc3764c968830946ea21e32b5e8e523ef117233 ##[error]=0
+JOB 125011449821 gate-nhanh-manh (ubuntu-latest, 7) [ubuntu-latest] conclusion=success bytes=124819 sha256=4e9694cec4006167e47a3af43219f0fe5b06e5b747a3fbe6b386275b9adf55db ##[error]=0
+JOB 125011449867 gate-nhanh-manh (windows-latest, 0) [windows-latest] conclusion=success bytes=129544 sha256=510d009105f1e633fdf7d449a50ab2e8484037630f398ecdb99bbbee63fa6211 ##[error]=0
+JOB 125011449878 gate-nhanh-manh (windows-latest, 1) [windows-latest] conclusion=success bytes=129514 sha256=dacfb92264c4cbec9883bb60586fd8844a7332c66f0d023bd119ac41a626778b ##[error]=0
+JOB 125011449874 gate-nhanh-manh (windows-latest, 2) [windows-latest] conclusion=success bytes=129430 sha256=ffb4b419c7a9bce2c7c379cf63819718e86ec001a5c498b118847c00eee8f5c8 ##[error]=0
+JOB 125011449788 gate-nhanh-manh (windows-latest, 3) [windows-latest] conclusion=success bytes=129581 sha256=97448b3ab7dcc08a2186bf6f425fc9d99cd9366483e97b7517f51cfdc0472d6d ##[error]=0
+JOB 125011449885 gate-nhanh-manh (windows-latest, 4) [windows-latest] conclusion=success bytes=129400 sha256=c51109397eab3949f13f2dcd328fbeb6997e271851ebed646edfd9c893a75c8d ##[error]=0
+JOB 125011449806 gate-nhanh-manh (windows-latest, 5) [windows-latest] conclusion=success bytes=128951 sha256=168c70b73099d5d7fa3198a43748a7eadd79cfb27286b703fc14049aa62f5064 ##[error]=0
+JOB 125011449829 gate-nhanh-manh (windows-latest, 6) [windows-latest] conclusion=success bytes=129595 sha256=bab6cddef63541c1a2e480109d7374138a406212333872d73d251d1a3cdcce5b ##[error]=0
+JOB 125011449860 gate-nhanh-manh (windows-latest, 7) [windows-latest] conclusion=success bytes=130219 sha256=da5d1e6ae80bc2f1d858c712b6b1f7bddb417daa3a163568ba353fc96497b1f1 ##[error]=0
+JOB 125011449706 gate-ops (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=395445 sha256=340e76288116a8ad0bd31ea626356f0ac5b91dbc8eee84dda8c0d8c21c2066d9 ##[error]=0
+    CA: 113/113 dat · 0 do · 0 hong
+    DOT BIEN: 419/419 bi giet dung ly do
+    TONG: DAT
+    TỔNG: ĐẠT
+JOB 125011449642 gate-ops (windows-latest) [windows-latest] conclusion=success bytes=401108 sha256=3b41374e57fb2b1508bfdd9ae9b4b799dfe26076ea5cd67ff92118751980e8a0 ##[error]=0
+    TỔNG: ĐẠT
+JOB 125011449759 gate-packet-loop (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=313553 sha256=d7aa70e628537fc32ea548815fc293122a80497f7671627d7aa9660dafd3fa55 ##[error]=0
+    TỔNG: ĐẠT
+JOB 125011449681 gate-packet-loop (windows-latest) [windows-latest] conclusion=success bytes=321888 sha256=54748be99864da52f9a7a9d5625753a686ced06c3a3b2afb55bb668f90f4233a ##[error]=0
+    TỔNG: ĐẠT
+JOB 125012293686 gate-registry (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=262623 sha256=efde3a75bafed3a4abaac70acfe9c8ca0c46c6d9fba5f9de07a8241520996ce3 ##[error]=0
+    CA: 22/22 dat
+    CA: 52/52 dat
+    CA: 61/61 dat
+    DOT BIEN: 106/106 bi giet dung ly do
+    DOT BIEN: 13/13 bi giet dung ly do
+    DOT BIEN: 343/343 bi giet dung ly do
+    DOT BIEN: 80/80 bi giet dung ly do
+    PHẢN CHỨNG: 1070/1070 đỏ đúng
+    TONG: DAT
+    TỔNG: ĐẠT
+JOB 125012293756 gate-registry (windows-latest) [windows-latest] conclusion=success bytes=262011 sha256=918005aeb3f9d2223126aa8a15d18330705f4bcf42dddd2a12fd49487a88f1cb ##[error]=0
+    CA: 22/22 dat
+    CA: 42/42 dat
+    CA: 61/61 dat
+    DOT BIEN: 106/106 bi giet dung ly do
+    DOT BIEN: 343/343 bi giet dung ly do
+    DOT BIEN: 53/53 bi giet dung ly do
+    PHẢN CHỨNG: 1062/1062 đỏ đúng
+    TONG: DAT
+    TỔNG: ĐẠT
+
+TONG: 37 job, success=37, ##[error]=0

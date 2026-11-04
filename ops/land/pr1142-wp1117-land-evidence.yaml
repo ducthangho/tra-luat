@@ -1,7 +1,7 @@
 # HO SO LAND — packet #1117 HARNESS-KET-QUA-NGOAI-MA-DOT-BIEN r2 g2, code qua PR #1142. Khuon: ops/land/pr1130-wp1122-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (279a39e3), landed FALSE — du bon moc §10.2.2 tren run push master 41399706045 (dung merge SHA, attempt 1), nhung
+# TRANG THAI: merged (279a39e3), landed TRUE theo quyet dinh chu kho 04-11 (khoi landed_20261104, kieu b); ban ghi goc: landed FALSE — du bon moc §10.2.2 tren run push master 41399706045 (dung merge SHA, attempt 1), nhung
 # (7) reviewer assurance §8.1 CHUA_DAT: sandbox mode cua luot approve KHONG_DO_DUOC (DanhTinhDoi, #1105). Tien le pr1080-wp1077:
 # chi nang landed khi chu kho chap nhan (kieu b).
 # NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nghia nhu khuon.
@@ -78,7 +78,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1117-r2-g2-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so (lan luu tru)', nhanh: claude/epic-ritchie-quvrz1, ghi_chu: 'PR #1151; chi cham ops/land/**'}
-  - {item: 'ban ghi M8', ket_qua: 'CHUA DANG — cho chu kho quyet §8.1 (landed false); #1117 con mo.'}
+  - {item: 'ban ghi M8', ket_qua: 'measured — readback-m8-issuecomment-6635566827.json (comment tren #1117, sau quyet dinh chu kho 04-11); khoi YAML trich tu readback khop tung byte ban nhap; kiem-dong-wp-m8.txt rc 0 "ĐÓNG ĐƯỢC WP ... merge 279a39e3"; readback-issue-1117.json: state closed, state_reason completed.'}
 # ---- het truong chuan
 packet_id: HARNESS-KET-QUA-NGOAI-MA-DOT-BIEN
 packet_issue: 1117
@@ -134,3 +134,22 @@ lech_dac_ta:
 khong_do_duoc:
   - 'Sandbox mode cua luot approve: KHONG_DO_DUOC (DanhTinhDoi, #1105) => §8.1 CHUA_DAT.'
   - 'Bam byte cau tra loi cua chu kho trong phien merge.'
+
+landed_20261104:
+  bo_canh: >-
+    Khoi nay ghi landed theo quyet dinh chu kho (kieu b, tien le pr1080-wp1077 landed_20261101). Khong sua dong nao o tren:
+    trang_thai_packet.landed false va reviewer_assurance_81 CHUA_DAT la ban ghi dung luc truoc quyet dinh (sandbox mode KHONG_DO_DUOC).
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/issues/1117#issuecomment-6635440982
+    noi_dung: >-
+      Chu kho chap nhan §8.1 theo tien le pr1080 cho #1117: chap nhan luot Codex 5 (launcher.py run e7296898) approve 0 P0-P3 tren DUNG
+      8f0dfcf35c8ee92a9a754bde82846eb11430bd0e voi sandbox mode KHONG_DO_DUOC (DanhTinhDoi, #1105), cho ghi landed true khi du bon moc
+      §10.2.2 (run 41399706045, wd-run 41859872200). AskUserQuestion "Chap nhan nhu pr1080", phien session_015GtxrYPjZCTZeRiazdssgq, 04-11-2026.
+    do_duoc: 'measured — readback-chap-nhan-issuecomment-6635440982.json: comment 6635440982 (user ducthangho, OWNER, 2026-11-04T16:02:03Z, chua sua) tren #1117. CAVEAT #566: agent dang bang token chu kho; ban chep, khong phai chu ky.'
+  landed: true
+  landed_dieu_kien: >-
+    (1) bon moc §10.2.2 tren merge 279a39e3: xem post_merge_checks (gate output danh gia THEO BUOC, phan-chung-buoc-41399706045.txt).
+    (2) lease wp1117-r2-g2-claude rut han b81c909. (3) bookkeeping: ho so nay + M8 tren #1117. (4) review neo DUNG authorized_head 8f0dfcf:
+    DAT. (5) uy quyen land: comment 6570603441, caveat #566. (6) muc tieu packet: DAT theo gate + review. (7) §8.1: CHUA_DAT ve sandbox —
+    chu kho CHAP NHAN bang quyet_dinh_chu_kho tren.

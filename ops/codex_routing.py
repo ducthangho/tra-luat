@@ -390,8 +390,15 @@ def _technical(snapshot, registry, b, policy, reservation, t, output, report, no
             require(producer[role]["session_id"] not in seen_sessions, "producer session replay")
             seen_sessions.add(producer[role]["session_id"])
         if producer_c1:
-            require(producer["evidence_mode"] == C1 and producer["terminal"] is True
-                    and producer["completion"] == "completed" and producer["verdict"] == "approve", "producer service not terminal/approved")
+            require(producer["evidence_mode"] == C1 and type(producer["terminal"]) is bool
+                    and producer["completion"] in ("completed", "partial", "running", "cancelled", "timeout", "infra_error", "failed", "not_run", "unassessed")
+                    and producer["verdict"] in ("approve", "changes_requested", "blocked", "unassessed"), "producer service outcome malformed")
+            digest(producer["dispatch_sha256"], "producer dispatch hash")
+            for key in ("started_at", "completed_at"):
+                shape(producer[key], {"executor", "reviewer"}, key)
+            for role in ("executor", "reviewer"):
+                start, end = timestamp(producer["started_at"][role]), producer["completed_at"][role]
+                require((not producer["terminal"]) if end is None else start <= timestamp(end), "producer service chronology malformed")
         else:
             require(type(producer["exit_code"]) is int, "producer exit code must be integer")
     producer = one(registry["producers"], lambda x: x["producer_id"] == t["provenance_id"], "producer")
@@ -440,12 +447,14 @@ def _verify(snapshot, request, *, now, output=b"", report=b""):
               "policy_sha256": sha256(canonical_bytes(policy)), "binding": b, "reservation_id": b["dispatch_id"],
               "positive_evidence": ["canonical policy scope and decision", "canonical allowance/history/reservation"],
               "limitations": LIMITATIONS, "lifecycle_integrated": False, "authorizes_dispatch": False}
+    if policy.get("evidence_mode") == C1:
+        result.update(evidence_mode=C1, serving_measurement="not_assessed")
+        result["positive_evidence"].append("C1 configured model/higher reviewer effort; actual higher effort not established")
     if operation != "admission":
         t = request["technical"]
         technical_hash = _technical(snapshot, registry, b, policy, reservation, t, output, report, timestamp(now))
         result.update(technical_sha256=technical_hash, model_reviewer_identity=t["reviewer"], technical_status="approved")
         if policy.get("evidence_mode") == C1:
-            result["evidence_mode"] = C1
             result["serving_measurement"] = "unknown" if any(t[role][key] == "unknown" for role in ("executor", "reviewer")
                                                             for key in ("observed_model", "observed_effort")) else "canonical_assertion_only"
             result["positive_evidence"].append("C1 configured model/higher reviewer effort; canonical pre-run dispatch and service terminal producer; actual higher effort not established")

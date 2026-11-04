@@ -153,9 +153,9 @@ class C1Tests(unittest.TestCase):
             self.assertTrue(out["test_only"])
             self.assertFalse(out["authorizes_dispatch"])
             self.assertEqual(out.get("assurance"), "human_audited" if operation == "composite" else None)
+            self.assertEqual(out["evidence_mode"], "configured_c1")
+            self.assertEqual(out["serving_measurement"], "not_assessed" if operation == "admission" else "unknown")
             if operation != "admission":
-                self.assertEqual(out["serving_measurement"], "unknown")
-                self.assertEqual(out["evidence_mode"], "configured_c1")
                 self.assertEqual(out["model_reviewer_identity"]["observed_effort"], "unknown")
                 self.assertIn("actual higher effort not established", out["positive_evidence"][-1 if operation == "technical" else -2])
 
@@ -334,8 +334,10 @@ class C1Tests(unittest.TestCase):
         q["audit"]["technical_run_id"] = q["technical"]["run_id"]
         reg["producers"][0]["producer_id"] = "strict-producer"
         reseal(reg, q)
-        for condition in ("revoked", "expired"):
-            with self.subTest(condition=condition):
+        outcomes = [("completed", "approve", True), ("completed", "changes_requested", True), ("failed", "blocked", True),
+                    ("cancelled", "unassessed", True), ("timeout", "blocked", True), ("partial", "unassessed", False), ("running", "unassessed", False)]
+        for condition, outcome in ((c, o) for c in ("revoked", "expired") for o in outcomes):
+            with self.subTest(condition=condition, outcome=outcome):
                 retained, c1_q, mixed = copy.deepcopy(self.reg), copy.deepcopy(self.q), copy.deepcopy(reg)
                 p = retained["policies"][0]
                 row = retained["ledgers"][0]["reservations"][0]
@@ -346,7 +348,10 @@ class C1Tests(unittest.TestCase):
                     for dispatch in row["dispatch"].values():
                         dispatch["policy_sha256"] = r.sha256(r.canonical_bytes(p))
                     c1_q["technical"]["dispatch_sha256"] = r.sha256(r.canonical_bytes(row["dispatch"]))
-                    c1_seal(retained, c1_q)
+                c1_q["technical"].update(completion=outcome[0], verdict=outcome[1], terminal=outcome[2])
+                if outcome[0] == "running":
+                    c1_q["technical"]["completed_at"]["reviewer"] = None
+                c1_seal(retained, c1_q)
                 with self.assertRaisesRegex(r.Blocked, "expired|revoked"):
                     c1_check(retained, c1_q, self.anchors)
                 retained["ledgers"][0]["reservations"].clear()
@@ -355,6 +360,11 @@ class C1Tests(unittest.TestCase):
                 for section in ("policies", "ledgers", "producers"):
                     mixed[section] += retained[section]
                 self.assertEqual(check(mixed, q)["status"], "validated")
+                for field, malformed in (("terminal", "false"), ("completion", {}), ("dispatch_sha256", "bad"), ("started_at", {})):
+                    bad = copy.deepcopy(mixed)
+                    bad["producers"][-1][field] = malformed
+                    with self.assertRaises(r.Blocked):
+                        check(bad, q)
 
 
 class SemanticTests(unittest.TestCase):
@@ -698,9 +708,10 @@ class GitCliTests(unittest.TestCase):
             self.assertTrue(out["test_only"])
             self.assertFalse(out["authorizes_dispatch"])
             self.assertIn("Git source base/head/tree/spec bytes", out["positive_evidence"])
+            self.assertEqual(out["evidence_mode"], "configured_c1")
+            self.assertEqual(out["serving_measurement"], "not_assessed" if operation == "admission" else "unknown")
             if operation != "admission":
-                self.assertEqual(out["evidence_mode"], "configured_c1")
-                self.assertEqual(out["serving_measurement"], "unknown")
+                self.assertIn("actual higher effort not established", " ".join(out["positive_evidence"]))
 
     def test_cli_c1_canonical_authority_dispatch_producer_and_audit_controls(self):
         original, q = self.publish_c1()

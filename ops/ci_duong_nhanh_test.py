@@ -2509,6 +2509,8 @@ KHUNG_BUOC_ENV_PHAN_LOAI = {
     "CI_DUONG_NHANH_NHANH_MAC_DINH": "${{ github.event.repository.default_branch }}"}
 Y04_IF_JOB_CHE_DO = {"gate-cong-cu": "needs.chuan-bi.outputs.che_do != 'duong_nhanh'"}
 Y04_ENV_BUOC_CHE_DO = {("chuan-bi", "phan loai diff (duong nhanh ho so)"): KHUNG_BUOC_ENV_PHAN_LOAI,
+                       ("gate-ops", "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)"):
+                       {"CI_DUONG_NHANH_CHE_DO": "${{ needs.chuan-bi.outputs.che_do }}"},
                        ("gate-cong-cu-gop", "G5 gom manh ban kinh dot bien (#668)"):
                        {"CONG_CU_TEST_GOP_CHE_DO": "${{ needs.chuan-bi.outputs.che_do }}"}}
 
@@ -2787,7 +2789,7 @@ KHUNG_BUOC = {
         ('cài rg cho G5 (cài xong đo lại)', {'if': "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}", 'shell': 'bash'}),
         ('DUONG_NHANH - liet ke buoc bo qua (job gate-ops)', {'if': "${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}"}),
         ('DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)', {'if': "${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}", 'shell': 'bash', 'env': {'CI_DUONG_NHANH_SU_KIEN': '${{ github.event_name }}', 'CI_DUONG_NHANH_GOC': '${{ needs.chuan-bi.outputs.goc }}', 'CI_DUONG_NHANH_DAU': '${{ needs.chuan-bi.outputs.dau }}', 'CI_DUONG_NHANH_MERGE': '${{ needs.chuan-bi.outputs.hop }}'}}),
-        ('ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)', {'if': "runner.os == 'Linux'"}),
+        ('ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)', {'if': "runner.os == 'Linux'", 'env': {'CI_DUONG_NHANH_CHE_DO': '${{ needs.chuan-bi.outputs.che_do }}'}}),
         ('bien-nhan v2 selftest', {}),
         ('lease-publish selftest (đo lại setup sau G5)', {'if': "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}", 'shell': 'bash', 'env': {'AL_VER': '1.7.7'}}),
         ('don-nhanh selftest (chốt xoá nhánh)', {'if': "${{ runner.os != 'Windows' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}", 'shell': 'pwsh'}),
@@ -3142,6 +3144,100 @@ def t94_main_in_dong_kiem_ke_that():
     dong = [d for d in ra.getvalue().splitlines() if d.startswith("KIEM KE:")]
     bang(rc == 0 and dong == [dong_kiem_ke()],
          "main phai in dung mot dong KIEM KE duoc doi chieu doc lap boi t96")
+
+
+@ca_tu_kiem
+def t94a_che_do_harness_chi_nhan_chuoi_chinh_xac():
+    for value in (None, "", "day_du", "Duong_nhanh", "duong_nhanh ", " duong_nhanh",
+                  "duong_nhanh\n", "tu_dong", 1, True, b"duong_nhanh"):
+        with mock.patch.object(os.environ, "get", return_value=value):
+            bang(che_do_harness() == "day_du", f"che_do_harness nhan sai {value!r}")
+    with mock.patch.object(os.environ, "get", return_value="duong_nhanh"):
+        bang(che_do_harness() == "chi_ca", "duong_nhanh chinh xac phai chi chay ca")
+    bang({"wp1143_m1_strip", "wp1143_m2_missing_fast"} <= {x[0] for x in DOT_BIEN},
+         "c1 phai co dot bien kiem dung chuoi")
+
+
+@ca_tu_kiem
+def t94b_main_chi_bo_dot_bien_khi_nhan_duong_nhanh():
+    import io
+    for value, quick in ((None, False), ("day_du", False), ("duong_nhanh", True)):
+        calls = []
+        def fake_mutants(tap):
+            calls.append(len(tap))
+            return len(tap), []
+        patch_env = {"CI_DUONG_NHANH_CHE_DO": value} if value is not None else {}
+        with mock.patch.dict(os.environ, patch_env, clear=False), \
+             mock.patch.dict(globals(), {"CAY": ROOT_THAT, "CA": {"fixture": lambda: None},
+                 "chay_tap_dot_bien": fake_mutants, "tu_kiem_phan_hang": lambda: [],
+                 "dong_kiem_ke": lambda: "KIEM KE: fixture"}, clear=False), \
+             contextlib.redirect_stdout(io.StringIO()) as out:
+            if value is None:
+                os.environ.pop("CI_DUONG_NHANH_CHE_DO", None)
+            rc = main([])
+        lines = out.getvalue().splitlines()
+        bang(rc == 0 and calls == ([] if quick else [len(DOT_BIEN)]),
+             f"mode {value!r}: rc={rc}, calls={calls}")
+        marker = f"DOT BIEN: BO QUA {len(DOT_BIEN)} (che_do=duong_nhanh)" if quick else \
+                 f"DOT BIEN: {len(DOT_BIEN)}/{len(DOT_BIEN)} bi giet dung ly do"
+        bang(marker in lines and lines[-1] == "TONG: DAT", f"mode {value!r}: {lines[-5:]}")
+    with mock.patch.dict(os.environ, {"CI_DUONG_NHANH_CHE_DO": "duong_nhanh"}), \
+         mock.patch.dict(globals(), {"CAY": ROOT_THAT, "CA": {"fixture": lambda: None},
+             "chay_ca_trong_tien_trinh": lambda _: ("DO", "fixture"),
+             "chay_tap_dot_bien": lambda _: (_ for _ in ()).throw(AssertionError("mutants ran")),
+             "tu_kiem_phan_hang": lambda: [], "dong_kiem_ke": lambda: "KIEM KE: fixture"}, clear=False), \
+         contextlib.redirect_stdout(io.StringIO()) as out:
+        rc = main([])
+    bang(rc == 1 and out.getvalue().splitlines()[-1] == "TONG: DO", "ca do tren duong nhanh van phai do")
+
+
+@ca_tu_kiem
+def t94c_main_go_env_o_ca_va_con_va_khoi_phuc_ca_ngoai_le():
+    import io
+    key, seen = "CI_DUONG_NHANH_CHE_DO", []
+    def fake_run(*args, **kwargs):
+        seen.append(("child", kwargs["env"].get(key)))
+        return type("Result", (), {"returncode": 0, "stdout": b"", "stderr": b""})()
+    def fixture():
+        seen.append(("case", os.environ.get(key)))
+        chay_con("fixture", ROOT_THAT)
+    common = {"CAY": ROOT_THAT, "CA": {"fixture": fixture},
+              "chay_tap_dot_bien": lambda _: (_ for _ in ()).throw(AssertionError("mutants ran")),
+              "tu_kiem_phan_hang": lambda: [], "dong_kiem_ke": lambda: "KIEM KE: fixture"}
+    with mock.patch.dict(os.environ, {key: "duong_nhanh"}), \
+         mock.patch.dict(globals(), common, clear=False), mock.patch.object(subprocess, "run", side_effect=fake_run), \
+         contextlib.redirect_stdout(io.StringIO()):
+        bang(main([]) == 0, "duong nhanh phai dat")
+        bang(os.environ.get(key) == "duong_nhanh", "phai khoi phuc env sau main")
+    bang(seen == [("case", None), ("child", None)], f"env loc vao ca/con: {seen}")
+    class Probe(Exception):
+        pass
+    calls = []
+    def explode():
+        calls.append("called")
+        raise Probe()
+    with mock.patch.dict(os.environ, {key: "duong_nhanh"}), \
+         mock.patch.dict(globals(), {**common, "tu_kiem_phan_hang": explode}, clear=False), \
+         mock.patch.object(subprocess, "run", side_effect=fake_run), contextlib.redirect_stdout(io.StringIO()):
+        try:
+            main([])
+        except Probe:
+            pass
+        else:
+            bang(False, "ngoai le phai thoat khoi main")
+        bang(calls == ["called"] and os.environ.get(key) == "duong_nhanh", "finally phai khoi phuc env")
+
+
+@ca_tu_kiem
+def t94d_harness_step_doc_dung_env_che_do():
+    name = "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)"
+    expected = {"CI_DUONG_NHANH_CHE_DO": "${{ needs.chuan-bi.outputs.che_do }}"}
+    step = next(b for b in doc_wf()["jobs"]["gate-ops"]["steps"] if b.get("name") == name)
+    bang(step.get("env") == expected and step.get("run") == "python ops/ci_duong_nhanh_test.py"
+         and step.get("if") == "runner.os == 'Linux'", f"harness step drift: {step}")
+    bang(Y04_ENV_BUOC_CHE_DO[("gate-ops", name)] == expected, "Y04 allowlist phai ghi dung env")
+    bang({"wp1143_m6_constant_yaml", "wp1143_m7_missing_yaml"} <= {x[0] for x in DOT_BIEN},
+         "c4 phai co dot bien cau truc YAML")
 
 
 @ca_tu_kiem
@@ -3643,9 +3739,9 @@ DOT_BIEN = [
     ("test_bo_loc_actor_o_env_git", _test('if not k.startswith("GIT_") and k != "GITHUB_ACTOR"}\n', 'if not k.startswith("GIT_")}\n'), ("t23_fixture_sach_khong_phu_thuoc_actor_ci",)),
     ("test_bo_patch_dict_o_helper_fixture", _test('            with mock.patch.dict(os.environ, {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}, clear=True):\n', '            with contextlib.nullcontext():\n'), ("t23_fixture_sach_khong_phu_thuoc_actor_ci",)),
     # ---- lop chot-yaml-chi-do-su-hien-dien (luot 2): moi dang nuot loi o MOI buoc/job
-    ("yml_nuot_loi_selftest_literal", _yml("        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", "        if: runner.os == 'Linux'\n        continue-on-error: true\n        run: python ops/ci_duong_nhanh_test.py\n"), ("y09_buoc_goi_test_cua_packet_khong_bi_bo",)),
-    ("yml_nuot_loi_selftest_bieu_thuc_true", _yml("        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", "        if: runner.os == 'Linux'\n        continue-on-error: ${{ true }}\n        run: python ops/ci_duong_nhanh_test.py\n"), ("y09_buoc_goi_test_cua_packet_khong_bi_bo",)),
-    ("yml_nuot_loi_selftest_bieu_thuc_dieu_kien", _yml("        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", "        if: runner.os == 'Linux'\n        continue-on-error: ${{ github.event_name == 'pull_request' }}\n        run: python ops/ci_duong_nhanh_test.py\n"), ("y09_buoc_goi_test_cua_packet_khong_bi_bo",)),
+    ("yml_nuot_loi_selftest_literal", _yml("        if: runner.os == 'Linux'\n        env:\n          CI_DUONG_NHANH_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n        run: python ops/ci_duong_nhanh_test.py\n", "        if: runner.os == 'Linux'\n        continue-on-error: true\n        env:\n          CI_DUONG_NHANH_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n        run: python ops/ci_duong_nhanh_test.py\n"), ("y09_buoc_goi_test_cua_packet_khong_bi_bo",)),
+    ("yml_nuot_loi_selftest_bieu_thuc_true", _yml("        if: runner.os == 'Linux'\n        env:\n          CI_DUONG_NHANH_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n        run: python ops/ci_duong_nhanh_test.py\n", "        if: runner.os == 'Linux'\n        continue-on-error: ${{ true }}\n        env:\n          CI_DUONG_NHANH_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n        run: python ops/ci_duong_nhanh_test.py\n"), ("y09_buoc_goi_test_cua_packet_khong_bi_bo",)),
+    ("yml_nuot_loi_selftest_bieu_thuc_dieu_kien", _yml("        if: runner.os == 'Linux'\n        env:\n          CI_DUONG_NHANH_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n        run: python ops/ci_duong_nhanh_test.py\n", "        if: runner.os == 'Linux'\n        continue-on-error: ${{ github.event_name == 'pull_request' }}\n        env:\n          CI_DUONG_NHANH_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n        run: python ops/ci_duong_nhanh_test.py\n"), ("y09_buoc_goi_test_cua_packet_khong_bi_bo",)),
     ("yml_nuot_loi_buoc_nang_literal", _yml("      - name: golden-test\n" + IF_XOA, "      - name: golden-test\n" + IF_XOA + "        continue-on-error: true\n"), ("y10_khong_continue_on_error_ngoai_danh_sach_cho_phep",)),
     ("yml_nuot_loi_buoc_nang_chuoi", _yml("      - name: release-check full\n" + IF_XOA, "      - name: release-check full\n" + IF_XOA + "        continue-on-error: 'true'\n"), ("y10_khong_continue_on_error_ngoai_danh_sach_cho_phep",)),
     ("yml_nuot_loi_job_gate_registry", _yml("  gate-registry:\n    # packet #463", "  gate-registry:\n    continue-on-error: true\n    # packet #463"), ("y10_khong_continue_on_error_ngoai_danh_sach_cho_phep",)),
@@ -3792,7 +3888,7 @@ DOT_BIEN = [
     ("yml_gate_packet_loop_nuot_loi", (YML, lambda vb: thay_regex(vb, r"(\n  gate-packet-loop:\n(?:    #[^\n]*\n)+)(    needs: chuan-bi\n)", r"\1\2    continue-on-error: true\n")), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
     ("yml_go_buoc_kiem_re", (YML, lambda vb: thay_regex(vb, r"      - name: DUONG_NHANH - kiem re thay cho buoc bi bo.*?(?=      # Phản chứng của bộ phân loại)", ""),), ("y08_buoc_kiem_re_o_gate_ops",)),
     ("yml_buoc_kiem_re_luon_chay", _yml("      - name: DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)\n        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}\n", "      - name: DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)\n"), ("y08_buoc_kiem_re_o_gate_ops",)),
-    ("yml_buoc_test_bi_bo_theo_che_do", _yml("        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", "        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n        run: python ops/ci_duong_nhanh_test.py\n"), ("y09_buoc_goi_test_cua_packet_khong_bi_bo",)),
+    ("yml_buoc_test_bi_bo_theo_che_do", _yml("        if: runner.os == 'Linux'\n        env:\n          CI_DUONG_NHANH_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n        run: python ops/ci_duong_nhanh_test.py\n", "        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n        env:\n          CI_DUONG_NHANH_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n        run: python ops/ci_duong_nhanh_test.py\n"), ("y09_buoc_goi_test_cua_packet_khong_bi_bo",)),
     # ---- luot 5, lop chot-yaml: than `run:` cua buoc packet, loader nghiem, cay duoi do
     ("yml_goi_test_exit0_truoc", _yml("        run: python ops/ci_duong_nhanh_test.py\n", "        run: |\n          exit 0\n          python ops/ci_duong_nhanh_test.py\n"), ("y14_than_run_cua_buoc_packet_them_khop_nguyen_van",)),
     ("yml_che_do_exit1", _yml('        run: python3 ops/ci_duong_nhanh.py\n', '        run: python3 ops/ci_duong_nhanh.py; exit 1\n'), ("y14_than_run_cua_buoc_packet_them_khop_nguyen_van",)),
@@ -3805,10 +3901,10 @@ DOT_BIEN = [
     # ---- luot 5 (Codex P2/P3): chot phai do DUONG GOI THAT (main / doc_wf / dong in), khong chi helper
     ("test_main_khong_goi_chot_cay", _test("    loi_cay = loi_cay_duoi_do(CAY, ROOT_THAT)\n", "    loi_cay = ''\n"), ("t95_lan_chay_day_du_chi_do_kho_chua_test",)),
     ("test_main_chot_cay_sai_toan_hang", _test("    loi_cay = loi_cay_duoi_do(CAY, ROOT_THAT)\n", "    loi_cay = loi_cay_duoi_do(ROOT_THAT, ROOT_THAT)\n"), ("t95_lan_chay_day_du_chi_do_kho_chua_test",)),
-    ("test_main_chot_cay_bo_return", _test("        print(loi_cay, file=sys.stderr)\n        return 2\n    dat = do = hong = 0\n", "        print(loi_cay, file=sys.stderr)\n    dat = do = hong = 0\n"), ("t95_lan_chay_day_du_chi_do_kho_chua_test",)),
+    ("test_main_chot_cay_bo_return", _test("        print(loi_cay, file=sys.stderr)\n        return 2\n    che_do = che_do_harness()\n", "        print(loi_cay, file=sys.stderr)\n    che_do = che_do_harness()\n"), ("t95_lan_chay_day_du_chi_do_kho_chua_test",)),
     ("test_doc_wf_that_dung_safe_load", _test('    return doc_wf_tu((CAY / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8"))\n', '    return yaml.safe_load((CAY / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8"))\n'), ("y15_loader_nghiem_tu_choi_khoa_trung_va_khoa_gop",)),
-    ("test_main_khong_in_kiem_ke", _test("    print(dong_kiem_ke())\n", ""), ("t94_main_in_dong_kiem_ke_that",)),
-    ("test_main_in_kiem_ke_hai_lan", _test("    print(dong_kiem_ke())\n", "    print(dong_kiem_ke())\n    print(dong_kiem_ke())\n"), ("t94_main_in_dong_kiem_ke_that",)),
+    ("test_main_khong_in_kiem_ke", _test("        print(dong_kiem_ke())\n", ""), ("t94_main_in_dong_kiem_ke_that",)),
+    ("test_main_in_kiem_ke_hai_lan", _test("        print(dong_kiem_ke())\n", "        print(dong_kiem_ke())\n        print(dong_kiem_ke())\n"), ("t94_main_in_dong_kiem_ke_that",)),
     ("test_main_in_kiem_ke_bi_doi", _test("    print(dong_kiem_ke())\n", "    print(dong_kiem_ke().replace('tu_kiem', 'tu kiem'))\n"), ("t94_main_in_dong_kiem_ke_that",)),
     # ---- chu kho (comment 5889513175): tran thoi gian cua chuan-bi
     ("yml_go_timeout_checkout_chuan_bi", _yml("        continue-on-error: true\n        timeout-minutes: 10\n", "        continue-on-error: true\n"), ("y16_chuan_bi_co_tran_thoi_gian_buoc_va_job", "y13_khoa_topology_cua_ci_yml_ngoai_than_run")),
@@ -3817,10 +3913,10 @@ DOT_BIEN = [
     ("yml_timeout_job_nho_hon_buoc", _yml("    timeout-minutes: 20\n    outputs:\n", "    timeout-minutes: 12\n    outputs:\n"), ("y16_chuan_bi_co_tran_thoi_gian_buoc_va_job",)),
     ("yml_timeout_checkout_qua_lon", _yml("        continue-on-error: true\n        timeout-minutes: 10\n", "        continue-on-error: true\n        timeout-minutes: 60\n"), ("y16_chuan_bi_co_tran_thoi_gian_buoc_va_job",)),
     # ---- luot 6 (executor tu liet ke): ket luan va ma thoat cua main / __main__
-    ("test_main_ok_luon_dung", _test("    ok = (dat == len(CA) " + "> 0 and giet", "    ok = True or (dat == len(CA) " + "> 0 and giet"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
-    ("test_main_bo_kiem_ca_dat", _test("    ok = (dat == len(CA) " + "> 0 and giet", "    ok = (len(CA) " + "> 0 and giet"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
-    ("test_main_bo_kiem_so_giet", _test("and giet == len(DOT_BIEN) " + "> 0 and not xau", "and len(DOT_BIEN) " + "> 0 and not xau"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
-    ("test_main_bo_kiem_xau", _test("> 0 and not xau " + "and not loi_tu_kiem", "> 0 " + "and not loi_tu_kiem"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
+    ("test_main_ok_luon_dung", _test("        for x in loi_tu_kiem:\n            print(f\"[TU KIEM] {x}\")\n        ok = (dat == len(CA) " + "> 0 and (che_do", "        for x in loi_tu_kiem:\n            print(f\"[TU KIEM] {x}\")\n        ok = True or (dat == len(CA) " + "> 0 and (che_do"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
+    ("test_main_bo_kiem_ca_dat", _test("        for x in loi_tu_kiem:\n            print(f\"[TU KIEM] {x}\")\n        ok = (dat == len(CA) " + "> 0 and (che_do", "        for x in loi_tu_kiem:\n            print(f\"[TU KIEM] {x}\")\n        ok = (len(CA) " + "> 0 and (che_do"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
+    ("test_main_bo_kiem_so_giet", _test("and (che_do == \"chi_ca\" or giet == len(DOT_BIEN) " + "> 0) and not xau", "and (che_do == \"chi_ca\" or len(DOT_BIEN) " + "> 0) and not xau"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
+    ("test_main_bo_kiem_xau", _test("> 0) and not xau " + "and not loi_tu_kiem", "> 0) " + "and not loi_tu_kiem"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
     ("test_main_bo_kiem_tu_kiem", _test("and not loi_tu_kiem " + "and trung == 0)", "and trung == 0)"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
     ("test_main_bo_kiem_ten_trung", _test("and not loi_tu_kiem and trung " + "== 0)", "and not loi_tu_kiem)"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
     ("test_main_in_ca_sai_tu_so", _test('    print(f"CA: {dat}' + '/{len(CA)} dat', '    print(f"CA: {len(CA)}' + '/{len(CA)} dat'), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
@@ -3832,8 +3928,8 @@ DOT_BIEN = [
     ("test_runner_hong_thanh_do", _test('    except Exception as e:\n        return "HONG", f"{type(e).__name__}' + ': {e}"', '    except Exception as e:\n        return "DO", f"{type(e).__name__}: {e}"'), ("t92_runner_thuc_su_goi_ca_va_phan_biet_loi",)),
     ("test_runner_nuot_tin_hieu_do", _test('    except TinHieuChotCa as e:\n        return "DO", str(e)' + '\n    except Exception', '    except TinHieuChotCa as e:\n        return "DAT", ""\n    except Exception'), ("t92_runner_thuc_su_goi_ca_va_phan_biet_loi", "t91_ma_thoat_that_khi_ca_dat_do_va_hong")),
     ("test_entrypoint_rc1_thanh_0", _test("    raise SystemExit(main(sys.argv" + "[1:]))\n", "    _rc = main(sys.argv[1:])\n    raise SystemExit(0 if _rc == 1 else _rc)\n"), ("t91_ma_thoat_that_khi_ca_dat_do_va_hong",)),
-    ("test_main_in_them_dong_kiem_ke_sai", _test("    print(dong_kiem_ke())" + "\n    for x in xau", "    print(dong_kiem_ke())\n    print('KIEM KE: ca hanh_vi=999 = 999')\n    for x in xau"), ("t94_main_in_dong_kiem_ke_that",)),
-    ("test_main_in_dong_kiem_ke_sai_truoc", _test("    print(dong_kiem_ke())" + "\n    for x in xau", "    print('KIEM KE: sai')\n    print(dong_kiem_ke())\n    for x in xau"), ("t94_main_in_dong_kiem_ke_that",)),
+    ("test_main_in_them_dong_kiem_ke_sai", _test("        print(dong_kiem_ke())" + "\n        for x in xau", "        print(dong_kiem_ke())\n        print('KIEM KE: ca hanh_vi=999 = 999')\n        for x in xau"), ("t94_main_in_dong_kiem_ke_that",)),
+    ("test_main_in_dong_kiem_ke_sai_truoc", _test("        print(dong_kiem_ke())" + "\n        for x in xau", "        print('KIEM KE: sai')\n        print(dong_kiem_ke())\n        for x in xau"), ("t94_main_in_dong_kiem_ke_that",)),
     # ---- luot 7 (Claude, lop kiem-re-cua-fail-close-chua-co-ca): moi cua mot mutant, moi mutant mot ca dich
     ("kiem_yaml_bo_duoi_yml", _ma('for duong in sorted(x for x in doi if x.endswith((".yaml", ".yml"))):', 'for duong in sorted(x for x in doi if x.endswith(".yaml")):'), ("t20h_kiem_yaml_duoi_yml_ngoai_lease_do",)),
     ("kiem_yaml_tep_xoa_cat_vong", _ma("        if not tep.is_file():\n            continue\n        try:\n            with tep.open(encoding=\"utf-8\") as f:\n                list(", "        if not tep.is_file():\n            break\n        try:\n            with tep.open(encoding=\"utf-8\") as f:\n                list("), ("t20i_tep_da_xoa_khong_cat_vong_kiem_yaml",)),
@@ -3851,7 +3947,7 @@ DOT_BIEN = [
     ("test_main_tu_kiem_in_so_sai", _test("({len(MAU_RC)}" + " mau rc, {len(TU_KIEM_DOT_BIEN)} dot bien that)\")", "({len(MAU_RC) + 1} mau rc, {len(TU_KIEM_DOT_BIEN)} dot bien that)\")"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
     ("test_main_tu_kiem_luon_in_dat", _test("{'DAT' if not loi_tu_kiem" + " else 'DO'} (", "{'DAT'} ("), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
     # ---- nghiệm thu 9: nối vào sổ test sống
-    ("yml_go_buoc_goi_test_khoi_ci", _yml("      - name: ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)\n        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", ""), ("y09_buoc_goi_test_cua_packet_khong_bi_bo", "k03_ci_goi_that_muc_da_noi")),
+    ("yml_go_buoc_goi_test_khoi_ci", _yml("      - name: ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)\n        if: runner.os == 'Linux'\n        env:\n          CI_DUONG_NHANH_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n        run: python ops/ci_duong_nhanh_test.py\n", ""), ("y09_buoc_goi_test_cua_packet_khong_bi_bo", "k03_ci_goi_that_muc_da_noi")),
     ("dk_go_muc_da_noi", (DK, lambda vb: thay_mot(vb, f'    "{DA_NOI_MUC}",\n', "")), ("k01_so_dang_ky_nhan_muc_da_noi",)),
     ("dk_go_muc_da_noi_kiem_dem_so", (DK, lambda vb: thay_mot(vb, f'    "{DA_NOI_MUC}",\n', "")), ("k02_da_noi_dung_mot_lan_va_test_song_khop_tep",)),
     # ---- cross-review luot 7: loai tep ho so (symlink)
@@ -4067,6 +4163,37 @@ DOT_BIEN += [(f"bo_quet_so_chu_bo_tu_so_{i:02d}", _bo_nhanh("(?:" + "|".join(SO_
               ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)) for i, tu in enumerate(SO_CHU_LUAT)]
 DOT_BIEN += [(f"bo_quet_so_chu_bo_danh_tu_{i:02d}", _bo_nhanh("(?:" + "|".join(DANH_TU_KHO_LUAT) + ")", tu),
               ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)) for i, tu in enumerate(DANH_TU_KHO_LUAT)]
+DOT_BIEN += [
+    ("wp1143_m1_strip", _test('    return "chi_ca" if type(value) is str and value == "duong_nhanh" else "day_du"\n\n\ndef main(argv):',
+       '    return "chi_ca" if type(value) is str and value.strip() == "duong_nhanh" else "day_du"\n\n\ndef main(argv):'),
+     ("t94a_che_do_harness_chi_nhan_chuoi_chinh_xac",)),
+    ("wp1143_m2_missing_fast", _test('else "day_du"\n\n\ndef main(argv):', 'else "chi_ca"\n\n\ndef main(argv):'),
+     ("t94a_che_do_harness_chi_nhan_chuoi_chinh_xac",)),
+    ("wp1143_m3_mutants_on_fast", _test('giet, xau = 0, []\n        else:',
+       'giet, xau = chay_tap_dot_bien(DOT_BIEN)\n        else:'),
+     ("t94b_main_chi_bo_dot_bien_khi_nhan_duong_nhanh",)),
+    ("wp1143_m4_ignore_case_failure", _test('        for x in loi_tu_kiem:\n            print(f"[TU KIEM] {x}")\n        ok = (dat == len(CA) > 0 and (che_do',
+       '        for x in loi_tu_kiem:\n            print(f"[TU KIEM] {x}")\n        ok = (True and (che_do'),
+     ("t94b_main_chi_bo_dot_bien_khi_nhan_duong_nhanh",)),
+    ("wp1143_m6_constant_yaml", _yml('CI_DUONG_NHANH_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}',
+       'CI_DUONG_NHANH_CHE_DO: duong_nhanh'), ("t94d_harness_step_doc_dung_env_che_do",)),
+    ("wp1143_m7_missing_yaml", _yml('        env:\n          CI_DUONG_NHANH_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n',
+       ''), ("t94d_harness_step_doc_dung_env_che_do",)),
+    ("wp1143_m8_env_leaks", _test('    goc_env = os.environ.pop(ten_env, None)\n    try:',
+       '    goc_env = os.environ.get(ten_env)\n    try:'), ("t94c_main_go_env_o_ca_va_con_va_khoi_phuc_ca_ngoai_le",)),
+    ("wp1143_m9_no_restore", _test('if goc_env is not None:\n            os.environ[ten_env] = goc_env',
+       'if False:\n            os.environ[ten_env] = goc_env'),
+     ("t94c_main_go_env_o_ca_va_con_va_khoi_phuc_ca_ngoai_le",)),
+    ("wp1143_m9b_restore_only_normal", (TEST, lambda vb: thay_mot(
+       thay_mot(vb, 'return 0 if ok else 1\n\n    finally:', 'outcome = 0 if ok else 1\n\n    except Exception:'),
+       '    except Exception:\n        if goc_env is not None:\n            os.environ[ten_env] = goc_env',
+       '    except Exception:\n        raise\n    if goc_env is not None:\n        os.environ[ten_env] = goc_env\n    return outcome')),
+     ("t94c_main_go_env_o_ca_va_con_va_khoi_phuc_ca_ngoai_le",)),
+    ("wp1143_m10_allowlist_constant", _test(
+       '("gate-ops", "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)"):\n                       {"CI_DUONG_NHANH_CHE_DO": "${{ needs.chuan-bi.outputs.che_do }}"}',
+       '("gate-ops", "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)"):\n                       {"CI_DUONG_NHANH_CHE_DO": "duong_nhanh"}'),
+     ("y04_tap_buoc_mang_if_che_do_khop_dung",)),
+]
 TEN_DOT_BIEN = [d[0] for d in DOT_BIEN]
 
 
@@ -4162,6 +4289,12 @@ def loi_cay_duoi_do(cay, goc):
     return ""
 
 
+def che_do_harness():
+    """Only the exact classifier output permits skipping harness mutations."""
+    value = os.environ.get("CI_DUONG_NHANH_CHE_DO")
+    return "chi_ca" if type(value) is str and value == "duong_nhanh" else "day_du"
+
+
 def main(argv):
     if len(argv) == 4 and argv[0] == "--nguon-test":
         # Chay CA tu BAN SAO (co the bi dot bien) cua chinh tep test; `__file__` giu la tep that de HERE/ROOT_THAT khong doi.
@@ -4190,31 +4323,44 @@ def main(argv):
     if loi_cay:
         print(loi_cay, file=sys.stderr)
         return 2
-    dat = do = hong = 0
-    for ten in CA:
-        kq, ly_do = chay_ca_trong_tien_trinh(ten)
-        if kq == "DAT":
-            dat += 1
+    che_do = che_do_harness()
+    ten_env = "CI_DUONG_NHANH_CHE_DO"
+    goc_env = os.environ.pop(ten_env, None)
+    try:
+        dat = do = hong = 0
+        for ten in CA:
+            kq, ly_do = chay_ca_trong_tien_trinh(ten)
+            if kq == "DAT":
+                dat += 1
+            else:
+                do += kq == "DO"
+                hong += kq == "HONG"
+                print(f"[{kq}] {ten}: {ly_do}")
+        print(f"CA: {dat}/{len(CA)} dat · {do} do · {hong} hong")
+
+        if che_do == "chi_ca":
+            giet, xau = 0, []
         else:
-            do += kq == "DO"
-            hong += kq == "HONG"
-            print(f"[{kq}] {ten}: {ly_do}")
-    print(f"CA: {dat}/{len(CA)} dat · {do} do · {hong} hong")
+            giet, xau = chay_tap_dot_bien(DOT_BIEN)
+        trung = len(TEN_DOT_BIEN) - len(set(TEN_DOT_BIEN))
+        if che_do == "chi_ca":
+            print(f"DOT BIEN: BO QUA {len(DOT_BIEN)} (che_do=duong_nhanh)")
+        else:
+            print(f"DOT BIEN: {giet}/{len(DOT_BIEN)} bi giet dung ly do")
+        print(dong_kiem_ke())
+        for x in xau:
+            print(f"[DOT BIEN KHONG BI GIET DUNG] {x}")
+        loi_tu_kiem = tu_kiem_phan_hang()
+        print(f"TU KIEM PHAN HANG: {'DAT' if not loi_tu_kiem else 'DO'} ({len(MAU_RC)} mau rc, {len(TU_KIEM_DOT_BIEN)} dot bien that)")
+        for x in loi_tu_kiem:
+            print(f"[TU KIEM] {x}")
+        ok = (dat == len(CA) > 0 and (che_do == "chi_ca" or giet == len(DOT_BIEN) > 0) and not xau and not loi_tu_kiem and trung == 0)
+        print(f"TONG: {'DAT' if ok else 'DO'}")
+        return 0 if ok else 1
 
-    giet, xau = chay_tap_dot_bien(DOT_BIEN)
-    trung = len(TEN_DOT_BIEN) - len(set(TEN_DOT_BIEN))
-    print(f"DOT BIEN: {giet}/{len(DOT_BIEN)} bi giet dung ly do")
-    print(dong_kiem_ke())
-    for x in xau:
-        print(f"[DOT BIEN KHONG BI GIET DUNG] {x}")
-    loi_tu_kiem = tu_kiem_phan_hang()
-    print(f"TU KIEM PHAN HANG: {'DAT' if not loi_tu_kiem else 'DO'} ({len(MAU_RC)} mau rc, {len(TU_KIEM_DOT_BIEN)} dot bien that)")
-    for x in loi_tu_kiem:
-        print(f"[TU KIEM] {x}")
-    ok = (dat == len(CA) > 0 and giet == len(DOT_BIEN) > 0 and not xau and not loi_tu_kiem and trung == 0)
-    print(f"TONG: {'DAT' if ok else 'DO'}")
-    return 0 if ok else 1
-
+    finally:
+        if goc_env is not None:
+            os.environ[ten_env] = goc_env
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))

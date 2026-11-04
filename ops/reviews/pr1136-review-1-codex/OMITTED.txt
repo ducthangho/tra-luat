@@ -1,0 +1,5 @@
+DIFF.patch	sha256 2704197fbfa4c55216789f6a30e993d1af665a95ea4d7184386f2c8a8d925474	bytes 714214	ly do: tai lap bang git diff 62e6291 1a87a86 (khong can chep)
+launcher.err	sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	bytes 0	ly do: tep rong
+evidence/original-before.json	sha256 b37684e92e512790feafddc4378ea8631bbd66257e78fc3843c4f82ffd5ba9c0	bytes 1494314	ly do: >500 KB (tien le TEP-LON-KHONG-VAO-KHO); giu tai sandbox reviewer
+cay-kho/ work/	khong chep: ban sao kho/ban sao lam viec cua sandbox reviewer; tai lap bang clone tai reviewed_sha / base
+nguon/review1131a/ nguon/review1131b/ (ban sao sandbox goc, da co trong ops/reviews/pr1131-review-1-codex)	khong chep

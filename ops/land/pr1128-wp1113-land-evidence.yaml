@@ -1,7 +1,7 @@
 # HO SO LAND — packet #1113 CI-LAN-LUU-TRU r1 (D1 cua ADR-0060 M11), lease g2, code qua PR #1128. Khuon: ops/land/pr1115-wp1079-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (c165a5d0), landed FALSE — canary A12 TRUOT tran runner-phut (19,3 > 12, PR #1140 run 41371625809); chu kho chon
+# TRANG THAI LUC BAN DAU: merged (c165a5d0), landed FALSE — canary A12 TRUOT tran runner-phut (19,3 > 12, PR #1140 run 41371625809); chu kho chon
 # ha landed va mo packet va (2026-11-02). Moi dieu kien khac cua §10.2.4 dat — xem trang_thai_packet. Gate hau merge do tren DUNG merge SHA bang run
 # workflow_dispatch 41361081437 (nhanh do claude/gate-hau-merge-c165a5d0 = c165a5d0), KHONG phai push master: run push 41356843718 bi
 # cancelled 0 job (concurrency master thay cho luot pending — Issue #1132). Rerun tren master se day luot pending cua #1133 ra.
@@ -84,12 +84,13 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-1128.json merged true; merge-va-diff.txt cha c6bb7c14 + 0445b938, tree 849a8505.'
-  landed: false
+  landed: true
+  landed_2026_11_02: true
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA c165a5d0: DAT, du bon moc (post_merge_checks muc 1; dispatch thay push vi #1132);
     (2) lease nha: rut han g2; (3) bookkeeping: ho so nay + ban ghi M8 tren Issue #1113; (4) review neo DUNG authorized_head 0445b938:
     luot 6 approve 0/0/0/0, connector sach; (5) uy quyen land: chu kho tu merge (M7); (6) muc tieu packet: A1-A10 dat, A11 chu kho mien
-    (comment 6564772718, xem authorization_ghi_chu), A12 TRUOT (xem canary_a12); (7) §8.1: DAT — model/effort/sandbox DO_DUOC ca 6 luot.
+    (comment 6564772718, xem authorization_ghi_chu), A12 gốc TRUOT (xem canary_a12), sau đó packet #1143 sửa và ba canary A11 mới đạt ngày 2026-11-02 (xem khac_phuc_a12_2026_11_02); (7) §8.1: DAT — model/effort/sandbox DO_DUOC ca 6 luot.
 
 assurance_81:
   reviewer_assurance_81: DAT
@@ -125,3 +126,19 @@ lech_dac_ta:
 khong_do_duoc:
   - 'Push master tai merge SHA: KHONG CO — run 41356843718 cancelled 0 job (#1132); thay bang dispatch cung SHA.'
   - 'kiem-merge K7 voi dong mien A11: khong goi (chi thi goc); dong mien co dau cham cuoi va dang sau merge.'
+
+# Bổ sung 2026-11-02: giữ nguyên lịch sử A12 trượt ở trên; packet khắc phục #1143 đóng nợ đó sau ba phép đo mới.
+khac_phuc_a12_2026_11_02:
+  packet: 1143
+  code_pr: https://github.com/ducthangho/tra-luat/pull/1155
+  code_merge: bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
+  archive_pr: https://github.com/ducthangho/tra-luat/pull/1157
+  archive_merge: 5202d3d57da96db2896aeea15fee83a8796bd26d
+  a11_pr: {run_id: 41426125071, runner_seconds: 673, conclusion: success}
+  a11_dispatch_before_merge: {run_id: 41427360983, runner_seconds: 569, conclusion: success}
+  a11_push_master: {run_id: 41428563676, runner_seconds: 608, conclusion: success}
+  windows_jobs_ran: 0
+  code_postmerge_ci: {run_id: 41425851232, conclusion: success, sha: bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca}
+  full_details: ops/land/pr1155-wp1143-land-evidence.yaml
+  original_a12_result: 'TRUOT — giữ nguyên như lịch sử, không coi run cũ là đạt.'
+  outcome: landed_2026_11_02

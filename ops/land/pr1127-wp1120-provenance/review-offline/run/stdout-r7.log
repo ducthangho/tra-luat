@@ -1,0 +1,24 @@
+Không phát hiện finding P0–P2 mới hoặc hồi quy làm mất hiệu lực kết luận lượt 6. AST runtime trước và sau commit trùng nhau: hành vi không đổi.
+
+- `reviewed_sha`: `5f627613800d434846e95d5f1772460bc187f79f`
+- Tree: `346647174753e11dd6f19c5cb9fcc2d2eb54f297`
+- Đặc tả r1/generation 1 khớp SHA-256 được giao.
+
+Đã chạy trên bản sao tạm bằng `python3 -B /tmp/kiem-merge-m9-r7-j4algjul/review_probe.py`, **rc=0**:
+
+| Phép kiểm | Kết quả |
+|---|---|
+| `moc_dot_bien_phai_khop_DUNG_MOT_CHO` | Đạt trên 1.413 đột biến, 1.440 cặp mốc/thay |
+| `cong_m9_*` | 53/53 đạt |
+| `cong_c_*` | 54/54 đạt |
+| Ca đích cũ trên baseline | 1/1 đạt |
+| Hai đột biến được yêu cầu | Cả hai bị giết bằng `AssertionError` của ca đích |
+| Đối chứng khác họ | 6/6 đạt |
+
+Không có ca bỏ qua. Đối chiếu lượt 6: không có finding còn mở; không thấy lớp lỗi tái mở trong phạm vi được giao. Checkout đầu–cuối giữ nguyên HEAD/tree và nội dung 10.207 tệp.
+
+Reviewer: `openai_codex / codex_cli / machine`; model/effort phục vụ chưa đo độc lập. Full suite, Windows và CI thật: `not_run`; verdict giới hạn ở review offline lượt 7.
+
+Chi tiết lệnh, kết quả và hash nằm trong [bộ bằng chứng](/tmp/kiem-merge-m9-r7-j4algjul/review-evidence.json).
+
+KET_LUAN: approve

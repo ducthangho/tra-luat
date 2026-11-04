@@ -1,0 +1,43 @@
+Không còn finding P0–P2 trong phạm vi review offline; không có P3 còn mở.
+
+- `reviewed_sha`: `6c965dcee4dc570ee9a224a3d075d235fbffe568`
+- Tree: `5cc0f5f62d88990b7c22536f60349ddc68b18480`
+- Đặc tả r1/generation 1 khớp SHA-256 được giao.
+- Diff đúng 5 tệp, 318 dòng thêm; trong trần 400 được `prompt.snapshot` cho phép.
+- Reviewer: `openai_codex / codex_cli / machine`; model/effort phục vụ chưa đo độc lập.
+
+**Kết quả đo trên bản sao tạm**
+
+| Phép kiểm | Kết quả |
+|---|---|
+| `cong_c_*` và `cong_m9_*` | 107/107 đạt |
+| Bộ mở rộng: ca gốc và 23 ca bổ sung | 130/130 đạt, rc=0 |
+| Ma trận tên tệp đặc biệt trên Git thật | 10/10 đạt |
+| Đột biến `m9_*` | 48/48 bị giết bằng assertion ca đích |
+| Đột biến tự soạn | 7/7 bị giết bằng assertion ca đích |
+| Đối chứng khác họ cho các đột biến | Đều xanh |
+| `doctrine-scan` | rc=0; 10 tệp, 0 vi phạm |
+| `adr-song` | rc=0; 59 ADR khớp 59 dòng |
+| `doc-claims-check --strict --json` | rc=0; `ok=true`, 0 flags |
+| Ruff pin/probe contract | rc=0; `RUFF_CONTRACT 3 []` |
+
+Các ca bổ sung kiểm phân trang hợp lệ, trang trùng và mâu thuẫn, kiểu ID, thiếu trường ở mọi vị trí job, cùng run có nhiều attempt, và tên tệp chứa Unicode/tab/LF/backslash. Attempt mới xanh vẫn được nhận khi attempt cũ đỏ; chiều ngược lại bị chặn.
+
+**Đối chiếu lượt trước**
+
+| Finding lượt 5 | Kết luận và bằng chứng |
+|---|---|
+| F30 — tệp M9 đứng sau | **ĐÃ VÁ THẬT**: `cong_m9_pham_vi_tep_sau` xanh; đột biến chỉ đọc tệp đầu bị giết |
+| F31 — job giữa lô | **ĐÃ VÁ THẬT**: hai ca job giữa xanh; hai đột biến chỉ kiểm hai đầu bị giết |
+| F32 — nhóm jobs run khác đỏ | **ĐÃ VÁ THẬT**: ca hợp lệ xanh; đột biến buộc mọi nhóm xanh bị giết |
+| F33 — ranh giới prefix/đuôi | **ĐÃ VÁ THẬT**: ca ranh giới xanh; cả bốn đột biến nới phạm vi bị giết |
+
+Các phản chứng F01–F29 cũng đã được kiểm lại, gồm kiểu bool/float, dòng miễn nguyên văn và CRLF, chọn run/job, rename/xoá/symlink/mode, lỗi Git có output và hồi quy K6 với diff rỗng. Không thấy tái diễn hoặc lỗi mới do các bản vá.
+
+Lệnh tái lập và output chi tiết nằm trong [bộ bằng chứng](/tmp/review-m9-r6-x6arkilf/review-evidence.json). Ba script kiểm thử đều chạy bằng `python3 -B`, kết thúc rc=0.
+
+Giới hạn: Linux/Python 3.13.18; toàn bộ suite, Windows A8 và CI thật A9 là `not_run`. Bare Ruff là `not_measured`: lệnh thoát rc=1 vì thiếu module `ruff`. Verdict này chưa xác nhận đủ điều kiện merge.
+
+Checkout đầu/cuối giữ nguyên HEAD/tree và hash của 10.207 tệp: không thêm, xoá hoặc đổi nội dung. Không gọi mạng tới GitHub.
+
+KET_LUAN: approve

@@ -322,7 +322,7 @@ class C1Tests(unittest.TestCase):
         reg["policies"].append(revoked)
         self.assertEqual(check(reg, q)["status"], "validated")
 
-    def test_strict_route_retains_revoked_c1_history(self):
+    def test_strict_route_retains_revoked_or_expired_c1_history(self):
         reg, q = fixture()
         q["binding"].update(grant_id="strict-grant", dispatch_id="strict-dispatch")
         reg["policies"][0]["grant_id"] = "strict-grant"
@@ -334,15 +334,27 @@ class C1Tests(unittest.TestCase):
         q["audit"]["technical_run_id"] = q["technical"]["run_id"]
         reg["producers"][0]["producer_id"] = "strict-producer"
         reseal(reg, q)
-        retained = copy.deepcopy(self.reg)
-        p = retained["policies"][0]
-        p["revoked"] = p["c1_authority"]["revoked"] = True
-        row = retained["ledgers"][0]["reservations"].pop()
-        retained["ledgers"][0]["history"].append(row)
-        retained["ledgers"][0]["usage"] = copy.deepcopy(row["units"])
-        for section in ("policies", "ledgers", "producers"):
-            reg[section] += retained[section]
-        self.assertEqual(check(reg, q)["status"], "validated")
+        for condition in ("revoked", "expired"):
+            with self.subTest(condition=condition):
+                retained, c1_q, mixed = copy.deepcopy(self.reg), copy.deepcopy(self.q), copy.deepcopy(reg)
+                p = retained["policies"][0]
+                row = retained["ledgers"][0]["reservations"][0]
+                if condition == "revoked":
+                    p["revoked"] = p["c1_authority"]["revoked"] = True
+                else:
+                    p["expires_at"] = NOW
+                    for dispatch in row["dispatch"].values():
+                        dispatch["policy_sha256"] = r.sha256(r.canonical_bytes(p))
+                    c1_q["technical"]["dispatch_sha256"] = r.sha256(r.canonical_bytes(row["dispatch"]))
+                    c1_seal(retained, c1_q)
+                with self.assertRaisesRegex(r.Blocked, "expired|revoked"):
+                    c1_check(retained, c1_q, self.anchors)
+                retained["ledgers"][0]["reservations"].clear()
+                retained["ledgers"][0]["history"].append(row)
+                retained["ledgers"][0]["usage"] = copy.deepcopy(row["units"])
+                for section in ("policies", "ledgers", "producers"):
+                    mixed[section] += retained[section]
+                self.assertEqual(check(mixed, q)["status"], "validated")
 
 
 class SemanticTests(unittest.TestCase):

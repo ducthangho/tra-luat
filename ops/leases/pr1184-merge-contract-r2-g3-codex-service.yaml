@@ -49,7 +49,7 @@ effective_write_set:
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6635721215
 leased_at_utc: '2026-11-04T16:12:22Z'
-heartbeat_at: '2026-11-04T16:12:22Z'
+heartbeat_at: '2026-11-04T16:30:21.642334Z'
 lease_until: '2026-11-04T18:42:17Z'
 lease_expires_at_utc: '2026-11-04T18:42:17Z'
 heartbeat_required_minutes: 360
@@ -109,8 +109,8 @@ review_budget_override:
   recorded_at_utc: '2026-11-04T15:13:49.540195+00:00'
   old_limit: 3
   new_limit: 4
-  calls_used_before_next: 3
-  authorized_additional_calls: 1
+  calls_used_before_next: 4
+  authorized_additional_calls: 0
   scope_head: 29ee9ca74d61544fbddd56c39dabbe194d26408e
   no_reset: true
   no_code_audit_or_land_authority: true
@@ -118,6 +118,14 @@ review_budget_override:
   rebind_authority: owner approved cold recovery successor and review rebinding in
     current chat
   source_rebinding: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6635721215
+  calls_started_with_output: 4
+  completed_verdicts: 3
+  remaining_calls: 0
+  active_review_run_id: 8e8d61b1d5514398907e89fba232f790
+  active_review_head: 29ee9ca74d61544fbddd56c39dabbe194d26408e
+  output_evidence: Fresh Claude session cd1bb32e-8bc1-4438-bc75-5d60e60192bd; observed53
+    assistant messages on claude-sonnet-5-5; raw JSONL outside product; final verdict
+    pending
 nang_tran_review_budget:
   ai_nang: ducthangho via explicitownerresponse
   can_cu: one fresh verification after owner required all4P3fixed; three actualreviewsused;

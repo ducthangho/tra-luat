@@ -1,0 +1,14 @@
+owner_trust_response: Cho phép trust clone này
+exact_clone: /workspace/scratch/pr1187-recovery/reviewer
+canonical_probe: 'DAT: Claude trust=true'
+review_tools:
+- Read
+- Glob
+- Grep
+no_shell_or_write_tools: true
+review_run_id: 8e8d61b1d5514398907e89fba232f790
+requested_model: claude-sonnet-5-5
+requested_effort: max
+actual_model_observed_in_session_log: claude-sonnet-5-5
+final_modelUsage: pending; must validate final output
+recorded_by: codex-service-controller, not reviewer

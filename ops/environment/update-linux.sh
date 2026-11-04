@@ -63,9 +63,16 @@ PY
 )"
   read -r tag url digest < <(printf '%s' "$release" | "$py" -c 'import json,sys; d=json.load(sys.stdin); a=[x for x in d["assets"] if x["name"]==sys.argv[1]]; assert len(a)==1; print(d["tag_name"],a[0]["browser_download_url"],a[0]["digest"])' "$asset")
   [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo 'AGY release has no valid SHA256 digest' >&2; return 5; }
-  # Already at the release tag: nothing to do. Otherwise always reinstall from the verified asset;
+  # Keep current releases wherever installed; update only our managed destination.
   # `agy update` would bypass the SHA256 check.
-  if native_command agy && [[ "$(agy_version || true)" == "${tag#v}" ]]; then return 0; fi
+  if native_command agy; then
+    if [[ "$(agy_version || true)" == "${tag#v}" ]]; then return 0; fi
+    found="$(command -v agy)"
+    if [[ "$found" != "$HOME/.local/bin/agy" ]]; then
+      printf 'AGY at %s needs repair or update; upgrade that installation with its package manager, or remove it before installing managed AGY at %s.\n' "$found" "$HOME/.local/bin/agy" >&2
+      return 5
+    fi
+  fi
   tmp="$(mktemp -d)"; archive="$tmp/$asset"
   curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 "$url" --output "$archive" ||
     { rm -rf -- "$tmp"; echo 'AGY download failed' >&2; return 5; }
@@ -137,7 +144,7 @@ PY
   ln -sfnT "$HOME/.local/share/tra-luat-tools/node/bin/npx" "$HOME/.local/bin/npx"
   rm -rf -- "$tmp"
   hash -r
-  if ! native_command node || ! native_command npm; then echo 'Native Node/npm not available after install' >&2; return 6; fi
+  if ! native_command node || ! native_command npm || ! npm --version >/dev/null 2>&1; then echo 'Native Node/npm not usable after install' >&2; return 6; fi
 }
 install_gh_user() {
   local release name url digest tag tmp archive entry arch
@@ -187,7 +194,14 @@ if (( user_only )); then
       esac
     done
   fi
-  { native_command node && native_command npm; } || install_node_user
+  if native_command node; then
+    if ! native_command npm || ! npm --version >/dev/null 2>&1; then
+      printf '%s\n' "--user-only requires working native npm for Node at $(command -v node); repair npm using the package manager for that Node installation, then rerun. Node will not be replaced." >&2
+      exit 5
+    fi
+  else
+    install_node_user
+  fi
   native_command gh || install_gh_user
 else
 need_apt=()

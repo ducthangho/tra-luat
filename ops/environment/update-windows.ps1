@@ -144,6 +144,9 @@ function Install-AgyVerified {
     $destination = Join-Path $bin 'agy.exe'
     $current = Get-Command agy -ErrorAction SilentlyContinue
     if ($current -and (Get-AgyVersion $current.Source) -ceq $target) { return }
+    if ($current -and $current.Source -ine $destination) {
+        throw "AGY at $($current.Source) needs repair or update; upgrade that installation with its package manager, or remove it before installing managed AGY at $destination."
+    }
     # Refuse reparse points in the installation path rather than following a redirected user bin.
     for ($parent = $destination; $parent; $parent = Split-Path $parent -Parent) {
         if ((Test-Path -LiteralPath $parent) -and

@@ -4,6 +4,7 @@ xoa dau hieu duong CHI cua buoc ay -> job PHAI ra not_measured. Them 3 ca dung: 
 trong log job) cho ca (a) ra passed — tuc lo hong connector tai hien duoc.
 Cach goi: python3 phan_chung_buoc.py <run_id>   (danh_gia_gate.py cung thu muc). rc 0 = moi ca am dung + doi chung tai hien."""
 import importlib.util, json, os, re, sys
+sys.dont_write_bytecode = True   # khong de __pycache__ trong thu muc provenance (connector P2 r4470015911)
 here = os.path.dirname(os.path.abspath(__file__))
 s = importlib.util.spec_from_file_location("d", os.path.join(here, "danh_gia_gate.py")); d = importlib.util.module_from_spec(s); s.loader.exec_module(d)
 run = sys.argv[1]

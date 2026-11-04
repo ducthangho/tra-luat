@@ -9242,7 +9242,15 @@ def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None, env=None, git_loi
              ddj=[{"id": 800 + i, "run_id": 700, "run_attempt": 1, "status": "completed", "conclusion": "success"} for i in range(2)])
     (doi or (lambda *_: None))(x, w, h)
     trang = lambda k, v: {"total_count": len({i["id"] for i in v}), k: v}  # noqa: E731
-    f = lambda ten, d: ((goc / ten).write_text(d if isinstance(d, str) else json.dumps(d).replace("o/r", repo), encoding="utf-8", newline="\n"), goc / ten)[1]  # noqa: E731
+    def fixture_repo(value):
+        if isinstance(value, dict):
+            return {k: repo if k == "full_name" and v == "o/r" else fixture_repo(v) for k, v in value.items()}
+        if isinstance(value, list): return [fixture_repo(v) for v in value]
+        if isinstance(value, str):
+            for prefix in ("https://api.github.com/repos/", "https://github.com/"):
+                if value.startswith(prefix + "o/r/"): return prefix + repo + value[len(prefix + "o/r"):]
+        return value
+    f = lambda ten, d: ((goc / ten).write_text(d if isinstance(d, str) else json.dumps(fixture_repo(d)), encoding="utf-8", newline="\n"), goc / ten)[1]  # noqa: E731
     cn = {"repo": repo, "pr": 55, "head_sha": h, **{k: trang("items", x[k]) for k in ("reviews", "review_comments", "issue_comments")}}
     args = ["kiem-merge", "--root", w, "--repo", repo, "--pr", 55, "--head", h, "--base", x.get("base", L2), "--spec", spec_path,
             "--lease", f("l.yaml", x["lease"] if isinstance(x["lease"], str) else yaml.safe_dump(x["lease"])), "--workflow-runs", f("wr.json", trang("workflow_runs", x["runs"])),
@@ -9250,11 +9258,14 @@ def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None, env=None, git_loi
             "--connector", f("cn.json", cn),
             *(("--offline-run-json", f("run.json", x["run"]), "--offline-stdout", f("out.log", x["out"])) if not x.get("no_model") else ()),
             *(("--human-audit-comment", f("audit.json", x["audit"]), "--human-remote-run", f("remote.json", x["remote"])) if x.get("audit") else ()),
+            *(("--human-transition-comment", f("transition.json", x["transition"])) if x.get("transition") else ()),
             *[a for k in x["p3off"] for a in ("--p3-offline", k)], *(("--chu-kho-comment", f("cmt.json", x["cmt"])) if x["cmt"] else ()),
             *(("--windows-json", f("win.json", x["win"])) if x["win"] else ()),
             *(("--dot-bien-du-runs", f("ddr.json", x.get("ddr_trang") or trang("workflow_runs", x["ddr"])),
                "--dot-bien-du-jobs", f("ddj.json", x.get("ddj_trang") or trang("jobs", x["ddj"])),
                *[a for i, v in enumerate(x.get("ddj_them", [])) for a in ("--dot-bien-du-jobs", f(f"ddj{i}.json", trang("jobs", v)))]) if x["ddr"] is not None else ())]
+    if x.get("milestone1187"):
+        return _transition_run1187(c.script, args, c.sd(), x["milestone1187"])
     return (_rev_list_loi if git_loi else run)(c.script, args, c.sd(), env)
 
 
@@ -9603,7 +9614,7 @@ def _r1187(c, kind="human", change=None, red=False):
         _g(w, "add", "-A"), _g(w, "commit", "-qm", "fixture")
         return _g(w, "rev-parse", "HEAD")
     commit({"README.md": "base\n"})
-    milestone = commit({"docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md": "accepted\n", m.ADR0063_TEP: "accepted\n"})
+    milestone = commit({"docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md": "accepted\n", m.ADR0063_TEP: "\n".join(m.ADR0063_ANCHORS) + "\n"})
     spec = b"packet_id: wp1187\nrevision: 1\n"
     if kind == "title": spec = b"# wp1187 r1 - frozen spec\n"
     if kind == "title_conflict": spec += b"# wrong r2 - conflicting title\n"
@@ -9628,16 +9639,19 @@ def _r1187(c, kind="human", change=None, red=False):
     ctx = dict(m=m, w=w, a=a, ls=ls, raw=raw, audit=audit, run=run, tr_raw=tr_raw, tr=tr, spec=spec)
     if change:
         change(ctx)
+    runs = ctx.get("runs", [run])
+    a.workflow_runs = str(w / "workflow-runs.json")
+    Path(a.workflow_runs).write_text(json.dumps(dict(total_count=len(runs), workflow_runs=runs)), encoding="utf-8")
     for attr, value in (("human_audit_comment", raw), ("human_transition_comment", tr_raw), ("human_remote_run", run)):
         if value is raw: value["body"] = ctx.get("body", yaml.safe_dump(audit))
         if value is tr_raw: value["body"] = yaml.safe_dump(tr)
         f = w / (attr + ".json"); f.write_text(json.dumps(value), encoding="utf-8"); setattr(a, attr, str(f))
     try:
-        if kind in ("spec", "title", "title_conflict", "markdown"):
+        if kind in ("spec", "title", "title_conflict", "markdown", "legacy"):
             actual = m._spec_merge(w, a.head, "ops/specs/X.md", ls)
             assert actual == spec, "positive spec bytes changed"
         else:
-            p3 = []; m._human_merge(a, w, ls, spec, p3)
+            p3 = []; m._human_merge(a, w, ls, ctx["spec"], p3)
             assert p3 == [("human", f["slug"]) for f in audit["open_findings"]], "P3 lost before K5"
     except ValueError:
         if red: return
@@ -9671,10 +9685,10 @@ for name, group, key, value in (("actor", "raw", "user", dict(login="codex", typ
     CASES.append(("r1187_" + name, _ca1187("human", lambda x, g=group, k=key, v=value: x[g].update({k: v}))))
 for name, change in {
     "missing": lambda x: x["audit"].pop("reviewed_sha"), "unknown": lambda x: x["audit"].update(extra="bad"),
-    "duplicate": lambda x: x.update(body="schema: human_exact_head_audit.v1\nschema: human_exact_head_audit.v1\n"),
+    "duplicate": lambda x: x.update(body=__import__("yaml").safe_dump(x["audit"]) + "schema: human_exact_head_audit.v1\n"),
     "free_text": lambda x: x.update(body="I audited this head and approve"),
     "no_transition": lambda x: x["tr_raw"].update(user=dict(login="agent", type="User")),
-    "off_first_parent": lambda x: _g(x["w"], "update-ref", "refs/remotes/origin/master", _g(x["w"], "commit-tree", "HEAD^{tree}", "-m", "independent history")),
+    "off_first_parent": lambda x: _offfp1187(x),
     "no_policy": lambda x: (_g(x["w"], "rm", "-q", x["m"].ADR0063_TEP), _g(x["w"], "commit", "-qm", "remove policy"), _g(x["w"], "update-ref", "refs/remotes/origin/master", _g(x["w"], "rev-parse", "HEAD"))),
 }.items():
     CASES.append(("r1187_" + name, _ca1187("human", change)))
@@ -9731,7 +9745,12 @@ for name, old, new, target in [
 
 
 def _cli1187(x, w, h):
-    if not h: return
+    if not h:
+        policy = "docs/adr/0063-merge-spec-ref-va-human-audit.md"
+        (w / policy).parent.mkdir(parents=True, exist_ok=True)
+        (w / policy).write_bytes((Path(__file__).resolve().parents[2] / policy).read_bytes())
+        _g(w, "add", policy), _g(w, "commit", "-qm", "land ADR63 fixture")
+        return
     import yaml
     repo="ducthangho/tra-luat"; url=f"https://github.com/{repo}/pull/55#issuecomment-1"
     x["lease"].update(packet_id="wp55", revision=1, generation=1)
@@ -9740,7 +9759,8 @@ def _cli1187(x, w, h):
                  review_axes=["spec", "standards_security"], open_findings=[], audit_source=url)
     x.update(no_model=True, audit=dict(id=1, user=dict(login="ducthangho", type="User"), author_association="OWNER", issue_url=f"https://api.github.com/repos/{repo}/issues/55",
              html_url=url, created_at="2026-11-04T09:00:00Z", updated_at="2026-11-04T09:00:00Z", body=yaml.safe_dump(receipt)),
-             remote=dict(id=2, repository=dict(full_name=repo), head_sha=h, event="push", html_url=f"https://github.com/{repo}/actions/runs/2", created_at="2026-11-04T09:01:00Z"))
+             remote=dict(id=100, repository=dict(full_name=repo), head_sha=h, event="push", html_url=f"https://github.com/{repo}/actions/runs/100", created_at="2026-11-04T09:01:00Z"))
+    x["runs"][0].update(x["remote"])
 
 
 CASES += [("r1187_cli_human", _c1106_ca(0, doi=_cli1187, repo="ducthangho/tra-luat")),
@@ -9760,7 +9780,7 @@ MUTANTS.update({
     "r1187_drop_ref_format": ('_git_do(root, "check-ref-format", ref.split("@")[0])[0] or ', '', ["r1187_spec_ref_name"]),
     "r1187_fallback_metadata": ('    spec = blob(m[1])', '    spec = blob(h)', ["r1187_spec_missing_object"]),
     "r1187_ignore_metadata": ('    if "spec_ref" not in lease:', '    if True:', ["r1187_spec_floating"]),
-    "r1187_drop_policy": ('or _git_do(root, "cat-file", "-e", f"refs/remotes/origin/master:{ADR0063_TEP}")[0]', '', ["r1187_no_policy"]),
+    "r1187_drop_policy": ('    _adr0063_landed(root)\n    if spec is None', '    if spec is None', ["r1187_no_policy"]),
     "r1187_drop_milestone_birth": ('or _git_do(root, "cat-file", "-e", f"{ADR0062_OID}^1:docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md")[0] == 0', '', ["r1187_milestone_not_birth"]),
     "r1187_drop_milestone_file": ('or _git_do(root, "cat-file", "-e", f"{ADR0062_OID}:docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md")[0]', '', ["r1187_milestone_missing"]),
 })
@@ -9782,15 +9802,202 @@ def _docs1187(c):
 
 CASES.append(("r1187_doc_anchors", _docs1187))
 MUTANTS["r1187_drop_doc_guard"] = ('        if s == "0063":', '        if False:', ["r1187_doc_anchors"])
-
+MUTANTS["r1187_drop_p3_forwarding"] = ('        p3.append(("human", f["slug"]))', '        pass', ["r1187_p3"])
 CASES += [("r1187_markdown_example", _ca1187("markdown", red=False)), ("r1187_title_positive", _ca1187("title", red=False)), ("r1187_title_conflict", _ca1187("title_conflict")),
           ("r1187_title_packet", _ca1187("title", lambda x: x["ls"].update(packet_id="wrong"))), ("r1187_title_revision", _ca1187("title", lambda x: x["ls"].update(revision=2)))]
 
 MUTANTS["r1187_drop_heading_identity"] = ('        headings = re.findall(r"(?m)^# ([A-Za-z0-9_-]+) r([1-9][0-9]*) (?:—|–|-) .+$", visible)', '        headings = []', ["r1187_title_positive"])
 MUTANTS["r1187_ignore_heading_conflict"] = ('values + [t[0 if key == "packet_id" else 1] for t in headings]', 'values or [t[0 if key == "packet_id" else 1] for t in headings]', ["r1187_title_conflict"])
 MUTANTS["r1187_read_fenced_example"] = ('visible, errors = _che_khong_render(spec.decode("utf-8"))', 'visible, errors = spec.decode("utf-8"), []', ["r1187_markdown_example"])
-
+MUTANTS["r1187_drop_yaml_duplicates"] = ('None in khoa or len(set(khoa)) != len(khoa)', 'None in khoa', ["r1187_duplicate"])
 CASES += [("r1187_event_pr", _ca1187("human", lambda x: x["run"].update(event="pull_request"), False)), ("r1187_event_pr_target", _ca1187("human", lambda x: x["run"].update(event="pull_request_target"), False))]
+
+# Revision 2 proposal: consumer-specific rollout, earliest-run and identity counterexamples.
+def _policy1187(x, content=None):
+    w = x["w"]
+    p = w / x["m"].ADR0063_TEP
+    if content is None:
+        _g(w, "rm", "-q", x["m"].ADR0063_TEP)
+    else:
+        p.write_text(content, encoding="utf-8", newline="\n")
+        _g(w, "add", x["m"].ADR0063_TEP)
+    _g(w, "commit", "-qm", "policy counterexample")
+    _g(w, "update-ref", "refs/remotes/origin/master", _g(w, "rev-parse", "HEAD"))
+
+
+def _rerun1187(x):
+    early = dict(x["run"])
+    x["run"].update(id=4, html_url=f"https://github.com/{x['a'].repo}/actions/runs/4", created_at="2026-11-04T09:01:00Z")
+    x["runs"] = [early, x["run"]]
+    x["tr_raw"]["user"]["login"] = "agent"
+
+
+def _identity1187(x):
+    x["m"]._che_khong_render = lambda _: ("packet_id: wp1187\nrevision: 1\n- packet_id: wp1187; revision: 2;\n", [])
+
+
+CASES += [
+    ("r1187_rerun_bypass", _ca1187("human", _rerun1187)),
+    ("r1187_spec_policy_absent", _ca1187("spec", lambda x: _policy1187(x))),
+    ("r1187_spec_policy_empty", _ca1187("spec", lambda x: _policy1187(x, ""))),
+    ("r1187_human_policy_empty", _ca1187("human", lambda x: _policy1187(x, ""))),
+    ("r1187_new_policy_absent", _ca1187("human", lambda x: (x["run"].update(created_at="2026-11-04T09:01:00Z"), _policy1187(x)))),
+    ("r1187_inline_conflict", _ca1187("spec", _identity1187)),
+    ("r1187_spec_lease_type", _ca1187("spec", lambda x: x["ls"].update(revision="1"))),
+    ("r1187_lease_bool", _ca1187("human", lambda x: (x["ls"].update(revision=True), x["audit"].update(revision=True), x["tr"].update(revision=True)))),
+    ("r1187_reason_type", _ca1187("human", lambda x: x["tr"].update(reason=1))),
+    ("r1187_raw_id_zero", _ca1187("human", lambda x: (x["raw"].update(id=0, html_url=f"https://github.com/{x['a'].repo}/pull/1187#issuecomment-0"), x["audit"].update(audit_source=f"https://github.com/{x['a'].repo}/pull/1187#issuecomment-0")))),
+    ("r1187_created_bad", _ca1187("human", lambda x: x["raw"].update(created_at="bad"))),
+    ("r1187_new_late", _ca1187("human", lambda x: (x["run"].update(created_at="2026-11-04T09:01:00Z"), x["raw"].update(updated_at="2026-11-04T09:02:00Z")))),
+    ("r1187_no_spec", _ca1187("human", lambda x: x.update(spec=None))),
+]
+
+
+def _p3cli1187(x, w, h, waived=False):
+    _cli1187(x, w, h)
+    if not h: return
+    import yaml
+    audit = yaml.safe_load(x["audit"]["body"])
+    audit["open_findings"] = [dict(slug="open-nit", severity="P3")]
+    x["audit"]["body"] = yaml.safe_dump(audit)
+    if waived:
+        x["cmt"] = dict(user=dict(login="ducthangho"), body=f"mien_p3: {h} human:open-nit")
+
+
+CASES += [("r1187_cli_p3_block", _c1106_ca(12, "K5", doi=_p3cli1187, repo="ducthangho/tra-luat")),
+          ("r1187_cli_p3_waive", _c1106_ca(0, doi=lambda x,w,h: _p3cli1187(x,w,h,True), repo="ducthangho/tra-luat"))]
+MUTANTS.update({
+    "r1187_drop_earliest": ('remote_time != min(times)', 'False', ["r1187_rerun_bypass"]),
+    "r1187_drop_spec_rollout": ('    _adr0063_landed(root)\n    if type(lease', '    if type(lease', ["r1187_spec_policy_absent"]),
+    "r1187_drop_human_rollout": ('    _adr0063_landed(root)\n    if spec is None', '    if spec is None', ["r1187_new_policy_absent"]),
+    "r1187_drop_rollout_content": ('all(anchor.encode() in intro and anchor.encode() in current for anchor in ADR0063_ANCHORS)', 'True', ["r1187_spec_policy_empty"]),
+    "r1187_drop_inline_agreement": ('if key == "revision":', 'if key == "revision" and not values:', ["r1187_inline_conflict"]),
+    "r1187_drop_spec_lease_type": ('type(lease.get("revision")) is not int', 'False', ["r1187_spec_lease_type"]),
+    "r1187_drop_raw_id": ('type(d.get("id")) is int and d["id"] > 0', 'True', ["r1187_raw_id_zero"]),
+    "r1187_drop_audit_order": ('_doc_han_utc(comment["updated_at"]) >= remote_time', 'False', ["r1187_new_late"]),
+    "r1187_drop_lease_int": ('any(type(bound[k]) is not int or bound[k] < 1 for k in ("revision", "generation", "pr"))', 'False', ["r1187_lease_bool"]),
+})
+
+
+def _transition_run1187(script, args, sd, milestone):
+    # Same parser/dispatcher and real Git/CLI inputs; only fixture milestone differs.
+    m = importlib.util.module_from_spec(sp := importlib.util.spec_from_file_location("transition_cli", script))
+    sys.path.insert(0, str(script.parent)), sp.loader.exec_module(m)
+    m.ADR0062_OID = milestone
+    out, err = __import__("io").StringIO(), __import__("io").StringIO()
+    try:
+        with __import__("contextlib").redirect_stderr(err), __import__("contextlib").redirect_stdout(out):
+            rc = m.main(["--state-dir", str(sd), *map(str, args)])
+    except SystemExit as ex:
+        rc = ex.code
+    return rc, out.getvalue().encode(), err.getvalue().encode()
+
+
+def _transition_cli1187(x, w, h, bad=False):
+    _cli1187(x, w, h)
+    if not h:
+        path = "docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md"
+        (w / path).write_text("fixture milestone\n", encoding="utf-8")
+        _g(w, "add", path), _g(w, "commit", "-qm", "milestone fixture")
+        x["milestone1187"] = _g(w, "rev-parse", "HEAD")
+        return
+    import yaml
+    x["remote"]["created_at"] = "2026-11-04T08:00:00Z"
+    x["runs"][0].update(x["remote"])
+    audit = yaml.safe_load(x["audit"]["body"])
+    transition = {k: audit[k] for k in ("packet", "revision", "generation", "pr", "reviewed_sha", "reviewed_tree", "spec_sha256")}
+    raw = dict(x["audit"], id=3, html_url="https://github.com/ducthangho/tra-luat/pull/55#issuecomment-3")
+    transition.update(schema="human_audit_transition.v1", adr0062_oid=x["milestone1187"], remote_run=x["remote"]["html_url"],
+                      disposition="accept_post_push_audit", reason="" if bad else "owner accepts timing", transition_source=raw["html_url"])
+    raw["body"] = yaml.safe_dump(transition)
+    x["transition"] = raw
+
+
+CASES += [("r1187_cli_transition", _c1106_ca(0, doi=_transition_cli1187, repo="ducthangho/tra-luat")),
+          ("r1187_cli_transition_bad", _c1106_ca(12, "K4", doi=lambda x,w,h: _transition_cli1187(x,w,h,True), repo="ducthangho/tra-luat"))]
+
+
+def _git_status1187(x, operation, occurrence):
+    original, count = x["m"]._git_do, [0]
+    def injected(root, *args):
+        result = original(root, *args)
+        if args[0] == operation:
+            count[0] += 1
+            if count[0] == occurrence: return 1, result[1]
+        return result
+    x["m"]._git_do = injected
+
+
+CASES += [("r1187_tree_rc", _ca1187("human", lambda x: _git_status1187(x, "rev-parse", 2))),
+          ("r1187_history_rc", _ca1187("human", lambda x: _git_status1187(x, "rev-list", 2))),
+          ("r1187_created_format", _ca1187("human", lambda x: x["raw"].update(created_at="2026-1-04T09:00:00Z"))),
+          ("r1187_updated_format", _ca1187("human", lambda x: x["raw"].update(updated_at="2026-1-04T09:00:00Z")))]
+MUTANTS.update({
+    "r1187_drop_tree_rc": ('    if rc or set(r) != set(expected)', '    if set(r) != set(expected)', ["r1187_tree_rc"]),
+    "r1187_drop_history_rc": ('or fp_rc or ADR0062_OID.encode()', 'or ADR0062_OID.encode()', ["r1187_history_rc"]),
+    "r1187_drop_comment_format": ('if not isinstance(d.get(key), str) or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z", d[key]):', 'if False:', ["r1187_created_format", "r1187_updated_format"]),
+    "r1187_drop_reason_type": ('not isinstance(tr["reason"], str) or not tr["reason"].strip()', 'False', ["r1187_reason_type"]),
+    "r1187_drop_cli_p3": ('        p3.append(("human", f["slug"]))', '        pass', ["r1187_cli_p3_block"]),
+})
+
+
+def _offfp1187(x):
+    original = x["m"].ADR0062_OID
+    separate = _g(x["w"], "commit-tree", f"{original}^{{tree}}", "-p", f"{original}^1", "-m", "independent milestone")
+    x["m"].ADR0062_OID = separate
+    x["tr"]["adr0062_oid"] = separate
+
+
+# Redundant bindings must be removed at every consumer for a semantic mutant.
+# Removing only one guarded copy remains fail-closed and earns no kill credit.
+MUTANTS.update({
+    "r1187_drop_run_repo": ((
+        'run.get("repository", {}).get("full_name") == a.repo',
+        'r.get("repository", {}).get("full_name") == a.repo',
+        '"id", "head_sha", "repository", "html_url", "event", "created_at"'),
+        ('True', 'True', '"id", "head_sha", "html_url", "event", "created_at"'), ["r1187_repo"]),
+    "r1187_drop_run_head": ((
+        'run.get("head_sha") == a.head', 'r.get("head_sha") == a.head',
+        '"id", "head_sha", "repository", "html_url", "event", "created_at"'),
+        ('True', 'True', '"id", "repository", "html_url", "event", "created_at"'), ["r1187_run_head_sha"]),
+    "r1187_drop_run_url": ((
+        'run.get("html_url") == run_url',
+        'candidate.get("html_url") != f"https://github.com/{a.repo}/actions/runs/{candidate[\'id\']}"'),
+        ('True', 'False'), ["r1187_run_html_url"]),
+    "r1187_drop_run_event": ((
+        'type(run.get("event")) is str and bool(run["event"])',
+        'type(candidate.get("event")) is not str or not candidate["event"]'),
+        ('True', 'False'), ["r1187_run_event"]),
+})
+
+
+def _rollout_git1187(x, operation, result):
+    original = x["m"]._git_do
+    x["run"]["created_at"] = "2026-11-04T09:01:00Z"
+    def injected(root, *args):
+        actual = original(root, *args)
+        if args[0] == operation or operation == "shallow" and args == ("rev-parse", "--is-shallow-repository"):
+            return result(actual)
+        return actual
+    x["m"]._git_do = injected
+
+
+CASES += [
+    ("r1187_rollout_parent_read", _ca1187("human", lambda x: _rollout_git1187(x, "ls-tree", lambda r: (1, r[1])))),
+    ("r1187_rollout_birth_read", _ca1187("human", lambda x: _rollout_git1187(x, "log", lambda r: (1, r[1])))),
+    ("r1187_rollout_first_parent", _ca1187("human", lambda x: _rollout_git1187(x, "rev-list", lambda r: (0, b"0"*40 + b"\n")))),
+    ("r1187_rollout_shallow", _ca1187("human", lambda x: _rollout_git1187(x, "shallow", lambda r: (0, b"true\n")))),
+    ("r1187_legacy_optional", _ca1187("legacy", lambda x: (x["ls"].pop("spec_ref"), x["ls"].update(spec_sha256_required="0"*64)), False)),
+    ("r1187_cli_neither", _c1106_ca(12, "K4", doi=lambda x,w,h: h and x.update(no_model=True))),
+]
+MUTANTS.update({
+    "r1187_drop_rollout_parent_read": ('and not parent_rc and not parent_file', 'and not parent_file', ["r1187_rollout_parent_read"]),
+    "r1187_drop_rollout_birth_read": ('if rc or born_rc or ', 'if rc or ', ["r1187_rollout_birth_read"]),
+    "r1187_drop_rollout_first_parent": ('oid.encode() in fp.split() and ', '', ["r1187_rollout_first_parent"]),
+    "r1187_drop_rollout_shallow": ('_git_do(root, "rev-parse", "--is-shallow-repository") != (0, b"false\\n")', 'False', ["r1187_rollout_shallow"]),
+    "r1187_drop_neither": ('raise ValueError("thiếu review model hoặc human độc lập")', 'return', ["r1187_cli_neither"]),
+})
+
 def main() -> int:
     _ = [s.reconfigure(encoding="utf-8", errors="backslashreplace")
          for s in (sys.stdout, sys.stderr) if hasattr(s, "reconfigure")]

@@ -3187,16 +3187,36 @@ ADR0063_TEP = "docs/adr/0063-merge-spec-ref-va-human-audit.md"
 ADR0063_ANCHORS = ("spec_ref", "spec_sha256_required", "human_exact_head_audit.v1", "human_audit_transition.v1", "M5/M12", "first-parent", "2026-11-04T08:36:24Z", "K0/K2/K3/K5/K6/K7", "thời hạn review")
 
 
+def _adr0063_landed(root):
+    """Use committed first-parent introduction, with readable complete history."""
+    master = "refs/remotes/origin/master"
+    rc, fp = _git_do(root, "rev-list", "--first-parent", master)
+    born_rc, born = _git_do(root, "log", "--first-parent", "--diff-filter=A", "--format=%H", master, "--", ADR0063_TEP)
+    if rc or born_rc or _git_do(root, "rev-parse", "--is-shallow-repository") != (0, b"false\n"):
+        raise ValueError("ADR0063 first-parent history không đo được")
+    for oid in born.decode().split():
+        parent_rc, parent_file = _git_do(root, "ls-tree", "-r", f"{oid}^1", "--", ADR0063_TEP)
+        intro_rc, intro = _git_do(root, "show", f"{oid}:{ADR0063_TEP}")
+        current_rc, current = _git_do(root, "show", f"{master}:{ADR0063_TEP}")
+        if (oid.encode() in fp.split() and not parent_rc and not parent_file and not intro_rc and not current_rc
+                and all(anchor.encode() in intro and anchor.encode() in current for anchor in ADR0063_ANCHORS)):
+            return
+    raise ValueError("ADR0063 chưa land với contract đầy đủ trên first-parent master")
+
+
 def _spec_merge(root, h, path, lease):
     def blob(oid):
         rc, spec = _git_do(root, "show", f"{oid}:{path}")
         if rc or hashlib.sha256(spec).hexdigest() != lease.get("spec_hash"):
             raise ValueError("spec blob/hash không khớp lease")
-        if "spec_sha256_required" in lease and lease["spec_sha256_required"] != lease["spec_hash"]:
-            raise ValueError("spec_sha256_required khác spec_hash")
         return spec
     if "spec_ref" not in lease:
         return blob(h)
+    _adr0063_landed(root)
+    if type(lease.get("packet_id")) is not str or not lease["packet_id"] or type(lease.get("revision")) is not int or lease["revision"] < 1:
+        raise ValueError("spec lease packet_id/revision sai kiểu")
+    if "spec_sha256_required" in lease and lease["spec_sha256_required"] != lease["spec_hash"]:
+        raise ValueError("spec_sha256_required khác spec_hash")
     ref = lease["spec_ref"]
     m = re.fullmatch(r"refs/heads/[^\s@:\\]+@([0-9a-f]{40})", ref) if isinstance(ref, str) else None
     if not m or _git_do(root, "check-ref-format", ref.split("@")[0])[0] or lease.get("spec_path") != path or not path or PurePosixPath(path).is_absolute() or ".." in PurePosixPath(path).parts:
@@ -3206,8 +3226,8 @@ def _spec_merge(root, h, path, lease):
     if errors: raise ValueError("spec Markdown không đóng rào/comment")
     for key in ("packet_id", "revision"):
         values = re.findall(rf"(?m)^(?:- )?{key}: ([^;\n]+)", visible)
-        if key == "revision" and not values:
-            values = re.findall(r"(?m)^- packet_id: [^;\n]+; revision: ([0-9]+);", visible)
+        if key == "revision":
+            values += re.findall(r"(?m)^- packet_id: [^;\n]+; revision: ([0-9]+);", visible)
         headings = re.findall(r"(?m)^# ([A-Za-z0-9_-]+) r([1-9][0-9]*) (?:—|–|-) .+$", visible)
         values = list(dict.fromkeys(values + [t[0 if key == "packet_id" else 1] for t in headings]))
         if values != [str(lease.get(key))]:
@@ -3218,7 +3238,11 @@ def _spec_merge(root, h, path, lease):
 
 
 def _owner_record(path, repo, pr, schema):
+    if not path:
+        raise ValueError("thiếu owner comment")
     d = _doc_json(path, RC_GATE)[0]
+    if not isinstance(d, dict):
+        raise ValueError("owner comment phải là object")
     url = f"https://github.com/{repo}/pull/{pr}#issuecomment-{d.get('id')}"
     if not (repo == "ducthangho/tra-luat" and type(d.get("id")) is int and d["id"] > 0
             and d.get("user", {}).get("login") == CHU_KHO and d.get("user", {}).get("type") == "User"
@@ -3236,6 +3260,9 @@ def _owner_record(path, repo, pr, schema):
 
 
 def _human_merge(a, root, lease, spec, p3):
+    _adr0063_landed(root)
+    if spec is None or type(lease.get("packet_id")) is not str or not lease["packet_id"]:
+        raise ValueError("human audit thiếu spec/packet identity")
     r, comment, url = _owner_record(a.human_audit_comment, a.repo, a.pr, "human_exact_head_audit.v1")
     rc, tree = _git_do(root, "rev-parse", f"{a.head}^{{tree}}")
     bound = dict(packet=lease.get("packet_id"), revision=lease.get("revision"), generation=lease.get("generation"), pr=a.pr,
@@ -3253,12 +3280,26 @@ def _human_merge(a, root, lease, spec, p3):
         if f["severity"] != "P3":
             raise ValueError("human audit còn P0–P2")
         p3.append(("human", f["slug"]))
+    if not a.human_remote_run:
+        raise ValueError("thiếu human remote run")
     run = _doc_json(a.human_remote_run, RC_GATE)[0]
     run_url = f"https://github.com/{a.repo}/actions/runs/{run.get('id')}"
     if not (type(run.get("id")) is int and run["id"] > 0 and run.get("repository", {}).get("full_name") == a.repo
             and run.get("head_sha") == a.head and run.get("html_url") == run_url and type(run.get("event")) is str and bool(run["event"])):
         raise ValueError("human remote run repo/head/origin sai")
+    runs = _trang_du(_doc_json(a.workflow_runs, RC_GATE)[0], "workflow_runs", "human workflow_runs")
+    same_head = [r for r in runs if r.get("head_sha") == a.head and r.get("repository", {}).get("full_name") == a.repo]
+    if not same_head:
+        raise ValueError("human run không có trong tập K2 đầy đủ")
+    times = []
+    for candidate in same_head:
+        if (candidate["id"] < 1 or candidate.get("html_url") != f"https://github.com/{a.repo}/actions/runs/{candidate['id']}"
+                or type(candidate.get("event")) is not str or not candidate["event"]):
+            raise ValueError("human K2 run origin sai")
+        times.append(_doc_han_utc(candidate["created_at"]))
     remote_time = _doc_han_utc(run["created_at"])
+    if remote_time != min(times) or not any(all(candidate.get(k) == run.get(k) for k in ("id", "head_sha", "repository", "html_url", "event", "created_at")) for candidate in same_head):
+        raise ValueError("human remote run phải là run sớm nhất trong tập K2 đầy đủ")
     if remote_time >= _doc_han_utc(ADR0062_TIME):
         if _doc_han_utc(comment["updated_at"]) >= remote_time:
             raise ValueError("candidate mới cần human review trước push M5/M12")
@@ -3271,7 +3312,7 @@ def _human_merge(a, root, lease, spec, p3):
             or not isinstance(tr["reason"], str) or not tr["reason"].strip() or fp_rc or ADR0062_OID.encode() not in fp.split()
             or _git_do(root, "cat-file", "-e", f"{ADR0062_OID}:docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md")[0]
             or _git_do(root, "cat-file", "-e", f"{ADR0062_OID}^1:docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md")[0] == 0
-            or _git_do(root, "cat-file", "-e", f"refs/remotes/origin/master:{ADR0063_TEP}")[0]):
+):
         raise ValueError("transition owner/bindings/mốc first-parent/ADR0063 chưa land")
 
 

@@ -103,8 +103,10 @@ windows_waiver_authority: https://github.com/ducthangho/tra-luat/issues/1124#iss
 windows_waiver_note: bind machine-readable owner comment to final H before K6; targeted
   diagnostics are not full acceptance
 runtime_lanes:
-- Windows Desktop Commander targeted only
-- Linux Ubuntu-Clean WSL for required non-Windows gates
+- Windows Desktop Commander targeted only (existing H82 pass retained)
+- 'Linux Debian WSL on C: A7 and supporting admission/probes using isolated Python3.12.16'
+- Linux Ubuntu-Clean historical completed H82 A9/light evidence only; no new work
+  while filesystem unhealthy
 tree_base: a8dc7f5fc314275131027aae2c0c4878b659b28d
 upstream_paths:
 - .github/workflows/ops-thu-hoi-admission.yml
@@ -218,3 +220,21 @@ current_holder_reconciliation:
     canonical_rc: 11
   note: One canonical API namespace scan; own lease is sole active holder for every
     path; not five CLI rc0 results
+runtime_recovery:
+  utc: '2026-11-03T23:56:37.496501+00:00'
+  head: 82adc57d1829bcac6aef6e8aae0b7f474054db94
+  failed_A7: Ubuntu-Clean rc1 Errno30 read-only filesystem; no full verdict
+  diagnosed_guard_error: Ubuntu-Clean VHDX actually D:/WSL/Ubuntu-Clean/ext4.vhdx;
+    prior guard watched C incorrectly
+  selected_distro: Debian
+  actual_vhdx: C:\Users\admin\AppData\Local\wsl\{f5862080-851a-4145-b0ff-b4c8d55a8476}\ext4.vhdx
+  data_drive: 'C:'
+  guard: discover distro VHDX from registry; guard its real drive plus Windows log
+    drive; probe native filesystem rw; >=10GiB before full, abort own group below2GiB
+  retained_evidence: A9 H82 1776/1776 on original Ubuntu-Clean; K4/focused Windows
+    same H; no relabel to Debian runs
+  user_space_only: true
+  source_head_changed: false
+  full_windows: false
+  authority: Standing owner authority over leases/runtime execution; current instruction
+    continue safely; no acceptance waiver or model/access/budget change

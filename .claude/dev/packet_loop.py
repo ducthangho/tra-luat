@@ -3176,6 +3176,96 @@ def _dong_chu_kho(duong, tho=False) -> list[str]:
     return [x if tho else x.strip() for x in (re.split(r"\r?\n", d["body"]) if tho else d["body"].splitlines())]  # lượt 3 F03: splitlines tách cả \v \f \x85 \u2028…
 
 
+# ADR-0063: authoritative spec and human evidence remain separate from model artifacts.
+ADR0062_OID = "1f0941e9bba1d1d517eda4174167b81963c06bd5"
+ADR0062_TIME = "2026-11-04T08:36:24Z"
+ADR0063_TEP = "docs/adr/0063-merge-spec-ref-va-human-audit.md"
+
+
+def _spec_merge(root, h, path, lease):
+    def blob(oid):
+        rc, spec = _git_do(root, "show", f"{oid}:{path}")
+        if rc or hashlib.sha256(spec).hexdigest() != lease.get("spec_hash"):
+            raise ValueError("spec blob/hash không khớp lease")
+        if "spec_sha256_required" in lease and lease["spec_sha256_required"] != lease["spec_hash"]:
+            raise ValueError("spec_sha256_required khác spec_hash")
+        return spec
+    if "spec_ref" not in lease:
+        return blob(h)
+    ref = lease["spec_ref"]
+    m = re.fullmatch(r"refs/heads/[^\s@:\\]+@([0-9a-f]{40})", ref) if isinstance(ref, str) else None
+    if not m or _git_do(root, "check-ref-format", ref.split("@")[0])[0] or lease.get("spec_path") != path or not path or PurePosixPath(path).is_absolute() or ".." in PurePosixPath(path).parts:
+        raise ValueError("spec_ref phải ghim OID40 và spec_path đúng nguồn")
+    spec = blob(m[1])
+    for key in ("packet_id", "revision"):
+        values = re.findall(rf"(?m)^(?:- )?{key}: ([^;\n]+)", spec.decode("utf-8"))
+        if key == "revision" and not values:
+            values = re.findall(r"(?m)^- packet_id: [^;\n]+; revision: ([0-9]+);", spec.decode("utf-8"))
+        if values != [str(lease.get(key))]:
+            raise ValueError(f"spec {key} không khớp lease")
+    if _git_do(root, "cat-file", "-e", f"{h}:{path}")[0] == 0 and blob(h) != spec:
+        raise ValueError("hai nguồn spec khác bytes")
+    return spec
+
+
+def _owner_record(path, repo, pr, schema):
+    d = _doc_json(path, RC_GATE)[0]
+    url = f"https://github.com/{repo}/pull/{pr}#issuecomment-{d.get('id')}"
+    if not (repo == "ducthangho/tra-luat" and type(d.get("id")) is int and d["id"] > 0
+            and d.get("user", {}).get("login") == CHU_KHO and d.get("user", {}).get("type") == "User"
+            and d.get("author_association") == "OWNER" and d.get("issue_url") == f"https://api.github.com/repos/{repo}/issues/{pr}"
+            and d.get("html_url") == url):
+        raise ValueError("owner comment origin/identity không hợp lệ")
+    for key in ("created_at", "updated_at"):
+        if not isinstance(d.get(key), str) or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z", d[key]):
+            raise ValueError("comment timestamp sai")
+        datetime.strptime(d[key], "%Y-%m-%dT%H:%M:%SZ")
+    record = _yaml_cay(d["body"].encode("utf-8"))
+    if not isinstance(record, dict) or record.get("schema") != schema:
+        raise ValueError("owner record schema không hợp lệ")
+    return record, d, url
+
+
+def _human_merge(a, root, lease, spec, p3):
+    r, comment, url = _owner_record(a.human_audit_comment, a.repo, a.pr, "human_exact_head_audit.v1")
+    rc, tree = _git_do(root, "rev-parse", f"{a.head}^{{tree}}")
+    bound = dict(packet=lease.get("packet_id"), revision=lease.get("revision"), generation=lease.get("generation"), pr=a.pr,
+                 reviewed_sha=a.head, reviewed_tree=tree.decode().strip(), spec_sha256=hashlib.sha256(spec).hexdigest())
+    expected = dict(schema="human_exact_head_audit.v1", **bound, verdict="approve", assurance="human_audited",
+                    review_axes=["spec", "standards_security"], open_findings=r.get("open_findings"), audit_source=url)
+    if rc or set(r) != set(expected) or any(type(r[k]) is not type(v) or r[k] != v for k, v in expected.items()) or not all(bound.values()) or any(type(bound[k]) is not int or bound[k] < 1 for k in ("revision", "generation", "pr")):
+        raise ValueError("human audit exact bindings/verdict không khớp")
+    findings = r["open_findings"]
+    if not isinstance(findings, list):
+        raise ValueError("open_findings phải là list")
+    for f in findings:
+        if not isinstance(f, dict) or set(f) != {"slug", "severity"} or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", f.get("slug", "")) or f.get("severity") not in ("P0", "P1", "P2", "P3"):
+            raise ValueError("finding schema sai")
+        if f["severity"] != "P3":
+            raise ValueError("human audit còn P0–P2")
+        p3.append(("human", f["slug"]))
+    run = _doc_json(a.human_remote_run, RC_GATE)[0]
+    run_url = f"https://github.com/{a.repo}/actions/runs/{run.get('id')}"
+    if not (type(run.get("id")) is int and run["id"] > 0 and run.get("repository", {}).get("full_name") == a.repo
+            and run.get("head_sha") == a.head and run.get("html_url") == run_url and run.get("event") == "push"):
+        raise ValueError("human remote run repo/head/origin sai")
+    remote_time = _doc_han_utc(run["created_at"])
+    if remote_time >= _doc_han_utc(ADR0062_TIME):
+        if _doc_han_utc(comment["updated_at"]) >= remote_time:
+            raise ValueError("candidate mới cần human review trước push M5/M12")
+        return
+    tr, _, tr_url = _owner_record(a.human_transition_comment, a.repo, a.pr, "human_audit_transition.v1")
+    expected_tr = dict(schema="human_audit_transition.v1", **bound, adr0062_oid=ADR0062_OID, remote_run=run_url,
+                       disposition="accept_post_push_audit", reason=tr.get("reason"), transition_source=tr_url)
+    fp_rc, fp = _git_do(root, "rev-list", "--first-parent", "refs/remotes/origin/master")
+    if (set(tr) != set(expected_tr) or any(type(tr[k]) is not type(v) or tr[k] != v for k, v in expected_tr.items())
+            or not isinstance(tr["reason"], str) or not tr["reason"].strip() or fp_rc or ADR0062_OID.encode() not in fp.split()
+            or _git_do(root, "cat-file", "-e", f"{ADR0062_OID}:docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md")[0]
+            or _git_do(root, "cat-file", "-e", f"{ADR0062_OID}^1:docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md")[0] == 0
+            or _git_do(root, "cat-file", "-e", f"refs/remotes/origin/master:{ADR0063_TEP}")[0]):
+        raise ValueError("transition owner/bindings/mốc first-parent/ADR0063 chưa land")
+
+
 def cmd_kiem_merge(a, state_dir: Path) -> int:
     if not (all(SHA_RE.fullmatch(x) for x in (a.head, a.base)) and re.fullmatch(r"[^/\s]+/[^/\s]+", a.repo)):
         _die(RC_ARG, "--head/--base phải là SHA 40 hex, --repo dạng chủ/kho")
@@ -3195,9 +3285,7 @@ def cmd_kiem_merge(a, state_dir: Path) -> int:
             _die(RC_GATE, f"PR head hiện hành ≠ {h}")
 
     def k1():
-        rc, spec = _git_do(root, "show", f"{h}:{a.spec}")
-        if rc or hashlib.sha256(spec).hexdigest() != lease.get("spec_hash"):
-            _die(RC_GATE, "blob --spec tại head không khớp spec_hash của lease")
+        spec = _spec_merge(root, h, a.spec, lease)
         khai = re.findall(rb"^dieu_kien_merge:[^\n]*$", spec, re.M)
         if not khai:
             return spec
@@ -3210,6 +3298,14 @@ def cmd_kiem_merge(a, state_dir: Path) -> int:
         return spec
 
     def k4():
+        if a.human_audit_comment:
+            if spec is None:
+                raise ValueError("K4 human cần K1 hợp lệ")
+            _human_merge(a, root, lease, spec, p3)
+        if not (a.offline_run_json or a.offline_stdout):
+            if a.human_audit_comment:
+                return
+            raise ValueError("thiếu review model hoặc human độc lập")
         r = _doc_json(a.offline_run_json, RC_GATE)[0]
         out = Path(a.offline_stdout).read_bytes()
         dong = [x for x in out.decode("utf-8").splitlines() if x.strip()]
@@ -3537,7 +3633,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     q = sub.add_parser("kiem-merge", help="#1106 ADR-0060: đủ điều kiện bỏ draft/merge trên head H? (K0–K7, không state)")
     for x in ("--root", "--repo", "--head", "--base", "--spec", "--lease", "--workflow-runs", "--check-runs", "--connector", "--offline-run-json", "--offline-stdout"):
-        q.add_argument(x, required=x != "--root", default="." if x == "--root" else None)
+        q.add_argument(x, required=x not in ("--root", "--offline-run-json", "--offline-stdout"), default="." if x == "--root" else None)
+    for x in ("--human-audit-comment", "--human-transition-comment", "--human-remote-run"):
+        q.add_argument(x, help="ADR-0063: raw API owner audit/transition comment hoặc run readback")
     q.add_argument("--pr", type=int, required=True)
     q.add_argument("--workflow-jobs", required=True, action="append")
     q.add_argument("--p3-offline", action="append", help="khoá P3 còn mở từ review offline; lặp")

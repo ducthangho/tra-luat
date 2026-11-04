@@ -29,7 +29,7 @@ merge_commit: c7174bfe03b3acd22cfa055b5fce176129d29542
 merge_commit_tree: 2b58328926438ecb9c6aa34cfed7d27bd8c41a03
 merge_commit_parents: [62e629156fd0729b743f15eed2f32487786b9adc, 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651]
 pre_merge_checks:
-  - {name: 'ci.yml pull_request tren head cuoi', sha: 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651, conclusion: success, ghi_chu: 'measured — REST commits/9d06bd1/check-runs: 28 check run, 27 success + 1 skipped (launcher PR theo nhan).'}
+  - {name: 'ci.yml pull_request tren head cuoi', sha: 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651, conclusion: success, ghi_chu: 'measured — readback-check-runs-9d06bd1.json (REST commits/9d06bd1/check-runs, doc lai 04-11): 28 check run, 27 success + 1 skipped (launcher PR theo nhan).'}
   - {name: 'Windows A3 (launcher-windows.yml workflow_dispatch tren dung head)', run_id: 41361328113, sha: 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651, conclusion: success, ghi_chu: 'loi_khai_co_neo — handoff wp1122: DOT BIEN 461/461 (118 khong do duoc), suite 290/290 (bo qua 74, hong 0); master truoc va la 430/434.'}
   - {name: 'Codex connector', sha: 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651, conclusion: 'completed; khong finding', ghi_chu: 'loi_khai_co_neo — comment tom tat 6565938874 (luot "Draft marked ready"). CAVEAT: merge goi luc 00:08:55Z khi luot connector CON DANG CHAY; ket qua ve sach sau do. Ghi lam bai hoc trong handoff.'}
   - {name: 'review offline Codex luot 10/10', sha: 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651, conclusion: 'approve; 0 P0, 0 P1, 0 P2, 0 P3', nguon: 'nhanh ops/wp1122-r1-g1-lease: ops/handoff/wp1122-g1-claude/luot10/{VERDICT.md,run/run.json,SHA256SUMS}', ghi_chu: 'loi_khai_co_neo — run 2b394187972546eeab9af23a0298151e; 10 luot o lease.codex_da_goi (luot 7 bi bo loc noi dung cua nen chan, van tinh 1 loi goi).'}
@@ -55,7 +55,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1122-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so (lan luu tru)', nhanh: claude/ghi-so-land-825, ghi_chu: 'chi cham ops/land/**'}
-  - {item: 'ban ghi M8', ket_qua: 'measured — issuecomment-6570713331 tren #1122, doc lai khoi YAML khop tung byte; kiem-dong-wp rc 0; #1122 dong completed.'}
+  - {item: 'ban ghi M8', ket_qua: 'measured — readback-m8-issuecomment-6570713331.json (comment tren #1122); khoi YAML trich tu readback khop tung byte ban nhap; kiem-dong-wp-m8.txt: chay lai tren khoi doc lai, rc 0 (04-11); readback-issue-1122.json: state closed, state_reason completed.'}
 # ---- het truong chuan
 packet_id: LAUNCHER-TEST-WINDOWS-TIN-DUNG-GIA
 packet_issue: 1122

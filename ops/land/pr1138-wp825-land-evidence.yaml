@@ -47,7 +47,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp825-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so (lan luu tru)', nhanh: claude/ghi-so-land-825, ghi_chu: 'chi cham ops/land/**'}
-  - {item: 'ban ghi M8', ket_qua: 'measured — issuecomment-6570676077 tren #825, doc lai khoi YAML khop tung byte; kiem-dong-wp rc 0 ("DONG DUOC WP ... merge e007a318"); #825 dong completed.'}
+  - {item: 'ban ghi M8', ket_qua: 'measured — readback-m8-issuecomment-6570676077.json (comment tren #825); khoi YAML trich tu readback khop tung byte ban nhap; kiem-dong-wp-m8.txt: chay lai tren khoi doc lai, rc 0 "ĐÓNG ĐƯỢC WP ... merge e007a318" (04-11); readback-issue-825.json: state closed, state_reason completed.'}
 # ---- het truong chuan
 packet_id: CODEX-REJECTED-STATE-KHONG-GHI-DUOC-ADR
 packet_issue: 825

@@ -9256,7 +9256,8 @@ def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None, env=None, git_loi
             "--lease", f("l.yaml", x["lease"] if isinstance(x["lease"], str) else yaml.safe_dump(x["lease"])), "--workflow-runs", f("wr.json", trang("workflow_runs", x["runs"])),
             "--workflow-jobs", f("wj.json", trang("jobs", x["jobs"])), "--check-runs", f("cr.json", trang("check_runs", x["cr"])),
             "--connector", f("cn.json", cn),
-            *(("--offline-run-json", f("run.json", x["run"]), "--offline-stdout", f("out.log", x["out"])) if not x.get("no_model") else ()),
+            *(("--offline-run-json", f("run.json", x["run"])) if not x.get("no_model") and not x.get("missing_model_run") else ()),
+            *(("--offline-stdout", f("out.log", x["out"])) if not x.get("no_model") and not x.get("missing_model_stdout") else ()),
             *(("--human-audit-comment", f("audit.json", x["audit"])) if x.get("audit") else ()),
             *(("--human-remote-run", f("remote.json", x["remote"])) if x.get("audit") and not x.get("missing_remote") else ()),
             *(("--human-transition-comment", f("transition.json", x["transition"])) if x.get("transition") else ()),
@@ -9974,9 +9975,9 @@ MUTANTS.update({
         '"id", "head_sha", "repository", "html_url", "event", "created_at"'),
         ('True', 'True', '"id", "head_sha", "html_url", "event", "created_at"'), ["r1187_repo"]),
     "r1187_drop_run_head": ((
-        'run.get("head_sha") == a.head', 'r.get("head_sha") == a.head',
+        'run.get("head_sha") == a.head', 'same_head = [r for r in runs if r.get("head_sha") == a.head',
         '"id", "head_sha", "repository", "html_url", "event", "created_at"'),
-        ('True', 'True', '"id", "repository", "html_url", "event", "created_at"'), ["r1187_run_head_sha"]),
+        ('True', 'same_head = [r for r in runs if True', '"id", "repository", "html_url", "event", "created_at"'), ["r1187_run_head_sha"]),
     "r1187_drop_run_url": ((
         'run.get("html_url") == run_url',
         'candidate.get("html_url") != f"https://github.com/{a.repo}/actions/runs/{candidate[\'id\']}"'),
@@ -10079,6 +10080,8 @@ CASES += [
     ("r1187_milestone_parent_rc", _ca1187("human", lambda x:_git_status1187(x,"ls-tree",2))),
     ("r1187_cli_missing_remote", _c1106_ca(12,"thiếu human remote run",doi=_missing_cli1187,repo="ducthangho/tra-luat")),
     ("r1187_cli_missing_transition", _c1106_ca(12,"thiếu owner comment",doi=lambda x,w,h:_missing_cli1187(x,w,h,True),repo="ducthangho/tra-luat")),
+    ("r1187_cli_missing_model_run", _c1106_ca(12,"K4",doi=lambda x,w,h:h and x.update(missing_model_run=True))),
+    ("r1187_cli_missing_model_stdout", _c1106_ca(12,"K4",doi=lambda x,w,h:h and x.update(missing_model_stdout=True))),
 ]
 MUTANTS_NHAM_TEST = MUTANTS_NHAM_TEST | {"r1187_drop_crash_classification"}
 MUTANTS.update({

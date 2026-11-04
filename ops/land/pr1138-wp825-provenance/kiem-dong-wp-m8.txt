@@ -1,4 +1,0 @@
-# 2026-11-04T15:35:11Z — khoi YAML trich tu readback-m8-issuecomment-6570676077.json; cmp voi ban nhap m8-825.yaml: byte khop
-# lenh: python3 .claude/dev/packet_loop.py kiem-dong-wp --root . --bien-ban <khoi YAML doc lai> --lease <lease cuoi wp825>
-ĐÓNG ĐƯỢC WP CODEX-REJECTED-STATE-KHONG-GHI-DUOC-ADR — merge e007a318ffbd0079380a72d9f74df8a401028ae4
-rc=0

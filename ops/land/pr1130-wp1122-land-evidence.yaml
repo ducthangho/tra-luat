@@ -1,7 +1,7 @@
 # HO SO LAND — packet #1122 LAUNCHER-TEST-WINDOWS-TIN-DUNG-GIA r1 g1, code qua PR #1130. Khuon: ops/land/pr1128-wp1113-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (c7174bfe), landed TRUE — du bon moc §10.2.2 tren run push master 41365578445 (dung merge SHA, attempt 1); A6 (Windows
+# TRANG THAI: merged (c7174bfe), landed FALSE — CHO DUYET NEO SHA 9d06bd1 (connector P1 r4469672169 tren PR #1153). Du bon moc §10.2.2 tren run push master 41365578445 (dung merge SHA, attempt 1); A6 (Windows
 # sau merge) dat o run push master 41365578430 (launcher-windows.yml, cung SHA).
 # NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nghia nhu khuon.
 # Readback tho: ops/land/pr1130-wp1122-provenance/ (SHA256SUMS kem). Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-11-02.
@@ -44,7 +44,7 @@ post_merge_checks:
     moc_run: 'measured — ci/provenance.yaml moc.run: event push, nhanh master, head_sha c7174bfe, run_attempt 1, passed.'
     moc_checkout: 'measured — ci/provenance.yaml moc.checkout: 23/23 job passed tai c7174bfe03b3acd22cfa055b5fce176129d29542 (doi_chieu sha_bang_head_sha).'
     moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition: passed (wd-run 41399464496, artifact workflow-definition-41365578445), ci_provenance.py thu tu tinh lai blob/sha256.'
-    moc_gate_output: 'measured — danh-gia-gate-output-41365578445.txt (danh_gia_gate.py: moi job PHAI co dong ket qua duong khop luat cua loai job, thieu => not_measured): 23/23 job passed, vd gate-cong-cu "cong_cu_test: 61/61 đạt" + "MẢNH k/8: N/N đột biến", gate-cong-cu-gop "SỐ LIỆU GOM: ... lỗi đột biến=0", gate-nhanh-manh "rc=0 · passed N/N", gate/ops/packet-loop/registry "TỔNG: ĐẠT". gate-output-41365578445.txt giu sha256 + so byte log tung job. Ban dau chi dua vao conclusion + ##[error]=0 — connector P1 r4439522915 bat; da sua. Lane launcher-windows 41365578430: danh-gia-gate-output-41365578430.txt 2/2 job co dau hieu duong (N/N ca + DOT BIEN N/N).'
+    moc_gate_output: 'measured — danh-gia-gate-output-41365578445.txt (danh_gia_gate.py: moi job PHAI co dong ket qua duong khop luat cua loai job, thieu => not_measured): 23/23 job passed, vd gate-cong-cu "cong_cu_test: 61/61 đạt" + "MẢNH k/8: N/N đột biến", gate-cong-cu-gop "SỐ LIỆU GOM: ... lỗi đột biến=0", gate-nhanh-manh "rc=0 · passed N/N", gate/ops/packet-loop/registry "TỔNG: ĐẠT". gate-output-41365578445.txt giu sha256 + so byte log tung job. Ban dau chi dua vao conclusion + ##[error]=0 — connector P1 r4439522915 bat; da sua. danh_gia_gate.py da va connector P2 r4469672182 (redirect khong mang token; phan-chung-redirect.txt), chay lai 04-11 than khop. Lane launcher-windows 41365578430: danh-gia-gate-output-41365578430.txt 2/2 job co dau hieu duong (N/N ca + DOT BIEN N/N).'
   - name: 'launcher-windows.yml push master tai DUNG merge SHA (A6 cua spec)'
     run_id: 41365578430
     run_attempt: 1
@@ -55,7 +55,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1122-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so (lan luu tru)', nhanh: claude/ghi-so-land-825, ghi_chu: 'chi cham ops/land/**'}
-  - {item: 'ban ghi M8', ket_qua: 'measured — readback-m8-issuecomment-6570713331.json (comment tren #1122); khoi YAML trich tu readback khop tung byte ban nhap; kiem-dong-wp-m8.txt: chay lai tren khoi doc lai, rc 0 (04-11); readback-issue-1122.json: state closed, state_reason completed.'}
+  - {item: 'ban ghi M8', ket_qua: 'measured — readback-m8-issuecomment-6570713331.json (comment tren #1122); khoi YAML trich tu readback khop tung byte ban nhap; kiem-dong-wp-m8.txt: chay lai tren khoi doc lai, rc 0 (04-11); readback-issue-1122.json: state closed, state_reason completed. LUU Y: M8 va viec dong #1122 xay ra TRUOC connector P1 r4469672169; khi co duyet neo SHA can comment bo sung tren #1122.'}
 # ---- het truong chuan
 packet_id: LAUNCHER-TEST-WINDOWS-TIN-DUNG-GIA
 packet_issue: 1122
@@ -81,11 +81,16 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-1130.json merged true; merge-va-diff.txt cha 62e62915 + 9d06bd10, tree 2b583289.'
-  landed: true
+  landed: false
+  landed_chua_dat: >-
+    Thieu loi duyet BEN cua chu kho neo dung SHA 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651 (AGENTS.md, PROTOCOL §13.1): authorization_url chi
+    tro PR #1130, loi duyet chi la loi ke cau tra loi AskUserQuestion trong phien. Bon moc §10.2.2, lease, review deu dat; chi muc (5)
+    chua dat. Phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq dang hoi chu kho (04-11); co comment duyet thi doi authorization_url
+    va nang landed. M8 issuecomment-6570713331 khai landed true TRUOC phat hien nay — xem ghi chu bookkeeping.
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA c7174bfe: DAT, du bon moc (post_merge_checks muc 1, push master); (2) lease nha: rut han;
     (3) bookkeeping: ho so nay + ban ghi M8 tren Issue #1122; (4) review neo DUNG authorized_head 9d06bd1: luot 10 approve 0/0/0/0,
-    connector sach (xem caveat thu tu); (5) uy quyen land: chu kho truc tiep "Có, merge #1130 rồi làm tiếp"; (6) muc tieu packet:
+    connector sach (xem caveat thu tu); (5) uy quyen land: CHUA DAT — chi co loi ke "Có, merge #1130 rồi làm tiếp", chua co comment duyet neo SHA; (6) muc tieu packet:
     N0, N0p, A1-A5 dat tren exact head, A6 dat (post_merge_checks muc 2); (7) §8.1: model/effort KHONG DO DUOC tung response.
 
 assurance_81:

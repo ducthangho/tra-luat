@@ -1,7 +1,7 @@
 # HO SO LAND — packet #1122 LAUNCHER-TEST-WINDOWS-TIN-DUNG-GIA r1 g1, code qua PR #1130. Khuon: ops/land/pr1128-wp1113-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (c7174bfe), landed FALSE — CHO DUYET NEO SHA 9d06bd1 (connector P1 r4469672169 tren PR #1153). Du bon moc §10.2.2 tren run push master 41365578445 (dung merge SHA, attempt 1); A6 (Windows
+# TRANG THAI: merged (c7174bfe), landed TRUE — duyet neo SHA 9d06bd1 SAU merge tai PR #1130 issuecomment-6635057729 (tra loi connector P1 r4469672169 tren PR #1153). Du bon moc §10.2.2 tren run push master 41365578445 (dung merge SHA, attempt 1); A6 (Windows
 # sau merge) dat o run push master 41365578430 (launcher-windows.yml, cung SHA).
 # NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nghia nhu khuon.
 # Readback tho: ops/land/pr1130-wp1122-provenance/ (SHA256SUMS kem). Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-11-02.
@@ -18,11 +18,14 @@ input_packet_generations:
   - {packet_issue: 1122, packet_id: LAUNCHER-TEST-WINDOWS-TIN-DUNG-GIA, revision: 1, generation: 1, lease_id: wp1122-r1-g1-claude}
 authorized_head_sha: 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651
 approver: ducthangho
-authorization_url: https://github.com/ducthangho/tra-luat/pull/1130
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1130#issuecomment-6635057729
 authorization_ghi_chu: >-
   Chi thi truc tiep cua chu kho trong phien session_015Gtxra7iT6mwM1kqpdggt6 qua AskUserQuestion: "Có, merge #1130 rồi làm tiếp
   (Recommended)", sau khi Codex luot 10/10 approve 0/0/0/0 tren 9d06bd1. Khong co comment duyet SHA tren PR (PR chi co 1 comment, cua
   connector). Phien nay goi merge. Bam byte cau tra loi KHONG DO DUOC.
+  BO SUNG 04-11: readback-duyet-issuecomment-6635057729.json — comment "Chu kho duyet head 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651"
+  (user ducthangho, OWNER, 2026-11-04T15:45:09Z, chua sua) tren PR #1130, do phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi ho
+  cau tra loi AskUserQuestion cua chu kho. Day la duyet SAU merge (merge 2026-11-02T00:08:55Z), khong phai truoc. CAVEAT #566.
 land_operator: 'measured — readback-pr-1130.json: merged true, merged_at 2026-11-02T00:08:55Z, merged_by ducthangho (token phien), merge_commit_sha c7174bfe.'
 merge_method: merge
 merge_commit: c7174bfe03b3acd22cfa055b5fce176129d29542
@@ -55,7 +58,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1122-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so (lan luu tru)', nhanh: claude/ghi-so-land-825, ghi_chu: 'chi cham ops/land/**'}
-  - {item: 'ban ghi M8', ket_qua: 'measured — readback-m8-issuecomment-6570713331.json (comment tren #1122); khoi YAML trich tu readback khop tung byte ban nhap; kiem-dong-wp-m8.txt: chay lai tren khoi doc lai, rc 0 (04-11); readback-issue-1122.json: state closed, state_reason completed. LUU Y: M8 va viec dong #1122 xay ra TRUOC connector P1 r4469672169; khi co duyet neo SHA can comment bo sung tren #1122.'}
+  - {item: 'ban ghi M8', ket_qua: 'measured — readback-m8-issuecomment-6570713331.json (comment tren #1122); khoi YAML trich tu readback khop tung byte ban nhap; kiem-dong-wp-m8.txt: chay lai tren khoi doc lai, rc 0 (04-11); readback-issue-1122.json: state closed, state_reason completed. LUU Y: M8 va viec dong #1122 xay ra TRUOC duyet neo SHA (04-11 15:45Z); comment bo sung tren #1122 tro toi duyet ay.'}
 # ---- het truong chuan
 packet_id: LAUNCHER-TEST-WINDOWS-TIN-DUNG-GIA
 packet_issue: 1122
@@ -81,16 +84,11 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-1130.json merged true; merge-va-diff.txt cha 62e62915 + 9d06bd10, tree 2b583289.'
-  landed: false
-  landed_chua_dat: >-
-    Thieu loi duyet BEN cua chu kho neo dung SHA 9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651 (AGENTS.md, PROTOCOL §13.1): authorization_url chi
-    tro PR #1130, loi duyet chi la loi ke cau tra loi AskUserQuestion trong phien. Bon moc §10.2.2, lease, review deu dat; chi muc (5)
-    chua dat. Phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq dang hoi chu kho (04-11); co comment duyet thi doi authorization_url
-    va nang landed. M8 issuecomment-6570713331 khai landed true TRUOC phat hien nay — xem ghi chu bookkeeping.
+  landed: true
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA c7174bfe: DAT, du bon moc (post_merge_checks muc 1, push master); (2) lease nha: rut han;
     (3) bookkeeping: ho so nay + ban ghi M8 tren Issue #1122; (4) review neo DUNG authorized_head 9d06bd1: luot 10 approve 0/0/0/0,
-    connector sach (xem caveat thu tu); (5) uy quyen land: CHUA DAT — chi co loi ke "Có, merge #1130 rồi làm tiếp", chua co comment duyet neo SHA; (6) muc tieu packet:
+    connector sach (xem caveat thu tu); (5) uy quyen land: chi thi truc tiep "Có, merge #1130 rồi làm tiếp" truoc merge + comment duyet neo SHA 9d06bd1 SAU merge (issuecomment-6635057729); (6) muc tieu packet:
     N0, N0p, A1-A5 dat tren exact head, A6 dat (post_merge_checks muc 2); (7) §8.1: model/effort KHONG DO DUOC tung response.
 
 assurance_81:

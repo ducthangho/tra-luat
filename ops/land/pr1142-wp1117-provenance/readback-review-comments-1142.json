@@ -1,0 +1,149 @@
+[
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4438879478",
+    "pull_request_review_id": 5732051456,
+    "id": 4438879478,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABCJPs9g",
+    "diff_hunk": "@@ -10306,20 +10294,48 @@ def r1079_ket_luan_mutant_neutral_do_khong_cap_tin_dung():\n @ca\n def r1079_cham_lap_ca_doi_dung_TinHieuChotCa():\n     \"\"\"#1079 F01 (b): chứng cứ là KÊNH KẾT QUẢ có nonce, không phải stdout — đuôi stdout giả rồi\n-    thoát, nonce sai, hay loại hỏng khác `TinHieuChotCa` đều KHÔNG phải giết.\"\"\"\n-    ghi = (\"import json,os,sys\\nk,n=os.environ['LT_KENH_KET_QUA'],os.environ['LT_KENH_NONCE']\\n\"\n-           \"def g(**d): open(k,'w').write(json.dumps({'nonce': n, 'ten': sys.argv[2], 'qua': 0, 'bo_qua': 0, 'hong': 0, 'loai': None, **d}))\\n\")\n-    vi_du = {\"giet\": \"g(hong=1, loai='TinHieuChotCa'); sys.exit(1)\",\n-             \"vocan\": \"g(hong=1, loai='AttributeError'); sys.exit(1)\",\n-             \"gia\": \"print('LOAI_HONG gia: TinHieuChotCa'); print(); print('LAP gia: 0/1 qua, 0 bo qua, 1 hong'); sys.exit(1)\",\n-             \"nonce\": \"n = 'x' * 32; g(hong=1, loai='TinHieuChotCa'); sys.exit(1)\",\n-             \"bo\": \"g(bo_qua=1)\", \"qua\": \"g(qua=1)\"}\n-    with San() as s:\n-        (s / \"launcher_test.py\").write_text(ghi + \"\".join(\n-            f\"if sys.argv[2] == {k!r}:\\n    {v}\\n\" for k, v in vi_du.items()), encoding=\"utf-8\")\n-        kq = {k: cham_lap_ca(s, k)[0] for k in vi_du}\n-    bang(kq == {\"giet\": \"giet\", \"vocan\": \"loi\", \"gia\": \"loi\", \"nonce\": \"loi\", \"bo\": \"bo_qua\", \"qua\": \"qua\"},\n-         f\"cham_lap_ca sai: {kq}\")\n+    thoát, loại lạ, hay loại hỏng khác `TinHieuChotCa` đều KHÔNG phải giết.\n+    #1117: tệp giả nay là MODULE mà runner thật nạp (`CA` + `cham_mot_ca`), không còn tự ghi kênh từ env.\n+    Module không thấy nonce, nên các chốt nonce/tên/kiểu của `cham_lap_ca` được đo bằng RUNNER GIẢ\n+    (`nonce_sai` · `ten_sai` · `danh_sach`, cùng đối chứng `runner_dung`). Thêm `loai_la` (chốt kiểm loại)\n+    và `vang` (tên ca không có trong `CA`).\"\"\"\n+    def tep(ten, tra=None, dau=\"\"):\n+        than = \"    pass\\n\" if tra is None else f\"    return {tra!r}\\n\"\n+        return (f\"{dau}def {ten}():\\n    pass\\nCA = [{ten}]\\n\"\n+                f\"def cham_mot_ca(fn):\\n{than}\")\n+    vi_du = {\"giet\": tep(\"giet\", (\"giet\", \"giet\")),\n+             \"vocan\": tep(\"vocan\", (\"loi\", \"vocan(AttributeError)\")),\n+             \"gia\": tep(\"gia\", dau=\"print('LOAI_HONG gia: TinHieuChotCa'); print(); \"\n+                                   \"print('LAP gia: 0/1 qua, 0 bo qua, 1 hong')\\nraise SystemExit(1)\\n\"),\n+             \"loai_la\": tep(\"loai_la\", (\"TinHieuChotCa\", \"loai_la\")),\n+             \"vang\": tep(\"khac\", (\"giet\", \"khac\")),\n+             \"bo\": tep(\"bo\", (\"bo_qua\", \"bo\")), \"qua\": tep(\"qua\", (\"qua\", \"qua\"))}\n+    runner_gia = {\"nonce_sai\": \"{'nonce': 'x' * 32, 'ten': 'nonce_sai', 'loai': 'giet'}\",\n+                  \"ten_sai\": \"{'nonce': n, 'ten': 'khac', 'loai': 'giet'}\",\n+                  \"danh_sach\": \"[n, 'danh_sach', 'giet']\",\n+                  \"runner_dung\": \"{'nonce': n, 'ten': 'runner_dung', 'loai': 'giet'}\"}\n+    with San() as s:\n+        kq = {}\n+        for k, ma in vi_du.items():\n+            (s / k).mkdir()\n+            (s / k / \"launcher_test.py\").write_text(ma, encoding=\"utf-8\")\n+            shutil.copy2(Path(__file__).with_name(RUNNER_TEN), s / k)\n+            kq[k] = cham_lap_ca(s / k, k)[0]\n+        for k, rec in runner_gia.items():   # runner GIẢ: đo chốt của chính `cham_lap_ca`\n+            (s / k).mkdir()\n+            (s / k / RUNNER_TEN).write_text(\n+                \"import json, sys\\nk, n = sys.stdin.read().split()\\n\"",
+    "path": ".claude/dev/launcher_test.py",
+    "commit_id": "6f4b88991b14f1a15ceafdf4b4b3b564039449a1",
+    "original_commit_id": "6f4b88991b14f1a15ceafdf4b4b3b564039449a1",
+    "user": {
+      "login": "chatgpt-codex-connector[bot]",
+      "id": 199175422,
+      "node_id": "BOT_kgDOC98s_g",
+      "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+      "html_url": "https://github.com/apps/chatgpt-codex-connector",
+      "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Preserve spaces when parsing the fake runner's input**\n\nWhen the temporary-directory path contains spaces, these fake runners split the channel path into multiple tokens and fail while unpacking `k, n`. Consequently, even `runner_dung` returns `loi`, making this regression case fail and blocking mutation checks that require its neutral result to pass. I reproduced this on Linux with `tempfile.tempdir` pointing to a directory containing a space: the parent commit passes, while this commit raises `TinHieuChotCa`. Parse the same UTF-8, two-line protocol used by the real runner instead of splitting on arbitrary whitespace, and add a space-containing temporary-directory regression while retaining the malformed-record rejection checks.\n\nUseful? React with 👍 / 👎.\n\n<!-- codex-code-review-finding:v1 -->",
+    "created_at": "2026-11-02T04:20:32Z",
+    "updated_at": "2026-11-02T04:20:32Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/1142#discussion_r4438879478",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1142",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4438879478"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/1142#discussion_r4438879478"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1142"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4438879478/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 10327,
+    "side": "RIGHT",
+    "author_association": "NONE",
+    "original_position": 146,
+    "position": 1,
+    "subject_type": "line",
+    "is_copilot_code_review": false,
+    "copilot_code_review_sources": [
+
+    ]
+  },
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4438888619",
+    "pull_request_review_id": 5732062302,
+    "id": 4438888619,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABCJQQqw",
+    "diff_hunk": "@@ -10306,20 +10294,48 @@ def r1079_ket_luan_mutant_neutral_do_khong_cap_tin_dung():\n @ca\n def r1079_cham_lap_ca_doi_dung_TinHieuChotCa():\n     \"\"\"#1079 F01 (b): chứng cứ là KÊNH KẾT QUẢ có nonce, không phải stdout — đuôi stdout giả rồi\n-    thoát, nonce sai, hay loại hỏng khác `TinHieuChotCa` đều KHÔNG phải giết.\"\"\"\n-    ghi = (\"import json,os,sys\\nk,n=os.environ['LT_KENH_KET_QUA'],os.environ['LT_KENH_NONCE']\\n\"\n-           \"def g(**d): open(k,'w').write(json.dumps({'nonce': n, 'ten': sys.argv[2], 'qua': 0, 'bo_qua': 0, 'hong': 0, 'loai': None, **d}))\\n\")\n-    vi_du = {\"giet\": \"g(hong=1, loai='TinHieuChotCa'); sys.exit(1)\",\n-             \"vocan\": \"g(hong=1, loai='AttributeError'); sys.exit(1)\",\n-             \"gia\": \"print('LOAI_HONG gia: TinHieuChotCa'); print(); print('LAP gia: 0/1 qua, 0 bo qua, 1 hong'); sys.exit(1)\",\n-             \"nonce\": \"n = 'x' * 32; g(hong=1, loai='TinHieuChotCa'); sys.exit(1)\",\n-             \"bo\": \"g(bo_qua=1)\", \"qua\": \"g(qua=1)\"}\n-    with San() as s:\n-        (s / \"launcher_test.py\").write_text(ghi + \"\".join(\n-            f\"if sys.argv[2] == {k!r}:\\n    {v}\\n\" for k, v in vi_du.items()), encoding=\"utf-8\")\n-        kq = {k: cham_lap_ca(s, k)[0] for k in vi_du}\n-    bang(kq == {\"giet\": \"giet\", \"vocan\": \"loi\", \"gia\": \"loi\", \"nonce\": \"loi\", \"bo\": \"bo_qua\", \"qua\": \"qua\"},\n-         f\"cham_lap_ca sai: {kq}\")\n+    thoát, loại lạ, hay loại hỏng khác `TinHieuChotCa` đều KHÔNG phải giết.\n+    #1117: tệp giả nay là MODULE mà runner thật nạp (`CA` + `cham_mot_ca`), không còn tự ghi kênh từ env.\n+    Module không thấy nonce, nên các chốt nonce/tên/kiểu của `cham_lap_ca` được đo bằng RUNNER GIẢ\n+    (`nonce_sai` · `ten_sai` · `danh_sach`, cùng đối chứng `runner_dung`). Thêm `loai_la` (chốt kiểm loại)\n+    và `vang` (tên ca không có trong `CA`).\"\"\"\n+    def tep(ten, tra=None, dau=\"\"):\n+        than = \"    pass\\n\" if tra is None else f\"    return {tra!r}\\n\"\n+        return (f\"{dau}def {ten}():\\n    pass\\nCA = [{ten}]\\n\"\n+                f\"def cham_mot_ca(fn):\\n{than}\")\n+    vi_du = {\"giet\": tep(\"giet\", (\"giet\", \"giet\")),\n+             \"vocan\": tep(\"vocan\", (\"loi\", \"vocan(AttributeError)\")),\n+             \"gia\": tep(\"gia\", dau=\"print('LOAI_HONG gia: TinHieuChotCa'); print(); \"\n+                                   \"print('LAP gia: 0/1 qua, 0 bo qua, 1 hong')\\nraise SystemExit(1)\\n\"),\n+             \"loai_la\": tep(\"loai_la\", (\"TinHieuChotCa\", \"loai_la\")),\n+             \"vang\": tep(\"khac\", (\"giet\", \"khac\")),\n+             \"bo\": tep(\"bo\", (\"bo_qua\", \"bo\")), \"qua\": tep(\"qua\", (\"qua\", \"qua\"))}\n+    runner_gia = {\"nonce_sai\": \"{'nonce': 'x' * 32, 'ten': 'nonce_sai', 'loai': 'giet'}\",\n+                  \"ten_sai\": \"{'nonce': n, 'ten': 'khac', 'loai': 'giet'}\",\n+                  \"danh_sach\": \"[n, 'danh_sach', 'giet']\",\n+                  \"runner_dung\": \"{'nonce': n, 'ten': 'runner_dung', 'loai': 'giet'}\"}\n+    with San() as s:\n+        kq = {}\n+        for k, ma in vi_du.items():\n+            (s / k).mkdir()\n+            (s / k / \"launcher_test.py\").write_text(ma, encoding=\"utf-8\")\n+            shutil.copy2(Path(__file__).with_name(RUNNER_TEN), s / k)\n+            kq[k] = cham_lap_ca(s / k, k)[0]\n+        for k, rec in runner_gia.items():   # runner GIẢ: đo chốt của chính `cham_lap_ca`\n+            (s / k).mkdir()\n+            (s / k / RUNNER_TEN).write_text(\n+                \"import json, sys\\nk, n = sys.stdin.read().split()\\n\"",
+    "path": ".claude/dev/launcher_test.py",
+    "commit_id": "6f4b88991b14f1a15ceafdf4b4b3b564039449a1",
+    "original_commit_id": "6f4b88991b14f1a15ceafdf4b4b3b564039449a1",
+    "user": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "Đúng, đã tái hiện. Với `TMPDIR=/var/tmp/co dau cach`, ca `r1079_cham_lap_ca_doi_dung_TinHieuChotCa` ra `0/1`.\n\nCommit `8f0dfcf` (đẩy ngay sau comment này) sửa như sau:\n- Runner giả đọc `sys.stdin.buffer.read().decode('utf-8').splitlines()`, đúng khung hai dòng UTF-8 của runner thật.\n- Ca đặt `tempfile.tempdir` vào một thư mục `co dau cach`, nên chính ca này trở thành phép hồi quy. Các chốt từ chối record hỏng (`nonce_sai`, `ten_sai`, `danh_sach`) giữ nguyên.\n\nKết quả đo:\n- Ca ra `1/1` ở cả TMPDIR thường lẫn TMPDIR có dấu cách.\n- Phản chứng: trả runner giả về `.split()` trong khi giữ `tempdir` mới thì ca ra `0/1`.\n- Nhóm 14 đột biến liên quan (`wp1117_*`, cùng các đột biến `wp1079_*` nhắm ca này) ra `(0, 0)`: mọi đột biến đều bị giết, không có tín dụng giả.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+    "created_at": "2026-11-02T04:22:49Z",
+    "updated_at": "2026-11-02T04:22:50Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/1142#discussion_r4438888619",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1142",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4438888619"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/1142#discussion_r4438888619"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1142"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4438888619/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 10327,
+    "side": "RIGHT",
+    "in_reply_to_id": 4438879478,
+    "author_association": "OWNER",
+    "original_position": 146,
+    "position": 1,
+    "subject_type": "line",
+    "is_copilot_code_review": false,
+    "copilot_code_review_sources": [
+
+    ]
+  }
+]

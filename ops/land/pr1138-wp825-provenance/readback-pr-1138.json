@@ -1,0 +1,12 @@
+{
+ "number": 1138,
+ "state": "closed",
+ "merged": true,
+ "merged_at": "2026-11-02T04:39:34Z",
+ "merge_commit_sha": "e007a318ffbd0079380a72d9f74df8a401028ae4",
+ "draft": false,
+ "title": "docs: ADR-0061 — chấp nhận vĩnh viễn việc không ghi được trạng thái từ chối Codex (#825)",
+ "merged_by": "ducthangho",
+ "head_sha": "f46115b42220620bb681abcad6399542c9b7c7b0",
+ "base_sha": "c7174bfe03b3acd22cfa055b5fce176129d29542"
+}

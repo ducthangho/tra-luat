@@ -24,8 +24,8 @@ recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; K
 
 leased_at_utc: '2026-11-04T15:45:00Z'
 heartbeat_at: '2026-11-04T15:45:00Z'
-lease_until: '2026-11-05T15:45:00Z'
-lease_expires_at_utc: '2026-11-05T15:45:00Z'
+lease_until: '2026-11-05T04:35:00Z'
+lease_expires_at_utc: '2026-11-05T04:35:00Z'
 
 packet_id: LEASE-PUBLISH-GHIM-PYTHON
 packet_slug: lease-publish-ghim-python
@@ -110,3 +110,18 @@ heartbeat_required_minutes: 360
 chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Ban python3 tren ubuntu-26.04 (log khong in) — A6 do sau land.'
+
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-05T15:45:00Z'
+  han_moi_utc: '2026-11-05T04:35:00Z'
+  chi_thi: >-
+    Chu kho nhan trong phien executor session_015GtxrauwJ84GSjQMdV2Gqn, 2026-11-05: "du dieu kien de merge thi merge, land va ghi
+    so luon di" (ghi ho #1189 issuecomment-6647091089); kiem-merge rc=0 tren 275869169e134758bb145565d28f0b0897a92f87 voi dong
+    mien cua chu kho PR #1193 issuecomment-6649353454.
+  ly_do: >-
+    Packet #1189 da MERGE: PR #1193, merge commit f2e33bc3ae9763e394cc34bb7ff644edb0b7f4bb (2026-11-05T04:04Z),
+    authorized_head_sha 275869169e134758bb145565d28f0b0897a92f87.
+  vi_sao_khong_dung_so: >-
+    Theo tien le #650/#661: rut han bang co che DA CAI (phan loai lease theo han). Han moi dat vai chuc phut SAU luc push de
+    ops-publish-lease.yml con thay lease song (khong roi vao rc=8). Lan push nay dong thoi la phep do A6: nhanh lease da merge
+    master f2e33bc nen workflow chay dung ban da va, va dang bu ban chieu lease (ngoai_le_dang_ban_chieu).

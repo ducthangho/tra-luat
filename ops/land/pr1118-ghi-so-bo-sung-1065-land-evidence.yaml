@@ -37,7 +37,9 @@ ghi_so:
 
 authorized_head_sha: ba7b0e96d293e2bfe353b84a8b793944a6ca2341
 approver: ducthangho
-authorization_url: KHONG_AP_DUNG
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1118#issuecomment-6648087882
+authorization_url_ban_ghi_goc: KHONG_AP_DUNG
+authorization_url_nguon: 'measured — readback-xac-nhan-issuecomment-6648087882.json: comment 6648087882 neo ba7b0e96d293e2bfe353b84a8b793944a6ca2341; dat 05-11-2026 thay ban ghi goc, xem landed_20261105.'
 authorization_ghi_chu: >-
   thuat_lai — chu kho duyet bang loi trong phien Claude Code: "voi 1118 lap cross review va cho toi het P1, P2, P3", roi
   "Voi cac viec con cho toi quyet thi hay lam theo khuyen nghi cua ban di" (khuyen nghi da neu: dua hien vat review vao #1118,
@@ -156,3 +158,17 @@ bookkeeping:
   - {item: 'hien vat cross-review #1118', ket_qua: 'ops/reviews/pr1118-review-1..2-codex* (trong chinh PR #1118)'}
   - {item: 'moc Checkout + Gate output run 41342580238', ket_qua: 'ops/land/pr1118-ghi-so-bo-sung-1065-provenance/gate-output-41342580238.txt'}
   - {item: 'PR ghi so landed', nhanh: ccr-5249948c-9epnbs, pr: 1133}
+
+landed_20261105:
+  bo_canh: >-
+    Khoi nay bo sung uy quyen neo SHA theo luat L-6 (ops/kiem_ho_so_land.py), phien session_015GtxrcbysJFmj2dSwnCkPL, 05-11-2026. Ban ghi goc
+    authorization_url = KHONG_AP_DUNG (giu nguyen o authorization_url_ban_ghi_goc), khong co comment GitHub nao neo SHA. Chi doi
+    dong authorization_url muc goc; khong sua dong nao khac o tren.
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/pull/1118#issuecomment-6648087882
+    noi_dung: >-
+      Chu kho chon "Xac nhan lai, ghi comment moi" (AskUserQuestion, phien session_015GtxrcbysJFmj2dSwnCkPL, 05-11-2026): xac nhan land #1118
+      tren authorized_head_sha ba7b0e96d293e2bfe353b84a8b793944a6ca2341, merge c6bb7c142623267a1b270fdb2492a89089b58d27.
+    do_duoc: 'measured — readback-xac-nhan-issuecomment-6648087882.json: comment 6648087882 (user ducthangho, OWNER, created_at = updated_at) ghi day du ba7b0e96d293e2bfe353b84a8b793944a6ca2341 va c6bb7c142623267a1b270fdb2492a89089b58d27; readback-pr-1118.json head.sha ba7b0e96d293e2bfe353b84a8b793944a6ca2341. CAVEAT #566: phien dang bang token chu kho; ban chep quyet dinh, khong phai chu ky.'
+  landed: true

@@ -1,0 +1,45 @@
+# phan_chung_buoc run 41399706045 — danh_gia_gate.py sha256 b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd
+GOC  chuan-bi: passed
+DAT  am [ops/ci_duong_nhanh.py] trong chuan-bi -> not_measured
+GOC  gate-cong-cu-gop (ubuntu-latest): passed
+DAT  am [ops/cong_cu_test.py --gop] trong gate-cong-cu-gop (ubuntu-latest) -> not_measured
+GOC  gate-cong-cu (ubuntu-latest, 6): passed
+DAT  am [ops/cong_cu.py kiem-tra] trong gate-cong-cu (ubuntu-latest, 6) -> not_measured
+GOC  gate-nhanh-manh (ubuntu-latest, 1): passed
+DAT  am [ops/nhanh_don_duoc_test.py] trong gate-nhanh-manh (ubuntu-latest, 1) -> not_measured
+GOC  gate-nhanh-gop (ubuntu-latest): passed
+DAT  am [--gop-dich] trong gate-nhanh-gop (ubuntu-latest) -> not_measured
+GOC  gate-packet-loop (ubuntu-latest): passed
+DAT  am [.claude/dev/packet_loop_test.py] trong gate-packet-loop (ubuntu-latest) -> not_measured
+GOC  gate-ops (ubuntu-latest): passed
+DAT  am [ops/ci_duong_nhanh_test.py] trong gate-ops (ubuntu-latest) -> not_measured
+DAT  am [ops/bien_nhan_v2_test.py] trong gate-ops (ubuntu-latest) -> not_measured
+DAT  am [ops/chay_lease_publish_test.sh] trong gate-ops (ubuntu-latest) -> not_measured
+DAT  am [scripts/don-nhanh_test.ps1] trong gate-ops (ubuntu-latest) -> not_measured
+DAT  am [.claude/dev/gate_lifecycle_test.py] trong gate-ops (ubuntu-latest) -> not_measured
+GOC  gate-registry (ubuntu-latest): passed
+DAT  am [.claude/dev/ci_dang_ky_test.py --chay] trong gate-registry (ubuntu-latest) -> not_measured
+GOC  gate (ubuntu-latest): passed
+DAT  am [.claude/dev/codex_cred_test.py] trong gate (ubuntu-latest) -> not_measured
+DAT  am [.claude/dev/idiom_py_test.py] trong gate (ubuntu-latest) -> not_measured
+DAT  am [.githooks/eol_policy_test.py] trong gate (ubuntu-latest) -> not_measured
+DAT  am [.githooks/pre_push_test.py] trong gate (ubuntu-latest) -> not_measured
+DAT  am [.githooks/eol_policy.py --all --json] trong gate (ubuntu-latest) -> not_measured
+DAT  am [.github/checks/bundle_fragment_check.py --json] trong gate (ubuntu-latest) -> not_measured
+DAT  am [scripts/gen_instructions.py --selftest] trong gate (ubuntu-latest) -> not_measured
+DAT  am [scripts/tl_core/command_registry_test.py] trong gate (ubuntu-latest) -> not_measured
+DAT  am [== tl selftest] trong gate (ubuntu-latest) -> not_measured
+DAT  am [scripts/tl.py workflow-audit --strict --json] trong gate (ubuntu-latest) -> not_measured
+DAT  am [scripts/tl.py golden-test --json] trong gate (ubuntu-latest) -> not_measured
+DAT  am [scripts/tl.py doc-claims-check --strict --json] trong gate (ubuntu-latest) -> not_measured
+DAT  am [scripts/tl.py determinism-audit --strict --json] trong gate (ubuntu-latest) -> not_measured
+DAT  am [.github/checks/ci_phamvi.py --kiem-bam] trong gate (ubuntu-latest) -> not_measured
+DAT  am [.github/checks/ci_phamvi_test.py] trong gate (ubuntu-latest) -> not_measured
+DAT  am [scripts/tl.py release-check --full --json] trong gate (ubuntu-latest) -> not_measured
+DAT  am [scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json] trong gate (ubuntu-latest) -> not_measured
+DAT  am [scripts/tl.py release-bundle --out dist/a.zip] trong gate (ubuntu-latest) -> not_measured
+DAT  ca (a) giu TỔNG idiom_py_test, bo tl selftest -> not_measured
+DAT  doi chung luat CU (bat ky 'TỔNG: ĐẠT' trong log job) cho ca (a) -> passed (lo hong tai hien)
+DAT  ca (b) chen 'CI_DANG_KY ops/x_test.py: ĐỎ rc=1' trong gate-registry (ubuntu-latest) -> not_measured
+DAT  ca (c) them 'TỔNG: ĐỎ' cuoi buoc trong gate-registry (ubuntu-latest) -> not_measured
+SAI: 0

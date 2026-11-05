@@ -1,0 +1,20 @@
+# Danh gia Gate output run 41388158239 attempt 1 head 8f0dfcf35c8ee92a9a754bde82846eb11430bd0e — luat dau hieu duong THEO BUOC (danh_gia_gate.py sha256 b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd)
+
+JOB 125093488226 chuan-bi [ubuntu-latest] conclusion=success log_sha256=24e799552625b5b97a9ea113fb0146e09545be2d85af2bcfe5d8feea26cf21bc -> passed: [ops/ci_duong_nhanh.py] che_do=day_du
+JOB 125093545409 gate (windows-latest) [windows-latest] conclusion=success log_sha256=18ac5ddfc784c4cd52aac8bc7dbd1ad69b740a07975146d6b046e70b7dd35a46 -> not_measured: thieu buoc [.github/checks/ci_phamvi_test.py]
+JOB 125093545415 gate-cong-cu (windows-latest, 0) [windows-latest] conclusion=success log_sha256=6947254d4b6301ed402201570868bea298d941f9c717090d1570570287900ce7 -> not_measured: buoc [ops/cong_cu.py kiem-tra] thieu dau hieu duong /^MẢNH \d+/\d+: (\d+)/\1 đột biến bán kính 1/
+JOB 125094727539 gate-cong-cu-gop: skipped (khong tinh)
+JOB 125097260896 gate-nhanh-gop (windows-latest) [windows-latest] conclusion=success log_sha256=997159f2f9fa851492df676fa32a95baf53297fce670728c4a95f66e9cc672ab -> passed: [--gop-dich] targeted_mutant_gate: DAT — KHONG phai full mutant audit; full_mutant_audit van BAT BUOC t
+JOB 125093545538 gate-nhanh-manh (windows-latest, 0) [windows-latest] conclusion=success log_sha256=29794b8293ea74fbd105fd3ac82956bcb56fe37f188e2a52f355cb5d1c48ab31 -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 0/8: rc=0 · passed 39/39
+JOB 125093545536 gate-nhanh-manh (windows-latest, 1) [windows-latest] conclusion=success log_sha256=484cc261672ddb1c18a669e5af55c1cf5de883e6d88ec3acc88e889779a1b355 -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 1/8: rc=0 · passed 41/41
+JOB 125093545564 gate-nhanh-manh (windows-latest, 2) [windows-latest] conclusion=success log_sha256=8c1aab16d680f9e704fdd34cee69bb1fb7e02b1c9451f86ecdfb0779225e4bad -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 2/8: rc=0 · passed 40/40
+JOB 125093545635 gate-nhanh-manh (windows-latest, 3) [windows-latest] conclusion=success log_sha256=5bc0533e1ae4cca8cecec492e2b900366145a21bebf93d4e690478224bc87b3d -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 3/8: rc=0 · passed 40/40
+JOB 125093545574 gate-nhanh-manh (windows-latest, 4) [windows-latest] conclusion=success log_sha256=3793feff0827111470315d02a476f9e7bf1cc580d5ba9f9d81fe45453aa19963 -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 4/8: rc=0 · passed 39/39
+JOB 125093545545 gate-nhanh-manh (windows-latest, 5) [windows-latest] conclusion=success log_sha256=650014ec5c1eab85645d67882d1d3e233d0c80d8dc5f5628ce5e1b18231a4244 -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 5/8: rc=0 · passed 41/41
+JOB 125093545622 gate-nhanh-manh (windows-latest, 6) [windows-latest] conclusion=success log_sha256=6f9c9cc9c5d8bd585c25aef819e823f2e8f6eba00a6ed1ac4d3a048ed6516424 -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 6/8: rc=0 · passed 39/39
+JOB 125093545604 gate-nhanh-manh (windows-latest, 7) [windows-latest] conclusion=success log_sha256=bf776f3f6cb5816a5ddc29619c979d6a6e500a3743c4d56d8ccdbcba57ff83f9 -> passed: [ops/nhanh_don_duoc_test.py] targeted_mutant_gate MANH 7/8: rc=0 · passed 42/42
+JOB 125093545553 gate-ops (windows-latest) [windows-latest] conclusion=success log_sha256=77a55d1de7d22b9db1b55bf4e62d05be222ee9521b442868b529dedd52a4be84 -> not_measured: thieu buoc [ops/ci_duong_nhanh_test.py]
+JOB 125093545527 gate-packet-loop (windows-latest) [windows-latest] conclusion=success log_sha256=cbe9e0d53ee77722ccb947a5f39aae9fe4fcd3f37af69f1fa91812ec1a70076e -> passed: [.claude/dev/packet_loop_test.py] TỔNG: ĐẠT
+JOB 125097386064 gate-registry (windows-latest) [windows-latest] conclusion=success log_sha256=11c4b2d8796e05abaf672c9175272eecee2447227379e8625dec6517e9bf5ab1 -> passed: [.claude/dev/ci_dang_ky_test.py --chay] TỔNG: ĐẠT | [.claude/dev/ci_dang_ky_test.py --chay] khong co /^CI_DANG_KY \S+: ĐỎ/
+
+MOC_GATE_OUTPUT: not_measured (12/15 job co dau hieu duong)

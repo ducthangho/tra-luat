@@ -1,0 +1,355 @@
+{
+  "version": "1.5.0",
+  "run_id": "6488aa67605849f5b20681abdcf0d364",
+  "short_id": "6488aa67",
+  "ten": "spec-pr1188-r7",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 11,
+    "van_tay": "91f3647c973b1dcf"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-11-04T16:32:37.286284+00:00",
+  "ket_thuc_utc": "2026-11-04T16:48:41.147377+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 7196,
+  "khoa_danh_tinh": "linux:282987",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/6a3b6f5f-bf00-57b7-90fe-d16753199911/scratchpad/rv/pr1188r7/cay-kho",
+  "head": "bc1d5e048cc7889e6a759027059c5dd4735a4678",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "578fb4b69ba52b40516f971824d1080f87345d08",
+    "d5166b2b4d5f2427a7e29d3ab28005f90b52beab",
+    "22da28c738e651361274c1264e681a52461dad1e",
+    "80f75b1b186cff3b6f564c99df01c0b3e057d14f",
+    "632a967a443e20515b1fdb4019f86745bfe51e0f",
+    "8aca1f53eaffdae236c983f7b7a0315c85aadf5c",
+    "52082546818b812dd826ac23b198d0b5ebd784a4",
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "fd9b30ff2aac1af0146f3e593aa19c243e5ece7d6c1540ed94e9ce18b542bf32",
+  "deadline_utc": "2026-11-04T19:32:36+00:00",
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "0e6a818f02f592491db12b8eb0c8dd0ca0b147565561d04b5c45696e4132a431",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/6a3b6f5f-bf00-57b7-90fe-d16753199911/scratchpad/rv/runs/6488aa67/prompt.snapshot",
+  "prompt_kin_hoan_toan": false,
+  "model_phuc_vu": [
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5e275a8887d1a0fccd4a51de5cef",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5e2822e887d1a2ffcea795886546",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5e2cd2b487d19813fff1998e8958",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5e33066c87d1aba368721419e93e",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5e41579487d1bef0ea4a48ffd153",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5e484d7487d1ba7543d09f3181ba",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5e4ada9c87d1993a923d851db799",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5e5084a487d1bb9223da72056caf",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5e5797d887d18b7fb95a2a8abafd",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5e724d7887d1b5fbb2ad25a8bc0c",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5ec52a6487d198662f03647ce0d0",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5ece3ea887d1a0a510407c4607f1",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5ee8738087d19941f166b236561f",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5ef12b7087d1995d032f2a3058d4",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5f0ebf3c87d181c3ceaa32ddab3b",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5f222cb887d19554cf7a68e2b2b1",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5f40079887d1bfaa17811517c34a",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5f56f4e087d1a8b37063c7b318bd",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5f931a5c87d1bd1cafb0f04f36d6",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5f9b0dd487d19dae2044f6e8c5a7",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb5fcdde0887d1a7522ea463580d64",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb6016b46887d1baaee1a10dfe81f4",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb602f6bbc87d19dca22b0c96f4c79",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb6059db8c87d196c1ac32faf6c3cc",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb607b218887d18f0335e46a0f9131",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb60b5ca0087d1822ac657587123e5",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb60e1494087d18d93717c1559a6fd",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb6106379487d1b7cea4ae385977fc",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb61cbdcc487d18e20c0f5e1f764f5",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0adcab922d829b70016aeb61e17e9087d1a7d0e0cef89e7440",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    }
+  ],
+  "model_phuc_vu_trang_thai": "DO_DUOC",
+  "stderr_bo_dong": 360380,
+  "stderr_bo_byte": 32236779,
+  "effort_phuc_vu": [
+    "xhigh"
+  ],
+  "effort_phuc_vu_trang_thai": "DO_DUOC",
+  "sandbox_quan_sat": [
+    {
+      "chuong_trinh": "codex-linux-sandbox",
+      "co": [
+        "--command-cwd=to_tien_workspace",
+        "--sandbox-policy-cwd=to_tien_workspace"
+      ],
+      "permission_profile": {
+        "file_system": "restricted",
+        "loai": "managed",
+        "muc": [
+          [
+            "root",
+            "read"
+          ],
+          [
+            "to_tien_workspace",
+            "write"
+          ],
+          [
+            "slash_tmp",
+            "write"
+          ],
+          [
+            "tmpdir",
+            "write"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ]
+        ],
+        "network": "restricted"
+      },
+      "so_lan": 19
+    },
+    {
+      "chuong_trinh": "bwrap",
+      "co": [
+        "--cap-drop=ALL",
+        "--die-with-parent",
+        "--new-session",
+        "--unshare-ipc",
+        "--unshare-net",
+        "--unshare-pid",
+        "--unshare-user"
+      ],
+      "gan": [
+        [
+          "--ro-bind",
+          "/"
+        ],
+        [
+          "--bind",
+          "/tmp"
+        ],
+        [
+          "--ro-bind",
+          "khac"
+        ],
+        [
+          "--bind",
+          "to_tien_workspace"
+        ]
+      ],
+      "so_lan": 18
+    },
+    {
+      "chuong_trinh": "codex-linux-sandbox",
+      "co": [
+        "--apply-seccomp-then-exec",
+        "--command-cwd=to_tien_workspace",
+        "--sandbox-policy-cwd=to_tien_workspace"
+      ],
+      "permission_profile": {
+        "file_system": "restricted",
+        "loai": "managed",
+        "muc": [
+          [
+            "root",
+            "read"
+          ],
+          [
+            "to_tien_workspace",
+            "write"
+          ],
+          [
+            "slash_tmp",
+            "write"
+          ],
+          [
+            "tmpdir",
+            "write"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ]
+        ],
+        "network": "restricted"
+      },
+      "so_lan": 18
+    }
+  ],
+  "sandbox_trang_thai": "DO_DUOC",
+  "sandbox_gioi_han": "lay mau /proc tu ben ngoai moi 0.2s: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. Moi lech danh tinh tien trinh (ke ca vong doi binh thuong nhu cha zombie) => KHONG_DO_DUOC: co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do",
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 963.861,
+  "stdout_byte": 308,
+  "stdout_sha256": "7e52bc9f287d17721f11ff44f989f6a303c7e0b6c04efb8094ab665586cc3589",
+  "stderr_byte": 39,
+  "stderr_sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+}

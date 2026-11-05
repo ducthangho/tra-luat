@@ -1,0 +1,14 @@
+2026-11-02T06:20:07.4969832Z Image: ubuntu-24.04
+2026-11-02T06:20:08.2219511Z ##[group]Run git config --global core.autocrlf false
+2026-11-02T06:20:08.2576590Z ##[group]Run actions/checkout@v4
+2026-11-02T06:20:13.4918558Z [command]/usr/bin/git rev-parse refs/remotes/origin/claude/gate-hau-merge-47ee1b20
+2026-11-02T06:20:13.4918984Z 47ee1b206d284c82d16036972b82b17196cd8dc7
+2026-11-02T06:20:14.3443684Z [command]/usr/bin/git log -1 --format=%H
+2026-11-02T06:20:14.3479031Z 47ee1b206d284c82d16036972b82b17196cd8dc7
+2026-11-02T06:20:14.3658009Z ##[group]Run actions/setup-python@v5
+2026-11-02T06:20:14.4763087Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-11-02T06:20:17.3084884Z ##[group]Run bash ops/cai_actionlint.sh
+2026-11-02T06:20:17.6012723Z ##[group]Run bash ops/cai_cong_cu.sh shellcheck
+2026-11-02T06:20:20.2002421Z ##[group]Run bash ops/cai_cong_cu.sh rg
+2026-11-02T06:20:23.9519870Z ##[group]Run python ops/cong_cu.py kiem-tra --json
+2026-11-02T06:32:55.3739570Z ##[group]Run actions/upload-artifact@v4

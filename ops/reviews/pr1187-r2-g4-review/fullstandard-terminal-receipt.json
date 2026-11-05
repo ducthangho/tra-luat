@@ -1,0 +1,21 @@
+{
+  "head": "33df4b678e3d1f12e68a9c9d362dc0446f0dd5c2",
+  "tree": "c8c206757733c713c4008c23985bf7efe325e9aa",
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "-B",
+    "-u",
+    ".claude/dev/packet_loop_test.py"
+  ],
+  "started": "2026-11-05T04:09:46.974593+00:00",
+  "ended": "2026-11-05T05:51:39.509094+00:00",
+  "deadline_utc": "2026-11-05T07:09:46Z",
+  "rc": 0,
+  "stdout_sha256": "56dba20f05e7d6f67376fbfdcef8a38190cf54fc67513a60d7d8b492bae94a11",
+  "log_bytes": 160202,
+  "head_after": "33df4b678e3d1f12e68a9c9d362dc0446f0dd5c2",
+  "tree_after": "c8c206757733c713c4008c23985bf7efe325e9aa",
+  "canonical_admission_receipt": "/workspace/scratch/pr1187-r2-g4/fullstandard/canonical-admission.json",
+  "no_model_call": true,
+  "read_only_validation_window_minutes": 180
+}

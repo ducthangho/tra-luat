@@ -1,0 +1,20 @@
+# merge fe84620 (PR #1231) — do 2026-11-05T15:51:27Z
+commit fe84620f897913c7f6c2ce5a0c7316a49655e82f
+parents d779d442920c3ae55a7c355b02a75e245dc8cd3b d5d521e3e600e9c549cf5dc9263ffc4385c13407
+tree 9c5534209694e0a7d71cca91b874c053762106f1
+committer_date 2026-11-05T20:06:42+07:00
+subject Merge pull request #1231: #1105 LAUNCHER-SANDBOX-LAY-MAU r3
+## git diff --stat fe84620^1 fe84620
+ .claude/dev/launcher.py      | 117 ++++++++++--
+ .claude/dev/launcher_test.py | 426 ++++++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 525 insertions(+), 18 deletions(-)
+## git diff --numstat 1f0941e9 d5d521e (base lease -> head)
+102	15	.claude/dev/launcher.py
+423	3	.claude/dev/launcher_test.py
+## merge-base --is-ancestor d5d521e origin/master
+rc=0
+## tree d5d521e
+2a3f117716076a2758c93005fbd1cd3dd3eb7498
+## spec tai fe84620
+92c132a2ba0687e1047c588f86c7e35c1e4888e3
+4355749db2a7f8ba07d59e4a0903be0a108ddc4d8607ce4e51c75897c770d754  -

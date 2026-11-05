@@ -1,0 +1,28 @@
+{
+  "H": "33df4b678e3d1f12e68a9c9d362dc0446f0dd5c2",
+  "T": "c8c206757733c713c4008c23985bf7efe325e9aa",
+  "g4_changed_paths": [
+    ".claude/dev/packet_loop.py",
+    ".claude/dev/packet_loop_test.py"
+  ],
+  "unchanged_inherited_files": [
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "inherited_blob": "342ea958a2036c54422b16354f3e8ccf4f1269b2",
+      "final_blob": "342ea958a2036c54422b16354f3e8ccf4f1269b2",
+      "sha256": "789fa745b9b59a5d2481e8a7ba5e5b78dc0320e3649e2538343eb198fd1cbce5"
+    },
+    {
+      "path": "docs/adr/0063-merge-spec-ref-va-human-audit.md",
+      "inherited_blob": "76d20c61ce7ae0cc3baf3c1e95bc7ad3d98e78a3",
+      "final_blob": "76d20c61ce7ae0cc3baf3c1e95bc7ad3d98e78a3",
+      "sha256": "1b3899acb90e93a4543547e4d6031f51786eefb066c819067a34dbb7b7d6447e"
+    },
+    {
+      "path": "ops/specs/PR1184-MERGE-CONTRACT-r2.md",
+      "inherited_blob": "bfc8e9ee9ed0b7922df119feac769e793b3f6182",
+      "final_blob": "bfc8e9ee9ed0b7922df119feac769e793b3f6182",
+      "sha256": "975c5d31be6ec4f26145f14893b5c8f7063e5921d1c6dafdca020f50e795299d"
+    }
+  ]
+}

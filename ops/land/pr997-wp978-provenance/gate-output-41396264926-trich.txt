@@ -1,0 +1,58 @@
+# TRICH tu log REST 23 job cua run 41396264926 (ci.yml push master, head 02ddeb4). Ban day du: 4090866 byte, sha256 54a472ac0f62a7329a4e5279ee66caa001ab178360e34f28b5ed645bcb72f129 (khong commit, tai lai bang GET actions/jobs/<id>/logs).
+# Moi dong duoi la dong nguyen van chua: tieu de job, ##[error], TONG/TỔNG, DOT BIEN, CA: n/n, TU KIEM PHAN HANG, '== ... selftest n/n ==', 'Process completed with exit code'.
+===== JOB 125118145681 chuan-bi conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206628 gate (ubuntu-latest) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-02T05:54:27.0859714Z TỔNG: ĐẠT
+2026-11-02T05:54:37.4308421Z TỔNG: ĐẠT
+2026-11-02T05:55:12.9770108Z == gen_instructions selftest 44/44 ==
+2026-11-02T05:58:44.2447724Z == transport selftest 12/12 ==
+2026-11-02T05:58:44.2849203Z == tl selftest 1775/1775 ==
+2026-11-02T06:00:00.3749814Z       "detail": "[OK] tier_full_audit_ok\n  [OK] tier_core_fails_full_audit\n  [OK] tier_full_litany_deduped\n  [OK] tier_core_size_budget\n  [OK] tier_nlm_unaffected_by_tier\n  [OK] style_template_separate_artifact\n  [OK] profile_block_binds_marker_meta\n  [OK] profile_block_no_fabrication_guard\n  [OK] profile_block_unified_env_target_split\n  [OK] profile_block_vbqppl_base_variant\n  [OK] profile_block_default_style_when_empty\n  [OK] profile_block_templates_conditional\n  [OK] audit_bad_project_instruction_fails\n  [OK] audit_bad_nlm_prompt_fails\n  [OK] version_fail_closed_missing_raises\n  [OK] version_fail_closed_empty_raises\n  [OK] version_fail_closed_invalid_raises\n  [OK] version_valid_returns_exact\n  [OK] version_allow_unversioned_dev\n  [OK] no_historical_fallback_literal\n== gen_instructions selftest 44/44 ==\n"
+===== JOB 125118206682 gate-packet-loop (ubuntu-latest) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-02T06:29:33.8728216Z TỔNG: ĐẠT
+===== JOB 125118206751 gate-cong-cu (ubuntu-latest, 5) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206779 gate-ops (ubuntu-latest) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-02T05:52:07.6413362Z CA: 113/113 dat · 0 do · 0 hong
+2026-11-02T06:00:51.8307047Z DOT BIEN: 419/419 bi giet dung ly do
+2026-11-02T06:00:54.4079099Z TU KIEM PHAN HANG: DAT (5 mau rc, 3 dot bien that)
+2026-11-02T06:00:54.4079655Z TONG: DAT
+2026-11-02T06:06:14.2943605Z TỔNG: ĐẠT
+===== JOB 125118206800 gate-cong-cu (ubuntu-latest, 2) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206817 gate-cong-cu (ubuntu-latest, 3) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206818 gate-cong-cu (ubuntu-latest, 1) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206831 gate-nhanh-manh (ubuntu-latest, 3) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206847 gate-cong-cu (ubuntu-latest, 4) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206859 gate-nhanh-manh (ubuntu-latest, 7) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206860 gate-cong-cu (ubuntu-latest, 0) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206867 gate-nhanh-manh (ubuntu-latest, 4) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206877 gate-cong-cu (ubuntu-latest, 7) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206885 gate-nhanh-manh (ubuntu-latest, 5) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206937 gate-cong-cu (ubuntu-latest, 6) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206941 gate-nhanh-manh (ubuntu-latest, 1) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206943 gate-nhanh-manh (ubuntu-latest, 0) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206961 gate-nhanh-manh (ubuntu-latest, 2) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118206964 gate-nhanh-manh (ubuntu-latest, 6) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118695365 gate-nhanh-gop (ubuntu-latest) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 125118770567 gate-registry (ubuntu-latest) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-02T05:52:29.5010587Z TỔNG: ĐẠT
+2026-11-02T05:52:52.8307235Z TỔNG: ĐẠT
+2026-11-02T05:52:52.8322463Z TỔNG: ĐẠT
+2026-11-02T05:52:52.8369889Z TONG: CA 44/44 dat · DOT BIEN 43 muc CHE DO NHE — do khi diff cham vung
+2026-11-02T05:52:52.8370266Z TONG: DAT
+2026-11-02T06:21:17.4672645Z TONG: CA 45/45 dat · DOT BIEN 25 muc CHE DO NHE — do khi diff cham vung
+2026-11-02T06:21:17.4672934Z TONG: DAT
+2026-11-02T06:21:17.4682114Z DOT BIEN: 13/13 bi giet dung ly do
+2026-11-02T06:21:17.4682944Z CA: 22/22 dat
+2026-11-02T06:21:17.4683131Z DOT BIEN: 106/106 bi giet dung ly do
+2026-11-02T06:21:17.4683367Z TU KIEM PHAN HANG: DAT (2 dot bien)
+2026-11-02T06:21:17.4683584Z TONG: DAT
+2026-11-02T06:21:17.4684096Z CA: 62/62 dat
+2026-11-02T06:21:17.4684280Z DOT BIEN: 398/398 bi giet dung ly do
+2026-11-02T06:21:17.4684506Z TU KIEM PHAN HANG: DAT (2 dot bien)
+2026-11-02T06:21:17.4684721Z TONG: DAT
+2026-11-02T06:21:17.4685167Z CA: 52/52 dat
+2026-11-02T06:21:17.4685323Z DOT BIEN: 80/80 bi giet dung ly do
+2026-11-02T06:21:17.4685515Z TU KIEM PHAN HANG: DAT (4 dot bien)
+2026-11-02T06:21:17.4685695Z TONG: DAT
+2026-11-02T06:21:17.4698982Z TỔNG: ĐẠT
+===== JOB 125124357745 gate-cong-cu-gop (ubuntu-latest) conclusion=success labels=['ubuntu-latest'] =====

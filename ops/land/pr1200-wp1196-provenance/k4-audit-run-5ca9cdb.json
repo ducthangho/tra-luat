@@ -1,0 +1,13 @@
+{
+ "head": "5ca9cdbf6bcd7d2e955bc3b57cd667c6efe7fc68",
+ "trang_thai": "xong",
+ "ma_thoat": 0,
+ "stdout_sha256": "b6e23623f6102f316cfda836dab1cbcb3f49ca621e7c815817293ab74bf1e0b9",
+ "nguon": "human_audit_chu_kho",
+ "reviewer": "ducthangho",
+ "comment_id": 6649074827,
+ "comment_url": "https://github.com/ducthangho/tra-luat/pull/1200#issuecomment-6649074827",
+ "comment_created_at": "2026-11-05T03:42:45Z",
+ "doc_lai_luc_utc": "2026-11-05T03:43:35Z",
+ "ghi_chu": "dung tu readback REST cua comment chu kho; stdout = than comment nguyen byte UTF-8"
+}

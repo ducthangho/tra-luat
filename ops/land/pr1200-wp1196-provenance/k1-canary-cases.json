@@ -1,0 +1,49 @@
+{
+ "A1": {
+  "head": "5ca9cdbf6bcd7d2e955bc3b57cd667c6efe7fc68",
+  "spec": "ops/specs/A13-K1-CANARY-r2.md",
+  "spec_hash": "d8985e2c2f9a500e2f8b604b554ed4cc5ae1630e196a0b7a3dff555305ffa9e0",
+  "tree": "cc94550f018c96ca310815fa68cdc5410d1c9a72"
+ },
+ "A2b": {
+  "head": "5ca9cdbf6bcd7d2e955bc3b57cd667c6efe7fc68",
+  "spec": "ops/specs/A13-K1-CANARY-r2.md",
+  "spec_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "tree": "cc94550f018c96ca310815fa68cdc5410d1c9a72"
+ },
+ "A3": {
+  "dong": 1,
+  "head": "8276506e0555c90008027bc37b0493e394733b6d",
+  "spec": "a13-phu/A3.md",
+  "spec_hash": "0b4321d08e3cba31f3a1748b06c8e90132b8e23a104db3302c6d6e1ef55babe7",
+  "tree": "fe0b7a71743026161611f51b4f5e6db32a1fb726"
+ },
+ "A4": {
+  "dong": 1,
+  "head": "b08743a3942b7f13401f0eb737d0534a05ccee90",
+  "spec": "a13-phu/A4.md",
+  "spec_hash": "fe6d64b81bfbe40648d083c02868855ce2d15917a8fe2f5a4676da47e57a262d",
+  "tree": "c8b766e35731a34cc033aebabf57483cfb478623"
+ },
+ "A4b": {
+  "dong": 1,
+  "head": "052d1c17e21a8a887ee5e781fe75a15d177f1bea",
+  "spec": "a13-phu/A4b.md",
+  "spec_hash": "c81deb79e2e632607330c99ec07d00024c38c983debac5b2fb7eff1f578a9c56",
+  "tree": "2a0d7beb64c57bcd3116d798dc94e12fa006ebcf"
+ },
+ "A4c": {
+  "dong": 1,
+  "head": "75b7a2d87d19b00caad72102ade7abd9c8fe82f3",
+  "spec": "a13-phu/A4c.md",
+  "spec_hash": "35e83cfdb4bbafa4007e79e014a0ccb3fc24f69b101aafa4bcf703f0bdd7273a",
+  "tree": "6b8f83e963a617ec5474a7abc63ead189dffc366"
+ },
+ "A5": {
+  "dong": 2,
+  "head": "131bd5462e08287eb9c1988463a61e2a4b839120",
+  "spec": "a13-phu/A5.md",
+  "spec_hash": "4f5d728aea08bbe9db3d24851b5bca288d7293e7e136da4242247477fd82b771",
+  "tree": "ca8200770f363f110aad498f5b56aede264dd2dc"
+ }
+}

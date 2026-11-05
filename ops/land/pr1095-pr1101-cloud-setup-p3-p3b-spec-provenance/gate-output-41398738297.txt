@@ -1,0 +1,622 @@
+# Gate output run 41398738297 attempt 1 (workflow_dispatch, nhanh claude/gate-hau-merge-8f123b27, head 8f123b27) — log REST tung job, 2026-11-04
+
+JOB 125125690131 chuan-bi [ubuntu-latest] conclusion=success bytes=3545 sha256=5f03ee98e42cc9a5c945cb26bf81929bb7235f3a9e53e1855f269307156e6394 ##[error]=0
+JOB 125125835004 gate (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=653058 sha256=39d895fa929eb2a32f7d09a4657f5e5a62d338df6e7b2ebc047466fa26ca03f5 ##[error]=0
+    TỔNG: ĐẠT
+    == gen_instructions selftest 44/44 ==
+    == transport selftest 12/12 ==
+    == tl selftest 1774/1774 ==
+    == ci_phamvi_test 7/7 ==
+JOB 125125835158 gate (windows-latest) [windows-latest] conclusion=success bytes=666222 sha256=32e09e28a6bafe9696f6cdae8464f9dbbe6431e062096a182d4ef8a6e69b8171 ##[error]=0
+    BỎ QUA t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi
+    BỎ QUA t48_khung_INDEX_giu_BYTES_va_anh_chup_ghim_BLOB
+    BỎ QUA phản chứng kernel O_NOFOLLOW; đo wiring bằng os giả có cờ
+    TỔNG: ĐẠT
+    BỎ QUA ba_nen_path
+    BỎ QUA doi_chung_dong
+    BỎ QUA ['ba_nen_path']
+    == gen_instructions selftest 44/44 ==
+    == transport selftest 12/12 ==
+    BỎ QUA (os.name=nt, ops/bash_nen.py có)
+    == tl selftest 1774/1774 ==
+JOB 125125835131 gate-cong-cu (ubuntu-latest, 0) [ubuntu-latest] conclusion=success bytes=138667 sha256=54cb97e0e978f8fdad4a171cdd826bc1dab8bbb8cd94c33c9f9bf5feeede7485 ##[error]=0
+JOB 125125835066 gate-cong-cu (ubuntu-latest, 1) [ubuntu-latest] conclusion=success bytes=137840 sha256=612074408624b90a379a79011c029abde4b822671eac511b0be5bd173520517a ##[error]=0
+JOB 125125835136 gate-cong-cu (ubuntu-latest, 2) [ubuntu-latest] conclusion=success bytes=138276 sha256=30ee4df92aba2c173e8d96189a67ccdf44378e7def0f496b7fe7ac5eafde7804 ##[error]=0
+JOB 125125835155 gate-cong-cu (ubuntu-latest, 3) [ubuntu-latest] conclusion=success bytes=138427 sha256=2f727526f8ba3f6fe8660e4bdd258009f57b992d8f208369551c6e8233731021 ##[error]=0
+JOB 125125834962 gate-cong-cu (ubuntu-latest, 4) [ubuntu-latest] conclusion=success bytes=137660 sha256=3b18825d01f41615e29cdd41b2c4416b4d1b1ff38730a58fbd92dccc5be75804 ##[error]=0
+JOB 125125835054 gate-cong-cu (ubuntu-latest, 5) [ubuntu-latest] conclusion=success bytes=137987 sha256=ef3610fd94cd363021e79bcafd6e1137c779a60df022e0dffaad933df6e49914 ##[error]=0
+JOB 125125835061 gate-cong-cu (ubuntu-latest, 6) [ubuntu-latest] conclusion=success bytes=137533 sha256=a1cee5b56d504b2483a775900d50dde32b238b1c67e0a297bb4d3af694d0d538 ##[error]=0
+JOB 125125835317 gate-cong-cu (ubuntu-latest, 7) [ubuntu-latest] conclusion=success bytes=138449 sha256=0eda3c4cc24d2085dc8c1b43947b98424509a568a3471e048133e76b9aed1580 ##[error]=0
+JOB 125125835430 gate-cong-cu (windows-latest, 0) [windows-latest] conclusion=success bytes=131010 sha256=3e483a1e0e361ec68d9cdb5ee4f563ae7046f5fc7ccbd79e35c4e9c0f20aa962 ##[error]=0
+    BỎ QUA t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi
+    BỎ QUA t48_khung_INDEX_giu_BYTES_va_anh_chup_ghim_BLOB
+    TỔNG: CA 59/59 đạt · ĐỘT BIẾN 490 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+JOB 125139172928 gate-cong-cu-gop (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=98267 sha256=541ae47fdf88aa7382fb58ff694654fb0903582531940f0764aed31c11ea5296 ##[error]=0
+JOB 125135839507 gate-nhanh-gop (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=122395 sha256=86a20c4dba5070a1d7564a0a0030f70af3c0a3ef01a2c99bc51e66332b844026 ##[error]=0
+    DOT BIEN (chi ca dich): 255/255 giet · DOT BIEN SAN PHAM: 10/10 giet
+    targeted_mutant_gate: DAT — KHONG phai full mutant audit; full_mutant_audit van BAT BUOC truoc merge/land/release
+JOB 125135839443 gate-nhanh-gop (windows-latest) [windows-latest] conclusion=success bytes=127669 sha256=b3838d96dc67f3a9c12ee04630f38c48035d5fa740c0dc618ee37cd8bcf3afea ##[error]=0
+    DOT BIEN (chi ca dich): 255/255 giet · DOT BIEN SAN PHAM: 10/10 giet
+    targeted_mutant_gate: DAT — KHONG phai full mutant audit; full_mutant_audit van BAT BUOC truoc merge/land/release
+JOB 125125835248 gate-nhanh-manh (ubuntu-latest, 0) [ubuntu-latest] conclusion=success bytes=125756 sha256=d840c2f0e66598eaa9c3f5ad26b1e00384f846a91b23f697044a507ee2c978a9 ##[error]=0
+    DOT BIEN TU KIEM bo-cua-theo-thong-diep | r545,r546,r547 | 3/3
+    DOT BIEN TU KIEM dau-phien-ha-tran-xuong-khong | r508,r527,r528,r543 | 4/4
+    DOT BIEN TU KIEM tu-dot-bien-nhan-giao-khac-rong | r516,r539 | 2/2
+    DOT BIEN TU KIEM bo-xoa-co-chi-tu-kiem | r519 | 1/1
+    DOT BIEN TU KIEM tk-proof-cases | r539,r540 | 2/2
+    DOT BIEN TU KIEM bo-vat-hoa-dich-o-chay-dot-bien | r521 | 1/1
+    DOT BIEN TU KIEM tu-dot-bien-chuan-hoa-hon-hop | r516 | 1/1
+    DOT BIEN TU KIEM tk-diagnostic-prefix-erasure | r542 | 1/1
+    DOT BIEN TU KIEM git-bao-tri-bo-kho-bare | r548 | 1/1
+    DOT BIEN TU KIEM bo-doi-ban-ghi-dong-luot | r509,r510,r538 | 3/3
+    DOT BIEN TU KIEM gop-bo-kiem-hop | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kiem-tap-manh | r552 | 1/1
+    DOT BIEN TU KIEM gop-cli-bo-qua | r552 | 1/1
+    DOT BIEN TU KIEM tom-tat-mat-thong-diep | r545,r547 | 2/2
+    DOT BIEN TU KIEM entropy-chi-giu-bit-cao | r509 | 1/1
+    DOT BIEN TU KIEM con-treo-wait-loi-thoat | r556 | 1/1
+    DOT BIEN TU KIEM thu-output-loi-thoat | r556 | 1/1
+    DOT BIEN TU KIEM loc-dang-ky-theo-thong-diep | r547 | 1/1
+    DOT BIEN TU KIEM manh-chay-truoc-xac-thuc | r549,r550 | 2/2
+    DOT BIEN TU KIEM nhan-rc-bool | r517 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-long-duoi-tin-dung-gia | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-ti-so-hai-so-khong-can-bang | r538 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-bat-rong | r543 | 1/1
+    DOT BIEN TU KIEM manh-bo-doi-ra | r549 | 1/1
+    DOT BIEN TU KIEM manh-fullmatch-thanh-match | r549 | 1/1
+    DOT BIEN TU KIEM ghi-so-phong-mutant | r545 | 1/1
+    DOT BIEN TU KIEM chan-doan-lat-khai-dong-ranh-gioi-khong-dem | r533 | 1/1
+    DOT BIEN TU KIEM bo-so-lan-thu | r515 | 1/1
+    DOT BIEN TU KIEM moc-bo-kiem-dao-nguoc | r554 | 1/1
+JOB 125125835564 gate-nhanh-manh (ubuntu-latest, 1) [ubuntu-latest] conclusion=success bytes=127302 sha256=11f85bf6893b59008ff599aaa239a04ee186c404faed406e6049935c5cf5fb0f ##[error]=0
+    DOT BIEN TU KIEM bo-cua-xoa-het | r545,r546,r547 | 3/3
+    DOT BIEN TU KIEM dau-phien-bo-vong-rut-lai | r527,r528 | 2/2
+    DOT BIEN TU KIEM gop-khong-do-vao-khong-giet | r514 | 1/1
+    DOT BIEN TU KIEM bo-so-tap-ca-do-voi-dich | r503,r504,r505,r512,r515,r521 | 6/6
+    DOT BIEN TU KIEM bo-tu-choi-dot-bien-noop | r519 | 1/1
+    DOT BIEN TU KIEM mo-cong-tu-dot-bien-hong | r513 | 1/1
+    DOT BIEN TU KIEM dung-chi-khi-khong-giet | r505,r520,r522,r523 | 4/4
+    DOT BIEN TU KIEM bo-phan-biet-lop-ngoai-le | r501,r504,r518 | 3/3
+    DOT BIEN TU KIEM manh-bo-tu-kiem | r551 | 1/1
+    DOT BIEN TU KIEM git-bao-tri-bo-nap | r548 | 1/1
+    DOT BIEN TU KIEM chan-doan-nuot-ca-ranh-gioi | r524,r531,r533,r534,r535,r536,r537,r538 | 8/8
+    DOT BIEN TU KIEM chan-doan-de-tran-nuot-nhan-bo-qua | r531,r533,r534,r536 | 4/4
+    DOT BIEN TU KIEM gop-bo-kiem-khoang-n | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kieu-int-manh | r552 | 1/1
+    DOT BIEN TU KIEM dung-chi-khi-giet | r505,r509 | 2/2
+    DOT BIEN TU KIEM entropy-giu-mot-byte | r509 | 1/1
+    DOT BIEN TU KIEM don-cay-nem-thay-124 | r556 | 1/1
+    DOT BIEN TU KIEM windows-popen-nem-ro-job | r556 | 1/1
+    DOT BIEN TU KIEM vang-khong-bat | r547 | 1/1
+    DOT BIEN TU KIEM bo-xac-thuc-nhan | r517 | 1/1
+    DOT BIEN TU KIEM chan-doan-cot-dich-nhan-moi-thu | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-long-duoi-mutant-that-bai | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-ten-ngoai-le-chi-ascii | r538 | 1/1
+    DOT BIEN TU KIEM r508-nhan-moi-kdd | r543 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-mat-so-lan | r543 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-raw-o-docstring-khoi-chan-doan | r526 | 1/1
+    DOT BIEN TU KIEM stderr-khai-ca-khi-khong-cat | r544 | 1/1
+    DOT BIEN TU KIEM r545-nuot-moi-oserror | r545 | 1/1
+    DOT BIEN TU KIEM chan-doan-quay-ve-lstrip-tap-ky-tu | r537 | 1/1
+    DOT BIEN TU KIEM bo-kiem-ban-ghi-trung | r507,r511 | 2/2
+    DOT BIEN TU KIEM khung-lay-ten-ca-tu-doi-so | r511 | 1/1
+JOB 125125835284 gate-nhanh-manh (ubuntu-latest, 2) [ubuntu-latest] conclusion=success bytes=126441 sha256=99d136d8b15b099aade3731e36d4bfd69dfa6b7bb17f1d04ea28240a9b75f834 ##[error]=0
+    DOT BIEN TU KIEM runner-khong-theo-vi-tri | r545,r546,r547 | 3/3
+    DOT BIEN TU KIEM dau-phien-r508-khong-di-qua-bo-tien-de | r528 | 1/1
+    DOT BIEN TU KIEM doi-cheo-khong-giet-va-khong-do | r514 | 1/1
+    DOT BIEN TU KIEM tu-dot-bien-nhan-bao-ham | r516,r539 | 2/2
+    DOT BIEN TU KIEM tk-proof-malformed | r525,r530,r532,r539,r540 | 5/5
+    DOT BIEN TU KIEM mo-cong-nhom-bat-buoc | r513 | 1/1
+    DOT BIEN TU KIEM tk-json-recursion-escape | r539 | 1/1
+    DOT BIEN TU KIEM manh-vong-tron-bang | r551,r552 | 2/2
+    DOT BIEN TU KIEM manh-in-dong-day-du | r551 | 1/1
+    DOT BIEN TU KIEM git-bao-tri-ghi-de | r548 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-dem-phan-bi-bo | r531,r533,r534,r535,r536,r538 | 6/6
+    DOT BIEN TU KIEM phan-hoach-lech-du | r550,r552 | 2/2
+    DOT BIEN TU KIEM gop-bo-kiem-nhom | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kieu-int-so-manh | r552 | 1/1
+    DOT BIEN TU KIEM archive-boc-lop-dong-ten | r502 | 1/1
+    DOT BIEN TU KIEM dau-phien-thanh-moc-giay | r508,r509 | 2/2
+    DOT BIEN TU KIEM entropy-bo-bit-cao-byte-giua | r509 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-long-ho-tu-kiem | r535,r538 | 2/2
+    DOT BIEN TU KIEM windows-khong-job-van-chay | r556 | 1/1
+    DOT BIEN TU KIEM runner-bo-loc-luc-doc | r547 | 1/1
+    DOT BIEN TU KIEM bo-xac-thuc-kieu-ten-ca | r517 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-dau-phan-cach-cua-nhan | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-long-duoi-loi-thieu-nhom | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-so-nhan-chu-so-unicode-va-dem | r538 | 1/1
+    DOT BIEN TU KIEM chuan-hoa-lan-hai-thanh-giet | r505 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-bo-dem-chot-long | r543 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-stderr-o-ca-suy-bien | r525 | 1/1
+    DOT BIEN TU KIEM stderr-duong-that-khai-ca-khi-ngan | r544 | 1/1
+    DOT BIEN TU KIEM r545-don-het-so | r545 | 1/1
+    DOT BIEN TU KIEM chan-doan-lat-khai-bo-khoang-trang-tung-dong | r537 | 1/1
+    DOT BIEN TU KIEM doc-tach-dong-bang-splitlines | r518 | 1/1
+JOB 125125835262 gate-nhanh-manh (ubuntu-latest, 3) [ubuntu-latest] conclusion=success bytes=126178 sha256=ddb3dc10dda64f57c0e297759d4fe122a2dc3c592ffb8ac351bd594707f3fe57 ##[error]=0
+    DOT BIEN TU KIEM ghi-so-doc-kenh-xac-thuc | r545,r546 | 2/2
+    DOT BIEN TU KIEM runner-bo-doi-nhan-loi-khac | r546 | 1/1
+    DOT BIEN TU KIEM cong-theo-so-lan | r514 | 1/1
+    DOT BIEN TU KIEM tu-dot-bien-nhan-tap-rong-lam-dich | r516,r525,r539 | 3/3
+    DOT BIEN TU KIEM timeout-chi-giet-con | r555,r556 | 2/2
+    DOT BIEN TU KIEM mo-cong-tong | r513 | 1/1
+    DOT BIEN TU KIEM tk-proof-decode-escape | r539 | 1/1
+    DOT BIEN TU KIEM tu-dot-bien-bo-so-rc-con | r516 | 1/1
+    DOT BIEN TU KIEM bo-bat-loi-phong-con | r520,r522,r545 | 3/3
+    DOT BIEN TU KIEM chan-doan-xoa-phan-biet-P1-P2 | r525,r532,r542 | 3/3
+    DOT BIEN TU KIEM manh-bo-tu-kiem-do | r551 | 1/1
+    DOT BIEN TU KIEM git-bao-tri-bo-tham-so | r548 | 1/1
+    DOT BIEN TU KIEM chan-doan-dem-ca-dong-ranh-gioi | r531,r533,r534,r535,r536,r537,r538 | 7/7
+    DOT BIEN TU KIEM chan-doan-doc-so-dong-bo-tu-van-ban | r531,r533,r534,r536 | 4/4
+    DOT BIEN TU KIEM gop-bo-kiem-lap | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kieu-int-phien-ban | r552 | 1/1
+    DOT BIEN TU KIEM archive-boc-lop-chot | r502 | 1/1
+    DOT BIEN TU KIEM nap-boc-lop-dong-ten | r502 | 1/1
+    DOT BIEN TU KIEM entropy-sap-xep-byte | r509 | 1/1
+    DOT BIEN TU KIEM ket-thuc-goi-taskkill | r556 | 1/1
+    DOT BIEN TU KIEM bo-cua-khong-lam-gi | r547 | 1/1
+    DOT BIEN TU KIEM vang-khong-don | r547 | 1/1
+    DOT BIEN TU KIEM ep-kieu-dau-dong-luot | r517 | 1/1
+    DOT BIEN TU KIEM chan-doan-lat-loi-khai-dau-rong-hon-ranh | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-quen-dong-ti-so-va-loi | r538 | 1/1
+    DOT BIEN TU KIEM tk-summary-count | r540 | 1/1
+    DOT BIEN TU KIEM tk-summary-total | r540 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-mat-thong-diep | r543 | 1/1
+    DOT BIEN TU KIEM chan-doan-r526-doc-duong-hai-bang-hang-sach | r526 | 1/1
+    DOT BIEN TU KIEM phan-hoach-bo-kiem-trung | r550 | 1/1
+    DOT BIEN TU KIEM khu-trung-toan-so | r545 | 1/1
+    DOT BIEN TU KIEM chan-doan-lat-khai-bo-dong-trang | r537 | 1/1
+    DOT BIEN TU KIEM tk-main-ignore-unmeasurable | r541 | 1/1
+JOB 125125835339 gate-nhanh-manh (ubuntu-latest, 4) [ubuntu-latest] conclusion=success bytes=126686 sha256=3f0cb3cb9aa5be10bed235d41eb19a0a41a1e1ba28079463e76038958e7e2aff ##[error]=0
+    DOT BIEN TU KIEM runner-bo-doi-nhan-chot | r545,r546 | 2/2
+    DOT BIEN TU KIEM cong-bu-theo-lan-thu | r514 | 1/1
+    DOT BIEN TU KIEM tu-dot-bien-nhan-moi-tap-ca | r516,r525,r532,r539,r542 | 5/5
+    DOT BIEN TU KIEM tu-dot-bien-bo-loc-loi-vo-can | r516,r530,r542 | 3/3
+    DOT BIEN TU KIEM in-sai-so-hang | r513 | 1/1
+    DOT BIEN TU KIEM tk-proof-nonce | r539,r540 | 2/2
+    DOT BIEN TU KIEM go-tat-ky-o-kho-mutant | r506 | 1/1
+    DOT BIEN TU KIEM manh-bam-sai-tep | r551,r552 | 2/2
+    DOT BIEN TU KIEM cham-doc-stdout-vo-dieu-kien | r512 | 1/1
+    DOT BIEN TU KIEM dot-bien-bo-tham-so-muc | r551 | 1/1
+    DOT BIEN TU KIEM tu-dot-bien-bo-tham-so-muc | r551 | 1/1
+    DOT BIEN TU KIEM git-bao-tri-thieu-khoa | r548 | 1/1
+    DOT BIEN TU KIEM chan-doan-chi-lay-ten-ca | r524,r530,r531,r534,r536,r537 | 6/6
+    DOT BIEN TU KIEM gop-bo-bam-tool | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kiem-san | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-qua-json-hong | r552 | 1/1
+    DOT BIEN TU KIEM nap-boc-lop-chot | r502 | 1/1
+    DOT BIEN TU KIEM entropy-nen-bang-modulo | r509 | 1/1
+    DOT BIEN TU KIEM don-cay-nem-thieu-ngoai-hop-dong | r556 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-dem-vao-do | r543,r545 | 2/2
+    DOT BIEN TU KIEM vang-khong-dang-ky | r547 | 1/1
+    DOT BIEN TU KIEM bo-xac-thuc-object | r517 | 1/1
+    DOT BIEN TU KIEM chan-doan-doi-khoang-trang-truoc-tong-ket-dot-bien | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-long-ho-mutant | r538 | 1/1
+    DOT BIEN TU KIEM tk-duplicate-diagnostic | r540 | 1/1
+    DOT BIEN TU KIEM tk-summary-diagnostics | r540 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-khong-ra-trang-thai-thu-ba | r543 | 1/1
+    DOT BIEN TU KIEM chan-doan-lat-loi-khai-stderr-sau-chot | r532 | 1/1
+    DOT BIEN TU KIEM ghi-so-bo-duyet-chuoi | r545 | 1/1
+    DOT BIEN TU KIEM ghi-so-doc-kenh | r545 | 1/1
+    DOT BIEN TU KIEM r545-nuot-theo-loai | r545 | 1/1
+    DOT BIEN TU KIEM bo-so-mutant | r515 | 1/1
+    DOT BIEN TU KIEM moc-bo-kiem-lech-giay | r554 | 1/1
+JOB 125125835280 gate-nhanh-manh (ubuntu-latest, 5) [ubuntu-latest] conclusion=success bytes=126632 sha256=fafa78bb57cea8e2a279935ccbc24c1cf08ea1c932804e89717ba34c4a02b4fb ##[error]=0
+    DOT BIEN TU KIEM runner-bo-doi-nhan-dat | r545,r546 | 2/2
+    DOT BIEN TU KIEM bo-so-dau-phien | r508,r509,r528,r543 | 4/4
+    DOT BIEN TU KIEM tk-always-unmeasurable | r516,r525,r530,r539,r540,r542 | 6/6
+    DOT BIEN TU KIEM bo-tran-chay-lai | r505,r509,r517,r520,r521,r522 | 6/6
+    DOT BIEN TU KIEM bo-xac-thuc-ten-dich-la | r519 | 1/1
+    DOT BIEN TU KIEM mo-cong-tu-dot-bien-thieu-giet | r513 | 1/1
+    DOT BIEN TU KIEM chan-doan-dung-o-dong-dau | r524,r531,r533,r535,r536,r537,r538,r542 | 8/8
+    DOT BIEN TU KIEM bo-vat-hoa-dich-o-chay-mot-mutant | r521 | 1/1
+    DOT BIEN TU KIEM tu-dot-bien-chuan-hoa-rc-khac | r516 | 1/1
+    DOT BIEN TU KIEM manh-bo-pop-env | r551 | 1/1
+    DOT BIEN TU KIEM run-nem-tin-hieu-chot | r501 | 1/1
+    DOT BIEN TU KIEM git-bao-tri-noi-trung | r548 | 1/1
+    DOT BIEN TU KIEM chan-doan-ranh-gioi-noi-long-ve-tien-to-tran | r531,r533,r535,r538 | 4/4
+    DOT BIEN TU KIEM gop-bo-kiem-phien-ban | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kieu-mang | r552 | 1/1
+    DOT BIEN TU KIEM cap-lop-chot-cho-assert-ha-tang | r502 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-mot-ky-tu-khoi-danh-sach-tach-dong | r529 | 1/1
+    DOT BIEN TU KIEM chan-doan-tach-dong-lai-nuot-dau-tach-unicode | r529 | 1/1
+    DOT BIEN TU KIEM con-treo-cho-khong-han | r556 | 1/1
+    DOT BIEN TU KIEM popen-nem-mat-ghi-chu-dong | r556 | 1/1
+    DOT BIEN TU KIEM bo-mien-tru-vang-tep | r547 | 1/1
+    DOT BIEN TU KIEM vang-moi-tep | r547 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-tran-ma-khong-doi-huong-cat | r525,r536 | 2/2
+    DOT BIEN TU KIEM chan-doan-ly-do-chi-kiem-khong-rong | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-quen-dong-tong-ket-nhom | r538 | 1/1
+    DOT BIEN TU KIEM tk-unknown-diagnostic | r540 | 1/1
+    DOT BIEN TU KIEM manh-bo-k-nho-hon-n | r549 | 1/1
+    DOT BIEN TU KIEM manh-regex-long | r549 | 1/1
+    DOT BIEN TU KIEM stderr-cat-khong-khai | r544 | 1/1
+    DOT BIEN TU KIEM ghi-so-kho-bare-liet-ke | r545 | 1/1
+    DOT BIEN TU KIEM tom-tat-mat-so-lan | r545 | 1/1
+    DOT BIEN TU KIEM bo-so-rc-tien-trinh | r515 | 1/1
+    DOT BIEN TU KIEM ram-pmc-thieu-truong | r553 | 1/1
+JOB 125125835333 gate-nhanh-manh (ubuntu-latest, 6) [ubuntu-latest] conclusion=success bytes=126884 sha256=3499a154b2844da555c334f3691b75ca653a95eefc9edfaae05b4012dff181b1 ##[error]=0
+    DOT BIEN TU KIEM ghi-so-bang-chung | r546 | 1/1
+    DOT BIEN TU KIEM ghi-so-gop-dich | r546 | 1/1
+    DOT BIEN TU KIEM cong-giet-theo-so-lan | r514 | 1/1
+    DOT BIEN TU KIEM cham-doc-stdout-khi-rc-mot | r505,r512,r520,r521,r522,r523 | 6/6
+    DOT BIEN TU KIEM tu-kiem-bo-ghi-nhan-loi-vo-can | r516,r542 | 2/2
+    DOT BIEN TU KIEM mo-cong-cuoi | r513 | 1/1
+    DOT BIEN TU KIEM tk-unbounded-number | r539,r540 | 2/2
+    DOT BIEN TU KIEM src-tat-ky-khong-chay | r506 | 1/1
+    DOT BIEN TU KIEM manh-tu-kiem-tron-bang | r551,r552 | 2/2
+    DOT BIEN TU KIEM cham-thu-hoi-giet-vi-stdout | r512 | 1/1
+    DOT BIEN TU KIEM manh-bo-so-hang-khong-do | r551 | 1/1
+    DOT BIEN TU KIEM runner-bat-assertion-tran | r501 | 1/1
+    DOT BIEN TU KIEM chan-doan-khai-bo-qua-ca-khi-khong-mat | r531,r533,r534,r535,r536,r538 | 6/6
+    DOT BIEN TU KIEM hep-lai-loi-phong-chi-oserror | r522 | 1/1
+    DOT BIEN TU KIEM gop-bo-kiem-bam | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kiem-so-manh | r552 | 1/1
+    DOT BIEN TU KIEM gop-chi-mot-bang | r552 | 1/1
+    DOT BIEN TU KIEM bo-loc-dang-ky | r545,r547 | 2/2
+    DOT BIEN TU KIEM cache-dau-phien-theo-dinh-danh | r509 | 1/1
+    DOT BIEN TU KIEM chan-doan-ho-case-t-lay-hinh-fixture-thay-hinh-runner | r535,r538 | 2/2
+    DOT BIEN TU KIEM windows-gan-hong-van-chay | r556 | 1/1
+    DOT BIEN TU KIEM r547-thu-moi-tep | r547 | 1/1
+    DOT BIEN TU KIEM bo-tach-ca-voi-dong-luot | r517 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-bien-phai-cua-nhan | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-long-duoi-ban-ghi-dot-bien | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-quen-ho-mutant-tung-muc | r538 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-mkdir-ngoai-try | r543 | 1/1
+    DOT BIEN TU KIEM chan-doan-r526-doc-hang-sach-thay-vi-tep-that | r526 | 1/1
+    DOT BIEN TU KIEM ghi-so-chay-ca | r545 | 1/1
+    DOT BIEN TU KIEM ghi-so-helper-r528 | r545 | 1/1
+    DOT BIEN TU KIEM runner-bo-duyet-chuoi | r545 | 1/1
+    DOT BIEN TU KIEM bo-so-rc-khi-child-khong | r515 | 1/1
+    DOT BIEN TU KIEM moc-nhan-sai-dinh-dang | r554 | 1/1
+JOB 125125835270 gate-nhanh-manh (ubuntu-latest, 7) [ubuntu-latest] conclusion=success bytes=126875 sha256=e257fd129ddf722ac34167e2e2924ab013bd63eaa7ef172e11db6c39f38749c2 ##[error]=0
+    DOT BIEN TU KIEM ghi-so-gop | r546 | 1/1
+    DOT BIEN TU KIEM r546-don-het-so | r546 | 1/1
+    DOT BIEN TU KIEM cong-khong-giet-theo-so-lan | r514 | 1/1
+    DOT BIEN TU KIEM bo-xac-thuc-dich-rong | r519,r521,r538 | 3/3
+    DOT BIEN TU KIEM dem-dich-ke-ca-trung | r519 | 1/1
+    DOT BIEN TU KIEM tk-inherit-outer-proof | r539 | 1/1
+    DOT BIEN TU KIEM tu-kiem-gop-hai-lop-ngoai-le | r516,r545 | 2/2
+    DOT BIEN TU KIEM bo-vat-hoa-dich-o-doc-kenh | r521 | 1/1
+    DOT BIEN TU KIEM chan-doan-tra-ranh-gioi-ve-ban-rong | r531,r533,r535,r538,r542 | 5/5
+    DOT BIEN TU KIEM manh-bo-chay-ca | r551 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-chuyen-tiep-o-nhanh-do-khac | r530,r542 | 2/2
+    DOT BIEN TU KIEM git-bao-tri-gia-tri-dau | r548 | 1/1
+    DOT BIEN TU KIEM chan-doan-vut-so-dong-bo-luc-dong-goi | r531,r533,r534,r535,r536,r538 | 6/6
+    DOT BIEN TU KIEM chan-doan-cat-lang-khong-khai | r524,r525,r531,r534,r536 | 5/5
+    DOT BIEN TU KIEM gop-bo-kiem-khoa | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kiem-thanh-vien | r552 | 1/1
+    DOT BIEN TU KIEM gop-rc-0-khi-loi | r552 | 1/1
+    DOT BIEN TU KIEM bo-vo-fail-close | r517,r545 | 2/2
+    DOT BIEN TU KIEM bo-chuan-hoa-ban-sao | r523 | 1/1
+    DOT BIEN TU KIEM zero-entropy-bo-dem | r509 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-chi-ba-loai-da-thu | r543,r545 | 2/2
+    DOT BIEN TU KIEM loc-luc-doc-theo-thong-diep | r547 | 1/1
+    DOT BIEN TU KIEM ban-sau-ghi-de-ban-dong-luot | r517 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-long-duoi-ca-do-thuc-te | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-rc-con-nhan-1-va-am-0 | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-chuyen-tiep-o-nhanh-rc-khac-1 | r530 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-gop-mot-loai | r543 | 1/1
+    DOT BIEN TU KIEM chan-doan-in-them-stderr-khi-da-co-chot | r532 | 1/1
+    DOT BIEN TU KIEM stderr-duong-that-bo-khai | r544 | 1/1
+    DOT BIEN TU KIEM khu-trung-bo-cua-so | r545 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-khoang-trang-tung-dong-that | r537 | 1/1
+    DOT BIEN TU KIEM dau-phien-can-tran-ma-lang-le-tra-cap-trung | r527 | 1/1
+JOB 125125835226 gate-nhanh-manh (windows-latest, 0) [windows-latest] conclusion=success bytes=131473 sha256=2bfdb0b317cd08bd140973967b6746d67fa0519a86470e21e7e5f87f52697df9 ##[error]=0
+    DOT BIEN TU KIEM bo-cua-theo-thong-diep | r545,r546,r547 | 3/3
+    DOT BIEN TU KIEM dau-phien-ha-tran-xuong-khong | r508,r527,r528,r543 | 4/4
+    DOT BIEN TU KIEM tu-dot-bien-nhan-giao-khac-rong | r516,r539 | 2/2
+    DOT BIEN TU KIEM bo-xoa-co-chi-tu-kiem | r519 | 1/1
+    DOT BIEN TU KIEM tk-proof-cases | r539,r540 | 2/2
+    DOT BIEN TU KIEM bo-vat-hoa-dich-o-chay-dot-bien | r521 | 1/1
+    DOT BIEN TU KIEM tu-dot-bien-chuan-hoa-hon-hop | r516 | 1/1
+    DOT BIEN TU KIEM tk-diagnostic-prefix-erasure | r542 | 1/1
+    DOT BIEN TU KIEM git-bao-tri-bo-kho-bare | r548 | 1/1
+    DOT BIEN TU KIEM bo-doi-ban-ghi-dong-luot | r509,r510,r538 | 3/3
+    DOT BIEN TU KIEM gop-bo-kiem-hop | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kiem-tap-manh | r552 | 1/1
+    DOT BIEN TU KIEM gop-cli-bo-qua | r552 | 1/1
+    DOT BIEN TU KIEM tom-tat-mat-thong-diep | r545,r547 | 2/2
+    DOT BIEN TU KIEM entropy-chi-giu-bit-cao | r509 | 1/1
+    DOT BIEN TU KIEM con-treo-wait-loi-thoat | r556 | 1/1
+    DOT BIEN TU KIEM thu-output-loi-thoat | r556 | 1/1
+    DOT BIEN TU KIEM loc-dang-ky-theo-thong-diep | r547 | 1/1
+    DOT BIEN TU KIEM manh-chay-truoc-xac-thuc | r549,r550 | 2/2
+    DOT BIEN TU KIEM nhan-rc-bool | r517 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-long-duoi-tin-dung-gia | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-ti-so-hai-so-khong-can-bang | r538 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-bat-rong | r543 | 1/1
+    DOT BIEN TU KIEM manh-bo-doi-ra | r549 | 1/1
+    DOT BIEN TU KIEM manh-fullmatch-thanh-match | r549 | 1/1
+    DOT BIEN TU KIEM ghi-so-phong-mutant | r545 | 1/1
+    DOT BIEN TU KIEM chan-doan-lat-khai-dong-ranh-gioi-khong-dem | r533 | 1/1
+    DOT BIEN TU KIEM bo-so-lan-thu | r515 | 1/1
+    DOT BIEN TU KIEM moc-bo-kiem-dao-nguoc | r554 | 1/1
+JOB 125125835324 gate-nhanh-manh (windows-latest, 1) [windows-latest] conclusion=success bytes=131684 sha256=85d1e325fb52ad8bfc36843dc7daea5030e98b708efb1a4f29c26b385ad0023f ##[error]=0
+    DOT BIEN TU KIEM bo-cua-xoa-het | r545,r546,r547 | 3/3
+    DOT BIEN TU KIEM dau-phien-bo-vong-rut-lai | r527,r528 | 2/2
+    DOT BIEN TU KIEM gop-khong-do-vao-khong-giet | r514 | 1/1
+    DOT BIEN TU KIEM bo-so-tap-ca-do-voi-dich | r503,r504,r505,r512,r515,r521 | 6/6
+    DOT BIEN TU KIEM bo-tu-choi-dot-bien-noop | r519 | 1/1
+    DOT BIEN TU KIEM mo-cong-tu-dot-bien-hong | r513 | 1/1
+    DOT BIEN TU KIEM dung-chi-khi-khong-giet | r505,r520,r522,r523 | 4/4
+    DOT BIEN TU KIEM bo-phan-biet-lop-ngoai-le | r501,r504,r518 | 3/3
+    DOT BIEN TU KIEM manh-bo-tu-kiem | r551 | 1/1
+    DOT BIEN TU KIEM git-bao-tri-bo-nap | r548 | 1/1
+    DOT BIEN TU KIEM chan-doan-nuot-ca-ranh-gioi | r524,r531,r533,r534,r535,r536,r537,r538 | 8/8
+    DOT BIEN TU KIEM chan-doan-de-tran-nuot-nhan-bo-qua | r531,r533,r534,r536 | 4/4
+    DOT BIEN TU KIEM gop-bo-kiem-khoang-n | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kieu-int-manh | r552 | 1/1
+    DOT BIEN TU KIEM dung-chi-khi-giet | r505,r509 | 2/2
+    DOT BIEN TU KIEM entropy-giu-mot-byte | r509 | 1/1
+    DOT BIEN TU KIEM don-cay-nem-thay-124 | r556 | 1/1
+    DOT BIEN TU KIEM windows-popen-nem-ro-job | r556 | 1/1
+    DOT BIEN TU KIEM vang-khong-bat | r547 | 1/1
+    DOT BIEN TU KIEM bo-xac-thuc-nhan | r517 | 1/1
+    DOT BIEN TU KIEM chan-doan-cot-dich-nhan-moi-thu | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-long-duoi-mutant-that-bai | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-ten-ngoai-le-chi-ascii | r538 | 1/1
+    DOT BIEN TU KIEM r508-nhan-moi-kdd | r543 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-mat-so-lan | r543 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-raw-o-docstring-khoi-chan-doan | r526 | 1/1
+    DOT BIEN TU KIEM stderr-khai-ca-khi-khong-cat | r544 | 1/1
+    DOT BIEN TU KIEM r545-nuot-moi-oserror | r545 | 1/1
+    DOT BIEN TU KIEM chan-doan-quay-ve-lstrip-tap-ky-tu | r537 | 1/1
+    DOT BIEN TU KIEM bo-kiem-ban-ghi-trung | r507,r511 | 2/2
+    DOT BIEN TU KIEM khung-lay-ten-ca-tu-doi-so | r511 | 1/1
+JOB 125125835390 gate-nhanh-manh (windows-latest, 2) [windows-latest] conclusion=success bytes=132205 sha256=beffccd1796070e879acacba335d6cd183604196fa63076a5291b707ece1c75c ##[error]=0
+    DOT BIEN TU KIEM runner-khong-theo-vi-tri | r545,r546,r547 | 3/3
+    DOT BIEN TU KIEM dau-phien-r508-khong-di-qua-bo-tien-de | r528 | 1/1
+    DOT BIEN TU KIEM doi-cheo-khong-giet-va-khong-do | r514 | 1/1
+    DOT BIEN TU KIEM tu-dot-bien-nhan-bao-ham | r516,r539 | 2/2
+    DOT BIEN TU KIEM tk-proof-malformed | r525,r530,r532,r539,r540 | 5/5
+    DOT BIEN TU KIEM mo-cong-nhom-bat-buoc | r513 | 1/1
+    DOT BIEN TU KIEM tk-json-recursion-escape | r539 | 1/1
+    DOT BIEN TU KIEM manh-vong-tron-bang | r551,r552 | 2/2
+    DOT BIEN TU KIEM manh-in-dong-day-du | r551 | 1/1
+    DOT BIEN TU KIEM git-bao-tri-ghi-de | r548 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-dem-phan-bi-bo | r531,r533,r534,r535,r536,r538 | 6/6
+    DOT BIEN TU KIEM phan-hoach-lech-du | r550,r552 | 2/2
+    DOT BIEN TU KIEM gop-bo-kiem-nhom | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kieu-int-so-manh | r552 | 1/1
+    DOT BIEN TU KIEM archive-boc-lop-dong-ten | r502 | 1/1
+    DOT BIEN TU KIEM dau-phien-thanh-moc-giay | r508,r509 | 2/2
+    DOT BIEN TU KIEM entropy-bo-bit-cao-byte-giua | r509 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-long-ho-tu-kiem | r535,r538 | 2/2
+    DOT BIEN TU KIEM windows-khong-job-van-chay | r556 | 1/1
+    DOT BIEN TU KIEM runner-bo-loc-luc-doc | r547 | 1/1
+    DOT BIEN TU KIEM bo-xac-thuc-kieu-ten-ca | r517 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-dau-phan-cach-cua-nhan | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-long-duoi-loi-thieu-nhom | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-so-nhan-chu-so-unicode-va-dem | r538 | 1/1
+    DOT BIEN TU KIEM chuan-hoa-lan-hai-thanh-giet | r505 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-bo-dem-chot-long | r543 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-stderr-o-ca-suy-bien | r525 | 1/1
+    DOT BIEN TU KIEM stderr-duong-that-khai-ca-khi-ngan | r544 | 1/1
+    DOT BIEN TU KIEM r545-don-het-so | r545 | 1/1
+    DOT BIEN TU KIEM chan-doan-lat-khai-bo-khoang-trang-tung-dong | r537 | 1/1
+    DOT BIEN TU KIEM doc-tach-dong-bang-splitlines | r518 | 1/1
+JOB 125125835399 gate-nhanh-manh (windows-latest, 3) [windows-latest] conclusion=success bytes=132122 sha256=966e916f8b6fb6ac5d6af629b2110a6045190754d65f92798e665553eefd5753 ##[error]=0
+    DOT BIEN TU KIEM ghi-so-doc-kenh-xac-thuc | r545,r546 | 2/2
+    DOT BIEN TU KIEM runner-bo-doi-nhan-loi-khac | r546 | 1/1
+    DOT BIEN TU KIEM cong-theo-so-lan | r514 | 1/1
+    DOT BIEN TU KIEM tu-dot-bien-nhan-tap-rong-lam-dich | r516,r525,r539 | 3/3
+    DOT BIEN TU KIEM timeout-chi-giet-con | r555,r556 | 2/2
+    DOT BIEN TU KIEM mo-cong-tong | r513 | 1/1
+    DOT BIEN TU KIEM tk-proof-decode-escape | r539 | 1/1
+    DOT BIEN TU KIEM tu-dot-bien-bo-so-rc-con | r516 | 1/1
+    DOT BIEN TU KIEM bo-bat-loi-phong-con | r520,r522,r545 | 3/3
+    DOT BIEN TU KIEM chan-doan-xoa-phan-biet-P1-P2 | r525,r532,r542 | 3/3
+    DOT BIEN TU KIEM manh-bo-tu-kiem-do | r551 | 1/1
+    DOT BIEN TU KIEM git-bao-tri-bo-tham-so | r548 | 1/1
+    DOT BIEN TU KIEM chan-doan-dem-ca-dong-ranh-gioi | r531,r533,r534,r535,r536,r537,r538 | 7/7
+    DOT BIEN TU KIEM chan-doan-doc-so-dong-bo-tu-van-ban | r531,r533,r534,r536 | 4/4
+    DOT BIEN TU KIEM gop-bo-kiem-lap | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kieu-int-phien-ban | r552 | 1/1
+    DOT BIEN TU KIEM archive-boc-lop-chot | r502 | 1/1
+    DOT BIEN TU KIEM nap-boc-lop-dong-ten | r502 | 1/1
+    DOT BIEN TU KIEM entropy-sap-xep-byte | r509 | 1/1
+    DOT BIEN TU KIEM ket-thuc-goi-taskkill | r556 | 1/1
+    DOT BIEN TU KIEM bo-cua-khong-lam-gi | r547 | 1/1
+    DOT BIEN TU KIEM vang-khong-don | r547 | 1/1
+    DOT BIEN TU KIEM ep-kieu-dau-dong-luot | r517 | 1/1
+    DOT BIEN TU KIEM chan-doan-lat-loi-khai-dau-rong-hon-ranh | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-quen-dong-ti-so-va-loi | r538 | 1/1
+    DOT BIEN TU KIEM tk-summary-count | r540 | 1/1
+    DOT BIEN TU KIEM tk-summary-total | r540 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-mat-thong-diep | r543 | 1/1
+    DOT BIEN TU KIEM chan-doan-r526-doc-duong-hai-bang-hang-sach | r526 | 1/1
+    DOT BIEN TU KIEM phan-hoach-bo-kiem-trung | r550 | 1/1
+    DOT BIEN TU KIEM khu-trung-toan-so | r545 | 1/1
+    DOT BIEN TU KIEM chan-doan-lat-khai-bo-dong-trang | r537 | 1/1
+    DOT BIEN TU KIEM tk-main-ignore-unmeasurable | r541 | 1/1
+JOB 125125835377 gate-nhanh-manh (windows-latest, 4) [windows-latest] conclusion=success bytes=132730 sha256=1c5dd8074589cf0e86060ba07e425ca3f893e99ce81073374f966878b0672c88 ##[error]=0
+    DOT BIEN TU KIEM runner-bo-doi-nhan-chot | r545,r546 | 2/2
+    DOT BIEN TU KIEM cong-bu-theo-lan-thu | r514 | 1/1
+    DOT BIEN TU KIEM tu-dot-bien-nhan-moi-tap-ca | r516,r525,r532,r539,r542 | 5/5
+    DOT BIEN TU KIEM tu-dot-bien-bo-loc-loi-vo-can | r516,r530,r542 | 3/3
+    DOT BIEN TU KIEM in-sai-so-hang | r513 | 1/1
+    DOT BIEN TU KIEM tk-proof-nonce | r539,r540 | 2/2
+    DOT BIEN TU KIEM go-tat-ky-o-kho-mutant | r506 | 1/1
+    DOT BIEN TU KIEM manh-bam-sai-tep | r551,r552 | 2/2
+    DOT BIEN TU KIEM cham-doc-stdout-vo-dieu-kien | r512 | 1/1
+    DOT BIEN TU KIEM dot-bien-bo-tham-so-muc | r551 | 1/1
+    DOT BIEN TU KIEM tu-dot-bien-bo-tham-so-muc | r551 | 1/1
+    DOT BIEN TU KIEM git-bao-tri-thieu-khoa | r548 | 1/1
+    DOT BIEN TU KIEM chan-doan-chi-lay-ten-ca | r524,r530,r531,r534,r536,r537 | 6/6
+    DOT BIEN TU KIEM gop-bo-bam-tool | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kiem-san | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-qua-json-hong | r552 | 1/1
+    DOT BIEN TU KIEM nap-boc-lop-chot | r502 | 1/1
+    DOT BIEN TU KIEM entropy-nen-bang-modulo | r509 | 1/1
+    DOT BIEN TU KIEM don-cay-nem-thieu-ngoai-hop-dong | r556 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-dem-vao-do | r543,r545 | 2/2
+    DOT BIEN TU KIEM vang-khong-dang-ky | r547 | 1/1
+    DOT BIEN TU KIEM bo-xac-thuc-object | r517 | 1/1
+    DOT BIEN TU KIEM chan-doan-doi-khoang-trang-truoc-tong-ket-dot-bien | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-long-ho-mutant | r538 | 1/1
+    DOT BIEN TU KIEM tk-duplicate-diagnostic | r540 | 1/1
+    DOT BIEN TU KIEM tk-summary-diagnostics | r540 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-khong-ra-trang-thai-thu-ba | r543 | 1/1
+    DOT BIEN TU KIEM chan-doan-lat-loi-khai-stderr-sau-chot | r532 | 1/1
+    DOT BIEN TU KIEM ghi-so-bo-duyet-chuoi | r545 | 1/1
+    DOT BIEN TU KIEM ghi-so-doc-kenh | r545 | 1/1
+    DOT BIEN TU KIEM r545-nuot-theo-loai | r545 | 1/1
+    DOT BIEN TU KIEM bo-so-mutant | r515 | 1/1
+    DOT BIEN TU KIEM moc-bo-kiem-lech-giay | r554 | 1/1
+JOB 125125835356 gate-nhanh-manh (windows-latest, 5) [windows-latest] conclusion=success bytes=132178 sha256=71fe2ddbf7375bb65a5fcc2769ad83e1bd38fc167646752730e1817848435f2c ##[error]=0
+    DOT BIEN TU KIEM runner-bo-doi-nhan-dat | r545,r546 | 2/2
+    DOT BIEN TU KIEM bo-so-dau-phien | r508,r509,r528,r543 | 4/4
+    DOT BIEN TU KIEM tk-always-unmeasurable | r516,r525,r530,r539,r540,r542 | 6/6
+    DOT BIEN TU KIEM bo-tran-chay-lai | r505,r509,r517,r520,r521,r522 | 6/6
+    DOT BIEN TU KIEM bo-xac-thuc-ten-dich-la | r519 | 1/1
+    DOT BIEN TU KIEM mo-cong-tu-dot-bien-thieu-giet | r513 | 1/1
+    DOT BIEN TU KIEM chan-doan-dung-o-dong-dau | r524,r531,r533,r535,r536,r537,r538,r542 | 8/8
+    DOT BIEN TU KIEM bo-vat-hoa-dich-o-chay-mot-mutant | r521 | 1/1
+    DOT BIEN TU KIEM tu-dot-bien-chuan-hoa-rc-khac | r516 | 1/1
+    DOT BIEN TU KIEM manh-bo-pop-env | r551 | 1/1
+    DOT BIEN TU KIEM run-nem-tin-hieu-chot | r501 | 1/1
+    DOT BIEN TU KIEM git-bao-tri-noi-trung | r548 | 1/1
+    DOT BIEN TU KIEM chan-doan-ranh-gioi-noi-long-ve-tien-to-tran | r531,r533,r535,r538 | 4/4
+    DOT BIEN TU KIEM gop-bo-kiem-phien-ban | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kieu-mang | r552 | 1/1
+    DOT BIEN TU KIEM cap-lop-chot-cho-assert-ha-tang | r502 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-mot-ky-tu-khoi-danh-sach-tach-dong | r529 | 1/1
+    DOT BIEN TU KIEM chan-doan-tach-dong-lai-nuot-dau-tach-unicode | r529 | 1/1
+    DOT BIEN TU KIEM con-treo-cho-khong-han | r556 | 1/1
+    DOT BIEN TU KIEM popen-nem-mat-ghi-chu-dong | r556 | 1/1
+    DOT BIEN TU KIEM bo-mien-tru-vang-tep | r547 | 1/1
+    DOT BIEN TU KIEM vang-moi-tep | r547 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-tran-ma-khong-doi-huong-cat | r525,r536 | 2/2
+    DOT BIEN TU KIEM chan-doan-ly-do-chi-kiem-khong-rong | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-quen-dong-tong-ket-nhom | r538 | 1/1
+    DOT BIEN TU KIEM tk-unknown-diagnostic | r540 | 1/1
+    DOT BIEN TU KIEM manh-bo-k-nho-hon-n | r549 | 1/1
+    DOT BIEN TU KIEM manh-regex-long | r549 | 1/1
+    DOT BIEN TU KIEM stderr-cat-khong-khai | r544 | 1/1
+    DOT BIEN TU KIEM ghi-so-kho-bare-liet-ke | r545 | 1/1
+    DOT BIEN TU KIEM tom-tat-mat-so-lan | r545 | 1/1
+    DOT BIEN TU KIEM bo-so-rc-tien-trinh | r515 | 1/1
+    DOT BIEN TU KIEM ram-pmc-thieu-truong | r553 | 1/1
+JOB 125125835319 gate-nhanh-manh (windows-latest, 6) [windows-latest] conclusion=success bytes=131069 sha256=1e44c8ce85c1c9a3ef791cc4202e5a20b5ebf5db5714ea5304eb0fe55cf817fb ##[error]=0
+    DOT BIEN TU KIEM ghi-so-bang-chung | r546 | 1/1
+    DOT BIEN TU KIEM ghi-so-gop-dich | r546 | 1/1
+    DOT BIEN TU KIEM cong-giet-theo-so-lan | r514 | 1/1
+    DOT BIEN TU KIEM cham-doc-stdout-khi-rc-mot | r505,r512,r520,r521,r522,r523 | 6/6
+    DOT BIEN TU KIEM tu-kiem-bo-ghi-nhan-loi-vo-can | r516,r542 | 2/2
+    DOT BIEN TU KIEM mo-cong-cuoi | r513 | 1/1
+    DOT BIEN TU KIEM tk-unbounded-number | r539,r540 | 2/2
+    DOT BIEN TU KIEM src-tat-ky-khong-chay | r506 | 1/1
+    DOT BIEN TU KIEM manh-tu-kiem-tron-bang | r551,r552 | 2/2
+    DOT BIEN TU KIEM cham-thu-hoi-giet-vi-stdout | r512 | 1/1
+    DOT BIEN TU KIEM manh-bo-so-hang-khong-do | r551 | 1/1
+    DOT BIEN TU KIEM runner-bat-assertion-tran | r501 | 1/1
+    DOT BIEN TU KIEM chan-doan-khai-bo-qua-ca-khi-khong-mat | r531,r533,r534,r535,r536,r538 | 6/6
+    DOT BIEN TU KIEM hep-lai-loi-phong-chi-oserror | r522 | 1/1
+    DOT BIEN TU KIEM gop-bo-kiem-bam | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kiem-so-manh | r552 | 1/1
+    DOT BIEN TU KIEM gop-chi-mot-bang | r552 | 1/1
+    DOT BIEN TU KIEM bo-loc-dang-ky | r545,r547 | 2/2
+    DOT BIEN TU KIEM cache-dau-phien-theo-dinh-danh | r509 | 1/1
+    DOT BIEN TU KIEM chan-doan-ho-case-t-lay-hinh-fixture-thay-hinh-runner | r535,r538 | 2/2
+    DOT BIEN TU KIEM windows-gan-hong-van-chay | r556 | 1/1
+    DOT BIEN TU KIEM r547-thu-moi-tep | r547 | 1/1
+    DOT BIEN TU KIEM bo-tach-ca-voi-dong-luot | r517 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-bien-phai-cua-nhan | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-long-duoi-ban-ghi-dot-bien | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-quen-ho-mutant-tung-muc | r538 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-mkdir-ngoai-try | r543 | 1/1
+    DOT BIEN TU KIEM chan-doan-r526-doc-hang-sach-thay-vi-tep-that | r526 | 1/1
+    DOT BIEN TU KIEM ghi-so-chay-ca | r545 | 1/1
+    DOT BIEN TU KIEM ghi-so-helper-r528 | r545 | 1/1
+    DOT BIEN TU KIEM runner-bo-duyet-chuoi | r545 | 1/1
+    DOT BIEN TU KIEM bo-so-rc-khi-child-khong | r515 | 1/1
+    DOT BIEN TU KIEM moc-nhan-sai-dinh-dang | r554 | 1/1
+JOB 125125835331 gate-nhanh-manh (windows-latest, 7) [windows-latest] conclusion=success bytes=132225 sha256=a5a4488e284fa07901b975e752ee443e7d43b1d41ff298a8aad1e5df407bd1fd ##[error]=0
+    DOT BIEN TU KIEM ghi-so-gop | r546 | 1/1
+    DOT BIEN TU KIEM r546-don-het-so | r546 | 1/1
+    DOT BIEN TU KIEM cong-khong-giet-theo-so-lan | r514 | 1/1
+    DOT BIEN TU KIEM bo-xac-thuc-dich-rong | r519,r521,r538 | 3/3
+    DOT BIEN TU KIEM dem-dich-ke-ca-trung | r519 | 1/1
+    DOT BIEN TU KIEM tk-inherit-outer-proof | r539 | 1/1
+    DOT BIEN TU KIEM tu-kiem-gop-hai-lop-ngoai-le | r516,r545 | 2/2
+    DOT BIEN TU KIEM bo-vat-hoa-dich-o-doc-kenh | r521 | 1/1
+    DOT BIEN TU KIEM chan-doan-tra-ranh-gioi-ve-ban-rong | r531,r533,r535,r538,r542 | 5/5
+    DOT BIEN TU KIEM manh-bo-chay-ca | r551 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-chuyen-tiep-o-nhanh-do-khac | r530,r542 | 2/2
+    DOT BIEN TU KIEM git-bao-tri-gia-tri-dau | r548 | 1/1
+    DOT BIEN TU KIEM chan-doan-vut-so-dong-bo-luc-dong-goi | r531,r533,r534,r535,r536,r538 | 6/6
+    DOT BIEN TU KIEM chan-doan-cat-lang-khong-khai | r524,r525,r531,r534,r536 | 5/5
+    DOT BIEN TU KIEM gop-bo-kiem-khoa | r552 | 1/1
+    DOT BIEN TU KIEM gop-bo-kiem-thanh-vien | r552 | 1/1
+    DOT BIEN TU KIEM gop-rc-0-khi-loi | r552 | 1/1
+    DOT BIEN TU KIEM bo-vo-fail-close | r517,r545 | 2/2
+    DOT BIEN TU KIEM bo-chuan-hoa-ban-sao | r523 | 1/1
+    DOT BIEN TU KIEM zero-entropy-bo-dem | r509 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-chi-ba-loai-da-thu | r543,r545 | 2/2
+    DOT BIEN TU KIEM loc-luc-doc-theo-thong-diep | r547 | 1/1
+    DOT BIEN TU KIEM ban-sau-ghi-de-ban-dong-luot | r517 | 1/1
+    DOT BIEN TU KIEM chan-doan-noi-long-duoi-ca-do-thuc-te | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-rc-con-nhan-1-va-am-0 | r538 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-chuyen-tiep-o-nhanh-rc-khac-1 | r530 | 1/1
+    DOT BIEN TU KIEM r528-ha-tang-gop-mot-loai | r543 | 1/1
+    DOT BIEN TU KIEM chan-doan-in-them-stderr-khi-da-co-chot | r532 | 1/1
+    DOT BIEN TU KIEM stderr-duong-that-bo-khai | r544 | 1/1
+    DOT BIEN TU KIEM khu-trung-bo-cua-so | r545 | 1/1
+    DOT BIEN TU KIEM chan-doan-bo-khoang-trang-tung-dong-that | r537 | 1/1
+    DOT BIEN TU KIEM dau-phien-can-tran-ma-lang-le-tra-cap-trung | r527 | 1/1
+JOB 125125835009 gate-ops (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=397862 sha256=240c6114410b1b9d4b79d41f2771b05ebc9c26cb30bbaff9010a3a2fcf2928e0 ##[error]=0
+    DOT BIEN: 392/392 bi giet dung ly do
+    TỔNG: ĐẠT
+JOB 125125835035 gate-ops (windows-latest) [windows-latest] conclusion=success bytes=403921 sha256=29f0801f668cbd6044a123abaceb9e25e6545f52f930e72f2ba55f0fba34d69a ##[error]=0
+    TỔNG: ĐẠT
+    BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO
+    BỎ QUA t59_moi_lease_goi_kiem_github_truoc_check
+    BỎ QUA t60_kiem_github_hong_khong_POST_va_lam_buoc_DO
+    BỎ QUA t62_kiem_github_rc9_bo_qua_lease_va_buoc_XANH
+    BỎ QUA t63_check_rc9_bo_qua_lease_va_buoc_XANH
+    BỎ QUA t66_moi_guard_co_phan_chung_va_ve_theo_vi_tri
+    BỎ QUA t68_post_rc_hong_van_COMMENT_DA_LEN_va_buoc_phai_DO
+    BỎ QUA t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat
+    BỎ QUA t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua
+    BỎ QUA t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua
+    BỎ QUA t198_M4_doi_chung_duong_chuoi_hop_le_dang_dung_mot_POST
+    BỎ QUA t200_M1_nguon_lease_publish_tuy_chon_that_su_duoc_dung
+    BỎ QUA t207_wp678_A3_bien_workflow_yes_gap_dau_True_buoc_DO_0_POST
+JOB 125125834926 gate-packet-loop (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=307187 sha256=e45afaf398338de918932674be2a021bbbb5e6cfe9a6ad15be4668dad1745ff2 ##[error]=0
+    BỎ QUA  luong_canonical_chay_that
+    BỎ QUA  đột biến luong_canonical_chay_that_dao_os_name
+    TỔNG: ĐẠT
+JOB 125125834921 gate-packet-loop (windows-latest) [windows-latest] conclusion=success bytes=316052 sha256=dfff50a7dcaad29d4bf26fdccb1d5a2c94310059a71515676fa7ca1903d14492 ##[error]=0
+    BỎ QUA  bien_nhan_sha256_root_xuong_dong_dem_MOT
+    BỎ QUA  bien_nhan_git_gia_duong_dan_nul_giu_fallback
+    BỎ QUA  r812_nguoi_giu_dau_cheo_nguoc
+    BỎ QUA  r812_r6_receipt_native
+    BỎ QUA  đột biến bien_nhan_root_xuong_dong_tach_tu_trai
+    BỎ QUA  đột biến bien_nhan_bo_nhanh_valueerror
+    BỎ QUA  đột biến bien_nhan_valueerror_tai_indexing_phai_noi
+    BỎ QUA  đột biến r812_bo_dau_cheo_nguoc
+    TỔNG: ĐẠT
+JOB 125139957371 gate-registry (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=265688 sha256=2135fd6a710ff411ed87511d3f8009959a340efafbd4bc54c8c20ab0e88d2794 ##[error]=0
+    TỔNG: ĐẠT
+    DOT BIEN (moi cai PHAI lam it nhat mot ca DO):
+    DOT BIEN 43/43 bi giet
+    DOT BIEN ---
+    DOT BIEN NHAM BO TEST ---
+    DOT BIEN NHAM settings.json ---
+    DOT BIEN 25/25 bi giet
+    DOT BIEN: 13/13 bi giet dung ly do
+    DOT BIEN: 106/106 bi giet dung ly do
+    DOT BIEN: 292/292 bi giet dung ly do
+    DOT BIEN: 49/49 bi giet dung ly do
+JOB 125139957345 gate-registry (windows-latest) [windows-latest] conclusion=success bytes=265176 sha256=285d32ee0f1808bacb7fd14295b83a5ec5befebf87df174711b699576490a0d1 ##[error]=0
+    TỔNG: ĐẠT
+    DOT BIEN 43 muc KHONG DO TREN WINDOWS — do tren ubuntu-latest
+    DOT BIEN ---
+    DOT BIEN NHAM BO TEST ---
+    DOT BIEN NHAM settings.json ---
+    DOT BIEN 25/25 bi giet
+    DOT BIEN: 106/106 bi giet dung ly do
+    DOT BIEN: 292/292 bi giet dung ly do
+    DOT BIEN: 24/24 bi giet dung ly do
+
+TONG: 37/37 job success, ##[error] = 0

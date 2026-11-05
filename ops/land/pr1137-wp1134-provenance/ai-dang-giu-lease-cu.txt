@@ -1,0 +1,26 @@
+# do 2026-11-05T05:04:06Z (sau git fetch --prune +refs/heads/* va git branch -f master origin/master)
+ls-remote 864 ten; guong 864 ref (gom HEAD neu co); so tap ten o tren: thieu 0 thua 0
+## ai-dang-giu scripts/tl_core/release.py
+HẾT_HẠN	wp1134-r2-g1-claude	refs/remotes/origin/ops/wp1134-r2-g1-lease:ops/leases/wp1134-r2-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ai-dang-giu scripts/tl_selftest.py
+HẾT_HẠN	wp1134-r2-g1-claude	refs/remotes/origin/ops/wp1134-r2-g1-lease:ops/leases/wp1134-r2-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ai-dang-giu scripts/test_fragments/wp1134_changelog_d_ngoai_goi.py
+HẾT_HẠN	wp1134-r2-g1-claude	refs/remotes/origin/ops/wp1134-r2-g1-lease:ops/leases/wp1134-r2-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ai-dang-giu scripts/tl_test_fragments_bundled.py
+HẾT_HẠN	wp1134-r2-g1-claude	refs/remotes/origin/ops/wp1134-r2-g1-lease:ops/leases/wp1134-r2-g1-claude.yaml
+NGƯỜI_GIỮ 1: wp1099-cloud-setup-p3b-r9-g1-claude
+rc=11
+## ai-dang-giu RELEASE_MANIFEST.json
+HẾT_HẠN	wp1134-r2-g1-claude	refs/remotes/origin/ops/wp1134-r2-g1-lease:ops/leases/wp1134-r2-g1-claude.yaml
+NGƯỜI_GIỮ 1: wp1099-cloud-setup-p3b-r9-g1-claude
+rc=11
+## ai-dang-giu ops/handoff/wp1134-g1-claude.md
+HẾT_HẠN	wp1134-r2-g1-claude	refs/remotes/origin/ops/wp1134-r2-g1-lease:ops/leases/wp1134-r2-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

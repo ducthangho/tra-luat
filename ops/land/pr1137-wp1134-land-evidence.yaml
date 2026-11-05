@@ -1,0 +1,172 @@
+# HO SO LAND — packet #1134 CHANGELOG-D-NGOAI-GOI r2, lease g1, code qua PR #1137. Khuon: ops/land/pr882-wp748-r23-land-evidence.yaml
+# (landed false) va ops/land/pr1141-wp1132-land-evidence.yaml (cung lo merge 02-11).
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+#
+# CAP NHAT 05-11: LANDED theo quyet dinh chu kho kieu b (khoi landed_20261105, issuecomment-6650528815, phu bang hau due b3249c3).
+# TRANG THAI LUC BAN DAU: merged (2be93d3), `landed: false` theo quyet dinh chu kho issuecomment-6650045712 ("Đóng + hồ sơ landed false + nợ riêng").
+# Ly do chinh: (1) gate tren DUNG merge SHA khong ton tai — luot ci.yml push master 41397040659 tren 2be93d3 bi HUY sau 9 s, 0 job
+# (nhom concurrency cu cua ci.yml, chinh loi #1132 sua o b3249c3 merge 28 s sau). Ba moc con lai cua §10.2.2 vi the khong co gi de do.
+# NHAN: measured = do trong phien ghi so (tep kem); loi_khai_co_neo = loi khai co neo URL/SHA; thuat_lai = so lieu cua luot thi cong,
+# KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr1137-wp1134-provenance/ (SHA256SUMS kem). Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-11-05.
+
+schema_version: 1
+mission_id: gh-1134
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrZjmb1AiDoYkoSFqph
+input_packet_generations:
+  - {packet_issue: 1134, packet_id: CHANGELOG-D-NGOAI-GOI, revision: 2, generation: 1, lease_id: wp1134-r2-g1-claude, ghi_chu: 'lease thi cong duy nhat cua packet.'}
+authorized_head_sha: 15872b71d3bcd3625263a03bc845979e3a670c45
+authorized_head_tree: 79d783655aa10d966aa664708107b839707f0b3f
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/issues/1134#issuecomment-6650045712
+authorization_ghi_chu: >-
+  measured — readback-pr-1137.json: merged true, merged_by ducthangho, merged_at 2026-11-02T05:57:57Z, head.sha 15872b7;
+  readback-comments-1137.json: KHONG co comment chu kho mang dong `approve_merge: <sha>` tren PR #1137 (7 comment: 4 cua ducthangho la
+  @codex review va bao cao kiem-merge, 3 cua connector). Merge cung lo voi PR #1141 (28 s sau), lo do theo chi thi trong phien
+  session_015GtxrcJvhJaXc7eNPaoNM4 "Hãy merge tất cả các wp, pr đủ điều kiện" (loi_khai_co_neo — thuat lai tu
+  ops/land/pr1141-wp1132-land-evidence.yaml authorization_ghi_chu). authorization_url tro quyet dinh chu kho 05-11 ve CHINH ho so nay
+  (dong #1134, landed false), KHONG phai duyet ben neo SHA 15872b7 truoc merge.
+land_operator: 'loi_khai_co_neo — readback-pr-1137.json merged_by ducthangho; CAVEAT #566: thao tac bang token chu kho deu hien ducthangho, KHONG_DO_DUOC phien nao bam.'
+merge_method: merge
+merge_commit: 2be93d3a4f892482dcadd7ce341b2c4db0a8dbff
+merge_commit_tree: 44ab5d231c643e3a99f3fa0d02a2756e120b256a
+merge_commit_parents: [02ddeb4e9ea9c130d935adc4d5bce4f11db7d6a0, 15872b71d3bcd3625263a03bc845979e3a670c45]
+pre_merge_checks:
+  - {name: 'ci.yml pull_request (ubuntu) tren head cuoi', run_id: 41370574607, run_attempt: 1, sha: 15872b71d3bcd3625263a03bc845979e3a670c45, conclusion: success, nguon: [readback-run-41370574607.json, readback-jobs-41370574607.json, readback-check-runs-15872b7-all.json, readback-runs-head-15872b7.json], ghi_chu: 'measured — readback-run-41370574607.json completed success, updated_at 2026-11-02T01:55:32Z; readback-jobs-41370574607.json 23/23 success, nhan ubuntu-latest, runner_id != 0 ca 23; readback-check-runs-15872b7-all.json 25/25 success. So selftest 1776/1776 la thuat_lai tu kiem-merge K2 (comment 6567252831), log job khong luu.'}
+  - {name: 'Codex connector', sha: 15872b71d3bcd3625263a03bc845979e3a670c45, conclusion: 'sach, khong finding', nguon: readback-comments-1137.json, ghi_chu: 'measured — readback-comments-1137.json comment 6567245144 (2026-11-02T01:57:33Z) "Reviewed commit: 15872b71d3", "Didn''t find any major issues"; comment 6565809174 tren 232ac54 cung sach.'}
+  - {name: 'review offline Codex (launcher.py run 169de7ad)', sha: 15872b71d3bcd3625263a03bc845979e3a670c45, conclusion: 'approve; 0 P1/P2/P3', ghi_chu: 'thuat_lai — kiem-merge K4 trong comment 6567252831 (readback-comments-1137.json): 197 s, ma_thoat 0, KET_LUAN approve. run.json va stdout cua 169de7ad KHONG nam trong kho (quet moi ref 05-11) => model/effort/sandbox phuc vu not_measured.'}
+  - {name: 'kiem-merge K0–K7 tren head cuoi', sha: 15872b71d3bcd3625263a03bc845979e3a670c45, conclusion: 'rc 0 — "ĐỦ ĐIỀU KIỆN MERGE"', ghi_chu: 'thuat_lai — comment 6567252831 (2026-11-02T01:58:14Z, readback-comments-1137.json); cac tep --workflow-runs/--connector/--offline-run-json/--windows-json khong luu, khong tai chay.'}
+  - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-1137.json, readback-review-comments-1137.json]}
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA'
+    run_id: 41397040659
+    run_attempt: 1
+    sha: 2be93d3a4f892482dcadd7ce341b2c4db0a8dbff
+    conclusion: cancelled
+    nguon: [readback-run-41397040659.json, readback-jobs-41397040659.json, readback-runs-merge-2be93d3.json, readback-check-runs-2be93d3-all.json]
+    moc_run: 'measured — readback-run-41397040659.json: event push, head_sha 2be93d3, run_attempt 1, completed cancelled, 05:57:59Z -> 05:58:08Z; readback-jobs-41397040659.json total_count 0; readback-runs-merge-2be93d3.json 1 run duy nhat; readback-check-runs-2be93d3-all.json 0 check run. FAILED.'
+    moc_checkout: 'not_measured — 0 job, khong co buoc checkout nao chay.'
+    moc_workflow_definition: 'not_measured — khong co luot thanh cong de neo; GraphQL WorkflowRun.file bi chan trong phien web (CLAUDE.md §GATE HAU MERGE).'
+    moc_gate_output: 'not_measured — 0 job, khong co output gate.'
+    ghi_chu: >-
+      Hau duet: 2be93d3 la to tien cua b3249c3 (merge #1141, merge-va-diff.txt: merge-base --is-ancestor rc 0), va luot push 41397085109
+      tren b3249c3 success voi du bon moc (readback-run-41397085109-b3249c3.json; bon moc o ops/land/pr1141-wp1132-provenance/ci/provenance.yaml).
+      Ho so nay KHONG dung luot do lam gate cua 2be93d3: §10.2.4 doi gate tren DUNG merge SHA, va chu kho da chon landed false.
+      Phu bang tien le "kieu b" (#1096) la quyet dinh cua chu kho, chua co.
+  - name: 'release-verify strict tren master hien tai (N3 sau land)'
+    sha: e62664871b6dfe48b0bed54a7d1eb9a81796e372
+    conclusion: success
+    nguon: [release-verify-master.txt, phan-chung-changelog-d.txt]
+    ghi_chu: 'measured — release-verify-master.txt: ok true, failed [], extra_files []; file_count 184 = len(files) 184; 0 muc changelog.d/; 14 tep changelog.d/ tren dia. phan-chung-changelog-d.txt: them changelog.d/wp-99999.md => file_count 184 -> 184; dot bien bo "changelog.d" khoi _RELEASE_EXCLUDE_DIRS => 199.'
+bookkeeping:
+  - {item: 'rut han lease wp1134-r2-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', nhanh: claude/ghi-so-land-1134, lease: changelog-d-ngoai-goi-land-r2-g1-claude-remote-20261105, ghi_chu: 'lan 1: PR #1213 (head 94807bd, ban landed false) merge a5293e1 luc 2026-11-05T05:18:45Z TRUOC khi khoi landed_20261105 kip day; khoi ay di qua PR ke tiep cung nhanh, rebase len a5293e1. Chi cham ops/land/pr1137-wp1134-*.'}
+  - {item: 'ban ghi M8 kieu b', ket_qua: 'measured — kiem-dong-wp-kieu-b.txt: kiem-dong-wp --bien-ban bien-ban-m8.yaml rc 0, "ĐÓNG ĐƯỢC WP CHANGELOG-D-NGOAI-GOI".'}
+  - {item: 'ban ghi M8 (ADR-0060), ban landed false', ket_qua: 'measured — kiem-dong-wp.txt (bien-ban-m8-landed-false.yaml): kiem-dong-wp --bien-ban bien-ban-m8.yaml --lease lease-wp1134-r2-g1-claude.yaml.txt rc 12, CHI thieu D2 (landed false, run cancelled); D1, D3, D4 dat. Chu kho da quyet dong #1134 du D2 do (issuecomment-6650045712).'}
+  - {item: 'no tach', ket_qua: 'hop nhat 14 fragment changelog.d/ vao CHANGELOG.md (co che hop nhat luc land chua bat, PROTOCOL:880) — Issue no rieng; references/RUNBOOK.md:737,840 tro changelog.d/wp-710.md (con tro chet trong goi, doc_pointers khong bat).'}
+# ---- het truong chuan
+packet_id: CHANGELOG-D-NGOAI-GOI
+packet_issue: 1134
+generation: 1
+pham_vi_land: code
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session session_015GtxrZjmb1AiDoYkoSFqph — KHAC phien executor (session_015GtxraNWSWRDjqY58pqwAN); executor_session cua lease
+  changelog-d-ngoai-goi-land-r2-g1-claude-remote-20261105 do phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq cap theo quyet dinh chu kho.
+
+spec:
+  path: ops/specs/CHANGELOG-D-NGOAI-GOI-r2.md
+  sha256: adb4002c41129c53c94a40f0e9ac33103cc6e42b42927c3c90e6e676caf6ac82
+  nguon: 'measured — merge-va-diff.txt: git show 2be93d3:ops/specs/CHANGELOG-D-NGOAI-GOI-r2.md | sha256sum = spec_hash cua lease (lease-wp1134-r2-g1-claude.yaml.txt). Spec den master qua PR #1135.'
+
+lease:
+  lease_id: wp1134-r2-g1-claude
+  path: ops/leases/wp1134-r2-g1-claude.yaml (nhanh ops/wp1134-r2-g1-lease)
+  ban_chup: lease-wp1134-r2-g1-claude.yaml.txt
+  thay_the_cho: 'khong — lease dau tien.'
+  write_set_so_tep: 6
+  thu_hoi_cuoi: >-
+    DA NHA bang RUT HAN (khong bia mo): commit 9a2c5c6 (2026-11-02T06:02:05Z) dua lease_until ve 2026-11-02T06:20:00Z, khoi
+    thu_hoi_bang_rut_han trong tep. measured — readback-runs-lease-rut-han-9a2c5c6.json: "ops — đăng lease bằng git" run 41397446936
+    success. measured — ai-dang-giu-lease-cu.txt: ls-remote 864 ten = guong 864 (thieu 0, thua 0); ca 6 duong dan ra wp1134-r2-g1-claude
+    HẾT_HẠN; 4 duong dan NGƯỜI_GIỮ 0, scripts/tl_test_fragments_bundled.py va RELEASE_MANIFEST.json NGƯỜI_GIỮ 1 la
+    wp1099-cloud-setup-p3b-r9-g1-claude (packet khac, dung ly do rut han som).
+  diff_do: 'measured — merge-va-diff.txt: git diff --stat 2be93d3^1 2be93d3 = 5 tep +75/-83, cung sha256 a186825d… voi diff 9091cf5..15872b7; dung write set (handoff chi tren nhanh lease); trong tran ADR-0053 6 tep / 450 dong.'
+  lease_ghi_so: lease-changelog-d-ngoai-goi-land-r2-g1.yaml.txt
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-1137.json merged true, merge_commit_sha 2be93d3; merge-va-diff.txt cha 02ddeb4 + 15872b7, tree 44ab5d2.'
+  landed: false
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 2be93d3: CHUA DAT — luot push duy nhat 41397040659 cancelled, 0 job (post_merge_checks muc 1);
+    (2) lease nha: rut han 9a2c5c6, publish 41397446936 success DAT; (3) bookkeeping: ho so nay; (4) review neo DUNG authorized_head
+    15872b7: connector sach (measured), offline 169de7ad approve (thuat_lai, hien vat khong luu); (5) uy quyen land neo SHA: CHUA DAT —
+    khong co dong approve_merge tren PR, chi chi thi merge ca lo trong phien; (6) muc tieu packet: N3 dat tren master (184/184, 0 muc
+    changelog.d/), phan chung changelog.d moi khong doi file_count DAT; N2 N4 N5 N6 N7 thuat_lai; (7) §8.1: CHUA DAT — model/effort/
+    sandbox cua luot offline 169de7ad not_measured.
+    Mo lai — TAT CA: (1) gate du bon moc §10.2.2 tren DUNG 2be93d3 (dispatch ci.yml tren ref tro 2be93d3 roi do bon moc), HOAC chu kho
+    ghi ben chap nhan phu bang hau due b3249c3; VA (5) duyet ben neo 15872b7; VA (7) bien nhan offline co model/effort/sandbox DO_DUOC.
+
+assurance_81:
+  reviewer_assurance_81: CHUA_DAT
+  ly_do: 'run.json cua launcher.py run 169de7ad khong nam trong kho => model, effort, sandbox phuc vu not_measured; connector receipt khong mang model.'
+
+review:
+  so_loi_goi_codex: 8
+  tran: '10 theo ADR-0055 (lease wp1134-r2-g1-claude assurance_ghi_chu); dem trong khoi codex_loi_goi_thuc_te cua lease tai 9a2c5c6.'
+  ket_qua_theo_luot: 'thuat_lai — dac ta: offline r1 b43436b6 request_changes 0/1/1 (F1 P2, F2 P3) -> r2; connector #1135 x2 sach. Thi cong: connector 232ac54 sach; connector 15872b7 x3 (2 luot chi cap nhat tom tat, luot 3 receipt 6567245144 sach); offline 169de7ad approve.'
+
+khong_do_duoc:
+  - 'Moc Checkout, Workflow definition, Gate output cua §10.2.2 tren 2be93d3: khong co job nao chay.'
+  - 'Model/effort/sandbox phuc vu cua review offline 169de7ad: hien vat khong luu.'
+  - 'N6 Windows (ASUS-LAPTOP do-luong.csv dong 36): loi khai trong comment kiem-merge, tep csv khong o trong kho.'
+  - 'So selftest 1776/1776 cua luot PR: log job khong luu; chi conclusion success cua 23 job duoc do.'
+
+landed_20261105:
+  bo_canh: >-
+    Khoi nay ghi landed theo quyet dinh chu kho (kieu b, tien le CUNG CA pr1055-wp1052 landed_20261102: run cua merge commit bi
+    concurrency huy, 0 job, chu kho chap nhan do tren hau due). Khong sua cac loi khai o tren: trang_thai_packet.landed false va
+    post_merge_checks muc 1 (cancelled) la ban ghi dung luc truoc quyet dinh. Bien ban M8 ban truoc: bien-ban-m8-landed-false.yaml.
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/issues/1134#issuecomment-6650528815
+    noi_dung: >-
+      Chu kho chon "Nang kieu b" trong phien session_015GtxrZjmb1AiDoYkoSFqph (05-11-2026), thay ve "ho so landed false" cua
+      issuecomment-6650045712; dong #1134 va no rieng #1214 giu nguyen. Comment ghi ho chi thi truc tiep trong phien.
+    do_duoc: >-
+      measured — readback-comment-6650528815.json: user ducthangho, author_association OWNER, created_at 2026-11-05T05:28:48Z,
+      than chua "trang_thai: da_duyet". CAVEAT #566: agent dang bang token chu kho; ban chep, khong phai chu ky.
+  phu_bang_hau_due:
+    merge_commit: 2be93d3a4f892482dcadd7ce341b2c4db0a8dbff
+    hau_due: b3249c3e8a5a8f3af5691160493b8ab3d52db99c
+    run_hau_due: 41397085109
+    tieu_chi_may: >-
+      measured — phu-hau-due-2be93d3-b3249c3.txt: (1) merge-base --is-ancestor 2be93d3 b3249c3 rc 0; (2) tree OID scripts/ hai ben
+      cung d1d230c2c6d2b4578e4833af75130311857a26f3; (3) git diff --quiet tren 184 tep goi cua 2be93d3 + scripts/ rc 0; (4) phan khac
+      ngoai ops/land/ chi la bieu thuc concurrency trong ci.yml/launcher-windows.yml, ops/ci_duong_nhanh_test.py, CLAUDE.md, ops/specs,
+      ops/reviews (khong tep nao trong goi hay scripts/).
+    bon_moc: 'loi_khai_co_neo — ops/land/pr1141-wp1132-land-evidence.yaml post_merge_checks muc 1: run 41397085109 du bon moc measured (ci/provenance.yaml, gate-output-41397085109.txt: tl selftest 1776/1776 = 1775 + fragment wp1134).'
+    gioi_han: 'Do tren hau due KHONG chung minh moi truong runner luc 05:57Z cho M; chi chung minh cung ma va cung test da xanh tren cung run.'
+  phan_bien_proxima:
+    prompt: proxima-phan-bien-prompt.md
+    ghi_chu: >-
+      loi_khai_co_neo — Proxima tren VM, route chatgpt:gpt-6-thinking (reportedModel "chatgpt", khong chung minh model upstream),
+      request 9abe3d54d22a411a96b89f88ad8f25fd, prompt sha256 ed1512b6… khop hai dau, 35 s. Q2 de phan chung "D bo test cua A":
+      do lai KHONG xay ra (tieu chi (2)(3) tren). Q1 ket luan "phai la push" sinh tu cach dat cau cua phien (§10.2.2 chi doi GHI event;
+      tien le #1113 dispatch). Tra loi luu tren VM, khong chep vao kho.
+  landed: true
+  landed_dieu_kien: >-
+    (1) bon moc §10.2.2 measured tren run 41397085109 cua HAU DUE b3249c3, KHONG tren chinh 2be93d3 (run 41397040659 cancelled 0 job);
+    chu kho CHAP NHAN phu bang hau due, tieu chi may o phu_bang_hau_due. (2) lease wp1134-r2-g1-claude rut han 9a2c5c6, HẾT_HẠN.
+    (3) bookkeeping: ho so nay; M8 bien-ban-m8.yaml kiem-dong-wp rc 0 (kiem-dong-wp-kieu-b.txt). (4) review: connector sach tren
+    DUNG authorized_head 15872b7; offline 169de7ad approve (thuat_lai). (5) uy quyen: quyet_dinh_chu_kho tren, caveat #566.
+    (6) muc tieu: N3 + phan chung changelog.d measured tren master. (7) §8.1 van CHUA_DAT (model/effort/sandbox offline not_measured);
+    landed di theo quyet dinh chu kho, khong nang assurance.

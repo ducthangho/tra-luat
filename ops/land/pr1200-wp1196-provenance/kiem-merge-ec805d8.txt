@@ -1,0 +1,9 @@
+# kiem-merge PL0 (1f0941e) tren head ec805d8c, do 2026-11-05T04:29:51Z, dau vao readback 04:1xZ; $S = scratch phien
+## stdout
+## stderr
+  THIẾU  K3 connector: connector chưa xong trên ec805d8c1ab322cd049d74822a3972425809cf93: không review hoàn tất/kết luận nào của chatgpt-codex-connector[bot]
+  THIẾU  K4 review offline: review offline chưa approve đúng head (run.json head/trang_thai/ma_thoat/stdout_sha256 hoặc dòng KET_LUAN)
+  THIẾU  K6 Windows: Windows `required`: thiếu lượt ứng viên xanh (sha = head, os Windows, tests khác rỗng, mọi ca passed) hoặc dòng miễn
+  THIẾU  K7 full_mutant_audit: diff chạm vùng M9 mà thiếu --dot-bien-du-runs/--dot-bien-du-jobs và dòng miễn `full_mutant_audit: H mien` của chủ kho
+CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu K3 connector; K4 review offline; K6 Windows; K7 full_mutant_audit
+rc=12

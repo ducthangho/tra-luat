@@ -1,0 +1,6 @@
+# merge 279a39e: cha1 8983e1b, cha2 8f0dfcf, merge-base 9091cf52cf20ac197c1a356d6a33cac6bab0b318
+# lenh: git diff 8983e1b 279a39e > A; git diff 9091cf52cf20ac197c1a356d6a33cac6bab0b318 8f0dfcf > B; cmp A B
+cmp rc=0
+# numstat cha1..merge:
+245	85	.claude/dev/launcher_test.py
+84	0	.claude/dev/launcher_test_runner.py

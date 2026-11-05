@@ -1,0 +1,11 @@
+# merge 4d258cc: cha va tree; diff cha1..merge so voi merge-base..head
+248bef0c859d9571fd5e92acefbc352941e9dd6a
+ab39416fe919452c9dadda38dd99c5589f7967e8
+95cb416f0467871277e56c515331f5f5c8f04bd7
+49a474d980fa22cc579b2f42d239f9433f63f260
+merge-base(cha1, head) = 1813bfd4513704cf792a272a86b22e5e08893b9a
+19	3	ops/lease_publish_test.py
+19	3	ops/lease_publish_test.py
+sha256 diff cha1..merge = daeb432c987d9f6758810663d931f748df8ae1c732d2f741117d231ec8800fcd
+sha256 diff merge-base..head = daeb432c987d9f6758810663d931f748df8ae1c732d2f741117d231ec8800fcd
+KHOP

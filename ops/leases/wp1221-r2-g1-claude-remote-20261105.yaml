@@ -21,7 +21,7 @@ recorder_is_dispatcher: true
 recorder_ghi_chu: 'phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; tham quyen la authority_url'
 executor_session: session_015GtxrZVmDpv9FPWFf1Uaoo
 leased_at_utc: '2026-11-05T08:47:00Z'
-heartbeat_at: '2026-11-05T09:27:00Z'
+heartbeat_at: '2026-11-05T10:16:00Z'
 lease_until: '2026-11-07T08:47:00Z'
 lease_expires_at_utc: '2026-11-07T08:47:00Z'
 role: executor
@@ -65,7 +65,7 @@ write_set_ghi_chu: 'ops/specs/wp1221-r2.md duoc chep nguyen byte vao nhanh neu K
 closure_status: 'holder scan 2026-11-05T08:47:00Z: ls-remote vs for-each-ref 870/870 (thieu 0); .githooks/eol_policy_test.py NGUOI_GIU 0'
 tran_kich_thuoc: 'nang_tran: <= 1 tep ma (.githooks/eol_policy_test.py) / <= 400 dong them (chu kho, issuecomment-6654445817); vuot => DUNG'
 tran_loi_goi_codex: 'doc tu dong tran_loi_goi_codex cua spec (ADR-0052@8ab10079); dem truoc MOI loi goi'
-windows: 'A11: do bang workflow_dispatch ci.yml runner_set=windows-only (phien dieu phoi bam)'
+windows: 'A11: chay TAP TRUNG eol_policy_test tren may Windows local tra-luat-win qua phien dieu phoi, giu KHOA.txt (ADR-0057); KHONG workflow_dispatch ci.yml (chi thi chu kho 05-11 ~09:30Z)'
 coordination_paths:
 - ops/leases/wp1221-r2-g1-claude-remote-20261105.yaml
 run_minutes: 2880

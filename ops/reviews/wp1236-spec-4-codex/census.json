@@ -1,0 +1,190 @@
+{
+  "time": "2026-11-05T19:11:07.042167+00:00",
+  "total_docs": 123,
+  "root_merge_count": 118,
+  "multi_pr_heads": [
+    [
+      "pr1042-pr1068-cloud-setup-p2-spec-land-evidence.yaml",
+      3,
+      [
+        "01ff65035c8b0833fa521b93239931772c14dffd",
+        "1bc4684571db74de9a607d6a1267df6506fa4a0d",
+        "97120d3c76ebb7c3eda4b585ff46f1c51e30c91b"
+      ]
+    ],
+    [
+      "pr1095-pr1101-cloud-setup-p3-p3b-spec-land-evidence.yaml",
+      2,
+      [
+        "47ee1b206d284c82d16036972b82b17196cd8dc7",
+        "8f123b27b338e5e173a668209eb4904f49dd611b"
+      ]
+    ]
+  ],
+  "landed_empty_H": [
+    "pr721-wp698-land-evidence.yaml",
+    "pr732-wp685-land-evidence.yaml"
+  ],
+  "provenance_docs": 28,
+  "provenance_files": 34,
+  "push": {
+    "('.github/workflows/ci.yml', 23)": 26,
+    "('.github/workflows/launcher-windows.yml', 2)": 4
+  },
+  "states": {
+    "not_measured": 753,
+    "failed": 1
+  },
+  "job_log_sets_equal": 34,
+  "duplicate_steps": [],
+  "windows_same_root_head": [
+    "pr1127-wp1120-land-evidence.yaml",
+    "pr1128-wp1113-land-evidence.yaml",
+    "pr945-wp899-land-evidence.yaml",
+    "pr957-wp748-r27-land-evidence.yaml",
+    "pr964-wp748-r28-land-evidence.yaml"
+  ],
+  "claim_key_counts": {
+    "moc_gate_output": 42,
+    "gate_output": 22,
+    "gate_output_nguon_va_gioi_han": 1,
+    "moc_gate_output_rc_disposition": 2,
+    "gate_output_nguon": 1
+  },
+  "claim_value_counts": {
+    "measured": 44,
+    "not_measured": 3,
+    "passed": 1,
+    "other": 1,
+    "dict": 9,
+    "list": 6
+  },
+  "claim_docs": 46,
+  "nonnm_docs": 44,
+  "exemptions": [
+    [
+      "pr594-wp578-land-evidence.yaml",
+      true
+    ],
+    [
+      "pr679-wp678-land-evidence.yaml",
+      false
+    ],
+    [
+      "pr680-wp676-land-evidence.yaml",
+      true
+    ],
+    [
+      "pr684-wp677-land-evidence.yaml",
+      true
+    ],
+    [
+      "pr689-wp677-land-evidence.yaml",
+      true
+    ],
+    [
+      "pr696-wp668-land-evidence.yaml",
+      true
+    ],
+    [
+      "pr701-wp687-land-evidence.yaml",
+      true
+    ],
+    [
+      "pr703-wp674-land-evidence.yaml",
+      true
+    ],
+    [
+      "pr707-wp705-land-evidence.yaml",
+      true
+    ]
+  ],
+  "L8_retrospective": 36,
+  "landed": 49,
+  "landed_with_claims": 32,
+  "formats": {
+    "danh_gia": [
+      6,
+      2
+    ],
+    "tom": [
+      7,
+      3
+    ],
+    "tu_do": [
+      13,
+      11
+    ]
+  },
+  "format_details": {
+    "pr1029-windows-local-r2-land-evidence.yaml": [
+      "tu_do"
+    ],
+    "pr1051-wp1006-t27-land-evidence.yaml": [
+      "tu_do"
+    ],
+    "pr1064-windows-local-r3-land-evidence.yaml": [
+      "tu_do"
+    ],
+    "pr1080-wp1077-land-evidence.yaml": [
+      "tu_do"
+    ],
+    "pr1095-pr1101-cloud-setup-p3-p3b-spec-land-evidence.yaml": [
+      "tom"
+    ],
+    "pr1097-wp1078-land-evidence.yaml": [
+      "tu_do"
+    ],
+    "pr1100-wp1089-r2-land-evidence.yaml": [
+      "tu_do"
+    ],
+    "pr1115-wp1079-land-evidence.yaml": [
+      "tu_do"
+    ],
+    "pr1127-wp1120-land-evidence.yaml": [
+      "tom",
+      "tu_do"
+    ],
+    "pr1128-wp1113-land-evidence.yaml": [
+      "tom"
+    ],
+    "pr1130-wp1122-land-evidence.yaml": [
+      "danh_gia",
+      "tom"
+    ],
+    "pr1138-wp825-land-evidence.yaml": [
+      "danh_gia",
+      "tom"
+    ],
+    "pr1141-wp1132-land-evidence.yaml": [
+      "tom"
+    ],
+    "pr1142-wp1117-land-evidence.yaml": [
+      "danh_gia",
+      "tom"
+    ],
+    "pr1192-wp1147-land-evidence.yaml": [
+      "tu_do"
+    ],
+    "pr1193-wp1189-land-evidence.yaml": [
+      "tu_do"
+    ],
+    "pr1197-wp1099-land-evidence.yaml": [
+      "tu_do"
+    ],
+    "pr1198-wp1195-land-evidence.yaml": [
+      "danh_gia"
+    ],
+    "pr1231-wp1105-land-evidence.yaml": [
+      "danh_gia"
+    ],
+    "pr631-doctrine-rest-land-evidence.yaml": [
+      "danh_gia",
+      "tu_do"
+    ],
+    "pr997-wp978-land-evidence.yaml": [
+      "tu_do"
+    ]
+  },
+  "unresolved_citations": []
+}

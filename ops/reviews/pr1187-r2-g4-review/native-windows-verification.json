@@ -1,0 +1,16 @@
+{
+  "archive_sha256": "c73dc7f77de215541b155c658319fd2aee707cf83a476332f9267dc5e154a8e3",
+  "archive_bytes": 28314,
+  "crc": "passed",
+  "all_manifest_file_hashes": "passed",
+  "raw_file_count": 14,
+  "baseline_passed": 59,
+  "baseline_total": 59,
+  "candidate_passed": 281,
+  "candidate_total": 281,
+  "native_windows_semantic_mutant": "passed with target/controls",
+  "driver_rc": 0,
+  "lock_bytes_after_driver": 0,
+  "sha": "33df4b678e3d1f12e68a9c9d362dc0446f0dd5c2",
+  "completed_at_utc": "2026-11-05T05:16:03.985394+00:00"
+}

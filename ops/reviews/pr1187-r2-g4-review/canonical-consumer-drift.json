@@ -1,0 +1,18 @@
+{
+  ".claude/dev/packet_loop.py": {
+    "master_sha256": "789bf9798d8627ed8254caf4fca7c6ff4c8448a4eb845d6802267394c737b3b4",
+    "same_as_1f": true
+  },
+  "ops/lease_publish.py": {
+    "master_sha256": "a4bf95b539e077edbb706afee6fc37b157815c0c246ca1bb01b307106d7be480",
+    "same_as_1f": true
+  },
+  "ops/ci_provenance.py": {
+    "master_sha256": "cf8e7a92817523dbea8ef62f9b4bfc9253aa91a820e3e606f931c0ccbcec8f3d",
+    "same_as_1f": true
+  },
+  ".github/workflows/ci.yml": {
+    "master_sha256": "cb5487d459082c0441bee2493e99ecc070589cbb9fa819888788b5fd969c47b9",
+    "same_as_1f": true
+  }
+}

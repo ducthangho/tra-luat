@@ -1,0 +1,12 @@
+{
+  "measured_at_utc": "2026-11-05T05:29:31.080379+00:00",
+  "head": "33df4b678e3d1f12e68a9c9d362dc0446f0dd5c2",
+  "run_id": "3ed988942d884ad2b29427134601b3e1",
+  "status": "in_progress",
+  "baseline_linux_passed": 1314,
+  "baseline_linux_total": 1314,
+  "platform_skips": 1,
+  "mutants_positive_so_far": 1271,
+  "hard_deadline_utc": "2026-11-05T07:09:46Z",
+  "terminal_pass": false
+}

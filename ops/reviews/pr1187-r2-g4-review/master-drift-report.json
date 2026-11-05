@@ -1,0 +1,77 @@
+{
+  "measured_at": "2026-11-05T05:18:59.836284+00:00",
+  "all_refs_sha256": "e33c682c94110f990d496d8d49837efd82e1813d571d330a819ba31f159afd3f",
+  "master": "a5293e10baf9b949a64db9d8125c8b9160eac53b",
+  "packets": {
+    "infra": {
+      "base": "1f0941e9bba1d1d517eda4174167b81963c06bd5",
+      "head": "33df4b678e3d1f12e68a9c9d362dc0446f0dd5c2",
+      "upstream_files": 764,
+      "head_files": [
+        ".claude/dev/packet_loop.py",
+        ".claude/dev/packet_loop_test.py",
+        "docs/PROTOCOL_DA_PHIEN.md",
+        "docs/adr/0063-merge-spec-ref-va-human-audit.md",
+        "ops/specs/PR1184-MERGE-CONTRACT-r2.md"
+      ],
+      "exact_path_intersection": [],
+      "upstream_noncoordination_paths": [
+        ".github/workflows/ops-publish-lease.yml",
+        "ops/ci_provenance_test.py",
+        "ops/lease_publish_test.py"
+      ],
+      "clean_merge": true,
+      "merge_tree": "39b60688c46635940efabe858106fc989981e152",
+      "merge_rc": 0,
+      "master_ancestor_H": false
+    },
+    "product": {
+      "base": "ec1b18a2a007fc2e697249c727a2ca8391ab209e",
+      "head": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+      "upstream_files": 769,
+      "head_files": [
+        ".github/workflows/ci.yml",
+        "ops/environment/README.md",
+        "ops/environment/login-linux.sh",
+        "ops/environment/login-windows.ps1",
+        "ops/environment/update-linux.sh",
+        "ops/environment/update-windows.ps1"
+      ],
+      "exact_path_intersection": [],
+      "upstream_noncoordination_paths": [
+        ".claude/dev/packet_loop.py",
+        ".claude/dev/packet_loop_test.py",
+        ".github/workflows/ops-publish-lease.yml",
+        "docs/PROTOCOL_DA_PHIEN.md",
+        "docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md",
+        "docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md",
+        "ops/ci_provenance_test.py",
+        "ops/lease_publish_test.py"
+      ],
+      "clean_merge": true,
+      "merge_tree": "708d1f11e67e22d909d10c823f14f82091d39233",
+      "merge_rc": 0,
+      "master_ancestor_H": false
+    }
+  },
+  "pr1194": {
+    "state": "open",
+    "draft": true,
+    "mergeable": null,
+    "mergeable_state": "unknown",
+    "head": "29ee9ca74d61544fbddd56c39dabbe194d26408e",
+    "base": "1813bfd4513704cf792a272a86b22e5e08893b9a"
+  },
+  "pr1202": {
+    "state": "open",
+    "draft": true,
+    "mergeable": null,
+    "mergeable_state": "unknown",
+    "head": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+    "base": "2b5df5d9f9958c72572a31ce59eca043af985c0a"
+  },
+  "new_product_head": "91686a66d855a9ddae9dcf4567b13ddaa092cbc2",
+  "new_product_tree": "e9d2b287343f44ac29a0713e0c0ea6b909aa408c",
+  "new_product_clean_merge": true,
+  "new_product_merged_tree": "65f51531758197b28a4e599c136c8d4bf4e8671c"
+}

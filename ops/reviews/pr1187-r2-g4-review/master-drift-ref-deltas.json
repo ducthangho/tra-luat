@@ -1,0 +1,353 @@
+{
+  "measured_at": "2026-11-05T05:26:33.095097+00:00",
+  "old_raw": "/workspace/scratch/pr1187-recovery/land-20261105/product-ci-continuation/refs-before-r5-grant.raw",
+  "new_raw": "/workspace/scratch/pr1187-recovery/land-20261105/drift-20261105-0521/all-refs.raw",
+  "all_heads_tags_pull_refs": true,
+  "deltas": [
+    {
+      "ref": "HEAD",
+      "old": "e62664871b6dfe48b0bed54a7d1eb9a81796e372",
+      "new": "a5293e10baf9b949a64db9d8125c8b9160eac53b",
+      "identity": "a5293e10baf9b949a64db9d8125c8b9160eac53b e62664871b6dfe48b0bed54a7d1eb9a81796e372 94807bd8e6ce5fb012763940c29549574f531f66 ec41a518639e3e246372e4b199a2a21063fafa5d",
+      "changed_paths": [
+        "ops/land/pr1137-wp1134-land-evidence.yaml",
+        "ops/land/pr1137-wp1134-provenance/SHA256SUMS",
+        "ops/land/pr1137-wp1134-provenance/ai-dang-giu-lease-cu.txt",
+        "ops/land/pr1137-wp1134-provenance/bien-ban-m8.yaml",
+        "ops/land/pr1137-wp1134-provenance/kiem-dong-wp.txt",
+        "ops/land/pr1137-wp1134-provenance/lease-changelog-d-ngoai-goi-land-r2-g1.yaml.txt",
+        "ops/land/pr1137-wp1134-provenance/lease-wp1134-r2-g1-claude.yaml.txt",
+        "ops/land/pr1137-wp1134-provenance/merge-va-diff.txt",
+        "ops/land/pr1137-wp1134-provenance/phan-chung-changelog-d.txt",
+        "ops/land/pr1137-wp1134-provenance/readback-check-runs-15872b7-all.json",
+        "ops/land/pr1137-wp1134-provenance/readback-check-runs-2be93d3-all.json",
+        "ops/land/pr1137-wp1134-provenance/readback-comments-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-events-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-jobs-41370574607.json",
+        "ops/land/pr1137-wp1134-provenance/readback-jobs-41397040659.json",
+        "ops/land/pr1137-wp1134-provenance/readback-pr-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-review-comments-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-reviews-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-run-41370574607.json",
+        "ops/land/pr1137-wp1134-provenance/readback-run-41397040659.json",
+        "ops/land/pr1137-wp1134-provenance/readback-run-41397085109-b3249c3.json",
+        "ops/land/pr1137-wp1134-provenance/readback-runs-head-15872b7.json",
+        "ops/land/pr1137-wp1134-provenance/readback-runs-lease-rut-han-9a2c5c6.json",
+        "ops/land/pr1137-wp1134-provenance/readback-runs-merge-2be93d3.json",
+        "ops/land/pr1137-wp1134-provenance/release-verify-master.txt"
+      ],
+      "write_overlap": [],
+      "disposition": "measured paths do not overlap sole effective ci.yml write; no integrated-CI credit"
+    },
+    {
+      "ref": "refs/heads/agent/wp1196-g1-claude",
+      "old": "ec805d8c1ab322cd049d74822a3972425809cf93",
+      "new": null,
+      "identity": "ec805d8c1ab322cd049d74822a3972425809cf93 5ca9cdbf6bcd7d2e955bc3b57cd667c6efe7fc68 f2e33bc3ae9763e394cc34bb7ff644edb0b7f4bb 514f9dae3849020871445ab17faaac0f765d5455",
+      "changed_paths": [],
+      "write_overlap": [],
+      "disposition": "measured paths do not overlap sole effective ci.yml write; no integrated-CI credit"
+    },
+    {
+      "ref": "refs/heads/agent/wp1196-land-claude",
+      "old": "57d60a8a7d3b8b8de304eebeb173249a9f032d96",
+      "new": null,
+      "identity": "57d60a8a7d3b8b8de304eebeb173249a9f032d96 39d511d23af3897c36de2ccf3fd75f35669f54bf 9c7a181b45bec06d254ddbd51cf3bc76da62916a",
+      "changed_paths": [
+        "ops/land/a13-k1-canary-evidence.yaml",
+        "ops/land/pr1200-wp1196-provenance/k1-canary-cases.json",
+        "ops/land/pr1200-wp1196-provenance/k1-canary-ket-qua.json",
+        "ops/land/pr1200-wp1196-provenance/k1-canary-tep-phu/A3.md",
+        "ops/land/pr1200-wp1196-provenance/k1-canary-tep-phu/A4.md",
+        "ops/land/pr1200-wp1196-provenance/k1-canary-tep-phu/A4b.md",
+        "ops/land/pr1200-wp1196-provenance/k1-canary-tep-phu/A4c.md",
+        "ops/land/pr1200-wp1196-provenance/k1-canary-tep-phu/A5.md",
+        "ops/land/pr1200-wp1196-provenance/k1-canary-tep-phu/lease-A2b.diff",
+        "ops/land/pr1200-wp1196-provenance/k1-canary-tep-phu/lease-A3.diff",
+        "ops/land/pr1200-wp1196-provenance/k1-canary-tep-phu/lease-A4.diff",
+        "ops/land/pr1200-wp1196-provenance/k1-canary-tep-phu/lease-A4b.diff",
+        "ops/land/pr1200-wp1196-provenance/k1-canary-tep-phu/lease-A4c.diff",
+        "ops/land/pr1200-wp1196-provenance/k1-canary-tep-phu/lease-A5.diff",
+        "ops/land/pr1200-wp1196-provenance/k4-audit-run-5ca9cdb.json",
+        "ops/land/pr1200-wp1196-provenance/k4-audit-stdout-5ca9cdb.txt",
+        "ops/land/pr1200-wp1196-provenance/kiem-dong-wp.txt",
+        "ops/land/pr1200-wp1196-provenance/kiem-merge-ec805d8.txt",
+        "ops/land/pr1200-wp1196-provenance/readback-check-runs-5ca9cdb-all.json",
+        "ops/land/pr1200-wp1196-provenance/readback-check-runs-7814938-all.json",
+        "ops/land/pr1200-wp1196-provenance/readback-check-runs-ec805d8-all.json",
+        "ops/land/pr1200-wp1196-provenance/readback-events-1200.json",
+        "ops/land/pr1200-wp1196-provenance/readback-issue-comments-1196.json",
+        "ops/land/pr1200-wp1196-provenance/readback-issue-comments-1200.json",
+        "ops/land/pr1200-wp1196-provenance/readback-jobs-41960570559.json",
+        "ops/land/pr1200-wp1196-provenance/readback-jobs-41966074217.json",
+        "ops/land/pr1200-wp1196-provenance/readback-jobs-41967113665.json",
+        "ops/land/pr1200-wp1196-provenance/readback-pr-1200.json",
+        "ops/land/pr1200-wp1196-provenance/readback-review-comments-1200.json",
+        "ops/land/pr1200-wp1196-provenance/readback-reviews-1200.json",
+        "ops/land/pr1200-wp1196-provenance/readback-runs-5ca9cdb.json",
+        "ops/land/pr1200-wp1196-provenance/readback-runs-7814938.json",
+        "ops/land/pr1200-wp1196-provenance/readback-runs-ec805d8.json"
+      ],
+      "write_overlap": [],
+      "disposition": "measured paths do not overlap sole effective ci.yml write; no integrated-CI credit"
+    },
+    {
+      "ref": "refs/heads/claude/ghi-so-land-1134",
+      "old": null,
+      "new": "94807bd8e6ce5fb012763940c29549574f531f66",
+      "identity": "94807bd8e6ce5fb012763940c29549574f531f66 e62664871b6dfe48b0bed54a7d1eb9a81796e372 ec41a518639e3e246372e4b199a2a21063fafa5d",
+      "changed_paths": [
+        "ops/land/pr1137-wp1134-land-evidence.yaml",
+        "ops/land/pr1137-wp1134-provenance/SHA256SUMS",
+        "ops/land/pr1137-wp1134-provenance/ai-dang-giu-lease-cu.txt",
+        "ops/land/pr1137-wp1134-provenance/bien-ban-m8.yaml",
+        "ops/land/pr1137-wp1134-provenance/kiem-dong-wp.txt",
+        "ops/land/pr1137-wp1134-provenance/lease-changelog-d-ngoai-goi-land-r2-g1.yaml.txt",
+        "ops/land/pr1137-wp1134-provenance/lease-wp1134-r2-g1-claude.yaml.txt",
+        "ops/land/pr1137-wp1134-provenance/merge-va-diff.txt",
+        "ops/land/pr1137-wp1134-provenance/phan-chung-changelog-d.txt",
+        "ops/land/pr1137-wp1134-provenance/readback-check-runs-15872b7-all.json",
+        "ops/land/pr1137-wp1134-provenance/readback-check-runs-2be93d3-all.json",
+        "ops/land/pr1137-wp1134-provenance/readback-comments-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-events-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-jobs-41370574607.json",
+        "ops/land/pr1137-wp1134-provenance/readback-jobs-41397040659.json",
+        "ops/land/pr1137-wp1134-provenance/readback-pr-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-review-comments-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-reviews-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-run-41370574607.json",
+        "ops/land/pr1137-wp1134-provenance/readback-run-41397040659.json",
+        "ops/land/pr1137-wp1134-provenance/readback-run-41397085109-b3249c3.json",
+        "ops/land/pr1137-wp1134-provenance/readback-runs-head-15872b7.json",
+        "ops/land/pr1137-wp1134-provenance/readback-runs-lease-rut-han-9a2c5c6.json",
+        "ops/land/pr1137-wp1134-provenance/readback-runs-merge-2be93d3.json",
+        "ops/land/pr1137-wp1134-provenance/release-verify-master.txt"
+      ],
+      "write_overlap": [],
+      "disposition": "measured paths do not overlap sole effective ci.yml write; no integrated-CI credit"
+    },
+    {
+      "ref": "refs/heads/claude/ghi-so-land-1196",
+      "old": "e0dbd4c6ddb52a25dcaf5785f2ff7b058b097032",
+      "new": null,
+      "identity": "e0dbd4c6ddb52a25dcaf5785f2ff7b058b097032 57d60a8a7d3b8b8de304eebeb173249a9f032d96 da4bfd7b83ce96de0cf947d31d266aac577f5d4f",
+      "changed_paths": [
+        "ops/land/a13-k1-canary-evidence.yaml",
+        "ops/land/pr1200-wp1196-provenance/kiem-dong-wp.txt"
+      ],
+      "write_overlap": [],
+      "disposition": "measured paths do not overlap sole effective ci.yml write; no integrated-CI credit"
+    },
+    {
+      "ref": "refs/heads/claude/wp1099-cloud-setup-p3b-spec-r10",
+      "old": null,
+      "new": "2ace10592ff56376889b7add09da24c3d3bf8332",
+      "identity": "2ace10592ff56376889b7add09da24c3d3bf8332 e62664871b6dfe48b0bed54a7d1eb9a81796e372 ce3bbf80030cd0bf6cbbb506978f783aab695077",
+      "changed_paths": [
+        "ops/specs/cloud-setup-p3b-nlm-401-r10.md"
+      ],
+      "write_overlap": [],
+      "disposition": "measured paths do not overlap sole effective ci.yml write; no integrated-CI credit"
+    },
+    {
+      "ref": "refs/heads/master",
+      "old": "e62664871b6dfe48b0bed54a7d1eb9a81796e372",
+      "new": "a5293e10baf9b949a64db9d8125c8b9160eac53b",
+      "identity": "a5293e10baf9b949a64db9d8125c8b9160eac53b e62664871b6dfe48b0bed54a7d1eb9a81796e372 94807bd8e6ce5fb012763940c29549574f531f66 ec41a518639e3e246372e4b199a2a21063fafa5d",
+      "changed_paths": [
+        "ops/land/pr1137-wp1134-land-evidence.yaml",
+        "ops/land/pr1137-wp1134-provenance/SHA256SUMS",
+        "ops/land/pr1137-wp1134-provenance/ai-dang-giu-lease-cu.txt",
+        "ops/land/pr1137-wp1134-provenance/bien-ban-m8.yaml",
+        "ops/land/pr1137-wp1134-provenance/kiem-dong-wp.txt",
+        "ops/land/pr1137-wp1134-provenance/lease-changelog-d-ngoai-goi-land-r2-g1.yaml.txt",
+        "ops/land/pr1137-wp1134-provenance/lease-wp1134-r2-g1-claude.yaml.txt",
+        "ops/land/pr1137-wp1134-provenance/merge-va-diff.txt",
+        "ops/land/pr1137-wp1134-provenance/phan-chung-changelog-d.txt",
+        "ops/land/pr1137-wp1134-provenance/readback-check-runs-15872b7-all.json",
+        "ops/land/pr1137-wp1134-provenance/readback-check-runs-2be93d3-all.json",
+        "ops/land/pr1137-wp1134-provenance/readback-comments-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-events-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-jobs-41370574607.json",
+        "ops/land/pr1137-wp1134-provenance/readback-jobs-41397040659.json",
+        "ops/land/pr1137-wp1134-provenance/readback-pr-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-review-comments-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-reviews-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-run-41370574607.json",
+        "ops/land/pr1137-wp1134-provenance/readback-run-41397040659.json",
+        "ops/land/pr1137-wp1134-provenance/readback-run-41397085109-b3249c3.json",
+        "ops/land/pr1137-wp1134-provenance/readback-runs-head-15872b7.json",
+        "ops/land/pr1137-wp1134-provenance/readback-runs-lease-rut-han-9a2c5c6.json",
+        "ops/land/pr1137-wp1134-provenance/readback-runs-merge-2be93d3.json",
+        "ops/land/pr1137-wp1134-provenance/release-verify-master.txt"
+      ],
+      "write_overlap": [],
+      "disposition": "measured paths do not overlap sole effective ci.yml write; no integrated-CI credit"
+    },
+    {
+      "ref": "refs/heads/ops/wp1178-r3-g3-lease",
+      "old": "f872b39220e500e152873f06db9e31b343248ba6",
+      "new": "2816c7c865d33abfa5655f2c630159975c17ba3f",
+      "identity": "2816c7c865d33abfa5655f2c630159975c17ba3f f872b39220e500e152873f06db9e31b343248ba6 5b7a6a5bc654071ab1a1b0dd9b48706a24bca62b",
+      "changed_paths": [
+        "ops/authorizations/wp1178-r5-owner-approved-20261105.json",
+        "ops/change-requests/mcr1177-r5-ci-correction-20261105.json",
+        "ops/change-requests/mission-1177-r3-r5-ci-plan.json",
+        "ops/leases/wp1178-r4-g4-codex-service.yaml",
+        "ops/leases/wp1178-r5-g5-codex-service.yaml",
+        "ops/specs/wp1178-r5-ci.md"
+      ],
+      "write_overlap": [],
+      "disposition": "measured paths do not overlap sole effective ci.yml write; no integrated-CI credit"
+    },
+    {
+      "ref": "refs/heads/ops/wp1178-r4-g4-lease",
+      "old": "f872b39220e500e152873f06db9e31b343248ba6",
+      "new": "2816c7c865d33abfa5655f2c630159975c17ba3f",
+      "identity": "2816c7c865d33abfa5655f2c630159975c17ba3f f872b39220e500e152873f06db9e31b343248ba6 5b7a6a5bc654071ab1a1b0dd9b48706a24bca62b",
+      "changed_paths": [
+        "ops/authorizations/wp1178-r5-owner-approved-20261105.json",
+        "ops/change-requests/mcr1177-r5-ci-correction-20261105.json",
+        "ops/change-requests/mission-1177-r3-r5-ci-plan.json",
+        "ops/leases/wp1178-r4-g4-codex-service.yaml",
+        "ops/leases/wp1178-r5-g5-codex-service.yaml",
+        "ops/specs/wp1178-r5-ci.md"
+      ],
+      "write_overlap": [],
+      "disposition": "measured paths do not overlap sole effective ci.yml write; no integrated-CI credit"
+    },
+    {
+      "ref": "refs/heads/ops/wp1178-r5-g5-lease",
+      "old": null,
+      "new": "2816c7c865d33abfa5655f2c630159975c17ba3f",
+      "identity": "2816c7c865d33abfa5655f2c630159975c17ba3f f872b39220e500e152873f06db9e31b343248ba6 5b7a6a5bc654071ab1a1b0dd9b48706a24bca62b",
+      "changed_paths": [
+        "ops/authorizations/wp1178-r5-owner-approved-20261105.json",
+        "ops/change-requests/mcr1177-r5-ci-correction-20261105.json",
+        "ops/change-requests/mission-1177-r3-r5-ci-plan.json",
+        "ops/leases/wp1178-r4-g4-codex-service.yaml",
+        "ops/leases/wp1178-r5-g5-codex-service.yaml",
+        "ops/specs/wp1178-r5-ci.md"
+      ],
+      "write_overlap": [],
+      "disposition": "measured paths do not overlap sole effective ci.yml write; no integrated-CI credit"
+    },
+    {
+      "ref": "refs/heads/ops/wp1210-spec",
+      "old": "855efdb767d2d14f1dfbddc0136bc6e5c4cbf5e1",
+      "new": "be6d180558772144a8fb39720ab14d9168567f2e",
+      "identity": "be6d180558772144a8fb39720ab14d9168567f2e 855efdb767d2d14f1dfbddc0136bc6e5c4cbf5e1 cba9a4afff603c00f552b93489ccbc030e573f6f",
+      "changed_paths": [
+        "ops/specs/wp1210-r2.md"
+      ],
+      "write_overlap": [],
+      "disposition": "measured paths do not overlap sole effective ci.yml write; no integrated-CI credit"
+    },
+    {
+      "ref": "refs/pull/1213/head",
+      "old": null,
+      "new": "94807bd8e6ce5fb012763940c29549574f531f66",
+      "identity": "94807bd8e6ce5fb012763940c29549574f531f66 e62664871b6dfe48b0bed54a7d1eb9a81796e372 ec41a518639e3e246372e4b199a2a21063fafa5d",
+      "changed_paths": [
+        "ops/land/pr1137-wp1134-land-evidence.yaml",
+        "ops/land/pr1137-wp1134-provenance/SHA256SUMS",
+        "ops/land/pr1137-wp1134-provenance/ai-dang-giu-lease-cu.txt",
+        "ops/land/pr1137-wp1134-provenance/bien-ban-m8.yaml",
+        "ops/land/pr1137-wp1134-provenance/kiem-dong-wp.txt",
+        "ops/land/pr1137-wp1134-provenance/lease-changelog-d-ngoai-goi-land-r2-g1.yaml.txt",
+        "ops/land/pr1137-wp1134-provenance/lease-wp1134-r2-g1-claude.yaml.txt",
+        "ops/land/pr1137-wp1134-provenance/merge-va-diff.txt",
+        "ops/land/pr1137-wp1134-provenance/phan-chung-changelog-d.txt",
+        "ops/land/pr1137-wp1134-provenance/readback-check-runs-15872b7-all.json",
+        "ops/land/pr1137-wp1134-provenance/readback-check-runs-2be93d3-all.json",
+        "ops/land/pr1137-wp1134-provenance/readback-comments-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-events-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-jobs-41370574607.json",
+        "ops/land/pr1137-wp1134-provenance/readback-jobs-41397040659.json",
+        "ops/land/pr1137-wp1134-provenance/readback-pr-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-review-comments-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-reviews-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-run-41370574607.json",
+        "ops/land/pr1137-wp1134-provenance/readback-run-41397040659.json",
+        "ops/land/pr1137-wp1134-provenance/readback-run-41397085109-b3249c3.json",
+        "ops/land/pr1137-wp1134-provenance/readback-runs-head-15872b7.json",
+        "ops/land/pr1137-wp1134-provenance/readback-runs-lease-rut-han-9a2c5c6.json",
+        "ops/land/pr1137-wp1134-provenance/readback-runs-merge-2be93d3.json",
+        "ops/land/pr1137-wp1134-provenance/release-verify-master.txt"
+      ],
+      "write_overlap": [],
+      "pr_state": {
+        "state": "closed",
+        "merged": true,
+        "draft": false
+      },
+      "pr_paths": [
+        "ops/land/pr1137-wp1134-land-evidence.yaml",
+        "ops/land/pr1137-wp1134-provenance/SHA256SUMS",
+        "ops/land/pr1137-wp1134-provenance/ai-dang-giu-lease-cu.txt",
+        "ops/land/pr1137-wp1134-provenance/bien-ban-m8.yaml",
+        "ops/land/pr1137-wp1134-provenance/kiem-dong-wp.txt",
+        "ops/land/pr1137-wp1134-provenance/lease-changelog-d-ngoai-goi-land-r2-g1.yaml.txt",
+        "ops/land/pr1137-wp1134-provenance/lease-wp1134-r2-g1-claude.yaml.txt",
+        "ops/land/pr1137-wp1134-provenance/merge-va-diff.txt",
+        "ops/land/pr1137-wp1134-provenance/phan-chung-changelog-d.txt",
+        "ops/land/pr1137-wp1134-provenance/readback-check-runs-15872b7-all.json",
+        "ops/land/pr1137-wp1134-provenance/readback-check-runs-2be93d3-all.json",
+        "ops/land/pr1137-wp1134-provenance/readback-comments-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-events-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-jobs-41370574607.json",
+        "ops/land/pr1137-wp1134-provenance/readback-jobs-41397040659.json",
+        "ops/land/pr1137-wp1134-provenance/readback-pr-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-review-comments-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-reviews-1137.json",
+        "ops/land/pr1137-wp1134-provenance/readback-run-41370574607.json",
+        "ops/land/pr1137-wp1134-provenance/readback-run-41397040659.json",
+        "ops/land/pr1137-wp1134-provenance/readback-run-41397085109-b3249c3.json",
+        "ops/land/pr1137-wp1134-provenance/readback-runs-head-15872b7.json",
+        "ops/land/pr1137-wp1134-provenance/readback-runs-lease-rut-han-9a2c5c6.json",
+        "ops/land/pr1137-wp1134-provenance/readback-runs-merge-2be93d3.json",
+        "ops/land/pr1137-wp1134-provenance/release-verify-master.txt"
+      ],
+      "disposition": "measured paths do not overlap sole effective ci.yml write; no integrated-CI credit"
+    },
+    {
+      "ref": "refs/pull/1215/head",
+      "old": null,
+      "new": "2ace10592ff56376889b7add09da24c3d3bf8332",
+      "identity": "2ace10592ff56376889b7add09da24c3d3bf8332 e62664871b6dfe48b0bed54a7d1eb9a81796e372 ce3bbf80030cd0bf6cbbb506978f783aab695077",
+      "changed_paths": [
+        "ops/specs/cloud-setup-p3b-nlm-401-r10.md"
+      ],
+      "write_overlap": [],
+      "pr_state": {
+        "state": "open",
+        "merged": false,
+        "draft": true
+      },
+      "pr_paths": [
+        "ops/specs/cloud-setup-p3b-nlm-401-r10.md"
+      ],
+      "disposition": "measured paths do not overlap sole effective ci.yml write; no integrated-CI credit"
+    },
+    {
+      "ref": "refs/pull/1215/merge",
+      "old": null,
+      "new": "8efea0c85c24da7c5e94809838af905035699c01",
+      "identity": "8efea0c85c24da7c5e94809838af905035699c01 e62664871b6dfe48b0bed54a7d1eb9a81796e372 2ace10592ff56376889b7add09da24c3d3bf8332 ce3bbf80030cd0bf6cbbb506978f783aab695077",
+      "changed_paths": [],
+      "write_overlap": [],
+      "pr_state": {
+        "state": "open",
+        "merged": false,
+        "draft": true
+      },
+      "pr_paths": [
+        "ops/specs/cloud-setup-p3b-nlm-401-r10.md"
+      ],
+      "disposition": "measured paths do not overlap sole effective ci.yml write; no integrated-CI credit"
+    }
+  ],
+  "old_raw_sha256": "8fd3b298790210e2d12af74c23f59747a9af80a303cea1104a7cd3d1bd77258f",
+  "new_raw_sha256": "e33c682c94110f990d496d8d49837efd82e1813d571d330a819ba31f159afd3f",
+  "no_final_merge_claim": true
+}

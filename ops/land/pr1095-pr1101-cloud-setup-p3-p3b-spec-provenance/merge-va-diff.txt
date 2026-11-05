@@ -1,0 +1,26 @@
+# do 2026-11-02T06:14:23Z tren origin/master 8983e1bbf00c91d8def101a97a4d32509ae630cc
+== PR #1095 merge 8f123b27b338e5e173a668209eb4904f49dd611b head 37d5965b30462ef2340a26dd19333873e14d84d5
+merge 8f123b27b338e5e173a668209eb4904f49dd611b parents 9ced16f3764aed80a3f2ac21ca3db475cbf8aea5 37d5965b30462ef2340a26dd19333873e14d84d5 tree 065b49bf9bdf155ef33d845607b4429076319675
+head 37d5965b30462ef2340a26dd19333873e14d84d5 tree 07d9e10b85a25b3c80c81bfd263a28911b0768a3
+merge-base(master-cha, head): 906b24fe23086e3ea47943e0311e8d75a6bbed6f
+head la cha thu 2 cua merge: co
+ ops/specs/cloud-setup-p3-writeback-r1.md | 223 ++++++++++++++++++++++++++++
+ ops/specs/cloud-setup-p3-writeback-r2.md | 240 +++++++++++++++++++++++++++++++
+ 2 files changed, 463 insertions(+)
+diff merge-base..head sha256 c20e18d558106e53 ; diff merge^1..merge sha256 c20e18d558106e53 ; khop: co
+== PR #1101 merge 47ee1b206d284c82d16036972b82b17196cd8dc7 head c6e4388ae1fece11f735f4cbe234de04fea56b37
+merge 47ee1b206d284c82d16036972b82b17196cd8dc7 parents 0300cac842476f78697635807381c23fc56c0760 c6e4388ae1fece11f735f4cbe234de04fea56b37 tree fb4e7aeb1ec93991d4c1ca60811c732b67158f35
+head c6e4388ae1fece11f735f4cbe234de04fea56b37 tree 7d808014be27ff5646f996885a99a1f813645020
+merge-base(master-cha, head): 9091cf52cf20ac197c1a356d6a33cac6bab0b318
+head la cha thu 2 cua merge: co
+ ops/specs/cloud-setup-p3b-nlm-401-r1.md | 187 +++++++++++++++++++++++++
+ ops/specs/cloud-setup-p3b-nlm-401-r2.md | 208 ++++++++++++++++++++++++++++
+ ops/specs/cloud-setup-p3b-nlm-401-r3.md | 237 ++++++++++++++++++++++++++++++++
+ 3 files changed, 632 insertions(+)
+diff merge-base..head sha256 1aeded772026b144 ; diff merge^1..merge sha256 1aeded772026b144 ; khop: co
+== spec tren origin/master
+ops/specs/cloud-setup-p3-writeback-r1.md blob b5bb73e8814f4f99eddc9ed645521401870fd363 sha256 e4b0800a197ab22d57b2ee75e11673960c6f47d8e7ace38c20a8aeab99e364d6
+ops/specs/cloud-setup-p3-writeback-r2.md blob 518d7488814e667805198b2d25a4be6162fcc73c sha256 c12e0449511f248de743ab603983c53d0a1c6f83f949bc4c1fa78b03f12bd020
+ops/specs/cloud-setup-p3b-nlm-401-r1.md blob ef74edbef8ed1126a66d8afea52b5c075623bc47 sha256 15fe242a65c8df1ff393cdc15784642013e904bacb9b754b0d72a64237dac11e
+ops/specs/cloud-setup-p3b-nlm-401-r2.md blob 6c6f3f952c9836d1d1b941f6e6ea11c9a7dd3289 sha256 c6e53a00c7370ce0d75d9bcd954f8b7e69aa7383a0f5e6427a29e5e0d0e3ed8d
+ops/specs/cloud-setup-p3b-nlm-401-r3.md blob af1e39afd9be46c06353a97aa2aaced66ad3750d sha256 e2246e90aaf35b6b006b40a258e694a99c796a1ff1a8ac21aebb408121efa121

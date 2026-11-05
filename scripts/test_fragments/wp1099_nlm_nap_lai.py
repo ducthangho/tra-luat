@@ -184,7 +184,7 @@ def _a9(cay):
     m._canary, m._NAP_LAI_KHOA = (lambda: (hen("c"), dem["c"] > 1 or san.wait(60) or het.append(1), goc())[2]), type(   # 60 s: ngân sách ĐO, hết ⇒ KHÔNG ĐO ĐƯỢC
         "K", (), {"__enter__": lambda s: (hen("k"), khoa.acquire()), "__exit__": lambda s, *a: khoa.release()})()
     try: [x.start() for x in ts], [x.join() for x in ts]  # noqa: E701
-    finally: sys.stderr = cu  # noqa: E701
+    finally: san.set(), [x.join() for x in ts if x.ident], setattr(sys, "stderr", cu)  # noqa: E701  (start dở dang: thả + join MỌI luồng đã chạy TRƯỚC teardown, r16 F11-02)
     if het: raise RuntimeError("A9 KHÔNG ĐO ĐƯỢC: luồng thứ hai không tới trong 60 s")  # noqa: E701
     _chot("A9", sum("nlm-auth-load" in c for c in cay.nhat_ky()) == 1, "hai luồng ⇒ nạp khác 1 lần")
     if hasattr(os, "mkfifo"):                     # spy: MỌI lần mở dấu có O_NONBLOCK (không phụ thuộc lịch); rồi đối chứng I/O FIFO thật (F06)

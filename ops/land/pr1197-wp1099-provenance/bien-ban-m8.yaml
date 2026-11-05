@@ -1,0 +1,69 @@
+# Bien ban M8 (ADR-0060) dong WP #1099 CLOUD-SETUP-P3B-NLM-401 r11 — kiem bang packet_loop.py kiem-dong-wp.
+# Nguon: ops/land/pr1197-wp1099-land-evidence.yaml (merge PR #1243, 25a1b79). Lease cuoi doc tai origin/ops/cap-lease-1099-g1 @ d2e53fc.
+packet: CLOUD-SETUP-P3B-NLM-401
+revision: 11
+generation: 1
+spec_hash: fcd75e67f3db8c8aea96a36c0fa53eeb6e0bb8b2f00939975361810bdda052a5
+head_da_review: 99442469f331e4808ee9de43e2beb75416e51a21
+tree_h: d19e573f19209a94a03d480cf2ea9c64ecc8b092
+review:
+  offline: 'Codex luot 17 (launcher run 7a5a35c0) approve, F11-02 da dong, 0 finding mo; kiem-merge-pnaa/run.json + stdout.log (khop bam)'
+  connector: 'issuecomment-6659911107 Reviewed commit 99442469f3, khong finding; codex-review-state completed has_any_findings false (6649637172)'
+  so_loi_goi_codex: 17
+  xu_ly_finding: 'cac finding luot truoc (A5, F11-01 x3, F13-01, F11-02) da va tren head truoc luot 17; thuat_lai tu than PR #1197 va comment #1099'
+windows:
+  phan_loai: required
+  nguon: 'measured_by_coordinator — windows-tra-luat-win/diag-9944246.log.b64 (349 byte, sha256 1aaccf5c…): run(tl) wp1099_nlm_nap_lai tren tra-luat-win, HEAD 99442469, CA A 12/12, D 3/3, DOT BIEN 29/30, BO QUA doc_dau_chan, KQ True'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1099#issuecomment-6662746856
+merge_commit: b255b0b7131da7f6e026639f6b0da0a06cc68a44
+tree_m: d19e573f19209a94a03d480cf2ea9c64ecc8b092
+ci_master:
+  run_id: 42058119067
+  conclusion: success
+  sha: b255b0b7131da7f6e026639f6b0da0a06cc68a44
+  jobs: '23/23 success, nhan ubuntu-latest; kiem-gate rc=0'
+nghiem_thu:
+  A1: passed
+  A2: passed
+  A3: passed
+  A4: passed
+  A5: passed
+  A6: passed
+  A7: passed
+  A8: passed
+  A9: passed
+  A10: passed
+  A11: passed
+  A12: passed
+  A13: passed
+  D1: passed
+  D2: passed
+  D3: passed
+  H1: passed
+  R1: passed
+  F1: passed
+  F2: passed
+  F3: passed
+  J1: passed
+  G1: passed
+  G2: passed
+  K1: passed
+  K2: passed
+  L1: passed
+  W1: CHO_QUYET_DINH
+  M1: CHO_QUYET_DINH
+nghiem_thu_nguon: >-
+  F1 measured — gate-hau-merge-20261105/gate-output-42058119067.txt ("tl selftest 1777/1777", "[wp1099_nlm_nap_lai] … DOT BIEN 30/30 …
+  BỎ QUA 0" tren posix). L1 measured — readback-jobs-42033337918-a3.json 23/23 success tren 9944246 + kiem-gate-pre-9944246.txt rc=0.
+  K2 measured — do-lai-nguon-20261105/merge-va-diff.txt: 9 tep, +550 -30. J1/F3/D1–D3/H1/G2/A* chay trong job CI tren b255b0b
+  (selftest, release-verify, bundle check) — gate output 0 ##[error]. R1, K1, G1 thuat_lai tu Codex luot 17 + kiem-merge, KHONG tai chay.
+  W1: van run(tl) Windows measured_by_coordinator; van ci.yml runner_set=windows-only tren 9944246 KHONG CO (REST: chi 3 run tren head,
+  khong lan windows-only). M1: LIVE sau land, chua chay.
+lease_cuoi: wp1099-cloud-setup-p3b-r11-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed
+moc_10_2_2_nguon: 'ops/land/pr1197-wp1099-provenance/gate-hau-merge-20261105/ci-provenance-42058119067/provenance.yaml + gate-output-42058119067.txt, run 42058119067 tren b255b0b'

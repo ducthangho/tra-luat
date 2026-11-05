@@ -1,0 +1,6 @@
+# do 2026-11-05T05:06:23Z tren master e62664871b6dfe48b0bed54a7d1eb9a81796e372, core.abbrev=7
+$ python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json  (trich)
+{"ok": true, "failed": [], "extra_files": []}
+rc=0
+file_count 184 len(files) 184 muc changelog.d/ 0
+tep tren dia changelog.d/: 14

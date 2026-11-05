@@ -140,3 +140,45 @@ cross_review_codex_20261105:
   landed_dieu_kien: >-
     #631 chi duoc nang landed khi ban va (a5fc816, 69f4826) da vao master qua PR ghi so cua khoi nay, gate hau merge tren merge
     SHA ay du bon moc §10.2.2, va chu kho duyet neo dung head ban va da review (L-6). Se ghi bang khoi moi sau merge.
+
+# ---- KHOI BO SUNG (append-only) — ket luan landed sau khi ban va F1 vao master
+landed_20261105:
+  authorized_head_sha: 69f48261618a72b9058e88e875ad8de5d52a8860
+  authorization_url: https://github.com/ducthangho/tra-luat/pull/631#issuecomment-6656897285
+  authorization_ghi_chu: >-
+    measured — gate-hau-merge-20261105b/readback-comment-6656897285.json (ducthangho OWNER, 2026-11-05T11:31:40Z, chua sua):
+    "duyet_land: pr 631, head_da_review 69f4826, review Codex luot 2 run 0ab91baa approve P0–P3 = 0, pr_ghi_so #1228 merge
+    a57eade", dieu kien chi ghi landed khi du bon moc §10.2.2 tren run push master a57eade. Comment do phien dieu phoi
+    session_015GtxrYPjZCTZeRiazdssgq dang bang token chu kho (#566), tu khai nguyen van chu kho "đồng ý cả hai".
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/pull/631#issuecomment-6656897285
+    do_duoc: 'measured — gate-hau-merge-20261105b/readback-comment-6656897285.json (ducthangho OWNER, 2026-11-05T11:31:40Z). CAVEAT #566: dang bang token chu kho; ban chep, khong phai chu ky.'
+  merge_ban_va:
+    pr: 1228
+    merge_commit: a57eade23dd5b54564be47d4f124511cf87aa1fa
+    parents: [33aa91d57266adbf00be9e32aef37760a3836e5a, e5ee8f6fd9ca1d7283265870a61ba244dfd20370]
+    noi_dung: 'measured — git: 69f4826 la to tien cua a57eade; git diff 69f4826 a57eade -- CLAUDE.md rong (0 dong) => CLAUDE.md tren master bang dung ban Codex luot 2 da approve.'
+  post_merge_checks:
+    - {name: 'ci.yml push master — DUNG merge SHA a57eade', run_id: 42018846747, run_attempt: 1, sha: a57eade23dd5b54564be47d4f124511cf87aa1fa, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', kiem_gate: 'measured — gate-hau-merge-20261105b/kiem-gate-a57eade.txt rc=0', nguon: [gate-hau-merge-20261105b/readback-run-42018846747.json, gate-hau-merge-20261105b/readback-jobs-42018846747.json, gate-hau-merge-20261105b/readback-check-runs-a57eade-all.json]}
+  moc_10_2_2:
+    run: 'measured — gate-hau-merge-20261105b/ci-provenance-42018846747/provenance.yaml moc.run passed.'
+    checkout: 'measured — gate-hau-merge-20261105b/ci-provenance-42018846747/provenance.yaml: 23/23 job checkout passed, sha a57eade doc tu log.'
+    gate_output: >-
+      measured — gate-hau-merge-20261105b/gate-output-42018846747.txt: log tho 23 job tai qua REST (sha256 tung log); 0 dong
+      ##[error]; 22/23 job co marker duong; chuan-bi khong in marker. 37 dong khop regex am deu o gate-ops: 36 la bao cao dot bien bi
+      giet, 1 la Traceback cua fixture co y "canary-import" (ModuleNotFoundError nonexistent_fixture_module) ngay truoc dong
+      "PASS harness-import".
+    workflow_definition: >-
+      measured — gate-hau-merge-20261105b/ci-provenance-42018846747/provenance.yaml moc.workflow_definition passed: luot
+      ops-do-workflow-definition.yml 42027686344 (artifact 13413763996), path .github/workflows/ci.yml, oid a57eade, blob
+      2b2c9aa25ad1c136e44cba457d9ae765d2544fc2 = git rev-parse a57eade:.github/workflows/ci.yml, sha256 aed785d6…be67.
+  landed: true
+  dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren DUNG merge SHA a57eade cua PR mang ban va: run 42018846747 23/23, du bon moc §10.2.2.
+    (2) lease: khong co (khong phai packet); ngoai le CLAUDE.md trong lease #1224 do phien dieu phoi thuong luong. (3) bookkeeping:
+    ho so nay. (4) review neo DUNG authorized_head_sha 69f4826: cross_review_codex_20261105.luot_2 approve, sandbox DO_DUOC,
+    snapshot khop => §8.1 DAT cho noi dung da land. (5) noi dung master = noi dung da review (diff rong). (6) duyet chu kho neo SHA
+    (comment 6656897285). (7) dieu kien chu kho o comment 5826012645 (vong Codex toi het P1/P2/P3) DAT qua luot 1–2.
+  caveat: [duyet chu kho dang ho bang token chu kho (#566), head_da_review trong comment ghi rut gon 7 ky tu, Windows khong chay (PR chi doi tai lieu va ops/land)]
+  thay_the: 'trang_thai_packet.landed (false), assurance_81 (CHUA_XAC_NHAN cho 6e5c748) va cross_review_codex_20261105.landed (false) giu nguyen nhu lich su; khoi nay la ket luan hien hanh.'

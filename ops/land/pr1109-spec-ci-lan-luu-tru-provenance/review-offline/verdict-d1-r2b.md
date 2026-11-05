@@ -1,0 +1,38 @@
+VERDICT: changes_requested — P0/P1/P2/P3 = 0/0/2/0
+
+Đếm theo **lớp**: đóng 3/5 lớp cũ, còn 2; không có lớp mới. Chỉ review phần đổi từ `9dcc0cbd` tới HEAD.
+
+`reviewed_sha`: `ea6ab705568056c7461ebac5be206133df5e8dc5`  
+`tree`: `496c027fc543f95c2359f92c5877d23227962aaa`
+
+Hash prompt và đặc tả khớp giá trị được giao. Không sửa tệp.
+
+**Đối chiếu lượt trước**
+
+| Finding | Kết luận | Bằng chứng |
+|---|---|---|
+| `gom-nham-consumer` | **ĐÓNG** | §2.2 đã đặt nhánh bỏ gộp tại YAML, giữ consumer đầy đủ. Probe trích `_loi_gop_dich` bằng AST xác nhận thiếu mảnh trả `khong co bien nhan manh nao`; không có nhánh đọc `che_do` trong consumer này. |
+| `write-set-thieu-t6` | **ĐÓNG** | §2.3 và §3 đã thêm đúng `ops/cong_cu_test.py::t6`, tổng tối đa sáu tệp. Chạy T6 hiện tại đạt; thêm `if` vào bước shellcheck trong bộ nhớ khiến T6 từ chối đúng thông báo “phải cài shellcheck vô điều kiện”. |
+| `nghiem-thu-thieu-doi-chung` | **ĐÓNG** | A2 đã cô lập hai luật mode; A7b có chiều hợp lệ và thiếu/sai cho push/dispatch; A12 thêm dispatch, log chế độ và kết quả `kiem-re`. Đây là đóng thiếu sót **đặc tả**, chưa chứng nhận triển khai đạt. |
+| `so-do-khong-tai-lap` | **CÒN** | Đã tái lập được 94/26/80 bằng cách xử lý output không `-z`, nhưng phép ấy phân loại sai một merge do tên tệp được Git đặt trong dấu nháy. Đếm đường dẫn thật trên base ghim cho 95/26/79 và 38 merge có đuôi mã. |
+| `luat-noi-bo-mau-thuan` | **VÁ SINH LỖI MỚI** | Luật thêm/xóa và câu về M6 đã sửa. Tuy nhiên câu mới “M8 vẫn đòi cross-review theo lớp” ngược ADR-0060 M8: PR lưu trữ đủ điều kiện đã được miễn cross-review bằng model. |
+
+**Bảng finding của lượt này** — hai biểu hiện thuộc lớp cũ, không tăng số lớp:
+
+| ID · lớp | Mức | Dòng | Mô tả | Sửa |
+|---|---|---|---|---|
+| `so-do-khong-tai-lap` · số đo | P2 | [27](ops/specs/CI-LAN-LUU-TRU-r1.md:27) | Merge `7471f95f75d4ed37591e307b281cda55aa0cd6fd` chỉ đổi `reviews/land`, nhưng tên `HƯỚNG 10 - HINT tren ban sao.log` bị Git quote/escape khiến lọc tiền tố nhận nhầm thành ngoài vùng. Lệnh `git ls-files 'ops/{land,reviews}/*.py'` còn trả **0**, không phải 651. | Sửa ngay S4: ghim OID, dùng `--name-only --no-renames -z` và tách NUL; đổi lệnh kiểm kê thành hai pathspec riêng. Đối chứng bằng chính merge trên. Không đổi kết luận chính sách hay thêm gate; tránh trộn số của ref hiện tại với mốc lịch sử. |
+| `luat-noi-bo-mau-thuan` · lệch ADR | P2 | [137](ops/specs/CI-LAN-LUU-TRU-r1.md:137) | “Chưa có miễn trừ nào” và “M8 vẫn đòi cross-review” phủ định miễn trừ đã có tại [ADR-0060 M8](docs/adr/0060-dieu-kien-merge-va-moc-ready.md:116). Điều này có thể khiến phiên sau chạy thêm review trái luật hiện hành. | Sửa câu này và diễn đạt nợ §6: M8 miễn cross-review cho PR lưu trữ đúng phạm vi; M6 vẫn đòi connector. Đối chiếu riêng PR bản ghi thụ động với PR chứa specs/leases. Tránh mở rộng miễn trừ M8 sang cả bốn tiền tố CI. Không cần sửa ADR trong D1. |
+
+S4 đã đo lại, mọi lệnh Git thành công (`rc=0`):
+
+| Mốc | Output theo dòng, chưa giải quote | Đường dẫn thật với `-z` |
+|---|---:|---:|
+| `7eeb1d9a10aea8e1805b66fbf3d68549eb6778da` | 94 / 26 / 80; đuôi mã 37 | **95 / 26 / 79; đuôi mã 38** |
+| `origin/master` tại `c6dd7b33b4f215809bf281ee1533bc1e8fa6920c` | 95 / 26 / 79; đuôi mã 37 | **96 / 26 / 78; đuôi mã 38** |
+
+Thứ tự ba nhóm: thuần reviews/land · hồ sơ có specs/leases · ngoài bốn tiền tố. Cả hai mốc có đúng 200 merge, không diff rỗng. Hai pathspec riêng cho kết quả **651 tệp Python: 1 cấp nông, 650 sâu hơn**.
+
+Phép đo chạy trên Linux, Python 3.13.18: script đếm S4 và probe AST qua `python -B -` đều `rc=0`; `git diff --check` đạt. Snapshot cuối gồm tracked/untracked/ignored, working diff và index đều sạch; HEAD/tree không đổi. Quét phần sửa chưa xác nhận thêm lỗi fail-open, check bắt buộc vắng/xanh giả hoặc thiếu write set.
+
+`not_run`: toàn suite, Windows, actionlint, full mutant audit. **KHÔNG ĐO ĐƯỢC**: canary A12, ruleset/run GitHub hiện hành, authority nâng trần và receipt xác minh model/effort/execution surface. Provider `openai_codex`, transport `machine`, sandbox chỉ đọc; không tự nhận assurance `cross_approved`.

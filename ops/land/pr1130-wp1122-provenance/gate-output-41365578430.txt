@@ -1,0 +1,8 @@
+# Gate output run 41365578430 attempt 1 (push launcher (Windows that), nhanh master, head c7174bfe) — log REST tung job, 2026-11-02
+
+JOB 125024913403 launcher (ubuntu-latest) ['ubuntu-latest'] conclusion=success bytes=113570 sha256=5a08e1e864bd0fcdac29cf3e8dfb934d21e7cfab3c2260ecf9a0b1c8f9490f76 ##[error]=0
+    362/362 ca DA CHAY QUA (tong 364, bo qua 2, hong 0) - KHONG DU: 2 ca BO QUA, chua do gi
+    DOT BIEN: 575/575 dat  (4 khong do duoc tren nen nay)
+JOB 125024913633 launcher (windows-latest) ['windows-latest'] conclusion=success bytes=143781 sha256=41d6d9ee33bea87decd6edf23bbeaedfc4b77487ec0d594c3fba9513fb6dff41 ##[error]=0
+    290/290 ca DA CHAY QUA (tong 364, bo qua 74, hong 0) - KHONG DU: 74 ca BO QUA, chua do gi
+    DOT BIEN: 461/461 dat  (118 khong do duoc tren nen nay)

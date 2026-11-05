@@ -1,0 +1,4 @@
+# 2026-11-04T16:08:01Z — khoi YAML trich tu readback-m8-issuecomment-6635566827.json; cmp voi ban nhap m8-1117.yaml: byte khop
+# lenh: python3 .claude/dev/packet_loop.py kiem-dong-wp --root . --bien-ban <khoi YAML doc lai> --lease <ops/leases/wp1117-r2-g2-claude.yaml tu nhanh ops/wp1117-r1-g1-lease>
+ĐÓNG ĐƯỢC WP HARNESS-KET-QUA-NGOAI-MA-DOT-BIEN — merge 279a39e34c26027ad792008962859aa79c16e35c
+rc=0

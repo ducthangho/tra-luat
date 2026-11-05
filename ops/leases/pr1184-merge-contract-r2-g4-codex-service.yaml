@@ -1,0 +1,101 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1187
+packet_id: PR1184-MERGE-CONTRACT
+mission_issue: 1177
+revision: 2
+role: executor
+provider: codex
+executor: codex
+model_family: openai
+execution_surface: codex_service
+transport: machine
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+reviewer: human
+reviewer_execution_surface: manual_audit
+reviewer_transport: human
+assurance_target: human_audited
+access: read-write
+spec_path: ops/specs/PR1184-MERGE-CONTRACT-r2.md
+spec_hash: 975c5d31be6ec4f26145f14893b5c8f7063e5921d1c6dafdca020f50e795299d
+spec_sha256_required: 975c5d31be6ec4f26145f14893b5c8f7063e5921d1c6dafdca020f50e795299d
+spec_ref: refs/heads/ops/pr1187-r2-g2-lease@74a0abdb2631ae38f9f76b7426b5e47a3c82ce8f
+target_branch_neu_land: master
+base_sha: 1f0941e9bba1d1d517eda4174167b81963c06bd5
+generation: 4
+lease_id: pr1184-merge-contract-r2-g4-codex-service
+prompt_path: ops/specs/PR1187-P2-G4-ADDENDUM.md
+prompt_sha256_required: 645b0b93f9ddf369aaac18b0f5e27cbe651565f3e7a6cfb03d5040b7bfb2ef1e
+operational_addendum_ref: refs/heads/ops/pr1187-p2-g4-proposal@2f39488e14e5038a1b6381c96dfc834d7a3e129d
+branch: agent/pr1187-r2-g4-codex-service
+branch_ownership: exclusive
+start_from_sha: 29ee9ca74d61544fbddd56c39dabbe194d26408e
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+effective_write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6648744733
+scope_steering_source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6648768539
+recorded_by: codex-service-controller
+recorder_is_executor: false
+leased_at_utc: '2026-11-05T03:23:42Z'
+heartbeat_at: '2026-11-05T03:23:42Z'
+lease_until: '2026-11-05T05:23:42Z'
+lease_expires_at_utc: '2026-11-05T05:23:42Z'
+heartbeat_required_minutes: 360
+run_minutes: 90
+run_started_at_utc: '2026-11-05T03:23:42Z'
+run_deadline_utc: '2026-11-05T04:53:42Z'
+depends_on: []
+thay_the_cho:
+- pr1184-merge-contract-r2-g3-codex-service
+size_limit:
+  effective_write_paths: 2
+  net_product_files: 5
+  added_lines: 1000
+nang_tran:
+  ai_nang: Chủ kho ducthangho theo protocol §2 — ĐỀ NGHỊ, CHƯA ĐƯỢC DUYỆT
+  can_cu: K1/spec identity/hash là input K4, cùng rollout ADR0063 và test consumer.
+    Có thể tách thành nhiều Packet/ADR/lease nhưng tăng coordination và trạng thái
+    trung gian; đề nghị review cùng một contract. Bỏ productcopy spec r1 đã supersede,
+    giữ frozen metadata/history; net base diff năm tệp, effective write set sáu paths.
+    Số đo exact numstat kèm proposal; cap dư có giới hạn cho sửa review, không bảo
+    đảm gói lớn dễ review.
+  tran_cu: 'ADR0053: 6 tệp/450 dòng thêm; approved r1: 5 tệp/450 dòng thêm'
+  tran_moi: 6 effective paths, tối đa 5 net tệp/1000 dòng thêm — đề nghị, chỉ áp dụng
+    khi chủ kho duyệt exact spec và lease r2g2
+review_budget_override:
+  approved_by: ducthangho
+  source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6648744733
+  historical_model_outputs: 5
+  old_limit: 5
+  new_limit: 6
+  authorized_additional_connector_calls: 1
+  remaining_calls: 1
+  local_model_calls: 0
+  no_reset: true
+read_only_validation_allowance:
+  fullstandard_minutes: 180
+  deadline: absolute at launch; no sourcewriter extension
+authority_notes:
+- Fresh separate Codex Executor exactlyone invocation; one90min run; no child delegation/local
+  model review.
+- Repair verified mixedcase identitysuffix P2 AND ALL SIX advisory4P3; no inherited
+  P3 waiver for futureH.
+- Exactlytwo writable sourcepaths. Frozenr2spec/ADR/protocol/workflows and other productfiles
+  unchanged.
+- Existing cap1000 unchanged. If complete actual patch needs more, preserve measuredpatch/checkpoint;
+  do not compress/remove tests or silently increase cap.
+- Actual finalH/tree gate and human audit needed anew beforefirstcodepush; no selfreview/approval/sourcepush/PR/ready/merge/land/deploy
+  permission.
+- OldH29 findings,audit,land,K4bootstrap and gates remain historical fornewH.
+- Canonical admission with actual S/H/T beforeheavy gates; currentmasterdrift must
+  remain truthfully classified; no rebase authorized.
+- Scope/caps governed by owner-approved addendum and explicit P3steering; historicalcost/attemptunknown
+  remainsunknown.

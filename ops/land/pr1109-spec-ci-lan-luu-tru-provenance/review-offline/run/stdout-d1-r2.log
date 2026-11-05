@@ -1,0 +1,9 @@
+Preflight bị chặn vì SHA không khớp:
+
+- Prompt ghi `ea6ab70586`; `git rev-parse --verify 'ea6ab70586^{commit}'` trả **rc=128**.
+- HEAD thực tế: `ea6ab705568056c7461ebac5be206133df5e8dc5`.
+- Hash SHA-256 của prompt và đặc tả đều **khớp** giá trị đã giao; worktree sạch.
+
+Theo **AGENTS.md §2**, lệch exact base Git OID phải dừng và báo người điều phối. Tôi chưa đưa verdict và không sửa tệp.
+
+Bạn xác nhận review HEAD thực tế `ea6ab705568056c7461ebac5be206133df5e8dc5` thay cho SHA ghi trong prompt?

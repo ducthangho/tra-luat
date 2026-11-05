@@ -1,0 +1,76 @@
+# HO SO LAND — dac ta CI-LAN-LUU-TRU r1 (packet #1113, D1 cua ADR-0060 M11), qua PR #1109. Khuon: ops/land/pr908-no-p3-spec-r4-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+# PR nay chi them DAC TA (ops/specs/), khong ma san pham, khong lease (ADR-0054 muc 1, Pham vi).
+# landed FALSE: §10.2.4 (4) — review offline KHONG co luot approve tren head cuoi 1ac712b8 (luot cuoi r2b tren ea6ab705: changes_requested
+# 0/0/2/0); sau do PR di ba vong va theo connector (6 finding P2) ma khong review offline lai. Connector sach tren head cuoi.
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nghia nhu khuon.
+# Readback tho: ops/land/pr1109-spec-ci-lan-luu-tru-provenance/ (SHA256SUMS kem). REST qua proxy phien bang GITHUB_PAT, 2026-11-02.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrcRSrPnyeixJVDudWu
+input_packet_generations:
+  - {packet_issue: 1113, packet_id: CI-LAN-LUU-TRU, revision: 1, generation: null, lease_id: null, ghi_chu: 'PR dac ta truoc lease (lease g1/g2 neo spec_hash nay).'}
+authorized_head_sha: 1ac712b8652fa75f75b4c279cebbac9eac8709c0
+authorized_head_tree: fac5c898d992aa8aa1603e993bd9ef71dd3f41fb
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1109
+authorization_ghi_chu: >-
+  readback-pr-1109.json: merged_by ducthangho, merged_at 2026-11-01T09:42:51Z. Chi thi chu kho trong phien session_015GtxrcRSrPnyeixJVDudWu:
+  "Connector sạch thì bỏ draft và báo tôi merge" va "Duyệt spec_hash cho tôi luôn đi" (spec_hash 7bd567f5...). KHONG co comment GitHub
+  rieng cua chu kho cho lan duyet nay.
+land_operator: 'measured — readback-pr-1109.json: merged true, merged_by ducthangho, merge_commit_sha 3bdd9877.'
+merge_method: merge
+merge_commit: 3bdd9877cab2543adc413a32a47decbb585ded97
+merge_commit_tree: 167c145074f711d95fee837c81801c5cbd2a9c82
+merge_commit_parents: [2cea62517d0bbc331afa4dcffabbc81f3b613a87, 1ac712b8652fa75f75b4c279cebbac9eac8709c0]
+merge_noi_dung: 'measured — merge-va-diff.txt: 1 tep ops/specs/CI-LAN-LUU-TRU-r1.md +218/-0; sha256 tai 3bdd987 = 7bd567f5fe75e4c5564fde767b39d4845fbb595b30f7005aae9e9f4468d1833c.'
+pre_merge_checks:
+  - {name: 'ci.yml pull_request (ubuntu) tren head cuoi', sha: 1ac712b8652fa75f75b4c279cebbac9eac8709c0, conclusion: success, ghi_chu: 'measured — readback-check-runs-1ac712b.json: 20 check run, 18 success, 2 skipped.'}
+  - {name: 'connector Codex tren head cuoi', sha: 1ac712b8652fa75f75b4c279cebbac9eac8709c0, conclusion: 'khong finding', ghi_chu: 'measured — readback-comment-6555351064-connector.json: Reviewed commit 1ac712b8, "Didn''t find any major issues".'}
+  - {name: 'connector Codex cac head truoc', conclusion: '6 finding P2 (4434801200, 4434813284, 4434830235, 4434838609, 4434853437, 4434853442), da va qua cac head ke tiep', ghi_chu: 'measured — readback-review-comments-1109.json: original_commit_id c6b66800, f46ccb35, eb37d4ac, c62b7707, 9bad1b27, 9bad1b27 (4434853437 bi GitHub doi commit_id sang 1ac712b8 — doc original_commit_id).'}
+  - {name: 'review offline Codex dac ta (launcher.py run)', conclusion: 'r1 9dcc0cbd changes_requested 0/0/5/0 · r2 preflight chan (SHA prompt sai, ma_thoat 0) · r2b ea6ab705 changes_requested 0/0/2/0', ghi_chu: 'measured — review-offline/run/run-d1-r1.json, review-offline/run/run-d1-r2.json, review-offline/run/run-d1-r2b.json (kem stdout-d1-rN.log byte launcher va verdict-d1-rN.md tep -o). model gpt-6-astra DO_DUOC, effort high DO_DUOC; sandbox DO_DUOC r1/r2, KHONG_DO_DUOC r2b.'}
+post_merge_checks:
+  - name: 'ci.yml push master — DUNG merge SHA'
+    run_id: 41290009265
+    run_attempt: 1
+    sha: 3bdd9877cab2543adc413a32a47decbb585ded97
+    conclusion: success
+    moc_run: 'measured — ci/run.json: push, head_sha 3bdd9877, conclusion success.'
+    moc_checkout: 'measured — ci/provenance.yaml: 24 job checkout=passed tai 3bdd9877.'
+    moc_workflow_definition: 'measured — ci/provenance.yaml: passed qua wd-run 41399333464 (artifact workflow-definition-41290009265).'
+    moc_gate_output: 'not_measured — ci/provenance.yaml: NOT_MEASURED 24 (gate=not_measured moi job; chi co conclusion success).'
+bookkeeping:
+  - {item: 'ho so land ma packet', ket_qua: 'ops/land/pr1128-wp1113-land-evidence.yaml (PR #1140 da merge 520f1732)'}
+  - {item: 'PR ghi so', nhanh: claude/ghi-so-land-1113-b}
+# ---- het truong chuan
+packet_id: CI-LAN-LUU-TRU
+packet_issue: 1113
+pham_vi_land: dac_ta
+environment: cloud
+operating_system: linux
+recorded_by: 'claude-session session_015GtxrcRSrPnyeixJVDudWu — CUNG la phien soan dac ta va executor cua packet.'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-1109.json merged true; merge-va-diff.txt cha 2cea6251 + 1ac712b8, tree 167c1450.'
+  landed: false
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 3bdd987: run push 41290009265 success; (2) lease: khong ap dung (PR dac ta);
+    (3) bookkeeping: ho so nay; (4) review neo DUNG authorized_head 1ac712b8: CHUA_DAT — khong co luot review offline approve tren head cuoi,
+    chi connector sach; (5) uy quyen: chu kho merge + chi thi trong phien, KHONG co comment GitHub; (6) muc tieu: dac ta da dong bang,
+    duoc lease g1/g2 neo bam; (7) §8.1: CHUA_DAT (khong co verdict approve de do).
+
+assurance_81:
+  reviewer_assurance_81: CHUA_DAT
+  review_exact_sha: 'CHUA_DAT — luot cuoi r2b neo ea6ab705, khong phai 1ac712b8; verdict changes_requested.'
+
+khong_do_duoc:
+  - 'Review offline approve tren head cuoi 1ac712b8: KHONG CO.'
+  - 'Comment GitHub cua chu kho cho lan duyet dac ta/spec_hash: KHONG CO (chi thi nam trong phien).'
+  - 'Moc Gate output §10.2.2 cho run 41290009265: not_measured (24 job).'

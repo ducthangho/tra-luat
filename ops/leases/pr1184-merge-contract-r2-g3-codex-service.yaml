@@ -205,7 +205,8 @@ reviewed_sha_required_history:
   disposition: historical282; anchor repaired after checkpoint; remaining review must
     target resulting exact commit
   source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6635295968
-operational_state: awaiting_land_under_separate_owner_authority; expired executor
-  lease not renewed
+operational_state: superseded_by_owner_authorized_g4_allP3plusP2; old expiry/run unchanged
 land_authority_path: ops/authorizations/pr1187-29ee9ca-owner-land-20261105.yaml
 land_authority_source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6646239057
+da_bi_thay_the: pr1184-merge-contract-r2-g4-codex-service
+superseded_at_utc: '2026-11-05T03:23:42Z'

@@ -1,0 +1,87 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1196
+packet_id: A13-K1-CANARY
+mission_issue: 1124
+mission_id: gh-1124
+mission_ghi_chu: 'canary do tieu chi A13 cua #1124 (ADR-0060-MAC-DINH, da land PR #1186); packet don le, Packet Issue #1196'
+revision: 2
+generation: 1
+lease_id: a13-k1-canary-r2-g1-claude-remote-20261105
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease dau tien cua packet; r1 chua tung co lease'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1196#issuecomment-6648580688
+authority_url: https://github.com/ducthangho/tra-luat/issues/1196#issuecomment-6648580688
+authority_ghi_chu: 'chu kho duyet spec_hash r2 d8985e2c...a9e0 (issuecomment-6648260019) va chi thi "Tao mot phien moi de thuc thi spec, cap list va tao packet" (05-11-2026); executor la phien session_015Gtxra9St4SrF625qHwL6o'
+recorded_by: anthropic_claude_dispatcher
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'phien soan dac ta session_015Gtxrb7zLc2qo5ePW7yTsS ghi theo chi thi truc tiep cua chu kho; tham quyen la authority_url, khong phai lease nay'
+executor_session: session_015Gtxra9St4SrF625qHwL6o
+leased_at_utc: '2026-11-05T03:08:00Z'
+heartbeat_at: '2026-11-05T03:08:00Z'
+lease_until: '2026-11-07T03:08:00Z'
+lease_expires_at_utc: '2026-11-07T03:08:00Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); phien thuc thi la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: normal
+review_class: routine
+effective_review_class: sensitive
+effective_review_class_ghi_chu: 'spec khai routine la muc TOI THIEU; cong lease (_tinh_lop_tu_write_set, danh sach cho phep) tinh ops/specs/*.md la sensitive (duong khong co trong _BANG_LOP => sensitive). Protocol 3/8: lop hieu luc = muc cao hon, executor khong duoc ha lop.'
+assurance_target: human_audited
+reviewer: human
+reviewer_provider: human
+reviewer_model_family: null
+reviewer_independence: 'chu kho ducthangho human audit exact head (lua chon con lai cua spec Q9 khi lop hieu luc la sensitive; phien Claude moi doc lap KHONG du cho sensitive). KHONG dung Codex (spec Q9). K4 can run.json + stdout KET_LUAN approve: executor hoi chu kho cach ghi bien nhan human audit truoc khi tu dung bat ky dinh dang nao.'
+spec_path: ops/specs/A13-K1-CANARY-r2.md
+spec_ref: refs/heads/ops/wp1196-r2-g1-lease
+spec_ref_ghi_chu: 'spec cung co o refs/heads/ops/a13-k1-canary-spec@f92f362c9cf5b3269932006cef01d671f1baca98; executor chep NGUYEN BYTE vao commit cua nhanh thuc thi. Thu dinh danh la BAM, khong phai ten nhanh.'
+spec_hash: d8985e2c2f9a500e2f8b604b554ed4cc5ae1630e196a0b7a3dff555305ffa9e0
+spec_sha256: d8985e2c2f9a500e2f8b604b554ed4cc5ae1630e196a0b7a3dff555305ffa9e0
+spec_blob: 652078a0f560e0fee899567ba4ab353cd06d5d86
+branch: agent/wp1196-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 4d258cc8831b5c6169114d1e8e88a8782096d6f6
+start_from_sha: 4d258cc8831b5c6169114d1e8e88a8782096d6f6
+reviewed_sha_required: 4d258cc8831b5c6169114d1e8e88a8782096d6f6
+reviewed_sha_ghi_chu: 'chua co head code luc cap lease; moi luot review neo dung SHA cua luot'
+write_set:
+- ops/specs/A13-K1-CANARY-r2.md
+write_set_planned:
+- ops/land/a13-k1-canary-evidence.yaml
+write_set_planned_ghi_chu: 'pha ghi so land sau merge, PR rieng; KHONG thuoc lease nay, can lease/chi thi rieng'
+write_set_hash: 039e840b03add8c207b5a2e719269cc8d1cdcccdffdf70fd2191a980dd99c14d
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: 'holder scan 2026-11-05T03:07:01Z: ls-remote = for-each-ref 849/849 (thieu 0, thua 0); 2/2 duong dan (write_set + write_set_planned) NGUOI_GIU 0; packet_loop.py tren master 4d258cc giong ban ghim 1f0941e (git diff --quiet rc=0)'
+tran_kich_thuoc: 'routine, khong khai tran_*; du kien 1 tep / 291 dong them (chinh spec)'
+tran_loi_goi_codex: '0 (spec Q9: khong dung Codex review)'
+dieu_kien_merge_bo_sung: 'ADR-0062 mac dinh; sensitive theo ADR-0060 M1 (0 P0-P2 mo, P3 dong hoac chu kho mien), spec KHONG co dong khai (chinh la thu duoc do); K6 Windows not_required, K7 khong cham (spec review_class); A9 cua spec'
+coordination_paths:
+- ops/leases/a13-k1-canary-r2-g1-claude-remote-20261105.yaml
+- ops/specs/A13-K1-CANARY-r2.md
+run_minutes: 2880
+heartbeat_required_minutes: 360
+review_sla_minutes: 240
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- kill_other_session_process
+- write_outside_effective_write_set
+- them_dong_khai_dieu_kien_merge_vao_spec
+- sua_packet_loop_py
+land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate

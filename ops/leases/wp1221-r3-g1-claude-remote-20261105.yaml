@@ -65,7 +65,7 @@ write_set_hash: b1866d09f9a776e79bc1f17c9645fee13d9454f0b0d9bd96efcbfec4dd5d2582
 write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
 write_set_ghi_chu: 'doc khong sua: scripts/pkg_secret_scan.py, .github/checks/bundle_fragment_check.py, scripts/tl_core/test_fragments.py'
 closure_status: 'holder scan 2026-11-05T16:27Z: ls-remote vs for-each-ref thieu 0; .githooks/eol_policy_test.py NGUOI_GIU 1 = wp1221-r2-g1 (bia mo hai chieu trong lan cap nay)'
-tran_kich_thuoc: '<= 1 tep / <= 600 dong them (spec r3 nang_tran, hieu luc khi duyet spec_hash); vuot => DUNG'
+tran_kich_thuoc: '<= 1 tep / <= 700 dong them (nang_tran 05-11 ~17:57Z, issuecomment-6665273200); vuot => DUNG'
 tran_loi_goi_codex: 'toi da 4 loi goi cho r3 (chu kho duyet 05-11 ~16:28Z); dem truoc MOI loi goi; het ma chua approve => DUNG, hoi chu kho'
 windows: 'A11: chay TAP TRUNG eol_policy_test tren may Windows local tra-luat-win qua phien dieu phoi, giu KHOA.txt (ADR-0057); KHONG workflow_dispatch ci.yml (chi thi chu kho 05-11 ~09:30Z)'
 coordination_paths:
@@ -84,3 +84,9 @@ prohibited_actions:
 - workflow_dispatch
 - sua_ci_yml
 land_authority_note: 'chu kho duyet SHA cu the truoc merge; dieu phoi merge khi kiem-merge rc=0'
+nang_tran:
+  tran_cu: '<= 1 tep / <= 600 dong them (spec r3)'
+  tran_moi: '<= 1 tep / <= 700 dong them (git diff --numstat 4fb3c03..head)'
+  can_cu: 'va 5 P2 Codex luot 1/4 (F1-F4, F7) +81 dong; numstat +663/-87 tren 3f80327'
+  ai_nang: ducthangho
+  can_cu_url: https://github.com/ducthangho/tra-luat/issues/1221#issuecomment-6665273200

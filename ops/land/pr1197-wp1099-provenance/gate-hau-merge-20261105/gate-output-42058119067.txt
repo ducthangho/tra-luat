@@ -1,0 +1,135 @@
+# Gate output — run 42058119067 attempt 1 (push master, b255b0b). Log tho tai qua REST actions/jobs/<id>/logs trong phien ghi so session_015GtxrashcQS6kbxWN1qRsA; log KHONG chep vao kho, chi ghi sha256.
+# Moi job: conclusion, labels, sha256 log tho, so dong ##[error], so dong co BO QUA/BỎ QUA, so dong khop regex am, marker duong (toi da 8). Marker am la regex tho (FAILED|Traceback|TONG: TRUOT/DO|DO|KHONG DAT): da phan loai tay — xem cuoi tep. Script: gate_output.py (scratchpad phien, khong chep).
+== chuan-bi job 127352000252 conclusion success labels ubuntu-latest sha256 ba6a10409803c2f4c569075affa55f71e46133f0d2463f4f236e8b83a22cc9cd bytes 109627 error_lines 0 bo_qua 0 marker_am 0
+   (khong co marker)
+== gate (ubuntu-latest) job 127352182855 conclusion success labels ubuntu-latest sha256 5d3680854e21729a63c7d023780c435a58d4c70030157b694a86807f60e015e3 bytes 698206 error_lines 0 bo_qua 2 marker_am 2
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+   CỔNG TRÊN CÂY THẬT: ĐẠT · nguon_tep=git · nguon_noi_dung=blob-index
+   TỰ KIỂM SONG SONG (N126): ĐẠT
+   SỐ LIỆU: ca=61 · đột biến=490 (giao mảnh) · lỗi đột biến=0 · tiền kiểm bỏ qua=0 · cổng cây thật=ĐẠT
+   nền: 18/18 đạt
+   TỔNG: ĐẠT
+   nền: 7/7 đạt · BỎ QUA: 0
+   TỔNG: ĐẠT
+== gate-cong-cu (ubuntu-latest, 0) job 127352183251 conclusion success labels ubuntu-latest sha256 385da1cb77e8785f3e69a03ce6df35189d886342d34afd66a825a47cdb1d568e bytes 134122 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 1) job 127352183506 conclusion success labels ubuntu-latest sha256 58d297ac6ebfaaaf82d48d72a2d6854209047e71425cab944f96d3d727cfe3f9 bytes 134123 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 2) job 127352183161 conclusion success labels ubuntu-latest sha256 d22add754eb1b9e0453f3bb516f998bfd85884b455bd4254fe2998669c05d08c bytes 134281 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 3) job 127352183269 conclusion success labels ubuntu-latest sha256 371936cea1ac5576c48a7f577f442d99e036c30a120584638a857c46a33a8ec6 bytes 134214 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 4) job 127352183514 conclusion success labels ubuntu-latest sha256 04d7b01ca2c57dd76de789f0081f24ec0a39923571d1b834c7ac9cf0699aebf8 bytes 134254 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 5) job 127352183369 conclusion success labels ubuntu-latest sha256 07a4c9e7f50dc0513116a502db60f36cc4c42e393ec5b9e872f0517193fc5ed8 bytes 134116 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 6) job 127352183195 conclusion success labels ubuntu-latest sha256 ec8ead778059fd92d0f79f4f60a755377325390c511f6e9c54c68f43eac47a97 bytes 133809 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 7) job 127352183343 conclusion success labels ubuntu-latest sha256 d98971b034d5fd4361e448c31d84843c1b143341acf4096083c1201f800626a2 bytes 134228 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu-gop (ubuntu-latest) job 127363532010 conclusion success labels ubuntu-latest sha256 d04e123f1b4aaf75abe177a80f15f344758e2befb32a552fe4fd1d626ff2075f bytes 98298 error_lines 0 bo_qua 0 marker_am 0
+   (khong co marker)
+== gate-nhanh-gop (ubuntu-latest) job 127353163635 conclusion success labels ubuntu-latest sha256 4eeda77b7cc3b62a408f46b753490f64da63b985ee822cb8f2fa681db8708396 bytes 117826 error_lines 0 bo_qua 0 marker_am 0
+   CA NEN: 56/56 passed · TU DOT BIEN (chi ca dich): 255/255 giet · DOT BIEN SAN PHAM: 10/10 giet
+== gate-nhanh-manh (ubuntu-latest, 0) job 127352183244 conclusion success labels ubuntu-latest sha256 b65d10c032d6b7bd970c0d3667947c003fe2b5f7dd356a2de0f3a8df760d526a bytes 121681 error_lines 0 bo_qua 0 marker_am 0
+   KET QUA tk:bo-cua-theo-thong-diep: passed (23.7s)
+   KET QUA tk:dau-phien-ha-tran-xuong-khong: passed (0.3s)
+   KET QUA db:bo-loai-mac-dinh: passed (1.0s)
+   KET QUA db:xoa-khai-gioi-han: passed (1.0s)
+   KET QUA ca:r514: passed (0.6s)
+   KET QUA tk:tu-dot-bien-nhan-giao-khac-rong: passed (1.2s)
+   KET QUA tk:bo-xoa-co-chi-tu-kiem: passed (0.3s)
+   KET QUA tk:tk-proof-cases: passed (1.2s)
+== gate-nhanh-manh (ubuntu-latest, 1) job 127352183390 conclusion success labels ubuntu-latest sha256 caa55de3e057210c0fc48a23989d33961ede361f1a358ef0d6a967aafcc2dd6f bytes 122732 error_lines 0 bo_qua 0 marker_am 0
+   KET QUA tk:bo-cua-xoa-het: passed (26.7s)
+   KET QUA tk:dau-phien-bo-vong-rut-lai: passed (0.5s)
+   KET QUA db:bo-chan-fetch-loi: passed (1.3s)
+   KET QUA db:loi-thanh-khong-commit-rieng: passed (1.3s)
+   KET QUA tk:gop-khong-do-vao-khong-giet: passed (0.3s)
+   KET QUA tk:bo-so-tap-ca-do-voi-dich: passed (0.2s)
+   KET QUA tk:bo-tu-choi-dot-bien-noop: passed (0.2s)
+   KET QUA tk:mo-cong-tu-dot-bien-hong: passed (0.9s)
+== gate-nhanh-manh (ubuntu-latest, 2) job 127352183458 conclusion success labels ubuntu-latest sha256 a37e6e19658f9743ceac7f41d509e6444b70f4484b398f6f1d22c6148e1ab90b bytes 122207 error_lines 0 bo_qua 0 marker_am 0
+   KET QUA tk:runner-khong-theo-vi-tri: passed (26.9s)
+   KET QUA tk:dau-phien-r508-khong-di-qua-bo-tien-de: passed (1.0s)
+   KET QUA ca:r528: passed (0.9s)
+   KET QUA tk:doi-cheo-khong-giet-va-khong-do: passed (0.3s)
+   KET QUA tk:tu-dot-bien-nhan-bao-ham: passed (1.7s)
+   KET QUA tk:tk-proof-malformed: passed (1.9s)
+   KET QUA tk:mo-cong-nhom-bat-buoc: passed (0.9s)
+   KET QUA tk:tk-json-recursion-escape: passed (0.9s)
+== gate-nhanh-manh (ubuntu-latest, 3) job 127352183145 conclusion success labels ubuntu-latest sha256 b7676905a39c2a120f9ebea166ff963b79e5d1cba73cbdba35d4656c9b6add70 bytes 122096 error_lines 0 bo_qua 0 marker_am 0
+   KET QUA tk:ghi-so-doc-kenh-xac-thuc: passed (23.7s)
+   KET QUA tk:runner-bo-doi-nhan-loi-khac: passed (23.9s)
+   KET QUA db:in-ca-C: passed (1.1s)
+   KET QUA tk:cong-theo-so-lan: passed (0.2s)
+   KET QUA tk:tu-dot-bien-nhan-tap-rong-lam-dich: passed (1.3s)
+   KET QUA tk:timeout-chi-giet-con: passed (6.9s)
+   KET QUA ca:r519: passed (0.2s)
+   KET QUA tk:mo-cong-tong: passed (0.6s)
+== gate-nhanh-manh (ubuntu-latest, 4) job 127352183362 conclusion success labels ubuntu-latest sha256 93b7310987386dae402514d9c4e860fc7536e6c311f9d62091c5a4304a1b1d58 bytes 122118 error_lines 0 bo_qua 0 marker_am 0
+   KET QUA tk:runner-bo-doi-nhan-chot: passed (26.0s)
+   KET QUA ca:r546: passed (25.7s)
+   KET QUA db:dao-chieu-to-tien: passed (1.2s)
+   KET QUA tk:cong-bu-theo-lan-thu: passed (0.3s)
+   KET QUA tk:tu-dot-bien-nhan-moi-tap-ca: passed (2.0s)
+   KET QUA tk:tu-dot-bien-bo-loc-loi-vo-can: passed (0.7s)
+   KET QUA tk:in-sai-so-hang: passed (0.8s)
+   KET QUA tk:tk-proof-nonce: passed (1.5s)
+== gate-nhanh-manh (ubuntu-latest, 5) job 127352183050 conclusion success labels ubuntu-latest sha256 936338d873ee91bcf629cce516146bf19cf68c7b7c1d852d6ec499db3120b4b0 bytes 122555 error_lines 0 bo_qua 0 marker_am 0
+   KET QUA tk:runner-bo-doi-nhan-dat: passed (22.6s)
+   KET QUA tk:bo-so-dau-phien: passed (0.7s)
+   KET QUA db:bo-kiem-commit-rieng: passed (1.0s)
+   KET QUA db:noi-B-thanh-mot-commit: passed (0.9s)
+   KET QUA tk:tk-always-unmeasurable: passed (1.3s)
+   KET QUA tk:bo-tran-chay-lai: passed (0.2s)
+   KET QUA tk:bo-xac-thuc-ten-dich-la: passed (0.1s)
+   KET QUA tk:mo-cong-tu-dot-bien-thieu-giet: passed (0.5s)
+== gate-nhanh-manh (ubuntu-latest, 6) job 127352183159 conclusion success labels ubuntu-latest sha256 b1054b3cd072004b0b6e7c838098e55a9b20597e3f9b2994e70737dd19826dd9 bytes 122321 error_lines 0 bo_qua 0 marker_am 0
+   KET QUA tk:ghi-so-bang-chung: passed (26.2s)
+   KET QUA tk:ghi-so-gop-dich: passed (26.3s)
+   KET QUA db:dao-khop-base-remote: passed (1.3s)
+   KET QUA tk:cong-giet-theo-so-lan: passed (0.3s)
+   KET QUA tk:cham-doc-stdout-khi-rc-mot: passed (0.9s)
+   KET QUA tk:tu-kiem-bo-ghi-nhan-loi-vo-can: passed (0.6s)
+   KET QUA tk:mo-cong-cuoi: passed (0.9s)
+   KET QUA tk:tk-unbounded-number: passed (1.1s)
+== gate-nhanh-manh (ubuntu-latest, 7) job 127352183338 conclusion success labels ubuntu-latest sha256 593ff100db87e8cffd0dbca0294942d1727865d604777c3cfb3f036c186ae200 bytes 123120 error_lines 0 bo_qua 0 marker_am 0
+   KET QUA tk:ghi-so-gop: passed (26.0s)
+   KET QUA tk:r546-don-het-so: passed (26.0s)
+   KET QUA db:go-nhanh-kho-nong: passed (1.3s)
+   KET QUA tk:cong-khong-giet-theo-so-lan: passed (0.3s)
+   KET QUA tk:bo-xac-thuc-dich-rong: passed (0.3s)
+   KET QUA ca:r555: passed (16.0s)
+   KET QUA tk:dem-dich-ke-ca-trung: passed (0.3s)
+   KET QUA tk:tk-inherit-outer-proof: passed (1.5s)
+== gate-ops (ubuntu-latest) job 127352182869 conclusion success labels ubuntu-latest sha256 1ca51f3f4fd70fd67e1dee9476450998894763a4d2373570a1712abadb84363f bytes 488466 error_lines 0 bo_qua 0 marker_am 86
+   CA: 118/118 dat · 0 do · 0 hong
+   TỔNG: ĐẠT
+   [A] lease_publish: 284/284 đạt; đã chạy=284, bỏ qua=0
+   [B] lease_publish: 284/284 đạt; đã chạy=284, bỏ qua=0
+   lease_publish: 284/284 đạt; đã chạy=284, bỏ qua=0
+   Broken external nlm at /tmp/tl-updater-selftest-6ed4sxwh/17/bin/nlm; repair that installation before --apply.
+   don-nhanh: 21/21 dat
+== gate-packet-loop (ubuntu-latest) job 127352182812 conclusion success labels ubuntu-latest sha256 56abde794eb9acc9f2adaf08f202519ea1a0a21f561c89218a7e74138b438319 bytes 328282 error_lines 0 bo_qua 3 marker_am 1
+   nền: 1314/1314 đạt · BỎ QUA: 1
+   TỔNG: ĐẠT
+== gate-registry (ubuntu-latest) job 127353348540 conclusion success labels ubuntu-latest sha256 28040fbed0426016afb4a47dc53aaa52ed6217518463b85eafeac592a1084466 bytes 261414 error_lines 0 bo_qua 0 marker_am 1070
+   CI_DANG_KY .claude/dev/doc_receipt_thu_hoi_test.py: ĐẠT rc=0
+   nền: 28/28 đạt
+   TỔNG: ĐẠT
+   CI_DANG_KY .claude/dev/chon_reviewer_test.py: ĐẠT rc=0
+   CI_DANG_KY .claude/dev/gh_readback_test.py: ĐẠT rc=0
+   CA         : 42/42 đạt · 0 đỏ · ĐẠT
+   ĐỘT BIẾN   : đã đo 65/65 tập giết · ĐẠT
+   D8(a) đích nằm trong tập giết: ĐẠT
+# PHAN LOAI marker_am (doc tay log tho trong phien ghi so):
+#  gate (ubuntu-latest) 2: "ĐỎ: không đọc credential an toàn được" nam giua cac dong "ok tNN ... giết 1/1 trong phai_chet" (stdout cua mutant bi giet);
+#     "tự chứng minh KHÔNG RỖNG (ca đích ĐỎ · nền vẫn phải xanh trước đó)" la tieu de tu kiem.
+#  gate-ops 86: bao cao dot bien bi giet ("CÓ RĂNG", "đột biến ...: ĐỎ=[...]") + 1 Traceback ModuleNotFoundError 'nonexistent_fixture_module' cua ca canary-import, ngay sau la "PASS harness-import".
+#  gate-packet-loop 1: tieu de tu kiem "tự chứng minh suite KHÔNG RỖNG (ca đích ĐỎ · đối chứng khác họ XANH)".
+#  gate-registry 1070: dong "ĐỘT BIẾN <ten>: ĐỎ đúng" (dot bien bi giet dung ky vong).
+#  => 0 dong am la loi that; 0 dong ##[error] tren ca 23 job.
+# MARKER DUONG RIENG cua packet (job gate (ubuntu-latest) 127352182855): "== tl selftest 1777/1777 ==" ·
+#  "[wp1099_nlm_nap_lai] CA A: 12/12 · D: 3/3 · DOT BIEN: 30/30 bị giết đúng ca · BỎ QUA 0".
+# Job khong in marker: chuan-bi, gate-cong-cu-gop (job gom ket qua manh).

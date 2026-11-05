@@ -1,0 +1,16 @@
+2026-11-05T15:45:20.6826982Z Image: ubuntu-26.04
+2026-11-05T15:45:21.3023007Z ##[group]Run git config --global core.autocrlf false
+2026-11-05T15:45:21.3584924Z ##[group]Run actions/checkout@v4
+2026-11-05T15:45:28.4762543Z [command]/usr/bin/git rev-parse refs/remotes/origin/master
+2026-11-05T15:45:28.4763985Z b255b0b7131da7f6e026639f6b0da0a06cc68a44
+2026-11-05T15:45:29.4673886Z [command]/usr/bin/git log -1 --format=%H
+2026-11-05T15:45:29.4700385Z b255b0b7131da7f6e026639f6b0da0a06cc68a44
+2026-11-05T15:45:29.4915151Z ##[group]Run actions/setup-python@v5
+2026-11-05T15:45:29.6764779Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-11-05T15:45:33.0731339Z ##[group]Run bash ops/cai_cong_cu.sh shellcheck
+2026-11-05T15:45:35.0773512Z ##[group]Run bash ops/cai_cong_cu.sh rg
+2026-11-05T15:45:39.9235903Z ##[group]Run python ops/ci_duong_nhanh_test.py
+2026-11-05T15:57:13.7907114Z ##[group]Run python ops/bien_nhan_v2_test.py
+2026-11-05T16:02:53.4494390Z ##[group]Run set -euo pipefail
+2026-11-05T16:10:20.5366604Z ##[group]Run pwsh -NoProfile -File scripts/don-nhanh_test.ps1
+2026-11-05T16:10:42.3411189Z ##[group]Run set -euo pipefail

@@ -80,6 +80,8 @@ review_budget_override:
   remaining_calls: 1
   local_model_calls: 0
   no_reset: true
+  scope_head: 33df4b678e3d1f12e68a9c9d362dc0446f0dd5c2
+  requires_new_head_primary_human_before_request: true
 read_only_validation_allowance:
   fullstandard_minutes: 180
   deadline: absolute at launch; no sourcewriter extension
@@ -103,7 +105,7 @@ authority_notes:
   must rebind actualfinalH before audit/CI. It does not authorize oldhead merge.
 - Owner explicit6648984609 supersedes only prior1000cap with1250 forcompleteP2+all6P3;
   frozenr2spec/prompt bytes retain historicaltext. Hardrun deadline04:53:42 unchanged.
-reviewed_sha_required: 29ee9ca74d61544fbddd56c39dabbe194d26408e
+reviewed_sha_required: 33df4b678e3d1f12e68a9c9d362dc0446f0dd5c2
 size_override:
   approved_by: ducthangho
   source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6648984609
@@ -114,3 +116,27 @@ size_override:
   proposed_patch_sha256: 28ea685432950eaaba2f9e39c616087140642251de60502c1bdaaacab63af642
   scope: sameg4 P2+all6P3, onlytwo writablepaths
   no_run_or_budget_reset: true
+frozen_head: 33df4b678e3d1f12e68a9c9d362dc0446f0dd5c2
+frozen_tree: c8c206757733c713c4008c23985bf7efe325e9aa
+operational_state: executor_sealed; controller180minfullstandard+nativeWindows active;
+  newheadhumanpending
+execution_handoff:
+  task: /root/pr1187_g4_executor
+  sealed_at_utc: '2026-11-05T04:06:02.419843+00:00'
+  head: 33df4b678e3d1f12e68a9c9d362dc0446f0dd5c2
+  tree: c8c206757733c713c4008c23985bf7efe325e9aa
+  net_files: 5
+  added: 1227
+  deleted: 11
+  targeted_cases: 222/222
+  targeted_mutants: 102/102 with measuredcontrols
+  tl_selftest: 1776/1776
+  source_pushes: 0
+  local_model_review_calls: 0
+  executor_manifest_sha256: 57c8c615e0cc1fbfb903a4d4d95a9020d86335270b4a44e2fd5009c27f0de665
+  manifest_emitter_log_note: 66/67 namedfiles matched; seal.log emitted after serialization;
+    originalpreserved andcontrollerterminal snapshot/hash recorded
+  fullstandard: not run byExecutor; separatecontrollerwindowactive
+  nativeWindows: not run byExecutor; controllerseparaterunactive
+  human_audit: pending
+  land_authority: pendingnewexactH

@@ -1,0 +1,16 @@
+{
+  "id": "base_ancestor_master",
+  "lenh": [
+    "git",
+    "merge-base",
+    "--is-ancestor",
+    "1f0941e9bba1d1d517eda4174167b81963c06bd5",
+    "5fe92c1390ca1723d19f374bd364487f013986a1"
+  ],
+  "cwd": "/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv3/cay-kho",
+  "rc": 0,
+  "trang_thai": "passed",
+  "giay": 0.004,
+  "log": "review-evidence/base_ancestor_master.log",
+  "ket_qua": ""
+}

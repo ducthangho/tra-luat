@@ -1,0 +1,15 @@
+ae2ef0b7a3d73c4daa5a2fdb57bcc2e56d988015d80926803902475663a2ad71  1538872  r1/review-evidence/snapshot-before.json
+ae2ef0b7a3d73c4daa5a2fdb57bcc2e56d988015d80926803902475663a2ad71  1538872  r1/review-evidence/snapshot-after.json
+cbe867407015255438272606214bae8fd9f34469fb15928a32c4b2806d4ccfb4  1541235  r1/review-evidence/snapshot-with-selftest-artifacts.json
+khong chep: r1/cay-kho (clone kho), r1/review-evidence/base-repo (clone kho nen)
+3fc6ae98d225ea2bfa2bc8ec6c8115c2e157acd80ae4e259b013d853f6d88e43  1888219  r2/review-evidence/snapshot-initial.json
+3fc6ae98d225ea2bfa2bc8ec6c8115c2e157acd80ae4e259b013d853f6d88e43  1888219  r2/review-evidence/snapshot-final.json
+khong chep: r2/cay-kho (clone kho), r2/review-evidence/base-repo (clone kho nen)
+876b8452ed58136e6d73da8624d048ec5a796dcfe52d4e7fe98586f35b42e1dc  2633038  r3/review-evidence/snapshot-initial.json
+876b8452ed58136e6d73da8624d048ec5a796dcfe52d4e7fe98586f35b42e1dc  2633038  r3/review-evidence/snapshot-final.json
+khong chep: r3/cay-kho (clone kho), r3/review-evidence/base-repo (clone kho nen)
+4364837f8b3bdf8abc4c65a1a0adcd87c16f18bdc55edeb2b4a148c1d8c95a55  2676713  r4/review-evidence/snapshot-initial.json
+e2108885b83e4559f074eb87023f9a98647211cd65d8afb2ea574d378d0e93a0  1062652  r4/review-evidence/measured-delta-luot3-luot4.patch
+4364837f8b3bdf8abc4c65a1a0adcd87c16f18bdc55edeb2b4a148c1d8c95a55  2676713  r4/review-evidence/snapshot-final.json
+e2108885b83e4559f074eb87023f9a98647211cd65d8afb2ea574d378d0e93a0  1062652  r4/delta_luot3_luot4.patch
+khong chep: r4/cay-kho (clone kho), r4/review-evidence/base-repo (clone kho nen)

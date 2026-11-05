@@ -165,6 +165,11 @@ assurance_81:
   review_exact_sha: 'DAT — luot offline 4 head d5d521e = authorized_head_sha, ma_thoat 0, KET_LUAN approve; connector sach tren d5d521e.'
   thuc_thi:
     model: 'measured — kiem-merge/run-offline-l4.json model_phuc_vu_trang_thai KHONG_DO_DUOC (2 dong giong khung response.created/completed khong doc duoc).'
+    model_effort_client_ghi_chu: >-
+      thuat_lai — executor session_015GtxrYPCoXRRL14oCzB5PN (send_message 16:04Z): rollout codex 01a1ab8d-b147-7673-9926-5c55cf732423
+      (sha256 6219102d…, 258 dong, khong co trong kho) co turn_context model gpt-6.1-sol, effort xhigh; 31 token_usage_record khong
+      mang truong model; run.json 32 khung deu gpt-6.1-sol nhung 2 khung khong doc duoc. Day la cau hinh phia client, §8.1 "cau hinh
+      yeu cau khong phai runtime evidence" — KHONG doi nhan CHUA_DAT.
     effort: 'measured — kiem-merge/run-offline-l4.json effort_phuc_vu_trang_thai KHONG_DO_DUOC (theo model).'
     sandbox_mode: 'measured — kiem-merge/run-offline-l4.json sandbox_trang_thai DO_DUOC, co sandbox_lech (muc tieu cua chinh packet nay, A13).'
   ghi_chu: 'Khong nang nhan: packet sua dung luong do sandbox; model/effort phuc vu van khong do duoc tren luot nay.'

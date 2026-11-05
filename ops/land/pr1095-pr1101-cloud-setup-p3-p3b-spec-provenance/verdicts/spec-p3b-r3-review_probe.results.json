@@ -1,0 +1,89 @@
+{
+  "canary": {
+    "connection_refused": {
+      "alive": null,
+      "code": 2,
+      "probe_count": 3,
+      "probe_timeouts": [
+        30,
+        30,
+        30
+      ],
+      "child_rc": 2
+    },
+    "permission_403": {
+      "alive": null,
+      "code": 2,
+      "probe_count": 1,
+      "probe_timeouts": [
+        30
+      ],
+      "child_rc": 2
+    },
+    "auth_persistent": {
+      "alive": false,
+      "code": 3,
+      "probe_count": 3,
+      "probe_timeouts": [
+        30,
+        30,
+        30
+      ],
+      "child_rc": 3
+    },
+    "network_network_auth": {
+      "alive": false,
+      "code": 3,
+      "probe_count": 3,
+      "probe_timeouts": [
+        30,
+        30,
+        30
+      ],
+      "child_rc": 3
+    },
+    "auth_network_auth": {
+      "alive": false,
+      "code": 3,
+      "probe_count": 3,
+      "probe_timeouts": [
+        30,
+        30,
+        30
+      ],
+      "child_rc": 3
+    }
+  },
+  "doctrine": {
+    "base": {
+      "r213_passed": true,
+      "D1": {
+        "RASOAT_HOSO_LOOP.md": {
+          "exception_count": 0,
+          "CAM_tu_present": true,
+          "nlm_auth_load_present": true
+        },
+        "QUY_TRINH_RA_SOAT_3_TANG.md": {
+          "exception_count": 0,
+          "CAM_tu_present": false,
+          "nlm_auth_load_present": true
+        }
+      }
+    },
+    "spec_append_only": {
+      "r213_passed": true,
+      "D1": {
+        "RASOAT_HOSO_LOOP.md": {
+          "exception_count": 1,
+          "CAM_tu_present": true,
+          "nlm_auth_load_present": true
+        },
+        "QUY_TRINH_RA_SOAT_3_TANG.md": {
+          "exception_count": 1,
+          "CAM_tu_present": false,
+          "nlm_auth_load_present": true
+        }
+      }
+    }
+  }
+}

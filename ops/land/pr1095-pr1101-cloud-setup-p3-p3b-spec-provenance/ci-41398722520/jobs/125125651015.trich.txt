@@ -1,0 +1,7 @@
+2026-11-02T06:15:10.1361353Z Image: ubuntu-24.04
+2026-11-02T06:15:10.6844040Z ##[group]Run actions/checkout@v4
+2026-11-02T06:15:17.4832940Z [command]/usr/bin/git rev-parse refs/remotes/origin/claude/gate-hau-merge-47ee1b20
+2026-11-02T06:15:17.4834487Z 47ee1b206d284c82d16036972b82b17196cd8dc7
+2026-11-02T06:15:18.3718981Z [command]/usr/bin/git log -1 --format=%H
+2026-11-02T06:15:18.3767650Z 47ee1b206d284c82d16036972b82b17196cd8dc7
+2026-11-02T06:15:18.4029597Z ##[group]Run python3 ops/ci_duong_nhanh.py

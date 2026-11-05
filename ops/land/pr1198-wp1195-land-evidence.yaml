@@ -1,0 +1,162 @@
+# HO SO LAND — packet #1195 T191-PY314-INTERPOLATION r1 g1, code qua PR #1198. Khuon: ops/land/pr882-wp748-r23-land-evidence.yaml
+# (truong) va ops/land/pr1142-wp1117-land-evidence.yaml (bon moc §10.2.2 do bang ci_provenance + danh_gia_gate THEO BUOC).
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+#
+# TRANG THAI: merged (4d258cc8), `landed: false`. Du bon moc §10.2.2 tren run push master 41959407371 (dung merge SHA, attempt 1),
+# lease da nha (rut han), M8 tren #1195 qua kiem-dong-wp rc 0, #1195 closed completed — NHUNG (5) uy quyen land CHUA co ban ghi BEN:
+# chi co hanh dong merge cua chu kho, khong comment duyet neo ab39416 => L-6 (ops/kiem_ho_so_land.py) khong cho landed true. Tien le
+# pr882-wp748-r23 (cung tinh huong, ghi landed false). LECH voi M8: ban ghi M8 issuecomment-6649417449 khai landed true vi kiem-dong-wp
+# (D1) chi doi duyet_chu_kho la URL github — hai cong doi hai muc chat khac nhau; ho so nay giu muc chat hon.
+# Them (7) §8.1 CHUA_DAT: luot review fd51d443 ghi VERDICT/dot bien TRONG checkout duoc review theo prompt cua executor
+# (AGENTS.md Reviewer) — connector P1 r4476535747; xem assurance_81.ly_do.
+# CAP NHAT 05-11: landed TRUE theo khoi landed_20261105 (kieu b) — chu kho duyet (a) uy quyen neo ab39416 va (b) ngoai le §8.1
+# tai #1195 issuecomment-6649676232. Cac dong landed false / CHUA_DAT ben duoi la ban ghi truoc quyet dinh, giu nguyen.
+# NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
+# review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr1198-wp1195-provenance/ (SHA256SUMS kem). Moi phep do REST: GET qua proxy phien, 2026-11-05.
+
+schema_version: 1
+mission_id: gh-1195
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrcdtToNTxYCuZKVwQx
+input_packet_generations:
+  - {packet_issue: 1195, packet_id: T191-PY314-INTERPOLATION, revision: 1, generation: 1, lease_id: t191-py314-interpolation-r1-g1-claude}
+authorized_head_sha: ab39416fe919452c9dadda38dd99c5589f7967e8
+authorized_head_tree: 49a474d980fa22cc579b2f42d239f9433f63f260
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1198
+authorization_ghi_chu: >-
+  measured — readback-pr-1198.json: merged true, merged_by ducthangho, merged_at 2026-11-05T03:05:43Z, head.sha ab39416. Chu kho tu
+  chuyen PR sang ready_for_review (03:02:25Z) roi bam merge. Day la uy quyen bang hanh dong merge, khong co ban ghi ben "duyet tren
+  SHA ab39416" rieng. Pham vi + ngoai le lease: than Issue #1195 (readback-issue-1195.json), caveat #566.
+land_operator: 'measured — readback-pr-1198.json merged_by ducthangho; executor khong merge (phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq giu quyen merge, chu kho bam).'
+merge_method: merge
+merge_commit: 4d258cc8831b5c6169114d1e8e88a8782096d6f6
+merge_commit_tree: 95cb416f0467871277e56c515331f5f5c8f04bd7
+merge_commit_parents: [248bef0c859d9571fd5e92acefbc352941e9dd6a, ab39416fe919452c9dadda38dd99c5589f7967e8]
+pre_merge_checks:
+  - {name: 'check run tren head cuoi', sha: ab39416fe919452c9dadda38dd99c5589f7967e8, conclusion: success, ghi_chu: 'measured — readback-check-runs-ab39416-all.json: moi check run completed, success hoac skipped (mo); khong failure.'}
+  - {name: 'Codex connector', sha: ab39416fe919452c9dadda38dd99c5589f7967e8, conclusion: 'completed; khong finding', ghi_chu: 'measured — readback-comments-1198.json: comment 6647952489 "Reviewed commit: ab39416fe9" khong finding; comment tom tat 6647891382 has_any_findings false (luot ready_for_review). readback-reviews-1198.json va readback-review-comments-1198.json: 0 thread.'}
+  - {name: 'review offline Codex 1/2 (launcher.py run fd51d443)', sha: ab39416fe919452c9dadda38dd99c5589f7967e8, conclusion: 'approve; 0 P0, 0 P1, 0 P2, 0 P3', nguon: [codex/run-fd51d443.json, codex/VERDICT-fd51d443.md, codex/PROMPT-fd51d443.md, codex/stdout-fd51d443.log, codex/mutations_results-fd51d443.json], ghi_chu: 'measured — codex/run-fd51d443.json: head ab39416, trang_thai xong, ma_thoat 0, prompt_sha256 7fb2e10e = sha256 codex/PROMPT-fd51d443.md; codex/VERDICT-fd51d443.md dong dau "VERDICT: approve", 9 dot bien 7 DO / 2 XANH (R3b, R5 khai trong PR #1198).'}
+  - {name: 'suite ops/lease_publish_test.py tren head cuoi, hai phien ban Python', sha: ab39416fe919452c9dadda38dd99c5589f7967e8, conclusion: '284/284 ca hai', ghi_chu: 'measured — suite-ab39416-py313.txt (Python 3.13.18) va suite-ab39416-py314.txt (Python 3.14.6): "lease_publish: 284/284 đạt; đã chạy=284, bỏ qua=0", rc=0; t191 3.13 7034 dong / 3.14 7100 dong.'}
+post_merge_checks:
+  - name: 'ci.yml push master tai DUNG merge SHA'
+    run_id: 41959407371
+    run_attempt: 1
+    sha: 4d258cc8831b5c6169114d1e8e88a8782096d6f6
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, danh-gia-gate-output-41959407371.txt, danh_gia_gate.py, phan-chung-buoc-41959407371.txt]
+    moc_run: 'measured — ci/provenance.yaml moc.run: event push, head_sha 4d258cc8, run_attempt 1, passed.'
+    moc_checkout: 'measured — ci/provenance.yaml moc.checkout: 23/23 job passed tai 4d258cc8831b5c6169114d1e8e88a8782096d6f6 (ci/jobs/*.trich.txt).'
+    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition: passed (wd-run 41965540570, readback-run-41965540570.json, artifact workflow-definition-41959407371; luot do chi doc do phien nay dispatch tren master).'
+    moc_gate_output: 'measured — danh-gia-gate-output-41959407371.txt (danh_gia_gate.py sha256 b87f9697 = ban ops/land/pr1142-wp1117-provenance/danh_gia_gate.py, luat THEO BUOC): 23/23 job passed. phan-chung-buoc-41959407371.txt: xoa dau hieu buoc chay_lease_publish_test.sh, bien_nhan_v2_test.py (gate-ops), ci_dang_ky_test.py --chay (gate-registry) => ca ba not_measured.'
+  - name: 'ops-publish-lease sau merge (muc tieu packet: workflow xanh lai tren runner Python 3.14)'
+    run_id: 41959532444
+    sha: a24a72b1b72ad99c24d14dafcbcd5f618c583605
+    conclusion: success
+    nguon: [readback-run-41959532444.json, trich-ops-publish-lease-41959532444.txt, readback-lease-issuecomment-6648650664.json, runner-image-41950099518.txt]
+    ghi_chu: 'measured — trich-ops-publish-lease-41959532444.txt: bo kiem neo "origin/master @ 4d258cc88", "lease_publish: 284/284 đạt", t191 7100 dong (so cua Python 3.14); comment lease dang bu readback-lease-issuecomment-6648650664.json. runner-image-41950099518.txt: Image ubuntu-26.04 20261101.186, readme khai Python 3.14.4.'
+  - name: 'ops-publish-lease sau rut han lease'
+    run_id: 41960396588
+    sha: 5d3a62f9a0f81b927aba882cf595a061be1607b4
+    conclusion: success
+    ghi_chu: 'measured — readback-run-41960396588.json: completed success; khong comment trung (readback-issue-1195.json comments 3).'
+bookkeeping:
+  - {item: 'rut han lease t191-py314-interpolation-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so (lan luu tru)', nhanh: claude/ghi-so-land-1198, ghi_chu: 'chi cham ops/land/**'}
+  - {item: 'ban ghi M8', ket_qua: 'measured — readback-m8-issuecomment-6649417449.json (comment tren #1195); khoi YAML trich tu readback khop tung byte ban nhap; kiem-dong-wp-m8.txt rc 0 "ĐÓNG ĐƯỢC WP T191-PY314-INTERPOLATION — merge 4d258cc8…"; readback-issue-1195.json: state closed, state_reason completed.'}
+# ---- het truong chuan
+packet_id: T191-PY314-INTERPOLATION
+packet_issue: 1195
+generation: 1
+pham_vi_land: code
+environment: cloud
+operating_system: linux
+recorded_by: 'claude-session session_015GtxrcdtToNTxYCuZKVwQx — CUNG phien la executor cua packet; ghi so theo chi thi phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq (chu kho yeu cau ghi so land moi PR da merge).'
+
+spec:
+  path: ops/specs/T191-PY314-INTERPOLATION-r1.md (nhanh ops/lease-1195-t191-g1, commit 47ba8008)
+  sha256: e6ea2cf7c20279e6f1521b71b6562e811add01256d6c373d677acf9e3acf4ebe
+  nguon: 'measured — readback-spec-issuecomment-6647581716.json dang bam truoc lease; lease-t191-py314-interpolation-r1-g1-claude.yaml.txt neo cung bam.'
+
+lease:
+  lease_id: t191-py314-interpolation-r1-g1-claude
+  path: ops/leases/t191-py314-interpolation-r1-g1-claude.yaml (nhanh ops/lease-1195-t191-g1)
+  thay_the_cho: '[]'
+  write_set: ['ops/lease_publish_test.py']
+  ngoai_le_chu_kho: 'loi_khai_co_neo — than #1195: lease chi can tren ref + lease_publish.py check; comment dang bu khi workflow xanh (da dang: issuecomment-6648650664).'
+  thu_hoi_cuoi: >-
+    DA NHA bang RUT HAN sau merge: lease_until ve 2026-11-05T03:45:00Z (khoi thu_hoi_bang_rut_han, commit 5d3a62f); khong bia mo vi
+    khong co lease ke nhiem. measured — ai-dang-giu-sau-rut-han.txt: thieu=0, luc 03:46:16Z, "NGƯỜI_GIỮ 0", lease nay HẾT_HẠN;
+    lease-t191-py314-interpolation-r1-g1-claude.yaml.txt la ban tep lease cuoi.
+  diff_do: 'measured — merge-va-diff.txt: diff cha1..merge = diff merge-base..ab39416 (cung sha256 daeb432c); 1 tep ops/lease_publish_test.py +19/-3, duoi tran 120 cua spec.'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-1198.json merged true; readback-commit-4d258cc.json cha 248bef0c + ab39416f.'
+  landed: false
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 4d258cc: DAT, du bon moc (post_merge_checks muc 1); (2) lease nha: rut han 03:45Z,
+    ai-dang-giu NGUOI_GIU 0; (3) bookkeeping: ho so nay + ban ghi M8 tren Issue #1195 (kiem-dong-wp rc 0); (4) review neo DUNG
+    authorized_head ab39416: Codex offline approve 0/0/0/0, connector sach; (5) uy quyen land: CHUA DAT — chu kho tu bam merge PR #1198 nhung KHONG
+    co comment duyet ben neo ab39416 (L-6 doi authorization_url la #issuecomment-/#pullrequestreview-); (6) muc tieu packet: ops-publish-lease xanh lai tren runner Python 3.14 (post_merge_checks muc 2);
+    (7) §8.1: CHUA_DAT — xem assurance_81 (reviewer ghi hien vat TRONG checkout duoc review, trai AGENTS.md "Reviewer").
+    Mo lai — CA HAI: (a) chu kho (hoac phien ghi ho, caveat #566) dang mot comment duyet land neo DUNG
+    ab39416fe919452c9dadda38dd99c5589f7967e8; VA (b) hoac mot luot review doc lap tuan thu ranh gioi (checkout read-only, scratch
+    NGOAI kho) tren DUNG ab39416, hoac mot ngoai le ben cua chu kho chap nhan luot fd51d443 voi gioi han nay. Khi du ca hai, them khoi landed_<YYYYMMDD> (kieu b, tien le pr1142 landed_20261104) voi quyet_dinh_chu_kho.comment tro comment ay —
+    KHONG sua dong landed false o tren.
+
+assurance_81:
+  reviewer_assurance_81: CHUA_DAT
+  ly_do: >-
+    measured — codex/VERDICT-fd51d443.md dong 13 khai "Chỉ ghi VERDICT.md và review_mutations_fd51d443/, theo ngoại lệ vị trí scratch
+    mà assignment chỉ định" — ca hai nam TRONG checkout duoc review (/tmp/claude-0/rv); codex/PROMPT-fd51d443.md cua EXECUTOR soan
+    chinh ngoai le ay ("Ghi kết luận vào VERDICT.md trong thư mục làm việc", thu muc dot bien "trong thư mục làm việc"). AGENTS.md
+    muc Reviewer doi checkout read-only va scratch phan chung NGOAI repository duoc review. Model/effort/sandbox DO_DUOC va tep tracked
+    khong doi KHONG chung minh tuan thu ranh gioi nay. Loi o thiet ke nhiem vu cua executor, khong o reviewer. Codex connector P1
+    r4476535747 tren PR #1204 bat. KHONG sua VERDICT lich su.
+  review_exact_sha: 'DAT — run fd51d443 head ab39416 = authorized_head_sha, ma_thoat 0, VERDICT approve (noi dung; assurance xem ly_do).'
+  thuc_thi:
+    model: 'measured — codex/run-fd51d443.json model_phuc_vu_trang_thai DO_DUOC, moi khung response gpt-6.1-sol (ho openai), khac ho executor claude.'
+    effort: 'measured — codex/run-fd51d443.json effort_phuc_vu [xhigh], effort_phuc_vu_trang_thai DO_DUOC.'
+    sandbox_mode: 'measured — codex/run-fd51d443.json sandbox_trang_thai DO_DUOC (codex-linux-sandbox, workspace write, network restricted).'
+
+review:
+  so_loi_goi_codex_cli: 1
+  tran: '2 (ADR-0036/0037, ghi trong lease).'
+  ket_qua_theo_luot: 'r1 fd51d443 tren ab39416: 0/0/0/0 approve.'
+  dot_bien_executor: 'measured — dot-bien-executor-py314.txt: R1/R2/R3/R4 rc 1 (t191 DO), R3b rc 0 (song, khai trong PR #1198).'
+
+lech_dac_ta:
+  - 'R3b (go loi goi _bo_str_t191 trong _sinh_goc_t191) va R5 song: t191 khong giet rieng duoc voi kho hien tai; spec A2 chi doi go tron R1..R4. Khai trong PR #1198 va VERDICT.'
+
+khong_do_duoc:
+  - 'Danh tinh nguoi bam merge ngoai tai khoan merged_by (caveat #566).'
+  - 'Lane Windows: khong chay (phan loai K6 unknown, khong co mien chu kho rieng); khong phai dieu kien cua lease.'
+
+landed_20261105:
+  bo_canh: >-
+    Khoi nay ghi landed theo quyet dinh chu kho (kieu b, tien le pr1142 landed_20261104). Khong sua dong nao o tren:
+    trang_thai_packet.landed false va assurance_81.reviewer_assurance_81 CHUA_DAT la ban ghi dung luc truoc quyet dinh.
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/issues/1195#issuecomment-6649676232
+    noi_dung: >-
+      (a) duyet_land PR #1198 neo head_da_review ab39416fe919452c9dadda38dd99c5589f7967e8, merge 4d258cc88; (b) ngoai_le_review: chap
+      nhan luot fd51d443 du ghi VERDICT va thu muc dot bien trong checkout dang review (connector P1 r4476535747), pham vi chi cho
+      viec nang #1198 len landed true, khong phai tien le. Nguyen van chu kho qua phien dieu phoi: "Đồng ý tất cả các đề xuất."
+    do_duoc: >-
+      measured — readback-duyet-issuecomment-6649676232.json: user ducthangho, author_association OWNER, created_at = updated_at
+      2026-11-05T04:27:29Z (chua sua), tren #1195. CAVEAT #566: than co chan "Generated by Claude Code" — phien dieu phoi
+      session_015GtxrYPjZCTZeRiazdssgq dang bang token chu kho; ban chep, khong phai chu ky.
+  landed: true
+  landed_dieu_kien: >-
+    (1) bon moc §10.2.2 tren merge 4d258cc8: xem post_merge_checks muc 1. (2) lease t191-py314-interpolation-r1-g1-claude rut han
+    5d3a62f, NGUOI_GIU 0. (3) bookkeeping: ho so nay + M8 va hai dinh chinh tren #1195. (4) review neo DUNG ab39416: DAT ve noi dung.
+    (5) uy quyen land: quyet_dinh_chu_kho.comment tren (y a), caveat #566. (6) muc tieu packet: DAT. (7) §8.1: CHUA_DAT ve ranh gioi
+    checkout — chu kho CHAP NHAN bang ngoai le (y b), chi cho #1198.

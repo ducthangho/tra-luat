@@ -1,0 +1,5 @@
+# kiem-gate offline tren readback-check-runs-<sha>-all.json (filter=all); ten bat buoc = moi job khong skipped cua attempt cuoi cua run do.
+== run 41374085718 attempt 1 event workflow_dispatch conclusion success suite 112126087677 15 ten (bo skipped)
+gate XANH trên c00561c9e9f581242e6d05ac3421e992d4b98f42 (suite 112126087677): chuan-bi id=125050488108 · gate (windows-latest) id=125051010234 · gate-cong-cu (windows-latest, 0) id=125051010163 · gate-nhanh-gop (windows-latest) id=125057636416 · gate-nhanh-manh (windows-latest, 0) id=125051010299 · gate-nhanh-manh (windows-latest, 1) id=125051010304 · gate-nhanh-manh (windows-latest, 2) id=125051010294 · gate-nhanh-manh (windows-latest, 3) id=125051010237 · gate-nhanh-manh (windows-latest, 4) id=125051010329 · gate-nhanh-manh (windows-latest, 5) id=125051010226 · gate-nhanh-manh (windows-latest, 6) id=125051010291 · gate-nhanh-manh (windows-latest, 7) id=125051010249 · gate-ops (windows-latest) id=125051010232 · gate-packet-loop (windows-latest) id=125051010160 · gate-registry (windows-latest) id=125057859558
+CẢNH BÁO: 'chuan-bi' có 1 run ở suite khác (125050480973) — bỏ qua
+rc=0

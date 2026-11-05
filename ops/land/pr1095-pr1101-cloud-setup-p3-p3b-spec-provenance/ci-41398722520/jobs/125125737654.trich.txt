@@ -1,0 +1,15 @@
+2026-11-02T06:16:00.3211429Z Image: windows-2025-vs2026
+2026-11-02T06:16:01.2746631Z ##[group]Run git config --global core.autocrlf false
+2026-11-02T06:16:02.4210968Z ##[group]Run actions/checkout@v4
+2026-11-02T06:16:22.7723157Z [command]"C:\Program Files\Git\bin\git.exe" rev-parse refs/remotes/origin/claude/gate-hau-merge-47ee1b20
+2026-11-02T06:16:22.8128921Z 47ee1b206d284c82d16036972b82b17196cd8dc7
+2026-11-02T06:16:26.6807336Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-11-02T06:16:26.7149878Z 47ee1b206d284c82d16036972b82b17196cd8dc7
+2026-11-02T06:16:26.7543644Z ##[group]Run actions/setup-python@v5
+2026-11-02T06:16:27.0508840Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-11-02T06:16:35.7496451Z ##[group]Run bash ops/cai_actionlint.sh
+2026-11-02T06:16:36.7706329Z ##[group]Run bash ops/cai_cong_cu.sh shellcheck
+2026-11-02T06:16:55.7844980Z ##[group]Run bash ops/cai_cong_cu.sh rg
+2026-11-02T06:17:03.1640047Z ##[group]Run python ops/cong_cu.py kiem-tra --json
+2026-11-02T06:17:03.8859186Z ##[group]Run python -m pip install --quiet ruff==0.15.15
+2026-11-02T06:17:07.6742659Z ##[group]Run python .claude/dev/packet_loop_test.py

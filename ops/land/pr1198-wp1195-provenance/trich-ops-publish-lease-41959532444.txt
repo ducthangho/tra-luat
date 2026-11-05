@@ -1,0 +1,10 @@
+# ops-publish-lease run 41959532444 job 127022321156 (nhanh ops/lease-1195-t191-g1 @ a24a72b), log tai qua MCP get_job_logs (tail 3000 dong);
+# sha256 noi dung log da tai: d9355efe80b0727697dcad64a5fa2b67caf134f98ace39cac9cba5d0589bc86f ; trich cac dong khop mau:
+2026-11-05T03:07:34.8491584Z bản ĐANG CHẠY — từ origin/master @ 4d258cc88:
+2026-11-05T03:10:02.8021621Z [A] t191: 13 chốt của kiem() đều PHU ở nhánh đã-có-dấu; miễn sẵn: [('raise Chan', 1114, 8)]; phân loại 7100 dòng (6961 sinh, 2402 ô, miễn 37); ca âm 11 dạng
+2026-11-05T03:10:03.1529667Z [B] t191: 13 chốt của kiem() đều PHU ở nhánh đã-có-dấu; miễn sẵn: [('raise Chan', 1114, 8)]; phân loại 7100 dòng (6961 sinh, 2402 ô, miễn 37); ca âm 11 dạng
+2026-11-05T03:10:30.8631273Z [A] lease_publish: 284/284 đạt; đã chạy=284, bỏ qua=0
+2026-11-05T03:10:31.3647913Z [B] lease_publish: 284/284 đạt; đã chạy=284, bỏ qua=0
+2026-11-05T03:11:42.4289796Z t191: 13 chốt của kiem() đều PHU ở nhánh đã-có-dấu; miễn sẵn: [('raise Chan', 1114, 8)]; phân loại 7100 dòng (6961 sinh, 2402 ô, miễn 37); ca âm 11 dạng
+2026-11-05T03:12:10.1375735Z lease_publish: 284/284 đạt; đã chạy=284, bỏ qua=0
+2026-11-05T03:12:11.6511460Z lease t191-py314-interpolation-r1-g1-claude ĐĂNG ĐƯỢC — issue #1195, neo 1813bfd45137, hết hạn 2026-11-06T02:05:00Z

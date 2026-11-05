@@ -1,0 +1,4 @@
+# doi chieu run.json voi stdout/verdict — 2026-11-02
+r1 run fe629fa7 head 024212c trang_thai dang_chay ma_thoat None model None effort None stdout khop None verdict dong []
+r2 run 3c24d26d head aad4865 trang_thai dang_chay ma_thoat None model None effort None stdout khop None verdict dong ['verdict: approve\n']
+r3 run dc4d673c head aad4865 trang_thai xong ma_thoat 0 model DO_DUOC effort DO_DUOC stdout khop True verdict dong ['verdict: approve\n']

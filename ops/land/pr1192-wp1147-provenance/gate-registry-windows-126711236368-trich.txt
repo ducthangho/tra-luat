@@ -1,0 +1,17 @@
+# trich tu log REST job 126711236368 (gate-registry windows-latest, run 41868410817, head 2344011); ban day du 271459 byte sha256 2fd829ccea211afb859a9af2288041976de39def82358b1b2e2f41491ed99b7b, khong commit
+2026-11-04T17:30:08.6464401Z BO QUA ca_nap_khong_giet_setup: đồ giả là script POSIX; script đích chỉ chạy trên Linux (Codex Cloud)
+2026-11-04T17:30:08.6464800Z BO QUA ca_dot_bien: đồ giả là script POSIX; script đích chỉ chạy trên Linux (Codex Cloud)
+2026-11-04T17:30:08.6465056Z 3/3
+2026-11-04T17:30:08.6465267Z CI_DANG_KY ops/codex_cloud_setup_test.py: ĐẠT rc=0
+2026-11-04T17:30:08.6466100Z CA: 22/22 dat
+2026-11-04T17:30:08.6466282Z DOT BIEN: 106/106 bi giet dung ly do
+2026-11-04T17:30:08.6466485Z TU KIEM PHAN HANG: DAT (2 dot bien)
+2026-11-04T17:30:08.6466689Z TONG: DAT
+2026-11-04T17:30:08.6466932Z CI_DANG_KY ops/land_evidence_nguon_test.py: ĐẠT rc=0
+2026-11-04T17:30:08.6467143Z CA: 63/63 dat
+2026-11-04T17:30:08.6467307Z DOT BIEN: 398/398 bi giet dung ly do
+2026-11-04T17:30:08.6467502Z TU KIEM PHAN HANG: DAT (2 dot bien)
+2026-11-04T17:30:08.6467682Z TONG: DAT
+2026-11-04T17:30:08.6467886Z CI_DANG_KY ops/ci_provenance_test.py: ĐẠT rc=0
+2026-11-04T17:30:08.6468235Z [BO QUA a4_qua_han_giet_ca_nhom: đồ giả là script POSIX / nhóm tiến trình POSIX]
+{"duong_dan": "ops/ci_provenance_test.py", "rc": 0, "giay": 1829.18, "bat_dau_utc": "2026-11-04T16:57:37.387Z", "ket_thuc_utc": "2026-11-04T17:28:06.567Z", "che_do": "day_du"}

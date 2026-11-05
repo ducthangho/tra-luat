@@ -1,0 +1,15 @@
+2026-11-02T07:19:43.4151175Z Image: ubuntu-24.04
+2026-11-02T07:19:44.1438878Z ##[group]Run git config --global core.autocrlf false
+2026-11-02T07:19:44.1876696Z ##[group]Run actions/checkout@v4
+2026-11-02T07:19:52.9609220Z [command]/usr/bin/git rev-parse refs/remotes/origin/claude/gate-hau-merge-8f123b27
+2026-11-02T07:19:52.9610644Z 8f123b27b338e5e173a668209eb4904f49dd611b
+2026-11-02T07:19:53.6364367Z [command]/usr/bin/git log -1 --format=%H
+2026-11-02T07:19:53.6395009Z 8f123b27b338e5e173a668209eb4904f49dd611b
+2026-11-02T07:19:53.6580273Z ##[group]Run actions/setup-python@v5
+2026-11-02T07:19:53.7922121Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-11-02T07:19:55.6932954Z ##[group]Run bash ops/cai_actionlint.sh
+2026-11-02T07:19:56.0858739Z ##[group]Run bash ops/cai_cong_cu.sh shellcheck
+2026-11-02T07:20:00.0357459Z ##[group]Run bash ops/cai_cong_cu.sh rg
+2026-11-02T07:20:04.5664197Z ##[group]Run python ops/cong_cu.py kiem-tra --json
+2026-11-02T07:20:04.9303238Z ##[group]Run python -m pip install --quiet ruff==0.15.15
+2026-11-02T07:20:05.9980142Z ##[group]Run python .claude/dev/ci_dang_ky_test.py --chay

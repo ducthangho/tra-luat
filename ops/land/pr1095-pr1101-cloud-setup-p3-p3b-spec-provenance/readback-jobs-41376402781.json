@@ -1,0 +1,89 @@
+{
+ "jobs": [
+  {
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/125057476404",
+   "completed_at": "2026-11-02T02:12:37Z",
+   "conclusion": "success",
+   "created_at": "2026-11-02T02:11:52Z",
+   "head_branch": "claude/wp1099-cloud-setup-p3b-spec",
+   "head_sha": "c6e4388ae1fece11f735f4cbe234de04fea56b37",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/41376402781/job/125057476404",
+   "id": 125057476404,
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "name": "thu-hoi",
+   "node_id": "CR_kwDOTNeRjc8AAAAdHgGnNA",
+   "run_attempt": 1,
+   "run_id": 41376402781,
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41376402781",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions",
+   "runner_id": 1000034291,
+   "runner_name": "GitHub Actions 1000034291",
+   "started_at": "2026-11-02T02:12:20Z",
+   "status": "completed",
+   "steps": [
+    {
+     "completed_at": "2026-11-02T02:12:22Z",
+     "conclusion": "success",
+     "name": "Set up job",
+     "number": 1,
+     "started_at": "2026-11-02T02:12:21Z",
+     "status": "completed"
+    },
+    {
+     "completed_at": "2026-11-02T02:12:30Z",
+     "conclusion": "success",
+     "name": "lấy MÃ CANONICAL tại workflow_sha — không bao giờ head PR",
+     "number": 2,
+     "started_at": "2026-11-02T02:12:22Z",
+     "status": "completed"
+    },
+    {
+     "completed_at": "2026-11-02T02:12:34Z",
+     "conclusion": "success",
+     "name": "cài PyYAML",
+     "number": 3,
+     "started_at": "2026-11-02T02:12:30Z",
+     "status": "completed"
+    },
+    {
+     "completed_at": "2026-11-02T02:12:34Z",
+     "conclusion": "success",
+     "name": "đo S, fetch H từ endpoint canonical, chạy bộ kiểm canonical, ghi receipt",
+     "number": 4,
+     "started_at": "2026-11-02T02:12:34Z",
+     "status": "completed"
+    },
+    {
+     "completed_at": "2026-11-02T02:12:35Z",
+     "conclusion": "success",
+     "name": "tải receipt lên artifact",
+     "number": 5,
+     "started_at": "2026-11-02T02:12:34Z",
+     "status": "completed"
+    },
+    {
+     "completed_at": "2026-11-02T02:12:35Z",
+     "conclusion": "success",
+     "name": "Post lấy MÃ CANONICAL tại workflow_sha — không bao giờ head PR",
+     "number": 10,
+     "started_at": "2026-11-02T02:12:35Z",
+     "status": "completed"
+    },
+    {
+     "completed_at": "2026-11-02T02:12:36Z",
+     "conclusion": "success",
+     "name": "Complete job",
+     "number": 11,
+     "started_at": "2026-11-02T02:12:35Z",
+     "status": "completed"
+    }
+   ],
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/125057476404",
+   "workflow_name": "thu-hoi"
+  }
+ ],
+ "total_count": 1
+}

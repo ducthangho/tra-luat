@@ -19,7 +19,9 @@ input_packet_generations:
   - {packet_issue: 1120, packet_id: KIEM-MERGE-M9, revision: 1, generation: 1, lease_id: kiem-merge-m9-r1-g1-claude-remote-20261101}
 authorized_head_sha: 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897
 approver: ducthangho
-authorization_url: https://github.com/ducthangho/tra-luat/pull/1127
+authorization_url: https://github.com/ducthangho/tra-luat/issues/1120#issuecomment-6648088895
+authorization_url_ban_ghi_goc: https://github.com/ducthangho/tra-luat/pull/1127
+authorization_url_nguon: 'measured — readback-xac-nhan-issuecomment-6648088895.json: comment 6648088895 neo 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897; dat 05-11-2026 thay ban ghi goc, xem landed_20261105.'
 authorization_ghi_chu: >-
   ADR-0060 M7: mot lan duyet = chu kho tu merge PR #1127 (merged_by ducthangho, 2026-11-01T18:26:35Z) sau khi executor bao
   kiem-merge rc=0 tren 06a5a40 va bo draft. Khong co comment duyet rieng tren PR. Nang tran 300 -> 400 dong va duyet buoc 8:
@@ -109,3 +111,17 @@ khong_do_duoc:
   - 'Push master tai merge SHA: KHONG CO — run 41336643336 cancelled 0 job ca hai attempt (#1132); thay bang dispatch cung SHA.'
   - 'Sandbox cua luot review offline 8: KHONG_DO_DUOC (xem assurance_81).'
   - 'Ban day du JSON A8 nam tren may tra-luat-win (C:\tl-win), khong chep vao kho; ban gon kiem-merge/win.json la dau vao cua kiem-merge K6.'
+
+landed_20261105:
+  bo_canh: >-
+    Khoi nay bo sung uy quyen neo SHA theo luat L-6 (ops/kiem_ho_so_land.py), phien session_015GtxrcbysJFmj2dSwnCkPL, 05-11-2026. Ban ghi goc
+    authorization_url = https://github.com/ducthangho/tra-luat/pull/1127 (giu nguyen o authorization_url_ban_ghi_goc), khong co comment GitHub nao neo SHA. Chi doi
+    dong authorization_url muc goc; khong sua dong nao khac o tren.
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/issues/1120#issuecomment-6648088895
+    noi_dung: >-
+      Chu kho chon "Xac nhan lai, ghi comment moi" (AskUserQuestion, phien session_015GtxrcbysJFmj2dSwnCkPL, 05-11-2026): xac nhan land #1120
+      tren authorized_head_sha 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897, merge f2102fc388a884d994f7bfeb29ef6863b9972b66.
+    do_duoc: 'measured — readback-xac-nhan-issuecomment-6648088895.json: comment 6648088895 (user ducthangho, OWNER, created_at = updated_at) ghi day du 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897 va f2102fc388a884d994f7bfeb29ef6863b9972b66; readback-pr-1127.json head.sha 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897. CAVEAT #566: phien dang bang token chu kho; ban chep quyet dinh, khong phai chu ky.'
+  landed: true

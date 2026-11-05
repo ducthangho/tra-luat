@@ -10295,6 +10295,7 @@ def _owner_yaml1187(x, alias=False):
     if alias:
         # A valid identity twin: packet and audit_source intentionally have equal strings.
         x["ls"]["packet_id"] = audit["packet"] = audit["audit_source"]
+        x["tr"]["packet"] = audit["packet"]
     body = yaml.safe_dump(audit)
     body = body.replace("packet: " + audit["packet"], "packet: &identity " + audit["packet"])
     if alias:

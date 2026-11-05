@@ -77,8 +77,8 @@ heartbeat_at: '2026-11-04T16:02:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
 heartbeat_required_minutes: 360
 heartbeat_required_ghi_chu: 'ADR-0056 => lease moi cap khai 360 phut.'
-lease_until: '2026-11-05T16:02:00Z'
-lease_expires_at_utc: '2026-11-05T16:02:00Z'
+lease_until: '2026-11-05T03:05:00Z'
+lease_expires_at_utc: '2026-11-05T03:05:00Z'
 run_minutes: 120
 heartbeat_minutes: 30
 attempts_used: 0
@@ -98,3 +98,12 @@ push_policy: 'day nhanh agent/wp1147-g1-claude khi N1, N2, N4 dat va review appr
 codex_da_goi:
 - {luot: 1, head: 7295d5c7171267c8abf13b711108c315fe697b73, run: be6f3bad, verdict: approve, p: '0/0/0/1', hien_vat: ops/reviews/wp1147-codex-luot1}
 - {luot: 2, head: 2344011617fa753adceef0be3306374cb3a096a1, run: 83e3a368, verdict: approve, p: '0/0/0/0', hien_vat: ops/reviews/wp1147-codex-luot2}
+lease_sua_lan_cuoi: '2026-11-05T02:45:00Z'
+lease_sua_ghi_chu: 'Rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch, budget.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-05T16:02:00Z'
+  han_moi_utc: '2026-11-05T03:05:00Z'
+  chi_thi: 'Chu kho trong phien session_015GtxrcrL4cwJqpNqx2ptAa: "Bo draft, merge, land va ghi so cho toi" (ban ghi https://github.com/ducthangho/tra-luat/pull/1192#issuecomment-6647192783).'
+  ly_do: 'Packet #1147 da merge (PR #1192, merge 9a5b462b6731). Nha ops/ci_provenance_test.py, ops/handoff/wp1147-g1-claude.md, ops/reviews/wp1147-*.'
+  vi_sao_han_moi_khong_bang_luc_sua: 'Han moi = luc sua + 20 phut de luot ops-publish-lease cua commit nay doc lease CON HAN (rc=9 da dang), khong roi vao rc=8 (bai hoc CLAUDE.md 20-09-2026). Khong viet bia mo: khong co lease ke nhiem cung packet.'
+  tien_le: 'wp1077-r1-g6-claude (37574c8), wp1045-r1-g2-claude (a430543).'

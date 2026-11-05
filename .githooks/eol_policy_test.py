@@ -131,28 +131,36 @@ def _che(text):
     return text
 
 
+_TEN_LOP = type.__dict__["__name__"].__get__   # đọc tên lớp KHÔNG qua metaclass (lượt review 2, F3)
+
+
+def _la(t, *kieu):
+    """`t` là đúng một trong các kiểu — so bằng `is`, không `in`/`==` (metaclass có thể hook `__eq__`)."""
+    return any(t is k for k in kieu)
+
+
 def _vat_hoa(x, sau=0):
     """Dựng bản BUILTIN đã che của `x`: không gọi `repr`/hook nào của đối tượng lạ (đặc tả M4)."""
     t = type(x)
     if t is str:
         return _che(x)
-    if t in (bytes, bytearray):
+    if _la(t, bytes, bytearray):
         return _che(bytes(x).decode("utf-8", "replace"))
-    if x is None or t in (bool, int, float):
+    if x is None or _la(t, bool, int, float):
         return x
     if sau >= 6:
         return "<sau qua 6 tang>"
     if t is dict:
         cap = list(x.items())
-        r = {(_che(k) if type(k) is str else "<khoa:%s>" % type(k).__name__): _vat_hoa(v, sau + 1)
+        r = {(_che(k) if type(k) is str else "<khoa:%s>" % _TEN_LOP(type(k))): _vat_hoa(v, sau + 1)
              for k, v in cap[:200]}
         if len(cap) > 200:
             r["<cat>"] = "bo %d muc" % (len(cap) - 200)
         return r
-    if t in (list, tuple, set, frozenset):
+    if _la(t, list, tuple, set, frozenset):
         cap = list(x)
         return [_vat_hoa(v, sau + 1) for v in cap[:200]] + (["<cat %d muc>" % (len(cap) - 200)] if len(cap) > 200 else [])
-    return "<%s>" % t.__name__
+    return "<%s>" % _TEN_LOP(t)
 
 
 def _ghi_an_toan(ham):
@@ -169,11 +177,12 @@ def _loi_an_toan(exc):
     """Mô tả lỗi đã che, dựng từ `args` qua `_vat_hoa` (không `repr` đối tượng); hỏng ⇒ chỉ tên lớp."""
     try:
         than = [_vat_hoa(a) for a in exc.args] + [_vat_hoa(getattr(exc, "filename", None))]
-        return _cat_duoi("%s%s" % (type(exc).__name__, json.dumps(than, ensure_ascii=False)), _CD_TRAN_CHUOI)
+        return _cat_duoi(_che("%s%s" % (_TEN_LOP(type(exc)), json.dumps(than, ensure_ascii=False))),
+                         _CD_TRAN_CHUOI)
     except KeyboardInterrupt:
         raise
     except BaseException:                                # noqa: BLE001
-        return "<%s>" % type(exc).__name__
+        return "<loi khong mo ta duoc>"
 
 
 def _cat_duoi(text, tran):
@@ -188,10 +197,10 @@ def _cd(nhan, gia_tri):
     Không bao giờ đổi kết quả ca (đặc tả M4): chỉ đọc kiểu builtin, mọi lỗi thành `CHAN_DOAN_LOI`.
     """
     def ghi():
-        if type(gia_tri) in (str, bytes, bytearray):
+        if _la(type(gia_tri), str, bytes, bytearray):
             chuoi, tran = _vat_hoa(gia_tri), _CD_TRAN_CHUOI
-        else:
-            chuoi = json.dumps(_vat_hoa(gia_tri), ensure_ascii=False, sort_keys=True)
+        else:   # che LÁ (dạng thoát) rồi che CẢ chuỗi cuối: số/tên lớp sinh ra khi tuần tự hoá (F8)
+            chuoi = _che(json.dumps(_vat_hoa(gia_tri), ensure_ascii=False, sort_keys=True))
             tran = _CD_TRAN_PAYLOAD
         _CD_NGAN_XEP[-1].append((_che(str(nhan)), _cat_duoi(chuoi, tran)))
     _ghi_an_toan(ghi)
@@ -304,10 +313,16 @@ def _chay_mot_ca(case, don_dep=None):
         except OSError as exc:
             loi_don = exc
     if loi_don is not None:
-        sau.append("CHAN_DOAN_DON_DEP: %s (%s)" % (_loi_an_toan(loi_don), _vat_hoa(td.name)))
-    if not ok:
         try:
-            sau += _khoi_chan_doan(ghi)
+            sau.append(_cat_duoi("CHAN_DOAN_DON_DEP: %s (%s)" % (_loi_an_toan(loi_don), _vat_hoa(td.name)),
+                                 _CD_TRAN_CHUOI))
+        except KeyboardInterrupt:
+            raise
+        except BaseException:                        # noqa: BLE001 — M7: không làm sập suite (F9)
+            sau.append("CHAN_DOAN_DON_DEP: <loi don thu muc tam; khong mo ta duoc an toan>")
+    if not ok:
+        try:     # dòng dọn dẹp tính vào trần toàn khối (F4)
+            sau += _khoi_chan_doan(ghi, _CD_TRAN_CA - sum(len(d) + 1 for d in sau))
         except KeyboardInterrupt:
             raise
         except BaseException as exc:                 # noqa: BLE001 — M4: không đổi kết quả
@@ -1162,6 +1177,37 @@ def case_chan_doan_vat_hoa_va_nguon_mau(root):
         globals()["_CD_NGUON_MAU"] = tam / "nguon_do.py"
         che_do = [_che(bi_mat), _che(bi_mat)]
         do_dai_cache_do = len(_CD_BO_CHE)
+        _CD_BO_CHE[:], globals()["_CD_NGUON_MAU"] = goc[3], goc[2]
+
+        so = "7" + "3141592653" + "58979"                # lượt review 2: F8 số / tên lớp; F3 metaclass
+        os.environ["EOL_TEST_FAKE_TOKEN"] = so
+        goi = []
+
+        class _Meta(type):
+            def __eq__(cls, o):
+                goi.append("eq")
+                return False
+            __hash__ = type.__hash__
+            __name__ = property(lambda cls: goi.append("name"))
+        _, g8 = _ghi_vao_kenh_rieng(lambda: (_cd("so", {"n": int(so), "o": type("T" + so, (), {})(),
+                                                         "m": _Meta("M", (), {})()}),
+                                             _ghi_payload_cong("cong", {"ok": True, "x": _Meta("N", (), {})()})))
+        k8 = "\n".join(_khoi_chan_doan(g8)) + _loi_an_toan(type("E" + so, (Exception,), {})("x"))
+
+        def ca_to(_r):        # F4: mục 1000 ký tự ⇒ khối dừng sát 11920; thiếu trừ dòng dọn dẹp là vượt
+            [_cd("m%d" % i, "y" * 1000) for i in range(13)]
+            return False
+        def don_dai(td):                               # thông điệp dài: dòng dọn dẹp vượt chỗ dành sẵn
+            td.cleanup()
+            raise PermissionError("k" * 1500)
+        _, dong_to = _chay_mot_ca(ca_to, don_dep=don_dai)
+
+        class _SubHong:                                 # F9: bộ che ném lúc dựng dòng dọn dẹp
+            def sub(self, *a):
+                raise RuntimeError("WP1221_F9_" + "LOI_CHE")
+        _CD_BO_CHE[:] = [("hong", _SubHong())]
+        ok9, dong9 = _chay_mot_ca(lambda _r: True, don_dep=don_hong)
+        _CD_BO_CHE[:] = goc[3]
     finally:
         tempfile.tempdir = goc[1]
         globals()["_CD_NGUON_MAU"] = goc[2]
@@ -1181,7 +1227,17 @@ def case_chan_doan_vat_hoa_va_nguon_mau(root):
             and _ve("F4 khoi <= tran ke ca dau cat", len(k4) <= _CD_TRAN_CA and "…[cat khoi" in k4)
             and _ve("F5 doc dung nguon dang tro", che_canary == "<CHE:canary>")
             and _ve("F6 nap do => fail-closed ca hai lan, cache rong",
-                    all(c.startswith("<CHE:khong_nap_duoc") for c in che_do) and do_dai_cache_do == 0))
+                    all(c.startswith("<CHE:khong_nap_duoc") for c in che_do) and do_dai_cache_do == 0)
+            and _ve("F5 nguon mac dinh la bang chuan",
+                    Path(goc[2]).resolve() == (_SOURCE_ROOT / "scripts" / "pkg_secret_scan.py").resolve())
+            and _ve("F8 so/ten lop/ten loi da che", so not in k8 and k8.count("<CHE:env:EOL_TEST_FAKE_TOKEN>") >= 3)
+            and _ve("F3 khong goi hook metaclass", goi == [])
+            and _ve("F4 khoi + dong don dep <= tran",
+                    sum(len(d) + 1 for d in dong_to if d.startswith("CHAN_DOAN")) <= _CD_TRAN_CA
+                    and any(d.startswith("CHAN_DOAN_DON_DEP") for d in dong_to))
+            and _ve("F9 che hong luc don dep khong sap suite",
+                    ok9 is True and dong9[0] == "PASS <lambda>" and len(dong9) == 2 and dong9[1].startswith("CHAN_DOAN")
+                    and "WP1221_F9_LOI_CHE" not in dong9[1]))
 
 
 CASES = [

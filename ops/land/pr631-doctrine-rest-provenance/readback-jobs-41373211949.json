@@ -1,0 +1,89 @@
+{
+ "jobs": [
+  {
+   "id": 125047889254,
+   "run_id": 41373211949,
+   "workflow_name": "thu-hoi",
+   "head_branch": "claude/doctrine-rest-do-lai-20260925",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41373211949",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAdHW9dZg",
+   "head_sha": "6e5c74849af68e748c4844bedf5856ead4c60be3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/125047889254",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/41373211949/job/125047889254",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-02T01:34:51Z",
+   "started_at": "2026-11-02T01:35:21Z",
+   "completed_at": "2026-11-02T01:35:36Z",
+   "name": "thu-hoi",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-02T01:35:22Z",
+     "completed_at": "2026-11-02T01:35:23Z"
+    },
+    {
+     "name": "lấy MÃ CANONICAL tại workflow_sha — không bao giờ head PR",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-02T01:35:23Z",
+     "completed_at": "2026-11-02T01:35:31Z"
+    },
+    {
+     "name": "cài PyYAML",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-02T01:35:31Z",
+     "completed_at": "2026-11-02T01:35:33Z"
+    },
+    {
+     "name": "đo S, fetch H từ endpoint canonical, chạy bộ kiểm canonical, ghi receipt",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-02T01:35:33Z",
+     "completed_at": "2026-11-02T01:35:34Z"
+    },
+    {
+     "name": "tải receipt lên artifact",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-02T01:35:34Z",
+     "completed_at": "2026-11-02T01:35:35Z"
+    },
+    {
+     "name": "Post lấy MÃ CANONICAL tại workflow_sha — không bao giờ head PR",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-02T01:35:35Z",
+     "completed_at": "2026-11-02T01:35:35Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-02T01:35:35Z",
+     "completed_at": "2026-11-02T01:35:35Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/125047889254",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000034097,
+   "runner_name": "GitHub Actions 1000034097",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  }
+ ],
+ "total_count": 1
+}

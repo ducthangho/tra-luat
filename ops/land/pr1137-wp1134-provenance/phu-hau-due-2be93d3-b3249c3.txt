@@ -1,0 +1,47 @@
+# do 2026-11-05T05:29:14Z — phu bang hau due: M=2be93d3 (merge #1137), D=b3249c3 (merge #1141)
+$ git merge-base --is-ancestor 2be93d3 b3249c3
+rc=0
+$ git rev-parse 2be93d3:scripts b3249c3:scripts
+d1d230c2c6d2b4578e4833af75130311857a26f3
+d1d230c2c6d2b4578e4833af75130311857a26f3
+$ git diff --quiet 2be93d3 b3249c3 -- <184 tep goi tai 2be93d3 (RELEASE_MANIFEST.json files)> scripts/
+rc=0 so_tep_goi=184
+$ git diff --name-only 2be93d3 b3249c3 | grep -v ^ops/land/
+.github/workflows/ci.yml
+.github/workflows/launcher-windows.yml
+CLAUDE.md
+ops/ci_duong_nhanh_test.py
+ops/reviews/pr631-review-1-claude/HINT.patch
+ops/reviews/pr631-review-1-claude/VERDICT.md
+ops/reviews/pr631-review-1b-claude-cli/HINT.patch
+ops/reviews/pr631-review-1b-claude-cli/PROMPT.md
+ops/reviews/pr631-review-1b-claude-cli/RUN.md
+ops/reviews/pr631-review-1b-claude-cli/VERDICT.md
+ops/reviews/pr631-review-2-opus-max/HINT.patch
+ops/reviews/pr631-review-2-opus-max/PROMPT.md
+ops/reviews/pr631-review-2-opus-max/RUN.md
+ops/reviews/pr631-review-2-opus-max/VERDICT.md
+ops/reviews/pr631-review-3-opus-max/HINT.patch
+ops/reviews/pr631-review-3-opus-max/PROMPT.md
+ops/reviews/pr631-review-3-opus-max/RUN.md
+ops/reviews/pr631-review-3-opus-max/VERDICT.md
+ops/reviews/pr631-review-4-opus-max/HINT.patch
+ops/reviews/pr631-review-4-opus-max/PROMPT.md
+ops/reviews/pr631-review-4-opus-max/RUN.md
+ops/reviews/pr631-review-4-opus-max/VERDICT.md
+ops/specs/CI-CONCURRENCY-MASTER-r1.md
+ops/specs/cloud-setup-p3b-nlm-401-r1.md
+ops/specs/cloud-setup-p3b-nlm-401-r2.md
+ops/specs/cloud-setup-p3b-nlm-401-r3.md
+$ git diff 2be93d3 b3249c3 -- .github/workflows/ (dong +/-)
+-  # KHÔNG huỷ trên master: đó là lượt gác cổng phát hành, phải chạy trọn.
+-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
++  # Master: GitHub giữ tối đa một lượt pending mỗi group, nên `cancel-in-progress: false` một mình
++  # KHÔNG đủ — push kế tiếp làm lượt đang chờ bị huỷ, 0 job, và merge commit ấy mất lượt gate tự
++  # động: nó chỉ được gate nếu có người chạy lại hoặc dispatch đúng SHA (#1132, đo 01-11-2026: 5
++  # commit). Vì vậy mỗi commit master có group riêng theo SHA; các lượt master chạy song song và chờ
++  # runner thay vì thay chỗ nhau.
++  group: ${{ github.workflow }}-${{ github.event.pull_request.number || (github.ref == 'refs/heads/master' && github.sha) || github.ref }}
+-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
++  # Master có group riêng theo SHA: một group chỉ giữ một lượt pending, lượt chờ bị thay chỗ là mất gate (#1132).
++  group: ${{ github.workflow }}-${{ github.event.pull_request.number || (github.ref == 'refs/heads/master' && github.sha) || github.ref }}

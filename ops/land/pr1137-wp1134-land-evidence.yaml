@@ -2,7 +2,8 @@
 # (landed false) va ops/land/pr1141-wp1132-land-evidence.yaml (cung lo merge 02-11).
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (2be93d3), `landed: false` theo quyet dinh chu kho issuecomment-6650045712 ("Đóng + hồ sơ landed false + nợ riêng").
+# CAP NHAT 05-11: LANDED theo quyet dinh chu kho kieu b (khoi landed_20261105, issuecomment-6650528815, phu bang hau due b3249c3).
+# TRANG THAI LUC BAN DAU: merged (2be93d3), `landed: false` theo quyet dinh chu kho issuecomment-6650045712 ("Đóng + hồ sơ landed false + nợ riêng").
 # Ly do chinh: (1) gate tren DUNG merge SHA khong ton tai — luot ci.yml push master 41397040659 tren 2be93d3 bi HUY sau 9 s, 0 job
 # (nhom concurrency cu cua ci.yml, chinh loi #1132 sua o b3249c3 merge 28 s sau). Ba moc con lai cua §10.2.2 vi the khong co gi de do.
 # NHAN: measured = do trong phien ghi so (tep kem); loi_khai_co_neo = loi khai co neo URL/SHA; thuat_lai = so lieu cua luot thi cong,
@@ -66,7 +67,8 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1134-r2-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: claude/ghi-so-land-1134, lease: changelog-d-ngoai-goi-land-r2-g1-claude-remote-20261105}
-  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — kiem-dong-wp.txt: kiem-dong-wp --bien-ban bien-ban-m8.yaml --lease lease-wp1134-r2-g1-claude.yaml.txt rc 12, CHI thieu D2 (landed false, run cancelled); D1, D3, D4 dat. Chu kho da quyet dong #1134 du D2 do (issuecomment-6650045712).'}
+  - {item: 'ban ghi M8 kieu b', ket_qua: 'measured — kiem-dong-wp-kieu-b.txt: kiem-dong-wp --bien-ban bien-ban-m8.yaml rc 0, "ĐÓNG ĐƯỢC WP CHANGELOG-D-NGOAI-GOI".'}
+  - {item: 'ban ghi M8 (ADR-0060), ban landed false', ket_qua: 'measured — kiem-dong-wp.txt (bien-ban-m8-landed-false.yaml): kiem-dong-wp --bien-ban bien-ban-m8.yaml --lease lease-wp1134-r2-g1-claude.yaml.txt rc 12, CHI thieu D2 (landed false, run cancelled); D1, D3, D4 dat. Chu kho da quyet dong #1134 du D2 do (issuecomment-6650045712).'}
   - {item: 'no tach', ket_qua: 'hop nhat 14 fragment changelog.d/ vao CHANGELOG.md (co che hop nhat luc land chua bat, PROTOCOL:880) — Issue no rieng; references/RUNBOOK.md:737,840 tro changelog.d/wp-710.md (con tro chet trong goi, doc_pointers khong bat).'}
 # ---- het truong chuan
 packet_id: CHANGELOG-D-NGOAI-GOI
@@ -127,3 +129,44 @@ khong_do_duoc:
   - 'Model/effort/sandbox phuc vu cua review offline 169de7ad: hien vat khong luu.'
   - 'N6 Windows (ASUS-LAPTOP do-luong.csv dong 36): loi khai trong comment kiem-merge, tep csv khong o trong kho.'
   - 'So selftest 1776/1776 cua luot PR: log job khong luu; chi conclusion success cua 23 job duoc do.'
+
+landed_20261105:
+  bo_canh: >-
+    Khoi nay ghi landed theo quyet dinh chu kho (kieu b, tien le CUNG CA pr1055-wp1052 landed_20261102: run cua merge commit bi
+    concurrency huy, 0 job, chu kho chap nhan do tren hau due). Khong sua cac loi khai o tren: trang_thai_packet.landed false va
+    post_merge_checks muc 1 (cancelled) la ban ghi dung luc truoc quyet dinh. Bien ban M8 ban truoc: bien-ban-m8-landed-false.yaml.
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/issues/1134#issuecomment-6650528815
+    noi_dung: >-
+      Chu kho chon "Nang kieu b" trong phien session_015GtxrZjmb1AiDoYkoSFqph (05-11-2026), thay ve "ho so landed false" cua
+      issuecomment-6650045712; dong #1134 va no rieng #1214 giu nguyen. Comment ghi ho chi thi truc tiep trong phien.
+    do_duoc: >-
+      measured — readback-comment-6650528815.json: user ducthangho, author_association OWNER, created_at 2026-11-05T05:28:48Z,
+      than chua "trang_thai: da_duyet". CAVEAT #566: agent dang bang token chu kho; ban chep, khong phai chu ky.
+  phu_bang_hau_due:
+    merge_commit: 2be93d3a4f892482dcadd7ce341b2c4db0a8dbff
+    hau_due: b3249c3e8a5a8f3af5691160493b8ab3d52db99c
+    run_hau_due: 41397085109
+    tieu_chi_may: >-
+      measured — phu-hau-due-2be93d3-b3249c3.txt: (1) merge-base --is-ancestor 2be93d3 b3249c3 rc 0; (2) tree OID scripts/ hai ben
+      cung d1d230c2c6d2b4578e4833af75130311857a26f3; (3) git diff --quiet tren 184 tep goi cua 2be93d3 + scripts/ rc 0; (4) phan khac
+      ngoai ops/land/ chi la bieu thuc concurrency trong ci.yml/launcher-windows.yml, ops/ci_duong_nhanh_test.py, CLAUDE.md, ops/specs,
+      ops/reviews (khong tep nao trong goi hay scripts/).
+    bon_moc: 'loi_khai_co_neo — ops/land/pr1141-wp1132-land-evidence.yaml post_merge_checks muc 1: run 41397085109 du bon moc measured (ci/provenance.yaml, gate-output-41397085109.txt: tl selftest 1776/1776 = 1775 + fragment wp1134).'
+    gioi_han: 'Do tren hau due KHONG chung minh moi truong runner luc 05:57Z cho M; chi chung minh cung ma va cung test da xanh tren cung run.'
+  phan_bien_proxima:
+    prompt: proxima-phan-bien-prompt.md
+    ghi_chu: >-
+      loi_khai_co_neo — Proxima tren VM, route chatgpt:gpt-6-thinking (reportedModel "chatgpt", khong chung minh model upstream),
+      request 9abe3d54d22a411a96b89f88ad8f25fd, prompt sha256 ed1512b6… khop hai dau, 35 s. Q2 de phan chung "D bo test cua A":
+      do lai KHONG xay ra (tieu chi (2)(3) tren). Q1 ket luan "phai la push" sinh tu cach dat cau cua phien (§10.2.2 chi doi GHI event;
+      tien le #1113 dispatch). Tra loi luu tren VM, khong chep vao kho.
+  landed: true
+  landed_dieu_kien: >-
+    (1) bon moc §10.2.2 measured tren run 41397085109 cua HAU DUE b3249c3, KHONG tren chinh 2be93d3 (run 41397040659 cancelled 0 job);
+    chu kho CHAP NHAN phu bang hau due, tieu chi may o phu_bang_hau_due. (2) lease wp1134-r2-g1-claude rut han 9a2c5c6, HẾT_HẠN.
+    (3) bookkeeping: ho so nay; M8 bien-ban-m8.yaml kiem-dong-wp rc 0 (kiem-dong-wp-kieu-b.txt). (4) review: connector sach tren
+    DUNG authorized_head 15872b7; offline 169de7ad approve (thuat_lai). (5) uy quyen: quyet_dinh_chu_kho tren, caveat #566.
+    (6) muc tieu: N3 + phan chung changelog.d measured tren master. (7) §8.1 van CHUA_DAT (model/effort/sandbox offline not_measured);
+    landed di theo quyet dinh chu kho, khong nang assurance.

@@ -63,10 +63,13 @@ for nut in AL_RETRY AL_RETRY_DELAY AL_RETRY_MAX_TIME; do
     loi 13 "\`${nut}\` phai la so nguyen khong dau (duoc '${!nut}')"
   fi
 done
-# Kiem DO DAI truoc phep so hoc: bash so hoc 64 bit TRAN SO am tham (mot chuoi chu so
-# dai co the quay vong thanh gia tri trong khoang), va `10#` de `08` khong bi doc la bat phan.
-if [ "${#AL_RETRY_MAX_TIME}" -gt 4 ] \
-   || (( 10#$AL_RETRY_MAX_TIME < 1 || 10#$AL_RETRY_MAX_TIME > 1800 )); then
+# Bo so 0 DUNG DAU truoc, roi moi kiem DO DAI, roi moi lam so hoc. Bash so hoc 64 bit TRAN
+# SO am tham (chuoi chu so dai quay vong thanh gia tri trong khoang), nen phai chan do dai;
+# nhung chan tren chuoi THO thi tu choi oan `000300` hop le (cross-review wp1237 luot 1, P2).
+# Chuoi toan so 0 thanh rong => coi la 0, bi tu choi duoi day. `10#` de `08` khong la bat phan.
+MT_CHUAN="${AL_RETRY_MAX_TIME#"${AL_RETRY_MAX_TIME%%[!0]*}"}"
+MT_CHUAN="${MT_CHUAN:-0}"
+if [ "${#MT_CHUAN}" -gt 4 ] || (( 10#$MT_CHUAN < 1 || 10#$MT_CHUAN > 1800 )); then
   loi 13 "\`AL_RETRY_MAX_TIME\` phai trong 1..1800 giay (duoc '${AL_RETRY_MAX_TIME}')"
 fi
 

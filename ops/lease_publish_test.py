@@ -14693,8 +14693,12 @@ def t237_cai_actionlint_retry_song_qua_5xx():
                            "NO_PROXY": "127.0.0.1,localhost",
                            "no_proxy": "127.0.0.1,localhost"})
                 mt.update(nut)
-                r = subprocess.run([bash, str(kich)], env=mt, timeout=240,
-                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                try:
+                    r = subprocess.run([bash, str(kich)], env=mt, timeout=240,
+                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                except subprocess.TimeoutExpired:
+                    # quá hạn là KẾT QUẢ ĐO của vế (retry kéo quá dài), không phải ngoại lệ vô can
+                    return None, "", "QUÁ HẠN 240s", may.so_yeu_cau, dich
                 return r.returncode, r.stdout or "", r.stderr or "", may.so_yeu_cau, dich
 
         def doi(ve, dieu, mo_ta):
@@ -14714,6 +14718,17 @@ def t237_cai_actionlint_retry_song_qua_5xx():
             f"luôn 504, AL_RETRY=2 ⇒ đòi rc=4, 3 yêu cầu, thông điệp nêu số lần thử và "
             f"trần; được rc={rc}, {n} yêu cầu, stderr={err.strip()[-300:]!r}")
 
+        # D7 (ngoài bảng đặc tả, cross-review lượt 1): mặc định AL_RETRY=8 phải ĐO được — D1 chỉ
+        # cần 3 lần thử lại nên hạ mặc định xuống 3 vẫn qua D1.
+        rc, ra, err, n, _ = chay("D7", [("504",)], AL_RETRY_MAX_TIME="60")
+        doi("D7", rc == 4 and n == 9, f"luôn 504, mặc định AL_RETRY, trần 60s ⇒ đòi rc=4 và 9 yêu cầu "
+            f"(1+8); được rc={rc}, {n} yêu cầu")
+        # D8: nhịp chờ và trần thời gian phải CÓ TÁC DỤNG. Cách 1s, trần 6s ⇒ khoảng 6–7 lần
+        # thử. Bỏ `--retry-delay` thì curl lùi 1,2,4… ⇒ ~3 lần; bỏ `--retry-max-time` ⇒ 9.
+        rc, ra, err, n, _ = chay("D8", [("504",)], AL_RETRY_MAX_TIME="6")
+        doi("D8", rc == 4 and 5 <= n <= 8, f"luôn 504, cách 1s, trần 6s ⇒ đòi rc=4 và 5..8 yêu "
+            f"cầu; được rc={rc}, {n} yêu cầu")
+
         for k, (ten, gt) in enumerate((("AL_RETRY", "abc"), ("AL_RETRY_DELAY", "-1"),
                                        ("AL_RETRY_MAX_TIME", "0"),
                                        ("AL_RETRY_MAX_TIME", "1801"),
@@ -14723,6 +14738,17 @@ def t237_cai_actionlint_retry_song_qua_5xx():
             doi("D4", rc == 13 and n == 0 and ten in err,
                 f"{ten}={gt!r} ⇒ đòi rc=13, 0 yêu cầu, tên biến trong thông điệp; được "
                 f"rc={rc}, {n} yêu cầu, stderr={err.strip()[-200:]!r}")
+
+        # Ca DƯƠNG của M2 (cross-review lượt 1, P2): số 0 đứng đầu vẫn là số nguyên hợp lệ
+        # trong khoảng. Chặn độ dài trên chuỗi THÔ từng từ chối oan `000300`.
+        for k, gt in enumerate(("08", "0099", "00001", "000300", "0001800", "0" * 30 + "1")):
+            rc, ra, err, n, _ = chay(f"D4p-{k}", [("goi", dung)], AL_RETRY_MAX_TIME=gt)
+            doi("D4", rc == 0 and n == 1, f"AL_RETRY_MAX_TIME={gt!r} hợp lệ (1..1800) ⇒ đòi "
+                f"rc=0, 1 yêu cầu; được rc={rc}, {n} yêu cầu, stderr={err.strip()[-200:]!r}")
+        for k, gt in enumerate(("00000", "0001801")):
+            rc, ra, err, n, _ = chay(f"D4z-{k}", [("goi", dung)], AL_RETRY_MAX_TIME=gt)
+            doi("D4", rc == 13 and n == 0, f"AL_RETRY_MAX_TIME={gt!r} ngoài khoảng ⇒ đòi rc=13, "
+                f"0 yêu cầu; được rc={rc}, {n} yêu cầu")
 
         rc, ra, err, n, dich = chay("D5", [("504",), ("goi", khac)])
         doi("D5", rc == 9 and n == 2 and not moc.exists()

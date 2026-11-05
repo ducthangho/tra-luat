@@ -10145,7 +10145,7 @@ CASES += [
     ("r1187_h_presence_rc", _ca1187("spec", lambda x:_git_status1187(x,"ls-tree",2))),
     ("r1187_milestone_parent_rc", _ca1187("human", lambda x:_git_status1187(x,"ls-tree",2))),
     ("r1187_cli_missing_remote", _c1106_ca(12,"thiếu human remote run",doi=_missing_cli1187,repo="ducthangho/tra-luat")),
-    ("r1187_cli_missing_transition", _c1106_ca(12,"thiếu owner comment",doi=lambda x,w,h:_missing_cli1187(x,w,h,True),repo="ducthangho/tra-luat")),
+    ("r1187_cli_missing_transition", _transition_case1187(12,"thiếu owner comment",doi=lambda x,w,h:_missing_cli1187(x,w,h,True),repo="ducthangho/tra-luat")),
     ("r1187_cli_missing_model_run", _c1106_ca(12,"thiếu cặp --offline-run-json/--offline-stdout",cam="TypeError",doi=lambda x,w,h:h and x.update(missing_model_run=True))),
     ("r1187_cli_missing_model_stdout", _c1106_ca(12,"thiếu cặp --offline-run-json/--offline-stdout",cam="TypeError",doi=lambda x,w,h:h and x.update(missing_model_stdout=True))),
 ]
@@ -10349,7 +10349,7 @@ def _packet_type1187(x, kind, value):
     x["ls"]["packet_id"] = value
     if kind == "spec" and type(value) is int:
         _format1187(x, f"packet_id: {value}\nrevision: 1\n".encode())
-    if kind == "human": x["audit"]["packet"] = value
+    if kind == "human": x["audit"]["packet"] = x["tr"]["packet"] = value
 
 
 for kind in ("spec","human"):
@@ -10460,17 +10460,37 @@ for label,value in (("min","0001-01-01T00:00:00+14:00"),("max","9999-12-31T23:59
     CASES.append(("r1187_cli_datetime_"+label,_c1106_ca(12,"K4 review offline: --expires-utc vượt biên UTC",cam="Traceback",doi=lambda x,w,h,v=value:_overflow_cli1187(x,w,h,v),repo="ducthangho/tra-luat")))
 MUTANTS.update({
     "r1187_partial_model_diagnostic": ('        if not (a.offline_run_json and a.offline_stdout):\n            raise ValueError("thiếu cặp --offline-run-json/--offline-stdout")\n', '', ["r1187_cli_missing_model_run","r1187_cli_missing_model_stdout"]),
-    "r1187_datetime_overflow": ('    except OverflowError:\n        _die(RC_ARG, f"--expires-utc vượt biên UTC: {chuoi!r}")', '    except OverflowError:\n        raise', ["r1187_cli_datetime_min","r1187_cli_datetime_max"]),
+    "r1187_datetime_overflow": ('    except OverflowError:\n        _die(RC_ARG, f"--expires-utc vượt biên UTC: {chuoi!r}")', '    except OverflowError:\n        return datetime(2026,11,4,9,1,tzinfo=timezone.utc)', ["r1187_cli_datetime_min","r1187_cli_datetime_max"]),
     "r1187_transition_reason_cli": ('not tr["reason"].strip()', 'False', ["r1187_cli_transition_bad"]),
 })
 
 
 def _controls1187(name, targets):
     # Actual healthy consumers supplement, rather than replace, the cross-family controls.
-    # This tightening mutant intentionally disables human K4, including transition CLI.
-    excluded = set(targets) | ({"r1187_cli_transition"} if name == "r1187_drop_human_call" else set())
+    # These broad mutants deliberately disable human K4 or reroute modern audits to legacy transition.
+    affected = {"r1187_drop_human_call": {"r1187_cli_transition"},
+                "r1187_drop_run_time": {"r1187_cli_human"}}
+    excluded = set(targets) | affected.get(name,set())
     return tuple(t for t in ("r1187_spec_positive","r1187_human_positive","r1187_cli_human","r1187_cli_transition","r1187_docs_positive")
                  if name.startswith("r1187_") and t not in excluded)
+
+
+def _overflow_crash_credit1187(c):
+    dev = c.tmp/"overflow-crash"; dev.mkdir()
+    anchor = '    except OverflowError:\n        _die(RC_ARG, f"--expires-utc vượt biên UTC: {chuoi!r}")'
+    source = c.script.read_text(encoding="utf-8"); assert source.count(anchor) == 1
+    script = dev/"packet_loop.py"
+    script.write_text(source.replace(anchor,'    except OverflowError:\n        raise',1),encoding="utf-8",newline="\n")
+    (dev/"launcher.py").write_bytes((HERE/"launcher.py").read_bytes())
+    saved = globals()["CASES"]; case = dict(saved)["r1187_cli_datetime_min"]
+    try:
+        globals()["CASES"] = [("crash",case)]
+        result = chay_suite(script,c.tmp/"crash-probe")
+    finally: globals()["CASES"] = saved
+    assert isinstance(result["crash"],_TinDungGia), "overflow crash received semantic credit"
+
+
+CASES.append(("r1187_overflow_crash_credit",_overflow_crash_credit1187))
 
 
 def main() -> int:

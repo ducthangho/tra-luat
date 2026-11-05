@@ -48,7 +48,10 @@ reviewer_ghi_chu: 'Codex offline qua launcher.py run tren SHA ung vien cuc bo (A
 access: read-write
 
 spec_path: ops/specs/cloud-setup-p3c-contract-r1.md
-spec_ref: refs/heads/master
+spec_ref_go_ghi_chu: >-
+  05-11-2026 ~12:30Z chu kho duyet "a'": BO spec_ref (ADR-0063: spec_ref la tuy chon; khai thi phai ghim
+  refs/heads/...@<OID40> va spec dung grammar H1/packet_id). Khong spec_ref => kiem-merge K1 doc spec tai H, so sha256 voi spec_hash.
+  Spec da tren master nen co mat tai H sau khi nhanh merge master. Moi truong khac giu nguyen.
 spec_source_oid: c5a1c3d1230b347333d4ca10f7dc514b817f7a9d
 spec_blob: d108533d28e2dcfce0529aebe7faf8107ed8170e
 spec_sha256: db83020d7cd57c8c9981c8f94ffcc50bf59d536a7224c1f3fb6ae6195511de3a

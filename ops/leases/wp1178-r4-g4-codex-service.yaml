@@ -1,0 +1,96 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1178
+packet_id: wp1178
+mission_issue: 1177
+mission_revision: 2
+mission_plan_hash: a5f11a52132db3ebe5951e7dcdcb0782f05259e6d514d11150680769503d7b6b
+revision: 4
+generation: 4
+lease_id: wp1178-r4-g4-codex-service
+role: executor
+provider: codex
+executor: codex
+model_family: openai
+execution_surface: codex_service
+transport: machine
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+reviewer: human
+reviewer_execution_surface: manual_audit
+reviewer_transport: human
+assurance_target: human_audited
+access: read-write
+spec_path: ops/specs/wp1178-r4-p2-ci.md
+spec_hash: 7886c45258405b3376f34ea084d12a13faceaabf056cf898a3a7db9e588bf0e2
+spec_sha256_required: 7886c45258405b3376f34ea084d12a13faceaabf056cf898a3a7db9e588bf0e2
+spec_ref: refs/heads/ops/wp1178-r4-p2-proposal@23e75a488361ed3c1de007a56b328bf518969437
+prompt_path: ops/specs/wp1178-r4-p2-ci.md
+prompt_sha256_required: 7886c45258405b3376f34ea084d12a13faceaabf056cf898a3a7db9e588bf0e2
+branch: agent/wp1178-g4-codex-service
+branch_ownership: exclusive
+base_sha: ec1b18a2a007fc2e697249c727a2ca8391ab209e
+start_from_sha: a7b5aedc122575a66280ace3ff7f2567251af8e2
+reviewed_sha_required: a7b5aedc122575a66280ace3ff7f2567251af8e2
+target_branch_neu_land: master
+write_set: &id001
+- ops/environment/update-linux.sh
+- .github/workflows/ci.yml
+effective_write_set: *id001
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1177#issuecomment-6647727192
+recorded_by: codex-service-controller
+recorder_is_executor: false
+leased_at_utc: '2026-11-05T02:21:13Z'
+heartbeat_at: '2026-11-05T02:21:13Z'
+lease_until: '2026-11-05T04:21:13Z'
+lease_expires_at_utc: '2026-11-05T04:21:13Z'
+heartbeat_required_minutes: 360
+run_minutes: 90
+run_started_at_utc: '2026-11-05T02:21:13Z'
+run_deadline_utc: '2026-11-05T03:51:13Z'
+depends_on: []
+thay_the_cho:
+- wp1178-r3-g3-codex
+nang_tran:
+  ai_nang: ducthangho via https://github.com/ducthangho/tra-luat/issues/1177#issuecomment-6647727192
+  can_cu: Preserve predecessor5files/+916 baseline; repair3P2 in updater, embedded
+    entrypoint selftest and exactlyoneCIstep. Frozen approved spec7886 and MCR bounded
+    caps; no baseline shift.
+  tran_cu: ADR0053≤6files/450added
+  tran_moi: ≤6netfiles/1300added from immutableec1; g4 writes only2exactpaths
+size_limit:
+  effective_write_paths: 2
+  net_product_files: 6
+  added_lines: 1300
+review_budget_override:
+  owner: ducthangho
+  source: https://github.com/ducthangho/tra-luat/issues/1177#issuecomment-6647727192
+  known_historical_model_outputs_minimum: 6
+  historical_completeness: unrecovered cost/attempt history KHONG_DO_DUOC; no reset
+  additional_connector_calls: 1
+  current_additional_window_used: 0
+  current_additional_window_reserved: 1
+  local_model_reviews_allowed: 0
+  scope: one productconnector on eventual auditedg4H; distinct infra1187 cap5
+execution_allowance:
+  fresh_executor_agents: 1
+  run_minutes: 90
+  starts_at: grant timestamp above
+  hard_deadline: '2026-11-05T03:51:13Z'
+  cumulative_history: unknown remains unknown; finite extra window authorized by owner;
+    no total-under360 claim
+authority_notes:
+- One separate fresh-context Codex Executor agent; controller is not source writer.
+  No child delegation or model review.
+- Only two exact source writes. Four inheritedproductfiles must retain a7blobhashes;
+  all source diff measured from immutableec1.
+- All3P2 require actual-entrypoint fixtures, semanticmutants and healthycontrols;
+  no real package/network/profile/credential operations in harness.
+- No codepush/PR/ready/merge/land/deploy from Executor. FutureH needs own human audit
+  before push and exact-head land authority; do not reuse a7 authorization.
+- ADR0063 from1187 is land-gate dependency, not permission to copy new spec into product.
+- Max90min from grant; lease expiry/CI/review/workingstate does not extend harddeadline.
+  Atdeadline stop and handoff all artifacts.

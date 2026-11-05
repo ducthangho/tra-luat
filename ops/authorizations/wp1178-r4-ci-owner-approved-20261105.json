@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "event": "owner_approved_exact_mcr_and_packet_spec",
+  "change_request_id": "mcr-1177-p2-continuation-ci-20261105",
+  "mission_issue": 1177,
+  "mission_revision": 2,
+  "plan_hash": "a5f11a52132db3ebe5951e7dcdcb0782f05259e6d514d11150680769503d7b6b",
+  "packet_issue": 1178,
+  "packet_id": "wp1178",
+  "revision": 4,
+  "generation": 4,
+  "spec_ref": "refs/heads/ops/wp1178-r4-p2-proposal@23e75a488361ed3c1de007a56b328bf518969437",
+  "spec_path": "ops/specs/wp1178-r4-p2-ci.md",
+  "spec_sha256": "7886c45258405b3376f34ea084d12a13faceaabf056cf898a3a7db9e588bf0e2",
+  "owner": "ducthangho",
+  "owner_response_verbatim": "Duyệt bản mới và giao Executor riêng",
+  "recorded_at_utc": "2026-11-05T02:11:57.063541+00:00",
+  "recorder": "openai_codex/codex_service/machine",
+  "recorder_is_executor": false,
+  "decision": "approved",
+  "approved_scope": [
+    {
+      "field": "envelope.max_attempts_per_packet",
+      "from": 3,
+      "to": 4
+    },
+    {
+      "scope": "1178r4g4",
+      "executor_allowance_minutes": 90,
+      "historical_cloud_spend": "KHONG_DO_DUOC; preserve history, finite additional window only"
+    },
+    {
+      "scope": "1178r4g4",
+      "size_cap_files": 6,
+      "size_cap_added_lines": 1300,
+      "immutable_base": "ec1b18a2a007fc2e697249c727a2ca8391ab209e"
+    },
+    {
+      "scope": "product1178",
+      "additional_connector_calls": 1,
+      "local_model_calls": 0,
+      "known_historical_outputs": 6,
+      "unrecovered_history": "KHONG_DO_DUOC; no reset; do not borrow1187 budget"
+    },
+    {
+      "field": "Mission write constraint",
+      "from": "only ops/environment/",
+      "to": "ops/environment/ plus exactly one Linux updater selftest step in .github/workflows/ci.yml, unchanged setup/permissions/other steps"
+    },
+    {
+      "scope": "1178r4g4",
+      "executor_provider": "codex",
+      "execution_surface": "codex_service",
+      "environment": "cloud",
+      "fresh_executor_agent_invocations": 1,
+      "source_writer_is_land_controller": false
+    }
+  ],
+  "no_deploy_or_ruleset_mutation": true,
+  "no_future_head_human_audit_or_land_approval": true,
+  "requires_real_grant_and_fence_before_source_edit": true,
+  "decision_url": "https://github.com/ducthangho/tra-luat/issues/1177#issuecomment-6647727192"
+}

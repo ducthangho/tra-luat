@@ -1,0 +1,13 @@
+{
+  "head": "91686a66d855a9ddae9dcf4567b13ddaa092cbc2",
+  "archive_sha256": "f9d08dcee003957d33220b5ad467e07122237e9d2f249001689f24c6afabd45c",
+  "archive_bytes": 25170,
+  "crc": "passed",
+  "all_manifest_hashes": "passed",
+  "baseline": "4/4",
+  "candidate": "7/7",
+  "driver_rc": 0,
+  "lock_bytes_after_driver": 0,
+  "completed_at_utc": "2026-11-05T05:25:00.295630+00:00",
+  "scope": "native Windows selected paired; actual new CI run body Windows guard; no Linux installer credit"
+}

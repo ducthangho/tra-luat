@@ -1,0 +1,10 @@
+{
+  "head": "91686a66d855a9ddae9dcf4567b13ddaa092cbc2",
+  "tree": "e9d2b287343f44ac29a0713e0c0ea6b909aa408c",
+  "manifest_sha256": "254784ddf630577a47499e954a1e4283cccdabb341381a5dc75c4868987da383",
+  "named_files_verified": 112,
+  "archive_sha256": "46d6e2f6b3735b4feffaf9a9c666c4183012efa3a45153a11b9e6a6274b02f1d",
+  "archive_bytes": 283700,
+  "crc": "passed",
+  "raw_patches_in_archive": true
+}

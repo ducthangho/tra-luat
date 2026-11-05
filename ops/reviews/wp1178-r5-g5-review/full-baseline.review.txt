@@ -1,0 +1,1225 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 75b5add..2b2c9aa 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -809,7 +809,12 @@ jobs:
+         shell: bash
+         env:
+           AL_VER: 1.7.7
+-        run: bash ops/chay_lease_publish_test.sh
++        run: |
++          set -euo pipefail
++          bash ops/chay_lease_publish_test.sh
++          if test "$RUNNER_OS" = Linux; then
++            bash ops/environment/update-linux.sh --selftest
++          fi
+       # `don-nhanh.ps1` XOÁ NHÁNH REMOTE — thao tác không hoàn tác được ở phía PR: xoá
+       # nhầm một nhánh đang là BASE của PR đang mở thì GitHub ĐÓNG các PR ấy, và tạo lại
+       # nhánh không mở lại chúng. Bộ này khoá đúng chỗ đó, cộng chốt fail-close khi không
+diff --git a/ops/environment/README.md b/ops/environment/README.md
+new file mode 100644
+index 0000000..19837a1
+--- /dev/null
++++ b/ops/environment/README.md
+@@ -0,0 +1,73 @@
++# tra-luat executor/reviewer environment
++
++Both update scripts use `ops/cong_cu.yaml` and `ops/cong_cu.py` for the shared baseline: git, Python, PyYAML, jsonschema, actionlint, shellcheck, ripgrep and Bash. Linux system mode and Windows probe each baseline entry and invoke `ops/cai_cong_cu.sh` only for entries that are not `DAT`, with ShellCheck prepared before actionlint. Linux system mode bootstraps checker PyYAML only when its import is missing, handles nonzero probe exits without aborting repair under `set -e`, and requires each repaired tool to report `DAT` in the parent process. Linux actionlint installation uses child-scoped `AL_DICH=$HOME/.local/bin`; that directory is already on the parent's PATH, so it does not depend on the installer's temporary default or child PATH changes. Linux `--user-only` installs pinned Python dependencies in an isolated venv and runs the same checker. `actionlint` is intentionally pinned to 1.7.7 by the repository manifest; the canary checks its ShellCheck integration. `--latest`/`-Latest` upgrades only the tools named in `--tools`/`-Tools` (default `claude,codex,agy,nlm,gws`); a tool already at the target version is not reinstalled. System tools use the configured OS package manager, so "latest" for those means the newest version in that repository, not necessarily the upstream release. Python and Node major updates can affect existing environments and are never selected by default.
++
++Run the scripts without `--apply`/`-Apply` to inspect. Check mode installs nothing and exits with the checker's exit code. The apply mode refuses to proceed while related tool/runtime processes are active (Claude, Codex, AGY, nlm, gws, uv, Node, Python; on Windows also WSL); on Linux it also refuses when `pgrep` is unavailable. An unknown `--tools` entry is rejected before any installation. `--persist-path`/`-PersistPath` is opt-in and adds user CLI directories idempotently: on Windows it edits the raw `HKCU\Environment\Path` value so existing `%VAR%` entries are preserved; on Linux it appends one marked, POSIX-compatible block to `~/.profile` and `~/.bashrc` that also sets `NPM_CONFIG_PREFIX=$HOME/.local` (do not use it together with nvm). Reopen terminals after changing persistent PATH.
++
++The updater reports only whether `TL_MASTER_KEY`, `TL_SECRETS_FILEID`, `TL_AGENT_CREDS_FILEID`, `TL_WEBAPP`, `TL_TOKEN` and `TL_PROFILE` have nonempty values. It never prints values, generates keys, copies credentials between Windows and WSL, runs `secrets-stage`, or runs `tl bootstrap`. The tra-luat config load order is environment `TL_WEBAPP`/`TL_TOKEN`, explicit `--config`, `~/.tra_luat_config.json`, then `/tmp/tra_luat_config.json`. WSL has its own HOME and must be bootstrapped separately with the repository's documented secret flow once the operator has securely supplied its key.
++
++Windows requires an existing PowerShell 7, Git for Windows (including Bash/cygpath) and callable Python with pip/venv support. From that baseline, plain `-Apply` installs missing gh and Node LTS (including npm) through existing Chocolatey, then missing uv in `%LOCALAPPDATA%\tra-luat-tools\venv`, Claude/Codex/gws from the official npm packages into `%APPDATA%\npm`, and nlm with uv's PyPI package `notebooklm-mcp-cli`. Supplemental CLIs with a successful nonempty version probe are retained; baseline entries already `DAT` are retained. Missing tools are installed regardless of `-Tools`; that list selects upgrades only. Chocolatey operations require an already elevated PowerShell and stop with an explicit prerequisite error otherwise; the updater neither installs a package manager nor opens an elevation prompt. An existing Node with missing/broken npm must be repaired separately, so installing npm cannot silently replace that Node major.
++
++Windows resolves Git Bash beside `git.exe` before either check or apply, and promotes its bin directory on the process PATH so the shared checker cannot select the WSL Bash launcher. Check mode makes only this process PATH adjustment; it does not write persistent PATH. After apply reconciles tool directories, Git Bash is promoted again. Missing actionlint is installed into `%USERPROFILE%\.local\bin` instead of the shared installer's temporary default, then checked in the PowerShell parent; the temporary `AL_DICH` override is restored after installation.
++
++Windows `-Apply` reconciles known user bin, WinGet Links, Chocolatey bin, Node, gh, npm, managed venv and AGY directories into its own process PATH after installs and before final checks. A repaired baseline candidate is accepted only after the shared checker reports that exact tool `DAT` in the parent process; this also handles a stale executable earlier on PATH. No child PATH receipt or installer stdout is imported. This session reconciliation does not require `-PersistPath`; it lasts for the updater process. The login script also recognizes the managed venv Scripts directory. Custom npm/uv install directories must already be on the caller's PATH; unsupported layouts or shadowing cause an explicit failure rather than importing arbitrary paths.
++
++On Ubuntu/WSL, `--user-only` never calls sudo or apt. It checks its prerequisites before any change and requires preinstalled git, python3, python3-venv (`ensurepip`), Bash, ripgrep, ShellCheck, actionlint and PowerShell; use system mode (which needs root or passwordless `sudo -n`) for a minimal Ubuntu installation. System mode supports Ubuntu only. For root, a function exported only to the shared installer's child process translates exactly `sudo apt-get ...` into `apt-get ...`; root does not need a sudo binary, and other sudo commands are refused by that adapter. Non-root system mode uses existing passwordless sudo. In `--user-only` mode, missing native Node (latest LTS) and gh are installed user-local from the official archives with SHA256 verification; system mode uses apt packages. If native Node already exists but native npm is missing or its `npm --version` probe fails, user-only mode stops before installation and identifies the Node path: repair npm through that installation's package manager and rerun. It does not install a second Node or silently change the Node major. The npm probe is also required after a managed Node install. CLIs that resolve to Windows binaries under `/mnt/*` (including Windows AGY) are treated as missing and may receive native Linux installs.
++
++AGY is the `google-antigravity/antigravity-cli` project; its CLI states that it is not an officially supported Google product. Both updaters install missing AGY and upgrade selected AGY from the latest GitHub release API only after requiring and verifying the asset's `sha256:` digest; neither invokes `agy update`. Windows selects `agy_cli_windows_x64.zip` or `agy_cli_windows_arm64.zip` using native OS architecture, accepts exactly one regular root `antigravity.exe` entry, checks its version, then atomically replaces `%LOCALAPPDATA%\agy\bin\agy.exe` using a staged file on the same volume. Unexpected layouts (including extra entries, paths and links), missing/invalid digests, hash mismatches and unsupported architectures fail closed. Installation paths containing reparse points are refused. Linux retains its single-root `antigravity` tar layout check and user bin installation. Both parse a single bare, `version:`, `agy` or `antigravity` semantic version line, allowing unrelated banner lines, and skip download/install when the resolved CLI already reports the release version. If an existing native AGY needs an update or has an unreadable version, only the managed destination (`$HOME/.local/bin/agy` on Linux, `%LOCALAPPDATA%\agy\bin\agy.exe` on Windows) may be replaced. An AGY resolved elsewhere causes a failure before download/install, with its path and guidance to upgrade that installation through its package manager or remove it before a managed install; no second user-local AGY is installed. An existing native AGY at the latest version remains a no-op at any path. After installation they verify version and PATH resolution. GitHub API access is required even for this latest-version comparison; the published digest provides integrity, not an independent publisher signature. Windows persistent PATH remains opt-in with `-PersistPath`.
++
++Do not use the legacy `tl-setup.ps1` to create plaintext `COWORK-paste.txt` as part of generic updates. The updater does not read or change secret values.
++
++## Verification status
++
++Generation 3 remediation on 2026-11-04 was edited through Remote Desktop Commander file tools only. No commands, tests or apply modes were run by this executor. This continuation also adds ordered Windows supplemental installs, parent PATH reconciliation and the root-without-sudo adapter. The latest Linux system-mode remediation replaces unconditional baseline batch installation with per-entry shared-checker probes and parent verification, bootstraps missing checker PyYAML, and installs actionlint into the parent-visible user bin. No shell, Git or tests were run for these edits. Dispatcher must verify compliant baseline repeat-apply performs no baseline installs, missing PyYAML bootstrap, nonzero probes under `set -e`, missing/stale actionlint repair without `--persist-path`, preservation of a caller's `AL_DICH`, and failure when a repaired baseline remains shadowed in the parent. This continuation changes `--user-only` to refuse existing native Node with missing/broken npm and adds AGY destination guards on both platforms. Dispatcher must verify native Node with absent, Windows-resolved or failing npm stops without a second Node install; working npm retains Node; absent native Node still installs and probes npm; external old/unparseable AGY refuses without download/install; external latest AGY is a no-op; old managed AGY updates through verified assets; and WSL Windows AGY permits a native install. These cases and all existing canaries remain unrun by this executor. Dispatcher must verify a baseline-only Windows host, repeat-apply no-op, selected upgrades, elevation refusal, fresh baseline binaries visible to the PowerShell parent without `-PersistPath`, root Ubuntu without sudo, and `--user-only` making no sudo/apt calls. The sparse checkout now includes `ops/cai_actionlint.sh` and `requirements.txt`; the executor read the actionlint installer but did not run it. This continuation resolves Git Bash before check-only, keeps it on the parent process PATH, and directs missing actionlint to the known user bin. Dispatcher must verify check-only with Bash absent from the initial PATH and with the WSL launcher earlier on PATH, repeated PATH reconciliation, missing/stale actionlint repair in the parent, and restoration of `AL_DICH` after success or failure. Dispatcher verification is pending: PowerShell parser, `bash -n`, ShellCheck, both check modes and login smoke tests; AGY bare/banner-plus-`version:` parsing and ambiguous/nonzero output; latest-version no-op; Windows x64/arm64 selection; missing/invalid/wrong digest; unsafe/duplicate/extra ZIP entries; PATH shadowing; locked binary and atomic replacement failure. Live Windows ZIP layout and Windows/Linux apply remain unmeasured for this revision. Run apply only after related CLI/runtime jobs finish.
++
++Historical measurements for the generation 2 candidate on 2026-11-04 (ASUS, Windows 11), not revalidated after generation 3 edits:
++
++- PowerShell 7.6.9 and Windows PowerShell 5.1 parse both `.ps1` files without errors; `bash -n` passes for both `.sh` files under Git Bash and WSL Debian 13; ShellCheck reports no findings.
++- Windows check mode exited 0: shared checker `trang_thai_tong=DAT`, actionlint/ShellCheck canary `DAT`. A stub checker exiting 7 makes check mode exit 7.
++- Login scripts: dot-sourcing/sourcing twice leaves PATH unchanged after the first time and sets `TL_REPO` (pwsh 7, PowerShell 5.1, Git Bash, WSL Debian); running them without dot-sourcing/sourcing refuses and changes nothing.
++- WSL Debian 13 (no Python) check mode exits 5 with "Python is required"; a stub checker exiting 7 makes it exit 7; an unknown `--tools` entry exits 2.
++- Not measured for this candidate: any apply mode (active Codex/Python/Node/Claude jobs on the host), Linux check mode with a real checker (the WSL Ubuntu distributions on the host did not start), Windows VM system scope.
++
++Earlier measurement of the pre-review scripts on 2026-11-04 (before the fixes in this candidate): WSL Ubuntu 24.04 `--apply --user-only --persist-path --latest` exited 0 with checker `DAT` and no sudo/system package changes; Windows `-Apply -Latest -Tools codex` stopped before mutation because Codex, Python and WSL processes were active; Windows VM `-ChiKiem -PhamVi NguoiDung` with the VM's own updater reported 11/11, system scope not run. WSL live `tl ping --json` reached the webapp but exited 1 because the deployed API version differed from the checkout's expected version; resolve that against the authoritative repo and deployment, do not edit a contract constant to silence it.
++
++## Dùng trực tiếp từ repository
++
++Từ thư mục gốc của `tra-luat`:
++
++```powershell
++pwsh -File ops/environment/update-windows.ps1 -Repo .
++pwsh -File ops/environment/update-windows.ps1 -Repo . -Apply -PersistPath
++pwsh -File ops/environment/update-windows.ps1 -Repo . -Apply -Latest -Tools claude,codex,agy,nlm,gws
++. ./ops/environment/login-windows.ps1
++python scripts/tl.py doctor --offline
++```
++
++```bash
++bash ops/environment/update-linux.sh --repo .
++bash ops/environment/update-linux.sh --repo . --apply --user-only --persist-path
++bash ops/environment/update-linux.sh --repo . --apply --user-only --latest --tools claude,codex,agy,nlm,gws
++source ops/environment/login-linux.sh
++python scripts/tl.py doctor --offline
++```
++
++Trên Ubuntu tối giản, bỏ `--user-only` và chạy với root hoặc `sudo` không cần mật khẩu (`sudo -n`). `--user-only` không bao giờ gọi sudo/apt và dừng trước mọi thay đổi nếu thiếu tiền điều kiện. Chạy chế độ kiểm tra trước, chỉ dùng `--apply` khi các công việc đang dùng CLI đã kết thúc.
++
++### Nạp PATH mỗi lần mở shell (opt-in)
++
++Script login không tự sửa profile. Muốn nạp mỗi lần mở shell thì tự thêm một dòng, thay đường dẫn theo checkout.
++
++PowerShell — thêm vào `$PROFILE`:
++
++```powershell
++Add-Content -LiteralPath $PROFILE -Value ". 'D:\Quốc hội\tra-luat\ops\environment\login-windows.ps1'"
++```
++
++Bash/WSL — thêm vào `~/.bashrc` (script cần Bash, đừng đặt vào `~/.profile` vì profile đó có thể chạy dưới `sh`):
++
++```bash
++printf '%s\n' "source '/mnt/d/Quốc hội/tra-luat/ops/environment/login-linux.sh'" >> ~/.bashrc
++```
++
++Các script login chỉ thêm các thư mục CLI người dùng đang có vào PATH của phiên hiện tại, đặt `TL_REPO` và in lệnh kiểm tra; nạp nhiều lần không nhân đôi PATH. Chúng không cài phần mềm, không sửa profile, không đăng nhập và không đọc/lưu `TL_MASTER_KEY`. Sau khi nạp, chạy `python scripts/tl.py doctor --offline` trong thư mục repo. Nếu cần khởi tạo xác thực, dùng quy trình `python scripts/tl.py bootstrap --env code` của repo bằng biến `TL_*` được cung cấp an toàn trong phiên hiện tại; không lưu `TL_MASTER_KEY` vào profile.
+diff --git a/ops/environment/login-linux.sh b/ops/environment/login-linux.sh
+new file mode 100644
+index 0000000..c52715e
+--- /dev/null
++++ b/ops/environment/login-linux.sh
+@@ -0,0 +1,25 @@
++#!/usr/bin/env bash
++# Source this file from ~/.bashrc or an interactive Bash shell:
++#   source /path/to/tra-luat/ops/environment/login-linux.sh
++# It only prepends existing user CLI directories to PATH and sets TL_REPO for this shell.
++# It never installs software, edits profiles, logs in, or reads/stores TL_MASTER_KEY.
++if [ -z "${BASH_VERSION:-}" ]; then
++  echo 'login-linux.sh requires Bash; source it from ~/.bashrc, not from a POSIX sh profile.' >&2
++  # shellcheck disable=SC2317  # exit is reached only when this file was executed by sh, not sourced
++  return 2 2>/dev/null || exit 2
++fi
++if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
++  echo 'login-linux.sh must be sourced, not executed: source ops/environment/login-linux.sh' >&2
++  exit 2
++fi
++_tl_env_repo="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)" || {
++  echo 'login-linux.sh: cannot resolve repository root' >&2; unset _tl_env_repo; return 2; }
++for _tl_env_dir in "$HOME/.local/bin" "$HOME/.local/share/tra-luat-tools/venv/bin"; do
++  if [[ -d "$_tl_env_dir" && ":$PATH:" != *":$_tl_env_dir:"* ]]; then PATH="$_tl_env_dir:$PATH"; fi
++done
++export PATH
++export TL_REPO="$_tl_env_repo"
++printf 'tra-luat session: %s\n' "$TL_REPO"
++printf 'Check: bash ops/environment/update-linux.sh --repo .\n'
++printf 'Health: python scripts/tl.py doctor --offline\n'
++unset _tl_env_repo _tl_env_dir
+diff --git a/ops/environment/login-windows.ps1 b/ops/environment/login-windows.ps1
+new file mode 100644
+index 0000000..acacf80
+--- /dev/null
++++ b/ops/environment/login-windows.ps1
+@@ -0,0 +1,31 @@
++# Dot-source this file from a PowerShell profile or an interactive session:
++#   . 'C:\path\to\tra-luat\ops\environment\login-windows.ps1'
++# It only adds existing user CLI directories to this session's PATH and sets TL_REPO.
++# It never installs software, edits profiles, logs in, or reads/stores TL_MASTER_KEY.
++if ($MyInvocation.InvocationName -ne '.') {
++    Write-Warning 'login-windows.ps1 must be dot-sourced: . .\ops\environment\login-windows.ps1'
++    return
++}
++& {
++    $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
++    $candidates = @(
++        (Join-Path $HOME '.local\bin'),
++        $(if ($env:APPDATA) { Join-Path $env:APPDATA 'npm' }),
++        $(if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA 'agy\bin' }),
++        $(if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA 'tra-luat-tools\venv\Scripts' }),
++        (Join-Path $HOME '.cargo\bin')
++    ) | Where-Object { $_ }
++    foreach ($dir in $candidates) {
++        $present = @($env:Path -split ';' | Where-Object { $_ -and $_.TrimEnd('\') -ieq $dir.TrimEnd('\') })
++        if ((Test-Path -LiteralPath $dir -PathType Container) -and -not $present.Count) {
++            if ($env:LOCALAPPDATA -and $dir -ieq (Join-Path $env:LOCALAPPDATA 'tra-luat-tools\venv\Scripts')) {
++                # Expose uv without replacing the caller's baseline Python with the tool venv.
++                $env:Path = "$env:Path;$dir"
++            } else { $env:Path = "$dir;$env:Path" }
++        }
++    }
++    $env:TL_REPO = $repo
++    Write-Host "tra-luat session: $repo"
++    Write-Host 'Check: pwsh -File ops/environment/update-windows.ps1 -Repo .'
++    Write-Host 'Health: python scripts/tl.py doctor --offline'
++}
+diff --git a/ops/environment/update-linux.sh b/ops/environment/update-linux.sh
+new file mode 100644
+index 0000000..3ccdae0
+--- /dev/null
++++ b/ops/environment/update-linux.sh
+@@ -0,0 +1,638 @@
++#!/usr/bin/env bash
++# Shared baseline with Windows: ops/cong_cu.yaml and ops/cai_cong_cu.sh.
++# Usage: bash ops/environment/update-linux.sh --repo /path/to/tra-luat [--apply [--user-only] [--persist-path]
++#          [--latest [--tools claude,codex,agy,nlm,gws]]]
++# Without --apply it only reports versions and the checker result (exit code = checker exit code).
++# It reports only whether TL_* variables are set; it never prints their values or reads credential files.
++set -euo pipefail
++# Developer regression mode: real entrypoint, isolated Ubuntu fixtures, no installers/network.
++if [[ "${1:-}" == --selftest ]]; then
++  shift
++  PYTHONDONTWRITEBYTECODE=1 python3 -B - "$0" "$@" <<'UPDATER_SELFTEST'
++import hashlib, io, json, os, pathlib, shutil, subprocess, sys, tarfile, tempfile, time
++
++source = pathlib.Path(sys.argv[1]).resolve()
++args = sys.argv[2:]
++if args:
++    if len(args) != 2 or args[0] != '--against':
++        raise SystemExit('selftest accepts only --against SCRIPT')
++    source = pathlib.Path(args[1]).resolve()
++text = source.read_text()
++if pathlib.Path('/etc/os-release').read_text().find('ID=ubuntu\n') < 0:
++    raise SystemExit('selftest requires real Ubuntu (fixture installers only)')
++real_python, real_bash = sys.executable, shutil.which('bash')
++real_pgrep = shutil.which('pgrep')
++assert real_pgrep and real_bash, 'fixture dependency missing'
++print('RUNTIME', sys.version.split()[0], pathlib.Path('/etc/os-release').read_text().splitlines()[0], flush=True)
++results = []
++def suite_ok(records):
++    return bool(records) and all(ok for _, ok in records)
++with tempfile.TemporaryDirectory(prefix='tl-updater-selftest-') as scratch:
++    root = pathlib.Path(scratch)
++    def executable(path, content):
++        path.parent.mkdir(parents=True, exist_ok=True)
++        path.write_text(content)
++        path.chmod(0o755)
++    # All package/network/profile effects stay inside this disposable fixture.
++    driver = root / 'driver'
++    executable(driver, '#!' + real_python + '\n' + r'''
++import json, os, pathlib, shutil, subprocess, sys
++name = pathlib.Path(sys.argv[0]).name
++args = sys.argv[1:]
++home = pathlib.Path(os.environ['HOME'])
++def event(value):
++    with open(os.environ['FIX_LOG'], 'a') as out: out.write(value + '\n')
++def tool(name, broken=False):
++    dest = home / ('.local/share/tra-luat-tools/venv/bin/uv' if name == 'uv' else '.local/bin/' + name)
++    dest.parent.mkdir(parents=True, exist_ok=True)
++    if dest.is_symlink(): dest.unlink()
++    dest.write_text('#!/bin/bash\n' + ('exit 127\n' if broken else 'echo "' + name + ' 1.2.3"\n'))
++    dest.chmod(0o755)
++if name == 'pgrep':
++    event('selector ' + json.dumps([os.environ['REAL_PGREP'], '-P', os.environ['FIX_PARENT']] + args))
++    sys.exit(subprocess.call([os.environ['REAL_PGREP'], '-P', os.environ['FIX_PARENT']] + args))
++if name in ('python', 'python3'):
++    if args[:2] == ['-m', 'pip']:
++        event('pip ' + ' '.join(args))
++        if 'uv' in args: tool('uv', os.environ.get('POST_BROKEN') == 'uv')
++        sys.exit(0)
++    if args[:2] == ['-m', 'venv']:
++        event('venv')
++        dest = pathlib.Path(args[2]) / 'bin/python'
++        dest.parent.mkdir(parents=True, exist_ok=True)
++        dest.symlink_to(sys.argv[0])
++        sys.exit(0)
++    if args and args[0] == 'ops/cong_cu.py':
++        event('checker')
++        print(json.dumps({'cong_cu': [{'ten': 'shellcheck', 'trang_thai': 'DAT'}]}))
++        sys.exit(0)
++    if args == ['-']:
++        code = sys.stdin.read()
++        if 'api.github.com/repos/google-antigravity' in code:
++            print(os.environ['AGY_RELEASE'])
++            sys.exit(0)
++        sys.exit(subprocess.run([os.environ['REAL_PYTHON']] + args, input=code, text=True).returncode)
++    sys.exit(subprocess.call([os.environ['REAL_PYTHON']] + args))
++if name in ('apt-get', 'sudo', 'dpkg', 'curl', 'npm', 'uv') and '--version' not in args:
++    event(name + ' ' + ' '.join(args))
++    if name == 'sudo':
++        if args[:2] == ['-n', 'apt-get']: args = args[1:]
++        if not args or args[0] != 'apt-get': raise SystemExit('UNEXPECTED fixture sudo')
++        sys.exit(subprocess.call([str(pathlib.Path(os.environ['FIX_BIN'], 'apt-get'))] + args[1:]))
++    elif name == 'apt-get' and 'install' in args and 'curl' in args:
++        pathlib.Path(os.environ['FIX_BIN'], 'curl').symlink_to(os.environ['DRIVER'])
++    elif name == 'curl':
++        if 'https://fixture.invalid/agy' not in args: raise SystemExit('UNEXPECTED fixture network')
++        dest = args[args.index('--output') + 1] if '--output' in args else args[args.index('-o') + 1]
++        shutil.copyfile(os.environ['AGY_ARCHIVE'], dest)
++    elif name == 'npm' and args[:1] == ['view']:
++        print('1.2.3')
++    elif name == 'npm' and 'install' in args:
++        for package, binary in [('@openai/codex', 'codex'), ('@anthropic-ai/claude-code', 'claude'), ('@googleworkspace/cli', 'gws')]:
++            if any(arg.startswith(package) for arg in args): tool(binary, os.environ.get('POST_BROKEN') == binary)
++    elif name == 'uv' and 'install' in args:
++        tool('nlm', os.environ.get('POST_BROKEN') == 'nlm')
++    elif name not in ('apt-get', 'npm'):
++        raise SystemExit('UNEXPECTED fixture operation: ' + name)
++    sys.exit(0)
++print(name + ' 1.2.3')
++''')
++    def run_case(label, script=text, mode='system', missing=(), broken=None,
++                 managed=False, child=None, post=None, agy=None, extra=(), escape=False):
++        case = root / str(len(list(root.iterdir())))
++        bin_dir, home, repo = case / 'bin', case / 'home', case / 'repo'
++        for directory in (bin_dir, home, repo / 'ops'):
++            directory.mkdir(parents=True)
++        log = case / 'events'
++        log.touch()
++        (repo / 'ops/cong_cu.yaml').write_text('cong_cu:\n  shellcheck:\n    bat_buoc: true\n  jsonschema:\n    cai:\n      lenh: pip install jsonschema==4.25.1\n    bat_buoc: false\n')
++        for file in ('ops/cong_cu.py', 'ops/cai_cong_cu.sh', 'requirements.txt'):
++            (repo / file).touch()
++        commands = 'git python python3 bash rg shellcheck actionlint gh node npm pwsh uv claude codex agy nlm gws curl apt-get sudo dpkg pgrep'
++        for name in commands.split():
++            if name not in missing: (bin_dir / name).symlink_to(driver)
++        (bin_dir / 'bash').unlink()
++        (bin_dir / 'bash').symlink_to(real_bash)
++        for name in 'uname id grep head readlink mkdir mktemp rm sha256sum tar gzip install awk ln cat'.split():
++            target = shutil.which(name)
++            assert target, 'missing fixture utility ' + name
++            (bin_dir / name).symlink_to(target)
++        venv = home / '.local/share/tra-luat-tools/venv/bin'
++        venv.mkdir(parents=True)
++        (venv / 'python').symlink_to(driver)
++        if broken:
++            dest = (venv / broken if broken == 'uv' else home / '.local/bin' / broken) if managed else bin_dir / broken
++            if dest.is_symlink(): dest.unlink()
++            executable(dest, '#!/bin/bash\nexit 127\n')
++            if escape:
++                external = case / 'external' / broken
++                executable(external, '#!/bin/bash\nexit 127\n')
++                dest.unlink()
++                dest.symlink_to(external)
++        archive = case / 'agy.tar.gz'
++        with tarfile.open(archive, 'w:gz') as out:
++            payload = b'#!/bin/bash\necho "agy 1.2.3"\n'
++            if post == 'agy': payload = b'#!/bin/bash\nexit 127\n'
++            info = tarfile.TarInfo('wrong' if agy == 'layout' else 'antigravity')
++            info.size = len(payload)
++            out.addfile(info, io.BytesIO(payload))
++        digest = hashlib.sha256(archive.read_bytes()).hexdigest() if agy != 'digest' else '0' * 64
++        release = {'tag_name': 'v1.2.3', 'assets': [{'name': 'agy_cli_linux_x64.tar.gz', 'browser_download_url': 'https://fixture.invalid/agy', 'digest': 'sha256:' + digest}]}
++        entry = case / 'updater.sh'
++        entry.write_text(script)
++        env = {'PATH': str(bin_dir), 'HOME': str(home), 'PYTHONDONTWRITEBYTECODE': '1',
++               'FIX_LOG': str(log), 'FIX_BIN': str(bin_dir), 'FIX_PARENT': str(os.getpid()),
++               'REAL_PYTHON': real_python, 'REAL_PGREP': real_pgrep, 'DRIVER': str(driver),
++               'AGY_RELEASE': json.dumps(release), 'AGY_ARCHIVE': str(archive), 'POST_BROKEN': post or ''}
++        def snapshot():
++            return [(str(p.relative_to(case)), p.lstat().st_mode, os.readlink(p) if p.is_symlink() else p.read_bytes())
++                    for tree in (home, repo) for p in sorted(tree.rglob('*')) if p.is_symlink() or p.is_file()]
++        before = snapshot()
++        process = None
++        try:
++            if child:
++                executable_name = case / child
++                executable_name.symlink_to(real_python)
++                process = subprocess.Popen([str(executable_name), '-B', '-c', 'import time; time.sleep(120)'], env=env)
++                for _ in range(100):
++                    comm = pathlib.Path('/proc', str(process.pid), 'comm').read_text().strip()
++                    if comm == child: break
++                    time.sleep(.01)
++                assert comm == child, 'child did not start with expected native comm'
++                print('CHILD', label, process.pid, comm, 'argv=' + json.dumps([str(executable_name), '-B', '-c', 'import time; time.sleep(120)']), flush=True)
++            command = [real_bash, str(entry), '--repo', str(repo), '--apply']
++            if mode == 'user': command.append('--user-only')
++            command.extend(extra)
++            result = subprocess.run(command, env=env, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60)
++        finally:
++            if process:
++                process.terminate()
++                process.wait(timeout=5)
++        events = log.read_text().splitlines()
++        mutations = [line for line in events if not line.startswith(('selector ', 'checker'))]
++        if snapshot() != before: mutations.append('fixture filesystem changed')
++        print('CASE', label, 'rc=' + str(result.returncode), 'events=' + json.dumps(events), flush=True)
++        print(result.stdout, end='', flush=True)
++        assert not any('UNEXPECTED' in line for line in result.stdout.splitlines()), 'unexpected fixture operation'
++        return result.returncode, result.stdout, mutations
++    def check(label, value):
++        results.append((label, bool(value)))
++        print(('PASS ' if value else 'FAIL ') + label, flush=True)
++    def rejected(result, message, rc=5):
++        code, output, mutations = result
++        return code == rc and message in output and not mutations
++    for mode in ('system', 'user'):
++        result = run_case('curl-' + mode, mode=mode, missing=('curl',) if mode == 'user' else ('curl', 'agy'), extra=('--persist-path',) if mode == 'user' else ())
++        check('curl-' + mode, rejected(result, 'requires preinstalled curl') if mode == 'user' else result[0] == 0 and 'apt-get install -y curl' in result[2] and any(e.startswith('curl ') for e in result[2]) and result[2].index('apt-get install -y curl') < next(i for i, e in enumerate(result[2]) if e.startswith('curl ')))
++        result = run_case('healthy-' + mode, mode=mode)
++        check('healthy-' + mode, result[0] == 0 and not any(e.startswith(('apt-get ', 'sudo ')) for e in result[2]))
++        check('python-version-' + mode, rejected(run_case('python-version-' + mode, mode=mode, child='python3.12', extra=('--persist-path',)), 'processes are active', 3))
++    check('exact-name-control', run_case('exact-name-control', child='notpython3.12')[0] == 0)
++    for tool in ('uv', 'claude', 'codex', 'nlm', 'agy'):
++        check('external-broken-' + tool, rejected(run_case('external-broken-' + tool, broken=tool, extra=('--persist-path',)), 'Broken external ' + tool))
++        result = run_case('managed-repair-' + tool, broken=tool, managed=True)
++        check('managed-repair-' + tool, result[0] == 0 and any(e.startswith(('pip ', 'npm ', 'uv ', 'curl ')) for e in result[2]))
++        result = run_case('managed-postcheck-' + tool, broken=tool, managed=True, post=tool)
++        check('managed-postcheck-' + tool, result[0] == 6 and ('version probe failed: ' + tool in result[1] or 'AGY did not reach' in result[1]))
++    for tool in ('codex', 'uv'):
++        check('managed-symlink-escape-' + tool, rejected(run_case('managed-symlink-escape-' + tool, broken=tool, managed=True, escape=True), 'Broken external ' + tool))
++    result = run_case('gws-repair', missing=('gws',))
++    check('gws-allow-scripts', result[0] == 0 and any('--allow-scripts=@googleworkspace/cli' in e for e in result[2]))
++    check('agy-current-external', not run_case('agy-current-external', extra=('--latest', '--tools', 'agy'))[2])
++    for fault, message in (('digest', 'AGY SHA256 mismatch'), ('layout', 'Unexpected AGY archive layout')):
++        result = run_case('agy-' + fault, missing=('agy',), agy=fault)
++        check('agy-' + fault, result[0] == 5 and message in result[1])
++    check('npm-user-broken', rejected(run_case('npm-user-broken', mode='user', broken='npm'), 'requires working native npm'))
++    check('healthy-external-no-duplicate', not run_case('healthy-external-no-duplicate')[2])
++    # Semantic mutants must lose the intended property, with healthy controls green.
++    if not args:
++        marker = '# END updater developer selftest\n'
++        prefix, body = text.split(marker, 1)
++        mutants = [
++            ('curl-user', 'in curl git python3', 'in git python3', dict(mode='user', missing=('curl',)), 'requires preinstalled curl', 5),
++            ('curl-system', 'command -v curl >/dev/null || need_apt+=(curl)', ': # curl provisioning removed', dict(missing=('curl', 'agy')), 'apt-get install -y curl', 0),
++            ('python-version', 'python([0-9]+([.][0-9]+)*)?', 'python|python3', dict(child='python3.12'), 'processes are active', 3),
++            ('external-probe', '&& ! usable_command "$tool" && ! managed_cli', '&& false && ! managed_cli', dict(broken='codex'), 'Broken external codex', 5),
++            ('execution-probe', 'native_command "$1" && "$1" --version >/dev/null 2>&1;', 'native_command "$1";', dict(broken='codex'), 'Broken external codex', 5),
++            ('final-probe', 'usable_command "$tool" || { echo "required Linux tool version probe failed: $tool" >&2; exit 6; }', ': # final probe removed', dict(broken='codex', managed=True, post='codex'), 'version probe failed: codex', 6),
++        ]
++        for label, before, after, options, message, code in mutants:
++            assert body.count(before) == 1, 'mutant anchor not unique: ' + label
++            mutant = prefix + marker + body.replace(before, after, 1)
++            result = run_case('mutant-' + label, script=mutant, **options)
++            intended = any(e == message for e in result[2]) if label == 'curl-system' else result[0] == code and message in result[1]
++            expected_rc = {'curl-system': 5, 'external-probe': 6}.get(label, 0)
++            evidence = 'AGY download failed' in result[1] if label == 'curl-system' else ('version probe failed: codex' in result[1] and any(e.startswith('npm install') for e in result[2]) if label == 'external-probe' else 'cong_cu' in result[1])
++            check('mutant-' + label, not intended and result[0] == expected_rc and evidence)
++            check('mutant-control-' + label, run_case('mutant-control-' + label, script=mutant)[0] == 0)
++        # A crash cannot count as a semantic kill, and a contaminated run cannot pass.
++        for label, bad in [('crash', 'echo "Broken external codex"; exit 99\n'), ('import', 'echo "Broken external codex"; python3 -c "import nonexistent_fixture_module"\n'), ('mutation', 'apt-get install -y forbidden; echo "Broken external codex"; exit 5\n')]:
++            result = run_case('canary-' + label, script=bad)
++            check('harness-' + label, not rejected(result, 'Broken external codex'))
++        try:
++            run_case('canary-network', script='curl --output "$HOME/unexpected" https://unexpected.invalid\n')
++            check('harness-network', False)
++        except AssertionError as error:
++            check('harness-network', str(error) == 'unexpected fixture operation')
++    check('harness-zero-tests', not suite_ok([]))
++    check('nonempty-results', len(results) > 0)
++passed = sum(ok for _, ok in results)
++print('COUNTS', json.dumps({'cases': len(results), 'mutants': sum(label.startswith('mutant-') and not label.startswith('mutant-control-') for label, _ in results), 'mutant_controls': sum(label.startswith('mutant-control-') for label, _ in results)}), flush=True)
++print('SELFTEST %d/%d' % (passed, len(results)), flush=True)
++raise SystemExit(0 if suite_ok(results) else 1)
++UPDATER_SELFTEST
++  exit $?
++fi
++# END updater developer selftest
++repo='' apply=0 latest=0 persist_path=0 user_only=0 selected='claude,codex,agy,nlm,gws'
++while (($#)); do
++  case "$1" in
++    --repo) repo="${2:?missing repository}"; shift 2 ;;
++    --apply) apply=1; shift ;;
++    --latest) latest=1; shift ;;
++    --persist-path) persist_path=1; shift ;;
++    --user-only) user_only=1; shift ;;
++    --tools) selected="${2:?missing tool list}"; shift 2 ;;
++    *) echo "unknown option: $1" >&2; exit 2 ;;
++  esac
++done
++if (( (latest || persist_path) && ! apply )); then
++  echo '--latest and --persist-path require --apply' >&2; exit 2
++fi
++[[ -n "$repo" ]] || { echo '--repo is required' >&2; exit 2; }
++# Validate the tool list before any mutation, not after earlier installs already ran.
++IFS=, read -r -a requested_tools <<< "$selected"
++for requested_tool in "${requested_tools[@]}"; do
++  case "$requested_tool" in
++    claude|codex|agy|nlm|gws|git|python|rg|shellcheck|gh|node|npm|pwsh|uv) : ;;
++    *) echo "unknown tool: $requested_tool" >&2; exit 2 ;;
++  esac
++done
++repo="$(cd -- "$repo" && pwd -P)"
++for f in ops/cong_cu.yaml ops/cong_cu.py ops/cai_cong_cu.sh; do
++  [[ -f "$repo/$f" ]] || { echo "missing $repo/$f" >&2; exit 2; }
++done
++case "$(uname -s)" in Linux*) : ;; *) echo 'Linux or WSL required' >&2; exit 4 ;; esac
++native_command() {
++  local p
++  p="$(command -v "$1" 2>/dev/null || true)"
++  [[ -n "$p" && "$p" != /mnt/* && "$p" != *.exe && "$p" != *.cmd ]]
++}
++usable_command() { native_command "$1" && "$1" --version >/dev/null 2>&1; }
++managed_cli() {
++  local found resolved expected
++  found="$(command -v "$1" 2>/dev/null || true)"
++  case "$1" in uv) expected="$HOME/.local/share/tra-luat-tools/venv/bin/uv" ;;
++    *) expected="$HOME/.local/bin/$1" ;;
++  esac
++  [[ "$found" == "$expected" && -O "$found" ]] || return 1
++  resolved="$(readlink -f -- "$found")" || return 1
++  [[ "$resolved" == "$HOME/.local/"* && -O "$resolved" ]]
++}
++# `python3 -m venv --help` succeeds even without python3-venv on Ubuntu; only ensurepip proves venv creation works.
++venv_available() { python3 -c 'import ensurepip, venv' >/dev/null 2>&1; }
++agy_version() {
++  local output
++  output="$(agy --version 2>/dev/null)" || return 1
++  # AGY may print a banner and a separate version: line. Reject ambiguous/no version output.
++  printf '%s\n' "$output" | "$py" -c 'import re,sys
++pattern=r"\s*(?:version:\s*|agy\s+|antigravity\s+)?v?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)\s*"
++versions=[m.group(1) for line in sys.stdin.read().splitlines() if (m:=re.fullmatch(pattern,line))]
++if len(versions)!=1: sys.exit(1)
++print(versions[0])'
++}
++install_agy_verified() {
++  local release asset url digest tag archive tmp found
++  case "$(uname -m)" in x86_64) asset=agy_cli_linux_x64.tar.gz ;; aarch64) asset=agy_cli_linux_arm64.tar.gz ;;
++    *) echo 'Unsupported AGY CPU architecture' >&2; return 5 ;; esac
++  release="$("$py" - <<'PY'
++import json, urllib.request
++req = urllib.request.Request('https://api.github.com/repos/google-antigravity/antigravity-cli/releases/latest', headers={'User-Agent':'tra-luat-env-setup'})
++print(json.dumps(json.load(urllib.request.urlopen(req, timeout=30))))
++PY
++)"
++  read -r tag url digest < <(printf '%s' "$release" | "$py" -c 'import json,sys; d=json.load(sys.stdin); a=[x for x in d["assets"] if x["name"]==sys.argv[1]]; assert len(a)==1; print(d["tag_name"],a[0]["browser_download_url"],a[0]["digest"])' "$asset")
++  [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo 'AGY release has no valid SHA256 digest' >&2; return 5; }
++  # Keep current releases wherever installed; update only our managed destination.
++  # `agy update` would bypass the SHA256 check.
++  if native_command agy; then
++    if [[ "$(agy_version || true)" == "${tag#v}" ]]; then return 0; fi
++    found="$(command -v agy)"
++    if [[ "$found" != "$HOME/.local/bin/agy" ]]; then
++      printf 'AGY at %s needs repair or update; upgrade that installation with its package manager, or remove it before installing managed AGY at %s.\n' "$found" "$HOME/.local/bin/agy" >&2
++      return 5
++    fi
++  fi
++  tmp="$(mktemp -d)"; archive="$tmp/$asset"
++  curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 "$url" --output "$archive" ||
++    { rm -rf -- "$tmp"; echo 'AGY download failed' >&2; return 5; }
++  printf '%s  %s\n' "${digest#sha256:}" "$archive" | sha256sum --check --status || { rm -rf -- "$tmp"; echo 'AGY SHA256 mismatch' >&2; return 5; }
++  found="$(tar -tzf "$archive")"
++  [[ "$found" == 'antigravity' ]] || { rm -rf -- "$tmp"; echo 'Unexpected AGY archive layout' >&2; return 5; }
++  tar -xOf "$archive" antigravity > "$tmp/agy"
++  mkdir -p "$HOME/.local/bin"
++  install -m 755 "$tmp/agy" "$HOME/.local/bin/agy"
++  rm -rf -- "$tmp"
++  hash -r
++  [[ "$(command -v agy)" == "$HOME/.local/bin/agy" ]] || { echo 'AGY is shadowed on PATH' >&2; return 6; }
++  [[ "$(agy_version)" == "${tag#v}" ]] || { echo "AGY did not reach $tag" >&2; return 6; }
++}
++if grep -qi microsoft /proc/version 2>/dev/null; then echo 'platform: WSL'; else echo 'platform: Linux'; fi
++cd -- "$repo"
++for name in TL_MASTER_KEY TL_SECRETS_FILEID TL_AGENT_CREDS_FILEID TL_WEBAPP TL_TOKEN TL_PROFILE; do
++  if [[ -n "${!name:-}" ]]; then printf '%-23s set\n' "$name"; else printf '%-23s unset\n' "$name"; fi
++done
++if [[ -n "${TL_SECRETS_FILEID:-}" && -z "${TL_MASTER_KEY:-}" ]]; then
++  echo 'Warning: secrets file ID is set but TL_MASTER_KEY is absent.' >&2
++fi
++if [[ -n "${TL_WEBAPP:-}" && -z "${TL_TOKEN:-}" ]] || [[ -z "${TL_WEBAPP:-}" && -n "${TL_TOKEN:-}" ]]; then
++  echo 'Warning: only one of TL_WEBAPP/TL_TOKEN is set; verify config precedence.' >&2
++fi
++echo 'Secrets are not copied from Windows or written to shell profiles.'
++if command -v python >/dev/null 2>&1; then py=python
++elif command -v python3 >/dev/null 2>&1; then py=python3
++else echo 'Python is required to read the shared tool manifest' >&2; exit 5
++fi
++for tool in git python bash rg shellcheck actionlint gh node npm pwsh uv claude codex agy nlm gws; do
++  if command -v "$tool" >/dev/null 2>&1; then
++    case "$tool" in actionlint) arg=-version ;; *) arg=--version ;; esac
++    printf '%-12s %s\n' "$tool" "$("$tool" "$arg" 2>/dev/null | head -1 || true)"
++  else printf '%-12s %s\n' "$tool" '(missing)'; fi
++done
++if (( ! apply )); then
++  "$py" ops/cong_cu.py kiem-tra --json
++  echo 'Check complete. Use --apply after related jobs finish.'
++  exit 0
++fi
++command -v pgrep >/dev/null 2>&1 || { echo 'pgrep (procps) is required to check for active jobs before --apply' >&2; exit 3; }
++if pgrep -x -u "$(id -u)" 'claude|codex|agy|nlm|gws|uv|node|python([0-9]+([.][0-9]+)*)?' >/dev/null 2>&1; then
++  echo 'Related tool/runtime processes are active; finish their jobs before updating.' >&2
++  exit 3
++fi
++install_node_user() {
++  local version file root tmp hash arch
++  case "$(uname -m)" in x86_64) arch=x64 ;; aarch64) arch=arm64 ;; *) echo 'Unsupported Node CPU architecture' >&2; return 5 ;; esac
++  version="$(python3 - <<'PY'
++import json,urllib.request
++d=json.load(urllib.request.urlopen('https://nodejs.org/dist/index.json',timeout=30))
++print(next(x['version'] for x in d if x.get('lts')))
++PY
++)"
++  file="node-${version}-linux-${arch}.tar.xz"; root="https://nodejs.org/dist/$version"
++  tmp="$(mktemp -d)"
++  if ! curl -fsSL --proto '=https' --tlsv1.2 "$root/$file" -o "$tmp/$file" ||
++     ! curl -fsSL --proto '=https' --tlsv1.2 "$root/SHASUMS256.txt" -o "$tmp/SHASUMS256.txt"; then
++    rm -rf -- "$tmp"; echo 'Node download failed' >&2; return 5
++  fi
++  hash="$(awk -v f="$file" '$2==f {print $1}' "$tmp/SHASUMS256.txt")"
++  [[ "$hash" =~ ^[0-9a-f]{64}$ ]] || { rm -rf -- "$tmp"; echo 'Node SHA256 unavailable' >&2; return 5; }
++  printf '%s  %s\n' "$hash" "$tmp/$file" | sha256sum --check --status || { rm -rf -- "$tmp"; echo 'Node SHA256 mismatch' >&2; return 5; }
++  mkdir -p "$HOME/.local/share/tra-luat-tools/node" "$HOME/.local/bin"
++  tar -xJf "$tmp/$file" -C "$HOME/.local/share/tra-luat-tools/node" --strip-components=1
++  ln -sfnT "$HOME/.local/share/tra-luat-tools/node/bin/node" "$HOME/.local/bin/node"
++  ln -sfnT "$HOME/.local/share/tra-luat-tools/node/bin/npm" "$HOME/.local/bin/npm"
++  ln -sfnT "$HOME/.local/share/tra-luat-tools/node/bin/npx" "$HOME/.local/bin/npx"
++  rm -rf -- "$tmp"
++  hash -r
++  if ! native_command node || ! native_command npm || ! npm --version >/dev/null 2>&1; then echo 'Native Node/npm not usable after install' >&2; return 6; fi
++}
++install_gh_user() {
++  local release name url digest tag tmp archive entry arch
++  case "$(uname -m)" in x86_64) arch=amd64 ;; aarch64) arch=arm64 ;; *) echo 'Unsupported gh CPU architecture' >&2; return 5 ;; esac
++  release="$(python3 - <<'PY'
++import json,urllib.request
++req=urllib.request.Request('https://api.github.com/repos/cli/cli/releases/latest',headers={'User-Agent':'tra-luat-env-setup'})
++print(json.dumps(json.load(urllib.request.urlopen(req,timeout=30))))
++PY
++)"
++  read -r tag name url digest < <(printf '%s' "$release" | python3 -c 'import json,sys,re; d=json.load(sys.stdin); arch=sys.argv[1]; a=[x for x in d["assets"] if re.fullmatch(r"gh_[0-9.]+_linux_"+arch+r"\.tar\.gz",x["name"])]; assert len(a)==1; print(d["tag_name"],a[0]["name"],a[0]["browser_download_url"],a[0]["digest"])' "$arch")
++  [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo 'gh release SHA256 unavailable' >&2; return 5; }
++  tmp="$(mktemp -d)"; archive="$tmp/$name"
++  curl -fsSL --proto '=https' --tlsv1.2 "$url" -o "$archive" || { rm -rf -- "$tmp"; echo 'gh download failed' >&2; return 5; }
++  printf '%s  %s\n' "${digest#sha256:}" "$archive" | sha256sum --check --status || { rm -rf -- "$tmp"; echo 'gh SHA256 mismatch' >&2; return 5; }
++  entry="${name%.tar.gz}/bin/gh"
++  tar -tzf "$archive" | grep -Fxq "$entry" || { rm -rf -- "$tmp"; echo 'gh binary missing from archive' >&2; return 5; }
++  mkdir -p "$HOME/.local/bin"
++  tar -xOf "$archive" "$entry" > "$tmp/gh"
++  install -m 755 "$tmp/gh" "$HOME/.local/bin/gh"
++  rm -rf -- "$tmp"; hash -r
++  [[ "$(gh --version | awk 'NR==1 {print $3}')" == "${tag#v}" ]] || { echo "gh did not reach $tag" >&2; return 6; }
++}
++install_gws() {
++  local target
++  target="$(npm view @googleworkspace/cli version)"
++  npm install -g --allow-scripts=@googleworkspace/cli "@googleworkspace/cli@$target" --no-fund --no-audit
++  [[ "$(gws --version | awk 'NR==1 {print $NF}')" == "$target" ]] || { echo "gws did not reach $target" >&2; return 6; }
++}
++# shellcheck source=/dev/null
++case "$(. /etc/os-release; echo "$ID")" in
++  ubuntu) : ;;
++  *) echo 'Automatic supplemental installation currently supports Ubuntu only' >&2; exit 5 ;;
++esac
++apt=(apt-get)
++if (( EUID != 0 )); then apt=(sudo -n apt-get); fi
++export PATH="$HOME/.local/bin:$PATH"
++tool_venv="$HOME/.local/share/tra-luat-tools/venv"
++export PATH="$tool_venv/bin:$PATH"
++# Refuse broken external installations before package, venv or profile changes.
++# Repair is limited to our owned destinations, including resolved symlink targets.
++for tool in uv claude codex nlm agy; do
++  if native_command "$tool" && ! usable_command "$tool" && ! managed_cli "$tool"; then
++    printf 'Broken external %s at %s; repair that installation before --apply.\n' "$tool" "$(command -v "$tool")" >&2
++    exit 5
++  fi
++done
++if (( user_only )); then
++  for prerequisite in curl git python3 bash rg shellcheck actionlint pwsh; do
++    command -v "$prerequisite" >/dev/null 2>&1 || { echo "--user-only requires preinstalled $prerequisite; use system mode to install OS packages" >&2; exit 5; }
++  done
++  venv_available || { echo '--user-only requires python3-venv (ensurepip); use system mode to install it' >&2; exit 5; }
++  if (( latest )); then
++    for requested_tool in "${requested_tools[@]}"; do
++      case "$requested_tool" in git|python|rg|shellcheck|gh|node|npm|pwsh)
++        echo "--user-only cannot upgrade OS package $requested_tool; rerun without --user-only" >&2; exit 5 ;;
++      esac
++    done
++  fi
++  if native_command node; then
++    if ! native_command npm || ! npm --version >/dev/null 2>&1; then
++      printf '%s\n' "--user-only requires working native npm for Node at $(command -v node); repair npm using the package manager for that Node installation, then rerun. Node will not be replaced." >&2
++      exit 5
++    fi
++  else
++    install_node_user
++  fi
++  native_command gh || install_gh_user
++else
++need_apt=()
++command -v curl >/dev/null || need_apt+=(curl)
++command -v git >/dev/null || need_apt+=(git)
++command -v python3 >/dev/null || need_apt+=(python3)
++native_command gh || need_apt+=(gh)
++native_command node || need_apt+=(nodejs)
++native_command npm || need_apt+=(npm)
++if ((${#need_apt[@]})); then
++  "${apt[@]}" update
++  "${apt[@]}" install -y "${need_apt[@]}"
++fi
++for native in gh node npm; do
++  native_command "$native" || { echo "$native resolves outside Linux after apt installation" >&2; exit 5; }
++done
++fi
++if (( ! user_only )) && ! venv_available; then
++  "${apt[@]}" update
++  "${apt[@]}" install -y python3-venv
++fi
++if [[ ! -x "$tool_venv/bin/python" ]]; then python3 -m venv "$tool_venv"; fi
++export PATH="$tool_venv/bin:$HOME/.local/bin:$PATH"
++export NPM_CONFIG_PREFIX="$HOME/.local"
++if ! usable_command uv; then python -m pip install --disable-pip-version-check --force-reinstall uv; fi
++if (( user_only )); then
++  python -m pip install --disable-pip-version-check 'PyYAML==6.0.3'
++  jsonschema_pin="$(python - <<'PY'
++import re,yaml
++d=yaml.safe_load(open('ops/cong_cu.yaml',encoding='utf-8'))['cong_cu']
++m=re.search(r'jsonschema==([0-9][0-9A-Za-z.+-]*)',d['jsonschema']['cai']['lenh'])
++assert m, 'jsonschema pin missing from manifest'
++print(m.group(1))
++PY
++)"
++  python -m pip install --disable-pip-version-check "jsonschema==$jsonschema_pin" -r requirements.txt
++  python ops/cong_cu.py kiem-tra --json
++else
++  # The checker imports yaml before probing any tool; bootstrap only if absent.
++  if ! python -c 'import yaml' >/dev/null 2>&1; then
++    python -m pip install --disable-pip-version-check 'PyYAML==6.0.3'
++  fi
++  baseline_dat() {
++    local result probe_rc=0
++    # Missing/broken tools are expected here; do not let errexit abort repair.
++    result="$(python ops/cong_cu.py kiem-tra --chi "$1" --json)" || probe_rc=$?
++    (( probe_rc == 0 )) || return 1
++    printf '%s' "$result" | python -c 'import json,sys
++entries=json.load(sys.stdin).get("cong_cu") or []
++sys.exit(0 if len(entries)==1 and entries[0].get("ten")==sys.argv[1] and entries[0].get("trang_thai")=="DAT" else 1)' "$1"
++  }
++  baseline_tools="$(python - <<'PY'
++import yaml
++tools=yaml.safe_load(open('ops/cong_cu.yaml',encoding='utf-8'))['cong_cu']
++names=[name for name,entry in tools.items() if entry['bat_buoc'] or entry.get('chuan_bi')]
++# Prepare ShellCheck before actionlint; the final full checker runs its canary.
++print('\n'.join(sorted(names,key=lambda name: name != 'shellcheck')))
++PY
++)"
++  [[ -n "$baseline_tools" ]] || { echo 'Shared baseline is empty' >&2; exit 5; }
++  while IFS= read -r baseline_tool; do
++    if baseline_dat "$baseline_tool"; then continue; fi
++    if (( EUID == 0 )); then
++      # Manifest OS recipes say "sudo apt-get". Keep this adapter child-scoped.
++      bash -c '
++        sudo() {
++          if (( EUID != 0 )) || [[ "$#" -lt 1 || "$1" != apt-get ]]; then
++            echo "root installer adapter permits only sudo apt-get" >&2
++            return 5
++          fi
++          shift
++          command apt-get "$@"
++        }
++        export -f sudo
++        if [[ "$2" == actionlint ]]; then export AL_DICH="$HOME/.local/bin"; fi
++        exec bash "$1" "$2"
++      ' tra-luat-root-installer "$repo/ops/cai_cong_cu.sh" "$baseline_tool"
++    elif [[ "$baseline_tool" == actionlint ]]; then
++      AL_DICH="$HOME/.local/bin" bash ops/cai_cong_cu.sh "$baseline_tool"
++    else
++      bash ops/cai_cong_cu.sh "$baseline_tool"
++    fi
++    # Child PATH changes cannot reach this parent. Known install directories
++    # are already on PATH; clear cached lookups and require this exact tool DAT.
++    hash -r
++    baseline_dat "$baseline_tool" || {
++      echo "Baseline tool $baseline_tool is not DAT in the parent after repair (check PATH shadowing)" >&2
++      exit 6
++    }
++  done <<< "$baseline_tools"
++fi
++if (( persist_path )); then
++  marker='# tra-luat CLI PATH'
++  for profile in "$HOME/.profile" "$HOME/.bashrc"; do
++    if ! grep -Fqx "$marker" "$profile" 2>/dev/null; then
++      # POSIX sh syntax (~/.profile may be read by sh); guarded so nested shells do not grow PATH.
++      cat >> "$profile" <<'PROFILE'
++
++# tra-luat CLI PATH
++for _tl_dir in "$HOME/.local/bin" "$HOME/.local/share/tra-luat-tools/venv/bin"; do
++  case ":$PATH:" in *":$_tl_dir:"*) ;; *) PATH="$_tl_dir:$PATH" ;; esac
++done
++unset _tl_dir
++export PATH NPM_CONFIG_PREFIX="$HOME/.local"
++PROFILE
++      echo "Added tra-luat CLI PATH block to $profile"
++    fi
++  done
++fi
++if ! usable_command codex; then npm install -g @openai/codex --no-fund --no-audit; fi
++if ! native_command gws || ! gws --version >/dev/null 2>&1; then install_gws; fi
++if ! usable_command claude; then npm install -g @anthropic-ai/claude-code --no-fund --no-audit; fi
++if ! usable_command nlm; then uv tool install --force notebooklm-mcp-cli; fi
++usable_command agy || install_agy_verified
++if (( ! user_only )) && ! command -v pwsh >/dev/null 2>&1; then
++  # shellcheck source=/dev/null
++  ubuntu_version="$(. /etc/os-release; echo "$VERSION_ID")"
++  microsoft_deb="$(mktemp --suffix=.deb)"
++  trap 'rm -f -- "$microsoft_deb"' EXIT
++  curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 \
++    "https://packages.microsoft.com/config/ubuntu/$ubuntu_version/packages-microsoft-prod.deb" \
++    --output "$microsoft_deb"
++  if (( EUID == 0 )); then dpkg -i "$microsoft_deb"; else sudo -n dpkg -i "$microsoft_deb"; fi
++  "${apt[@]}" update
++  "${apt[@]}" install -y powershell
++  rm -f -- "$microsoft_deb"
++  trap - EXIT
++fi
++if (( latest )); then
++  tools=("${requested_tools[@]}")
++  for tool in "${tools[@]}"; do
++    case "$tool" in
++      codex)
++        target="$(npm view @openai/codex version)"
++        current="$(codex --version 2>/dev/null || true)"
++        [[ "${current##* }" == "$target" ]] || npm install -g "@openai/codex@$target" --no-fund --no-audit
++        [[ "$(codex --version | awk '{print $NF}')" == "$target" ]] || { echo "Codex did not reach $target" >&2; exit 6; } ;;
++      gws)
++        target="$(npm view @googleworkspace/cli version)"
++        current="$(gws --version 2>/dev/null | head -1 || true)"
++        [[ "${current##* }" == "$target" ]] || install_gws
++        [[ "$(gws --version | awk 'NR==1 {print $NF}')" == "$target" ]] || { echo "gws did not reach $target" >&2; exit 6; } ;;
++      claude) claude update ;;
++      agy) install_agy_verified ;;
++      nlm) uv tool upgrade notebooklm-mcp-cli ;;
++      git|python|rg|shellcheck|gh|node|npm|pwsh)
++        case "$tool" in python) package=python3 ;; rg) package=ripgrep ;; node) package=nodejs ;;
++          pwsh) package=powershell ;; *) package="$tool" ;; esac
++        "${apt[@]}" update
++        "${apt[@]}" install -y --only-upgrade "$package" ;;
++      uv) python -m pip install --disable-pip-version-check --upgrade uv ;;
++      *) echo "unknown tool: $tool" >&2; exit 2 ;;
++    esac
++  done
++  for tool in "${tools[@]}"; do
++    case "$tool" in
++      claude)
++        target="$(python -c 'import json,urllib.request; print(json.load(urllib.request.urlopen("https://api.github.com/repos/anthropics/claude-code/releases/latest",timeout=20))["tag_name"].lstrip("v"))')"
++        [[ "$(claude --version | awk '{print $1}')" == "$target" ]] || { echo "Claude did not reach $target" >&2; exit 6; } ;;
++      nlm)
++        target="$(python -c 'import json,urllib.request; print(json.load(urllib.request.urlopen("https://pypi.org/pypi/notebooklm-mcp-cli/json",timeout=20))["info"]["version"])')"
++        [[ "$(nlm --version | awk 'NR==1 {print $NF}')" == "$target" ]] || { echo "nlm did not reach $target" >&2; exit 6; } ;;
++      agy) agy --version >/dev/null ;;
++    esac
++  done
++fi
++for tool in git python bash rg shellcheck actionlint gh node npm pwsh uv claude codex agy nlm gws; do
++  command -v "$tool" >/dev/null 2>&1 || { echo "required executor/reviewer tool missing: $tool" >&2; exit 5; }
++done
++for tool in gh node npm uv claude codex gws agy nlm; do
++  native_command "$tool" || { echo "required Linux tool resolves to Windows or outside Linux: $tool" >&2; exit 5; }
++  usable_command "$tool" || { echo "required Linux tool version probe failed: $tool" >&2; exit 6; }
++done
++python ops/cong_cu.py kiem-tra --json
+diff --git a/ops/environment/update-windows.ps1 b/ops/environment/update-windows.ps1
+new file mode 100644
+index 0000000..1bf5369
+--- /dev/null
++++ b/ops/environment/update-windows.ps1
+@@ -0,0 +1,410 @@
++#requires -Version 7.0
++<#
++Windows wrapper for the tra-luat tool manifest. Run from a tra-luat checkout:
++  pwsh -File ops/environment/update-windows.ps1 -Repo .           # check only; exit code = checker exit code
++  pwsh -File ops/environment/update-windows.ps1 -Repo . -Apply    # install missing baseline tools
++This script reports only whether TL_* variables are set; it never prints their values,
++reads credential files, changes ACLs, or registers background tasks.
++#>
++[CmdletBinding()]
++param([Parameter(Mandatory)][string]$Repo, [switch]$Apply, [switch]$Latest, [switch]$PersistPath,
++      [ValidateSet('claude','codex','agy','nlm','gws','git','python','rg','shellcheck','gh','node','pwsh','uv','npm')][string[]]$Tools = @('claude','codex','agy','nlm','gws'))
++$ErrorActionPreference = 'Stop'
++if (($Latest -or $PersistPath) -and -not $Apply) { throw '-Latest and -PersistPath require -Apply' }
++function Show-EnvironmentStatus {
++    foreach ($name in @('TL_MASTER_KEY','TL_SECRETS_FILEID','TL_AGENT_CREDS_FILEID','TL_WEBAPP','TL_TOKEN','TL_PROFILE')) {
++        $processSet = -not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name,'Process'))
++        $userSet = -not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name,'User'))
++        '{0,-23} process={1} user={2}' -f $name, $processSet, $userSet
++    }
++    if (-not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable('TL_SECRETS_FILEID','Process')) -and
++        [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable('TL_MASTER_KEY','Process'))) {
++        Write-Warning 'Secrets file ID exists but TL_MASTER_KEY is absent from this process.'
++    }
++    $webapp = -not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable('TL_WEBAPP','Process'))
++    $token = -not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable('TL_TOKEN','Process'))
++    if ($webapp -xor $token) { Write-Warning 'Only one of TL_WEBAPP/TL_TOKEN is set; verify config precedence.' }
++    Write-Host 'Secrets are never copied to WSL or written to logs by this updater.'
++}
++function Test-PathListContains([string]$list, [string]$directory) {
++    $wanted = [Environment]::ExpandEnvironmentVariables($directory).TrimEnd('\')
++    foreach ($item in @($list -split ';' | Where-Object { $_ })) {
++        if ([Environment]::ExpandEnvironmentVariables($item).TrimEnd('\') -ieq $wanted) { return $true }
++    }
++    return $false
++}
++function Add-UserPath([string]$directory) {
++    if (-not $directory -or -not (Test-Path -LiteralPath $directory -PathType Container)) { return }
++    # Read and write HKCU\Environment\Path raw: [Environment]::Get/SetEnvironmentVariable expands
++    # %VAR% entries and rewrites the value as REG_SZ, silently destroying the user's references.
++    $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true)
++    if (-not $key) { throw 'Cannot open HKCU\Environment for writing' }
++    try {
++        $raw = [string]$key.GetValue('Path', '', [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
++        if (-not (Test-PathListContains $raw $directory)) {
++            $kind = [Microsoft.Win32.RegistryValueKind]::ExpandString
++            if (($key.GetValueNames() -contains 'Path') -and
++                $key.GetValueKind('Path') -eq [Microsoft.Win32.RegistryValueKind]::String) {
++                $kind = [Microsoft.Win32.RegistryValueKind]::String
++            }
++            $items = @($raw -split ';' | Where-Object { $_ }) + $directory
++            $key.SetValue('Path', ($items -join ';'), $kind)
++            Write-Host "Added to user PATH: $directory"
++        }
++    } finally { $key.Dispose() }
++    if (-not (Test-PathListContains $env:Path $directory)) { $env:Path = "$env:Path;$directory" }
++}
++function Sync-ToolPath([string]$baselineTool = '') {
++    # Fixed installation locations only; never import a child PATH or installer stdout.
++    $directories = @(
++        (Join-Path $env:USERPROFILE '.local\bin'),
++        (Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Links'),
++        (Join-Path $env:ProgramData 'chocolatey\bin'),
++        (Join-Path $env:ProgramFiles 'nodejs'),
++        (Join-Path $env:ProgramFiles 'GitHub CLI'),
++        (Join-Path $env:APPDATA 'npm'),
++        (Join-Path $env:LOCALAPPDATA 'tra-luat-tools\venv\Scripts'),
++        (Join-Path $env:LOCALAPPDATA 'agy\bin')
++    )
++    $choco = Get-Command choco -CommandType Application -ErrorAction SilentlyContinue
++    if ($choco) { $directories += Split-Path $choco.Source -Parent }
++    foreach ($directory in $directories) {
++        if (-not (Test-Path -LiteralPath $directory -PathType Container)) { continue }
++        # Add a known bin for unresolved tools, or promote a checker-verified repaired baseline.
++        foreach ($tool in @('rg','shellcheck','actionlint','gh','node','npm','uv','claude','codex','nlm','gws','agy')) {
++            if ($baselineTool -cne $tool -and (Get-Command $tool -ErrorAction SilentlyContinue)) { continue }
++            if ((Test-Path -LiteralPath (Join-Path $directory "$tool.exe") -PathType Leaf) -or
++                (Test-Path -LiteralPath (Join-Path $directory "$tool.cmd") -PathType Leaf)) {
++                if ($baselineTool -ceq $tool) {
++                    $previousPath = $env:Path
++                    $accepted = $false
++                    try {
++                        $env:Path = "$directory;$previousPath"
++                        $json = @(& python $checker kiem-tra --chi $tool --json)
++                        $rc = $LASTEXITCODE
++                        $result = ($json -join [Environment]::NewLine) | ConvertFrom-Json
++                        $entries = @($result.cong_cu)
++                        $accepted = $rc -eq 0 -and $entries.Count -eq 1 -and
++                            $entries[0].ten -ceq $tool -and $entries[0].trang_thai -ceq 'DAT'
++                    } finally { $env:Path = $previousPath }
++                    if (-not $accepted) { continue }
++                    $remaining = @($env:Path -split ';' | Where-Object { $_ -and -not (Test-PathListContains $_ $directory) })
++                    $env:Path = (@($directory) + $remaining) -join ';'
++                } elseif (-not (Test-PathListContains $env:Path $directory)) {
++                    # Append supplemental bins so the uv venv's python cannot shadow the baseline Python.
++                    $env:Path = "$env:Path;$directory"
++                }
++            }
++        }
++    }
++    # A promoted user bin must not shadow Git Bash with another bash.exe.
++    Sync-GitBashPath
++}
++function Assert-ChocoReady {
++    if (-not (Get-Command choco -CommandType Application -ErrorAction SilentlyContinue)) {
++        throw 'This installation needs existing Chocolatey. Provision it separately, then rerun; this script does not bootstrap a package manager.'
++    }
++    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
++    try { $admin = ([Security.Principal.WindowsPrincipal]::new($identity)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) }
++    finally { $identity.Dispose() }
++    if (-not $admin) { throw 'Chocolatey system packages require an already elevated PowerShell. No elevation will be requested automatically.' }
++}
++function Test-ToolReady([string]$name) {
++    $command = Get-Command $name -ErrorAction SilentlyContinue
++    if (-not $command) { return $false }
++    $output = @(& $command.Source --version 2>$null)
++    return ($LASTEXITCODE -eq 0 -and ($output -join '').Trim().Length -gt 0)
++}
++function Get-AgyVersion([string]$executable) {
++    $lines = @(& $executable --version 2>$null)
++    if ($LASTEXITCODE -ne 0) { return $null }
++    $versions = @($lines | ForEach-Object {
++        if ([string]$_ -cmatch '^\s*(?:version:\s*|agy\s+|antigravity\s+)?v?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)\s*$') { $Matches[1] }
++    })
++    if ($versions.Count -eq 1) { return $versions[0] }
++    return $null
++}
++function Install-AgyVerified {
++    $arch = switch ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()) {
++        'X64' { 'x64' }
++        'Arm64' { 'arm64' }
++        default { throw 'Unsupported AGY CPU architecture' }
++    }
++    $release = Invoke-RestMethod -Uri 'https://api.github.com/repos/google-antigravity/antigravity-cli/releases/latest' -Headers @{ 'User-Agent'='tra-luat-env-setup' } -TimeoutSec 30
++    $tag = [string]$release.tag_name
++    if ($tag -cnotmatch '^v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$') { throw 'Invalid AGY release tag' }
++    $target = $tag -creplace '^v',''
++    $assets = @($release.assets | Where-Object { $_.name -ceq "agy_cli_windows_$arch.zip" })
++    if ($assets.Count -ne 1) { throw 'Expected exactly one AGY Windows release asset' }
++    $asset = $assets[0]
++    if ([string]$asset.digest -cnotmatch '^sha256:[0-9a-f]{64}$') { throw 'AGY release has no valid SHA256 digest' }
++    $expectedUrl = "https://github.com/google-antigravity/antigravity-cli/releases/download/$tag/$($asset.name)"
++    if ([string]$asset.browser_download_url -cne $expectedUrl) { throw 'Unexpected AGY asset URL' }
++    $bin = Join-Path $env:LOCALAPPDATA 'agy\bin'
++    $destination = Join-Path $bin 'agy.exe'
++    $current = Get-Command agy -ErrorAction SilentlyContinue
++    if ($current -and (Get-AgyVersion $current.Source) -ceq $target) { return }
++    if ($current -and $current.Source -ine $destination) {
++        throw "AGY at $($current.Source) needs repair or update; upgrade that installation with its package manager, or remove it before installing managed AGY at $destination."
++    }
++    # Refuse reparse points in the installation path rather than following a redirected user bin.
++    for ($parent = $destination; $parent; $parent = Split-Path $parent -Parent) {
++        if ((Test-Path -LiteralPath $parent) -and
++            ((Get-Item -LiteralPath $parent -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
++            throw "AGY install path contains a reparse point: $parent"
++        }
++    }
++    $tmp = Join-Path ([IO.Path]::GetTempPath()) ("tra-luat-agy-" + [guid]::NewGuid().ToString('N'))
++    $staged = $null
++    New-Item -ItemType Directory -Path $tmp | Out-Null
++    try {
++        $archive = Join-Path $tmp 'release.zip'
++        Invoke-WebRequest -Uri $expectedUrl -OutFile $archive -TimeoutSec 120
++        if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant() -cne ([string]$asset.digest).Substring(7)) {
++            throw 'AGY SHA256 mismatch'
++        }
++        $zip = [IO.Compression.ZipFile]::OpenRead($archive)
++        try {
++            # Only one regular root executable is accepted; no paths, duplicates, links or extra files.
++            if ($zip.Entries.Count -ne 1) { throw 'Unexpected AGY archive layout' }
++            $entry = $zip.Entries[0]
++            $unixType = ($entry.ExternalAttributes -shr 16) -band 0xF000
++            if ($entry.FullName -cne 'antigravity.exe' -or $entry.Length -le 0 -or
++                $unixType -notin @(0, 0x8000) -or ($entry.ExternalAttributes -band 0x410)) {
++                throw 'Unexpected AGY archive entry'
++            }
++            $candidate = Join-Path $tmp 'agy.exe'
++            [IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $candidate, $false)
++        } finally { $zip.Dispose() }
++        if ((Get-AgyVersion $candidate) -cne $target) { throw "AGY archive binary did not report $target" }
++        New-Item -ItemType Directory -Path $bin -Force | Out-Null
++        # Stage on the destination volume; Replace/Move publish a complete binary atomically.
++        $staged = Join-Path $bin ('.agy-' + [guid]::NewGuid().ToString('N') + '.exe')
++        [IO.File]::Copy($candidate, $staged, $false)
++        if (Test-Path -LiteralPath $destination) { [IO.File]::Replace($staged, $destination, $null) }
++        else { [IO.File]::Move($staged, $destination) }
++        if (-not (Test-PathListContains $env:Path $bin)) { $env:Path = "$bin;$env:Path" }
++        $resolved = Get-Command agy -ErrorAction Stop
++        if ($resolved.Source -ine $destination) { throw 'AGY is shadowed on PATH' }
++        if ((Get-AgyVersion $destination) -cne $target) { throw "AGY did not reach $target" }
++    } finally {
++        if ($staged -and (Test-Path -LiteralPath $staged)) { Remove-Item -LiteralPath $staged -Force }
++        Remove-Item -LiteralPath $tmp -Recurse -Force
++    }
++}
++function Resolve-GitTool([string]$gitExe, [string]$relative) {
++    # git.exe may live in <GitRoot>\cmd, <GitRoot>\bin or <GitRoot>\mingw64\bin.
++    $dir = Split-Path $gitExe -Parent
++    for ($i = 0; $i -lt 3; $i++) {
++        $dir = Split-Path $dir -Parent
++        if (-not $dir) { break }
++        $candidate = Join-Path $dir $relative
++        if (Test-Path -LiteralPath $candidate -PathType Leaf) { return $candidate }
++    }
++    return $null
++}
++function Sync-GitBashPath {
++    # Python's checker also resolves bare bash through the parent's process PATH.
++    # Promote the Git bin even when already present later, ahead of a WSL launcher.
++    $directory = Split-Path $gitBash -Parent
++    $remaining = @($env:Path -split ';' | Where-Object { $_ -and -not (Test-PathListContains $_ $directory) })
++    $env:Path = (@($directory) + $remaining) -join ';'
++}
++$repoPath = (Resolve-Path -LiteralPath $Repo).Path
++$manifest = Join-Path $repoPath 'ops\cong_cu.yaml'
++$checker = Join-Path $repoPath 'ops\cong_cu.py'
++$installer = Join-Path $repoPath 'ops\cai_cong_cu.sh'
++$gitExe = (Get-Command git -ErrorAction Stop).Source
++foreach ($path in @($manifest, $checker, $installer)) {
++    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Missing repository file: $path" }
++}
++# Resolve before check-only too; change only this process's PATH, never persistent PATH.
++$gitBash = Resolve-GitTool $gitExe 'bin\bash.exe'
++if (-not $gitBash) { throw "Git Bash not found near $gitExe" }
++Sync-GitBashPath
++function Run([string]$name, [string[]]$arguments) {
++    $cmd = Get-Command $name -ErrorAction Stop
++    & $cmd.Source @arguments
++    if ($LASTEXITCODE -ne 0) { throw "$name exited $LASTEXITCODE" }
++}
++function Version([string]$name, [string[]]$arguments) {
++    $cmd = Get-Command $name -ErrorAction SilentlyContinue
++    if (-not $cmd) { return '(missing)' }
++    try {
++        $lines = @(& $cmd.Source @arguments 2>$null)
++        $versionLine = $lines | Where-Object { $_ -match '^version:\s*\d' } | Select-Object -First 1
++        if ($versionLine) { return ([string]$versionLine).Trim() }
++        return ([string]($lines | Select-Object -First 1)).Trim()
++    }
++    catch { return '(error)' }
++}
++foreach ($name in @('git','python','rg','shellcheck','actionlint','gh','node','npm','pwsh','uv','claude','codex','agy','nlm','gws')) {
++    $arg = if ($name -eq 'actionlint') { @('-version') } else { @('--version') }
++    '{0,-12} {1}' -f $name, (Version $name $arg)
++}
++Show-EnvironmentStatus
++if (-not $Apply) {
++    & python $checker kiem-tra --json
++    $checkerExit = $LASTEXITCODE
++    Write-Host "Checker exit code: $checkerExit. Add -Apply after related jobs finish."
++    exit $checkerExit
++}
++# Only apply needs path translation for the shared installer.
++$cygpath = Resolve-GitTool $gitExe 'usr\bin\cygpath.exe'
++if (-not $cygpath) { throw "Git cygpath not found near $gitExe" }
++$active = @(Get-Process -ErrorAction Stop | Where-Object {
++    $_.ProcessName -match '^(claude|codex|codex-command-runner.*|agy|nlm|gws|uv|node|python|pythonw|py|wsl|wslhost|vmmemWSL)$'
++})
++if ($active.Count) {
++    $names = ($active | Select-Object -ExpandProperty ProcessName -Unique) -join ', '
++    throw "Active tool/runtime processes: $names. Finish related jobs before updating."
++}
++Push-Location $repoPath
++try {
++    $unixInstaller = (& $cygpath -u $installer | Select-Object -First 1).Trim()
++    if (-not $unixInstaller) { throw 'Could not translate installer path for Git Bash' }
++    Sync-ToolPath
++    # Plan missing system prerequisites before any package mutation. Never self-elevate.
++    $missingNode = -not (Test-ToolReady 'node')
++    $missingNpm = -not (Test-ToolReady 'npm')
++    if (-not $missingNode -and $missingNpm) {
++        throw 'Node is present but npm is missing or broken. Repair that Node installation first; refusing to replace an existing Node major.'
++    }
++    $systemPackages = @()
++    if (-not (Test-ToolReady 'gh')) { $systemPackages += 'gh' }
++    if ($missingNode) { $systemPackages += 'nodejs-lts' }
++    if ($systemPackages.Count -or ($Latest -and @($Tools | Where-Object { $_ -in @('git','python','rg','shellcheck','gh','node','pwsh') }).Count)) {
++        Assert-ChocoReady
++    }
++    & python -c 'import yaml' 2>$null
++    if ($LASTEXITCODE -ne 0) { Run 'python' @('-m','pip','install','PyYAML==6.0.3') }
++    # Preserve sufficient baseline versions. ShellCheck must precede the actionlint canary.
++    foreach ($baseline in @('git','python','PyYAML','jsonschema','shellcheck','rg','bash','actionlint')) {
++        $json = @(& python $checker kiem-tra --chi $baseline --json)
++        $probeExit = $LASTEXITCODE
++        $probe = ($json -join [Environment]::NewLine) | ConvertFrom-Json
++        $entries = @($probe.cong_cu)
++        if ($entries.Count -ne 1 -or $entries[0].ten -cne $baseline) { throw "Invalid baseline probe: $baseline" }
++        if ($probeExit -eq 0 -and $entries[0].trang_thai -ceq 'DAT') { continue }
++        if ($baseline -in @('git','python','shellcheck','rg','bash')) { Assert-ChocoReady }
++        $previousActionlintDir = $env:AL_DICH
++        try {
++            if ($baseline -ceq 'actionlint') {
++                # The shared default is a child-only temp bin; use a known parent candidate.
++                $userBin = Join-Path $env:USERPROFILE '.local\bin'
++                $translated = @(& $cygpath -u $userBin)
++                if ($LASTEXITCODE -ne 0 -or $translated.Count -ne 1 -or
++                    [string]::IsNullOrWhiteSpace([string]$translated[0])) {
++                    throw 'Could not translate actionlint user bin for Git Bash'
++                }
++                $env:AL_DICH = ([string]$translated[0]).Trim()
++            }
++            & $gitBash $unixInstaller $baseline
++            if ($LASTEXITCODE -ne 0) { throw "Base tool installer for $baseline exited $LASTEXITCODE" }
++        } finally { $env:AL_DICH = $previousActionlintDir }
++        Sync-ToolPath $baseline
++        # Measure in the parent, which does not inherit the Git Bash installer's PATH.
++        $json = @(& python $checker kiem-tra --chi $baseline --json)
++        $probeExit = $LASTEXITCODE
++        $probe = ($json -join [Environment]::NewLine) | ConvertFrom-Json
++        $entries = @($probe.cong_cu)
++        if ($probeExit -ne 0 -or $entries.Count -ne 1 -or $entries[0].ten -cne $baseline -or
++            $entries[0].trang_thai -cne 'DAT') { throw "Baseline tool not DAT in PowerShell parent: $baseline" }
++    }
++    foreach ($package in $systemPackages) {
++        Run 'choco' @('install', $package, '--yes', '--no-progress')
++        Sync-ToolPath
++    }
++    foreach ($prerequisite in @('gh','node','npm')) {
++        if (-not (Test-ToolReady $prerequisite)) { throw "Supplemental prerequisite not usable: $prerequisite" }
++    }
++    if (-not (Test-ToolReady 'uv')) {
++        $toolVenv = Join-Path $env:LOCALAPPDATA 'tra-luat-tools\venv'
++        $venvPython = Join-Path $toolVenv 'Scripts\python.exe'
++        if (-not (Test-Path -LiteralPath $venvPython -PathType Leaf)) { Run 'python' @('-m','venv',$toolVenv) }
++        & $venvPython -m pip install --disable-pip-version-check uv
++        if ($LASTEXITCODE -ne 0) { throw "uv installation exited $LASTEXITCODE" }
++        Sync-ToolPath
++    }
++    if (-not (Test-ToolReady 'uv')) { throw 'uv is not usable after installation' }
++    foreach ($cli in @('claude','codex','gws')) {
++        if (Test-ToolReady $cli) { continue }
++        $package = @{ claude='@anthropic-ai/claude-code'; codex='@openai/codex'; gws='@googleworkspace/cli' }[$cli]
++        Run 'npm' @('install','--global','--prefix',(Join-Path $env:APPDATA 'npm'),$package,'--no-fund','--no-audit')
++        Sync-ToolPath
++        if (-not (Test-ToolReady $cli)) { throw "$cli is not usable after installation (check PATH shadowing)" }
++    }
++    if (-not (Test-ToolReady 'nlm')) {
++        Run 'uv' @('tool','install','notebooklm-mcp-cli')
++        Sync-ToolPath
++        if (-not (Test-ToolReady 'nlm')) { throw 'nlm is not usable after installation (check uv tool directory and PATH shadowing)' }
++    }
++    if (-not (Test-ToolReady 'agy')) { Install-AgyVerified }
++    if ($PersistPath) {
++        $npmCommand = Get-Command npm -ErrorAction SilentlyContinue
++        foreach ($directory in @((Join-Path $env:USERPROFILE '.local\bin'),
++            (Join-Path $env:LOCALAPPDATA 'agy\bin'), (Join-Path $env:APPDATA 'npm'),
++            (Join-Path $env:LOCALAPPDATA 'tra-luat-tools\venv\Scripts'),
++            $(if ($npmCommand) { Split-Path $npmCommand.Source -Parent }),
++            (Split-Path $gitExe -Parent))) { Add-UserPath $directory }
++    }
++    if ($Latest) {
++        foreach ($item in $Tools) {
++            switch ($item) {
++                'codex' {
++                    $target = (& npm view '@openai/codex' version | Select-Object -First 1).Trim()
++                    if ($LASTEXITCODE -ne 0 -or -not $target) { throw 'Could not resolve latest Codex version' }
++                    if (((Version 'codex' @('--version')) -split '\s+')[-1] -cne $target) {
++                        Run 'npm' @('install', '-g', "@openai/codex@$target", '--no-fund', '--no-audit')
++                    }
++                    if (((Version 'codex' @('--version')) -split '\s+')[-1] -cne $target) { throw "Codex did not reach $target" }
++                }
++                'gws' {
++                    $target = (& npm view '@googleworkspace/cli' version | Select-Object -First 1).Trim()
++                    if ($LASTEXITCODE -ne 0 -or -not $target) { throw 'Could not resolve latest gws version' }
++                    if (((Version 'gws' @('--version')) -split '\s+')[-1] -cne $target) {
++                        Run 'npm' @('install', '-g', "@googleworkspace/cli@$target", '--no-fund', '--no-audit')
++                    }
++                    if (((Version 'gws' @('--version')) -split '\s+')[-1] -cne $target) { throw "gws did not reach $target" }
++                }
++                'claude' {
++                    $target = ((Invoke-RestMethod -Uri 'https://api.github.com/repos/anthropics/claude-code/releases/latest' -TimeoutSec 20).tag_name -replace '^v','')
++                    if (((Version 'claude' @('--version')) -split '\s+')[0] -cne $target) { Run 'claude' @('update') }
++                    if (((Version 'claude' @('--version')) -split '\s+')[0] -cne $target) { throw "Claude did not reach $target" }
++                }
++                'agy' { Install-AgyVerified }
++                'nlm' {
++                    $target = (Invoke-RestMethod -Uri 'https://pypi.org/pypi/notebooklm-mcp-cli/json' -TimeoutSec 20).info.version
++                    if (((Version 'nlm' @('--version')) -split '\s+')[-1] -cne $target) { Run 'uv' @('tool', 'upgrade', 'notebooklm-mcp-cli') }
++                    if (((Version 'nlm' @('--version')) -split '\s+')[-1] -cne $target) { throw "nlm did not reach $target" }
++                }
++                { $_ -in @('git','python','rg','shellcheck','gh','node','pwsh') } {
++                    $package = @{ git='git'; python='python'; rg='ripgrep'; shellcheck='shellcheck'; gh='gh'; node='nodejs-lts'; pwsh='powershell-core' }[$item]
++                    Run 'choco' @('upgrade', $package, '--yes', '--no-progress')
++                }
++                'uv' {
++                    $target = (Invoke-RestMethod -Uri 'https://pypi.org/pypi/uv/json' -TimeoutSec 20).info.version
++                    if (((Version 'uv' @('--version')) -split '\s+')[1] -cne $target) {
++                        $managedPython = Join-Path $env:LOCALAPPDATA 'tra-luat-tools\venv\Scripts\python.exe'
++                        $managedUv = Join-Path $env:LOCALAPPDATA 'tra-luat-tools\venv\Scripts\uv.exe'
++                        if ((Get-Command uv).Source -ieq $managedUv) {
++                            & $managedPython -m pip install --disable-pip-version-check --upgrade "uv==$target"
++                            if ($LASTEXITCODE -ne 0) { throw "uv upgrade exited $LASTEXITCODE" }
++                        } else { Run 'python' @('-m','pip','install','--upgrade',"uv==$target") }
++                    }
++                    if (((Version 'uv' @('--version')) -split '\s+')[1] -cne $target) { throw "uv did not reach $target" }
++                }
++                'npm' { Run 'npm' @('install','-g','npm@latest','--no-fund','--no-audit') }
++            }
++        }
++    }
++    Sync-ToolPath
++    foreach ($required in @('git','python','rg','shellcheck','actionlint','gh','node','npm','pwsh','uv','claude','codex','agy','nlm','gws')) {
++        if (-not (Get-Command $required -ErrorAction SilentlyContinue)) { throw "Required executor/reviewer tool missing: $required" }
++    }
++    Write-Host 'Versions after update:'
++    foreach ($name in @('claude','codex','agy','nlm','gws')) {
++        '{0,-8} {1}' -f $name, (Version $name @('--version'))
++    }
++    Run 'python' @($checker, 'kiem-tra', '--json')
++} finally { Pop-Location }

@@ -1,0 +1,66 @@
+{
+  "measured_at_utc": "2026-11-05T05:59:34.634448+00:00",
+  "canonical_S": "d0fde4aabb968dc89f5530f93ae60c2128dff846",
+  "canonical_checker_sha256": "a4bf95b539e077edbb706afee6fc37b157815c0c246ca1bb01b307106d7be480",
+  "root_HEAD_matches_S": true,
+  "read_only_prospective_objects_only": true,
+  "branch_heads_unchanged": true,
+  "source_branch_currentS_admission_rc12_not_relabelled": true,
+  "actual_merge_and_postmerge_admission_still_required": true,
+  "integrations": [
+    {
+      "candidate_head": "33df4b678e3d1f12e68a9c9d362dc0446f0dd5c2",
+      "canonical_S": "d0fde4aabb968dc89f5530f93ae60c2128dff846",
+      "synthetic_merge": "6a01bd9f3d514ba1f0c2574c6c86575f43fe7e9e",
+      "tree": "76f0c0fa047f179e8c21c42699afe5011484dd9e",
+      "parents": [
+        "d0fde4aabb968dc89f5530f93ae60c2128dff846",
+        "33df4b678e3d1f12e68a9c9d362dc0446f0dd5c2"
+      ],
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "/workspace/scratch/pr1187-recovery/control/ops/lease_publish.py",
+        "kiem-thu-hoi-github",
+        "6a01bd9f3d514ba1f0c2574c6c86575f43fe7e9e",
+        "--root",
+        "/workspace/scratch/pr1187-recovery/control",
+        "--canonical-base",
+        "d0fde4aabb968dc89f5530f93ae60c2128dff846",
+        "--nhanh-mac-dinh",
+        "master",
+        "--receipt",
+        "/workspace/scratch/pr1187-recovery/land-20261105/prospective-integration/infra33-admission.json"
+      ],
+      "rc": 0,
+      "NOT_actual_merge_or_branch_admission": true
+    },
+    {
+      "candidate_head": "91686a66d855a9ddae9dcf4567b13ddaa092cbc2",
+      "canonical_S": "d0fde4aabb968dc89f5530f93ae60c2128dff846",
+      "synthetic_merge": "1c456a7f65147551cda07613bdce5ac42612ae4d",
+      "tree": "82e9c57371125c920207ce0b7552ec7b6e25489a",
+      "parents": [
+        "6a01bd9f3d514ba1f0c2574c6c86575f43fe7e9e",
+        "91686a66d855a9ddae9dcf4567b13ddaa092cbc2"
+      ],
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "/workspace/scratch/pr1187-recovery/control/ops/lease_publish.py",
+        "kiem-thu-hoi-github",
+        "1c456a7f65147551cda07613bdce5ac42612ae4d",
+        "--root",
+        "/workspace/scratch/pr1187-recovery/control",
+        "--canonical-base",
+        "d0fde4aabb968dc89f5530f93ae60c2128dff846",
+        "--nhanh-mac-dinh",
+        "master",
+        "--receipt",
+        "/workspace/scratch/pr1187-recovery/land-20261105/prospective-integration/infra33-plus-product916-admission.json"
+      ],
+      "rc": 0,
+      "NOT_actual_merge_or_branch_admission": true
+    }
+  ]
+}

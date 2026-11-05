@@ -14723,10 +14723,17 @@ def t237_cai_actionlint_retry_song_qua_5xx():
         rc, ra, err, n, _ = chay("D7", [("504",)], AL_RETRY_MAX_TIME="60")
         doi("D7", rc == 4 and n == 9, f"luôn 504, mặc định AL_RETRY, trần 60s ⇒ đòi rc=4 và 9 yêu cầu "
             f"(1+8); được rc={rc}, {n} yêu cầu")
-        # D8: nhịp chờ và trần thời gian phải CÓ TÁC DỤNG. Cách 1s, trần 6s ⇒ khoảng 6–7 lần
-        # thử. Bỏ `--retry-delay` thì curl lùi 1,2,4… ⇒ ~3 lần; bỏ `--retry-max-time` ⇒ 9.
-        rc, ra, err, n, _ = chay("D8", [("504",)], AL_RETRY_MAX_TIME="6")
-        doi("D8", rc == 4 and 5 <= n <= 8, f"luôn 504, cách 1s, trần 6s ⇒ đòi rc=4 và 5..8 yêu "
+        # D8 tách đôi (cross-review lượt 2, P3): mỗi vế chỉ một cận, và cận ấy chỉ AN TOÀN HƠN khi
+        # runner chậm — đòi cận dưới số yêu cầu trong một cửa sổ thời gian thì máy chậm đỏ oan.
+        # D8a nhịp chờ: cách 3s × 3 lần thử lại ⇒ ≥ 9s. Bỏ `--retry-delay` thì curl lùi 1+2+4 = 7s.
+        t0 = __import__("time").monotonic()
+        rc, ra, err, n, _ = chay("D8a", [("504",)], AL_RETRY="3", AL_RETRY_DELAY="3")
+        tg = __import__("time").monotonic() - t0
+        doi("D8a", rc == 4 and n == 4 and tg >= 8.5, f"luôn 504, AL_RETRY=3, cách 3s ⇒ đòi rc=4, "
+            f"4 yêu cầu, ≥ 8.5s; được rc={rc}, {n} yêu cầu, {tg:.1f}s")
+        # D8b trần thời gian: cách 1s, trần 3s ⇒ không quá ~4–5 lần thử; bỏ `--retry-max-time` ⇒ 9.
+        rc, ra, err, n, _ = chay("D8b", [("504",)], AL_RETRY_MAX_TIME="3")
+        doi("D8b", rc == 4 and 1 <= n <= 6, f"luôn 504, cách 1s, trần 3s ⇒ đòi rc=4 và ≤ 6 yêu "
             f"cầu; được rc={rc}, {n} yêu cầu")
 
         for k, (ten, gt) in enumerate((("AL_RETRY", "abc"), ("AL_RETRY_DELAY", "-1"),

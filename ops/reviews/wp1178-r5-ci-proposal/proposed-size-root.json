@@ -1,0 +1,9 @@
+{
+  "patch_sha256": "d90771cb5d9e77bbb410bcbbea0ca33517d5edd5bcbd31308857cd4b3802fff5",
+  "proposed_tree": "e9d2b287343f44ac29a0713e0c0ea6b909aa408c",
+  "method": "exactef temporaryindex +proposedpatch direct immutableec1 numstat; candidate unchanged",
+  "net_files": 6,
+  "added": 1183,
+  "deleted": 1,
+  "numstat": "6\t1\t.github/workflows/ci.yml\n73\t0\tops/environment/README.md\n25\t0\tops/environment/login-linux.sh\n31\t0\tops/environment/login-windows.ps1\n638\t0\tops/environment/update-linux.sh\n410\t0\tops/environment/update-windows.ps1\n"
+}

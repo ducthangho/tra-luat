@@ -1,0 +1,41 @@
+{
+  "scope": "proposedrunbytes inisolatedstubs, no actualupdater/installer/network",
+  "results": [
+    {
+      "id": "linux_success",
+      "rc": 0,
+      "calls": [
+        "BASELINE",
+        "UPDATER"
+      ],
+      "passed": true
+    },
+    {
+      "id": "windows_skips_updater",
+      "rc": 0,
+      "calls": [
+        "BASELINE"
+      ],
+      "passed": true
+    },
+    {
+      "id": "updater_red_propagates",
+      "rc": 7,
+      "calls": [
+        "BASELINE",
+        "UPDATER"
+      ],
+      "passed": true
+    },
+    {
+      "id": "baseline_red_stops",
+      "rc": 9,
+      "calls": [
+        "BASELINE"
+      ],
+      "passed": true
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

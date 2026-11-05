@@ -1,0 +1,23 @@
+{
+  "change_request_id": "mcr1177-r5-ci-correction-20261105",
+  "mission_issue": 1177,
+  "previous_revision": 2,
+  "proposed_revision": 3,
+  "previous_plan_hash": "a5f11a52132db3ebe5951e7dcdcb0782f05259e6d514d11150680769503d7b6b",
+  "proposed_plan_hash": "137f0a87fcc11df0a939d323c5a19e823d14ad7f349c42da00a1afae31695f11",
+  "decision": "pending",
+  "spec_path": "ops/specs/wp1178-r5-ci.md",
+  "spec_sha256": "da794b6d67489851d05eae3e64d3b08686bf0b4cd76c96a022d1958943c5afe6",
+  "exact_write_paths": [
+    ".github/workflows/ci.yml"
+  ],
+  "same_cap_files": 6,
+  "same_cap_added": 1300,
+  "one_fresh_executor_90_minutes": true,
+  "one_additional_product_connector": true,
+  "one_additional_fastforward_push_PR1202": true,
+  "one_new_head_M9": true,
+  "no_local_model_review": true,
+  "historical_cost_attempts": "unknown, preserve/no reset",
+  "candidate_not_written": true
+}

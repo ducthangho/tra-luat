@@ -1,0 +1,112 @@
+{
+  "scope": "PROPOSAL ONLY, no candidate source edit/admission/newhead/lease",
+  "old_head": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+  "patch_sha256": "d90771cb5d9e77bbb410bcbbea0ca33517d5edd5bcbd31308857cd4b3802fff5",
+  "proposed_workflow_sha256": "aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67",
+  "actual_policy_cases": [
+    {
+      "workflow": "actual_ef",
+      "id": "y03_buoc_nang_mang_if_bo_theo_che_do",
+      "rc": 3,
+      "diagnostic": "gate-ops/Linux updater selftest (wp1178): buoc ngoai tap cho phep phai mang `if:` FAST noi && muc ngoai, duoc \"needs.chuan-bi.outputs.che_do != 'duong_nhanh' && runner.os == 'Linux'\""
+    },
+    {
+      "workflow": "actual_ef",
+      "id": "y07_buoc_bi_bo_tu_noi_ly_do",
+      "rc": 3,
+      "diagnostic": "gate-ops: cac buoc duoc noi 'bo qua' phai KHOP DUNG cac buoc bi bo: thua [], thieu ['Linux updater selftest (wp1178)']"
+    },
+    {
+      "workflow": "actual_ef",
+      "id": "y12_moi_if_cap_buoc_khop_dung_danh_sach_cho_phep",
+      "rc": 3,
+      "diagnostic": "gate-ops: tap `if:` cap buoc lech danh sach cho phep: thua/doi [('Linux updater selftest (wp1178)', \"needs.chuan-bi.outputs.che_do != 'duong_nhanh' && runner.os == 'Linux'\")], thieu []"
+    },
+    {
+      "workflow": "actual_ef",
+      "id": "y13_khoa_topology_cua_ci_yml_ngoai_than_run",
+      "rc": 3,
+      "diagnostic": "gate-ops: danh sach/thu tu/khoa cua buoc lech khung; buoc dau tien lech: 10"
+    },
+    {
+      "workflow": "actual_ef",
+      "id": "y14_than_run_cua_buoc_packet_them_khop_nguyen_van",
+      "rc": 0,
+      "diagnostic": ""
+    },
+    {
+      "workflow": "actual_ef",
+      "id": "t58_bang_uy_nhiem_phu_dung_buoc_bi_bo",
+      "rc": 3,
+      "diagnostic": "UY_NHIEM lech buoc bi bo: thieu [('gate-ops', 'Linux updater selftest (wp1178)')], thua []"
+    },
+    {
+      "workflow": "actual_ef",
+      "id": "t94d_harness_step_doc_dung_env_che_do",
+      "rc": 0,
+      "diagnostic": ""
+    },
+    {
+      "workflow": "proposed_existing_run",
+      "id": "y03_buoc_nang_mang_if_bo_theo_che_do",
+      "rc": 0,
+      "diagnostic": ""
+    },
+    {
+      "workflow": "proposed_existing_run",
+      "id": "y07_buoc_bi_bo_tu_noi_ly_do",
+      "rc": 0,
+      "diagnostic": ""
+    },
+    {
+      "workflow": "proposed_existing_run",
+      "id": "y12_moi_if_cap_buoc_khop_dung_danh_sach_cho_phep",
+      "rc": 0,
+      "diagnostic": ""
+    },
+    {
+      "workflow": "proposed_existing_run",
+      "id": "y13_khoa_topology_cua_ci_yml_ngoai_than_run",
+      "rc": 0,
+      "diagnostic": ""
+    },
+    {
+      "workflow": "proposed_existing_run",
+      "id": "y14_than_run_cua_buoc_packet_them_khop_nguyen_van",
+      "rc": 0,
+      "diagnostic": ""
+    },
+    {
+      "workflow": "proposed_existing_run",
+      "id": "t58_bang_uy_nhiem_phu_dung_buoc_bi_bo",
+      "rc": 0,
+      "diagnostic": ""
+    },
+    {
+      "workflow": "proposed_existing_run",
+      "id": "t94d_harness_step_doc_dung_env_che_do",
+      "rc": 0,
+      "diagnostic": ""
+    }
+  ],
+  "registry_contracts": {
+    "loi_ruff_ci": [
+      [],
+      3
+    ],
+    "loi_ci_dispatch_windows": [
+      [],
+      3
+    ],
+    "loi_gate_nhanh": [],
+    "loi_vung_thiet_lap": [],
+    "loi_env_registry": [],
+    "loi_g5_workflow": [],
+    "loi_workflow_dot_bien_du": []
+  },
+  "new_step_added": false,
+  "existing_step_run_only_expanded": "lease-publish selftest (đo lại setup sau G5)",
+  "other_setup_G5_job_if_topology_unchanged": true,
+  "full_ci_duong_nhanh_suite": "not_run_pendingrevisionlease",
+  "newhead_human_CI_M9_connector": "not_run"
+}

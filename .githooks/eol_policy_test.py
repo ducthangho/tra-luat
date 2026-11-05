@@ -366,18 +366,17 @@ def _don_thu_muc_tam(td):
 
 
 def _vi_tri_loi(exc):
-    """X1: `tệp:dòng` của frame trong cùng — chỉ basename, chỉ khi tệp nằm TRONG kho hoặc thư viện chuẩn."""
-    tb = exc.__traceback__
-    while tb is not None and tb.tb_next is not None:
+    """X1: `tệp:dòng` của frame SÂU NHẤT thuộc tập NHỎ tệp đã biết (tệp này, policy, hợp đồng fragment, cổng), không có
+    ⇒ `?`. Không tin `co_filename`/`__file__` của module bất kỳ: loader cấp được tên tùy ý (F1b, lượt 2–3)."""
+    biet = {os.path.realpath(str(x)) for x in (__file__, _SOURCE_ROOT / ".githooks" / "eol_policy.py",
+                                                _CANONICAL_SCRIPTS / "tl_core" / "test_fragments.py", _CONG_BUNDLE_FRAGMENT)}
+    tb, ra = exc.__traceback__, "?"
+    while tb is not None:
+        duong = os.path.realpath(tb.tb_frame.f_code.co_filename)
+        if duong in biet:
+            ra = "%s:%d" % (os.path.basename(duong), tb.tb_lineno)
         tb = tb.tb_next
-    if tb is None:
-        return "?"
-    duong = os.path.realpath(tb.tb_frame.f_code.co_filename)
-    goc = (os.path.realpath(str(_SOURCE_ROOT)), os.path.realpath(os.path.dirname(os.__file__)))
-    nap = {os.path.realpath(f) for f in [__file__] + [getattr(m, "__file__", None) for m in list(sys.modules.values())]
-           if type(f) is str}                   # tệp ĐÃ NẠP làm module: `co_filename` bịa không có mặt ở đây (F1b)
-    trong = duong in nap and any(duong.startswith(g + os.sep) for g in goc)
-    return "%s:%d" % (os.path.basename(duong), tb.tb_lineno) if trong else "?"
+    return ra
 
 
 def _dong_don_dep(exc, td):
@@ -1139,16 +1138,20 @@ def _vi_pham_kien_truc():
     import ast
     import linecache
     cay = ast.parse("".join(linecache.getlines(str(Path(__file__).resolve()))))
-    mien = {"main", "_env_con", "case_chan_doan_mac_dinh_khong_lo_bi_mat", "case_chan_doan_co_tho_chi_cuc_bo"}
-    bo = {id(n) for f in cay.body if isinstance(f, ast.FunctionDef) and f.name in mien for n in ast.walk(f)}
-    env, che, moc = [], [], "".join(["pkg_secret", "_scan"])
+    ham = {f.name: f for f in cay.body if isinstance(f, ast.FunctionDef)}
+    bo = {id(n) for k in ("case_chan_doan_mac_dinh_khong_lo_bi_mat", "case_chan_doan_co_tho_chi_cuc_bo")
+          for n in ast.walk(ham[k])}            # miễn HẸP: main chỉ `"X" in os.environ`, _env_con chỉ `dict(os.environ…)`
+    bo |= {id(c.comparators[0]) for c in ast.walk(ham["main"]) if isinstance(c, ast.Compare) and isinstance(c.ops[0], ast.In)}
+    bo |= {id(c.args[0]) for c in ast.walk(ham["_env_con"]) if isinstance(c, ast.Call) and getattr(c.func, "id", 0) == "dict"}
+    env = [n.lineno for k in ("main", "_env_con") for n in ast.walk(ham[k]) if isinstance(n, (ast.Global, ast.Nonlocal))]
+    che, moc = [], "".join(["pkg_secret", "_scan"])
     for n in ast.walk(cay):
-        ten = getattr(n, "attr", None) or getattr(n, "id", None)
+        ten = getattr(n, "attr", None) or getattr(n, "id", None) or getattr(n, "name", None)   # `name`: alias của import
         if id(n) not in bo and ten in ("environ", "getenv", "putenv"):
-            env.append(n.lineno)
-        if (isinstance(n, ast.Attribute) and ten in ("sub", "subn")) or (isinstance(n, (ast.Import, ast.ImportFrom))
+            env.append(getattr(n, "lineno", 0))
+        if (isinstance(n, (ast.Attribute, ast.alias)) and ten in ("sub", "subn")) or (isinstance(n, (ast.Import, ast.ImportFrom))
                 and moc in ast.dump(n)) or (isinstance(n, ast.Constant) and type(n.value) is str and moc in n.value):
-            che.append(n.lineno)
+            che.append(getattr(n, "lineno", 0))
     return env, che
 
 
@@ -1209,12 +1212,16 @@ def case_chan_doan_mac_dinh_khong_lo_bi_mat(root):
                                           "cases": [{"name": hx, "ok": False}] * 60})
         [_cd("rc", 1, int) for _ in range(1000)]                       # mục nhỏ: khối đầy SÁT trần
         raise ValueError("z" * 50)                                      # X1 cũng nằm trong trần khối (F3)
-    bia = [lambda r, g=g: exec(compile("raise ValueError('x')", os.path.join(g, h6 + ".py"), "exec"))
-           for g in (str(_SOURCE_ROOT), os.path.dirname(os.__file__))]  # F1b: co_filename bịa trong kho/stdlib
+    def bia(g):                                 # F1b: module ĐĂNG KÝ trong sys.modules, `__file__` bịa trong kho/stdlib
+        def ca(r):
+            sys.modules["wp1221_bia"] = m = type(sys)("wp1221_bia")
+            m.__file__ = os.path.join(g, h6 + ".py")
+            exec(compile("raise ValueError('x')", m.__file__, "exec"), m.__dict__)
+        return ca
     try:
         ra = []
         for ca, dd in ((ca_gia, None), (ca_nem, None), (ca_nem_lop_dong, None), (lambda r: True, don_khoa),
-                       (bia[0], None), (bia[1], None)):
+                       (bia(str(_SOURCE_ROOT)), None), (bia(os.path.dirname(os.__file__)), None)):
             ra += _chay_mot_ca(ca, don_dep=dd)[1]
         _, dai = _chay_mot_ca(ca_dai)
         _CD_THO[0] = True                       # F3: payload THÔ nhiều dòng — trần tính cả dòng tiếp nối
@@ -1222,6 +1229,7 @@ def case_chan_doan_mac_dinh_khong_lo_bi_mat(root):
         _CD_THO[0] = False
     finally:
         _CD_THO[0] = tho
+        sys.modules.pop("wp1221_bia", None)
         for k, v in cu.items():
             os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)
     out = "\n".join(ra + dai)
@@ -1243,7 +1251,7 @@ def case_chan_doan_mac_dinh_khong_lo_bi_mat(root):
                     and "problems = [NO_BUNDLED_CASES, <loai:str len:15>, <loai:str" in out)
             and _ve("A6 X1 ngoai le: lop + vi tri; lop dong => khong in", "  ! ca_nem: OSError len:" in out
                     and " tai eol_policy_test.py:" in out and "  ! ca_nem_lop_dong: <lop khong in> len:1" in out
-                    and out.count("  ! <lambda>: ValueError len:1 tai ?") == 2)
+                    and out.count("  ! ca: ValueError len:1 tai eol_policy_test.py:") == 2)
             and _ve("A6 M4 loi ghi => CHAN_DOAN_LOI", "CHAN_DOAN_LOI: ZeroDivisionError len:" in out)
             and _ve("A6 X2 don dep", "PASS <lambda>" in out and "CHAN_DOAN_DON_DEP: PermissionError errno:13" in out
                     and "la_thu_muc_tam:True" in out and "D14_KHOA_GIA" not in out)

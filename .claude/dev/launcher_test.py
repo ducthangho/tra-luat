@@ -12964,7 +12964,7 @@ _R1105_KHOA = ("chuyen_cha_trong_cay", "chuyen_cha_ngoai_cay", "cha_con_song", "
 
 @ca
 def r1105_phan_loai_lech_ham_thuan():
-    # #1105 A3: hàm thuần §2.2 — đủ sáu đầu ra, mỗi vế (i)(ii)(iii) một ca chỉ hỏng đúng vế ấy, ba dạng của (ii),
+    # #1105 A3: hàm thuần §2.2 — đủ năm giá trị trả về (đặc tả r3), mỗi vế (i)(ii)(iii) một ca chỉ hỏng đúng vế ấy, ba dạng của (ii),
     # N = PID 1 và N ngoài chuỗi. Chạy với Path/platform bị chặn: hàm đọc /proc hay rẽ theo nền thì ném ngay.
     m = _tai_launcher_thu()
     ch = ((10, (1, b"100")), (20, (10, b"200")), (30, (20, b"300")))

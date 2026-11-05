@@ -1,0 +1,9 @@
+# A8 (bat bien (a)) do 2026-11-05T21:20:16Z — phien ghi so; merge 50baf894216504d4bb975690ceb9dee4835a2ad7, head 1d5ee679ced60ca6dfade2096a1cb805e9cadad8
+## git diff --check 50baf894216504d4bb975690ceb9dee4835a2ad7^1 50baf894216504d4bb975690ceb9dee4835a2ad7   (dong gop RIENG cua merge: tep packet + RELEASE_MANIFEST.json; khong lay c5a1c3d..head vi gop ca lich su master)
+rc=0
+## doctrine-scan --root <git archive 1d5ee679ced60ca6dfade2096a1cb805e9cadad8>
+doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine
+rc=0
+## ruff ruff 0.17.4 check --select F scripts/tl.py: base c5a1c3d vs head 1d5ee679ced60ca6dfade2096a1cb805e9cadad8 (tieu chi DELTA = 0, CLAUDE.md)
+base:      12 F821  tong=12
+head:      12 F821  tong=12

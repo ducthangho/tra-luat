@@ -1,6 +1,6 @@
 # Bien ban M8 (ADR-0060) dong WP #1223 CLOUD-SETUP-P3C-CONTRACT r1 — kiem bang packet_loop.py kiem-dong-wp
 # Nhan nguon tung muc: ops/land/pr1229-wp1223-land-evidence.yaml (nghiem_thu, assurance_81). "passed" o nghiem_thu la gop:
-# A7, A10 measured; A1–A6, A8, A9 loi_khai_co_neo (offline luot 4 approve + gate master xanh) — xem ho so.
+# A1–A8, A10 measured (A1–A6 do lai: nghiem-thu-a1-a6.txt; A8: nghiem-thu-a8.txt); A9 loi_khai_co_neo — xem ho so.
 packet: CLOUD-SETUP-P3C-CONTRACT
 revision: 1
 generation: 1

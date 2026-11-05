@@ -1,6 +1,6 @@
 # Bien ban M8 (ADR-0060) dong WP #1224 CLOUD-SETUP-P3C-DOCS r2 — kiem bang packet_loop.py kiem-dong-wp
 # Nhan nguon tung muc: ops/land/pr1230-wp1224-land-evidence.yaml (nghiem_thu, assurance_81). "passed" o nghiem_thu la gop:
-# A7, A9 measured; A1–A6, A8 loi_khai_co_neo (offline luot 4 approve + gate master xanh) — xem ho so.
+# A1–A9 measured (A1–A6 do lai: nghiem-thu-a1-a6.txt; A8: nghiem-thu-a8.txt) — xem ho so. landed false: xem ho so trang_thai_packet.thieu_de_landed.
 packet: CLOUD-SETUP-P3C-DOCS
 revision: 2
 generation: 2
@@ -10,7 +10,7 @@ tree_h: 1e59c76b1f3d39df32e3714da703ff5d2c4bc3ae
 review:
   offline: 'run a8d7350a approve tren 4dc4fe9 (model/effort/sandbox DO_DUOC; su co ghi 11 tep ignored, tree/HEAD khong doi)'
   connector: 'issuecomment-6665136419 sach tren 4dc4fe9'
-  assurance_81: DAT
+  assurance_81: CHUA_DAT  # vi pham read-only §8.2 cua luot offline 4 chua xu ly (finding P1 r4485646628, PR #1251)
 windows:
   phan_loai: not_required
   nguon: 'dac ta §0 windows not_required; issuecomment-6665073038 "windows: 4dc4fe9… not_required"'
@@ -32,7 +32,7 @@ nghiem_thu:
   A8: passed
   A9: passed
 lease_cuoi: wp1224-r2-g2-claude
-landed: true
+landed: false
 moc_10_2_2:
   run: passed
   checkout: passed

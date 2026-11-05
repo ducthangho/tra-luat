@@ -143,7 +143,7 @@ trang_thai_packet:
     strict lane LAND); (2) lease nha: xem lease.thu_hoi_cuoi; (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp-m8.txt);
     (4) review neo DUNG authorized_head 1d5ee67: offline luot 4 approve (model/effort/sandbox DO_DUOC), connector sach;
     (5) uy quyen land: DAT bang comment approve_merge HOI TO 6665710907 neo 1d5ee67 (dang SAU merge, xem authorization_ghi_chu);
-    (6) muc tieu packet: xem nghiem_thu (A10 measured; A1–A9 loi_khai_co_neo); (7) §8.1: DAT — model/effort/sandbox phuc vu DO_DUOC.
+    (6) muc tieu packet: xem nghiem_thu (A1–A8, A10 measured; A9 loi_khai_co_neo); (7) §8.1: DAT — model/effort/sandbox phuc vu DO_DUOC.
 
 assurance_81:
   reviewer_assurance_81: DAT
@@ -163,9 +163,20 @@ review:
     approve (measured) · connector 1d5ee67 sach (measured).
 
 nghiem_thu:
-  A1_den_A6: 'loi_khai_co_neo — offline luot 4 approve tren 1d5ee67 voi 6 tep packet giong tung byte f27dba4 (lenh @codex review 6662994121); gate push master xanh tren 50baf89 (tl selftest, doc-claims-check, golden trong job gate).'
+  A1_den_A6: >-
+    measured — nghiem-thu-a1-a6.txt (do_nghiem_thu.py, phien ghi so do lai sau finding P1 r4485646618 tren PR #1251: luot offline 4
+    chi review delta, khong co hien vat luot 1–3): A1–A4, A6 DAT tren blob 50baf89 (so base c5a1c3d) — ve duong True, MOI dot bien
+    cua cot 'dot bien lam DO' cho False; A1 kem contract_check.py --audit rc 0 tren git archive 50baf89; A3 phep do S3: 77 ten case,
+    thieu base {agent_creds_put, configView, regenRegistry} -> merge {configView, regenRegistry}. A5 ve duong: gate output run
+    42073104862 'tl selftest 1777/1777' (danh-gia-gate-output-42073104862.txt) + ba ten ca co mat trong tl_selftest.py@merge; ve am
+    (dot bien chay selftest that, nghiem-thu-a5-dot-bien.txt): DAT — so voi nen cung moi truong (1775/1777, 2 ca do san do cay
+    archive), dot bien SKILL.md them do r210 (+ r219), dot bien EXPECT_VERSION them do expect_version + r119.
   A7: 'measured — merge-va-diff.txt: 6 tep write set + RELEASE_MANIFEST.json; manifest thuoc commit land 1d5ee67 (release-verify-head-1d5ee67.txt), worker khong cham VERSION/CHANGELOG.md/manifest.'
-  A8_A9: 'loi_khai_co_neo — kiem-merge rc 0; CI PR lane worker (thuat_lai qua kiem-merge). Gate master job gate xanh.'
+  A8: >-
+    measured — nghiem-thu-a8.txt: git diff --check 50baf89^1 50baf89 rc 0; doctrine-scan tren git archive 1d5ee67 sach rc 0; ruff
+    0.17.4 --select F scripts/tl.py base c5a1c3d 12 F821 = head 1d5ee67 12 F821, delta 0. doc-claims-check --strict: gate output
+    run 42073104862 ok:true.
+  A9: 'loi_khai_co_neo — kiem-merge rc 0 (CI PR lane worker release-verify manifest tam: thuat_lai qua kiem-merge).'
   A10: >-
     measured — truoc merge: release-verify-head-1d5ee67.txt ok, 184/184; sau merge: release-verify-land-127406160681.txt lane LAND
     ok 184/184; tl-ping-a10.txt: tl ping env=code 18:47Z version 2.21.2q, khong dong CẢNH BÁO (S1 da in canh bao lech).
@@ -173,4 +184,5 @@ nghiem_thu:
 khong_do_duoc:
   - 'Lenh goc duyet land cua chu kho truoc luc merge: chi co loi thuat lai cua phien dieu phoi; comment 6665710907 la hoi to.'
   - 'Quyet dinh Q4 (worker khong cham manifest) cua chu kho: thuat_lai qua giao viec.'
-  - 'Luot offline 1–3 cua packet: khong co hien vat trong kho phien nay doc.'
+  - 'Luot offline 1–3 cua packet: khong co hien vat trong kho phien nay doc (A1–A6 do lai thay the, xem nghiem_thu).'
+  - 'Snapshot read-only cua luot offline 4 (/tmp/wp1223-review4-…/review-evidence.json): nam ngoai kho; stdout tu khai selftest chay tren BAN SAO va kho goc khong delta, khong noi ro co gom tep ignored (§8.2) — not_measured.'

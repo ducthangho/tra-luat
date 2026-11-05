@@ -3,3 +3,9 @@
 # lease sau rut han cmp origin/ops/cap-lease-p3c-g1:ops/leases/wp1224-r2-g2-claude.yaml: khop
 ĐÓNG ĐƯỢC WP CLOUD-SETUP-P3C-DOCS — merge 825eb3561a94e05c36045d2c981b4108c523e31c
 rc=0
+
+# LAN 2 (sau khi ha landed false theo finding P1 r4485646628: review offline luot 4 vi pham read-only §8.2)
+# checkout: 48419a829d0c928bd5ca3f79027ac36cd983df0f (+ thay doi chua commit trong ops/land) ; luc: 2026-11-05T21:21:53Z
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12

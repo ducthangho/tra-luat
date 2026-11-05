@@ -155,7 +155,7 @@ def _a5(cay):
     for che_do, mong in (("song", "BỎ QUA — canary sống"), ("none", "KHÔNG ĐO ĐƯỢC — canary"),
                          ("loi", "KHÔNG ĐO ĐƯỢC — canary"), ("ngu", "KHÔNG ĐO ĐƯỢC — canary")):
         cay.dat(canary="jar" if che_do == "song" else che_do, jar="chet")
-        (m := cay.moi())._NAP_LAI_HAN_CANARY = 1
+        (m := cay.moi())._NAP_LAI_HAN_CANARY = 1 if che_do == "ngu" else 120   # hạn nhỏ CHỈ cho ca ngủ: runner tải nặng khởi động con > 1 s
         if che_do == "song":                         # canary sống trong khi nlm vẫn báo auth: lỗi không do auth
             cay.dat(nlm_rc=1, nlm_err="unauthorized", jar="song")
         kq, err = cay.goi(m, _SL)

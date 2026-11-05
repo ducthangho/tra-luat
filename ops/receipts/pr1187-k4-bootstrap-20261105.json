@@ -1,0 +1,10 @@
+{
+  "recorded_at": "2026-11-05T00:37:27.170692+00:00",
+  "owner_response_verbatim": "Cho phép bootstrap K4 riêng #1187",
+  "scope_head": "29ee9ca74d61544fbddd56c39dabbe194d26408e",
+  "scope_packet": 1187,
+  "exception": "canonical old checker K4 model input replaced only for bootstrap by actual independent primary human audit and owner P3 waiver",
+  "other_gates_unchanged": true,
+  "postland_new_checker_revalidation_required": true,
+  "no_fake_model_run_json": true
+}

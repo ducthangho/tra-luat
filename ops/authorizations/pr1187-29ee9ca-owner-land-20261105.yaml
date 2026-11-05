@@ -1,0 +1,33 @@
+recorded_at_utc: '2026-11-05T00:35:17.220265+00:00'
+owner_instruction_verbatim: Tôi đồng ý duyệt các đề xuất của bạn. Hãy tiếp tục. Tôi
+  chấp nhận các P3. Hãy merge land và ghi sổ
+owner_audit_confirmation_verbatim: Đã đọc spec/diff và chấp thuận nội dung
+human_actor: ducthangho
+recorder: openai_codex/codex_service/machine
+infrastructure_head: 29ee9ca74d61544fbddd56c39dabbe194d26408e
+infrastructure_tree: 996c6af444aeb22d69587ed7852b78f35102eb9b
+product_pr1184_head: a7b5aedc122575a66280ace3ff7f2567251af8e2
+waived_P3_slugs:
+- a2-actual-wp1178-r3-and-frozen-own-spec-blobs-not-exercised
+- identity-h1-trigger-overbroad-false-reject
+- k4-owner-record-negative-locks-missing
+- k1-lease-packet-id-type-and-spec-ref-oid40-strictness-unlocked
+- r1187-crash-classification-and-mutant-controls-not-uniform
+- k4-fail-closed-diagnostics-incidental-typeerror-and-overflow
+land_valid_until_utc: '2026-11-05T12:35:17.220265+00:00'
+model_review_budget:
+  used: 4
+  limit: 4
+  remaining: 0
+gate_waiver: false
+deploy_authorized: false
+owner_decision_source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6646239057
+bootstrap_k4_source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6646274186
+bootstrap_k4_owner_response: 'Cho phép bootstrap K4 riêng #1187'
+infrastructure_reserved_pr: 1194
+human_audit_raw_comment_id: 6646293153
+fullstandard_run_id: fabcb7b776b9444fbd09eae9a3d8d105
+fullstandard_deadline: '2026-11-05T03:31:18Z'
+executor_lease_g3_expired_not_revived: true
+remediation_r3: approved proposal; held due later owner P3 waiver and direction to
+  preserve29ee9ca for land

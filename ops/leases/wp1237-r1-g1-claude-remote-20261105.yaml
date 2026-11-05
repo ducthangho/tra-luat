@@ -22,8 +22,8 @@ recorder_ghi_chu: 'phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; tham qu
 executor_session: session_015GtxrZX3cx55Fs3dp8KLdr
 leased_at_utc: '2026-11-05T15:12:00Z'
 heartbeat_at: '2026-11-05T15:12:00Z'
-lease_until: '2026-11-07T15:12:00Z'
-lease_expires_at_utc: '2026-11-07T15:12:00Z'
+lease_until: '2026-11-05T19:30:00Z'
+lease_expires_at_utc: '2026-11-05T19:30:00Z'
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude
@@ -82,3 +82,18 @@ prohibited_actions:
 - workflow_dispatch
 - sua_ci_yml
 land_authority_note: 'chu kho duyet SHA cu the truoc merge; dieu phoi merge khi kiem-merge rc=0'
+
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-07T15:12:00Z'
+  han_moi_utc: '2026-11-05T19:30:00Z'
+  chi_thi: >-
+    Lease ghi so ghi-so-land-pr1242-wp1237-r1-g1-claude-remote-20261105 (nhanh ops/ghi-so-land-1237-lease @ cf415f7, cap boi phien
+    dieu phoi session_015GtxrYPjZCTZeRiazdssgq, tham quyen #1237 issuecomment-6665806176): write set gom
+    ops/leases/wp1237-r1-g1-claude-remote-20261105.yaml, chi rut han de nha lease thi cong.
+  ly_do: >-
+    Packet wp1237 da MERGE: PR #1242, merge commit 801042cbf6ccc00a4da37ed2a62a61bac10bae02 (2026-11-05T18:24Z),
+    head 97cb2dda246886c7d4bec2bea4a4b89342403a65.
+  vi_sao_khong_dung_so: >-
+    Theo tien le #650/#661, pr1193 (8e32834) va pr1197 (d2e53fc): rut han bang co che DA CAI (phan loai lease theo han). Han moi dat
+    khoang mot gio SAU luc push de ops-publish-lease.yml con thay lease song (khong roi vao rc=8).
+  ghi_boi: 'phien thuc thi kiem ghi so session_015GtxrZX3cx55Fs3dp8KLdr'

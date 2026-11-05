@@ -140,20 +140,16 @@ _CANARY = ("import sys\nsys.path.insert(0, sys.argv[1])\ntry:\n    import tl\n  
            "except Exception:\n    alive = None\nsys.exit(0 if alive is True else 3 if alive is False else 2)\n")
 _NAP_LAI_THU_MUC = os.path.dirname(os.path.abspath(__file__))
 
-
 def _tep_dau() -> str:
     return os.path.join(os.path.expanduser("~"), ".notebooklm-mcp-cli", ".tra-luat-nap-lai.json")
 
-
 def _doc_dau():
-    """ts (float) của dấu, hoặc None khi vắng/hỏng/không phải object/không có ts số."""
     try:
         d = json.load(open(_tep_dau(), encoding="utf-8"))
         ts = d.get("ts") if isinstance(d, dict) else None
         return float(ts) if isinstance(ts, (int, float)) and not isinstance(ts, bool) else None
     except Exception:
         return None
-
 
 def _ghi_dau(ts: int, ket_qua: str) -> bool:
     """Ghi nguyên tử, quyền 0600; True khi đã thay tệp dấu. Lỗi ⇒ False và dọn tệp tạm."""
@@ -165,10 +161,11 @@ def _ghi_dau(ts: int, ket_qua: str) -> bool:
         os.chmod(tam, 0o600); os.replace(tam, p)
         return True
     except Exception:
-        if tam and os.path.lexists(tam):
-            os.unlink(tam)
+        try:                           # dọn best effort: lỗi dọn KHÔNG được thoát khỏi `_run` (review PR #1197 F05)
+            os.unlink(tam) if tam else None
+        except OSError:
+            pass
         return False
-
 
 def _con(argv: list, han: int):
     """(rc, đầu ra gộp) của tiến trình con, hoặc (lý do, "") khi quá hạn/OSError. Không chuyển tiếp đầu ra."""
@@ -183,21 +180,17 @@ def _con(argv: list, han: int):
     except OSError as e:
         return type(e).__name__, ""
 
-
 def _canary():
     return _con([sys.executable, "-c", _CANARY, _NAP_LAI_THU_MUC], _NAP_LAI_HAN_CANARY)[0]
-
 
 def _bao(trang_thai: str, chi_tiet: str) -> None:
     global NAP_LAI_GAN_NHAT
     NAP_LAI_GAN_NHAT = {"trang_thai": trang_thai, "ts": int(time.time())}
     print(f"nlm_nap_lai: {trang_thai} — {chi_tiet}", file=sys.stderr)
 
-
 def _nap_lai(args: list, timeout: int, dau: tuple) -> tuple[int, str, str]:
     with _NAP_LAI_KHOA:                # luồng thứ hai chờ rồi thấy _NAP_LAI_DA_NAP ⇒ BỎ QUA (review PR #1197 F02)
         return _nap_lai_mot(args, timeout, dau)
-
 
 def _nap_lai_mot(args: list, timeout: int, dau: tuple) -> tuple[int, str, str]:
     global _NAP_LAI_DA_NAP
@@ -245,7 +238,6 @@ def _run(args: list[str], timeout: int = 120) -> tuple[int, str, str]:
 
 
 def _kem(d: dict) -> dict:
-    """WP1099: gắn `nap_lai` khi lời gọi `_run` gần nhất đã tới bước Giới hạn; mọi khoá cũ giữ nguyên."""
     if NAP_LAI_GAN_NHAT is not None:
         d["nap_lai"] = NAP_LAI_GAN_NHAT
     return d

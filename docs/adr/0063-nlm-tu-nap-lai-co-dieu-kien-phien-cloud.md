@@ -7,9 +7,7 @@
 
 Quyết định r208c (chú thích quanh `_nlm_auth_load` và chốt chống hạ cấp `_nlm_auth_load_downgrade` trong `scripts/tl_gws.py`;
 điều cấm ở §4b của `references/RASOAT_HOSO_LOOP.md` và gạch "Sửa xác thực" của `references/QUY_TRINH_RA_SOAT_3_TANG.md`) bác
-việc tự nạp jar khi hết hạn: bundle có thể CŨ hơn hoặc CŨNG CHẾT, nên vòng nạp-thử-lại quay vô ích.
-
-Tiền đề đã đổi: laptop chạy WP710 mỗi 30 phút và từ wp726 chỉ stage `nlm_cred.enc` sau canary LIVE dương, nên nguồn ấy thường
+việc tự nạp jar khi hết hạn: bundle có thể CŨ hơn hoặc CŨNG CHẾT, nên vòng nạp-thử-lại quay vô ích. Tiền đề đã đổi: laptop chạy WP710 mỗi 30 phút và từ wp726 chỉ stage `nlm_cred.enc` sau canary LIVE dương, nên nguồn ấy thường
 tươi hơn bản trong `tl_secrets.enc` mà phiên Claude Code web nạp một lần lúc bootstrap; chốt chống hạ cấp vẫn còn. Phiên cloud
 không có trình duyệt, nên khi jar chết giữa phiên thì mọi lệnh `nlm` chỉ trả `auth_hint` rồi rơi về MCP.
 

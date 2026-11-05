@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-"""wp1099 — `nlm_cli._run` tự nạp lại jar NLM có điều kiện ở phiên cloud (ADR-0063, spec cloud-setup-p3b-nlm-401-r9).
-
-Chép `nlm_cli.py` THẬT (hoặc bản đột biến) vào cây tạm cạnh `tl.py` GIẢ (mô-đun canary + CLI `nlm-auth-load`) và `nlm` GIẢ
-trên `TL_NLM_BIN`; đồ giả giữ TRẠNG THÁI chung `{jar, bundle, ...}` và ghi nhật ký mọi lời gọi. Ca hỏng ném
-`TinHieuChotCa(<ca>)`; đột biến chỉ tính GIẾT khi đúng ca đích ném đúng lớp ấy (ngoại lệ khác = tín dụng giả ⇒ ĐỎ)."""
+"""wp1099 — `nlm_cli._run` tự nạp lại jar NLM có điều kiện ở phiên cloud (ADR-0063, spec cloud-setup-p3b-nlm-401-r9). `nlm_cli`
+THẬT (hoặc đột biến) chạy với `tl.py`/`nlm` GIẢ giữ trạng thái; đột biến chỉ tính GIẾT khi đúng ca ném `TinHieuChotCa`."""
 
 import contextlib, hashlib, importlib.util, inspect, io, json, os, subprocess, sys, tempfile, threading, time
 from pathlib import Path
@@ -146,10 +143,9 @@ def _a1(cay):
             _chot("A1", kq == goc and not any(c.startswith("tl ") for c in cay.nhat_ky()) and not _dong(err),
                   "%s: cơ chế chạy khi cổng tắt" % ten)
 def _a2(cay):
-    for st in ({"nlm_rc": 1, "nlm_err": "boom"}, {"nlm_rc": 124, "nlm_err": "auth timeout"},
-               {"nlm_rc": 127, "nlm_err": "auth missing"}):
-        kq, err, log = _mot(cay, "A2", _SL, **st)
-        _chot("A2", not any(c.startswith(("tl ", "canary")) for c in log) and not _dong(err), "ứng viên sai: %r" % st)
+    for rc, e in ((1, "boom"), (124, "auth timeout"), (127, "auth missing")):
+        kq, err, log = _mot(cay, "A2", _SL, nlm_rc=rc, nlm_err=e)
+        _chot("A2", not any(c.startswith(("tl ", "canary")) for c in log) and not _dong(err), "ứng viên sai: rc %d" % rc)
 def _a3(cay):
     kq, err, log = _mot(cay, "A3", _SL)
     loai = [c.split()[0] if not c.startswith("tl ") else "tl " + c.split()[1] for c in log]
@@ -179,8 +175,8 @@ def _a6(cay, ca="A6", bundle="chet", mong="BUNDLE CŨNG CHẾT — "):     # A7:
     _chot(ca, sum("nlm-auth-load" in c for c in log) == 1 and sum(c.startswith("nlm ") for c in log) == 1 and kq[0] == 1
           and _dong(err)[0].startswith("nlm_nap_lai: " + mong) and not any("--force" in c for c in log), "%r %r" % (log, err))
 def _a8(cay):
-    for args, lai, mong in ((["source", "add", "NB", "--url", "x"], 1, "ĐÃ NẠP, KHÔNG THỬ LẠI (lệnh ghi)"),
-                            (["source", "sync", "S"], 1, "ĐÃ NẠP, KHÔNG THỬ LẠI (lệnh ghi)"),
+    ghi = "ĐÃ NẠP, KHÔNG THỬ LẠI (lệnh ghi)"
+    for args, lai, mong in ((["source", "add", "NB", "--url", "x"], 1, ghi), (["source", "sync", "S"], 1, ghi),
                             (["notebook", "query", "NB", "q", "-j"], 2, "ĐÃ NẠP, THỬ LẠI ĐẠT")):
         kq, err, log = _mot(cay, "A8", args)
         _chot("A8", sum(c.startswith("nlm ") for c in log) == lai and _dong(err)[0].startswith("nlm_nap_lai: " + mong),
@@ -209,7 +205,16 @@ def _a10(cay):
     tep = cay.tep_dau
     _chot("A10", any("nlm-auth-load" in c and "dau_co=1" in c for c in log)
           and (os.name != "posix" or (tep.stat().st_mode & 0o777) == 0o600), "dấu chưa có lúc nạp / quyền: %r" % log)
-    cay.dat()
+    cay.dat()                                     # rename LẪN dọn đều lỗi ⇒ vẫn trả tuple gốc + đúng 1 dòng (F05)
+    cu, os.replace, os.unlink = (os.replace, os.unlink), *[lambda *a: os.chmod("/nonexistent-wp1099", 0)] * 2
+    try:
+        kq, err = cay.goi(cay.moi(), _SL)
+    except Exception as e:
+        _chot("A10", False, "lỗi dọn tệp tạm thoát khỏi _run: %s" % type(e).__name__)
+    finally:
+        os.replace, os.unlink = cu
+    _chot("A10", kq[0] == 1 and "không ghi được tệp dấu" in err, "lỗi kép: %r %r" % (kq, err))
+    [x.unlink() for x in tep.parent.glob(".nap-lai-*")], cay.dat()   # rác do OS (giả) từ chối xoá — không phải của ca sau
     tep.mkdir()                                   # đường tệp dấu là THƯ MỤC ⇒ không ghi được ⇒ không nạp, không rác (F01)
     kq, err = cay.goi(cay.moi(), _SL)
     _chot("A10", not any("nlm-auth-load" in c for c in cay.nhat_ky()) and "không ghi được tệp dấu" in err
@@ -287,7 +292,8 @@ _DOT_BIEN = (
     ("them_force", '"tl.py"), "nlm-auth-load"]', '"tl.py"), "nlm-auth-load", "--force"]', "A7", "A7"),
     ("danh_sach_cam", "if tuple(args[:2]) not in _NAP_LAI_CHO_PHEP:", 'if tuple(args[:2]) == ("source", "add"):', "A8", "A8"),
     ("ghi_dau_hong_van_nap", 'if not _ghi_dau(int(now), "dang_nap"):', 'if not (_ghi_dau(int(now), "dang_nap") or 1):', "A10", "A10"),
-    ("de_rac_tam", "            os.unlink(tam)", "            pass", "A10", "A10"),
+    ("de_rac_tam", "            os.unlink(tam) if tam else None", "            pass", "A10", "A10"),
+    ("don_khong_bao_ve", "        except OSError:\n            pass\n        return False", "        except ZeroDivisionError:\n            pass\n        return False", "A10", "A10"),
     ("bo_khoa_luong", "    with _NAP_LAI_KHOA:", "    if True:", "A9", "A9"),
     ("cua_so_60", "_NAP_LAI_CUA_SO = 600", "_NAP_LAI_CUA_SO = 60", "A9", "A9"),
     ("bo_chot_dong_ho_lech", "ts <= now + 60 and ", "", "A9", "A9"),

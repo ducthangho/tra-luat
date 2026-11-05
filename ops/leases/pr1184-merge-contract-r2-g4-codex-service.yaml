@@ -99,3 +99,6 @@ authority_notes:
   remain truthfully classified; no rebase authorized.
 - Scope/caps governed by owner-approved addendum and explicit P3steering; historicalcost/attemptunknown
   remainsunknown.
+- reviewed_sha_required initially pins inherited handoff/startH29 only; controller
+  must rebind actualfinalH before audit/CI. It does not authorize oldhead merge.
+reviewed_sha_required: 29ee9ca74d61544fbddd56c39dabbe194d26408e

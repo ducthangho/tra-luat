@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2q",
   "root_name": "tra-luat",
   "file_count": 184,
-  "total_bytes": 9122769,
-  "package_hash": "b235b6c4bd55963f8c641aad0d73a7abe8d7842b4ab952a46a7f0939886dce68",
-  "content_hash": "b235b6c4bd55963f8c641aad0d73a7abe8d7842b4ab952a46a7f0939886dce68",
+  "total_bytes": 9122779,
+  "package_hash": "21c17d38fcc62d047556acc28a88457abe6f9cf7923bcf8449842b25a0402773",
+  "content_hash": "21c17d38fcc62d047556acc28a88457abe6f9cf7923bcf8449842b25a0402773",
   "required_missing": [],
   "files": [
     {
@@ -108,8 +108,8 @@
     },
     {
       "path": "references/DELTA_v1.19.md",
-      "size": 11104,
-      "sha256": "2f876adc853c9b7c43a7dd38163d097df1266136b430210bfb61ffec58201e60"
+      "size": 11114,
+      "sha256": "72a5c2c25a776083b522bf3a4a9421661c374168447bade4e4e556343317500c"
     },
     {
       "path": "references/DEPENDENCIES.md",
@@ -119,7 +119,7 @@
     {
       "path": "references/DEV_TOOLING_GUIDE.md",
       "size": 13576,
-      "sha256": "56a564971f835518d40fdfecc7c5c4cc3241713d2715afb1e80dc7cef39bf7a5"
+      "sha256": "bfce60878b2c2f66fc1b71f64d1aee50040889f4f304ee8b57c0e8425ddb283d"
     },
     {
       "path": "references/DOCTRINE_APPENDIX.md",

@@ -1,0 +1,8 @@
+# trich tu log REST job 126994820238 (gate-registry windows-latest, run 41949816794, workflow_dispatch windows-only day_du tren ed07782); ban day du 273248 byte sha256 960ee0949baa3030bc050fd89d8624795661e65ad71917704a1d2c9e7273a9db, khong commit
+2026-11-05T03:01:42.5000740Z CI_DANG_KY ops/land_evidence_nguon_test.py: ĐẠT rc=0
+2026-11-05T03:01:42.5001085Z CA: 63/63 dat
+2026-11-05T03:01:42.5001332Z DOT BIEN: 398/398 bi giet dung ly do
+2026-11-05T03:01:42.5001645Z TU KIEM PHAN HANG: DAT (2 dot bien)
+2026-11-05T03:01:42.5001934Z TONG: DAT
+2026-11-05T03:01:42.5002249Z CI_DANG_KY ops/ci_provenance_test.py: ĐẠT rc=0
+{"duong_dan": "ops/ci_provenance_test.py", "rc": 0, "giay": 2577.598, "bat_dau_utc": "2026-11-05T02:15:49.488Z", "ket_thuc_utc": "2026-11-05T02:58:47.086Z", "che_do": "day_du"}

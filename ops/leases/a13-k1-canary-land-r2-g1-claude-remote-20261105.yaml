@@ -1,0 +1,72 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1196
+packet_id: A13-K1-CANARY
+mission_issue: 1124
+mission_id: gh-1124
+mission_ghi_chu: 'pha ghi so land cua packet #1196 sau merge PR #1200 (7814938)'
+revision: 2
+generation: 1
+lease_id: a13-k1-canary-land-r2-g1-claude-remote-20261105
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease rieng cho write_set_planned cua a13-k1-canary-r2-g1-claude-remote-20261105; lease ay van giu spec, khong chong lan duong dan'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1196#issuecomment-6649732390
+authority_url: https://github.com/ducthangho/tra-luat/issues/1196#issuecomment-6649732390
+authority_ghi_chu: 'chu kho "Cap lease de ghi ho so land cho 1196" (05-11-2026); chi thi M8 landed false tai issuecomment-6649676420'
+recorded_by: anthropic_claude_dispatcher
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi theo quyet dinh truc tiep cua chu kho; tham quyen la authority_url'
+executor_session: session_015Gtxra9St4SrF625qHwL6o
+leased_at_utc: '2026-11-05T04:32:00Z'
+heartbeat_at: '2026-11-05T04:32:00Z'
+lease_until: '2026-11-07T04:32:00Z'
+lease_expires_at_utc: '2026-11-07T04:32:00Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); phien thuc thi la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+effective_review_class_ghi_chu: 'ops/land/ khong co trong _BANG_LOP => cong tinh sensitive; executor khong ha lop'
+assurance_target: cross_approved
+reviewer: openai_codex
+reviewer_provider: openai_codex
+reviewer_independence: 'PR chi ghi ops/land/**; dieu phoi merge khi CI xanh va connector sach tren head'
+spec_path: ops/specs/A13-K1-CANARY-r2.md
+spec_hash: d8985e2c2f9a500e2f8b604b554ed4cc5ae1630e196a0b7a3dff555305ffa9e0
+spec_sha256: d8985e2c2f9a500e2f8b604b554ed4cc5ae1630e196a0b7a3dff555305ffa9e0
+branch: claude/ghi-so-land-1196
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 39d511d23af3897c36de2ccf3fd75f35669f54bf
+start_from_sha: 39d511d23af3897c36de2ccf3fd75f35669f54bf
+reviewed_sha_required: 39d511d23af3897c36de2ccf3fd75f35669f54bf
+reviewed_sha_ghi_chu: 'chua co head luc cap lease; review neo dung head cua PR'
+write_set:
+- ops/land/a13-k1-canary-evidence.yaml
+- ops/land/pr1200-wp1196-provenance/
+write_set_hash: 5bb71661cdb40d2df1a0f83ff1176e6124c93d92153ab3b176ef90325003e4b8
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: 'holder scan 2026-11-05T04:32:00Z: ls-remote vs for-each-ref 858 ten (thieu 0, thua 1 = nhanh cuc bo chua day); 2/2 duong dan NGUOI_GIU 0'
+coordination_paths:
+- ops/leases/a13-k1-canary-land-r2-g1-claude-remote-20261105.yaml
+run_minutes: 2880
+heartbeat_required_minutes: 360
+review_sla_minutes: 240
+prohibited_actions:
+- LIVE
+- edit_real_credential
+- self_approve
+- merge
+- write_outside_effective_write_set
+- sua_packet_loop_py
+land_authority_note: 'dieu phoi merge PR ghi so; M8 ghi landed false theo chi thi chu kho'

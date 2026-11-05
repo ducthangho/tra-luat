@@ -1,0 +1,81 @@
+# Gate output — run 41397085109 attempt 1 (push master, b3249c3). Log tho tai qua REST actions/jobs/<id>/logs trong phien ghi so 2026-11-05; log KHONG chep vao kho, chi ghi sha256.
+# Moi job: conclusion, sha256 log tho, so dong ##[error], so dong co chu BO QUA/BỎ QUA, so dong marker am, marker duong (toi da 8). Script: gate_output.py (scratchpad phien, khong chep).
+== chuan-bi job 125120627089 conclusion success sha256 c1ad9dd6a6b2785cff0933d388ae0bc46bbc7e10734a5c3b42fdcf4ff9527cbd error_lines 0 bo_qua 0 marker_am 0
+   (khong co marker)
+== gate (ubuntu-latest) job 125120694870 conclusion success sha256 880f125f59268b36762bf02ba55880c9328ea86888c8981db6b109d92d669a72 error_lines 0 bo_qua 1 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+   CỔNG TRÊN CÂY THẬT: ĐẠT · nguon_tep=git · nguon_noi_dung=blob-index
+   TỰ KIỂM SONG SONG (N126): ĐẠT
+   SỐ LIỆU: ca=61 · đột biến=490 (giao mảnh) · lỗi đột biến=0 · tiền kiểm bỏ qua=0 · cổng cây thật=ĐẠT
+   nền: 18/18 đạt
+   TỔNG: ĐẠT
+   nền: 7/7 đạt · BỎ QUA: 0
+   30/30 dat
+== gate-cong-cu (ubuntu-latest, 0) job 125120694950 conclusion success sha256 d17b2775644af6d0794f45e8d14eeb2996ab1aaa6a1cb2f71080f16ee5f63916 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 1) job 125120694925 conclusion success sha256 b590bc4218abbb47af65ce6e257c9d87f8508a5685fe16c230cd07ed0e36c29b error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 2) job 125120694982 conclusion success sha256 abec069b9d1a103cf4a18a8d383568073bb320ffb9477494dd1bb330e1dd57d4 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 3) job 125120694913 conclusion success sha256 068571b148f807c6d58cb77f24065df42023b8a0763a70d3fa1afcb862160cc8 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 4) job 125120695000 conclusion success sha256 224db7fcf1b9b19a755bc63a17b1ed40f6f1d05995d1d40b8f09a6ff43cfe718 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 5) job 125120694914 conclusion success sha256 90ceae01539dc5da4c79313d04c3563ed75df0a30ad877ad057921bdbe2689bc error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 6) job 125120694924 conclusion success sha256 167edc9034db0a4391ec2659f31f5b4a72a7a590c4969ec5777bbddcac3b0e76 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 7) job 125120694964 conclusion success sha256 1658b9c1634fe9de423352090ddc36f207aa80d4a7e331d8f811a33033b8e3ab error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu-gop (ubuntu-latest) job 125127855045 conclusion success sha256 9444c40025b2a0e9e702a5a878bb9aab29c74353e6697ca989c10e044477ba8d error_lines 0 bo_qua 0 marker_am 0
+   GOM MẢNH 8/8
+   SỐ LIỆU GOM: ca=61 · đột biến=490 · lỗi đột biến=0
+== gate-nhanh-gop (ubuntu-latest) job 125123836538 conclusion success sha256 47141052781da9f49650090f20bade091a859fdd6966d304100f236d427100e9 error_lines 0 bo_qua 0 marker_am 0
+   CA NEN: 56/56 passed · TU DOT BIEN (chi ca dich): 255/255 giet · DOT BIEN SAN PHAM: 10/10 giet
+== gate-nhanh-manh (ubuntu-latest, 0) job 125120695013 conclusion success sha256 3c278f85e301f116ae546d9e3416fa5bef60273bde1b243d240011d830fb0a09 error_lines 0 bo_qua 0 marker_am 0
+   TU KIEM: 1/1
+   targeted_mutant_gate MANH 0/8: rc=0 · passed 39/39
+== gate-nhanh-manh (ubuntu-latest, 1) job 125120695068 conclusion success sha256 6401989aa45593e7e1ac47d18d356f21169969b02a6910c4f73254b3a4b6ef08 error_lines 0 bo_qua 0 marker_am 0
+   TU KIEM: 1/1
+   targeted_mutant_gate MANH 1/8: rc=0 · passed 41/41
+== gate-nhanh-manh (ubuntu-latest, 2) job 125120694981 conclusion success sha256 ac5db06246210e8e4a264e6f93bbf4b85677e6ee3a7166b05130f9fc1b389cd3 error_lines 0 bo_qua 0 marker_am 0
+   TU KIEM: 1/1
+   targeted_mutant_gate MANH 2/8: rc=0 · passed 40/40
+== gate-nhanh-manh (ubuntu-latest, 3) job 125120694928 conclusion success sha256 9890b5c35e762bdb8d2c47fa48759b045fc97b7b46c032b2842f20f211ec3ee7 error_lines 0 bo_qua 0 marker_am 0
+   TU KIEM: 1/1
+   targeted_mutant_gate MANH 3/8: rc=0 · passed 40/40
+== gate-nhanh-manh (ubuntu-latest, 4) job 125120695210 conclusion success sha256 a71d609920272677aceaa51412d3be46509ec1c03783b619b62b9180a63bc0cb error_lines 0 bo_qua 0 marker_am 0
+   TU KIEM: 1/1
+   targeted_mutant_gate MANH 4/8: rc=0 · passed 39/39
+== gate-nhanh-manh (ubuntu-latest, 5) job 125120695069 conclusion success sha256 c52318ded8df228960286c32f3682c01cf898f56ec8911076706273630710070 error_lines 0 bo_qua 0 marker_am 0
+   TU KIEM: 1/1
+   targeted_mutant_gate MANH 5/8: rc=0 · passed 41/41
+== gate-nhanh-manh (ubuntu-latest, 6) job 125120694957 conclusion success sha256 cb1cb05dfd57a2095e59a3afdae4c982c3af4cb1b1b59937deacbc23292d448f error_lines 0 bo_qua 0 marker_am 0
+   TU KIEM: 1/1
+   targeted_mutant_gate MANH 6/8: rc=0 · passed 39/39
+== gate-nhanh-manh (ubuntu-latest, 7) job 125120695027 conclusion success sha256 0ef9c6a92102f08a7a625cf7c7372f5d1b953cb55a87d79bf2dd03630e8889a5 error_lines 0 bo_qua 0 marker_am 0
+   TU KIEM: 1/1
+   targeted_mutant_gate MANH 7/8: rc=0 · passed 42/42
+== gate-ops (ubuntu-latest) job 125120694848 conclusion success sha256 e911441a66e6596bf7ec9477bcea69613f6a8f84e3b26f9ecb6d1ef9141e5491 error_lines 0 bo_qua 0 marker_am 36
+   CA: 114/114 dat · 0 do · 0 hong
+   TỔNG: ĐẠT
+   [B] lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
+   [A] lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
+   lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
+   don-nhanh: 21/21 dat
+   [am] đột biến prunable: ĐỎ=['prunable'], đối chứng cho phép sống=2
+   [am] đột biến last-wins: ĐỎ=['hai'], đối chứng cho phép sống=2
+   [am] đột biến sạch: ĐỎ=['ban'], đối chứng cho phép sống=2
+== gate-packet-loop (ubuntu-latest) job 125120694894 conclusion success sha256 b6312c7a908008311a3c98d2f01c0d034009a99e15876ddbcca5d7b74e3b6f97 error_lines 0 bo_qua 3 marker_am 0
+   nền: 1088/1088 đạt · BỎ QUA: 1
+   TỔNG: ĐẠT
+== gate-registry (ubuntu-latest) job 125128671218 conclusion success sha256 23d7503ea6ce4ac3d3fdef55f11596bea7069fadd7507d262d6fe31af7cb3dad error_lines 0 bo_qua 0 marker_am 0
+   CI_DANG_KY .claude/dev/doc_receipt_thu_hoi_test.py: ĐẠT rc=0
+   nền: 28/28 đạt
+   TỔNG: ĐẠT
+   CI_DANG_KY .claude/dev/chon_reviewer_test.py: ĐẠT rc=0
+   CI_DANG_KY .claude/dev/gh_readback_test.py: ĐẠT rc=0
+   CA         : 42/42 đạt · 0 đỏ · ĐẠT
+   D8(a) đích nằm trong tập giết: ĐẠT
+   D8(b) không tập giết rỗng: ĐẠT
+# TONG: 23 job; ##[error] 0; dong marker am 36 (regex rong, doc tay neu > 0); job co marker duong 22/23

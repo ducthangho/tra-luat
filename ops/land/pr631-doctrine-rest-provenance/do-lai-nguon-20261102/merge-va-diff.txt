@@ -1,0 +1,30 @@
+merge 0300cac842476f78697635807381c23fc56c0760 tree 83c56a97bcbd937afc6b515db54da50c3e2a17f6 parents f202fb8e2b1fc7affe5e423552fc6da5b624579c 6e5c74849af68e748c4844bedf5856ead4c60be3
+head 6e5c74849af68e748c4844bedf5856ead4c60be3 tree ffb3654a010b80c5035264d9af02f087371eb46b
+merge-base=9091cf52cf20ac197c1a356d6a33cac6bab0b318
+diff P1..M sha256 c1560fcfca1e8e59ed04de5314e63e92f00d8a2d981e5eb044caed3610b3f967
+ CLAUDE.md                                         |  86 +++++++-
+ ops/reviews/pr631-review-1-claude/HINT.patch      |  46 +++++
+ ops/reviews/pr631-review-1-claude/VERDICT.md      |  26 +++
+ ops/reviews/pr631-review-1b-claude-cli/HINT.patch | 117 +++++++++++
+ ops/reviews/pr631-review-1b-claude-cli/PROMPT.md  |  44 ++++
+ ops/reviews/pr631-review-1b-claude-cli/RUN.md     |   9 +
+ ops/reviews/pr631-review-1b-claude-cli/VERDICT.md | 240 ++++++++++++++++++++++
+ ops/reviews/pr631-review-2-opus-max/HINT.patch    | 118 +++++++++++
+ ops/reviews/pr631-review-2-opus-max/PROMPT.md     |  47 +++++
+ ops/reviews/pr631-review-2-opus-max/RUN.md        |   7 +
+ ops/reviews/pr631-review-2-opus-max/VERDICT.md    | 209 +++++++++++++++++++
+ ops/reviews/pr631-review-3-opus-max/HINT.patch    |  21 ++
+ ops/reviews/pr631-review-3-opus-max/PROMPT.md     |  48 +++++
+ ops/reviews/pr631-review-3-opus-max/RUN.md        |   7 +
+ ops/reviews/pr631-review-3-opus-max/VERDICT.md    | 194 +++++++++++++++++
+ ops/reviews/pr631-review-4-opus-max/HINT.patch    |   0
+ ops/reviews/pr631-review-4-opus-max/PROMPT.md     |  48 +++++
+ ops/reviews/pr631-review-4-opus-max/RUN.md        |   7 +
+ ops/reviews/pr631-review-4-opus-max/VERDICT.md    | 216 +++++++++++++++++++
+ 19 files changed, 1486 insertions(+), 4 deletions(-)
+diff MB..H sha256 c1560fcfca1e8e59ed04de5314e63e92f00d8a2d981e5eb044caed3610b3f967
+
+# doi chieu head review approve (e2fa6d7, luot 4) voi head merge (6e5c748), chi CLAUDE.md:
+git diff e2fa6d7 6e5c748 -- CLAUDE.md (dong +/-) sha256 a76647473fa1861cb2a962a5da44025017218b4c487221085b35ed994d4f530d, +121 -10
+git diff c16bec6 9091cf5 -- CLAUDE.md (thay doi cua master giua hai lan hoa) sha256 a76647473fa1861cb2a962a5da44025017218b4c487221085b35ed994d4f530d, +121 -10
+=> phan PR tren CLAUDE.md o 6e5c748 bang phan da review o e2fa6d7; e2fa6d7..f95ceb4 chi them ops/reviews/pr631-review-4-opus-max/ (4 tep +271).

@@ -1884,13 +1884,15 @@ _SANDBOX_GIOI_HAN = ("lay mau /proc tu ben ngoai moi %ss: lenh ngan hon chu ky c
 _KHOA_LECH = ("chuyen_cha_trong_cay", "chuyen_cha_ngoai_cay", "cha_con_song", "tai_dung", "to_tien_doi")
 
 
-def _phan_loai_lech(c, cu, moi, cha_cu, chuoi, n_bd) -> str:
+def _phan_loai_lech(c, cu, moi, cha_cu, chuoi, n_bd, to_tien_hien) -> str:
     """#1105 §2.2 — hàm THUẦN (không đọc /proc, không rẽ theo nền): phân loại MỘT lần lệch danh tính của `c`.
 
     `cu`/`moi`: (ppid, starttime) đã xác thực / vừa đọc. `cha_cu`: None khi cha cũ P vắng khỏi /proc, hoặc
     (trạng thái, starttime) hiện của P. `chuoi`: ((pid, (ppid, starttime)), ...) đã xác thực từ gốc tới P — kể cả gốc.
-    `n_bd`: starttime hiện của cha mới N (None khi N vắng). Trả "tha" (chuyển cha bình thường, đạt cả ba vế
-    (i)(ii)(iii) của §2.1) hoặc đúng một khoá của `_KHOA_LECH`. `c` nằm TRONG chuỗi ⇒ đó là tổ tiên đọc lại bị đổi."""
+    `n_bd`: starttime hiện của cha mới N (None khi N vắng). `to_tien_hien`: {pid: (ppid, starttime) hiện, hoặc None khi
+    vắng} của các tổ tiên trong `chuoi` trừ P. Trả "tha" (chuyển cha bình thường, đạt cả ba vế (i)(ii)(iii) của §2.1;
+    `_dem` đếm nó vào `chuyen_cha_trong_cay`) hoặc một trong bốn nhãn không tha. `c` nằm TRONG chuỗi ⇒ đó là tổ tiên
+    đọc lại bị đổi."""
     luu = dict(chuoi)
     if c in luu:
         return "to_tien_doi"
@@ -1902,6 +1904,16 @@ def _phan_loai_lech(c, cu, moi, cha_cu, chuoi, n_bd) -> str:
     n = luu.get(moi[0])
     if moi[0] == 1 or n is None or n_bd != n[1]:
         return "chuyen_cha_ngoai_cay"                                      # hỏng (iii); PID 1 không bao giờ được tha
+    # (iii) vế chuỗi — identity-chain-bypass, review offline lượt 1: mọi tổ tiên CÒN SỐNG trừ P phải khớp (ppid,
+    # starttime) đã lưu; riêng gốc (đầu chuỗi) chỉ đòi starttime.
+    for pid, bo in chuoi:
+        hien = to_tien_hien[pid] if pid != cu[0] else None
+        if hien is None:
+            continue
+        if pid == chuoi[0][0]:
+            hien = (bo[0], hien[1])
+        if hien != bo:
+            return "to_tien_doi"
     return "tha"
 
 
@@ -2096,12 +2108,9 @@ class _LayMauSandbox:
         """`c` đổi (ppid, starttime) từ `cu` sang `moi`. Đọc P và N, hỏi `_phan_loai_lech`, đếm. True = chuyển cha
         bình thường: cạnh và chuỗi đã xác thực của `c` chuyển sang N. False = lệch thật, người gọi ghi DanhTinhDoi."""
         p, n = self._stat_tt(cu[0]), self._stat(moi[0])
-        nhan = _phan_loai_lech(c, cu, moi, None if p is None else (p[0], p[2]), chuoi, None if n is None else n[1])
-        # identity-chain-bypass (review offline lượt 1, chủ kho duyệt vá hẹp 05-11): (iii) chỉ so starttime của N, nên
-        # trước khi tha phải đọc lại MỌI tổ tiên còn sống trừ P — tổ tiên nào đổi ppid/starttime ⇒ lệch (to_tien_doi).
-        if nhan == "tha" and self._doc_lai_chuoi(tuple(x for x in chuoi if x[0] != cu[0])) == "lech":
-            return False
-        if self._dem(nhan) != "tha":
+        hien = {x: self._stat(x) for x, _ in chuoi if x != cu[0]}   # đọc MỚI mọi tổ tiên trừ P (vế chuỗi của (iii))
+        if self._dem(_phan_loai_lech(c, cu, moi, None if p is None else (p[0], p[2]), chuoi,
+                                     None if n is None else n[1], hien)) != "tha":
             return False
         self.canh[c] = (moi[0], cu[1])
         ids = [x[0] for x in chuoi]
@@ -2115,7 +2124,7 @@ class _LayMauSandbox:
             s = self._stat(p)
             if s is None:
                 vang = True
-            elif s != bo and self._dem(_phan_loai_lech(p, bo, s, None, chuoi, None)) != "tha":
+            elif s != bo and self._dem(_phan_loai_lech(p, bo, s, None, chuoi, None, {})) != "tha":
                 return "lech"
         return "vang" if vang else "khop"
 

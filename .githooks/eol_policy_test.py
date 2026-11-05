@@ -288,8 +288,16 @@ def _chay_policy(root, mode):
     return out
 
 
+def _dong_cua(nhan, chuoi):
+    """ĐÚNG các dòng sẽ in cho một mục kênh — dùng CHUNG cho in và cho ngân sách M5 (kể cả dòng tiếp nối)."""
+    if nhan == "CHAN_DOAN_LOI":
+        return ["CHAN_DOAN_LOI: %s" % chuoi]
+    phan = chuoi.splitlines() or [""]
+    return ["CHAN_DOAN: %s = %s" % (nhan, phan[0])] + ["CHAN_DOAN:   | %s" % p for p in phan[1:]]
+
+
 def _dai_dong(n, v):
-    return len("CHAN_DOAN: %s = %s" % (n, v)) + 1          # đúng chuỗi sẽ in, kể cả xuống dòng (M5)
+    return sum(len(d) + 1 for d in _dong_cua(n, v))
 
 
 def _ghi_payload_cong(nhan, p):
@@ -342,11 +350,7 @@ def _khoi_chan_doan(ghi, tran=None):
         return ["CHAN_DOAN: (rong — ca khong ghi chan doan)"]
     dong, tong = [], 0
     for i, (nhan, chuoi) in enumerate(ghi):
-        if nhan == "CHAN_DOAN_LOI":
-            moi = ["CHAN_DOAN_LOI: %s" % chuoi]
-        else:
-            phan = chuoi.splitlines() or [""]
-            moi = ["CHAN_DOAN: %s = %s" % (nhan, phan[0])] + ["CHAN_DOAN:   | %s" % p for p in phan[1:]]
+        moi = _dong_cua(nhan, chuoi)
         do_dai = sum(len(d) + 1 for d in moi)
         if tong + do_dai > tran - _CD_CHO_DAU_CAT:
             dong.append("CHAN_DOAN: …[cat khoi: bo %d muc, ~%d ky tu]"
@@ -370,7 +374,9 @@ def _vi_tri_loi(exc):
         return "?"
     duong = os.path.realpath(tb.tb_frame.f_code.co_filename)
     goc = (os.path.realpath(str(_SOURCE_ROOT)), os.path.realpath(os.path.dirname(os.__file__)))
-    trong = any(duong.startswith(g + os.sep) for g in goc)
+    nap = {os.path.realpath(f) for f in [__file__] + [getattr(m, "__file__", None) for m in list(sys.modules.values())]
+           if type(f) is str}                   # tệp ĐÃ NẠP làm module: `co_filename` bịa không có mặt ở đây (F1b)
+    trong = duong in nap and any(duong.startswith(g + os.sep) for g in goc)
     return "%s:%d" % (os.path.basename(duong), tb.tb_lineno) if trong else "?"
 
 
@@ -425,7 +431,7 @@ def _chay_mot_ca(case, don_dep=None):
             sau.append("CHAN_DOAN_DON_DEP: <loi don thu muc tam; khong mo ta duoc>")
     if not ok:
         try:     # dòng dọn dẹp tính vào trần toàn khối
-            sau += _khoi_chan_doan(ghi, _CD_TRAN_CA - sum(len(d) + 1 for d in sau))
+            sau += _khoi_chan_doan(ghi, _CD_TRAN_CA - sum(len(d) + 1 for d in truoc + sau))   # X1/X2 trong trần
         except KeyboardInterrupt:
             raise
         except BaseException as exc:                 # noqa: BLE001 — M4: không đổi kết quả
@@ -1127,14 +1133,23 @@ def case_binary_giu_nguyen_byte_qua_renormalize(root):
 
 # ── wp1221 r3: tự kiểm kênh chẩn đoán (M6) ────────────────────────────────────────────────────────
 
-def _ma_trong(f):
-    """Tên và hằng chuỗi trong code object của `f`, kể cả hàm lồng — dùng cho kiểm tĩnh A14."""
-    ra, ngan = [], [f.__code__]
-    while ngan:
-        c = ngan.pop()
-        ra += list(c.co_names) + [k for k in c.co_consts if type(k) is str]
-        ngan += [k for k in c.co_consts if type(k) is type(c)]
-    return ra
+def _vi_pham_kien_truc():
+    """A14: AST của NGUỒN ĐANG CHẠY (qua `linecache` — bộ đột biến nạp bản đột biến vào đó). Trả `(env, che)`: dòng đọc
+    env ngoài `main` (chốt M8)/`_env_con`/hai ca tự kiểm, và dòng mang bộ che (import/hằng chuỗi nhắc bộ quét bí mật, `.sub`)."""
+    import ast
+    import linecache
+    cay = ast.parse("".join(linecache.getlines(str(Path(__file__).resolve()))))
+    mien = {"main", "_env_con", "case_chan_doan_mac_dinh_khong_lo_bi_mat", "case_chan_doan_co_tho_chi_cuc_bo"}
+    bo = {id(n) for f in cay.body if isinstance(f, ast.FunctionDef) and f.name in mien for n in ast.walk(f)}
+    env, che, moc = [], [], "".join(["pkg_secret", "_scan"])
+    for n in ast.walk(cay):
+        ten = getattr(n, "attr", None) or getattr(n, "id", None)
+        if id(n) not in bo and ten in ("environ", "getenv", "putenv"):
+            env.append(n.lineno)
+        if (isinstance(n, ast.Attribute) and ten in ("sub", "subn")) or (isinstance(n, (ast.Import, ast.ImportFrom))
+                and moc in ast.dump(n)) or (isinstance(n, ast.Constant) and type(n.value) is str and moc in n.value):
+            che.append(n.lineno)
+    return env, che
 
 
 def case_chan_doan_mac_dinh_khong_lo_bi_mat(root):
@@ -1147,7 +1162,7 @@ def case_chan_doan_mac_dinh_khong_lo_bi_mat(root):
     """
     import base64
     b64 = base64.b64encode(os.urandom(240)).decode()                   # có `/` `+` như thân PEM thật
-    hx, k1, k2, h3, h4, h5 = (os.urandom(n).hex() for n in (16, 10, 18, 9, 9, 9))
+    hx, k1, k2, h3, h4, h5, h6 = (os.urandom(n).hex() for n in (16, 10, 18, 9, 9, 9, 9))
     pem = "\n".join(["-----BEG" + "IN RSA PRIVATE KEY-----"] + [b64[i:i + 64] for i in range(0, 320, 64)]
                     + ["-----END RSA PRIVATE KEY-----"])
     api = "AI" + "za" + k1 + "AI" + "za" + k2[:35]                      # V4: hai khoá chồng nhau (họ F)
@@ -1160,7 +1175,7 @@ def case_chan_doan_mac_dinh_khong_lo_bi_mat(root):
                                                  "error": "W" + h5 + "Error: " + pem}]}
     env = {"EOL_TEST_FAKE_TOKEN": "TIEN_" + pem + "_HAU", "EOL_TEST_FAKE_SECRET": json.dumps(payload, sort_keys=True),
            "EOL_TEST_FAKE_KEY": tok[:14]}                               # V3: họ D / E / C
-    bi_mat = [b64[:320], hx, k1, k2[:35], h3.upper(), h4, h5]
+    bi_mat = [b64[:320], hx, k1, k2[:35], h3.upper(), h4, h5, h6]
     cu, tho = {k: os.environ.get(k) for k in env}, _CD_THO[0]
     _CD_THO[0] = False                          # ca này đo ĐƯỜNG MẶC ĐỊNH, kể cả khi suite chạy với `--chan-doan-tho`
     os.environ.update(env)
@@ -1192,14 +1207,19 @@ def case_chan_doan_mac_dinh_khong_lo_bi_mat(root):
     def ca_dai(r):                                                      # A7: danh sách dài + payload + khối vượt trần
         _ghi_payload_cong("payload dai", {"dev_test_ids": [_PROBE_FILE_ID] * 5000, "bundle_test_ids": [],
                                           "cases": [{"name": hx, "ok": False}] * 60})
-        for _ in range(10):
-            _cd("ids", [_PROBE_FILE_ID] * 5000, _id_kho)
-        return False
+        [_cd("rc", 1, int) for _ in range(1000)]                       # mục nhỏ: khối đầy SÁT trần
+        raise ValueError("z" * 50)                                      # X1 cũng nằm trong trần khối (F3)
+    bia = [lambda r, g=g: exec(compile("raise ValueError('x')", os.path.join(g, h6 + ".py"), "exec"))
+           for g in (str(_SOURCE_ROOT), os.path.dirname(os.__file__))]  # F1b: co_filename bịa trong kho/stdlib
     try:
         ra = []
-        for ca, dd in ((ca_gia, None), (ca_nem, None), (ca_nem_lop_dong, None), (lambda r: True, don_khoa)):
+        for ca, dd in ((ca_gia, None), (ca_nem, None), (ca_nem_lop_dong, None), (lambda r: True, don_khoa),
+                       (bia[0], None), (bia[1], None)):
             ra += _chay_mot_ca(ca, don_dep=dd)[1]
         _, dai = _chay_mot_ca(ca_dai)
+        _CD_THO[0] = True                       # F3: payload THÔ nhiều dòng — trần tính cả dòng tiếp nối
+        dai_tho = _chay_mot_ca(lambda r: _ghi_payload_cong("payload tho", {"detail": "x\n" * 400}) or False)[1]
+        _CD_THO[0] = False
     finally:
         _CD_THO[0] = tho
         for k, v in cu.items():
@@ -1208,9 +1228,7 @@ def case_chan_doan_mac_dinh_khong_lo_bi_mat(root):
     lo = [s[i:i + 8] for s in bi_mat for i in range(len(s) - 7) if s[i:i + 8] in out]
     _cd("so cua so 8 ky tu da so / so lo", [sum(len(s) - 7 for s in bi_mat), len(lo)], (int, int))
     dong_pl = [d for d in dai if d.startswith("CHAN_DOAN: payload dai")]
-    ham = [v for k, v in list(globals().items()) if type(v) is type(_loc)
-           and k not in ("main", "_env_con") and not k.startswith("case_chan_doan")]
-    moc = "".join(["pkg_secret", "_scan"])
+    env_sai, che = _vi_pham_kien_truc()
     return (_ve("A6 khong cua so 8 ky tu nao cua bi mat", not lo)
             and _ve("A6 rc + nhan lenh hang", "python -c <ca tu kiem> :: rc = 3" in out
                     and "python <pem o argv1> :: rc = 2" in out)
@@ -1224,7 +1242,8 @@ def case_chan_doan_mac_dinh_khong_lo_bi_mat(root):
                     and "case_count = <loai:bool len:->" in out and "error = <loai:str" in out
                     and "problems = [NO_BUNDLED_CASES, <loai:str len:15>, <loai:str" in out)
             and _ve("A6 X1 ngoai le: lop + vi tri; lop dong => khong in", "  ! ca_nem: OSError len:" in out
-                    and " tai " in out and "  ! ca_nem_lop_dong: <lop khong in> len:1" in out)
+                    and " tai eol_policy_test.py:" in out and "  ! ca_nem_lop_dong: <lop khong in> len:1" in out
+                    and out.count("  ! <lambda>: ValueError len:1 tai ?") == 2)
             and _ve("A6 M4 loi ghi => CHAN_DOAN_LOI", "CHAN_DOAN_LOI: ZeroDivisionError len:" in out)
             and _ve("A6 X2 don dep", "PASS <lambda>" in out and "CHAN_DOAN_DON_DEP: PermissionError errno:13" in out
                     and "la_thu_muc_tam:True" in out and "D14_KHOA_GIA" not in out)
@@ -1232,10 +1251,10 @@ def case_chan_doan_mac_dinh_khong_lo_bi_mat(root):
                     all(_CD_TRAN_CHUOI - 2 <= len(_cat("x" * n, _CD_TRAN_CHUOI)) <= min(n, _CD_TRAN_CHUOI)
                         for n in (1999, 2000, 2001, 50000))
                     and sum(len(d) + 1 for d in dong_pl) <= _CD_TRAN_PAYLOAD and "/5000 muc]" in "".join(dong_pl)
-                    and sum(len(d) + 1 for d in dai) <= _CD_TRAN_CA and "…[cat khoi" in dai[-1])
-            and _ve("A14 khong ham nao (tru main/_env_con) doc env", not any("environ" in _ma_trong(f) for f in ham))
-            and _ve("A14 khong co bo che bi mat", not any(moc in x for f in ham for x in _ma_trong(f))
-                    and not any(type(v) is type(os) and moc in v.__name__ for v in list(globals().values()))))
+                    and sum(len(d) + 1 for d in dai if d != "FAIL ca_dai") <= _CD_TRAN_CA and "…[cat khoi" in dai[-1]
+                    and sum(len(d) + 1 for d in dai_tho if d.startswith("CHAN_DOAN")) <= _CD_TRAN_PAYLOAD)
+            and _ve("A14 khong ham nao (tru main/_env_con) doc env", not env_sai)
+            and _ve("A14 khong co bo che bi mat", not che))
 
 
 def case_chan_doan_co_tho_chi_cuc_bo(root):

@@ -191,10 +191,10 @@ def _a9(cay):
         cay.dat(), cay.dau(1), (m := cay.moi()), (co := []), (o := os.open)
         m.os = type("O", (), {"__getattr__": lambda s, n: getattr(os, n), "open": lambda s, p, f, *a: (co.append(f), o(p, f, *a))[1]})()
         m._doc_dau(), _chot("A9", co and all(f & os.O_NONBLOCK for f in co), "mở dấu thiếu O_NONBLOCK: %r" % co)
-        cay.dat(), os.mkfifo(cay.tep_dau), (x := threading.Thread(target=cay.moi()._doc_dau, daemon=True)), x.start(), x.join(60), (con := x.is_alive())   # chụp TRƯỚC gỡ
-        with contextlib.suppress(OSError): con and os.close(os.open(cay.tep_dau, os.O_WRONLY | os.O_NONBLOCK))  # noqa: E701
-        x.join(5), cay.tep_dau.unlink()           # hết ngân sách ⇒ KHÔNG ĐO ĐƯỢC, không bao giờ là phán quyết A9 (r14 F11-01); phán quyết ở spy trên
-        if con: raise RuntimeError("A9 KHÔNG ĐO ĐƯỢC: đọc dấu FIFO quá ngân sách 60 s")  # noqa: E701
+        cay.dat(), os.mkfifo(cay.tep_dau)         # đối chứng I/O FIFO THẬT trong tiến trình CON: quá hạn ⇒ kill+wait, không worker nào sống qua teardown (r15)
+        try: rc = subprocess.run([sys.executable, "-c", "import sys; sys.path.insert(0, sys.argv[1]); import nlm_cli; nlm_cli._doc_dau()", str(cay.td / "s")], capture_output=True, timeout=60).returncode  # noqa: E701
+        except subprocess.TimeoutExpired: rc = "quá ngân sách 60 s"  # noqa: E701
+        if cay.tep_dau.unlink() or rc: raise RuntimeError("A9 KHÔNG ĐO ĐƯỢC: đọc dấu FIFO: %s" % rc)  # noqa: E701  (không bao giờ là phán quyết; phán quyết ở spy)
     for dau, nap in ((-300, 0), (-700, 1), (3600, 1), ([1], 1)):
         cay.dat(bundle="chet"), cay.dau(dau if isinstance(dau, list) else int(time.time()) + dau)
         cay.goi(cay.moi(), _SL), _chot("A9", sum("nlm-auth-load" in c for c in cay.nhat_ky()) == nap, "dấu %r ⇒ nạp %d" % (dau, 1 - nap))

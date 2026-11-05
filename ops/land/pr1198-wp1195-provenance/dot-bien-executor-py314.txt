@@ -1,0 +1,5 @@
+R1_bo_mau_tstring rc 1 ['lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0'] !!! do t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG MA TRẬN SINH: mục miễn không khớp khoá vũ trụ nào (miễn chết)
+R2_regex_cu rc 1 ['lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0'] !!! do t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG chữ ký docstring lệch `_fields`
+R3_bo_xoa_str rc 1 ['lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0'] !!! do t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG MA TRẬN SINH: vũ trụ khoá ≠ khoá có dòng ∪ miễn — thiếu [('chot', 'Interpolation', 'value', 'don', 'ke-co', False), ('chot', 'Interpolation', 'value', 'don', 'ke-khon
+R3b_bo_goi_o_goc rc 0 ['lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0'] 
+R4_bo_mien rc 1 ['lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0'] !!! do t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG MA TRẬN SINH: vũ trụ khoá ≠ khoá có dòng ∪ miễn — thiếu [('chot', 'Interpolation', 'format_spec', 'don', 'ke-co', False), ('chot', 'Interpolation', 'format_spec', 'do

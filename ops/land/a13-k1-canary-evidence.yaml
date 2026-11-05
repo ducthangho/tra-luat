@@ -1,0 +1,160 @@
+# HO SO LAND + BANG CHUNG — packet #1196 A13-K1-CANARY r2 g1, qua PR #1200 (merge 7814938).
+# Khuon: ops/land/pr1051-wp1006-t27-land-evidence.yaml. Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; truong M8 (kiem-dong-wp) o dau tep.
+# NHAN: measured = do trong phien executor (tep kem o ops/land/pr1200-wp1196-provenance/); thuat_lai = chep tu transcript/tin nhan,
+# KHONG co tep tho; not_measured = khong do. Pham vi ghi: chi thi chu kho #1196 issuecomment-6649676420.
+# landed FALSE: PR #1200 merge khi kiem-merge tren head ec805d8 CHUA rc=0 (thieu K3 K4 K6 K7) — ghi dung, KHONG xin ngoai le.
+
+# ---- TRUONG M8 (kiem-dong-wp D1)
+packet: A13-K1-CANARY
+revision: 2
+generation: 1
+spec_hash: d8985e2c2f9a500e2f8b604b554ed4cc5ae1630e196a0b7a3dff555305ffa9e0
+head_da_review: ec805d8c1ab322cd049d74822a3972425809cf93
+tree_h: 514f9dae3849020871445ab17faaac0f765d5455
+review:
+  human_audit: 'measured — readback-issue-comments-1200.json id 6649074827 (ducthangho, 03:42:45Z): KET_LUAN approve, neo head 5ca9cdbf (head CU), KHONG neo ec805d8.'
+  connector: 'measured — readback-issue-comments-1200.json id 6649440969 (chatgpt-codex-connector[bot]): codex-review-state commit_sha ec805d8, status completed, has_any_findings false; 0 review, 0 review comment.'
+  codex_cli: 'khong dung (spec Q9).'
+windows:
+  phan_loai_ec805d8: 'required (kiem-merge K6, do diff 4d258cc..ec805d8 chua .github/workflows/ops-publish-lease.yml cua master)'
+  phan_loai_5ca9cdb: 'not_required (kiem-merge K6 qua tren head cu)'
+  luot_windows: not_measured
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1200#issuecomment-6649074827
+merge_commit: 7814938e78e32a828117d212c2e7e91d29630f19
+tree_m: 79bdc6893ef74d0e5de9583b14e0e846a5267ef9
+ci_master:
+  run_id: 41967113665
+  conclusion: success
+nghiem_thu:
+  A1: passed
+  A2: passed
+  A2b: passed
+  A3: passed
+  A4: passed
+  A4b: passed
+  A4c: passed
+  A5: passed
+  A6: khong_ap_dung
+  A7: passed
+  A8: not_measured
+  A9: failed
+  A10: passed
+lease_cuoi: a13-k1-canary-land-r2-g1-claude-remote-20261105
+landed: false
+moc_10_2_2:
+  run: 'measured — readback-runs-7814938.json: run 41967113665 ci.yml push, head_sha 7814938, completed/success; readback-jobs-41967113665.json 16 job, ket luan {success, skipped}, nhan ubuntu-latest. kiem-gate tren run nay: not_measured.'
+  checkout: not_measured
+  workflow_definition: not_measured
+  gate_output: not_measured
+# ---- het truong M8
+
+schema_version: 1
+mission_id: gh-1124
+mission_issue: 1124
+packet_issue: 1196
+packet_id: A13-K1-CANARY
+provider: claude
+role: executor_va_ghi_so
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+operating_system: linux
+session_id: https://claude.ai/code/session_015Gtxra9St4SrF625qHwL6o
+chi_thi_ghi_so: https://github.com/ducthangho/tra-luat/issues/1196#issuecomment-6649676420
+chi_thi_ghi_so_ghi_chu: 'measured — readback-issue-comments-1196.json: comment do phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq dang bang token chu kho, chep cau duyet "Đồng ý tất cả các đề xuất."; pham vi ops/land/a13-k1-canary-evidence.yaml + ops/land/pr1200-wp1196-*/**.'
+
+spec:
+  path: ops/specs/A13-K1-CANARY-r2.md
+  sha256: d8985e2c2f9a500e2f8b604b554ed4cc5ae1630e196a0b7a3dff555305ffa9e0
+  blob: 652078a0f560e0fee899567ba4ab353cd06d5d86
+  blob_tai_merge: 'measured — git rev-parse 7814938:ops/specs/A13-K1-CANARY-r2.md = 652078a0 (A10).'
+lease:
+  lease_id: a13-k1-canary-r2-g1-claude-remote-20261105
+  path: ops/leases/a13-k1-canary-r2-g1-claude-remote-20261105.yaml (nhanh ops/wp1196-r2-g1-lease @ b677392e)
+  sha256_tep: 040e078e5c9ca4ae889178cfbae31be9bc69e789b3db4bd682d1645f87e385ab
+  ban_chieu: https://github.com/ducthangho/tra-luat/issues/1196#issuecomment-6648703355
+  lease_until: '2026-11-07T03:08:00Z'
+  base_sha: 4d258cc8831b5c6169114d1e8e88a8782096d6f6
+  write_set: [ops/specs/A13-K1-CANARY-r2.md]
+lease_ghi_so:
+  lease_id: a13-k1-canary-land-r2-g1-claude-remote-20261105
+  path: ops/leases/a13-k1-canary-land-r2-g1-claude-remote-20261105.yaml (nhanh ops/wp1196-land-r2-g1-lease @ 2469362)
+  ban_chieu: https://github.com/ducthangho/tra-luat/issues/1196#issuecomment-6649814220
+  authority_url: https://github.com/ducthangho/tra-luat/issues/1196#issuecomment-6649732390
+  lease_until: '2026-11-07T04:32:00Z'
+  branch: claude/ghi-so-land-1196
+  base_sha: 39d511d23af3897c36de2ccf3fd75f35669f54bf
+  write_set: [ops/land/a13-k1-canary-evidence.yaml, ops/land/pr1200-wp1196-provenance/]
+  ghi_chu: 'commit dau 57d60a8 ghi luc 04:32Z theo chi thi chu kho 6649676420, TRUOC khi lease nay duoc dang; cung base, cung write set. Ban dau day len agent/wp1196-land-claude (PR #1207, da dong), nay chuyen sang nhanh cua lease.'
+
+pr:
+  number: 1200
+  heads:
+    - {sha: 5ca9cdbf6bcd7d2e955bc3b57cd667c6efe7fc68, tree: cc94550f018c96ca310815fa68cdc5410d1c9a72, noi_dung: 'commit chep spec nguyen byte, cha 4d258cc'}
+    - {sha: ec805d8c1ab322cd049d74822a3972425809cf93, tree: 514f9dae3849020871445ab17faaac0f765d5455, noi_dung: 'merge origin/master f2e33bc vao nhanh (chu kho yeu cau xu ly troi head); diff so master van 1 tep'}
+  merged_by: 'measured — readback-pr-1200.json / readback-events-1200.json: ducthangho, 2026-11-05T04:19:41Z. Phien bam merge la phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq (thuat_lai — tin nhan cua phien do; tu nhan merge khi chua co kiem-merge rc=0).'
+  merge_commit_parents: [36ef706183df76a754ff438eb7cf122d79e13a36, ec805d8c1ab322cd049d74822a3972425809cf93]
+  merge_noi_dung: 'measured — git diff --stat 7814938^1 7814938: 1 tep ops/specs/A13-K1-CANARY-r2.md, +291; 7814938 tren first-parent origin/master.'
+
+# ---- A13: do K1 tren kho that (A1–A6, A10)
+pl0:
+  cach_xuat: 'git archive --format=tar 1f0941e9bba1d1d517eda4174167b81963c06bd5 .claude/dev, tar -x vao thu muc tam'
+  git_hash_object: f5a4bb11fc6529999bb5ab60a5e9d60f90c04a44
+  git_hash_object_khop: 'measured — = git rev-parse 1f0941e:.claude/dev/packet_loop.py'
+  sha256: 789bf9798d8627ed8254caf4fca7c6ff4c8448a4eb845d6802267394c737b3b4
+kho_khong_nong: 'measured (transcript) — mo phien --is-shallow-repository = true; git fetch --unshallow; sau do false; moi ca chay sau khi bo nong.'
+a2:
+  thoi_diem_utc: 'khoang 2026-11-05T03:16Z (khong ghi dau thoi gian chinh xac)'
+  sha256_H_S: d8985e2c2f9a500e2f8b604b554ed4cc5ae1630e196a0b7a3dff555305ffa9e0
+  so_dong_khai: 0
+  spec_hash_kieu: 'str, khop ^[0-9a-f]{64}$'
+  ket_qua: passed
+cac_ca:
+  nguon: 'measured — k1-canary-ket-qua.json (lenh day du, rc, moi dong THIEU, dong K1, head, tree, spec_hash, sha256 tep lease, thoi diem); k1-canary-cases.json; k1-canary-tep-phu/ (tep phu A3–A5 va diff lease tung ca so voi L). $S = thu muc scratch cua phien.'
+  base: 4d258cc8831b5c6169114d1e8e88a8782096d6f6
+  pl0_sha256: 789bf9798d8627ed8254caf4fca7c6ff4c8448a4eb845d6802267394c737b3b4
+  lease_id: a13-k1-canary-r2-g1-claude-remote-20261105
+  bang:
+    - {ca: A1, thoi_diem_utc: '2026-11-05T03:17:54Z', head: 5ca9cdbf6bcd7d2e955bc3b57cd667c6efe7fc68, tree: cc94550f018c96ca310815fa68cdc5410d1c9a72, spec_hash: d8985e2c2f9a500e2f8b604b554ed4cc5ae1630e196a0b7a3dff555305ffa9e0, rc: 12, thieu: [K2, K3, K4], dong_k1: khong_co, ket_qua: passed}
+    - {ca: A2b, thoi_diem_utc: '2026-11-05T03:17:55Z', head: 5ca9cdbf6bcd7d2e955bc3b57cd667c6efe7fc68, tree: cc94550f018c96ca310815fa68cdc5410d1c9a72, spec_hash: '0000000000000000000000000000000000000000000000000000000000000000', rc: 12, thieu: [K1, K2, K3, K4], dong_k1: 'K1 hiệu lực M10: blob --spec tại head không khớp spec_hash của lease', ket_qua: passed}
+    - {ca: A3, thoi_diem_utc: '2026-11-05T03:17:55Z', head: 8276506e0555c90008027bc37b0493e394733b6d, tree: fe0b7a71743026161611f51b4f5e6db32a1fb726, spec_hash: 0b4321d08e3cba31f3a1748b06c8e90132b8e23a104db3302c6d6e1ef55babe7, rc: 12, thieu: [K0, K2, K3, K4], dong_k1: khong_co, ket_qua: passed}
+    - {ca: A4, thoi_diem_utc: '2026-11-05T03:17:56Z', head: b08743a3942b7f13401f0eb737d0534a05ccee90, tree: c8b766e35731a34cc033aebabf57483cfb478623, spec_hash: fe6d64b81bfbe40648d083c02868855ce2d15917a8fe2f5a4676da47e57a262d, rc: 12, thieu: [K0, K1, K2, K3, K4], dong_k1: 'K1 hiệu lực M10: K1: 1 dòng khai dieu_kien_merge; cần 0 hoặc đúng 1 dòng hợp lệ với OID land ADR-0060 trên first-parent master', ket_qua: passed}
+    - {ca: A4b, thoi_diem_utc: '2026-11-05T03:17:57Z', head: 052d1c17e21a8a887ee5e781fe75a15d177f1bea, tree: 2a0d7beb64c57bcd3116d798dc94e12fa006ebcf, spec_hash: c81deb79e2e632607330c99ec07d00024c38c983debac5b2fb7eff1f578a9c56, rc: 12, thieu: [K0, K1, K2, K3, K4], dong_k1: 'K1 hiệu lực M10: K1: 1 dòng khai dieu_kien_merge; cần 0 hoặc đúng 1 dòng hợp lệ với OID land ADR-0060 trên first-parent master', ket_qua: passed}
+    - {ca: A4c, thoi_diem_utc: '2026-11-05T03:17:57Z', head: 75b7a2d87d19b00caad72102ade7abd9c8fe82f3, tree: 6b8f83e963a617ec5474a7abc63ead189dffc366, spec_hash: 35e83cfdb4bbafa4007e79e014a0ccb3fc24f69b101aafa4bcf703f0bdd7273a, rc: 12, thieu: [K0, K1, K2, K3, K4], dong_k1: 'K1 hiệu lực M10: K1: 1 dòng khai dieu_kien_merge; cần 0 hoặc đúng 1 dòng hợp lệ với OID land ADR-0060 trên first-parent master', ket_qua: passed}
+    - {ca: A5, thoi_diem_utc: '2026-11-05T03:17:58Z', head: 131bd5462e08287eb9c1988463a61e2a4b839120, tree: ca8200770f363f110aad498f5b56aede264dd2dc, spec_hash: 4f5d728aea08bbe9db3d24851b5bca288d7293e7e136da4242247477fd82b771, rc: 12, thieu: [K0, K1, K2, K3, K4], dong_k1: 'K1 hiệu lực M10: K1: 2 dòng khai dieu_kien_merge; cần 0 hoặc đúng 1 dòng hợp lệ với OID land ADR-0060 trên first-parent master', ket_qua: passed}
+  ghi_chu: 'K2/K3/K4 tro duong dan khong ton tai => KHONG ĐO ĐƯỢC (dac ta cho phep). K0 o A3–A5 do vi H′ khong phai PR head. H′ la commit cuc bo, KHONG day.'
+  tien_de_a4c: 'measured (transcript) — cat-file -e 5c47a8aa:docs/adr/0060-… rc=0; tren 5c47a8aa^1 rc=128; rev-list --first-parent origin/master | grep -c 5c47a8aa7cea = 0, 36d7c5dcdcbb = 1.'
+  a6: 'khong_ap_dung — git diff --quiet 1f0941e origin/master(4d258cc8) -- .claude/dev/packet_loop.py rc=0 luc 03:18Z; do lai 03:43Z (master 2b5df5d9) rc=0.'
+  ban_chieu_issue: https://github.com/ducthangho/tra-luat/issues/1196#issuecomment-6648757905
+  vung_chua_do: 've kho-khong-nong cua K1: chua co ca rieng (chua_do_duoc, nhu dac ta).'
+ket_luan_a13: 'measured — K1 (ban ghim 1f0941e) tren kho that, PR head that 5ca9cdbf, lease da dang: 0 dong K1; sau merge master vao nhanh, tren ec805d8 K1 van 0 dong (kiem-merge-ec805d8.txt). Sau phan chung cho dung mau. A13 = measured, K1 xanh.'
+
+# ---- kiem-merge truoc merge (A9)
+kiem_merge:
+  luot:
+  - {head: 5ca9cdbf6bcd7d2e955bc3b57cd667c6efe7fc68, thoi_diem_utc: '2026-11-05T03:43:48Z', ban: 'PL0 1f0941e va master 2b5df5d9 (packet_loop.py giong het)', rc: 12, thieu: [K3], dong_k3: 'connector chưa xong trên 5ca9cdbf…: không review hoàn tất/kết luận nào của chatgpt-codex-connector[bot]', nguon: 'thuat_lai — transcript phien; dau vao K4 = k4-audit-run-5ca9cdb.json + k4-audit-stdout-5ca9cdb.txt; tep dau ra khong luu'}
+  - {head: ec805d8c1ab322cd049d74822a3972425809cf93, thoi_diem_utc: '2026-11-05T04:29:51Z', ban: 'PL0 1f0941e', rc: 12, thieu: [K3, K4, K6, K7], nguon: 'measured — kiem-merge-ec805d8.txt'}
+  ly_do_thieu:
+    K3: 'K3 do co the OAN: connector bao sach qua comment "Codex Review Summary" (codex-review-state has_any_findings false, status completed, commit ec805d8) ma khong co dong "Reviewed commit:" va khong tao review; _doc_connector chi nhan hai dang ay. No cong, xem no_ghi_nhan.'
+    K4: 'audit chu kho 6649074827 neo head cu 5ca9cdbf; head doi sang ec805d8 sau merge master vao nhanh.'
+    K6: 'diff tu base lease 4d258cc toi ec805d8 chua .github/workflows/ops-publish-lease.yml (cua master, khong phai cua PR) => required.'
+    K7: 'cung ly do K6: diff cham .github/workflows/** => vung M9.'
+  a9: failed
+
+no_ghi_nhan:
+  - id: K1-KHONG-CO-DAU-HIEU-DUONG
+    mo_ta: 'K1 dat ma khong in gi; phep do duong o day dung tu su vang mat dong K1 cong phan tong ket. Them dau hieu duong cho K1 sau khi #1187 nha .claude/dev/packet_loop.py.'
+  - id: K3-KHONG-DOC-CODEX-REVIEW-SUMMARY
+    mo_ta: 'Connector Codex bao ket luan sach chi qua comment tom tat co codex-review-state (JSON trong comment HTML), khong co "Reviewed commit:" va khong tao review => K3 do oan. Chuyen cho #1187 hoac packet rieng.'
+  - id: KIEM-MERGE-BASE-SAU-MERGE-MASTER
+    mo_ta: 'K6/K7 tinh diff tu base_sha cua lease; merge master vao nhanh PR keo thay doi cua master vao diff => phan loai sai. Can quy uoc (cap lease moi voi base moi, hoac diff tu merge-base).'
+
+# ---- A8 / dong packet
+a8_backlink_1124: not_measured
+kiem_dong_wp: 'measured — kiem-dong-wp.txt rc=12: chi thieu D2 (landed false) va D4 (lease_until cua lease_cuoi 2026-11-07T04:32Z chua qua); D1, D3 qua. #1196 CHUA dong duoc theo chi thi (dieu kien rc=0).'
+khong_do_duoc:
+  - 'Moc checkout / workflow_definition / gate_output cua run 41967113665.'
+  - 'Luot Windows va full mutant audit tren ec805d8.'
+  - 'Audit chu kho tren ec805d8.'
+  - 'Dau ra tho kiem-merge tren 5ca9cdbf (chi co transcript).'

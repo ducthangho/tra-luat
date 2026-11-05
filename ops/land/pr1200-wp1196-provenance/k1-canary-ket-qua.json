@@ -1,0 +1,169 @@
+{
+ "A1": {
+  "dong_k1": [],
+  "dong_thieu": [
+   "  THIẾU  K2 CI: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/wr.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/wr.json'",
+   "  THIẾU  K3 connector: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/conn.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/conn.json'",
+   "  THIẾU  K4 review offline: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/run.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/run.json'"
+  ],
+  "head": "5ca9cdbf6bcd7d2e955bc3b57cd667c6efe7fc68",
+  "lease_file_sha256": "040e078e5c9ca4ae889178cfbae31be9bc69e789b3db4bd682d1645f87e385ab",
+  "lenh": "python3 $S/pl0/.claude/dev/packet_loop.py kiem-merge --root . --repo ducthangho/tra-luat --pr 1200 --head 5ca9cdbf6bcd7d2e955bc3b57cd667c6efe7fc68 --base 4d258cc8831b5c6169114d1e8e88a8782096d6f6 --spec ops/specs/A13-K1-CANARY-r2.md --lease $S/L.yaml --workflow-runs $S/khong-ton-tai/wr.json --check-runs $S/khong-ton-tai/cr.json --connector $S/khong-ton-tai/conn.json --offline-run-json $S/khong-ton-tai/run.json --offline-stdout $S/khong-ton-tai/stdout.txt --workflow-jobs $S/khong-ton-tai/wj.json",
+  "rc": 12,
+  "spec": "ops/specs/A13-K1-CANARY-r2.md",
+  "spec_hash": "d8985e2c2f9a500e2f8b604b554ed4cc5ae1630e196a0b7a3dff555305ffa9e0",
+  "stderr_cuoi": [
+   "CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu K2 CI; K3 connector; K4 review offline"
+  ],
+  "stdout": "",
+  "thoi_diem_utc": "2026-11-05T03:17:54Z",
+  "tong_ket": true,
+  "tree": "cc94550f018c96ca310815fa68cdc5410d1c9a72"
+ },
+ "A2b": {
+  "dong_k1": [
+   "  THIẾU  K1 hiệu lực M10: blob --spec tại head không khớp spec_hash của lease"
+  ],
+  "dong_thieu": [
+   "  THIẾU  K1 hiệu lực M10: blob --spec tại head không khớp spec_hash của lease",
+   "  THIẾU  K2 CI: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/wr.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/wr.json'",
+   "  THIẾU  K3 connector: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/conn.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/conn.json'",
+   "  THIẾU  K4 review offline: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/run.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/run.json'"
+  ],
+  "head": "5ca9cdbf6bcd7d2e955bc3b57cd667c6efe7fc68",
+  "lease_file_sha256": "98bcd50d0fc48714821c66b1700c3ac5df08c68bf2ad4b18742deef74da9e94c",
+  "lenh": "python3 $S/pl0/.claude/dev/packet_loop.py kiem-merge --root . --repo ducthangho/tra-luat --pr 1200 --head 5ca9cdbf6bcd7d2e955bc3b57cd667c6efe7fc68 --base 4d258cc8831b5c6169114d1e8e88a8782096d6f6 --spec ops/specs/A13-K1-CANARY-r2.md --lease $S/L_A2b.yaml --workflow-runs $S/khong-ton-tai/wr.json --check-runs $S/khong-ton-tai/cr.json --connector $S/khong-ton-tai/conn.json --offline-run-json $S/khong-ton-tai/run.json --offline-stdout $S/khong-ton-tai/stdout.txt --workflow-jobs $S/khong-ton-tai/wj.json",
+  "rc": 12,
+  "spec": "ops/specs/A13-K1-CANARY-r2.md",
+  "spec_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "stderr_cuoi": [
+   "CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu K1 hiệu lực M10; K2 CI; K3 connector; K4 review offline"
+  ],
+  "stdout": "",
+  "thoi_diem_utc": "2026-11-05T03:17:55Z",
+  "tong_ket": true,
+  "tree": "cc94550f018c96ca310815fa68cdc5410d1c9a72"
+ },
+ "A3": {
+  "dong_k1": [],
+  "dong_thieu": [
+   "  THIẾU  K0 đầu vào neo: PR head hiện hành ≠ 8276506e0555c90008027bc37b0493e394733b6d",
+   "  THIẾU  K2 CI: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/wr.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/wr.json'",
+   "  THIẾU  K3 connector: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/conn.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/conn.json'",
+   "  THIẾU  K4 review offline: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/run.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/run.json'"
+  ],
+  "head": "8276506e0555c90008027bc37b0493e394733b6d",
+  "lease_file_sha256": "d6c0bc825271161294a68b529fa7a56f8b319330fe173bfa816ffc432980703f",
+  "lenh": "python3 $S/pl0/.claude/dev/packet_loop.py kiem-merge --root . --repo ducthangho/tra-luat --pr 1200 --head 8276506e0555c90008027bc37b0493e394733b6d --base 4d258cc8831b5c6169114d1e8e88a8782096d6f6 --spec a13-phu/A3.md --lease $S/L_A3.yaml --workflow-runs $S/khong-ton-tai/wr.json --check-runs $S/khong-ton-tai/cr.json --connector $S/khong-ton-tai/conn.json --offline-run-json $S/khong-ton-tai/run.json --offline-stdout $S/khong-ton-tai/stdout.txt --workflow-jobs $S/khong-ton-tai/wj.json",
+  "rc": 12,
+  "spec": "a13-phu/A3.md",
+  "spec_hash": "0b4321d08e3cba31f3a1748b06c8e90132b8e23a104db3302c6d6e1ef55babe7",
+  "stderr_cuoi": [
+   "CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu K0 đầu vào neo; K2 CI; K3 connector; K4 review offline"
+  ],
+  "stdout": "",
+  "thoi_diem_utc": "2026-11-05T03:17:55Z",
+  "tong_ket": true,
+  "tree": "fe0b7a71743026161611f51b4f5e6db32a1fb726"
+ },
+ "A4": {
+  "dong_k1": [
+   "  THIẾU  K1 hiệu lực M10: K1: 1 dòng khai dieu_kien_merge; cần 0 hoặc đúng 1 dòng hợp lệ với OID land ADR-0060 trên first-parent master"
+  ],
+  "dong_thieu": [
+   "  THIẾU  K0 đầu vào neo: PR head hiện hành ≠ b08743a3942b7f13401f0eb737d0534a05ccee90",
+   "  THIẾU  K1 hiệu lực M10: K1: 1 dòng khai dieu_kien_merge; cần 0 hoặc đúng 1 dòng hợp lệ với OID land ADR-0060 trên first-parent master",
+   "  THIẾU  K2 CI: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/wr.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/wr.json'",
+   "  THIẾU  K3 connector: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/conn.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/conn.json'",
+   "  THIẾU  K4 review offline: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/run.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/run.json'"
+  ],
+  "head": "b08743a3942b7f13401f0eb737d0534a05ccee90",
+  "lease_file_sha256": "389fe9f7f43cd3e3a97e89d7a52500f98cc9290f5d1285fc21208b805f45dc26",
+  "lenh": "python3 $S/pl0/.claude/dev/packet_loop.py kiem-merge --root . --repo ducthangho/tra-luat --pr 1200 --head b08743a3942b7f13401f0eb737d0534a05ccee90 --base 4d258cc8831b5c6169114d1e8e88a8782096d6f6 --spec a13-phu/A4.md --lease $S/L_A4.yaml --workflow-runs $S/khong-ton-tai/wr.json --check-runs $S/khong-ton-tai/cr.json --connector $S/khong-ton-tai/conn.json --offline-run-json $S/khong-ton-tai/run.json --offline-stdout $S/khong-ton-tai/stdout.txt --workflow-jobs $S/khong-ton-tai/wj.json",
+  "rc": 12,
+  "spec": "a13-phu/A4.md",
+  "spec_hash": "fe6d64b81bfbe40648d083c02868855ce2d15917a8fe2f5a4676da47e57a262d",
+  "stderr_cuoi": [
+   "CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu K0 đầu vào neo; K1 hiệu lực M10; K2 CI; K3 connector; K4 review offline"
+  ],
+  "stdout": "",
+  "thoi_diem_utc": "2026-11-05T03:17:56Z",
+  "tong_ket": true,
+  "tree": "c8b766e35731a34cc033aebabf57483cfb478623"
+ },
+ "A4b": {
+  "dong_k1": [
+   "  THIẾU  K1 hiệu lực M10: K1: 1 dòng khai dieu_kien_merge; cần 0 hoặc đúng 1 dòng hợp lệ với OID land ADR-0060 trên first-parent master"
+  ],
+  "dong_thieu": [
+   "  THIẾU  K0 đầu vào neo: PR head hiện hành ≠ 052d1c17e21a8a887ee5e781fe75a15d177f1bea",
+   "  THIẾU  K1 hiệu lực M10: K1: 1 dòng khai dieu_kien_merge; cần 0 hoặc đúng 1 dòng hợp lệ với OID land ADR-0060 trên first-parent master",
+   "  THIẾU  K2 CI: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/wr.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/wr.json'",
+   "  THIẾU  K3 connector: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/conn.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/conn.json'",
+   "  THIẾU  K4 review offline: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/run.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/run.json'"
+  ],
+  "head": "052d1c17e21a8a887ee5e781fe75a15d177f1bea",
+  "lease_file_sha256": "65a5bde053d155790a9bbc6a6d8c6b44aca7e35f8fc80a3222cde185e9eb1b7c",
+  "lenh": "python3 $S/pl0/.claude/dev/packet_loop.py kiem-merge --root . --repo ducthangho/tra-luat --pr 1200 --head 052d1c17e21a8a887ee5e781fe75a15d177f1bea --base 4d258cc8831b5c6169114d1e8e88a8782096d6f6 --spec a13-phu/A4b.md --lease $S/L_A4b.yaml --workflow-runs $S/khong-ton-tai/wr.json --check-runs $S/khong-ton-tai/cr.json --connector $S/khong-ton-tai/conn.json --offline-run-json $S/khong-ton-tai/run.json --offline-stdout $S/khong-ton-tai/stdout.txt --workflow-jobs $S/khong-ton-tai/wj.json",
+  "rc": 12,
+  "spec": "a13-phu/A4b.md",
+  "spec_hash": "c81deb79e2e632607330c99ec07d00024c38c983debac5b2fb7eff1f578a9c56",
+  "stderr_cuoi": [
+   "CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu K0 đầu vào neo; K1 hiệu lực M10; K2 CI; K3 connector; K4 review offline"
+  ],
+  "stdout": "",
+  "thoi_diem_utc": "2026-11-05T03:17:57Z",
+  "tong_ket": true,
+  "tree": "2a0d7beb64c57bcd3116d798dc94e12fa006ebcf"
+ },
+ "A4c": {
+  "dong_k1": [
+   "  THIẾU  K1 hiệu lực M10: K1: 1 dòng khai dieu_kien_merge; cần 0 hoặc đúng 1 dòng hợp lệ với OID land ADR-0060 trên first-parent master"
+  ],
+  "dong_thieu": [
+   "  THIẾU  K0 đầu vào neo: PR head hiện hành ≠ 75b7a2d87d19b00caad72102ade7abd9c8fe82f3",
+   "  THIẾU  K1 hiệu lực M10: K1: 1 dòng khai dieu_kien_merge; cần 0 hoặc đúng 1 dòng hợp lệ với OID land ADR-0060 trên first-parent master",
+   "  THIẾU  K2 CI: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/wr.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/wr.json'",
+   "  THIẾU  K3 connector: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/conn.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/conn.json'",
+   "  THIẾU  K4 review offline: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/run.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/run.json'"
+  ],
+  "head": "75b7a2d87d19b00caad72102ade7abd9c8fe82f3",
+  "lease_file_sha256": "62023627ff1b9c3b9ba5055e80fbe07dc5af039e2da83831cb8a15d7e6ce866c",
+  "lenh": "python3 $S/pl0/.claude/dev/packet_loop.py kiem-merge --root . --repo ducthangho/tra-luat --pr 1200 --head 75b7a2d87d19b00caad72102ade7abd9c8fe82f3 --base 4d258cc8831b5c6169114d1e8e88a8782096d6f6 --spec a13-phu/A4c.md --lease $S/L_A4c.yaml --workflow-runs $S/khong-ton-tai/wr.json --check-runs $S/khong-ton-tai/cr.json --connector $S/khong-ton-tai/conn.json --offline-run-json $S/khong-ton-tai/run.json --offline-stdout $S/khong-ton-tai/stdout.txt --workflow-jobs $S/khong-ton-tai/wj.json",
+  "rc": 12,
+  "spec": "a13-phu/A4c.md",
+  "spec_hash": "35e83cfdb4bbafa4007e79e014a0ccb3fc24f69b101aafa4bcf703f0bdd7273a",
+  "stderr_cuoi": [
+   "CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu K0 đầu vào neo; K1 hiệu lực M10; K2 CI; K3 connector; K4 review offline"
+  ],
+  "stdout": "",
+  "thoi_diem_utc": "2026-11-05T03:17:57Z",
+  "tong_ket": true,
+  "tree": "6b8f83e963a617ec5474a7abc63ead189dffc366"
+ },
+ "A5": {
+  "dong_k1": [
+   "  THIẾU  K1 hiệu lực M10: K1: 2 dòng khai dieu_kien_merge; cần 0 hoặc đúng 1 dòng hợp lệ với OID land ADR-0060 trên first-parent master"
+  ],
+  "dong_thieu": [
+   "  THIẾU  K0 đầu vào neo: PR head hiện hành ≠ 131bd5462e08287eb9c1988463a61e2a4b839120",
+   "  THIẾU  K1 hiệu lực M10: K1: 2 dòng khai dieu_kien_merge; cần 0 hoặc đúng 1 dòng hợp lệ với OID land ADR-0060 trên first-parent master",
+   "  THIẾU  K2 CI: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/wr.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/wr.json'",
+   "  THIẾU  K3 connector: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/conn.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/conn.json'",
+   "  THIẾU  K4 review offline: KHÔNG ĐO ĐƯỢC: $S/khong-ton-tai/run.json: FileNotFoundError: [Errno 2] No such file or directory: '$S/khong-ton-tai/run.json'"
+  ],
+  "head": "131bd5462e08287eb9c1988463a61e2a4b839120",
+  "lease_file_sha256": "3594d700bd1684f7cd25886e6a277e47bd86d99e0ca299b8b18e8012d33dbee0",
+  "lenh": "python3 $S/pl0/.claude/dev/packet_loop.py kiem-merge --root . --repo ducthangho/tra-luat --pr 1200 --head 131bd5462e08287eb9c1988463a61e2a4b839120 --base 4d258cc8831b5c6169114d1e8e88a8782096d6f6 --spec a13-phu/A5.md --lease $S/L_A5.yaml --workflow-runs $S/khong-ton-tai/wr.json --check-runs $S/khong-ton-tai/cr.json --connector $S/khong-ton-tai/conn.json --offline-run-json $S/khong-ton-tai/run.json --offline-stdout $S/khong-ton-tai/stdout.txt --workflow-jobs $S/khong-ton-tai/wj.json",
+  "rc": 12,
+  "spec": "a13-phu/A5.md",
+  "spec_hash": "4f5d728aea08bbe9db3d24851b5bca288d7293e7e136da4242247477fd82b771",
+  "stderr_cuoi": [
+   "CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu K0 đầu vào neo; K1 hiệu lực M10; K2 CI; K3 connector; K4 review offline"
+  ],
+  "stdout": "",
+  "thoi_diem_utc": "2026-11-05T03:17:58Z",
+  "tong_ket": true,
+  "tree": "ca8200770f363f110aad498f5b56aede264dd2dc"
+ }
+}

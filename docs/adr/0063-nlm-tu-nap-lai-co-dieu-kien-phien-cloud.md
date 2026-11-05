@@ -1,0 +1,41 @@
+# ADR-0063 — NLM tự nạp lại jar có điều kiện ở phiên cloud
+
+- **Trạng thái:** Accepted
+- **Nguồn:** packet `CLOUD-SETUP-P3B-NLM-401` #1099 (Issue cha #1008), đặc tả `ops/specs/cloud-setup-p3b-nlm-401-r9.md`
+  (sha256 `377c166e…cd12`, chủ kho duyệt ở issuecomment-6647222942).
+
+## Bối cảnh
+
+Quyết định r208c (chú thích quanh `_nlm_auth_load` và chốt chống hạ cấp `_nlm_auth_load_downgrade` trong `scripts/tl_gws.py`;
+điều cấm ở §4b của `references/RASOAT_HOSO_LOOP.md` và gạch "Sửa xác thực" của `references/QUY_TRINH_RA_SOAT_3_TANG.md`) bác
+việc tự nạp jar khi hết hạn: bundle có thể CŨ hơn hoặc CŨNG CHẾT, nên vòng nạp-thử-lại quay vô ích.
+
+Tiền đề đã đổi: laptop chạy WP710 mỗi 30 phút và từ wp726 chỉ stage `nlm_cred.enc` sau canary LIVE dương, nên nguồn ấy thường
+tươi hơn bản trong `tl_secrets.enc` mà phiên Claude Code web nạp một lần lúc bootstrap; chốt chống hạ cấp vẫn còn. Phiên cloud
+không có trình duyệt, nên khi jar chết giữa phiên thì mọi lệnh `nlm` chỉ trả `auth_hint` rồi rơi về MCP.
+
+## Quyết định
+
+ADR này thay r208c ở đúng một điểm, "tự nạp khi hết hạn", và chỉ cho phiên cloud. Cơ chế nằm trong `nlm_cli._run`:
+
+- Chỉ áp dụng khi biến môi trường CLAUDE_CODE_REMOTE có giá trị true.
+- Chỉ nạp khi canary _nlm_auth_alive trong tiến trình con trả mã 3 (jar đã chết).
+- Chỉ nạp từ nlm_cred.enc bằng tl.py nlm-auth-load, không dùng cờ --force.
+- Mỗi tiến trình nạp tối đa 1 lần; cửa sổ 600 giây giữa các tiến trình là best effort, không bảo đảm khi cạnh tranh.
+- Chỉ tự chạy lại các lệnh đọc trong danh sách cho phép.
+- Nạp xong mà vẫn lỗi xác thực thì dừng và làm theo §4b của RASOAT_HOSO_LOOP.md.
+
+Điều cấm dành cho AGENT không đổi: agent vẫn không tự gõ `nlm-auth-load` trong lượt rà, và câu trừ
+`_AUTH_FIX_RASOAT_CARVE` của `nlm_cli.py` giữ nguyên. Cowork và laptop không bật cơ chế này.
+
+## Hệ quả
+
+- Canary chỉ xét lần thử CUỐI của `_nlm_auth_alive`; chuỗi trộn kết thúc bằng lỗi auth có thể gây một lần nạp thừa.
+  Chủ kho chấp nhận (04-11-2026).
+- Tệp dấu `~/.notebooklm-mcp-cli/.tra-luat-nap-lai.json` không có khoá; hai tiến trình cùng lúc có thể cùng nạp một lần.
+- Việc `nlm_cred.enc` LIVE có đủ tươi để hồi sinh jar hay không chỉ đo được bằng M1 của đặc tả (sau land, chủ kho duyệt).
+
+## Cưỡng chế
+
+Fragment selftest `wp1099_nlm_nap_lai` (`scripts/test_fragments/wp1099_nlm_nap_lai.py`): ca A1–A13 chạy `nlm_cli` thật với đồ
+giả giữ trạng thái, kèm bảng đột biến. Bảng §20 của `docs/PROTOCOL_DA_PHIEN.md` đăng ký ADR này (cổng `adr-song`).

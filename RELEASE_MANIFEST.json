@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 184,
-  "total_bytes": 9085767,
-  "package_hash": "68f513692332e0fca3a86871389106a66149cee0409dd79c43083df8f24bd920",
-  "content_hash": "68f513692332e0fca3a86871389106a66149cee0409dd79c43083df8f24bd920",
+  "total_bytes": 9113220,
+  "package_hash": "c1714dc853bde0434133a057c7ce6ded1d9137a35b50915e3e7628d4bcaa93ee",
+  "content_hash": "c1714dc853bde0434133a057c7ce6ded1d9137a35b50915e3e7628d4bcaa93ee",
   "required_missing": [],
   "files": [
     {
@@ -158,13 +158,13 @@
     },
     {
       "path": "references/QUY_TRINH_RA_SOAT_3_TANG.md",
-      "size": 17645,
-      "sha256": "da69f4bc573256e3ddf1ab8697ec7410a8883ba0806307af4f32a46f3177c097"
+      "size": 17807,
+      "sha256": "cac4bb1e328ab32e66fcb1728e30053462bd293229cf6d5656df30483986ccd3"
     },
     {
       "path": "references/RASOAT_HOSO_LOOP.md",
-      "size": 25062,
-      "sha256": "f696871e0b26d69698801a1acc75bb93500c2c64580603f6d4dade1a200376c4"
+      "size": 25224,
+      "sha256": "1994f5020a5aaea5f340999cfd1e49301f8e1610767a050a65a98eba08f3d384"
     },
     {
       "path": "references/RASOAT_PLAN_SCHEMA.md",
@@ -653,8 +653,8 @@
     },
     {
       "path": "scripts/nlm_cli.py",
-      "size": 20244,
-      "sha256": "d909237d908690eda3cf0df744e8a507e7749bbc346f1a1e4db7068037edb0c1"
+      "size": 26239,
+      "sha256": "f86ec3e659eadead8d690c41908892d8fd004901afb8ae1d7cdd6fb640874f68"
     },
     {
       "path": "scripts/nlm_sources.py",
@@ -883,8 +883,8 @@
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",
-      "size": 73663,
-      "sha256": "27e1d5dff02187e9dc39078695d8fb3a13ad0dfb2078a5e1cf460a54442afdf1"
+      "size": 94797,
+      "sha256": "28dca75a021551efbdf4e35d21e570c27d9f7534bca784a2eee8de237ff87dc2"
     },
     {
       "path": "scripts/tra_cuu.py",

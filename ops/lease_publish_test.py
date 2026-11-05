@@ -10963,7 +10963,8 @@ _KHO_T191 = (
     # kiểu trường từ siêu dữ liệu `ast` (docstring): `else` của `async for`, `else`/`finally` của `try … except*`
     "async def _k2():\n    async for _i in _k2():\n        pass\n    else:\n        pass\n        pass\n        pass\n_k2().close()",
     "try:\n    pass\nexcept* ValueError:\n    pass\nelse:\n    pass\n    pass\n    pass\nfinally:\n    pass\n    pass\n    pass") + tuple(
-    g for g in ("type _Ta[_T: int, *_Ts, **_P] = list[_T]", "type _Tb[_U = int, *_Us = (), **_Q = []] = int") if _phan_tich_duoc_t191(g))
+    g for g in ("type _Ta[_T: int, *_Ts, **_P] = list[_T]", "type _Tb[_U = int, *_Us = (), **_Q = []] = int",
+                "_a = t'{1!r:>{2}}{3}{4}'") if _phan_tich_duoc_t191(g))  # #1195: t-string 3.14 (`TemplateStr`, `Interpolation`)
 _CHUOI_SS_T191 = {"Eq": "1 == 1 == 1 == 1", "NotEq": "1 != 2 != 3 != 5", "Lt": "1 < 2 < 3 < 5", "LtE": "1 <= 1 <= 2 <= 2",
                   "Gt": "5 > 3 > 2 > 1", "GtE": "5 >= 5 >= 3 >= 3", "In": "1 in (1, 2) in ((1, 2),) in [((1, 2),)]",
                   "NotIn": "1 not in (2,) not in ((3,),) not in [5]", "Is": "_h is _h is _h is _h", "IsNot": "_h is not _box is not _h is not _box"}
@@ -11015,7 +11016,12 @@ def _thay_t191(goc, i, moi):
         if c is None: raise ValueError("không có con đại diện")
     if k is None: setattr(n, f, moi(c))
     else: getattr(n, f)[k] = moi(c)
+    _bo_str_t191(n)
     return ast.unparse(ast.fix_missing_locations(cay))
+def _bo_str_t191(n):
+    """#1195 (3.14): `ast.unparse` in `Interpolation` từ trường `str` (văn bản nguồn) nếu có, KHÔNG từ `value` — thay con mà
+    giữ `str` thì chốt/cờ bị bỏ qua âm thầm (witness `(False, False)`). Chỉ `Interpolation` có trường `str`; xoá nó ⇒ dựng từ `value`."""
+    if "str" in getattr(n, "_fields", ()): n.str = None
 def _chot_t191(c):
     import ast
     if isinstance(c, ast.stmt): return ast.parse("_kiem_gia_t191(lease)").body[0]
@@ -11114,6 +11120,7 @@ def _sinh_goc_t191(dong, co_dong, hong):
                 if isinstance(getattr(c, "ctx", None), (ast.Store, ast.Del)): continue
                 if kk is None: setattr(cn, f, moi)
                 else: getattr(cn, f)[kk] = moi
+                _bo_str_t191(cn)
                 try: e = ast.unparse(ast.fix_missing_locations(cay))
                 except ValueError as l_: ghi(k, type(l_).__name__); continue
                 for ng, (mau, sl) in _GOC_NGU_CANH_T191.items():
@@ -11140,7 +11147,13 @@ _MIEN_SINH_T191 = {
     # F1-L35 (chiều phạm vi): cờ trong `yield` NGAY thân `kiem()` biến nó thành generator — không chạy; bản lồng trong `lambda` có dòng
     **{("co", k, "value", "don", None, False): "witness (False, False)" for k in ("Yield", "YieldFrom")},
     # F1-L33: `lambda`, `(… for …)` LUÔN ĐÚNG ⇒ trong `F or @` chốt KHÔNG BAO GIỜ chạy (mã chết). (`{…}` KHÔNG: `{*()}` rỗng — F2-L35)
-    **{("goc", k, "or"): "witness (False, False)" for k in ("Lambda", "GeneratorExp")}}
+    **{("goc", k, "or"): "witness (False, False)" for k in ("Lambda", "GeneratorExp")},
+    # #1195 (3.14, t-string): cùng lý do với ô f-string tương ứng — `TemplateStr.values` ~ `JoinedStr.values`, `Interpolation.format_spec`
+    # ~ `FormattedValue.format_spec`, gốc `Interpolation` ~ gốc `FormattedValue`; `Template` LUÔN ĐÚNG ⇒ `F or @` mã chết (~ `Lambda`).
+    **({**{(l, "TemplateStr", "values", v): "ValueError" for l in ("chot", "co") for v in ("dau", "giua", "cuoi")},
+        **{(l, "Interpolation", "format_spec", "don"): "ValueError" for l in ("chot", "co")},
+        ("goc", "Interpolation"): "SyntaxError|dung-lai-khac-lop", ("goc", "TemplateStr", "or"): "ValueError|witness (False, False)"}
+       if sys.version_info >= (3, 14) else {})}
 def _khoa_dong_t191(k):
     """Khoá phủ ĐỌC TỪ KHOÁ DÒNG `sinh.*` (không tin tập khoá do bộ sinh tự khai) — F1-L34: bỏ một dòng thì khoá của nó phải mất."""
     p = k.split(".")[1:]
@@ -11287,7 +11300,7 @@ def _vu_tru_t191():
     goc = (ast.stmt, ast.expr, ast.excepthandler, ast.pattern) + ((ast.type_param,) if hasattr(ast, "type_param") else ())
     lop = [c for c in vars(ast).values() if isinstance(c, type) and issubclass(c, goc) and c not in goc and c._fields
            and type(c) is type] + [ast.comprehension, ast.arguments, ast.keyword, ast.withitem, ast.match_case, ast.arg, ast.alias]
-    kieu = lambda c: {t: k for k, t in re.findall(r"(\w+)[*?]? (\w+)", (c.__doc__ or "").split("(", 1)[-1])}
+    kieu = lambda c: {t: k for k, t in re.findall(r"(\w+)[*?]* (\w+)", (c.__doc__ or "").split("(", 1)[-1])}
     mang = {"expr", "stmt", "keyword", "comprehension", "withitem", "excepthandler", "match_case"}
     kho = _KHO_T191 + tuple(_kho_toan_tu_t191())
     tt = {ast.BinOp: ast.operator, ast.AugAssign: ast.operator, ast.UnaryOp: ast.unaryop, ast.Compare: ast.cmpop, ast.BoolOp: ast.boolop}
@@ -11378,6 +11391,9 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
          f"MA TRẬN SINH: ô không dòng phải ĐÚNG bảng miễn, và mọi lần xuất hiện hỏng đúng lý do đã khai — lệch "
          f"{sorted((o, sorted(v)) for o, v in chua.items() if v != set(md.get(o, '').split('|')))} · thừa {sorted(set(md) - set(chua))}")
     chot(_vu_tru_t191() == ([], [], [], []), f"MA TRẬN SINH: vũ trụ `ast` chưa phủ (lớp, trường, vị trí, toán tử): {_vu_tru_t191()}")
+    if sys.version_info >= (3, 14):  # #1195 R5: thay `Interpolation.value` phải ĐẾN được văn bản dựng lại (unparse đọc `str` nếu còn)
+        g5 = "_a = t'{1}'"; i5 = next(j for j, q in enumerate(_o_sinh_t191(ast.parse(g5))) if type(q[0]).__name__ == "Interpolation")
+        chot("_kiem_gia_t191" in _thay_t191(g5, i5, _chot_t191), "3.14: thay `Interpolation.value` bị `unparse` bỏ qua (còn `str`)")
     sai_w = [(k, tuple(r), m) for k, d, *r in sinh for m in [_mong_witness_t191(k, d)] if tuple(r) != m]
     chot(not sai_w, f"MA TRẬN SINH: bộ ba trái witness chạy trên CHÍNH nội dung dòng (nhãn, bộ ba, witness đòi) — {sai_w[:3]}")
     hang = _PHAN_LOAI_T191 + sinh

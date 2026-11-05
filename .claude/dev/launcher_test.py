@@ -12959,6 +12959,384 @@ def r927_canh_cha_doi_giua_hai_luot_quet():
         cha.wait()
 
 
+_R1105_KHOA = ("chuyen_cha_trong_cay", "chuyen_cha_ngoai_cay", "cha_con_song", "tai_dung", "to_tien_doi")
+
+
+@ca
+def r1105_phan_loai_lech_ham_thuan():
+    # #1105 A3: hàm thuần §2.2 — đủ năm giá trị trả về (đặc tả r3), mỗi vế (i)(ii)(iii) một ca chỉ hỏng đúng vế ấy, ba dạng của (ii),
+    # N = PID 1 và N ngoài chuỗi. Chạy với Path/platform bị chặn: hàm đọc /proc hay rẽ theo nền thì ném ngay.
+    m = _tai_launcher_thu()
+    ch = ((10, (1, b"100")), (20, (10, b"200")), (30, (20, b"300")))
+    ch1 = ((1, (0, b"1")), (30, (1, b"300")))               # gốc là PID 1: chỉ luật PID 1 chặn được N = 1
+    giu = {10: (1, b"100"), 20: (10, b"200")}               # tổ tiên trừ P còn khớp đã lưu (chuỗi giữ nguyên)
+    giu1 = {1: (0, b"1")}
+    bang_ca = [
+        ("tha_P_vang", 40, (30, b"400"), (10, b"400"), None, ch, b"100", giu, "tha"),
+        ("tha_P_zombie", 40, (30, b"400"), (10, b"400"), ("Z", b"300"), ch, b"100", giu, "tha"),
+        ("tha_P_X", 40, (30, b"400"), (10, b"400"), ("X", b"300"), ch, b"100", giu, "tha"),
+        ("tha_P_doi_starttime", 40, (30, b"400"), (10, b"400"), ("S", b"999"), ch, b"100", giu, "tha"),
+        ("tha_N_trung_gian", 40, (30, b"400"), (20, b"400"), None, ch, b"200", giu, "tha"),
+        ("chi_hong_i", 40, (30, b"400"), (10, b"401"), None, ch, b"100", giu, "tai_dung"),
+        ("chi_hong_ii", 40, (30, b"400"), (10, b"400"), ("S", b"300"), ch, b"100", giu, "cha_con_song"),
+        ("chi_hong_iii_N_doi", 40, (30, b"400"), (10, b"400"), None, ch, b"101", giu, "chuyen_cha_ngoai_cay"),
+        ("N_vang", 40, (30, b"400"), (10, b"400"), None, ch, None, giu, "chuyen_cha_ngoai_cay"),
+        ("N_ngoai_chuoi", 40, (30, b"400"), (50, b"400"), None, ch, b"500", giu, "chuyen_cha_ngoai_cay"),
+        ("N_pid1", 40, (30, b"400"), (1, b"400"), None, ch1, b"1", giu1, "chuyen_cha_ngoai_cay"),
+        ("to_tien_doi", 20, (10, b"200"), (10, b"201"), None, ch, None, {}, "to_tien_doi"),
+        # vế chuỗi của (iii): tổ tiên còn sống trừ P (kể cả N) phải khớp (ppid, starttime); gốc chỉ đòi starttime
+        ("chuoi_trung_gian_doi_ppid", 40, (30, b"400"), (10, b"400"), None, ch, b"100", {10: (1, b"100"), 20: (99, b"200")},
+         "to_tien_doi"),
+        ("chuoi_N_doi_ppid", 40, (30, b"400"), (20, b"400"), None, ch, b"200", {10: (1, b"100"), 20: (99, b"200")},
+         "to_tien_doi"),
+        ("chuoi_goc_doi_starttime", 40, (30, b"400"), (20, b"400"), None, ch, b"200", {10: (1, b"101"), 20: (10, b"200")},
+         "to_tien_doi"),
+        ("tha_goc_doi_ppid", 40, (30, b"400"), (10, b"400"), None, ch, b"100", {10: (7, b"100"), 20: (10, b"200")}, "tha"),
+        ("tha_to_tien_vang", 40, (30, b"400"), (10, b"400"), None, ch, b"100", {10: (1, b"100"), 20: None}, "tha"),
+        # thứ tự §2.3 (errata r3) khi nhiều điều kiện cùng hỏng: (i) > (ii) > phần đầu (iii) > vế chuỗi > tha
+        ("nhieu_hong_tai_dung", 40, (30, b"400"), (50, b"401"), ("S", b"300"), ch, b"500", {10: (1, b"100"), 20: (99, b"200")},
+         "tai_dung"),
+        ("nhieu_hong_cha_con_song", 40, (30, b"400"), (50, b"400"), ("S", b"300"), ch, b"500",
+         {10: (1, b"100"), 20: (99, b"200")}, "cha_con_song"),
+        ("nhieu_hong_ngoai_cay", 40, (30, b"400"), (20, b"400"), None, ch, b"201", {10: (1, b"100"), 20: (99, b"201")},
+         "chuyen_cha_ngoai_cay"),
+    ]
+    # Đủ NĂM giá trị trả về: "tha" (đếm vào `chuyen_cha_trong_cay`) + bốn nhãn không tha; mỗi giá trị ≥ 1 ca.
+    ra = {x[-1] for x in bang_ca}
+    bang(ra == {"tha", "chuyen_cha_ngoai_cay", "cha_con_song", "tai_dung", "to_tien_doi"}
+         and tuple(m._KHOA_LECH) == _R1105_KHOA, f"bang ca khong phu du nam gia tri: {sorted(ra)}")
+
+    class Chan:
+        def __getattr__(self, ten):
+            raise TinHieuChotCa(f"ham thuan cham {ten}")
+
+        def __call__(self, *a, **k):
+            raise TinHieuChotCa("ham thuan doc Path")
+    goc_p, goc_pf = m.Path, m.platform
+    m.Path, m.platform = Chan(), Chan()
+    try:
+        sai = [(t, kq) for t, c, cu, moi, p, chuoi, n, hien, mong in bang_ca
+               if (kq := m._phan_loai_lech(c, cu, moi, p, chuoi, n, hien)) != mong]
+    finally:
+        m.Path, m.platform = goc_p, goc_pf
+    bang(not sai, f"phan loai sai: {sai}")
+
+
+@ca
+def r1105_cha_zombie_ve_to_tien():
+    # #1105 A4 (Q11): y như kịch bản `cha_zombie` của r927 nhưng cháu chuyển về GỐC ⇒ được tha, có quan sát ⇒ DO_DUOC.
+    # Đối chứng cùng ca: về PID 1 (đúng `cha_zombie`) ⇒ DanhTinhDoi, đếm vào khoá ngoài-cây chứ không vào trong-cây.
+    if platform.system() != "Linux":
+        return "can /proc cua Linux"
+    m = _tai_launcher_thu()
+    goc = m.Path
+    con, chau = _r27_cay_cha_chau()
+    try:
+        for ten, ppid_moi in (("ve_goc", str(os.getpid()).encode()), ("ve_pid1", b"1")):
+            vet = {"cmd": False}
+
+            class PathGia(type(Path())):
+                def read_bytes(self):
+                    x = str(self)
+                    b = super().read_bytes()
+                    if x == f"/proc/{chau}/cmdline":
+                        vet["cmd"] = True
+                    elif vet["cmd"] and x == f"/proc/{chau}/stat":
+                        return _r27_sua_stat(b, ppid=ppid_moi)
+                    elif vet["cmd"] and x == f"/proc/{con.pid}/stat":
+                        return _r27_sua_stat(b, trang_thai=b"Z")
+                    return b
+            m.Path = PathGia
+            try:
+                lay = m._LayMauSandbox(os.getpid(), "/w")
+                lay.thay['{"chuong_trinh": "bwrap"}'] = 1
+                lay.dung.set()
+                lay._chay()
+            finally:
+                m.Path = goc
+            d = {}
+            lay.ghi_so(d, Path(os.devnull))
+            lech = d.get("sandbox_lech", {})
+            if ten == "ve_goc":
+                bang(lay.loi == [] and d["sandbox_trang_thai"] == "DO_DUOC" and lech.get("chuyen_cha_trong_cay") == 1
+                     and lech.get("chuyen_cha_ngoai_cay") == 0, f"{ten}: loi={lay.loi} {d}")
+            else:
+                bang(lay.loi == ["DanhTinhDoi"] and d["sandbox_trang_thai"] == "KHONG_DO_DUOC"
+                     and lech.get("chuyen_cha_ngoai_cay") == 1 and lech.get("chuyen_cha_trong_cay") == 0,
+                     f"{ten}: loi={lay.loi} {d}")
+    finally:
+        con.kill()
+        con.wait()
+
+
+@ca
+def r1105_chuyen_cha_xuyen_luot():
+    # #1105 A5: MỘT sampler qua ba lượt. Lượt 2 cha cũ vắng, cháu (sống, starttime giữ) đổi ppid về gốc ⇒ không lỗi,
+    # cạnh của cháu trong `self.canh` chuyển về gốc. Ở lượt 2 cmdline của cháu cũng vắng (thoát giữa chừng) để lượt
+    # duyệt cây không ghi đè cạnh hộ: chỉ nhánh `self.canh` được đo. Đối chứng: cha cũ CÒN sống ⇒ DanhTinhDoi.
+    if platform.system() != "Linux":
+        return "can /proc cua Linux"
+    m = _tai_launcher_thu()
+    goc = m.Path
+    cha, chau = _r27_cay_cha_chau()
+    try:
+        for ten, cha_vang in (("cha_vang", True), ("cha_song", False)):
+            vet = {"luot": 0}
+
+            class PathGia(type(Path())):
+                def read_bytes(self):
+                    x = str(self)
+                    if vet["luot"] >= 2 and cha_vang and x == f"/proc/{cha.pid}/stat":
+                        raise FileNotFoundError(2, "da thoat")
+                    if vet["luot"] == 2 and x == f"/proc/{chau}/cmdline":
+                        raise FileNotFoundError(2, "da thoat")
+                    b = super().read_bytes()
+                    if vet["luot"] >= 2 and x == f"/proc/{chau}/stat":
+                        return _r27_sua_stat(b, ppid=str(os.getpid()).encode())
+                    return b
+            m.Path = PathGia
+            try:
+                lay = m._LayMauSandbox(os.getpid(), "/w")
+                lay.dung.set()
+                vet["luot"] = 1
+                lay._chay()
+                bd = lay.canh.get(chau, (None, None))[1]
+                vet["luot"] = 2
+                lay._chay()
+                canh2 = lay.canh.get(chau)
+                vet["luot"] = 3
+                if cha_vang:
+                    lay._chay()
+            finally:
+                m.Path = goc
+            if cha_vang:
+                bang(bd is not None and lay.loi == [] and canh2 == (os.getpid(), bd)
+                     and lay.lech["chuyen_cha_trong_cay"] == 1, f"{ten}: loi={lay.loi} canh={canh2} {lay.lech}")
+            else:
+                bang(lay.loi == ["DanhTinhDoi"] and lay.lech["cha_con_song"] == 1
+                     and lay.lech["chuyen_cha_trong_cay"] == 0, f"{ten}: loi={lay.loi} {lay.lech}")
+    finally:
+        cha.kill()
+        cha.wait()
+
+
+def _r1105_cay_bon_tang():
+    """(con, chau, chat): con là con trực tiếp của tiến trình test, chau con của con, chat con của chau."""
+    con = subprocess.Popen([PY, "-c", "import subprocess,sys,time;subprocess.Popen([sys.executable,'-c',"
+                            "\"import subprocess,sys,time;subprocess.Popen([sys.executable,'-c','import time;time.sleep(8)']);"
+                            "time.sleep(8)\"]);time.sleep(8)"])
+
+    def con_cua(cha):
+        for d in os.listdir("/proc"):
+            if d.isdigit():
+                with contextlib.suppress(OSError, IndexError, ValueError):
+                    b = Path(f"/proc/{d}/stat").read_bytes()
+                    if int(b[b.rindex(b")") + 2:].split()[1]) == cha:
+                        return int(d)
+        return None
+    han = time.monotonic() + 10
+    while time.monotonic() < han:
+        chau = con_cua(con.pid)
+        chat = con_cua(chau) if chau else None
+        if chat:
+            return con, chau, chat
+        time.sleep(0.05)
+    con.kill()
+    con.wait()
+    raise TinHieuChotCa("fixture: khong thay cay bon tang")
+
+
+@ca
+def r1105_tha_doc_lai_chuoi_to_tien():
+    # identity-chain-bypass (review offline lượt 1) — vế chuỗi của (iii): cây gốc → con → chau(P) → chat(c). chat chuyển
+    # hợp lệ khỏi chau (Z/vắng), nhưng một tổ tiên CÒN SỐNG khác P đổi ppid ⇒ DanhTinhDoi, đếm `to_tien_doi`, không tha.
+    # Ba biến thể âm: trong lượt; xuyên lượt; N (= con) đổi ppid SAU ảnh chụp. Đổi "sau ảnh chụp" phân biệt bằng kiểu
+    # pid: lượt quét /proc đọc bằng tên thư mục (str), lần đọc mới bằng int. Hai ca dương: chuỗi giữ nguyên ⇒ tha; gốc
+    # chỉ đổi ppid ⇒ vẫn tha (gốc chỉ đòi starttime) — gốc vắng khỏi ảnh chụp lượt 2 để lượt duyệt cây (vốn đòi đủ
+    # cạnh của gốc) không chạy, chỉ đường tha được đo.
+    if platform.system() != "Linux":
+        return "can /proc cua Linux"
+    m = _tai_launcher_thu()
+    goc_p, goc_st = m.Path, m._LayMauSandbox.__dict__["_stat_tt"]
+    con, chau, chat = _r1105_cay_bon_tang()
+    g = os.getpid()
+    try:
+        for ten, ve, doi, mong in (("trong_luot", g, "con", "to_tien_doi"), ("xuyen_luot", g, "con", "to_tien_doi"),
+                                   ("N_doi_sau_anh_chup", con.pid, "con", "to_tien_doi"),
+                                   ("duong_giu_nguyen", g, None, "tha"), ("duong_goc_doi_ppid", g, "goc", "tha")):
+            vet = {"cmd": False, "luot": 1}
+
+            def bat():
+                return vet["cmd"] if ten == "trong_luot" else vet["luot"] == 2
+
+            def stat(pid, _ten=ten, _ve=ve, _doi=doi):
+                v = goc_st.__func__(pid)
+                if v is None or not bat():
+                    return v
+                moi = isinstance(pid, int)
+                if int(pid) == chau:
+                    return ("Z", v[1], v[2]) if _ten == "trong_luot" else None
+                if int(pid) == chat:
+                    return v[0], _ve, v[2]
+                if moi and _doi == "con" and int(pid) == con.pid or moi and _doi == "goc" and int(pid) == g:
+                    return v[0], 2 if v[1] == 1 else 1, v[2]
+                if not moi and _doi == "goc" and int(pid) == g:
+                    return None
+                return v
+
+            class PathGia(type(Path())):
+                def read_bytes(self, _ten=ten):
+                    if _ten != "trong_luot" and vet["luot"] == 2 and str(self) == f"/proc/{chat}/cmdline":
+                        raise FileNotFoundError(2, "da thoat")       # cô lập nhánh `self.canh` như A5
+                    b = super().read_bytes()
+                    if str(self) == f"/proc/{chat}/cmdline":
+                        vet["cmd"] = True
+                    return b
+            m.Path, m._LayMauSandbox._stat_tt = PathGia, staticmethod(stat)
+            try:
+                lay = m._LayMauSandbox(g, "/w")
+                lay.thay['{"chuong_trinh": "bwrap"}'] = 1
+                lay.dung.set()
+                lay._chay()
+                if ten != "trong_luot":
+                    bang(lay.loi == [] and chat in lay.canh, f"{ten} luot 1: loi={lay.loi}")
+                    vet["luot"] = 2
+                    lay._chay()
+            finally:
+                m.Path, m._LayMauSandbox._stat_tt = goc_p, goc_st
+            d = {}
+            lay.ghi_so(d, Path(os.devnull))
+            lech = d["sandbox_lech"]
+            if mong == "tha":
+                bang(lay.loi == [] and d["sandbox_trang_thai"] == "DO_DUOC" and lech["chuyen_cha_trong_cay"] == 1
+                     and lech["to_tien_doi"] == 0 and lay.canh.get(chat, (None,))[0] == ve, f"{ten}: loi={lay.loi} {lech}")
+            else:
+                bang(lay.loi == ["DanhTinhDoi"] and d["sandbox_trang_thai"] == "KHONG_DO_DUOC" and lech["to_tien_doi"] == 1
+                     and lech["chuyen_cha_trong_cay"] == 0, f"{ten}: loi={lay.loi} {lech}")
+    finally:
+        for x in (chat, chau):
+            with contextlib.suppress(OSError):
+                os.kill(x, signal.SIGKILL)
+        con.kill()
+        con.wait()
+
+
+_R1105_HELPER = r"""
+import ctypes, os, subprocess, sys, time
+if ctypes.CDLL(None, use_errno=True).prctl(36, 1, 0, 0, 0) != 0:
+    print("KHONG_SUBREAPER", ctypes.get_errno(), flush=True)
+    sys.exit(3)
+con = subprocess.Popen([sys.executable, "-c", sys.argv[1]])
+print("CON", con.pid, flush=True)
+while True:
+    try:
+        os.waitpid(-1, 0)
+    except ChildProcessError:
+        time.sleep(0.05)
+"""
+_R1105_CON = ("import subprocess,sys,time;p=subprocess.Popen(['bwrap','-c','import time;time.sleep(60)'],"
+              "executable=sys.executable);print('CHAU',p.pid,flush=True);time.sleep(60)")
+
+
+def _r1105_ppid(pid):
+    with contextlib.suppress(OSError, ValueError, IndexError):
+        b = Path(f"/proc/{pid}/stat").read_bytes()
+        return int(b[b.rindex(b")") + 2:].split()[1])
+    return None
+
+
+@ca
+def r1105_tien_trinh_that_ve_subreaper():
+    # #1105 A6 (Q6 tầng 1): tiến trình THẬT, không giả /proc. Helper đặt PR_SET_CHILD_SUBREAPER (vai init của pid
+    # namespace bwrap), sinh con, con sinh cháu mang argv `bwrap`. Lượt 1 khi cháu còn dưới con; giết con, ĐỢI tới khi
+    # /proc báo cháu dưới helper (đồng bộ theo điều kiện, không ngủ đoán giờ); lượt 2 đi đúng nhánh xuyên lượt.
+    if platform.system() != "Linux":
+        return "can prctl(PR_SET_CHILD_SUBREAPER) cua Linux"
+    import select
+    m = _tai_launcher_thu()
+    h = subprocess.Popen([PY, "-c", _R1105_HELPER, _R1105_CON], stdout=subprocess.PIPE)
+    pid = {}
+    try:
+        han = time.monotonic() + 20
+        dem = b""
+        while ("CON" not in pid or "CHAU" not in pid) and time.monotonic() < han:
+            if select.select([h.stdout], [], [], 0.2)[0]:
+                khoi = os.read(h.stdout.fileno(), 4096)
+                if not khoi:
+                    break
+                dem += khoi
+                for dong in dem.split(b"\n"):
+                    t = dong.split()
+                    if len(t) == 2 and t[0] in (b"CON", b"CHAU") and t[1].isdigit():
+                        pid[t[0].decode()] = int(t[1])
+                    bang(not dong.startswith(b"KHONG_SUBREAPER"), f"khong dat duoc subreaper: {dong!r}")
+        bang("CON" in pid and "CHAU" in pid, f"fixture: khong thay con/chau: {dem!r}")
+        con, chau = pid["CON"], pid["CHAU"]
+
+        def doi(dk, mo_ta):
+            han = time.monotonic() + 10
+            while time.monotonic() < han:
+                if dk():
+                    return
+                time.sleep(0.01)
+            raise TinHieuChotCa(f"fixture: het gio doi {mo_ta}")
+        doi(lambda: _r1105_ppid(chau) == con and Path(f"/proc/{chau}/cmdline").read_bytes().startswith(b"bwrap\0"),
+            "chau duoi con")
+        lay = m._LayMauSandbox(h.pid, "/w")
+        lay._quet()
+        bang(lay.loi == [] and lay.canh.get(chau, (None,))[0] == con, f"luot 1: loi={lay.loi} canh={lay.canh}")
+        os.kill(con, signal.SIGKILL)
+        doi(lambda: _r1105_ppid(chau) == h.pid, "chau ve helper")
+        lay._quet()
+        d = {}
+        lay.ghi_so(d, Path(os.devnull))
+        bang(lay.loi == [] and d["sandbox_lech"]["chuyen_cha_trong_cay"] >= 1 and d["sandbox_trang_thai"] == "DO_DUOC"
+             and any(x.get("chuong_trinh") == "bwrap" for x in d["sandbox_quan_sat"]), f"luot 2: loi={lay.loi} {d}")
+    finally:
+        for p in pid.values():
+            with contextlib.suppress(OSError):
+                os.kill(p, signal.SIGKILL)
+        h.kill()
+        h.wait()
+
+
+@ca
+def r1105_sandbox_lech_luon_co():
+    # #1105 A7: `ghi_so` LUÔN ghi đúng năm khoá, số nguyên ≥ 0 — sampler sạch, sampler có lỗi, sampler không phải Linux.
+    # Nền được DỰNG tường minh (platform giả "Windows" lúc tạo, luồng giả cho hai ca đầu), không theo nền chủ (R27-TEST-05).
+    m = _tai_launcher_thu()
+    goc = m.platform.system
+    m.platform.system = lambda: "Windows"
+    try:
+        lays = [m._LayMauSandbox(os.getpid(), "/w") for _ in range(3)]
+    finally:
+        m.platform.system = goc
+    sach, loi, ngoai = lays
+    for x in (sach, loi):
+        x.luong, x.goc_bd = threading.Thread(target=lambda: None), b"1"
+        x.thay['{"chuong_trinh": "bwrap"}'] = 1
+    loi.loi.append("DanhTinhDoi")
+    loi.lech["cha_con_song"] += 2
+    for ten, x, mong_tt, mong in (("sach", sach, "DO_DUOC", 0), ("loi", loi, "KHONG_DO_DUOC", 2),
+                                  ("ngoai_linux", ngoai, "KHONG_DO_DUOC", 0)):
+        d = {}
+        x.ghi_so(d, Path(os.devnull))
+        lech = d.get("sandbox_lech")
+        bang(type(lech) is dict and tuple(lech) == _R1105_KHOA
+             and all(type(v) is int and v >= 0 for v in lech.values())
+             and lech["cha_con_song"] == mong and d["sandbox_trang_thai"] == mong_tt, f"{ten}: {d}")
+
+
+@ca
+def r1105_gioi_han_khai_dung_pham_vi():
+    # #1105 A8 (Q12): đo trên CHUỖI ĐÃ ĐÁNH GIÁ, không đo mã nguồn hay Markdown.
+    m = _tai_launcher_thu()
+    s = m._SANDBOX_GIOI_HAN % m._CHU_KY_SANDBOX
+    bang("chuyen cha khi cha cu da mat/Z va cha moi la to tien da xac thuc thi duoc tha; moi lech khac (ke ca chuyen "
+         "ra ngoai cay hay PID 1) => KHONG_DO_DUOC" in s, f"thieu cau khai moi: {s}")
+    bang("ke ca vong doi binh thuong nhu cha zombie" not in s, f"con cau khai cu: {s}")
+
+
 @ca
 def r927_cmdline_tho_giu_doi_so_rong_qua_bo_giai_ma_that():
     # R27-PARSE-02b: đi từ BYTE cmdline thô qua đúng bộ giải mã `_quet` dùng, tới trạng thái trong sổ.
@@ -13022,6 +13400,7 @@ def r927_lenh_run_ghi_effort_va_sandbox_vao_run_json():
         r, tm, so = _r25_chay(s, err, sau)
         bang(r.returncode == 0 and so.get("effort_phuc_vu") == ["xhigh"]
              and so.get("effort_phuc_vu_trang_thai") == "DO_DUOC", f"effort: {r.stderr[-300:]} {so}")
+        bang(tuple(so.get("sandbox_lech") or ()) == _R1105_KHOA, f"run.json thieu sandbox_lech (#1105 A8): {so}")
         if platform.system() == "Linux":
             bang(so.get("sandbox_trang_thai") == "DO_DUOC"
                  and any(x.get("chuong_trinh") == "bwrap" for x in so.get("sandbox_quan_sat", [])), f"sandbox: {so}")
@@ -13050,7 +13429,7 @@ DOT_BIEN = [
      ["r927_canh_cha_doi_giua_hai_luot_quet"]),
     ("r27_canh_khong_doi_chieu", ('            elif hien != bo:\n', '            elif False:\n'), ["r927_canh_cha_doi_giua_hai_luot_quet"]),
     ("r27_canh_khong_ghi", ('                self.canh[c] = sau\n', ''), ["r927_canh_cha_doi_giua_hai_luot_quet"]),
-    ("r27_to_tien_chi_so_bd", ('any(self._stat(p) != bo for p, bo in chuoi)', 'any((self._stat(p) or (0, 0))[1] != bo[1] for p, bo in chuoi)'),
+    ("r27_to_tien_chi_so_bd", ('elif s != bo and self._dem(', 'elif s[1] != bo[1] and self._dem('),   # #1105: tương đương sau tái cấu trúc
      ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
     ("r27_goc_ghim_tre", ('        if goc is None or self.goc_bd is None:\n            return',
                           '        if goc is not None and self.goc_bd is None:\n            self.goc_bd = goc[1]\n        if goc is None:\n            return'),
@@ -13058,7 +13437,7 @@ DOT_BIEN = [
     ("r27_cmdline_bo_doi_so_rong", ('return [x.decode("utf-8", "replace") for x in tho[:-1].split(b"\\0")]',
                                     'return [x.decode("utf-8", "replace") for x in tho[:-1].split(b"\\0") if x]'), ["r927_cmdline_tho_giu_doi_so_rong_qua_bo_giai_ma_that"]),
     ("r27_cmdline_khong_nul_van_tin", ('    if not tho.endswith(b"\\0"):\n        return None\n', ''), ["r927_cmdline_tho_giu_doi_so_rong_qua_bo_giai_ma_that"]),
-    ("r27_khong_xac_thuc_to_tien", (' or any(self._stat(p) != bo for p, bo in chuoi)', ''),
+    ("r27_khong_xac_thuc_to_tien", ('kq = self._doc_lai_chuoi(chuoi)', 'kq = "khop"'),   # #1105: tương đương
      ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
     ("r27_goc_ghim_muon", ('            else:\n                self.goc_bd = goc[1]\n', '            else:\n                pass\n'), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
     ("r27_trong_ws_chep_ten", ('        return "trong_workspace"\n', '        return "workspace/" + p[len(ws) + 1:]\n'), ["r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep"]),
@@ -13075,7 +13454,8 @@ DOT_BIEN = [
     ("r27_khong_ro_van_do_duoc", ('        elif any(json.loads(k).get("khong_ro") for k in thay):\n', '        elif False:\n'), ["r927_trang_thai_sandbox_moi_nhanh"]),
     ("r27_cmdline_nuot_moi_loi", ('                except (FileNotFoundError, ProcessLookupError):\n                    continue',
                                   '                except OSError:\n                    continue'), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
-    ("r27_khong_doc_lai_stat", ('if sau != (cha, bd) or any(', 'if any('), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
+    ("r27_khong_doc_lai_stat", ('                if sau != (cha, bd):\n', '                if False:\n'),   # #1105: tương đương
+     ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
     ("r27_goc_khong_ghim", ('        if goc[1] != self.goc_bd:\n', '        if False:\n'), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
     ("r27_effort_khong_kiem_kieu", ('eff = eff if isinstance(eff, str) and eff.strip() else None', 'eff = eff'),
      ["r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC"]),
@@ -13120,6 +13500,46 @@ DOT_BIEN = [
     ("r27_quet_doc_environ", ('                    tho = Path(f"/proc/{c}/cmdline").read_bytes()\n',
                               '                    tho = Path(f"/proc/{c}/cmdline").read_bytes()\n                    Path(f"/proc/{c}/environ").read_bytes()\n'),
      ["r927_lay_mau_that_thay_sandbox_sau_exec_va_khong_doc_environ"]),
+    # #1105 (launcher-sandbox-lay-mau r2 §4): mỗi vế của quy tắc tha và mỗi chốt mới một đột biến, ca đích ghi trong đặc tả.
+    ("r1105_bo_ve_ii", ('        return "cha_con_song"', '        pass'), ["r927_canh_cha_doi_giua_hai_luot_quet"]),
+    ("r1105_bo_ve_iii", ('    if moi[0] == 1 or n is None or n_bd != n[1]:\n', '    if False:\n'), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
+    ("r1105_bo_ve_i", ('        return "tai_dung"', '        return "tha"'), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
+    ("r1105_tha_to_tien_doi", ('    if c in luu:\n        return "to_tien_doi"\n',
+                               '    if c in luu:\n        return "to_tien_doi" if moi[1] == cu[1] else "tha"\n'),
+     ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
+    ("r1105_ham_tha_moi_ca", ('    luu = dict(chuoi)\n', '    return "tha"\n    luu = dict(chuoi)\n'), ["r1105_phan_loai_lech_ham_thuan"]),
+    ("r1105_ham_khong_tha", ('            return "to_tien_doi"\n    return "tha"\n', '            return "to_tien_doi"\n    return "chuyen_cha_ngoai_cay"\n'),
+     ["r1105_phan_loai_lech_ham_thuan"]),
+    ("r1105_ham_bo_trang_thai_X", ('("Z", "X")', '("Z",)'), ["r1105_phan_loai_lech_ham_thuan"]),
+    ("r1105_khong_tha_trong_luot", ('                    if not self._lech(c, (cha, bd), sau, chuoi):\n',
+                                    '                    if not self._lech(c, (cha, bd), sau, chuoi) or True:\n'),
+     ["r1105_cha_zombie_ve_to_tien"]),
+    ("r1105_khong_tha_xuyen_luot", ('                if not self._lech(c, bo, hien, self.chuoi.get(c, ())):',
+                                    '                if not self._lech(c, bo, hien, self.chuoi.get(c, ())) or True:'),
+     ["r1105_chuyen_cha_xuyen_luot", "r1105_tien_trinh_that_ve_subreaper"]),
+    ("r1105_tha_khong_cap_nhat_canh", ('        self.canh[c] = (moi[0], cu[1])\n', ''), ["r1105_chuyen_cha_xuyen_luot"]),
+    ("r1105_tha_bo_kiem_chuoi", ('    for pid, bo in chuoi:\n        hien = to_tien_hien', '    for pid, bo in ():\n        hien = to_tien_hien'),
+     ["r1105_tha_doc_lai_chuoi_to_tien"]),
+    ("r1105_tha_doi_ppid_goc", ('        if pid == chuoi[0][0]:\n            hien = (bo[0], hien[1])\n', ''),
+     ["r1105_tha_doc_lai_chuoi_to_tien"]),
+    ("r1105_ham_dao_thu_tu", [('    n = luu.get(moi[0])\n    if moi[0] == 1 or n is None or n_bd != n[1]:\n        return "chuyen_cha_ngoai_cay"                                      # hỏng (iii); PID 1 không bao giờ được tha\n', ''),
+                              ('            return "to_tien_doi"\n    return "tha"\n',
+                               '            return "to_tien_doi"\n    n = luu.get(moi[0])\n    if moi[0] == 1 or n is None or n_bd != n[1]:\n        return "chuyen_cha_ngoai_cay"                                      # hỏng (iii); PID 1 không bao giờ được tha\n    return "tha"\n')],
+     ["r1105_phan_loai_lech_ham_thuan"]),
+    ("r1105_ham_doi_nhan_khong_tha", ('        return "chuyen_cha_ngoai_cay"', '        return "cha_con_song"'),
+     ["r1105_phan_loai_lech_ham_thuan"]),
+    ("r1105_bo_sandbox_lech_khi_sach", ('        ban_ghi["sandbox_lech"] = ',
+                                        '        if any(self.lech.values()):\n            ban_ghi["sandbox_lech"] = '),
+     ["r1105_sandbox_lech_luon_co"]),
+    ("r1105_dem_sai_khoa", ('"chuyen_cha_trong_cay" if nhan == "tha" else nhan',
+                            '"chuyen_cha_trong_cay" if nhan in ("tha", "chuyen_cha_ngoai_cay") else nhan'),
+     ["r1105_cha_zombie_ve_to_tien"]),
+    ("r1105_gioi_han_cau_cu", ('"Lech danh tinh tien trinh (#1105): chuyen cha khi cha cu da mat/Z va cha moi la to tien da xac thuc "\n'
+                               '                     "thi duoc tha; moi lech khac (ke ca chuyen ra ngoai cay hay PID 1) => KHONG_DO_DUOC: "',
+                               '"Moi lech danh tinh tien trinh (ke ca vong doi binh thuong nhu cha zombie) => KHONG_DO_DUOC: "'),
+     ["r1105_gioi_han_khai_dung_pham_vi"]),
+    ("r1105_gioi_han_cat_hau_to", ('"thi duoc tha; moi lech khac (ke ca chuyen ra ngoai cay hay PID 1) => KHONG_DO_DUOC: "',
+                                   '"thi duoc tha; moi lech khac "'), ["r1105_gioi_han_khai_dung_pham_vi"]),
     ("r27_lenh_run_khong_lay_mau", ('            sandbox.bat_dau()\n', ''), ["r927_lenh_run_ghi_effort_va_sandbox_vao_run_json"]),
     ("r27_lenh_run_khong_ghi_so", ('        sandbox.ghi_so(ban_ghi, thu_muc / "stdout.log")\n', '        pass\n'),
      ["r927_lenh_run_ghi_effort_va_sandbox_vao_run_json"]),

@@ -11,7 +11,7 @@ Gate: chỉ dùng khi `nlm` có trên PATH + auth OK; nếu không trả {"ok": 
 session hết hạn hẳn cần `nlm login` (TƯƠNG TÁC — không chạy headless được).
 """
 from __future__ import annotations
-import argparse, json, os, re, shutil, subprocess, sys
+import argparse, json, os, re, shutil, stat, subprocess, sys, tempfile, threading, time
 
 # Group E1 (log rà): subprocess nlm/keyring rò dòng "Using keyring backend: keyring" lẫn stdout → VỠ json.loads.
 # CHỈ bỏ dòng nhiễu keyring THUẦN (KHÔNG chứa ký tự cấu trúc JSON {}[]) → không bao giờ nuốt thân JSON
@@ -107,7 +107,7 @@ def nlm_available() -> bool:
     return nlm_exe() is not None
 
 
-def _run(args: list[str], timeout: int = 120) -> tuple[int, str, str]:
+def _run_mot(args: list[str], timeout: int = 120) -> tuple[int, str, str]:
     exe = nlm_exe() or "nlm"
     # 2.2: truyền env với PATH ĐÃ NỐI ~/.local/bin (+ user-base bin) → bản thân nlm gọi tool con (uv/python)
     # vẫn thấy; không phụ thuộc shell người dùng đã export PATH hay chưa.
@@ -122,6 +122,132 @@ def _run(args: list[str], timeout: int = 120) -> tuple[int, str, str]:
         return 127, "", "nlm không có (PATH / ~/.local/bin) — pip install notebooklm-mcp-cli"
     except subprocess.TimeoutExpired:
         return 124, "", f"timeout {timeout}s"
+
+
+
+# ── WP1099 (ADR-0064, spec cloud-setup-p3b-nlm-401-r11): jar chết giữa phiên cloud ⇒ TỰ NẠP CÓ ĐIỀU KIỆN (r208c bác tự nạp vì bundle có thể cũ/cũng chết) ⇒ chỉ nạp khi canary CON (thân `_canary_song` của nlm-auto-refresh.sh) trả 3,
+# chỉ `tl nlm-auth-load` (không --force), 1 lần/tiến trình + dấu 600 s (best effort), chỉ chạy lại lệnh ĐỌC cho phép.
+NAP_LAI_GAN_NHAT = None            # {trang_thai, ts} của lời gọi `_run` gần nhất đã tới bước "Giới hạn", hoặc None
+_NAP_LAI_DA_NAP = False            # trần BẢO ĐẢM: 1 lần nạp mỗi tiến trình (khoá luồng giữ nó đúng cả khi đa luồng)
+_NAP_LAI_KHOA = threading.Lock()
+_NAP_LAI_HAN_CANARY, _NAP_LAI_HAN_NAP, _NAP_LAI_CUA_SO = 120, 60, 600     # canary: 3 lần × 30 s + 4,5 s chờ
+_NAP_LAI_CHO_PHEP = frozenset({("source", "list"), ("source", "get"), ("source", "content"),
+                               ("notebook", "get"), ("notebook", "list"), ("notebook", "query")})
+_CANARY = ("import sys\nsys.path.insert(0, sys.argv[1])\ntry:\n    import tl\n    tg = tl._imp('tl_gws')\n    tg.bind(tl)\n"
+           "    alive, _ = tg._nlm_auth_alive(tg._nlm_canary_notebook(None), require_notebook_body=True)\n"
+           "except Exception:\n    alive = None\nsys.exit(0 if alive is True else 3 if alive is False else 2)\n")
+_NAP_LAI_THU_MUC = os.path.dirname(os.path.abspath(__file__))
+
+def _tep_dau() -> str:
+    return os.path.join(os.path.expanduser("~"), ".notebooklm-mcp-cli", ".tra-luat-nap-lai.json")
+
+# Tệp dấu — MỌI đường I/O (review PR #1197 F01/F05/F06/F07): không chặn, không theo symlink, chỉ tệp thường, ≤ 4 KiB; mọi fd đóng trong `finally`; lỗi ghi ⇒ False (không nạp), lỗi dọn bị nuốt; không đường nào ném ra khỏi `_run`.
+def _doc_dau():
+    fd = None
+    try:
+        fd = os.open(_tep_dau(), os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_NOFOLLOW", 0))
+        d = json.loads(os.read(fd, 4096)) if stat.S_ISREG(os.fstat(fd).st_mode) else None
+        ts = d.get("ts") if isinstance(d, dict) else None
+        return float(ts) if isinstance(ts, (int, float)) and not isinstance(ts, bool) else None
+    except Exception:
+        return None
+    finally:
+        _don(lambda: fd is not None and os.close(fd))
+
+def _don(*viec) -> None:
+    for v in viec:
+        try:
+            v()
+        except OSError:
+            pass
+
+def _ghi_dau(ts: int, ket_qua: str) -> bool:
+    p, tam, fd = _tep_dau(), None, None
+    try:
+        os.makedirs(os.path.dirname(p), exist_ok=True); fd, tam = tempfile.mkstemp(dir=os.path.dirname(p), prefix=".nap-lai-")
+        b = json.dumps({"ts": ts, "ket_qua": ket_qua}).encode("utf-8")
+        if os.write(fd, b) != len(b): raise OSError("ghi NGẮN tệp dấu (review F08)")  # noqa: E701
+        os.close(fd); fd = None
+        os.chmod(tam, 0o600); os.replace(tam, p)
+        return True
+    except Exception:
+        _don(lambda: fd is not None and os.close(fd), lambda: tam and os.unlink(tam))
+        return False
+
+def _con(argv: list, han: int):
+    """(rc, đầu ra gộp) của tiến trình con, hoặc (lý do, "") khi quá hạn/OSError. Không chuyển tiếp đầu ra."""
+    env = os.environ.copy()
+    env["TL_NLM_NAP_LAI_TAT"] = "1"        # tiến trình con gọi lại nlm_cli thì cơ chế TẮT — không đệ quy
+    try:
+        p = subprocess.run(argv, cwd=os.path.dirname(_NAP_LAI_THU_MUC), env=env, stdin=subprocess.DEVNULL,
+                           capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=han)
+        return p.returncode, (p.stdout or "") + (p.stderr or "")
+    except subprocess.TimeoutExpired:
+        return "quá hạn", ""
+    except OSError as e:
+        return type(e).__name__, ""
+
+def _canary():
+    return _con([sys.executable, "-c", _CANARY, _NAP_LAI_THU_MUC], _NAP_LAI_HAN_CANARY)[0]
+
+def _bao(trang_thai: str, chi_tiet: str) -> None:
+    global NAP_LAI_GAN_NHAT
+    NAP_LAI_GAN_NHAT = {"trang_thai": trang_thai, "ts": int(time.time())}
+    print(f"nlm_nap_lai: {trang_thai} — {chi_tiet}", file=sys.stderr)
+
+def _nap_lai(args: list, timeout: int, dau: tuple) -> tuple[int, str, str]:
+    with _NAP_LAI_KHOA:                # luồng thứ hai chờ rồi thấy _NAP_LAI_DA_NAP ⇒ BỎ QUA (review PR #1197 F02)
+        return _nap_lai_mot(args, timeout, dau)
+
+def _nap_lai_mot(args: list, timeout: int, dau: tuple) -> tuple[int, str, str]:
+    global _NAP_LAI_DA_NAP
+    now = time.time()
+    ts = _doc_dau()
+    if _NAP_LAI_DA_NAP:
+        _bao("BỎ QUA", "đã nạp trong tiến trình này"); return dau
+    if ts is not None and ts <= now + 60 and now - ts < _NAP_LAI_CUA_SO:
+        _bao("BỎ QUA", f"đã nạp lúc {int(ts)}"); return dau
+    ma = _canary()
+    if ma == 0:
+        _bao("BỎ QUA", "canary sống, lỗi không do auth"); return dau
+    if ma != 3:
+        _bao("KHÔNG ĐO ĐƯỢC", f"canary {ma}"); return dau
+    if not _ghi_dau(int(now), "dang_nap"):      # dấu là điều kiện TRƯỚC nạp (F01): không ghi được thì không nạp
+        _bao("KHÔNG ĐO ĐƯỢC", "không ghi được tệp dấu"); return dau
+    _NAP_LAI_DA_NAP = True
+    rc, ra = _con([sys.executable, os.path.join(_NAP_LAI_THU_MUC, "tl.py"), "nlm-auth-load"], _NAP_LAI_HAN_NAP)
+    if rc != 0:
+        tt, ct = (("TỪ CHỐI HẠ CẤP", "bundle cũ hơn jar") if "TỪ CHỐI HẠ CẤP" in ra
+                  else ("KHÔNG ĐO ĐƯỢC", f"nlm-auth-load rc={rc}"))
+        _ghi_dau(int(now), tt); _bao(tt, ct); return dau
+    ma = _canary()
+    if ma != 0:
+        tt, ct = (("BUNDLE CŨNG CHẾT", "laptop WP710 cần đăng nhập lại") if ma == 3
+                  else ("KHÔNG ĐO ĐƯỢC", f"canary sau nạp {ma}"))
+        _ghi_dau(int(now), tt); _bao(tt, ct); return dau
+    _ghi_dau(int(now), "da_nap")
+    if tuple(args[:2]) not in _NAP_LAI_CHO_PHEP:
+        _bao("ĐÃ NẠP, KHÔNG THỬ LẠI (lệnh ghi)", " ".join(args[:2])); return dau
+    lai = _run_mot(args, timeout)
+    _bao("ĐÃ NẠP, THỬ LẠI ĐẠT" if lai[0] == 0 else f"ĐÃ NẠP, THỬ LẠI VẪN LỖI rc={lai[0]}", " ".join(args[:2]))
+    return lai
+
+
+def _run(args: list[str], timeout: int = 120) -> tuple[int, str, str]:
+    global NAP_LAI_GAN_NHAT
+    NAP_LAI_GAN_NHAT = None
+    rc, out, err = kq = _run_mot(args, timeout)
+    if (os.environ.get("CLAUDE_CODE_REMOTE") == "true" and os.environ.get("TL_NLM_NAP_LAI_TAT") != "1"
+            and rc not in (0, 124, 127)
+            and any(t in (err + out).lower() for t in ("auth", "401", "login", "unauthor", "credential"))):
+        return _nap_lai(args, timeout, kq)
+    return kq
+
+
+def _kem(d: dict) -> dict:
+    if NAP_LAI_GAN_NHAT is not None:
+        d["nap_lai"] = NAP_LAI_GAN_NHAT
+    return d
 
 
 def source_list(notebook_id: str, skip_freshness: bool = True, drive: bool = True,
@@ -141,15 +267,15 @@ def source_list(notebook_id: str, skip_freshness: bool = True, drive: bool = Tru
     if rc != 0:
         low = (err + out).lower()
         auth = any(t in low for t in ("auth", "401", "login", "unauthor", "credential"))
-        return {"ok": False, "rc": rc, "error": f"nlm source list rc={rc}: {(err or out)[:300]}",
-                "fallback": "mcp",
-                "auth_hint": AUTH_FIX_HINT if auth else None}   # r208b 3.2: chuỗi đúng đường, KHÔNG chỉ `nlm login`
+        return _kem({"ok": False, "rc": rc, "error": f"nlm source list rc={rc}: {(err or out)[:300]}",
+                     "fallback": "mcp",
+                     "auth_hint": AUTH_FIX_HINT if auth else None})   # r208b 3.2: chuỗi đúng đường, KHÔNG chỉ `nlm login`
     try:
         data = json.loads(out)
     except Exception as e:
-        return {"ok": False, "error": f"parse JSON lỗi: {e}", "raw": out[:300], "fallback": "mcp"}
+        return _kem({"ok": False, "error": f"parse JSON lỗi: {e}", "raw": out[:300], "fallback": "mcp"})
     items = data if isinstance(data, list) else (data.get("sources") or data.get("items") or [])
-    return {"ok": True, "count": len(items), "sources": items, "via": "nlm-cli", "skip_freshness": skip_freshness}
+    return _kem({"ok": True, "count": len(items), "sources": items, "via": "nlm-cli", "skip_freshness": skip_freshness})
 
 
 def _run_json(args: list[str], timeout: int = 180) -> dict:
@@ -160,12 +286,12 @@ def _run_json(args: list[str], timeout: int = 180) -> dict:
     if rc != 0:
         low = (err + out).lower()
         auth = any(t in low for t in ("auth", "401", "login", "unauthor", "credential"))
-        return {"ok": False, "rc": rc, "error": f"nlm rc={rc}: {(err or out)[:300]}", "fallback": "mcp",
-                "auth_hint": AUTH_FIX_HINT if auth else None}   # r208b 3.2
+        return _kem({"ok": False, "rc": rc, "error": f"nlm rc={rc}: {(err or out)[:300]}", "fallback": "mcp",
+                     "auth_hint": AUTH_FIX_HINT if auth else None})   # r208b 3.2
     try:
-        return {"ok": True, "data": json.loads(out), "via": "nlm-cli"}
+        return _kem({"ok": True, "data": json.loads(out), "via": "nlm-cli"})
     except Exception:
-        return {"ok": True, "text": out, "via": "nlm-cli"}   # vài lệnh trả text thuần
+        return _kem({"ok": True, "text": out, "via": "nlm-cli"})   # vài lệnh trả text thuần
 
 
 def source_get(source_id: str, timeout: int = 120) -> dict:
@@ -227,8 +353,8 @@ def _add_args(notebook_id: str, drive_id=None, url=None, file=None, text=None,
 def _auth_fail(rc: int, out: str, err: str) -> dict:
     low = (err + out).lower()
     auth = any(t in low for t in ("auth", "401", "login", "unauthor", "credential"))
-    return {"ok": False, "rc": rc, "error": f"nlm rc={rc}: {(err or out)[:300]}", "fallback": "mcp",
-            "auth_hint": AUTH_FIX_HINT if auth else None}   # r208b 3.2
+    return _kem({"ok": False, "rc": rc, "error": f"nlm rc={rc}: {(err or out)[:300]}", "fallback": "mcp",
+                 "auth_hint": AUTH_FIX_HINT if auth else None})   # r208b 3.2
 
 
 def source_add(notebook_id: str, drive_id=None, url=None, file=None, text=None,
@@ -247,9 +373,9 @@ def source_add(notebook_id: str, drive_id=None, url=None, file=None, text=None,
     m = _SID_RE.search(out or "")
     if rc != 0:
         if m:   # van 3: add đã trả Source ID — chỉ là CLI bỏ chờ/hết giờ settle, KHÔNG phải fail
-            return {"ok": True, "source_id": m.group(1), "ready": False, "settle_timeout": True,
-                    "via": "nlm-cli", "raw": (out or "").strip()[-200:],
-                    "note": f"thôi chờ settle sau {timeout}s (nguồn đang index) — nlm-reconcile cuối lô xác minh"}
+            return _kem({"ok": True, "source_id": m.group(1), "ready": False, "settle_timeout": True,
+                         "via": "nlm-cli", "raw": (out or "").strip()[-200:],
+                         "note": f"thôi chờ settle sau {timeout}s (nguồn đang index) — nlm-reconcile cuối lô xác minh"})
         r = _auth_fail(rc, out, err)
         if rc == 124:
             r["settle_timeout"] = True
@@ -302,7 +428,7 @@ def notebook_get(notebook_id: str, timeout: int = 120) -> dict:
     cnt = d.get("source_count")
     if cnt is None and isinstance(srcs, list):
         cnt = len(srcs)
-    return {"ok": True, "source_count": cnt, "title": d.get("title") or d.get("name"), "via": "nlm-cli", "raw": d}
+    return _kem({"ok": True, "source_count": cnt, "title": d.get("title") or d.get("name"), "via": "nlm-cli", "raw": d})
 
 
 def cross_query(query: str, notebooks=None, tags=None, all_notebooks: bool = False, timeout: int = 360) -> dict:

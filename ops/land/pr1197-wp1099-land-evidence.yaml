@@ -1,0 +1,122 @@
+# HO SO LAND — packet #1099 CLOUD-SETUP-P3B-NLM-401 r11 g1 (nlm_cli tu nap lai jar NLM co dieu kien), qua PR #1197.
+# Ban luu Git do lai doc lap tu readback REST trong phien ghi so. Khuon: ops/land/pr1193-wp1189-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7. Bon moc: §10.2.2. Luat L-6: ops/kiem_ho_so_land.py.
+# NHAN: measured = do trong phien ghi so (tep kem); measured_by_coordinator = phien dieu phoi do, bytes goc kem va da do lai
+# sha256 o day; thuat_lai = loi khai cua phien khac, KHONG tai chay; not_measured = khong do duoc.
+# Readback tho: ops/land/pr1197-wp1099-provenance/.
+
+schema_version: 1
+mission_id: gh-1099
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrashcQS6kbxWN1qRsA
+input_packet_generations:
+  - {packet_issue: 1099, packet_id: CLOUD-SETUP-P3B-NLM-401, revision: 11, generation: 1, lease_id: wp1099-cloud-setup-p3b-r11-g1-claude}
+authorized_head_sha: 99442469f331e4808ee9de43e2beb75416e51a21
+authorized_head_tree: d19e573f19209a94a03d480cf2ea9c64ecc8b092
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/issues/1099#issuecomment-6662746856
+authorization_ghi_chu: >-
+  measured — readback-comment-6662746856.json (ducthangho, 2026-11-05T16:02:47Z, updated_at == created_at): "Ủy quyền M7: chủ kho
+  cho phép ghi `landed: true` cho packet #1099", neo head 99442469f331e4808ee9de43e2beb75416e51a21 du 40 hex, merge b255b0b, base
+  fe84620, spec sha256 fcd75e67…, dieu kien "chi ghi landed true khi do du bon moc §10.2.2 tren b255b0b". Comment dang SAU merge
+  (15:44:56Z) — uy quyen M7 hau kiem, chu kho tu khai pham vi gom ghi so. Dang bang token chu kho (#566) trong phien dieu phoi
+  session_015GtxrYPjZCTZeRiazdssgq: ban chep, khong phai chu ky. Truoc merge chi co ngoai le K3 neo 9944246
+  (issuecomment-6659374888, readback-comments-issue-1099-since-20261105T12.json).
+land_operator: >-
+  measured — readback-pr-1197.json merged_by=ducthangho, merged_at 2026-11-05T15:44:56Z; readback-events-1197.json.
+  Phien bam merge: executor session_015GtxrcPNaayykBErdfcNUB sau kiem-merge rc=0 (thuat_lai, #1099 issuecomment-6662458438).
+merge_method: merge
+merge_commit: b255b0b7131da7f6e026639f6b0da0a06cc68a44
+merge_commit_tree: d19e573f19209a94a03d480cf2ea9c64ecc8b092
+merge_commit_parents: [fe84620f897913c7f6c2ce5a0c7316a49655e82f, 99442469f331e4808ee9de43e2beb75416e51a21]
+merge_noi_dung: >-
+  measured — do-lai-nguon-20261105/merge-va-diff.txt: merge-base(fe84620, 9944246) = fe84620 nen tree(M) = tree(H) = d19e573;
+  diff cha1 fe84620 .. merge sha256 e426306a… BANG diff merge-base .. 9944246; 9 tep (+550 -30): scripts/nlm_cli.py,
+  scripts/test_fragments/wp1099_nlm_nap_lai.py, scripts/tl_test_fragments_bundled.py, docs/adr/0064-…, docs/PROTOCOL_DA_PHIEN.md,
+  RELEASE_MANIFEST.json, changelog.d/wp-1099.md, references/QUY_TRINH_RA_SOAT_3_TANG.md, references/RASOAT_HOSO_LOOP.md.
+  b255b0b la to tien cua origin/master (rc=0).
+pre_merge_checks:
+  - {name: 'kiem-merge (ADR-0060 K0–K7) — head cuoi', sha: 99442469f331e4808ee9de43e2beb75416e51a21, conclusion: 'rc=0, "ĐỦ ĐIỀU KIỆN MERGE trên 99442469…"', kiem: 'measured_by_executor — kiem-merge-pnaa/km2.out 74 byte sha256 aaeba2cd…, gui boi session_015GtxrcPNaayykBErdfcNUB, do lai sha256 khop; rc=0 la loi khai (thuat_lai)', nguon: [kiem-merge-pnaa/km2.out]}
+  - {name: 'ci.yml pull_request (ubuntu) — head cuoi', run_id: 42033337918, run_attempt: 3, sha: 99442469f331e4808ee9de43e2beb75416e51a21, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', kiem_gate: 'measured — do-lai-nguon-20261105/kiem-gate-pre-9944246.txt rc=0 (suite 113897639675)', nguon: [readback-run-42033337918.json, readback-jobs-42033337918-a3.json, readback-check-runs-9944246-all.json]}
+  - {name: 'review offline Codex qua launcher.py run, luot 17 — DUNG head cuoi', sha: 99442469f331e4808ee9de43e2beb75416e51a21, conclusion: 'approve; F11-02 da dong, khong finding mo', nguon: [kiem-merge-pnaa/run.json, kiem-merge-pnaa/stdout.log]}
+  - {name: 'connector Codex GitHub tren PR #1197', conclusion: 'codex-review-state completed tren 99442469, has_any_findings false (comment 6649637172); receipt "Reviewed commit: 99442469f3" (comment 6659911107); 0 review comment', nguon: [readback-comments-1197.json, readback-reviews-1197.json, readback-review-comments-1197.json]}
+  - {name: 'ngoai le K3 cua chu kho neo 9944246', conclusion: 'issuecomment-6659374888 (ducthangho 13:36:25Z): chi K3, head 99442469…', nguon: [readback-comments-issue-1099-since-20261105T12.json]}
+  - {name: 'Windows — chay tap trung wp1099_nlm_nap_lai tren tra-luat-win', sha: 99442469f331e4808ee9de43e2beb75416e51a21, conclusion: 'passed — CA A 12/12, D 3/3, DOT BIEN 29/30 giet dung ca, BO QUA 1 (doc_dau_chan: nen khong co O_NONBLOCK/mkfifo), KQ True, 58 s', kiem: 'measured_by_coordinator — windows-tra-luat-win/diag-9944246.log.b64 giai ma 349 byte sha256 1aaccf5c… = so certutil cua dieu phoi; dong dau "HEAD 99442469…". Pham vi: chi ca packet, khong full Windows CI, khong chay dot bien toan bo tren Windows (kiem-merge-pnaa/win.json, thuat_lai)', nguon: [windows-tra-luat-win/diag-9944246.log.b64, windows-tra-luat-win/README.txt, kiem-merge-pnaa/win.json]}
+  - {name: 'full_mutant_audit (M9)', conclusion: 'khong bat buoc — diff khong cham .claude/dev/**, ops/**/*.py hay .github/workflows/** (do-lai-nguon-20261105/merge-va-diff.txt)'}
+post_merge_checks:
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 42058119067, run_attempt: 1, sha: b255b0b7131da7f6e026639f6b0da0a06cc68a44, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', kiem_gate: 'measured — gate-hau-merge-20261105/kiem-gate-b255b0b.txt rc=0 (suite 113966991573)', nguon: [gate-hau-merge-20261105/readback-run-42058119067.json, gate-hau-merge-20261105/readback-jobs-42058119067.json, gate-hau-merge-20261105/readback-check-runs-b255b0b-all.json]}
+bookkeeping:
+  - {item: 'lease ghi so', ket_qua: 'ghi-so-land-pr1197-wp1099-r11-g1-claude-remote-20261105 tren nhanh ops/ghi-so-land-1099-lease @ cc81002 (cap boi phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq, tham quyen #1099 issuecomment-6662458438); dang qua run 42059153998 (thuat_lai dieu phoi).'}
+  - {item: 'nha lease thi cong', ket_qua: 'measured — nha-lease-20261105/lease-rut-han-d2e53fc.txt: commit d2e53fc tren ops/cap-lease-1099-g1, lease_until 2026-11-06T08:19Z -> 2026-11-05T16:40Z, khoi thu_hoi_bang_rut_han; lease_publish check rc=0; nha-lease-20261105/readback-run-42059673864.json: workflow dang lease tren d2e53fc success.'}
+  - {item: 'bien ban M8 tren Issue', ket_qua: 'not_measured — chua co tai luc ghi ho so; M8 la ban ghi diem cuoi tren #1099, ho so nay la ban luu Git.'}
+  - {item: 'PR ghi so', nhanh: claude/ghi-so-land-1197}
+# ---- het truong chuan
+packet_id: CLOUD-SETUP-P3B-NLM-401
+packet_issue: 1099
+revision: 11
+generation: 1
+pham_vi_land: ma
+pham_vi_land_ghi_chu: 'scripts/nlm_cli.py va fragment selftest vao goi phat hanh; RELEASE_MANIFEST.json da tai sinh trong PR. Deploy Package la cong rieng, chua lam.'
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session https://claude.ai/code/session_015GtxrashcQS6kbxWN1qRsA — phien ghi so (khac phien executor
+  session_015GtxrcPNaayykBErdfcNUB va phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq).
+
+spec:
+  r11: {path: ops/specs/cloud-setup-p3b-nlm-401-r11.md (trong cay merge b255b0b), sha256: fcd75e67f3db8c8aea96a36c0fa53eeb6e0bb8b2f00939975361810bdda052a5}
+  hieu_luc_adr_0060: 'ADR-0062 N1 ap ADR-0060 mac dinh cho packet chua merge tu commit land ADR-0062; #1197 merge 05-11 => ADR-0060 AP DUNG (kiem-merge K0–K7 da chay).'
+lease:
+  lease_id: wp1099-cloud-setup-p3b-r11-g1-claude
+  path: ops/leases/wp1099-cloud-setup-p3b-r11-g1-claude.yaml (nhanh ops/cap-lease-1099-g1; cap @ a5221a3, rut han @ d2e53fc)
+  thu_hoi_cuoi: 'measured — nha-lease-20261105/lease-rut-han-d2e53fc.txt: rut han ve 2026-11-05T16:40:00Z (tien le pr1193).'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-1197.json: merged true, merged_at 2026-11-05T15:44:56Z, merge_commit_sha b255b0b, head.sha 9944246, base.sha fe84620, 25 commit.'
+  landed: true
+  landed_dieu_kien: >-
+    (1) gate tren DUNG merge SHA b255b0b: run 42058119067 23/23, kiem-gate rc=0, du bon moc §10.2.2 (moc_10_2_2) DAT.
+    (2) lease thi cong nha bang rut han (d2e53fc). (3) bookkeeping: ho so nay; M8 tren Issue chua co.
+    (4) review neo DUNG authorized_head 9944246: Codex offline luot 17 approve + connector sach. (5) noi dung merge = diff PR DAT.
+    (6) uy quyen M7 cua chu kho neo 9944246 (issuecomment-6662746856) voi dieu kien bon moc — dieu kien da dat.
+  luu_y_assurance: 'landed true theo uy quyen M7 neo head + bon moc; sandbox luot 17 DO_DUOC (assurance_81) nhung snapshot §8.2 ngoai sandbox not_measured.'
+assurance_81:
+  review_exact_sha: DAT
+  review_exact_sha_nguon: 'measured_by_executor — kiem-merge-pnaa/run.json head 99442469 = authorized_head_sha, worktree_sach true, ma_thoat 0, stdout_sha256 7fec356b… khop kiem-merge-pnaa/stdout.log ("KET_LUAN: approve"). run.json 18238 byte sha256 9fd59175… do lai khop so executor gui.'
+  thuc_thi:
+    model: 'measured_by_executor — run.json model_phuc_vu_trang_thai DO_DUOC, 66 response deu gpt-6.1-sol (ho openai, khac ho claude)'
+    effort: 'measured_by_executor — run.json effort_phuc_vu [xhigh], DO_DUOC'
+    sandbox_mode: 'measured_by_executor — run.json sandbox_trang_thai DO_DUOC (codex-linux-sandbox file_system restricted, network restricted; bwrap --unshare-net), sandbox_lech toan 0; gioi han: lay mau /proc moi 0.2s'
+  snapshot_82: 'not_measured — khong co snapshot dau/cuoi do ngoai sandbox trong ban giao.'
+  VERDICT_md: 'not_measured — VERDICT.md luot 17 nam trong scratchpad phien executor, khong ban giao; chi co stdout.log tro toi no.'
+
+review:
+  so_loi_goi_codex: 17
+  tran_loi_goi_codex: '18 (chu kho nang 16 -> 18, #1099 issuecomment-6657907423)'
+
+moc_10_2_2:
+  run: 'measured — gate-hau-merge-20261105/ci-provenance-42058119067/provenance.yaml moc.run passed: run 42058119067 attempt 1, event push, head_sha b255b0b, path .github/workflows/ci.yml, suite 113966991573.'
+  checkout: 'measured — gate-hau-merge-20261105/ci-provenance-42058119067/provenance.yaml: 23/23 job checkout passed, sha b255b0b doc tu log, parents [fe84620, 9944246], tree d19e573.'
+  gate_output: >-
+    measured — gate-hau-merge-20261105/gate-output-42058119067.txt: log tho 23 job tai qua REST (sha256 tung log, khop
+    log_day_du cua provenance.yaml); 0 dong ##[error]; 21/23 job co marker duong (chuan-bi va gate-cong-cu-gop khong in);
+    marker rieng: "== tl selftest 1777/1777 ==", "[wp1099_nlm_nap_lai] CA A: 12/12 · D: 3/3 · DOT BIEN: 30/30 · BỎ QUA 0";
+    dong khop regex am da phan loai tay: deu la bao cao dot bien bi giet / tieu de tu kiem / canary fixture.
+    provenance.yaml moc.gate_output tung job la not_measured (cong cu khong cham marker) — moc nay do bang gate-output thu cong nhu pr1193.
+  workflow_definition: >-
+    measured — gate-hau-merge-20261105/ci-provenance-42058119067/provenance.yaml moc.workflow_definition passed: luot
+    ops-do-workflow-definition.yml 42066156398 (artifact 13432807724, sha256 e53423b1…), path .github/workflows/ci.yml, oid b255b0b,
+    blob 2b2c9aa25ad1c136e44cba457d9ae765d2544fc2 = git rev-parse b255b0b:.github/workflows/ci.yml, sha256 aed785d6…be67 (do lai khop).
+
+khong_do_duoc:
+  - 'Snapshot §8.2 ngoai sandbox va VERDICT.md cua luot Codex 17 (chi co run.json + stdout.log).'
+  - 'rc=0 cua kiem-merge chi la loi khai; km2.out chi chua stdout.'
+  - 'Windows: chi ca packet tren tra-luat-win, khong full Windows CI (pham vi chu kho, kiem-merge-pnaa/win.json); chu tieng Viet trong log la mojibake tu luc ghi (README.txt).'
+  - 'Merge va comment uy quyen bam qua credential chu kho (#566): chi co merged_by / user.login.'
+  - 'Bien ban M8 tren Issue #1099 chua dang tai luc ghi.'

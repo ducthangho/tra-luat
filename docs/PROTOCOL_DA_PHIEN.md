@@ -1521,6 +1521,7 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` �
 | `ADR-0061` | Không ghi được trạng thái "credential Codex bị từ chối": chấp nhận vĩnh viễn khả năng probe lặp khi state còn đọc được mà chưa nhớ danh tính ấy (nợ #825); cả ba lối báo lỗi ghi có lý do riêng; không dựng chỗ lưu dự phòng | Accepted | có nhắc: `launcher.py`×4 (hàm/tên nợ, chưa chứng minh cổng đọc quyết định); việc chấp nhận sống bằng kỷ luật đọc |
 | `ADR-0062` | ADR-0060 mặc định cho packet chưa merge, đóng băng ADR-0054 và chuyển ba bất biến push vào protocol | Accepted | `packet_loop.py` `kiem-merge` K1 |
 | `ADR-0063` | Nguồn spec ghim OID, human audit riêng và chuyển tiếp candidate lịch sử có owner disposition | Accepted — hiệu lực từ land trên first-parent master | `packet_loop.py` `kiem-merge` K1/K4 |
+| `ADR-0064` | NLM tự nạp lại jar có điều kiện, chỉ ở phiên cloud (thay r208c ở điểm "tự nạp khi hết hạn") | Accepted | `wp1099_nlm_nap_lai` (selftest fragment) |
 
 ### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
 

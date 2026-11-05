@@ -48,7 +48,7 @@ post_merge_checks:
     moc_run: 'measured — ci/provenance.yaml moc.run: event workflow_dispatch, head_sha f2102fc3, run_attempt 1, path .github/workflows/ci.yml, passed; 37 job success.'
     moc_checkout: 'measured — ci/provenance.yaml moc.checkout: 36/36 job co buoc checkout passed f2102fc3, tree 4c134d1b; chuan-bi not_measured theo thiet ke (khong checkout).'
     moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition: passed (wd-run 41368107476, artifact 13108295728), blob 82d9f239ff31, sha256 ce9a3ec0f777; git rev-parse f2102fc:.github/workflows/ci.yml cho cung blob.'
-    moc_gate_output: 'measured — ci/kiem-gate-output.txt: packet_loop.py kiem-gate rc=0, 37/37 ten bat buoc xanh trong suite 112082061848 (ci/check-runs-f2102fc-filter-all.json).'
+    moc_gate_output: 'measured (dinh chinh 2026-11-05 lan 2, xem dinh_chinh_20261105) — ci/gate-output-41356691133.txt sinh bang ci/tom_gate_output.py tom tu log REST 37/37 job (bytes + sha256 tung log, ##[error]=0): moi job ghi CMD (buoc run) va marker hoan tat neo ca dong, N/M ep N=M — vd gate-cong-cu 8 manh MANH k/8 61/61..62/62 dot bien ban kinh 1, gate-cong-cu-gop CMD python ops/cong_cu_test.py --gop manh + GOM MANH 8/8 + SO LIEU GOM loi dot bien=0, gate-nhanh-manh 16 job targeted_mutant_gate rc=0 passed N/N, TONG DAT x8, tl selftest 1774/1774 x2. ci/kiem-tom-gate-output.txt: kiem rc=0 tren ban that, rc=1 tren 4 phan chung. kiem-gate (ci/kiem-gate-output.txt) CHI do ket luan check run.'
     ghi_chu: >-
       Vi sao dispatch: run push master 41336643336 (f2102fc3) cancelled 0 job o attempt 1 (thay cho boi de06112) va attempt 2
       (thay cho boi b01c0ac) — ci/readback-run-41336643336-push-cancelled.json; dung Issue #1132. Nhanh tam ops/ci-f2102fc co
@@ -125,3 +125,20 @@ landed_20261105:
       tren authorized_head_sha 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897, merge f2102fc388a884d994f7bfeb29ef6863b9972b66.
     do_duoc: 'measured — readback-xac-nhan-issuecomment-6648088895.json: comment 6648088895 (user ducthangho, OWNER, created_at = updated_at) ghi day du 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897 va f2102fc388a884d994f7bfeb29ef6863b9972b66; readback-pr-1127.json head.sha 06a5a40735d5f486c9ffdedeb9a5ccbfc5c17897. CAVEAT #566: phien dang bang token chu kho; ban chep quyet dinh, khong phai chu ky.'
   landed: true
+
+dinh_chinh_20261105:
+  ly_do: >-
+    Codex connector P1 tren PR #1150 (https://github.com/ducthangho/tra-luat/pull/1150#issuecomment-4439853849): ban truoc khai
+    moc_gate_output measured chi tu kiem-gate (ket luan check run), trong khi ci/provenance.yaml cua chinh ho so ghi gate_output
+    not_measured cho ca 37 job. Finding DUNG — ket luan check run khong phai command/rc/marker duong cua §10.2.2.
+  do_lai: >-
+    measured — ci/gate-output-41356691133.txt: tai log REST cua tung job trong run 41356691133 attempt 1 (head f2102fc3), ghi
+    bytes + sha256 tung log, dem ##[error] (0/37), trich marker duong theo job. Log tho khong chep vao kho (6,7 MB); sha256 trong
+    tep cho phep doi chieu khi tai lai.
+  lan_2: >-
+    Codex P1 tren PR #1235 (pull/1235#discussion_r4482143157): ban tom lan 1 dung mot regex rong — 17/37 job khong co dong marker,
+    8 manh gate-cong-cu chi co dong MO DAU manh, gate-cong-cu-gop khong co gi. Finding DUNG. Lan 2: ci/tom_gate_output.py (mau neo
+    ca dong, backref N=M, ghi CMD tung buoc) + lenh kiem do moi job gate co >=1 marker hoan tat; cac dong JOB (bytes, sha256,
+    ##[error]) khop tung byte voi lan 1. Chot hoi quy trong CONG (khong chi trong ho so) la viec cua Issue #1236.
+  pham_vi: 'Chi doi dong moc_gate_output va them khoi nay. ci/provenance.yaml giu nguyen (ban chup cua ci_provenance.py luc do, gate_output not_measured) — tep moi la phep do bo sung, khong ghi de.'
+  ban_ghi_m8: 'Ban ghi M8 tren #1120 (issuecomment-6566496567) mang cung loi khai gate_output passed tu kiem-gate; dinh chinh bang comment tren #1120, khong sua comment goc.'

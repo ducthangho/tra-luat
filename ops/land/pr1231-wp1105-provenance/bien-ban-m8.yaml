@@ -1,0 +1,46 @@
+# Bien ban M8 (ADR-0060) dong WP #1105 LAUNCHER-SANDBOX-LAY-MAU r3 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1231-wp1105-land-evidence.yaml (nghiem_thu, assurance_81).
+packet: LAUNCHER-SANDBOX-LAY-MAU
+revision: 3
+generation: 3
+spec_hash: 4355749db2a7f8ba07d59e4a0903be0a108ddc4d8607ce4e51c75897c770d754
+head_da_review: d5d521e3e600e9c549cf5dc9263ffc4385c13407
+tree_h: 2a3f117716076a2758c93005fbd1cd3dd3eb7498
+review:
+  offline: 'run 2d61d684 approve tren d5d521e (model/effort KHONG_DO_DUOC, sandbox DO_DUOC)'
+  connector: 'issuecomment-6657536573 sach tren d5d521e; P2 df34637 dong theo issuecomment-6657983059'
+  so_loi_goi_codex: 6
+  assurance_81: 'DAT theo mien chu kho issuecomment-6664163643 (assurance_81_mien: d5d521e, hoi to 17:05:43Z), chi model/effort luot 4'
+windows:
+  phan_loai: required
+  nguon: 'lease g3 dieu_kien_merge windows required; mien K6 issuecomment-6658278170; ngoai le A10 issuecomment-6654573852'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1231#issuecomment-6662804340
+duyet_chu_kho_ghi_chu: 'approve_merge HOI TO, dang 16:05:48Z SAU merge 13:06:43Z (xem ho so land).'
+merge_commit: fe84620f897913c7f6c2ce5a0c7316a49655e82f
+tree_m: 9c5534209694e0a7d71cca91b874c053762106f1
+ci_master:
+  run_id: 42032872356
+  conclusion: success
+nghiem_thu:
+  A1: passed
+  A2: passed
+  A3: passed
+  A4: passed
+  A5: passed
+  A6: passed
+  A7: passed
+  A8: passed
+  A9: passed
+  A10: owner_waived
+  A11: passed
+  A12: passed
+  A13: passed
+  A14: passed
+  A15: passed
+lease_cuoi: wp1105-r3-g3-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

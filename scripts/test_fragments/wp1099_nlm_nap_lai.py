@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""wp1099 — `nlm_cli._run` tự nạp lại jar NLM có điều kiện ở phiên cloud (ADR-0064, spec cloud-setup-p3b-nlm-401-r10). `nlm_cli`
+"""wp1099 — `nlm_cli._run` tự nạp lại jar NLM có điều kiện ở phiên cloud (ADR-0064, spec cloud-setup-p3b-nlm-401-r11). `nlm_cli`
 THẬT (hoặc đột biến) chạy với `tl.py`/`nlm` GIẢ giữ trạng thái; đột biến chỉ tính GIẾT khi đúng ca ném `TinHieuChotCa`."""
 import contextlib, hashlib, importlib.util, inspect, io, json, os, subprocess, sys, tempfile, threading, time; from pathlib import Path  # noqa: E702
 TEST_ID = "wp1099_nlm_nap_lai"
@@ -217,11 +217,12 @@ def _a10(cay):
     _chot("A10", not any("nlm-auth-load" in c for c in cay.nhat_ky()) and "không ghi được tệp dấu" in err
           and not list(tep.parent.glob(".nap-lai-*")), "ghi thiếu dấu vẫn nạp/để rác: %r" % err), cay.dat()
     tep.mkdir()                                   # dấu là THƯ MỤC ⇒ không ghi được ⇒ không nạp, không rác (F01), không rò fd (F07)
-    m, fd = cay.moi(), (lambda: len(os.listdir("/dev/fd")) if os.path.isdir("/dev/fd") else 0)
+    m, fd = cay.moi(), (lambda: (n := os.open(os.devnull, os.O_RDONLY), os.close(n))[0])   # fd trống THẤP NHẤT: rò ⇒ tăng (mọi nền)
     truoc, (kq, err) = fd(), cay.goi(m, _SL)
-    [m._doc_dau() for _ in range(20)]
-    _chot("A10", not any("nlm-auth-load" in c for c in cay.nhat_ky()) and "không ghi được tệp dấu" in err and fd() == truoc
+    _chot("A10", [m._doc_dau() for _ in range(20)] and not any("nlm-auth-load" in c for c in cay.nhat_ky()) and "không ghi được tệp dấu" in err and fd() == truoc
           and not list(tep.parent.glob(".nap-lai-*")), "dấu là thư mục: nạp/để rác/rò fd: %r" % err)
+    tep.rmdir(), cay.dau(1234), (truoc := fd()), [m._doc_dau() for _ in range(20)]   # dấu THƯỜNG: không rò fd (review r10 F01)
+    _chot("A10", fd() == truoc and m._doc_dau() == 1234.0, "đọc dấu thường rò fd / sai ts")
 # sha256 của json.dumps(bốn hằng) đọc từ `git show _BASE:scripts/nlm_cli.py` — đo được cả ở gói phát hành không có git.
 _A12_BAM = "57ec1837153e8d1a796f852249ac23695990c3c1f20a5af6a86a55488ea34211"
 def _a12(cay, kho):
@@ -315,8 +316,7 @@ def _chay(nguon, ten_ca, tl_module, kho, ham=None):
         cay = _Cay(td, nguon, kho)
         with _Env(cay.env):
             {"A12": lambda: _a12(cay, kho), "A13": lambda: _a13(cay, tl_module, ham)}.get(ten_ca, lambda: _CA[ten_ca](cay))()
-_NANG_LUC = {"doc_dau_chan": (hasattr(os, "mkfifo") and hasattr(os, "O_NONBLOCK"), "nền không có O_NONBLOCK/mkfifo"),   # spec r10 E27
-             "doc_dau_ro_fd": (os.path.isdir("/dev/fd"), "nền không os.open được thư mục / không có /dev/fd")}
+_NANG_LUC = {"doc_dau_chan": (hasattr(os, "mkfifo") and hasattr(os, "O_NONBLOCK"), "nền không có O_NONBLOCK/mkfifo")}   # spec r11
 _bao_loi = lambda msg: print("[%s] FAIL %s" % (TEST_ID, msg), file=sys.stderr)
 def run(tl_module):
     kho = Path(tl_module.__file__).resolve().parent.parent

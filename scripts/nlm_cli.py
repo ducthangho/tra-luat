@@ -125,7 +125,7 @@ def _run_mot(args: list[str], timeout: int = 120) -> tuple[int, str, str]:
 
 
 
-# ── WP1099 (ADR-0064, spec cloud-setup-p3b-nlm-401-r10): jar chết giữa phiên cloud ⇒ TỰ NẠP CÓ ĐIỀU KIỆN (r208c bác tự nạp vì bundle có thể cũ/cũng chết) ⇒ chỉ nạp khi canary CON (thân `_canary_song` của nlm-auto-refresh.sh) trả 3,
+# ── WP1099 (ADR-0064, spec cloud-setup-p3b-nlm-401-r11): jar chết giữa phiên cloud ⇒ TỰ NẠP CÓ ĐIỀU KIỆN (r208c bác tự nạp vì bundle có thể cũ/cũng chết) ⇒ chỉ nạp khi canary CON (thân `_canary_song` của nlm-auto-refresh.sh) trả 3,
 # chỉ `tl nlm-auth-load` (không --force), 1 lần/tiến trình + dấu 600 s (best effort), chỉ chạy lại lệnh ĐỌC cho phép.
 NAP_LAI_GAN_NHAT = None            # {trang_thai, ts} của lời gọi `_run` gần nhất đã tới bước "Giới hạn", hoặc None
 _NAP_LAI_DA_NAP = False            # trần BẢO ĐẢM: 1 lần nạp mỗi tiến trình (khoá luồng giữ nó đúng cả khi đa luồng)

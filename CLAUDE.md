@@ -624,7 +624,7 @@ credentials"*. `curl https://api.github.com` cũng 403; container không có `gh
 xoá nhánh/tạo tag. **Lỗ đã biết của chốt ấy:** nó chặn theo HÌNH DẠNG chứ không theo HẬU QUẢ —
 `git push --force` (ép lùi) VẪN được phép, mà ép lùi cũng làm commit thành không tra được y như xoá.
 **Đoạn trên là trạng thái 16-08, và câu "`curl https://api.github.com` cũng 403" ĐÃ TRÔI** — đo
-`2026-09-30T06:31Z`, `urllib` + `curl`, ba vế không token · token thật · token giả: gốc `/` trả **200**
+`2026-09-30T06:31Z`, `urllib` + `curl` (mốc giờ và client: lời khai chưa có biên nhận, xem nhãn ở §Gọi agent đa nền), ba vế không token · token thật · token giả: gốc `/` trả **200**
 thân `{}` (2 byte), **KHÔNG `Server: github.com`, KHÔNG `X-GitHub-*`** ⇒ proxy tự trả, đọc theo mã
 trạng thái là đọc sai; `/repos/<kho>`, PR và comment thì 200 CÓ `X-GitHub-*` dưới danh tính bị THAY
 (§Gọi agent đa nền), mà KHÔNG phải mọi đường con: đo `07:11Z` cùng ngày (`urllib`, ba vế y hệt), `/repos/<kho>/collaborators`
@@ -735,13 +735,18 @@ không tra được.
   `ops/land/`), `/search/issues`, `/user/repos`, `/repos/cli/cli` (kho khác), `/repos/<kho>/collaborators`. Nên
   các câu SUY về `gh` — *"cài cũng vô ích"*, *"MỌI lệnh việc thật ăn 403"*, *"mọi thao tác kho trả 403"* (gạch `t103`
   dưới) — chỉ mất chân đỡ CŨ; lệnh `gh` nào đi GraphQL, và chính `gh`: phiên đo không có ⇒ KHÔNG ĐO ĐƯỢC.
+  **Nhãn cho mọi mốc giờ 30-09 trong mục này và ở §Đẩy ref** (`06:29Z` · `06:30–06:31Z` · `06:31Z` ·
+  `07:10–07:11Z` · `07:11Z` · `07:51–07:57Z`): giờ chạy và độ phủ client (vd. *"`curl` 10"*) là LỜI KHAI của
+  phiên executor, log gốc không lưu ⇒ **KHÔNG ĐO ĐƯỢC** (cross-review Codex F1, P2, trên PR #631). Thứ có
+  biên nhận là trạng thái HTTP do reviewer đo lại ở giờ khác (`ops/reviews/pr631-review-3-opus-max/VERDICT.md`,
+  `ops/reviews/pr631-review-4-opus-max/VERDICT.md`); đừng đọc mốc giờ nào ở đây thành phép đo đã kiểm.
   **Nguyên nhân KHÔNG ĐO ĐƯỢC** — nền đổi cho mọi phiên hay
   cấu hình THEO PHIÊN, chưa phép đo nào tách được (thân 403 cũ tự ghi *"not enabled for this
   session"*); không thấy dấu hiệu lượt cũ đo sai, nhưng thế chưa phải chứng minh. Nên đây là trạng
   thái của CÁC PHIÊN ĐÃ ĐO: phiên nào gặp lại 403 KHÔNG header GitHub thì đó là proxy của phiên ấy,
   không phải token của bạn, và nguồn trạng thái của `/repos/<kho>` (CHỈ đường ấy; `doctor` không hỏi
-  GraphQL) là `doctor` (`rest-kho`) mỗi phiên, không phải tệp này. Hook phiên 30-09 in `rest-kho=OK` lúc 06:29Z; còn
-  "in `OK` từ trước khi mục này được sửa" thì KHÔNG có biên nhận. Văn bản 403 cũ cũng KHÔNG chỉ nằm
+  GraphQL) là `doctor` (`rest-kho`) mỗi phiên, không phải tệp này. Lời khai hook phiên 30-09 in `rest-kho=OK` lúc 06:29Z
+  KHÔNG có biên nhận (KHÔNG ĐO ĐƯỢC), "in `OK` từ trước khi mục này được sửa" cũng vậy. Văn bản 403 cũ cũng KHÔNG chỉ nằm
   ở đây. Quét `rg --hidden` bằng mẫu chữ ngoài `ops/` (30-09; mẫu có thể sót), chỗ vẫn rút KẾT LUẬN
   hiện tại từ 403 cũ: `.claude/dev/launcher.py` (`_do_github` cùng chú thích quanh nó; mục `gh` trong
   `CONG_CU`, chỗ đỡ `bat_buoc.remote: False`), khối "KHONG cai `gh`" trong `.claude/hooks/session-start.sh`,

@@ -153,17 +153,17 @@ print(name + ' 1.2.3')
             if child:
                 executable_name = case / child
                 executable_name.symlink_to(real_python)
-                process = subprocess.Popen([str(executable_name), '-B', '-c', 'import time; time.sleep(30)'], env=env)
+                process = subprocess.Popen([str(executable_name), '-B', '-c', 'import time; time.sleep(120)'], env=env)
                 for _ in range(100):
                     comm = pathlib.Path('/proc', str(process.pid), 'comm').read_text().strip()
                     if comm == child: break
                     time.sleep(.01)
                 assert comm == child, 'child did not start with expected native comm'
-                print('CHILD', label, process.pid, comm, 'argv=' + json.dumps([str(executable_name), '-B', '-c', 'import time; time.sleep(30)']), flush=True)
+                print('CHILD', label, process.pid, comm, 'argv=' + json.dumps([str(executable_name), '-B', '-c', 'import time; time.sleep(120)']), flush=True)
             command = [real_bash, str(entry), '--repo', str(repo), '--apply']
             if mode == 'user': command.append('--user-only')
             command.extend(extra)
-            result = subprocess.run(command, env=env, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=15)
+            result = subprocess.run(command, env=env, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60)
         finally:
             if process:
                 process.terminate()

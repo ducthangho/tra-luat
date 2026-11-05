@@ -142,6 +142,9 @@ dang_ban_chieu_ghi_chu: >-
   Lan day dau (573b7a5, 04-11) do cong dang lease hong tren ubuntu-26.04 (#1189). #1189 land M f2e33bc; nhanh nay da merge
   master (8f89755) roi cap nhat heartbeat de kich lai luot dang ban chieu. Noi dung cap khong doi.
 
+da_bi_thay_the: wp1105-r3-g3-claude
+da_bi_thay_the_ghi_chu: 'Thay bang g3 (spec r3) ngay 05-11-2026 ~09:50Z theo chi thi chu kho; xem ops/leases/wp1105-r3-g3-claude.yaml.'
+
 chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Thoi luong A10 (launcher_test.py tron bo tren Windows, hai luot) va A11 (spec §6).'

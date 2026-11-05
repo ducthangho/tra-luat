@@ -1,0 +1,30 @@
+{
+  "acceptance_criteria": [
+    "Windows and Linux/WSL updater scripts use the shared tool manifest and checker, support check/apply/latest selection, and avoid duplicate installation when compliant.",
+    "Windows and Bash login scripts set session PATH and TL_REPO without installing software or persisting secrets.",
+    "Documentation includes use, prerequisites, measured Windows/WSL results, and known limitations.",
+    "Independent review and required checks pass on the exact candidate head before land."
+  ],
+  "constraints": [
+    "Write only ops/environment/ in the product PR.",
+    "Do not store credentials, TL_MASTER_KEY, or user profile modifications in Git.",
+    "Do not interrupt active jobs or replace in-use binaries.",
+    "Use durable Packet Issue, lease, independent exact-head review, CI and authorized land.",
+    "Packet1178 g4 permits one additional bounded90-minute executor window under owner exception; historical cloud spend remains separately unmeasured, never reset or assumed zero."
+  ],
+  "envelope": {
+    "max_agent_invocations": 30,
+    "max_attempts_per_packet": 4,
+    "max_cloud_minutes": 360,
+    "max_inbox_backlog": 100,
+    "max_packets": 2,
+    "max_parallel_workers": 1,
+    "max_run_minutes": 90,
+    "max_successor_depth": 1,
+    "provider_budgets": {},
+    "same_failure_limit": 2
+  },
+  "objective": "Install documented Windows, WSL and Ubuntu executor/reviewer environment scripts in tra-luat.",
+  "requires_live": false,
+  "risk": "sensitive"
+}

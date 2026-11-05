@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "change_request_id": "mcr-1177-p2-continuation-20261105",
+  "mission_issue": 1177,
+  "requested_by": "codex-service-controller",
+  "reason": "Three connector P2 on exacta7; owner directs r4/g4 continuation; g3 expired/maxattempt3 reached",
+  "proposed_changes": [
+    {
+      "field": "envelope.max_attempts_per_packet",
+      "from": 3,
+      "to": 4
+    },
+    {
+      "scope": "1178r4g4",
+      "executor_allowance_minutes": 90,
+      "historical_cloud_spend": "KHONG_DO_DUOC; preserve history, finite additional window only"
+    },
+    {
+      "scope": "1178r4g4",
+      "size_cap_files": 6,
+      "size_cap_added_lines": 1300,
+      "immutable_base": "ec1b18a2a007fc2e697249c727a2ca8391ab209e"
+    },
+    {
+      "scope": "product1178",
+      "additional_connector_calls": 1,
+      "local_model_calls": 0,
+      "known_historical_outputs": 6,
+      "unrecovered_history": "KHONG_DO_DUOC; no reset; do not borrow1187 budget"
+    }
+  ],
+  "affected_packets": [
+    1178
+  ],
+  "landed_work_impact": "none",
+  "risk_change": "none",
+  "decision": "pending",
+  "decision_source": "human",
+  "approved_by": null,
+  "decision_url": null,
+  "supersedes_revision": 1,
+  "proposed_revision": 2,
+  "previous_plan_hash": "2100018167928fc4366c74b2260c09ff5949b94340bebbb9b859bf836a1b539c",
+  "proposed_plan_hash": "02efc3fd7ede2ec4e066c042e2249ad479645553f95c6f0e8f3c56e7f3d3789b",
+  "packet_spec_path": "ops/specs/wp1178-r4-p2.md",
+  "packet_spec_sha256": "fbe162992b1fe55733f800be2afa5626e626b06dea4f0343af6d767bddd2e720",
+  "source_edit_paths": [
+    "ops/environment/update-linux.sh",
+    "ops/environment/update-linux_test.py"
+  ],
+  "source_writes_before_approval": false,
+  "no_land_authority_for_future_head": true
+}

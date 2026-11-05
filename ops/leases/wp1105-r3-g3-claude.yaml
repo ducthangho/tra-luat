@@ -29,8 +29,23 @@ recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; K
 
 leased_at_utc: '2026-11-05T09:50:00Z'
 heartbeat_at: '2026-11-05T09:50:00Z'
-lease_until: '2026-11-06T09:50:00Z'
-lease_expires_at_utc: '2026-11-06T09:50:00Z'
+lease_until: '2026-11-05T16:40:00Z'
+lease_expires_at_utc: '2026-11-05T16:40:00Z'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-06T09:50:00Z'
+  han_moi_utc: '2026-11-05T16:40:00Z'
+  chi_thi: >-
+    Chu kho ra lenh "Land 1105" trong phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4; phien dieu phoi tong
+    session_015GtxrYPjZCTZeRiazdssgq dong y. Phien dieu phoi giao phien ghi so (2026-11-05 ~15:48Z): rut han lease g3 sau merge.
+  ly_do: >-
+    Packet #1105 (LAUNCHER-SANDBOX-LAY-MAU r3) da MERGE: PR #1231 (agent/wp1105-g1-claude, head d5d521e3) merge bang merge commit
+    fe84620f897913c7f6c2ce5a0c7316a49655e82f (cha d779d442 + d5d521e3), merged_by ducthangho luc 2026-11-05T13:06:43Z. Gate push
+    master run 42032872356 success tren dung fe84620. Lease khong tu chet khi land (CLAUDE.md).
+  vi_sao_khong_dung_bia_mo: >-
+    Tien le #1132 (1aa7509) / #1195: rut han dung co che da cai. Han moi dat SAU luc push de luot dang lease con thay lease song,
+    tranh rc=8 che rc=9. Khong co lease ke nhiem thay the packet nay; g2 da mang bia mo tro toi g3, khong sua g2.
+  nguoi_rut: 'phien ghi so land (khong phai executor, khong phai phien dieu phoi) theo giao viec cua phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4'
+  nghiem_thu: 'ai-dang-giu cho ba duong dan write set sau 16:40Z phai ra NGUOI_GIU 0.'
 
 packet_id: LAUNCHER-SANDBOX-LAY-MAU
 packet_slug: launcher-sandbox-lay-mau

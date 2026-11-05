@@ -19,8 +19,22 @@ recorder_ghi_chu: 'Phien session_015GtxrcdtToNTxYCuZKVwQx (executor duoc giao) g
 
 leased_at_utc: '2026-11-05T02:05:00Z'
 heartbeat_at: '2026-11-05T03:07:00Z'
-lease_until: '2026-11-06T02:05:00Z'
-lease_expires_at_utc: '2026-11-06T02:05:00Z'
+lease_until: '2026-11-05T03:45:00Z'
+lease_expires_at_utc: '2026-11-05T03:45:00Z'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-06T02:05:00Z'
+  han_moi_utc: '2026-11-05T03:45:00Z'
+  chi_thi: >-
+    Phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq (send_message 2026-11-05T03:06Z): "PR #1198 DA MERGE ... Rut han lease,
+    ghi so va dong #1195."
+  ly_do: >-
+    Packet #1195 (T191-PY314-INTERPOLATION r1) da MERGE: PR #1198 (claude/t191-py314-interpolation, head ab39416f) merge commit
+    4d258cc88. Luot ops-publish-lease 41959532444 (a24a72b) XANH tren bo kiem neo master 4d258cc88, 284/284; comment lease
+    dang bu o #1195 issuecomment-6648650664. Lease khong tu chet khi land (CLAUDE.md).
+  vi_sao_khong_dung_bia_mo: >-
+    Tien le #1132 (1aa7509) / #1113 (d9171daf): rut han dung co che da cai. Han moi dat SAU luc push de luot dang lease con thay
+    lease song, tranh rc=8 che rc=9. Khong co lease ke nhiem thay the packet nay.
+  nguoi_rut: 'executor session_015GtxrcdtToNTxYCuZKVwQx theo chi thi phien dieu phoi'
 
 packet_id: T191-PY314-INTERPOLATION
 packet_slug: t191-py314-interpolation

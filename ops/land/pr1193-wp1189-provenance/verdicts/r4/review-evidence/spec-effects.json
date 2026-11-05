@@ -1,0 +1,14 @@
+{
+  "id": "spec-effects",
+  "lenh": [
+    "/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/py312/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv4/review_spec_effects.py"
+  ],
+  "cwd": "/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv4",
+  "rc": 0,
+  "trang_thai": "passed",
+  "giay": 0.235,
+  "log": "review-evidence/spec-effects.log",
+  "ket_qua": "{\n  \"K1_real_function_isolated\": {\n    \"before_spec\": {\n      \"rc\": 12,\n      \"stderr\": \"blob --spec tại head không khớp spec_hash của lease\\n\"\n    },\n    \"candidate\": {\n      \"rc\": 0,\n      \"returns_exact_spec\": true\n    }\n  },\n  \"K1_scope\": \"Nested k1 AST from exact candidate source; real local Git. Other kiem-merge gates not executed; no network.\",\n  \"ci_classifier\": {\n    \"paths\": [\n      \".github/workflows/ops-publish-lease.yml\",\n      \"ops/specs/lease-publish-ghim-python-r1.md\"\n    ],\n    \"mode\": \"day_du\",\n    \"reason\": \"DUONG_NHANH: DAY_DU vi diff co 1 tep ngoai allowlist: '.github/workflows/ops-publish-lease.yml'\"\n  },\n  \"release_include_spec\": false,\n  \"doc_claims_default_roots\": [\n    \"CHANGELOG.md\",\n    \"SKILL.md\",\n    \"CLAUDE.md\",\n    \"CONTEXT.md\",\n    \"references\",\n    \"docs\"\n  ],\n  \"doc_claims_scans_spec\": false,\n  \"doc_claims_result\": {\n    \"ok\": true,\n    \"files_scanned\": 123,\n    \"flags\": [],\n    \"advisory_count\": 381,\n    \"layers_skipped\": {}\n  },\n  \"doctrine_scan_default_targets\": [\n    \".claude/skills/cross-review/SKILL.md\",\n    \".claude/skills/grill-me/SKILL.md\",\n    \".claude/skills/grilling/SKILL.md\",\n    \".claude/skills/land-packets/SKILL.md\",\n    \".claude/skills/soan-spec/SKILL.md\",\n    \".claude/skills/work-packet/SKILL.md\",\n    \".agents/skills/cross-review/SKILL.md\",\n    \".agents/skills/land-packets/SKILL.md\",\n    \".agents/skills/work-packet/SKILL.md\",\n    \"CLAUDE.md\"\n  ],\n  \"doctrine_scans_spec\": false,\n  \"windows_actual_classifier\": \"required\",\n  \"windows_execution\": \"not_run: ngoài phạm vi chỉ thị review OFFLINE lượt 4; không suy not_required từ câu trong bản đặc tả lưu byte\"\n}\n"
+}

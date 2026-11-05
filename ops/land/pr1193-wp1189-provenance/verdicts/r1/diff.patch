@@ -1,0 +1,19 @@
+diff --git a/.github/workflows/ops-publish-lease.yml b/.github/workflows/ops-publish-lease.yml
+index 4114a52..0822678 100644
+--- a/.github/workflows/ops-publish-lease.yml
++++ b/.github/workflows/ops-publish-lease.yml
+@@ -70,6 +70,14 @@ jobs:
+         with:
+           fetch-depth: 0        # cần lịch sử để so `before`..`sha`
+ 
++      # GHIM PYTHON, cùng số với `ci.yml` (Issue #1189). Từ khi `ubuntu-latest` lên
++      # `ubuntu-26.04` (04-11-2026), `python3` của hệ điều hành là 3.14 và bước tự kiểm
++      # đỏ ở `t191` (283/284); cùng commit chạy 3.13 thì xanh. Cổng phải chạy trên đúng
++      # bản Python mà CI đã đo nó. Bước này đặt `python3` trên PATH, các bước dưới giữ nguyên.
++      - uses: actions/setup-python@v5
++        with:
++          python-version: "3.12"
++
+       # GHIM EXACT, cùng số với `ci.yml`. Cross-review PR "#134" (codex) đo được lỗ spec
+       # trần có ở CẢ HAI workflow, không chỉ ở bản vá mới — nên sửa một chỗ là để lại
+       # đúng lỗ ấy ở chỗ NGUY HIỂM HƠN: đường này chạy với `issues: write`, và bộ kiểm nó

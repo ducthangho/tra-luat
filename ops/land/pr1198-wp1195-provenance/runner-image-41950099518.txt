@@ -1,0 +1,9 @@
+# runner image cua ops-publish-lease run 41950099518 (truoc va), log 'Set up job' tai ve qua get_workflow_run_logs_url (zip), trich 6 dong:
+2026-11-05T01:40:28.6086163Z Version: 20261028.624
+2026-11-05T01:40:28.6092215Z Image: ubuntu-26.04
+2026-11-05T01:40:28.6092554Z Version: 20261101.186.1
+2026-11-05T01:40:28.6093202Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261101.186/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-05T01:40:28.6094310Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261101.186
+
+# readme image: raw.githubusercontent.com/actions/runner-images/ubuntu26/20261101.186/images/ubuntu/Ubuntu2604-Readme.md (HTTP 200), dong 27:
+- Python 3.14.4

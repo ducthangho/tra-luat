@@ -1,0 +1,106 @@
+{
+ "sha": "4d258cc8831b5c6169114d1e8e88a8782096d6f6",
+ "node_id": "C_kwDOTNeRjdoAKDRkMjU4Y2M4ODMxYjVjNjE2OTExNGQxZThlODhhODc4MjA5NmQ2ZjY",
+ "commit": {
+  "author": {
+   "name": "ducthangho",
+   "email": "ducthangho@gmail.com",
+   "date": "2026-11-05T03:05:42Z"
+  },
+  "committer": {
+   "name": "GitHub",
+   "email": "noreply@github.com",
+   "date": "2026-11-05T03:05:42Z"
+  },
+  "message": "Merge pull request #1198 from ducthangho/claude/t191-py314-interpolation\n\nfix(#1195): t191 đúng trên cả Python 3.13 lẫn 3.14 — ops-publish-lease xanh lại",
+  "tree": {
+   "sha": "95cb416f0467871277e56c515331f5f5c8f04bd7",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/95cb416f0467871277e56c515331f5f5c8f04bd7"
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/4d258cc8831b5c6169114d1e8e88a8782096d6f6",
+  "comment_count": 0,
+  "verification": {
+   "verified": true,
+   "reason": "valid",
+   "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq6/KGCRC1aQ7uu5UhlAAAscIQADnUA7iJFR9lZg93YplLSfn5\n673qG9sl7jzly8YjZ7e55ap+iLg1YjrzYUWuFa9Np+qVhPdrWRrpfbAwFUOxbnNs\nu38wK9xWJmRN9Ibx54guA8Jn9BYRXueAOXmI9jQ4wi7TyB6bu1ebDCOl1sBvj0sg\nk197OB4JtNN51Fj9RSGKOl4yhAEshXsN8l7V1cPmMqhJsQx/iEPb29nsZyWuxmwK\nbLXVhl2PactZoeEuvyMFq+ltP2QgQssDNj0chl1baYdsdJEz1ZE4eIAQJ+0P/NxN\nEEm93S7WBzLsJXYkGy5Yg3XqpZNeopabh2IZrcL5EjM4iuE3oqPbJueKNI4tIQXw\nj6NKwR6NTXPaYrd0w1sjR9SKMyyjSh0+F/GHaQaa11IEiaaMpC7SROsbL/33NGot\nHXjRkBNxmjNESpVQ2t7/5Q26LhQqFGKtVgj//zhPe5jr3WXAKSVCGxws5+lgCGK9\nhTjY5xtk62w519T+QQfJ6/VZlwvNPS2+m1g8Zqqg6yRQnKNGKxNdapWnOR7rLt/j\nKN4OatuAviXLLFqahNPzr2eJBwfSbgnO4fcCPixd7GEh8ZvtWk0YbHIbI/POX+Xd\nFE/YB9GWbbTDrz1c/w7+TwbFYxvPugOkslhgms27JDr6587RVDghBmhU+hzNLUnS\nWtu+XMQW7flRheVHrUzr\n=mO6U\n-----END PGP SIGNATURE-----\n",
+   "payload": "tree 95cb416f0467871277e56c515331f5f5c8f04bd7\nparent 248bef0c859d9571fd5e92acefbc352941e9dd6a\nparent ab39416fe919452c9dadda38dd99c5589f7967e8\nauthor ducthangho <ducthangho@gmail.com> 1793847942 +0700\ncommitter GitHub <noreply@github.com> 1793847942 +0700\n\nMerge pull request #1198 from ducthangho/claude/t191-py314-interpolation\n\nfix(#1195): t191 đúng trên cả Python 3.13 lẫn 3.14 — ops-publish-lease xanh lại",
+   "verified_at": "2026-11-05T03:05:43Z"
+  }
+ },
+ "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/4d258cc8831b5c6169114d1e8e88a8782096d6f6",
+ "html_url": "https://github.com/ducthangho/tra-luat/commit/4d258cc8831b5c6169114d1e8e88a8782096d6f6",
+ "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/4d258cc8831b5c6169114d1e8e88a8782096d6f6/comments",
+ "author": {
+  "login": "ducthangho",
+  "id": 12748935,
+  "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+  "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+  "gravatar_id": "",
+  "url": "https://api.github.com/users/ducthangho",
+  "html_url": "https://github.com/ducthangho",
+  "followers_url": "https://api.github.com/users/ducthangho/followers",
+  "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+  "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+  "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+  "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+  "repos_url": "https://api.github.com/users/ducthangho/repos",
+  "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+  "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+  "type": "User",
+  "user_view_type": "public",
+  "site_admin": false
+ },
+ "committer": {
+  "login": "web-flow",
+  "id": 19864447,
+  "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+  "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+  "gravatar_id": "",
+  "url": "https://api.github.com/users/web-flow",
+  "html_url": "https://github.com/web-flow",
+  "followers_url": "https://api.github.com/users/web-flow/followers",
+  "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+  "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+  "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+  "organizations_url": "https://api.github.com/users/web-flow/orgs",
+  "repos_url": "https://api.github.com/users/web-flow/repos",
+  "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+  "received_events_url": "https://api.github.com/users/web-flow/received_events",
+  "type": "User",
+  "user_view_type": "public",
+  "site_admin": false
+ },
+ "parents": [
+  {
+   "sha": "248bef0c859d9571fd5e92acefbc352941e9dd6a",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/248bef0c859d9571fd5e92acefbc352941e9dd6a",
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/248bef0c859d9571fd5e92acefbc352941e9dd6a"
+  },
+  {
+   "sha": "ab39416fe919452c9dadda38dd99c5589f7967e8",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ab39416fe919452c9dadda38dd99c5589f7967e8",
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/ab39416fe919452c9dadda38dd99c5589f7967e8"
+  }
+ ],
+ "stats": {
+  "total": 22,
+  "additions": 19,
+  "deletions": 3
+ },
+ "files": [
+  {
+   "sha": "4286a34289d2cf138813dbba7919537acf3272d5",
+   "filename": "ops/lease_publish_test.py",
+   "status": "modified",
+   "additions": 19,
+   "deletions": 3,
+   "changes": 22,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/4d258cc8831b5c6169114d1e8e88a8782096d6f6/ops%2Flease_publish_test.py",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/4d258cc8831b5c6169114d1e8e88a8782096d6f6/ops%2Flease_publish_test.py",
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/ops%2Flease_publish_test.py?ref=4d258cc8831b5c6169114d1e8e88a8782096d6f6",
+   "patch": "@@ -10963,7 +10963,8 @@ def _phan_tich_duoc_t191(g):  # mẫu theo phiên bản: `type` (3.12), mặc đ\n     # kiểu trường từ siêu dữ liệu `ast` (docstring): `else` của `async for`, `else`/`finally` của `try … except*`\n     \"async def _k2():\\n    async for _i in _k2():\\n        pass\\n    else:\\n        pass\\n        pass\\n        pass\\n_k2().close()\",\n     \"try:\\n    pass\\nexcept* ValueError:\\n    pass\\nelse:\\n    pass\\n    pass\\n    pass\\nfinally:\\n    pass\\n    pass\\n    pass\") + tuple(\n-    g for g in (\"type _Ta[_T: int, *_Ts, **_P] = list[_T]\", \"type _Tb[_U = int, *_Us = (), **_Q = []] = int\") if _phan_tich_duoc_t191(g))\n+    g for g in (\"type _Ta[_T: int, *_Ts, **_P] = list[_T]\", \"type _Tb[_U = int, *_Us = (), **_Q = []] = int\",\n+                \"_a = t'{1!r:>{2}}{3}{4}'\") if _phan_tich_duoc_t191(g))  # #1195: t-string 3.14 (`TemplateStr`, `Interpolation`)\n _CHUOI_SS_T191 = {\"Eq\": \"1 == 1 == 1 == 1\", \"NotEq\": \"1 != 2 != 3 != 5\", \"Lt\": \"1 < 2 < 3 < 5\", \"LtE\": \"1 <= 1 <= 2 <= 2\",\n                   \"Gt\": \"5 > 3 > 2 > 1\", \"GtE\": \"5 >= 5 >= 3 >= 3\", \"In\": \"1 in (1, 2) in ((1, 2),) in [((1, 2),)]\",\n                   \"NotIn\": \"1 not in (2,) not in ((3,),) not in [5]\", \"Is\": \"_h is _h is _h is _h\", \"IsNot\": \"_h is not _box is not _h is not _box\"}\n@@ -11015,7 +11016,12 @@ def _thay_t191(goc, i, moi):\n         if c is None: raise ValueError(\"không có con đại diện\")\n     if k is None: setattr(n, f, moi(c))\n     else: getattr(n, f)[k] = moi(c)\n+    _bo_str_t191(n)\n     return ast.unparse(ast.fix_missing_locations(cay))\n+def _bo_str_t191(n):\n+    \"\"\"#1195 (3.14): `ast.unparse` in `Interpolation` từ trường `str` (văn bản nguồn) nếu có, KHÔNG từ `value` — thay con mà\n+    giữ `str` thì chốt/cờ bị bỏ qua âm thầm (witness `(False, False)`). Chỉ `Interpolation` có trường `str`; xoá nó ⇒ dựng từ `value`.\"\"\"\n+    if \"str\" in getattr(n, \"_fields\", ()): n.str = None\n def _chot_t191(c):\n     import ast\n     if isinstance(c, ast.stmt): return ast.parse(\"_kiem_gia_t191(lease)\").body[0]\n@@ -11114,6 +11120,7 @@ def _sinh_goc_t191(dong, co_dong, hong):\n                 if isinstance(getattr(c, \"ctx\", None), (ast.Store, ast.Del)): continue\n                 if kk is None: setattr(cn, f, moi)\n                 else: getattr(cn, f)[kk] = moi\n+                _bo_str_t191(cn)\n                 try: e = ast.unparse(ast.fix_missing_locations(cay))\n                 except ValueError as l_: ghi(k, type(l_).__name__); continue\n                 for ng, (mau, sl) in _GOC_NGU_CANH_T191.items():\n@@ -11140,7 +11147,13 @@ def _sinh_goc_t191(dong, co_dong, hong):\n     # F1-L35 (chiều phạm vi): cờ trong `yield` NGAY thân `kiem()` biến nó thành generator — không chạy; bản lồng trong `lambda` có dòng\n     **{(\"co\", k, \"value\", \"don\", None, False): \"witness (False, False)\" for k in (\"Yield\", \"YieldFrom\")},\n     # F1-L33: `lambda`, `(… for …)` LUÔN ĐÚNG ⇒ trong `F or @` chốt KHÔNG BAO GIỜ chạy (mã chết). (`{…}` KHÔNG: `{*()}` rỗng — F2-L35)\n-    **{(\"goc\", k, \"or\"): \"witness (False, False)\" for k in (\"Lambda\", \"GeneratorExp\")}}\n+    **{(\"goc\", k, \"or\"): \"witness (False, False)\" for k in (\"Lambda\", \"GeneratorExp\")},\n+    # #1195 (3.14, t-string): cùng lý do với ô f-string tương ứng — `TemplateStr.values` ~ `JoinedStr.values`, `Interpolation.format_spec`\n+    # ~ `FormattedValue.format_spec`, gốc `Interpolation` ~ gốc `FormattedValue`; `Template` LUÔN ĐÚNG ⇒ `F or @` mã chết (~ `Lambda`).\n+    **({**{(l, \"TemplateStr\", \"values\", v): \"ValueError\" for l in (\"chot\", \"co\") for v in (\"dau\", \"giua\", \"cuoi\")},\n+        **{(l, \"Interpolation\", \"format_spec\", \"don\"): \"ValueError\" for l in (\"chot\", \"co\")},\n+        (\"goc\", \"Interpolation\"): \"SyntaxError|dung-lai-khac-lop\", (\"goc\", \"TemplateStr\", \"or\"): \"ValueError|witness (False, False)\"}\n+       if sys.version_info >= (3, 14) else {})}\n def _khoa_dong_t191(k):\n     \"\"\"Khoá phủ ĐỌC TỪ KHOÁ DÒNG `sinh.*` (không tin tập khoá do bộ sinh tự khai) — F1-L34: bỏ một dòng thì khoá của nó phải mất.\"\"\"\n     p = k.split(\".\")[1:]\n@@ -11287,7 +11300,7 @@ def _vu_tru_t191():\n     goc = (ast.stmt, ast.expr, ast.excepthandler, ast.pattern) + ((ast.type_param,) if hasattr(ast, \"type_param\") else ())\n     lop = [c for c in vars(ast).values() if isinstance(c, type) and issubclass(c, goc) and c not in goc and c._fields\n            and type(c) is type] + [ast.comprehension, ast.arguments, ast.keyword, ast.withitem, ast.match_case, ast.arg, ast.alias]\n-    kieu = lambda c: {t: k for k, t in re.findall(r\"(\\w+)[*?]? (\\w+)\", (c.__doc__ or \"\").split(\"(\", 1)[-1])}\n+    kieu = lambda c: {t: k for k, t in re.findall(r\"(\\w+)[*?]* (\\w+)\", (c.__doc__ or \"\").split(\"(\", 1)[-1])}\n     mang = {\"expr\", \"stmt\", \"keyword\", \"comprehension\", \"withitem\", \"excepthandler\", \"match_case\"}\n     kho = _KHO_T191 + tuple(_kho_toan_tu_t191())\n     tt = {ast.BinOp: ast.operator, ast.AugAssign: ast.operator, ast.UnaryOp: ast.unaryop, ast.Compare: ast.cmpop, ast.BoolOp: ast.boolop}\n@@ -11378,6 +11391,9 @@ def _dong_gia(g, cac):\n          f\"MA TRẬN SINH: ô không dòng phải ĐÚNG bảng miễn, và mọi lần xuất hiện hỏng đúng lý do đã khai — lệch \"\n          f\"{sorted((o, sorted(v)) for o, v in chua.items() if v != set(md.get(o, '').split('|')))} · thừa {sorted(set(md) - set(chua))}\")\n     chot(_vu_tru_t191() == ([], [], [], []), f\"MA TRẬN SINH: vũ trụ `ast` chưa phủ (lớp, trường, vị trí, toán tử): {_vu_tru_t191()}\")\n+    if sys.version_info >= (3, 14):  # #1195 R5: thay `Interpolation.value` phải ĐẾN được văn bản dựng lại (unparse đọc `str` nếu còn)\n+        g5 = \"_a = t'{1}'\"; i5 = next(j for j, q in enumerate(_o_sinh_t191(ast.parse(g5))) if type(q[0]).__name__ == \"Interpolation\")\n+        chot(\"_kiem_gia_t191\" in _thay_t191(g5, i5, _chot_t191), \"3.14: thay `Interpolation.value` bị `unparse` bỏ qua (còn `str`)\")\n     sai_w = [(k, tuple(r), m) for k, d, *r in sinh for m in [_mong_witness_t191(k, d)] if tuple(r) != m]\n     chot(not sai_w, f\"MA TRẬN SINH: bộ ba trái witness chạy trên CHÍNH nội dung dòng (nhãn, bộ ba, witness đòi) — {sai_w[:3]}\")\n     hang = _PHAN_LOAI_T191 + sinh"
+  }
+ ]
+}

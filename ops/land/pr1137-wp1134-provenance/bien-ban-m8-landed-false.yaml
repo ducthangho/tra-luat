@@ -1,0 +1,36 @@
+# Bien ban M8 BAN LANDED FALSE (giu lai nguyen van, truoc quyet dinh kieu b 6650528815) — kiem-dong-wp.txt la ket qua cua ban nay
+# landed false theo quyet dinh chu kho issuecomment-6650045712; D2 do la DU KIEN (luot push master tren 2be93d3 bi huy, 0 job).
+packet: CHANGELOG-D-NGOAI-GOI
+revision: 2
+generation: 1
+spec_hash: adb4002c41129c53c94a40f0e9ac33103cc6e42b42927c3c90e6e676caf6ac82
+head_da_review: 15872b71d3bcd3625263a03bc845979e3a670c45
+tree_h: 79d783655aa10d966aa664708107b839707f0b3f
+review:
+  offline: 'run 169de7ad approve 0 P1/P2/P3 (thuat_lai tu kiem-merge comment 6567252831; run.json khong luu trong kho)'
+  connector: 'issuecomment-6567245144 Reviewed commit 15872b71d3, khong finding'
+  so_loi_goi_codex: 8
+windows:
+  phan_loai: required
+  nguon: 'thuat_lai — kiem-merge K6 (comment 6567252831): ASUS-LAPTOP do-luong.csv dong 36, 5/5; tep csv khong o trong kho'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1134#issuecomment-6650045712
+merge_commit: 2be93d3a4f892482dcadd7ce341b2c4db0a8dbff
+tree_m: 44ab5d231c643e3a99f3fa0d02a2756e120b256a
+ci_master:
+  run_id: 41397040659
+  conclusion: cancelled
+nghiem_thu:
+  N1: passed
+  N2: thuat_lai
+  N3: passed
+  N4: thuat_lai
+  N5: thuat_lai
+  N6: thuat_lai
+  N7: thuat_lai
+lease_cuoi: wp1134-r2-g1-claude
+landed: false
+moc_10_2_2:
+  run: failed
+  checkout: not_measured
+  workflow_definition: not_measured
+  gate_output: not_measured

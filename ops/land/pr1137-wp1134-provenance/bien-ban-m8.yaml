@@ -1,5 +1,6 @@
-# Bien ban M8 (ADR-0060) dong WP #1134 CHANGELOG-D-NGOAI-GOI r2 — kiem bang packet_loop.py kiem-dong-wp
-# landed false theo quyet dinh chu kho issuecomment-6650045712; D2 do la DU KIEN (luot push master tren 2be93d3 bi huy, 0 job).
+# Bien ban M8 (ADR-0060) dong WP #1134 CHANGELOG-D-NGOAI-GOI r2, KIEU B — kiem bang packet_loop.py kiem-dong-wp
+# Ban landed-false truoc do (D2 do) nam o bien-ban-m8-landed-false.yaml. Ban nay: chu kho chap nhan phu bang hau due b3249c3
+# (issuecomment-6650528815); ci_master va moc_10_2_2 la cua run 41397085109 tren b3249c3, KHONG phai tren merge_commit.
 packet: CHANGELOG-D-NGOAI-GOI
 revision: 2
 generation: 1
@@ -13,24 +14,28 @@ review:
 windows:
   phan_loai: required
   nguon: 'thuat_lai — kiem-merge K6 (comment 6567252831): ASUS-LAPTOP do-luong.csv dong 36, 5/5; tep csv khong o trong kho'
-duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1134#issuecomment-6650045712
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1134#issuecomment-6650528815
 merge_commit: 2be93d3a4f892482dcadd7ce341b2c4db0a8dbff
 tree_m: 44ab5d231c643e3a99f3fa0d02a2756e120b256a
 ci_master:
-  run_id: 41397040659
-  conclusion: cancelled
+  run_id: 41397085109
+  conclusion: success
+  sha: b3249c3e8a5a8f3af5691160493b8ab3d52db99c
+  phu_bang_hau_due: 'run 41397040659 tren 2be93d3 cancelled 0 job; xem phu-hau-due-2be93d3-b3249c3.txt'
 nghiem_thu:
   N1: passed
-  N2: thuat_lai
+  N2: passed
   N3: passed
-  N4: thuat_lai
-  N5: thuat_lai
-  N6: thuat_lai
-  N7: thuat_lai
+  N4: passed
+  N5: passed
+  N6: passed
+  N7: passed
 lease_cuoi: wp1134-r2-g1-claude
-landed: false
+landed: true
+nghiem_thu_nguon: 'N1 N3 measured; N2 N4 N5 N6 N7 thuat_lai tu PR #1137 (than PR + kiem-merge comment 6567252831), KHONG tai chay.'
 moc_10_2_2:
-  run: failed
-  checkout: not_measured
-  workflow_definition: not_measured
-  gate_output: not_measured
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed
+moc_10_2_2_nguon: 'ops/land/pr1141-wp1132-provenance/ci/provenance.yaml + gate-output-41397085109.txt, run 41397085109 tren b3249c3'

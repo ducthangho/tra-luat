@@ -1,0 +1,14 @@
+# A11 — luot ci.yml push tren 11 commit master lien tiep tu b3249c3 toi 8983e1b (push 05:58:28Z..05:59:49Z 02-11); do 2026-11-05T04:14:14Z
+# dem: job attempt 1; job conclusion=skipped (duong nhanh bo gate-cong-cu) khong bao gio nhan runner nen tach rieng
+b3249c3 41397085109 a1 completed success jobs=23 chay=23 runner_id!=0=23 skipped=0 DAT
+68fa6a1 41397090825 a1 completed success jobs=23 chay=23 runner_id!=0=23 skipped=0 DAT
+f23530b 41397102205 a1 completed success jobs=16 chay=15 runner_id!=0=15 skipped=1(gate-cong-cu) DAT
+0a05638 41397111167 a1 completed success jobs=16 chay=15 runner_id!=0=15 skipped=1(gate-cong-cu) DAT
+cedad78 41397115605 a1 completed success jobs=23 chay=23 runner_id!=0=23 skipped=0 DAT
+08a517e 41397120499 a1 completed success jobs=16 chay=15 runner_id!=0=15 skipped=1(gate-cong-cu) DAT
+520f173 41397125998 a1 completed success jobs=16 chay=15 runner_id!=0=15 skipped=1(gate-cong-cu) DAT
+798c281 41397131612 a1 completed success jobs=16 chay=15 runner_id!=0=15 skipped=1(gate-cong-cu) DAT
+f0c6c79 41397138295 a1 completed success jobs=16 chay=15 runner_id!=0=15 skipped=1(gate-cong-cu) DAT
+46233b0 41397199843 a1 completed success jobs=16 chay=15 runner_id!=0=15 skipped=1(gate-cong-cu) DAT
+8983e1b 41397205258 a1 completed success jobs=16 chay=15 runner_id!=0=15 skipped=1(gate-cong-cu) DAT
+TONG: 11 / 11 commit: luot push success, moi job khong-skipped deu chay (runner_id != 0) va success; 0 luot cancelled

@@ -1,0 +1,39 @@
+# Bien ban M8 (ADR-0060) dong WP #1132 CI-CONCURRENCY-MASTER r1 — kiem bang packet_loop.py kiem-dong-wp
+packet: CI-CONCURRENCY-MASTER
+revision: 1
+generation: 1
+spec_hash: 72b63a79e0b63193904aaa5378ffd266bce1eb0322cf8c4e425c5b7d9a58f7f8
+head_da_review: aad4865c734e7c146463b13ed1750a47e6a9cb8f
+tree_h: dce456c90ddffaef089140293e77de2cbb502c48
+review:
+  offline: 'run dc4d673c approve 0/0/0/0 (gpt-6.1-sol, xhigh, DO_DUOC)'
+  connector: 'issuecomment-6567791670 sach; luot Draft marked ready sach'
+  so_loi_goi_codex: 5
+windows:
+  phan_loai: not_required
+  nguon: 'dac ta Q6 + mien K6 issuecomment-6569226312; Windows CI 41387206828 success'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1141#issuecomment-6569263109
+merge_commit: b3249c3e8a5a8f3af5691160493b8ab3d52db99c
+tree_m: aa670e40c5a95a2a896705c7c4f2321ed4c31063
+ci_master:
+  run_id: 41397085109
+  conclusion: success
+nghiem_thu:
+  A1: passed
+  A2: passed
+  A3: passed
+  A4: passed
+  A5: passed
+  A6: passed
+  A7: passed
+  A8: passed
+  A9: passed
+  A10: passed
+  A11: passed
+lease_cuoi: ci-concurrency-master-r1-g1-claude-remote-20261102
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

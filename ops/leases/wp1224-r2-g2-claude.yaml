@@ -1,0 +1,118 @@
+# LEASE — CLOUD-SETUP-P3C-DOCS revision 2 / generation 2 — tai lieu theo 2.21.2q va danh dau CODEX_AUTH_JSON la duong cu
+# GHI HO theo chi thi CHU KHO (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 1224
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1224
+authority_url: https://github.com/ducthangho/tra-luat/issues/1224
+granted_on_instruction_nguyen_van: >-
+  Chu kho trong phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4, 05-11-2026: ~08:20Z 'G3 duyệt và bắt đầu P3c'; vong hoi
+  soan-spec Q1–Q10 'theo khuyến nghị'; ~09:25Z 'Duyệt cả ba, làm theo kế hoạch' (dong bang dac ta va cap lease, mo executor).
+authority_caveat: >-
+  Chi thi qua tin nhan trong phien dieu phoi; comment dong bang tren Issue do phien agent dang bang token chu kho (#566).
+dieu_kien_cap_da_do: >-
+  Cap g2 05-11-2026 ~10:35Z: chu kho chon '(b), làm theo khuyến nghị' cho P3 F03 (dac ta r2, issuecomment-6655468517) va
+  'Nâng lên 5, làm theo khuyến nghị' (ngan sach mem Codex). r2 land qua PR #1227 merge 33aa91d. Bao truoc phien dieu phoi
+  #1206 session_015GtxrYPjZCTZeRiazdssgq; ai-dang-giu 6/6: chi wp1224-r1-g1-claude (lease duoc thay).
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; KHONG thi hanh packet nay.'
+
+leased_at_utc: '2026-11-05T10:35:00Z'
+heartbeat_at: '2026-11-05T10:35:00Z'
+lease_until: '2026-11-06T10:35:00Z'
+lease_expires_at_utc: '2026-11-06T10:35:00Z'
+
+packet_id: CLOUD-SETUP-P3C-DOCS
+packet_slug: cloud-setup-p3c-docs
+revision: 2
+generation: 2
+lease_id: wp1224-r2-g2-claude
+thay_the_cho:
+  - wp1224-r1-g1-claude
+thay_the_cho_ghi_chu: 'g1 CON HAN, co executor dang lam => bia mo hai chieu (g1 mang da_bi_thay_the). Cung executor, nhanh, write set; doi spec r1 -> r2.'
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_cli
+reviewer_ghi_chu: 'Codex offline qua launcher.py run tren SHA ung vien cuc bo (ADR-0060 M12), roi connector @codex review tren PR draft.'
+access: read-write
+
+spec_path: ops/specs/cloud-setup-p3c-docs-r2.md
+spec_ref: refs/heads/master
+spec_source_oid: 33aa91d57266adbf00be9e32aef37760a3836e5a
+spec_blob: 0fd4e50125c6746721ca3fd59d5c011834ee1c7a
+spec_sha256: a5afb3e749870535340d65cbbd4ebdc7eec5f82b1be053e4278a78ff95349bda
+spec_hash: a5afb3e749870535340d65cbbd4ebdc7eec5f82b1be053e4278a78ff95349bda
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+spec_ref_ghi_chu: 'Dac ta r2 (errata r1, F03) land qua PR #1227 merge 33aa91d; dong bang issuecomment-6655468517. Thu dinh danh la BLOB/BAM.'
+ngoai_le_write_set_claude_md: >-
+  Phien 01V2 (session_01V2PEqhkb91vD5PCBM5yXbm) duoc chu kho cho sua CLAUDE.md trong pham vi #631 c-6654446146 (moc do REST
+  30-09 o §Goi agent da nen va §Day ref). Hai viec sua o hai doan khac nhau: #1224 chi noi mot cau vao gach dau dong 'Refresh
+  token cua codex XOAY VONG'. Ben merge sau dung merge commit, chi dung doan cua minh. Thong nhat voi phien dieu phoi #1206.
+
+branch: agent/wp1224-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: c5a1c3d1230b347333d4ca10f7dc514b817f7a9d
+start_from_sha: c5a1c3d1230b347333d4ca10f7dc514b817f7a9d
+immutable_acceptance_baseline: c5a1c3d1230b347333d4ca10f7dc514b817f7a9d
+reviewed_sha_required: c5a1c3d1230b347333d4ca10f7dc514b817f7a9d
+reviewed_sha_ghi_chu: 'chua co head code luc cap lease; moi luot review neo dung SHA cua luot.'
+
+write_set:
+  - CLAUDE.md
+  - changelog.d/wp-1224.md
+  - docs/GOI_AGENT_DA_NEN.md
+  - ops/handoff/wp1224-g1-claude.md
+  - references/DELTA_v1.19.md
+  - references/DEV_TOOLING_GUIDE.md
+write_set_hash: 99614505a72d3e6fd5dda3968e9da75e1762258e7c81023aaa04815528f66fad
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP (LC_ALL=C), noi bang LF, co LF cuoi, utf-8.'
+write_set_ghi_chu: 'Diff PR dung 5 tep; handoff chi tren nhanh lease/handoff. Worker KHONG sua VERSION, CHANGELOG.md, RELEASE_MANIFEST.json (phien land tai sinh manifest truoc merge).'
+tran_kich_thuoc: 'ADR-0053: <= 6 tep / <= 450 dong them.'
+tran_loi_goi_codex: >-
+  ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544: tran cung 10; ngan sach mem 5 (chu kho nang 05-11 ~10:30Z); da dung 2 (hai luot tren 96aa2fe duoi g1). Hai luot lien tiep chua approve
+  => Review Rescue Checkpoint (ADR-0037), hoi chu kho truoc loi goi ke tiep.
+quy_trinh_ap: >-
+  ADR-0060 mac dinh theo ADR-0062: worker gate tai cho tren dung SHA ung vien (bat bien (a)) -> handoff len Issue #1224 neo SHA
+  ung vien -> review Codex OFFLINE tren SHA cuc bo -> approve moi push DUNG SHA do mot lan + PR draft -> connector + CI PR.
+  Truoc khi bao san sang merge: packet_loop.py kiem-merge rc=0. Windows: not_required (spec). Luat ban giao chu kho 02-11 khi dung.
+ci_budget:
+  gate_tu_dong: 'CI PR tu dong (ubuntu) tren PR cua packet'
+  windows: 'KHONG chay Windows (spec not_required; chi thi chu kho 05-11: khong CI Windows).'
+  het: 'Mot job bat buoc do 2 luot lien tiep cung mot loi => DUNG, bao phien dieu phoi'
+dieu_kien_dung:
+  - 'S1 — can sua tep ngoai write set (ke ca code doc CODEX_AUTH_JSON, ho so lich su ops/**, RELEASE_MANIFEST.json). DUNG, handoff.'
+  - 'S2 — vuot tran ADR-0053 (> 6 tep hoac > 450 dong them). DUNG, checkpoint chu kho.'
+  - 'S3 — spec tu mau thuan / thieu du kien. DUNG, bao phien dieu phoi (khong tu suy).'
+  - 'S4 — het han lease => ngung ghi, ban giao theo luat chu kho 02-11.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land
+  - Khong LIVE (Drive/NLM/webapp/registry), khong deploy webapp hay Package, khong bump VERSION
+  - Khong doc/ghi credential that
+  - Khong workflow_dispatch
+  - Khong force-push
+  - Khong viet chuoi bo-qua-CI nguyen van trong commit message
+
+coordination_paths:
+  - ops/leases/wp1224-r1-g1-claude.yaml
+  - ops/leases/wp1224-r2-g2-claude.yaml
+run_minutes: 1440
+heartbeat_required_minutes: 360
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'

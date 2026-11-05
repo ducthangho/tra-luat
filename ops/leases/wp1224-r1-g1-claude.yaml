@@ -107,5 +107,8 @@ coordination_paths:
 run_minutes: 1440
 heartbeat_required_minutes: 360
 
+da_bi_thay_the: wp1224-r2-g2-claude
+da_bi_thay_the_ghi_chu: 'Thay bang g2 (spec r2) 05-11 ~10:35Z; xem ops/leases/wp1224-r2-g2-claude.yaml.'
+
 chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'

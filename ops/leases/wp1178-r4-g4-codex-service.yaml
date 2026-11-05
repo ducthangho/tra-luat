@@ -33,7 +33,7 @@ branch: agent/wp1178-g4-codex-service
 branch_ownership: exclusive
 base_sha: ec1b18a2a007fc2e697249c727a2ca8391ab209e
 start_from_sha: a7b5aedc122575a66280ace3ff7f2567251af8e2
-reviewed_sha_required: a7b5aedc122575a66280ace3ff7f2567251af8e2
+reviewed_sha_required: ef864d6b3192a08487cd7fc0e526633afcb693d9
 target_branch_neu_land: master
 write_set: &id001
 - ops/environment/update-linux.sh
@@ -94,3 +94,24 @@ authority_notes:
 - ADR0063 from1187 is land-gate dependency, not permission to copy new spec into product.
 - Max90min from grant; lease expiry/CI/review/workingstate does not extend harddeadline.
   Atdeadline stop and handoff all artifacts.
+frozen_head: ef864d6b3192a08487cd7fc0e526633afcb693d9
+frozen_tree: 70bc751068856245e92875a13e182a9c90781f8b
+operational_state: executor_sealed; primary human personally approved; gates/land
+  pending
+execution_handoff:
+  completed_at_utc: '2026-11-05T03:12:32Z'
+  task: /root/wp1178_r4_executor
+  head: ef864d6b3192a08487cd7fc0e526633afcb693d9
+  tree: 70bc751068856245e92875a13e182a9c90781f8b
+  full_diff_files: 6
+  full_diff_added: 1181
+  full_diff_deleted: 0
+  actual_changed_paths:
+  - ops/environment/update-linux.sh
+  - .github/workflows/ci.yml
+  evidence_manifest_sha256: c90363dc1fa8f837bd3af21a83b0deb552f6a4717bc5837880e8387d2ad6ef25
+  no_source_push_by_executor: true
+human_audit_source: https://github.com/ducthangho/tra-luat/issues/1178#issuecomment-6648977402
+primary_human_audit_comment: https://github.com/ducthangho/tra-luat/pull/1202#issuecomment-6648978880
+land_authority_source: https://github.com/ducthangho/tra-luat/issues/1178#issuecomment-6648977402
+review_bundle: https://github.com/ducthangho/tra-luat/tree/9ad0e483832278fc9aa63628991801695068852a/ops/reviews/wp1178-r4-g4-review

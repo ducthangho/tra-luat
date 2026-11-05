@@ -1,0 +1,278 @@
+name: ops — đăng lease bằng git
+
+# VÌ SAO CÓ WORKFLOW NÀY
+# Git không tạo được issue/comment/PR — đó là CSDL riêng của GitHub, không phải
+# object trong git. Nhưng Actions kích hoạt được bằng `push` và tự có GITHUB_TOKEN,
+# nên `git push → workflow → API` biến git thành đường vận chuyển. Phiên chạy chỉ
+# cần quyền GIT, thứ mọi phiên đều có. ĐÃ ĐO 13/14-08-2026: phiên
+# `origin: claude_code_mcp_seed` bị 403 ở mọi lời gọi api.github.com trong khi
+# clone/fetch/push đều chạy — nên đường API không dùng để điều phối được.
+#
+# RỦI RO, NÓI THẲNG: workflow chạy bằng GITHUB_TOKEN ⇒ **push được thành đăng được**.
+# Bốn lớp thu hẹp:
+#   1. Chỉ nhánh `ops/**` và chỉ đường dẫn `ops/leases/**` mới kích hoạt.
+#   2. `permissions` tối thiểu — không có `pull-requests`, không có `actions`.
+#   3. Mọi lease đi qua `ops/lease_publish.py` (13 ca phản chứng), nơi chặn
+#      `granted_by` mang tên provider, lease hết hạn, SHA sai dạng, YAML hỏng.
+#   4. Bộ kiểm ấy NEO VÀO NHÁNH MẶC ĐỊNH, không lấy từ head được đẩy.
+# KHÔNG dùng `pull_request_target`: nó chạy code của nhánh đích với token ghi.
+#
+# VÌ SAO CÓ LỚP 4 — finding P1 của cross-review trên PR #104 (14-08-2026):
+# Bản trước chạy `python3 ops/lease_publish.py` LẤY TỪ HEAD ĐƯỢC ĐẨY. Một người có
+# quyền ghi kho chỉ cần MỘT push vào `ops/**` vừa thêm tên mình vào
+# `NGUOI_CO_THAM_QUYEN` vừa đổi lease: bộ lọc đường dẫn kích hoạt, `checkout` lấy
+# đúng head chưa ai review đó, rồi workflow chạy bộ kiểm ĐÃ BỊ SỬA — nên cả chốt
+# `granted_by` lẫn chốt `GITHUB_ACTOR` đều qua trơn. Lời khai "sửa danh sách phải
+# qua một commit có review" khi ấy không được cưỡng chế ở đâu cả. **Bộ kiểm nằm
+# cùng nhánh với thứ nó kiểm thì nó không kiểm gì hết.**
+#
+# NÓI THẲNG PHẦN CÒN THỦNG, đừng để ai đọc rộng hơn thực tế: với sự kiện `push`,
+# GitHub lấy CHÍNH TỆP YAML NÀY từ head được đẩy. Ai sửa được `ops/lease_publish.py`
+# thì cũng sửa được tệp này và gỡ luôn mỏ neo. Lớp 4 đóng đường "một push đổi bộ
+# kiểm"; nó KHÔNG biến `push` thành thao tác có thẩm quyền. Thứ đóng nốt phần còn
+# lại nằm NGOÀI kho: ruleset/branch protection chặn push vào `.github/workflows/**`
+# và `ops/lease_publish*.py`. Chưa đặt ruleset thì đường này vẫn quy về "ai push
+# được vào `ops/**` thì đăng được" — cứ nói đúng như vậy, đừng khai rộng hơn.
+#
+# PHÚT ACTIONS: r245 đã đo Free 2.000 phút/tháng bị đốt ~8.100 nên CI từng chết.
+# Job này ubuntu (hệ số 1x), vài giây, không matrix — nhiễu không đáng kể so với
+# gate Windows 20 phút/lượt.
+
+on:
+  push:
+    branches: ['ops/**']
+    paths:
+      - 'ops/leases/**.yaml'
+      - 'ops/leases/**.yml'
+
+permissions:
+  contents: read    # CHỈ ĐỌC — đủ cho `checkout`. Workflow này không còn ghi vào kho.
+  issues: write     # đăng comment
+
+concurrency:
+  group: ops-publish-lease-${{ github.ref }}
+  cancel-in-progress: false   # đăng comment KHÔNG được huỷ giữa chừng
+
+jobs:
+  dang:
+    # CHỐNG LẶP — nay KHÔNG CÒN LÀ CHỐT CHỊU LỰC, và nói thẳng như vậy.
+    # Workflow này từng tự sinh một commit ghi ngược `posted_comment_id` vào đúng
+    # `ops/leases/**` mà nó theo dõi, nên nó tự kích hoạt lại chính mình. Packet #396
+    # đã BỎ HẲN bước ấy: không còn `git commit`/`git push`, và `permissions` chỉ còn
+    # `contents: read`. Nguồn đệ quy đã biến mất chứ không phải bị chặn.
+    #
+    # Giữ `if:` lại làm phòng thủ chiều sâu cho một bot TƯƠNG LAI đẩy vào `ops/leases/**`,
+    # không phải vì đường cũ còn sống. Đừng đọc nó như bằng chứng rằng có gì đó cần chặn.
+    if: github.event.head_commit.author.name != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # cần lịch sử để so `before`..`sha`
+
+      # GHIM PYTHON, cùng số với `ci.yml` (Issue #1189). Từ khi `ubuntu-latest` lên
+      # `ubuntu-26.04` (04-11-2026), `python3` của hệ điều hành là 3.14 và bước tự kiểm
+      # đỏ ở `t191` (283/284); cùng commit chạy 3.13 thì xanh. Cổng phải chạy trên đúng
+      # bản Python mà CI đã đo nó. Bước này đặt `python3` trên PATH, các bước dưới giữ nguyên.
+      # GHIM EXACT, cùng số với `ci.yml`. Cross-review PR "#134" (codex) đo được lỗ spec
+      # trần có ở CẢ HAI workflow, không chỉ ở bản vá mới — nên sửa một chỗ là để lại
+      # đúng lỗ ấy ở chỗ NGUY HIỂM HƠN: đường này chạy với `issues: write`, và bộ kiểm nó
+      # chạy là thứ DUY NHẤT đứng giữa một tệp YAML và một comment mang danh nghĩa kho.
+      # Một dependency trôi ở đây là trôi ngay dưới chân cổng.
+      # Hai chỗ phải cùng số; lệch nhau thì bên quên cập nhật chính là bên đẩy lọt.
+      - name: cài PyYAML
+        run: python3 -m pip install --quiet PyYAML==6.0.3
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+
+      - name: neo bộ kiểm vào nhánh mặc định
+        # Dựng một worktree RỜI của nhánh mặc định rồi chạy bộ kiểm TỪ ĐÓ. Head được
+        # đẩy chỉ còn góp đúng thứ nó có quyền góp: TỆP LEASE. Xem đầu tệp về finding
+        # P1 đã buộc phải có bước này.
+        #
+        # Vì sao worktree chứ không phải `git show > tệp`: bộ phản chứng đo cả cây —
+        # `t23` quét `ops/leases/**`, `t24` quét `.github/workflows/**`. Chép mỗi hai
+        # tệp `.py` ra một thư mục trơ thì hai ca ấy không thấy thư mục cần quét và
+        # `return` sớm: suite vẫn báo N/N trong khi hai ca không đo gì. Đúng bệnh
+        # "ca có MẶT khác ca có ĐO" mà `t24` sinh ra để chặn — đừng tái lập nó ở đây.
+        env:
+          MAC_DINH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          test -n "$MAC_DINH"
+          git fetch --no-tags origin "$MAC_DINH"
+          NEO="$RUNNER_TEMP/neo"          # NGOÀI workspace: không làm bẩn cây được đẩy
+          git worktree add --detach "$NEO" "origin/$MAC_DINH"
+          test -s "$NEO/ops/lease_publish.py"
+          test -s "$NEO/ops/lease_publish_test.py"
+          test -s "$NEO/ops/cai_actionlint.sh"
+          test -s "$NEO/ops/chay_lease_publish_test.sh"
+          echo "NEO=$NEO" >> "$GITHUB_ENV"
+          # BẰNG CHỨNG DƯƠNG: in băm cả chuỗi được chạy để lượt chạy TỰ KHAI bản nào.
+          # Hai băm khác nhau là chuyện bình thường (head có thể đi trước master);
+          # điều cần đọc được từ log là bản ĐANG CHẠY đến từ đâu.
+          echo "bản ĐANG CHẠY — từ origin/$MAC_DINH @ $(git -C "$NEO" rev-parse --short HEAD):"
+          sha256sum "$NEO/ops/lease_publish.py" "$NEO/ops/lease_publish_test.py" \
+            "$NEO/ops/cai_actionlint.sh" "$NEO/ops/chay_lease_publish_test.sh"
+          echo "bản trong head được đẩy — KHÔNG chạy:"
+          sha256sum ops/lease_publish.py ops/lease_publish_test.py \
+            ops/cai_actionlint.sh ops/chay_lease_publish_test.sh
+
+      # Cài + đối chiếu `actionlint` và chạy bộ test neo trong MỘT lời gọi. Vì wrapper
+      # cũng đến từ `$NEO`, head được đẩy không thể sửa installer hoặc selftest mà cổng
+      # này sẽ chạy. Installer hỏng thì test không chạy; installer xanh thì PATH được cấp
+      # ngay trong cùng tiến trình, không chờ bước Actions kế tiếp.
+      #
+      # F2 `if: false` trên một installer riêng nay vô nghĩa: không còn bước installer
+      # riêng để bỏ qua mà vẫn chạy test. Đặt `if: false` lên bước wrapper sẽ bỏ qua CẢ
+      # hai; đó là nợ "CI có thật sự chạy gate không" của required status check bên
+      # ngoài kho, không còn là đường "test chạy nhưng thiếu công cụ" mà F2 đã phá.
+      - name: tự kiểm cổng trước khi tin nó (cài công cụ + chạy cổng)
+        shell: bash
+        env:
+          AL_VER: 1.7.7
+        # Cổng này là thứ DUY NHẤT đứng giữa một tệp YAML và một comment mang danh
+        # nghĩa kho. Chạy phản chứng của chính nó trước mỗi lượt đăng — rẻ hơn
+        # nhiều so với một lần đăng sai.
+        run: bash "$NEO/ops/chay_lease_publish_test.sh"
+
+      - name: tìm lease vừa đổi
+        id: tim
+        # KHÔNG nội suy `${{ }}` vào THÂN `run`, khai qua `env:` như bước neo ở trên.
+        # Hai lý do, cả hai đã trả giá: (a) GitHub nội suy biểu thức trên TOÀN BỘ thân
+        # `run` trước khi shell thấy nó — một cặp RỖNG nằm trong một dòng CHÚ THÍCH làm
+        # cả tệp không hợp lệ (`ops-don-ref.yml`, run 31971137920: một run mang tên
+        # đường dẫn tệp, 0 job, `conclusion: failure`); (b) thân bước chỉ CHẠY LẠI ĐƯỢC
+        # ngoài Actions khi nó không còn biểu thức — đó là điều kiện để `t32` trích
+        # THÂN BƯỚC TỪ CHÍNH TỆP NÀY rồi chạy thật, thay vì chép lại rồi trôi lệch.
+        env:
+          TRUOC: ${{ github.event.before }}
+          NAY: ${{ github.sha }}
+          MAC_DINH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          test -n "${NAY:-}"
+          test -n "${MAC_DINH:-}"
+          # MỐC SO. Push thường: `before`..`sha`. Push MỞ NHÁNH MỚI: `before` toàn số 0,
+          # không diff được — mốc đúng khi ấy là điểm nhánh này rẽ khỏi nhánh mặc định.
+          #
+          # BẢN TRƯỚC QUÉT CẢ `ops/leases/`, và đó là lỗi đã trả giá (#195): mọi lease
+          # đều đăng bằng một nhánh MỚI theo `ops/README.md`, nên đường "dự phòng" ấy
+          # thật ra là đường CHÍNH. Một lease cũ CHƯA TỪNG ĐĂNG mà đã hết hạn nằm trong
+          # cây làm cả lượt chạy `rc=8` ⇒ MỌI lease mới không đăng được, từ 18-08-2026
+          # tới 20-08-2026 mà không ai biết. Chú thích cũ khai "chốt `posted_comment_id`
+          # lo phần không đăng trùng" — đúng cho lease ĐÃ đăng (rc=9, bỏ qua), sai cho
+          # lease chưa từng đăng. Cổng không nói dối, nó VẮNG MẶT.
+          TU=""
+          if [ -n "${TRUOC:-}" ] \
+             && [ "$TRUOC" != "0000000000000000000000000000000000000000" ] \
+             && git cat-file -e "${TRUOC}^{commit}" 2>/dev/null; then
+            TU="$TRUOC"
+          elif git rev-parse --verify --quiet "origin/$MAC_DINH^{commit}" >/dev/null; then
+            TU="$(git merge-base "origin/$MAC_DINH" "$NAY" || true)"
+          fi
+          # KHÔNG ĐO ĐƯỢC ≠ KHÔNG CÓ GÌ. Bản trước nối `|| true` vào `git diff`, nên một
+          # lỗi biến thành danh sách RỖNG — mà rỗng đọc y hệt "không có lease nào để
+          # đăng". Ba trạng thái: có · không · KHÔNG ĐO ĐƯỢC; trạng thái thứ ba phải làm
+          # cổng ĐỎ, đúng doctrine `None ≠ False`.
+          if [ -z "$TU" ]; then
+            echo "::error::KHONG DO DUOC moc so (before=${TRUOC:-<rong>}," \
+                 "origin/$MAC_DINH khong phan giai duoc) — khong dang gi"
+            exit 1
+          fi
+          echo "moc so: $TU..$NAY"
+          git diff --name-only --diff-filter=ACM "$TU" "$NAY" -- \
+            'ops/leases/*.yaml' 'ops/leases/*.yml' > ds.txt
+          echo "tìm thấy $(wc -l < ds.txt) tệp:"; cat ds.txt
+
+      - name: đăng
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          BI_CHAN=0
+          bao_chan() {
+            echo "::error file=$tep::$1"
+            BI_CHAN=1
+            echo "::endgroup::"
+          }
+          while IFS= read -r tep; do
+            [ -n "$tep" ] || continue
+            [ -f "$tep" ] || continue
+            echo "::group::$tep"
+
+            # `--root .` là gốc kho ĐƯỢC ĐẨY: bộ kiểm đến từ nhánh mặc định, còn tệp
+            # lease và `prompt_path` mà nó neo thì đọc từ head. Không nêu cờ này thì
+            # `_goc_kho` đi ngược từ tệp lease tìm `.git` và cũng ra đúng chỗ đó, nhưng
+            # nói rõ ràng vẫn hơn để tuỳ một hàm suy đoán.
+            set +e
+            python3 "$NEO/ops/lease_publish.py" kiem-github "$tep" --root .
+            rc=$?
+            set -e
+            if [ "$rc" = "9" ]; then echo "đã đăng trước đó — bỏ qua"; echo "::endgroup::"; continue; fi
+            if [ "$rc" != "0" ]; then
+              bao_chan "hai lớp GitHub chặn (rc=$rc)"
+              continue
+            fi
+
+            # `check` phân ba đường bằng MÃ THOÁT, không bằng chữ: 0 đăng được,
+            # 9 đã đăng rồi (bỏ qua, không phải lỗi), còn lại là CHẶN.
+            set +e
+            python3 "$NEO/ops/lease_publish.py" check "$tep" --root .
+            rc=$?
+            set -e
+            if [ "$rc" = "9" ]; then echo "đã đăng trước đó — bỏ qua"; echo "::endgroup::"; continue; fi
+            if [ "$rc" != "0" ]; then
+              bao_chan "cổng chặn (rc=$rc)"
+              continue
+            fi
+
+            set +e
+            ISSUE=$(python3 -c "import sys,yaml;print(yaml.safe_load(open(sys.argv[1],encoding='utf-8'))['packet_issue'])" "$tep")
+            rc=$?
+            set -e
+            if [ "$rc" != "0" ]; then
+              bao_chan "không đọc được packet_issue (rc=$rc)"
+              continue
+            fi
+            # `body` cũng phải đi từ bản neo: nó dựng NỘI DUNG comment mang danh nghĩa
+            # kho, nên một bản `body` bị sửa đăng được bất cứ thứ gì dù `check` xanh.
+            set +e
+            python3 "$NEO/ops/lease_publish.py" body "$tep" > than.md
+            rc=$?
+            set -e
+            if [ "$rc" != "0" ]; then
+              bao_chan "không dựng được thân comment (rc=$rc)"
+              continue
+            fi
+            # Dựng JSON bằng python: thân comment có tiếng Việt, dấu nháy và xuống
+            # dòng — nhét thẳng vào đối số shell là hỏng ở chỗ khó đọc.
+            set +e
+            python3 -c "import json,sys;print(json.dumps({'body':open('than.md',encoding='utf-8').read()}))" > payload.json
+            rc=$?
+            set -e
+            if [ "$rc" != "0" ]; then
+              bao_chan "không dựng được payload (rc=$rc)"
+              continue
+            fi
+
+            set +e
+            ID=$(gh api "repos/$REPO/issues/$ISSUE/comments" --input payload.json --jq .id)
+            rc=$?
+            set -e
+            if [ "$rc" != "0" ]; then
+              bao_chan "đăng comment hỏng (rc=$rc)"
+              continue
+            fi
+            # BẰNG CHỨNG DƯƠNG: đòi một ID số, đừng tin rc của `gh`.
+            case "$ID" in
+              ''|*[!0-9]*) bao_chan "gh không trả về comment id: $ID"; continue;;
+            esac
+            echo "đã đăng comment $ID lên #$ISSUE"
+            echo "::endgroup::"
+          done < ds.txt
+          if [ "$BI_CHAN" != "0" ]; then exit 1; fi

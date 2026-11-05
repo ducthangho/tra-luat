@@ -1,0 +1,53 @@
+{
+  "K1_real_function_isolated": {
+    "before_spec": {
+      "rc": 12,
+      "stderr": "blob --spec tại head không khớp spec_hash của lease\n"
+    },
+    "candidate": {
+      "rc": 0,
+      "returns_exact_spec": true
+    }
+  },
+  "K1_scope": "Nested k1 AST from exact candidate source; real local Git. Other kiem-merge gates not executed; no network.",
+  "ci_classifier": {
+    "paths": [
+      ".github/workflows/ops-publish-lease.yml",
+      "ops/specs/lease-publish-ghim-python-r1.md"
+    ],
+    "mode": "day_du",
+    "reason": "DUONG_NHANH: DAY_DU vi diff co 1 tep ngoai allowlist: '.github/workflows/ops-publish-lease.yml'"
+  },
+  "release_include_spec": false,
+  "doc_claims_default_roots": [
+    "CHANGELOG.md",
+    "SKILL.md",
+    "CLAUDE.md",
+    "CONTEXT.md",
+    "references",
+    "docs"
+  ],
+  "doc_claims_scans_spec": false,
+  "doc_claims_result": {
+    "ok": true,
+    "files_scanned": 123,
+    "flags": [],
+    "advisory_count": 381,
+    "layers_skipped": {}
+  },
+  "doctrine_scan_default_targets": [
+    ".claude/skills/cross-review/SKILL.md",
+    ".claude/skills/grill-me/SKILL.md",
+    ".claude/skills/grilling/SKILL.md",
+    ".claude/skills/land-packets/SKILL.md",
+    ".claude/skills/soan-spec/SKILL.md",
+    ".claude/skills/work-packet/SKILL.md",
+    ".agents/skills/cross-review/SKILL.md",
+    ".agents/skills/land-packets/SKILL.md",
+    ".agents/skills/work-packet/SKILL.md",
+    "CLAUDE.md"
+  ],
+  "doctrine_scans_spec": false,
+  "windows_actual_classifier": "required",
+  "windows_execution": "not_run: ngoài phạm vi chỉ thị review OFFLINE lượt 4; không suy not_required từ câu trong bản đặc tả lưu byte"
+}

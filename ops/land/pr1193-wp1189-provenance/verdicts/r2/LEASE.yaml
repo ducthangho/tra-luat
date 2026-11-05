@@ -1,0 +1,112 @@
+# LEASE — LEASE-PUBLISH-GHIM-PYTHON revision 1 / generation 1 — ghim Python 3.12 cho cong dang lease
+# GHI HO theo chi thi CHU KHO (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 1189
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1189
+authority_url: https://github.com/ducthangho/tra-luat/issues/1189
+granted_on_instruction_nguyen_van: >-
+  Chu kho trong phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4, 04-11-2026: (1) ~15:38Z chon 'Ghim Python 3.12
+  (Recommended)' cho loi cong dang lease do tu khi ubuntu-latest len 26.04; (2) ~15:45Z chon 'Duyệt cả ba (Recommended)' cho
+  cau hoi 'Bạn duyệt đóng băng đặc tả, cấp lease và mở phiên executor không?' ve dac ta r1 sha256 8f4f89a1…, kem chap nhan
+  ngoai le: lease cua packet nay khong dang duoc ban chieu cho toi khi ban va land.
+authority_caveat: >-
+  Chi thi qua AskUserQuestion trong phien dieu phoi; chua co comment chu kho tu viet tren Issue (#566).
+dieu_kien_cap_da_do: >-
+  Do 2026-11-04T15:39Z sau fetch +refs/heads/* va git branch -f master: ops/lease_publish.py ai-dang-giu 2/2 duong dan
+  NGUOI_GIU 0.
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; KHONG thi hanh packet nay.'
+
+leased_at_utc: '2026-11-04T15:45:00Z'
+heartbeat_at: '2026-11-04T15:45:00Z'
+lease_until: '2026-11-05T15:45:00Z'
+lease_expires_at_utc: '2026-11-05T15:45:00Z'
+
+packet_id: LEASE-PUBLISH-GHIM-PYTHON
+packet_slug: lease-publish-ghim-python
+revision: 1
+generation: 1
+lease_id: wp1189-r1-g1-claude
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'Lease dau tien cua packet #1189.'
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_cli
+reviewer_ghi_chu: 'Codex offline qua launcher.py run tren SHA ung vien cuc bo (ADR-0060 M12), roi connector @codex review tren PR draft.'
+access: read-write
+
+spec_path: ops/specs/lease-publish-ghim-python-r1.md
+spec_ref: refs/heads/ops/cap-lease-1189-g1
+spec_source_oid: c1389b19d2dc38706d0a2cd40a81b5eb8e1a617c
+spec_blob: 9137e7f71c27289b2709cdb8919715d41000c4e6
+spec_sha256: 8f4f89a1414fd009f5a16be358925332c6c576a132710f5819e5cce7e778f5ce
+spec_hash: 8f4f89a1414fd009f5a16be358925332c6c576a132710f5819e5cce7e778f5ce
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+spec_ref_ghi_chu: >-
+  Dac ta r1 dong bang tren nhanh lease nay (tien le wp1122: spec + lease cung nhanh ops/**); thu dinh danh la BLOB/BAM.
+
+branch: agent/wp1189-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 1f0941e9bba1d1d517eda4174167b81963c06bd5
+start_from_sha: 1f0941e9bba1d1d517eda4174167b81963c06bd5
+immutable_acceptance_baseline: 1f0941e9bba1d1d517eda4174167b81963c06bd5
+reviewed_sha_required: 1f0941e9bba1d1d517eda4174167b81963c06bd5
+reviewed_sha_ghi_chu: 'chua co head code luc cap lease; moi luot review neo dung SHA cua luot.'
+
+write_set:
+  - .github/workflows/ops-publish-lease.yml
+  - ops/handoff/wp1189-g1-claude.md
+write_set_hash: c252cccdb738966f5fc1b64cbcb66a27804d93bf9aaa11f1e8a77825d5d80f09
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP (LC_ALL=C), noi bang LF, co LF cuoi, utf-8.'
+write_set_ghi_chu: 'Diff PR dung 1 tep (.github/workflows/ops-publish-lease.yml); handoff chi tren nhanh lease/handoff.'
+tran_kich_thuoc: 'ADR-0053: <= 6 tep / <= 450 dong them; A4 chi cho phep 1 tep trong diff PR.'
+tran_loi_goi_codex: >-
+  ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544: tran cung 10; ngan sach mem 2; da dung 0. Hai luot lien tiep chua approve
+  => Review Rescue Checkpoint (ADR-0037), hoi chu kho truoc loi goi ke tiep.
+quy_trinh_ap: >-
+  ADR-0060 mac dinh theo ADR-0062: worker gate tai cho tren dung SHA ung vien (bat bien (a)) -> handoff len Issue #1189 neo SHA
+  ung vien -> review Codex OFFLINE tren SHA cuc bo -> approve moi push DUNG SHA do mot lan + PR draft -> connector + CI PR.
+  Windows khong bat buoc. Luat ban giao chu kho 02-11 khi dung.
+ci_budget:
+  gate_tu_dong: 'CI PR tu dong (ubuntu) tren PR cua packet'
+  het: 'Mot job bat buoc do 2 luot lien tiep cung mot loi => DUNG, bao phien dieu phoi'
+dieu_kien_dung:
+  - 'S1 — can sua tep ngoai write set (ke ca ops/lease_publish_test.py, ci.yml, workflow khac). DUNG, handoff.'
+  - 'S2 — bat ky ca nao trong ops/lease_publish_test.py do vi ban va (khong phai do san tren base). DUNG, bao phien dieu phoi.'
+  - 'S3 — spec tu mau thuan / thieu du kien. DUNG, bao phien dieu phoi.'
+  - 'S4 — het han lease => ngung ghi, ban giao theo luat chu kho 02-11.'
+ngoai_le_dang_ban_chieu: >-
+  Chu kho chap nhan: lease nay KHONG dang duoc ban chieu len Issue cho toi khi ban va land (workflow dang lease di theo ref duoc
+  day, nhanh nay mang ban hong). Lease co hieu luc tren ref; phien dieu phoi dang bu sau land (A6).
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land
+  - Khong day nhanh ops/** thu de do A6 (A6 la viec cua phien dieu phoi sau land)
+  - Khong workflow_dispatch
+  - Khong force-push
+  - Khong viet chuoi bo-qua-CI nguyen van trong commit message
+
+coordination_paths:
+  - ops/leases/wp1189-r1-g1-claude.yaml
+run_minutes: 1440
+heartbeat_required_minutes: 360
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Ban python3 tren ubuntu-26.04 (log khong in) — A6 do sau land.'

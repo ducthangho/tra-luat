@@ -1,0 +1,103 @@
+diff --git a/.github/workflows/ops-publish-lease.yml b/.github/workflows/ops-publish-lease.yml
+index 4114a52..a3f3309 100644
+--- a/.github/workflows/ops-publish-lease.yml
++++ b/.github/workflows/ops-publish-lease.yml
+@@ -70,6 +70,14 @@ jobs:
+         with:
+           fetch-depth: 0        # cần lịch sử để so `before`..`sha`
+ 
++      # GHIM PYTHON, cùng số với `ci.yml` (Issue #1189). Từ khi `ubuntu-latest` lên
++      # `ubuntu-26.04` (04-11-2026), bước tự kiểm đỏ ở `t191` (283/284); tại chỗ 3.13 xanh,
++      # 3.14 tái hiện đúng chữ ký ấy (bản trên runner chưa đo, A6). Cổng phải chạy trên đúng
++      # bản Python mà CI đã đo nó. Bước này đặt `python3` trên PATH, các bước dưới giữ nguyên.
++      - uses: actions/setup-python@v5
++        with:
++          python-version: "3.12"
++
+       # GHIM EXACT, cùng số với `ci.yml`. Cross-review PR "#134" (codex) đo được lỗ spec
+       # trần có ở CẢ HAI workflow, không chỉ ở bản vá mới — nên sửa một chỗ là để lại
+       # đúng lỗ ấy ở chỗ NGUY HIỂM HƠN: đường này chạy với `issues: write`, và bộ kiểm nó
+diff --git a/ops/specs/lease-publish-ghim-python-r1.md b/ops/specs/lease-publish-ghim-python-r1.md
+new file mode 100644
+index 0000000..9137e7f
+--- /dev/null
++++ b/ops/specs/lease-publish-ghim-python-r1.md
+@@ -0,0 +1,78 @@
++# Đặc tả packet `LEASE-PUBLISH-GHIM-PYTHON` r1: ghim Python 3.12 cho cổng đăng lease
++
++tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
++tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
++
++| trường | giá trị |
++|---|---|
++| packet_id | `LEASE-PUBLISH-GHIM-PYTHON`, revision 1, generation 1 |
++| packet_issue | #1189 |
++| nguon_cap_viec | Issue #1189 (phiên điều phối mở 04-11-2026 ~15:40Z). Chủ kho chọn *"Ghim Python 3.12 (Recommended)"* qua AskUserQuestion trong phiên điều phối `session_015GtxraXfMD1t2FJLzzGDr4`, 04-11-2026 ~15:38Z |
++| review_class | `sensitive` — định nghĩa workflow của cổng đăng lease (`issues: write`) |
++| base | `origin/master` lúc cấp lease |
++| executor | `anthropic_claude` (Claude Code remote, Linux) |
++| reviewer | `openai_codex` qua `launcher.py run` (offline, neo SHA ứng viên, ADR-0060 M12) + connector `@codex review` trên PR draft |
++| luật merge | ADR-0060 mặc định theo ADR-0062 (không cần dòng khai `dieu_kien_merge`) |
++
++## 1. Vì sao — số đo (04-11-2026, `origin/master` = `1f0941e`)
++
++| # | sự kiện | số đo |
++|---|---|---|
++| S1 | lượt `ops — đăng lease bằng git` đỏ | mọi lượt từ 10:52Z (≥ 9 lượt, nhánh lease #1187 và #1105); lượt xanh cuối 41806052278 lúc 09:16Z; master không đổi trong khoảng ấy |
++| S2 | bước đỏ | *tự kiểm cổng trước khi tin nó*: `lease_publish: 283/284 đạt`, ca đỏ duy nhất `t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG` |
++| S3 | image runner | xanh 41806052278 `ubuntu-24.04`; đỏ 41817032032 `ubuntu-26.04` |
++| S4 | tái hiện tại chỗ, cùng `1f0941e`, `--chi-ca=t191_` | Python 3.13.17 ⇒ `1/1 đạt`; Python 3.14.6 ⇒ `0/1`, thiếu khoá `('goc','Interpolation',{and,case,if,ifexp,or})` |
++| S5 | workflow | `ops-publish-lease.yml` gọi `python3` hệ điều hành, KHÔNG có `actions/setup-python`; `ci.yml` ghim `"3.12"` bằng `actions/setup-python@v5` (8 chỗ) |
++
++## 2. Thay đổi
++
++Thêm vào job `dang` của `.github/workflows/ops-publish-lease.yml` **đúng một** bước `uses: actions/setup-python@v5`
++với `with: python-version: "3.12"`, đặt ngay sau `actions/checkout@v4` và **trước** bước `cài PyYAML` (bước đầu tiên
++gọi `python3`). Kèm một khối chú thích ngắn nêu lý do (S1–S5, Issue #1189) và rằng số `"3.12"` phải cùng số với `ci.yml`.
++
++Không đổi bước nào khác, không đổi `on:`/`permissions`/`if:`/`env:`, không đổi chuỗi `python3` trong các bước.
++`actions/setup-python` đặt `python3` trên PATH trỏ về bản đã ghim, nên các lời gọi `python3 …` giữ nguyên.
++
++## 3. Write set
++
++```yaml
++write_set:
++  - .github/workflows/ops-publish-lease.yml
++  - ops/handoff/wp1189-g1-claude.md
++```
++
++Diff PR: đúng 1 tệp (`ops-publish-lease.yml`). Handoff chỉ sống trên nhánh lease/handoff. Trần kích thước theo
++`ADR-0053` (≤ 6 tệp / ≤ 450 dòng thêm); dự kiến ≤ 20 dòng thêm.
++
++Trần lời gọi Codex: dòng khai `ADR-0055` ⇒ trần **10**; ngân sách mềm **2**. Hai lượt liên tiếp chưa approve ⇒ Review
++Rescue Checkpoint (`ADR-0037`), hỏi chủ kho trước lời gọi kế tiếp.
++
++## 4. Nghiệm thu
++
++| ID | phép đo | nền | đột biến làm ĐỎ |
++|---|---|---|---|
++| A1 | `yaml.safe_load` tệp ứng viên: job `dang` có đúng một bước `uses` bắt đầu `actions/setup-python@`, `with.python-version == "3.12"`, nằm sau checkout và trước MỌI bước có `run` chứa `python3` | linux | bỏ bước; đổi `"3.12"` thành `"3.x"`; dời bước xuống sau `cài PyYAML` |
++| A2 | `ops/lease_publish_test.py` trọn bộ trên SHA ứng viên, Python 3.12: dòng `lease_publish: N/N đạt` hai số bằng nhau, `bỏ qua=0`; gồm các ca canh workflow (`t24`, `t33` actionlint trên `ops-publish-lease.yml`, các ca đọc `WORKFLOW_DANG`) | linux | — |
++| A3 | `actionlint` trên `ops-publish-lease.yml` ứng viên: rc=0 với `shellcheck` có mặt (thiếu công cụ ⇒ KHÔNG ĐO ĐƯỢC, không xanh) | linux | — |
++| A4 | `git diff --numstat <base> <ứng viên>`: chỉ `.github/workflows/ops-publish-lease.yml`; ≤ 450 dòng thêm | — | thêm tệp thứ hai vào diff ⇒ ĐỎ |
++| A5 | bất biến (a) protocol: `python scripts/tl.py --selftest` N/N và `git diff --check` rc=0 trên SHA sẽ đẩy | linux | — |
++| A6 (sau land) | phiên điều phối merge master vào một nhánh lease đang chờ (`ops/cap-lease-1105-g1` hoặc `ops/cap-lease-1189-g1`), đẩy, và đọc lượt `ops — đăng lease bằng git`: job chạy trên `ubuntu-26.04` (nhãn image trong log), bước tự kiểm in `lease_publish: N/N đạt` hai số bằng nhau, conclusion success | GitHub Actions | — |
++
++A6 là phép đo LIVE sau merge, do phiên điều phối làm; executor không đẩy nhánh `ops/**` thử.
++
++## 5. Ngoài phạm vi (nợ có tên)
++
++- `t191-python-314-interpolation`: cho `t191` phủ `ast.Interpolation` của Python 3.14 (sửa `ops/lease_publish_test.py`). Packet riêng.
++- `ops-thu-hoi-admission.yml` và `ops-do-workflow-definition.yml` cũng dùng `python3` hệ điều hành; chưa đo thấy hỏng (thu-hoi không chạy bộ test có `t191`). Ghim chúng là packet riêng nếu cần.
++- Không đổi `runs-on` (không ghim `ubuntu-24.04`).
++
++## 6. Ngoại lệ đã biết
++
++- **Lease của chính packet này không đăng được bản chiếu** cho tới khi A6 xanh: định nghĩa workflow đi theo ref được đẩy,
++  nên nhánh lease vẫn chạy bản hỏng. Lease có hiệu lực trên ref (`ai-dang-giu` đọc ref); phiên điều phối đăng bù sau land
++  bằng cách merge master vào nhánh lease và đẩy lại.
++- Windows: không bắt buộc (diff không chạm `.claude/dev/**`, không có dòng khai `windows: required`).
++
++## 7. `chua_do_duoc`
++
++- Bản Python `python3` thực tế trên image `ubuntu-26.04`: log không in; suy từ S4 (3.14 tái hiện đúng chữ ký) — A6 đo thẳng sau land.

@@ -20,8 +20,8 @@ recorder_ghi_chu: 'phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi theo quy
 executor_session: session_015GtxrZjmb1AiDoYkoSFqph
 leased_at_utc: '2026-11-05T04:56:00Z'
 heartbeat_at: '2026-11-05T04:56:00Z'
-lease_until: '2026-11-07T04:56:00Z'
-lease_expires_at_utc: '2026-11-07T04:56:00Z'
+lease_until: '2026-11-05T06:05:00Z'
+lease_expires_at_utc: '2026-11-05T06:05:00Z'
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude
@@ -70,3 +70,12 @@ prohibited_actions:
 - write_outside_effective_write_set
 - sua_packet_loop_py
 land_authority_note: 'dieu phoi merge PR ghi so; ho so ghi landed false, moc chua do ghi not_measured'
+lease_sua_lan_cuoi: '2026-11-05T05:47:00Z'
+lease_sua_ghi_chu: 'Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han) sau khi PR #1220 merge. Khong doi write set, spec, branch.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-07T04:56:00Z'
+  han_moi_utc: '2026-11-05T06:05:00Z'
+  chi_thi: 'Phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq giao rut han sau merge (theo quyet dinh chu kho issuecomment-6650045712); executor session_015GtxrZjmb1AiDoYkoSFqph ghi.'
+  ly_do: 'Ghi so xong: PR #1213 merge a5293e1 (ban landed false) va PR #1220 merge d0fde4a (khoi landed_20261105 kieu b); M8 dang issuecomment-6650790274; #1134 da dong completed.'
+  vi_sao_han_moi_khong_bang_luc_sua: 'Han moi = luc sua + 18 phut de luot ops-publish-lease cua commit nay doc lease CON HAN (rc=9 da dang), khong roi vao rc=8 (bai hoc CLAUDE.md 20-09-2026). Khong viet bia mo: khong co lease ke nhiem.'
+  tien_le: 'wp1134-r2-g1-claude (9a2c5c6).'

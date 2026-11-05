@@ -1,0 +1,24 @@
+{
+  "owner_reply": "Đã đọc cả hai, duyệt land đủ gate và bootstrap K4 riêng 33df4b6",
+  "owner_source": "https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6650620685",
+  "heads": [
+    "33df4b678e3d1f12e68a9c9d362dc0446f0dd5c2",
+    "91686a66d855a9ddae9dcf4567b13ddaa092cbc2"
+  ],
+  "method": "merge",
+  "target": "master",
+  "expires_at": "2026-11-05T12:35:17Z",
+  "scope": [
+    "authorizedpublication",
+    "draftlifecycle",
+    "conditionalexactheadmerge",
+    "postmergeCI",
+    "canonicalnewchecker",
+    "M8/readback",
+    "leaseclosure",
+    "Packet/Missionbookkeeping"
+  ],
+  "infra_only_bootstrap_K4": true,
+  "other_gates_unchanged": true,
+  "no_deploy_or_ruleset_bypass": true
+}

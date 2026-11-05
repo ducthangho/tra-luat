@@ -95,7 +95,8 @@ authority_notes:
   expiry/review does not extend.
 - Physical g4-named source branch reused under new g5 lease by explicit owner exception;
   predecessor expired and sealed, two-way superseded.
-operational_state: granted; awaiting publication/readback before Executor start
+operational_state: executor sealed; exact-head personal human approved; sourcepublication
+  and external gates pending
 publication_allowance:
   additional_fastforward_source_pushes: 1
   pull_request: 1202
@@ -105,4 +106,21 @@ publication_allowance:
   source_push_used: 0
   M9_used: 0
   no_force_push: true
-reviewed_sha_required: ef864d6b3192a08487cd7fc0e526633afcb693d9
+reviewed_sha_required: 91686a66d855a9ddae9dcf4567b13ddaa092cbc2
+frozen_head: 91686a66d855a9ddae9dcf4567b13ddaa092cbc2
+frozen_tree: e9d2b287343f44ac29a0713e0c0ea6b909aa408c
+human_audit_source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6650620685
+primary_human_audit_comment: https://github.com/ducthangho/tra-luat/pull/1202#issuecomment-6650626062
+land_authority_source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6650620685
+execution_handoff:
+  completed_at_utc: '2026-11-05T05:45:22Z'
+  task: /root/wp1178_r5_executor
+  head: 91686a66d855a9ddae9dcf4567b13ddaa092cbc2
+  tree: e9d2b287343f44ac29a0713e0c0ea6b909aa408c
+  full_diff_files: 6
+  full_diff_added: 1183
+  full_diff_deleted: 1
+  actual_changed_paths:
+  - .github/workflows/ci.yml
+  evidence_manifest_sha256: 254784ddf630577a47499e954a1e4283cccdabb341381a5dc75c4868987da383
+  no_source_push_by_executor: true

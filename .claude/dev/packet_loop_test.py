@@ -9768,7 +9768,7 @@ def _cli1187(x, w, h):
     if not h:
         policy = "docs/adr/0063-merge-spec-ref-va-human-audit.md"
         (w / policy).parent.mkdir(parents=True, exist_ok=True)
-        (w / policy).write_bytes((Path(__file__).resolve().parents[2] / policy).read_bytes())
+        (w / policy).write_bytes((HERE.parents[1] / policy).read_bytes())
         _g(w, "add", policy), _g(w, "commit", "-qm", "land ADR63 fixture")
         return
     import yaml
@@ -10559,6 +10559,7 @@ def main() -> int:
                 suite = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(suite)
                 suite.HERE = HERE  # fixture canonical; __file__ vẫn là harness đột biến
+                suite.ROOT = ROOT
             doi_chung = suite._doi_chung_khac_ho(phai_chet) + suite._controls1187(ten_mut, phai_chet)
             ket_mut = suite.chay_suite(mut, mut_dir,
                                        chi_chay=set(phai_chet) | set(doi_chung))

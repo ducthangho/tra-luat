@@ -1,0 +1,23 @@
+# merge b3249c3 — do 2026-11-02T06:17:53Z trong phien session_015GtxrcJvhJaXc7eNPaoNM4
+commit b3249c3e8a5a8f3af5691160493b8ab3d52db99c
+parents 47ee1b206d284c82d16036972b82b17196cd8dc7 aad4865c734e7c146463b13ed1750a47e6a9cb8f
+tree aa670e40c5a95a2a896705c7c4f2321ed4c31063
+author ducthangho 2026-11-02T12:58:25+07:00
+tree(H aad4865) dce456c90ddffaef089140293e77de2cbb502c48
+
+## git diff --stat b3249c3^1 b3249c3 (dong gop cua PR so voi cha master)
+ .github/workflows/ci.yml               |  8 ++-
+ .github/workflows/launcher-windows.yml |  3 +-
+ ops/ci_duong_nhanh_test.py             | 29 ++++++++++-
+ ops/specs/CI-CONCURRENCY-MASTER-r1.md  | 95 ++++++++++++++++++++++++++++++++++
+ 4 files changed, 131 insertions(+), 4 deletions(-)
+
+## git diff --numstat 9091cf5 aad4865 (base lease .. head)
+6	2	.github/workflows/ci.yml
+2	1	.github/workflows/launcher-windows.yml
+28	1	ops/ci_duong_nhanh_test.py
+95	0	ops/specs/CI-CONCURRENCY-MASTER-r1.md
+
+## ancestry (kieu b): 2609cd8, b01c0ac, 02ddeb4 la to tien cua b3249c3?
+2609cd816c44607e5ff697e58c77b989fc4a558b ancestor rc=0
+b01c0ac8e663eee938e359a7f94c3867435a6556 ancestor rc=0

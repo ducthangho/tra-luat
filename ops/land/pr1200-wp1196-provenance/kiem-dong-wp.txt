@@ -1,4 +1,4 @@
-# kiem-dong-wp (packet_loop.py master 39d511d) do 2026-11-05T04:32:15Z; --lease = tep lease tai ops/wp1196-r2-g1-lease@b677392e
+# kiem-dong-wp (packet_loop.py master 39d511d) do 2026-11-05T04:39:18Z; --lease = ops/leases/a13-k1-canary-land-r2-g1-claude-remote-20261105.yaml tai ops/wp1196-land-r2-g1-lease@2469362
   THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
   THIẾU  D4 lease: không khớp lease_cuoi/packet/generation hoặc lease_until chưa qua
 CHƯA ĐÓNG ĐƯỢC WP: thiếu D2; D4

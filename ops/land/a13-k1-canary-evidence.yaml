@@ -39,7 +39,7 @@ nghiem_thu:
   A8: not_measured
   A9: failed
   A10: passed
-lease_cuoi: a13-k1-canary-r2-g1-claude-remote-20261105
+lease_cuoi: a13-k1-canary-land-r2-g1-claude-remote-20261105
 landed: false
 moc_10_2_2:
   run: 'measured — readback-runs-7814938.json: run 41967113665 ci.yml push, head_sha 7814938, completed/success; readback-jobs-41967113665.json 16 job, ket luan {success, skipped}, nhan ubuntu-latest. kiem-gate tren run nay: not_measured.'
@@ -77,6 +77,16 @@ lease:
   lease_until: '2026-11-07T03:08:00Z'
   base_sha: 4d258cc8831b5c6169114d1e8e88a8782096d6f6
   write_set: [ops/specs/A13-K1-CANARY-r2.md]
+lease_ghi_so:
+  lease_id: a13-k1-canary-land-r2-g1-claude-remote-20261105
+  path: ops/leases/a13-k1-canary-land-r2-g1-claude-remote-20261105.yaml (nhanh ops/wp1196-land-r2-g1-lease @ 2469362)
+  ban_chieu: https://github.com/ducthangho/tra-luat/issues/1196#issuecomment-6649814220
+  authority_url: https://github.com/ducthangho/tra-luat/issues/1196#issuecomment-6649732390
+  lease_until: '2026-11-07T04:32:00Z'
+  branch: claude/ghi-so-land-1196
+  base_sha: 39d511d23af3897c36de2ccf3fd75f35669f54bf
+  write_set: [ops/land/a13-k1-canary-evidence.yaml, ops/land/pr1200-wp1196-provenance/]
+  ghi_chu: 'commit dau 57d60a8 ghi luc 04:32Z theo chi thi chu kho 6649676420, TRUOC khi lease nay duoc dang; cung base, cung write set. Ban dau day len agent/wp1196-land-claude (PR #1207, da dong), nay chuyen sang nhanh cua lease.'
 
 pr:
   number: 1200
@@ -142,7 +152,7 @@ no_ghi_nhan:
 
 # ---- A8 / dong packet
 a8_backlink_1124: not_measured
-kiem_dong_wp: 'measured — kiem-dong-wp.txt rc=12: chi thieu D2 (landed false) va D4 (lease_until 2026-11-07T03:08Z chua qua); D1, D3 qua. #1196 CHUA dong duoc theo chi thi (dieu kien rc=0).'
+kiem_dong_wp: 'measured — kiem-dong-wp.txt rc=12: chi thieu D2 (landed false) va D4 (lease_until cua lease_cuoi 2026-11-07T04:32Z chua qua); D1, D3 qua. #1196 CHUA dong duoc theo chi thi (dieu kien rc=0).'
 khong_do_duoc:
   - 'Moc checkout / workflow_definition / gate_output cua run 41967113665.'
   - 'Luot Windows va full mutant audit tren ec805d8.'

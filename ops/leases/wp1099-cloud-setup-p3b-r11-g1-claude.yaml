@@ -20,8 +20,8 @@ recorder_ghi_chu: 'Phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; executo
 
 leased_at_utc: '2026-11-05T08:19:00Z'
 heartbeat_at: '2026-11-05T12:24:00Z'
-lease_until: '2026-11-06T08:19:00Z'
-lease_expires_at_utc: '2026-11-06T08:19:00Z'
+lease_until: '2026-11-05T16:40:00Z'
+lease_expires_at_utc: '2026-11-05T16:40:00Z'
 
 packet_id: CLOUD-SETUP-P3B-NLM-401
 packet_slug: cloud-setup-p3b-nlm-401
@@ -122,3 +122,18 @@ chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Cach dem loi goi Codex giua pha dac ta va pha thuc thi cho #1099 (xem tran_loi_goi_codex).'
   - 'M1 (LIVE sau land) — chu kho duyet rieng; khong phai viec cua executor truoc land.'
+
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-06T08:19:00Z'
+  han_moi_utc: '2026-11-05T16:40:00Z'
+  chi_thi: >-
+    Chu kho duyet "Dong y cap lease ghi so land #1099" (05-11-2026 ~15:49Z, phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq;
+    #1099 issuecomment-6662458438): write set lease ghi so gom ops/leases/wp1099-cloud-setup-p3b-r11-g1-claude.yaml, chi rut han
+    de nha lease thi cong. Lease ghi so ghi-so-land-pr1197-wp1099-r11-g1-claude-remote-20261105 (nhanh ops/ghi-so-land-1099-lease @ cc81002).
+  ly_do: >-
+    Packet #1099 da MERGE: PR #1197, merge commit b255b0b7131da7f6e026639f6b0da0a06cc68a44 (2026-11-05T15:44:56Z),
+    head 99442469f331e4808ee9de43e2beb75416e51a21.
+  vi_sao_khong_dung_so: >-
+    Theo tien le #650/#661 va pr1193 (8e32834): rut han bang co che DA CAI (phan loai lease theo han). Han moi dat vai chuc phut
+    SAU luc push de ops-publish-lease.yml con thay lease song (khong roi vao rc=8).
+  ghi_boi: 'phien ghi so session_015GtxrashcQS6kbxWN1qRsA'

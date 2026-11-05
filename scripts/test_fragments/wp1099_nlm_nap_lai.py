@@ -132,11 +132,9 @@ def _mot(cay, ca, args, **st):
     return kq, err, cay.nhat_ky()
 _SL = ["source", "list", "NB", "-j"]
 def _a1(cay):
-    for ten, them in (("vang", {"CLAUDE_CODE_REMOTE": None}), ("false", {"CLAUDE_CODE_REMOTE": "false"}),
-                      ("tat", {"TL_NLM_NAP_LAI_TAT": "1"})):
+    for ten, them in (("vang", {"CLAUDE_CODE_REMOTE": None}), ("false", {"CLAUDE_CODE_REMOTE": "false"}), ("tat", {"TL_NLM_NAP_LAI_TAT": "1"})):
         with _Env({**cay.env, **them}):
-            cay.dat()
-            m = cay.moi()
+            cay.dat(), (m := cay.moi())
             goc = m._run_mot(_SL, 30)                 # thân `_run` của base, giữ nguyên byte (chỉ đổi tên)
             cay.dat()
             kq, err = cay.goi(m, _SL)
@@ -163,8 +161,7 @@ def _a5(cay):
     for che_do, mong in (("song", "BỎ QUA — canary sống"), ("none", "KHÔNG ĐO ĐƯỢC — canary"),
                          ("loi", "KHÔNG ĐO ĐƯỢC — canary"), ("ngu", "KHÔNG ĐO ĐƯỢC — canary")):
         cay.dat(canary="jar" if che_do == "song" else che_do, jar="chet")
-        m = cay.moi()
-        m._NAP_LAI_HAN_CANARY = 1
+        (m := cay.moi())._NAP_LAI_HAN_CANARY = 1
         if che_do == "song":                         # canary sống trong khi nlm vẫn báo auth: lỗi không do auth
             cay.dat(nlm_rc=1, nlm_err="unauthorized", jar="song")
         kq, err = cay.goi(m, _SL)
@@ -195,6 +192,11 @@ def _a9(cay):
     finally:
         sys.stderr = cu
     _chot("A9", sum("nlm-auth-load" in c for c in cay.nhat_ky()) == 1, "hai luồng ⇒ nạp khác 1 lần")
+    if hasattr(os, "mkfifo"):                     # dấu là FIFO không có bên ghi ⇒ đọc dấu không được treo (F06)
+        cay.dat(), os.mkfifo(cay.tep_dau)
+        x = threading.Thread(target=cay.moi()._doc_dau, daemon=True)
+        x.start(), x.join(5), x.is_alive() and os.close(os.open(cay.tep_dau, os.O_WRONLY | os.O_NONBLOCK))  # gỡ kẹt
+        _chot("A9", not x.is_alive(), "đọc dấu FIFO treo"), cay.tep_dau.unlink()
     for dau, nap in ((-300, 0), (-700, 1), (3600, 1), ([1], 1)):
         cay.dat(bundle="chet")
         cay.dau(dau if isinstance(dau, list) else int(time.time()) + dau)
@@ -295,7 +297,8 @@ _DOT_BIEN = (
     ("de_rac_tam", "            os.unlink(tam) if tam else None", "            pass", "A10", "A10"),
     ("don_khong_bao_ve", "        except OSError:\n            pass\n        return False", "        except ZeroDivisionError:\n            pass\n        return False", "A10", "A10"),
     ("bo_khoa_luong", "    with _NAP_LAI_KHOA:", "    if True:", "A9", "A9"),
-    ("cua_so_60", "_NAP_LAI_CUA_SO = 600", "_NAP_LAI_CUA_SO = 60", "A9", "A9"),
+    ("doc_dau_chan", ' | getattr(os, "O_NONBLOCK", 0)', "", "A9", "A9"),
+    ("cua_so_60", "= 120, 60, 600", "= 120, 60, 60", "A9", "A9"),
     ("bo_chot_dong_ho_lech", "ts <= now + 60 and ", "", "A9", "A9"),
     ("ghi_dau_sau_nap", 'if not _ghi_dau(int(now), "dang_nap"):', "if False:", "A10", "A10"),
     ("chuyen_tiep_dau_ra_con", "        return p.returncode, (p.stdout or \"\")", "        print(p.stdout, file=sys.stderr)\n        return p.returncode, (p.stdout or \"\")", "A5", "A11"),

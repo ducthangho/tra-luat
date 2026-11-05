@@ -131,8 +131,7 @@ def _run_mot(args: list[str], timeout: int = 120) -> tuple[int, str, str]:
 NAP_LAI_GAN_NHAT = None            # {trang_thai, ts} của lời gọi `_run` gần nhất đã tới bước "Giới hạn", hoặc None
 _NAP_LAI_DA_NAP = False            # trần BẢO ĐẢM: 1 lần nạp mỗi tiến trình (khoá luồng giữ nó đúng cả khi đa luồng)
 _NAP_LAI_KHOA = threading.Lock()
-_NAP_LAI_HAN_CANARY, _NAP_LAI_HAN_NAP = 120, 60     # canary: _nlm_auth_alive thử 3 lần × 30 s + 4,5 s chờ
-_NAP_LAI_CUA_SO = 600
+_NAP_LAI_HAN_CANARY, _NAP_LAI_HAN_NAP, _NAP_LAI_CUA_SO = 120, 60, 600     # canary: 3 lần × 30 s + 4,5 s chờ
 _NAP_LAI_CHO_PHEP = frozenset({("source", "list"), ("source", "get"), ("source", "content"),
                                ("notebook", "get"), ("notebook", "list"), ("notebook", "query")})
 _CANARY = ("import sys\nsys.path.insert(0, sys.argv[1])\ntry:\n    import tl\n    tg = tl._imp('tl_gws')\n    tg.bind(tl)\n"
@@ -144,8 +143,10 @@ def _tep_dau() -> str:
     return os.path.join(os.path.expanduser("~"), ".notebooklm-mcp-cli", ".tra-luat-nap-lai.json")
 
 def _doc_dau():
-    try:
-        d = json.load(open(_tep_dau(), encoding="utf-8"))
+    try:                               # không chặn, không theo symlink, đọc ≤ 4 KiB: FIFO/thiết bị không treo `_run` (F06)
+        fd = os.open(_tep_dau(), os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_NOFOLLOW", 0))
+        with os.fdopen(fd, "rb") as f:
+            d = json.loads(f.read(4096))
         ts = d.get("ts") if isinstance(d, dict) else None
         return float(ts) if isinstance(ts, (int, float)) and not isinstance(ts, bool) else None
     except Exception:

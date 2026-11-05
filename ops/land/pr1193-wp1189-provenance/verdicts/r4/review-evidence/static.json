@@ -1,0 +1,57 @@
+{
+  "head": "275869169e134758bb145565d28f0b0897a92f87",
+  "reviewed_tree": "701104e0f3c038fde275c784726c1addaa06a74e",
+  "merge": "ccf77900e698727d9d5987414bc85def40f0c17c",
+  "merge_parents": [
+    "3b430923c88f67041ce79ce9b2f8aac0e53a28b4",
+    "358451e80b573d148807717bece3fd973915fbad"
+  ],
+  "merge_base": "5fe92c1390ca1723d19f374bd364487f013986a1",
+  "master_ancestor": true,
+  "numstat": [
+    [
+      "8",
+      "0",
+      ".github/workflows/ops-publish-lease.yml"
+    ],
+    [
+      "78",
+      "0",
+      "ops/specs/lease-publish-ghim-python-r1.md"
+    ]
+  ],
+  "spec_sha256": "8f4f89a1414fd009f5a16be358925332c6c576a132710f5819e5cce7e778f5ce",
+  "spec_bytes": 6121,
+  "spec_equals_supplied": true,
+  "workflow_equals_luot2_luot3": true,
+  "workflow_patch_byte_equal": true,
+  "workflow_patch_sha256": "06989b97c8c10848ed4966289e4cf049ba14b9a5acc02d712f3a56aa42431481",
+  "expected_merge_tree": "f8a30333125236981012051d204a892c513c7aa4",
+  "merge_tree_equals_master_with_approved_workflow": true,
+  "merge_delta_equals_master_delta": true,
+  "master_changed_paths": 109,
+  "merge_only_master_content": true,
+  "head_only_adds_spec": true,
+  "yaml_remove_setup_equals_master": true,
+  "setup_step": {
+    "uses": "actions/setup-python@v5",
+    "with": {
+      "python-version": "3.12"
+    }
+  },
+  "setup_index": 1,
+  "ci_matching_python_pins": 8,
+  "supplied_patches_match": {
+    "diff_vs_master.patch": true,
+    "delta_luot3_luot4.patch": true
+  },
+  "core_abbrev": "7",
+  "master_change_summary": {
+    "statuses": {
+      "M": 2,
+      "A": 107
+    },
+    "all_under_ops_land": true,
+    "changed_paths": 109
+  }
+}

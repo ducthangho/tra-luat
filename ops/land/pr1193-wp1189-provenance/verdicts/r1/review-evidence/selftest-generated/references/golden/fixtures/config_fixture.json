@@ -1,0 +1,25 @@
+{
+ "defaultProfile": "vbqppl",
+ "profiles": {
+  "Hồ sơ 74": {
+   "categories": "own",
+   "manifestId": "manifest_p74",
+   "manifestScope": "own",
+   "metaFolderId": "meta_p74",
+   "notebookId": "nb_p74",
+   "registryDocId": "regsheet_p74_1234567890",
+   "rootFolderId": "root_p74"
+  },
+  "vbqppl": {
+   "manifestId": "manifest_fix",
+   "metaFolderId": "meta_fix",
+   "notebookId": "nb_base",
+   "overflowNotebookId": "nb_ovf",
+   "registryDocId": "regsheet_fixture_1234567890",
+   "rootFolderId": "root_fix"
+  }
+ },
+ "schema": 2,
+ "token": "tk_fixture",
+ "webappUrl": "https://fixture.invalid/exec"
+}

@@ -1,0 +1,2163 @@
+/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:3627: SyntaxWarning: invalid escape sequence '\s'
+  """Nợ được ĐẶT TÊN trong mã phải có nhà trong sổ, và mục đã khai backlink phải còn marker.
+/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:5774: SyntaxWarning: invalid escape sequence '\d'
+  """Tail tệp log con đang ghi, in từng DÒNG ĐỦ ra stdout CHA kèm tiền tố. Line-atomic qua `khoa`.
+>>> vao t01_lease_hop_le_thi_QUA 2026-11-04T16:26:49Z
+<<< ra t01_lease_hop_le_thi_QUA 0.105s QUA
+>>> vao t01_legacy_provider_aliases 2026-11-04T16:26:49Z
+<<< ra t01_legacy_provider_aliases 2.524s QUA
+>>> vao t01_executor_assurance_target_is_not_review_verdict 2026-11-04T16:26:52Z
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+<<< ra t01_executor_assurance_target_is_not_review_verdict 1.858s QUA
+>>> vao t01_ag_identity_and_family_gate 2026-11-04T16:26:53Z
+<<< ra t01_ag_identity_and_family_gate 8.210s QUA
+>>> vao t02_granted_by_la_ten_provider_bi_CHAN 2026-11-04T16:27:02Z
+<<< ra t02_granted_by_la_ten_provider_bi_CHAN 0.336s QUA
+>>> vao t02b_ten_KHONG_CO_THAM_QUYEN_bi_CHAN 2026-11-04T16:27:02Z
+<<< ra t02b_ten_KHONG_CO_THAM_QUYEN_bi_CHAN 0.563s QUA
+>>> vao t02c_nguoi_CO_tham_quyen_thi_QUA_moi_cach_viet 2026-11-04T16:27:03Z
+<<< ra t02c_nguoi_CO_tham_quyen_thi_QUA_moi_cach_viet 0.252s QUA
+>>> vao t02d_GITHUB_ACTOR_khong_co_tham_quyen_bi_CHAN 2026-11-04T16:27:03Z
+<<< ra t02d_GITHUB_ACTOR_khong_co_tham_quyen_bi_CHAN 0.168s QUA
+>>> vao t03_lease_da_het_han_bi_CHAN 2026-11-04T16:27:03Z
+<<< ra t03_lease_da_het_han_bi_CHAN 0.082s QUA
+>>> vao t04_han_thieu_mui_gio_bi_CHAN 2026-11-04T16:27:03Z
+<<< ra t04_han_thieu_mui_gio_bi_CHAN 0.082s QUA
+>>> vao t05_thieu_truong_bat_buoc_bi_CHAN 2026-11-04T16:27:03Z
+<<< ra t05_thieu_truong_bat_buoc_bi_CHAN 0.479s QUA
+>>> vao t06_sha_khong_dung_dang_bi_CHAN 2026-11-04T16:27:04Z
+<<< ra t06_sha_khong_dung_dang_bi_CHAN 0.352s QUA
+>>> vao t07_packet_issue_khong_phai_so_bi_CHAN 2026-11-04T16:27:04Z
+<<< ra t07_packet_issue_khong_phai_so_bi_CHAN 0.088s QUA
+>>> vao t09_body_in_ra_nguyen_van_YAML_de_doi_chieu 2026-11-04T16:27:04Z
+<<< ra t09_body_in_ra_nguyen_van_YAML_de_doi_chieu 0.089s QUA
+>>> vao t10_body_TU_CHOI_lease_khong_hop_le 2026-11-04T16:27:04Z
+<<< ra t10_body_TU_CHOI_lease_khong_hop_le 0.085s QUA
+>>> vao t12_tep_khong_ton_tai_bao_ro 2026-11-04T16:27:04Z
+<<< ra t12_tep_khong_ton_tai_bao_ro 0.100s QUA
+>>> vao t13_yaml_hong_khong_duoc_no_traceback 2026-11-04T16:27:04Z
+<<< ra t13_yaml_hong_khong_duoc_no_traceback 0.085s QUA
+>>> vao t14_neo_prompt_DUNG_thi_QUA 2026-11-04T16:27:04Z
+<<< ra t14_neo_prompt_DUNG_thi_QUA 0.092s QUA
+>>> vao t15_bam_LECH_thi_CHAN 2026-11-04T16:27:05Z
+<<< ra t15_bam_LECH_thi_CHAN 0.089s QUA
+>>> vao t16_tep_prompt_KHONG_CO_thi_CHAN 2026-11-04T16:27:05Z
+<<< ra t16_tep_prompt_KHONG_CO_thi_CHAN 0.092s QUA
+>>> vao t17_neo_NUA_VOI_thi_CHAN_CA_HAI_CHIEU 2026-11-04T16:27:05Z
+<<< ra t17_neo_NUA_VOI_thi_CHAN_CA_HAI_CHIEU 0.171s QUA
+>>> vao t18_prompt_path_VUOT_RA_NGOAI_kho_thi_CHAN 2026-11-04T16:27:05Z
+<<< ra t18_prompt_path_VUOT_RA_NGOAI_kho_thi_CHAN 0.350s QUA
+>>> vao t19_symlink_tro_RA_NGOAI_kho_thi_CHAN 2026-11-04T16:27:05Z
+<<< ra t19_symlink_tro_RA_NGOAI_kho_thi_CHAN 0.084s QUA
+>>> vao t20_sha256_SAI_DANG_thi_CHAN 2026-11-04T16:27:05Z
+<<< ra t20_sha256_SAI_DANG_thi_CHAN 0.373s QUA
+>>> vao t21_bam_theo_BYTE_chu_khong_theo_van_ban 2026-11-04T16:27:06Z
+<<< ra t21_bam_theo_BYTE_chu_khong_theo_van_ban 0.173s QUA
+>>> vao t22_body_cung_bi_CHAN_khi_neo_hong 2026-11-04T16:27:06Z
+<<< ra t22_body_cung_bi_CHAN_khi_neo_hong 0.099s QUA
+>>> vao t23_MOI_lease_THAT_trong_kho_phai_QUA 2026-11-04T16:27:06Z
+<<< ra t23_MOI_lease_THAT_trong_kho_phai_QUA 1.084s QUA
+>>> vao t24_workflow_KHONG_duoc_nhet_dau_skip_ci_vao_commit 2026-11-04T16:27:07Z
+<<< ra t24_workflow_KHONG_duoc_nhet_dau_skip_ci_vao_commit 0.001s QUA
+>>> vao t25_workflow_dang_lease_phai_chay_bo_kiem_NEO_khong_lay_tu_head 2026-11-04T16:27:07Z
+<<< ra t25_workflow_dang_lease_phai_chay_bo_kiem_NEO_khong_lay_tu_head 0.001s QUA
+>>> vao t41_t25_chi_cat_chu_thich_run_inline_khi_chac_chan 2026-11-04T16:27:07Z
+<<< ra t41_t25_chi_cat_chu_thich_run_inline_khi_chac_chan 0.000s QUA
+>>> vao t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi 2026-11-04T16:27:07Z
+<<< ra t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi 2.268s QUA
+>>> vao t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc 2026-11-04T16:27:09Z
+<<< ra t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc 5.998s QUA
+>>> vao t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen 2026-11-04T16:27:15Z
+<<< ra t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen 0.005s QUA
+>>> vao t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t27 2026-11-04T16:27:15Z
+<<< ra t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t27 0.148s QUA
+>>> vao t31_moi_workflow_cai_pyyaml_phai_GHIM_va_ghim_CUNG_MOT_ban 2026-11-04T16:27:15Z
+<<< ra t31_moi_workflow_cai_pyyaml_phai_GHIM_va_ghim_CUNG_MOT_ban 0.006s QUA
+>>> vao t32_buoc_chon_lease_KHONG_duoc_quet_CA_THU_MUC 2026-11-04T16:27:15Z
+warning: You appear to have cloned an empty repository.
+<<< ra t32_buoc_chon_lease_KHONG_duoc_quet_CA_THU_MUC 0.202s QUA
+>>> vao t33_workflow_dang_lease_phai_qua_actionlint 2026-11-04T16:27:16Z
+<<< ra t33_workflow_dang_lease_phai_qua_actionlint 0.060s QUA
+>>> vao t34_workflow_khong_duoc_goi_THANG_tep_bo_test 2026-11-04T16:27:16Z
+<<< ra t34_workflow_khong_duoc_goi_THANG_tep_bo_test 0.112s QUA
+>>> vao t35_script_cai_actionlint_phai_TU_CHOI_ban_sai 2026-11-04T16:27:16Z
+<<< ra t35_script_cai_actionlint_phai_TU_CHOI_ban_sai 0.285s QUA
+>>> vao t36_giai_nen_phai_chiu_duoc_duong_dan_mang_DAU_HAI_CHAM 2026-11-04T16:27:16Z
+<<< ra t36_giai_nen_phai_chiu_duoc_duong_dan_mang_DAU_HAI_CHAM 0.030s QUA
+>>> vao t37_goi_tai_ve_phai_qua_DOI_CHIEU_BAM_truoc_khi_chay 2026-11-04T16:27:16Z
+<<< ra t37_goi_tai_ve_phai_qua_DOI_CHIEU_BAM_truoc_khi_chay 0.051s QUA
+>>> vao t38_bam_phai_dung_khi_DUONG_DAN_co_dau_cheo_nguoc 2026-11-04T16:27:16Z
+<<< ra t38_bam_phai_dung_khi_DUONG_DAN_co_dau_cheo_nguoc 0.028s QUA
+>>> vao t39_loai_archive_phai_do_NOI_DUNG_khong_doan_tu_ten 2026-11-04T16:27:16Z
+<<< ra t39_loai_archive_phai_do_NOI_DUNG_khong_doan_tu_ten 0.048s QUA
+>>> vao t40_wrapper_phai_CAI_truoc_CHAY_va_giu_rc_cua_bo_test 2026-11-04T16:27:16Z
+<<< ra t40_wrapper_phai_CAI_truoc_CHAY_va_giu_rc_cua_bo_test 0.168s QUA
+>>> vao t42_marker_NO_CO_TEN_va_muc_so_no_phai_khop_HAI_CHIEU 2026-11-04T16:27:16Z
+<<< ra t42_marker_NO_CO_TEN_va_muc_so_no_phai_khop_HAI_CHIEU 0.002s QUA
+>>> vao t43_PR_phai_CHAN_va_neu_pull_requests 2026-11-04T16:27:16Z
+<<< ra t43_PR_phai_CHAN_va_neu_pull_requests 0.029s QUA
+>>> vao t44_loi_do_loai_phai_CHAN_khong_dang 2026-11-04T16:27:16Z
+<<< ra t44_loi_do_loai_phai_CHAN_khong_dang 0.027s QUA
+>>> vao t45_ISSUE_phai_QUA_lop_do_loai 2026-11-04T16:27:17Z
+<<< ra t45_ISSUE_phai_QUA_lop_do_loai 0.026s QUA
+>>> vao t46_comment_da_co_thi_BO_QUA_xuyen_nhanh 2026-11-04T16:27:17Z
+<<< ra t46_comment_da_co_thi_BO_QUA_xuyen_nhanh 0.053s QUA
+>>> vao t47_dau_lease_KHAC_khong_duoc_chan 2026-11-04T16:27:17Z
+<<< ra t47_dau_lease_KHAC_khong_duoc_chan 0.026s QUA
+>>> vao t48_loi_doc_comment_phai_CHAN_khong_dang 2026-11-04T16:27:17Z
+<<< ra t48_loi_doc_comment_phai_CHAN_khong_dang 0.028s QUA
+>>> vao t49_env_va_lease_khong_duoc_chon_moi_noi 2026-11-04T16:27:17Z
+<<< ra t49_env_va_lease_khong_duoc_chon_moi_noi 0.422s QUA
+>>> vao t50_ngoai_Actions_phai_KHAI_hai_lop_vang 2026-11-04T16:27:17Z
+<<< ra t50_ngoai_Actions_phai_KHAI_hai_lop_vang 0.086s QUA
+>>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-11-04T16:27:17Z
+<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.625s QUA
+>>> vao t53_check_trong_Actions_khong_gh_van_QUA 2026-11-04T16:27:18Z
+<<< ra t53_check_trong_Actions_khong_gh_van_QUA 0.090s QUA
+>>> vao t54_comment_nguoi_ngoai_khong_duoc_bit_lease 2026-11-04T16:27:18Z
+<<< ra t54_comment_nguoi_ngoai_khong_duoc_bit_lease 0.029s QUA
+>>> vao t55a_thieu_user_login_phai_CHAN 2026-11-04T16:27:18Z
+<<< ra t55a_thieu_user_login_phai_CHAN 0.033s QUA
+>>> vao t55b_dau_khong_o_dau_than_thi_khong_tinh 2026-11-04T16:27:18Z
+<<< ra t55b_dau_khong_o_dau_than_thi_khong_tinh 0.029s QUA
+>>> vao t56_lease_id_ky_tu_dac_biet_phai_CHAN 2026-11-04T16:27:18Z
+<<< ra t56_lease_id_ky_tu_dac_biet_phai_CHAN 0.183s QUA
+>>> vao t57_slurp_khong_trang_CHAN_mot_trang_rong_QUA 2026-11-04T16:27:18Z
+<<< ra t57_slurp_khong_trang_CHAN_mot_trang_rong_QUA 0.056s QUA
+>>> vao t58_check_body_thuan_va_check_khai_lop_chua_chay 2026-11-04T16:27:18Z
+<<< ra t58_check_body_thuan_va_check_khai_lop_chua_chay 0.029s QUA
+>>> vao t59_moi_lease_goi_kiem_github_truoc_check 2026-11-04T16:27:18Z
+<<< ra t59_moi_lease_goi_kiem_github_truoc_check 0.716s QUA
+>>> vao t60_kiem_github_hong_khong_POST_va_lam_buoc_DO 2026-11-04T16:27:19Z
+<<< ra t60_kiem_github_hong_khong_POST_va_lam_buoc_DO 0.513s QUA
+>>> vao t62_kiem_github_rc9_bo_qua_lease_va_buoc_XANH 2026-11-04T16:27:19Z
+<<< ra t62_kiem_github_rc9_bo_qua_lease_va_buoc_XANH 0.499s QUA
+>>> vao t63_check_rc9_bo_qua_lease_va_buoc_XANH 2026-11-04T16:27:20Z
+<<< ra t63_check_rc9_bo_qua_lease_va_buoc_XANH 0.553s QUA
+>>> vao t64_guard_dan_xuat_tu_YAML_khop_so_dang_ky 2026-11-04T16:27:21Z
+<<< ra t64_guard_dan_xuat_tu_YAML_khop_so_dang_ky 0.009s QUA
+>>> vao t65_bo_trich_rong_hoac_hong_phai_DO 2026-11-04T16:27:21Z
+<<< ra t65_bo_trich_rong_hoac_hong_phai_DO 0.008s QUA
+>>> vao t66_moi_guard_co_phan_chung_va_ve_theo_vi_tri 2026-11-04T16:27:21Z
+<<< ra t66_moi_guard_co_phan_chung_va_ve_theo_vi_tri 4.411s QUA
+>>> vao t67_ve_khang_dinh_phai_khop_vi_tri_dan_xuat_tu_YAML 2026-11-04T16:27:25Z
+<<< ra t67_ve_khang_dinh_phai_khop_vi_tri_dan_xuat_tu_YAML 0.007s QUA
+>>> vao t68_post_rc_hong_van_COMMENT_DA_LEN_va_buoc_phai_DO 2026-11-04T16:27:25Z
+<<< ra t68_post_rc_hong_van_COMMENT_DA_LEN_va_buoc_phai_DO 0.724s QUA
+>>> vao t69_W1_W2_thieu_dau_ra_do_gia_phai_bao_du_ba_manh 2026-11-04T16:27:26Z
+<<< ra t69_W1_W2_thieu_dau_ra_do_gia_phai_bao_du_ba_manh 0.000s QUA
+>>> vao t70_W6_matrix_co_Windows_phai_chay_lai_bay_ca 2026-11-04T16:27:26Z
+<<< ra t70_W6_matrix_co_Windows_phai_chay_lai_bay_ca 0.001s QUA
+>>> vao t71_W7_workflow_khong_ubuntu_only_cam_bo_qua 2026-11-04T16:27:26Z
+<<< ra t71_W7_workflow_khong_ubuntu_only_cam_bo_qua 0.001s QUA
+>>> vao t72_W8_bo_qua_phai_in_runs_on_va_tong_ket 2026-11-04T16:27:26Z
+<<< ra t72_W8_bo_qua_phai_in_runs_on_va_tong_ket 0.003s QUA
+>>> vao t73_nen_posix_khong_duoc_bo_qua_ca_nao 2026-11-04T16:27:26Z
+<<< ra t73_nen_posix_khong_duoc_bo_qua_ca_nao 0.008s QUA
+>>> vao t74_A1_A2_executor_khong_duoc_ha_lop_va_ve_dung_phai_QUA 2026-11-04T16:27:26Z
+<<< ra t74_A1_A2_executor_khong_duoc_ha_lop_va_ve_dung_phai_QUA 0.028s QUA
+>>> vao t75_A3_A13_reviewer_sensitive_va_KHONG_doc_thu_muc_lease 2026-11-04T16:27:26Z
+<<< ra t75_A3_A13_reviewer_sensitive_va_KHONG_doc_thu_muc_lease 0.091s QUA
+>>> vao t76_A4_reviewer_khai_thap_phai_bi_CHAN 2026-11-04T16:27:26Z
+<<< ra t76_A4_reviewer_khai_thap_phai_bi_CHAN 0.027s QUA
+>>> vao t77_A5_planned_duoc_cat_truoc_khi_tra_bang 2026-11-04T16:27:26Z
+<<< ra t77_A5_planned_duoc_cat_truoc_khi_tra_bang 0.025s QUA
+>>> vao t78_A6_write_set_thieu_rong_hong_deu_sensitive 2026-11-04T16:27:26Z
+<<< ra t78_A6_write_set_thieu_rong_hong_deu_sensitive 0.027s QUA
+>>> vao t79_A7_noi_bang_launcher_lam_ca_dich_DO 2026-11-04T16:27:26Z
+<<< ra t79_A7_noi_bang_launcher_lam_ca_dich_DO 0.025s QUA
+>>> vao t80_A8_schema_v1_bo_qua_chot_va_co_canh_bao 2026-11-04T16:27:26Z
+<<< ra t80_A8_schema_v1_bo_qua_chot_va_co_canh_bao 0.084s QUA
+>>> vao t81_A14_ve_duong_executor_routine_phai_song 2026-11-04T16:27:26Z
+<<< ra t81_A14_ve_duong_executor_routine_phai_song 0.031s QUA
+>>> vao t82_A10_dot_bien_A1_A8_tren_ban_sao_CA_CAY_ten_rieng 2026-11-04T16:27:26Z
+<<< ra t82_A10_dot_bien_A1_A8_tren_ban_sao_CA_CAY_ten_rieng 1.430s QUA
+>>> vao t83_traversal_duoc_chuan_hoa_truoc_khi_tra_bang 2026-11-04T16:27:27Z
+<<< ra t83_traversal_duoc_chuan_hoa_truoc_khi_tra_bang 0.033s QUA
+>>> vao t88_traversal_khong_duoc_nhan_lop_thap_truoc_khi_chuan_hoa 2026-11-04T16:27:27Z
+<<< ra t88_traversal_khong_duoc_nhan_lop_thap_truoc_khi_chuan_hoa 0.025s QUA
+>>> vao t84_schema_version_hong_vo_huong_phai_bi_CHAN 2026-11-04T16:27:28Z
+<<< ra t84_schema_version_hong_vo_huong_phai_bi_CHAN 0.027s QUA
+>>> vao t85_schema_version_hong_container_phai_bi_CHAN 2026-11-04T16:27:28Z
+<<< ra t85_schema_version_hong_container_phai_bi_CHAN 0.036s QUA
+>>> vao t86_moi_muc_bang_seed_deu_phai_sensitive 2026-11-04T16:27:28Z
+<<< ra t86_moi_muc_bang_seed_deu_phai_sensitive 0.036s QUA
+>>> vao t87_ba_duong_van_hanh_phai_sensitive 2026-11-04T16:27:28Z
+<<< ra t87_ba_duong_van_hanh_phai_sensitive 0.036s QUA
+>>> vao t89_A1_A2b_quet_du_hai_nguoi_giu_va_ba_trang_thai 2026-11-04T16:27:28Z
+<<< ra t89_A1_A2b_quet_du_hai_nguoi_giu_va_ba_trang_thai 0.040s QUA
+>>> vao t90_A2_yaml_hong_fail_close 2026-11-04T16:27:28Z
+<<< ra t90_A2_yaml_hong_fail_close 0.037s QUA
+>>> vao t91_A2c_da_bi_thay_the_van_in_nhung_khong_giu 2026-11-04T16:27:28Z
+<<< ra t91_A2c_da_bi_thay_the_van_in_nhung_khong_giu 0.034s QUA
+>>> vao t92_A3_A4_A5_A6_so_tap_ten_ref 2026-11-04T16:27:28Z
+<<< ra t92_A3_A4_A5_A6_so_tap_ten_ref 0.074s QUA
+>>> vao t94_A8_moi_ca_co_dot_bien_ma_san_pham_lam_DO 2026-11-04T16:27:28Z
+đột biến mã sản phẩm: đã chạy=9, bị giết=9
+<<< ra t94_A8_moi_ca_co_dot_bien_ma_san_pham_lam_DO 0.240s QUA
+>>> vao t95_git_that_bai_phai_fail_close_khong_duoc_nuot_loi 2026-11-04T16:27:28Z
+<<< ra t95_git_that_bai_phai_fail_close_khong_duoc_nuot_loi 0.024s QUA
+>>> vao t96_lease_cham_duong_khop_tuyet_doi_khong_phai_chua 2026-11-04T16:27:28Z
+<<< ra t96_lease_cham_duong_khop_tuyet_doi_khong_phai_chua 0.024s QUA
+>>> vao t98_truc_phan_biet_la_NEN_chu_khong_phai_TEN_TEP 2026-11-04T16:27:28Z
+<<< ra t98_truc_phan_biet_la_NEN_chu_khong_phai_TEN_TEP 0.007s QUA
+>>> vao t99_con_tro_treo_chan_xau_khong_chan_ten_truong_cua_spec_va_quet_nguoc 2026-11-04T16:27:28Z
+<<< ra t99_con_tro_treo_chan_xau_khong_chan_ten_truong_cua_spec_va_quet_nguoc 0.038s QUA
+>>> vao t100_bia_mo_doi_dau_cu_thieu_danh_dau_nhung_cho_ca_dung 2026-11-04T16:27:28Z
+<<< ra t100_bia_mo_doi_dau_cu_thieu_danh_dau_nhung_cho_ca_dung 0.033s QUA
+>>> vao t101_dot_bien_con_tro_treo_va_bia_mo_deu_bi_giet 2026-11-04T16:27:28Z
+đột biến packet #313: đã chạy=4, bị giết=4
+<<< ra t101_dot_bien_con_tro_treo_va_bia_mo_deu_bi_giet 0.133s QUA
+>>> vao t102_nhanh_cuc_bo_tut_sau_phai_CHAN_truoc_khu_trung_lease_id 2026-11-04T16:27:28Z
+<<< ra t102_nhanh_cuc_bo_tut_sau_phai_CHAN_truoc_khu_trung_lease_id 0.025s QUA
+>>> vao t103_nhanh_cuc_bo_bang_origin_phai_QUA 2026-11-04T16:27:28Z
+<<< ra t103_nhanh_cuc_bo_bang_origin_phai_QUA 0.024s QUA
+>>> vao t104_nhanh_cuc_bo_di_truoc_origin_phai_QUA 2026-11-04T16:27:28Z
+<<< ra t104_nhanh_cuc_bo_di_truoc_origin_phai_QUA 0.024s QUA
+>>> vao t105_nhanh_cuc_bo_khong_co_origin_phai_QUA 2026-11-04T16:27:28Z
+<<< ra t105_nhanh_cuc_bo_khong_co_origin_phai_QUA 0.025s QUA
+>>> vao t106_cung_lease_id_khac_noi_dung_chi_dem_MOT 2026-11-04T16:27:28Z
+<<< ra t106_cung_lease_id_khac_noi_dung_chi_dem_MOT 0.027s QUA
+>>> vao t107_hai_lease_id_khac_nhau_phai_dem_HAI 2026-11-04T16:27:28Z
+<<< ra t107_hai_lease_id_khac_nhau_phai_dem_HAI 0.026s QUA
+>>> vao t108_moi_chot_ref_cuc_bo_co_dot_bien_rieng 2026-11-04T16:27:28Z
+đột biến ref cục bộ: đã chạy=6, bị giết=6
+<<< ra t108_moi_chot_ref_cuc_bo_co_dot_bien_rieng 0.165s QUA
+>>> vao t109_lenh_chua_nhanh_ranh_phai_chay_duoc_va_khop_origin 2026-11-04T16:27:29Z
+<<< ra t109_lenh_chua_nhanh_ranh_phai_chay_duoc_va_khop_origin 0.192s QUA
+>>> vao t110_lenh_chua_nhanh_bi_worktree_giu_phai_chay_duoc_va_khop_origin 2026-11-04T16:27:29Z
+<<< ra t110_lenh_chua_nhanh_bi_worktree_giu_phai_chay_duoc_va_khop_origin 0.180s QUA
+>>> vao t111_allowlist_worktree_nam_trang_thai_va_dot_bien 2026-11-04T16:27:29Z
+đột biến prunable: ĐỎ=['prunable'], đối chứng cho phép sống=2
+đột biến last-wins: ĐỎ=['hai'], đối chứng cho phép sống=2
+đột biến sạch: ĐỎ=['ban'], đối chứng cho phép sống=2
+đột biến thao-tác-dở: ĐỎ=['merge', 'rebase'], đối chứng cho phép sống=2
+đột biến vô-điều-kiện: ĐỎ=['ban', 'hai', 'merge', 'prunable', 'rebase'], đối chứng cho phép sống=2
+<<< ra t111_allowlist_worktree_nam_trang_thai_va_dot_bien 7.103s QUA
+>>> vao t112_cac_ca_khoa_upstream_that_va_bon_trang_thai 2026-11-04T16:27:36Z
+ca upstream tutsau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: tutsau -> refs/remotes/origin/tutsau (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f tutsau refs/remotes/origin/tutsau
+ca upstream phanky: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_PHÂN_KỲ: phanky -> refs/remotes/origin/phanky (1/1). KHÔNG_PHÁT_LỆNH_CHỮA; người dùng tự quyết cách hợp nhất hoặc giữ commit.
+ca upstream main: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: main -> refs/remotes/origin/main (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f main refs/remotes/origin/main
+ca upstream bang: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+ca upstream ditruoc: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+ca upstream thuancucbo: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+ca upstream khacten: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_PHÂN_KỲ: khacten -> refs/remotes/origin/main (1/1). KHÔNG_PHÁT_LỆNH_CHỮA; người dùng tự quyết cách hợp nhất hoặc giữ commit.
+ca upstream khactensau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: khactensau -> refs/remotes/origin/main (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f khactensau refs/remotes/origin/main
+ca upstream khaihong: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: khaihong có config upstream nhưng không giải được: branch.khaihong.remote='khongcorenote', branch.khaihong.merge='refs/heads/khaihong'
+ca upstream khaihongkhongref: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: khaihongkhongref có config upstream nhưng không giải được: branch.khaihongkhongref.remote='khongcorenote', branch.khaihongkhongref.merge='refs/heads/khaihongkhongref'
+ca upstream remotecham: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+ca upstream tagup: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+ca upstream tagupsau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: tagupsau -> refs/tags/v1 (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f tagupsau refs/tags/v1
+ca upstream tagpeel: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: git check-ref-format refs/tags/vann^{} rc=1: refname không hợp lệ
+ca upstream refnamesai: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: git check-ref-format refs/heads/ten sai rc=1: refname không hợp lệ
+ca upstream refcodau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: ref có hình dạng không an toàn (bắt đầu bằng '-'): --help
+<<< ra t112_cac_ca_khoa_upstream_that_va_bon_trang_thai 0.474s QUA
+>>> vao t113_sau_dot_bien_upstream_va_phan_ky_deu_bi_giet 2026-11-04T16:27:37Z
+đột biến go-phat-hien-phan-ky: thư_mục=lp_g_guz80y; ĐỎ=['khacten', 'phanky'], đối chứng SỐNG=['bang', 'ditruoc', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+đột biến phan-ky-thanh-tut-sau: thư_mục=lp_polic_zc; ĐỎ=['khacten', 'phanky'], đối chứng SỐNG=['bang', 'ditruoc', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+đột biến doi-ung-theo-ten: thư_mục=lp_skh5gx5m; ĐỎ=['khacten', 'khactensau', 'khaihong', 'remotecham', 'tagup', 'tagupsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'tagpeel', 'thuancucbo', 'tutsau']
+đột biến ton-tai-lai-hoi-tap-ref: thư_mục=lp__ah9aq39; ĐỎ=['tagup', 'tagupsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'thuancucbo', 'tutsau']
+đột biến go-phat-hien-khai-hong: thư_mục=lp_9zbqdme3; ĐỎ=['khaihong', 'khaihongkhongref'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+đột biến khai-hong-lui-ve-ten: thư_mục=lp_i7v_y85p; ĐỎ=['khaihong'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+đột biến chan-remote-cham: thư_mục=lp_7s0_10h0; ĐỎ=['remotecham', 'tagup', 'tagupsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'tagpeel', 'thuancucbo', 'tutsau']
+đột biến chan-khong-upstream: thư_mục=lp__65fg89b; ĐỎ=['thuancucbo'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'tutsau']
+đột biến go-chot-quan-he-ref: thư_mục=lp_9sct28ze; ĐỎ=['khacten', 'phanky'], đối chứng SỐNG=['bang', 'ditruoc', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+đột biến go-lui-ve-ten: thư_mục=lp_kbz06or3; ĐỎ=['main', 'phanky', 'tutsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo']
+<<< ra t113_sau_dot_bien_upstream_va_phan_ky_deu_bi_giet 4.342s QUA
+>>> vao t114_khong_config_nhung_co_origin_cung_ten_phai_duoc_phan_loai 2026-11-04T16:27:41Z
+<<< ra t114_khong_config_nhung_co_origin_cung_ten_phai_duoc_phan_loai 0.057s QUA
+>>> vao t115_tag_khong_nam_trong_pham_vi_quet_lease_va_dot_bien 2026-11-04T16:27:41Z
+đột biến mở-phạm-vi-quét-tag: thư_mục=lp_qgz0cwe_; ĐỎ=['tag-khong-quet'], đối chứng SỐNG=['remotecham', 'tagup']
+<<< ra t115_tag_khong_nam_trong_pham_vi_quet_lease_va_dot_bien 0.104s QUA
+>>> vao t116_ref_chinh_xac_hinh_dang_va_bon_dot_bien_bat_buoc 2026-11-04T16:27:41Z
+đột biến bắt buộc go-chot-dau-tru: thư_mục=lp_a68rfepv; ĐỎ=['refcodau']
+đột biến bắt buộc rev-parse: thư_mục=lp_zkn9t9mq; ĐỎ=['refnamesai', 'tagpeel']
+đột biến bắt buộc go-check-ref-format: thư_mục=lp_qszuxtgr; ĐỎ=['refnamesai', 'tagpeel']
+đột biến bắt buộc mo-pham-vi-tag: thư_mục=lp_qjhqjhkf; ĐỎ=['tag-khong-quet']
+đột biến bắt buộc chan-tag-that: thư_mục=lp_yffr1tcw; ĐỎ=['tagup']
+<<< ra t116_ref_chinh_xac_hinh_dang_va_bon_dot_bien_bat_buoc 0.629s QUA
+>>> vao t117_bia_mo_tro_lease_khong_ton_tai_phai_KHONG_XAC_DINH 2026-11-04T16:27:42Z
+<<< ra t117_bia_mo_tro_lease_khong_ton_tai_phai_KHONG_XAC_DINH 0.025s QUA
+>>> vao t118_bia_mo_co_lease_moi_nhung_khong_tro_nguoc_phai_CHAN 2026-11-04T16:27:42Z
+<<< ra t118_bia_mo_co_lease_moi_nhung_khong_tro_nguoc_phai_CHAN 0.025s QUA
+>>> vao t119_bia_mo_hai_chieu_day_du_van_go_lease_cu 2026-11-04T16:27:42Z
+<<< ra t119_bia_mo_hai_chieu_day_du_van_go_lease_cu 0.027s QUA
+>>> vao t120_thay_the_cho_danh_sach_hai_lease_deu_co_bia_mo_phai_QUA 2026-11-04T16:27:42Z
+<<< ra t120_thay_the_cho_danh_sach_hai_lease_deu_co_bia_mo_phai_QUA 0.056s QUA
+>>> vao t121_thay_the_cho_danh_sach_thieu_mot_bia_mo_phai_CHAN 2026-11-04T16:27:42Z
+<<< ra t121_thay_the_cho_danh_sach_thieu_mot_bia_mo_phai_CHAN 0.029s QUA
+>>> vao t122_hai_lease_tro_vong_cho_ket_qua_xac_dinh_khong_de_quy 2026-11-04T16:27:42Z
+<<< ra t122_hai_lease_tro_vong_cho_ket_qua_xac_dinh_khong_de_quy 0.025s QUA
+>>> vao t123_bia_mo_hong_het_han_va_khong_cham_duong_khong_duoc_lan_toa 2026-11-04T16:27:42Z
+<<< ra t123_bia_mo_hong_het_han_va_khong_cham_duong_khong_duoc_lan_toa 0.026s QUA
+>>> vao t124_bay_dot_bien_bia_mo_giet_dung_va_chi_dung_tap_dich 2026-11-04T16:27:42Z
+đột biến bia mộ noi-vi-tu-thanh-if-False: ĐỎ=['t117', 't118'], SỐNG=['t119', 't120', 't121', 't122', 't123']
+đột biến bia mộ so-bang-thanh-do-chuoi: ĐỎ=['t118'], SỐNG=['t117', 't119', 't120', 't121', 't122', 't123']
+đột biến bia mộ bo-schema-danh-sach: ĐỎ=['t120', 't121'], SỐNG=['t117', 't118', 't119', 't122', 't123']
+đột biến bia mộ chi-kiem-phan-tu-dau: ĐỎ=['t121'], SỐNG=['t117', 't118', 't119', 't120', 't122', 't123']
+đột biến bia mộ bo-hanh-vi-go: ĐỎ=['t119', 't120', 't122'], SỐNG=['t117', 't118', 't121', 't123']
+đột biến bia mộ fail-toan-ca-het-han: ĐỎ=['t123'], SỐNG=['t117', 't118', 't119', 't120', 't121', 't122']
+đột biến bia mộ fail-toan-ca-khong-cham: ĐỎ=['t123'], SỐNG=['t117', 't118', 't119', 't120', 't121', 't122']
+<<< ra t124_bay_dot_bien_bia_mo_giet_dung_va_chi_dung_tap_dich 1.780s QUA
+>>> vao t126_dau_da_dang_la_HIEN_VAT_SUA_DUOC_chu_khong_phai_ban_ghi_git 2026-11-04T16:27:44Z
+<<< ra t126_dau_da_dang_la_HIEN_VAT_SUA_DUOC_chu_khong_phai_ban_ghi_git 0.121s QUA
+>>> vao t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor 2026-11-04T16:27:44Z
+[A err] /tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:3627: SyntaxWarning: invalid escape sequence '\s'
+[A err]   """Nợ được ĐẶT TÊN trong mã phải có nhà trong sổ, và mục đã khai backlink phải còn marker.
+[A err] /tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:5774: SyntaxWarning: invalid escape sequence '\d'
+[A err]   """Tail tệp log con đang ghi, in từng DÒNG ĐỦ ra stdout CHA kèm tiền tố. Line-atomic qua `khoa`.
+[B err] /tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:3627: SyntaxWarning: invalid escape sequence '\s'
+[B err]   """Nợ được ĐẶT TÊN trong mã phải có nhà trong sổ, và mục đã khai backlink phải còn marker.
+[B err] /tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:5774: SyntaxWarning: invalid escape sequence '\d'
+[B err]   """Tail tệp log con đang ghi, in từng DÒNG ĐỦ ra stdout CHA kèm tiền tố. Line-atomic qua `khoa`.
+[A] >>> vao t01_lease_hop_le_thi_QUA 2026-11-04T16:27:44Z
+[B] >>> vao t01_lease_hop_le_thi_QUA 2026-11-04T16:27:44Z
+[A] <<< ra t01_lease_hop_le_thi_QUA 0.123s QUA
+[A] >>> vao t01_legacy_provider_aliases 2026-11-04T16:27:44Z
+[B] <<< ra t01_lease_hop_le_thi_QUA 0.101s QUA
+[B] >>> vao t01_legacy_provider_aliases 2026-11-04T16:27:44Z
+[B] <<< ra t01_legacy_provider_aliases 2.493s QUA
+[B] >>> vao t01_executor_assurance_target_is_not_review_verdict 2026-11-04T16:27:47Z
+[B err] CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+[B err] CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+[A] <<< ra t01_legacy_provider_aliases 2.594s QUA
+[A] >>> vao t01_executor_assurance_target_is_not_review_verdict 2026-11-04T16:27:47Z
+[A err] CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+[A err] CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+[B] <<< ra t01_executor_assurance_target_is_not_review_verdict 1.808s QUA
+[B] >>> vao t01_ag_identity_and_family_gate 2026-11-04T16:27:48Z
+[A] <<< ra t01_executor_assurance_target_is_not_review_verdict 1.923s QUA
+[A] >>> vao t01_ag_identity_and_family_gate 2026-11-04T16:27:49Z
+[B] <<< ra t01_ag_identity_and_family_gate 8.194s QUA
+[B] >>> vao t02_granted_by_la_ten_provider_bi_CHAN 2026-11-04T16:27:57Z
+[A] <<< ra t01_ag_identity_and_family_gate 8.295s QUA
+[A] >>> vao t02_granted_by_la_ten_provider_bi_CHAN 2026-11-04T16:27:57Z
+[B] <<< ra t02_granted_by_la_ten_provider_bi_CHAN 0.375s QUA
+[B] >>> vao t02b_ten_KHONG_CO_THAM_QUYEN_bi_CHAN 2026-11-04T16:27:57Z
+[A] <<< ra t02_granted_by_la_ten_provider_bi_CHAN 0.387s QUA
+[A] >>> vao t02b_ten_KHONG_CO_THAM_QUYEN_bi_CHAN 2026-11-04T16:27:57Z
+[B] <<< ra t02b_ten_KHONG_CO_THAM_QUYEN_bi_CHAN 0.544s QUA
+[B] >>> vao t02c_nguoi_CO_tham_quyen_thi_QUA_moi_cach_viet 2026-11-04T16:27:58Z
+[B] <<< ra t02c_nguoi_CO_tham_quyen_thi_QUA_moi_cach_viet 0.269s QUA
+[B] >>> vao t02d_GITHUB_ACTOR_khong_co_tham_quyen_bi_CHAN 2026-11-04T16:27:58Z
+[A] <<< ra t02b_ten_KHONG_CO_THAM_QUYEN_bi_CHAN 0.564s QUA
+[A] >>> vao t02c_nguoi_CO_tham_quyen_thi_QUA_moi_cach_viet 2026-11-04T16:27:58Z
+[B] <<< ra t02d_GITHUB_ACTOR_khong_co_tham_quyen_bi_CHAN 0.192s QUA
+[B] >>> vao t03_lease_da_het_han_bi_CHAN 2026-11-04T16:27:58Z
+[B] <<< ra t03_lease_da_het_han_bi_CHAN 0.083s QUA
+[B] >>> vao t04_han_thieu_mui_gio_bi_CHAN 2026-11-04T16:27:58Z
+[B] <<< ra t04_han_thieu_mui_gio_bi_CHAN 0.098s QUA
+[B] >>> vao t05_thieu_truong_bat_buoc_bi_CHAN 2026-11-04T16:27:58Z
+[A] <<< ra t02c_nguoi_CO_tham_quyen_thi_QUA_moi_cach_viet 0.300s QUA
+[A] >>> vao t02d_GITHUB_ACTOR_khong_co_tham_quyen_bi_CHAN 2026-11-04T16:27:58Z
+[A] <<< ra t02d_GITHUB_ACTOR_khong_co_tham_quyen_bi_CHAN 0.167s QUA
+[A] >>> vao t03_lease_da_het_han_bi_CHAN 2026-11-04T16:27:58Z
+[A] <<< ra t03_lease_da_het_han_bi_CHAN 0.088s QUA
+[A] >>> vao t04_han_thieu_mui_gio_bi_CHAN 2026-11-04T16:27:59Z
+[A] <<< ra t04_han_thieu_mui_gio_bi_CHAN 0.087s QUA
+[A] >>> vao t05_thieu_truong_bat_buoc_bi_CHAN 2026-11-04T16:27:59Z
+[B] <<< ra t05_thieu_truong_bat_buoc_bi_CHAN 0.428s QUA
+[B] >>> vao t06_sha_khong_dung_dang_bi_CHAN 2026-11-04T16:27:59Z
+[B] <<< ra t06_sha_khong_dung_dang_bi_CHAN 0.402s QUA
+[B] >>> vao t07_packet_issue_khong_phai_so_bi_CHAN 2026-11-04T16:27:59Z
+[A] <<< ra t05_thieu_truong_bat_buoc_bi_CHAN 0.473s QUA
+[A] >>> vao t06_sha_khong_dung_dang_bi_CHAN 2026-11-04T16:27:59Z
+[B] <<< ra t07_packet_issue_khong_phai_so_bi_CHAN 0.083s QUA
+[B] >>> vao t09_body_in_ra_nguyen_van_YAML_de_doi_chieu 2026-11-04T16:27:59Z
+[B] <<< ra t09_body_in_ra_nguyen_van_YAML_de_doi_chieu 0.102s QUA
+[B] >>> vao t10_body_TU_CHOI_lease_khong_hop_le 2026-11-04T16:27:59Z
+[B] <<< ra t10_body_TU_CHOI_lease_khong_hop_le 0.127s QUA
+[B] >>> vao t12_tep_khong_ton_tai_bao_ro 2026-11-04T16:27:59Z
+[A] <<< ra t06_sha_khong_dung_dang_bi_CHAN 0.396s QUA
+[A] >>> vao t07_packet_issue_khong_phai_so_bi_CHAN 2026-11-04T16:27:59Z
+[B] <<< ra t12_tep_khong_ton_tai_bao_ro 0.104s QUA
+[B] >>> vao t13_yaml_hong_khong_duoc_no_traceback 2026-11-04T16:27:59Z
+[A] <<< ra t07_packet_issue_khong_phai_so_bi_CHAN 0.100s QUA
+[A] >>> vao t09_body_in_ra_nguyen_van_YAML_de_doi_chieu 2026-11-04T16:28:00Z
+[B] <<< ra t13_yaml_hong_khong_duoc_no_traceback 0.099s QUA
+[B] >>> vao t14_neo_prompt_DUNG_thi_QUA 2026-11-04T16:28:00Z
+[A] <<< ra t09_body_in_ra_nguyen_van_YAML_de_doi_chieu 0.083s QUA
+[A] >>> vao t10_body_TU_CHOI_lease_khong_hop_le 2026-11-04T16:28:00Z
+[B] <<< ra t14_neo_prompt_DUNG_thi_QUA 0.087s QUA
+[B] >>> vao t15_bam_LECH_thi_CHAN 2026-11-04T16:28:00Z
+[A] <<< ra t10_body_TU_CHOI_lease_khong_hop_le 0.083s QUA
+[A] >>> vao t12_tep_khong_ton_tai_bao_ro 2026-11-04T16:28:00Z
+[B] <<< ra t15_bam_LECH_thi_CHAN 0.101s QUA
+[B] >>> vao t16_tep_prompt_KHONG_CO_thi_CHAN 2026-11-04T16:28:00Z
+[A] <<< ra t12_tep_khong_ton_tai_bao_ro 0.068s QUA
+[A] >>> vao t13_yaml_hong_khong_duoc_no_traceback 2026-11-04T16:28:00Z
+[A] <<< ra t13_yaml_hong_khong_duoc_no_traceback 0.093s QUA
+[A] >>> vao t14_neo_prompt_DUNG_thi_QUA 2026-11-04T16:28:00Z
+[B] <<< ra t16_tep_prompt_KHONG_CO_thi_CHAN 0.101s QUA
+[B] >>> vao t17_neo_NUA_VOI_thi_CHAN_CA_HAI_CHIEU 2026-11-04T16:28:00Z
+[A] <<< ra t14_neo_prompt_DUNG_thi_QUA 0.097s QUA
+[A] >>> vao t15_bam_LECH_thi_CHAN 2026-11-04T16:28:00Z
+[B] <<< ra t17_neo_NUA_VOI_thi_CHAN_CA_HAI_CHIEU 0.168s QUA
+[B] >>> vao t18_prompt_path_VUOT_RA_NGOAI_kho_thi_CHAN 2026-11-04T16:28:00Z
+[A] <<< ra t15_bam_LECH_thi_CHAN 0.097s QUA
+[A] >>> vao t16_tep_prompt_KHONG_CO_thi_CHAN 2026-11-04T16:28:00Z
+[A] <<< ra t16_tep_prompt_KHONG_CO_thi_CHAN 0.090s QUA
+[A] >>> vao t17_neo_NUA_VOI_thi_CHAN_CA_HAI_CHIEU 2026-11-04T16:28:00Z
+[A] <<< ra t17_neo_NUA_VOI_thi_CHAN_CA_HAI_CHIEU 0.178s QUA
+[A] >>> vao t18_prompt_path_VUOT_RA_NGOAI_kho_thi_CHAN 2026-11-04T16:28:00Z
+[B] <<< ra t18_prompt_path_VUOT_RA_NGOAI_kho_thi_CHAN 0.353s QUA
+[B] >>> vao t19_symlink_tro_RA_NGOAI_kho_thi_CHAN 2026-11-04T16:28:00Z
+[B] <<< ra t19_symlink_tro_RA_NGOAI_kho_thi_CHAN 0.087s QUA
+[B] >>> vao t20_sha256_SAI_DANG_thi_CHAN 2026-11-04T16:28:00Z
+[A] <<< ra t18_prompt_path_VUOT_RA_NGOAI_kho_thi_CHAN 0.369s QUA
+[A] >>> vao t19_symlink_tro_RA_NGOAI_kho_thi_CHAN 2026-11-04T16:28:01Z
+[A] <<< ra t19_symlink_tro_RA_NGOAI_kho_thi_CHAN 0.085s QUA
+[A] >>> vao t20_sha256_SAI_DANG_thi_CHAN 2026-11-04T16:28:01Z
+[B] <<< ra t20_sha256_SAI_DANG_thi_CHAN 0.384s QUA
+[B] >>> vao t21_bam_theo_BYTE_chu_khong_theo_van_ban 2026-11-04T16:28:01Z
+[B] <<< ra t21_bam_theo_BYTE_chu_khong_theo_van_ban 0.243s QUA
+[B] >>> vao t22_body_cung_bi_CHAN_khi_neo_hong 2026-11-04T16:28:01Z
+[A] <<< ra t20_sha256_SAI_DANG_thi_CHAN 0.363s QUA
+[A] >>> vao t21_bam_theo_BYTE_chu_khong_theo_van_ban 2026-11-04T16:28:01Z
+[B] <<< ra t22_body_cung_bi_CHAN_khi_neo_hong 0.100s QUA
+[B] >>> vao t23_MOI_lease_THAT_trong_kho_phai_QUA 2026-11-04T16:28:01Z
+[A] <<< ra t21_bam_theo_BYTE_chu_khong_theo_van_ban 0.170s QUA
+[A] >>> vao t22_body_cung_bi_CHAN_khi_neo_hong 2026-11-04T16:28:01Z
+[A] <<< ra t22_body_cung_bi_CHAN_khi_neo_hong 0.100s QUA
+[A] >>> vao t23_MOI_lease_THAT_trong_kho_phai_QUA 2026-11-04T16:28:01Z
+[B] <<< ra t23_MOI_lease_THAT_trong_kho_phai_QUA 1.109s QUA
+[B] >>> vao t24_workflow_KHONG_duoc_nhet_dau_skip_ci_vao_commit 2026-11-04T16:28:02Z
+[B] <<< ra t24_workflow_KHONG_duoc_nhet_dau_skip_ci_vao_commit 0.001s QUA
+[B] >>> vao t25_workflow_dang_lease_phai_chay_bo_kiem_NEO_khong_lay_tu_head 2026-11-04T16:28:02Z
+[B] <<< ra t25_workflow_dang_lease_phai_chay_bo_kiem_NEO_khong_lay_tu_head 0.001s QUA
+[B] >>> vao t41_t25_chi_cat_chu_thich_run_inline_khi_chac_chan 2026-11-04T16:28:02Z
+[B] <<< ra t41_t25_chi_cat_chu_thich_run_inline_khi_chac_chan 0.000s QUA
+[B] >>> vao t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi 2026-11-04T16:28:02Z
+[A] <<< ra t23_MOI_lease_THAT_trong_kho_phai_QUA 1.123s QUA
+[A] >>> vao t24_workflow_KHONG_duoc_nhet_dau_skip_ci_vao_commit 2026-11-04T16:28:03Z
+[A] <<< ra t24_workflow_KHONG_duoc_nhet_dau_skip_ci_vao_commit 0.002s QUA
+[A] >>> vao t25_workflow_dang_lease_phai_chay_bo_kiem_NEO_khong_lay_tu_head 2026-11-04T16:28:03Z
+[A] <<< ra t25_workflow_dang_lease_phai_chay_bo_kiem_NEO_khong_lay_tu_head 0.001s QUA
+[A] >>> vao t41_t25_chi_cat_chu_thich_run_inline_khi_chac_chan 2026-11-04T16:28:03Z
+[A] <<< ra t41_t25_chi_cat_chu_thich_run_inline_khi_chac_chan 0.000s QUA
+[A] >>> vao t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi 2026-11-04T16:28:03Z
+[B] <<< ra t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi 2.233s QUA
+[B] >>> vao t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc 2026-11-04T16:28:05Z
+[A] <<< ra t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi 2.191s QUA
+[A] >>> vao t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc 2026-11-04T16:28:05Z
+[B] <<< ra t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc 6.017s QUA
+[B] >>> vao t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen 2026-11-04T16:28:11Z
+[B] <<< ra t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen 0.007s QUA
+[B] >>> vao t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t27 2026-11-04T16:28:11Z
+[B] <<< ra t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t27 0.160s QUA
+[B] >>> vao t31_moi_workflow_cai_pyyaml_phai_GHIM_va_ghim_CUNG_MOT_ban 2026-11-04T16:28:11Z
+[B] <<< ra t31_moi_workflow_cai_pyyaml_phai_GHIM_va_ghim_CUNG_MOT_ban 0.003s QUA
+[B] >>> vao t32_buoc_chon_lease_KHONG_duoc_quet_CA_THU_MUC 2026-11-04T16:28:11Z
+[B err] warning: You appear to have cloned an empty repository.
+[A] <<< ra t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc 6.018s QUA
+[A] >>> vao t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen 2026-11-04T16:28:11Z
+[A] <<< ra t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen 0.008s QUA
+[A] >>> vao t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t27 2026-11-04T16:28:11Z
+[B] <<< ra t32_buoc_chon_lease_KHONG_duoc_quet_CA_THU_MUC 0.251s QUA
+[B] >>> vao t33_workflow_dang_lease_phai_qua_actionlint 2026-11-04T16:28:11Z
+[A] <<< ra t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t27 0.185s QUA
+[A] >>> vao t31_moi_workflow_cai_pyyaml_phai_GHIM_va_ghim_CUNG_MOT_ban 2026-11-04T16:28:11Z
+[A] <<< ra t31_moi_workflow_cai_pyyaml_phai_GHIM_va_ghim_CUNG_MOT_ban 0.002s QUA
+[A] >>> vao t32_buoc_chon_lease_KHONG_duoc_quet_CA_THU_MUC 2026-11-04T16:28:11Z
+[B] <<< ra t33_workflow_dang_lease_phai_qua_actionlint 0.064s QUA
+[B] >>> vao t34_workflow_khong_duoc_goi_THANG_tep_bo_test 2026-11-04T16:28:11Z
+[A err] warning: You appear to have cloned an empty repository.
+[B] <<< ra t34_workflow_khong_duoc_goi_THANG_tep_bo_test 0.103s QUA
+[B] >>> vao t35_script_cai_actionlint_phai_TU_CHOI_ban_sai 2026-11-04T16:28:11Z
+[A] <<< ra t32_buoc_chon_lease_KHONG_duoc_quet_CA_THU_MUC 0.240s QUA
+[A] >>> vao t33_workflow_dang_lease_phai_qua_actionlint 2026-11-04T16:28:11Z
+[A] <<< ra t33_workflow_dang_lease_phai_qua_actionlint 0.054s QUA
+[A] >>> vao t34_workflow_khong_duoc_goi_THANG_tep_bo_test 2026-11-04T16:28:11Z
+[A] <<< ra t34_workflow_khong_duoc_goi_THANG_tep_bo_test 0.105s QUA
+[A] >>> vao t35_script_cai_actionlint_phai_TU_CHOI_ban_sai 2026-11-04T16:28:11Z
+[B] <<< ra t35_script_cai_actionlint_phai_TU_CHOI_ban_sai 0.331s QUA
+[B] >>> vao t36_giai_nen_phai_chiu_duoc_duong_dan_mang_DAU_HAI_CHAM 2026-11-04T16:28:11Z
+[B] <<< ra t36_giai_nen_phai_chiu_duoc_duong_dan_mang_DAU_HAI_CHAM 0.035s QUA
+[B] >>> vao t37_goi_tai_ve_phai_qua_DOI_CHIEU_BAM_truoc_khi_chay 2026-11-04T16:28:12Z
+[B] <<< ra t37_goi_tai_ve_phai_qua_DOI_CHIEU_BAM_truoc_khi_chay 0.055s QUA
+[B] >>> vao t38_bam_phai_dung_khi_DUONG_DAN_co_dau_cheo_nguoc 2026-11-04T16:28:12Z
+[B] <<< ra t38_bam_phai_dung_khi_DUONG_DAN_co_dau_cheo_nguoc 0.029s QUA
+[B] >>> vao t39_loai_archive_phai_do_NOI_DUNG_khong_doan_tu_ten 2026-11-04T16:28:12Z
+[B] <<< ra t39_loai_archive_phai_do_NOI_DUNG_khong_doan_tu_ten 0.058s QUA
+[B] >>> vao t40_wrapper_phai_CAI_truoc_CHAY_va_giu_rc_cua_bo_test 2026-11-04T16:28:12Z
+[A] <<< ra t35_script_cai_actionlint_phai_TU_CHOI_ban_sai 0.398s QUA
+[A] >>> vao t36_giai_nen_phai_chiu_duoc_duong_dan_mang_DAU_HAI_CHAM 2026-11-04T16:28:12Z
+[A] <<< ra t36_giai_nen_phai_chiu_duoc_duong_dan_mang_DAU_HAI_CHAM 0.036s QUA
+[A] >>> vao t37_goi_tai_ve_phai_qua_DOI_CHIEU_BAM_truoc_khi_chay 2026-11-04T16:28:12Z
+[B] <<< ra t40_wrapper_phai_CAI_truoc_CHAY_va_giu_rc_cua_bo_test 0.206s QUA
+[B] >>> vao t42_marker_NO_CO_TEN_va_muc_so_no_phai_khop_HAI_CHIEU 2026-11-04T16:28:12Z
+[B] <<< ra t42_marker_NO_CO_TEN_va_muc_so_no_phai_khop_HAI_CHIEU 0.002s QUA
+[B] >>> vao t43_PR_phai_CHAN_va_neu_pull_requests 2026-11-04T16:28:12Z
+[B] <<< ra t43_PR_phai_CHAN_va_neu_pull_requests 0.031s QUA
+[B] >>> vao t44_loi_do_loai_phai_CHAN_khong_dang 2026-11-04T16:28:12Z
+[A] <<< ra t37_goi_tai_ve_phai_qua_DOI_CHIEU_BAM_truoc_khi_chay 0.063s QUA
+[A] >>> vao t38_bam_phai_dung_khi_DUONG_DAN_co_dau_cheo_nguoc 2026-11-04T16:28:12Z
+[A] <<< ra t38_bam_phai_dung_khi_DUONG_DAN_co_dau_cheo_nguoc 0.031s QUA
+[A] >>> vao t39_loai_archive_phai_do_NOI_DUNG_khong_doan_tu_ten 2026-11-04T16:28:12Z
+[B] <<< ra t44_loi_do_loai_phai_CHAN_khong_dang 0.029s QUA
+[B] >>> vao t45_ISSUE_phai_QUA_lop_do_loai 2026-11-04T16:28:12Z
+[B] <<< ra t45_ISSUE_phai_QUA_lop_do_loai 0.031s QUA
+[B] >>> vao t46_comment_da_co_thi_BO_QUA_xuyen_nhanh 2026-11-04T16:28:12Z
+[A] <<< ra t39_loai_archive_phai_do_NOI_DUNG_khong_doan_tu_ten 0.049s QUA
+[A] >>> vao t40_wrapper_phai_CAI_truoc_CHAY_va_giu_rc_cua_bo_test 2026-11-04T16:28:12Z
+[B] <<< ra t46_comment_da_co_thi_BO_QUA_xuyen_nhanh 0.056s QUA
+[B] >>> vao t47_dau_lease_KHAC_khong_duoc_chan 2026-11-04T16:28:12Z
+[B] <<< ra t47_dau_lease_KHAC_khong_duoc_chan 0.028s QUA
+[B] >>> vao t48_loi_doc_comment_phai_CHAN_khong_dang 2026-11-04T16:28:12Z
+[B] <<< ra t48_loi_doc_comment_phai_CHAN_khong_dang 0.030s QUA
+[B] >>> vao t49_env_va_lease_khong_duoc_chon_moi_noi 2026-11-04T16:28:12Z
+[A] <<< ra t40_wrapper_phai_CAI_truoc_CHAY_va_giu_rc_cua_bo_test 0.184s QUA
+[A] >>> vao t42_marker_NO_CO_TEN_va_muc_so_no_phai_khop_HAI_CHIEU 2026-11-04T16:28:12Z
+[A] <<< ra t42_marker_NO_CO_TEN_va_muc_so_no_phai_khop_HAI_CHIEU 0.002s QUA
+[A] >>> vao t43_PR_phai_CHAN_va_neu_pull_requests 2026-11-04T16:28:12Z
+[A] <<< ra t43_PR_phai_CHAN_va_neu_pull_requests 0.031s QUA
+[A] >>> vao t44_loi_do_loai_phai_CHAN_khong_dang 2026-11-04T16:28:12Z
+[A] <<< ra t44_loi_do_loai_phai_CHAN_khong_dang 0.028s QUA
+[A] >>> vao t45_ISSUE_phai_QUA_lop_do_loai 2026-11-04T16:28:12Z
+[A] <<< ra t45_ISSUE_phai_QUA_lop_do_loai 0.031s QUA
+[A] >>> vao t46_comment_da_co_thi_BO_QUA_xuyen_nhanh 2026-11-04T16:28:12Z
+[A] <<< ra t46_comment_da_co_thi_BO_QUA_xuyen_nhanh 0.065s QUA
+[A] >>> vao t47_dau_lease_KHAC_khong_duoc_chan 2026-11-04T16:28:12Z
+[A] <<< ra t47_dau_lease_KHAC_khong_duoc_chan 0.030s QUA
+[A] >>> vao t48_loi_doc_comment_phai_CHAN_khong_dang 2026-11-04T16:28:12Z
+[A] <<< ra t48_loi_doc_comment_phai_CHAN_khong_dang 0.031s QUA
+[A] >>> vao t49_env_va_lease_khong_duoc_chon_moi_noi 2026-11-04T16:28:12Z
+[B] <<< ra t49_env_va_lease_khong_duoc_chon_moi_noi 0.359s QUA
+[B] >>> vao t50_ngoai_Actions_phai_KHAI_hai_lop_vang 2026-11-04T16:28:12Z
+[B] <<< ra t50_ngoai_Actions_phai_KHAI_hai_lop_vang 0.115s QUA
+[B] >>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-11-04T16:28:13Z
+[A] <<< ra t49_env_va_lease_khong_duoc_chon_moi_noi 0.390s QUA
+[A] >>> vao t50_ngoai_Actions_phai_KHAI_hai_lop_vang 2026-11-04T16:28:13Z
+[A] <<< ra t50_ngoai_Actions_phai_KHAI_hai_lop_vang 0.085s QUA
+[A] >>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-11-04T16:28:13Z
+[B] <<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.659s QUA
+[B] >>> vao t53_check_trong_Actions_khong_gh_van_QUA 2026-11-04T16:28:13Z
+[B] <<< ra t53_check_trong_Actions_khong_gh_van_QUA 0.094s QUA
+[B] >>> vao t54_comment_nguoi_ngoai_khong_duoc_bit_lease 2026-11-04T16:28:13Z
+[B] <<< ra t54_comment_nguoi_ngoai_khong_duoc_bit_lease 0.031s QUA
+[B] >>> vao t55a_thieu_user_login_phai_CHAN 2026-11-04T16:28:13Z
+[B] <<< ra t55a_thieu_user_login_phai_CHAN 0.030s QUA
+[B] >>> vao t55b_dau_khong_o_dau_than_thi_khong_tinh 2026-11-04T16:28:13Z
+[B] <<< ra t55b_dau_khong_o_dau_than_thi_khong_tinh 0.029s QUA
+[B] >>> vao t56_lease_id_ky_tu_dac_biet_phai_CHAN 2026-11-04T16:28:13Z
+[A] <<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.642s QUA
+[A] >>> vao t53_check_trong_Actions_khong_gh_van_QUA 2026-11-04T16:28:13Z
+[A] <<< ra t53_check_trong_Actions_khong_gh_van_QUA 0.087s QUA
+[A] >>> vao t54_comment_nguoi_ngoai_khong_duoc_bit_lease 2026-11-04T16:28:14Z
+[B] <<< ra t56_lease_id_ky_tu_dac_biet_phai_CHAN 0.180s QUA
+[B] >>> vao t57_slurp_khong_trang_CHAN_mot_trang_rong_QUA 2026-11-04T16:28:14Z
+[A] <<< ra t54_comment_nguoi_ngoai_khong_duoc_bit_lease 0.029s QUA
+[A] >>> vao t55a_thieu_user_login_phai_CHAN 2026-11-04T16:28:14Z
+[B] <<< ra t57_slurp_khong_trang_CHAN_mot_trang_rong_QUA 0.061s QUA
+[B] >>> vao t58_check_body_thuan_va_check_khai_lop_chua_chay 2026-11-04T16:28:14Z
+[B] <<< ra t58_check_body_thuan_va_check_khai_lop_chua_chay 0.035s QUA
+[B] >>> vao t59_moi_lease_goi_kiem_github_truoc_check 2026-11-04T16:28:14Z
+[A] <<< ra t55a_thieu_user_login_phai_CHAN 0.027s QUA
+[A] >>> vao t55b_dau_khong_o_dau_than_thi_khong_tinh 2026-11-04T16:28:14Z
+[A] <<< ra t55b_dau_khong_o_dau_than_thi_khong_tinh 0.026s QUA
+[A] >>> vao t56_lease_id_ky_tu_dac_biet_phai_CHAN 2026-11-04T16:28:14Z
+[A] <<< ra t56_lease_id_ky_tu_dac_biet_phai_CHAN 0.178s QUA
+[A] >>> vao t57_slurp_khong_trang_CHAN_mot_trang_rong_QUA 2026-11-04T16:28:14Z
+[A] <<< ra t57_slurp_khong_trang_CHAN_mot_trang_rong_QUA 0.063s QUA
+[A] >>> vao t58_check_body_thuan_va_check_khai_lop_chua_chay 2026-11-04T16:28:14Z
+[A] <<< ra t58_check_body_thuan_va_check_khai_lop_chua_chay 0.031s QUA
+[A] >>> vao t59_moi_lease_goi_kiem_github_truoc_check 2026-11-04T16:28:14Z
+[B] <<< ra t59_moi_lease_goi_kiem_github_truoc_check 0.686s QUA
+[B] >>> vao t60_kiem_github_hong_khong_POST_va_lam_buoc_DO 2026-11-04T16:28:14Z
+[A] <<< ra t59_moi_lease_goi_kiem_github_truoc_check 0.722s QUA
+[A] >>> vao t60_kiem_github_hong_khong_POST_va_lam_buoc_DO 2026-11-04T16:28:15Z
+[B] <<< ra t60_kiem_github_hong_khong_POST_va_lam_buoc_DO 0.494s QUA
+[B] >>> vao t62_kiem_github_rc9_bo_qua_lease_va_buoc_XANH 2026-11-04T16:28:15Z
+[A] <<< ra t60_kiem_github_hong_khong_POST_va_lam_buoc_DO 0.512s QUA
+[A] >>> vao t62_kiem_github_rc9_bo_qua_lease_va_buoc_XANH 2026-11-04T16:28:15Z
+[B] <<< ra t62_kiem_github_rc9_bo_qua_lease_va_buoc_XANH 0.513s QUA
+[B] >>> vao t63_check_rc9_bo_qua_lease_va_buoc_XANH 2026-11-04T16:28:15Z
+[A] <<< ra t62_kiem_github_rc9_bo_qua_lease_va_buoc_XANH 0.502s QUA
+[A] >>> vao t63_check_rc9_bo_qua_lease_va_buoc_XANH 2026-11-04T16:28:16Z
+[B] <<< ra t63_check_rc9_bo_qua_lease_va_buoc_XANH 0.557s QUA
+[B] >>> vao t64_guard_dan_xuat_tu_YAML_khop_so_dang_ky 2026-11-04T16:28:16Z
+[B] <<< ra t64_guard_dan_xuat_tu_YAML_khop_so_dang_ky 0.009s QUA
+[B] >>> vao t65_bo_trich_rong_hoac_hong_phai_DO 2026-11-04T16:28:16Z
+[B] <<< ra t65_bo_trich_rong_hoac_hong_phai_DO 0.009s QUA
+[B] >>> vao t66_moi_guard_co_phan_chung_va_ve_theo_vi_tri 2026-11-04T16:28:16Z
+[A] <<< ra t63_check_rc9_bo_qua_lease_va_buoc_XANH 0.542s QUA
+[A] >>> vao t64_guard_dan_xuat_tu_YAML_khop_so_dang_ky 2026-11-04T16:28:16Z
+[A] <<< ra t64_guard_dan_xuat_tu_YAML_khop_so_dang_ky 0.008s QUA
+[A] >>> vao t65_bo_trich_rong_hoac_hong_phai_DO 2026-11-04T16:28:16Z
+[A] <<< ra t65_bo_trich_rong_hoac_hong_phai_DO 0.007s QUA
+[A] >>> vao t66_moi_guard_co_phan_chung_va_ve_theo_vi_tri 2026-11-04T16:28:16Z
+[B] <<< ra t66_moi_guard_co_phan_chung_va_ve_theo_vi_tri 4.237s QUA
+[B] >>> vao t67_ve_khang_dinh_phai_khop_vi_tri_dan_xuat_tu_YAML 2026-11-04T16:28:20Z
+[B] <<< ra t67_ve_khang_dinh_phai_khop_vi_tri_dan_xuat_tu_YAML 0.014s QUA
+[B] >>> vao t68_post_rc_hong_van_COMMENT_DA_LEN_va_buoc_phai_DO 2026-11-04T16:28:20Z
+[A] <<< ra t66_moi_guard_co_phan_chung_va_ve_theo_vi_tri 4.246s QUA
+[A] >>> vao t67_ve_khang_dinh_phai_khop_vi_tri_dan_xuat_tu_YAML 2026-11-04T16:28:20Z
+[A] <<< ra t67_ve_khang_dinh_phai_khop_vi_tri_dan_xuat_tu_YAML 0.007s QUA
+[A] >>> vao t68_post_rc_hong_van_COMMENT_DA_LEN_va_buoc_phai_DO 2026-11-04T16:28:20Z
+[B] <<< ra t68_post_rc_hong_van_COMMENT_DA_LEN_va_buoc_phai_DO 0.665s QUA
+[B] >>> vao t69_W1_W2_thieu_dau_ra_do_gia_phai_bao_du_ba_manh 2026-11-04T16:28:21Z
+[B] <<< ra t69_W1_W2_thieu_dau_ra_do_gia_phai_bao_du_ba_manh 0.000s QUA
+[B] >>> vao t70_W6_matrix_co_Windows_phai_chay_lai_bay_ca 2026-11-04T16:28:21Z
+[B] <<< ra t70_W6_matrix_co_Windows_phai_chay_lai_bay_ca 0.000s QUA
+[B] >>> vao t71_W7_workflow_khong_ubuntu_only_cam_bo_qua 2026-11-04T16:28:21Z
+[B] <<< ra t71_W7_workflow_khong_ubuntu_only_cam_bo_qua 0.001s QUA
+[B] >>> vao t72_W8_bo_qua_phai_in_runs_on_va_tong_ket 2026-11-04T16:28:21Z
+[B] <<< ra t72_W8_bo_qua_phai_in_runs_on_va_tong_ket 0.003s QUA
+[B] >>> vao t73_nen_posix_khong_duoc_bo_qua_ca_nao 2026-11-04T16:28:21Z
+[B] <<< ra t73_nen_posix_khong_duoc_bo_qua_ca_nao 0.008s QUA
+[B] >>> vao t74_A1_A2_executor_khong_duoc_ha_lop_va_ve_dung_phai_QUA 2026-11-04T16:28:21Z
+[B] <<< ra t74_A1_A2_executor_khong_duoc_ha_lop_va_ve_dung_phai_QUA 0.029s QUA
+[B] >>> vao t75_A3_A13_reviewer_sensitive_va_KHONG_doc_thu_muc_lease 2026-11-04T16:28:21Z
+[B] <<< ra t75_A3_A13_reviewer_sensitive_va_KHONG_doc_thu_muc_lease 0.083s QUA
+[B] >>> vao t76_A4_reviewer_khai_thap_phai_bi_CHAN 2026-11-04T16:28:21Z
+[B] <<< ra t76_A4_reviewer_khai_thap_phai_bi_CHAN 0.033s QUA
+[B] >>> vao t77_A5_planned_duoc_cat_truoc_khi_tra_bang 2026-11-04T16:28:21Z
+[B] <<< ra t77_A5_planned_duoc_cat_truoc_khi_tra_bang 0.027s QUA
+[B] >>> vao t78_A6_write_set_thieu_rong_hong_deu_sensitive 2026-11-04T16:28:21Z
+[B] <<< ra t78_A6_write_set_thieu_rong_hong_deu_sensitive 0.025s QUA
+[B] >>> vao t79_A7_noi_bang_launcher_lam_ca_dich_DO 2026-11-04T16:28:21Z
+[B] <<< ra t79_A7_noi_bang_launcher_lam_ca_dich_DO 0.029s QUA
+[B] >>> vao t80_A8_schema_v1_bo_qua_chot_va_co_canh_bao 2026-11-04T16:28:21Z
+[A] <<< ra t68_post_rc_hong_van_COMMENT_DA_LEN_va_buoc_phai_DO 0.656s QUA
+[A] >>> vao t69_W1_W2_thieu_dau_ra_do_gia_phai_bao_du_ba_manh 2026-11-04T16:28:21Z
+[A] <<< ra t69_W1_W2_thieu_dau_ra_do_gia_phai_bao_du_ba_manh 0.001s QUA
+[A] >>> vao t70_W6_matrix_co_Windows_phai_chay_lai_bay_ca 2026-11-04T16:28:21Z
+[A] <<< ra t70_W6_matrix_co_Windows_phai_chay_lai_bay_ca 0.000s QUA
+[A] >>> vao t71_W7_workflow_khong_ubuntu_only_cam_bo_qua 2026-11-04T16:28:21Z
+[A] <<< ra t71_W7_workflow_khong_ubuntu_only_cam_bo_qua 0.001s QUA
+[A] >>> vao t72_W8_bo_qua_phai_in_runs_on_va_tong_ket 2026-11-04T16:28:21Z
+[A] <<< ra t72_W8_bo_qua_phai_in_runs_on_va_tong_ket 0.002s QUA
+[A] >>> vao t73_nen_posix_khong_duoc_bo_qua_ca_nao 2026-11-04T16:28:21Z
+[A] <<< ra t73_nen_posix_khong_duoc_bo_qua_ca_nao 0.011s QUA
+[A] >>> vao t74_A1_A2_executor_khong_duoc_ha_lop_va_ve_dung_phai_QUA 2026-11-04T16:28:21Z
+[B] <<< ra t80_A8_schema_v1_bo_qua_chot_va_co_canh_bao 0.093s QUA
+[B] >>> vao t81_A14_ve_duong_executor_routine_phai_song 2026-11-04T16:28:21Z
+[A] <<< ra t74_A1_A2_executor_khong_duoc_ha_lop_va_ve_dung_phai_QUA 0.035s QUA
+[A] >>> vao t75_A3_A13_reviewer_sensitive_va_KHONG_doc_thu_muc_lease 2026-11-04T16:28:21Z
+[B] <<< ra t81_A14_ve_duong_executor_routine_phai_song 0.030s QUA
+[B] >>> vao t82_A10_dot_bien_A1_A8_tren_ban_sao_CA_CAY_ten_rieng 2026-11-04T16:28:21Z
+[A] <<< ra t75_A3_A13_reviewer_sensitive_va_KHONG_doc_thu_muc_lease 0.091s QUA
+[A] >>> vao t76_A4_reviewer_khai_thap_phai_bi_CHAN 2026-11-04T16:28:21Z
+[A] <<< ra t76_A4_reviewer_khai_thap_phai_bi_CHAN 0.029s QUA
+[A] >>> vao t77_A5_planned_duoc_cat_truoc_khi_tra_bang 2026-11-04T16:28:21Z
+[A] <<< ra t77_A5_planned_duoc_cat_truoc_khi_tra_bang 0.027s QUA
+[A] >>> vao t78_A6_write_set_thieu_rong_hong_deu_sensitive 2026-11-04T16:28:21Z
+[A] <<< ra t78_A6_write_set_thieu_rong_hong_deu_sensitive 0.026s QUA
+[A] >>> vao t79_A7_noi_bang_launcher_lam_ca_dich_DO 2026-11-04T16:28:21Z
+[A] <<< ra t79_A7_noi_bang_launcher_lam_ca_dich_DO 0.025s QUA
+[A] >>> vao t80_A8_schema_v1_bo_qua_chot_va_co_canh_bao 2026-11-04T16:28:21Z
+[A] <<< ra t80_A8_schema_v1_bo_qua_chot_va_co_canh_bao 0.106s QUA
+[A] >>> vao t81_A14_ve_duong_executor_routine_phai_song 2026-11-04T16:28:21Z
+[A] <<< ra t81_A14_ve_duong_executor_routine_phai_song 0.031s QUA
+[A] >>> vao t82_A10_dot_bien_A1_A8_tren_ban_sao_CA_CAY_ten_rieng 2026-11-04T16:28:22Z
+[B] <<< ra t82_A10_dot_bien_A1_A8_tren_ban_sao_CA_CAY_ten_rieng 3.902s QUA
+[B] >>> vao t83_traversal_duoc_chuan_hoa_truoc_khi_tra_bang 2026-11-04T16:28:25Z
+[B] <<< ra t83_traversal_duoc_chuan_hoa_truoc_khi_tra_bang 0.034s QUA
+[B] >>> vao t88_traversal_khong_duoc_nhan_lop_thap_truoc_khi_chuan_hoa 2026-11-04T16:28:25Z
+[B] <<< ra t88_traversal_khong_duoc_nhan_lop_thap_truoc_khi_chuan_hoa 0.026s QUA
+[B] >>> vao t84_schema_version_hong_vo_huong_phai_bi_CHAN 2026-11-04T16:28:25Z
+[B] <<< ra t84_schema_version_hong_vo_huong_phai_bi_CHAN 0.027s QUA
+[B] >>> vao t85_schema_version_hong_container_phai_bi_CHAN 2026-11-04T16:28:25Z
+[B] <<< ra t85_schema_version_hong_container_phai_bi_CHAN 0.026s QUA
+[B] >>> vao t86_moi_muc_bang_seed_deu_phai_sensitive 2026-11-04T16:28:25Z
+[B] <<< ra t86_moi_muc_bang_seed_deu_phai_sensitive 0.026s QUA
+[B] >>> vao t87_ba_duong_van_hanh_phai_sensitive 2026-11-04T16:28:25Z
+[B] <<< ra t87_ba_duong_van_hanh_phai_sensitive 0.025s QUA
+[B] >>> vao t89_A1_A2b_quet_du_hai_nguoi_giu_va_ba_trang_thai 2026-11-04T16:28:25Z
+[B] <<< ra t89_A1_A2b_quet_du_hai_nguoi_giu_va_ba_trang_thai 0.028s QUA
+[B] >>> vao t90_A2_yaml_hong_fail_close 2026-11-04T16:28:25Z
+[B] <<< ra t90_A2_yaml_hong_fail_close 0.026s QUA
+[B] >>> vao t91_A2c_da_bi_thay_the_van_in_nhung_khong_giu 2026-11-04T16:28:25Z
+[A] <<< ra t82_A10_dot_bien_A1_A8_tren_ban_sao_CA_CAY_ten_rieng 3.865s QUA
+[A] >>> vao t83_traversal_duoc_chuan_hoa_truoc_khi_tra_bang 2026-11-04T16:28:25Z
+[A] <<< ra t83_traversal_duoc_chuan_hoa_truoc_khi_tra_bang 0.030s QUA
+[A] >>> vao t88_traversal_khong_duoc_nhan_lop_thap_truoc_khi_chuan_hoa 2026-11-04T16:28:25Z
+[B] <<< ra t91_A2c_da_bi_thay_the_van_in_nhung_khong_giu 0.038s QUA
+[B] >>> vao t92_A3_A4_A5_A6_so_tap_ten_ref 2026-11-04T16:28:25Z
+[A] <<< ra t88_traversal_khong_duoc_nhan_lop_thap_truoc_khi_chuan_hoa 0.028s QUA
+[A] >>> vao t84_schema_version_hong_vo_huong_phai_bi_CHAN 2026-11-04T16:28:25Z
+[A] <<< ra t84_schema_version_hong_vo_huong_phai_bi_CHAN 0.028s QUA
+[A] >>> vao t85_schema_version_hong_container_phai_bi_CHAN 2026-11-04T16:28:25Z
+[B] <<< ra t92_A3_A4_A5_A6_so_tap_ten_ref 0.084s QUA
+[B] >>> vao t94_A8_moi_ca_co_dot_bien_ma_san_pham_lam_DO 2026-11-04T16:28:25Z
+[A] <<< ra t85_schema_version_hong_container_phai_bi_CHAN 0.038s QUA
+[A] >>> vao t86_moi_muc_bang_seed_deu_phai_sensitive 2026-11-04T16:28:26Z
+[A] <<< ra t86_moi_muc_bang_seed_deu_phai_sensitive 0.029s QUA
+[A] >>> vao t87_ba_duong_van_hanh_phai_sensitive 2026-11-04T16:28:26Z
+[A] <<< ra t87_ba_duong_van_hanh_phai_sensitive 0.034s QUA
+[A] >>> vao t89_A1_A2b_quet_du_hai_nguoi_giu_va_ba_trang_thai 2026-11-04T16:28:26Z
+[A] <<< ra t89_A1_A2b_quet_du_hai_nguoi_giu_va_ba_trang_thai 0.038s QUA
+[A] >>> vao t90_A2_yaml_hong_fail_close 2026-11-04T16:28:26Z
+[A] <<< ra t90_A2_yaml_hong_fail_close 0.027s QUA
+[A] >>> vao t91_A2c_da_bi_thay_the_van_in_nhung_khong_giu 2026-11-04T16:28:26Z
+[A] <<< ra t91_A2c_da_bi_thay_the_van_in_nhung_khong_giu 0.037s QUA
+[A] >>> vao t92_A3_A4_A5_A6_so_tap_ten_ref 2026-11-04T16:28:26Z
+[A] <<< ra t92_A3_A4_A5_A6_so_tap_ten_ref 0.077s QUA
+[A] >>> vao t94_A8_moi_ca_co_dot_bien_ma_san_pham_lam_DO 2026-11-04T16:28:26Z
+[B] đột biến mã sản phẩm: đã chạy=9, bị giết=9
+[B] <<< ra t94_A8_moi_ca_co_dot_bien_ma_san_pham_lam_DO 0.291s QUA
+[B] >>> vao t95_git_that_bai_phai_fail_close_khong_duoc_nuot_loi 2026-11-04T16:28:26Z
+[B] <<< ra t95_git_that_bai_phai_fail_close_khong_duoc_nuot_loi 0.025s QUA
+[B] >>> vao t96_lease_cham_duong_khop_tuyet_doi_khong_phai_chua 2026-11-04T16:28:26Z
+[B] <<< ra t96_lease_cham_duong_khop_tuyet_doi_khong_phai_chua 0.026s QUA
+[B] >>> vao t98_truc_phan_biet_la_NEN_chu_khong_phai_TEN_TEP 2026-11-04T16:28:26Z
+[B] <<< ra t98_truc_phan_biet_la_NEN_chu_khong_phai_TEN_TEP 0.009s QUA
+[B] >>> vao t99_con_tro_treo_chan_xau_khong_chan_ten_truong_cua_spec_va_quet_nguoc 2026-11-04T16:28:26Z
+[B] <<< ra t99_con_tro_treo_chan_xau_khong_chan_ten_truong_cua_spec_va_quet_nguoc 0.044s QUA
+[B] >>> vao t100_bia_mo_doi_dau_cu_thieu_danh_dau_nhung_cho_ca_dung 2026-11-04T16:28:26Z
+[B] <<< ra t100_bia_mo_doi_dau_cu_thieu_danh_dau_nhung_cho_ca_dung 0.037s QUA
+[B] >>> vao t101_dot_bien_con_tro_treo_va_bia_mo_deu_bi_giet 2026-11-04T16:28:26Z
+[A] đột biến mã sản phẩm: đã chạy=9, bị giết=9
+[A] <<< ra t94_A8_moi_ca_co_dot_bien_ma_san_pham_lam_DO 0.256s QUA
+[A] >>> vao t95_git_that_bai_phai_fail_close_khong_duoc_nuot_loi 2026-11-04T16:28:26Z
+[A] <<< ra t95_git_that_bai_phai_fail_close_khong_duoc_nuot_loi 0.026s QUA
+[A] >>> vao t96_lease_cham_duong_khop_tuyet_doi_khong_phai_chua 2026-11-04T16:28:26Z
+[A] <<< ra t96_lease_cham_duong_khop_tuyet_doi_khong_phai_chua 0.025s QUA
+[A] >>> vao t98_truc_phan_biet_la_NEN_chu_khong_phai_TEN_TEP 2026-11-04T16:28:26Z
+[A] <<< ra t98_truc_phan_biet_la_NEN_chu_khong_phai_TEN_TEP 0.007s QUA
+[A] >>> vao t99_con_tro_treo_chan_xau_khong_chan_ten_truong_cua_spec_va_quet_nguoc 2026-11-04T16:28:26Z
+[A] <<< ra t99_con_tro_treo_chan_xau_khong_chan_ten_truong_cua_spec_va_quet_nguoc 0.041s QUA
+[A] >>> vao t100_bia_mo_doi_dau_cu_thieu_danh_dau_nhung_cho_ca_dung 2026-11-04T16:28:26Z
+[B] đột biến packet #313: đã chạy=4, bị giết=4
+[B] <<< ra t101_dot_bien_con_tro_treo_va_bia_mo_deu_bi_giet 0.178s QUA
+[B] >>> vao t102_nhanh_cuc_bo_tut_sau_phai_CHAN_truoc_khu_trung_lease_id 2026-11-04T16:28:26Z
+[B] <<< ra t102_nhanh_cuc_bo_tut_sau_phai_CHAN_truoc_khu_trung_lease_id 0.041s QUA
+[B] >>> vao t103_nhanh_cuc_bo_bang_origin_phai_QUA 2026-11-04T16:28:26Z
+[A] <<< ra t100_bia_mo_doi_dau_cu_thieu_danh_dau_nhung_cho_ca_dung 0.056s QUA
+[A] >>> vao t101_dot_bien_con_tro_treo_va_bia_mo_deu_bi_giet 2026-11-04T16:28:26Z
+[B] <<< ra t103_nhanh_cuc_bo_bang_origin_phai_QUA 0.028s QUA
+[B] >>> vao t104_nhanh_cuc_bo_di_truoc_origin_phai_QUA 2026-11-04T16:28:26Z
+[B] <<< ra t104_nhanh_cuc_bo_di_truoc_origin_phai_QUA 0.027s QUA
+[B] >>> vao t105_nhanh_cuc_bo_khong_co_origin_phai_QUA 2026-11-04T16:28:26Z
+[B] <<< ra t105_nhanh_cuc_bo_khong_co_origin_phai_QUA 0.028s QUA
+[B] >>> vao t106_cung_lease_id_khac_noi_dung_chi_dem_MOT 2026-11-04T16:28:26Z
+[B] <<< ra t106_cung_lease_id_khac_noi_dung_chi_dem_MOT 0.027s QUA
+[B] >>> vao t107_hai_lease_id_khac_nhau_phai_dem_HAI 2026-11-04T16:28:26Z
+[B] <<< ra t107_hai_lease_id_khac_nhau_phai_dem_HAI 0.027s QUA
+[B] >>> vao t108_moi_chot_ref_cuc_bo_co_dot_bien_rieng 2026-11-04T16:28:26Z
+[A] đột biến packet #313: đã chạy=4, bị giết=4
+[A] <<< ra t101_dot_bien_con_tro_treo_va_bia_mo_deu_bi_giet 0.143s QUA
+[A] >>> vao t102_nhanh_cuc_bo_tut_sau_phai_CHAN_truoc_khu_trung_lease_id 2026-11-04T16:28:26Z
+[A] <<< ra t102_nhanh_cuc_bo_tut_sau_phai_CHAN_truoc_khu_trung_lease_id 0.027s QUA
+[A] >>> vao t103_nhanh_cuc_bo_bang_origin_phai_QUA 2026-11-04T16:28:26Z
+[A] <<< ra t103_nhanh_cuc_bo_bang_origin_phai_QUA 0.027s QUA
+[A] >>> vao t104_nhanh_cuc_bo_di_truoc_origin_phai_QUA 2026-11-04T16:28:26Z
+[A] <<< ra t104_nhanh_cuc_bo_di_truoc_origin_phai_QUA 0.031s QUA
+[A] >>> vao t105_nhanh_cuc_bo_khong_co_origin_phai_QUA 2026-11-04T16:28:26Z
+[A] <<< ra t105_nhanh_cuc_bo_khong_co_origin_phai_QUA 0.031s QUA
+[A] >>> vao t106_cung_lease_id_khac_noi_dung_chi_dem_MOT 2026-11-04T16:28:26Z
+[A] <<< ra t106_cung_lease_id_khac_noi_dung_chi_dem_MOT 0.031s QUA
+[A] >>> vao t107_hai_lease_id_khac_nhau_phai_dem_HAI 2026-11-04T16:28:26Z
+[B] đột biến ref cục bộ: đã chạy=6, bị giết=6
+[B] <<< ra t108_moi_chot_ref_cuc_bo_co_dot_bien_rieng 0.177s QUA
+[B] >>> vao t109_lenh_chua_nhanh_ranh_phai_chay_duoc_va_khop_origin 2026-11-04T16:28:26Z
+[A] <<< ra t107_hai_lease_id_khac_nhau_phai_dem_HAI 0.042s QUA
+[A] >>> vao t108_moi_chot_ref_cuc_bo_co_dot_bien_rieng 2026-11-04T16:28:26Z
+[B] <<< ra t109_lenh_chua_nhanh_ranh_phai_chay_duoc_va_khop_origin 0.202s QUA
+[B] >>> vao t110_lenh_chua_nhanh_bi_worktree_giu_phai_chay_duoc_va_khop_origin 2026-11-04T16:28:27Z
+[A] đột biến ref cục bộ: đã chạy=6, bị giết=6
+[A] <<< ra t108_moi_chot_ref_cuc_bo_co_dot_bien_rieng 0.201s QUA
+[A] >>> vao t109_lenh_chua_nhanh_ranh_phai_chay_duoc_va_khop_origin 2026-11-04T16:28:27Z
+[B] <<< ra t110_lenh_chua_nhanh_bi_worktree_giu_phai_chay_duoc_va_khop_origin 0.173s QUA
+[B] >>> vao t111_allowlist_worktree_nam_trang_thai_va_dot_bien 2026-11-04T16:28:27Z
+[A] <<< ra t109_lenh_chua_nhanh_ranh_phai_chay_duoc_va_khop_origin 0.142s QUA
+[A] >>> vao t110_lenh_chua_nhanh_bi_worktree_giu_phai_chay_duoc_va_khop_origin 2026-11-04T16:28:27Z
+[A] <<< ra t110_lenh_chua_nhanh_bi_worktree_giu_phai_chay_duoc_va_khop_origin 0.163s QUA
+[A] >>> vao t111_allowlist_worktree_nam_trang_thai_va_dot_bien 2026-11-04T16:28:27Z
+[B] đột biến prunable: ĐỎ=['prunable'], đối chứng cho phép sống=2
+[A] đột biến prunable: ĐỎ=['prunable'], đối chứng cho phép sống=2
+[B] đột biến last-wins: ĐỎ=['hai'], đối chứng cho phép sống=2
+[A] đột biến last-wins: ĐỎ=['hai'], đối chứng cho phép sống=2
+[B] đột biến sạch: ĐỎ=['ban'], đối chứng cho phép sống=2
+[A] đột biến sạch: ĐỎ=['ban'], đối chứng cho phép sống=2
+[B] đột biến thao-tác-dở: ĐỎ=['merge', 'rebase'], đối chứng cho phép sống=2
+[A] đột biến thao-tác-dở: ĐỎ=['merge', 'rebase'], đối chứng cho phép sống=2
+[B] đột biến vô-điều-kiện: ĐỎ=['ban', 'hai', 'merge', 'prunable', 'rebase'], đối chứng cho phép sống=2
+[B] <<< ra t111_allowlist_worktree_nam_trang_thai_va_dot_bien 6.872s QUA
+[B] >>> vao t112_cac_ca_khoa_upstream_that_va_bon_trang_thai 2026-11-04T16:28:34Z
+[B] ca upstream tutsau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: tutsau -> refs/remotes/origin/tutsau (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f tutsau refs/remotes/origin/tutsau
+[B] ca upstream phanky: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_PHÂN_KỲ: phanky -> refs/remotes/origin/phanky (1/1). KHÔNG_PHÁT_LỆNH_CHỮA; người dùng tự quyết cách hợp nhất hoặc giữ commit.
+[B] ca upstream main: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: main -> refs/remotes/origin/main (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f main refs/remotes/origin/main
+[B] ca upstream bang: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+[B] ca upstream ditruoc: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+[B] ca upstream thuancucbo: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+[B] ca upstream khacten: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_PHÂN_KỲ: khacten -> refs/remotes/origin/main (1/1). KHÔNG_PHÁT_LỆNH_CHỮA; người dùng tự quyết cách hợp nhất hoặc giữ commit.
+[B] ca upstream khactensau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: khactensau -> refs/remotes/origin/main (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f khactensau refs/remotes/origin/main
+[B] ca upstream khaihong: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: khaihong có config upstream nhưng không giải được: branch.khaihong.remote='khongcorenote', branch.khaihong.merge='refs/heads/khaihong'
+[A] đột biến vô-điều-kiện: ĐỎ=['ban', 'hai', 'merge', 'prunable', 'rebase'], đối chứng cho phép sống=2
+[A] <<< ra t111_allowlist_worktree_nam_trang_thai_va_dot_bien 6.927s QUA
+[A] >>> vao t112_cac_ca_khoa_upstream_that_va_bon_trang_thai 2026-11-04T16:28:34Z
+[B] ca upstream khaihongkhongref: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: khaihongkhongref có config upstream nhưng không giải được: branch.khaihongkhongref.remote='khongcorenote', branch.khaihongkhongref.merge='refs/heads/khaihongkhongref'
+[B] ca upstream remotecham: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+[A] ca upstream tutsau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: tutsau -> refs/remotes/origin/tutsau (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f tutsau refs/remotes/origin/tutsau
+[A] ca upstream phanky: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_PHÂN_KỲ: phanky -> refs/remotes/origin/phanky (1/1). KHÔNG_PHÁT_LỆNH_CHỮA; người dùng tự quyết cách hợp nhất hoặc giữ commit.
+[B] ca upstream tagup: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+[B] ca upstream tagupsau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: tagupsau -> refs/tags/v1 (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f tagupsau refs/tags/v1
+[A] ca upstream main: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: main -> refs/remotes/origin/main (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f main refs/remotes/origin/main
+[A] ca upstream bang: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+[B] ca upstream tagpeel: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: git check-ref-format refs/tags/vann^{} rc=1: refname không hợp lệ
+[B] ca upstream refnamesai: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: git check-ref-format refs/heads/ten sai rc=1: refname không hợp lệ
+[A] ca upstream ditruoc: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+[A] ca upstream thuancucbo: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+[B] ca upstream refcodau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: ref có hình dạng không an toàn (bắt đầu bằng '-'): --help
+[B] <<< ra t112_cac_ca_khoa_upstream_that_va_bon_trang_thai 0.441s QUA
+[B] >>> vao t113_sau_dot_bien_upstream_va_phan_ky_deu_bi_giet 2026-11-04T16:28:34Z
+[A] ca upstream khacten: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_PHÂN_KỲ: khacten -> refs/remotes/origin/main (1/1). KHÔNG_PHÁT_LỆNH_CHỮA; người dùng tự quyết cách hợp nhất hoặc giữ commit.
+[A] ca upstream khactensau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: khactensau -> refs/remotes/origin/main (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f khactensau refs/remotes/origin/main
+[A] ca upstream khaihong: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: khaihong có config upstream nhưng không giải được: branch.khaihong.remote='khongcorenote', branch.khaihong.merge='refs/heads/khaihong'
+[A] ca upstream khaihongkhongref: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: khaihongkhongref có config upstream nhưng không giải được: branch.khaihongkhongref.remote='khongcorenote', branch.khaihongkhongref.merge='refs/heads/khaihongkhongref'
+[A] ca upstream remotecham: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+[A] ca upstream tagup: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+[A] ca upstream tagupsau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: tagupsau -> refs/tags/v1 (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f tagupsau refs/tags/v1
+[A] ca upstream tagpeel: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: git check-ref-format refs/tags/vann^{} rc=1: refname không hợp lệ
+[A] ca upstream refnamesai: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: git check-ref-format refs/heads/ten sai rc=1: refname không hợp lệ
+[A] ca upstream refcodau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: ref có hình dạng không an toàn (bắt đầu bằng '-'): --help
+[A] <<< ra t112_cac_ca_khoa_upstream_that_va_bon_trang_thai 0.425s QUA
+[A] >>> vao t113_sau_dot_bien_upstream_va_phan_ky_deu_bi_giet 2026-11-04T16:28:34Z
+[B] đột biến go-phat-hien-phan-ky: thư_mục=lp_b7uvuyif; ĐỎ=['khacten', 'phanky'], đối chứng SỐNG=['bang', 'ditruoc', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+[A] đột biến go-phat-hien-phan-ky: thư_mục=lp_w9w0f1s0; ĐỎ=['khacten', 'phanky'], đối chứng SỐNG=['bang', 'ditruoc', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+[B] đột biến phan-ky-thanh-tut-sau: thư_mục=lp_x1fbbem5; ĐỎ=['khacten', 'phanky'], đối chứng SỐNG=['bang', 'ditruoc', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+[A] đột biến phan-ky-thanh-tut-sau: thư_mục=lp__gnp8h5m; ĐỎ=['khacten', 'phanky'], đối chứng SỐNG=['bang', 'ditruoc', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+[B] đột biến doi-ung-theo-ten: thư_mục=lp_cf1rsytt; ĐỎ=['khacten', 'khactensau', 'khaihong', 'remotecham', 'tagup', 'tagupsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'tagpeel', 'thuancucbo', 'tutsau']
+[A] đột biến doi-ung-theo-ten: thư_mục=lp_w96krlkm; ĐỎ=['khacten', 'khactensau', 'khaihong', 'remotecham', 'tagup', 'tagupsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'tagpeel', 'thuancucbo', 'tutsau']
+[B] đột biến ton-tai-lai-hoi-tap-ref: thư_mục=lp_ndpbavfs; ĐỎ=['tagup', 'tagupsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'thuancucbo', 'tutsau']
+[A] đột biến ton-tai-lai-hoi-tap-ref: thư_mục=lp_iyq6kjeg; ĐỎ=['tagup', 'tagupsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'thuancucbo', 'tutsau']
+[B] đột biến go-phat-hien-khai-hong: thư_mục=lp_bir_w_q5; ĐỎ=['khaihong', 'khaihongkhongref'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+[A] đột biến go-phat-hien-khai-hong: thư_mục=lp_t4hcdgz6; ĐỎ=['khaihong', 'khaihongkhongref'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+[B] đột biến khai-hong-lui-ve-ten: thư_mục=lp_81elc2rl; ĐỎ=['khaihong'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+[A] đột biến khai-hong-lui-ve-ten: thư_mục=lp_oa0ztvhj; ĐỎ=['khaihong'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+[B] đột biến chan-remote-cham: thư_mục=lp_wjlxg8af; ĐỎ=['remotecham', 'tagup', 'tagupsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'tagpeel', 'thuancucbo', 'tutsau']
+[A] đột biến chan-remote-cham: thư_mục=lp_yfffp7nm; ĐỎ=['remotecham', 'tagup', 'tagupsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'tagpeel', 'thuancucbo', 'tutsau']
+[B] đột biến chan-khong-upstream: thư_mục=lp_nqdim27h; ĐỎ=['thuancucbo'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'tutsau']
+[A] đột biến chan-khong-upstream: thư_mục=lp_hs3u0jbb; ĐỎ=['thuancucbo'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'tutsau']
+[B] đột biến go-chot-quan-he-ref: thư_mục=lp_tmo9hs7w; ĐỎ=['khacten', 'phanky'], đối chứng SỐNG=['bang', 'ditruoc', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+[A] đột biến go-chot-quan-he-ref: thư_mục=lp_1r644jzg; ĐỎ=['khacten', 'phanky'], đối chứng SỐNG=['bang', 'ditruoc', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+[B] đột biến go-lui-ve-ten: thư_mục=lp_lnjxkqeo; ĐỎ=['main', 'phanky', 'tutsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo']
+[B] <<< ra t113_sau_dot_bien_upstream_va_phan_ky_deu_bi_giet 4.363s QUA
+[B] >>> vao t114_khong_config_nhung_co_origin_cung_ten_phai_duoc_phan_loai 2026-11-04T16:28:38Z
+[B] <<< ra t114_khong_config_nhung_co_origin_cung_ten_phai_duoc_phan_loai 0.051s QUA
+[B] >>> vao t115_tag_khong_nam_trong_pham_vi_quet_lease_va_dot_bien 2026-11-04T16:28:39Z
+[B] đột biến mở-phạm-vi-quét-tag: thư_mục=lp_jnlwvtvs; ĐỎ=['tag-khong-quet'], đối chứng SỐNG=['remotecham', 'tagup']
+[B] <<< ra t115_tag_khong_nam_trong_pham_vi_quet_lease_va_dot_bien 0.104s QUA
+[B] >>> vao t116_ref_chinh_xac_hinh_dang_va_bon_dot_bien_bat_buoc 2026-11-04T16:28:39Z
+[A] đột biến go-lui-ve-ten: thư_mục=lp_qox2tuip; ĐỎ=['main', 'phanky', 'tutsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo']
+[A] <<< ra t113_sau_dot_bien_upstream_va_phan_ky_deu_bi_giet 4.406s QUA
+[A] >>> vao t114_khong_config_nhung_co_origin_cung_ten_phai_duoc_phan_loai 2026-11-04T16:28:39Z
+[A] <<< ra t114_khong_config_nhung_co_origin_cung_ten_phai_duoc_phan_loai 0.050s QUA
+[A] >>> vao t115_tag_khong_nam_trong_pham_vi_quet_lease_va_dot_bien 2026-11-04T16:28:39Z
+[B] đột biến bắt buộc go-chot-dau-tru: thư_mục=lp_w5_ziplt; ĐỎ=['refcodau']
+[A] đột biến mở-phạm-vi-quét-tag: thư_mục=lp_jmlf2pws; ĐỎ=['tag-khong-quet'], đối chứng SỐNG=['remotecham', 'tagup']
+[A] <<< ra t115_tag_khong_nam_trong_pham_vi_quet_lease_va_dot_bien 0.102s QUA
+[A] >>> vao t116_ref_chinh_xac_hinh_dang_va_bon_dot_bien_bat_buoc 2026-11-04T16:28:39Z
+[B] đột biến bắt buộc rev-parse: thư_mục=lp_q7nukg9m; ĐỎ=['refnamesai', 'tagpeel']
+[B] đột biến bắt buộc go-check-ref-format: thư_mục=lp_y1s_ky0h; ĐỎ=['refnamesai', 'tagpeel']
+[A] đột biến bắt buộc go-chot-dau-tru: thư_mục=lp_p9i9pvao; ĐỎ=['refcodau']
+[B] đột biến bắt buộc mo-pham-vi-tag: thư_mục=lp_p64gibu2; ĐỎ=['tag-khong-quet']
+[A] đột biến bắt buộc rev-parse: thư_mục=lp_3ojany88; ĐỎ=['refnamesai', 'tagpeel']
+[B] đột biến bắt buộc chan-tag-that: thư_mục=lp_y1hq2eeu; ĐỎ=['tagup']
+[B] <<< ra t116_ref_chinh_xac_hinh_dang_va_bon_dot_bien_bat_buoc 0.657s QUA
+[B] >>> vao t117_bia_mo_tro_lease_khong_ton_tai_phai_KHONG_XAC_DINH 2026-11-04T16:28:39Z
+[B] <<< ra t117_bia_mo_tro_lease_khong_ton_tai_phai_KHONG_XAC_DINH 0.026s QUA
+[B] >>> vao t118_bia_mo_co_lease_moi_nhung_khong_tro_nguoc_phai_CHAN 2026-11-04T16:28:39Z
+[A] đột biến bắt buộc go-check-ref-format: thư_mục=lp_hkcs3f1x; ĐỎ=['refnamesai', 'tagpeel']
+[B] <<< ra t118_bia_mo_co_lease_moi_nhung_khong_tro_nguoc_phai_CHAN 0.026s QUA
+[B] >>> vao t119_bia_mo_hai_chieu_day_du_van_go_lease_cu 2026-11-04T16:28:39Z
+[B] <<< ra t119_bia_mo_hai_chieu_day_du_van_go_lease_cu 0.028s QUA
+[B] >>> vao t120_thay_the_cho_danh_sach_hai_lease_deu_co_bia_mo_phai_QUA 2026-11-04T16:28:39Z
+[B] <<< ra t120_thay_the_cho_danh_sach_hai_lease_deu_co_bia_mo_phai_QUA 0.058s QUA
+[B] >>> vao t121_thay_the_cho_danh_sach_thieu_mot_bia_mo_phai_CHAN 2026-11-04T16:28:39Z
+[B] <<< ra t121_thay_the_cho_danh_sach_thieu_mot_bia_mo_phai_CHAN 0.031s QUA
+[B] >>> vao t122_hai_lease_tro_vong_cho_ket_qua_xac_dinh_khong_de_quy 2026-11-04T16:28:39Z
+[B] <<< ra t122_hai_lease_tro_vong_cho_ket_qua_xac_dinh_khong_de_quy 0.027s QUA
+[B] >>> vao t123_bia_mo_hong_het_han_va_khong_cham_duong_khong_duoc_lan_toa 2026-11-04T16:28:39Z
+[A] đột biến bắt buộc mo-pham-vi-tag: thư_mục=lp_k9g_6qam; ĐỎ=['tag-khong-quet']
+[B] <<< ra t123_bia_mo_hong_het_han_va_khong_cham_duong_khong_duoc_lan_toa 0.027s QUA
+[B] >>> vao t124_bay_dot_bien_bia_mo_giet_dung_va_chi_dung_tap_dich 2026-11-04T16:28:40Z
+[A] đột biến bắt buộc chan-tag-that: thư_mục=lp_sfm06a5s; ĐỎ=['tagup']
+[A] <<< ra t116_ref_chinh_xac_hinh_dang_va_bon_dot_bien_bat_buoc 0.724s QUA
+[A] >>> vao t117_bia_mo_tro_lease_khong_ton_tai_phai_KHONG_XAC_DINH 2026-11-04T16:28:40Z
+[A] <<< ra t117_bia_mo_tro_lease_khong_ton_tai_phai_KHONG_XAC_DINH 0.026s QUA
+[A] >>> vao t118_bia_mo_co_lease_moi_nhung_khong_tro_nguoc_phai_CHAN 2026-11-04T16:28:40Z
+[A] <<< ra t118_bia_mo_co_lease_moi_nhung_khong_tro_nguoc_phai_CHAN 0.027s QUA
+[A] >>> vao t119_bia_mo_hai_chieu_day_du_van_go_lease_cu 2026-11-04T16:28:40Z
+[A] <<< ra t119_bia_mo_hai_chieu_day_du_van_go_lease_cu 0.029s QUA
+[A] >>> vao t120_thay_the_cho_danh_sach_hai_lease_deu_co_bia_mo_phai_QUA 2026-11-04T16:28:40Z
+[B] đột biến bia mộ noi-vi-tu-thanh-if-False: ĐỎ=['t117', 't118'], SỐNG=['t119', 't120', 't121', 't122', 't123']
+[A] <<< ra t120_thay_the_cho_danh_sach_hai_lease_deu_co_bia_mo_phai_QUA 0.080s QUA
+[A] >>> vao t121_thay_the_cho_danh_sach_thieu_mot_bia_mo_phai_CHAN 2026-11-04T16:28:40Z
+[A] <<< ra t121_thay_the_cho_danh_sach_thieu_mot_bia_mo_phai_CHAN 0.050s QUA
+[A] >>> vao t122_hai_lease_tro_vong_cho_ket_qua_xac_dinh_khong_de_quy 2026-11-04T16:28:40Z
+[A] <<< ra t122_hai_lease_tro_vong_cho_ket_qua_xac_dinh_khong_de_quy 0.028s QUA
+[A] >>> vao t123_bia_mo_hong_het_han_va_khong_cham_duong_khong_duoc_lan_toa 2026-11-04T16:28:40Z
+[A] <<< ra t123_bia_mo_hong_het_han_va_khong_cham_duong_khong_duoc_lan_toa 0.028s QUA
+[A] >>> vao t124_bay_dot_bien_bia_mo_giet_dung_va_chi_dung_tap_dich 2026-11-04T16:28:40Z
+[B] đột biến bia mộ so-bang-thanh-do-chuoi: ĐỎ=['t118'], SỐNG=['t117', 't119', 't120', 't121', 't122', 't123']
+[A] đột biến bia mộ noi-vi-tu-thanh-if-False: ĐỎ=['t117', 't118'], SỐNG=['t119', 't120', 't121', 't122', 't123']
+[B] đột biến bia mộ bo-schema-danh-sach: ĐỎ=['t120', 't121'], SỐNG=['t117', 't118', 't119', 't122', 't123']
+[A] đột biến bia mộ so-bang-thanh-do-chuoi: ĐỎ=['t118'], SỐNG=['t117', 't119', 't120', 't121', 't122', 't123']
+[B] đột biến bia mộ chi-kiem-phan-tu-dau: ĐỎ=['t121'], SỐNG=['t117', 't118', 't119', 't120', 't122', 't123']
+[A] đột biến bia mộ bo-schema-danh-sach: ĐỎ=['t120', 't121'], SỐNG=['t117', 't118', 't119', 't122', 't123']
+[B] đột biến bia mộ bo-hanh-vi-go: ĐỎ=['t119', 't120', 't122'], SỐNG=['t117', 't118', 't121', 't123']
+[A] đột biến bia mộ chi-kiem-phan-tu-dau: ĐỎ=['t121'], SỐNG=['t117', 't118', 't119', 't120', 't122', 't123']
+[B] đột biến bia mộ fail-toan-ca-het-han: ĐỎ=['t123'], SỐNG=['t117', 't118', 't119', 't120', 't121', 't122']
+[A] đột biến bia mộ bo-hanh-vi-go: ĐỎ=['t119', 't120', 't122'], SỐNG=['t117', 't118', 't121', 't123']
+[B] đột biến bia mộ fail-toan-ca-khong-cham: ĐỎ=['t123'], SỐNG=['t117', 't118', 't119', 't120', 't121', 't122']
+[B] <<< ra t124_bay_dot_bien_bia_mo_giet_dung_va_chi_dung_tap_dich 1.619s QUA
+[B] >>> vao t126_dau_da_dang_la_HIEN_VAT_SUA_DUOC_chu_khong_phai_ban_ghi_git 2026-11-04T16:28:41Z
+[B] <<< ra t126_dau_da_dang_la_HIEN_VAT_SUA_DUOC_chu_khong_phai_ban_ghi_git 0.129s QUA
+[B] >>> vao t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor 2026-11-04T16:28:41Z
+[B] <<< ra t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor 0.000s QUA
+[B] >>> vao t127_A7_M1_ma_tran_ban_ghi_thu_hoi_thu_tu_loi_12_4_8 2026-11-04T16:28:41Z
+[B] <<< ra t127_A7_M1_ma_tran_ban_ghi_thu_hoi_thu_tu_loi_12_4_8 0.069s QUA
+[B] >>> vao t128_S7_dinh_tuyen_metadata_dung_MOT_path_va_schema_retired 2026-11-04T16:28:41Z
+[A] đột biến bia mộ fail-toan-ca-het-han: ĐỎ=['t123'], SỐNG=['t117', 't118', 't119', 't120', 't121', 't122']
+[B] <<< ra t128_S7_dinh_tuyen_metadata_dung_MOT_path_va_schema_retired 0.035s QUA
+[B] >>> vao t129_Q45_reader_object_store_bam_lai_va_canh_tu_bytes 2026-11-04T16:28:41Z
+[B] <<< ra t129_Q45_reader_object_store_bam_lai_va_canh_tu_bytes 0.223s QUA
+[B] >>> vao t130_S2_seam_bytes_lech_OID_12_va_parser_KHONG_nhan_byte 2026-11-04T16:28:42Z
+[A] đột biến bia mộ fail-toan-ca-khong-cham: ĐỎ=['t123'], SỐNG=['t117', 't118', 't119', 't120', 't121', 't122']
+[A] <<< ra t124_bay_dot_bien_bia_mo_giet_dung_va_chi_dung_tap_dich 1.707s QUA
+[A] >>> vao t126_dau_da_dang_la_HIEN_VAT_SUA_DUOC_chu_khong_phai_ban_ghi_git 2026-11-04T16:28:42Z
+[A] <<< ra t126_dau_da_dang_la_HIEN_VAT_SUA_DUOC_chu_khong_phai_ban_ghi_git 0.120s QUA
+[A] >>> vao t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor 2026-11-04T16:28:42Z
+[A] <<< ra t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor 0.000s QUA
+[A] >>> vao t127_A7_M1_ma_tran_ban_ghi_thu_hoi_thu_tu_loi_12_4_8 2026-11-04T16:28:42Z
+[B] <<< ra t130_S2_seam_bytes_lech_OID_12_va_parser_KHONG_nhan_byte 0.190s QUA
+[B] >>> vao t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline 2026-11-04T16:28:42Z
+[A] <<< ra t127_A7_M1_ma_tran_ban_ghi_thu_hoi_thu_tu_loi_12_4_8 0.070s QUA
+[A] >>> vao t128_S7_dinh_tuyen_metadata_dung_MOT_path_va_schema_retired 2026-11-04T16:28:42Z
+[A] <<< ra t128_S7_dinh_tuyen_metadata_dung_MOT_path_va_schema_retired 0.036s QUA
+[A] >>> vao t129_Q45_reader_object_store_bam_lai_va_canh_tu_bytes 2026-11-04T16:28:42Z
+[A] <<< ra t129_Q45_reader_object_store_bam_lai_va_canh_tu_bytes 0.210s QUA
+[A] >>> vao t130_S2_seam_bytes_lech_OID_12_va_parser_KHONG_nhan_byte 2026-11-04T16:28:42Z
+[A] <<< ra t130_S2_seam_bytes_lech_OID_12_va_parser_KHONG_nhan_byte 0.197s QUA
+[A] >>> vao t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline 2026-11-04T16:28:42Z
+[B] === t131 deadline/kill DA CHAY, launcher .sh
+[B] <<< ra t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline 1.741s QUA
+[B] >>> vao t132_shallow_va_object_thieu_la_12_khong_phai_vang 2026-11-04T16:28:44Z
+[B] <<< ra t132_shallow_va_object_thieu_la_12_khong_phai_vang 0.201s QUA
+[B] >>> vao t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat 2026-11-04T16:28:44Z
+[A] === t131 deadline/kill DA CHAY, launcher .sh
+[A] <<< ra t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline 1.701s QUA
+[A] >>> vao t132_shallow_va_object_thieu_la_12_khong_phai_vang 2026-11-04T16:28:44Z
+[A] <<< ra t132_shallow_va_object_thieu_la_12_khong_phai_vang 0.224s QUA
+[A] >>> vao t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat 2026-11-04T16:28:44Z
+[B] <<< ra t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat 3.134s QUA
+[B] >>> vao t221_mau_t133_tat_auto_maintenance_truoc_commit_dau 2026-11-04T16:28:47Z
+[B] <<< ra t221_mau_t133_tat_auto_maintenance_truoc_commit_dau 0.006s QUA
+[B] >>> vao t134_M2_ai_dang_giu_so_khong_rong_khi_co_False_la_12_va_du_bao_khong_doi_rc 2026-11-04T16:28:47Z
+[B err] warning: You appear to have cloned an empty repository.
+[A] <<< ra t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat 3.175s QUA
+[A] >>> vao t221_mau_t133_tat_auto_maintenance_truoc_commit_dau 2026-11-04T16:28:47Z
+[A] <<< ra t221_mau_t133_tat_auto_maintenance_truoc_commit_dau 0.004s QUA
+[A] >>> vao t134_M2_ai_dang_giu_so_khong_rong_khi_co_False_la_12_va_du_bao_khong_doi_rc 2026-11-04T16:28:47Z
+[A err] warning: You appear to have cloned an empty repository.
+[B] <<< ra t134_M2_ai_dang_giu_so_khong_rong_khi_co_False_la_12_va_du_bao_khong_doi_rc 0.899s QUA
+[B] >>> vao t135_M3_check_thuan_mac_dinh_va_du_bao_chi_them_dong 2026-11-04T16:28:48Z
+[B err] warning: You appear to have cloned an empty repository.
+[A] <<< ra t134_M2_ai_dang_giu_so_khong_rong_khi_co_False_la_12_va_du_bao_khong_doi_rc 0.867s QUA
+[A] >>> vao t135_M3_check_thuan_mac_dinh_va_du_bao_chi_them_dong 2026-11-04T16:28:48Z
+[A err] warning: You appear to have cloned an empty repository.
+[B] <<< ra t135_M3_check_thuan_mac_dinh_va_du_bao_chi_them_dong 0.677s QUA
+[B] >>> vao t136_A2_adapter_nguon_ghim_danh_tinh_profile_duyet_va_khong_doc_config_kho 2026-11-04T16:28:48Z
+[B err] warning: You appear to have cloned an empty repository.
+[B] <<< ra t136_A2_adapter_nguon_ghim_danh_tinh_profile_duyet_va_khong_doc_config_kho 0.294s QUA
+[B] >>> vao t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck 2026-11-04T16:28:49Z
+[B] <<< ra t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck 0.075s QUA
+[B] >>> vao t138_A12_bien_nhan_receipt_du_truong_va_neo_doc_lap_cay_PR 2026-11-04T16:28:49Z
+[A] <<< ra t135_M3_check_thuan_mac_dinh_va_du_bao_chi_them_dong 0.614s QUA
+[A] >>> vao t136_A2_adapter_nguon_ghim_danh_tinh_profile_duyet_va_khong_doc_config_kho 2026-11-04T16:28:49Z
+[A err] warning: You appear to have cloned an empty repository.
+[B] <<< ra t138_A12_bien_nhan_receipt_du_truong_va_neo_doc_lap_cay_PR 0.204s QUA
+[B] >>> vao t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam 2026-11-04T16:28:49Z
+[A] <<< ra t136_A2_adapter_nguon_ghim_danh_tinh_profile_duyet_va_khong_doc_config_kho 0.303s QUA
+[A] >>> vao t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck 2026-11-04T16:28:49Z
+[A] <<< ra t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck 0.076s QUA
+[A] >>> vao t138_A12_bien_nhan_receipt_du_truong_va_neo_doc_lap_cay_PR 2026-11-04T16:28:49Z
+[A] <<< ra t138_A12_bien_nhan_receipt_du_truong_va_neo_doc_lap_cay_PR 0.190s QUA
+[A] >>> vao t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam 2026-11-04T16:28:49Z
+[B err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[B err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[B err] warning: You appear to have cloned an empty repository.
+[B err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[B err] warning: You appear to have cloned an empty repository.
+[B err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[B err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[B err] warning: You appear to have cloned an empty repository.
+[B err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[B err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[B err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[B err] warning: You appear to have cloned an empty repository.
+[B err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[B] catalog mutant A0: mẫu số=37, giết thật=34, SỐNG có chủ đích=3, tín dụng giả=0
+[B] <<< ra t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam 15.889s QUA
+[B] >>> vao t140_review_F01_Q13_policy_hong_va_binding_sai_phai_12 2026-11-04T16:29:05Z
+[A err] warning: You appear to have cloned an empty repository.
+[B] <<< ra t140_review_F01_Q13_policy_hong_va_binding_sai_phai_12 0.207s QUA
+[B] >>> vao t141_review_F02_ten_tieng_Viet_khong_duoc_bien_so_thanh_rong 2026-11-04T16:29:05Z
+[B err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[B] <<< ra t141_review_F02_ten_tieng_Viet_khong_duoc_bien_so_thanh_rong 0.381s QUA
+[B] >>> vao t142_review_F02_namespace_sai_type_khong_phai_vang 2026-11-04T16:29:05Z
+[B err] warning: You appear to have cloned an empty repository.
+[A] catalog mutant A0: mẫu số=37, giết thật=34, SỐNG có chủ đích=3, tín dụng giả=0
+[A] <<< ra t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam 16.138s QUA
+[A] >>> vao t140_review_F01_Q13_policy_hong_va_binding_sai_phai_12 2026-11-04T16:29:06Z
+[A] <<< ra t140_review_F01_Q13_policy_hong_va_binding_sai_phai_12 0.225s QUA
+[A] >>> vao t141_review_F02_ten_tieng_Viet_khong_duoc_bien_so_thanh_rong 2026-11-04T16:29:06Z
+[B err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[B] <<< ra t142_review_F02_namespace_sai_type_khong_phai_vang 0.504s QUA
+[B] >>> vao t143_review_F03_tree_entry_co_slash_phai_12 2026-11-04T16:29:06Z
+[B] <<< ra t143_review_F03_tree_entry_co_slash_phai_12 0.148s QUA
+[B] >>> vao t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat 2026-11-04T16:29:06Z
+[A] <<< ra t141_review_F02_ten_tieng_Viet_khong_duoc_bien_so_thanh_rong 0.399s QUA
+[A] >>> vao t142_review_F02_namespace_sai_type_khong_phai_vang 2026-11-04T16:29:06Z
+[A err] warning: You appear to have cloned an empty repository.
+[B] <<< ra t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat 0.141s QUA
+[B] >>> vao t145_review_F05_object_lon_phai_12_va_thu_hoi_cat_file 2026-11-04T16:29:06Z
+[B] <<< ra t145_review_F05_object_lon_phai_12_va_thu_hoi_cat_file 0.160s QUA
+[B] >>> vao t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file 2026-11-04T16:29:06Z
+[A err] warning: You appear to have cloned an empty repository.
+[B] <<< ra t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file 0.184s QUA
+[B] >>> vao t147_review_F06_schema_version_la_integer_va_ngay_hop_le 2026-11-04T16:29:07Z
+[A] <<< ra t142_review_F02_namespace_sai_type_khong_phai_vang 0.491s QUA
+[A] >>> vao t143_review_F03_tree_entry_co_slash_phai_12 2026-11-04T16:29:07Z
+[A] <<< ra t143_review_F03_tree_entry_co_slash_phai_12 0.179s QUA
+[A] >>> vao t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat 2026-11-04T16:29:07Z
+[A] <<< ra t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat 0.142s QUA
+[A] >>> vao t145_review_F05_object_lon_phai_12_va_thu_hoi_cat_file 2026-11-04T16:29:07Z
+[B] <<< ra t147_review_F06_schema_version_la_integer_va_ngay_hop_le 0.477s QUA
+[B] >>> vao t148_review_F07_M9_definition_receipt_va_commit_pin 2026-11-04T16:29:07Z
+[B] <<< ra t148_review_F07_M9_definition_receipt_va_commit_pin 0.007s QUA
+[B] >>> vao t149_review_F09_preflight_object_store_khong_ke_thua_env 2026-11-04T16:29:07Z
+[A] <<< ra t145_review_F05_object_lon_phai_12_va_thu_hoi_cat_file 0.144s QUA
+[A] >>> vao t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file 2026-11-04T16:29:07Z
+[B] <<< ra t149_review_F09_preflight_object_store_khong_ke_thua_env 0.122s QUA
+[B] >>> vao t150_review2_F10_nguon_khong_utf8_la_12_khong_traceback 2026-11-04T16:29:07Z
+[A] <<< ra t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file 0.149s QUA
+[A] >>> vao t147_review_F06_schema_version_la_integer_va_ngay_hop_le 2026-11-04T16:29:07Z
+[B err] warning: You appear to have cloned an empty repository.
+[B err] warning: You appear to have cloned an empty repository.
+[B] <<< ra t150_review2_F10_nguon_khong_utf8_la_12_khong_traceback 0.540s QUA
+[B] >>> vao t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu 2026-11-04T16:29:08Z
+[A] <<< ra t147_review_F06_schema_version_la_integer_va_ngay_hop_le 0.515s QUA
+[A] >>> vao t148_review_F07_M9_definition_receipt_va_commit_pin 2026-11-04T16:29:08Z
+[A] <<< ra t148_review_F07_M9_definition_receipt_va_commit_pin 0.007s QUA
+[A] >>> vao t149_review_F09_preflight_object_store_khong_ke_thua_env 2026-11-04T16:29:08Z
+[A] <<< ra t149_review_F09_preflight_object_store_khong_ke_thua_env 0.138s QUA
+[A] >>> vao t150_review2_F10_nguon_khong_utf8_la_12_khong_traceback 2026-11-04T16:29:08Z
+[A err] warning: You appear to have cloned an empty repository.
+[B err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[B err] warning: You appear to have cloned an empty repository.
+[A] <<< ra t150_review2_F10_nguon_khong_utf8_la_12_khong_traceback 0.545s QUA
+[A] >>> vao t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu 2026-11-04T16:29:08Z
+[B err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[B] <<< ra t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu 1.125s QUA
+[B] >>> vao t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL 2026-11-04T16:29:09Z
+[B] <<< ra t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL 0.069s QUA
+[B] >>> vao t155_618_neo_dinh_nghia_theo_workflow_sha_khong_theo_base_sha 2026-11-04T16:29:09Z
+[A err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[A] <<< ra t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu 1.126s QUA
+[A] >>> vao t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL 2026-11-04T16:29:10Z
+[B] <<< ra t155_618_neo_dinh_nghia_theo_workflow_sha_khong_theo_base_sha 0.695s QUA
+[B] >>> vao t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem 2026-11-04T16:29:10Z
+[A] <<< ra t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL 0.062s QUA
+[A] >>> vao t155_618_neo_dinh_nghia_theo_workflow_sha_khong_theo_base_sha 2026-11-04T16:29:10Z
+[B] <<< ra t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem 0.366s QUA
+[B] >>> vao t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON 2026-11-04T16:29:10Z
+[A] <<< ra t155_618_neo_dinh_nghia_theo_workflow_sha_khong_theo_base_sha 0.516s QUA
+[A] >>> vao t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem 2026-11-04T16:29:10Z
+[A] <<< ra t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem 0.367s QUA
+[A] >>> vao t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON 2026-11-04T16:29:11Z
+[B] <<< ra t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON 7.617s QUA
+[B] >>> vao t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY 2026-11-04T16:29:18Z
+[B] <<< ra t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY 0.254s QUA
+[B] >>> vao t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM 2026-11-04T16:29:18Z
+[A] <<< ra t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON 7.662s QUA
+[A] >>> vao t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY 2026-11-04T16:29:18Z
+[A] <<< ra t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY 0.256s QUA
+[A] >>> vao t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM 2026-11-04T16:29:18Z
+[B] <<< ra t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM 3.438s QUA
+[B] >>> vao t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125 2026-11-04T16:29:21Z
+[B] <<< ra t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125 0.208s QUA
+[B] >>> vao t155_chon_ca_khong_khop_hoac_RONG_thi_KHONG_XANH 2026-11-04T16:29:22Z
+[A] <<< ra t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM 3.437s QUA
+[A] >>> vao t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125 2026-11-04T16:29:22Z
+[A] <<< ra t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125 0.181s QUA
+[A] >>> vao t155_chon_ca_khong_khop_hoac_RONG_thi_KHONG_XANH 2026-11-04T16:29:22Z
+[B] <<< ra t155_chon_ca_khong_khop_hoac_RONG_thi_KHONG_XANH 1.188s QUA
+[B] >>> vao t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung 2026-11-04T16:29:23Z
+[A] <<< ra t155_chon_ca_khong_khop_hoac_RONG_thi_KHONG_XANH 1.171s QUA
+[A] >>> vao t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung 2026-11-04T16:29:23Z
+[B] <<< ra t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung 4.224s QUA
+[B] >>> vao t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout 2026-11-04T16:29:27Z
+[B] <<< ra t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout 0.039s QUA
+[B] >>> vao t161_M3_chot_nguon_duy_nhat_ma_tran_ci 2026-11-04T16:29:27Z
+[B] <<< ra t161_M3_chot_nguon_duy_nhat_ma_tran_ci 0.118s QUA
+[B] >>> vao t162_M4_evaluator_toi_gian_chuan_bi 2026-11-04T16:29:27Z
+[B] KHÔNG ĐO ĐƯỢC: vế điều kiện không nằm trong tập tối giản hỗ trợ: "inputs.123 == 'x'"
+[B] KHÔNG ĐO ĐƯỢC: vế điều kiện không nằm trong tập tối giản hỗ trợ: ''
+[B] KHÔNG ĐO ĐƯỢC: literal/ngoặc không cân trong điều kiện: "github.ref == 'a"
+[B] KHÔNG ĐO ĐƯỢC: biểu thức không khớp hình chuẩn tối giản của chuan-bi: 'fromJSON(\'["ubuntu-latest"]\')'
+[B] <<< ra t162_M4_evaluator_toi_gian_chuan_bi 0.059s QUA
+[B] >>> vao t165_N1_giai_git_windows_program_files_va_fail_closed 2026-11-04T16:29:27Z
+[B] <<< ra t165_N1_giai_git_windows_program_files_va_fail_closed 0.031s QUA
+[B] >>> vao t166_N2_giai_git_windows_loai_tru_cwd 2026-11-04T16:29:27Z
+[B] <<< ra t166_N2_giai_git_windows_loai_tru_cwd 0.029s QUA
+[B] >>> vao t167_N3_giai_git_windows_loai_tru_system_root_va_chan_doan 2026-11-04T16:29:27Z
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B] <<< ra t167_N3_giai_git_windows_loai_tru_system_root_va_chan_doan 0.028s QUA
+[B] >>> vao t168_N4_posix_khong_hoi_quy_usr_bin_git 2026-11-04T16:29:27Z
+[B] <<< ra t168_N4_posix_khong_hoi_quy_usr_bin_git 0.027s QUA
+[B] >>> vao t169_N8_cong_cu_git_chi_nhan_git_exe 2026-11-04T16:29:27Z
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B] <<< ra t169_N8_cong_cu_git_chi_nhan_git_exe 0.028s QUA
+[B] >>> vao t170_N9_path_boc_nhay_kep_va_khoang_trang 2026-11-04T16:29:27Z
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B] <<< ra t170_N9_path_boc_nhay_kep_va_khoang_trang 0.028s QUA
+[B] >>> vao t171_N10_path_dung_DUNG_dau_phan_cach_duoc_truyen 2026-11-04T16:29:27Z
+[B] <<< ra t171_N10_path_dung_DUNG_dau_phan_cach_duoc_truyen 0.028s QUA
+[B] >>> vao t172_N11_chan_doan_chuyen_kenh_stderr_0_byte 2026-11-04T16:29:27Z
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[B] <<< ra t172_N11_chan_doan_chuyen_kenh_stderr_0_byte 0.027s QUA
+[B] >>> vao t173_N12_hang_fixture_dung_tren_CA_HAI_nen 2026-11-04T16:29:27Z
+[B] <<< ra t173_N12_hang_fixture_dung_tren_CA_HAI_nen 0.000s QUA
+[B] >>> vao t174_het_han_ma_DA_co_dau_thi_bo_qua_chu_khong_ket_toi_het_han 2026-11-04T16:29:27Z
+[B] <<< ra t174_het_han_ma_DA_co_dau_thi_bo_qua_chu_khong_ket_toi_het_han 0.027s QUA
+[B] >>> vao t175_het_han_ma_KHONG_co_dau_thi_van_la_het_han 2026-11-04T16:29:27Z
+[A] <<< ra t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung 4.236s QUA
+[A] >>> vao t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout 2026-11-04T16:29:27Z
+[B] <<< ra t175_het_han_ma_KHONG_co_dau_thi_van_la_het_han 0.027s QUA
+[B] >>> vao t176_con_han_ma_DA_co_dau_van_bo_qua_nhu_cu 2026-11-04T16:29:27Z
+[B] <<< ra t176_con_han_ma_DA_co_dau_van_bo_qua_nhu_cu 0.028s QUA
+[B] >>> vao t177_con_han_KHONG_dau_thi_MOI_CHOT_cua_kiem_van_phai_chay 2026-11-04T16:29:27Z
+[A] <<< ra t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout 0.035s QUA
+[A] >>> vao t161_M3_chot_nguon_duy_nhat_ma_tran_ci 2026-11-04T16:29:28Z
+[A] <<< ra t161_M3_chot_nguon_duy_nhat_ma_tran_ci 0.104s QUA
+[A] >>> vao t162_M4_evaluator_toi_gian_chuan_bi 2026-11-04T16:29:28Z
+[B] <<< ra t177_con_han_KHONG_dau_thi_MOI_CHOT_cua_kiem_van_phai_chay 0.111s QUA
+[B] >>> vao t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang 2026-11-04T16:29:28Z
+[A] KHÔNG ĐO ĐƯỢC: vế điều kiện không nằm trong tập tối giản hỗ trợ: "inputs.123 == 'x'"
+[A] KHÔNG ĐO ĐƯỢC: vế điều kiện không nằm trong tập tối giản hỗ trợ: ''
+[A] KHÔNG ĐO ĐƯỢC: literal/ngoặc không cân trong điều kiện: "github.ref == 'a"
+[A] KHÔNG ĐO ĐƯỢC: biểu thức không khớp hình chuẩn tối giản của chuan-bi: 'fromJSON(\'["ubuntu-latest"]\')'
+[A] <<< ra t162_M4_evaluator_toi_gian_chuan_bi 0.057s QUA
+[A] >>> vao t165_N1_giai_git_windows_program_files_va_fail_closed 2026-11-04T16:29:28Z
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A] <<< ra t165_N1_giai_git_windows_program_files_va_fail_closed 0.030s QUA
+[A] >>> vao t166_N2_giai_git_windows_loai_tru_cwd 2026-11-04T16:29:28Z
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A] <<< ra t166_N2_giai_git_windows_loai_tru_cwd 0.031s QUA
+[A] >>> vao t167_N3_giai_git_windows_loai_tru_system_root_va_chan_doan 2026-11-04T16:29:28Z
+[A] <<< ra t167_N3_giai_git_windows_loai_tru_system_root_va_chan_doan 0.029s QUA
+[A] >>> vao t168_N4_posix_khong_hoi_quy_usr_bin_git 2026-11-04T16:29:28Z
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A] <<< ra t168_N4_posix_khong_hoi_quy_usr_bin_git 0.028s QUA
+[A] >>> vao t169_N8_cong_cu_git_chi_nhan_git_exe 2026-11-04T16:29:28Z
+[A] <<< ra t169_N8_cong_cu_git_chi_nhan_git_exe 0.028s QUA
+[A] >>> vao t170_N9_path_boc_nhay_kep_va_khoang_trang 2026-11-04T16:29:28Z
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A err] KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+[A] <<< ra t170_N9_path_boc_nhay_kep_va_khoang_trang 0.029s QUA
+[A] >>> vao t171_N10_path_dung_DUNG_dau_phan_cach_duoc_truyen 2026-11-04T16:29:28Z
+[A] <<< ra t171_N10_path_dung_DUNG_dau_phan_cach_duoc_truyen 0.028s QUA
+[A] >>> vao t172_N11_chan_doan_chuyen_kenh_stderr_0_byte 2026-11-04T16:29:28Z
+[B] <<< ra t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang 0.281s QUA
+[B] >>> vao t179_do_dau_KHONG_DO_DUOC_thi_nhuong_lai_cho_chuoi_cu 2026-11-04T16:29:28Z
+[A] <<< ra t172_N11_chan_doan_chuyen_kenh_stderr_0_byte 0.027s QUA
+[A] >>> vao t173_N12_hang_fixture_dung_tren_CA_HAI_nen 2026-11-04T16:29:28Z
+[A] <<< ra t173_N12_hang_fixture_dung_tren_CA_HAI_nen 0.000s QUA
+[A] >>> vao t174_het_han_ma_DA_co_dau_thi_bo_qua_chu_khong_ket_toi_het_han 2026-11-04T16:29:28Z
+[A] <<< ra t174_het_han_ma_DA_co_dau_thi_bo_qua_chu_khong_ket_toi_het_han 0.028s QUA
+[A] >>> vao t175_het_han_ma_KHONG_co_dau_thi_van_la_het_han 2026-11-04T16:29:28Z
+[B] <<< ra t179_do_dau_KHONG_DO_DUOC_thi_nhuong_lai_cho_chuoi_cu 0.110s QUA
+[B] >>> vao t180_hai_loi_cung_luc_thi_tien_kiem_KHONG_duoc_cuop_quyen_phan 2026-11-04T16:29:28Z
+[A] <<< ra t175_het_han_ma_KHONG_co_dau_thi_van_la_het_han 0.027s QUA
+[A] >>> vao t176_con_han_ma_DA_co_dau_van_bo_qua_nhu_cu 2026-11-04T16:29:28Z
+[B] <<< ra t180_hai_loi_cung_luc_thi_tien_kiem_KHONG_duoc_cuop_quyen_phan 0.030s QUA
+[B] >>> vao t181_cua_CUOI_van_phai_chan_khi_API_comment_hong 2026-11-04T16:29:28Z
+[B] <<< ra t181_cua_CUOI_van_phai_chan_khi_API_comment_hong 0.028s QUA
+[B] >>> vao t182_lease_KHONG_PHAI_anh_xa_thi_chan_co_ten_chu_khong_vo_tran 2026-11-04T16:29:28Z
+[A] <<< ra t176_con_han_ma_DA_co_dau_van_bo_qua_nhu_cu 0.027s QUA
+[A] >>> vao t177_con_han_KHONG_dau_thi_MOI_CHOT_cua_kiem_van_phai_chay 2026-11-04T16:29:28Z
+[A] <<< ra t177_con_han_KHONG_dau_thi_MOI_CHOT_cua_kiem_van_phai_chay 0.121s QUA
+[A] >>> vao t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang 2026-11-04T16:29:28Z
+[B] <<< ra t182_lease_KHONG_PHAI_anh_xa_thi_chan_co_ten_chu_khong_vo_tran 0.143s QUA
+[B] >>> vao t183_do_dau_HONG_roi_PHUC_HOI_thi_cua_cuoi_van_phai_bo_qua 2026-11-04T16:29:28Z
+[B] <<< ra t183_do_dau_HONG_roi_PHUC_HOI_thi_cua_cuoi_van_phai_bo_qua 0.028s QUA
+[B] >>> vao t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran 2026-11-04T16:29:28Z
+[B] <<< ra t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran 0.219s QUA
+[B] >>> vao t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance 2026-11-04T16:29:28Z
+[A] <<< ra t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang 0.285s QUA
+[A] >>> vao t179_do_dau_KHONG_DO_DUOC_thi_nhuong_lai_cho_chuoi_cu 2026-11-04T16:29:28Z
+[A] <<< ra t179_do_dau_KHONG_DO_DUOC_thi_nhuong_lai_cho_chuoi_cu 0.108s QUA
+[A] >>> vao t180_hai_loi_cung_luc_thi_tien_kiem_KHONG_duoc_cuop_quyen_phan 2026-11-04T16:29:29Z
+[A] <<< ra t180_hai_loi_cung_luc_thi_tien_kiem_KHONG_duoc_cuop_quyen_phan 0.029s QUA
+[A] >>> vao t181_cua_CUOI_van_phai_chan_khi_API_comment_hong 2026-11-04T16:29:29Z
+[A] <<< ra t181_cua_CUOI_van_phai_chan_khi_API_comment_hong 0.028s QUA
+[A] >>> vao t182_lease_KHONG_PHAI_anh_xa_thi_chan_co_ten_chu_khong_vo_tran 2026-11-04T16:29:29Z
+[A] <<< ra t182_lease_KHONG_PHAI_anh_xa_thi_chan_co_ten_chu_khong_vo_tran 0.137s QUA
+[A] >>> vao t183_do_dau_HONG_roi_PHUC_HOI_thi_cua_cuoi_van_phai_bo_qua 2026-11-04T16:29:29Z
+[A] <<< ra t183_do_dau_HONG_roi_PHUC_HOI_thi_cua_cuoi_van_phai_bo_qua 0.028s QUA
+[A] >>> vao t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran 2026-11-04T16:29:29Z
+[A] <<< ra t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran 0.218s QUA
+[A] >>> vao t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance 2026-11-04T16:29:29Z
+[B] <<< ra t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance 0.673s QUA
+[B] >>> vao t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han 2026-11-04T16:29:29Z
+[A] <<< ra t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance 0.672s QUA
+[A] >>> vao t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han 2026-11-04T16:29:30Z
+[B] <<< ra t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han 0.977s QUA
+[B] >>> vao t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG 2026-11-04T16:29:30Z
+[A] <<< ra t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han 0.976s QUA
+[A] >>> vao t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG 2026-11-04T16:29:31Z
+[B] t191: 13 chốt của kiem() đều PHU ở nhánh đã-có-dấu; miễn sẵn: [('raise Chan', 1114, 8)]; phân loại 7019 dòng (6880 sinh, 2377 ô, miễn 27); ca âm 11 dạng
+[B] <<< ra t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG 56.782s QUA
+[B] >>> vao t192_S8_het_deadline_la_12_va_KHONG_spawn_cat_file_dem_bang_Popen 2026-11-04T16:30:27Z
+[B] <<< ra t192_S8_het_deadline_la_12_va_KHONG_spawn_cat_file_dem_bang_Popen 0.121s QUA
+[B] >>> vao t185_cua_DEM_phai_chot_KET_QUA_truoc_khi_chot_SO_LOI_GOI 2026-11-04T16:30:27Z
+[B] <<< ra t185_cua_DEM_phai_chot_KET_QUA_truoc_khi_chot_SO_LOI_GOI 0.150s QUA
+[B] >>> vao t186_KHONG_ca_nao_duoc_chot_SO_LOI_GOI_ngoai_CUA 2026-11-04T16:30:27Z
+[B err] <unknown>:3627: SyntaxWarning: invalid escape sequence '\s'
+[B err] <unknown>:5774: SyntaxWarning: invalid escape sequence '\d'
+[B] <<< ra t186_KHONG_ca_nao_duoc_chot_SO_LOI_GOI_ngoai_CUA 0.390s QUA
+[B] >>> vao t174_GOI_GIT_giai_ma_dong_bo_va_giu_hop_dong_text 2026-11-04T16:30:28Z
+[B] <<< ra t174_GOI_GIT_giai_ma_dong_bo_va_giu_hop_dong_text 0.068s QUA
+[B] >>> vao t188_moi_ve_DOI_TRA_VE_cua_t184_phai_qua_CUA_chi_ve_d_duoc_goi_tran 2026-11-04T16:30:28Z
+[B err] <unknown>:3627: SyntaxWarning: invalid escape sequence '\s'
+[B err] <unknown>:5774: SyntaxWarning: invalid escape sequence '\d'
+[B] <<< ra t188_moi_ve_DOI_TRA_VE_cua_t184_phai_qua_CUA_chi_ve_d_duoc_goi_tran 0.285s QUA
+[B] >>> vao t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat 2026-11-04T16:30:28Z
+[B err] <unknown>:3627: SyntaxWarning: invalid escape sequence '\s'
+[A] t191: 13 chốt của kiem() đều PHU ở nhánh đã-có-dấu; miễn sẵn: [('raise Chan', 1114, 8)]; phân loại 7019 dòng (6880 sinh, 2377 ô, miễn 27); ca âm 11 dạng
+[A] <<< ra t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG 57.384s QUA
+[A] >>> vao t192_S8_het_deadline_la_12_va_KHONG_spawn_cat_file_dem_bang_Popen 2026-11-04T16:30:28Z
+[B err] <unknown>:5774: SyntaxWarning: invalid escape sequence '\d'
+[A] <<< ra t192_S8_het_deadline_la_12_va_KHONG_spawn_cat_file_dem_bang_Popen 0.160s QUA
+[A] >>> vao t185_cua_DEM_phai_chot_KET_QUA_truoc_khi_chot_SO_LOI_GOI 2026-11-04T16:30:28Z
+[B] <<< ra t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat 0.321s QUA
+[B] >>> vao t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky 2026-11-04T16:30:28Z
+[A] <<< ra t185_cua_DEM_phai_chot_KET_QUA_truoc_khi_chot_SO_LOI_GOI 0.149s QUA
+[A] >>> vao t186_KHONG_ca_nao_duoc_chot_SO_LOI_GOI_ngoai_CUA 2026-11-04T16:30:28Z
+[A err] <unknown>:3627: SyntaxWarning: invalid escape sequence '\s'
+[A err] <unknown>:5774: SyntaxWarning: invalid escape sequence '\d'
+[B err] <unknown>:3627: SyntaxWarning: invalid escape sequence '\s'
+[B err] <unknown>:5774: SyntaxWarning: invalid escape sequence '\d'
+[A] <<< ra t186_KHONG_ca_nao_duoc_chot_SO_LOI_GOI_ngoai_CUA 0.423s QUA
+[A] >>> vao t174_GOI_GIT_giai_ma_dong_bo_va_giu_hop_dong_text 2026-11-04T16:30:29Z
+[B err] /tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:3627: SyntaxWarning: invalid escape sequence '\s'
+[B err]   """Nợ được ĐẶT TÊN trong mã phải có nhà trong sổ, và mục đã khai backlink phải còn marker.
+[A] <<< ra t174_GOI_GIT_giai_ma_dong_bo_va_giu_hop_dong_text 0.088s QUA
+[A] >>> vao t188_moi_ve_DOI_TRA_VE_cua_t184_phai_qua_CUA_chi_ve_d_duoc_goi_tran 2026-11-04T16:30:29Z
+[B err] /tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:5774: SyntaxWarning: invalid escape sequence '\d'
+[B err]   """Tail tệp log con đang ghi, in từng DÒNG ĐỦ ra stdout CHA kèm tiền tố. Line-atomic qua `khoa`.
+[A err] <unknown>:3627: SyntaxWarning: invalid escape sequence '\s'
+[A err] <unknown>:5774: SyntaxWarning: invalid escape sequence '\d'
+[A] <<< ra t188_moi_ve_DOI_TRA_VE_cua_t184_phai_qua_CUA_chi_ve_d_duoc_goi_tran 0.325s QUA
+[A] >>> vao t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat 2026-11-04T16:30:29Z
+[A err] <unknown>:3627: SyntaxWarning: invalid escape sequence '\s'
+[A err] <unknown>:5774: SyntaxWarning: invalid escape sequence '\d'
+[A] <<< ra t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat 0.276s QUA
+[A] >>> vao t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky 2026-11-04T16:30:29Z
+[A err] <unknown>:3627: SyntaxWarning: invalid escape sequence '\s'
+[A err] <unknown>:5774: SyntaxWarning: invalid escape sequence '\d'
+[A err] /tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:3627: SyntaxWarning: invalid escape sequence '\s'
+[A err]   """Nợ được ĐẶT TÊN trong mã phải có nhà trong sổ, và mục đã khai backlink phải còn marker.
+[A err] /tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:5774: SyntaxWarning: invalid escape sequence '\d'
+[A err]   """Tail tệp log con đang ghi, in từng DÒNG ĐỦ ra stdout CHA kèm tiền tố. Line-atomic qua `khoa`.
+[B err] /tmp/lp_b5juxhwz/ops/lease_publish_test.py:3627: SyntaxWarning: invalid escape sequence '\s'
+[B err]   """Nợ được ĐẶT TÊN trong mã phải có nhà trong sổ, và mục đã khai backlink phải còn marker.
+[B err] /tmp/lp_b5juxhwz/ops/lease_publish_test.py:5774: SyntaxWarning: invalid escape sequence '\d'
+[B err]   """Tail tệp log con đang ghi, in từng DÒNG ĐỦ ra stdout CHA kèm tiền tố. Line-atomic qua `khoa`.
+[B] <<< ra t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky 2.141s QUA
+[B] >>> vao t194_AB_phai_du_bang_chung_truoc_khi_so 2026-11-04T16:30:30Z
+[B] <<< ra t194_AB_phai_du_bang_chung_truoc_khi_so 0.045s QUA
+[B] >>> vao t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat 2026-11-04T16:30:30Z
+[A err] /tmp/lp_eyjn2f33/ops/lease_publish_test.py:3627: SyntaxWarning: invalid escape sequence '\s'
+[A err]   """Nợ được ĐẶT TÊN trong mã phải có nhà trong sổ, và mục đã khai backlink phải còn marker.
+[A err] /tmp/lp_eyjn2f33/ops/lease_publish_test.py:5774: SyntaxWarning: invalid escape sequence '\d'
+[A err]   """Tail tệp log con đang ghi, in từng DÒNG ĐỦ ra stdout CHA kèm tiền tố. Line-atomic qua `khoa`.
+[A] <<< ra t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky 2.087s QUA
+[A] >>> vao t194_AB_phai_du_bang_chung_truoc_khi_so 2026-11-04T16:30:31Z
+[A] <<< ra t194_AB_phai_du_bang_chung_truoc_khi_so 0.043s QUA
+[A] >>> vao t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat 2026-11-04T16:30:32Z
+[B] <<< ra t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat 1.976s QUA
+[B] >>> vao t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua 2026-11-04T16:30:32Z
+[B] <<< ra t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua 0.390s QUA
+[B] >>> vao t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua 2026-11-04T16:30:33Z
+[B] <<< ra t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua 0.414s QUA
+[B] >>> vao t198_M4_doi_chung_duong_chuoi_hop_le_dang_dung_mot_POST 2026-11-04T16:30:33Z
+[A] <<< ra t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat 2.000s QUA
+[A] >>> vao t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua 2026-11-04T16:30:34Z
+[B] <<< ra t198_M4_doi_chung_duong_chuoi_hop_le_dang_dung_mot_POST 0.503s QUA
+[B] >>> vao t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai 2026-11-04T16:30:34Z
+[B err] <unknown>:3627: SyntaxWarning: invalid escape sequence '\s'
+[B err] <unknown>:5774: SyntaxWarning: invalid escape sequence '\d'
+[A] <<< ra t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua 0.383s QUA
+[A] >>> vao t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua 2026-11-04T16:30:34Z
+[B err] /tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:3627: SyntaxWarning: invalid escape sequence '\s'
+[B err]   """Nợ được ĐẶT TÊN trong mã phải có nhà trong sổ, và mục đã khai backlink phải còn marker.
+[B err] /tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:5774: SyntaxWarning: invalid escape sequence '\d'
+[B err]   """Tail tệp log con đang ghi, in từng DÒNG ĐỦ ra stdout CHA kèm tiền tố. Line-atomic qua `khoa`.
+[A] <<< ra t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua 0.382s QUA
+[A] >>> vao t198_M4_doi_chung_duong_chuoi_hop_le_dang_dung_mot_POST 2026-11-04T16:30:34Z
+[B] <<< ra t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai 0.637s QUA
+[B] >>> vao t200_M1_nguon_lease_publish_tuy_chon_that_su_duoc_dung 2026-11-04T16:30:34Z
+[B] <<< ra t200_M1_nguon_lease_publish_tuy_chon_that_su_duoc_dung 0.097s QUA
+[B] >>> vao t201_M1_gh_gia_hai_GET_cung_snapshot_va_POST_luu_trang_thai 2026-11-04T16:30:34Z
+[B] <<< ra t201_M1_gh_gia_hai_GET_cung_snapshot_va_POST_luu_trang_thai 0.265s QUA
+[B] >>> vao t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng 2026-11-04T16:30:35Z
+[A] <<< ra t198_M4_doi_chung_duong_chuoi_hop_le_dang_dung_mot_POST 0.488s QUA
+[A] >>> vao t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai 2026-11-04T16:30:35Z
+[A err] <unknown>:3627: SyntaxWarning: invalid escape sequence '\s'
+[A err] <unknown>:5774: SyntaxWarning: invalid escape sequence '\d'
+[A err] /tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:3627: SyntaxWarning: invalid escape sequence '\s'
+[A err]   """Nợ được ĐẶT TÊN trong mã phải có nhà trong sổ, và mục đã khai backlink phải còn marker.
+[A err] /tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:5774: SyntaxWarning: invalid escape sequence '\d'
+[A err]   """Tail tệp log con đang ghi, in từng DÒNG ĐỦ ra stdout CHA kèm tiền tố. Line-atomic qua `khoa`.
+[B] <<< ra t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng 0.565s QUA
+[B] >>> vao t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi 2026-11-04T16:30:35Z
+[B] <<< ra t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi 0.028s QUA
+[B] >>> vao t204_wp678_A1_lease_id_ep_kieu_YAML_qua_doc_yaml_bi_kiem_tu_choi_rc8 2026-11-04T16:30:35Z
+[A] <<< ra t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai 0.576s QUA
+[A] >>> vao t200_M1_nguon_lease_publish_tuy_chon_that_su_duoc_dung 2026-11-04T16:30:35Z
+[B] <<< ra t204_wp678_A1_lease_id_ep_kieu_YAML_qua_doc_yaml_bi_kiem_tu_choi_rc8 0.095s QUA
+[B] >>> vao t219_wp678_kiem_bo_qua_han_van_chan_lease_id_khong_hop_le 2026-11-04T16:30:35Z
+[A] <<< ra t200_M1_nguon_lease_publish_tuy_chon_that_su_duoc_dung 0.096s QUA
+[A] >>> vao t201_M1_gh_gia_hai_GET_cung_snapshot_va_POST_luu_trang_thai 2026-11-04T16:30:35Z
+[B] <<< ra t219_wp678_kiem_bo_qua_han_van_chan_lease_id_khong_hop_le 0.154s QUA
+[B] >>> vao t205_wp678_A2_tien_kiem_D2_truc_tiep_int_rc8_chuoi_tra_ve 2026-11-04T16:30:36Z
+[B] <<< ra t205_wp678_A2_tien_kiem_D2_truc_tiep_int_rc8_chuoi_tra_ve 0.033s QUA
+[B] >>> vao t206_wp678_A3_don_vi_kiem_comment_da_co_ep_kieu_rc8_khong_rc9 2026-11-04T16:30:36Z
+[A] <<< ra t201_M1_gh_gia_hai_GET_cung_snapshot_va_POST_luu_trang_thai 0.278s QUA
+[A] >>> vao t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng 2026-11-04T16:30:36Z
+[B] <<< ra t206_wp678_A3_don_vi_kiem_comment_da_co_ep_kieu_rc8_khong_rc9 0.258s QUA
+[B] >>> vao t207_wp678_A3_bien_workflow_yes_gap_dau_True_buoc_DO_0_POST 2026-11-04T16:30:36Z
+[A] <<< ra t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng 0.560s QUA
+[A] >>> vao t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi 2026-11-04T16:30:36Z
+[A] <<< ra t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi 0.028s QUA
+[A] >>> vao t204_wp678_A1_lease_id_ep_kieu_YAML_qua_doc_yaml_bi_kiem_tu_choi_rc8 2026-11-04T16:30:36Z
+[A] <<< ra t204_wp678_A1_lease_id_ep_kieu_YAML_qua_doc_yaml_bi_kiem_tu_choi_rc8 0.100s QUA
+[A] >>> vao t219_wp678_kiem_bo_qua_han_van_chan_lease_id_khong_hop_le 2026-11-04T16:30:36Z
+[B] <<< ra t207_wp678_A3_bien_workflow_yes_gap_dau_True_buoc_DO_0_POST 0.618s QUA
+[B] >>> vao t208_wp678_A4_dung_than_lease_id_khong_phai_chuoi_rc8 2026-11-04T16:30:36Z
+[B] <<< ra t208_wp678_A4_dung_than_lease_id_khong_phai_chuoi_rc8 0.031s QUA
+[B] >>> vao t209_wp678_A5_D6_lease_cu_duoc_quet_int_khong_thoa_bia_mo 2026-11-04T16:30:36Z
+[A] <<< ra t219_wp678_kiem_bo_qua_han_van_chan_lease_id_khong_hop_le 0.134s QUA
+[A] >>> vao t205_wp678_A2_tien_kiem_D2_truc_tiep_int_rc8_chuoi_tra_ve 2026-11-04T16:30:37Z
+[A] <<< ra t205_wp678_A2_tien_kiem_D2_truc_tiep_int_rc8_chuoi_tra_ve 0.029s QUA
+[A] >>> vao t206_wp678_A3_don_vi_kiem_comment_da_co_ep_kieu_rc8_khong_rc9 2026-11-04T16:30:37Z
+[A] <<< ra t206_wp678_A3_don_vi_kiem_comment_da_co_ep_kieu_rc8_khong_rc9 0.309s QUA
+[A] >>> vao t207_wp678_A3_bien_workflow_yes_gap_dau_True_buoc_DO_0_POST 2026-11-04T16:30:37Z
+[B] <<< ra t209_wp678_A5_D6_lease_cu_duoc_quet_int_khong_thoa_bia_mo 0.406s QUA
+[B] >>> vao t210_wp678_A5_D6_lease_moi_int_goi_truc_tiep_rc8 2026-11-04T16:30:37Z
+[B] <<< ra t210_wp678_A5_D6_lease_moi_int_goi_truc_tiep_rc8 0.403s QUA
+[B] >>> vao t211_wp678_A5_D5_bia_mo_doi_xung_lease_cu_int_False 2026-11-04T16:30:37Z
+[B] <<< ra t211_wp678_A5_D5_bia_mo_doi_xung_lease_cu_int_False 0.038s QUA
+[B] >>> vao t212_wp678_A5_D5_bia_mo_doi_xung_lease_duoc_quet_int_False 2026-11-04T16:30:37Z
+[B] <<< ra t212_wp678_A5_D5_bia_mo_doi_xung_lease_duoc_quet_int_False 0.027s QUA
+[B] >>> vao t213_wp678_A6_ai_dang_giu_yes_on_hai_ref_KHONG_XAC_DINH_ca_hai 2026-11-04T16:30:37Z
+[A] <<< ra t207_wp678_A3_bien_workflow_yes_gap_dau_True_buoc_DO_0_POST 0.605s QUA
+[A] >>> vao t208_wp678_A4_dung_than_lease_id_khong_phai_chuoi_rc8 2026-11-04T16:30:38Z
+[A] <<< ra t208_wp678_A4_dung_than_lease_id_khong_phai_chuoi_rc8 0.038s QUA
+[A] >>> vao t209_wp678_A5_D6_lease_cu_duoc_quet_int_khong_thoa_bia_mo 2026-11-04T16:30:38Z
+[B] <<< ra t213_wp678_A6_ai_dang_giu_yes_on_hai_ref_KHONG_XAC_DINH_ca_hai 0.637s QUA
+[B] >>> vao t214_wp678_A7_du_bao_check_chot_D8_truc_tiep_va_CLI_chan_truoc 2026-11-04T16:30:38Z
+[A] <<< ra t209_wp678_A5_D6_lease_cu_duoc_quet_int_khong_thoa_bia_mo 0.428s QUA
+[A] >>> vao t210_wp678_A5_D6_lease_moi_int_goi_truc_tiep_rc8 2026-11-04T16:30:38Z
+[B] <<< ra t214_wp678_A7_du_bao_check_chot_D8_truc_tiep_va_CLI_chan_truoc 0.258s QUA
+[B] >>> vao t215_wp678_A7_du_bao_ai_dang_giu_khong_ep_kieu_tra_so 2026-11-04T16:30:38Z
+[A] <<< ra t210_wp678_A5_D6_lease_moi_int_goi_truc_tiep_rc8 0.382s QUA
+[A] >>> vao t211_wp678_A5_D5_bia_mo_doi_xung_lease_cu_int_False 2026-11-04T16:30:38Z
+[A] <<< ra t211_wp678_A5_D5_bia_mo_doi_xung_lease_cu_int_False 0.030s QUA
+[A] >>> vao t212_wp678_A5_D5_bia_mo_doi_xung_lease_duoc_quet_int_False 2026-11-04T16:30:38Z
+[A] <<< ra t212_wp678_A5_D5_bia_mo_doi_xung_lease_duoc_quet_int_False 0.026s QUA
+[A] >>> vao t213_wp678_A6_ai_dang_giu_yes_on_hai_ref_KHONG_XAC_DINH_ca_hai 2026-11-04T16:30:38Z
+[B] <<< ra t215_wp678_A7_du_bao_ai_dang_giu_khong_ep_kieu_tra_so 0.304s QUA
+[B] >>> vao t216_wp678_A10_catalog_dot_bien_giet_dung_ca_bang_TinHieuChotCa 2026-11-04T16:30:39Z
+[A] <<< ra t213_wp678_A6_ai_dang_giu_yes_on_hai_ref_KHONG_XAC_DINH_ca_hai 0.674s QUA
+[A] >>> vao t214_wp678_A7_du_bao_check_chot_D8_truc_tiep_va_CLI_chan_truoc 2026-11-04T16:30:39Z
+[A] <<< ra t214_wp678_A7_du_bao_check_chot_D8_truc_tiep_va_CLI_chan_truoc 0.262s QUA
+[A] >>> vao t215_wp678_A7_du_bao_ai_dang_giu_khong_ep_kieu_tra_so 2026-11-04T16:30:39Z
+[A] <<< ra t215_wp678_A7_du_bao_ai_dang_giu_khong_ep_kieu_tra_so 0.285s QUA
+[A] >>> vao t216_wp678_A10_catalog_dot_bien_giet_dung_ca_bang_TinHieuChotCa 2026-11-04T16:30:40Z
+[B] catalog đột biến wp678: mẫu số=12, giết thật=12, tín dụng giả=0, sống sót=0
+[B] <<< ra t216_wp678_A10_catalog_dot_bien_giet_dung_ca_bang_TinHieuChotCa 1.560s QUA
+[B] >>> vao t218_wp678_lease_id_khong_hop_le_chi_nem_Chan_va_thong_diep_co_tran 2026-11-04T16:30:40Z
+[B] <<< ra t218_wp678_lease_id_khong_hop_le_chi_nem_Chan_va_thong_diep_co_tran 0.828s QUA
+[B] >>> vao t217_a9_doi_chung_chuoi_hop_le_va_HEAD_tuong_trung_bi_bo 2026-11-04T16:30:41Z
+[B] <<< ra t217_a9_doi_chung_chuoi_hop_le_va_HEAD_tuong_trung_bi_bo 0.330s QUA
+[B] >>> vao t217_a9_int_trong_tep_yml 2026-11-04T16:30:41Z
+[A] catalog đột biến wp678: mẫu số=12, giết thật=12, tín dụng giả=0, sống sót=0
+[A] <<< ra t216_wp678_A10_catalog_dot_bien_giet_dung_ca_bang_TinHieuChotCa 1.677s QUA
+[A] >>> vao t218_wp678_lease_id_khong_hop_le_chi_nem_Chan_va_thong_diep_co_tran 2026-11-04T16:30:41Z
+[B] <<< ra t217_a9_int_trong_tep_yml 0.324s QUA
+[B] >>> vao t217_a9_sai_kieu_chi_tren_head_cuc_bo 2026-11-04T16:30:42Z
+[B] <<< ra t217_a9_sai_kieu_chi_tren_head_cuc_bo 0.363s QUA
+[B] >>> vao t217_a9_sai_kieu_chi_o_ref_thuong_topic_HEAD 2026-11-04T16:30:42Z
+[A] <<< ra t218_wp678_lease_id_khong_hop_le_chi_nem_Chan_va_thong_diep_co_tran 0.879s QUA
+[A] >>> vao t217_a9_doi_chung_chuoi_hop_le_va_HEAD_tuong_trung_bi_bo 2026-11-04T16:30:42Z
+[B] <<< ra t217_a9_sai_kieu_chi_o_ref_thuong_topic_HEAD 0.345s QUA
+[B] >>> vao t217_a9_sai_kieu_chi_o_refs_remotes 2026-11-04T16:30:42Z
+[A] <<< ra t217_a9_doi_chung_chuoi_hop_le_va_HEAD_tuong_trung_bi_bo 0.312s QUA
+[A] >>> vao t217_a9_int_trong_tep_yml 2026-11-04T16:30:42Z
+[B] <<< ra t217_a9_sai_kieu_chi_o_refs_remotes 0.464s QUA
+[B] >>> vao t217_a9_sai_kieu_chi_o_remote_khong_phai_origin 2026-11-04T16:30:43Z
+[A] <<< ra t217_a9_int_trong_tep_yml 0.324s QUA
+[A] >>> vao t217_a9_sai_kieu_chi_tren_head_cuc_bo 2026-11-04T16:30:43Z
+[B] <<< ra t217_a9_sai_kieu_chi_o_remote_khong_phai_origin 0.354s QUA
+[B] >>> vao t217_a9_sai_kieu_chi_o_ref_thuong_remotes_HEAD 2026-11-04T16:30:43Z
+[A] <<< ra t217_a9_sai_kieu_chi_tren_head_cuc_bo 0.531s QUA
+[A] >>> vao t217_a9_sai_kieu_chi_o_ref_thuong_topic_HEAD 2026-11-04T16:30:43Z
+[B] <<< ra t217_a9_sai_kieu_chi_o_ref_thuong_remotes_HEAD 0.478s QUA
+[B] >>> vao t217_a9_sai_kieu_chi_qua_ref_tuong_trung_khong_phai_HEAD 2026-11-04T16:30:44Z
+[A] <<< ra t217_a9_sai_kieu_chi_o_ref_thuong_topic_HEAD 0.404s QUA
+[A] >>> vao t217_a9_sai_kieu_chi_o_refs_remotes 2026-11-04T16:30:44Z
+[B] <<< ra t217_a9_sai_kieu_chi_qua_ref_tuong_trung_khong_phai_HEAD 0.451s QUA
+[B] >>> vao t217_a9_sai_kieu_chi_o_origin_HEAD_khong_tuong_trung 2026-11-04T16:30:44Z
+[A] <<< ra t217_a9_sai_kieu_chi_o_refs_remotes 0.462s QUA
+[A] >>> vao t217_a9_sai_kieu_chi_o_remote_khong_phai_origin 2026-11-04T16:30:44Z
+[B] <<< ra t217_a9_sai_kieu_chi_o_origin_HEAD_khong_tuong_trung 0.367s QUA
+[B] >>> vao t217_a9_sai_kieu_chi_qua_ref_tuong_trung_duoi_remotes_khong_phai_HEAD 2026-11-04T16:30:44Z
+[A] <<< ra t217_a9_sai_kieu_chi_o_remote_khong_phai_origin 0.345s QUA
+[A] >>> vao t217_a9_sai_kieu_chi_o_ref_thuong_remotes_HEAD 2026-11-04T16:30:45Z
+[B] <<< ra t217_a9_sai_kieu_chi_qua_ref_tuong_trung_duoi_remotes_khong_phai_HEAD 0.384s QUA
+[B] >>> vao t217_a9_sai_kieu_qua_ref_tuong_trung_leaf_gan_HEAD 2026-11-04T16:30:45Z
+[A] <<< ra t217_a9_sai_kieu_chi_o_ref_thuong_remotes_HEAD 0.380s QUA
+[A] >>> vao t217_a9_sai_kieu_chi_qua_ref_tuong_trung_khong_phai_HEAD 2026-11-04T16:30:45Z
+[A] <<< ra t217_a9_sai_kieu_chi_qua_ref_tuong_trung_khong_phai_HEAD 0.368s QUA
+[A] >>> vao t217_a9_sai_kieu_chi_o_origin_HEAD_khong_tuong_trung 2026-11-04T16:30:45Z
+[A] <<< ra t217_a9_sai_kieu_chi_o_origin_HEAD_khong_tuong_trung 0.378s QUA
+[A] >>> vao t217_a9_sai_kieu_chi_qua_ref_tuong_trung_duoi_remotes_khong_phai_HEAD 2026-11-04T16:30:46Z
+[B] <<< ra t217_a9_sai_kieu_qua_ref_tuong_trung_leaf_gan_HEAD 1.160s QUA
+[B] >>> vao t217_a9_thieu_lease_id 2026-11-04T16:30:46Z
+[A] <<< ra t217_a9_sai_kieu_chi_qua_ref_tuong_trung_duoi_remotes_khong_phai_HEAD 0.375s QUA
+[A] >>> vao t217_a9_sai_kieu_qua_ref_tuong_trung_leaf_gan_HEAD 2026-11-04T16:30:46Z
+[B] <<< ra t217_a9_thieu_lease_id 0.368s QUA
+[B] >>> vao t217_a9_tai_lieu_khong_phai_anh_xa 2026-11-04T16:30:46Z
+[B] <<< ra t217_a9_tai_lieu_khong_phai_anh_xa 0.340s QUA
+[B] >>> vao t217_a9_yaml_loi_thong_thuong 2026-11-04T16:30:47Z
+[B] <<< ra t217_a9_yaml_loi_thong_thuong 0.320s QUA
+[B] >>> vao t217_a9_da_bi_thay_the_la_list 2026-11-04T16:30:47Z
+[A] <<< ra t217_a9_sai_kieu_qua_ref_tuong_trung_leaf_gan_HEAD 1.088s QUA
+[A] >>> vao t217_a9_thieu_lease_id 2026-11-04T16:30:47Z
+[B] <<< ra t217_a9_da_bi_thay_the_la_list 0.305s QUA
+[B] >>> vao t217_a9_thay_the_cho_phan_tu_rong 2026-11-04T16:30:47Z
+[A] <<< ra t217_a9_thieu_lease_id 0.310s QUA
+[A] >>> vao t217_a9_tai_lieu_khong_phai_anh_xa 2026-11-04T16:30:47Z
+[B] <<< ra t217_a9_thay_the_cho_phan_tu_rong 0.322s QUA
+[B] >>> vao t217_a9_thay_the_cho_phan_tu_trang 2026-11-04T16:30:48Z
+[B] <<< ra t217_a9_thay_the_cho_phan_tu_trang 0.363s QUA
+[B] >>> vao t217_a9_da_bi_thay_the_chuoi_trang 2026-11-04T16:30:48Z
+[A] <<< ra t217_a9_tai_lieu_khong_phai_anh_xa 0.531s QUA
+[A] >>> vao t217_a9_yaml_loi_thong_thuong 2026-11-04T16:30:48Z
+[B] <<< ra t217_a9_da_bi_thay_the_chuoi_trang 0.317s QUA
+[B] >>> vao t217_a9_thay_the_cho_false 2026-11-04T16:30:48Z
+[A] <<< ra t217_a9_yaml_loi_thong_thuong 0.315s QUA
+[A] >>> vao t217_a9_da_bi_thay_the_la_list 2026-11-04T16:30:48Z
+[B] <<< ra t217_a9_thay_the_cho_false 0.307s QUA
+[B] >>> vao t217_a9_thay_the_cho_0 2026-11-04T16:30:49Z
+[A] <<< ra t217_a9_da_bi_thay_the_la_list 0.307s QUA
+[A] >>> vao t217_a9_thay_the_cho_phan_tu_rong 2026-11-04T16:30:49Z
+[B] <<< ra t217_a9_thay_the_cho_0 0.307s QUA
+[B] >>> vao t217_a9_da_bi_thay_the_false 2026-11-04T16:30:49Z
+[A] <<< ra t217_a9_thay_the_cho_phan_tu_rong 0.330s QUA
+[A] >>> vao t217_a9_thay_the_cho_phan_tu_trang 2026-11-04T16:30:49Z
+[B] <<< ra t217_a9_da_bi_thay_the_false 0.297s QUA
+[B] >>> vao t217_a9_da_bi_thay_the_0 2026-11-04T16:30:49Z
+[A] <<< ra t217_a9_thay_the_cho_phan_tu_trang 0.311s QUA
+[A] >>> vao t217_a9_da_bi_thay_the_chuoi_trang 2026-11-04T16:30:49Z
+[B] <<< ra t217_a9_da_bi_thay_the_0 0.311s QUA
+[B] >>> vao t217_a9_thay_the_cho_list_rong_hop_le 2026-11-04T16:30:49Z
+[A] <<< ra t217_a9_da_bi_thay_the_chuoi_trang 0.319s QUA
+[A] >>> vao t217_a9_thay_the_cho_false 2026-11-04T16:30:50Z
+[B] <<< ra t217_a9_thay_the_cho_list_rong_hop_le 0.302s QUA
+[B] >>> vao t217_a9_duong_thay_the_cho_vang 2026-11-04T16:30:50Z
+[A] <<< ra t217_a9_thay_the_cho_false 0.317s QUA
+[A] >>> vao t217_a9_thay_the_cho_0 2026-11-04T16:30:50Z
+[B] <<< ra t217_a9_duong_thay_the_cho_vang 0.302s QUA
+[B] >>> vao t217_a9_duong_thay_the_cho_null 2026-11-04T16:30:50Z
+[A] <<< ra t217_a9_thay_the_cho_0 0.316s QUA
+[A] >>> vao t217_a9_da_bi_thay_the_false 2026-11-04T16:30:50Z
+[B] <<< ra t217_a9_duong_thay_the_cho_null 0.301s QUA
+[B] >>> vao t217_a9_duong_thay_the_cho_chuoi_rong 2026-11-04T16:30:50Z
+[A] <<< ra t217_a9_da_bi_thay_the_false 0.318s QUA
+[A] >>> vao t217_a9_da_bi_thay_the_0 2026-11-04T16:30:51Z
+[B] <<< ra t217_a9_duong_thay_the_cho_chuoi_rong 0.325s QUA
+[B] >>> vao t217_a9_duong_thay_the_cho_chuoi_trang 2026-11-04T16:30:51Z
+[A] <<< ra t217_a9_da_bi_thay_the_0 0.304s QUA
+[A] >>> vao t217_a9_thay_the_cho_list_rong_hop_le 2026-11-04T16:30:51Z
+[B] <<< ra t217_a9_duong_thay_the_cho_chuoi_trang 0.375s QUA
+[B] >>> vao t217_a9_duong_da_bi_thay_the_vang 2026-11-04T16:30:51Z
+[A] <<< ra t217_a9_thay_the_cho_list_rong_hop_le 0.345s QUA
+[A] >>> vao t217_a9_duong_thay_the_cho_vang 2026-11-04T16:30:51Z
+[B] <<< ra t217_a9_duong_da_bi_thay_the_vang 0.324s QUA
+[B] >>> vao t217_a9_duong_da_bi_thay_the_null 2026-11-04T16:30:51Z
+[A] <<< ra t217_a9_duong_thay_the_cho_vang 0.311s QUA
+[A] >>> vao t217_a9_duong_thay_the_cho_null 2026-11-04T16:30:51Z
+[B] <<< ra t217_a9_duong_da_bi_thay_the_null 0.394s QUA
+[B] >>> vao t217_a9_duong_da_bi_thay_the_chuoi_rong 2026-11-04T16:30:52Z
+[A] <<< ra t217_a9_duong_thay_the_cho_null 0.361s QUA
+[A] >>> vao t217_a9_duong_thay_the_cho_chuoi_rong 2026-11-04T16:30:52Z
+[B] <<< ra t217_a9_duong_da_bi_thay_the_chuoi_rong 0.311s QUA
+[B] >>> vao t217_a9_git_ref_hong_oid_toan_0 2026-11-04T16:30:52Z
+[A] <<< ra t217_a9_duong_thay_the_cho_chuoi_rong 0.323s QUA
+[A] >>> vao t217_a9_duong_thay_the_cho_chuoi_trang 2026-11-04T16:30:52Z
+[B] <<< ra t217_a9_git_ref_hong_oid_toan_0 0.305s QUA
+[B] >>> vao t217_a9_git_kho_khong_ton_tai 2026-11-04T16:30:52Z
+[A] <<< ra t217_a9_duong_thay_the_cho_chuoi_trang 0.298s QUA
+[A] >>> vao t217_a9_duong_da_bi_thay_the_vang 2026-11-04T16:30:52Z
+[B] <<< ra t217_a9_git_kho_khong_ton_tai 0.271s QUA
+[B] >>> vao t217_a9_replace_commit_van_doc_OID_goc 2026-11-04T16:30:53Z
+[A] <<< ra t217_a9_duong_da_bi_thay_the_vang 0.343s QUA
+[A] >>> vao t217_a9_duong_da_bi_thay_the_null 2026-11-04T16:30:53Z
+[B] <<< ra t217_a9_replace_commit_van_doc_OID_goc 0.343s QUA
+[B] >>> vao t217_a9_replace_blob_van_doc_OID_goc 2026-11-04T16:30:53Z
+[A] <<< ra t217_a9_duong_da_bi_thay_the_null 0.296s QUA
+[A] >>> vao t217_a9_duong_da_bi_thay_the_chuoi_rong 2026-11-04T16:30:53Z
+[B] <<< ra t217_a9_replace_blob_van_doc_OID_goc 0.346s QUA
+[B] >>> vao t217_a9_doi_chung_khong_replace 2026-11-04T16:30:53Z
+[A] <<< ra t217_a9_duong_da_bi_thay_the_chuoi_rong 0.316s QUA
+[A] >>> vao t217_a9_git_ref_hong_oid_toan_0 2026-11-04T16:30:53Z
+[A] <<< ra t217_a9_git_ref_hong_oid_toan_0 0.310s QUA
+[A] >>> vao t217_a9_git_kho_khong_ton_tai 2026-11-04T16:30:54Z
+[B] <<< ra t217_a9_doi_chung_khong_replace 0.367s QUA
+[B] >>> vao t217_a9_race_ref_doi_sau_liet_ke_van_doc_OID_da_liet_ke 2026-11-04T16:30:54Z
+[B] <<< ra t217_a9_race_ref_doi_sau_liet_ke_van_doc_OID_da_liet_ke 0.090s QUA
+[B] >>> vao t217_a9_cung_blob_hai_mien 2026-11-04T16:30:54Z
+[A] <<< ra t217_a9_git_kho_khong_ton_tai 0.257s QUA
+[A] >>> vao t217_a9_replace_commit_van_doc_OID_goc 2026-11-04T16:30:54Z
+[B] <<< ra t217_a9_cung_blob_hai_mien 0.282s QUA
+[B] >>> vao t217_a9_bien_blob_khong_UTF8 2026-11-04T16:30:54Z
+[A] <<< ra t217_a9_replace_commit_van_doc_OID_goc 0.332s QUA
+[A] >>> vao t217_a9_replace_blob_van_doc_OID_goc 2026-11-04T16:30:54Z
+[B] <<< ra t217_a9_bien_blob_khong_UTF8 0.273s QUA
+[B] >>> vao t217_a9_bien_ngay_khong_ton_tai 2026-11-04T16:30:54Z
+[A] <<< ra t217_a9_replace_blob_van_doc_OID_goc 0.318s QUA
+[A] >>> vao t217_a9_doi_chung_khong_replace 2026-11-04T16:30:55Z
+[B] <<< ra t217_a9_bien_ngay_khong_ton_tai 0.287s QUA
+[B] >>> vao t217_a9_bien_so_vuot_gioi_han_chuyen_doi 2026-11-04T16:30:55Z
+[B] <<< ra t217_a9_bien_so_vuot_gioi_han_chuyen_doi 0.294s QUA
+[B] >>> vao t217_a9_bien_tai_lieu_qua_sau 2026-11-04T16:30:55Z
+[A] <<< ra t217_a9_doi_chung_khong_replace 0.372s QUA
+[A] >>> vao t217_a9_race_ref_doi_sau_liet_ke_van_doc_OID_da_liet_ke 2026-11-04T16:30:55Z
+[A] <<< ra t217_a9_race_ref_doi_sau_liet_ke_van_doc_OID_da_liet_ke 0.065s QUA
+[A] >>> vao t217_a9_cung_blob_hai_mien 2026-11-04T16:30:55Z
+[A] <<< ra t217_a9_cung_blob_hai_mien 0.273s QUA
+[A] >>> vao t217_a9_bien_blob_khong_UTF8 2026-11-04T16:30:55Z
+[A] <<< ra t217_a9_bien_blob_khong_UTF8 0.334s QUA
+[A] >>> vao t217_a9_bien_ngay_khong_ton_tai 2026-11-04T16:30:56Z
+[A] <<< ra t217_a9_bien_ngay_khong_ton_tai 0.279s QUA
+[A] >>> vao t217_a9_bien_so_vuot_gioi_han_chuyen_doi 2026-11-04T16:30:56Z
+[B] <<< ra t217_a9_bien_tai_lieu_qua_sau 1.097s QUA
+[B] >>> vao t217_a9_doi_chung_tep_hop_le_rat_lon 2026-11-04T16:30:56Z
+[A] <<< ra t217_a9_bien_so_vuot_gioi_han_chuyen_doi 0.283s QUA
+[A] >>> vao t217_a9_bien_tai_lieu_qua_sau 2026-11-04T16:30:56Z
+[B] <<< ra t217_a9_doi_chung_tep_hop_le_rat_lon 0.390s QUA
+[B] >>> vao t217_a9_bien_argv_thieu_va_thua 2026-11-04T16:30:56Z
+[B] <<< ra t217_a9_bien_argv_thieu_va_thua 0.491s QUA
+[B] >>> vao t217_a9_bien_git_vang 2026-11-04T16:30:57Z
+[B] <<< ra t217_a9_bien_git_vang 0.267s QUA
+[B] >>> vao t217_a9_bien_pyyaml_vang 2026-11-04T16:30:57Z
+[A] <<< ra t217_a9_bien_tai_lieu_qua_sau 1.105s QUA
+[A] >>> vao t217_a9_doi_chung_tep_hop_le_rat_lon 2026-11-04T16:30:57Z
+[B] <<< ra t217_a9_bien_pyyaml_vang 0.260s QUA
+[B] >>> vao t220_giu_hau_due_windows_moi_loi_goi_ctypes_launcher_trong_khoa 2026-11-04T16:30:57Z
+[B] <<< ra t220_giu_hau_due_windows_moi_loi_goi_ctypes_launcher_trong_khoa 0.002s QUA
+[B] >>> vao t217_a9_object_store_blob_sai_bam_la_2 2026-11-04T16:30:57Z
+[A] <<< ra t217_a9_doi_chung_tep_hop_le_rat_lon 0.408s QUA
+[A] >>> vao t217_a9_bien_argv_thieu_va_thua 2026-11-04T16:30:58Z
+[B] <<< ra t217_a9_object_store_blob_sai_bam_la_2 0.312s QUA
+[B] >>> vao t217_a9_object_store_thieu_blob_la_2 2026-11-04T16:30:58Z
+[B] <<< ra t217_a9_object_store_thieu_blob_la_2 0.320s QUA
+[B] >>> vao t217_a9_object_store_khoi_phuc_dung_bytes_la_1 2026-11-04T16:30:58Z
+[A] <<< ra t217_a9_bien_argv_thieu_va_thua 0.515s QUA
+[A] >>> vao t217_a9_bien_git_vang 2026-11-04T16:30:58Z
+[B] <<< ra t217_a9_object_store_khoi_phuc_dung_bytes_la_1 0.329s QUA
+[B] >>> vao t217_a9_regex_dong_bo_LEASE_ID_san_pham 2026-11-04T16:30:58Z
+[B] <<< ra t217_a9_regex_dong_bo_LEASE_ID_san_pham 0.031s QUA
+[B] >>> vao t222_a1a_profile_v2_required_vs_audit_and_runner_tristate 2026-11-04T16:30:58Z
+[B] <<< ra t222_a1a_profile_v2_required_vs_audit_and_runner_tristate 0.046s QUA
+[B] >>> vao t223_a1a_q6_ancestor_and_fixed_history 2026-11-04T16:30:59Z
+[A] <<< ra t217_a9_bien_git_vang 0.283s QUA
+[A] >>> vao t217_a9_bien_pyyaml_vang 2026-11-04T16:30:59Z
+[B] <<< ra t223_a1a_q6_ancestor_and_fixed_history 0.085s QUA
+[B] >>> vao t224_a1a_historical_pair_both_ends 2026-11-04T16:30:59Z
+[B] <<< ra t224_a1a_historical_pair_both_ends 0.038s QUA
+[B] >>> vao t225_a1a_upload_artifact_exact_pin 2026-11-04T16:30:59Z
+[B] <<< ra t225_a1a_upload_artifact_exact_pin 0.000s QUA
+[B] >>> vao t226_a1a_default_tree_CHE_dedup_and_legacy_invariance 2026-11-04T16:30:59Z
+[B err] warning: You appear to have cloned an empty repository.
+[A] <<< ra t217_a9_bien_pyyaml_vang 0.271s QUA
+[A] >>> vao t220_giu_hau_due_windows_moi_loi_goi_ctypes_launcher_trong_khoa 2026-11-04T16:30:59Z
+[A] <<< ra t220_giu_hau_due_windows_moi_loi_goi_ctypes_launcher_trong_khoa 0.002s QUA
+[A] >>> vao t217_a9_object_store_blob_sai_bam_la_2 2026-11-04T16:30:59Z
+[A] <<< ra t217_a9_object_store_blob_sai_bam_la_2 0.322s QUA
+[A] >>> vao t217_a9_object_store_thieu_blob_la_2 2026-11-04T16:30:59Z
+[A] <<< ra t217_a9_object_store_thieu_blob_la_2 0.323s QUA
+[A] >>> vao t217_a9_object_store_khoi_phuc_dung_bytes_la_1 2026-11-04T16:30:59Z
+[A] <<< ra t217_a9_object_store_khoi_phuc_dung_bytes_la_1 0.363s QUA
+[A] >>> vao t217_a9_regex_dong_bo_LEASE_ID_san_pham 2026-11-04T16:31:00Z
+[A] <<< ra t217_a9_regex_dong_bo_LEASE_ID_san_pham 0.031s QUA
+[A] >>> vao t222_a1a_profile_v2_required_vs_audit_and_runner_tristate 2026-11-04T16:31:00Z
+[A] <<< ra t222_a1a_profile_v2_required_vs_audit_and_runner_tristate 0.048s QUA
+[A] >>> vao t223_a1a_q6_ancestor_and_fixed_history 2026-11-04T16:31:00Z
+[B] <<< ra t226_a1a_default_tree_CHE_dedup_and_legacy_invariance 1.280s QUA
+[B] >>> vao t227_a1a_side_tombstone_and_missing_reverse_are_unknown 2026-11-04T16:31:00Z
+[B err] warning: You appear to have cloned an empty repository.
+[A] <<< ra t223_a1a_q6_ancestor_and_fixed_history 0.115s QUA
+[A] >>> vao t224_a1a_historical_pair_both_ends 2026-11-04T16:31:00Z
+[A] <<< ra t224_a1a_historical_pair_both_ends 0.029s QUA
+[A] >>> vao t225_a1a_upload_artifact_exact_pin 2026-11-04T16:31:00Z
+[A] <<< ra t225_a1a_upload_artifact_exact_pin 0.000s QUA
+[A] >>> vao t226_a1a_default_tree_CHE_dedup_and_legacy_invariance 2026-11-04T16:31:00Z
+[A err] warning: You appear to have cloned an empty repository.
+[B] <<< ra t227_a1a_side_tombstone_and_missing_reverse_are_unknown 0.669s QUA
+[B] >>> vao t228_a1a_q13_descriptor_exact_and_other_bindings 2026-11-04T16:31:01Z
+[A] <<< ra t226_a1a_default_tree_CHE_dedup_and_legacy_invariance 1.352s QUA
+[A] >>> vao t227_a1a_side_tombstone_and_missing_reverse_are_unknown 2026-11-04T16:31:01Z
+[B] <<< ra t228_a1a_q13_descriptor_exact_and_other_bindings 0.794s QUA
+[B] >>> vao t229_a1a_blob_raw_bytes_and_read_failures 2026-11-04T16:31:01Z
+[B err] warning: You appear to have cloned an empty repository.
+[A err] warning: You appear to have cloned an empty repository.
+[B] <<< ra t229_a1a_blob_raw_bytes_and_read_failures 0.189s QUA
+[B] >>> vao t230_a1a_m4_one_clock_snapshot 2026-11-04T16:31:02Z
+[B] <<< ra t230_a1a_m4_one_clock_snapshot 0.279s QUA
+[B] >>> vao t231_a1a_A4_mutant_to_case_matrix 2026-11-04T16:31:02Z
+[B] MUTANT_CASE A4_missing_image_os Signal
+[B] MUTANT_CASE A4_missing_image_version Signal
+[B] MUTANT_CASE A4_none_image_os Signal
+[B] MUTANT_CASE A4_none_image_version Signal
+[B] <<< ra t231_a1a_A4_mutant_to_case_matrix 0.057s QUA
+[B] >>> vao t232_a1a_M14_mutant_to_case_matrix_and_tree_pin 2026-11-04T16:31:02Z
+[B] MUTANT_CASE A20_unit Signal
+[B] MUTANT_CASE A22i_cli Signal
+[B] MUTANT_CASE A21_unit Signal
+[B] MUTANT_CASE A22i_cli Signal
+[B] MUTANT_CASE A22ii_cli Signal
+[B] MUTANT_CASE A22iii_unit Signal
+[B] MUTANT_CASE A22ivL_unit Signal
+[B] MUTANT_CASE A22ivN_unit Signal
+[B] MUTANT_CASE A19_cli Signal
+[B] MUTANT_CASE A22i_cli Signal
+[B] MUTANT_CASE A22ii_cli Signal
+[A] <<< ra t227_a1a_side_tombstone_and_missing_reverse_are_unknown 0.727s QUA
+[A] >>> vao t228_a1a_q13_descriptor_exact_and_other_bindings 2026-11-04T16:31:02Z
+[B] MUTANT_CASE A22ivL_unit Signal
+[B] MUTANT_CASE A22ivN_unit Signal
+[B] MUTANT_CASE A22ii_cli RuntimeError
+[B] <<< ra t232_a1a_M14_mutant_to_case_matrix_and_tree_pin 0.278s QUA
+[B] >>> vao t233_a1a_descendant_stdout_cancel_closes_owners 2026-11-04T16:31:02Z
+[B] <<< ra t233_a1a_descendant_stdout_cancel_closes_owners 0.363s QUA
+[B] >>> vao t234_a1a_recursive_yaml_duplicate_unknown_and_cli_invariance 2026-11-04T16:31:03Z
+[B err] warning: You appear to have cloned an empty repository.
+[B] M14 alias cycle after=0.022s
+[A] <<< ra t228_a1a_q13_descriptor_exact_and_other_bindings 0.776s QUA
+[A] >>> vao t229_a1a_blob_raw_bytes_and_read_failures 2026-11-04T16:31:03Z
+[A err] warning: You appear to have cloned an empty repository.
+[B] M14 alias DAG equal depth=28 after=0.026s
+[A] <<< ra t229_a1a_blob_raw_bytes_and_read_failures 0.146s QUA
+[A] >>> vao t230_a1a_m4_one_clock_snapshot 2026-11-04T16:31:03Z
+[A] <<< ra t230_a1a_m4_one_clock_snapshot 0.251s QUA
+[A] >>> vao t231_a1a_A4_mutant_to_case_matrix 2026-11-04T16:31:03Z
+[A] MUTANT_CASE A4_missing_image_os Signal
+[A] MUTANT_CASE A4_missing_image_version Signal
+[A] MUTANT_CASE A4_none_image_os Signal
+[A] MUTANT_CASE A4_none_image_version Signal
+[A] <<< ra t231_a1a_A4_mutant_to_case_matrix 0.050s QUA
+[A] >>> vao t232_a1a_M14_mutant_to_case_matrix_and_tree_pin 2026-11-04T16:31:03Z
+[A] MUTANT_CASE A20_unit Signal
+[A] MUTANT_CASE A22i_cli Signal
+[A] MUTANT_CASE A21_unit Signal
+[A] MUTANT_CASE A22i_cli Signal
+[A] MUTANT_CASE A22ii_cli Signal
+[A] MUTANT_CASE A22iii_unit Signal
+[A] MUTANT_CASE A22ivL_unit Signal
+[A] MUTANT_CASE A22ivN_unit Signal
+[A] MUTANT_CASE A19_cli Signal
+[A] MUTANT_CASE A22i_cli Signal
+[A] MUTANT_CASE A22ii_cli Signal
+[A] MUTANT_CASE A22ivL_unit Signal
+[A] MUTANT_CASE A22ivN_unit Signal
+[A] MUTANT_CASE A22ii_cli RuntimeError
+[A] <<< ra t232_a1a_M14_mutant_to_case_matrix_and_tree_pin 0.281s QUA
+[A] >>> vao t233_a1a_descendant_stdout_cancel_closes_owners 2026-11-04T16:31:04Z
+[A] <<< ra t233_a1a_descendant_stdout_cancel_closes_owners 0.357s QUA
+[A] >>> vao t234_a1a_recursive_yaml_duplicate_unknown_and_cli_invariance 2026-11-04T16:31:04Z
+[A err] warning: You appear to have cloned an empty repository.
+[A] M14 alias cycle after=0.017s
+[A] M14 alias DAG equal depth=28 after=0.021s
+[B] M14 alias DAG equal depth=28 before=>5.000s (bounded timeout)
+[B] M14 alias DAG conflicting depth=28 after=0.023s
+[B] <<< ra t234_a1a_recursive_yaml_duplicate_unknown_and_cli_invariance 6.782s QUA
+[B] >>> vao t235_a1a_audit_presence_does_not_control_discovery 2026-11-04T16:31:09Z
+[B] <<< ra t235_a1a_audit_presence_does_not_control_discovery 0.053s QUA
+[B] >>> vao t236_a1a_old_marker_policy_removed_guard_mutant 2026-11-04T16:31:09Z
+[A] M14 alias DAG equal depth=28 before=>5.000s (bounded timeout)
+[A] M14 alias DAG conflicting depth=28 after=0.022s
+[B] <<< ra t236_a1a_old_marker_policy_removed_guard_mutant 0.432s QUA
+[B] 
+[B] lease_publish: 284/284 đạt; đã chạy=284, bỏ qua=0
+[A] <<< ra t234_a1a_recursive_yaml_duplicate_unknown_and_cli_invariance 6.734s QUA
+[A] >>> vao t235_a1a_audit_presence_does_not_control_discovery 2026-11-04T16:31:11Z
+[A] <<< ra t235_a1a_audit_presence_does_not_control_discovery 0.050s QUA
+[A] >>> vao t236_a1a_old_marker_policy_removed_guard_mutant 2026-11-04T16:31:11Z
+[A] <<< ra t236_a1a_old_marker_policy_removed_guard_mutant 0.425s QUA
+[A] 
+[A] lease_publish: 284/284 đạt; đã chạy=284, bỏ qua=0
+<<< ra t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor 207.528s QUA
+>>> vao t127_A7_M1_ma_tran_ban_ghi_thu_hoi_thu_tu_loi_12_4_8 2026-11-04T16:31:11Z
+<<< ra t127_A7_M1_ma_tran_ban_ghi_thu_hoi_thu_tu_loi_12_4_8 0.068s QUA
+>>> vao t128_S7_dinh_tuyen_metadata_dung_MOT_path_va_schema_retired 2026-11-04T16:31:11Z
+<<< ra t128_S7_dinh_tuyen_metadata_dung_MOT_path_va_schema_retired 0.050s QUA
+>>> vao t129_Q45_reader_object_store_bam_lai_va_canh_tu_bytes 2026-11-04T16:31:12Z
+<<< ra t129_Q45_reader_object_store_bam_lai_va_canh_tu_bytes 0.226s QUA
+>>> vao t130_S2_seam_bytes_lech_OID_12_va_parser_KHONG_nhan_byte 2026-11-04T16:31:12Z
+<<< ra t130_S2_seam_bytes_lech_OID_12_va_parser_KHONG_nhan_byte 0.191s QUA
+>>> vao t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline 2026-11-04T16:31:12Z
+=== t131 deadline/kill DA CHAY, launcher .sh
+<<< ra t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline 1.747s QUA
+>>> vao t132_shallow_va_object_thieu_la_12_khong_phai_vang 2026-11-04T16:31:14Z
+<<< ra t132_shallow_va_object_thieu_la_12_khong_phai_vang 0.251s QUA
+>>> vao t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat 2026-11-04T16:31:14Z
+<<< ra t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat 3.556s QUA
+>>> vao t221_mau_t133_tat_auto_maintenance_truoc_commit_dau 2026-11-04T16:31:17Z
+<<< ra t221_mau_t133_tat_auto_maintenance_truoc_commit_dau 0.006s QUA
+>>> vao t134_M2_ai_dang_giu_so_khong_rong_khi_co_False_la_12_va_du_bao_khong_doi_rc 2026-11-04T16:31:17Z
+warning: You appear to have cloned an empty repository.
+<<< ra t134_M2_ai_dang_giu_so_khong_rong_khi_co_False_la_12_va_du_bao_khong_doi_rc 0.884s QUA
+>>> vao t135_M3_check_thuan_mac_dinh_va_du_bao_chi_them_dong 2026-11-04T16:31:18Z
+warning: You appear to have cloned an empty repository.
+<<< ra t135_M3_check_thuan_mac_dinh_va_du_bao_chi_them_dong 0.681s QUA
+>>> vao t136_A2_adapter_nguon_ghim_danh_tinh_profile_duyet_va_khong_doc_config_kho 2026-11-04T16:31:19Z
+warning: You appear to have cloned an empty repository.
+<<< ra t136_A2_adapter_nguon_ghim_danh_tinh_profile_duyet_va_khong_doc_config_kho 0.327s QUA
+>>> vao t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck 2026-11-04T16:31:19Z
+<<< ra t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck 0.079s QUA
+>>> vao t138_A12_bien_nhan_receipt_du_truong_va_neo_doc_lap_cay_PR 2026-11-04T16:31:19Z
+<<< ra t138_A12_bien_nhan_receipt_du_truong_va_neo_doc_lap_cay_PR 0.195s QUA
+>>> vao t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam 2026-11-04T16:31:20Z
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+catalog mutant A0: mẫu số=37, giết thật=34, SỐNG có chủ đích=3, tín dụng giả=0
+<<< ra t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam 15.776s QUA
+>>> vao t140_review_F01_Q13_policy_hong_va_binding_sai_phai_12 2026-11-04T16:31:35Z
+<<< ra t140_review_F01_Q13_policy_hong_va_binding_sai_phai_12 0.211s QUA
+>>> vao t141_review_F02_ten_tieng_Viet_khong_duoc_bien_so_thanh_rong 2026-11-04T16:31:36Z
+warning: You appear to have cloned an empty repository.
+<<< ra t141_review_F02_ten_tieng_Viet_khong_duoc_bien_so_thanh_rong 0.390s QUA
+>>> vao t142_review_F02_namespace_sai_type_khong_phai_vang 2026-11-04T16:31:36Z
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+<<< ra t142_review_F02_namespace_sai_type_khong_phai_vang 0.520s QUA
+>>> vao t143_review_F03_tree_entry_co_slash_phai_12 2026-11-04T16:31:37Z
+<<< ra t143_review_F03_tree_entry_co_slash_phai_12 0.163s QUA
+>>> vao t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat 2026-11-04T16:31:37Z
+<<< ra t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat 0.148s QUA
+>>> vao t145_review_F05_object_lon_phai_12_va_thu_hoi_cat_file 2026-11-04T16:31:37Z
+<<< ra t145_review_F05_object_lon_phai_12_va_thu_hoi_cat_file 0.146s QUA
+>>> vao t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file 2026-11-04T16:31:37Z
+<<< ra t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file 0.138s QUA
+>>> vao t147_review_F06_schema_version_la_integer_va_ngay_hop_le 2026-11-04T16:31:37Z
+<<< ra t147_review_F06_schema_version_la_integer_va_ngay_hop_le 0.468s QUA
+>>> vao t148_review_F07_M9_definition_receipt_va_commit_pin 2026-11-04T16:31:38Z
+<<< ra t148_review_F07_M9_definition_receipt_va_commit_pin 0.007s QUA
+>>> vao t149_review_F09_preflight_object_store_khong_ke_thua_env 2026-11-04T16:31:38Z
+<<< ra t149_review_F09_preflight_object_store_khong_ke_thua_env 0.119s QUA
+>>> vao t150_review2_F10_nguon_khong_utf8_la_12_khong_traceback 2026-11-04T16:31:38Z
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+<<< ra t150_review2_F10_nguon_khong_utf8_la_12_khong_traceback 0.548s QUA
+>>> vao t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu 2026-11-04T16:31:38Z
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+<<< ra t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu 1.101s QUA
+>>> vao t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL 2026-11-04T16:31:39Z
+<<< ra t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL 0.060s QUA
+>>> vao t155_618_neo_dinh_nghia_theo_workflow_sha_khong_theo_base_sha 2026-11-04T16:31:39Z
+<<< ra t155_618_neo_dinh_nghia_theo_workflow_sha_khong_theo_base_sha 0.627s QUA
+>>> vao t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem 2026-11-04T16:31:40Z
+<<< ra t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem 0.368s QUA
+>>> vao t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON 2026-11-04T16:31:40Z
+<<< ra t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON 7.687s QUA
+>>> vao t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY 2026-11-04T16:31:48Z
+<<< ra t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY 0.254s QUA
+>>> vao t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM 2026-11-04T16:31:48Z
+<<< ra t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM 3.442s QUA
+>>> vao t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125 2026-11-04T16:31:52Z
+<<< ra t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125 0.199s QUA
+>>> vao t155_chon_ca_khong_khop_hoac_RONG_thi_KHONG_XANH 2026-11-04T16:31:52Z
+<<< ra t155_chon_ca_khong_khop_hoac_RONG_thi_KHONG_XANH 1.185s QUA
+>>> vao t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung 2026-11-04T16:31:53Z
+<<< ra t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung 4.181s QUA
+>>> vao t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout 2026-11-04T16:31:57Z
+<<< ra t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout 0.043s QUA
+>>> vao t161_M3_chot_nguon_duy_nhat_ma_tran_ci 2026-11-04T16:31:57Z
+<<< ra t161_M3_chot_nguon_duy_nhat_ma_tran_ci 0.126s QUA
+>>> vao t162_M4_evaluator_toi_gian_chuan_bi 2026-11-04T16:31:58Z
+KHÔNG ĐO ĐƯỢC: vế điều kiện không nằm trong tập tối giản hỗ trợ: "inputs.123 == 'x'"
+KHÔNG ĐO ĐƯỢC: vế điều kiện không nằm trong tập tối giản hỗ trợ: ''
+KHÔNG ĐO ĐƯỢC: literal/ngoặc không cân trong điều kiện: "github.ref == 'a"
+KHÔNG ĐO ĐƯỢC: biểu thức không khớp hình chuẩn tối giản của chuan-bi: 'fromJSON(\'["ubuntu-latest"]\')'
+<<< ra t162_M4_evaluator_toi_gian_chuan_bi 0.075s QUA
+>>> vao t165_N1_giai_git_windows_program_files_va_fail_closed 2026-11-04T16:31:58Z
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+<<< ra t165_N1_giai_git_windows_program_files_va_fail_closed 0.029s QUA
+>>> vao t166_N2_giai_git_windows_loai_tru_cwd 2026-11-04T16:31:58Z
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+<<< ra t166_N2_giai_git_windows_loai_tru_cwd 0.028s QUA
+>>> vao t167_N3_giai_git_windows_loai_tru_system_root_va_chan_doan 2026-11-04T16:31:58Z
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+<<< ra t167_N3_giai_git_windows_loai_tru_system_root_va_chan_doan 0.027s QUA
+>>> vao t168_N4_posix_khong_hoi_quy_usr_bin_git 2026-11-04T16:31:58Z
+<<< ra t168_N4_posix_khong_hoi_quy_usr_bin_git 0.027s QUA
+>>> vao t169_N8_cong_cu_git_chi_nhan_git_exe 2026-11-04T16:31:58Z
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+<<< ra t169_N8_cong_cu_git_chi_nhan_git_exe 0.027s QUA
+>>> vao t170_N9_path_boc_nhay_kep_va_khoang_trang 2026-11-04T16:31:58Z
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+<<< ra t170_N9_path_boc_nhay_kep_va_khoang_trang 0.027s QUA
+>>> vao t171_N10_path_dung_DUNG_dau_phan_cach_duoc_truyen 2026-11-04T16:31:58Z
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH
+<<< ra t171_N10_path_dung_DUNG_dau_phan_cach_duoc_truyen 0.028s QUA
+>>> vao t172_N11_chan_doan_chuyen_kenh_stderr_0_byte 2026-11-04T16:31:58Z
+<<< ra t172_N11_chan_doan_chuyen_kenh_stderr_0_byte 0.027s QUA
+>>> vao t173_N12_hang_fixture_dung_tren_CA_HAI_nen 2026-11-04T16:31:58Z
+<<< ra t173_N12_hang_fixture_dung_tren_CA_HAI_nen 0.000s QUA
+>>> vao t174_het_han_ma_DA_co_dau_thi_bo_qua_chu_khong_ket_toi_het_han 2026-11-04T16:31:58Z
+<<< ra t174_het_han_ma_DA_co_dau_thi_bo_qua_chu_khong_ket_toi_het_han 0.027s QUA
+>>> vao t175_het_han_ma_KHONG_co_dau_thi_van_la_het_han 2026-11-04T16:31:58Z
+<<< ra t175_het_han_ma_KHONG_co_dau_thi_van_la_het_han 0.027s QUA
+>>> vao t176_con_han_ma_DA_co_dau_van_bo_qua_nhu_cu 2026-11-04T16:31:58Z
+<<< ra t176_con_han_ma_DA_co_dau_van_bo_qua_nhu_cu 0.027s QUA
+>>> vao t177_con_han_KHONG_dau_thi_MOI_CHOT_cua_kiem_van_phai_chay 2026-11-04T16:31:58Z
+<<< ra t177_con_han_KHONG_dau_thi_MOI_CHOT_cua_kiem_van_phai_chay 0.108s QUA
+>>> vao t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang 2026-11-04T16:31:58Z
+<<< ra t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang 0.306s QUA
+>>> vao t179_do_dau_KHONG_DO_DUOC_thi_nhuong_lai_cho_chuoi_cu 2026-11-04T16:31:58Z
+<<< ra t179_do_dau_KHONG_DO_DUOC_thi_nhuong_lai_cho_chuoi_cu 0.136s QUA
+>>> vao t180_hai_loi_cung_luc_thi_tien_kiem_KHONG_duoc_cuop_quyen_phan 2026-11-04T16:31:58Z
+<<< ra t180_hai_loi_cung_luc_thi_tien_kiem_KHONG_duoc_cuop_quyen_phan 0.034s QUA
+>>> vao t181_cua_CUOI_van_phai_chan_khi_API_comment_hong 2026-11-04T16:31:59Z
+<<< ra t181_cua_CUOI_van_phai_chan_khi_API_comment_hong 0.035s QUA
+>>> vao t182_lease_KHONG_PHAI_anh_xa_thi_chan_co_ten_chu_khong_vo_tran 2026-11-04T16:31:59Z
+<<< ra t182_lease_KHONG_PHAI_anh_xa_thi_chan_co_ten_chu_khong_vo_tran 0.153s QUA
+>>> vao t183_do_dau_HONG_roi_PHUC_HOI_thi_cua_cuoi_van_phai_bo_qua 2026-11-04T16:31:59Z
+<<< ra t183_do_dau_HONG_roi_PHUC_HOI_thi_cua_cuoi_van_phai_bo_qua 0.029s QUA
+>>> vao t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran 2026-11-04T16:31:59Z
+<<< ra t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran 0.235s QUA
+>>> vao t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance 2026-11-04T16:31:59Z
+<<< ra t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance 0.800s QUA
+>>> vao t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han 2026-11-04T16:32:00Z
+<<< ra t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han 1.040s QUA
+>>> vao t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG 2026-11-04T16:32:01Z
+t191: 13 chốt của kiem() đều PHU ở nhánh đã-có-dấu; miễn sẵn: [('raise Chan', 1114, 8)]; phân loại 7019 dòng (6880 sinh, 2377 ô, miễn 27); ca âm 11 dạng
+<<< ra t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG 56.765s QUA
+>>> vao t192_S8_het_deadline_la_12_va_KHONG_spawn_cat_file_dem_bang_Popen 2026-11-04T16:32:58Z
+<<< ra t192_S8_het_deadline_la_12_va_KHONG_spawn_cat_file_dem_bang_Popen 0.094s QUA
+>>> vao t185_cua_DEM_phai_chot_KET_QUA_truoc_khi_chot_SO_LOI_GOI 2026-11-04T16:32:58Z
+<<< ra t185_cua_DEM_phai_chot_KET_QUA_truoc_khi_chot_SO_LOI_GOI 0.142s QUA
+>>> vao t186_KHONG_ca_nao_duoc_chot_SO_LOI_GOI_ngoai_CUA 2026-11-04T16:32:58Z
+<unknown>:3627: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5774: SyntaxWarning: invalid escape sequence '\d'
+<<< ra t186_KHONG_ca_nao_duoc_chot_SO_LOI_GOI_ngoai_CUA 0.386s QUA
+>>> vao t174_GOI_GIT_giai_ma_dong_bo_va_giu_hop_dong_text 2026-11-04T16:32:58Z
+<<< ra t174_GOI_GIT_giai_ma_dong_bo_va_giu_hop_dong_text 0.070s QUA
+>>> vao t188_moi_ve_DOI_TRA_VE_cua_t184_phai_qua_CUA_chi_ve_d_duoc_goi_tran 2026-11-04T16:32:58Z
+<unknown>:3627: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5774: SyntaxWarning: invalid escape sequence '\d'
+<<< ra t188_moi_ve_DOI_TRA_VE_cua_t184_phai_qua_CUA_chi_ve_d_duoc_goi_tran 0.282s QUA
+>>> vao t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat 2026-11-04T16:32:59Z
+<unknown>:3627: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5774: SyntaxWarning: invalid escape sequence '\d'
+<<< ra t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat 0.294s QUA
+>>> vao t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky 2026-11-04T16:32:59Z
+<unknown>:3627: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5774: SyntaxWarning: invalid escape sequence '\d'
+/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:3627: SyntaxWarning: invalid escape sequence '\s'
+  """Nợ được ĐẶT TÊN trong mã phải có nhà trong sổ, và mục đã khai backlink phải còn marker.
+/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:5774: SyntaxWarning: invalid escape sequence '\d'
+  """Tail tệp log con đang ghi, in từng DÒNG ĐỦ ra stdout CHA kèm tiền tố. Line-atomic qua `khoa`.
+/tmp/lp_t4ua2qlz/ops/lease_publish_test.py:3627: SyntaxWarning: invalid escape sequence '\s'
+  """Nợ được ĐẶT TÊN trong mã phải có nhà trong sổ, và mục đã khai backlink phải còn marker.
+/tmp/lp_t4ua2qlz/ops/lease_publish_test.py:5774: SyntaxWarning: invalid escape sequence '\d'
+  """Tail tệp log con đang ghi, in từng DÒNG ĐỦ ra stdout CHA kèm tiền tố. Line-atomic qua `khoa`.
+<<< ra t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky 1.945s QUA
+>>> vao t194_AB_phai_du_bang_chung_truoc_khi_so 2026-11-04T16:33:01Z
+<<< ra t194_AB_phai_du_bang_chung_truoc_khi_so 0.037s QUA
+>>> vao t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat 2026-11-04T16:33:01Z
+<<< ra t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat 1.729s QUA
+>>> vao t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua 2026-11-04T16:33:03Z
+<<< ra t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua 0.347s QUA
+>>> vao t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua 2026-11-04T16:33:03Z
+<<< ra t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua 0.380s QUA
+>>> vao t198_M4_doi_chung_duong_chuoi_hop_le_dang_dung_mot_POST 2026-11-04T16:33:03Z
+<<< ra t198_M4_doi_chung_duong_chuoi_hop_le_dang_dung_mot_POST 0.498s QUA
+>>> vao t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai 2026-11-04T16:33:04Z
+<unknown>:3627: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5774: SyntaxWarning: invalid escape sequence '\d'
+/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:3627: SyntaxWarning: invalid escape sequence '\s'
+  """Nợ được ĐẶT TÊN trong mã phải có nhà trong sổ, và mục đã khai backlink phải còn marker.
+/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv2/cay-kho/ops/lease_publish_test.py:5774: SyntaxWarning: invalid escape sequence '\d'
+  """Tail tệp log con đang ghi, in từng DÒNG ĐỦ ra stdout CHA kèm tiền tố. Line-atomic qua `khoa`.
+<<< ra t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai 0.594s QUA
+>>> vao t200_M1_nguon_lease_publish_tuy_chon_that_su_duoc_dung 2026-11-04T16:33:04Z
+<<< ra t200_M1_nguon_lease_publish_tuy_chon_that_su_duoc_dung 0.084s QUA
+>>> vao t201_M1_gh_gia_hai_GET_cung_snapshot_va_POST_luu_trang_thai 2026-11-04T16:33:04Z
+<<< ra t201_M1_gh_gia_hai_GET_cung_snapshot_va_POST_luu_trang_thai 0.279s QUA
+>>> vao t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng 2026-11-04T16:33:05Z
+<<< ra t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng 0.522s QUA
+>>> vao t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi 2026-11-04T16:33:05Z
+<<< ra t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi 0.028s QUA
+>>> vao t204_wp678_A1_lease_id_ep_kieu_YAML_qua_doc_yaml_bi_kiem_tu_choi_rc8 2026-11-04T16:33:05Z
+<<< ra t204_wp678_A1_lease_id_ep_kieu_YAML_qua_doc_yaml_bi_kiem_tu_choi_rc8 0.079s QUA
+>>> vao t219_wp678_kiem_bo_qua_han_van_chan_lease_id_khong_hop_le 2026-11-04T16:33:05Z
+<<< ra t219_wp678_kiem_bo_qua_han_van_chan_lease_id_khong_hop_le 0.137s QUA
+>>> vao t205_wp678_A2_tien_kiem_D2_truc_tiep_int_rc8_chuoi_tra_ve 2026-11-04T16:33:06Z
+<<< ra t205_wp678_A2_tien_kiem_D2_truc_tiep_int_rc8_chuoi_tra_ve 0.030s QUA
+>>> vao t206_wp678_A3_don_vi_kiem_comment_da_co_ep_kieu_rc8_khong_rc9 2026-11-04T16:33:06Z
+<<< ra t206_wp678_A3_don_vi_kiem_comment_da_co_ep_kieu_rc8_khong_rc9 0.248s QUA
+>>> vao t207_wp678_A3_bien_workflow_yes_gap_dau_True_buoc_DO_0_POST 2026-11-04T16:33:06Z
+<<< ra t207_wp678_A3_bien_workflow_yes_gap_dau_True_buoc_DO_0_POST 0.622s QUA
+>>> vao t208_wp678_A4_dung_than_lease_id_khong_phai_chuoi_rc8 2026-11-04T16:33:06Z
+<<< ra t208_wp678_A4_dung_than_lease_id_khong_phai_chuoi_rc8 0.031s QUA
+>>> vao t209_wp678_A5_D6_lease_cu_duoc_quet_int_khong_thoa_bia_mo 2026-11-04T16:33:06Z
+<<< ra t209_wp678_A5_D6_lease_cu_duoc_quet_int_khong_thoa_bia_mo 0.304s QUA
+>>> vao t210_wp678_A5_D6_lease_moi_int_goi_truc_tiep_rc8 2026-11-04T16:33:07Z
+<<< ra t210_wp678_A5_D6_lease_moi_int_goi_truc_tiep_rc8 0.282s QUA
+>>> vao t211_wp678_A5_D5_bia_mo_doi_xung_lease_cu_int_False 2026-11-04T16:33:07Z
+<<< ra t211_wp678_A5_D5_bia_mo_doi_xung_lease_cu_int_False 0.030s QUA
+>>> vao t212_wp678_A5_D5_bia_mo_doi_xung_lease_duoc_quet_int_False 2026-11-04T16:33:07Z
+<<< ra t212_wp678_A5_D5_bia_mo_doi_xung_lease_duoc_quet_int_False 0.030s QUA
+>>> vao t213_wp678_A6_ai_dang_giu_yes_on_hai_ref_KHONG_XAC_DINH_ca_hai 2026-11-04T16:33:07Z
+<<< ra t213_wp678_A6_ai_dang_giu_yes_on_hai_ref_KHONG_XAC_DINH_ca_hai 0.550s QUA
+>>> vao t214_wp678_A7_du_bao_check_chot_D8_truc_tiep_va_CLI_chan_truoc 2026-11-04T16:33:08Z
+<<< ra t214_wp678_A7_du_bao_check_chot_D8_truc_tiep_va_CLI_chan_truoc 0.204s QUA
+>>> vao t215_wp678_A7_du_bao_ai_dang_giu_khong_ep_kieu_tra_so 2026-11-04T16:33:08Z
+<<< ra t215_wp678_A7_du_bao_ai_dang_giu_khong_ep_kieu_tra_so 0.245s QUA
+>>> vao t216_wp678_A10_catalog_dot_bien_giet_dung_ca_bang_TinHieuChotCa 2026-11-04T16:33:08Z
+catalog đột biến wp678: mẫu số=12, giết thật=12, tín dụng giả=0, sống sót=0
+<<< ra t216_wp678_A10_catalog_dot_bien_giet_dung_ca_bang_TinHieuChotCa 1.386s QUA
+>>> vao t218_wp678_lease_id_khong_hop_le_chi_nem_Chan_va_thong_diep_co_tran 2026-11-04T16:33:09Z
+<<< ra t218_wp678_lease_id_khong_hop_le_chi_nem_Chan_va_thong_diep_co_tran 0.773s QUA
+>>> vao t217_a9_doi_chung_chuoi_hop_le_va_HEAD_tuong_trung_bi_bo 2026-11-04T16:33:10Z
+<<< ra t217_a9_doi_chung_chuoi_hop_le_va_HEAD_tuong_trung_bi_bo 0.336s QUA
+>>> vao t217_a9_int_trong_tep_yml 2026-11-04T16:33:11Z
+<<< ra t217_a9_int_trong_tep_yml 0.317s QUA
+>>> vao t217_a9_sai_kieu_chi_tren_head_cuc_bo 2026-11-04T16:33:11Z
+<<< ra t217_a9_sai_kieu_chi_tren_head_cuc_bo 0.361s QUA
+>>> vao t217_a9_sai_kieu_chi_o_ref_thuong_topic_HEAD 2026-11-04T16:33:11Z
+<<< ra t217_a9_sai_kieu_chi_o_ref_thuong_topic_HEAD 0.340s QUA
+>>> vao t217_a9_sai_kieu_chi_o_refs_remotes 2026-11-04T16:33:12Z
+<<< ra t217_a9_sai_kieu_chi_o_refs_remotes 0.426s QUA
+>>> vao t217_a9_sai_kieu_chi_o_remote_khong_phai_origin 2026-11-04T16:33:12Z
+<<< ra t217_a9_sai_kieu_chi_o_remote_khong_phai_origin 0.384s QUA
+>>> vao t217_a9_sai_kieu_chi_o_ref_thuong_remotes_HEAD 2026-11-04T16:33:12Z
+<<< ra t217_a9_sai_kieu_chi_o_ref_thuong_remotes_HEAD 0.371s QUA
+>>> vao t217_a9_sai_kieu_chi_qua_ref_tuong_trung_khong_phai_HEAD 2026-11-04T16:33:13Z
+<<< ra t217_a9_sai_kieu_chi_qua_ref_tuong_trung_khong_phai_HEAD 0.388s QUA
+>>> vao t217_a9_sai_kieu_chi_o_origin_HEAD_khong_tuong_trung 2026-11-04T16:33:13Z
+<<< ra t217_a9_sai_kieu_chi_o_origin_HEAD_khong_tuong_trung 0.373s QUA
+>>> vao t217_a9_sai_kieu_chi_qua_ref_tuong_trung_duoi_remotes_khong_phai_HEAD 2026-11-04T16:33:14Z
+<<< ra t217_a9_sai_kieu_chi_qua_ref_tuong_trung_duoi_remotes_khong_phai_HEAD 0.362s QUA
+>>> vao t217_a9_sai_kieu_qua_ref_tuong_trung_leaf_gan_HEAD 2026-11-04T16:33:14Z
+<<< ra t217_a9_sai_kieu_qua_ref_tuong_trung_leaf_gan_HEAD 1.054s QUA
+>>> vao t217_a9_thieu_lease_id 2026-11-04T16:33:15Z
+<<< ra t217_a9_thieu_lease_id 0.313s QUA
+>>> vao t217_a9_tai_lieu_khong_phai_anh_xa 2026-11-04T16:33:15Z
+<<< ra t217_a9_tai_lieu_khong_phai_anh_xa 0.330s QUA
+>>> vao t217_a9_yaml_loi_thong_thuong 2026-11-04T16:33:16Z
+<<< ra t217_a9_yaml_loi_thong_thuong 0.288s QUA
+>>> vao t217_a9_da_bi_thay_the_la_list 2026-11-04T16:33:16Z
+<<< ra t217_a9_da_bi_thay_the_la_list 0.287s QUA
+>>> vao t217_a9_thay_the_cho_phan_tu_rong 2026-11-04T16:33:16Z
+<<< ra t217_a9_thay_the_cho_phan_tu_rong 0.278s QUA
+>>> vao t217_a9_thay_the_cho_phan_tu_trang 2026-11-04T16:33:16Z
+<<< ra t217_a9_thay_the_cho_phan_tu_trang 0.301s QUA
+>>> vao t217_a9_da_bi_thay_the_chuoi_trang 2026-11-04T16:33:17Z
+<<< ra t217_a9_da_bi_thay_the_chuoi_trang 0.310s QUA
+>>> vao t217_a9_thay_the_cho_false 2026-11-04T16:33:17Z
+<<< ra t217_a9_thay_the_cho_false 0.285s QUA
+>>> vao t217_a9_thay_the_cho_0 2026-11-04T16:33:17Z
+<<< ra t217_a9_thay_the_cho_0 0.364s QUA
+>>> vao t217_a9_da_bi_thay_the_false 2026-11-04T16:33:18Z
+<<< ra t217_a9_da_bi_thay_the_false 0.279s QUA
+>>> vao t217_a9_da_bi_thay_the_0 2026-11-04T16:33:18Z
+<<< ra t217_a9_da_bi_thay_the_0 0.313s QUA
+>>> vao t217_a9_thay_the_cho_list_rong_hop_le 2026-11-04T16:33:18Z
+<<< ra t217_a9_thay_the_cho_list_rong_hop_le 0.295s QUA
+>>> vao t217_a9_duong_thay_the_cho_vang 2026-11-04T16:33:19Z
+<<< ra t217_a9_duong_thay_the_cho_vang 0.283s QUA
+>>> vao t217_a9_duong_thay_the_cho_null 2026-11-04T16:33:19Z
+<<< ra t217_a9_duong_thay_the_cho_null 0.284s QUA
+>>> vao t217_a9_duong_thay_the_cho_chuoi_rong 2026-11-04T16:33:19Z
+<<< ra t217_a9_duong_thay_the_cho_chuoi_rong 0.291s QUA
+>>> vao t217_a9_duong_thay_the_cho_chuoi_trang 2026-11-04T16:33:19Z
+<<< ra t217_a9_duong_thay_the_cho_chuoi_trang 0.306s QUA
+>>> vao t217_a9_duong_da_bi_thay_the_vang 2026-11-04T16:33:20Z
+<<< ra t217_a9_duong_da_bi_thay_the_vang 0.282s QUA
+>>> vao t217_a9_duong_da_bi_thay_the_null 2026-11-04T16:33:20Z
+<<< ra t217_a9_duong_da_bi_thay_the_null 0.347s QUA
+>>> vao t217_a9_duong_da_bi_thay_the_chuoi_rong 2026-11-04T16:33:20Z
+<<< ra t217_a9_duong_da_bi_thay_the_chuoi_rong 0.335s QUA
+>>> vao t217_a9_git_ref_hong_oid_toan_0 2026-11-04T16:33:21Z
+<<< ra t217_a9_git_ref_hong_oid_toan_0 0.266s QUA
+>>> vao t217_a9_git_kho_khong_ton_tai 2026-11-04T16:33:21Z
+<<< ra t217_a9_git_kho_khong_ton_tai 0.269s QUA
+>>> vao t217_a9_replace_commit_van_doc_OID_goc 2026-11-04T16:33:21Z
+<<< ra t217_a9_replace_commit_van_doc_OID_goc 0.327s QUA
+>>> vao t217_a9_replace_blob_van_doc_OID_goc 2026-11-04T16:33:22Z
+<<< ra t217_a9_replace_blob_van_doc_OID_goc 0.318s QUA
+>>> vao t217_a9_doi_chung_khong_replace 2026-11-04T16:33:22Z
+<<< ra t217_a9_doi_chung_khong_replace 0.314s QUA
+>>> vao t217_a9_race_ref_doi_sau_liet_ke_van_doc_OID_da_liet_ke 2026-11-04T16:33:22Z
+<<< ra t217_a9_race_ref_doi_sau_liet_ke_van_doc_OID_da_liet_ke 0.060s QUA
+>>> vao t217_a9_cung_blob_hai_mien 2026-11-04T16:33:22Z
+<<< ra t217_a9_cung_blob_hai_mien 0.280s QUA
+>>> vao t217_a9_bien_blob_khong_UTF8 2026-11-04T16:33:23Z
+<<< ra t217_a9_bien_blob_khong_UTF8 0.298s QUA
+>>> vao t217_a9_bien_ngay_khong_ton_tai 2026-11-04T16:33:23Z
+<<< ra t217_a9_bien_ngay_khong_ton_tai 0.282s QUA
+>>> vao t217_a9_bien_so_vuot_gioi_han_chuyen_doi 2026-11-04T16:33:23Z
+<<< ra t217_a9_bien_so_vuot_gioi_han_chuyen_doi 0.284s QUA
+>>> vao t217_a9_bien_tai_lieu_qua_sau 2026-11-04T16:33:23Z
+<<< ra t217_a9_bien_tai_lieu_qua_sau 1.080s QUA
+>>> vao t217_a9_doi_chung_tep_hop_le_rat_lon 2026-11-04T16:33:25Z
+<<< ra t217_a9_doi_chung_tep_hop_le_rat_lon 0.409s QUA
+>>> vao t217_a9_bien_argv_thieu_va_thua 2026-11-04T16:33:25Z
+<<< ra t217_a9_bien_argv_thieu_va_thua 0.486s QUA
+>>> vao t217_a9_bien_git_vang 2026-11-04T16:33:25Z
+<<< ra t217_a9_bien_git_vang 0.265s QUA
+>>> vao t217_a9_bien_pyyaml_vang 2026-11-04T16:33:26Z
+<<< ra t217_a9_bien_pyyaml_vang 0.256s QUA
+>>> vao t220_giu_hau_due_windows_moi_loi_goi_ctypes_launcher_trong_khoa 2026-11-04T16:33:26Z
+<<< ra t220_giu_hau_due_windows_moi_loi_goi_ctypes_launcher_trong_khoa 0.002s QUA
+>>> vao t217_a9_object_store_blob_sai_bam_la_2 2026-11-04T16:33:26Z
+<<< ra t217_a9_object_store_blob_sai_bam_la_2 0.320s QUA
+>>> vao t217_a9_object_store_thieu_blob_la_2 2026-11-04T16:33:26Z
+<<< ra t217_a9_object_store_thieu_blob_la_2 0.306s QUA
+>>> vao t217_a9_object_store_khoi_phuc_dung_bytes_la_1 2026-11-04T16:33:27Z
+<<< ra t217_a9_object_store_khoi_phuc_dung_bytes_la_1 0.303s QUA
+>>> vao t217_a9_regex_dong_bo_LEASE_ID_san_pham 2026-11-04T16:33:27Z
+<<< ra t217_a9_regex_dong_bo_LEASE_ID_san_pham 0.030s QUA
+>>> vao t222_a1a_profile_v2_required_vs_audit_and_runner_tristate 2026-11-04T16:33:27Z
+<<< ra t222_a1a_profile_v2_required_vs_audit_and_runner_tristate 0.043s QUA
+>>> vao t223_a1a_q6_ancestor_and_fixed_history 2026-11-04T16:33:27Z
+<<< ra t223_a1a_q6_ancestor_and_fixed_history 0.084s QUA
+>>> vao t224_a1a_historical_pair_both_ends 2026-11-04T16:33:27Z
+<<< ra t224_a1a_historical_pair_both_ends 0.032s QUA
+>>> vao t225_a1a_upload_artifact_exact_pin 2026-11-04T16:33:27Z
+<<< ra t225_a1a_upload_artifact_exact_pin 0.000s QUA
+>>> vao t226_a1a_default_tree_CHE_dedup_and_legacy_invariance 2026-11-04T16:33:27Z
+warning: You appear to have cloned an empty repository.
+<<< ra t226_a1a_default_tree_CHE_dedup_and_legacy_invariance 1.127s QUA
+>>> vao t227_a1a_side_tombstone_and_missing_reverse_are_unknown 2026-11-04T16:33:28Z
+warning: You appear to have cloned an empty repository.
+<<< ra t227_a1a_side_tombstone_and_missing_reverse_are_unknown 0.563s QUA
+>>> vao t228_a1a_q13_descriptor_exact_and_other_bindings 2026-11-04T16:33:29Z
+<<< ra t228_a1a_q13_descriptor_exact_and_other_bindings 0.614s QUA
+>>> vao t229_a1a_blob_raw_bytes_and_read_failures 2026-11-04T16:33:29Z
+warning: You appear to have cloned an empty repository.
+<<< ra t229_a1a_blob_raw_bytes_and_read_failures 0.117s QUA
+>>> vao t230_a1a_m4_one_clock_snapshot 2026-11-04T16:33:29Z
+<<< ra t230_a1a_m4_one_clock_snapshot 0.139s QUA
+>>> vao t231_a1a_A4_mutant_to_case_matrix 2026-11-04T16:33:30Z
+MUTANT_CASE A4_missing_image_os Signal
+MUTANT_CASE A4_missing_image_version Signal
+MUTANT_CASE A4_none_image_os Signal
+MUTANT_CASE A4_none_image_version Signal
+<<< ra t231_a1a_A4_mutant_to_case_matrix 0.047s QUA
+>>> vao t232_a1a_M14_mutant_to_case_matrix_and_tree_pin 2026-11-04T16:33:30Z
+MUTANT_CASE A20_unit Signal
+MUTANT_CASE A22i_cli Signal
+MUTANT_CASE A21_unit Signal
+MUTANT_CASE A22i_cli Signal
+MUTANT_CASE A22ii_cli Signal
+MUTANT_CASE A22iii_unit Signal
+MUTANT_CASE A22ivL_unit Signal
+MUTANT_CASE A22ivN_unit Signal
+MUTANT_CASE A19_cli Signal
+MUTANT_CASE A22i_cli Signal
+MUTANT_CASE A22ii_cli Signal
+MUTANT_CASE A22ivL_unit Signal
+MUTANT_CASE A22ivN_unit Signal
+MUTANT_CASE A22ii_cli RuntimeError
+<<< ra t232_a1a_M14_mutant_to_case_matrix_and_tree_pin 0.285s QUA
+>>> vao t233_a1a_descendant_stdout_cancel_closes_owners 2026-11-04T16:33:30Z
+<<< ra t233_a1a_descendant_stdout_cancel_closes_owners 0.320s QUA
+>>> vao t234_a1a_recursive_yaml_duplicate_unknown_and_cli_invariance 2026-11-04T16:33:30Z
+warning: You appear to have cloned an empty repository.
+M14 alias cycle after=0.018s
+M14 alias DAG equal depth=28 after=0.022s
+M14 alias DAG equal depth=28 before=>5.000s (bounded timeout)
+M14 alias DAG conflicting depth=28 after=0.029s
+<<< ra t234_a1a_recursive_yaml_duplicate_unknown_and_cli_invariance 6.557s QUA
+>>> vao t235_a1a_audit_presence_does_not_control_discovery 2026-11-04T16:33:37Z
+<<< ra t235_a1a_audit_presence_does_not_control_discovery 0.050s QUA
+>>> vao t236_a1a_old_marker_policy_removed_guard_mutant 2026-11-04T16:33:37Z
+<<< ra t236_a1a_old_marker_policy_removed_guard_mutant 0.286s QUA
+
+lease_publish: 284/284 đạt; đã chạy=284, bỏ qua=0

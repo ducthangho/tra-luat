@@ -1,0 +1,34 @@
+{
+  "expected_tree": "b7b92f98080fb2099f97177e1d0bad51c9020c71",
+  "actual_tree": "b7b92f98080fb2099f97177e1d0bad51c9020c71",
+  "patch_full_index_byte_equal": true,
+  "patch_sha256": "06989b97c8c10848ed4966289e4cf049ba14b9a5acc02d712f3a56aa42431481",
+  "supplied_patches_match": true,
+  "merge_base": "1f0941e9bba1d1d517eda4174167b81963c06bd5",
+  "master_new_file_count": 86,
+  "master_only_adds_ops_land": true,
+  "master_unchanged_blobs": {
+    ".github/workflows/ops-publish-lease.yml": true,
+    "ops/lease_publish.py": true,
+    "ops/lease_publish_test.py": true,
+    ".github/workflows/ci.yml": true,
+    "ops/bash_nen.py": true,
+    "ops/chay_lease_publish_test.sh": true,
+    "ops/cai_actionlint.sh": true
+  },
+  "setup_index": 1,
+  "python3_run_indices": [
+    2,
+    6
+  ],
+  "remove_setup_equals_master": true,
+  "ci_matching_pins": 8,
+  "workflow_equals_luot2": true,
+  "added_comments": [
+    "# GHIM PYTHON, cùng số với `ci.yml` (Issue #1189). Từ khi `ubuntu-latest` lên",
+    "# `ubuntu-26.04` (04-11-2026), bước tự kiểm đỏ ở `t191` (283/284); tại chỗ 3.13 xanh,",
+    "# 3.14 tái hiện đúng chữ ký ấy (bản trên runner chưa đo, A6). Cổng phải chạy trên đúng",
+    "# bản Python mà CI đã đo nó. Bước này đặt `python3` trên PATH, các bước dưới giữ nguyên."
+  ],
+  "Actions_expression_in_added_comments": false
+}

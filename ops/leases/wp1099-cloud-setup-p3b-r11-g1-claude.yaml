@@ -19,7 +19,7 @@ recorder_is_dispatcher: true
 recorder_ghi_chu: 'Phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; executor van la session_015GtxrcPNaayykBErdfcNUB.'
 
 leased_at_utc: '2026-11-05T08:19:00Z'
-heartbeat_at: '2026-11-05T10:42:00Z'
+heartbeat_at: '2026-11-05T12:24:00Z'
 lease_until: '2026-11-06T08:19:00Z'
 lease_expires_at_utc: '2026-11-06T08:19:00Z'
 
@@ -48,14 +48,14 @@ reviewer_ghi_chu: 'Cross-review theo .claude/skills/cross-review/SKILL.md (phien
 access: read-write
 
 spec_path: ops/specs/cloud-setup-p3b-nlm-401-r11.md
-spec_ref: refs/pull/1215/head
 spec_source_oid: 1fd41423e54545c1a89b6b21b1098499bcbfd04b
 spec_blob: 'xem spec_source_oid:spec_path'
 spec_sha256: fcd75e67f3db8c8aea96a36c0fa53eeb6e0bb8b2f00939975361810bdda052a5
 spec_hash: fcd75e67f3db8c8aea96a36c0fa53eeb6e0bb8b2f00939975361810bdda052a5
 spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
 spec_ref_ghi_chu: >-
-  Spec r11 o PR #1215 (se merge truoc #1197); thu dinh danh la BAM. Tim o master truoc, chua thay thi fetch spec_ref.
+  BO spec_ref (05-11): kiem-merge K1 (_spec_merge, ADR-0063) doi spec_ref ghim refs/heads/...@OID40; spec r11 da len master qua
+  PR #1215 (6aee54b) va head #1197 da merge master, nen K1 doc blob spec tai H va so spec_hash.
 spec_review: 'r11 chi doi E28 so r10 (sua tien de E27 theo F01 P2 cua review luot 9).'
 
 branch: claude/wp1099-cloud-setup-p3b-g1
@@ -87,8 +87,8 @@ write_set_da_do_truoc_khi_cap: >-
   (bi thay the boi lease nay), docs/adr/0064-* NGUOI_GIU 0; quet 865 nhanh: 0064+ chua tep nao (executor do ~05:10Z).
 tran_kich_thuoc: 'nang_tran spec (vong 2 Q13): <= 9 tep / <= 550 dong them, do so merge-base (git diff --numstat origin/master...HEAD). Vuot 550 => bo bot ca phu, KHONG xin nang them; vuot 9 tep => DUNG, hoi chu kho.'
 tran_loi_goi_codex: >-
-  16 (chu kho: 12 -> 14 tai issuecomment-6654445526; 14 -> 16 ngay 05-11 ~10:41Z, chi dung khi luot 14 ra finding moi
-  da va, cung model). Het tran chua approve => Review Rescue Checkpoint (ADR-0037).
+  18 (chu kho: 12 -> 14 issuecomment-6654445526; 14 -> 16 issuecomment-6655945847; 16 -> 18 ngay 05-11 ~12:20Z, chi dung khi
+  luot 16 ra finding da va, cung model). Het tran chua approve => Review Rescue Checkpoint (ADR-0037).
 ci_budget:
   gate_tu_dong: 'CI PR tu dong (ubuntu) tren PR cua packet'
   phep_do_duoc_cap: 'khong — spec L1 chi doi luot CI PR Ubuntu'

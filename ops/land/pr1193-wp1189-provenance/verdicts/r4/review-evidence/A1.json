@@ -1,0 +1,14 @@
+{
+  "id": "A1",
+  "lenh": [
+    "/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/py312/bin/python",
+    "/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv4/a1_check.py",
+    "/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv4/cay-kho/.github/workflows/ops-publish-lease.yml"
+  ],
+  "cwd": "/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv4",
+  "rc": 0,
+  "trang_thai": "passed",
+  "giay": 0.03,
+  "log": "review-evidence/A1.log",
+  "ket_qua": "DAT\n"
+}

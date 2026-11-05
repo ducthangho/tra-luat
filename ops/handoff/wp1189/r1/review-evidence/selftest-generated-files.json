@@ -1,0 +1,22 @@
+[
+  "references/golden/fixtures/cache_hygiene/extract_gd_doctext60.txt",
+  "references/golden/fixtures/cache_hygiene/manifest.json",
+  "references/golden/fixtures/config_fixture.json",
+  "references/golden/fixtures/doc_claims/claims.md",
+  "references/golden/fixtures/dup.zip",
+  "references/golden/fixtures/sample_profile.txt",
+  "references/golden/fixtures/slip.zip",
+  "references/golden/fixtures/snap_a.json",
+  "references/golden/fixtures/snap_a2.json",
+  "scripts/.tl_state/nlm_list_cache_nbX.json",
+  "scripts/.tl_state/reconcile_plan_22222222-2222-4222-8222-222222222222.json",
+  "scripts/.tl_state/reconcile_plan_NB1.json",
+  "scripts/.tl_state/reconcile_plan_NBc.BLOCKED.json",
+  "scripts/.tl_state/reconcile_plan_NBc.json",
+  "scripts/.tl_state/reconcile_plan_NBd.BLOCKED.json",
+  "scripts/.tl_state/reconcile_plan_NBp.BLOCKED.json",
+  "scripts/.tl_state/reconcile_plan_NBp.json",
+  "scripts/.tl_state/reconcile_plan_base96.json",
+  "scripts/.tl_state/reconcile_plan_ov-reg-110.json",
+  "scripts/.tl_state/reconcile_plan_ovf96.json"
+]

@@ -1,0 +1,9 @@
+Đã ghi [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv1/VERDICT.md): **approve**.
+
+- A1–A4 đạt; ba đột biến A1 đều đỏ.
+- A2: **284/284 đạt, bỏ qua=0**.
+- A5: **1776/1776** sau khi xử lý cấu hình ký Git của môi trường.
+- Có **1 P3 không chặn**: chú thích khẳng định runner dùng Python 3.14 khi chưa đo trực tiếp.
+- Đã dọn tệp phụ trợ do selftest sinh; cây cuối khớp snapshot ban đầu.
+
+A6 LIVE chưa chạy, đúng phạm vi review offline.

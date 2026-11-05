@@ -1,0 +1,18 @@
+# Gate output run 41397205258 attempt 1 (push, .github/workflows/ci.yml, nhanh master, head 8983e1bbf00c91d8def101a97a4d32509ae630cc) — log REST tung job, doc 2026-11-04
+
+JOB 125121001411 chuan-bi ['ubuntu-latest'] conclusion=success runner_id=1000034846 bytes=112808 sha256=a20e2253e64d11f9384dbaaf6dfff7b1fd71d7ff64a615c93d8d88059dd5a71f ##[error]=0
+JOB 125123982350 gate (ubuntu-latest) ['ubuntu-latest'] conclusion=success runner_id=1000035267 bytes=280951 sha256=b21ea5fc718764b87cad79da74543e51719571e5a5759d591a56989b31320e3a ##[error]=0
+JOB 125123983359 gate-cong-cu: skipped
+JOB 125123982584 gate-cong-cu-gop (ubuntu-latest) ['ubuntu-latest'] conclusion=success runner_id=1000035270 bytes=18160 sha256=fb58292bece628747b60dc5c8010c7d34341f1a92115714f6875858e58967f12 ##[error]=0
+JOB 125150552534 gate-nhanh-gop (ubuntu-latest) ['ubuntu-latest'] conclusion=success runner_id=1000035292 bytes=115413 sha256=aced9250196ab8f96acf534977648204206d7cf3f8f9d09f183f1461fd0e8e92 ##[error]=0
+JOB 125123982316 gate-nhanh-manh (ubuntu-latest, 0) ['ubuntu-latest'] conclusion=success runner_id=1000035265 bytes=114292 sha256=26702a184e937ccd0453c65eeea4cd3d63136eb15efe5a8957c3a2a8af194138 ##[error]=0
+JOB 125123982378 gate-nhanh-manh (ubuntu-latest, 1) ['ubuntu-latest'] conclusion=success runner_id=1000035272 bytes=114295 sha256=acc72fc9bbccb1d8e1f6a0881ec2cc04cf6c8a8b7ca9fab9242affc8a80beee4 ##[error]=0
+JOB 125123982264 gate-nhanh-manh (ubuntu-latest, 2) ['ubuntu-latest'] conclusion=success runner_id=1000035263 bytes=114491 sha256=ef0de5bc4af810f24149cebce98e008dad1842ed495a8863b414988e722a0087 ##[error]=0
+JOB 125123982385 gate-nhanh-manh (ubuntu-latest, 3) ['ubuntu-latest'] conclusion=success runner_id=1000035273 bytes=114295 sha256=d24a79d0f49cb1859be0ea7b7ffec39864e58f5973359396a763f030ff3736b6 ##[error]=0
+JOB 125123982381 gate-nhanh-manh (ubuntu-latest, 4) ['ubuntu-latest'] conclusion=success runner_id=1000035274 bytes=114292 sha256=35e914e51e13dd65e80da4964e9da2f1953324d3617b8cb43ee717a00b5f74f7 ##[error]=0
+JOB 125123982386 gate-nhanh-manh (ubuntu-latest, 5) ['ubuntu-latest'] conclusion=success runner_id=1000035271 bytes=114295 sha256=496aa8572787b99209dba4021aef73be0d4ec7c7e39b2faae4ba7afbca512167 ##[error]=0
+JOB 125123982352 gate-nhanh-manh (ubuntu-latest, 6) ['ubuntu-latest'] conclusion=success runner_id=1000035268 bytes=114295 sha256=40193780f0e5f9b55795e5b373ba8f35a69b7298dcd0a628e8b5c3313715b867 ##[error]=0
+JOB 125123982307 gate-nhanh-manh (ubuntu-latest, 7) ['ubuntu-latest'] conclusion=success runner_id=1000035264 bytes=114293 sha256=8bcf96ff46d717a737c9552b56ed96d3ffaf2ac58bd0e369e408adf536e35054 ##[error]=0
+JOB 125123982218 gate-ops (ubuntu-latest) ['ubuntu-latest'] conclusion=success runner_id=1000035266 bytes=168345 sha256=1bc9942e01d88b5462da3987aff54e579e3ec8c639a485797dc96e2898257580 ##[error]=0
+JOB 125123982255 gate-packet-loop (ubuntu-latest) ['ubuntu-latest'] conclusion=success runner_id=1000035269 bytes=116489 sha256=c6dcfc29c7384b8aaf1641b82054813e117efdbe532e8c077f8958cf95292495 ##[error]=0
+JOB 125151029828 gate-registry (ubuntu-latest) ['ubuntu-latest'] conclusion=success runner_id=1000035321 bytes=116564 sha256=031e902002c3c88273ccdd84d807f520f64e60db61e84b56b76d8c6429c6627d ##[error]=0

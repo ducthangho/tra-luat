@@ -21,8 +21,8 @@ recorder_ghi_chu: 'phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; tham qu
 executor_session: session_015GtxrashcQS6kbxWN1qRsA
 leased_at_utc: '2026-11-05T15:52:00Z'
 heartbeat_at: '2026-11-05T15:52:00Z'
-lease_until: '2026-11-07T15:52:00Z'
-lease_expires_at_utc: '2026-11-07T15:52:00Z'
+lease_until: '2026-11-05T18:00:00Z'
+lease_expires_at_utc: '2026-11-05T18:00:00Z'
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude
@@ -73,3 +73,19 @@ prohibited_actions:
 - write_outside_effective_write_set
 - sua_packet_loop_py
 land_authority_note: 'dieu phoi merge PR ghi so; landed true chi khi du bon moc va uy quyen neo head (L-6)'
+
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-07T15:52:00Z'
+  han_moi_utc: '2026-11-05T18:00:00Z'
+  chi_thi: >-
+    Phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq (05-11-2026 ~17:01Z): rut han lease ghi so sau khi PR M8 mot phan merge;
+    tep lease nam trong coordination_paths cua chinh no (tien le pr1193).
+  ly_do: >-
+    Viec ghi so den M8 mot phan da xong: ho so land ops/land/pr1197-wp1099-land-evidence.yaml (PR #1243 -> 25a1b79), bien ban
+    ops/land/pr1197-wp1099-provenance/bien-ban-m8-cho-m1.yaml (PR #1245 -> b004dac), ban chieu #1099 issuecomment-6664302588,
+    lease thi cong wp1099-cloud-setup-p3b-r11-g1-claude da rut han (d2e53fc). WP #1099 con MO cho M1 LIVE; M8 cuoi (sau M1) se
+    cap lease moi.
+  vi_sao_khong_dung_so: >-
+    Theo tien le #650/#661/pr1193: rut han bang co che da cai (phan loai lease theo han). Han moi dat vai chuc phut SAU luc push
+    de ops-publish-lease.yml con thay lease song (khong roi vao rc=8).
+  ghi_boi: 'phien ghi so session_015GtxrashcQS6kbxWN1qRsA'

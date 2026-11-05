@@ -40,6 +40,9 @@ def _nlm_auth_alive(nb, require_notebook_body=False):
     che_do = st.get("canary", "jar")
     if che_do == "loi":
         raise RuntimeError(_CANH)
+    if st.get("hen"):                              # A9: HẸN hai canary qua tệp (≤ 8 s) — không khoá ⇒ cả hai cùng vào, bất kể lịch luồng
+        _ghi("hen"); t0 = time.time()  # noqa: E702
+        while open(_LOG, encoding="utf-8").read().count("hen\n") < 2 and time.time() - t0 < 8: time.sleep(0.05)  # noqa: E701
     time.sleep(5 if che_do == "ngu" else st.get("cham", 0))
     return (None if che_do == "none" else st["jar"] == "song"), "x"
 if __name__ == "__main__":
@@ -178,25 +181,26 @@ def _a9(cay):
     d1, d2 = cay.goi(m, _SL)[1], cay.goi(m, _SL)
     _chot("A9", _dong(d1)[0].startswith("nlm_nap_lai: BUNDLE CŨNG CHẾT") and len(_dong(d2[1])) == 1
           and _dong(d2[1])[0].startswith("nlm_nap_lai: BỎ QUA — đã nạp"), "hai lời gọi: %r %r" % (d1, d2[1]))
-    cay.dat(bundle="chet", cham=0.5)              # hai LUỒNG cùng tiến trình: canary chậm để cả hai vào cùng lúc (F02)
+    cay.dat(bundle="chet", hen=1)                 # hai LUỒNG cùng tiến trình: canary HẸN nhau (F02; review r11 F11-01)
     m, cu, sys.stderr = cay.moi(), sys.stderr, io.StringIO()
     ts = [threading.Thread(target=m._run, args=(_SL, 30)) for _ in range(2)]
-    try:
-        [x.start() for x in ts], [x.join() for x in ts]
-    finally:
-        sys.stderr = cu
+    try: [x.start() for x in ts], [x.join() for x in ts]  # noqa: E701
+    finally: sys.stderr = cu  # noqa: E701
     _chot("A9", sum("nlm-auth-load" in c for c in cay.nhat_ky()) == 1, "hai luồng ⇒ nạp khác 1 lần")
     if hasattr(os, "mkfifo"):                     # dấu là FIFO không có bên ghi ⇒ đọc dấu không được treo (F06)
         cay.dat(), os.mkfifo(cay.tep_dau)
         x = threading.Thread(target=cay.moi()._doc_dau, daemon=True)
-        x.start(), x.join(5), x.is_alive() and os.close(os.open(cay.tep_dau, os.O_WRONLY | os.O_NONBLOCK))  # gỡ kẹt
+        x.start(), x.join(20)                     # hạn RỘNG: chỉ treo thật (thiếu O_NONBLOCK) mới còn sống; gỡ kẹt khi đó có bên đọc ⇒ không ENXIO
+        with contextlib.suppress(OSError): x.is_alive() and os.close(os.open(cay.tep_dau, os.O_WRONLY | os.O_NONBLOCK))  # noqa: E701
         _chot("A9", not x.is_alive(), "đọc dấu FIFO treo"), cay.tep_dau.unlink()
     for dau, nap in ((-300, 0), (-700, 1), (3600, 1), ([1], 1)):
         cay.dat(bundle="chet")
         cay.dau(dau if isinstance(dau, list) else int(time.time()) + dau)
         cay.goi(cay.moi(), _SL)
         _chot("A9", sum("nlm-auth-load" in c for c in cay.nhat_ky()) == nap, "dấu %r ⇒ nạp %d" % (dau, 1 - nap))
-def _a10(cay):
+def _a10(cay):                                    # dấu THƯỜNG đo rò fd ĐẦU ca, trước mọi xoá/thay tệp: Windows khoá tệp còn mở ⇒ PermissionError (r10 F01)
+    cay.dat(), cay.dau(1234), (m := cay.moi()), (fd := lambda: (n := os.open(os.devnull, os.O_RDONLY), os.close(n))[0]), (truoc := fd()), [m._doc_dau() for _ in range(20)]
+    _chot("A10", fd() == truoc and m._doc_dau() == 1234.0, "đọc dấu thường rò fd / sai ts")
     kq, err, log = _mot(cay, "A10", _SL)
     tep = cay.tep_dau
     _chot("A10", any("nlm-auth-load" in c and "dau_co=1" in c for c in log)
@@ -217,12 +221,10 @@ def _a10(cay):
     _chot("A10", not any("nlm-auth-load" in c for c in cay.nhat_ky()) and "không ghi được tệp dấu" in err
           and not list(tep.parent.glob(".nap-lai-*")), "ghi thiếu dấu vẫn nạp/để rác: %r" % err), cay.dat()
     tep.mkdir()                                   # dấu là THƯ MỤC ⇒ không ghi được ⇒ không nạp, không rác (F01), không rò fd (F07)
-    m, fd = cay.moi(), (lambda: (n := os.open(os.devnull, os.O_RDONLY), os.close(n))[0])   # fd trống THẤP NHẤT: rò ⇒ tăng (mọi nền)
+    m = cay.moi()                                 # fd(): fd trống THẤP NHẤT, rò ⇒ tăng (mọi nền)
     truoc, (kq, err) = fd(), cay.goi(m, _SL)
     _chot("A10", [m._doc_dau() for _ in range(20)] and not any("nlm-auth-load" in c for c in cay.nhat_ky()) and "không ghi được tệp dấu" in err and fd() == truoc
           and not list(tep.parent.glob(".nap-lai-*")), "dấu là thư mục: nạp/để rác/rò fd: %r" % err)
-    tep.rmdir(), cay.dau(1234), (truoc := fd()), [m._doc_dau() for _ in range(20)]   # dấu THƯỜNG: không rò fd (review r10 F01)
-    _chot("A10", fd() == truoc and m._doc_dau() == 1234.0, "đọc dấu thường rò fd / sai ts")
 # sha256 của json.dumps(bốn hằng) đọc từ `git show _BASE:scripts/nlm_cli.py` — đo được cả ở gói phát hành không có git.
 _A12_BAM = "57ec1837153e8d1a796f852249ac23695990c3c1f20a5af6a86a55488ea34211"
 def _a12(cay, kho):
@@ -274,10 +276,8 @@ def _Env(env):
     dat = lambda d: [os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v) for k, v in d.items()]
     cu = {k: os.environ.get(k) for k in env}
     dat(env)
-    try:
-        yield
-    finally:
-        dat(cu)
+    try: yield  # noqa: E701
+    finally: dat(cu)  # noqa: E701
 _CA = {"A1": _a1, "A2": _a2, "A3": _a3, "A4": _a4, "A5": _a5, "A6": _a6, "A7": lambda c: _a6(c, "A7", "cu_hon", "TỪ CHỐI HẠ CẤP"), "A8": _a8, "A9": _a9, "A10": _a10}
 # (tên, chuỗi cũ, chuỗi mới, ca chạy, ca phải bắn) — chuỗi cũ phải có ĐÚNG 1 lần trong nlm_cli.py, không thì ĐỎ
 _DOT_BIEN = (
@@ -312,7 +312,7 @@ _DOT_BIEN_D = (("d1_xoa_cau", _RA, " " + _CAU, "", "D1"), ("d1_lap_cau", _QT, _C
                ("d2_xoa_dong", _PR, "| `ADR-0064` |", "| ADR-0064 |", "D2"),
                ("d3_them_proposed", _ADR, "- **Trạng thái:** Accepted\n", "- **Trạng thái:** Accepted\n- **Trạng thái:** Proposed\n", "D3"))
 def _chay(nguon, ten_ca, tl_module, kho, ham=None):
-    with tempfile.TemporaryDirectory(prefix="wp1099_") as td:
+    with tempfile.TemporaryDirectory(prefix="wp1099_", ignore_cleanup_errors=True) as td:   # dọn lỗi (Windows khoá tệp) KHÔNG được che TinHieuChotCa
         cay = _Cay(td, nguon, kho)
         with _Env(cay.env):
             {"A12": lambda: _a12(cay, kho), "A13": lambda: _a13(cay, tl_module, ham)}.get(ten_ca, lambda: _CA[ten_ca](cay))()

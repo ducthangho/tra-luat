@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 """wp1099 — `nlm_cli._run` tự nạp lại jar NLM có điều kiện ở phiên cloud (ADR-0063, spec cloud-setup-p3b-nlm-401-r9). `nlm_cli`
 THẬT (hoặc đột biến) chạy với `tl.py`/`nlm` GIẢ giữ trạng thái; đột biến chỉ tính GIẾT khi đúng ca ném `TinHieuChotCa`."""
-
 import contextlib, hashlib, importlib.util, inspect, io, json, os, subprocess, sys, tempfile, threading, time
 from pathlib import Path
-
 TEST_ID = "wp1099_nlm_nap_lai"
 _BASE = "358451e80b573d148807717bece3fd973915fbad"   # base của lease wp1099-cloud-setup-p3b-r9-g1-claude
 _CANH = "SENTINEL-COOKIE-wp1099"
@@ -217,13 +215,17 @@ def _a10(cay):
         os.replace, os.unlink = cu
     _chot("A10", kq[0] == 1 and "không ghi được tệp dấu" in err, "lỗi kép: %r %r" % (kq, err))
     [x.unlink() for x in tep.parent.glob(".nap-lai-*")], cay.dat()   # rác do OS (giả) từ chối xoá — không phải của ca sau
+    w, os.write = os.write, lambda f, b: w(f, b[:1] if b.startswith(b'{"ts"') else b)   # ghi NGẮN không ném (F08)
+    try: kq, err = cay.goi(cay.moi(), _SL)  # noqa: E701
+    finally: os.write = w  # noqa: E701
+    _chot("A10", not any("nlm-auth-load" in c for c in cay.nhat_ky()) and "không ghi được tệp dấu" in err
+          and not list(tep.parent.glob(".nap-lai-*")), "ghi thiếu dấu vẫn nạp/để rác: %r" % err), cay.dat()
     tep.mkdir()                                   # dấu là THƯ MỤC ⇒ không ghi được ⇒ không nạp, không rác (F01), không rò fd (F07)
     m, fd = cay.moi(), (lambda: len(os.listdir("/dev/fd")) if os.path.isdir("/dev/fd") else 0)
     truoc, (kq, err) = fd(), cay.goi(m, _SL)
     [m._doc_dau() for _ in range(20)]
     _chot("A10", not any("nlm-auth-load" in c for c in cay.nhat_ky()) and "không ghi được tệp dấu" in err and fd() == truoc
           and not list(tep.parent.glob(".nap-lai-*")), "dấu là thư mục: nạp/để rác/rò fd: %r" % err)
-
 # sha256 của json.dumps(bốn hằng) đọc từ `git show _BASE:scripts/nlm_cli.py` — đo được cả ở gói phát hành không có git.
 _A12_BAM = "57ec1837153e8d1a796f852249ac23695990c3c1f20a5af6a86a55488ea34211"
 def _a12(cay, kho):
@@ -280,7 +282,6 @@ def _Env(env):
     finally:
         dat(cu)
 _CA = {"A1": _a1, "A2": _a2, "A3": _a3, "A4": _a4, "A5": _a5, "A6": _a6, "A7": lambda c: _a6(c, "A7", "cu_hon", "TỪ CHỐI HẠ CẤP"), "A8": _a8, "A9": _a9, "A10": _a10}
-
 # (tên, chuỗi cũ, chuỗi mới, ca chạy, ca phải bắn) — chuỗi cũ phải có ĐÚNG 1 lần trong nlm_cli.py, không thì ĐỎ
 _DOT_BIEN = (
     ("bo_cong_remote", 'os.environ.get("CLAUDE_CODE_REMOTE") == "true" and ', "", "A1", "A1"),
@@ -293,6 +294,7 @@ _DOT_BIEN = (
     ("them_force", '"tl.py"), "nlm-auth-load"]', '"tl.py"), "nlm-auth-load", "--force"]', "A7", "A7"),
     ("danh_sach_cam", "if tuple(args[:2]) not in _NAP_LAI_CHO_PHEP:", 'if tuple(args[:2]) == ("source", "add"):', "A8", "A8"),
     ("ghi_dau_hong_van_nap", 'if not _ghi_dau(int(now), "dang_nap"):', 'if not (_ghi_dau(int(now), "dang_nap") or 1):', "A10", "A10"),
+    ("ghi_ngan_coi_la_xong", "if os.write(fd, b) != len(b):", "if os.write(fd, b) < 0:", "A10", "A10"),
     ("de_rac_tam", ", lambda: tam and os.unlink(tam))", ")", "A10", "A10"),
     ("don_khong_bao_ve", "        except OSError:\n            pass", "        except ZeroDivisionError:\n            pass", "A10", "A10"),
     ("doc_dau_ro_fd", "        _don(lambda: fd is not None and os.close(fd))\n\ndef _don", "        pass\n\ndef _don", "A10", "A10"),
@@ -307,7 +309,6 @@ _DOT_BIEN = (
     ("canary_la_nlm_auth_status", '_con([sys.executable, "-c", _CANARY, _NAP_LAI_THU_MUC]', '_con([sys.executable, os.path.join(_NAP_LAI_THU_MUC, "tl.py"), "nlm-auth-status"]', "A13", "A13"),
     ("sua_cau_tru", "KHÔNG tự chạy (1)/(2) ", "tự chạy (1)/(2) ", "A12", "A12"),
 )
-
 # đột biến TÀI LIỆU (chỉ cây dev): (tên, tệp, chuỗi cũ, chuỗi mới, ca phải bắn)
 _DOT_BIEN_D = (("d1_xoa_cau", _RA, " " + _CAU, "", "D1"), ("d1_lap_cau", _QT, _CAU, _CAU + " " + _CAU, "D1"),
                ("d1_sua_chu_cu", _QT, "**CẤM** tự", "CẤM tự", "D1"),
@@ -318,7 +319,6 @@ def _chay(nguon, ten_ca, tl_module, kho, ham=None):
         cay = _Cay(td, nguon, kho)
         with _Env(cay.env):
             {"A12": lambda: _a12(cay, kho), "A13": lambda: _a13(cay, tl_module, ham)}.get(ten_ca, lambda: _CA[ten_ca](cay))()
-
 _bao_loi = lambda msg: print("[%s] FAIL %s" % (TEST_ID, msg), file=sys.stderr)
 def run(tl_module):
     kho = Path(tl_module.__file__).resolve().parent.parent
@@ -332,7 +332,6 @@ def run(tl_module):
         return False
     tg, co_git = tl_module._imp("tl_gws"), (kho / ".git").exists()
     src = inspect.getsource(tg._nlm_auth_alive)
-
     def _gws():                                   # tl_gws "lần thử ĐẦU quyết định" trên BẢN SAO hàm ⇒ A13 ĐỎ
         g = dict(tg._nlm_auth_alive.__globals__)
         exec(compile(src.replace("if _att < 2:", "if False:"), "mutant", "exec"), g)

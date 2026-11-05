@@ -165,7 +165,9 @@ def _ghi_dau(ts: int, ket_qua: str) -> bool:
     p, tam, fd = _tep_dau(), None, None
     try:
         os.makedirs(os.path.dirname(p), exist_ok=True); fd, tam = tempfile.mkstemp(dir=os.path.dirname(p), prefix=".nap-lai-")
-        os.write(fd, json.dumps({"ts": ts, "ket_qua": ket_qua}).encode("utf-8")); os.close(fd); fd = None
+        b = json.dumps({"ts": ts, "ket_qua": ket_qua}).encode("utf-8")
+        if os.write(fd, b) != len(b): raise OSError("ghi NGẮN tệp dấu (review F08)")  # noqa: E701
+        os.close(fd); fd = None
         os.chmod(tam, 0o600); os.replace(tam, p)
         return True
     except Exception:

@@ -76,6 +76,195 @@ _MAU_BINARY = {
 }
 
 
+# ── wp1221: ca đỏ phải nói VÌ SAO ────────────────────────────────────────────────────────────────
+#
+# Mỗi ca chỉ trả `bool`, nên trước bản vá một ca đỏ chỉ để lại dòng `FAIL <ca>`: CI Windows run
+# 41975947155 ra 28/30 mà không biết fragment nào hỏng. Kênh dưới đây cho ca GHI lại thứ nó đã thấy
+# (rc, stderr, payload, vế nào trượt); `main()` chỉ in khi ca FAIL. Bất biến (đặc tả wp1221 r2, M4):
+# phần ghi KHÔNG BAO GIỜ đổi kết quả ca — mọi lỗi của nó bị bắt và chỉ in thành `CHAN_DOAN_LOI`.
+_CD_TRAN_CHUOI = 2000       # mỗi giá trị chuỗi: giữ ĐUÔI (lỗi Python/git nằm ở cuối)
+_CD_TRAN_PAYLOAD = 4000     # payload JSON tuần tự hoá
+_CD_TRAN_CA = 12000         # cả khối chẩn đoán của một ca
+_CD_TU_ENV = ("TOKEN", "SECRET", "KEY", "PAT", "PASSWORD", "AUTH", "COOKIE")
+_CD_NGAN_XEP = [[]]          # ngăn xếp kênh; `_chay_mot_ca` đẩy một kênh mới cho mỗi ca
+_CD_BO_CHE = []              # (tên, regex) nạp từ `scripts/pkg_secret_scan.py` — KHÔNG chép bảng
+
+
+def _nap_bo_che():
+    """Bảng mẫu bí mật của kho, nạp từ ĐÚNG một chỗ (CLAUDE.md: hai bản sẽ trôi lệch).
+
+    Không nạp được thì trả `None`: `_che` khi ấy từ chối in mọi giá trị (fail-closed).
+    """
+    if _CD_BO_CHE:
+        return _CD_BO_CHE
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "_wp1221_pkg_secret_scan", _CANONICAL_SCRIPTS / "pkg_secret_scan.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        _CD_BO_CHE.extend(mod.PATTERNS)
+    except Exception:                                    # noqa: BLE001 — fail-closed ở `_che`
+        return None
+    return _CD_BO_CHE if _CD_BO_CHE else None
+
+
+def _che(text):
+    """Che bí mật: mẫu của `pkg_secret_scan` + giá trị env có tên nhạy cảm (đặc tả M3)."""
+    bang = _nap_bo_che()
+    if bang is None:
+        return "<CHE:khong_nap_duoc_bang_mau — khong in gia tri>"
+    gia_tri_env = []
+    for ten, gt in os.environ.items():
+        if len(gt) >= 8 and any(tu in ten.upper() for tu in _CD_TU_ENV):
+            gia_tri_env.append((gt, ten))
+    for gt, ten in sorted(gia_tri_env, key=lambda x: -len(x[0])):  # dài trước: chuỗi con không che dở
+        text = text.replace(gt, "<CHE:env:%s>" % ten)
+    for ten, mau in bang:
+        text = mau.sub("<CHE:%s>" % ten, text)
+    return text
+
+
+def _loi_an_toan(exc):
+    """`repr(exc)` đã che; nếu chính bộ che hỏng thì chỉ in TÊN lớp lỗi — không bao giờ in thô."""
+    try:
+        return _cat_duoi(_che(repr(exc)), _CD_TRAN_CHUOI)
+    except Exception:                                    # noqa: BLE001
+        return "<%s>" % type(exc).__name__
+
+
+def _cat_duoi(text, tran):
+    if len(text) <= tran:
+        return text
+    return "…[cat %d ky tu dau]" % (len(text) - tran) + text[-tran:]
+
+
+def _cd(nhan, gia_tri):
+    """Ghi một cặp `nhãn → giá trị` vào kênh của ca đang chạy; trả lại `gia_tri` nguyên vẹn.
+
+    Không bao giờ ném: chẩn đoán hỏng không được biến một ca PASS thành FAIL (đặc tả M4).
+    """
+    try:
+        if isinstance(gia_tri, (bytes, bytearray)):
+            chuoi, tran = bytes(gia_tri).decode("utf-8", "replace"), _CD_TRAN_CHUOI
+        elif isinstance(gia_tri, str):
+            chuoi, tran = gia_tri, _CD_TRAN_CHUOI
+        else:
+            chuoi = json.dumps(gia_tri, ensure_ascii=False, sort_keys=True, default=repr)
+            tran = _CD_TRAN_PAYLOAD
+        _CD_NGAN_XEP[-1].append((str(nhan), _cat_duoi(_che(chuoi), tran)))
+    except Exception as exc:                             # noqa: BLE001 — xem docstring
+        _CD_NGAN_XEP[-1].append(("CHAN_DOAN_LOI", _loi_an_toan(exc)))   # _loi_an_toan không ném
+    return gia_tri
+
+
+def _ve(nhan, gia_tri):
+    """Ghi giá trị một vế của biểu thức quyết định, trả lại nó — dùng TRONG chuỗi `and`.
+
+    Giữ nguyên short-circuit: vế cuối cùng được ghi chính là vế đã trượt.
+    """
+    _cd("ve:" + nhan, bool(gia_tri))
+    return gia_tri
+
+
+def _ten_ngan(arg):
+    s = str(arg)
+    return os.path.basename(s) if (os.sep in s or "/" in s) else s
+
+
+def _chay_tien_trinh(nhan, cmd, **kw):
+    """`subprocess.run` + ghi lệnh rút gọn, rc, stdout, stderr. Không bao giờ ghi `env`."""
+    kw.setdefault("stdout", subprocess.PIPE)
+    kw.setdefault("stderr", subprocess.PIPE)
+    proc = subprocess.run(cmd, **kw)
+    _cd(nhan + ".lenh", " ".join(_ten_ngan(a) for a in cmd[:4]))
+    _cd(nhan + ".rc", proc.returncode)
+    if proc.stdout:
+        _cd(nhan + ".stdout", proc.stdout)
+    if proc.stderr:
+        _cd(nhan + ".stderr", proc.stderr)
+    return proc
+
+
+def _chay_policy(root, mode):
+    """`eol_policy.run` + ghi payload trả về (nhóm B của đặc tả wp1221)."""
+    out = eol_policy.run(root, mode)
+    _cd("eol_policy.run(%s)" % mode, out)
+    return out
+
+
+_KHOA_PAYLOAD_CONG = ("ok", "error", "problems", "failed", "load_error", "dev_discovery_error",
+                      "case_count", "dev_test_ids", "bundle_test_ids")
+
+
+def _ghi_payload_cong(nhan, payload):
+    _cd(nhan + ".payload", {k: payload.get(k) for k in _KHOA_PAYLOAD_CONG if k in payload})
+    hong = [c for c in (payload.get("cases") or []) if not (isinstance(c, dict) and c.get("ok") is True)]
+    if hong:
+        _cd(nhan + ".cases_khong_ok", hong)
+
+
+def _khoi_chan_doan(ghi, tran=None):
+    """Dựng các dòng chẩn đoán từ kênh `ghi`. Mọi dòng bắt đầu bằng tiền tố `CHAN_DOAN`."""
+    tran = _CD_TRAN_CA if tran is None else tran
+    if not ghi:
+        return ["CHAN_DOAN: (rong — ca khong ghi chan doan)"]
+    dong, tong = [], 0
+    for i, (nhan, chuoi) in enumerate(ghi):
+        if nhan == "CHAN_DOAN_LOI":
+            moi = ["CHAN_DOAN_LOI: %s" % chuoi]
+        else:
+            phan = chuoi.splitlines() or [""]
+            moi = ["CHAN_DOAN: %s = %s" % (nhan, phan[0])]
+            moi += ["CHAN_DOAN:   | %s" % p for p in phan[1:]]
+        do_dai = sum(len(d) + 1 for d in moi)
+        if tong + do_dai > tran:
+            con = sum(len(n) + len(c) for n, c in ghi[i:])
+            dong.append("CHAN_DOAN: …[cat khoi: bo %d muc, ~%d ky tu]" % (len(ghi) - i, con))
+            break
+        dong += moi
+        tong += do_dai
+    return dong
+
+
+def _don_thu_muc_tam(td):
+    td.cleanup()
+
+
+def _chay_mot_ca(case, don_dep=None):
+    """Chạy MỘT ca trong thư mục tạm riêng; trả `(ok, dòng_cần_in)`.
+
+    Lỗi dọn thư mục tạm (Windows khoá tệp) KHÔNG làm sập suite và KHÔNG đổi kết quả ca: nó chỉ
+    thành một dòng `CHAN_DOAN_DON_DEP` (đặc tả wp1221 r2, M7). Lỗi của `_init` vẫn ném như trước.
+    """
+    don_dep = _don_thu_muc_tam if don_dep is None else don_dep
+    ghi, truoc, sau, loi_don = [], [], [], None
+    td = tempfile.TemporaryDirectory(prefix="eol_policy_")
+    _CD_NGAN_XEP.append(ghi)
+    try:
+        root = Path(td.name) / "kho"
+        root.mkdir()
+        _init(root)
+        try:
+            ok = bool(case(root))
+        except Exception as exc:                     # noqa: BLE001 — bao loi, khong nuot
+            ok = False
+            truoc.append("  ! %s: %s" % (case.__name__, _loi_an_toan(exc)))
+    finally:
+        _CD_NGAN_XEP.pop()
+        try:
+            don_dep(td)
+        except OSError as exc:
+            loi_don = exc
+    if loi_don is not None:
+        sau.append("CHAN_DOAN_DON_DEP: %s (%s)" % (_loi_an_toan(loi_don), td.name))
+    if not ok:
+        try:
+            sau += _khoi_chan_doan(ghi)
+        except Exception as exc:                     # noqa: BLE001 — M4: không đổi kết quả
+            sau.append("CHAN_DOAN_LOI: %s" % _loi_an_toan(exc))
+    return ok, truoc + ["%s %s" % ("PASS" if ok else "FAIL", case.__name__)] + sau
+
+
 def _git(root, *args, stdin=None):
     proc = subprocess.run(
         ["git", "-C", str(root)] + list(args),
@@ -134,7 +323,8 @@ def _install_real_pre_commit(root):
 
 def _commit_through_real_hook(root):
     _install_real_pre_commit(root)
-    return subprocess.run(
+    return _chay_tien_trinh(
+        "git_commit_qua_hook",
         ["git", "-C", str(root), "commit", "-m", "hook must block"],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
     )
@@ -159,20 +349,20 @@ def case_new_file_crlf_bi_chan(root):
     tep moi, tuc la duong de dua CRLF moi vao kho khong he bi soi.
     """
     _inject(root, "moi.py", b"a = 1\r\nb = 2\r\n")
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return out["ok"] is False and _paths(out) == {"moi.py"}
 
 
 def case_new_file_lf_duoc_qua(root):
     _inject(root, "moi.py", b"a = 1\nb = 2\n")
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return out["ok"] is True and out["checked"] == 1
 
 
 def case_ten_co_khoang_trang(root):
     """`for f in $staged` cua hook cu tach theo khoang trang -> mot ten thanh hai path ma."""
     _inject(root, "thu muc/ghi chu.md", b"x\r\ny\r\n")
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return out["ok"] is False and _paths(out) == {"thu muc/ghi chu.md"}
 
 
@@ -180,20 +370,20 @@ def case_ten_tieng_viet(root):
     """Kho nay checkout o `D:/Quốc hội/tra-luat`; ten co dau khong phai gia dinh."""
     ten = "tài liệu/Quốc hội.md"
     _inject(root, ten, b"x\r\ny\r\n")
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return out["ok"] is False and _paths(out) == {ten}
 
 
 def case_cmd_lf_trong_index_duoc_qua(root):
     """`*.cmd text eol=crlf`: index van phai LF, CRLF chi sinh ra luc checkout."""
     _inject(root, "setup.cmd", b"@echo off\nexit /b 0\n")
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return out["ok"] is True and out["checked"] == 1
 
 
 def case_cmd_crlf_trong_index_bi_chan(root):
     _inject(root, "setup.cmd", b"@echo off\r\nexit /b 0\r\n")
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     if out["ok"] is not False or _paths(out) != {"setup.cmd"}:
         return False
     # Thong diep phai noi ro index-LF/checkout-CRLF, neu khong nguoi sua mo tep tren dia thay
@@ -204,20 +394,20 @@ def case_cmd_crlf_trong_index_bi_chan(root):
 def case_golden_duoc_bo_qua(root):
     """`references/golden/** -text`: golden so BYTE, validator khong duoc dung vao."""
     _inject(root, "references/golden/fix.json", b"{\r\n  \"a\": 1\r\n}\r\n")
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return out["ok"] is True and out["checked"] == 0 and out["skipped"] == 1
 
 
 def case_mixed_eol_bi_chan(root):
     _inject(root, "tron.txt", b"a\r\nb\nc\r\n")
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return (out["ok"] is False and _paths(out) == {"tron.txt"}
             and out["violations"][0]["error"] == "MIXED_EOL_IN_INDEX")
 
 
 def case_lone_cr_bi_chan(root):
     _inject(root, "co.txt", b"a\rb\r")
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return (out["ok"] is False and _paths(out) == {"co.txt"}
             and out["violations"][0]["error"] == "LONE_CR_IN_INDEX")
 
@@ -229,8 +419,8 @@ def case_khong_chi_so_voi_head(root):
     `--staged` sach la dung: khong co gi dang stage. Do la ly do CI phai chay `--all`.
     """
     _commit_blob(root, "cu.py", b"a = 1\r\n", "legacy crlf")
-    staged = eol_policy.run(root, "staged")
-    allrun = eol_policy.run(root, "all")
+    staged = _chay_policy(root, "staged")
+    allrun = _chay_policy(root, "all")
     return (staged["ok"] is True and staged["scanned"] == 0
             and allrun["ok"] is False and _paths(allrun) == {"cu.py"})
 
@@ -238,9 +428,9 @@ def case_khong_chi_so_voi_head(root):
 def case_attr_doc_tu_gitattributes(root):
     """Policy khong duoc chep cung: doi `.gitattributes` trong index thi verdict phai doi theo."""
     _inject(root, "x.txt", b"a\r\nb\r\n")
-    truoc = eol_policy.run(root, "staged")
+    truoc = _chay_policy(root, "staged")
     _inject(root, ".gitattributes", _ATTRS + b"x.txt -text\n")
-    sau = eol_policy.run(root, "staged")
+    sau = _chay_policy(root, "staged")
     return (truoc["ok"] is False
             and sau["ok"] is True and sau["skipped"] == 1 and sau["checked"] == 1)
 
@@ -256,7 +446,7 @@ def case_rename_golden_sang_text_bi_chan(root):
     """
     _commit_blob(root, "references/golden/fix.json", b"a\r\nb\r\n", "golden")
     _git(root, "mv", "references/golden/fix.json", "moved.txt")
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return (out["ok"] is False and _paths(out) == {"moved.txt"}
             and out["violations"][0]["error"] == "CRLF_IN_INDEX")
 
@@ -272,7 +462,7 @@ def case_copy_golden_sang_text_bi_chan(root):
     _git(root, "config", "diff.renames", "copies")
     blob = _git(root, "cat-file", "blob", ":references/golden/fix.json")
     _inject(root, "ban_sao.txt", blob)
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return out["ok"] is False and "ban_sao.txt" in _paths(out)
 
 
@@ -280,7 +470,7 @@ def case_rename_hop_le_van_qua(root):
     """Phan chung P1(c). Rename giua hai path text tren blob LF phai KHONG bi chan."""
     _commit_blob(root, "cu.py", b"a = 1\n", "lf source")
     _git(root, "mv", "cu.py", "moi.py")
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return out["ok"] is True and out["scanned"] == 1 and out["checked"] == 1
 
 
@@ -290,7 +480,7 @@ def case_rename_dich_unicode_va_khoang_trang(root):
     _commit_blob(root, "references/golden/fix.json", b"a\r\nb\r\n", "golden")
     (root / "tài liệu").mkdir(parents=True, exist_ok=True)   # `git mv` doi thu muc dich co san
     _git(root, "mv", "references/golden/fix.json", ten)
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return out["ok"] is False and _paths(out) == {ten}
 
 
@@ -303,7 +493,7 @@ def case_parse_raw_z_hai_path(root):
     z = (b":100644 100644 " + b"a" * 40 + b" " + b"b" * 40 + b" R100\x00src.txt\x00dst.txt\x00"
          b":100644 100644 " + b"c" * 40 + b" " + b"d" * 40 + b" C75\x00from.txt\x00to.txt\x00"
          b":100644 100644 " + b"e" * 40 + b" " + b"f" * 40 + b" M\x00plain.txt\x00")
-    got = eol_policy.parse_raw_z(z)
+    got = _cd("parse_raw_z", eol_policy.parse_raw_z(z))
     return got == [("dst.txt", "b" * 40), ("to.txt", "d" * 40), ("plain.txt", "f" * 40)]
 
 
@@ -314,11 +504,12 @@ def case_real_hook_rename_only_bi_chan(root):
     statuses = _staged_statuses(root)
     proc = _commit_through_real_hook(root)
     output = (proc.stdout + proc.stderr).decode("utf-8", "replace")
+    _cd("statuses", statuses)
     return (
-        statuses == ["R100"]
-        and proc.returncode != 0
-        and "CRLF_IN_INDEX" in output
-        and "moved.txt" in output
+        _ve("statuses==R100", statuses == ["R100"])
+        and _ve("rc!=0", proc.returncode != 0)
+        and _ve("CRLF_IN_INDEX in output", "CRLF_IN_INDEX" in output)
+        and _ve("moved.txt in output", "moved.txt" in output)
     )
 
 
@@ -333,25 +524,28 @@ def case_real_hook_rename_copy_only_bi_chan(root):
     statuses = _staged_statuses(root)
     proc = _commit_through_real_hook(root)
     output = (proc.stdout + proc.stderr).decode("utf-8", "replace")
+    _cd("statuses", statuses)
     return (
-        sorted(statuses) == ["C100", "R100"]
-        and proc.returncode != 0
-        and "CRLF_IN_INDEX" in output
-        and "copied.txt" in output
-        and "moved.txt" in output
+        _ve("statuses==C100,R100", sorted(statuses) == ["C100", "R100"])
+        and _ve("rc!=0", proc.returncode != 0)
+        and _ve("CRLF_IN_INDEX in output", "CRLF_IN_INDEX" in output)
+        and _ve("copied.txt in output", "copied.txt" in output)
+        and _ve("moved.txt in output", "moved.txt" in output)
     )
 
 
 def case_release_bundle_chay_real_wp49_fragment(root):
     """Integration: case wp49 thật phải xanh sau release-bundle + extract, không có editorconfig."""
     out_zip = root.parent / "wp49-release.zip"
-    proc = subprocess.run(
+    proc = _chay_tien_trinh(
+        "release-bundle",
         [sys.executable, str(_SOURCE_ROOT / "scripts" / "tl.py"),
          "release-bundle", "--root", str(_SOURCE_ROOT),
          "--out", str(out_zip), "--top", "tra-luat", "--json"],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
     )
     if proc.returncode != 0 or not out_zip.is_file():
+        _cd("tra_false_som", "release-bundle hong: rc=%s, co_zip=%s" % (proc.returncode, out_zip.is_file()))
         return False
     extract_root = root.parent / "extracted"
     with zipfile.ZipFile(out_zip) as archive:
@@ -363,6 +557,12 @@ def case_release_bundle_chay_real_wp49_fragment(root):
         or not (package_root / ".gitattributes").is_file()
         or not (package_root / "scripts" / "tl_test_fragments_bundled.py").is_file()
     ):
+        _cd("tra_false_som", "bo cuc goi sai: %s" % {
+            ".editorconfig": (package_root / ".editorconfig").exists(),
+            "scripts/test_fragments": (package_root / "scripts" / "test_fragments").exists(),
+            ".gitattributes": (package_root / ".gitattributes").is_file(),
+            "tl_test_fragments_bundled.py":
+                (package_root / "scripts" / "tl_test_fragments_bundled.py").is_file()})
         return False
     probe = r'''import sys
 from pathlib import Path
@@ -376,9 +576,12 @@ topology, _ = _runtime_fragment_topology(root / "scripts")
 cases = load_runtime_fragment_cases(root / "scripts")
 targets = [case for case in cases if case.test_id == "wp49_eol_policy_index_blobs"]
 ok = topology == "bundle" and len(targets) == 1 and bool(targets[0].run(tl))
+if not ok:
+    sys.stderr.write("probe: topology=%r targets=%d\n" % (topology, len(targets)))
 raise SystemExit(0 if ok else 1)
 '''
-    checked = subprocess.run(
+    checked = _chay_tien_trinh(
+        "probe_wp49_trong_goi",
         [sys.executable, "-c", probe, str(package_root)],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
     )
@@ -493,13 +696,17 @@ def _tai_sinh_bundled(copy):
 
 def _chay_cong(copy):
     """Chạy CHÍNH cổng production trên bản sao tạm; trả `(rc, payload)`."""
-    proc = subprocess.run(
+    proc = _chay_tien_trinh(
+        "cong_bundle_fragment",
         [sys.executable, str(_CONG_BUNDLE_FRAGMENT), "--json"],
         cwd=str(copy), env=_env_con(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
         payload = json.loads(proc.stdout.decode("utf-8", "replace"))
     except ValueError:
+        _cd("cong_bundle_fragment.stdout_khong_phai_json", proc.stdout)
         payload = {}
+    if isinstance(payload, dict):
+        _ghi_payload_cong("cong_bundle_fragment", payload)
     return proc.returncode, payload
 
 
@@ -511,6 +718,7 @@ def case_probe_hop_dong_canonical_o_cay_dev(root):
     """Probe HỢP LỆ phải qua được cả discovery lẫn runtime dev của hợp đồng canonical."""
     if ("TEST_ID: str = 'wp999_file_probe'" not in _PROBE_FILE_SRC
             or "__file__" not in _PROBE_FILE_SRC):
+        _cd("tra_false_som", "_PROBE_FILE_SRC thieu dong TEST_ID annotated hoac __file__")
         return False
     tf = _hop_dong_fragment()
     scripts = root.parent / "dev" / "scripts"
@@ -518,11 +726,12 @@ def case_probe_hop_dong_canonical_o_cay_dev(root):
     frag.mkdir(parents=True)
     (frag / (_PROBE_FILE_ID + ".py")).write_text(_PROBE_FILE_SRC, encoding="utf-8", newline="\n")
 
-    ids = {entry.test_id for entry in tf.discover_fragment_test_ids(frag)}
+    ids = _cd("ids_do_duoc", {entry.test_id for entry in tf.discover_fragment_test_ids(frag)})
     cases = tf.load_runtime_fragment_cases(scripts)
-    return (ids == {_PROBE_FILE_ID}
-            and len(cases) == 1 and cases[0].test_id == _PROBE_FILE_ID
-            and cases[0].run(object()) is True)
+    _cd("cases_nap_duoc", [c.test_id for c in cases])
+    return (_ve("ids == {_PROBE_FILE_ID}", ids == {_PROBE_FILE_ID})
+            and _ve("len(cases) == 1 and cases[0].test_id == _PROBE_FILE_ID", len(cases) == 1 and cases[0].test_id == _PROBE_FILE_ID)
+            and _ve("cases[0].run(object()) is True", cases[0].run(object()) is True))
 
 
 def case_probe_qua_bundled_topology_canonical(root):
@@ -537,8 +746,9 @@ def case_probe_qua_bundled_topology_canonical(root):
     (scripts / "tl_test_fragments_bundled.py").write_bytes(tf.generate_bundled_module_bytes(frag))
 
     cases = tf.load_runtime_fragment_cases(scripts)     # không có test_fragments/ ⇒ topology bundle
-    return (len(cases) == 1 and cases[0].test_id == _PROBE_FILE_ID
-            and cases[0].run(object()) is True)
+    _cd("cases_nap_duoc", [c.test_id for c in cases])
+    return (_ve("len(cases) == 1 and cases[0].test_id == _PROBE_FILE_ID", len(cases) == 1 and cases[0].test_id == _PROBE_FILE_ID)
+            and _ve("cases[0].run(object()) is True", cases[0].run(object()) is True))
 
 
 def case_driver_that_chay_probe_tren_bundle_giai_nen(root):
@@ -553,16 +763,20 @@ def case_driver_that_chay_probe_tren_bundle_giai_nen(root):
     spec.loader.exec_module(cong)
 
     out_zip = root.parent / "driver-release.zip"
-    proc = subprocess.run(
+    proc = _chay_tien_trinh(
+        "release-bundle",
         [sys.executable, str(_CANONICAL_SCRIPTS / "tl.py"), "release-bundle",
          "--root", str(_SOURCE_ROOT), "--out", str(out_zip), "--top", "tra-luat", "--json"],
         env=_env_con(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if proc.returncode != 0 or not out_zip.is_file():
+        _cd("tra_false_som", "release-bundle hong: rc=%s, co_zip=%s" % (proc.returncode, out_zip.is_file()))
         return False
     goi = root.parent / "giai-nen" / "tra-luat"
     with zipfile.ZipFile(out_zip) as archive:
         archive.extractall(goi.parent)
     if (goi / "scripts" / "test_fragments").exists() or (goi / ".editorconfig").exists():
+        _cd("tra_false_som", "bo cuc goi sai: test_fragments=%s editorconfig=%s" % (
+            (goi / "scripts" / "test_fragments").exists(), (goi / ".editorconfig").exists()))
         return False
 
     # Bơm probe vào adapter BÊN TRONG gói tạm, qua generator canonical. Cây canonical không bị chạm.
@@ -578,18 +792,23 @@ def case_driver_that_chay_probe_tren_bundle_giai_nen(root):
 
     driver = root.parent / "driver.py"
     driver.write_text(cong._DRIVER, encoding="utf-8", newline="\n")
-    chay = subprocess.run(
+    chay = _chay_tien_trinh(
+        "driver_cong",
         [sys.executable, str(driver), str(goi)], cwd=str(goi), env=_env_con(),
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
         payload = json.loads(chay.stdout.decode("utf-8", "replace"))
     except ValueError:
+        _cd("tra_false_som", "stdout cua driver khong phai JSON")
         return False
+    _cd("so_fragment_canonical", len(goc))
+    if isinstance(payload, dict):
+        _ghi_payload_cong("driver_cong", payload)
     cases = payload.get("cases") or []
-    return (payload.get("load_error") is None
-            and len(cases) == len(goc) + 1
-            and all(c.get("ok") for c in cases)
-            and any(c.get("test_id") == _PROBE_FILE_ID for c in cases))
+    return (_ve("payload.get('load_error') is None", payload.get("load_error") is None)
+            and _ve("len(cases) == len(goc) + 1", len(cases) == len(goc) + 1)
+            and _ve("all(c.get('ok') for c in cases)", all(c.get("ok") for c in cases))
+            and _ve("any(c.get('test_id') == _PROBE_FILE_ID for c in cases)", any(c.get("test_id") == _PROBE_FILE_ID for c in cases)))
 
 
 def case_cong_bao_load_failed_truoc_trieu_chung(root):
@@ -605,14 +824,14 @@ def case_cong_bao_load_failed_truoc_trieu_chung(root):
 
     rc, p = _chay_cong(copy)
     problems = p.get("problems") or []
-    return (rc == 1 and p.get("ok") is False
-            and p.get("error") == "BUNDLED_FRAGMENT_LOAD_FAILED"
-            and problems[:1] == ["BUNDLED_FRAGMENT_LOAD_FAILED"]
-            and _PROBE_LOAD_ID in (p.get("load_error") or "")
-            and p.get("case_count") == 0
-            and p.get("dev_discovery_error") is None
-            and _truoc(problems, "BUNDLED_FRAGMENT_LOAD_FAILED", "NO_BUNDLED_CASES")
-            and _truoc(problems, "BUNDLED_FRAGMENT_LOAD_FAILED", "TEST_ID_SET_MISMATCH"))
+    return (_ve("rc == 1 and p.get('ok') is False", rc == 1 and p.get("ok") is False)
+            and _ve("p.get('error') == 'BUNDLED_FRAGMENT_LOAD_FAILED'", p.get("error") == "BUNDLED_FRAGMENT_LOAD_FAILED")
+            and _ve("problems[:1] == ['BUNDLED_FRAGMENT_LOAD_FAILED']", problems[:1] == ["BUNDLED_FRAGMENT_LOAD_FAILED"])
+            and _ve("_PROBE_LOAD_ID in (p.get('load_error') or '')", _PROBE_LOAD_ID in (p.get("load_error") or ""))
+            and _ve("p.get('case_count') == 0", p.get("case_count") == 0)
+            and _ve("p.get('dev_discovery_error') is None", p.get("dev_discovery_error") is None)
+            and _ve("_truoc(problems, 'BUNDLED_FRAGMENT_LOAD_FAILED', 'NO_BUNDLED_CASES')", _truoc(problems, "BUNDLED_FRAGMENT_LOAD_FAILED", "NO_BUNDLED_CASES"))
+            and _ve("_truoc(problems, 'BUNDLED_FRAGMENT_LOAD_FAILED', 'TEST_ID_SET_MISMATCH')", _truoc(problems, "BUNDLED_FRAGMENT_LOAD_FAILED", "TEST_ID_SET_MISMATCH")))
 
 
 def case_cong_bao_dev_discovery_failed_truoc_mismatch(root):
@@ -627,14 +846,14 @@ def case_cong_bao_dev_discovery_failed_truoc_mismatch(root):
 
     rc, p = _chay_cong(copy)
     problems = p.get("problems") or []
-    return (rc == 1 and p.get("ok") is False
-            and p.get("error") == "DEV_FRAGMENT_DISCOVERY_FAILED"
-            and problems[:1] == ["DEV_FRAGMENT_DISCOVERY_FAILED"]
-            and "INVALID_FRAGMENT_PATH" in (p.get("dev_discovery_error") or "")
-            and p.get("load_error") is None
-            and p.get("case_count") == len(_fragment_canonical())
-            and not p.get("failed")
-            and _truoc(problems, "DEV_FRAGMENT_DISCOVERY_FAILED", "TEST_ID_SET_MISMATCH"))
+    return (_ve("rc == 1 and p.get('ok') is False", rc == 1 and p.get("ok") is False)
+            and _ve("p.get('error') == 'DEV_FRAGMENT_DISCOVERY_FAILED'", p.get("error") == "DEV_FRAGMENT_DISCOVERY_FAILED")
+            and _ve("problems[:1] == ['DEV_FRAGMENT_DISCOVERY_FAILED']", problems[:1] == ["DEV_FRAGMENT_DISCOVERY_FAILED"])
+            and _ve("'INVALID_FRAGMENT_PATH' in (p.get('dev_discovery_error') or '')", "INVALID_FRAGMENT_PATH" in (p.get("dev_discovery_error") or ""))
+            and _ve("p.get('load_error') is None", p.get("load_error") is None)
+            and _ve("p.get('case_count') == len(_fragment_canonical())", p.get("case_count") == len(_fragment_canonical()))
+            and _ve("not p.get('failed')", not p.get("failed"))
+            and _ve("_truoc(problems, 'DEV_FRAGMENT_DISCOVERY_FAILED', 'TEST_ID_SET_MISMATCH')", _truoc(problems, "DEV_FRAGMENT_DISCOVERY_FAILED", "TEST_ID_SET_MISMATCH")))
 
 
 def case_cong_bao_fragment_failed_khi_run_tra_false(root):
@@ -650,14 +869,14 @@ def case_cong_bao_fragment_failed_khi_run_tra_false(root):
 
     rc, p = _chay_cong(copy)
     hong = {c.get("test_id") for c in (p.get("failed") or [])}
-    return (rc == 1 and p.get("ok") is False
-            and (p.get("problems") or []) == ["BUNDLED_FRAGMENT_FAILED"]
-            and p.get("error") == "BUNDLED_FRAGMENT_FAILED"
-            and hong == {_PROBE_FAIL_ID}
-            and p.get("load_error") is None
-            and p.get("dev_discovery_error") is None
-            and p.get("dev_test_ids") == p.get("bundle_test_ids")
-            and p.get("case_count") == len(_fragment_canonical()) + 1)
+    return (_ve("rc == 1 and p.get('ok') is False", rc == 1 and p.get("ok") is False)
+            and _ve("(p.get('problems') or []) == ['BUNDLED_FRAGMENT_FAILED']", (p.get("problems") or []) == ["BUNDLED_FRAGMENT_FAILED"])
+            and _ve("p.get('error') == 'BUNDLED_FRAGMENT_FAILED'", p.get("error") == "BUNDLED_FRAGMENT_FAILED")
+            and _ve("hong == {_PROBE_FAIL_ID}", hong == {_PROBE_FAIL_ID})
+            and _ve("p.get('load_error') is None", p.get("load_error") is None)
+            and _ve("p.get('dev_discovery_error') is None", p.get("dev_discovery_error") is None)
+            and _ve("p.get('dev_test_ids') == p.get('bundle_test_ids')", p.get("dev_test_ids") == p.get("bundle_test_ids"))
+            and _ve("p.get('case_count') == len(_fragment_canonical()) + 1", p.get("case_count") == len(_fragment_canonical()) + 1))
 
 
 # ── P2: binary khai -text, khong dua vao NUL ──────────────────────────────────────────────────
@@ -665,7 +884,7 @@ def case_cong_bao_fragment_failed_khi_run_tra_false(root):
 def case_binary_nul_duoc_bo_qua(root):
     """`text=auto` coi blob co NUL la binary — luoi CUOI, khong phai co che chinh."""
     _inject(root, "data.unknownext", b"\x89PNG\r\n\x1a\n\x00\x00\x00\x0d")
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return out["ok"] is True and out["checked"] == 0 and out["skipped"] == 1
 
 
@@ -680,7 +899,7 @@ def case_binary_khong_co_NUL_van_duoc_tha_nho_khai_text(root):
     pdf = b"%PDF-1.4\r\n1 0 obj\r\n<< /Type /Catalog >>\r\nendobj\r\n%%EOF\r\n"
     assert b"\x00" not in pdf
     _inject(root, "tep.pdf", pdf)
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return out["ok"] is True and out["checked"] == 0 and out["skipped"] == 1
 
 
@@ -694,7 +913,7 @@ def case_moi_ho_binary_deu_duoc_tha(root):
     for ten, blob in _MAU_BINARY.items():
         assert b"\x00" not in blob, ten
         _inject(root, ten, blob)
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return (out["ok"] is True and out["checked"] == 0
             and out["skipped"] == len(_MAU_BINARY))
 
@@ -708,7 +927,7 @@ def case_ho_binary_thieu_khai_thi_bi_bat(root):
     thieu = _ATTRS.replace(b"*.tif -text\n", b"")
     _inject(root, ".gitattributes", thieu)
     _inject(root, "tep.tif", _MAU_BINARY["tep.tif"])
-    out = eol_policy.run(root, "staged")
+    out = _chay_policy(root, "staged")
     return out["ok"] is False and "tep.tif" in _paths(out)
 
 
@@ -723,8 +942,112 @@ def case_binary_giu_nguyen_byte_qua_renormalize(root):
     _git(root, "add", "--renormalize", ".")
     sau_pdf = _git(root, "cat-file", "blob", ":tep.pdf")
     sau_zip = _git(root, "cat-file", "blob", ":goi.zip")
-    out = eol_policy.run(root, "all")
+    _cd("sau_pdf_giu_nguyen", sau_pdf == pdf)
+    _cd("sau_zip_giu_nguyen", sau_zip == zipish)
+    out = _chay_policy(root, "all")
     return sau_pdf == pdf and sau_zip == zipish and out["ok"] is True
+
+
+# ── wp1221: tự kiểm kênh chẩn đoán ────────────────────────────────────────────────────────────
+
+_MA_CD_NGAN = "WP1221_MA_NGAN"
+_MA_CD_DUOI = "WP1221_MA_DUOI"
+_MA_CD_DON = "WP1221_D14_KHOA_GIA"
+
+
+def _ghi_vao_kenh_rieng(ham):
+    """Chạy `ham()` với một kênh RIÊNG rồi trả `(kết_quả, ghi)`; kênh của ca gọi không bị chạm."""
+    ghi = []
+    _CD_NGAN_XEP.append(ghi)
+    try:
+        return ham(), ghi
+    finally:
+        _CD_NGAN_XEP.pop()
+
+
+def case_chan_doan_kenh_in_che_cat(root):
+    """Kênh chẩn đoán phải IN được rc + stderr, CHE được bí mật, CẮT giữ đuôi (đặc tả wp1221 M1/M3/M5/M6).
+
+    Chuỗi bí mật dựng bằng ghép chuỗi LÚC CHẠY: viết nguyên văn vào tệp thì `pkg_secret_scan` của gói
+    (hoặc của người đọc) sẽ bắt nhầm. Dùng CHÍNH `_chay_tien_trinh` / `_khoi_chan_doan` mà các ca thật
+    dùng — chép lại một bản là đo bản chép.
+    """
+    bi_mat = "GOC" + "SPX-" + "Ab1x" * 6
+    the = "wp1221" + "".join(chr(97 + (i * 7) % 26) for i in range(18))
+    cu = os.environ.get("EOL_TEST_FAKE_TOKEN")
+    os.environ["EOL_TEST_FAKE_TOKEN"] = the
+    try:
+        # Mã nhận biết dựng BÊN TRONG tiến trình con bằng ghép chuỗi: truyền qua argv thì nó hiện cả
+        # ở dòng `.lenh`, và phép kiểm "có mã" luôn đúng dù stderr có được ghi hay không.
+        ma_nguon = ("import os,sys; sys.stderr.write('WP1221_' + 'MA_NGAN ' + sys.argv[1] + ' '"
+                    " + os.environ['EOL_TEST_FAKE_TOKEN'] + '\\n'); sys.exit(3)")
+        _, ghi = _ghi_vao_kenh_rieng(lambda: _chay_tien_trinh(
+            "gia", [sys.executable, "-c", ma_nguon, bi_mat]))
+        ngan = "\n".join(_khoi_chan_doan(ghi))
+    finally:
+        if cu is None:
+            os.environ.pop("EOL_TEST_FAKE_TOKEN", None)
+        else:
+            os.environ["EOL_TEST_FAKE_TOKEN"] = cu
+    _cd("khoi_ngan", ngan)
+
+    ma_dai = "import sys; sys.stderr.write('x' * 50000 + 'WP1221_' + 'MA_DUOI'); sys.exit(1)"
+    _, ghi_dai = _ghi_vao_kenh_rieng(lambda: _chay_tien_trinh(
+        "dai", [sys.executable, "-c", ma_dai]))
+    dai = "\n".join(_khoi_chan_doan(ghi_dai))
+    _cd("do_dai_khoi_dai", len(dai))
+
+    def ca_gia_do(_root):
+        return False
+
+    def ca_gia_xanh(_root):
+        _cd("khong_duoc_in_khi_PASS", "x")
+        return True
+
+    def don_hong(td):
+        td.cleanup()
+        raise PermissionError(_MA_CD_DON)
+
+    class _ReprNem:
+        def __repr__(self):
+            raise RuntimeError("repr hong " + bi_mat)
+
+    _, ghi_loi = _ghi_vao_kenh_rieng(lambda: _cd("gia_tri_repr_nem", _ReprNem()))
+    khoi_loi = "\n".join(_khoi_chan_doan(ghi_loi))
+    _cd("khoi_loi", khoi_loi)
+
+    ok_do, dong_do = _chay_mot_ca(ca_gia_do)
+    ok_xanh, dong_xanh = _chay_mot_ca(ca_gia_xanh)
+    ok_don, dong_don = _chay_mot_ca(ca_gia_xanh, don_dep=don_hong)
+    _cd("dong_do", dong_do)
+    _cd("dong_xanh", dong_xanh)
+    _cd("dong_don", dong_don)
+
+    nguon = Path(__file__).read_text(encoding="utf-8")
+    dong_err = [d for d in ngan.split("\n") if d.startswith("CHAN_DOAN: gia.stderr = ")]
+    dong_err_dai = "\n".join(d for d in dai.split("\n") if d.startswith("CHAN_DOAN: dai.stderr = "))
+    return (_ve("ma ngan co trong dong stderr", any(_MA_CD_NGAN in d for d in dong_err))
+            and _ve("rc = 3 co trong khoi", "gia.rc = 3" in ngan)
+            and _ve("co dau <CHE:", "<CHE:google_oauth_client_secret>" in ngan)
+            and _ve("bi mat tho KHONG co", bi_mat not in ngan)
+            and _ve("env token bi che", "<CHE:env:EOL_TEST_FAKE_TOKEN>" in ngan and the not in ngan)
+            and _ve("khoi dai <= tran", len(dai) <= _CD_TRAN_CA)
+            and _ve("loi trong _cd thanh CHAN_DOAN_LOI da che",
+                    khoi_loi.startswith("CHAN_DOAN_LOI: ") and bi_mat not in khoi_loi
+                    and "<CHE:google_oauth_client_secret>" in khoi_loi)
+            and _ve("khoi dai giu DUOI cua stderr", _MA_CD_DUOI in dong_err_dai and "…[cat " in dong_err_dai)
+            and _ve("moi dong bat dau CHAN_DOAN", all(d.startswith("CHAN_DOAN") for d in dai.split("\n")))
+            and _ve("ca do khong ghi => dong rong tuong minh",
+                    ok_do is False and dong_do == ["FAIL ca_gia_do",
+                                                    "CHAN_DOAN: (rong — ca khong ghi chan doan)"])
+            and _ve("ca PASS khong in chan doan", ok_xanh is True and dong_xanh == ["PASS ca_gia_xanh"])
+            and _ve("loi don dep khong doi ket qua", ok_don is True and dong_don[0] == "PASS ca_gia_xanh")
+            and _ve("loi don dep in dung mot dong ngay duoi",
+                    len(dong_don) == 2 and dong_don[1].startswith("CHAN_DOAN_DON_DEP: ")
+                    and sum(d.count(_MA_CD_DON) for d in dong_don) == 1)
+            and _ve("bang mau nap tu pkg_secret_scan, khong chep",
+                    "pkg_secret_scan.py" in nguon and ("GOC" + "SPX") not in nguon
+                    and bool(_nap_bo_che())))
 
 
 CASES = [
@@ -758,6 +1081,7 @@ CASES = [
     case_moi_ho_binary_deu_duoc_tha,
     case_ho_binary_thieu_khai_thi_bi_bat,
     case_binary_giu_nguyen_byte_qua_renormalize,
+    case_chan_doan_kenh_in_che_cat,
 ]
 
 
@@ -767,16 +1091,9 @@ def main():
     dat = 0
     hong = []
     for case in CASES:
-        with tempfile.TemporaryDirectory(prefix="eol_policy_") as tmp:
-            root = Path(tmp) / "kho"
-            root.mkdir()
-            _init(root)
-            try:
-                ok = bool(case(root))
-            except Exception as exc:                     # noqa: BLE001 — bao loi, khong nuot
-                ok = False
-                print("  ! %s: %r" % (case.__name__, exc))
-        print("%s %s" % ("PASS" if ok else "FAIL", case.__name__))
+        ok, dong = _chay_mot_ca(case)
+        for d in dong:
+            print(d)
         if ok:
             dat += 1
         else:

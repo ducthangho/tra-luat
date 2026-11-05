@@ -1,0 +1,39 @@
+{
+  "recorded_at": "2026-11-05T01:53:27.904955+00:00",
+  "old_proposal_blocker": {
+    "path": "ops/environment/update-linux_test.py",
+    "classification": "unknown position; would fail registry",
+    "live": [],
+    "unknown": [
+      "ops/environment/update-linux_test.py"
+    ]
+  },
+  "replacement": "embedded updater --selftest + explicit gated Linux CI step; no new *_test.py path",
+  "static_workflow_contracts": {
+    "loi_ruff_ci": [
+      [],
+      3
+    ],
+    "loi_ci_dispatch_windows": [
+      [],
+      3
+    ],
+    "loi_gate_nhanh": [],
+    "loi_vung_thiet_lap": [],
+    "loi_env_registry": [],
+    "loi_g5_workflow": [],
+    "loi_workflow_dot_bien_du": []
+  },
+  "source_files_edited": false,
+  "assessment": "seven static contract functions passed; tuple-return arity initially mishandled in scratch assertion, no contract error",
+  "corrected_at": "2026-11-05T01:53:38.597620+00:00",
+  "actionlint": {
+    "command": [
+      "actionlint",
+      "-no-color",
+      "/workspace/scratch/pr1187-recovery/land-20261105/product-continuation/workflow-selftest-proposal.yaml"
+    ],
+    "observed_rc": 0,
+    "observed_output_bytes": 0
+  }
+}

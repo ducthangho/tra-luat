@@ -1,0 +1,11 @@
+# merge e007a31 — do 2026-11-02 trong phien session_015Gtxra7iT6mwM1kqpdggt6
+commit e007a318ffbd0079380a72d9f74df8a401028ae4
+parents 9156fece51e50d9f39e8ae1644f583666013a289 f46115b42220620bb681abcad6399542c9b7c7b0
+tree d7f713cce4bd9f8e7c0bf1b15aa53cfa7bbff83f
+author ducthangho 2026-11-02T11:39:33+07:00
+tree(H f46115b) 4c6001c924fb21acc35d027ee2696ef3c469df2a
+
+## git diff --stat e007a318^1 e007a318 (dong gop cua PR so voi cha master)
+ docs/PROTOCOL_DA_PHIEN.md                          |  1 +
+ ...0061-codex-trang-thai-tu-choi-khong-ghi-duoc.md | 85 ++++++++++++++++++++++
+ 2 files changed, 86 insertions(+)

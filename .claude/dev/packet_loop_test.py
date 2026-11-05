@@ -119,6 +119,9 @@ BIEN_BC = "TL_MOI_TRUONG_JSON"
 VOID_DUYET = ["--khong-co-bang-chung", "--ai-cho-phep", "ducthangho",
               "--can-cu", "ca test có người duyệt"]
 _ANH_SACH = []
+# Ảnh doctor của suite phải luôn trẻ hơn ngưỡng 3600s của packet_loop.py;
+# suite đầy đủ có thể chạy nhiều giờ, nên làm mới trước khi chạm ngưỡng.
+NGUONG_TUOI_ANH_TEST_GIAY = 3000
 
 
 # --- hạ tầng ------------------------------------------------------------------
@@ -132,12 +135,30 @@ def anh_doctor(**doi) -> str:
          "he_dieu_hanh": platform.system()}
     d.update(doi)
     if not doi and _ANH_SACH:
-        return _ANH_SACH[0]
+        cu = Path(_ANH_SACH[0])
+        if cu.is_file() and time.time() - cu.stat().st_mtime < NGUONG_TUOI_ANH_TEST_GIAY:
+            return str(cu)
     f = Path(tempfile.mkdtemp(prefix="tl-doctor-")) / "doctor.json"
     f.write_text(json.dumps(d), encoding="utf-8")
     if not doi:
-        _ANH_SACH.append(str(f))
+        _ANH_SACH[:] = [str(f)]
     return str(f)
+
+
+def case_anh_doctor_lam_moi(_c):
+    """Fixture tuổi cao phải được chụp mới; ảnh tươi vẫn được tái sử dụng."""
+    truoc = list(_ANH_SACH)
+    try:
+        _ANH_SACH.clear()
+        cu = Path(anh_doctor())
+        assert Path(anh_doctor()) == cu
+        het_han = time.time() - NGUONG_TUOI_ANH_TEST_GIAY - 1
+        os.utime(cu, (het_han, het_han))
+        moi = Path(anh_doctor())
+        assert moi != cu and moi.is_file()
+        assert Path(anh_doctor()) == moi
+    finally:
+        _ANH_SACH[:] = truoc
 
 
 def anh_doctor_ky(sd, **doi) -> str:
@@ -1479,7 +1500,9 @@ def _repo_gia(tmp: Path, noi_dung: str, ten="demo", protocol: str | None = None)
     `protocol=None` ⇒ ghi nguồn TRUNG TÍNH (ca không nói gì về chép). Ca nào đo hành vi chép
     thì truyền protocol THẬT vào, tường minh, để người đọc thấy nguồn so sánh là gì.
     """
-    r = tmp / f"repo_{abs(hash(noi_dung)) % 10**8}_{ten}"
+    # Tên thư mục của fixture phải ngắn trên Windows; tên skill thật vẫn là `ten`.
+    dinh_danh = hashlib.sha256((ten + "\0" + noi_dung).encode("utf-8")).hexdigest()[:32]
+    r = tmp / f"repo_{dinh_danh}"
     d = r / ".claude" / "skills" / ten
     d.mkdir(parents=True, exist_ok=True)
     (d / "SKILL.md").write_text(noi_dung, encoding="utf-8", newline="\n")
@@ -2983,6 +3006,7 @@ def case_wp320_valid_evidence(c: Ctx):
 
 
 CASES = [
+    ("anh_doctor_lam_moi", case_anh_doctor_lam_moi),
     ("wp320_invalid_inputs", case_wp320_invalid_inputs),
     ("wp320_valid_evidence", case_wp320_valid_evidence),
     ("init_KHONG_duoc_tu_cap_lease", case_init_KHONG_duoc_tu_cap_lease),
@@ -3852,8 +3876,8 @@ MUTANTS = {
         "        goc.mkdir()\n", '        raise BoQua("đột biến: tha vô điều kiện")\n',
         ["bien_nhan_sha256_root_xuong_dong_dem_MOT"]),
     "bien_nhan_shim_tha_vo_dieu_kien": (
-        "        p = subprocess.run([str(git)], capture_output=True, check=True)\n",
-        '        raise BoQua("đột biến: tha vô điều kiện")\n',
+        '    env["PYTHONPATH"] = os.pathsep.join([str(c.tmp), *inherited_paths])\n',
+        '    env["PYTHONPATH"] = os.pathsep.join(inherited_paths)  # đột biến: bỏ shim\n',
         ["bien_nhan_git_gia_duong_dan_nul_giu_fallback"]),
     # Hai chiều của CÙNG một vị từ, vì bản lượt 2 không có chiều nào: nới thành luôn-tha
     # (`if True:`) và siết thành luôn-tố (`if False:`). Cả hai PHẢI giết
@@ -4619,20 +4643,92 @@ def case_bien_nhan_sha256_root_xuong_dong_dem_MOT(c: Ctx):
 
 
 def case_bien_nhan_git_gia_duong_dan_nul_giu_fallback(c: Ctx):
-    git = c.tmp / "git"
-    git.write_text("#!/usr/bin/env python3\nimport sys\nsys.stdout.buffer.write(b'/tmp/a\\x00b\\nsha256\\n')\n", encoding="utf-8")
-    git.chmod(0o755)
-    try:
-        p = subprocess.run([str(git)], capture_output=True, check=True)
-    except OSError as ex:
-        raise BoQua(f"nền từ chối thi hành git giả: {ex}") from ex
-    if b"\x00" not in p.stdout:
-        raise AssertionError("git giả được gọi nhưng không trả fixture NUL")
+    # Python tải `sitecustomize` từ PYTHONPATH trên cả Windows và Linux. Chỉ chặn
+    # đúng một lệnh git probe, còn entrypoint và mọi lệnh con khác chạy thật.
     goc = _kho_gia_co_verdict(c, "bnnul", [
         ("a-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU)),
         ("b-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU[:7]))])
+    shim = c.tmp / "sitecustomize.py"
+    shim.write_text(
+        "import json, os, subprocess\n"
+        "from pathlib import Path\n"
+        "_real_run = subprocess.run\n"
+        "_real_resolve = Path.resolve\n"
+        "def _probe_resolve(self, *args, **kwargs):\n"
+        "    if self.as_posix() == '/tmp/a\\x00b':\n"
+        "        Path(os.environ['TL_RESOLVE_PROBE_MARKER']).write_text('called', encoding='utf-8')\n"
+        "        raise ValueError('embedded null byte')\n"
+        "    return _real_resolve(self, *args, **kwargs)\n"
+        "Path.resolve = _probe_resolve\n"
+        "def _probe_run(argv, *args, **kwargs):\n"
+        "    if (isinstance(argv, (list, tuple)) and len(argv) == 6\n"
+        "            and argv[0] == 'git' and argv[1] == '-C'\n"
+        "            and argv[2] == os.environ.get('TL_GIT_EXPECTED_ROOT')\n"
+        "            and list(argv[-3:]) == ['rev-parse', '--show-toplevel', '--show-object-format']):\n"
+        "        with Path(os.environ['TL_GIT_PROBE_MARKER']).open('a', encoding='utf-8') as f:\n"
+        "            f.write(json.dumps(argv) + '\\n')\n"
+        "        out = '/tmp/a\\x00b\\nsha256\\n'\n"
+        "        as_text = kwargs.get('text') or kwargs.get('universal_newlines')\n"
+        "        return subprocess.CompletedProcess(argv, 0, stdout=out if as_text else out.encode(),\n"
+        "                                           stderr='' if as_text else b'')\n"
+        "    return _real_run(argv, *args, **kwargs)\n"
+        "subprocess.run = _probe_run\n", encoding="utf-8")
+    # Lỗi API được tiêm riêng cho đúng top-level giả; Python mới có thể không ném
+    # ValueError khi resolve NUL. Mọi đường dẫn thật vẫn dùng Path.resolve thật.
+    marker = c.tmp / "git-probe-invocation.json"
+    resolve_marker = c.tmp / "resolve-probe.txt"
+    env = os.environ.copy()
+    inherited_paths = [p for p in env.get("PYTHONPATH", "").split(os.pathsep) if p]
+    env["PYTHONPATH"] = os.pathsep.join([str(c.tmp), *inherited_paths])
+    if not env["PYTHONPATH"] or "" in env["PYTHONPATH"].split(os.pathsep):
+        raise AssertionError("PYTHONPATH của fixture có đoạn rỗng (CWD import)")
+    env["TL_GIT_PROBE_MARKER"] = str(marker)
+    env["TL_GIT_EXPECTED_ROOT"] = str(goc)
+    env["TL_RESOLVE_PROBE_MARKER"] = str(resolve_marker)
+    p = subprocess.run(
+        [sys.executable, "-c", "import os, subprocess; p=subprocess.run("
+         "['git','-C',os.environ['TL_GIT_EXPECTED_ROOT'],'rev-parse','--show-toplevel','--show-object-format'],"
+         "capture_output=True,text=True); print(p.stdout,end='')"],
+        capture_output=True, env=env, check=True)
+    if b"\x00" not in p.stdout or not marker.is_file():
+        raise AssertionError("shim không trả fixture NUL hoặc không ghi invocation")
+    marker.unlink()
     rc, o, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"],
-                   env_extra={"PATH": str(c.tmp) + os.pathsep + os.environ["PATH"]})
+                   env_extra={"PYTHONPATH": env["PYTHONPATH"],
+                              "TL_GIT_PROBE_MARKER": str(marker),
+                              "TL_GIT_EXPECTED_ROOT": str(goc),
+                              "TL_RESOLVE_PROBE_MARKER": str(resolve_marker)})
+    if not marker.is_file():
+        if rc != 0:
+            raise CliSapDo(f"CLI sập trước khi gọi git probe: {_txt(e)[:500]!r}")
+        raise AssertionError("entrypoint không gọi git probe")
+    try:
+        invocations = [json.loads(line) for line in marker.read_text(encoding="utf-8").splitlines()]
+    except (OSError, ValueError) as ex:
+        if rc != 0:
+            raise CliSapDo("CLI sập và marker git probe không đọc được") from ex
+        raise AssertionError("marker git probe không đọc được") from ex
+    if (len(invocations) != 1 or not isinstance(invocations[0], list) or
+            len(invocations[0]) != 6 or invocations[0][2] != str(goc)):
+        if rc != 0:
+            raise CliSapDo(f"CLI sập và số invocation git probe sai: {invocations!r}")
+        raise AssertionError(f"git probe phải gọi đúng một lần trên root fixture: {invocations!r}")
+    if rc != 0:
+        loi = _txt(e)
+        # Hai đột biến được phép làm lộ ValueError CỤ THỂ của fixture này.
+        # Mọi kiểu sập khác là tín dụng giả, không được tính là giết đột biến.
+        traceback_cuoi = loi.replace("\r\n", "\n").rsplit(
+            "Traceback (most recent call last):", 1)[-1]
+        dong_cuoi = traceback_cuoi.strip().splitlines()[-1] if traceback_cuoi.strip() else ""
+        loi_mong_doi = ("in _be_rong_oid_cua_kho" in traceback_cuoi and
+                        (dong_cuoi == "ValueError: injected-indexing" or
+                         dong_cuoi.startswith("ValueError:") and
+                         "embedded null" in dong_cuoi.lower() and resolve_marker.is_file()))
+        if not loi_mong_doi:
+            raise CliSapDo(f"CLI sập ngoài nhánh ValueError cần đo: {loi[:500]!r}")
+        raise AssertionError(f"ValueError của git probe thoát khỏi chốt fallback: {loi[-500:]!r}")
+    if not resolve_marker.is_file():
+        raise AssertionError("entrypoint không đo nhánh ValueError của Path.resolve")
     _doi(0, rc, e, "ValueError từ top-level không hợp lệ thoát traceback")
     if "1 biên nhận PHÂN BIỆT ĐƯỢC" not in _txt(o):
         raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
@@ -7655,6 +7751,7 @@ MUTANTS.update({
 # --- #812 MAY-ADR-0054-a r2: mỗi ca dựng baseline DƯƠNG đầy đủ (kho git + origin bare, lease đã đẩy, validator canon + nguồn của nó
 # trên origin/master, biên nhận H THẬT: verdict blob trong git, băm đúng) rồi đổi ĐÚNG một yếu tố. Mẫu kho dựng MỘT lần mỗi biến thể.
 _R812_MAU: dict = {}
+_R812_MAU_TAO_LUC: dict = {}
 _g = lambda cwd, *a: subprocess.run(["git", *a], cwd=cwd, capture_output=True, text=True, check=True).stdout.strip()  # noqa: E731
 _R812_LEASE = {"schema_version": 2, "event": "executor_lease_granted", "packet_issue": 55, "packet_id": "wp55", "mission_issue": 54, "revision": 1,
                "generation": 1, "lease_id": "wp55-r1-g1-claude", "role": "executor", "provider": "claude", "executor": "claude", "model": "claude-opus-5-5",
@@ -7669,6 +7766,9 @@ _R812_LEASE = {"schema_version": 2, "event": "executor_lease_granted", "packet_i
 def _kho812(c: Ctx, bien: str = "") -> Path:
     """Biến thể: khong_kich_hoat · spec_lech · cuc_bo · h_hong · giu_khac · nong · hai_dong · thieu_nguon · rc_falsy · oid_khong_chua ·
     oid_khong_dua_vao · oid_ngoai_fp (ba phép đo land-OID, mỗi biến thể làm hỏng đúng MỘT phép)."""
+    # Lease trong mẫu chỉ sống 6 giờ; suite dài phải dựng lại trước khi nó hết hạn.
+    if bien in _R812_MAU and time.time() - _R812_MAU_TAO_LUC.get(bien, 0) >= 5 * 3600:
+        del _R812_MAU[bien]
     if bien not in _R812_MAU:
         goc, R = Path(tempfile.mkdtemp(prefix="r812-")), HERE.parent.parent
         w = goc / "w"
@@ -7705,8 +7805,21 @@ def _kho812(c: Ctx, bien: str = "") -> Path:
         if bien == "nong":
             (w / ".git" / "shallow").write_text(_g(w, "rev-parse", "master~2") + "\n")
         _R812_MAU[bien] = (goc, V)
+        _R812_MAU_TAO_LUC[bien] = time.time()
     __import__("shutil").copytree(_R812_MAU[bien][0], c.tmp / f"kho{bien}", symlinks=True)
     return c.tmp / f"kho{bien}" / "w"
+
+
+def case_r812_mau_tu_lam_moi(c: Ctx):
+    first = _kho812(Ctx(c.script, c.tmp / "first"))
+    old = _R812_MAU[""][0]
+    old_lease = _g(first, "show", "refs/remotes/origin/ops/wp55-spec:ops/leases/l.yaml")
+    _R812_MAU_TAO_LUC[""] = time.time() - 5 * 3600 - 1
+    second = _kho812(Ctx(c.script, c.tmp / "second"))
+    if _R812_MAU[""][0] == old or not second.is_dir():
+        raise AssertionError("mẫu lease quá tuổi vẫn được dùng lại")
+    if _g(first, "show", "refs/remotes/origin/ops/wp55-spec:ops/leases/l.yaml") != old_lease:
+        raise AssertionError("làm mới cache đã sửa fixture đang dùng")
 
 
 def _bn812(w: Path, h: str, sh: str, lop=(), bn=None) -> dict:
@@ -7738,11 +7851,13 @@ def _r812(c: Ctx, den: str, bien="", comment=True, bn=None, lop=(), verdict="app
     return rc, sd, e, truoc
 
 
-def _r812_ca(den, rc_doi, muon=None, **doi):
+def _r812_ca(den, rc_doi, muon=None, *, loi_doi=None, **doi):
     """rc đúng; ca dương kiểm `muon`, ca âm đòi state giữ nguyên TỪNG BYTE so với ảnh ngay trước bước bị từ chối (I4)."""
     def ca(c):
         rc, sd, e, truoc = _r812(c, den, **doi)
         _doi(rc_doi, rc, e, f"r812 {den} {sorted(doi)}")
+        if loi_doi is not None and loi_doi not in _txt(e):
+            raise AssertionError(f"r812 từ chối sai nguyên nhân, cần {loi_doi!r}: {_txt(e)!r}")
         if muon:
             _kiem(sd, f"r812 {den} {sorted(doi)}", **muon)
         elif (sd / "wp55.json").read_bytes() != truoc:
@@ -8539,16 +8654,21 @@ def _r812_r8_symlink(dich, ws_khac, cay="khac", ten=None):
             _g(w, "branch", "-q", "-D", nhanh)
     return doi
 
+MUTANTS_NHAM_TEST = MUTANTS_NHAM_TEST | {"r812_mau_khong_lam_moi"}
+MUTANTS["r812_mau_khong_lam_moi"] = (
+    "time.time() - _R812_MAU_TAO_LUC.get(bien, 0)" + " >= 5 * 3600",
+    "False", ["r812_mau_tu_lam_moi"])
+
 LOP_R8 = (("lop-tai-dien", "P1"), ("lop-moi", "P2"))
 BN_AM = {"verdict": "changes_requested"}
 CASES += [
-    ("r812_r8_symlink_chi_trong_ref", _r812_ca("lease", 7, truoc_lease=_r812_r8_symlink("x", ["alias/a.py"]))),
-    ("r812_r8_symlink_chi_trong_snapshot", _r812_ca("lease", 7, truoc_lease=_r812_r8_symlink("x", ["alias/a.py"], cay="spec"))),
+    ("r812_r8_symlink_chi_trong_ref", _r812_ca("lease", 7, loi_doi="lease khác còn hiệu lực giao write set", truoc_lease=_r812_r8_symlink("x", ["alias/a.py"]))),
+    ("r812_r8_symlink_chi_trong_snapshot", _r812_ca("lease", 7, loi_doi="lease khác còn hiệu lực giao write set", truoc_lease=_r812_r8_symlink("x", ["alias/a.py"], cay="spec"))),
     ("r812_r8_symlink_doi_chung", _r812_ca("lease", 0, {"state": "leased"}, truoc_lease=_r812_r8_symlink("x", ["alias/b.py"]))),
-    ("r812_r8_symlink_hoa_thuong", _r812_ca("lease", 7, truoc_lease=_r812_r8_symlink("x", ["ALIAS/a.py"]))),
-    ("r812_r8_symlink_unicode", _r812_ca("lease", 7, truoc_lease=_r812_r8_symlink("x", ["CAFE\u0301/a.py"], ten={"caf\u00e9": "x"}))),
+    ("r812_r8_symlink_hoa_thuong", _r812_ca("lease", 7, loi_doi="lease khác còn hiệu lực giao write set", truoc_lease=_r812_r8_symlink("x", ["ALIAS/a.py"]))),
+    ("r812_r8_symlink_unicode", _r812_ca("lease", 7, loi_doi="lease khác còn hiệu lực giao write set", truoc_lease=_r812_r8_symlink("x", ["CAFE\u0301/a.py"], ten={"caf\u00e9": "x"}))),
     ("r812_r8_symlink_hoa_thuong_doi_chung", _r812_ca("lease", 0, {"state": "leased"}, truoc_lease=_r812_r8_symlink("x", ["ALIAS/b.py"]))),
-    ("r812_r8_symlink_mo_ho", _r812_ca("lease", 7, truoc_lease=_r812_r8_symlink("x", ["Alias/a.py"], ten={"ALIAS": "y", "alias": "x"}))),
+    ("r812_r8_symlink_mo_ho", _r812_ca("lease", 7, loi_doi="khớp nhiều entry", truoc_lease=_r812_r8_symlink("x", ["Alias/a.py"], ten={"ALIAS": "y", "alias": "x"}))),
     ("r812_r8_am_bo_lop_tai_dien", _r812_ca("review", 11, bn=BN_AM, lop=LOP_R8, verdict="changes_requested", ids=("lop-moi",))),
     ("r812_r8_am_du_lop", _r812_ca("review", 0, {"state": "running", "finding_counts": {"lop-tai-dien": 1, "lop-moi": 1}}, bn=BN_AM,
                                    lop=LOP_R8, verdict="changes_requested", ids=("lop-tai-dien", "lop-moi"))),
@@ -9050,7 +9170,10 @@ def chay_suite(script: Path, tmp: Path, chi_chay=None):
         if ten in WINDOWS_ONLY and platform.system() != "Windows":
             ket[ten] = BoQua("chỉ đo lệnh pwsh trên Windows")
             continue
-        d = tmp / ten
+        # Giữ TEST ID ở khoá `ket`; rút tên thư mục fixture để mutation lồng nhiều
+        # tầng vẫn nằm dưới giới hạn đường dẫn Windows.
+        ma_ca = hashlib.sha256(ten.encode("utf-8")).hexdigest()[:16]
+        d = tmp / f"{ten[:8]}-{ma_ca}"
         d.mkdir(parents=True, exist_ok=True)
         try:
             fn(Ctx(script, d))
@@ -9202,6 +9325,8 @@ CASES += [
     ("cong_c_k0_pr_head", _c1106_ca(12, "K0", doi=lambda x, w, h: h and (_g(w, "commit", "-q", "--allow-empty", "-m", "H2"),
                                                                        _g(w, "push", "-q", "-f", "origin", "HEAD:refs/pull/55/head")))),
     ("cong_c_k1_hash", _c1106_ca(12, "K1", doi=lambda x, w, h: h and x.update(lease={"spec_hash": "0" * 64}))),
+    ("cong_c_k1_khong_dong", _c1106_ca(0, doi=lambda x, w, h: h is None and x.update(spec="# spec\n"))),
+    ("cong_c_k1_mot_dong_sai", _c1106_ca(12, "K1: 1 dòng khai dieu_kien_merge", doi=lambda x, w, h: h is None and x.update(spec="dieu_kien_merge: ADR-0060@sai\n"))),
     ("cong_c_k1_l2", _c1106_ca(12, "K1", doi=lambda x, w, h: h is None and x.update(spec=f"dieu_kien_merge: ADR-0060@{x['L2']}\n"))),
     ("cong_c_k1_hai_dong", _c1106_ca(12, "K1", doi=lambda x, w, h: h is None and x.update(spec=x["spec"] * 2))),
     ("cong_c_k2_ci_do", _c1106_ca(12, "K2", doi=lambda x, w, h: h and x["jobs"][0].update(conclusion="failure"))),
@@ -9270,6 +9395,9 @@ CASES += [
 MUTANTS.update({
     "c1106_k0_bo_pr_head": ("x[0] or x[1].split()[:1] != [h.encode()]", "x[0]", ["cong_c_k0_pr_head"]),
     "c1106_k1_bo_spec_hash": ('rc or hashlib.sha256(spec).hexdigest() != lease.get("spec_hash")', "rc", ["cong_c_k1_hash"]),
+    "wp1124_k1_doi_mot_dong": ('        if not khai:\n            return spec\n', '', ["cong_c_k1_khong_dong"]),
+    "wp1124_k1_chi_dem_dong_hop_le": ('re.findall(rb"^dieu_kien_merge:[^\\n]*$", spec, re.M)', 'LUAT_0060_RE.findall(spec)', ["cong_c_k1_mot_dong_sai"]),
+    "wp1124_k1_nhan_hai_dong": ('if len(khai) == 1 else None', 'if len(khai) >= 1 else None', ["cong_c_k1_hai_dong"]),
     "c1106_k6_bo_rc_diff": ('    if rc:\n        raise ValueError("không đo được dòng thêm', '    if False:\n        raise ValueError("không đo được dòng thêm', ["cong_c_k6_diff_loi"]),
     "c1106_yaml_nhan_anchor": (' or getattr(e, "anchor", None)', "", ["cong_c_k1_anchor"]),
     "c1106_k1_bo_rc_rev_list": ('(fp := _git_do(root, "rev-list", "--first-parent", "refs/remotes/origin/master"))[0] == 0 and ', '(fp := _git_do(root, "rev-list", "--first-parent", "refs/remotes/origin/master")) and ', ["cong_c_k1_git_loi"]),
@@ -9531,7 +9659,8 @@ def main() -> int:
                 print(f"  ĐỎ  đột biến {ten_mut}: không tìm thấy mỏ neo {thieu!r}")
                 that_bai_tong += len(thieu)
                 continue
-            mut_dir = tmp / f"mut_{ten_mut}"
+            ma_mut = hashlib.sha256(ten_mut.encode("utf-8")).hexdigest()[:16]
+            mut_dir = tmp / f"mut_{ma_mut}"
             mut_dir.mkdir(parents=True, exist_ok=True)
             mut = mut_dir / "packet_loop.py"
             for t, th in cap:
@@ -9546,6 +9675,7 @@ def main() -> int:
                 spec = importlib.util.spec_from_file_location(f"packet_loop_test_{ten_mut}", test_mut)
                 suite = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(suite)
+                suite.HERE = HERE  # fixture canonical; __file__ vẫn là harness đột biến
             doi_chung = suite._doi_chung_khac_ho(phai_chet)
             ket_mut = suite.chay_suite(mut, mut_dir,
                                        chi_chay=set(phai_chet) | set(doi_chung))

@@ -1,0 +1,12 @@
+{
+ "number": 1130,
+ "state": "closed",
+ "merged": true,
+ "merged_at": "2026-11-02T00:08:55Z",
+ "merge_commit_sha": "c7174bfe03b3acd22cfa055b5fce176129d29542",
+ "draft": false,
+ "title": "launcher_test: chặn tín dụng giả chỉ-Windows + gốc t73 cp1252 (#1122)",
+ "merged_by": "ducthangho",
+ "head_sha": "9d06bd10ce9f2ec6d07f13308bfb6990eb1ee651",
+ "base_sha": "180039c4b791fba4c89991623151cbb7378fce53"
+}

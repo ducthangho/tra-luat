@@ -1,0 +1,169 @@
+# HO SO LAND — packet #1223 CLOUD-SETUP-P3C-CONTRACT r1, lease g1, code qua PR #1229. Khuon: ops/land/pr1231-wp1105-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+#
+# TRANG THAI: merged (50baf89), LANDED — du bon moc §10.2.2 tren DUNG merge SHA (run push master 42073104862 + wd-run 42087170784).
+# Uy quyen land: comment approve_merge HOI TO 6665710907 (18:18:22Z), dang SAU merge 17:17:05Z.
+# NHAN: measured (phien nay do lai, co tep nguon) / loi_khai_co_neo (lay tu hien vat/comment co neo, phien nay khong chay lai) /
+#       thuat_lai (chi co loi ke cua phien khac) / not_measured.
+# Readback tho: ops/land/pr1229-wp1223-provenance/ (SHA256SUMS kem). Moi phep do REST: GET qua proxy phien bang GITHUB_PAT.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrZk7fu1wjDZjWqyg2R
+input_packet_generations:
+  - {packet_issue: 1223, packet_id: CLOUD-SETUP-P3C-CONTRACT, revision: 1, generation: 1, lease_id: wp1223-r1-g1-claude, ghi_chu: 'lease duy nhat (thay_the_cho rong); rut han sau merge (xem lease.thu_hoi_cuoi).'}
+authorized_head_sha: 1d5ee679ced60ca6dfade2096a1cb805e9cadad8
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1229#issuecomment-6665710907
+authorization_ghi_chu: >-
+  measured — readback-duyet-issuecomment-6665710907.json: user ducthangho, created_at = updated_at = 2026-11-05T18:18:22Z, dong dau
+  `approve_merge: 1d5ee679ced60ca6dfade2096a1cb805e9cadad8`, than tu ghi "Xác nhận hồi tố": duyet land #1223 theo ke hoach da chot
+  trong phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4. Comment dang SAU merge 17:17:05Z (~1 gio) — la XAC NHAN HOI TO, khong
+  phai duyet truoc merge; lenh goc trong phien dieu phoi truoc luc merge chi la thuat_lai. Phien tong session_015GtxrYPjZCTZeRiazdssgq
+  merge sau luot connector sach (thuat_lai). CAVEAT #566: comment dang bang token chu kho deu hien ducthangho.
+land_operator: 'measured — readback-pr-1229.json: merged true, merged_at 2026-11-05T17:17:05Z, merged_by ducthangho, merge_commit_sha 50baf89 (thuat_lai: phien tong bam merge).'
+merge_method: merge
+merge_commit: 50baf894216504d4bb975690ceb9dee4835a2ad7
+merge_commit_tree: 59897b1183de3d1feef954f9ca0175122cea08d3
+merge_commit_parents: [7200e7b4082a8ab4037a6f5774ef525cc6334ade, 1d5ee679ced60ca6dfade2096a1cb805e9cadad8]
+pre_merge_checks:
+  - name: 'kiem-merge K0–K7 tren head cuoi'
+    sha: 1d5ee679ced60ca6dfade2096a1cb805e9cadad8
+    conclusion: 'rc 0 — "ĐỦ ĐIỀU KIỆN MERGE"'
+    nguon: 'provenance/kiem-merge/output-rc0.txt (nhanh claude/handoff-p3c-kiem-merge @69fb42e; SHA256SUMS cua chinh thu muc kiem lai OK)'
+    ghi_chu: >-
+      loi_khai_co_neo — phien nay KHONG chay lai kiem-merge. kiem-merge/output.txt ghi luot goi TRUOC do rc 2 "--lease phải là mapping"
+      (loi cach goi, khong phai ket luan ve packet); luot sau rc 0. kiem-merge/lease.yaml cmp KHOP ops/leases/wp1223-r1-g1-claude.yaml
+      tren origin/ops/cap-lease-p3c-g1 (e259710). Merge commit thuc te co cha mot 7200e7b (master tien sau base b255b0b cua lan kiem);
+      merge-va-diff.txt: diff 50baf89^1..50baf89 = 7 tep (6 tep write set + RELEASE_MANIFEST.json cua phien land).
+  - name: 'RELEASE_MANIFEST.json tai sinh tren head (A10 vế truoc merge)'
+    sha: 1d5ee679ced60ca6dfade2096a1cb805e9cadad8
+    conclusion: 'ok true, strict, 184/184, rc 0'
+    nguon: 'provenance/release-verify-head-1d5ee67.txt'
+    ghi_chu: >-
+      measured — git archive 1d5ee67 ra thu muc tam, tl.py cua chinh cay: release-verify --strict --json ok=True, expected 184 =
+      checked 184, failed 0, extra 0. Commit 1d5ee67 (cha 3095ad9) chi doi RELEASE_MANIFEST.json (+11/-11) — do phien land lam;
+      worker khong cham manifest (A7; quyet dinh Q4 cua chu kho: thuat_lai).
+  - name: 'Codex connector tren head cuoi'
+    sha: 1d5ee679ced60ca6dfade2096a1cb805e9cadad8
+    conclusion: 'sach'
+    ghi_chu: >-
+      measured — readback-comments-pr-1229.json: issuecomment-6663030933 "Didn't find any major issues", "Reviewed commit: 1d5ee679ce"
+      (16:16:37Z); khoi codex-review-state 6656130584 commit_sha 1d5ee67, has_any_findings false. Luot truoc: f27dba4 sach
+      (6656212368), da87d40 sach (6656246779).
+  - name: 'review offline Codex (ADR-0060 M12) luot 4 tren head cuoi'
+    sha: 1d5ee679ced60ca6dfade2096a1cb805e9cadad8
+    conclusion: 'approve (dong cuoi KET_LUAN: approve)'
+    nguon: 'provenance/kiem-merge/run-offline-l4.json + kiem-merge/stdout-offline-l4.log (= review-offline/run.json, cmp khop)'
+    ghi_chu: >-
+      measured — run 4dda2d88, head 1d5ee67, trang_thai xong, ma_thoat 0, 15:57:24Z → 16:14:38Z, stdout_sha256 e3f0a6bd… khop
+      sha256 cua stdout-offline-l4.log. model_phuc_vu_trang_thai DO_DUOC (moi khung response.created deu gpt-6.1-sol),
+      effort_phuc_vu_trang_thai DO_DUOC [xhigh], sandbox_trang_thai DO_DUOC, sandbox_lech toan 0.
+  - name: 'Windows K6'
+    sha: 1d5ee679ced60ca6dfade2096a1cb805e9cadad8
+    conclusion: 'not_required'
+    ghi_chu: >-
+      measured — readback-windows-issuecomment-6663059067.json: user ducthangho, 2026-11-05T16:17:46Z, than
+      "windows: 1d5ee679ced60ca6dfade2096a1cb805e9cadad8 not_required"; khop dac ta §0 (windows not_required — Markdown va hai
+      literal Python, khong cham .claude/dev/**, .github/**). Khong chay CI Windows.
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA'
+    run_id: 42073104862
+    run_attempt: 1
+    sha: 50baf894216504d4bb975690ceb9dee4835a2ad7
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, danh-gia-gate-output-42073104862.txt, danh_gia_gate.py, phan-chung-buoc-42073104862.txt, release-verify-land-127406160681.txt, readback-run-42087170784.json]
+    moc_run: 'measured — ci/provenance.yaml moc.run: event push, head_sha 50baf89, run_attempt 1, passed; ci/jobs.json 23/23 job success, nhan ubuntu-latest, runner_id khac 0 (17:17:08Z → 17:56:42Z).'
+    moc_checkout: 'measured — ci/provenance.yaml: 23/23 job co buoc checkout passed 50baf894216504d4bb975690ceb9dee4835a2ad7.'
+    moc_workflow_definition: >-
+      measured — ci/provenance.yaml moc.workflow_definition: passed; path .github/workflows/ci.yml, oid 50baf89, blob 2b2c9aa2,
+      sha256 aed785d6…; wd-run 42087170784 (ops-do-workflow-definition.yml, workflow_dispatch tu phien nay, success,
+      readback-run-42087170784.json), artifact 13442777891 workflow-definition-42073104862 (digest 2c5151c4…).
+    moc_gate_output: >-
+      measured — danh-gia-gate-output-42073104862.txt (danh_gia_gate.py sha256 b87f9697 = ban ops/land/pr1231-wp1105-provenance/,
+      luat THEO BUOC): MOC_GATE_OUTPUT passed, 23/23 job co dau hieu duong. Lane LAND: release-verify-land-127406160681.txt — buoc
+      "release-verify strict (lane LAND — manifest committed)" cua job gate (ubuntu-latest): ok true, strict true, 184/184, failed [].
+      phan-chung-buoc-42073104862.txt: xoa dau hieu cua 4 buoc (lease_publish, bien_nhan_v2, ci_dang_ky --chay, release-verify
+      --strict) => ca bon not_measured, rc 0.
+bookkeeping:
+  - {item: 'rut han lease wp1223-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', nhanh: 'claude/ghi-so-land-p3c', ghi_chu: 'chi cham ops/land/**; lease rut han nam tren nhanh ops/cap-lease-p3c-g1.'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'xem bien-ban-m8.yaml + kiem-dong-wp-m8.txt'}
+  - {item: 'ban giao hien vat kiem-merge + review offline', ket_qua: 'nhanh claude/handoff-p3c-kiem-merge @69fb42e (phien dieu phoi), giu nguyen trong provenance/kiem-merge/ va provenance/review-offline/.'}
+  - {item: 'dong Issue #1223', ket_qua: 'not_measured — phien dieu phoi dong sau khi PR ghi so merge.'}
+# ---- het truong chuan
+packet_id: CLOUD-SETUP-P3C-CONTRACT
+packet_issue: 1223
+revision: 1
+generation: 1
+pham_vi_land: code
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session session_015GtxrZk7fu1wjDZjWqyg2R — phien GHI SO duoc phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 giao;
+  KHONG phai executor va khong phai phien merge (phien tong session_015GtxrYPjZCTZeRiazdssgq).
+
+spec:
+  path: ops/specs/cloud-setup-p3c-contract-r1.md
+  blob: d108533d28e2dcfce0529aebe7faf8107ed8170e
+  sha256: db83020d7cd57c8c9981c8f94ffcc50bf59d536a7224c1f3fb6ae6195511de3a
+  nguon: >-
+    measured — merge-va-diff.txt: git rev-parse 50baf89:ops/specs/cloud-setup-p3c-contract-r1.md = d108533d, sha256 db83020d…11de3a,
+    khop spec_blob + spec_hash cua lease g1 (spec_source_oid c5a1c3d).
+
+lease:
+  lease_id: wp1223-r1-g1-claude
+  path: ops/leases/wp1223-r1-g1-claude.yaml (nhanh ops/cap-lease-p3c-g1)
+  thay_the_cho: '[] (lease dau tien).'
+  write_set_so_tep: 7
+  thu_hoi_cuoi: CHO_DIEN
+  diff_do: >-
+    measured — merge-va-diff.txt: git diff --stat 50baf89^1 50baf89 = 7 tep +42/-25: INSTALL.md, SKILL.md, changelog.d/wp-1223.md,
+    references/API_CONTRACT.md, scripts/tl.py, scripts/tl_selftest.py (6 tep write set; ops/handoff chi o nhanh handoff) +
+    RELEASE_MANIFEST.json (phien land, ngoai write set worker theo Q4). +42 <= 450 (ADR-0053).
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-1229.json merged true; merge-va-diff.txt cha 7200e7b + 1d5ee67, tree 59897b1; 1d5ee67 la to tien origin/master.'
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 50baf89: DAT, du bon moc (post_merge_checks muc 1, luot push that, gom release-verify
+    strict lane LAND); (2) lease nha: xem lease.thu_hoi_cuoi; (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp-m8.txt);
+    (4) review neo DUNG authorized_head 1d5ee67: offline luot 4 approve (model/effort/sandbox DO_DUOC), connector sach;
+    (5) uy quyen land: DAT bang comment approve_merge HOI TO 6665710907 neo 1d5ee67 (dang SAU merge, xem authorization_ghi_chu);
+    (6) muc tieu packet: xem nghiem_thu (A10 measured; A1–A9 loi_khai_co_neo); (7) §8.1: DAT — model/effort/sandbox phuc vu DO_DUOC.
+
+assurance_81:
+  reviewer_assurance_81: DAT
+  review_exact_sha: 'DAT — luot offline 4 head 1d5ee67 = authorized_head_sha, ma_thoat 0, KET_LUAN approve; connector sach tren 1d5ee67.'
+  thuc_thi:
+    model: 'measured — kiem-merge/run-offline-l4.json model_phuc_vu_trang_thai DO_DUOC; moi khung response.created mang model gpt-6.1-sol.'
+    effort: 'measured — kiem-merge/run-offline-l4.json effort_phuc_vu_trang_thai DO_DUOC, effort_phuc_vu [xhigh].'
+    sandbox_mode: 'measured — kiem-merge/run-offline-l4.json sandbox_trang_thai DO_DUOC, sandbox_lech toan 0.'
+
+review:
+  so_loi_goi_codex: >-
+    connector 3 (measured: f27dba4, da87d40, 1d5ee67 — readback-comments-pr-1229.json) + offline 4 (luot 4 measured; luot 1–3 chi
+    co ten "luot 4/5" va "approve o luot 3 f27dba4" trong review-offline/prompt-l4.md: thuat_lai).
+  tran: 'loi_khai_co_neo — prompt-l4.md: "luot 4/5 (tran cung 10)".'
+  ket_qua_theo_luot: >-
+    offline 3 f27dba4 approve 0 P0–P3 (thuat_lai, prompt-l4.md) · connector f27dba4 sach · connector da87d40 sach · offline 4 1d5ee67
+    approve (measured) · connector 1d5ee67 sach (measured).
+
+nghiem_thu:
+  A1_den_A6: 'loi_khai_co_neo — offline luot 4 approve tren 1d5ee67 voi 6 tep packet giong tung byte f27dba4 (lenh @codex review 6662994121); gate push master xanh tren 50baf89 (tl selftest, doc-claims-check, golden trong job gate).'
+  A7: 'measured — merge-va-diff.txt: 6 tep write set + RELEASE_MANIFEST.json; manifest thuoc commit land 1d5ee67 (release-verify-head-1d5ee67.txt), worker khong cham VERSION/CHANGELOG.md/manifest.'
+  A8_A9: 'loi_khai_co_neo — kiem-merge rc 0; CI PR lane worker (thuat_lai qua kiem-merge). Gate master job gate xanh.'
+  A10: >-
+    measured — truoc merge: release-verify-head-1d5ee67.txt ok, 184/184; sau merge: release-verify-land-127406160681.txt lane LAND
+    ok 184/184; tl-ping-a10.txt: tl ping env=code 18:47Z version 2.21.2q, khong dong CẢNH BÁO (S1 da in canh bao lech).
+
+khong_do_duoc:
+  - 'Lenh goc duyet land cua chu kho truoc luc merge: chi co loi thuat lai cua phien dieu phoi; comment 6665710907 la hoi to.'
+  - 'Quyet dinh Q4 (worker khong cham manifest) cua chu kho: thuat_lai qua giao viec.'
+  - 'Luot offline 1–3 cua packet: khong co hien vat trong kho phien nay doc.'

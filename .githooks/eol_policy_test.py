@@ -251,7 +251,7 @@ _KHOA_PAYLOAD_CONG = ("ok", "error", "problems", "failed", "load_error", "dev_di
 def _ghi_payload_cong(nhan, payload):
     def ghi():
         if type(payload) is not dict:
-            return _cd(nhan + ".payload_khong_phai_dict", type(payload).__name__)
+            return _cd(nhan + ".payload_khong_phai_dict", _TEN_LOP(type(payload)))
         _cd(nhan + ".payload", {k: payload[k] for k in _KHOA_PAYLOAD_CONG if k in payload})
         cases = payload.get("cases")
         hong = [c for c in cases if not (type(c) is dict and c.get("ok") is True)] if type(cases) is list else cases
@@ -314,8 +314,8 @@ def _chay_mot_ca(case, don_dep=None):
             loi_don = exc
     if loi_don is not None:
         try:
-            sau.append(_cat_duoi("CHAN_DOAN_DON_DEP: %s (%s)" % (_loi_an_toan(loi_don), _vat_hoa(td.name)),
-                                 _CD_TRAN_CHUOI))
+            sau.append("CHAN_DOAN_DON_DEP: " + _cat_duoi(      # tiền tố NGOÀI phần cắt (lượt 3, F10)
+                "%s (%s)" % (_loi_an_toan(loi_don), _vat_hoa(td.name)), _CD_TRAN_CHUOI))
         except KeyboardInterrupt:
             raise
         except BaseException:                        # noqa: BLE001 — M7: không làm sập suite (F9)
@@ -775,8 +775,7 @@ def _chay_cong(copy):
     except ValueError:
         _cd("cong_bundle_fragment.stdout_khong_phai_json", proc.stdout)
         payload = {}
-    if isinstance(payload, dict):
-        _ghi_payload_cong("cong_bundle_fragment", payload)
+    _ghi_payload_cong("cong_bundle_fragment", payload)            # tự kiểm kiểu bằng `is`; không `isinstance` (F3)
     return proc.returncode, payload
 
 
@@ -872,8 +871,7 @@ def case_driver_that_chay_probe_tren_bundle_giai_nen(root):
         _cd("tra_false_som", "stdout cua driver khong phai JSON")
         return False
     _cd("so_fragment_canonical", len(goc))
-    if isinstance(payload, dict):
-        _ghi_payload_cong("driver_cong", payload)
+    _ghi_payload_cong("driver_cong", payload)            # tự kiểm kiểu bằng `is`; không `isinstance` (F3)
     cases = payload.get("cases") or []
     return (_ve("payload.get('load_error') is None", payload.get("load_error") is None)
             and _ve("len(cases) == len(goc) + 1", len(cases) == len(goc) + 1)
@@ -1191,7 +1189,8 @@ def case_chan_doan_vat_hoa_va_nguon_mau(root):
             __name__ = property(lambda cls: goi.append("name"))
         _, g8 = _ghi_vao_kenh_rieng(lambda: (_cd("so", {"n": int(so), "o": type("T" + so, (), {})(),
                                                          "m": _Meta("M", (), {})()}),
-                                             _ghi_payload_cong("cong", {"ok": True, "x": _Meta("N", (), {})()})))
+                                             _ghi_payload_cong("cong", {"ok": True, "x": _Meta("N", (), {})()}),
+                                             _ghi_payload_cong("cong2", _Meta("MD", (dict,), {})())))
         k8 = "\n".join(_khoi_chan_doan(g8)) + _loi_an_toan(type("E" + so, (Exception,), {})("x"))
 
         def ca_to(_r):        # F4: mục 1000 ký tự ⇒ khối dừng sát 11920; thiếu trừ dòng dọn dẹp là vượt
@@ -1199,7 +1198,7 @@ def case_chan_doan_vat_hoa_va_nguon_mau(root):
             return False
         def don_dai(td):                               # thông điệp dài: dòng dọn dẹp vượt chỗ dành sẵn
             td.cleanup()
-            raise PermissionError("k" * 1500)
+            raise PermissionError("k" * 3000)        # > _CD_TRAN_CHUOI: tiền tố phải còn (F10)
         _, dong_to = _chay_mot_ca(ca_to, don_dep=don_dai)
 
         class _SubHong:                                 # F9: bộ che ném lúc dựng dòng dọn dẹp

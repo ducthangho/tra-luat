@@ -1,0 +1,356 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 75b5add..2463651 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -804,6 +804,10 @@ jobs:
+       # NỢ CÓ TÊN `PLAT-X5-required-status-check`: selftest không thể tự chứng minh job
+       # này thật sự được GitHub gọi. Branch protection phải require status của job `gate`;
+       # t34 chỉ còn canh lời gọi thẳng tệp `.py`, không giả làm bộ phân tích shell.
++      - name: Linux updater selftest (wp1178)
++        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' && runner.os == 'Linux' }}
++        shell: bash
++        run: bash ops/environment/update-linux.sh --selftest
+       - name: lease-publish selftest (đo lại setup sau G5)
+         if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+         shell: bash
+diff --git a/ops/environment/update-linux.sh b/ops/environment/update-linux.sh
+index 263e2ad..3ccdae0 100644
+--- a/ops/environment/update-linux.sh
++++ b/ops/environment/update-linux.sh
+@@ -5,6 +5,245 @@
+ # Without --apply it only reports versions and the checker result (exit code = checker exit code).
+ # It reports only whether TL_* variables are set; it never prints their values or reads credential files.
+ set -euo pipefail
++# Developer regression mode: real entrypoint, isolated Ubuntu fixtures, no installers/network.
++if [[ "${1:-}" == --selftest ]]; then
++  shift
++  PYTHONDONTWRITEBYTECODE=1 python3 -B - "$0" "$@" <<'UPDATER_SELFTEST'
++import hashlib, io, json, os, pathlib, shutil, subprocess, sys, tarfile, tempfile, time
++
++source = pathlib.Path(sys.argv[1]).resolve()
++args = sys.argv[2:]
++if args:
++    if len(args) != 2 or args[0] != '--against':
++        raise SystemExit('selftest accepts only --against SCRIPT')
++    source = pathlib.Path(args[1]).resolve()
++text = source.read_text()
++if pathlib.Path('/etc/os-release').read_text().find('ID=ubuntu\n') < 0:
++    raise SystemExit('selftest requires real Ubuntu (fixture installers only)')
++real_python, real_bash = sys.executable, shutil.which('bash')
++real_pgrep = shutil.which('pgrep')
++assert real_pgrep and real_bash, 'fixture dependency missing'
++print('RUNTIME', sys.version.split()[0], pathlib.Path('/etc/os-release').read_text().splitlines()[0], flush=True)
++results = []
++def suite_ok(records):
++    return bool(records) and all(ok for _, ok in records)
++with tempfile.TemporaryDirectory(prefix='tl-updater-selftest-') as scratch:
++    root = pathlib.Path(scratch)
++    def executable(path, content):
++        path.parent.mkdir(parents=True, exist_ok=True)
++        path.write_text(content)
++        path.chmod(0o755)
++    # All package/network/profile effects stay inside this disposable fixture.
++    driver = root / 'driver'
++    executable(driver, '#!' + real_python + '\n' + r'''
++import json, os, pathlib, shutil, subprocess, sys
++name = pathlib.Path(sys.argv[0]).name
++args = sys.argv[1:]
++home = pathlib.Path(os.environ['HOME'])
++def event(value):
++    with open(os.environ['FIX_LOG'], 'a') as out: out.write(value + '\n')
++def tool(name, broken=False):
++    dest = home / ('.local/share/tra-luat-tools/venv/bin/uv' if name == 'uv' else '.local/bin/' + name)
++    dest.parent.mkdir(parents=True, exist_ok=True)
++    if dest.is_symlink(): dest.unlink()
++    dest.write_text('#!/bin/bash\n' + ('exit 127\n' if broken else 'echo "' + name + ' 1.2.3"\n'))
++    dest.chmod(0o755)
++if name == 'pgrep':
++    event('selector ' + json.dumps([os.environ['REAL_PGREP'], '-P', os.environ['FIX_PARENT']] + args))
++    sys.exit(subprocess.call([os.environ['REAL_PGREP'], '-P', os.environ['FIX_PARENT']] + args))
++if name in ('python', 'python3'):
++    if args[:2] == ['-m', 'pip']:
++        event('pip ' + ' '.join(args))
++        if 'uv' in args: tool('uv', os.environ.get('POST_BROKEN') == 'uv')
++        sys.exit(0)
++    if args[:2] == ['-m', 'venv']:
++        event('venv')
++        dest = pathlib.Path(args[2]) / 'bin/python'
++        dest.parent.mkdir(parents=True, exist_ok=True)
++        dest.symlink_to(sys.argv[0])
++        sys.exit(0)
++    if args and args[0] == 'ops/cong_cu.py':
++        event('checker')
++        print(json.dumps({'cong_cu': [{'ten': 'shellcheck', 'trang_thai': 'DAT'}]}))
++        sys.exit(0)
++    if args == ['-']:
++        code = sys.stdin.read()
++        if 'api.github.com/repos/google-antigravity' in code:
++            print(os.environ['AGY_RELEASE'])
++            sys.exit(0)
++        sys.exit(subprocess.run([os.environ['REAL_PYTHON']] + args, input=code, text=True).returncode)
++    sys.exit(subprocess.call([os.environ['REAL_PYTHON']] + args))
++if name in ('apt-get', 'sudo', 'dpkg', 'curl', 'npm', 'uv') and '--version' not in args:
++    event(name + ' ' + ' '.join(args))
++    if name == 'sudo':
++        if args[:2] == ['-n', 'apt-get']: args = args[1:]
++        if not args or args[0] != 'apt-get': raise SystemExit('UNEXPECTED fixture sudo')
++        sys.exit(subprocess.call([str(pathlib.Path(os.environ['FIX_BIN'], 'apt-get'))] + args[1:]))
++    elif name == 'apt-get' and 'install' in args and 'curl' in args:
++        pathlib.Path(os.environ['FIX_BIN'], 'curl').symlink_to(os.environ['DRIVER'])
++    elif name == 'curl':
++        if 'https://fixture.invalid/agy' not in args: raise SystemExit('UNEXPECTED fixture network')
++        dest = args[args.index('--output') + 1] if '--output' in args else args[args.index('-o') + 1]
++        shutil.copyfile(os.environ['AGY_ARCHIVE'], dest)
++    elif name == 'npm' and args[:1] == ['view']:
++        print('1.2.3')
++    elif name == 'npm' and 'install' in args:
++        for package, binary in [('@openai/codex', 'codex'), ('@anthropic-ai/claude-code', 'claude'), ('@googleworkspace/cli', 'gws')]:
++            if any(arg.startswith(package) for arg in args): tool(binary, os.environ.get('POST_BROKEN') == binary)
++    elif name == 'uv' and 'install' in args:
++        tool('nlm', os.environ.get('POST_BROKEN') == 'nlm')
++    elif name not in ('apt-get', 'npm'):
++        raise SystemExit('UNEXPECTED fixture operation: ' + name)
++    sys.exit(0)
++print(name + ' 1.2.3')
++''')
++    def run_case(label, script=text, mode='system', missing=(), broken=None,
++                 managed=False, child=None, post=None, agy=None, extra=(), escape=False):
++        case = root / str(len(list(root.iterdir())))
++        bin_dir, home, repo = case / 'bin', case / 'home', case / 'repo'
++        for directory in (bin_dir, home, repo / 'ops'):
++            directory.mkdir(parents=True)
++        log = case / 'events'
++        log.touch()
++        (repo / 'ops/cong_cu.yaml').write_text('cong_cu:\n  shellcheck:\n    bat_buoc: true\n  jsonschema:\n    cai:\n      lenh: pip install jsonschema==4.25.1\n    bat_buoc: false\n')
++        for file in ('ops/cong_cu.py', 'ops/cai_cong_cu.sh', 'requirements.txt'):
++            (repo / file).touch()
++        commands = 'git python python3 bash rg shellcheck actionlint gh node npm pwsh uv claude codex agy nlm gws curl apt-get sudo dpkg pgrep'
++        for name in commands.split():
++            if name not in missing: (bin_dir / name).symlink_to(driver)
++        (bin_dir / 'bash').unlink()
++        (bin_dir / 'bash').symlink_to(real_bash)
++        for name in 'uname id grep head readlink mkdir mktemp rm sha256sum tar gzip install awk ln cat'.split():
++            target = shutil.which(name)
++            assert target, 'missing fixture utility ' + name
++            (bin_dir / name).symlink_to(target)
++        venv = home / '.local/share/tra-luat-tools/venv/bin'
++        venv.mkdir(parents=True)
++        (venv / 'python').symlink_to(driver)
++        if broken:
++            dest = (venv / broken if broken == 'uv' else home / '.local/bin' / broken) if managed else bin_dir / broken
++            if dest.is_symlink(): dest.unlink()
++            executable(dest, '#!/bin/bash\nexit 127\n')
++            if escape:
++                external = case / 'external' / broken
++                executable(external, '#!/bin/bash\nexit 127\n')
++                dest.unlink()
++                dest.symlink_to(external)
++        archive = case / 'agy.tar.gz'
++        with tarfile.open(archive, 'w:gz') as out:
++            payload = b'#!/bin/bash\necho "agy 1.2.3"\n'
++            if post == 'agy': payload = b'#!/bin/bash\nexit 127\n'
++            info = tarfile.TarInfo('wrong' if agy == 'layout' else 'antigravity')
++            info.size = len(payload)
++            out.addfile(info, io.BytesIO(payload))
++        digest = hashlib.sha256(archive.read_bytes()).hexdigest() if agy != 'digest' else '0' * 64
++        release = {'tag_name': 'v1.2.3', 'assets': [{'name': 'agy_cli_linux_x64.tar.gz', 'browser_download_url': 'https://fixture.invalid/agy', 'digest': 'sha256:' + digest}]}
++        entry = case / 'updater.sh'
++        entry.write_text(script)
++        env = {'PATH': str(bin_dir), 'HOME': str(home), 'PYTHONDONTWRITEBYTECODE': '1',
++               'FIX_LOG': str(log), 'FIX_BIN': str(bin_dir), 'FIX_PARENT': str(os.getpid()),
++               'REAL_PYTHON': real_python, 'REAL_PGREP': real_pgrep, 'DRIVER': str(driver),
++               'AGY_RELEASE': json.dumps(release), 'AGY_ARCHIVE': str(archive), 'POST_BROKEN': post or ''}
++        def snapshot():
++            return [(str(p.relative_to(case)), p.lstat().st_mode, os.readlink(p) if p.is_symlink() else p.read_bytes())
++                    for tree in (home, repo) for p in sorted(tree.rglob('*')) if p.is_symlink() or p.is_file()]
++        before = snapshot()
++        process = None
++        try:
++            if child:
++                executable_name = case / child
++                executable_name.symlink_to(real_python)
++                process = subprocess.Popen([str(executable_name), '-B', '-c', 'import time; time.sleep(120)'], env=env)
++                for _ in range(100):
++                    comm = pathlib.Path('/proc', str(process.pid), 'comm').read_text().strip()
++                    if comm == child: break
++                    time.sleep(.01)
++                assert comm == child, 'child did not start with expected native comm'
++                print('CHILD', label, process.pid, comm, 'argv=' + json.dumps([str(executable_name), '-B', '-c', 'import time; time.sleep(120)']), flush=True)
++            command = [real_bash, str(entry), '--repo', str(repo), '--apply']
++            if mode == 'user': command.append('--user-only')
++            command.extend(extra)
++            result = subprocess.run(command, env=env, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60)
++        finally:
++            if process:
++                process.terminate()
++                process.wait(timeout=5)
++        events = log.read_text().splitlines()
++        mutations = [line for line in events if not line.startswith(('selector ', 'checker'))]
++        if snapshot() != before: mutations.append('fixture filesystem changed')
++        print('CASE', label, 'rc=' + str(result.returncode), 'events=' + json.dumps(events), flush=True)
++        print(result.stdout, end='', flush=True)
++        assert not any('UNEXPECTED' in line for line in result.stdout.splitlines()), 'unexpected fixture operation'
++        return result.returncode, result.stdout, mutations
++    def check(label, value):
++        results.append((label, bool(value)))
++        print(('PASS ' if value else 'FAIL ') + label, flush=True)
++    def rejected(result, message, rc=5):
++        code, output, mutations = result
++        return code == rc and message in output and not mutations
++    for mode in ('system', 'user'):
++        result = run_case('curl-' + mode, mode=mode, missing=('curl',) if mode == 'user' else ('curl', 'agy'), extra=('--persist-path',) if mode == 'user' else ())
++        check('curl-' + mode, rejected(result, 'requires preinstalled curl') if mode == 'user' else result[0] == 0 and 'apt-get install -y curl' in result[2] and any(e.startswith('curl ') for e in result[2]) and result[2].index('apt-get install -y curl') < next(i for i, e in enumerate(result[2]) if e.startswith('curl ')))
++        result = run_case('healthy-' + mode, mode=mode)
++        check('healthy-' + mode, result[0] == 0 and not any(e.startswith(('apt-get ', 'sudo ')) for e in result[2]))
++        check('python-version-' + mode, rejected(run_case('python-version-' + mode, mode=mode, child='python3.12', extra=('--persist-path',)), 'processes are active', 3))
++    check('exact-name-control', run_case('exact-name-control', child='notpython3.12')[0] == 0)
++    for tool in ('uv', 'claude', 'codex', 'nlm', 'agy'):
++        check('external-broken-' + tool, rejected(run_case('external-broken-' + tool, broken=tool, extra=('--persist-path',)), 'Broken external ' + tool))
++        result = run_case('managed-repair-' + tool, broken=tool, managed=True)
++        check('managed-repair-' + tool, result[0] == 0 and any(e.startswith(('pip ', 'npm ', 'uv ', 'curl ')) for e in result[2]))
++        result = run_case('managed-postcheck-' + tool, broken=tool, managed=True, post=tool)
++        check('managed-postcheck-' + tool, result[0] == 6 and ('version probe failed: ' + tool in result[1] or 'AGY did not reach' in result[1]))
++    for tool in ('codex', 'uv'):
++        check('managed-symlink-escape-' + tool, rejected(run_case('managed-symlink-escape-' + tool, broken=tool, managed=True, escape=True), 'Broken external ' + tool))
++    result = run_case('gws-repair', missing=('gws',))
++    check('gws-allow-scripts', result[0] == 0 and any('--allow-scripts=@googleworkspace/cli' in e for e in result[2]))
++    check('agy-current-external', not run_case('agy-current-external', extra=('--latest', '--tools', 'agy'))[2])
++    for fault, message in (('digest', 'AGY SHA256 mismatch'), ('layout', 'Unexpected AGY archive layout')):
++        result = run_case('agy-' + fault, missing=('agy',), agy=fault)
++        check('agy-' + fault, result[0] == 5 and message in result[1])
++    check('npm-user-broken', rejected(run_case('npm-user-broken', mode='user', broken='npm'), 'requires working native npm'))
++    check('healthy-external-no-duplicate', not run_case('healthy-external-no-duplicate')[2])
++    # Semantic mutants must lose the intended property, with healthy controls green.
++    if not args:
++        marker = '# END updater developer selftest\n'
++        prefix, body = text.split(marker, 1)
++        mutants = [
++            ('curl-user', 'in curl git python3', 'in git python3', dict(mode='user', missing=('curl',)), 'requires preinstalled curl', 5),
++            ('curl-system', 'command -v curl >/dev/null || need_apt+=(curl)', ': # curl provisioning removed', dict(missing=('curl', 'agy')), 'apt-get install -y curl', 0),
++            ('python-version', 'python([0-9]+([.][0-9]+)*)?', 'python|python3', dict(child='python3.12'), 'processes are active', 3),
++            ('external-probe', '&& ! usable_command "$tool" && ! managed_cli', '&& false && ! managed_cli', dict(broken='codex'), 'Broken external codex', 5),
++            ('execution-probe', 'native_command "$1" && "$1" --version >/dev/null 2>&1;', 'native_command "$1";', dict(broken='codex'), 'Broken external codex', 5),
++            ('final-probe', 'usable_command "$tool" || { echo "required Linux tool version probe failed: $tool" >&2; exit 6; }', ': # final probe removed', dict(broken='codex', managed=True, post='codex'), 'version probe failed: codex', 6),
++        ]
++        for label, before, after, options, message, code in mutants:
++            assert body.count(before) == 1, 'mutant anchor not unique: ' + label
++            mutant = prefix + marker + body.replace(before, after, 1)
++            result = run_case('mutant-' + label, script=mutant, **options)
++            intended = any(e == message for e in result[2]) if label == 'curl-system' else result[0] == code and message in result[1]
++            expected_rc = {'curl-system': 5, 'external-probe': 6}.get(label, 0)
++            evidence = 'AGY download failed' in result[1] if label == 'curl-system' else ('version probe failed: codex' in result[1] and any(e.startswith('npm install') for e in result[2]) if label == 'external-probe' else 'cong_cu' in result[1])
++            check('mutant-' + label, not intended and result[0] == expected_rc and evidence)
++            check('mutant-control-' + label, run_case('mutant-control-' + label, script=mutant)[0] == 0)
++        # A crash cannot count as a semantic kill, and a contaminated run cannot pass.
++        for label, bad in [('crash', 'echo "Broken external codex"; exit 99\n'), ('import', 'echo "Broken external codex"; python3 -c "import nonexistent_fixture_module"\n'), ('mutation', 'apt-get install -y forbidden; echo "Broken external codex"; exit 5\n')]:
++            result = run_case('canary-' + label, script=bad)
++            check('harness-' + label, not rejected(result, 'Broken external codex'))
++        try:
++            run_case('canary-network', script='curl --output "$HOME/unexpected" https://unexpected.invalid\n')
++            check('harness-network', False)
++        except AssertionError as error:
++            check('harness-network', str(error) == 'unexpected fixture operation')
++    check('harness-zero-tests', not suite_ok([]))
++    check('nonempty-results', len(results) > 0)
++passed = sum(ok for _, ok in results)
++print('COUNTS', json.dumps({'cases': len(results), 'mutants': sum(label.startswith('mutant-') and not label.startswith('mutant-control-') for label, _ in results), 'mutant_controls': sum(label.startswith('mutant-control-') for label, _ in results)}), flush=True)
++print('SELFTEST %d/%d' % (passed, len(results)), flush=True)
++raise SystemExit(0 if suite_ok(results) else 1)
++UPDATER_SELFTEST
++  exit $?
++fi
++# END updater developer selftest
+ repo='' apply=0 latest=0 persist_path=0 user_only=0 selected='claude,codex,agy,nlm,gws'
+ while (($#)); do
+   case "$1" in
+@@ -39,6 +278,17 @@ native_command() {
+   p="$(command -v "$1" 2>/dev/null || true)"
+   [[ -n "$p" && "$p" != /mnt/* && "$p" != *.exe && "$p" != *.cmd ]]
+ }
++usable_command() { native_command "$1" && "$1" --version >/dev/null 2>&1; }
++managed_cli() {
++  local found resolved expected
++  found="$(command -v "$1" 2>/dev/null || true)"
++  case "$1" in uv) expected="$HOME/.local/share/tra-luat-tools/venv/bin/uv" ;;
++    *) expected="$HOME/.local/bin/$1" ;;
++  esac
++  [[ "$found" == "$expected" && -O "$found" ]] || return 1
++  resolved="$(readlink -f -- "$found")" || return 1
++  [[ "$resolved" == "$HOME/.local/"* && -O "$resolved" ]]
++}
+ # `python3 -m venv --help` succeeds even without python3-venv on Ubuntu; only ensurepip proves venv creation works.
+ venv_available() { python3 -c 'import ensurepip, venv' >/dev/null 2>&1; }
+ agy_version() {
+@@ -115,7 +365,7 @@ if (( ! apply )); then
+   exit 0
+ fi
+ command -v pgrep >/dev/null 2>&1 || { echo 'pgrep (procps) is required to check for active jobs before --apply' >&2; exit 3; }
+-if pgrep -x -u "$(id -u)" 'claude|codex|agy|nlm|gws|uv|node|python|python3' >/dev/null 2>&1; then
++if pgrep -x -u "$(id -u)" 'claude|codex|agy|nlm|gws|uv|node|python([0-9]+([.][0-9]+)*)?' >/dev/null 2>&1; then
+   echo 'Related tool/runtime processes are active; finish their jobs before updating.' >&2
+   exit 3
+ fi
+@@ -182,8 +432,18 @@ esac
+ apt=(apt-get)
+ if (( EUID != 0 )); then apt=(sudo -n apt-get); fi
+ export PATH="$HOME/.local/bin:$PATH"
++tool_venv="$HOME/.local/share/tra-luat-tools/venv"
++export PATH="$tool_venv/bin:$PATH"
++# Refuse broken external installations before package, venv or profile changes.
++# Repair is limited to our owned destinations, including resolved symlink targets.
++for tool in uv claude codex nlm agy; do
++  if native_command "$tool" && ! usable_command "$tool" && ! managed_cli "$tool"; then
++    printf 'Broken external %s at %s; repair that installation before --apply.\n' "$tool" "$(command -v "$tool")" >&2
++    exit 5
++  fi
++done
+ if (( user_only )); then
+-  for prerequisite in git python3 bash rg shellcheck actionlint pwsh; do
++  for prerequisite in curl git python3 bash rg shellcheck actionlint pwsh; do
+     command -v "$prerequisite" >/dev/null 2>&1 || { echo "--user-only requires preinstalled $prerequisite; use system mode to install OS packages" >&2; exit 5; }
+   done
+   venv_available || { echo '--user-only requires python3-venv (ensurepip); use system mode to install it' >&2; exit 5; }
+@@ -205,6 +465,7 @@ if (( user_only )); then
+   native_command gh || install_gh_user
+ else
+ need_apt=()
++command -v curl >/dev/null || need_apt+=(curl)
+ command -v git >/dev/null || need_apt+=(git)
+ command -v python3 >/dev/null || need_apt+=(python3)
+ native_command gh || need_apt+=(gh)
+@@ -222,11 +483,10 @@ if (( ! user_only )) && ! venv_available; then
+   "${apt[@]}" update
+   "${apt[@]}" install -y python3-venv
+ fi
+-tool_venv="$HOME/.local/share/tra-luat-tools/venv"
+ if [[ ! -x "$tool_venv/bin/python" ]]; then python3 -m venv "$tool_venv"; fi
+ export PATH="$tool_venv/bin:$HOME/.local/bin:$PATH"
+ export NPM_CONFIG_PREFIX="$HOME/.local"
+-if ! native_command uv; then python -m pip install --disable-pip-version-check uv; fi
++if ! usable_command uv; then python -m pip install --disable-pip-version-check --force-reinstall uv; fi
+ if (( user_only )); then
+   python -m pip install --disable-pip-version-check 'PyYAML==6.0.3'
+   jsonschema_pin="$(python - <<'PY'
+@@ -311,11 +571,11 @@ PROFILE
+     fi
+   done
+ fi
+-if ! native_command codex; then npm install -g @openai/codex --no-fund --no-audit; fi
++if ! usable_command codex; then npm install -g @openai/codex --no-fund --no-audit; fi
+ if ! native_command gws || ! gws --version >/dev/null 2>&1; then install_gws; fi
+-if ! native_command claude; then npm install -g @anthropic-ai/claude-code --no-fund --no-audit; fi
+-if ! native_command nlm; then uv tool install notebooklm-mcp-cli; fi
+-native_command agy || install_agy_verified
++if ! usable_command claude; then npm install -g @anthropic-ai/claude-code --no-fund --no-audit; fi
++if ! usable_command nlm; then uv tool install --force notebooklm-mcp-cli; fi
++usable_command agy || install_agy_verified
+ if (( ! user_only )) && ! command -v pwsh >/dev/null 2>&1; then
+   # shellcheck source=/dev/null
+   ubuntu_version="$(. /etc/os-release; echo "$VERSION_ID")"
+@@ -373,5 +633,6 @@ for tool in git python bash rg shellcheck actionlint gh node npm pwsh uv claude
+ done
+ for tool in gh node npm uv claude codex gws agy nlm; do
+   native_command "$tool" || { echo "required Linux tool resolves to Windows or outside Linux: $tool" >&2; exit 5; }
++  usable_command "$tool" || { echo "required Linux tool version probe failed: $tool" >&2; exit 6; }
+ done
+ python ops/cong_cu.py kiem-tra --json

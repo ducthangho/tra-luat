@@ -1,0 +1,10 @@
+{
+  "README.md": "477a21b719347c735dd46a8c8e2a044e459d58a5ae9b75b5c53024d587b5310b",
+  "continuation.diff": "f996b5f520b80910b33cec987172ec0d5b6cdcc763cfdd48a171a626f64cca55",
+  "executor-evidence-manifest.json": "c90363dc1fa8f837bd3af21a83b0deb552f6a4717bc5837880e8387d2ad6ef25",
+  "executor-handoff.md": "b25074abf864c62076aeee4305922427cdb2d7eab12749b29760357921aed0f5",
+  "final-evidence-summary.json": "2be98fbd41cf5df9f3921482a92cbda32cf6f17a73ffb1efc7cef6b8b7131f76",
+  "full-baseline.diff": "84f5f66219db31f7264f4aa8922dc41c9fe649ec77ba989e351896447fd1c95c",
+  "windows-evidence.zip": "25b62f5d130118f2a581bfbcee68e804e731d12e7f42fce9c127d07256290856",
+  "windows-paired-evidence.json": "edf9f224e718587788d2fc7e805f0e57c27c301b3777c0883e81e59bb6196b86"
+}

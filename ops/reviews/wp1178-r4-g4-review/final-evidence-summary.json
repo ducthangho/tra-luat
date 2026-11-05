@@ -1,0 +1,294 @@
+{
+  "H": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+  "tree": "70bc751068856245e92875a13e182a9c90781f8b",
+  "sealed_at": "2026-11-05T03:11:38.608728+00:00",
+  "final_gate_receipts": {
+    "admission-ef864d6": {
+      "head": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+      "tree": "70bc751068856245e92875a13e182a9c90781f8b",
+      "head_unchanged": true,
+      "command": [
+        "python3",
+        "-B",
+        "/workspace/scratch/wp1178-r4-g4/artifacts/canonical-lease-publish-ec1.py",
+        "kiem-thu-hoi-github",
+        "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+        "--canonical-base",
+        "ec1b18a2a007fc2e697249c727a2ca8391ab209e",
+        "--nhanh-mac-dinh",
+        "master",
+        "--root",
+        "/workspace/scratch/wp1178-r4-g4/candidate",
+        "--receipt",
+        "/workspace/scratch/wp1178-r4-g4/artifacts/canonical-admission-ef864d6.json"
+      ],
+      "started_at": "2026-11-05T03:00:24.486925+00:00",
+      "finished_at": "2026-11-05T03:00:24.686283+00:00",
+      "rc": 0,
+      "sha256": "1554d7031f54e7d67eed29c72233061f97fc9b457d52b512ed025bfa659343ec",
+      "log": "/workspace/scratch/wp1178-r4-g4/artifacts/admission-ef864d6.log"
+    },
+    "regression-ef864d6": {
+      "head": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+      "tree": "70bc751068856245e92875a13e182a9c90781f8b",
+      "head_unchanged": true,
+      "source_sha256": "75f83de55799efbc3365c70fe532ea563f86a3c1424fc5ff52ee0fa7fd18ce66",
+      "source_unchanged": true,
+      "command": [
+        "docker",
+        "--host=unix:///var/run/docker.sock",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--mount",
+        "type=bind,src=/workspace/scratch/wp1178-r4-g4/candidate,dst=/source,readonly",
+        "--mount",
+        "type=bind,src=/workspace/scratch/wp1178-r4-g4/artifacts,dst=/artifacts",
+        "wp1178-ubuntu-fixture:20261105",
+        "bash",
+        "-c",
+        "cd /source && bash ops/environment/update-linux.sh --selftest"
+      ],
+      "started_at": "2026-11-05T03:01:52.417319+00:00",
+      "finished_at": "2026-11-05T03:03:44.948315+00:00",
+      "rc": 0,
+      "log": "/workspace/scratch/wp1178-r4-g4/artifacts/regression-ef864d6.log",
+      "sha256": "329ffb9d0676fabe21cf80175f50bae2846ed4c3866dedd3d2cf1d69e84eb0e1"
+    },
+    "regression-ef864d6-nonroot": {
+      "head": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+      "tree": "70bc751068856245e92875a13e182a9c90781f8b",
+      "head_unchanged": true,
+      "source_sha256": "75f83de55799efbc3365c70fe532ea563f86a3c1424fc5ff52ee0fa7fd18ce66",
+      "source_unchanged": true,
+      "command": [
+        "docker",
+        "--host=unix:///var/run/docker.sock",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,src=/workspace/scratch/wp1178-r4-g4/candidate,dst=/source,readonly",
+        "--mount",
+        "type=bind,src=/workspace/scratch/wp1178-r4-g4/artifacts,dst=/artifacts",
+        "wp1178-ubuntu-fixture:20261105",
+        "bash",
+        "-c",
+        "cd /source && bash ops/environment/update-linux.sh --selftest"
+      ],
+      "started_at": "2026-11-05T03:06:23.904000+00:00",
+      "finished_at": "2026-11-05T03:08:10.406673+00:00",
+      "rc": 0,
+      "log": "/workspace/scratch/wp1178-r4-g4/artifacts/regression-ef864d6-nonroot.log",
+      "sha256": "e107fbba42503fee57e66d0e94436c3af02a0d4c41cb03300403334cff4d5279"
+    },
+    "baseline-ef864d6": {
+      "head": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+      "tree": "70bc751068856245e92875a13e182a9c90781f8b",
+      "head_unchanged": true,
+      "source_sha256": "75f83de55799efbc3365c70fe532ea563f86a3c1424fc5ff52ee0fa7fd18ce66",
+      "source_unchanged": true,
+      "command": [
+        "docker",
+        "--host=unix:///var/run/docker.sock",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--mount",
+        "type=bind,src=/workspace/scratch/wp1178-r4-g4/candidate,dst=/source,readonly",
+        "--mount",
+        "type=bind,src=/workspace/scratch/wp1178-r4-g4/artifacts,dst=/artifacts",
+        "wp1178-ubuntu-fixture:20261105",
+        "bash",
+        "-c",
+        "cd /source && bash ops/environment/update-linux.sh --selftest --against /artifacts/baseline-a7-update-linux.sh"
+      ],
+      "started_at": "2026-11-05T03:04:20.991284+00:00",
+      "finished_at": "2026-11-05T03:06:03.111172+00:00",
+      "rc": 1,
+      "log": "/workspace/scratch/wp1178-r4-g4/artifacts/baseline-ef864d6.log",
+      "sha256": "1c2942ceaa3d90c7cc3df5aab9e77ed59a7878e3ef4c5dc8bdf9e2c332a3c7de"
+    },
+    "harness-integrity-ef864d6": {
+      "head": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+      "tree": "70bc751068856245e92875a13e182a9c90781f8b",
+      "head_unchanged": true,
+      "source_sha256": "75f83de55799efbc3365c70fe532ea563f86a3c1424fc5ff52ee0fa7fd18ce66",
+      "source_unchanged": true,
+      "command": [
+        "docker",
+        "--host=unix:///var/run/docker.sock",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--mount",
+        "type=bind,src=/workspace/scratch/wp1178-r4-g4/candidate,dst=/source,readonly",
+        "--mount",
+        "type=bind,src=/workspace/scratch/wp1178-r4-g4/artifacts,dst=/artifacts",
+        "wp1178-ubuntu-fixture:20261105",
+        "bash",
+        "-c",
+        "python3 -B /artifacts/harness-integrity.py"
+      ],
+      "started_at": "2026-11-05T03:05:02.654246+00:00",
+      "finished_at": "2026-11-05T03:05:30.667335+00:00",
+      "rc": 0,
+      "log": "/workspace/scratch/wp1178-r4-g4/artifacts/harness-integrity-ef864d6.log",
+      "sha256": "7d06c321d0f705acb12af3ea1eaa45cae8eac957e642f2366d141abe8acf2a6f"
+    },
+    "tl-ef864d6": {
+      "head": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+      "tree": "70bc751068856245e92875a13e182a9c90781f8b",
+      "head_unchanged": true,
+      "command": [
+        "python3",
+        "-B",
+        "scripts/tl.py",
+        "--selftest"
+      ],
+      "started_at": "2026-11-05T03:03:45.301317+00:00",
+      "finished_at": "2026-11-05T03:10:00.983623+00:00",
+      "rc": 0,
+      "sha256": "e8f293112b2db164db7861bc563c92375a54dbdda7a0751ff5107b9eb9a435b8",
+      "log": "/workspace/scratch/wp1178-r4-g4/artifacts/tl-ef864d6.log"
+    },
+    "shellcheck-ef864d6": {
+      "head": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+      "tree": "70bc751068856245e92875a13e182a9c90781f8b",
+      "head_unchanged": true,
+      "command": [
+        "shellcheck",
+        "ops/environment/update-linux.sh"
+      ],
+      "started_at": "2026-11-05T03:04:22.310234+00:00",
+      "finished_at": "2026-11-05T03:04:23.283590+00:00",
+      "rc": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log": "/workspace/scratch/wp1178-r4-g4/artifacts/shellcheck-ef864d6.log"
+    },
+    "syntax-ef864d6": {
+      "head": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+      "tree": "70bc751068856245e92875a13e182a9c90781f8b",
+      "head_unchanged": true,
+      "command": [
+        "bash",
+        "-n",
+        "ops/environment/update-linux.sh"
+      ],
+      "started_at": "2026-11-05T03:04:23.347236+00:00",
+      "finished_at": "2026-11-05T03:04:23.354889+00:00",
+      "rc": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log": "/workspace/scratch/wp1178-r4-g4/artifacts/syntax-ef864d6.log"
+    },
+    "actionlint-ef864d6": {
+      "head": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+      "tree": "70bc751068856245e92875a13e182a9c90781f8b",
+      "head_unchanged": true,
+      "command": [
+        "actionlint",
+        ".github/workflows/ci.yml"
+      ],
+      "started_at": "2026-11-05T03:04:23.421464+00:00",
+      "finished_at": "2026-11-05T03:04:23.906799+00:00",
+      "rc": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log": "/workspace/scratch/wp1178-r4-g4/artifacts/actionlint-ef864d6.log"
+    },
+    "contracts-ef864d6": {
+      "head": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+      "tree": "70bc751068856245e92875a13e182a9c90781f8b",
+      "head_unchanged": true,
+      "command": [
+        "python3",
+        "-B",
+        "/workspace/scratch/wp1178-r4-g4/artifacts/static-contracts.py"
+      ],
+      "started_at": "2026-11-05T03:04:23.970412+00:00",
+      "finished_at": "2026-11-05T03:04:24.445849+00:00",
+      "rc": 0,
+      "sha256": "ffd294ddc8dc4fad24f2f40519e3f3e309dbe752cb67af22b65c7a343958010e",
+      "log": "/workspace/scratch/wp1178-r4-g4/artifacts/contracts-ef864d6.log"
+    },
+    "eol-ef864d6": {
+      "head": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+      "tree": "70bc751068856245e92875a13e182a9c90781f8b",
+      "head_unchanged": true,
+      "command": [
+        "python3",
+        "-B",
+        ".githooks/eol_policy.py",
+        "--all",
+        "--json"
+      ],
+      "started_at": "2026-11-05T03:04:24.519521+00:00",
+      "finished_at": "2026-11-05T03:04:33.606620+00:00",
+      "rc": 0,
+      "sha256": "72ace5cda8c5cc8ae9ccc355fc349aec6a65d6f865b04aa413a366ef3b69488c",
+      "log": "/workspace/scratch/wp1178-r4-g4/artifacts/eol-ef864d6.log"
+    },
+    "diffcheck-ef864d6": {
+      "head": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+      "tree": "70bc751068856245e92875a13e182a9c90781f8b",
+      "head_unchanged": true,
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "ec1b18a2a007fc2e697249c727a2ca8391ab209e",
+        "HEAD"
+      ],
+      "started_at": "2026-11-05T03:04:33.705423+00:00",
+      "finished_at": "2026-11-05T03:04:33.727575+00:00",
+      "rc": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log": "/workspace/scratch/wp1178-r4-g4/artifacts/diffcheck-ef864d6.log"
+    }
+  },
+  "actual_counts": {
+    "regression-ef864d6": {
+      "result_ids": 48,
+      "actual_entrypoint_invocations": 46,
+      "selftest_pair": [
+        "48",
+        "48"
+      ]
+    },
+    "regression-ef864d6-nonroot": {
+      "result_ids": 48,
+      "actual_entrypoint_invocations": 46,
+      "selftest_pair": [
+        "48",
+        "48"
+      ]
+    },
+    "baseline-ef864d6": {
+      "result_ids": 32,
+      "actual_entrypoint_invocations": 30,
+      "selftest_pair": [
+        "11",
+        "32"
+      ]
+    }
+  },
+  "tl_selftest": [
+    1776,
+    1776
+  ],
+  "all_final_requirements_in_executor_scope_passed": true,
+  "human_audited": false,
+  "ready": false,
+  "remaining_outside_executor_scope": [
+    "Windows M3",
+    "fresh human audit",
+    "connector",
+    "push/PR/M9/CI",
+    "land authorization/master drift/postmerge/closure"
+  ]
+}

@@ -1,0 +1,1042 @@
+{
+  "schema": "wp1178_windows_paired.v1",
+  "session": "codex-wp1178-g4-ef864d6-m3-20261105",
+  "machine": "ASUS-LAPTOP",
+  "os": "Windows",
+  "single_orchestrator": true,
+  "baseline": "ec1b18a2a007fc2e697249c727a2ca8391ab209e",
+  "candidate": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+  "started_at_utc": "2026-11-05T03:11:48.337219+00:00",
+  "runs": [
+    {
+      "label": "baseline",
+      "sha": "ec1b18a2a007fc2e697249c727a2ca8391ab209e",
+      "tree": "a8dc7f5fc314275131027aae2c0c4878b659b28d",
+      "parents": "3c2def2807e5acca9763d9d6c350c78c8bbe90e6 a6993f7a33292c9168ce86e142aeec1bd6f3b7ca",
+      "started_at_utc": "2026-11-05T03:13:39.228965+00:00",
+      "tests": [
+        {
+          "id": "git-diff-check",
+          "command": [
+            "git",
+            "diff",
+            "--check",
+            "ec1b18a2a007fc2e697249c727a2ca8391ab209e",
+            "ec1b18a2a007fc2e697249c727a2ca8391ab209e"
+          ],
+          "rc": 0,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "log": "baseline-diff.log",
+          "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb",
+          "ket_qua": "passed"
+        },
+        {
+          "id": "shared-checker-nonempty-canary-DAT",
+          "command": [
+            "python",
+            "ops/cong_cu.py",
+            "kiem-tra",
+            "--json"
+          ],
+          "rc": 0,
+          "stdout_sha256": "d109d01e2e4e9abd15d686481e40d9f7cd52acf746f5f096e6c3e53b63f75d67",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "log": "baseline-checker.log",
+          "log_sha256": "e595e77e7b8ac0bfa94e0d6384c5e53a679d626e33126341d8f20fbc43332f51",
+          "ket_qua": "passed",
+          "tool_results": [
+            {
+              "ten": "git",
+              "bat_buoc": true,
+              "ban_ghim": null,
+              "ban_thay": {
+                "mac_dinh": "2.55.0.windows.5"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            },
+            {
+              "ten": "python",
+              "bat_buoc": true,
+              "ban_ghim": null,
+              "ban_thay": {
+                "mac_dinh": "3.13.1"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            },
+            {
+              "ten": "PyYAML",
+              "bat_buoc": true,
+              "ban_ghim": null,
+              "ban_thay": {
+                "mac_dinh": "6.0.3"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            },
+            {
+              "ten": "actionlint",
+              "bat_buoc": true,
+              "ban_ghim": "1.7.7",
+              "ban_thay": {
+                "mac_dinh": "1.7.7"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            },
+            {
+              "ten": "jsonschema",
+              "bat_buoc": true,
+              "ban_ghim": "4.26.0",
+              "ban_thay": {
+                "mac_dinh": "4.26.0"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            },
+            {
+              "ten": "shellcheck",
+              "bat_buoc": false,
+              "ban_ghim": null,
+              "ban_thay": {
+                "mac_dinh": "0.9.0"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            },
+            {
+              "ten": "rg",
+              "bat_buoc": true,
+              "ban_ghim": null,
+              "ban_thay": {
+                "mac_dinh": "15.2.0"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            },
+            {
+              "ten": "bash",
+              "bat_buoc": true,
+              "ban_ghim": null,
+              "ban_thay": {
+                "mac_dinh": "5.3.15"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            }
+          ],
+          "canary_results": [
+            {
+              "ten": "actionlint_shellcheck",
+              "chu_so_huu": "actionlint",
+              "chinh_sach": "blocking",
+              "trang_thai": "DAT",
+              "chi_tiet": "canary bat dung SC1003 (rc=1)"
+            }
+          ],
+          "summary": "DAT"
+        },
+        {
+          "id": "powershell-parser-inventory",
+          "command": [
+            "D:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "-NoProfile",
+            "-Command",
+            "$ErrorActionPreference='Stop'; $files=Get-Content -Raw -LiteralPath 'D:\\tl-win\\codex-wp1178-g4-ef864d6-m3-20261105\\baseline-ps-inventory.json' | ConvertFrom-Json; $bad=0; foreach($f in $files) { $tok=$null;$err=$null; [System.Management.Automation.Language.Parser]::ParseFile((Join-Path 'D:\\tl-win\\codex-wp1178-g4-ef864d6-m3-20261105\\repo' $f),[ref]$tok,[ref]$err)|Out-Null; if($err.Count){$bad++; Write-Output ('BAD '+$f);$err|ForEach-Object{$_.Message}} }; Write-Output ('PARSED='+$files.Count+' BAD='+$bad); if($bad){exit 1}"
+          ],
+          "rc": 0,
+          "stdout_sha256": "62eca36f16c264d0da3f4e7f2986618f6e5af05e2eabf8c25bd25336b2a774ee",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "log": "baseline-ps-parser.log",
+          "log_sha256": "a8c8b544864641a0fff4e38359a7596309aff66b1b148d64fcaba5206348dc7f",
+          "ket_qua": "passed",
+          "inventory": [
+            ".claude/dev/chay-cong-windows.ps1",
+            ".claude/dev/chay-cong-windows_test.ps1",
+            "docs/runbooks/Fill-SharedWorkPacketPrompt.ps1",
+            "docs/runbooks/Invoke-SharedWorkPacketFlow.ps1",
+            "docs/runbooks/New-SharedWorkPacket.ps1",
+            "docs/runbooks/tests/Test-InvokeSharedWorkPacketFlow.ps1",
+            "docs/runbooks/tests/Test-NewSharedWorkPacket.ps1",
+            "ops/land/pr1042-pr1068-cloud-setup-p2-spec-provenance/m1-live-p2a/m1-p2a.ps1",
+            "ops/reviews/pr1065-review-16-codex/review_evidence/probes/audit-source.ps1",
+            "ops/reviews/pr1065-review-16-codex/review_evidence/probes/icacls-round15.ps1",
+            "ops/reviews/pr1065-review-16-codex/review_evidence/probes/inventory.ps1",
+            "ops/reviews/pr1091-review-1-codex/review_evidence/probes/native-wrapper.ps1",
+            "ops/reviews/pr1091-review-1-codex/review_evidence/probes/state-original-model.ps1",
+            "ops/reviews/pr1091-review-2-codex/review_evidence/probes/state-head-model.ps1",
+            "ops/reviews/wp541-do-g2.ps1",
+            "ops/vm/cap-nhat-cong-cu.ps1",
+            "ops/vm/cap-nhat-cong-cu_test.ps1",
+            "scripts/deploy-guard.ps1",
+            "scripts/deploy-package.ps1",
+            "scripts/don-nhanh.ps1",
+            "scripts/don-nhanh_test.ps1",
+            "scripts/nlm-credential-refresh.Tests.ps1",
+            "scripts/nlm-credential-refresh.ps1",
+            "tl-setup.ps1"
+          ]
+        },
+        {
+          "id": "bash-syntax-inventory",
+          "command": [
+            "C:\\Program Files\\Git\\bin\\bash.exe",
+            "-n",
+            "each tracked .sh"
+          ],
+          "rc": 0,
+          "ket_qua": "passed",
+          "inventory": [
+            {
+              "path": ".claude/hooks/session-start.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                ".claude/hooks/session-start.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-0.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/cai_actionlint.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/cai_actionlint.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-1.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/cai_cong_cu.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/cai_cong_cu.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-2.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/chay_lease_publish_test.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/chay_lease_publish_test.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-3.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/codex_cloud_setup.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/codex_cloud_setup.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-4.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/do_sigpipe.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/do_sigpipe.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-5.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/don_ref_chot_test.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/don_ref_chot_test.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-6.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/dung_goi_review.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/dung_goi_review.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-7.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/evidence/wp685-r28-g5-attempt-2/chay_b1_b5.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/evidence/wp685-r28-g5-attempt-2/chay_b1_b5.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-8.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/evidence/wp685-r28-g5-attempt-2/chay_b6.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/evidence/wp685-r28-g5-attempt-2/chay_b6.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-9.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/evidence/wp685-r28-g5-attempt-2/chay_b6_tuan_tu.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/evidence/wp685-r28-g5-attempt-2/chay_b6_tuan_tu.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-10.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/evidence/wp685-r28-g5-attempt-2/chay_log.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/evidence/wp685-r28-g5-attempt-2/chay_log.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-11.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/evidence/wp685-r28-g5-attempt-2/sau_ca.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/evidence/wp685-r28-g5-attempt-2/sau_ca.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-12.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/kiem_trang_quyet_dinh.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/kiem_trang_quyet_dinh.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-13.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/kiem_trang_quyet_dinh_test.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/kiem_trang_quyet_dinh_test.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-14.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/land/pr1127-wp1120-provenance/kiem-merge/lenh.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/land/pr1127-wp1120-provenance/kiem-merge/lenh.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-15.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/reviews/wp743-r1-g1-exec-review-1-codex/TAI_LAP.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/reviews/wp743-r1-g1-exec-review-1-codex/TAI_LAP.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-16.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "scripts/deploy-package.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "scripts/deploy-package.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-17.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "scripts/env-reimport.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "scripts/env-reimport.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-18.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "scripts/nlm-auth-import.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "scripts/nlm-auth-import.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-19.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "scripts/nlm-auto-refresh.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "scripts/nlm-auto-refresh.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-20.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "scripts/tl_fetch.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "scripts/tl_fetch.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "baseline-bash-21.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            }
+          ]
+        }
+      ],
+      "elapsed_seconds": 19.430280499997025,
+      "completed_at_utc": "2026-11-05T03:13:58.449755+00:00"
+    },
+    {
+      "label": "candidate",
+      "sha": "ef864d6b3192a08487cd7fc0e526633afcb693d9",
+      "tree": "70bc751068856245e92875a13e182a9c90781f8b",
+      "parents": "50108b397f06183172016f5c3a341202e6826249",
+      "started_at_utc": "2026-11-05T03:13:59.077687+00:00",
+      "tests": [
+        {
+          "id": "git-diff-check",
+          "command": [
+            "git",
+            "diff",
+            "--check",
+            "ec1b18a2a007fc2e697249c727a2ca8391ab209e",
+            "ef864d6b3192a08487cd7fc0e526633afcb693d9"
+          ],
+          "rc": 0,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "log": "candidate-diff.log",
+          "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb",
+          "ket_qua": "passed"
+        },
+        {
+          "id": "shared-checker-nonempty-canary-DAT",
+          "command": [
+            "python",
+            "ops/cong_cu.py",
+            "kiem-tra",
+            "--json"
+          ],
+          "rc": 0,
+          "stdout_sha256": "d109d01e2e4e9abd15d686481e40d9f7cd52acf746f5f096e6c3e53b63f75d67",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "log": "candidate-checker.log",
+          "log_sha256": "e595e77e7b8ac0bfa94e0d6384c5e53a679d626e33126341d8f20fbc43332f51",
+          "ket_qua": "passed",
+          "tool_results": [
+            {
+              "ten": "git",
+              "bat_buoc": true,
+              "ban_ghim": null,
+              "ban_thay": {
+                "mac_dinh": "2.55.0.windows.5"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            },
+            {
+              "ten": "python",
+              "bat_buoc": true,
+              "ban_ghim": null,
+              "ban_thay": {
+                "mac_dinh": "3.13.1"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            },
+            {
+              "ten": "PyYAML",
+              "bat_buoc": true,
+              "ban_ghim": null,
+              "ban_thay": {
+                "mac_dinh": "6.0.3"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            },
+            {
+              "ten": "actionlint",
+              "bat_buoc": true,
+              "ban_ghim": "1.7.7",
+              "ban_thay": {
+                "mac_dinh": "1.7.7"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            },
+            {
+              "ten": "jsonschema",
+              "bat_buoc": true,
+              "ban_ghim": "4.26.0",
+              "ban_thay": {
+                "mac_dinh": "4.26.0"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            },
+            {
+              "ten": "shellcheck",
+              "bat_buoc": false,
+              "ban_ghim": null,
+              "ban_thay": {
+                "mac_dinh": "0.9.0"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            },
+            {
+              "ten": "rg",
+              "bat_buoc": true,
+              "ban_ghim": null,
+              "ban_thay": {
+                "mac_dinh": "15.2.0"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            },
+            {
+              "ten": "bash",
+              "bat_buoc": true,
+              "ban_ghim": null,
+              "ban_thay": {
+                "mac_dinh": "5.3.15"
+              },
+              "trang_thai": "DAT",
+              "chi_tiet": "dat"
+            }
+          ],
+          "canary_results": [
+            {
+              "ten": "actionlint_shellcheck",
+              "chu_so_huu": "actionlint",
+              "chinh_sach": "blocking",
+              "trang_thai": "DAT",
+              "chi_tiet": "canary bat dung SC1003 (rc=1)"
+            }
+          ],
+          "summary": "DAT"
+        },
+        {
+          "id": "powershell-parser-inventory",
+          "command": [
+            "D:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "-NoProfile",
+            "-Command",
+            "$ErrorActionPreference='Stop'; $files=Get-Content -Raw -LiteralPath 'D:\\tl-win\\codex-wp1178-g4-ef864d6-m3-20261105\\candidate-ps-inventory.json' | ConvertFrom-Json; $bad=0; foreach($f in $files) { $tok=$null;$err=$null; [System.Management.Automation.Language.Parser]::ParseFile((Join-Path 'D:\\tl-win\\codex-wp1178-g4-ef864d6-m3-20261105\\repo' $f),[ref]$tok,[ref]$err)|Out-Null; if($err.Count){$bad++; Write-Output ('BAD '+$f);$err|ForEach-Object{$_.Message}} }; Write-Output ('PARSED='+$files.Count+' BAD='+$bad); if($bad){exit 1}"
+          ],
+          "rc": 0,
+          "stdout_sha256": "015011f98e3b7241d4bae3d8eade82ce24ef4762542e9ca768f86c0740d53f66",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "log": "candidate-ps-parser.log",
+          "log_sha256": "cb08fff505b875bbb3bba0a355097e2ecc78dc627399c10a86720cbeffaeb9c1",
+          "ket_qua": "passed",
+          "inventory": [
+            ".claude/dev/chay-cong-windows.ps1",
+            ".claude/dev/chay-cong-windows_test.ps1",
+            "docs/runbooks/Fill-SharedWorkPacketPrompt.ps1",
+            "docs/runbooks/Invoke-SharedWorkPacketFlow.ps1",
+            "docs/runbooks/New-SharedWorkPacket.ps1",
+            "docs/runbooks/tests/Test-InvokeSharedWorkPacketFlow.ps1",
+            "docs/runbooks/tests/Test-NewSharedWorkPacket.ps1",
+            "ops/environment/login-windows.ps1",
+            "ops/environment/update-windows.ps1",
+            "ops/land/pr1042-pr1068-cloud-setup-p2-spec-provenance/m1-live-p2a/m1-p2a.ps1",
+            "ops/reviews/pr1065-review-16-codex/review_evidence/probes/audit-source.ps1",
+            "ops/reviews/pr1065-review-16-codex/review_evidence/probes/icacls-round15.ps1",
+            "ops/reviews/pr1065-review-16-codex/review_evidence/probes/inventory.ps1",
+            "ops/reviews/pr1091-review-1-codex/review_evidence/probes/native-wrapper.ps1",
+            "ops/reviews/pr1091-review-1-codex/review_evidence/probes/state-original-model.ps1",
+            "ops/reviews/pr1091-review-2-codex/review_evidence/probes/state-head-model.ps1",
+            "ops/reviews/wp541-do-g2.ps1",
+            "ops/vm/cap-nhat-cong-cu.ps1",
+            "ops/vm/cap-nhat-cong-cu_test.ps1",
+            "scripts/deploy-guard.ps1",
+            "scripts/deploy-package.ps1",
+            "scripts/don-nhanh.ps1",
+            "scripts/don-nhanh_test.ps1",
+            "scripts/nlm-credential-refresh.Tests.ps1",
+            "scripts/nlm-credential-refresh.ps1",
+            "tl-setup.ps1"
+          ]
+        },
+        {
+          "id": "bash-syntax-inventory",
+          "command": [
+            "C:\\Program Files\\Git\\bin\\bash.exe",
+            "-n",
+            "each tracked .sh"
+          ],
+          "rc": 0,
+          "ket_qua": "passed",
+          "inventory": [
+            {
+              "path": ".claude/hooks/session-start.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                ".claude/hooks/session-start.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-0.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/cai_actionlint.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/cai_actionlint.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-1.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/cai_cong_cu.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/cai_cong_cu.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-2.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/chay_lease_publish_test.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/chay_lease_publish_test.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-3.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/codex_cloud_setup.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/codex_cloud_setup.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-4.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/do_sigpipe.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/do_sigpipe.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-5.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/don_ref_chot_test.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/don_ref_chot_test.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-6.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/dung_goi_review.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/dung_goi_review.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-7.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/environment/login-linux.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/environment/login-linux.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-8.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/environment/update-linux.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/environment/update-linux.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-9.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/evidence/wp685-r28-g5-attempt-2/chay_b1_b5.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/evidence/wp685-r28-g5-attempt-2/chay_b1_b5.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-10.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/evidence/wp685-r28-g5-attempt-2/chay_b6.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/evidence/wp685-r28-g5-attempt-2/chay_b6.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-11.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/evidence/wp685-r28-g5-attempt-2/chay_b6_tuan_tu.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/evidence/wp685-r28-g5-attempt-2/chay_b6_tuan_tu.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-12.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/evidence/wp685-r28-g5-attempt-2/chay_log.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/evidence/wp685-r28-g5-attempt-2/chay_log.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-13.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/evidence/wp685-r28-g5-attempt-2/sau_ca.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/evidence/wp685-r28-g5-attempt-2/sau_ca.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-14.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/kiem_trang_quyet_dinh.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/kiem_trang_quyet_dinh.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-15.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/kiem_trang_quyet_dinh_test.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/kiem_trang_quyet_dinh_test.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-16.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/land/pr1127-wp1120-provenance/kiem-merge/lenh.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/land/pr1127-wp1120-provenance/kiem-merge/lenh.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-17.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "ops/reviews/wp743-r1-g1-exec-review-1-codex/TAI_LAP.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "ops/reviews/wp743-r1-g1-exec-review-1-codex/TAI_LAP.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-18.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "scripts/deploy-package.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "scripts/deploy-package.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-19.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "scripts/env-reimport.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "scripts/env-reimport.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-20.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "scripts/nlm-auth-import.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "scripts/nlm-auth-import.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-21.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "scripts/nlm-auto-refresh.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "scripts/nlm-auto-refresh.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-22.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            },
+            {
+              "path": "scripts/tl_fetch.sh",
+              "command": [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "-n",
+                "scripts/tl_fetch.sh"
+              ],
+              "rc": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "log": "candidate-bash-23.log",
+              "log_sha256": "169f24774e13a79b6341d6c41c58f159e180701e87e9028aa70afdf8712b6fbb"
+            }
+          ]
+        },
+        {
+          "id": "updater-check-only",
+          "command": [
+            "D:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "-NoProfile",
+            "-File",
+            "ops/environment/update-windows.ps1",
+            "-Repo",
+            "D:\\tl-win\\codex-wp1178-g4-ef864d6-m3-20261105\\repo"
+          ],
+          "rc": 0,
+          "stdout_sha256": "4a806118938bdcdf3c942f3c2f05977d2432469a46ad313a86b353b4985de41e",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "log": "candidate-updater-check.log",
+          "log_sha256": "a046e46cd3b0ea9bbed9305c755d62733f7ee2562801ca6ae5c618056eded421",
+          "ket_qua": "passed"
+        },
+        {
+          "id": "login-idempotence",
+          "command": [
+            "D:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "-NoProfile",
+            "-Command",
+            "$ErrorActionPreference='Stop'; $before=[Environment]::GetEnvironmentVariable('Path','User'); . 'D:\\tl-win\\codex-wp1178-g4-ef864d6-m3-20261105\\repo\\ops\\environment\\login-windows.ps1'; $one=$env:Path; . 'D:\\tl-win\\codex-wp1178-g4-ef864d6-m3-20261105\\repo\\ops\\environment\\login-windows.ps1'; if($env:Path -cne $one){throw 'PATH not idempotent'}; if($env:TL_REPO -cne 'D:\\tl-win\\codex-wp1178-g4-ef864d6-m3-20261105\\repo'){throw 'TL_REPO mismatch'}; if([Environment]::GetEnvironmentVariable('Path','User') -cne $before){throw 'Persistent PATH changed'}; Write-Output 'LOGIN_IDEMPOTENT=1 PERSISTENT_PATH_UNCHANGED=1'"
+          ],
+          "rc": 0,
+          "stdout_sha256": "bf64c1d0564ab2e47936ec38a7ef1db888d79122ce4adc87011da74e6b8ee37b",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "log": "candidate-login-idempotence.log",
+          "log_sha256": "2a4a959b709f7b36548c61fb7373fe9281f668a266dcf2818256bba72737319e",
+          "ket_qua": "passed"
+        }
+      ],
+      "inherited_blobs": {
+        "ops/environment/README.md": {
+          "a7": "19837a1c62c6eb1781a7730e2c50034cb012640e",
+          "H": "19837a1c62c6eb1781a7730e2c50034cb012640e"
+        },
+        "ops/environment/login-linux.sh": {
+          "a7": "c52715e48a70f463045a96d6715c67a50967a7ca",
+          "H": "c52715e48a70f463045a96d6715c67a50967a7ca"
+        },
+        "ops/environment/login-windows.ps1": {
+          "a7": "acacf801fe912b8d1c6929ddc49c0f38ba86b621",
+          "H": "acacf801fe912b8d1c6929ddc49c0f38ba86b621"
+        },
+        "ops/environment/update-windows.ps1": {
+          "a7": "1bf5369c2de53bc6bcce5f7701a78028a82d5878",
+          "H": "1bf5369c2de53bc6bcce5f7701a78028a82d5878"
+        }
+      },
+      "elapsed_seconds": 26.1170678999988,
+      "completed_at_utc": "2026-11-05T03:14:25.141545+00:00"
+    }
+  ],
+  "errors": [],
+  "limitations": [
+    "Native Windows selected common checks and candidate updater check/login; Linux regression measured separately on Ubuntu. No Apply/Latest/installer/profile/credential operations."
+  ],
+  "rc": 0,
+  "completed_at_utc": "2026-11-05T03:14:25.145077+00:00"
+}

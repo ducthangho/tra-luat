@@ -93,7 +93,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1223-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: 'claude/ghi-so-land-p3c', ghi_chu: 'chi cham ops/land/**; lease rut han nam tren nhanh ops/cap-lease-p3c-g1.'}
-  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'xem bien-ban-m8.yaml + kiem-dong-wp-m8.txt'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: kiem-dong-wp tren lease sau rut han luc 2026-11-05T20:18:46Z rc 0.'}
   - {item: 'ban giao hien vat kiem-merge + review offline', ket_qua: 'nhanh claude/handoff-p3c-kiem-merge @69fb42e (phien dieu phoi), giu nguyen trong provenance/kiem-merge/ va provenance/review-offline/.'}
   - {item: 'dong Issue #1223', ket_qua: 'not_measured — phien dieu phoi dong sau khi PR ghi so merge.'}
 # ---- het truong chuan
@@ -121,7 +121,14 @@ lease:
   path: ops/leases/wp1223-r1-g1-claude.yaml (nhanh ops/cap-lease-p3c-g1)
   thay_the_cho: '[] (lease dau tien).'
   write_set_so_tep: 7
-  thu_hoi_cuoi: CHO_DIEN
+  thu_hoi_cuoi: >-
+    DA NHA bang RUT HAN sau merge: lease_until 2026-11-06T09:55Z -> 2026-11-05T20:15:00Z (khoi thu_hoi_bang_rut_han, commit 5f8d7d4 tren
+    ops/cap-lease-p3c-g1, cha e259710, push 19:38Z; chung commit voi lease wp1224-r2-g2-claude); lease_publish.py check rc 0 truoc va sau commit;
+    ops-publish-lease run 42095853382 success, job dang runner_id khac 0, buoc 'dang' success (readback-run-42095853382.json,
+    readback-jobs-42095853382.json); ops-publish-lease-42095853382-trich.txt: lease wp1223-r1-g1-claude 'CHAN [9] … đã có comment … bỏ qua'
+    (da dang truoc do — dung nhanh rc 9, khong bi rc 8 che vi han moi dat sau luc push). Tep lease sau rut han:
+    lease-wp1223-r1-g1-claude-sau-rut-han.yaml.txt (cmp khop origin/ops/cap-lease-p3c-g1). Sau 20:15Z: ai-dang-giu-sau-rut-han.txt (2026-11-05T20:16:37Z) —
+    thieu ref 0 (762 nhanh, so theo TAP TEN), 7 duong dan write set NGUOI_GIU 0. Khong bia mo vi khong co lease ke nhiem.
   diff_do: >-
     measured — merge-va-diff.txt: git diff --stat 50baf89^1 50baf89 = 7 tep +42/-25: INSTALL.md, SKILL.md, changelog.d/wp-1223.md,
     references/API_CONTRACT.md, scripts/tl.py, scripts/tl_selftest.py (6 tep write set; ops/handoff chi o nhanh handoff) +

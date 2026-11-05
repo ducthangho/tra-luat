@@ -25,7 +25,7 @@ c8f92a63bcc9b2e44e7cca5b229ad7ecf05ca61d325dfc70e224879377b74f62  ./ci/jobs/1269
 6db28af849a61ac3ac2ddd2de596062e7e84e2a8ece42fe141f7fd0f2f97dcd9  ./ci/provenance.yaml
 8e7e8bc2759e2ad0fe8c7945ead8b71b8760b095afc9527d712c4784d3c9d14b  ./ci/run.json
 e7ca8cb68a15dc7671fd7d661570fa35b22c72ac5007ed1072dfccabf77e1a2e  ./gate-output-41949673119-trich.txt
-535ed274d1602a49792d9e3994ee873577b3bb5b3cc5035c9365ebe63cde25f0  ./gate-registry-windows-126711236368-trich.txt
+855bc59352cdb51eb7af5fa987c47af30534c38a3e29d960f85c5188b07ea483  ./gate-registry-windows-126711236368-trich.txt
 01a0dd0ace9c9cf818d59ffd459e36f166998ac9010fed1616b45cd88e9212ec  ./lease-check-wp1147-r2-g2.txt
 3a3c28af898355a91962a59071467b88ce3b050e01b5159b8ad01e9ccdf40849  ./lease-wp1147-r2-g2-claude-sau-rut-han-86eb977.yaml.txt
 f7bb7ac132acc80db729580f8b2100c275faf52f1c811d99ce9c94534ac75fd3  ./merge-va-diff.txt

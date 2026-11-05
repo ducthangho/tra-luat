@@ -1116,7 +1116,8 @@ def case_chan_doan_mac_dinh_khong_lo_bi_mat(root):
     api = "AI" + "za" + k1 + "AI" + "za" + k2                           # V4: hai khoá chồng nhau (họ F)
     tok = "GOC" + "SPX-" + hx
     bi_mat = [b64[:320], hx, k1, k2]
-    cu = os.environ.get("EOL_TEST_FAKE_TOKEN")
+    cu, tho = os.environ.get("EOL_TEST_FAKE_TOKEN"), _CD_THO[0]
+    _CD_THO[0] = False                          # ca này đo ĐƯỜNG MẶC ĐỊNH, kể cả khi suite chạy với `--chan-doan-tho`
     os.environ["EOL_TEST_FAKE_TOKEN"] = "TIEN_" + json.dumps({"p": pem, "t": tok}) + "_HAU"   # V3 (họ C/D/E)
     ma = ("import os,sys; x=sys.argv[1]; e=os.environ['EOL_TEST_FAKE_TOKEN']; sys.stdout.write(x.replace("
           "chr(10), chr(13)+chr(10)) + e); sys.stderr.write(x + x[:100] + e + sys.argv[2]); sys.exit(3)")
@@ -1152,6 +1153,7 @@ def case_chan_doan_mac_dinh_khong_lo_bi_mat(root):
             ra += _chay_mot_ca(ca, don_dep=dd)[1]
         _, dai = _chay_mot_ca(ca_dai)
     finally:
+        _CD_THO[0] = tho
         if cu is None:
             os.environ.pop("EOL_TEST_FAKE_TOKEN", None)
         else:

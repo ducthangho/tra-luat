@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "change_request_id": "mcr-1177-p2-continuation-ci-20261105",
+  "mission_issue": 1177,
+  "requested_by": "codex-service-controller",
+  "reason": "Three connector P2 on exacta7; owner requests continuation. Old g3 lease expired. Prior proposed Python test path is rejected by canonical registry; use embedded selftest and CI connection. Historical attempt count remains unmeasured, distinct from generation count.",
+  "proposed_changes": [
+    {
+      "field": "envelope.max_attempts_per_packet",
+      "from": 3,
+      "to": 4
+    },
+    {
+      "scope": "1178r4g4",
+      "executor_allowance_minutes": 90,
+      "historical_cloud_spend": "KHONG_DO_DUOC; preserve history, finite additional window only"
+    },
+    {
+      "scope": "1178r4g4",
+      "size_cap_files": 6,
+      "size_cap_added_lines": 1300,
+      "immutable_base": "ec1b18a2a007fc2e697249c727a2ca8391ab209e"
+    },
+    {
+      "scope": "product1178",
+      "additional_connector_calls": 1,
+      "local_model_calls": 0,
+      "known_historical_outputs": 6,
+      "unrecovered_history": "KHONG_DO_DUOC; no reset; do not borrow1187 budget"
+    },
+    {
+      "field": "Mission write constraint",
+      "from": "only ops/environment/",
+      "to": "ops/environment/ plus exactly one Linux updater selftest step in .github/workflows/ci.yml, unchanged setup/permissions/other steps"
+    },
+    {
+      "scope": "1178r4g4",
+      "executor_provider": "codex",
+      "execution_surface": "codex_service",
+      "environment": "cloud",
+      "fresh_executor_agent_invocations": 1,
+      "source_writer_is_land_controller": false
+    }
+  ],
+  "affected_packets": [
+    1178
+  ],
+  "landed_work_impact": "none",
+  "risk_change": "none",
+  "decision": "pending",
+  "decision_source": "human",
+  "approved_by": null,
+  "decision_url": null,
+  "supersedes_revision": 1,
+  "proposed_revision": 2,
+  "previous_plan_hash": "2100018167928fc4366c74b2260c09ff5949b94340bebbb9b859bf836a1b539c",
+  "proposed_plan_hash": "a5f11a52132db3ebe5951e7dcdcb0782f05259e6d514d11150680769503d7b6b",
+  "packet_spec_path": "ops/specs/wp1178-r4-p2-ci.md",
+  "packet_spec_sha256": "7886c45258405b3376f34ea084d12a13faceaabf056cf898a3a7db9e588bf0e2",
+  "source_edit_paths": [
+    "ops/environment/update-linux.sh",
+    ".github/workflows/ci.yml"
+  ],
+  "source_writes_before_approval": false,
+  "no_land_authority_for_future_head": true,
+  "supersedes_unapproved_change_request": "mcr-1177-p2-continuation-20261105",
+  "supersedes_unapproved_spec_sha256": "fbe162992b1fe55733f800be2afa5626e626b06dea4f0343af6d767bddd2e720"
+}

@@ -14594,6 +14594,151 @@ def t236_a1a_old_marker_policy_removed_guard_mutant():
         rc, _, err = verdict(mutant, removed)
         chot(rc == 0, f"guard-removal mutant must expose the isolated gap: {rc} {err!r}")
 
+class _MayChuGoiT237:
+    """Máy chủ HTTP CỤC BỘ THẬT cho `t237`, GIỮ TRẠNG THÁI (wp1237).
+
+    Đếm yêu cầu và trả theo KỊCH BẢN THEO THỨ TỰ YÊU CẦU: phần tử thứ i của `kich_ban`
+    trả cho yêu cầu thứ i; hết kịch bản thì lặp phần tử cuối. Mỗi phần tử là
+    `("504",)`, `("goi", bytes)` hoặc `("cat", bytes)` — `cat` khai `Content-Length` đầy
+    đủ, gửi nửa thân rồi ĐÓNG kết nối. Không `curl` giả: ca đo chính cơ chế retry của curl.
+    """
+
+    def __init__(self, kich_ban):
+        import http.server
+        import threading
+        self.kich_ban, self.so_yeu_cau, self._khoa = list(kich_ban), 0, threading.Lock()
+        chu = self
+
+        class _Xu(http.server.BaseHTTPRequestHandler):
+            protocol_version = "HTTP/1.1"
+
+            def log_message(self, *a):
+                pass
+
+            def do_GET(self):
+                with chu._khoa:
+                    i = chu.so_yeu_cau
+                    chu.so_yeu_cau += 1
+                buoc = chu.kich_ban[min(i, len(chu.kich_ban) - 1)]
+                if buoc[0] == "504":
+                    than = b"gateway timeout\n"
+                    self.send_response(504)
+                else:
+                    than = buoc[1]
+                    self.send_response(200)
+                self.send_header("Content-Length", str(len(than)))
+                self.send_header("Connection", "close")
+                self.end_headers()
+                self.wfile.write(than if buoc[0] != "cat" else than[: len(than) // 2])
+                self.wfile.flush()
+                self.close_connection = True
+
+        self._may = http.server.ThreadingHTTPServer(("127.0.0.1", 0), _Xu)
+        self.cong = self._may.server_address[1]
+        self._luong = threading.Thread(target=self._may.serve_forever, daemon=True)
+
+    def __enter__(self):
+        self._luong.start()
+        return self
+
+    def __exit__(self, *a):
+        self._may.shutdown()
+        self._may.server_close()
+
+
+@ca
+def t237_cai_actionlint_retry_song_qua_5xx():
+    """`ops/cai_actionlint.sh` phải sống qua một đợt 5xx NGẮN của GitHub Releases (wp1237).
+
+    VÌ SAO. PR #1197, run 42033337918: attempt 2 đỏ ở bước `cài actionlint cho G5` vì
+    Releases trả 504; attempt 3 cùng head xanh. `--retry 2` cũ chỉ kéo vài giây. Đặc tả
+    `ops/specs/wp1237-r1.md` đòi retry đủ dài, MÀ cổng băm giữ nguyên.
+
+    CHẠY THẬT script với một máy chủ HTTP cục bộ GIỮ TRẠNG THÁI (`_MayChuGoiT237`). Mỗi vế
+    đọc `rc` từ tiến trình VÀ số yêu cầu ở máy chủ — đếm yêu cầu mới phân biệt được "retry
+    có xảy ra" với "tình cờ ra đúng mã thoát". Bảng vế D1–D6 ở đặc tả.
+    """
+    import os
+    import subprocess
+    import tempfile
+    from pathlib import Path as _P
+
+    kich = HERE.parent / "ops" / "cai_actionlint.sh"
+    bang(kich.is_file(), f"không thấy {kich}")
+    bash = _bash_cho_cai_actionlint()
+    VER = "1.7.7"
+    loi = []
+
+    with tempfile.TemporaryDirectory() as tam:
+        tam = _P(tam)
+        moc = tam / "goi-sai-da-chay"
+        dung = _goi_actionlint_gia(tam, VER, f"#!/bin/sh\necho {VER}").read_bytes()
+        (tam / "khac").mkdir()
+        # gói KHÁC băm mà binary khai ĐÚNG bản: nếu cổng băm sống thì nó không bao giờ được
+        # giải nén hay chạy; nếu chết thì `--version` qua và để lại dấu `moc`.
+        khac = _goi_actionlint_gia(tam / "khac", VER,
+                                   f"#!/bin/sh\n: > '{moc.as_posix()}'\necho {VER}").read_bytes()
+        bam_dung = __import__("hashlib").sha256(dung).hexdigest()
+
+        def chay(ve, kich_ban, **nut):
+            dich = tam / f"d-{ve}"
+            with _MayChuGoiT237(kich_ban) as may:
+                mt = dict(os.environ)
+                for k in ("AL_GOI", "AL_RETRY", "AL_RETRY_DELAY", "AL_RETRY_MAX_TIME",
+                          "GITHUB_PATH"):
+                    mt.pop(k, None)
+                mt.update({"AL_VER": VER, "AL_DICH": str(dich), "AL_NEN": "Linux",
+                           "AL_BASE_URL": f"http://127.0.0.1:{may.cong}",
+                           "AL_SHA256": bam_dung, "AL_RETRY_DELAY": "1",
+                           "NO_PROXY": "127.0.0.1,localhost",
+                           "no_proxy": "127.0.0.1,localhost"})
+                mt.update(nut)
+                r = subprocess.run([bash, str(kich)], env=mt, timeout=240,
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                return r.returncode, r.stdout or "", r.stderr or "", may.so_yeu_cau, dich
+
+        def doi(ve, dieu, mo_ta):
+            if not dieu:
+                loi.append(f"{ve}: {mo_ta}")
+
+        rc, ra, err, n, _ = chay("D1", [("504",)] * 3 + [("goi", dung)])
+        doi("D1", rc == 0 and n == 4, f"3×504 rồi gói đúng, mặc định AL_RETRY ⇒ đòi rc=0 "
+            f"và 4 yêu cầu; được rc={rc}, {n} yêu cầu. {err.strip()[-300:]}")
+
+        rc, ra, err, n, _ = chay("D2", [("cat", dung), ("goi", dung)])
+        doi("D2", rc == 0 and n == 2, f"kết nối bị CẮT giữa thân rồi gói đúng ⇒ đòi rc=0 và "
+            f"2 yêu cầu; được rc={rc}, {n} yêu cầu. {err.strip()[-300:]}")
+
+        rc, ra, err, n, _ = chay("D3", [("504",)], AL_RETRY="2", AL_RETRY_MAX_TIME="30")
+        doi("D3", rc == 4 and n == 3 and "1+2 lan thu" in err and "30s" in err,
+            f"luôn 504, AL_RETRY=2 ⇒ đòi rc=4, 3 yêu cầu, thông điệp nêu số lần thử và "
+            f"trần; được rc={rc}, {n} yêu cầu, stderr={err.strip()[-300:]!r}")
+
+        for k, (ten, gt) in enumerate((("AL_RETRY", "abc"), ("AL_RETRY_DELAY", "-1"),
+                                       ("AL_RETRY_MAX_TIME", "0"),
+                                       ("AL_RETRY_MAX_TIME", "1801"),
+                                       ("AL_RETRY", ""), ("AL_RETRY_MAX_TIME", "1e3"),
+                                       ("AL_RETRY_MAX_TIME", "18446744073709551617"))):
+            rc, ra, err, n, _ = chay(f"D4-{k}", [("goi", dung)], **{ten: gt})
+            doi("D4", rc == 13 and n == 0 and ten in err,
+                f"{ten}={gt!r} ⇒ đòi rc=13, 0 yêu cầu, tên biến trong thông điệp; được "
+                f"rc={rc}, {n} yêu cầu, stderr={err.strip()[-200:]!r}")
+
+        rc, ra, err, n, dich = chay("D5", [("504",), ("goi", khac)])
+        doi("D5", rc == 9 and n == 2 and not moc.exists()
+            and not (dich / "actionlint").exists(),
+            f"504 rồi gói KHÁC băm ⇒ đòi rc=9, 2 yêu cầu, gói KHÔNG được giải nén hay chạy; "
+            f"được rc={rc}, {n} yêu cầu, đã chạy={moc.exists()}, "
+            f"đã giải nén={(dich / 'actionlint').exists()}")
+
+        rc, ra, err, n, dich = chay("D6", [("goi", dung)])
+        doi("D6", rc == 0 and n == 1 and ra.splitlines() == [str(dich)],
+            f"gói đúng ngay lần đầu ⇒ đòi rc=0, 1 yêu cầu, stdout đúng một dòng thư mục "
+            f"cài; được rc={rc}, {n} yêu cầu, stdout={ra!r}")
+
+    bang(not loi, "retry của `cai_actionlint.sh` sai:\n  - " + "\n  - ".join(loi))
+
+
 def main(chon=None, nen=None, so=None) -> int:
     """`chon`/`nen`/`so` là SEAM của ca meta (`_chay_main_meta`): danh sách ca, nền, sổ bỏ ca — không vá
     `CA`/`os.name` toàn cục. Chạy thật (`sys.exit(main())`) thì cả ba là None ⇒ argv, `os.name`, `SO_BO_QUA`."""

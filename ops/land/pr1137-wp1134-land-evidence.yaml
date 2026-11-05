@@ -66,7 +66,7 @@ post_merge_checks:
     ghi_chu: 'measured — release-verify-master.txt: ok true, failed [], extra_files []; file_count 184 = len(files) 184; 0 muc changelog.d/; 14 tep changelog.d/ tren dia. phan-chung-changelog-d.txt: them changelog.d/wp-99999.md => file_count 184 -> 184; dot bien bo "changelog.d" khoi _RELEASE_EXCLUDE_DIRS => 199.'
 bookkeeping:
   - {item: 'rut han lease wp1134-r2-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
-  - {item: 'PR ghi so', nhanh: claude/ghi-so-land-1134, lease: changelog-d-ngoai-goi-land-r2-g1-claude-remote-20261105}
+  - {item: 'PR ghi so', nhanh: claude/ghi-so-land-1134, lease: changelog-d-ngoai-goi-land-r2-g1-claude-remote-20261105, ghi_chu: 'lan 1: PR #1213 (head 94807bd, ban landed false) merge a5293e1 luc 2026-11-05T05:18:45Z TRUOC khi khoi landed_20261105 kip day; khoi ay di qua PR ke tiep cung nhanh, rebase len a5293e1. Chi cham ops/land/pr1137-wp1134-*.'}
   - {item: 'ban ghi M8 kieu b', ket_qua: 'measured — kiem-dong-wp-kieu-b.txt: kiem-dong-wp --bien-ban bien-ban-m8.yaml rc 0, "ĐÓNG ĐƯỢC WP CHANGELOG-D-NGOAI-GOI".'}
   - {item: 'ban ghi M8 (ADR-0060), ban landed false', ket_qua: 'measured — kiem-dong-wp.txt (bien-ban-m8-landed-false.yaml): kiem-dong-wp --bien-ban bien-ban-m8.yaml --lease lease-wp1134-r2-g1-claude.yaml.txt rc 12, CHI thieu D2 (landed false, run cancelled); D1, D3, D4 dat. Chu kho da quyet dong #1134 du D2 do (issuecomment-6650045712).'}
   - {item: 'no tach', ket_qua: 'hop nhat 14 fragment changelog.d/ vao CHANGELOG.md (co che hop nhat luc land chua bat, PROTOCOL:880) — Issue no rieng; references/RUNBOOK.md:737,840 tro changelog.d/wp-710.md (con tro chet trong goi, doc_pointers khong bat).'}

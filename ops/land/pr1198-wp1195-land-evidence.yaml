@@ -7,6 +7,8 @@
 # chi co hanh dong merge cua chu kho, khong comment duyet neo ab39416 => L-6 (ops/kiem_ho_so_land.py) khong cho landed true. Tien le
 # pr882-wp748-r23 (cung tinh huong, ghi landed false). LECH voi M8: ban ghi M8 issuecomment-6649417449 khai landed true vi kiem-dong-wp
 # (D1) chi doi duyet_chu_kho la URL github — hai cong doi hai muc chat khac nhau; ho so nay giu muc chat hon.
+# Them (7) §8.1 CHUA_DAT: luot review fd51d443 ghi VERDICT/dot bien TRONG checkout duoc review theo prompt cua executor
+# (AGENTS.md Reviewer) — connector P1 r4476535747; xem assurance_81.ly_do.
 # NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
 # review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr1198-wp1195-provenance/ (SHA256SUMS kem). Moi phep do REST: GET qua proxy phien, 2026-11-05.
@@ -101,14 +103,22 @@ trang_thai_packet:
     ai-dang-giu NGUOI_GIU 0; (3) bookkeeping: ho so nay + ban ghi M8 tren Issue #1195 (kiem-dong-wp rc 0); (4) review neo DUNG
     authorized_head ab39416: Codex offline approve 0/0/0/0, connector sach; (5) uy quyen land: CHUA DAT — chu kho tu bam merge PR #1198 nhung KHONG
     co comment duyet ben neo ab39416 (L-6 doi authorization_url la #issuecomment-/#pullrequestreview-); (6) muc tieu packet: ops-publish-lease xanh lai tren runner Python 3.14 (post_merge_checks muc 2);
-    (7) §8.1: xem assurance_81.
-    Mo lai: chu kho (hoac phien ghi ho, caveat #566) dang mot comment duyet land neo DUNG ab39416fe919452c9dadda38dd99c5589f7967e8;
-    khi ay them khoi landed_<YYYYMMDD> (kieu b, tien le pr1142 landed_20261104) voi quyet_dinh_chu_kho.comment tro comment ay —
+    (7) §8.1: CHUA_DAT — xem assurance_81 (reviewer ghi hien vat TRONG checkout duoc review, trai AGENTS.md "Reviewer").
+    Mo lai — CA HAI: (a) chu kho (hoac phien ghi ho, caveat #566) dang mot comment duyet land neo DUNG
+    ab39416fe919452c9dadda38dd99c5589f7967e8; VA (b) hoac mot luot review doc lap tuan thu ranh gioi (checkout read-only, scratch
+    NGOAI kho) tren DUNG ab39416, hoac mot ngoai le ben cua chu kho chap nhan luot fd51d443 voi gioi han nay. Khi du ca hai, them khoi landed_<YYYYMMDD> (kieu b, tien le pr1142 landed_20261104) voi quyet_dinh_chu_kho.comment tro comment ay —
     KHONG sua dong landed false o tren.
 
 assurance_81:
-  reviewer_assurance_81: DAT
-  review_exact_sha: 'DAT — run fd51d443 head ab39416 = authorized_head_sha, ma_thoat 0, VERDICT approve.'
+  reviewer_assurance_81: CHUA_DAT
+  ly_do: >-
+    measured — codex/VERDICT-fd51d443.md dong 13 khai "Chỉ ghi VERDICT.md và review_mutations_fd51d443/, theo ngoại lệ vị trí scratch
+    mà assignment chỉ định" — ca hai nam TRONG checkout duoc review (/tmp/claude-0/rv); codex/PROMPT-fd51d443.md cua EXECUTOR soan
+    chinh ngoai le ay ("Ghi kết luận vào VERDICT.md trong thư mục làm việc", thu muc dot bien "trong thư mục làm việc"). AGENTS.md
+    muc Reviewer doi checkout read-only va scratch phan chung NGOAI repository duoc review. Model/effort/sandbox DO_DUOC va tep tracked
+    khong doi KHONG chung minh tuan thu ranh gioi nay. Loi o thiet ke nhiem vu cua executor, khong o reviewer. Codex connector P1
+    r4476535747 tren PR #1204 bat. KHONG sua VERDICT lich su.
+  review_exact_sha: 'DAT — run fd51d443 head ab39416 = authorized_head_sha, ma_thoat 0, VERDICT approve (noi dung; assurance xem ly_do).'
   thuc_thi:
     model: 'measured — codex/run-fd51d443.json model_phuc_vu_trang_thai DO_DUOC, moi khung response gpt-6.1-sol (ho openai), khac ho executor claude.'
     effort: 'measured — codex/run-fd51d443.json effort_phuc_vu [xhigh], effort_phuc_vu_trang_thai DO_DUOC.'

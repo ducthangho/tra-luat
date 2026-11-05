@@ -1,8 +1,7 @@
 # ADR-0063 — NLM tự nạp lại jar có điều kiện ở phiên cloud
 
 - **Trạng thái:** Accepted
-- **Nguồn:** packet `CLOUD-SETUP-P3B-NLM-401` #1099 (Issue cha #1008), đặc tả `ops/specs/cloud-setup-p3b-nlm-401-r9.md`
-  (sha256 `377c166e…cd12`, chủ kho duyệt ở issuecomment-6647222942).
+- **Nguồn:** packet `CLOUD-SETUP-P3B-NLM-401` #1099, đặc tả `ops/specs/cloud-setup-p3b-nlm-401-r9.md` (sha256 `377c166e…cd12`).
 
 ## Bối cảnh
 
@@ -25,17 +24,13 @@ ADR này thay r208c ở đúng một điểm, "tự nạp khi hết hạn", và 
 - Chỉ tự chạy lại các lệnh đọc trong danh sách cho phép.
 - Nạp xong mà vẫn lỗi xác thực thì dừng và làm theo §4b của RASOAT_HOSO_LOOP.md.
 
-Điều cấm dành cho AGENT không đổi: agent vẫn không tự gõ `nlm-auth-load` trong lượt rà, và câu trừ
-`_AUTH_FIX_RASOAT_CARVE` của `nlm_cli.py` giữ nguyên. Cowork và laptop không bật cơ chế này.
+Điều cấm dành cho AGENT không đổi (agent không tự gõ `nlm-auth-load` trong lượt rà; `_AUTH_FIX_RASOAT_CARVE` giữ nguyên).
 
 ## Hệ quả
 
-- Canary chỉ xét lần thử CUỐI của `_nlm_auth_alive`; chuỗi trộn kết thúc bằng lỗi auth có thể gây một lần nạp thừa.
-  Chủ kho chấp nhận (04-11-2026).
-- Tệp dấu `~/.notebooklm-mcp-cli/.tra-luat-nap-lai.json` không có khoá; hai tiến trình cùng lúc có thể cùng nạp một lần.
-- Việc `nlm_cred.enc` LIVE có đủ tươi để hồi sinh jar hay không chỉ đo được bằng M1 của đặc tả (sau land, chủ kho duyệt).
+Canary chỉ xét lần thử CUỐI của `_nlm_auth_alive` (chuỗi trộn kết thúc bằng lỗi auth có thể gây một lần nạp thừa) và tệp dấu
+không có khoá giữa tiến trình; chủ kho chấp nhận cả hai (04-11-2026). `nlm_cred.enc` LIVE đủ tươi hay không chỉ đo được bằng M1.
 
 ## Cưỡng chế
 
-Fragment selftest `wp1099_nlm_nap_lai` (`scripts/test_fragments/wp1099_nlm_nap_lai.py`): ca A1–A13 chạy `nlm_cli` thật với đồ
-giả giữ trạng thái, kèm bảng đột biến. Bảng §20 của `docs/PROTOCOL_DA_PHIEN.md` đăng ký ADR này (cổng `adr-song`).
+Fragment selftest `wp1099_nlm_nap_lai` (ca A1–A13, D1–D3 và bảng đột biến); bảng §20 của protocol đăng ký ADR này (`adr-song`).

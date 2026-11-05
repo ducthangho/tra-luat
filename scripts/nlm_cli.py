@@ -11,7 +11,7 @@ Gate: chỉ dùng khi `nlm` có trên PATH + auth OK; nếu không trả {"ok": 
 session hết hạn hẳn cần `nlm login` (TƯƠNG TÁC — không chạy headless được).
 """
 from __future__ import annotations
-import argparse, json, os, re, shutil, subprocess, sys, tempfile, time
+import argparse, json, os, re, shutil, subprocess, sys, tempfile, threading, time
 
 # Group E1 (log rà): subprocess nlm/keyring rò dòng "Using keyring backend: keyring" lẫn stdout → VỠ json.loads.
 # CHỈ bỏ dòng nhiễu keyring THUẦN (KHÔNG chứa ký tự cấu trúc JSON {}[]) → không bao giờ nuốt thân JSON
@@ -129,22 +129,15 @@ def _run_mot(args: list[str], timeout: int = 120) -> tuple[int, str, str]:
 # vì bundle có thể cũ/cũng chết ⇒ chỉ nạp khi canary CON (thân `_canary_song` của nlm-auto-refresh.sh) trả 3, chỉ
 # `tl nlm-auth-load` (không --force), 1 lần/tiến trình + dấu 600 s (best effort), chỉ chạy lại lệnh ĐỌC cho phép.
 NAP_LAI_GAN_NHAT = None            # {trang_thai, ts} của lời gọi `_run` gần nhất đã tới bước "Giới hạn", hoặc None
-_NAP_LAI_DA_NAP = False            # trần BẢO ĐẢM: 1 lần nạp mỗi tiến trình
+_NAP_LAI_DA_NAP = False            # trần BẢO ĐẢM: 1 lần nạp mỗi tiến trình (khoá luồng giữ nó đúng cả khi đa luồng)
+_NAP_LAI_KHOA = threading.Lock()
 _NAP_LAI_HAN_CANARY, _NAP_LAI_HAN_NAP = 120, 60     # canary: _nlm_auth_alive thử 3 lần × 30 s + 4,5 s chờ
 _NAP_LAI_CUA_SO = 600
 _NAP_LAI_CHO_PHEP = frozenset({("source", "list"), ("source", "get"), ("source", "content"),
                                ("notebook", "get"), ("notebook", "list"), ("notebook", "query")})
-_CANARY = (
-    "import sys\n"
-    "sys.path.insert(0, sys.argv[1])\n"
-    "try:\n"
-    "    import tl\n"
-    "    tg = tl._imp('tl_gws')\n"
-    "    tg.bind(tl)\n"
-    "    alive, _ = tg._nlm_auth_alive(tg._nlm_canary_notebook(None), require_notebook_body=True)\n"
-    "except Exception:\n"
-    "    alive = None\n"
-    "sys.exit(0 if alive is True else 3 if alive is False else 2)\n")
+_CANARY = ("import sys\nsys.path.insert(0, sys.argv[1])\ntry:\n    import tl\n    tg = tl._imp('tl_gws')\n    tg.bind(tl)\n"
+           "    alive, _ = tg._nlm_auth_alive(tg._nlm_canary_notebook(None), require_notebook_body=True)\n"
+           "except Exception:\n    alive = None\nsys.exit(0 if alive is True else 3 if alive is False else 2)\n")
 _NAP_LAI_THU_MUC = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -162,17 +155,19 @@ def _doc_dau():
         return None
 
 
-def _ghi_dau(ts: int, ket_qua: str) -> None:
-    """Ghi nguyên tử, quyền 0600; lỗi ghi không chặn việc nạp (dấu chỉ là best effort giữa tiến trình)."""
-    p = _tep_dau()
+def _ghi_dau(ts: int, ket_qua: str) -> bool:
+    """Ghi nguyên tử, quyền 0600; True khi đã thay tệp dấu. Lỗi ⇒ False và dọn tệp tạm."""
+    p, tam = _tep_dau(), None
     try:
         os.makedirs(os.path.dirname(p), exist_ok=True); fd, tam = tempfile.mkstemp(dir=os.path.dirname(p), prefix=".nap-lai-")
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             json.dump({"ts": ts, "ket_qua": ket_qua}, f)
-        os.chmod(tam, 0o600)
-        os.replace(tam, p)
+        os.chmod(tam, 0o600); os.replace(tam, p)
+        return True
     except Exception:
-        pass
+        if tam and os.path.lexists(tam):
+            os.unlink(tam)
+        return False
 
 
 def _con(argv: list, han: int):
@@ -200,6 +195,11 @@ def _bao(trang_thai: str, chi_tiet: str) -> None:
 
 
 def _nap_lai(args: list, timeout: int, dau: tuple) -> tuple[int, str, str]:
+    with _NAP_LAI_KHOA:                # luồng thứ hai chờ rồi thấy _NAP_LAI_DA_NAP ⇒ BỎ QUA (review PR #1197 F02)
+        return _nap_lai_mot(args, timeout, dau)
+
+
+def _nap_lai_mot(args: list, timeout: int, dau: tuple) -> tuple[int, str, str]:
     global _NAP_LAI_DA_NAP
     now = time.time()
     ts = _doc_dau()
@@ -212,7 +212,8 @@ def _nap_lai(args: list, timeout: int, dau: tuple) -> tuple[int, str, str]:
         _bao("BỎ QUA", "canary sống, lỗi không do auth"); return dau
     if ma != 3:
         _bao("KHÔNG ĐO ĐƯỢC", f"canary {ma}"); return dau
-    _ghi_dau(int(now), "dang_nap")
+    if not _ghi_dau(int(now), "dang_nap"):      # dấu là điều kiện TRƯỚC nạp (F01): không ghi được thì không nạp
+        _bao("KHÔNG ĐO ĐƯỢC", "không ghi được tệp dấu"); return dau
     _NAP_LAI_DA_NAP = True
     rc, ra = _con([sys.executable, os.path.join(_NAP_LAI_THU_MUC, "tl.py"), "nlm-auth-load"], _NAP_LAI_HAN_NAP)
     if rc != 0:
@@ -373,9 +374,9 @@ def source_add(notebook_id: str, drive_id=None, url=None, file=None, text=None,
     m = _SID_RE.search(out or "")
     if rc != 0:
         if m:   # van 3: add đã trả Source ID — chỉ là CLI bỏ chờ/hết giờ settle, KHÔNG phải fail
-            return {"ok": True, "source_id": m.group(1), "ready": False, "settle_timeout": True,
-                    "via": "nlm-cli", "raw": (out or "").strip()[-200:],
-                    "note": f"thôi chờ settle sau {timeout}s (nguồn đang index) — nlm-reconcile cuối lô xác minh"}
+            return _kem({"ok": True, "source_id": m.group(1), "ready": False, "settle_timeout": True,
+                         "via": "nlm-cli", "raw": (out or "").strip()[-200:],
+                         "note": f"thôi chờ settle sau {timeout}s (nguồn đang index) — nlm-reconcile cuối lô xác minh"})
         r = _auth_fail(rc, out, err)
         if rc == 124:
             r["settle_timeout"] = True

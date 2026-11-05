@@ -22,8 +22,24 @@ recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; K
 
 leased_at_utc: '2026-11-05T09:55:00Z'
 heartbeat_at: '2026-11-05T09:55:00Z'
-lease_until: '2026-11-06T09:55:00Z'
-lease_expires_at_utc: '2026-11-06T09:55:00Z'
+lease_until: '2026-11-05T20:15:00Z'
+lease_expires_at_utc: '2026-11-05T20:15:00Z'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-06T09:55:00Z'
+  han_moi_utc: '2026-11-05T20:15:00Z'
+  chi_thi: >-
+    Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 giao phien ghi so land session_015GtxrZk7fu1wjDZjWqyg2R (2026-11-05 ~18:40Z):
+    rut han lease sau merge bang khoi thu_hoi_bang_rut_han, khong bia mo; phien dieu phoi xac nhan thu tu (rut SAU khi do xong gate
+    push cua #1224) luc 18:51Z.
+  ly_do: >-
+    Packet #1223 (CLOUD-SETUP-P3C-CONTRACT r1) da MERGE: PR #1229 (head 1d5ee679) merge bang merge commit
+    50baf894216504d4bb975690ceb9dee4835a2ad7 (cha 7200e7b4 + 1d5ee679), merged_by ducthangho luc 2026-11-05T17:17:05Z. Gate push
+    master run 42073104862 success 23/23 tren dung 50baf89, du bon moc §10.2.2 (wd-run 42087170784). Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: >-
+    Khong co lease ke nhiem thay the packet nay (thay_the_cho rong). Rut han dung co che da cai (tien le #1105 942fb45). Han moi
+    dat SAU luc push de luot dang lease con thay lease song, tranh rc=8 che rc=9.
+  nguoi_rut: 'phien ghi so land (khong phai executor, khong phai phien dieu phoi) theo giao viec cua phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4'
+  nghiem_thu: 'ai-dang-giu cho 7 duong dan write set sau 20:15Z phai ra NGUOI_GIU 0.'
 
 packet_id: CLOUD-SETUP-P3C-CONTRACT
 packet_slug: cloud-setup-p3c-contract

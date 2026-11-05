@@ -845,7 +845,10 @@ def _doc_han_utc(chuoi: str) -> datetime:
         # KHÔNG đoán múi giờ của người gõ: "hết hạn 18:30" mà không nói múi là hai
         # mốc cách nhau tới 26 giờ. Một lease sai 26 giờ thì chốt hạn thành trang trí.
         _die(RC_ARG, f"--expires-utc phải kèm múi giờ (thêm 'Z'): {chuoi!r}")
-    return d.astimezone(timezone.utc)
+    try:
+        return d.astimezone(timezone.utc)
+    except OverflowError:
+        _die(RC_ARG, f"--expires-utc vượt biên UTC: {chuoi!r}")
 
 
 # Cửa sổ hạn hợp lệ của một lease. Chặn `expires_utc` năm 9999 — một lease sống
@@ -3232,9 +3235,9 @@ def _spec_merge(root, h, path, lease):
     for line in visible.split("\n"):
         if re.match(r"(?i)\s*(?:-\s*)?(?:packet_id|revision)\s*:", line) and not (re.fullmatch(declaration, line) or re.fullmatch(inline, line)):
             raise ValueError("spec identity declaration sai grammar")
-        if len(re.findall(r"\b(?:packet_id|revision)\s*:", line)) > 2 and re.fullmatch(inline, line):
+        if len(re.findall(r"(?i)\b(?:packet_id|revision)\s*:", line)) > 2 and re.fullmatch(inline, line):
             raise ValueError("spec identity declaration lặp trong inline")
-        if re.match(r"(?i)\s*# .* r\S+", line) and not re.fullmatch(heading, line):
+        if re.match(r"(?i)\s*# .* r[0-9]\S*", line) and not re.fullmatch(heading, line):
             raise ValueError("spec identity H1 sai grammar")
     for key in ("packet_id", "revision"):
         values = re.findall(rf"(?m)^(?:- )?{key}: ([^;\n]+)", visible)
@@ -3379,6 +3382,8 @@ def cmd_kiem_merge(a, state_dir: Path) -> int:
             if a.human_audit_comment:
                 return
             raise ValueError("thiếu review model hoặc human độc lập")
+        if not (a.offline_run_json and a.offline_stdout):
+            raise ValueError("thiếu cặp --offline-run-json/--offline-stdout")
         r = _doc_json(a.offline_run_json, RC_GATE)[0]
         out = Path(a.offline_stdout).read_bytes()
         dong = [x for x in out.decode("utf-8").splitlines() if x.strip()]

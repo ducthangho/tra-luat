@@ -84,51 +84,95 @@ _MAU_BINARY = {
 # phần ghi KHÔNG BAO GIỜ đổi kết quả ca — mọi lỗi của nó bị bắt và chỉ in thành `CHAN_DOAN_LOI`.
 _CD_TRAN_CHUOI = 2000       # mỗi giá trị chuỗi: giữ ĐUÔI (lỗi Python/git nằm ở cuối)
 _CD_TRAN_PAYLOAD = 4000     # payload JSON tuần tự hoá
-_CD_TRAN_CA = 12000         # cả khối chẩn đoán của một ca
+_CD_TRAN_CA = 12000         # cả khối chẩn đoán của một ca (đã TÍNH chỗ cho dấu cắt)
+_CD_CHO_DAU_CAT = 80        # ngân sách dành sẵn cho dòng `…[cat khoi …]`
 _CD_TU_ENV = ("TOKEN", "SECRET", "KEY", "PAT", "PASSWORD", "AUTH", "COOKIE")
 _CD_NGAN_XEP = [[]]          # ngăn xếp kênh; `_chay_mot_ca` đẩy một kênh mới cho mỗi ca
-_CD_BO_CHE = []              # (tên, regex) nạp từ `scripts/pkg_secret_scan.py` — KHÔNG chép bảng
+_CD_BO_CHE = []              # (tên, regex) nạp từ `_CD_NGUON_MAU` — KHÔNG chép bảng vào tệp này
+_CD_NGUON_MAU = _CANONICAL_SCRIPTS / "pkg_secret_scan.py"
 
 
 def _nap_bo_che():
     """Bảng mẫu bí mật của kho, nạp từ ĐÚNG một chỗ (CLAUDE.md: hai bản sẽ trôi lệch).
 
-    Không nạp được thì trả `None`: `_che` khi ấy từ chối in mọi giá trị (fail-closed).
+    Nạp NGUYÊN TỬ: dựng bảng tạm, kiểm từng mục, chỉ công bố vào cache khi đủ cả. Hỏng ⇒ `None`,
+    và `_che` từ chối in mọi giá trị (fail-closed). Cache dở không bao giờ được dùng lại.
     """
     if _CD_BO_CHE:
         return _CD_BO_CHE
     try:
-        spec = importlib.util.spec_from_file_location(
-            "_wp1221_pkg_secret_scan", _CANONICAL_SCRIPTS / "pkg_secret_scan.py")
+        spec = importlib.util.spec_from_file_location("_wp1221_pkg_secret_scan", _CD_NGUON_MAU)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
-        _CD_BO_CHE.extend(mod.PATTERNS)
+        bang = [(ten, mau) for ten, mau in mod.PATTERNS]
+        if not bang or not all(type(t) is str and callable(getattr(m, "sub", None)) for t, m in bang):
+            return None
     except Exception:                                    # noqa: BLE001 — fail-closed ở `_che`
         return None
-    return _CD_BO_CHE if _CD_BO_CHE else None
+    _CD_BO_CHE[:] = bang
+    return _CD_BO_CHE
 
 
 def _che(text):
-    """Che bí mật: mẫu của `pkg_secret_scan` + giá trị env có tên nhạy cảm (đặc tả M3)."""
+    """Che bí mật trong MỘT chuỗi: giá trị env có tên nhạy cảm (cả dạng đã thoát JSON/repr) rồi
+    mẫu của `pkg_secret_scan` (đặc tả M3). Gọi trên chuỗi LÁ, trước mọi bước tuần tự hoá."""
     bang = _nap_bo_che()
     if bang is None:
         return "<CHE:khong_nap_duoc_bang_mau — khong in gia tri>"
-    gia_tri_env = []
+    dang = []
     for ten, gt in os.environ.items():
         if len(gt) >= 8 and any(tu in ten.upper() for tu in _CD_TU_ENV):
-            gia_tri_env.append((gt, ten))
-    for gt, ten in sorted(gia_tri_env, key=lambda x: -len(x[0])):  # dài trước: chuỗi con không che dở
+            for d in {gt, json.dumps(gt)[1:-1], json.dumps(gt, ensure_ascii=False)[1:-1], repr(gt)[1:-1]}:
+                dang.append((d, ten))
+    for gt, ten in sorted(dang, key=lambda x: -len(x[0])):  # dài trước: chuỗi con không che dở
         text = text.replace(gt, "<CHE:env:%s>" % ten)
     for ten, mau in bang:
         text = mau.sub("<CHE:%s>" % ten, text)
     return text
 
 
-def _loi_an_toan(exc):
-    """`repr(exc)` đã che; nếu chính bộ che hỏng thì chỉ in TÊN lớp lỗi — không bao giờ in thô."""
+def _vat_hoa(x, sau=0):
+    """Dựng bản BUILTIN đã che của `x`: không gọi `repr`/hook nào của đối tượng lạ (đặc tả M4)."""
+    t = type(x)
+    if t is str:
+        return _che(x)
+    if t in (bytes, bytearray):
+        return _che(bytes(x).decode("utf-8", "replace"))
+    if x is None or t in (bool, int, float):
+        return x
+    if sau >= 6:
+        return "<sau qua 6 tang>"
+    if t is dict:
+        cap = list(x.items())
+        r = {(_che(k) if type(k) is str else "<khoa:%s>" % type(k).__name__): _vat_hoa(v, sau + 1)
+             for k, v in cap[:200]}
+        if len(cap) > 200:
+            r["<cat>"] = "bo %d muc" % (len(cap) - 200)
+        return r
+    if t in (list, tuple, set, frozenset):
+        cap = list(x)
+        return [_vat_hoa(v, sau + 1) for v in cap[:200]] + (["<cat %d muc>" % (len(cap) - 200)] if len(cap) > 200 else [])
+    return "<%s>" % t.__name__
+
+
+def _ghi_an_toan(ham):
+    """Chạy một bước GHI chẩn đoán; mọi lỗi của nó (kể cả BaseException trừ Ctrl-C) thành `CHAN_DOAN_LOI`."""
     try:
-        return _cat_duoi(_che(repr(exc)), _CD_TRAN_CHUOI)
-    except Exception:                                    # noqa: BLE001
+        ham()
+    except KeyboardInterrupt:
+        raise
+    except BaseException as exc:                         # noqa: BLE001 — M4: không đổi kết quả ca
+        _CD_NGAN_XEP[-1].append(("CHAN_DOAN_LOI", _loi_an_toan(exc)))
+
+
+def _loi_an_toan(exc):
+    """Mô tả lỗi đã che, dựng từ `args` qua `_vat_hoa` (không `repr` đối tượng); hỏng ⇒ chỉ tên lớp."""
+    try:
+        than = [_vat_hoa(a) for a in exc.args] + [_vat_hoa(getattr(exc, "filename", None))]
+        return _cat_duoi("%s%s" % (type(exc).__name__, json.dumps(than, ensure_ascii=False)), _CD_TRAN_CHUOI)
+    except KeyboardInterrupt:
+        raise
+    except BaseException:                                # noqa: BLE001
         return "<%s>" % type(exc).__name__
 
 
@@ -141,28 +185,25 @@ def _cat_duoi(text, tran):
 def _cd(nhan, gia_tri):
     """Ghi một cặp `nhãn → giá trị` vào kênh của ca đang chạy; trả lại `gia_tri` nguyên vẹn.
 
-    Không bao giờ ném: chẩn đoán hỏng không được biến một ca PASS thành FAIL (đặc tả M4).
+    Không bao giờ đổi kết quả ca (đặc tả M4): chỉ đọc kiểu builtin, mọi lỗi thành `CHAN_DOAN_LOI`.
     """
-    try:
-        if isinstance(gia_tri, (bytes, bytearray)):
-            chuoi, tran = bytes(gia_tri).decode("utf-8", "replace"), _CD_TRAN_CHUOI
-        elif isinstance(gia_tri, str):
-            chuoi, tran = gia_tri, _CD_TRAN_CHUOI
+    def ghi():
+        if type(gia_tri) in (str, bytes, bytearray):
+            chuoi, tran = _vat_hoa(gia_tri), _CD_TRAN_CHUOI
         else:
-            chuoi = json.dumps(gia_tri, ensure_ascii=False, sort_keys=True, default=repr)
+            chuoi = json.dumps(_vat_hoa(gia_tri), ensure_ascii=False, sort_keys=True)
             tran = _CD_TRAN_PAYLOAD
-        _CD_NGAN_XEP[-1].append((str(nhan), _cat_duoi(_che(chuoi), tran)))
-    except Exception as exc:                             # noqa: BLE001 — xem docstring
-        _CD_NGAN_XEP[-1].append(("CHAN_DOAN_LOI", _loi_an_toan(exc)))   # _loi_an_toan không ném
+        _CD_NGAN_XEP[-1].append((_che(str(nhan)), _cat_duoi(chuoi, tran)))
+    _ghi_an_toan(ghi)
     return gia_tri
 
 
 def _ve(nhan, gia_tri):
     """Ghi giá trị một vế của biểu thức quyết định, trả lại nó — dùng TRONG chuỗi `and`.
 
-    Giữ nguyên short-circuit: vế cuối cùng được ghi chính là vế đã trượt.
+    Giữ nguyên short-circuit: vế cuối cùng được ghi chính là vế đã trượt. Không gọi `bool()` thêm.
     """
-    _cd("ve:" + nhan, bool(gia_tri))
+    _cd("ve:" + nhan, gia_tri)
     return gia_tri
 
 
@@ -176,12 +217,14 @@ def _chay_tien_trinh(nhan, cmd, **kw):
     kw.setdefault("stdout", subprocess.PIPE)
     kw.setdefault("stderr", subprocess.PIPE)
     proc = subprocess.run(cmd, **kw)
-    _cd(nhan + ".lenh", " ".join(_ten_ngan(a) for a in cmd[:4]))
-    _cd(nhan + ".rc", proc.returncode)
-    if proc.stdout:
-        _cd(nhan + ".stdout", proc.stdout)
-    if proc.stderr:
-        _cd(nhan + ".stderr", proc.stderr)
+
+    def ghi():
+        _cd(nhan + ".lenh", " ".join(_ten_ngan(a) for a in cmd[:4]))
+        _cd(nhan + ".rc", proc.returncode)
+        for kenh in ("stdout", "stderr"):
+            if getattr(proc, kenh):
+                _cd(nhan + "." + kenh, getattr(proc, kenh))
+    _ghi_an_toan(ghi)
     return proc
 
 
@@ -197,10 +240,15 @@ _KHOA_PAYLOAD_CONG = ("ok", "error", "problems", "failed", "load_error", "dev_di
 
 
 def _ghi_payload_cong(nhan, payload):
-    _cd(nhan + ".payload", {k: payload.get(k) for k in _KHOA_PAYLOAD_CONG if k in payload})
-    hong = [c for c in (payload.get("cases") or []) if not (isinstance(c, dict) and c.get("ok") is True)]
-    if hong:
-        _cd(nhan + ".cases_khong_ok", hong)
+    def ghi():
+        if type(payload) is not dict:
+            return _cd(nhan + ".payload_khong_phai_dict", type(payload).__name__)
+        _cd(nhan + ".payload", {k: payload[k] for k in _KHOA_PAYLOAD_CONG if k in payload})
+        cases = payload.get("cases")
+        hong = [c for c in cases if not (type(c) is dict and c.get("ok") is True)] if type(cases) is list else cases
+        if hong:
+            _cd(nhan + ".cases_khong_ok", hong)
+    _ghi_an_toan(ghi)
 
 
 def _khoi_chan_doan(ghi, tran=None):
@@ -217,7 +265,7 @@ def _khoi_chan_doan(ghi, tran=None):
             moi = ["CHAN_DOAN: %s = %s" % (nhan, phan[0])]
             moi += ["CHAN_DOAN:   | %s" % p for p in phan[1:]]
         do_dai = sum(len(d) + 1 for d in moi)
-        if tong + do_dai > tran:
+        if tong + do_dai > tran - _CD_CHO_DAU_CAT:
             con = sum(len(n) + len(c) for n, c in ghi[i:])
             dong.append("CHAN_DOAN: …[cat khoi: bo %d muc, ~%d ky tu]" % (len(ghi) - i, con))
             break
@@ -256,11 +304,13 @@ def _chay_mot_ca(case, don_dep=None):
         except OSError as exc:
             loi_don = exc
     if loi_don is not None:
-        sau.append("CHAN_DOAN_DON_DEP: %s (%s)" % (_loi_an_toan(loi_don), td.name))
+        sau.append("CHAN_DOAN_DON_DEP: %s (%s)" % (_loi_an_toan(loi_don), _vat_hoa(td.name)))
     if not ok:
         try:
             sau += _khoi_chan_doan(ghi)
-        except Exception as exc:                     # noqa: BLE001 — M4: không đổi kết quả
+        except KeyboardInterrupt:
+            raise
+        except BaseException as exc:                 # noqa: BLE001 — M4: không đổi kết quả
             sau.append("CHAN_DOAN_LOI: %s" % _loi_an_toan(exc))
     return ok, truoc + ["%s %s" % ("PASS" if ok else "FAIL", case.__name__)] + sau
 
@@ -504,12 +554,14 @@ def case_real_hook_rename_only_bi_chan(root):
     statuses = _staged_statuses(root)
     proc = _commit_through_real_hook(root)
     output = (proc.stdout + proc.stderr).decode("utf-8", "replace")
-    _cd("statuses", statuses)
+    _ghi_an_toan(lambda: _cd("cac_ve", {          # ĐỦ mọi vế, từ dữ liệu đã có; không gọi lại commit
+        "statuses": statuses, "statuses==R100": statuses == ["R100"], "rc!=0": proc.returncode != 0,
+        "CRLF_IN_INDEX in output": "CRLF_IN_INDEX" in output, "moved.txt in output": "moved.txt" in output}))
     return (
-        _ve("statuses==R100", statuses == ["R100"])
-        and _ve("rc!=0", proc.returncode != 0)
-        and _ve("CRLF_IN_INDEX in output", "CRLF_IN_INDEX" in output)
-        and _ve("moved.txt in output", "moved.txt" in output)
+        statuses == ["R100"]
+        and proc.returncode != 0
+        and "CRLF_IN_INDEX" in output
+        and "moved.txt" in output
     )
 
 
@@ -524,13 +576,16 @@ def case_real_hook_rename_copy_only_bi_chan(root):
     statuses = _staged_statuses(root)
     proc = _commit_through_real_hook(root)
     output = (proc.stdout + proc.stderr).decode("utf-8", "replace")
-    _cd("statuses", statuses)
+    _ghi_an_toan(lambda: _cd("cac_ve", {
+        "statuses": statuses, "statuses==C100,R100": sorted(statuses) == ["C100", "R100"],
+        "rc!=0": proc.returncode != 0, "CRLF_IN_INDEX in output": "CRLF_IN_INDEX" in output,
+        "copied.txt in output": "copied.txt" in output, "moved.txt in output": "moved.txt" in output}))
     return (
-        _ve("statuses==C100,R100", sorted(statuses) == ["C100", "R100"])
-        and _ve("rc!=0", proc.returncode != 0)
-        and _ve("CRLF_IN_INDEX in output", "CRLF_IN_INDEX" in output)
-        and _ve("copied.txt in output", "copied.txt" in output)
-        and _ve("moved.txt in output", "moved.txt" in output)
+        sorted(statuses) == ["C100", "R100"]
+        and proc.returncode != 0
+        and "CRLF_IN_INDEX" in output
+        and "copied.txt" in output
+        and "moved.txt" in output
     )
 
 
@@ -728,7 +783,7 @@ def case_probe_hop_dong_canonical_o_cay_dev(root):
 
     ids = _cd("ids_do_duoc", {entry.test_id for entry in tf.discover_fragment_test_ids(frag)})
     cases = tf.load_runtime_fragment_cases(scripts)
-    _cd("cases_nap_duoc", [c.test_id for c in cases])
+    _ghi_an_toan(lambda: _cd("cases_nap_duoc", [c.test_id for c in cases]))
     return (_ve("ids == {_PROBE_FILE_ID}", ids == {_PROBE_FILE_ID})
             and _ve("len(cases) == 1 and cases[0].test_id == _PROBE_FILE_ID", len(cases) == 1 and cases[0].test_id == _PROBE_FILE_ID)
             and _ve("cases[0].run(object()) is True", cases[0].run(object()) is True))
@@ -746,7 +801,7 @@ def case_probe_qua_bundled_topology_canonical(root):
     (scripts / "tl_test_fragments_bundled.py").write_bytes(tf.generate_bundled_module_bytes(frag))
 
     cases = tf.load_runtime_fragment_cases(scripts)     # không có test_fragments/ ⇒ topology bundle
-    _cd("cases_nap_duoc", [c.test_id for c in cases])
+    _ghi_an_toan(lambda: _cd("cases_nap_duoc", [c.test_id for c in cases]))
     return (_ve("len(cases) == 1 and cases[0].test_id == _PROBE_FILE_ID", len(cases) == 1 and cases[0].test_id == _PROBE_FILE_ID)
             and _ve("cases[0].run(object()) is True", cases[0].run(object()) is True))
 
@@ -1008,11 +1063,11 @@ def case_chan_doan_kenh_in_che_cat(root):
         td.cleanup()
         raise PermissionError(_MA_CD_DON)
 
-    class _ReprNem:
-        def __repr__(self):
-            raise RuntimeError("repr hong " + bi_mat)
+    class _StrNem:                                  # nhãn có __str__ ném: đường lỗi THẬT của `_cd`
+        def __str__(self):
+            raise RuntimeError("str hong " + bi_mat)
 
-    _, ghi_loi = _ghi_vao_kenh_rieng(lambda: _cd("gia_tri_repr_nem", _ReprNem()))
+    _, ghi_loi = _ghi_vao_kenh_rieng(lambda: _cd(_StrNem(), 1))
     khoi_loi = "\n".join(_khoi_chan_doan(ghi_loi))
     _cd("khoi_loi", khoi_loi)
 
@@ -1050,6 +1105,85 @@ def case_chan_doan_kenh_in_che_cat(root):
                     and bool(_nap_bo_che())))
 
 
+def case_chan_doan_vat_hoa_va_nguon_mau(root):
+    """Lượt review 1 của wp1221 (F1–F6): che TRƯỚC khi thoát ký tự, không gọi hook, nạp bảng nguyên tử.
+
+    Mỗi vế là một phản chứng của reviewer, dựng lại bằng dữ liệu giả; mọi trạng thái toàn cục bị thay
+    (env, `tempfile.tempdir`, nguồn bảng mẫu, cache) được khôi phục trong `finally`.
+    """
+    bi_mat = "GOC" + "SPX-" + "Ab1x" * 6
+    the = 'wp1221"q\\b' + "".join(chr(97 + (i * 5) % 26) for i in range(14))   # có `"` và `\`
+    goc = (os.environ.get("EOL_TEST_FAKE_TOKEN"), tempfile.tempdir, globals()["_CD_NGUON_MAU"],
+           list(_CD_BO_CHE))
+    tam = Path(root.parent) / "wp1221-nguon"
+    tam.mkdir()
+    try:
+        os.environ["EOL_TEST_FAKE_TOKEN"] = the
+
+        class _Moc:                                  # hook của đối tượng lạ KHÔNG được chạy (F3)
+            goi = []
+
+            def __repr__(self):
+                _Moc.goi.append(1)
+                raise SystemExit(23)
+        out = {"ok": True, "x": _Moc()}
+        _, g1 = _ghi_vao_kenh_rieng(lambda: (_cd("long", {"a": [the, {"b": bi_mat}]}), _cd("moc", out),
+                                             _ghi_payload_cong("cong", {"ok": True, "cases": 1}),
+                                             _chay_tien_trinh("con", [sys.executable, "-c",
+                                                              "import json,os; print(json.dumps(os.environ['EOL_TEST_FAKE_TOKEN']))"])))
+        k1 = "\n".join(_khoi_chan_doan(g1))
+        _cd("khoi_vat_hoa", k1)
+        dau_the = [the, json.dumps(the)[1:-1], repr(the)[1:-1]]
+
+        tempfile.tempdir = str(tam / ("d-" + "Zq9" + "wp1221tmp" * 2))   # F2: đường dẫn mang giá trị env
+        os.environ["EOL_TEST_FAKE_TOKEN"] = "Zq9" + "wp1221tmp" * 2
+
+        def don_hong(td):
+            td.cleanup()
+            raise PermissionError("khoa")
+        (tam / ("d-" + "Zq9" + "wp1221tmp" * 2)).mkdir()
+        _, dong_don = _chay_mot_ca(lambda _r: True, don_dep=don_hong)
+        tempfile.tempdir = goc[1]
+
+        # F4: 6 mục x (17 + 1982 + 1) = ĐÚNG 12000 ký tự ⇒ không dành chỗ thì mục 7 đẩy dấu cắt vượt trần.
+        _, g4 = _ghi_vao_kenh_rieng(lambda: [_cd("m%02d" % i, "y" * 1982) for i in range(7)])
+        k4 = "\n".join(_khoi_chan_doan(g4))
+
+        canary = "WP1221" + "CANARY" + "42"           # F5: bộ che phải đọc ĐÚNG nguồn đang trỏ tới
+        (tam / "nguon_tot.py").write_text(
+            "import re\nPATTERNS = [('canary', re.compile('WP1221' + 'CANARY[0-9]+'))]\n", encoding="utf-8")
+        (tam / "nguon_do.py").write_text(               # F6: nạp dở rồi ném
+            "import re\ndef _g():\n    yield ('a', re.compile('zzz'))\n    raise RuntimeError('do')\n"
+            "PATTERNS = _g()\n", encoding="utf-8")
+        _CD_BO_CHE[:] = []
+        globals()["_CD_NGUON_MAU"] = tam / "nguon_tot.py"
+        che_canary = _che(canary)
+        _CD_BO_CHE[:] = []
+        globals()["_CD_NGUON_MAU"] = tam / "nguon_do.py"
+        che_do = [_che(bi_mat), _che(bi_mat)]
+        do_dai_cache_do = len(_CD_BO_CHE)
+    finally:
+        tempfile.tempdir = goc[1]
+        globals()["_CD_NGUON_MAU"] = goc[2]
+        _CD_BO_CHE[:] = goc[3]
+        if goc[0] is None:
+            os.environ.pop("EOL_TEST_FAKE_TOKEN", None)
+        else:
+            os.environ["EOL_TEST_FAKE_TOKEN"] = goc[0]
+    _cd("dong_don", dong_don)
+    return (_ve("F1 env co \" va \\ bi che o moi dang", all(d not in k1 for d in dau_the)
+                and k1.count("<CHE:env:EOL_TEST_FAKE_TOKEN>") >= 2)
+            and _ve("F1 bi mat long trong dict bi che", bi_mat not in k1)
+            and _ve("F3 khong goi hook cua doi tuong la", not _Moc.goi and '"x": "<_Moc>"' in k1)
+            and _ve("F3 payload cong la khong lam hong", "CHAN_DOAN_LOI" not in k1)
+            and _ve("F2 duong dan don dep da che", len(dong_don) == 2 and "wp1221tmpwp1221tmp" not in dong_don[1]
+                    and "<CHE:env:EOL_TEST_FAKE_TOKEN>" in dong_don[1])
+            and _ve("F4 khoi <= tran ke ca dau cat", len(k4) <= _CD_TRAN_CA and "…[cat khoi" in k4)
+            and _ve("F5 doc dung nguon dang tro", che_canary == "<CHE:canary>")
+            and _ve("F6 nap do => fail-closed ca hai lan, cache rong",
+                    all(c.startswith("<CHE:khong_nap_duoc") for c in che_do) and do_dai_cache_do == 0))
+
+
 CASES = [
     case_new_file_crlf_bi_chan,
     case_new_file_lf_duoc_qua,
@@ -1082,6 +1216,7 @@ CASES = [
     case_ho_binary_thieu_khai_thi_bi_bat,
     case_binary_giu_nguyen_byte_qua_renormalize,
     case_chan_doan_kenh_in_che_cat,
+    case_chan_doan_vat_hoa_va_nguon_mau,
 ]
 
 

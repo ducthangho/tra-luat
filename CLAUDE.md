@@ -803,6 +803,8 @@ không tra được.
   **ngay sau `codex login`**, đừng chạy `codex` trên máy cá nhân trong lúc còn muốn dùng
   chuỗi đó ở phiên remote. `doctor` nay cảnh báo TRƯỚC (`SAP_HET_HAN`) khi `exp` dưới 24h
   **hoặc** `last_refresh` cũ hơn 24h — tín hiệu thứ hai mới là cái bắt được ca đã xảy ra.
+  **Từ 05-11-2026 biến này là đường cũ**: `agent_creds` (P2b/P3) thay thế; code đọc biến vẫn còn để tương thích và
+  chưa gỡ — xem khối đầu mục *Để không phải nhập mã lại mỗi phiên* trong `docs/GOI_AGENT_DA_NEN.md`.
 - **`codex login status` NÓI DỐI** — chỉ kiểm tệp đọc được, không kiểm token còn sống
   (rc=0 "Logged in" trong khi mọi lời gọi trả 401). Đã trả giá HAI lần: một lần dán nhãn
   `DUNG_DUOC` sai, một lần chốt "đã đăng nhập thì không ghi đè" bảo vệ đúng bản đã chết và

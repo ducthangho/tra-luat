@@ -1,0 +1,41 @@
+# Bien ban M8 (ADR-0060) dong WP #1223 CLOUD-SETUP-P3C-CONTRACT r1 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1229-wp1223-land-evidence.yaml (nghiem_thu, assurance_81). "passed" o nghiem_thu la gop:
+# A1–A8, A10 measured (A1–A6 do lai: nghiem-thu-a1-a6.txt; A8: nghiem-thu-a8.txt); A9 loi_khai_co_neo — xem ho so.
+packet: CLOUD-SETUP-P3C-CONTRACT
+revision: 1
+generation: 1
+spec_hash: db83020d7cd57c8c9981c8f94ffcc50bf59d536a7224c1f3fb6ae6195511de3a
+head_da_review: 1d5ee679ced60ca6dfade2096a1cb805e9cadad8
+tree_h: 151298207d8021baa0afbd40bf660afd3bd9ad78
+review:
+  offline: 'run 4dda2d88 approve tren 1d5ee67 (model/effort/sandbox DO_DUOC)'
+  connector: 'issuecomment-6663030933 sach tren 1d5ee67'
+  assurance_81: DAT
+windows:
+  phan_loai: not_required
+  nguon: 'dac ta §0 windows not_required; issuecomment-6663059067 "windows: 1d5ee67… not_required"'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1229#issuecomment-6665710907
+duyet_chu_kho_ghi_chu: 'approve_merge HOI TO, dang 18:18:22Z SAU merge 17:17:05Z (xem ho so land).'
+merge_commit: 50baf894216504d4bb975690ceb9dee4835a2ad7
+tree_m: 59897b1183de3d1feef954f9ca0175122cea08d3
+ci_master:
+  run_id: 42073104862
+  conclusion: success
+nghiem_thu:
+  A1: passed
+  A2: passed
+  A3: passed
+  A4: passed
+  A5: passed
+  A6: passed
+  A7: passed
+  A8: passed
+  A9: passed
+  A10: passed
+lease_cuoi: wp1223-r1-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

@@ -1,0 +1,23 @@
+Không có phát hiện **P0/P1/P2/P3** trong delta được giao. Lượt 3 không có finding cần đóng lại.
+
+```text
+reviewed_sha: 1d5ee679ced60ca6dfade2096a1cb805e9cadad8
+tree: 151298207d8021baa0afbd40bf660afd3bd9ad78
+reviewer: openai_codex / codex_cli / machine
+```
+
+Spec r1/g1 khớp SHA-256 đã cung cấp.
+
+| Kiểm | Kết quả |
+|---|---|
+| K-a | `git diff --quiet` trên đúng sáu tệp: **rc=0**, giữ nguyên byte so với `f27dba4`. |
+| K-b | `git diff --stat b255b0b HEAD`: đúng sáu tệp packet + manifest. `git grep` conflict marker: **rc=1**, output rỗng. |
+| K-c | `release-verify --strict --json`: **rc=0**, `ok=true`, **184/184**, `len(failed)=0`. Target `2.21.2q`; đúng năm mục tệp đổi, chỉ các trường tổng hợp được phép đổi; `file_count` giữ nguyên. |
+| K-d | Full selftest: **rc=0, 1777/1777**; `expect_version`, `r119`, `r210` đều đạt. |
+| K-e | Không thấy phụ thuộc phiên bản hoặc hai tài liệu trong mã/fragment #1099. Fragment đạt **12/12** ca hành vi, **3/3** ca tài liệu, **30/30** đột biến; không skip. |
+
+Selftest chạy trên bản sao local đúng SHA, Linux/Python 3.13.17. Lượt đầu **failed: 1775/1777** do ký commit Git toàn cục gọi helper bị sandbox chặn. Lượt chạy lại tắt ký riêng trong tiến trình kiểm thử; không đổi cấu hình kho/toàn cục. [Log đạt](/tmp/wp1223-review4-jg588m2w/selftest-unsigned.stdout).
+
+Snapshot cuối của kho gốc không có delta; HEAD/tree giữ nguyên. [Bằng chứng local](/tmp/wp1223-review4-jg588m2w/review-evidence.json).
+
+KET_LUAN: approve

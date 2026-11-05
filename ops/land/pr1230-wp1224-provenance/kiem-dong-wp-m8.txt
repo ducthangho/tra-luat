@@ -1,0 +1,16 @@
+# lenh: python3 .claude/dev/packet_loop.py kiem-dong-wp --root . --bien-ban ops/land/pr1230-wp1224-provenance/bien-ban-m8.yaml --lease ops/land/pr1230-wp1224-provenance/lease-wp1224-r2-g2-claude-sau-rut-han.yaml.txt
+# checkout: 5d3b8b85590435dd9e793fabda80924979de0ed7 (+ thay doi chua commit trong ops/land) ; origin/master: 825eb3561a94e05c36045d2c981b4108c523e31c ; luc: 2026-11-05T20:18:47Z
+# lease sau rut han cmp origin/ops/cap-lease-p3c-g1:ops/leases/wp1224-r2-g2-claude.yaml: khop
+ĐÓNG ĐƯỢC WP CLOUD-SETUP-P3C-DOCS — merge 825eb3561a94e05c36045d2c981b4108c523e31c
+rc=0
+
+# LAN 2 (sau khi ha landed false theo finding P1 r4485646628: review offline luot 4 vi pham read-only §8.2)
+# checkout: 48419a829d0c928bd5ca3f79027ac36cd983df0f (+ thay doi chua commit trong ops/land) ; luc: 2026-11-05T21:21:53Z
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12
+
+# LAN 3 (sau khi do hien vat luot 5/5 read-only run 4e47e737; bien-ban-m8.yaml landed true, assurance_81 DAT)
+# checkout: 3191eea425140babc5746089113f1e5f1d548cf8 (+ thay doi chua commit trong ops/land) ; luc: 2026-11-05T21:40:22Z
+ĐÓNG ĐƯỢC WP CLOUD-SETUP-P3C-DOCS — merge 825eb3561a94e05c36045d2c981b4108c523e31c
+rc=0

@@ -1,0 +1,18 @@
+# tom_gate_output.py kiem — do 2026-11-05. Phan chung dung tren ban sao cua gate-output-41356691133.txt:
+#  1: xoa moi dong OK cua gate-cong-cu-gop  2: manh ubuntu 3 chi con dong MO DAU 'ĐỘT BIẾN — MẢNH 3/8 (61/490'
+#  3: 'MẢNH 3/8: 61/61' -> '60/61'  4: doi conclusion dau tien (chuan-bi) thanh failure
+## phan chung 1
+KIEM: DO — 37 job, thieu marker hoan tat: ['gate-cong-cu-gop']
+rc=1
+## phan chung 2
+KIEM: DO — 37 job, thieu marker hoan tat: ['gate-cong-cu']
+rc=1
+## phan chung 3
+KIEM: DO — 37 job, thieu marker hoan tat: ['gate-cong-cu']
+rc=1
+## phan chung 4
+KIEM: DO — 37 job, thieu marker hoan tat: ['chuan-bi (conclusion=failure, ##[error]=0)']
+rc=1
+## ban that
+KIEM: DAT — 37 job, moi job gate co >=1 marker hoan tat neo ca dong (['chuan-bi'] khong phai gate)
+rc=0

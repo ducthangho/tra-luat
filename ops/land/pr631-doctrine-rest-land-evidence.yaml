@@ -165,10 +165,13 @@ landed_20261105:
     run: 'measured — gate-hau-merge-20261105b/ci-provenance-42018846747/provenance.yaml moc.run passed.'
     checkout: 'measured — gate-hau-merge-20261105b/ci-provenance-42018846747/provenance.yaml: 23/23 job checkout passed, sha a57eade doc tu log.'
     gate_output: >-
-      measured — gate-hau-merge-20261105b/gate-output-42018846747.txt: log tho 23 job tai qua REST (sha256 tung log); 0 dong
-      ##[error]; 22/23 job co marker duong; chuan-bi khong in marker. 37 dong khop regex am deu o gate-ops: 36 la bao cao dot bien bi
-      giet, 1 la Traceback cua fixture co y "canary-import" (ModuleNotFoundError nonexistent_fixture_module) ngay truoc dong
-      "PASS harness-import".
+      measured — gate-hau-merge-20261105b/danh-gia-gate-output-42018846747.txt (danh_gia_gate.py, chep tu
+      ops/land/pr1142-wp1117-provenance, sha256 b87f9697…9fcd; luat dau hieu duong THEO BUOC): MOC_GATE_OUTPUT passed, 23/23 job
+      co dau hieu duong trong chinh output cua buoc bat buoc. Job thu 23 hay bi hoi la chuan-bi: no la job phan loai duong
+      nhanh/day du, khong chay bo test, va LUAT ("chuan-bi", [("ops/ci_duong_nhanh.py", ["^che_do=(day_du|duong_nhanh)$"])])
+      doi dau hieu che_do=… — da khop. Doi chieu tho: gate-hau-merge-20261105b/gate-output-42018846747.txt (regex rong cua phien,
+      0 dong ##[error]); 37 dong khop regex am deu o gate-ops: 36 dong bao cao dot bien bi giet, 1 Traceback cua fixture co y
+      "canary-import" ngay truoc "PASS harness-import". Ban truoc cua dong nay ghi "22/23" theo regex tho — sai so voi luat theo buoc.
     workflow_definition: >-
       measured — gate-hau-merge-20261105b/ci-provenance-42018846747/provenance.yaml moc.workflow_definition passed: luot
       ops-do-workflow-definition.yml 42027686344 (artifact 13413763996), path .github/workflows/ci.yml, oid a57eade, blob

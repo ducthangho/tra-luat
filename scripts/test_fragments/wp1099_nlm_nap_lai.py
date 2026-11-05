@@ -40,9 +40,6 @@ def _nlm_auth_alive(nb, require_notebook_body=False):
     che_do = st.get("canary", "jar")
     if che_do == "loi":
         raise RuntimeError(_CANH)
-    if st.get("hen"):                              # A9: HẸN hai canary qua tệp (≤ 8 s) — không khoá ⇒ cả hai cùng vào, bất kể lịch luồng
-        _ghi("hen"); t0 = time.time()  # noqa: E702
-        while open(_LOG, encoding="utf-8").read().count("hen\n") < 2 and time.time() - t0 < 8: time.sleep(0.05)  # noqa: E701
     time.sleep(5 if che_do == "ngu" else st.get("cham", 0))
     return (None if che_do == "none" else st["jar"] == "song"), "x"
 if __name__ == "__main__":
@@ -176,26 +173,29 @@ def _a8(cay):
         _chot("A8", sum(c.startswith("nlm ") for c in log) == lai and _dong(err)[0].startswith("nlm_nap_lai: " + mong),
               "%r: %r" % (args, log))
 def _a9(cay):
-    cay.dat(bundle="chet")
-    m = cay.moi()
+    cay.dat(bundle="chet"), (m := cay.moi())
     d1, d2 = cay.goi(m, _SL)[1], cay.goi(m, _SL)
     _chot("A9", _dong(d1)[0].startswith("nlm_nap_lai: BUNDLE CŨNG CHẾT") and len(_dong(d2[1])) == 1
           and _dong(d2[1])[0].startswith("nlm_nap_lai: BỎ QUA — đã nạp"), "hai lời gọi: %r %r" % (d1, d2[1]))
-    cay.dat(bundle="chet", hen=1)                 # hai LUỒNG cùng tiến trình: canary HẸN nhau (F02; review r11 F11-01)
-    m, cu, sys.stderr = cay.moi(), sys.stderr, io.StringIO()
-    ts = [threading.Thread(target=m._run, args=(_SL, 30)) for _ in range(2)]
+    cay.dat(bundle="chet")                        # hai LUỒNG: canary đầu CHỜ tới khi luồng kia THỬ khoá (bản thật) hoặc VÀO canary (bỏ khoá) — không ngưỡng (F02; r12–r13 F11-01)
+    m, cu, sys.stderr, san, dem, het = cay.moi(), sys.stderr, io.StringIO(), threading.Event(), {"k": 0, "c": 0}, []
+    goc, khoa, ts = m._canary, m._NAP_LAI_KHOA, [threading.Thread(target=m._run, args=(_SL, 30)) for _ in range(2)]
+    hen = lambda loai: (dem.__setitem__(loai, dem[loai] + 1), dem[loai] > 1 and san.set())  # noqa: E731
+    m._canary, m._NAP_LAI_KHOA = (lambda: (hen("c"), dem["c"] > 1 or san.wait(60) or het.append(1), goc())[2]), type(   # 60 s: ngân sách ĐO, hết ⇒ KHÔNG ĐO ĐƯỢC
+        "K", (), {"__enter__": lambda s: (hen("k"), khoa.acquire()), "__exit__": lambda s, *a: khoa.release()})()
     try: [x.start() for x in ts], [x.join() for x in ts]  # noqa: E701
     finally: sys.stderr = cu  # noqa: E701
+    if het: raise RuntimeError("A9 KHÔNG ĐO ĐƯỢC: luồng thứ hai không tới trong 60 s")  # noqa: E701
     _chot("A9", sum("nlm-auth-load" in c for c in cay.nhat_ky()) == 1, "hai luồng ⇒ nạp khác 1 lần")
-    if hasattr(os, "mkfifo"):                     # dấu là FIFO không có bên ghi ⇒ đọc dấu không được treo (F06)
-        cay.dat(), os.mkfifo(cay.tep_dau)
-        x = threading.Thread(target=cay.moi()._doc_dau, daemon=True)
-        x.start(), x.join(20)                     # hạn RỘNG: chỉ treo thật (thiếu O_NONBLOCK) mới còn sống; gỡ kẹt khi đó có bên đọc ⇒ không ENXIO
+    if hasattr(os, "mkfifo"):                     # spy: MỌI lần mở dấu có O_NONBLOCK (không phụ thuộc lịch); rồi đối chứng I/O FIFO thật (F06)
+        cay.dat(), cay.dau(1), (m := cay.moi()), (co := []), (o := os.open)
+        m.os = type("O", (), {"__getattr__": lambda s, n: getattr(os, n), "open": lambda s, p, f, *a: (co.append(f), o(p, f, *a))[1]})()
+        m._doc_dau(), _chot("A9", co and all(f & os.O_NONBLOCK for f in co), "mở dấu thiếu O_NONBLOCK: %r" % co)
+        cay.dat(), os.mkfifo(cay.tep_dau), (x := threading.Thread(target=cay.moi()._doc_dau, daemon=True)), x.start(), x.join(60)   # ngân sách đo
         with contextlib.suppress(OSError): x.is_alive() and os.close(os.open(cay.tep_dau, os.O_WRONLY | os.O_NONBLOCK))  # noqa: E701
         _chot("A9", not x.is_alive(), "đọc dấu FIFO treo"), cay.tep_dau.unlink()
     for dau, nap in ((-300, 0), (-700, 1), (3600, 1), ([1], 1)):
-        cay.dat(bundle="chet")
-        cay.dau(dau if isinstance(dau, list) else int(time.time()) + dau)
+        cay.dat(bundle="chet"), cay.dau(dau if isinstance(dau, list) else int(time.time()) + dau)
         cay.goi(cay.moi(), _SL)
         _chot("A9", sum("nlm-auth-load" in c for c in cay.nhat_ky()) == nap, "dấu %r ⇒ nạp %d" % (dau, 1 - nap))
 def _a10(cay):                                    # dấu THƯỜNG đo rò fd ĐẦU ca, trước mọi xoá/thay tệp: Windows khoá tệp còn mở ⇒ PermissionError (r10 F01)

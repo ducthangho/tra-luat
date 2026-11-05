@@ -86,3 +86,5 @@ nang_tran:
   tran_moi: '<= 1 tep / <= 600 dong them'
   can_cu_lan_1: https://github.com/ducthangho/tra-luat/issues/1221#issuecomment-6654445817
   can_cu_lan_2: 'issue #1221, chu kho 05-11 ~10:44Z (comment phien dieu phoi)'
+da_bi_thay_the: wp1221-r3-g1-claude-remote-20261105
+da_bi_thay_the_ghi_chu: 'spec r3 (danh sach cho phep) duoc chu kho duyet 05-11 ~16:28Z (issuecomment-6663244016); lease r2 g1 con han nen bia mo hai chieu la duong thu hoi duy nhat; head 5387a82 cua r2 khong land'

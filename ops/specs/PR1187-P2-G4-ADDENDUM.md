@@ -1,0 +1,21 @@
+# PR1187 r2/g4 — proposed successor for verified connector P2
+
+Status: PROPOSED; no lease/run/source write is granted by this document.
+Packet: PR1184-MERGE-CONTRACT (#1187), revision2, proposed generation4.
+Existing frozen normative spec remains ops/specs/PR1184-MERGE-CONTRACT-r2.md at74a0abdb2631ae38f9f76b7426b5e47a3c82ce8f, SHA256975c5d31be6ec4f26145f14893b5c8f7063e5921d1c6dafdca020f50e795299d. This addendum changes only operational allowance/continuation identity; acceptance already forbids malformed/conflicting declarations.
+
+Verified blocker: PR1194 review5779358121 inline4476177126, P2, exact29ee9ca74d61544fbddd56c39dabbe194d26408e/tree996c6af444aeb22d69587ed7852b78f35102eb9b. Actual consumer accepts mixed-case inline suffix Revision:2 and Packet_id:wrong while lowercase duplicate is rejected. Canonical K3 rc12. No P2 waiver proposed. Six historical P3 waivers apply only their authorized H29; any future head needs new findings disposition during its own audit.
+
+Immutable acceptance base remains1f0941e9bba1d1d517eda4174167b81963c06bd5. Continuation starts exact29ee9ca. Separate fresh Codex Executor agent/context, codex_service/cloud/machine, one invocation and one run <=90minutes from grant; no extension through lease expiry. Controller does not author source in this run. New source branch and two-way predecessor supersession fences before source writes; expiredg3 is never revived. No rebase or master/ruleset/workflow change is authorized.
+
+Write permission ONLY .claude/dev/packet_loop.py and .claude/dev/packet_loop_test.py. Make identity-looking inline suffix recognition case-insensitive; reject additional packet_id/revision declarations regardless of key case. Add independent real-Git negative fixtures for mixed-case keys/conflicting values and healthy inline prose/control; semantic mutation proves removed case-insensitive detection is caught. Setup/import/crash/timeout cannot count as semantic kill. Existing frozen spec/product docs/ADR/source paths remain byte-identical except these two permitted paths.
+
+Existing approved size limits unchanged: <=5 net files/+1000 added lines vs immutablebase; six effective paths inherited, onlytwo writable now. Existing net H29 is5files/+936/-9. Stop before exceeding cap; no test compression/removal to fit.
+
+Budget request: preserve historical five model outputs (four advisory+one connector), grant exactly ONE additional connector on final human-audited newH (limit5->6), no local model review or seventh call. One new90min Executor run; separately authorize one read-only canonical fullstandard validation window <=180min from launch if source run cannot finish it. Prior timings/cost unknown remain unknown, no reset or total-under-budget claim. M9 gets exactlyone new dispatch on finalH; automatic PR/master CI recorded separately. OldH29 M9/CI may finish and are historical for newH, no reuse as final evidence.
+
+Before codepush: final committed H/tree, canonical admission with measured ancestry/runtime, exactdiff/write-set/size/EOL, fulltlN/N, fullpacket-loop standard including actual mutants/controls, supporting doctrine/ADR/docchecks, nativeWindowsM3 on online available machine with lock/load/paired baseline, and independent primary human personally reading newH spec/full diff. No localmodel reviewer substitution. User must separately authorize newH land after actual review. PriorH29 audit/land/K4bootstrap is not automatically rebound. NewH may still need explicit K4bootstrap because ADR0063 notlanded; it must be requested with actual new-head audit, never fake model output.
+
+After audit and codepush once: newdraftPR, exacthead connector, mandatory M9, canonicalK0–K7 with any separately authorized K4exception, four CI provenance markers, fullref fence/masterdrift assessment/rulesetreadback, owner exacthead landauthority before ready/merge. No auto/admin bypass, no deploy. Postmerge actualmasterCI and newcanonicalchecker revalidation, M8/D1–D4, predecessor/currentlease release, then Packetlanded/close; Mission1177 stays open until product1178 is also landed.
+
+If any required budget/authority/gate is missing, preserve evidence and stop that action. This proposal grants nothing before owner explicit approval and realGit lease publication.

@@ -19,7 +19,7 @@ description: >-
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
-> - **`references/API_CONTRACT.md`** — tham số + khóa response MỌI action webapp (target `2.21.2p`). **Tra trước khi gọi action — KHÔNG đoán tham số.**
+> - **`references/API_CONTRACT.md`** — tham số + khóa response MỌI action webapp (target `2.21.2q`). **Tra trước khi gọi action — KHÔNG đoán tham số.**
 > - **`references/RUNBOOK.md`** — trình tự khởi động + cổng vận hành (đánh số, tất định).
 > - **`references/DOCTRINE_APPENDIX.md`** — lịch sử + biện luận đầy đủ (changelog v1.x→v1.15.7). Tra khi cần BỐI CẢNH/lý do.
 >
@@ -241,12 +241,12 @@ Cờ `--profile/--config/--deterministic/--json` nhận ở mọi lệnh; `--out
 - **Tra cứu/Instruction:** `tra_cuu.py` · `keywords.py` · `verify_deep.py` · `gen_instructions.py` (sinh/audit Instruction có `SKILL_OF_RECORD` + external-ingest gate).
 
 ## 8. APPS SCRIPT WEBAPP
-Target contract = **2.21.2p** (`Code.2.21.2p.gs`, ĐÃ LIVE — verify `ping.version`, `registry_schema=reg_cols_row_kind_v1`, 27 cột). Tham số/khóa/gotcha MỌI action: **`references/API_CONTRACT.md`**.
+Target contract = **2.21.2q** (`Code.2.21.2q.gs`, ĐÃ LIVE — verify `ping.version`, `registry_schema=reg_cols_row_kind_v1`, 27 cột). Tham số/khóa/gotcha MỌI action: **`references/API_CONTRACT.md`**.
 - **`references/REGEN2_PROFILE_SCOPE_V1.19.5.md`:** quyết định best-combined, khác biệt hai nhánh và quy trình phục hồi an toàn.
 - Bản `.gs` đời trước (2.21.1→2.21.2h) ĐÃ đưa ra archive ngoài skill — chỉ giữ bản LIVE; lịch sử ở `DOCTRINE_APPENDIX.md`/`CHANGELOG.md`.
-- Deploy: `clasp push` + `clasp deploy -i` (GIỮ URL+token — xem gas-project/), `tl ping` phải ra `2.21.2p`, rồi `contract_check.py --audit`.
+- Deploy: `clasp push` + `clasp deploy -i` (GIỮ URL+token — xem gas-project/), `tl ping` phải ra `2.21.2q`, rồi `contract_check.py --audit`.
 - Cột registry mới muốn sống qua `regen2` → khai báo `REG_COLS_` + `REG_NLM_KEEP_` trong `.gs` → Deploy → `reg_addcols&confirm=yes`.
-- Lịch sử vá: F1–F16c → 2.21.2b; profile-scope guard → 2.21.2l. `API_CONTRACT.md`, `tl.py EXPECT_VERSION`, SKILL/RUNBOOK đồng bộ `2.21.2p`.
+- Lịch sử vá: F1–F16c → 2.21.2b; profile-scope guard → 2.21.2l. `API_CONTRACT.md`, `tl.py EXPECT_VERSION`, SKILL/RUNBOOK đồng bộ `2.21.2q`.
 
 ## 9. PHỤ THUỘC
 `pip install -r requirements.txt`. Cần env `TL_WEBAPP` / `TL_TOKEN` (mirror `tra_luat_config.json`).

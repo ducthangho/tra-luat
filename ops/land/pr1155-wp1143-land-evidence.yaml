@@ -30,6 +30,15 @@ windows:
   head_full_suite: 15/36, exit 1
   note: t30 thiếu cùng năm khóa; t32 chỉ đổi dấu vân gate-ops; mọi ca khác giữ màu. Lỗi Git dựng kho giả có ở hai vế.
 duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1143#issuecomment-6571828431
+authorized_head_sha: 1039f0d71eec0c863a50a342a4753f9982768611
+authorized_head_sha_nguon: 'measured — readback-pr-1155.json: merged true, head.sha 1039f0d7 (= head_da_review), merge_commit_sha bae0c966; them 05-11-2026.'
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/issues/1143#issuecomment-6648090031
+authorization_url_nguon: >-
+  measured — readback-xac-nhan-issuecomment-6648090031.json: comment 6648090031 (ducthangho, OWNER) ghi 1039f0d71eec0c863a50a342a4753f9982768611
+  va bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca. Them 05-11-2026 theo luat L-6: chu kho chon "Xac nhan lai, ghi comment moi"
+  (AskUserQuestion, phien session_015GtxrcbysJFmj2dSwnCkPL). duyet_chu_kho o tren giu nguyen: no ghi viec giao packet, khong neo head.
+  CAVEAT #566: phien dang bang token chu kho; ban chep quyet dinh, khong phai chu ky.
 merge_commit: bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca
 tree_m: 38271ee1dee8a475674f9eddd43fb248b693b2d6
 ci_master:

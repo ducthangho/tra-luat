@@ -131,3 +131,6 @@ chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Cach dem loi goi Codex giua pha dac ta va pha thuc thi cho #1099 (xem tran_loi_goi_codex).'
   - 'M1 (LIVE sau land) — chu kho duyet rieng; khong phai viec cua executor truoc land.'
+
+da_bi_thay_the: wp1099-cloud-setup-p3b-r10-g1-claude
+da_bi_thay_the_ghi_chu: 'spec r10 (ADR-0064 + nang luc nen); ghi boi phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq, 05-11-2026.'

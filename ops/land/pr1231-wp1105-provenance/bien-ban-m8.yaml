@@ -37,7 +37,7 @@ nghiem_thu:
   A14: passed
   A15: passed
 lease_cuoi: wp1105-r3-g3-claude
-landed: true
+landed: false  # CHUA land: uy quyen khong co comment neo SHA + §8.1 CHUA_DAT (xem ho so land)
 moc_10_2_2:
   run: passed
   checkout: passed

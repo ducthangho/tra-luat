@@ -1,8 +1,9 @@
 # HO SO LAND — packet #1105 LAUNCHER-SANDBOX-LAY-MAU r3, lease g3, code qua PR #1231. Khuon: ops/land/pr1141-wp1132-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (fe84620), LANDED — du bon moc §10.2.2 tren DUNG merge SHA bang run push master 42032872356 (luot push that cua
-# chinh merge commit) + wd-run 42058496716 (ops-do-workflow-definition.yml, do phien dieu phoi dispatch ~15:47Z).
+# TRANG THAI: merged (fe84620), CHUA LANDED (landed: false) — bon moc §10.2.2 tren DUNG merge SHA DA DU (run push master 42032872356 +
+# wd-run 42058496716), nhung uy quyen land khong co comment neo SHA (L-6) va §8.1 chua dat (model/effort phuc vu luot review 4
+# KHONG_DO_DUOC). Ha nhan theo chot cua phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 (send_message 15:57Z) va tien le pr1198.
 # NHAN: measured (phien nay do lai, co tep nguon) / loi_khai_co_neo (lay tu hien vat/comment co neo, phien nay khong chay lai) /
 #       thuat_lai (chi co loi ke cua phien khac) / not_measured.
 # Readback tho: ops/land/pr1231-wp1105-provenance/ (SHA256SUMS kem). Moi phep do REST: GET qua proxy phien bang GITHUB_PAT.
@@ -56,8 +57,8 @@ pre_merge_checks:
     conclusion: 'approve (dong cuoi KET_LUAN: approve)'
     nguon: 'provenance/kiem-merge/run-offline-l4.json + kiem-merge/stdout-offline-l4.log'
     ghi_chu: >-
-      measured — run-offline-l4.json: run 2d61d684, head d5d521e, trang_thai xong, ma_thoat 0, stdout_sha256 06e54fc7… khop
-      sha256 cua stdout-offline-l4.log (kiem-merge/SHA256SUMS). model_phuc_vu_trang_thai KHONG_DO_DUOC, effort_phuc_vu_trang_thai
+      measured — kiem-merge/run-offline-l4.json: run 2d61d684, head d5d521e, trang_thai xong, ma_thoat 0, stdout_sha256 06e54fc7… khop
+      sha256 cua kiem-merge/stdout-offline-l4.log (kiem-merge/SHA256SUMS). model_phuc_vu_trang_thai KHONG_DO_DUOC, effort_phuc_vu_trang_thai
       KHONG_DO_DUOC, sandbox_trang_thai DO_DUOC (sandbox_lech chuyen_cha_trong_cay 2, bon khoa con lai 0).
   - name: 'ci-dot-bien-du.yml (M9 full_mutant_audit, K7) tren head cuoi'
     run_id: 42023912484
@@ -101,7 +102,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1105-r3-g3-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: 'claude/ghi-so-land-1231', ghi_chu: 'chi cham ops/land/**; lease rut han nam tren nhanh ops/cap-lease-1105-g1.'}
-  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — provenance/bien-ban-m8.yaml + provenance/kiem-dong-wp-m8.txt (packet_loop.py kiem-dong-wp, lease sau rut han).'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt (kiem-dong-wp tren lease sau rut han lease-wp1105-r3-g3-claude-sau-rut-han.yaml.txt).'}
   - {item: 'ban giao hien vat kiem-merge', ket_qua: 'nhanh claude/handoff-wp1105-kiem-merge @781d6a5 (chep vao provenance/kiem-merge/).'}
   - item: 'no tach (de xuat Issue, phien dieu phoi quyet)'
     ket_qua: >-
@@ -145,15 +146,22 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-1231.json merged true; merge-va-diff.txt cha d779d442 + d5d521e3, tree 9c553420; d5d521e la to tien origin/master.'
-  landed: true
+  landed: false
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA fe84620: DAT, du bon moc (post_merge_checks muc 1, luot push that); (2) lease nha:
-    rut han 942fb45; (3) bookkeeping: ho so nay; (4) review neo DUNG authorized_head d5d521e: offline luot 4 approve, connector
-    sach; P2 tren df34637 dong theo quyet dinh chu kho; (5) uy quyen land: thuat_lai (xem authorization_ghi_chu) + mien K6 cua chu
-    kho; (6) muc tieu packet: xem nghiem_thu; (7) §8.1: KHONG DAT DU — xem assurance_81.
+    rut han 942fb45 ve 16:40Z; (3) bookkeeping: ho so nay + bien ban M8; (4) review neo DUNG authorized_head d5d521e: offline luot 4
+    approve, connector sach; P2 tren df34637 dong theo quyet dinh chu kho (a); (5) uy quyen land: CHUA DAT — lenh "Land 1105" chi
+    co qua loi thuat lai cua phien dieu phoi, KHONG co comment duyet ben neo d5d521e (L-6 doi authorization_url la
+    #issuecomment-/#pullrequestreview-); phien dieu phoi chot KHONG xin chu kho dang comment duyet hoi to; (6) muc tieu packet:
+    xem nghiem_thu (phan lon loi_khai_co_neo); (7) §8.1: CHUA_DAT — xem assurance_81 (model/effort phuc vu luot offline 4
+    KHONG_DO_DUOC; §8.1 "Evidence ... khong du nhan dang thi chua nhan assurance").
+    Mo lai — CA HAI: (a) mot comment duyet land neo DUNG d5d521e3e600e9c549cf5dc9263ffc4385c13407 (chu kho hoac phien ghi ho,
+    caveat #566), hoac chu kho chap nhan ro tinh trang thuat_lai nay; VA (b) mot luot review doc lap tren DUNG d5d521e co model/effort
+    DO_DUOC, hoac ngoai le ben cua chu kho chap nhan luot 2d61d684 voi gioi han nay. Khi du ca hai, them khoi landed_<YYYYMMDD>
+    (kieu b, tien le pr1142 landed_20261104) — KHONG sua dong landed false o tren.
 
 assurance_81:
-  reviewer_assurance_81: KHONG_DAT_DU
+  reviewer_assurance_81: CHUA_DAT
   review_exact_sha: 'DAT — luot offline 4 head d5d521e = authorized_head_sha, ma_thoat 0, KET_LUAN approve; connector sach tren d5d521e.'
   thuc_thi:
     model: 'measured — kiem-merge/run-offline-l4.json model_phuc_vu_trang_thai KHONG_DO_DUOC (2 dong giong khung response.created/completed khong doc duoc).'
@@ -177,7 +185,7 @@ nghiem_thu:
   A10: 'owner_waived — dong mien K6 6658278170 + ngoai le A10 6654573852; luot Windows tap trung: loi_khai_co_neo (A3/A7 QUA, delta 0).'
   A11: 'loi_khai_co_neo — ci-dot-bien-du run 42023912484 success tren d5d521e (kiem-merge/ddr.json, ddj.json).'
   A12: 'loi_khai_co_neo — handoff: ruff F delta 0, diff --check rc 0, doctrine-scan rc 0.'
-  A13: 'measured (mot phan) — run-offline-l4.json sandbox DO_DUOC + sandbox_lech; khop sha256 launcher.py cua ung vien: thuat_lai (handoff).'
+  A13: 'measured (mot phan) — kiem-merge/run-offline-l4.json sandbox DO_DUOC + sandbox_lech; khop sha256 tep launcher cua ung vien: thuat_lai (handoff).'
   A14: 'thuat_lai — handoff 6655220155: ung vien 9/9 DO_DUOC, nen 0/6 (do tren e87f017).'
 
 khong_do_duoc:

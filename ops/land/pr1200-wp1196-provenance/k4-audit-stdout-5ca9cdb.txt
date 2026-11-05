@@ -1,0 +1,16 @@
+## Human audit — A13-K1-CANARY r2 g1 (#1196)
+
+reviewer: ducthangho (chủ kho, human audit)
+head: 5ca9cdbf6bcd7d2e955bc3b57cd667c6efe7fc68
+tree: cc94550f018c96ca310815fa68cdc5410d1c9a72
+base: 4d258cc8831b5c6169114d1e8e88a8782096d6f6
+lease: a13-k1-canary-r2-g1-claude-remote-20261105
+spec_hash: d8985e2c2f9a500e2f8b604b554ed4cc5ae1630e196a0b7a3dff555305ffa9e0
+lop_hieu_luc: sensitive
+
+Đã kiểm:
+- Diff so base đúng 1 tệp ops/specs/A13-K1-CANARY-r2.md, blob 652078a0f560e0fee899567ba4ab353cd06d5d86, nguyên byte bản đóng băng r2.
+- Kết quả A1–A6 của executor: https://github.com/ducthangho/tra-luat/issues/1196#issuecomment-6648757905
+- Không có P0–P3 mở.
+
+KET_LUAN: approve

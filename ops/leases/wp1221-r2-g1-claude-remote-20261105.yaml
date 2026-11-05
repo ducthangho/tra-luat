@@ -21,7 +21,7 @@ recorder_is_dispatcher: true
 recorder_ghi_chu: 'phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; tham quyen la authority_url'
 executor_session: session_015GtxrZVmDpv9FPWFf1Uaoo
 leased_at_utc: '2026-11-05T08:47:00Z'
-heartbeat_at: '2026-11-05T10:45:00Z'
+heartbeat_at: '2026-11-05T12:24:00Z'
 lease_until: '2026-11-07T08:47:00Z'
 lease_expires_at_utc: '2026-11-07T08:47:00Z'
 role: executor
@@ -44,12 +44,12 @@ reviewer: openai_codex
 reviewer_provider: openai_codex
 reviewer_independence: 'cross-review theo .claude/skills/cross-review/SKILL.md, phien doc lap read-only neo exact head; connector la lop bo sung'
 spec_path: ops/specs/wp1221-r2.md
-spec_ref: refs/heads/ops/wp1221-spec
+spec_ref: refs/heads/ops/wp1221-spec@6f0ca3ccff3d689cc3173f6e525a3ff5f5b16224
 spec_source_oid: 6f0ca3ccff3d689cc3173f6e525a3ff5f5b16224
 spec_blob: d5bd465cfc007695302bb0153c1b8d21b9ab29ae
 spec_hash: c71882764f6ba477b59eb27d476339407809ecff3124058e830515fb87cd118d
 spec_sha256: c71882764f6ba477b59eb27d476339407809ecff3124058e830515fb87cd118d
-spec_ref_ghi_chu: 'spec chua tren master (PR #1222 draft); executor chep NGUYEN BYTE spec vao nhanh thuc thi neu kiem-merge K1 doi blob o head. Thu dinh danh la BAM.'
+spec_ref_ghi_chu: 'ghim OID40 theo kiem-merge K1 (_spec_merge, ADR-0063); H1 spec "# wp1221 r2 — ..." khop packet_id/revision lease; executor KHONG chep spec vao nhanh'
 branch: claude/wp1221-g1
 branch_ownership: exclusive
 target_branch_neu_land: master

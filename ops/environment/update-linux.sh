@@ -226,9 +226,14 @@ print(name + ' 1.2.3')
             check('mutant-' + label, not intended and result[0] == expected_rc and evidence)
             check('mutant-control-' + label, run_case('mutant-control-' + label, script=mutant)[0] == 0)
         # A crash cannot count as a semantic kill, and a contaminated run cannot pass.
-        for label, bad in [('crash', 'exit 99\n'), ('import', 'python3 -c "import nonexistent_fixture_module"\n'), ('mutation', 'apt-get install -y forbidden\n')]:
+        for label, bad in [('crash', 'echo "Broken external codex"; exit 99\n'), ('import', 'echo "Broken external codex"; python3 -c "import nonexistent_fixture_module"\n'), ('mutation', 'apt-get install -y forbidden; echo "Broken external codex"; exit 5\n')]:
             result = run_case('canary-' + label, script=bad)
             check('harness-' + label, not rejected(result, 'Broken external codex'))
+        try:
+            run_case('canary-network', script='curl --output "$HOME/unexpected" https://unexpected.invalid\n')
+            check('harness-network', False)
+        except AssertionError as error:
+            check('harness-network', str(error) == 'unexpected fixture operation')
     check('harness-zero-tests', not suite_ok([]))
     check('nonempty-results', len(results) > 0)
 passed = sum(ok for _, ok in results)

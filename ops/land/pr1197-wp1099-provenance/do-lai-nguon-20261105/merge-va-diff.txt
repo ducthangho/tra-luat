@@ -1,0 +1,20 @@
+# do lai trong phien ghi so session_015GtxrashcQS6kbxWN1qRsA, 2026-11-05T15:54:43Z, git 2.43.0
+$ git show -s --format='%H %P %T' b255b0b7131da7f6e026639f6b0da0a06cc68a44
+b255b0b7131da7f6e026639f6b0da0a06cc68a44 fe84620f897913c7f6c2ce5a0c7316a49655e82f 99442469f331e4808ee9de43e2beb75416e51a21 d19e573f19209a94a03d480cf2ea9c64ecc8b092
+$ git show -s --format='%H %T' 99442469f331e4808ee9de43e2beb75416e51a21
+99442469f331e4808ee9de43e2beb75416e51a21 d19e573f19209a94a03d480cf2ea9c64ecc8b092
+merge-base(fe84620f897913c7f6c2ce5a0c7316a49655e82f,99442469f331e4808ee9de43e2beb75416e51a21) = fe84620f897913c7f6c2ce5a0c7316a49655e82f
+diff cha1..merge sha256: e426306ad56b003ddbde506fe6842a5594fd363547c43600a2ecf3b16e030a85
+diff merge-base..head sha256: e426306ad56b003ddbde506fe6842a5594fd363547c43600a2ecf3b16e030a85
+$ git diff --numstat fe84620f897913c7f6c2ce5a0c7316a49655e82f b255b0b7131da7f6e026639f6b0da0a06cc68a44
+11	11	RELEASE_MANIFEST.json
+3	0	changelog.d/wp-1099.md
+1	0	docs/PROTOCOL_DA_PHIEN.md
+29	0	docs/adr/0064-nlm-tu-nap-lai-co-dieu-kien-phien-cloud.md
+1	1	references/QUY_TRINH_RA_SOAT_3_TANG.md
+1	1	references/RASOAT_HOSO_LOOP.md
+143	17	scripts/nlm_cli.py
+360	0	scripts/test_fragments/wp1099_nlm_nap_lai.py
+1	0	scripts/tl_test_fragments_bundled.py
+$ git merge-base --is-ancestor b255b0b7131da7f6e026639f6b0da0a06cc68a44 origin/master; rc
+rc=0

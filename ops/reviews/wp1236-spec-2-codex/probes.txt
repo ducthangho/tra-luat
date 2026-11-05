@@ -1,0 +1,14 @@
+LUAT 10 STEP_TYPES 31 PATTERNS 36 KINDS {'DONG': 21, 'CUOI': 6, 'KHONG': 1, 'JSON_OK': 8}
+RUN 42032872356 HEAD fe84620f897913c7f6c2ce5a0c7316a49655e82f ATTEMPT 1
+K7 {"job_id": 127263440466, "job": "chuan-bi", "cmd": "python3 ops/ci_duong_nhanh.py", "header_in_log": true, "expected_by_spec": "Run python3 ops/ci_duong_nhanh.py", "rest_name": "phan loai diff (duong nhanh ho so)", "rest_conclusion": "success", "k7_match": false, "shell": null, "job_defaults": null, "workflow_defaults": null}
+K7 {"job_id": 127263577918, "job": "gate-packet-loop (ubuntu-latest)", "cmd": "python .claude/dev/packet_loop_test.py", "header_in_log": true, "expected_by_spec": "Run python .claude/dev/packet_loop_test.py", "rest_name": "packet-loop selftest", "rest_conclusion": "success", "k7_match": false, "shell": null, "job_defaults": null, "workflow_defaults": null}
+K7 {"job_id": 127265027298, "job": "gate-registry (ubuntu-latest)", "cmd": "python .claude/dev/ci_dang_ky_test.py --chay", "header_in_log": true, "expected_by_spec": "Run python .claude/dev/ci_dang_ky_test.py --chay", "rest_name": "test registry (phạm vi + các bộ chưa được nối)", "rest_conclusion": "success", "k7_match": false, "shell": null, "job_defaults": null, "workflow_defaults": null}
+NEO_RUN_EXAMPLE {"merge_commit": "09e059457a033de769f7cb789edc20810f4b95f5", "pre_merge": [{"run_id": 41004664516, "run_attempt": 1, "sha": "5b76266d391695940c449497bfbf0acbdfb7d499"}], "post_merge": [{"run_id": 41017062295, "run_attempt": 1, "sha": "09e059457a033de769f7cb789edc20810f4b95f5"}]}
+BASELINE land_evidence_nguon rc 0 ['land_evidence_nguon: 98 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 123', 'TỔNG: ĐẠT']
+BASELINE kiem_ho_so_land rc 0 ['DAT ops/land/pr997-wp978-land-evidence.yaml — đủ authorized_head_sha và authorization_url (landed đọc từ trang_thai_packet.landed)', 'TỔNG: 49/49 hồ sơ landed True đạt · 0 miễn trừ · rc=0']
+BASELINE packet_loop rc 0 ['doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine']
+BASELINE ruff rc 1 {('packet_loop.py', 'F841'): 1, ('packet_loop_test.py', 'F541'): 2}
+LINES ops/land_evidence_nguon.py 412
+LINES ops/land_evidence_nguon_test.py 719
+LINES ops/kiem_ho_so_land.py 177
+LINES ops/kiem_ho_so_land_test.py 418

@@ -1,1 +1,4 @@
-# kiem-dong-wp chua chay lai sau han 16:40Z — tep nay se ghi lenh + output + rc sau 16:40Z.
+# lenh: python3 .claude/dev/packet_loop.py kiem-dong-wp --root . --bien-ban ops/land/pr1231-wp1105-provenance/bien-ban-m8.yaml --lease ops/land/pr1231-wp1105-provenance/lease-wp1105-r3-g3-claude-sau-rut-han.yaml.txt
+# checkout: e8827606367a82d244f31815a117edbd6d41cdbe ; origin/master: b255b0b7131da7f6e026639f6b0da0a06cc68a44 ; luc: 2026-11-05T16:41:37Z
+ĐÓNG ĐƯỢC WP LAUNCHER-SANDBOX-LAY-MAU — merge fe84620f897913c7f6c2ce5a0c7316a49655e82f
+rc=0

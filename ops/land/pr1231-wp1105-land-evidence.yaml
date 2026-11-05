@@ -101,7 +101,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1105-r3-g3-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: 'claude/ghi-so-land-1231', ghi_chu: 'chi cham ops/land/**; lease rut han nam tren nhanh ops/cap-lease-1105-g1.'}
-  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt (kiem-dong-wp tren lease sau rut han lease-wp1105-r3-g3-claude-sau-rut-han.yaml.txt).'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: kiem-dong-wp tren lease sau rut han (lease-wp1105-r3-g3-claude-sau-rut-han.yaml.txt) luc 16:41:37Z rc 0 "ĐÓNG ĐƯỢC WP LAUNCHER-SANDBOX-LAY-MAU — merge fe84620".'}
   - {item: 'ban giao hien vat kiem-merge', ket_qua: 'nhanh claude/handoff-wp1105-kiem-merge @781d6a5 (chep vao provenance/kiem-merge/).'}
   - item: 'no tach (de xuat Issue, phien dieu phoi quyet)'
     ket_qua: >-
@@ -137,7 +137,10 @@ lease:
   thu_hoi_cuoi: >-
     DA NHA bang RUT HAN sau merge: lease_until 2026-11-06T09:50Z -> 2026-11-05T16:40:00Z (khoi thu_hoi_bang_rut_han, commit 942fb45
     tren ops/cap-lease-1105-g1, cha 1613c68, push 15:53Z); lease_publish.py check rc 0 truoc push; ops-publish-lease run 42059523698
-    (ket qua: xem provenance/lease-rut-han.txt). Khong bia mo vi khong co lease ke nhiem.
+    success ca buoc dang (readback-run-42059523698.json, readback-jobs-42059523698.json). Tep lease sau rut han:
+    lease-wp1105-r3-g3-claude-sau-rut-han.yaml.txt (cmp khop origin/ops/cap-lease-1105-g1 luc 16:41Z). Sau 16:40Z:
+    ai-dang-giu-sau-rut-han.txt — thieu ref 0, ba duong dan write set NGUOI_GIU 0 (g3 hien HET_HAN). Khong bia mo vi khong co lease
+    ke nhiem.
   diff_do: >-
     measured — merge-va-diff.txt: git diff --stat fe84620^1 fe84620 = 2 tep +525/-18 (.claude/dev/launcher.py,
     .claude/dev/launcher_test.py); numstat base lease 1f0941e..d5d521e = +102/-15 va +423/-3, tong them 525 <= 850 (A9).

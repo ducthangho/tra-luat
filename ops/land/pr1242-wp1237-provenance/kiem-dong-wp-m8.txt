@@ -1,0 +1,10 @@
+# lenh: python3 .claude/dev/packet_loop.py kiem-dong-wp --root . --bien-ban ops/land/pr1242-wp1237-provenance/bien-ban-m8.yaml --lease ops/land/pr1242-wp1237-provenance/lease-wp1237-r1-g1-sau-rut-han.yaml.txt
+# checkout: 920ab7cf0668051e2ebc1a22f1479e1d0043dd45 (+ thay doi chua commit trong ops/land) ; origin/master: 825eb3561a94e05c36045d2c981b4108c523e31c ; luc: 2026-11-05T19:23:33Z
+  THIẾU  D4 lease: không khớp lease_cuoi/packet/generation hoặc lease_until chưa qua
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D4
+rc=12
+
+# LAN 2 (sau lease_until 19:30Z cua lease thi cong; lan 1 thieu D4 vi han chua qua)
+# checkout: 920ab7cf0668051e2ebc1a22f1479e1d0043dd45 (+ thay doi chua commit trong ops/land) ; origin/master: 825eb3561a94e05c36045d2c981b4108c523e31c ; luc: 2026-11-05T19:31:00Z
+ĐÓNG ĐƯỢC WP wp1237 — merge 801042cbf6ccc00a4da37ed2a62a61bac10bae02
+rc=0

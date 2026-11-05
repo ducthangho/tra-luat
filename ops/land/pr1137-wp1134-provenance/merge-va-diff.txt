@@ -1,0 +1,26 @@
+# do 2026-11-05T05:03:24Z, git local sau fetch
+## git cat-file -p 2be93d3 (header)
+tree 44ab5d231c643e3a99f3fa0d02a2756e120b256a
+parent 02ddeb4e9ea9c130d935adc4d5bce4f11db7d6a0
+parent 15872b71d3bcd3625263a03bc845979e3a670c45
+## git diff --stat 2be93d3^1 2be93d3
+ RELEASE_MANIFEST.json                              | 90 +++-------------------
+ .../test_fragments/wp1134_changelog_d_ngoai_goi.py | 54 +++++++++++++
+ scripts/tl_core/release.py                         |  7 +-
+ scripts/tl_selftest.py                             |  6 +-
+ scripts/tl_test_fragments_bundled.py               |  1 +
+ 5 files changed, 75 insertions(+), 83 deletions(-)
+## git diff --stat 9091cf5 15872b7
+ RELEASE_MANIFEST.json                              | 90 +++-------------------
+ .../test_fragments/wp1134_changelog_d_ngoai_goi.py | 54 +++++++++++++
+ scripts/tl_core/release.py                         |  7 +-
+ scripts/tl_selftest.py                             |  6 +-
+ scripts/tl_test_fragments_bundled.py               |  1 +
+ 5 files changed, 75 insertions(+), 83 deletions(-)
+## sha256 cua hai diff
+a186825dc74167cef8b66685c1952da17892aedf3553fe5cd7c1945dafa79821  -
+a186825dc74167cef8b66685c1952da17892aedf3553fe5cd7c1945dafa79821  -
+## merge-base --is-ancestor 2be93d3 b3249c3 (#1141 merge)
+rc=0
+## sha256 dac ta tai 2be93d3
+adb4002c41129c53c94a40f0e9ac33103cc6e42b42927c3c90e6e676caf6ac82  -

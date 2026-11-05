@@ -1,0 +1,296 @@
+# Gate output run 41356691133 attempt 1 (workflow_dispatch, nhanh tam ops/ci-f2102fc, head f2102fc3) — log REST tung job, do 2026-11-05; sinh bang tom_gate_output.py tom, tu kiem bang tom_gate_output.py kiem
+JOB 124998156040 chuan-bi [ubuntu-latest] conclusion=success bytes=3547 sha256=8d298028a5ab2d7c30ef3e0ce35b3176cefe24b34f10c6ef0ac5bafd4d479c81 ##[error]=0
+    CMD echo "DUONG_NHANH: khong phan loai - su_kien=${SU_KIEN} khong phai pull_request, luon DAY_DU"
+JOB 124998175208 gate (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=649838 sha256=4191228da1bc9a35f72960adedda328acc8c06baf7fd0fa48bc64b8548d54514 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_actionlint.sh
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/cong_cu.py kiem-tra --json
+    CMD python -m pip install --quiet ruff==0.15.15
+    CMD python -m py_compile scripts/tl.py scripts/tl_boot.py scripts/gen_instructions.py scripts/tl_core/__init__.py scripts/tl_core/deterministic.py scripts/tl_core/jsonio.py scripts/tl_core/workflow.py scripts/tl_core/release.py scripts/tl_core/live.py scripts/tl_core/zip_ingest.py scripts/tl_core/ocr.py scripts/tl_core/chunking.py scripts/tl_core/command_registry.py
+    CMD python .claude/dev/codex_cred_test.py
+    OK  nền: 18/18 đạt
+    OK  TỔNG: ĐẠT
+    CMD python .claude/dev/idiom_py_test.py
+    OK  nền: 7/7 đạt · BỎ QUA: 0
+    CMD python .githooks/eol_policy_test.py
+    CMD python .githooks/pre_push_test.py
+    CMD python .githooks/eol_policy.py --all --json
+    CMD python .github/checks/bundle_fragment_check.py --json
+    CMD python scripts/gen_instructions.py --selftest
+    OK  == gen_instructions selftest 44/44 ==
+    CMD python scripts/tl_core/command_registry_test.py
+    CMD set -euo pipefail
+    OK  == transport selftest 12/12 ==
+    OK  == tl selftest 1774/1774 ==
+    CMD python scripts/tl.py workflow-audit --strict --json
+    CMD python scripts/tl.py golden-test --json
+    CMD python scripts/tl.py doc-claims-check --strict --json
+    CMD python scripts/tl.py determinism-audit --strict --json
+    CMD python .github/checks/ci_phamvi.py --kiem-bam
+    CMD python .github/checks/ci_phamvi_test.py
+    OK  == ci_phamvi_test 7/7 ==
+    CMD python scripts/tl.py release-check --full --json
+    CMD set -euo pipefail
+    CMD python scripts/tl.py release-bundle --out dist/a.zip --json > /dev/null
+    CMD python scripts/tl_boot.py --version
+JOB 124998175157 gate (windows-latest) [windows-latest] conclusion=success bytes=663331 sha256=e1ab1246e97271b76ebb01b287849c4a2dd9eb0cc2fedc961f0ce34c758efd57 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_actionlint.sh
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/cong_cu.py kiem-tra --json
+    CMD python -m pip install --quiet ruff==0.15.15
+    CMD python -m py_compile scripts/tl.py scripts/tl_boot.py scripts/gen_instructions.py scripts/tl_core/__init__.py scripts/tl_core/deterministic.py scripts/tl_core/jsonio.py scripts/tl_core/workflow.py scripts/tl_core/release.py scripts/tl_core/live.py scripts/tl_core/zip_ingest.py scripts/tl_core/ocr.py scripts/tl_core/chunking.py scripts/tl_core/command_registry.py
+    CMD python .claude/dev/codex_cred_test.py
+    OK  nền: 18/18 đạt
+    OK  TỔNG: ĐẠT
+    CMD python .claude/dev/idiom_py_test.py
+    OK  nền: 5/5 đạt · BỎ QUA: 2
+    CMD python .githooks/eol_policy_test.py
+    CMD python .githooks/pre_push_test.py
+    CMD python .githooks/eol_policy.py --all --json
+    CMD python .github/checks/bundle_fragment_check.py --json
+    CMD python scripts/gen_instructions.py --selftest
+    OK  == gen_instructions selftest 44/44 ==
+    CMD python scripts/tl_core/command_registry_test.py
+    CMD set -euo pipefail
+    OK  == transport selftest 12/12 ==
+    OK  == tl selftest 1774/1774 ==
+    CMD python scripts/tl.py workflow-audit --strict --json
+    CMD python scripts/tl.py golden-test --json
+    CMD python scripts/tl.py doc-claims-check --strict --json
+    CMD python scripts/tl.py determinism-audit --strict --json
+    CMD python .github/checks/ci_phamvi.py --kiem-bam
+    CMD python scripts/tl.py release-check --full --json
+    CMD set -euo pipefail
+    CMD python scripts/tl.py release-bundle --out dist/a.zip --json > /dev/null
+    CMD python scripts/tl_boot.py --version
+JOB 124998175817 gate-cong-cu (ubuntu-latest, 0) [ubuntu-latest] conclusion=success bytes=135429 sha256=567ce75612d46435e52f3d47fe46cade5312da0bceb797ef89779fe7f0883193 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_actionlint.sh
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/cong_cu.py kiem-tra --json
+    OK  MẢNH 0/8: 62/62 đột biến bán kính 1 · ghi manh/manh-0.txt
+JOB 124998175381 gate-cong-cu (ubuntu-latest, 1) [ubuntu-latest] conclusion=success bytes=135229 sha256=217cbce5c7b9458028596b8acfa6dae04955da3d2d345750d9ed71293fcad9e6 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_actionlint.sh
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/cong_cu.py kiem-tra --json
+    OK  MẢNH 1/8: 62/62 đột biến bán kính 1 · ghi manh/manh-1.txt
+JOB 124998175301 gate-cong-cu (ubuntu-latest, 2) [ubuntu-latest] conclusion=success bytes=135068 sha256=ca8a7de9644d114dd82ad57febeb9d2abae75751678ed2210efa71519cf5d299 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_actionlint.sh
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/cong_cu.py kiem-tra --json
+    OK  MẢNH 2/8: 61/61 đột biến bán kính 1 · ghi manh/manh-2.txt
+JOB 124998175225 gate-cong-cu (ubuntu-latest, 3) [ubuntu-latest] conclusion=success bytes=134998 sha256=d7def2550cb335c85360a080845bcc4fededc2e39aedeea22690d9ac32ee839b ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_actionlint.sh
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/cong_cu.py kiem-tra --json
+    OK  MẢNH 3/8: 61/61 đột biến bán kính 1 · ghi manh/manh-3.txt
+JOB 124998175323 gate-cong-cu (ubuntu-latest, 4) [ubuntu-latest] conclusion=success bytes=135041 sha256=826c1c80f1dab87b9c11fa0bcb5074def6ae26b9394ea2c752614a7d8b1f3bfb ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_actionlint.sh
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/cong_cu.py kiem-tra --json
+    OK  MẢNH 4/8: 61/61 đột biến bán kính 1 · ghi manh/manh-4.txt
+JOB 124998175329 gate-cong-cu (ubuntu-latest, 5) [ubuntu-latest] conclusion=success bytes=134893 sha256=a9be27462cf3523c669e5f351ef3001cb8e34138e4a3c735f7c02c7062672a20 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_actionlint.sh
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/cong_cu.py kiem-tra --json
+    OK  MẢNH 5/8: 61/61 đột biến bán kính 1 · ghi manh/manh-5.txt
+JOB 124998175362 gate-cong-cu (ubuntu-latest, 6) [ubuntu-latest] conclusion=success bytes=134920 sha256=0ed8e8103c2e2ae06beda368eab4031c24cb5fd07064cde21619c355cd4807f9 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_actionlint.sh
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/cong_cu.py kiem-tra --json
+    OK  MẢNH 6/8: 61/61 đột biến bán kính 1 · ghi manh/manh-6.txt
+JOB 124998175357 gate-cong-cu (ubuntu-latest, 7) [ubuntu-latest] conclusion=success bytes=135020 sha256=68d8f186c43d8f7e50d5a8deef041ec8a59ef66636a66711c4388c9652e55bbf ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_actionlint.sh
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/cong_cu.py kiem-tra --json
+    OK  MẢNH 7/8: 61/61 đột biến bán kính 1 · ghi manh/manh-7.txt
+JOB 124998175565 gate-cong-cu (windows-latest, 0) [windows-latest] conclusion=success bytes=128452 sha256=4c619ffd6381e7ef50c3b34bc0225e6ab1db7a877c8194f90707c7579ef9a66e ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_actionlint.sh
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/cong_cu.py kiem-tra --json
+    OK  TỔNG: CA 59/59 đạt · ĐỘT BIẾN 490 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+JOB 125003468609 gate-cong-cu-gop (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=98163 sha256=4f5172a69c81e02556e509169e608db25a8df1a37ce149e2dcbc87597d95f9bc ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD python ops/cong_cu_test.py --gop manh
+    OK  GOM MẢNH 8/8
+    OK  SỐ LIỆU GOM: ca=61 · đột biến=490 · lỗi đột biến=0
+JOB 124998923464 gate-nhanh-gop (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=118967 sha256=8662a1e7f226d5b49059be9c15e2adc2f948cae136d27cff615fb9ccb6931f02 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py --gop-dich manh
+    OK  targeted_mutant_gate GOP 8/8 manh · head f2102fc388a884d994f7bfeb29ef6863b9972b66
+    OK  targeted_mutant_gate: DAT — KHONG phai full mutant audit; full_mutant_audit van BAT BUOC truoc merge/land/release
+JOB 124998923536 gate-nhanh-gop (windows-latest) [windows-latest] conclusion=success bytes=124550 sha256=948fb011c70b79c62a00112967a9b53436bcdeaebe2c35735cbe986225658154 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py --gop-dich manh
+    OK  targeted_mutant_gate GOP 8/8 manh · head f2102fc388a884d994f7bfeb29ef6863b9972b66
+    OK  targeted_mutant_gate: DAT — KHONG phai full mutant audit; full_mutant_audit van BAT BUOC truoc merge/land/release
+JOB 124998175366 gate-nhanh-manh (ubuntu-latest, 0) [ubuntu-latest] conclusion=success bytes=123141 sha256=9fd0ae1dc724ccdcd7683f96bb9f909d9bf3fefa9b40058cd68bb21fb6715bd3 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 0/8: rc=0 · passed 39/39
+JOB 124998175426 gate-nhanh-manh (ubuntu-latest, 1) [ubuntu-latest] conclusion=success bytes=123873 sha256=11ab2f3db9e0ae2a2a63f810b59746c7ce9df5471fccd34b8cbb2a1708d214be ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 1/8: rc=0 · passed 41/41
+JOB 124998175368 gate-nhanh-manh (ubuntu-latest, 2) [ubuntu-latest] conclusion=success bytes=123351 sha256=a1949166f27679f3a3cd48164c689795035df33869e4404b77950839b37392c7 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 2/8: rc=0 · passed 40/40
+JOB 124998175340 gate-nhanh-manh (ubuntu-latest, 3) [ubuntu-latest] conclusion=success bytes=123564 sha256=2c3f38a701adb1601f41e882684d10fddef1d81f0dd9d3b01074916152b2a5e7 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 3/8: rc=0 · passed 40/40
+JOB 124998175378 gate-nhanh-manh (ubuntu-latest, 4) [ubuntu-latest] conclusion=success bytes=123259 sha256=d818c0dd4f56331e782d54ea11e87485e1126933467d36fe4e9a73e68374784f ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 4/8: rc=0 · passed 39/39
+JOB 124998175400 gate-nhanh-manh (ubuntu-latest, 5) [ubuntu-latest] conclusion=success bytes=124016 sha256=9216ee2bb88dfa8b95f3deba18340f515797628696299de4ec72818c9c01523c ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 5/8: rc=0 · passed 41/41
+JOB 124998175484 gate-nhanh-manh (ubuntu-latest, 6) [ubuntu-latest] conclusion=success bytes=123653 sha256=4bc0653587038652a9836b8316373e7a9887fcb6f03080a8d6ea310aa656ea2c ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 6/8: rc=0 · passed 39/39
+JOB 124998175405 gate-nhanh-manh (ubuntu-latest, 7) [ubuntu-latest] conclusion=success bytes=124259 sha256=f63deb3e8458be472c9eca4a55480765f8ccac9342d2b435e5e1a1bacc7879da ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 7/8: rc=0 · passed 42/42
+JOB 124998175341 gate-nhanh-manh (windows-latest, 0) [windows-latest] conclusion=success bytes=128861 sha256=59de350ee1139c134261d4a3160d62fca0dc3526c12e9a390e932274759fdd84 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 0/8: rc=0 · passed 39/39
+JOB 124998175403 gate-nhanh-manh (windows-latest, 1) [windows-latest] conclusion=success bytes=129284 sha256=86a448e84636696075df616a555cebb43e538cf4127bbda41710301f801473a4 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 1/8: rc=0 · passed 41/41
+JOB 124998175461 gate-nhanh-manh (windows-latest, 2) [windows-latest] conclusion=success bytes=127786 sha256=ce79e158e078237e3bde92d9df596f300f4d8c4da51e21a58fc93528bcceeb4f ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 2/8: rc=0 · passed 40/40
+JOB 124998175430 gate-nhanh-manh (windows-latest, 3) [windows-latest] conclusion=success bytes=129214 sha256=220645e14359ce74f464e5322c27976843dacd17baae55915c4e291832098c12 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 3/8: rc=0 · passed 40/40
+JOB 124998175476 gate-nhanh-manh (windows-latest, 4) [windows-latest] conclusion=success bytes=128207 sha256=fc1a6d5e43816a9d59202e1f951928e2ab5c3822f011d4ff0adf575fcb5c1fc9 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 4/8: rc=0 · passed 39/39
+JOB 124998175477 gate-nhanh-manh (windows-latest, 5) [windows-latest] conclusion=success bytes=129669 sha256=0fb9f7c7045531dcc676b0f5567b62342753bad18d88c944983160c6bbe3ac00 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 5/8: rc=0 · passed 41/41
+JOB 124998175437 gate-nhanh-manh (windows-latest, 6) [windows-latest] conclusion=success bytes=129175 sha256=41ac04ccddc6878e95dd1be88c563a4be74f955a13946f66b52a62ddfbcf64df ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 6/8: rc=0 · passed 39/39
+JOB 124998175449 gate-nhanh-manh (windows-latest, 7) [windows-latest] conclusion=success bytes=129989 sha256=a4a16d837162867fa8dc1a1f8ec5613cfa62908191bcb45467f101e9c400f74a ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python ops/nhanh_don_duoc_test.py
+    OK  targeted_mutant_gate MANH 7/8: rc=0 · passed 42/42
+JOB 124998175181 gate-ops (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=394887 sha256=4219e55c91d95acfa0614e794314557fd9b095ee023d6da4cec0534c1a6a11b6 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/ci_duong_nhanh_test.py
+    CMD python ops/bien_nhan_v2_test.py
+    OK  TỔNG: ĐẠT
+    CMD bash ops/chay_lease_publish_test.sh
+    OK  [A] lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
+    OK  [B] lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
+    OK  lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
+    CMD pwsh -NoProfile -File scripts/don-nhanh_test.ps1
+    OK  don-nhanh: 21/21 dat
+    CMD set -euo pipefail
+    OK  gate lifecycle tests: 28/28 ca QUA (bo qua 0, hong 0)
+JOB 124998175192 gate-ops (windows-latest) [windows-latest] conclusion=success bytes=401314 sha256=3c1ce734742e15e33437333e73023b4d48e356abb6ed9fe9d4c3af17073f15dd ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/bien_nhan_v2_test.py
+    OK  TỔNG: ĐẠT
+    CMD bash ops/chay_lease_publish_test.sh
+    CMD python .claude/dev/gate_lifecycle_test.py
+JOB 124998175233 gate-packet-loop (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=312996 sha256=a9dda0d50363650068236e78e071e1fe6ed72c0b5b3a3d27130389cb48488cf0 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_actionlint.sh
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/cong_cu.py kiem-tra --json
+    CMD python -m pip install --quiet ruff==0.15.15
+    CMD python .claude/dev/packet_loop_test.py
+    OK  nền: 1088/1088 đạt · BỎ QUA: 1
+    OK  TỔNG: ĐẠT
+JOB 124998175229 gate-packet-loop (windows-latest) [windows-latest] conclusion=success bytes=322161 sha256=5401a4b99009aa5a69cae8bb99401394a902c426908d5f7168063efb36df8a5a ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_actionlint.sh
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/cong_cu.py kiem-tra --json
+    CMD python -m pip install --quiet ruff==0.15.15
+    CMD python .claude/dev/packet_loop_test.py
+    OK  nền: 1085/1085 đạt · BỎ QUA: 4
+    OK  TỔNG: ĐẠT
+JOB 124999223609 gate-registry (ubuntu-latest) [ubuntu-latest] conclusion=success bytes=262467 sha256=1135f803ee54d92830b2e3b918baf77e2001025a776167803c35d39ec2cad54b ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_actionlint.sh
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/cong_cu.py kiem-tra --json
+    CMD python -m pip install --quiet ruff==0.15.15
+    CMD python .claude/dev/ci_dang_ky_test.py --chay
+    OK  nền: 28/28 đạt
+    OK  TỔNG: ĐẠT
+    OK  ĐỘT BIẾN   : đã đo 65/65 tập giết · ĐẠT
+    OK  nền: 11/11 đạt
+JOB 124999223640 gate-registry (windows-latest) [windows-latest] conclusion=success bytes=262091 sha256=c06f82a2f4f48b285c5f123e0db533edefa430a8a183ea7c32c3861f5840a0d0 ##[error]=0
+    CMD git config --global core.autocrlf false
+    CMD python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+    CMD bash ops/cai_actionlint.sh
+    CMD bash ops/cai_cong_cu.sh shellcheck
+    CMD bash ops/cai_cong_cu.sh rg
+    CMD python ops/cong_cu.py kiem-tra --json
+    CMD python -m pip install --quiet ruff==0.15.15
+    CMD python .claude/dev/ci_dang_ky_test.py --chay
+    OK  nền: 28/28 đạt
+    OK  TỔNG: ĐẠT
+    OK  ĐỘT BIẾN   : đã đo 65/65 tập giết · ĐẠT
+    OK  nền: 11/11 đạt

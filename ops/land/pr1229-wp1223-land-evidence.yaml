@@ -61,8 +61,8 @@ pre_merge_checks:
     conclusion: 'approve (dong cuoi KET_LUAN: approve)'
     nguon: 'provenance/kiem-merge/run-offline-l4.json + kiem-merge/stdout-offline-l4.log (= review-offline/run.json, cmp khop)'
     ghi_chu: >-
-      measured — run 4dda2d88, head 1d5ee67, trang_thai xong, ma_thoat 0, 15:57:24Z → 16:14:38Z, stdout_sha256 e3f0a6bd… khop
-      sha256 cua stdout-offline-l4.log. model_phuc_vu_trang_thai DO_DUOC (moi khung response.created deu gpt-6.1-sol),
+      measured — kiem-merge/run-offline-l4.json: run 4dda2d88, head 1d5ee67, trang_thai xong, ma_thoat 0, 15:57:24Z → 16:14:38Z, stdout_sha256 e3f0a6bd… khop
+      sha256 cua kiem-merge/stdout-offline-l4.log. model_phuc_vu_trang_thai DO_DUOC (moi khung response.created deu gpt-6.1-sol),
       effort_phuc_vu_trang_thai DO_DUOC [xhigh], sandbox_trang_thai DO_DUOC, sandbox_lech toan 0.
   - name: 'Windows K6'
     sha: 1d5ee679ced60ca6dfade2096a1cb805e9cadad8

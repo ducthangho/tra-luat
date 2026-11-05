@@ -29,13 +29,27 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 
 - **M1 → `references/DEV_TOOLING_GUIDE.md`**: dòng 57 "hiện hành `references/Code.2.21.2q.gs`".
 - **M2 → `references/DELTA_v1.19.md`**: dòng 8 thành "ba bản mới nhất (`2.21.2o`, `2.21.2p`, `2.21.2q`)".
-- **M3 → `docs/GOI_AGENT_DA_NEN.md`**: một khối ngắn ngay đầu mục nói về `CODEX_AUTH_JSON` (quanh dòng 86), nội dung tương đương
-  câu sau (phản biện GPT 05-11): *`CODEX_AUTH_JSON` là cơ chế cấu hình cũ, không dùng cho thiết lập mới. Đường hiện hành là
-  `agent_creds` (P2b nạp lúc mở phiên, P3 ghi ngược khi `Stop`). Code vẫn còn đọc `CODEX_AUTH_JSON` để tương thích (hook phiên,
-  `.claude/dev/launcher.py`, `.claude/dev/codex_cred.py`); đường ấy CHƯA gỡ, việc gỡ là packet riêng.* Không xoá hay sửa các
-  đoạn lịch sử bên dưới.
-- **M4 → `CLAUDE.md`**: một câu nối vào gạch đầu dòng "Refresh token của codex XOAY VÒNG …" (dòng 795) trỏ sang khối M3: biến đã
-  là đường cũ, `agent_creds` thay thế, code dự phòng còn. KHÔNG sửa dòng 673–683 (kể sự cố 15-08-2026, là lịch sử).
+- **M3 → `docs/GOI_AGENT_DA_NEN.md`**: chèn đúng khối trích dẫn sau (nguyên văn; cách ngắt dòng tuỳ ý) ngay dưới tiêu đề
+  `### Để không phải nhập mã lại mỗi phiên` (base dòng 82) và TRƯỚC đoạn bắt đầu `Container phiên remote là` (base dòng 84 —
+  đoạn có lần nhắc `CODEX_AUTH_JSON` đầu tiên của mục trên base); câu chữ theo phản biện GPT 05-11:
+
+  ```
+  > **Đường cũ (05-11-2026).** `CODEX_AUTH_JSON` là cơ chế cấu hình cũ, không dùng cho thiết lập mới. Đường hiện
+  > hành là `agent_creds`: P2b nạp credential lúc mở phiên, P3 ghi ngược khi `Stop`. Code vẫn còn đọc `CODEX_AUTH_JSON`
+  > để tương thích (hook phiên, `.claude/dev/launcher.py`, `.claude/dev/codex_cred.py`); đường ấy chưa gỡ, việc gỡ là
+  > packet riêng `CODEX-AUTH-JSON-GO-CODE`.
+  ```
+
+  Không xoá hay sửa các đoạn bên dưới (chúng kể lịch sử).
+- **M4 → `CLAUDE.md`**: nối vào CUỐI gạch đầu dòng "Refresh token của codex XOAY VÒNG …" (base dòng 795) đúng câu sau (nguyên
+  văn; ngắt dòng tuỳ ý):
+
+  ```
+  **Từ 05-11-2026 biến này là đường cũ**: `agent_creds` (P2b/P3) thay thế; code đọc biến vẫn còn để tương thích và
+  chưa gỡ — xem khối đầu mục *Để không phải nhập mã lại mỗi phiên* trong `docs/GOI_AGENT_DA_NEN.md`.
+  ```
+
+  KHÔNG sửa dòng 673–683 (kể sự cố 15-08-2026, là lịch sử).
 - **M5 → `changelog.d/wp-1224.md`**: ghi chú thay đổi.
 
 ## 3. Write set
@@ -67,8 +81,8 @@ Phép đo chuỗi theo L6 của `soan-spec`: vế dương trên nội dung MỚI
 |---|---|---|
 | A1 | `DEV_TOOLING_GUIDE.md`: `2.21.2p` 0 lần trong dòng "hiện hành …", cụm `` hiện hành `references/Code.2.21.2q.gs` `` đúng 1 lần | để `2p` ⇒ ĐỎ |
 | A2 | `DELTA_v1.19.md`: script lấy tập `references/Code.*.gs` trong `RELEASE_MANIFEST.json` của base và tập `.gs` liệt kê trong đoạn "Gói phát hành chỉ kèm snapshot …"; hai tập BẰNG nhau, và con số chữ ("ba") khớp lực lượng | xoá `2.21.2q` khỏi đoạn ⇒ ĐỎ; để chữ "hai" ⇒ ĐỎ |
-| A3 | `docs/GOI_AGENT_DA_NEN.md`: trong CÙNG một đoạn có đủ bốn cụm (đếm từng cụm): `CODEX_AUTH_JSON` · "cũ" · `agent_creds` · ("vẫn còn" hoặc "chưa gỡ"); đoạn ấy nằm TRƯỚC lần nhắc `CODEX_AUTH_JSON` đầu tiên của mục | bỏ vế "chưa gỡ" ⇒ ĐỎ; dời khối xuống cuối mục ⇒ ĐỎ |
-| A4 | `CLAUDE.md`: gạch đầu dòng "Refresh token của codex XOAY VÒNG" chứa `agent_creds` và một con trỏ tới `docs/GOI_AGENT_DA_NEN.md` | bỏ câu nối ⇒ ĐỎ |
+| A3 | `docs/GOI_AGENT_DA_NEN.md`: khối trích dẫn của M3, sau khi bỏ tiền tố `> ` và gộp khoảng trắng trong đoạn, BẰNG ĐÚNG văn bản M3 (cũng gộp khoảng trắng), xuất hiện đúng 1 lần; nằm giữa dòng tiêu đề `### Để không phải nhập mã lại mỗi phiên` và đoạn bắt đầu `Container phiên remote là`, không có đoạn nào khác xen giữa | xoá BẤT KỲ một mệnh đề nào ("không dùng cho thiết lập mới" · "Đường hiện hành là `agent_creds`" · "Code vẫn còn đọc" · "đường ấy chưa gỡ") ⇒ ĐỎ (mỗi mệnh đề một đột biến); dời khối xuống cuối mục ⇒ ĐỎ |
+| A4 | `CLAUDE.md`: câu M4 (gộp khoảng trắng) xuất hiện đúng 1 lần, nằm TRONG gạch đầu dòng bắt đầu `- **Refresh token của codex XOAY VÒNG` (trước gạch đầu dòng kế tiếp) | bỏ câu ⇒ ĐỎ; xoá vế "chưa gỡ" ⇒ ĐỎ; dời câu sang gạch đầu dòng khác ⇒ ĐỎ |
 | A5 | vế âm cho cả hai tệp M3/M4: không đoạn nào vừa có `CODEX_AUTH_JSON` vừa có một trong các cụm "đã gỡ", "đã bỏ", "không còn hỗ trợ", "removed" mà không có phủ định "chưa"/"không" đứng ngay trước (phép đo theo đoạn) | thêm câu "code đọc CODEX_AUTH_JSON đã gỡ" ⇒ ĐỎ |
 | A6 | `CLAUDE.md` dòng 673–683 của base giữ nguyên byte (so đoạn `git show <base>:CLAUDE.md` với ứng viên theo nội dung, không theo số dòng) | sửa đoạn sự cố 15-08 ⇒ ĐỎ |
 | A7 | `git diff --numstat <base> <cand>`: đúng 5 tệp của write set (trừ handoff); không có `VERSION`, `CHANGELOG.md`, `RELEASE_MANIFEST.json` | thêm tệp thứ 6 ⇒ ĐỎ |

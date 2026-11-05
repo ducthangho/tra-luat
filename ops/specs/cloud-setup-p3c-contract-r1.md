@@ -22,7 +22,7 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 |---|---|---|
 | S1 | webapp LIVE | `tl ping` 08:21Z: `version=2.21.2q`, `schema_version=2.21.2q`, `registry_cols=27`; client in `⚠ CẢNH BÁO: webapp version=2.21.2q ≠ 2.21.2p` |
 | S2 | client | `scripts/tl.py:98` `EXPECT_VERSION = "2.21.2p"`; `references/API_CONTRACT.md:3` đóng dấu `2.21.2p` |
-| S3 | action thiếu trong hợp đồng | `references/Code.2.21.2q.gs` có 73 `case '<action>'` phân biệt; `API_CONTRACT.md` thiếu đúng 1: `agent_creds_put` (đo 08:3xZ) |
+| S3 | action thiếu trong hợp đồng | `set(re.findall(r"case '([^']+)'", …))` trên `references/Code.2.21.2q.gs` ⇒ **77** tên phân biệt; tên nào không có dạng `` `<tên>` `` trong `API_CONTRACT.md` ⇒ thiếu **3**: `agent_creds_put`, `configView`, `regenRegistry` (đo 09:1xZ, Codex phản biện đo cùng số). Hai tên sau là bí danh camelCase sẵn có từ trước (`configView` ⇒ `doConfigView_`; `regenRegistry` chỉ trả `deprecated:true`), ngoài phạm vi; chỉ `agent_creds_put` là action mới của 2.21.2q |
 | S4 | công cụ bump | `scripts/contract_check.py --bump 2.21.2q` trên bản sao: 4 tệp (`SKILL.md`, `API_CONTRACT.md`, `tl.py`, `tl_selftest.py`), +14/−14 dòng; thay CẢ ghi chú lịch sử (xem M1) |
 | S5 | ca sẽ đỏ | `scripts/tl_selftest.py:24308` (`r210_skill_tro_kich_ban_va_gas_dung_ban`) đòi `sk.count("2.21.2p") >= 3` trên `SKILL.md` — bump xong số đếm 5 → 0 (Codex phản biện 05-11, tôi đo lại) |
 | S6 | hướng dẫn deploy cũ | `INSTALL.md:52,78,110` bảo deploy `Code.2.21.2p.gs` / webapp `2.21.2p` |
@@ -46,14 +46,15 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
   `AGENT_CREDS_NOT_CONFIGURED`, `AGENT_CREDS_FILEID_MISMATCH`, `EXPECT_MD5_REQUIRED`, `BLOB_SIZE`, `LOCK_BUSY`, `CAS_CONFLICT`
   (kèm `md5` hiện tại); ghi chú: chỉ ghi đè NỘI DUNG đúng tệp Script Property `TL_AGENT_CREDS_FILEID`, CAS theo `md5Checksum`
   trong script lock, không có chế độ ghi mù; v2.21.2q (#1089). Nội dung chép từ mục *Hợp đồng `agent_creds_put`* của
-  `ops/specs/cloud-setup-p3-writeback-r1.md`, đối chiếu `references/Code.2.21.2q.gs:331–338`.
+  `ops/specs/cloud-setup-p3-writeback-r1.md`, đối chiếu thân hàm `references/Code.2.21.2q.gs:344–364` (dispatch ở dòng 331).
 - **M3 → `scripts/tl.py`**: `EXPECT_VERSION = "2.21.2q"`. Không đổi hằng `VERSION`.
 - **M4 → `scripts/tl_selftest.py`**: literal ca `expect_version` sang `"2.21.2q"` (giữ chú thích, thêm "2.21.2q: +agent_creds_put");
   ca `r210_skill_tro_kich_ban_va_gas_dung_ban`: `sk.count("2.21.2p") >= 3` → `sk.count("2.21.2q") >= 3`, thêm vế
   `and "2.21.2p" not in sk` (cùng hình dạng vế `"2.21.2m" not in sk` sẵn có), chú thích "bản LIVE là 2.21.2q".
 - **M5 → `SKILL.md`**: bốn dòng 22, 244, 247, 249 sang `2.21.2q` / `Code.2.21.2q.gs`. KHÔNG đổi header version (dòng 18).
 - **M6 → `INSTALL.md`**: dòng 52, 110 sang `2.21.2q` / `Code.2.21.2q.gs`; dòng 78 thành "Các bản `.gs` tới 2.21.2p là lịch sử;
-  bản cần deploy là `Code.2.21.2q.gs` và `ping` phải trả `2.21.2q`".
+  bản cần deploy là `Code.2.21.2q.gs` và `ping` phải trả `2.21.2q`" — chuỗi `2.21.2p` DUY NHẤT được giữ trong `INSTALL.md` là
+  cụm lịch sử `` Các bản `.gs` tới 2.21.2p là lịch sử ``.
 - **M7 → `changelog.d/wp-1223.md`**: ghi chú thay đổi (protocol: worker không sửa `CHANGELOG.md`).
 
 ## 3. Write set
@@ -91,10 +92,10 @@ neo băm.
 |---|---|---|
 | A1 | `API_CONTRACT.md`: 400 byte đầu chứa `` `2.21.2q` `` (dương) và KHÔNG chứa `` (LIVE): `2.21.2p` `` (âm); `python scripts/contract_check.py --audit` rc 0 và in khớp `2.21.2q` | để dấu `2p` ở dòng 3 ⇒ ĐỎ |
 | A2 | sáu cụm lịch sử của M1 có mặt NGUYÊN VĂN với `2.21.2p`, đếm từng cụm, mỗi cụm đúng số lần như base (cụm 5: hai lần trên dòng `ingest_commit`); không cụm nào xuất hiện dạng thay `2p`→`2q` | chạy `--bump` mà không trả tay ⇒ ĐỎ; trả tay sót một cụm ⇒ ĐỎ |
-| A3 | `API_CONTRACT.md` có đúng 1 dòng bảng bắt đầu `` | `agent_creds_put` | ``, chứa `POST`, đủ 3 tham số và đủ 6 mã lỗi (đếm từng mã); script đối chiếu tập `case '<x>'` của `references/Code.2.21.2q.gs` với tập action có dòng bảng ⇒ thiếu 0 (base: thiếu 1) | xoá dòng ⇒ thiếu 1 ⇒ ĐỎ; bỏ `CAS_CONFLICT` ⇒ ĐỎ |
+| A3 | `API_CONTRACT.md` có đúng 1 dòng bảng bắt đầu `` | `agent_creds_put` | ``, chứa `POST`, đủ 3 tham số và đủ 6 mã lỗi (đếm từng mã); phép đo S3 (tên `case` của `Code.2.21.2q.gs` không có dạng `` `<tên>` `` trong hợp đồng) ⇒ tập thiếu ĐÚNG BẰNG `{configView, regenRegistry}` (base: `{agent_creds_put, configView, regenRegistry}`) | xoá dòng ⇒ tập thiếu có `agent_creds_put` ⇒ ĐỎ; bỏ `CAS_CONFLICT` ⇒ ĐỎ |
 | A4 | `scripts/tl.py`: dòng `EXPECT_VERSION = "2.21.2q"` đúng 1 lần, không còn dòng `EXPECT_VERSION = "2.21.2p"`; dòng `VERSION = ` không đổi so base | đổi lại `2p` ⇒ `r119_*` + `expect_version` ĐỎ |
 | A5 | `python scripts/tl.py --selftest` N/N hai số bằng nhau; gồm `r119_api_contract_version_stamp_matches_expect`, `expect_version`, `r210_skill_tro_kich_ban_va_gas_dung_ban` | trên ứng viên, chèn lại một dòng `2.21.2p` vào `SKILL.md` ⇒ `r210` ĐỎ (vế âm mới có răng); trả `EXPECT_VERSION` về `2p` ⇒ `expect_version` ĐỎ |
-| A6 | `SKILL.md` và `INSTALL.md`: từng tệp đếm `2.21.2p` = 0 và `2.21.2q` ≥ (4, 3) | để sót một dòng ⇒ ĐỎ |
+| A6 | `SKILL.md`: `2.21.2p` = 0 lần, `2.21.2q` ≥ 4. `INSTALL.md`: `2.21.2p` đúng 1 lần và lần ấy nằm trong cụm `` Các bản `.gs` tới 2.21.2p là lịch sử ``; `2.21.2q` ≥ 3; ba chỉ dẫn hiện hành (dòng deploy `.gs`, dòng `ping` phải trả, dòng "Webapp cần deploy") mỗi dòng chứa `2.21.2q` (đếm từng dòng) | để sót một dòng chỉ dẫn ở `2p` ⇒ ĐỎ; xoá cụm lịch sử ⇒ ĐỎ |
 | A7 | `git diff --numstat <base> <cand>`: đúng 6 tệp của write set (trừ handoff), không tệp nào ngoài; ≤ 450 dòng thêm; KHÔNG có `VERSION`, `CHANGELOG.md`, `RELEASE_MANIFEST.json` | thêm tệp thứ 7 hoặc sửa manifest ⇒ ĐỎ |
 | A8 | bất biến (a): `git diff --check` rc 0; `python .claude/dev/packet_loop.py doctrine-scan --root .` rc 0; doc-claims-check như gate rc 0; delta `ruff check --select F scripts/tl.py` so base = 0 | — |
 | A9 | lane worker: `release-verify` với manifest tạm như CI PR | — |

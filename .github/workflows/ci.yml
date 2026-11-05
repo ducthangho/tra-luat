@@ -809,7 +809,12 @@ jobs:
         shell: bash
         env:
           AL_VER: 1.7.7
-        run: bash ops/chay_lease_publish_test.sh
+        run: |
+          set -euo pipefail
+          bash ops/chay_lease_publish_test.sh
+          if test "$RUNNER_OS" = Linux; then
+            bash ops/environment/update-linux.sh --selftest
+          fi
       # `don-nhanh.ps1` XOÁ NHÁNH REMOTE — thao tác không hoàn tác được ở phía PR: xoá
       # nhầm một nhánh đang là BASE của PR đang mở thì GitHub ĐÓNG các PR ấy, và tạo lại
       # nhánh không mở lại chúng. Bộ này khoá đúng chỗ đó, cộng chốt fail-close khi không

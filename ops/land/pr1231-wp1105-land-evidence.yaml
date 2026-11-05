@@ -165,11 +165,18 @@ assurance_81:
   review_exact_sha: 'DAT — luot offline 4 head d5d521e = authorized_head_sha, ma_thoat 0, KET_LUAN approve; connector sach tren d5d521e.'
   thuc_thi:
     model: 'measured — kiem-merge/run-offline-l4.json model_phuc_vu_trang_thai KHONG_DO_DUOC (2 dong giong khung response.created/completed khong doc duoc).'
-    model_effort_client_ghi_chu: >-
-      thuat_lai — executor session_015GtxrYPCoXRRL14oCzB5PN (send_message 16:04Z): rollout codex 01a1ab8d-b147-7673-9926-5c55cf732423
-      (sha256 6219102d…, 258 dong, khong co trong kho) co turn_context model gpt-6.1-sol, effort xhigh; 31 token_usage_record khong
-      mang truong model; run.json 32 khung deu gpt-6.1-sol nhung 2 khung khong doc duoc. Day la cau hinh phia client, §8.1 "cau hinh
-      yeu cau khong phai runtime evidence" — KHONG doi nhan CHUA_DAT.
+    model_effort_do_lai: >-
+      loi_khai_co_neo — do lai boi executor session_015GtxrYPCoXRRL14oCzB5PN (send_message 16:04Z, phien dieu phoi xac nhan 16:05Z):
+      rollout /root/.codex/sessions/2026/11/05/rollout-2026-11-05T11-52-33-01a1ab8d-b147-7673-9926-5c55cf732423.jsonl, sha256
+      6219102d38b87f26d92762284cb9165fdc774d39ae4b005b876e9b83e37d2520, 258 dong (tep nam trong container executor, KHONG co trong
+      kho, phien ghi so khong doc duoc). DO LAI DUOC: turn_context (1 luot) model gpt-6.1-sol, effort xhigh; session_meta codex-cli
+      0.166.0, originator codex_exec, provider openai; kiem-merge/run-offline-l4.json 32 khung deu gpt-6.1-sol. CHUA DO DUOC:
+      turn_context la cau hinh phia CLIENT, khong phai may chu xac nhan; 31 token_usage_record khong mang truong model nen model
+      theo tung phan hoi khong do duoc; 2 khung trong run.json khong doc duoc => model/effort PHUC VU van KHONG_DO_DUOC.
+    mien_chu_kho_model_effort: >-
+      thuat_lai — chu kho trong phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 (chuyen nguyen van qua send_message 16:05Z):
+      "về model và effort của codex hãy thử đo lại, nếu không được tôi cho phép bỏ qua". Da thu do lai (model_effort_do_lai) va
+      khong do duoc phan phuc vu => phan thieu cua moc model/effort duoc MIEN theo chu kho (owner_waived). Khong vien dan #1240.
     effort: 'measured — kiem-merge/run-offline-l4.json effort_phuc_vu_trang_thai KHONG_DO_DUOC (theo model).'
     sandbox_mode: 'measured — kiem-merge/run-offline-l4.json sandbox_trang_thai DO_DUOC, co sandbox_lech (muc tieu cua chinh packet nay, A13).'
   ghi_chu: 'Khong nang nhan: packet sua dung luong do sandbox; model/effort phuc vu van khong do duoc tren luot nay.'

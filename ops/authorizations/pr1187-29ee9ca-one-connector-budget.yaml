@@ -1,0 +1,13 @@
+owner_response_verbatim: Cho phép thêm đúng 1 connector review
+recorded_at: '2026-11-05T00:54:40.570036+00:00'
+packet_issue: 1187
+reviewed_sha: 29ee9ca74d61544fbddd56c39dabbe194d26408e
+old_limit: 4
+new_limit: 5
+calls_used: 4
+authorized_additional_calls: 1
+scope: one GitHub connector review on infrastructure PR1194 exact29ee9ca only; no
+  local model calls, no sixth
+source_scope: owner reply to exact K3 budget question in current conversation
+no_history_reset: true
+source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6646555992

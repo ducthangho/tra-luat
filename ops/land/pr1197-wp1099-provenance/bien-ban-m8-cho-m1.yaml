@@ -1,4 +1,6 @@
 # Bien ban M8 (ADR-0060) dong WP #1099 CLOUD-SETUP-P3B-NLM-401 r11 — kiem bang packet_loop.py kiem-dong-wp.
+# TRANG THAI: landed nhung WP #1099 MO — cho M1 LIVE (chu kho KHONG mien, issuecomment-6664028312). Ban M8 cuoi se la
+# bien-ban-m8.yaml, tro ve tep nay (ADR-0060 M8: sua thi ghi ban moi tro ban cu; tien le pr1137 bien-ban-m8-landed-false.yaml).
 # Nguon: ops/land/pr1197-wp1099-land-evidence.yaml (merge PR #1243, 25a1b79). Lease cuoi doc tai origin/ops/cap-lease-1099-g1 @ d2e53fc.
 packet: CLOUD-SETUP-P3B-NLM-401
 revision: 11
@@ -50,15 +52,16 @@ nghiem_thu:
   K1: passed
   K2: passed
   L1: passed
-  W1: CHO_QUYET_DINH
-  M1: CHO_QUYET_DINH
+  W1: owner_waived
+  M1: not_measured
 nghiem_thu_nguon: >-
   F1 measured — gate-hau-merge-20261105/gate-output-42058119067.txt ("tl selftest 1777/1777", "[wp1099_nlm_nap_lai] … DOT BIEN 30/30 …
   BỎ QUA 0" tren posix). L1 measured — readback-jobs-42033337918-a3.json 23/23 success tren 9944246 + kiem-gate-pre-9944246.txt rc=0.
   K2 measured — do-lai-nguon-20261105/merge-va-diff.txt: 9 tep, +550 -30. J1/F3/D1–D3/H1/G2/A* chay trong job CI tren b255b0b
   (selftest, release-verify, bundle check) — gate output 0 ##[error]. R1, K1, G1 thuat_lai tu Codex luot 17 + kiem-merge, KHONG tai chay.
-  W1: van run(tl) Windows measured_by_coordinator; van ci.yml runner_set=windows-only tren 9944246 KHONG CO (REST: chi 3 run tren head,
-  khong lan windows-only). M1: LIVE sau land, chua chay.
+  W1: van run(tl) Windows measured_by_coordinator (passed); van ci.yml runner_set=windows-only tren 9944246 KHONG CO (REST: chi 3 run
+  tren head) — owner_waived DUNG phan CI Windows, neo 9944246: readback-comment-6664028312.json (ducthangho 16:59:54Z).
+  M1: LIVE sau land, chua chay; chu kho KHONG mien (cung comment).
 lease_cuoi: wp1099-cloud-setup-p3b-r11-g1-claude
 landed: true
 moc_10_2_2:
@@ -67,3 +70,11 @@ moc_10_2_2:
   workflow_definition: passed
   gate_output: passed
 moc_10_2_2_nguon: 'ops/land/pr1197-wp1099-provenance/gate-hau-merge-20261105/ci-provenance-42058119067/provenance.yaml + gate-output-42058119067.txt, run 42058119067 tren b255b0b'
+w1_owner_waived: https://github.com/ducthangho/tra-luat/issues/1099#issuecomment-6664028312
+trang_thai_wp: 'MO — cho M1 LIVE; khong dong WP #1099 cho toi khi M1 chay that va chu kho duyet rieng'
+kiem_dong_wp:
+  lenh: 'python3 .claude/dev/packet_loop.py kiem-dong-wp --root . --bien-ban ops/land/pr1197-wp1099-provenance/bien-ban-m8-cho-m1.yaml --lease <origin/ops/cap-lease-1099-g1 @ d2e53fc:ops/leases/wp1099-cloud-setup-p3b-r11-g1-claude.yaml>'
+  rc: 12
+  output_dong:  # nguyen van tung dong stderr (danh sach de giu khoang trang dau dong)
+  - "  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt"
+  - "CHƯA ĐÓNG ĐƯỢC WP: thiếu D2"

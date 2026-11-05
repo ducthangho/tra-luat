@@ -20,8 +20,15 @@ recorder_ghi_chu: 'phien soan dac ta session_015Gtxrb7zLc2qo5ePW7yTsS ghi theo c
 executor_session: session_015Gtxra9St4SrF625qHwL6o
 leased_at_utc: '2026-11-05T03:08:00Z'
 heartbeat_at: '2026-11-05T03:08:00Z'
-lease_until: '2026-11-07T03:08:00Z'
-lease_expires_at_utc: '2026-11-07T03:08:00Z'
+lease_until: '2026-11-05T04:53:00Z'
+lease_expires_at_utc: '2026-11-05T04:53:00Z'
+rut_han:
+  han_cu: '2026-11-07T03:08:00Z'
+  han_moi: '2026-11-05T04:53:00Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #1196 xong: PR thi cong #1200 merge 7814938, PR ghi so #1209 merge 8416696; chu kho quyet dinh dong #1196 voi landed false (#1196 issuecomment-6650011805), M8 issuecomment-6649949052.'
+  vi_sao_khong_bia_mo: 'khong co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp929-r1-g1-claude (b713173).'
+  ghi_boi: executor session_015Gtxra9St4SrF625qHwL6o (theo chi thi chuyen qua phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq)
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude

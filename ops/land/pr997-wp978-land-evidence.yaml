@@ -1,9 +1,10 @@
 # HO SO LAND — packet #978 CI-PROVENANCE-COMMIT-ENCODING r2 (lease g2), code qua PR #997. Khuon: ops/land/pr1080-wp1077-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (02ddeb4e). landed = false: bon moc §10.2.2 tren merge SHA DAT tren Ubuntu, NHUNG gate-registry (windows-latest)
-# DO vi ops/ci_provenance_test.py het gio 5400 s — loi DO DIFF NAY gay ra (ca c62 + 55 dot bien F13 chay ca dich hai lan/muc).
-# Ban va: packet #1147 (chua merge). Doc ky khoi windows_sau_merge.
+# TRANG THAI: merged (02ddeb4e). landed = true tu 05-11-2026 (nang cap qua PR ghi so claude/ghi-so-land-1147): bon moc §10.2.2 tren merge SHA
+# DAT tren Ubuntu; gate-registry (windows-latest) tung DO vi ops/ci_provenance_test.py het gio 5400 s (loi do diff nay gay ra), da va boi
+# packet #1147 (PR #1192, merge 9a5b462) va do lai XANH tren master ed07782 (run 41949816794). Doc ky khoi windows_sau_merge.
+# Ban ghi landed false truoc do (PR #1191, merge ed07782) giu trong lich su git.
 # NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nghia nhu khuon.
 # Readback tho: ops/land/pr997-wp978-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-11-02 va 2026-11-04.
 
@@ -21,7 +22,9 @@ input_packet_generations:
   - {packet_issue: 978, packet_id: wp978, revision: 2, generation: 2, lease_id: wp978-r2-g2-claude}
 authorized_head_sha: 516a33467b1212a90153bb25ed44f28b16d5fac9
 approver: ducthangho
-authorization_url: https://github.com/ducthangho/tra-luat/pull/997
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1192#issuecomment-6647192783
+authorization_url_merge: https://github.com/ducthangho/tra-luat/pull/997
+authorization_url_ghi_chu: 'Tu 05-11-2026 authorization_url tro ban ghi chi thi land cua chu kho (dung cho nang landed true, luat L-6 doi #issuecomment-); merge PR #997 van do chu kho tu bam (authorization_url_merge, authorization_ghi_chu).'
 authorization_ghi_chu: >-
   measured — readback-pr-997.json: merged true, merged_by ducthangho, merged_at 2026-11-02T05:49:37Z, head_sha 516a334, merge_commit_sha 02ddeb4.
   Chu kho TU merge tren DUNG head cuoi; khong co chi thi merge rieng tren GitHub, khong co comment neo SHA. Luc merge, gate-registry
@@ -49,7 +52,12 @@ post_merge_checks:
     moc_gate_output: 'measured — gate-output-41396264926-trich.txt (trich tu log REST 23 job; ban day du 4090866 byte, sha256 54a472ac0f62a7329a4e5279ee66caa001ab178360e34f28b5ed645bcb72f129, khong commit): ##[error] = 0; TONG: DAT 6x, TỔNG: ĐẠT 8x, khong TONG: DO/TỔNG: ĐỎ; ops/ci_provenance_test.py CA 62/62 · DOT BIEN 398/398 · TU KIEM DAT · TONG DAT; tl selftest 1775/1775.'
     ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master). Khong co luot Windows tren chinh merge SHA.'
 windows_sau_merge:
-  ket_luan: 'DO — loi do diff #978 gay ra, chua va tren master.'
+  ket_luan: 'XANH sau ban va #1147 — truoc do DO (loi do diff #978 gay ra).'
+  sau_ban_va:
+    - 'measured — readback-run-41949816794-windows.json: ci.yml workflow_dispatch windows-only che_do day_du tren master ed07782, conclusion success, 15 job windows-latest success (gate-cong-cu-gop skipped).'
+    - 'measured — gate-registry-windows-126994820238-trich.txt: ops/ci_provenance_test.py CA 63/63 · DOT BIEN 398/398 · TU KIEM DAT · TONG DAT, CI_DANG_KY rc=0, bo {"giay": 2577.598} < 5400.'
+    - 'measured — ed07782-quan-he.txt: 02ddeb4 la to tien cua ed07782; ed07782 = 9a5b462 (merge #1147) + PR #1191 (chi tep duoi ops/land/pr997-wp978-*). Luot Windows nay KHONG chay tren chinh 02ddeb4: noi dung #978 + ban va #1147.'
+    - 'thuat_lai — ho so ops/land/pr1192-wp1147-land-evidence.yaml (cung PR ghi so): bon moc Ubuntu tren 9a5b462 DAT.'
   do_duoc:
     - 'measured — readback-run-41388133371-windows.json + gate-registry-windows-125097257815-trich.txt: head 516a334 (= authorized_head), job gate-registry (windows-latest) failure, ops/ci_provenance_test.py rc 1 sau 5400.151 s (het tran GIAY_TOI_DA_MOT_BO).'
     - 'measured — readback-run-41401509813-windows.json: ci.yml workflow_dispatch windows-only tren 279a39e (master sau #997), job gate-registry (windows-latest) failure, buoc test registry 08:31:25Z -> 10:32:14Z. Log chua trich trong ho so nay.'
@@ -59,6 +67,7 @@ windows_sau_merge:
 bookkeeping:
   - {item: 'thu hoi lease wp978-r2-g2-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: claude/ghi-so-land-978}
+  - {item: 'PR ghi so nang landed true', nhanh: claude/ghi-so-land-1147}
 # ---- het truong chuan
 packet_id: wp978
 packet_issue: 978
@@ -89,12 +98,13 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-997.json merged true; merge-va-diff.txt cha e007a318 + 516a334, tree b1a90b45.'
-  landed: false
+  landed: true
+  landed_nang_cap: 'loi_khai_co_neo — chi thi chu kho "Bo draft, merge, land va ghi so cho toi" (05-11-2026), ban ghi https://github.com/ducthangho/tra-luat/pull/1192#issuecomment-6647192783.'
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren merge SHA 02ddeb4: Ubuntu DAT (bon moc run 41396264926); Windows DO (gate-registry het gio 5400 s tren 516a334
-    va 279a39e, xem windows_sau_merge) => KHONG DAT; (2) lease nha: bia mo hai chieu; (3) bookkeeping: ho so nay; (4) review neo DUNG authorized_head
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 02ddeb4: Ubuntu DAT (bon moc run 41396264926); Windows tung DO (gate-registry het gio 5400 s tren
+    516a334 va 279a39e); sau ban va #1147, gate-registry windows-latest DAT tren master ed07782 (run 41949816794, 2577.598 s), xem windows_sau_merge; (2) lease nha: bia mo hai chieu; (3) bookkeeping: ho so nay; (4) review neo DUNG authorized_head
     516a334: DAT (Codex luot 11 approve 0/0/0, 3 P3 mien; connector sach); (5) uy quyen land: chu kho tu merge; (6) muc tieu packet: N1p-N3p Linux dat,
-    Windows KHONG dat; (7) §8.1: xem run.json luot 11.
+    Windows dat sau ban va #1147; (7) §8.1: xem run.json luot 11.
 
 review:
   so_loi_goi_codex_cli: 11

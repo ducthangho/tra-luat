@@ -1,0 +1,315 @@
+# TRICH tu log REST 23 job cua run 41949673119 (ci.yml push master, head 9a5b462). Ban day du: 4294656 byte, sha256 c06efcbfe411d72d15f72a5ede34dd669859a9cf6377bb59b53f1a5376539c2b (khong commit, tai lai bang GET actions/jobs/<id>/logs).
+# Moi dong duoi la dong nguyen van chua: tieu de job, ##[error], TONG/TỔNG, DOT BIEN, CA: n/n, TU KIEM PHAN HANG, '== ... selftest n/n ==', 'Process completed with exit code', CI_DANG_KY ops/ci_provenance_test.
+# DEM: ##[error]=0 {'TỔNG: ĐẠT': 8, 'TONG: DAT': 6}
+===== JOB 126990367434 chuan-bi conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 126990429068 gate-packet-loop (ubuntu-latest) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-05T02:31:44.2466415Z TỔNG: ĐẠT
+===== JOB 126990429112 gate (ubuntu-latest) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-05T01:42:54.4017216Z TỔNG: ĐẠT
+2026-11-05T01:43:07.0673261Z TỔNG: ĐẠT
+2026-11-05T01:43:54.7572255Z == gen_instructions selftest 44/44 ==
+2026-11-05T01:48:05.8320541Z == transport selftest 12/12 ==
+2026-11-05T01:48:05.8823238Z == tl selftest 1776/1776 ==
+===== JOB 126990429176 gate-ops (ubuntu-latest) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-05T01:38:36.1727082Z CA: 118/118 dat · 0 do · 0 hong
+2026-11-05T01:43:58.0995671Z DOT BIEN: 431/431 bi giet dung ly do
+2026-11-05T01:43:59.8315265Z TU KIEM PHAN HANG: DAT (5 mau rc, 3 dot bien that)
+2026-11-05T01:43:59.8316151Z TONG: DAT
+2026-11-05T01:47:54.2724501Z TỔNG: ĐẠT
+===== JOB 126990429180 gate-nhanh-manh (ubuntu-latest, 6) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-05T01:37:27.6297489Z DOT BIEN TU KIEM ghi-so-bang-chung | r546 | 1/1
+2026-11-05T01:37:53.7355808Z DOT BIEN TU KIEM ghi-so-gop-dich | r546 | 1/1
+2026-11-05T01:37:55.2048386Z DOT BIEN TU KIEM cong-giet-theo-so-lan | r514 | 1/1
+2026-11-05T01:37:56.0159514Z DOT BIEN TU KIEM cham-doc-stdout-khi-rc-mot | r505,r512,r520,r521,r522,r523 | 6/6
+2026-11-05T01:37:56.6122481Z DOT BIEN TU KIEM tu-kiem-bo-ghi-nhan-loi-vo-can | r516,r542 | 2/2
+2026-11-05T01:37:57.4249125Z DOT BIEN TU KIEM mo-cong-cuoi | r513 | 1/1
+2026-11-05T01:37:58.4905272Z DOT BIEN TU KIEM tk-unbounded-number | r539,r540 | 2/2
+2026-11-05T01:37:58.8812864Z DOT BIEN TU KIEM src-tat-ky-khong-chay | r506 | 1/1
+2026-11-05T01:37:59.1462257Z DOT BIEN TU KIEM manh-tu-kiem-tron-bang | r551,r552 | 2/2
+2026-11-05T01:37:59.3874701Z DOT BIEN TU KIEM cham-thu-hoi-giet-vi-stdout | r512 | 1/1
+2026-11-05T01:37:59.9349689Z DOT BIEN TU KIEM manh-bo-so-hang-khong-do | r551 | 1/1
+2026-11-05T01:38:00.2056309Z DOT BIEN TU KIEM runner-bat-assertion-tran | r501 | 1/1
+2026-11-05T01:38:01.4883599Z DOT BIEN TU KIEM chan-doan-khai-bo-qua-ca-khi-khong-mat | r531,r533,r534,r535,r536,r538 | 6/6
+2026-11-05T01:38:01.6835546Z DOT BIEN TU KIEM hep-lai-loi-phong-chi-oserror | r522 | 1/1
+2026-11-05T01:38:01.8967492Z DOT BIEN TU KIEM gop-bo-kiem-bam | r552 | 1/1
+2026-11-05T01:38:02.1190568Z DOT BIEN TU KIEM gop-bo-kiem-so-manh | r552 | 1/1
+2026-11-05T01:38:02.3302295Z DOT BIEN TU KIEM gop-chi-mot-bang | r552 | 1/1
+2026-11-05T01:38:02.7284029Z DOT BIEN TU KIEM bo-loc-dang-ky | r545,r547 | 2/2
+2026-11-05T01:38:02.8561197Z DOT BIEN TU KIEM cache-dau-phien-theo-dinh-danh | r509 | 1/1
+2026-11-05T01:38:03.1295285Z DOT BIEN TU KIEM chan-doan-ho-case-t-lay-hinh-fixture-thay-hinh-runner | r535,r538 | 2/2
+2026-11-05T01:38:03.4072085Z DOT BIEN TU KIEM windows-gan-hong-van-chay | r556 | 1/1
+2026-11-05T01:38:03.7360706Z DOT BIEN TU KIEM r547-thu-moi-tep | r547 | 1/1
+2026-11-05T01:38:03.8605637Z DOT BIEN TU KIEM bo-tach-ca-voi-dong-luot | r517 | 1/1
+2026-11-05T01:38:04.0611574Z DOT BIEN TU KIEM chan-doan-bo-bien-phai-cua-nhan | r538 | 1/1
+2026-11-05T01:38:04.2632168Z DOT BIEN TU KIEM chan-doan-noi-long-duoi-ban-ghi-dot-bien | r538 | 1/1
+2026-11-05T01:38:04.4603093Z DOT BIEN TU KIEM chan-doan-quen-ho-mutant-tung-muc | r538 | 1/1
+2026-11-05T01:38:04.8759539Z DOT BIEN TU KIEM r528-ha-tang-mkdir-ngoai-try | r543 | 1/1
+2026-11-05T01:38:05.0026447Z DOT BIEN TU KIEM chan-doan-r526-doc-hang-sach-thay-vi-tep-that | r526 | 1/1
+2026-11-05T01:38:05.2057330Z DOT BIEN TU KIEM ghi-so-chay-ca | r545 | 1/1
+2026-11-05T01:38:05.4059407Z DOT BIEN TU KIEM ghi-so-helper-r528 | r545 | 1/1
+2026-11-05T01:38:05.6075514Z DOT BIEN TU KIEM runner-bo-duyet-chuoi | r545 | 1/1
+2026-11-05T01:38:05.7264041Z DOT BIEN TU KIEM bo-so-rc-khi-child-khong | r515 | 1/1
+2026-11-05T01:38:05.8840532Z DOT BIEN TU KIEM moc-nhan-sai-dinh-dang | r554 | 1/1
+===== JOB 126990429205 gate-nhanh-manh (ubuntu-latest, 1) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-05T01:37:29.9223179Z DOT BIEN TU KIEM bo-cua-xoa-het | r545,r546,r547 | 3/3
+2026-11-05T01:37:30.3060964Z DOT BIEN TU KIEM dau-phien-bo-vong-rut-lai | r527,r528 | 2/2
+2026-11-05T01:37:34.4047020Z DOT BIEN TU KIEM gop-khong-do-vao-khong-giet | r514 | 1/1
+2026-11-05T01:37:34.5898864Z DOT BIEN TU KIEM bo-so-tap-ca-do-voi-dich | r503,r504,r505,r512,r515,r521 | 6/6
+2026-11-05T01:37:34.7862175Z DOT BIEN TU KIEM bo-tu-choi-dot-bien-noop | r519 | 1/1
+2026-11-05T01:37:35.5030935Z DOT BIEN TU KIEM mo-cong-tu-dot-bien-hong | r513 | 1/1
+2026-11-05T01:37:37.3137108Z DOT BIEN TU KIEM dung-chi-khi-khong-giet | r505,r520,r522,r523 | 4/4
+2026-11-05T01:37:37.8897359Z DOT BIEN TU KIEM bo-phan-biet-lop-ngoai-le | r501,r504,r518 | 3/3
+2026-11-05T01:37:38.0606221Z DOT BIEN TU KIEM manh-bo-tu-kiem | r551 | 1/1
+2026-11-05T01:37:38.4654109Z DOT BIEN TU KIEM git-bao-tri-bo-nap | r548 | 1/1
+2026-11-05T01:37:38.9759304Z DOT BIEN TU KIEM chan-doan-nuot-ca-ranh-gioi | r524,r531,r533,r534,r535,r536,r537,r538 | 8/8
+2026-11-05T01:37:39.3087547Z DOT BIEN TU KIEM chan-doan-de-tran-nuot-nhan-bo-qua | r531,r533,r534,r536 | 4/4
+2026-11-05T01:37:39.5041842Z DOT BIEN TU KIEM gop-bo-kiem-khoang-n | r552 | 1/1
+2026-11-05T01:37:39.6752197Z DOT BIEN TU KIEM gop-bo-kieu-int-manh | r552 | 1/1
+2026-11-05T01:37:39.7950957Z DOT BIEN TU KIEM dung-chi-khi-giet | r505,r509 | 2/2
+2026-11-05T01:37:40.2726915Z DOT BIEN TU KIEM entropy-giu-mot-byte | r509 | 1/1
+2026-11-05T01:37:40.5048788Z DOT BIEN TU KIEM don-cay-nem-thay-124 | r556 | 1/1
+2026-11-05T01:37:40.7385058Z DOT BIEN TU KIEM windows-popen-nem-ro-job | r556 | 1/1
+2026-11-05T01:37:41.0136673Z DOT BIEN TU KIEM vang-khong-bat | r547 | 1/1
+2026-11-05T01:37:41.1170982Z DOT BIEN TU KIEM bo-xac-thuc-nhan | r517 | 1/1
+2026-11-05T01:37:41.2837463Z DOT BIEN TU KIEM chan-doan-cot-dich-nhan-moi-thu | r538 | 1/1
+2026-11-05T01:37:41.4476691Z DOT BIEN TU KIEM chan-doan-noi-long-duoi-mutant-that-bai | r538 | 1/1
+2026-11-05T01:37:41.6126086Z DOT BIEN TU KIEM chan-doan-ten-ngoai-le-chi-ascii | r538 | 1/1
+2026-11-05T01:37:41.7826591Z DOT BIEN TU KIEM r508-nhan-moi-kdd | r543 | 1/1
+2026-11-05T01:37:41.9470580Z DOT BIEN TU KIEM r528-ha-tang-mat-so-lan | r543 | 1/1
+2026-11-05T01:37:42.1166603Z DOT BIEN TU KIEM chan-doan-bo-raw-o-docstring-khoi-chan-doan | r526 | 1/1
+2026-11-05T01:37:42.2823599Z DOT BIEN TU KIEM stderr-khai-ca-khi-khong-cat | r544 | 1/1
+2026-11-05T01:37:42.4484787Z DOT BIEN TU KIEM r545-nuot-moi-oserror | r545 | 1/1
+2026-11-05T01:37:42.6135446Z DOT BIEN TU KIEM chan-doan-quay-ve-lstrip-tap-ky-tu | r537 | 1/1
+2026-11-05T01:37:42.7155348Z DOT BIEN TU KIEM bo-kiem-ban-ghi-trung | r507,r511 | 2/2
+2026-11-05T01:37:42.8170590Z DOT BIEN TU KIEM khung-lay-ten-ca-tu-doi-so | r511 | 1/1
+===== JOB 126990429221 gate-cong-cu (ubuntu-latest, 4) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 126990429227 gate-nhanh-manh (ubuntu-latest, 3) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-05T01:37:30.4435610Z DOT BIEN TU KIEM ghi-so-doc-kenh-xac-thuc | r545,r546 | 2/2
+2026-11-05T01:37:56.2256464Z DOT BIEN TU KIEM runner-bo-doi-nhan-loi-khac | r546 | 1/1
+2026-11-05T01:37:57.7320514Z DOT BIEN TU KIEM cong-theo-so-lan | r514 | 1/1
+2026-11-05T01:37:59.4201202Z DOT BIEN TU KIEM tu-dot-bien-nhan-tap-rong-lam-dich | r516,r525,r539 | 3/3
+2026-11-05T01:38:06.4049130Z DOT BIEN TU KIEM timeout-chi-giet-con | r555,r556 | 2/2
+2026-11-05T01:38:07.5411918Z DOT BIEN TU KIEM mo-cong-tong | r513 | 1/1
+2026-11-05T01:38:08.3030668Z DOT BIEN TU KIEM tk-proof-decode-escape | r539 | 1/1
+2026-11-05T01:38:08.5982334Z DOT BIEN TU KIEM tu-dot-bien-bo-so-rc-con | r516 | 1/1
+2026-11-05T01:38:08.9257700Z DOT BIEN TU KIEM bo-bat-loi-phong-con | r520,r522,r545 | 3/3
+2026-11-05T01:38:09.5079600Z DOT BIEN TU KIEM chan-doan-xoa-phan-biet-P1-P2 | r525,r532,r542 | 3/3
+2026-11-05T01:38:09.8400403Z DOT BIEN TU KIEM manh-bo-tu-kiem-do | r551 | 1/1
+2026-11-05T01:38:10.2948949Z DOT BIEN TU KIEM git-bao-tri-bo-tham-so | r548 | 1/1
+2026-11-05T01:38:10.9117637Z DOT BIEN TU KIEM chan-doan-dem-ca-dong-ranh-gioi | r531,r533,r534,r535,r536,r537,r538 | 7/7
+2026-11-05T01:38:11.3082354Z DOT BIEN TU KIEM chan-doan-doc-so-dong-bo-tu-van-ban | r531,r533,r534,r536 | 4/4
+2026-11-05T01:38:11.5172411Z DOT BIEN TU KIEM gop-bo-kiem-lap | r552 | 1/1
+2026-11-05T01:38:11.7361629Z DOT BIEN TU KIEM gop-bo-kieu-int-phien-ban | r552 | 1/1
+2026-11-05T01:38:12.1377757Z DOT BIEN TU KIEM archive-boc-lop-chot | r502 | 1/1
+2026-11-05T01:38:12.4401787Z DOT BIEN TU KIEM nap-boc-lop-dong-ten | r502 | 1/1
+2026-11-05T01:38:12.5575888Z DOT BIEN TU KIEM entropy-sap-xep-byte | r509 | 1/1
+2026-11-05T01:38:12.8340905Z DOT BIEN TU KIEM ket-thuc-goi-taskkill | r556 | 1/1
+2026-11-05T01:38:13.1570619Z DOT BIEN TU KIEM bo-cua-khong-lam-gi | r547 | 1/1
+2026-11-05T01:38:13.4844017Z DOT BIEN TU KIEM vang-khong-don | r547 | 1/1
+2026-11-05T01:38:13.6066594Z DOT BIEN TU KIEM ep-kieu-dau-dong-luot | r517 | 1/1
+2026-11-05T01:38:13.8066064Z DOT BIEN TU KIEM chan-doan-lat-loi-khai-dau-rong-hon-ranh | r538 | 1/1
+2026-11-05T01:38:14.0081838Z DOT BIEN TU KIEM chan-doan-quen-dong-ti-so-va-loi | r538 | 1/1
+2026-11-05T01:38:14.2063497Z DOT BIEN TU KIEM tk-summary-count | r540 | 1/1
+2026-11-05T01:38:14.4041475Z DOT BIEN TU KIEM tk-summary-total | r540 | 1/1
+2026-11-05T01:38:14.6020439Z DOT BIEN TU KIEM r528-ha-tang-mat-thong-diep | r543 | 1/1
+2026-11-05T01:38:14.7238082Z DOT BIEN TU KIEM chan-doan-r526-doc-duong-hai-bang-hang-sach | r526 | 1/1
+2026-11-05T01:38:14.9202351Z DOT BIEN TU KIEM phan-hoach-bo-kiem-trung | r550 | 1/1
+2026-11-05T01:38:15.1183817Z DOT BIEN TU KIEM khu-trung-toan-so | r545 | 1/1
+2026-11-05T01:38:15.3173318Z DOT BIEN TU KIEM chan-doan-lat-khai-bo-dong-trang | r537 | 1/1
+2026-11-05T01:38:15.5112409Z DOT BIEN TU KIEM tk-main-ignore-unmeasurable | r541 | 1/1
+===== JOB 126990429242 gate-nhanh-manh (ubuntu-latest, 0) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-05T01:37:29.1748539Z DOT BIEN TU KIEM bo-cua-theo-thong-diep | r545,r546,r547 | 3/3
+2026-11-05T01:37:29.6188610Z DOT BIEN TU KIEM dau-phien-ha-tran-xuong-khong | r508,r527,r528,r543 | 4/4
+2026-11-05T01:37:34.6107389Z DOT BIEN TU KIEM tu-dot-bien-nhan-giao-khac-rong | r516,r539 | 2/2
+2026-11-05T01:37:35.0133529Z DOT BIEN TU KIEM bo-xoa-co-chi-tu-kiem | r519 | 1/1
+2026-11-05T01:37:36.5953871Z DOT BIEN TU KIEM tk-proof-cases | r539,r540 | 2/2
+2026-11-05T01:37:38.4397420Z DOT BIEN TU KIEM bo-vat-hoa-dich-o-chay-dot-bien | r521 | 1/1
+2026-11-05T01:37:38.7401091Z DOT BIEN TU KIEM tu-dot-bien-chuan-hoa-hon-hop | r516 | 1/1
+2026-11-05T01:37:39.3110977Z DOT BIEN TU KIEM tk-diagnostic-prefix-erasure | r542 | 1/1
+2026-11-05T01:37:39.7687421Z DOT BIEN TU KIEM git-bao-tri-bo-kho-bare | r548 | 1/1
+2026-11-05T01:37:40.2330437Z DOT BIEN TU KIEM bo-doi-ban-ghi-dong-luot | r509,r510,r538 | 3/3
+2026-11-05T01:37:40.4394930Z DOT BIEN TU KIEM gop-bo-kiem-hop | r552 | 1/1
+2026-11-05T01:37:40.6403499Z DOT BIEN TU KIEM gop-bo-kiem-tap-manh | r552 | 1/1
+2026-11-05T01:37:42.0742017Z DOT BIEN TU KIEM gop-cli-bo-qua | r552 | 1/1
+2026-11-05T01:37:42.4736119Z DOT BIEN TU KIEM tom-tat-mat-thong-diep | r545,r547 | 2/2
+2026-11-05T01:37:42.5905663Z DOT BIEN TU KIEM entropy-chi-giu-bit-cao | r509 | 1/1
+2026-11-05T01:37:42.8623625Z DOT BIEN TU KIEM con-treo-wait-loi-thoat | r556 | 1/1
+2026-11-05T01:37:43.1372041Z DOT BIEN TU KIEM thu-output-loi-thoat | r556 | 1/1
+2026-11-05T01:37:43.4604155Z DOT BIEN TU KIEM loc-dang-ky-theo-thong-diep | r547 | 1/1
+2026-11-05T01:37:43.7220474Z DOT BIEN TU KIEM manh-chay-truoc-xac-thuc | r549,r550 | 2/2
+2026-11-05T01:37:43.8427554Z DOT BIEN TU KIEM nhan-rc-bool | r517 | 1/1
+2026-11-05T01:37:44.0419155Z DOT BIEN TU KIEM chan-doan-noi-long-duoi-tin-dung-gia | r538 | 1/1
+2026-11-05T01:37:44.2377087Z DOT BIEN TU KIEM chan-doan-ti-so-hai-so-khong-can-bang | r538 | 1/1
+2026-11-05T01:37:44.4396633Z DOT BIEN TU KIEM r528-ha-tang-bat-rong | r543 | 1/1
+2026-11-05T01:37:44.6363212Z DOT BIEN TU KIEM manh-bo-doi-ra | r549 | 1/1
+2026-11-05T01:37:44.8412798Z DOT BIEN TU KIEM manh-fullmatch-thanh-match | r549 | 1/1
+2026-11-05T01:37:45.3223825Z DOT BIEN TU KIEM ghi-so-phong-mutant | r545 | 1/1
+2026-11-05T01:37:45.5230009Z DOT BIEN TU KIEM chan-doan-lat-khai-dong-ranh-gioi-khong-dem | r533 | 1/1
+2026-11-05T01:37:45.6405582Z DOT BIEN TU KIEM bo-so-lan-thu | r515 | 1/1
+2026-11-05T01:37:45.7946587Z DOT BIEN TU KIEM moc-bo-kiem-dao-nguoc | r554 | 1/1
+===== JOB 126990429248 gate-nhanh-manh (ubuntu-latest, 2) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-05T01:37:28.7267548Z DOT BIEN TU KIEM runner-khong-theo-vi-tri | r545,r546,r547 | 3/3
+2026-11-05T01:37:29.7452777Z DOT BIEN TU KIEM dau-phien-r508-khong-di-qua-bo-tien-de | r528 | 1/1
+2026-11-05T01:37:30.9300099Z DOT BIEN TU KIEM doi-cheo-khong-giet-va-khong-do | r514 | 1/1
+2026-11-05T01:37:32.6426409Z DOT BIEN TU KIEM tu-dot-bien-nhan-bao-ham | r516,r539 | 2/2
+2026-11-05T01:37:34.5085469Z DOT BIEN TU KIEM tk-proof-malformed | r525,r530,r532,r539,r540 | 5/5
+2026-11-05T01:37:35.4219951Z DOT BIEN TU KIEM mo-cong-nhom-bat-buoc | r513 | 1/1
+2026-11-05T01:37:36.3495272Z DOT BIEN TU KIEM tk-json-recursion-escape | r539 | 1/1
+2026-11-05T01:37:36.6379471Z DOT BIEN TU KIEM manh-vong-tron-bang | r551,r552 | 2/2
+2026-11-05T01:37:37.4702408Z DOT BIEN TU KIEM manh-in-dong-day-du | r551 | 1/1
+2026-11-05T01:37:37.9648121Z DOT BIEN TU KIEM git-bao-tri-ghi-de | r548 | 1/1
+2026-11-05T01:37:38.5666344Z DOT BIEN TU KIEM chan-doan-bo-dem-phan-bi-bo | r531,r533,r534,r535,r536,r538 | 6/6
+2026-11-05T01:37:38.8559727Z DOT BIEN TU KIEM phan-hoach-lech-du | r550,r552 | 2/2
+2026-11-05T01:37:39.0916487Z DOT BIEN TU KIEM gop-bo-kiem-nhom | r552 | 1/1
+2026-11-05T01:37:39.3282568Z DOT BIEN TU KIEM gop-bo-kieu-int-so-manh | r552 | 1/1
+2026-11-05T01:37:39.7531378Z DOT BIEN TU KIEM archive-boc-lop-dong-ten | r502 | 1/1
+2026-11-05T01:37:39.8768999Z DOT BIEN TU KIEM dau-phien-thanh-moc-giay | r508,r509 | 2/2
+2026-11-05T01:37:40.0012880Z DOT BIEN TU KIEM entropy-bo-bit-cao-byte-giua | r509 | 1/1
+2026-11-05T01:37:40.2865044Z DOT BIEN TU KIEM chan-doan-noi-long-ho-tu-kiem | r535,r538 | 2/2
+2026-11-05T01:37:40.5766438Z DOT BIEN TU KIEM windows-khong-job-van-chay | r556 | 1/1
+2026-11-05T01:37:40.9209155Z DOT BIEN TU KIEM runner-bo-loc-luc-doc | r547 | 1/1
+2026-11-05T01:37:41.0499458Z DOT BIEN TU KIEM bo-xac-thuc-kieu-ten-ca | r517 | 1/1
+2026-11-05T01:37:41.2638649Z DOT BIEN TU KIEM chan-doan-bo-dau-phan-cach-cua-nhan | r538 | 1/1
+2026-11-05T01:37:41.4746703Z DOT BIEN TU KIEM chan-doan-noi-long-duoi-loi-thieu-nhom | r538 | 1/1
+2026-11-05T01:37:41.6895395Z DOT BIEN TU KIEM chan-doan-so-nhan-chu-so-unicode-va-dem | r538 | 1/1
+2026-11-05T01:37:41.8275085Z DOT BIEN TU KIEM chuan-hoa-lan-hai-thanh-giet | r505 | 1/1
+2026-11-05T01:37:42.0459886Z DOT BIEN TU KIEM r528-ha-tang-bo-dem-chot-long | r543 | 1/1
+2026-11-05T01:37:42.2632526Z DOT BIEN TU KIEM chan-doan-bo-stderr-o-ca-suy-bien | r525 | 1/1
+2026-11-05T01:37:42.4751130Z DOT BIEN TU KIEM stderr-duong-that-khai-ca-khi-ngan | r544 | 1/1
+2026-11-05T01:37:42.6880228Z DOT BIEN TU KIEM r545-don-het-so | r545 | 1/1
+2026-11-05T01:37:42.9019287Z DOT BIEN TU KIEM chan-doan-lat-khai-bo-khoang-trang-tung-dong | r537 | 1/1
+2026-11-05T01:37:43.0255493Z DOT BIEN TU KIEM doc-tach-dong-bang-splitlines | r518 | 1/1
+===== JOB 126990429253 gate-nhanh-manh (ubuntu-latest, 5) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-05T01:37:27.8119887Z DOT BIEN TU KIEM runner-bo-doi-nhan-dat | r545,r546 | 2/2
+2026-11-05T01:37:28.7369886Z DOT BIEN TU KIEM bo-so-dau-phien | r508,r509,r528,r543 | 4/4
+2026-11-05T01:37:32.9056028Z DOT BIEN TU KIEM tk-always-unmeasurable | r516,r525,r530,r539,r540,r542 | 6/6
+2026-11-05T01:37:33.2290282Z DOT BIEN TU KIEM bo-tran-chay-lai | r505,r509,r517,r520,r521,r522 | 6/6
+2026-11-05T01:37:33.3393124Z DOT BIEN TU KIEM bo-xac-thuc-ten-dich-la | r519 | 1/1
+2026-11-05T01:37:34.1135116Z DOT BIEN TU KIEM mo-cong-tu-dot-bien-thieu-giet | r513 | 1/1
+2026-11-05T01:37:34.9452156Z DOT BIEN TU KIEM chan-doan-dung-o-dong-dau | r524,r531,r533,r535,r536,r537,r538,r542 | 8/8
+2026-11-05T01:37:35.1261046Z DOT BIEN TU KIEM bo-vat-hoa-dich-o-chay-mot-mutant | r521 | 1/1
+2026-11-05T01:37:35.3974448Z DOT BIEN TU KIEM tu-dot-bien-chuan-hoa-rc-khac | r516 | 1/1
+2026-11-05T01:37:35.5790733Z DOT BIEN TU KIEM manh-bo-pop-env | r551 | 1/1
+2026-11-05T01:37:35.8158816Z DOT BIEN TU KIEM run-nem-tin-hieu-chot | r501 | 1/1
+2026-11-05T01:37:36.2311002Z DOT BIEN TU KIEM git-bao-tri-noi-trung | r548 | 1/1
+2026-11-05T01:37:36.8934470Z DOT BIEN TU KIEM chan-doan-ranh-gioi-noi-long-ve-tien-to-tran | r531,r533,r535,r538 | 4/4
+2026-11-05T01:37:37.0918380Z DOT BIEN TU KIEM gop-bo-kiem-phien-ban | r552 | 1/1
+2026-11-05T01:37:37.2923777Z DOT BIEN TU KIEM gop-bo-kieu-mang | r552 | 1/1
+2026-11-05T01:37:37.5099185Z DOT BIEN TU KIEM cap-lop-chot-cho-assert-ha-tang | r502 | 1/1
+2026-11-05T01:37:37.9296823Z DOT BIEN TU KIEM chan-doan-bo-mot-ky-tu-khoi-danh-sach-tach-dong | r529 | 1/1
+2026-11-05T01:37:38.3544772Z DOT BIEN TU KIEM chan-doan-tach-dong-lai-nuot-dau-tach-unicode | r529 | 1/1
+2026-11-05T01:37:38.6130864Z DOT BIEN TU KIEM con-treo-cho-khong-han | r556 | 1/1
+2026-11-05T01:37:38.8709370Z DOT BIEN TU KIEM popen-nem-mat-ghi-chu-dong | r556 | 1/1
+2026-11-05T01:37:39.1895641Z DOT BIEN TU KIEM bo-mien-tru-vang-tep | r547 | 1/1
+2026-11-05T01:37:39.4924488Z DOT BIEN TU KIEM vang-moi-tep | r547 | 1/1
+2026-11-05T01:37:39.7481589Z DOT BIEN TU KIEM chan-doan-noi-tran-ma-khong-doi-huong-cat | r525,r536 | 2/2
+2026-11-05T01:37:39.9310343Z DOT BIEN TU KIEM chan-doan-ly-do-chi-kiem-khong-rong | r538 | 1/1
+2026-11-05T01:37:40.1136120Z DOT BIEN TU KIEM chan-doan-quen-dong-tong-ket-nhom | r538 | 1/1
+2026-11-05T01:37:40.2958535Z DOT BIEN TU KIEM tk-unknown-diagnostic | r540 | 1/1
+2026-11-05T01:37:40.4784711Z DOT BIEN TU KIEM manh-bo-k-nho-hon-n | r549 | 1/1
+2026-11-05T01:37:40.6626089Z DOT BIEN TU KIEM manh-regex-long | r549 | 1/1
+2026-11-05T01:37:40.8405814Z DOT BIEN TU KIEM stderr-cat-khong-khai | r544 | 1/1
+2026-11-05T01:37:41.0204813Z DOT BIEN TU KIEM ghi-so-kho-bare-liet-ke | r545 | 1/1
+2026-11-05T01:37:41.2029758Z DOT BIEN TU KIEM tom-tat-mat-so-lan | r545 | 1/1
+2026-11-05T01:37:41.3137432Z DOT BIEN TU KIEM bo-so-rc-tien-trinh | r515 | 1/1
+2026-11-05T01:37:41.5789343Z DOT BIEN TU KIEM ram-pmc-thieu-truong | r553 | 1/1
+===== JOB 126990429255 gate-nhanh-manh (ubuntu-latest, 4) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-05T01:37:28.2082947Z DOT BIEN TU KIEM runner-bo-doi-nhan-chot | r545,r546 | 2/2
+2026-11-05T01:37:55.4890065Z DOT BIEN TU KIEM cong-bu-theo-lan-thu | r514 | 1/1
+2026-11-05T01:37:57.5328976Z DOT BIEN TU KIEM tu-dot-bien-nhan-moi-tap-ca | r516,r525,r532,r539,r542 | 5/5
+2026-11-05T01:37:58.1986638Z DOT BIEN TU KIEM tu-dot-bien-bo-loc-loi-vo-can | r516,r530,r542 | 3/3
+2026-11-05T01:37:59.0084386Z DOT BIEN TU KIEM in-sai-so-hang | r513 | 1/1
+2026-11-05T01:38:00.5109447Z DOT BIEN TU KIEM tk-proof-nonce | r539,r540 | 2/2
+2026-11-05T01:38:00.7358985Z DOT BIEN TU KIEM go-tat-ky-o-kho-mutant | r506 | 1/1
+2026-11-05T01:38:01.0026659Z DOT BIEN TU KIEM manh-bam-sai-tep | r551,r552 | 2/2
+2026-11-05T01:38:01.2012530Z DOT BIEN TU KIEM cham-doc-stdout-vo-dieu-kien | r512 | 1/1
+2026-11-05T01:38:02.0472440Z DOT BIEN TU KIEM dot-bien-bo-tham-so-muc | r551 | 1/1
+2026-11-05T01:38:02.8995677Z DOT BIEN TU KIEM tu-dot-bien-bo-tham-so-muc | r551 | 1/1
+2026-11-05T01:38:03.3491866Z DOT BIEN TU KIEM git-bao-tri-thieu-khoa | r548 | 1/1
+2026-11-05T01:38:04.1553726Z DOT BIEN TU KIEM chan-doan-chi-lay-ten-ca | r524,r530,r531,r534,r536,r537 | 6/6
+2026-11-05T01:38:04.3663681Z DOT BIEN TU KIEM gop-bo-bam-tool | r552 | 1/1
+2026-11-05T01:38:04.5916165Z DOT BIEN TU KIEM gop-bo-kiem-san | r552 | 1/1
+2026-11-05T01:38:04.8061808Z DOT BIEN TU KIEM gop-bo-qua-json-hong | r552 | 1/1
+2026-11-05T01:38:05.1052295Z DOT BIEN TU KIEM nap-boc-lop-chot | r502 | 1/1
+2026-11-05T01:38:05.2226311Z DOT BIEN TU KIEM entropy-nen-bang-modulo | r509 | 1/1
+2026-11-05T01:38:05.4964698Z DOT BIEN TU KIEM don-cay-nem-thieu-ngoai-hop-dong | r556 | 1/1
+2026-11-05T01:38:05.7630546Z DOT BIEN TU KIEM r528-ha-tang-dem-vao-do | r543,r545 | 2/2
+2026-11-05T01:38:06.0930955Z DOT BIEN TU KIEM vang-khong-dang-ky | r547 | 1/1
+2026-11-05T01:38:06.2126166Z DOT BIEN TU KIEM bo-xac-thuc-object | r517 | 1/1
+2026-11-05T01:38:06.4117165Z DOT BIEN TU KIEM chan-doan-doi-khoang-trang-truoc-tong-ket-dot-bien | r538 | 1/1
+2026-11-05T01:38:06.6073270Z DOT BIEN TU KIEM chan-doan-noi-long-ho-mutant | r538 | 1/1
+2026-11-05T01:38:06.7996874Z DOT BIEN TU KIEM tk-duplicate-diagnostic | r540 | 1/1
+2026-11-05T01:38:06.9941503Z DOT BIEN TU KIEM tk-summary-diagnostics | r540 | 1/1
+2026-11-05T01:38:07.1941059Z DOT BIEN TU KIEM r528-ha-tang-khong-ra-trang-thai-thu-ba | r543 | 1/1
+2026-11-05T01:38:07.3951474Z DOT BIEN TU KIEM chan-doan-lat-loi-khai-stderr-sau-chot | r532 | 1/1
+2026-11-05T01:38:07.5899610Z DOT BIEN TU KIEM ghi-so-bo-duyet-chuoi | r545 | 1/1
+2026-11-05T01:38:07.7847337Z DOT BIEN TU KIEM ghi-so-doc-kenh | r545 | 1/1
+2026-11-05T01:38:07.9840117Z DOT BIEN TU KIEM r545-nuot-theo-loai | r545 | 1/1
+2026-11-05T01:38:08.1040327Z DOT BIEN TU KIEM bo-so-mutant | r515 | 1/1
+2026-11-05T01:38:08.2548004Z DOT BIEN TU KIEM moc-bo-kiem-lech-giay | r554 | 1/1
+===== JOB 126990429261 gate-cong-cu (ubuntu-latest, 5) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 126990429271 gate-cong-cu (ubuntu-latest, 1) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 126990429275 gate-nhanh-manh (ubuntu-latest, 7) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-05T01:37:28.3822328Z DOT BIEN TU KIEM ghi-so-gop | r546 | 1/1
+2026-11-05T01:37:53.9428815Z DOT BIEN TU KIEM r546-don-het-so | r546 | 1/1
+2026-11-05T01:37:55.6528376Z DOT BIEN TU KIEM cong-khong-giet-theo-so-lan | r514 | 1/1
+2026-11-05T01:37:55.9233178Z DOT BIEN TU KIEM bo-xac-thuc-dich-rong | r519,r521,r538 | 3/3
+2026-11-05T01:38:12.3477690Z DOT BIEN TU KIEM dem-dich-ke-ca-trung | r519 | 1/1
+2026-11-05T01:38:13.6671545Z DOT BIEN TU KIEM tk-inherit-outer-proof | r539 | 1/1
+2026-11-05T01:38:13.9844206Z DOT BIEN TU KIEM tu-kiem-gop-hai-lop-ngoai-le | r516,r545 | 2/2
+2026-11-05T01:38:14.0906011Z DOT BIEN TU KIEM bo-vat-hoa-dich-o-doc-kenh | r521 | 1/1
+2026-11-05T01:38:14.7184262Z DOT BIEN TU KIEM chan-doan-tra-ranh-gioi-ve-ban-rong | r531,r533,r535,r538,r542 | 5/5
+2026-11-05T01:38:14.8967954Z DOT BIEN TU KIEM manh-bo-chay-ca | r551 | 1/1
+2026-11-05T01:38:15.3400745Z DOT BIEN TU KIEM chan-doan-bo-chuyen-tiep-o-nhanh-do-khac | r530,r542 | 2/2
+2026-11-05T01:38:15.7380284Z DOT BIEN TU KIEM git-bao-tri-gia-tri-dau | r548 | 1/1
+2026-11-05T01:38:16.2158430Z DOT BIEN TU KIEM chan-doan-vut-so-dong-bo-luc-dong-goi | r531,r533,r534,r535,r536,r538 | 6/6
+2026-11-05T01:38:16.5730407Z DOT BIEN TU KIEM chan-doan-cat-lang-khong-khai | r524,r525,r531,r534,r536 | 5/5
+2026-11-05T01:38:16.7636606Z DOT BIEN TU KIEM gop-bo-kiem-khoa | r552 | 1/1
+2026-11-05T01:38:16.9478603Z DOT BIEN TU KIEM gop-bo-kiem-thanh-vien | r552 | 1/1
+2026-11-05T01:38:17.1243829Z DOT BIEN TU KIEM gop-rc-0-khi-loi | r552 | 1/1
+2026-11-05T01:38:17.3025457Z DOT BIEN TU KIEM bo-vo-fail-close | r517,r545 | 2/2
+2026-11-05T01:38:17.8204389Z DOT BIEN TU KIEM bo-chuan-hoa-ban-sao | r523 | 1/1
+2026-11-05T01:38:17.9256206Z DOT BIEN TU KIEM zero-entropy-bo-dem | r509 | 1/1
+2026-11-05T01:38:18.1599005Z DOT BIEN TU KIEM r528-ha-tang-chi-ba-loai-da-thu | r543,r545 | 2/2
+2026-11-05T01:38:18.4468592Z DOT BIEN TU KIEM loc-luc-doc-theo-thong-diep | r547 | 1/1
+2026-11-05T01:38:18.5557690Z DOT BIEN TU KIEM ban-sau-ghi-de-ban-dong-luot | r517 | 1/1
+2026-11-05T01:38:19.0266416Z DOT BIEN TU KIEM chan-doan-noi-long-duoi-ca-do-thuc-te | r538 | 1/1
+2026-11-05T01:38:19.2012848Z DOT BIEN TU KIEM chan-doan-rc-con-nhan-1-va-am-0 | r538 | 1/1
+2026-11-05T01:38:19.3794326Z DOT BIEN TU KIEM chan-doan-bo-chuyen-tiep-o-nhanh-rc-khac-1 | r530 | 1/1
+2026-11-05T01:38:19.5513014Z DOT BIEN TU KIEM r528-ha-tang-gop-mot-loai | r543 | 1/1
+2026-11-05T01:38:19.7289025Z DOT BIEN TU KIEM chan-doan-in-them-stderr-khi-da-co-chot | r532 | 1/1
+2026-11-05T01:38:19.9011574Z DOT BIEN TU KIEM stderr-duong-that-bo-khai | r544 | 1/1
+2026-11-05T01:38:20.0726197Z DOT BIEN TU KIEM khu-trung-bo-cua-so | r545 | 1/1
+2026-11-05T01:38:20.2438738Z DOT BIEN TU KIEM chan-doan-bo-khoang-trang-tung-dong-that | r537 | 1/1
+2026-11-05T01:38:20.4168753Z DOT BIEN TU KIEM dau-phien-can-tran-ma-lang-le-tra-cap-trung | r527 | 1/1
+===== JOB 126990429291 gate-cong-cu (ubuntu-latest, 2) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 126990429300 gate-cong-cu (ubuntu-latest, 0) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 126990429312 gate-cong-cu (ubuntu-latest, 7) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 126990429317 gate-cong-cu (ubuntu-latest, 3) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 126990429422 gate-cong-cu (ubuntu-latest, 6) conclusion=success labels=['ubuntu-latest'] =====
+===== JOB 126990999354 gate-nhanh-gop (ubuntu-latest) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-05T01:38:38.2223892Z CA NEN: 56/56 passed · TU DOT BIEN (chi ca dich): 255/255 giet · DOT BIEN SAN PHAM: 10/10 giet
+===== JOB 126991104011 gate-registry (ubuntu-latest) conclusion=success labels=['ubuntu-latest'] =====
+2026-11-05T01:39:37.5541419Z TỔNG: ĐẠT
+2026-11-05T01:40:03.3796761Z TỔNG: ĐẠT
+2026-11-05T01:40:03.3802562Z TỔNG: ĐẠT
+2026-11-05T01:40:03.3848675Z TONG: CA 44/44 dat · DOT BIEN 43 muc CHE DO NHE — do khi diff cham vung
+2026-11-05T01:40:03.3849096Z TONG: DAT
+2026-11-05T01:56:51.4732474Z TONG: CA 45/45 dat · DOT BIEN 25 muc CHE DO NHE — do khi diff cham vung
+2026-11-05T01:56:51.4732757Z TONG: DAT
+2026-11-05T01:56:51.4741393Z DOT BIEN: 13/13 bi giet dung ly do
+2026-11-05T01:56:51.4742060Z CA: 22/22 dat
+2026-11-05T01:56:51.4742233Z DOT BIEN: 106/106 bi giet dung ly do
+2026-11-05T01:56:51.4742446Z TU KIEM PHAN HANG: DAT (2 dot bien)
+2026-11-05T01:56:51.4742643Z TONG: DAT
+2026-11-05T01:56:51.4743111Z CA: 63/63 dat
+2026-11-05T01:56:51.4743278Z DOT BIEN: 398/398 bi giet dung ly do
+2026-11-05T01:56:51.4743492Z TU KIEM PHAN HANG: DAT (2 dot bien)
+2026-11-05T01:56:51.4743685Z TONG: DAT
+2026-11-05T01:56:51.4743897Z CI_DANG_KY ops/ci_provenance_test.py: ĐẠT rc=0
+2026-11-05T01:56:51.4744324Z CA: 52/52 dat
+2026-11-05T01:56:51.4744492Z DOT BIEN: 80/80 bi giet dung ly do
+2026-11-05T01:56:51.4744700Z TU KIEM PHAN HANG: DAT (4 dot bien)
+2026-11-05T01:56:51.4744889Z TONG: DAT
+2026-11-05T01:56:51.4759185Z TỔNG: ĐẠT
+===== JOB 126997790634 gate-cong-cu-gop (ubuntu-latest) conclusion=success labels=['ubuntu-latest'] =====

@@ -154,13 +154,13 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   `/repos/<kho>`, PR và comment trả **200 kèm `X-GitHub-*`** (KHÔNG phải mọi đường con, xem §Đẩy ref);
   trạng thái ấy chỉ nói cho phiên đã đo, `doctor` (`rest-kho`, chỉ hỏi `/repos/<kho>`) đo lại mỗi phiên.
   Đo 25-09 trên `issuecomment-5811128755` (bản chiếu lease, dày dấu nháy): REST trả **44 dấu `'`
-  thật · 8 dấu `>` thật · 3 dấu `<` thật · 0 thực thể HTML** (đo lại `2026-09-30T06:31–06:33Z`,
+  thật · 8 dấu `>` thật · 3 dấu `<` thật · 0 thực thể HTML** (đo lại `2026-09-30T06:31–06:33Z` — mốc giờ và client: lời khai chưa có biên nhận, xem nhãn ở §Gọi agent đa nền —
   `urllib` và `curl` khớp băm thân: y hệt). Phiên 25-09 khai đọc chính comment ấy qua MCP cũng ra
   ký tự thật (công cụ nào: không ghi; chưa đo lại) ⇒ trên comment ẤY, lệch 22-08 **KHÔNG TÁI LẬP**.
   **CA CŨ CŨNG ĐO ĐƯỢC — bản trước khai ngược, cross-review bác** (P1 trên PR #631): *"comment của
   lượt 22-08 không còn để thử lại"* là lời khai VẮNG MẶT không kèm phép đo, trong khi chỗ kết luận
   được ghi nằm ngay trong kho: `posted_comment_id` của `ops/leases/lease-dang-windows-*-20260822.yaml`.
-  Đo `2026-09-30T06:31Z` (REST GET, `urllib` + `curl` khớp băm từng thân): **7/7** comment ấy còn trên
+  Đo `2026-09-30T06:31Z` (REST GET, `urllib` + `curl` khớp băm từng thân; mốc giờ và client: lời khai chưa có biên nhận, như trên): **7/7** comment ấy còn trên
   `#238`, `updated_at == created_at` (22-08, chưa ai sửa), dấu `'` thật (22/33/14/49/34/33/19), **0
   thực thể HTML, 0 dấu `&`** ⇒ byte GitHub giữ là ký tự thật, `&#39;` hôm 22-08 sinh trên **đường ĐỌC
   MCP**. Giới hạn: tệp không ghi comment NÀO đã bị đọc (cả 7 đều sạch), đầu ra thô của MCP 22-08
@@ -735,8 +735,8 @@ không tra được.
   `ops/land/`), `/search/issues`, `/user/repos`, `/repos/cli/cli` (kho khác), `/repos/<kho>/collaborators`. Nên
   các câu SUY về `gh` — *"cài cũng vô ích"*, *"MỌI lệnh việc thật ăn 403"*, *"mọi thao tác kho trả 403"* (gạch `t103`
   dưới) — chỉ mất chân đỡ CŨ; lệnh `gh` nào đi GraphQL, và chính `gh`: phiên đo không có ⇒ KHÔNG ĐO ĐƯỢC.
-  **Nhãn cho mọi mốc giờ 30-09 trong mục này và ở §Đẩy ref** (`06:29Z` · `06:30–06:31Z` · `06:31Z` ·
-  `07:10–07:11Z` · `07:11Z` · `07:51–07:57Z`): giờ chạy và độ phủ client (vd. *"`curl` 10"*) là LỜI KHAI của
+  **Nhãn cho mọi mốc giờ 30-09 trong TỆP NÀY** — mục này, §Đẩy ref, và đoạn readback/MCP ở §Bài học đắt giá
+  (`06:29Z` · `06:30–06:31Z` · `06:31Z` · `06:31–06:33Z` · `07:10Z` · `07:10–07:11Z` · `07:11Z` · `07:51–07:57Z`): giờ chạy và độ phủ client (vd. *"`curl` 10"*) là LỜI KHAI của
   phiên executor, log gốc không lưu ⇒ **KHÔNG ĐO ĐƯỢC** (cross-review Codex F1, P2, trên PR #631). Thứ có
   biên nhận là trạng thái HTTP do reviewer đo lại ở giờ khác (`ops/reviews/pr631-review-3-opus-max/VERDICT.md`,
   `ops/reviews/pr631-review-4-opus-max/VERDICT.md`); đừng đọc mốc giờ nào ở đây thành phép đo đã kiểm.

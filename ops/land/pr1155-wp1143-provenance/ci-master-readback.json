@@ -1,0 +1,27 @@
+{
+  "run_id": 41425851232,
+  "attempt": 1,
+  "head_sha": "bae0c96620e2accd3c4b45b60d5fdeb6ce55e2ca",
+  "event": "push",
+  "status": "completed",
+  "conclusion": "success",
+  "job_count": 23,
+  "job_success_count": 23,
+  "checkout_exact_sha_count": 23,
+  "checkout_missing": [],
+  "workflow_definition_run_id": 41429154809,
+  "workflow_definition_blob": "75b5add9186c158b2f6f36891074e9c4bd592515",
+  "workflow_definition_sha256": "cb5487d459082c0441bee2493e99ecc070589cbb9fa819888788b5fd969c47b9",
+  "workflow_definition_verdict": "passed",
+  "gate_output_markers": [
+    "gate-ops (ubuntu-latest)\tci-duong-nhanh selftest (phan loai diff + khoa cau truc if)\t2026-11-02T10:07:50.7569440Z CA: 118/118 dat · 0 do · 0 hong",
+    "gate-ops (ubuntu-latest)\tci-duong-nhanh selftest (phan loai diff + khoa cau truc if)\t2026-11-02T10:17:10.2182882Z DOT BIEN: 431/431 bi giet dung ly do",
+    "gate-ops (ubuntu-latest)\tci-duong-nhanh selftest (phan loai diff + khoa cau truc if)\t2026-11-02T10:17:12.7652698Z TONG: DAT",
+    "gate-registry (ubuntu-latest)\ttest registry (phạm vi + các bộ chưa được nối)\t2026-11-02T10:08:26.2074576Z TỔNG: ĐẠT",
+    "gate-registry (ubuntu-latest)\ttest registry (phạm vi + các bộ chưa được nối)\t2026-11-02T10:29:23.1557290Z TỔNG: ĐẠT",
+    "gate-registry (ubuntu-latest)\ttest registry (phạm vi + các bộ chưa được nối)\t2026-11-02T10:29:23.1566074Z TỔNG: ĐẠT",
+    "gate-registry (ubuntu-latest)\ttest registry (phạm vi + các bộ chưa được nối)\t2026-11-02T10:57:30.5097507Z TỔNG: ĐẠT"
+  ],
+  "log_sha256": "5eee997a5b5184451e2a01d7ce9616945d12031f9e1da0a79d53e79642855fc9",
+  "log_errors_count": 0
+}

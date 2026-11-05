@@ -1,0 +1,113 @@
+**Có 7 finding P2 thuộc 4 lớp; chưa xác nhận lỗi P0/P1 trên mã hiện tại.** Các finding là khoảng trống kiểm thử: 7 đột biến làm sai hợp đồng vẫn qua toàn bộ 86 ca được chọn.
+
+Review neo vào:
+
+- Head: `91d46534773b4cefc56b43a7873aaac97554aa81`
+- Tree: `bc4221d66973dc8a3e5482cb2c8fe5901eecab18`
+- Base: `f4b513da5802d439aedbe58ae4a5cd38ff47d6ab`
+- Packet: `KIEM-MERGE-M9`, r1/g1, `sensitive`; hash đặc tả khớp `d18820c854af40a4e0d6ca58f6b8812296a3057b0e7b063f704f5a4cdd7ca442`.
+- Reviewer: `openai_codex / codex_cli / machine`, run `c9e6b55c`. Model/effort chưa đo được từ receipt hiện có.
+
+Mọi phép thử chạy ngoài checkout, tại `/tmp/kiem-m9-review-c9e6b55c`. Snapshot tracked/index/untracked/ignored trước–sau giống nhau; không gọi mạng GitHub.
+
+Bằng chứng chung:
+
+| Phép đo | Kết quả |
+|---|---|
+| Bộ chọn `cong_m9_*`, `cong_c_*` theo snapshot | rc=0, **86/86**, không bỏ qua |
+| 18 đột biến `m9_*` hiện có | **18/18 bị giết**, 20/20 kết quả ca đích là `AssertionError` |
+| 7 đột biến sống bổ sung | Mỗi đột biến vẫn đạt **86/86** |
+| 7 ca phản chứng mới | **7/7 qua trên head**, **7/7 giết đúng đột biến bằng AssertionError** |
+| `doctrine-scan --root .` | rc=0, 10 tệp, 0 vi phạm |
+| `adr-song --root .` | rc=0, 59 ADR khớp 59 dòng |
+| `doc-claims-check --strict --json` | rc=0, `ok=true`, 0 flags |
+| Diff | Đúng 5 tệp, 230 dòng thêm, đạt A6 |
+
+Các script và output đo được có thể chạy lại:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/kiem-m9-review-c9e6b55c/mutants.py
+PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/kiem-m9-review-c9e6b55c/more_mutants.py
+PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/kiem-m9-review-c9e6b55c/new_cases.py
+```
+
+Cả ba lệnh đã thoát rc=0. Chi tiết nằm trong [mutants.json](/tmp/kiem-m9-review-c9e6b55c/mutants.json), [more-mutants.json](/tmp/kiem-m9-review-c9e6b55c/more-mutants.json) và [new-cases.log](/tmp/kiem-m9-review-c9e6b55c/new-cases.log).
+
+**F10–F12 — P2, lớp `thieu-ca-bool-khi-noi-run-job`.** Ba chốt kiểm kiểu đều thiếu ca phân biệt `bool` với `int`:
+
+| ID | Vị trí test | Đột biến sống |
+|---|---|---|
+| F10 | [test:9351](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop_test.py:9351) | `extra_bool_job_run_id` |
+| F11 | [test:9350](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop_test.py:9350) | `extra_bool_job_attempt` |
+| F12 | [test:9352](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop_test.py:9352) | `extra_bool_run_attempt` |
+
+Mỗi đột biến đổi chốt tương ứng từ `type(value) is int` thành `isinstance(value, int)`. Cả ba vẫn qua 86/86. Phản chứng mới lần lượt đặt job `run_id=True` với run ID `1`, job `run_attempt=True`, và run `run_attempt=True`: head trả rc=12, thiếu K7; mutant trả rc=0. Ba ca mới đều bắt bằng:
+
+```text
+AssertionError: c1106: đòi rc=12, được rc=0; stderr=''
+```
+
+Đề xuất sửa tại các ca trên và bảng `MUTANTS`: thêm riêng cả ba đầu vào bool cùng ba đột biến tương ứng. Giữ ca dương với int thật. Cần dùng run ID `1` cho F10 để phép nối thực sự có thể nhầm `True == 1`; chọn ID khác sẽ tạo ca không đo được lỗ này.
+
+**F13 — P2, lớp `thieu-ca-mien-sha-rut-gon`, [test:9340](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop_test.py:9340).**
+
+Ca hiện có chỉ thử SHA khác hoàn toàn. Đột biến `extra_short_sha_waiver` cho phép thêm dòng miễn chứa `H[:7]` vẫn qua 86/86. Với comment đúng chủ kho, không có run/jobs:
+
+```text
+SHA 7 ký tự: head rc=12, thiếu K7; mutant rc=0
+SHA đủ 40 ký tự: head rc=0
+```
+
+Đề xuất thêm ca từ chối SHA rút gọn và mutant cho phép tiền tố, cạnh ca SHA khác hiện có. Khóa cả chiều nhận SHA đầy đủ; tránh sửa test khiến mọi dòng miễn đều bị từ chối mà vẫn được tính là đạt.
+
+**F14 — P2, lớp `thieu-ca-git-loi-co-output`, [test:9301](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop_test.py:9301).**
+
+`_m9_git_loi` chỉ tiêm `(128, b"")`. Đột biến `extra_git_partial_output` đổi chốt `_diff_raw` từ `if rc` thành `if rc and not raw`, vẫn qua 86/86.
+
+Khi tiêm rc=128 **kèm một raw record hợp lệ** cho `docs/x.md`:
+
+```text
+head: K7 và K6 đều raise ValueError
+mutant: K7=False; K6='not_required'
+```
+
+Ca bổ sung giết mutant bằng:
+
+```text
+AssertionError: rc=128 with nonempty raw accepted: K7=False, K6='not_required'
+```
+
+Đề xuất tham số hóa ca lỗi git cho cả stdout rỗng và khác rỗng, kiểm cả hai consumer K6/K7. Giữ riêng ca rc=0/diff rỗng của F09; gộp các trường hợp sẽ dễ làm mất một chốt độc lập.
+
+**F15–F16 — P2, lớp `thieu-ca-bien-pham-vi-m9`.**
+
+| ID | Vị trí test | Đột biến sống | Phản chứng mới |
+|---|---|---|---|
+| F15 | [test:9326](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop_test.py:9326) | `extra_ops_basename_uppercase`: nhận thêm đuôi `.PY` | `ops/x.PY`: head `False`, mutant `True` |
+| F16 | [test:9330](/tmp/claude-0/-home-user-tra-luat/fc00a76b-dcbf-53b5-8bcc-85c7e6fcaf5a/scratchpad/rv/.claude/dev/packet_loop_test.py:9330) | `extra_m9_ignore_deleted`: bỏ đường dẫn không còn ở H | Xóa `ops/x.py`: head `True`, mutant `False` |
+
+Mỗi mutant vẫn đạt 86/86. Hai ca mới chết bằng assertion so phạm vi mong đợi với thực tế.
+
+Đề xuất bổ sung các ca này bằng lịch sử Git thật, giữ cách khớp `.py` nguyên chữ theo §2. Tôi cũng đã đo chiều head với rename ra ngoài vùng, đổi mode, symlink an toàn và tên chứa khoảng trắng/tab/newline: đều nhận diện đúng. Nên giữ các chiều ấy khi bổ sung test để tránh chuyển sang kiểm cây H hoặc chuẩn hóa đường dẫn quá mức.
+
+Đối chiếu lượt trước:
+
+| Finding | Kết luận trên phản chứng gốc |
+|---|---|
+| F01 | **ĐÃ VÁ THẬT:** trang jobs được kiểm theo từng tệp; trộn run và lặp nhóm bị chặn; hai run/hai tệp hợp lệ qua |
+| F02 | **ĐÃ VÁ THẬT ở runtime:** float và ba đường bool bị chặn; độ phủ hồi quy còn F10–F12 |
+| F03 | **ĐÃ VÁ THẬT:** thụt đầu dòng và tab cuối dòng bị chặn; cả hai mutant strip bị giết |
+| F04 | **ĐÃ VÁ THẬT:** mutant bỏ so run ID bị giết |
+| F05 | **ĐÃ VÁ THẬT:** mutant bỏ run `completed` bị giết |
+| F06 | **ĐÃ VÁ THẬT:** mutant bỏ job `completed` bị giết |
+| F07 | **ĐÃ VÁ THẬT:** mutant bỏ kiểm đủ trang jobs bị giết |
+| F08 | **ĐÃ VÁ THẬT:** mutant nhận run attempt float bị giết |
+| F09 | **ĐÃ VÁ THẬT:** mutant nhận diff rỗng K6 bị giết |
+
+Các ca hợp lệ nhiều run, run xanh nằm sau run đỏ, jobs riêng của run khác, và attempt 2 xanh đều qua. Comment không phải chủ kho kèm run xanh hiện bị chặn ở K5/K6/K7; tôi không ghi thành P1 mới vì tham số đó vốn yêu cầu comment của chủ kho.
+
+`not_run`: toàn bộ suite, Windows A8, canary GitHub A9. Ruff contract đạt `3 []`; bare Ruff **chưa đo được** vì môi trường thiếu module `ruff`. Các kết quả này không được tính là pass.
+
+Theo trần hai vòng, kết quả này cần chuyển checkpoint chủ kho trước khi mở vòng review tiếp theo.
+
+KET_LUAN: changes_requested

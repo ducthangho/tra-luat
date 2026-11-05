@@ -1,8 +1,6 @@
 # ADR-0054 — Đẩy nhánh code một lần, dừng vá theo hạng, review tìm theo lớp
 
-- **Trạng thái:** Accepted (2026-10-16, chỉ thị chủ kho `ducthangho`; thi hành bằng packet `wp784`
-  `PUSH-MOT-LAN-VA-DUNG-VA`, Issue #784 — không phải một phiên tự đặt luật) · **CHƯA KÍCH HOẠT**: chờ packet
-  máy trạng thái, xem mục *Hiệu lực*. Tới lúc ấy mọi packet chịu luật cũ.
+- **Trạng thái:** Đóng băng (2026-11-02, `ADR-0062`) — không kích hoạt. Các bất biến còn giá trị đã chuyển sang `docs/PROTOCOL_DA_PHIEN.md`.
 
 Ba luật, một chỉ thị. Chủ kho nói: *"sẽ không được push vào cho đến khi đủ điều kiện để merge"*, *"điều kiện
 để dừng vá là khi hết P1 và P2"*, và *"cross review thì luôn tìm theo phân lớp, không tìm theo các lỗi riêng

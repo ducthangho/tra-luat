@@ -758,6 +758,8 @@ jobs:
       # loại chạy ở `chuan-bi` (ubuntu-latest); test dựng kho git tạm và chạy tiến trình con. KHÔNG có `if:` theo `che_do`.
       - name: ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)
         if: runner.os == 'Linux'
+        env:
+          CI_DUONG_NHANH_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}
         run: python ops/ci_duong_nhanh_test.py
       # CONG LUOC DO v2 CHO BIEN NHAN REVIEW (PROTOCOL §8, dong 453-458). Dac ta co tu
       # `2f84531` (18-08-2026) va KHONG AI THI CONG: do tren `3bc2895`, 62 bien nhan / 10

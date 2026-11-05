@@ -140,3 +140,6 @@ execution_handoff:
   nativeWindows: not run byExecutor; controllerseparaterunactive
   human_audit: pending
   land_authority: pendingnewexactH
+da_bi_thay_the: pr1184-merge-contract-r2-g5-codex-service
+superseded_at_utc: '2026-11-05T08:27:25Z'
+supersession_source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6653257566

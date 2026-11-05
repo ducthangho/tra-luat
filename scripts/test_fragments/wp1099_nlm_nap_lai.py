@@ -180,7 +180,7 @@ def _a9(cay):
     cay.dat(bundle="chet")                        # hai LUỒNG: canary đầu CHỜ tới khi luồng kia THỬ khoá (bản thật) hoặc VÀO canary (bỏ khoá) — không ngưỡng (F02; r12–r13 F11-01)
     m, cu, sys.stderr, san, dem, het = cay.moi(), sys.stderr, io.StringIO(), threading.Event(), {"k": 0, "c": 0}, []
     goc, khoa, ts = m._canary, m._NAP_LAI_KHOA, [threading.Thread(target=m._run, args=(_SL, 30)) for _ in range(2)]
-    hen = lambda loai: (dem.__setitem__(loai, dem[loai] + 1), dem[loai] > 1 and san.set())  # noqa: E731
+    hen = lambda loai, lk=threading.Lock(): (lk.acquire(), dem.__setitem__(loai, (v := dem[loai] + 1)), lk.release(), v > 1 and san.set())  # noqa: E731  (đếm dưới khoá RIÊNG, r14)
     m._canary, m._NAP_LAI_KHOA = (lambda: (hen("c"), dem["c"] > 1 or san.wait(60) or het.append(1), goc())[2]), type(   # 60 s: ngân sách ĐO, hết ⇒ KHÔNG ĐO ĐƯỢC
         "K", (), {"__enter__": lambda s: (hen("k"), khoa.acquire()), "__exit__": lambda s, *a: khoa.release()})()
     try: [x.start() for x in ts], [x.join() for x in ts]  # noqa: E701
@@ -191,13 +191,13 @@ def _a9(cay):
         cay.dat(), cay.dau(1), (m := cay.moi()), (co := []), (o := os.open)
         m.os = type("O", (), {"__getattr__": lambda s, n: getattr(os, n), "open": lambda s, p, f, *a: (co.append(f), o(p, f, *a))[1]})()
         m._doc_dau(), _chot("A9", co and all(f & os.O_NONBLOCK for f in co), "mở dấu thiếu O_NONBLOCK: %r" % co)
-        cay.dat(), os.mkfifo(cay.tep_dau), (x := threading.Thread(target=cay.moi()._doc_dau, daemon=True)), x.start(), x.join(60)   # ngân sách đo
-        with contextlib.suppress(OSError): x.is_alive() and os.close(os.open(cay.tep_dau, os.O_WRONLY | os.O_NONBLOCK))  # noqa: E701
-        _chot("A9", not x.is_alive(), "đọc dấu FIFO treo"), cay.tep_dau.unlink()
+        cay.dat(), os.mkfifo(cay.tep_dau), (x := threading.Thread(target=cay.moi()._doc_dau, daemon=True)), x.start(), x.join(60), (con := x.is_alive())   # chụp TRƯỚC gỡ
+        with contextlib.suppress(OSError): con and os.close(os.open(cay.tep_dau, os.O_WRONLY | os.O_NONBLOCK))  # noqa: E701
+        x.join(5), cay.tep_dau.unlink()           # hết ngân sách ⇒ KHÔNG ĐO ĐƯỢC, không bao giờ là phán quyết A9 (r14 F11-01); phán quyết ở spy trên
+        if con: raise RuntimeError("A9 KHÔNG ĐO ĐƯỢC: đọc dấu FIFO quá ngân sách 60 s")  # noqa: E701
     for dau, nap in ((-300, 0), (-700, 1), (3600, 1), ([1], 1)):
         cay.dat(bundle="chet"), cay.dau(dau if isinstance(dau, list) else int(time.time()) + dau)
-        cay.goi(cay.moi(), _SL)
-        _chot("A9", sum("nlm-auth-load" in c for c in cay.nhat_ky()) == nap, "dấu %r ⇒ nạp %d" % (dau, 1 - nap))
+        cay.goi(cay.moi(), _SL), _chot("A9", sum("nlm-auth-load" in c for c in cay.nhat_ky()) == nap, "dấu %r ⇒ nạp %d" % (dau, 1 - nap))
 def _a10(cay):                                    # dấu THƯỜNG đo rò fd ĐẦU ca, trước mọi xoá/thay tệp: Windows khoá tệp còn mở ⇒ PermissionError (r10 F01)
     cay.dat(), cay.dau(1234), (m := cay.moi()), (fd := lambda: (n := os.open(os.devnull, os.O_RDONLY), os.close(n))[0]), (truoc := fd()), [m._doc_dau() for _ in range(20)]
     _chot("A10", fd() == truoc and m._doc_dau() == 1234.0, "đọc dấu thường rò fd / sai ts")

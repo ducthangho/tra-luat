@@ -1,7 +1,7 @@
-# ADR-0063 — NLM tự nạp lại jar có điều kiện ở phiên cloud
+# ADR-0064 — NLM tự nạp lại jar có điều kiện ở phiên cloud
 
 - **Trạng thái:** Accepted
-- **Nguồn:** packet `CLOUD-SETUP-P3B-NLM-401` #1099, đặc tả `ops/specs/cloud-setup-p3b-nlm-401-r9.md` (sha256 `377c166e…cd12`).
+- **Nguồn:** packet `CLOUD-SETUP-P3B-NLM-401` #1099, đặc tả `ops/specs/cloud-setup-p3b-nlm-401-r10.md` (sha256 `23516c9c…bd99`).
 
 ## Bối cảnh
 

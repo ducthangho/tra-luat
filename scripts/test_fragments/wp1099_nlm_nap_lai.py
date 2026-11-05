@@ -1,19 +1,16 @@
 # -*- coding: utf-8 -*-
-"""wp1099 — `nlm_cli._run` tự nạp lại jar NLM có điều kiện ở phiên cloud (ADR-0063, spec cloud-setup-p3b-nlm-401-r9). `nlm_cli`
+"""wp1099 — `nlm_cli._run` tự nạp lại jar NLM có điều kiện ở phiên cloud (ADR-0064, spec cloud-setup-p3b-nlm-401-r10). `nlm_cli`
 THẬT (hoặc đột biến) chạy với `tl.py`/`nlm` GIẢ giữ trạng thái; đột biến chỉ tính GIẾT khi đúng ca ném `TinHieuChotCa`."""
-import contextlib, hashlib, importlib.util, inspect, io, json, os, subprocess, sys, tempfile, threading, time
-from pathlib import Path
+import contextlib, hashlib, importlib.util, inspect, io, json, os, subprocess, sys, tempfile, threading, time; from pathlib import Path  # noqa: E702
 TEST_ID = "wp1099_nlm_nap_lai"
 _BASE = "358451e80b573d148807717bece3fd973915fbad"   # base của lease wp1099-cloud-setup-p3b-r9-g1-claude
 _CANH = "SENTINEL-COOKIE-wp1099"
-_CAU = ("Ngoại lệ duy nhất: cơ chế tự nạp có điều kiện bên trong `nlm_cli` ở phiên cloud (`ADR-0063`) — agent vẫn không tự gõ "
+_CAU = ("Ngoại lệ duy nhất: cơ chế tự nạp có điều kiện bên trong `nlm_cli` ở phiên cloud (`ADR-0064`) — agent vẫn không tự gõ "
         "lệnh nạp.")
 _RA, _QT, _PR = "references/RASOAT_HOSO_LOOP.md", "references/QUY_TRINH_RA_SOAT_3_TANG.md", "docs/PROTOCOL_DA_PHIEN.md"
-_ADR = "docs/adr/0063-nlm-tu-nap-lai-co-dieu-kien-phien-cloud.md"
+_ADR = "docs/adr/0064-nlm-tu-nap-lai-co-dieu-kien-phien-cloud.md"
 class TinHieuChotCa(AssertionError):
-    def __init__(self, ca, msg):
-        super().__init__("%s: %s" % (ca, msg))
-        self.ca = ca
+    def __init__(self, ca, msg): super().__init__("%s: %s" % (ca, msg)); self.ca = ca  # noqa: E701,E702
 _TL_GIA = r'''
 import json, os, sys, time
 _ST, _LOG, _CANH = os.environ["WP1099_ST"], os.environ["WP1099_LOG"], os.environ["WP1099_CANH"]
@@ -121,8 +118,7 @@ class _Cay:
         (self.td / "home" / ".notebooklm-mcp-cli").mkdir(exist_ok=True)
         self.tep_dau.write_text(json.dumps(ts if isinstance(ts, list) else {"ts": ts}), encoding="utf-8")
 def _chot(ca, dk, msg):
-    if not dk:
-        raise TinHieuChotCa(ca, msg)
+    if not dk: raise TinHieuChotCa(ca, msg)  # noqa: E701
 _dong = lambda err: [d for d in err.splitlines() if d.startswith("nlm_nap_lai:")]
 def _mot(cay, ca, args, **st):
     cay.dat(**st)
@@ -268,7 +264,7 @@ def _d(kho, doc=None):
         nb, nh = " ".join(b.stdout.decode("utf-8").split()), " ".join(doc_tep(tep).split())
         i = nh.find(_CAU)
         _chot("D1", nb.count(_CAU) == 0 and nh.count(_CAU) == 1 and nh[:i - 1] + nh[i + len(_CAU):] == nb, tep)
-    _chot("D2", sum(d.startswith("| `ADR-0063` |") for d in doc_tep(_PR).splitlines()) == 1, "dòng §20")
+    _chot("D2", sum(d.startswith("| `ADR-0064` |") for d in doc_tep(_PR).splitlines()) == 1, "dòng §20")
     import re
     tt = re.compile(r"^[-*]\s*\*\*Tr[aạ]ng th[aá]i:?\*\*:?\s*(\S.*)$", re.M | re.I)
     _chot("D3", [x.group(0).strip() for x in tt.finditer(doc_tep(_ADR))] == ["- **Trạng thái:** Accepted"], "trạng thái")
@@ -312,13 +308,15 @@ _DOT_BIEN = (
 # đột biến TÀI LIỆU (chỉ cây dev): (tên, tệp, chuỗi cũ, chuỗi mới, ca phải bắn)
 _DOT_BIEN_D = (("d1_xoa_cau", _RA, " " + _CAU, "", "D1"), ("d1_lap_cau", _QT, _CAU, _CAU + " " + _CAU, "D1"),
                ("d1_sua_chu_cu", _QT, "**CẤM** tự", "CẤM tự", "D1"),
-               ("d2_xoa_dong", _PR, "| `ADR-0063` |", "| ADR-0063 |", "D2"),
+               ("d2_xoa_dong", _PR, "| `ADR-0064` |", "| ADR-0064 |", "D2"),
                ("d3_them_proposed", _ADR, "- **Trạng thái:** Accepted\n", "- **Trạng thái:** Accepted\n- **Trạng thái:** Proposed\n", "D3"))
 def _chay(nguon, ten_ca, tl_module, kho, ham=None):
     with tempfile.TemporaryDirectory(prefix="wp1099_") as td:
         cay = _Cay(td, nguon, kho)
         with _Env(cay.env):
             {"A12": lambda: _a12(cay, kho), "A13": lambda: _a13(cay, tl_module, ham)}.get(ten_ca, lambda: _CA[ten_ca](cay))()
+_NANG_LUC = {"doc_dau_chan": (hasattr(os, "mkfifo") and hasattr(os, "O_NONBLOCK"), "nền không có O_NONBLOCK/mkfifo"),   # spec r10 E27
+             "doc_dau_ro_fd": (os.path.isdir("/dev/fd"), "nền không os.open được thư mục / không có /dev/fd")}
 _bao_loi = lambda msg: print("[%s] FAIL %s" % (TEST_ID, msg), file=sys.stderr)
 def run(tl_module):
     kho = Path(tl_module.__file__).resolve().parent.parent
@@ -341,7 +339,9 @@ def run(tl_module):
             for ten, cu, moi, c, dich in _DOT_BIEN] + [("tl_gws_lan_dau", "A13", src.count("if _att < 2:"), _gws)]
     viec += [(ten, dich, doc(tep).count(cu), lambda tep=tep, cu=cu, moi=moi: _d(kho, {tep: doc(tep).replace(cu, moi)}))
              for ten, tep, cu, moi, dich in (_DOT_BIEN_D if co_git else ())]
-    song = []
+    bo_qua = ["%s (%s)" % (t, ly) for t, (co, ly) in _NANG_LUC.items() if not co]
+    if bo_qua and os.name == "posix": return _bao_loi("posix mà BỎ QUA đột biến: %s" % "; ".join(bo_qua)) or False  # noqa: E701
+    song, viec = [], [v for v in viec if _NANG_LUC.get(v[0], (True,))[0]]
     for ten, dich, so_lan, fn in viec:
         try:
             _chot("ĐỘT BIẾN", so_lan == 1, "chuỗi cũ xuất hiện %d lần" % so_lan)
@@ -355,6 +355,6 @@ def run(tl_module):
     if song:
         _bao_loi("đột biến không bị giết đúng lý do: %s" % "; ".join(song))
         return False
-    print("[%s] CA A: %d/%d · D: %s · DOT BIEN: %d/%d bị giết đúng ca" % ((TEST_ID,) + (len(_CA) + 2,) * 2 + (
-        "3/3" if co_git else "BỎ QUA (không có .git)",) + (len(viec),) * 2), file=sys.stderr)
+    print("[%s] CA A: %d/%d · D: %s · DOT BIEN: %d/%d bị giết đúng ca · BỎ QUA %d%s" % ((TEST_ID,) + (len(_CA) + 2,) * 2 + (  # mẫu = cả bảng
+        "3/3" if co_git else "BỎ QUA (không có .git)", len(viec), len(viec) + len(bo_qua), len(bo_qua), "".join(": " + x for x in bo_qua))), file=sys.stderr)
     return True

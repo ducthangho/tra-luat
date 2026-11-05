@@ -46,7 +46,7 @@ PHA 0 Khởi động ──► PHA 1 Định vị VB đích ──► PHA 2 Phá
 - **Thứ tự:** b1–b4 luôn chạy trước; b5–b6 CHỈ chạy khi lượt sắp cần NLM — không probe máy móc mỗi phiên.
 - **Chi phí trước cổng = 0 call truy vấn.** Canary là `notebook_get` (siêu dữ liệu, ~4,3s), KHÔNG trừ vào ngân sách 60 call/hồ sơ — ngân sách đó dành cho `notebook_query`.
 - **Đọc verdict cho đúng** (đo 26-07 đã BÁC mô hình "cookie chết theo tuổi"; `age_min` = thời gian từ lần xác thực THÀNH CÔNG gần nhất, KHÔNG dự đoán được cái chết): `alive=false` ⇒ chuyển chế độ không-NLM · `alive=null` ⇒ **KHÔNG chặn** (không probe được ≠ chết) · `alive=true` kèm `rotation_token_expired` ⇒ chạy tiếp nhưng **không mở lô dài** (phiên hết đường gia hạn, có thể chết đột ngột).
-- **Sửa xác thực:** CHỈ `nlm login` thay phiên mới (local); **CẤM** tự `nlm-auth-load` (ghi đè jar bằng bản cũ/cũng chết); không tin `nlm login --check` (FALSE-GREEN) — chốt duy nhất là probe LIVE. Ngoại lệ duy nhất: cơ chế tự nạp có điều kiện bên trong `nlm_cli` ở phiên cloud (`ADR-0063`) — agent vẫn không tự gõ lệnh nạp.
+- **Sửa xác thực:** CHỈ `nlm login` thay phiên mới (local); **CẤM** tự `nlm-auth-load` (ghi đè jar bằng bản cũ/cũng chết); không tin `nlm login --check` (FALSE-GREEN) — chốt duy nhất là probe LIVE. Ngoại lệ duy nhất: cơ chế tự nạp có điều kiện bên trong `nlm_cli` ở phiên cloud (`ADR-0064`) — agent vẫn không tự gõ lệnh nạp.
 - **Hỏng có fallback KHÔNG dừng vòng:** ghi sổ lỗi + chạy chế độ không-NLM (T2 quét cache/Drive trực tiếp; phát hiện mang `muc_chac_chan="cho_verify_nlm"` → Q-VERIFY, trả nợ kiểm chéo khi phiên NLM sống lại).
 
 <!-- PHA0_GATE_v1

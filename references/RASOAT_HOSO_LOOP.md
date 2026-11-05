@@ -117,7 +117,7 @@ hash đổi / bị supersede / TTL 90 ngày cạn (chỉ mức `can_kiem_tra`) �
 tiếp; phát hiện vẫn ghi nhưng `muc_chac_chan="cho_verify_nlm"` + vào **Q-VERIFY**; cookie sống lại → MỘT
 lượt trả nợ kiểm chéo tuần tự, đạt thì nâng hạng. Sửa auth: **CHỈ `nlm login` thay phiên mới** — CẤM tự
 `nlm-auth-load` (ghi đè jar bằng bản cũ/cũng chết); không tin `nlm login --check` (FALSE-GREEN), chốt
-duy nhất là probe LIVE. Ngoại lệ duy nhất: cơ chế tự nạp có điều kiện bên trong `nlm_cli` ở phiên cloud (`ADR-0063`) — agent vẫn không tự gõ lệnh nạp. **Vòng RÀ không bao giờ dừng vì cookie.**
+duy nhất là probe LIVE. Ngoại lệ duy nhất: cơ chế tự nạp có điều kiện bên trong `nlm_cli` ở phiên cloud (`ADR-0064`) — agent vẫn không tự gõ lệnh nạp. **Vòng RÀ không bao giờ dừng vì cookie.**
 
 > **Mâu thuẫn doctrine đã chốt (r213 — đo 26-07).** Chuỗi khắc phục của `nlm-auth-status` xếp
 > `tl nlm-auth-load` ở vị trí **(1)**, ngược hẳn điều cấm ngay trên. Cả hai đều đúng, khác NGỮ CẢNH:

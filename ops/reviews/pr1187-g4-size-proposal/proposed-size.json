@@ -1,0 +1,11 @@
+{
+  "proposed_increment_added": 257,
+  "proposed_increment_deleted": 24,
+  "total_added_from_base": 1193,
+  "total_deleted_from_base": 33,
+  "cap": 1000,
+  "exceeds_by": 193,
+  "syntax": "passed",
+  "candidate_head": "29ee9ca74d61544fbddd56c39dabbe194d26408e",
+  "status": "proposal; not admitted or committed; targeted validation pending"
+}

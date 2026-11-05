@@ -20,8 +20,8 @@ recorder_ghi_chu: 'phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi theo quy
 executor_session: session_01V2PEqhkb91vD5PCBM5yXbm
 leased_at_utc: '2026-11-05T09:08:00Z'
 heartbeat_at: '2026-11-05T09:08:00Z'
-lease_until: '2026-11-07T09:08:00Z'
-lease_expires_at_utc: '2026-11-07T09:08:00Z'
+lease_until: '2026-11-05T09:31:00Z'
+lease_expires_at_utc: '2026-11-05T09:31:00Z'
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude
@@ -70,3 +70,11 @@ prohibited_actions:
 - write_outside_effective_write_set
 - sua_packet_loop_py
 land_authority_note: 'dieu phoi merge PR ghi so; landed true chi khi du bon moc va uy quyen neo head (L-6)'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-07T09:08:00Z'
+  han_moi_utc: '2026-11-05T09:31:00Z'
+  chi_thi: >-
+    Executor session_01V2PEqhkb91vD5PCBM5yXbm tra lai, khong dung: #1186 la packet Codex, da co M8 FINAL LANDED tren #1124
+    (issuecomment-6627764265). Khong co tep nao duoc ghi theo lease nay.
+  ly_do: 'lease khong con viec; rut han de nha write set'
+  ghi_boi: phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq

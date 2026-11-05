@@ -19,7 +19,7 @@ recorder_is_dispatcher: true
 recorder_ghi_chu: 'Phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; executor van la session_015GtxrcPNaayykBErdfcNUB.'
 
 leased_at_utc: '2026-11-05T08:19:00Z'
-heartbeat_at: '2026-11-05T09:27:00Z'
+heartbeat_at: '2026-11-05T10:42:00Z'
 lease_until: '2026-11-06T08:19:00Z'
 lease_expires_at_utc: '2026-11-06T08:19:00Z'
 
@@ -87,8 +87,8 @@ write_set_da_do_truoc_khi_cap: >-
   (bi thay the boi lease nay), docs/adr/0064-* NGUOI_GIU 0; quet 865 nhanh: 0064+ chua tep nao (executor do ~05:10Z).
 tran_kich_thuoc: 'nang_tran spec (vong 2 Q13): <= 9 tep / <= 550 dong them, do so merge-base (git diff --numstat origin/master...HEAD). Vuot 550 => bo bot ca phu, KHONG xin nang them; vuot 9 tep => DUNG, hoi chu kho.'
 tran_loi_goi_codex: >-
-  14 (chu kho nang 12 -> 14 tai issuecomment-6654445526; chi dung 2 loi goi them khi luot 12 khong ra approve, cung model).
-  Het tran chua approve => Review Rescue Checkpoint (ADR-0037).
+  16 (chu kho: 12 -> 14 tai issuecomment-6654445526; 14 -> 16 ngay 05-11 ~10:41Z, chi dung khi luot 14 ra finding moi
+  da va, cung model). Het tran chua approve => Review Rescue Checkpoint (ADR-0037).
 ci_budget:
   gate_tu_dong: 'CI PR tu dong (ubuntu) tren PR cua packet'
   phep_do_duoc_cap: 'khong — spec L1 chi doi luot CI PR Ubuntu'

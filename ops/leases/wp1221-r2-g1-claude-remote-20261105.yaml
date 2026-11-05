@@ -21,7 +21,7 @@ recorder_is_dispatcher: true
 recorder_ghi_chu: 'phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; tham quyen la authority_url'
 executor_session: session_015GtxrZVmDpv9FPWFf1Uaoo
 leased_at_utc: '2026-11-05T08:47:00Z'
-heartbeat_at: '2026-11-05T12:58:00Z'
+heartbeat_at: '2026-11-05T13:14:00Z'
 lease_until: '2026-11-07T08:47:00Z'
 lease_expires_at_utc: '2026-11-07T08:47:00Z'
 role: executor
@@ -53,10 +53,10 @@ spec_ref_ghi_chu: 'ghim OID40 theo kiem-merge K1 (_spec_merge, ADR-0063); H1 spe
 branch: claude/wp1221-g1
 branch_ownership: exclusive
 target_branch_neu_land: master
-base_sha: d779d442920c3ae55a7c355b02a75e245dc8cd3b
-start_from_sha: d779d442920c3ae55a7c355b02a75e245dc8cd3b
-reviewed_sha_required: d779d442920c3ae55a7c355b02a75e245dc8cd3b
-reviewed_sha_ghi_chu: 'doi base 07b773c -> d779d44 (05-11, dieu phoi): Codex 5/8 approve e9637bb nhung master di tiep 18 commit, diff tren vung lien quan rong; executor merge master (merge commit) roi xac nhan 6/8 tren head merge'
+base_sha: fe84620f897913c7f6c2ce5a0c7316a49655e82f
+start_from_sha: fe84620f897913c7f6c2ce5a0c7316a49655e82f
+reviewed_sha_required: fe84620f897913c7f6c2ce5a0c7316a49655e82f
+reviewed_sha_ghi_chu: 'doi base 07b773c -> d779d44 -> fe84620 (05-11, dieu phoi): nhanh merge master fe84620 (PR #1231); base cu keo launcher.py/launcher_test.py vao diff kiem-merge (no #1217)'
 write_set:
 - .githooks/eol_policy_test.py
 write_set_hash: b1866d09f9a776e79bc1f17c9645fee13d9454f0b0d9bd96efcbfec4dd5d2582

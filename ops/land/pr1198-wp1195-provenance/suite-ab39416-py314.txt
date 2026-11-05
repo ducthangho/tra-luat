@@ -1,0 +1,9 @@
+# ops/lease_publish_test.py tren head ab39416 (claude/t191-py314-interpolation), /root/.local/share/uv/python/cpython-3.14-linux-x86_64-gnu/bin/python3.14 = Python 3.14.6, -B, actionlint 1.7.7 + shellcheck 0.9.0; trich: dong t191 + dong tong + rc
+[B] t191: 13 chốt của kiem() đều PHU ở nhánh đã-có-dấu; miễn sẵn: [('raise Chan', 1114, 8)]; phân loại 7100 dòng (6961 sinh, 2402 ô, miễn 37); ca âm 11 dạng
+[A] t191: 13 chốt của kiem() đều PHU ở nhánh đã-có-dấu; miễn sẵn: [('raise Chan', 1114, 8)]; phân loại 7100 dòng (6961 sinh, 2402 ô, miễn 37); ca âm 11 dạng
+[A] lease_publish: 284/284 đạt; đã chạy=284, bỏ qua=0
+[B] lease_publish: 284/284 đạt; đã chạy=284, bỏ qua=0
+t191: 13 chốt của kiem() đều PHU ở nhánh đã-có-dấu; miễn sẵn: [('raise Chan', 1114, 8)]; phân loại 7100 dòng (6961 sinh, 2402 ô, miễn 37); ca âm 11 dạng
+lease_publish: 284/284 đạt; đã chạy=284, bỏ qua=0
+rc=0
+so_dong_log_goc: 2332 sha256_log_goc: 0e51169c628fe46cf29ca857231b23f7c43404e5f2eb6c977171dc5d74bd964b

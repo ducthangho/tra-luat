@@ -1,0 +1,146 @@
+[
+  {
+    "name": "R1_no_template_sample",
+    "command": [
+      "/tmp/claude-0/v314/bin/python",
+      "-B",
+      "/tmp/claude-0/rv/review_mutations_fd51d443/R1_no_template_sample/lease_publish_test.py",
+      "--chi-ca=t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG"
+    ],
+    "cwd": "/tmp/claude-0/rv",
+    "rc": 1,
+    "seconds": 38.769,
+    "status": "RED",
+    "source_sha256": "c9e39e0423cee2027dbcc26b1401e849ba99bc2b112082d8aa401294e5330de7",
+    "stdout_sha256": "0e911835cf78eeae6893662035799d67643e3bab316c1e28973f89bbd8e0747d",
+    "stderr_sha256": "c7f6fabe6f3ae727db297e4ef96fe27409d09038e43bc0f035394df56c35830b"
+  },
+  {
+    "name": "R2_old_doc_regex",
+    "command": [
+      "/tmp/claude-0/v314/bin/python",
+      "-B",
+      "/tmp/claude-0/rv/review_mutations_fd51d443/R2_old_doc_regex/lease_publish_test.py",
+      "--chi-ca=t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG"
+    ],
+    "cwd": "/tmp/claude-0/rv",
+    "rc": 1,
+    "seconds": 39.699,
+    "status": "RED",
+    "source_sha256": "a896fbf34c50885d8597e599a600425275b6a2f66ef47227ff3991fd93e8025f",
+    "stdout_sha256": "d652d4dcbb2d3166f456c4de3ff6e826c0ec62f06b3fb49cb2713e43c33ffb18",
+    "stderr_sha256": "2e9e8431a2bed9d15b77b08ccb647ca17a5bac0d6f203d9c15f2fbc656cb0964"
+  },
+  {
+    "name": "R3_no_str_clearing",
+    "command": [
+      "/tmp/claude-0/v314/bin/python",
+      "-B",
+      "/tmp/claude-0/rv/review_mutations_fd51d443/R3_no_str_clearing/lease_publish_test.py",
+      "--chi-ca=t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG"
+    ],
+    "cwd": "/tmp/claude-0/rv",
+    "rc": 1,
+    "seconds": 27.78,
+    "status": "RED",
+    "source_sha256": "521b0af48a9b154880a49fe3e3410c156cb5647f20fbc1a6b7fdc7a603993f3f",
+    "stdout_sha256": "74de666e5fb54acd641bb6d0ec2bbad86008f36b69c84ac97f968344bd7e87a0",
+    "stderr_sha256": "5a84692cf8dbda8965e6f4a99b645a9547cdd363e9c345edd0ee1611e36eedb9"
+  },
+  {
+    "name": "R3a_no_str_in_thay",
+    "command": [
+      "/tmp/claude-0/v314/bin/python",
+      "-B",
+      "/tmp/claude-0/rv/review_mutations_fd51d443/R3a_no_str_in_thay/lease_publish_test.py",
+      "--chi-ca=t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG"
+    ],
+    "cwd": "/tmp/claude-0/rv",
+    "rc": 1,
+    "seconds": 28.323,
+    "status": "RED",
+    "source_sha256": "aa5a93865c2c06e1af7b9f7e9e8d639baab80dba275b5144d057da935e424cf4",
+    "stdout_sha256": "f9572f62f88cb15a470cc4d290986b41ea846408f8f9bb9a64744960e977465e",
+    "stderr_sha256": "c97e5aa1954020545958c7fbc4ddc3ee0a49db265383774709c7a54b3715faac"
+  },
+  {
+    "name": "R3b_no_str_in_goc",
+    "command": [
+      "/tmp/claude-0/v314/bin/python",
+      "-B",
+      "/tmp/claude-0/rv/review_mutations_fd51d443/R3b_no_str_in_goc/lease_publish_test.py",
+      "--chi-ca=t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG"
+    ],
+    "cwd": "/tmp/claude-0/rv",
+    "rc": 0,
+    "seconds": 68.048,
+    "status": "GREEN",
+    "source_sha256": "812450d0bec712721c6d373778dadc762c6f5ac97852bd85711a82a06723dae6",
+    "stdout_sha256": "806766f9af829c7a5eff01fb8d433a25479aa768e6748432b314ca5b84fb3e97",
+    "stderr_sha256": "ccf7a509a738173f018cba0bd07bb2e3df208415d36afc2aadd22d2661e7939c"
+  },
+  {
+    "name": "R4_no_template_exemptions",
+    "command": [
+      "/tmp/claude-0/v314/bin/python",
+      "-B",
+      "/tmp/claude-0/rv/review_mutations_fd51d443/R4_no_template_exemptions/lease_publish_test.py",
+      "--chi-ca=t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG"
+    ],
+    "cwd": "/tmp/claude-0/rv",
+    "rc": 1,
+    "seconds": 25.078,
+    "status": "RED",
+    "source_sha256": "f8e8cd12360ee337e1e473ad41c22021617a2285f03906b90b75500bfbf38069",
+    "stdout_sha256": "f87c4b10d6390e8b20cb31aab2e3ffbb1ecd6b7cf808208c3984fcd312014550",
+    "stderr_sha256": "bc2918417cfd62778eb8475c6cbd62cb183a2c3771c57e183acb9b03eea6af40"
+  },
+  {
+    "name": "R5_no_smoke_check",
+    "command": [
+      "/tmp/claude-0/v314/bin/python",
+      "-B",
+      "/tmp/claude-0/rv/review_mutations_fd51d443/R5_no_smoke_check/lease_publish_test.py",
+      "--chi-ca=t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG"
+    ],
+    "cwd": "/tmp/claude-0/rv",
+    "rc": 0,
+    "seconds": 62.174,
+    "status": "GREEN",
+    "source_sha256": "a2544929130e9b867afcd28d3ebbc1c60527fd88ba951b52de2b845d9e3764a0",
+    "stdout_sha256": "cf34c9e419a2134e7862d53e110c3defc7e211f2f9a8c6d9c3265586b55fa043",
+    "stderr_sha256": "49c985d2127a17afc746cbea41e2a0bc11cd1a18a3cd43cef536dd2007a2fdfa"
+  },
+  {
+    "name": "EXTRA_broad_interpolation_exemption",
+    "command": [
+      "/tmp/claude-0/v314/bin/python",
+      "-B",
+      "/tmp/claude-0/rv/review_mutations_fd51d443/EXTRA_broad_interpolation_exemption/lease_publish_test.py",
+      "--chi-ca=t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG"
+    ],
+    "cwd": "/tmp/claude-0/rv",
+    "rc": 1,
+    "seconds": 20.402,
+    "status": "RED",
+    "source_sha256": "221a8110c26cadd526955085144991bd0f69fe49b264d2cacb47e607f98a2681",
+    "stdout_sha256": "9980416852a4c11ad1137a2f61b43b3955106cec3642843601520cbc7c61af64",
+    "stderr_sha256": "32bd0645b2d4de62f81b194bd77809e69fd904836c1f7ff5857a91a5a14c09a2"
+  },
+  {
+    "name": "EXTRA_wrong_version_315",
+    "command": [
+      "/tmp/claude-0/v314/bin/python",
+      "-B",
+      "/tmp/claude-0/rv/review_mutations_fd51d443/EXTRA_wrong_version_315/lease_publish_test.py",
+      "--chi-ca=t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG"
+    ],
+    "cwd": "/tmp/claude-0/rv",
+    "rc": 1,
+    "seconds": 18.355,
+    "status": "RED",
+    "source_sha256": "49526a907218b3e58999e86641593fab8f4b26949955af45b9466244d2354556",
+    "stdout_sha256": "f13dc45c39e3be1146867915bf93dcbd0d3cabcf63fd3c389aef4c1fc4307af7",
+    "stderr_sha256": "6785f6335dce777de650ab6fab9ef3a38f5cf1a418acc16cc1c8f8d483ae8a9a"
+  }
+]

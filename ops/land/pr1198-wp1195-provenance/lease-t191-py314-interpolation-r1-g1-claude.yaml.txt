@@ -1,0 +1,117 @@
+# LEASE — T191-PY314-INTERPOLATION revision 1 / generation 1 — va khan ca t191 cho Python 3.14 (runner ubuntu-26.04)
+# GHI HO theo chi thi CHU KHO ghi o than Issue #1195. Khuon: wp1099-cloud-setup-p3b-r9-g1-claude.
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 1195
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1195
+authority_url: https://github.com/ducthangho/tra-luat/issues/1195
+granted_on_instruction_nguyen_van: >-
+  Than Issue #1195: "Ghi theo câu trả lời trực tiếp của chủ kho ngày 05-11-2026 trong phiên điều phối (AskUserQuestion:
+  \"Vá khẩn t191\", \"#1099 thi công ngay\")." Phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq giao phien nay lam executor.
+authority_caveat: >-
+  Issue do phien agent dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment chu kho tu viet (#566).
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_ghi_chu: 'Phien session_015GtxrcdtToNTxYCuZKVwQx (executor duoc giao) ghi lease nay.'
+
+leased_at_utc: '2026-11-05T02:05:00Z'
+heartbeat_at: '2026-11-05T03:07:00Z'
+lease_until: '2026-11-05T03:45:00Z'
+lease_expires_at_utc: '2026-11-05T03:45:00Z'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-06T02:05:00Z'
+  han_moi_utc: '2026-11-05T03:45:00Z'
+  chi_thi: >-
+    Phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq (send_message 2026-11-05T03:06Z): "PR #1198 DA MERGE ... Rut han lease,
+    ghi so va dong #1195."
+  ly_do: >-
+    Packet #1195 (T191-PY314-INTERPOLATION r1) da MERGE: PR #1198 (claude/t191-py314-interpolation, head ab39416f) merge commit
+    4d258cc88. Luot ops-publish-lease 41959532444 (a24a72b) XANH tren bo kiem neo master 4d258cc88, 284/284; comment lease
+    dang bu o #1195 issuecomment-6648650664. Lease khong tu chet khi land (CLAUDE.md).
+  vi_sao_khong_dung_bia_mo: >-
+    Tien le #1132 (1aa7509) / #1113 (d9171daf): rut han dung co che da cai. Han moi dat SAU luc push de luot dang lease con thay
+    lease song, tranh rc=8 che rc=9. Khong co lease ke nhiem thay the packet nay.
+  nguoi_rut: 'executor session_015GtxrcdtToNTxYCuZKVwQx theo chi thi phien dieu phoi'
+
+packet_id: T191-PY314-INTERPOLATION
+packet_slug: t191-py314-interpolation
+revision: 1
+generation: 1
+lease_id: t191-py314-interpolation-r1-g1-claude
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'Lease dau tien cua packet #1195.'
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+environment: cloud
+environment_ghi_chu: 'Phien Claude Code remote (Linux); Python 3.13.18 he thong + Python 3.14.6 (uv) de chay that ca hai.'
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_cli
+reviewer_ghi_chu: 'Codex offline qua launcher.py run tren clone doc lap + Codex connector tren PR.'
+access: read-write
+
+spec_path: ops/specs/T191-PY314-INTERPOLATION-r1.md
+spec_ref: refs/heads/ops/lease-1195-t191-g1
+spec_source_oid: 47ba8008c1412a5bef6d6032a0c897bcad7db04a
+spec_blob: 4e16830662ab09d806ef27b1f5cdbb4b1a2ea178
+spec_sha256: e6ea2cf7c20279e6f1521b71b6562e811add01256d6c373d677acf9e3acf4ebe
+spec_hash: e6ea2cf7c20279e6f1521b71b6562e811add01256d6c373d677acf9e3acf4ebe
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+spec_ref_ghi_chu: >-
+  Thu dinh danh spec la BLOB/BAM, khong phai ten nhanh. Tim o master truoc (sau khi PR cua packet merge), chua thay thi fetch
+  nhanh spec_ref. Bam da dang len #1195 (issuecomment-6647581716).
+
+branch: claude/t191-py314-interpolation
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 1813bfd4513704cf792a272a86b22e5e08893b9a
+start_from_sha: 1813bfd4513704cf792a272a86b22e5e08893b9a
+immutable_acceptance_baseline: 1813bfd4513704cf792a272a86b22e5e08893b9a
+base_ghi_chu: 'Base = origin/master luc cap lease (merge PR #1188).'
+reviewed_sha_required: 1813bfd4513704cf792a272a86b22e5e08893b9a
+reviewed_sha_ghi_chu: 'chua co head code luc cap lease; moi luot review neo dung SHA cua luot.'
+
+write_set:
+  - ops/lease_publish_test.py
+write_set_hash: 94d43dbfd09ef93bc4e24aeaae23e66641567dcfd65e8b88aa5f67422e5a25fd
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-11-05T02:0xZ sau fetch du refs/heads (ls-remote so for-each-ref theo tap ten, comm -23 = 0; kho khong nong) va
+  master = 1813bfd4: `ops/lease_publish.py ai-dang-giu ops/lease_publish_test.py` => NGUOI_GIU 0 (moi lease thay deu HET_HAN).
+tran_kich_thuoc: '1 tep code, <= 120 dong them (git diff --numstat so merge-base). Vuot => DUNG, hoi chu kho.'
+tran_loi_goi_codex: 'ADR-0036/0037: toi da 2 loi goi Codex review offline; het tran chua approve => Review Rescue Checkpoint.'
+ngoai_le_chu_kho: >-
+  #1195: workflow dang lease dang hong vi chinh loi packet nay va; lease chi can nam tren ref va qua `lease_publish.py check`,
+  comment lease dang bu khi workflow xanh lai. Luot workflow do o buoc tu kiem cua lease nay la dung du kien.
+ci_budget:
+  gate_tu_dong: 'CI PR tu dong (ubuntu) tren PR cua packet'
+  het: 'Mot job bat buoc do 2 luot lien tiep cung mot loi => DUNG, bao chu kho truoc luot thu ba'
+dieu_kien_dung:
+  - 'S1 — can sua tep ngoai write set (ke ca ops/lease_publish.py, workflow). DUNG, handoff.'
+  - 'S2 — vuot tran 120 dong. DUNG, hoi chu kho.'
+  - 'S3 — spec tu mau thuan. DUNG, bao chu kho.'
+  - 'S4 — het han lease => ngung ghi, handoff §7.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong nới chot chung cua t191
+  - Khong tu review / approve / merge / land
+  - Khong force-push
+  - Khong viet chuoi bo-qua-CI nguyen van trong commit message
+
+coordination_paths:
+  - ops/leases/t191-py314-interpolation-r1-g1-claude.yaml
+  - ops/specs/T191-PY314-INTERPOLATION-r1.md
+run_minutes: 1440
+heartbeat_required_minutes: 360
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'

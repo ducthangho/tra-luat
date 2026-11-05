@@ -11,7 +11,7 @@ Gate: chỉ dùng khi `nlm` có trên PATH + auth OK; nếu không trả {"ok": 
 session hết hạn hẳn cần `nlm login` (TƯƠNG TÁC — không chạy headless được).
 """
 from __future__ import annotations
-import argparse, json, os, re, shutil, subprocess, sys, tempfile, threading, time
+import argparse, json, os, re, shutil, stat, subprocess, sys, tempfile, threading, time
 
 # Group E1 (log rà): subprocess nlm/keyring rò dòng "Using keyring backend: keyring" lẫn stdout → VỠ json.loads.
 # CHỈ bỏ dòng nhiễu keyring THUẦN (KHÔNG chứa ký tự cấu trúc JSON {}[]) → không bao giờ nuốt thân JSON
@@ -125,9 +125,8 @@ def _run_mot(args: list[str], timeout: int = 120) -> tuple[int, str, str]:
 
 
 
-# ── WP1099 (ADR-0063, spec cloud-setup-p3b-nlm-401-r9): jar chết giữa phiên cloud ⇒ TỰ NẠP CÓ ĐIỀU KIỆN. r208c bác tự nạp
-# vì bundle có thể cũ/cũng chết ⇒ chỉ nạp khi canary CON (thân `_canary_song` của nlm-auto-refresh.sh) trả 3, chỉ
-# `tl nlm-auth-load` (không --force), 1 lần/tiến trình + dấu 600 s (best effort), chỉ chạy lại lệnh ĐỌC cho phép.
+# ── WP1099 (ADR-0063, spec cloud-setup-p3b-nlm-401-r9): jar chết giữa phiên cloud ⇒ TỰ NẠP CÓ ĐIỀU KIỆN (r208c bác tự nạp vì bundle có thể cũ/cũng chết) ⇒ chỉ nạp khi canary CON (thân `_canary_song` của nlm-auto-refresh.sh) trả 3,
+# chỉ `tl nlm-auth-load` (không --force), 1 lần/tiến trình + dấu 600 s (best effort), chỉ chạy lại lệnh ĐỌC cho phép.
 NAP_LAI_GAN_NHAT = None            # {trang_thai, ts} của lời gọi `_run` gần nhất đã tới bước "Giới hạn", hoặc None
 _NAP_LAI_DA_NAP = False            # trần BẢO ĐẢM: 1 lần nạp mỗi tiến trình (khoá luồng giữ nó đúng cả khi đa luồng)
 _NAP_LAI_KHOA = threading.Lock()
@@ -142,30 +141,35 @@ _NAP_LAI_THU_MUC = os.path.dirname(os.path.abspath(__file__))
 def _tep_dau() -> str:
     return os.path.join(os.path.expanduser("~"), ".notebooklm-mcp-cli", ".tra-luat-nap-lai.json")
 
+# Tệp dấu — MỌI đường I/O (review PR #1197 F01/F05/F06/F07): không chặn, không theo symlink, chỉ tệp thường, ≤ 4 KiB; mọi fd đóng trong `finally`; lỗi ghi ⇒ False (không nạp), lỗi dọn bị nuốt; không đường nào ném ra khỏi `_run`.
 def _doc_dau():
-    try:                               # không chặn, không theo symlink, đọc ≤ 4 KiB: FIFO/thiết bị không treo `_run` (F06)
+    fd = None
+    try:
         fd = os.open(_tep_dau(), os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_NOFOLLOW", 0))
-        with os.fdopen(fd, "rb") as f:
-            d = json.loads(f.read(4096))
+        d = json.loads(os.read(fd, 4096)) if stat.S_ISREG(os.fstat(fd).st_mode) else None
         ts = d.get("ts") if isinstance(d, dict) else None
         return float(ts) if isinstance(ts, (int, float)) and not isinstance(ts, bool) else None
     except Exception:
         return None
+    finally:
+        _don(lambda: fd is not None and os.close(fd))
+
+def _don(*viec) -> None:
+    for v in viec:
+        try:
+            v()
+        except OSError:
+            pass
 
 def _ghi_dau(ts: int, ket_qua: str) -> bool:
-    """Ghi nguyên tử, quyền 0600; True khi đã thay tệp dấu. Lỗi ⇒ False và dọn tệp tạm."""
-    p, tam = _tep_dau(), None
+    p, tam, fd = _tep_dau(), None, None
     try:
         os.makedirs(os.path.dirname(p), exist_ok=True); fd, tam = tempfile.mkstemp(dir=os.path.dirname(p), prefix=".nap-lai-")
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            json.dump({"ts": ts, "ket_qua": ket_qua}, f)
+        os.write(fd, json.dumps({"ts": ts, "ket_qua": ket_qua}).encode("utf-8")); os.close(fd); fd = None
         os.chmod(tam, 0o600); os.replace(tam, p)
         return True
     except Exception:
-        try:                           # dọn best effort: lỗi dọn KHÔNG được thoát khỏi `_run` (review PR #1197 F05)
-            os.unlink(tam) if tam else None
-        except OSError:
-            pass
+        _don(lambda: fd is not None and os.close(fd), lambda: tam and os.unlink(tam))
         return False
 
 def _con(argv: list, han: int):

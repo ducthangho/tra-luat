@@ -217,10 +217,12 @@ def _a10(cay):
         os.replace, os.unlink = cu
     _chot("A10", kq[0] == 1 and "không ghi được tệp dấu" in err, "lỗi kép: %r %r" % (kq, err))
     [x.unlink() for x in tep.parent.glob(".nap-lai-*")], cay.dat()   # rác do OS (giả) từ chối xoá — không phải của ca sau
-    tep.mkdir()                                   # đường tệp dấu là THƯ MỤC ⇒ không ghi được ⇒ không nạp, không rác (F01)
-    kq, err = cay.goi(cay.moi(), _SL)
-    _chot("A10", not any("nlm-auth-load" in c for c in cay.nhat_ky()) and "không ghi được tệp dấu" in err
-          and not list(tep.parent.glob(".nap-lai-*")), "dấu không ghi được mà vẫn nạp/để rác: %r" % err)
+    tep.mkdir()                                   # dấu là THƯ MỤC ⇒ không ghi được ⇒ không nạp, không rác (F01), không rò fd (F07)
+    m, fd = cay.moi(), (lambda: len(os.listdir("/dev/fd")) if os.path.isdir("/dev/fd") else 0)
+    truoc, (kq, err) = fd(), cay.goi(m, _SL)
+    [m._doc_dau() for _ in range(20)]
+    _chot("A10", not any("nlm-auth-load" in c for c in cay.nhat_ky()) and "không ghi được tệp dấu" in err and fd() == truoc
+          and not list(tep.parent.glob(".nap-lai-*")), "dấu là thư mục: nạp/để rác/rò fd: %r" % err)
 
 # sha256 của json.dumps(bốn hằng) đọc từ `git show _BASE:scripts/nlm_cli.py` — đo được cả ở gói phát hành không có git.
 _A12_BAM = "57ec1837153e8d1a796f852249ac23695990c3c1f20a5af6a86a55488ea34211"
@@ -233,12 +235,9 @@ _A13 = (("connection refused", None, 2), ("HTTP 403 permission denied", None, 2)
         (["connection refused", "connection refused", "Authentication expired"], False, 3),
         (["Authentication expired", "connection refused", "Authentication expired"], False, 3),
         (["Authentication expired", "Authentication expired", "connection refused"], None, 2))
-class _NC:
-    AUTH_FIX_HINT, nlm_available = "auth", (lambda self: True)
-    def __init__(self, seq):
-        self.seq = iter(seq + seq[-1:] * 3)
-    def _run(self, args, timeout=30):
-        return 1, "", next(self.seq)
+def _NC(seq):
+    it = iter(seq + seq[-1:] * 3)
+    return type("NC", (), {"AUTH_FIX_HINT": "auth", "nlm_available": lambda s: True, "_run": lambda s, a, timeout=30: (1, "", next(it))})()
 def _a13(cay, tl_module, ham=None):
     tg = tl_module._imp("tl_gws")
     tg.bind(tl_module)
@@ -294,8 +293,9 @@ _DOT_BIEN = (
     ("them_force", '"tl.py"), "nlm-auth-load"]', '"tl.py"), "nlm-auth-load", "--force"]', "A7", "A7"),
     ("danh_sach_cam", "if tuple(args[:2]) not in _NAP_LAI_CHO_PHEP:", 'if tuple(args[:2]) == ("source", "add"):', "A8", "A8"),
     ("ghi_dau_hong_van_nap", 'if not _ghi_dau(int(now), "dang_nap"):', 'if not (_ghi_dau(int(now), "dang_nap") or 1):', "A10", "A10"),
-    ("de_rac_tam", "            os.unlink(tam) if tam else None", "            pass", "A10", "A10"),
-    ("don_khong_bao_ve", "        except OSError:\n            pass\n        return False", "        except ZeroDivisionError:\n            pass\n        return False", "A10", "A10"),
+    ("de_rac_tam", ", lambda: tam and os.unlink(tam))", ")", "A10", "A10"),
+    ("don_khong_bao_ve", "        except OSError:\n            pass", "        except ZeroDivisionError:\n            pass", "A10", "A10"),
+    ("doc_dau_ro_fd", "        _don(lambda: fd is not None and os.close(fd))\n\ndef _don", "        pass\n\ndef _don", "A10", "A10"),
     ("bo_khoa_luong", "    with _NAP_LAI_KHOA:", "    if True:", "A9", "A9"),
     ("doc_dau_chan", ' | getattr(os, "O_NONBLOCK", 0)', "", "A9", "A9"),
     ("cua_so_60", "= 120, 60, 600", "= 120, 60, 60", "A9", "A9"),

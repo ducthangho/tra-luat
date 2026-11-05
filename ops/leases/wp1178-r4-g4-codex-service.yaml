@@ -96,8 +96,7 @@ authority_notes:
   Atdeadline stop and handoff all artifacts.
 frozen_head: ef864d6b3192a08487cd7fc0e526633afcb693d9
 frozen_tree: 70bc751068856245e92875a13e182a9c90781f8b
-operational_state: executor_sealed; primary human personally approved; gates/land
-  pending
+operational_state: 'stale: expired and superseded by g5; ef history retained; CI blocked'
 execution_handoff:
   completed_at_utc: '2026-11-05T03:12:32Z'
   task: /root/wp1178_r4_executor
@@ -115,3 +114,6 @@ human_audit_source: https://github.com/ducthangho/tra-luat/issues/1178#issuecomm
 primary_human_audit_comment: https://github.com/ducthangho/tra-luat/pull/1202#issuecomment-6648978880
 land_authority_source: https://github.com/ducthangho/tra-luat/issues/1178#issuecomment-6648977402
 review_bundle: https://github.com/ducthangho/tra-luat/tree/9ad0e483832278fc9aa63628991801695068852a/ops/reviews/wp1178-r4-g4-review
+da_bi_thay_the: wp1178-r5-g5-codex-service
+superseded_at_utc: '2026-11-05T05:11:01Z'
+supersession_authority: https://github.com/ducthangho/tra-luat/issues/1178#issuecomment-6650226071

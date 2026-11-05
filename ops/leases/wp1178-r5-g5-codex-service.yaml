@@ -1,0 +1,108 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1178
+packet_id: wp1178
+mission_issue: 1177
+mission_revision: 3
+mission_plan_hash: 137f0a87fcc11df0a939d323c5a19e823d14ad7f349c42da00a1afae31695f11
+revision: 5
+generation: 5
+lease_id: wp1178-r5-g5-codex-service
+role: executor
+provider: codex
+executor: codex
+model_family: openai
+execution_surface: codex_service
+transport: machine
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+reviewer: human
+reviewer_execution_surface: manual_audit
+reviewer_transport: human
+assurance_target: human_audited
+access: read-write
+spec_path: ops/specs/wp1178-r5-ci.md
+spec_hash: da794b6d67489851d05eae3e64d3b08686bf0b4cd76c96a022d1958943c5afe6
+spec_sha256_required: da794b6d67489851d05eae3e64d3b08686bf0b4cd76c96a022d1958943c5afe6
+spec_ref: refs/heads/ops/wp1178-r5-ci-proposal@e631c7aa6d5b9865613ce6c7697978c3ca5d3a9a
+prompt_path: ops/specs/wp1178-r5-ci.md
+prompt_sha256_required: da794b6d67489851d05eae3e64d3b08686bf0b4cd76c96a022d1958943c5afe6
+branch: agent/wp1178-g4-codex-service
+branch_ownership: exclusive
+base_sha: ec1b18a2a007fc2e697249c727a2ca8391ab209e
+start_from_sha: ef864d6b3192a08487cd7fc0e526633afcb693d9
+target_branch_neu_land: master
+write_set:
+- .github/workflows/ci.yml
+effective_write_set:
+- .github/workflows/ci.yml
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1178#issuecomment-6650226071
+recorded_by: codex-service-controller
+recorder_is_executor: false
+leased_at_utc: '2026-11-05T05:11:01Z'
+heartbeat_at: '2026-11-05T05:11:01Z'
+lease_until: '2026-11-05T07:11:01Z'
+lease_expires_at_utc: '2026-11-05T07:11:01Z'
+heartbeat_required_minutes: 360
+run_minutes: 90
+run_started_at_utc: '2026-11-05T05:11:01Z'
+run_deadline_utc: '2026-11-05T06:41:01Z'
+depends_on: []
+thay_the_cho:
+- wp1178-r4-g4-codex-service
+nang_tran:
+  ai_nang: ducthangho via https://github.com/ducthangho/tra-luat/issues/1178#issuecomment-6650226071
+  can_cu: Owner approved r5 correction only existing CI Bash run body; preserve immutableec1
+    and fiveefenvironmentblobs. Physical branch agent/wp1178-g4-codex-service reused
+    under exclusive g5 authority after predecessor supersession.
+  tran_cu: ADR0053≤6files/450added
+  tran_moi: ≤6netfiles/1300added from immutableec1; g5 writes only ci.yml
+size_limit:
+  effective_write_paths: 1
+  net_product_files: 6
+  added_lines: 1300
+review_budget_override:
+  owner: ducthangho
+  source: https://github.com/ducthangho/tra-luat/issues/1178#issuecomment-6650226071
+  known_historical_model_outputs_minimum: 7
+  historical_completeness: unrecovered cost/attempt history UNKNOWN; no reset
+  additional_connector_calls: 1
+  current_additional_window_used: 0
+  current_additional_window_reserved: 1
+  local_model_reviews_allowed: 0
+  scope: one productconnector on eventual auditedg5H; prior g4 allowance consumed;
+    distinct infra1187 cap6
+execution_allowance:
+  fresh_executor_agents: 1
+  run_minutes: 90
+  starts_at: '2026-11-05T05:11:01Z'
+  hard_deadline: '2026-11-05T06:41:01Z'
+  cumulative_history: unknown remains unknown; finite extra window authorized; no
+    total-under360 claim
+authority_notes:
+- Exactly one fresh separate Codex Executor; no child delegation or local model review.
+  Controller is not source writer.
+- 'Write only ci.yml: remove added step, extend existing lease-publish Bash run body;
+  all five environment blobs remain ef. No checker/setup/G5/topology/permission changes.'
+- Full actual ci_duong_nhanh suite and semantic mutants/controls required on final
+  committed H; proposal subset is not full gate.
+- No external writes/sourcepush/PR/ready/merge/land/deploy by Executor. New H needs
+  fresh personal audit and land authority; ef approval does not transfer.
+- ADR0063 actual land from1187 remains dependency. Hard90minute run deadline immutable;
+  expiry/review does not extend.
+- Physical g4-named source branch reused under new g5 lease by explicit owner exception;
+  predecessor expired and sealed, two-way superseded.
+operational_state: granted; awaiting publication/readback before Executor start
+publication_allowance:
+  additional_fastforward_source_pushes: 1
+  pull_request: 1202
+  branch: agent/wp1178-g4-codex-service
+  must_wait_for_new_head_personal_audit: true
+  M9_dispatches_new_head: 1
+  source_push_used: 0
+  M9_used: 0
+  no_force_push: true
+reviewed_sha_required: ef864d6b3192a08487cd7fc0e526633afcb693d9

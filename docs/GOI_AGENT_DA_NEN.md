@@ -83,8 +83,8 @@ ChatGPT.
 
 > **Đường cũ (05-11-2026).** `CODEX_AUTH_JSON` là cơ chế cấu hình cũ, không dùng cho thiết lập mới. Đường hiện
 > hành là `agent_creds`: P2b nạp credential lúc mở phiên, P3 ghi ngược khi `Stop`. Code vẫn còn đọc `CODEX_AUTH_JSON`
-> để tương thích (hook phiên, `.claude/dev/launcher.py`, `.claude/dev/codex_cred.py`); đường ấy chưa gỡ, việc gỡ là
-> packet riêng `CODEX-AUTH-JSON-GO-CODE`.
+> để tương thích (hook phiên, `.claude/dev/launcher.py`; `.claude/dev/codex_cred.py` còn sinh và gỡ biến); đường ấy
+> chưa gỡ, việc gỡ là packet riêng `CODEX-AUTH-JSON-GO-CODE`.
 
 Container phiên remote là **phù du** — thu hồi là mất `~/.codex/auth.json`. Một chốt đòi
 thao tác tay mỗi lượt thì sớm muộn bị bỏ qua, nên hook `.claude/hooks/session-start.sh`

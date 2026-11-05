@@ -804,6 +804,10 @@ jobs:
       # NỢ CÓ TÊN `PLAT-X5-required-status-check`: selftest không thể tự chứng minh job
       # này thật sự được GitHub gọi. Branch protection phải require status của job `gate`;
       # t34 chỉ còn canh lời gọi thẳng tệp `.py`, không giả làm bộ phân tích shell.
+      - name: Linux updater selftest (wp1178)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' && runner.os == 'Linux' }}
+        shell: bash
+        run: bash ops/environment/update-linux.sh --selftest
       - name: lease-publish selftest (đo lại setup sau G5)
         if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash

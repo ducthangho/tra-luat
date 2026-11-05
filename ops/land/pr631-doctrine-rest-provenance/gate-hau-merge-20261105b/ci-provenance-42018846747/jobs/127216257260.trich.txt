@@ -1,0 +1,15 @@
+2026-11-05T11:25:46.5929685Z Image: ubuntu-26.04
+2026-11-05T11:25:47.2299019Z ##[group]Run git config --global core.autocrlf false
+2026-11-05T11:25:47.2923449Z ##[group]Run actions/checkout@v4
+2026-11-05T11:25:54.5032061Z [command]/usr/bin/git rev-parse refs/remotes/origin/master
+2026-11-05T11:25:54.5033906Z a57eade23dd5b54564be47d4f124511cf87aa1fa
+2026-11-05T11:25:55.4641388Z [command]/usr/bin/git log -1 --format=%H
+2026-11-05T11:25:55.4670153Z a57eade23dd5b54564be47d4f124511cf87aa1fa
+2026-11-05T11:25:55.4892413Z ##[group]Run actions/setup-python@v5
+2026-11-05T11:25:55.6596013Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-11-05T11:25:57.3529227Z ##[group]Run bash ops/cai_actionlint.sh
+2026-11-05T11:25:57.4757252Z ##[group]Run bash ops/cai_cong_cu.sh shellcheck
+2026-11-05T11:25:59.6075437Z ##[group]Run bash ops/cai_cong_cu.sh rg
+2026-11-05T11:26:04.2492215Z ##[group]Run python ops/cong_cu.py kiem-tra --json
+2026-11-05T11:26:04.5590466Z ##[group]Run python -m pip install --quiet ruff==0.15.15
+2026-11-05T11:26:05.6663176Z ##[group]Run python .claude/dev/packet_loop_test.py

@@ -1,0 +1,11 @@
+{
+  "tong_ket": "lease_publish: 284/284 đạt; đã chạy=284, bỏ qua=0",
+  "vao": 284,
+  "ra_QUA": 284,
+  "ca_bat_buoc_QUA": [
+    "t24_workflow_KHONG_duoc_nhet_dau_skip_ci_vao_commit",
+    "t33_workflow_dang_lease_phai_qua_actionlint",
+    "t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor",
+    "t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG"
+  ]
+}

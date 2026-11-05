@@ -1,0 +1,17 @@
+{
+  "yaml_safe_load_luot1_equals_luot2": true,
+  "delta_changed_lines": [
+    "-       # `ubuntu-26.04` (04-11-2026), `python3` của hệ điều hành là 3.14 và bước tự kiểm",
+    "-       # đỏ ở `t191` (283/284); cùng commit chạy 3.13 thì xanh. Cổng phải chạy trên đúng",
+    "+       # `ubuntu-26.04` (04-11-2026), bước tự kiểm đỏ ở `t191` (283/284); tại chỗ 3.13 xanh,",
+    "+       # 3.14 tái hiện đúng chữ ký ấy (bản trên runner chưa đo, A6). Cổng phải chạy trên đúng"
+  ],
+  "Actions_expression_in_new_comments": false,
+  "setup_index": 1,
+  "python3_run_indices": [
+    2,
+    6
+  ],
+  "remove_setup_equals_base": true,
+  "ci_setup_python_matching": 8
+}

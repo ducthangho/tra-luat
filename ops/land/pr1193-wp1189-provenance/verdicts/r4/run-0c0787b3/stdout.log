@@ -1,0 +1,7 @@
+Đã ghi [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/de0a61d6-485d-5aff-a726-b5b4e3780688/scratchpad/rv4/VERDICT.md).
+
+Mọi phép đo yêu cầu lượt 4 đều đạt: diff đúng 2 tệp, hash đặc tả khớp, merge sạch; A2 đạt **284/284, bỏ qua=0**. Không có finding mở. Kho giữ nguyên; không push hoặc gọi GitHub.
+
+Windows, A6 và selftest `tl.py` chưa chạy trong lượt offline này.
+
+KET_LUAN: approve

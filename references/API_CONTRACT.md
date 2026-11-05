@@ -1,9 +1,9 @@
 # tra-luat — HỢP ĐỒNG API SỐNG (webapp Apps Script)
 
-> **Phiên bản deploy đã đóng dấu (LIVE): `2.21.2p`** · đã xác minh `ping.version=2.21.2p`, `registry_schema=reg_cols_row_kind_v1` (27 cột) · = 2.21.2n (profile_catalog + drive_info_bulk r185/WP5) ⊕ `ingest_commit` (r198/ADR-0014 — gộp organize+register+readback 1 RTT, sub-step marker) ⊕ **2.21.2p ATOMIC registry RMW** (KI-25 `withRegLock_` ôm TRỌN đọc-sửa-ghi · KI-26 `ensureRegTabs_` không tạo tab rỗng khi đang swap · KI-27 chốt chặn `REGISTRY_SHRINK_REFUSED` + sao lưu xoay vòng `files_bak_<ts>` + `reg_bak_list`/`reg_bak_restore`); `tl.py EXPECT_VERSION=2.21.2p`. *(Dấu này PHẢI khớp EXPECT_VERSION — drift-lock r119 khoá.)*
+> **Phiên bản deploy đã đóng dấu (LIVE): `2.21.2q`** · đã xác minh `ping.version=2.21.2q`, `registry_schema=reg_cols_row_kind_v1` (27 cột) · = 2.21.2n (profile_catalog + drive_info_bulk r185/WP5) ⊕ `ingest_commit` (r198/ADR-0014 — gộp organize+register+readback 1 RTT, sub-step marker) ⊕ **2.21.2p ATOMIC registry RMW** (KI-25 `withRegLock_` ôm TRỌN đọc-sửa-ghi · KI-26 `ensureRegTabs_` không tạo tab rỗng khi đang swap · KI-27 chốt chặn `REGISTRY_SHRINK_REFUSED` + sao lưu xoay vòng `files_bak_<ts>` + `reg_bak_list`/`reg_bak_restore`) ⊕ **2.21.2q** +agent_creds_put (#1089); `tl.py EXPECT_VERSION=2.21.2q`. *(Dấu này PHẢI khớp EXPECT_VERSION — drift-lock r119 khoá.)*
 > **CÁCH XÁC MINH PHIÊN BẢN (làm đầu phiên):** `gas.get('ping')` → `version/schema_version/registry_schema`. Nếu KHÁC
-> `2.21.2p`: server đã trôi version → đối chiếu deploy. (Nếu `< 2.21.2l` thì thiếu regen2 own-scope/guard → deploy lại
-> `Code.2.21.2p.gs` qua clasp -i giữ URL; version-gate vẫn CHẶN regen2 profile cho tới khi đủ.) (Header `.gs` ghi `v2.8.0` là
+> `2.21.2q`: server đã trôi version → đối chiếu deploy. (Nếu `< 2.21.2l` thì thiếu regen2 own-scope/guard → deploy lại
+> `Code.2.21.2q.gs` qua clasp -i giữ URL; version-gate vẫn CHẶN regen2 profile cho tới khi đủ.) (Header `.gs` ghi `v2.8.0` là
 > nhãn cũ, KHÔNG phải phiên bản deploy; nguồn sự thật = `ping.version`.)
 >
 > **Slot theo notebook (LIVE từ 2.21.2g):** `nlm_slots`/`nlm_preflight`/`nlm_dedup` đếm theo
@@ -177,6 +177,7 @@ folder → `refreshcats` để map đúng. Token đặt ở Script Property; mir
 | `reg_addcols` | GET | **`confirm='yes'`** | — | `ok, cols, header[]` (ghi lại header sheet — chạy 1 lần sau khi thêm cột) |
 | `reg_bak_list` | GET | — | — | `ok, current_rows, keep, count, baks[]` (`{tab,stamp,rows}`, mới→cũ) — **v2.21.2p KI-27** CHỈ ĐỌC: liệt kê bản sao registry xoay vòng `files_bak_<ts>` (giữ 5 bản, sinh tự động mỗi lần `regWriteAll_`) |
 | `reg_bak_restore` | **POST** | **`confirm='yes'`**, `tab` (`files_bak_<ts>`) **hoặc** `stamp` | — | `ok, restored_from, rows_before, rows_after` — **v2.21.2p KI-27**: thay TOÀN BỘ registry bằng bản sao; bản đang dùng được giữ thành `files_bak_<ts>` mới ⇒ khôi phục ĐẢO NGƯỢC được. Chạy `manifest_export` sau đó |
+| `agent_creds_put` | **POST** | `fileId, expect_md5, b64` | — | `ok, md5, size` (ghi xong; `md5` đọc lại SAU khi ghi) · lỗi: `ok=false, error` ∈ `AGENT_CREDS_NOT_CONFIGURED` · `AGENT_CREDS_FILEID_MISMATCH` · `EXPECT_MD5_REQUIRED` · `BLOB_SIZE` · `LOCK_BUSY` · `CAS_CONFLICT` (kèm `md5` hiện tại) — mọi lỗi KHÔNG ghi gì. Chỉ ghi đè NỘI DUNG đúng tệp Script Property `TL_AGENT_CREDS_FILEID` (không đổi tên/thư mục/chia sẻ); CAS theo `md5Checksum` trong script lock (chung lock với `withRegLock_`); `b64` giải ra 1–65536 byte; không có chế độ ghi mù — v2.21.2q (#1089) |
 | `map_set` | GET | `drive_id`\|`sohieu` | `nlm_source_id, status, notebookId`(=`nlm_notebook_id`\|`notebook`)`, nlm_title` | `ok, drive_id, updated` (gọi SAU mỗi `source_add` ok; **v1.18: LUÔN truyền `notebookId` để slot đếm đúng theo notebook**) |
 | `map_unpushed` | GET | — | `includeStale, refresh` | `ok, count, rows[], nlm_quota{tier,cap,pushed,slots_free}` |
 | `map_mark_stale` | GET | `drive_id` | — | `ok, drive_id, updated` |

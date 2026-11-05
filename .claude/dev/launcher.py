@@ -1877,8 +1877,32 @@ _HO_SO_GIA_TRI = {"loai": ("managed", "disabled", "external"), "file_system": ("
 _CHU_KY_SANDBOX = 0.2
 _SANDBOX_GIOI_HAN = ("lay mau /proc tu ben ngoai moi %ss: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. "
                      "DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. "
-                     "Moi lech danh tinh tien trinh (ke ca vong doi binh thuong nhu cha zombie) => KHONG_DO_DUOC: "
+                     "Lech danh tinh tien trinh (#1105): chuyen cha khi cha cu da mat/Z va cha moi la to tien da xac thuc "
+                     "thi duoc tha; moi lech khac (ke ca chuyen ra ngoai cay hay PID 1) => KHONG_DO_DUOC: "
                      "co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do")
+# #1105 §2.3: năm khoá CỐ ĐỊNH của `sandbox_lech` — chỉ số đếm, không pid/tên/đường dẫn (cùng nguyên tắc R27-ALLOW-01).
+_KHOA_LECH = ("chuyen_cha_trong_cay", "chuyen_cha_ngoai_cay", "cha_con_song", "tai_dung", "to_tien_doi")
+
+
+def _phan_loai_lech(c, cu, moi, cha_cu, chuoi, n_bd) -> str:
+    """#1105 §2.2 — hàm THUẦN (không đọc /proc, không rẽ theo nền): phân loại MỘT lần lệch danh tính của `c`.
+
+    `cu`/`moi`: (ppid, starttime) đã xác thực / vừa đọc. `cha_cu`: None khi cha cũ P vắng khỏi /proc, hoặc
+    (trạng thái, starttime) hiện của P. `chuoi`: ((pid, (ppid, starttime)), ...) đã xác thực từ gốc tới P — kể cả gốc.
+    `n_bd`: starttime hiện của cha mới N (None khi N vắng). Trả "tha" (chuyển cha bình thường, đạt cả ba vế
+    (i)(ii)(iii) của §2.1) hoặc đúng một khoá của `_KHOA_LECH`. `c` nằm TRONG chuỗi ⇒ đó là tổ tiên đọc lại bị đổi."""
+    luu = dict(chuoi)
+    if c in luu:
+        return "to_tien_doi"
+    if moi[1] != cu[1]:
+        return "tai_dung"                                                  # hỏng (i)
+    p = luu.get(cu[0])
+    if cha_cu is not None and cha_cu[0] not in ("Z", "X") and (p is None or cha_cu[1] == p[1]):
+        return "cha_con_song"                                              # hỏng (ii)
+    n = luu.get(moi[0])
+    if moi[0] == 1 or n is None or n_bd != n[1]:
+        return "chuyen_cha_ngoai_cay"                                      # hỏng (iii); PID 1 không bao giờ được tha
+    return "tha"
 
 
 def _nhan_duong_sb(p, ws: str) -> str:
@@ -2020,6 +2044,8 @@ class _LayMauSandbox:
         self.thay: dict = {}
         self.da: set = set()
         self.canh: dict = {}         # pid -> (ppid, starttime) đã xác thực, giữ XUYÊN lượt quét (R27-PID-04f)
+        self.chuoi: dict = {}        # pid -> chuỗi tổ tiên đã xác thực từ gốc tới cha, lưu cùng lúc với `canh` (#1105)
+        self.lech: dict = dict.fromkeys(_KHOA_LECH, 0)
         self.loi: list = []
         self.con_chay = False
         self.dung = threading.Event()
@@ -2047,15 +2073,47 @@ class _LayMauSandbox:
             self.loi.append(type(e).__name__)
 
     @staticmethod
-    def _stat(pid):
-        """(ppid, starttime) hoặc None khi tiến trình không còn trong /proc. Lỗi khác (quyền, I/O) NÉM — R27-PROC-03:
-        chỉ biến mất mới là bình thường, đọc bị từ chối là không đo được."""
+    def _stat_tt(pid):
+        """(trạng thái, ppid, starttime) hoặc None khi tiến trình không còn trong /proc. Lỗi khác (quyền, I/O) NÉM —
+        R27-PROC-03: chỉ biến mất mới là bình thường, đọc bị từ chối là không đo được."""
         try:
             st = Path(f"/proc/{pid}/stat").read_bytes()
         except (FileNotFoundError, ProcessLookupError):
             return None
         f = st[st.rindex(b")") + 2:].split()
-        return int(f[1]), f[19]
+        return f[0].decode("ascii", "replace"), int(f[1]), f[19]
+
+    @staticmethod
+    def _stat(pid):
+        t = _LayMauSandbox._stat_tt(pid)
+        return None if t is None else t[1:]
+
+    def _dem(self, nhan: str) -> str:
+        self.lech["chuyen_cha_trong_cay" if nhan == "tha" else nhan] += 1
+        return nhan
+
+    def _lech(self, c, cu, moi, chuoi) -> bool:
+        """`c` đổi (ppid, starttime) từ `cu` sang `moi`. Đọc P và N, hỏi `_phan_loai_lech`, đếm. True = chuyển cha
+        bình thường: cạnh và chuỗi đã xác thực của `c` chuyển sang N. False = lệch thật, người gọi ghi DanhTinhDoi."""
+        p, n = self._stat_tt(cu[0]), self._stat(moi[0])
+        if self._dem(_phan_loai_lech(c, cu, moi, None if p is None else (p[0], p[2]), chuoi,
+                                     None if n is None else n[1])) != "tha":
+            return False
+        self.canh[c] = (moi[0], cu[1])
+        ids = [x[0] for x in chuoi]
+        self.chuoi[c] = chuoi[:ids.index(moi[0]) + 1] if moi[0] in ids else chuoi
+        return True
+
+    def _doc_lai_chuoi(self, chuoi) -> str:
+        """"khop" | "vang" (một tổ tiên đã biến mất: bỏ nhánh, không lỗi) | "lech" (tổ tiên còn sống mà đổi)."""
+        vang = False
+        for p, bo in chuoi:
+            s = self._stat(p)
+            if s is None:
+                vang = True
+            elif s != bo and self._dem(_phan_loai_lech(p, bo, s, None, chuoi, None)) != "tha":
+                return "lech"
+        return "vang" if vang else "khop"
 
     def _quet(self) -> None:
         info: dict = {}
@@ -2067,10 +2125,12 @@ class _LayMauSandbox:
         for c, bo in list(self.canh.items()):   # TRƯỚC return vì gốc vắng (04g); cùng starttime, đổi cha ⇒ lệch
             hien = info.get(c)
             if hien is None or hien[1] != bo[1]:
-                del self.canh[c]                         # đã biến mất (pid có thể đã có chủ mới): ngoại lệ duy nhất
+                del self.canh[c]                         # đã biến mất (pid có thể đã có chủ mới)
+                self.chuoi.pop(c, None)
             elif hien != bo:
-                self.loi.append("DanhTinhDoi")
-                return
+                if not self._lech(c, bo, hien, self.chuoi.get(c, ())):   # #1105: tha chuyển cha bình thường
+                    self.loi.append("DanhTinhDoi")
+                    return
         goc = info.get(self.pid)
         if goc is None or self.goc_bd is None:
             return                       # gốc đã thoát, hoặc chưa từng ghim được (đã ghi ở __init__)
@@ -2079,12 +2139,15 @@ class _LayMauSandbox:
         con: dict = {}
         for c, (pp, bd) in info.items():
             con.setdefault(pp, []).append((c, bd))
-        # R27-PID-04b/c/d — chủ kho chọn THU HẸP (26-10-2026, sau bốn lượt cùng một lớp lỗi): mỗi mục hàng đợi là chuỗi
-        # tổ tiên đã xác thực (gốc trước); con chỉ vào hàng SAU khi chính nó và cả chuỗi được đọc lại khớp ảnh chụp.
-        # Mọi chỗ lệch — con đổi ppid/starttime, tổ tiên biến mất hay đổi, kể cả cha thành zombie rồi con bị chuyển cha
-        # theo vòng đời bình thường — đều là KHÔNG ĐO ĐƯỢC, không phân biệt "êm" với "lỗi". Giá phải trả: một lượt bình
-        # thường đôi khi bị hạ thành KHONG_DO_DUOC; đổi lại sổ không bao giờ khai mạnh hơn phép đo. Chỉ một trường hợp
-        # được coi là bình thường: chính tiến trình đang đọc đã biến mất khỏi /proc.
+        # R27-PID-04b/c/d — lịch sử: chủ kho chọn THU HẸP (26-10-2026, sau bốn lượt cùng một lớp lỗi): mỗi mục hàng đợi
+        # là chuỗi tổ tiên đã xác thực (gốc trước); con chỉ vào hàng SAU khi chính nó và cả chuỗi được đọc lại khớp ảnh
+        # chụp, và MỌI chỗ lệch — kể cả cha thành zombie rồi con bị chuyển cha theo vòng đời bình thường — là KHÔNG ĐO
+        # ĐƯỢC. Giá đo được trên Codex thật: 8/9 lượt bị hạ (#1105 S1), cơ chế là tiến trình nền trong bwrap (S5).
+        # #1105 (đặc tả launcher-sandbox-lay-mau r2 §2.1) mở lại đúng 04c bằng MỘT quy tắc tha, quyết định ở
+        # `_phan_loai_lech`: đổi ppid là chuyển cha bình thường khi (i) con giữ (pid, starttime), (ii) cha cũ vắng / Z / X
+        # / đổi starttime, (iii) cha mới thuộc chuỗi tổ tiên đã xác thực và còn khớp danh tính — khi ấy bỏ nhánh trong
+        # lượt này (lượt sau thấy con dưới cha mới). Về PID 1 hay ra ngoài cây vẫn KHÔNG ĐO ĐƯỢC. Tổ tiên vắng khi đọc
+        # lại chuỗi ⇒ bỏ nhánh, không ghi quan sát; tổ tiên còn sống mà đổi ⇒ lệch. Mọi lệch đếm vào `self.lech`.
         hang = [((self.pid, goc),)]          # (pid, (ppid, starttime)): R27-PID-04e so NGUYÊN bộ, cả cạnh cha
         while hang:
             chuoi = hang.pop()
@@ -2097,11 +2160,20 @@ class _LayMauSandbox:
                 sau = self._stat(c)
                 if sau is None:
                     continue
-                if sau != (cha, bd) or any(self._stat(p) != bo for p, bo in chuoi):
+                if sau != (cha, bd):
+                    if not self._lech(c, (cha, bd), sau, chuoi):
+                        self.loi.append("DanhTinhDoi")
+                        return
+                    continue
+                kq = self._doc_lai_chuoi(chuoi)
+                if kq == "vang":
+                    continue
+                if kq != "khop":
                     self.loi.append("DanhTinhDoi")
                     return
                 hang.append(chuoi + ((c, sau),))
                 self.canh[c] = sau
+                self.chuoi[c] = chuoi
                 # khoá gồm cả cmdline: tiến trình vừa fork chưa exec mang argv của cha, phải xét lại sau exec
                 if (c, bd, tho) in self.da:
                     continue
@@ -2148,6 +2220,7 @@ class _LayMauSandbox:
             else:
                 tt, ld = "KHONG_THAY_LENH", "stdout khong co command_execution nao"
         ban_ghi["sandbox_quan_sat"] = [dict(json.loads(k), so_lan=n) for k, n in thay.items()]
+        ban_ghi["sandbox_lech"] = {k: int(self.lech.get(k, 0)) for k in _KHOA_LECH}
         ban_ghi["sandbox_trang_thai"] = tt
         if ld:
             ban_ghi["sandbox_ly_do"] = ld

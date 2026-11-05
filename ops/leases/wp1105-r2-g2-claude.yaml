@@ -30,7 +30,7 @@ recorder_is_dispatcher: true
 recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; KHONG thi hanh packet nay.'
 
 leased_at_utc: '2026-11-04T15:30:00Z'
-heartbeat_at: '2026-11-04T15:30:00Z'
+heartbeat_at: '2026-11-05T06:20:00Z'
 lease_until: '2026-11-05T15:30:00Z'
 lease_expires_at_utc: '2026-11-05T15:30:00Z'
 
@@ -137,6 +137,10 @@ coordination_paths:
   - ops/leases/wp1105-r2-g1-claude.yaml
 run_minutes: 1440
 heartbeat_required_minutes: 360
+
+dang_ban_chieu_ghi_chu: >-
+  Lan day dau (573b7a5, 04-11) do cong dang lease hong tren ubuntu-26.04 (#1189). #1189 land M f2e33bc; nhanh nay da merge
+  master (8f89755) roi cap nhat heartbeat de kich lai luot dang ban chieu. Noi dung cap khong doi.
 
 chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'

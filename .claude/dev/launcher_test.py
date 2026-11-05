@@ -13102,6 +13102,59 @@ def r1105_chuyen_cha_xuyen_luot():
         cha.wait()
 
 
+@ca
+def r1105_tha_doc_lai_chuoi_to_tien():
+    # identity-chain-bypass (review offline lượt 1): cháu chuyển hợp lệ từ cha cũ (Z/vắng) về gốc, NHƯNG gốc còn sống đổi
+    # ppid (starttime giữ). Vế (iii) chỉ so starttime nên phải có lần đọc lại chuỗi trên đường tha ⇒ DanhTinhDoi,
+    # đếm `to_tien_doi`, không đếm tha — ở cả nhánh trong lượt lẫn xuyên lượt (lượt 2 làm vắng cmdline như A5).
+    if platform.system() != "Linux":
+        return "can /proc cua Linux"
+    m = _tai_launcher_thu()
+    goc = m.Path
+    con, chau = _r27_cay_cha_chau()
+    try:
+        for ten in ("trong_luot", "xuyen_luot"):
+            vet = {"cmd": False, "luot": 1}
+
+            class PathGia(type(Path())):
+                def read_bytes(self):
+                    x = str(self)
+                    bat = vet["cmd"] if ten == "trong_luot" else vet["luot"] == 2
+                    if bat and ten == "xuyen_luot" and x in (f"/proc/{con.pid}/stat", f"/proc/{chau}/cmdline"):
+                        raise FileNotFoundError(2, "da thoat")
+                    b = super().read_bytes()
+                    if x == f"/proc/{chau}/cmdline":
+                        vet["cmd"] = True
+                    elif bat and x == f"/proc/{chau}/stat":
+                        return _r27_sua_stat(b, ppid=str(os.getpid()).encode())
+                    elif bat and x == f"/proc/{con.pid}/stat":
+                        return _r27_sua_stat(b, trang_thai=b"Z")
+                    elif bat and x == f"/proc/{os.getpid()}/stat":
+                        cu = b[b.rindex(b")") + 2:].split()[1]
+                        return _r27_sua_stat(b, ppid=b"2" if cu == b"1" else b"1")
+                    return b
+            m.Path = PathGia
+            try:
+                lay = m._LayMauSandbox(os.getpid(), "/w")
+                lay.thay['{"chuong_trinh": "bwrap"}'] = 1
+                lay.dung.set()
+                lay._chay()
+                if ten == "xuyen_luot":
+                    bang(lay.loi == [] and chau in lay.canh, f"{ten} luot 1: loi={lay.loi}")
+                    vet["luot"] = 2
+                    lay._chay()
+            finally:
+                m.Path = goc
+            d = {}
+            lay.ghi_so(d, Path(os.devnull))
+            lech = d["sandbox_lech"]
+            bang(lay.loi == ["DanhTinhDoi"] and d["sandbox_trang_thai"] == "KHONG_DO_DUOC" and lech["to_tien_doi"] == 1
+                 and lech["chuyen_cha_trong_cay"] == 0, f"{ten}: loi={lay.loi} {lech}")
+    finally:
+        con.kill()
+        con.wait()
+
+
 _R1105_HELPER = r"""
 import ctypes, os, subprocess, sys, time
 if ctypes.CDLL(None, use_errno=True).prctl(36, 1, 0, 0, 0) != 0:
@@ -13398,6 +13451,8 @@ DOT_BIEN = [
                                     '                if not self._lech(c, bo, hien, self.chuoi.get(c, ())) or True:'),
      ["r1105_chuyen_cha_xuyen_luot", "r1105_tien_trinh_that_ve_subreaper"]),
     ("r1105_tha_khong_cap_nhat_canh", ('        self.canh[c] = (moi[0], cu[1])\n', ''), ["r1105_chuyen_cha_xuyen_luot"]),
+    ("r1105_tha_bo_kiem_chuoi", ('if nhan == "tha" and self._doc_lai_chuoi(', 'if False and self._doc_lai_chuoi('),
+     ["r1105_tha_doc_lai_chuoi_to_tien"]),
     ("r1105_bo_sandbox_lech_khi_sach", ('        ban_ghi["sandbox_lech"] = ',
                                         '        if any(self.lech.values()):\n            ban_ghi["sandbox_lech"] = '),
      ["r1105_sandbox_lech_luon_co"]),

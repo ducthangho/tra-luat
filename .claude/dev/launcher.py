@@ -2096,8 +2096,12 @@ class _LayMauSandbox:
         """`c` đổi (ppid, starttime) từ `cu` sang `moi`. Đọc P và N, hỏi `_phan_loai_lech`, đếm. True = chuyển cha
         bình thường: cạnh và chuỗi đã xác thực của `c` chuyển sang N. False = lệch thật, người gọi ghi DanhTinhDoi."""
         p, n = self._stat_tt(cu[0]), self._stat(moi[0])
-        if self._dem(_phan_loai_lech(c, cu, moi, None if p is None else (p[0], p[2]), chuoi,
-                                     None if n is None else n[1])) != "tha":
+        nhan = _phan_loai_lech(c, cu, moi, None if p is None else (p[0], p[2]), chuoi, None if n is None else n[1])
+        # identity-chain-bypass (review offline lượt 1, chủ kho duyệt vá hẹp 05-11): (iii) chỉ so starttime của N, nên
+        # trước khi tha phải đọc lại MỌI tổ tiên còn sống trừ P — tổ tiên nào đổi ppid/starttime ⇒ lệch (to_tien_doi).
+        if nhan == "tha" and self._doc_lai_chuoi(tuple(x for x in chuoi if x[0] != cu[0])) == "lech":
+            return False
+        if self._dem(nhan) != "tha":
             return False
         self.canh[c] = (moi[0], cu[1])
         ids = [x[0] for x in chuoi]

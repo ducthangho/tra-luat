@@ -58,7 +58,7 @@ thay_the_cho:
 size_limit:
   effective_write_paths: 2
   net_product_files: 5
-  added_lines: 1000
+  added_lines: 1250
 nang_tran:
   ai_nang: Chủ kho ducthangho theo protocol §2 — ĐỀ NGHỊ, CHƯA ĐƯỢC DUYỆT
   can_cu: K1/spec identity/hash là input K4, cùng rollout ADR0063 và test consumer.
@@ -101,4 +101,16 @@ authority_notes:
   remainsunknown.
 - reviewed_sha_required initially pins inherited handoff/startH29 only; controller
   must rebind actualfinalH before audit/CI. It does not authorize oldhead merge.
+- Owner explicit6648984609 supersedes only prior1000cap with1250 forcompleteP2+all6P3;
+  frozenr2spec/prompt bytes retain historicaltext. Hardrun deadline04:53:42 unchanged.
 reviewed_sha_required: 29ee9ca74d61544fbddd56c39dabbe194d26408e
+size_override:
+  approved_by: ducthangho
+  source: https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-6648984609
+  old_added_lines: 1000
+  new_added_lines: 1250
+  measured_proposed_added: 1176
+  measured_proposed_deleted: 11
+  proposed_patch_sha256: 28ea685432950eaaba2f9e39c616087140642251de60502c1bdaaacab63af642
+  scope: sameg4 P2+all6P3, onlytwo writablepaths
+  no_run_or_budget_reset: true

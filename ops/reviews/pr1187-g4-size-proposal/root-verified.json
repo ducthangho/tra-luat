@@ -1,0 +1,9 @@
+{
+  "patch_sha256": "28ea685432950eaaba2f9e39c616087140642251de60502c1bdaaacab63af642",
+  "method": "temporary index initialized exactH29; applycached then directgitdiff immutable1f vsproposedindex; candidate source/index unchanged",
+  "net_files": 5,
+  "added": 1176,
+  "deleted": 11,
+  "numstat": "181\t5\t.claude/dev/packet_loop.py\n861\t6\t.claude/dev/packet_loop_test.py\n4\t0\tdocs/PROTOCOL_DA_PHIEN.md\n24\t0\tdocs/adr/0063-merge-spec-ref-va-human-audit.md\n106\t0\tops/specs/PR1184-MERGE-CONTRACT-r2.md\n",
+  "proposed_tree": "a2ff27f88218d2dbf1c58585a1434d900a18060c"
+}

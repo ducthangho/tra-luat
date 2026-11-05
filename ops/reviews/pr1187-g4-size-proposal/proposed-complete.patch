@@ -36,7 +36,7 @@ index 5bf4181..ce2b00a 100644
          out = Path(a.offline_stdout).read_bytes()
          dong = [x for x in out.decode("utf-8").splitlines() if x.strip()]
 diff --git a/.claude/dev/packet_loop_test.py b/.claude/dev/packet_loop_test.py
-index ed9903d..c430874 100644
+index ed9903d..39f4d30 100644
 --- a/.claude/dev/packet_loop_test.py
 +++ b/.claude/dev/packet_loop_test.py
 @@ -20,6 +20,7 @@ Chạy: `python .claude/dev/packet_loop_test.py`
@@ -173,7 +173,7 @@ index ed9903d..c430874 100644
  for packet in ("gói-1187", "packet with spaces"):
      CASES.append(("r1187_format_unquoted_"+packet,_ca1187("spec",lambda x,p=packet:(_format1187(x,("packet_id: "+p+"\nrevision: 1\n").encode()),x["ls"].update(packet_id=p)),False)))
  MUTANTS["r1187_format_ignore_invalid"] = ('and not (re.fullmatch(declaration, line) or re.fullmatch(inline, line)):', 'and False:', ["r1187_format_quoted", "r1187_format_no_semicolon", "r1187_format_indent"])
-@@ -10210,6 +10246,198 @@ MUTANTS.update({
+@@ -10210,6 +10246,203 @@ MUTANTS.update({
  })
  
  
@@ -204,7 +204,12 @@ index ed9903d..c430874 100644
 +
 +for row in _ACTUAL_SPECS1187:
 +    CASES.append(("r1187_actual_" + row[0], lambda c,r=row: _actual_spec1187(c,r)))
-+CASES.append(("r1187_actual_own_spec_at_H", lambda c: _actual_spec1187(c,_ACTUAL_SPECS1187[2],True)))
++def _own_head1187(c):
++    row = list(_ACTUAL_SPECS1187[2]); row[1] = _g(ROOT,"rev-parse","HEAD")
++    _actual_spec1187(c,tuple(row),True)
++
++
++CASES.append(("r1187_actual_own_spec_at_H", _own_head1187))
 +for label, suffix in {"revision":"Revision: 2;", "packet":"Packet_id: wrong;", "upper":"REVISION: 1;"}.items():
 +    CASES.append(("r1187_inline_mixed_"+label, _ca1187("spec", lambda x,s=suffix: _format1187(x, ("# wp1187 r1 - valid\n- packet_id: wp1187; revision: 1; "+s+"\n").encode()))))
 +CASES += [("r1187_inline_prose", _ca1187("spec", lambda x: _format1187(x,b"- packet_id: wp1187; revision: 1; healthy inline prose\n"),False)),
@@ -372,7 +377,7 @@ index ed9903d..c430874 100644
  def main() -> int:
      _ = [s.reconfigure(encoding="utf-8", errors="backslashreplace")
           for s in (sys.stdout, sys.stderr) if hasattr(s, "reconfigure")]
-@@ -10298,7 +10526,7 @@ def main() -> int:
+@@ -10298,7 +10531,7 @@ def main() -> int:
                  suite = importlib.util.module_from_spec(spec)
                  spec.loader.exec_module(suite)
                  suite.HERE = HERE  # fixture canonical; __file__ vẫn là harness đột biến

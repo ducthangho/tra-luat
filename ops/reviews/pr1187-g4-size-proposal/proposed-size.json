@@ -1,11 +1,33 @@
 {
-  "proposed_increment_added": 257,
-  "proposed_increment_deleted": 24,
-  "total_added_from_base": 1193,
-  "total_deleted_from_base": 33,
+  "rows": [
+    {
+      "path": ".claude/dev/packet_loop.py",
+      "added": 181,
+      "deleted": 5
+    },
+    {
+      "path": ".claude/dev/packet_loop_test.py",
+      "added": 861,
+      "deleted": 6
+    },
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "added": 4,
+      "deleted": 0
+    },
+    {
+      "path": "docs/adr/0063-merge-spec-ref-va-human-audit.md",
+      "added": 24,
+      "deleted": 0
+    },
+    {
+      "path": "ops/specs/PR1184-MERGE-CONTRACT-r2.md",
+      "added": 106,
+      "deleted": 0
+    }
+  ],
+  "total_added_from_base": 1176,
+  "total_deleted_from_base": 11,
   "cap": 1000,
-  "exceeds_by": 193,
-  "syntax": "passed",
-  "candidate_head": "29ee9ca74d61544fbddd56c39dabbe194d26408e",
-  "status": "proposal; not admitted or committed; targeted validation pending"
+  "status": "scratch proposal; not admitted; candidate clean H29; targeted validation pending"
 }

@@ -1,0 +1,86 @@
+[
+ {
+  "_links": {
+   "html": {
+    "href": "https://github.com/ducthangho/tra-luat/pull/1095#pullrequestreview-5725684104"
+   },
+   "pull_request": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1095"
+   }
+  },
+  "author_association": "NONE",
+  "body": "<!-- codex-review-receipt:v1 -->\n\n\n### 💡 Codex Review\n\nHere are some automated review suggestions for this pull request.\n\n**Reviewed commit:** `9440278ab4`\n    \n\n<details> <summary>ℹ️ About Codex in GitHub</summary>\n<br/>\n\n[Your team has set up Codex to review pull requests in this repo](https://chatgpt.com/codex/cloud/settings/general). Reviews are triggered when you\n- Open a pull request for review\n- Mark a draft as ready\n- Comment \"@codex review\".\n\nIf Codex has suggestions, it will comment; otherwise it will react with 👍.\n\n\n\n\nCodex can also answer questions or update the PR. Try commenting \"@codex address that feedback\".\n            \n</details>",
+  "commit_id": "9440278ab466e8d9462f39675b124d7f707cec78",
+  "copilot_code_review_effort": null,
+  "html_url": "https://github.com/ducthangho/tra-luat/pull/1095#pullrequestreview-5725684104",
+  "id": 5725684104,
+  "is_copilot_code_review": false,
+  "node_id": "PRR_kwDOTNeRjc8AAAABVUcBiA",
+  "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1095",
+  "state": "COMMENTED",
+  "submitted_at": "2026-11-01T00:41:32Z",
+  "user": {
+   "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+   "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+   "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+   "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+   "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/apps/chatgpt-codex-connector",
+   "id": 199175422,
+   "login": "chatgpt-codex-connector[bot]",
+   "node_id": "BOT_kgDOC98s_g",
+   "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+   "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+   "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+   "type": "Bot",
+   "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+   "user_view_type": "public"
+  }
+ },
+ {
+  "_links": {
+   "html": {
+    "href": "https://github.com/ducthangho/tra-luat/pull/1095#pullrequestreview-5725695338"
+   },
+   "pull_request": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1095"
+   }
+  },
+  "author_association": "OWNER",
+  "body": "",
+  "commit_id": "37d5965b30462ef2340a26dd19333873e14d84d5",
+  "copilot_code_review_effort": null,
+  "html_url": "https://github.com/ducthangho/tra-luat/pull/1095#pullrequestreview-5725695338",
+  "id": 5725695338,
+  "is_copilot_code_review": false,
+  "node_id": "PRR_kwDOTNeRjc8AAAABVUctag",
+  "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1095",
+  "state": "COMMENTED",
+  "submitted_at": "2026-11-01T00:43:25Z",
+  "user": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+   "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+   "followers_url": "https://api.github.com/users/ducthangho/followers",
+   "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+   "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/ducthangho",
+   "id": 12748935,
+   "login": "ducthangho",
+   "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+   "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+   "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+   "repos_url": "https://api.github.com/users/ducthangho/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/ducthangho",
+   "user_view_type": "public"
+  }
+ }
+]

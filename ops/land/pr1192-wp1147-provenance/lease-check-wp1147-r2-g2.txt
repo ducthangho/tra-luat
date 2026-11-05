@@ -1,0 +1,5 @@
+86eb97743d64681a833bdf5a42962d98ad00845f ops: rut han lease wp1147-r2-g2-claude — packet #1147 da merge (PR #1192)
+LỆNH check KHÔNG CHẠY hai lớp GitHub: đo ISSUE/PR và dò comment; dùng `kiem-github`
+lease wp1147-r2-g2-claude ĐĂNG ĐƯỢC — issue #1147, neo 7295d5c71712, hết hạn 2026-11-05T03:05:00Z, prompt ops/specs/wp1147-r2.md khớp băm b8f69631a070
+rc=0
+b8f69631a070aab3effee8c40e21a7159964885363287f94e682c5e5afa2cd96  ops/specs/wp1147-r2.md

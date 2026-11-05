@@ -12993,6 +12993,13 @@ def r1105_phan_loai_lech_ham_thuan():
          "to_tien_doi"),
         ("tha_goc_doi_ppid", 40, (30, b"400"), (10, b"400"), None, ch, b"100", {10: (7, b"100"), 20: (10, b"200")}, "tha"),
         ("tha_to_tien_vang", 40, (30, b"400"), (10, b"400"), None, ch, b"100", {10: (1, b"100"), 20: None}, "tha"),
+        # thứ tự §2.3 (errata r3) khi nhiều điều kiện cùng hỏng: (i) > (ii) > phần đầu (iii) > vế chuỗi > tha
+        ("nhieu_hong_tai_dung", 40, (30, b"400"), (50, b"401"), ("S", b"300"), ch, b"500", {10: (1, b"100"), 20: (99, b"200")},
+         "tai_dung"),
+        ("nhieu_hong_cha_con_song", 40, (30, b"400"), (50, b"400"), ("S", b"300"), ch, b"500",
+         {10: (1, b"100"), 20: (99, b"200")}, "cha_con_song"),
+        ("nhieu_hong_ngoai_cay", 40, (30, b"400"), (20, b"400"), None, ch, b"201", {10: (1, b"100"), 20: (99, b"201")},
+         "chuyen_cha_ngoai_cay"),
     ]
     # Đủ NĂM giá trị trả về: "tha" (đếm vào `chuyen_cha_trong_cay`) + bốn nhãn không tha; mỗi giá trị ≥ 1 ca.
     ra = {x[-1] for x in bang_ca}
@@ -13514,6 +13521,10 @@ DOT_BIEN = [
      ["r1105_tha_doc_lai_chuoi_to_tien"]),
     ("r1105_tha_doi_ppid_goc", ('        if pid == chuoi[0][0]:\n            hien = (bo[0], hien[1])\n', ''),
      ["r1105_tha_doc_lai_chuoi_to_tien"]),
+    ("r1105_ham_dao_thu_tu", [('    n = luu.get(moi[0])\n    if moi[0] == 1 or n is None or n_bd != n[1]:\n        return "chuyen_cha_ngoai_cay"                                      # hỏng (iii); PID 1 không bao giờ được tha\n', ''),
+                              ('            return "to_tien_doi"\n    return "tha"\n',
+                               '            return "to_tien_doi"\n    n = luu.get(moi[0])\n    if moi[0] == 1 or n is None or n_bd != n[1]:\n        return "chuyen_cha_ngoai_cay"                                      # hỏng (iii); PID 1 không bao giờ được tha\n    return "tha"\n')],
+     ["r1105_phan_loai_lech_ham_thuan"]),
     ("r1105_ham_doi_nhan_khong_tha", ('        return "chuyen_cha_ngoai_cay"', '        return "cha_con_song"'),
      ["r1105_phan_loai_lech_ham_thuan"]),
     ("r1105_bo_sandbox_lech_khi_sach", ('        ban_ghi["sandbox_lech"] = ',

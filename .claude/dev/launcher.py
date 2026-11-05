@@ -1892,7 +1892,8 @@ def _phan_loai_lech(c, cu, moi, cha_cu, chuoi, n_bd, to_tien_hien) -> str:
     `n_bd`: starttime hiện của cha mới N (None khi N vắng). `to_tien_hien`: {pid: (ppid, starttime) hiện, hoặc None khi
     vắng} của các tổ tiên trong `chuoi` trừ P. Trả "tha" (chuyển cha bình thường, đạt cả ba vế (i)(ii)(iii) của §2.1;
     `_dem` đếm nó vào `chuyen_cha_trong_cay`) hoặc một trong bốn nhãn không tha. `c` nằm TRONG chuỗi ⇒ đó là tổ tiên
-    đọc lại bị đổi."""
+    đọc lại bị đổi. Thứ tự khi nhiều điều kiện cùng hỏng (đặc tả r3 §2.3): (i) ⇒ tai_dung; (ii) ⇒ cha_con_song; phần
+    đầu (iii) — N là PID 1 / ngoài chuỗi / starttime lệch ⇒ chuyen_cha_ngoai_cay; vế chuỗi ⇒ to_tien_doi; còn lại tha."""
     luu = dict(chuoi)
     if c in luu:
         return "to_tien_doi"

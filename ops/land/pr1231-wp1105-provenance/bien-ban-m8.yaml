@@ -10,6 +10,7 @@ review:
   offline: 'run 2d61d684 approve tren d5d521e (model/effort KHONG_DO_DUOC, sandbox DO_DUOC)'
   connector: 'issuecomment-6657536573 sach tren d5d521e; P2 df34637 dong theo issuecomment-6657983059'
   so_loi_goi_codex: 6
+  assurance_81: 'DAT theo mien chu kho issuecomment-6664163643 (assurance_81_mien: d5d521e, hoi to 17:05:43Z), chi model/effort luot 4'
 windows:
   phan_loai: required
   nguon: 'lease g3 dieu_kien_merge windows required; mien K6 issuecomment-6658278170; ngoai le A10 issuecomment-6654573852'

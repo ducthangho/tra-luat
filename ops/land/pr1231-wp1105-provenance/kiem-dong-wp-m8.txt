@@ -2,3 +2,8 @@
 # checkout: e8827606367a82d244f31815a117edbd6d41cdbe ; origin/master: b255b0b7131da7f6e026639f6b0da0a06cc68a44 ; luc: 2026-11-05T16:41:37Z
 ĐÓNG ĐƯỢC WP LAUNCHER-SANDBOX-LAY-MAU — merge fe84620f897913c7f6c2ce5a0c7316a49655e82f
 rc=0
+
+# LAN 2 (sau khi neo mien §8.1 vao issuecomment-6664163643; bien-ban-m8.yaml them dong review.assurance_81)
+# checkout: cf9d9b5c56a91e47c54d002ffaf2f83763b2da47 (+ thay doi chua commit trong ops/land) ; luc: 2026-11-05T17:07:07Z
+ĐÓNG ĐƯỢC WP LAUNCHER-SANDBOX-LAY-MAU — merge fe84620f897913c7f6c2ce5a0c7316a49655e82f
+rc=0

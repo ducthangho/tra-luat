@@ -2,8 +2,8 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
 # TRANG THAI: merged (fe84620), LANDED — du bon moc §10.2.2 tren DUNG merge SHA (run push master 42032872356 + wd-run 42058496716).
-# Uy quyen land: comment approve_merge HOI TO 6662804340 (dang 16:05:48Z, SAU merge 13:06:43Z). §8.1: model/effort phuc vu do lai mot
-# phan, phan con thieu MIEN theo chu kho. Ban dau cua ho so nay (commit 737c26a) ghi landed false; nang len sau khi co du hai neo.
+# Uy quyen land: comment approve_merge HOI TO 6662804340 (16:05:48Z). §8.1: model/effort phuc vu do lai mot phan, phan con thieu MIEN
+# bang comment HOI TO 6664163643 `assurance_81_mien` (17:05:43Z). Ca hai dang SAU merge 13:06:43Z. Ban dau (737c26a) ghi landed false.
 # NHAN: measured (phien nay do lai, co tep nguon) / loi_khai_co_neo (lay tu hien vat/comment co neo, phien nay khong chay lai) /
 #       thuat_lai (chi co loi ke cua phien khac) / not_measured.
 # Readback tho: ops/land/pr1231-wp1105-provenance/ (SHA256SUMS kem). Moi phep do REST: GET qua proxy phien bang GITHUB_PAT.
@@ -155,10 +155,12 @@ trang_thai_packet:
     (4) review neo DUNG authorized_head d5d521e: offline luot 4 approve, connector sach; P2 tren df34637 dong theo quyet dinh chu kho
     (a); (5) uy quyen land: DAT bang comment approve_merge HOI TO 6662804340 neo d5d521e (dang SAU merge, xem authorization_ghi_chu);
     (6) muc tieu packet: xem nghiem_thu (phan lon loi_khai_co_neo; A10 owner_waived); (7) §8.1: DAT theo MIEN chu kho cho phan
-    model/effort phuc vu khong do duoc (assurance_81.mien_chu_kho_model_effort); sandbox DO_DUOC.
+    model/effort phuc vu khong do duoc — comment HOI TO 6664163643 `assurance_81_mien: d5d521e…` (assurance_81.mien_chu_kho_model_effort);
+    sandbox DO_DUOC.
   lich_su_nhan: >-
     737c26a: landed false — thieu (5) comment neo SHA va (7) model/effort KHONG_DO_DUOC (chot phien dieu phoi 15:57Z, tien le pr1198).
-    Nang len true sau: (7) do lai + mien chu kho (send_message 16:05Z), (5) comment 6662804340 (16:05:48Z).
+    Nang len true sau: (7) do lai + mien chu kho (send_message 16:05Z), (5) comment 6662804340 (16:05:48Z). Connector P1 r4483463940
+    (PR #1244, cf9d9b5): mien (7) chi co nguon thuat_lai => neo lai vao comment 6664163643 (17:05:43Z) cua chu kho, dung SHA + pham vi.
 
 assurance_81:
   reviewer_assurance_81: DAT_THEO_MIEN_CHU_KHO
@@ -174,9 +176,14 @@ assurance_81:
       turn_context la cau hinh phia CLIENT, khong phai may chu xac nhan; 31 token_usage_record khong mang truong model nen model
       theo tung phan hoi khong do duoc; 2 khung trong run.json khong doc duoc => model/effort PHUC VU van KHONG_DO_DUOC.
     mien_chu_kho_model_effort: >-
-      thuat_lai — chu kho trong phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 (chuyen nguyen van qua send_message 16:05Z):
-      "về model và effort của codex hãy thử đo lại, nếu không được tôi cho phép bỏ qua". Da thu do lai (model_effort_do_lai) va
-      khong do duoc phan phuc vu => phan thieu cua moc model/effort duoc MIEN theo chu kho (owner_waived). Khong vien dan #1240.
+      measured — readback-mien-81-issuecomment-6664163643.json: user ducthangho, created_at = updated_at = 2026-11-05T17:05:43Z,
+      tren PR #1231 (https://github.com/ducthangho/tra-luat/pull/1231#issuecomment-6664163643), dong dau
+      `assurance_81_mien: d5d521e3e600e9c549cf5dc9263ffc4385c13407`. Pham vi chu kho tu ghi: CHI model/effort PHUC VU khong do duoc
+      cua luot review offline 4 (launcher run 2d61d684) tren d5d521e; KHONG mien exact SHA, ma_thoat, stdout_sha256, verdict hay
+      sandbox. Loi mien dang SAU merge 13:06:43Z (~4 gio) — la XAC NHAN HOI TO; chi thi goc trong phien dieu phoi
+      session_015GtxraXfMD1t2FJLzzGDr4 ("về model và effort của codex hãy thử đo lại, nếu không được tôi cho phép bỏ qua") chi la
+      thuat_lai. Da thu do lai truoc (model_effort_do_lai). Khong vien dan #1240. CAVEAT #566: comment dang bang token chu kho deu
+      hien ducthangho. Ban truoc cua khoi nay neo vao send_message (thuat_lai) — connector P1 r4483463940 tren PR #1244 bat; thay neo.
     effort: 'measured — kiem-merge/run-offline-l4.json effort_phuc_vu_trang_thai KHONG_DO_DUOC (theo model).'
     sandbox_mode: 'measured — kiem-merge/run-offline-l4.json sandbox_trang_thai DO_DUOC, co sandbox_lech (muc tieu cua chinh packet nay, A13).'
   ghi_chu: 'Khong nang nhan: packet sua dung luong do sandbox; model/effort phuc vu van khong do duoc tren luot nay.'

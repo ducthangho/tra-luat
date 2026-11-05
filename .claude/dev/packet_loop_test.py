@@ -9968,15 +9968,16 @@ def _transition_cli1187(x, w, h, bad=False):
     x["transition"] = raw
 
 
-def _transition_case1187(*args,**kwargs):
-    fn = _c1106_ca(*args,**kwargs)
+def _transition_case1187(rc_doi, phai="", cam=None, **kwargs):
     def case(c):
         try:
-            return fn(c)
-        except AssertionError:
-            raise
+            rc,o,e = _c1106(c,**kwargs)
         except (Exception, SystemExit) as ex:
             raise CliSapDo("transition1187 consumer crashed") from ex
+        if _co_banner(o) or _co_banner(e):
+            raise CliSapDo("transition1187 CLI traceback")
+        _doi(rc_doi,rc,e,"transition1187")
+        assert phai in _txt(e) and not (cam and cam in _txt(e)), "transition1187 diagnostic changed"
     return case
 
 
@@ -10425,7 +10426,7 @@ def _harness_fault1187(c, kind, stage, error):
 CASES.append(("r1187_docs_positive",_docs_positive1187))
 for kind in ("docs","transition"):
     for stage in ("import","setup","dispatch"):
-        for error in (RuntimeError,subprocess.TimeoutExpired):
+        for error in (AssertionError,RuntimeError,subprocess.TimeoutExpired):
             CASES.append((f"r1187_{kind}_{stage}_{error.__name__}",lambda c,k=kind,s=stage,e=error:_harness_fault1187(c,k,s,e)))
 
 

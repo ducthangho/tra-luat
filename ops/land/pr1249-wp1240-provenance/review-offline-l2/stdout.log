@@ -1,0 +1,36 @@
+Không có phát hiện P0/P1/P2 hoặc P3 mới. Đã review toàn bộ diff 4 tệp theo đặc tả r1; hash đặc tả khớp.
+
+- HEAD: `ecd30737e10cb7cdffe0e17178c28b3a12448874`
+- Tree: `1b18da0468a9b04a2d0d567935157d17f3c5111f`
+- Reviewer: `openai_codex / openai / codex_cli / machine`; model/effort: `KHONG_DO_DUOC`; sandbox thực tế: `workspace-write`.
+
+| Tiêu chí | Vế dương và phản chứng |
+|---|---|
+| A1 | ADR có đúng một dòng §20; xoá dòng ⇒ rc 9. |
+| A2 | Ba cụm bắt buộc đều xuất hiện đúng một lần; thay câu ⇒ bị bắt. |
+| A3 | Hai câu cũ đều vắng; chèn lại ⇒ bị bắt. |
+| A4 | Model/effort `not_measured` được nhận; m1 bị giết đúng c23. |
+| A5 | Chỉ sandbox measured được nhận; thiếu sandbox đúng một vi phạm; m1/m2 bị giết. |
+| A6 | Giá trị rác bị từ chối đúng khoá; m3 bị giết. |
+| A7 | Base/head chạy trong cùng một lệnh, stdout giống từng byte: **98 ĐẠT · 25/28 miễn trừ · 0 vi phạm**, rc 0. |
+| A8 | Diff rỗng, hai blob giống nhau; đột biến ⇒ diff rc 1, blob khác. |
+| A9 | Không có token phụ thuộc nền tảng; thêm `encoding=` ⇒ đếm 1. |
+| A10 | Doctrine, Ruff delta, release và full selftest đạt; các đột biến đều bị bắt. |
+| A11 | ADR đủ (i)–(vi), đúng Q1/Q2; xoá (iv) ⇒ mất neo `identity provider`. |
+
+Kết quả kiểm thử:
+
+- `python ops/land_evidence_nguon_test.py`: rc **0**, `CA: 23/23`, `DOT BIEN: 116/116`, `TONG: DAT`.
+- `python scripts/tl.py --selftest`: rc **0**, **1777/1777**. Full suite trên đột biến header phiên bản trả rc **1**, bắt đúng lỗi phiên bản.
+- `release-verify`: rc **0**, `ok=true`, **184/184**.
+- Ruff **0.16.9**: hai tệp thay đổi đều rc 0 trên base/head; delta bằng 0.
+
+Lượt selftest đầu đỏ hai ca vì cấu hình Git toàn cục yêu cầu ký commit qua endpoint bị sandbox chặn. Chạy lại với `GIT_CONFIG_GLOBAL=/dev/null` cho repo kiểm thử tạm đạt toàn bộ. Windows `not_required` theo A9; GitHub CI `not_run` trong review offline.
+
+**ĐỐI CHIẾU LƯỢT TRƯỚC:** F1 P3 chưa được tuyên bố vá; giữ nợ **#1236** theo chỉ thị, không tính lại thành P1/P2.
+
+**K-f:** Clone đầu tiên ghi vào `/tmp/rv1240-copy`. Cấu hình, test và đột biến chạy trong các bản sao `/tmp/rv1240-copy`, `/tmp/rv1240-base`, `/tmp/rv1240-mutant`; hiện vật ở `/tmp/rv1240-evidence`. Tôi **KHÔNG ghi gì vào checkout gốc**. Đối soát **12.406/12.406 tệp**, gồm `.git` và ignored: **0 delta**; `.git/config` giữ nguyên.
+
+[Lệnh, rc, hash và bằng chứng đầy đủ](/tmp/rv1240-evidence/review-metadata.json).
+
+KET_LUAN: approve

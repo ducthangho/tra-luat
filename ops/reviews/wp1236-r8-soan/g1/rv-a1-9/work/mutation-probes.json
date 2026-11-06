@@ -1,0 +1,144 @@
+{
+  "old_anchors": [
+    {
+      "anchor": " or m[3] == \"errexit\"",
+      "previous_count": 1,
+      "head_count": 0
+    },
+    {
+      "anchor": "(\"o\" in m[2]) != bool(m[3]) or ",
+      "previous_count": 1,
+      "head_count": 0
+    }
+  ],
+  "mutants": [
+    {
+      "name": "own_disable_only_with_pipe",
+      "anchor": "    if RE_TAT_TUY_CHON.search(",
+      "replacement": "    if RE_ONG.search(run) and RE_TAT_TUY_CHON.search(",
+      "target": "a14",
+      "classification": "GIET",
+      "detail": "DO:a14_k7_yaml:tat_e_dai/mac_dinh: mong not_measured/tat_tuy_chon_shell, được passed []"
+    },
+    {
+      "name": "own_disable_reason_removed",
+      "anchor": "        return \"tat_tuy_chon_shell\"",
+      "replacement": "        return None",
+      "target": "a14",
+      "classification": "GIET",
+      "detail": "DO:a14_k7_yaml:tat_pf/mac_dinh: mong not_measured/tat_tuy_chon_shell, được passed []"
+    },
+    {
+      "name": "own_absent_shell_allowed",
+      "anchor": "    if shell != \"bash\":",
+      "replacement": "    if shell not in (None, \"bash\"):",
+      "target": "a14",
+      "classification": "GIET",
+      "detail": "DO:a14_k7_yaml:b: mong not_measured/ong_khong_pipefail, được passed []"
+    },
+    {
+      "name": "own_sh_allowed",
+      "anchor": "    if shell != \"bash\":",
+      "replacement": "    if shell not in (\"sh\", \"bash\"):",
+      "target": "a14",
+      "classification": "GIET",
+      "detail": "DO:a14_k7_yaml:tre/sh: mong not_measured/ong_khong_pipefail, được not_measured ['ong_cau_truc_khong_do_duoc:packet-loop selftest']"
+    },
+    {
+      "name": "own_pwsh_allowed",
+      "anchor": "    if shell != \"bash\":",
+      "replacement": "    if shell not in (\"pwsh\", \"bash\"):",
+      "target": "a14",
+      "classification": "GIET",
+      "detail": "DO:a14_k7_yaml:tre/pwsh: mong not_measured/ong_khong_pipefail, được not_measured ['ong_cau_truc_khong_do_duoc:packet-loop selftest']"
+    },
+    {
+      "name": "own_no_pipeline_blocked",
+      "anchor": "        return None   # bước không ống:",
+      "replacement": "        return \"ong_khong_pipefail\"   # bước không ống:",
+      "target": "a14d",
+      "classification": "GIET",
+      "detail": "pipefail:lease-publish selftest (đo lại', 'ong_khong_pipefail:don-nhanh selftest (chốt xoá n', 'ong_khong_pipefail:bo ca gate chay TRONG cgroup d', 'ong_khong_pipefail:codex credential selftest (pac']"
+    },
+    {
+      "name": "own_drop_errexit_token",
+      "anchor": "r\"errexit|",
+      "replacement": "r\"",
+      "target": "a14",
+      "classification": "SONG_SOT",
+      "detail": ""
+    },
+    {
+      "name": "own_drop_plus_e_token",
+      "anchor": "(?<![\\w-])\\+['\\\"]*[A-Za-z]*e|",
+      "replacement": "",
+      "target": "a14",
+      "classification": "SONG_SOT",
+      "detail": ""
+    },
+    {
+      "name": "own_drop_keyword_set",
+      "anchor": "set|",
+      "replacement": "",
+      "target": "a14",
+      "classification": "GIET",
+      "detail": "DO:a14_k7_yaml:tre/bash: mong not_measured/ong_cau_truc_khong_do_duoc, được passed []"
+    },
+    {
+      "name": "own_drop_keyword_builtin",
+      "anchor": "builtin|",
+      "replacement": "",
+      "target": "a14",
+      "classification": "SONG_SOT",
+      "detail": ""
+    },
+    {
+      "name": "own_drop_keyword_command",
+      "anchor": "command|",
+      "replacement": "",
+      "target": "a14",
+      "classification": "SONG_SOT",
+      "detail": ""
+    },
+    {
+      "name": "own_drop_keyword_shopt",
+      "anchor": "shopt|",
+      "replacement": "",
+      "target": "a14",
+      "classification": "SONG_SOT",
+      "detail": ""
+    },
+    {
+      "name": "own_drop_keyword_function",
+      "anchor": "function|",
+      "replacement": "",
+      "target": "a14",
+      "classification": "SONG_SOT",
+      "detail": ""
+    },
+    {
+      "name": "own_drop_keyword_eval",
+      "anchor": "eval|",
+      "replacement": "",
+      "target": "a14",
+      "classification": "GIET",
+      "detail": "DO:a14_k7_yaml:eval/bash: mong not_measured/ong_cau_truc_khong_do_duoc, được passed []"
+    },
+    {
+      "name": "own_drop_keyword_source",
+      "anchor": "source|",
+      "replacement": "",
+      "target": "a14",
+      "classification": "SONG_SOT",
+      "detail": ""
+    },
+    {
+      "name": "own_drop_keyword_exec",
+      "anchor": "|exec)",
+      "replacement": ")",
+      "target": "a14",
+      "classification": "SONG_SOT",
+      "detail": ""
+    }
+  ]
+}

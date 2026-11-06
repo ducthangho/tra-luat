@@ -418,6 +418,19 @@ def a14_k7_yaml():
     q = copy.deepcopy(p)
     q["moc"]["checkout"][3]["sha"] = "1" * 40
     ky(text, q, "not_measured", "khong_xac_dinh_sha_checkout", "h")
+    R, L = "        run: python .claude/dev/packet_loop_test.py\n", "python .claude/dev/packet_loop_test.py | cat"   # 4493205478: THỨ TỰ
+    for ten, sh, than, ly in (("k", "", [L, "set -o pipefail"], "ong_khong_pipefail"),
+                              ("m", "", ["set -euo pipefail", "set +o pipefail", L], "ong_khong_pipefail"),
+                              ("n", "", ["set -o pipefail", "set +e", L], "tat_errexit"),
+                              ("o", "", [f"set -o pipefail; {L}"], "set_khong_doc_duoc"),
+                              ("p", "        shell: pwsh\n", ["set -o pipefail", L], "ong_khong_pipefail"),
+                              ("q", "        shell: bash\n", ["set +o pipefail", L], "ong_khong_pipefail")):
+        ky(text, bien_the_yaml(p, lambda v, sh=sh, than=than: v.replace(R, sh + "        run: |\n" + "".join(f"          {x}\n" for x in than))),
+           "not_measured", ly, ten)
+    for ten, cu, moi in (("r", "== gen_instructions selftest 44/44 ==", "== gen_instructions selftest 0/0 =="),   # 4493205470: đếm > 0
+                         ("s", "2/2 ca TỰ KIỂM", "0/0 ca TỰ KIỂM"), ("t", "SỐ LIỆU GOM: ca=61", "SỐ LIỆU GOM: ca=0")):
+        bang(text.count(cu) == 1, f"{ten}: mốc {cu!r}")
+        ky(text.replace(cu, moi), p, "not_measured", "thieu_dau_hieu", ten)
 
 
 @ca
@@ -426,6 +439,8 @@ def a14d_k7_yaml_duong():
     sua = (lambda v: v.replace(BLOCK + "        run: python .claude/dev/packet_loop_test.py\n",
                                BLOCK + "        shell: bash\n        run: python .claude/dev/packet_loop_test.py | cat\n"))
     ky(text, bien_the_yaml(p, sua), "passed", ten="i")
+    ky(text, bien_the_yaml(p, lambda v: v.replace("        run: python .claude/dev/packet_loop_test.py\n", "        run: |\n"
+       "          set -euo pipefail\n          python .claude/dev/packet_loop_test.py | cat\n")), "passed", ten="i2: pipefail TRƯỚC ống")
     bang("CI_DANG_KY_SU_KIEN" in ci_goc() and "conclusion=success\n    BUOC [test registry" in text, "j: bước registry có env thật")
     ky(text, p, "passed", ten="j")
 
@@ -862,7 +877,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m-A4b_conclusion_tu_tep", '        if p.get("conclusion") != "success":', '        if j["conclusion"] != "success":', "a04"),
     ("m-A4c_bo_so_labels", '(j["name"], j["labels"], j["conclusion"]) != (p.get("name"), p.get("labels"), p.get("conclusion"))',
      '(j["name"], j["conclusion"]) != (p.get("name"), p.get("conclusion"))', "a04"),
-    ("m-A5_fullmatch_thanh_search", 'not any(re.fullmatch(r, x) for x in thuong)', "not any(re.search(r, x) for x in thuong)", "a05"),
+    ("m-A5_fullmatch_thanh_search", "not any((m := re.fullmatch(r, x))", "not any((m := re.search(r, x))", "a05"),
     ("m-A6_mot_dau_hieu_bat_ky", '    loi, thuong = [], [nd for lo, nd in buoc if lo == ""]',
      '    if buoc:\n        return []\n    loi, thuong = [], [nd for lo, nd in buoc if lo == ""]', "a06"),
     ("m-A7_bo_backreference", r'r"== gen_instructions selftest (\d+)/\1 =="', r'r"== gen_instructions selftest (\d+)/\d+ =="', "a07"),
@@ -880,14 +895,22 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m-A13c_nhan_nhieu_step", "        if len(st) != 1:\n            nm.append(f\"thieu_hoac_lap_buoc", "        if not st:\n            nm.append(f\"thieu_hoac_lap_buoc",
      "a13"),
     ("m-A14a_bo_coe", '    if s.get("continue-on-error", False) is not False:', "    if False:", "a14"),
-    ("m-A14b_bo_pipefail", "and RE_ONG.search(_bo_nhay(str(y.get(\"run\", \"\"))))", "and False", "a14"),
+    ("m-A14b_bo_pipefail", 'if RE_ONG.search(dong) and (shell == "pwsh" or not pf):', "if False:", "a14"),
+    ("m-A14k_dem_cho_phep_0", " and all(int(g) > 0 for g in m.groups())", "", "a14"),
+    ("m-A14l_pipefail_khong_theo_thu_tu", 'pf = shell == "bash"   #', 'pf = shell == "bash" or "pipefail" in run   #', "a14"),
+    ("m-A14m_bo_tat_pipefail", 'pf = (m[1] == "-") if m[3] == "pipefail" else pf', 'pf = True if m[3] == "pipefail" else pf', "a14"),
+    ("m-A14n_bo_tat_errexit", 'if m[1] == "+" and ("e" in m[2]', 'if False and ("e" in m[2]', "a14"),
+    ("m-A14o_bo_set_khong_doc", '                return "set_khong_doc_duoc"', "                continue", "a14"),
+    ("m-A14p_pwsh_khong_xet", '(shell == "pwsh" or not pf)', "(not pf)", "a14"),
+    ("m-A14q_bash_bo_qua_set", 'if re.match(r"\\s*set\\b", dong)', 'if shell != "bash" and re.match(r"\\s*set\\b", dong)', "a14"),
+    ("m-A14d_i2_pipefail_truoc_ong_bi_chan", "if RE_ONG.search(dong) and (", "if RE_ONG.search(dong) or (", "a14d"),
     ("m-A14c_bo_shell", '    if s.get("shell", "bash") not in ("bash", "pwsh", "sh"):', "    if False:", "a14"),
     ("m-A14d_bo_wf_khong_doc", '        nm += [] if wf else ["khong_doc_duoc_workflow"]', "        pass", "a14"),
     ("m-A14e_bo_env_buoc", 'not set(s["env"]) <= set(env_buoc)', "False", "a14"),
     ("m-A14f_bo_env_job_workflow", ' or not set(d.get("env") or {}) <= set(env_job):', ":", "a14"),
     ("m-A14g_bo_github_env", 'if any(re.search("GITHUB_(ENV|PATH)", str(t.get("run", ""))) for t in jb["steps"][:i]):', "if False:", "a14"),
     ("m-A14h_nhan_nhieu_sha", "    if len(sha) != 1:\n", "    if not sha:\n", "a14"),
-    ("m-A14i_bash_khong_pipefail", 'y.get("shell") in (None, "sh")', 'y.get("shell") in (None, "sh", "bash")', "a14d"),
+    ("m-A14i_bash_khong_pipefail", 'pf = shell == "bash"   #', "pf = False   #", "a14d"),
     ("m-A14j_goi_chan_buoc", 'chan_k7(wf, k, sy[0], lb["env"] if lb else [], luat["ENV_JOB_CHO_PHEP"])',
      '("chan_buoc" if cp.chan_buoc(wf, k, sy[0]) else None)', "a14d"),
     ("m-A15a_so_Run_lenh", 'cp.ten_du_kien(y) == s["name"]', '"Run " + str(y.get("run", "")).split("\\n")[0] == s["name"]', "a15"),

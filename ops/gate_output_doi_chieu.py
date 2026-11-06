@@ -114,7 +114,7 @@ RE_STEP = re.compile(r'  STEP name=("(?:[^"\\]|\\.)*") conclusion=([a-z_]+)')
 RE_BUOC = re.compile(r"    BUOC \[([^\]\n]+)\] (CUOI |JSON |KHONG )?(.*)")
 RE_MOC = re.compile(r"MOC_GATE_OUTPUT: (passed|not_measured|failed) \(([0-9]+)/([0-9]+) job\)")
 RE_ONG = re.compile(r"(?<![|])\|(?![|])")
-RE_PIPEFAIL = re.compile(r"(?m)^\s*set\s+-[a-z]*o\s+pipefail\b")
+RE_SET = re.compile(r"\s*set\s+([-+])([A-Za-z]+)(?:\s+(\w+))?\s*")   # `set -euo pipefail`, `set +o pipefail`, `set +e`…
 
 
 def _json_chuan(raw):   # chuỗi JSON phải đúng dạng chuẩn hoá (để tệp viết tay và `tom` A2 cùng một byte)
@@ -150,6 +150,21 @@ def _bo_nhay(run):   # bỏ chú thích và chuỗi nháy trước khi tìm `|`
     return re.sub(r"(?m)(^|\s)#.*$", r"\1", run)
 
 
+def che_do_shell(run, shell):   # P2 connector 4493205478: đọc THEO THỨ TỰ dòng; pipefail phải có hiệu lực TRƯỚC ống
+    pf = shell == "bash"   # `shell: bash` tường minh = `bash -eo pipefail`; vắng/`sh` = `-e` không pipefail
+    for dong in _bo_nhay(run).splitlines():
+        if re.match(r"\s*set\b", dong) and re.search(r"pipefail|errexit|\+[A-Za-z]*e", dong):
+            m = RE_SET.fullmatch(dong)
+            if not m or ("o" in m[2]) != bool(m[3]) or m[3] not in (None, "pipefail", "errexit"):
+                return "set_khong_doc_duoc"   # `set -o pipefail; a | b`, set trong dòng ghép… ⇒ không xác lập được
+            if m[1] == "+" and ("e" in m[2] or m[3] == "errexit"):
+                return "tat_errexit"
+            pf = (m[1] == "-") if m[3] == "pipefail" else pf
+        if RE_ONG.search(dong) and (shell == "pwsh" or not pf):
+            return "ong_khong_pipefail"
+    return None
+
+
 def chan_k7(wf, k, i, env_buoc, env_job):
     """Lý do chặn (chuỗi) hoặc None — thay `cp.chan_buoc`: cho `env:` mức bước trong tập của luật; giữ mọi điều kiện khác."""
     jb, s = wf["jobs"][k], wf["jobs"][k]["steps"][i]
@@ -173,7 +188,7 @@ def _dat_dau_hieu(dau_hieu, buoc):
     """Lý do thiếu dấu hiệu (list) cho một bước; `buoc` = [(loai, nd)] đã lọc đúng nhãn."""
     loi, thuong = [], [nd for lo, nd in buoc if lo == ""]
     for loai, r in dau_hieu:
-        if loai == "DONG" and not any(re.fullmatch(r, x) for x in thuong):
+        if loai == "DONG" and not any((m := re.fullmatch(r, x)) and all(int(g) > 0 for g in m.groups()) for x in thuong):   # 4493205470: đếm > 0
             loi.append(f"thieu_dau_hieu:{r[:40]}")
         elif loai == "CUOI" and not ((cu := [nd for lo, nd in buoc if lo == "CUOI"]) and re.fullmatch(r, cu[-1])):
             loi.append("cuoi_khong_dat")
@@ -323,9 +338,8 @@ def _kiem_job(j, p, muc, wf, luat):
             y, lb = wf["jobs"][k]["steps"][sy[0]], ten_luat.get(s["name"])
             if ly := chan_k7(wf, k, sy[0], lb["env"] if lb else [], luat["ENV_JOB_CHO_PHEP"]):
                 nm.append(f"che_do_khong_xac_dinh:{ly}:{s['name'][:30]}")
-            elif (y.get("shell") in (None, "sh") and RE_ONG.search(_bo_nhay(str(y.get("run", ""))))
-                  and not RE_PIPEFAIL.search(str(y.get("run", "")))):
-                nm.append(f"ong_khong_pipefail:{s['name'][:30]}")
+            elif ly := che_do_shell(str(y.get("run", "")), y.get("shell")):
+                nm.append(f"{ly}:{s['name'][:30]}")
     for b in muc["buoc"]:
         st = [s for s in j["steps"] if s["name"] in b["ten"]]
         if len(st) != 1:

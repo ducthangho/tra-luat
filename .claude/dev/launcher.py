@@ -109,8 +109,9 @@ def ky_ban_ghi_luot(ban_ghi: dict, khoa_hex: str) -> str:
     Khoá nằm trong state chỉ mua integrity, không mua authenticity.
     """
     than = {k: v for k, v in ban_ghi.items() if k != "chu_ky"}
-    raw = json.dumps(than, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
-                     allow_nan=False).encode("utf-8")
+    # #1252 Codex lượt 2 F7: tên tệp byte lạ (surrogate) không được làm vỡ phép ký; bản ghi thường giữ
+    # NGUYÊN byte cũ (`ensure_ascii=False`), nên chữ ký cũ vẫn kiểm được.
+    raw = _json_an_toan(than, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
     return hmac.new(bytes.fromhex(khoa_hex), raw, hashlib.sha256).hexdigest()
 
 # launcher-nang-luc: so-dinh-luong module-python hook-phien moi-truong chuan-bi tu-cu probe-qua-han-ba-trang-thai mcp-endpoint van-chuyen-prompt
@@ -1017,11 +1018,38 @@ def _chup_an_toan(goc, loai_tru):
         return None
 
 
+# `os.replace` không nằm trong `os.supports_dir_fd` (nó nhận src_dir_fd/dst_dir_fd), nên chỉ hỏi open/unlink:
+# hai hàm ấy có dir_fd nghĩa là nền có họ *at(2), tức renameat cũng có.
+_CO_DIR_FD = (os.open in os.supports_dir_fd and os.unlink in os.supports_dir_fd
+              and hasattr(os, "O_NOFOLLOW") and hasattr(os, "O_DIRECTORY"))
+
+
 def _ghi_tep_0600(duong: Path, data: bytes) -> None:
     """Codex F1 (P1): KHÔNG mở lại đích — con có thể đã đặt sẵn symlink/hardlink tới một tệp của workspace
     (mở `O_TRUNC` là ghi đè tệp ấy sau mốc chụp cuối) hoặc một tệp 0644. Tạo tệp MỚI bằng `mkstemp`
     (`O_EXCL`, 0600) cạnh đích rồi `os.replace` — thay mục thư mục, không đi theo liên kết."""
     cha = duong.parent
+    if _CO_DIR_FD:
+        # Codex lượt 2 F1: ghim DANH TÍNH thư mục bằng một fd mở `O_NOFOLLOW`; mọi bước tạo/đổi tên/dọn đi qua fd
+        # ấy, nên đổi đường dẫn thư mục thành symlink giữa chừng không dời được lần ghi vào workspace.
+        dfd = os.open(cha, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | os.O_NOFOLLOW)
+        tam = f".chup-{secrets.token_hex(8)}"
+        try:
+            fd = os.open(tam, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=dfd)
+            try:
+                with os.fdopen(fd, "wb") as f:
+                    f.write(data)
+                    f.flush()
+                    os.fsync(f.fileno())
+                os.replace(tam, duong.name, src_dir_fd=dfd, dst_dir_fd=dfd)
+            except BaseException:
+                with contextlib.suppress(OSError):
+                    os.unlink(tam, dir_fd=dfd)
+                raise
+        finally:
+            os.close(dfd)
+        return
+    # Windows (không có dir_fd): còn khe giữa kiểm và tạo; launcher chỉ ghi khi đã chứng minh cây chết (lenh_run).
     if cha.is_symlink():
         raise OSError(f"thu muc luot la symlink: {cha}")
     fd, tam = tempfile.mkstemp(prefix=".chup-", dir=str(cha))
@@ -2683,18 +2711,24 @@ def lenh_run(a) -> int:
     kq_chup = None
     ngat_khi_chup = False
     if ban_ghi["chup_workspace"]:
+        # Codex F5 (lượt 1 + lượt 2): vùng bắt ngắt phủ TỪ chụp sau TỚI hết ghi tệp bằng chứng.
         try:
             cay_chet = _cay_da_chet(p.pid, job)
             chup_sau = _chup_an_toan(kq["workspace"], loai_tru)
-        except KeyboardInterrupt:      # Codex F5: ngắt khi chụp sau ⇒ không đo được, sổ vẫn kết thúc
-            ngat_khi_chup, cay_chet, chup_sau = True, False, None
-        kq_chup = _ket_qua_snapshot(chup_truoc, chup_sau, cay_chet)
-        for ten, ban in (("snapshot-truoc.txt", chup_truoc), ("snapshot-sau.txt", chup_sau)):
-            if ban is not None:
+            kq_chup = _ket_qua_snapshot(chup_truoc, chup_sau, cay_chet)
+            for ten, ban in (("snapshot-truoc.txt", chup_truoc), ("snapshot-sau.txt", chup_sau)):
+                if ban is None:
+                    continue
+                if not cay_chet:       # Codex lượt 2 F1: còn hậu duệ sống thì không ghi gì vào thư mục lượt
+                    kq_chup["snapshot_tep_chup_bo_qua"] = "cay_chua_chung_minh_chet"
+                    continue
                 try:
                     _ghi_tep_0600(thu_muc / ten, ban[1])
                 except OSError:        # Codex F2: thiếu tệp bằng chứng thì KHÔNG công bố sạch
                     kq_chup.update(snapshot_ket_qua="khong_do_duoc", snapshot_ly_do="chup_loi")
+        except KeyboardInterrupt:
+            ngat_khi_chup = True
+            kq_chup = _ket_qua_snapshot(chup_truoc, None, False)
         ban_ghi.update(kq_chup)
 
     if khoa is None and qua_han:
@@ -2808,7 +2842,7 @@ def lenh_status(a) -> int:
         so = _doc_so(thu_muc)
         if so is None:
             raise Chan(MA_THAM_SO, f"so luot chay hong: {thu_muc}")
-        _in_an_toan(json.dumps(so, ensure_ascii=False, indent=2))
+        _in_an_toan(_json_an_toan(so, indent=2))   # #1252 F7: không để stdout thay byte lạ bằng "?"
         return MA_OK
     ds = []
     hong = False

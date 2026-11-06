@@ -1,0 +1,5 @@
+$ PYTHONDONTWRITEBYTECODE=1 python -B .claude/dev/doc_receipt_thu_hoi_test.py
+cwd=baseline at 889334fb87c25136a13c6776a40a25b401820e04
+rc=0
+nghia vu: witness_killed 162 · equivalent_verified 9 · unresolved 0
+doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET

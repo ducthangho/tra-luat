@@ -447,7 +447,7 @@ def kiem_ho_so_gate_output(tep_ho_so, cay_yaml, goc, url_hop_le):
         tok = m[1] if type(gt) is str and (m := RE_TOKEN.match(gt.casefold())) and m[1] in TOKEN else None
         pv = [p for p in prov if neo and _m(_m(p, "moc"), "run").get("run_id") == neo[0]]
         land = bool(neo) and neo[2] in H and (not pv or any(la_run_land(p) or not all(   # F09: thiếu dữ liệu ⇒ land (fail-closed)
-            type(_m(_m(p, "moc"), "run").get(k)) is str for k in ("loi_khai_rest_path", "event")) for p in pv))
+            type(v := _m(_m(p, "moc"), "run").get(k)) is str and v.strip() for k in ("loi_khai_rest_path", "event")) for p in pv))
         loi = []
         if tok is None:
             loi.append("dinh_dang_loi_khai")

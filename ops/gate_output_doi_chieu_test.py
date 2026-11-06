@@ -635,6 +635,14 @@ def a21_pham_vi_land():
         q["moc"]["run"].pop("event") if gt is None else q["moc"]["run"].update(event=gt)
         r = ho_so(am, tep={"provenance.yaml": yaml.safe_dump(q, allow_unicode=True)})
         bang(len(r) == 1 and r[0]["la_land"] and not r[0]["hop_le"], f"{ten}: {r}")
+    for k in ("event", "loi_khai_rest_path"):   # F09 lượt 4: chuỗi rỗng/chỉ khoảng trắng ⇒ land, cả bốn token âm
+        for gt in ("", "   "):
+            q = copy.deepcopy(p)
+            q["moc"]["run"][k] = gt
+            for tk in ("not_measured", "failed", "skipped", "not_run"):
+                r = ho_so({"merge_commit": SHA_CK, "pmc": neo_map(gate_output=f"{tk} — chưa đo")},
+                          tep={"provenance.yaml": yaml.safe_dump(q, allow_unicode=True)})
+                bang(len(r) == 1 and r[0]["la_land"] and not r[0]["hop_le"], f"j {k}={gt!r} {tk}: {r}")
 
 
 @ca
@@ -893,6 +901,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
      'json.dumps({k: v for k, v in luat.items() if k != "JOB_BAT_BUOC"}, ensure_ascii', "a20"),
     ("m-A21a_chi_merge_commit_goc", ', *(_h40(p.get("merge_commit")) for p in prs if type(p) is dict)]', "]", "a21"),
     ("m-A21b_khong_provenance_khong_land", "(not pv or any(la_run_land(p) or not all(", "(any(la_run_land(p) or not all(", "a21"),
+    ("m-A21j_chuoi_rong_la_ngoai_land", " is str and v.strip() for k in", " is str for k in", "a21"),
     ("m-A21e_thieu_event_la_ngoai_land", "la_run_land(p) or not all(   # F09", "la_run_land(p) or False and all(   # F09", "a21"),
     ("m-A21c_bo_event_push", ' and r.get("event") == "push"', "", "a21"),
     ("m-A21d_nhan_loi_khai_land_am", "        elif land:\n            loi.append(", "        elif False:\n            loi.append(", "a21"),

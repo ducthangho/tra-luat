@@ -854,9 +854,8 @@ def _pid_trong_job(job) -> list[int] | None:
 
 # ------------------------------------------------- #1252: chụp workspace trước/sau
 
-# Spec `ops/specs/launcher-readonly-ignored-r1.md` (#1252). Hai lượt review offline (#1224 `a8d7350a`: 11 tệp
-# ignored; #1240 `bc004964`: 20 tệp ignored) đã ghi vào checkout mà `run.json` vẫn `worktree_sach: true`,
-# vì `chot_sach` chỉ đo MỘT mốc, TRƯỚC khi sinh con, và không đo tệp ignored hay `.git`.
+# Spec `ops/specs/launcher-readonly-ignored-r1.md` (#1252): `chot_sach` chỉ đo MỘT mốc trước khi sinh con, không
+# đo tệp ignored hay `.git` — #1224 `a8d7350a` (11 tệp) và #1240 `bc004964` (20 tệp) đã lọt qua.
 _TEP_DOI_TRAN = 50
 _SNAPSHOT_GIOI_HAN = ("chi so hai moc truoc/sau; ghi roi hoan nguyen giua hai moc thi khong thay; "
                       "chau tu setsid hoac sinh truoc khi gan job thi khong chung minh duoc")
@@ -944,8 +943,7 @@ def _so_snapshot(truoc: list, sau: list) -> list:
 
 
 def _hien_thi_duong(d: bytes) -> str:
-    """Spec §2.4: `os.fsdecode` — ĐƠN ÁNH (Codex F7: `backslashreplace` gộp `b"\\xff"` với `b"\\\\xff"`).
-    Byte không giải mã được thành surrogate; `_json_an_toan` thoát nó khi tuần tự hoá."""
+    """Spec §2.4: `os.fsdecode`, đơn ánh (Codex F7); surrogate do `_json_an_toan` thoát khi tuần tự hoá."""
     try:
         return os.fsdecode(d)
     except UnicodeDecodeError:          # Windows: fsdecode là utf-8/surrogatepass, không nhận byte lẻ
@@ -1000,6 +998,17 @@ def _ket_qua_snapshot(truoc, sau, cay_chet: bool) -> dict:
     return kq
 
 
+def _cung_thu_muc(duong, dfd) -> bool:
+    """Đường dẫn `duong` hôm nay còn trỏ đúng thư mục đã ghim bằng `dfd` không (dev, inode)."""
+    if dfd is None:
+        return False
+    try:
+        a, b = os.stat(duong), os.fstat(dfd)
+    except OSError:
+        return False
+    return (a.st_dev, a.st_ino) == (b.st_dev, b.st_ino)
+
+
 def _nam_trong(con, cha) -> bool:
     """`con` nằm TRONG `cha` (không phải chính nó) sau `realpath`."""
     try:
@@ -1024,15 +1033,22 @@ _CO_DIR_FD = (os.open in os.supports_dir_fd and os.unlink in os.supports_dir_fd
               and hasattr(os, "O_NOFOLLOW") and hasattr(os, "O_DIRECTORY"))
 
 
-def _ghi_tep_0600(duong: Path, data: bytes) -> None:
-    """Codex F1 (P1): KHÔNG mở lại đích — con có thể đã đặt sẵn symlink/hardlink tới một tệp của workspace
-    (mở `O_TRUNC` là ghi đè tệp ấy sau mốc chụp cuối) hoặc một tệp 0644. Tạo tệp MỚI bằng `mkstemp`
-    (`O_EXCL`, 0600) cạnh đích rồi `os.replace` — thay mục thư mục, không đi theo liên kết."""
+def _mo_thu_muc_luot(duong):
+    """Codex lượt 4 F1: mở fd thư mục lượt `O_NOFOLLOW` TRƯỚC khi sinh con — lúc ấy chưa ai đổi được tổ tiên nào —
+    rồi giữ nó tới lúc ghi tệp chụp. `None` khi nền không có họ *at(2) (Windows)."""
+    if not _CO_DIR_FD:
+        return None
+    return os.open(duong, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+
+
+def _ghi_tep_0600(duong: Path, data: bytes, dfd=None) -> None:
+    """Codex F1: KHÔNG mở lại đích (con có thể đặt sẵn symlink/hardlink/tệp 0644); tạo tệp MỚI 0600 rồi `os.replace`."""
     cha = duong.parent
     if _CO_DIR_FD:
-        # Codex lượt 2 F1: ghim DANH TÍNH thư mục bằng một fd mở `O_NOFOLLOW`; mọi bước tạo/đổi tên/dọn đi qua fd
-        # ấy, nên đổi đường dẫn thư mục thành symlink giữa chừng không dời được lần ghi vào workspace.
-        dfd = os.open(cha, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | os.O_NOFOLLOW)
+        # Codex lượt 2/4 F1: mọi bước tạo/đổi tên/dọn đi qua fd thư mục đã ghim, không qua đường dẫn.
+        rieng = dfd is None
+        if rieng:
+            dfd = _mo_thu_muc_luot(cha)
         tam = f".chup-{secrets.token_hex(8)}"
         try:
             fd = os.open(tam, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=dfd)
@@ -1047,7 +1063,8 @@ def _ghi_tep_0600(duong: Path, data: bytes) -> None:
                     os.unlink(tam, dir_fd=dfd)
                 raise
         finally:
-            os.close(dfd)
+            if rieng:
+                os.close(dfd)
         return
     # Windows (không có dir_fd): còn khe giữa kiểm và tạo; launcher chỉ ghi khi đã chứng minh cây chết (lenh_run).
     if cha.is_symlink():
@@ -2619,11 +2636,16 @@ def lenh_run(a) -> int:
             return 130
         han_chup = _doc_iso(kq["deadline_utc"]) if kq["deadline_utc"] else None
         if han_chup is not None and _bay_gio() >= han_chup:   # Codex F6: chụp chậm không được sinh con quá hạn
+            ban_ghi.update(_ket_qua_snapshot(chup_truoc, None, False))   # Codex lượt 4 F8: đủ khoá snapshot §2.4
             ban_ghi.update(trang_thai="hong", ly_do_dung="han chot da qua sau khi chup workspace; khong sinh con",
                            ket_thuc_utc=_bay_gio().isoformat())
             _ghi_so(thu_muc, ban_ghi, khoa_ky)
             f_out.close(); f_err.close()
             raise Chan(MA_HAN, "han chot da qua sau khi chup workspace; khong sinh con")
+    dfd_luot = None
+    if ban_ghi["chup_workspace"]:
+        with contextlib.suppress(OSError):
+            dfd_luot = _mo_thu_muc_luot(thu_muc)
     try:
         p = subprocess.Popen(lenh_con, cwd=kq["workspace"],
                              stdout=f_out, stderr=subprocess.PIPE if do_model else f_err,
@@ -2640,6 +2662,8 @@ def lenh_run(a) -> int:
                        ket_thuc_utc=_bay_gio().isoformat())
         _ghi_so(thu_muc, ban_ghi, khoa_ky)
         f_out.close(); f_err.close()
+        if dfd_luot is not None:
+            os.close(dfd_luot)
         raise Chan(MA_THAM_SO, f"khong chay duoc lenh: {e}")
 
     # Once a child has started, a timeout/nonzero exit does not prove its cause.
@@ -2722,13 +2746,20 @@ def lenh_run(a) -> int:
                 if not cay_chet:       # Codex lượt 2 F1: còn hậu duệ sống thì không ghi gì vào thư mục lượt
                     kq_chup["snapshot_tep_chup_bo_qua"] = "cay_chua_chung_minh_chet"
                     continue
+                if _CO_DIR_FD and not _cung_thu_muc(thu_muc, dfd_luot):   # Codex lượt 4 F1: đường dẫn bị lái
+                    kq_chup.update(snapshot_ket_qua="khong_do_duoc", snapshot_ly_do="chup_loi",
+                                   snapshot_tep_chup_bo_qua="thu_muc_luot_bi_doi")
+                    continue
                 try:
-                    _ghi_tep_0600(thu_muc / ten, ban[1])
+                    _ghi_tep_0600(thu_muc / ten, ban[1], dfd_luot)
                 except OSError:        # Codex F2: thiếu tệp bằng chứng thì KHÔNG công bố sạch
                     kq_chup.update(snapshot_ket_qua="khong_do_duoc", snapshot_ly_do="chup_loi")
         except KeyboardInterrupt:
             ngat_khi_chup = True
             kq_chup = _ket_qua_snapshot(chup_truoc, None, False)
+        finally:
+            if dfd_luot is not None:
+                os.close(dfd_luot)
         ban_ghi.update(kq_chup)
 
     if khoa is None and qua_han:

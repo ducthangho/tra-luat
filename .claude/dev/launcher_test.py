@@ -13798,7 +13798,8 @@ def r1252_han_sau_khi_chup():
         so, _ = _r1252_so(s / "runs")
         bang(not dau.exists() and so["trang_thai"] == "hong", f"van sinh con sau han: {so.get('trang_thai')}")
         thieu = [k for k in _R1252_KHOA if k not in so]
-        bang(not thieu and so["snapshot_ket_qua"] == "khong_do_duoc", f"duong qua han thieu khoa snapshot (F8): {thieu}")
+        bang(not thieu and so["snapshot_ket_qua"] == "khong_do_duoc" and so["snapshot_truoc_sha256"],
+             f"duong qua han thieu khoa snapshot hoac bam moc dau (F8): {thieu}")
 
 
 @ca
@@ -13937,6 +13938,7 @@ def r1252_ket_thuc_som_du_khoa():
                 bang(so.get("chup_workspace") is False and not [k for k in _R1252_KHOA if k in so], f"{ten}: tat co ma co khoa")
                 continue
             thieu = [k for k in _R1252_KHOA if k not in so]
+            bang(not ten.startswith("popen") or so["snapshot_truoc_sha256"], f"{ten}: da chup dau ma so mat bam moc dau")
             bang((ten.startswith("prompt") or so["trang_thai"] == "hong") and so.get("chup_workspace") is True and not thieu
                  and so["snapshot_ket_qua"] == "khong_do_duoc", f"{ten}: so ket thuc som thieu khoa: {thieu}")
 

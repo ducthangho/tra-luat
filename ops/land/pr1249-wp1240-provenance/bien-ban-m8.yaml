@@ -1,0 +1,42 @@
+# Bien ban M8 (ADR-0060) dong WP #1240 ASSURANCE-81-MODEL-EFFORT-TUY-CHON r1 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1249-wp1240-land-evidence.yaml (nghiem_thu, assurance_81). A1–A11 measured: nghiem-thu-a1-a11.txt.
+# Luot 1 (bc004964) bi loai vi vi pham read-only; assurance bang luot 2/2 (review-offline-l2/).
+packet: ASSURANCE-81-MODEL-EFFORT-TUY-CHON
+revision: 1
+generation: 1
+spec_hash: e7c6707860ba6a7ca6d24b1cadc2510b4b93952048375bdc332e0328d601487e
+head_da_review: ecd30737e10cb7cdffe0e17178c28b3a12448874
+tree_h: 1b18da0468a9b04a2d0d567935157d17f3c5111f
+review:
+  offline: 'run 7801b46a (luot 2/2 read-only) approve tren ecd3073, snapshot toan cay 12406 tep diff rong (model/effort/sandbox DO_DUOC); luot 1 run bc004964 BI LOAI (ghi 20 tep ignored)'
+  connector: 'issuecomment-6665640232 sach tren ecd3073'
+  assurance_81: DAT  # luat ADR-0065; bang luot 2/2 read-only
+windows:
+  phan_loai: not_required
+  nguon: 'issuecomment-6674302414 "windows: ecd3073… not_required"; A9 = 0'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1249#issuecomment-6674302414
+duyet_chu_kho_ghi_chu: 'approve_merge dang 01:31:53Z TRUOC merge 01:40:51Z.'
+merge_commit: 51d6509e918b8b5403248b52727e53358a23a3a0
+tree_m: 811701252257ff8b688cad601d0b1a6eb56cafc5
+ci_master:
+  run_id: 42145442236
+  conclusion: success
+nghiem_thu:
+  A1: passed
+  A2: passed
+  A3: passed
+  A4: passed
+  A5: passed
+  A6: passed
+  A7: passed
+  A8: passed
+  A9: passed
+  A10: passed
+  A11: passed
+lease_cuoi: wp1240-r1-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

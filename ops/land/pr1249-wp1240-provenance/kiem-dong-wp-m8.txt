@@ -1,0 +1,5 @@
+# lenh: python3 .claude/dev/packet_loop.py kiem-dong-wp --root . --bien-ban ops/land/pr1249-wp1240-provenance/bien-ban-m8.yaml --lease ops/land/pr1249-wp1240-provenance/lease-wp1240-r1-g1-claude-sau-rut-han.yaml.txt
+# checkout: 24e461ac790b10f8c6a60dbf89f264c384f55cea (+ thay doi chua commit trong ops/land) ; origin/master: 51d6509e918b8b5403248b52727e53358a23a3a0 ; luc: 2026-11-06T02:39:13Z
+# lease sau rut han cmp origin/ops/wp1240-r1-g1-lease:ops/leases/wp1240-r1-g1-claude.yaml: khop
+ĐÓNG ĐƯỢC WP ASSURANCE-81-MODEL-EFFORT-TUY-CHON — merge 51d6509e918b8b5403248b52727e53358a23a3a0
+rc=0

@@ -13915,13 +13915,17 @@ def r1252_ket_thuc_som_du_khoa():
     with San() as s:
         repo = _r1252_kho(s)
         khong_co = str(s / "khong-ton-tai")
-        for ten, them in (("probe", ()), ("popen", ("--bo-qua-probe", "thu F8"))):
+        for ten, them, bat in ((f"{t}{b}", (() if t == "probe" else ("--bo-qua-probe", "thu F8")), b)
+                               for t in ("probe", "popen") for b in (True, False)):   # Codex lượt 6 F10: cả tắt cờ
             a = m.build_parser().parse_args(["run", "--workspace", str(repo), "--run-root", str(s / ten), *them,
-                                             "--chup-workspace", "--", khong_co])
+                                             *(["--chup-workspace"] if bat else []), "--", khong_co])
             a.lenh = a.lenh[1:]
             with contextlib.suppress(m.Chan), contextlib.redirect_stdout(io.StringIO()):
                 m.lenh_run(a)
             so, _ = _r1252_so(s / ten)
+            if not bat:
+                bang(so.get("chup_workspace") is False and not [k for k in _R1252_KHOA if k in so], f"{ten}: tat co ma co khoa")
+                continue
             thieu = [k for k in _R1252_KHOA if k not in so]
             bang(so["trang_thai"] == "hong" and so.get("chup_workspace") is True and not thieu
                  and so["snapshot_ket_qua"] == "khong_do_duoc", f"{ten}: so ket thuc som thieu khoa: {thieu}")
@@ -13946,6 +13950,9 @@ def r1252_mo_thu_muc_luot_dung_mot_lan():
 
 
 DOT_BIEN = [
+    ("r1252_bo_kiem_co_khi_ket_thuc_som", ('    return {"chup_workspace": True, **_ket_qua_snapshot(chup_truoc, None, False)} if bat else',
+                                           '    return {"chup_workspace": True, **_ket_qua_snapshot(chup_truoc, None, False)} if True else'),
+     ["r1252_ket_thuc_som_du_khoa"]),   # Codex lượt 6 F10: đúng đột biến reviewer đã đo
     # #1252 lượt Codex offline 5 (run a00f5531): F8 hai đường kết thúc sớm, F9 đúng đột biến reviewer đã đo.
     ("r1252_probe_hong_thieu_khoa", ('            **_khoa_chup_som(getattr(a, "chup_workspace", False), None),   # Codex lượt 5 F8\n', ''),
      ["r1252_ket_thuc_som_du_khoa"]),

@@ -177,6 +177,12 @@ trang_thai_packet:
     session_015GtxraXfMD1t2FJLzzGDr4 (send_message 04:48Z): thuat_lai. ADR-0060 M1 cam agent tu ghi no P3, nen phien ghi so khong
     tu nang landed tren mot comment do agent dang. Dong duoc khi: chu kho tu dang (performed_via_github_app null) mot comment mien
     hoac xac nhan 6677161517, neo ecd3073.
+  xac_nhan_f1_06_11: >-
+    loi_khai_co_neo, CHUA nhan — readback-xac-nhan-f1-issuecomment-6677277905.json: Issue #1240, ducthangho, OWNER, 2026-11-06T04:56:02Z,
+    performed_via_github_app claude, footer Claude Code; than tu khai do agent dang theo chi thi 'Dang giup toi' chu kho go trong
+    phien session_015GtxraXfMD1t2FJLzzGDr4 (~04:55Z) va tu ghi 'Neu ADR-0060 M1 doi chu kho tu tay dang thi comment nay chua du'.
+    Chi thi cua chu kho chi den phien ghi so qua loi thuat cua agent: thuat_lai. Khong nang nhan. Con mot duong: chu kho tu tay dang
+    (performed_via_github_app null), hoac chu kho quyet rang comment dang ho qua app claude du cho M1.
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 51d6509: DAT, du bon moc (post_merge_checks muc 1, luot push that, gom release-verify
     strict lane LAND); (2) lease nha: xem lease.thu_hoi_cuoi; (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp-m8.txt);
@@ -191,6 +197,7 @@ trang_thai_packet:
     tren PR #1256 chua tung khai landed. fd877ed: landed true sau khi do hien vat luot 2/2 read-only (run 7801b46a). Ha xuong false
     sau connector P1 r4488478726 (PR #1256): F1 P3 khong co mien cua chu kho (ADR-0060 M1).
     Giu false sau comment 6677161517 (04:47:33Z): do agent dang qua GitHub App claude, xem mien_f1_06_11.
+    Giu false sau xac nhan 6677277905 (04:56:02Z): cung dang qua app claude, xem xac_nhan_f1_06_11.
 
 assurance_81:
   reviewer_assurance_81: DAT

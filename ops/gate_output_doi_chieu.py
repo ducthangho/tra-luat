@@ -189,17 +189,27 @@ def _dat_dau_hieu(dau_hieu, buoc):
     return loi
 
 
+def _m(d, k):   # F06: mapping lồng sai kiểu ⇒ rỗng, không ném
+    v = d.get(k) if type(d) is dict else None
+    return v if type(v) is dict else {}
+
+
+def _l(d, k):
+    v = d.get(k) if type(d) is dict else None
+    return [x for x in v if type(x) is dict] if type(v) is list else []
+
+
 def kiem(text, provenance, goc):
     """(trang_thai, [lý do]) — OFFLINE. `failed` thắng `not_measured`. `goc` = kho git chứa SHA checkout."""
     if loi := kiem_so_luat():
         return "not_measured", ["so_luat_hong", *loi]
     try:
         dau, jobs, moc = phan_tich(text)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, AttributeError):
         return "not_measured", ["dinh_dang"]
     nm, fl = [], []
     pv = provenance if type(provenance) is dict else {}
-    run = (pv.get("moc") or {}).get("run") or {}
+    run = _m(_m(pv, "moc"), "run")
     if (int(dau[1]), int(dau[2]), dau[3]) != (run.get("run_id"), pv.get("attempt_yeu_cau"), run.get("head_sha")):
         nm.append("neo_run")
     if run.get("trang_thai") != "passed" or run.get("repo") != "ducthangho/tra-luat":
@@ -210,18 +220,20 @@ def kiem(text, provenance, goc):
     a, z = MIEN_HIEU_LUC.get(dau[4], (None, None))
     if luat is None or type(run.get("run_id")) is not int or not (a <= run["run_id"] and (z is None or run["run_id"] <= z)):
         return "not_measured", nm + ["luat_ngoai_so_hoac_mien"]
-    pj = {j.get("job_id"): j for j in ((pv.get("moc") or {}).get("gate_output") or {}).get("jobs") or [] if type(j) is dict}
-    tp = {i: j for i, j in pj.items() if j.get("conclusion") != "skipped"}
-    log = pv.get("log_day_du") or {}
+    ds = _l(_m(_m(pv, "moc"), "gate_output"), "jobs")
+    if len({j.get("job_id") for j in ds}) != len(ds):   # F01: dict sẽ nuốt bản ghi trùng id (có thể là bản `failure`)
+        return "not_measured", nm + ["job_id_trung_provenance"]
+    tp = {j.get("job_id"): j for j in ds if j.get("conclusion") != "skipped"}
+    log = _m(pv, "log_day_du")
     if any(j.get("runner_id") == 0 or j.get("trang_thai") == "not_run" for j in tp.values()):
         return "not_measured", nm + ["job_chua_chay"]
     ids = [j["id"] for j in jobs]
     if len(ids) != len(set(ids)) or set(ids) != set(tp) or set(tp) != set(log):
         return "not_measured", nm + ["tap_job"]
-    jj = [i for i, j in tp.items() if set(j.get("labels") or []) & set(luat["OS_BAT_BUOC"]) and j.get("name") not in luat["KHONG_PHAI_GATE"]]
+    jj = [i for i, j in tp.items() if type(j.get("labels")) is list and set(j["labels"]) & set(luat["OS_BAT_BUOC"]) and j.get("name") not in luat["KHONG_PHAI_GATE"]]
     if not jj:
         return "not_measured", nm + ["tap_job_rong"]
-    co = [c for c in (pv.get("moc") or {}).get("checkout") or [] if type(c) is dict and c.get("trang_thai") == "passed"]
+    co = [c for c in _l(_m(pv, "moc"), "checkout") if c.get("trang_thai") == "passed"]
     sha = {c.get("sha") for c in co}
     wf = None
     if len(sha) != 1:
@@ -234,7 +246,7 @@ def kiem(text, provenance, goc):
         p = tp[j["id"]]
         if (j["name"], j["labels"], j["conclusion"]) != (p.get("name"), p.get("labels"), p.get("conclusion")):
             nm.append(f"danh_tinh:{j['id']}")
-        if j["log"] != (log.get(j["id"]) or {}).get("sha256"):
+        if j["log"] != _m(log, j["id"]).get("sha256"):
             nm.append(f"bam_log:{j['id']}")
         if j["id"] not in jj:
             mui = "not_measured" if p.get("name") in luat["KHONG_PHAI_GATE"] else "ngoai_pham_vi_os"
@@ -247,7 +259,7 @@ def kiem(text, provenance, goc):
             nm.append(f"mui_ten:{j['id']}")
         if not any(c.get("job_id") == j["id"] and c.get("sha") in sha for c in co):
             nm.append(f"checkout_job_chua_do:{j['id']}")
-        m = _muc(luat, p.get("name") or "")
+        m = _muc(luat, str(p.get("name")))
         if len(m) != 1:
             nm.append(f"khong_co_luat:{j['id']}")
             continue
@@ -335,7 +347,7 @@ def tap_head_land(cay_yaml):
 
 
 def la_run_land(provenance):
-    r = ((provenance or {}).get("moc") or {}).get("run") or {}
+    r = _m(_m(provenance, "moc"), "run")
     return r.get("loi_khai_rest_path") == ".github/workflows/ci.yml" and r.get("event") == "push"
 
 
@@ -389,9 +401,9 @@ def kiem_waiver(chuoi, head, readback, url_hop_le):
     return not loi, loi
 
 
-def _an_toan(thu, ten):   # CHỈ tương đối `<hồ sơ>-provenance/`: cấm tuyệt đối, cấm `..`, cấm symlink ở mọi thành phần
+def _an_toan(thu, ten):   # CHỈ tương đối `<hồ sơ>-provenance/`: cấm tuyệt đối, cấm `..`, cấm symlink ở mọi thành phần KỂ CẢ thư mục ấy (F02)
     p, n = thu / ten, len(Path(ten).parts)
-    ok = not ten.startswith("/") and ".." not in Path(ten).parts and p.is_file() and not any(q.is_symlink() for q in [p, *p.parents][:n])
+    ok = not ten.startswith("/") and ".." not in Path(ten).parts and p.is_file() and not any(q.is_symlink() for q in [p, *p.parents][:n + 1])
     return p if ok else None
 
 
@@ -410,7 +422,7 @@ def kiem_ho_so_gate_output(tep_ho_so, cay_yaml, goc, url_hop_le):
     H, ra = tap_head_land(cay_yaml), []
     for duong, gt, neo in _duyet(cay_yaml):
         tok = m[1] if type(gt) is str and (m := RE_TOKEN.match(gt.casefold())) and m[1] in TOKEN else None
-        pv = [p for p in prov if neo and ((p.get("moc") or {}).get("run") or {}).get("run_id") == neo[0]]
+        pv = [p for p in prov if neo and _m(_m(p, "moc"), "run").get("run_id") == neo[0]]
         land = bool(neo) and neo[2] in H and (not pv or any(la_run_land(p) for p in pv))
         loi = []
         if tok is None:
@@ -447,7 +459,9 @@ def _kiem_duong(gt, neo, thu, prov, goc):
         van = p.read_text(encoding="utf-8")
         if not (d := RE_DAU.fullmatch(van.split("\n", 1)[0])) or (int(d[1]), int(d[2]), d[3]) != neo:
             continue
-        pv = [x for x in prov if ((x.get("moc") or {}).get("run") or {}).get("run_id") == int(d[1])]
+        if p.name != f"gate-output2-{d[1]}-a{d[2]}.txt":   # F02: tên tệp BẮT BUỘC theo run/attempt của header
+            continue
+        pv = [x for x in prov if _m(_m(x, "moc"), "run").get("run_id") == int(d[1])]
         if len(pv) == 1 and kiem(van, pv[0], goc)[0] == "passed":
             return []
     return ["tep_gate_output_khong_dat"]
@@ -466,11 +480,14 @@ def main(argv=None):
         if len(a) == 4 and a[0] == "kiem-ho-so" and a[1] == "--root":
             tep = Path(a[3])
             kq = kiem_ho_so_gate_output(tep, yaml.safe_load(tep.read_text(encoding="utf-8")), a[2], None)
+            mien = [x for x in kq if x["token"] == "owner_waived"]   # F03: CLI không có `url_hop_le` (một chiều phụ thuộc) ⇒ không đo
+            do = [x for x in kq if not x["hop_le"] and x not in mien]
             for x in kq:
-                print(f"{'ĐẠT' if x['hop_le'] else 'ĐỎ'} {x['duong_dan']} token={x['token']} land={x['la_land']} {' '.join(x['ly_do'])}")
-            print(f"TỔNG: {'ĐẠT' if all(x['hop_le'] for x in kq) else 'ĐỎ'} ({len(kq)} lời khai; owner_waived qua CLI: không có "
-                  f"url_hop_le ⇒ ĐỎ; {GIOI_HAN})")
-            return 0 if all(x["hop_le"] for x in kq) else 1
+                nhan = "KHÔNG ĐO ĐƯỢC" if x in mien else "ĐẠT" if x["hop_le"] else "ĐỎ"
+                print(f"{nhan} {x['duong_dan']} token={x['token']} land={x['la_land']} {' '.join(x['ly_do'])}")
+            print(f"TỔNG: {'ĐỎ' if do else 'KHÔNG ĐO ĐƯỢC' if mien else 'ĐẠT'} ({len(kq)} lời khai; owner_waived chỉ kiểm được qua "
+                  f"L8/L-7, nơi có url_hop_le; {GIOI_HAN})")
+            return 1 if do else 2 if mien else 0
     except (OSError, ValueError, yaml.YAMLError) as e:
         print(f"KHÔNG ĐO ĐƯỢC: {type(e).__name__}: {e}", file=sys.stderr)
         return 2

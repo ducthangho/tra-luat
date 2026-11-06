@@ -258,6 +258,12 @@ def a03_tap_job():
     q["log_day_du"][g3["job_id"]] = q["log_day_du"][g["job_id"]]
     q["moc"]["checkout"].append(dict(next(c for c in q["moc"]["checkout"] if c["job_id"] == g["job_id"]), job_id=g3["job_id"]))
     ky(van(q), q, "not_measured", "job_ngoai_luat:gate-moi (ubuntu-latest)", "j″")
+    for truoc in (True, False):   # (k) F01: bản ghi trùng `job_id` mang `failure`, đứng trước hoặc sau
+        q = copy.deepcopy(p)
+        ds = q["moc"]["gate_output"]["jobs"]
+        hong = dict(copy.deepcopy(g), conclusion="failure")
+        ds.insert(ds.index(jb(q, "gate (ubuntu-latest)")) + (0 if truoc else 1), hong)
+        ky(text, q, "not_measured", "job_id_trung_provenance", f"k{truoc}")
 
 
 @functools.cache
@@ -309,9 +315,11 @@ def a06_sai_loai():
 
 @ca
 def a07_n_tren_m():
-    text, p = f_ok()
+    text, p = f_ok()   # F04: header theo băm của CHÍNH module đang chạy, để đột biến regex không chết vì đổi băm (A20 canh băm)
+    text = re.sub("luat_sha256=[0-9a-f]{64}", "luat_sha256=" + nap().bam(nap().LUAT_v1), text)
     ky(text.replace("passed (22/22 job)", "passed (21/22 job)"), p, "not_measured", "moc_tong", "moc")
     ky(text.replace("gen_instructions selftest 44/44", "gen_instructions selftest 43/44"), p, "not_measured", "thieu_dau_hieu", "N/M")
+    ky(text.replace("cong_cu_test: 61/61 đạt; tổng=61", "cong_cu_test: 60/61 đạt; tổng=61"), p, "not_measured", "thieu_dau_hieu", "60/61")
 
 
 @ca
@@ -450,7 +458,7 @@ def a16_dong_la():
 GO2 = "gate-output2-42032872356-a1.txt"
 
 
-def ho_so(cay_yaml, tep=None, url_hop_le=None):
+def ho_so(cay_yaml, tep=None, url_hop_le=None, lien_ket=None):
     """Cây tạm `ops/land/pr9001-x-land-evidence.yaml` + `pr9001-x-provenance/` (tep: {đường dẫn: nội dung | None ⇒ không thư mục})."""
     text, p = f_ok()
     tep = {"provenance.yaml": yaml.safe_dump(p, allow_unicode=True), GO2: text} if tep is None else tep
@@ -462,6 +470,8 @@ def ho_so(cay_yaml, tep=None, url_hop_le=None):
             (land / "pr9001-x-provenance" / k).write_text(v, encoding="utf-8")
         if tep == {}:
             (land / "pr9001-x-provenance").rmdir()
+        for ten, dich in (lien_ket or {}).items():   # symlink: "" ⇒ chính thư mục provenance
+            (land / "pr9001-x-provenance" / ten if ten else land / "pr9001-x-provenance").symlink_to(dich)
         return nap().kiem_ho_so_gate_output(land / "pr9001-x-land-evidence.yaml", cay_yaml, goc(), url_hop_le)
 
 
@@ -508,6 +518,16 @@ def a18_neo_trich_tep():
     text, p = f_ok()
     tep = {"provenance.yaml": yaml.safe_dump(p, allow_unicode=True), f"../x/{GO2}": text}
     bang(not mot(neo_map(gate_output=f"measured — ../x/{GO2}"), tep=tep)["hop_le"], "l: thoát thư mục provenance")
+    for ten in (f"tien-to-{GO2}", "gate-output2-1-a9.txt"):   # (m) F02: tên phải đúng `gate-output2-<run>-a<attempt>.txt` của header
+        tep = {"provenance.yaml": yaml.safe_dump(p, allow_unicode=True), ten: text}
+        bang(not mot(neo_map(gate_output=f"measured — {ten}"), tep=tep)["hop_le"], f"m: tên {ten}")
+    with tempfile.TemporaryDirectory(prefix="go2_sl_") as d:   # (n) symlink ở tệp; (o) symlink ở CHÍNH thư mục provenance
+        (Path(d) / GO2).write_text(text, encoding="utf-8")
+        (Path(d) / "provenance.yaml").write_text(yaml.safe_dump(p, allow_unicode=True), encoding="utf-8")
+        r = ho_so(neo_map(), tep={"provenance.yaml": yaml.safe_dump(p, allow_unicode=True)}, lien_ket={GO2: Path(d) / GO2})
+        bang(len(r) == 1 and not r[0]["hop_le"], f"n: symlink tệp {r}")
+        r = ho_so(neo_map(), tep={}, lien_ket={"": Path(d)})
+        bang(len(r) == 1 and not r[0]["hop_le"], f"o: symlink thư mục provenance {r}")
 
 
 def url_ok(u):
@@ -566,7 +586,8 @@ def a20_so_luat():
             ("f", "LUAT_v1['JOB_BAT_BUOC'].append('gate (ubuntu-latest)')\n" + tinh, "job_bat_buoc_trung"),
             ("g", "LUAT_v1['JOB_BAT_BUOC'].remove('gate-ops (ubuntu-latest)')\n" + tinh, "mien_mo_thieu_check_bat_buoc"),
             ("h", "LUAT_v1['JOB_BAT_BUOC'].append('khac (ubuntu-latest)')\n" + tinh, "job_khong_dung_mot_muc"),
-            ("i", "LUAT_v1['JOB_BAT_BUOC'].pop()\n", "khoa_khac_bam")):
+            ("i", "LUAT_v1['JOB_BAT_BUOC'].pop()\n", "khoa_khac_bam"),
+            ("j", "MIEN_HIEU_LUC = {}\n", "khoa_thieu_mien")):
         loi = ban_sao(them).kiem_so_luat()
         bang(any(x.startswith(ly) for x in loi), f"{ten}: mong {ly}, được {loi}")
         text, p = f_ok()
@@ -594,6 +615,13 @@ def a21_pham_vi_land():
     bang(land(prov=False) == [True], "c: không có provenance cho run ⇒ land (fail-closed)")
     bang(nap().tap_head_land({"prs": [{"merge_commit": "a" * 40}, {"merge_commit": "b" * 40}]}) == {"a" * 40, "b" * 40}, "d")
     bang(land(lambda q: q["moc"]["run"].update(event="workflow_dispatch")) == [False], "e: dispatch cùng head")
+    am = {"merge_commit": SHA_CK, "pmc": neo_map(gate_output="not_measured — chưa đo")}   # (f) lời khai land âm ⇒ KHÔNG hợp lệ (Q8)
+    r = ho_so(am)
+    bang(len(r) == 1 and r[0]["la_land"] and not r[0]["hop_le"], f"f: {r}")
+    q = copy.deepcopy(p)
+    q["moc"]["run"]["event"] = "workflow_dispatch"
+    r = ho_so(am, tep={"provenance.yaml": yaml.safe_dump(q, allow_unicode=True)})
+    bang(len(r) == 1 and not r[0]["la_land"] and r[0]["hop_le"], f"g: lời khai PHỤ được not_measured {r}")
 
 
 @ca
@@ -612,7 +640,12 @@ def a22_mot_chieu_phu_thuoc():
                "5": "import runpy, importlib.util as _u\nrunpy.run_path(_u.cache_from_source(str(Path(__file__).with_name('kiem_ho_so_land.py'))))\n",
                "6": "import sys as _s\n_s.path.insert(0, str(Path(__file__).parent))\nimport kiem_ho_so_land\n"}
         text, p = f_ok()
-        (Path(d) / "vao.json").write_text(json.dumps({"text": text, "p": p, "goc": str(goc())}), encoding="utf-8")
+        hs = Path(d) / "hs"   # F05: tiến trình con gọi CẢ `kiem_ho_so_gate_output` trên cây hồ sơ dương (tệp `.yaml`/`.txt`, ngoài tập đo)
+        (hs / "pr9001-x-provenance").mkdir(parents=True)
+        (hs / "pr9001-x-provenance/provenance.yaml").write_text(yaml.safe_dump(p, allow_unicode=True), encoding="utf-8")
+        (hs / "pr9001-x-provenance" / GO2).write_text(text, encoding="utf-8")
+        (Path(d) / "vao.json").write_text(json.dumps({"text": text, "p": p, "goc": str(goc()), "hs": str(hs), "cay": neo_map()}),
+                                          encoding="utf-8")
         kq_ = {}
         for ten, them in doi.items():
             (ops / "gate_output_doi_chieu.py").write_text(MA.read_text(encoding="utf-8") + "\n" + them, encoding="utf-8")
@@ -634,16 +667,26 @@ goc = Path(sys.argv[1]).resolve()
 ops = goc / "ops"
 cho = {str(ops / t) for t in ("gate_output_doi_chieu.py", "ci_provenance.py")}
 mo = []
+def ghi(x):   # chỉ `.py`/`.pyc` DƯỚI gốc cây được đo (cả ba lớp dùng chung)
+    try:
+        q = Path(os.fsdecode(x)).resolve()
+    except (OSError, ValueError, TypeError):
+        return
+    if q.is_relative_to(goc) and q.suffix in (".py", ".pyc"):
+        mo.append(str(q))
 def hook(ev, a):
     if ev == "open" and isinstance(a[0], (str, bytes, os.PathLike)):
-        try:
-            q = Path(os.fsdecode(a[0])).resolve()
-        except (OSError, ValueError):
-            return
-        if q.is_relative_to(goc) and q.suffix in (".py", ".pyc"):
-            mo.append(str(q))
+        ghi(a[0])
 sys.addaudithook(hook)
-import importlib.util
+import importlib.machinery, importlib.util
+_em, _sf = importlib.machinery.SourceFileLoader.exec_module, importlib.util.spec_from_file_location
+def em(self, mod):   # lớp 1–2: ghi mọi đường dẫn nguồn được thực thi / được tạo spec
+    ghi(self.path); return _em(self, mod)
+def sf(name, loc=None, *a, **k):
+    if loc is not None: ghi(loc)
+    return _sf(name, loc, *a, **k)
+importlib.machinery.SourceFileLoader.exec_module, importlib.util.spec_from_file_location = em, sf
+mo.clear()
 ok = True
 try:
     s = importlib.util.spec_from_file_location("gate_output_doi_chieu", ops / "gate_output_doi_chieu.py")
@@ -651,6 +694,8 @@ try:
     v = json.loads((goc / "vao.json").read_text(encoding="utf-8"))
     p = v["p"]; p["log_day_du"] = {int(k): x for k, x in p["log_day_du"].items()}
     ok = m.kiem(v["text"], p, v["goc"])[0] == "passed"
+    r = m.kiem_ho_so_gate_output(Path(v["hs"]) / "pr9001-x-land-evidence.yaml", v["cay"], v["goc"], lambda u: True)
+    ok = ok and len(r) == 1 and r[0]["hop_le"]
 except Exception:
     ok = False
 def duoc(q):
@@ -670,7 +715,8 @@ def p1127_phan_chung():
     for c in ("bb47274", "936744e", "7f22121"):
         cay = yaml.safe_load(git("show", f"{c}:ops/land/pr1127-wp1120-land-evidence.yaml", cwd=ROOT))
         with tempfile.TemporaryDirectory(prefix="go2_1127_") as d:
-            subprocess.run(f"git -C {ROOT} archive {c} ops/land/pr1127-wp1120-provenance | tar -x -C {d}", shell=True, check=True)
+            tar = subprocess.run(["git", "-C", str(ROOT), "archive", c, "ops/land/pr1127-wp1120-provenance"], capture_output=True, check=True)
+            subprocess.run(["tar", "-x", "-C", d], input=tar.stdout, check=True)
             land = Path(d) / "ops/land"
             r = nap().kiem_ho_so_gate_output(land / "pr1127-wp1120-land-evidence.yaml", cay, goc(), url_ok)
         bang(r and not all(x["hop_le"] for x in r), f"{c}: phải ĐỎ, được {r}")
@@ -690,7 +736,38 @@ def a23_cli():
         r = subprocess.run([sys.executable, "-B", str(MA), "kiem", "--provenance", str(Path(d) / "p.yaml"), "--goc", str(goc()),
                             str(Path(d) / GO2)], capture_output=True)
         r2 = subprocess.run([sys.executable, "-B", str(MA), "sai"], capture_output=True)
+        (Path(d) / "hong.yaml").write_text("schema: ci_provenance/1\nmoc: x\n", encoding="utf-8")   # F06: dữ liệu hỏng ⇒ rc 2
+        r3 = subprocess.run([sys.executable, "-B", str(MA), "kiem", "--provenance", str(Path(d) / "hong.yaml"), "--goc", str(goc()),
+                             str(Path(d) / GO2)], capture_output=True)
+        land = Path(d) / "ops/land"   # F03: owner_waived qua CLI (không có url_hop_le) ⇒ KHÔNG ĐO ĐƯỢC, rc 2
+        (land / "pr9001-x-provenance").mkdir(parents=True)
+        (land / "pr9001-x-land-evidence.yaml").write_text(yaml.safe_dump(
+            neo_map(gate_output=f"owner_waived — {URL_RB} {SHA_CK} miễn vì đường nhanh hồ sơ")), encoding="utf-8")
+        r4 = subprocess.run([sys.executable, "-B", str(MA), "kiem-ho-so", "--root", str(goc()), str(land / "pr9001-x-land-evidence.yaml")],
+                            capture_output=True)
     bang(r.returncode == 0 and b"GATE_OUTPUT: passed" in r.stdout and r2.returncode == 2, f"CLI: {r.returncode} {r.stdout[-200:]}")
+    bang(r3.returncode == 2 and b"Traceback" not in r3.stderr, f"CLI dữ liệu hỏng: {r3.returncode} {r3.stdout[-120:]} {r3.stderr[-200:]}")
+    bang(r4.returncode == 2 and "KHÔNG ĐO ĐƯỢC".encode() in r4.stdout, f"CLI waiver: {r4.returncode} {r4.stdout[-200:]}")
+
+
+@ca
+def a24_du_lieu_sai_kieu():
+    """F06: mapping lồng sai kiểu ⇒ `not_measured` có lý do, không ném ngoại lệ (API)."""
+    text, p = f_ok()
+    for ten, sua in (("moc", lambda q: q.update(moc="x")), ("run", lambda q: q["moc"].update(run="x")),
+                     ("gate_output", lambda q: q["moc"].update(gate_output="x")), ("jobs", lambda q: q["moc"]["gate_output"].update(jobs="x")),
+                     ("log", lambda q: q["log_day_du"].update({k: "x" for k in q["log_day_du"]})),
+                     ("labels", lambda q: jb(q, "gate (ubuntu-latest)").update(labels="ubuntu-latest")),
+                     ("checkout", lambda q: q["moc"].update(checkout="x"))):
+        q = copy.deepcopy(p)
+        sua(q)
+        try:
+            tt = kq(text, q)[0]
+            r = ho_so(neo_map(), tep={"provenance.yaml": yaml.safe_dump(q, allow_unicode=True), GO2: text})
+        except Exception as e:   # ngoại lệ ở đây CHÍNH là lỗi đang canh ⇒ tín hiệu chốt, không phải lỗi vô can
+            bang(False, f"{ten}: ném {type(e).__name__}: {e}")
+        bang(tt == "not_measured" and len(r) == 1 and not r[0]["hop_le"], f"{ten}: {tt} {r}")
+    bang(kq(text, ["x"])[0] == "not_measured" and kq(None, p)[0] == "not_measured", "provenance/tệp không phải dict/chuỗi")
 
 
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần trong module.
@@ -707,6 +784,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m-A3g_bo_job_ngoai_luat", 'if t not in luat["JOB_BAT_BUOC"]]', "if False]", "a03"),
     ("m-A3k_chot_du_job_chi_khi_chua_co_ly_do", 'for t in luat["JOB_BAT_BUOC"] if ten_j.count(t) == 0]',
      'for t in luat["JOB_BAT_BUOC"] if ten_j.count(t) == 0 and not nm]', "a03k"),
+    ("m-A3h_bo_chot_id_trung", '    if len({j.get("job_id") for j in ds}) != len(ds):', "    if False:", "a03"),
     ("m-A4a_bo_so_name", '(j["name"], j["labels"], j["conclusion"]) != (p.get("name"), p.get("labels"), p.get("conclusion"))',
      '(j["labels"], j["conclusion"]) != (p.get("labels"), p.get("conclusion"))', "a04"),
     ("m-A4b_conclusion_tu_tep", '        if p.get("conclusion") != "success":', '        if j["conclusion"] != "success":', "a04"),
@@ -754,6 +832,9 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m-A18e_bo_nhanh_moc", "if MOC_10_2_2 <= set(m) and", "if False and", "a18"),
     ("m-A18f_provenance_vang_la_dat", '            elif not prov:\n                loi.append("khong_co_provenance")',
      '            elif not prov:\n                pass', "a18"),
+    ("m-A18h_bo_symlink_thu_muc", "for q in [p, *p.parents][:n + 1])", "for q in [p, *p.parents][:n])", "a18"),
+    ("m-A18i_bo_kiem_ten_tep", '        if p.name != f"gate-output2-{d[1]}-a{d[2]}.txt":', "        if False:", "a18"),
+    ("m-A18j_bo_symlink_moi_thanh_phan", "and not any(q.is_symlink() for q in [p, *p.parents][:n + 1])", "", "a18"),
     ("m-A18g_cho_thoat_thu_muc", 'not ten.startswith("/") and ".." not in Path(ten).parts and ', "", "a18"),
     ("m-A19a_bo_url", '    if len(url) != 1 or url_hop_le is None or not url_hop_le(url[0][0]):\n        loi.append("url")',
      '    if False:\n        loi.append("url")', "a19"),
@@ -774,12 +855,18 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m-A20f_bo_kiem_trung", '        loi += ["job_bat_buoc_trung"] * (len(ds) != len(set(ds)))', "", "a20"),
     ("m-A20g_bo_kiem_check_bat_buoc", '            loi.append("mien_mo_thieu_check_bat_buoc")', "            pass", "a20"),
     ("m-A20g2_check_cho_moi_mien", 'if MIEN_HIEU_LUC.get(k, (0, 0))[1] is None and not', "if not", "a20"),
+    ("m-A20j_bo_kiem_khoa_thieu_mien", '    loi += ["khoa_thieu_mien"] * (set(LUAT_PHIEN_BAN) != set(MIEN_HIEU_LUC))', "", "a20"),
     ("m-A20h_bo_kiem_mot_muc", '        loi += [f"job_khong_dung_mot_muc:{t}" for t in ds if len(_muc(v, t)) != 1]', "", "a20"),
     ("m-A20i_JOB_BAT_BUOC_ngoai_bam", "json.dumps(luat, ensure_ascii",
      'json.dumps({k: v for k, v in luat.items() if k != "JOB_BAT_BUOC"}, ensure_ascii', "a20"),
     ("m-A21a_chi_merge_commit_goc", ', *(_h40(p.get("merge_commit")) for p in prs if type(p) is dict)]', "]", "a21"),
     ("m-A21b_khong_provenance_khong_land", "(not pv or any(la_run_land(p) for p in pv))", "any(la_run_land(p) for p in pv)", "a21"),
     ("m-A21c_bo_event_push", ' and r.get("event") == "push"', "", "a21"),
+    ("m-A21d_nhan_loi_khai_land_am", "        elif land:\n            loi.append(", "        elif False:\n            loi.append(", "a21"),
+    ("m-A22_ho_so_nem_loi", '    """Mỗi lời khai: {duong_dan, token, neo, la_land, hop_le, ly_do}. L8 và L-7 tự rút kết luận."""',
+     '    raise RuntimeError("db")', "a22"),
+    ("m-A23a_cli_waiver_la_do", "            return 1 if do else 2 if mien else 0", "            return 1 if do or mien else 0", "a23"),
+    ("m-A24_bo_kiem_kieu_mapping", "    return v if type(v) is dict else {}", "    return v or {}", "a24"),
     ("m-p1127_khong_trich_tep_la_dat", 'return ["chi_ket_luan_check_run" if re.search(r"kiem-gate|check-runs", gt) else "khong_trich_tep_gate_output"]',
      "return []", "p1127"),
 )

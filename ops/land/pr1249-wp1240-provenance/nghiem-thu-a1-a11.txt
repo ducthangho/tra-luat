@@ -1,0 +1,17 @@
+# lenh: python3 ops/land/pr1249-wp1240-provenance/do_nghiem_thu.py 51d6509e918b8b5403248b52727e53358a23a3a0 (ruff 0.17.4, python Python 3.13.18); script sha256 45068afd15f79fa95d8d1ee2aa41fa4b422d79d40149e664a6ea4bfdc3be3500
+2026-11-06T02:04:50Z
+merge 51d6509e918b8b5403248b52727e53358a23a3a0 · nen (cha mot) 4f03566fe9e686ed53c7f8ed0619300c1debba76 · spec sha256 e7c6707860ba6a7ca6d24b1cadc2510b4b93952048375bdc332e0328d601487e
+A1: DAT — adr-song rc 0; dong §20 ADR-0065 = 1 (nen 0, ADR nen ton tai False); dot bien xoa dong §20 => adr-song rc 9 (1 chỗ lệch giữa docs/adr/ và §20 của docs/PROTOCOL_DA_PHIEN.md)
+A2: DAT — merge [1, 1, 1] · nen [0, 0, 0] · dot bien 'ghi nếu đo được'->'bắt buộc' cum 1 = 0
+A3: DAT — merge [0, 0] · nen [1, 1] (nen = 1,1 la mau 'chua lam'; A2 chan duong xoa trang)
+A4: DAT — merge 0 vi pham L7 · nen 2 · m1 (bat buoc lai) 2
+A5: DAT — (a) chi sandbox: merge 0, m1 2 · (b) thieu sandbox: merge 1 'L7 $.assurance_81.thuc_thi.sandbox_mode: khai DAT mà không p', m2 0 (m2 lam ca (b) mat vi pham => DO)
+A6: DAT — model: merge 1 (dung khoa 1), m3 0; effort: merge 1 (dung khoa 1), m3 0; model: merge 1 (dung khoa 1), m3 0
+A7: DAT — cong rc 0: land_evidence_nguon: 101 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 126 · test rc 0: CA CA: 23/23, DOT BIEN: 116/116, TONG: DAT True; dong m1–m3 trong output: 0
+A8: DAT — diff cha..merge rc 0; diff base 3163f4d..head ecd3073 rc 0; blob merge 846f3697dc45 = cha 846f3697dc45 = base 846f3697dc45
+A9: DAT — 62 dong them trong *.py, token nen = 0; dot bien them encoding= => 1
+A10: DAT — doctrine-scan rc 0; ruff F merge 0 / nen 0 (delta 0); selftest rc 0 1777/1777; release-verify rc 0 ok True, strict True, 184/184, failed []
+A11: DAT — cum {'ghi nếu đo được': 2, 'không chặn landed': 1, 'sandbox mode': 2, 'identity provider': 1, 'hồi tố': 4, 'launcher': 2}; dot bien xoa doan chua (iv) => 'identity provider' = 0; nen: ADR vang = True
+TONG: 11/11 DAT · thu muc tam /tmp/nt1240-4ntn_e0f
+rc=0
+2026-11-06T02:10:01Z

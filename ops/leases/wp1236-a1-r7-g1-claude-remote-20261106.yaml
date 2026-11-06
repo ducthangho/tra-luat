@@ -1,0 +1,87 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1236
+packet_id: wp1236
+packet_slug: GATE-OUTPUT-DOI-CHIEU
+dot: A1
+mission_issue: 1236
+mission_id: gh-1236
+mission_ghi_chu: 'dot A1 (phan DOC: so luat, gate_output/2, kiem K1-K9, CLI) cua packet wp1236 r7; Q4 nam dot A1->A2->B->C->D'
+revision: 7
+generation: 1
+lease_id: wp1236-a1-r7-g1-claude-remote-20261106
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease dau tien cua packet'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-6676924904
+authority_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-6676924904
+authority_ghi_chu: 'chu kho duyet spec_hash r7 31415a8a + Q1-Q10 theo khuyen nghi + cho phep G05/G06/G07/G19/G20/G03 (06-11 ~04:30Z)'
+authority_caveat: 'comment neo do phien dieu phoi dang bang token chu kho (#566)'
+recorded_by: anthropic_claude_dispatcher
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; tham quyen la authority_url'
+executor_session: session_015GtxrYvvXqhFG2QYbhCEv2
+executor_ghi_chu: 'phien soan dac ta lam executor dot A1; reviewer doc lap la openai_codex, khong phai phien nay'
+leased_at_utc: '2026-11-06T04:33:00Z'
+heartbeat_at: '2026-11-06T04:33:00Z'
+lease_until: '2026-11-08T04:33:00Z'
+lease_expires_at_utc: '2026-11-08T04:33:00Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); phien thuc thi la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+effective_review_class_ghi_chu: 'spec review_class sensitive (cong land/M8)'
+assurance_target: cross_approved
+reviewer: openai_codex
+reviewer_provider: openai_codex
+reviewer_independence: 'cross-review theo .claude/skills/cross-review/SKILL.md, phien doc lap read-only neo exact head; connector la lop bo sung'
+spec_path: ops/specs/wp1236-r7.md
+spec_ref: refs/heads/ops/wp1236-spec@b1a10dc2150d2ba721c208a0251f4dc1ebce5e0c
+spec_source_oid: b1a10dc2150d2ba721c208a0251f4dc1ebce5e0c
+spec_blob: b0b1e10fd7210570aa323396c14246b427491b95
+spec_hash: 31415a8a840c63c3b3a16eefe83dc90739698c3d10afb2348b5e7c5011ae26ba
+spec_sha256: 31415a8a840c63c3b3a16eefe83dc90739698c3d10afb2348b5e7c5011ae26ba
+spec_ref_ghi_chu: 'ghim OID40 theo kiem-merge K1 (_spec_merge, ADR-0063); H1 spec "# wp1236 r7 — ..." khop packet_id/revision lease; executor KHONG chep spec vao nhanh'
+branch: claude/wp1236-a1-g1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: b7962596ac5e0d97fd1f180462bdf0ee13b83526
+start_from_sha: b7962596ac5e0d97fd1f180462bdf0ee13b83526
+reviewed_sha_required: b7962596ac5e0d97fd1f180462bdf0ee13b83526
+write_set:
+- ops/gate_output_doi_chieu.py
+- ops/gate_output_doi_chieu_test.py
+- .claude/dev/ci_dang_ky_test.py
+write_set_hash: e348a0aec274cc000368e7b728a9a70423434e000ace619fbc059383907fb2f5
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+write_set_ghi_chu: '.claude/dev/ci_dang_ky_test.py CHI THEM dung mot muc MOI (numstat 1 0); hai tep ops/ la tep MOI'
+closure_status: 'holder scan 2026-11-06T04:31:30Z: ls-remote vs for-each-ref thieu 0; 3/3 duong dan NGUOI_GIU 0'
+tran_kich_thuoc: '<= 3 tep / <= 950 dong them (nang_tran cua spec r7, CHI dot A1); vuot => DUNG truoc review'
+tran_loi_goi_codex: 'doc tu dong tran_loi_goi_codex cua spec (ADR-0052@8ab10079); dem truoc MOI loi goi'
+windows: 'khong bat buoc cho dot A1 (Q7: OS_BAT_BUOC ubuntu-latest); neu can do Windows thi chay TAP TRUNG tren tra-luat-win qua phien dieu phoi, KHONG workflow_dispatch'
+coordination_paths:
+- ops/leases/wp1236-a1-r7-g1-claude-remote-20261106.yaml
+run_minutes: 2880
+heartbeat_required_minutes: 360
+review_sla_minutes: 240
+prohibited_actions:
+- LIVE
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- write_outside_effective_write_set
+- workflow_dispatch
+- sua_ci_yml
+land_authority_note: 'chu kho duyet SHA cu the truoc merge; dieu phoi merge khi kiem-merge rc=0'

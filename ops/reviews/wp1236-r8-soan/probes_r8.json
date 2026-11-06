@@ -112,6 +112,22 @@
    "grammar": "lenh_ngoai_cu_phap",
    "rc_bash": 0
   },
+  "c4495881317_if_ong_bash": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 0
+  },
+  "c4495881317_ong_hoac_true": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 0
+  },
+  "c4495881327_thay_lenh_trong_nhay_kep": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 0
+  },
+  "c4495881327_thay_lenh_doi_so_nhay_kep": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 0
+  },
   "g_cham_phay": {
    "grammar": "lenh_ngoai_cu_phap",
    "rc_bash": 1

@@ -38,6 +38,10 @@ AM = {  # nhãn: (thân run, shell)
  # --- connector ---
  "c4495417390_if_false_pipefail": (f"if false; then\n  set -o pipefail\nfi\n{X} | {Y}\n", None),
  "c4493205478_pipefail_sau_ong": (f"{X} | {Y}\nset -o pipefail\n", None),
+ "c4495881317_if_ong_bash": (f"if {X} | {Y}; then :; fi\n", "bash"),
+ "c4495881317_ong_hoac_true": (f"{X} | {Y} || true\n", "bash"),
+ "c4495881327_thay_lenh_trong_nhay_kep": (f"echo \"$({X} | {Y})\"\n", None),
+ "c4495881327_thay_lenh_doi_so_nhay_kep": (f"python ops/qua.py \"$({X} | {Y})\"\n", None),
  # --- bổ sung của grammar r8 (phiên soạn) ---
  "g_cham_phay": (f"{X}; true\n", None),
  "g_hai_dong": (f"{X}\ntrue\n", None),

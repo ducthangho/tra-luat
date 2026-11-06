@@ -1,0 +1,94 @@
+# ai-dang-giu 5 duong dan write set wp1240-r1-g1-claude sau rut han (han moi 02:30:00Z); fetch +refs/heads/*; git branch -f master origin/master (51d6509); ls-remote so for-each-ref theo TAP TEN
+thieu=0 / may chu 768
+2026-11-06T02:33:46Z
+## docs/PROTOCOL_DA_PHIEN.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp538-r1-g1-codex-windows	refs/heads/claude/ghi-so-land-1249:ops/leases/wp538-r1-g1-codex-windows.yaml
+HẾT_HẠN	wp538-r2-g2-codex-windows	refs/heads/claude/ghi-so-land-1249:ops/leases/wp538-r2-g2-codex-windows.yaml
+HẾT_HẠN	wp1240-r1-g1-claude	refs/heads/ops/wp1240-r1-g1-lease:ops/leases/wp1240-r1-g1-claude.yaml
+HẾT_HẠN	wp538-r2-g2-codex-windows	refs/remotes/origin/claude/bia-mo-wp538-g2-20260916:ops/leases/wp538-r2-g2-codex-windows.yaml
+HẾT_HẠN	wp538-r3-g3-claude-review	refs/remotes/origin/claude/bia-mo-wp538-g2-20260916:ops/leases/wp538-r3-g3-claude-review.yaml
+HẾT_HẠN	wp538-r3-g3-claude-review	refs/remotes/origin/claude/bia-mo-wp538-g3-20260916:ops/leases/wp538-r3-g3-claude-review.yaml
+HẾT_HẠN	quy-trinh-lap-review-r13-g13-codex	refs/remotes/origin/codex/wp523-r13-authority:ops/leases/quy-trinh-lap-review-r13-g13-codex.yaml
+HẾT_HẠN	quy-trinh-lap-review-r14-g14-codex	refs/remotes/origin/codex/wp523-r14-authority:ops/leases/quy-trinh-lap-review-r14-g14-codex.yaml
+HẾT_HẠN	wp709-exec-g1-codex-20261005	refs/remotes/origin/codex/wp709-bootstrap:ops/leases/wp709-exec-g1-codex-20261005.yaml
+HẾT_HẠN	wp709-exec-g2-codex-20261006	refs/remotes/origin/codex/wp709-bootstrap:ops/leases/wp709-exec-g2-codex-20261006.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1099-cloud-setup-p3b-r10-g1-claude	refs/remotes/origin/ops/cap-lease-1099-g1:ops/leases/wp1099-cloud-setup-p3b-r10-g1-claude.yaml
+HẾT_HẠN	wp1099-cloud-setup-p3b-r11-g1-claude	refs/remotes/origin/ops/cap-lease-1099-g1:ops/leases/wp1099-cloud-setup-p3b-r11-g1-claude.yaml
+HẾT_HẠN	wp1099-cloud-setup-p3b-r9-g1-claude	refs/remotes/origin/ops/cap-lease-1099-g1:ops/leases/wp1099-cloud-setup-p3b-r9-g1-claude.yaml
+HẾT_HẠN	skill-goi-python-ba-ten-exec-1-claude-20260826	refs/remotes/origin/ops/cap-lease-4-packet-20260826:ops/leases/skill-goi-python-ba-ten-exec-1-claude-20260826.yaml
+HẾT_HẠN	tran-vong-review-len-muoi-exec-1-claude-20260912	refs/remotes/origin/ops/cap-lease-522-523:ops/leases/tran-vong-review-len-muoi-exec-1-claude-20260912.yaml
+HẾT_HẠN	tran-vong-review-len-muoi-exec-3-claude-20260912	refs/remotes/origin/ops/cap-lease-522-523:ops/leases/tran-vong-review-len-muoi-exec-3-claude-20260912.yaml
+HẾT_HẠN	wp538-r3-g3-claude-review	refs/remotes/origin/ops/cap-lease-538-r3:ops/leases/wp538-r3-g3-claude-review.yaml
+HẾT_HẠN	wp538-r4-g4-antigravity	refs/remotes/origin/ops/cap-lease-538-r4:ops/leases/wp538-r4-g4-antigravity.yaml
+HẾT_HẠN	ci-windows-r1-g1-antigravity	refs/remotes/origin/ops/cap-lease-548:ops/leases/ci-windows-r1-g1-antigravity.yaml
+HẾT_HẠN	ci-windows-r2-g2-antigravity	refs/remotes/origin/ops/cap-lease-548-r2:ops/leases/ci-windows-r2-g2-antigravity.yaml
+HẾT_HẠN	assurance-ho-model-r1-g1-claude	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r1-g1-claude.yaml
+HẾT_HẠN	assurance-ho-model-r2-g2-claude	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r2-g2-claude.yaml
+HẾT_HẠN	assurance-ho-model-r3-g3-antigravity	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r3-g3-antigravity.yaml
+HẾT_HẠN	assurance-ho-model-r4-g4-claude	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r4-g4-claude.yaml
+HẾT_HẠN	human-audited-khai-ai-dang-r1-g1-claude	refs/remotes/origin/ops/cap-lease-566:ops/leases/human-audited-khai-ai-dang-r1-g1-claude.yaml
+HẾT_HẠN	human-audited-khai-ai-dang-r1-g2-claude	refs/remotes/origin/ops/cap-lease-566:ops/leases/human-audited-khai-ai-dang-r1-g2-claude.yaml
+HẾT_HẠN	tran-codex-va-sensitive-r1-g1-claude-20261016	refs/remotes/origin/ops/cap-lease-782:ops/leases/tran-codex-va-sensitive-r1-g1-claude-20261016.yaml
+HẾT_HẠN	tran-codex-va-sensitive-r2-g2-claude-20261016	refs/remotes/origin/ops/cap-lease-782:ops/leases/tran-codex-va-sensitive-r2-g2-claude-20261016.yaml
+HẾT_HẠN	wp782-r3-g3-claude-20261016	refs/remotes/origin/ops/cap-lease-782:ops/leases/wp782-r3-g3-claude-20261016.yaml
+HẾT_HẠN	wp782-r4-g4-claude-20261017	refs/remotes/origin/ops/cap-lease-782:ops/leases/wp782-r4-g4-claude-20261017.yaml
+HẾT_HẠN	wp782-r5-g5-claude-20261017	refs/remotes/origin/ops/cap-lease-782:ops/leases/wp782-r5-g5-claude-20261017.yaml
+HẾT_HẠN	wp782-r5-g5b-claude-20261017	refs/remotes/origin/ops/cap-lease-782:ops/leases/wp782-r5-g5b-claude-20261017.yaml
+HẾT_HẠN	wp784-r2-g2-claude-20261017	refs/remotes/origin/ops/cap-lease-784:ops/leases/wp784-r2-g2-claude-20261017.yaml
+HẾT_HẠN	dieu-kien-merge-cong-r1-g1-claude-remote-20261101	refs/remotes/origin/ops/dieu-kien-merge-cong-r1-lease:ops/leases/dieu-kien-merge-cong-r1-g1-claude-remote-20261101.yaml
+HẾT_HẠN	dieu-kien-merge-va-so-sach-r1-g1-claude-remote-20261031	refs/remotes/origin/ops/dieu-kien-merge-r1-lease:ops/leases/dieu-kien-merge-va-so-sach-r1-g1-claude-remote-20261031.yaml
+HẾT_HẠN	pr1184-merge-contract-r1-g1-codex	refs/remotes/origin/ops/pr1187-r1-g1-lease:ops/leases/pr1184-merge-contract-r1-g1-codex.yaml
+HẾT_HẠN	pr1184-merge-contract-r2-g2-codex	refs/remotes/origin/ops/pr1187-r1-g1-lease:ops/leases/pr1184-merge-contract-r2-g2-codex.yaml
+HẾT_HẠN	pr1184-merge-contract-r2-g3-codex-service	refs/remotes/origin/ops/pr1187-r1-g1-lease:ops/leases/pr1184-merge-contract-r2-g3-codex-service.yaml
+HẾT_HẠN	windows-local-may-chu-kho-r1-g1-claude-remote-20261029	refs/remotes/origin/ops/windows-local-may-chu-kho-r1-lease:ops/leases/windows-local-may-chu-kho-r1-g1-claude-remote-20261029.yaml
+HẾT_HẠN	windows-local-may-chu-kho-r2-g1-claude-remote-20261030	refs/remotes/origin/ops/windows-local-may-chu-kho-r2-lease:ops/leases/windows-local-may-chu-kho-r2-g1-claude-remote-20261030.yaml
+HẾT_HẠN	windows-local-may-chu-kho-r3-g1-claude-remote-20261031	refs/remotes/origin/ops/windows-local-may-chu-kho-r3-lease:ops/leases/windows-local-may-chu-kho-r3-g1-claude-remote-20261031.yaml
+HẾT_HẠN	adr-0060-mac-dinh-r3-g1-codex-20261102	refs/remotes/origin/ops/wp1124-r3-g1-lease:ops/leases/adr-0060-mac-dinh-r3-g1-codex-20261102.yaml
+HẾT_HẠN	adr-0060-mac-dinh-r4-g1-codex-20261102	refs/remotes/origin/ops/wp1124-r4-g1-lease:ops/leases/adr-0060-mac-dinh-r4-g1-codex-20261102.yaml
+HẾT_HẠN	adr-0060-mac-dinh-r6-g1-codex-20261103	refs/remotes/origin/ops/wp1124-r6-g1-lease:ops/leases/adr-0060-mac-dinh-r6-g1-codex-20261103.yaml
+HẾT_HẠN	wp812-r1-g1-antigravity	refs/remotes/origin/ops/wp812-spec:ops/leases/wp812-r1-g1-antigravity.yaml
+HẾT_HẠN	wp812-r1-g2-claude	refs/remotes/origin/ops/wp812-spec:ops/leases/wp812-r1-g2-claude.yaml
+HẾT_HẠN	wp812-r2-g3-claude	refs/remotes/origin/ops/wp812-spec:ops/leases/wp812-r2-g3-claude.yaml
+HẾT_HẠN	wp825-r1-g1-claude	refs/remotes/origin/ops/wp825-r1-g1-lease:ops/leases/wp825-r1-g1-claude.yaml
+HẾT_HẠN	wp834-r1-g1-claude	refs/remotes/origin/ops/wp834-r1-g1-lease:ops/leases/wp834-r1-g1-claude.yaml
+HẾT_HẠN	wp835-r1-g1-claude-governance-20261019	refs/remotes/origin/ops/wp835-r1-g1-lease:ops/leases/wp835-r1-g1-claude-governance-20261019.yaml
+HẾT_HẠN	wp835-r2-g2-claude-governance-20261019	refs/remotes/origin/ops/wp835-r2-g2-lease:ops/leases/wp835-r2-g2-claude-governance-20261019.yaml
+HẾT_HẠN	wp835-r3-g3-claude	refs/remotes/origin/ops/wp835-r3-g3-lease:ops/leases/wp835-r3-g3-claude.yaml
+HẾT_HẠN	wp835-r4-g4-claude	refs/remotes/origin/ops/wp835-r4-g4-lease:ops/leases/wp835-r4-g4-claude.yaml
+HẾT_HẠN	wp919-r1-g1-claude-remote-20261025	refs/remotes/origin/ops/wp919-r1-g1-lease:ops/leases/wp919-r1-g1-claude-remote-20261025.yaml
+HẾT_HẠN	wp919-r2-g2-claude-remote-20261025	refs/remotes/origin/ops/wp919-r1-g1-lease:ops/leases/wp919-r2-g2-claude-remote-20261025.yaml
+HẾT_HẠN	wp919-r3-g3-claude-remote-20261025	refs/remotes/origin/ops/wp919-r1-g1-lease:ops/leases/wp919-r3-g3-claude-remote-20261025.yaml
+HẾT_HẠN	wp943-r1-g1-claude	refs/remotes/origin/ops/wp943-r1-g1-lease:ops/leases/wp943-r1-g1-claude.yaml
+HẾT_HẠN	wp977-r1-g1-claude	refs/remotes/origin/ops/wp977-r1-g1-lease:ops/leases/wp977-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## docs/adr/0065-model-effort-phuc-vu-tuy-chon.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp1240-r1-g1-claude	refs/heads/ops/wp1240-r1-g1-lease:ops/leases/wp1240-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ops/handoff/wp1240-g1-claude.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp1240-r1-g1-claude	refs/heads/ops/wp1240-r1-g1-lease:ops/leases/wp1240-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ops/land_evidence_nguon.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp773-r1-g1-claude-20261016	refs/heads/claude/ghi-so-land-1249:ops/leases/wp773-r1-g1-claude-20261016.yaml
+HẾT_HẠN	wp773-r1-g1x-claude-20261018	refs/heads/claude/ghi-so-land-1249:ops/leases/wp773-r1-g1x-claude-20261018.yaml
+HẾT_HẠN	wp1240-r1-g1-claude	refs/heads/ops/wp1240-r1-g1-lease:ops/leases/wp1240-r1-g1-claude.yaml
+HẾT_HẠN	land-evidence-l7-r1-g1-claude-remote-20261027	refs/remotes/origin/ops/wp748-r28-l7-lease:ops/leases/land-evidence-l7-r1-g1-claude-remote-20261027.yaml
+HẾT_HẠN	wp845-r1-g1-claude	refs/remotes/origin/ops/wp845-r1-g1-lease:ops/leases/wp845-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ops/land_evidence_nguon_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp773-r1-g1-claude-20261016	refs/heads/claude/ghi-so-land-1249:ops/leases/wp773-r1-g1-claude-20261016.yaml
+HẾT_HẠN	wp773-r1-g1x-claude-20261018	refs/heads/claude/ghi-so-land-1249:ops/leases/wp773-r1-g1x-claude-20261018.yaml
+HẾT_HẠN	wp1240-r1-g1-claude	refs/heads/ops/wp1240-r1-g1-lease:ops/leases/wp1240-r1-g1-claude.yaml
+HẾT_HẠN	land-evidence-l7-r1-g1-claude-remote-20261027	refs/remotes/origin/ops/wp748-r28-l7-lease:ops/leases/land-evidence-l7-r1-g1-claude-remote-20261027.yaml
+HẾT_HẠN	wp845-r1-g1-claude	refs/remotes/origin/ops/wp845-r1-g1-lease:ops/leases/wp845-r1-g1-claude.yaml
+HẾT_HẠN	wp871-r1-g1-claude	refs/remotes/origin/ops/wp871-r1-g1-lease:ops/leases/wp871-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

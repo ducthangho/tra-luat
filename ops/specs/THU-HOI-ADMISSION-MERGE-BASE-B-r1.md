@@ -48,9 +48,10 @@ nó trong mã.
 
 Điều kiện cấp lease: không lease nào còn hiệu lực giữ một đường dẫn trên (đo như packet A). Đo 06-11-2026 trên kho
 có `refs/heads/*` khớp máy chủ: `ops/lease_publish.py`, `ops/lease_publish_test.py` và
-`.github/workflows/ops-thu-hoi-admission.yml` ⇒ `NGƯỜI_GIỮ 0`. `.claude/dev/doc_receipt_thu_hoi.py` và
-`.claude/dev/doc_receipt_thu_hoi_test.py` ⇒ `CHAN [12]` vì máy chủ thêm nhánh giữa lượt quét (`claude/ghi-so-land-1258`,
-`ops/wp1239-r4-g3-lease`; chốt fail-close đúng thiết kế). Người cấp lease đo lại cả năm đường dẫn ngay trước khi cấp (L5).
+`.github/workflows/ops-thu-hoi-admission.yml` ⇒ `NGƯỜI_GIỮ 0`. `.claude/dev/doc_receipt_thu_hoi.py` ⇒ `NGƯỜI_GIỮ 0`
+(lượt quét bắt đầu 16:54Z) và `.claude/dev/doc_receipt_thu_hoi_test.py` ⇒ `NGƯỜI_GIỮ 0` (17:01Z). Hai lượt trước đó
+bị chốt fail-close chặn vì máy chủ thêm nhánh giữa lượt quét; làm mới cache rồi chạy lại ngay thì ra kết quả trên.
+Người cấp lease đo lại cả năm đường dẫn ngay trước khi cấp (L5).
 
 ## 2. ngoai_pham_vi
 
@@ -253,8 +254,8 @@ không vay ngân sách của packet khác.
 
 ## 9. chua_do_duoc
 
-- Kết quả `ai-dang-giu` cho `.claude/dev/doc_receipt_thu_hoi.py` và `.claude/dev/doc_receipt_thu_hoi_test.py`: cả hai
-  bị chốt fail-close chặn vì máy chủ thêm nhánh giữa lượt quét.
+- Kết quả `ai-dang-giu` (mục 1) đúng tới lúc đo trong ngày 06-11-2026; nó cũ đi theo từng nhánh mới, nên người cấp
+  lease phải đo lại cả năm đường dẫn.
 - Ca nào của t133/t151/t137 chạy được trên Windows native: chưa đo (mục 6 bước 1).
 - Runner tập trung (mục 6 bước 3): chưa dựng, chưa chạy lần nào.
 - Các trần ở mục 8 là đề xuất; chưa có số đo mức dùng thực của một packet cỡ này để biện hộ từng con số.

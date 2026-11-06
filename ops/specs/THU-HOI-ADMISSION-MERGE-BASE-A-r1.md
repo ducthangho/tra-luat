@@ -45,18 +45,21 @@ SHA. Trong khi đó vùng mà bộ kiểm đọc — `ops/thu-hoi/**` và `.gith
 
 Điều kiện cấp lease: không lease nào còn hiệu lực giữ một đường dẫn của write set, đo bằng
 `ops/lease_publish.py ai-dang-giu <đường dẫn>` trên một kho có `refs/heads/*` khớp máy chủ (so tập tên
-`git ls-remote --heads origin` với tập ref cục bộ, lệch phía "thiếu cục bộ" phải bằng 0). Đo 06-11: hai đường
-dẫn **chưa đo được**: `docs/PROTOCOL_DA_PHIEN.md` ⇒ `CHAN [12]` hai lần liền vì máy chủ thêm nhánh giữa lượt quét
-(lần hai: `claude/ghi-so-land-1258`, `ops/wp1239-r4-g3-lease`) — chốt fail-close đúng thiết kế; tệp ADR mới chưa có
-kết quả lúc viết. Người cấp lease đo lại ngay trước khi cấp (L5), và chỉ cấp khi cả hai ra `NGƯỜI_GIỮ 0`.
+`git ls-remote --heads origin` với tập ref cục bộ, lệch phía "thiếu cục bộ" phải bằng 0). Đo 06-11-2026:
+`docs/PROTOCOL_DA_PHIEN.md` ⇒ `NGƯỜI_GIỮ 0` (lượt quét bắt đầu 15:10Z);
+`docs/adr/0066-admission-thu-hoi-theo-merge-base.md` ⇒ `NGƯỜI_GIỮ 0` (17:08Z). Hai lượt trước đó bị chốt fail-close
+chặn vì máy chủ thêm nhánh giữa lượt quét; làm mới cache rồi chạy lại ngay thì ra kết quả trên. Người cấp lease đo lại
+ngay trước khi cấp (L5), và chỉ cấp khi cả hai ra `NGƯỜI_GIỮ 0`.
+
+Số ADR: không ref nào có tệp mang tiền tố `docs/adr/0066-` (đo 17:18Z 06-11-2026 trên 783/783 ref, khớp số nhánh máy
+chủ), và trên master `d26b36f` không tệp nào trong `ops/specs`, `docs` nhắc `ADR-0066`. Hai đặc tả của Mission này có
+nhắc, nhưng chúng không chiếm số. Bị chiếm ⇒ DỪNG, revision mới đổi số; không tự chọn số khác.
 
 **Va chạm đã biết với WP1174 (#1174).** Bộ duyệt C6 của WP1174 có `docs/PROTOCOL_DA_PHIEN.md` trong write set, lease dự
 kiến tối đa 24 giờ, hạn cứng `2026-11-08T08:03:01Z`. Đo 15:0xZ 06-11-2026: WP1174 chưa được cấp lease, chưa có nhánh,
 commit metadata P chưa có trên máy chủ. Write set của WP1174 không có `docs/adr/**`, nên không tranh số ADR. Thứ tự đề
 xuất: cấp lease A **trước** khi cấp lease WP1174, vì A chỉ 2 tệp và khoảng nửa ngày. Nếu WP1174 được cấp trước thì A
-chờ lease ấy nhả, không xin chia tệp. Số ADR: trên mọi ref, không tệp nào mang tiền tố `docs/adr/0066-` và không đặc tả nào nhắc
-`ADR-0066` (đo 08:2xZ 06-11 trên master: 0 tệp, 0 chỗ nhắc). Bị chiếm ⇒ DỪNG, revision mới đổi số; không tự chọn
-số khác.
+chờ lease ấy nhả, không xin chia tệp.
 
 ## 2. ngoai_pham_vi
 
@@ -162,7 +165,7 @@ hoặc không biết mức đã dùng ⇒ dừng ở checkpoint chủ kho.
 
 ## 7. chua_do_duoc
 
-- Kết quả `ai-dang-giu` cho hai đường dẫn của write set: chưa có kết quả dương (mục 1); phải có `NGƯỜI_GIỮ 0` trước
-  khi cấp lease.
+- Kết quả `ai-dang-giu` (mục 1) đúng tới lúc đo, 15:10Z–17:08Z 06-11-2026; nó cũ đi theo từng nhánh mới, nên người cấp
+  lease phải đo lại.
 - Lời khai *"0 commit chạm vùng"* đúng tới 08:2xZ 06-11-2026; đo lại khi viết ADR.
 - Comment duyệt băm của chủ kho trên #1265: chưa có lúc viết.

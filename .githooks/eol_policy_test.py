@@ -79,15 +79,11 @@ _MAU_BINARY = {
 
 
 # ── wp1221 (đặc tả r3): ca đỏ phải nói VÌ SAO — và chỉ nói bằng DANH SÁCH CHO PHÉP ──────────────────
-#
-# Mỗi ca chỉ trả `bool`, nên trước bản vá một ca đỏ chỉ để lại `FAIL <ca>` (CI Windows run 41975947155:
-# 28/30, không biết fragment nào hỏng). Kênh dưới đây cho ca GHI lại thứ nó đã thấy; `main()` chỉ in khi
-# ca FAIL. Bất biến M4: phần ghi KHÔNG BAO GIỜ đổi kết quả ca — lỗi của nó chỉ thành `CHAN_DOAN_LOI`.
-#
-# M3: KHÔNG có bộ che. Bộ che hỏi "chuỗi này có GIỐNG bí mật không" và đã thua năm lần trong mười lượt
-# review (mỗi phép biến đổi trên đường in đẻ ra một biểu diễn mới). Ở đây bộ lọc hỏi "giá trị này có
-# NGUỒN GỐC an toàn không": số/bool, mã trong tập đóng, định danh do chính kho khai. Chuỗi tự do (stderr,
-# thông điệp lỗi, `detail`…) chỉ in LOẠI + ĐỘ DÀI. Nội dung thô chỉ có ở `--chan-doan-tho` (M8), ngoài CI.
+# Trước bản vá một ca đỏ chỉ để lại `FAIL <ca>` (CI Windows run 41975947155: 28/30, không biết fragment nào hỏng).
+# Kênh dưới đây cho ca GHI thứ nó thấy; `main()` chỉ in khi ca FAIL; lỗi khi ghi chỉ thành `CHAN_DOAN_LOI` (M4).
+# M3: KHÔNG có bộ che (nó hỏi "chuỗi có GIỐNG bí mật không" và thua năm lần trong mười lượt review). Bộ lọc hỏi
+# "giá trị có NGUỒN GỐC an toàn không": số/bool, mã tập đóng, định danh kho khai. Chuỗi tự do chỉ in LOẠI + ĐỘ DÀI;
+# nội dung thô chỉ có ở `--chan-doan-tho` (M8), ngoài CI.
 _CD_TRAN_CHUOI = 2000       # mỗi giá trị đã lọc
 _CD_TRAN_PAYLOAD = 4000     # mọi dòng của MỘT payload cộng lại
 _CD_TRAN_CA = 12000         # cả khối chẩn đoán của một ca (đã TÍNH chỗ cho dấu cắt)
@@ -256,8 +252,8 @@ def _ve(nhan, gia_tri):
     return gia_tri
 
 
+# `subprocess.run` + ghi `rc` dưới NHÃN LỆNH HẰNG (bảng N); stdout/stderr chỉ ghi ở chế độ thô (M8). Đóng băng: `_HINH_HAM`.
 def _chay_tien_trinh(nhan, cmd, **kw):
-    """`subprocess.run` + ghi `rc` dưới NHÃN LỆNH HẰNG (bảng N). stdout/stderr chỉ ghi ở chế độ thô (M8)."""
     kw.setdefault("stdout", subprocess.PIPE)
     kw.setdefault("stderr", subprocess.PIPE)
     proc = subprocess.run(cmd, **kw)
@@ -830,18 +826,19 @@ _PROBE_FAIL_SRC = (
 )
 
 
-# A14 (lượt 6 r3) so CẤU TRÚC thân `_env_con` (bỏ docstring) với hằng này — danh sách CHO PHÉP, không đoán idiom.
-# SỬA `_env_con` THÌ PHẢI SỬA HẰNG NÀY, có chủ đích và qua review; lệch một nút AST là A14 đỏ.
-_HINH_ENV_CON = ('env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", PYTHONUTF8="1", PYTHONIOENCODING="utf-8")\n'
-                 'for ten in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY"):\n    env.pop(ten, None)\nreturn env\n')
+# A14 so NGUYÊN định nghĩa (args, decorator, thân) của `_env_con` và `_chay_tien_trinh` với hằng này — danh sách CHO PHÉP.
+# SỬA MỘT TRONG HAI HÀM THÌ PHẢI SỬA HẰNG NÀY, có chủ đích và qua review. Hai hàm KHÔNG có docstring (chú thích `#`).
+_HINH_HAM = ('def _env_con():\n    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", PYTHONUTF8="1", PYTHONIOENCODING="utf-8")\n'
+             '    for ten in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY"):\n        env.pop(ten, None)\n'
+             '    return env\n\ndef _chay_tien_trinh(nhan, cmd, **kw):\n    kw.setdefault("stdout", subprocess.PIPE)\n'
+             '    kw.setdefault("stderr", subprocess.PIPE)\n    proc = subprocess.run(cmd, **kw)\n'
+             '    _cd(nhan + " :: rc", proc.returncode, int)\n    if _CD_THO[0]:\n        _cd(nhan + " :: stdout", proc.stdout)\n'
+             '        _cd(nhan + " :: stderr", proc.stderr)\n    return proc\n')
 
 
+# Env cho tiến trình con: không đẻ bytecode, UTF-8, KHÔNG rò biến git của tiến trình cha (`bundle_fragment_check._repo_root()`
+# chạy `git rev-parse --show-toplevel` THEO CWD: một `GIT_DIR` rò rỉ kéo nó về kho khác mà ca vẫn báo xanh).
 def _env_con():
-    """Env cho tiến trình con: không đẻ bytecode, UTF-8, và KHÔNG rò biến git của tiến trình cha.
-
-    `bundle_fragment_check._repo_root()` chạy `git rev-parse --show-toplevel` THEO CWD; một `GIT_DIR`
-    rò rỉ sẽ kéo nó về kho khác, và cả ca đo sai thứ mà vẫn báo xanh.
-    """
     env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
     for ten in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY"):
         env.pop(ten, None)
@@ -1140,7 +1137,7 @@ def case_binary_giu_nguyen_byte_qua_renormalize(root):
 
 def _vi_pham_kien_truc():
     """A14: AST của NGUỒN ĐANG CHẠY (qua `linecache` — bộ đột biến nạp bản đột biến vào đó). Trả `(env, che)`: dòng đọc
-    env ngoài `main` (chốt M8)/`_env_con` (khớp `_HINH_ENV_CON`)/hai ca tự kiểm, và dòng mang bộ che (import/hằng chuỗi nhắc bộ quét bí mật, `.sub`)."""
+    env ngoài `main` (chốt M8)/`_env_con` (khớp `_HINH_HAM`)/hai ca tự kiểm, và dòng mang bộ che (import/hằng chuỗi nhắc bộ quét bí mật, `.sub`)."""
     import ast
     import linecache
     cay = ast.parse("".join(linecache.getlines(str(Path(__file__).resolve()))))
@@ -1148,9 +1145,9 @@ def _vi_pham_kien_truc():
     bo = {id(n) for k in ("case_chan_doan_mac_dinh_khong_lo_bi_mat", "case_chan_doan_co_tho_chi_cuc_bo")
           for n in ast.walk(ham[k])}            # miễn HẸP: main chỉ `"X" in os.environ`, _env_con chỉ `dict(os.environ…)`
     bo |= {id(c.comparators[0]) for c in ast.walk(ham["main"]) if isinstance(c, ast.Compare) and isinstance(c.ops[0], ast.In)}
-    khop = [ast.dump(x) for x in ham["_env_con"].body[1:]] == [ast.dump(x) for x in ast.parse(_HINH_ENV_CON).body]
-    bo |= {id(n) for n in ast.walk(ham["_env_con"])} if khop else set()   # khớp hình mẫu ⇒ thân đã được duyệt
-    env = [ham["_env_con"].lineno] * (not khop) + [n.lineno for n in ast.walk(ham["main"]) if isinstance(n, (ast.Global, ast.Nonlocal))]
+    lech = [k for k, f in ((f.name, f) for f in ast.parse(_HINH_HAM).body) if k not in ham or ast.dump(ham[k]) != ast.dump(f)]
+    bo |= {id(n) for n in ast.walk(ham["_env_con"])} if "_env_con" not in lech else set()   # khớp NGUYÊN định nghĩa
+    env = [ham.get(k, cay.body[0]).lineno for k in lech] + [n.lineno for n in ast.walk(ham["main"]) if isinstance(n, (ast.Global, ast.Nonlocal))]
     goi = {id(k.value.func) for c in ast.walk(cay) if isinstance(c, ast.Call) and ast.unparse(c.func) in ("subprocess.run",
            "_chay_tien_trinh") for k in c.keywords if k.arg == "env" and isinstance(k.value, ast.Call)}   # CHỈ env= tiến trình con
     env += [n.lineno for n in ast.walk(cay) if getattr(n, "id", 0) == "_env_con" and id(n) not in goi | bo]
@@ -1166,13 +1163,9 @@ def _vi_pham_kien_truc():
 
 
 def case_chan_doan_mac_dinh_khong_lo_bi_mat(root):
-    """A6/A7/A14: phản chứng của 10 lượt review r2 và lượt 1 r3 đi qua ĐƯỜNG MẶC ĐỊNH ⇒ 0 cửa sổ 8 ký tự của bí mật.
-
-    Bí mật là dữ liệu GIẢ dựng lúc chạy (viết nguyên văn thì bộ quét bí mật của gói bắt nhầm). Mỗi vector đi đúng
-    đường thật: tiến trình con (V1 PEM LF/CRLF/cắt dở, V2 PEM ở argv[1]/argv[3], V3 env bằng nguyên payload / tiền
-    tố token / bọc PEM, V4 hai khoá chồng nhau), payload cổng (V5: mã, `code`, fragment, lớp ngoài tập; sai kiểu
-    trường), ngoại lệ ca (V6, cả lớp động), lỗi dọn dẹp (V7), stdout cổng không phải JSON (V8).
-    """
+    """A6/A7/A14: phản chứng của các lượt review đi qua ĐƯỜNG MẶC ĐỊNH ⇒ 0 cửa sổ 8 ký tự của bí mật GIẢ dựng lúc chạy.
+    V1 PEM LF/CRLF/cắt dở · V2 PEM ở argv · V3 env bằng payload/tiền tố/bọc PEM · V4 khoá chồng nhau · V5 payload cổng
+    (mã/code/fragment/lớp ngoài tập, sai kiểu) · V6 ngoại lệ (cả lớp động) · V7 dọn dẹp · V8 stdout không phải JSON."""
     import base64
     b64 = base64.b64encode(os.urandom(240)).decode()                   # có `/` `+` như thân PEM thật
     hx, k1, k2, h3, h4, h5, h6 = (os.urandom(n).hex() for n in (16, 10, 18, 9, 9, 9, 9))

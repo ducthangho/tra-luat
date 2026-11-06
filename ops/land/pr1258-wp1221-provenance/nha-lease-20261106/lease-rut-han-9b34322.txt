@@ -1,0 +1,46 @@
+# rut han lease thi cong wp1221-r3-g1 — commit 9b34322071ed4a7ffc5572d8d86cc32dfd01309e tren ops/wp1221-r3-g1-lease (CHUA push luc ghi)
+$ git show --stat HEAD
+9b34322071ed4a7ffc5572d8d86cc32dfd01309e 8a4ace31f5a9d0af610017b56ce37c28441d5736
+ops(#1221): rut han lease thi cong wp1221-r3-g1 sau merge #1258 (08bcb51)
+
+ ops/leases/wp1221-r3-g1-claude-remote-20261105.yaml | 19 +++++++++++++++++--
+ 1 file changed, 17 insertions(+), 2 deletions(-)
+$ git diff HEAD^ HEAD
+diff --git a/ops/leases/wp1221-r3-g1-claude-remote-20261105.yaml b/ops/leases/wp1221-r3-g1-claude-remote-20261105.yaml
+index 895bc8e9d..5e9960648 100644
+--- a/ops/leases/wp1221-r3-g1-claude-remote-20261105.yaml
++++ b/ops/leases/wp1221-r3-g1-claude-remote-20261105.yaml
+@@ -23,8 +23,8 @@ recorder_ghi_chu: 'phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; tham qu
+ executor_session: session_015GtxrZVmDpv9FPWFf1Uaoo
+ leased_at_utc: '2026-11-05T16:30:00Z'
+ heartbeat_at: '2026-11-05T16:30:00Z'
+-lease_until: '2026-11-07T16:30:00Z'
+-lease_expires_at_utc: '2026-11-07T16:30:00Z'
++lease_until: '2026-11-06T10:30:00Z'
++lease_expires_at_utc: '2026-11-06T10:30:00Z'
+ role: executor
+ provider: anthropic_claude
+ executor: anthropic_claude
+@@ -90,3 +90,18 @@ nang_tran:
+   can_cu: 'va 5 P2 Codex luot 1/4 (F1-F4, F7) +81 dong; numstat +663/-87 tren 3f80327'
+   ai_nang: ducthangho
+   can_cu_url: https://github.com/ducthangho/tra-luat/issues/1221#issuecomment-6665273200
++
++thu_hoi_bang_rut_han:
++  han_goc_utc: '2026-11-07T16:30:00Z'
++  han_moi_utc: '2026-11-06T10:30:00Z'
++  chi_thi: >-
++    Phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq: lease ghi so ghi-so-land-pr1258-wp1221-r1-g1-claude-remote-20261106
++    (nhanh ops/ghi-so-land-1258-lease @ da4bd71) giao "them thu_hoi_bang_rut_han vao lease thi cong" cho phien ghi so; tham quyen
++    #1221 issuecomment-6680321819. Tep nay nam trong write_set cua lease ghi so (chi khoi rut han).
++  ly_do: >-
++    Viec thi cong da xong: PR #1258 merge (08bcb51, 2026-11-06T07:24:02Z), merge^2 = ee7a385, diff merge = diff PR (mot tep
++    .githooks/eol_policy_test.py +698 -92); CI master run 42180624203 23/23 success. Ho so land: ops/land/pr1258-wp1221-land-evidence.yaml.
++  vi_sao_khong_dung_so: >-
++    Theo tien le 102ec83 (wp1237) va 6e1ba1f: rut han bang co che da cai; han moi dat SAU luc push de ops-publish-lease.yml con thay
++    lease song (khong roi vao rc=8).
++  ghi_boi: 'phien ghi so session_015GtxrZMWPFi4PgpnoScEnv'
+$ python3 ops/lease_publish.py check ops/leases/wp1221-r3-g1-claude-remote-20261105.yaml
+LỆNH check KHÔNG CHẠY hai lớp GitHub: đo ISSUE/PR và dò comment; dùng `kiem-github`
+lease wp1221-r3-g1-claude-remote-20261105 ĐĂNG ĐƯỢC — issue #1221, neo b7962596ac5e, hết hạn 2026-11-06T10:30:00Z
+rc=0

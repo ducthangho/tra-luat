@@ -1,0 +1,3 @@
+# kiem-dong-wp tren bien-ban-m8.yaml (landed true 6680515199, nghiem thu A10 passed + 13 owner_waived 6680636879) va lease thi cong SAU rut han (git show origin/ops/wp1221-r3-g1-lease @ 9b34322, byte-khop lease-wp1221-r3-g1-sau-rut-han.yaml.txt) — 2026-11-06T10:34:03Z, sau lease_until 2026-11-06T10:30:00Z
+ĐÓNG ĐƯỢC WP wp1221 — merge 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9
+rc=0

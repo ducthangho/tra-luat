@@ -13892,19 +13892,28 @@ def r1252_status_va_chu_ky_byte_la():
 def r1252_doi_to_tien_thu_muc_luot():
     """Codex lượt 4 F1: con lái `--run-root` (tổ tiên) vào workspace ⇒ không ghi theo đường bị lái, `thu_muc_luot_bi_doi`."""
     m = _tai_launcher_thu()
-    if not m._CO_DIR_FD:
-        return "bo qua: nen khong co dir_fd (Windows: gioi han da khai trong _ghi_tep_0600)"
     with San() as s:
+        try:
+            os.symlink(s, s / "thu-lk")
+        except OSError:
+            return "bo qua: nen khong tao duoc symlink"
+    for che_do in (["dir_fd"] if m._CO_DIR_FD else []) + ["du_phong"]:   # connector P2: cả nhánh không dir_fd
+      with San() as s:
         repo = _r1252_kho(s)
         goc = s / "rr" / "runs"
         con = (f"import glob,os\nR = {str(goc)!r}\nsid = os.path.basename(glob.glob(R + '/*/')[0].rstrip('/'))\n"
                f"gia = {str(repo / '.tl_state' / 'gia')!r}\nos.makedirs(os.path.join(gia, sid))\n"
                "os.rename(R, R + '-goc')\nos.symlink(gia, R)\n")
-        rc, so, thu_muc = _r1252_run(repo, goc, con)
+        cu = m._CO_DIR_FD
+        m._CO_DIR_FD = cu and che_do == "dir_fd"
+        try:
+            rc, so, thu_muc = _r1252_run(repo, goc, con, m=m)
+        finally:
+            m._CO_DIR_FD = cu
         gia = repo / ".tl_state" / "gia" / so["short_id"]
-        bang(not list(gia.glob("snapshot-*.txt")), "tep chup bi ghi theo duong dan da bi lai vao workspace")
+        bang(not list(gia.glob("snapshot-*.txt")), f"{che_do}: tep chup bi ghi theo duong dan da bi lai vao workspace")
         bang(rc == 17 and so["snapshot_ly_do"] == "chup_loi" and so.get("snapshot_tep_chup_bo_qua") == "thu_muc_luot_bi_doi",
-             f"phai ra 17/chup_loi/thu_muc_luot_bi_doi: rc={rc} {so.get('snapshot_ly_do')} {so.get('snapshot_tep_chup_bo_qua')}")
+             f"{che_do}: phai ra 17/chup_loi/thu_muc_luot_bi_doi: rc={rc} {so.get('snapshot_tep_chup_bo_qua')}")
 
 
 
@@ -13916,9 +13925,10 @@ def r1252_ket_thuc_som_du_khoa():
         repo = _r1252_kho(s)
         khong_co = str(s / "khong-ton-tai")
         for ten, them, bat in ((f"{t}{b}", (() if t == "probe" else ("--bo-qua-probe", "thu F8")), b)
-                               for t in ("probe", "popen") for b in (True, False)):   # Codex lượt 6 F10: cả tắt cờ
+                               for t in ("probe", "popen", "prompt") for b in (True, False)):   # F10: cả tắt cờ
+            lenh = [PY, "{PROMPT_FILE}"] if ten.startswith("prompt") else [khong_co]   # connector P2: lỗi prompt
             a = m.build_parser().parse_args(["run", "--workspace", str(repo), "--run-root", str(s / ten), *them,
-                                             *(["--chup-workspace"] if bat else []), "--", khong_co])
+                                             *(["--chup-workspace"] if bat else []), "--", *lenh])
             a.lenh = a.lenh[1:]
             with contextlib.suppress(m.Chan), contextlib.redirect_stdout(io.StringIO()):
                 m.lenh_run(a)
@@ -13927,7 +13937,7 @@ def r1252_ket_thuc_som_du_khoa():
                 bang(so.get("chup_workspace") is False and not [k for k in _R1252_KHOA if k in so], f"{ten}: tat co ma co khoa")
                 continue
             thieu = [k for k in _R1252_KHOA if k not in so]
-            bang(so["trang_thai"] == "hong" and so.get("chup_workspace") is True and not thieu
+            bang((ten.startswith("prompt") or so["trang_thai"] == "hong") and so.get("chup_workspace") is True and not thieu
                  and so["snapshot_ket_qua"] == "khong_do_duoc", f"{ten}: so ket thuc som thieu khoa: {thieu}")
 
 
@@ -13949,6 +13959,25 @@ def r1252_mo_thu_muc_luot_dung_mot_lan():
 
 
 
+@ca
+def r1252_bam_tep_khong_theo_lien_ket():
+    """Connector P2 (PR #1267): `_bam_tep` không đi theo symlink, không treo/không băm FIFO ⇒ cả hai thành `?`."""
+    if LA_WINDOWS or not hasattr(os, "mkfifo"):
+        return "bo qua: nen khong co FIFO/O_NOFOLLOW"
+    m = _tai_launcher_thu()
+    with San() as s:
+        (s / "that").write_text("x", encoding="utf-8")
+        os.symlink(s / "that", s / "lk")
+        os.mkfifo(s / "ong")
+        for ten in ("lk", "ong"):
+            try:
+                m._bam_tep(str(s / ten))
+            except OSError:
+                continue
+            bang(False, f"_bam_tep van bam {ten} (phai tu choi: khong theo lien ket / khong phai tep thuong)")
+
+
+
 DOT_BIEN = [
     ("r1252_bo_kiem_co_khi_ket_thuc_som", ('    return {"chup_workspace": True, **_ket_qua_snapshot(chup_truoc, None, False)} if bat else',
                                            '    return {"chup_workspace": True, **_ket_qua_snapshot(chup_truoc, None, False)} if True else'),
@@ -13965,10 +13994,17 @@ DOT_BIEN = [
      ["r1252_khong_do_duoc"]),
     ("r1252_mo_thu_muc_theo_symlink", ('    return os.open(duong, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)',
                                        '    return os.open(duong, os.O_RDONLY | os.O_DIRECTORY)'), ["r1252_ghi_qua_dir_fd"]),
-    ("r1252_bo_kiem_danh_tinh_thu_muc", ('                if _CO_DIR_FD and not _cung_thu_muc(thu_muc, dfd_luot):',
-                                         '                if False:'), ["r1252_doi_to_tien_thu_muc_luot"]),
+    ("r1252_bo_kiem_danh_tinh_thu_muc", ('                if not (_cung_thu_muc(thu_muc, dfd_luot) if _CO_DIR_FD\n',
+                                         '                if False and (_cung_thu_muc(thu_muc, dfd_luot) if _CO_DIR_FD\n'), ["r1252_doi_to_tien_thu_muc_luot"]),
+    ("r1252_du_phong_khong_kiem_danh_tinh", ('else danh_tinh_luot is not None and _danh_tinh(thu_muc) == danh_tinh_luot):', 'else True):'),
+     ["r1252_doi_to_tien_thu_muc_luot"]),
+    ("r1252_bam_bo_kiem_loai", ('    if not stat.S_ISREG(os.fstat(fd).st_mode):\n', '    if False:\n'), ["r1252_bam_tep_khong_theo_lien_ket"]),
+    ("r1252_bam_theo_symlink", ('os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)', 'os.O_RDONLY | getattr(os, "O_NONBLOCK", 0)'),
+     ["r1252_bam_tep_khong_theo_lien_ket"]),
+    ("r1252_bo_dien_san_khoa", ('        **_khoa_chup_som(bool(getattr(a, "chup_workspace", False)), None),   # F8 kiến trúc',
+                                '        "chup_workspace": bool(getattr(a, "chup_workspace", False)),   # F8 kiến trúc'), ["r1252_ket_thuc_som_du_khoa"]),
     ("r1252_ghi_theo_duong_dan_sau_con",
-     [('                if _CO_DIR_FD and not _cung_thu_muc(thu_muc, dfd_luot):', '                if False:'),
+     [('                if not (_cung_thu_muc(thu_muc, dfd_luot) if _CO_DIR_FD\n', '                if False and (_cung_thu_muc(thu_muc, dfd_luot) if _CO_DIR_FD\n'),
       ('                    _ghi_tep_0600(thu_muc / ten, ban[1], dfd_luot)', '                    _ghi_tep_0600(thu_muc / ten, ban[1])')],
      ["r1252_doi_to_tien_thu_muc_luot"]),
     ("r1252_qua_han_thieu_khoa", ('            ban_ghi.update(_khoa_chup_som(True, chup_truoc))   # Codex lượt 4 F8', '            pass   # Codex lượt 4 F8'),

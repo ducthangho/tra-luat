@@ -878,8 +878,14 @@ def _duong_tuong_doi(goc: str, duong: str) -> bytes:
 
 
 def _bam_tep(duong: str) -> str:
+    """Connector P2 (PR #1267): mở KHÔNG theo symlink, KHÔNG chặn trên FIFO, rồi xét loại trên CHÍNH fd đã mở —
+    hậu duệ còn sống có thể tráo tệp giữa `lstat` và lúc mở."""
+    fd = os.open(duong, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0))
+    if not stat.S_ISREG(os.fstat(fd).st_mode):
+        os.close(fd)
+        raise OSError("khong_phai_tep_thuong")
     h = hashlib.sha256()
-    with open(duong, "rb") as f:
+    with os.fdopen(fd, "rb") as f:
         for khoi in iter(lambda: f.read(1024 * 1024), b""):
             h.update(khoi)
     return h.hexdigest()
@@ -1001,6 +1007,15 @@ def _ket_qua_snapshot(truoc, sau, cay_chet: bool) -> dict:
 def _khoa_chup_som(bat: bool, chup_truoc) -> dict:
     """Codex lượt 4–5 F8: mọi đường kết thúc sớm khi bật cờ vẫn đủ khoá §2.4 (`khong_do_duoc`/`chup_loi`)."""
     return {"chup_workspace": True, **_ket_qua_snapshot(chup_truoc, None, False)} if bat else {"chup_workspace": False}
+
+
+def _danh_tinh(duong):
+    """(dev, inode, realpath) của thư mục, `None` nếu không đo được — dùng cho nhánh không có dir_fd."""
+    try:
+        st = os.stat(duong)
+        return (st.st_dev, st.st_ino, os.path.realpath(duong))
+    except OSError:
+        return None
 
 
 def _cung_thu_muc(duong, dfd) -> bool:
@@ -2548,7 +2563,7 @@ def lenh_run(a) -> int:
         "bat_dau_utc": _bay_gio().isoformat(), "ket_thuc_utc": None,
         "ma_thoat": None, "ly_do_dung": None, "pid": None, "khoa_danh_tinh": None,
         **kq, **_dinh_danh_van_chuyen(a.lenh),
-        "chup_workspace": bool(getattr(a, "chup_workspace", False)),
+        **_khoa_chup_som(bool(getattr(a, "chup_workspace", False)), None),   # F8 kiến trúc: mọi đường thoát sớm đủ khoá
     }
     if neo:
         ban_ghi.update(nonce=neo["nonce"], attempt=neo["attempt"], void_reason=a.void_reason)
@@ -2649,6 +2664,7 @@ def lenh_run(a) -> int:
             f_out.close(); f_err.close()
             raise Chan(MA_HAN, "han chot da qua sau khi chup workspace; khong sinh con")
     dfd_luot = None
+    danh_tinh_luot = _danh_tinh(thu_muc)   # Connector P2: nhánh dự phòng (không dir_fd) đối chiếu danh tính này
     if ban_ghi["chup_workspace"]:
         with contextlib.suppress(OSError):
             dfd_luot = _mo_thu_muc_luot(thu_muc)
@@ -2753,7 +2769,8 @@ def lenh_run(a) -> int:
                 if not cay_chet:       # Codex lượt 2 F1: còn hậu duệ sống thì không ghi gì vào thư mục lượt
                     kq_chup["snapshot_tep_chup_bo_qua"] = "cay_chua_chung_minh_chet"
                     continue
-                if _CO_DIR_FD and not _cung_thu_muc(thu_muc, dfd_luot):   # Codex lượt 4 F1: đường dẫn bị lái
+                if not (_cung_thu_muc(thu_muc, dfd_luot) if _CO_DIR_FD
+                        else danh_tinh_luot is not None and _danh_tinh(thu_muc) == danh_tinh_luot):   # đường dẫn bị lái
                     kq_chup.update(snapshot_ket_qua="khong_do_duoc", snapshot_ly_do="chup_loi",
                                    snapshot_tep_chup_bo_qua="thu_muc_luot_bi_doi")
                     continue

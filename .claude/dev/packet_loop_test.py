@@ -10258,17 +10258,27 @@ _ACTUAL_SPECS1187 = (
 def _actual_spec1187(c, row, at_head=False):
     label, oid, path, packet, revision, sha = row
     m, w, a, lease, _, _, _ = _setup1187(c, "spec", None)
-    # Import original committed objects intact; rollout policy is SYNTHETIC, not canonical admission.
-    _g(w, "fetch", "-q", str(ROOT), oid)
-    rc, blob = m._git_do(w, "show", f"{oid}:{path}")
-    assert rc == 0 and hashlib.sha256(blob).hexdigest() == sha
-    lease.update(packet_id=packet, revision=revision, spec_path=path, spec_ref=f"refs/heads/ops/actual@{oid}", spec_hash=sha, spec_sha256_required=sha)
+    # Frozen byte fixtures make branch-only/offline clones self-contained.
+    # Original metadata OIDs remain provenance; the consumer uses a synthetic fixture commit.
+    original_oid = oid
     if at_head:
-        f = w / path; f.parent.mkdir(parents=True, exist_ok=True); f.write_bytes(blob)
-        _g(w, "add", path); _g(w, "commit", "-qm", "own frozen spec at H")
-        a.head = _g(w, "rev-parse", "HEAD")
+        rc, blob = m._git_do(ROOT, "show", f"{oid}:{path}")
+        assert rc == 0
+    else:
+        blob = (HERE / "fixtures" / "specs1187" / (label + ".md")).read_bytes()
+    assert hashlib.sha256(blob).hexdigest() == sha
+    previous_head = _g(w, "rev-parse", "HEAD")
+    f = w / path; f.parent.mkdir(parents=True, exist_ok=True); f.write_bytes(blob)
+    _g(w, "add", path); _g(w, "commit", "-qm", "frozen spec fixture bytes")
+    oid = _g(w, "rev-parse", "HEAD")
+    if at_head:
+        a.head = oid
+    else:
+        _g(w, "checkout", "-q", "--detach", previous_head)
+    lease.update(packet_id=packet, revision=revision, spec_path=path, spec_ref=f"refs/heads/ops/actual@{oid}", spec_hash=sha, spec_sha256_required=sha)
     assert m._spec_merge(w, a.head, path, lease) == blob
-    print(json.dumps(dict(test=label, source_oid=oid, source_path=path, sha256=sha, rc=0, at_head=at_head,
+    print(json.dumps(dict(test=label, original_source_oid=original_oid, fixture_source_oid=oid,
+                          source_path=path, sha256=sha, rc=0, at_head=at_head,
                           policy_graph="synthetic rollout; not canonical rollout authority")))
 
 

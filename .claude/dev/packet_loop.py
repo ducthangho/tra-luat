@@ -3263,7 +3263,7 @@ def _owner_record(path, repo, pr, schema):
         raise ValueError("owner comment phải là object")
     url = f"https://github.com/{repo}/pull/{pr}#issuecomment-{d.get('id')}"
     issue_comment_url = f"https://github.com/{repo}/issues/{pr}#issuecomment-{d.get('id')}"
-    # ADR-0065: GitHub rewrites only the display URL when an issue becomes a PR.
+    # Packet #1254: GitHub rewrites only the display URL when an issue becomes a PR.
     allowed_urls = (url, issue_comment_url) if schema == "human_exact_head_audit.v1" else (url,)
     if not (repo == "ducthangho/tra-luat" and type(d.get("id")) is int and d["id"] > 0
             and isinstance(d.get("user"), dict) and d["user"].get("login") == CHU_KHO and d["user"].get("type") == "User"

@@ -1,7 +1,8 @@
-# ADR-0065 - Human audit comment identity across issue-to-PR conversion
+# Human audit comment URL identity - Packet #1254
 
-- Status: proposed amendment; effective only after this ADR and its consumer land on canonical master.
-- Source: Packet #1254, HUMAN-AUDIT-URL-IDENTITY r1; separate from frozen Packet #1187 and PR #1253.
+- Status: proposed normative addendum; effective only after this addendum and its consumer land on canonical master.
+- Source: HUMAN-AUDIT-URL-IDENTITY r2; separate from frozen Packet #1187 and PR #1253.
+- This bounded addendum amends only the audit-source URL comparison described by ADR-0063.
 
 ## Decision
 
@@ -21,11 +22,10 @@ exception and does not extend URL equivalence to authorization or historical tra
 
 ## Compatibility and evidence
 
-This prospective amendment clarifies the audit-source URL comparison in ADR-0063 and existing
-`human_exact_head_audit.v1` consumers. Frozen historical spec bytes remain untouched; they are
-not rewritten to claim prior implementation of this rule. The same unchanged historical raw
-comment may be evaluated by the amended canonical consumer after rollout, without changing
-its original H/tree/spec or timing. A proposed local consumer passing is not a production gate.
+Frozen historical spec bytes and Accepted ADR-0063 remain untouched; they are not rewritten
+to claim prior implementation of this rule. The same unchanged historical raw comment may be
+evaluated by the amended canonical consumer after rollout, without changing its original
+H/tree/spec or timing. A proposed local consumer passing is not a production gate.
 
-Existing long-test receipts remain evidence for their exact original identities. This ADR
+Existing long-test receipts remain evidence for their exact original identities. This addendum
 does not waive CI, M9, admission, independent review, land authority or integration checks.

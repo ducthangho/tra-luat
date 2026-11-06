@@ -67,7 +67,7 @@ write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 J
 write_set_ghi_chu: '.claude/dev/ci_dang_ky_test.py CHI THEM dung mot muc MOI (numstat 1 0); hai tep ops/ la tep MOI'
 closure_status: 'holder scan 2026-11-06T04:31:30Z: ls-remote vs for-each-ref thieu 0; 3/3 duong dan NGUOI_GIU 0'
 tran_kich_thuoc: '<= 3 tep / <= 1550 dong them, do git diff --numstat origin/master...<head A1> (nang_tran lan 3 dot A1 06-11 ~08:30Z, issuecomment-6680590199; lan 2 len 1500 issuecomment-6679264765; lan 1 len 1400 issuecomment-6677406420; spec r7 cho 950); vuot => DUNG truoc review'
-tran_loi_goi_codex: 'doc tu dong tran_loi_goi_codex cua spec (ADR-0052@8ab10079); dem truoc MOI loi goi'
+tran_loi_goi_codex: 'doc tu dong tran_loi_goi_codex cua spec (ADR-0052@8ab10079); RIENG dot A1: nang 4 -> 5 (khoi nang_tran_codex, issuecomment-6681159074), luot 5 chi xac minh F09; dem truoc MOI loi goi'
 windows: 'khong bat buoc cho dot A1 (Q7: OS_BAT_BUOC ubuntu-latest); neu can do Windows thi chay TAP TRUNG tren tra-luat-win qua phien dieu phoi, KHONG workflow_dispatch'
 coordination_paths:
 - ops/leases/wp1236-a1-r7-g1-claude-remote-20261106.yaml
@@ -101,3 +101,10 @@ nang_tran:
     tran_moi: '<= 3 tep / <= 1400 dong them'
     can_cu: 'numstat 2d3cb50 = +1347 (module 482, test 864, dang ky 1); 26/26 ca, 72/72 dot bien'
     can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-6677406420
+nang_tran_codex:
+  pham_vi: dot A1 (PR #1260)
+  tran_cu: 4 loi goi Codex (spec r7)
+  tran_moi: 5 loi goi Codex; luot 5 CHI xac minh F09 tren head moi; khong co luot 6
+  can_cu: 'Codex luot 4/4 (run 35c9a73a, issuecomment-6681084627) dong F01-F08, F10; con F09 P2 fail-open (chuoi rong/khoang trang)'
+  ai_nang: ducthangho
+  can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-6681159074

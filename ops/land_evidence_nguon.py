@@ -37,6 +37,9 @@ LUẬT:
       `reviewer_assurance_81` lồng chuẩn hoá ra DAT chỉ thành ghi chú (hồ sơ chỉ thêm, câu DAT cũ còn nằm đó). Không có khối ấy
       ⇒ mỗi khoá lồng (mọi độ sâu, kể cả trong list) chuẩn hoá ra DAT là MỘT vi phạm; không nhận `thuc_thi` lồng. Giá trị
       không phải chuỗi ⇒ không áp, ghi chú. Lời khai văn xuôi (`§8.1 … cross_approved` trong chuỗi) KHÔNG đọc được, không bắt.
+      #1240 (ADR-0065, `ops/specs/assurance-81-model-effort-tuy-chon-r1.md`) NỚI: chỉ `sandbox_mode` (`L7_KHOA`) còn bắt buộc
+      là lời khai measured. `model`, `effort` (`L7_KHOA_TUY_CHON`) là trường ghi nếu đo được: được VẮNG; có mặt thì phải là
+      chuỗi khớp `RE_KHAI_DO` hoặc `RE_KHAI_KHONG_DO` (`not_measured …`). Rỗng, `DAT`, null, sai kiểu ⇒ vẫn ĐỎ.
 
 ĐIỀU CỔNG NÀY KHÔNG LÀM (đặc tả `ngoai_pham_vi`): L1 chỉ đo "lời khai trỏ tới thứ CÓ THẬT", KHÔNG đo thứ ấy chứng minh câu
 văn — một tệp vô can vẫn làm L1 qua. Chỉ L2 đọc NỘI DUNG, và chỉ cho token số. Hồ sơ cũ đi qua miễn trừ, không được kiểm.
@@ -96,6 +99,7 @@ MIEN_TRU_CUTOVER = {
 }
 
 RE_KHAI_DO = re.compile(r"\s*measured(?:\s|—|-|:)", re.IGNORECASE)
+RE_KHAI_KHONG_DO = re.compile(r"\s*not_measured(?:\s|—|-|:)", flags=re.IGNORECASE)   # #1240: chỉ L7 tuỳ chọn đọc; L1 không đòi nguồn
 _KT = r"A-Za-z0-9_./{}*-"
 RE_DAI = re.compile(rf"(?<![{_KT}])[{_KT}]+")
 RE_DUOI_NGUON = re.compile(r"\.(?:json|txt|log|yaml|yml|md|sh|py|patch)$")
@@ -103,7 +107,8 @@ RE_SO_POS = re.compile(r"(?<!\d)\d+/\d+(?!\d)|(?<![A-Za-z0-9_])hong \d+(?!\d)")
 RE_MOC = re.compile(r"\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:[Zz]|[+-]\d{2}:?\d{2})?(?![\d:])")
 L6_PHAN_HOAN_TAT = ("post_merge_checks", "bookkeeping")   # cây thật 19-10-2026: mọi hồ sơ landed true đã có cả hai
 L6_DAU_GIU_CHO = "CHO_DIEN"
-L7_KHOA = ("model", "effort", "sandbox_mode")
+L7_KHOA = ("sandbox_mode",)   # #1240 ADR-0065: bắt buộc measured khi khai DAT
+L7_KHOA_TUY_CHON = ("model", "effort")   # #1240 ADR-0065: ghi nếu đo được — vắng được, có mặt thì measured/not_measured
 L7_MUC_DAT = ("DAT", "ĐẠT")   # sau `_chuan_hoa_81`; dạng NFC
 # L7 — đo 2026-10-27 trên `7129f7d` (băm chụp lại sau #962/#966 sửa pr924, pr950; tên giữ nguyên như ở `f577ab5`):
 # 3 hồ sơ khai DAT mà thiếu `thuc_thi`. KHÔNG thêm tên mới; chụp lại băm chỉ khi có comment chủ kho cho phép —
@@ -318,6 +323,8 @@ def kiem_ho_so(tep, byte, goc, yaml):
         elif not mien:
             vp += [f"L7 $.assurance_81.thuc_thi.{k}: khai DAT mà không phải lời khai measured — {str(tt7.get(k))[:60]!r}"
                    for k in L7_KHOA if not (isinstance(tt7.get(k), str) and RE_KHAI_DO.match(tt7[k]))]
+            vp += [f"L7 $.assurance_81.thuc_thi.{k}: có mặt mà không phải lời khai measured/not_measured — {str(tt7[k])[:60]!r}"
+                   for k in L7_KHOA_TUY_CHON if k in tt7 and not _khai_tuy_chon(tt7[k])]
     co_goc = isinstance(a81, dict)   # L7 r2: có khối cấp gốc ⇒ khối ấy là nguồn DUY NHẤT, khoá lồng chỉ được ghi chú
     for d, v in _khoa_81(du_lieu):
         if d == "$.assurance_81.reviewer_assurance_81":   # chính khối gốc, r1 đã xét
@@ -352,6 +359,11 @@ def _doan(k):
     if not isinstance(k, str):
         return f"[{type(k).__name__}:{k!r}]"
     return f".{k}" if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", k) else f"[{json.dumps(k, ensure_ascii=False)}]"
+
+
+def _khai_tuy_chon(v):
+    """#1240: trường L7 tuỳ chọn có mặt ⇒ chuỗi `measured …` hoặc `not_measured …`; mọi giá trị khác là rác."""
+    return isinstance(v, str) and bool(RE_KHAI_DO.match(v) or RE_KHAI_KHONG_DO.match(v))
 
 
 def _chuan_hoa_81(v):

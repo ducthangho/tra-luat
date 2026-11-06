@@ -1,0 +1,38 @@
+# Bien ban M8 (ADR-0060) dong WP #1237 wp1237 CAI-ACTIONLINT-RETRY r1 — kiem bang packet_loop.py kiem-dong-wp.
+# Nhan nguon tung muc: ops/land/pr1242-wp1237-land-evidence.yaml. #1237 khong co muc LIVE (spec ngoai_pham_vi/chua_do_duoc).
+packet: wp1237
+revision: 1
+generation: 1
+spec_hash: b0e12304e0c591db6e2130454ed6a72c1458d4541b1312037935b0ccbb210666
+head_da_review: 97cb2dda246886c7d4bec2bea4a4b89342403a65
+tree_h: f5ab9894b8eeccd2aeab913cfa257a1d05db39e5
+review:
+  offline: 'Codex luot 4/8 (launcher run, kiem-merge/run-offline-l4.json) approve tren 97cb2dd; model/effort/sandbox DO_DUOC'
+  connector: 'issuecomment-6665730294 Reviewed commit 97cb2dda24, khong finding; codex-review-state completed has_any_findings false (6665064742)'
+  so_loi_goi_codex: 4
+  xu_ly_finding: 'P2 retry-max-time-decimal-equivalence (luot 1) va tren 4458d06; P3 retry-window-request-count-flakiness (luot 2) va tren 69dbf3a; luot 3, 4 approve'
+windows:
+  phan_loai: required
+  nguon: 'measured_by_coordinator — t237/t35/t37/t38 dat tren tra-luat-win, HEAD 97cb2dd (kiem-merge/win.json; log sha256 f05b6225… khong kem)'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1237#issuecomment-6665806176
+merge_commit: 801042cbf6ccc00a4da37ed2a62a61bac10bae02
+tree_m: 6d22bf4dc6cc2721df9b14b5d5fb3d4e114fa664
+ci_master:
+  run_id: 42083807690
+  conclusion: success
+  sha: 801042cbf6ccc00a4da37ed2a62a61bac10bae02
+  jobs: '23/23 success, nhan ubuntu-latest; kiem-gate rc=0'
+nghiem_thu:
+  D1: passed
+  D2: passed
+  D3: passed
+  D4: passed
+  D5: passed
+  D6: passed
+lease_cuoi: wp1237-r1-g1-claude-remote-20261105
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

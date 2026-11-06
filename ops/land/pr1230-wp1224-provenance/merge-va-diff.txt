@@ -1,0 +1,17 @@
+# do 2026-11-05T18:45:33Z tren 825eb3561a94e05c36045d2c981b4108c523e31c
+commit 825eb3561a94e05c36045d2c981b4108c523e31c
+tree fa1dd196d0a1054b0e5bdae85e18068eadcf3b55
+parents 801042cbf6ccc00a4da37ed2a62a61bac10bae02 4dc4fe9a30517cf4bb1cb78105a91687814cc0fa
+author_date 2026-11-06T01:41:17+07:00
+merge-base --is-ancestor 4dc4fe9a30517cf4bb1cb78105a91687814cc0fa origin/master: yes
+## git diff --stat 825eb3561a94e05c36045d2c981b4108c523e31c^1 825eb3561a94e05c36045d2c981b4108c523e31c
+ CLAUDE.md                       |  2 ++
+ RELEASE_MANIFEST.json           | 12 ++++++------
+ changelog.d/wp-1224.md          |  1 +
+ docs/GOI_AGENT_DA_NEN.md        |  5 +++++
+ references/DELTA_v1.19.md       |  2 +-
+ references/DEV_TOOLING_GUIDE.md |  2 +-
+ 6 files changed, 16 insertions(+), 8 deletions(-)
+## spec
+blob 0fd4e50125c6746721ca3fd59d5c011834ee1c7a
+a5afb3e749870535340d65cbbd4ebdc7eec5f82b1be053e4278a78ff95349bda  -

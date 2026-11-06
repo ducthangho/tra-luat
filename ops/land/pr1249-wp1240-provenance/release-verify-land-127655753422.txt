@@ -1,0 +1,62 @@
+# trich buoc release-verify --strict (lane LAND) tu log job 127655753422 gate (ubuntu-latest), run 42145442236 attempt 1, head 51d6509
+# log_sha256 f4a25bf6e380180413683473c6dafba05f3e73bbcb12598e12dff6083175e25f
+##[group]Run python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
+[36;1mpython scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json[0m
+shell: /usr/bin/bash -e {0}
+env:
+  PYTHONIOENCODING: utf-8
+  PYTHONUTF8: 1
+  PYTHONDONTWRITEBYTECODE: 1
+  pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+  PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+  Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+##[endgroup]
+{
+  "ok": true,
+  "schema": "release_verify.v1",
+  "strict": true,
+  "root_name": "tra-luat",
+  "manifest_schema": "release_manifest.v1",
+  "skill_version": "1.36.69",
+  "expected_file_count": 184,
+  "checked_file_count": 184,
+  "failed": [],
+  "extra_files": [],
+  "missing_from_current_manifest": [],
+  "required_missing": [],
+  "skill_links": {
+    "links_checked": 16,
+    "links_missing": [],
+    "links_ok": true
+  },
+  "doc_pointers": {
+    "pointers_checked": 318,
+    "pointers_fail": [],
+    "pointers_advisory": [
+      [
+        "CHANGELOG.md",
+        "references/BANG_PHAN_TANG_RUI_RO.md"
+      ],
+      [
+        "CHANGELOG.md",
+        "references/Code"
+      ],
+      [
+        "CHANGELOG.md",
+        "references/Code.2.21.2h.gs"
+      ],
+      [
+        "CHANGELOG.md",
+        "references/Code.2.21.2i.gs"
+      ],
+      [
+        "CHANGELOG.md",
+        "references/Code.2.21.2n.gs"
+      ],
+      [
+        "CHANGELOG.md",
+        "references/KHONG_CO_FILE.md"
+      ],

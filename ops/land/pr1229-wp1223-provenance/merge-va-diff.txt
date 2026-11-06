@@ -1,0 +1,18 @@
+# do 2026-11-05T18:45:33Z tren 50baf894216504d4bb975690ceb9dee4835a2ad7
+commit 50baf894216504d4bb975690ceb9dee4835a2ad7
+tree 59897b1183de3d1feef954f9ca0175122cea08d3
+parents 7200e7b4082a8ab4037a6f5774ef525cc6334ade 1d5ee679ced60ca6dfade2096a1cb805e9cadad8
+author_date 2026-11-06T00:17:04+07:00
+merge-base --is-ancestor 1d5ee679ced60ca6dfade2096a1cb805e9cadad8 origin/master: yes
+## git diff --stat 50baf894216504d4bb975690ceb9dee4835a2ad7^1 50baf894216504d4bb975690ceb9dee4835a2ad7
+ INSTALL.md                 |  6 +++---
+ RELEASE_MANIFEST.json      | 22 +++++++++++-----------
+ SKILL.md                   |  8 ++++----
+ changelog.d/wp-1223.md     | 16 ++++++++++++++++
+ references/API_CONTRACT.md |  7 ++++---
+ scripts/tl.py              |  2 +-
+ scripts/tl_selftest.py     |  6 +++---
+ 7 files changed, 42 insertions(+), 25 deletions(-)
+## spec
+blob d108533d28e2dcfce0529aebe7faf8107ed8170e
+db83020d7cd57c8c9981c8f94ffcc50bf59d536a7224c1f3fb6ae6195511de3a  -

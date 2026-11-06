@@ -1,0 +1,100 @@
+init RC 0 OUT đã khởi tạo packet 1179 (mission 499) — executor claude, reviewer codex, state awaiting_lease ERR 
+status RC 0 OUT {
+  "accepted_sha": null,
+  "attempt_anchor": null,
+  "attempt_open": false,
+  "attempts_limit": 3,
+  "attempts_used": 0,
+  "codex_calls": [],
+  "codex_review_calls_limit": 3,
+  "codex_review_calls_used": 0,
+  "executor": "claude",
+  "executor_identity": {
+    "execution_surface": null,
+    "model_family": "claude",
+    "provider": "claude",
+    "transport": null
+  },
+  "finding_counts": {},
+  "history": [],
+  "hmac_key": "4a246f69fc28b4b8a8771265c2e39af57fc57307051fe0a1ae43cb557b02f672",
+  "lease": null,
+  "mission": 499,
+  "nang_tran": [],
+  "packet": 1179,
+  "posts": {},
+  "review_rounds_limit": 10,
+  "review_rounds_used": 0,
+  "reviewer": "codex",
+  "reviewer_identity": {
+    "execution_surface": null,
+    "model_family": "openai",
+    "provider": "codex",
+    "transport": null
+  },
+  "reviewing_head_sha": null,
+  "reviews": [],
+  "same_failure_limit": 2,
+  "schema_version": 2,
+  "state": "awaiting_lease"
+} ERR 
+missing_mission RC 2 OUT  ERR usage: packet_loop.py init [-h] --packet PACKET --mission MISSION
+                           --executor EXECUTOR --reviewer REVIEWER
+                           [--executor-model-family EXECUTOR_MODEL_FAMILY]
+                           [--executor-execution-surface EXECUTOR_EXECUTION_SURFACE]
+                           [--executor-transport EXECUTOR_TRANSPORT]
+                           [--reviewer-model-family REVIEWER_MODEL_FAMILY]
+                           [--reviewer-execution-surface REVIEWER_EXECUTION_SURFACE]
+                           [--reviewer-transport REVIEWER_TRANSPORT]
+                           [--attempts-limit ATTEMPTS_LIMIT]
+                           [--same-failure-limit SAME_FAILURE_LIMIT]
+                           [--review-rounds-limit REVIEW_ROUNDS_LIMIT]
+                           [--codex-review-calls-limit CODEX_REVIEW_CALLS_LIMIT]
+packet_loop.py init: error: the following arguments are required: --mission
+limit0 RC 2 OUT  ERR --review-rounds-limit/--codex-review-calls-limit phải là số nguyên DƯƠNG
+default2 RC 0 OUT đã khởi tạo packet 1179 (mission 499) — executor claude, reviewer codex, state awaiting_lease ERR 
+status_default RC 0 OUT {
+  "accepted_sha": null,
+  "attempt_anchor": null,
+  "attempt_open": false,
+  "attempts_limit": 3,
+  "attempts_used": 0,
+  "codex_calls": [],
+  "codex_review_calls_limit": 2,
+  "codex_review_calls_used": 0,
+  "executor": "claude",
+  "executor_identity": {
+    "execution_surface": null,
+    "model_family": "claude",
+    "provider": "claude",
+    "transport": null
+  },
+  "finding_counts": {},
+  "history": [],
+  "hmac_key": "f54598335647f6a685ed4fc3cf9ef131ae804226bd4e7cb2cdaad73462984aae",
+  "lease": null,
+  "mission": 499,
+  "nang_tran": [],
+  "packet": 1179,
+  "posts": {},
+  "review_rounds_limit": 10,
+  "review_rounds_used": 0,
+  "reviewer": "codex",
+  "reviewer_identity": {
+    "execution_surface": null,
+    "model_family": "openai",
+    "provider": "codex",
+    "transport": null
+  },
+  "reviewing_head_sha": null,
+  "reviews": [],
+  "same_failure_limit": 2,
+  "schema_version": 2,
+  "state": "awaiting_lease"
+} ERR 
+call1 RC 8 OUT  ERR chỉ ghi lời gọi codex khi state 'reviewing' (đang 'awaiting_lease')
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv8/sandbox/cli_probe.py", line 19, in <module>
+    assert (p.returncode==0)==(i<=3)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

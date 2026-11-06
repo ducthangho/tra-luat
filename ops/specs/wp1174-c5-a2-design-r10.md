@@ -1,9 +1,9 @@
 dieu_kien_merge: ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 
-# WP1174 C5-A2 — Candidate đặc tả r9 (chưa freeze/lease)
+# WP1174 C5-A2 — Candidate đặc tả r10 (chưa freeze/lease)
 
-- packet_id: WP1174; revision: 1; design_revision: 9;
+- packet_id: WP1174; revision: 1; design_revision: 10;
 - packet_issue: 1174
 - review_class: sensitive
 - candidate_kind: specification_proposal_only
@@ -41,7 +41,7 @@ Cả hai mode cần admission/authority còn hiệu lực, exact adoption ID và
 
 Prepared state giữ immutable source snapshot, hash bytes nguồn, deterministic target payload, tombstone bytes/hash, binding hash và lineage. `prepared_payload_sha256` được tính từ **immutable payload projection** đã liệt kê, loại trừ field hash của chính nó và các field phase/revision tiến trình; không dùng self-referential whole-file hash. Validator dẫn xuất lại payload từ source snapshot có hash ghim trong admission.
 
-Trước khi thử ghi tombstone, ghi durable `cutover_started: true` vào prepared journal và readback; chỉ sau đó mới động tới path cũ. Flag này monotonic, không về false. Sau tombstone durable/readback, mới chuyển target adopted. Quiescence giữ xuyên quy trình. Đây là state machine nhiều bước, không hứa atomic nhiều file.
+Trước khi thử ghi tombstone, ghi durable `cutover_started: true` vào prepared journal và readback; chỉ sau đó mới động tới path cũ. Flag này monotonic, không về false. Sau tombstone durable/readback, mới chuyển target adopted; bước finalize witness vẫn bắt buộc trước khi cho kết thúc adoption. Quiescence giữ xuyên quy trình. Đây là state machine nhiều bước, không hứa atomic nhiều file.
 
 | Disposition | Preconditions | Hành động |
 |---|---|---|
@@ -66,11 +66,21 @@ Scoped `init` là ngoại lệ hẹp của gate load-state:
 
 Admission có predecessor/source, lineage đã có history/counter hoặc không chứng minh được lineage mới ⇒ init rc 8, không tạo file. Missing target của generation đã được khai predecessor hoặc đã init trước đây ⇒ UNKNOWN, không init lại. `adopt-state` là lệnh duy nhất tạo **target có predecessor**.
 
-Witness chống init lại là file one-shot durable ngoài target generation, nằm trong journal Packet hiện hữu; path cố định do canonical binding chọn, không caller chọn và không unlink. Fresh init chỉ dương nếu cả witness và target đều absent, đồng thời registration xác minh lineage mới. Sau lock và validate, tạo witness bằng O_CREAT|O_EXCL, fsync/readback trước target; phase reserved→initialized chỉ tiến tới, initialized chỉ sau target durable. Mọi mutator/dispatch phải thấy witness initialized; mất target mà witness tồn tại thì ordinary init rc8/UNKNOWN, không reset counters. Witness đã initialized thì không được dùng source hash ban đầu để tạo lại state mất. Không có registry tổng quát mới.
+Witness là một file durable **cho toàn Packet lineage**, không theo generation, ở path cố định do canonical binding chọn. Cùng mount với target/lock/temp, không unlink hoặc có khoảng absent sau lần tạo đầu. Mọi lần đọc dùng lstat và O_NOFOLLOW, fstat regular file và so identity/readback; symlink/missing/corrupt ⇒ UNKNOWN. Tạo đầu bằng O_CREAT|O_EXCL; mọi cập nhật dùng temp cùng thư mục → fsync file → atomic replace → fsyncdir → readback. Lock giữ tới hết các bước. Hash/mtime đơn lẻ không là chống writer ngoài profile.
 
-Recovery init là mode của cùng init (không thêm mutator): `--mode resume-initialization` chỉ khi authority có disposition exact enrollment/binding, witness reserved và không có bằng chứng initialized/dispatch; tiếp tục tạo awaiting_lease từ grant gốc, không cấp dispatch. Dữ liệu mâu thuẫn hoặc witness initialized mà target mất thì UNKNOWN và yêu cầu khôi phục đúng lịch sử đã đối soát, không tự dựng state rỗng. Adoption từ lineage cũ cũng nhập witness với history/counters thật trước activation; không khai là fresh init.
+Witness giữ origin (fresh_init hoặc imported_lineage), enrollment/binding ID, active generation, phase reserved|initialized, witness_revision, pending_adoption khi có, suspended và history append-only. phase chỉ đi reserved→initialized một lần, không lùi. Path không đổi qua các generation; witness initialized được đọc/cập nhật cho adoption tiếp, không O_EXCL lần nữa. Chỉ lần chưa từng có witness mới O_EXCL, và authority phải chứng minh fresh/import lineage tương ứng.
 
-Oracle thêm: init→xóa target→init lại bị chặn; mutant bỏ witness check phải đỏ. Crash sau witness reserved thì normal init chặn, chỉ recovery có authority được resume; crash hoặc state initialized rồi target mất không được reset.
+Fresh init đòi cả witness và target absent, registration xác minh lineage mới và sentinel absent. Tạo witness reserved durable trước target. Target initial awaiting_lease được dẫn xuất tất định từ exact grant, sau target durable/readback mới chuyển witness initialized durable; init chỉ trả thành công sau đó. Mọi mutator/dispatch kiểm witness initialized, binding/active_generation khớp, không pending_adoption và không suspended trước validate, rồi kiểm lại sau persist trước dispatch right.
+
+`init --mode resume-initialization` cần disposition exact enrollment và origin=fresh_init, witness reserved. Target absent ⇒ tạo đúng initial bytes từ grant; target hiện hữu ⇒ chỉ nhận khi byte-for-byte bằng initial bytes ấy rồi chỉ advance witness, không ghi đè target. Sai bytes hoặc witness initialized mà target thiếu ⇒ UNKNOWN, không reset state. Provider không được gọi trong giai đoạn reserved. Witness initialized + target missing phải khôi phục đúng lịch sử được đối soát qua authority, không dựng lại counters ban đầu.
+
+Adopt-state trong cùng lock: witness tồn tại phải đúng lineage/binding và không có pending khác; nếu lineage v2 chưa có witness thì tạo reserved origin=imported_lineage bằng O_EXCL, giữ source generation/hash đã được admission ghim. Ghi pending_adoption exact ID/generation durable **trước prepared/cutover**; witness tạo/đọc xong mới tới prepared → cutover_started → tombstone → adopted như §3. Witness đã initialized không lùi reserved; pending/suspended chặn ordinary mutator. Sau target adopted durable/readback và mọi tombstone khớp, mới advance witness active_generation, append history và clear pending/suspended atomically/durably. Chỉ sau witness final readback mới kết thúc adoption. Target adopted mà thiếu witness hoặc còn pending ⇒ chặn, không miễn.
+
+Recovery adopt-state nếu witness có pending đúng ID nhưng target chưa được tạo: chỉ được dựng prepared từ source bytes còn đúng hash đã ghim, quiescence và authority còn hợp lệ; source đã là tombstone mà target mất ⇒ UNKNOWN. Nếu target đã adopted nhưng witness chưa advance, recovery kiểm mọi exact hash rồi chỉ finalize witness; không early-return already_completed trước khi witness khớp. Normal mutator không được finalize hộ. initialized witness có history adoption ID đã hoàn tất và target adopted khớp ⇒ replay already_completed_no_dispatch.
+
+Abandon trước cutover giữ aborted target/node trong lineage, clear pending bằng durable update, đặt suspended=true và append aborted history; không cho predecessor tự dispatch lại. imported witness nếu còn reserved vẫn giữ reserved, không xóa để trông như fresh. Adoption lần sau phải có admission/generation/adoption ID mới, dùng lại witness đã tồn tại và giữ toàn history; chỉ clear suspended sau target mới adopted + witness finalize. `init` không bao giờ nhận witness của imported lineage hoặc abandoned adoption làm fresh lineage.
+
+Oracle: mọi điểm crash giữa witness/source/target/cutover/adopted/finalize/abandon đều không reset hoặc dispatch; reserved+initial-target-present chỉ advance witness khi bytes đúng; adopted+missing/pending witness bị chặn. Mutant bỏ witness ở gate, lần kiểm sau persist hoặc adopt-state đều phải đỏ.
 
 Oracle bổ sung: fresh lineage + absent sentinel dương; predecessor + init âm; generation đổi + init âm; sentinel sai/thiếu âm; state đã có/corrupt/symlink âm. Không được xóa lịch sử canonical để làm lineage trông mới.
 
@@ -92,7 +102,7 @@ Chuỗi kiểm bắt buộc:
 
 1. Xác minh frozen spec/source authority, registration đúng Mission/Packet/revision/generation và expiry/revocation bằng canonical hiện hành. Candidate tự chứa descriptor không cấp quyền cho chính nó.
 2. Đọc Git object đúng OID/path từ ref descriptor; không resolve nhánh trôi. Hash bytes phải bằng admission_sha256. Ref chỉ là nhãn nguồn, không phải chứng minh reachability hiện thời.
-3. So bytes của FILE với chính bytes immutable ấy, không chỉ parse rồi so subset. FILE khác hash/bytes ⇒ mutator trả rc 8 trước mọi write; guard-first-publication trả rc 12 với status admission_rejected, không trả 0. Kể cả FILE khớp, consumer vẫn validate fields và current authority/expiry/revocation.
+3. So bytes của FILE với chính bytes immutable ấy, không chỉ parse rồi so subset. Mọi resolver rejection (FILE/OID/path/hash/spec/generation/revocation/expiry/canonical source lỗi) ⇒ mutator rc 8 trước mọi write, guard-first-publication rc 12 với status admission_rejected. rc 2 chỉ cho argv syntax, không dùng cho rejection dữ liệu FILE. Không có resolver rejection nào cho guard trả 0 hoặc 8. Kể cả FILE khớp, consumer vẫn validate fields và current authority/expiry/revocation.
 4. Payload đóng các binding bắt buộc: schema, Mission/plan hash, Packet/spec contract ID/revision/generation, base, coordinator enrollment, state/lock/root identities, predecessor/lineage, source hash khi có predecessor, allowance window/limits và expiry. Không nhúng SHA256 của spec S vào payload A khi S đã ghim hash A: dùng đồ thị hash một chiều S → A. Resolver receipt ràng đồng thời spec_sha256(S) và admission_sha256(A) từ nguồn authority đã xác minh; contract ID trong A phải khớp identity của S. Nếu chọn layout lease ghim A thay vì S thì cũng phải khai đồ thị hash không vòng, không ngầm tạo cặp hash tự tham chiếu. Freshness của grant/revocation là kiểm riêng; OID immutable không tự chứng minh grant còn hiệu lực.
 5. `init`, cả hai mode adopt-state, mọi mutator scoped và guard-first-publication dùng cùng resolver này. Không lấy CLI expected hash từ FILE làm root authority.
 
@@ -107,7 +117,7 @@ Tombstone đề xuất `packet_state_retired.v1` có đúng các key:
 - `format`: chuỗi cố định `packet_state_retired.v1`;
 - `packet_id`: int dương, không nhận bool;
 - `from_generation`, `to_generation`: int thật, không bool, from không âm, to > from theo binding được cấp;
-- `adoption_id`: string ASCII khớp `^[a-z0-9][a-z0-9._-]{0,127}$`, đồng thời exact trong authority/record;
+- `adoption_id`: type(value) is str và `re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,127}", value, flags=re.ASCII)`, đồng thời exact trong authority/record;
 - `source_sha256`, `binding_sha256`: đúng 64 lowercase hex.
 
 Không chứa key `packet`, `schema_version`, `reviewer`, `reviews` hoặc payload schema 2. Serialization: JSON UTF-8, `ensure_ascii=False`, `sort_keys=True`, separators `(',', ':')`, **một LF cuối**. Tombstone hash tính từ chính bytes này trước prepared persist, không field hash self-reference.
@@ -116,7 +126,7 @@ Golden phải ghi đúng bytes do renderer này sinh; chạy lại đủ 13 entr
 
 ## 7. Transaction và dispatch
 
-Gate gồm 13 entry point legacy và adopt-state (14 mutator tổng). Fresh init dùng nhánh absent được mô tả riêng, không load target chưa tồn tại. Các trường hợp còn lại đi qua: lấy lock → load → kiểm authority/binding/topology/revision/phase và tripwire lần 1 → validate → mutate/reserve → persist durable → readback → tripwire lần 2 → kết luận → nhả lock.
+Gate gồm 13 entry point legacy và adopt-state (14 mutator tổng). Fresh init dùng nhánh absent được mô tả riêng, không load target chưa tồn tại. Các trường hợp còn lại đi qua: lấy lock → load → kiểm authority/binding/topology/revision/phase, witness đủ initialized/active generation/no pending/no suspended và tripwire lần 1 → validate → mutate/reserve → persist durable → readback → kiểm witness lại và tripwire lần 2 → kết luận → nhả lock.
 
 - Lockfile cố định, không unlink, mở `O_CLOEXEC`; fd không truyền cho provider. Temp cùng filesystem/thư mục. Giữ lock tới sau readback và tripwire lần 2.
 - **Chỉ trả `dispatch_allowed=true` sau toàn bộ fsync file, replace, fsyncdir, readback và tripwire lần 2 thành công.** Đây mới là điểm coordinator được phép gọi provider.
@@ -153,11 +163,11 @@ Receipt đề xuất đóng field: schema, repo ID/full_name, H, audit comment I
 
 Residual policy đề xuất chỉ có hai lớp: hoạt động server không được API công bố; object storage của fork nằm ngoài repo/ref scope đã khai. Owner phải duyệt policy trước activation. **Retention hoặc thiếu page trong phạm vi cần kiểm không được đổi nhãn thành residual.** Một đường introduction thực tế không được hỗ trợ vẫn UNKNOWN.
 
-Đọc lại API do eventual consistency tối đa ba lần trong một cửa sổ 180 giây; mỗi lần thu tối đa 100 trang/120 giây/30 MiB và phải còn trong wall deadline chung. Hết số lần/thời gian ⇒ UNKNOWN, không PASS do timeout, không mở thêm invocation provider. Consumer đề xuất là command read-only `guard-first-publication --packet N --admission FILE --receipt FILE`, chạy canonical có hiệu lực sau rollout trước `kiem-merge`. Nó không ghi state; exit 0 chỉ khi điều kiện collector/audit/publication đủ theo policy đã duyệt, exit 12 cho FAIL hoặc UNKNOWN kèm JSON status phân biệt, exit 2 cho lỗi đối số. Chưa có command production mới được triển khai trong bản này.
+Đọc lại API do eventual consistency tối đa ba lần trong một cửa sổ 180 giây; mỗi lần thu tối đa 100 trang/120 giây/30 MiB và phải còn trong wall deadline chung. Hết số lần/thời gian ⇒ UNKNOWN, không PASS do timeout, không mở thêm invocation provider. Consumer đề xuất là command read-only `guard-first-publication --packet N --admission FILE --receipt FILE`, chạy canonical có hiệu lực sau rollout trước `kiem-merge`. Nó không ghi state; exit 0 chỉ khi điều kiện collector/audit/publication đủ theo policy đã duyệt, exit 12 cho FAIL, UNKNOWN hoặc admission_rejected kèm JSON status phân biệt, exit 2 cho lỗi đối số. Chưa có command production mới được triển khai trong bản này.
 
 ## 10. Inventory, acceptance và hình dạng kế thừa
 
-Inventory product dự kiến: 13 mutator legacy + adopt-state (initial/recovery cùng command), tổng 14. guard-first-publication read-only. Không thêm writer recovery thứ 15 hoặc writer ngoài transaction gate. Mã thoát: input 2; state/revision/authority mismatch 8; exhausted 3; gate UNKNOWN/FAIL 12; thành công 0 có status riêng. Frozen fixtures phải đối chiếu cả parser và call graph trước source lease.
+Inventory product dự kiến: 13 mutator legacy + adopt-state (initial/recovery cùng command), tổng 14. guard-first-publication read-only. Không thêm writer recovery thứ 15 hoặc writer ngoài transaction gate. Mã thoát: input 2; mutator state/revision/authority mismatch 8; exhausted 3; guard mọi resolver rejection 12/admission_rejected; guard evidence UNKNOWN/FAIL 12 với status tương ứng; thành công 0 có status riêng. Frozen fixtures phải đối chiếu cả parser và call graph trước source lease.
 
 Các lớp do reviewer quyết định sau khi quét mọi biểu hiện; các nhóm sau là handoff, không là trần review:
 
@@ -175,7 +185,7 @@ Có 8 finding ID nguồn (N1–N4, A1 F1–F4), dự kiến 7 lớp; N2 và F2 n
 
 Acceptance cho implementation: init dương/âm; adoption exact bytes; crash trước/sau cutover intent/tombstone/adopted; missing/corrupt không reset; resolver authority sai OID/path/hash/revocation; contention đúng một reservation; mọi writer cùng gate; fsync/readback lỗi không dispatch; topology dương thật và ngoài profile âm; full advisory→actual human→canonical gates lifecycle; scope ngoài Mission không nới. Mỗi ca cần negative/mutant oracle trong frozen inventory; chưa có product tests nào chạy trong proposal này.
 
-Bằng chứng đã có: r7 golden tombstone 13/13 legacy CLI từ chối (hash 99aa16ab7d70793d36361757fe84a883ddb5b86fbd1dd85ed2948bfdb34d0c03); phản chứng cached writer phục hồi schema 2; prototype single host 7/7; không production migration, Windows claim, power-loss hoặc cross-host proof. Root phải mang raw results/hash vào review bundle, không chỉ tổng suite.
+Bằng chứng đã có: r7 golden tombstone 13/13 legacy CLI từ chối (hash 99aa16ab7d70793d36361757fe84a883ddb5b86fbd1dd85ed2948bfdb34d0c03), chỉ là prototype fixture của revision r7, KHÔNG là coverage renderer revision hiện hành; phản chứng cached writer phục hồi schema 2; prototype single host 7/7; không production migration, Windows claim, power-loss hoặc cross-host proof. Root phải mang raw results/hash vào review bundle, không chỉ tổng suite.
 
 ## 11. ADR-0060 và publication
 

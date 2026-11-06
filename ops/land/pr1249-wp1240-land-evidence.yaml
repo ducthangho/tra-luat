@@ -1,7 +1,8 @@
 # HO SO LAND — packet #1240 ASSURANCE-81-MODEL-EFFORT-TUY-CHON r1, lease g1, qua PR #1249. Khuon: ops/land/pr1230-wp1224-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (51d6509), LANDED — du bon moc §10.2.2 tren DUNG merge SHA (run push master 42145442236 + wd-run 42151025945).
+# TRANG THAI: merged (51d6509), CHUA LANDED — thieu mien P3 F1 cua chu kho (ADR-0060 M1; connector P1 r4488478726 tren PR #1256).
+# Du bon moc §10.2.2 tren DUNG merge SHA (run push master 42145442236 + wd-run 42151025945).
 # Review offline luot 1 (run bc004964) VI PHAM read-only §8.2 (tu khai sinh 20 tep ignored trong checkout roi doi ra) => BI LOAI o
 # assurance; phien dieu phoi chon (a): luot 2/2 read-only (run 7801b46a, snapshot toan cay 12406 tep, diff rong) thay luot 1.
 # Luot 2/2 chay SAU merge (tien le #1224 luot 5). Lich su nhan: trang_thai_packet.lich_su_nhan.
@@ -113,7 +114,7 @@ bookkeeping:
   - {item: 'PR ghi so', nhanh: 'claude/ghi-so-land-1249', ghi_chu: 'PR #1256; chi cham ops/land/**; lease rut han nam tren nhanh ops/wp1240-r1-g1-lease.'}
   - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt.'}
   - {item: 'ban giao hien vat', ket_qua: 'handoff ops/wp1240-r1-g1-lease@5d95ae9 (14 khoi nhung, tach vao review-offline/ va kiem-merge/); luot 2/2 tu claude/handoff-wp1240-review-l2@aec196d (review-offline-l2/).'}
-  - {item: 'no F1 P3 (7 dot bien song cua c23)', ket_qua: 'loi_khai_co_neo — chuyen sang #1236 theo quyet dinh phien dieu phoi (handoff muc F1); luot 2/2 giu nguyen no, khong tinh lai.'}
+  - {item: 'no F1 P3 (7 dot bien song cua c23)', ket_qua: 'loi_khai_co_neo — chuyen sang #1236 theo quyet dinh PHIEN DIEU PHOI (handoff muc F1, readback-f1-issuecomment-6665597541.json); luot 2/2 giu nguyen no. CHUA co mien cua chu kho (ADR-0060 M1) => chan landed.'}
   - {item: 'dong Issue #1240', ket_qua: 'not_measured — phien dieu phoi dong sau khi PR ghi so merge.'}
 # ---- het truong chuan
 packet_id: ASSURANCE-81-MODEL-EFFORT-TUY-CHON
@@ -157,7 +158,14 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-1249.json merged true; merge-va-diff.txt cha 4f03566 + ecd3073, tree 8117012; ecd3073 la to tien origin/master (rc 0).'
-  landed: true
+  landed: false
+  thieu_de_landed: >-
+    ADR-0060 M1 (lease dieu_kien_merge ADR-0060@36d7c5d): moi P3 hoac dong co bang chung, hoac CHU KHO mien bang comment neu slug,
+    SHA, ly do, huong xu ly; 'Agent khong tu ghi no P3'. F1 P3 (c23, 7 dot bien song) CHUA dong (review-offline-l2/stdout.log giu no) va
+    CHUA co mien cua chu kho neo ecd3073: readback-chu-kho-issuecomment-6674302414.json chi co windows + approve_merge;
+    readback-f1-issuecomment-6665597541.json (hien ducthangho — caveat #566) tu khai 'quyet dinh cua phien dieu phoi', tuc agent ghi
+    no. kiem-merge K5 rc 0 khong bat duoc vi chi doc P3 cua connector. Can: comment chu kho mien F1 neo ecd3073 (Issue #1240 hoac
+    PR #1249), roi phien ghi so readback, kiem lai va moi nang landed. Connector P1 r4488478726 tren PR #1256.
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 51d6509: DAT, du bon moc (post_merge_checks muc 1, luot push that, gom release-verify
     strict lane LAND); (2) lease nha: xem lease.thu_hoi_cuoi; (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp-m8.txt);
@@ -165,10 +173,12 @@ trang_thai_packet:
     rong, review_sau_merge); luot 1 (run bc004964) BI LOAI vi vi pham read-only §8.2; connector sach. Luot 2/2 chay SAU merge — cung
     hinh dang tien le #1224 (luot 5 sau merge), phien dieu phoi chon (a);
     (5) uy quyen land: DAT bang comment approve_merge 6674302414 neo ecd3073, dang TRUOC merge; (6) muc tieu packet: xem nghiem_thu
-    (A1–A11 measured tren blob merge); (7) §8.1 (luat moi ADR-0065): DAT — xem assurance_81.
+    (A1–A11 measured tren blob merge); (7) §8.1 (luat moi ADR-0065): DAT — xem assurance_81;
+    (8) ADR-0060 M1 P3: CHUA DAT — xem thieu_de_landed.
   lich_su_nhan: >-
     Phien ghi so phat hien vi pham read-only cua luot 1 (bc004964) ngay khi tach hien vat, bao phien dieu phoi truoc moi ghi; ban WIP
-    tren PR #1256 chua tung khai landed. Ho so ghi landed true lan dau sau khi do hien vat luot 2/2 read-only (run 7801b46a).
+    tren PR #1256 chua tung khai landed. fd877ed: landed true sau khi do hien vat luot 2/2 read-only (run 7801b46a). Ha xuong false
+    sau connector P1 r4488478726 (PR #1256): F1 P3 khong co mien cua chu kho (ADR-0060 M1).
 
 assurance_81:
   reviewer_assurance_81: DAT

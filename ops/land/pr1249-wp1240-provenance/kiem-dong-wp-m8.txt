@@ -3,3 +3,9 @@
 # lease sau rut han cmp origin/ops/wp1240-r1-g1-lease:ops/leases/wp1240-r1-g1-claude.yaml: khop
 ĐÓNG ĐƯỢC WP ASSURANCE-81-MODEL-EFFORT-TUY-CHON — merge 51d6509e918b8b5403248b52727e53358a23a3a0
 rc=0
+
+# LAN 2 (sau khi ha landed false theo connector P1 r4488478726 tren PR #1256: F1 P3 thieu mien chu kho, ADR-0060 M1)
+# checkout: fd877ed52a799be326830ea9c0d814e789ff7c2a (+ thay doi chua commit trong ops/land) ; luc: 2026-11-06T02:45:11Z
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12

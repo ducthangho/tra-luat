@@ -1,0 +1,9 @@
+truoc            a04e4ee2421eba4c
+rc=0 a04e4ee2421eba4c  git status --short
+rc=0 a04e4ee2421eba4c  git log --oneline -3
+rc=0 a04e4ee2421eba4c  git diff --stat HEAD~1 HEAD
+rc=0 a04e4ee2421eba4c  git show --stat HEAD
+rc=0 a04e4ee2421eba4c  git rev-parse HEAD
+rc=0 a04e4ee2421eba4c  git ls-files -s README.md
+rc=0 e01b530f2544ca7c  touch -m .agents/skills/cross-review/SKILL.md; git status --short
+rc=0 e01b530f2544ca7c  git diff --quiet (sau touch)

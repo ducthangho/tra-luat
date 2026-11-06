@@ -1,0 +1,85 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1179
+packet_id: wp1179
+packet_slug: LAND-DOC-RECEIPT-THU-HOI-C1a1b
+mission_issue: 499
+mission_id: gh-499
+mission_ghi_chu: 'no C1 cua #499; phuc vu T2 cua #656/#564 nhung KHONG dong duoc hai Issue ay'
+revision: 9
+generation: 1
+lease_id: wp1179-r9-g1-claude-remote-20261106
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease thi cong dau tien cua #1179; dispatcher cu chua tung cap lease (fence issuecomment-6679422380)'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1179#issuecomment-6692047867
+authority_url: https://github.com/ducthangho/tra-luat/issues/1179#issuecomment-6692047867
+authority_ghi_chu: 'chu kho duyet spec_hash r9 c9bc8aca va cap lease thi cong (06-11 ~18:20Z)'
+authority_caveat: 'comment neo do phien dieu phoi dang bang token chu kho (#566)'
+recorded_by: anthropic_claude_dispatcher
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; tham quyen la authority_url'
+executor_session: session_015GtxrZNAaGP4K8HUy8WEp5
+leased_at_utc: '2026-11-06T19:05:00Z'
+heartbeat_at: '2026-11-06T19:05:00Z'
+lease_until: '2026-11-08T19:05:00Z'
+lease_expires_at_utc: '2026-11-08T19:05:00Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); phien thuc thi la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+assurance_ghi_chu: 'cong human audit cua chu kho truoc merge (than Issue #1179)'
+reviewer: openai_codex
+reviewer_provider: openai_codex
+reviewer_independence: 'cross-review theo .claude/skills/cross-review/SKILL.md, phien doc lap read-only neo exact head, khong --add-dir; connector la lop bo sung'
+spec_path: ops/specs/wp1179-c1a1b-r9.md
+spec_ref: refs/heads/master@9607e3eba96b2ce091e34196cbb8ede31a521ff9
+spec_source_oid: 9607e3eba96b2ce091e34196cbb8ede31a521ff9
+spec_blob: 73b35505db4b951e4a355b3128618575d4b30bbd
+spec_hash: c9bc8acac6710f8395b4ca88c69ef39dfaa1b3acbf468aa0eea2b3f7d530ef74
+spec_sha256: c9bc8acac6710f8395b4ca88c69ef39dfaa1b3acbf468aa0eea2b3f7d530ef74
+spec_ref_ghi_chu: 'spec merge vao master qua PR #1262 (9607e3e); executor KHONG chep spec vao nhanh'
+branch: claude/wp1179-r9-g1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 9607e3eba96b2ce091e34196cbb8ede31a521ff9
+start_from_sha: 9607e3eba96b2ce091e34196cbb8ede31a521ff9
+reviewed_sha_required: 9607e3eba96b2ce091e34196cbb8ede31a521ff9
+reviewed_sha_ghi_chu: 'chua co head luc cap lease; review neo dung head cua PR'
+write_set:
+- .claude/dev/doc_receipt_thu_hoi_git.py
+- .claude/dev/doc_receipt_thu_hoi_test.py
+write_set_hash: 98262826266c3e2ca4f5aa1fcb57e4f8b5863a340ca085540681fad780513bd8
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+write_set_ghi_chu: 'phuong an B: KHONG cham .claude/dev/ci_dang_ky_test.py (doc_receipt_thu_hoi_test.py da dang ky san)'
+closure_status: 'holder scan 2026-11-06T19:03:20Z: ls-remote vs for-each-ref thieu 0; 2/2 duong dan NGUOI_GIU 0'
+tran_kich_thuoc: '<= 2 tep / <= 750 dong them (git diff --numstat origin/master...<head>; chu kho duyet issuecomment-6680102065, ADR-0053 ngoai le); vuot => DUNG'
+tran_loi_goi_codex: 'TRAN CUNG 3 loi goi Codex cho pha thi cong (allowance, spec r9 §8; init --codex-review-calls-limit 3); connector @codex review tinh vao truc nay; U_lower toan packet = 14/16 (journal dispatcher cu unknown); dem truoc MOI loi goi; het ma chua approve => DUNG, hoi chu kho'
+windows: 'A16 required: chay TAP TRUNG tren tra-luat-win qua phien dieu phoi, giu KHOA.txt (ADR-0057); KHONG workflow_dispatch ci.yml'
+coordination_paths:
+- ops/leases/wp1179-r9-g1-claude-remote-20261106.yaml
+run_minutes: 2880
+heartbeat_required_minutes: 360
+review_sla_minutes: 240
+prohibited_actions:
+- LIVE
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- write_outside_effective_write_set
+- workflow_dispatch
+- sua_ci_yml
+land_authority_note: 'chu kho duyet SHA cu the + human audit truoc merge; dieu phoi merge khi kiem-merge rc=0'

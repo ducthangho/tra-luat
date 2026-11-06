@@ -1,0 +1,66 @@
+schema_version: 2
+packet_issue: 1254
+packet_id: HUMAN-AUDIT-URL-IDENTITY
+revision: 2
+generation: 2
+role: executor
+provider: codex
+executor: codex
+model_family: openai
+execution_surface: codex_service
+transport: machine
+environment: local
+risk: sensitive
+review_class: sensitive
+reviewer: human
+reviewer_execution_surface: manual_audit
+reviewer_transport: human
+assurance_target: human_audited
+access: read-write
+lease_id: human-audit-url-identity-r2-g2-codex-service
+branch: agent/wp1254-k4-url-identity-r2-g2
+branch_ownership: exclusive
+base_sha: 4f03566fe9e686ed53c7f8ed0619300c1debba76
+start_from_sha: 493e7d62b96053cdadd34a42fb5c9fbb3c18a084
+spec_path: ops/specs/HUMAN-AUDIT-URL-IDENTITY-r2.md
+spec_hash: a2faedf1af22b8b4b601b69d77c75005a2a248453f5621e4e3bc2d319e4b2eea
+prompt_path: ops/specs/HUMAN-AUDIT-URL-IDENTITY-r2.md
+prompt_sha256_required: a2faedf1af22b8b4b601b69d77c75005a2a248453f5621e4e3bc2d319e4b2eea
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/HUMAN_AUDIT_COMMENT_URL_IDENTITY.md
+- docs/adr/0065-human-audit-comment-url-identity.md
+effective_write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/HUMAN_AUDIT_COMMENT_URL_IDENTITY.md
+- docs/adr/0065-human-audit-comment-url-identity.md
+granted_by: ducthangho
+recorded_by: codex-service-controller
+granted_on_instruction: Owner accepted the separately proposed K4 implementation in
+  current conversation; this is an execution grant, not code audit or land approval.
+leased_at_utc: '2026-11-06T01:06:09Z'
+heartbeat_at: '2026-11-06T01:06:09Z'
+lease_until: '2026-11-06T02:47:14Z'
+lease_expires_at_utc: '2026-11-06T02:47:14Z'
+run_started_at_utc: '2026-11-06T01:06:09Z'
+run_minutes: 71
+run_deadline_utc: '2026-11-06T02:17:14Z'
+heartbeat_required_minutes: 360
+size_limit:
+  effective_write_paths: 4
+  net_product_files: 3
+  added_lines: 450
+target_branch_neu_land: master
+reviewed_sha_required: 493e7d62b96053cdadd34a42fb5c9fbb3c18a084
+effective_review_class: sensitive
+spec_sha256_required: a2faedf1af22b8b4b601b69d77c75005a2a248453f5621e4e3bc2d319e4b2eea
+thay_the_cho:
+- human-audit-url-identity-r1-g1-codex-service
+authority_notes:
+- Owner authorized bounded K4 implementation; documentation placement adjusted to
+  avoid active protocol ownership.
+- Original r1 run_deadline_utc and lease expiry retained; no reset or extension.
+- g1 remains sealed; no long test, M9, new source CI/PR or land authority.
+spec_ref: refs/heads/ops/wp1254-r1-g1-lease@e7d7c14510292c5128b0d98673c6cf1e37f87c4d

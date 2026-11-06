@@ -374,6 +374,10 @@ def la_run_land(provenance):
     return r.get("loi_khai_rest_path") == ".github/workflows/ci.yml" and r.get("event") == "push"
 
 
+def _pv_neo(prov, neo):   # MỘT luật neo cho mọi đường đọc bằng chứng dương (P2 connector 4491937587, F11 lượt 6)
+    return [x for x in prov if (_m(_m(x, "moc"), "run").get("run_id"), x.get("attempt_yeu_cau"), _m(_m(x, "moc"), "run").get("head_sha")) == neo]
+
+
 def _neo(m, cha):
     if type(m.get("run_id")) is int:
         h = [x for x in (_h40(m.get(k)) for k in ("sha", "head_sha", "merge_commit")) if x]
@@ -467,6 +471,8 @@ def kiem_ho_so_gate_output(tep_ho_so, cay_yaml, goc, url_hop_le):
                 loi.append("khong_co_provenance")
             else:
                 loi += _kiem_duong(gt, neo, thu, prov, goc)
+                if land and not (len(n1 := _pv_neo(prov, neo)) == 1 and la_run_land(n1[0])):   # F11: land DƯƠNG chỉ do provenance ĐÚNG neo
+                    loi.append("bang_chung_land_khong_dung_neo")
         elif land:
             loi.append("loi_khai_land_khong_hop_le")
         ra.append({"duong_dan": duong, "token": tok, "neo": neo, "la_land": land, "hop_le": not loi, "ly_do": loi})
@@ -485,8 +491,7 @@ def _kiem_duong(gt, neo, thu, prov, goc):
             continue
         if p.name != f"gate-output2-{d[1]}-a{d[2]}.txt":   # F02: tên tệp BẮT BUỘC theo run/attempt của header
             continue
-        pv = [x for x in prov if (_m(_m(x, "moc"), "run").get("run_id"), x.get("attempt_yeu_cau"),   # P2 connector 4491937587:
-              _m(_m(x, "moc"), "run").get("head_sha")) == (int(d[1]), int(d[2]), d[3])]   # neo đủ (run, attempt, head)
+        pv = _pv_neo(prov, (int(d[1]), int(d[2]), d[3]))   # P2 connector 4491937587: neo đủ (run, attempt, head)
         if len(pv) == 1 and kiem(van, pv[0], goc)[0] == "passed":
             return []
     return ["tep_gate_output_khong_dat"]

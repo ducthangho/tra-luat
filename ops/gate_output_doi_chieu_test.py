@@ -651,6 +651,30 @@ def a21_pham_vi_land():
                 r = ho_so({"merge_commit": SHA_CK, "pmc": neo_map(gate_output=f"{tk} — chưa đo")},
                           tep={"provenance.yaml": yaml.safe_dump(q, allow_unicode=True)})
                 bang(len(r) == 1 and r[0]["la_land"] and not r[0]["hop_le"], f"j {k}={gt!r} {tk}: {r}")
+    # F11 lượt 6: ghép chéo attempt cùng run — mỗi đường đọc provenance/land một ca (k dương, l/m đối chứng, n âm bảo thủ)
+    ga2 = GO2.replace("-a1.", "-a2.")
+    def hai(a_neo, ev_neo, ev_khac, tk="measured"):
+        q1, q2 = copy.deepcopy(p), copy.deepcopy(p)
+        q1["attempt_yeu_cau"], q2["attempt_yeu_cau"] = a_neo, 3 - a_neo
+        q1["moc"]["run"]["event"] = ev_neo
+        q2["moc"]["run"].pop("event") if ev_khac is None else q2["moc"]["run"].update(event=ev_khac)
+        tep = {"provenance.yaml": yaml.safe_dump(q1, allow_unicode=True), "provenance-khac.yaml": yaml.safe_dump(q2, allow_unicode=True),
+               GO2: text, ga2: text.replace(" attempt=1 ", " attempt=2 ", 1)}
+        return mot({"merge_commit": SHA_CK, "pmc": neo_map(run_attempt=a_neo, gate_output=f"{tk} — {GO2 if a_neo == 1 else ga2}")}, tep=tep)
+    for a_neo in (1, 2):
+        for ev in (None, "", "push"):
+            for tk in ("passed", "measured"):
+                r = hai(a_neo, "workflow_dispatch", ev, tk)
+                bang(r["la_land"] and not r["hop_le"] and "bang_chung_land_khong_dung_neo" in r["ly_do"], f"k a{a_neo} khac={ev!r} {tk}: {r}")
+    r = hai(1, "push", "workflow_dispatch")
+    bang(r["la_land"] and r["hop_le"], f"l: neo ci.yml push, attempt khác dispatch ⇒ land hợp lệ {r}")
+    bang(mot({"merge_commit": SHA_CK, "pmc": neo_map()}, tep={"provenance.yaml": yaml.safe_dump(
+        dict(p, moc=dict(p["moc"], run=dict(p["moc"]["run"], event="workflow_dispatch"))), allow_unicode=True), GO2: text}) == {
+        "duong_dan": "$.pmc.gate_output", "token": "measured", "neo": (RUN, 1, SHA_CK), "la_land": False, "hop_le": True, "ly_do": []}, "m: dispatch một mình")
+    q1, q2 = copy.deepcopy(p), copy.deepcopy(p)
+    q1["moc"]["run"]["event"], q2["attempt_yeu_cau"] = "workflow_dispatch", 2
+    r = ho_so(am, tep={"provenance.yaml": yaml.safe_dump(q1, allow_unicode=True), "provenance-khac.yaml": yaml.safe_dump(q2, allow_unicode=True)})
+    bang(len(r) == 1 and r[0]["la_land"] and not r[0]["hop_le"], f"n: lời khai ÂM, attempt khác là land ⇒ vẫn land (bảo thủ) {r}")
 
 
 @ca
@@ -883,8 +907,12 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m-A18h_bo_symlink_thu_muc", "for q in [p, *p.parents][:n + 1])", "for q in [p, *p.parents][:n])", "a18"),
     ("m-A18i_bo_kiem_ten_tep", '        if p.name != f"gate-output2-{d[1]}-a{d[2]}.txt":', "        if False:", "a18"),
     ("m-A18j_bo_symlink_moi_thanh_phan", "and not any(q.is_symlink() for q in [p, *p.parents][:n + 1])", "", "a18"),
-    ("m-A18k_pv_chi_theo_run_id", '_m(_m(x, "moc"), "run").get("head_sha")) == (int(d[1]), int(d[2]), d[3])]',
-     '_m(_m(x, "moc"), "run").get("head_sha"))[0] == int(d[1])]', "a18"),
+    ("m-A18k_pv_chi_theo_run_id", '"head_sha")) == neo]', '"head_sha"))[0] == neo[0]]', "a18"),
+    ("m-A21k_bo_chot_land_dung_neo", "if land and not (len(n1 := _pv_neo(prov, neo)) == 1", "if False and not (len(n1 := _pv_neo(prov, neo)) == 1", "a21"),
+    ("m-A21l_land_duong_theo_run_id", "(len(n1 := _pv_neo(prov, neo)) == 1 and la_run_land(n1[0]))",
+     '(any(la_run_land(x) for x in prov if _m(_m(x, "moc"), "run").get("run_id") == neo[0]))', "a21"),
+    ("m-A21n_bao_thu_chi_theo_neo", 'pv = [p for p in prov if neo and _m(_m(p, "moc"), "run").get("run_id") == neo[0]]',
+     "pv = _pv_neo(prov, neo) if neo else []", "a21"),
     ("m-A18g_cho_thoat_thu_muc", 'not ten.startswith("/") and ".." not in Path(ten).parts and ', "", "a18"),
     ("m-A19a_bo_url", '    if len(url) != 1 or url_hop_le is None or not url_hop_le(url[0][0]):\n        loi.append("url")',
      '    if False:\n        loi.append("url")', "a19"),

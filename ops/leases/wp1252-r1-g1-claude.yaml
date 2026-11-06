@@ -1,0 +1,115 @@
+# LEASE — LAUNCHER-READONLY-IGNORED revision 1 / generation 1 — launcher.py run --chup-workspace (snapshot sha256 truoc/sau)
+# GHI HO theo chi thi CHU KHO (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 1252
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1252#issuecomment-6679154388
+authority_url: https://github.com/ducthangho/tra-luat/issues/1252
+granted_on_instruction_nguyen_van: >-
+  Chu kho trong phien session_015GtxraXfMD1t2FJLzzGDr4, 06-11-2026: ~05:58Z chon 'Soan spec ngay (Khuyen nghi)' cho #1252;
+  ~06:10Z 'Theo khuyến nghị' cho Q1-Q9; ~06:58Z 'Duyệt spec_hash b2c52a9a'.
+authority_caveat: >-
+  Chi thi qua tin nhan trong phien; comment ghi lai tren Issue #1252 do phien agent dang bang token chu kho (#566).
+dieu_kien_cap_da_do: >-
+  Spec r1 land qua PR #1259 (merge 889334f, 07:06Z). ai-dang-giu do 07:08Z sau fetch du +refs/heads/* va dong bo nhanh cuc bo:
+  NGUOI_GIU 0 cho ca 3 duong dan write set. Bao truoc phien dieu phoi tong session_015GtxrYPjZCTZeRiazdssgq.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_ghi_chu: 'Phien session_015GtxraXfMD1t2FJLzzGDr4 soan spec, ghi lease va THI HANH packet nay.'
+
+leased_at_utc: '2026-11-06T07:09:00Z'
+heartbeat_at: '2026-11-06T07:09:00Z'
+lease_until: '2026-11-07T19:12:00Z'
+lease_expires_at_utc: '2026-11-07T19:12:00Z'
+
+packet_id: LAUNCHER-READONLY-IGNORED
+packet_slug: launcher-readonly-ignored
+revision: 1
+generation: 1
+lease_id: wp1252-r1-g1-claude
+thay_the_cho: []
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_cli
+reviewer_ghi_chu: 'Codex offline qua launcher.py run tren SHA ung vien cuc bo (ADR-0060 M12), roi connector @codex review tren PR draft.'
+access: read-write
+
+spec_path: ops/specs/launcher-readonly-ignored-r1.md
+spec_source_oid: 889334fb87c25136a13c6776a40a25b401820e04
+spec_blob: 8f7f5e19efd9a4831daecf4ead12184888411157
+spec_sha256: b2c52a9aaf4a347dc212ad26d4b0ff83fb9cd58a70252e42f66d81b4d8d897cf
+spec_hash: b2c52a9aaf4a347dc212ad26d4b0ff83fb9cd58a70252e42f66d81b4d8d897cf
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+spec_ref_ghi_chu: 'Khong spec_ref: spec da tren master (PR #1259) => kiem-merge K1 doc spec tai H, so sha256 voi spec_hash.'
+
+branch: agent/wp1252-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 889334fb87c25136a13c6776a40a25b401820e04
+start_from_sha: 889334fb87c25136a13c6776a40a25b401820e04
+immutable_acceptance_baseline: 889334fb87c25136a13c6776a40a25b401820e04
+reviewed_sha_required: 889334fb87c25136a13c6776a40a25b401820e04
+reviewed_sha_ghi_chu: 'chua co head code luc cap lease; moi luot review neo dung SHA cua luot.'
+
+write_set:
+  - .claude/dev/launcher.py
+  - .claude/dev/launcher_test.py
+  - ops/handoff/wp1252-g1-claude.md
+write_set_hash: 39b3de1445b5f4bb40db39908c737847cc52c4072cba368d128ce7430acb10ac
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP (LC_ALL=C), noi bang LF, co LF cuoi, utf-8.'
+write_set_ghi_chu: >-
+  Diff PR dung 2 tep (launcher.py, launcher_test.py); handoff chi tren nhanh lease/handoff. KHONG sua ci_dang_ky_test.py
+  (launcher_test.py da dang ky), KHONG sua kiem-merge / land_evidence_nguon / ho so land (spec §5: consumer la packet RIENG).
+bat_bien_tuong_thich_nguoc: >-
+  Khong bat --chup-workspace thi moi hanh vi va moi khoa run.json giu nguyen nhu base, tru khoa chup_workspace=false (spec A7).
+  Moi ca hien co cua launcher_test.py giu ky vong cu.
+tran_kich_thuoc: 'nang_tran cua spec §3: <= 2 tep trong diff PR / <= 800 dong them (thay ADR-0053 <= 6 / <= 450).'
+tran_loi_goi_codex: >-
+  ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544: tran cung 10; ngan sach mem 4. Hai luot lien tiep chua approve
+  => Review Rescue Checkpoint (ADR-0037), hoi chu kho truoc loi goi ke tiep.
+quy_trinh_ap: >-
+  ADR-0060 mac dinh theo ADR-0062: worker gate tai cho tren dung SHA ung vien -> handoff neo SHA ung vien -> review Codex
+  OFFLINE tren SHA cuc bo (in dung 'KET_LUAN: approve'; ban sao moi + chup sha256 truoc/sau ca .git va tep ignored, diff rong)
+  -> approve moi push DUNG SHA do mot lan + PR draft -> connector + CI PR. Truoc khi bao san sang merge: packet_loop.py
+  kiem-merge rc=0. Windows: required (spec), chi chay tap trung 10 ca r1252_* (A10).
+ci_budget:
+  gate_tu_dong: 'CI PR tu dong (ubuntu) tren PR cua packet'
+  windows: 'KHONG chay CI Windows; khong full mutant tren Windows (chi thi chu kho). A10: chi --lap-ca 10 ca r1252_* tren may chu kho, bao truoc phien dieu phoi tong.'
+  full_mutant: 'A11: ci-dot-bien-du.yml tren Ubuntu (M9 bat buoc vi diff cham .claude/dev/**).'
+  het: 'Mot job bat buoc do 2 luot lien tiep cung mot loi => DUNG, bao phien dieu phoi'
+dieu_kien_dung:
+  - 'S1 — can sua tep ngoai write set. DUNG, handoff.'
+  - 'S2 — vuot tran nang_tran (> 2 tep trong diff PR hoac > 800 dong them). DUNG, checkpoint chu kho.'
+  - 'S3 — spec tu mau thuan / thieu du kien. DUNG, bao phien dieu phoi (khong tu suy).'
+  - 'S4 — het han lease => ngung ghi, ban giao theo luat chu kho 02-11.'
+  - 'S5 — bieu hien thu 3 cua lop reviewer-readonly-write-undetected (spec §7). DUNG, bao phien dieu phoi.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land
+  - Khong LIVE (Drive/NLM/webapp/registry), khong deploy webapp hay Package, khong bump VERSION
+  - Khong doc/ghi credential that
+  - Khong force-push
+  - Khong viet chuoi bo-qua-CI nguyen van trong commit message
+
+coordination_paths:
+  - ops/leases/wp1252-r1-g1-claude.yaml
+run_minutes: 2160
+heartbeat_required_minutes: 360
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
+dieu_kien_merge: ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587

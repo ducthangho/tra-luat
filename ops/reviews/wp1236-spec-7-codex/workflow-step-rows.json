@@ -1,0 +1,518 @@
+[
+  {
+    "job": "gate-ops (ubuntu-latest)",
+    "label": "ops/ci_duong_nhanh_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)"
+  },
+  {
+    "job": "gate-ops (ubuntu-latest)",
+    "label": "ops/bien_nhan_v2_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "bien-nhan v2 selftest",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "bien-nhan v2 selftest"
+  },
+  {
+    "job": "gate-ops (ubuntu-latest)",
+    "label": "ops/chay_lease_publish_test.sh",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "lease-publish selftest (đo lại setup sau G5)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "lease-publish selftest (đo lại setup sau G5)"
+  },
+  {
+    "job": "gate-ops (ubuntu-latest)",
+    "label": "scripts/don-nhanh_test.ps1",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "don-nhanh selftest (chốt xoá nhánh)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "don-nhanh selftest (chốt xoá nhánh)"
+  },
+  {
+    "job": "gate-ops (ubuntu-latest)",
+    "label": ".claude/dev/gate_lifecycle_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "bo ca gate chay TRONG cgroup duoc uy quyen (Linux)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "bo ca gate chay TRONG cgroup duoc uy quyen (Linux)"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": ".claude/dev/codex_cred_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "codex credential selftest (packet #300)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "codex credential selftest (packet #300)"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": ".claude/dev/idiom_py_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "idiom-ba-ten selftest",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "idiom-ba-ten selftest"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": ".githooks/eol_policy_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "eol-policy selftest",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "eol-policy selftest"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": ".githooks/pre_push_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "pre-push selftest",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "pre-push selftest"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": ".githooks/eol_policy.py --all --json",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "eol-policy survey",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "eol-policy survey"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": ".github/checks/bundle_fragment_check.py --json",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "bundled-fragment check (topology gói)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "bundled-fragment check (topology gói)"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": "scripts/gen_instructions.py --selftest",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "gen_instructions selftest",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "gen_instructions selftest"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": "scripts/tl_core/command_registry_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "command-registry unit test (AG-T0-03)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "command-registry unit test (AG-T0-03)"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": "== tl selftest",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "tl selftest (co bang chung exact-identity)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "tl selftest (co bang chung exact-identity)"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": "scripts/tl.py workflow-audit --strict --json",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "workflow-audit strict",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "workflow-audit strict"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": "scripts/tl.py golden-test --json",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "golden-test",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "golden-test"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": "scripts/tl.py doc-claims-check --strict --json",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "doc-claims-check strict",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "doc-claims-check strict"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": "scripts/tl.py determinism-audit --strict --json",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "determinism-audit strict",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "determinism-audit strict"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": ".github/checks/ci_phamvi.py --kiem-bam",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "ci-phamvi guard (bang phu thuoc khop ma)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "ci-phamvi guard (bang phu thuoc khop ma)"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": ".github/checks/ci_phamvi_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "ci-phamvi selftest (phan chung — cong co rang)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "ci-phamvi selftest (phan chung — cong co rang)"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": "scripts/tl.py release-check --full --json",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "release-check full",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "release-check full"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": "scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "release-verify strict (lane LAND — manifest committed)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "release-verify strict (lane LAND — manifest committed)"
+  },
+  {
+    "job": "gate (ubuntu-latest)",
+    "label": "scripts/tl.py release-bundle --out dist/a.zip",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "release-bundle x2 cùng SHA-256",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "release-bundle x2 cùng SHA-256"
+  },
+  {
+    "job": "gate-packet-loop (ubuntu-latest)",
+    "label": ".claude/dev/packet_loop_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "packet-loop selftest",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "packet-loop selftest"
+  },
+  {
+    "job": "gate-nhanh-manh (ubuntu-latest, 5)",
+    "label": "ops/nhanh_don_duoc_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)"
+  },
+  {
+    "job": "gate-nhanh-manh (ubuntu-latest, 6)",
+    "label": "ops/nhanh_don_duoc_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)"
+  },
+  {
+    "job": "gate-nhanh-manh (ubuntu-latest, 3)",
+    "label": "ops/nhanh_don_duoc_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)"
+  },
+  {
+    "job": "gate-nhanh-manh (ubuntu-latest, 0)",
+    "label": "ops/nhanh_don_duoc_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)"
+  },
+  {
+    "job": "gate-cong-cu (ubuntu-latest, 1)",
+    "label": "ops/cong_cu.py kiem-tra",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "G5 manh ban kinh dot bien (#668)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "G5 manh ban kinh dot bien (#668)"
+  },
+  {
+    "job": "gate-cong-cu (ubuntu-latest, 4)",
+    "label": "ops/cong_cu.py kiem-tra",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "G5 manh ban kinh dot bien (#668)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "G5 manh ban kinh dot bien (#668)"
+  },
+  {
+    "job": "gate-cong-cu (ubuntu-latest, 7)",
+    "label": "ops/cong_cu.py kiem-tra",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "G5 manh ban kinh dot bien (#668)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "G5 manh ban kinh dot bien (#668)"
+  },
+  {
+    "job": "gate-cong-cu (ubuntu-latest, 3)",
+    "label": "ops/cong_cu.py kiem-tra",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "G5 manh ban kinh dot bien (#668)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "G5 manh ban kinh dot bien (#668)"
+  },
+  {
+    "job": "gate-nhanh-manh (ubuntu-latest, 4)",
+    "label": "ops/nhanh_don_duoc_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)"
+  },
+  {
+    "job": "gate-cong-cu (ubuntu-latest, 5)",
+    "label": "ops/cong_cu.py kiem-tra",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "G5 manh ban kinh dot bien (#668)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "G5 manh ban kinh dot bien (#668)"
+  },
+  {
+    "job": "gate-nhanh-manh (ubuntu-latest, 1)",
+    "label": "ops/nhanh_don_duoc_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)"
+  },
+  {
+    "job": "gate-cong-cu (ubuntu-latest, 6)",
+    "label": "ops/cong_cu.py kiem-tra",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "G5 manh ban kinh dot bien (#668)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "G5 manh ban kinh dot bien (#668)"
+  },
+  {
+    "job": "gate-cong-cu (ubuntu-latest, 0)",
+    "label": "ops/cong_cu.py kiem-tra",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "G5 manh ban kinh dot bien (#668)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "G5 manh ban kinh dot bien (#668)"
+  },
+  {
+    "job": "gate-nhanh-manh (ubuntu-latest, 7)",
+    "label": "ops/nhanh_don_duoc_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)"
+  },
+  {
+    "job": "gate-nhanh-manh (ubuntu-latest, 2)",
+    "label": "ops/nhanh_don_duoc_test.py",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)"
+  },
+  {
+    "job": "gate-cong-cu (ubuntu-latest, 2)",
+    "label": "ops/cong_cu.py kiem-tra",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "G5 manh ban kinh dot bien (#668)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "G5 manh ban kinh dot bien (#668)"
+  },
+  {
+    "job": "gate-nhanh-gop (ubuntu-latest)",
+    "label": "--gop-dich",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "gộp mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "gộp mảnh nhanh_don_duoc (targeted_mutant_gate)"
+  },
+  {
+    "job": "gate-registry (ubuntu-latest)",
+    "label": ".claude/dev/ci_dang_ky_test.py --chay",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "test registry (phạm vi + các bộ chưa được nối)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "test registry (phạm vi + các bộ chưa được nối)"
+  },
+  {
+    "job": "gate-cong-cu-gop (ubuntu-latest)",
+    "label": "ops/cong_cu_test.py --gop",
+    "yaml_count": 1,
+    "rest": [
+      {
+        "name": "G5 gom manh ban kinh dot bien (#668)",
+        "conclusion": "success"
+      }
+    ],
+    "step_name": "G5 gom manh ban kinh dot bien (#668)"
+  }
+]

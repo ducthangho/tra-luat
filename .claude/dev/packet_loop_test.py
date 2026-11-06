@@ -9747,7 +9747,7 @@ for name, old, new, target in [
     ("bot", 'd["user"].get("type") == "User"', 'True', "bot"),
     ("association", 'd.get("author_association") == "OWNER"', 'True', "raw_author_association"),
     ("issue_url", 'd.get("issue_url") == f"https://api.github.com/repos/{repo}/issues/{pr}"', 'True', "raw_issue_url"),
-    ("comment_url", 'd.get("html_url") == url', 'True', "raw_html_url"),
+    ("comment_url", 'd.get("html_url") in allowed_urls', 'True', "raw_html_url"),
     ("run_repo", 'run.get("repository", {}).get("full_name") == a.repo', 'True', "repo"),
     ("run_head", 'run.get("head_sha") == a.head', 'True', "run_head_sha"),
     ("run_url", 'run.get("html_url") == run_url', 'True', "run_html_url"),
@@ -10491,6 +10491,95 @@ def _overflow_crash_credit1187(c):
 
 
 CASES.append(("r1187_overflow_crash_credit",_overflow_crash_credit1187))
+
+
+# #1254: exact URL aliases only, exercising K4 without rewriting raw audit history.
+def _url1254(x, raw_kind="pull", source_kind="issues", change=None):
+    prefix = f"https://github.com/{x['a'].repo}"
+    x["raw"]["html_url"] = f"{prefix}/{raw_kind}/{x['a'].pr}#issuecomment-1"
+    x["audit"]["audit_source"] = f"{prefix}/{source_kind}/{x['a'].pr}#issuecomment-1"
+    x["run"]["created_at"] = "2026-11-04T09:01:00Z"
+    if change:
+        change(x)
+
+
+for _raw1254 in ("pull", "issues"):
+    for _source1254 in ("pull", "issues"):
+        CASES.append((f"wp1254_alias_{_raw1254}_{_source1254}", _ca1187("human",
+                      lambda x, r=_raw1254, s=_source1254: _url1254(x, r, s), False)))
+
+_BAD_URLS1254 = {
+    "repo": "https://github.com/evil/tra-luat/pull/1187#issuecomment-1",
+    "host": "https://evil.example/ducthangho/tra-luat/pull/1187#issuecomment-1",
+    "number": "https://github.com/ducthangho/tra-luat/issues/1188#issuecomment-1",
+    "comment": "https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-2",
+    "scheme": "http://github.com/ducthangho/tra-luat/issues/1187#issuecomment-1",
+    "query": "https://github.com/ducthangho/tra-luat/issues/1187?x=1#issuecomment-1",
+    "encoded": "https://github.com/ducthangho/tra-luat/%69ssues/1187#issuecomment-1",
+    "leading_zero": "https://github.com/ducthangho/tra-luat/issues/01187#issuecomment-1",
+    "suffix": "https://github.com/ducthangho/tra-luat/issues/1187/extra#issuecomment-1",
+    "wrong_type": ["https://github.com/ducthangho/tra-luat/issues/1187#issuecomment-1"],
+}
+for _group1254, _key1254 in (("raw", "html_url"), ("audit", "audit_source")):
+    for _name1254, _value1254 in _BAD_URLS1254.items():
+        CASES.append((f"wp1254_bad_{_group1254}_{_name1254}", _ca1187("human",
+                      lambda x, g=_group1254, k=_key1254, v=_value1254:
+                      _url1254(x, change=lambda y: y[g].update({k: v})))))
+for _index1254, (_group1254, _key1254, _value1254) in enumerate((
+    ("raw", "user", dict(login="agent", type="User")),
+    ("raw", "user", dict(login="ducthangho", type="Bot")),
+    ("raw", "author_association", "MEMBER"),
+    ("raw", "issue_url", "https://api.github.com/repos/evil/repo/issues/1187"),
+    ("raw", "updated_at", "2026-11-04T09:02:00Z"),
+    ("audit", "reviewed_sha", "0" * 40), ("audit", "reviewed_tree", "0" * 40),
+    ("audit", "spec_sha256", "0" * 64), ("audit", "packet", "wrong"),
+    ("audit", "revision", True), ("audit", "generation", 2), ("audit", "pr", 1188),
+    ("audit", "verdict", "changes_requested"), ("audit", "review_axes", ["spec"]),
+    ("audit", "open_findings", [dict(slug="blocker", severity="P2")]),
+)):
+    CASES.append((f"wp1254_guard_{_index1254}", _ca1187("human",
+                  lambda x, g=_group1254, k=_key1254, v=_value1254:
+                  _url1254(x, change=lambda y: y[g].update({k: v})))))
+CASES.append(("wp1254_duplicate", _ca1187("human", lambda x: _url1254(x,
+              change=lambda y: y.update(body=__import__("yaml").safe_dump(y["audit"]) + "revision: 1\n")))))
+CASES.append(("wp1254_transition_stays_strict", _ca1187("human", lambda x:
+              x["tr_raw"].update(html_url=x["tr_raw"]["html_url"].replace("/pull/", "/issues/")))))
+
+
+def _readonly1254(c):
+    m, w, a, lease, ctx, spec, _ = _setup1187(c, "human", _url1254)
+    before = Path(a.human_audit_comment).read_bytes()
+    m._human_merge(a, w, lease, spec, [])
+    assert Path(a.human_audit_comment).read_bytes() == before, "raw audit rewritten"
+
+
+CASES.append(("wp1254_raw_audit_unchanged", _readonly1254))
+
+
+def _cli_url1254(x, w, h, late=False, wrong=False):
+    _cli1187(x, w, h)
+    if not h:
+        return
+    import yaml
+    body = yaml.safe_load(x["audit"]["body"])
+    body["audit_source"] = body["audit_source"].replace("/pull/55", "/issues/56" if wrong else "/issues/55")
+    x["audit"]["body"] = yaml.safe_dump(body)
+    if late:
+        x["audit"]["updated_at"] = "2026-11-04T09:02:00Z"
+
+
+CASES += [
+    ("wp1254_cli_conversion", _c1106_ca(0, doi=_cli_url1254, repo="ducthangho/tra-luat")),
+    ("wp1254_cli_late", _c1106_ca(12, "K4", doi=lambda x,w,h: _cli_url1254(x,w,h,late=True), repo="ducthangho/tra-luat")),
+    ("wp1254_cli_wrong_number", _c1106_ca(12, "K4", doi=lambda x,w,h: _cli_url1254(x,w,h,wrong=True), repo="ducthangho/tra-luat")),
+]
+MUTANTS.update({
+    "wp1254_reject_issue_source": ('record.get("audit_source") == issue_comment_url', 'False', ["wp1254_alias_pull_issues"]),
+    "wp1254_normalize_any_source": ('record.get("audit_source") == issue_comment_url', 'True', ["wp1254_bad_audit_repo"]),
+    "wp1254_accept_any_raw_url": ('d.get("html_url") in allowed_urls', 'True', ["wp1254_bad_raw_host"]),
+    "wp1254_reject_raw_issue_url": ('allowed_urls = (url, issue_comment_url) if schema == "human_exact_head_audit.v1" else (url,)',
+                                   'allowed_urls = (url,)', ["wp1254_alias_issues_pull"]),
+})
 
 
 def main() -> int:

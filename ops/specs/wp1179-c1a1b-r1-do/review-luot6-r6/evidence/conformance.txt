@@ -1,0 +1,67 @@
+G1 C=B GOT qua EXPECTED qua
+G1 C=E GOT do EXPECTED do
+G1 C=X GOT do EXPECTED do
+G1 C=601a0f18c83057fa079d204122660f5697fc6389 GOT qua EXPECTED qua
+G1 C=541fa6ca9ba78d2669261b528572dbc05b53ea87 GOT do EXPECTED do
+G2 strict reverse GOT do EXPECTED do
+G3 branch GOT do EXPECTED do
+G4 T=treeS GOT do EXPECTED do
+G5 treeS=treeH GOT do EXPECTED do
+G6 missing leaf mode=100644 GOT qua EXPECTED qua
+G6 null with leaf mode=100644 GOT do EXPECTED do
+G6 missing leaf mode=100755 GOT qua EXPECTED qua
+G6 null with leaf mode=100755 GOT do EXPECTED do
+G6 missing leaf mode=120000 GOT qua EXPECTED qua
+G6 null with leaf mode=120000 GOT do EXPECTED do
+G6 missing leaf mode=160000 GOT qua EXPECTED qua
+G6 null with leaf mode=160000 GOT do EXPECTED do
+G6 missing leaf mode=40000 GOT qua EXPECTED qua
+G6 null with leaf mode=40000 GOT do EXPECTED do
+G7 mode=100644 GOT qua EXPECTED qua
+G7 mode=100755 GOT qua EXPECTED qua
+G7 mode=120000 GOT qua EXPECTED qua
+G7 mode=160000 GOT do EXPECTED do
+G7 mode=40000 GOT do EXPECTED do
+G7 OID match missing GOT khong_do_duoc EXPECTED khong_do_duoc
+G7 OID mismatch missing GOT do EXPECTED do
+G7 OID match type GOT khong_do_duoc EXPECTED khong_do_duoc
+G7 OID mismatch type GOT do EXPECTED do
+G7 absent entry GOT do EXPECTED do
+G8 mode=100644 GOT qua EXPECTED qua
+G8 mode=100755 GOT qua EXPECTED qua
+G8 mode=120000 GOT qua EXPECTED qua
+G8 mode=160000 GOT do EXPECTED do
+G8 mode=40000 GOT do EXPECTED do
+G8 OID match missing GOT khong_do_duoc EXPECTED khong_do_duoc
+G8 OID mismatch missing GOT do EXPECTED do
+G8 OID match type GOT khong_do_duoc EXPECTED khong_do_duoc
+G8 OID mismatch type GOT do EXPECTED do
+G8 absent entry GOT do EXPECTED do
+G6 absent null GOT qua EXPECTED qua
+G6 absent hex GOT do EXPECTED do
+readsets A unknown= G1,G5,G6 states= {"G0": "qua", "G1": "khong_do_duoc", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "khong_do_duoc", "G6": "khong_do_duoc", "G7": "qua", "G8": "qua", "G9": "qua"} why= {"G1": "E_vang", "G5": "E_vang", "G6": "E_vang"}
+readsets B unknown= G1,G2,G7,G8 states= {"G0": "qua", "G1": "khong_do_duoc", "G2": "khong_do_duoc", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "khong_do_duoc", "G8": "khong_do_duoc", "G9": "qua"} why= {"G1": "E_vang", "G2": "E_vang", "G7": "E_vang", "G8": "E_vang"}
+readsets H1 unknown= G3,G4 states= {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "khong_do_duoc", "G4": "khong_do_duoc", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "qua", "G9": "qua"} why= {"G3": "E_vang", "G4": "E_vang"}
+A12 actual H missing unknown= G3,G4 states= {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "khong_do_duoc", "G4": "khong_do_duoc", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "qua", "G9": "qua"} why= {"G3": "E_vang", "G4": "E_vang"}
+A12 actual H hash mismatch unknown= G3,G4 states= {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "khong_do_duoc", "G4": "khong_do_duoc", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "qua", "G9": "qua"} why= {"G3": "E_bam_lech", "G4": "E_bam_lech"}
+A13 object cap unknown= G3,G4 states= {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "khong_do_duoc", "G4": "khong_do_duoc", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "qua", "G9": "qua"} why= {"G3": "E_ngan_sach", "G4": "E_ngan_sach"}
+A13 total first G1 GOT khong_do_duoc EXPECTED khong_do_duoc
+memo objects unique GOT 12 EXPECTED 12
+memo byte sum GOT 134354 EXPECTED 134354
+N6 final ref changed GOT khong_do_duoc EXPECTED khong_do_duoc
+N6 final ref absent GOT khong_do_duoc EXPECTED khong_do_duoc
+ABI_MODEL positive {"git": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "qua", "G9": "qua"}, "json": {"luat": {"K1": "qua", "K2": "qua", "K3": "qua", "K4": "qua", "K5": "qua"}, "ly_do": [], "ok": true}, "ok": true}
+K gating positive GOT False EXPECTED False
+ABI_MODEL K1 {"git": {"G0": "qua", "G1": "khong_chay", "G2": "khong_chay", "G3": "khong_chay", "G4": "khong_chay", "G5": "khong_chay", "G6": "khong_chay", "G7": "khong_chay", "G8": "khong_chay", "G9": "khong_chay"}, "json": {"luat": {"K1": "do", "K2": "do", "K3": "do", "K4": "do", "K5": "do"}, "ly_do": ["K1: tap khoa lech: thieu ['H', 'S', 'T', 'bo_kiem_da_chay_commit', 'canh_ancestry', 'che_do', 'check_run_id', 'checker_rc', 'checkout_commit', 'descriptor_q13_ghim', 'discovery', 'event', 'job_id', 'ket_luan', 'kho_canonical', 'metadata_T', 'ngan_sach', 'nhanh_mac_dinh', 'oid_bo_kiem_da_chay', 'oid_bo_kiem_tai_S', 'policy_T', 'profile_digest', 'pull_request', 'repository', 'run_attempt', 'run_id', 'schema_version', 'so_object_da_doc', 'so_thu_hoi_S', 'so_thu_hoi_T', 'thoi_diem_utc', 'thu_hoi_moi', 'tong_bytes', 'tree_S', 'workflow_definition_blob', 'workflow_definition_commit', 'workflow_definition_sha256', 'workflow_ref'] thua []", "K2: K1 do", "K3: K1 do", "K4: K1 do", "K5: K1 do"], "ok": false}, "ok": false}
+K gating K1 GOT True EXPECTED True
+ABI_MODEL K2 {"git": {"G0": "qua", "G1": "khong_chay", "G2": "khong_chay", "G3": "khong_chay", "G4": "khong_chay", "G5": "khong_chay", "G6": "khong_chay", "G7": "khong_chay", "G8": "khong_chay", "G9": "khong_chay"}, "json": {"luat": {"K1": "qua", "K2": "do", "K3": "qua", "K4": "qua", "K5": "qua"}, "ly_do": ["K2: T sai kieu"], "ok": false}, "ok": false}
+K gating K2 GOT True EXPECTED True
+ABI_MODEL K4 {"git": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "qua", "G9": "qua"}, "json": {"luat": {"K1": "qua", "K2": "qua", "K3": "qua", "K4": "do", "K5": "qua"}, "ly_do": ["K4: S stale, chay lai"], "ok": false}, "ok": false}
+K gating K4 GOT False EXPECTED False
+ABI_RC_MODEL True['qua', 'qua'] GOT 0 EXPECTED 0
+ABI_RC_MODEL True['do', 'qua'] GOT 12 EXPECTED 12
+ABI_RC_MODEL True['khong_do_duoc', 'qua'] GOT 13 EXPECTED 13
+ABI_RC_MODEL True['do', 'khong_do_duoc'] GOT 12 EXPECTED 12
+ABI_RC_MODEL False['qua', 'qua'] GOT 12 EXPECTED 12
+ABI_RC_MODEL None['do', 'khong_chay'] GOT 12 EXPECTED 12
+NOT_RUN: future kiem_git CLI, real wall timeout/blocked pipe, Windows, full_mutant_audit, A18 candidate e2e, Ruff candidate delta

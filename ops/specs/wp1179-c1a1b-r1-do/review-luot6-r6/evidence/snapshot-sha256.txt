@@ -1,0 +1,4 @@
+9e3a34de45fad0fe00acfd33f8300f4b1c8cae7d571d80e3545db32b67b07469  ops/specs/wp1179-c1a1b-r1-do/review-luot6-r6/evidence/snapshot-start.json
+9e3a34de45fad0fe00acfd33f8300f4b1c8cae7d571d80e3545db32b67b07469  ops/specs/wp1179-c1a1b-r1-do/review-luot6-r6/evidence/snapshot-end.json
+giong_nhau True
+Hai snapshot đầy đủ (~1,7 MB mỗi tệp) giữ ở sandbox reviewer, không chép vào kho; băm ở trên.

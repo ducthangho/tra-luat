@@ -1,0 +1,76 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1221
+packet_id: wp1221
+packet_slug: EOL-TEST-CHAN-DOAN
+mission_issue: 1221
+mission_id: gh-1221
+mission_ghi_chu: 'pha ghi so land cho PR #1258 da merge (08bcb51)'
+revision: 3
+generation: 1
+lease_id: ghi-so-land-pr1258-wp1221-r1-g1-claude-remote-20261106
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease ghi so rieng; lease thi cong r3 g1 se duoc rut han trong chinh viec nay'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1221#issuecomment-6680321819
+authority_url: https://github.com/ducthangho/tra-luat/issues/1221#issuecomment-6680321819
+authority_ghi_chu: 'chu kho duyet merge ee7a385 + duyet lease ghi so land (06-11 ~08:10Z); M7 landed:true CHUA duyet'
+authority_caveat: 'comment neo do phien dieu phoi dang bang token chu kho (#566)'
+recorded_by: anthropic_claude_dispatcher
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; tham quyen la authority_url'
+executor_session: session_015GtxrZMWPFi4PgpnoScEnv
+leased_at_utc: '2026-11-06T08:15:00Z'
+heartbeat_at: '2026-11-06T08:15:00Z'
+lease_until: '2026-11-08T08:15:00Z'
+lease_expires_at_utc: '2026-11-08T08:15:00Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); phien thuc thi la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+effective_review_class_ghi_chu: 'ops/land/ khong co trong _BANG_LOP => cong tinh sensitive; executor khong ha lop'
+assurance_target: cross_approved
+reviewer: openai_codex
+reviewer_provider: openai_codex
+reviewer_independence: 'PR chi ghi ops/land/**; dieu phoi merge khi CI xanh va connector sach tren head'
+spec_path: ops/specs/wp1221-r3.md
+spec_hash: 30c073c5c4726548f0423077e3db7e0dbc260afb2f88e1a826e58a2094ae2659
+spec_sha256: 30c073c5c4726548f0423077e3db7e0dbc260afb2f88e1a826e58a2094ae2659
+branch: claude/ghi-so-land-1258
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9
+start_from_sha: 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9
+reviewed_sha_required: 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9
+reviewed_sha_ghi_chu: 'chua co head luc cap lease; review neo dung head cua PR'
+write_set:
+- ops/land/pr1258-wp1221-land-evidence.yaml
+- ops/land/pr1258-wp1221-provenance/
+- ops/leases/wp1221-r3-g1-claude-remote-20261105.yaml
+write_set_hash: 07aa4de1bd7e63d143d6140c7b55c9d6d2e23287b9968b2e645e723ec1cf0a95
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+write_set_ghi_chu: 'ops/leases/wp1221-r3-g1-...yaml CHI them khoi thu_hoi_bang_rut_han tren nhanh ops/wp1221-r3-g1-lease'
+closure_status: 'holder scan 2026-11-06T08:11:56Z: fetch du ref (thieu 0); 3/3 duong dan NGUOI_GIU 0'
+coordination_paths:
+- ops/leases/ghi-so-land-pr1258-wp1221-r1-g1-claude-remote-20261106.yaml
+run_minutes: 2880
+heartbeat_required_minutes: 360
+review_sla_minutes: 240
+prohibited_actions:
+- LIVE
+- edit_real_credential
+- self_approve
+- merge
+- write_outside_effective_write_set
+- sua_packet_loop_py
+land_authority_note: 'dieu phoi merge PR ghi so; landed true chi khi du bon moc va uy quyen neo head (L-6)'

@@ -252,7 +252,7 @@ Bằng chứng đã có: r7 golden tombstone 13/13 legacy CLI từ chối (hash 
 
 ## 11. ADR-0060 và publication
 
-M1/M2: reviewer quét theo lớp, giữ slug và đọc nghĩa, zero P0/P1/P2; mọi P3 phải reviewer xác nhận đóng hoặc owner miễn exact H. Yêu cầu riêng của #1174 vẫn zero P1/P2/P3 trước nghiệm thu. Không reset history qua C5-A2.
+M1/M2: reviewer quét theo lớp, giữ slug và đọc nghĩa, zero P0/P1/P2; mọi P3 phải reviewer xác nhận đóng hoặc owner miễn exact H. Yêu cầu zero P1/P2/P3 ban đầu được owner sửa riêng cho vòng r19/lượt13 tại comment6679267205: P0–P2 vẫn phải zero, P3 còn lại được cho nợ có comment exactH/slug/lý do/hướng xử lý sau verdict. Đây là owner waiver theo M1, không phải reviewer closed hoặc product acceptance. Không reset history qua C5-A2.
 
 M5/M12: local candidate H/tree và diff được freeze, handoff lên Packet Issue, cross review độc lập offline hai trục trước push. Có commit mới thì review/gates cũ stale. Không push candidate chưa approve; không đổi namespace để miễn push count. Không tự coi bundle hash cũ là Git SHA.
 
@@ -262,7 +262,7 @@ M10: declaration ở đầu là anchor dự kiến; khi lease trỏ đúng spec_
 
 M9/Windows của implementation đọc lại theo diff thật; không lấy not_required của Markdown proposal áp cho packet_loop/protocol code về sau. Không CI Windows/full mutant Windows theo owner; Linux CI/full M9 giữ khi scope triggered.
 
-Ngân sách hiện hành: owner ban đầu Review Rescue cap10 tại #1172 comment6674183346, thêm một lượt nâng tổng11 tại #1174 comment6677917525, rồi duyệt thêm đúng một lượt r18 tại #1174 comment6678119045, nâng tổng C5 thành12 invocation. Không reset A1/A2 hoặc các lượt thất bại; không tự có lượt13. Giữ210 active cloud phút; historical usage trước lượt12 hạch toán bảo thủ134phút, user-idle loại trừ. SourceB vẫn ceiling2executor/2reviewer, conditional và cũng phải còn ngân sách tổng thực; quyết định này chưa mở sourceB. Không paid/AGY/Windows CI/full Windows mutants, không tăng CI/M9/Windows-focused caps hoặc quyền merge. Đọc lại usage trước dispatch; chạm cap/M1/capability stop thì checkpoint.
+Ngân sách hiện hành: owner đã duyệt cap10, rồi thêm từng lượt11 và12; quyết định #1174 comment6679267205 cho áp dụng r19 và đúng một lượt13. Tổng C5=13 invocation, không reset A1/A2/lượt lỗi, không tự có lượt14. Giữ210 active cloud phút; historical usage trước lượt13 hạch toán bảo thủ143phút, user-idle loại trừ. Cùng quyết định này cho nợ P3 còn lại sau review13 nếu không có P0–P2, ghi ID/slug/exactH/lý do/hướng xử lý trên Packet Issue; không đổi findings thành closed hoặc technical approve. SourceB vẫn conditional và cần số dư/gate riêng, ceiling2executor/2reviewer không tự nới. Không paid/AGY/Windows CI/full Windows mutants/CI-M9 cap tăng/quyền merge.
 
 Chưa đo: product tests, actual human, remote runs, merge/land, capability native ext4/XFS và complete ownership của write set implementation. Đặc tả không tự cấp quyền cho những bước đó.
 
@@ -286,4 +286,4 @@ R16-L04 thuộc adoption-lineage-counter-integrity: schema witness đóng/kiểu
 
 R17-L05: shared validator bắt buộc bảng bốn row + quy tắc chung, exact fresh reserved image và retry imported đã abandon. Oracle r18 phải có từng tổ hợp sai được reviewer nêu, cùng positive reserved-import retry/history-aborted/pending-new để tránh vá quá chặt. R18 đã áp dụng theo owner Review Rescue comment6678119045, trần tổng12; đang chờ cross-review exact H mới. Không tự nhận finding closed hoặc mở sourceB từ patch này.
 
-R18-L06 cùng adoption-lineage-counter-integrity: mọi writer phải prevalidate exact post-image và whitelist transitions trước write, không chỉ readback. Oracle r19: fresh reserved+valid adoption admission phải rc8/bytes-revision unchanged/no temp; với từng9row writer, mutant tạo out-of-table post-image bị chặn trước persistent write; imported reserved retry vẫn positive. R19 là draft chưa áp dụng/chưa review; cap12 đã hết, không tự gọi13.
+R18-L06 cùng adoption-lineage-counter-integrity: mọi writer phải prevalidate exact post-image và whitelist transitions trước write, không chỉ readback. Oracle r19: fresh reserved+valid adoption admission phải rc8/bytes-revision unchanged/no temp; với từng9row writer, mutant tạo out-of-table post-image bị chặn trước persistent write; imported reserved retry vẫn positive. R19 đã áp dụng theo owner decision comment6679267205, đang chờ review13 trên H mới. P3 còn lại chỉ ghi nợ theo quyết định owner/exactH, không tự claim closed/approve hoặc mở sourceB.

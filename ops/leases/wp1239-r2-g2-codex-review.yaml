@@ -93,3 +93,4 @@ executor_execution_surface: claude_code
 executor_transport: machine/local
 reviewed_tree_required: 43ce78d329fd54266ad73baba351044a0feca85c
 review_sla: '2026-11-06T08:00:32Z'
+da_bi_thay_the: wp1239-r4-g3-claude

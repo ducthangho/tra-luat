@@ -1,0 +1,95 @@
+schema_version: 2
+event: reviewer_lease_granted
+packet_issue: 1239
+packet_id: wp1239
+mission_issue: 1238
+revision: 2
+generation: 2
+lease_id: wp1239-r2-g2-codex-review
+role: reviewer
+provider: codex
+executor: claude
+model: gpt-6.1-sol
+effort: xhigh
+model_family: openai
+execution_surface: codex_cli
+transport: machine
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+risk: sensitive
+access: read-only
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/PROXIMA-PLAYWRIGHT-P0-r2.md
+spec_ref: refs/heads/ops/proxima-playwright-p0-spec@5dfb0e724ff7dc92f9aa54204a6981c5e4715948
+spec_sha256_required: c8eabf2c900b4416f8c4e289a667a59cf511a0f96fbd80ecde5fc823857d8ee3
+spec_hash: c8eabf2c900b4416f8c4e289a667a59cf511a0f96fbd80ecde5fc823857d8ee3
+prompt_path: ops/prompts/wp1239-r2-g2-codex-review.md
+write_set: &id001
+- ops/plans/PROXIMA-PLAYWRIGHT-v1.md
+- docs/research/2026-11-05-proxima-playwright-p0.md
+write_set_hash: df7de52a9da7e047e70bdf23f07b0e79aaac059272bbbfaaa7f6fe1a063372c6
+change_policy_sha: null
+effective_write_set: *id001
+effective_write_set_nguon: descriptor thu cong spec r2 §14, owner-approved scope exception
+  only wp1239
+required_checks:
+- doc_integrity_N1_N4_and_manual_R1_R4_on_exact_H_tree
+- tl_selftest_N_equals_N_before_primary_push_ADR0062
+- git_diff_check_on_exact_H
+- independent_Codex_review_exact_H_tree_sensitive_assurance
+- canonical_ci_yml_at_4fb3c034d0456a600634f501b8f20bd1487e3b83_sha256_aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67_all_applicable_required_jobs_on_exact_H
+- branch_protection_required_checks_readback_before_merge_or_block
+land_obligations: []
+branch: agent/wp1239-g2-claude
+branch_ownership: exclusive
+base_sha: fe84620f897913c7f6c2ce5a0c7316a49655e82f
+start_from_sha: ba0126bd20c99669264b788e15da2b6ebcda0fd7
+reviewed_sha_required: ba0126bd20c99669264b788e15da2b6ebcda0fd7
+reviewed_sha_required_note: exact existing H handed off before executor expiry; reviewer
+  read-only lease is separate from expired executor lease
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1239#issuecomment-6674687823
+granted_on_instruction_quote: Duyệt g2 theo phương án đã công bố
+recorded_by: openai_codex/codex_service dispatcher in current chat
+recorder_is_executor: false
+authority_note: Dispatcher routes the independently authorized read-only Codex review
+  from owner g2 approval. No executor lease renewal, source writes, push, merge, land
+  or deploy authority; no budget increase.
+heartbeat_required_minutes: 360
+run_minutes: 90
+attempts_limit: 3
+same_failure_limit: 2
+review_rounds_limit: 3
+codex_review_calls_limit: 2
+thay_the_cho: []
+requires_live: false
+uy_quyen_merge: false
+worker_scope_note: only two approved Markdown files; control-plane prompt/lease/spec
+  not copied into worker product
+packet_budget_carryover:
+  attempts_used: 2
+  attempts_limit: 3
+  codex_review_calls_used: 1
+  codex_review_calls_limit: 2
+  remaining_codex_calls: 1
+  review_rounds_used: 0
+  review_rounds_limit: 3
+prompt_sha256_required: bc58f9eb941e30c6999215e8a5a003d65658bec1cb57f4fb932ec8030be523ed
+leased_at_utc: '2026-11-06T06:00:32Z'
+heartbeat_at: '2026-11-06T06:00:32Z'
+lease_until: '2026-11-06T08:00:32Z'
+lease_expires_at_utc: '2026-11-06T08:00:32Z'
+xung_dot_write_set_do_luc_cap:
+  source: fresh all-ref fetch; both executor leases expired; only read-only review
+    on frozen H is authorized
+  master: 12e5b36225005e257026e57903f2e859a870e6f9
+executor_model_family: claude
+executor_execution_surface: claude_code
+executor_transport: machine/local
+reviewed_tree_required: 43ce78d329fd54266ad73baba351044a0feca85c
+review_sla: '2026-11-06T08:00:32Z'

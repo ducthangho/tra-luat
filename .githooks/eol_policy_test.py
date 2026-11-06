@@ -1142,12 +1142,17 @@ def _vi_pham_kien_truc():
     bo = {id(n) for k in ("case_chan_doan_mac_dinh_khong_lo_bi_mat", "case_chan_doan_co_tho_chi_cuc_bo")
           for n in ast.walk(ham[k])}            # miễn HẸP: main chỉ `"X" in os.environ`, _env_con chỉ `dict(os.environ…)`
     bo |= {id(c.comparators[0]) for c in ast.walk(ham["main"]) if isinstance(c, ast.Compare) and isinstance(c.ops[0], ast.In)}
-    bo |= {id(c.args[0]) for c in ast.walk(ham["_env_con"]) if isinstance(c, ast.Call) and getattr(c.func, "id", 0) == "dict"}
+    bo |= {id(c.args[0]) for c in ast.walk(ham["_env_con"]) if isinstance(c, ast.Call) and getattr(c.func, "id", 0) == "dict" and c.args}
     env = [n.lineno for k in ("main", "_env_con") for n in ast.walk(ham[k]) if isinstance(n, (ast.Global, ast.Nonlocal))]
+    env += [c.lineno for c in ast.walk(ham["_env_con"]) if isinstance(c, ast.Call)        # _env_con chỉ `dict(...)` rồi
+            and getattr(c.func, "id", 0) != "dict" and getattr(c.func, "attr", 0) != "pop"]   # `.pop`: không cache env đi đâu
+    goi = {id(k.value.func) for c in ast.walk(cay) if isinstance(c, ast.Call) for k in c.keywords if k.arg == "env"
+           and isinstance(k.value, ast.Call)}  # `_env_con` CHỈ được dùng làm `env=` của tiến trình con (lượt 4, F4)
+    env += [n.lineno for n in ast.walk(cay) if getattr(n, "id", 0) == "_env_con" and id(n) not in goi | bo]
     che, moc = [], "".join(["pkg_secret", "_scan"])
     for n in ast.walk(cay):
         ten = getattr(n, "attr", None) or getattr(n, "id", None) or getattr(n, "name", None)   # `name`: alias của import
-        if id(n) not in bo and ten in ("environ", "getenv", "putenv"):
+        if id(n) not in bo and ten in ("environ", "getenv", "putenv", "environb", "getenvb"):
             env.append(getattr(n, "lineno", 0))
         if (isinstance(n, (ast.Attribute, ast.alias)) and ten in ("sub", "subn")) or (isinstance(n, (ast.Import, ast.ImportFrom))
                 and moc in ast.dump(n)) or (isinstance(n, ast.Constant) and type(n.value) is str and moc in n.value):

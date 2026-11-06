@@ -101,3 +101,4 @@ preflight_no_model:
   permission_mailbox: allow/deny/mismatch 3/3; actual remote dispatcher decision+readback
     passed
   untracked: 7 files preserved outside repo with manifest/hash, clean after preservation
+da_bi_thay_the: wp1239-r6-g5-agy

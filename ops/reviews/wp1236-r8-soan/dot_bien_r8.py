@@ -119,6 +119,30 @@ def _ong_giua_mo(run, shell):   # J01 Codex vòng 3: chỉ kiểm thành phần 
 
 
 DB_SINH["m-S7j_ong_giua_mo"] = _ong_giua_mo
+# Claude J01 vòng 3: sáu cài đặt sống qua bản kho trước
+DB_SINH["v3a_bash_P_bat_ky"] = dung(DANG=rf"(?:python {gram.P}\.py|bash \S+\.sh|pwsh -NoProfile -File {gram.P}\.ps1)")
+DB_SINH["v3b_pwsh_P_bat_ky"] = dung(DANG=rf"(?:python {gram.P}\.py|bash {gram.P}\.sh|pwsh -NoProfile -File \S+\.ps1)")
+DB_SINH["v3c_bash_tuy_chon"] = dung(DANG=rf"(?:python {gram.P}\.py|bash(?: -[a-z]+)* {gram.P}\.sh|pwsh -NoProfile -File {gram.P}\.ps1)")
+DB_SINH["v3d_python_tuy_chon"] = dung(DANG=rf"(?:python(?: -[A-Za-z]+)* {gram.P}\.py|bash {gram.P}\.sh|pwsh -NoProfile -File {gram.P}\.ps1)")
+
+
+def _ong_duoi(mau):
+    def f(run, shell):
+        if type(run) is not str:
+            return "lenh_ngoai_cu_phap"
+        if shell not in (None, "bash", "sh"):
+            return "shell_ngoai_cu_phap"
+        b = run[:-1] if run.endswith("\n") else run
+        if gram.RE_DON.fullmatch(b):
+            return None
+        if re.fullmatch(mau, b, re.ASCII):
+            return None if shell == "bash" else "ong_khong_bash_tuong_minh"
+        return "lenh_ngoai_cu_phap"
+    return f
+
+
+DB_SINH["v3f_ong_hoac_cuoi"] = _ong_duoi(rf"{gram.LENH}(?: \| {gram.LENH})+(?: \|\| {gram.LENH})?")
+DB_SINH["v3h_ong_cham_than"] = _ong_duoi(rf"{gram.LENH}(?: \| (?:! )?{gram.LENH})+")
 for c in ";&|!(){}$`'\"\\<>#*?[]~+,@%^":
     lop = r"[A-Za-z0-9_./" + re.escape(c) + "-]*"
     Pc = r"[A-Za-z0-9_.]" + lop

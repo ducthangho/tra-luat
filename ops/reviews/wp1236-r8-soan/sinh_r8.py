@@ -17,6 +17,7 @@ import gram
 SHELL_LENH = {None: ["/usr/bin/bash", "-e"], "bash": ["/usr/bin/bash", "--noprofile", "--norc", "-eo", "pipefail"], "sh": ["/bin/sh", "-e"]}
 HONG = "import pathlib, sys; pathlib.Path('DA_CHAY').touch(); sys.exit(1)\n"
 QUA = "import sys; sys.stdout.write(sys.stdin.read())\n"
+HONG_SH, QUA_SH = "touch DA_CHAY; exit 1\n", "cat\n"
 LENH_MAU = ["python ops/a.py w", "bash ops/b.sh w", "pwsh -NoProfile -File ops/c.ps1 w"]
 LENH = ["python ops/x.py", "python ops/y.py --json a=b", "bash ops/z.sh", "pwsh -NoProfile -File ops/v.ps1"]
 NGOAI = ["true", "cat", ":", "exit 0"]
@@ -24,6 +25,8 @@ SHELL = [None, "bash", "sh"]
 OP2 = ["||", "&&", ";", "&", "|", "|&", "\n", ";;", "&;", "||&", "| |"]
 TIEN = ["!", "! ", "time ", "exec ", "command ", "builtin ", "eval ", "coproc ", "{ ", "( ", "A=1 ", "-", "--", "./", "/", "~"]
 HAU = [" &", "&", " ;", ";", " ||", " |", " #", "#", " \\", "\\", ")", " }", " 2>&1", " >x", " <x", "\n", "\r", " ", "  "]
+TOK = ["-n", "-s", "-h", "-c", "-x", "-i", "-m", "--", "-", "!", "||", "&&", ";", "&", "|", "|&", "time", "exec", "true", "{", "}", "(", ")",
+       "2>&1", ">x", "<x", "#", "-NoProfile", "-File", "-Command"]
 KT = ";&|!(){}$`'\"\\<>#*?[]~+,@%^= \t\n\r\x00 ο١"   # 35 ký tự
 
 
@@ -53,6 +56,16 @@ def kho():
                 out.append(f"{a} | {b} | {c}")
                 for op in OP2:
                     out.append(f"{a} | {b} {op} {c}")
+    for a in LENH:   # toán tử ở ranh giới thứ nhất của ống ba thành phần (Claude J01 vòng 3: `X || Y | Z`, `X | Y || Y`)
+        for c in LENH:
+            for op in OP2:
+                out.append(f"{a} {op} {c} | {LENH[0]}")
+    hat = LENH + [f"{a} | {b}" for a in LENH for b in LENH] + [f"{LENH[0]} | {b} | {LENH[2]}" for b in LENH]
+    for h in hat:   # (v) chèn TOKEN ở MỌI ranh giới dấu cách của mọi hạt (tuỳ chọn giữa tên chương trình và P, toán tử, từ khoá)
+        vt = [i for i, ch in enumerate(h) if ch == " "] + [len(h)]
+        for i in vt:
+            for t in TOK:
+                out.append(h[:i] + " " + t + h[i:])
     for mau in LENH_MAU:   # (iii) ký tự ở mọi vị trí của mỗi nhánh DANG
         out += chen(mau)
     x, y, z = "python ops/x.py", "bash ops/z.sh", "pwsh -NoProfile -File ops/v.ps1"
@@ -66,13 +79,16 @@ def chay_nguyen_byte(run, sh, hong):
     with tempfile.TemporaryDirectory() as d:
         p = pathlib.Path(d); (p / "bin").mkdir()
         os.symlink(sys.executable, p / "bin/python")
-        for ten in ("bash", "pwsh"):   # GIẢ trên PATH cho dạng `bash P.sh`, `pwsh -NoProfile -File P.ps1`: chạy tệp như Python
-            (p / "bin" / ten).write_text(f"#!/bin/sh\nwhile [ $# -gt 0 ]; do case $1 in -*) shift;; *) exec {sys.executable} \"$@\";; esac; done\n")
-            (p / "bin" / ten).chmod(0o755)
+        # `bash P.sh` chạy /usr/bin/bash THẬT (Claude J02 vòng 3); `pwsh` GIẢ CHẶT: chỉ nhận đúng `-NoProfile -File <tệp> [đối số]`,
+        # lệch dạng ⇒ thoát 99 KHÔNG chạy tệp (container không có pwsh)
+        (p / "bin" / "pwsh").write_text(f"#!/bin/sh\n[ \"$1\" = -NoProfile ] && [ \"$2\" = -File ] && [ -n \"$3\" ] || exit 99\n"
+                                       f"shift 2; exec {sys.executable} \"$@\"\n")
+        (p / "bin" / "pwsh").chmod(0o755)
         for t in set(re.findall(r"[^\s|&;()<>]+\.(?:py|sh|ps1)", run)):
             f = p / t
             try:
-                f.parent.mkdir(parents=True, exist_ok=True); f.write_text(HONG if t in hong else QUA)
+                f.parent.mkdir(parents=True, exist_ok=True)
+                f.write_text((HONG_SH if t in hong else QUA_SH) if t.endswith(".sh") else (HONG if t in hong else QUA))
             except (OSError, ValueError):
                 pass
         (p / "s.sh").write_bytes(run.encode("utf-8", "surrogatepass"))
@@ -89,7 +105,10 @@ def do_than(run, sh):
     return [(sorted(h),) + chay_nguyen_byte(run, sh, h) for h in phep or [set()]]
 
 
-def main(vi_tu=None, chay_tren="nhan"):
+def main(vi_tu=None):
+    """vi_tu = None: đo THAM CHIẾU (chạy Bash trên mọi thân được nhận). vi_tu khác: đo ĐỘT BIẾN — (a) đếm lệch trên mọi đầu vào; (b) chỉ
+    chạy Bash trên thân đột biến NHẬN mà tham chiếu từ chối (thân tham chiếu nhận đã đo ở lượt tham chiếu)."""
+    dot_bien = vi_tu is not None
     vi_tu = vi_tu or gram.cu_phap_run
     lech, nhan, xau, n = [], 0, [], 0
     for than in kho():
@@ -99,7 +118,7 @@ def main(vi_tu=None, chay_tren="nhan"):
                 a, b = vi_tu(run, sh), gram.cu_phap_run(run, sh)
                 if a != b:
                     lech.append((run, sh, a, b))
-                if a is None:
+                if a is None and (not dot_bien or b is not None):
                     nhan += 1
                     for h, loai, rc in do_than(run, sh):
                         if loai != "truyen_loi":

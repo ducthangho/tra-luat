@@ -22,8 +22,8 @@ recorder_ghi_chu: 'phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; tham qu
 executor_session: session_015GtxrZMWPFi4PgpnoScEnv
 leased_at_utc: '2026-11-06T08:15:00Z'
 heartbeat_at: '2026-11-06T08:15:00Z'
-lease_until: '2026-11-08T08:15:00Z'
-lease_expires_at_utc: '2026-11-08T08:15:00Z'
+lease_until: '2026-11-06T12:00:00Z'
+lease_expires_at_utc: '2026-11-06T12:00:00Z'
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude
@@ -74,3 +74,17 @@ prohibited_actions:
 - write_outside_effective_write_set
 - sua_packet_loop_py
 land_authority_note: 'dieu phoi merge PR ghi so; landed true chi khi du bon moc va uy quyen neo head (L-6)'
+
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-08T08:15:00Z'
+  han_moi_utc: '2026-11-06T12:00:00Z'
+  chi_thi: >-
+    Phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq (06-11-2026 ~10:50Z): "PR #1263 DA MERGE -> d26b36f. M8 dang #1221 (6683107883),
+    Issue #1221 da dong (completed). Viec cuoi: rut han lease ghi so cua chinh ban". Tep lease nay nam trong coordination_paths cua chinh no.
+  ly_do: >-
+    Viec ghi so da xong: PR #1263 merge (d26b36f, cha 08bcb51 + 8cfb450), M8 dang tren #1221 (issuecomment-6683107883), kiem-dong-wp
+    rc=0, Issue #1221 dong.
+  vi_sao_khong_dung_so: >-
+    Theo tien le 6e1ba1f va 9b34322 (lease thi cong wp1221): rut han bang co che da cai; han moi dat khoang mot gio SAU luc push de
+    ops-publish-lease.yml con thay lease song (khong roi vao rc=8).
+  ghi_boi: 'phien ghi so session_015GtxrZMWPFi4PgpnoScEnv'

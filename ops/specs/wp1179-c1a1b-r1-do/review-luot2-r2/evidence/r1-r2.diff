@@ -1,0 +1,387 @@
+diff --git a/ops/specs/wp1179-c1a1b-r1.md b/ops/specs/wp1179-c1a1b-r2.md
+index bbdbf0dbc..a6dd05c87 100644
+--- a/ops/specs/wp1179-c1a1b-r1.md
++++ b/ops/specs/wp1179-c1a1b-r2.md
+@@ -1,4 +1,4 @@
+-# Đặc tả packet `LAND-DOC-RECEIPT-THU-HOI-C1a1b` r1: kiểm đồ thị Git cho receipt thu hồi
++# Đặc tả packet `LAND-DOC-RECEIPT-THU-HOI-C1a1b` r2: kiểm đồ thị Git cho receipt thu hồi
+ 
+ tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
+ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
+@@ -7,7 +7,8 @@ windows: required
+ 
+ | trường | giá trị |
+ |---|---|
+-| packet_id | `wp1179` (`LAND-DOC-RECEIPT-THU-HOI-C1a1b`), revision 1, generation 1 |
++| packet_id | `wp1179` (`LAND-DOC-RECEIPT-THU-HOI-C1a1b`), revision 2, generation 1 |
++| thay_the | r1 `ops/specs/wp1179-c1a1b-r1.md`, sha256 `3dc6a2b9cd6dcf85a11dab3aa5fb8d44bf7945f61071e20bb33405e2521f6d04` (commit `24354e77`), chưa đóng băng, chưa lease nào neo. r2 = r1 + quyết định Review Rescue (A) của chủ kho + vá F1–F5 của Codex lượt 1 trên r1 (§0.3) |
+ | packet_issue | #1179 |
+ | mission_issue | #499 (nợ C1). Phục vụ T2 của #656 (A1b) và #564 (A1), nhưng **không** đóng được hai Issue ấy (§6) |
+ | nguon_cap_viec | Issue #1179. Quyết định Review Rescue "revision" ở `issuecomment-6624905106`. Bàn giao dispatcher ở `issuecomment-6679422380` (06-11-2026 ~07:14Z): phiên điều phối #1206 tiếp quản, đặc tả soạn lại từ nội dung Issue trên master `889334fb87c2` |
+@@ -40,12 +41,14 @@ Bản nháp 0–4 nằm ngoài Git, ở máy dispatcher cũ; tệp này **không
+ Log của ba lượt có verdict: sha256 `501592a5…264f`, `f0969eb2…2879`, `a54a0830…0bea` (`issuecomment-6624954880`,
+ giữ ở máy dispatcher cũ, chưa công bố).
+ 
+-**Trục lời gọi Codex của đặc tả này:** đã dùng **≥ 4** (ba verdict + một lượt mất kết quả). Lượt bị auto-review từ
+-chối **không** tính là đã dùng, nhưng được ghi ở đây và **không** được gọi lại mà không có căn cứ mới. Phiên soạn
+-r1 được cấp tối đa **2** lời gọi mới (chỉ thị phiên điều phối); số thật đã dùng ghi ở §9. Không con số nào ở
+-đây được đặt lại về 0 khi đổi bản nháp, đổi phiên hay mở PR.
++**Trục lời gọi Codex của packet này:** trước phiên soạn r1 đã dùng **≥ 4** (ba verdict + một lượt mất kết quả).
++Phiên soạn r1 dùng thêm **1** (lượt 1 trên r1, §9) ⇒ **≥ 5** lúc soạn r2. Lượt bị auto-review từ chối **không**
++tính là đã dùng, nhưng được ghi ở đây và **không** được gọi lại mà không có căn cứ mới. Lượt bị launcher chặn
++`CHAN [11]` trước khi model chạy (07:32Z 06-11, mirror không có remote) cũng không tính. Phiên soạn được cấp tối
++đa **2** lời gọi mới (chỉ thị phiên điều phối). Không con số nào ở đây được đặt lại về 0 khi đổi bản nháp, đổi
++phiên, mở PR hay `packet_loop init` (quyết định Q-NS của chủ kho, §8).
+ 
+-### 0.1 Ba P2 còn mở từ review draft2, và chỗ r1 trả lời
++### 0.1 Ba P2 còn mở từ review draft2, và chỗ trả lời (r1, sửa ở r2 theo §0.3)
+ 
+ | P2 | nội dung (tóm từ Issue) | trả lời ở |
+ |---|---|---|
+@@ -55,19 +58,39 @@ r1 được cấp tối đa **2** lời gọi mới (chỉ thị phiên điều
+ 
+ ### 0.2 Hai lớp lặp ba lượt, và chốt KIẾN TRÚC cho từng lớp
+ 
+-| lớp | chốt trong r1 | đo bằng |
++| lớp | chốt (r1 → r2) | đo bằng |
+ |---|---|---|
+ | `mo-rong-module-pha-hop-dong-json-thuan` | Module JSON C1a1a giữ **nguyên byte**. Logic Git ở module **mới**; module mới gọi `kiem_json` của module cũ và đặt kết quả **nguyên vẹn** vào một khoá riêng. Không thêm khoá vào dict của `kiem_json` | A1, A2, A3 |
+-| `phan-loai-vang-va-khong-do-duoc` | Một luật chỉ được `khong_do_duoc` khi **thiếu bytes đã xác minh** cần cho nó (object vắng/hỏng, ngân sách, trôi ref, git lỗi). "Path vắng trong một tree đã xác minh" là **sự kiện đã đo**, nên ra `qua` hoặc `do` theo bảng §2.4, không bao giờ ra `khong_do_duoc` | §2.3, A9–A12 |
++| `phan-loai-vang-va-khong-do-duoc` | r1 dùng một câu văn "khi và chỉ khi"; Codex lượt 1 bắt được G1 tự mâu thuẫn với câu ấy (F4, biểu hiện **thứ 4**). r2 **đổi phương pháp** theo quyết định chủ kho: thay câu văn bằng **BẢNG ĐÓNG** §2.3 — một tập sự kiện `E` có tên, và cho từng luật G một dòng nêu đúng object nó cần đọc và kết quả cho mọi tổ hợp. Không còn câu luật chung nào để các luật diễn giải khác nhau | §2.3, A7, A10–A12, A20 |
++
++### 0.3 Quyết định Review Rescue của chủ kho và chỗ r2 vá
++
++Nguồn: tin nhắn phiên điều phối #1206 (`session_015GtxrYPjZCTZeRiazdssgq`) gửi phiên soạn lúc ~07:57Z 06-11-2026,
++chuyển quyết định của chủ kho `ducthangho` (~07:58Z); phiên điều phối đăng comment xác nhận trên Issue #1179. Tệp
++này ghi lại đúng lựa chọn, không phải lời chủ kho tự gõ trên GitHub.
++
++| # | quyết định | ở đâu trong r2 |
++|---|---|---|
++| Q-R | Review Rescue: phương án **(A)** — revision r2 đổi phương pháp ở gốc lớp phân loại (bảng đóng, G1 không gặp MOC ⇒ `do`), vá F1, F2 (nhánh tương thích producer), F3, F5; Codex lượt 2/2 xác minh; còn finding cùng lớp ⇒ DỪNG, chuyển (B) human audit | §2.3, §2.4, §4, §7 |
++| Q-KT | Trần kích thước thi công **≤ 2 tệp / ≤ 750 dòng thêm**: DUYỆT | §3 `nang_tran` |
++| Q-NS | Trục ngân sách PR thi công **tính tiếp lịch sử** (≥ 5 + các lời gọi r2), dưới trần `ADR-0055` = 10: DUYỆT | §0, §8 |
++
++| finding lượt 1 (trên r1) | vá ở r2 |
++|---|---|
++| F1 P2 `dat-lai-ngan-sach-khi-doi-truc` | §8: một trục duy nhất, không `init` về 0; cơ chế `--codex-review-calls-limit (10 − U)` |
++| F2 P2 `predicate-consumer-khong-khop-producer` | §2.4 G7/G8: nhận `120000` như producer, so OID entry, khai giới hạn "mã đã chạy" |
++| F3 P2 `dot-bien-tuong-duong-hoac-thieu` (A9, A18, ABI) | §4 hạ tầng: ba tree S, H, C đôi một khác nhau; A9 ca đích `T = tree(S)`, `tree_S = tree(H)`; A18 ca end-to-end qua entrypoint; A4/A5 ma trận `ok` iff + byte stdout |
++| F4 P2 `phan-loai-vang-va-khong-do-duoc` | §2.3 bảng đóng; G1 đi hết chuỗi đã xác minh mà không gặp MOC ⇒ `do`; A7 tách "commit trên chuỗi vắng" với "MOC không trên chuỗi" |
++| F5 P3 `so-do-ke-thua-chua-do-lai` | §1 S4 đo lại trên base: 4.360 / 64 |
+ 
+ ## 1. Vì sao: số đo
+ 
+ | # | sự kiện | số đo | nguồn / thời điểm |
+ |---|---|---|---|
+ | S1 | C1a1a chỉ kiểm hình dạng JSON | `ok: true` của C1a1a không chứng minh provenance; receipt đổi cả ba trường C sang cùng một commit khác vẫn qua (spec C1a1a §5.0 "Ngoài phạm vi") | spec C1a1a r5 |
+-| S2 | first-parent `601a0f18^..master` | **411** commit (gồm MOC); đi bằng reader băm lại: **410** cạnh, **531.751** byte, **0,030 s** | `git rev-list --first-parent …|wc -l` 07:22Z; `do_profile.py` 07:23Z, hai lần, cùng số |
++| S2 | first-parent `601a0f18^..master` | **411** commit (gồm MOC); đi bằng reader băm lại: **410** commit đã đọc (reader dừng khi gặp OID của MOC, không đọc object MOC), **531.751** byte, **0,030 s** | `git rev-list --first-parent …|wc -l` 07:22Z; `do_profile.py` 07:23Z, hai lần, cùng số |
+ | S3 | mọi tổ tiên của master (trần trên của một phép đi ancestry) | **5.444** commit, **8.480.418** byte, **0,337 s** / **0,341 s** | `do_profile.py` 07:23Z; `git rev-list --count origin/master` = 5444 |
+-| S4 | tổ tiên master mà không trên first-parent | khảo sát cũ (spec C1a1a §8 N1): **1.795**, trong đó 37 chạm `ops/lease_publish.py` | spec C1a1a r5, chưa đo lại |
++| S4 | tổ tiên master mà không trên first-parent | trên base `889334fb`: **4.360** commit (= `rev-list` 5.444 − `rev-list --first-parent` 1.084, hiệu tập); giao với `git log --format=%H 889334fb -- ops/lease_publish.py` (64 commit, mặc định của `git log` bỏ merge và đơn giản hoá lịch sử) = **64**. Số cũ của spec C1a1a §8 N1 (1.795 / 37) là lịch sử | đo ~08:0xZ 06-11, phiên soạn; Codex lượt 1 đo độc lập cùng số (`review-luot1/evidence/counts.txt`) |
+ | S5 | producer từ MOC tới base | `git diff --stat 601a0f18 889334fb -- ops/lease_publish.py .github/workflows/ops-thu-hoi-admission.yml`: 2 tệp, +650/−93 | 07:2xZ 06-11. Tập 38 khoá do K1 của C1a1a canh |
+ | S6 | suite C1a1a trên base | `156/156 ca QUA · 162/162 dot bien GIET`, `equivalent_verified 9`, rc 0, ~11 s | `wp1179-c1a1b-r1-do/c1a1a-suite-nen.txt` |
+ | S7 | receipt thật | mọi receipt đã đọc đều S = C (PR #589; run 41774780889). Chưa có receipt thật S ≠ C | Issue #1179 `6622860952`; §7 |
+@@ -97,20 +120,23 @@ CLI: `kiem-git --receipt <tệp> --kho <owner/repo> --nhanh-mac-dinh <tên> --ba
+ 
+ ### 2.2 Đầu ra (ABI) và mã thoát
+ 
+-Đầu ra là **một dòng JSON** trên stdout (`ensure_ascii=True`, `sort_keys=True`) với **đúng bốn** khoá:
++Đầu ra là **một dòng JSON** trên stdout với **đúng bốn** khoá. Byte stdout của CLI phải **bằng đúng**
++`(json.dumps(kq, ensure_ascii=True, sort_keys=True) + "\n").encode("ascii")`, với `kq` là dict mà hàm `kiem_git`
++trả cho cùng đầu vào; không có byte nào khác trên stdout:
+ 
+ | khoá | kiểu | nghĩa |
+ |---|---|---|
+-| `ok` | `bool` | `true` khi và chỉ khi `json.ok is true` **và** mọi luật trong `git.luat` là `qua` |
++| `ok` | `bool` (kiểu `bool`, không phải `int`) | `true` khi và chỉ khi `json` khác `null`, `json.ok is true`, **và** cả mười luật trong `git.luat` là `qua`. Mọi tổ hợp khác ⇒ `false` |
+ | `json` | `dict` hoặc `null` | kết quả `kiem_json` của C1a1a, **nguyên vẹn** (cùng ba khoá `ok`/`luat`/`ly_do`). `null` khi và chỉ khi `G0` là `do` |
+ | `git` | `dict` | đúng hai khoá: `luat` (dict `G0`…`G9` → trạng thái) và `ly_do` (`list[str]`, mỗi phần tử bắt đầu bằng `G<n>: `) |
+ | `do_dac` | `dict` | đúng hai khoá `so_object`, `tong_bytes` (`int`): số object và tổng byte nội dung reader đã đọc. Không có số đo thời gian (giữ đầu ra tất định) |
+ 
+ Trạng thái của một luật G thuộc tập đóng `{"qua", "do", "khong_do_duoc", "khong_chay"}`:
+ 
+-- `khong_chay` chỉ khi `G0` là `do`, hoặc `json.luat.K1` hay `json.luat.K2` là `do` (trường receipt không đủ tin để
+-  đem đi đo). K3/K4/K5 đỏ **không** chặn G: G vẫn chạy để chẩn đoán đủ.
+-- `khong_do_duoc` theo §2.3.
++- `G0` chạy **trước** mọi thứ và luôn có kết quả `qua` hoặc `do` (không bao giờ `khong_chay`).
++- `G1`…`G9` là `khong_chay` khi và chỉ khi `G0` là `do`, hoặc `json.luat.K1` hay `json.luat.K2` là `do` (trường
++  receipt không đủ tin để đem đi đo). K3/K4/K5 đỏ **không** chặn G: G vẫn chạy để chẩn đoán đủ.
++- `khong_do_duoc` theo bảng đóng §2.3, không theo diễn giải.
+ 
+ Mã thoát, xét theo thứ tự:
+ 
+@@ -143,10 +169,39 @@ Module tự đọc object, **không** dùng `git rev-list`, `merge-base`, `rev-p
+ 4. Vì vậy `refs/replace/*`, `info/grafts`, commit-graph và alternates **không** đổi được kết luận: chúng chỉ đổi nơi
+    chứa bytes, còn bytes phải băm ra đúng OID.
+ 
+-**Luật phân loại (đóng lớp `phan-loai-vang-va-khong-do-duoc`):** một luật ra `khong_do_duoc` khi và chỉ khi thiếu
+-bytes đã xác minh mà luật ấy cần: object vắng, object băm lệch, kiểu object sai, tree/commit hỏng, vượt ngân sách
+-§2.6, trôi ref (G9), hoặc tiến trình git chết. Mọi kết luận rút từ bytes đã xác minh, kể cả "entry không có trong
+-tree", là `qua` hoặc `do`.
++**Bảng đóng phân loại (r2, thay câu văn của r1).** Tập sự kiện `E`, mỗi sự kiện có tên, phát ra **chỉ** tại reader
++hoặc tại lần đọc ref:
++
++| sự kiện `E` | phát ra khi |
++|---|---|
++| `E_vang` | `cat-file --batch` trả dòng `<oid> missing` cho một OID luật cần đọc |
++| `E_bam_lech` | bytes nhận được băm ra OID khác OID đã hỏi |
++| `E_kieu_sai` | object đọc theo cạnh parent/tree/entry có kiểu khác kiểu mong đợi |
++| `E_hong` | commit thiếu dòng `tree`, dòng `parent` sai dạng, tree có entry cụt, mode ngoài tập §2.3 mục 3, tên entry trùng hoặc không phải UTF-8 |
++| `E_ngan_sach` | vượt một giới hạn §2.6 |
++| `E_git_chet` | tiến trình `cat-file` thoát, đóng ống, hoặc framing (dòng đầu) không đúng dạng `<oid> <type> <size>` |
++| `E_troi_ref` | lần đọc ref cuối (G9) khác `--master`, hoặc ref vắng |
++
++Luật cho **mọi** G1–G9: nếu trong lúc đánh giá luật ấy có **bất kỳ** sự kiện `E` nào trên một object luật ấy cần
++(cột "đọc" dưới), luật ra `khong_do_duoc`. Nếu không có sự kiện nào, luật ra `qua` hoặc `do` theo cột "kết quả".
++Không có đường thứ ba. Một sự kiện trên object mà luật **không** cần thì **không** đổi màu luật ấy.
++
++| luật | đọc (object luật cần) | kết quả khi không có sự kiện `E` |
++|---|---|---|
++| G1 | các commit trên chuỗi first-parent từ `master` lùi dần, tới khi gặp OID của `MOC` hoặc tới commit không parent | gặp C trước hoặc đúng lúc gặp MOC ⇒ `qua`; gặp MOC mà chưa gặp C ⇒ `do`; tới commit không parent mà chưa gặp MOC ⇒ **`do`** (chuỗi đã xác minh trọn, MOC không nằm trên first-parent của `master` này) |
++| G2 | các commit tổ tiên của C (mọi parent), tới khi gặp S hoặc hết | gặp S ⇒ `qua`; hết ⇒ `do` |
++| G3 | các commit tổ tiên của H (mọi parent), tới khi gặp S hoặc hết | gặp S ⇒ `qua`; hết ⇒ `do` |
++| G4 | commit H | tree(H) = `T` ⇒ `qua`, khác ⇒ `do` |
++| G5 | commit S | tree(S) = `tree_S` ⇒ `qua`, khác ⇒ `do` |
++| G6 | commit S, các tree trên đường `ops/lease_publish.py` trong tree(S). **Không** đọc object của entry cuối | bảng G6 §2.4 |
++| G7 | commit C, các tree trên đường `ops/lease_publish.py` trong tree(C), **và** object blob của entry cuối khi entry có mode `100644`/`100755`/`120000` | bảng G7 §2.4 |
++| G8 | commit C, các tree trên đường `.github/workflows/ops-thu-hoi-admission.yml`, **và** object blob của entry cuối khi mode thuộc tập nhận | bảng G8 §2.4 |
++| G9 | ref `refs/remotes/origin/<nhanh>` đọc lần cuối | khớp `--master` ⇒ `qua`; còn lại là `E_troi_ref` ⇒ `khong_do_duoc` |
++
++Hệ quả, viết ra để không ai diễn giải lại: "entry không có trong tree đã xác minh" và "MOC không nằm trên chuỗi đã
++xác minh" là **kết quả đo** (`qua`/`do`), không phải sự kiện `E`. G0 nằm ngoài bảng vì nó không đọc object nào.
++Cấu hình git (`system`, `global`, `local`) chỉ đổi nơi bytes được lấy; mọi bytes vẫn phải qua băm lại, nên cấu hình
++không sinh sự kiện riêng: hoặc bytes đúng, hoặc phát `E_vang`/`E_bam_lech`/`E_git_chet`.
+ 
+ ### 2.4 Luật G
+ 
+@@ -157,7 +212,7 @@ Ký hiệu: `C` là giá trị chung của ba trường C (K2 đã buộc chúng
+ | luật | nghĩa vụ C1a1a | mệnh đề | `do` khi |
+ |---|---|---|---|
+ | G0 | — | receipt ≤ 8.388.608 byte. Đọc tối đa 8.388.609 byte | dài hơn. Khi đó `json` là `null`, G1–G9 `khong_chay` |
+-| G1 | N1 | C thuộc chuỗi first-parent đi từ `master` lùi về `MOC`, **gồm cả** `MOC` | đi tới `MOC` mà chưa gặp C. Đi hết chuỗi (commit không parent) mà không gặp `MOC` ⇒ `khong_do_duoc` (kho không chứa mốc) |
++| G1 | N1 | C thuộc chuỗi first-parent đi từ `master` lùi về `MOC`, **gồm cả** `MOC` | đi tới `MOC` mà chưa gặp C; hoặc đi hết chuỗi đã xác minh (commit không parent) mà không gặp `MOC` (r2, F4: đó là kết quả đo, không phải thiếu bytes) |
+ | G2 | spec cha | S ≤ C | S không phải tổ tiên-hoặc-bằng C |
+ | G3 | N2 | S ≤ H | S không phải tổ tiên-hoặc-bằng H |
+ | G4 | spec cha | tree(H) = `T` | khác |
+@@ -183,21 +238,34 @@ G6 **không** đọc object của entry, nên gitlink (`160000`, commit không c
+ Dòng cuối là `do`, không phải `khong_do_duoc`: mọi bytes cần đã đọc và băm được; producer gặp đúng cấu trúc ấy thì
+ ném `KHÔNG_XÁC_ĐỊNH` và **không** phát receipt, nên receipt nào khai giá trị ở đây đều không nhất quán.
+ 
+-**Bảng G7 — C, mã đã chạy.** Predicate **riêng**, chặt hơn G6, vì Python đã thực thi tệp này tại C:
++**Bảng G7 — C, OID mà producer ghi cho "mã đã chạy"** (r2, nhánh **tương thích producer** theo Q-R). Producer
++lấy `oid_bo_kiem_da_chay` bằng `git rev-parse <C>:ops/lease_publish.py` (workflow, khối Python cuối) — tức OID của
++**entry**, không theo symlink, không kiểm mode. Codex lượt 1 đo được producer chạy rc 0 và phát receipt khi
++`ops/lease_publish.py` tại C là symlink nội bộ (`review-luot1/evidence/graph.txt`). Predicate C vẫn **riêng** với
++G6 ở hai điểm: đòi object blob của entry đọc được, và bác `160000`/`40000`:
+ 
+ | trạng thái đường dẫn trong tree(C) | kết quả |
+ |---|---|
+-| entry `100644` hoặc `100755`, kiểu `blob`, OID = `oid_bo_kiem_da_chay`, và object blob **đọc + băm lại được** | `qua` |
+-| như trên nhưng OID khác | `do` |
+-| entry `120000`, `160000` hoặc `40000` | `do` |
++| entry `100644`, `100755` hoặc `120000`, kiểu `blob`, OID = `oid_bo_kiem_da_chay`, object blob đọc + băm lại được | `qua` |
++| entry `100644`, `100755` hoặc `120000`, OID khác | `do` |
++| entry `160000` (gitlink) hoặc `40000` (thư mục) | `do` |
+ | không có entry, hoặc tổ tiên không phải tree | `do` |
+-| entry đúng mode/OID mà object blob vắng hoặc băm lệch | `khong_do_duoc` |
++| entry thuộc tập nhận, OID khớp, mà object blob phát `E_vang`/`E_bam_lech`/`E_kieu_sai` | `khong_do_duoc` |
+ 
+-**Bảng G8 — định nghĩa workflow tại C.** Như G7 cho đường `.github/workflows/ops-thu-hoi-admission.yml` so với
+-`workflow_definition_blob`; thêm: qua hết bảng G7 rồi mà sha256 của **nội dung** blob (không gồm header) khác
+-`workflow_definition_sha256` ⇒ `do`.
++**Giới hạn lời khai của G7 (bắt buộc giữ khi trích):** với entry `120000`, `qua` chỉ nói receipt khớp OID của
++**chính symlink** (blob chứa chuỗi đích), **không** chứng minh nội dung tệp đích mà Python đã chạy. G7 không theo
++symlink vì producer không theo. Bác `160000`/`40000` là điểm phiên soạn tự quyết (§10 điểm 4): checkout gitlink ra
++thư mục rỗng nên `python3 ops/lease_publish.py` không chạy được; thư mục có `__main__.py` thì chạy được, nhưng
++receipt khi đó không còn nói gì về một tệp mã — nên bác, và đây là chỗ G7 **chặt hơn** producer, có khai.
+ 
+-Mỗi luật được ghi trạng thái; không dừng ở luật đỏ đầu tiên. Thiếu bytes cho một luật không chặn các luật khác.
++**Bảng G8 — định nghĩa workflow tại C.** Cùng tập mode nhận và cùng năm dòng như G7, cho đường
++`.github/workflows/ops-thu-hoi-admission.yml` so với `workflow_definition_blob`; thêm: qua hết rồi mà sha256 của
++**nội dung** blob của entry (không gồm header; với `120000` là chuỗi đích, đúng như producer
++`git cat-file blob <wf_blob>`) khác `workflow_definition_sha256` ⇒ `do`. Giới hạn: GitHub có nạp định nghĩa workflow
++từ một symlink hay không là **KHÔNG ĐO ĐƯỢC** trong packet này; G8 chỉ đo nhất quán receipt ↔ cây C.
++
++Mỗi luật được ghi trạng thái; không dừng ở luật đỏ đầu tiên. Sự kiện `E` của một luật không chặn các luật khác
++(bảng đóng §2.3).
+ 
+ ### 2.5 Tham số và N6
+ 
+@@ -219,7 +287,7 @@ trước land, không lấy từ receipt. Module này không kiểm được ngu
+ | giới hạn | giá trị | căn cứ |
+ |---|---:|---|
+ | byte receipt | 8.388.608 | G0; guard 8.388.608 nhận / 8.388.609 bác đã khảo sát trên Windows và WSL (`6622920623`) |
+-| commit tối đa cho MỖI phép đi (G1, G2, G3 tính riêng) | 50.000 | S3: toàn lịch sử master hôm nay 5.444 (≈ 9,2 lần dư) |
++| commit tối đa cho MỖI phép đi (G1, G2, G3 tính riêng) | 50.000 | S3: toàn lịch sử master hôm nay 5.444 (≈ 9,2 lần dư). S3 là trần trên cho G1 và G2 (C hợp lệ nằm trên master); **không** phải trần trên cho G3, vì H là head PR có thể mang lịch sử ngoài master — vượt thì `E_ngan_sach` ⇒ `khong_do_duoc` |
+ | byte tối đa một object | 8.388.608 | bằng producer `max_object_bytes` |
+ | tổng byte nội dung đọc trong một lần chạy | 134.217.728 | bằng producer; S3 ước 50.000 commit ≈ 78 MB theo tỉ lệ 1,56 KB/commit |
+ | thời gian tường | 60 s, đồng hồ `monotonic` | S3: 0,34 s cho toàn lịch sử trên Linux |
+@@ -257,14 +325,15 @@ Lần đo trước đó cùng phiên ra `CHAN [12] NHÁNH_CỤC_BỘ_TỤT_SAU`
+ phải `NGƯỜI_GIỮ 0`. Phiên cấp lease phải đo lại toàn bộ trước khi cấp, theo CLAUDE.md (so tập tên `ls-remote` với
+ `for-each-ref`).
+ 
+-**Kích thước.** Ước lúc soạn: module ~220 dòng, phần thêm của test ~400 dòng; tổng ~620, vượt trần `ADR-0053`
+-(≤ 6 tệp / ≤ 450 dòng thêm). Tiền lệ cùng chuỗi: C1a1a merge ở +650 trên 3 tệp (erratum r5). Đề xuất, **có hiệu
+-lực chỉ khi chủ kho duyệt `spec_hash` của tệp này**:
++**Kích thước.** Ước lúc soạn r1: module ~220 dòng, phần thêm của test ~400 dòng; r2 thêm ca (A4, A5, A7, A9, A13,
++A18 e2e, A20) nên ước lại ~240 + ~470 ≈ **710**, sát trần. Vượt trần `ADR-0053` (≤ 6 tệp / ≤ 450 dòng thêm).
++Tiền lệ cùng chuỗi: C1a1a merge ở +650 trên 3 tệp (erratum r5). Đã duyệt, **có hiệu
++lực theo quyết định Q-KT của chủ kho (§0.3), cùng lúc đặc tả được đóng băng**:
+ 
+ ```yaml
+ nang_tran:
+   truc: kich_thuoc
+-  ai_nang: ducthangho   # chủ kho, khi duyệt spec_hash; chưa duyệt thì trần ADR-0053 giữ nguyên
++  ai_nang: ducthangho   # chủ kho, quyết định Q-KT (§0.3), chuyển qua phiên điều phối #1206 ~07:58Z 06-11-2026
+   can_cu: >-
+     Module reader + 10 luật + CLI ~220 dòng; nhóm test Git (dựng đồ thị trên MOC thật, ~45 ca, bảng nghĩa vụ,
+     đột biến, chốt dòng tổng) ~400 dòng. Tách module khỏi phản chứng là land một bộ kiểm chưa có răng.
+@@ -282,7 +351,7 @@ plumbing (`hash-object -w`, `mktree`, `commit-tree`) với tác giả/ngày cố
+ `refs/remotes/origin/master` trong clone tạm (N3). `GOC_KHO` thiếu `MOC` ⇒ suite ĐỎ, in `KHÔNG ĐO ĐƯỢC: thiếu MOC`;
+ không có nhánh "bỏ qua" (CI đã `fetch-depth: 0`). Đồ thị tối thiểu: `MOC → A → B → D` (first-parent), `E` con của
+ `A`, `D` là merge `(B, E)`; `P` là parent thứ nhất của `MOC`; `H1` con của `A` (head PR); `X` con của `MOC` không
+-nằm dưới `D`. Fixture dương: `S=A`, `C=B`, `H=H1` (S ≠ C thật). Mọi ca âm là **một** biến đổi của fixture dương.
++nằm dưới `D`. Fixture dương: `S=A`, `C=B`, `H=H1` (S ≠ C thật). Mỗi commit `A`, `B`, `H1` sửa một tệp khác nhau so với cha nên tree(S), tree(C), tree(H) **đôi một khác nhau**; một ca tự kiểm fixture assert điều đó (A9). Đồ thị phụ cho A7: chuỗi first-parent `Q1 → … → gốc` dựng từ `P`, không qua `MOC`. Mọi ca âm là **một** biến đổi của fixture dương.
+ 
+ **Đột biến.** Chạy trên **bản sao tạm** của `doc_receipt_thu_hoi_git.py`, đặt cạnh **bản chép nguyên byte** của
+ `doc_receipt_thu_hoi.py`, nạp với `sys.dont_write_bytecode = True`, tên tệp riêng từng đột biến. "Đột biến X ⇒ ca Y
+@@ -295,22 +364,23 @@ cho mệnh đề §2.2–§2.6 của tệp này; `unresolved` > 0 chặn merge.
+ | A1 | `git diff --exit-code <base> <cand> -- .claude/dev/doc_receipt_thu_hoi.py` rc 0 | mọi nền | sửa một byte module C1a1a ⇒ rc 1 |
+ | A2 | Nhóm JSON giữ nguyên: suite in dòng nhóm JSON đúng `156/156` ca và `162/162` đột biến, `equivalent_verified 9`; số nền đo **cùng một lệnh** trên base và ứng viên. Không có tệp `*_test.py` mới dưới `.claude/dev/`; `python .claude/dev/ci_dang_ky_test.py` (chế độ kiểm sổ) rc 0 trên ứng viên | linux | xoá một ca nhóm JSON ⇒ số nhóm JSON lệch nền; thêm `doc_receipt_thu_hoi_git_test.py` ⇒ `ci_dang_ky_test.py` rc ≠ 0 |
+ | A3 | `g_json_nguyen_ven`: với fixture dương và với ba ca JSON đỏ (K1, K2, K4), `kq["json"]` **bằng** kết quả gọi trực tiếp `kiem_json` của module C1a1a trên cùng bytes và tham số | linux | đột biến thay lời gọi `kiem_json` bằng hằng `{"ok": True, …}` ⇒ ĐỎ; đột biến thêm một khoá vào `kq["json"]` ⇒ ĐỎ |
+-| A4 | `g_abi`: đúng bốn khoá top-level; `git` đúng hai khoá; `do_dac` đúng hai khoá `int`; `git.luat` đúng 10 khoá `G0`…`G9`, giá trị thuộc tập đóng §2.2; mỗi `ly_do` bắt đầu bằng `G<n>: ` của một luật không `qua`. CLI in đúng một dòng | linux | thêm khoá `giay` vào `do_dac` ⇒ ĐỎ; đổi một trạng thái thành `"loi"` ⇒ ĐỎ |
+-| A5 | `g_ma_thoat`: rc đọc thẳng từ `subprocess.run`: dương ⇒ 0; một G `do` ⇒ 12; chỉ `khong_do_duoc` ⇒ 13; `do` cùng `khong_do_duoc` ⇒ 12; JSON đỏ ⇒ 12; tham số sai (mỗi vế §2.5 một ca) ⇒ 2 với stdout rỗng; **N6 ban đầu lệch** ⇒ 2 | linux + windows | đổi thứ tự xét 12/13 ⇒ ca "`do` cùng `khong_do_duoc`" ĐỎ; bỏ chốt N6 ban đầu ⇒ ca N6 ĐỎ |
++| A4 | `g_abi`: đúng bốn khoá top-level; `git` đúng hai khoá; `do_dac` đúng hai khoá `int`; `git.luat` đúng 10 khoá `G0`…`G9`, giá trị thuộc tập đóng §2.2; mỗi `ly_do` bắt đầu bằng `G<n>: ` của một luật không `qua`. **Ma trận `ok` iff** (r2, F3): chạy ít nhất các tổ hợp (a) JSON qua + mọi G qua ⇒ `ok is True`; (b) JSON qua + một G `do`; (c) JSON qua + một G `khong_do_duoc`; (d) JSON đỏ (K4) + mọi G qua; (e) G0 `do` ⇒ (b)–(e) đều `ok is False`, và `type(ok) is bool` ở cả năm. **Byte stdout**: với cả năm tổ hợp, `subprocess.run(...).stdout` bằng đúng `(json.dumps(kq, ensure_ascii=True, sort_keys=True) + "\n").encode("ascii")`, `kq` tính lại bằng lời gọi hàm trong cùng ca | linux | đột biến `ok = json.ok` ⇒ tổ hợp (b) ĐỎ; `ok = all(G == "qua")` bỏ vế JSON ⇒ (d) ĐỎ; bỏ `sort_keys` ⇒ vế byte ĐỎ; thêm khoá `giay` vào `do_dac` ⇒ ĐỎ; đổi một trạng thái thành `"loi"` ⇒ ĐỎ |
++| A5 | `g_ma_thoat`: rc đọc thẳng từ `subprocess.run`, **cùng ca** đọc cả `ok` và trạng thái luật của đầu ra để rc không tự đứng một mình: dương ⇒ 0; một G `do` ⇒ 12; chỉ `khong_do_duoc` ⇒ 13; `do` cùng `khong_do_duoc` ⇒ 12; JSON đỏ ⇒ 12; G0 `do` ⇒ 12; tham số sai — **mỗi vế §2.5 một ca** (`--kho` rỗng, nhánh sai mẫu, nhánh bắt đầu bằng `-`, mỗi OID sai dạng, `--goc-kho` không phải kho, receipt không đọc được) ⇒ 2 với stdout rỗng; **N6 ban đầu lệch** và **ref vắng ở lần đọc đầu** ⇒ 2 | linux + windows | đổi thứ tự xét 12/13 ⇒ ca "`do` cùng `khong_do_duoc`" ĐỎ; bỏ chốt N6 ban đầu ⇒ ca N6 ĐỎ |
+ | A6 | `g_khong_chay`: K1 đỏ ⇒ mọi G `khong_chay`, `ok` false, rc 12; K2 đỏ ⇒ như trên; K4 đỏ (S lệch `--base-hien-hanh`) ⇒ G vẫn chạy và có `qua` | linux | đột biến chạy G cả khi K2 đỏ ⇒ ca K2 ĐỎ; đột biến bỏ G khi K4 đỏ ⇒ ca K4 ĐỎ |
+-| A7 | G1 (N1): `C=B` ⇒ `qua`; `C=MOC` ⇒ `qua` (biên gồm); `C=P` ⇒ `do` (trước mốc); `C=E` ⇒ `do` (tổ tiên master, không first-parent); `C=X` ⇒ `do`; master không chứa `MOC` trên first-parent (ref trỏ nhánh từ `P`) ⇒ `khong_do_duoc` | linux | đột biến dùng mọi parent thay first-parent ⇒ ca `E` ĐỎ; bỏ biên `MOC` ⇒ ca `P` ĐỎ; loại trừ `MOC` ⇒ ca `C=MOC` ĐỎ |
++| A7 | G1 (N1): `C=B` ⇒ `qua`; `C=MOC` ⇒ `qua` (biên gồm); `C=P` ⇒ `do` (trước mốc); `C=E` ⇒ `do` (tổ tiên master, không first-parent); `C=X` ⇒ `do`. Hai ca phân loại (r2, F4), **cùng** đầu vào receipt, khác đúng một sự kiện: (i) `master` trỏ chuỗi first-parent dựng từ `P` tới gốc, không qua `MOC`, mọi commit có trong kho ⇒ G1 **`do`**; (ii) như (i) nhưng một commit giữa chuỗi bị xoá khỏi kho tạm (loose object) ⇒ G1 `khong_do_duoc` | linux | dùng mọi parent thay first-parent ⇒ ca `E` ĐỎ; bỏ biên `MOC` ⇒ ca `P` ĐỎ; loại trừ `MOC` ⇒ ca `C=MOC` ĐỎ; đột biến trả `khong_do_duoc` khi hết chuỗi không gặp MOC (hành vi r1) ⇒ ca (i) ĐỎ; đột biến coi object vắng là hết chuỗi ⇒ ca (ii) ĐỎ |
+ | A8 | G2/G3 (N2, N5): `S=A,C=B` ⇒ G2 `qua`; `S=B,C=A` (C là tổ tiên thật sự của S) ⇒ G2 `do`; `S=A,H=X` ⇒ G3 `do`; `S=C=B`, H con của B ⇒ cả hai `qua` | linux | đảo toán hạng ancestry ⇒ ca `S=B,C=A` ĐỎ (ca nhánh rẽ không giết được nó, N5); đổi G3 thành so S với C ⇒ ca `H=X` ĐỎ |
+-| A9 | G4/G5: đổi `T` sang tree khác ⇒ G4 `do`; đổi `tree_S` ⇒ G5 `do`; G4/G5 không đổi màu nhau | linux | so `T` với tree(S) ⇒ ca G4 ĐỎ |
++| A9 | G4/G5 (r2, F3): hạ tầng buộc tree(S), tree(H), tree(C) **đôi một khác nhau** (ca tự kiểm fixture assert điều này trước mọi ca G). Ca đích G4: `T = tree(S)` ⇒ G4 `do`. Ca đích G5: `tree_S = tree(H)` ⇒ G5 `do`. Ca phụ: `T` = empty tree ⇒ G4 `do`; G4/G5 không đổi màu nhau | linux | so `T` với tree(S) ⇒ ca `T = tree(S)` ĐỎ (trên mutant ra `qua`); so `tree_S` với tree(H) ⇒ ca `tree_S = tree(H)` ĐỎ; bỏ assert ba tree khác nhau ⇒ ca tự kiểm fixture ĐỎ khi fixture bị dựng chung tree |
+ | A10 | G6 đủ **bảy** ô bảng §2.4: có entry + `null` ⇒ `do`; có entry + đúng OID ⇒ `qua`; có entry + OID khác ⇒ `do`; vắng + `null` ⇒ `qua`; vắng + hex ⇒ `do`; entry `160000` (commit không có trong kho) + đúng OID ⇒ `qua`; tổ tiên `ops` là blob, với `null` và với hex ⇒ `do` | linux | đọc object của entry trước khi so ⇒ ca gitlink ra `khong_do_duoc`, ĐỎ; coi tổ tiên-không-phải-tree là "vắng" ⇒ ca blob-`null` ĐỎ; nhận `null` khi có entry ⇒ ĐỎ |
+-| A11 | G7 và G8 đủ năm dòng bảng: `100644` đúng ⇒ `qua`; `100755` đúng ⇒ `qua`; OID khác ⇒ `do`; `120000`, `160000`, `40000` mỗi mode một ca ⇒ `do`; vắng ⇒ `do`; blob vắng khỏi kho (entry trỏ OID không có object) ⇒ `khong_do_duoc`; G8 sha256 lệch ⇒ `do` | linux | dùng predicate G6 cho G7 ⇒ ca symlink ĐỎ; bỏ phép đọc blob ở G7 ⇒ ca blob-vắng ĐỎ; bỏ phép so sha256 ⇒ ca G8 ĐỎ |
++| A11 | G7 và G8 đủ năm dòng bảng r2: `100644` đúng ⇒ `qua`; `100755` đúng ⇒ `qua`; **`120000` (symlink nội bộ) đúng OID entry ⇒ `qua`**; OID khác ⇒ `do`; `160000`, `40000` mỗi mode một ca ⇒ `do`; vắng ⇒ `do`; tổ tiên không phải tree ⇒ `do`; blob vắng khỏi kho (entry trỏ OID không có object) ⇒ `khong_do_duoc`; G8 sha256 lệch ⇒ `do`; G8 symlink: sha256 tính trên chuỗi đích ⇒ `qua` khi khớp | linux | dùng predicate G6 cho G7 ⇒ ca `160000` ĐỎ (G6 nhận); bác `120000` (hành vi r1) ⇒ ca symlink ĐỎ; theo symlink tới tệp đích ⇒ ca symlink ĐỎ; bỏ phép đọc blob ở G7 ⇒ ca blob-vắng ĐỎ; bỏ phép so sha256 ⇒ ca G8 ĐỎ |
+ | A12 | Reader (§2.3): (a) commit H vắng khỏi kho ⇒ G3, G4 `khong_do_duoc`, G1 vẫn `qua`, rc 13; (b) loose object ghi tay có nội dung không băm ra tên ⇒ `khong_do_duoc`; (c) `refs/replace/<B>` trỏ commit khác ⇒ kết quả như không có replace; (d) đặt biến `GIT_OBJECT_DIRECTORY` trỏ kho khác trong môi trường gọi ⇒ kết quả không đổi | linux + windows | bỏ băm lại ⇒ ca (b) ĐỎ; bỏ `--no-replace-objects` và biến tương ứng ⇒ ca (c) ĐỎ; bỏ lọc `GIT_*` ⇒ ca (d) ĐỎ |
+-| A13 | Ngân sách (§2.6), qua tham số nội bộ `ngan_sach`: trần commit = 2 ⇒ G1 `khong_do_duoc`, không `do`; trần byte nhỏ hơn một commit ⇒ `khong_do_duoc`; đồng hồ tiêm vượt hạn ⇒ `khong_do_duoc`. G0: 8.388.608 byte đọc được (rồi K1 xử lý), 8.388.609 ⇒ G0 `do`, `json` `null`, rc 12. Hằng mặc định trong module bằng bảng §2.6 | linux | đổi vượt ngân sách thành `do` ⇒ ca trần commit ĐỎ; G0 `>=` thay `>` ⇒ ca 8.388.608 ĐỎ |
++| A13 | Ngân sách (§2.6), qua tham số nội bộ `ngan_sach`, **mỗi giới hạn một ca riêng**: trần commit = 2 cho G1 ⇒ G1 `khong_do_duoc`, G4 vẫn `qua`; trần commit cho G3 riêng ⇒ chỉ G3 `khong_do_duoc` (per-walk); `max_object_bytes` nhỏ hơn commit H ⇒ G4 `khong_do_duoc`; `max_tong_bytes` nhỏ hơn tổng đọc của fixture nhưng lớn hơn mọi object ⇒ `khong_do_duoc` ở luật chạm ngưỡng; đồng hồ tiêm vượt hạn ⇒ `khong_do_duoc`; một object đọc hai lần (memo) chỉ cộng `do_dac.tong_bytes` một lần. G0: 8.388.608 byte đọc được (rồi K1 xử lý), 8.388.609 ⇒ G0 `do`, `json` `null`, rc 12. Hằng mặc định trong module bằng bảng §2.6 | linux | đổi vượt ngân sách thành `do` ⇒ ca trần commit ĐỎ; gộp bộ đếm commit của ba phép đi ⇒ ca per-walk ĐỎ; bỏ chốt `max_object_bytes` ⇒ ca ấy ĐỎ; bỏ memo ⇒ ca memo ĐỎ; G0 `>=` thay `>` ⇒ ca 8.388.608 ĐỎ |
+ | A14 | G9 (trôi): qua `_seam` đổi ref sau lần đọc đầu ⇒ G9 `khong_do_duoc`, rc 13, **không** rc 2; xoá ref sau lần đọc đầu ⇒ như trên | linux | đổi G9 thành rc 2 ⇒ ĐỎ; bỏ lần đọc lại ⇒ ĐỎ |
+-| A15 | `git diff --numstat <base> <cand>` chỉ gồm hai đường write set; tổng dòng thêm ≤ 750 khi `nang_tran` §3 được duyệt, ≤ 450 khi chưa. Kiểm staged/unstaged/untracked rỗng trước khi tính | mọi nền | thêm tệp thứ ba ⇒ ĐỎ |
+-| A16 | Windows theo `ADR-0060` M3, trên máy chủ kho qua Desktop Commander theo `ADR-0057`/`0058`/`0059`. Lượt **tập trung**: toàn bộ ca `g_*` cộng nhóm JSON; hai lượt (base, ứng viên) cùng máy dựng trong một lệnh. Ghi `BỎ QUA` riêng; ca bị bỏ qua không tính là đạt. Không Windows CI, không full mutant trên Windows | windows | — |
++| A15 | `git diff --numstat <base> <cand>` chỉ gồm hai đường write set; tổng dòng thêm ≤ 750 (`nang_tran` §3, Q-KT). Kiểm staged/unstaged/untracked rỗng trước khi tính | mọi nền | thêm tệp thứ ba ⇒ ĐỎ |
++| A16 | Windows theo `ADR-0060` M3, trên máy chủ kho qua Desktop Commander theo `ADR-0057`/`0058`/`0059`. Lượt **tập trung**: lệnh `python .claude/dev/doc_receipt_thu_hoi_test.py` (cả hai nhóm, gồm đột biến của suite này), hai lượt (base, ứng viên) cùng máy dựng trong một lệnh; ghi rc, dòng tổng và mọi dòng `BỎ QUA`. Ca bị bỏ qua không tính là đạt. Phạm vi miễn chỉ là: lượt tập trung này **không** chạy `ci-dot-bien-du.yml` hay full mutant audit trên Windows. Windows CI của kho áp như `ci.yml` quy định, packet này không tắt hay thay nó | windows | — |
+ | A17 | `full_mutant_audit` theo `ADR-0060` M9 (diff chạm `.claude/dev/**`): receipt `ci-dot-bien-du.yml` trên Ubuntu, hoặc waiver `owner_waived` đúng scope §10.2.3 | linux (CI) | thiếu cả hai khi merge |
+-| A18 | Dòng tổng: suite in một dòng nhóm JSON, một dòng nhóm Git (cả hai **không** khớp regex sổ đăng ký), rồi dòng tổng `doc_receipt_thu_hoi tests: N/N ca QUA · M/M dot bien GIET` với N = N_json + N_git, M = M_json + M_git. Dòng tổng chỉ được in khi cả hai nhóm đã chạy và N_git ≥ 1, M_git ≥ 1. Ca `g_dong_tong` gọi hàm dựng dòng tổng (thuần) với: thiếu nhóm Git; nhóm Git `0/0`; nhóm Git có ca hỏng; lỗi import module Git (ghi thành hỏng, không thành bỏ qua); dòng nhóm giả mạo dạng dòng tổng — mọi vế không sinh dòng khớp regex sổ | linux | bỏ điều kiện N_git ≥ 1 ⇒ vế `0/0` ĐỎ; nuốt lỗi import ⇒ vế import ĐỎ |
++| A18 | Dòng tổng (r2, F3): suite in một dòng nhóm JSON, một dòng nhóm Git (cả hai **không** khớp regex sổ đăng ký), rồi dòng tổng `doc_receipt_thu_hoi tests: N/N ca QUA · M/M dot bien GIET` với N = N_json + N_git, M = M_json + M_git, chỉ khi cả hai nhóm đã chạy, N_git ≥ 1, M_git ≥ 1. Ca **end-to-end** `g_dong_tong_e2e`: chép suite + hai module vào thư mục tạm, thay `doc_receipt_thu_hoi_git.py` bằng (a) tệp ném `ImportError` khi nạp, (b) tệp có lỗi cú pháp, (c) tệp vắng; chạy **entrypoint** của suite bằng `subprocess.run` ⇒ rc ≠ 0, **và** không dòng nào của stdout khớp regex sổ (đọc regex từ `.claude/dev/ci_dang_ky_test.py`, không chép tay). Ca thuần `g_dong_tong` giữ các vế: nhóm Git `0/0`, có ca hỏng, dòng nhóm giả mạo | linux | đột biến caller nuốt lỗi import nhóm Git (in dòng tổng chỉ từ nhóm JSON) ⇒ ca e2e ĐỎ; bỏ điều kiện N_git ≥ 1 ⇒ vế `0/0` ĐỎ |
+ | A19 | Gate phụ: `python -m ruff check --select F` cho hai tệp, DELTA so nền = 0 (đo cùng lệnh); `python .claude/dev/packet_loop.py doctrine-scan --root .` rc 0; `adr-song` rc 0; `git diff --check` rc 0 | linux | — |
++| A20 | Bảng đóng §2.3 (r2, đổi phương pháp cho lớp `phan-loai-vang-va-khong-do-duoc`): bảng nghĩa vụ của nhóm Git có **một ID cho mỗi ô** (luật × sự kiện `E` mà luật ấy có thể gặp, cộng ô "không sự kiện"), và mỗi ô có ca hoặc disposition `equivalent_verified` có lập luận. Tối thiểu các ô sau có ca: `E_vang` (A7 ii, A11, A12 a); `E_bam_lech` (A12 b); `E_kieu_sai` (tree của commit là blob); `E_hong` (commit thiếu dòng `tree`; tree có mode `100600`); `E_ngan_sach` (A13); `E_git_chet` (seam tiêm framing hỏng); `E_troi_ref` (A14). Mỗi ca kiểm luật đích ra `khong_do_duoc` **và** một luật không cần object ấy giữ nguyên màu | linux | đột biến phân loại một sự kiện `E` thành `do` ⇒ ca của ô ấy ĐỎ; đột biến lan sự kiện sang mọi luật ⇒ vế "luật không liên quan giữ màu" ĐỎ |
+ 
+ Không tiêu chí nào đóng bằng `rc=0` trơn: mỗi tiêu chí đòi bằng chứng dương (hai số bằng nhau, giá trị đúng, hoặc
+ đột biến đổi màu đúng ca đích).
+@@ -334,61 +404,76 @@ Không tiêu chí nào đóng bằng `rc=0` trơn: mỗi tiêu chí đòi bằng
+ 2. **Profile trên Windows và bộ đệm lạnh.** S2–S3 chỉ đo Linux, bộ đệm ấm, một container. Số Windows (S8) là khảo
+    sát cũ trên master khác. A16 ghi thời gian chạy suite trên Windows; ngân sách §2.6 có thể phải xem lại nếu
+    Windows chậm hơn ~100 lần.
+-3. **Số dòng.** ~620 là ước; A15 đo trên mã thật.
++3. **Số dòng.** ~710 là ước (§3); A15 đo trên mã thật.
+ 4. **`GIT_CONFIG_GLOBAL=<os.devnull>` trên Windows** (`nul`): chưa đo. Nếu git không nhận, A12/A16 sẽ lộ.
+-5. **Tổ tiên master ngoài first-parent (S4)** chưa đo lại trên base này; G1 không phụ thuộc con số ấy.
+-6. **Quota Codex** cho PR thi công: snapshot cũ `primary.usedPercent=0` lúc 07:11Z 04-11 (`6624954880`); chưa đo lại,
++5. **Quota Codex** cho PR thi công: snapshot cũ `primary.usedPercent=0` lúc 07:11Z 04-11 (`6624954880`); chưa đo lại,
+    không phải reservation.
++6. **Nạp workflow từ symlink trên GitHub** (G8, giới hạn đã khai): chưa đo.
+ 
+ ## 7. hinh_dang_ke_thua
+ 
+-| lớp | biểu hiện | nguồn | chốt ở r1 |
++| lớp | biểu hiện | nguồn | chốt ở r2 |
+ |---|---|---|---|
+-| `mo-rong-module-pha-hop-dong-json-thuan` | **3** (review draft0–2) | `6623060128` | §0.2, A1–A3 |
+-| `phan-loai-vang-va-khong-do-duoc` | **3** (review draft0–2) | `6623060128` | §0.2, §2.3, A10–A12 |
++| `mo-rong-module-pha-hop-dong-json-thuan` | **3** (review draft0–2); Codex lượt 1 trên r1: **đã đóng ở tầng đặc tả** | `6623060128`; `review-luot1/VERDICT.md` | §0.2, A1–A3 |
++| `phan-loai-vang-va-khong-do-duoc` | **4** (draft0–2, cộng F4 lượt 1 trên r1) | như trên | **đổi phương pháp**: bảng đóng §2.3, A7, A20 |
++| `dot-bien-tuong-duong-hoac-thieu` (lớp của C1a1a, 5 lượt ở đó) | lượt 1 trên r1: F3, ba biểu hiện (A9, A18, ABI) | `review-luot1/VERDICT.md` | A4, A5, A9, A18 e2e, A20 |
++| `predicate-consumer-khong-khop-producer` | **1** (F2) | như trên | G7/G8 r2 |
++| `dat-lai-ngan-sach-khi-doi-truc` | **1** (F1) | như trên | §8 r2 |
++| `so-do-ke-thua-chua-do-lai` | **1** (F5) | như trên | §1 S4 |
+ | `nguon-duoc-tin-ma-chua-xac-minh` (từ spec C1a1a §6) | 7 (chuỗi thu hồi) | spec C1a1a r5 §6 | reader băm lại (§2.3); N6 hai lần đọc; nguồn tham số là hợp đồng caller (§2.5) |
+ 
+-Cả hai lớp đầu đã ở **3** ⇒ biểu hiện thứ **4** của một trong hai lớp, ở bất kỳ lượt review nào (đặc tả hay PR thi
+-công) ⇒ DỪNG, Review Rescue Checkpoint, báo phiên điều phối để chủ kho quyết; không vá tiếp theo chỗ bị chỉ.
+-
+-## 8. Review và ngân sách
+-
+-- Đặc tả này: reviewer Codex `gpt-6-astra` effort `xhigh` qua `launcher.py run`, phiên độc lập, tối đa **2** lời
+-  gọi trong phiên soạn r1, đếm **trước** mỗi lời gọi. Tổng trục đặc tả: **≥ 4 + số lời gọi ghi ở §9**. Trần PR theo
+-  dòng khai `ADR-0055`: 10. Hai lượt liên tiếp chưa approve ⇒ Review Rescue Checkpoint (`ADR-0037`).
+-- PR thi công là **PR khác**, trục lời gọi riêng theo `ADR-0055` (trần mỗi PR). Ngân sách mềm đề xuất: **4** lời gọi
+-  Codex offline + connector. **Quyết định chờ chủ kho**: nếu chủ kho muốn tính tiếp lịch sử ≥ 4 vào PR thi công
+-  thì ghi `nang_tran` hoặc trần riêng trong lease; mặc định của tệp này là trục riêng, khai rõ để không ai đọc
+-  thành "đặt lại về 0".
++**Điều kiện dừng (Q-R):** lượt Codex 2/2 trên r2 còn **bất kỳ** finding nào thuộc `phan-loai-vang-va-khong-do-duoc`
++hoặc `dot-bien-tuong-duong-hoac-thieu` ⇒ DỪNG, báo phiên điều phối; đặc tả chuyển sang phương án (B) đóng băng
++bằng human audit của chủ kho, không vá tiếp theo chỗ bị chỉ. Áp như nhau cho mọi lượt review của PR thi công: biểu
++hiện mới của hai lớp ấy ⇒ Review Rescue Checkpoint.
++
++## 8. Review và ngân sách (Q-NS: một trục, tính tiếp)
++
++- **Một trục lời gọi Codex cho cả packet**, gồm đặc tả và PR thi công. Bộ đếm `U` = số lời gọi Codex đã sinh output
++  của packet. Lúc soạn r2: `U ≥ 5` (§0). Mỗi lời gọi sau đó, kể cả lượt bị cắt sau khi đã sinh output và lượt
++  connector, cộng 1. Trần: dòng khai `ADR-0055` ⇒ **10**. Lượt bị chặn trước khi model chạy không tính, nhưng ghi.
++- Đặc tả: reviewer Codex `gpt-6-astra` effort `xhigh` qua `launcher.py run`, phiên độc lập; phiên soạn còn **1**
++  lời gọi (lượt 2/2) để xác minh r2. Đếm **trước** mỗi lời gọi.
++- PR thi công **không** mở trục mới. `packet_loop init` mặc định đặt bộ đếm 0 và chưa đọc được lịch sử; nên người
++  khởi tạo state truyền `--codex-review-calls-limit (10 − U)`, với `U` đọc từ §9 của đặc tả đã đóng băng cộng các
++  lời gọi đã ghi sau đó trên Issue, và **ghi `U` cùng công thức vào lease**. Ví dụ: đóng băng ở `U = 6` ⇒ limit 4.
++  Không tự đặt lại `U` về 0 bằng `init`, đổi phiên hay đổi revision.
++- Hai lượt liên tiếp chưa approve ⇒ Review Rescue Checkpoint (`ADR-0037`), trước lời gọi kế tiếp.
+ - `packet_loop init --executor claude --reviewer codex` qua chốt cùng provider (probe `6626378748` chỉ chặn
+-  executor = reviewer). `init` đặt bộ đếm 0 cho state của PR thi công; lịch sử đặc tả vẫn sống ở §0 và §9.
++  executor = reviewer).
+ - Điều kiện merge theo `ADR-0060` M1: 0 P0/P1/P2 mở; mỗi P3 đóng có bằng chứng hoặc chủ kho miễn. Thêm **human
+   audit** của chủ kho trên exact head (Issue #1179).
+ 
+-## 9. Lịch sử review của r1
++## 9. Lịch sử review của packet (trục lời gọi, §8)
+ 
+-| lượt | reviewer | đối tượng | verdict | P1 | P2 | P3 |
+-|---|---|---|---|---:|---:|---:|
+-| — | — | — | (chưa chạy lúc commit tệp này) | | | |
++| `U` sau lượt | lượt | reviewer | đối tượng | verdict | P1 | P2 | P3 |
++|---:|---|---|---|---|---:|---:|---:|
++| ≥ 4 | draft0–2 + lượt mất kết quả | Codex advisory, máy dispatcher cũ | bản nháp ngoài Git (§0) | 3 verdict changes_requested + 1 không verdict | 1 | 12 | 1 |
++| — | draft3 | (auto-review từ chối trước khi chạy) | `de10ed3d…41b1` | không tính | | | |
++| — | r1 lượt 1 lần khởi chạy đầu | (launcher `CHAN [11]`, model không chạy) | — | không tính | | | |
++| ≥ 5 | r1 lượt 1 | `openai_codex`, `gpt-6-astra` / `xhigh` (`run.json`: `DO_DUOC`), run `202041c2`, 07:32:15–07:53:15Z 06-11, `launcher.py run` | r1 `24354e77`, sha256 `3dc6a2b9…6d04` | changes_requested; VERDICT sha256 `f77f269f…b8de` (`wp1179-c1a1b-r1-do/review-luot1/`) | 0 | 4 | 1 |
++| — | r2 lượt 2 | (chưa chạy lúc commit tệp này) | | | | | |
+ 
+ ## 10. Bản đồ quyết định (phiên soạn, 06-11-2026)
+ 
+ | điểm | quyết định | nguồn quyền |
+ |---|---|---|
+-| Rescue | revision, không tách Stable Slice | `6624905106` |
++| Rescue lần 1 (draft2) | revision, không tách Stable Slice | `6624905106` |
++| Rescue lần 2 (r1, F4) | **(A)**: r2 đổi phương pháp + vá F1–F5, lượt 2/2 xác minh, còn cùng lớp ⇒ (B) | Q-R, §0.3 |
+ | Routing | Claude executor, Codex reviewer, phiên độc lập | `6679422380` |
+ | Write set | phương án B: module mới + suite đã đăng ký, không chạm sổ | `6679422380` (ưu tiên B), đo §3 |
+-| Trần lời gọi | dòng khai `ADR-0055`; lịch sử ≥ 4 giữ nguyên | `6679422380` |
+-| Trần kích thước | `nang_tran` ≤ 2 tệp / ≤ 750 dòng — **chờ chủ kho** duyệt cùng `spec_hash` | §3 |
+-| Trục ngân sách PR thi công | trục riêng, mềm 4 — **chờ chủ kho** | §8 |
++| Trần lời gọi | dòng khai `ADR-0055`; một trục, tính tiếp từ `U ≥ 5` | `6679422380`, Q-NS |
++| Trần kích thước | `nang_tran` ≤ 2 tệp / ≤ 750 dòng thêm | Q-KT |
+ 
+ Các điểm phiên soạn tự quyết khi viết; chủ kho duyệt bằng cách duyệt `spec_hash`:
+ 
+ 1. Mã thoát **13** riêng cho `khong_do_duoc` (§2.2).
+-2. Luật phân loại "chỉ thiếu bytes mới là không đo được" (§2.3).
++2. Bảng đóng sự kiện `E` × luật (§2.3), thay câu luật chung của r1.
+ 3. Reader tự băm lại, không dùng engine đồ thị của git (§2.3) — vì commit-graph, replace và grafts đổi được kết
+    quả của `rev-list`/`merge-base`.
+-4. G6 mô phỏng producer (mode bất kỳ, không đọc object); G7/G8 chặt hơn (§2.4).
++4. G6 mô phỏng producer (mode bất kỳ, không đọc object). G7/G8 tương thích producer với `120000` nhưng bác
++   `160000`/`40000` và đòi đọc được blob — chỗ chặt hơn producer, có khai (§2.4).
+ 5. G9 trôi ref là `khong_do_duoc`, N6 ban đầu là rc 2 (§2.2, §2.5).
+ 6. G0 guard 8 MiB với `json: null` (§2.2).
+ 7. Không thêm `*_test.py` mới; nhóm Git trong suite đã đăng ký, dòng tổng cộng hai nhóm (§3, A18).
++8. Cơ chế `--codex-review-calls-limit (10 − U)` để `init` không đặt lại trục (§8).

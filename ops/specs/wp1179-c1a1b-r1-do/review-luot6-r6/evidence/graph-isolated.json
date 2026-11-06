@@ -1,0 +1,193 @@
+{
+  "fixture": {
+    "A": "c51a8fa68b4adfcc91564a1782c5ebe7b9be11af",
+    "B": "ec7f2abdb343c82b96a7952c40acce441e3167bc",
+    "H1": "803c57d6b50bc299f72974c43a3b0fc0df1de5b8",
+    "E": "dd346643b4589c1748944a4f55cc55ec48f30863",
+    "D": "998abba497d6fecef0cca788b0b75f020e05987f",
+    "X": "caf0387fe0e2ad141f210294c89741d188269783",
+    "treeA": "8fdc79883504817a23a6a9ba8f1de6169b9e25cd",
+    "treeB": "657b3c2e7f385bcd1467eb3d2eff9869e7f6dbbe",
+    "treeH": "5e4be7ec36c13cc9224757ed8dd3fa7ee44fed29",
+    "S": "c51a8fa68b4adfcc91564a1782c5ebe7b9be11af",
+    "C": "ec7f2abdb343c82b96a7952c40acce441e3167bc",
+    "H": "803c57d6b50bc299f72974c43a3b0fc0df1de5b8",
+    "T": "5e4be7ec36c13cc9224757ed8dd3fa7ee44fed29",
+    "tree_S": "8fdc79883504817a23a6a9ba8f1de6169b9e25cd",
+    "master": "998abba497d6fecef0cca788b0b75f020e05987f"
+  },
+  "measurement": {
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "qua",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "trace": {
+      "G1": [
+        [
+          "commit",
+          "998abba497d6fecef0cca788b0b75f020e05987f"
+        ],
+        [
+          "commit",
+          "ec7f2abdb343c82b96a7952c40acce441e3167bc"
+        ],
+        [
+          "commit",
+          "c51a8fa68b4adfcc91564a1782c5ebe7b9be11af"
+        ]
+      ],
+      "G2": [
+        [
+          "commit",
+          "ec7f2abdb343c82b96a7952c40acce441e3167bc"
+        ]
+      ],
+      "G3": [
+        [
+          "commit",
+          "803c57d6b50bc299f72974c43a3b0fc0df1de5b8"
+        ]
+      ],
+      "G4": [
+        [
+          "commit",
+          "803c57d6b50bc299f72974c43a3b0fc0df1de5b8"
+        ]
+      ],
+      "G5": [
+        [
+          "commit",
+          "c51a8fa68b4adfcc91564a1782c5ebe7b9be11af"
+        ]
+      ],
+      "G6": [
+        [
+          "commit",
+          "c51a8fa68b4adfcc91564a1782c5ebe7b9be11af"
+        ],
+        [
+          "tree",
+          "8fdc79883504817a23a6a9ba8f1de6169b9e25cd"
+        ],
+        [
+          "tree",
+          "d7a9de07a99585b13f133306a605b031b1ce0e05"
+        ]
+      ],
+      "G7": [
+        [
+          "commit",
+          "ec7f2abdb343c82b96a7952c40acce441e3167bc"
+        ],
+        [
+          "tree",
+          "657b3c2e7f385bcd1467eb3d2eff9869e7f6dbbe"
+        ],
+        [
+          "tree",
+          "c7c3b62d48aecf231ae9368d35e80266903cf7a2"
+        ],
+        [
+          "blob",
+          "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+        ]
+      ],
+      "G8": [
+        [
+          "commit",
+          "ec7f2abdb343c82b96a7952c40acce441e3167bc"
+        ],
+        [
+          "tree",
+          "657b3c2e7f385bcd1467eb3d2eff9869e7f6dbbe"
+        ],
+        [
+          "tree",
+          "1cedef937c9e22acf246dc2ec029a24a6065f0bb"
+        ],
+        [
+          "tree",
+          "0b173d69c2372af2a528215651c545b82edf5667"
+        ],
+        [
+          "blob",
+          "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+        ]
+      ]
+    },
+    "why": {},
+    "total": 134354,
+    "physical": [
+      [
+        "commit",
+        "998abba497d6fecef0cca788b0b75f020e05987f",
+        260
+      ],
+      [
+        "commit",
+        "ec7f2abdb343c82b96a7952c40acce441e3167bc",
+        212
+      ],
+      [
+        "commit",
+        "c51a8fa68b4adfcc91564a1782c5ebe7b9be11af",
+        212
+      ],
+      [
+        "commit",
+        "803c57d6b50bc299f72974c43a3b0fc0df1de5b8",
+        213
+      ],
+      [
+        "tree",
+        "8fdc79883504817a23a6a9ba8f1de6169b9e25cd",
+        1059
+      ],
+      [
+        "tree",
+        "d7a9de07a99585b13f133306a605b031b1ce0e05",
+        2653
+      ],
+      [
+        "tree",
+        "657b3c2e7f385bcd1467eb3d2eff9869e7f6dbbe",
+        1059
+      ],
+      [
+        "tree",
+        "c7c3b62d48aecf231ae9368d35e80266903cf7a2",
+        2692
+      ],
+      [
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650",
+        111792
+      ],
+      [
+        "tree",
+        "1cedef937c9e22acf246dc2ec029a24a6065f0bb",
+        108
+      ],
+      [
+        "tree",
+        "0b173d69c2372af2a528215651c545b82edf5667",
+        270
+      ],
+      [
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a",
+        13824
+      ]
+    ],
+    "stderr": "",
+    "reader_rc": 0
+  }
+}

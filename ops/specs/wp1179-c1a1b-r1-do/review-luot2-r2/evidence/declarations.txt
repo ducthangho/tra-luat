@@ -1,0 +1,16 @@
+tran_loi_goi_codex: exact_valid_line_count=1
+['git', 'cat-file', '-e', 'd2e3052d479d140b7e7b91df41ec4914fab7d544:docs/adr/0055-tran-loi-goi-codex-len-muoi.md']: rc=0
+['git', 'cat-file', '-e', 'd2e3052d479d140b7e7b91df41ec4914fab7d544^1:docs/adr/0055-tran-loi-goi-codex-len-muoi.md']: rc=128
+git rev-list --first-parent origin/master | grep -qx d2e3052d479d140b7e7b91df41ec4914fab7d544: producer_rc=0, grep_rc=0
+tran_kich_thuoc_sensitive: exact_valid_line_count=1
+['git', 'cat-file', '-e', '8ab100793df9831505f495543a74044b91c2c9ab:docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md']: rc=0
+['git', 'cat-file', '-e', '8ab100793df9831505f495543a74044b91c2c9ab^1:docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md']: rc=128
+git rev-list --first-parent origin/master | grep -qx 8ab100793df9831505f495543a74044b91c2c9ab: producer_rc=0, grep_rc=0
+dieu_kien_merge: exact_valid_line_count=1
+['git', 'cat-file', '-e', '36d7c5dcdcbbb27176b75135125b9009f9fe0587:docs/adr/0060-dieu-kien-merge-va-moc-ready.md']: rc=0
+['git', 'cat-file', '-e', '36d7c5dcdcbbb27176b75135125b9009f9fe0587^1:docs/adr/0060-dieu-kien-merge-va-moc-ready.md']: rc=128
+git rev-list --first-parent origin/master | grep -qx 36d7c5dcdcbbb27176b75135125b9009f9fe0587: producer_rc=0, grep_rc=0
+ADR-0052 declaration count=0
+ref snapshot rc=0: raw entries=779, origin/HEAD=1, branch heads=778; SHA256=c01e13e52920d5d630c8dc6795ee872243772be49a81c75d6da5795994ef20a6
+7cfb4d760fc85d3c6430444a234a8abd66427e59 refs/remotes/origin/claude/spec-1179-c1a1b
+review source final status rc=0, stdout=''

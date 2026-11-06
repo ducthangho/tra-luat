@@ -1,0 +1,86 @@
+JSON positive {'ok': True, 'luat': {'K1': 'qua', 'K2': 'qua', 'K3': 'qua', 'K4': 'qua', 'K5': 'qua'}, 'ly_do': []}
+JSON K1 {'ok': False, 'luat': {'K1': 'do', 'K2': 'do', 'K3': 'do', 'K4': 'do', 'K5': 'do'}, 'ly_do': ["K1: tap khoa lech: thieu ['H', 'S', 'T', 'bo_kiem_da_chay_commit', 'canh_ancestry', 'che_do', 'check_run_id', 'checker_rc', 'checkout_commit', 'descriptor_q13_ghim', 'discovery', 'event', 'job_id', 'ket_luan', 'kho_canonical', 'metadata_T', 'ngan_sach', 'nhanh_mac_dinh', 'oid_bo_kiem_da_chay', 'oid_bo_kiem_tai_S', 'policy_T', 'profile_digest', 'pull_request', 'repository', 'run_attempt', 'run_id', 'schema_version', 'so_object_da_doc', 'so_thu_hoi_S', 'so_thu_hoi_T', 'thoi_diem_utc', 'thu_hoi_moi', 'tong_bytes', 'tree_S', 'workflow_definition_blob', 'workflow_definition_commit', 'workflow_definition_sha256', 'workflow_ref'] thua []", 'K2: K1 do', 'K3: K1 do', 'K4: K1 do', 'K5: K1 do']}
+JSON K2 {'ok': False, 'luat': {'K1': 'qua', 'K2': 'do', 'K3': 'qua', 'K4': 'qua', 'K5': 'qua'}, 'ly_do': ['K2: job_id sai kieu']}
+JSON K4 {'ok': False, 'luat': {'K1': 'qua', 'K2': 'qua', 'K3': 'qua', 'K4': 'do', 'K5': 'qua'}, 'ly_do': ['K4: S stale, chay lai']}
+ABI_MATRIX a ok True rc 0 stdout_equal True
+ABI_MATRIX b ok False rc 12 stdout_equal True
+ABI_MATRIX c ok False rc 13 stdout_equal True
+ABI_MATRIX d ok False rc 12 stdout_equal True
+ABI_MATRIX e ok False rc 12 stdout_equal True
+ABI_MATRIX mixed ok False rc 12 stdout_equal True
+A6_G0_K1_K2_PASS
+REGISTRY_REAL ([], 29, 29)
+REGISTRY_EXTRA_TEST (['test sống chưa đăng ký: .claude/dev/doc_receipt_thu_hoi_git_test.py'], 30, 29)
+$ /usr/local/bin/python -B /tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_test.py 
+rc= 0 
+stdout= JSON: 156/156 ca QUA · 162/162 dot bien GIET
+Git: 1/1 ca QUA · 1/1 dot bien GIET
+doc_receipt_thu_hoi tests: 157/157 ca QUA · 163/163 dot bien GIET
+ 
+stderr= 
+$ /usr/local/bin/python -B /tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_test.py 
+rc= 1 
+stdout=  
+stderr= Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_test.py", line 556, in <module>
+    sys.exit(prototype_main())
+             ~~~~~~~~~~~~~~^^
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_test.py", line 543, in prototype_main
+    git_group = _nap(GOC / "doc_receipt_thu_hoi_git.py", "doc_receipt_thu_hoi_git")
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_test.py", line 457, in _nap
+    sp.loader.exec_module(m)
+    ~~~~~~~~~~~~~~~~~~~~~^^^
+  File "<frozen importlib._bootstrap_external>", line 1027, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_git.py", line 1, in <module>
+    raise ImportError("probe Git import")
+ImportError: probe Git import
+
+A18_IMPORT_BLOCKED ImportError
+$ /usr/local/bin/python -B /tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_test.py 
+rc= 1 
+stdout=  
+stderr= Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_test.py", line 556, in <module>
+    sys.exit(prototype_main())
+             ~~~~~~~~~~~~~~^^
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_test.py", line 543, in prototype_main
+    git_group = _nap(GOC / "doc_receipt_thu_hoi_git.py", "doc_receipt_thu_hoi_git")
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_test.py", line 457, in _nap
+    sp.loader.exec_module(m)
+    ~~~~~~~~~~~~~~~~~~~~~^^^
+  File "<frozen importlib._bootstrap_external>", line 1023, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1161, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1091, in source_to_code
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_git.py", line 1
+    def malformed(
+                 ^
+SyntaxError: '(' was never closed
+
+A18_IMPORT_BLOCKED SyntaxError
+$ /usr/local/bin/python -B /tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_test.py 
+rc= 1 
+stdout=  
+stderr= Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_test.py", line 556, in <module>
+    sys.exit(prototype_main())
+             ~~~~~~~~~~~~~~^^
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_test.py", line 543, in prototype_main
+    git_group = _nap(GOC / "doc_receipt_thu_hoi_git.py", "doc_receipt_thu_hoi_git")
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_test.py", line 457, in _nap
+    sp.loader.exec_module(m)
+    ~~~~~~~~~~~~~~~~~~~~~^^^
+  File "<frozen importlib._bootstrap_external>", line 1023, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1160, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1218, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_git.py'
+
+A18_IMPORT_BLOCKED FileNotFoundError
+$ /usr/local/bin/python -B /tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/a18-9ftk2gav/doc_receipt_thu_hoi_test.py 
+rc= 0 
+stdout= doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET
+ 
+stderr= 
+A18_CALLER_MUTANT_KILLED g_dong_tong_e2e: swallowed import produced success
+ACCEPTANCE_PASS

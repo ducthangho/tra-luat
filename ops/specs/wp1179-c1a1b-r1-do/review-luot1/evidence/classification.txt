@@ -1,0 +1,5 @@
+$ git ['commit-tree', '38825864c1c51a35a1db0099f78966bc80164aef', '-p', '541fa6ca9ba78d2669261b528572dbc05b53ea87']: rc=0, stdout=b'8366992f8aeb95ade81e6601499eb76ef0673e53\n'
+$ git ['cat-file', '-e', '601a0f18c83057fa079d204122660f5697fc6389^{commit}']: rc=0, stdout=b''
+A7 master=Y; full first-parent verified: commits=674, found_MOC=False, end=394e93468fc8d84ec20938e6df8fb7ab72b2cc37, batch_rc=0; MOC object exists independently; missing/corrupt objects=0
+Spec G1/A7 says khong_do_duoc, while the universal classification only permits this on missing verified bytes; every needed byte was verified.
+A6 K1-invalid receipt size=2 <= 8388608: G0 size predicate true; A6 demands G0=khong_chay as part of all G. Needs explicit exception if intended.

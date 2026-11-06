@@ -1,0 +1,45 @@
+COMMAND ['git', 'clone', '--shared', '--no-checkout', '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/cay-kho', 'graph']
+rc=0
+stdout=''
+stderr="Cloning into '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/sandbox/graph-r4-final'...\ndone.\n"
+graph A=b1ef7ea1bed3c0186ba68b380d9fd765b5ea906c B=b665b51898e372e72fcac8305391bc2e23c2c1c5 D=79ce693d4c337cc8bdec22a1e252f1dfe7d430f7 E=87091dd07ed6cfeafa6508aad3aa2d4cae070c13 H=1630bcd8f8c31eaba8d0723221f468bdeaf33b0d X=2ba2cb025da30ec168d095c0fba30aff222d1b9a; trees=56c66ca20f085bcaf61c87724da3e0655190d9ba,71acadf73421622c5bd4aacf5a4b13be96facf43,418dd08d90a0db16815e6f7bead4a3ee896b11d7
+G1 C=b665b51898e372e72fcac8305391bc2e23c2c1c5: qua
+G1 C=601a0f18c83057fa079d204122660f5697fc6389: qua
+G1 C=541fa6ca9ba78d2669261b528572dbc05b53ea87: do
+G1 C=87091dd07ed6cfeafa6508aad3aa2d4cae070c13: do
+G1 C=2ba2cb025da30ec168d095c0fba30aff222d1b9a: do
+ancestry(b1ef7ea1bed3c0186ba68b380d9fd765b5ea906c,b665b51898e372e72fcac8305391bc2e23c2c1c5)=qua
+ancestry(b665b51898e372e72fcac8305391bc2e23c2c1c5,b1ef7ea1bed3c0186ba68b380d9fd765b5ea906c)=do
+ancestry(b1ef7ea1bed3c0186ba68b380d9fd765b5ea906c,2ba2cb025da30ec168d095c0fba30aff222d1b9a)=do
+ancestry(b665b51898e372e72fcac8305391bc2e23c2c1c5,b665b51898e372e72fcac8305391bc2e23c2c1c5)=qua
+A9 target T=tree(S) differs from tree(H); tree_S=tree(H) differs from tree(S). Both swapped-source mutants change do -> qua.
+A7 no-MOC complete=do; missing scratch-only Q1=khong_do_duoc:E_vang
+G6 mode=100644: prototype=qua; producer=('100644', '7f7471792149a0f76035f7d95740d90d0860fc03', 'blob'); leaf_read=False
+G6 mode=100755: prototype=qua; producer=('100755', '7f7471792149a0f76035f7d95740d90d0860fc03', 'blob'); leaf_read=False
+G6 mode=120000: prototype=qua; producer=('120000', '7f7471792149a0f76035f7d95740d90d0860fc03', 'blob'); leaf_read=False
+G6 mode=160000: prototype=qua; producer=('160000', '1111111111111111111111111111111111111111', 'commit'); leaf_read=False
+G6 mode=40000: prototype=qua; producer=('040000', '4b825dc642cb6eb9a060e54bf8d69288fbee4904', 'tree'); leaf_read=False
+G6 null/present/absent/ancestor-non-tree cases PASS
+G7 missing: mismatch=do (no leaf read); match=khong_do_duoc:E_vang; read-first mutant=khong_do_duoc:E_vang
+G8 missing: mismatch=do (no leaf read); match=khong_do_duoc:E_vang; read-first mutant=khong_do_duoc:E_vang
+G7 bad_hash: mismatch=do (no leaf read); match=khong_do_duoc:E_bam_lech; read-first mutant=khong_do_duoc:E_bam_lech
+G8 bad_hash: mismatch=do (no leaf read); match=khong_do_duoc:E_bam_lech; read-first mutant=khong_do_duoc:E_bam_lech
+G7 wrong_type: mismatch=do (no leaf read); match=khong_do_duoc:E_kieu_sai; read-first mutant=khong_do_duoc:E_kieu_sai
+G8 wrong_type: mismatch=do (no leaf read); match=khong_do_duoc:E_kieu_sai; read-first mutant=khong_do_duoc:E_kieu_sai
+G7 acceptance mode=100644: qua
+G7 acceptance mode=100755: qua
+G7 acceptance mode=120000: qua
+G7 acceptance mode=160000: do
+G7 acceptance mode=40000: do
+G8 correct hash=qua; mismatch hash=do
+EMPTY-NAME witness: bad_tree=904feb04b25082aed73d8076ee57570d3735c34c; hash verified; literal r4 G6=qua, G7=qua; producer rejects=KHÔNG_XÁC_ĐỊNH: tree 904feb04b250 tên entry không hợp lệ/trùng ''
+EMPTY-NAME G6: literal=qua; repaired=khong_do_duoc:E_hong; valid control=qua; non-target tree(commit)==T unchanged
+EMPTY-NAME G7: literal=qua; repaired=khong_do_duoc:E_hong; valid control=qua; non-target tree(commit)==T unchanged
+EMPTY-NAME G8: literal=qua; repaired=khong_do_duoc:E_hong; valid control=qua; non-target tree(commit)==T unchanged
+COMMAND ['git', 'fsck', '--strict', '--no-reflogs', '2c449d99e84c9124a3b1a3fc495f3cfb1ee67e60']
+rc=1
+stdout='dangling commit 680074a7aeffc2701d52e80c5c9c97c27467e96a\ndangling commit d200e0640e50e065d2d180557c9c96ff47ae7603\ndangling commit 3005584d45f861654af0be6b04f54a2b9a08f4af\ndangling commit 3c0b5c973f34b8c6c4a05ff51c654036282d2345\ndangling commit 6a0fdcc9376012ce5f1cb22c2c8a8c9a657e3201\ndangling commit 1812b08779a8a1183679fa92c67a38f73f03ac59\ndangling commit 7414dcb9486ef9042d261ddd58e57506118840ce\ndangling commit 03191ca0da23f1146ab6c4422d6a77561dcbe94f\ndangling commit 571b586fba9896339ef8be837ed6c02046df2fde\ndangling commit af1c743f24f8abb9dc8433c40a807ed285ee8f76\ndangling commit b81c90941ed9da9d17fd9bcba65085b94718470b\ndangling commit 971eb08a13f5cd6298f5783ca0d566eefbeb3747\ndangling commit 1d205c8e7eb2a216a6b9eac25b446f7a0c8b7eee\ndangling commit 3d282477d435ac92c10b931c7b8e044fae2a1964\ndangling commit 422aa037dbe9a4aa2afbe45276b52eead5c84ed8\ndangling commit b92b401affe68083dafe31e0ac7a8b5ffacc847f\ndangling commit 642c802cb1ade1223953965eba6d04628e9adc1f\ndangling commit 772c645626c59d8a51de3e137f195aad827e5c42\ndangling commit 9a2c5c6b21195e285546848d29460e9aa8e4dc11\ndangling tree 5d2d2cfdc776d54907330629df7a41e0329d3484\ndangling commit b72dec3b78097f22f3a37e41a2786ad23e752878\ndangling commit 102ec839694ffc8a89913a3e53e111c02563008c\ndangling commit 322e8417b7b221d84cdf4f7f4b9bf129a29691f4\ndangling commit 942fb4554d00c99823426d7bd72d6e1704c073d4\ndangling commit 1630bcd8f8c31eaba8d0723221f468bdeaf33b0d\ndangling commit a430543515b07247ff576cc7ed2422067383a75c\ndangling commit 4234'
+stderr='error: 44d6628cdc698707a875a1059f701f7c639845ad: hash-path mismatch, found at: .git/objects/22/22222222222222222222222222222222222222\nerror: empty filename in tree entry\nerror in tree 48973264ed17d633136c20b91836f67f1366cc78: broken links\nerror: empty filename in tree entry\nerror in tree 48973264ed17d633136c20b91836f67f1366cc78: badTree: cannot be parsed as a tree\nerror: object 4b825dc642cb6eb9a060e54bf8d69288fbee4904 is a blob, not a tree\nerror: 4b825dc642cb6eb9a060e54bf8d69288fbee4904: object could not be parsed: .git/objects/4b/825dc642cb6eb9a060e54bf8d69288fbee4904\nerror: empty filename in tree entry\nerror in tree 904feb04b25082aed73d8076ee57570d3735c34c: broken links\nerror: empty filename in tree entry\nerror in tree 904feb04b25082aed73d8076ee57570d3735c34c: badTree: cannot be parsed as a tree\nerror: object 7f7471792149a0f76035f7d95740d90d0860fc03 is a blob, not a tree\nerror in tree ba5b817602fc14112af1f4dfcb0cf4af9d47c015: broken links\nerror: object 4b825dc642cb6eb9a060e54bf8d69288fbee4904 is a blob, not a tree\nerror in tree e0675498caf4ae484a52405836c48bdf26465124: broken links\nerror: empty filename in tree entry\n'
+N6 initial D=master -> valid; initial mismatch/missing -> rc2; final B/missing -> E_troi_ref/rc13 (table oracle).
+replace enabled bytes differ; sanitized --no-replace-objects reader returns original and verifies hash.
+PASS graph probes. Consumer statuses are table prototype, not an implemented C1a1b gate.

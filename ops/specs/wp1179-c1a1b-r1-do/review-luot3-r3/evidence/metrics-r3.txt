@@ -1,0 +1,51 @@
+$ git ('rev-parse', 'HEAD')
+rc=0
+stdout='0924f4f69b26728a29faa970d1660aff6dc176ad\n'
+stderr=''
+$ git ('rev-parse', '--is-shallow-repository')
+rc=0
+stdout='false\n'
+stderr=''
+$ git ('rev-list', '--count', '--first-parent', '601a0f18c83057fa079d204122660f5697fc6389^..889334fb87c25136a13c6776a40a25b401820e04')
+rc=0
+stdout='411\n'
+stderr=''
+$ git ('diff', '--numstat', '601a0f18c83057fa079d204122660f5697fc6389', '889334fb87c25136a13c6776a40a25b401820e04', '--', 'ops/lease_publish.py', '.github/workflows/ops-thu-hoi-admission.yml')
+rc=0
+stdout='1\t1\t.github/workflows/ops-thu-hoi-admission.yml\n649\t92\tops/lease_publish.py\n'
+stderr=''
+$ git ('diff', '--numstat', '889334fb87c25136a13c6776a40a25b401820e04', '08bcb51fbed359eaeeca41bc3a0559fe308c0aa9')
+rc=0
+stdout='698\t92\t.githooks/eol_policy_test.py\n'
+stderr=''
+$ git ('diff', '--name-only', '889334fb87c25136a13c6776a40a25b401820e04', '08bcb51fbed359eaeeca41bc3a0559fe308c0aa9', '--', '.claude/dev/doc_receipt_thu_hoi_git.py', '.claude/dev/doc_receipt_thu_hoi_test.py', '.claude/dev/doc_receipt_thu_hoi.py', '.claude/dev/ci_dang_ky_test.py', 'ops/lease_publish.py', '.github/workflows/ops-thu-hoi-admission.yml', '.github/workflows/ci.yml', '.claude/dev/packet_loop.py', '.claude/dev/launcher.py', 'docs/PROTOCOL_DA_PHIEN.md', 'docs/adr', 'ops/specs/LAND-DOC-RECEIPT-THU-HOI-C1a1a.md', 'ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md', 'ops/specs/THU-HOI-LEASE-A1b.md', 'CLAUDE.md', 'AGENTS.md')
+rc=0
+stdout=''
+stderr=''
+$ git ('diff', '--name-only', '889334fb87c25136a13c6776a40a25b401820e04', '0924f4f69b26728a29faa970d1660aff6dc176ad', '--', '.claude/dev/doc_receipt_thu_hoi_git.py', '.claude/dev/doc_receipt_thu_hoi_test.py', '.claude/dev/doc_receipt_thu_hoi.py', '.claude/dev/ci_dang_ky_test.py', 'ops/lease_publish.py', '.github/workflows/ops-thu-hoi-admission.yml', '.github/workflows/ci.yml', '.claude/dev/packet_loop.py', '.claude/dev/launcher.py', 'docs/PROTOCOL_DA_PHIEN.md', 'docs/adr', 'ops/specs/LAND-DOC-RECEIPT-THU-HOI-C1a1a.md', 'ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md', 'ops/specs/THU-HOI-LEASE-A1b.md', 'CLAUDE.md', 'AGENTS.md')
+rc=0
+stdout=''
+stderr=''
+.claude/dev/doc_receipt_thu_hoi.py: lines=114 sha256=3fe697710a880bac0d3a22f08b746bf65a3671952954d89575b855be35272ae3
+.claude/dev/doc_receipt_thu_hoi_test.py: lines=535 sha256=c4e437fc1f9406f67fc109fc8d12cba7aaee8ed8e1b39e727be8341593744909
+.claude/dev/ci_dang_ky_test.py: lines=2479 sha256=9b521ec1579f8d4d6252b9ad86fa0ea585300048b37951d3894cb9d46114023b
+C1a1b implementation exists=False
+$ git ('diff', '--check', 'origin/master', 'HEAD', '--', 'ops/specs/wp1179-c1a1b-r3.md')
+rc=0
+stdout=''
+stderr=''
+$ git ('diff', '--check', 'origin/master', 'HEAD')
+rc=2
+stdout='ops/specs/wp1179-c1a1b-r1-do/review-luot1/evidence/basic.txt:76: new blank line at EOF.\nops/specs/wp1179-c1a1b-r1-do/review-luot1/evidence/counts.txt:25: new blank line at EOF.\nops/specs/wp1179-c1a1b-r1-do/review-luot1/evidence/holders.txt:788: trailing whitespace.\n+hint: \nops/specs/wp1179-c1a1b-r1-do/review-luot1/evidence/holders.txt:790: trailing whitespace.\n+hint: \nops/specs/wp1179-c1a1b-r1-do/review-luot1/evidence/holders.txt:793: trailing whitespace.\n+hint: \nops/specs/wp1179-c1a1b-r1-do/review-luot1/evidence/holders.txt:1010: new blank line at EOF.\nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/final-r2.txt:20: trailing whitespace.\n++hint: \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/final-r2.txt:22: trailing whitespace.\n++hint: \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/final-r2.txt:24: trailing whitespace.\n++hint: \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:8: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:12: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:24: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:35: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:38: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:42: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:44: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:71: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:73: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:86: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:88: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:93: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:101: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:103: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:111: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:113: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:117: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:155: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:157: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:170: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:177: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:189: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:198: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:208: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:210: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:223: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:231: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:246: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:279: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:294: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:296: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:309: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:344: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:347: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:358: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:360: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:373: trailing whitespace.\n+ \nops/specs/wp1179-c1a1b-r1-do/review-luot2-r2/evidence/r1-r2.diff:375: trailing whitespace.\n+ \n'
+stderr=''
+platform=Linux-6.18.44-fc-v242-x86_64-with-glibc2.39 Python=3.13.18 os.devnull='/dev/null'
+$ git ('--version',)
+rc=0
+stdout='git version 2.43.0\n'
+stderr=''
+budget hypothetical L=10, observed U>=6, actual_U=6, new_local_limit=4: allowed_total=10, exceeds=False
+budget hypothetical L=10, observed U>=6, actual_U=7, new_local_limit=4: allowed_total=11, exceeds=True
+budget hypothetical L=10, observed U>=6, actual_U=10, new_local_limit=1: allowed_total=11, exceeds=True
+budget hypothetical L=16, observed U>=6, actual_U=7, new_local_limit=10: allowed_total=17, exceeds=True
+budget hypothetical L=16, observed U>=6, actual_U=16, new_local_limit=1: allowed_total=17, exceeds=True
+General: U>=lower gives an upper bound on remaining, not a guaranteed positive allowance; reducing local_limit without U_upper is insufficient.

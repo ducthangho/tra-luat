@@ -1,0 +1,18 @@
+A12_e_baseline ['qua', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'qua'] 0 0
+A12_e_LOCAL_NO_RESTART ['qua', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'qua'] 0 0
+A12_h_baseline ['qua', 'qua', 'qua', 'qua', 'qua', 'qua', 'qua', 'khong_do_duoc', 'khong_do_duoc', 'qua']
+A12_h_LOCAL_NO_RESTART ['qua', 'qua', 'qua', 'qua', 'qua', 'qua', 'qua', 'khong_do_duoc', 'qua', 'qua']
+A12_f_baseline ['qua', 'qua', 'qua', 'qua', 'qua', 'qua', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'qua'] 4 912
+A12_f_REEVALUATE_MEMO ['qua', 'qua', 'qua', 'qua', 'qua', 'qua', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'qua'] 4 912
+A12_f_INVALIDATE ['qua', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'qua']
+COMPLETED_G4_DEATH_AND_DEADLINE qua khong_do_duoc
+RESULT local_event survives e, is killed by h: NOT equivalent_verified across all inputs
+CORE §1–§6 equal except A12 mutation column; all acceptance oracles byte-identical
+CORE_NORMALIZED_SHA256 0cfce467131b41ad094d5bd59af6018f133b0ba38734a59a313df54e339d734d
+NAMED_WITNESS {"case": "A12(h)", "mutation": "local_event", "baseline": ["qua", "qua", "qua", "qua", "qua", "qua", "qua", "khong_do_duoc", "khong_do_duoc", "qua"], "mutant": ["qua", "qua", "qua", "qua", "qua", "qua", "qua", "khong_do_duoc", "qua", "qua"], "killed": true, "process_starts": 1}
+NAMED_WITNESS {"case": "A12(f)", "mutation": "invalidate_done", "baseline": ["qua", "qua", "qua", "qua", "qua", "qua", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "qua"], "mutant": ["qua", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "qua"], "killed": true, "process_starts": 1}
+NAMED_WITNESS {"case": "A12(e)", "mutation": "restart", "baseline": ["qua", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "qua"], "mutant": ["qua", "qua", "qua", "qua", "qua", "qua", "qua", "qua", "qua", "qua"], "killed": true, "process_starts": 2}
+NAMED_WITNESS {"case": "A12(h)", "mutation": "restart", "baseline": ["qua", "qua", "qua", "qua", "qua", "qua", "qua", "khong_do_duoc", "khong_do_duoc", "qua"], "mutant": ["qua", "qua", "qua", "qua", "qua", "qua", "qua", "khong_do_duoc", "qua", "qua"], "killed": true, "process_starts": 2}
+NAMED_WITNESS {"case": "A12(f2)", "mutation": "clear_memo", "baseline": ["qua", "qua", "qua", "qua", "qua", "qua", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "qua"], "mutant": ["qua", "qua", "qua", "qua", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "khong_do_duoc", "qua"], "killed": true, "process_starts": 1}
+CONTROL local_event survives e as expected; not claimed globally equivalent
+F19_ALL_5_NAMED_WITNESSES_PASS

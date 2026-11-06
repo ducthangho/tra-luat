@@ -1,0 +1,40 @@
+JSON positive: bytes=1863; result={'ok': True, 'luat': {'K1': 'qua', 'K2': 'qua', 'K3': 'qua', 'K4': 'qua', 'K5': 'qua'}, 'ly_do': []}; proposed Git vector={'G0': 'qua', 'G1': 'qua', 'G2': 'qua', 'G3': 'qua', 'G4': 'qua', 'G5': 'qua', 'G6': 'qua', 'G7': 'qua', 'G8': 'qua', 'G9': 'qua'}
+JSON K1: bytes=2; result={'ok': False, 'luat': {'K1': 'do', 'K2': 'do', 'K3': 'do', 'K4': 'do', 'K5': 'do'}, 'ly_do': ["K1: tap khoa lech: thieu ['H', 'S', 'T', 'bo_kiem_da_chay_commit', 'canh_ancestry', 'che_do', 'check_run_id', 'checker_rc', 'checkout_commit', 'descriptor_q13_ghim', 'discovery', 'event', 'job_id', 'ket_luan', 'kho_canonical', 'metadata_T', 'ngan_sach', 'nhanh_mac_dinh', 'oid_bo_kiem_da_chay', 'oid_bo_kiem_tai_S', 'policy_T', 'profile_digest', 'pull_request', 'repository', 'run_attempt', 'run_id', 'schema_version', 'so_object_da_doc', 'so_thu_hoi_S', 'so_thu_hoi_T', 'thoi_diem_utc', 'thu_hoi_moi', 'tong_bytes', 'tree_S', 'workflow_definition_blob', 'workflow_definition_commit', 'workflow_definition_sha256', 'workflow_ref'] thua []", 'K2: K1 do', 'K3: K1 do', 'K4: K1 do', 'K5: K1 do']}; proposed Git vector={'G0': 'qua', 'G1': 'khong_chay', 'G2': 'khong_chay', 'G3': 'khong_chay', 'G4': 'khong_chay', 'G5': 'khong_chay', 'G6': 'khong_chay', 'G7': 'khong_chay', 'G8': 'khong_chay', 'G9': 'khong_chay'}
+JSON K2: bytes=1824; result={'ok': False, 'luat': {'K1': 'qua', 'K2': 'do', 'K3': 'qua', 'K4': 'qua', 'K5': 'qua'}, 'ly_do': ['K2: tree_S sai kieu']}; proposed Git vector={'G0': 'qua', 'G1': 'khong_chay', 'G2': 'khong_chay', 'G3': 'khong_chay', 'G4': 'khong_chay', 'G5': 'khong_chay', 'G6': 'khong_chay', 'G7': 'khong_chay', 'G8': 'khong_chay', 'G9': 'khong_chay'}
+JSON K4: bytes=1863; result={'ok': False, 'luat': {'K1': 'qua', 'K2': 'qua', 'K3': 'qua', 'K4': 'do', 'K5': 'qua'}, 'ly_do': ['K4: S stale, chay lai']}; proposed Git vector={'G0': 'qua', 'G1': 'qua', 'G2': 'qua', 'G3': 'qua', 'G4': 'qua', 'G5': 'qua', 'G6': 'qua', 'G7': 'qua', 'G8': 'qua', 'G9': 'qua'}
+A4/A5 a: ok=True; rc_oracle=0; serializer_rc=0; exact_bytes=True; unsorted_mutant_differs=True
+A4/A5 b: ok=False; rc_oracle=12; serializer_rc=0; exact_bytes=True; unsorted_mutant_differs=True
+A4/A5 c: ok=False; rc_oracle=13; serializer_rc=0; exact_bytes=True; unsorted_mutant_differs=True
+A4/A5 d: ok=False; rc_oracle=12; serializer_rc=0; exact_bytes=True; unsorted_mutant_differs=True
+A4/A5 e: ok=False; rc_oracle=12; serializer_rc=0; exact_bytes=True; unsorted_mutant_differs=True
+G0 boundary bytes=8388607: qua
+G0 boundary bytes=8388608: qua
+G0 boundary bytes=8388609: do
+profile ratio=9.184423; estimated 50000 commits=77887747.979 bytes; not an RSS bound
+registry base: ([], 29, 29)
+registry new-module: ([], 29, 29)
+registry new-test: (['test sống chưa đăng ký: .claude/dev/doc_receipt_thu_hoi_git_test.py'], 30, 29)
+A18 group lines do not match registry; combined positive total matches.
+COMMAND ['A18 child', 'positive']
+rc=0
+stdout='nghia vu: witness_killed 162 · equivalent_verified 9 · unresolved 0\nnhom JSON: 156/156 ca QUA · 162/162 dot bien GIET\nnhom Git: 1/1 ca QUA · 1/1 dot bien GIET\ndoc_receipt_thu_hoi tests: 157/157 ca QUA · 163/163 dot bien GIET\n'
+stderr=''
+COMMAND ['A18 child', 'import']
+rc=1
+stdout=''
+stderr='Traceback (most recent call last):\n  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/sandbox/a18/doc_receipt_thu_hoi_test.py", line 551, in <module>\n    sys.exit(combined_prototype())\n             ~~~~~~~~~~~~~~~~~~^^\n  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/sandbox/a18/doc_receipt_thu_hoi_test.py", line 540, in combined_prototype\n    _nap(GOC / "doc_receipt_thu_hoi_git.py", "doc_receipt_thu_hoi_git")\n    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/sandbox/a18/doc_receipt_thu_hoi_test.py", line 457, in _nap\n    sp.loader.exec_module(m)\n    ~~~~~~~~~~~~~~~~~~~~~^^^\n  File "<frozen importlib._bootstrap_external>", line 1027, in exec_module\n  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed\n  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/sandbox/a18/doc_receipt_thu_hoi_git.py", line 1, in <module>\n    raise ImportError("doc_receipt_thu_hoi_git probe")\nImportError: doc_receipt_thu_hoi_git probe\n'
+COMMAND ['A18 child', 'syntax']
+rc=1
+stdout=''
+stderr='Traceback (most recent call last):\n  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/sandbox/a18/doc_receipt_thu_hoi_test.py", line 551, in <module>\n    sys.exit(combined_prototype())\n             ~~~~~~~~~~~~~~~~~~^^\n  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/sandbox/a18/doc_receipt_thu_hoi_test.py", line 540, in combined_prototype\n    _nap(GOC / "doc_receipt_thu_hoi_git.py", "doc_receipt_thu_hoi_git")\n    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/sandbox/a18/doc_receipt_thu_hoi_test.py", line 457, in _nap\n    sp.loader.exec_module(m)\n    ~~~~~~~~~~~~~~~~~~~~~^^^\n  File "<frozen importlib._bootstrap_external>", line 1023, in exec_module\n  File "<frozen importlib._bootstrap_external>", line 1161, in get_code\n  File "<frozen importlib._bootstrap_external>", line 1091, in source_to_code\n  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed\n  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/sandbox/a18/doc_receipt_thu_hoi_git.py", line 1\n    def invalid(\n               ^\nSyntaxError: \'(\' was never closed\n'
+COMMAND ['A18 child', 'missing']
+rc=1
+stdout=''
+stderr='Traceback (most recent call last):\n  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/sandbox/a18/doc_receipt_thu_hoi_test.py", line 551, in <module>\n    sys.exit(combined_prototype())\n             ~~~~~~~~~~~~~~~~~~^^\n  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/sandbox/a18/doc_receipt_thu_hoi_test.py", line 540, in combined_prototype\n    _nap(GOC / "doc_receipt_thu_hoi_git.py", "doc_receipt_thu_hoi_git")\n    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/sandbox/a18/doc_receipt_thu_hoi_test.py", line 457, in _nap\n    sp.loader.exec_module(m)\n    ~~~~~~~~~~~~~~~~~~~~~^^^\n  File "<frozen importlib._bootstrap_external>", line 1023, in exec_module\n  File "<frozen importlib._bootstrap_external>", line 1160, in get_code\n  File "<frozen importlib._bootstrap_external>", line 1218, in get_data\nFileNotFoundError: [Errno 2] No such file or directory: \'/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/sandbox/a18/doc_receipt_thu_hoi_git.py\'\n'
+COMMAND ['A18 child', 'caller-swallow-import mutant']
+rc=0
+stdout='nghia vu: witness_killed 162 · equivalent_verified 9 · unresolved 0\nnhom JSON: 156/156 ca QUA · 162/162 dot bien GIET\nnhom Git: 1/1 ca QUA · 1/1 dot bien GIET\ndoc_receipt_thu_hoi tests: 157/157 ca QUA · 163/163 dot bien GIET\n'
+stderr=''
+caller mutant killed by exact target: g_dong_tong_e2e: import failure was swallowed
+A18 N=0/M>0 and M=0/N>0 distinguish the two omitted-guard mutants.
+PASS. ABI/Git aggregator are prototypes; no product CLI or Windows gate is claimed.

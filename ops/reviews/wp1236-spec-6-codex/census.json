@@ -1,0 +1,1248 @@
+{
+  "measured_at": "2026-11-06T03:04:59.014642+00:00",
+  "counts": {
+    "records": 126,
+    "root_merge_commit": 121,
+    "claims": 67,
+    "records_with_claims": 49,
+    "provenance_records": 31,
+    "provenance_files": 37,
+    "landed": 52,
+    "landed_DAT": 52,
+    "landed_without_claims": 17,
+    "l5_matching": 25,
+    "l5_lost": 3
+  },
+  "claim_values": {
+    "measured": 47,
+    "not_measured": 3,
+    "passed": 1,
+    "other_string": 1,
+    "mapping": 9,
+    "list": 6
+  },
+  "q7": {
+    "push|.github/workflows/ci.yml": 29,
+    "workflow_dispatch|.github/workflows/ci.yml": 4,
+    "push|.github/workflows/launcher-windows.yml": 4
+  },
+  "files": [
+    {
+      "file": "ops/land/pr1013-land-evidence-l7-r2-provenance/ci-provenance-40842340568/provenance.yaml",
+      "run": 40842340568,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "e9967f07b95c6458afc63dabf4a5c0494e90eca7",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1022-windows-local-r1-provenance/ci-provenance-40867518266/provenance.yaml",
+      "run": 40867518266,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "d31df1eb84c31514537d08f51ecb9a20b3cc07fc",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1029-windows-local-r2-provenance/gate-hau-merge-attempt2-20261030/ci-provenance-41004317229-a2/provenance.yaml",
+      "run": 41004317229,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "eaf83fd78ad3a85a6758d0e81be233b5fedcdf6c",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1051-wp1006-t27-provenance/gate-hau-merge-20261105/ci-provenance-41397090825/provenance.yaml",
+      "run": 41397090825,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "68fa6a1c6a629d0a623661ae1032532280598e58",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1064-windows-local-r3-provenance/gate-hau-merge-20261031/ci-provenance-41191196998/provenance.yaml",
+      "run": 41191196998,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "086f1b7343fc1d778e50797e6c9ca0964b11a755",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1080-wp1077-provenance/ci/provenance.yaml",
+      "run": 41259734324,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "9ced16f3764aed80a3f2ac21ca3db475cbf8aea5",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1095-pr1101-cloud-setup-p3-p3b-spec-provenance/ci-41398722520/provenance.yaml",
+      "run": 41398722520,
+      "event": "workflow_dispatch",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "47ee1b206d284c82d16036972b82b17196cd8dc7",
+      "job_count": 37,
+      "non_skipped": 37
+    },
+    {
+      "file": "ops/land/pr1095-pr1101-cloud-setup-p3-p3b-spec-provenance/ci-41398738297/provenance.yaml",
+      "run": 41398738297,
+      "event": "workflow_dispatch",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "8f123b27b338e5e173a668209eb4904f49dd611b",
+      "job_count": 37,
+      "non_skipped": 37
+    },
+    {
+      "file": "ops/land/pr1097-wp1078-provenance/ci/provenance.yaml",
+      "run": 41279007434,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "7eeb1d9a10aea8e1805b66fbf3d68549eb6778da",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1100-wp1089-r2-provenance/ci/provenance.yaml",
+      "run": 41271627232,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "e4fdab583a33b08f364a9daa30035d48416190bf",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1109-spec-ci-lan-luu-tru-provenance/ci/provenance.yaml",
+      "run": 41290009265,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "3bdd9877cab2543adc413a32a47decbb585ded97",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1115-wp1079-provenance/ci/provenance.yaml",
+      "run": 41322980582,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "c82047da4d6f9546ce1d68282c37acf9567b74bc",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1115-wp1079-provenance/windows-41365578430/provenance.yaml",
+      "run": 41365578430,
+      "event": "push",
+      "workflow": ".github/workflows/launcher-windows.yml",
+      "head": "c7174bfe03b3acd22cfa055b5fce176129d29542",
+      "job_count": 2,
+      "non_skipped": 2
+    },
+    {
+      "file": "ops/land/pr1127-wp1120-provenance/ci/provenance.yaml",
+      "run": 41356691133,
+      "event": "workflow_dispatch",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "f2102fc388a884d994f7bfeb29ef6863b9972b66",
+      "job_count": 37,
+      "non_skipped": 37
+    },
+    {
+      "file": "ops/land/pr1128-wp1113-provenance/ci/provenance.yaml",
+      "run": 41361081437,
+      "event": "workflow_dispatch",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "c165a5d0d4048e10e7da875f2ba7524136fb5735",
+      "job_count": 37,
+      "non_skipped": 37
+    },
+    {
+      "file": "ops/land/pr1130-wp1122-provenance/ci/provenance.yaml",
+      "run": 41365578445,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "c7174bfe03b3acd22cfa055b5fce176129d29542",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1138-wp825-provenance/ci/provenance.yaml",
+      "run": 41389693283,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "e007a318ffbd0079380a72d9f74df8a401028ae4",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1141-wp1132-provenance/ci/provenance.yaml",
+      "run": 41397085109,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "b3249c3e8a5a8f3af5691160493b8ab3d52db99c",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1142-wp1117-provenance/ci/provenance.yaml",
+      "run": 41399706045,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "279a39e34c26027ad792008962859aa79c16e35c",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1192-wp1147-provenance/ci/provenance.yaml",
+      "run": 41949673119,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "9a5b462b6731c13f9f2c72b9d9774e58acb850f1",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1193-wp1189-provenance/gate-hau-merge-20261105/ci-provenance-41965501823/provenance.yaml",
+      "run": 41965501823,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "f2e33bc3ae9763e394cc34bb7ff644edb0b7f4bb",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1197-wp1099-provenance/gate-hau-merge-20261105/ci-provenance-42058119067/provenance.yaml",
+      "run": 42058119067,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "b255b0b7131da7f6e026639f6b0da0a06cc68a44",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1198-wp1195-provenance/ci/provenance.yaml",
+      "run": 41959407371,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "4d258cc8831b5c6169114d1e8e88a8782096d6f6",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1229-wp1223-provenance/ci/provenance.yaml",
+      "run": 42073104862,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "50baf894216504d4bb975690ceb9dee4835a2ad7",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1230-wp1224-provenance/ci/provenance.yaml",
+      "run": 42086637029,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "825eb3561a94e05c36045d2c981b4108c523e31c",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1231-wp1105-provenance/ci/provenance.yaml",
+      "run": 42032872356,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "fe84620f897913c7f6c2ce5a0c7316a49655e82f",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr1242-wp1237-provenance/gate-hau-merge-20261105/ci-provenance-42083807690/provenance.yaml",
+      "run": 42083807690,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "801042cbf6ccc00a4da37ed2a62a61bac10bae02",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr631-doctrine-rest-provenance/gate-hau-merge-20261105/ci-provenance-41397085109/provenance.yaml",
+      "run": 41397085109,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "b3249c3e8a5a8f3af5691160493b8ab3d52db99c",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr631-doctrine-rest-provenance/gate-hau-merge-20261105b/ci-provenance-42018846747/provenance.yaml",
+      "run": 42018846747,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "a57eade23dd5b54564be47d4f124511cf87aa1fa",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr945-wp899-provenance/do-1026-cebb5b2/ci-provenance-40268583877.yaml",
+      "run": 40268583877,
+      "event": "push",
+      "workflow": ".github/workflows/launcher-windows.yml",
+      "head": "cebb5b22e1ebf369a70234662b7e9355bdd5095e",
+      "job_count": 2,
+      "non_skipped": 2
+    },
+    {
+      "file": "ops/land/pr945-wp899-provenance/do-1026-cebb5b2/ci-provenance-40268583940.yaml",
+      "run": 40268583940,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "cebb5b22e1ebf369a70234662b7e9355bdd5095e",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr957-wp748-r27-provenance/ci-provenance-40437650174/provenance.yaml",
+      "run": 40437650174,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "06152341f461eedd97f1b95a2ae7bd9cb2f2e174",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr957-wp748-r27-provenance/ci-provenance-40437650224/provenance.yaml",
+      "run": 40437650224,
+      "event": "push",
+      "workflow": ".github/workflows/launcher-windows.yml",
+      "head": "06152341f461eedd97f1b95a2ae7bd9cb2f2e174",
+      "job_count": 2,
+      "non_skipped": 2
+    },
+    {
+      "file": "ops/land/pr964-wp748-r28-provenance/ci-provenance-40454280949/provenance.yaml",
+      "run": 40454280949,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "a195b958cdf371de5723251d7f20bd6ff348a1b2",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr964-wp748-r28-provenance/ci-provenance-40454280983/provenance.yaml",
+      "run": 40454280983,
+      "event": "push",
+      "workflow": ".github/workflows/launcher-windows.yml",
+      "head": "a195b958cdf371de5723251d7f20bd6ff348a1b2",
+      "job_count": 2,
+      "non_skipped": 2
+    },
+    {
+      "file": "ops/land/pr994-land-81-ha-cap-r2-provenance/ci-provenance-40830701116/provenance.yaml",
+      "run": 40830701116,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "0a8f4d78d30854247a7147e45f5586bf856925da",
+      "job_count": 23,
+      "non_skipped": 23
+    },
+    {
+      "file": "ops/land/pr997-wp978-provenance/ci/provenance.yaml",
+      "run": 41396264926,
+      "event": "push",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "02ddeb4e9ea9c130d935adc4d5bce4f11db7d6a0",
+      "job_count": 23,
+      "non_skipped": 23
+    }
+  ],
+  "records": [
+    {
+      "file": "plat-x8-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr1013-land-evidence-l7-r2-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 1,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr1022-windows-local-r1-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 1,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr1023-wp1009-r4-land-evidence.yaml",
+      "claims": 2,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1029-windows-local-r2-land-evidence.yaml",
+      "claims": 2,
+      "provenance_files": 1,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr1040-wp1021-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1041-wp1037-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr1042-pr1068-cloud-setup-p2-spec-land-evidence.yaml",
+      "claims": 6,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1046-wp1030-r6-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr1047-wp1045-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr1048-claude-md-powershell-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr1051-wp1006-t27-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr1055-wp1052-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1063-wp1038-r1-land-evidence.yaml",
+      "claims": 2,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1064-windows-local-r3-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1073-wp1039-r1-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1080-wp1077-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1095-pr1101-cloud-setup-p3-p3b-spec-land-evidence.yaml",
+      "claims": 2,
+      "provenance_files": 2,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr1097-wp1078-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1100-wp1089-r2-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1109-spec-ci-lan-luu-tru-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr1115-wp1079-land-evidence.yaml",
+      "claims": 2,
+      "provenance_files": 2,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1118-ghi-so-bo-sung-1065-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1127-wp1120-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1128-wp1113-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1130-wp1122-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1137-wp1134-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1138-wp825-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1141-wp1132-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1142-wp1117-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1155-wp1143-land-evidence.yaml",
+      "claims": 2,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1192-wp1147-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1193-wp1189-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr1197-wp1099-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1198-wp1195-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1229-wp1223-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1230-wp1224-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1231-wp1105-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr1242-wp1237-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr468-hoso-4-packet-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr477-dung-goi-review-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr478-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr480-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr487-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr489-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr491-r358-ghi-so-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr493-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr554-wp541-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr594-wp578-land-evidence.yaml",
+      "claims": 4,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr621-skill-bai-hoc-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr631-doctrine-rest-land-evidence.yaml",
+      "claims": 2,
+      "provenance_files": 2,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr666-wp650-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr672-wp574-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr679-wp678-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr680-wp676-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr684-wp677-land-evidence.yaml",
+      "claims": 2,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr689-wp677-land-evidence.yaml",
+      "claims": 2,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr696-wp668-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr701-wp687-land-evidence.yaml",
+      "claims": 2,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr703-wp674-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr707-wp705-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr714-wp710-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr718-wp678-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr721-wp698-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr732-wp685-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr759-no-p3-ho-so-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr765-wp743-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr772-wp766-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr778-wp773-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr779-wp775-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr791-wp782-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr792-wp484-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr793-wp784-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr800-wp794-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr801-wp795-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr818-wp788-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr823-wp802-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr832-wp831-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr836-wp812-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr838-wp671-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr846-wp845-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr848-wp744-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr849-wp748-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr851-wp822-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr862-wp748-r21-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr864-wp858-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr866-wp856-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr869-wp748-r22-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr870-claude-md-bai-hoc-c-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr872-wp871-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr873-wp868-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr877-wp854-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr880-wp878-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr881-wp852-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr882-wp748-r23-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr883-wp879-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr888-wp886-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr889-claude-md-bai-hoc-c-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr894-wp748-r24-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr895-wp892-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr907-wp906-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr908-no-p3-spec-r4-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr909-wp748-r25-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr913-wp910-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr917-wp910-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr924-wp923-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr926-wp919-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr930-wp752-wp763-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr931-wp835-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr932-wp748-r26-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr933-wp929-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr945-wp899-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 2,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr950-wp834-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr957-wp748-r27-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 2,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr963-wp943-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": true,
+      "status": "DAT"
+    },
+    {
+      "file": "pr964-wp748-r28-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 2,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr969-wp813-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr983-wp923-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr990-wp981-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr991-wp987-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr992-wp923-r3-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr994-land-81-ha-cap-r2-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 1,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr995-wp960-land-evidence.yaml",
+      "claims": 0,
+      "provenance_files": 0,
+      "landed": false,
+      "status": "BO_QUA"
+    },
+    {
+      "file": "pr997-wp978-land-evidence.yaml",
+      "claims": 1,
+      "provenance_files": 1,
+      "landed": true,
+      "status": "DAT"
+    }
+  ]
+}

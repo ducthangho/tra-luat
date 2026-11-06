@@ -1,0 +1,57 @@
+{
+  "measured_at": "2026-11-06T03:04:56.495190+00:00",
+  "checks": [
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "-B",
+        "ops/land_evidence_nguon.py",
+        "--root",
+        "."
+      ],
+      "rc": 0,
+      "output": "/tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r6-codex/work/check-0.txt",
+      "sha256": "cf5c4948773d442928e96354b0f73570d240d80620a625d559ef00d7cd53b147",
+      "tail": [
+        "ĐẠT ops/land/pr997-wp978-land-evidence.yaml",
+        "land_evidence_nguon: 101 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 126",
+        "TỔNG: ĐẠT"
+      ]
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "-B",
+        "ops/kiem_ho_so_land.py",
+        "--root",
+        "."
+      ],
+      "rc": 0,
+      "output": "/tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r6-codex/work/check-1.txt",
+      "sha256": "cd62b5fecfb92d9360b46ee64d759ead45b124d77ff6945b62dd683ff97b575e",
+      "tail": [
+        "BO_QUA ops/land/pr995-wp960-land-evidence.yaml — trang_thai_packet.landed = False, không phải True; không khối landed_<ngày> nào landed True",
+        "DAT ops/land/pr997-wp978-land-evidence.yaml — đủ authorized_head_sha và authorization_url (landed đọc từ trang_thai_packet.landed)",
+        "TỔNG: 52/52 hồ sơ landed True đạt · 0 miễn trừ · rc=0"
+      ]
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "-B",
+        ".claude/dev/packet_loop.py",
+        "--state-dir",
+        "/tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r6-codex/work/state",
+        "doctrine-scan",
+        "--root",
+        "."
+      ],
+      "rc": 0,
+      "output": "/tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r6-codex/work/check-2.txt",
+      "sha256": "5dc320d098e17eea22fc3d940e41b58774b648394253380eeb99bf85aacdba83",
+      "tail": [
+        "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine"
+      ]
+    }
+  ]
+}

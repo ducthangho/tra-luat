@@ -998,6 +998,11 @@ def _ket_qua_snapshot(truoc, sau, cay_chet: bool) -> dict:
     return kq
 
 
+def _khoa_chup_som(bat: bool, chup_truoc) -> dict:
+    """Codex lượt 4–5 F8: mọi đường kết thúc sớm khi bật cờ vẫn đủ khoá §2.4 (`khong_do_duoc`/`chup_loi`)."""
+    return {"chup_workspace": True, **_ket_qua_snapshot(chup_truoc, None, False)} if bat else {"chup_workspace": False}
+
+
 def _cung_thu_muc(duong, dfd) -> bool:
     """Đường dẫn `duong` hôm nay còn trỏ đúng thư mục đã ghim bằng `dfd` không (dev, inode)."""
     if dfd is None:
@@ -2507,6 +2512,7 @@ def lenh_run(a) -> int:
             "ly_do_dung": e.thong_diep, "pid": None, "khoa_danh_tinh": None,
             **kq, **_dinh_danh_van_chuyen(a.lenh),
             "probe": _probe_cho_so(e.probe), "bo_qua_probe_ly_do": None,
+            **_khoa_chup_som(getattr(a, "chup_workspace", False), None),   # Codex lượt 5 F8
         })
         raise
     kq.update(probe=_probe_cho_so(probe), bo_qua_probe_ly_do=ly_do_bo_qua)
@@ -2636,7 +2642,7 @@ def lenh_run(a) -> int:
             return 130
         han_chup = _doc_iso(kq["deadline_utc"]) if kq["deadline_utc"] else None
         if han_chup is not None and _bay_gio() >= han_chup:   # Codex F6: chụp chậm không được sinh con quá hạn
-            ban_ghi.update(_ket_qua_snapshot(chup_truoc, None, False))   # Codex lượt 4 F8: đủ khoá snapshot §2.4
+            ban_ghi.update(_khoa_chup_som(True, chup_truoc))   # Codex lượt 4 F8: đủ khoá snapshot §2.4
             ban_ghi.update(trang_thai="hong", ly_do_dung="han chot da qua sau khi chup workspace; khong sinh con",
                            ket_thuc_utc=_bay_gio().isoformat())
             _ghi_so(thu_muc, ban_ghi, khoa_ky)
@@ -2659,7 +2665,8 @@ def lenh_run(a) -> int:
         if isinstance(e, ValueError):
             ban_ghi.pop("void_reason", None)
         ban_ghi.update(trang_thai="hong", ly_do_dung=f"khong chay duoc lenh: {e}",
-                       ket_thuc_utc=_bay_gio().isoformat())
+                       ket_thuc_utc=_bay_gio().isoformat(),
+                       **_khoa_chup_som(ban_ghi["chup_workspace"], chup_truoc))   # Codex lượt 5 F8
         _ghi_so(thu_muc, ban_ghi, khoa_ky)
         f_out.close(); f_err.close()
         if dfd_luot is not None:

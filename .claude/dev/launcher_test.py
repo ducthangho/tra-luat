@@ -13418,8 +13418,7 @@ def r927_lenh_run_ghi_effort_va_sandbox_vao_run_json():
 # ------------------------------------------- #1252: run --chup-workspace (spec launcher-readonly-ignored-r1)
 
 def _r1252_kho(s: Path) -> Path:
-    """Kho tạm có `.tl_state/` bị ignore (qua `.git/info/exclude`, không thêm tệp tracked) và thư mục ấy
-    đã tồn tại, để một tệp mới trong nó chỉ sinh ĐÚNG một mục `them`."""
+    """Kho tạm có `.tl_state/` đã tồn tại và bị ignore qua `.git/info/exclude`."""
     repo = tao_repo(s)
     (repo / ".git" / "info").mkdir(exist_ok=True)
     (repo / ".git" / "info" / "exclude").write_text(".tl_state/\n", encoding="utf-8")
@@ -13434,8 +13433,7 @@ def _r1252_so(run_root: Path) -> dict:
 
 
 def _r1252_run(repo: Path, run_root: Path, ma_con: str, *them, m=None, chup=True):
-    """Chạy `run` THẬT: qua CLI (m=None) hoặc `m.lenh_run` trong tiến trình test (để thay hàm).
-    Trả `(rc, run.json, thư mục lượt)`."""
+    """`run` THẬT qua CLI (m=None) hoặc `m.lenh_run` trong tiến trình; trả `(rc, run.json, thư mục lượt)`."""
     doi = ["run", "--workspace", str(repo), "--run-root", str(run_root), *them]
     if chup:
         doi.append("--chup-workspace")
@@ -13824,8 +13822,7 @@ def r1252_hien_thi_duong_dan_don_anh():
 
 @ca
 def r1252_ghi_qua_dir_fd():
-    """Codex lượt 2 F1 (P1): đổi đường dẫn thư mục lượt thành symlink tới workspace SAU khi đã mở thư mục ⇒ tệp chụp
-    vẫn vào thư mục gốc, tệp cùng tên trong workspace giữ nguyên, không còn `.chup-*` ở cả hai nơi."""
+    """Codex lượt 2 F1: đổi thư mục lượt thành symlink SAU khi đã mở ⇒ ghi vào thư mục gốc, workspace nguyên vẹn."""
     if not (os.open in os.supports_dir_fd and hasattr(os, "O_NOFOLLOW")):
         return "bo qua: nen khong co dir_fd/O_NOFOLLOW (Windows dung nhanh du phong, xem _ghi_tep_0600)"
     m = _tai_launcher_thu()
@@ -13893,8 +13890,7 @@ def r1252_status_va_chu_ky_byte_la():
 
 @ca
 def r1252_doi_to_tien_thu_muc_luot():
-    """Codex lượt 4 F1: con đổi TỔ TIÊN của thư mục lượt (chính `--run-root`) thành symlink vào workspace ⇒
-    launcher không ghi tệp chụp theo đường dẫn bị lái, kết quả `khong_do_duoc` có lý do `thu_muc_luot_bi_doi`."""
+    """Codex lượt 4 F1: con lái `--run-root` (tổ tiên) vào workspace ⇒ không ghi theo đường bị lái, `thu_muc_luot_bi_doi`."""
     m = _tai_launcher_thu()
     if not m._CO_DIR_FD:
         return "bo qua: nen khong co dir_fd (Windows: gioi han da khai trong _ghi_tep_0600)"
@@ -13912,7 +13908,51 @@ def r1252_doi_to_tien_thu_muc_luot():
 
 
 
+@ca
+def r1252_ket_thuc_som_du_khoa():
+    """Codex lượt 5 F8: probe hỏng và `Popen` ném lỗi khi bật cờ ⇒ sổ `hong` vẫn đủ khoá §2.4, mã lỗi gốc giữ."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = _r1252_kho(s)
+        khong_co = str(s / "khong-ton-tai")
+        for ten, them in (("probe", ()), ("popen", ("--bo-qua-probe", "thu F8"))):
+            a = m.build_parser().parse_args(["run", "--workspace", str(repo), "--run-root", str(s / ten), *them,
+                                             "--chup-workspace", "--", khong_co])
+            a.lenh = a.lenh[1:]
+            with contextlib.suppress(m.Chan), contextlib.redirect_stdout(io.StringIO()):
+                m.lenh_run(a)
+            so, _ = _r1252_so(s / ten)
+            thieu = [k for k in _R1252_KHOA if k not in so]
+            bang(so["trang_thai"] == "hong" and so.get("chup_workspace") is True and not thieu
+                 and so["snapshot_ket_qua"] == "khong_do_duoc", f"{ten}: so ket thuc som thieu khoa: {thieu}")
+
+
+@ca
+def r1252_mo_thu_muc_luot_dung_mot_lan():
+    """Codex lượt 5 F9: thư mục lượt được mở ĐÚNG MỘT lần, trước khi sinh con; ghi tệp chụp phải dùng fd ấy."""
+    m = _tai_launcher_thu()
+    if not m._CO_DIR_FD:
+        return "bo qua: nen khong co dir_fd"
+    goc, dem = m._mo_thu_muc_luot, []
+    m._mo_thu_muc_luot = lambda d: (dem.append(str(d)), goc(d))[1]
+    try:
+        with San() as s:
+            rc, so, _ = _r1252_run(_r1252_kho(s), s / "runs", "pass", m=m)
+    finally:
+        m._mo_thu_muc_luot = goc
+    bang(rc == 0 and so["snapshot_ket_qua"] == "sach", f"luot sach phai sach: rc={rc}")
+    bang(len(dem) == 1, f"thu muc luot phai mo dung 1 lan truoc khi sinh con, mo {len(dem)} lan")
+
+
+
 DOT_BIEN = [
+    # #1252 lượt Codex offline 5 (run a00f5531): F8 hai đường kết thúc sớm, F9 đúng đột biến reviewer đã đo.
+    ("r1252_probe_hong_thieu_khoa", ('            **_khoa_chup_som(getattr(a, "chup_workspace", False), None),   # Codex lượt 5 F8\n', ''),
+     ["r1252_ket_thuc_som_du_khoa"]),
+    ("r1252_popen_loi_thieu_khoa", ('                       **_khoa_chup_som(ban_ghi["chup_workspace"], chup_truoc))   # Codex lượt 5 F8',
+                                    '                       )   # Codex lượt 5 F8'), ["r1252_ket_thuc_som_du_khoa"]),
+    ("r1252_bo_truyen_fd_ghim", ('                    _ghi_tep_0600(thu_muc / ten, ban[1], dfd_luot)', '                    _ghi_tep_0600(thu_muc / ten, ban[1])'),
+     ["r1252_mo_thu_muc_luot_dung_mot_lan"]),
     # #1252 lượt Codex offline 4 (run f77da936): F1 kiến trúc fd ghim trước khi sinh con, F8, và răng cho hai chốt.
     ("r1252_ghi_khi_cay_song", ('                if not cay_chet:       # Codex lượt 2 F1', '                if False:       # Codex lượt 2 F1'),
      ["r1252_khong_do_duoc"]),
@@ -13924,7 +13964,7 @@ DOT_BIEN = [
      [('                if _CO_DIR_FD and not _cung_thu_muc(thu_muc, dfd_luot):', '                if False:'),
       ('                    _ghi_tep_0600(thu_muc / ten, ban[1], dfd_luot)', '                    _ghi_tep_0600(thu_muc / ten, ban[1])')],
      ["r1252_doi_to_tien_thu_muc_luot"]),
-    ("r1252_qua_han_thieu_khoa", ('            ban_ghi.update(_ket_qua_snapshot(chup_truoc, None, False))   # Codex lượt 4 F8', '            pass   # Codex lượt 4 F8'),
+    ("r1252_qua_han_thieu_khoa", ('            ban_ghi.update(_khoa_chup_som(True, chup_truoc))   # Codex lượt 4 F8', '            pass   # Codex lượt 4 F8'),
      ["r1252_han_sau_khi_chup"]),
     # #1252 lượt Codex offline 1 (run e9e4e6ce): mỗi finding F1–F7 một chốt, một đột biến.
     ("r1252_ghi_de_dich_truc_tiep", ('                os.replace(tam, duong.name, src_dir_fd=dfd, dst_dir_fd=dfd)\n',

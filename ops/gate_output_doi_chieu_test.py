@@ -95,7 +95,7 @@ def commit_ci(van):
     t = git("mktree", cwd=k, inp=f"100644 blob {b}\tci.yml\n".encode())
     t = git("mktree", cwd=k, inp=f"040000 tree {t}\tworkflows\n".encode())
     t = git("mktree", cwd=k, inp=f"040000 tree {t}\t.github\n".encode())
-    return git("commit-tree", t, "-m", "bien the", cwd=k)
+    return git("-c", "user.name=go2", "-c", "user.email=go2@local", "commit-tree", t, "-m", "bien the", cwd=k)   # runner CI không có danh tính
 
 
 @functools.cache

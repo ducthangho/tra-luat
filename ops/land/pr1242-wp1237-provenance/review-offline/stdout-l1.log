@@ -1,0 +1,6 @@
+Đã ghi [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/6069468f-704e-54be-b58b-87d2f97748a7/scratchpad/xr1/VERDICT.md): **changes_requested**.
+
+- Có 1 finding P2: MAX_TIME hợp lệ như `00001` bị từ chối sai.
+- `t35`, `t37`, `t38` và shellcheck đạt.
+- `t237` cùng 12 đột biến không đo được vì sandbox chặn socket.
+- Kho nguồn không thay đổi.

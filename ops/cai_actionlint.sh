@@ -21,13 +21,22 @@
 #               offline/air-gapped, va cho `t35` dua vao mot goi GIA de do HANH VI that
 #               ma khong can mang (nen `t35` chay duoc ca tren runner Windows)
 #   AL_NEN      ten nen (mac dinh: $RUNNER_OS, roi den `uname`)
+#   AL_RETRY          so lan THU LAI khi tai ve hong (mac dinh 8 => toi da 9 lan thu)
+#   AL_RETRY_DELAY    giay cho giua hai lan thu (mac dinh 15)
+#   AL_RETRY_MAX_TIME tran TONG thoi gian thu lai, giay, 1..1800 (mac dinh 300)
+#               wp1237: `--retry 2` cu chi keo vai giay, nen mot dot 504 ngan cua GitHub
+#               Releases da lam do buoc cai (#1197, run 42033337918 attempt 2; attempt 3
+#               cung head thi xanh). Ba nut nay de ca test chay nhanh, va de nguoi goi
+#               muon cho ngan (vd hook phien) tu ha xuong. Ca ba phai la so nguyen khong
+#               dau (`^[0-9]+$`), sai thi rc=13. Retry CHI boc lan tai ve: cong bam ben
+#               duoi khong doi va khong co duong nao bo qua no.
 #
 # Ma thoat — RIENG BIET de nguoi goi (va `t35`) khang dinh duoc LY DO tu choi:
 #   2 thieu/sai `AL_VER`      5 giai nen hong hoac khong thay binary
 #   3 nen khong duoc ho tro   6 binary khong chay duoc (`--version` rc != 0)
 #   4 tai ve that bai         7 CAI XONG NHUNG SAI BAN (hoac khong phai actionlint)
 #   8 KHONG CO BAM de doi chieu goi   9 BAM GOI KHONG KHOP
-#  12 khong tao duoc thu muc cai
+#  12 khong tao duoc thu muc cai   13 nut retry (`AL_RETRY*`) sai dang/ngoai khoang
 set -euo pipefail
 
 loi() { ma="$1"; shift; printf '%s\n' "cai_actionlint: $*" >&2; exit "$ma"; }
@@ -42,6 +51,26 @@ AL_VER="${AL_VER-}"
 # `#!/usr/bin/env bash` ngay dong dau nen dung duoc.
 if [[ ! "$AL_VER" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   loi 2 "thieu \`AL_VER\` dang X.Y.Z (duoc '${AL_VER}')"
+fi
+
+# wp1237 M2: kiem nut retry TRUOC moi viec khac. Gia tri la di thang vao doi so `curl`
+# thi `curl` chet rc=2 va bi doc nham thanh "tai ve that bai" (rc=4) — sai LY DO.
+AL_RETRY="${AL_RETRY-8}"
+AL_RETRY_DELAY="${AL_RETRY_DELAY-15}"
+AL_RETRY_MAX_TIME="${AL_RETRY_MAX_TIME-300}"
+for nut in AL_RETRY AL_RETRY_DELAY AL_RETRY_MAX_TIME; do
+  if [[ ! "${!nut}" =~ ^[0-9]+$ ]]; then
+    loi 13 "\`${nut}\` phai la so nguyen khong dau (duoc '${!nut}')"
+  fi
+done
+# Bo so 0 DUNG DAU truoc, roi moi kiem DO DAI, roi moi lam so hoc. Bash so hoc 64 bit TRAN
+# SO am tham (chuoi chu so dai quay vong thanh gia tri trong khoang), nen phai chan do dai;
+# nhung chan tren chuoi THO thi tu choi oan `000300` hop le (cross-review wp1237 luot 1, P2).
+# Chuoi toan so 0 thanh rong => coi la 0, bi tu choi duoi day. `10#` de `08` khong la bat phan.
+MT_CHUAN="${AL_RETRY_MAX_TIME#"${AL_RETRY_MAX_TIME%%[!0]*}"}"
+MT_CHUAN="${MT_CHUAN:-0}"
+if [ "${#MT_CHUAN}" -gt 4 ] || (( 10#$MT_CHUAN < 1 || 10#$MT_CHUAN > 1800 )); then
+  loi 13 "\`AL_RETRY_MAX_TIME\` phai trong 1..1800 giay (duoc '${AL_RETRY_MAX_TIME}')"
 fi
 
 AL_DICH="${AL_DICH:-${RUNNER_TEMP:-/tmp}/actionlint}"
@@ -105,8 +134,12 @@ if [ -n "${AL_GOI:-}" ]; then
   [ -f "$AL_GOI" ] || loi 4 "khong thay goi co san '$AL_GOI'"
   TEN_GOI="$AL_GOI"
 else
-  curl -fsSL --retry 2 -o "$AL_DICH/goi.${GOI##*.}" "${AL_BASE_URL}/v${AL_VER}/${GOI}" \
-    || loi 4 "tai ve that bai: ${AL_BASE_URL}/v${AL_VER}/${GOI}"
+  # `--retry-all-errors`: khong co no thi `curl` chi thu lai 408/429/5xx/timeout — mot
+  # ket noi bi CAT GIUA THAN (curl rc=18) roi thang vao loi 4 du con luot thu.
+  curl -fsSL --retry "$AL_RETRY" --retry-delay "$AL_RETRY_DELAY" --retry-all-errors \
+    --retry-max-time "$AL_RETRY_MAX_TIME" --connect-timeout 20 \
+    -o "$AL_DICH/goi.${GOI##*.}" "${AL_BASE_URL}/v${AL_VER}/${GOI}" \
+    || loi 4 "tai ve that bai sau toi da 1+${AL_RETRY} lan thu (AL_RETRY=${AL_RETRY}, cach ${AL_RETRY_DELAY}s, tran ${AL_RETRY_MAX_TIME}s): ${AL_BASE_URL}/v${AL_VER}/${GOI}"
   TEN_GOI="$AL_DICH/goi.${GOI##*.}"
 fi
 

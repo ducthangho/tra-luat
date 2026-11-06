@@ -1,0 +1,16 @@
+# python3 -I do_nghiem_thu.py --kho . --cay <git archive 50baf89> ; luc 2026-11-05T21:19:23Z
+# contract_check.py --audit (cay 50baf89): rc=0; dong co 2.21.2q: ['  API_CONTRACT.md   : 2.21.2q', '  tl.py EXPECT_VERSION: 2.21.2q', '✓ KHỚP (2.21.2q).']
+A1: DAT — duong=True | am[dong3 (LIVE) ve 2p]=False
+# dem cum (base/merge): '**2.21.2p ATOMIC registry RMW**' 1/1; 'v2.21.2p tự khai `expect_shrink`' 1/1; '**v2.21.2p KI-27** CHỈ ĐỌC' 1/1; '**v2.21.2p KI-27**: thay TOÀN BỘ registry' 1/1; 'v2.21.2p (r198/ADR-0014)' 1/1; 'feature-detect ≥2.21.2p' 1/1; '`regen2` (v2.21.2p: nhận thêm' 1/1
+A2: DAT — duong=True | am[bump 2p->2q khong tra tay]=False | am[sot mot cum (cum 3)]=False
+# so ten case trong Code.2.21.2q.gs: 77; thieu(base)=['agent_creds_put', 'configView', 'regenRegistry']; thieu(merge)=['configView', 'regenRegistry']; so dong agent_creds_put=1
+A3: DAT — duong=True | am[xoa dong]=False | am[bo CAS_CONFLICT]=False
+A4: DAT — duong=True | am[doi lai 2p]=False
+# A5 su co mat ten ca trong tl_selftest.py@merge: r119_api_contract_version_stamp_matches_expect=True, "expect_version"=True, r210_skill_tro_kich_ban_va_gas_dung_ban=True; vi tu r210 tren merge: ['ok2 = "2.21.2m" not in sk and "2.21.2p" not in sk and sk.count("2.21.2q") >= 3']
+# SKILL.md 2p=0 2q=5; INSTALL.md 2p=1 2q=7
+#   INSTALL: > Deploy `references/Code.2.21.2q.gs`; sau deploy webapp phải là **2.21.2q**. Chạy `tl ping` + `contract_check.py --audit` để xác minh.
+#   INSTALL: > Các bản `.gs` tới 2.21.2p là lịch sử; bản cần deploy là `Code.2.21.2q.gs` và `ping` phải trả `2.21.2q`.
+#   INSTALL: 4. Webapp cần deploy **2.21.2q** (từ `references/Code.2.21.2q.gs`); contract + `tl.py EXPECT_VERSION` đồng bộ 2.21.2q.
+A6: DAT — duong=True | am[sot dong 'Webapp cần deploy' o 2p]=False | am[xoa cum lich su]=False
+TONG: 5/5 tieu chi DAT (A1–A4, A6; A5 xem gate output)
+rc=0

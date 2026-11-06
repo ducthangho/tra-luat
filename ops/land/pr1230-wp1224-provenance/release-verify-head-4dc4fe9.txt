@@ -1,0 +1,7 @@
+# do 2026-11-05T18:48:16Z: git archive 4dc4fe9a30517cf4bb1cb78105a91687814cc0fa -> thu muc tam; chay tl.py CUA CHINH cay ay: release-verify RELEASE_MANIFEST.json --strict --json (cwd = cay tam)
+# commit: 4dc4fe9a3 land(#1224): tai sinh RELEASE_MANIFEST.json tren head sau merge master 50baf89 ; cha: d09303dee4d5427c60e573a1bf651279b051ec03
+# git diff --stat 4dc4fe9a30517cf4bb1cb78105a91687814cc0fa^1 4dc4fe9a30517cf4bb1cb78105a91687814cc0fa:
+ RELEASE_MANIFEST.json | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+ok=True strict=True expected_file_count=184 checked_file_count=184 failed=0 extra_files=0 missing=0
+rc=0

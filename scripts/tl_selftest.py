@@ -3522,7 +3522,7 @@ def run() -> int:
         cases.append(("gen_instructions_skill_binding", bool(_audit.get("ok"))))
     except Exception:
         cases.append(("gen_instructions_skill_binding", False))
-    cases.append(("expect_version", EXPECT_VERSION == "2.21.2p"))   # r198/ADR-0014: +ingest_commit (trước: 2.21.2n r185/WP5)
+    cases.append(("expect_version", EXPECT_VERSION == "2.21.2q"))   # 2.21.2q: +agent_creds_put (#1089) (trước: 2.21.2p r198/ADR-0014 +ingest_commit; 2.21.2n r185/WP5)
     cases.append(("gws_pin_set", bool(re.match(r"^\d+\.\d+\.\d+$", GWS_PINNED_VERSION)) and "latest" not in GWS_PINNED_VERSION))
     try:
         _tr = _imp("transport")
@@ -24302,10 +24302,10 @@ def run() -> int:
 
     def _c210_skill_tro_kich_ban_va_gas_dung_ban():
         # SKILL.md phải trỏ kịch bản mới (guard r209 đã bắt con trỏ đứt) VÀ hết nhắc GAS 2.21.2m —
-        # bản LIVE là 2.21.2p; dòng "tl ping phải ra 2.21.2m" là chỉ dẫn SAI đã sửa cùng đợt.
+        # bản LIVE là 2.21.2q; dòng "tl ping phải ra 2.21.2m" là chỉ dẫn SAI đã sửa cùng đợt.
         sk = (_ROOT210 / "SKILL.md").read_text(encoding="utf-8", errors="replace")
         ok1 = "references/RASOAT_HOSO_LOOP.md" in sk and "rasoat-loop" in sk
-        ok2 = "2.21.2m" not in sk and sk.count("2.21.2p") >= 3
+        ok2 = "2.21.2m" not in sk and "2.21.2p" not in sk and sk.count("2.21.2q") >= 3
         ok3 = ("references/RASOAT_HOSO_LOOP.md" in _rel209._RELEASE_REQUIRED_FILES
                and "references/RASOAT_PLAN_SCHEMA.md" in _rel209._RELEASE_REQUIRED_FILES)
         return ok1 and ok2 and ok3

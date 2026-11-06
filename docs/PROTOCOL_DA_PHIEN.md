@@ -615,7 +615,7 @@ về executor/rework, còn commit mới luôn làm verdict/CI/authorization củ
 
 Mức review được ghi tường minh:
 
-1. `cross_approved`: reviewer và executor dùng hai họ model độc lập phục vụ lượt chạy (ví dụ họ Claude review họ Codex hoặc ngược lại); neo vào họ model đã phục vụ lượt chạy, không neo vào hãng công cụ. Cùng một họ model dù qua hai vỏ công cụ khác nhau (như Antigravity đặt model Claude được Claude Code review) vẫn là `same_provider_approved`, không thành `cross_approved`. Ba mức bằng chứng họ model: `do_may` (máy đo từng lượt chạy), `khai_co_audit` (người khai kèm người audit xác nhận; mức này bắt buộc phải tự khai là yếu hơn `do_may` ngay tại chỗ dùng), hoặc `khong_do_duoc`.
+1. `cross_approved`: reviewer và executor dùng hai họ model độc lập phục vụ lượt chạy (ví dụ họ Claude review họ Codex hoặc ngược lại); neo vào họ model đã phục vụ lượt chạy, không neo vào hãng công cụ. Cùng một họ model dù qua hai vỏ công cụ khác nhau (như Antigravity đặt model Claude được Claude Code review) vẫn là `same_provider_approved`, không thành `cross_approved`. Ba mức bằng chứng họ model: `do_may` (máy đo từng lượt chạy), `khai_co_audit` (người khai kèm người audit xác nhận; mức này bắt buộc phải tự khai là yếu hơn `do_may` ngay tại chỗ dùng), hoặc `khong_do_duoc`. Theo `ADR-0065`, model phục vụ không đo được thì họ model lấy theo identity provider (Claude Code ⇒ họ `claude`, Codex ⇒ họ `openai`); provider không gắn một họ duy nhất (`google_antigravity`) vẫn phải khai `model_family`.
 2. `human_audited`: người audit có danh tính bền trên GitHub, độc lập với Executor/tác giả, tự đọc spec/diff, ghi
    evidence audit và verdict bền, đồng thời neo cả hai vào exact `reviewed_sha`.
 3. `same_provider_approved`: cùng provider trong điều kiện fallback được canon cho phép,
@@ -757,12 +757,14 @@ Không tự chấp nhận trust, đổi permission hay dùng cờ bypass để l
 denial là evidence thiếu năng lực; sửa bootstrap bằng quyền đã cấp hoặc trả checkpoint.
 Clone, cài dependency và cấu hình cần thiết kết thúc trước mốc snapshot bàn giao.
 
-Ghi cặp Executor–Reviewer thực tế: provider, model, effort, execution surface, transport,
-session/run ID và nguồn đo. Cấu hình yêu cầu không phải runtime evidence. Nếu Packet đòi
-reviewer cùng model nhưng effort cao hơn, phải đối chiếu cả hai lượt với thang effort đã
-xác minh của model ấy; không suy thứ tự giữa các model khác nhau. Header CLI chỉ chứng minh
-model/effort CLI công bố; không chứng minh mọi request giữ model đó. Evidence fallback hoặc
-không đủ nhận dạng thì chưa nhận assurance. ChatGPT Web qua người vận chuyển vẫn chỉ là
+Ghi cặp Executor–Reviewer thực tế: provider, execution surface, transport, session/run ID
+và nguồn đo; cấu hình yêu cầu không phải runtime evidence. Theo `ADR-0065`, model và effort
+phục vụ của reviewer là trường ghi nếu đo được, ở mọi Packet, không ngoại lệ: đo được thì ghi
+kèm nguồn, không đo được thì ghi `KHONG_DO_DUOC`. `KHONG_DO_DUOC` ở hai trường này không làm
+assurance thành `CHUA_DAT` và không chặn `landed`. Các mốc vẫn bắt buộc: `exact SHA`,
+`ma_thoat`, `stdout_sha256`, verdict và sandbox mode. Header CLI chỉ chứng minh model/effort
+CLI công bố; không chứng minh mọi request giữ model đó. Thiếu nhận dạng provider, execution
+surface, transport, session/run ID hoặc sandbox thì chưa nhận assurance. ChatGPT Web qua người vận chuyển vẫn chỉ là
 `advisory_review` theo hợp đồng provider, không tự tạo các mức approval ở trên.
 
 Sau run, đối chiếu trạng thái terminal/rc con, launcher rc, lỗi permission, header/model
@@ -1522,6 +1524,7 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` �
 | `ADR-0062` | ADR-0060 mặc định cho packet chưa merge, đóng băng ADR-0054 và chuyển ba bất biến push vào protocol | Accepted | `packet_loop.py` `kiem-merge` K1 |
 | `ADR-0063` | Nguồn spec ghim OID, human audit riêng và chuyển tiếp candidate lịch sử có owner disposition | Accepted — hiệu lực từ land trên first-parent master | `packet_loop.py` `kiem-merge` K1/K4 |
 | `ADR-0064` | NLM tự nạp lại jar có điều kiện, chỉ ở phiên cloud (thay r208c ở điểm "tự nạp khi hết hạn") | Accepted | `wp1099_nlm_nap_lai` (selftest fragment) |
+| `ADR-0065` | Model/effort phục vụ của reviewer là trường ghi nếu đo được; `KHONG_DO_DUOC` không chặn assurance §8.1 hay `landed`; họ model theo identity provider; hồi tố ở packet riêng | Accepted | `ops/land_evidence_nguon.py` (L7) |
 
 ### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
 

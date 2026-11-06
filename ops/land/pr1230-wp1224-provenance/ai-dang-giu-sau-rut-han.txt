@@ -1,0 +1,91 @@
+# ai-dang-giu 6 duong dan write set wp1224-r2-g2-claude sau rut han (han moi 20:15:00Z); fetch +refs/heads/*; git branch -f master origin/master; ls-remote so for-each-ref theo TAP TEN (comm -23 = thieu)
+thieu=0
+2026-11-05T20:19:05Z
+## CLAUDE.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r30-g29-claude	refs/heads/claude/ghi-so-land-p3c:ops/leases/dang-lease-dau-truoc-kiem-sau-r30-g29-claude.yaml
+HẾT_HẠN	wp55-r4-exec-1-claude-20260816	refs/heads/claude/ghi-so-land-p3c:ops/leases/wp55-r4-exec-1-claude-20260816.yaml
+HẾT_HẠN	wp55-r4-exec-2-claude-20260816	refs/heads/claude/ghi-so-land-p3c:ops/leases/wp55-r4-exec-2-claude-20260816.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1224-r1-g1-claude	refs/heads/ops/cap-lease-p3c-g1:ops/leases/wp1224-r1-g1-claude.yaml
+HẾT_HẠN	wp1224-r2-g2-claude	refs/heads/ops/cap-lease-p3c-g1:ops/leases/wp1224-r2-g2-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r1-g1-claude	refs/remotes/origin/claude/nhap-thu-hep-579-20260921:ops/leases/dang-lease-dau-truoc-kiem-sau-r1-g1-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r2-g2-claude	refs/remotes/origin/claude/nhap-thu-hep-579-20260921:ops/leases/dang-lease-dau-truoc-kiem-sau-r2-g2-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r2-g3-claude	refs/remotes/origin/claude/nhap-thu-hep-579-20260921:ops/leases/dang-lease-dau-truoc-kiem-sau-r2-g3-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r12-g10-claude	refs/remotes/origin/ops/cap-lease-579-g10:ops/leases/dang-lease-dau-truoc-kiem-sau-r12-g10-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r13-g11-claude	refs/remotes/origin/ops/cap-lease-579-g11:ops/leases/dang-lease-dau-truoc-kiem-sau-r13-g11-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r14-g12-claude	refs/remotes/origin/ops/cap-lease-579-g12:ops/leases/dang-lease-dau-truoc-kiem-sau-r14-g12-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r15-g13-claude	refs/remotes/origin/ops/cap-lease-579-g13:ops/leases/dang-lease-dau-truoc-kiem-sau-r15-g13-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r16-g14-claude	refs/remotes/origin/ops/cap-lease-579-g14:ops/leases/dang-lease-dau-truoc-kiem-sau-r16-g14-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r17-g15-claude	refs/remotes/origin/ops/cap-lease-579-g15:ops/leases/dang-lease-dau-truoc-kiem-sau-r17-g15-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r18-g16-claude	refs/remotes/origin/ops/cap-lease-579-g16:ops/leases/dang-lease-dau-truoc-kiem-sau-r18-g16-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r19-g17-claude	refs/remotes/origin/ops/cap-lease-579-g17:ops/leases/dang-lease-dau-truoc-kiem-sau-r19-g17-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r20-g18-claude	refs/remotes/origin/ops/cap-lease-579-g18:ops/leases/dang-lease-dau-truoc-kiem-sau-r20-g18-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r21-g19-claude	refs/remotes/origin/ops/cap-lease-579-g19:ops/leases/dang-lease-dau-truoc-kiem-sau-r21-g19-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r21-g20-claude	refs/remotes/origin/ops/cap-lease-579-g20:ops/leases/dang-lease-dau-truoc-kiem-sau-r21-g20-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r22-g21-claude	refs/remotes/origin/ops/cap-lease-579-g21:ops/leases/dang-lease-dau-truoc-kiem-sau-r22-g21-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r23-g22-claude	refs/remotes/origin/ops/cap-lease-579-g22:ops/leases/dang-lease-dau-truoc-kiem-sau-r23-g22-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r24-g23-claude	refs/remotes/origin/ops/cap-lease-579-g23:ops/leases/dang-lease-dau-truoc-kiem-sau-r24-g23-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r25-g24-claude	refs/remotes/origin/ops/cap-lease-579-g24:ops/leases/dang-lease-dau-truoc-kiem-sau-r25-g24-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r26-g25-claude	refs/remotes/origin/ops/cap-lease-579-g25:ops/leases/dang-lease-dau-truoc-kiem-sau-r26-g25-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r27-g26-claude	refs/remotes/origin/ops/cap-lease-579-g26:ops/leases/dang-lease-dau-truoc-kiem-sau-r27-g26-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r28-g27-claude	refs/remotes/origin/ops/cap-lease-579-g27:ops/leases/dang-lease-dau-truoc-kiem-sau-r28-g27-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r29-g28-claude	refs/remotes/origin/ops/cap-lease-579-g28:ops/leases/dang-lease-dau-truoc-kiem-sau-r29-g28-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r2-g3-claude	refs/remotes/origin/ops/cap-lease-579-g4:ops/leases/dang-lease-dau-truoc-kiem-sau-r2-g3-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r6-g4-claude	refs/remotes/origin/ops/cap-lease-579-g4:ops/leases/dang-lease-dau-truoc-kiem-sau-r6-g4-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r7-g5-claude	refs/remotes/origin/ops/cap-lease-579-g5:ops/leases/dang-lease-dau-truoc-kiem-sau-r7-g5-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r8-g6-claude	refs/remotes/origin/ops/cap-lease-579-g6:ops/leases/dang-lease-dau-truoc-kiem-sau-r8-g6-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r9-g7-claude	refs/remotes/origin/ops/cap-lease-579-g7:ops/leases/dang-lease-dau-truoc-kiem-sau-r9-g7-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r10-g8-claude	refs/remotes/origin/ops/cap-lease-579-g8:ops/leases/dang-lease-dau-truoc-kiem-sau-r10-g8-claude.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r11-g9-claude	refs/remotes/origin/ops/cap-lease-579-g9:ops/leases/dang-lease-dau-truoc-kiem-sau-r11-g9-claude.yaml
+HẾT_HẠN	mu-ref-khong-phu-tag-exec-1-claude-20260908	refs/remotes/origin/ops/cap-lease-mu-ref-va-verdict:ops/leases/mu-ref-khong-phu-tag-exec-1-claude-20260908.yaml
+HẾT_HẠN	doctrine-rig-va-reviewer-exec-1-claude-20260824	refs/remotes/origin/ops/cap-lease-t33-doi-shellcheck:ops/leases/doctrine-rig-va-reviewer-exec-1-claude-20260824.yaml
+HẾT_HẠN	wp55-r2-exec-3-claude-20260814	refs/remotes/origin/ops/wp55-lease-exec-3:ops/leases/wp55-r2-exec-3-claude-20260814.yaml
+HẾT_HẠN	wp55-r3-exec-4-claude-20260814	refs/remotes/origin/ops/wp55-r3-exec-4:ops/leases/wp55-r3-exec-4-claude-20260814.yaml
+HẾT_HẠN	wp55-r3-exec-5-claude-20260815	refs/remotes/origin/ops/wp55-r3-exec-5:ops/leases/wp55-r3-exec-5-claude-20260815.yaml
+HẾT_HẠN	wp55-r3-exec-9-claude-20260815	refs/remotes/origin/ops/wp55-r3-exec-9:ops/leases/wp55-r3-exec-9-claude-20260815.yaml
+HẾT_HẠN	wp878-r1-g1-claude	refs/remotes/origin/ops/wp878-r1-g1-lease:ops/leases/wp878-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## changelog.d/wp-1224.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1224-r1-g1-claude	refs/heads/ops/cap-lease-p3c-g1:ops/leases/wp1224-r1-g1-claude.yaml
+HẾT_HẠN	wp1224-r2-g2-claude	refs/heads/ops/cap-lease-p3c-g1:ops/leases/wp1224-r2-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## docs/GOI_AGENT_DA_NEN.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1224-r1-g1-claude	refs/heads/ops/cap-lease-p3c-g1:ops/leases/wp1224-r1-g1-claude.yaml
+HẾT_HẠN	wp1224-r2-g2-claude	refs/heads/ops/cap-lease-p3c-g1:ops/leases/wp1224-r2-g2-claude.yaml
+HẾT_HẠN	doctrine-allowlist-reviewer-exec-1-claude-20260824	refs/remotes/origin/ops/cap-lease-doctrine-allowlist:ops/leases/doctrine-allowlist-reviewer-exec-1-claude-20260824.yaml
+HẾT_HẠN	doctrine-allowlist-reviewer-exec-1r2-claude-20260824	refs/remotes/origin/ops/cap-lease-doctrine-allowlist:ops/leases/doctrine-allowlist-reviewer-exec-1r2-claude-20260824.yaml
+HẾT_HẠN	doctrine-allowlist-reviewer-exec-1r3-claude-20260824	refs/remotes/origin/ops/cap-lease-doctrine-allowlist:ops/leases/doctrine-allowlist-reviewer-exec-1r3-claude-20260824.yaml
+HẾT_HẠN	doctrine-allowlist-reviewer-exec-1r4-claude-20260824	refs/remotes/origin/ops/cap-lease-doctrine-allowlist:ops/leases/doctrine-allowlist-reviewer-exec-1r4-claude-20260824.yaml
+HẾT_HẠN	doctrine-ranh-gioi-reviewer-exec-1-claude-20260826	refs/remotes/origin/ops/cap-lease-tach-314:ops/leases/doctrine-ranh-gioi-reviewer-exec-1-claude-20260826.yaml
+HẾT_HẠN	doctrine-ranh-gioi-reviewer-exec-1r2-claude-20260826	refs/remotes/origin/ops/cap-lease-tach-314:ops/leases/doctrine-ranh-gioi-reviewer-exec-1r2-claude-20260826.yaml
+HẾT_HẠN	doctrine-ranh-gioi-reviewer-exec-1r3-claude-20260826	refs/remotes/origin/ops/cap-lease-tach-314:ops/leases/doctrine-ranh-gioi-reviewer-exec-1r3-claude-20260826.yaml
+HẾT_HẠN	doctrine-ranh-gioi-reviewer-exec-1r4-claude-20260826	refs/remotes/origin/ops/cap-lease-tach-314:ops/leases/doctrine-ranh-gioi-reviewer-exec-1r4-claude-20260826.yaml
+HẾT_HẠN	nang-nhan-menh-de-thu-tam-exec-1-claude-20260828	refs/remotes/origin/ops/cap-lease-tach-314:ops/leases/nang-nhan-menh-de-thu-tam-exec-1-claude-20260828.yaml
+HẾT_HẠN	wp831-r1-g1-claude	refs/remotes/origin/ops/wp831-r1-g1-lease:ops/leases/wp831-r1-g1-claude.yaml
+HẾT_HẠN	wp831-r2-g2-claude	refs/remotes/origin/ops/wp831-r2-g2-lease:ops/leases/wp831-r2-g2-claude.yaml
+HẾT_HẠN	wp831-r3-g3-claude	refs/remotes/origin/ops/wp831-r3-g3-lease:ops/leases/wp831-r3-g3-claude.yaml
+HẾT_HẠN	wp831-r4-g4-claude	refs/remotes/origin/ops/wp831-r4-g4-lease:ops/leases/wp831-r4-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ops/handoff/wp1224-g1-claude.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1224-r1-g1-claude	refs/heads/ops/cap-lease-p3c-g1:ops/leases/wp1224-r1-g1-claude.yaml
+HẾT_HẠN	wp1224-r2-g2-claude	refs/heads/ops/cap-lease-p3c-g1:ops/leases/wp1224-r2-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## references/DELTA_v1.19.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1224-r1-g1-claude	refs/heads/ops/cap-lease-p3c-g1:ops/leases/wp1224-r1-g1-claude.yaml
+HẾT_HẠN	wp1224-r2-g2-claude	refs/heads/ops/cap-lease-p3c-g1:ops/leases/wp1224-r2-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## references/DEV_TOOLING_GUIDE.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1224-r1-g1-claude	refs/heads/ops/cap-lease-p3c-g1:ops/leases/wp1224-r1-g1-claude.yaml
+HẾT_HẠN	wp1224-r2-g2-claude	refs/heads/ops/cap-lease-p3c-g1:ops/leases/wp1224-r2-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

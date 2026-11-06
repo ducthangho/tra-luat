@@ -55,10 +55,10 @@ branch: claude/wp1221-r3-g1
 branch_ownership: exclusive
 branch_ghi_chu: 'nhanh moi tu master; claude/wp1221-g1 (5387a82, PR #1234) la cua r2 va KHONG land; 3 commit cuc bo r2 khong day'
 target_branch_neu_land: master
-base_sha: 4fb3c034d0456a600634f501b8f20bd1487e3b83
-start_from_sha: 4fb3c034d0456a600634f501b8f20bd1487e3b83
-reviewed_sha_required: 4fb3c034d0456a600634f501b8f20bd1487e3b83
-reviewed_sha_ghi_chu: 'spec do tren b255b0b; 4fb3c03 chi them ops/land/pr1127 (#1235); .githooks/eol_policy_test.py cung blob 81e64bd o ca hai'
+base_sha: b7962596ac5e0d97fd1f180462bdf0ee13b83526
+start_from_sha: b7962596ac5e0d97fd1f180462bdf0ee13b83526
+reviewed_sha_required: b7962596ac5e0d97fd1f180462bdf0ee13b83526
+reviewed_sha_ghi_chu: 'doi base 4fb3c03 -> b796259 (06-11, M5 lan day 2, issuecomment-6677404899): thu-hoi do vi master tien 60 commit, khong commit nao cham tep dich'
 write_set:
 - .githooks/eol_policy_test.py
 write_set_hash: b1866d09f9a776e79bc1f17c9645fee13d9454f0b0d9bd96efcbfec4dd5d2582

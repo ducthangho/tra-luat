@@ -201,7 +201,8 @@ def _l(d, k):
 
 def _sai_kieu(pv):   # F06 lượt 2: kiểm cấu trúc MỘT lần; phần tử hỏng ⇒ từ chối, không lọc âm thầm
     moc = pv.get("moc")
-    if type(moc) is not dict or type(moc.get("run")) is not dict or type(moc.get("gate_output")) is not dict:
+    if type(moc) is not dict or type(moc.get("run")) is not dict or type(moc.get("gate_output")) is not dict or type(
+            moc["run"].get("loi_khai_rest_path")) is not str:
         return True
     ds, co, log = moc["gate_output"].get("jobs"), moc.get("checkout"), pv.get("log_day_du")
     if type(ds) is not list or type(co) is not list or type(log) is not dict:
@@ -212,7 +213,7 @@ def _sai_kieu(pv):   # F06 lượt 2: kiểm cấu trúc MỘT lần; phần t�
                 and (j.get("buoc") == "not_measured" or type(j.get("buoc")) is list and all(
                     type(b) is dict and type(b.get("name")) is str and type(b.get("conclusion")) is str for b in j["buoc"]))):
             return True
-    return not (all(type(c) is dict and type(c.get("job_id")) is int and type(c.get("sha", "")) is str for c in co)
+    return not (all(type(c) is dict and type(c.get("job_id")) is int and (c.get("sha") is None or _h40(c.get("sha"))) for c in co)
                 and all(type(v) is dict and type(v.get("sha256")) is str for v in log.values()))
 
 
@@ -258,8 +259,11 @@ def kiem(text, provenance, goc):
     if len(sha) != 1:
         nm.append("khong_xac_dinh_sha_checkout")
     else:
-        r = subprocess.run(["git", "-C", str(goc), "show", f"{next(iter(sha))}:{run.get('loi_khai_rest_path')}"], capture_output=True)
+        r = subprocess.run(["git", "-C", str(goc), "show", "--end-of-options", f"{next(iter(sha))}:{run['loi_khai_rest_path']}"],
+                           capture_output=True)   # F10: SHA đã buộc 40 hex ở `_sai_kieu`; `--end-of-options` chặn đọc thành tuỳ chọn
         wf = cp.doc_wf(r.stdout.decode("utf-8", "replace")) if r.returncode == 0 else None
+        wf = wf if wf and all(type(x) is dict and type(x.get("steps", [])) is list and all(type(y) is dict for y in x.get("steps", []))
+                              for x in wf["jobs"].values()) else None   # F06: workflow hỏng cấu trúc ⇒ như không đọc được
         nm += [] if wf else ["khong_doc_duoc_workflow"]
     for j in jobs:
         p = tp[j["id"]]
@@ -442,7 +446,8 @@ def kiem_ho_so_gate_output(tep_ho_so, cay_yaml, goc, url_hop_le):
     for duong, gt, neo in _duyet(cay_yaml):
         tok = m[1] if type(gt) is str and (m := RE_TOKEN.match(gt.casefold())) and m[1] in TOKEN else None
         pv = [p for p in prov if neo and _m(_m(p, "moc"), "run").get("run_id") == neo[0]]
-        land = bool(neo) and neo[2] in H and (not pv or any(la_run_land(p) for p in pv))
+        land = bool(neo) and neo[2] in H and (not pv or any(la_run_land(p) or not all(   # F09: thiếu dữ liệu ⇒ land (fail-closed)
+            type(_m(_m(p, "moc"), "run").get(k)) is str for k in ("loi_khai_rest_path", "event")) for p in pv))
         loi = []
         if tok is None:
             loi.append("dinh_dang_loi_khai")

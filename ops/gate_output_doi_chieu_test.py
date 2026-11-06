@@ -458,7 +458,14 @@ def a16_dong_la():
 GO2 = "gate-output2-42032872356-a1.txt"
 
 
-def ho_so(cay_yaml, tep=None, url_hop_le=None, lien_ket=None):
+def api(f, *a, ten=""):   # F08: CHỈ lời gọi API nằm trong vùng bắt; lỗi dựng fixture vẫn là lỗi vô can (rc 4)
+    try:
+        return f(*a)
+    except Exception as e:
+        bang(False, f"{ten}: API ném {type(e).__name__}: {e}")
+
+
+def ho_so(cay_yaml, tep=None, url_hop_le=None, lien_ket=None, bat=False):
     """Cây tạm `ops/land/pr9001-x-land-evidence.yaml` + `pr9001-x-provenance/` (tep: {đường dẫn: nội dung | None ⇒ không thư mục})."""
     text, p = f_ok()
     tep = {"provenance.yaml": yaml.safe_dump(p, allow_unicode=True), GO2: text} if tep is None else tep
@@ -472,7 +479,8 @@ def ho_so(cay_yaml, tep=None, url_hop_le=None, lien_ket=None):
             (land / "pr9001-x-provenance").rmdir()
         for ten, dich in (lien_ket or {}).items():   # symlink: "" ⇒ chính thư mục provenance
             (land / "pr9001-x-provenance" / ten if ten else land / "pr9001-x-provenance").symlink_to(dich)
-        return nap().kiem_ho_so_gate_output(land / "pr9001-x-land-evidence.yaml", cay_yaml, goc(), url_hop_le)
+        goi = nap().kiem_ho_so_gate_output, land / "pr9001-x-land-evidence.yaml", cay_yaml, goc(), url_hop_le
+        return api(*goi, ten="ho_so") if bat else goi[0](*goi[1:])
 
 
 def mot(cay_yaml, **kw):
@@ -539,7 +547,7 @@ RB = LAND / f"pr1130-wp1122-provenance/readback-duyet-issuecomment-{RB_ID}.json"
 URL_RB = f"https://github.com/ducthangho/tra-luat/pull/1130#issuecomment-{RB_ID}"
 
 
-def waiver(chuoi=None, body=None, **rb):
+def waiver(chuoi=None, body=None, _bat=False, **rb):
     rbj = json.loads(RB.read_text(encoding="utf-8"))
     rbj["body"] = (f"Miễn.\nmien_gate_output: {SHA_CK} os=ubuntu-latest ly_do=duong_nhanh han=2026-12-31\n" if body is None else body)
     rbj |= rb
@@ -547,7 +555,7 @@ def waiver(chuoi=None, body=None, **rb):
            chuoi if chuoi is not None else f"owner_waived — {URL_RB} {SHA_CK} miễn vì đường nhanh hồ sơ"}
     text, p = f_ok()
     tep = {"provenance.yaml": yaml.safe_dump(p, allow_unicode=True), f"readback-x-issuecomment-{RB_ID}.json": json.dumps(rbj)}
-    return mot(cay, tep=tep, url_hop_le=url_ok)
+    return mot(cay, tep=tep, url_hop_le=url_ok, bat=_bat)
 
 
 @ca
@@ -622,6 +630,11 @@ def a21_pham_vi_land():
     q["moc"]["run"]["event"] = "workflow_dispatch"
     r = ho_so(am, tep={"provenance.yaml": yaml.safe_dump(q, allow_unicode=True)})
     bang(len(r) == 1 and not r[0]["la_land"] and r[0]["hop_le"], f"g: lời khai PHỤ được not_measured {r}")
+    for ten, gt in (("h", None), ("i", ["push"])):   # F09: thiếu/sai kiểu `event` ⇒ KHÔNG được coi là ngoài land (fail-closed)
+        q = copy.deepcopy(p)
+        q["moc"]["run"].pop("event") if gt is None else q["moc"]["run"].update(event=gt)
+        r = ho_so(am, tep={"provenance.yaml": yaml.safe_dump(q, allow_unicode=True)})
+        bang(len(r) == 1 and r[0]["la_land"] and not r[0]["hop_le"], f"{ten}: {r}")
 
 
 @ca
@@ -775,18 +788,18 @@ def a24_du_lieu_sai_kieu():
                      ("null_buoc", lambda q: jb(q, "gate (ubuntu-latest)")["buoc"].append(None))):
         q = copy.deepcopy(p)
         sua(q)
-        try:
-            tt = kq(text, q)[0]
-            r = ho_so(neo_map(), tep={"provenance.yaml": yaml.safe_dump(q, allow_unicode=True), GO2: text})
-        except Exception as e:   # ngoại lệ ở đây CHÍNH là lỗi đang canh ⇒ tín hiệu chốt, không phải lỗi vô can
-            bang(False, f"{ten}: ném {type(e).__name__}: {e}")
+        tt = api(nap().kiem, text, q, goc(), ten=ten)[0]
+        r = ho_so(neo_map(), tep={"provenance.yaml": yaml.safe_dump(q, allow_unicode=True), GO2: text}, bat=True)
         bang(tt == "not_measured" and len(r) == 1 and not r[0]["hop_le"], f"{ten}: {tt} {r}")
-    bang(kq(text, ["x"])[0] == "not_measured" and kq(None, p)[0] == "not_measured", "provenance/tệp không phải dict/chuỗi")
-    try:
-        r = waiver(user="x")
-    except Exception as e:
-        bang(False, f"readback.user sai kiểu: ném {type(e).__name__}")
+    bang(api(nap().kiem, text, ["x"], goc())[0] == "not_measured" and api(nap().kiem, None, p, goc())[0] == "not_measured", "không dict/chuỗi")
+    r = waiver(user="x", _bat=True)
     bang(not r["hop_le"], f"readback.user sai kiểu phải ĐỎ: {r}")
+    for ten, sua in (("steps_null", lambda v: v.replace(BLOCK, "      - null\n" + BLOCK)),   # F06 lượt 3: workflow hỏng cấu trúc
+                     ("steps_so", lambda v: sau(v, "  gate-packet-loop:", "    steps:\n", "    steps: 1\n    x:\n"))):
+        bang(api(nap().kiem, text, bien_the_yaml(p, sua), goc(), ten=ten)[0] == "not_measured", ten)
+    q = copy.deepcopy(p)   # F10: SHA checkout không đúng 40 hex ⇒ từ chối TRƯỚC subprocess
+    [c.update(sha="not-a-sha") for c in q["moc"]["checkout"] if c.get("trang_thai") == "passed"]
+    bang(api(nap().kiem, text, q, goc())[1][:1] == ["provenance_sai_kieu"], "F10: sha không 40 hex")
 
 
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần trong module.
@@ -879,7 +892,8 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m-A20i_JOB_BAT_BUOC_ngoai_bam", "json.dumps(luat, ensure_ascii",
      'json.dumps({k: v for k, v in luat.items() if k != "JOB_BAT_BUOC"}, ensure_ascii', "a20"),
     ("m-A21a_chi_merge_commit_goc", ', *(_h40(p.get("merge_commit")) for p in prs if type(p) is dict)]', "]", "a21"),
-    ("m-A21b_khong_provenance_khong_land", "(not pv or any(la_run_land(p) for p in pv))", "any(la_run_land(p) for p in pv)", "a21"),
+    ("m-A21b_khong_provenance_khong_land", "(not pv or any(la_run_land(p) or not all(", "(any(la_run_land(p) or not all(", "a21"),
+    ("m-A21e_thieu_event_la_ngoai_land", "la_run_land(p) or not all(   # F09", "la_run_land(p) or False and all(   # F09", "a21"),
     ("m-A21c_bo_event_push", ' and r.get("event") == "push"', "", "a21"),
     ("m-A21d_nhan_loi_khai_land_am", "        elif land:\n            loi.append(", "        elif False:\n            loi.append(", "a21"),
     ("m-A22_cho_phep_thanh_cam", 'loi, "cho_phep": sorted({q for q in mo + f if not '  # neo tách hai mảnh: đột biến sửa CHÍNH tệp này
@@ -888,6 +902,8 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m-A23a_cli_khong_url", "a[2], khl._url_hop_le)", "a[2], None)", "a23"),
     ("m-A24_bo_kiem_kieu_mapping", "    return v if type(v) is dict else {}", "    return v or {}", "a24"),
     ("m-A24b_bo_kiem_cau_truc", "    if _sai_kieu(pv):\n", "    if False:\n", "a24"),
+    ("m-A24c_bo_kiem_cau_truc_workflow", "        wf = wf if wf and all(", "        wf = wf if True or all(", "a24"),
+    ("m-A24d_bo_kiem_sha_40_hex", '(c.get("sha") is None or _h40(c.get("sha")))', "True", "a24"),
     ("m-p1127_khong_trich_tep_la_dat", 'return ["chi_ket_luan_check_run" if re.search(r"kiem-gate|check-runs", gt) else "khong_trich_tep_gate_output"]',
      "return []", "p1127"),
 )
@@ -895,6 +911,8 @@ TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi): kiểm chín
     ("vo_can_KeyError", "def kiem_so_luat():\n", "def kiem_so_luat():\n    raise KeyError('vo can')\n", "a01", "TIN_DUNG_GIA"),
     ("chi_them_chu_thich", "def la_run_land(provenance):\n", "def la_run_land(provenance):   # vo hai\n", "a21", "SONG_SOT"),
     ("vo_can_a22", "def kiem_so_luat():\n", "def kiem_so_luat():\n    raise AttributeError('vo can')\n", "a22", "TIN_DUNG_GIA"),
+    ("vo_can_fixture_a24", '    with tempfile.TemporaryDirectory(prefix="go2' '_hs_") as d:\n',   # neo tách: tự kiểm sửa CHÍNH tệp này
+     '    raise AttributeError("vo can")\n    with tempfile.TemporaryDirectory(prefix="go2' '_hs_") as d:\n', "a24", "TIN_DUNG_GIA", "test"),
 )
 
 
@@ -962,8 +980,8 @@ def main(argv):
     for x in xau:
         print(f"[DOT BIEN KHONG BI GIET DUNG] {x}")
     print(f"DOT BIEN: {len(DOT_BIEN) - len(xau)}/{len(DOT_BIEN)} bi giet dung ly do")
-    loi_tk = [f"{ten}: mong {mong}, duoc {h}" for ten, cu, moi, dich, mong in TU_KIEM
-              for h in [chay_dot_bien(ten, cu, moi, dich)[0]] if h != mong]
+    loi_tk = [f"{ten}: mong {mong}, duoc {h}" for ten, cu, moi, dich, mong, *noi in TU_KIEM
+              for h in [chay_dot_bien(ten, cu, moi, dich, *noi)[0]] if h != mong]
     for x in loi_tk:
         print(f"[TU KIEM] {x}")
     print(f"TU KIEM PHAN HANG: {'DAT' if not loi_tk else 'DO'} ({len(TU_KIEM)} dot bien)")

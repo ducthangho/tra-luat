@@ -114,7 +114,8 @@ RE_STEP = re.compile(r'  STEP name=("(?:[^"\\]|\\.)*") conclusion=([a-z_]+)')
 RE_BUOC = re.compile(r"    BUOC \[([^\]\n]+)\] (CUOI |JSON |KHONG )?(.*)")
 RE_MOC = re.compile(r"MOC_GATE_OUTPUT: (passed|not_measured|failed) \(([0-9]+)/([0-9]+) job\)")
 RE_ONG = re.compile(r"(?<![|])\|(?![|])")
-RE_SET = re.compile(r"\s*set\s+([-+])([A-Za-z]+)(?:\s+(\w+))?\s*")   # `set -euo pipefail`, `set +o pipefail`, `set +e`…
+RE_TAT_TUY_CHON = re.compile(r"errexit|(?<![\w-])\+['\"]*[A-Za-z]*e|\bset\b[^\n]*\+")   # F12: tắt errexit/pipefail, kể cả bước không ống
+RE_CAU_TRUC_SHELL = re.compile(r"\b(?:set|builtin|command|shopt|function|eval|source|exec)\b|^\s*\.\s|[(){}`]|\\\s*$", re.M)   # F12
 
 
 def _json_chuan(raw):   # chuỗi JSON phải đúng dạng chuẩn hoá (để tệp viết tay và `tom` A2 cùng một byte)
@@ -150,19 +151,14 @@ def _bo_nhay(run):   # bỏ chú thích và chuỗi nháy trước khi tìm `|`
     return re.sub(r"(?m)(^|\s)#.*$", r"\1", run)
 
 
-def che_do_shell(run, shell):   # P2 connector 4493205478: đọc THEO THỨ TỰ dòng; pipefail phải có hiệu lực TRƯỚC ống
-    pf = shell == "bash"   # `shell: bash` tường minh = `bash -eo pipefail`; vắng/`sh` = `-e` không pipefail
-    for dong in _bo_nhay(run).splitlines():
-        if re.match(r"\s*set\b", dong) and re.search(r"pipefail|errexit|\+[A-Za-z]*e", dong):
-            m = RE_SET.fullmatch(dong)
-            if not m or ("o" in m[2]) != bool(m[3]) or m[3] not in (None, "pipefail", "errexit"):
-                return "set_khong_doc_duoc"   # `set -o pipefail; a | b`, set trong dòng ghép… ⇒ không xác lập được
-            if m[1] == "+" and ("e" in m[2] or m[3] == "errexit"):
-                return "tat_errexit"
-            pf = (m[1] == "-") if m[3] == "pipefail" else pf
-        if RE_ONG.search(dong) and (shell == "pwsh" or not pf):
-            return "ong_khong_pipefail"
-    return None
+def che_do_shell(run, shell):   # F12 Review Rescue (#1236 6690900537): DANH SÁCH CHO PHÉP, không suy luận trạng thái từ `set`
+    if RE_TAT_TUY_CHON.search(re.sub(r"\\\s*\n", " ", run)):
+        return "tat_tuy_chon_shell"   # mọi bước: `set +e`, `set +o …`, `builtin set '+e'`… (nối dòng `\` đã gộp) ⇒ không xác lập
+    if not RE_ONG.search(_bo_nhay(run)):
+        return None   # bước không ống: không cần pipefail
+    if shell != "bash":
+        return "ong_khong_pipefail"   # chỉ `shell: bash` tường minh (`bash --noprofile --norc -eo pipefail {0}`) mới có pipefail chắc chắn
+    return "ong_cau_truc_khong_do_duoc" if RE_CAU_TRUC_SHELL.search(run) else None   # quét thân THÔ, kể cả nháy/chú thích
 
 
 def chan_k7(wf, k, i, env_buoc, env_job):

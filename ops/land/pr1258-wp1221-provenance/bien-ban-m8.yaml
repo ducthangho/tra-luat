@@ -1,7 +1,7 @@
 # Bien ban M8 (ADR-0060) WP #1221 wp1221 EOL-TEST-CHAN-DOAN r3 g1 — kiem bang packet_loop.py kiem-dong-wp.
 # Nhan nguon tung muc: ops/land/pr1258-wp1221-land-evidence.yaml. #1221 khong co muc LIVE.
-# landed: false — uy quyen M7 (landed:true) CHUA duoc chu kho cap (#1221 issuecomment-6680321819). Vi vay kiem-dong-wp
-# phai ra D2 "chua land"; ket qua do kem o kiem-dong-wp-m8.txt. Bon moc §10.2.2 deu passed.
+# landed: true — uy quyen M7 cua chu kho #1221 issuecomment-6680515199 (neo merge 08bcb51). Bon moc §10.2.2 deu passed.
+# kiem-dong-wp van ra D2 vi nghiem_thu co muc thuat_lai (khong passed/owner_waived) — ghi trung thuc, KHONG nang nhan.
 # nghiem_thu: gia tri `passed` chi cho muc do duoc tren MERGE (A10, CI master). Cac muc con lai la `thuat_lai` — loi khai cua
 # phien executor session_015GtxrZVmDpv9FPWFf1Uaoo (than PR #1258, do tren d912f03) va cua phien dieu phoi (A11); phien ghi so
 # khong tai chay.
@@ -19,8 +19,8 @@ review:
   mien_p3_k7: 'issuecomment-6679448513: mien_p3 ee7a385 (3 P3) va full_mutant_audit ee7a385 mien'
 windows:
   phan_loai: required
-  nguon: 'thuat_lai — phien dieu phoi: A11 eol_policy_test 32/32 tren tra-luat-win, head ee7a385; bytes log khong kem'
-duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1221#issuecomment-6680321819
+  nguon: 'thuat_lai — phien dieu phoi: log C:\work\diag-1221-r3-a11-ee7a385.log tren tra-luat-win, HEAD ee7a385, RC 0, 32/32 dat, SECONDS 687; bytes log khong kem'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1221#issuecomment-6680515199
 merge_commit: 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9
 tree_m: c7c80550aef10749ce1ea19ce2fec4e683f572aa
 ci_master:
@@ -44,7 +44,7 @@ nghiem_thu:
   A13: thuat_lai
   A14: thuat_lai
 lease_cuoi: wp1221-r3-g1-claude-remote-20261105
-landed: false
+landed: true
 moc_10_2_2:
   run: passed
   checkout: passed

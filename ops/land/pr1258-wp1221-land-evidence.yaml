@@ -19,9 +19,12 @@ input_packet_generations:
 authorized_head_sha: ee7a3850b99c6256f9ecf226676f0764f540f892
 authorized_head_tree: 4aee6da527687a2dde20e3196a2aad7867dfcded
 approver: ducthangho
-authorization_url: https://github.com/ducthangho/tra-luat/issues/1221#issuecomment-6680321819
+authorization_url: https://github.com/ducthangho/tra-luat/issues/1221#issuecomment-6680515199
 authorization_ghi_chu: >-
-  measured — readback-comment-6680321819.json (ducthangho, 2026-11-06T08:10:24Z, updated_at == created_at): ghi lai "chu kho duyet
+  measured — readback-comment-6680515199.json (ducthangho, 2026-11-06T08:21:57Z, updated_at == created_at): "Chủ kho ủy quyền ghi
+  `landed: true` cho wp1221 r3 tại merge commit 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9 (PR #1258, head ee7a3850b99c)", can cu bon moc
+  §10.2.2 do phien ghi so do (bang run/checkout/workflow_definition/gate_output khop ho so nay); neo merge du 40 hex, head 12 hex. Dang
+  bang token chu kho (#566) trong phien dieu phoi: ban chep, khong phai chu ky. Duyet merge va lease ghi so: readback-comment-6680321819.json (ducthangho, 2026-11-06T08:10:24Z, updated_at == created_at): ghi lai "chu kho duyet
   merge PR #1258 dung SHA ee7a3850b99c6256f9ecf226676f0764f540f892" sau kiem-merge rc=0, va "Chu kho duyet cap lease ghi so land";
   "landed:true (M7): CHUA duyet. Ho so mac dinh landed: false". Comment dang SAU merge (merged_at 07:24:02Z) — no la ban ghi lai cua
   phien dieu phoi #1206 bang token chu kho (#566), khong phai chu ky; lan duyet merge truoc 07:24Z KHONG co ban REST rieng trong ho so nay.
@@ -44,13 +47,13 @@ pre_merge_checks:
   - {name: 'mien P3 va full_mutant_audit (K5, K7)', sha: ee7a3850b99c6256f9ecf226676f0764f540f892, conclusion: 'dong "mien_p3: ee7a385 human:f2-scalar-field-rule,human:f4-a14-runtime-binding,human:h1-reflection-evasion" va "full_mutant_audit: ee7a385 mien"', kiem: 'measured — readback-comment-6679448513.json (ducthangho 07:15:58Z)', nguon: [readback-comment-6679448513.json]}
   - {name: 'connector Codex GitHub tren PR #1258', conclusion: 'codex-review-state completed tren ee7a385, has_any_findings false (6678598136); receipt "Reviewed commit: ee7a3850b9" khong finding (6678660904, 06:25:25Z); sau ready_for_review 07:19:27Z connector tha +1 luc 07:23:12Z, khong comment moi; 0 review, 0 review comment', kiem: measured, nguon: [readback-comment-6678598136.json, readback-comment-6678660904.json, readback-comments-1258.json, readback-reactions-pr-1258.json, readback-events-1258.json, readback-reviews-1258.json, readback-review-comments-1258.json]}
   - {name: 'review offline Codex 8/8 qua launcher.py run', conclusion: 'luot 1–8 changes_requested; luot 8 tren d912f03 con F4 => chu kho chon human_audited, F4 ghi thanh no', kiem: 'thuat_lai — than PR #1258 (readback-pr-1258.json); hien vat o scratchpad phien executor, KHONG kem.', nguon: [readback-pr-1258.json]}
-  - {name: 'Windows A11 — eol_policy_test tap trung tren tra-luat-win', sha: ee7a3850b99c6256f9ecf226676f0764f540f892, conclusion: '32/32', kiem: 'thuat_lai — phien dieu phoi khai (issuecomment-6680321819); bytes log KHONG kem; khong full Windows CI (lease cam workflow_dispatch).', nguon: [readback-comment-6680321819.json]}
+  - {name: 'Windows A11 — eol_policy_test tap trung tren tra-luat-win', sha: ee7a3850b99c6256f9ecf226676f0764f540f892, conclusion: '32/32 dat, RC 0', kiem: 'thuat_lai — phien dieu phoi khai: log goc C:\work\diag-1221-r3-a11-ee7a385.log tren tra-luat-win (HEAD ee7a385, RC 0, 32/32 dat, SECONDS 687); phien ghi so khong doc duoc may do, bytes KHONG kem; khong full Windows CI (lease cam workflow_dispatch).', nguon: [readback-comment-6680321819.json]}
 post_merge_checks:
   - {name: 'ci.yml push master — DUNG merge SHA', run_id: 42180624203, run_attempt: 1, sha: 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest, runner_id khac 0', kiem_gate: 'measured — gate-hau-merge-20261106/kiem-gate-08bcb51.txt rc=0 (suite 114291539410)', nguon: [gate-hau-merge-20261106/readback-run-42180624203.json, gate-hau-merge-20261106/readback-jobs-42180624203.json, gate-hau-merge-20261106/readback-check-runs-08bcb51-all.json]}
 bookkeeping:
   - {item: 'lease ghi so', ket_qua: 'ghi-so-land-pr1258-wp1221-r1-g1-claude-remote-20261106 tren nhanh ops/ghi-so-land-1258-lease @ da4bd71 (cap boi phien dieu phoi, executor_session = phien nay, lease_publish check rc=0 theo dieu phoi — thuat_lai).'}
   - {item: 'nha lease thi cong', ket_qua: 'measured — nha-lease-20261106/lease-rut-han-9b34322.txt: commit 9b34322 tren ops/wp1221-r3-g1-lease, lease_until 2026-11-07T16:30Z -> 2026-11-06T10:30Z, khoi thu_hoi_bang_rut_han; lease_publish check rc=0. Luc ghi CHUA push; readback workflow dang lease: not_measured.'}
-  - {item: 'bien ban M8', ket_qua: 'measured — pr1258-wp1221-provenance/bien-ban-m8.yaml; kiem-dong-wp-m8.txt rc=12 "CHƯA ĐÓNG ĐƯỢC WP: thiếu D2; D4" — DUNG ky vong: landed false (M7 chua duyet) va lease_until chua qua; D1, D3 dat. Dang M8 len Issue #1221: not_measured (viec cua dieu phoi).'}
+  - {item: 'bien ban M8', ket_qua: 'measured — pr1258-wp1221-provenance/bien-ban-m8.yaml; kiem-dong-wp-m8.txt rc=12 "CHƯA ĐÓNG ĐƯỢC WP: thiếu D2; D4": D2 vi nghiem_thu A1–A9, A11–A14 la thuat_lai (khong phai passed/owner_waived), D4 vi lease_until 10:30Z chua qua; D1, D3 dat. Dang M8 len Issue #1221: not_measured (viec cua dieu phoi).'}
   - {item: 'PR ghi so', nhanh: claude/ghi-so-land-1258}
 # ---- het truong chuan
 packet_id: wp1221
@@ -77,12 +80,12 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-1258.json: merged true, merged_at 2026-11-06T07:24:02Z, merge_commit_sha 08bcb51, head.sha ee7a385, base.sha 12e5b36, 11 commit, 1 tep +698 -92.'
-  landed: false
+  landed: true
   landed_dieu_kien: >-
-    landed:true CHI ghi khi chu kho duyet M7. Hien trang: (1) gate tren DUNG merge SHA 08bcb51: run 42180624203 23/23, kiem-gate rc=0, du
+    (1) gate tren DUNG merge SHA 08bcb51: run 42180624203 23/23, kiem-gate rc=0, du
     bon moc §10.2.2 (moc_10_2_2) DAT. (2) lease thi cong rut han (9b34322, cho push). (3) bookkeeping: ho so nay; M8 kiem-dong-wp rc=12
-    (D2/D4, dung ky vong). (4) review neo DUNG authorized_head ee7a385: human audit approve + connector sach. (5) noi dung merge = diff PR
-    DAT. (6) uy quyen M7 neo ee7a385: CHUA co (issuecomment-6680321819 ghi ro chua duyet).
+    (D2 nghiem thu thuat_lai, D4 han lease). (4) review neo DUNG authorized_head ee7a385: human audit approve + connector sach. (5) noi dung merge = diff PR
+    DAT. (6) uy quyen M7 cua chu kho neo merge 08bcb51 / head ee7a3850b99c (issuecomment-6680515199), can cu bon moc — dieu kien da dat.
   luu_y_assurance: 'assurance human_audited (Codex offline 8/8 khong approve); nghiem thu A1–A9, A11–A14 la thuat_lai; A10 do tren CI master.'
 
 review:

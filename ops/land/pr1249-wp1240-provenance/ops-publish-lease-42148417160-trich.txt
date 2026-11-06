@@ -1,0 +1,5 @@
+# trich log job 127665410826 (run 42148417160, ops-publish-lease, head 17255e67) qua MCP get_job_logs tail 40 — chi cac dong buoc dang
+2026-11-06T02:16:12.9690698Z ##[group]ops/leases/wp1240-r1-g1-claude.yaml
+2026-11-06T02:16:13.5643403Z CHAN [9]: lease 'wp1240-r1-g1-claude' đã có comment 6664904811 trên issue #1240 — bỏ qua
+2026-11-06T02:16:13.5732238Z đã đăng trước đó — bỏ qua
+2026-11-06T02:16:13.5733050Z ##[endgroup]

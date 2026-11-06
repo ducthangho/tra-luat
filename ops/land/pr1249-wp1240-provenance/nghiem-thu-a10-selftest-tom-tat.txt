@@ -1,0 +1,2 @@
+== tl selftest 1777/1777 ==
+full stdout sha256 b488e2b9c376f5f5f58e3038f05ef4fe36c9a27890405b1a145186a8e71a937a, 1825 dong, [OK] 1789, [FAIL] 0

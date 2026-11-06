@@ -1,9 +1,11 @@
 {
  "kq": {
-  "dau_vao": 11838,
-  "nhan": 86,
+  "dau_vao": 32370,
+  "nhan": 247,
   "lech_tham_chieu": 0,
-  "nhan_ma_nuot_loi": 0
+  "nuot_loi": 0,
+  "khong_chay": 0
  },
- "nhan_ma_nuot_loi": []
+ "ky_tu": 35,
+ "xau": []
 }

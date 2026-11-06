@@ -103,8 +103,28 @@ DB_SINH = {
     "m-S7h_don_cham_than_dau": _don_mo(lambda L: rf"(?:! )?{L}"),
     "m-S7i_don_hoac_lenh": _don_mo(lambda L: rf"{L}(?: \|\| {L})*"),
 }
+
+
+def _ong_giua_mo(run, shell):   # J01 Codex vòng 3: chỉ kiểm thành phần ĐẦU và CUỐI của ống, thành phần giữa là chuỗi W bất kỳ
+    if type(run) is not str:
+        return "lenh_ngoai_cu_phap"
+    if shell not in (None, "bash", "sh"):
+        return "shell_ngoai_cu_phap"
+    b = run[:-1] if run.endswith("\n") else run
+    if gram.RE_DON.fullmatch(b):
+        return None
+    if re.fullmatch(rf"{gram.LENH}(?: \| [A-Za-z0-9_./=: -]+)* \| {gram.LENH}", b, re.ASCII):
+        return None if shell == "bash" else "ong_khong_bash_tuong_minh"
+    return "lenh_ngoai_cu_phap"
+
+
+DB_SINH["m-S7j_ong_giua_mo"] = _ong_giua_mo
 for c in ";&|!(){}$`'\"\\<>#*?[]~+,@%^":
-    DB_SINH[f"m-S15[{ord(c):02x}]_P_them"] = dung(P=r"[A-Za-z0-9_.][A-Za-z0-9_./" + re.escape(c) + "-]*")
+    lop = r"[A-Za-z0-9_./" + re.escape(c) + "-]*"
+    Pc = r"[A-Za-z0-9_.]" + lop
+    DB_SINH[f"m-S15[{ord(c):02x}]_P_moi_nhanh"] = dung(P=Pc)
+    DB_SINH[f"m-S15b[{ord(c):02x}]_P_nhanh_bash"] = dung(DANG=rf"(?:python {gram.P}\.py|bash {Pc}\.sh|pwsh -NoProfile -File {gram.P}\.ps1)")
+    DB_SINH[f"m-S15p[{ord(c):02x}]_P_nhanh_pwsh"] = dung(DANG=rf"(?:python {gram.P}\.py|bash {gram.P}\.sh|pwsh -NoProfile -File {Pc}\.ps1)")
 
 
 def main_sinh():
@@ -116,7 +136,8 @@ def main_sinh():
         bang.append({"dot_bien": ten, **kq, "giet": giet})
         hong += not giet
     print(json.dumps({"dot_bien_sinh": len(DB_SINH), "giet_o_kho_sinh": sum(b["giet"] for b in bang),
-                      "co_than_nhan_ma_nuot_loi": sum(b["nhan_ma_nuot_loi"] > 0 for b in bang)}))
+                      "co_than_nhan_ma_nuot_loi": sum(b["nuot_loi"] > 0 for b in bang),
+                      "chi_khong_chay": sum(b["nuot_loi"] == 0 and b["khong_chay"] > 0 for b in bang)}))
     json.dump(bang, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "dot_bien_sinh_r8.json"), "w"), ensure_ascii=False, indent=1)
     return hong
 

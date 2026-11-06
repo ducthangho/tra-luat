@@ -536,6 +536,14 @@ def a18_neo_trich_tep():
         bang(len(r) == 1 and not r[0]["hop_le"], f"n: symlink tệp {r}")
         r = ho_so(neo_map(), tep={}, lien_ket={"": Path(d)})
         bang(len(r) == 1 and not r[0]["hop_le"], f"o: symlink thư mục provenance {r}")
+    q, ten2 = copy.deepcopy(p), GO2.replace("-a1.", "-a2.")   # (p)(q) P2 connector 4491937587: giữ provenance CẢ HAI attempt cùng run
+    q["attempt_yeu_cau"] = 2
+    hai = {"provenance.yaml": yaml.safe_dump(p, allow_unicode=True), "provenance-a2.yaml": yaml.safe_dump(q, allow_unicode=True),
+           GO2: text, ten2: text.replace(" attempt=1 ", " attempt=2 ", 1)}
+    bang(mot(neo_map(), tep=hai)["hop_le"], "p: attempt 1 đạt khi có thêm provenance attempt 2")
+    bang(mot(neo_map(run_attempt=2, gate_output=f"measured — {ten2}"), tep=hai)["hop_le"], "q: attempt 2 đạt khi có provenance attempt 1")
+    trung = {"provenance.yaml": yaml.safe_dump(p, allow_unicode=True), "provenance-b.yaml": yaml.safe_dump(p, allow_unicode=True), GO2: text}
+    bang(not mot(neo_map(), tep=trung)["hop_le"], "r: hai provenance CÙNG neo vẫn bị từ chối")
 
 
 def url_ok(u):
@@ -875,6 +883,8 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m-A18h_bo_symlink_thu_muc", "for q in [p, *p.parents][:n + 1])", "for q in [p, *p.parents][:n])", "a18"),
     ("m-A18i_bo_kiem_ten_tep", '        if p.name != f"gate-output2-{d[1]}-a{d[2]}.txt":', "        if False:", "a18"),
     ("m-A18j_bo_symlink_moi_thanh_phan", "and not any(q.is_symlink() for q in [p, *p.parents][:n + 1])", "", "a18"),
+    ("m-A18k_pv_chi_theo_run_id", '_m(_m(x, "moc"), "run").get("head_sha")) == (int(d[1]), int(d[2]), d[3])]',
+     '_m(_m(x, "moc"), "run").get("head_sha"))[0] == int(d[1])]', "a18"),
     ("m-A18g_cho_thoat_thu_muc", 'not ten.startswith("/") and ".." not in Path(ten).parts and ', "", "a18"),
     ("m-A19a_bo_url", '    if len(url) != 1 or url_hop_le is None or not url_hop_le(url[0][0]):\n        loi.append("url")',
      '    if False:\n        loi.append("url")', "a19"),

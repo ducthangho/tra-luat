@@ -485,7 +485,8 @@ def _kiem_duong(gt, neo, thu, prov, goc):
             continue
         if p.name != f"gate-output2-{d[1]}-a{d[2]}.txt":   # F02: tên tệp BẮT BUỘC theo run/attempt của header
             continue
-        pv = [x for x in prov if _m(_m(x, "moc"), "run").get("run_id") == int(d[1])]
+        pv = [x for x in prov if (_m(_m(x, "moc"), "run").get("run_id"), x.get("attempt_yeu_cau"),   # P2 connector 4491937587:
+              _m(_m(x, "moc"), "run").get("head_sha")) == (int(d[1]), int(d[2]), d[3])]   # neo đủ (run, attempt, head)
         if len(pv) == 1 and kiem(van, pv[0], goc)[0] == "passed":
             return []
     return ["tep_gate_output_khong_dat"]

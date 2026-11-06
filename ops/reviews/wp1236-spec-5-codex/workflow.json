@@ -1,0 +1,174 @@
+{
+  "J_pr1231": 22,
+  "env_keys": [
+    "PYTHONDONTWRITEBYTECODE",
+    "PYTHONIOENCODING",
+    "PYTHONUTF8"
+  ],
+  "checkout_passed": 22,
+  "checkout_shas": [
+    "fe84620f897913c7f6c2ce5a0c7316a49655e82f"
+  ],
+  "quick_J": [
+    {
+      "name": "gate-ops (ubuntu-latest)",
+      "conclusion": "success",
+      "yaml_skip_steps": 1,
+      "rest_skip_steps": 1,
+      "echo_count": 6
+    },
+    {
+      "name": "gate-packet-loop (ubuntu-latest)",
+      "conclusion": "success",
+      "yaml_skip_steps": 1,
+      "rest_skip_steps": 1,
+      "echo_count": 6
+    },
+    {
+      "name": "gate-nhanh-manh (ubuntu-latest, 2)",
+      "conclusion": "success",
+      "yaml_skip_steps": 1,
+      "rest_skip_steps": 1,
+      "echo_count": 2
+    },
+    {
+      "name": "gate-nhanh-manh (ubuntu-latest, 7)",
+      "conclusion": "success",
+      "yaml_skip_steps": 1,
+      "rest_skip_steps": 1,
+      "echo_count": 2
+    },
+    {
+      "name": "gate-nhanh-manh (ubuntu-latest, 0)",
+      "conclusion": "success",
+      "yaml_skip_steps": 1,
+      "rest_skip_steps": 1,
+      "echo_count": 2
+    },
+    {
+      "name": "gate (ubuntu-latest)",
+      "conclusion": "success",
+      "yaml_skip_steps": 1,
+      "rest_skip_steps": 1,
+      "echo_count": 27
+    },
+    {
+      "name": "gate-nhanh-manh (ubuntu-latest, 6)",
+      "conclusion": "success",
+      "yaml_skip_steps": 1,
+      "rest_skip_steps": 1,
+      "echo_count": 2
+    },
+    {
+      "name": "gate-nhanh-manh (ubuntu-latest, 1)",
+      "conclusion": "success",
+      "yaml_skip_steps": 1,
+      "rest_skip_steps": 1,
+      "echo_count": 2
+    },
+    {
+      "name": "gate-nhanh-manh (ubuntu-latest, 4)",
+      "conclusion": "success",
+      "yaml_skip_steps": 1,
+      "rest_skip_steps": 1,
+      "echo_count": 2
+    },
+    {
+      "name": "gate-nhanh-manh (ubuntu-latest, 3)",
+      "conclusion": "success",
+      "yaml_skip_steps": 1,
+      "rest_skip_steps": 1,
+      "echo_count": 2
+    },
+    {
+      "name": "gate-nhanh-manh (ubuntu-latest, 5)",
+      "conclusion": "success",
+      "yaml_skip_steps": 1,
+      "rest_skip_steps": 1,
+      "echo_count": 2
+    },
+    {
+      "name": "gate-cong-cu-gop (ubuntu-latest)",
+      "conclusion": "success",
+      "yaml_skip_steps": 0,
+      "rest_skip_steps": 0,
+      "echo_count": 0
+    },
+    {
+      "name": "gate-nhanh-gop (ubuntu-latest)",
+      "conclusion": "success",
+      "yaml_skip_steps": 1,
+      "rest_skip_steps": 1,
+      "echo_count": 2
+    },
+    {
+      "name": "gate-registry (ubuntu-latest)",
+      "conclusion": "success",
+      "yaml_skip_steps": 1,
+      "rest_skip_steps": 1,
+      "echo_count": 6
+    }
+  ],
+  "special_steps": {
+    "chuan-bi": [
+      {
+        "name": "phan loai diff (duong nhanh ho so)",
+        "id": "phan-loai",
+        "continue-on-error": true,
+        "timeout-minutes": 5,
+        "env": {
+          "CI_DUONG_NHANH_SU_KIEN": "${{ github.event_name }}",
+          "CI_DUONG_NHANH_GOC": "${{ github.event.pull_request.base.sha || github.event.before }}",
+          "CI_DUONG_NHANH_DAU": "${{ github.event.pull_request.head.sha }}",
+          "CI_DUONG_NHANH_MERGE": "${{ github.sha }}",
+          "CI_DUONG_NHANH_CHE_DO_VAO": "${{ inputs.che_do }}",
+          "CI_DUONG_NHANH_NHANH_MAC_DINH": "${{ github.event.repository.default_branch }}"
+        },
+        "run": "python3 ops/ci_duong_nhanh.py"
+      }
+    ],
+    "gate-cong-cu-gop": [
+      {
+        "name": "G5 gom manh ban kinh dot bien (#668)",
+        "shell": "bash",
+        "env": {
+          "CONG_CU_TEST_GOP_CHE_DO": "${{ needs.chuan-bi.outputs.che_do }}"
+        },
+        "run": "python ops/cong_cu_test.py --gop manh"
+      }
+    ],
+    "gate-ops": [
+      {
+        "name": "DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)",
+        "if": "${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}",
+        "shell": "bash",
+        "env": {
+          "CI_DUONG_NHANH_SU_KIEN": "${{ github.event_name }}",
+          "CI_DUONG_NHANH_GOC": "${{ needs.chuan-bi.outputs.goc }}",
+          "CI_DUONG_NHANH_DAU": "${{ needs.chuan-bi.outputs.dau }}",
+          "CI_DUONG_NHANH_MERGE": "${{ needs.chuan-bi.outputs.hop }}"
+        },
+        "run": "set -euo pipefail\npython .claude/dev/packet_loop.py doctrine-scan --root .\npython ops/ci_duong_nhanh.py kiem-re\n"
+      },
+      {
+        "name": "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)",
+        "if": "runner.os == 'Linux'",
+        "env": {
+          "CI_DUONG_NHANH_CHE_DO": "${{ needs.chuan-bi.outputs.che_do }}"
+        },
+        "run": "python ops/ci_duong_nhanh_test.py"
+      },
+      {
+        "name": "bien-nhan v2 selftest",
+        "run": "python ops/bien_nhan_v2_test.py"
+      }
+    ],
+    "gate-nhanh-gop": [
+      {
+        "name": "DUONG_NHANH - gom KHONG DO (job gate-nhanh-gop)",
+        "if": "${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}",
+        "run": "echo \"GOM: KHONG DO — duong_nhanh, 0 manh (khong manh nao chay)\"\n"
+      }
+    ]
+  }
+}

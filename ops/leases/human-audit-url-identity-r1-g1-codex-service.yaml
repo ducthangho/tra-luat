@@ -55,3 +55,6 @@ reviewed_sha_required: 4f03566fe9e686ed53c7f8ed0619300c1debba76
 effective_review_class: sensitive
 spec_ref: refs/heads/ops/wp1254-r1-g1-lease@a87d7275881948e751dea09686d6f92786267325
 spec_sha256_required: 9c59e834e55523f25a7766089d96b61e0d9a7860b7bbbebb6a6f698b22f532f9
+da_bi_thay_the: human-audit-url-identity-r2-g2-codex-service
+operational_state: source sealed; successor records doc-placement correction; old
+  clocks preserved

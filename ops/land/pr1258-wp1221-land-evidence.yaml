@@ -53,7 +53,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'lease ghi so', ket_qua: 'ghi-so-land-pr1258-wp1221-r1-g1-claude-remote-20261106 tren nhanh ops/ghi-so-land-1258-lease @ da4bd71 (cap boi phien dieu phoi, executor_session = phien nay, lease_publish check rc=0 theo dieu phoi — thuat_lai).'}
   - {item: 'nha lease thi cong', ket_qua: 'measured — nha-lease-20261106/lease-rut-han-9b34322.txt: commit 9b34322 tren ops/wp1221-r3-g1-lease, lease_until 2026-11-07T16:30Z -> 2026-11-06T10:30Z, khoi thu_hoi_bang_rut_han; lease_publish check rc=0. Push 08:23Z (ls-remote = 9b34322); nha-lease-20261106/readback-run-42187334636.json + readback-jobs-42187334636.json: ops-publish-lease.yml tren 9b34322 completed success (job dang success).'}
-  - {item: 'bien ban M8', ket_qua: 'measured — pr1258-wp1221-provenance/bien-ban-m8.yaml; nghiem_thu A10 passed, 13 muc owner_waived theo readback-comment-6680636879.json (ducthangho OWNER, 2026-11-06T08:29:18Z, performed_via_github_app null, dong dau nghiem_thu_mien khop); kiem-dong-wp-m8.txt: xem tep (D4 cho lease_until 10:30Z qua). Dang M8 len Issue #1221: not_measured (viec cua dieu phoi).'}
+  - {item: 'bien ban M8', ket_qua: 'measured — pr1258-wp1221-provenance/bien-ban-m8.yaml; nghiem_thu A10 passed, 13 muc owner_waived theo readback-comment-6680636879.json (ducthangho OWNER, 2026-11-06T08:29:18Z, performed_via_github_app null, dong dau nghiem_thu_mien khop); kiem-dong-wp-m8.txt (10:34Z, sau lease_until 10:30Z, lease doc tu origin/ops/wp1221-r3-g1-lease @ 9b34322) rc=0 "ĐÓNG ĐƯỢC WP wp1221". Dang M8 len Issue #1221: not_measured (viec cua dieu phoi).'}
   - {item: 'PR ghi so', nhanh: claude/ghi-so-land-1258}
 # ---- het truong chuan
 packet_id: wp1221
@@ -84,7 +84,7 @@ trang_thai_packet:
   landed_dieu_kien: >-
     (1) gate tren DUNG merge SHA 08bcb51: run 42180624203 23/23, kiem-gate rc=0, du
     bon moc §10.2.2 (moc_10_2_2) DAT. (2) lease thi cong rut han (9b34322, cho push). (3) bookkeeping: ho so nay; M8 nghiem thu A10 passed + 13 muc owner_waived
-    (issuecomment-6680636879); kiem-dong-wp xem kiem-dong-wp-m8.txt. (4) review neo DUNG authorized_head ee7a385: human audit approve + connector sach. (5) noi dung merge = diff PR
+    (issuecomment-6680636879); kiem-dong-wp rc=0 "ĐÓNG ĐƯỢC WP". (4) review neo DUNG authorized_head ee7a385: human audit approve + connector sach. (5) noi dung merge = diff PR
     DAT. (6) uy quyen M7 cua chu kho neo merge 08bcb51 / head ee7a3850b99c (issuecomment-6680515199), can cu bon moc — dieu kien da dat.
   luu_y_assurance: 'assurance human_audited (Codex offline 8/8 khong approve); nghiem thu A1–A9, A11–A14: loi khai goc thuat_lai, M8 ghi owner_waived theo waiver chu kho (readback-comment-6680636879.json) — waiver khong doi chung thanh passed; A10 do tren CI master.'
 

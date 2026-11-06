@@ -9,3 +9,8 @@ rc=0
   THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
 CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
 rc=12
+
+# LAN 3 (sau mien F1 cua chu kho tu dang 6677379340; bien-ban-m8.yaml landed true)
+# checkout: 85a7653316e9d35391071dc20ada3abfe0e0dc76 (+ thay doi chua commit trong ops/land) ; origin/master: 51d6509e918b8b5403248b52727e53358a23a3a0 ; luc: 2026-11-06T05:05:31Z
+ĐÓNG ĐƯỢC WP ASSURANCE-81-MODEL-EFFORT-TUY-CHON — merge 51d6509e918b8b5403248b52727e53358a23a3a0
+rc=0

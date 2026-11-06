@@ -1,7 +1,7 @@
 # HO SO LAND — packet #1240 ASSURANCE-81-MODEL-EFFORT-TUY-CHON r1, lease g1, qua PR #1249. Khuon: ops/land/pr1230-wp1224-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (51d6509), CHUA LANDED — thieu mien P3 F1 cua chu kho (ADR-0060 M1; connector P1 r4488478726 tren PR #1256).
+# TRANG THAI: merged (51d6509), LANDED — mien P3 F1 cua chu kho tu dang 6677379340 (ADR-0060 M1; dong connector P1 r4488478726, PR #1256).
 # Du bon moc §10.2.2 tren DUNG merge SHA (run push master 42145442236 + wd-run 42151025945).
 # Review offline luot 1 (run bc004964) VI PHAM read-only §8.2 (tu khai sinh 20 tep ignored trong checkout roi doi ra) => BI LOAI o
 # assurance; phien dieu phoi chon (a): luot 2/2 read-only (run 7801b46a, snapshot toan cay 12406 tep, diff rong) thay luot 1.
@@ -114,7 +114,7 @@ bookkeeping:
   - {item: 'PR ghi so', nhanh: 'claude/ghi-so-land-1249', ghi_chu: 'PR #1256; chi cham ops/land/**; lease rut han nam tren nhanh ops/wp1240-r1-g1-lease.'}
   - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt.'}
   - {item: 'ban giao hien vat', ket_qua: 'handoff ops/wp1240-r1-g1-lease@5d95ae9 (14 khoi nhung, tach vao review-offline/ va kiem-merge/); luot 2/2 tu claude/handoff-wp1240-review-l2@aec196d (review-offline-l2/).'}
-  - {item: 'no F1 P3 (7 dot bien song cua c23)', ket_qua: 'loi_khai_co_neo — chuyen sang #1236 theo quyet dinh PHIEN DIEU PHOI (handoff muc F1, readback-f1-issuecomment-6665597541.json); luot 2/2 giu nguyen no. CHUA co mien cua chu kho (ADR-0060 M1) => chan landed.'}
+  - {item: 'no F1 P3 (7 dot bien song cua c23)', ket_qua: 'loi_khai_co_neo — chuyen sang #1236 theo quyet dinh PHIEN DIEU PHOI (handoff muc F1, readback-f1-issuecomment-6665597541.json); luot 2/2 giu nguyen no. mien cua chu kho: issuecomment-6677379340 (tu dang, app null) xac nhan 6677161517 => dong.'}
   - {item: 'dong Issue #1240', ket_qua: 'not_measured — phien dieu phoi dong sau khi PR ghi so merge.'}
 # ---- het truong chuan
 packet_id: ASSURANCE-81-MODEL-EFFORT-TUY-CHON
@@ -158,8 +158,8 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-1249.json merged true; merge-va-diff.txt cha 4f03566 + ecd3073, tree 8117012; ecd3073 la to tien origin/master (rc 0).'
-  landed: false
-  thieu_de_landed: >-
+  landed: true
+  thieu_de_landed_da_dong: >-
     ADR-0060 M1 (lease dieu_kien_merge ADR-0060@36d7c5d): moi P3 hoac dong co bang chung, hoac CHU KHO mien bang comment neu slug,
     SHA, ly do, huong xu ly; 'Agent khong tu ghi no P3'. F1 P3 (c23, 7 dot bien song) CHUA dong (review-offline-l2/stdout.log giu no) va
     CHUA co mien cua chu kho neo ecd3073: readback-chu-kho-issuecomment-6674302414.json chi co windows + approve_merge;
@@ -177,6 +177,14 @@ trang_thai_packet:
     session_015GtxraXfMD1t2FJLzzGDr4 (send_message 04:48Z): thuat_lai. ADR-0060 M1 cam agent tu ghi no P3, nen phien ghi so khong
     tu nang landed tren mot comment do agent dang. Dong duoc khi: chu kho tu dang (performed_via_github_app null) mot comment mien
     hoac xac nhan 6677161517, neo ecd3073.
+  mien_f1_chu_kho_tu_dang: >-
+    measured — readback-chu-kho-mien-f1-issuecomment-6677379340.json (REST GET 2026-11-06T05:05Z): Issue #1240, user ducthangho,
+    author_association OWNER, created_at = updated_at = 2026-11-06T05:03:05Z, performed_via_github_app null, khong footer — cung dang
+    voi approve_merge 6674302414. Than mot dong: 'Xác nhận: tôi (chủ kho) miễn F1 (P3) cho ecd30737e10cb7cdffe0e17178c28b3a12448874
+    như comment 6677161517.' Ket hop 6677161517 (slug F1 c23, SHA, ly do, huong #1236, pham vi chi F1) => du bon thanh phan M1, neo
+    dung authorized_head_sha. CAVEAT #566: comment dang bang token chu kho deu hien ducthangho; app null va khong footer la dau hieu
+    do duoc tot nhat, khong chung minh tuyet doi ai bam nut. CAVEAT 2: mien dang SAU merge (01:40:51Z) — M1 la dieu kien merge, nen
+    PR #1249 da merge khi F1 chua duoc mien; ho so nay chi ghi su khac phuc sau merge cho dieu kien landed (cung hinh dang luot 2/2).
   xac_nhan_f1_06_11: >-
     loi_khai_co_neo, CHUA nhan — readback-xac-nhan-f1-issuecomment-6677277905.json: Issue #1240, ducthangho, OWNER, 2026-11-06T04:56:02Z,
     performed_via_github_app claude, footer Claude Code; than tu khai do agent dang theo chi thi 'Dang giup toi' chu kho go trong
@@ -191,13 +199,14 @@ trang_thai_packet:
     hinh dang tien le #1224 (luot 5 sau merge), phien dieu phoi chon (a);
     (5) uy quyen land: DAT bang comment approve_merge 6674302414 neo ecd3073, dang TRUOC merge; (6) muc tieu packet: xem nghiem_thu
     (A1–A11 measured tren blob merge); (7) §8.1 (luat moi ADR-0065): DAT — xem assurance_81;
-    (8) ADR-0060 M1 P3: CHUA DAT — xem thieu_de_landed.
+    (8) ADR-0060 M1 P3: DAT — F1 duoc chu kho mien, xem mien_f1_chu_kho_tu_dang.
   lich_su_nhan: >-
     Phien ghi so phat hien vi pham read-only cua luot 1 (bc004964) ngay khi tach hien vat, bao phien dieu phoi truoc moi ghi; ban WIP
     tren PR #1256 chua tung khai landed. fd877ed: landed true sau khi do hien vat luot 2/2 read-only (run 7801b46a). Ha xuong false
     sau connector P1 r4488478726 (PR #1256): F1 P3 khong co mien cua chu kho (ADR-0060 M1).
     Giu false sau comment 6677161517 (04:47:33Z): do agent dang qua GitHub App claude, xem mien_f1_06_11.
-    Giu false sau xac nhan 6677277905 (04:56:02Z): cung dang qua app claude, xem xac_nhan_f1_06_11.
+    Giu false sau xac nhan 6677277905 (04:56:02Z): cung dang qua app claude, xem xac_nhan_f1_06_11. Nang true sau comment chu kho tu
+    dang 6677379340 (05:03:05Z, performed_via_github_app null), xem mien_f1_chu_kho_tu_dang.
 
 assurance_81:
   reviewer_assurance_81: DAT

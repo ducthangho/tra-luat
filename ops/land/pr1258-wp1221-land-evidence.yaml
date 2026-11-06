@@ -52,7 +52,7 @@ post_merge_checks:
   - {name: 'ci.yml push master — DUNG merge SHA', run_id: 42180624203, run_attempt: 1, sha: 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest, runner_id khac 0', kiem_gate: 'measured — gate-hau-merge-20261106/kiem-gate-08bcb51.txt rc=0 (suite 114291539410)', nguon: [gate-hau-merge-20261106/readback-run-42180624203.json, gate-hau-merge-20261106/readback-jobs-42180624203.json, gate-hau-merge-20261106/readback-check-runs-08bcb51-all.json]}
 bookkeeping:
   - {item: 'lease ghi so', ket_qua: 'ghi-so-land-pr1258-wp1221-r1-g1-claude-remote-20261106 tren nhanh ops/ghi-so-land-1258-lease @ da4bd71 (cap boi phien dieu phoi, executor_session = phien nay, lease_publish check rc=0 theo dieu phoi — thuat_lai).'}
-  - {item: 'nha lease thi cong', ket_qua: 'measured — nha-lease-20261106/lease-rut-han-9b34322.txt: commit 9b34322 tren ops/wp1221-r3-g1-lease, lease_until 2026-11-07T16:30Z -> 2026-11-06T10:30Z, khoi thu_hoi_bang_rut_han; lease_publish check rc=0. Luc ghi CHUA push; readback workflow dang lease: not_measured.'}
+  - {item: 'nha lease thi cong', ket_qua: 'measured — nha-lease-20261106/lease-rut-han-9b34322.txt: commit 9b34322 tren ops/wp1221-r3-g1-lease, lease_until 2026-11-07T16:30Z -> 2026-11-06T10:30Z, khoi thu_hoi_bang_rut_han; lease_publish check rc=0. Push 08:23Z (ls-remote = 9b34322); nha-lease-20261106/readback-run-42187334636.json + readback-jobs-42187334636.json: ops-publish-lease.yml tren 9b34322 completed success (job dang success).'}
   - {item: 'bien ban M8', ket_qua: 'measured — pr1258-wp1221-provenance/bien-ban-m8.yaml; nghiem_thu A10 passed, 13 muc owner_waived theo readback-comment-6680636879.json (ducthangho OWNER, 2026-11-06T08:29:18Z, performed_via_github_app null, dong dau nghiem_thu_mien khop); kiem-dong-wp-m8.txt: xem tep (D4 cho lease_until 10:30Z qua). Dang M8 len Issue #1221: not_measured (viec cua dieu phoi).'}
   - {item: 'PR ghi so', nhanh: claude/ghi-so-land-1258}
 # ---- het truong chuan
@@ -115,5 +115,4 @@ khong_do_duoc:
   - 'Hien vat 8 luot Codex offline (run.json, VERDICT) o scratchpad phien executor, khong kem.'
   - 'Nghiem thu A1–A9, A11–A14 khong tai chay trong phien ghi so (phan nhieu do tren d912f03 theo than PR, truoc hai lan day toi ee7a385).'
   - 'Merge va comment uy quyen bam qua credential chu kho (#566): chi co merged_by / user.login.'
-  - 'Readback workflow dang lease cho commit rut han 9b34322: chua push luc ghi.'
   - 'Bien ban M8 chua dang len Issue #1221 tai luc ghi.'

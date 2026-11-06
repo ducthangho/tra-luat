@@ -77,5 +77,51 @@ def main():
     sys.exit(1 if hong else 0)
 
 
+
+
+# --- Đột biến lớp I01 (reviewer Claude vòng 2 r8): chết ở KHO SINH (A14-S6), không cần một vế viết tay cho từng cái ---
+def _don_mo(mau):   # mau(LENH) -> regex DON đột biến
+    def f(run, shell):
+        if type(run) is not str:
+            return "lenh_ngoai_cu_phap"
+        if shell not in (None, "bash", "sh"):
+            return "shell_ngoai_cu_phap"
+        b = run[:-1] if run.endswith("\n") else run
+        if re.fullmatch(mau(gram.LENH), b, re.ASCII):
+            return None
+        if gram.RE_ONG.fullmatch(b):
+            return None if shell == "bash" else "ong_khong_bash_tuong_minh"
+        return "lenh_ngoai_cu_phap"
+    return f
+
+
+DB_SINH = {
+    "m-S7d_tach_ong_hai_gach": dung(ong_sep=r" \|\|? "),
+    "m-S7e_tach_ong_nhieu_gach": dung(ong_sep=r" \|+ "),
+    "m-S7f_tach_ong_va": dung(ong_sep=r" [|&] "),
+    "m-S7g_don_va_cuoi": _don_mo(lambda L: rf"{L}(?: &)?"),
+    "m-S7h_don_cham_than_dau": _don_mo(lambda L: rf"(?:! )?{L}"),
+    "m-S7i_don_hoac_lenh": _don_mo(lambda L: rf"{L}(?: \|\| {L})*"),
+}
+for c in ";&|!(){}$`'\"\\<>#*?[]~+,@%^":
+    DB_SINH[f"m-S15[{ord(c):02x}]_P_them"] = dung(P=r"[A-Za-z0-9_.][A-Za-z0-9_./" + re.escape(c) + "-]*")
+
+
+def main_sinh():
+    import sinh_r8
+    hong, bang = 0, []
+    for ten, f in DB_SINH.items():
+        kq, lech, nuot = sinh_r8.main(f)
+        giet = kq["lech_tham_chieu"] > 0
+        bang.append({"dot_bien": ten, **kq, "giet": giet})
+        hong += not giet
+    print(json.dumps({"dot_bien_sinh": len(DB_SINH), "giet_o_kho_sinh": sum(b["giet"] for b in bang),
+                      "co_than_nhan_ma_nuot_loi": sum(b["nhan_ma_nuot_loi"] > 0 for b in bang)}))
+    json.dump(bang, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "dot_bien_sinh_r8.json"), "w"), ensure_ascii=False, indent=1)
+    return hong
+
+
 if __name__ == "__main__":
+    if sys.argv[1:] == ["--sinh"]:
+        sys.exit(1 if main_sinh() else 0)
     main()

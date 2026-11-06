@@ -830,6 +830,12 @@ _PROBE_FAIL_SRC = (
 )
 
 
+# A14 (lượt 6 r3) so CẤU TRÚC thân `_env_con` (bỏ docstring) với hằng này — danh sách CHO PHÉP, không đoán idiom.
+# SỬA `_env_con` THÌ PHẢI SỬA HẰNG NÀY, có chủ đích và qua review; lệch một nút AST là A14 đỏ.
+_HINH_ENV_CON = ('env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", PYTHONUTF8="1", PYTHONIOENCODING="utf-8")\n'
+                 'for ten in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY"):\n    env.pop(ten, None)\nreturn env\n')
+
+
 def _env_con():
     """Env cho tiến trình con: không đẻ bytecode, UTF-8, và KHÔNG rò biến git của tiến trình cha.
 
@@ -1134,7 +1140,7 @@ def case_binary_giu_nguyen_byte_qua_renormalize(root):
 
 def _vi_pham_kien_truc():
     """A14: AST của NGUỒN ĐANG CHẠY (qua `linecache` — bộ đột biến nạp bản đột biến vào đó). Trả `(env, che)`: dòng đọc
-    env ngoài `main` (chốt M8)/`_env_con`/hai ca tự kiểm, và dòng mang bộ che (import/hằng chuỗi nhắc bộ quét bí mật, `.sub`)."""
+    env ngoài `main` (chốt M8)/`_env_con` (khớp `_HINH_ENV_CON`)/hai ca tự kiểm, và dòng mang bộ che (import/hằng chuỗi nhắc bộ quét bí mật, `.sub`)."""
     import ast
     import linecache
     cay = ast.parse("".join(linecache.getlines(str(Path(__file__).resolve()))))
@@ -1142,12 +1148,9 @@ def _vi_pham_kien_truc():
     bo = {id(n) for k in ("case_chan_doan_mac_dinh_khong_lo_bi_mat", "case_chan_doan_co_tho_chi_cuc_bo")
           for n in ast.walk(ham[k])}            # miễn HẸP: main chỉ `"X" in os.environ`, _env_con chỉ `dict(os.environ…)`
     bo |= {id(c.comparators[0]) for c in ast.walk(ham["main"]) if isinstance(c, ast.Compare) and isinstance(c.ops[0], ast.In)}
-    bo |= {id(c.args[0]) for c in ast.walk(ham["_env_con"]) if isinstance(c, ast.Call) and getattr(c.func, "id", 0) == "dict" and c.args}
-    env = [n.lineno for k in ("main", "_env_con") for n in ast.walk(ham[k]) if isinstance(n, (ast.Global, ast.Nonlocal))]
-    env += [c.lineno for c in ast.walk(ham["_env_con"]) if isinstance(c, ast.Call)        # _env_con chỉ `dict(...)` rồi
-            and getattr(c.func, "id", 0) != "dict" and getattr(c.func, "attr", 0) != "pop"]   # `.pop`: không cache env đi đâu
-    env += [t.lineno for a in ast.walk(ham["_env_con"]) if isinstance(a, (ast.Assign, ast.AugAssign, ast.AnnAssign))
-            for t in getattr(a, "targets", [getattr(a, "target", None)]) if not isinstance(t, ast.Name)]   # chỉ gán CỤC BỘ
+    khop = [ast.dump(x) for x in ham["_env_con"].body[1:]] == [ast.dump(x) for x in ast.parse(_HINH_ENV_CON).body]
+    bo |= {id(n) for n in ast.walk(ham["_env_con"])} if khop else set()   # khớp hình mẫu ⇒ thân đã được duyệt
+    env = [ham["_env_con"].lineno] * (not khop) + [n.lineno for n in ast.walk(ham["main"]) if isinstance(n, (ast.Global, ast.Nonlocal))]
     goi = {id(k.value.func) for c in ast.walk(cay) if isinstance(c, ast.Call) and ast.unparse(c.func) in ("subprocess.run",
            "_chay_tien_trinh") for k in c.keywords if k.arg == "env" and isinstance(k.value, ast.Call)}   # CHỈ env= tiến trình con
     env += [n.lineno for n in ast.walk(cay) if getattr(n, "id", 0) == "_env_con" and id(n) not in goi | bo]

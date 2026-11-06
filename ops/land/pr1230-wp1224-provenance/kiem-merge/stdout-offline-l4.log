@@ -1,0 +1,19 @@
+Không có phát hiện P0/P1/P2/P3.
+
+- SHA: `4dc4fe9a30517cf4bb1cb78105a91687814cc0fa`
+- Tree: `1e59c76b1f3d39df32e3714da703ff5d2c4bc3ae`
+- Reviewer: `openai_codex / codex_cli / machine`
+
+| Kiểm | Kết quả |
+|---|---|
+| K-a | 5 diff khớp lượt 3; M4 đúng một lần; đoạn 15-08 nguyên byte |
+| K-b | Đúng 6 tệp; không conflict marker; `diff --check` rc 0 |
+| K-c | `ok: true`, `184/184`, `failed: []`, rc 0; đúng hai mục tài liệu đổi, DELTA tăng 10 byte |
+| K-d | `1777/1777`, rc 0 trên bản sao cùng SHA/tree |
+| K-e | Ba snapshot o/p/q khớp manifest; hướng dẫn và `EXPECT_VERSION` đúng q |
+
+Lệnh đối chiếu K-a/b/c/e: `python -B /tmp/wp1224-review4-fiaf60ga/check_delta.py` → rc 0. [Runner selftest](/tmp/wp1224-review4-fiaf60ga/run_selftest_isolated.py) và [bằng chứng](/tmp/wp1224-review4-fiaf60ga/final-evidence.json).
+
+Lượt selftest đầu trả `1775/1777`, rc 1 do trình ký commit bị chặn socket; chạy lại trong bản sao với ký commit giả tắt thì đạt. Lượt đầu cũng tự cập nhật [11 tệp ignored](/tmp/wp1224-review4-fiaf60ga/reviewer-state-write-incident.json), vi phạm yêu cầu chỉ đọc. Tệp tracked, index và HEAD/tree không đổi.
+
+KET_LUAN: approve

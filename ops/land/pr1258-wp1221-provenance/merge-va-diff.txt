@@ -1,0 +1,21 @@
+# merge-va-diff PR #1258 — do trong phien ghi so 2026-11-06T08:16:41Z, git 2.43.0
+$ git show -s --format='%H %T %P' 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9
+08bcb51fbed359eaeeca41bc3a0559fe308c0aa9 c7c80550aef10749ce1ea19ce2fec4e683f572aa 889334fb87c25136a13c6776a40a25b401820e04 ee7a3850b99c6256f9ecf226676f0764f540f892
+$ git merge-base 889334fb87c25136a13c6776a40a25b401820e04 ee7a3850b99c6256f9ecf226676f0764f540f892
+12e5b36225005e257026e57903f2e859a870e6f9
+$ git rev-parse ee7a3850b99c6256f9ecf226676f0764f540f892^{tree}
+4aee6da527687a2dde20e3196a2aad7867dfcded
+$ git diff --numstat 889334fb87c25136a13c6776a40a25b401820e04 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9
+698	92	.githooks/eol_policy_test.py
+$ git diff --numstat 12e5b36225005e257026e57903f2e859a870e6f9 ee7a3850b99c6256f9ecf226676f0764f540f892
+698	92	.githooks/eol_policy_test.py
+sha256(diff cha1..merge)      = b93ea950c8f059561be7246040bbff5ae69395bf715d079216d55ba843a055fe
+sha256(diff merge-base..head) = b93ea950c8f059561be7246040bbff5ae69395bf715d079216d55ba843a055fe
+BANG NHAU
+$ git rev-parse 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9:.githooks/eol_policy_test.py ee7a3850b99c6256f9ecf226676f0764f540f892:.githooks/eol_policy_test.py
+c162f447a039d2912029ce090ed506c6e7247f8f
+c162f447a039d2912029ce090ed506c6e7247f8f
+$ git diff --stat ee7a3850b99c6256f9ecf226676f0764f540f892 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9 -- .githooks/eol_policy_test.py (rong = 0 byte)
+0
+$ git merge-base --is-ancestor 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9 origin/master
+rc=0

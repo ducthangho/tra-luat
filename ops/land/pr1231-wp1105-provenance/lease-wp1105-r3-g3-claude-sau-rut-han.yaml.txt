@@ -1,0 +1,165 @@
+# LEASE — LAUNCHER-SANDBOX-LAY-MAU revision 3 / generation 3 — tha "chuyen cha binh thuong" trong luong lay mau sandbox
+# GHI HO theo chi thi CHU KHO (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 1105
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1105#issuecomment-6555779346
+authority_url: https://github.com/ducthangho/tra-luat/issues/1105#issuecomment-6555779346
+granted_on_instruction_nguyen_van: >-
+  Tin nhan chu kho trong phien dieu phoi 01-11-2026 ~08:54Z: '#1079 land xong thì cấp lease #1105'. Dieu kien cap ghi o comment
+  neo: (a) #1079 da land; (b) ai-dang-giu 3 duong dan write set deu NGUOI_GIU 0, do lai ngay truoc luc cap tren clone du ref.
+authority_caveat: >-
+  Comment neo do phien agent dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment chu kho tu viet (#566).
+dieu_kien_cap_da_do: >-
+  Cap g3 theo chi thi chu kho 05-11-2026 trong phien dieu phoi: ~08:20Z 'G3 duyệt và bắt đầu P3c' (duyet truoc g3); ~09:25Z
+  'Duyệt cả ba, làm theo kế hoạch' (dong bang r3 sha256 4355749d…, issuecomment-6654439304). r3 vao master qua PR #1226 merge
+  c5a1c3d. Do 2026-11-05T09:4xZ sau fetch +refs/heads/* (ls-remote so for-each-ref: thieu 0) va git branch -f master:
+  ops/lease_publish.py ai-dang-giu 3/3 duong dan NGUOI_GIU 1 = wp1105-r2-g2-claude (chinh lease duoc thay, bia mo hai chieu).
+quy_trinh_ap: >-
+  ADR-0060 mac dinh theo ADR-0062 (merge 1f0941e9, #1124): worker gate tai cho tren dung SHA ung vien (bat bien (a)) -> handoff
+  len Issue #1105 neo SHA ung vien cuc bo -> review Codex OFFLINE qua launcher.py run tren SHA cuc bo (M12) -> chi khi approve moi
+  push DUNG SHA do mot lan + mo PR draft -> connector, CI PR, A10 Windows local. Severity M1: 0 P0/P1/P2 mo; moi P3 dong co bang
+  chung reviewer hoac chu kho mien neo exact SHA. Push them vi CI do theo bat bien (b). Luat ban giao chu kho 02-11 khi dung.
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; KHONG thi hanh packet nay.'
+
+leased_at_utc: '2026-11-05T09:50:00Z'
+heartbeat_at: '2026-11-05T09:50:00Z'
+lease_until: '2026-11-05T16:40:00Z'
+lease_expires_at_utc: '2026-11-05T16:40:00Z'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-06T09:50:00Z'
+  han_moi_utc: '2026-11-05T16:40:00Z'
+  chi_thi: >-
+    Chu kho ra lenh "Land 1105" trong phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4; phien dieu phoi tong
+    session_015GtxrYPjZCTZeRiazdssgq dong y. Phien dieu phoi giao phien ghi so (2026-11-05 ~15:48Z): rut han lease g3 sau merge.
+  ly_do: >-
+    Packet #1105 (LAUNCHER-SANDBOX-LAY-MAU r3) da MERGE: PR #1231 (agent/wp1105-g1-claude, head d5d521e3) merge bang merge commit
+    fe84620f897913c7f6c2ce5a0c7316a49655e82f (cha d779d442 + d5d521e3), merged_by ducthangho luc 2026-11-05T13:06:43Z. Gate push
+    master run 42032872356 success tren dung fe84620. Lease khong tu chet khi land (CLAUDE.md).
+  vi_sao_khong_dung_bia_mo: >-
+    Tien le #1132 (1aa7509) / #1195: rut han dung co che da cai. Han moi dat SAU luc push de luot dang lease con thay lease song,
+    tranh rc=8 che rc=9. Khong co lease ke nhiem thay the packet nay; g2 da mang bia mo tro toi g3, khong sua g2.
+  nguoi_rut: 'phien ghi so land (khong phai executor, khong phai phien dieu phoi) theo giao viec cua phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4'
+  nghiem_thu: 'ai-dang-giu cho ba duong dan write set sau 16:40Z phai ra NGUOI_GIU 0.'
+
+packet_id: LAUNCHER-SANDBOX-LAY-MAU
+packet_slug: launcher-sandbox-lay-mau
+revision: 3
+generation: 3
+lease_id: wp1105-r3-g3-claude
+depends_on:
+  - 1079
+thay_the_cho:
+  - wp1105-r2-g2-claude
+thay_the_cho_ghi_chu: >-
+  g2 CON HAN (toi 2026-11-05T15:30Z) va dang co executor session_015GtxrYPCoXRRL14oCzB5PN lam viec (ung vien cuc bo e87f017,
+  du phong claude/handoff-wp1105-db47fcf) => bia mo hai chieu: g2 mang da_bi_thay_the: wp1105-r3-g3-claude. Cung executor, cung
+  nhanh, cung write set; doi spec r2 -> r3.
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+environment: cloud
+environment_ghi_chu: >-
+  Phien con Claude Code remote (Linux) do phien dieu phoi tao; A10 chay tren may Windows cua chu kho qua Desktop Commander theo
+  ADR-0057/0058/0059 (khoa, kiem tai, thu muc rieng, so do).
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_cli
+reviewer_ghi_chu: >-
+  Cross-review theo .claude/skills/cross-review/SKILL.md qua launcher.py run (offline, neo SHA ung vien, ADR-0060 M12) + connector
+  '@codex review' tren PR draft. Luu y: chinh packet nay sua luong lay mau sandbox §8.1 — luot review truoc khi va land co the van
+  KHONG_DO_DUOC sandbox (bang chung S1); ghi dung trang thai do duoc, khong nang assurance.
+access: read-write
+
+spec_path: ops/specs/launcher-sandbox-lay-mau-r3.md
+spec_ref_go_ghi_chu: >-
+  05-11-2026 ~12:30Z chu kho duyet "a'": BO spec_ref (ADR-0063: spec_ref la tuy chon; khai thi phai ghim
+  refs/heads/...@<OID40> va spec dung grammar H1/packet_id). Khong spec_ref => kiem-merge K1 doc spec tai H, so sha256 voi spec_hash.
+  Spec da tren master nen co mat tai H sau khi nhanh merge master. Moi truong khac giu nguyen.
+spec_source_oid: c5a1c3d1230b347333d4ca10f7dc514b817f7a9d
+spec_blob: 92c132a2ba0687e1047c588f86c7e35c1e4888e3
+spec_sha256: 4355749db2a7f8ba07d59e4a0903be0a108ddc4d8607ce4e51c75897c770d754
+spec_hash: 4355749db2a7f8ba07d59e4a0903be0a108ddc4d8607ce4e51c75897c770d754
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+spec_ref_ghi_chu: >-
+  Spec r3 (errata cua r2: §2.1 ve (iii) chuoi to tien, §2.2 mien tra ve nam gia tri, §2.3 thu tu phan loai, A2 42 dot bien, A3,
+  A10 tap bo qua, A15 moi, §7) land qua PR #1226 merge c5a1c3d. Dong bang r3: issuecomment-6654439304. Thu dinh danh la BLOB/BAM.
+spec_review: 'Codex CLI soat 2 luot (9 finding -> sua; 3 diem -> sua 1646d3d); connector #1226 sach tren 0e025dc; GPT qua Proxima.'
+ngoai_le_a10: >-
+  Chu kho 05-11 ~09:35Z: 'Không chạy CI Windows, không chạy full mutant test trên Windows, chỉ chạy Windows tập trung'; chon (a)
+  ~09:40Z: issuecomment-6654573852 — A10 = MOT luot Windows tap trung (--lap-ca tung ca, nen + ung vien chung mot script),
+  bat buoc A3 r1105_phan_loai_lech_ham_thuan va A7 r1105_sandbox_lech_luon_co QUA; khong dot-bien, khong workflow_dispatch.
+
+branch: agent/wp1105-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 1f0941e9bba1d1d517eda4174167b81963c06bd5
+start_from_sha: 1f0941e9bba1d1d517eda4174167b81963c06bd5
+immutable_acceptance_baseline: 1f0941e9bba1d1d517eda4174167b81963c06bd5
+base_ghi_chu: >-
+  Base = origin/master luc cap lease (spec Q14: base ghim luc cap). Spec do nen tren c6dd7b3; tieu chi do DELTA (A9 numstat, A10
+  B_nen/B_ung, A14) do lai tren base nay, khong doi spec. Moi phep do kich thuoc: git diff --numstat <base_sha> <candidate>.
+reviewed_sha_required: 1f0941e9bba1d1d517eda4174167b81963c06bd5
+reviewed_sha_ghi_chu: 'chua co head code luc cap lease; moi luot review neo dung SHA cua luot.'
+
+write_set:
+  - .claude/dev/launcher.py
+  - .claude/dev/launcher_test.py
+  - ops/handoff/wp1105-g1-claude.md
+write_set_hash: 98d2f9018f2d83b80bd4d6e7c0312810fca5eb99a1ed4536d589fcfdf992f9bc
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP (LC_ALL=C), noi bang LF, co LF cuoi, utf-8.'
+write_set_ghi_chu: >-
+  Spec §3: diff PR chi 2 tep (.claude/dev/launcher.py, .claude/dev/launcher_test.py); ops/handoff/wp1105-g1-claude.md chi song tren
+  nhanh lease/handoff. Khong them tep test moi, khong cham .claude/dev/ci_dang_ky_test.py.
+tran_kich_thuoc: >-
+  nang_tran spec §3 (chu kho, Q16 'Sửa trần <=10, <=850'): <= 10 tep / <= 850 dong them; A9 chi cho phep 2 tep trong diff PR.
+  Vuot 850 => DUNG, checkpoint chu kho.
+tran_loi_goi_codex: >-
+  ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544: tran cung 10 loi goi Codex review; ngan sach mem chu kho duyet (Q9, Q17) = 4;
+  da dung 0. Truoc MOI loi goi dem so da dung. Hai luot lien tiep chua approve => Review Rescue Checkpoint (ADR-0037), hoi chu kho
+  truoc loi goi ke tiep. Luot bi cat sau khi da sinh output van tinh mot loi goi.
+dieu_kien_merge: 'ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587; windows: required (spec dong khai).'
+ci_budget:
+  gate_tu_dong: 'CI PR tu dong (ubuntu) tren PR cua packet'
+  windows: >-
+    A10 theo ngoai_le_a10 (issuecomment-6654573852): mot luot Windows TAP TRUNG tren tra-luat-win qua Desktop Commander
+    (ADR-0057/0058/0059: giu KHOA.txt, kiem tai, thu muc rieng, so do), bao truoc phien dieu phoi #1099
+    session_015GtxrYPjZCTZeRiazdssgq. KHONG workflow_dispatch, KHONG --dot-bien tren Windows, KHONG launcher_test tron bo tren
+    Windows. Quota Desktop Commander ~90% thang: gom lenh.
+  het: 'Mot job bat buoc do 2 luot lien tiep cung mot loi => DUNG, bao phien dieu phoi truoc luot thu ba'
+dieu_kien_dung:
+  - 'S1 — can sua tep ngoai write set (ke ca .claude/dev/ci_dang_ky_test.py, ops/**, .github/**). DUNG, handoff.'
+  - 'S2 — vuot 850 dong them hoac diff PR co tep thu ba (A9). DUNG, checkpoint chu kho.'
+  - 'S3 — spec tu mau thuan / thieu du kien de lam dung tieu chi. DUNG, bao phien dieu phoi (khong tu suy).'
+  - 'S4 — het han lease => ngung ghi, handoff §7 (luat ban giao chu kho 02-11: day commit chua day len claude/handoff-wp1105-<sha7>, gui hien trang, comment ban giao tren #1105).'
+  - 'S5 — bieu hien thu 9 cua lop sandbox-process-identity-race (spec r3 §7: da biet 8) => DUNG han, bao phien dieu phoi.'
+  - 'S6 — may Windows chu kho khong Online qua 24 gio cho A10 => packet blocked, bao phien dieu phoi.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land
+  - Khong LIVE (Drive/NLM/webapp/registry), khong deploy webapp hay Package, khong bump VERSION
+  - Khong doc/ghi credential that (tl_secrets*, *.enc, auth.json that, token); test chi dung fixture gia
+  - Khong workflow_dispatch (A10 la luot local tren may chu kho)
+  - Khong force-push
+  - Khong viet chuoi bo-qua-CI nguyen van trong commit message
+
+coordination_paths:
+  - ops/leases/wp1105-r2-g2-claude.yaml
+run_minutes: 1440
+heartbeat_required_minutes: 360
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Thoi luong A10 tap trung tren Windows va A11 (spec §6).'
+  - 'May Windows chu kho Online trong thoi gian thi hanh: chi biet luc do (list_devices).'

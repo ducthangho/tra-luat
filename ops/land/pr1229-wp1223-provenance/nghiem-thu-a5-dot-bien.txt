@@ -1,0 +1,21 @@
+# A5 #1223 ve am — tl selftest THAT tren ba ban git archive 50baf89 (git init rong, HOME tam rieng), chay song song ~21:16–21:23Z
+# nen   : khong dot bien
+# skill : them dong 'Webapp cũ: 2.21.2p' cuoi SKILL.md (dot bien 'chen lai mot dong 2.21.2p vao SKILL.md' cua dac ta)
+# expect: EXPECT_VERSION = "2.21.2q" -> "2.21.2p" trong scripts/tl.py (dot bien 'tra EXPECT_VERSION ve 2p')
+# Phan dinh: ca do = tap FAIL cua ban dot bien TRU tap FAIL cua nen (nen do san 2 ca vi cay archive khong co lich su git).
+## base: == tl selftest 1775/1777 == rc=1
+  [FAIL] r218_docclaims_sach_khong_bao_gia
+  [FAIL] wp1099_nlm_nap_lai
+## a5skill: == tl selftest 1773/1777 == rc=1
+  [FAIL] r210_skill_tro_kich_ban_va_gas_dung_ban
+  [FAIL] r218_docclaims_sach_khong_bao_gia
+  [FAIL] r219_gotchas_nhan_trang_thai
+  [FAIL] wp1099_nlm_nap_lai
+## a5expect: == tl selftest 1773/1777 == rc=1
+  [FAIL] expect_version
+  [FAIL] r119_api_contract_version_stamp_matches_expect
+  [FAIL] r218_docclaims_sach_khong_bao_gia
+  [FAIL] wp1099_nlm_nap_lai
+DELTA a5skill: ['r210_skill_tro_kich_ban_va_gas_dung_ban', 'r219_gotchas_nhan_trang_thai']
+DELTA a5expect: ['expect_version', 'r119_api_contract_version_stamp_matches_expect']
+A5 ve am: DAT — moi dot bien lam DO dung ca dich (va chi ca cua no trong ba ca dich)

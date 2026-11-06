@@ -1,0 +1,37 @@
+Không có phát hiện P0/P1/P2/P3.
+
+Reviewer: `openai_codex / codex_cli / machine`, họ OpenAI. Model/effort phục vụ chưa được đo độc lập.
+
+- HEAD: `4dc4fe9a30517cf4bb1cb78105a91687814cc0fa`
+- Tree: `1e59c76b1f3d39df32e3714da703ff5d2c4bc3ae`
+- SHA-256 đặc tả khớp neo yêu cầu.
+
+| Kiểm tra | Kết quả |
+|---|---|
+| K-a | Hunk và context của 5 tệp trùng byte sau bỏ metadata `index` và số dòng hunk. M4 đúng 1 lần; đoạn sự cố 15-08 nguyên byte. |
+| K-b | Đúng 5 tệp packet + manifest; không conflict marker; `diff --check` rc 0. |
+| K-c | `ok: true`, **184/184**, `failed: []`, rc 0. Manifest chỉ đổi hai entry cho phép, size DELTA +10 byte và các trường tổng hợp. |
+| K-d | **1777/1777**, rc 0, với cấu hình ký commit fixture được cô lập theo tiến trình. |
+| K-e | DELTA khớp ba snapshot o/p/q trong manifest; guide trỏ bản q và tệp tồn tại. |
+| K-f | **KHÔNG ghi vào checkout gốc**. SHA-256 trước/sau của toàn bộ **12.404 mục**, gồm ignored và `.git`, trùng nhau; thêm/xoá/đổi đều bằng 0. |
+
+Lần selftest ban đầu **failed: 1775/1777**, do signer Git bị sandbox chặn. Hai ca này cũng đỏ trên base; cả hai xanh khi đặt `commit.gpgsign=false` riêng cho tiến trình test. Full selftest sau đó **passed: 1777/1777**, không sửa mã hoặc ca test.
+
+Mọi thực thi dự án có thể ghi chạy trong `/tmp/rv5-copy`; đối chứng dùng `/tmp/rv5-base`. Hiện vật nằm tại `/tmp/rv5-evidence-6ctr6y7r`. Lỗi ghi ignored khiến lượt 4 vô hiệu đã được kiểm soát bằng bản sao và snapshot toàn cây.
+
+Các lệnh tái hiện:
+
+```bash
+cd /tmp/rv5-copy
+python -B /tmp/rv5-evidence-6ctr6y7r/verify_packet.py
+git diff --stat 50baf894216504d4bb975690ceb9dee4835a2ad7 HEAD
+python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
+python -B /tmp/rv5-evidence-6ctr6y7r/reproduce_selftest.py
+python -B /tmp/rv5-evidence-6ctr6y7r/check_readonly.py
+```
+
+`doctrine-scan` và `doc-claims-check --strict`: passed. CI từ xa: not_run trong lượt offline.
+
+[Biên bản và bằng chứng đầy đủ](/tmp/rv5-evidence-6ctr6y7r/review.evidence.json).
+
+KET_LUAN: approve

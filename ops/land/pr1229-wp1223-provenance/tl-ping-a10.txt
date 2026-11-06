@@ -1,0 +1,4 @@
+# A10 (#1223) — python scripts/tl.py ping, env=code (bootstrap phien nay), luc ~2026-11-05T18:47Z
+# checkout 69fb42e (cha 825eb35 = origin/master; scripts/tl.py giong het 50baf89: khong-doi); EXPECT_VERSION: EXPECT_VERSION = "2.21.2q"
+# stdout+stderr, rc 0; grep 'CẢNH BÁO' = 0
+{"ok": true, "pong": true, "ts": "2026-11-05T18:47:29.545Z", "version": "2.21.2q", "schema_version": "2.21.2q", "registry_schema": "reg_cols_row_kind_v1", "registry_cols": 27, "action": "ping", "elapsed_ms": 65, "_client_ms": 3031}

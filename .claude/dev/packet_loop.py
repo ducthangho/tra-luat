@@ -3262,10 +3262,13 @@ def _owner_record(path, repo, pr, schema):
     if not isinstance(d, dict):
         raise ValueError("owner comment phải là object")
     url = f"https://github.com/{repo}/pull/{pr}#issuecomment-{d.get('id')}"
+    issue_comment_url = f"https://github.com/{repo}/issues/{pr}#issuecomment-{d.get('id')}"
+    # Packet #1254: GitHub rewrites only the display URL when an issue becomes a PR.
+    allowed_urls = (url, issue_comment_url) if schema == "human_exact_head_audit.v1" else (url,)
     if not (repo == "ducthangho/tra-luat" and type(d.get("id")) is int and d["id"] > 0
             and isinstance(d.get("user"), dict) and d["user"].get("login") == CHU_KHO and d["user"].get("type") == "User"
             and d.get("author_association") == "OWNER" and d.get("issue_url") == f"https://api.github.com/repos/{repo}/issues/{pr}"
-            and d.get("html_url") == url):
+            and d.get("html_url") in allowed_urls):
         raise ValueError("owner comment origin/identity không hợp lệ")
     for key in ("created_at", "updated_at"):
         if not isinstance(d.get(key), str) or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z", d[key]):
@@ -3276,6 +3279,9 @@ def _owner_record(path, repo, pr, schema):
     record = _yaml_cay(d["body"].encode("utf-8"))
     if not isinstance(record, dict) or record.get("schema") != schema:
         raise ValueError("owner record schema không hợp lệ")
+    if schema == "human_exact_head_audit.v1" and record.get("audit_source") == issue_comment_url:
+        # Normalize a parsed copy only; raw body, identity and timestamps stay untouched.
+        record = dict(record, audit_source=url)
     return record, d, url
 
 

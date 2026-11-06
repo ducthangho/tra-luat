@@ -1,0 +1,26 @@
+# do lai trong phien ghi so session_015GtxrZX3cx55Fs3dp8KLdr, 2026-11-05T18:40:19Z, git version 2.43.0
+$ git show -s --format='%H %P %T' 801042cbf6ccc00a4da37ed2a62a61bac10bae02
+801042cbf6ccc00a4da37ed2a62a61bac10bae02 3163f4d02a583787a9340c63a1f5eebd3780d970 97cb2dda246886c7d4bec2bea4a4b89342403a65 6d22bf4dc6cc2721df9b14b5d5fb3d4e114fa664
+$ git show -s --format='%H %P %T' 97cb2dda246886c7d4bec2bea4a4b89342403a65
+97cb2dda246886c7d4bec2bea4a4b89342403a65 69dbf3af3c82bc6e1d6769666ca670bd706e80a5 4fb3c034d0456a600634f501b8f20bd1487e3b83 f5ab9894b8eeccd2aeab913cfa257a1d05db39e5
+$ git merge-base 3163f4d02a583787a9340c63a1f5eebd3780d970 97cb2dda246886c7d4bec2bea4a4b89342403a65
+4fb3c034d0456a600634f501b8f20bd1487e3b83
+$ git diff --numstat 3163f4d02a583787a9340c63a1f5eebd3780d970 801042cbf6ccc00a4da37ed2a62a61bac10bae02
+36	3	ops/cai_actionlint.sh
+178	0	ops/lease_publish_test.py
+$ git diff $(git merge-base 3163f4d02a583787a9340c63a1f5eebd3780d970 97cb2dda246886c7d4bec2bea4a4b89342403a65) 97cb2dda246886c7d4bec2bea4a4b89342403a65 | sha256sum
+feb8642f43b3dfcc11b2155759e0b200a462e0ed3398f0b5347e393e6b3e743b  -
+$ git diff 3163f4d02a583787a9340c63a1f5eebd3780d970 801042cbf6ccc00a4da37ed2a62a61bac10bae02 | sha256sum
+feb8642f43b3dfcc11b2155759e0b200a462e0ed3398f0b5347e393e6b3e743b  -
+$ git diff --numstat fe84620f897913c7f6c2ce5a0c7316a49655e82f 69dbf3af3c82bc6e1d6769666ca670bd706e80a5
+36	3	ops/cai_actionlint.sh
+178	0	ops/lease_publish_test.py
+$ git diff 69dbf3af3c82bc6e1d6769666ca670bd706e80a5 801042cbf6ccc00a4da37ed2a62a61bac10bae02 -- ops/cai_actionlint.sh ops/lease_publish_test.py | wc -c
+0
+$ git merge-base --is-ancestor 801042cbf6ccc00a4da37ed2a62a61bac10bae02 origin/master; echo rc=$?
+rc=0
+$ git rev-parse 801042cbf6ccc00a4da37ed2a62a61bac10bae02:ops/cai_actionlint.sh 97cb2dda246886c7d4bec2bea4a4b89342403a65:ops/cai_actionlint.sh 801042cbf6ccc00a4da37ed2a62a61bac10bae02:ops/lease_publish_test.py 97cb2dda246886c7d4bec2bea4a4b89342403a65:ops/lease_publish_test.py
+03d98e236f28d8bd07c1ee01ee1810d17387dfee
+03d98e236f28d8bd07c1ee01ee1810d17387dfee
+9c749d9a57bdb55a3d924cb2802e2501bf9f5bb5
+9c749d9a57bdb55a3d924cb2802e2501bf9f5bb5

@@ -1,0 +1,213 @@
+# HO SO LAND — packet #1105 LAUNCHER-SANDBOX-LAY-MAU r3, lease g3, code qua PR #1231. Khuon: ops/land/pr1141-wp1132-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+#
+# TRANG THAI: merged (fe84620), LANDED — du bon moc §10.2.2 tren DUNG merge SHA (run push master 42032872356 + wd-run 42058496716).
+# Uy quyen land: comment approve_merge HOI TO 6662804340 (16:05:48Z). §8.1: model/effort phuc vu do lai mot phan, phan con thieu MIEN
+# bang comment HOI TO 6664163643 `assurance_81_mien` (17:05:43Z). Ca hai dang SAU merge 13:06:43Z. Ban dau (737c26a) ghi landed false.
+# NHAN: measured (phien nay do lai, co tep nguon) / loi_khai_co_neo (lay tu hien vat/comment co neo, phien nay khong chay lai) /
+#       thuat_lai (chi co loi ke cua phien khac) / not_measured.
+# Readback tho: ops/land/pr1231-wp1105-provenance/ (SHA256SUMS kem). Moi phep do REST: GET qua proxy phien bang GITHUB_PAT.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrZoeWT1FNmfcexDuPL
+input_packet_generations:
+  - {packet_issue: 1105, packet_id: LAUNCHER-SANDBOX-LAY-MAU, revision: 2, generation: 1, lease_id: wp1105-r2-g1-claude, ghi_chu: 'het han tu nhien; khong bia mo (g2 khai thay_the_cho rong).'}
+  - {packet_issue: 1105, packet_id: LAUNCHER-SANDBOX-LAY-MAU, revision: 2, generation: 2, lease_id: wp1105-r2-g2-claude, ghi_chu: 'da_bi_thay_the: wp1105-r3-g3-claude (bia mo hai chieu, 7aac413).'}
+  - {packet_issue: 1105, packet_id: LAUNCHER-SANDBOX-LAY-MAU, revision: 3, generation: 3, lease_id: wp1105-r3-g3-claude, ghi_chu: 'lease cuoi; rut han sau merge (xem lease.thu_hoi_cuoi).'}
+authorized_head_sha: d5d521e3e600e9c549cf5dc9263ffc4385c13407
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1231#issuecomment-6662804340
+authorization_ghi_chu: >-
+  measured — readback-duyet-issuecomment-6662804340.json: user ducthangho, created_at = updated_at = 2026-11-05T16:05:48Z, dong dau
+  `approve_merge: d5d521e3e600e9c549cf5dc9263ffc4385c13407`, than tu ghi "Xác nhận hồi tố": lenh "Land 1105" trong phien dieu phoi
+  session_015GtxraXfMD1t2FJLzzGDr4 truoc luc merge 13:06:43Z. Comment dang SAU merge ~3 gio — la XAC NHAN HOI TO, khong phai duyet
+  truoc merge; lenh goc "Land 1105" truoc merge van chi la thuat_lai. Phien dieu phoi tong session_015GtxrYPjZCTZeRiazdssgq dong y
+  merge (thuat_lai). Mien Windows K6: issuecomment-6658278170. CAVEAT #566: comment dang bang token chu kho deu hien ducthangho.
+land_operator: 'measured — readback-pr-1231.json: merged true, merged_at 2026-11-05T13:06:43Z, merged_by ducthangho, merge_commit_sha fe84620.'
+merge_method: merge
+merge_commit: fe84620f897913c7f6c2ce5a0c7316a49655e82f
+merge_commit_tree: 9c5534209694e0a7d71cca91b874c053762106f1
+merge_commit_parents: [d779d442920c3ae55a7c355b02a75e245dc8cd3b, d5d521e3e600e9c549cf5dc9263ffc4385c13407]
+pre_merge_checks:
+  - name: 'kiem-merge K0–K7 tren head cuoi'
+    sha: d5d521e3e600e9c549cf5dc9263ffc4385c13407
+    conclusion: 'rc 0 — "ĐỦ ĐIỀU KIỆN MERGE"'
+    nguon: 'provenance/kiem-merge/ (13 tep tu nhanh claude/handoff-wp1105-kiem-merge @781d6a5; SHA256SUMS cua chinh thu muc kiem lai OK)'
+    ghi_chu: >-
+      loi_khai_co_neo — kiem-merge/output.txt + kiem-merge/lenh.sh: phien nay KHONG chay lai kiem-merge. lenh.sh dung --base a57eade
+      (base PR luc kiem); merge commit thuc te co cha mot d779d442 (master tien qua PR #1232 truoc luc merge) — merge-va-diff.txt cho
+      thay diff fe84620^1..fe84620 van chi 2 tep cua write set (+525/-18).
+  - name: 'Codex connector tren head cuoi'
+    sha: d5d521e3e600e9c549cf5dc9263ffc4385c13407
+    conclusion: 'sach'
+    ghi_chu: >-
+      measured — readback-comments-pr-1231.json: issuecomment-6657536573 "Didn't find any major issues", "Reviewed commit: d5d521e3e6";
+      khoi codex-review-state 6656662929 commit_sha d5d521e, has_any_findings false. Luot tren df34637: 6656712650 sach va
+      6656849922 Request changes [P2] ancestor ordering — dong theo quyet dinh chu kho (a) issuecomment-6657983059 (ghi ho, #566),
+      no co ten R3-PHAN-LOAI-TO-TIEN-DOC-LAI.
+  - name: 'review offline Codex (ADR-0060 M12) luot 4 tren head cuoi'
+    sha: d5d521e3e600e9c549cf5dc9263ffc4385c13407
+    conclusion: 'approve (dong cuoi KET_LUAN: approve)'
+    nguon: 'provenance/kiem-merge/run-offline-l4.json + kiem-merge/stdout-offline-l4.log'
+    ghi_chu: >-
+      measured — kiem-merge/run-offline-l4.json: run 2d61d684, head d5d521e, trang_thai xong, ma_thoat 0, stdout_sha256 06e54fc7… khop
+      sha256 cua kiem-merge/stdout-offline-l4.log (kiem-merge/SHA256SUMS). model_phuc_vu_trang_thai KHONG_DO_DUOC, effort_phuc_vu_trang_thai
+      KHONG_DO_DUOC, sandbox_trang_thai DO_DUOC (sandbox_lech chuyen_cha_trong_cay 2, bon khoa con lai 0).
+  - name: 'ci-dot-bien-du.yml (M9 full_mutant_audit, K7) tren head cuoi'
+    run_id: 42023912484
+    sha: d5d521e3e600e9c549cf5dc9263ffc4385c13407
+    conclusion: success
+    ghi_chu: 'loi_khai_co_neo — kiem-merge/ddr.json + kiem-merge/ddj.json: run 42023912484 success, 10 job success (8 manh + du + gop).'
+  - name: 'Windows K6'
+    sha: d5d521e3e600e9c549cf5dc9263ffc4385c13407
+    conclusion: 'owner_waived — dong mien'
+    ghi_chu: >-
+      measured — readback-mien-k6-issuecomment-6658278170.json: user ducthangho, 2026-11-05T12:43:08Z, than
+      "windows: d5d521e3e600e9c549cf5dc9263ffc4385c13407 mien"; ly do A10 tap trung theo ngoai le issuecomment-6654573852
+      (readback-ngoai-le-a10-issuecomment-6654573852.json), A3/A7 QUA, ca r927_lenh_run_ghi_effort_va_sandbox_vao_run_json do ca nen
+      1f0941e lan head (WinError 3), delta 0 — phan A3/A7/delta la loi_khai_co_neo, phien nay khong chay Windows.
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA'
+    run_id: 42032872356
+    run_attempt: 1
+    sha: fe84620f897913c7f6c2ce5a0c7316a49655e82f
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, danh-gia-gate-output-42032872356.txt, danh_gia_gate.py, phan-chung-buoc-42032872356.txt]
+    moc_run: 'measured — ci/provenance.yaml moc.run: event push, head_sha fe84620, run_attempt 1, passed; ci/jobs.json 23/23 job success (13:06:50Z → 13:53:28Z).'
+    moc_checkout: 'measured — ci/provenance.yaml: 23/23 job co buoc checkout passed fe84620f897913c7f6c2ce5a0c7316a49655e82f, tree 9c55342.'
+    moc_workflow_definition: >-
+      measured — ci/provenance.yaml moc.workflow_definition: passed; path .github/workflows/ci.yml, oid fe84620, blob 2b2c9aa2,
+      sha256 aed785d6…; wd-run 42058496716 (ops-do-workflow-definition.yml, workflow_dispatch success 15:47:11Z,
+      readback-run-42058496716.json), artifact 13428729811.
+    moc_gate_output: >-
+      measured — danh-gia-gate-output-42032872356.txt (danh_gia_gate.py sha256 b87f9697 = ban ops/land/pr1198-wp1195-provenance/,
+      luat THEO BUOC): MOC_GATE_OUTPUT passed, 23/23 job co dau hieu duong. phan-chung-buoc-42032872356.txt: xoa dau hieu buoc
+      chay_lease_publish_test.sh, bien_nhan_v2_test.py (gate-ops), ci_dang_ky_test.py --chay (gate-registry) => ca ba not_measured.
+  - name: 'launcher-windows.yml push master tren fe84620'
+    run_id: 42032872386
+    sha: fe84620f897913c7f6c2ce5a0c7316a49655e82f
+    conclusion: cancelled
+    nguon: [readback-run-42032872386.json, readback-jobs-42032872386.json]
+    ghi_chu: >-
+      measured — run cancelled (13:06:47Z → 13:18:20Z), hai job launcher (ubuntu-latest) va launcher (windows-latest) deu cancelled.
+      thuat_lai — bi HUY theo lenh chu kho "không chạy CI Windows" (ngoai le A10 issuecomment-6654573852); REST khong ghi ai huy.
+      Lane nay khong phai gate (CLAUDE.md muc c); khong tinh vao bon moc.
+bookkeeping:
+  - {item: 'rut han lease wp1105-r3-g3-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', nhanh: 'claude/ghi-so-land-1231', ghi_chu: 'chi cham ops/land/**; lease rut han nam tren nhanh ops/cap-lease-1105-g1.'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: kiem-dong-wp tren lease sau rut han (lease-wp1105-r3-g3-claude-sau-rut-han.yaml.txt) luc 16:41:37Z rc 0 "ĐÓNG ĐƯỢC WP LAUNCHER-SANDBOX-LAY-MAU — merge fe84620".'}
+  - {item: 'ban giao hien vat kiem-merge', ket_qua: 'nhanh claude/handoff-wp1105-kiem-merge @781d6a5 (chep vao provenance/kiem-merge/).'}
+  - item: 'no tach (de xuat Issue, phien dieu phoi quyet)'
+    ket_qua: >-
+      (1) R3-PHAN-LOAI-TO-TIEN-DOC-LAI — errata §2.3 dac ta: ghi tuong minh truong hop to tien doc lai doi starttime/ppid khi c la
+      to tien (connector P2 6656849922, quyet dinh (a) 6657983059). (2) R927-WINDOWS-RUNS-DIR — ca
+      r927_lenh_run_ghi_effort_va_sandbox_vao_run_json do tren Windows o ca nen lan head (FileNotFoundError WinError 3), dong mien
+      6658278170.
+# ---- het truong chuan
+packet_id: LAUNCHER-SANDBOX-LAY-MAU
+packet_issue: 1105
+revision: 3
+generation: 3
+pham_vi_land: code
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session session_015GtxrZoeWT1FNmfcexDuPL — phien GHI SO duoc phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 giao;
+  KHONG phai executor (session_015GtxrYPCoXRRL14oCzB5PN) va khong phai phien merge.
+
+spec:
+  path: ops/specs/launcher-sandbox-lay-mau-r3.md
+  blob: 92c132a2ba0687e1047c588f86c7e35c1e4888e3
+  sha256: 4355749db2a7f8ba07d59e4a0903be0a108ddc4d8607ce4e51c75897c770d754
+  nguon: >-
+    measured — merge-va-diff.txt: git rev-parse fe84620:ops/specs/launcher-sandbox-lay-mau-r3.md = 92c132a2, sha256 4355749d…d754,
+    khop spec_hash cua lease g3. Dong bang r3: issuecomment-6654439304 (ghi ho, #566); vao master qua PR #1226 (c5a1c3d).
+
+lease:
+  lease_id: wp1105-r3-g3-claude
+  path: ops/leases/wp1105-r3-g3-claude.yaml (nhanh ops/cap-lease-1105-g1)
+  thay_the_cho: 'wp1105-r2-g2-claude (bia mo hai chieu 7aac413, g2 con han luc cap).'
+  write_set_so_tep: 3
+  thu_hoi_cuoi: >-
+    DA NHA bang RUT HAN sau merge: lease_until 2026-11-06T09:50Z -> 2026-11-05T16:40:00Z (khoi thu_hoi_bang_rut_han, commit 942fb45
+    tren ops/cap-lease-1105-g1, cha 1613c68, push 15:53Z); lease_publish.py check rc 0 truoc push; ops-publish-lease run 42059523698
+    success ca buoc dang (readback-run-42059523698.json, readback-jobs-42059523698.json). Tep lease sau rut han:
+    lease-wp1105-r3-g3-claude-sau-rut-han.yaml.txt (cmp khop origin/ops/cap-lease-1105-g1 luc 16:41Z). Sau 16:40Z:
+    ai-dang-giu-sau-rut-han.txt — thieu ref 0, ba duong dan write set NGUOI_GIU 0 (g3 hien HET_HAN). Khong bia mo vi khong co lease
+    ke nhiem.
+  diff_do: >-
+    measured — merge-va-diff.txt: git diff --stat fe84620^1 fe84620 = 2 tep +525/-18 (.claude/dev/launcher.py,
+    .claude/dev/launcher_test.py); numstat base lease 1f0941e..d5d521e = +102/-15 va +423/-3, tong them 525 <= 850 (A9).
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-1231.json merged true; merge-va-diff.txt cha d779d442 + d5d521e3, tree 9c553420; d5d521e la to tien origin/master.'
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA fe84620: DAT, du bon moc (post_merge_checks muc 1, luot push that); (2) lease nha:
+    rut han 942fb45 ve 16:40Z, ops-publish-lease 42059523698 success; (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp-m8.txt);
+    (4) review neo DUNG authorized_head d5d521e: offline luot 4 approve, connector sach; P2 tren df34637 dong theo quyet dinh chu kho
+    (a); (5) uy quyen land: DAT bang comment approve_merge HOI TO 6662804340 neo d5d521e (dang SAU merge, xem authorization_ghi_chu);
+    (6) muc tieu packet: xem nghiem_thu (phan lon loi_khai_co_neo; A10 owner_waived); (7) §8.1: DAT theo MIEN chu kho cho phan
+    model/effort phuc vu khong do duoc — comment HOI TO 6664163643 `assurance_81_mien: d5d521e…` (assurance_81.mien_chu_kho_model_effort);
+    sandbox DO_DUOC.
+  lich_su_nhan: >-
+    737c26a: landed false — thieu (5) comment neo SHA va (7) model/effort KHONG_DO_DUOC (chot phien dieu phoi 15:57Z, tien le pr1198).
+    Nang len true sau: (7) do lai + mien chu kho (send_message 16:05Z), (5) comment 6662804340 (16:05:48Z). Connector P1 r4483463940
+    (PR #1244, cf9d9b5): mien (7) chi co nguon thuat_lai => neo lai vao comment 6664163643 (17:05:43Z) cua chu kho, dung SHA + pham vi.
+
+assurance_81:
+  reviewer_assurance_81: DAT_THEO_MIEN_CHU_KHO
+  review_exact_sha: 'DAT — luot offline 4 head d5d521e = authorized_head_sha, ma_thoat 0, KET_LUAN approve; connector sach tren d5d521e.'
+  thuc_thi:
+    model: 'measured — kiem-merge/run-offline-l4.json model_phuc_vu_trang_thai KHONG_DO_DUOC (2 dong giong khung response.created/completed khong doc duoc).'
+    model_effort_do_lai: >-
+      loi_khai_co_neo — do lai boi executor session_015GtxrYPCoXRRL14oCzB5PN (send_message 16:04Z, phien dieu phoi xac nhan 16:05Z):
+      rollout /root/.codex/sessions/2026/11/05/rollout-2026-11-05T11-52-33-01a1ab8d-b147-7673-9926-5c55cf732423.jsonl, sha256
+      6219102d38b87f26d92762284cb9165fdc774d39ae4b005b876e9b83e37d2520, 258 dong (tep nam trong container executor, KHONG co trong
+      kho, phien ghi so khong doc duoc). DO LAI DUOC: turn_context (1 luot) model gpt-6.1-sol, effort xhigh; session_meta codex-cli
+      0.166.0, originator codex_exec, provider openai; kiem-merge/run-offline-l4.json 32 khung deu gpt-6.1-sol. CHUA DO DUOC:
+      turn_context la cau hinh phia CLIENT, khong phai may chu xac nhan; 31 token_usage_record khong mang truong model nen model
+      theo tung phan hoi khong do duoc; 2 khung trong run.json khong doc duoc => model/effort PHUC VU van KHONG_DO_DUOC.
+    mien_chu_kho_model_effort: >-
+      measured — readback-mien-81-issuecomment-6664163643.json: user ducthangho, created_at = updated_at = 2026-11-05T17:05:43Z,
+      tren PR #1231 (https://github.com/ducthangho/tra-luat/pull/1231#issuecomment-6664163643), dong dau
+      `assurance_81_mien: d5d521e3e600e9c549cf5dc9263ffc4385c13407`. Pham vi chu kho tu ghi: CHI model/effort PHUC VU khong do duoc
+      cua luot review offline 4 (launcher run 2d61d684) tren d5d521e; KHONG mien exact SHA, ma_thoat, stdout_sha256, verdict hay
+      sandbox. Loi mien dang SAU merge 13:06:43Z (~4 gio) — la XAC NHAN HOI TO; chi thi goc trong phien dieu phoi
+      session_015GtxraXfMD1t2FJLzzGDr4 ("về model và effort của codex hãy thử đo lại, nếu không được tôi cho phép bỏ qua") chi la
+      thuat_lai. Da thu do lai truoc (model_effort_do_lai). Khong vien dan #1240. CAVEAT #566: comment dang bang token chu kho deu
+      hien ducthangho. Ban truoc cua khoi nay neo vao send_message (thuat_lai) — connector P1 r4483463940 tren PR #1244 bat; thay neo.
+    effort: 'measured — kiem-merge/run-offline-l4.json effort_phuc_vu_trang_thai KHONG_DO_DUOC (theo model).'
+    sandbox_mode: 'measured — kiem-merge/run-offline-l4.json sandbox_trang_thai DO_DUOC, co sandbox_lech (muc tieu cua chinh packet nay, A13).'
+  ghi_chu: 'Khong nang nhan: packet sua dung luong do sandbox; model/effort phuc vu van khong do duoc tren luot nay.'
+
+review:
+  so_loi_goi_codex: 'thuat_lai — 6 theo dem cua phien dieu phoi (offline 1 db47fcf, 2 e87f017, 3 df34637 theo 6656761412; offline 4 d5d521e; connector df34637, d5d521e).'
+  tran: 'ngan sach mem 6 (chu kho "B + 6", issuecomment-6656761412, ghi ho #566); tran cung 10 (ADR-0055@d2e3052).'
+  ket_qua_theo_luot: >-
+    offline 1 db47fcf request_changes (P1 identity-chain-bypass -> A15 / r3) · offline 2 e87f017 approve · offline 3 df34637 approve
+    (thuat_lai, 6656761412) · connector df34637 sach + P2 ancestor ordering (dong theo quyet dinh (a)) · offline 4 d5d521e approve
+    (measured) · connector d5d521e sach (measured).
+
+nghiem_thu:
+  A1: 'loi_khai_co_neo — PR comment 6657488652 + handoff: launcher_test 373/373 (nen a57eade 366/366), --dot-bien 602/602 tren d5d521e.'
+  A2: 'loi_khai_co_neo — handoff 6655220155: tap ten r27_* nen 42 ⊆ ung vien 42.'
+  A3_den_A8_A15: 'loi_khai_co_neo — ca r1105_* nam trong launcher_test 373/373 va dot bien 602/602 (A1); CI push master gate-cong-cu/gate-nhanh xanh tren fe84620.'
+  A9: 'measured — merge-va-diff.txt: 2 tep, +525 <= 850.'
+  A10: 'owner_waived — dong mien K6 6658278170 + ngoai le A10 6654573852; luot Windows tap trung: loi_khai_co_neo (A3/A7 QUA, delta 0).'
+  A11: 'loi_khai_co_neo — ci-dot-bien-du run 42023912484 success tren d5d521e (kiem-merge/ddr.json, ddj.json).'
+  A12: 'loi_khai_co_neo — handoff: ruff F delta 0, diff --check rc 0, doctrine-scan rc 0.'
+  A13: 'measured (mot phan) — kiem-merge/run-offline-l4.json sandbox DO_DUOC + sandbox_lech; khop sha256 tep launcher cua ung vien: thuat_lai (handoff).'
+  A14: 'thuat_lai — handoff 6655220155: ung vien 9/9 DO_DUOC, nen 0/6 (do tren e87f017).'
+
+khong_do_duoc:
+  - 'Tin nhan goc "Land 1105" cua chu kho: chi co loi thuat lai cua phien dieu phoi.'
+  - 'Ai huy run launcher-windows 42032872386: REST khong ghi.'
+  - 'Model/effort phuc vu cua luot review offline 4: KHONG_DO_DUOC (run.json).'

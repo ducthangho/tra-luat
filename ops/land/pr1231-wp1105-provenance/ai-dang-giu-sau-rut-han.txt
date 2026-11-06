@@ -1,0 +1,15 @@
+# ai-dang-giu 3 duong dan write set g3 sau rut han; fetch +refs/heads/*; git branch -f master origin/master; ls-remote so for-each-ref theo TAP TEN (comm -23 = thieu)
+thieu=0
+2026-11-05T16:42:14Z
+## .claude/dev/launcher.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0
+## .claude/dev/launcher_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ops/handoff/wp1105-g1-claude.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0

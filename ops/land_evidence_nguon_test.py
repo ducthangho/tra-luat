@@ -38,7 +38,8 @@ L6_TRUONG = ("post_merge_checks", "bookkeeping")   # chép riêng, không đọc
 KY_VONG_SO_MIEN_TRU = 28
 KY_VONG_VAN_TAY_MIEN_TRU = "5311e7557cd75ef2f3b06371c66a4830d4970613c1e98a8fd4af732d7dab2257"
 # L7 — cùng cách chép riêng, đo trên `7129f7d` (27-10-2026): 3 hồ sơ khai DAT thiếu `thuc_thi`. Đổi danh sách ⇒ c19 ĐỎ.
-L7_KHOA = ("model", "effort", "sandbox_mode")   # chép riêng: bỏ một khoá ở bộ kiểm ⇒ c17 ĐỎ
+L7_KHOA = ("sandbox_mode",)   # chép riêng: bỏ khoá ở bộ kiểm ⇒ c17/c23 ĐỎ
+L7_TUY_CHON = ("model", "effort")   # #1240 ADR-0065: ghi nếu đo được (vắng được); đưa lại vào bắt buộc ⇒ c23 ĐỎ
 KY_VONG_SO_MIEN_TRU_L7 = 3
 KY_VONG_VAN_TAY_MIEN_TRU_L7 = "6b5ef08603e37239742fe5d7fe8cbe933b24e33174cf3af04c453b0e7be83574"
 
@@ -348,7 +349,7 @@ def c16_l6_landed_true_phai_co_phan_hoan_tat():
 
 
 P7 = {"run.json": "{}"}
-DU7 = {k: "measured — run.json" for k in L7_KHOA}
+DU7 = {k: "measured — run.json" for k in L7_KHOA + L7_TUY_CHON}
 
 
 def hs7(muc, thuc_thi=None):
@@ -361,17 +362,18 @@ def hs7(muc, thuc_thi=None):
 
 @ca
 def c17_l7_khai_dat_phai_do_thuc_thi():
-    """#748 L7: khai §8.1 DAT đòi `thuc_thi.{model,effort,sandbox_mode}` là lời khai measured (connector P1 PR #934)."""
+    """#748 L7: khai §8.1 DAT đòi `thuc_thi.sandbox_mode` là lời khai measured (connector P1 PR #934); #1240 nới model/effort."""
     ky(hs7("DAT", DU7), P7, 0, "DAT đủ ba khoá measured có nguồn")
     ky(hs7("DAT"), P7, 1, "DAT thiếu thuc_thi", "L7 $.assurance_81.thuc_thi:")
     ky(hs7("DAT", "measured — run.json"), P7, 1, "thuc_thi vô hướng", "L7 $.assurance_81.thuc_thi:")
-    for k in L7_KHOA:   # review l7d P3: mapping RỖNG vẫn phải kiểm đủ ba khoá
+    for k in L7_KHOA:   # review l7d P3: mapping RỖNG vẫn phải kiểm đủ khoá bắt buộc
         ky(hs7("DAT") + "  thuc_thi: {}\n", P7, 1, f"thuc_thi {{}} thiếu {k}", f"L7 $.assurance_81.thuc_thi.{k}:")
     ky(hs7("DAT") + "thuc_thi:\n" + "".join(f"  {k}: '{v}'\n" for k, v in DU7.items()), P7, 1,
        "thuc_thi ở GỐC không thay được thuc_thi dưới assurance_81", "L7 $.assurance_81.thuc_thi:")
-    for k in L7_KHOA:
-        ky(hs7("DAT", {x: v for x, v in DU7.items() if x != k}), P7, 1, f"thiếu {k}", f"L7 $.assurance_81.thuc_thi.{k}:")
-        for sai in ("not_measured — run.json", "da do — run.json", "measuredx run.json"):
+    for k in L7_KHOA + L7_TUY_CHON:
+        if k in L7_KHOA:
+            ky(hs7("DAT", {x: v for x, v in DU7.items() if x != k}), P7, 1, f"thiếu {k}", f"L7 $.assurance_81.thuc_thi.{k}:")
+        for sai in ("not_measured — run.json",) * (k in L7_KHOA) + ("da do — run.json", "measuredx run.json"):
             ky(hs7("DAT", DU7 | {k: sai}), P7, 1, f"{k} = {sai!r}", f"L7 $.assurance_81.thuc_thi.{k}:")
         for tho in ("null", "true", "3", "['measured — run.json']", "{a: 'measured — run.json'}"):   # review l7a P3: có mặt, không phải chuỗi
             hs = hs7("DAT", {x: v for x, v in DU7.items() if x != k}) + f"    {k}: {tho}\n"
@@ -500,6 +502,30 @@ def c22_l7r2_khoi_goc_la_nguon_duy_nhat():
 
 
 @ca
+def c23_l7_model_effort_tuy_chon():
+    """#1240 ADR-0065 (A4–A6): model/effort là trường ghi nếu đo được — vắng hoặc `not_measured` ⇒ 0 vi phạm L7;
+    sandbox_mode vẫn bắt buộc; có mặt mà là rác ⇒ ĐỎ. Đích của m1 (bắt buộc lại), m2 (bỏ sandbox), m3 (nhận mọi giá trị)."""
+    sb = {"sandbox_mode": "measured — run.json"}
+    kd = {k: f"not_measured — {k} khong co trong bien nhan" for k in L7_TUY_CHON}
+    ky7(hs7("DAT", sb | kd), 0, "A4 model/effort not_measured", khong=["L7"])
+    ky7(hs7("DAT", sb | {k: f"NOT_MEASURED: {k}" for k in L7_TUY_CHON}), 0, "A4 not_measured hoa thường + ':'", khong=["L7"])
+    ky7(hs7("DAT", sb), 0, "A5a chỉ sandbox_mode measured", khong=["L7"])
+    for k in L7_TUY_CHON:
+        ky7(hs7("DAT", sb | {k: "measured — run.json"}), 0, f"A5a chỉ {k} measured + sandbox", khong=["L7"])
+    ky7(hs7("DAT", {k: "measured — run.json" for k in L7_TUY_CHON}), 1, "A5b thiếu sandbox_mode",
+          ["L7 $.assurance_81.thuc_thi.sandbox_mode:", ": 1 vi phạm"])
+    ky7(hs7("DAT", kd), 1, "A5b not_measured không thay được sandbox_mode",
+          ["L7 $.assurance_81.thuc_thi.sandbox_mode:", ": 1 vi phạm"])
+    ky7(hs7("DAT", {"sandbox_mode": "not_measured — x"} | kd), 1, "sandbox not_measured vẫn ĐỎ",
+          ["L7 $.assurance_81.thuc_thi.sandbox_mode:", ": 1 vi phạm"])
+    for k in L7_TUY_CHON:   # A6: rác vẫn ĐỎ, đúng MỘT vi phạm ở đúng khoá
+        for tho in ("DAT", "''", "5", "null", "true", "[not_measured — x]", "'not_measuredx'", "'khong do duoc'", "'x not_measured — y'"):
+            ky7(hs7("DAT", sb) + f"    {k}: {tho}\n", 1, f"A6 {k} = {tho}",
+                  [f"L7 $.assurance_81.thuc_thi.{k}: có mặt mà không phải lời khai measured/not_measured", ": 1 vi phạm"])
+    ky7(hs7("CHUA_DAT", {"model": "DAT"}), 0, "không khai DAT ⇒ L7 không áp cho rác tuỳ chọn", khong=["L7"])
+
+
+@ca
 def c12_dong_cuoi_dung_dinh_dang():
     import re
     rc, ra = chay("x: 'measured — a.json'\n", {"a.json": "{}"})
@@ -596,9 +622,22 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L7_khong_doi_measured", " and RE_KHAI_DO.match(tt7[k]))]", ")]", "c17"),
     ("L7_nhan_khong_phai_chuoi", "if not (isinstance(tt7.get(k), str) and RE_KHAI_DO.match(tt7[k]))]",
      "if not (k in tt7 and (not isinstance(tt7[k], str) or RE_KHAI_DO.match(tt7[k])))]", "c17"),
-    ("L7_bo_model", 'L7_KHOA = ("model", "effort", "sandbox_mode")', 'L7_KHOA = ("effort", "sandbox_mode")', "c17"),
-    ("L7_bo_effort", 'L7_KHOA = ("model", "effort", "sandbox_mode")', 'L7_KHOA = ("model", "sandbox_mode")', "c17"),
-    ("L7_bo_sandbox_mode", 'L7_KHOA = ("model", "effort", "sandbox_mode")', 'L7_KHOA = ("model", "effort")', "c17"),
+    ("L7_bo_model", 'L7_KHOA_TUY_CHON = ("model", "effort")', 'L7_KHOA_TUY_CHON = ("effort",)', "c17"),
+    ("L7_bo_effort", 'L7_KHOA_TUY_CHON = ("model", "effort")', 'L7_KHOA_TUY_CHON = ("model",)', "c17"),
+    ("L7_bo_sandbox_mode", 'L7_KHOA = ("sandbox_mode",)', 'L7_KHOA = ()', "c17"),
+    # #1240 ADR-0065 — đột biến m1–m3 của đặc tả (A4–A6) cộng biên của mẫu not_measured
+    ("m1_model_effort_bat_buoc_lai", 'L7_KHOA = ("sandbox_mode",)', 'L7_KHOA = ("model", "effort", "sandbox_mode")', "c23"),
+    ("m2_bo_sandbox_khoi_bat_buoc", 'L7_KHOA = ("sandbox_mode",)', 'L7_KHOA = ()', "c23"),
+    ("m3_nhan_moi_gia_tri_khi_co_mat", "for k in L7_KHOA_TUY_CHON if k in tt7 and not _khai_tuy_chon(tt7[k])]",
+     "for k in L7_KHOA_TUY_CHON if False]", "c23"),
+    ("L7_tuy_chon_bo_not_measured", "bool(RE_KHAI_DO.match(v) or RE_KHAI_KHONG_DO.match(v))", "bool(RE_KHAI_DO.match(v))", "c23"),
+    ("L7_tuy_chon_not_measured_khong_bien", r'RE_KHAI_KHONG_DO = re.compile(r"\s*not_measured(?:\s|—|-|:)"',
+     r'RE_KHAI_KHONG_DO = re.compile(r"\s*not_measured"', "c23"),
+    ("L7_tuy_chon_not_measured_o_giua", "or RE_KHAI_KHONG_DO.match(v))", "or RE_KHAI_KHONG_DO.search(v))", "c23"),
+    ("L7_tuy_chon_phan_biet_hoa", 'not_measured(?:\\s|—|-|:)", flags=re.IGNORECASE)', 'not_measured(?:\\s|—|-|:)")', "c23"),
+    ("L7_tuy_chon_null_la_vang", "if k in tt7 and not _khai_tuy_chon", "if tt7.get(k) is not None and not _khai_tuy_chon", "c23"),
+    ("L7_tuy_chon_khong_chuoi_qua", "return isinstance(v, str) and bool(", "return not isinstance(v, str) or bool(", "c23"),
+    ("L7_tuy_chon_rong_la_vang", "if k in tt7 and not _khai_tuy_chon", "if tt7.get(k) and not _khai_tuy_chon", "c23"),
     ("L7_mien_tru_bo_so_bam", "mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam", "mien = bam is not None", "c18"),
     ("L7_bam_doc_lai_dia", "and hashlib.sha256(byte).hexdigest() == bam", "and hashlib.sha256(tep.read_bytes()).hexdigest() == bam", "c18"),
     ("L7_map_rong_bo_kiem", "        elif not mien:\n", "        elif not mien and tt7:\n", "c17"),

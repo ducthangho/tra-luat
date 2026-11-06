@@ -1,0 +1,20 @@
+# lenh git tai checkout 24e461ac790b10f8c6a60dbf89f264c384f55cea luc 2026-11-06T02:37:01Z
+## git log -1 --format='%H %T %P %cI' 51d6509
+51d6509e918b8b5403248b52727e53358a23a3a0 811701252257ff8b688cad601d0b1a6eb56cafc5 4f03566fe9e686ed53c7f8ed0619300c1debba76 ecd30737e10cb7cdffe0e17178c28b3a12448874 2026-11-06T08:40:51+07:00
+## git merge-base --is-ancestor ecd3073 origin/master
+rc=0
+## git diff --stat 51d6509^1 51d6509
+ docs/PROTOCOL_DA_PHIEN.md                      | 17 +++++---
+ docs/adr/0065-model-effort-phuc-vu-tuy-chon.md | 56 ++++++++++++++++++++++++
+ ops/land_evidence_nguon.py                     | 14 +++++-
+ ops/land_evidence_nguon_test.py                | 59 +++++++++++++++++++++-----
+ 4 files changed, 128 insertions(+), 18 deletions(-)
+## git diff --stat 3163f4d ecd3073
+ 4 files changed, 128 insertions(+), 18 deletions(-)
+## git rev-parse 51d6509:<spec>; sha256
+02b9d4fe932d02fe36ab534962b0253fccefb911
+e7c6707860ba6a7ca6d24b1cadc2510b4b93952048375bdc332e0328d601487e  -
+## git rev-parse ecd3073^{tree}
+1b18da0468a9b04a2d0d567935157d17f3c5111f
+## git diff --check 51d6509^1 51d6509
+rc=0

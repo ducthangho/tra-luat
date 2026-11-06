@@ -1,0 +1,17 @@
+# python3 -I do_nghiem_thu.py --kho . ; luc 2026-11-05T21:19:24Z
+# DEV_TOOLING_GUIDE dong 'hiện hành' co .gs: ['deploy, hiện hành `references/Code.2.21.2q.gs` (kho giữ từ `2.21.2k` trở đi) — tài']
+A1: DAT — duong=True | am[de 2p]=False
+# .gs trong RELEASE_MANIFEST.json@base: ['2.21.2o', '2.21.2p', '2.21.2q']; doan DELTA: '> Gói phát hành chỉ kèm snapshot `.gs` của ba bản mới nhất (`2.21.2o`, `2.21.2p`, `2.21.2q`); các bản cũ hơn —'
+A2: DAT — duong=True | am[xoa 2.21.2q khoi doan]=False | am[chu 'hai']=False
+# A3 khoi tim thay: True; so lan khop M3: 1
+A3: DAT — duong=True | am[xoa 'không dùng cho thiết lập mới']=False | am[xoa 'Đường hiện
+> hành là `agent_creds`']=False | am[xoa 'Code vẫn còn đọc']=False | am[xoa 'đường ấy
+> chưa gỡ']=False | am[doi khoi xuong cuoi muc]=False
+A4: DAT — duong=True | am[bo cau]=False | am[xoa ve 'chưa gỡ']=False | am[doi sang gach khac]=False
+# A5 GOI_AGENT_DA_NEN.md: vi pham theo doan-cach-dong-trong: merge 0 / base 0; theo doan+muc: merge 0 / base 0
+# A5 CLAUDE.md: vi pham theo doan-cach-dong-trong: merge 1 / base 1; theo doan+muc: merge 0 / base 0 | ('đã gỡ', 'hi vào config.   Gỡ là `codex_env_policy.py --go`, dựng bản đã gỡ')
+A5: DAT — duong=True | am[them 'code đọc CODEX_AUTH_JSON đã gỡ']=False | am[them vao gach Refresh token cua CLAUDE.md]=False
+# A6 doan base 673–683: 895 ky tu, dong dau '  `CODEX_AUTH_JSON` từ 14-08, có bốn chốt viết kỹ, và `docs/GOI_AGENT_DA_NEN.md`'
+A6: DAT — duong=True | am[sua doan su co 15-08]=False
+TONG: 6/6 tieu chi DAT (A1–A6)
+rc=0

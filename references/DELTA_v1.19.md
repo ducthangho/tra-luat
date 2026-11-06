@@ -5,7 +5,7 @@ Trạng thái: **`2.21.2h` là bản cần deploy (LIVE target)** = Cách B + wr
 
 ## A. Apps Script (`.gs`) — bản GAS `2.21.2h` (LIVE target thời v1.19; tiền thân `2.21.2g`)
 
-> Gói phát hành chỉ kèm snapshot `.gs` của hai bản mới nhất (`2.21.2o`, `2.21.2p`); các bản cũ hơn —
+> Gói phát hành chỉ kèm snapshot `.gs` của ba bản mới nhất (`2.21.2o`, `2.21.2p`, `2.21.2q`); các bản cũ hơn —
 > kể cả `2.21.2h`/`2.21.2g` — không đóng vào gói.
 
 Mục tiêu: mọi action thao tác registry/manifest nhận `registryDocId`/`manifestId`; thiếu ⇒ hằng VBQPPL nền

@@ -54,7 +54,7 @@ cd "D:\Quốc hội\tra-luat"
 .\gas-deploy.ps1 -Message "mô tả thay đổi vừa sửa"
 ```
 Sau khi deploy thành công, script **tự đồng bộ ngược** `gas-project/Code.gs` → snapshot theo đúng version vừa
-deploy, hiện hành `references/Code.2.21.2p.gs` (kho giữ từ `2.21.2k` trở đi) — tài
+deploy, hiện hành `references/Code.2.21.2q.gs` (kho giữ từ `2.21.2k` trở đi) — tài
 liệu tham chiếu không bao giờ trôi khỏi live nữa (bài học từ vụ `PENDING_EFFECT` viết sẵn nhưng quên deploy).
 
 **Lệnh clasp hữu ích khác:**

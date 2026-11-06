@@ -1,0 +1,63 @@
+# job 127485562940 (dang), run 42095853382 ops-publish-lease tren 5f8d7d4 (ops/cap-lease-p3c-g1); log_sha256 d6b33d8df59ff665d4fbff040b043dde2b7451bb042ba9f08418504521171898
+# dong 105-165 cua ban trich (buoc neo + tim lease vua doi + dang); ban day du: log REST cua job
+##[endgroup]
+From https://github.com/ducthangho/tra-luat
+ * branch                master     -> FETCH_HEAD
+Preparing worktree (detached HEAD 825eb3561)
+HEAD is now at 825eb3561 Merge pull request #1230: wp1224 CLOUD-SETUP-P3C-DOCS (tài liệu webapp 2.21.2q)
+bản ĐANG CHẠY — từ origin/master @ 825eb3561:
+a4bf95b539e077edbb706afee6fc37b157815c0c246ca1bb01b307106d7be480  /home/runner/work/_temp/neo/ops/lease_publish.py
+62d68c9cb71d7f79184bfe2c02a0722bf03f35e4a3c67489a8072d0ef657717a  /home/runner/work/_temp/neo/ops/lease_publish_test.py
+6c73648647c8ce714ce45f52b70fa29d31e2c3d91df24f4c213e3b13578d8b74  /home/runner/work/_temp/neo/ops/cai_actionlint.sh
+87c760294763c71a67cfaee50a440e62b31c439beb0abbfcb5e34076d32be693  /home/runner/work/_temp/neo/ops/chay_lease_publish_test.sh
+bản trong head được đẩy — KHÔNG chạy:
+a4bf95b539e077edbb706afee6fc37b157815c0c246ca1bb01b307106d7be480  ops/lease_publish.py
+ac29a8b329def89d91598776af39ef80f0c45ae711d3d7ddaa857f5f86c7b70a  ops/lease_publish_test.py
+c17673160507f2a5612e81dd21063eb294ab1b9ddcc66ca9bee18c9054bbb5ed  ops/cai_actionlint.sh
+87c760294763c71a67cfaee50a440e62b31c439beb0abbfcb5e34076d32be693  ops/chay_lease_publish_test.sh
+----
+##[group]Run set -euo pipefail
+shell: /usr/bin/bash -e {0}
+env:
+  pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+  PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+  Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+  NEO: /home/runner/work/_temp/neo
+  TRUOC: e259710ef69312f90067e651efcbc4cad8f09519
+  NAY: 5f8d7d4944b70e401f6d8b8e0b0d79b3993387c8
+  MAC_DINH: master
+##[endgroup]
+moc so: e259710ef69312f90067e651efcbc4cad8f09519..5f8d7d4944b70e401f6d8b8e0b0d79b3993387c8
+tìm thấy 2 tệp:
+ops/leases/wp1223-r1-g1-claude.yaml
+ops/leases/wp1224-r2-g2-claude.yaml
+----
+##[group]Run set -euo pipefail
+shell: /usr/bin/bash -e {0}
+env:
+  pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+  PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+  Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+  NEO: /home/runner/work/_temp/neo
+  GH_TOKEN: ***
+  REPO: ducthangho/tra-luat
+##[endgroup]
+##[group]ops/leases/wp1223-r1-g1-claude.yaml
+CHAN [9]: lease 'wp1223-r1-g1-claude' đã có comment 6654946995 trên issue #1223 — bỏ qua
+đã đăng trước đó — bỏ qua
+##[endgroup]
+##[group]ops/leases/wp1224-r2-g2-claude.yaml
+CHAN [9]: lease 'wp1224-r2-g2-claude' đã có comment 6655842921 trên issue #1224 — bỏ qua
+đã đăng trước đó — bỏ qua
+##[endgroup]
+Post job cleanup.
+(node:36288) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Post job cleanup.
+[command]/usr/bin/git version

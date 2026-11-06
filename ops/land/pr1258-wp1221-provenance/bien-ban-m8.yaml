@@ -1,10 +1,10 @@
 # Bien ban M8 (ADR-0060) WP #1221 wp1221 EOL-TEST-CHAN-DOAN r3 g1 — kiem bang packet_loop.py kiem-dong-wp.
 # Nhan nguon tung muc: ops/land/pr1258-wp1221-land-evidence.yaml. #1221 khong co muc LIVE.
 # landed: true — uy quyen M7 cua chu kho #1221 issuecomment-6680515199 (neo merge 08bcb51). Bon moc §10.2.2 deu passed.
-# kiem-dong-wp van ra D2 vi nghiem_thu co muc thuat_lai (khong passed/owner_waived) — ghi trung thuc, KHONG nang nhan.
-# nghiem_thu: gia tri `passed` chi cho muc do duoc tren MERGE (A10, CI master). Cac muc con lai la `thuat_lai` — loi khai cua
-# phien executor session_015GtxrZVmDpv9FPWFf1Uaoo (than PR #1258, do tren d912f03) va cua phien dieu phoi (A11); phien ghi so
-# khong tai chay.
+# nghiem_thu: `passed` chi cho muc do duoc tren MERGE (A10, CI master). 13 muc con lai `owner_waived` theo waiver chu kho
+# #1221 issuecomment-6680636879 (ducthangho OWNER, 08:29:18Z, performed_via_github_app null; dong dau "nghiem_thu_mien: wp1221 r3 g1
+# ee7a385… owner_waived A1,…,A9,A11,…,A14"; du sau yeu to §10.2.3). Loi khai goc cua cac muc ay van la thuat_lai (phien executor
+# session_015GtxrZVmDpv9FPWFf1Uaoo va phien dieu phoi cho A11); waiver KHONG doi chung thanh passed.
 packet: wp1221
 revision: 3
 generation: 1
@@ -19,8 +19,10 @@ review:
   mien_p3_k7: 'issuecomment-6679448513: mien_p3 ee7a385 (3 P3) va full_mutant_audit ee7a385 mien'
 windows:
   phan_loai: required
+  ket_qua: 'owner_waived (A11) — issuecomment-6680636879'
   nguon: 'thuat_lai — phien dieu phoi: log C:\work\diag-1221-r3-a11-ee7a385.log tren tra-luat-win, HEAD ee7a385, RC 0, 32/32 dat, SECONDS 687; bytes log khong kem'
 duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1221#issuecomment-6680515199
+mien_nghiem_thu: https://github.com/ducthangho/tra-luat/issues/1221#issuecomment-6680636879
 merge_commit: 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9
 tree_m: c7c80550aef10749ce1ea19ce2fec4e683f572aa
 ci_master:
@@ -29,20 +31,20 @@ ci_master:
   sha: 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9
   jobs: '23/23 success, nhan ubuntu-latest; kiem-gate rc=0; gate co ".githooks/eol_policy_test.py 32/32 dat"'
 nghiem_thu:
-  A1: thuat_lai
-  A2: thuat_lai
-  A3: thuat_lai
-  A4: thuat_lai
-  A5: thuat_lai
-  A6: thuat_lai
-  A7: thuat_lai
-  A8: thuat_lai
-  A9: thuat_lai
+  A1: owner_waived
+  A2: owner_waived
+  A3: owner_waived
+  A4: owner_waived
+  A5: owner_waived
+  A6: owner_waived
+  A7: owner_waived
+  A8: owner_waived
+  A9: owner_waived
   A10: passed
-  A11: thuat_lai
-  A12: thuat_lai
-  A13: thuat_lai
-  A14: thuat_lai
+  A11: owner_waived
+  A12: owner_waived
+  A13: owner_waived
+  A14: owner_waived
 lease_cuoi: wp1221-r3-g1-claude-remote-20261105
 landed: true
 moc_10_2_2:

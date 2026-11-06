@@ -66,7 +66,7 @@ write_set_hash: e348a0aec274cc000368e7b728a9a70423434e000ace619fbc059383907fb2f5
 write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
 write_set_ghi_chu: '.claude/dev/ci_dang_ky_test.py CHI THEM dung mot muc MOI (numstat 1 0); hai tep ops/ la tep MOI'
 closure_status: 'holder scan 2026-11-06T04:31:30Z: ls-remote vs for-each-ref thieu 0; 3/3 duong dan NGUOI_GIU 0'
-tran_kich_thuoc: '<= 3 tep / <= 950 dong them (nang_tran cua spec r7, CHI dot A1); vuot => DUNG truoc review'
+tran_kich_thuoc: '<= 3 tep / <= 1400 dong them (nang_tran dot A1 06-11 ~05:05Z, issuecomment-6677406420; spec r7 cho 950); vuot => DUNG truoc review'
 tran_loi_goi_codex: 'doc tu dong tran_loi_goi_codex cua spec (ADR-0052@8ab10079); dem truoc MOI loi goi'
 windows: 'khong bat buoc cho dot A1 (Q7: OS_BAT_BUOC ubuntu-latest); neu can do Windows thi chay TAP TRUNG tren tra-luat-win qua phien dieu phoi, KHONG workflow_dispatch'
 coordination_paths:
@@ -85,3 +85,9 @@ prohibited_actions:
 - workflow_dispatch
 - sua_ci_yml
 land_authority_note: 'chu kho duyet SHA cu the truoc merge; dieu phoi merge khi kiem-merge rc=0'
+nang_tran:
+  tran_cu: '<= 3 tep / <= 950 dong them (spec r7 nang_tran A1)'
+  tran_moi: '<= 3 tep / <= 1400 dong them (git diff --numstat <base A1>..<head A1>)'
+  can_cu: 'numstat 2d3cb50 = +1347 (module 482, test 864, dang ky 1); 26/26 ca, 72/72 dot bien'
+  ai_nang: ducthangho
+  can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-6677406420

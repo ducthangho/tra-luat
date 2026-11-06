@@ -16,6 +16,7 @@
   kiện merge theo `ADR-0060`.
 - Windows: `required` theo `ADR-0060` M3, vì diff chạm `.github/workflows/**` và `.claude/dev/**` (mục 6).
 - `full_mutant_audit`: bắt buộc theo M9/K7, vì diff chạm `ops/**/*.py`, `.claude/dev/**` và `.github/workflows/**`.
+- Ngân sách đóng của packet (CI, M9, Windows, lời gọi model): mục 8.
 
 tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
@@ -61,6 +62,11 @@ có `refs/heads/*` khớp máy chủ: `ops/lease_publish.py`, `ops/lease_publish
 - Các lệnh khác của `ops/lease_publish.py` (`check`, `body`, `kiem-github`, `ai-dang-giu`) và các bước của workflow.
 - Vùng so sánh **không** gồm `ops/leases/**` (vòng 2 Q8). A1b phải mở rộng vùng khi bộ kiểm bắt đầu đọc lease.
 - Đặc tả đã đóng băng (r9 của `THU-HOI-LEASE-VA-CAP-LAI`, r5 của `LAND-DOC-RECEIPT-THU-HOI-C1a1a`) và đặc tả #1179.
+- WP1174 (#1174, bộ duyệt C6 chờ chủ kho, đo 15:0xZ 06-11-2026: chưa cấp lease) sửa `kiem-merge` trong
+  `.claude/dev/packet_loop.py`. Packet này không thích nghi trước với thay đổi ấy: nếu WP1174 land trước khi B merge,
+  điều kiện merge của B được đánh giá bằng mã canonical tại thời điểm merge.
+- Ngoại lệ closure `ADR-0032` kiểu WP1174: không xin. Đo 06-11-2026: 0/179 lease trên master có ngoại lệ closure;
+  các lease gần đây bỏ trống hoặc để `null` trường `change_policy_sha`.
 
 ## 3. Bảng ba trạng thái — đóng, mọi bước mới phải theo
 
@@ -147,16 +153,65 @@ Chạy thử trên nền (worktree tách ở `origin/master` `08bcb51f`, 08:3xZ 
   chúng đỏ đúng chỗ, trước khi sửa bộ kiểm.
 - B13: chưa chạy toàn bộ suite trên nền ở phiên này; số ca nền lấy từ CI của base khi cấp lease.
 
+### 5.1 Kho ID đóng băng
+
+Danh tính của một ca là **hậu tố tên** dưới đây, không phải số thứ tự. Trong `ops/lease_publish_test.py` mọi ca tên
+`t<số>_…` và đăng ký qua `CA.append` (đo 06-11-2026 trên `origin/master`: 280 ca, số lớn nhất `t237`). Executor chọn
+số kế tiếp còn trống trên base của lease, giữ nguyên hậu tố. Mỗi hậu tố phải khớp **đúng một** hàm; không khớp hoặc
+khớp hai ⇒ runner đỏ. Mỗi đột biến có ID riêng, đăng ký vào bảng đột biến sẵn có của tệp test tương ứng; tệp nào
+chưa có bảng thì executor chạy đột biến bằng tay trên bản sao tạm và ghi ID, lệnh, kết quả vào handoff.
+
+| ca | tệp | hậu tố / tên ca | ID đột biến | nền |
+|---|---|---|---|---|
+| B1 | `ops/lease_publish_test.py` | `_amb01_to_tien_giu_nguyen` | `amb-m01-luon-di-merge-base` | cả hai |
+| B2 | `ops/lease_publish_test.py` | `_amb02_merge_base_vung_bang_nhau` | `amb-m02-bat-lai-to-tien` | cả hai |
+| B3 | `ops/lease_publish_test.py` | `_amb03_policy_lech_sau_merge_base` | `amb-m03-bo-cong-so-vung` | cả hai |
+| B3b | `ops/lease_publish_test.py` | `_amb03b_thu_hoi_moi_tren_master` | — (mục 5, hàng B3b) | cả hai |
+| B4 | `ops/lease_publish_test.py` | `_amb04_append_only_qua_merge_base` | `amb-m04-bo-append-only` | cả hai |
+| B5 | `ops/lease_publish_test.py` | `_amb05_criss_cross_mot_base_lech` | `amb-m05-chi-so-base-dau` | cả hai |
+| B6 | `ops/lease_publish_test.py` | `_amb06_khong_chung_goc` | `amb-m06-rong-la-dat` | cả hai |
+| B7 | `ops/lease_publish_test.py` | `_amb07_vuot_ngan_sach_merge_base` | `amb-m07-nuot-vuot-ngan-sach` | cả hai |
+| B8 | `ops/lease_publish_test.py` | `_amb08_object_gia_tren_duong_duyet` | `amb-m08-git-merge-base-thay-bo-doc` | cả hai |
+| B9 | `ops/lease_publish_test.py` | `_amb09_vuot_ngan_sach_khi_xet_to_tien` | `amb-m09-vuot-ngan-sach-thanh-khong-to-tien` | cả hai |
+| B10 | `ops/lease_publish_test.py` | `_amb10_chu_thich_workflow_adr0066` | `amb-m10-ghi-lai-cau-cu` | cả hai |
+| t133 | `ops/lease_publish_test.py` | tên hiện có, ca con "S không tổ tiên H" đổi kỳ vọng (mục tiêu 5) | `amb-m02-bat-lai-to-tien` | cả hai |
+| B11 | `.claude/dev/doc_receipt_thu_hoi_test.py` | ca bảng `v2_to_tien`, `v2_merge_base`, `v2_thieu_merge_bases`, `v2_thua_khoa`, `v2_to_tien_base_khac_S`, `v2_merge_base_canh_so`, `schema_3`; ca v1 hiện có giữ nguyên | `amb-m11-bo-tap-khoa-v2` | cả hai |
+| B12 | `.claude/dev/doc_receipt_thu_hoi_test.py` | ca `thuan_json_khong_subprocess_socket_urllib` | `amb-m12-them-subprocess` | cả hai |
+
+Cột "nền" là ý định; nền thật của từng ca do bước đo nền ở mục 6 quyết. Ca đã ghi "cả hai" mà không chạy được trên
+Windows native phải khai lý do trên #1266 trước lượt ứng viên (mục 6 bước 2), không lặng lẽ bỏ.
+
 ## 6. Windows (vòng 2 Q12)
 
-1. Trước khi sửa, executor chạy trên `tra-luat-win` (qua Desktop Commander, giữ `KHOA.txt` theo `ADR-0057`–`0059`)
-   tập ứng viên: toàn bộ `.claude/dev/doc_receipt_thu_hoi_test.py`; các ca t133, t151, t137 của
-   `ops/lease_publish_test.py`. Ghi ca nào chạy native được trên base.
-2. Ca nào cần năng lực chỉ có trên Linux (protocol ghi bộ giải Git của admission dùng PATH `/usr/bin:/bin`, chưa
-   hỗ trợ Windows native) phải được liệt kê kèm lý do và đăng lên Issue **trước** lượt chạy ứng viên. Tập bắt buộc
-   = các ca chạy được ở bước 1, cộng các ca mới B1–B12 nếu chạy được.
-3. Lượt nền và lượt ứng viên dựng trong **cùng một lệnh**, cùng máy, có danh sách ID ca và kết quả (M3 a). Ca bắt
+Máy: `tra-luat-win`, Desktop Commander device `f7281f27-f79f-40a2-a2f5-b454b58a166a`, tài khoản `tlcommander`.
+Không dùng device khác của cùng VM chạy dưới tài khoản quản trị để lấy quyền cao hơn. Clone thường, có thư mục `.git`
+riêng; H chưa lên GitHub thì đưa sang bằng git bundle và kiểm commit, tree, cha khớp từng hash (`ADR-0060` M4).
+Output, cache, thư mục tạm đặt ngoài checkout. Giữ `KHOA.txt` theo `ADR-0057`–`0059`; không đụng tiến trình hay khoá
+của packet khác.
+
+1. **Đo nền**, trước khi sửa mã: chạy trên base tập ứng viên gồm toàn bộ `.claude/dev/doc_receipt_thu_hoi_test.py`,
+   cùng các ca t133, t151, t137 của `ops/lease_publish_test.py`. Ghi ca nào chạy native được.
+2. **Đóng băng tập bắt buộc** và đăng lên #1266 **trước** lượt ứng viên. Tập ấy gồm:
+   - **luôn có**: toàn bộ `doc_receipt_thu_hoi_test.py` (gồm B11, B12) và `_amb10_chu_thich_workflow_adr0066`;
+   - **có điều kiện**: t133 và các ca `_amb01`…`_amb09` — vào tập bắt buộc nếu t133 chạy native được ở bước 1;
+     nếu không, mỗi ca loại ra phải kèm lý do (protocol ghi bộ giải Git của admission dùng PATH `/usr/bin:/bin`,
+     chưa hỗ trợ Windows native).
+
+   Sau khi đã đăng, tập bắt buộc chỉ được **thêm** ca, không được bớt.
+3. **Runner tập trung** nằm ngoài checkout (không thuộc write set). Nó gọi `main(chon=[...])` của
+   `ops/lease_publish_test.py` với các hàm tìm theo hậu tố ở mục 5.1, và `chay_ca(..., chi=...)` (hoặc toàn tệp)
+   của `doc_receipt_thu_hoi_test.py`. Không gọi `main()` không đối số, vì nó chạy cả 280 ca cũ. Runner phải:
+   - kiểm `git rev-parse HEAD` bằng H và `git status --porcelain` rỗng, trước và sau lượt chạy;
+   - kiểm nền thật (`platform.system()`), phiên bản Python và Git;
+   - đỏ khi một ID không khớp đúng một hàm; coi `BỎ QUA`, skip, timeout, lỗi hạ tầng là **không đạt**;
+   - ghi JSON gồm H, tree, nền, danh sách ID, kết quả từng ID, rc, kèm sha256 của tệp JSON.
+
+   Cùng runner ấy chạy trên Linux trước full gate, để có kết quả tập trung nhanh.
+4. Lượt nền và lượt ứng viên dựng trong **cùng một lệnh**, cùng máy, có danh sách ID ca và kết quả (M3 a). Ca bắt
    buộc bị `skipped`/`not_run` ⇒ không xanh.
+5. Tiến trình test không được thấy credential LIVE: `TL_TOKEN`, `TL_WEBAPP`, `TL_MASTER_KEY`,
+   `TL_AGENT_CREDS_FILEID` và các biến Drive/GAS/NLM khác phải vắng. Runner kiểm sự vắng mặt bằng giá trị đúng/sai,
+   không in giá trị.
 
 ## 7. hinh_dang_ke_thua
 
@@ -172,18 +227,37 @@ Chép từ đặc tả #1179 r1 §7 (nhánh `claude/spec-1179-c1a1b`, commit `7c
 Một biểu hiện mới của **bất kỳ** lớp nào trên ở bất kỳ lượt review nào (đặc tả hay PR thi công) ⇒ DỪNG, Review
 Rescue Checkpoint (`ADR-0037`), báo chủ kho; không vá tiếp theo chỗ bị chỉ.
 
-## 8. Review và ngân sách
+## 8. Review và ngân sách đóng
 
-Reviewer Codex độc lập, phiên riêng; trần 10 lời gọi theo dòng khai `ADR-0055` ở đầu tệp, đếm **trước** mỗi lời
-gọi. Ngân sách mềm 4 lời gọi; hai lượt liên tiếp chưa approve ⇒ Review Rescue Checkpoint. Reviewer **chạy** các ca
-và **đột biến bản vá** để đo răng; hướng thử cần soạn nội dung nhạy cảm thì mô tả bằng lời cho phiên điều phối
-viết. Human audit theo `human_exact_head_audit.v1` (`ADR-0063`) trên exact head trước merge.
+**Review đặc tả, trước khi chủ kho duyệt băm:** một lượt review độc lập của chính đặc tả này (Codex, ≤ 2 lời gọi,
+tính trên PR đưa đặc tả vào kho). Finding P0–P2 ⇒ sửa đặc tả và tính băm mới trước khi duyệt.
+
+**Review mã:** reviewer Codex độc lập, phiên riêng; trần 10 lời gọi theo dòng khai `ADR-0055` ở đầu tệp, đếm
+**trước** mỗi lời gọi. Ngân sách mềm 4 lời gọi; hai lượt liên tiếp chưa approve ⇒ Review Rescue Checkpoint.
+Reviewer **chạy** các ca và **đột biến bản vá** để đo răng; hướng thử cần soạn nội dung nhạy cảm thì mô tả bằng lời
+cho phiên điều phối viết. Human audit theo `human_exact_head_audit.v1` (`ADR-0063`) trên exact head trước merge.
+
+**Ngân sách đóng của PR mã** (đề xuất trong đặc tả; chủ kho chốt khi duyệt băm):
+
+| hạng mục | trần | ghi chú |
+|---|---|---|
+| Lượt CI Ubuntu trên PR (head hoặc attempt) | 2 | rerun cũng tính; khớp `ADR-0060` M5 (một lần push chính) |
+| Lượt `ci-dot-bien-du.yml` đầy đủ | 1 | lượt thứ 2 chỉ khi head đổi sau rework, cần checkpoint chủ kho |
+| Lượt Windows native tập trung | 2 | mỗi lượt gồm nền và ứng viên trong một lệnh; tổng ≤ 60 phút |
+| Phiên executor | 2 | checkpoint chủ kho nếu một phiên chạy quá 120 phút chủ động mà chưa có H |
+| Lời gọi Codex review mã | 10 | mềm 4, như trên |
+
+Không trong packet này: gắn nhãn `windows` lên PR; gọi tay `ci.yml` (cả hai `runner_set` đều có Windows); Windows
+CI; full mutant trên Windows; mua credits. Hết một trần, hoặc không biết mức đã dùng ⇒ dừng ở checkpoint chủ kho;
+không vay ngân sách của packet khác.
 
 ## 9. chua_do_duoc
 
 - Kết quả `ai-dang-giu` cho `.claude/dev/doc_receipt_thu_hoi.py` và `.claude/dev/doc_receipt_thu_hoi_test.py`: cả hai
   bị chốt fail-close chặn vì máy chủ thêm nhánh giữa lượt quét.
 - Ca nào của t133/t151/t137 chạy được trên Windows native: chưa đo (mục 6 bước 1).
+- Runner tập trung (mục 6 bước 3): chưa dựng, chưa chạy lần nào.
+- Các trần ở mục 8 là đề xuất; chưa có số đo mức dùng thực của một packet cỡ này để biện hộ từng con số.
 - Hiệu năng thật của phép tính merge-base trên kho này (B17): mới có số đo duyệt toàn lịch sử master của #1179,
   chưa đo phép giao hai phía.
 - Canary B18: chỉ đo được sau land.

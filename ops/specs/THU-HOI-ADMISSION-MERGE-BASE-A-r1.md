@@ -48,7 +48,13 @@ SHA. Trong khi đó vùng mà bộ kiểm đọc — `ops/thu-hoi/**` và `.gith
 `git ls-remote --heads origin` với tập ref cục bộ, lệch phía "thiếu cục bộ" phải bằng 0). Đo 06-11: hai đường
 dẫn **chưa đo được**: `docs/PROTOCOL_DA_PHIEN.md` ⇒ `CHAN [12]` hai lần liền vì máy chủ thêm nhánh giữa lượt quét
 (lần hai: `claude/ghi-so-land-1258`, `ops/wp1239-r4-g3-lease`) — chốt fail-close đúng thiết kế; tệp ADR mới chưa có
-kết quả lúc viết. Người cấp lease đo lại ngay trước khi cấp (L5), và chỉ cấp khi cả hai ra `NGƯỜI_GIỮ 0`. Số ADR: trên mọi ref, không tệp nào mang tiền tố `docs/adr/0066-` và không đặc tả nào nhắc
+kết quả lúc viết. Người cấp lease đo lại ngay trước khi cấp (L5), và chỉ cấp khi cả hai ra `NGƯỜI_GIỮ 0`.
+
+**Va chạm đã biết với WP1174 (#1174).** Bộ duyệt C6 của WP1174 có `docs/PROTOCOL_DA_PHIEN.md` trong write set, lease dự
+kiến tối đa 24 giờ, hạn cứng `2026-11-08T08:03:01Z`. Đo 15:0xZ 06-11-2026: WP1174 chưa được cấp lease, chưa có nhánh,
+commit metadata P chưa có trên máy chủ. Write set của WP1174 không có `docs/adr/**`, nên không tranh số ADR. Thứ tự đề
+xuất: cấp lease A **trước** khi cấp lease WP1174, vì A chỉ 2 tệp và khoảng nửa ngày. Nếu WP1174 được cấp trước thì A
+chờ lease ấy nhả, không xin chia tệp. Số ADR: trên mọi ref, không tệp nào mang tiền tố `docs/adr/0066-` và không đặc tả nào nhắc
 `ADR-0066` (đo 08:2xZ 06-11 trên master: 0 tệp, 0 chỗ nhắc). Bị chiếm ⇒ DỪNG, revision mới đổi số; không tự chọn
 số khác.
 
@@ -140,9 +146,19 @@ Một biểu hiện mới của lớp thứ nhất ở bất kỳ lượt review
 
 ## 6. Review và ngân sách
 
-Reviewer Codex độc lập, trần 10 lời gọi theo dòng khai `ADR-0055` ở đầu tệp; đếm **trước** mỗi lời gọi. Ngân sách
-mềm 2 lời gọi; hai lượt liên tiếp chưa approve ⇒ Review Rescue Checkpoint. Connector `@codex review` trên PR draft
-theo `ADR-0060` M6.
+**Review đặc tả, trước khi chủ kho duyệt băm:** một lượt review độc lập của chính đặc tả này (Codex, ≤ 2 lời gọi,
+tính trên PR đưa đặc tả vào kho). Finding P0–P2 ⇒ sửa đặc tả và tính băm mới trước khi duyệt.
+
+**Review mã:** reviewer Codex độc lập, trần 10 lời gọi theo dòng khai `ADR-0055` ở đầu tệp; đếm **trước** mỗi lời
+gọi. Ngân sách mềm 2 lời gọi; hai lượt liên tiếp chưa approve ⇒ Review Rescue Checkpoint. Connector `@codex review`
+trên PR draft theo `ADR-0060` M6.
+
+**Phân loại theo `ADR-0060`:** M3 Windows = `not_required` (bước 3: mọi tệp của diff là `*.md`); M9
+`full_mutant_audit` không áp (diff không chạm `.claude/dev/**`, `ops/**/*.py`, `.github/workflows/**`).
+
+**Ngân sách đóng của PR** (đề xuất trong đặc tả; chủ kho chốt khi duyệt băm): ≤ 2 lượt CI Ubuntu (head hoặc attempt,
+rerun cũng tính); 1 phiên executor; không gắn nhãn `windows`, không gọi tay `ci.yml`, không Windows CI. Hết trần
+hoặc không biết mức đã dùng ⇒ dừng ở checkpoint chủ kho.
 
 ## 7. chua_do_duoc
 

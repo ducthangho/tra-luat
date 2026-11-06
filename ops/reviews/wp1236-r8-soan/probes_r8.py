@@ -76,6 +76,7 @@ AM = {  # nhãn: (thân run, shell)
  "g_glob": ("python ops/*.py\n", None),
  "g_ngoa": ("python ~/x.py\n", None),
  "g_run_khong_phai_chuoi": (None, None),
+ "g_run_khong_phai_chuoi_pwsh": (None, "pwsh"),   # H04 (Codex r8 vòng 1): thứ tự bước 1–2 phân biệt được
  "g_hai_lenh_hop_le": (f"{X}\n{Y}\n", None),
  "g_python_c_tran": ("python -c pass\n", None),
  "g_bash_c_tran": ("bash -c true\n", None),
@@ -92,24 +93,25 @@ DUONG = {
 }
 SHELL = {None: ["bash", "-e"], "bash": ["bash", "--noprofile", "--norc", "-eo", "pipefail"], "sh": ["sh", "-e"]}
 def chay(run, shell):
-    if run is None or shell == "pwsh": return None
+    if run is None or shell == "pwsh": return None, False
     with tempfile.TemporaryDirectory() as d:
         p = pathlib.Path(d); (p/"ops").mkdir(); (p/"bin").mkdir()
-        (p/"ops/hong_test.py").write_text("import sys; sys.exit(1)\n"); (p/"ops/qua.py").write_text("import sys; sys.stdout.write(sys.stdin.read())\n")
+        (p/"ops/hong_test.py").write_text("import pathlib, sys; pathlib.Path(sys.argv[0]).with_name(\"DA_CHAY\").touch(); sys.exit(1)\n"); (p/"ops/qua.py").write_text("import sys; sys.stdout.write(sys.stdin.read())\n")
         os.symlink(sys.executable, p/"bin/python"); (p/"s.sh").write_text(run)
         env = {"PATH": f"{p}/bin:/usr/bin:/bin", "HOME": d}
-        return subprocess.run(SHELL[shell] + [str(p/"s.sh")], cwd=d, env=env, capture_output=True, stdin=subprocess.DEVNULL, timeout=20).returncode
+        rc = subprocess.run(SHELL[shell] + [str(p/"s.sh")], cwd=d, env=env, capture_output=True, stdin=subprocess.DEVNULL, timeout=20).returncode
+        return rc, (p/"ops/DA_CHAY").exists()   # H03 (Codex r8 vòng 1): rc 0 chỉ là "nuốt lỗi" khi chương trình hỏng ĐÃ CHẠY
 def main():
     kq = {"am": {}, "duong": {}}; hong = 0
     for k, (r, s) in AM.items():
-        ly = cp(r, s); rc = chay(r, s); kq["am"][k] = {"grammar": ly, "rc_bash": rc}
+        ly = cp(r, s); rc, dc = chay(r, s); kq["am"][k] = {"grammar": ly, "rc_bash": rc, "da_chay_ct_hong": dc}
         if ly is None: hong += 1; print("LOT", k)
     for k, (r, s) in DUONG.items():
-        ly = cp(r, s); rc = chay(r, s); kq["duong"][k] = {"grammar": ly, "rc_bash": rc}
-        if ly is not None or rc == 0: hong += 1; print("DUONG HONG", k, ly, rc)
+        ly = cp(r, s); rc, dc = chay(r, s); kq["duong"][k] = {"grammar": ly, "rc_bash": rc, "da_chay_ct_hong": dc}
+        if ly is not None or rc == 0 or not dc: hong += 1; print("DUONG HONG", k, ly, rc)
     nuot = [k for k, v in kq["am"].items() if v["rc_bash"] == 0]
     print(json.dumps({"am": len(AM), "am_bi_tu_choi": sum(v["grammar"] is not None for v in kq["am"].values()),
-                      "am_bash_that_nuot_loi_rc0": len(nuot), "duong": len(DUONG), "hong": hong}, ensure_ascii=False))
+                      "am_bash_rc0": len(nuot), "am_nuot_loi_that": sum(v["rc_bash"] == 0 and v["da_chay_ct_hong"] for v in kq["am"].values()), "duong": len(DUONG), "hong": hong}, ensure_ascii=False))
     json.dump(kq, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "probes_r8.json"), "w"), ensure_ascii=False, indent=1)
     sys.exit(1 if hong else 0)
 

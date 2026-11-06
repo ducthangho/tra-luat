@@ -8,13 +8,15 @@ from probes_r8 import AM, DUONG   # noqa: E402  (probes_r8 chạy Bash khi impor
 
 
 def dung(P=gram.P, W=gram.W, DANG=None, sep=" ", flags=re.ASCII, khop="fullmatch", bo_lf="mot", nhieu_dong=False,
-         ong_shell=("bash",), shell_ok=(None, "bash", "sh"), phai_ong=None):
+         ong_shell=("bash",), shell_ok=(None, "bash", "sh"), phai_ong=None, dao_thu_tu=False):
     DANG = DANG or rf"(?:python {P}\.py|bash {P}\.sh|pwsh -NoProfile -File {P}\.ps1)"
     LENH = rf"{DANG}(?:{sep}{W})*"
     phai = phai_ong or LENH
     don, ong = re.compile(LENH, flags), re.compile(rf"{LENH}(?: \| {phai})+", flags)
 
     def f(run, shell):
+        if dao_thu_tu and shell not in shell_ok:
+            return "shell_ngoai_cu_phap"
         if type(run) is not str:
             return "lenh_ngoai_cu_phap"
         if shell not in shell_ok:
@@ -47,6 +49,7 @@ DB = {   # tên: (hàm đột biến, ca đích)
     "m-S11_ong_sh": (dung(ong_shell=("bash", "sh")), "g_ong_sh"),
     "m-S12_ve_phai_mo": (dung(phai_ong=rf"{gram.W}(?: {gram.W})*"), "g_ong_toi_cat"),
     "m-S13_nhan_pwsh": (dung(shell_ok=(None, "bash", "sh", "pwsh")), "g_pwsh_shell"),
+    "m-S19_dao_thu_tu_1_2": (dung(dao_thu_tu=True), "g_run_khong_phai_chuoi_pwsh"),
 }
 for c in ";&|!(){}$`'\"\\<>#*?[]~\t\n\r":
     DB[f"m-S14[{ord(c):02x}]"] = (dung(W=r"[A-Za-z0-9_./=:" + re.escape(c) + "-]+"), f"kt_{ord(c):02x}")
@@ -56,7 +59,7 @@ def main():
     hong, bang = 0, []
     for ten, (f, dich) in DB.items():
         r, s = AM[dich]
-        giet = gram.cu_phap_run(r, s) is not None and f(r, s) is None
+        giet = gram.cu_phap_run(r, s) is not None and f(r, s) != gram.cu_phap_run(r, s)   # đổi lý do (kể cả thành None) = ca đích đỏ
         duong_hong = [k for k, (r2, s2) in DUONG.items() if f(r2, s2) is not None]
         bang.append({"dot_bien": ten, "ca_dich": dich, "giet_ca_dich": giet, "lam_hong_ca_duong": duong_hong})
         hong += (not giet) or bool(duong_hong)

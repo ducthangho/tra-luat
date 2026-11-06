@@ -96,6 +96,12 @@
   "lam_hong_ca_duong": []
  },
  {
+  "dot_bien": "m-S19_dao_thu_tu_1_2",
+  "ca_dich": "g_run_khong_phai_chuoi_pwsh",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
   "dot_bien": "m-S14[3b]",
   "ca_dich": "kt_3b",
   "giet_ca_dich": true,

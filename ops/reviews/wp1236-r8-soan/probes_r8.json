@@ -2,413 +2,520 @@
  "am": {
   "l8_01_set_trong_if_false": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l8_02_set_trong_ham_chua_goi": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l8_03_set_trong_subshell": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l8_04_set_trong_command_subst": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l8_05_builtin_set_tat": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l8_06_command_set_tat": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l8_07_tuy_chon_nhay_don": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l8_08_tuy_chon_nhay_kep": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l8_09_noi_dong": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l8_10_set_sau_ong": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l8_11_set_trong_while_khong_chay": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l8_12_set_trong_case_khong_khop": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l8_13_eval_tat": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l8_14_shopt_tat": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l8_15_set_tat_errexit": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l8_16_set_ghep_co_tat": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l9_01_ong_trong_if": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l9_02_ong_trong_while": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l9_03_ong_trong_until": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l9_04_va_va": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "l9_05_hoac_hoac": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l9_06_phu_dinh_ong": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l9_07_ong_chay_nen": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l9_08_for_hoac": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l9_09_trap_doi_ma": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "l9_10_if_khong_ong": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "c4495417390_if_false_pipefail": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "c4493205478_pipefail_sau_ong": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "c4495881317_if_ong_bash": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "c4495881317_ong_hoac_true": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "c4495881327_thay_lenh_trong_nhay_kep": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "c4495881327_thay_lenh_doi_so_nhay_kep": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "g_cham_phay": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_hai_dong": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_hai_lf_cuoi": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_bash_c": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "g_sh_c": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "g_eval": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_exec": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_python_c": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": false
   },
   "g_python_stdin": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": false
   },
   "g_gan_bien_dau": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_chuyen_huong": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_chuyen_huong_2": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_ong_va_loi": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_ngoac_nhon": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_command_subst": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_backtick": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_bieu_thuc_actions": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": false
   },
   "g_bien": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_chu_thich": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_tab": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_cr": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 2
+   "rc_bash": 2,
+   "da_chay_ct_hong": false
   },
   "g_dau_cach_cuoi": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_hai_dau_cach": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_chu_dong_hinh": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 127
+   "rc_bash": 127,
+   "da_chay_ct_hong": false
   },
   "g_chu_so_unicode": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 2
+   "rc_bash": 2,
+   "da_chay_ct_hong": false
   },
   "g_ong_khong_bash": {
    "grammar": "ong_khong_bash_tuong_minh",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "g_ong_sh": {
    "grammar": "ong_khong_bash_tuong_minh",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
   },
   "g_pwsh_shell": {
    "grammar": "shell_ngoai_cu_phap",
-   "rc_bash": null
+   "rc_bash": null,
+   "da_chay_ct_hong": false
   },
   "g_lenh_ngoai_ds": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": false
   },
   "g_ong_toi_cat": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_glob": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_ngoa": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 2
+   "rc_bash": 2,
+   "da_chay_ct_hong": false
   },
   "g_run_khong_phai_chuoi": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": null
+   "rc_bash": null,
+   "da_chay_ct_hong": false
+  },
+  "g_run_khong_phai_chuoi_pwsh": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": null,
+   "da_chay_ct_hong": false
   },
   "g_hai_lenh_hop_le": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_python_c_tran": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": false
   },
   "g_bash_c_tran": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 0
+   "rc_bash": 0,
+   "da_chay_ct_hong": false
   },
   "g_tuyet_doi": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 2
+   "rc_bash": 2,
+   "da_chay_ct_hong": false
   },
   "g_tab_doi_so": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "g_hai_dau_cach_doi_so": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_3b": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_26": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 127
+   "rc_bash": 127,
+   "da_chay_ct_hong": true
   },
   "kt_7c": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 127
+   "rc_bash": 127,
+   "da_chay_ct_hong": true
   },
   "kt_21": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_28": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 2
+   "rc_bash": 2,
+   "da_chay_ct_hong": false
   },
   "kt_29": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 2
+   "rc_bash": 2,
+   "da_chay_ct_hong": false
   },
   "kt_7b": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_7d": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_24": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_60": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 2
+   "rc_bash": 2,
+   "da_chay_ct_hong": false
   },
   "kt_27": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 2
+   "rc_bash": 2,
+   "da_chay_ct_hong": false
   },
   "kt_22": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 2
+   "rc_bash": 2,
+   "da_chay_ct_hong": false
   },
   "kt_5c": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_3c": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": false
   },
   "kt_3e": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_23": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_2a": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_3f": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_5b": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_5d": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_7e": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_09": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_0a": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "kt_0d": {
    "grammar": "lenh_ngoai_cu_phap",
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   }
  },
  "duong": {
   "d_mot_lenh": {
    "grammar": null,
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "d_mot_lenh_khong_lf": {
    "grammar": null,
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "d_mot_lenh_bash": {
    "grammar": null,
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "d_mot_lenh_sh": {
    "grammar": null,
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "d_doi_so": {
    "grammar": null,
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "d_ong_bash_trai_hong": {
    "grammar": null,
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   },
   "d_ong_bash_phai_hong": {
    "grammar": null,
-   "rc_bash": 1
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
   }
  }
 }

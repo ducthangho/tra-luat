@@ -1146,8 +1146,10 @@ def _vi_pham_kien_truc():
     env = [n.lineno for k in ("main", "_env_con") for n in ast.walk(ham[k]) if isinstance(n, (ast.Global, ast.Nonlocal))]
     env += [c.lineno for c in ast.walk(ham["_env_con"]) if isinstance(c, ast.Call)        # _env_con chỉ `dict(...)` rồi
             and getattr(c.func, "id", 0) != "dict" and getattr(c.func, "attr", 0) != "pop"]   # `.pop`: không cache env đi đâu
-    goi = {id(k.value.func) for c in ast.walk(cay) if isinstance(c, ast.Call) for k in c.keywords if k.arg == "env"
-           and isinstance(k.value, ast.Call)}  # `_env_con` CHỈ được dùng làm `env=` của tiến trình con (lượt 4, F4)
+    env += [t.lineno for a in ast.walk(ham["_env_con"]) if isinstance(a, (ast.Assign, ast.AugAssign, ast.AnnAssign))
+            for t in getattr(a, "targets", [getattr(a, "target", None)]) if not isinstance(t, ast.Name)]   # chỉ gán CỤC BỘ
+    goi = {id(k.value.func) for c in ast.walk(cay) if isinstance(c, ast.Call) and ast.unparse(c.func) in ("subprocess.run",
+           "_chay_tien_trinh") for k in c.keywords if k.arg == "env" and isinstance(k.value, ast.Call)}   # CHỈ env= tiến trình con
     env += [n.lineno for n in ast.walk(cay) if getattr(n, "id", 0) == "_env_con" and id(n) not in goi | bo]
     che, moc = [], "".join(["pkg_secret", "_scan"])
     for n in ast.walk(cay):

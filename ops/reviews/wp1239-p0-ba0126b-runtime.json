@@ -1,0 +1,66 @@
+{
+  "packet_id": "wp1239",
+  "revision": 2,
+  "generation": 2,
+  "reviewed_sha": "ba0126bd20c99669264b788e15da2b6ebcda0fd7",
+  "reviewed_tree": "43ce78d329fd54266ad73baba351044a0feca85c",
+  "verdict": "approve",
+  "findings": [],
+  "assurance": "cross_approved",
+  "scope": [
+    "ops/plans/PROXIMA-PLAYWRIGHT-v1.md",
+    "docs/research/2026-11-05-proxima-playwright-p0.md"
+  ],
+  "executor": {
+    "provider": "anthropic_claude",
+    "surface": "claude_code",
+    "transport": "machine/local",
+    "actual_model": "claude-opus-5-5",
+    "requested_effort": "max",
+    "served_effort": "unmeasured",
+    "run_id": "7e16374232d44fc38a7ee0d92df97853",
+    "signed_run_hmac_verified_by_dispatcher": true
+  },
+  "reviewer": {
+    "provider": "openai_codex",
+    "surface": "codex_cli",
+    "transport": "machine",
+    "served_model": "gpt-6.1-sol",
+    "served_effort": "xhigh",
+    "model_measurement": "DO_DUOC",
+    "effort_measurement": "DO_DUOC",
+    "sandbox_measurement": "DO_DUOC",
+    "observed_permissions": "filesystem read-only; network restricted",
+    "launcher_run_id": "adc10e4516c04210921322e6c5e91cfd",
+    "codex_thread_id": "01a1af7a-8495-72b0-9996-b9ab2a943834",
+    "reserved_call_id": "38152309d87d4389bdfb3360adcc837f",
+    "terminal_rc": 0,
+    "started_utc": "2026-11-06T06:10:04.529505+00:00",
+    "ended_utc": "2026-11-06T06:17:24.828905+00:00",
+    "duration_seconds": 440.299
+  },
+  "limits": {
+    "sandbox": "lay mau /proc tu ben ngoai moi 0.2s: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. Lech danh tinh tien trinh (#1105): chuyen cha khi cha cu da mat/Z va cha moi la to tien da xac thuc thi duoc tha; moi lech khac (ke ca chuyen ra ngoai cay hay PID 1) => KHONG_DO_DUOC: co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do",
+    "executor_served_effort": "not measured, not inferred from CLI flags",
+    "canonical_linux_ci": "pending before merge",
+    "branch_protection_readback": "pending before merge",
+    "source_writes_or_push": "not authorized by reviewer lease; executor lease expired"
+  },
+  "hashes": {
+    "verdict_sha256": "46a2ec79c7b46f0552cc0ac867c995128ef1ec852a836e462e8256d78034b13f",
+    "run_json_sha256": "95425612666851128588dc8ce76c1d4c51c6eba29a0f20b9b0a35f967fb03ef9",
+    "stdout_sha256": "855571fc2210fa0f04a17a0f7d209d3ed0bd82aaa0b49fe62d1d6e0fc9428183",
+    "stderr_sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+  },
+  "snapshot_tracked_files_unchanged": 12250,
+  "checks": {
+    "linux_selftest": "1776/1776 rc0",
+    "N1_N4": "passed",
+    "R1_R4": "passed independently",
+    "ruff_contract": "passed 3/3",
+    "ruff_bare_lint": "failed 12 F821; baseline same12; delta0"
+  },
+  "github_submitter_identity": "ducthangho",
+  "github_submitter_is_model_reviewer": false,
+  "recorded_utc": "2026-11-06T06:21:55.862453+00:00"
+}

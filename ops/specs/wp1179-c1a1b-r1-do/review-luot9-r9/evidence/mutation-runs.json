@@ -1,0 +1,1268 @@
+{
+  "e_base": {
+    "states": [
+      "qua",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "qua"
+    ],
+    "errors": {
+      "1": "E_reader_chet",
+      "2": "E_reader_chet",
+      "3": "E_reader_chet",
+      "4": "E_reader_chet",
+      "5": "E_reader_chet",
+      "6": "E_reader_chet",
+      "7": "E_reader_chet",
+      "8": "E_reader_chet"
+    },
+    "total": 0,
+    "count": 0,
+    "trace": [],
+    "memo_at": {
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": [],
+      "6": [],
+      "7": [],
+      "8": [],
+      "9": []
+    }
+  },
+  "e_mutant": {
+    "states": [
+      "qua",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "qua"
+    ],
+    "errors": {
+      "1": "E_reader_chet",
+      "2": "E_reader_chet",
+      "3": "E_reader_chet",
+      "4": "E_reader_chet",
+      "5": "E_reader_chet",
+      "6": "E_reader_chet",
+      "7": "E_reader_chet",
+      "8": "E_reader_chet"
+    },
+    "total": 0,
+    "count": 0,
+    "trace": [],
+    "memo_at": {
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": [],
+      "6": [],
+      "7": [],
+      "8": [],
+      "9": []
+    }
+  },
+  "h_base": {
+    "states": [
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "qua"
+    ],
+    "errors": {
+      "7": "E_reader_chet",
+      "8": "E_reader_chet"
+    },
+    "total": 8366,
+    "count": 8,
+    "trace": [
+      [
+        1,
+        "commit",
+        "2961657d7257cb3a69ca92c00639761d6d0d1cd4",
+        264
+      ],
+      [
+        1,
+        "commit",
+        "aab31e2a5f663dfb66705b4946493881ecb7b560",
+        216
+      ],
+      [
+        1,
+        "commit",
+        "968d44f2706d9f8408538c3516b1d4617f23aea8",
+        216
+      ],
+      [
+        3,
+        "commit",
+        "e668a5eaf5061b41651260b093579d1de8f1956c",
+        216
+      ],
+      [
+        6,
+        "tree",
+        "0db8f9bc1db423fd62b040d7a786aea009b58da2",
+        1020
+      ],
+      [
+        6,
+        "tree",
+        "a35e897dc4d1163743360f386a623aaf5ebfdf8a",
+        2689
+      ],
+      [
+        7,
+        "tree",
+        "99a7ebcfd6f543908d412c49a3cde9f6eac781a0",
+        1020
+      ],
+      [
+        7,
+        "tree",
+        "e5ace5c67e6820ee4f37258160e79fcf94357cf9",
+        2725
+      ]
+    ],
+    "memo_at": {
+      "1": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ]
+      ],
+      "2": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ]
+      ],
+      "3": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "4": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "5": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "6": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ],
+        [
+          "tree",
+          "0db8f9bc1db423fd62b040d7a786aea009b58da2"
+        ],
+        [
+          "tree",
+          "a35e897dc4d1163743360f386a623aaf5ebfdf8a"
+        ]
+      ],
+      "7": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ],
+        [
+          "tree",
+          "0db8f9bc1db423fd62b040d7a786aea009b58da2"
+        ],
+        [
+          "tree",
+          "99a7ebcfd6f543908d412c49a3cde9f6eac781a0"
+        ],
+        [
+          "tree",
+          "a35e897dc4d1163743360f386a623aaf5ebfdf8a"
+        ]
+      ],
+      "8": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ],
+        [
+          "tree",
+          "0db8f9bc1db423fd62b040d7a786aea009b58da2"
+        ],
+        [
+          "tree",
+          "99a7ebcfd6f543908d412c49a3cde9f6eac781a0"
+        ],
+        [
+          "tree",
+          "a35e897dc4d1163743360f386a623aaf5ebfdf8a"
+        ]
+      ],
+      "9": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ],
+        [
+          "tree",
+          "0db8f9bc1db423fd62b040d7a786aea009b58da2"
+        ],
+        [
+          "tree",
+          "99a7ebcfd6f543908d412c49a3cde9f6eac781a0"
+        ],
+        [
+          "tree",
+          "a35e897dc4d1163743360f386a623aaf5ebfdf8a"
+        ]
+      ]
+    }
+  },
+  "h_mutant": {
+    "states": [
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "khong_do_duoc",
+      "qua",
+      "qua"
+    ],
+    "errors": {
+      "7": "E_reader_chet"
+    },
+    "total": 22604,
+    "count": 11,
+    "trace": [
+      [
+        1,
+        "commit",
+        "2961657d7257cb3a69ca92c00639761d6d0d1cd4",
+        264
+      ],
+      [
+        1,
+        "commit",
+        "aab31e2a5f663dfb66705b4946493881ecb7b560",
+        216
+      ],
+      [
+        1,
+        "commit",
+        "968d44f2706d9f8408538c3516b1d4617f23aea8",
+        216
+      ],
+      [
+        3,
+        "commit",
+        "e668a5eaf5061b41651260b093579d1de8f1956c",
+        216
+      ],
+      [
+        6,
+        "tree",
+        "0db8f9bc1db423fd62b040d7a786aea009b58da2",
+        1020
+      ],
+      [
+        6,
+        "tree",
+        "a35e897dc4d1163743360f386a623aaf5ebfdf8a",
+        2689
+      ],
+      [
+        7,
+        "tree",
+        "99a7ebcfd6f543908d412c49a3cde9f6eac781a0",
+        1020
+      ],
+      [
+        7,
+        "tree",
+        "e5ace5c67e6820ee4f37258160e79fcf94357cf9",
+        2725
+      ],
+      [
+        8,
+        "tree",
+        "9f739ed8695b6c1690a3df3c002e1eebfc9bb1f8",
+        108
+      ],
+      [
+        8,
+        "tree",
+        "4e4b2f1e90b1f7a953e9e2b63dd739ded0c6361c",
+        306
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a",
+        13824
+      ]
+    ],
+    "memo_at": {
+      "1": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ]
+      ],
+      "2": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ]
+      ],
+      "3": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "4": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "5": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "6": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ],
+        [
+          "tree",
+          "0db8f9bc1db423fd62b040d7a786aea009b58da2"
+        ],
+        [
+          "tree",
+          "a35e897dc4d1163743360f386a623aaf5ebfdf8a"
+        ]
+      ],
+      "7": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ],
+        [
+          "tree",
+          "0db8f9bc1db423fd62b040d7a786aea009b58da2"
+        ],
+        [
+          "tree",
+          "99a7ebcfd6f543908d412c49a3cde9f6eac781a0"
+        ],
+        [
+          "tree",
+          "a35e897dc4d1163743360f386a623aaf5ebfdf8a"
+        ]
+      ],
+      "8": [
+        [
+          "blob",
+          "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+        ],
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ],
+        [
+          "tree",
+          "0db8f9bc1db423fd62b040d7a786aea009b58da2"
+        ],
+        [
+          "tree",
+          "4e4b2f1e90b1f7a953e9e2b63dd739ded0c6361c"
+        ],
+        [
+          "tree",
+          "99a7ebcfd6f543908d412c49a3cde9f6eac781a0"
+        ],
+        [
+          "tree",
+          "9f739ed8695b6c1690a3df3c002e1eebfc9bb1f8"
+        ],
+        [
+          "tree",
+          "a35e897dc4d1163743360f386a623aaf5ebfdf8a"
+        ]
+      ],
+      "9": [
+        [
+          "blob",
+          "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+        ],
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ],
+        [
+          "tree",
+          "0db8f9bc1db423fd62b040d7a786aea009b58da2"
+        ],
+        [
+          "tree",
+          "4e4b2f1e90b1f7a953e9e2b63dd739ded0c6361c"
+        ],
+        [
+          "tree",
+          "99a7ebcfd6f543908d412c49a3cde9f6eac781a0"
+        ],
+        [
+          "tree",
+          "9f739ed8695b6c1690a3df3c002e1eebfc9bb1f8"
+        ],
+        [
+          "tree",
+          "a35e897dc4d1163743360f386a623aaf5ebfdf8a"
+        ]
+      ]
+    }
+  },
+  "f_base": {
+    "states": [
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "qua"
+    ],
+    "errors": {
+      "6": "E_reader_chet",
+      "7": "E_reader_chet",
+      "8": "E_reader_chet"
+    },
+    "total": 912,
+    "count": 4,
+    "trace": [
+      [
+        1,
+        "commit",
+        "2961657d7257cb3a69ca92c00639761d6d0d1cd4",
+        264
+      ],
+      [
+        1,
+        "commit",
+        "aab31e2a5f663dfb66705b4946493881ecb7b560",
+        216
+      ],
+      [
+        1,
+        "commit",
+        "968d44f2706d9f8408538c3516b1d4617f23aea8",
+        216
+      ],
+      [
+        3,
+        "commit",
+        "e668a5eaf5061b41651260b093579d1de8f1956c",
+        216
+      ]
+    ],
+    "memo_at": {
+      "1": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ]
+      ],
+      "2": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ]
+      ],
+      "3": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "4": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "5": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "6": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "7": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "8": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "9": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ]
+    }
+  },
+  "f_rerun": {
+    "states": [
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "qua"
+    ],
+    "errors": {
+      "6": "E_reader_chet",
+      "7": "E_reader_chet",
+      "8": "E_reader_chet"
+    },
+    "total": 912,
+    "count": 4,
+    "trace": [
+      [
+        1,
+        "commit",
+        "2961657d7257cb3a69ca92c00639761d6d0d1cd4",
+        264
+      ],
+      [
+        1,
+        "commit",
+        "aab31e2a5f663dfb66705b4946493881ecb7b560",
+        216
+      ],
+      [
+        1,
+        "commit",
+        "968d44f2706d9f8408538c3516b1d4617f23aea8",
+        216
+      ],
+      [
+        3,
+        "commit",
+        "e668a5eaf5061b41651260b093579d1de8f1956c",
+        216
+      ]
+    ],
+    "memo_at": {
+      "1": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ]
+      ],
+      "2": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ]
+      ],
+      "3": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "4": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "5": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "6": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "7": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "8": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "9": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ]
+    }
+  },
+  "f_invalidate": {
+    "states": [
+      "qua",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "qua"
+    ],
+    "errors": {
+      "6": "E_reader_chet",
+      "7": "E_reader_chet",
+      "8": "E_reader_chet"
+    },
+    "total": 912,
+    "count": 4,
+    "trace": [
+      [
+        1,
+        "commit",
+        "2961657d7257cb3a69ca92c00639761d6d0d1cd4",
+        264
+      ],
+      [
+        1,
+        "commit",
+        "aab31e2a5f663dfb66705b4946493881ecb7b560",
+        216
+      ],
+      [
+        1,
+        "commit",
+        "968d44f2706d9f8408538c3516b1d4617f23aea8",
+        216
+      ],
+      [
+        3,
+        "commit",
+        "e668a5eaf5061b41651260b093579d1de8f1956c",
+        216
+      ]
+    ],
+    "memo_at": {
+      "1": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ]
+      ],
+      "2": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ]
+      ],
+      "3": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "4": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "5": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "6": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "7": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "8": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ],
+      "9": [
+        [
+          "commit",
+          "2961657d7257cb3a69ca92c00639761d6d0d1cd4"
+        ],
+        [
+          "commit",
+          "968d44f2706d9f8408538c3516b1d4617f23aea8"
+        ],
+        [
+          "commit",
+          "aab31e2a5f663dfb66705b4946493881ecb7b560"
+        ],
+        [
+          "commit",
+          "e668a5eaf5061b41651260b093579d1de8f1956c"
+        ]
+      ]
+    }
+  }
+}

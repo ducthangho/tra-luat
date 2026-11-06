@@ -1,0 +1,79 @@
+[
+ {
+  "dot_bien": "v3a_bash_P_khong_trang",
+  "than": "bash ops/hong.sh||true||x.sh",
+  "shell": null,
+  "tham_chieu": "lenh_ngoai_cu_phap",
+  "dot_bien_nhan": true,
+  "rc": 0,
+  "DA_CHAY": true,
+  "loai": "nuot_that",
+  "stderr": ""
+ },
+ {
+  "dot_bien": "v3b_pwsh_P_khong_trang",
+  "than": "pwsh -NoProfile -File ops/hong.ps1||true||x.ps1",
+  "shell": null,
+  "tham_chieu": "lenh_ngoai_cu_phap",
+  "dot_bien_nhan": true,
+  "rc": 0,
+  "DA_CHAY": true,
+  "loai": "nuot_that",
+  "stderr": ""
+ },
+ {
+  "dot_bien": "v3c_bash_tuy_chon_truoc_P",
+  "than": "bash -n ops/hong.sh",
+  "shell": null,
+  "tham_chieu": "lenh_ngoai_cu_phap",
+  "dot_bien_nhan": true,
+  "rc": 0,
+  "DA_CHAY": false,
+  "loai": "khong_chay_rc0",
+  "stderr": ""
+ },
+ {
+  "dot_bien": "v3c_bash_tuy_chon_truoc_P",
+  "than": "bash -s ops/hong.sh",
+  "shell": null,
+  "tham_chieu": "lenh_ngoai_cu_phap",
+  "dot_bien_nhan": true,
+  "rc": 0,
+  "DA_CHAY": false,
+  "loai": "khong_chay_rc0",
+  "stderr": ""
+ },
+ {
+  "dot_bien": "v3d_python_tuy_chon_truoc_P",
+  "than": "python -h ops/hong_test.py",
+  "shell": null,
+  "tham_chieu": "lenh_ngoai_cu_phap",
+  "dot_bien_nhan": true,
+  "rc": 0,
+  "DA_CHAY": false,
+  "loai": "khong_chay_rc0",
+  "stderr": ""
+ },
+ {
+  "dot_bien": "v3f_ong_hoac_lenh_cuoi",
+  "than": "python ops/hong_test.py | python ops/qua.py || python ops/qua.py",
+  "shell": "bash",
+  "tham_chieu": "lenh_ngoai_cu_phap",
+  "dot_bien_nhan": true,
+  "rc": 0,
+  "DA_CHAY": true,
+  "loai": "nuot_that",
+  "stderr": ""
+ },
+ {
+  "dot_bien": "v3h_ong_cham_than_ve_phai",
+  "than": "python ops/qua.py | ! python ops/hong_test.py",
+  "shell": "bash",
+  "tham_chieu": "lenh_ngoai_cu_phap",
+  "dot_bien_nhan": true,
+  "rc": 2,
+  "DA_CHAY": false,
+  "loai": "rc_khac_0",
+  "stderr": "/tmp/tmpipyx4d0m/s.sh: line 1: syntax error near unexpected token `!'"
+ }
+]

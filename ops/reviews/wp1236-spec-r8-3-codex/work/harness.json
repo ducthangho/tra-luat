@@ -1,0 +1,105 @@
+[
+  {
+    "mutant": "m-S15[3b]_P_them",
+    "checks": 36,
+    "rc0_and_ran": 0,
+    "rc0_not_ran": 0,
+    "rc_nonzero_not_ran": 36,
+    "rc_nonzero_ran": 0,
+    "original_comparison": null
+  },
+  {
+    "mutant": "m-S15[26]_P_them",
+    "checks": 36,
+    "rc0_and_ran": 0,
+    "rc0_not_ran": 0,
+    "rc_nonzero_not_ran": 36,
+    "rc_nonzero_ran": 0,
+    "original_comparison": null
+  },
+  {
+    "mutant": "m-S15[7c]_P_them",
+    "checks": 36,
+    "rc0_and_ran": 0,
+    "rc0_not_ran": 0,
+    "rc_nonzero_not_ran": 36,
+    "rc_nonzero_ran": 0,
+    "original_comparison": null
+  },
+  {
+    "mutant": "m-S15[28]_P_them",
+    "checks": 36,
+    "rc0_and_ran": 0,
+    "rc0_not_ran": 0,
+    "rc_nonzero_not_ran": 36,
+    "rc_nonzero_ran": 0,
+    "original_comparison": null
+  },
+  {
+    "mutant": "m-S15[29]_P_them",
+    "checks": 36,
+    "rc0_and_ran": 0,
+    "rc0_not_ran": 0,
+    "rc_nonzero_not_ran": 36,
+    "rc_nonzero_ran": 0,
+    "original_comparison": null
+  },
+  {
+    "mutant": "m-S15[27]_P_them",
+    "checks": 36,
+    "rc0_and_ran": 0,
+    "rc0_not_ran": 0,
+    "rc_nonzero_not_ran": 0,
+    "rc_nonzero_ran": 36,
+    "original_comparison": {
+      "char_code": 39,
+      "shell": null,
+      "harness": [
+        0,
+        1,
+        true
+      ],
+      "original_rc": 2,
+      "original_ran": false,
+      "original_stderr": "<scratch>/s.sh: line 1: unexpected EOF while looking for matching `''\n"
+    }
+  },
+  {
+    "mutant": "m-S15[22]_P_them",
+    "checks": 36,
+    "rc0_and_ran": 0,
+    "rc0_not_ran": 0,
+    "rc_nonzero_not_ran": 0,
+    "rc_nonzero_ran": 36,
+    "original_comparison": {
+      "char_code": 34,
+      "shell": null,
+      "harness": [
+        0,
+        1,
+        true
+      ],
+      "original_rc": 2,
+      "original_ran": false,
+      "original_stderr": "<scratch>/s.sh: line 1: unexpected EOF while looking for matching `\"'\n"
+    }
+  },
+  {
+    "mutant": "m-S15[3c]_P_them",
+    "checks": 36,
+    "rc0_and_ran": 0,
+    "rc0_not_ran": 0,
+    "rc_nonzero_not_ran": 36,
+    "rc_nonzero_ran": 0,
+    "original_comparison": null
+  },
+  {
+    "mutant": "m-S15[3e]_P_them",
+    "checks": 36,
+    "rc0_and_ran": 0,
+    "rc0_not_ran": 0,
+    "rc_nonzero_not_ran": 36,
+    "rc_nonzero_ran": 0,
+    "original_comparison": null
+  }
+]

@@ -1,0 +1,239 @@
+{
+ "m-S7d_tach_ong_hai_gach": {
+  "nhan_ma_nuot_loi": 100,
+  "nuot_that": 50,
+  "khong_chay_rc0": 50,
+  "vd": [
+   [
+    "bash ops/hong.sh || bash ops/hong.sh",
+    "bash",
+    0,
+    true
+   ],
+   [
+    "bash ops/hong.sh || bash ops/hong.sh",
+    "bash",
+    0,
+    false
+   ]
+  ]
+ },
+ "m-S7e_tach_ong_nhieu_gach": {
+  "nhan_ma_nuot_loi": 100,
+  "nuot_that": 50,
+  "khong_chay_rc0": 50,
+  "vd": [
+   [
+    "bash ops/hong.sh || bash ops/hong.sh",
+    "bash",
+    0,
+    true
+   ],
+   [
+    "bash ops/hong.sh || bash ops/hong.sh",
+    "bash",
+    0,
+    false
+   ]
+  ]
+ },
+ "m-S7f_tach_ong_va": {
+  "nhan_ma_nuot_loi": 50,
+  "nuot_that": 50,
+  "vd": [
+   [
+    "bash ops/hong.sh & bash ops/hong.sh",
+    "bash",
+    0,
+    true
+   ],
+   [
+    "bash ops/hong.sh & bash ops/hong.sh\n",
+    "bash",
+    0,
+    true
+   ]
+  ]
+ },
+ "m-S7g_don_va_cuoi": {
+  "nhan_ma_nuot_loi": 30,
+  "nuot_that": 30,
+  "vd": [
+   [
+    "bash ops/hong.sh &",
+    null,
+    0,
+    true
+   ],
+   [
+    "bash ops/hong.sh &\n",
+    null,
+    0,
+    true
+   ]
+  ]
+ },
+ "m-S7h_don_cham_than_dau": {
+  "nhan_ma_nuot_loi": 30,
+  "nuot_that": 30,
+  "vd": [
+   [
+    "! bash ops/hong.sh",
+    null,
+    0,
+    true
+   ],
+   [
+    "! bash ops/hong.sh\n",
+    null,
+    0,
+    true
+   ]
+  ]
+ },
+ "m-S7i_don_hoac_lenh": {
+  "nhan_ma_nuot_loi": 300,
+  "nuot_that": 150,
+  "khong_chay_rc0": 150,
+  "vd": [
+   [
+    "bash ops/hong.sh || bash ops/hong.sh",
+    null,
+    0,
+    true
+   ],
+   [
+    "bash ops/hong.sh || bash ops/hong.sh",
+    null,
+    0,
+    false
+   ]
+  ]
+ },
+ "m-S15[3b]_P_them": {
+  "nhan_ma_nuot_loi": 36,
+  "khong_chay_rc_khac_0": 36,
+  "vd": [
+   [
+    "python o;ps/ab.py w",
+    null,
+    2,
+    false
+   ],
+   [
+    "python o;ps/ab.py w\n",
+    null,
+    2,
+    false
+   ]
+  ]
+ },
+ "m-S15[26]_P_them": {
+  "nhan_ma_nuot_loi": 36,
+  "khong_chay_rc_khac_0": 36,
+  "vd": [
+   [
+    "python o&ps/ab.py w",
+    null,
+    126,
+    false
+   ],
+   [
+    "python o&ps/ab.py w\n",
+    null,
+    126,
+    false
+   ]
+  ]
+ },
+ "m-S15[7c]_P_them": {
+  "nhan_ma_nuot_loi": 36,
+  "khong_chay_rc_khac_0": 36,
+  "vd": [
+   [
+    "python ops/ab|.py w",
+    null,
+    127,
+    false
+   ],
+   [
+    "python ops/ab|.py w\n",
+    null,
+    127,
+    false
+   ]
+  ]
+ },
+ "m-S15[28]_P_them": {
+  "nhan_ma_nuot_loi": 36,
+  "khong_chay_rc_khac_0": 36,
+  "vd": [
+   [
+    "python o(ps/ab.py w",
+    null,
+    2,
+    false
+   ],
+   [
+    "python o(ps/ab.py w\n",
+    null,
+    2,
+    false
+   ]
+  ]
+ },
+ "m-S15[29]_P_them": {
+  "nhan_ma_nuot_loi": 36,
+  "khong_chay_rc_khac_0": 36,
+  "vd": [
+   [
+    "python o)ps/ab.py w",
+    null,
+    2,
+    false
+   ],
+   [
+    "python o)ps/ab.py w\n",
+    null,
+    2,
+    false
+   ]
+  ]
+ },
+ "m-S15[3c]_P_them": {
+  "nhan_ma_nuot_loi": 36,
+  "khong_chay_rc_khac_0": 36,
+  "vd": [
+   [
+    "python o<ps/ab.py w",
+    null,
+    2,
+    false
+   ],
+   [
+    "python o<ps/ab.py w\n",
+    null,
+    2,
+    false
+   ]
+  ]
+ },
+ "m-S15[3e]_P_them": {
+  "nhan_ma_nuot_loi": 36,
+  "khong_chay_rc_khac_0": 36,
+  "vd": [
+   [
+    "python o>ps/ab.py w",
+    null,
+    2,
+    false
+   ],
+   [
+    "python o>ps/ab.py w\n",
+    null,
+    2,
+    false
+   ]
+  ]
+ }
+}

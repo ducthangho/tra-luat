@@ -1,0 +1,333 @@
+{
+  "KT_count": 35,
+  "unique_bodies": 1973,
+  "generated_inputs": 11838,
+  "old_inputs": 168,
+  "branch_mutants": [
+    {
+      "branch": "sh",
+      "char_code": 59,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 38,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 124,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 33,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 40,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 41,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 123,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 125,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 36,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 96,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 39,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 34,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 92,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 60,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 62,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 35,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 42,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 63,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 91,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 93,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 126,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 43,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 44,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 64,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 37,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "sh",
+      "char_code": 94,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 59,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 38,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 124,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 33,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 40,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 41,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 123,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 125,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 36,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 96,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 39,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 34,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 92,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 60,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 62,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 35,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 42,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 63,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 91,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 93,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 126,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 43,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 44,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 64,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 37,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    },
+    {
+      "branch": "ps1",
+      "char_code": 94,
+      "old_diffs": 0,
+      "generated_diffs": 0
+    }
+  ],
+  "endpoints_only": {
+    "old_diffs": 0,
+    "generated_diffs": 0,
+    "harmless_witness": {
+      "reference": "lenh_ngoai_cu_phap",
+      "mutant": null
+    }
+  },
+  "branch_survivors": 52,
+  "accepted_pipeline_lengths": {
+    "1": 36,
+    "2": 50
+  }
+}

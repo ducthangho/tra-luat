@@ -66,7 +66,7 @@ write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 J
 write_set_ghi_chu: 'doc khong sua: scripts/pkg_secret_scan.py, .github/checks/bundle_fragment_check.py, scripts/tl_core/test_fragments.py'
 closure_status: 'holder scan 2026-11-05T16:27Z: ls-remote vs for-each-ref thieu 0; .githooks/eol_policy_test.py NGUOI_GIU 1 = wp1221-r2-g1 (bia mo hai chieu trong lan cap nay)'
 tran_kich_thuoc: '<= 1 tep / <= 700 dong them (nang_tran 05-11 ~17:57Z, issuecomment-6665273200); vuot => DUNG'
-tran_loi_goi_codex: 'toi da 7 loi goi cho r3 (4 ban dau + 2 nang 06-11 issuecomment-6674362385 + 1 nang 06-11 issuecomment-6675488272); dem truoc MOI loi goi; het ma chua approve => DUNG, hoi chu kho'
+tran_loi_goi_codex: 'toi da 8 loi goi cho r3 = tran ADR-0052 (4 + 2 issuecomment-6674362385 + 1 issuecomment-6675488272 + 1 issuecomment-6676455701); dem truoc MOI loi goi; het ma chua approve => DUNG, hoi chu kho'
 windows: 'A11: chay TAP TRUNG eol_policy_test tren may Windows local tra-luat-win qua phien dieu phoi, giu KHOA.txt (ADR-0057); KHONG workflow_dispatch ci.yml (chi thi chu kho 05-11 ~09:30Z)'
 coordination_paths:
 - ops/leases/wp1221-r3-g1-claude-remote-20261105.yaml

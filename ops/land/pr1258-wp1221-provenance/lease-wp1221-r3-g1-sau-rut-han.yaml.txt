@@ -1,0 +1,107 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1221
+packet_id: wp1221
+packet_slug: EOL-TEST-CHAN-DOAN
+mission_issue: 1221
+mission_id: gh-1221
+mission_ghi_chu: 'packet don le; Packet Issue #1221'
+revision: 3
+generation: 1
+lease_id: wp1221-r3-g1-claude-remote-20261105
+thay_the_cho:
+- wp1221-r2-g1-claude-remote-20261105
+thay_the_cho_ghi_chu: 'r2 g1 con han; bia mo hai chieu tren ops/wp1221-r2-g1-lease (da_bi_thay_the)'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1221#issuecomment-6663244016
+authority_url: https://github.com/ducthangho/tra-luat/issues/1221#issuecomment-6663244016
+authority_ghi_chu: 'chu kho "Duyet + cap lease + thi cong" (05-11-2026 ~16:28Z) cho spec_hash r3 30c073c5; quyet dinh ra r3 tai issuecomment-6663014430'
+authority_caveat: 'comment neo do phien dieu phoi dang bang token chu kho (#566)'
+recorded_by: anthropic_claude_dispatcher
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; tham quyen la authority_url'
+executor_session: session_015GtxrZVmDpv9FPWFf1Uaoo
+leased_at_utc: '2026-11-05T16:30:00Z'
+heartbeat_at: '2026-11-05T16:30:00Z'
+lease_until: '2026-11-06T10:30:00Z'
+lease_expires_at_utc: '2026-11-06T10:30:00Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); phien thuc thi la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+effective_review_class_ghi_chu: '.githooks/ khong co trong _BANG_LOP => cong tinh sensitive'
+assurance_target: cross_approved
+reviewer: openai_codex
+reviewer_provider: openai_codex
+reviewer_independence: 'cross-review theo .claude/skills/cross-review/SKILL.md, phien doc lap read-only neo exact head; connector la lop bo sung'
+spec_path: ops/specs/wp1221-r3.md
+spec_ref: refs/heads/ops/wp1221-spec@a83dc45e2d2dea104e59b0385014339bcaae1f9b
+spec_source_oid: a83dc45e2d2dea104e59b0385014339bcaae1f9b
+spec_blob: 50e55484e6df54df6ec515904ae0257c49f63576
+spec_hash: 30c073c5c4726548f0423077e3db7e0dbc260afb2f88e1a826e58a2094ae2659
+spec_sha256: 30c073c5c4726548f0423077e3db7e0dbc260afb2f88e1a826e58a2094ae2659
+spec_ref_ghi_chu: 'ghim OID40 theo kiem-merge K1 (_spec_merge, ADR-0063); H1 spec "# wp1221 r3 — ..." khop packet_id/revision lease; executor KHONG chep spec vao nhanh'
+branch: claude/wp1221-r3-g1
+branch_ownership: exclusive
+branch_ghi_chu: 'nhanh moi tu master; claude/wp1221-g1 (5387a82, PR #1234) la cua r2 va KHONG land; 3 commit cuc bo r2 khong day'
+target_branch_neu_land: master
+base_sha: b7962596ac5e0d97fd1f180462bdf0ee13b83526
+start_from_sha: b7962596ac5e0d97fd1f180462bdf0ee13b83526
+reviewed_sha_required: b7962596ac5e0d97fd1f180462bdf0ee13b83526
+reviewed_sha_ghi_chu: 'doi base 4fb3c03 -> b796259 (06-11, M5 lan day 2, issuecomment-6677404899): thu-hoi do vi master tien 60 commit, khong commit nao cham tep dich'
+write_set:
+- .githooks/eol_policy_test.py
+write_set_hash: b1866d09f9a776e79bc1f17c9645fee13d9454f0b0d9bd96efcbfec4dd5d2582
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+write_set_ghi_chu: 'doc khong sua: scripts/pkg_secret_scan.py, .github/checks/bundle_fragment_check.py, scripts/tl_core/test_fragments.py'
+closure_status: 'holder scan 2026-11-05T16:27Z: ls-remote vs for-each-ref thieu 0; .githooks/eol_policy_test.py NGUOI_GIU 1 = wp1221-r2-g1 (bia mo hai chieu trong lan cap nay)'
+tran_kich_thuoc: '<= 1 tep / <= 700 dong them (nang_tran 05-11 ~17:57Z, issuecomment-6665273200); vuot => DUNG'
+tran_loi_goi_codex: 'toi da 8 loi goi cho r3 = tran ADR-0052 (4 + 2 issuecomment-6674362385 + 1 issuecomment-6675488272 + 1 issuecomment-6676455701); dem truoc MOI loi goi; het ma chua approve => DUNG, hoi chu kho'
+windows: 'A11: chay TAP TRUNG eol_policy_test tren may Windows local tra-luat-win qua phien dieu phoi, giu KHOA.txt (ADR-0057); KHONG workflow_dispatch ci.yml (chi thi chu kho 05-11 ~09:30Z)'
+coordination_paths:
+- ops/leases/wp1221-r3-g1-claude-remote-20261105.yaml
+run_minutes: 2880
+heartbeat_required_minutes: 360
+review_sla_minutes: 240
+prohibited_actions:
+- LIVE
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- write_outside_effective_write_set
+- workflow_dispatch
+- sua_ci_yml
+land_authority_note: 'chu kho duyet SHA cu the truoc merge; dieu phoi merge khi kiem-merge rc=0'
+nang_tran:
+  tran_cu: '<= 1 tep / <= 600 dong them (spec r3)'
+  tran_moi: '<= 1 tep / <= 700 dong them (git diff --numstat 4fb3c03..head)'
+  can_cu: 'va 5 P2 Codex luot 1/4 (F1-F4, F7) +81 dong; numstat +663/-87 tren 3f80327'
+  ai_nang: ducthangho
+  can_cu_url: https://github.com/ducthangho/tra-luat/issues/1221#issuecomment-6665273200
+
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-07T16:30:00Z'
+  han_moi_utc: '2026-11-06T10:30:00Z'
+  chi_thi: >-
+    Phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq: lease ghi so ghi-so-land-pr1258-wp1221-r1-g1-claude-remote-20261106
+    (nhanh ops/ghi-so-land-1258-lease @ da4bd71) giao "them thu_hoi_bang_rut_han vao lease thi cong" cho phien ghi so; tham quyen
+    #1221 issuecomment-6680321819. Tep nay nam trong write_set cua lease ghi so (chi khoi rut han).
+  ly_do: >-
+    Viec thi cong da xong: PR #1258 merge (08bcb51, 2026-11-06T07:24:02Z), merge^2 = ee7a385, diff merge = diff PR (mot tep
+    .githooks/eol_policy_test.py +698 -92); CI master run 42180624203 23/23 success. Ho so land: ops/land/pr1258-wp1221-land-evidence.yaml.
+  vi_sao_khong_dung_so: >-
+    Theo tien le 102ec83 (wp1237) va 6e1ba1f: rut han bang co che da cai; han moi dat SAU luc push de ops-publish-lease.yml con thay
+    lease song (khong roi vao rc=8).
+  ghi_boi: 'phien ghi so session_015GtxrZMWPFi4PgpnoScEnv'

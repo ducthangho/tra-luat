@@ -1,0 +1,6 @@
+# kiem-dong-wp tren bien-ban-m8.yaml va lease thi cong SAU rut han (ban cuc bo commit 9b34322, chua push) — 2026-11-06T08:19:29Z
+# Ky vong: CHUA dong duoc — D2 (landed false, nghiem_thu thuat_lai) va D4 (lease_until 10:30Z chua qua).
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+  THIẾU  D4 lease: không khớp lease_cuoi/packet/generation hoặc lease_until chưa qua
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2; D4
+rc=12

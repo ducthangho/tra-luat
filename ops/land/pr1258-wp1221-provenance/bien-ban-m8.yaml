@@ -1,0 +1,52 @@
+# Bien ban M8 (ADR-0060) WP #1221 wp1221 EOL-TEST-CHAN-DOAN r3 g1 — kiem bang packet_loop.py kiem-dong-wp.
+# Nhan nguon tung muc: ops/land/pr1258-wp1221-land-evidence.yaml. #1221 khong co muc LIVE.
+# landed: false — uy quyen M7 (landed:true) CHUA duoc chu kho cap (#1221 issuecomment-6680321819). Vi vay kiem-dong-wp
+# phai ra D2 "chua land"; ket qua do kem o kiem-dong-wp-m8.txt. Bon moc §10.2.2 deu passed.
+# nghiem_thu: gia tri `passed` chi cho muc do duoc tren MERGE (A10, CI master). Cac muc con lai la `thuat_lai` — loi khai cua
+# phien executor session_015GtxrZVmDpv9FPWFf1Uaoo (than PR #1258, do tren d912f03) va cua phien dieu phoi (A11); phien ghi so
+# khong tai chay.
+packet: wp1221
+revision: 3
+generation: 1
+spec_hash: 30c073c5c4726548f0423077e3db7e0dbc260afb2f88e1a826e58a2094ae2659
+head_da_review: ee7a3850b99c6256f9ecf226676f0764f540f892
+tree_h: 4aee6da527687a2dde20e3196a2aad7867dfcded
+review:
+  human: 'issuecomment-6678177593 human_exact_head_audit.v1 approve, reviewed_sha ee7a385, tree 4aee6da, 3 P3 mo'
+  connector: 'issuecomment-6678660904 Reviewed commit ee7a3850b9, khong finding; review-state 6678598136 completed has_any_findings false; reaction +1 07:23:12Z sau ready_for_review 07:19:27Z'
+  offline: 'thuat_lai — 8/8 luot Codex launcher run, luot 8 tren d912f03 changes_requested F4 => chu kho chon human_audited (than PR #1258)'
+  so_loi_goi_codex: 8
+  mien_p3_k7: 'issuecomment-6679448513: mien_p3 ee7a385 (3 P3) va full_mutant_audit ee7a385 mien'
+windows:
+  phan_loai: required
+  nguon: 'thuat_lai — phien dieu phoi: A11 eol_policy_test 32/32 tren tra-luat-win, head ee7a385; bytes log khong kem'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1221#issuecomment-6680321819
+merge_commit: 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9
+tree_m: c7c80550aef10749ce1ea19ce2fec4e683f572aa
+ci_master:
+  run_id: 42180624203
+  conclusion: success
+  sha: 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9
+  jobs: '23/23 success, nhan ubuntu-latest; kiem-gate rc=0; gate co ".githooks/eol_policy_test.py 32/32 dat"'
+nghiem_thu:
+  A1: thuat_lai
+  A2: thuat_lai
+  A3: thuat_lai
+  A4: thuat_lai
+  A5: thuat_lai
+  A6: thuat_lai
+  A7: thuat_lai
+  A8: thuat_lai
+  A9: thuat_lai
+  A10: passed
+  A11: thuat_lai
+  A12: thuat_lai
+  A13: thuat_lai
+  A14: thuat_lai
+lease_cuoi: wp1221-r3-g1-claude-remote-20261105
+landed: false
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

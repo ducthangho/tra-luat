@@ -31,7 +31,7 @@ for _s in (sys.stdout, sys.stderr):
         _s.reconfigure(encoding="utf-8", errors="backslashreplace")
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parent
+ROOT = Path(os.environ.get("GATE_OUTPUT_DOI_CHIEU_GOC") or HERE.parent)   # bản sao test bị đột biến chạy ngoài kho
 MA = Path(os.environ.get("GATE_OUTPUT_DOI_CHIEU_MA") or HERE / "gate_output_doi_chieu.py")
 LAND = ROOT / "ops/land"
 PR1231 = LAND / "pr1231-wp1105-provenance/ci/provenance.yaml"
@@ -654,7 +654,9 @@ def a22_mot_chieu_phu_thuoc():
             subprocess.run([sys.executable, "-m", "compileall", "-q", str(ops)], check=True, capture_output=True)
             env = {k: v for k, v in os.environ.items() if k not in ("PYTHONDONTWRITEBYTECODE", "PYTHONPYCACHEPREFIX")}
             r = subprocess.run([sys.executable, "-c", CON_A22, d], capture_output=True, env=env, timeout=120)
-            kq_[ten] = json.loads(r.stdout or b"{}")
+            if r.returncode or not r.stdout or json.loads(r.stdout).get("loi"):
+                raise RuntimeError(f"A22 tiến trình con {ten}: rc={r.returncode} {r.stdout[-200:]} {r.stderr[-300:]}")   # vô can ⇒ rc 4
+            kq_[ten] = json.loads(r.stdout)
         bang(kq_["duong"].get("cho_phep") == [] and kq_["duong"].get("ok"), f"dương phải sạch: {kq_['duong']}")
         bang(all(kq_[k].get("cho_phep") for k in "123456"), f"mọi đối chứng phải bị danh sách cho phép bắt: {kq_}")
         bang(not all(kq_[k].get("cam_py") for k in "123456"), f"đối chứng phải có ca danh sách cấm `.py` (r6) lọt: {kq_}")
@@ -696,8 +698,9 @@ try:
     ok = m.kiem(v["text"], p, v["goc"])[0] == "passed"
     r = m.kiem_ho_so_gate_output(Path(v["hs"]) / "pr9001-x-land-evidence.yaml", v["cay"], v["goc"], lambda u: True)
     ok = ok and len(r) == 1 and r[0]["hop_le"]
-except Exception:
-    ok = False
+    loi = None
+except Exception as e:   # F08: báo RIÊNG, để người gọi phân hạng là lỗi vô can, không phải tín hiệu chốt
+    ok, loi = False, type(e).__name__
 def duoc(q):
     q = Path(q)
     return str(q) in cho or (q.parent.name == "__pycache__" and q.parent.parent == ops and q.name.split(".")[0] in
@@ -705,7 +708,7 @@ def duoc(q):
 f = [str(Path(x.__file__).resolve()) for x in list(sys.modules.values()) if getattr(x, "__file__", None)]
 f = [x for x in f if Path(x).is_relative_to(goc)]
 cam = {str(ops / "kiem_ho_so_land.py"), str(ops / "land_evidence_nguon.py")}
-print(json.dumps({"ok": ok, "cho_phep": sorted({q for q in mo + f if not duoc(q)}), "cam_py": sorted({q for q in mo + f if q in cam})}))
+print(json.dumps({"ok": ok, "loi": loi, "cho_phep": sorted({q for q in mo + f if not duoc(q)}), "cam_py": sorted({q for q in mo + f if q in cam})}))
 """
 
 
@@ -739,15 +742,19 @@ def a23_cli():
         (Path(d) / "hong.yaml").write_text("schema: ci_provenance/1\nmoc: x\n", encoding="utf-8")   # F06: dữ liệu hỏng ⇒ rc 2
         r3 = subprocess.run([sys.executable, "-B", str(MA), "kiem", "--provenance", str(Path(d) / "hong.yaml"), "--goc", str(goc()),
                              str(Path(d) / GO2)], capture_output=True)
-        land = Path(d) / "ops/land"   # F03: owner_waived qua CLI (không có url_hop_le) ⇒ KHÔNG ĐO ĐƯỢC, rc 2
+        land = Path(d) / "ops/land"   # F03 lượt 2: CLI kiểm được waiver (nạp `_url_hop_le` của L-7) ⇒ hợp lệ rc 0, sai rc 1
         (land / "pr9001-x-provenance").mkdir(parents=True)
-        (land / "pr9001-x-land-evidence.yaml").write_text(yaml.safe_dump(
-            neo_map(gate_output=f"owner_waived — {URL_RB} {SHA_CK} miễn vì đường nhanh hồ sơ")), encoding="utf-8")
-        r4 = subprocess.run([sys.executable, "-B", str(MA), "kiem-ho-so", "--root", str(goc()), str(land / "pr9001-x-land-evidence.yaml")],
-                            capture_output=True)
+        rbj = json.loads(RB.read_text(encoding="utf-8"))
+        rbj["body"] = f"mien_gate_output: {SHA_CK} os=ubuntu-latest ly_do=duong_nhanh han=2026-12-31"
+        (land / f"pr9001-x-provenance/readback-x-issuecomment-{RB_ID}.json").write_text(json.dumps(rbj), encoding="utf-8")
+        rc4 = []
+        for chuoi in (f"owner_waived — {URL_RB} {SHA_CK} miễn vì đường nhanh hồ sơ", f"owner_waived — {URL_RB} miễn vì đường nhanh hồ sơ"):
+            (land / "pr9001-x-land-evidence.yaml").write_text(yaml.safe_dump(neo_map(gate_output=chuoi)), encoding="utf-8")
+            rc4.append(subprocess.run([sys.executable, "-B", str(MA), "kiem-ho-so", "--root", str(goc()),
+                                       str(land / "pr9001-x-land-evidence.yaml")], capture_output=True).returncode)
     bang(r.returncode == 0 and b"GATE_OUTPUT: passed" in r.stdout and r2.returncode == 2, f"CLI: {r.returncode} {r.stdout[-200:]}")
     bang(r3.returncode == 2 and b"Traceback" not in r3.stderr, f"CLI dữ liệu hỏng: {r3.returncode} {r3.stdout[-120:]} {r3.stderr[-200:]}")
-    bang(r4.returncode == 2 and "KHÔNG ĐO ĐƯỢC".encode() in r4.stdout, f"CLI waiver: {r4.returncode} {r4.stdout[-200:]}")
+    bang(rc4 == [0, 1], f"CLI waiver: hợp lệ ⇒ 0, thiếu SHA ⇒ 1; được {rc4}")
 
 
 @ca
@@ -758,7 +765,14 @@ def a24_du_lieu_sai_kieu():
                      ("gate_output", lambda q: q["moc"].update(gate_output="x")), ("jobs", lambda q: q["moc"]["gate_output"].update(jobs="x")),
                      ("log", lambda q: q["log_day_du"].update({k: "x" for k in q["log_day_du"]})),
                      ("labels", lambda q: jb(q, "gate (ubuntu-latest)").update(labels="ubuntu-latest")),
-                     ("checkout", lambda q: q["moc"].update(checkout="x"))):
+                     ("checkout", lambda q: q["moc"].update(checkout="x")),
+                     ("job_id", lambda q: jb(q, "gate (ubuntu-latest)").update(job_id=[])),
+                     ("labels_long", lambda q: jb(q, "gate (ubuntu-latest)").update(labels=[[]])),
+                     ("name", lambda q: jb(q, "gate (ubuntu-latest)").update(name=[])),
+                     ("sha", lambda q: q["moc"]["checkout"][0].update(sha=[])),
+                     ("null_jobs", lambda q: q["moc"]["gate_output"]["jobs"].append(None)),
+                     ("null_checkout", lambda q: q["moc"]["checkout"].append(None)),
+                     ("null_buoc", lambda q: jb(q, "gate (ubuntu-latest)")["buoc"].append(None))):
         q = copy.deepcopy(p)
         sua(q)
         try:
@@ -768,6 +782,11 @@ def a24_du_lieu_sai_kieu():
             bang(False, f"{ten}: ném {type(e).__name__}: {e}")
         bang(tt == "not_measured" and len(r) == 1 and not r[0]["hop_le"], f"{ten}: {tt} {r}")
     bang(kq(text, ["x"])[0] == "not_measured" and kq(None, p)[0] == "not_measured", "provenance/tệp không phải dict/chuỗi")
+    try:
+        r = waiver(user="x")
+    except Exception as e:
+        bang(False, f"readback.user sai kiểu: ném {type(e).__name__}")
+    bang(not r["hop_le"], f"readback.user sai kiểu phải ĐỎ: {r}")
 
 
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần trong module.
@@ -841,7 +860,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m-A19c_bo_sha", '    if head not in RE_SHA.findall(chuoi):', "    if False:", "a19"),
     ("m-A19d_bo_ly_do", "    if len(con.strip(\" \\t—-:;,.()\")) < 10:", "    if False:", "a19"),
     ("m-A19f_bo_html_url", '    if not url or rb.get("html_url") != url[0][0]:', "    if False:", "a19"),
-    ("m-A19g_bo_chu_kho", 'if (rb.get("user") or {}).get("login") != "ducthangho" or rb.get("author_association") != "OWNER":', "if False:", "a19"),
+    ("m-A19g_bo_chu_kho", 'if _m(rb, "user").get("login") != "ducthangho" or rb.get("author_association") != "OWNER":', "if False:", "a19"),
     ("m-A19h_bo_dong_may_doc", '    if len(dong) != 1:\n        loi.append("khong_dung_mot_dong_mien_gate_output")\n    elif',
      '    if len(dong) > 1:\n        loi.append("khong_dung_mot_dong_mien_gate_output")\n    elif not dong:\n        pass\n    elif', "a19"),
     ("m-A19j_bo_so_sha_dong", "(m := RE_MIEN.fullmatch(d.strip())) and m[1] == head]", "(m := RE_MIEN.fullmatch(d.strip()))]", "a19"),
@@ -863,22 +882,26 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m-A21b_khong_provenance_khong_land", "(not pv or any(la_run_land(p) for p in pv))", "any(la_run_land(p) for p in pv)", "a21"),
     ("m-A21c_bo_event_push", ' and r.get("event") == "push"', "", "a21"),
     ("m-A21d_nhan_loi_khai_land_am", "        elif land:\n            loi.append(", "        elif False:\n            loi.append(", "a21"),
-    ("m-A22_ho_so_nem_loi", '    """Mỗi lời khai: {duong_dan, token, neo, la_land, hop_le, ly_do}. L8 và L-7 tự rút kết luận."""',
-     '    raise RuntimeError("db")', "a22"),
-    ("m-A23a_cli_waiver_la_do", "            return 1 if do else 2 if mien else 0", "            return 1 if do or mien else 0", "a23"),
+    ("m-A22_cho_phep_thanh_cam", 'loi, "cho_phep": sorted({q for q in mo + f if not '  # neo tách hai mảnh: đột biến sửa CHÍNH tệp này
+     'duoc(q)})', 'loi, "cho_phep": sorted({q for q in mo + f if q in cam})',
+     "a22", "test"),
+    ("m-A23a_cli_khong_url", "a[2], khl._url_hop_le)", "a[2], None)", "a23"),
     ("m-A24_bo_kiem_kieu_mapping", "    return v if type(v) is dict else {}", "    return v or {}", "a24"),
+    ("m-A24b_bo_kiem_cau_truc", "    if _sai_kieu(pv):\n", "    if False:\n", "a24"),
     ("m-p1127_khong_trich_tep_la_dat", 'return ["chi_ket_luan_check_run" if re.search(r"kiem-gate|check-runs", gt) else "khong_trich_tep_gate_output"]',
      "return []", "p1127"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi): kiểm chính bộ phân hạng
     ("vo_can_KeyError", "def kiem_so_luat():\n", "def kiem_so_luat():\n    raise KeyError('vo can')\n", "a01", "TIN_DUNG_GIA"),
     ("chi_them_chu_thich", "def la_run_land(provenance):\n", "def la_run_land(provenance):   # vo hai\n", "a21", "SONG_SOT"),
+    ("vo_can_a22", "def kiem_so_luat():\n", "def kiem_so_luat():\n    raise AttributeError('vo can')\n", "a22", "TIN_DUNG_GIA"),
 )
 
 
-def chay_con(ten_ca, ma):
-    r = subprocess.run([sys.executable, "-B", str(HERE / "gate_output_doi_chieu_test.py"), "--mot-ca", ten_ca], capture_output=True,
-                       env=dict(os.environ, GATE_OUTPUT_DOI_CHIEU_MA=str(ma), PYTHONDONTWRITEBYTECODE="1"), timeout=600)
+def chay_con(ten_ca, ma, tep_test=None):
+    r = subprocess.run([sys.executable, "-B", str(tep_test or HERE / "gate_output_doi_chieu_test.py"), "--mot-ca", ten_ca], capture_output=True,
+                       env=dict(os.environ, GATE_OUTPUT_DOI_CHIEU_MA=str(ma), GATE_OUTPUT_DOI_CHIEU_GOC=str(ROOT), PYTHONDONTWRITEBYTECODE="1"),
+                       timeout=600)
     return r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace")
 
 
@@ -890,23 +913,25 @@ def phan_hang(rc, ra, ten_ca):
     return "TIN_DUNG_GIA" if rc == 4 else "HONG"
 
 
-def chay_dot_bien(ten, cu, moi, tien_to):
+def chay_dot_bien(ten, cu, moi, tien_to, *noi):   # `noi` = ("test",) ⇒ đột biến bộ kiểm trong CHÍNH test (A22), không phải module
     khop = [c for c in CA if c.split("_")[0] == tien_to]
     if len(khop) != 1:
         return "HONG", f"tiền tố ca đích {tien_to!r} phải khớp ĐÚNG MỘT ca, khớp {khop}"
-    goc_ = (HERE / "gate_output_doi_chieu.py").read_text(encoding="utf-8")
+    goc_ = (HERE / ("gate_output_doi_chieu_test.py" if noi else "gate_output_doi_chieu.py")).read_text(encoding="utf-8")
     if goc_.count(cu) != 1 or cu == moi:
         return "HONG", f"neo phải xuất hiện đúng 1 lần và đột biến phải đổi mã (thấy {goc_.count(cu)})"
     with tempfile.TemporaryDirectory(prefix="go2_db_") as thu:
-        for t in ("ci_provenance.py",):
+        for t in ("ci_provenance.py", "kiem_ho_so_land.py"):   # CLI `kiem-ho-so` nạp `_url_hop_le` cùng thư mục
             shutil.copy(HERE / t, Path(thu) / t)
-        ban = Path(thu) / "gate_output_doi_chieu.py"
+        ma = Path(thu) / "gate_output_doi_chieu.py"
+        shutil.copy(HERE / "gate_output_doi_chieu.py", ma)
+        ban = Path(thu) / ("gate_output_doi_chieu_test.py" if noi else "gate_output_doi_chieu.py")
         ban.write_text(goc_, encoding="utf-8")
-        rc, ra = chay_con(khop[0], ban)
+        rc, ra = chay_con(khop[0], ma, ban if noi else None)
         if rc != 0:
             return "HONG", f"ca đích không xanh trên bản gốc (rc={rc}): {ra[-200:]}"
         ban.write_text(goc_.replace(cu, moi), encoding="utf-8")
-        rc, ra = chay_con(khop[0], ban)
+        rc, ra = chay_con(khop[0], ma, ban if noi else None)
         return phan_hang(rc, ra, khop[0]), ra.strip()[-200:]
 
 
@@ -933,7 +958,7 @@ def main(argv):
     print("".join(f"[{dong}]\n" for rc, dong in kq_ if rc), end="")
     dat = sum(rc == 0 for rc, _ in kq_)
     print(f"CA: {dat}/{len(CA)} dat")
-    xau = [f"{ten}: {h} {ct}" for ten, cu, moi, dich in DOT_BIEN for h, ct in [chay_dot_bien(ten, cu, moi, dich)] if h != "GIET"]
+    xau = [f"{m[0]}: {h} {ct}" for m in DOT_BIEN for h, ct in [chay_dot_bien(*m)] if h != "GIET"]
     for x in xau:
         print(f"[DOT BIEN KHONG BI GIET DUNG] {x}")
     print(f"DOT BIEN: {len(DOT_BIEN) - len(xau)}/{len(DOT_BIEN)} bi giet dung ly do")

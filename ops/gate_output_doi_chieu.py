@@ -199,6 +199,23 @@ def _l(d, k):
     return [x for x in v if type(x) is dict] if type(v) is list else []
 
 
+def _sai_kieu(pv):   # F06 lượt 2: kiểm cấu trúc MỘT lần; phần tử hỏng ⇒ từ chối, không lọc âm thầm
+    moc = pv.get("moc")
+    if type(moc) is not dict or type(moc.get("run")) is not dict or type(moc.get("gate_output")) is not dict:
+        return True
+    ds, co, log = moc["gate_output"].get("jobs"), moc.get("checkout"), pv.get("log_day_du")
+    if type(ds) is not list or type(co) is not list or type(log) is not dict:
+        return True
+    for j in ds:
+        if not (type(j) is dict and type(j.get("job_id")) is int and type(j.get("name")) is str and type(j.get("conclusion")) is str
+                and type(j.get("labels")) is list and all(type(x) is str for x in j["labels"])
+                and (j.get("buoc") == "not_measured" or type(j.get("buoc")) is list and all(
+                    type(b) is dict and type(b.get("name")) is str and type(b.get("conclusion")) is str for b in j["buoc"]))):
+            return True
+    return not (all(type(c) is dict and type(c.get("job_id")) is int and type(c.get("sha", "")) is str for c in co)
+                and all(type(v) is dict and type(v.get("sha256")) is str for v in log.values()))
+
+
 def kiem(text, provenance, goc):
     """(trang_thai, [lý do]) — OFFLINE. `failed` thắng `not_measured`. `goc` = kho git chứa SHA checkout."""
     if loi := kiem_so_luat():
@@ -209,6 +226,8 @@ def kiem(text, provenance, goc):
         return "not_measured", ["dinh_dang"]
     nm, fl = [], []
     pv = provenance if type(provenance) is dict else {}
+    if _sai_kieu(pv):
+        return "not_measured", ["provenance_sai_kieu"]
     run = _m(_m(pv, "moc"), "run")
     if (int(dau[1]), int(dau[2]), dau[3]) != (run.get("run_id"), pv.get("attempt_yeu_cau"), run.get("head_sha")):
         nm.append("neo_run")
@@ -386,7 +405,7 @@ def kiem_waiver(chuoi, head, readback, url_hop_le):
     rb = readback if type(readback) is dict else {}
     if not url or rb.get("html_url") != url[0][0]:
         loi.append("readback_html_url")
-    if (rb.get("user") or {}).get("login") != "ducthangho" or rb.get("author_association") != "OWNER":
+    if _m(rb, "user").get("login") != "ducthangho" or rb.get("author_association") != "OWNER":
         loi.append("readback_khong_phai_chu_kho")
     dong = [m for d in str(rb.get("body") or "").splitlines() if (m := RE_MIEN.fullmatch(d.strip())) and m[1] == head]
     if len(dong) != 1:
@@ -479,15 +498,15 @@ def main(argv=None):
             return {"passed": 0, "failed": 1}.get(tt, 2)
         if len(a) == 4 and a[0] == "kiem-ho-so" and a[1] == "--root":
             tep = Path(a[3])
-            kq = kiem_ho_so_gate_output(tep, yaml.safe_load(tep.read_text(encoding="utf-8")), a[2], None)
-            mien = [x for x in kq if x["token"] == "owner_waived"]   # F03: CLI không có `url_hop_le` (một chiều phụ thuộc) ⇒ không đo
-            do = [x for x in kq if not x["hop_le"] and x not in mien]
+            # F03 lượt 2: CLI là NGƯỜI GỌI ⇒ nạp lười `_url_hop_le` của cổng L-7 ngay tại đây; thư viện vẫn không import nó (A22)
+            s = importlib.util.spec_from_file_location("kiem_ho_so_land_cho_cli", Path(__file__).with_name("kiem_ho_so_land.py"))
+            khl = importlib.util.module_from_spec(s)
+            s.loader.exec_module(khl)
+            kq = kiem_ho_so_gate_output(tep, yaml.safe_load(tep.read_text(encoding="utf-8")), a[2], khl._url_hop_le)
             for x in kq:
-                nhan = "KHÔNG ĐO ĐƯỢC" if x in mien else "ĐẠT" if x["hop_le"] else "ĐỎ"
-                print(f"{nhan} {x['duong_dan']} token={x['token']} land={x['la_land']} {' '.join(x['ly_do'])}")
-            print(f"TỔNG: {'ĐỎ' if do else 'KHÔNG ĐO ĐƯỢC' if mien else 'ĐẠT'} ({len(kq)} lời khai; owner_waived chỉ kiểm được qua "
-                  f"L8/L-7, nơi có url_hop_le; {GIOI_HAN})")
-            return 1 if do else 2 if mien else 0
+                print(f"{'ĐẠT' if x['hop_le'] else 'ĐỎ'} {x['duong_dan']} token={x['token']} land={x['la_land']} {' '.join(x['ly_do'])}")
+            print(f"TỔNG: {'ĐẠT' if all(x['hop_le'] for x in kq) else 'ĐỎ'} ({len(kq)} lời khai; {GIOI_HAN})")
+            return 0 if all(x["hop_le"] for x in kq) else 1
     except (OSError, ValueError, yaml.YAMLError) as e:
         print(f"KHÔNG ĐO ĐƯỢC: {type(e).__name__}: {e}", file=sys.stderr)
         return 2

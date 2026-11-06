@@ -29,6 +29,7 @@ AM = {  # nhãn: (thân run, shell)
  "l9_02_ong_trong_while": (f"while {X} | {Y}; do break; done\n", "bash"),
  "l9_03_ong_trong_until": (f"until {X} | {Y}; do break; done\n", "bash"),
  "l9_04_va_va": (f"{X} && true\n", None),
+ "l9_04b_va_va_dong_sau": (f"{X} && true\ntrue\n", None),   # H03 Claude: đúng hình lượt 9 (`and_list`), rc 0
  "l9_05_hoac_hoac": (f"{X} || true\n", None),
  "l9_06_phu_dinh_ong": (f"! {X} | {Y}\n", "bash"),
  "l9_07_ong_chay_nen": (f"{X} | {Y} &\n", "bash"),
@@ -76,7 +77,14 @@ AM = {  # nhãn: (thân run, shell)
  "g_glob": ("python ops/*.py\n", None),
  "g_ngoa": ("python ~/x.py\n", None),
  "g_run_khong_phai_chuoi": (None, None),
- "g_run_khong_phai_chuoi_pwsh": (None, "pwsh"),   # H04 (Codex r8 vòng 1): thứ tự bước 1–2 phân biệt được
+ "g_run_khong_phai_chuoi_pwsh": (None, "pwsh"),
+ "g_pwsh_command": ("pwsh -NoProfile -Command exit\n", None),   # H02 Claude: chốt dạng pwsh / P / đuôi
+ "g_pwsh_thieu_noprofile": ("pwsh -File ops/x.ps1\n", None),
+ "g_pwsh_duoi_py": ("pwsh -NoProfile -File ops/x.py\n", None),
+ "g_P_gach_dau": ("python -x.py\n", None),
+ "g_python_khong_duoi": ("python ops/x\n", None),
+ "g_bash_duoi_py": ("bash ops/x.py\n", None),
+ "g_ong_khong_cach": (f"{X}|{Y}\n", "bash"),   # H04 (Codex r8 vòng 1): thứ tự bước 1–2 phân biệt được
  "g_hai_lenh_hop_le": (f"{X}\n{Y}\n", None),
  "g_python_c_tran": ("python -c pass\n", None),
  "g_bash_c_tran": ("bash -c true\n", None),
@@ -84,7 +92,7 @@ AM = {  # nhãn: (thân run, shell)
  "g_tab_doi_so": (f"{X}\t--json\n", None),
  "g_hai_dau_cach_doi_so": (f"{X}  --json\n", None),
 }
-for c in ";&|!(){}$`'\"\\<>#*?[]~\t\n\r":   # họ ký tự: m-S14[c] thêm c vào W phải làm đúng ca này ĐỎ
+for c in ";&|!(){}$`'\"\\<>#*?[]~\t\n\r+,@%^":   # +,@%^ (H02 Claude x6): vô hại với shell nhưng ngoài tập ĐÓNG   # họ ký tự: m-S14[c] thêm c vào W phải làm đúng ca này ĐỎ
     AM[f"kt_{ord(c):02x}"] = (f"{X} a{c}b\n", None)
 DUONG = {
  "d_mot_lenh": (f"{X}\n", None), "d_mot_lenh_khong_lf": (X, None), "d_mot_lenh_bash": (f"{X}\n", "bash"),

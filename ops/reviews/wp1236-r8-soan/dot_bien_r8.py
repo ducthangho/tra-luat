@@ -8,11 +8,11 @@ from probes_r8 import AM, DUONG   # noqa: E402  (probes_r8 chạy Bash khi impor
 
 
 def dung(P=gram.P, W=gram.W, DANG=None, sep=" ", flags=re.ASCII, khop="fullmatch", bo_lf="mot", nhieu_dong=False,
-         ong_shell=("bash",), shell_ok=(None, "bash", "sh"), phai_ong=None, dao_thu_tu=False):
+         ong_shell=("bash",), shell_ok=(None, "bash", "sh"), phai_ong=None, dao_thu_tu=False, ong_sep=r" \| "):
     DANG = DANG or rf"(?:python {P}\.py|bash {P}\.sh|pwsh -NoProfile -File {P}\.ps1)"
     LENH = rf"{DANG}(?:{sep}{W})*"
     phai = phai_ong or LENH
-    don, ong = re.compile(LENH, flags), re.compile(rf"{LENH}(?: \| {phai})+", flags)
+    don, ong = re.compile(LENH, flags), re.compile(rf"{LENH}(?:{ong_sep}{phai})+", flags)
 
     def f(run, shell):
         if dao_thu_tu and shell not in shell_ok:
@@ -50,8 +50,16 @@ DB = {   # tên: (hàm đột biến, ca đích)
     "m-S12_ve_phai_mo": (dung(phai_ong=rf"{gram.W}(?: {gram.W})*"), "g_ong_toi_cat"),
     "m-S13_nhan_pwsh": (dung(shell_ok=(None, "bash", "sh", "pwsh")), "g_pwsh_shell"),
     "m-S19_dao_thu_tu_1_2": (dung(dao_thu_tu=True), "g_run_khong_phai_chuoi_pwsh"),
+    "m-S9p_pwsh_mo": (dung(DANG=rf"(?:python {gram.P}\.py|bash {gram.P}\.sh|pwsh(?: {gram.W})+)"), "g_pwsh_command"),
+    "m-S9q_noprofile_tuy_chon": (dung(DANG=rf"(?:python {gram.P}\.py|bash {gram.P}\.sh|pwsh(?: -NoProfile)? -File {gram.P}\.ps1)"), "g_pwsh_thieu_noprofile"),
+    "m-S9d_P_gach_dau": (dung(P=r"[A-Za-z0-9_.-][A-Za-z0-9_./-]*"), "g_P_gach_dau"),
+    "m-S9e_duoi_bat_ky": (dung(DANG=rf"(?:python|bash|pwsh -NoProfile -File) {gram.P}\.(?:py|sh|ps1)"), "g_bash_duoi_py"),
+    "m-S9f_python_bo_duoi": (dung(DANG=rf"(?:python {gram.P}|bash {gram.P}\.sh|pwsh -NoProfile -File {gram.P}\.ps1)"), "g_python_khong_duoi"),
+    "m-S9g_pwsh_duoi_bat_ky": (dung(DANG=rf"(?:python {gram.P}\.py|bash {gram.P}\.sh|pwsh -NoProfile -File {gram.P}\.(?:ps1|py))"), "g_pwsh_duoi_py"),
+    "m-S7c_ong_khong_cach": (None, "g_ong_khong_cach"),
 }
-for c in ";&|!(){}$`'\"\\<>#*?[]~\t\n\r":
+DB["m-S7c_ong_khong_cach"] = (dung(ong_sep=r" ?\| ?"), "g_ong_khong_cach")
+for c in ";&|!(){}$`'\"\\<>#*?[]~\t\n\r+,@%^":
     DB[f"m-S14[{ord(c):02x}]"] = (dung(W=r"[A-Za-z0-9_./=:" + re.escape(c) + "-]+"), f"kt_{ord(c):02x}")
 
 

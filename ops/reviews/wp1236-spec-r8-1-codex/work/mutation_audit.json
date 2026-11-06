@@ -1,0 +1,17 @@
+{
+  "mutants": 40,
+  "not_killed": [],
+  "m_S12_prime_positive_failures": [
+    "d_ong_bash_trai_hong",
+    "d_ong_bash_phai_hong"
+  ],
+  "order_mutation_original_98_cases_different": [],
+  "order_counterexample": {
+    "input": [
+      null,
+      "pwsh"
+    ],
+    "original": "lenh_ngoai_cu_phap",
+    "swapped": "shell_ngoai_cu_phap"
+  }
+}

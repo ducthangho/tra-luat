@@ -102,6 +102,48 @@
   "lam_hong_ca_duong": []
  },
  {
+  "dot_bien": "m-S9p_pwsh_mo",
+  "ca_dich": "g_pwsh_command",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S9q_noprofile_tuy_chon",
+  "ca_dich": "g_pwsh_thieu_noprofile",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S9d_P_gach_dau",
+  "ca_dich": "g_P_gach_dau",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S9e_duoi_bat_ky",
+  "ca_dich": "g_bash_duoi_py",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S9f_python_bo_duoi",
+  "ca_dich": "g_python_khong_duoi",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S9g_pwsh_duoi_bat_ky",
+  "ca_dich": "g_pwsh_duoi_py",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S7c_ong_khong_cach",
+  "ca_dich": "g_ong_khong_cach",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
   "dot_bien": "m-S14[3b]",
   "ca_dich": "kt_3b",
   "giet_ca_dich": true,
@@ -242,6 +284,36 @@
  {
   "dot_bien": "m-S14[0d]",
   "ca_dich": "kt_0d",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[2b]",
+  "ca_dich": "kt_2b",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[2c]",
+  "ca_dich": "kt_2c",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[40]",
+  "ca_dich": "kt_40",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[25]",
+  "ca_dich": "kt_25",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[5e]",
+  "ca_dich": "kt_5e",
   "giet_ca_dich": true,
   "lam_hong_ca_duong": []
  }

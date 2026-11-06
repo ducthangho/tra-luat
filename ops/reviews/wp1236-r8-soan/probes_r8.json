@@ -100,6 +100,11 @@
    "rc_bash": 1,
    "da_chay_ct_hong": true
   },
+  "l9_04b_va_va_dong_sau": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
+  },
   "l9_05_hoac_hoac": {
    "grammar": "lenh_ngoai_cu_phap",
    "rc_bash": 0,
@@ -330,6 +335,41 @@
    "rc_bash": null,
    "da_chay_ct_hong": false
   },
+  "g_pwsh_command": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 127,
+   "da_chay_ct_hong": false
+  },
+  "g_pwsh_thieu_noprofile": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 127,
+   "da_chay_ct_hong": false
+  },
+  "g_pwsh_duoi_py": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 127,
+   "da_chay_ct_hong": false
+  },
+  "g_P_gach_dau": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 2,
+   "da_chay_ct_hong": false
+  },
+  "g_python_khong_duoi": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 2,
+   "da_chay_ct_hong": false
+  },
+  "g_bash_duoi_py": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 127,
+   "da_chay_ct_hong": false
+  },
+  "g_ong_khong_cach": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
+  },
   "g_hai_lenh_hop_le": {
    "grammar": "lenh_ngoai_cu_phap",
    "rc_bash": 1,
@@ -476,6 +516,31 @@
    "da_chay_ct_hong": true
   },
   "kt_0d": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
+  },
+  "kt_2b": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
+  },
+  "kt_2c": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
+  },
+  "kt_40": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
+  },
+  "kt_25": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 1,
+   "da_chay_ct_hong": true
+  },
+  "kt_5e": {
    "grammar": "lenh_ngoai_cu_phap",
    "rc_bash": 1,
    "da_chay_ct_hong": true

@@ -13415,7 +13415,348 @@ def r927_lenh_run_ghi_effort_va_sandbox_vao_run_json():
             return "phan sandbox can /proc cua Linux (effort va KHONG_DO_DUOC ngoai Linux da do o tren)"
 
 
+# ------------------------------------------- #1252: run --chup-workspace (spec launcher-readonly-ignored-r1)
+
+def _r1252_kho(s: Path) -> Path:
+    """Kho tạm có `.tl_state/` bị ignore (qua `.git/info/exclude`, không thêm tệp tracked) và thư mục ấy
+    đã tồn tại, để một tệp mới trong nó chỉ sinh ĐÚNG một mục `them`."""
+    repo = tao_repo(s)
+    (repo / ".git" / "info").mkdir(exist_ok=True)
+    (repo / ".git" / "info" / "exclude").write_text(".tl_state/\n", encoding="utf-8")
+    (repo / ".tl_state").mkdir()
+    return repo
+
+
+def _r1252_so(run_root: Path) -> dict:
+    ds = [d for d in run_root.iterdir() if (d / "run.json").is_file()]
+    bang(len(ds) == 1, f"phai co dung mot luot chay trong {run_root}: {ds}")
+    return json.loads((ds[0] / "run.json").read_text(encoding="utf-8")), ds[0]
+
+
+def _r1252_run(repo: Path, run_root: Path, ma_con: str, *them, m=None, chup=True):
+    """Chạy `run` THẬT: qua CLI (m=None) hoặc `m.lenh_run` trong tiến trình test (để thay hàm).
+    Trả `(rc, run.json, thư mục lượt)`."""
+    doi = ["run", "--workspace", str(repo), "--run-root", str(run_root), *them]
+    if chup:
+        doi.append("--chup-workspace")
+    doi += ["--", PY, "-c", ma_con]
+    if m is None:
+        rc = chay(*doi).returncode
+    else:
+        a = m.build_parser().parse_args(doi)
+        a.lenh = a.lenh[1:]
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = m.lenh_run(a)
+    so, thu_muc = _r1252_so(run_root)
+    return rc, so, thu_muc
+
+
+_R1252_KHOA = ("snapshot_truoc_sha256", "snapshot_sau_sha256", "snapshot_so_muc", "snapshot_ket_qua",
+               "snapshot_ly_do", "tep_doi", "tep_doi_tong", "tep_doi_bi_cat", "snapshot_gioi_han")
+
+
+@ca
+def r1252_ghi_tep_ignored():
+    """A2: tệp ignored mới ⇒ ghi_workspace rc 16, đúng một mục `them`; ghi đè tệp ignored có sẵn ⇒ `sua`."""
+    with San() as s:
+        repo = _r1252_kho(s)
+        rc, so, _ = _r1252_run(repo, s / "runs", "open('.tl_state/x','w').write('1')")
+        bang(rc == 16 and so["trang_thai"] == "ghi_workspace" and so["ma_thoat"] == 0,
+             f"ghi tep ignored phai ra ghi_workspace/16: rc={rc} {so.get('trang_thai')}")
+        bang(so["tep_doi"] == [{"duong_dan": ".tl_state/x", "doi": "them"}] and so["tep_doi_tong"] == 1,
+             f"tep_doi sai: {so['tep_doi']}")
+        rc, so, _ = _r1252_run(repo, s / "runs2", "open('.tl_state/x','w').write('2')")
+        bang(rc == 16 and so["tep_doi"] == [{"duong_dan": ".tl_state/x", "doi": "sua"}],
+             f"ghi de tep ignored phai ra sua: rc={rc} {so['tep_doi']}")
+
+
+@ca
+def r1252_ghi_trong_git():
+    """A3: con ghi `.git/x` ⇒ ghi_workspace, `tep_doi` chứa `.git/x`."""
+    with San() as s:
+        repo = _r1252_kho(s)
+        rc, so, _ = _r1252_run(repo, s / "runs", "open('.git/x','w').write('1')")
+        bang(rc == 16 and {"duong_dan": ".git/x", "doi": "them"} in so["tep_doi"],
+             f"ghi vao .git phai bi bat: rc={rc} {so['tep_doi']}")
+
+
+@ca
+def r1252_khong_ghi_thi_sach():
+    """A4: con chỉ đọc ⇒ xong/0/sach; băm trong sổ = băm tệp chụp; quyền 0600 (POSIX)."""
+    with San() as s:
+        repo = _r1252_kho(s)
+        rc, so, thu_muc = _r1252_run(repo, s / "runs", "print(open('a.txt').read())")
+        bang(rc == 0 and so["trang_thai"] == "xong" and so["snapshot_ket_qua"] == "sach"
+             and so["snapshot_ly_do"] is None and so["tep_doi"] == [],
+             f"con chi doc phai sach: rc={rc} {so.get('snapshot_ket_qua')} {so.get('tep_doi')}")
+        bang(so["snapshot_truoc_sha256"] == so["snapshot_sau_sha256"], "hai bam phai bang nhau")
+        for ten, khoa in (("snapshot-truoc.txt", "snapshot_truoc_sha256"), ("snapshot-sau.txt", "snapshot_sau_sha256")):
+            tep = thu_muc / ten
+            bang(tep.is_file() and hashlib.sha256(tep.read_bytes()).hexdigest() == so[khoa],
+                 f"{ten}: bam trong so khong phai bam cua tep")
+            if not LA_WINDOWS:
+                bang((tep.stat().st_mode & 0o777) == 0o600, f"{ten} phai 0600: {oct(tep.stat().st_mode)}")
+
+
+@ca
+def r1252_run_root_trong_workspace_bi_loai():
+    """A5: --run-root trong workspace bị loại (launcher tự ghi vào đó); tệp CẠNH nó thì không."""
+    with San() as s:
+        repo = _r1252_kho(s)
+        (repo / "ra").mkdir()
+        rc, so, _ = _r1252_run(repo, repo / "ra" / "runs", "pass")
+        bang(rc == 0 and so["snapshot_ket_qua"] == "sach",
+             f"run-root trong workspace phai bi loai: rc={rc} {so.get('tep_doi')}")
+        rc, so, _ = _r1252_run(repo, repo / "ra" / "runs2", "open('ra/canh.txt','w').write('1')")
+        bang(rc == 16 and so["tep_doi"] == [{"duong_dan": "ra/canh.txt", "doi": "them"}],
+             f"tep canh run-root phai bi bat: rc={rc} {so.get('tep_doi')}")
+
+
+@ca
+def r1252_khong_do_duoc():
+    """A6 (a)–(e): mọi đường KHÔNG ĐO ĐƯỢC ra rc 17 với đúng lý do; đối chứng (d) không ra lý do cây."""
+    import types
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = _r1252_kho(s)
+        # (a) một tệp không đọc được, cộng một tệp đổi (khoá thứ tự `?` trước `tep_doi`)
+        (repo / "khoa.bin").write_bytes(b"k")
+        goc_bam = m._bam_tep
+
+        def bam_loi(d):
+            if d.endswith("khoa.bin"):
+                raise PermissionError(13, "dung doc", d)
+            return goc_bam(d)
+
+        m._bam_tep = bam_loi
+        try:
+            rc, so, _ = _r1252_run(repo, s / "ra", "open('.tl_state/x','w').write('1')", m=m)
+        finally:
+            m._bam_tep = goc_bam
+        bang(rc == 17 and so["trang_thai"] == "khong_do_duoc_workspace"
+             and so["snapshot_ly_do"] == "muc_khong_doc_duoc",
+             f"(a) muc khong doc duoc: rc={rc} {so.get('snapshot_ly_do')}")
+        # (b) cháu còn sống khi con thoát (Windows: cháu sinh SAU khi con đã vào job)
+        ma = ("import subprocess,sys,time;time.sleep(1);"
+              "subprocess.Popen([sys.executable,'-c','import time;time.sleep(8)'])")
+        rc, so, _ = _r1252_run(repo, s / "rb", ma)
+        bang(rc == 17 and so["snapshot_ly_do"] == "cay_chua_chung_minh_chet",
+             f"(b) chau con song: rc={rc} {so.get('snapshot_ly_do')}")
+        # (c) bộ chụp ném lỗi
+        goc_chup = m._chup_workspace
+        m._chup_workspace = lambda *_a, **_k: (_ for _ in ()).throw(RuntimeError("hong"))
+        try:
+            rc, so, _ = _r1252_run(repo, s / "rc", "pass", m=m)
+        finally:
+            m._chup_workspace = goc_chup
+        bang(rc == 17 and so["snapshot_ly_do"] == "chup_loi" and so["snapshot_truoc_sha256"] is None,
+             f"(c) chup loi: rc={rc} {so.get('snapshot_ly_do')}")
+        # (d) đối chứng cùng nền: con thoát, không cháu
+        rc, so, _ = _r1252_run(repo, s / "rd", "pass")
+        bang(rc == 0 and so["snapshot_ly_do"] != "cay_chua_chung_minh_chet",
+             f"(d) con thoat sach khong duoc ra ly do cay: rc={rc} {so.get('snapshot_ly_do')}")
+        # (d') phép chứng minh theo nền, gọi thẳng hàm (chạy được trên mọi nền)
+        goc_pf, goc_job, goc_nhom = m.platform, m._pid_trong_job, m._thanh_vien_nhom
+        try:
+            m.platform = types.SimpleNamespace(system=lambda: "Windows")
+            for job, ds, mong in ((object(), [], True), (None, [], False), (object(), [7], False),
+                                  (object(), None, False)):
+                m._pid_trong_job = lambda _j, ds=ds: ds
+                bang(m._cay_da_chet(1, job) is mong, f"(d') windows job={job is not None} ds={ds}: phai {mong}")
+            m.platform = types.SimpleNamespace(system=lambda: "Linux")
+            for ds, mong in (([], True), ([7], False), (None, False)):
+                m._thanh_vien_nhom = lambda _p, ds=ds: ds
+                bang(m._cay_da_chet(1, None) is mong, f"(d') posix ds={ds}: phai {mong}")
+        finally:
+            m.platform, m._pid_trong_job, m._thanh_vien_nhom = goc_pf, goc_job, goc_nhom
+        # (e) hàm liệt kê của nền đang chạy trả None ⇒ không chứng minh được
+        ten = "_pid_trong_job" if LA_WINDOWS else "_thanh_vien_nhom"
+        goc = getattr(m, ten)
+        setattr(m, ten, lambda *_a: None)
+        try:
+            rc, so, _ = _r1252_run(repo, s / "re", "pass", m=m)
+        finally:
+            setattr(m, ten, goc)
+        bang(rc == 17 and so["snapshot_ly_do"] == "cay_chua_chung_minh_chet",
+             f"(e) liet ke None phai ra khong do duoc: rc={rc} {so.get('snapshot_ly_do')}")
+
+
+@ca
+def r1252_tat_co_giu_nguyen():
+    """A7: không bật cờ ⇒ hành vi như base, chỉ thêm `chup_workspace: false`; cờ và hai mã có trong --help."""
+    with San() as s:
+        repo = _r1252_kho(s)
+        rc, so, _ = _r1252_run(repo, s / "runs", "open('.tl_state/x','w').write('1')", chup=False)
+        bang(rc == 0 and so["trang_thai"] == "xong" and so.get("chup_workspace") is False,
+             f"tat co phai xong/0, chup_workspace=false: rc={rc} {so.get('trang_thai')} {so.get('chup_workspace')}")
+        thua = [k for k in _R1252_KHOA if k in so]
+        bang(not thua, f"tat co ma van co khoa snapshot: {thua}")
+    h_run = chay("run", "--help").stdout
+    h = chay("--help").stdout
+    bang("--chup-workspace" in h_run, "run --help thieu --chup-workspace")
+    bang("MA_GHI_WORKSPACE" in h and "MA_KHONG_DO_WORKSPACE" in h, "launcher.py --help thieu ten hai ma")
+    m = _tai_launcher_thu()
+    bang(m.MA_GHI_WORKSPACE == 16 and m.MA_KHONG_DO_WORKSPACE == 17, "hai hang phai la 16, 17")
+    bang(re.search(r"^  16  ", m.__doc__, re.M) and re.search(r"^  17  ", m.__doc__, re.M),
+         "bang ma thoat dau tep thieu 16/17")
+
+
+@ca
+def r1252_trang_thai_khac_khong_bi_de():
+    """A8: quá hạn mà có ghi ⇒ vẫn `qua_han` (rc 124/125), và vẫn có `snapshot_ket_qua`."""
+    with San() as s:
+        repo = _r1252_kho(s)
+        rc, so, _ = _r1252_run(repo, s / "runs", "import time;open('.tl_state/x','w').write('1');time.sleep(30)",
+                               "--deadline-utc", mai_sau(4))
+        bang(so["trang_thai"] == "qua_han" and rc in (124, 125),
+             f"qua han khong duoc bi de: rc={rc} {so.get('trang_thai')}")
+        bang(so.get("snapshot_ket_qua") in ("ghi_workspace", "khong_do_duoc"),
+             f"van phai ghi ket qua chup: {so.get('snapshot_ket_qua')}")
+
+
+@ca
+def r1252_gioi_han_khai():
+    """A9: `snapshot_gioi_han` có CẢ HAI cụm (kiểm riêng); tắt cờ thì khoá vắng."""
+    with San() as s:
+        repo = _r1252_kho(s)
+        _, so, _ = _r1252_run(repo, s / "runs", "pass")
+        gh = so.get("snapshot_gioi_han") or ""
+        bang("chi so hai moc truoc/sau; ghi roi hoan nguyen giua hai moc thi khong thay" in gh,
+             f"thieu cum hai moc: {gh!r}")
+        bang("chau tu setsid hoac sinh truoc khi gan job thi khong chung minh duoc" in gh,
+             f"thieu cum setsid/job: {gh!r}")
+        _, so, _ = _r1252_run(repo, s / "runs2", "pass", chup=False)
+        bang("snapshot_gioi_han" not in so, "tat co ma van co snapshot_gioi_han")
+
+
+@ca
+def r1252_cat_50():
+    """A15: biên 50/51 — tổng là số THẬT, chỉ `run.json` bị cắt, tệp chụp đủ."""
+    with San() as s:
+        repo = _r1252_kho(s)
+        (repo / "ra").mkdir(); (repo / "rb").mkdir()
+        rc, so, _ = _r1252_run(repo, s / "runs", "[open(f'ra/f{i:03d}','w').write('1') for i in range(50)]")
+        bang(rc == 16 and so["tep_doi_tong"] == 50 and so["tep_doi_bi_cat"] is False and len(so["tep_doi"]) == 50,
+             f"(a) 50 tep: {so['tep_doi_tong']} {so['tep_doi_bi_cat']} {len(so['tep_doi'])}")
+        rc, so, thu_muc = _r1252_run(repo, s / "runs2", "[open(f'rb/f{i:03d}','w').write('1') for i in range(51)]")
+        mong = [{"duong_dan": f"rb/f{i:03d}", "doi": "them"} for i in range(50)]
+        bang(so["tep_doi_tong"] == 51 and so["tep_doi_bi_cat"] is True and so["tep_doi"] == mong,
+             f"(b) 51 tep: {so['tep_doi_tong']} {so['tep_doi_bi_cat']} {len(so['tep_doi'])}")
+        dong = (thu_muc / "snapshot-sau.txt").read_bytes().splitlines()
+        rb = [d for d in dong if bytes.fromhex(json.loads(d)[2]).startswith(b"rb/")]
+        bang(len(rb) == 51 and len(dong) == so["snapshot_so_muc"]["sau"],
+             f"(b) tep chup phai du 51 muc rb/: {len(rb)}, {len(dong)} dong")
+
+
+@ca
+def r1252_bieu_dien_khong_nhap_nhang():
+    """A16: hàm thuần biểu diễn chuẩn — hai cặp va chạm của connector P2 4489586579 phải khác nhau; thứ tự byte."""
+    m = _tai_launcher_thu()
+    f = m._bieu_dien_chuan
+    bang(f([("F", "x", b"\xff")]) != f([("F", "x", b"hex:ff")]), "(i) b'\\xff' va 'hex:ff' trung bieu dien")
+    bang(f([("D", "", b"a\nD\t\tb")]) != f([("D", "", b"a"), ("D", "", b"b")]),
+         "(ii) ten co xuong dong/tab trung hai thu muc")
+    ds = [("F", "1", b"b"), ("D", "", b"a"), ("F", "2", b"a/c")]
+    bang(f(list(reversed(ds))) == f(ds) == f(sorted(ds, key=lambda x: x[2])), "xao tron phai cho cung bieu dien")
+    dong = f(ds).splitlines()
+    bang([bytes.fromhex(json.loads(d)[2]) for d in dong] == [b"a", b"a/c", b"b"], f"phai sap theo byte: {dong}")
+
+
+@ca
+def r1252_bo_dem_stat_lam_moi_truoc_chup():
+    """A17: stat lỗi thời có SẴN trước khi gọi launcher thì `chot_sach` đã làm mới index trước mốc chụp đầu ⇒
+    con `git status` không bị tính là ghi. Đối chứng: con tự đổi mtime rồi `git status` ⇒ `.git/index` đổi."""
+    with San() as s:
+        repo = _r1252_kho(s)
+        time.sleep(2)
+        bay_gio = time.time()
+        os.utime(repo / "a.txt", (bay_gio - 1, bay_gio - 1))
+        ma = "import subprocess;subprocess.run(['git','status','--short'],capture_output=True)"
+        rc, so, _ = _r1252_run(repo, s / "runs", ma)
+        bang(rc == 0 and so["snapshot_ket_qua"] == "sach",
+             f"stat loi thoi co san khong duoc tinh la ghi: rc={rc} {so.get('tep_doi')}")
+        ma2 = ("import os,subprocess,time;t=time.time()-30;os.utime('a.txt',(t,t));"
+               "subprocess.run(['git','status','--short'],capture_output=True)")
+        rc, so, _ = _r1252_run(repo, s / "runs2", ma2)
+        bang(rc == 16 and {"duong_dan": ".git/index", "doi": "sua"} in so["tep_doi"],
+             f"con tu doi mtime roi git status phai bi bat: rc={rc} {so.get('tep_doi')}")
+
+
+
 DOT_BIEN = [
+    # #1252 (spec launcher-readonly-ignored-r1 §4): mỗi vế của bộ chụp một đột biến, giết đúng ca đích.
+    ("r1252_bo_tep_ignored",
+     ('    return muc\n\n\ndef _so_snapshot(',
+      '    return [x for x in muc if subprocess.run(["git", "-C", goc, "check-ignore", "-q", "--", '
+      'x[2].decode("utf-8", "replace")], capture_output=True).returncode != 0]\n\n\ndef _so_snapshot('),
+     ["r1252_ghi_tep_ignored"]),
+    ("r1252_bo_thu_muc_git",
+     ('            if os.path.islink(d):\n                ds_tep.append(ten)',
+      '            if ten == ".git":\n                continue\n            if os.path.islink(d):\n                ds_tep.append(ten)'),
+     ["r1252_ghi_trong_git"]),
+    ("r1252_luon_bao_lech", ('    elif doi:\n        ket, ly = "ghi_workspace", "tep_doi"',
+                             '    elif True:\n        ket, ly = "ghi_workspace", "tep_doi"'), ["r1252_khong_ghi_thi_sach"]),
+    ("r1252_bam_khac_tep", ('hashlib.sha256(truoc[1]).hexdigest() if truoc else None',
+                            'hashlib.sha256(truoc[1] + b"x").hexdigest() if truoc else None'), ["r1252_khong_ghi_thi_sach"]),
+    ("r1252_khong_loai_run_root", ('            if bo is not None and os.path.realpath(d) == bo',
+                                   '            if False and os.path.realpath(d) == bo'),
+     ["r1252_run_root_trong_workspace_bi_loai"]),
+    ("r1252_loai_ca_thu_muc_cha", ('            if bo is not None and os.path.realpath(d) == bo',
+                                   '            if bo is not None and (bo + os.sep).startswith(os.path.realpath(d) + os.sep)'),
+     ["r1252_run_root_trong_workspace_bi_loai"]),
+    ("r1252_nuot_muc_loi", ('    elif any(m[0] == "?" for m in truoc[0]) or any(m[0] == "?" for m in sau[0]):',
+                            '    elif False:'), ["r1252_khong_do_duoc"]),
+    ("r1252_dao_thu_tu_phan_loai",
+     ('    elif any(m[0] == "?" for m in truoc[0]) or any(m[0] == "?" for m in sau[0]):\n'
+      '        ket, ly = "khong_do_duoc", "muc_khong_doc_duoc"\n    elif doi:\n        ket, ly = "ghi_workspace", "tep_doi"',
+      '    elif doi:\n        ket, ly = "ghi_workspace", "tep_doi"\n'
+      '    elif any(m[0] == "?" for m in truoc[0]) or any(m[0] == "?" for m in sau[0]):\n'
+      '        ket, ly = "khong_do_duoc", "muc_khong_doc_duoc"'),
+     ["r1252_khong_do_duoc"]),
+    ("r1252_tin_me_chet", ('        cay_chet = _cay_da_chet(p.pid, job)', '        cay_chet = p.poll() is not None'),
+     ["r1252_khong_do_duoc"]),
+    ("r1252_none_la_chet", ('        return _thanh_vien_nhom(pid) == []', '        return not _thanh_vien_nhom(pid)'),
+     ["r1252_khong_do_duoc"]),
+    ("r1252_windows_khong_dung_job", ('        return job is not None and _pid_trong_job(job) == []', '        return False'),
+     ["r1252_khong_do_duoc"]),
+    ("r1252_mac_dinh_bat", ('    r.add_argument("--chup-workspace", action="store_true",',
+                            '    r.add_argument("--chup-workspace", action="store_true", default=True,'),
+     ["r1252_tat_co_giu_nguyen"]),
+    ("r1252_de_trang_thai", ('    if kq_chup is not None and ban_ghi["trang_thai"] == "xong":',
+                             '    if kq_chup is not None:'), ["r1252_trang_thai_khac_khong_bi_de"]),
+    ("r1252_cat_hau_to_gioi_han", ('ghi roi hoan nguyen giua hai moc thi khong thay; "',
+                                   'ghi roi hoan nguyen giua hai moc; "'), ["r1252_gioi_han_khai"]),
+    ("r1252_bo_cum_setsid", ('                      "chau tu setsid hoac sinh truoc khi gan job thi khong chung minh duoc")',
+                             '                      "")'), ["r1252_gioi_han_khai"]),
+    ("r1252_bo_cat", ('for d, x in doi[:_TEP_DOI_TRAN]]', 'for d, x in doi]'), ["r1252_cat_50"]),
+    ("r1252_tong_sau_cat", ('    kq["tep_doi_tong"] = len(doi)', '    kq["tep_doi_tong"] = min(len(doi), _TEP_DOI_TRAN)'),
+     ["r1252_cat_50"]),
+    ("r1252_bi_cat_luon_false", ('    kq["tep_doi_bi_cat"] = len(doi) > _TEP_DOI_TRAN', '    kq["tep_doi_bi_cat"] = False'),
+     ["r1252_cat_50"]),
+    ("r1252_cat_49", ('_TEP_DOI_TRAN = 50', '_TEP_DOI_TRAN = 49'), ["r1252_cat_50"]),
+    ("r1252_cat_ca_tep_chup", ('                    _ghi_tep_0600(thu_muc / ten, ban[1])',
+                               '                    _ghi_tep_0600(thu_muc / ten, b"".join(ban[1].splitlines(True)[:_TEP_DOI_TRAN]))'),
+     ["r1252_cat_50"]),
+    ("r1252_ghi_chu_khi_utf8", ('json.dumps([loai, gia_tri, duong.hex()], separators=(",", ":"))',
+                                'json.dumps([loai, gia_tri, (duong.decode() if duong.isascii() else "hex:" + duong.hex())], '
+                                'separators=(",", ":"))'), ["r1252_bieu_dien_khong_nhap_nhang"]),
+    ("r1252_tab_xuong_dong", ('(json.dumps([loai, gia_tri, duong.hex()], separators=(",", ":")) + "\\n").encode("utf-8")',
+                              '(f"{loai}\\t{gia_tri}\\t{duong.decode(\'utf-8\', \'replace\')}\\n").encode("utf-8")'),
+     ["r1252_bieu_dien_khong_nhap_nhang"]),
+    ("r1252_khong_sap", ('for loai, gia_tri, duong in sorted(muc, key=lambda x: x[2]))',
+                         'for loai, gia_tri, duong in muc)'), ["r1252_bieu_dien_khong_nhap_nhang"]),
+    ("r1252_chup_truoc_chot",
+     [('    kq = chay_cac_chot(a)\n    resume_id',
+       '    _m1252 = (_chup_an_toan(tim_workspace(a.workspace), None) if getattr(a, "chup_workspace", False) else None)\n'
+       '    kq = chay_cac_chot(a)\n    resume_id'),
+      ('    chup_truoc = (_chup_an_toan(kq["workspace"], thu_muc if _nam_trong(thu_muc, kq["workspace"]) else None)\n'
+       '                  if ban_ghi["chup_workspace"] else None)',
+       '    chup_truoc = _m1252')],
+     ["r1252_bo_dem_stat_lam_moi_truoc_chup"]),
+    ("r1252_chot_sach_khong_ghi_index",
+     ('    rc, out, err = _git(ws, "status", "--porcelain=v1", "--untracked-files=all")',
+      '    rc, out, err = _git(ws, "--no-optional-locks", "status", "--porcelain=v1", "--untracked-files=all")'),
+     ["r1252_bo_dem_stat_lam_moi_truoc_chup"]),
     ("r952_bo_ep_kieu_truong_credential",
      ('           for k in _TRUONG_TOKEN_CHUOI):',
       '           for k in ()):'),

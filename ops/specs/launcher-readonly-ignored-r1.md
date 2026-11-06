@@ -33,7 +33,7 @@ này do người làm bằng tay, và đã hai lần nó là thứ duy nhất b�
 
 S6 chỉ phủ 6 lệnh git chỉ đọc trên Linux. Từ S6 KHÔNG suy ra được "mọi lệnh git chỉ đọc đều không ghi `.git`".
 Thứ S6 cho thấy là: `git status` làm mới bộ đệm stat trong `.git/index` khi mtime của một tệp tracked đổi. Vì vậy
-§2.3 cho launcher tự làm mới bộ đệm này TRƯỚC mốc chụp đầu.
+§2.3 đòi bộ đệm ấy đã được làm mới TRƯỚC mốc chụp đầu; `chot_sach` của launcher đã làm việc này.
 
 ## 2. Thay đổi
 
@@ -70,12 +70,14 @@ và phép so `tep_doi` đều đi qua đúng hàm ấy. Trong `tep_doi`, `duong_
 
 ### 2.3 Thời điểm chụp và phép chứng minh cây đã chết
 
-- **Làm mới bộ đệm stat (S6):** ngay trước mốc chụp đầu, launcher chạy `git -C <workspace> update-index -q --refresh`
-  và ghi `rc` vào `snapshot_refresh_rc`. `rc` khác 0 KHÔNG làm lượt hỏng (lệnh trả 1 khi có tệp tracked đã sửa,
-  mà `--require-clean` mới là chốt cho việc ấy); nó chỉ được ghi lại. Sau bước này, một lệnh `git status` của con
-  chỉ ghi lại `.git/index` khi chính con đã đổi mtime hay nội dung một tệp tracked, tức là đã ghi.
-- **Trước:** sau mọi chốt và mọi probe (`chay_cac_chot`, `chay_cac_probe`), sau khi đã ghi bản chụp prompt, sau bước
-  làm mới, ngay trước `subprocess.Popen`.
+- **Làm mới bộ đệm stat (S6):** không thêm bước riêng. `chay_cac_chot` đã LUÔN gọi `chot_sach`, tức
+  `git status --porcelain=v1 --untracked-files=all`, kể cả khi không bật `--require-clean`
+  (`launcher.py:1347–1355, 1399–1400` trên `12e5b36`). Lệnh ấy làm mới bộ đệm stat trong `.git/index` trước mốc
+  chụp đầu (connector review lượt 2, P2 `4489640552`, đo trên Linux/Git 2.43.0). Packet này KHÔNG được đổi `chot_sach`
+  sang chế độ không ghi index (ví dụ `--no-optional-locks`) và KHÔNG được dời mốc chụp đầu lên trước `chay_cac_chot`;
+  A17 khoá cả hai.
+- **Trước:** sau mọi chốt và mọi probe (`chay_cac_chot`, `chay_cac_probe`), sau khi đã ghi bản chụp prompt, ngay
+  trước `subprocess.Popen`.
 - **Sau:** sau khi con thoát và sau `sandbox.ket_thuc` / `bo_loc.ket_thuc`, trước khi chốt `trang_thai`.
 
 Mốc sau chỉ có giá trị khi đã **chứng minh** không còn hậu duệ nào sống. Phép chứng minh theo nền:
@@ -107,7 +109,6 @@ nằm ngoài job (khe đã ghi ở docstring `_job_windows`).
 | `tep_doi` | danh sách tối đa **50** phần tử `{"duong_dan": str, "doi": "them"\|"xoa"\|"sua"\|"doi_loai"}`, sắp theo đường dẫn |
 | `tep_doi_tong` | int: tổng số đường dẫn đổi, không bị cắt |
 | `tep_doi_bi_cat` | bool: `tep_doi_tong > 50` |
-| `snapshot_refresh_rc` | int: `rc` của bước làm mới bộ đệm stat (§2.3), hoặc `null` nếu không chạy được |
 | `snapshot_gioi_han` | câu cố định chứa nguyên văn hai cụm `chi so hai moc truoc/sau; ghi roi hoan nguyen giua hai moc thi khong thay` và `chau tu setsid hoac sinh truoc khi gan job thi khong chung minh duoc` |
 
 Danh sách đầy đủ của hai bản chụp được ghi vào `snapshot-truoc.txt` và `snapshot-sau.txt` trong thư mục lượt chạy,
@@ -179,14 +180,14 @@ dựng tại chỗ (không dùng checkout đang chạy test).
 | A3 | `r1252_ghi_trong_git`: con ghi `.git/x` ⇒ `ghi_workspace`, `tep_doi` chứa `.git/x` | linux + windows | `r1252_bo_thu_muc_git` (bỏ `.git` khỏi phép chụp) ⇒ ĐỎ |
 | A4 | `r1252_khong_ghi_thi_sach`: con chỉ đọc (in nội dung một tệp tracked) ⇒ `trang_thai == "xong"`, rc 0, `snapshot_ket_qua == "sach"`, `snapshot_truoc_sha256 == snapshot_sau_sha256`, `tep_doi == []`; sha256 của `snapshot-truoc.txt` bằng `snapshot_truoc_sha256`; quyền tệp `0600` (chỉ kiểm quyền trên POSIX) | linux + windows | `r1252_luon_bao_lech` (so luôn ra khác) ⇒ ĐỎ · `r1252_bam_khac_tep` (băm một chuỗi khác nội dung tệp đã ghi) ⇒ ĐỎ |
 | A5 | `r1252_run_root_trong_workspace_bi_loai`: `--run-root` là một thư mục con của kho tạm, con không ghi gì ⇒ `sach` (launcher tự ghi `run.json`/log vào đó mà không bị tính). Vế đối chứng cùng ca: con ghi một tệp NGOÀI `--run-root`, cạnh nó ⇒ `ghi_workspace` | linux + windows | `r1252_khong_loai_run_root` ⇒ vế thứ nhất ĐỎ · `r1252_loai_ca_thu_muc_cha` (loại cả thư mục chứa `--run-root`) ⇒ vế đối chứng ĐỎ |
-| A6 | `r1252_khong_do_duoc`: ba vế. (a) Một tệp trong kho tạm không đọc được (`chmod 000`; trên Windows, hoặc khi chạy root mà đọc vẫn được, ca dựng lỗi đọc bằng cách thay hàm đọc của bộ chụp trong tiến trình test, có ghi rõ trong ca) ⇒ `khong_do_duoc_workspace`, rc **17**, `snapshot_ly_do == "muc_khong_doc_duoc"`. (b) Con sinh một cháu còn sống khi con thoát (POSIX: cháu cùng nhóm tiến trình; Windows: cháu sinh sau khi con đã vào job) ⇒ `khong_do_duoc` / `cay_chua_chung_minh_chet`. (c) Lệnh chụp ném lỗi ⇒ `khong_do_duoc` / `chup_loi`, launcher không traceback. (d) Đối chứng của (b) trên CÙNG nền: con thoát, không để lại cháu ⇒ KHÔNG ra `cay_chua_chung_minh_chet` (trên Windows là bằng chứng job rỗng thật, không phải `None`) | linux + windows (a, b, c, d) | `r1252_nuot_muc_loi` (bỏ qua phần tử `?`) ⇒ (a) ĐỎ · `r1252_tin_me_chet` (dùng `p.poll() is not None` làm bằng chứng cây chết) ⇒ (b) ĐỎ trên cả hai nền · `r1252_none_la_chet` (coi `None` của `_thanh_vien_nhom`/`_pid_trong_job` là rỗng) ⇒ (b) ĐỎ · `r1252_windows_khong_dung_job` (Windows luôn trả "không chứng minh được") ⇒ (d) ĐỎ trên Windows · `r1252_dao_thu_tu_phan_loai` (xét `tep_doi` trước `muc_khong_doc_duoc`) ⇒ (a) ĐỎ, vì ca (a) có cả một tệp đổi |
+| A6 | `r1252_khong_do_duoc`: ba vế. (a) Một tệp trong kho tạm không đọc được (`chmod 000`; trên Windows, hoặc khi chạy root mà đọc vẫn được, ca dựng lỗi đọc bằng cách thay hàm đọc của bộ chụp trong tiến trình test, có ghi rõ trong ca) ⇒ `khong_do_duoc_workspace`, rc **17**, `snapshot_ly_do == "muc_khong_doc_duoc"`. (b) Con sinh một cháu còn sống khi con thoát (POSIX: cháu cùng nhóm tiến trình; Windows: cháu sinh sau khi con đã vào job) ⇒ `khong_do_duoc` / `cay_chua_chung_minh_chet`. (c) Lệnh chụp ném lỗi ⇒ `khong_do_duoc` / `chup_loi`, launcher không traceback. (d) Đối chứng của (b) trên CÙNG nền: con thoát, không để lại cháu ⇒ KHÔNG ra `cay_chua_chung_minh_chet` (trên Windows là bằng chứng job rỗng thật, không phải `None`). (e) Phép liệt kê hậu duệ KHÔNG đo được: chạy `m.lenh_run` trong tiến trình test (như các ca hiện có đã làm), con thoát sạch như (d), nhưng hàm liệt kê của nền đang chạy được thay để trả `None` (`_thanh_vien_nhom` trên POSIX, `_pid_trong_job` trên Windows) ⇒ rc **17**, `snapshot_ly_do == "cay_chua_chung_minh_chet"`. (b) và (d) vẫn chạy với tiến trình/job thật; chỉ (e) dùng phép thay hàm | linux + windows (a, b, c, d, e) | `r1252_nuot_muc_loi` (bỏ qua phần tử `?`) ⇒ (a) ĐỎ · `r1252_tin_me_chet` (dùng `p.poll() is not None` làm bằng chứng cây chết) ⇒ (b) ĐỎ trên cả hai nền · `r1252_none_la_chet` (coi `None` của `_thanh_vien_nhom`/`_pid_trong_job` là rỗng, ví dụ `not members` thay cho `members == []`) ⇒ (e) ĐỎ · `r1252_windows_khong_dung_job` (Windows luôn trả "không chứng minh được") ⇒ (d) ĐỎ trên Windows · `r1252_dao_thu_tu_phan_loai` (xét `tep_doi` trước `muc_khong_doc_duoc`) ⇒ (a) ĐỎ, vì ca (a) có cả một tệp đổi |
 | A7 | `r1252_tat_co_giu_nguyen`: không bật cờ, con ghi `.tl_state/x` ⇒ `trang_thai == "xong"`, rc 0, `run.json` có `chup_workspace == false` và KHÔNG có khoá nào khác của bảng §2.4. Cùng ca: `--help` của `run` có `--chup-workspace`; hai hằng 16, 17 nằm trong bảng mã thoát và tên của chúng có trong `launcher.py --help` | linux + windows | `r1252_mac_dinh_bat` (mặc định bật) ⇒ ĐỎ |
 | A8 | `r1252_trang_thai_khac_khong_bi_de`: bật cờ, con ngủ quá `--deadline-utc` và ghi một tệp trước khi bị giết ⇒ `trang_thai == "qua_han"` (không thành `ghi_workspace`), rc 124 hoặc 125 như base, và vẫn có `snapshot_ket_qua` (`ghi_workspace` hoặc `khong_do_duoc`) | linux | `r1252_de_trang_thai` (luôn đặt `ghi_workspace` khi lệch) ⇒ ĐỎ |
 | A9 | `r1252_gioi_han_khai`: chuỗi `snapshot_gioi_han` trong `run.json` có nguyên văn CẢ HAI cụm §2.4, mỗi cụm kiểm riêng (vế dương, đo trên giá trị chuỗi đã đánh giá nên không bị ngắt dòng, L6(b)). Vế âm: khi không bật cờ, khoá ấy vắng | linux + windows | `r1252_cat_hau_to_gioi_han` (cắt `thi khong thay`) ⇒ ĐỎ · `r1252_bo_cum_setsid` (bỏ cụm thứ hai) ⇒ ĐỎ |
 | A15 | `r1252_cat_50`: hai vế trong cùng ca. (a) Con tạo đúng **50** tệp mới ⇒ `tep_doi_tong == 50`, `tep_doi_bi_cat is False`, `len(tep_doi) == 50`. (b) Con tạo đúng **51** tệp mới ⇒ `tep_doi_tong == 51`, `tep_doi_bi_cat is True`, `len(tep_doi) == 50`, và `tep_doi` bằng đúng 50 đường dẫn ĐẦU theo thứ tự byte; `snapshot-sau.txt` có đủ 51 dòng tương ứng (cắt chỉ áp cho `run.json`, không áp cho tệp chụp) | linux + windows | `r1252_bo_cat` (không cắt) ⇒ (b) ĐỎ · `r1252_tong_sau_cat` (tổng tính sau khi cắt) ⇒ (b) ĐỎ · `r1252_bi_cat_luon_false` ⇒ (b) ĐỎ · `r1252_cat_49` (cắt ở 49) ⇒ (a) ĐỎ · `r1252_cat_ca_tep_chup` (cắt luôn `snapshot-sau.txt`) ⇒ (b) ĐỎ |
 | A16 | `r1252_bieu_dien_khong_nhap_nhang`: gọi THẲNG hàm thuần biểu diễn chuẩn (§2.2) trên danh sách phần tử dựng sẵn, không đọc hệ tệp, nên chạy được trên mọi nền. Hai cặp phải ra hai biểu diễn (và hai sha256) khác nhau: (i) một tệp tên byte `b"\xff"` so với một tệp tên `hex:ff`; (ii) một thư mục tên `a\nD\t\tb` so với hai thư mục `a` và `b`. Cùng ca: biểu diễn của một danh sách đã xáo trộn bằng biểu diễn của danh sách đã sắp (thứ tự byte) | linux + windows | `r1252_ghi_chu_khi_utf8` (đường dẫn UTF-8 hợp lệ ghi chữ, còn lại ghi `hex:`) ⇒ (i) ĐỎ · `r1252_tab_xuong_dong` (quay về định dạng `<loại>\t<giá trị>\t<đường dẫn>`) ⇒ (ii) ĐỎ · `r1252_khong_sap` ⇒ vế xáo trộn ĐỎ |
-| A17 | `r1252_lam_moi_bo_dem_stat`: kho tạm có một tệp tracked; ca đặt mtime của tệp ấy mới hơn mtime ghi trong `.git/index` mà KHÔNG đổi nội dung (dựng lại đúng điều kiện của S6), rồi chạy `run --chup-workspace` với con là `git status --short` ⇒ `snapshot_ket_qua == "sach"` và `snapshot_refresh_rc` là int. Đối chứng cùng ca: con tự `touch -m` (qua `os.utime`) tệp ấy rồi chạy `git status --short` ⇒ `ghi_workspace`, `tep_doi` chứa `.git/index` | linux + windows | `r1252_bo_lam_moi` (bỏ bước `update-index --refresh`) ⇒ vế thứ nhất ĐỎ (điều kiện: trên nền, không có bước làm mới thì vế ấy ra `ghi_workspace`; người thi hành phải đo điều này bằng chính đột biến, nếu vế ấy vẫn `sach` dưới đột biến thì fixture chưa dựng đúng S6 và ca chưa đạt) |
-| A10 | Windows theo `ADR-0060` M3, trên máy chủ kho qua Desktop Commander, theo `ADR-0057`/`0058`/`0059` (khoá, kiểm tải, thư mục riêng, sổ đo). Đây là lượt **TẬP TRUNG**, không phải trọn bộ: theo chỉ thị chủ kho (không CI Windows, không full mutant trên Windows, chỉ Windows tập trung), chạy `--lap-ca` cho đúng mười CA `r1252_*` có nền "windows" ở A2–A7, A9, A15, A16, A17 (đếm theo tên ca), trên ứng viên. Mọi ca phải `qua`, không ca nào bị bỏ qua, kể cả bốn vế (a)–(d) của A6 | windows (local) | ca nào trong danh sách bị bỏ qua hoặc đỏ ⇒ ĐỎ; máy không `Online` quá 24 giờ ⇒ packet `blocked` (không tự miễn) |
+| A17 | `r1252_bo_dem_stat_lam_moi_truoc_chup`: kho tạm có một tệp tracked; TRƯỚC khi gọi launcher, ca đặt mtime của tệp ấy mới hơn mtime ghi trong `.git/index` mà KHÔNG đổi nội dung (dựng lại đúng điều kiện của S6), rồi chạy `run --chup-workspace` với con là `git status --short` ⇒ `snapshot_ket_qua == "sach"`. Đối chứng cùng ca: con tự đổi mtime tệp ấy (qua `os.utime`) rồi chạy `git status --short` ⇒ `ghi_workspace`, `tep_doi` chứa `.git/index` | linux + windows | `r1252_chup_truoc_chot` (dời mốc chụp đầu lên trước `chay_cac_chot`) ⇒ vế thứ nhất ĐỎ · `r1252_chot_sach_khong_ghi_index` (thêm `--no-optional-locks` vào lệnh của `chot_sach`) ⇒ vế thứ nhất ĐỎ. Người thi hành phải chạy cả hai đột biến và thấy vế thứ nhất ra `ghi_workspace`; nếu vế ấy vẫn `sach` dưới đột biến thì fixture chưa dựng đúng S6 và ca chưa đạt |
+| A10 | Windows theo `ADR-0060` M3, trên máy chủ kho qua Desktop Commander, theo `ADR-0057`/`0058`/`0059` (khoá, kiểm tải, thư mục riêng, sổ đo). Đây là lượt **TẬP TRUNG**, không phải trọn bộ: theo chỉ thị chủ kho (không CI Windows, không full mutant trên Windows, chỉ Windows tập trung), chạy `--lap-ca` cho đúng mười CA `r1252_*` có nền "windows" ở A2–A7, A9, A15, A16, A17 (đếm theo tên ca), trên ứng viên. Mọi ca phải `qua`, không ca nào bị bỏ qua, kể cả năm vế (a)–(e) của A6 | windows (local) | ca nào trong danh sách bị bỏ qua hoặc đỏ ⇒ ĐỎ; máy không `Online` quá 24 giờ ⇒ packet `blocked` (không tự miễn) |
 | A11 | `full_mutant_audit` theo `ADR-0060` M9: **bắt buộc** (diff chạm `.claude/dev/**`), chạy bằng dispatch `ci-dot-bien-du.yml` trên Ubuntu | linux (CI) | thiếu receipt, hoặc thiếu waiver `owner_waived` đúng scope §10.2.3, khi merge |
 | A12 | Gate phụ trên ứng viên: `python -m ruff check --select F` cho hai tệp, DELTA so nền = 0 (đo nền và ứng viên trong cùng một lệnh); `python .claude/dev/packet_loop.py doctrine-scan --root .` rc 0; `git diff --check` rc 0 | linux | (cổng canh bất biến; xanh sẵn trên nền là đúng) |
 | A13 | `git diff --numstat <base_oid> <candidate_oid>` chỉ gồm `.claude/dev/launcher.py` và `.claude/dev/launcher_test.py`; tổng dòng thêm ≤ 800 (khối `nang_tran` §3). Trước khi tính, kiểm staged/unstaged/untracked rỗng | (không phụ thuộc nền) | thêm tệp thứ ba vào diff ⇒ ĐỎ; vượt 800 ⇒ dừng, checkpoint chủ kho |
@@ -243,7 +244,8 @@ phối để chủ kho quyết. Ngưỡng ba lần lặp theo CLAUDE.md.
 
 Các điểm phiên soạn tự thêm khi viết. Chủ kho duyệt bằng cách duyệt `spec_hash`. Điểm 1–4 có từ bản đầu (blob
 `da478a61`); điểm 5–9 thêm sau connector review lượt 1 trên `67a4d9c` (P1 `4489586568`, P2 `4489586575`,
-`4489586571`, `4489586579`) và một lỗi phiên soạn tự phát hiện khi đo lại S6:
+`4489586571`, `4489586579`) và một lỗi phiên soạn tự phát hiện khi đo lại S6; điểm 9 sửa lại và điểm 10 thêm sau
+connector review lượt 2 trên `cef84ed`:
 
 1. Mã **17** riêng cho `khong_do_duoc` (Q4 chỉ nói "một mã thoát riêng" cho `ghi_workspace`).
 2. Vế `cay_chua_chung_minh_chet` (§2.3): chưa chứng minh được hậu duệ đã chết lúc chụp sau ⇒ không đo được.
@@ -254,5 +256,8 @@ Các điểm phiên soạn tự thêm khi viết. Chủ kho duyệt bằng cách
    P2 `4489586575`.
 7. Biên cắt 50/51 (A15); P2 `4489586571`.
 8. Biểu diễn chuẩn bằng JSON + hex cho mọi đường dẫn (§2.2, A16); P2 `4489586579`.
-9. S6 bản đầu khai sai: `git status` CÓ ghi lại `.git/index` sau khi mtime tệp tracked đổi. Thêm bước
-   `update-index -q --refresh` trước mốc chụp đầu (§2.3, A17). Phiên soạn tự phát hiện khi đo lại S6 có hiện vật.
+9. S6 bản đầu khai sai: `git status` CÓ ghi lại `.git/index` sau khi mtime tệp tracked đổi. Phiên soạn tự phát
+   hiện khi đo lại S6 có hiện vật. Ở `cef84ed`, bản sửa thêm một bước `update-index -q --refresh`; connector review
+   lượt 2 (P2 `4489640552`) chỉ ra `chot_sach` đã làm mới bộ đệm stat nên bước ấy thừa và đột biến của A17 không đỏ.
+   Bản này bỏ bước riêng, giữ thứ tự `chay_cac_chot` → mốc chụp đầu, và A17 khoá thứ tự ấy (§2.3, A17).
+10. A6 thêm vế (e) tiêm `None` vào hàm liệt kê hậu duệ; P2 `4489640557` (connector review lượt 2).

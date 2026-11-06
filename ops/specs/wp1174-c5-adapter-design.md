@@ -183,13 +183,15 @@ Các lớp do reviewer quyết định sau khi quét mọi biểu hiện; các n
 |---|---|---|
 | legacy-writer-reentry | r5 N1, A1 đã đóng ở thiết kế | Tombstone đúng bytes; quiescence/producer coverage trước activation; cached writer không bị gọi là đã fence |
 | adoption-lineage-counter-integrity | r5 N2 và A1 F2 | Exact source bytes, missing/corrupt UNKNOWN; fresh init predecessor none+absent; không reset generation/history |
-| dispatch-durability-order | r5 N3 | Quyền dispatch chỉ sau fsync/readback/tripwire; lỗi giữ slot, không retry |
+| dispatch-durability-order | r5 N3, R10-D01 | Quyền dispatch chỉ sau fsync/readback/tripwire; lỗi giữ slot, không retry |
 | pr-preparation-identity | r5 N4 | P có giá trị độc lập, PR ID thật, review exact H, budget chung |
-| recovery-state-machine | A1 F1/P2 | Hai mode, disposition đóng, durable cutover intent, reboot readmission, không rollback schema 2 |
+| recovery-state-machine | A1 F1/P2, A2-02, R10-A02 | Hai mode, disposition đóng, durable cutover intent, reboot readmission, không rollback schema 2 |
 | admission-authority-anchor | A1 F3/P2 | Ref/OID/path/hash từ authority canonical; FILE không là trust root; tránh hash cycle |
-| tombstone-bytes-coverage | A1 F4/P3 | Golden đúng renderer/tập field, lý do từ chối đúng, không gán fixture thành product acceptance |
+| tombstone-bytes-coverage | A1 F4/P3, A2-04 | Golden đúng renderer/tập field, lý do từ chối đúng, không gán fixture thành product acceptance |
 
-Có 8 finding ID nguồn (N1–N4, A1 F1–F4), dự kiến 7 lớp; N2 và F2 nối cùng cơ chế counter/lineage, không giảm severity. Reviewer phải xác nhận hoặc sửa phân lớp, nêu lý do tách/gộp và mọi biểu hiện cùng cơ chế còn lại. A1 có 4 finding mở trong 4 lớp; lớp lineage không được ghi closed chỉ vì biểu hiện adopt-state đã đóng.
+| proposal-write-set-identity | R10-W01/P3 | Path stable wp1174-c5-adapter-design.md, diff set bằng declared write set; revision/history không lẫn |
+
+Lịch sử ban đầu có 8 finding ID (N1–N4, A1 F1–F4) trong 7 lớp; sau A2-01..04 và R10-A02/R10-D01/R10-W01 có tổng 15 ID duy nhất trong 8 lớp. Đây là provenance lịch sử, không là giới hạn review. Ban đầu  N2 và F2 nối cùng cơ chế counter/lineage, không giảm severity. Reviewer phải xác nhận hoặc sửa phân lớp, nêu lý do tách/gộp và mọi biểu hiện cùng cơ chế còn lại. A1 có 4 finding mở trong 4 lớp; lớp lineage không được ghi closed chỉ vì biểu hiện adopt-state đã đóng.
 
 Acceptance cho implementation: init dương/âm; adoption exact bytes; crash trước/sau cutover intent/tombstone/adopted; missing/corrupt không reset; resolver authority sai OID/path/hash/revocation; contention đúng một reservation; mọi writer cùng gate; fsync/readback lỗi không dispatch; topology dương thật và ngoài profile âm; full advisory→actual human→canonical gates lifecycle; scope ngoài Mission không nới. Mỗi ca cần negative/mutant oracle trong frozen inventory; chưa có product tests nào chạy trong proposal này.
 
@@ -207,10 +209,12 @@ M10: declaration ở đầu là anchor dự kiến; khi lease trỏ đúng spec_
 
 M9/Windows của implementation đọc lại theo diff thật; không lấy not_required của Markdown proposal áp cho packet_loop/protocol code về sau. Không CI Windows/full mutant Windows theo owner; Linux CI/full M9 giữ khi scope triggered.
 
-Ngân sách: C5-A1 đã tiêu 1 closure, giữ raw needs_revision. C5-A2 là lượt bổ sung được yêu cầu với quy trình vá/cross review cho cả lịch sử A1 lẫn candidate này. Source B vẫn 2 executor +2 reviewer chưa mở, không chuyển slot để chạy thêm closure tùy ý; không mua credits. Chạm trần thì checkpoint.
+Ngân sách hiện hành: owner đã Review Rescue bằng chỉ thị “Tiếp đi, lặp tới hết P1, P2, P3, nâng trần gọi lên 10” (Mission #1172 comment 6674183346). Trần tổng C5 là 10 model invocation, tính cả A1/A2 và source B nếu mở; không reset lịch sử hoặc cộng 10 mới. Vòng chốt spec được tiếp tục trong tổng 210 active cloud phút, hạch toán old C5 bảo thủ60 phút, không tính user-idle. Source B vẫn có ceiling 2 executor/2 reviewer và chỉ mở khi đủ gates, cũng phải còn số dư tổng. Không paid credits/AGY/Windows CI hoặc full Windows mutants. Usage phải đọc lại trước mỗi dispatch; chạm trần/capability stop thì checkpoint.
 
 Chưa đo: product tests, actual human, remote runs, merge/land, capability native ext4/XFS và complete ownership của write set implementation. Đặc tả không tự cấp quyền cho những bước đó.
 
 ## 12. Hình dạng kế thừa từ A2
 
 A2-01/P2 thuộc adoption-lineage-counter-integrity: witness outside target; A2-02/P3 thuộc recovery-state-machine: aborted generation nằm trong lineage và cần admission mới; A2-03/P3 thuộc admission-authority-anchor: guard map resolver error ra12/admission_rejected; A2-04/P3 thuộc tombstone-bytes-coverage: bool/grammar và golden bytes. Các thay đổi này mới là executor patch, chưa reviewer xác nhận đóng. Review A2 trên H trước chỉ đọc snapshot do prompt lỗi cấm Git; không dùng nó làm M12 approval hồi tố. Không push candidate mới trước offline review hợp lệ.
+
+R10-A02, R10-D01 và R10-W01 là biểu hiện kế thừa mới, giữ stable slug đã ghi. Không gọi các biểu hiện đã vá là class closed trước cross-review exact H; không dùng recap lịch sử 8-ID/7-class làm số hiện hành.

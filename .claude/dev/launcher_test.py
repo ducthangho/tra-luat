@@ -13507,6 +13507,9 @@ def r1252_run_root_trong_workspace_bi_loai():
         rc, so, _ = _r1252_run(repo, repo / "ra" / "runs", "pass")
         bang(rc == 0 and so["snapshot_ket_qua"] == "sach",
              f"run-root trong workspace phai bi loai: rc={rc} {so.get('tep_doi')}")
+        rc, so, _ = _r1252_run(repo, repo / "ra" / "runs3", "open('ra/runs3/khac.txt','w').write('1')")
+        bang(rc == 0 and so["snapshot_ket_qua"] == "sach",
+             f"ca cay --run-root phai bi loai (Codex F3): rc={rc} {so.get('tep_doi')}")
         rc, so, _ = _r1252_run(repo, repo / "ra" / "runs2", "open('ra/canh.txt','w').write('1')")
         bang(rc == 16 and so["tep_doi"] == [{"duong_dan": "ra/canh.txt", "doi": "them"}],
              f"tep canh run-root phai bi bat: rc={rc} {so.get('tep_doi')}")
@@ -13683,7 +13686,157 @@ def r1252_bo_dem_stat_lam_moi_truoc_chup():
 
 
 
+@ca
+def r1252_ghi_bang_chung_an_toan():
+    """Codex F1 (P1) + F2: con đặt sẵn symlink/hardlink/tệp 0644 tại tên tệp chụp thì launcher KHÔNG được ghi
+    xuyên qua chúng vào workspace; một thư mục tại tên ấy (ghi lỗi) ⇒ rc 17, không công bố sạch."""
+    with San() as s:
+        repo = _r1252_kho(s)
+        a = str(repo / "a.txt")
+        for ten, ma in (("symlink", f"os.symlink({a!r}, d + 'snapshot-truoc.txt')"),
+                        ("hardlink", f"os.link({a!r}, d + 'snapshot-sau.txt')"),
+                        ("0644", "fd = os.open(d + 'snapshot-truoc.txt', os.O_WRONLY | os.O_CREAT, 0o644); os.close(fd)")):
+            goc = s / f"r-{ten}"
+            con = f"import glob,os,sys\nd = glob.glob({str(goc)!r} + '/*/')[0]\ntry:\n    {ma}\nexcept OSError:\n    sys.exit(0)\n"
+            rc, so, thu_muc = _r1252_run(repo, goc, con)
+            bang((repo / "a.txt").read_text(encoding="utf-8") == "x", f"{ten}: launcher ghi xuyen vao a.txt")
+            bang(rc == 0 and so["snapshot_ket_qua"] == "sach", f"{ten}: rc={rc} {so.get('snapshot_ket_qua')}")
+            for tep in ("snapshot-truoc.txt", "snapshot-sau.txt"):
+                st = os.lstat(thu_muc / tep)
+                bang(not os.path.islink(thu_muc / tep) and st.st_nlink == 1, f"{ten}: {tep} van la lien ket")
+                if not LA_WINDOWS:
+                    bang((st.st_mode & 0o777) == 0o600, f"{ten}: {tep} khong 0600: {oct(st.st_mode)}")
+        goc = s / "r-thu-muc"
+        rc, so, _ = _r1252_run(repo, goc, f"import glob,os\nos.mkdir(glob.glob({str(goc)!r} + '/*/')[0] + 'snapshot-truoc.txt')\n")
+        bang(rc == 17 and so["snapshot_ly_do"] == "chup_loi", f"ghi tep chup loi phai ra 17/chup_loi: rc={rc} {so.get('snapshot_ly_do')}")
+
+
+@ca
+def r1252_stop_giu_trang_thai_ket_thuc():
+    """Codex F4: `stop` sau lượt đã kết thúc bằng 16/17 không được đổi nhãn thành `da_dung`."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = _r1252_kho(s)
+        ten = "_pid_trong_job" if LA_WINDOWS else "_thanh_vien_nhom"
+        for goc, ma, mong, qua_m in ((s / "r16", "open('.tl_state/x','w').write('1')", "ghi_workspace", False),
+                                     (s / "r17", "pass", "khong_do_duoc_workspace", True)):
+            cu = getattr(m, ten)
+            if qua_m:
+                setattr(m, ten, lambda *_a: None)
+            try:
+                _, so, _ = _r1252_run(repo, goc, ma, m=m if qua_m else None)
+            finally:
+                setattr(m, ten, cu)
+            bang(so["trang_thai"] == mong, f"truoc stop: {so['trang_thai']}")
+            chay("stop", "--run-root", str(goc), "--id", so["short_id"])
+            sau, _ = _r1252_so(goc)
+            bang(sau["trang_thai"] == mong, f"stop doi {mong} thanh {sau['trang_thai']}")
+
+
+@ca
+def r1252_ngat_khi_chup():
+    """Codex F5: Ctrl-C trong lúc chụp đầu ⇒ không sinh con, sổ `bi_ngat`; trong lúc chụp sau ⇒ sổ `bi_ngat`,
+    `ma_thoat` là mã thật của con, `khong_do_duoc`/`chup_loi` — không bao giờ kẹt `dang_chay`."""
+    m = _tai_launcher_thu()
+    goc_chup = m._chup_an_toan
+    with San() as s:
+        repo = _r1252_kho(s)
+        dau = s / "con-da-chay"
+        for lan_ngat in (1, 2):
+            dem = [0]
+
+            def chup(*a, **k):
+                dem[0] += 1
+                if dem[0] == lan_ngat:
+                    raise KeyboardInterrupt
+                return goc_chup(*a, **k)
+
+            m._chup_an_toan = chup
+            try:
+                rc, so, _ = _r1252_run(repo, s / f"r{lan_ngat}", f"open({str(dau)!r},'w').write('1')", m=m)
+            except KeyboardInterrupt:
+                bang(False, f"ngat lan {lan_ngat} lot ra ngoai lenh_run")
+            finally:
+                m._chup_an_toan = goc_chup
+            bang(rc == 130 and so["trang_thai"] == "bi_ngat" and so["snapshot_ly_do"] == "chup_loi",
+                 f"ngat lan {lan_ngat}: rc={rc} {so.get('trang_thai')} {so.get('snapshot_ly_do')}")
+            if lan_ngat == 1:
+                bang(not dau.exists() and so["pid"] is None, "ngat khi chup dau ma van sinh con")
+            else:
+                bang(so["ma_thoat"] == 0 and dau.exists(), f"ngat khi chup sau: ma_thoat={so.get('ma_thoat')}")
+
+
+@ca
+def r1252_han_sau_khi_chup():
+    """Codex F6: chụp đầu chậm vượt `--deadline-utc` ⇒ KHÔNG sinh con, `Chan(MA_HAN)`, sổ `hong`."""
+    m = _tai_launcher_thu()
+    goc_chup = m._chup_an_toan
+    with San() as s:
+        repo = _r1252_kho(s)
+        dau = s / "con-da-chay"
+
+        def cham(*a, **k):
+            time.sleep(3)
+            return goc_chup(*a, **k)
+
+        m._chup_an_toan = cham
+        try:
+            try:
+                _r1252_run(repo, s / "runs", f"open({str(dau)!r},'w').write('1')", "--deadline-utc", mai_sau(2), m=m)
+            except m.Chan as e:
+                bang(e.ma == MA_HAN, f"sai ma: {e.ma}")
+            else:
+                bang(False, "chup qua han van chay tiep")
+        finally:
+            m._chup_an_toan = goc_chup
+        so, _ = _r1252_so(s / "runs")
+        bang(not dau.exists() and so["trang_thai"] == "hong", f"van sinh con sau han: {so.get('trang_thai')}")
+
+
+@ca
+def r1252_hien_thi_duong_dan_don_anh():
+    """Codex F7: `tep_doi.duong_dan` phải đơn ánh theo byte và qua được JSON/UTF-8 (spec §2.4: `os.fsdecode`)."""
+    m = _tai_launcher_thu()
+    sau = [("F", "x", b"\xff"), ("F", "x", b"\\xff")]
+    kq = m._ket_qua_snapshot(([], m._bieu_dien_chuan([])), (sau, m._bieu_dien_chuan(sau)), True)
+    ten = [x["duong_dan"] for x in kq["tep_doi"]]
+    bang(len(set(ten)) == 2, f"hai ten byte khac nhau hien giong nhau: {ten!r}")
+    chuoi = m._json_an_toan(kq)
+    try:
+        chuoi.encode("utf-8")
+    except UnicodeEncodeError:
+        bang(False, "JSON chua surrogate tran: ghi run.json UTF-8 se nem loi")
+    bang(json.loads(chuoi)["tep_doi"] == kq["tep_doi"], "JSON khong hoan nguyen duoc tep_doi")
+    if not LA_WINDOWS:
+        bang(sorted(os.fsencode(x) for x in ten) == sorted(d for _, _, d in sau), f"khong hoan nguyen byte: {ten!r}")
+
+
+
 DOT_BIEN = [
+    # #1252 lượt Codex offline 1 (run e9e4e6ce): mỗi finding F1–F7 một chốt, một đột biến.
+    ("r1252_ghi_de_dich_truc_tiep", ('        os.replace(tam, duong)\n',
+                                     '        os.unlink(tam)\n        with open(duong, "wb") as g:\n            g.write(data)\n'),
+     ["r1252_ghi_bang_chung_an_toan"]),
+    ("r1252_nuot_loi_ghi_bang_chung",
+     ('                    kq_chup.update(snapshot_ket_qua="khong_do_duoc", snapshot_ly_do="chup_loi")', '                    pass'),
+     ["r1252_ghi_bang_chung_an_toan"]),
+    ("r1252_loai_thu_muc_luot", ('    loai_tru = run_root if _nam_trong(run_root, kq["workspace"]) else None',
+                                 '    loai_tru = thu_muc if _nam_trong(thu_muc, kq["workspace"]) else None'),
+     ["r1252_run_root_trong_workspace_bi_loai"]),
+    ("r1252_bo_dang_ky_trang_thai", (',\n                       "ghi_workspace", "khong_do_duoc_workspace"}', '}'),
+     ["r1252_stop_giu_trang_thai_ket_thuc"]),
+    ("r1252_bo_xu_ly_ngat_truoc", ('            chup_truoc = _chup_an_toan(kq["workspace"], loai_tru)\n        except KeyboardInterrupt:',
+                                   '            chup_truoc = _chup_an_toan(kq["workspace"], loai_tru)\n        except ZeroDivisionError:'),
+     ["r1252_ngat_khi_chup"]),
+    ("r1252_bo_xu_ly_ngat_sau", ('            chup_sau = _chup_an_toan(kq["workspace"], loai_tru)\n        except KeyboardInterrupt:',
+                                 '            chup_sau = _chup_an_toan(kq["workspace"], loai_tru)\n        except ZeroDivisionError:'),
+     ["r1252_ngat_khi_chup"]),
+    ("r1252_bo_kiem_han_sau_chup", ('        if han_chup is not None and _bay_gio() >= han_chup:', '        if False:'),
+     ["r1252_han_sau_khi_chup"]),
+    ("r1252_hien_thi_backslash", ('        return os.fsdecode(d)\n', '        return d.decode("utf-8", "backslashreplace")\n'),
+     ["r1252_hien_thi_duong_dan_don_anh"]),
+    ("r1252_json_khong_an_toan", ('        s.encode("utf-8")\n        return s\n', '        return s\n'),
+     ["r1252_hien_thi_duong_dan_don_anh"]),
     # #1252 (spec launcher-readonly-ignored-r1 §4): mỗi vế của bộ chụp một đột biến, giết đúng ca đích.
     ("r1252_bo_tep_ignored",
      ('    return muc\n\n\ndef _so_snapshot(',
@@ -13749,9 +13902,8 @@ DOT_BIEN = [
      [('    kq = chay_cac_chot(a)\n    resume_id',
        '    _m1252 = (_chup_an_toan(tim_workspace(a.workspace), None) if getattr(a, "chup_workspace", False) else None)\n'
        '    kq = chay_cac_chot(a)\n    resume_id'),
-      ('    chup_truoc = (_chup_an_toan(kq["workspace"], thu_muc if _nam_trong(thu_muc, kq["workspace"]) else None)\n'
-       '                  if ban_ghi["chup_workspace"] else None)',
-       '    chup_truoc = _m1252')],
+      ('            chup_truoc = _chup_an_toan(kq["workspace"], loai_tru)\n',
+       '            chup_truoc = _m1252\n')],
      ["r1252_bo_dem_stat_lam_moi_truoc_chup"]),
     ("r1252_chot_sach_khong_ghi_index",
      ('    rc, out, err = _git(ws, "status", "--porcelain=v1", "--untracked-files=all")',

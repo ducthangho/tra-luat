@@ -241,7 +241,8 @@ TY_LE_DOT_BIEN_TOI_THIEU_PHAN_MUOI = 7
 # hệ thống ngoài cây không còn làm hỏng ảnh của cây vô can.
 
 # Trạng thái CUỐI của một lượt chạy — `stop` không được ghi đè lên chúng.
-TRANG_THAI_KET_THUC = {"xong", "qua_han", "bi_ngat", "hong", "da_dung"}
+TRANG_THAI_KET_THUC = {"xong", "qua_han", "bi_ngat", "hong", "da_dung",
+                       "ghi_workspace", "khong_do_duoc_workspace"}   # #1252 (Codex F4)
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 # git@host:owner/repo.git  —  dạng kiểu scp, KHÔNG phải URL nên urlparse đọc sai
@@ -941,6 +942,26 @@ def _so_snapshot(truoc: list, sau: list) -> list:
     return ra
 
 
+def _hien_thi_duong(d: bytes) -> str:
+    """Spec §2.4: `os.fsdecode` — ĐƠN ÁNH (Codex F7: `backslashreplace` gộp `b"\\xff"` với `b"\\\\xff"`).
+    Byte không giải mã được thành surrogate; `_json_an_toan` thoát nó khi tuần tự hoá."""
+    try:
+        return os.fsdecode(d)
+    except UnicodeDecodeError:          # Windows: fsdecode là utf-8/surrogatepass, không nhận byte lẻ
+        return d.decode("utf-8", "surrogateescape")
+
+
+def _json_an_toan(obj, **kw) -> str:
+    """`ensure_ascii=False` cho dễ đọc; chuỗi có surrogate (tên tệp byte lạ) thì `ensure_ascii=True`,
+    để tệp UTF-8 và stdout không ném `UnicodeEncodeError`. Cả hai là JSON hợp lệ, `json.loads` hoàn nguyên."""
+    s = json.dumps(obj, ensure_ascii=False, **kw)
+    try:
+        s.encode("utf-8")
+        return s
+    except UnicodeEncodeError:
+        return json.dumps(obj, ensure_ascii=True, **kw)
+
+
 def _cay_da_chet(pid: int, job) -> bool:
     """Spec §2.3: CHỨNG MINH không còn hậu duệ sống. `p.poll()` (mẹ đã thoát) KHÔNG phải bằng chứng;
     `None` (không đo được) KHÔNG phải rỗng. Windows: `_thanh_vien_nhom` luôn `None`, nên dùng job."""
@@ -962,8 +983,7 @@ def _ket_qua_snapshot(truoc, sau, cay_chet: bool) -> dict:
     doi = _so_snapshot(truoc[0], sau[0]) if truoc and sau else []
     kq["tep_doi_tong"] = len(doi)
     kq["tep_doi_bi_cat"] = len(doi) > _TEP_DOI_TRAN
-    kq["tep_doi"] = [{"duong_dan": d.decode("utf-8", "backslashreplace"), "doi": x}
-                     for d, x in doi[:_TEP_DOI_TRAN]]
+    kq["tep_doi"] = [{"duong_dan": _hien_thi_duong(d), "doi": x} for d, x in doi[:_TEP_DOI_TRAN]]
     if truoc is None or sau is None:
         ket, ly = "khong_do_duoc", "chup_loi"
     elif not cay_chet:
@@ -998,9 +1018,23 @@ def _chup_an_toan(goc, loai_tru):
 
 
 def _ghi_tep_0600(duong: Path, data: bytes) -> None:
-    fd = os.open(duong, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "wb") as f:
-        f.write(data)
+    """Codex F1 (P1): KHÔNG mở lại đích — con có thể đã đặt sẵn symlink/hardlink tới một tệp của workspace
+    (mở `O_TRUNC` là ghi đè tệp ấy sau mốc chụp cuối) hoặc một tệp 0644. Tạo tệp MỚI bằng `mkstemp`
+    (`O_EXCL`, 0600) cạnh đích rồi `os.replace` — thay mục thư mục, không đi theo liên kết."""
+    cha = duong.parent
+    if cha.is_symlink():
+        raise OSError(f"thu muc luot la symlink: {cha}")
+    fd, tam = tempfile.mkstemp(prefix=".chup-", dir=str(cha))
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(data)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tam, duong)
+    except BaseException:
+        with contextlib.suppress(OSError):
+            os.unlink(tam)
+        raise
 
 
 def _giet_windows(pid: int, khoa: str | None = None,
@@ -1658,7 +1692,7 @@ def _ghi_so(thu_muc: Path, ban_ghi: dict, khoa_ky: str | None = None) -> None:
     # ngay vòng đầu (audit codex đo được khi stress hai writer).
     tam = thu_muc / f"run.json.{os.getpid()}.{uuid.uuid4().hex[:8]}.tmp"
     try:
-        tam.write_text(json.dumps(ban_ghi, ensure_ascii=False, indent=2), encoding="utf-8")
+        tam.write_text(_json_an_toan(ban_ghi, indent=2), encoding="utf-8")
         os.replace(tam, thu_muc / "run.json")
     finally:
         try:
@@ -2542,8 +2576,26 @@ def lenh_run(a) -> int:
         them["start_new_session"] = True
     # #1252 §2.3: mốc chụp đầu SAU mọi chốt/probe — `chot_sach` (git status) đã làm mới bộ đệm stat của
     # `.git/index` (S6) — và ngay trước khi sinh con. Không được dời lên trước `chay_cac_chot` (A17).
-    chup_truoc = (_chup_an_toan(kq["workspace"], thu_muc if _nam_trong(thu_muc, kq["workspace"]) else None)
-                  if ban_ghi["chup_workspace"] else None)
+    # Codex F3: loại CẢ cây --run-root (spec §2.2), không chỉ thư mục lượt này.
+    loai_tru = run_root if _nam_trong(run_root, kq["workspace"]) else None
+    chup_truoc = None
+    if ban_ghi["chup_workspace"]:
+        try:
+            chup_truoc = _chup_an_toan(kq["workspace"], loai_tru)
+        except KeyboardInterrupt:      # Codex F5: ngắt khi chụp đầu ⇒ chưa sinh con, sổ phải KẾT THÚC
+            ban_ghi.update(_ket_qua_snapshot(None, None, False), trang_thai="bi_ngat",
+                           ly_do_dung="bi ngat trong luc chup workspace truoc; chua sinh con",
+                           ket_thuc_utc=_bay_gio().isoformat())
+            _ghi_so(thu_muc, ban_ghi, khoa_ky)
+            f_out.close(); f_err.close()
+            return 130
+        han_chup = _doc_iso(kq["deadline_utc"]) if kq["deadline_utc"] else None
+        if han_chup is not None and _bay_gio() >= han_chup:   # Codex F6: chụp chậm không được sinh con quá hạn
+            ban_ghi.update(trang_thai="hong", ly_do_dung="han chot da qua sau khi chup workspace; khong sinh con",
+                           ket_thuc_utc=_bay_gio().isoformat())
+            _ghi_so(thu_muc, ban_ghi, khoa_ky)
+            f_out.close(); f_err.close()
+            raise Chan(MA_HAN, "han chot da qua sau khi chup workspace; khong sinh con")
     try:
         p = subprocess.Popen(lenh_con, cwd=kq["workspace"],
                              stdout=f_out, stderr=subprocess.PIPE if do_model else f_err,
@@ -2629,16 +2681,20 @@ def lenh_run(a) -> int:
     if sandbox is not None:
         sandbox.ghi_so(ban_ghi, thu_muc / "stdout.log")
     kq_chup = None
+    ngat_khi_chup = False
     if ban_ghi["chup_workspace"]:
-        cay_chet = _cay_da_chet(p.pid, job)
-        chup_sau = _chup_an_toan(kq["workspace"], thu_muc if _nam_trong(thu_muc, kq["workspace"]) else None)
+        try:
+            cay_chet = _cay_da_chet(p.pid, job)
+            chup_sau = _chup_an_toan(kq["workspace"], loai_tru)
+        except KeyboardInterrupt:      # Codex F5: ngắt khi chụp sau ⇒ không đo được, sổ vẫn kết thúc
+            ngat_khi_chup, cay_chet, chup_sau = True, False, None
         kq_chup = _ket_qua_snapshot(chup_truoc, chup_sau, cay_chet)
         for ten, ban in (("snapshot-truoc.txt", chup_truoc), ("snapshot-sau.txt", chup_sau)):
             if ban is not None:
                 try:
                     _ghi_tep_0600(thu_muc / ten, ban[1])
-                except OSError:
-                    pass         # tệp chụp là bằng chứng phụ; băm đã nằm trong run.json
+                except OSError:        # Codex F2: thiếu tệp bằng chứng thì KHÔNG công bố sạch
+                    kq_chup.update(snapshot_ket_qua="khong_do_duoc", snapshot_ly_do="chup_loi")
         ban_ghi.update(kq_chup)
 
     if khoa is None and qua_han:
@@ -2667,6 +2723,10 @@ def lenh_run(a) -> int:
         ban_ghi["trang_thai"] = ("bi_ngat" if bi_ngat
                                  else "qua_han" if qua_han else "xong")
     # #1252 §2.4: chỉ thay `xong`; qua_han/bi_ngat/da_dung giữ nguyên (A8). `ma_thoat` vẫn là mã THẬT.
+    if ngat_khi_chup and ban_ghi["trang_thai"] == "xong":
+        ban_ghi["trang_thai"] = "bi_ngat"
+        ban_ghi["ly_do_dung"] = "bi ngat trong luc chup workspace sau"
+        ma = 130
     if kq_chup is not None and ban_ghi["trang_thai"] == "xong":
         if kq_chup["snapshot_ket_qua"] == "ghi_workspace":
             ban_ghi["trang_thai"] = "ghi_workspace"
@@ -2726,7 +2786,7 @@ def lenh_run(a) -> int:
             ban_ghi[ten_bam] = None
     _ghi_so(thu_muc, ban_ghi, khoa_ky)
     if a.json:
-        print(json.dumps(ban_ghi, ensure_ascii=False))
+        print(_json_an_toan(ban_ghi))
     else:
         print(f"trang thai: {ban_ghi['trang_thai']}  ma_thoat={ma}")
         # In CẠNH nhau, không để người đọc phải mở sổ mới thấy: "xong ma_thoat=0"

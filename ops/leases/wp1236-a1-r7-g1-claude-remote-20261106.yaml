@@ -67,7 +67,7 @@ write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 J
 write_set_ghi_chu: '.claude/dev/ci_dang_ky_test.py CHI THEM dung mot muc MOI (numstat 1 0); hai tep ops/ la tep MOI'
 closure_status: 'holder scan 2026-11-06T04:31:30Z: ls-remote vs for-each-ref thieu 0; 3/3 duong dan NGUOI_GIU 0'
 tran_kich_thuoc: '<= 3 tep / <= 1650 dong them, do git diff --numstat origin/master...<head A1> (nang_tran lan 5 dot A1 06-11 ~15:00Z, issuecomment-6687823867; cac lan truoc 1600/1550/1500/1400, spec r7 cho 950); vuot => DUNG truoc review'
-tran_loi_goi_codex: 'doc tu dong tran_loi_goi_codex cua spec (ADR-0052@8ab10079, dem theo PR); RIENG dot A1: 4 -> 5 -> 6 -> 7 -> 8 (issuecomment-6687232830), luot 8 la loi goi CUOI cua PR #1260 theo ADR-0052; dem truoc MOI loi goi'
+tran_loi_goi_codex: 'doc tu dong tran_loi_goi_codex cua spec (ADR-0052@8ab10079, dem theo PR); RIENG dot A1: 4 -> ... -> 8 -> 9 (Review Rescue, nang_tran ADR-0052 cua chu kho, issuecomment-6690900537), luot 9 chi xac minh F12 + 2 dot bien song; khong co luot 10; dem truoc MOI loi goi'
 windows: 'khong bat buoc cho dot A1 (Q7: OS_BAT_BUOC ubuntu-latest); neu can do Windows thi chay TAP TRUNG tren tra-luat-win qua phien dieu phoi, KHONG workflow_dispatch'
 coordination_paths:
 - ops/leases/wp1236-a1-r7-g1-claude-remote-20261106.yaml
@@ -113,12 +113,18 @@ nang_tran:
     can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-6677406420
 nang_tran_codex:
   pham_vi: 'dot A1 (PR #1260)'
-  tran_cu: 7 loi goi Codex (nang lan 3, issuecomment-6684776121)
-  tran_moi: '8 loi goi Codex; luot 8 CHI xac minh va 2 P2 connector 4493205470 (dem 0/0) va 4493205478 (pipefail sau pipeline); PR #1260 = 8/8 ADR-0052, het tran => Review Rescue'
-  can_cu: Codex luot 7/7 approve tren be1aeee (6685453691); connector khi bo draft (review 5801111832) tim 2 P2 fail-open
+  tran_cu: 8 loi goi Codex (tran ADR-0052, nang lan 4, issuecomment-6687232830)
+  tran_moi: 9 loi goi Codex; vuot tran ADR-0052 (8) bang nang_tran cua chu kho sau Review Rescue; luot 9 CHI xac minh F12 (chot shell danh sach cho phep) + 2 dot bien song a14; khong co luot 10
+  can_cu: 'Codex luot 8/8 (run 35a18f18, issuecomment-6690875449): F12 P2 fail-open 16 bien the; Review Rescue Checkpoint ADR-0037'
   ai_nang: ducthangho
-  can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-6687232830
+  can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-6690900537
   lich_su:
+  - pham_vi: 'dot A1 (PR #1260)'
+    tran_cu: 7 loi goi Codex (nang lan 3, issuecomment-6684776121)
+    tran_moi: '8 loi goi Codex; luot 8 CHI xac minh va 2 P2 connector 4493205470 (dem 0/0) va 4493205478 (pipefail sau pipeline); PR #1260 = 8/8 ADR-0052, het tran => Review Rescue'
+    can_cu: Codex luot 7/7 approve tren be1aeee (6685453691); connector khi bo draft (review 5801111832) tim 2 P2 fail-open
+    ai_nang: ducthangho
+    can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-6687232830
   - pham_vi: 'dot A1 (PR #1260)'
     tran_cu: 6 loi goi Codex (nang lan 2, issuecomment-6683884474)
     tran_moi: '7 loi goi Codex; luot 7 CHI xac minh va F11 (bang chung land duong chi tu provenance dung neo run+attempt+head); PR #1260 = 7/8 ADR-0052'

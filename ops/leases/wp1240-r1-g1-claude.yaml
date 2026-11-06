@@ -24,8 +24,24 @@ recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; K
 
 leased_at_utc: '2026-11-05T17:32:53Z'
 heartbeat_at: '2026-11-05T17:32:53Z'
-lease_until: '2026-11-06T17:32:53Z'
-lease_expires_at_utc: '2026-11-06T17:32:53Z'
+lease_until: '2026-11-06T02:30:00Z'
+lease_expires_at_utc: '2026-11-06T02:30:00Z'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-06T17:32:53Z'
+  han_moi_utc: '2026-11-06T02:30:00Z'
+  chi_thi: >-
+    Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 giao phien ghi so land session_015GtxrYZbszZAUUTAqmnc8K (2026-11-06 01:54Z
+    va 02:07Z, send_message): rut han lease NGAY sau merge bang khoi thu_hoi_bang_rut_han, khong bia mo, truoc ho so land, vi
+    #1236 dang cho ops/land_evidence_nguon.py; han moi dat sau luc push vai phut.
+  ly_do: >-
+    Packet #1240 (ASSURANCE-81-MODEL-EFFORT-TUY-CHON r1) da MERGE: PR #1249 (head ecd30737) merge bang merge commit
+    51d6509e918b8b5403248b52727e53358a23a3a0 (cha 4f03566f + ecd30737), merged_by ducthangho luc 2026-11-06T01:40:51Z
+    (REST GET pulls/1249). Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: >-
+    Khong co lease ke nhiem (thay_the_cho rong). Rut han dung co che da cai (tien le #1105 942fb45, #1224 5f8d7d4). Han moi dat
+    SAU luc push de luot dang lease con thay lease song, tranh rc=8 che rc=9.
+  nguoi_rut: 'phien ghi so land (khong phai executor, khong phai phien dieu phoi) theo giao viec cua phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4'
+  nghiem_thu: 'ai-dang-giu cho 5 duong dan write set sau 02:30Z phai ra NGUOI_GIU 0.'
 
 packet_id: ASSURANCE-81-MODEL-EFFORT-TUY-CHON
 packet_slug: assurance-81-model-effort-tuy-chon

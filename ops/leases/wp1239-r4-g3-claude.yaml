@@ -95,3 +95,4 @@ integration_base_sha: 08bcb51fbed359eaeeca41bc3a0559fe308c0aa9
 integration_base_tree: c7c80550aef10749ce1ea19ce2fec4e683f572aa
 canonical_refresh_limit: 1
 prior_g3_authority: https://github.com/ducthangho/tra-luat/issues/1239#issuecomment-6680244818
+da_bi_thay_the: wp1239-r5-g4-claude

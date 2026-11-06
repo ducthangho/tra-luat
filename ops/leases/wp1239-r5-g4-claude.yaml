@@ -1,0 +1,103 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1239
+packet_id: wp1239
+mission_issue: 1238
+revision: 5
+generation: 4
+lease_id: wp1239-r5-g4-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+effort: max
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: local
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/PROXIMA-PLAYWRIGHT-P0-r5.md
+spec_ref: refs/heads/ops/proxima-playwright-p0-spec@255f835478ff14cda8eca2db1d44f3332c87d5aa
+spec_sha256_required: 3023fc8d29a83c47cc2b7983edb496f98476223d984d337d00aaf889b2928c40
+spec_hash: 3023fc8d29a83c47cc2b7983edb496f98476223d984d337d00aaf889b2928c40
+prompt_path: ops/prompts/wp1239-r5-g4-claude.md
+write_set: &id001
+- ops/plans/PROXIMA-PLAYWRIGHT-v1.md
+- docs/research/2026-11-05-proxima-playwright-p0.md
+write_set_hash: df7de52a9da7e047e70bdf23f07b0e79aaac059272bbbfaaa7f6fe1a063372c6
+change_policy_sha: null
+effective_write_set: *id001
+effective_write_set_nguon: owner-approved manual descriptor spec r5; only wp1239 revision5;
+  effective authored diff relative bound S_final
+required_checks:
+- doc_N1_N4_R1_R4_exact_H_tree
+- canonical_thu_hoi_admission_rc0_S_final_ancestor_H
+- H0_ancestor_H_and_outside_scope_equal_S_final
+- tl_selftest_Linux_N_equals_N_before_push_ADR0062
+- independent_Codex_exact_H_cross_approved
+- canonical_applicable_Linux_CI_and_branch_protection_before_merge
+land_obligations: []
+branch: agent/wp1239-g4-claude
+branch_ownership: exclusive
+base_sha: ba0126bd20c99669264b788e15da2b6ebcda0fd7
+start_from_sha: ba0126bd20c99669264b788e15da2b6ebcda0fd7
+reviewed_sha_required: ba0126bd20c99669264b788e15da2b6ebcda0fd7
+reviewed_sha_required_note: bootstrap START only; new independent verdict must bind
+  new H/tree
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1239#issuecomment-6690703905
+granted_on_instruction_quote: Duyệt lease mới, kiểm tra agy đã hoạt động chưa, review
+  kết quả thế nào đã merge được chưa. Cập nhật các thay đổi trên repo
+recorded_by: openai_codex/codex_service dispatcher in current chat
+recorder_is_executor: false
+authority_note: recorded on behalf of user; GH submitter identity does not prove human
+  audit; no merge/land/deploy authority
+heartbeat_required_minutes: 360
+run_minutes: 90
+attempts_limit: 4
+same_failure_limit: 2
+review_rounds_limit: 3
+codex_review_calls_limit: 3
+thay_the_cho:
+- wp1239-r4-g3-claude
+requires_live: false
+uy_quyen_merge: false
+worker_scope_note: only two approved Markdown files; control-plane prompt/lease/spec
+  not copied into worker product
+packet_budget_carryover:
+  attempts_used: 3
+  attempts_limit: 4
+  review_rounds_used: 1
+  review_rounds_limit: 3
+  codex_review_calls_used: 2
+  codex_review_calls_limit: 3
+  generation_remaining_attempts: 1
+  generation_remaining_review_rounds: 2
+  generation_remaining_codex_calls: 1
+prompt_sha256_required: 85638ee87a618420a337a711b8418f48f13a0f2de3c6ac931cc23141f2d36a2e
+leased_at_utc: '2026-11-06T17:13:44Z'
+heartbeat_at: '2026-11-06T17:13:44Z'
+lease_until: '2026-11-06T21:13:44Z'
+lease_expires_at_utc: '2026-11-06T21:13:44Z'
+xung_dot_write_set_do_luc_cap:
+  measured_at_utc: '2026-11-06T17:13:44Z'
+  source: fresh all-ref scan both paths holders0, old g3 expired; canonical policy/schema
+    absent
+integration_base_sha: d26b36f5d2f952c2d952d58517571ffe27c4f826
+integration_base_tree: 6dcde7830199dff9b149d4fb7caa31181979b560
+canonical_refresh_limit: 1
+prior_g3_authority: https://github.com/ducthangho/tra-luat/issues/1239#issuecomment-6680244818
+preflight_no_model:
+  deadline_probe: 8c02400c71704791a8105ae7aed9fea4 rc124 qua_han complete tree kill
+    12.39s
+  permission_mailbox: allow/deny/mismatch 3/3; actual remote dispatcher decision+readback
+    passed
+  untracked: 7 files preserved outside repo with manifest/hash, clean after preservation

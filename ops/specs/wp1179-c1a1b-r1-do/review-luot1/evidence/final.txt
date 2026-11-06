@@ -1,0 +1,5 @@
+git --version rc=0: git version 2.43.0
+status rc=0: ''
+rev-parse rc=0: 24354e7709da4d6aa0299e4eff982b7d50b98d76
+93fb483b1ec506e70de72c1b027d795d65008be8
+spec_sha256=3dc6a2b9cd6dcf85a11dab3aa5fb8d44bf7945f61071e20bb33405e2521f6d04

@@ -266,7 +266,7 @@ Bằng chứng đã có: r7 golden tombstone 13/13 legacy CLI từ chối (hash 
 
 ## 11. ADR-0060 và publication
 
-M1/M2: reviewer quét theo lớp, giữ slug và đọc nghĩa, zero P0/P1/P2; mọi P3 phải reviewer xác nhận đóng hoặc owner miễn exact H. Yêu cầu zero P1/P2/P3 ban đầu được owner sửa riêng cho vòng r19/lượt13 tại comment6679267205: P0–P2 vẫn phải zero, P3 còn lại được cho nợ có comment exactH/slug/lý do/hướng xử lý sau verdict. Đây là owner waiver theo M1, không phải reviewer closed hoặc product acceptance. Không reset history qua C5-A2.
+M1/M2: reviewer quét theo lớp, giữ slug và đọc nghĩa, zero P0/P1/P2; mọi P3 phải reviewer xác nhận đóng hoặc owner miễn exact H. Yêu cầu zero P1/P2/P3 ban đầu được owner sửa tại comment6679267205 và giữ khi duyệt r20/lượt14 tại comment6679865940: P0–P2 vẫn phải zero; P3 còn lại được cho nợ có comment exactH/slug/lý do/hướng xử lý sau verdict. Đây là owner waiver theo M1, không phải reviewer closed hoặc product acceptance. Không reset history qua C5-A2.
 
 M5/M12: local candidate H/tree và diff được freeze, handoff lên Packet Issue, cross review độc lập offline hai trục trước push. Có commit mới thì review/gates cũ stale. Không push candidate chưa approve; không đổi namespace để miễn push count. Không tự coi bundle hash cũ là Git SHA.
 
@@ -276,7 +276,7 @@ M10: declaration ở đầu là anchor dự kiến; khi lease trỏ đúng spec_
 
 M9/Windows của implementation đọc lại theo diff thật; không lấy not_required của Markdown proposal áp cho packet_loop/protocol code về sau. Không CI Windows/full mutant Windows theo owner; Linux CI/full M9 giữ khi scope triggered.
 
-Ngân sách hiện hành: owner đã duyệt cap10, rồi thêm từng lượt11 và12; quyết định #1174 comment6679267205 cho áp dụng r19 và đúng một lượt13. Tổng C5=13 invocation, không reset A1/A2/lượt lỗi, không tự có lượt14. Giữ210 active cloud phút; historical usage trước lượt13 hạch toán bảo thủ143phút, user-idle loại trừ. Cùng quyết định này cho nợ P3 còn lại sau review13 nếu không có P0–P2, ghi ID/slug/exactH/lý do/hướng xử lý trên Packet Issue; không đổi findings thành closed hoặc technical approve. SourceB vẫn conditional và cần số dư/gate riêng, ceiling2executor/2reviewer không tự nới. Không paid/AGY/Windows CI/full Windows mutants/CI-M9 cap tăng/quyền merge.
+Ngân sách hiện hành: owner duyệt cap10 và từng lượt11–13; quyết định #1174 comment6679865940 cho áp dụng r20 và đúng một lượt14 để khắc phục P2 R19-L07. Tổng C5=14 invocation, không reset A1/A2/lượt lỗi, không tự có lượt15. Giữ210 active cloud phút; historical usage trước lượt14 hạch toán bảo thủ155phút, user-idle loại trừ. Owner cho nợ P3 còn lại nếu review14 zeroP0–P2, ghi ID/slug/exactH/lý do/hướng xử lý trên Packet Issue; không đổi technical verdict/finding thành closed. P2 không thuộc quyền nợ. SourceB vẫn conditional/cần số dư và gate riêng, ceiling2executor/2reviewer không tự nới. Không paid/AGY/Windows CI/full Windows mutants/CI-M9 cap tăng/quyền merge.
 
 Chưa đo: product tests, actual human, remote runs, merge/land, capability native ext4/XFS và complete ownership của write set implementation. Đặc tả không tự cấp quyền cho những bước đó.
 
@@ -302,4 +302,4 @@ R17-L05: shared validator bắt buộc bảng bốn row + quy tắc chung, exact
 
 R18-L06 cùng adoption-lineage-counter-integrity: mọi writer phải prevalidate exact post-image và whitelist transitions trước write, không chỉ readback. Oracle r19: fresh reserved+valid adoption admission phải rc8/bytes-revision unchanged/no temp; với từng9row writer, mutant tạo out-of-table post-image bị chặn trước persistent write; imported reserved retry vẫn positive. R19 đã áp dụng theo owner decision comment6679267205, đang chờ review13 trên H mới. P3 còn lại chỉ ghi nợ theo quyết định owner/exactH, không tự claim closed/approve hoặc mở sourceB.
 
-R19-L07/P2: high_water source binding cho initialized adoption, không laundering stale/ahead/foreign source qua admission hash. Oracle r20 phải giữ initialized witness unchanged trước write khi mismatch; positive source==high_water và legacy reserved retry vẫn hợp lệ. R20 là proposed design chưa áp dụng/chưa review; P3 debt permission không bao gồm P2. Cap13 đã hết, không tự gọi14.
+R19-L07/P2: high_water source binding cho initialized adoption, không laundering stale/ahead/foreign source qua admission hash. Oracle r20 phải giữ initialized witness unchanged trước write khi mismatch; positive source==high_water và legacy reserved retry vẫn hợp lệ. R20 đã áp dụng theo owner decision comment6679865940, đang chờ review14 trên H mới. P3 debt permission không bao gồm P2; không tự claim closed/approve hoặc mở sourceB.

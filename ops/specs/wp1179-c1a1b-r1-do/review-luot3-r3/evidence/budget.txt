@@ -1,0 +1,5 @@
+G0 prototype size=8388607 status=qua json_ok=True
+G0 prototype size=8388608 status=qua json_ok=True
+G0 prototype size=8388609 status=do json_ok=None
+commits=5444 bytes=8480418 max_commit=8477 mean=1557.754960 linear_50000=77887747.979; revlist_rc=0 batch_rc=0
+50k/5444=9.184423218221896; this measures commits on master only, not arbitrary PR H, trees, cold cache or Windows.

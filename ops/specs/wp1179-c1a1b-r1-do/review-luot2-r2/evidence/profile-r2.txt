@@ -1,0 +1,2 @@
+first_parent master->MOC: 410 commit, 531751 byte, 0.029s
+to_tien(master) moi parent: 5444 commit, 8480418 byte, 0.252s

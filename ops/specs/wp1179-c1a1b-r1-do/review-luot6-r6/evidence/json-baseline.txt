@@ -1,0 +1,2 @@
+nghia vu: witness_killed 162 · equivalent_verified 9 · unresolved 0
+doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET

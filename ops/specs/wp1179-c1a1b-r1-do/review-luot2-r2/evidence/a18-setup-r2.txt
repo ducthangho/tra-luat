@@ -1,0 +1,5 @@
+registry_present=False swallow_import=False: rc=1; stdout_matches=False; A18_oracle_pass=True; stderr_last=["FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv2/sandbox/a18-setup-0-0/ci_dang_ky_test.py'"]
+registry_present=False swallow_import=True: rc=1; stdout_matches=False; A18_oracle_pass=True; stderr_last=["FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv2/sandbox/a18-setup-0-1/ci_dang_ky_test.py'"]
+registry_present=True swallow_import=False: rc=1; stdout_matches=False; A18_oracle_pass=True; stderr_last=['ImportError: target Git import failure']
+registry_present=True swallow_import=True: rc=0; stdout_matches=True; A18_oracle_pass=False; stderr_last=[]
+With exactly suite + two modules, BOTH callers pass A18 because unchanged JSON registry test crashes first. Adding the registry dependency makes the exact caller mutation observable.

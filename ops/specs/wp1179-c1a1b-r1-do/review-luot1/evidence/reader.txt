@@ -1,0 +1,4 @@
+cat-file --batch 83cdfa481e5c77fa77c3afb8d92d45cba8ca890b: rc=0, header=b'83cdfa481e5c77fa77c3afb8d92d45cba8ca890b commit 209', rehash_matches=False, filter=True
+cat-file --batch 14a341ac6cbceb45153e1deb4aa48ce95f750f6d: rc=0, header=b'14a341ac6cbceb45153e1deb4aa48ce95f750f6d missing', rehash_matches=None, filter=False
+cat-file --batch 14a341ac6cbceb45153e1deb4aa48ce95f750f6d: rc=0, header=b'14a341ac6cbceb45153e1deb4aa48ce95f750f6d commit 212', rehash_matches=True, filter=True
+cat-file --batch 1234567890abcdef1234567890abcdef12345678: rc=0, header=b'1234567890abcdef1234567890abcdef12345678 missing', rehash_matches=None, filter=True

@@ -1,0 +1,21 @@
+GRAPH {"MOC": "601a0f18c83057fa079d204122660f5697fc6389", "P": "541fa6ca9ba78d2669261b528572dbc05b53ea87", "A": "492be1a675e274664dda110609e20f908bbc99e2", "B": "14a341ac6cbceb45153e1deb4aa48ce95f750f6d", "E": "b190ca7d88863d7ca64ce26510e14b60998d3fe9", "D": "3ce11253365cfc344977a912fa00e374e975e396", "H": "3bcc3982e5846c7ba616c80e66d570bcddd168bc", "X": "c3f552fd5b9a54da08f669fa22900ecb1b6959dc", "tree_S": "38825864c1c51a35a1db0099f78966bc80164aef", "tree_H": "1dfdae4ae3239d4187b4d9790bb0e2c728f21850", "other": "4b825dc642cb6eb9a060e54bf8d69288fbee4904", "checker": "f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1", "workflow": "3c9c7e4863118c4ace0ab6422c5dab9d0a498847"}
+ancestry 492be1a -> 14a341a rc=0
+ancestry 14a341a -> 492be1a rc=1
+ancestry 492be1a -> c3f552f rc=1
+ancestry 14a341a -> 14a341a rc=0
+A9 A9 stated negative: T=other: correct=do, mutant_compare_S=do, target_changes=False
+A9 additional negative: T=tree(S): correct=do, mutant_compare_S=qua, target_changes=True
+A9 positive: correct=qua, mutant_compare_S=do, target_changes=True
+G6 producer mode=100644 result=('100644', 'f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1', 'blob') reads=2 bytes=74
+G6 producer mode=100755 result=('100755', 'f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1', 'blob') reads=2 bytes=74
+G6 producer mode=120000 result=('120000', '203e9c185dec2f21482a7f1138284d2bcf531bab', 'blob') reads=2 bytes=74
+G6 producer mode=160000 result=('160000', '1234567890abcdef1234567890abcdef12345678', 'commit') reads=2 bytes=74
+G6 producer mode=40000 result=('040000', '4b825dc642cb6eb9a060e54bf8d69288fbee4904', 'tree') reads=2 bytes=73
+G6 producer absent: None
+G6 producer ancestor_blob: Chan KHÔNG_XÁC_ĐỊNH: tổ tiên của ops/lease_publish.py không phải thư mục (mode 100644 blob) — không suy vắng
+A12 replace_enabled rc=0 header_oid=14a341ac6cbceb45153e1deb4aa48ce95f750f6d rehash_matches=False
+A12 replace_disabled rc=0 header_oid=14a341ac6cbceb45153e1deb4aa48ce95f750f6d rehash_matches=True
+G7 symlink actual producer rc=0 stdout=THU_HOI_ADMISSION TAP_THU_HOI_RONG: S=492be1a675e2 H=3bcc3982e584 T=1dfdae4ae323 ancestry=1 cạnh; sổ S=0 T=0 entry; object đã băm=6
+G7 workflow rev-parse reported=203e9c185dec2f21482a7f1138284d2bcf531bab, symlink_blob=203e9c185dec2f21482a7f1138284d2bcf531bab, regular_modes_predicate=False
+G7 completed offline receipt JSON={"ok": true, "luat": {"K1": "qua", "K2": "qua", "K3": "qua", "K4": "qua", "K5": "qua"}, "ly_do": []}
+No GitHub run/API provenance asserted; local producer and local workflow commands only.

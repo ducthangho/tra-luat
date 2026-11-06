@@ -1,0 +1,20 @@
+DOC_TABLE_AND_GUARDS PASS {"G0": [], "G1": [["commit", "22c9e730d9605c7ae50400ede5d76dc82241fdcf"], ["commit", "c7472777889e9e0dc9b8bfc90361489607d7af48"], ["commit", "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"]], "G2": [["commit", "c7472777889e9e0dc9b8bfc90361489607d7af48"]], "G3": [["commit", "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"]], "G4": [["commit", "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"]], "G5": [["commit", "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"]], "G6": [["commit", "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"], ["tree", "3519263482b206c2b5a898189473069cca402c31"], ["tree", "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"]], "G7": [["commit", "c7472777889e9e0dc9b8bfc90361489607d7af48"], ["tree", "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"], ["tree", "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"], ["blob", "5e811ebbf89c0d439776dd8fbaff694a4dce6650"]], "G8": [["commit", "c7472777889e9e0dc9b8bfc90361489607d7af48"], ["tree", "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"], ["tree", "ef442502f1e7d7390afaaebf4036098742160c98"], ["tree", "eb1211ee4990343bc541c57ede49da141f61bd20"], ["blob", "277df262ff3f7bc6bc0be839be6419f6db441f5a"]], "G9": []}
+positive {"name": "positive", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "qua", "G9": "qua"}, "bytes": 134396, "count": 12}
+A12a {"name": "A12a", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "khong_do_duoc", "G4": "khong_do_duoc", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "qua", "G9": "qua"}, "bytes": 134184, "count": 11}
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv7/sandbox/probes.py", line 488, in <module>
+    main()
+    ~~~~^^
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv7/sandbox/probes.py", line 416, in main
+    store_under_oid(f['repo'], oid, typ, body.replace(b'b-review.txt', b'c-review.txt'))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv7/sandbox/probes.py", line 387, in store_under_oid
+    p.write_bytes(zlib.compress(typ.encode() + b' ' + str(len(body)).encode() + b'\0' + body))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/pathlib/_abc.py", line 641, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/pathlib/_local.py", line 537, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv7/sandbox/fixtures/isolated/.git/objects/cc/40e8cc36f278d1277a53696a5fd3b2e3bf5190'

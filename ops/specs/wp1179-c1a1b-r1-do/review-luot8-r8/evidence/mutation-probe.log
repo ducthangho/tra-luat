@@ -1,0 +1,9 @@
+A12_e_baseline ['qua', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'qua'] 0 0
+A12_e_LOCAL_NO_RESTART ['qua', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'qua'] 0 0
+A12_h_baseline ['qua', 'qua', 'qua', 'qua', 'qua', 'qua', 'qua', 'khong_do_duoc', 'khong_do_duoc', 'qua']
+A12_h_LOCAL_NO_RESTART ['qua', 'qua', 'qua', 'qua', 'qua', 'qua', 'qua', 'khong_do_duoc', 'qua', 'qua']
+A12_f_baseline ['qua', 'qua', 'qua', 'qua', 'qua', 'qua', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'qua'] 4 912
+A12_f_REEVALUATE_MEMO ['qua', 'qua', 'qua', 'qua', 'qua', 'qua', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'qua'] 4 912
+A12_f_INVALIDATE ['qua', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'khong_do_duoc', 'qua']
+COMPLETED_G4_DEATH_AND_DEADLINE qua khong_do_duoc
+RESULT local_event survives e, is killed by h: NOT equivalent_verified across all inputs

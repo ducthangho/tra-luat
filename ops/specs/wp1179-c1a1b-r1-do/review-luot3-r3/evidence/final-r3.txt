@@ -1,0 +1,7 @@
+$ git ('rev-parse', 'HEAD', 'HEAD^{tree}'): rc=0 stdout='0924f4f69b26728a29faa970d1660aff6dc176ad\ne8997f59b248abf43b6c0744c5fd2463b233fd54\n' stderr=''
+$ git ('status', '--porcelain=v1', '--untracked-files=all', '--ignored'): rc=0 stdout='' stderr=''
+$ git ('diff', '--exit-code'): rc=0 stdout='' stderr=''
+$ git ('diff', '--cached', '--exit-code'): rc=0 stdout='' stderr=''
+checkout content manifest: before=12741, after=12741, changed=[]
+spec_sha256=779f9384cf87aacd9bbe3c5737c9585ef4c408178df8fc7b4c3121fa31aab039
+probe manifest: 14 scripts; no changes to review checkout observed at start/end; no claim of filesystem-enforced read-only.

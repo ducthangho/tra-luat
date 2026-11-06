@@ -1,0 +1,64 @@
+[
+  {
+    "argv": [
+      "/usr/local/bin/python",
+      "-B",
+      ".claude/dev/doc_receipt_thu_hoi_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv9/sandbox/tmp/json-pair/base",
+    "rc": 0,
+    "stdout": "nghia vu: witness_killed 162 · equivalent_verified 9 · unresolved 0\ndoc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python",
+      "-B",
+      ".claude/dev/doc_receipt_thu_hoi_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv9/sandbox/tmp/json-pair/candidate",
+    "rc": 0,
+    "stdout": "nghia vu: witness_killed 162 · equivalent_verified 9 · unresolved 0\ndoc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "--no-optional-locks",
+      "diff",
+      "--name-only",
+      "889334fb87c25136a13c6776a40a25b401820e04",
+      "3408591b7b318578a17c9b1ba00c1b87cee4f688",
+      "--",
+      ".claude/dev/doc_receipt_thu_hoi.py",
+      ".claude/dev/doc_receipt_thu_hoi_test.py",
+      ".claude/dev/ci_dang_ky_test.py",
+      "ops/lease_publish.py",
+      ".github/workflows/ops-thu-hoi-admission.yml",
+      ".github/workflows/ci.yml",
+      ".claude/dev/packet_loop.py",
+      ".claude/dev/launcher.py",
+      "docs/PROTOCOL_DA_PHIEN.md",
+      "docs/adr",
+      "CLAUDE.md",
+      "AGENTS.md"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv9/cay-kho",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "merge-base",
+      "--is-ancestor",
+      "origin/master",
+      "3408591b7b318578a17c9b1ba00c1b87cee4f688"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv9/cay-kho",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

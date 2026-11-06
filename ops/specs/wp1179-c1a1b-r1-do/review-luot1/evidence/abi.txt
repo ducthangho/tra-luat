@@ -1,0 +1,7 @@
+qua/correct: A4=True A5_rc=0 G1=qua ok=True; full_contract=True
+qua/mutant_ok_json_only: A4=True A5_rc=0 G1=qua ok=True; full_contract=True
+do/correct: A4=True A5_rc=12 G1=do ok=False; full_contract=True
+do/mutant_ok_json_only: A4=True A5_rc=12 G1=do ok=True; full_contract=False
+khong_do_duoc/correct: A4=True A5_rc=13 G1=khong_do_duoc ok=False; full_contract=True
+khong_do_duoc/mutant_ok_json_only: A4=True A5_rc=13 G1=khong_do_duoc ok=True; full_contract=False
+unsorted stdout: A4=True, equal_required_serialization=False

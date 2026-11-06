@@ -166,6 +166,17 @@ trang_thai_packet:
     readback-f1-issuecomment-6665597541.json (hien ducthangho — caveat #566) tu khai 'quyet dinh cua phien dieu phoi', tuc agent ghi
     no. kiem-merge K5 rc 0 khong bat duoc vi chi doc P3 cua connector. Can: comment chu kho mien F1 neo ecd3073 (Issue #1240 hoac
     PR #1249), roi phien ghi so readback, kiem lai va moi nang landed. Connector P1 r4488478726 tren PR #1256.
+  mien_f1_06_11: >-
+    loi_khai_co_neo, CHUA nhan lam mien cua chu kho — readback-mien-f1-issuecomment-6677161517.json (REST GET 2026-11-06T04:49Z):
+    Issue #1240, user ducthangho, author_association OWNER, created_at = updated_at = 2026-11-06T04:47:33Z; than du hinh thuc M1
+    (finding F1 P3 c23, head ecd30737e10cb7cdffe0e17178c28b3a12448874, ly do, huong #1236, pham vi chi F1). NHUNG: truong
+    performed_via_github_app = claude (GitHub App Anthropic) va than co footer Claude Code, tu khai dang 'trong phien dieu phoi
+    session_015GtxrYPjZCTZeRiazdssgq' — tuc AGENT dang duoi danh tinh chu kho (caveat #566), cung dang voi
+    readback-f1-issuecomment-6665597541.json (performed_via_github_app claude). Doi chieu: readback-chu-kho-issuecomment-6674302414.json
+    (approve_merge) co performed_via_github_app null va khong footer. 'Chu kho da duyet' chi co loi khai cua phien dieu phoi
+    session_015GtxraXfMD1t2FJLzzGDr4 (send_message 04:48Z): thuat_lai. ADR-0060 M1 cam agent tu ghi no P3, nen phien ghi so khong
+    tu nang landed tren mot comment do agent dang. Dong duoc khi: chu kho tu dang (performed_via_github_app null) mot comment mien
+    hoac xac nhan 6677161517, neo ecd3073.
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 51d6509: DAT, du bon moc (post_merge_checks muc 1, luot push that, gom release-verify
     strict lane LAND); (2) lease nha: xem lease.thu_hoi_cuoi; (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp-m8.txt);
@@ -179,6 +190,7 @@ trang_thai_packet:
     Phien ghi so phat hien vi pham read-only cua luot 1 (bc004964) ngay khi tach hien vat, bao phien dieu phoi truoc moi ghi; ban WIP
     tren PR #1256 chua tung khai landed. fd877ed: landed true sau khi do hien vat luot 2/2 read-only (run 7801b46a). Ha xuong false
     sau connector P1 r4488478726 (PR #1256): F1 P3 khong co mien cua chu kho (ADR-0060 M1).
+    Giu false sau comment 6677161517 (04:47:33Z): do agent dang qua GitHub App claude, xem mien_f1_06_11.
 
 assurance_81:
   reviewer_assurance_81: DAT

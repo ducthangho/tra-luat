@@ -18,7 +18,7 @@
   "reviewer_transport": "machine/local",
   "review_class": "sensitive",
   "effective_review_class": "sensitive",
-  "assurance_target": "cross_approved_or_human_audited",
+  "assurance_target": "cross_approved",
   "branch": "agent/wp1174-g5-codex",
   "granted_by": "ducthangho",
   "granted_on_instruction": "https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6710785136",
@@ -129,5 +129,6 @@
   "reviewer": "claude",
   "pull_request": 1275,
   "source_pr": 1275,
-  "metadata_review_disposition": "P6 native approve retained; P7 governance-only reanchor approved under delegation, not relabelled native approve; source H native review mandatory"
+  "metadata_review_disposition": "P6 native approve retained; P7 governance-only reanchor approved under delegation, not relabelled native approve; source H native review mandatory",
+  "assurance_enum_correction": "Before record-lease/begin-attempt; canonical packet_loop closed enum; cross-provider code review + separate required actual human gate unchanged. Prior commit/history retained."
 }

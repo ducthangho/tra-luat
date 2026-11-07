@@ -29,7 +29,7 @@ $Report = [ordered]@{ schema = 'proxima_config_tests.v3'; ps_version = "$($PSVer
     module_path = $ModulePath; module_sha256 = $null; sample_sha256 = $null; harness_sha256 = $null; api_state = 'unknown'
     alias_r = $null; subst_drive = $null; subst_junction_drive = $null; short_name_alias = $null; vhd_fixture = [bool]$VhdFixture; setup_error = $null
     mandatory_ids = $Ids; optional_ids = @('A3-07'); closure_ids = $Closure; counterexample_ids = @(); scratch = $null; evidence_dir = $null; snapshot_exclusions = @()
-    total = 0; passed = 0; failed = 0; failed_ids = @(); setup_error_ids = @(); unavailable_ids = @(); cases = $Results
+    key_identity_observations = $null; total = 0; passed = 0; failed = 0; failed_ids = @(); setup_error_ids = @(); unavailable_ids = @(); cases = $Results
     counterexample_evidence = [Collections.Generic.List[object]]::new(); cleanup = $Cleanup }
 $Utf8 = [Text.UTF8Encoding]::new($false); $Sha = [Security.Cryptography.SHA256]::Create()
 $Sys = [Environment]::SystemDirectory; $SubstExe = "$Sys\subst.exe"; $DiskpartExe = "$Sys\diskpart.exe"; $MountvolExe = "$Sys\mountvol.exe"
@@ -298,6 +298,7 @@ $SampleExpect = [ordered]@{ schemaVersion = 1; targetId = 'example-target'; mode
     connectionUri = 'https://gateway.example.invalid:5986/wsman'; configurationName = 'Example.Endpoint' }
 # r8: JSON escapes are built from [char]92 so no tool or transport layer can decode them while this file is edited.
 $B = [string][char]92; $Routes = 'Local targetId', 'Remote targetId', 'Remote configurationName'
+$KeyNames = 'schemaVersion', 'targetId', 'mode', 'basePath', 'connectionUri', 'configurationName'
 # ---- cases (mandatory IDs; A5-03 runs last so it sees every read) ----
 Invoke-Case 'A1-01' api {
     $a = Write-Fixture 'ext1\a.json' (New-ConfigJson); $b = Write-Fixture 'ext2\b.json' (New-ConfigJson -Remote)
@@ -375,6 +376,24 @@ Invoke-Case 'A2-05' api {
     Assert-Rejected (Invoke-GuardedRead (Write-Fixture 'ext1\u.json' (New-ConfigJson @{ extra = '1' }))) 'UnknownField' 'unknown field'
     Assert-Rejected (Invoke-GuardedRead (Write-Fixture 'ext1\u.json' ('{"schemaVersion":1,' + (New-ConfigJson).Substring(1)))) 'DuplicateField' 'duplicate field'
     Assert-Rejected (Invoke-GuardedRead (Write-Fixture 'ext1\u.json' ((New-ConfigJson) -creplace '"mode"', '"Mode"'))) 'UnknownField' 'case-variant key'
+    # r9 (review 09287a70): every genuine field present plus ONE extra key = an allowed name with U+0000, soft hyphen or
+    # zero-width joiner inserted as a JSON escape (prefix/infix/suffix) must be UnknownField with nothing returned, Local
+    # and Remote. The harness's own -ccontains vs Ordinal results are OBSERVATIONS only; no collation outcome is assumed.
+    $ins = [ordered]@{ NUL = 0; SHY = 0xAD; ZWJ = 0x200D }; $obs = [Collections.Generic.List[string]]::new(); $Report.key_identity_observations = $obs
+    foreach ($rm in $false, $true) {
+        $md = $(if ($rm) { 'Remote' } else { 'Local' })
+        Assert-Accepted (Invoke-GuardedRead (Write-Fixture 'ext1\k.json' (New-ConfigJson -Remote:$rm))) $(if ($rm) { 'tgt-two' } else { 'tgt-one' }) "$md canonical keys"
+        foreach ($f in $KeyNames) {
+            $at = [ordered]@{ prefix = 0; infix = [int][Math]::Floor($f.Length / 2); suffix = $f.Length }
+            foreach ($n in $ins.Keys) {
+                foreach ($p in $at.Keys) {
+                    if (-not $rm) { $real = $f.Insert($at[$p], [string][char]$ins[$n]); $obs.Add("$f $n $p ccontains=$($KeyNames -ccontains $real) ordinal_equal=$([string]::Equals($f, $real, [StringComparison]::Ordinal))") }
+                    $key = $f.Insert($at[$p], $B + 'u' + ([int]$ins[$n]).ToString('x4'))
+                    Assert-Rejected (Invoke-GuardedRead (Write-Fixture 'ext1\k.json' (New-ConfigJson -Remote:$rm @{ $key = '"extra"' }))) 'UnknownField' "$md $f $n $p"
+                }
+            }
+        }
+    }
 }
 Invoke-Case 'A2-06' api {
     Assert-Rejected (Invoke-GuardedRead (Write-Fixture 'ext1\x.json' (New-ConfigJson @{ connectionUri = '"https://gw.example.invalid/"' }))) 'ModeMismatch' 'Local+connectionUri'
@@ -525,6 +544,9 @@ $Cx = @(@{ n = 'default-config'; e = @('$repo = Open-PxChain', "$Default; `$repo
     @{ n = 'reject-external-subst'; e = @($Backing, 'Stop-Px Unverifiable'); red = @('A3-05:REJECTED_VALID[SUBST path physically outside the repository]') },
     @{ n = 'ignore-mount-topology'; vhd = $true; e = @('if (-not $Ctx.Seen.Add($vol)) { return }', 'return'); red = @('A3-08:ACCEPTED_INVALID[volume mounted inside repository]') },
     @{ n = 'allow-unknown'; e = @('Stop-Px SecretField', '', 'Stop-Px UnknownField', ''); red = @('A2-05:ACCEPTED_INVALID[unknown field]', 'A4-01:ACCEPTED_INVALID[password]') },
+    # r9: H6's culture-aware membership restored in the one Ordinal helper must ACCEPT every U+0000 extra-key variant.
+    @{ n = 'cultural-key-membership'; e = @('return $script:FieldSet.Contains($Name)', 'return $script:Fields -ccontains $Name')
+        red = @(foreach ($md in 'Local', 'Remote') { foreach ($f in $KeyNames) { foreach ($p in 'prefix', 'infix', 'suffix') { "A2-05:ACCEPTED_INVALID[$md $f NUL $p]" } } }) },
     @{ n = 'echo-raw'; e = @('$msg = "Config rejected: $Code."', '$msg = "Config rejected: $Code." + $Field', '(New-PxError $code $field)', '(New-PxError $code ([string]$text))')
         red = @('A4-01:SENTINEL_ECHOED[password]') },
     @{ n = 'side-effect'; e = @('$repo = Open-PxChain', 'Invoke-WebRequest -Uri https://side-effect.invalid/ -UseBasicParsing | Out-Null; $repo = Open-PxChain'); red = @('A5-03:SIDE_EFFECT_HITS[') },

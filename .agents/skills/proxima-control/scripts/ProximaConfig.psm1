@@ -13,6 +13,10 @@
 # covered: junctions/symlinks stored INSIDE the repository pointing out to the config (needs a repository tree walk).
 Set-StrictMode -Version 3.0
 $script:Fields = @('schemaVersion', 'targetId', 'mode', 'basePath', 'connectionUri', 'configurationName')
+# r9 (review 09287a70: -cnotcontains is culture-aware equality that ignores U+0000, so an EXTRA key target<U+0000>Id was
+# taken for targetId and silently dropped). JSON field names are identities: membership is Ordinal and case-sensitive
+# everywhere (Test-PxFieldName), never collation; keys are never trimmed, stripped or normalized into allowed names.
+$script:FieldSet = [Collections.Generic.HashSet[string]]::new([string[]]$script:Fields, [StringComparer]::Ordinal)
 $script:RemoteOnly = @('connectionUri', 'configurationName')
 $script:SecretKey = '(?i)pass|pwd|secret|token|credential|cookie|api.?key|auth|bearer|private|cert'
 # ReparsePoint 0x400 | Offline 0x1000 | RecallOnOpen 0x40000 | RecallOnDataAccess 0x400000 (cloud placeholders).
@@ -39,10 +43,11 @@ $script:Native = & {
 }
 # Codes are constant identifiers set only by Stop-Px (see the Stop-Px calls below); anything else is Internal.
 function Stop-Px([string]$Code, [string]$Field = '') { $ex = [Exception]::new("ProximaConfig.$Code"); $ex.Data['PxCode'] = $Code; $ex.Data['PxField'] = $Field; throw $ex }
+function Test-PxFieldName([string]$Name) { return $script:FieldSet.Contains($Name) }
 function New-PxError([string]$Code, [string]$Field) {
     if ($Code -cnotmatch '^[A-Za-z]{1,40}\z') { $Code = 'Internal' }
     $msg = "Config rejected: $Code."
-    if ($script:Fields -ccontains $Field) { $msg += " Field: $Field." }
+    if (Test-PxFieldName $Field) { $msg += " Field: $Field." }
     $cat = $(if ($Code -like '*NotFound') { 'ObjectNotFound' } else { 'InvalidData' })
     return [Management.Automation.ErrorRecord]::new([InvalidOperationException]::new("ProximaConfig: $msg"), "ProximaConfig.$Code", $cat, $null)
 }
@@ -226,8 +231,8 @@ function Get-PxField($o, [string]$Name, [string]$Kind, [scriptblock]$Valid) {
     return $o[$Name].V
 }
 function ConvertTo-PxConfig($o) {
-    foreach ($k in $o.Keys) { if ($script:Fields -cnotcontains $k -and $k -match $script:SecretKey) { Stop-Px SecretField } }
-    foreach ($k in $o.Keys) { if ($script:Fields -cnotcontains $k) { Stop-Px UnknownField } }
+    foreach ($k in $o.Keys) { if (-not (Test-PxFieldName $k) -and $k -match $script:SecretKey) { Stop-Px SecretField } }
+    foreach ($k in $o.Keys) { if (-not (Test-PxFieldName $k)) { Stop-Px UnknownField } }
     $null = Get-PxField $o 'schemaVersion' 'number' { $args[0] -ceq '1' }
     $out = [ordered]@{ schemaVersion = 1 }
     $out.targetId = Get-PxField $o 'targetId' 'string' { Test-PxText $args[0] }
@@ -266,7 +271,11 @@ function Read-ProximaConfig {
         while ($n -lt $bytes.Length) { $k = $fs.Read($bytes, $n, $bytes.Length - $n); if ($k -le 0) { Stop-Px Changed }; $n += $k }
         if ($fs.ReadByte() -ne -1) { Stop-Px Changed }
         # Mappings/mount lists changed since verifying reject (narrows, does not close, a change-and-restore window).
-        foreach ($c in $ctx.Recheck) { if ($(if ($c[0] -ceq 'dos') { Get-PxDosTarget $c[1] } else { Get-PxVolumePaths $c[1] }) -cne $c[2]) { Stop-Px Changed } }
+        # r9: Ordinal, as for field names - culture equality would miss a change that only adds an ignorable character.
+        foreach ($c in $ctx.Recheck) {
+            $now = $(if ($c[0] -ceq 'dos') { Get-PxDosTarget $c[1] } else { Get-PxVolumePaths $c[1] })
+            if (-not [string]::Equals($now, $c[2], [StringComparison]::Ordinal)) { Stop-Px Changed }
+        }
         $text = ConvertFrom-PxUtf8 $bytes
         $state = @{ T = $text; P = 0 }
         $root = Read-PxValue $state 0

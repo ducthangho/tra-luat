@@ -1,0 +1,71 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1271
+packet_id: wp1271
+mission_issue: 1238
+revision: 1
+generation: 1
+lease_id: wp1271-r1-g1-agy
+role: executor
+provider: google_antigravity
+executor: google_antigravity
+model: gemini-4-argon-high
+effort: high
+model_family: gemini
+execution_surface: antigravity
+transport: machine/local
+environment: local
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1271-r1.md
+spec_ref: refs/heads/ops/wp1271-spec@4b1008d69e9939c2dd7f4c25725a1cbb41a878e8
+spec_sha256_required: 60b880b5b2ddab005b6a63cd0309be893b8b378467a1a854159f8eb05cf7a151
+spec_hash: 60b880b5b2ddab005b6a63cd0309be893b8b378467a1a854159f8eb05cf7a151
+prompt_path: ops/prompts/wp1271-r1-g1-agy.md
+prompt_sha256_required: ac4ceb5c8d73b6cb8d83c429ca486359f88a83b6cbc22d4a89b4780c224930b0
+write_set:
+- .agents/skills/proxima-control/scripts/ProximaConfig.psm1
+- .agents/skills/proxima-control/config.example.json
+- .agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1
+write_set_hash: 2a078a18512575d7c99522a0a78ec8583e7d9d5062e23a8b729cb60405138578
+change_policy_sha: null
+required_checks:
+- A1-A7 focused PS5.1 and PS7
+- Linux tl selftest N/N before primary push
+- Ruff F delta zero
+- independent Codex CLI exact SHA sensitive review
+- applicable Ubuntu CI and required branch checks
+land_obligations: []
+branch: agent/wp1271-g1-agy
+base_sha: 27fd80803e9a8f80e660752f58c8dd477e9730c8
+start_from_sha: 27fd80803e9a8f80e660752f58c8dd477e9730c8
+reviewed_sha_required: 27fd80803e9a8f80e660752f58c8dd477e9730c8
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6708576608
+recorded_by: openai_codex/codex_service dispatcher, delegated owner authority
+recorder_is_executor: false
+heartbeat_required_minutes: 360
+leased_at_utc: '2026-11-07T15:01:20.614221+00:00'
+heartbeat_at: '2026-11-07T15:01:20.614221+00:00'
+lease_until: '2026-11-07T19:01:20.614221+00:00'
+lease_expires_at_utc: '2026-11-07T19:01:20.614221+00:00'
+run_minutes: 90
+attempts_limit: 3
+review_rounds_limit: 3
+codex_review_calls_limit: 8
+same_failure_limit: 2
+requires_live: false
+uy_quyen_merge: false
+authority_note: Executor lease grants no merge/deploy; dispatcher owner delegation
+  recorded separately. First model turn read-only; no writes before runtime-family
+  admission.
+effective_write_set:
+- .agents/skills/proxima-control/scripts/ProximaConfig.psm1
+- .agents/skills/proxima-control/config.example.json
+- .agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1

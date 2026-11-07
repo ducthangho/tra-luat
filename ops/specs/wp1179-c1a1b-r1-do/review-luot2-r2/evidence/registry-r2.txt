@@ -1,0 +1,3 @@
+base: ([], 29, 29)
+new Git module: ([], 29, 29)
+extra test outside write set: (['test sống chưa đăng ký: .claude/dev/doc_receipt_thu_hoi_git_test.py'], 30, 29)

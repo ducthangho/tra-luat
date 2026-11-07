@@ -1,0 +1,152 @@
+[
+  {
+    "case": "A12(h)",
+    "mutation": "local_event",
+    "baseline": [
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "qua"
+    ],
+    "mutant": [
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "khong_do_duoc",
+      "qua",
+      "qua"
+    ],
+    "killed": true,
+    "process_starts": 1
+  },
+  {
+    "case": "A12(f)",
+    "mutation": "invalidate_done",
+    "baseline": [
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "qua"
+    ],
+    "mutant": [
+      "qua",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "qua"
+    ],
+    "killed": true,
+    "process_starts": 1
+  },
+  {
+    "case": "A12(e)",
+    "mutation": "restart",
+    "baseline": [
+      "qua",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "qua"
+    ],
+    "mutant": [
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua"
+    ],
+    "killed": true,
+    "process_starts": 2
+  },
+  {
+    "case": "A12(h)",
+    "mutation": "restart",
+    "baseline": [
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "qua"
+    ],
+    "mutant": [
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "khong_do_duoc",
+      "qua",
+      "qua"
+    ],
+    "killed": true,
+    "process_starts": 2
+  },
+  {
+    "case": "A12(f2)",
+    "mutation": "clear_memo",
+    "baseline": [
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "qua"
+    ],
+    "mutant": [
+      "qua",
+      "qua",
+      "qua",
+      "qua",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "khong_do_duoc",
+      "qua"
+    ],
+    "killed": true,
+    "process_starts": 1
+  }
+]

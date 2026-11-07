@@ -1,0 +1,7 @@
+A23a exact doc table 10/10
+A23 oracle structural guard baseline=pass mutant=fail
+COMMON_RESOURCE_ORACLE 0 target [1, 2, 3, 4, 5, 6, 7, 8] deadline [1, 2, 3, 4, 5, 6, 7, 8, 9]
+COMMON_RESOURCE_ORACLE 3 target [6, 7, 8] deadline [4, 5, 6, 7, 8, 9]
+COMMON_RESOURCE_ORACLE 5 target [6, 7, 8] deadline [6, 7, 8, 9]
+SPEC lines 927 bytes 108609 sha256 24418d1e68ea46324b8bb9a6cecb44eddcf31dd0e0ad0af39a2a2852f0f88454
+JSON_suite_lines 535

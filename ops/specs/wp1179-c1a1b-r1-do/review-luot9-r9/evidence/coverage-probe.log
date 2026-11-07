@@ -1,0 +1,90 @@
+full_base qua,qua,qua,qua,qua,qua,qua,qua,qua,qua 12 134396
+A7_C_B qua,qua,qua,qua,qua,qua,qua,qua,qua,qua 12 134396
+A7_C_P qua,do,do,qua,qua,qua,qua,qua,do,qua 2474 5225257
+A7_C_E qua,do,qua,qua,qua,qua,qua,qua,qua,qua 12 131887
+A7_C_X qua,do,do,qua,qua,qua,qua,qua,qua,qua 2482 5248543
+A7_C_MOC qua,qua,do,qua,qua,qua,qua,qua,qua,qua 2481 5248327
+A7_noMOC_complete qua,do,qua,qua,qua,qua,qua,qua,qua,qua 686 1373223
+A7_noMOC_missing qua,khong_do_duoc,qua,qua,qua,qua,qua,qua,qua,qua 12 134359
+A8_A9_reverse qua,qua,do,do,qua,do,qua,qua,qua,qua 2481 5248399
+A8_A9_branchH qua,qua,qua,do,do,qua,qua,qua,qua,qua 2481 5248435
+A8_A9_equal qua,qua,qua,qua,qua,do,qua,qua,qua,qua 10 130693
+A8_A9_G4 qua,qua,qua,qua,do,qua,qua,qua,qua,qua 12 134396
+A8_A9_G5 qua,qua,qua,qua,qua,do,qua,qua,qua,qua 12 134396
+A10_mode_100644 qua,qua,qua,qua,qua,qua,qua,qua,qua,qua 12 134424
+A10_mode_null_100644 qua,qua,qua,qua,qua,qua,do,qua,qua,qua 12 134424
+A10_mode_100755 qua,qua,qua,qua,qua,qua,qua,qua,qua,qua 12 134424
+A10_mode_null_100755 qua,qua,qua,qua,qua,qua,do,qua,qua,qua 12 134424
+A10_mode_120000 qua,qua,qua,qua,qua,qua,qua,qua,qua,qua 12 134424
+A10_mode_null_120000 qua,qua,qua,qua,qua,qua,do,qua,qua,qua 12 134424
+A10_mode_160000 qua,qua,qua,qua,qua,qua,qua,qua,qua,qua 12 134424
+A10_mode_null_160000 qua,qua,qua,qua,qua,qua,do,qua,qua,qua 12 134424
+A10_mode_40000 qua,qua,qua,qua,qua,qua,qua,qua,qua,qua 12 134423
+A10_mode_null_40000 qua,qua,qua,qua,qua,qua,do,qua,qua,qua 12 134423
+A10_absent_None qua,qua,qua,qua,qua,qua,qua,qua,qua,qua 12 134380
+A10_parentblob_None qua,qua,qua,qua,qua,qua,do,qua,qua,qua 11 131736
+A10_absent_a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7 qua,qua,qua,qua,qua,qua,do,qua,qua,qua 12 134380
+A10_parentblob_a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7 qua,qua,qua,qua,qua,qua,do,qua,qua,qua 11 131736
+A11_G7_mode_100644 qua,qua,qua,qua,qua,qua,qua,qua,qua,qua 12 22646
+A11_G7_mode_100755 qua,qua,qua,qua,qua,qua,qua,qua,qua,qua 12 22646
+A11_G7_mode_120000 qua,qua,qua,qua,qua,qua,qua,qua,qua,qua 12 22645
+A11_G7_mode_160000 qua,qua,qua,qua,qua,qua,qua,do,qua,qua 11 22632
+A11_G7_mode_40000 qua,qua,qua,qua,qua,qua,qua,do,qua,qua 11 22631
+A11_missing_G7 qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua 11 22632
+A11_F6_G7 qua,qua,qua,qua,qua,qua,qua,do,qua,qua 11 22632
+A11_absent_G7 qua,qua,qua,qua,qua,qua,qua,do,qua,qua 11 22588
+A11_parent_G7 qua,qua,qua,qua,qua,qua,qua,do,qua,qua 10 19908
+A11_G8_mode_100644 qua,qua,qua,qua,qua,qua,qua,qua,qua,qua 12 120614
+A11_G8_mode_100755 qua,qua,qua,qua,qua,qua,qua,qua,qua,qua 12 120614
+A11_G8_mode_120000 qua,qua,qua,qua,qua,qua,qua,qua,qua,qua 12 120613
+A11_G8_mode_160000 qua,qua,qua,qua,qua,qua,qua,qua,do,qua 11 120600
+A11_G8_mode_40000 qua,qua,qua,qua,qua,qua,qua,qua,do,qua 11 120599
+A11_missing_G8 qua,qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua 11 120600
+A11_F6_G8 qua,qua,qua,qua,qua,qua,qua,qua,do,qua 11 120600
+A11_absent_G8 qua,qua,qua,qua,qua,qua,qua,qua,do,qua 11 120547
+A11_parent_G8 qua,qua,qua,qua,qua,qua,qua,qua,do,qua 10 120295
+A11_sha256 qua,qua,qua,qua,qua,qua,qua,qua,do,qua 12 134396
+A20b_t1_no_nul_G6 qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua,qua 12 131746
+A20b_t1_no_nul_G7 qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua 11 19918
+A20b_t1_no_nul_G8 qua,qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua 11 120305
+A20b_t1_short_oid_G6 qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua,qua 12 131766
+A20b_t1_short_oid_G7 qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua 11 19938
+A20b_t1_short_oid_G8 qua,qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua 11 120325
+A20b_t2_no_sep_G6 qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua,qua 12 131762
+A20b_t2_no_sep_G7 qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua 11 19934
+A20b_t2_no_sep_G8 qua,qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua 11 120321
+A20b_t3_mode_G6 qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua,qua 12 131767
+A20b_t3_mode_G7 qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua 11 19939
+A20b_t3_mode_G8 qua,qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua 11 120326
+A20b_t4_utf8_G6 qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua,qua 12 131764
+A20b_t4_utf8_G7 qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua 11 19936
+A20b_t4_utf8_G8 qua,qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua 11 120323
+A20b_t5_empty_G6 qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua,qua 12 131763
+A20b_t5_empty_G7 qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua 11 19935
+A20b_t5_empty_G8 qua,qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua 11 120322
+A20b_t10_duplicate_G6 qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua,qua 12 131799
+A20b_t10_duplicate_G7 qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua 11 19971
+A20b_t10_duplicate_G8 qua,qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua 11 120358
+A20b_valid_G6 qua,qua,qua,qua,qua,qua,do,qua,qua,qua 12 131767
+A20b_valid_G7 qua,qua,qua,qua,qua,qua,qua,do,qua,qua 11 19939
+A20b_valid_G8 qua,qua,qua,qua,qua,qua,qua,qua,do,qua 11 120326
+A20b_c1_missing qua,qua,qua,khong_do_duoc,khong_do_duoc,qua,qua,qua,qua,qua 13 134283
+A20b_c1_bad qua,qua,qua,khong_do_duoc,khong_do_duoc,qua,qua,qua,qua,qua 13 134239
+A20b_c2_bad qua,qua,qua,khong_do_duoc,khong_do_duoc,qua,qua,qua,qua,qua 13 134335
+A20_wrong_type qua,qua,qua,qua,qua,qua,qua,khong_do_duoc,qua,qua 11 19919
+N6_PREFIX_RAW refs/remotes/origin/probe/child 2961657d7257cb3a69ca92c00639761d6d0d1cd4 EXACT []
+JSON_REAL positive True {'K1': 'qua', 'K2': 'qua', 'K3': 'qua', 'K4': 'qua', 'K5': 'qua'}
+JSON_REAL K1 False {'K1': 'do', 'K2': 'do', 'K3': 'do', 'K4': 'do', 'K5': 'do'}
+JSON_REAL K2 False {'K1': 'qua', 'K2': 'do', 'K3': 'qua', 'K4': 'do', 'K5': 'qua'}
+JSON_REAL K4 False {'K1': 'qua', 'K2': 'qua', 'K3': 'qua', 'K4': 'do', 'K5': 'qua'}
+G0 8388608 qua MUTANT_GE do
+G0 8388609 do MUTANT_GE do
+GUARD_NEGATIVE_AND_BYPASS_KILLED oid
+GUARD_NEGATIVE_AND_BYPASS_KILLED storage
+GUARD_NEGATIVE_AND_BYPASS_KILLED total
+GUARD_NEGATIVE_AND_BYPASS_KILLED object
+GUARD_NEGATIVE_AND_BYPASS_KILLED memo
+STORAGE_local_copy True source_rc 0
+STORAGE_postdelete_still_in_alternate_rc 0
+A12_f_literal_rerun_is_not_invalidate_completed: see main probe
+COVERAGE_RUNS 74

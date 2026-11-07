@@ -1,0 +1,4 @@
+15a2e8f96e1bae9ec17f6a4fd43bc076049d003dac3c66d3d2ba658d502bb657  snapshot-start.json
+15a2e8f96e1bae9ec17f6a4fd43bc076049d003dac3c66d3d2ba658d502bb657  snapshot-end.json
+giong_nhau True dict 5
+Hai tệp snapshot đầy đủ (~1,8 MB mỗi tệp) giữ ở sandbox reviewer, không chép vào kho; băm ở trên.

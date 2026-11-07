@@ -1,0 +1,26 @@
+A4 matrix a: ok=True; baseline_abi=True; byte_stdout=True; remove_sort_keys_changes=True
+A4 matrix b: ok=False; baseline_abi=True; byte_stdout=True; remove_sort_keys_changes=True
+A4 matrix c: ok=False; baseline_abi=True; byte_stdout=True; remove_sort_keys_changes=True
+A4 matrix d: ok=False; baseline_abi=True; byte_stdout=True; remove_sort_keys_changes=True
+A4 matrix e: ok=False; baseline_abi=True; byte_stdout=True; remove_sort_keys_changes=True
+A4 mutant json_only_b: target_pass=False
+A4 mutant allG_only_d: target_pass=False
+A4 mutant bool_to_int: target_pass=False
+A5 projection do: rc=12 ok=False
+A5 projection unknown: rc=13 ok=False
+A5 mixed: correct_rc=12; reversed_priority_rc=13
+A9_G4: correct=False mutant=True target_changes=True
+A9_G5: correct=False mutant=True target_changes=True
+A11 symlink: entry=203e9c185dec2f21482a7f1138284d2bcf531bab; target=f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1; reject_mode flips=True; follow_symlink flips=True
+A11 gitlink matching entry: G7=do, mutant_G6=qua; accepted_missing_blob: G7=khong_do_duoc, skip_read=qua; wrong_sha256: G8=do, skip_sha256=qua
+A13 max_object_bytes: commit_sizes=[260, 212, 212, 213]; limit=211; guarded=khong_do_duoc; removed_guard=qua
+A13 per_walk witness (H extended): correct=['qua', 'qua', 'khong_do_duoc']; shared_counter=['qua', 'khong_do_duoc', 'khong_do_duoc']; changed=True
+A13 memo: repeated_object_bytes=213; correct_total=213; mutant_total=426
+A13 G0 boundary 8388608: correct=qua, mutant_>= =do; limit_exceeded: correct=khong_do_duoc, mutant=do
+A20 E_vang: correct=['khong_do_duoc', 'qua']; event_as_do=['do', 'qua']; spread=['khong_do_duoc', 'khong_do_duoc']; target_changes=True
+A20 E_bam_lech: correct=['khong_do_duoc', 'qua']; event_as_do=['do', 'qua']; spread=['khong_do_duoc', 'khong_do_duoc']; target_changes=True
+A20 E_kieu_sai: correct=['khong_do_duoc', 'qua']; event_as_do=['do', 'qua']; spread=['khong_do_duoc', 'khong_do_duoc']; target_changes=True
+A20 E_hong: correct=['khong_do_duoc', 'qua']; event_as_do=['do', 'qua']; spread=['khong_do_duoc', 'khong_do_duoc']; target_changes=True
+A20 E_ngan_sach: correct=['khong_do_duoc', 'qua']; event_as_do=['do', 'qua']; spread=['khong_do_duoc', 'khong_do_duoc']; target_changes=True
+A20 E_git_chet: correct=['khong_do_duoc', 'qua']; event_as_do=['do', 'qua']; spread=['khong_do_duoc', 'khong_do_duoc']; target_changes=True
+A20 E_troi_ref: correct=['khong_do_duoc', 'qua']; event_as_do=['do', 'qua']; spread=['khong_do_duoc', 'khong_do_duoc']; target_changes=True

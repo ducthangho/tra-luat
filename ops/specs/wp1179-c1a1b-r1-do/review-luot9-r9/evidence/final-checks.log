@@ -1,0 +1,15 @@
+$ /usr/local/bin/python -B .claude/dev/doc_receipt_thu_hoi_test.py RC 0
+nghia vu: witness_killed 162 · equivalent_verified 9 · unresolved 0
+doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET
+
+$ /usr/local/bin/python -B .claude/dev/doc_receipt_thu_hoi_test.py RC 0
+nghia vu: witness_killed 162 · equivalent_verified 9 · unresolved 0
+doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET
+
+$ git --no-optional-locks diff --name-only 889334fb87c25136a13c6776a40a25b401820e04 3408591b7b318578a17c9b1ba00c1b87cee4f688 -- .claude/dev/doc_receipt_thu_hoi.py .claude/dev/doc_receipt_thu_hoi_test.py .claude/dev/ci_dang_ky_test.py ops/lease_publish.py .github/workflows/ops-thu-hoi-admission.yml .github/workflows/ci.yml .claude/dev/packet_loop.py .claude/dev/launcher.py docs/PROTOCOL_DA_PHIEN.md docs/adr CLAUDE.md AGENTS.md RC 0
+
+$ git merge-base --is-ancestor origin/master 3408591b7b318578a17c9b1ba00c1b87cee4f688 RC 0
+
+origin/master is ancestor of reviewed head; no dependency drift from frozen base
+A20b t2 safe no-separator sample: original / remove t2 / remove t2+t3+t5 = ['E_hong', 'E_hong', 'accepted']
+Proof across domain: no separator implies partition name is empty; retained t5 rejects. If mode is invalid retained t3 also rejects. No traversal payload constructed.

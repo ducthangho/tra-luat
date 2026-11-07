@@ -1,0 +1,78 @@
+{
+  "states": {
+    "G0": "qua",
+    "G1": "khong_do_duoc",
+    "G2": "khong_do_duoc",
+    "G3": "khong_do_duoc",
+    "G4": "khong_do_duoc",
+    "G5": "khong_do_duoc",
+    "G6": "khong_do_duoc",
+    "G7": "khong_do_duoc",
+    "G8": "khong_do_duoc",
+    "G9": "qua"
+  },
+  "trace": {
+    "G1": [
+      [
+        "commit",
+        "998abba497d6fecef0cca788b0b75f020e05987f"
+      ]
+    ],
+    "G2": [
+      [
+        "commit",
+        "ec7f2abdb343c82b96a7952c40acce441e3167bc"
+      ]
+    ],
+    "G3": [
+      [
+        "commit",
+        "803c57d6b50bc299f72974c43a3b0fc0df1de5b8"
+      ]
+    ],
+    "G4": [
+      [
+        "commit",
+        "803c57d6b50bc299f72974c43a3b0fc0df1de5b8"
+      ]
+    ],
+    "G5": [
+      [
+        "commit",
+        "c51a8fa68b4adfcc91564a1782c5ebe7b9be11af"
+      ]
+    ],
+    "G6": [
+      [
+        "commit",
+        "c51a8fa68b4adfcc91564a1782c5ebe7b9be11af"
+      ]
+    ],
+    "G7": [
+      [
+        "commit",
+        "ec7f2abdb343c82b96a7952c40acce441e3167bc"
+      ]
+    ],
+    "G8": [
+      [
+        "commit",
+        "ec7f2abdb343c82b96a7952c40acce441e3167bc"
+      ]
+    ]
+  },
+  "why": {
+    "G1": "E_git_chet",
+    "G2": "E_git_chet",
+    "G3": "E_git_chet",
+    "G4": "E_git_chet",
+    "G5": "E_git_chet",
+    "G6": "E_git_chet",
+    "G7": "E_git_chet",
+    "G8": "E_git_chet"
+  },
+  "total": 0,
+  "physical": [],
+  "stderr": "",
+  "reader_rc": -9
+}

@@ -1,0 +1,23 @@
+F6 G7 event=E_vang oid_equal=False: result=do leaf_reads=0 observed=None; cat-file rc=0
+F6 mutant read-before-OID: G7 E_vang: do -> khong_do_duoc; target changes=True
+F6 G7 event=E_vang oid_equal=True: result=khong_do_duoc leaf_reads=1 observed=E_vang; cat-file rc=0
+F6 G7 event=E_bam_lech oid_equal=False: result=do leaf_reads=0 observed=None; cat-file rc=0
+F6 mutant read-before-OID: G7 E_bam_lech: do -> khong_do_duoc; target changes=True
+F6 G7 event=E_bam_lech oid_equal=True: result=khong_do_duoc leaf_reads=1 observed=E_bam_lech; cat-file rc=0
+F6 G7 event=E_kieu_sai oid_equal=False: result=do leaf_reads=0 observed=None; cat-file rc=0
+F6 mutant read-before-OID: G7 E_kieu_sai: do -> khong_do_duoc; target changes=True
+F6 G7 event=E_kieu_sai oid_equal=True: result=khong_do_duoc leaf_reads=1 observed=E_kieu_sai; cat-file rc=0
+F6 G8 event=E_vang oid_equal=False: result=do leaf_reads=0 observed=None; cat-file rc=0
+F6 mutant read-before-OID: G8 E_vang: do -> khong_do_duoc; target changes=True
+F6 G8 event=E_vang oid_equal=True: result=khong_do_duoc leaf_reads=1 observed=E_vang; cat-file rc=0
+F6 G8 event=E_bam_lech oid_equal=False: result=do leaf_reads=0 observed=None; cat-file rc=0
+F6 mutant read-before-OID: G8 E_bam_lech: do -> khong_do_duoc; target changes=True
+F6 G8 event=E_bam_lech oid_equal=True: result=khong_do_duoc leaf_reads=1 observed=E_bam_lech; cat-file rc=0
+F6 G8 event=E_kieu_sai oid_equal=False: result=do leaf_reads=0 observed=None; cat-file rc=0
+F6 mutant read-before-OID: G8 E_kieu_sai: do -> khong_do_duoc; target changes=True
+F6 G8 event=E_kieu_sai oid_equal=True: result=khong_do_duoc leaf_reads=1 observed=E_kieu_sai; cat-file rc=0
+F8 K1: bytes=2 json_null=False G0=qua G1..9=khong_chay ok=False rc=12; mutant G0=khong_chay violates=True
+F8 K2: bytes=1856 json_null=False G0=qua G1..9=khong_chay ok=False rc=12; mutant G0=khong_chay violates=True
+F8 K4: bytes=1856 json_null=False G0=qua G1..9=qua ok=False rc=12; mutant G0=khong_chay violates=False
+F8 G0: bytes=8388609 json_null=True G0=do G1..9=khong_chay ok=False rc=12; mutant G0=khong_chay violates=False
+A7 root without MOC=('do', 675); missing intermediate=('khong_do_duoc', 1); both declared mutations change target

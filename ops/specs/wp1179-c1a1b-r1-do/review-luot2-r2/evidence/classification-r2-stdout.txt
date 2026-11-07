@@ -1,0 +1,7 @@
+A7(i): verified_commits=675 MOC_on_chain=False status=do; git rc=0
+A7(ii): verified_prefix=1 missing=3d8edc1427a1e45a2a41bb04b27cbfc5aa83e86e status=khong_do_duoc; cat-file rc=0
+A7 mutants: r1 root=>unknown changes (i) do->khong_do_duoc; missing=>root changes (ii) khong_do_duoc->do; both distinguished
+G7: C=a4e2c67ce281af83dad46da51cded96111528b6f; path=ops/lease_publish.py; entry_mode=100644; tree_hashes_verified=True; entry=1234567890abcdef1234567890abcdef12345678; receipt_oid=f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1; batch_header=b'1234567890abcdef1234567890abcdef12345678 missing'; §2.3(read accepted leaf + E priority)=khong_do_duoc; §2.4(OID different)=do; isolated rc=13 vs 12
+G8: C=a57e4a644628747ccf075de0b7acfc4e067cd09c; path=.github/workflows/ops-thu-hoi-admission.yml; entry_mode=100644; tree_hashes_verified=True; entry=1234567890abcdef1234567890abcdef12345678; receipt_oid=f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1; batch_header=b'1234567890abcdef1234567890abcdef12345678 missing'; §2.3(read accepted leaf + E priority)=khong_do_duoc; §2.4(OID different)=do; isolated rc=13 vs 12
+A6 residual: raw={} bytes=2; K1=do; §2.2 G0=qua, G1..G9=khong_chay; A6 says every G=khong_chay
+A6 K2: bytes=1856 K1=qua K2=do; §2.2 G0=qua; A6 G0=khong_chay

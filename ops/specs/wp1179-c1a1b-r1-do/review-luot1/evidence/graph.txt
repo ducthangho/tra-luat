@@ -1,0 +1,205 @@
+$ ['git', 'rev-parse', '601a0f18c83057fa079d204122660f5697fc6389^1'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'541fa6ca9ba78d2669261b528572dbc05b53ea87\n'
+b''
+$ ['git', 'hash-object', '-w', '--stdin'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1\n'
+b''
+$ ['git', 'hash-object', '-w', '--stdin'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'3c9c7e4863118c4ace0ab6422c5dab9d0a498847\n'
+b''
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'3184b684214767590025b0e9b610e2f172dffac3\n'
+b''
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'13c233777a00fbe62092f58d62dfa9095df5620f\n'
+b''
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'29b2d74ca2bd33e51be4074bca06e28a25c3fb00\n'
+b''
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'38825864c1c51a35a1db0099f78966bc80164aef\n'
+b''
+$ ['git', 'hash-object', '-w', '--stdin'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'564b12f45becba5fb2f70e270af067c1f13b3aab\n'
+b''
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'1dfdae4ae3239d4187b4d9790bb0e2c728f21850\n'
+b''
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'4b825dc642cb6eb9a060e54bf8d69288fbee4904\n'
+b''
+$ ['git', 'commit-tree', '38825864c1c51a35a1db0099f78966bc80164aef', '-p', '601a0f18c83057fa079d204122660f5697fc6389'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'492be1a675e274664dda110609e20f908bbc99e2\n'
+b''
+$ ['git', 'commit-tree', '38825864c1c51a35a1db0099f78966bc80164aef', '-p', '492be1a675e274664dda110609e20f908bbc99e2'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'14a341ac6cbceb45153e1deb4aa48ce95f750f6d\n'
+b''
+$ ['git', 'commit-tree', '38825864c1c51a35a1db0099f78966bc80164aef', '-p', '492be1a675e274664dda110609e20f908bbc99e2'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'b190ca7d88863d7ca64ce26510e14b60998d3fe9\n'
+b''
+$ ['git', 'commit-tree', '38825864c1c51a35a1db0099f78966bc80164aef', '-p', '14a341ac6cbceb45153e1deb4aa48ce95f750f6d', '-p', 'b190ca7d88863d7ca64ce26510e14b60998d3fe9'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'3ce11253365cfc344977a912fa00e374e975e396\n'
+b''
+$ ['git', 'commit-tree', '1dfdae4ae3239d4187b4d9790bb0e2c728f21850', '-p', '492be1a675e274664dda110609e20f908bbc99e2'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'3bcc3982e5846c7ba616c80e66d570bcddd168bc\n'
+b''
+$ ['git', 'commit-tree', '38825864c1c51a35a1db0099f78966bc80164aef', '-p', '601a0f18c83057fa079d204122660f5697fc6389'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'c3f552fd5b9a54da08f669fa22900ecb1b6959dc\n'
+b''
+$ ['git', 'update-ref', 'refs/remotes/origin/master', '3ce11253365cfc344977a912fa00e374e975e396'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b''
+b''
+GRAPH {"MOC": "601a0f18c83057fa079d204122660f5697fc6389", "P": "541fa6ca9ba78d2669261b528572dbc05b53ea87", "A": "492be1a675e274664dda110609e20f908bbc99e2", "B": "14a341ac6cbceb45153e1deb4aa48ce95f750f6d", "E": "b190ca7d88863d7ca64ce26510e14b60998d3fe9", "D": "3ce11253365cfc344977a912fa00e374e975e396", "H": "3bcc3982e5846c7ba616c80e66d570bcddd168bc", "X": "c3f552fd5b9a54da08f669fa22900ecb1b6959dc", "tree_S": "38825864c1c51a35a1db0099f78966bc80164aef", "tree_H": "1dfdae4ae3239d4187b4d9790bb0e2c728f21850", "other": "4b825dc642cb6eb9a060e54bf8d69288fbee4904", "checker": "f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1", "workflow": "3c9c7e4863118c4ace0ab6422c5dab9d0a498847"}
+$ ['git', 'merge-base', '--is-ancestor', '492be1a675e274664dda110609e20f908bbc99e2', '14a341ac6cbceb45153e1deb4aa48ce95f750f6d'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b''
+b''
+ancestry 492be1a -> 14a341a rc=0
+$ ['git', 'merge-base', '--is-ancestor', '14a341ac6cbceb45153e1deb4aa48ce95f750f6d', '492be1a675e274664dda110609e20f908bbc99e2'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=1
+b''
+b''
+ancestry 14a341a -> 492be1a rc=1
+$ ['git', 'merge-base', '--is-ancestor', '492be1a675e274664dda110609e20f908bbc99e2', 'c3f552fd5b9a54da08f669fa22900ecb1b6959dc'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=1
+b''
+b''
+ancestry 492be1a -> c3f552f rc=1
+$ ['git', 'merge-base', '--is-ancestor', '14a341ac6cbceb45153e1deb4aa48ce95f750f6d', '14a341ac6cbceb45153e1deb4aa48ce95f750f6d'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b''
+b''
+ancestry 14a341a -> 14a341a rc=0
+A9 A9 stated negative: T=other: correct=do, mutant_compare_S=do, target_changes=False
+A9 additional negative: T=tree(S): correct=do, mutant_compare_S=qua, target_changes=True
+A9 positive: correct=qua, mutant_compare_S=do, target_changes=True
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'4b825dc642cb6eb9a060e54bf8d69288fbee4904\n'
+b''
+$ ['git', 'hash-object', '-w', '--stdin'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'203e9c185dec2f21482a7f1138284d2bcf531bab\n'
+b''
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'29b2d74ca2bd33e51be4074bca06e28a25c3fb00\n'
+b''
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'28c3a78f1e31a12379f272e06bcdd9ed776261e3\n'
+b''
+G6 producer mode=100644 result=('100644', 'f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1', 'blob') reads=2 bytes=74
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'5744ca3c5ec01699b53187bd8e6697e8d909eac8\n'
+b''
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'5fabab4538ecac91baa09ec87d7017ffd6552d43\n'
+b''
+G6 producer mode=100755 result=('100755', 'f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1', 'blob') reads=2 bytes=74
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'b9fc4a2ecc7a7f84b755c5fd52d68101b902a53b\n'
+b''
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'5d73566986992778ad5931e827336092efcda9d7\n'
+b''
+G6 producer mode=120000 result=('120000', '203e9c185dec2f21482a7f1138284d2bcf531bab', 'blob') reads=2 bytes=74
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'cb1a328d05305de887ee8a17f5e55a4d5b6303e5\n'
+b''
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'0e180e7bc9baa136a38ce5f585cf6005664e3a3e\n'
+b''
+G6 producer mode=160000 result=('160000', '1234567890abcdef1234567890abcdef12345678', 'commit') reads=2 bytes=74
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'e0675498caf4ae484a52405836c48bdf26465124\n'
+b''
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'3d7e485b1714b9d0baefb22f1a6fe602cf94acf3\n'
+b''
+G6 producer mode=40000 result=('040000', '4b825dc642cb6eb9a060e54bf8d69288fbee4904', 'tree') reads=2 bytes=73
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'2282edca7d09dc380f33b854891bba12af1d7ddf\n'
+b''
+G6 producer absent: None
+G6 producer ancestor_blob: Chan KHÔNG_XÁC_ĐỊNH: tổ tiên của ops/lease_publish.py không phải thư mục (mode 100644 blob) — không suy vắng
+$ ['git', 'update-ref', 'refs/replace/14a341ac6cbceb45153e1deb4aa48ce95f750f6d', 'c3f552fd5b9a54da08f669fa22900ecb1b6959dc'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b''
+b''
+A12 replace_enabled rc=0 header_oid=14a341ac6cbceb45153e1deb4aa48ce95f750f6d rehash_matches=False
+A12 replace_disabled rc=0 header_oid=14a341ac6cbceb45153e1deb4aa48ce95f750f6d rehash_matches=True
+$ ['git', 'update-ref', '-d', 'refs/replace/14a341ac6cbceb45153e1deb4aa48ce95f750f6d'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b''
+b''
+$ ['git', 'hash-object', '-w', '--stdin'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'203e9c185dec2f21482a7f1138284d2bcf531bab\n'
+b''
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'8bc8b1957370c150a6d7ad8749e94b7a8b0f7d02\n'
+b''
+$ ['git', 'mktree', '--missing'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'0e7c0ebb04c49e92f17e4a2c9d33a71e2ca37609\n'
+b''
+$ ['git', 'commit-tree', '0e7c0ebb04c49e92f17e4a2c9d33a71e2ca37609', '-p', '14a341ac6cbceb45153e1deb4aa48ce95f750f6d'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'fcaf02680495a7083a3e0f160d8b1afc2eb84399\n'
+b''
+$ ['git', 'checkout', '--detach', 'fcaf02680495a7083a3e0f160d8b1afc2eb84399'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b''
+b'HEAD is now at fcaf02680 C symlink checker\n'
+$ ['git', 'update-ref', 'refs/remotes/origin/master', 'fcaf02680495a7083a3e0f160d8b1afc2eb84399'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b''
+b''
+$ ['/usr/local/bin/python', '-B', 'ops/lease_publish.py', 'kiem-thu-hoi-github', '3bcc3982e5846c7ba616c80e66d570bcddd168bc', '--canonical-base', '492be1a675e274664dda110609e20f908bbc99e2', '--nhanh-mac-dinh', 'master', '--receipt', '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/evidence/symlink-receipt.json'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'THU_HOI_ADMISSION TAP_THU_HOI_RONG: S=492be1a675e2 H=3bcc3982e584 T=1dfdae4ae323 ancestry=1 c\xe1\xba\xa1nh; s\xe1\xbb\x95 S=0 T=0 entry; object \xc4\x91\xc3\xa3 b\xc4\x83m=6\n'
+b''
+G7 symlink actual producer rc=0 stdout=THU_HOI_ADMISSION TAP_THU_HOI_RONG: S=492be1a675e2 H=3bcc3982e584 T=1dfdae4ae323 ancestry=1 cạnh; sổ S=0 T=0 entry; object đã băm=6
+$ ['git', 'rev-parse', 'fcaf02680495a7083a3e0f160d8b1afc2eb84399:ops/lease_publish.py'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'203e9c185dec2f21482a7f1138284d2bcf531bab\n'
+b''
+G7 workflow rev-parse reported=203e9c185dec2f21482a7f1138284d2bcf531bab, symlink_blob=203e9c185dec2f21482a7f1138284d2bcf531bab, regular_modes_predicate=False
+$ ['git', 'rev-parse', 'fcaf02680495a7083a3e0f160d8b1afc2eb84399:.github/workflows/ops-thu-hoi-admission.yml'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'3c9c7e4863118c4ace0ab6422c5dab9d0a498847\n'
+b''
+$ ['git', 'cat-file', 'blob', '3c9c7e4863118c4ace0ab6422c5dab9d0a498847'] cwd=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/sandbox/graph
+rc=0
+b'name: thu-hoi\n\n# C\xe1\xbb\x94NG TI\xe1\xba\xbeP NH\xe1\xba\xacN S\xe1\xbb\x94 THU H\xe1\xbb\x92I LEASE (spec `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` r9 \xc2\xa7M9; ADR-0047).\n# TR\xe1\xba\xa0NG TH\xc3\x81I: C\xc3\x80I \xe1\xbb\x9f slice A0, CH\xc6\xafA K\xc3\x8dCH HO\xe1\xba\xa0T \xe2\x80\x94 `SO_THU_HOI_KICH_HOAT = False` trong\n# `ops/lease_publish.py`, n\xc3\xaan b\xe1\xbb\x99 ki\xe1\xbb\x83m ch\xe1\xbb\x89 ch\xe1\xbb\xa9ng minh t\xe1\xba\xadp revocation R\xe1\xbb\x96NG \xe1\xbb\x9f c\xe1\xba\xa3 S l\xe1\xba\xabn T v\xc3\xa0\n# ghi receipt; ch\xc6\xb0a l\xc3\xa0 required check, ch\xc6\xb0a c\xc3\xb3 consumer \xc4\x91\xe1\xbb\x8dc receipt (dependency\n# LAND-DOC-RECEIPT-THU-HOI). Nghi\xe1\xbb\x87m thu + b\xe1\xba\xadt l\xc3\xa0 slice A1, quy\xe1\xba\xbft \xc4\x91\xe1\xbb\x8bnh c\xe1\xbb\xa7a ch\xe1\xbb\xa7 kho.\n#\n# V\xc3\x8c SAO `pull_request_target` m\xc3\xa0 KH\xc3\x94NG ch\xe1\xba\xa1y code \xe1\xbb\xa9ng vi\xc3\xaan: c\xe1\xbb\x95ng ph\xe1\xba\xa3i ch\xe1\xba\xa1y M\xc3\x83 CANONICAL \xe2\x80\x94 b\xe1\xbb\x99 ki\xe1\xbb\x83m\n# l\xe1\xba\xa5y t\xe1\xbb\xab c\xc3\xa2y C = `workflow_sha` (packet #618; tr\xc6\xb0\xe1\xbb\x9bc \xc4\x91\xc3\xb3 l\xc3\xa0 base.sha) \xe2\x80\x94 tr\xc3\xaan \xc4\x91\xc3\xbang head \xe1\xbb\xa9ng vi\xc3\xaan (H)\n# \xc4\x91\xc3\xa3 \xc4\x91\xc6\xb0\xe1\xbb\xa3c fetch v\xc3\xa0o object-store; c\xc3\xa2y c\xe1\xbb\xa7a H ch\xe1\xbb\x89\n# \xc4\x91\xc6\xb0\xe1\xbb\xa3c \xc4\x90\xe1\xbb\x8cC qua object-store, kh\xc3\xb4ng checkout, kh\xc3\xb4ng hook, kh\xc3\xb4ng action n\xc3\xa0o c\xe1\xbb\xa7a c\xc3\xa2y \xe1\xbb\xa9ng vi\xc3\xaan ch\xe1\xba\xa1y.\n# `ops-publish-lease.yml` t\xe1\xbb\xabng \xc4\x83n P1 v\xc3\xac b\xe1\xbb\x99 ki\xe1\xbb\x83m n\xe1\xba\xb1m c\xc3\xb9ng nh\xc3\xa1nh v\xe1\xbb\x9bi th\xe1\xbb\xa9 n\xc3\xb3 ki\xe1\xbb\x83m (PR #104).\n# `pull_request_target` l\xc3\xa0 c\xc3\xa1ch duy nh\xe1\xba\xa5t c\xc3\xb3 token \xc4\x91\xe1\xbb\x8dc + \xc4\x91\xe1\xbb\x8bnh ngh\xc4\xa9a workflow t\xe1\xbb\xab base; token \xe1\xbb\x9f \xc4\x91\xc3\xa2y\n# CH\xe1\xbb\x88 \xc4\x90\xe1\xbb\x8cC (`contents: read`, `pull-requests: read`) \xe2\x80\x94 job n\xc3\xa0y kh\xc3\xb4ng ghi Issue/PR/kho.\n#\n# B\xe1\xbb\x90N m\xe1\xbb\x8f neo \xc4\x90O, kh\xc3\xb4ng tin l\xe1\xbb\x9di khai c\xe1\xbb\xa7a event (packet #618 t\xc3\xa1ch S kh\xe1\xbb\x8fi C \xe2\x80\x94 tr\xc6\xb0\xe1\xbb\x9bc \xc4\x91\xc3\xb3 hai m\xe1\xbb\x91c l\xc3\xa0 m\xe1\xbb\x99t):\n#   C \xe2\x80\x94 c\xc3\xa2y ch\xe1\xba\xa1y = CH\xc3\x8dNH commit \xc4\x91\xe1\xbb\x8bnh ngh\xc4\xa9a: `git rev-parse HEAD` ph\xe1\xba\xa3i b\xe1\xba\xb1ng `github.workflow_sha`, v\xc3\xa0\n#       `workflow_ref` ph\xe1\xba\xa3i tr\xe1\xbb\x8f `refs/heads/<nh\xc3\xa1nh m\xe1\xba\xb7c \xc4\x91\xe1\xbb\x8bnh>` (finding F07 cross-review A0: checkout \xc4\x91\xc3\xbang\n#       m\xe1\xbb\x99t commit kh\xc3\xb4ng t\xe1\xbb\xb1 ch\xe1\xbb\xa9ng minh t\xe1\xbb\x87p workflow \xc4\x91\xc6\xb0\xe1\xbb\xa3c l\xe1\xba\xa5y t\xe1\xbb\xab commit \xe1\xba\xa5y \xe2\x80\x94 n\xc3\xaan \xc4\x91o c\xe1\xba\xa3 hai).\n#   S \xe2\x80\x94 `base.sha` c\xe1\xbb\xa7a event: m\xe1\xbb\x91c SO S\xe1\xbb\x94 revocation (`--canonical-base`), KH\xc3\x94NG c\xc3\xb2n l\xc3\xa0 m\xe1\xbb\x91c checkout.\n#       Ch\xe1\xbb\x91ng l\xc3\xb9i: S ph\xe1\xba\xa3i l\xc3\xa0 t\xe1\xbb\x95 ti\xc3\xaan c\xe1\xbb\xa7a C. B\xe1\xbb\x99 ki\xe1\xbb\x83m c\xc3\xb2n \xc4\x91\xc3\xb2i S l\xc3\xa0 t\xe1\xbb\x95 ti\xc3\xaan c\xe1\xbb\xa7a H \xe2\x80\x94 \xc4\x91\xc3\xb3 l\xc3\xa0 thi\xe1\xba\xbft k\xe1\xba\xbf\n#       fail-close gi\xe1\xbb\xaf nguy\xc3\xaan theo quy\xe1\xba\xbft \xc4\x91\xe1\xbb\x8bnh ch\xe1\xbb\xa7 kho cho #618 (\xc4\x91\xc6\xb0\xe1\xbb\x9dng (a)), kh\xc3\xb4ng ph\xe1\xba\xa3i d\xc6\xb0\xc6\xa1ng t\xc3\xadnh gi\xe1\xba\xa3.\n#   H \xe2\x80\x94 fetch `refs/pull/<n>/head` t\xe1\xbb\xab endpoint canonical t\xc6\xb0\xe1\xbb\x9dng minh; OID nh\xe1\xba\xadn \xc4\x91\xc6\xb0\xe1\xbb\xa3c ph\xe1\xba\xa3i b\xe1\xba\xb1ng `head.sha`.\n#   T \xe2\x80\x94 tree(H) do b\xe1\xbb\x99 ki\xe1\xbb\x83m t\xe1\xbb\xb1 l\xe1\xba\xa5y t\xe1\xbb\xab bytes \xc4\x91\xc3\xa3 b\xc4\x83m.\n# V\xc3\xac sao g\xe1\xbb\xa1 `workflow_sha == base.sha`: v\xe1\xbb\x9bi `pull_request_target`, GitHub n\xe1\xba\xa1p \xc4\x91\xe1\xbb\x8bnh ngh\xc4\xa9a t\xe1\xbb\xab HEAD nh\xc3\xa1nh\n# M\xe1\xba\xb6C \xc4\x90\xe1\xbb\x8aNH l\xc3\xbac ch\xe1\xba\xa1y (k\xe1\xbb\x83 c\xe1\xba\xa3 khi PR nh\xe1\xba\xafm base kh\xc3\xa1c; lane n\xc3\xa0y ch\xe1\xbb\x89 nh\xe1\xba\xadn base master), n\xc3\xaan hai gi\xc3\xa1 tr\xe1\xbb\x8b ch\xe1\xbb\x89 b\xe1\xba\xb1ng nhau khi nh\xc3\xa1nh m\xe1\xba\xb7c \xc4\x91\xe1\xbb\x8bnh ch\xc6\xb0a ti\xe1\xba\xbfn \xe2\x80\x94 ch\xe1\xbb\x91t \xe1\xba\xa5y ch\xe1\xba\xb7n vi\xe1\xbb\x87c \xc4\x90\xc3\x9aNG.\n# KH\xc3\x94NG `workflow_dispatch` (h\xe1\xbb\xa3p \xc4\x91\xe1\xbb\x93ng R5/S5: consumer t\xe1\xbb\xab ch\xe1\xbb\x91i m\xe1\xbb\x8di event kh\xc3\xa1c k\xe1\xbb\x83 c\xe1\xba\xa3 c\xc3\xb9ng t\xc3\xaan).\n# Kh\xc3\xb4ng l\xe1\xbb\x8dc `paths:` \xe2\x80\x94 m\xe1\xbb\x8di PR v\xc3\xa0o nh\xc3\xa1nh m\xe1\xba\xb7c \xc4\x91\xe1\xbb\x8bnh \xc4\x91\xe1\xbb\x81u qua admission (A11: docs/bot/rc9/standalone).\n\non:\n  pull_request_target:\n    types: [opened, reopened, synchronize, ready_for_review, edited]\n    branches: [master]\n\npermissions:\n  contents: read\n  pull-requests: read\n  actions: read      # \xc4\x91\xe1\xbb\x8dc jobs c\xe1\xbb\xa7a ch\xc3\xadnh run n\xc3\xa0y \xc4\x91\xe1\xbb\x83 l\xe1\xba\xa5y check_run_url (kh\xc3\xb4ng ghi g\xc3\xac)\n\nconcurrency:\n  group: thu-hoi-${{ github.event.pull_request.number }}\n  cancel-in-progress: false   # receipt c\xe1\xbb\xa7a attempt tr\xc6\xb0\xe1\xbb\x9bc kh\xc3\xb4ng b\xe1\xbb\x8b hu\xe1\xbb\xb7 gi\xe1\xbb\xafa ch\xe1\xbb\xabng\n\njobs:\n  thu-hoi:\n    runs-on: ubuntu-latest\n    permissions:\n      contents: read\n      pull-requests: read\n      actions: read\n    steps:\n      # packet #618: m\xe1\xbb\x91c checkout l\xc3\xa0 `workflow_sha`, KH\xc3\x94NG ph\xe1\xba\xa3i `base.sha`. L\xc3\xbd do \xe1\xbb\x9f kh\xe1\xbb\x91i ch\xc3\xba th\xc3\xadch\n      # "B\xe1\xbb\x90N M\xe1\xbb\x8e NEO \xc4\x90O" ph\xc3\xada tr\xc3\xaan. V\xe1\xba\xabn kh\xc3\xb4ng bao gi\xe1\xbb\x9d l\xc3\xa0 head PR: v\xe1\xbb\x9bi `pull_request_target`, GitHub\n      # n\xe1\xba\xa1p \xc4\x91\xe1\xbb\x8bnh ngh\xc4\xa9a t\xe1\xbb\xab nh\xc3\xa1nh M\xe1\xba\xb6C \xc4\x90\xe1\xbb\x8aNH, n\xc3\xaan `workflow_sha` lu\xc3\xb4n l\xc3\xa0 m\xe1\xbb\x99t commit c\xe1\xbb\xa7a nh\xc3\xa1nh \xe1\xba\xa5y.\n      - name: l\xe1\xba\xa5y M\xc3\x83 CANONICAL t\xe1\xba\xa1i workflow_sha \xe2\x80\x94 kh\xc3\xb4ng bao gi\xe1\xbb\x9d head PR\n        uses: actions/checkout@v4\n        with:\n          ref: ${{ github.workflow_sha }}\n          fetch-depth: 0\n          persist-credentials: false'
+b''
+G7 completed offline receipt JSON={"ok": true, "luat": {"K1": "qua", "K2": "qua", "K3": "qua", "K4": "qua", "K5": "qua"}, "ly_do": []}
+No GitHub run/API provenance asserted; local producer and local workflow commands only.

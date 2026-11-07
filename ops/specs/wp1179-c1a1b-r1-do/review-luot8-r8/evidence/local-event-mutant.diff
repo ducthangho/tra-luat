@@ -1,0 +1,41 @@
+--- graph_probe.py
++++ local_event_mutant.py
+@@ -95,7 +95,10 @@
+         if self.p.poll() is None:self.p.kill()
+         self.p.wait()
+         for s in (self.p.stdin,self.p.stdout,self.p.stderr):s.close()
+-    def die(self):
++    def die(self,external=False):
++        if self.mut=="local_event":
++            if external:self.stop()
++            return
+         self.stop();self.dead=True
+         if self.mut=='clear_memo':self.memo.clear()
+         if self.mut=='restart':self.start();self.dead=False
+@@ -107,7 +110,10 @@
+             else:raise Event('E_reader_chet')
+         if self.exhausted:raise Event('E_ngan_sach_total')
+         if key in self.failures and self.mut=='first_only':return self.failures[key]
+-        self.p.stdin.write((o+'\n').encode());self.p.stdin.flush();header=self.p.stdout.readline().split()
++        try:
++            self.p.stdin.write((o+'\n').encode());self.p.stdin.flush();header=self.p.stdout.readline().split()
++        except (OSError,ValueError):
++            raise Event('E_reader_chet')
+         if len(header)==2 and header[1]==b'missing':
+             if self.mut=='error_empty':self.memo[key]=b''
+             if self.mut=='first_only':self.failures[key]=self.target[1]
+@@ -203,12 +209,12 @@
+         except Event as e:
+             errors[str(g)]=str(e);return 'do' if mut=='budget_red' and str(e).startswith('E_ngan_sach') else 'khong_do_duoc'
+     try:
+-        if kill_after==0:r.die()
++        if kill_after==0:r.die(external=True)
+         for g in range(1,10):
+             if mut=='reset_total':r.total=0;r.exhausted=False
+             states[g]=one(g);memo_at[str(g)]=sorted(r.memo)
+             if g==kill_after:
+-                r.die()
++                r.die(external=True)
+                 if mut=='reevaluate':
+                     for prev in range(1,g+1):states[prev]=one(prev)
+                 if mut=='invalidate_done':states[1:g+1]=['khong_do_duoc']*g

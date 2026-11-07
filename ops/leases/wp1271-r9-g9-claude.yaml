@@ -83,3 +83,6 @@ nang_tran:
     and mandatedPR/canonicalCIlogdigests, nohistoryreset
   tran_cu: same3files/900additions,attempts7,calls12,rounds4
   tran_moi: same3files/950additions,attempts8,calls16,rounds5
+da_bi_thay_the: wp1271-r10-g10-claude
+superseded_reason: g9terminalH7; nativepreflightconfirmsdisclosedlocalegap beforefreshreview5;
+  r10additionalcheckpoint, no reviewroundreset

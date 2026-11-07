@@ -1,0 +1,30 @@
+{
+  "state": "merged_canonical_ci_pending",
+  "landed": false,
+  "recorded_at": "2026-11-07T23:27:52.235063+00:00",
+  "merge_commit": "efebadf83409a81e42e6c97f1b7255ede76110f5",
+  "canonical_run": 42424728996,
+  "source_files": {
+    "pr1276-merge-tool-result.json": "e491ff90d963c799813f64d4cad64c489a9bd61061e50ec2f2981cbd75e74301",
+    "pr1276-merged-api-readback.json": "ee40442938a36094c33ac349f11b233024a0b1c63ed5dfdf4d317587f5909b57",
+    "pr1276-merge-identity.json": "51f07589d87fd820b34a55129a7ee44bcc9dfc8223bdb23d544c288929d771d9",
+    "pr1276-merge-preconditions-final.json": "adb25b1e59f95029105be02e27b7654ac7a9a7e9302390ef2a3912d42cbc56db",
+    "pr1276-K0-K7-before-merge.json": "1ae662fd790908849888ebd70bbefc31214c46887df3cb07439db549db427041",
+    "pr1276-K0-K7-before-merge.log": "dc129301d798978d069f0ace8d985ec70dc2d4ed45e3a70c1fc8027517bbd613",
+    "pr1276-rules-before-merge.json": "cb077dd76788fdd45ca49a9846ce111de20adc00c2dbd01f6b4e6a2da2a948c4",
+    "pr1276-ruleset-before-merge.json": "ad21489e5cd17cc4dc3fcae0be3e89a4380a4f4c7b01dad8a48102fdd3e524a8",
+    "pr1276-repo-before-merge.json": "2e087df801ad8f8ae2d829f57e14a39b9a0630a68846d2e015dbd803f63006e7",
+    "pr1276-before-merge-fence.json": "3b88a986ca74d4ab508f975a94419763f648d8b4dd1de35a325b8d2fb4ddf663",
+    "pr1276-before-merge-fence.raw": "096637d95fb3d6551f33de7463ac8ecef0894178bf3d13b10095d0322b862fa0",
+    "pr1276-before-merge-fence.sorted": "4704592f07934a13c1ee5b6565c8c7ed559c55b9b9166c9c720b4ad28b4eb6e6",
+    "pr1276-after-merge-fence.json": "7ad90a3f89d7132c043a5e212552c8438ffe52cbc964df9503d70bc7e0348e2b",
+    "pr1276-after-merge-fence.raw": "221134a93e2ce81b1cda16ec1baaf985fbd427f6ce06a4e8c2863d88929e71cc",
+    "pr1276-after-merge-fence.sorted": "3e1275307f1582e8ef4f1750c952ec12ca8c3bebdb97bf6cf65c318fdfe0391c",
+    "pr1276-postmerge-ref-delta-classification.json": "48ecdb0d46385eda0479e52ab9c4fd5a75218bcef2b3e09a168c3d1b4060e06e",
+    "canonical-M-workflow-definition.json": "33666491c1a0988001a61bf6f8ac240c81b8dee2283c56dba1561ff13bdf8472",
+    "canonical-M-current-run.json": "1cb1a4bbe51c2b99cc643742fefc672c14fb1f963fc0507b46309c91cf8ecc1d",
+    "issue1271-merged-body.md": "2db24b98d1500c9d6ac5409c3ce5463894d5046b0f8c3ba8a96700b0d718fb15",
+    "issue1271-merged-readback.json": "0c0065ed85ea8e51e925c4b1c8d7e9491a4c844e0bdcff03df570671aea2d112"
+  },
+  "archive_sha256": "4cda3c2a6befa29f2f1ee550f4b17f2093e2f2d8988f6c6439ddeed877714f89"
+}

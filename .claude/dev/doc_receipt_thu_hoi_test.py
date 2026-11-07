@@ -695,32 +695,43 @@ def gac_luu(F, o):
         raise LoiDo(f"guard vi tri luu: {o} khong phai object loose rieng cua clone tam")
 
 
-def xoa(F, o):
+def _mo_ghi(F, o):
+    """Sau guard: gỡ read-only của loose object (git ghi chỉ-đọc; Windows từ chối unlink/ghi — A16, WinError 5)."""
     gac_luu(F, o)
-    _loose(F, o).unlink()
+    _loose(F, o).chmod(0o644)  # Windows chỉ đọc bit S_IWRITE (0o200) của mode
+    return _loose(F, o)
+
+
+def xoa(F, o):
+    _mo_ghi(F, o).unlink()
     if _co(F["k"], o):
         raise LoiDo(f"xoa {o} xong cat-file -e van thay")
 
 
 def ghi_de(F, o, kieu):
     """`E_bam_lech`: bytes ĐÚNG kiểu, cấu trúc hợp lệ, nhưng không băm ra tên — chỉ chốt băm lại bắt được."""
-    gac_luu(F, o)
+    p = _mo_ghi(F, o)
     b = {"tree": _ma_tree([("100644", "c1a1b_gia", "ab" * 20)]), "commit": f"tree {F['tA']}\n\nc1a1b gia\n".encode()}.get(kieu, b"gia")
-    _loose(F, o).chmod(0o644)
-    _loose(F, o).write_bytes(zlib.compress(f"{kieu} {len(b)}\0".encode() + b))
+    p.write_bytes(zlib.compress(f"{kieu} {len(b)}\0".encode() + b))
 
 
 class Ra:
     """Bọc stdout của reader: 'lech' = dòng đầu đúng dạng mà OID khác (thân giữ nguyên); 'hong' = thay CẢ phản hồi bằng một
     dòng sai dạng (luồng vẫn đồng bộ, nên chỉ reader bị kết thúc mới làm luật sau đổi màu)."""
 
-    def __init__(s, f, oid, kieu, cb=None):
-        s.f, s.oid, s.kieu, s.cb = f, oid.encode(), kieu, cb
+    def __init__(s, f, oid, kieu, cb=None, k=7):
+        s.f, s.oid, s.kieu, s.cb, s.k, s.buf, s.eof = f, oid.encode(), kieu, cb, k, b"", False
 
     def readline(s):
+        if s.eof:
+            return b""
         d = s.f.readline()
         if s.oid and d.startswith(s.oid):
             s.oid, c = None, d.split()
+            if s.kieu in ("cut", "lf", "eof_lf"):  # F5: header đúng, phần SAU header bị cắt / LF thay / EOF trước LF
+                than = s.f.read(int(c[2]) + 1)[:-1]
+                s.buf, s.eof = {"cut": than[:s.k], "lf": than + b"X", "eof_lf": than}[s.kieu], s.kieu != "lf"  # 'lf': luồng chạy tiếp
+                return d
             if s.kieu == "han":  # lật đồng hồ seam đúng lúc đọc object này (deadline GIỮA luật)
                 s.cb()
                 return d
@@ -731,11 +742,14 @@ class Ra:
         return d
 
     def read(s, n):
+        if s.buf or s.eof:
+            s.buf, b = s.buf[n:], s.buf[:n]
+            return b
         return s.f.read(n)
 
 
-def ra(oid, kieu, cb=None, **seam):
-    return {"_seam": {"ra": lambda f: Ra(f, oid, kieu, cb), **seam}}
+def ra(oid, kieu, cb=None, k=7, **seam):
+    return {"_seam": {"ra": lambda f: Ra(f, oid, kieu, cb, k), **seam}}
 
 
 def giet_sau(g0):
@@ -762,6 +776,7 @@ def gac_chung(ten, F, g, x, dich, R=None):
     tinh = {g} | {h for h in G_[i + 1:9] if not set(d[h]) <= memo}
     if x not in d[g] or tinh != set(dich):
         raise LoiDo(f"{ten}: guard su kien chung {sorted(tinh)} != khai {sorted(dich)}")
+    return memo - {None}
 
 
 def gac_walk(ten, F, gioi, dich, R=None):
@@ -1071,6 +1086,32 @@ def _g_r_h3(m, t, ten):
     F = dung(t)
     gac_chung(ten, F, "G3", ("commit", F["H1"]), {g for g in G_ if _SAU_H1[g] == "khong_do_duoc"})
     can(ten, chay(m, F, **ra(F["H1"], "hong")), _SAU_H1)
+
+
+def _than(ten, m, F, g, x, dich, k, **kw):
+    """F5: reader chết vì thân/LF ⇒ vector theo bảng phạm vi; do_dac = memo tại điểm phát hiện + đúng `k` byte thân đã trả."""
+    memo = gac_chung(ten, F, g, x, dich)
+    kq = chay(m, F, **kw)
+    can(ten, kq, V(**dict.fromkeys(dich, "k")))
+    if kq["do_dac"] != {"so_object": len(memo) + 1, "tong_bytes": _kich(F, memo) + k}:
+        raise TinHieuChotCa(f"{ten}: do_dac {kq['do_dac']} != {len(memo) + 1} object / {_kich(F, memo) + k} B")
+
+
+@cg("g_r_cut")  # thân cụt rồi EOF: ở ops(B), và ĐANG XẢ H1 quá max_object (đọc dở trên nhánh xả)
+def _g_r_cut(m, t, ten):
+    F = dung(t, ten="a")
+    _than(f"{ten}:ops", m, F, "G7", ("tree", _opsB(F)), {"G7", "G8"}, 7, **ra(_opsB(F), "cut"))
+    G = _to(pathlib.Path(t) / "b")
+    _than(f"{ten}:xa", m, G, "G3", ("commit", G["H1"]), {"G3", "G4", "G6", "G7", "G8"}, 7, ngan_sach={"max_object_bytes": gac_obj(G)},
+          **ra(G["H1"], "cut"))
+
+
+@cg("g_r_lf")  # thân đủ, byte phân cách khác LF / EOF trước LF
+def _g_r_lf(m, t, ten):
+    for kieu in ("lf", "eof_lf"):
+        F = dung(t, ten=kieu)
+        n = len(_raw(F["k"], _opsB(F))[1])
+        _than(f"{ten}:{kieu}", m, F, "G7", ("tree", _opsB(F)), {"G7", "G8"}, n, **ra(_opsB(F), kieu))
 
 
 @cg("g_ns_tong3")
@@ -1509,6 +1550,9 @@ DBG = [
     ("A13h", "đếm byte ở MỌI đường (F2)", "dem_chi_thanh_cong", ("            if dem:\n                s.tong_bytes += len(c)\n", "        return than\n\n    def commit"),
      ("", "        s.tong_bytes += n\n        return than\n\n    def commit"), "g_ns_dem"),
     ("A13i", "đếm cả thân bị xả (F2)", "dem_bo_xa", "            if dem:\n", "            if dem and giu:\n", "g_ns_dem"),
+    ("A13j", "đếm byte đọc dở trước EOF (F5)", "dem_sau_lay_du", ("            if dem:\n                s.tong_bytes += len(c)\n", '        return b"".join(ket)'),
+     ("", '        s.tong_bytes += n if dem else 0\n        return b"".join(ket)'), "g_r_cut"),
+    ("A12k", "byte sau thân phải là LF (F5)", "bo_so_lf", 'if s._lay(1, dem=False) != b"\\n":', 'if s._lay(1, dem=False) != b"\\n" and False:', "g_r_lf"),
     ("A13e", "memo đếm mỗi object một lần", "bo_memo", "        s.memo[k] = than\n", "", "g_ns_memo"),
     ("A13f", "G0 nhận đúng 8.388.608 byte", "g0_ge", "    if len(raw) > TRAN_RECEIPT:", "    if len(raw) >= TRAN_RECEIPT:", "g_ns_g0"),
     ("A14a", "trôi ref ⇒ 13, không 2", "g9_rc2", '    tt = set(kq["git"]["luat"].values())',

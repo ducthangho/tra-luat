@@ -1,7 +1,7 @@
 # ProximaConfig.psm1 - wp1271 r4 (PROXIMA-P1-S1). Standalone, read-only reader for ONE explicit Proxima
 # target config file. No discovery, defaults, fallback or writes; reading never contacts the target.
-# Fail closed: any path or value that is not provably safe is rejected. Errors have FullyQualifiedErrorId
-# 'ProximaConfig.<Code>' and a fixed message that never echoes config keys, values, raw JSON or inner errors.
+# Fail closed: any path that is not provably safe, and any value outside the schema, is rejected. Errors have
+# FullyQualifiedErrorId 'ProximaConfig.<Code>' and a fixed message that never echoes config keys, values, raw JSON or inner errors.
 # Windows path semantics only: drive-qualified, local fixed drive, case-insensitive containment.
 # r3 (H0 accepted repository files through SUBST and hardlink aliases on PS5.1 and PS7) - containment is decided
 # on PHYSICAL paths read back from handles that stay open while verifying and reading, and multiply-linked files
@@ -206,12 +206,13 @@ function Read-PxContainer($s, [int]$Depth, [string]$Close) {
         return , $o
     }
 }
-# targetId/configurationName: any nonempty Unicode text - spaces allowed anywhere - that is not blank (whitespace only
-# counts as empty) and has no control characters or unpaired surrogates; no ASCII-only or length rule (the file itself is
-# bounded). Values are returned exactly as given: never trimmed, normalized or truncated.
-# r7 (review 42c31cf4: valid 'Target West'/'Endpoint West' rejected; the schema has no whitespace-free token rule).
+# targetId/configurationName = the schema's 'nonempty string', literally: length >= 1 and valid Unicode (no unpaired
+# surrogate). Whitespace-only text (ASCII or Unicode) and JSON-escaped controls are valid values; unescaped controls are
+# already malformed JSON. No token, nonblank, control-free, ASCII-only or length rule (the file itself is bounded).
+# Returned exactly: never trimmed, normalized or truncated. S1 only returns them - never used as paths or commands.
+# r7/r8 (reviews 42c31cf4, 0fcd56b7: spaces, then blank and escaped-control names were rejected without schema basis).
 function Test-PxText([string]$V) {
-    return $V.Length -gt 0 -and $V -match '\S' -and $V -notmatch '\p{Cc}|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]'
+    return $V.Length -gt 0 -and $V -notmatch '[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]'
 }
 # Absolute HTTPS URI (scheme case-insensitive) with a host. Userinfo, query and fragment are forbidden so no auth
 # material can live in the JSON. Only the AUTHORITY excludes '@'; a path may contain it (r4: https://h/a@b is valid).

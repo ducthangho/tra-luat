@@ -210,9 +210,11 @@ function Assert-Rejected($X, [string]$Code, [string]$Label) {
     elseif (-not $X.Err) { Add-Fail "NO_ERROR[$Label]" }
     elseif ($Code -and $id -notmatch "^ProximaConfig\.$Code(,|\z)") { Add-Fail "WRONG_CODE[$Label] expected ProximaConfig.$Code, got $id" }
 }
+# r8 exact preservation: a string, ordinal equal - never culture collation, which may ignore controls such as NUL.
+function Test-SameText($Got, [string]$Want) { return $Got -is [string] -and [string]::Equals($Got, $Want, [StringComparison]::Ordinal) }
 function Assert-Accepted($X, [string]$TargetId, [string]$Label) {
     if ($null -eq $X.Out) { Add-Fail "REJECTED_VALID[$Label] $(if ($X.Err) { $X.Err.FullyQualifiedErrorId })" }
-    elseif ($X.Out.targetId -cne $TargetId) { Add-Fail "ALTERED_VALID[$Label]" }
+    elseif (-not (Test-SameText $X.Out.targetId $TargetId)) { Add-Fail "ALTERED_VALID[$Label]" }
 }
 function Invoke-Case([string]$Id, [string[]]$Needs, [scriptblock]$Body) {
     $script:CaseFail = [Collections.Generic.List[string]]::new(); $why = $null; $outcome = 'passed'
@@ -294,6 +296,8 @@ if ([IO.File]::Exists($ModulePath)) {
 }
 $SampleExpect = [ordered]@{ schemaVersion = 1; targetId = 'example-target'; mode = 'Remote'; basePath = 'C:\ProximaExample'
     connectionUri = 'https://gateway.example.invalid:5986/wsman'; configurationName = 'Example.Endpoint' }
+# r8: JSON escapes are built from [char]92 so no tool or transport layer can decode them while this file is edited.
+$B = [string][char]92; $Routes = 'Local targetId', 'Remote targetId', 'Remote configurationName'
 # ---- cases (mandatory IDs; A5-03 runs last so it sees every read) ----
 Invoke-Case 'A1-01' api {
     $a = Write-Fixture 'ext1\a.json' (New-ConfigJson); $b = Write-Fixture 'ext2\b.json' (New-ConfigJson -Remote)
@@ -317,7 +321,7 @@ Invoke-Case 'A1-02' api {
     $uni = [regex]::Unescape('M\u1ee5c-ti\u00eau_\u76ee\u6a19') + [char]::ConvertFromUtf32(0x1F680); $cn = [regex]::Unescape('C\u1ea5u.H\u00ecnh'); $uri = 'HTTPS://GW.Example.Invalid:5986/WSMan'
     $r = Invoke-GuardedRead (Write-Fixture 'ext2\u.json' (New-ConfigJson -Remote @{ targetId = '"' + $uni + '"'; configurationName = '"' + $cn + '"'; connectionUri = '"' + $uri + '"' }))
     Assert-Accepted $r $uni 'Unicode targetId'
-    if ($r.Out -and ($r.Out.configurationName -cne $cn -or $r.Out.connectionUri -cne $uri)) { Add-Fail 'ALTERED_VALID[Unicode configurationName or uppercase HTTPS]' }
+    if ($r.Out -and (-not (Test-SameText $r.Out.configurationName $cn) -or $r.Out.connectionUri -cne $uri)) { Add-Fail 'ALTERED_VALID[Unicode configurationName or uppercase HTTPS]' }
     $long = 'T' * 300; Assert-Accepted (Invoke-GuardedRead (Write-Fixture 'ext2\l.json' (New-ConfigJson @{ targetId = '"' + $long + '"' }))) $long 'long targetId'
     $esc = [char]::ConvertFromUtf32(0x1F680) + 'x'; Assert-Accepted (Invoke-GuardedRead (Write-Fixture 'ext2\e.json' (New-ConfigJson @{ targetId = '"\ud83d\ude80x"' }))) $esc 'escaped surrogate pair'
     # r7: spaces (ASCII, NBSP, ideographic; inner, leading, trailing) are ordinary text, returned exactly - never trimmed.
@@ -326,7 +330,21 @@ Invoke-Case 'A1-02' api {
     Assert-Accepted (Invoke-GuardedRead (Write-Fixture 'ext2\s2.json' (New-ConfigJson -Remote @{ targetId = '"' + $sr + '"' }))) $sr 'Remote targetId with internal spaces'
     $r = Invoke-GuardedRead (Write-Fixture 'ext2\s3.json' (New-ConfigJson -Remote @{ configurationName = '"' + $sc + '"' }))
     Assert-Accepted $r 'tgt-two' 'Remote configurationName with internal spaces'
-    if ($r.Out -and $r.Out.configurationName -cne $sc) { Add-Fail 'ALTERED_VALID[Remote configurationName with internal spaces]' }
+    if ($r.Out -and -not (Test-SameText $r.Out.configurationName $sc)) { Add-Fail 'ALTERED_VALID[Remote configurationName with internal spaces]' }
+    # r8: 'nonempty string' literally - blank (ASCII; NBSP + ideographic space) and JSON-escaped controls (short and
+    # 4-hex forms, leading/inner/trailing) are valid on EVERY route and come back exactly. Label: '<route> <kind>'.
+    $names = [ordered]@{ 'ASCII blank' = @('" "', ' '); 'Unicode blank' = @(('"' + $B + 'u00a0' + $B + 'u3000"'), ([string][char]0xA0 + [char]0x3000))
+        'escaped controls' = @(('"' + $B + 'ta' + $B + 'u0000' + $B + 'u0001b' + $B + 'n' + $B + 'u001F' + $B + 'u007f' + $B + 'r"'),
+            ([string][char]9 + 'a' + [char]0 + [char]1 + 'b' + [char]10 + [char]0x1F + [char]0x7F + [char]13)) }
+    foreach ($k in $names.Keys) {
+        $j, $v = $names[$k]; $i = 0
+        foreach ($rt in $Routes) {
+            $i++; $set = $(if ($i -eq 3) { @{ configurationName = $j } } else { @{ targetId = $j } })
+            $r = Invoke-GuardedRead (Write-Fixture "ext2\n$i.json" (New-ConfigJson -Remote:($i -gt 1) $set))
+            Assert-Accepted $r $(if ($i -eq 3) { 'tgt-two' } else { $v }) "$rt $k"
+            if ($i -eq 3 -and $r.Out -and -not (Test-SameText $r.Out.configurationName $v)) { Add-Fail "ALTERED_VALID[$rt $k]" }
+        }
+    }
 }
 Invoke-Case 'A2-01' api {
     $m = "$S\ext1\missing.json"; Assert-Rejected (Invoke-GuardedRead $m) 'NotFound' 'missing config'
@@ -335,14 +353,15 @@ Invoke-Case 'A2-01' api {
 }
 Invoke-Case 'A2-02' api {
     $bad = '', '{', '{"schemaVersion":1,}', ((New-ConfigJson) + ' x'), "{'schemaVersion':1}", '{"schemaVersion":01}', '{"targetId":"a\q"}',
-    "// c`n{}", '{"schemaVersion":NaN}', '{"a":1 "b":2}', '{"a":"x', [byte[]](0xEF, 0xBB, 0xBF)
+    "// c`n{}", '{"schemaVersion":NaN}', '{"a":1 "b":2}', '{"a":"x', [byte[]](0xEF, 0xBB, 0xBF),
+    (New-ConfigJson @{ targetId = '"a' + [char]9 + 'b"' }), (New-ConfigJson -Remote @{ configurationName = '"a' + [char]1 + 'b"' }) # r8: raw controls in names stay malformed
     $i = 0; foreach ($j in $bad) { $i++; Assert-Rejected (Invoke-GuardedRead (Write-Fixture 'ext1\m.json' $j)) 'MalformedJson' "malformed#$i" }
     Assert-Rejected (Invoke-GuardedRead (Write-Fixture 'ext1\m.json' ([byte[]](0x7B, 0x22, 0x61, 0x22, 0x3A, 0x22, 0xC3, 0x28, 0x22, 0x7D)))) 'Encoding' 'invalid utf-8'
 }
 Invoke-Case 'A2-03' api { $i = 0; foreach ($j in '1', '"x"', '[]', '[{}]', 'null', 'true') { $i++; Assert-Rejected (Invoke-GuardedRead (Write-Fixture 'ext1\m.json' $j)) 'NotObject' "nonobject#$i" } }
 Invoke-Case 'A2-04' api {
     $bad = [ordered]@{ schemaVersion = '"1"', '1.0', '2', 'true', 'null', '1e0', '[1]'
-        targetId = '5', '""', '"   "', ('"\' + 'u00a0\' + 'u3000"'), '["t"]', '{}', '"a\tb"', '"\u0000x"', '"\ud800"', '"\udc00x"'
+        targetId = '5', '""', 'true', 'null', '["t"]', '{}', '"\ud800"', '"\udc00x"', ('"' + $B + 'ude00' + $B + 'ud83d"')
         mode = '"local"', '"Hybrid"', '1', '""'; basePath = '"px\\rel"', '"C:px"', '"\\\\srv\\share"', '"\\px"', '"C:\\a\\..\\b"', '"C:/a"', '""', '"C:\\a\\"' }
     foreach ($f in $bad.Keys) {
         foreach ($v in $bad[$f]) {
@@ -361,7 +380,7 @@ Invoke-Case 'A2-06' api {
     Assert-Rejected (Invoke-GuardedRead (Write-Fixture 'ext1\x.json' (New-ConfigJson @{ connectionUri = '"https://gw.example.invalid/"' }))) 'ModeMismatch' 'Local+connectionUri'
     Assert-Rejected (Invoke-GuardedRead (Write-Fixture 'ext1\x.json' (New-ConfigJson @{ configurationName = '"px.endpoint"' }))) 'ModeMismatch' 'Local+configurationName'
     foreach ($f in 'connectionUri', 'configurationName') { Assert-Rejected (Invoke-GuardedRead (Write-Fixture 'ext1\x.json' (New-ConfigJson -Remote -Drop $f))) 'InvalidField' "Remote without $f" }
-    foreach ($v in '""', '"   "', '"a\u0001b"', '5') { Assert-Rejected (Invoke-GuardedRead (Write-Fixture 'ext1\x.json' (New-ConfigJson -Remote @{ configurationName = $v }))) 'InvalidField' "configurationName $v" }
+    foreach ($v in '""', '5', 'null', '["x"]', ('"x' + $B + 'udc00"')) { Assert-Rejected (Invoke-GuardedRead (Write-Fixture 'ext1\x.json' (New-ConfigJson -Remote @{ configurationName = $v }))) 'InvalidField' "configurationName $v" }
     # r4: '@' in the PATH is not userinfo - accepted and returned byte-for-byte; '@' in the authority stays rejected.
     $at = 'https://gateway.example.invalid/a@b'; $r = Invoke-GuardedRead (Write-Fixture 'ext1\x.json' (New-ConfigJson -Remote @{ connectionUri = '"' + $at + '"' }))
     Assert-Accepted $r 'tgt-two' 'uri path with @'
@@ -482,9 +501,14 @@ $Cx = @(@{ n = 'default-config'; e = @('$repo = Open-PxChain', "$Default; `$repo
     @{ n = 'synthesize-missing'; e = @('$file = Open-PxChain', "if (-not [IO.File]::Exists(`$ConfigPath)) { $Default }; `$file = Open-PxChain"); red = @('A2-01:ACCEPTED_INVALID[missing config]') },
     @{ n = 'accept-wrong-type'; e = @(' -or $o[$Name].K -cne $Kind', ''); red = @('A2-04:ACCEPTED_INVALID[targetId=5]') },
     @{ n = 'ascii-only-text'; e = @('return $V.Length -gt 0 -and', 'return $V -cmatch ''^[A-Za-z0-9][A-Za-z0-9._-]{0,127}\z'' -and'); red = @('A1-02:REJECTED_VALID[Unicode targetId]') },
-    # r7: restoring H4's whitespace-free text predicate must reject each named space-containing valid value.
-    @{ n = 'whitespace-free-text'; e = @('-notmatch ''\p{Cc}|', '-notmatch ''[\s\p{Cc}]|')
+    # r7/r8: restoring H4's whitespace-free rule must reject each named space-containing valid value (r8 anchor: the
+    # predicate's only -notmatch, since H5's \p{Cc} alternative is gone). r8: H5's nonblank (\S) and control-free (\p{Cc})
+    # rules, each restored ALONE, must reject its own named positives on all three routes.
+    @{ n = 'whitespace-free-text'; e = @('$V -notmatch ''[', '$V -notmatch ''\s|[')
         red = @('A1-02:REJECTED_VALID[Local targetId with internal spaces]', 'A1-02:REJECTED_VALID[Remote targetId with internal spaces]', 'A1-02:REJECTED_VALID[Remote configurationName with internal spaces]') },
+    @{ n = 'nonblank-text'; e = @('-gt 0 -and $V -notmatch', '-gt 0 -and $V -match ''\S'' -and $V -notmatch')
+        red = @($Routes | ForEach-Object { "A1-02:REJECTED_VALID[$_ ASCII blank]"; "A1-02:REJECTED_VALID[$_ Unicode blank]" }) },
+    @{ n = 'control-free-text'; e = @('$V -notmatch ''[', '$V -notmatch ''\p{Cc}|['); red = @($Routes | ForEach-Object { "A1-02:REJECTED_VALID[$_ escaped controls]" }) },
     @{ n = 'textual-prefix'; e = @($Physical, 'if ($ConfigPath.StartsWith($RepositoryRoot, [StringComparison]::Ordinal)) { Stop-Px InsideRepository }')
         red = @('A3-02:ACCEPTED_INVALID[case-variant config path]', 'A3-03:REJECTED_VALID[same-prefix sibling outside repository]') },
     @{ n = 'display-path-containment'; e = @($Physical, 'if ($ConfigPath.StartsWith($RepositoryRoot.TrimEnd(''\'') + ''\'', [StringComparison]::OrdinalIgnoreCase)) { Stop-Px InsideRepository }')

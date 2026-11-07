@@ -1,0 +1,32 @@
+{
+ "L1_ong_match": [
+  "ast_ham"
+ ],
+ "L3_rstrip": [
+  "ast_ham"
+ ],
+ "L4_strip": [
+  "ast_ham"
+ ],
+ "L5_bo_chu_thich": [
+  "ast_ham"
+ ],
+ "L6_removesuffix_va": [
+  "ast_ham"
+ ],
+ "L7_removeprefix_phu_dinh": [
+  "ast_ham"
+ ],
+ "L8_splitlines": [
+  "ast_ham"
+ ],
+ "L14_removesuffix_hai_cham": [
+  "ast_ham"
+ ],
+ "L15_ham_phu": [
+  "ast_ham"
+ ],
+ "L17_ong_khi_shell_khac": [
+  "ast_ham"
+ ]
+}

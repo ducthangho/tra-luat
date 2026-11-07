@@ -1,0 +1,63 @@
+{
+  "remove_initial_bom": {
+    "six_constants_and_flags": true,
+    "regex_refs": [
+      "RE_DON",
+      "RE_ONG"
+    ],
+    "canonical_function_ast_equal": false,
+    "third_regex_calls": [],
+    "regex_calls": [
+      "RE_DON.fullmatch",
+      "RE_ONG.fullmatch"
+    ],
+    "table_cases": 168,
+    "table_diff": 0,
+    "generated_cases": 61530,
+    "generated_diff": 0,
+    "harmless_witness": {
+      "run": "\ufeffpython ops/x.py",
+      "reference": "lenh_ngoai_cu_phap",
+      "mutant": null
+    }
+  },
+  "lowercase_initial_letter": {
+    "six_constants_and_flags": true,
+    "regex_refs": [
+      "RE_DON",
+      "RE_ONG"
+    ],
+    "canonical_function_ast_equal": false,
+    "third_regex_calls": [],
+    "regex_calls": [
+      "RE_DON.fullmatch",
+      "RE_ONG.fullmatch"
+    ],
+    "table_cases": 168,
+    "table_diff": 0,
+    "generated_cases": 61530,
+    "generated_diff": 0,
+    "harmless_witness": {
+      "run": "Python ops/x.py",
+      "reference": "lenh_ngoai_cu_phap",
+      "mutant": null
+    }
+  },
+  "ong_match_control": {
+    "six_constants_and_flags": true,
+    "regex_refs": [
+      "RE_DON",
+      "RE_ONG"
+    ],
+    "canonical_function_ast_equal": false,
+    "third_regex_calls": [],
+    "regex_calls": [
+      "RE_DON.fullmatch",
+      "RE_ONG.match"
+    ],
+    "table_cases": 168,
+    "table_diff": 4,
+    "generated_cases": 61530,
+    "generated_diff": 9816
+  }
+}

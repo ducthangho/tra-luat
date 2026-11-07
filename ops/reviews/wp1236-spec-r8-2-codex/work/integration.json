@@ -1,0 +1,192 @@
+{
+  "model": "gen1 + reference K7-S call, not r8 implementation",
+  "F_ok": [
+    "passed",
+    []
+  ],
+  "F_ok_original": [
+    "not_measured",
+    [
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-ops (ubuntu-latest):lease-publish selftest (đo lại setup sau G5)",
+      "cu_phap_run:shell_ngoai_cu_phap:gate-ops (ubuntu-latest):don-nhanh selftest (chốt xoá nhánh)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-ops (ubuntu-latest):bo ca gate chay TRONG cgroup duoc uy quyen (Linux)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate (ubuntu-latest):tl selftest (co bang chung exact-identity)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate (ubuntu-latest):release-bundle x2 cùng SHA-256",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 1):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 4):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 7):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 3):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 5):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 6):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 0):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 2):G5 manh ban kinh dot bien (#668)"
+    ]
+  ],
+  "fixture_child": "95e5335c81318e8655c1192892a56c90a1b4e2f9",
+  "fixture_parent": "fe84620f897913c7f6c2ce5a0c7316a49655e82f",
+  "checkout_count": 23,
+  "A14_i": [
+    "passed",
+    []
+  ],
+  "A14_i_prime": [
+    "not_measured",
+    [
+      "cu_phap_run:ong_khong_bash_tuong_minh:gate-packet-loop (ubuntu-latest):packet-loop selftest"
+    ]
+  ],
+  "A14_c": [
+    "not_measured",
+    [
+      "che_do_khong_xac_dinh:shell_la:packet-loop selftest"
+    ]
+  ],
+  "m_S20": [
+    "not_measured",
+    [
+      "che_do_khong_xac_dinh:shell_la:packet-loop selftest",
+      "cu_phap_run:shell_ngoai_cu_phap:gate-packet-loop (ubuntu-latest):packet-loop selftest"
+    ]
+  ],
+  "m_S16": [
+    "passed",
+    []
+  ],
+  "m_A15c": [
+    "passed",
+    []
+  ],
+  "A14_S3": [
+    [
+      "l9_05_hoac_hoac",
+      [
+        "not_measured",
+        [
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-packet-loop (ubuntu-latest):packet-loop selftest"
+        ]
+      ],
+      [
+        "passed",
+        []
+      ]
+    ],
+    [
+      "l8_10_set_sau_ong",
+      [
+        "not_measured",
+        [
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-packet-loop (ubuntu-latest):packet-loop selftest"
+        ]
+      ],
+      [
+        "passed",
+        []
+      ]
+    ]
+  ],
+  "G1_cases_through_kiem": [
+    [
+      "rv-a1-8/work/probes.py",
+      26
+    ],
+    [
+      "rv-a1-9/work/extra_shell_probes.py",
+      26
+    ]
+  ],
+  "A20": {
+    "f": {
+      "baseline": [
+        "job_bat_buoc_trung"
+      ],
+      "mutant": [],
+      "baseline_kiem": [
+        "not_measured",
+        [
+          "so_luat_hong",
+          "job_bat_buoc_trung"
+        ]
+      ],
+      "mutant_kiem": [
+        "not_measured",
+        [
+          "luat_ngoai_so_hoac_mien"
+        ]
+      ]
+    },
+    "g": {
+      "baseline": [
+        "mien_mo_thieu_check_bat_buoc"
+      ],
+      "mutant": [],
+      "baseline_kiem": [
+        "not_measured",
+        [
+          "so_luat_hong",
+          "mien_mo_thieu_check_bat_buoc"
+        ]
+      ],
+      "mutant_kiem": [
+        "not_measured",
+        [
+          "luat_ngoai_so_hoac_mien"
+        ]
+      ]
+    },
+    "h": {
+      "baseline": [
+        "job_khong_dung_mot_muc:unmatched (ubuntu-latest)"
+      ],
+      "mutant": [],
+      "baseline_kiem": [
+        "not_measured",
+        [
+          "so_luat_hong",
+          "job_khong_dung_mot_muc:unmatched (ubuntu-latest)"
+        ]
+      ],
+      "mutant_kiem": [
+        "not_measured",
+        [
+          "luat_ngoai_so_hoac_mien"
+        ]
+      ]
+    },
+    "i": {
+      "baseline": [
+        "job_khong_dung_mot_muc:gate (ubuntu-latest)"
+      ],
+      "mutant": [],
+      "baseline_kiem": [
+        "not_measured",
+        [
+          "so_luat_hong",
+          "job_khong_dung_mot_muc:gate (ubuntu-latest)"
+        ]
+      ],
+      "mutant_kiem": [
+        "not_measured",
+        [
+          "luat_ngoai_so_hoac_mien"
+        ]
+      ]
+    },
+    "i_prime": {
+      "baseline": [],
+      "mutant": [
+        "mien_mo_thieu_check_bat_buoc"
+      ],
+      "baseline_kiem": [
+        "passed",
+        []
+      ],
+      "mutant_kiem": [
+        "not_measured",
+        [
+          "so_luat_hong",
+          "mien_mo_thieu_check_bat_buoc"
+        ]
+      ]
+    }
+  }
+}

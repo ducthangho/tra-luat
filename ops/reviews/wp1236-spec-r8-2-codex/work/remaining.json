@@ -1,0 +1,47 @@
+{
+  "G16_run_41397205258": {
+    "status": "not_measured",
+    "missing_required": [
+      "thieu_job_bat_buoc:gate-cong-cu (ubuntu-latest, 0)",
+      "thieu_job_bat_buoc:gate-cong-cu (ubuntu-latest, 1)",
+      "thieu_job_bat_buoc:gate-cong-cu (ubuntu-latest, 2)",
+      "thieu_job_bat_buoc:gate-cong-cu (ubuntu-latest, 3)",
+      "thieu_job_bat_buoc:gate-cong-cu (ubuntu-latest, 4)",
+      "thieu_job_bat_buoc:gate-cong-cu (ubuntu-latest, 5)",
+      "thieu_job_bat_buoc:gate-cong-cu (ubuntu-latest, 6)",
+      "thieu_job_bat_buoc:gate-cong-cu (ubuntu-latest, 7)"
+    ]
+  },
+  "G17_la_run_land": [
+    [
+      ".github/workflows/ci.yml",
+      "push",
+      true
+    ],
+    [
+      ".github/workflows/ci.yml",
+      "workflow_dispatch",
+      false
+    ],
+    [
+      ".github/workflows/launcher-windows.yml",
+      "push",
+      false
+    ],
+    [
+      ".github/workflows/launcher-windows.yml",
+      "workflow_dispatch",
+      false
+    ]
+  ],
+  "H04_order": [
+    "lenh_ngoai_cu_phap",
+    "shell_ngoai_cu_phap"
+  ],
+  "m_S12_prime": [
+    "d_ong_bash_trai_hong",
+    "d_ong_bash_phai_hong"
+  ],
+  "DONG_numeric_patterns": 13,
+  "DONG_numeric_groups": 16
+}

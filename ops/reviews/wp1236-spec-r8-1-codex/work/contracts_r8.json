@@ -1,0 +1,124 @@
+{
+  "F_ok_goc": {
+    "state": "not_measured",
+    "reason_count": 13,
+    "affected_J": 10,
+    "reasons": [
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-ops (ubuntu-latest):lease-publish selftest (đo lại setup sau G5)",
+      "cu_phap_run:shell_ngoai_cu_phap:gate-ops (ubuntu-latest):don-nhanh selftest (chốt xoá nhánh)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-ops (ubuntu-latest):bo ca gate chay TRONG cgroup duoc uy quyen (Linux)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate (ubuntu-latest):tl selftest (co bang chung exact-identity)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate (ubuntu-latest):release-bundle x2 cùng SHA-256",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 1):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 4):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 7):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 3):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 5):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 6):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 0):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 2):G5 manh ban kinh dot bien (#668)"
+    ]
+  },
+  "F_that_A15": {
+    "invocations": 43,
+    "by_invocation": {
+      "accepted": 30,
+      "rejected": 13
+    },
+    "distinct_names": 29,
+    "distinct_accepted": 23,
+    "distinct_rejected": 6,
+    "law_names_without_success_rest": [
+      "tl selftest (luot PR — khong sinh bang chung)"
+    ],
+    "chan_k7": []
+  },
+  "F_ok_VL_F": [
+    "passed",
+    []
+  ],
+  "A14_i": [
+    "passed",
+    []
+  ],
+  "A14_i_prime": [
+    "not_measured",
+    [
+      "cu_phap_run:ong_khong_bash_tuong_minh:gate-packet-loop (ubuntu-latest):packet-loop selftest"
+    ]
+  ],
+  "env_precedence": [
+    [
+      "workflow",
+      "BASH_ENV",
+      "not_measured"
+    ],
+    [
+      "workflow",
+      "SHELLOPTS",
+      "not_measured"
+    ],
+    [
+      "workflow",
+      "BASH_FUNC_python%%",
+      "not_measured"
+    ],
+    [
+      "job",
+      "BASH_ENV",
+      "not_measured"
+    ],
+    [
+      "job",
+      "SHELLOPTS",
+      "not_measured"
+    ],
+    [
+      "job",
+      "BASH_FUNC_python%%",
+      "not_measured"
+    ],
+    [
+      "step",
+      "BASH_ENV",
+      "not_measured"
+    ],
+    [
+      "step",
+      "SHELLOPTS",
+      "not_measured"
+    ],
+    [
+      "step",
+      "BASH_FUNC_python%%",
+      "not_measured"
+    ]
+  ],
+  "inherited_cases": {
+    "a01_duong_f_ok": "passed",
+    "a02_bam_log": "passed",
+    "a03_tap_job": "passed",
+    "a04_danh_tinh": "passed",
+    "a05_ca_dong": "passed",
+    "a06_sai_loai": "passed",
+    "a07_n_tren_m": "passed",
+    "a08_neo_run": "passed",
+    "a09_so_luat_mien": "passed",
+    "a10_cuoi": "passed",
+    "a11_khong": "passed",
+    "a12_json": "passed",
+    "a13_buoc_rest": "passed",
+    "a16_dong_la": "passed",
+    "a17_loi_khai": "passed",
+    "a18_neo_trich_tep": "passed",
+    "a19_owner_waived": "passed",
+    "a20_so_luat": "passed",
+    "a21_pham_vi_land": "passed"
+  },
+  "order_counterexample": {
+    "run": null,
+    "shell": "pwsh",
+    "specified": "lenh_ngoai_cu_phap",
+    "shell_first": "shell_ngoai_cu_phap"
+  }
+}

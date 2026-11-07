@@ -1,0 +1,80 @@
+{
+ "strip": {
+  "mau_A14_S3b": 2,
+  "ca_kiem_khac": 0,
+  "toan_kho_A14_S6": 273,
+  "AM_neu_qua_kiem": 3
+ },
+ "rstrip": {
+  "mau_A14_S3b": 2,
+  "ca_kiem_khac": 0,
+  "toan_kho_A14_S6": 171,
+  "AM_neu_qua_kiem": 3
+ },
+ "rstrip_lf": {
+  "mau_A14_S3b": 0,
+  "ca_kiem_khac": 0,
+  "toan_kho_A14_S6": 21,
+  "AM_neu_qua_kiem": 1
+ },
+ "bo_bom": {
+  "mau_A14_S3b": 1,
+  "ca_kiem_khac": 0,
+  "toan_kho_A14_S6": 0,
+  "AM_neu_qua_kiem": 1
+ },
+ "ha_chu": {
+  "mau_A14_S3b": 1,
+  "ca_kiem_khac": 0,
+  "toan_kho_A14_S6": 0,
+  "AM_neu_qua_kiem": 1
+ },
+ "suffix_hoac_hai_cham": {
+  "mau_A14_S3b": 0,
+  "ca_kiem_khac": 0,
+  "toan_kho_A14_S6": 0,
+  "AM_neu_qua_kiem": 0
+ },
+ "suffix_va_nen": {
+  "mau_A14_S3b": 1,
+  "ca_kiem_khac": 0,
+  "toan_kho_A14_S6": 144,
+  "AM_neu_qua_kiem": 1
+ },
+ "prefix_phu_dinh": {
+  "mau_A14_S3b": 0,
+  "ca_kiem_khac": 0,
+  "toan_kho_A14_S6": 24,
+  "AM_neu_qua_kiem": 1
+ },
+ "crlf": {
+  "mau_A14_S3b": 0,
+  "ca_kiem_khac": 0,
+  "toan_kho_A14_S6": 21,
+  "AM_neu_qua_kiem": 1
+ },
+ "tab_cach": {
+  "mau_A14_S3b": 0,
+  "ca_kiem_khac": 0,
+  "toan_kho_A14_S6": 18,
+  "AM_neu_qua_kiem": 3
+ },
+ "gop_cach": {
+  "mau_A14_S3b": 4,
+  "ca_kiem_khac": 1,
+  "toan_kho_A14_S6": 1839,
+  "AM_neu_qua_kiem": 14
+ },
+ "dong_dau": {
+  "mau_A14_S3b": 0,
+  "ca_kiem_khac": 1,
+  "toan_kho_A14_S6": 231,
+  "AM_neu_qua_kiem": 6
+ },
+ "suffix_exit0": {
+  "mau_A14_S3b": 0,
+  "ca_kiem_khac": 0,
+  "toan_kho_A14_S6": 0,
+  "AM_neu_qua_kiem": 0
+ }
+}

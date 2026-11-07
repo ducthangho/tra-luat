@@ -1,0 +1,161 @@
+diff --git a/ops/specs/wp1236-r8.md b/ops/specs/wp1236-r8.md
+index 8d5db1ca..6ceafc4d 100644
+--- a/ops/specs/wp1236-r8.md
++++ b/ops/specs/wp1236-r8.md
+@@ -381,7 +381,11 @@ P     = [A-Za-z0-9_.] , { [A-Za-z0-9_./-] }
+ W     = [A-Za-z0-9_./=:-] , { [A-Za-z0-9_./=:-] }
+ ```
+ 
+-Cài đặt THAM CHIẾU (executor được viết khác, miễn tương đương; ca A14-S6 đo tương đương trên KHO SINH TỔ HỢP, ngoài kho ấy là giới hạn khai):
++**Cài đặt BẮT BUỘC, NGUYÊN VĂN** (sửa ở r8 vòng 3 — reviewer Codex J01 và Claude J01 cùng đo rằng kho sinh không phủ được lớp "cài đặt khác
++mà tưởng tương đương"; hướng (A) của Claude: đóng theo KIẾN TRÚC, không theo độ phủ). Module PHẢI định nghĩa sáu hằng dưới đây byte-đúng
++(cùng chuỗi `pattern`, cùng cờ `re.ASCII`, không cờ khác), và `cu_phap_run` PHẢI là đúng sáu bước ở trên, chỉ dùng `RE_DON.fullmatch` và
++`RE_ONG.fullmatch` để nhận — KHÔNG có đường nhận thứ ba. Ca A14-S0 so `pattern`/`flags` của module với bản chép trong test. Quyền "executor
++viết khác miễn tương đương" của bản vòng 2 BỎ:
+ ```python
+ P = r"[A-Za-z0-9_.][A-Za-z0-9_./-]*"
+ W = r"[A-Za-z0-9_./=:-]+"
+@@ -771,7 +775,7 @@ test 279 + 318 = 597; `ops/kiem_ho_so_land.py` + test 140 + 263 = 403. Hai nguy
+ 
+ | đợt | tệp | dòng thêm ước | trần |
+ |---|---|---|---|
+-| A1 (gen 2, r8) | 3 | 1900–2050. Căn cứ ĐO, không còn ước từ tiền lệ: generation 1 ở `508d678` = +1620/−0 (module 539, test 1080, đăng ký 1; Codex lượt 9 và vòng 1 r8 đo lại). r8 so với `508d678`: module bỏ `RE_ONG`/`RE_TAT_TUY_CHON`/`RE_CAU_TRUC_SHELL`/`_bo_nhay`/`che_do_shell` (~15) và thêm `cu_phap_run` + grammar (~25); test bỏ phần a14 dựa trên `set` (~40 dòng biến thể ở `a14_k7_yaml`, dùng lại được làm vế âm) và thêm bảng A14-S 116 vế (~120), danh mục gốc gen 1 52 vế (~55), A14-S3/S4/S5 (~45), 53 + 6 đột biến (~65), `VL-F` + `F-ok-goc` + A15d (~40), A20 (f)–(i′), (e′) (~22), A14-S6 kho sinh + 32 đột biến (~60), dòng `GIOI_HAN` + m-A1b (~5), A23 bổ sung (~20) ⇒ ≈ 1620 + 10 + 390 ≈ 2020 | vượt ADR-0053 ⇒ `nang_tran` |
++| A1 (gen 2, r8) | 3 | 2050–2200. Căn cứ ĐO, không còn ước từ tiền lệ: generation 1 ở `508d678` = +1620/−0 (module 539, test 1080, đăng ký 1; Codex lượt 9 và vòng 1 r8 đo lại). r8 so với `508d678`: module bỏ `RE_ONG`/`RE_TAT_TUY_CHON`/`RE_CAU_TRUC_SHELL`/`_bo_nhay`/`che_do_shell` (~15) và thêm `cu_phap_run` + grammar (~25); test bỏ phần a14 dựa trên `set` (~40 dòng biến thể ở `a14_k7_yaml`, dùng lại được làm vế âm) và thêm bảng A14-S 116 vế (~120), danh mục gốc gen 1 52 vế (~55), A14-S3/S4/S5 (~45), 53 + 6 đột biến (~65), `VL-F` + `F-ok-goc` + A15d (~40), A20 (f)–(i′), (e′) (~22), A14-S6 kho sinh + harness nguyên byte + 91 đột biến kho sinh (~200; reviewer Claude J04 vòng 3 đếm riêng phần mã tham chiếu cần chép của bản vòng 2 đã là 164 dòng), A14-S0 + 8 đột biến hằng (~20), dòng `GIOI_HAN` + m-A1b/c (~8), A23 bổ sung (~20) ⇒ ≈ 1620 + 10 + 540 ≈ 2170 | vượt ADR-0053 ⇒ `nang_tran` |
+ | A2 | 2 | 250–400 (`tom` ~120, test ~200, `F-luat` log giả ~80) | ≤ 6 / ≤ 450 |
+ | B | 2 | 220–330 (`MIEN_TRU_GATE_OUTPUT` 49 mục + bản chép ≈ 100) | ≤ 6 / ≤ 450 |
+ | C | 2 | 260–400 (`MIEN_TRU_L8` 36 mục + bản chép ≈ 75; N1 ≈ 60; N2 ≈ 30) | ≤ 6 / ≤ 450 |
+@@ -784,13 +788,14 @@ nang_tran:
+     trần này; mức 1650 cấp cho PR #1260 (Review Rescue 6690900537) không chuyển sang generation 2.
+   can_cu: >-
+     Đo: generation 1 của A1 ở 508d678 = +1620 dòng, 3 tệp (Codex lượt 9). r8 thay chốt shell bằng grammar đóng (module ≈ +10 ròng) và
+-    thêm bảng phản chứng 116 vế + 52 vế gốc gen 1 + kho sinh A14-S6 + 92 đột biến + fixture VL-F + A20 (f)–(i′) (test ≈ +390 ròng), ước 1900–2050
++    thêm bảng phản chứng 116 vế + 52 vế gốc gen 1 + kho sinh A14-S6 + A14-S0 + 158 đột biến (53 bảng + 91 kho sinh + 8 hằng + 6 khác) +
++    fixture VL-F + A20 (f)–(i′) (test ≈ +540 ròng), ước 2050–2200
+     (bảng kich_thuoc). Bảng vế âm là
+     dữ liệu, không phải logic; nén nó thì mất đúng thứ chín lượt review đòi. CHẠM TRẦN là khả năng THẬT; khi ấy đi đường DỪNG dưới,
+     không nén mã. Tiền lệ: r7 xin 950 cho A1 và generation 1 vượt dần qua 1550 → 1600 → 1650 bằng ba quyết định chủ kho — ước r7
+     thấp gần gấp đôi; r8 ước từ số đo nên không lặp sai số ấy.
+   tran_cu: ≤ 6 tệp / ≤ 450 dòng thêm (ADR-0053)
+-  tran_moi: ≤ 3 tệp / ≤ 2150 dòng thêm, đo bằng `git diff --numstat <base đợt A1 gen 2>..<head đợt A1 gen 2>`
++  tran_moi: ≤ 3 tệp / ≤ 2300 dòng thêm, đo bằng `git diff --numstat <base đợt A1 gen 2>..<head đợt A1 gen 2>`
+ ```
+ 
+ Numstat thật vượt trần (`tran_moi` cho A1, trần cũ cho đợt khác) ⇒ DỪNG TRƯỚC review, hỏi chủ kho. Không nén mã để lách.
+@@ -826,7 +831,7 @@ Mỗi mục chiếu vào đúng một đường dẫn trong write set của đ
+   `gate_output/2`; `kiem` (K1–K9); *Lời khai*, *Neo*, `kiem_ho_so_gate_output(…, url_hop_le)`; CLI `kiem --provenance P --goc G TEP` ·
+   `kiem-ho-so --root G TEP_HO_SO`. Mã thoát: 0 `passed`/ĐẠT · 1 `failed`/ĐỎ · 2 `not_measured`/KHÔNG ĐO ĐƯỢC/đối số sai. Chỉ thư viện
+   chuẩn + PyYAML + import chỉ đọc `ops/ci_provenance.py`. Ép stdout/stderr UTF-8.
+-- **A1-M2** (`ops/gate_output_doi_chieu_test.py`): ca A1–A23, A14-S1…S5, A15d và đột biến của đợt A1. In đúng dạng mà mục `MOI` đòi.
++- **A1-M2** (`ops/gate_output_doi_chieu_test.py`): ca A1–A23, A14-S0…S6, A15d và đột biến của đợt A1. In đúng dạng mà mục `MOI` đòi.
+ - **A1-M3** (`.claude/dev/ci_dang_ky_test.py`): THÊM đúng một mục `MOI` cho test mới.
+ 
+ **Đợt A2**
+@@ -889,7 +894,7 @@ Thân PR của mỗi đợt có bảng đột biến kèm ca đỏ. Mỗi tiêu
+ 
+ | ca | đầu vào | đòi | đột biến làm CHÍNH ca ĐỎ |
+ |---|---|---|---|
+-| A1 dương | `F-ok` | `passed`, rc 0; CLI `kiem` in đúng một dòng `GIOI_HAN: …` cố định (*Phạm vi của `passed`*) | m-A1 `kiem` luôn `not_measured`; m-A1b CLI bỏ dòng `GIOI_HAN` |
++| A1 dương | `F-ok` | `passed`, rc 0; CLI `kiem` VÀ CLI `kiem-ho-so` (trên hồ sơ của A18a) khi ĐẠT in đúng một dòng `GIOI_HAN: …` cố định (*Phạm vi của `passed`*) | m-A1 `kiem` luôn `not_measured`; m-A1b `kiem` bỏ dòng `GIOI_HAN`; m-A1c `kiem-ho-so` bỏ dòng ấy |
+ | A2 băm | sửa 1 ký tự `log_sha256` (cả với job `chuan-bi`) | `not_measured` | m-A2 bỏ K4 |
+ | A3 tập job | (a) xoá một JOB; (b) JOB ngoài `log_day_du`; (c) lặp JOB; (d) T rỗng; (e) mọi job skipped; (f) job `not_run`; (g) J rỗng vì chỉ còn `chuan-bi`; (h) J rỗng vì mọi job là `windows-latest`; (i) một job trong J không có mục `checkout` `passed` cùng SHA; (j) trên `F-ok`, tám job `gate-cong-cu (ubuntu-latest, k)` thay bằng MỘT mục job skipped dựng bằng CHÍNH `ci_provenance.moc_gate` trên mục REST `gate-cong-cu` của `readback-jobs-41397205258.json` (`labels: []`, `runner_id: None`, `conclusion: skipped`, `buoc: "not_measured"`), cộng mục `checkout` `trang_thai: skipped` như `ci_provenance.thu` ghi; bỏ tám job khỏi `log_day_du` và tệp; `kiem` không ném khi `buoc` là chuỗi (quyết định G06 khi duyệt r7) ⇒ `thieu_job_bat_buoc` đủ tám tên; (j′) một job `gate (ubuntu-latest)` thứ hai ⇒ `job_trung_ten`; (j″) thêm job `gate-moi (ubuntu-latest)` (provenance, `log_day_du`, `checkout`, tệp; KHÔNG sửa module, nên `luat_sha256` giữ nguyên) ⇒ danh sách lý do CHỨA `job_ngoai_luat:gate-moi (ubuntu-latest)` | mỗi vế `not_measured`, kèm lý do đã ghi (ca so danh sách lý do, không chỉ trạng thái) | m-A3a bỏ so tập; m-A3b bỏ chốt J khác rỗng (d, e, g, h); m-A3c bỏ kiểm checkout từng job (i); m-A3d gỡ chốt đủ job (j đỏ); m-A3e chỉ đòi năm tên `CHECK_BAT_BUOC` (j đỏ: `gate-cong-cu` không thuộc năm tên); m-A3f nhận tên trùng (j′ đỏ); m-A3g bỏ lý do `job_ngoai_luat` (j″ đỏ dù vẫn `not_measured` nhờ `khong_co_luat`) |
+ | A3k run đường nhanh thật | `F-41397205258` | `not_measured`; danh sách lý do CHỨA đúng tám `thieu_job_bat_buoc:gate-cong-cu (ubuntu-latest, k)` (k = 0…7), không lý do `thieu_job_bat_buoc` nào khác; `MOC_GATE_OUTPUT` không phải `passed` | m-A3k chốt đủ job chỉ chạy khi chưa có lý do `not_measured` nào khác (A3k đỏ vì thiếu tám lý do; A3j vẫn xanh — quyết định G07 khi duyệt r7); m-A3e làm A3k đỏ |
+@@ -941,12 +946,13 @@ chạy*), dạng `{nhãn: (run, shell, lý do kỳ vọng)}`. Lý do kỳ vọng
+ 
+ | ca | đòi | đột biến làm CHÍNH ca ĐỎ |
+ |---|---|---|
++| A14-S0 hằng nguyên văn | `RE_DON.pattern`, `RE_ONG.pattern` và bốn chuỗi `P`, `W`, `DANG`, `LENH` của module BẰNG byte bản chép trong test; `RE_DON.flags == RE_ONG.flags == re.compile("", re.ASCII).flags`; module không có `re.compile` nào khác được `cu_phap_run` gọi (kiểm bằng `ast`: thân `cu_phap_run` chỉ tham chiếu `RE_DON`, `RE_ONG`) | m-S0[h] (6): sửa MỘT ký tự trong từng hằng (A14-S0 đỏ); m-S0f bỏ `re.ASCII`; m-S0g thêm một `re.fullmatch` khác vào `cu_phap_run` |
+ | A14-S1 âm | mọi vế âm ⇒ đúng lý do kỳ vọng | xem bảng disposition dưới (mỗi đột biến một ca đích) |
+ | A14-S2 dương | mọi vế dương ⇒ None | m-S12′ coi vế phải ống là `W` đơn (hai vế ống dương đỏ) |
+ | A14-S3 qua `kiem` | trên `F-ok`, thay thân bước `packet-loop selftest` bằng thân của `l9_05_hoac_hoac` (`… \|\| true`) ⇒ `not_measured`, lý do đúng một mục `cu_phap_run:lenh_ngoai_cu_phap:gate-packet-loop (ubuntu-latest):packet-loop selftest`; bằng thân `l8_10_set_sau_ong` với `shell: bash` ⇒ như vậy | m-S17 đưa K7-S ra khỏi đường gọi của `kiem` (gọi trong test thì đúng, `kiem` không gọi) |
+ | A14-S4 không ném | `run` là `None`, số, list, mapping (YAML `run: 1`, `run: [a]`) ⇒ `lenh_ngoai_cu_phap`, không traceback (cả API và CLI rc 2) | m-S-kieu bỏ kiểm kiểu: chết bằng `AttributeError` ⇒ phân hạng `TIN_DUNG_GIA`, KHÔNG tính có răng (ghi trong thân PR); chốt kiểu được canh bằng chính ca này qua phân hạng |
+ | A14-S5 Bash thật | với MỌI vế (âm lẫn dương) mà `cu_phap_run` trả None — trên module chưa đột biến tức đúng bảy vế dương —, chạy Bash/`sh` thật đúng dòng lệnh GitHub dùng cho `shell` ấy (`bash -e`, `bash --noprofile --norc -eo pipefail`, `sh -e`), chương trình hỏng thoát 1 ⇒ rc ≠ 0. Chạy khi `bash`/`sh` có trên `PATH`; trên Linux vắng ⇒ ĐỎ; nền khác vắng ⇒ `BỎ QUA` có ghi dòng | m-S18 thêm vào `DON` dạng `{LENH} \|\| true` (vế `l9_05_hoac_hoac` được nhận, Bash thật rc 0 ⇒ A14-S5 đỏ — bất biến "được nhận ⇒ truyền lỗi" đo bằng Bash, không bằng bảng kỳ vọng) |
+-| A14-S6 kho sinh tổ hợp | Kho đầu vào SINH tất định trong test, theo `ops/reviews/wp1236-r8-soan/sinh_r8.py` (reviewer Claude I01 vòng 2): (i) mọi cặp `A op B` với A, B thuộc năm `LENH` hợp lệ (ba dạng `DANG`, có/không đối số) và op thuộc `\|\|` `&&` `;` `&` `\|` `\|&` LF `;;` `&;` `\|\|&` `\| \|`, mỗi op với bốn cách đặt dấu cách; (ii) mỗi `LENH` với 16 tiền tố (`!`, `time`, `exec`, `command`, `builtin`, `eval`, `coproc`, `{`, `(`, gán biến, `-`, `--`, `./`, `/`, `~`…) và 19 hậu tố (`&`, `;`, `\|\|`, `\|`, `#`, `\`, `)`, `}`, `2>&1`, `>x`, `<x`, LF, CR, dấu cách…); (iii) mỗi ký tự trong 37 ký tự (`; & \| ! ( ) { } $ ` ' " \ < > # * ? [ ] ~ + , @ % ^ =`, dấu cách, tab, LF, CR, NUL, NBSP, `ο`, `١`) chèn vào MỌI vị trí của `python ops/ab.py w` và thay mọi dấu cách của nó; mỗi thân × `shell` vắng/`bash`/`sh` × có/không LF cuối. Đo trên tham chiếu: **11 838 đầu vào, 86 được nhận**. Đòi: (a) `cu_phap_run` của module BẰNG `gram.py` (chép vào test) trên MỌI đầu vào; (b) với MỌI thân được nhận và MỖI thành phần ống k: cho chương trình của k hỏng (ghi dấu `DA_CHAY`, thoát 1), các thành phần khác chép stdin, chạy Bash/`sh` thật đúng mẫu GitHub ⇒ `DA_CHAY` có VÀ rc ≠ 0 (`bash`/`pwsh` của dạng `DANG` được mô phỏng bằng chương trình giả trên `PATH` — thứ được đo là đường nối shell). Tham chiếu: 0 lệch, 0 thân nhận mà nuốt lỗi. Nền thiếu `bash`/`sh`: như A14-S5 | m-S7d…m-S7i, m-S15[c] (bảng dưới) |
++| A14-S6 kho sinh tổ hợp (phép đo PHỤ) | Kho đầu vào SINH tất định trong test, theo `ops/reviews/wp1236-r8-soan/sinh_r8.py` (bản vòng 3; reviewer Claude I01 vòng 2, Codex J01/J02 và Claude J01/J02 vòng 3): (i) `A op B` với A, B thuộc bốn `LENH` hợp lệ (ba nhánh `DANG`, có/không đối số), op thuộc 11 toán tử (`\|\|` `&&` `;` `&` `\|` `\|&` LF `;;` `&;` `\|\|&` `\| \|`) × bốn cách đặt dấu cách; (ii) mỗi `LENH` với 16 tiền tố và 19 hậu tố; (iii) ống BA thành phần: thành phần giữa hợp lệ hoặc ngoài tập (`true`, `cat`, `:`, `exit 0`), và 11 toán tử ở ranh giới thứ nhất hay thứ hai; (iv) 35 ký tự (27 dấu + dấu cách, tab, LF, CR, NUL, NBSP, `ο`, `١`) chèn vào MỌI vị trí của MỖI mẫu nhánh (`python ops/a.py w`, `bash ops/b.sh w`, `pwsh -NoProfile -File ops/c.ps1 w`) và thay mọi dấu cách của nó, cùng vào thành phần đầu/giữa/cuối của một ống ba thành phần; (v) 30 TOKEN (`-n -s -h -c -x -i -m -- -`, `! \|\| && ; & \| \|&`, `time exec true { } ( )`, `2>&1 >x <x #`, `-NoProfile -File -Command`) chèn ở MỌI ranh giới dấu cách của 34 hạt (4 lệnh, 16 ống đôi, 4 ống ba); mỗi thân × `shell` vắng/`bash`/`sh` × có/không LF cuối. Tham chiếu: **61 530 đầu vào, 2 647 được nhận**. Đòi: (a) `cu_phap_run` của module BẰNG tham chiếu (chép vào test) trên MỌI đầu vào; (b) với MỌI thân được nhận, chạy NGUYÊN BYTE (tự kiểm: tệp chạy == thân), mỗi chương trình đặt ở ĐÚNG đường dẫn chữ của token: với mỗi đường dẫn riêng k, k hỏng (ghi `DA_CHAY`, thoát 1), còn lại chép stdin; nếu có đường dẫn trùng thì thêm lượt cho tất cả hỏng ⇒ mỗi lượt phân loại `truyen_loi` (rc ≠ 0 và `DA_CHAY`) / `nuot_loi` (rc 0, `DA_CHAY`) / `khong_chay`; đòi 100 % `truyen_loi`. `bash P.sh` chạy `/usr/bin/bash` THẬT; `pwsh` là chương trình GIẢ CHẶT trên `PATH`, chỉ nhận đúng `-NoProfile -File <tệp>`, lệch thì thoát 99 không chạy tệp (container không có pwsh). Tham chiếu: 0 lệch, 0 `nuot_loi`, 0 `khong_chay`. Nền thiếu `bash`/`sh`: như A14-S5 | m-S7d…m-S7j, v3a…v3h, m-S15/m-S15b/m-S15p[c] (bảng dưới) |
+ 
+ **Bảng disposition đột biến K7-S** (m-S1…m-S14, m-S19, m-S7c, m-S9d…g/p/q — 53 đột biến kể cả họ m-S14 — đo trên cài đặt THAM CHIẾU
+ bằng `ops/reviews/wp1236-r8-soan/dot_bien_r8.py`: 53/53 làm ca đích đổi lý do, 0 làm hỏng vế dương; m-S12′ đo ở lượt chạy đầu của script ấy: làm hỏng đúng hai vế ống dương. m-S16…m-S18, m-A15c cần module và
+@@ -990,13 +996,25 @@ fixture thật, CHƯA đo. Executor đo lại TẤT CẢ trên module thật):
+ | m-S7g | `DON` nhận `&` cuối | A14-S6 |
+ | m-S7h | `DON` nhận `!` đầu | A14-S6 |
+ | m-S7i | `DON` nhận `… \|\| LENH` | A14-S6 |
+-| m-S15[c] (26) | thêm ký tự c vào lớp đuôi của `P` | A14-S6 |
+-
+-Sáu đột biến m-S7d…i và 26 đột biến m-S15[c] là đúng những cài đặt "không tương đương, nguy hiểm thật" mà reviewer Claude dựng ở vòng 2 và
+-sống qua A14-S1…S5. Đo trên tham chiếu (`python3 -I ops/reviews/wp1236-r8-soan/dot_bien_r8.py --sinh`, `dot_bien_sinh_r8.json`): **32/32 bị
+-A14-S6 bắt** ở vế (a) (lệch tham chiếu: 30–150 đầu vào mỗi đột biến); 13/32 còn có thân được nhận mà Bash thật nuốt lỗi, tức (b) bắt độc lập.
+-Đây là chốt cho LỚP, không cho từng cửa: một cài đặt lệch tham chiếu ở bất kỳ toán tử/ký tự nào trong kho sinh đều đỏ, không phải chờ reviewer
+-chỉ cửa thứ ba (bài học CLAUDE.md "vá đúng chỗ được chỉ rồi bỏ sót đường thứ ba").
++| m-S7j | ống chỉ kiểm thành phần đầu/cuối (giữa là chuỗi `W` bất kỳ) | A14-S6 |
++| m-S15[c] (26) | thêm ký tự c vào lớp đuôi của `P` (mọi nhánh) | A14-S0, A14-S6 |
++| m-S15b[c], m-S15p[c] (26 + 26) | như trên, CHỈ nhánh `bash` / CHỈ nhánh `pwsh` (Codex J01 vòng 3) | A14-S0, A14-S6 |
++| v3a, v3b | `P` của nhánh `bash`/`pwsh` là `\S+` (Claude J01 vòng 3) | A14-S0, A14-S6 |
++| v3c, v3d | cho tuỳ chọn giữa `bash`/`python` và `P` (`bash -n`, `python -h`) | A14-S0, A14-S6 |
++| v3f, v3h | ống nhận `… \|\| LENH` ở cuối / `\| ! LENH` | A14-S0, A14-S6 |
++| m-S0[h] (6), m-S0f, m-S0g | sửa một ký tự mỗi hằng; bỏ `re.ASCII`; thêm đường nhận thứ ba | A14-S0 |
++
++**Chốt cho LỚP là A14-S0, không phải A14-S6.** Hai vòng liền (Claude I01 vòng 2, Codex J01 + Claude J01 vòng 3) reviewer dựng được cài đặt
++không tương đương sống qua mọi kho vế đang có; mỗi lần kho được mở thêm đúng chỗ bị chỉ. Đó là hình dạng "vá đúng chỗ được chỉ rồi bỏ sót
++đường thứ ba" của CLAUDE.md, lần thứ 3 trong r8. r8 vòng 3 đổi CÁCH: không đòi kho vế phủ mọi cài đặt khác, mà CẤM cài đặt khác — module
++chép nguyên văn sáu hằng của grammar, A14-S0 so byte. Khi đó mọi đột biến của hằng (kể cả m-S6…S15, v3a…v3h) chết ở A14-S0 ngay; các đột
++biến của LOGIC `cu_phap_run` (m-S1…S5, m-S16…S20) vẫn cần các ca hành vi; A14-S6 là phép đo PHỤ cho bất biến "được nhận ⇒ truyền lỗi" và
++"bằng tham chiếu" trên một kho hữu hạn.
++
++Đo trên tham chiếu, kho sinh bản vòng 3 (`dot_bien_r8.py --sinh`, `dot_bien_sinh_r8.json`): **91/91 đột biến** (m-S7d…j, v3a…v3h, m-S15/m-S15b/m-S15p
++× 26 ký tự) bị vế (a) bắt, lệch tham chiếu 24–1 440 đầu vào mỗi cái. Vế (b) phân loại riêng (Codex J02, Claude J02 vòng 3): 9/91 có thân được
++nhận mà Bash thật NUỐT lỗi (m-S7d/e/f/g/h/i/j, v3d, v3f); 40/91 chỉ có thân "không chạy" chương trình hỏng (lỗi cú pháp, `bash -n`, `pwsh`
++sai dạng…); 42/91 chỉ bị (a) bắt. Số "13/32 nuốt lỗi" của bản vòng 2 SAI (đổi tên tệp xoá ký tự thử, gộp "không chạy"); bỏ.
+ 
+ Đột biến TƯƠNG ĐƯƠNG đã xét, không liệt kê có răng: bỏ `re.ASCII` mà GIỮ lớp ký tự tường minh `[A-Za-z0-9…]` (lớp tường minh không đổi theo
+ cờ; `re.ASCII` chỉ đổi `\w`/`\d`/`\s`/`\b`, mà grammar không dùng) — tương đương, ghi trong thân PR. (Bản đầu của r8 khai thêm "đổi thứ tự bước 1–2
+@@ -1051,7 +1069,7 @@ Thêm, không hồi quy:
+ 
+ | ca | đòi | đột biến làm CHÍNH ca ĐỎ |
+ |---|---|---|
+-| B1 landed kiểu a, một head, lời khai land trích `F-ok`, neo khớp | `DAT` | m-B1 L-7 luôn TRUOT |
++| B1 landed kiểu a, một head, lời khai land trích `F-ok`, neo khớp | `DAT`; stdout khi ĐẠT chứa nguyên văn dòng `GIOI_HAN` (Codex J03, Claude J03 vòng 3) | m-B1 L-7 luôn TRUOT; m-B1b bỏ in dòng `GIOI_HAN` |
+ | B2 landed, không lời khai land nào | `TRUOT … gate_output` | m-B2 bỏ đòi ≥ 1 lời khai land |
+ | B3 landed kiểu b, lời khai land trích tệp dạng `tom` | `TRUOT` | m-B3 chỉ áp cho kiểu a |
+ | B4 không landed, lời khai sai | `BO_QUA` | m-B4 áp cho mọi hồ sơ |
+@@ -1073,7 +1091,7 @@ Trên cây thật (base đợt B): `--root .` ⇒ rc 0, số `DAT` bằng nền,
+ 
+ | ca | đòi | đột biến làm CHÍNH ca ĐỎ |
+ |---|---|---|
+-| C1 lời khai dương trích `F-ok`, neo khớp | 0 vi phạm L8 | m-C1 L8 luôn vi phạm |
++| C1 lời khai dương trích `F-ok`, neo khớp | 0 vi phạm L8; stdout khi ĐẠT chứa nguyên văn dòng `GIOI_HAN` | m-C1 L8 luôn vi phạm; m-C1b bỏ in dòng `GIOI_HAN` |
+ | C2 lời khai dương chỉ trích `kiem-gate-output.txt` | 1 vi phạm `chi_ket_luan_check_run` | m-C2 nhận `kiem-gate*`; m-C6 gỡ L8 |
+ | C3 lời khai `passed`, thư mục provenance vắng | 1 vi phạm `khong_co_provenance` | m-C3 bỏ qua khi vắng provenance; m-C6 |
+ | C4 `not_measured — …` | 0 vi phạm L8 | m-C4 coi mọi token là dương |
+@@ -1092,7 +1110,7 @@ hiện có; đợt C KHÔNG sửa `.claude/dev/ci_dang_ky_test.py`.
+ 
+ | ca | đòi | đột biến làm CHÍNH ca ĐỎ |
+ |---|---|---|
+-| D1 dương `passed` + `gate_output_nguon` trỏ `F-ok`; `ci_master.run_id`/`run_attempt`, `merge_commit` khớp | D2/D2b không vào `thieu` | m-D1 D2b luôn thiếu |
++| D1 dương `passed` + `gate_output_nguon` trỏ `F-ok`; `ci_master.run_id`/`run_attempt`, `merge_commit` khớp | D2/D2b không vào `thieu`; stdout của `kiem-dong-wp` khi `ĐÓNG ĐƯỢC WP` chứa nguyên văn dòng `GIOI_HAN` | m-D1 D2b luôn thiếu; m-D1b bỏ in dòng `GIOI_HAN` |
+ | D2 thiếu `gate_output_nguon` | rc 12, `D2b` | m-D2 bỏ đòi |
+ | D3 `run_id` hoặc `run_attempt` lệch | rc 12 | m-D3a bỏ so `run_id`; m-D3b bỏ so `run_attempt` |
+ | D4 `head_sha` lệch `merge_commit` | rc 12 | m-D4 bỏ so head |
+@@ -1396,7 +1414,7 @@ Chín lượt Codex thi công cùng bốn connector đã đóng F01–F11 và ba
+ | 8 đột biến sống ở a14 lượt 9 | hết đối tượng: mã của chúng bị bỏ (*Bỏ ở r8*); mỗi chốt của K7-S có đột biến riêng (bảng disposition) |
+ | lời khai "0/30 (0/31) bước luật bị ảnh hưởng" | đo lại theo r8: 6/30 bước, 10/22 job J ⇒ mục *Hệ quả*, Q-r8-1 |
+ | F01–F11, connector 4491937587, 4493205470 | giữ nguyên: mục *Kế thừa từ A1*, ca A23 |
+-| kích thước: 950 (r7) ⇒ thực tế 1620 | ước r8 từ số đo, `tran_moi` 2150 (*kich_thuoc*) |
++| kích thước: 950 (r7) ⇒ thực tế 1620 | ước r8 từ số đo, `tran_moi` 2300 (*kich_thuoc*) |
+ 
+ Hình dạng lặp, ghi để đếm: **"chốt dựng bằng danh sách cấm / suy luận ngữ nghĩa trên một ngôn ngữ mở"** — lượt 7→8 suy trạng thái từ `set`,
+ lượt 8→9 danh sách cấm token, cả hai cùng thua trước các biến thể chưa ai liệt kê. Đây đúng bài học "danh sách CẤM không bao giờ đủ" của
+@@ -1439,3 +1457,15 @@ trừ Claude H05 (một phần, xem I05). Grammar vẫn đúng trong môi trư
+ | Claude I06 (P3) — năm lời khai nhỏ | sửa cả năm (`8983e1b` hai bước; `:193`; 14/24 có đối số; 31/31; ai đo `F-ok`) |
+ | Codex I01 (P3) — 68 vế "Bash không nuốt lỗi" gồm 3 vế không chạy | 109 = 106 chạy shell (41 rc 0 + 65 rc ≠ 0) + 3 chỉ grammar |
+ | Codex I02 (P3) — chốt "đúng một miền mở" không có vế riêng | A20 (e′) mọi miền đóng + m-A20i |
++
++### r8 vòng 3 → r8 bản sửa 3 (Codex `changes_requested` 2 P2 + 2 P3; Claude `changes_requested` 1 P2 + 3 P3)
++
++VERDICT ở `ops/reviews/wp1236-spec-r8-3-codex/` và `ops/reviews/wp1236-spec-r8-3-claude/`. Hai reviewer đóng mọi finding vòng 2 của mình
++trừ Claude I01 (một phần). Grammar vẫn đúng trong môi trường sạch (Codex 468 + 12; Claude 4 272 lệnh đơn + 80 ống, 26 072 lượt).
++
++| finding | xử lý |
++|---|---|
++| Codex J01 = Claude J01 (P2) — kho sinh chỉ chèn ký tự trên mẫu `python`, ống hai thành phần, không token giữa tên chương trình và `P`; 52 + 6 đột biến sống | **đổi phương pháp** (hướng A của Claude): grammar NGUYÊN VĂN + ca A14-S0 so byte; quyền "viết khác miễn tương đương" BỎ; A14-S6 thành phép đo phụ, mở rộng theo từng nhánh `DANG`, ống ba thành phần, 30 token ở mọi ranh giới (61 530 đầu vào); 91/91 đột biến bị bắt. Đếm hình dạng "vá theo danh sách reviewer": 3 — lần này đổi KIẾN TRÚC thay vì mở kho tiếp |
++| Codex J02 = Claude J02 (P2/P3) — harness đổi tên tệp, `bash` giả bỏ mọi `-*`, gộp "không chạy" vào "nuốt lỗi" | harness chạy nguyên byte (tự kiểm), tệp ở đúng đường dẫn chữ, `/usr/bin/bash` thật, `pwsh` giả chặt (thoát 99 khi lệch dạng), ba lớp `truyen_loi`/`nuot_loi`/`khong_chay`; bỏ số 13/32 |
++| Codex J03 = Claude J03 (P3) — `GIOI_HAN` ở B/C/D không có ca | B1, C1, D1 đòi dòng `GIOI_HAN` + m-B1b, m-C1b, m-D1b; CLI `kiem-ho-so` cũng in (m-A1c); A1-M2 sửa thành A14-S0…S6 |
++| Codex J04 = Claude J04 (P3) — "37 ký tự", "92 đột biến", ước A14-S6 thấp | 35 ký tự; 158 đột biến (53 + 91 + 8 + 6); ước 2050–2200, `tran_moi` 2300 |

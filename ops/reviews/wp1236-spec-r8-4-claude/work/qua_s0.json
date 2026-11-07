@@ -1,0 +1,303 @@
+{
+ "L0_tham_chieu": {
+  "S0_chat": true,
+  "S0_long": true,
+  "A14_S1": 0,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 0,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": true,
+  "song_sot_S0_long_va_hanh_vi": true,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": []
+ },
+ "L1_ong_match": {
+  "S0_chat": false,
+  "S0_long": true,
+  "A14_S1": 4,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 9816,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": false,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": []
+ },
+ "L2_don_match(m-S4)": {
+  "S0_chat": false,
+  "S0_long": true,
+  "A14_S1": 55,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 12,
+  "A14_S6a_lech": 38351,
+  "ci_vlf_lech": 3,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": false,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": [
+   [
+    "'python ops/hong_test.py || :\\n'",
+    null,
+    0,
+    true
+   ],
+   [
+    "'python ops/hong_test.py &\\n'",
+    null,
+    0,
+    true
+   ],
+   [
+    "'python ops/hong_test.py; true\\n'",
+    null,
+    1,
+    true
+   ],
+   [
+    "'python ops/hong_test.py #c\\n'",
+    null,
+    1,
+    true
+   ]
+  ]
+ },
+ "L3_rstrip(m-S2)": {
+  "S0_chat": true,
+  "S0_long": true,
+  "A14_S1": 1,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 21,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": false,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": []
+ },
+ "L4_strip(m-S3)": {
+  "S0_chat": true,
+  "S0_long": true,
+  "A14_S1": 3,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 273,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": false,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": []
+ },
+ "L5_bo_chu_thich": {
+  "S0_chat": true,
+  "S0_long": true,
+  "A14_S1": 1,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 426,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": false,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": [
+   [
+    "'python ops/hong_test.py #c\\n'",
+    null,
+    1,
+    true
+   ]
+  ]
+ },
+ "L6_bo_va_cuoi": {
+  "S0_chat": true,
+  "S0_long": true,
+  "A14_S1": 0,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 24,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": false,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": [
+   [
+    "'python ops/hong_test.py &\\n'",
+    null,
+    0,
+    true
+   ]
+  ]
+ },
+ "L7_bo_cham_than_dau": {
+  "S0_chat": true,
+  "S0_long": true,
+  "A14_S1": 0,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 24,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": false,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": [
+   [
+    "'! python ops/hong_test.py\\n'",
+    null,
+    0,
+    true
+   ]
+  ]
+ },
+ "L8_splitlines": {
+  "S0_chat": false,
+  "S0_long": true,
+  "A14_S1": 1,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 42,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": false,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": []
+ },
+ "L9_crlf": {
+  "S0_chat": true,
+  "S0_long": true,
+  "A14_S1": 1,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 21,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": false,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": []
+ },
+ "L10_ong_tung_doan": {
+  "S0_chat": false,
+  "S0_long": true,
+  "A14_S1": 0,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 0,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": true,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": []
+ },
+ "L11_ong_pipe_amp": {
+  "S0_chat": true,
+  "S0_long": true,
+  "A14_S1": 1,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 576,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": false,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": []
+ },
+ "L12_dong_cuoi": {
+  "S0_chat": true,
+  "S0_long": true,
+  "A14_S1": 16,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 210,
+  "ci_vlf_lech": 4,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": false,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": []
+ },
+ "L13_cham_phay_dau": {
+  "S0_chat": true,
+  "S0_long": true,
+  "A14_S1": 1,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 120,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": false,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": [
+   [
+    "'python ops/hong_test.py; true\\n'",
+    null,
+    1,
+    true
+   ]
+  ]
+ },
+ "L14_hoac_vo_hai": {
+  "S0_chat": true,
+  "S0_long": true,
+  "A14_S1": 0,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 0,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": true,
+  "song_sot_S0_long_va_hanh_vi": true,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": [
+   [
+    "'python ops/hong_test.py || :\\n'",
+    null,
+    0,
+    true
+   ]
+  ]
+ },
+ "L15_tro_giup": {
+  "S0_chat": false,
+  "S0_long": true,
+  "A14_S1": 0,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 24,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": false,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": [
+   [
+    "'python ops/hong_test.py &\\n'",
+    null,
+    0,
+    true
+   ]
+  ]
+ },
+ "L16_khong_str_None": {
+  "S0_chat": true,
+  "S0_long": true,
+  "A14_S1": 2,
+  "A14_S2": 0,
+  "A14_S4": 12,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 0,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": false,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": []
+ },
+ "L17_ong_shell_khac_sh": {
+  "S0_chat": true,
+  "S0_long": true,
+  "A14_S1": 1,
+  "A14_S2": 0,
+  "A14_S4": 0,
+  "g1_nhan": 0,
+  "A14_S6a_lech": 2032,
+  "ci_vlf_lech": 0,
+  "song_sot_S0_chat_va_hanh_vi": false,
+  "song_sot_S0_long_va_hanh_vi": false,
+  "ngoai_kho_nhan_bash(rc,DA_CHAY)": []
+ }
+}

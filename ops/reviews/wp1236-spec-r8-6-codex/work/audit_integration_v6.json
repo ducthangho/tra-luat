@@ -1,0 +1,114 @@
+{
+  "F_ok": [
+    "passed",
+    []
+  ],
+  "F_ok_goc": [
+    "not_measured",
+    [
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-ops (ubuntu-latest):lease-publish selftest (đo lại setup sau G5)",
+      "cu_phap_run:shell_ngoai_cu_phap:gate-ops (ubuntu-latest):don-nhanh selftest (chốt xoá nhánh)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-ops (ubuntu-latest):bo ca gate chay TRONG cgroup duoc uy quyen (Linux)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate (ubuntu-latest):tl selftest (co bang chung exact-identity)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate (ubuntu-latest):release-bundle x2 cùng SHA-256",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 1):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 4):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 7):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 3):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 5):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 6):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 0):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 2):G5 manh ban kinh dot bien (#668)"
+    ]
+  ],
+  "spy_F_ok": {
+    "calls": 43,
+    "expected": 43,
+    "exact_multiset": true
+  },
+  "spy_F_ok_goc": {
+    "calls": 43,
+    "expected": 43,
+    "exact_multiset": true
+  },
+  "spy_special": [
+    {
+      "body": "python ops/x.py\n",
+      "shell": null,
+      "calls": 43,
+      "expected": 43,
+      "exact_multiset": true
+    },
+    {
+      "body": "python ops/x.py\n",
+      "shell": "bash",
+      "calls": 43,
+      "expected": 43,
+      "exact_multiset": true
+    },
+    {
+      "body": "python ops/K.py\n",
+      "shell": null,
+      "calls": 43,
+      "expected": 43,
+      "exact_multiset": true
+    },
+    {
+      "body": "python ops/K.py\n",
+      "shell": "bash",
+      "calls": 43,
+      "expected": 43,
+      "exact_multiset": true
+    },
+    {
+      "body": "python ops/é.py\n",
+      "shell": null,
+      "calls": 43,
+      "expected": 43,
+      "exact_multiset": true
+    },
+    {
+      "body": "python ops/é.py\n",
+      "shell": "bash",
+      "calls": 43,
+      "expected": 43,
+      "exact_multiset": true
+    },
+    {
+      "body": "python ops/x.py\n\n",
+      "shell": null,
+      "calls": 43,
+      "expected": 43,
+      "exact_multiset": true
+    },
+    {
+      "body": "python ops/x.py\n\n",
+      "shell": "bash",
+      "calls": 43,
+      "expected": 43,
+      "exact_multiset": true
+    },
+    {
+      "body": "﻿python ops/x.py\n",
+      "shell": null,
+      "calls": 43,
+      "expected": 43,
+      "exact_multiset": true
+    },
+    {
+      "body": "﻿python ops/x.py\n",
+      "shell": "bash",
+      "calls": 43,
+      "expected": 43,
+      "exact_multiset": true
+    }
+  ],
+  "S3b": {
+    "n": 325,
+    "errors": []
+  },
+  "legacy_cases": {
+    "a03k_run_duong_nhanh_that": "passed",
+    "a21_pham_vi_land": "passed"
+  }
+}

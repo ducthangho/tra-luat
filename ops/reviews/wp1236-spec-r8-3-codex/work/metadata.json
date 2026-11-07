@@ -1,0 +1,113 @@
+{
+  "head": "09cc1a225169a1ed22cca4aaab5d74faff72e998",
+  "tree": "65234f92f718cbb0bcf144054331fe5e6e67662e",
+  "A15": {
+    "instances": 43,
+    "accepted": 30,
+    "rejected": 13,
+    "names": 29,
+    "accepted_names": 23,
+    "rejected_names": 6,
+    "affected_jobs": 10,
+    "chan_k7": [],
+    "chan_buoc_affected_jobs": 19
+  },
+  "uses_before_first_rule": [
+    22,
+    22
+  ],
+  "checkout_sha": [
+    "fe84620f897913c7f6c2ce5a0c7316a49655e82f"
+  ],
+  "all_checkout_jobs": 23,
+  "luat_sha256": "ee0f2db86fc579ff236ff0417de0658a184a4ed4871468c90a2f0c42417037cc",
+  "ops/cai_cong_cu.sh": [
+    40,
+    45,
+    73,
+    78
+  ],
+  "ops/cai_actionlint.sh": [
+    193
+  ],
+  "before_rule_scripts": {
+    "ops/cai_cong_cu.sh": [
+      "gate",
+      "gate-cong-cu",
+      "gate-ops",
+      "gate-registry",
+      "gate-packet-loop"
+    ],
+    "ops/cai_actionlint.sh": [
+      "gate",
+      "gate-cong-cu",
+      "gate-registry",
+      "gate-packet-loop"
+    ]
+  },
+  "r7_provenance": {
+    "count": 29,
+    "matching": 29,
+    "earliest": [
+      40268583940,
+      "ops/land/pr945-wp899-provenance/do-1026-cebb5b2/ci-provenance-40268583940.yaml",
+      true
+    ]
+  },
+  "gen1_size": {
+    "files": 3,
+    "added": 1620,
+    "deleted": 0
+  },
+  "estimate_arithmetic": 1955,
+  "g1_hashes": [
+    [
+      "rv-a1-8/work/probes.py",
+      true
+    ],
+    [
+      "rv-a1-9/work/extra_shell_probes.py",
+      true
+    ],
+    [
+      "rv-a1-9/work/extra-shell-probes.json",
+      true
+    ],
+    [
+      "rv-a1-9/work/mutation-probes.json",
+      true
+    ],
+    [
+      "rv-a1-9/work/mutant-witnesses.json",
+      true
+    ],
+    [
+      "bot2/rep.py",
+      true
+    ],
+    [
+      "k3chk/rep.py",
+      true
+    ]
+  ],
+  "probes": {
+    "reasons": {
+      "lenh_ngoai_cu_phap": 106,
+      "ong_khong_bash_tuong_minh": 2,
+      "shell_ngoai_cu_phap": 1
+    },
+    "rc0_not_run": [
+      "g_python_c",
+      "g_python_stdin",
+      "g_lenh_ngoai_ds",
+      "g_python_c_tran",
+      "g_bash_c_tran"
+    ],
+    "not_executed_by_harness": [
+      "g_pwsh_shell",
+      "g_run_khong_phai_chuoi",
+      "g_run_khong_phai_chuoi_pwsh"
+    ],
+    "rc_nonzero": 65
+  }
+}

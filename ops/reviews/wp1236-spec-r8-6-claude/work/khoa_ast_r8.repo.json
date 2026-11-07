@@ -1,0 +1,67 @@
+{
+ "goc": [],
+ "dinh_dang_chu_thich": [],
+ "bom": [
+  "ast_ham"
+ ],
+ "ha_chu": [
+  "ast_ham"
+ ],
+ "removesuffix": [
+  "ast_ham"
+ ],
+ "match": [
+  "ast_ham"
+ ],
+ "wrapper": [
+  "kieu:RE_DON"
+ ],
+ "bong_type": [
+  "bong_ten:type"
+ ],
+ "rstrip": [
+  "ast_ham"
+ ],
+ "s0_goc": [],
+ "s0_dinh_dang_chu_thich": [],
+ "s0_chu_thich_tra_ve": [],
+ "s0_chu_thich_tham_so": [
+  "ast_doi_tuong"
+ ],
+ "s0_gan_lai_ten": [
+  "ast_doi_tuong"
+ ],
+ "s0_hai_def": [
+  "ast_doi_tuong"
+ ],
+ "s0_decorator": [
+  "closure_defaults",
+  "ast_doi_tuong"
+ ],
+ "s0_doi_code": [
+  "ast_doi_tuong"
+ ],
+ "s0_defaults": [
+  "closure_defaults",
+  "ast_doi_tuong"
+ ],
+ "gd_goc": [],
+ "gd_nfc_ban_sao": [
+  "'python ops/K.py\\n'",
+  "'python ops/K.py\\n'",
+  "'python ops/é.py\\n'",
+  "'python ops/é.py\\n'"
+ ],
+ "gd_rstrip_ban_sao": [
+  "'python ops/x.py\\n'",
+  "'python ops/x.py\\n'",
+  "'python ops/K.py\\n'",
+  "'python ops/K.py\\n'",
+  "'python ops/é.py\\n'",
+  "'python ops/é.py\\n'",
+  "'python ops/x.py\\n\\n'",
+  "'python ops/x.py\\n\\n'",
+  "'\\ufeffpython ops/x.py\\n'",
+  "'\\ufeffpython ops/x.py\\n'"
+ ]
+}

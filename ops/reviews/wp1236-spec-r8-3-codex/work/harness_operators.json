@@ -1,0 +1,26 @@
+[
+  {
+    "mutant": "m-S7d_tach_ong_hai_gach",
+    "actual_rc0_and_ran": true
+  },
+  {
+    "mutant": "m-S7e_tach_ong_nhieu_gach",
+    "actual_rc0_and_ran": true
+  },
+  {
+    "mutant": "m-S7f_tach_ong_va",
+    "actual_rc0_and_ran": true
+  },
+  {
+    "mutant": "m-S7g_don_va_cuoi",
+    "actual_rc0_and_ran": true
+  },
+  {
+    "mutant": "m-S7h_don_cham_than_dau",
+    "actual_rc0_and_ran": true
+  },
+  {
+    "mutant": "m-S7i_don_hoac_lenh",
+    "actual_rc0_and_ran": true
+  }
+]

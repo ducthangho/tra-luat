@@ -1,0 +1,114 @@
+[
+  {
+    "name": "errexit",
+    "run": "bash +o errexit -c 'python .claude/dev/packet_loop_test.py; true'",
+    "original": [
+      "not_measured",
+      [
+        "tat_tuy_chon_shell:packet-loop selftest"
+      ]
+    ],
+    "mutant": [
+      "passed",
+      []
+    ]
+  },
+  {
+    "name": "plus_e",
+    "run": "bash +e -c 'python .claude/dev/packet_loop_test.py; true'",
+    "original": [
+      "not_measured",
+      [
+        "tat_tuy_chon_shell:packet-loop selftest"
+      ]
+    ],
+    "mutant": [
+      "passed",
+      []
+    ]
+  },
+  {
+    "name": "builtin",
+    "run": "builtin true\npython .claude/dev/packet_loop_test.py | cat",
+    "original": [
+      "not_measured",
+      [
+        "ong_cau_truc_khong_do_duoc:packet-loop selftest"
+      ]
+    ],
+    "mutant": [
+      "passed",
+      []
+    ]
+  },
+  {
+    "name": "command",
+    "run": "command true\npython .claude/dev/packet_loop_test.py | cat",
+    "original": [
+      "not_measured",
+      [
+        "ong_cau_truc_khong_do_duoc:packet-loop selftest"
+      ]
+    ],
+    "mutant": [
+      "passed",
+      []
+    ]
+  },
+  {
+    "name": "shopt",
+    "run": "shopt -s nullglob\npython .claude/dev/packet_loop_test.py | cat",
+    "original": [
+      "not_measured",
+      [
+        "ong_cau_truc_khong_do_duoc:packet-loop selftest"
+      ]
+    ],
+    "mutant": [
+      "passed",
+      []
+    ]
+  },
+  {
+    "name": "function",
+    "run": "echo function\npython .claude/dev/packet_loop_test.py | cat",
+    "original": [
+      "not_measured",
+      [
+        "ong_cau_truc_khong_do_duoc:packet-loop selftest"
+      ]
+    ],
+    "mutant": [
+      "passed",
+      []
+    ]
+  },
+  {
+    "name": "source",
+    "run": "source /dev/null\npython .claude/dev/packet_loop_test.py | cat",
+    "original": [
+      "not_measured",
+      [
+        "ong_cau_truc_khong_do_duoc:packet-loop selftest"
+      ]
+    ],
+    "mutant": [
+      "passed",
+      []
+    ]
+  },
+  {
+    "name": "exec",
+    "run": "exec 3>/dev/null\npython .claude/dev/packet_loop_test.py | cat",
+    "original": [
+      "not_measured",
+      [
+        "ong_cau_truc_khong_do_duoc:packet-loop selftest"
+      ]
+    ],
+    "mutant": [
+      "passed",
+      []
+    ]
+  }
+]

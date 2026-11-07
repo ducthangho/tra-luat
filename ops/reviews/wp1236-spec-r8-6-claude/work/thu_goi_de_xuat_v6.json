@@ -1,0 +1,74 @@
+{
+ "removesuffix_hoac_hai_cham": {
+  "gian_diep_cu": 0,
+  "gian_diep_them": 2,
+  "S3b_cu": 0,
+  "S3b_khong_lf": 1
+ },
+ "removesuffix_hoac_exit0": {
+  "gian_diep_cu": 0,
+  "gian_diep_them": 2,
+  "S3b_cu": 0,
+  "S3b_khong_lf": 0
+ },
+ "removesuffix_hoac_true": {
+  "gian_diep_cu": 0,
+  "gian_diep_them": 2,
+  "S3b_cu": 0,
+  "S3b_khong_lf": 2
+ },
+ "removesuffix_va": {
+  "gian_diep_cu": 0,
+  "gian_diep_them": 2,
+  "S3b_cu": 1,
+  "S3b_khong_lf": 1
+ },
+ "removeprefix_phu_dinh": {
+  "gian_diep_cu": 0,
+  "gian_diep_them": 2,
+  "S3b_cu": 1,
+  "S3b_khong_lf": 1
+ },
+ "crlf_lf": {
+  "gian_diep_cu": 0,
+  "gian_diep_them": 2,
+  "S3b_cu": 1,
+  "S3b_khong_lf": 0
+ },
+ "bo_cr": {
+  "gian_diep_cu": 0,
+  "gian_diep_them": 2,
+  "S3b_cu": 4,
+  "S3b_khong_lf": 2
+ },
+ "tab_cach": {
+  "gian_diep_cu": 0,
+  "gian_diep_them": 2,
+  "S3b_cu": 3,
+  "S3b_khong_lf": 3
+ },
+ "gop_cach": {
+  "gian_diep_cu": 0,
+  "gian_diep_them": 2,
+  "S3b_cu": 2,
+  "S3b_khong_lf": 2
+ },
+ "strip": {
+  "gian_diep_cu": 10,
+  "gian_diep_them": 8,
+  "S3b_cu": 3,
+  "S3b_khong_lf": 2
+ },
+ "rstrip_lf": {
+  "gian_diep_cu": 10,
+  "gian_diep_them": 2,
+  "S3b_cu": 1,
+  "S3b_khong_lf": 0
+ },
+ "nfc": {
+  "gian_diep_cu": 4,
+  "gian_diep_them": 0,
+  "S3b_cu": 0,
+  "S3b_khong_lf": 0
+ }
+}

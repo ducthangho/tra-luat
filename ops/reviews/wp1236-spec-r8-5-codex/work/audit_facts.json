@@ -1,0 +1,99 @@
+{
+  "b796259": {
+    "provenance": 37,
+    "ci_push": 29,
+    "job_set_match": 29,
+    "earliest_run": 40268583940,
+    "checkout_head_mismatch": 0,
+    "workflow_passed": 26,
+    "workflow_blob_match": 26
+  },
+  "d26b36f": {
+    "provenance": 39,
+    "ci_push": 31,
+    "job_set_match": 31,
+    "earliest_run": 40268583940,
+    "checkout_head_mismatch": 0,
+    "workflow_passed": 28,
+    "workflow_blob_match": 28
+  },
+  "workflow": {
+    "rule_steps": 30,
+    "accepted": 24,
+    "accepted_with_args": 14,
+    "shells": {
+      "None": 24,
+      "bash": 5,
+      "pwsh": 1
+    },
+    "actions": {
+      "actions/checkout@v4": 9,
+      "actions/setup-python@v5": 8,
+      "actions/upload-artifact@v4": 3,
+      "actions/download-artifact@v4": 2
+    }
+  },
+  "adr_land": {
+    "52": {
+      "exists_rcs": [
+        0,
+        128
+      ],
+      "first_parent": true,
+      "ref": "9607e3eba96b2ce091e34196cbb8ede31a521ff9"
+    },
+    "53": {
+      "exists_rcs": [
+        0,
+        128
+      ],
+      "first_parent": true,
+      "ref": "9607e3eba96b2ce091e34196cbb8ede31a521ff9"
+    }
+  },
+  "numstat": [
+    "1\t0\t.claude/dev/ci_dang_ky_test.py",
+    "539\t0\tops/gate_output_doi_chieu.py",
+    "1080\t0\tops/gate_output_doi_chieu_test.py"
+  ],
+  "estimate": {
+    "test_net": 555,
+    "module_net": 10,
+    "total_explicit_terms": 2185,
+    "mutants_listed": 164,
+    "current_total": 2248
+  },
+  "generator": {
+    "KT": 35,
+    "hat": 24,
+    "all_position_pipeline_unique": 1989,
+    "present": 666,
+    "missing": 1323
+  },
+  "g1_hashes": [
+    7,
+    7
+  ],
+  "limit_assertions": {
+    "A1": {
+      "GIOI_HAN": true,
+      "mutant": true
+    },
+    "B1": {
+      "GIOI_HAN": true,
+      "mutant": true
+    },
+    "C1": {
+      "GIOI_HAN": true,
+      "mutant": true
+    },
+    "D1": {
+      "GIOI_HAN": true,
+      "mutant": true
+    }
+  },
+  "H04": {
+    "reference": "lenh_ngoai_cu_phap",
+    "swapped": "shell_ngoai_cu_phap"
+  }
+}

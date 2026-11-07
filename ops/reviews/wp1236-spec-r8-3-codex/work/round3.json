@@ -1,0 +1,84 @@
+{
+  "workflows": {
+    "d26b36f": {
+      "steps": 30,
+      "accepted": 24,
+      "with_args": 14,
+      "shells": {
+        "None": 24,
+        "bash": 5,
+        "pwsh": 1
+      },
+      "uses": {
+        "actions/checkout@v4": 9,
+        "actions/setup-python@v5": 8,
+        "actions/upload-artifact@v4": 3,
+        "actions/download-artifact@v4": 2
+      },
+      "pinned_sha": 0,
+      "actionlint_GITHUB_PATH_lines": [
+        226
+      ]
+    },
+    "fe84620": {
+      "steps": 30,
+      "accepted": 24,
+      "with_args": 14,
+      "shells": {
+        "None": 24,
+        "bash": 5,
+        "pwsh": 1
+      },
+      "uses": {
+        "actions/checkout@v4": 9,
+        "actions/setup-python@v5": 8,
+        "actions/upload-artifact@v4": 3,
+        "actions/download-artifact@v4": 2
+      },
+      "pinned_sha": 0,
+      "actionlint_GITHUB_PATH_lines": [
+        193
+      ]
+    },
+    "8983e1b": {
+      "steps": 30,
+      "accepted": 25,
+      "with_args": 14,
+      "shells": {
+        "None": 24,
+        "bash": 5,
+        "pwsh": 1
+      },
+      "uses": {
+        "actions/checkout@v4": 9,
+        "actions/setup-python@v5": 8,
+        "actions/upload-artifact@v4": 3,
+        "actions/download-artifact@v4": 2
+      },
+      "pinned_sha": 0,
+      "actionlint_GITHUB_PATH_lines": [
+        193
+      ]
+    }
+  },
+  "changed_rule_steps": [
+    "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)",
+    "lease-publish selftest (đo lại setup sau G5)"
+  ],
+  "provenance": {
+    "total": 39,
+    "checkout_head_different": [],
+    "workflow_passed": 28,
+    "workflow_blob_match": 28,
+    "ci_push": 31,
+    "jobs_match": 31,
+    "earliest": [
+      40268583940,
+      "ops/land/pr945-wp899-provenance/do-1026-cebb5b2/ci-provenance-40268583940.yaml",
+      true
+    ]
+  },
+  "new_estimate_arithmetic": 2022,
+  "declared_estimate_arithmetic": 2020,
+  "ceiling": 2150
+}

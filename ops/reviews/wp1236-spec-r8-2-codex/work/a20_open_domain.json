@@ -1,0 +1,121 @@
+{
+  "a": {
+    "baseline_ledger": [],
+    "mutant_ledger": [],
+    "specified_case_passes": [
+      true,
+      true
+    ]
+  },
+  "b": {
+    "baseline_ledger": [],
+    "mutant_ledger": [],
+    "specified_case_passes": [
+      true,
+      true
+    ]
+  },
+  "c": {
+    "baseline_ledger": [
+      "khoa_khac_bam:000000000000"
+    ],
+    "mutant_ledger": [
+      "khoa_khac_bam:000000000000"
+    ],
+    "specified_case_passes": [
+      true,
+      true
+    ]
+  },
+  "d": {
+    "baseline_ledger": [
+      "mien_chong"
+    ],
+    "mutant_ledger": [
+      "mien_chong"
+    ],
+    "specified_case_passes": [
+      true,
+      true
+    ]
+  },
+  "e": {
+    "baseline_ledger": [
+      "mien_chong",
+      "mien_mo_khac_1"
+    ],
+    "mutant_ledger": [
+      "mien_chong"
+    ],
+    "specified_case_passes": [
+      true,
+      true
+    ]
+  },
+  "f": {
+    "baseline_ledger": [
+      "job_bat_buoc_trung"
+    ],
+    "mutant_ledger": [
+      "job_bat_buoc_trung"
+    ],
+    "specified_case_passes": [
+      true,
+      true
+    ]
+  },
+  "g": {
+    "baseline_ledger": [
+      "mien_mo_thieu_check_bat_buoc"
+    ],
+    "mutant_ledger": [
+      "mien_mo_thieu_check_bat_buoc"
+    ],
+    "specified_case_passes": [
+      true,
+      true
+    ]
+  },
+  "h": {
+    "baseline_ledger": [
+      "job_khong_dung_mot_muc:unmatched (ubuntu-latest)"
+    ],
+    "mutant_ledger": [
+      "job_khong_dung_mot_muc:unmatched (ubuntu-latest)"
+    ],
+    "specified_case_passes": [
+      true,
+      true
+    ]
+  },
+  "i": {
+    "baseline_ledger": [
+      "job_khong_dung_mot_muc:gate (ubuntu-latest)"
+    ],
+    "mutant_ledger": [
+      "job_khong_dung_mot_muc:gate (ubuntu-latest)"
+    ],
+    "specified_case_passes": [
+      true,
+      true
+    ]
+  },
+  "i_prime": {
+    "baseline_ledger": [],
+    "mutant_ledger": [],
+    "specified_case_passes": [
+      true,
+      true
+    ]
+  },
+  "zero_open": {
+    "baseline_ledger": [
+      "mien_mo_khac_1"
+    ],
+    "mutant_ledger": [],
+    "specified_case_passes": [
+      true,
+      false
+    ]
+  }
+}

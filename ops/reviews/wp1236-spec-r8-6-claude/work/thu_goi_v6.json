@@ -1,0 +1,110 @@
+{
+ "removesuffix_hoac_hai_cham": {
+  "doi_F-ok-goc": 0,
+  "doi_F-ok": 0,
+  "doi_gian_diep": 0,
+  "lech_S3b_bang": 0,
+  "lech_S3b_mau": 0,
+  "lech_kho_S6": 0,
+  "qua_moi_ca": true
+ },
+ "removesuffix_hoac_exit0": {
+  "doi_F-ok-goc": 0,
+  "doi_F-ok": 0,
+  "doi_gian_diep": 0,
+  "lech_S3b_bang": 0,
+  "lech_S3b_mau": 0,
+  "lech_kho_S6": 0,
+  "qua_moi_ca": true
+ },
+ "removesuffix_hoac_true": {
+  "doi_F-ok-goc": 0,
+  "doi_F-ok": 0,
+  "doi_gian_diep": 0,
+  "lech_S3b_bang": 0,
+  "lech_S3b_mau": 0,
+  "lech_kho_S6": 0,
+  "qua_moi_ca": true
+ },
+ "removesuffix_va": {
+  "doi_F-ok-goc": 0,
+  "doi_F-ok": 0,
+  "doi_gian_diep": 0,
+  "lech_S3b_bang": 0,
+  "lech_S3b_mau": 1,
+  "lech_kho_S6": 72,
+  "qua_moi_ca": false
+ },
+ "removeprefix_phu_dinh": {
+  "doi_F-ok-goc": 0,
+  "doi_F-ok": 0,
+  "doi_gian_diep": 0,
+  "lech_S3b_bang": 1,
+  "lech_S3b_mau": 0,
+  "lech_kho_S6": 24,
+  "qua_moi_ca": false
+ },
+ "crlf_lf": {
+  "doi_F-ok-goc": 0,
+  "doi_F-ok": 0,
+  "doi_gian_diep": 0,
+  "lech_S3b_bang": 1,
+  "lech_S3b_mau": 0,
+  "lech_kho_S6": 21,
+  "qua_moi_ca": false
+ },
+ "bo_cr": {
+  "doi_F-ok-goc": 0,
+  "doi_F-ok": 0,
+  "doi_gian_diep": 0,
+  "lech_S3b_bang": 2,
+  "lech_S3b_mau": 2,
+  "lech_kho_S6": 540,
+  "qua_moi_ca": false
+ },
+ "tab_cach": {
+  "doi_F-ok-goc": 0,
+  "doi_F-ok": 0,
+  "doi_gian_diep": 0,
+  "lech_S3b_bang": 3,
+  "lech_S3b_mau": 0,
+  "lech_kho_S6": 18,
+  "qua_moi_ca": false
+ },
+ "gop_cach": {
+  "doi_F-ok-goc": 3,
+  "doi_F-ok": 0,
+  "doi_gian_diep": 0,
+  "lech_S3b_bang": 2,
+  "lech_S3b_mau": 0,
+  "lech_kho_S6": 96,
+  "qua_moi_ca": false
+ },
+ "strip": {
+  "doi_F-ok-goc": 5,
+  "doi_F-ok": 6,
+  "doi_gian_diep": 10,
+  "lech_S3b_bang": 3,
+  "lech_S3b_mau": 0,
+  "lech_kho_S6": 273,
+  "qua_moi_ca": false
+ },
+ "rstrip_lf": {
+  "doi_F-ok-goc": 5,
+  "doi_F-ok": 6,
+  "doi_gian_diep": 10,
+  "lech_S3b_bang": 1,
+  "lech_S3b_mau": 0,
+  "lech_kho_S6": 21,
+  "qua_moi_ca": false
+ },
+ "nfc": {
+  "doi_F-ok-goc": 0,
+  "doi_F-ok": 0,
+  "doi_gian_diep": 4,
+  "lech_S3b_bang": 0,
+  "lech_S3b_mau": 0,
+  "lech_kho_S6": 0,
+  "qua_moi_ca": false
+ }
+}

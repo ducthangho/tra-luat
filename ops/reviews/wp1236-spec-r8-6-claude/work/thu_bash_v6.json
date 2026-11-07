@@ -1,0 +1,38 @@
+{
+ "python ops/hong.py || : | None": {
+  "rc": 0,
+  "DA_CHAY": true
+ },
+ "python ops/hong.py || : | bash": {
+  "rc": 0,
+  "DA_CHAY": true
+ },
+ "python ops/hong.py || : | sh": {
+  "rc": 0,
+  "DA_CHAY": true
+ },
+ "python ops/hong.py || true | None": {
+  "rc": 0,
+  "DA_CHAY": true
+ },
+ "python ops/hong.py || true | bash": {
+  "rc": 0,
+  "DA_CHAY": true
+ },
+ "python ops/hong.py || true | sh": {
+  "rc": 0,
+  "DA_CHAY": true
+ },
+ "python ops/hong.py || exit 0 | None": {
+  "rc": 0,
+  "DA_CHAY": true
+ },
+ "python ops/hong.py || exit 0 | bash": {
+  "rc": 0,
+  "DA_CHAY": true
+ },
+ "python ops/hong.py || exit 0 | sh": {
+  "rc": 0,
+  "DA_CHAY": true
+ }
+}

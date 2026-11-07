@@ -1,0 +1,41 @@
+{
+  "event": "owner_directed_finding_waiver",
+  "packet_issue": 1239,
+  "mission_issue": 1238,
+  "revision": 7,
+  "generation": 5,
+  "owner_instruction": "F1, F2 không thể sửa được phải không. Tôi cho phép bỏ qua",
+  "source": "owner instruction in dispatcher conversation",
+  "recorded_by": "Codex Dispatcher; transport only, not reviewer or human auditor",
+  "head": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb",
+  "findings": [
+    {
+      "id": "F1",
+      "slug": "sensitive-assurance-unproven-executor-family",
+      "severity": "P1",
+      "disposition": "owner_waived",
+      "residual": "AGY serving-family remains KHONG_DO_DUOC; no cross_approved/human_audited claim"
+    },
+    {
+      "id": "F2",
+      "slug": "full-gate-execution-binding-incomplete",
+      "severity": "P2",
+      "disposition": "owner_waived",
+      "residual": "Complete replacement gate receipt exists; not independently closed by reviewer"
+    }
+  ],
+  "reason": "Owner explicitly accepts bypass of these two evidence findings after explanation; no product content finding remains. This is a scoped owner exception, not a normal P3 waiver under ADR0060 M1.",
+  "scope": "Only F1/F2 on this exact H/tree, single P0 candidate; no other checks or packets",
+  "expiry": "Invalid on any candidate head/tree change; ends with this P0 disposition",
+  "raw_reviewer_verdict": "blocked; unchanged",
+  "assurance": "not_established; unchanged",
+  "models_called": false,
+  "budget_reset": false,
+  "executor_restarted": false,
+  "merge_land_deploy_authorized": false,
+  "required_checks_waived": false,
+  "branch_protection_bypass_authorized": false,
+  "packet_loop_state": "blocked/rescue; no unsupported state edit",
+  "durable_url": "https://github.com/ducthangho/tra-luat/issues/1239#issuecomment-6704067442"
+}

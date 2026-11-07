@@ -28,6 +28,8 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import contextvars
+import functools
 import hashlib
 import hmac
 import html
@@ -2420,12 +2422,27 @@ KHOA_NGU_CANH = ("lease_id", "lease_ref", "lease_oid", "lease_path", "repo", "br
                  "executor", "reviewer", "required_checks")
 
 
+_1174_SCOPED = contextvars.ContextVar("wp1174_scoped", default=False)
+
+
+def _1174_scoped(fn):
+    @functools.wraps(fn)
+    def scoped(*args, **kwargs):
+        token = _1174_SCOPED.set(True)
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            _1174_SCOPED.reset(token)
+    return scoped
+
+
 def _git_do(root: Path, *args, deadline=None) -> tuple[int, bytes]:
     try:
         remaining=300 if deadline is None else min(300,deadline-time.time())
         if remaining<=0:return -1,b""
-        p = subprocess.run(["git", "--no-replace-objects", "-C", str(root), *args],
-                           env=_1174_git_env(), capture_output=True, timeout=remaining)
+        scoped = _1174_SCOPED.get() or deadline is not None
+        p = subprocess.run(["git", *(["--no-replace-objects"] if scoped else []), "-C", str(root), *args],
+                           **({"env": _1174_git_env()} if scoped else {}), capture_output=True, timeout=remaining)
         if deadline is not None and time.time()>=deadline:return -1,b""
         return p.returncode, p.stdout
     except (OSError, subprocess.SubprocessError, ValueError):
@@ -2473,7 +2490,8 @@ def _nap(td: Path, ten: str):
 
 def _chay_canon(*args, **kwargs):
     try:
-        kwargs.setdefault("env", _1174_git_env())
+        if _1174_SCOPED.get():
+            kwargs.setdefault("env", _1174_git_env())
         return subprocess.run(*args, **kwargs)
     except (OSError, subprocess.SubprocessError, ValueError) as ex:
         _die(RC_GUARD, f"KHÔNG ĐO ĐƯỢC: chạy validator canon: {type(ex).__name__}")
@@ -2700,7 +2718,10 @@ def _verify_lease_ref(a, st: dict):
 
 
 def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
-    facts = _verify_lease_ref(a, st)
+    return _apply_lease_ref(a, state_dir, st, _verify_lease_ref(a, st))
+
+
+def _apply_lease_ref(a, state_dir, st, facts):
     lease, nc, che_do = facts["lease"], facts["context"], facts["mode"]
     lid, oid = lease["lease_id"], nc["lease_oid"]
     st.update(lease=lease, state="leased", luat_adr0054=che_do, ngu_canh_lease=nc)
@@ -3536,9 +3557,18 @@ _T1174_DISPOSITIONS = {"adopted": "resume_forward", "aborted": "abandon_before_c
                        "aborted_intent": "abandon_before_prepare"}
 
 
+class _1174Error(ValueError):
+    def __init__(self, reason, status="UNKNOWN"):
+        super().__init__("WP1174 UNKNOWN: " + reason)
+        self.status = status
+
+
 def _1174_require(ok, reason):
     if not ok:
-        raise ValueError("WP1174 UNKNOWN: " + reason)
+        status = ("input_rejected" if reason.startswith("input_rejected:") else
+                  reason if reason in ("revision_rejected", "legacy_changed") else
+                  "FAIL" if reason == "publication evidence FAIL" else "UNKNOWN")
+        raise _1174Error(reason, status)
 
 
 def _1174_int(value):
@@ -4126,7 +4156,7 @@ def _1174_api(endpoint, *, root, deadline, max_bytes=30*1024*1024, on_bytes=None
     except (UnicodeError,ValueError) as ex:raise ValueError("WP1174 UNKNOWN: scoped API JSON") from ex
 
 
-def _1174_comments(lp, packet, root):
+def _1174_comments(packet, root):
     started, count, comments = time.monotonic(), 0, []
     deadline=time.time()+120
     for page in range(1, 101):
@@ -4188,6 +4218,7 @@ def _1174_git_env():
     return {k: v for k, v in os.environ.items() if k not in selectors and not k.startswith("GIT_CONFIG_")}
 
 
+@_1174_scoped
 def _1174_git_view(root):
     root = Path(root)
     _1174_require(root.is_absolute() and root.resolve(strict=True) == root and (root / ".git").is_dir(),
@@ -4220,6 +4251,7 @@ def _1174_rollout(root):
     _1174_require(rc == 0 and raw == Path(__file__).read_bytes(), "consumer not current landed canonical code")
 
 
+@_1174_scoped
 def _1174_resolve(root, packet, revision, generation, admission_file, identities=None):
     with _1174_git_snapshot(root) as snapshot:
         _1174_rollout(snapshot)
@@ -4236,6 +4268,7 @@ def _1174_i2_identity(pinned, identities):
     return {k: pinned[k] for k in keys}
 
 
+@_1174_scoped
 def _1174_resolve_snapshot(root, packet, revision, generation, admission_file, identities=None):
     """Discover the existing canonical lease/spec chain; FILE is only a byte copy.
 
@@ -4258,18 +4291,22 @@ def _1174_resolve_snapshot(root, packet, revision, generation, admission_file, i
         permission = _1174_api(f"repos/{_1174_REPO}/collaborators/{CHU_KHO}/permission",root=root,deadline=time.time()+120)
         _1174_require(type(permission) is dict and permission.get("permission") in ("admin", "maintain") and
                       permission.get("user", {}).get("login") == CHU_KHO, "owner maintain permission")
-        comments = _1174_comments(lp, packet, root)
+        comments = _1174_comments(packet, root)
         all_leases = lp._quet_lease_toan_kho(root, chan_nhanh_tut_sau=True)
         _1174_require(type(all_leases) is list and all(type(row) is dict and type(row.get("lease")) is dict
                       for row in all_leases), "canonical lease collection")
         registered = [row for row in all_leases if all(type(row["lease"].get(k)) is int and row["lease"][k] == v
             for k, v in (("packet_issue", packet), ("revision", revision), ("generation", generation))) and
-            lp._phan_loai_lease(row["lease"]) == "CÒN_HẠN" and lp._bia_mo_doi_xung(row["lease"], all_leases) is False]
+            lp._phan_loai_lease(row["lease"]) == "CÒN_HẠN" and lp._bia_mo_doi_xung(row["lease"], all_leases) is None]
         _1174_require(len(registered) == 1, "no unique current canonical Packet lease/spec")
         row, now = registered[0], datetime.now(timezone.utc)
+        lease_rc, lease_oid_raw = _git_do(root, "rev-parse", row["ref"])
+        lease_oid = lease_oid_raw.decode().strip()
+        _1174_require(lease_rc == 0 and SHA_RE.fullmatch(lease_oid), "canonical lease ref OID")
         lease = row["lease"]
         _1174_require(type(lease.get("spec_ref")) is str and "@" in lease["spec_ref"], "canonical immutable spec required")
-        spec = _spec_merge(root, None, lease.get("spec_path"), lease)
+        spec_oid = lease["spec_ref"].rsplit("@", 1)[1]
+        spec = _spec_merge(root, spec_oid, lease.get("spec_path"), lease)
         visible, errors = _che_khong_render(spec.decode("utf-8"))
         _1174_require(not errors, "canonical spec render")
         descriptor = {}
@@ -4311,13 +4348,16 @@ def _1174_resolve_snapshot(root, packet, revision, generation, admission_file, i
                 with contextlib.redirect_stdout(io.StringIO()):
                     verified = _verify_lease_ref(argparse.Namespace(root=str(root), lease_ref="origin/" + remote_ref,
                         lease_path=row["path"], lease_comments=str(readback)), st)
-                _1174_require(type(verified) is dict and verified["lease"]["lease_id"] == lease["lease_id"], "canonical lease verification")
+                _1174_require(type(verified) is dict and verified["lease"]["lease_id"] == lease["lease_id"] and
+                    verified["context"]["lease_oid"] == lease_oid, "canonical lease verification")
             except SystemExit as ex:
                 raise ValueError("WP1174 UNKNOWN: canonical I2 verification rc=" + str(ex.code)) from ex
-        _, installed_id = _1174_installed_mission(_1174_comments(lp, 1172, root), admission, now)
+        _, installed_id = _1174_installed_mission(_1174_comments(1172, root), admission, now)
         return admission, dict(canonical_oid=local.decode().strip(), spec_sha256=registration["spec_sha256"],
                                admission_sha256=registration["admission_sha256"], mission_install_id=installed_id,
-                               lease_id=lease["lease_id"], lease=lease, spec=spec)
+                               lease_id=lease["lease_id"], lease=lease, spec=spec, verified_i2=verified,
+                               lease_oid=lease_oid,
+                               lease_ref="origin/" + remote_ref, lease_path=row["path"], comments=comments)
 
 
 _1174_MUTATORS = ("init", "record-lease", "begin-attempt", "void-attempt", "record-review", "transition",
@@ -4705,7 +4745,8 @@ def _1174_initialize(a, admission, witness_raw):
     return "completed_no_dispatch"
 
 
-def _1174_ordinary(a, directory, admission, witness_raw):
+@_1174_scoped
+def _1174_ordinary(a, directory, admission, witness_raw, facts=None):
     global _1174_TRANSACTION
     _1174_alive(admission)
     e = admission["enrollment"]
@@ -4725,7 +4766,8 @@ def _1174_ordinary(a, directory, admission, witness_raw):
         with contextlib.redirect_stdout(io.StringIO()):
             try:
                 rc = (_1174_review(a, directory, admission) if a.cmd == "record-review" else
-                      _1174_accept(a, directory, admission) if a.cmd == "accept" else a.fn(a, directory))
+                      _1174_accept(a, directory, admission) if a.cmd == "accept" else
+                      _1174_record_lease(a, directory, state, admission, facts) if a.cmd == "record-lease" else a.fn(a, directory))
             except SystemExit as ex:
                 rc = ex.code
         _1174_require(type(rc) is int and rc in (0, 3) and tx["proposal"] is not None, "legacy predicate rejected")
@@ -4748,6 +4790,29 @@ def _1174_ordinary(a, directory, admission, witness_raw):
         return "quota_exhausted" if rc == 3 else "reserved_for_dispatch" if a.cmd in ("begin-attempt", "record-codex-call") else "completed_no_dispatch"
     finally:
         _1174_TRANSACTION = previous
+
+
+def _1174_record_lease(a, directory, state, admission, facts):
+    state = _load(directory, a.packet)
+    _1174_require(type(facts) is dict and "verified_i2" in facts, "scoped lease authority missing")
+    verified = facts["verified_i2"]
+    context = verified["context"]
+    lease = facts["lease"]
+    _1174_require(a.lease_ref == facts["lease_ref"] == context["lease_ref"] and
+        a.lease_path == facts["lease_path"] == context["lease_path"] and
+        context["lease_oid"] == facts["lease_oid"] and
+        verified["lease"]["lease_id"] == facts["lease_id"] == lease["lease_id"] and
+        all(type(lease.get(k)) is int and lease[k] == admission[k] == getattr(a,k) for k in ("revision", "generation")) and
+        context["generation"] == admission["generation"] and
+        not any(getattr(a, k, None) is not None for k in ("lease_id", "granted_by", "evidence", "expires_utc")),
+        "scoped lease authority mismatch")
+    _1174_require(type(a.lease_comments) is str and _1174_read_json(a.lease_comments) == facts["comments"],
+        "scoped lease comments differ from API")
+    _1174_require(verified["comments_sha256"] == hashlib.sha256(_1174_bytes(facts["comments"])).hexdigest(),
+        "scoped lease API receipt binding")
+    _1174_require(state["state"] == "awaiting_lease", "scoped lease state")
+    _xet_dung(directory, state, "record-lease")
+    return _apply_lease_ref(a, directory, state, verified)
 
 
 def _1174_postimage(old, new, command, admission):
@@ -4804,16 +4869,25 @@ def _1174_lifecycle_records(state, admission):
 def _1174_review(a, directory, admission):
     st = _load(directory, a.packet)
     _1174_require(st.get("luat_adr0054") is True,"scoped review requires canonical pending/human lane")
+    _1174_require(type(a.bien_nhan) is str and bool(a.bien_nhan), "review receipt required")
+    receipt_path = Path(a.bien_nhan)
+    before = receipt_path.stat()
+    raw = receipt_path.read_bytes()
+    signature = lambda st: (st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns, st.st_ctime_ns)
     service = st["reviewer_identity"]["execution_surface"] == "codex_service"
     if not service:
-        rc = cmd_record_review(a, directory)
+        with tempfile.TemporaryDirectory(prefix="wp1174-receipt-") as temporary:
+            copy = Path(temporary) / "receipt"
+            copy.write_bytes(raw)
+            args = argparse.Namespace(**vars(a))
+            args.bien_nhan = str(copy)
+            rc = cmd_record_review(args, directory)
         proposal = _1174_TRANSACTION["proposal"]
     else:
         _1174_require(st["state"] == "reviewing" and st["attempt_open"] and st["attempts_used"] > 0 and
             a.reviewed_sha == st["reviewing_head_sha"], "advisory attempt/head")
         _check_runtime_identity(a, st, "reviewer")
         _1174_require(a.provider == st["reviewer"], "advisory provider")
-        raw = Path(a.bien_nhan).read_bytes()
         record = _1174_json(raw)
         expected = dict(schema="wp1174_service_advisory.v1", head=a.reviewed_sha,
             identity=st["reviewer_identity"], verdict=a.verdict, finding_ids=sorted(set(a.finding_id or [])), assurance="advisory_review")
@@ -4838,9 +4912,10 @@ def _1174_review(a, directory, admission):
         st["history"].append(dict(event="record_review", verdict=a.verdict, reviewed_sha=a.reviewed_sha, finding_ids=record["finding_ids"]))
         _save(directory, st)
         proposal, rc = _1174_TRANSACTION["proposal"], 0
+    _1174_require(signature(receipt_path.stat()) == signature(before), "review receipt changed during validation")
     proposal["scoped_review"] = dict(schema="wp1174_scoped_review.v1", head=a.reviewed_sha,
         identity=st["reviewer_identity"], verdict=a.verdict, finding_ids=sorted(set(a.finding_id or [])),
-        receipt_sha256=hashlib.sha256(Path(a.bien_nhan).read_bytes()).hexdigest(), assurance="advisory_review", call_id=a.codex_call)
+        receipt_sha256=hashlib.sha256(raw).hexdigest(), assurance="advisory_review", call_id=a.codex_call)
     proposal["human_acceptance"] = None
     return rc
 
@@ -4967,6 +5042,47 @@ def _1174_collector_receipt(receipt, head, audit, repo_id):
     return receipt
 
 
+def _1174_read_json(path):
+    return json.loads(Path(path).read_bytes().decode("utf-8"), object_pairs_hook=_cam_khoa_trung,
+        parse_constant=_cam_hang_ngoai_json)
+
+
+def _1174_human_runs(a, head, deadline):
+    _1174_require(type(a.human_remote_run) is str and type(a.workflow_runs) is str, "human run files required")
+    claimed = _1174_read_json(a.human_remote_run)
+    _1174_require(type(claimed) is dict and type(claimed.get("id")) is int and claimed["id"] > 0, "human run id")
+    size = 0
+    def fetch(endpoint):
+        nonlocal size
+        measured = []
+        value = _1174_api(endpoint, root=Path(a.root), deadline=deadline,
+            max_bytes=30*1024*1024-size, on_bytes=measured.append)
+        size += sum(measured) if measured else len(_1174_bytes(value))
+        _1174_require(time.time() < deadline and size <= 30*1024*1024, "human run readback budget")
+        return value
+    run = fetch(f"repos/{_1174_REPO}/actions/runs/{claimed['id']}")
+    _1174_require(_1174_bytes(run) == _1174_bytes(claimed), "human remote run current readback mismatch")
+    rows, total = [], None
+    for page in range(1, 101):
+        data = fetch(f"repos/{_1174_REPO}/actions/runs?head_sha={head}&per_page=100&page={page}")
+        _1174_require(type(data) is dict and type(data.get("total_count")) is int and data["total_count"] >= 0 and
+            type(data.get("workflow_runs")) is list and len(data["workflow_runs"]) <= 100,
+            "human run pagination")
+        total = data["total_count"] if total is None else total
+        _1174_require(data["total_count"] == total, "human run pagination changed")
+        rows.extend(data["workflow_runs"])
+        if len(rows) >= total or len(data["workflow_runs"]) < 100:
+            break
+    _1174_require(len(rows) == total and all(type(x) is dict and type(x.get("id")) is int for x in rows) and
+        len({x["id"] for x in rows}) == total, "human run pagination incomplete")
+    caller = _trang_du(_1174_read_json(a.workflow_runs), "workflow_runs", "scoped human workflow_runs")
+    key = lambda row: row["id"]
+    _1174_require(_1174_bytes(sorted(rows, key=key)) == _1174_bytes(sorted(caller, key=key)),
+        "human workflow set current readback mismatch")
+    return run, dict(total_count=total, workflow_runs=rows)
+
+
+@_1174_scoped
 def _1174_human_evidence(a, admission, head):
     current, facts = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission)
     _1174_require(current == admission, "human authority changed")
@@ -4977,18 +5093,22 @@ def _1174_human_evidence(a, admission, head):
         all(type(facts["lease"].get(k)) is int and facts["lease"][k] == admission[k] for k in ("revision", "generation")), "human canonical scope")
     _1174_require(_git_do(Path(a.root),"rev-parse","refs/remotes/origin/master") ==
         (0,(facts["canonical_oid"]+"\n").encode()),"human canonical Git snapshot stale")
-    _human_merge(args, Path(a.root), facts["lease"], facts["spec"], p3)
+    collection_end = min(time.time()+180, _1174_time(admission["expires_utc"]).timestamp())
+    run, runs = _1174_human_runs(args, head, min(collection_end, time.time()+120))
+    with tempfile.TemporaryDirectory(prefix="wp1174-human-runs-") as temporary:
+        for field, value in (("human_remote_run", run), ("workflow_runs", runs)):
+            path = Path(temporary) / field
+            path.write_bytes(_1174_bytes(value))
+            setattr(args, field, str(path))
+        _human_merge(args, Path(a.root), facts["lease"], facts["spec"], p3)
     _1174_require(not p3, "human findings remain")
     _, audit, _ = _owner_record(a.human_audit_comment, _1174_REPO, a.pr, "human_exact_head_audit.v1")
-    with _canon(Path(a.root)) as canonical:
-        lp = _nap(canonical, "lease_publish")
-        collection_end=min(time.time()+180,_1174_time(admission["expires_utc"]).timestamp())
-        repo = _1174_api("repos/" + _1174_REPO,root=Path(a.root),deadline=collection_end)
-        _1174_require(type(repo.get("id")) is int and repo["id"] > 0 and repo.get("full_name") == _1174_REPO, "collector repository")
-        observed_audit=_1174_api(f"repos/{_1174_REPO}/issues/comments/{audit['id']}",root=Path(a.root),deadline=collection_end)
-        _1174_require(type(observed_audit) is dict and _1174_bytes(observed_audit)==_1174_bytes(audit),"human audit current readback mismatch")
-        collected = _1174_collect(lambda endpoint,**limits: _1174_api(endpoint,root=Path(a.root),**limits), Path(a.root), head, audit, repo["id"],
-            deadline=collection_end)
+    repo = _1174_api("repos/" + _1174_REPO,root=Path(a.root),deadline=collection_end)
+    _1174_require(type(repo.get("id")) is int and repo["id"] > 0 and repo.get("full_name") == _1174_REPO, "collector repository")
+    observed_audit=_1174_api(f"repos/{_1174_REPO}/issues/comments/{audit['id']}",root=Path(a.root),deadline=collection_end)
+    _1174_require(type(observed_audit) is dict and _1174_bytes(observed_audit)==_1174_bytes(audit),"human audit current readback mismatch")
+    collected = _1174_collect(lambda endpoint,**limits: _1174_api(endpoint,root=Path(a.root),**limits), Path(a.root), head, audit, repo["id"],
+        deadline=collection_end)
     path = getattr(a, "publication_receipt", None) or getattr(a, "receipt", None)
     supplied = _1174_collector_receipt(_1174_json(Path(path).read_bytes()), head, audit, repo["id"])
     # Observation timestamps can differ across two collections. All immutable
@@ -5014,6 +5134,7 @@ def _1174_accept(a, directory, admission):
     return rc
 
 
+@_1174_scoped
 def _1174_guard(a):
     try:
         _1174_require(type(a.packet) is int and a.packet > 0 and type(a.revision) is int and a.revision > 0 and
@@ -5022,12 +5143,12 @@ def _1174_guard(a):
         admission, _ = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission)
         _1174_runtime(a, admission)
     except (Exception, SystemExit) as ex:
-        return _1174_emit("input_rejected" if "input_rejected:" in str(ex) else "admission_rejected", str(ex), guard=True)
+        return _1174_emit("input_rejected" if isinstance(ex, _1174Error) and ex.status == "input_rejected" else "admission_rejected", str(ex), guard=True)
     try:
         _1174_human_evidence(a, admission, a.head)
         return _1174_emit("PASS", guard=True)
     except (Exception, SystemExit) as ex:
-        return _1174_emit("FAIL" if "publication evidence FAIL" in str(ex) or "M5/M12" in str(ex) else "UNKNOWN", str(ex), guard=True)
+        return _1174_emit("FAIL" if isinstance(ex, _1174Error) and ex.status == "FAIL" else "UNKNOWN", str(ex), guard=True)
 
 
 def _1174_input(a):
@@ -5055,6 +5176,7 @@ def _1174_emit(status, detail=None, guard=False):
     return rc
 
 
+@_1174_scoped
 def _1174_command(a, state_dir):
     global _1174_IO_STARTED
     _1174_IO_STARTED = False
@@ -5072,7 +5194,7 @@ def _1174_command(a, state_dir):
         with _1174_lock(Path(e["lock_path"])):
             identities = (_1174_state(_1174_read(Path(e["state_path"])), admission) if
                           a.cmd not in ("init", "adopt-state") else None)
-            current, _ = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission, identities)
+            current, facts = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission, identities)
             _1174_require(current == admission, "authority changed under lock")
             witness_raw = _1174_read(Path(e["witness_path"])) if os.path.lexists(e["witness_path"]) else None
             if a.cmd == "init":
@@ -5080,13 +5202,13 @@ def _1174_command(a, state_dir):
             elif a.cmd == "adopt-state":
                 status = _1174_adopt(a, admission, witness_raw)
             else:
-                status = _1174_ordinary(a, directory, admission, witness_raw)
+                status = _1174_ordinary(a, directory, admission, witness_raw, facts)
     except (Exception, SystemExit) as ex:
         # Boundary includes canonical Chan, TimeoutExpired and parser failures;
         # process kill/KeyboardInterrupt still cannot produce a success record.
         detail = f"{type(ex).__name__}: {ex}"
-        status = ("input_rejected" if "input_rejected:" in str(ex) else "revision_rejected" if
-                  "revision_rejected" in str(ex) else "legacy_changed" if "legacy_changed" in str(ex) else "durability_unknown" if _1174_IO_STARTED else "UNKNOWN")
+        status = ("durability_unknown" if _1174_IO_STARTED else ex.status if isinstance(ex, _1174Error) and
+                  ex.status in ("input_rejected", "revision_rejected", "legacy_changed") else "UNKNOWN")
     return _1174_emit(status, detail)
 
 

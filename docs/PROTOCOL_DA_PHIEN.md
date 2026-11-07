@@ -1606,3 +1606,15 @@ before/after và capability facts. Windows main giữ legacy +12 pure IDs; focus
 Windows có13 IDs và một pure unit oracle riêng. Non-Linux report luôn ineligible.
 Fixture/overlay pass không thay native Linux proof, Windows proof, independent
 review/audit, K0–K7, full Linux M9 hoặc target canary sau land.
+
+
+<!-- WP1174 scoped consumer: implementation notes, authority remains the frozen contract. -->
+Trong tuyến scoped WP1174, resolver ghim OID bất biến của spec và giữ nguyên
+canonical I2 facts sau lần xác minh dưới khóa. `record-lease` chỉ ghi lease đó;
+ref, OID, path, revision, generation và comments phải khớp authority đã đọc qua API.
+Human audit đọc lại remote run và toàn bộ tập workflow runs qua API giới hạn
+thời gian, dung lượng và số trang trước khi chạy canonical human predicate.
+Biên nhận review được đọc một lần; hash lấy từ chính bytes đã xác minh.
+Lỗi sau khi bắt đầu ghi trả `durability_unknown`, không cho dispatch; lỗi có
+kiểu xác định trạng thái, nội dung chuỗi lỗi không cấp authority.
+Git environment hardening chỉ áp dụng trong scoped context, giữ hành vi legacy.

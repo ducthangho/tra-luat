@@ -10966,7 +10966,7 @@ def _resolver1174(c, change=None):
             blob="7" * 40, lease=dict(lease_id="fixture-lease", packet_issue=r["packet"], revision=r["revision"], generation=r["generation"],
                 spec_ref=r["spec_ref"], spec_path=r["spec_path"], spec_hash=r["spec_sha256"], lease_expires_at_utc=r["expires_utc"]))]
     def canonical_spec(root, head, path, lease):
-        assert head is None and lease["spec_ref"] == response["registration"]["spec_ref"]
+        assert head == response["registration"]["spec_ref"].rsplit("@",1)[1] and lease["spec_ref"] == response["registration"]["spec_ref"]
         blob = git(root, "show", lease["spec_ref"].split("@")[1] + ":" + path)
         if blob[0] or hashlib.sha256(blob[1]).hexdigest() != lease["spec_hash"]:
             raise ValueError("WP1174 UNKNOWN: canonical immutable spec unavailable")
@@ -10976,7 +10976,7 @@ def _resolver1174(c, change=None):
         records = json.loads(Path(args.lease_comments).read_bytes())
         if response["owner"] != "ducthangho" or not records:
             raise ValueError("fixture canonical grant rejected")
-        return dict(lease=dict(lease_id="fixture-lease"))
+        return dict(lease=dict(lease_id="fixture-lease"),context=dict(lease_oid="6"*40))
     @contextlib.contextmanager
     def canonical(_):
         yield c.tmp
@@ -10984,10 +10984,121 @@ def _resolver1174(c, change=None):
     with patch.object(m, "_git_do", git), patch.object(m, "_canon", canonical), patch.object(m, "_spec_merge", canonical_spec), patch.object(
             m, "_verify_lease_ref", verify_lease), patch.object(m,"_1174_api",side_effect=lambda endpoint,**limits:github("fixture",endpoint)), patch.object(m, "_nap", return_value=SimpleNamespace(_doc_gh=github,
             _quet_lease_toan_kho=scan, _phan_loai_lease=lambda _: "REVOKED" if response["registration"]["revoked"] else "CÒN_HẠN",
-            _bia_mo_doi_xung=lambda *_: False)):
+            _bia_mo_doi_xung=lambda *_: None)):
         result = m._1174_resolve_snapshot(c.tmp, 1174, 7, 5, sample)
     assert sample.read_bytes() == before
     return result
+
+
+def _composition1174(c):
+    """Real Git/canonical composition; only local transport, API and native mount facts are fixtures."""
+    import contextlib, io, shutil
+    from unittest.mock import patch
+    m, _, admission, _ = _a1174(c)
+    w = _kho812(c)
+    remote = w.parent / "o.git"
+    old = json.loads(_g(w,"show","refs/remotes/origin/ops/wp55-spec:ops/leases/l.yaml"))
+    def commit(files):
+        for name, raw in files.items():
+            path=w/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(raw)
+        _g(w,"add","-A");_g(w,"commit","-qm","composition fixture")
+        return _g(w,"rev-parse","HEAD")
+    commit({m.ADR0063_TEP:("\n".join(m.ADR0063_ANCHORS)+"\n").encode(),
+        ".claude/dev/packet_loop.py":c.script.read_bytes()})
+    admission.update(packet=55,revision=1,generation=1,contract_id="composition-r1")
+    e=admission["enrollment"]
+    e.update(g0=1,git_root=str(w.resolve()),state_path=str(c.tmp/"wp55.json"),initial_state_path=str(c.tmp/"wp55.json"),
+        root_device=c.tmp.stat().st_dev,root_inode=c.tmp.stat().st_ino,
+        boot_id=Path("/proc/sys/kernel/random/boot_id").read_text().strip())
+    p=e["initial_state_projection"]
+    p.update(packet=55,generation=1,executor="claude",reviewer="codex",
+        executor_identity=m._identity("claude","claude","claude_code","machine/local"),
+        reviewer_identity=m._identity("codex","openai","codex_cli","machine"))
+    plan_raw=m._1174_bytes(dict(mission_id="gh-1172",revision=11,packet_graph=[dict(packet=55,revision=1,generation=1,contract_id="composition-r1")],
+        routing_history=dict(previous_exception=dict(actual_human_audit_required=True,hard_expiry_utc="2100-01-01T00:00:00Z"))))
+    admission["mission_plan_sha256"]=hashlib.sha256(plan_raw).hexdigest()
+    # Real canonical leases expire in hours; descriptor/admission stay within that grant.
+    admission["expires_utc"]=old["lease_expires_at_utc"]
+    admission["allowance"]["ends_utc"]=old["lease_expires_at_utc"]
+    seed=Path(e["private_seed_path"]);seed.write_bytes(bytes(range(32)));seed.chmod(0o600)
+    raw=m._1174_bytes(admission);sample=c.tmp/"admission.json";sample.write_bytes(raw)
+    A=commit({"ops/admission/target.json":raw})
+    spec=("# wp55 r1 — Composition fixture\npacket_id: wp55\nrevision: 1\ncontract_id: composition-r1\nmission_plan_sha256: "+admission["mission_plan_sha256"]+
+        "\nimmutable_acceptance_baseline: "+admission["base"]+"\nadmission_ref: refs/heads/master@"+A+
+        "\nadmission_path: ops/admission/target.json\nadmission_sha256: "+hashlib.sha256(raw).hexdigest()+
+        "\nluat_push_va_dung_va: ADR-0054@"+old["base_sha"]+"\n").encode()
+    S=commit({"ops/specs/wp55.md":spec})
+    _g(w,"push","-q","origin","master")
+    _g(w,"checkout","-qb","ops/composition",S)
+    old.update(spec_ref="refs/heads/master@"+S,spec_hash=hashlib.sha256(spec).hexdigest(),
+        granted_on_instruction="https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5281636040")
+    commit({"ops/leases/l.yaml":json.dumps(old).encode()})
+    _g(w,"push","-q","origin","+HEAD:refs/heads/ops/wp55-spec")
+    _g(w,"checkout","-q","master");_g(w,"branch","-D","ops/composition")
+    _g(w,"fetch","-q","origin")
+    _g(w,"remote","set-url","origin","https://github.com/ducthangho/tra-luat.git")
+    # The shim changes transport destinations only. All Git commands and canonical
+    # Python modules execute normally, including children of the I2 validator.
+    shim=c.tmp/"transport";shim.mkdir();real_git=shutil.which("git")
+    code='''#!/usr/bin/env python3
+import os,subprocess,sys
+args=sys.argv[1:]
+remote=os.environ["WP1174_FIXTURE_REMOTE"]
+real=os.environ["WP1174_FIXTURE_GIT"]
+args=[remote if x.startswith("https://github.com/ducthangho/tra-luat") else x for x in args]
+if "fetch" in args or "ls-remote" in args:
+    args=[remote if x=="origin" else x for x in args]
+p=subprocess.run([real,*args])
+if "clone" in args and p.returncode==0:
+    subprocess.run([real,"-C",args[-1],"remote","set-url","origin","https://github.com/ducthangho/tra-luat.git"],check=True)
+sys.exit(p.returncode)
+'''
+    (shim/"git").write_text(code);(shim/"git").chmod(0o700)
+    mission=dict(id=6710770550,user=dict(login="ducthangho",type="User"),author_association="OWNER",
+        issue_url="https://api.github.com/repos/ducthangho/tra-luat/issues/1172",
+        html_url="https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6710770550",updated_at="2026-01-01T00:00:00Z",
+        body="## Mission #1172 — Installed revision 11\n\nPlan SHA256 `"+admission["mission_plan_sha256"]+"`\n```json\n"+plan_raw.decode()+"```\n")
+    comments=[dict(user=dict(login="github-actions[bot]"),body="lease_id: "+old["lease_id"],issue_url="https://api.github.com/repos/ducthangho/tra-luat/issues/55")]
+    def api(endpoint,**limits):
+        if endpoint=="repos/"+m._1174_REPO:return dict(full_name=m._1174_REPO,default_branch="master")
+        if endpoint.endswith("/permission"):return dict(permission="maintain",user=dict(login="ducthangho"))
+        if "/issues/55/comments?" in endpoint:return comments
+        if "/issues/1172/comments?" in endpoint:return [mission]
+        raise AssertionError(endpoint)
+    env=dict(PATH=str(shim)+os.pathsep+os.environ["PATH"],WP1174_FIXTURE_REMOTE=str(remote),WP1174_FIXTURE_GIT=real_git)
+    mount=dict(mount_id=e["mount_id"],device=e["mount_device"],filesystem=e["filesystem"],magic=e["magic"])
+    with patch.dict(os.environ,env),patch.object(m,"_1174_api",side_effect=api),patch.object(m,"_1174_mount",return_value=mount):
+        # Use the actual router to turn a missing feature into a semantic result,
+        # so restoring None cannot get crash-as-kill credit.
+        out=io.StringIO()
+        args=["--state-dir",str(c.tmp),"init","--packet","55","--mission","1172","--executor","claude","--reviewer","codex",
+            "--executor-model-family","claude","--executor-execution-surface","claude_code","--executor-transport","machine/local",
+            "--reviewer-model-family","openai","--reviewer-execution-surface","codex_cli","--reviewer-transport","machine",
+            "--root",str(w),"--admission",str(sample),"--revision","1","--generation","1","--coordinator-id","coordinator-1","--expected-revision","absent"]
+        # Probe is the only native capability seam; runtime and all authority composition remain real.
+        with patch.object(m,"_1174_probe",return_value=dict(native_fixture=True)),contextlib.redirect_stdout(out):rc=m.main(args)
+        result=json.loads(out.getvalue());assert rc==0 and result["status"]=="completed_no_dispatch",(rc,result)
+        resolved,facts=m._1174_resolve(w,55,1,1,sample)
+        assert resolved==admission and facts["verified_i2"]["context"]["lease_ref"]=="origin/ops/wp55-spec"
+        initial=(Path(e["state_path"]).read_bytes(),Path(e["witness_path"]).read_bytes())
+        receipt=c.tmp/"api-comments.json";receipt.write_bytes(m._1174_bytes(comments))
+        lease_args=["--state-dir",str(c.tmp),"record-lease","--packet","55","--root",str(w),"--admission",str(sample),
+            "--revision","1","--generation","1","--coordinator-id","coordinator-1","--expected-revision","0",
+            "--lease-ref","origin/ops/wp55-spec","--lease-path","ops/leases/l.yaml","--lease-comments",str(receipt)]
+        wrong=list(lease_args);wrong[wrong.index("--lease-ref")+1]="origin/ops/other"
+        out=io.StringIO()
+        with patch.object(m,"_1174_probe",return_value=dict(native_fixture=True)),contextlib.redirect_stdout(out):rc=m.main(wrong)
+        result=json.loads(out.getvalue());assert rc==8 and result["status"]=="UNKNOWN" and "scoped lease authority mismatch" in result["detail"],(rc,result)
+        assert initial==(Path(e["state_path"]).read_bytes(),Path(e["witness_path"]).read_bytes())
+        out=io.StringIO()
+        with patch.object(m,"_1174_probe",return_value=dict(native_fixture=True)),contextlib.redirect_stdout(out):rc=m.main(lease_args)
+        result=json.loads(out.getvalue());assert rc==0 and result["status"]=="completed_no_dispatch",(rc,result)
+        state=json.loads(Path(e["state_path"]).read_bytes())
+        assert state["lease"]["lease_id"]==old["lease_id"] and state["state_revision"]==1
+        initial=(Path(e["state_path"]).read_bytes(),Path(e["witness_path"]).read_bytes())
+        sample.write_bytes(raw+b"\n")
+        _reject1174(m._1174_resolve,w,55,1,1,sample,reason="FILE differs from immutable admission")
+        assert initial==(Path(e["state_path"]).read_bytes(),Path(e["witness_path"]).read_bytes())
 
 
 def _admission_case1174(kind):
@@ -11060,6 +11171,7 @@ def _admission_case1174(kind):
                 descriptor("sha256", hashlib.sha256(response["admission"]).hexdigest())(response)
             return change
         if kind=="file_bytes":
+            comp=c.tmp/"composition";comp.mkdir();_composition1174(Ctx(c.script,comp))
             valid,facts=_call1174(_resolver1174,c)
             assert valid["packet"]==1174 and facts["lease_id"]=="fixture-lease" and facts["canonical_oid"]=="6"*40
         changes = {
@@ -11198,6 +11310,18 @@ def _legacy1174(c):
         provider="codex", model_family="openai", execution_surface="codex_service", transport="machine")
     assert "reviewing" in m.CHUYEN_HOP_LE["running"] and "accepted" not in m.CHUYEN_HOP_LE["awaiting_lease"]
 
+def _legacy_env1174(c,m):
+    from unittest.mock import patch
+    left=c.tmp/"left";right=c.tmp/"right"
+    for path in (left,right):path.mkdir();_g(path,"init","-q")
+    expected=subprocess.run(["git","-C",str(left),"rev-parse","--absolute-git-dir"],capture_output=True,
+        env=dict(os.environ,GIT_DIR=str(right/".git")))
+    with patch.dict(os.environ,{"GIT_DIR":str(right/".git")}):
+        assert m._git_do(left,"rev-parse","--absolute-git-dir")== (expected.returncode,expected.stdout)
+        @m._1174_scoped
+        def scoped():return m._git_do(left,"rev-parse","--absolute-git-dir")
+        assert scoped()==(0,os.fsencode(left/".git")+b"\n")
+
 
 def _init_fixture1174(c):
     m, _, admission, _ = _a1174(c)
@@ -11228,6 +11352,7 @@ def _init_case1174(kind):
             _seed_variants1174(c,m,admission,args)
             _closed_errors1174(c, m)
             _legacy_cli1174(c)
+            _legacy_env1174(c,m)
             _reject1174(_resolver1174, c, lambda response: response.update(no_registration=True),
                         reason="no unique current canonical Packet lease/spec")
             seed = Path(e["private_seed_path"])
@@ -11301,14 +11426,14 @@ def _closed_errors1174(c, m):
         pass
     before = {p: p.read_bytes() for p in c.tmp.rglob("*") if p.is_file()}
     for error in (Chan("authority unavailable"), subprocess.TimeoutExpired("fixture", 1), SystemExit(8),
-                  OSError("read failed"), IndexError("mount parse"), ValueError("revision_rejected")):
+                  OSError("read failed"), IndexError("mount parse"), ValueError("revision_rejected"), m._1174Error("revision_rejected", "revision_rejected")):
         stdout = io.StringIO()
         with patch.object(m, "_1174_IMPLEMENTATION_COMPLETE", True), patch.object(m, "_1174_resolve", side_effect=error), contextlib.redirect_stdout(stdout):
             rc = m.main(arguments)
         rows = stdout.getvalue().splitlines()
         assert rc == 8 and len(rows) == 1
         result = json.loads(rows[0])
-        assert result["status"] == ("revision_rejected" if isinstance(error, ValueError) else "UNKNOWN") and result["dispatch_allowed"] is False
+        assert result["status"] == (error.status if isinstance(error, m._1174Error) else "UNKNOWN") and result["dispatch_allowed"] is False
     for flags in (["--expected-revision", "0"], ["--admission", "fixture", "--revision", "wrong"],
                   ["--admission", "fixture", "--expected-revision", "absent", "--expected-witness-revision", "0"]):
         stdout = io.StringIO()
@@ -11920,6 +12045,15 @@ def _runtime1174(c, command):
     else:pair(state)
     argv=["--state-dir",str(sd),command,"--packet","55",*commands.get(command,[]),*common]
     if command != "init":argv += ["--expected-revision","0"]
+    lease_facts = {}
+    if command == "record-lease":
+        ns = m.build_parser().parse_args(argv)
+        verified = m._verify_lease_ref(ns, state)
+        full_lease = json.loads(_g(w,"show","refs/remotes/origin/ops/wp55-spec:ops/leases/l.yaml"))
+        comments = json.loads((c.tmp/"cm.json").read_bytes())
+        verified["comments_sha256"] = hashlib.sha256(m._1174_bytes(comments)).hexdigest()
+        lease_facts = dict(verified_i2=verified, lease=full_lease, lease_id=full_lease["lease_id"],
+            lease_ref=ns.lease_ref, lease_path=ns.lease_path, lease_oid=verified["context"]["lease_oid"], comments=comments)
     def invoke(args=None):
         out,err=io.StringIO(),io.StringIO()
         calls=0
@@ -11927,7 +12061,7 @@ def _runtime1174(c, command):
             nonlocal calls
             calls+=1
             if calls==2 and hasattr(m,"_fixture_gate_observer"):m._fixture_gate_observer()
-            return admission,{}
+            return admission,lease_facts
         with patch.object(m,"_1174_IMPLEMENTATION_COMPLETE",True),patch.object(m,"_1174_resolve",side_effect=resolved),             patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_probe",return_value={}),             contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
             rc=m.main(argv if args is None else args)
         lines=out.getvalue().splitlines()
@@ -11948,6 +12082,18 @@ def _writer1174(name):
             rc,result,err=invoke(bad)
             assert rc==8 and result["status"]=="revision_rejected",(name,rc,result,err)
             assert (target.read_bytes(),witness.read_bytes())==before
+        if name == "record_lease":
+            import copy
+            before=(target.read_bytes(),witness.read_bytes())
+            for flag,value in (("--lease-ref","origin/ops/other"),("--lease-ref","origin/ops/wp55-spec@"+"0"*40),
+                    ("--lease-path","ops/leases/other.yaml"),("--revision","2"),("--generation","2")):
+                bad=list(argv);bad[bad.index(flag)+1]=value
+                rc,result,err=invoke(bad)
+                assert rc==8 and not result["dispatch_allowed"] and before==(target.read_bytes(),witness.read_bytes()),(flag,value,rc,result)
+            comments=Path(argv[argv.index("--lease-comments")+1]);original=comments.read_bytes()
+            comments.write_text(json.dumps([dict(user=dict(login="github-actions[bot]"),body="lease_id: fabricated")]))
+            rc,result,err=invoke();assert rc==8 and before==(target.read_bytes(),witness.read_bytes())
+            comments.write_bytes(original)
         rc,result,err=invoke()
         assert rc==0,(name,rc,result,err)
         assert result["status"] == ("reserved_for_dispatch" if name in ("begin_attempt","record_codex_call") else "completed_no_dispatch")
@@ -12043,9 +12189,13 @@ def _human_fixture1174(c, change=None):
     events=[dict(id="12",type="PushEvent",created_at="2026-11-04T09:01:00Z",repo=dict(name=m._1174_REPO),actor=dict(login="ducthangho"),payload=dict(head=args.head,before=before,ref="refs/heads/candidate")),
             dict(id="11",type="PushEvent",created_at="2026-11-04T08:59:00Z",repo=dict(name=m._1174_REPO),actor=dict(login="ducthangho"),payload=dict(head=before,before=before,ref="refs/heads/master"))]
     pages={"events":events,"git/matching-refs/heads":[dict(ref="refs/heads/candidate",object=dict(sha=args.head))],"git/matching-refs/tags":[],"pulls":[]}
+    server_run=json.loads(Path(args.human_remote_run).read_bytes())
+    server_runs=json.loads(Path(args.workflow_runs).read_bytes())
     def fetch(endpoint,**limits):
         if endpoint=="repos/"+m._1174_REPO:return dict(id=123,full_name=m._1174_REPO)
         if endpoint==f"repos/{m._1174_REPO}/issues/comments/{audit['id']}":return audit
+        if endpoint.endswith("/actions/runs/"+str(server_run["id"])):return server_run
+        if "/actions/runs?" in endpoint:return server_runs
         family=endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]
         assert family in pages,endpoint
         return pages[family]
@@ -12059,6 +12209,45 @@ def _human_fixture1174(c, change=None):
     receipt=m._1174_collect(fetch,w,args.head,audit,123)
     path=c.tmp/"publication.json";path.write_bytes(m._1174_bytes(receipt));args.receipt=args.publication_receipt=str(path)
     return m,w,args,admission,audit,pages,seams
+
+
+def _run_limits1174(c,m,args):
+    import copy
+    from unittest.mock import patch
+    paths=[Path(args.human_remote_run),Path(args.workflow_runs)]
+    saved=[p.read_bytes() for p in paths]
+    run=json.loads(saved[0]);rows=[]
+    for index in range(1,202):
+        row=copy.deepcopy(run);row["id"]=index;rows.append(row)
+    rows[run["id"]-1]=run
+    paths[1].write_bytes(m._1174_bytes(dict(total_count=len(rows),workflow_runs=rows)))
+    seen=[]
+    def paged(endpoint,**limits):
+        seen.append((endpoint,limits))
+        if "?" not in endpoint:return run
+        page=int(endpoint.rsplit("page=",1)[1]);return dict(total_count=len(rows),workflow_runs=rows[(page-1)*100:page*100])
+    try:
+        with patch.object(m,"_1174_api",side_effect=paged):
+            observed,complete=_call1174(m._1174_human_runs,args,args.head,time.time()+10)
+        assert observed==run and complete["workflow_runs"]==rows and len(seen)==4
+        assert all(0<limits["max_bytes"]<=30*1024*1024 for _,limits in seen)
+        def incomplete(endpoint,**limits):
+            if "?" not in endpoint:return run
+            return dict(total_count=201,workflow_runs=rows[:1])
+        with patch.object(m,"_1174_api",side_effect=incomplete):
+            _reject1174(m._1174_human_runs,args,args.head,time.time()+10,reason="human run pagination incomplete")
+        with patch.object(m,"_1174_api",return_value=None):
+            _reject1174(m._1174_human_runs,args,args.head,time.time()+10,reason="human remote run current readback mismatch")
+        clock=[1000.0]
+        def late(endpoint,**limits):clock[0]=1001;return run
+        with patch.object(m.time,"time",side_effect=lambda:clock[0]),patch.object(m,"_1174_api",side_effect=late):
+            _reject1174(m._1174_human_runs,args,args.head,1000.05,reason="human run readback budget")
+        def huge(endpoint,**limits):
+            limits["on_bytes"](30*1024*1024+1);return run
+        with patch.object(m,"_1174_api",side_effect=huge):
+            _reject1174(m._1174_human_runs,args,args.head,time.time()+10,reason="human run readback budget")
+    finally:
+        for path,raw in zip(paths,saved):path.write_bytes(raw)
 
 
 def _lifecycle1174(kind):
@@ -12085,8 +12274,20 @@ def _lifecycle1174(kind):
             before=(target.read_bytes(),witness.read_bytes())
             rc,result,_=invoke(bad);assert rc==8 and not result["dispatch_allowed"]
             assert (target.read_bytes(),witness.read_bytes())==before
+            receipt=Path(argv[argv.index("--bien-nhan")+1]);original=receipt.read_bytes()
+            parser=m._1174_json
+            def swap(raw):
+                parsed=parser(raw)
+                if parsed==record:receipt.write_bytes(original+b"\n")
+                return parsed
+            with patch.object(m,"_1174_json",side_effect=swap):rc,result,_=invoke()
+            assert rc==8 and result["status"]=="UNKNOWN" and (target.read_bytes(),witness.read_bytes())==before,(rc,result)
+            receipt.write_bytes(original)
+            missing=list(argv);index=missing.index("--bien-nhan");del missing[index:index+2]
+            rc,result,_=invoke(missing);assert rc==8 and "review receipt required" in result["detail"] and (target.read_bytes(),witness.read_bytes())==before
             rc,result,_=invoke();assert rc==0,(rc,result)
             after=json.loads(target.read_bytes())
+            assert after["scoped_review"]["receipt_sha256"]==hashlib.sha256(original).hexdigest()
             assert after["state"]=="approved_pending" and after["accepted_sha"] is None and after["human_acceptance"] is None
             assert after["scoped_review"]["assurance"]=="advisory_review" and after["review_rounds_used"]==state["review_rounds_used"]+1
             assert after["codex_calls"][0]["da_dung"] is True
@@ -12109,6 +12310,16 @@ def _lifecycle1174(kind):
             with seams():record=_call1174(m._1174_human_evidence,args,a,args.head)
             assert record["assurance"]=="human_audited" and record["head"]==args.head and record["audit_comment_id"]==audit["id"]
         elif kind=="human_negative":
+            _run_limits1174(c,m,args)
+            with seams():assert _call1174(m._1174_human_evidence,args,a,args.head)["assurance"]=="human_audited"
+            for field,reason in (("human_remote_run","human remote run current readback mismatch"),("workflow_runs","human workflow set current readback mismatch")):
+                path=Path(getattr(args,field));saved=path.read_bytes();wrong=json.loads(saved)
+                if field=="human_remote_run":wrong["created_at"]="2026-11-04T09:00:59Z"
+                else:
+                    for row in wrong["workflow_runs"]:row["created_at"]="2026-11-04T09:00:59Z"
+                path.write_bytes(m._1174_bytes(wrong))
+                with seams():_reject1174(m._1174_human_evidence,args,a,args.head,reason=reason)
+                path.write_bytes(saved)
             original=Path(args.human_audit_comment).read_bytes()
             for field,value in (("user",dict(login="agent",type="User")),("user",dict(login="ducthangho",type="Bot")),("updated_at","2026-11-04T09:02:00Z")):
                 wrong=copy.deepcopy(audit);wrong[field]=value;Path(args.human_audit_comment).write_bytes(m._1174_bytes(wrong))
@@ -12316,6 +12527,8 @@ def _accept_entry1174(c,race=False):
     def fetch(endpoint,**limits):
         if endpoint=="repos/"+m._1174_REPO:return dict(id=123,full_name=m._1174_REPO)
         if endpoint==f"repos/{m._1174_REPO}/issues/comments/{audit['id']}":return audit
+        if endpoint.endswith("/actions/runs/2"):return json.loads(Path(hargs.human_remote_run).read_bytes())
+        if "/actions/runs?" in endpoint:return files["workflow_runs"]
         return pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
     @contextlib.contextmanager
     def canonical(_):yield w
@@ -12373,7 +12586,7 @@ MUTANTS.update({
     "m1174_drop_oid_path_hash": ('hashlib.sha256(raw).hexdigest() == descriptor["admission_sha256"]','True',["wp1174_admission_oid_path_hash"]),
     "m1174_drop_expired_revoked": ('lp._phan_loai_lease(row["lease"]) == "CÒN_HẠN"','True',["wp1174_admission_expired_revoked"]),
     "m1174_drop_candidate_root": ('def _1174_git_view(root):','def _1174_git_view(root):\n    return None',["wp1174_admission_candidate_root"]),
-    "m1174_drop_unresolved": ('_, installed_id = _1174_installed_mission(_1174_comments(lp, 1172, root), admission, now)','installed_id = 1',["wp1174_admission_unresolved"]),
+    "m1174_drop_unresolved": ('_, installed_id = _1174_installed_mission(_1174_comments(1172, root), admission, now)','installed_id = 1',["wp1174_admission_unresolved"]),
     "m1174_reject_valid_witness": ('w["phase"] in ("reserved", "initialized")','w["phase"] in ("initialized",)',["wp1174_witness_valid"]),
     "m1174_drop_witness_enum_hash": ('re.fullmatch(r"[0-9a-f]{64}", value, re.ASCII)', 're.fullmatch(r"[0-9a-f]{63,64}", value, re.ASCII)', ['wp1174_witness_enum_hash']),
     "m1174_drop_witness_fresh_reserved": ('raw == _1174_bytes(_1174_reserved(enrollment_id, binding_sha256, g0))','True',["wp1174_witness_fresh_reserved"]),
@@ -12780,7 +12993,7 @@ def _collector_limits1174(c,m,w,args,audit,pages):
     clock[0]=1000
     def comments(endpoint,**limits):clock[0]=limits["deadline"]+1;return []
     with patch.object(m.time,"time",side_effect=lambda:clock[0]),patch.object(m,"_1174_api",comments):
-        _reject1174(m._1174_comments,None,1174,w,reason="authority collection deadline")
+        _reject1174(m._1174_comments,1174,w,reason="authority collection deadline")
 
 
 MUTANTS["m1174_api_host"] = ('["gh","api","--hostname","github.com",endpoint]','["gh","api","--hostname","hostile.invalid",endpoint]',["wp1174_admission_candidate_root"])
@@ -12792,6 +13005,16 @@ MUTANTS["m1174_transport_orphan"] = ('try:os.killpg(child.pid,signal.SIGKILL)\n 
     'try:\n            if child.poll() is None:os.killpg(child.pid,signal.SIGKILL)\n        except ProcessLookupError:pass',["wp1174_admission_candidate_root"])
 MUTANTS["m1174_collector_expired_entry"] = ('last_status,dag,earliest = "UNKNOWN",False,None','last_status,dag,earliest = "RECORDED_EARLIEST_MATCH",False,None',["wp1174_lifecycle_first_publication"])
 MUTANTS["m1174_git_late_result"] = ('if deadline is not None and time.time()>=deadline:return -1,b""','if False:return -1,b""',["wp1174_lifecycle_first_publication"])
+
+
+MUTANTS["m1174_resolver_none_head"] = ('_spec_merge(root, spec_oid, lease.get("spec_path"), lease)', '_spec_merge(root, None, lease.get("spec_path"), lease)', ["wp1174_admission_file_bytes"])
+MUTANTS["m1174_resolver_active_tombstone"] = ('lp._bia_mo_doi_xung(row["lease"], all_leases) is None','lp._bia_mo_doi_xung(row["lease"], all_leases) is False',["wp1174_admission_file_bytes"])
+MUTANTS["m1174_lease_drop_ref_binding"] = ('a.lease_ref == facts["lease_ref"] == context["lease_ref"]','True',["wp1174_writer_record_lease"])
+MUTANTS["m1174_human_skip_run_readback"] = ('_1174_bytes(run) == _1174_bytes(claimed), "human remote run current readback mismatch"','True, "human remote run current readback mismatch"',["wp1174_lifecycle_human_negative"])
+MUTANTS["m1174_human_skip_k2_readback"] = ('_1174_bytes(sorted(rows, key=key)) == _1174_bytes(sorted(caller, key=key))','True',["wp1174_lifecycle_human_negative"])
+MUTANTS["m1174_receipt_swap"] = ('signature(receipt_path.stat()) == signature(before)','True',["wp1174_lifecycle_identity_advisory"])
+MUTANTS["m1174_postwrite_status"] = ('"durability_unknown" if _1174_IO_STARTED else ex.status if isinstance(ex, _1174Error) and','ex.status if isinstance(ex, _1174Error) and',["wp1174_durability_ordinary_pair"])
+MUTANTS["m1174_legacy_env_isolation"] = ('scoped = _1174_SCOPED.get() or deadline is not None','scoped = True',["wp1174_init_preflight"])
 
 
 def _expiry_after_reservation1174(c):
@@ -12808,6 +13031,17 @@ def _expiry_after_reservation1174(c):
     assert state["state_revision"]==1 and state["codex_review_calls_used"]==1 and state["codex_calls"][0]["da_dung"] is False
     before=(target.read_bytes(),witness.read_bytes());rc,result,_=invoke()
     assert rc==8 and result["status"]=="revision_rejected" and before==(target.read_bytes(),witness.read_bytes())
+    root=c.tmp/"tripwire-after-reservation";root.mkdir()
+    m,a,old,argv,invoke,target,witness,_=_runtime1174(Ctx(c.script,root),"record-codex-call")
+    count=[0]
+    def tripwire(_):
+        count[0]+=1
+        m._1174_require(count[0]!=2,"legacy_changed")
+    with patch.object(m,"_1174_tripwire",side_effect=tripwire):rc,result,_=invoke()
+    assert rc==8 and result["status"]=="durability_unknown" and not result["dispatch_allowed"],(rc,result)
+    committed=_call1174(m._1174_pair,a,json.loads(witness.read_bytes()),target.read_bytes())
+    assert committed["state_revision"]==1 and committed["codex_review_calls_used"]==1
+
 
 
 MUTANTS["m1174_expiry_after_commit"] = ('_1174_tripwire(new)\n        _1174_alive(admission)','_1174_tripwire(new)\n        pass # omit post-persist expiry check',["wp1174_durability_ordinary_pair"])

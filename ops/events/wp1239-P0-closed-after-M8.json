@@ -1,0 +1,15 @@
+{
+  "event": "P0_packet_closed_after_landed_M8",
+  "packet_issue": 1239,
+  "merge_commit": "132d376cbbfea0692ff6db284753b33f437c637a",
+  "landed": true,
+  "bookkeeping_complete": true,
+  "M8_comment": 6705526770,
+  "Packet_state": "CLOSED",
+  "Mission_state": "OPEN",
+  "active_lease_holders": 0,
+  "global_model_calls_used": 3,
+  "global_model_calls_limit": 3,
+  "no_budget_reset": true,
+  "no_deploy_or_next_phase": true
+}

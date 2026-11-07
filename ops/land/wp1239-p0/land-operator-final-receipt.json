@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "mission_id": "gh-1238",
+  "generation": 1,
+  "provider": "codex",
+  "role": "land_operator",
+  "model_family": "openai",
+  "execution_surface": "codex_service",
+  "transport": "machine",
+  "session_id": "wp1239-land-6704865424",
+  "session_identity_note": "Controller operation correlation ID; not a new CLI model invocation or claimed serving-model measurement",
+  "input_packet_generations": [
+    {
+      "packet": "wp1239",
+      "generation": 5,
+      "effective_revision": 7,
+      "historical_lease_revision": 6
+    }
+  ],
+  "authorized_head_sha": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "approver": "ducthangho",
+  "authorization_url": "https://github.com/ducthangho/tra-luat/issues/1239#issuecomment-6704865424",
+  "land_operator": "Codex controller, mechanically executing owner instruction",
+  "github_merge_actor": "ducthangho",
+  "merge_method": "merge",
+  "merge_commit": "132d376cbbfea0692ff6db284753b33f437c637a",
+  "pre_merge_checks": {
+    "CI_PR": "23/23Ubuntu success",
+    "source_base_full_fence": "passed",
+    "full_native_protection_and_rulesets": "passed, no bypass actors",
+    "K3_K4": "owner_scoped_exception; not machinepass",
+    "F1_F2": "owner_waived; rawreviewblocked preserved"
+  },
+  "post_merge_checks": {
+    "CI_master_run": 42358749773,
+    "CI_master": "23/23Ubuntu success",
+    "selftest": "1777/1777 rc0",
+    "execution_identity": "actual merged commit/tree/runtime/code/catalog/command/output verified",
+    "M8_D1_D4": "passed rc0",
+    "independent_canonical_delta": "PR1267 launcher-only; P0/docs/policy unchanged; M remains first-parent ancestor"
+  },
+  "bookkeeping": {
+    "M8": "https://github.com/ducthangho/tra-luat/issues/1239#issuecomment-6705526770",
+    "M8_readback_exact": true,
+    "Packet1239": "CLOSED/completed",
+    "Mission1238": "OPEN/in_progress/P0landed/P1-P6pending",
+    "active_lease_holders_both_paths": 0
+  },
+  "scope": "P0 documentation only; no deployment/LIVE/add-on installation or activation; no new model calls",
+  "completed_utc": "2026-11-07T10:22:17.383305+00:00"
+}

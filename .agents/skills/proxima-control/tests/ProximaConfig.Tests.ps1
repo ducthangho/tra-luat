@@ -28,7 +28,7 @@ $Cleanup = [ordered]@{ status = 'not_run'; errors = [Collections.Generic.List[st
 $Report = [ordered]@{ schema = 'proxima_config_tests.v3'; ps_version = "$($PSVersionTable.PSVersion)"; ps_edition = "$($PSVersionTable.PSEdition)"
     module_path = $ModulePath; module_sha256 = $null; sample_sha256 = $null; harness_sha256 = $null; api_state = 'unknown'
     alias_r = $null; subst_drive = $null; subst_junction_drive = $null; short_name_alias = $null; vhd_fixture = [bool]$VhdFixture; setup_error = $null
-    mandatory_ids = $Ids; optional_ids = @('A3-07'); closure_ids = $Closure; counterexample_ids = @(); scratch = $null; evidence_dir = $null
+    mandatory_ids = $Ids; optional_ids = @('A3-07'); closure_ids = $Closure; counterexample_ids = @(); scratch = $null; evidence_dir = $null; snapshot_exclusions = @()
     total = 0; passed = 0; failed = 0; failed_ids = @(); setup_error_ids = @(); unavailable_ids = @(); cases = $Results
     counterexample_evidence = [Collections.Generic.List[object]]::new(); cleanup = $Cleanup }
 $Utf8 = [Text.UTF8Encoding]::new($false); $Sha = [Security.Cryptography.SHA256]::Create()
@@ -56,13 +56,18 @@ function Remove-OwnedTree([string]$Root, $Errors) {
     try { [IO.Directory]::Delete($Root) } catch { $Errors.Add("$Root :: $($_.Exception.Message)") }
 }
 # Tree listing that records reparse points as such and never enters them (junction cycles, dangling links, mounts).
-function Get-TreeSnapshot([string]$Root, [switch]$Meta) {
+# r6 (H3 native: ReadAllBytes on the own ATTACHED px.vhd failed 19 cases before any read): -LiveVhd = the ONE verified
+# fixture VHD; only its exact path gets an identity row (attached, own label) not raw bytes, else error; <letter>\px is hashed.
+function Get-TreeSnapshot([string]$Root, [switch]$Meta, $LiveVhd = $null) {
     if (-not [IO.Directory]::Exists($Root)) { return 'absent' }
     $rows = [Collections.Generic.List[string]]::new(); $todo = [Collections.Generic.Stack[string]]::new(); $todo.Push($Root)
     while ($todo.Count) {
         foreach ($p in [IO.Directory]::GetFileSystemEntries($todo.Pop())) {
             $a = [int][IO.File]::GetAttributes($p)
             if ($a -band 0x400) { $rows.Add("$p|reparse") } elseif ($a -band 0x10) { $rows.Add("$p|dir"); $todo.Push($p) }
+            elseif ($LiveVhd -and $p -ceq $LiveVhd.file) {
+                $d = [IO.DriveInfo]::new($LiveVhd.letter); if ((Test-Unattached $p) -or -not $d.IsReady -or $d.VolumeLabel -cne $LiveVhd.label) { throw "SETUP: own VHD container $p is not attached as verified volume $($LiveVhd.letter) $($LiveVhd.label)" }
+                $rows.Add("$p|owned-live-vhd-container|attached|$($d.VolumeLabel)|$($d.DriveFormat)|$($d.TotalSize)") }
             elseif ($Meta) { $f = [IO.FileInfo]::new($p); $rows.Add("$p|$($f.Length)|$($f.LastWriteTimeUtc.Ticks)") } else { $rows.Add("$p|$(Get-FileSha256 $p)") }
         }
     }
@@ -185,8 +190,8 @@ function New-ConfigJson([hashtable]$Set = @{}, [string[]]$Drop = @(), [switch]$R
     foreach ($k in $Drop) { $m.Remove($k) }
     return '{' + (@($m.Keys | ForEach-Object { '"' + $_ + '":' + $m[$_] }) -join ',') + '}'
 }
-function Get-FixtureSnapshot { (Get-TreeSnapshot $S) + "`n" + $(if ($Vhd) { Get-TreeSnapshot "$($Vhd.letter)\px" }) }
-# One guarded read: fixture tree bytes (VHD included) and sentinel count must not change; every error text is collected.
+function Get-FixtureSnapshot { $t = Get-TreeSnapshot $S -LiveVhd $Vhd; if ($Vhd -and [regex]::Matches($t, '\|owned-live-vhd-container\|').Count -ne 1) { throw "SETUP: own VHD container $($Vhd.file) not listed exactly once" }; $t + "`n" + $(if ($Vhd) { Get-TreeSnapshot "$($Vhd.letter)\px" }) }
+# One guarded read: fixture tree bytes (VHD logical files; live container by identity) and sentinel count must not change.
 function Invoke-GuardedRead([string]$Cfg, [string]$Repo = "$S\repo") {
     $before = Get-FixtureSnapshot; $hits = $global:PxHits.Count; $global:Error.Clear(); $o = $null; $e = $null
     try { $o = Read-ProximaConfig -ConfigPath $Cfg -RepositoryRoot $Repo } catch { $e = $_ }
@@ -260,7 +265,7 @@ if ([IO.FileInfo]::new("$S\ext1\hardlink.json").Length -ne [IO.FileInfo]::new("$
 # SUBST of a repository subdirectory (H0 accepted it); r4: SUBST backed through junction jn to external ext1\deep.
 $SubstDrive = New-TestSubst "$S\repo\cfg"; $Report.subst_drive = $SubstDrive
 $SubstJn = New-TestSubst "$S\jn\deep"; $Report.subst_junction_drive = $SubstJn
-if ($VhdFixture) { $Vhd = New-TestVhd }
+if ($VhdFixture) { $Vhd = New-TestVhd; $Report.snapshot_exclusions = @([ordered]@{ path = $Vhd.file; raw_bytes = 'not_hashed: attached, held exclusively by Windows'; identity = "attached + label $($Vhd.label) + volume $($Vhd.letter)"; logical_files_hashed = "$($Vhd.letter)\px" }) }
 $Evid = "$(if ($EvidenceRoot) { [IO.Path]::GetFullPath($EvidenceRoot).TrimEnd('\') } else { $FullScratch })\pxevid-$RunId"
 if ($Counterexamples) { $null = [IO.Directory]::CreateDirectory($Evid); $Report.evidence_dir = $Evid }
 # 8.3 alias: capability evidence only. A short name is used only when it really resolves to this directory.

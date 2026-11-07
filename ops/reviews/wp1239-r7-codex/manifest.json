@@ -7,6 +7,10 @@
     "bytes": 1460,
     "sha256": "528f907251a1ac8c3d840ca33d9c3d6d0218767caaa9002f68e4e185a7783357"
   },
+  "README.md": {
+    "bytes": 2364,
+    "sha256": "186f51bb65708c6bcfe6756404b39b66d6ede113380ebc4bcf3a75a112afc874"
+  },
   "review-runtime-validation.json": {
     "bytes": 9246,
     "sha256": "68de30692e7bedf9243fed01fd60e8e399e8a585663d1f7c715b49b16f49ad71"

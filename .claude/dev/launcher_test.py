@@ -13566,9 +13566,13 @@ def r1252_khong_do_duoc():
                                   (object(), None, False)):
                 m._pid_trong_job = lambda _j, ds=ds: ds
                 bang(m._cay_da_chet(1, job) is mong, f"(d') windows job={job is not None} ds={ds}: phai {mong}")
-            tre = iter(([7], [7], []))   # A10: job báo trễ rồi mới rỗng ⇒ phải chờ, không vội kết luận chưa chết
-            m._pid_trong_job = lambda _j: next(tre)
-            bang(m._cay_da_chet(1, object()) is True, "(d') windows: job cap nhat tre phai duoc cho")
+            ngu, goc_time = [], m.time   # A10 + Codex lượt 8 F11: job chỉ rỗng sau khi ĐÃ NGỦ đủ ⇒ khoá cả khoảng chờ
+            m.time = types.SimpleNamespace(sleep=ngu.append)
+            m._pid_trong_job = lambda _j: [] if sum(ngu) >= 0.19 else [7]
+            try:
+                bang(m._cay_da_chet(1, object()) is True, f"(d') windows: job cap nhat tre phai duoc cho: ngu={ngu}")
+            finally:
+                m.time = goc_time
             m.platform = types.SimpleNamespace(system=lambda: "Linux")
             for ds, mong in (([], True), ([7], False), (None, False)):
                 m._thanh_vien_nhom = lambda _p, ds=ds: ds
@@ -14100,6 +14104,7 @@ DOT_BIEN = [
      ["r1252_khong_do_duoc"]),
     ("r1252_windows_khong_dung_job", ('                return ds == []', '                return False'),
      ["r1252_khong_do_duoc"]),
+    ("r1252_windows_bo_ngu", ('            time.sleep(0.1)', '            pass'), ["r1252_khong_do_duoc"]),
     ("r1252_windows_khong_cho_job", ('        for _ in range(20):   # A10', '        for _ in range(1):   # A10'),
      ["r1252_khong_do_duoc"]),
     ("r1252_mac_dinh_bat", ('    r.add_argument("--chup-workspace", action="store_true",',

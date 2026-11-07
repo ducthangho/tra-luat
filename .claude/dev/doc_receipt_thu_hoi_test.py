@@ -538,12 +538,18 @@ def _obj(k, kieu, b):
     return _g(k, "hash-object", "-w", "--literally", "-t", kieu, "--stdin", inp=b).decode().strip()
 
 
+_RAW = {}
+
+
 def _raw(k, o):
-    """(type, body) | (None, b"") — đọc trên kho tạm cho oracle/builder; KHÔNG đi qua module đang kiểm."""
-    r = subprocess.run(["git", "--no-replace-objects", "-C", str(k), "cat-file", "--batch"], input=o.encode() + b"\n",
-                       capture_output=True, env=_EG, timeout=60)
-    c = r.stdout.partition(b"\n")[0].split()
-    return (c[1].decode(), r.stdout.partition(b"\n")[2][:int(c[2])]) if len(c) == 3 else (None, b"")
+    """(type, body) | (None, b"") — đọc trên kho tạm cho oracle/builder; KHÔNG đi qua module đang kiểm. Một tiến trình
+    `cat-file --batch` giữ lâu cho mỗi kho (phép đi cả lịch sử của guard), đóng ở cuối mỗi ca (`chay_g`)."""
+    p = _RAW.get(str(k)) or _RAW.setdefault(str(k), subprocess.Popen(
+        ["git", "--no-replace-objects", "-C", str(k), "cat-file", "--batch"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, env=_EG))
+    p.stdin.write(o.encode() + b"\n")
+    p.stdin.flush()
+    c = p.stdout.readline().split()
+    return (c[1].decode(), p.stdout.read(int(c[2]) + 1)[:-1]) if len(c) == 3 else (None, b"")
 
 
 def _es(k, t):
@@ -661,7 +667,7 @@ def tap_doc(F, R=None, master=None):
     def dg(c, duong, blob=None):
         t, phan = hdr(c)[0], duong.split("/")
         o = [("commit", c)] + [("tree", t)] * (t is not None)
-        for i, p in enumerate(phan):
+        for i, p in enumerate(phan * (t is not None)):  # commit không có tree (hỏng/sai kiểu): module dừng ở commit
             e = {n: (md, x) for md, n, x in (_es(k, t) or [])}.get(p)
             if e is None or (i < len(phan) - 1 and e[0] != "40000"):
                 break
@@ -708,13 +714,16 @@ class Ra:
     """Bọc stdout của reader: 'lech' = dòng đầu đúng dạng mà OID khác (thân giữ nguyên); 'hong' = thay CẢ phản hồi bằng một
     dòng sai dạng (luồng vẫn đồng bộ, nên chỉ reader bị kết thúc mới làm luật sau đổi màu)."""
 
-    def __init__(s, f, oid, kieu):
-        s.f, s.oid, s.kieu = f, oid.encode(), kieu
+    def __init__(s, f, oid, kieu, cb=None):
+        s.f, s.oid, s.kieu, s.cb = f, oid.encode(), kieu, cb
 
     def readline(s):
         d = s.f.readline()
         if s.oid and d.startswith(s.oid):
             s.oid, c = None, d.split()
+            if s.kieu == "han":  # lật đồng hồ seam đúng lúc đọc object này (deadline GIỮA luật)
+                s.cb()
+                return d
             if s.kieu == "lech":
                 return b" ".join([X40.encode(), *c[1:]]) + b"\n"
             s.f.read(int(c[2]) + 1)
@@ -725,8 +734,8 @@ class Ra:
         return s.f.read(n)
 
 
-def ra(oid, kieu):
-    return {"_seam": {"ra": lambda f: Ra(f, oid, kieu)}}
+def ra(oid, kieu, cb=None, **seam):
+    return {"_seam": {"ra": lambda f: Ra(f, oid, kieu, cb), **seam}}
 
 
 def giet_sau(g0):
@@ -737,11 +746,34 @@ def giet_sau(g0):
     return {"_seam": {"sau_luat": h}}
 
 
-def su_kien(ten, m, F, kieu, oid, tiem, dich, R=None, **kw):
-    """A12/A20/A23: luật đích = {G : (kiểu, OID) ∈ doc(G)}; guard so với tập KHAI trước khi tiêm; luật khác giữ màu."""
-    tinh = {g for g, o in tap_doc(F, R, kw.get("master")).items() if (kieu, oid) in o}
+def gac(ten, F, kieu, oid, dich, R=None, master=None):
+    """A23 guard sự kiện CỤC BỘ: {G : (kiểu, OID) ∈ doc(G)} phải bằng tập KHAI, chạy TRƯỚC khi tiêm."""
+    tinh = {g for g, o in tap_doc(F, R, master).items() if (kieu, oid) in o}
     if not tinh or tinh != set(dich):
         raise LoiDo(f"{ten}: guard A23 tap doc {sorted(tinh)} != khai {sorted(dich)}")
+    return tinh
+
+
+def gac_chung(ten, F, g, x, dich, R=None):
+    """A23 guard sự kiện CHUNG phát lần đầu ở object `x` của luật `g`: memo = doc(G1..G(g-1)) + phần doc(g) trước `x`; luật
+    đích = g và mọi luật sau còn cần object ngoài memo (bảng phạm vi §2.3). Phải bằng tập KHAI."""
+    d, i = tap_doc(F, R), int(g[1:])
+    memo = {o for j in range(1, i) for o in d[f"G{j}"]} | set(d[g][:d[g].index(x)] if x in d[g] else [None])
+    tinh = {g} | {h for h in G_[i + 1:9] if not set(d[h]) <= memo}
+    if x not in d[g] or tinh != set(dich):
+        raise LoiDo(f"{ten}: guard su kien chung {sorted(tinh)} != khai {sorted(dich)}")
+
+
+def gac_walk(ten, F, gioi, dich, R=None):
+    """A23 guard trần commit MỖI phép đi: đúng các luật đi đồ thị có số commit cần đọc vượt `gioi` mới là đích."""
+    d = tap_doc(F, R)
+    if {g for g in ("G1", "G2", "G3") if len(d[g]) > gioi} != set(dich):
+        raise LoiDo(f"{ten}: guard tran phep di")
+
+
+def su_kien(ten, m, F, kieu, oid, tiem, dich, R=None, **kw):
+    """A12/A20/A23: luật đích = {G : (kiểu, OID) ∈ doc(G)}; guard so với tập KHAI trước khi tiêm; luật khác giữ màu."""
+    tinh = gac(ten, F, kieu, oid, dich, R, kw.get("master"))
     v0, them = chay(m, F, R, **kw)["git"]["luat"], tiem() or {}
     kq = chay(m, F, R, **kw, **them)
     can(ten, kq, {g: "khong_do_duoc" if g in tinh else v0[g] for g in G_})
@@ -923,6 +955,8 @@ def _bang(m, t, ten, vt, g, hang):
     """A10/A11: mỗi hàng (nhãn, hàm tree hoặc None, R thêm, trạng thái mong) dựng một fixture riêng; mọi luật khác qua."""
     for i, (nhan, ham, R, tt) in enumerate(hang):
         F = dung(t, hong={vt: ham} if ham else None, ten=f"k{i}")
+        if tt == "k":  # F4: object vắng chỉ thuộc tập đọc của đúng luật đang đo
+            gac(f"{ten}:{nhan}", F, "blob", X40, {g}, R)
         can(f"{ten}:{nhan}", chay(m, F, R), V(**{g: tt}))
 
 
@@ -1009,6 +1043,8 @@ for _ten, _sau, _mong in (("g_r_e", "G0", V(**dict.fromkeys(G_[1:9], "k"))), ("g
         F = dung(t)
         if sau == "G3":
             gac_memo(F, sau)
+        if sau != "G0":  # reader chết được PHÁT HIỆN ở lần đọc chưa memo đầu tiên: tree(S) của G6
+            gac_chung(ten, F, "G6", ("tree", F["tA"]), {g for g in G_ if mong[g] == "khong_do_duoc"})
         can(ten, chay(m, F, **giet_sau(sau)), mong)
     cg(_ten)(_f)
 
@@ -1022,12 +1058,42 @@ def _g_r_g(m, t, ten):
 @cg("g_r_h")
 def _g_r_h(m, t, ten):
     F = dung(t)
+    gac_chung(ten, F, "G7", ("tree", _opsB(F)), {"G7", "G8"})
     can(ten, chay(m, F, **ra(_opsB(F), "hong")), V(G7="k", G8="k"))
+
+
+# F3: sự kiện chung PHÁT HIỆN ở H1 (G3); G5 phải giữ `qua` nhờ memo A từ G1 — khoá hậu quả SAU điểm phát hiện thật
+_SAU_H1 = V(G3="k", G4="k", G6="k", G7="k", G8="k")
+
+
+@cg("g_r_h3")
+def _g_r_h3(m, t, ten):
+    F = dung(t)
+    gac_chung(ten, F, "G3", ("commit", F["H1"]), {g for g in G_ if _SAU_H1[g] == "khong_do_duoc"})
+    can(ten, chay(m, F, **ra(F["H1"], "hong")), _SAU_H1)
+
+
+@cg("g_ns_tong3")
+def _g_ns_tong3(m, t, ten):
+    F = dung(t)
+    gac_chung(ten, F, "G3", ("commit", F["H1"]), {g for g in G_ if _SAU_H1[g] == "khong_do_duoc"})
+    d = tap_doc(F)
+    can(ten, chay(m, F, ngan_sach={"max_tong_bytes": _kich(F, d["G1"] + d["G2"])}), _SAU_H1)
 
 
 @cg("g_ns_commit")
 def _g_ns_commit(m, t, ten):
-    can(ten, chay(m, dung(t), ngan_sach={"max_commit_moi_phep_di": 2}), V(G1="k"))
+    F = dung(t)
+    gac_walk(ten, F, 2, {"G1"})
+    can(ten, chay(m, F, ngan_sach={"max_commit_moi_phep_di": 2}), V(G1="k"))
+
+
+@cg("g_ns_g2")  # ô G2 × E_ngan_sach (F3): S = MOC nên G2, G3 phải đi tới MOC
+def _g_ns_g2(m, t, ten):
+    F = dung(t)
+    R = {"S": MOC, "tree_S": _rev(F["k"], MOC + "^{tree}")}
+    gac_walk(ten, F, 1, {"G1", "G2", "G3"}, R)
+    can(ten, chay(m, F, R, base_hien_hanh=MOC, ngan_sach={"max_commit_moi_phep_di": 1}), V(G1="k", G2="k", G3="k"))
 
 
 @cg("g_ns_walk")
@@ -1036,6 +1102,7 @@ def _g_ns_walk(m, t, ten):
     h = F["A"]
     for i in range(4):
         h = _cm(F["k"], F["tA"], h, msg=f"Hc{i}")
+    gac_walk(ten, F, 3, {"G3"}, {"H": h})
     can(ten, chay(m, F, {"H": h, "T": F["tA"]}, head_hien_hanh=h, ngan_sach={"max_commit_moi_phep_di": 3}), V(G3="k"))
 
 
@@ -1046,10 +1113,15 @@ def _to(t):
 @cg("g_ns_obj")
 def _g_ns_obj(m, t, ten):
     F = _to(t)
-    n, d = len(_raw(F["k"], F["H1"])[1]), tap_doc(F)
-    if max(len(_raw(F["k"], o[1])[1]) for ds in d.values() for o in ds if o[1] != F["H1"]) >= n - 1:
-        raise LoiDo(f"{ten}: guard kich thuoc max_object_bytes")
-    can(ten, chay(m, F, ngan_sach={"max_object_bytes": n - 1}), V(G3="k", G4="k"))
+    can(ten, chay(m, F, ngan_sach={"max_object_bytes": gac_obj(F)}), V(G3="k", G4="k"))
+
+
+def gac_obj(F):
+    """A23(e) guard KÍCH THƯỚC (A13 max_object_bytes): trần = cỡ H1 − 1 phải lớn hơn mọi object khác luật sẽ đọc."""
+    n = len(_raw(F["k"], F["H1"])[1])
+    if max(len(_raw(F["k"], o[1])[1]) for ds in tap_doc(F).values() for o in ds if o[1] != F["H1"]) >= n - 1:
+        raise LoiDo("guard kich thuoc max_object_bytes")
+    return n - 1
 
 
 @cg("g_ns_tong")
@@ -1067,6 +1139,55 @@ def _g_ns_han(m, t, ten):
         if g == "G3":
             gio[0] = 1e9
     can(ten, chay(m, F, _seam={"dong_ho": lambda: gio[0], "sau_luat": h}), V(**dict.fromkeys(G_[4:], "k")))
+
+
+def _han(g0=None):  # đồng hồ seam: lật quá hạn sau luật `g0` (hook), hoặc qua hàm `lat` trả về
+    gio = [0.0]
+
+    def lat():
+        gio[0] = 1e9
+    return {"dong_ho": lambda: gio[0], "sau_luat": lambda g, d: g == g0 and lat()}, lat
+
+
+@cg("g_ns_han0")  # F1(a): hết hạn trước một luật KHÔNG đọc object (G2 khi S = C) ⇒ vẫn khong_do_duoc
+def _g_ns_han0(m, t, ten):
+    F = dung(t)
+    HB = _cm(F["k"], F["tB"], F["B"], msg="HB")
+    R = {"S": F["B"], "H": HB, "T": F["tB"], "tree_S": F["tB"]}
+    if tap_doc(F, R)["G2"]:
+        raise LoiDo(f"{ten}: guard: G2 phai la nhanh khong doc object")
+    sm, _ = _han("G1")
+    can(ten, chay(m, F, R, base_hien_hanh=F["B"], head_hien_hanh=HB, _seam=sm), V(**dict.fromkeys(G_[2:], "k")))
+
+
+@cg("g_ns_han_g8")  # F1(b): hết hạn GIỮA luật — trong lần đọc blob cuối của G8 — kết quả vừa tính không được ghi
+def _g_ns_han_g8(m, t, ten):
+    F = dung(t)
+    sm, lat = _han()
+    can(ten, chay(m, F, _seam={**sm, **ra(OID_WF, "han", lat)["_seam"]}), V(G8="k", G9="k"))
+
+
+@cg("g_ns_han_g9")  # F1(c): hết hạn trong G9 (trước lần đọc ref cuối)
+def _g_ns_han_g9(m, t, ten):
+    F = dung(t)
+    sm, lat = _han()
+    can(ten, chay(m, F, _seam={**sm, "truoc_g9": lat}), V(G9="k"))
+
+
+@cg("g_ns_dem")  # F2: byte/object đã đọc khỏi ống được đếm ở MỌI đường, khớp oracle; memo/sổ lỗi không đếm lại
+def _g_ns_dem(m, t, ten):
+    for nhan, F, kw, tiem in (
+            ("kieu_sai", dung(t, hong={"tB": lambda k, t_: _dat(k, t_, "ops", ("40000", _blob(k, b"c1a1b la blob\n")))}, ten="a"), {}, None),
+            ("lech_la", dung(t, ten="b"), ra(OID, "lech"), None), ("bam_lech", dung(t, ten="c"), {}, "opsB"),
+            ("max_object", _to(pathlib.Path(t) / "d"), {}, None)):
+        if tiem:
+            ghi_de(F, _oid(F, tiem), "tree")
+        if nhan == "max_object":
+            kw = {"ngan_sach": {"max_object_bytes": gac_obj(F)}}
+        u = {o for ds in tap_doc(F).values() for o in ds}
+        dd = chay(m, F, **kw)["do_dac"]
+        if dd != {"so_object": len(u), "tong_bytes": _kich(F, u)}:
+            raise TinHieuChotCa(f"{ten}:{nhan}: do_dac {dd} != {len(u)} object / {_kich(F, u)} B")
 
 
 @cg("g_ns_memo")
@@ -1119,7 +1240,9 @@ for _o, (_kieu, _dich) in _OBJ.items():
 
 @cg("g_k_entry")  # E_kieu_sai: entry `ops` của tree(B) mode 40000 mà object là blob ⇒ chỉ G7
 def _g_k_entry(m, t, ten):
-    can(ten, chay(m, dung(t, hong={"tB": lambda k, t_: _dat(k, t_, "ops", ("40000", _blob(k, b"c1a1b la blob\n")))})), V(G7="k"))
+    F = dung(t, hong={"tB": lambda k, t_: _dat(k, t_, "ops", ("40000", _blob(k, b"c1a1b la blob\n")))})
+    gac(ten, F, "tree", _rev(F["k"], F["tB"] + ":ops"), {"G7"})
+    can(ten, chay(m, F), V(G7="k"))
 
 
 @cg("g_k_moc")  # E_kieu_sai trên OID lấy từ receipt / cạnh parent
@@ -1127,12 +1250,14 @@ def _g_k_moc(m, t, ten):
     F = dung(t)
     bl = _blob(F["k"], b"c1a1b parent la blob\n")
     H2, M2 = _cm(F["k"], F["tH"], bl, msg="H2"), _cm(F["k"], F["tB"], bl, msg="M2")
-    for nhan, R, th, mong in (("C=tree", dict.fromkeys(C3, F["tB"]), {}, V(G1="d", G2="k", G7="k", G8="k")),
-                              ("H=tree", {"H": F["tH"]}, {"head_hien_hanh": F["tH"]}, V(G3="k", G4="k")),
-                              ("S=tree", {"S": F["tA"]}, {"base_hien_hanh": F["tA"]}, V(G2="d", G3="d", G5="k", G6="k")),
-                              ("cha_H=blob", {"H": H2}, {"head_hien_hanh": H2}, V(G3="k"))):
+    for nhan, R, th, mong, x in (("C=tree", dict.fromkeys(C3, F["tB"]), {}, V(G1="d", G2="k", G7="k", G8="k"), F["tB"]),
+                                 ("H=tree", {"H": F["tH"]}, {"head_hien_hanh": F["tH"]}, V(G3="k", G4="k"), F["tH"]),
+                                 ("S=tree", {"S": F["tA"]}, {"base_hien_hanh": F["tA"]}, V(G2="d", G3="d", G5="k", G6="k"), F["tA"]),
+                                 ("cha_H=blob", {"H": H2}, {"head_hien_hanh": H2}, V(G3="k"), bl)):
+        gac(f"{ten}:{nhan}", F, "commit", x, {g for g in G_ if mong[g] == "khong_do_duoc"}, R)
         can(f"{ten}:{nhan}", chay(m, F, R, **th), mong)
     _g(F["k"], "update-ref", "refs/remotes/origin/master", M2)
+    gac(f"{ten}:cha_master=blob", F, "commit", bl, {"G1"}, master=M2)
     can(f"{ten}:cha_master=blob", chay(m, F, master=M2), V(G1="k"))
 
 
@@ -1161,14 +1286,23 @@ for _chot in _DUOI:
         cg(f"g_p_{_chot}_{_v}")(_f)
 
 
-for _c, _ham in (("c1", lambda b: b.replace(b"tree ", b"xree ", 1)), ("c2", lambda b: b.replace(b"\nparent ", b"\nparent zz\nparent ", 1))):
-    cg(f"g_p_{_c}")(lambda m, t, ten, h=_ham: can(ten, chay(m, dung(t, hong={"H1": h})), V(G3="k", G4="k")))
+_C1, _C2 = (lambda b: b.replace(b"tree ", b"xree ", 1)), (lambda b: b.replace(b"\nparent ", b"\nparent zz\nparent ", 1))
+for _c, _vt, _ham, _dich in (("c1", "H1", _C1, "G3 G4"), ("c2", "H1", _C2, "G3 G4"), ("c1A", "A", _C1, "G1 G5 G6"), ("c1B", "B", _C1, "G1 G2 G7 G8")):
+    def _f(m, t, ten, vt=_vt, h=_ham, dich=_dich):
+        F = dung(t, hong={vt: h})
+        gac(ten, F, "commit", F[vt], dich.split())
+        can(ten, chay(m, F), V(**dict.fromkeys(dich.split(), "k")))
+    cg(f"g_p_{_c}")(_f)
 
 
 @cg("g_p_alias")
 def _g_p_alias(m, t, ten):
     h = thay("ops", _hong_tree("t8"))
-    can(ten, chay(m, dung(t, alias=True, hong={"tA": h, "tB": h})), V(G6="k", G7="k"))
+    F = dung(t, alias=True, hong={"tA": h, "tB": h})
+    if _oid(F, "opsA") != _oid(F, "opsB"):
+        raise LoiDo(f"{ten}: guard alias: ops(A) != ops(B)")
+    gac(ten, F, "tree", _oid(F, "opsA"), {"G6", "G7"})
+    can(ten, chay(m, F), V(G6="k", G7="k"))
 
 
 @cg("g_tap_doc")  # A23(a): oracle khớp bảng §4 theo OID; oracle không gọi module, không rev-list/merge-base/ls-tree
@@ -1215,6 +1349,28 @@ def _g_guard(m, t, ten):
     _phai_loi_do(f"{ten}:vi_tri_luu", lambda: gac_luu(G, _rev(G["k"], MOC + ":ops")))  # alias kiểu r7: `ops` mượn từ MOC
     _phai_loi_do(f"{ten}:kich_thuoc", lambda: gac_tong(G))  # không phóng to H1
     _phai_loi_do(f"{ten}:diem_tiem", lambda: gac_memo(G, "G0"))  # tiêm trước G1
+    _phai_loi_do(f"{ten}:max_object", lambda: gac_obj(G))  # không phóng to H1
+    _phai_loi_do(f"{ten}:su_kien_chung", lambda: gac_chung(ten, G, "G7", ("tree", _oid(G, "opsB")), {"G7"}))  # G8 còn đọc
+    _phai_loi_do(f"{ten}:tran_phep_di", lambda: gac_walk(ten, G, 2, {"G1", "G3"}))
+
+
+# A20 (F3): MỘT ô cho mỗi (luật × sự kiện E mà luật ấy gặp được), mỗi ô một ca đích; mỗi ô một đột biến riêng (`DBG`).
+_EV7 = ("E_vang", "E_bam_lech", "E_kieu_sai", "E_hong", "E_ngan_sach", "E_framing_lech", "E_reader_chet")
+_VAT = dict(zip(G_[1:9], ("D", "B", "H1", "H1", "A", "opsA", "opsB", "wfB")))
+O_GIT = {(g, e): c for g, o in _VAT.items() for e, c in (
+    ("E_vang", f"g_o_vang_{o}"), ("E_bam_lech", f"g_o_bam_{o}"), ("E_framing_lech", f"g_o_lech_{o}"), ("E_reader_chet", "g_r_e"),
+    ("E_kieu_sai", "g_k_entry" if g == "G7" else "g_k_moc"),
+    ("E_hong", {"G1": "g_p_c1A", "G2": "g_p_c1B", "G3": "g_p_c1", "G4": "g_p_c1", "G5": "g_p_c1A", "G6": "g_p_t8_S", "G7": "g_p_t8_C",
+                "G8": "g_p_t8_W"}[g]),
+    ("E_ngan_sach", {"G1": "g_ns_commit", "G2": "g_ns_g2", "G3": "g_ns_walk", "G4": "g_ns_obj", "G5": "g_ns_han"}.get(g, "g_ns_tong")))}
+O_GIT.update({("G9", "E_ngan_sach"): "g_ns_han", ("G9", "E_troi_ref"): "g_troi"})
+
+
+@cg("g_o_bang")
+def _g_o_bang(m, t, ten):
+    du = {(g, e) for g in G_[1:9] for e in _EV7} | {("G9", "E_ngan_sach"), ("G9", "E_troi_ref")}
+    if set(O_GIT) != du or not set(O_GIT.values()) <= set(CG):
+        raise TinHieuChotCa(f"{ten}: bang o luat x su kien thieu {sorted(du - set(O_GIT))} hoac tro ca khong co")
 
 
 def dong_nhom(ten, ca, db, ev):  # dòng nhóm KHÔNG được khớp regex sổ đăng ký (A18)
@@ -1266,14 +1422,20 @@ def chay_g(m, chi=None):
     for ten, f in CG.items():
         if chi is None or ten in chi:
             with tempfile.TemporaryDirectory(prefix="c1a1b_", ignore_cleanup_errors=True) as t:
-                f(m, t, ten)
+                try:
+                    f(m, t, ten)
+                finally:
+                    for p in _RAW.values():
+                        p.kill()
+                        p.wait()
+                        p.stdin.close()
+                        p.stdout.close()
+                    _RAW.clear()
 
 
 # Bảng nghĩa vụ nhóm Git: (ID, mệnh đề, tên đột biến, chuỗi cũ, chuỗi mới — tuple = nhiều chỗ, ca đích | "TD: lập luận", ca gác).
 # Ca gác mặc định `g_duong`; None khi đột biến tất yếu đổi fixture dương (khai rõ, không ngầm miễn).
-_KDD, _TRY = 'ghi(g, "khong_do_duoc", str(e))', '                try:\n                    dat, ly = f()'
-_EV = {"E_vang": "g_o_vang_D", "E_bam_lech": "g_r_b", "E_kieu_sai": "g_k_entry", "E_hong": "g_p_t8_C", "E_ngan_sach": "g_ns_commit",
-       "E_framing_lech": "g_r_g", "E_reader_chet": "g_r_e", "E_troi_ref": "g_troi"}
+_KDD, _TRY, _HAN = 'ghi(g, "khong_do_duoc", str(e))', "                try:  # F1:", "                    d.kiem_han()\n                    dat, ly = f()\n                    d.kiem_han()\n"
 _TT = r'''            if j < 0 or j + 21 > len(b):
                 raise SuKien(f"E_hong: t1 {oid}")'''
 DBG = [
@@ -1327,22 +1489,31 @@ DBG = [
     ("A12e", "reader chết là sự kiện CHUNG", "chet_cuc_bo", '            s._chet(f"dong dau sai dang {dau[:60]!r}")', '            raise SuKien("E_reader_chet: cuc bo")', "g_r_h"),
     ("A12f", "kết quả đã hoàn tất bất biến", "ghi_de_hoan_tat", '        dd = {"so_object"',
      '        if d.chet:\n            luat.update(dict.fromkeys(LUAT[1:9], "khong_do_duoc"))\n        dd = {"so_object"', "g_r_f"),
-    ("A12g", "memo dùng được sau reader chết", "xoa_memo", "        if k in s.memo:\n", "        if s.p.poll() is not None:\n            s.memo.clear()\n        if k in s.memo:\n", "g_r_f2"),
+    ("A12g", "memo giữ được SAU khi phát hiện reader chết", "xoa_memo", "        s.chet = True  #", "        s.memo.clear()\n        s.chet = True  #", "g_r_h3"),
     ("A12h", "reader chết không chặn memo (khác deadline)", "deadline_cho_reader", "        if k in s.memo:\n",
-     '        if s.p.poll() is not None:\n            s._chet("x")\n        if k in s.memo:\n', "g_r_f2"),
+     '        if s.chet:\n            raise SuKien("E_reader_chet: x")\n        if k in s.memo:\n', "g_r_h3"),
+    ("A12j", "tổng byte không chặn memo", "tong_chan_memo", "        if k in s.memo:\n",
+     '        if s.het_tong:\n            raise SuKien("E_ngan_sach: tong byte")\n        if k in s.memo:\n', "g_ns_tong3"),
     ("A12i", "framing lệch là cục bộ", "lech_la_chet", '        if m[1] != oid.encode():\n            raise SuKien(f"E_framing_lech',
      '        if m[1] != oid.encode():\n            s._chet("x")\n            raise SuKien(f"E_framing_lech', "g_r_g"),
     ("A13a", "bộ đếm commit riêng từng phép đi", "gop_dem", '        if dem > s.ns["max_commit_moi_phep_di"]:',
      '        s.tong_dem = getattr(s, "tong_dem", 0) + 1\n        if s.tong_dem > s.ns["max_commit_moi_phep_di"]:', "g_ns_walk"),
     ("A13b", "chốt max_object_bytes", "bo_max_obj", 'if n > s.ns["max_object_bytes"]', "if False", "g_ns_obj"),
     ("A13c", "tổng byte là tài nguyên chung", "tong_cuc_bo", _TRY, "                d.tong_bytes, d.het_tong = 0, False\n" + _TRY, "g_ns_tong"),
-    ("A13d", "deadline chặn cả luật đủ memo", "han_sau_memo", ("        s.kiem_han()  #", "            return s.memo[k]\n"),
-     ("        pass  #", "            return s.memo[k]\n        s.kiem_han()\n"), "g_ns_han"),
+    ("A13d", "deadline đầu luật", "bo_han_dau", _HAN, "                    dat, ly = f()\n                    d.kiem_han()\n",
+     "TD: kiem_han CUỐI luật bắt mọi hạn đã qua trước khi ghi kết quả; đầu luật chỉ là dừng sớm (đo nhóm ở A13d3)"),
+    ("A13d2", "deadline cuối luật, sau lần đọc cuối", "bo_han_cuoi", _HAN, "                    d.kiem_han()\n                    dat, ly = f()\n", "g_ns_han_g8"),
+    ("A13d3", "deadline đầu+cuối luật cả nhóm", "bo_han_ca_nhom", _HAN, "                    dat, ly = f()\n", "g_ns_han0"),
+    ("A13d4", "deadline trong doc() là dừng sớm", "bo_han_doc", "        s.kiem_han()  #", "        pass  #",
+     "TD: kiem_han cuối luật quyết định kết quả; lần kiểm trong doc() chỉ cắt phép đi dài, không đổi vector"),
+    ("A13h", "đếm byte ở MỌI đường (F2)", "dem_chi_thanh_cong", ("            if dem:\n                s.tong_bytes += len(c)\n", "        return than\n\n    def commit"),
+     ("", "        s.tong_bytes += n\n        return than\n\n    def commit"), "g_ns_dem"),
+    ("A13i", "đếm cả thân bị xả (F2)", "dem_bo_xa", "            if dem:\n", "            if dem and giu:\n", "g_ns_dem"),
     ("A13e", "memo đếm mỗi object một lần", "bo_memo", "        s.memo[k] = than\n", "", "g_ns_memo"),
     ("A13f", "G0 nhận đúng 8.388.608 byte", "g0_ge", "    if len(raw) > TRAN_RECEIPT:", "    if len(raw) >= TRAN_RECEIPT:", "g_ns_g0"),
     ("A14a", "trôi ref ⇒ 13, không 2", "g9_rc2", '    tt = set(kq["git"]["luat"].values())',
      '    if any(x.startswith("G9: ") for x in kq["git"]["ly_do"]):\n        return 2\n    tt = set(kq["git"]["luat"].values())', "g_troi"),
-    ("A14b", "G9 đọc lại ref", "bo_doc_lai", "            v = doc_ref(goc_kho, nhanh)", "            v = master", "g_troi"),
+    ("A14b", "G9 đọc lại ref", "bo_doc_lai", "            v = doc_ref(goc_kho, nhanh, timeout=", "            v = master or doc_ref(goc_kho, nhanh, timeout=", "g_troi"),
     ("A20a", "sự kiện cục bộ không lan", "lan_su_kien", '                    ghi(g, "qua" if dat else "do", ly)',
      '                    ghi(g, "khong_do_duoc" if "khong_do_duoc" in luat.values() else "qua" if dat else "do", ly)', "g_o_vang_opsB"),
     ("A20b.t1", "chốt t1", "bo_t1", _TT, '            if False:\n                raise SuKien("")', "g_p_t1b_C"),
@@ -1359,8 +1530,8 @@ DBG = [
 ]
 DBG += [(f"A20b.{c}", f"chốt {c}", f"bo_{c}", f'("{c}", {v})', f'("{c}", False)', f"g_p_{c}_C")
         for c, v in (("t5", "not ten"), ("t6", 'ten == "."'), ("t7", 'ten == ".."'), ("t8", '"/" in ten'), ("t9", 'ten == ".git"'), ("t10", "ten in ket"))]
-DBG += [(f"A20.{e}", f"{e} ⇒ khong_do_duoc, không phải do", f"do_{e}", _KDD, f'ghi(g, "do" if str(e).startswith("{e}") else "khong_do_duoc", str(e))', c)
-        for e, c in _EV.items()]
+DBG += [(f"A20.{g}.{e}", f"ô {g} × {e} ⇒ khong_do_duoc", f"do_{g}_{e}", _KDD,
+         f'ghi(g, "do" if g == "{g}" and str(e).startswith("{e}") else "khong_do_duoc", str(e))', c) for (g, e), c in O_GIT.items()]
 # Đột biến HẠ TẦNG (r3 F7): đặt trong CHÍNH suite, chạy trên bản sao suite cạnh bản chép nguyên byte của hai module + sổ.
 _NAP = '    mg = _nap(MODUN_GIT, "doc_receipt_thu_hoi_git")'
 DBH = [
@@ -1376,6 +1547,11 @@ DBH = [
     ("H7", "oracle không dùng module/engine git", "oracle_goi_module", '    k, R = F["k"], {**F["R"], **(R or {})}\n\n    def hdr',
      '    k, R = F["k"], {**F["R"], **(R or {})}\n    assert MODUN_GIT\n\n    def hdr', "g_tap_doc"),
     ("H8", "guard kích thước", "bo_gac_tong", '    if max(_kich(F, d[g]) for g in ("G6", "G7", "G8")) >= tran:', "    if False:", "g_guard"),
+    ("H10", "bảng ô phủ đủ luật × E", "bo_mot_o", 'O_GIT.update({("G9", "E_ngan_sach"): "g_ns_han", ("G9", "E_troi_ref"): "g_troi"})',
+     'O_GIT.update({("G9", "E_ngan_sach"): "g_ns_han"})', "g_o_bang"),
+    ("H11", "guard max_object_bytes", "bo_gac_obj", '    if max(len(_raw(F["k"], o[1])[1]) for ds in tap_doc(F).values()', '    if False and max(len(_raw(F["k"], o[1])[1]) for ds in tap_doc(F).values()', "g_guard"),
+    ("H12", "guard sự kiện chung", "bo_gac_chung", "    if x not in d[g] or tinh != set(dich):", "    if False:", "g_guard"),
+    ("H13", "guard trần phép đi", "bo_gac_walk", '    if {g for g in ("G1", "G2", "G3") if len(d[g]) > gioi} != set(dich):', "    if False:", "g_guard"),
     ("H9", "guard điểm tiêm", "bo_gac_memo", "    if not set(d[\"G4\"] + d[\"G5\"]) <=", "    if False and set(d[\"G4\"] + d[\"G5\"]) <=", "g_guard"),
 ]
 

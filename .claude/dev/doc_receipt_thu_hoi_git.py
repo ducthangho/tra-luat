@@ -44,15 +44,15 @@ def _env():
     return e
 
 
-def _git(goc, *a):
-    return subprocess.run(["git", "--no-replace-objects", "-C", str(goc), *a], capture_output=True, env=_env(), timeout=60)
+def _git(goc, *a, timeout=60.0):
+    return subprocess.run(["git", "--no-replace-objects", "-C", str(goc), *a], capture_output=True, env=_env(), timeout=timeout)
 
 
-def doc_ref(goc, nhanh):
+def doc_ref(goc, nhanh, timeout=60.0):
     """`refs/remotes/origin/<nhanh>` khớp ĐÚNG tên (không DWIM, không tiền tố); None khi không đúng một hex40."""
     ten = f"refs/remotes/origin/{nhanh}"
     try:
-        p = _git(goc, "for-each-ref", "--format=%(refname) %(objectname)", ten)
+        p = _git(goc, "for-each-ref", "--format=%(refname) %(objectname)", ten, timeout=timeout)
     except (OSError, subprocess.SubprocessError):
         return None
     ds = [d.split(" ")[-1] for d in p.stdout.decode("utf-8", "replace").splitlines() if d.split(" ")[0] == ten]
@@ -99,19 +99,22 @@ class Doc:
             s.p.kill()
         raise SuKien(f"E_reader_chet: {ly}")
 
-    def _lay(s, n, giu=True):
+    def _lay(s, n, giu=True, dem=True):
+        """F2: MỌI byte nội dung lấy khỏi ống đều được đếm, kể cả thân bị xả, bị bác, hay đọc dở trước khi reader chết."""
         ket, con = [], n
         while con:
             c = s.ra.read(min(con, 1 << 20))
             if not c:
                 s._chet(f"than ngan {n - con}/{n}")
             con -= len(c)
+            if dem:
+                s.tong_bytes += len(c)
             if giu:
                 ket.append(c)
         return b"".join(ket)
 
     def doc(s, oid, kieu):
-        s.kiem_han()  # deadline trước memo: luật chưa hoàn tất dù đủ memo vẫn bị chặn (bảng phạm vi §2.3)
+        s.kiem_han()  # dừng sớm phép đi dài; kết quả luật đã do kiem_han đầu/cuối luật quyết định (bảng phạm vi §2.3)
         k = (kieu, oid)
         if k in s.memo:
             return s.memo[k]
@@ -142,10 +145,11 @@ class Doc:
         if m[4]:
             raise SuKien(f"E_vang: {oid}" if m[1] == oid.encode() else f"E_framing_lech: {oid} -> {m[1].decode()}")
         loai, n = m[2].decode(), int(m[3])
+        s.so_object += 1  # mọi phản hồi có thân, không chỉ đường thành công (F2)
         vuot = ("E_ngan_sach: max_object_bytes" if n > s.ns["max_object_bytes"]
                 else "E_ngan_sach: tong byte" if s.tong_bytes + n > s.ns["max_tong_bytes"] else None)
         than = s._lay(n, vuot is None)
-        if s._lay(1) != b"\n":
+        if s._lay(1, dem=False) != b"\n":
             s._chet("thieu LF cuoi")
         if vuot:
             s.het_tong = s.het_tong or vuot.endswith("tong byte")
@@ -156,8 +160,6 @@ class Doc:
             raise SuKien(f"E_bam_lech: {oid}")
         if loai != kieu:
             raise SuKien(f"E_kieu_sai: {oid} la {loai}, mong doi {kieu}")
-        s.so_object += 1
-        s.tong_bytes += n
         return than
 
     def commit(s, oid):
@@ -281,9 +283,8 @@ def kiem_git(raw, *, kho, nhanh, base_hien_hanh, head_hien_hanh, master, goc_kho
         d, hook = Doc(goc_kho, ns, seam), seam.get("sau_luat", lambda g, d: None)
 
         def g9():
-            d.kiem_han()
             seam.get("truoc_g9", lambda: None)()
-            v = doc_ref(goc_kho, nhanh)
+            v = doc_ref(goc_kho, nhanh, timeout=min(60.0, max(d.han - d.dong_ho(), 0.001)))  # I/O ref theo phần hạn còn lại
             if v != master:
                 raise SuKien(f"E_troi_ref: {v} != {master}")
             return True, ""
@@ -295,8 +296,10 @@ def kiem_git(raw, *, kho, nhanh, base_hien_hanh, head_hien_hanh, master, goc_kho
                          ("G6", lambda: d.g6(S, r["oid_bo_kiem_tai_S"])), ("G7", lambda: d.g7(C, r["oid_bo_kiem_da_chay"])),
                          ("G8", lambda: d.g7(C, r["workflow_definition_blob"], DUONG_WF, r["workflow_definition_sha256"])),
                          ("G9", g9)):
-                try:
+                try:  # F1: deadline ở ĐẦU và CUỐI mỗi luật — kể cả nhánh không đọc object và kết quả vừa tính xong
+                    d.kiem_han()
                     dat, ly = f()
+                    d.kiem_han()
                 except SuKien as e:
                     ghi(g, "khong_do_duoc", str(e))
                 else:

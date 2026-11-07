@@ -84,3 +84,6 @@ nang_tran:
     reservations; countersnotreset
   tran_cu: 3files/900additions,attempts6,calls10,rounds3
   tran_moi: same3files/900additions,attempts7,calls12,rounds4
+da_bi_thay_the: wp1271-r9-g9-claude
+superseded_reason: review4terminalchanges_requested, 2/2oldclassesclosed but newnativeconfirmedfieldcollationP2;
+  explicitR9Rescue/counterscarry

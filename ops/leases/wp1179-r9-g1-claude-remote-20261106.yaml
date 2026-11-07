@@ -14,11 +14,11 @@ thay_the_cho_ghi_chu: 'lease thi cong dau tien cua #1179; dispatcher cu chua tun
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1179#issuecomment-6692047867
 authority_url: https://github.com/ducthangho/tra-luat/issues/1179#issuecomment-6692047867
-authority_ghi_chu: 'chu kho duyet spec_hash r9 c9bc8aca va cap lease thi cong (06-11 ~18:20Z)'
-authority_caveat: 'comment neo do phien dieu phoi dang bang token chu kho (#566)'
+authority_ghi_chu: chu kho duyet spec_hash r9 c9bc8aca va cap lease thi cong (06-11 ~18:20Z)
+authority_caveat: comment neo do phien dieu phoi dang bang token chu kho (#566)
 recorded_by: anthropic_claude_dispatcher
 recorder_is_dispatcher: true
-recorder_ghi_chu: 'phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; tham quyen la authority_url'
+recorder_ghi_chu: phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq ghi; tham quyen la authority_url
 executor_session: session_015GtxrZNAaGP4K8HUy8WEp5
 leased_at_utc: '2026-11-06T19:05:00Z'
 heartbeat_at: '2026-11-06T19:05:00Z'
@@ -42,7 +42,7 @@ assurance_target: cross_approved
 assurance_ghi_chu: 'cong human audit cua chu kho truoc merge (than Issue #1179)'
 reviewer: openai_codex
 reviewer_provider: openai_codex
-reviewer_independence: 'cross-review theo .claude/skills/cross-review/SKILL.md, phien doc lap read-only neo exact head, khong --add-dir; connector la lop bo sung'
+reviewer_independence: cross-review theo .claude/skills/cross-review/SKILL.md, phien doc lap read-only neo exact head, khong --add-dir; connector la lop bo sung
 spec_path: ops/specs/wp1179-c1a1b-r9.md
 spec_ref: refs/heads/master@9607e3eba96b2ce091e34196cbb8ede31a521ff9
 spec_source_oid: 9607e3eba96b2ce091e34196cbb8ede31a521ff9
@@ -56,7 +56,7 @@ target_branch_neu_land: master
 base_sha: 9607e3eba96b2ce091e34196cbb8ede31a521ff9
 start_from_sha: 9607e3eba96b2ce091e34196cbb8ede31a521ff9
 reviewed_sha_required: 9607e3eba96b2ce091e34196cbb8ede31a521ff9
-reviewed_sha_ghi_chu: 'chua co head luc cap lease; review neo dung head cua PR'
+reviewed_sha_ghi_chu: chua co head luc cap lease; review neo dung head cua PR
 write_set:
 - .claude/dev/doc_receipt_thu_hoi_git.py
 - .claude/dev/doc_receipt_thu_hoi_test.py
@@ -64,8 +64,8 @@ write_set_hash: 98262826266c3e2ca4f5aa1fcb57e4f8b5863a340ca085540681fad780513bd8
 write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
 write_set_ghi_chu: 'phuong an B: KHONG cham .claude/dev/ci_dang_ky_test.py (doc_receipt_thu_hoi_test.py da dang ky san)'
 closure_status: 'holder scan 2026-11-06T19:03:20Z: ls-remote vs for-each-ref thieu 0; 2/2 duong dan NGUOI_GIU 0'
-tran_kich_thuoc: '<= 2 tep / <= 1600 dong them (git diff --numstat origin/master...<head>; nang_tran lan 2 07-11, issuecomment-6700574535; lan 1 1350 issuecomment-6700073551; goc 750); vuot => DUNG'
-tran_loi_goi_codex: 'TRAN CUNG 3 loi goi Codex cho pha thi cong (allowance, spec r9 §8; init --codex-review-calls-limit 3); connector @codex review tinh vao truc nay; U_lower toan packet = 14/16 (journal dispatcher cu unknown); dem truoc MOI loi goi; het ma chua approve => DUNG, hoi chu kho'
+tran_kich_thuoc: <= 2 tep / <= 1700 dong them (git diff --numstat origin/master...<head>; nang_tran lan 3 07-11, issuecomment-6714549069; lan 2 1600 issuecomment-6700574535; lan 1 1350 issuecomment-6700073551; goc 750); vuot => DUNG
+tran_loi_goi_codex: TRAN CUNG 4 loi goi Codex cho pha thi cong (3 allowance spec r9 §8 + 1 luot xac minh F6/F7, issuecomment-6714549069); connector @codex review tinh vao truc nay; dem truoc MOI loi goi; luot 4 con finding => DUNG, hoi chu kho
 windows: 'A16 required: chay TAP TRUNG tren tra-luat-win qua phien dieu phoi, giu KHOA.txt (ADR-0057); KHONG workflow_dispatch ci.yml'
 coordination_paths:
 - ops/leases/wp1179-r9-g1-claude-remote-20261106.yaml
@@ -82,14 +82,19 @@ prohibited_actions:
 - write_outside_effective_write_set
 - workflow_dispatch
 - sua_ci_yml
-land_authority_note: 'chu kho duyet SHA cu the + human audit truoc merge; dieu phoi merge khi kiem-merge rc=0'
+land_authority_note: chu kho duyet SHA cu the + human audit truoc merge; dieu phoi merge khi kiem-merge rc=0
 nang_tran:
-  tran_cu: <= 2 tep / <= 1350 dong them (nang_tran lan 1, issuecomment-6700073551)
-  tran_moi: <= 2 tep / <= 1600 dong them (git diff --numstat origin/master...<head>)
-  can_cu: 'Review Rescue sau Codex luot 1/3 (run a4bceca6): va F1-F4 uoc +180-230 dong tren 1304 => ~1480-1530'
+  tran_cu: <= 2 tep / <= 1600 dong them (nang_tran lan 2, issuecomment-6700574535)
+  tran_moi: <= 2 tep / <= 1700 dong them (git diff --numstat origin/master...<head>)
+  can_cu: 'Review Rescue sau Codex luot 3/3 (run ef67aa49): head 5457068 = +1598/-7; va F6+F7 uoc 60-100 dong'
   ai_nang: ducthangho
-  can_cu_url: https://github.com/ducthangho/tra-luat/issues/1179#issuecomment-6700574535
+  can_cu_url: https://github.com/ducthangho/tra-luat/issues/1179#issuecomment-6714549069
   lich_su:
+  - tran_cu: <= 2 tep / <= 1350 dong them (nang_tran lan 1, issuecomment-6700073551)
+    tran_moi: <= 2 tep / <= 1600 dong them (git diff --numstat origin/master...<head>)
+    can_cu: 'Review Rescue sau Codex luot 1/3 (run a4bceca6): va F1-F4 uoc +180-230 dong tren 1304 => ~1480-1530'
+    ai_nang: ducthangho
+    can_cu_url: https://github.com/ducthangho/tra-luat/issues/1179#issuecomment-6700574535
   - tran_cu: <= 2 tep / <= 750 dong them (issuecomment-6680102065, ngoai le ADR-0053)
     tran_moi: <= 2 tep / <= 1350 dong them (git diff --numstat origin/master...<head>)
     can_cu: 563c732 = +1305 (module 358, test 947/-6); ~97 ca bat buoc A3-A23 cua spec r9; 156/156+97/97+253/253 ca, 162+81+243 dot bien giet
@@ -100,10 +105,14 @@ ngan_sach_thi_cong:
   U_lower_nguon: '>=4 lich su truoc ban giao (6624954880) + 9 luot Codex pha spec (r1..r9, run 202041c2..112cc186) + 1 connector Draft-marked-ready tren PR #1262 (6692050961)'
   U_max: unknown
   U_max_ly_do: journal/state cua dispatcher cu chua xac minh (6679422380)
-  tran_tong: 16
-  tran_tong_nguon: issuecomment-6686369822
-  allowance: 3
-  cap: 3
-  cap_quy_tac: cap = allowance khi U_max unknown (spec r9 §8); KHONG tinh tu U_lower
+  tran_tong: 18
+  tran_tong_nguon: issuecomment-6714549069 (nang tu 16, issuecomment-6686369822; U_lower 14 + 4 thi cong)
+  allowance: 4
+  cap: 4
+  cap_quy_tac: cap = 3 allowance (spec r9 §8) + 1 luot chu kho cap them (issuecomment-6714549069); KHONG tinh tu U_lower
   init: packet_loop init --codex-review-calls-limit 3 (§11.2)
-  da_dung: 1
+  da_dung: 3
+  da_dung_runs:
+  - a4bceca6fbeb4e7884ce1b626cbc7fae
+  - ec20186a21aa40d3aa85534e6e316b71
+  - ef67aa4996004dc99a98f39e635fcc65

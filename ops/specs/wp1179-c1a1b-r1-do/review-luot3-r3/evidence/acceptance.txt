@@ -1,0 +1,27 @@
+$ git ('rev-list', '--first-parent', '601a0f18c83057fa079d204122660f5697fc6389^..073052a51a2c9770b6766b11fb1e01a73fff78e6'): rc=0 out='073052a51a2c9770b6766b11fb1e01a73fff78e6\n5128d09714b980894a22d4458fcd250317b595b7\n492be1a675e274664d'
+$ git ('rev-list', '073052a51a2c9770b6766b11fb1e01a73fff78e6'): rc=0 out='073052a51a2c9770b6766b11fb1e01a73fff78e6\n5128d09714b980894a22d4458fcd250317b595b7\nb190ca7d88863d7ca6'
+$ git ('rev-list', '--first-parent', '073052a51a2c9770b6766b11fb1e01a73fff78e6'): rc=0 out='073052a51a2c9770b6766b11fb1e01a73fff78e6\n5128d09714b980894a22d4458fcd250317b595b7\n492be1a675e274664d'
+A7 C=B correct=True all_parent=True no_MOC_bound=True exclude_MOC=True
+$ git ('rev-list', '--first-parent', '073052a51a2c9770b6766b11fb1e01a73fff78e6'): rc=0 out='073052a51a2c9770b6766b11fb1e01a73fff78e6\n5128d09714b980894a22d4458fcd250317b595b7\n492be1a675e274664d'
+A7 C=MOC correct=True all_parent=True no_MOC_bound=True exclude_MOC=False
+$ git ('rev-list', '--first-parent', '073052a51a2c9770b6766b11fb1e01a73fff78e6'): rc=0 out='073052a51a2c9770b6766b11fb1e01a73fff78e6\n5128d09714b980894a22d4458fcd250317b595b7\n492be1a675e274664d'
+A7 C=P correct=False all_parent=True no_MOC_bound=True exclude_MOC=False
+$ git ('rev-list', '--first-parent', '073052a51a2c9770b6766b11fb1e01a73fff78e6'): rc=0 out='073052a51a2c9770b6766b11fb1e01a73fff78e6\n5128d09714b980894a22d4458fcd250317b595b7\n492be1a675e274664d'
+A7 C=E correct=False all_parent=True no_MOC_bound=False exclude_MOC=False
+$ git ('rev-list', '--first-parent', '073052a51a2c9770b6766b11fb1e01a73fff78e6'): rc=0 out='073052a51a2c9770b6766b11fb1e01a73fff78e6\n5128d09714b980894a22d4458fcd250317b595b7\n492be1a675e274664d'
+A7 C=X correct=False all_parent=False no_MOC_bound=False exclude_MOC=False
+$ git ('merge-base', '--is-ancestor', '5128d09714b980894a22d4458fcd250317b595b7', '492be1a675e274664dda110609e20f908bbc99e2'): rc=1 out=''
+$ git ('merge-base', '--is-ancestor', '492be1a675e274664dda110609e20f908bbc99e2', '5128d09714b980894a22d4458fcd250317b595b7'): rc=0 out=''
+A8 inverted ancestor target S=B,C=A: correct_rc=1 inverted_rc=0
+$ git ('merge-base', '--is-ancestor', '492be1a675e274664dda110609e20f908bbc99e2', 'c3f552fd5b9a54da08f669fa22900ecb1b6959dc'): rc=1 out=''
+$ git ('merge-base', '--is-ancestor', '492be1a675e274664dda110609e20f908bbc99e2', '5128d09714b980894a22d4458fcd250317b595b7'): rc=0 out=''
+A8 G3 target H=X: correct_rc=1 mutant_uses_C_rc=0
+$ git ('rev-parse', 'refs/remotes/origin/master'): rc=0 out='3c4d05223777036a39848327fe4d2d2ab7c775bd\n'
+$ git ('update-ref', 'refs/remotes/origin/master', '073052a51a2c9770b6766b11fb1e01a73fff78e6'): rc=0 out=''
+$ git ('for-each-ref', '--format=%(objectname)', 'refs/remotes/origin/master'): rc=0 out='073052a51a2c9770b6766b11fb1e01a73fff78e6\n'
+$ git ('update-ref', 'refs/remotes/origin/master', '5128d09714b980894a22d4458fcd250317b595b7'): rc=0 out=''
+$ git ('for-each-ref', '--format=%(objectname)', 'refs/remotes/origin/master'): rc=0 out='5128d09714b980894a22d4458fcd250317b595b7\n'
+$ git ('update-ref', '-d', 'refs/remotes/origin/master'): rc=0 out=''
+$ git ('for-each-ref', '--format=%(objectname)', 'refs/remotes/origin/master'): rc=0 out=''
+$ git ('update-ref', 'refs/remotes/origin/master', '3c4d05223777036a39848327fe4d2d2ab7c775bd'): rc=0 out=''
+A5/A14 real ref observations: initial_matches_D=True, changed=True, deleted_empty=True; distinct rc policies (2 initial / 13 post-read) are implementable.

@@ -1,0 +1,34 @@
+# do 2026-11-06T14:35:37Z, base b5c44b9c2d441ea98acb86a0468126d215a8775f, state-dir tam (khong phai state that)
+$ python -B .claude/dev/packet_loop.py --state-dir <STATE_DIR_TAM> init --packet 1179 --executor claude --reviewer codex --codex-review-calls-limit 3
+                           [--review-rounds-limit REVIEW_ROUNDS_LIMIT]
+                           [--codex-review-calls-limit CODEX_REVIEW_CALLS_LIMIT]
+packet_loop.py init: error: the following arguments are required: --mission
+rc=2
+
+$ python -B .claude/dev/packet_loop.py --state-dir <STATE_DIR_TAM> init --packet 1179 --mission 499 --executor claude --reviewer codex --codex-review-calls-limit 3
+đã khởi tạo packet 1179 (mission 499) — executor claude, reviewer codex, state awaiting_lease
+rc=0
+
+$ python -B .claude/dev/packet_loop.py --state-dir <STATE_DIR_TAM> status --packet 1179
+  "schema_version": 2,
+  "state": "awaiting_lease"
+}
+rc=0
+
+$ python -B .claude/dev/packet_loop.py --state-dir <STATE_DIR_TAM> record-rescue --packet 1179 --quyet-dinh revision --can-cu 6686369822
+record-rescue chỉ cho blocked vì rescue_required (đang 'awaiting_lease')
+rc=8
+
+$ python -B .claude/dev/packet_loop.py --state-dir <STATE_DIR_TAM> record-rescue --packet 1179 --quyet-dinh revision --can-cu https://github.com/ducthangho/tra-luat/issues/1179#issuecomment-6686369822
+record-rescue chỉ cho blocked vì rescue_required (đang 'awaiting_lease')
+rc=8
+
+$ python -B .claude/dev/packet_loop.py --state-dir <STATE_DIR_TAM> init --packet 1180 --mission 499 --executor claude --reviewer codex --codex-review-calls-limit 0
+--review-rounds-limit/--codex-review-calls-limit phải là số nguyên DƯƠNG
+rc=2
+
+$ python -B ops/lease_publish.py ai-dang-giu .claude/dev/doc_receipt_thu_hoi_git.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CHAN [12]: NHÁNH_CỤC_BỘ_TỤT_SAU: master -> refs/remotes/origin/master (0/18). ai-dang-giu quét refs/heads/*; chữa: git branch -f master refs/remotes/origin/master
+rc=12
+

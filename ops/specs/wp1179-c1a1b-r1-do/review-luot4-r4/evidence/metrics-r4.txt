@@ -1,0 +1,56 @@
+platform=Linux-6.18.44-fc-v242-x86_64-with-glibc2.39; Python=3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]
+COMMAND ['git', 'rev-parse', 'HEAD', 'HEAD^{tree}', 'origin/master']
+rc=0
+stdout='3646365f965478fbe79be4a975f4eb3075ab405d\n90f2f210cc18aebd7db10e857eab117bea2174e3\nd26b36f5d2f952c2d952d58517571ffe27c4f826\n'
+stderr=''
+COMMAND ['git', 'rev-parse', '--is-shallow-repository']
+rc=0
+stdout='false\n'
+stderr=''
+COMMAND ['git', 'status', '--porcelain=v1', '--untracked-files=all']
+rc=0
+stdout=''
+stderr=''
+COMMAND ['git', '--version']
+rc=0
+stdout='git version 2.43.0\n'
+stderr=''
+spec_sha256=348340b05edf987d6de1ac504407c9065bfcd2c2c3db15c5f029126596d40188
+remote_tracking_refs=781; branch_refs_excluding_HEAD=780; live_remote=NOT_MEASURED
+S2 interval=411; S3 all=5444; S4 first_parent=1084; non_fp=4360; checker_log=64; intersection=64
+COMMAND ['git', 'diff', '--numstat', '601a0f18c83057fa079d204122660f5697fc6389', '889334fb87c25136a13c6776a40a25b401820e04', '--', 'ops/lease_publish.py', '.github/workflows/ops-thu-hoi-admission.yml']
+rc=0
+stdout='1\t1\t.github/workflows/ops-thu-hoi-admission.yml\n649\t92\tops/lease_publish.py\n'
+stderr=''
+COMMAND ['git', 'diff', '--numstat', '889334fb87c25136a13c6776a40a25b401820e04', '08bcb51fbed359eaeeca41bc3a0559fe308c0aa9']
+rc=0
+stdout='698\t92\t.githooks/eol_policy_test.py\n'
+stderr=''
+COMMAND ['git', 'diff', '--exit-code', '889334fb87c25136a13c6776a40a25b401820e04', '3646365f965478fbe79be4a975f4eb3075ab405d', '--', '.claude/dev/doc_receipt_thu_hoi.py']
+rc=0
+stdout=''
+stderr=''
+COMMAND ['git', 'diff', '--check', '889334fb87c25136a13c6776a40a25b401820e04', '3646365f965478fbe79be4a975f4eb3075ab405d', '--', 'ops/specs/wp1179-c1a1b-r4.md']
+rc=0
+stdout=''
+stderr=''
+COMMAND ['git', 'rev-parse', '889334fb87c25136a13c6776a40a25b401820e04:.claude/dev/doc_receipt_thu_hoi.py']
+rc=0
+stdout='3490ea0ee40081c0eba2d121f5b19a67a021a54b\n'
+stderr=''
+COMMAND ['git', 'diff', '--stat', '889334fb87c25136a13c6776a40a25b401820e04', '08bcb51fbed359eaeeca41bc3a0559fe308c0aa9', '--', '.claude/dev/doc_receipt_thu_hoi.py', '.claude/dev/doc_receipt_thu_hoi_test.py', '.claude/dev/ci_dang_ky_test.py', 'ops/lease_publish.py', '.github/workflows/ops-thu-hoi-admission.yml', '.github/workflows/ci.yml', '.claude/dev/packet_loop.py', '.claude/dev/launcher.py', 'docs/PROTOCOL_DA_PHIEN.md', 'docs/adr', 'ops/specs/LAND-DOC-RECEIPT-THU-HOI-C1a1a.md', 'ops/specs/THU-HOI-LEASE-A1b.md', 'CLAUDE.md', 'AGENTS.md']
+rc=0
+stdout=''
+stderr=''
+COMMAND ['git', 'diff', '--stat', '889334fb87c25136a13c6776a40a25b401820e04', '3646365f965478fbe79be4a975f4eb3075ab405d', '--', '.claude/dev/doc_receipt_thu_hoi.py', '.claude/dev/doc_receipt_thu_hoi_test.py', '.claude/dev/ci_dang_ky_test.py', 'ops/lease_publish.py', '.github/workflows/ops-thu-hoi-admission.yml', '.github/workflows/ci.yml', '.claude/dev/packet_loop.py', '.claude/dev/launcher.py', 'docs/PROTOCOL_DA_PHIEN.md', 'docs/adr', 'ops/specs/LAND-DOC-RECEIPT-THU-HOI-C1a1a.md', 'ops/specs/THU-HOI-LEASE-A1b.md', 'CLAUDE.md', 'AGENTS.md']
+rc=0
+stdout=''
+stderr=''
+ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544 path=docs/adr/0055-tran-loi-goi-codex-len-muoi.md; rc=[0, 128, 0]; snapshot only, no fresh fetch
+ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab path=docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md; rc=[0, 128, 0]; snapshot only, no fresh fetch
+ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587 path=docs/adr/0060-dieu-kien-merge-va-moc-ready.md; rc=[0, 128, 0]; snapshot only, no fresh fetch
+JSON module lines=114; suite lines=535
+COMMAND ['python', '-B', 'do_profile.py', '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/cay-kho', '889334fb87c25136a13c6776a40a25b401820e04', '601a0f18c83057fa079d204122660f5697fc6389']
+rc=0
+stdout='first_parent master->MOC: 410 commit, 531751 byte, 0.027s\nto_tien(master) moi parent: 5444 commit, 8480418 byte, 0.356s\n'
+stderr=''

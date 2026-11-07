@@ -1,0 +1,9 @@
+first_parent master->MOC: 410 commit, 531751 byte, 0.030s
+to_tien(master) moi parent: 5444 commit, 8480418 byte, 0.337s
+rc=0
+first_parent master->MOC: 410 commit, 531751 byte, 0.030s
+to_tien(master) moi parent: 5444 commit, 8480418 byte, 0.341s
+rc=0
+2026-11-06T07:23:44Z
+git version 2.43.0
+Linux 6.18.44-fc-v242

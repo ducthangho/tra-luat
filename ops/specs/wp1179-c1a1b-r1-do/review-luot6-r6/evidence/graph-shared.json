@@ -1,0 +1,348 @@
+{
+  "fixture": {
+    "A": "9d07540aca1d543a4ad6bf1a745524ee8de4620e",
+    "B": "0a65e89d88812e5e1a1b917ca5e5e7b8ad866ed0",
+    "H1": "eab4f8718d6335577165d880c30fe72455f379ae",
+    "E": "64d22527b35a5f083133cee61d5a11f2d73ff888",
+    "D": "3e24ab34bbeb038d37f2048fedd1630dd4773c0e",
+    "X": "caf0387fe0e2ad141f210294c89741d188269783",
+    "treeA": "f54585b68674a39c3e5f7d4cde8cc66f96466b1c",
+    "treeB": "735cf9b59cd7f9e67c0d437b2187a705596cd13d",
+    "treeH": "9b7d1b419c2c17466a45cc2f0a469958a36e2950",
+    "S": "9d07540aca1d543a4ad6bf1a745524ee8de4620e",
+    "C": "0a65e89d88812e5e1a1b917ca5e5e7b8ad866ed0",
+    "H": "eab4f8718d6335577165d880c30fe72455f379ae",
+    "T": "9b7d1b419c2c17466a45cc2f0a469958a36e2950",
+    "tree_S": "f54585b68674a39c3e5f7d4cde8cc66f96466b1c",
+    "master": "3e24ab34bbeb038d37f2048fedd1630dd4773c0e"
+  },
+  "positive": {
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "qua",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "trace": {
+      "G1": [
+        [
+          "commit",
+          "3e24ab34bbeb038d37f2048fedd1630dd4773c0e"
+        ],
+        [
+          "commit",
+          "0a65e89d88812e5e1a1b917ca5e5e7b8ad866ed0"
+        ],
+        [
+          "commit",
+          "9d07540aca1d543a4ad6bf1a745524ee8de4620e"
+        ]
+      ],
+      "G2": [
+        [
+          "commit",
+          "0a65e89d88812e5e1a1b917ca5e5e7b8ad866ed0"
+        ]
+      ],
+      "G3": [
+        [
+          "commit",
+          "eab4f8718d6335577165d880c30fe72455f379ae"
+        ]
+      ],
+      "G4": [
+        [
+          "commit",
+          "eab4f8718d6335577165d880c30fe72455f379ae"
+        ]
+      ],
+      "G5": [
+        [
+          "commit",
+          "9d07540aca1d543a4ad6bf1a745524ee8de4620e"
+        ]
+      ],
+      "G6": [
+        [
+          "commit",
+          "9d07540aca1d543a4ad6bf1a745524ee8de4620e"
+        ],
+        [
+          "tree",
+          "f54585b68674a39c3e5f7d4cde8cc66f96466b1c"
+        ],
+        [
+          "tree",
+          "23643283e2c95b438173a4b302830b5dd3bef358"
+        ]
+      ],
+      "G7": [
+        [
+          "commit",
+          "0a65e89d88812e5e1a1b917ca5e5e7b8ad866ed0"
+        ],
+        [
+          "tree",
+          "735cf9b59cd7f9e67c0d437b2187a705596cd13d"
+        ],
+        [
+          "tree",
+          "23643283e2c95b438173a4b302830b5dd3bef358"
+        ],
+        [
+          "blob",
+          "9e987f9179f4841d44c4095db1cd48605b780c3e"
+        ]
+      ],
+      "G8": [
+        [
+          "commit",
+          "0a65e89d88812e5e1a1b917ca5e5e7b8ad866ed0"
+        ],
+        [
+          "tree",
+          "735cf9b59cd7f9e67c0d437b2187a705596cd13d"
+        ],
+        [
+          "tree",
+          "1cedef937c9e22acf246dc2ec029a24a6065f0bb"
+        ],
+        [
+          "tree",
+          "0b173d69c2372af2a528215651c545b82edf5667"
+        ],
+        [
+          "blob",
+          "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+        ]
+      ]
+    },
+    "why": {},
+    "total": 19853,
+    "physical": [
+      [
+        "commit",
+        "3e24ab34bbeb038d37f2048fedd1630dd4773c0e",
+        260
+      ],
+      [
+        "commit",
+        "0a65e89d88812e5e1a1b917ca5e5e7b8ad866ed0",
+        212
+      ],
+      [
+        "commit",
+        "9d07540aca1d543a4ad6bf1a745524ee8de4620e",
+        212
+      ],
+      [
+        "commit",
+        "eab4f8718d6335577165d880c30fe72455f379ae",
+        213
+      ],
+      [
+        "tree",
+        "f54585b68674a39c3e5f7d4cde8cc66f96466b1c",
+        1020
+      ],
+      [
+        "tree",
+        "23643283e2c95b438173a4b302830b5dd3bef358",
+        2653
+      ],
+      [
+        "tree",
+        "735cf9b59cd7f9e67c0d437b2187a705596cd13d",
+        1059
+      ],
+      [
+        "blob",
+        "9e987f9179f4841d44c4095db1cd48605b780c3e",
+        22
+      ],
+      [
+        "tree",
+        "1cedef937c9e22acf246dc2ec029a24a6065f0bb",
+        108
+      ],
+      [
+        "tree",
+        "0b173d69c2372af2a528215651c545b82edf5667",
+        270
+      ],
+      [
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a",
+        13824
+      ]
+    ],
+    "stderr": "",
+    "reader_rc": 0
+  },
+  "negative": {
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "khong_do_duoc",
+      "G7": "khong_do_duoc",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "trace": {
+      "G1": [
+        [
+          "commit",
+          "3e24ab34bbeb038d37f2048fedd1630dd4773c0e"
+        ],
+        [
+          "commit",
+          "0a65e89d88812e5e1a1b917ca5e5e7b8ad866ed0"
+        ],
+        [
+          "commit",
+          "9d07540aca1d543a4ad6bf1a745524ee8de4620e"
+        ]
+      ],
+      "G2": [
+        [
+          "commit",
+          "0a65e89d88812e5e1a1b917ca5e5e7b8ad866ed0"
+        ]
+      ],
+      "G3": [
+        [
+          "commit",
+          "eab4f8718d6335577165d880c30fe72455f379ae"
+        ]
+      ],
+      "G4": [
+        [
+          "commit",
+          "eab4f8718d6335577165d880c30fe72455f379ae"
+        ]
+      ],
+      "G5": [
+        [
+          "commit",
+          "9d07540aca1d543a4ad6bf1a745524ee8de4620e"
+        ]
+      ],
+      "G6": [
+        [
+          "commit",
+          "9d07540aca1d543a4ad6bf1a745524ee8de4620e"
+        ],
+        [
+          "tree",
+          "f54585b68674a39c3e5f7d4cde8cc66f96466b1c"
+        ],
+        [
+          "tree",
+          "23643283e2c95b438173a4b302830b5dd3bef358"
+        ]
+      ],
+      "G7": [
+        [
+          "commit",
+          "0a65e89d88812e5e1a1b917ca5e5e7b8ad866ed0"
+        ],
+        [
+          "tree",
+          "735cf9b59cd7f9e67c0d437b2187a705596cd13d"
+        ],
+        [
+          "tree",
+          "23643283e2c95b438173a4b302830b5dd3bef358"
+        ]
+      ],
+      "G8": [
+        [
+          "commit",
+          "0a65e89d88812e5e1a1b917ca5e5e7b8ad866ed0"
+        ],
+        [
+          "tree",
+          "735cf9b59cd7f9e67c0d437b2187a705596cd13d"
+        ],
+        [
+          "tree",
+          "1cedef937c9e22acf246dc2ec029a24a6065f0bb"
+        ],
+        [
+          "tree",
+          "0b173d69c2372af2a528215651c545b82edf5667"
+        ],
+        [
+          "blob",
+          "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+        ]
+      ]
+    },
+    "why": {
+      "G6": "E_vang",
+      "G7": "E_vang"
+    },
+    "total": 17178,
+    "physical": [
+      [
+        "commit",
+        "3e24ab34bbeb038d37f2048fedd1630dd4773c0e",
+        260
+      ],
+      [
+        "commit",
+        "0a65e89d88812e5e1a1b917ca5e5e7b8ad866ed0",
+        212
+      ],
+      [
+        "commit",
+        "9d07540aca1d543a4ad6bf1a745524ee8de4620e",
+        212
+      ],
+      [
+        "commit",
+        "eab4f8718d6335577165d880c30fe72455f379ae",
+        213
+      ],
+      [
+        "tree",
+        "f54585b68674a39c3e5f7d4cde8cc66f96466b1c",
+        1020
+      ],
+      [
+        "tree",
+        "735cf9b59cd7f9e67c0d437b2187a705596cd13d",
+        1059
+      ],
+      [
+        "tree",
+        "1cedef937c9e22acf246dc2ec029a24a6065f0bb",
+        108
+      ],
+      [
+        "tree",
+        "0b173d69c2372af2a528215651c545b82edf5667",
+        270
+      ],
+      [
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a",
+        13824
+      ]
+    ],
+    "stderr": "",
+    "reader_rc": 0
+  },
+  "ops_s": "23643283e2c95b438173a4b302830b5dd3bef358",
+  "ops_c": "23643283e2c95b438173a4b302830b5dd3bef358"
+}

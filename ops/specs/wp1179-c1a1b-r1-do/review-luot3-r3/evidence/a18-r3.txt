@@ -1,0 +1,21 @@
+positive swallow=False: rc=0; totals=['doc_receipt_thu_hoi tests: 157/157 ca QUA · 163/163 dot bien GIET']; last_stderr=[]
+negative import swallow=False: rc=1; totals=[]; last_stderr=['ImportError: target Git import']
+g_dong_tong_e2e exact assertion raised=False; expected=False
+negative syntax swallow=False: rc=1; totals=[]; last_stderr=["SyntaxError: '(' was never closed"]
+g_dong_tong_e2e exact assertion raised=False; expected=False
+negative missing swallow=False: rc=1; totals=[]; last_stderr=["FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv3/sandbox/a18-r3/missing-False/doc_receipt_thu_hoi_git.py'"]
+g_dong_tong_e2e exact assertion raised=False; expected=False
+positive swallow=True: rc=0; totals=['doc_receipt_thu_hoi tests: 157/157 ca QUA · 163/163 dot bien GIET']; last_stderr=[]
+negative import swallow=True: rc=0; totals=['doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET']; last_stderr=[]
+g_dong_tong_e2e exact assertion raised=True; expected=True
+negative syntax swallow=True: rc=1; totals=[]; last_stderr=["SyntaxError: '(' was never closed"]
+g_dong_tong_e2e exact assertion raised=False; expected=False
+negative missing swallow=True: rc=1; totals=[]; last_stderr=["FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv3/sandbox/a18-r3/missing-True/doc_receipt_thu_hoi_git.py'"]
+g_dong_tong_e2e exact assertion raised=False; expected=False
+missing registry: rc=1; totals=[]; last_stderr=["FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv3/sandbox/a18-r3/bad-setup/ci_dang_ky_test.py'"]
+missing registry rejected before injections: g_dong_tong_e2e: positive setup failed
+g_dong_tong zero_N: normal=False mutant=True; TinHieuChotCa target discriminates
+g_dong_tong zero_M: normal=False mutant=True; TinHieuChotCa target discriminates
+A9 fixture guard omit=False: degenerate fixture rejected=True; target changes
+A9 fixture guard omit=True: degenerate fixture rejected=False; target changes
+F7 repaired at specification/harness level. JSON tests/mutants are real; Git smoke counts are a prototype, not C1a1b acceptance.

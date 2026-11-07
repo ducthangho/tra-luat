@@ -1,0 +1,66 @@
+$ git clone --shared --no-checkout /tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/cay-kho /tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/graph-r5-hdl8vn70/repo 
+rc= 0 
+stdout=  
+stderr= Cloning into '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv5/sandbox/tmp/graph-r5-hdl8vn70/repo'...
+done.
+
+CONTROL {'G6': 'qua', 'G7': 'qua', 'G8': 'qua', 'G4': 'qua'}
+A20b_AS_WRITTEN d6d278dbc2f40928dc0ac4cab6d3d31564d377d0 9eb7673e36a3bbfdf93c921bf8ab5b8e88199c6b {'G6': 'khong_do_duoc:E_hong', 'G7': 'khong_do_duoc:E_hong', 'G8': 'qua', 'G4': 'qua'}
+A20b_G8_CORRECT_PATH {'G6': 'qua', 'G7': 'qua', 'G8': 'khong_do_duoc:E_hong', 'G4': 'qua'}
+PARSER_REJECT t1_no_nul 05fa8cbcbac1fe588cd1c7bdf6afdbc35dd19a48 ('E_hong', 'KHÔNG_XÁC_ĐỊNH: tree 05fa8cbcbac1 entry cụt')
+PARSER_REJECT t1_short_oid 5e7fb7d6cdf3094e4086ca3da20d3e1b57bbdc9e ('E_hong', 'KHÔNG_XÁC_ĐỊNH: tree 5e7fb7d6cdf3 entry cụt')
+PARSER_REJECT t2_no_space_valid_mode 5dce4a20fe388f361f43fdb3c5388ee6bed6c382 ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree 5dce4a20fe38 entry mode không hợp lệ '100644'")
+PARSER_REJECT t2_no_space_invalid_mode 3273086eb8bc4ba8b05a87f74ed621d90d84dadf ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree 3273086eb8bc entry mode không hợp lệ '100644safe'")
+PARSER_REJECT t3 4de191341cd53e85bebc315f5014997c2826266e ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree 4de191341cd5 entry mode không hợp lệ '100600'")
+PARSER_REJECT t4 40539c5ae297ca30f6d1e76878876d5a59a82434 ('E_hong', 'KHÔNG_XÁC_ĐỊNH: tree 40539c5ae297 tên entry không phải UTF-8')
+PARSER_REJECT t5 00e814da6bcbe7eb9cdbd6925c02404f357347a0 ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree 00e814da6bcb tên entry không hợp lệ/trùng ''")
+PARSER_REJECT t9 fb26362e588b2998e46e5e74d019a0f924044436 ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree fb26362e588b tên entry không hợp lệ/trùng '.git'")
+PARSER_REJECT t10 0873fbd847d02df7ad8ae45068a4a4c69e724f03 ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree 0873fbd847d0 tên entry không hợp lệ/trùng 'safe'")
+PARSER_REJECT c1_missing 2ac4a3129e9755672754aaf56989aadb837683c0 ('E_hong', 'KHÔNG_XÁC_ĐỊNH: commit 2ac4a3129e97 header hỏng')
+PARSER_REJECT c1_invalid f22bd56a6832b7758dcf2bedb6789bd99f12a3e4 ('E_hong', 'KHÔNG_XÁC_ĐỊNH: commit f22bd56a6832 header hỏng')
+PARSER_REJECT c2 1123446643b84cd0db6a47d066f51a55255f8b9e ('E_hong', 'KHÔNG_XÁC_ĐỊNH: commit 1123446643b8 header hỏng')
+PARSER_ACCEPT case_sensitive ('ok', [('100644', '.GIT', 'fbbdd5f1d852d8c97cff81fa43ab3f1e6ea0f9e7', 'blob')])
+PARSER_ACCEPT unordered ('ok', [('100644', 'z', 'fbbdd5f1d852d8c97cff81fa43ab3f1e6ea0f9e7', 'blob'), ('100644', 'a', 'fbbdd5f1d852d8c97cff81fa43ab3f1e6ea0f9e7', 'blob')])
+COMMIT_ACCEPT_BOUNDARY tree_last_wins ('ok', ('e8170ba7dd8679015b7d2380000efd7d2bc3a08e', []))
+COMMIT_ACCEPT_BOUNDARY whitespace ('ok', ('e8170ba7dd8679015b7d2380000efd7d2bc3a08e', []))
+COMMIT_ACCEPT_BOUNDARY message_not_header ('ok', ('e8170ba7dd8679015b7d2380000efd7d2bc3a08e', []))
+DROP_T2 b'100644' ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree 5dce4a20fe38 entry mode không hợp lệ '100644'") ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree 5dce4a20fe38 tên entry không hợp lệ/trùng ''")
+DROP_T2 b'100755' ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree fa3592e18c4f entry mode không hợp lệ '100755'") ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree fa3592e18c4f tên entry không hợp lệ/trùng ''")
+DROP_T2 b'120000' ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree 9e66d77f6b65 entry mode không hợp lệ '120000'") ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree 9e66d77f6b65 tên entry không hợp lệ/trùng ''")
+DROP_T2 b'160000' ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree bd222f8d39b2 entry mode không hợp lệ '160000'") ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree bd222f8d39b2 tên entry không hợp lệ/trùng ''")
+DROP_T2 b'40000' ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree b16ddd6beb23 entry mode không hợp lệ '40000'") ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree b16ddd6beb23 tên entry không hợp lệ/trùng ''")
+DROP_T2 b'' ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree 3dc4aa7c49af entry mode không hợp lệ ''") ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree 3dc4aa7c49af entry mode không hợp lệ ''")
+DROP_T2 b'100644safe' ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree 3273086eb8bc entry mode không hợp lệ '100644safe'") ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree 3273086eb8bc entry mode không hợp lệ '100644safe'")
+DROP_T2 b'100600' ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree f1740fedcea0 entry mode không hợp lệ '100600'") ('E_hong', "KHÔNG_XÁC_ĐỊNH: tree f1740fedcea0 entry mode không hợp lệ '100600'")
+DROP_T2_EQUIVALENCE: if no separator, name is empty; valid mode -> t5, invalid mode -> t3. Thus t2 has no independent witness with t3+t5 retained.
+F6 missing ops/lease_publish.py equal False result do leaf_read False
+F6 missing ops/lease_publish.py equal True result khong_do_duoc:E_vang leaf_read True
+F6 missing .github/workflows/ops-thu-hoi-admission.yml equal False result do leaf_read False
+F6 missing .github/workflows/ops-thu-hoi-admission.yml equal True result khong_do_duoc:E_vang leaf_read True
+F6 hash ops/lease_publish.py equal False result do leaf_read False
+F6 hash ops/lease_publish.py equal True result khong_do_duoc:E_bam_lech leaf_read True
+F6 hash .github/workflows/ops-thu-hoi-admission.yml equal False result do leaf_read False
+F6 hash .github/workflows/ops-thu-hoi-admission.yml equal True result khong_do_duoc:E_bam_lech leaf_read True
+F6 type ops/lease_publish.py equal False result do leaf_read False
+F6 type ops/lease_publish.py equal True result khong_do_duoc:E_kieu_sai leaf_read True
+F6 type .github/workflows/ops-thu-hoi-admission.yml equal False result do leaf_read False
+F6 type .github/workflows/ops-thu-hoi-admission.yml equal True result khong_do_duoc:E_kieu_sai leaf_read True
+G6_MODE_MISSING_LEAF 100644 qua
+G6_MODE_MISSING_LEAF 100755 qua
+G6_MODE_MISSING_LEAF 120000 qua
+G6_MODE_MISSING_LEAF 160000 qua
+G6_MODE_MISSING_LEAF 40000 qua
+G1 c8054cb75d1630887fdc6e7f5f8f518ee62c790a qua
+G1 601a0f18c83057fa079d204122660f5697fc6389 qua
+G1 541fa6ca9ba78d2669261b528572dbc05b53ea87 do
+G1 e9c8f1304d9e28bce729a5d2096d81925575980b do
+G1 8aca161250594d546e300ce6050ba2467892944b do
+ANCESTRY a4c920f0ac96b6f43e07d45c3060909d83d93522 c8054cb75d1630887fdc6e7f5f8f518ee62c790a qua
+ANCESTRY c8054cb75d1630887fdc6e7f5f8f518ee62c790a a4c920f0ac96b6f43e07d45c3060909d83d93522 do
+ANCESTRY a4c920f0ac96b6f43e07d45c3060909d83d93522 8aca161250594d546e300ce6050ba2467892944b do
+ANCESTRY c8054cb75d1630887fdc6e7f5f8f518ee62c790a c8054cb75d1630887fdc6e7f5f8f518ee62c790a qua
+N6_INITIAL b''
+N6_REF d02a4e76c888bd850355000a4ed8b023d12da577 'refs/remotes/origin/master d02a4e76c888bd850355000a4ed8b023d12da577'
+N6_REF c8054cb75d1630887fdc6e7f5f8f518ee62c790a 'refs/remotes/origin/master c8054cb75d1630887fdc6e7f5f8f518ee62c790a'
+N6_REF None ''
+GRAPH_PARSER_PASS

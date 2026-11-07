@@ -1,0 +1,76 @@
+$ ['git', 'rev-parse', 'HEAD', 'HEAD^{tree}', 'origin/master', '--is-shallow-repository']
+rc=0, seconds=0.003
+24354e7709da4d6aa0299e4eff982b7d50b98d76
+93fb483b1ec506e70de72c1b027d795d65008be8
+889334fb87c25136a13c6776a40a25b401820e04
+false
+
+$ ['git', 'rev-list', '--first-parent', '--count', '601a0f18^..889334fb']
+rc=0, seconds=0.008
+411
+
+$ ['git', 'rev-list', '--count', '889334fb']
+rc=0, seconds=0.078
+5444
+
+$ ['git', 'diff', '--stat', '601a0f18', '889334fb', '--', 'ops/lease_publish.py', '.github/workflows/ops-thu-hoi-admission.yml']
+rc=0, seconds=0.004
+ .github/workflows/ops-thu-hoi-admission.yml |   2 +-
+ ops/lease_publish.py                        | 741 ++++++++++++++++++++++++----
+ 2 files changed, 650 insertions(+), 93 deletions(-)
+
+$ ['/usr/local/bin/python', '-B', '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/cay-kho/ops/specs/wp1179-c1a1b-r1-do/do_profile.py', '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/cay-kho', '889334fb87c25136a13c6776a40a25b401820e04', '601a0f18c83057fa079d204122660f5697fc6389']
+rc=0, seconds=0.404
+first_parent master->MOC: 410 commit, 531751 byte, 0.027s
+to_tien(master) moi parent: 5444 commit, 8480418 byte, 0.345s
+
+$ ['/usr/local/bin/python', '-B', '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/cay-kho/ops/specs/wp1179-c1a1b-r1-do/do_profile.py', '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/cay-kho', '889334fb87c25136a13c6776a40a25b401820e04', '601a0f18c83057fa079d204122660f5697fc6389']
+rc=0, seconds=0.392
+first_parent master->MOC: 410 commit, 531751 byte, 0.027s
+to_tien(master) moi parent: 5444 commit, 8480418 byte, 0.330s
+
+S4 current: off_first_parent=4360, touching_producer=64
+tran_loi_goi_codex: matches=['d2e3052d479d140b7e7b91df41ec4914fab7d544']
+$ ['git', 'cat-file', '-e', 'd2e3052d479d140b7e7b91df41ec4914fab7d544:docs/adr/0055-tran-loi-goi-codex-len-muoi.md']
+rc=0, seconds=0.003
+
+$ ['git', 'cat-file', '-e', 'd2e3052d479d140b7e7b91df41ec4914fab7d544^1:docs/adr/0055-tran-loi-goi-codex-len-muoi.md']
+rc=128, seconds=0.002
+fatal: path 'docs/adr/0055-tran-loi-goi-codex-len-muoi.md' exists on disk, but not in 'd2e3052d479d140b7e7b91df41ec4914fab7d544^1'
+
+first_parent_contains=True
+tran_kich_thuoc_sensitive: matches=['8ab100793df9831505f495543a74044b91c2c9ab']
+$ ['git', 'cat-file', '-e', '8ab100793df9831505f495543a74044b91c2c9ab:docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md']
+rc=0, seconds=0.002
+
+$ ['git', 'cat-file', '-e', '8ab100793df9831505f495543a74044b91c2c9ab^1:docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md']
+rc=128, seconds=0.002
+fatal: path 'docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md' exists on disk, but not in '8ab100793df9831505f495543a74044b91c2c9ab^1'
+
+first_parent_contains=True
+dieu_kien_merge: matches=['36d7c5dcdcbbb27176b75135125b9009f9fe0587']
+$ ['git', 'cat-file', '-e', '36d7c5dcdcbbb27176b75135125b9009f9fe0587:docs/adr/0060-dieu-kien-merge-va-moc-ready.md']
+rc=0, seconds=0.002
+
+$ ['git', 'cat-file', '-e', '36d7c5dcdcbbb27176b75135125b9009f9fe0587^1:docs/adr/0060-dieu-kien-merge-va-moc-ready.md']
+rc=128, seconds=0.002
+fatal: path 'docs/adr/0060-dieu-kien-merge-va-moc-ready.md' exists on disk, but not in '36d7c5dcdcbbb27176b75135125b9009f9fe0587^1'
+
+first_parent_contains=True
+$ ['git', 'clone', '--shared', '--no-checkout', '/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv1/cay-kho', 'baseline']
+rc=0, seconds=0.011
+Cloning into 'baseline'...
+done.
+
+$ ['git', 'checkout', '--detach', '889334fb87c25136a13c6776a40a25b401820e04']
+rc=0, seconds=2.582
+HEAD is now at 889334fb8 Merge pull request #1259 from ducthangho/claude/spec-1252-launcher-chup-workspace
+
+$ ['git', 'config', 'core.abbrev', '7']
+rc=0, seconds=0.003
+
+$ ['/usr/local/bin/python', '-B', '.claude/dev/doc_receipt_thu_hoi_test.py']
+rc=0, seconds=11.349
+nghia vu: witness_killed 162 · equivalent_verified 9 · unresolved 0
+doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET
+

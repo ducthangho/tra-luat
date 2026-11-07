@@ -1,0 +1,30 @@
+{
+  "repo": "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv7/sandbox/fixtures/isolated",
+  "A": "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67",
+  "B": "c7472777889e9e0dc9b8bfc90361489607d7af48",
+  "H": "6f0d49007d27f0d6fcab4ba34868e9778f702ff6",
+  "D": "22c9e730d9605c7ae50400ede5d76dc82241fdcf",
+  "E": "bbdf48780ef618c4f0602c52f22aa75a6f3988ab",
+  "X": "6a85e9c6a05fa9480b2db6f95e6ffd53e1846c28",
+  "P": "541fa6ca9ba78d2669261b528572dbc05b53ea87",
+  "ta": "3519263482b206c2b5a898189473069cca402c31",
+  "tb": "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0",
+  "th": "f42136f0d60c0d6f67aaedfde41f582ea1d4ec0c",
+  "ops_a": "5073acfd1d1126abedc41c0558dc9efb0ab6cb75",
+  "ops_b": "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190",
+  "gh": "ef442502f1e7d7390afaaebf4036098742160c98",
+  "wf_tree": "eb1211ee4990343bc541c57ede49da141f61bd20",
+  "checker": "5e811ebbf89c0d439776dd8fbaff694a4dce6650",
+  "workflow": "277df262ff3f7bc6bc0be839be6419f6db441f5a",
+  "r": {
+    "S": "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67",
+    "C": "c7472777889e9e0dc9b8bfc90361489607d7af48",
+    "H": "6f0d49007d27f0d6fcab4ba34868e9778f702ff6",
+    "T": "f42136f0d60c0d6f67aaedfde41f582ea1d4ec0c",
+    "tree_S": "3519263482b206c2b5a898189473069cca402c31",
+    "checker": "5e811ebbf89c0d439776dd8fbaff694a4dce6650",
+    "checker_S": "5e811ebbf89c0d439776dd8fbaff694a4dce6650",
+    "workflow": "277df262ff3f7bc6bc0be839be6419f6db441f5a",
+    "wf_sha": "e1d1785915a6e3fa4f633f7588c5022d3466d41db69d1b692867404926e49b79"
+  }
+}

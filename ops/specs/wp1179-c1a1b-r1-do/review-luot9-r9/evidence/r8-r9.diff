@@ -1,0 +1,113 @@
+--- r8
++++ r9
+@@ -1,4 +1,4 @@
+-# Đặc tả packet `LAND-DOC-RECEIPT-THU-HOI-C1a1b` r8: kiểm đồ thị Git cho receipt thu hồi
++# Đặc tả packet `LAND-DOC-RECEIPT-THU-HOI-C1a1b` r9: kiểm đồ thị Git cho receipt thu hồi
+ 
+ tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
+ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
+@@ -7,8 +7,8 @@
+ 
+ | trường | giá trị |
+ |---|---|
+-| packet_id | `wp1179` (`LAND-DOC-RECEIPT-THU-HOI-C1a1b`), revision 8, generation 1 |
+-| thay_the | r7 `ops/specs/wp1179-c1a1b-r7.md`, sha256 `9f9c50b93070838cd3fb6c76a7a10969862d79ee0bc17d1183123345daab56c2` (commit `4f3738ae`), chưa đóng băng. r8 = r7 + vá F17, F18 của Codex lượt 7 trên r7 (§0.9). r1–r7 giữ làm lịch sử |
++| packet_id | `wp1179` (`LAND-DOC-RECEIPT-THU-HOI-C1a1b`), revision 9, generation 1 |
++| thay_the | r8 `ops/specs/wp1179-c1a1b-r8.md`, sha256 `24418d1e68ea46324b8bb9a6cecb44eddcf31dd0e0ad0af39a2a2852f0f88454` (commit `caa5a0ec`), chưa đóng băng. r9 = r8 + vá **cơ học** F19 của Codex lượt 8 trên r8, chỉ ở cột đột biến A12, theo quyết định chủ kho `6691581371` (§0.10). Oracle không đổi. r1–r8 giữ làm lịch sử |
+ | packet_issue | #1179 |
+ | mission_issue | #499 (nợ C1). Phục vụ T2 của #656 (A1b) và #564 (A1), nhưng **không** đóng được hai Issue ấy (§6) |
+ | nguon_cap_viec | Issue #1179. Quyết định Review Rescue "revision" ở `issuecomment-6624905106`. Bàn giao dispatcher ở `issuecomment-6679422380` (06-11-2026 ~07:14Z): phiên điều phối #1206 tiếp quản, đặc tả soạn lại từ nội dung Issue trên master `889334fb87c2` |
+@@ -42,7 +42,7 @@
+ giữ ở máy dispatcher cũ, chưa công bố).
+ 
+ **Trục lời gọi Codex của packet này:** trước phiên soạn r1 đã dùng **≥ 4** (ba verdict + một lượt mất kết quả).
+-Phiên soạn dùng thêm **7** (lượt 1–7 trên r1–r7; §9) ⇒ **≥ 11** lúc soạn r8. Lượt bị auto-review từ chối **không**
++Phiên soạn dùng thêm **8** (lượt 1–8 trên r1–r8; §9) ⇒ **≥ 12** lúc soạn r9. Lượt bị auto-review từ chối **không**
+ tính là đã dùng, nhưng được ghi ở đây và **không** được gọi lại mà không có căn cứ mới. Lượt bị launcher chặn
+ `CHAN [11]` trước khi model chạy (07:32Z 06-11, mirror không có remote) cũng không tính. Phiên soạn được cấp tối
+ đa **2** lời gọi mới (chỉ thị phiên điều phối). Không con số nào ở đây được đặt lại về 0 khi đổi bản nháp, đổi
+@@ -310,6 +310,26 @@
+   Quy tắc chung đặt vào A23: **guard tiền đề** (tập đọc, vị trí lưu, kích thước so với trần, điểm tiêm so với luật
+   đã hoàn tất) chạy **trước** khi tiêm. Mỗi guard có ca âm riêng.
+ 
++### 0.10 Lượt 8 (thêm 2/2) và vá cơ học F19 ở r9
++
++Codex lượt 8 (run `1d06f0ca`, 17:25:33–17:46:58Z 06-11; `run.json`: model, effort `xhigh`, sandbox đều `DO_DUOC`;
++không `--add-dir`) trên r8 (`caa5a0ec`): `changes_requested`, 0 P1 / 1 P2 / 0 P3; VERDICT sha256 ở §9. F17: **vá
++thật**, lớp `phan-loai-vang-va-khong-do-duoc` **đóng** ở tầng đặc tả. F18 (a, b, c): **vá thật**. Chủ kho
++(`6691581371`, ~17:55Z 06-11, phiên điều phối #1206 ghi hộ): r9 chỉ vá cơ học hai đề xuất của reviewer, rồi **một**
++lượt Codex xác minh (`U_lower` ≤ 13); còn finding ⇒ DỪNG.
++
++| finding (lượt 8) | đề xuất của verdict, đã áp nguyên | đoạn sửa ở r9 |
++|---|---|---|
++| F19 P2 `dot-bien-tuong-duong-hoac-thieu` — (a) đột biến "reader chết là lỗi cục bộ, không restart" sống trên ca (e), vì tiến trình đã chết thật; ca (h) phân biệt được (G8 `khong_do_duoc` → `qua`). (b) đột biến "đánh giá lại luật đã hoàn tất" của (f) không đổi vector (memo đủ); đột biến (f) giết được là "ghi đè kết quả đã hoàn tất thành unknown" | (a) chuyển ca đích của đột biến lỗi cục bộ từ (e) sang (h), giữ (e) cho đột biến restart; (b) đổi đột biến của (f) thành ghi đè kết quả đã hoàn tất; giữ (f2) cho xoá memo; thêm hai đường vào danh sách cùng lớp | A12, cột đột biến; §0.9 danh sách F18 (hai mục 8, 9 thêm ở đây) |
++
++**Bổ sung danh sách cùng lớp của F18 (§0.9), hai đường lượt 8 tìm ra:**
++8. A12(e) với đột biến "lỗi cục bộ": tiền đề "reader còn sống sau sự kiện" không thoả ở (e) (tiến trình chết thật), nên
++   ca không phân biệt chính sách cục bộ/chung. Ca phân biệt được là (h): reader còn sống, framing hỏng.
++9. A12(f) với đột biến "đánh giá lại": thao tác đột biến không đổi trạng thái quan sát được khi memo đủ. Đột biến phải
++   là thay đổi hành vi có thể quan sát được, ở đây là ghi đè trạng thái đã hoàn tất.
++Quy tắc chung không đổi (đoạn **Đột biến** §4, A23 e): mỗi đột biến khai ở §4 là một thay đổi hành vi đơn lẻ, ghép
++đúng với tiền đề vật lý của ca đích. Không đổi oracle nào.
++
+ ## 1. Vì sao: số đo
+ 
+ | # | sự kiện | số đo | nguồn / thời điểm |
+@@ -694,7 +714,7 @@
+ | A9 | G4/G5 (r2, F3): hạ tầng buộc tree(S), tree(H), tree(C) **đôi một khác nhau** (ca tự kiểm fixture assert điều này trước mọi ca G). Ca đích G4: `T = tree(S)` ⇒ G4 `do`. Ca đích G5: `tree_S = tree(H)` ⇒ G5 `do`. Ca phụ: `T` = empty tree ⇒ G4 `do`; G4/G5 không đổi màu nhau | linux | so `T` với tree(S) ⇒ ca `T = tree(S)` ĐỎ (trên mutant ra `qua`); so `tree_S` với tree(H) ⇒ ca `tree_S = tree(H)` ĐỎ; bỏ assert ba tree khác nhau ⇒ ca tự kiểm fixture ĐỎ khi fixture bị dựng chung tree |
+ | A10 | G6 đủ **bảy** ô bảng §2.4: có entry + `null` ⇒ `do`; có entry + đúng OID ⇒ `qua`; có entry + OID khác ⇒ `do`; vắng + `null` ⇒ `qua`; vắng + hex ⇒ `do`; entry `160000` (commit không có trong kho) + đúng OID ⇒ `qua`; tổ tiên `ops` là blob, với `null` và với hex ⇒ `do` | linux | đọc object của entry trước khi so ⇒ ca gitlink ra `khong_do_duoc`, ĐỎ; coi tổ tiên-không-phải-tree là "vắng" ⇒ ca blob-`null` ĐỎ; nhận `null` khi có entry ⇒ ĐỎ |
+ | A11 | G7 và G8 đủ các dòng bảng (r2, r3): `100644` đúng ⇒ `qua`; `100755` đúng ⇒ `qua`; **`120000` (symlink nội bộ) đúng OID entry ⇒ `qua`**; OID khác ⇒ `do`; `160000`, `40000` mỗi mode một ca ⇒ `do`; vắng ⇒ `do`; tổ tiên không phải tree ⇒ `do`; blob vắng khỏi kho (entry trỏ OID không có object) ⇒ `khong_do_duoc` ở đúng luật đọc blob ấy, có guard A23 (r7); G8 sha256 lệch ⇒ `do`; G8 symlink: sha256 tính trên chuỗi đích ⇒ `qua` khi khớp; **giao OID lệch × blob vắng** (r3, F6), mỗi luật G7 và G8 một ca: entry `100644` trỏ OID không có object, receipt khai OID khác ⇒ `do`, rc 12 (không 13) | linux | dùng predicate G6 cho G7 ⇒ ca `160000` ĐỎ (G6 nhận); bác `120000` (hành vi r1) ⇒ ca symlink ĐỎ; theo symlink tới tệp đích ⇒ ca symlink ĐỎ; bỏ phép đọc blob ở G7 ⇒ ca blob-vắng ĐỎ; bỏ phép so sha256 ⇒ ca G8 ĐỎ; đọc blob trước khi so OID ⇒ hai ca giao F6 ĐỎ (ra `khong_do_duoc`, rc 13) |
+-| A12 | Reader (§2.3), luật đích lấy từ tập đọc theo OID (§4) và bảng phạm vi §2.3, mỗi ca có guard A23 (tập đọc, và vị trí lưu cho mọi ca xoá hoặc ghi đè object): (a) commit `H1` vắng khỏi kho ⇒ G3, G4 `khong_do_duoc`, mọi luật khác giữ màu, rc 13; (b) loose object của tree `ops`(B) ghi tay có nội dung không băm ra tên ⇒ chỉ G7 `khong_do_duoc` (`E_bam_lech`); (c) `refs/replace/<B>` trỏ commit khác ⇒ kết quả như không có replace; (d) đặt biến `GIT_OBJECT_DIRECTORY` trỏ kho khác trong môi trường gọi ⇒ kết quả không đổi; (e) **reader chết sớm** (seam kết thúc `cat-file` trước lần đọc đầu của G1) ⇒ G1–G8 `khong_do_duoc`, G0 và G9 giữ màu, rc 13; (f) **reader chết muộn** (seam kết thúc `cat-file` ngay sau khi G5 hoàn tất) ⇒ G1–G5 giữ kết quả; G6 (cần `tree(A)` chưa memo) và G7, G8 `khong_do_duoc`; G9 giữ màu. Ca này khoá "kết quả đã hoàn tất bất biến"; (f2) **reader chết sau G3** (r8, F18a) ⇒ G1–G3 giữ kết quả; **G4, G5 `qua`** (chưa hoàn tất, nhưng `H1` và `A` đã có trong memo từ G3 và G1); G6–G8 `khong_do_duoc`; G9 `qua`. Guard tiền đề: mọi object trong `doc(G4)` ∪ `doc(G5)` đã có trong memo tại điểm tiêm; (g) **framing lệch phục hồi được** (seam trả dòng đầu đúng dạng nhưng OID khác cho đúng một lần đọc tree `ops`(B), thân đúng `size` byte) ⇒ chỉ G7 `khong_do_duoc` (`E_framing_lech`), G8 vẫn `qua` (reader còn đồng bộ); (h) **framing hỏng** (seam trả dòng đầu sai dạng ở cùng vị trí) ⇒ `E_reader_chet` từ đó: G7, G8 `khong_do_duoc`, G1–G6 giữ kết quả | linux + windows | bỏ băm lại ⇒ ca (b) ĐỎ; bỏ `--no-replace-objects` và biến tương ứng ⇒ ca (c) ĐỎ; bỏ lọc `GIT_*` ⇒ ca (d) ĐỎ; khởi động lại reader sau khi chết ⇒ (e) và (h) ĐỎ (G8 ra `qua`); coi reader chết là sự kiện cục bộ ⇒ (e) ĐỎ (G2–G8 ra `qua`); đánh giá lại luật đã hoàn tất sau khi reader chết ⇒ (f) ĐỎ (G1–G5 ra `khong_do_duoc`); xoá memo khi reader chết ⇒ (f2) ĐỎ (G4, G5 ra `khong_do_duoc`); áp quy tắc deadline cho reader chết ⇒ (f2) ĐỎ; coi `E_framing_lech` là reader chết ⇒ (g) ĐỎ (G8 ra `khong_do_duoc`) |
++| A12 | Reader (§2.3), luật đích lấy từ tập đọc theo OID (§4) và bảng phạm vi §2.3, mỗi ca có guard A23 (tập đọc, và vị trí lưu cho mọi ca xoá hoặc ghi đè object): (a) commit `H1` vắng khỏi kho ⇒ G3, G4 `khong_do_duoc`, mọi luật khác giữ màu, rc 13; (b) loose object của tree `ops`(B) ghi tay có nội dung không băm ra tên ⇒ chỉ G7 `khong_do_duoc` (`E_bam_lech`); (c) `refs/replace/<B>` trỏ commit khác ⇒ kết quả như không có replace; (d) đặt biến `GIT_OBJECT_DIRECTORY` trỏ kho khác trong môi trường gọi ⇒ kết quả không đổi; (e) **reader chết sớm** (seam kết thúc `cat-file` trước lần đọc đầu của G1) ⇒ G1–G8 `khong_do_duoc`, G0 và G9 giữ màu, rc 13; (f) **reader chết muộn** (seam kết thúc `cat-file` ngay sau khi G5 hoàn tất) ⇒ G1–G5 giữ kết quả; G6 (cần `tree(A)` chưa memo) và G7, G8 `khong_do_duoc`; G9 giữ màu. Ca này khoá "kết quả đã hoàn tất bất biến"; (f2) **reader chết sau G3** (r8, F18a) ⇒ G1–G3 giữ kết quả; **G4, G5 `qua`** (chưa hoàn tất, nhưng `H1` và `A` đã có trong memo từ G3 và G1); G6–G8 `khong_do_duoc`; G9 `qua`. Guard tiền đề: mọi object trong `doc(G4)` ∪ `doc(G5)` đã có trong memo tại điểm tiêm; (g) **framing lệch phục hồi được** (seam trả dòng đầu đúng dạng nhưng OID khác cho đúng một lần đọc tree `ops`(B), thân đúng `size` byte) ⇒ chỉ G7 `khong_do_duoc` (`E_framing_lech`), G8 vẫn `qua` (reader còn đồng bộ); (h) **framing hỏng** (seam trả dòng đầu sai dạng ở cùng vị trí) ⇒ `E_reader_chet` từ đó: G7, G8 `khong_do_duoc`, G1–G6 giữ kết quả | linux + windows | bỏ băm lại ⇒ ca (b) ĐỎ; bỏ `--no-replace-objects` và biến tương ứng ⇒ ca (c) ĐỎ; bỏ lọc `GIT_*` ⇒ ca (d) ĐỎ; khởi động lại reader sau khi chết ⇒ (e) và (h) ĐỎ (G8 ra `qua`); coi reader chết là sự kiện cục bộ (không khởi động lại reader) ⇒ **(h)** ĐỎ (G8 ra `qua` vì reader không bị kết thúc khi framing hỏng; r9, F19a — ở ca (e) tiến trình đã chết thật nên đột biến này không đổi màu (e)); **ghi đè trạng thái của luật đã hoàn tất thành `khong_do_duoc`** khi reader chết ⇒ (f) ĐỎ (G1–G5 ra `khong_do_duoc`; r9, F19b — "đánh giá lại" thuần không đổi vector vì memo đủ, nên không dùng làm đột biến của (f)); xoá memo khi reader chết ⇒ (f2) ĐỎ (G4, G5 ra `khong_do_duoc`); áp quy tắc deadline cho reader chết ⇒ (f2) ĐỎ; coi `E_framing_lech` là reader chết ⇒ (g) ĐỎ (G8 ra `khong_do_duoc`) |
+ | A13 | Ngân sách (§2.6), qua tham số nội bộ `ngan_sach`, **mỗi giới hạn một ca riêng**, giới hạn khác giữ mặc định; luật đích lấy từ tập đọc theo OID (§4), có guard A23: trần commit = 2 cho G1 ⇒ G1 `khong_do_duoc`, G2–G9 giữ màu (cục bộ theo phép đi); trần commit cho G3 riêng ⇒ chỉ G3 `khong_do_duoc` (per-walk); `max_object_bytes` nhỏ hơn kích thước commit `H1` nhưng lớn hơn mọi object khác (guard tiền đề đo trên OID thật) ⇒ G3 và G4 `khong_do_duoc`, mọi luật khác giữ màu (cục bộ theo OID); `max_tong_bytes` = tổng byte mà G1–G5 đọc (đo trước bằng oracle), trên biến thể fixture có message commit `H1` phóng to (vd. 300.000 byte) để tổng ấy **lớn hơn** số byte mà riêng mỗi luật G6, G7, G8 cần đọc (r8, F18b). Guard tiền đề: `max(byte_cần(G6), byte_cần(G7), byte_cần(G8)) < max_tong_bytes`, tính trên OID thật; `max_object_bytes` giữ mặc định và lớn hơn `H1`. Kết quả: G1–G5 giữ kết quả, G6–G8 `khong_do_duoc` (chung, kể từ lần đọc chưa memo đầu tiên của G6), G9 giữ màu, không luật nào ra `do` vì ngân sách; đồng hồ tiêm vượt hạn ngay sau khi G3 hoàn tất ⇒ G1–G3 giữ kết quả, G4–G9 `khong_do_duoc` kể cả G4, G5 (object đã memo) và G9, đúng bảng phạm vi §2.3. Guard tiền đề giống A12(f2): `doc(G4)` ∪ `doc(G5)` đã có trong memo. Ca này và A12(f2) tiêm **cùng thời điểm**, khác loại sự kiện, và phải cho G4/G5 **khác nhau** (`khong_do_duoc` ở đây, `qua` ở A12 f2) (r8, F17); một object đọc hai lần (memo) chỉ cộng `do_dac.tong_bytes` một lần. G0: 8.388.608 byte đọc được (rồi K1 xử lý), 8.388.609 ⇒ G0 `do`, `json` `null`, rc 12. Hằng mặc định trong module bằng bảng §2.6 | linux | đổi vượt ngân sách thành `do` ⇒ ca trần commit ĐỎ; gộp bộ đếm commit của ba phép đi ⇒ ca per-walk ĐỎ; bỏ chốt `max_object_bytes` ⇒ ca ấy ĐỎ (trần tổng giữ mặc định nên không che); coi tổng byte là cục bộ (reset theo luật) ⇒ ca tổng byte ĐỎ (G6–G8 ra `qua`, nhờ guard tiền đề); deadline cho luật đã đủ memo chạy tiếp ⇒ ca deadline ĐỎ (G4 ra `qua`); bỏ memo ⇒ ca memo ĐỎ; G0 `>=` thay `>` ⇒ ca 8.388.608 ĐỎ |
+ | A14 | G9 (trôi): qua `_seam` đổi ref sau lần đọc đầu ⇒ G9 `khong_do_duoc`, rc 13, **không** rc 2; xoá ref sau lần đọc đầu ⇒ như trên | linux | đổi G9 thành rc 2 ⇒ ĐỎ; bỏ lần đọc lại ⇒ ĐỎ |
+ | A15 | `git diff --numstat <base> <cand>` chỉ gồm hai đường write set; tổng dòng thêm ≤ 750 (`nang_tran` §3, Q-KT). Kiểm staged/unstaged/untracked rỗng trước khi tính | mọi nền | thêm tệp thứ ba ⇒ ĐỎ |
+@@ -741,8 +761,8 @@
+ | lớp | biểu hiện | nguồn | chốt ở r2 |
+ |---|---|---|---|
+ | `mo-rong-module-pha-hop-dong-json-thuan` | **3** (review draft0–2); Codex lượt 1 trên r1: **đã đóng ở tầng đặc tả** | `6623060128`; `review-luot1/VERDICT.md` | §0.2, A1–A3 |
+-| `phan-loai-vang-va-khong-do-duoc` | **9** (draft0–2; F4 lượt 1; F6 lượt 2; F11 lượt 4; F13 lượt 5; F16 lượt 6; F17 lượt 7) | như trên; `review-luot2-r2/VERDICT.md` | bảng đóng §2.3 (r2), thứ tự cố định G7/G8 (r3), A7, A11, A20 |
+-| `dot-bien-tuong-duong-hoac-thieu` (lớp của C1a1a, 5 lượt ở đó) | lượt 1 trên r1: F3, ba biểu hiện (A9, A18, ABI); lượt 2 trên r2: F7 (A18 setup, mutant hạ tầng); lượt 5 trên r5: F14 (chốt t2 bị che); lượt 7 trên r7: F18 (ba tiền đề setup) | `review-luot1/`, `review-luot2-r2/`, `review-luot5-r5/` | A4, A5, A9, A18 e2e có child dương, đột biến hạ tầng, A20 |
++| `phan-loai-vang-va-khong-do-duoc` | **9** (draft0–2; F4 lượt 1; F6 lượt 2; F11 lượt 4; F13 lượt 5; F16 lượt 6; F17 lượt 7); lượt 8: **đóng** ở tầng đặc tả | như trên; `review-luot2-r2/VERDICT.md` | bảng đóng §2.3 (r2), thứ tự cố định G7/G8 (r3), A7, A11, A20 |
++| `dot-bien-tuong-duong-hoac-thieu` (lớp của C1a1a, 5 lượt ở đó) | lượt 1 trên r1: F3, ba biểu hiện (A9, A18, ABI); lượt 2 trên r2: F7 (A18 setup, mutant hạ tầng); lượt 5 trên r5: F14 (chốt t2 bị che); lượt 7 trên r7: F18 (ba tiền đề setup); lượt 8 trên r8: F19 (hai ánh xạ đột biến ↔ ca đích ở A12) | `review-luot1/`, `review-luot2-r2/`, `review-luot5-r5/` | A4, A5, A9, A18 e2e có child dương, đột biến hạ tầng, A20 |
+ | `huong-dan-cli-khong-khop-parser` | **2** (F12 lượt 4, hai biểu hiện; F15 lượt 5) | `review-luot4-r4/`, `review-luot5-r5/` | §8, §11.2, A22 |
+ | `oracle-trang-thai-g0-mau-thuan` | **1** (F8) | `review-luot2-r2/VERDICT.md` | A6 r3 |
+ | `predicate-consumer-khong-khop-producer` | **1** (F2) | như trên | G7/G8 r2 |
+@@ -793,7 +813,7 @@
+ - `allowance(P)` dương (4 và 3), nên `cap` không thể ≤ 0 trong packet này. Nếu chủ kho hạ allowance về 0 thì **không**
+   `init`, không gọi. `packet_loop init` từ chối limit 0 (rc 2, `cli-r5/cli-out.txt`); cũng không được bỏ cờ để rơi về
+   mặc định 2.
+-- Pha spec: `allowance = 4`, đã dùng **4** (lượt 3–6); chủ kho cho thêm **2** (`6690435193`): đã dùng **1** (lượt 7), lượt 8 là lượt cuối, `U_lower` ≤ 12. Reviewer Codex `gpt-6-astra` effort `xhigh` qua
++- Pha spec: `allowance = 4`, đã dùng **4** (lượt 3–6); chủ kho cho thêm **2** (`6690435193`, đã dùng: lượt 7, 8) và thêm **1** (`6691581371`, lượt 9, xác minh r9), `U_lower` ≤ 13. Reviewer Codex `gpt-6-astra` effort `xhigh` qua
+   `launcher.py run`, phiên độc lập. Đếm **trước** mỗi lời gọi.
+ - Pha thi công: `allowance = 3`. Người khởi tạo state truyền `--codex-review-calls-limit <cap(thi_cong)>` và ghi vào
+   lease khối `ngan_sach_thi_cong` gồm `U_lower` kèm nguồn, `U_max: unknown`, `allowance: 3`, công thức `cap =
+@@ -821,7 +841,8 @@
+ | ≥ 9 | r5 lượt 5 (pha spec 3/4) | `openai_codex`, `gpt-6-astra` / `xhigh` (`run.json`: model, effort, sandbox `DO_DUOC`; không `--add-dir`), run `0b6aa6d7`, 14:39:44–14:52:44Z 06-11, `launcher.py run` | r5 `26813745`, sha256 `746c0ef2…abd` | changes_requested; VERDICT sha256 `a00a88d2…169c` (`wp1179-c1a1b-r1-do/review-luot5-r5/`) | 0 | 2 | 1 |
+ | ≥ 10 | r6 lượt 6 (pha spec 4/4) | `openai_codex`, `gpt-6-astra` / `xhigh` (`run.json`: model, effort, sandbox `DO_DUOC`; không `--add-dir`), run `f5898993`, 14:59:34–15:21:51Z 06-11, `launcher.py run` | r6 `b439048e`, sha256 `a76b3e98…c7e2` | changes_requested; VERDICT sha256 `b811bb68…d774` (`wp1179-c1a1b-r1-do/review-luot6-r6/`) | 0 | 1 | 0 |
+ | ≥ 11 | r7 lượt 7 (thêm 1/2, `6690435193`) | `openai_codex`, `gpt-6-astra` / `xhigh` (`run.json`: model, effort, sandbox `DO_DUOC`; không `--add-dir`), run `ffd08d32`, 17:01:56–17:22:03Z 06-11, `launcher.py run` | r7 `4f3738ae`, sha256 `9f9c50b9…56c2` | changes_requested; VERDICT sha256 `aa00825b…4af1` (`wp1179-c1a1b-r1-do/review-luot7-r7/`) | 0 | 2 | 0 |
+-| — | r8 lượt 8 (thêm 2/2, lượt cuối) | (chưa chạy lúc commit tệp này) | | | | | |
++| ≥ 12 | r8 lượt 8 (thêm 2/2) | `openai_codex`, `gpt-6-astra` / `xhigh` (`run.json`: model, effort, sandbox `DO_DUOC`; không `--add-dir`), run `1d06f0ca`, 17:25:33–17:46:58Z 06-11, `launcher.py run` | r8 `caa5a0ec`, sha256 `24418d1e…8454` | changes_requested; VERDICT sha256 `29b6271f…a1e5` (`wp1179-c1a1b-r1-do/review-luot8-r8/`) | 0 | 1 | 0 |
++| — | r9 lượt 9 (xác minh, `6691581371`) | (chưa chạy lúc commit tệp này) | | | | | |
+ 
+ ## 10. Bản đồ quyết định (phiên soạn, 06-11-2026)
+ 
+@@ -836,6 +857,7 @@
+ | Rescue lần 3 (r2, F6/F7) | Q-R kích hoạt ⇒ (B): r3 vá cơ học F6–F8, human audit trên băm r3, không gọi Codex | chủ kho ~08:27Z 06-11 qua phiên điều phối #1206, §0.4 |
+ | Đổi hướng (sau r3) | bỏ (B); lặp review Codex tới một lượt sạch, pha spec tối đa lượt 3–6 | Q-NT `6686369822`, §0.5 |
+ | Thêm lượt (sau r6) | tối đa 2 lượt nữa (7, 8) để vá F16; lượt 8 còn finding ⇒ dừng | `6690435193`, §0.8 |
++| Vá cơ học F19 (sau r8) | r9 chỉ sửa cột đột biến A12 + §0.9; một lượt xác minh; còn finding ⇒ dừng | `6691581371`, §0.10 |
+ 
+ Các điểm phiên soạn tự quyết khi viết; chủ kho duyệt bằng cách duyệt `spec_hash`:
+ 
+@@ -866,8 +888,8 @@
+ | `U` | **≥ 6** | cộng | cận dưới |
+ | không tính, có ghi | auto-review từ chối draft3; launcher `CHAN [11]` 07:32Z 06-11 | `6623060128`; §9 | model không chạy |
+ | reserved | **unknown** | chưa có cơ chế reservation được đo; snapshot quota `6624954880` không phải reservation | unknown |
+-| used, pha spec sau đổi hướng | **5** lúc soạn r8 (run `f2172e8b`, `6405185b`, `0b6aa6d7`, `f5898993`, `ffd08d32`) | `review-luot{3-r3,4-r4,5-r5,6-r6,7-r7}/run.json` | đo được |
+-| `U_lower` lúc soạn r8 | **11** | cộng ba dòng used | cận dưới |
++| used, pha spec sau đổi hướng | **6** lúc soạn r9 (run `f2172e8b`, `6405185b`, `0b6aa6d7`, `f5898993`, `ffd08d32`, `1d06f0ca`) | `review-luot{3-r3,…,8-r8}/run.json` | đo được |
++| `U_lower` lúc soạn r9 | **12** | cộng ba dòng used | cận dưới |
+ | `U_max` | **unknown**, không đường nào gán số (§8, r5) | — | — |
+ | trần trục | 10 (dòng khai `ADR-0055`, ba phép đo 0/128/0) → **16** (`nang_tran` §8) | §8 | có thẩm quyền |
+ | số dư `16 − U` | **unknown** | — | không suy từ cận dưới (protocol §12); thay bằng allowance theo pha (§8) |

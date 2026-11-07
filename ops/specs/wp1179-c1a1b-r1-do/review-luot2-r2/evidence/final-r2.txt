@@ -1,0 +1,31 @@
+git ('rev-parse', 'HEAD'): rc=0
+735a0ef8480f62b9a5f003135ee5fcbf4bd0bd54
+
+git ('status', '--porcelain=v1', '--untracked-files=all', '--ignored'): rc=0
+
+git ('rev-parse', '--is-shallow-repository'): rc=0
+false
+
+git ('rev-parse', 'HEAD^{tree}', 'origin/master'): rc=0
+55a6098d313530f8a4d9792083334d373d8f3118
+08bcb51fbed359eaeeca41bc3a0559fe308c0aa9
+
+spec_sha256=04fa50683c44f3db093ab2396ebef7e0a12b88740eb35745da39c8016e9d108d
+git ('diff', '--check', 'HEAD^', 'HEAD', '--', 'ops/specs/wp1179-c1a1b-r2.md'): rc=0
+
+git ('diff', '--check', 'origin/master', 'HEAD'): rc=2
+ops/specs/wp1179-c1a1b-r1-do/review-luot1/evidence/basic.txt:76: new blank line at EOF.
+ops/specs/wp1179-c1a1b-r1-do/review-luot1/evidence/counts.txt:25: new blank line at EOF.
+ops/specs/wp1179-c1a1b-r1-do/review-luot1/evidence/holders.txt:788: trailing whitespace.
++hint: 
+ops/specs/wp1179-c1a1b-r1-do/review-luot1/evidence/holders.txt:790: trailing whitespace.
++hint: 
+ops/specs/wp1179-c1a1b-r1-do/review-luot1/evidence/holders.txt:793: trailing whitespace.
++hint: 
+ops/specs/wp1179-c1a1b-r1-do/review-luot1/evidence/holders.txt:1010: new blank line at EOF.
+
+git ('diff', '--exit-code', '889334fb87c25136a13c6776a40a25b401820e04', 'HEAD', '--', 'ops/lease_publish.py', '.github/workflows/ops-thu-hoi-admission.yml', '.claude/dev/doc_receipt_thu_hoi.py', '.claude/dev/doc_receipt_thu_hoi_test.py', '.claude/dev/ci_dang_ky_test.py'): rc=0
+
+Linux=Linux-6.18.44-fc-v242-x86_64-with-glibc2.39; Python=3.13.18
+git version 2.43.0
+C1a1b_module_exists=False

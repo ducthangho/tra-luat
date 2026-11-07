@@ -1,0 +1,11 @@
+{
+  "command": "python ops/bien_nhan_v2.py --root .",
+  "actual_result": {
+    "chunk_id": "98ca74",
+    "wall_time_seconds": 0.000023845,
+    "exit_code": 0,
+    "original_token_count": 65,
+    "output": "\nbien_nhan_v2: 301 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 354\ncâu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0\nTỔNG: ĐẠT\n"
+  },
+  "receipt_correction": "Adds actual executor identity and measured model evidence fields; original approval unchanged"
+}

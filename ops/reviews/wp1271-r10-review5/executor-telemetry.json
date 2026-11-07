@@ -1,0 +1,38 @@
+{
+  "run_id": "543dc17c54de467fb356eeb01675fc25",
+  "actual_terminal_rc": 0,
+  "original_stdout_sha256": "346c91b3f7ca10cdf13fd91dd09bfd2c64d457abb1dcbc9f75b7cb441d8aff10",
+  "source": "Original actual Claude Code stream-json init and terminal result, excerpted without model thinking",
+  "init": {
+    "type": "system",
+    "subtype": "init",
+    "model": "claude-opus-5-5",
+    "session_id": "4dedbedf-f225-4b57-8a85-fd0d0f3c22f3",
+    "claude_code_version": "2.1.318",
+    "permissionMode": "dontAsk"
+  },
+  "result": {
+    "type": "result",
+    "subtype": "success",
+    "is_error": false,
+    "session_id": "4dedbedf-f225-4b57-8a85-fd0d0f3c22f3",
+    "modelUsage": {
+      "claude-opus-5-5": {
+        "inputTokens": 62,
+        "outputTokens": 70539,
+        "cacheReadInputTokens": 4937648,
+        "cacheCreationInputTokens": 211718,
+        "webSearchRequests": 0,
+        "costUSD": 4.0923016,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "thinkingTokens": 53014,
+        "cacheCreationEphemeral5mInputTokens": 0,
+        "cacheCreationEphemeral1hInputTokens": 211718,
+        "canonicalModel": "claude-opus-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    }
+  }
+}

@@ -64,7 +64,7 @@ write_set_hash: 98262826266c3e2ca4f5aa1fcb57e4f8b5863a340ca085540681fad780513bd8
 write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
 write_set_ghi_chu: 'phuong an B: KHONG cham .claude/dev/ci_dang_ky_test.py (doc_receipt_thu_hoi_test.py da dang ky san)'
 closure_status: 'holder scan 2026-11-06T19:03:20Z: ls-remote vs for-each-ref thieu 0; 2/2 duong dan NGUOI_GIU 0'
-tran_kich_thuoc: '<= 2 tep / <= 750 dong them (git diff --numstat origin/master...<head>; chu kho duyet issuecomment-6680102065, ADR-0053 ngoai le); vuot => DUNG'
+tran_kich_thuoc: '<= 2 tep / <= 1350 dong them (git diff --numstat origin/master...<head>; nang_tran 07-11, issuecomment-6700073551; truoc do 750 issuecomment-6680102065); vuot => DUNG'
 tran_loi_goi_codex: 'TRAN CUNG 3 loi goi Codex cho pha thi cong (allowance, spec r9 §8; init --codex-review-calls-limit 3); connector @codex review tinh vao truc nay; U_lower toan packet = 14/16 (journal dispatcher cu unknown); dem truoc MOI loi goi; het ma chua approve => DUNG, hoi chu kho'
 windows: 'A16 required: chay TAP TRUNG tren tra-luat-win qua phien dieu phoi, giu KHOA.txt (ADR-0057); KHONG workflow_dispatch ci.yml'
 coordination_paths:
@@ -83,3 +83,21 @@ prohibited_actions:
 - workflow_dispatch
 - sua_ci_yml
 land_authority_note: 'chu kho duyet SHA cu the + human audit truoc merge; dieu phoi merge khi kiem-merge rc=0'
+nang_tran:
+  tran_cu: <= 2 tep / <= 750 dong them (issuecomment-6680102065, ngoai le ADR-0053)
+  tran_moi: <= 2 tep / <= 1350 dong them (git diff --numstat origin/master...<head>)
+  can_cu: 563c732 = +1305 (module 358, test 947/-6); ~97 ca bat buoc A3-A23 cua spec r9; 156/156+97/97+253/253 ca, 162+81+243 dot bien giet
+  ai_nang: ducthangho
+  can_cu_url: https://github.com/ducthangho/tra-luat/issues/1179#issuecomment-6700073551
+ngan_sach_thi_cong:
+  U_lower: 14
+  U_lower_nguon: '>=4 lich su truoc ban giao (6624954880) + 9 luot Codex pha spec (r1..r9, run 202041c2..112cc186) + 1 connector Draft-marked-ready tren PR #1262 (6692050961)'
+  U_max: unknown
+  U_max_ly_do: journal/state cua dispatcher cu chua xac minh (6679422380)
+  tran_tong: 16
+  tran_tong_nguon: issuecomment-6686369822
+  allowance: 3
+  cap: 3
+  cap_quy_tac: cap = allowance khi U_max unknown (spec r9 §8); KHONG tinh tu U_lower
+  init: packet_loop init --codex-review-calls-limit 3 (§11.2)
+  da_dung: 0

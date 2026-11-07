@@ -1,0 +1,12 @@
+{
+  "job_id": 128344358009,
+  "run_id": 42352790095,
+  "log_bytes": 654152,
+  "sha256": "12b369f3dcbf7857296a5c752dd388322f075fde4580160a9c5b3902c79d7bbc",
+  "selftest_markers": [
+    "2026-11-07T07:58:50.9966287Z == tl selftest 1777/1777 =="
+  ],
+  "workflow_run_head": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "actual_tested_commit": "0eda0d2b3f28c723828b7e78692589176df57f35",
+  "actual_tested_tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb"
+}

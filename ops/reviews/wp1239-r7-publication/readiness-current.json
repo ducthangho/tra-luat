@@ -1,0 +1,37 @@
+{
+  "head": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb",
+  "published": true,
+  "owner_waiver_url": "https://github.com/ducthangho/tra-luat/issues/1239#issuecomment-6704067442",
+  "PR_waiver_url": "https://github.com/ducthangho/tra-luat/pull/1261#issuecomment-6704208279",
+  "publication_decision_url": "https://github.com/ducthangho/tra-luat/issues/1239#issuecomment-6704099531",
+  "admission": {
+    "run_id": 42352790162,
+    "status": "success"
+  },
+  "Linux_CI": {
+    "run_id": 42352790095,
+    "status": "in_progress",
+    "main_job": "success",
+    "last_observed_success_count": 22,
+    "last_observed_in_progress_count": 1,
+    "no_failed_jobs_observed": true,
+    "job_total_count": 23,
+    "remaining_jobs": [
+      "gate-packet-loop (ubuntu-latest)"
+    ]
+  },
+  "remaining_gate": {
+    "name": "K3 connector / ADR0060 M6",
+    "canonical_probe_rc": 12,
+    "reason": "No completed connector review on H7; budget3/3 forbids another model call without new authority",
+    "covered_by_F1_F2_waiver": false
+  },
+  "raw_Codex_verdict": "blocked",
+  "owner_F1_F2_disposition": "owner_waived",
+  "automatic_gate_state_not_forged": true,
+  "merge_land_deploy_authority": false,
+  "ready_exception_checkpoint": "https://github.com/ducthangho/tra-luat/issues/1239#issuecomment-6704355356",
+  "ready_exception_approved": false,
+  "legacy_branch_protection_readback": "REST403 and GraphQLFORBIDDEN; ruleset readbackavailable"
+}

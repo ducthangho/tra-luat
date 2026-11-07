@@ -1,0 +1,1 @@
+{"data":{"repository":{"ref":{"name":"master","branchProtectionRule":null}}},"errors":[{"type":"FORBIDDEN","path":["repository","ref","branchProtectionRule"],"extensions":{"saml_failure":false,"ip_allow_list_failure":false},"locations":[{"line":1,"column":104}],"message":"Resource not accessible by integration"}]}

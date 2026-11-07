@@ -1,0 +1,19 @@
+{
+  "run_id": 42352790095,
+  "run_attempt": 1,
+  "job_id": 128344358009,
+  "workflow_run_head": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "source_head": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "definition_oid": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "observed_checkout_tested_commit": "0eda0d2b3f28c723828b7e78692589176df57f35",
+  "tested_tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb",
+  "candidate_tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb",
+  "trees_equal": true,
+  "tested_parents": [
+    "9607e3eba96b2ce091e34196cbb8ede31a521ff9",
+    "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa"
+  ],
+  "target_canonical_at_run": "9607e3eba96b2ce091e34196cbb8ede31a521ff9",
+  "actual_landed_commit": null,
+  "limit": "Tree equality does not make candidate and tested merge the same commit; PR not merged."
+}

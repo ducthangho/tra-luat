@@ -1560,3 +1560,41 @@ Liệt kê TỪNG SỐ, không dùng phạm vi: một phạm vi là thứ vừa 
   bằng `Superseded` nhưng ADR ấy **vẫn còn hiệu lực một phần**. Vì vậy cổng ở đây cố ý KHÔNG phán
   xử hiệu lực từ chuỗi trạng thái; nó chỉ đòi **có mặt trong bảng**. Phán xử hiệu lực bằng cách
   khớp tiền tố chuỗi là đúng hình dạng lỗi *"phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN"*.
+# WP1174 r7 — trạng thái thi công adapter
+
+Source hiện tại là phần triển khai chưa hoàn tất của contract
+`ops/specs/wp1174-implementation-r7.md`; không phải bằng chứng nghiệm thu hoặc
+quyền activate routing. CLI scoped đang chặn bằng `UNKNOWN`, rc8,
+`dispatch_allowed=false`. Không có cờ argv/env/descriptor để mở chốt này.
+Adoption/recovery, advisory review → actual human → accept, collector first
+publication và native evidence gate đầy đủ vẫn phải được hoàn tất và review.
+
+Phần đã có để kiểm chứng bằng fixture gồm grammar witness/pending/history,
+whitelist post-image, immutable source/high_water predicates, exact tombstone,
+native profile probes, durable publication, fresh/resume initialization và
+ordinary state/witness commit. Fixture không cấp enrollment, lease hay dispatch.
+Production resolver lấy current lease/spec từ canonical all-ref/I2 và ADR0063,
+đọc descriptor từ immutable spec rồi đối chiếu FILE; không nhận registration
+JSON do caller tự khai làm nguồn thẩm quyền. Mission installed decision giữ
+nguyên JSON frozen `proposed_not_installed`/`paused`; outer installed wrapper,
+exact plan hash và registered Packet graph được kiểm riêng.
+
+`--admission FILE` là bản đối chiếu bytes. Các đối số scoped
+`--revision`, `--generation`, `--coordinator-id` và expected revision chỉ dùng
+đối chiếu nguồn đã được cấp. Ordinary dùng `--expected-revision N`; fresh init
+dùng `--expected-revision absent`; resume initialization dùng
+`--mode resume-initialization --expected-witness-revision N`. Không tự suy
+revision thiếu thành 0. `adopt-state` có namespace management riêng và hiện
+chưa được mở cho production.
+
+Linux main phải báo đỏ khi thiếu required IDs hoặc required case bị skip.
+Windows main giữ legacy và 12 ca pure áp dụng; Windows focused có 13 ca riêng.
+Native Linux/canary pending không được ghi thành pass từ fixture hoặc overlay.
+
+Hai vấn đề kiến trúc còn mở: closed state v3 hiện dựa keyset của initial image,
+chưa có projection đầy đủ cho các optional field do legacy mutator bổ sung;
+initial image hiện được helper lấy nguyên từ admission, trong khi state legacy
+có private `hmac_key`. Không tạo production admission công khai chứa key này.
+Deterministic init/resume và durability của HMAC riêng tư phải được thiết kế,
+review và kiểm chứng trước khi bỏ chốt incomplete; fixture hiện tại không giải
+quyết hay miễn điều kiện đó.

@@ -646,10 +646,16 @@ def _state_path(state_dir: Path, packet: int) -> Path:
 
 def _load(state_dir: Path, packet: int) -> dict:
     p = _state_path(state_dir, packet)
-    if not p.exists():
+    tx = globals().get("_1174_TRANSACTION")
+    if tx is None and not p.exists():
         _die(RC_STATE, f"chưa có state cho packet {packet} — chạy `init` trước ({p})")
     try:  # #775 bộ đọc NGHIÊM: lệch hình dạng hay bất biến sổ/bộ đếm ⇒ RC_STATE, không traceback, không đoán
-        st = json.loads(p.read_text(encoding="utf-8"))
+        if tx is not None:
+            _1174_require(Path(state_dir).resolve() == tx["directory"] and packet == tx["state"]["packet"], "transaction namespace")
+            st = json.loads(_1174_bytes(tx["state"]))
+            st["schema_version"] = 2
+        else:
+            st = json.loads(p.read_text(encoding="utf-8"))
         for role in ("executor", "reviewer"):
             identity = st.get(f"{role}_identity")
             if identity is not None and (type(identity) is not dict or role == "reviewer" and st["reviewer"] == "codex" and identity.get("model_family", PROVIDER_FAMILIES["codex"]) != "openai"):
@@ -703,6 +709,11 @@ def _vao_rescue(state_dir: Path, st: dict, truc: str, ngu_canh: str) -> None:
 
 
 def _save(state_dir: Path, st: dict) -> None:
+    tx = globals().get("_1174_TRANSACTION")
+    if tx is not None:
+        _1174_require(Path(state_dir).resolve() == tx["directory"] and st["packet"] == tx["state"]["packet"], "transaction save namespace")
+        tx["proposal"] = json.loads(_1174_bytes(st))
+        return
     state_dir.mkdir(parents=True, exist_ok=True)
     p = _state_path(state_dir, st["packet"])
     # Mọi lỗi serialization/encoding là lỗi đầu vào: đo TRƯỚC khi mở/truncate state.
@@ -3502,6 +3513,820 @@ def cmd_kiem_dong_wp(a, state_dir: Path) -> int:
     return RC_OK
 
 
+# WP1174 r7: pure lineage grammar. These validators do not grant runtime authority.
+_W1174_KEYS = frozenset(("origin", "enrollment_id", "binding_sha256", "active_generation",
+                        "phase", "witness_revision", "high_water", "pending_adoption", "suspended", "history"))
+_P1174_KEYS = frozenset(("adoption_id", "generation", "binding_sha256", "canonical_path", "source_sha256", "cutover_started"))
+_H1174_KEYS = frozenset(("terminal_kind", "adoption_id", "binding_sha256", "generation", "canonical_path",
+                        "as_of_revision", "as_of_sha256", "terminal_disposition"))
+_T1174_DISPOSITIONS = {"adopted": "resume_forward", "aborted": "abandon_before_cutover",
+                       "aborted_intent": "abandon_before_prepare"}
+
+
+def _1174_require(ok, reason):
+    if not ok:
+        raise ValueError("WP1174 UNKNOWN: " + reason)
+
+
+def _1174_int(value):
+    return type(value) is int and value >= 0
+
+
+def _1174_hash(value):
+    return type(value) is str and re.fullmatch(r"[0-9a-f]{64}", value, re.ASCII) is not None
+
+
+def _1174_bytes(value):
+    return (json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+                       allow_nan=False) + "\n").encode("utf-8")
+
+
+def _1174_json(raw):
+    def pairs(items):
+        value = {}
+        for key, item in items:
+            _1174_require(key not in value, "duplicate JSON key")
+            value[key] = item
+        return value
+    def constant(_):
+        raise ValueError("WP1174 UNKNOWN: nonfinite JSON")
+    _1174_require(type(raw) is bytes, "JSON bytes required")
+    value = json.loads(raw.decode("utf-8"), object_pairs_hook=pairs, parse_constant=constant)
+    _1174_require(_1174_bytes(value) == raw, "noncanonical JSON bytes")
+    return value
+
+
+def _1174_identity(node):
+    _1174_require(type(node.get("adoption_id")) is str and re.fullmatch(
+        r"[a-z0-9][a-z0-9._-]{0,127}", node["adoption_id"], re.ASCII) is not None, "adoption ID")
+    _1174_require(_1174_int(node.get("generation")), "generation integer")
+    _1174_require(_1174_hash(node.get("binding_sha256")), "operation binding hash")
+    path = node.get("canonical_path")
+    _1174_require(type(path) is str and path and str(Path(path)) == path and Path(path).is_absolute()
+                  and ".." not in Path(path).parts, "canonical target path")
+
+
+def _1174_pending(node, expected=None):
+    _1174_require(type(node) is dict and set(node) == _P1174_KEYS, "pending keyset")
+    _1174_identity(node)
+    _1174_require(_1174_hash(node["source_sha256"]) and type(node["cutover_started"]) is bool,
+                  "pending source/intent")
+    if expected is not None:
+        _1174_require(type(expected) is dict and set(expected) == _P1174_KEYS and all(
+            type(node[k]) is type(expected[k]) and node[k] == expected[k] for k in _P1174_KEYS),
+            "pending operation differs from resolved binding")
+    return node
+
+
+def _1174_history(nodes, g0):
+    _1174_require(type(nodes) is list, "history list")
+    seen = {key: set() for key in ("generation", "canonical_path", "adoption_id")}
+    previous = g0
+    for node in nodes:
+        _1174_require(type(node) is dict and set(node) == _H1174_KEYS, "history keyset")
+        _1174_identity(node)
+        kind = node["terminal_kind"]
+        _1174_require(type(kind) is str and kind in _T1174_DISPOSITIONS and
+                      node["terminal_disposition"] == _T1174_DISPOSITIONS[kind], "history terminal disposition")
+        _1174_require(node["generation"] > previous, "history generation order")
+        previous = node["generation"]
+        for key in seen:
+            _1174_require(node[key] not in seen[key], "history duplicate " + key)
+            seen[key].add(node[key])
+        if kind == "aborted_intent":
+            _1174_require(node["as_of_revision"] is None and node["as_of_sha256"] is None,
+                          "aborted intent has no target image")
+        else:
+            _1174_require(_1174_int(node["as_of_revision"]) and _1174_hash(node["as_of_sha256"]),
+                          "terminal target revision/hash")
+    return nodes
+
+
+def _1174_reserved(enrollment_id, binding_sha256, g0):
+    return dict(origin="fresh_init", enrollment_id=enrollment_id, binding_sha256=binding_sha256,
+                active_generation=g0, phase="reserved", witness_revision=0, high_water=None,
+                pending_adoption=None, suspended=False, history=[])
+
+
+def _1174_witness(raw, enrollment_id, binding_sha256, g0, pending=None):
+    """Validate r20's four rows using enrollment facts already resolved by the caller.
+
+    No filesystem, OS probe, normalization or authority acquisition occurs here.
+    """
+    _1174_require(type(enrollment_id) is str and enrollment_id and _1174_hash(binding_sha256)
+                  and _1174_int(g0), "resolved enrollment facts")
+    w = _1174_json(raw)
+    _1174_require(type(w) is dict and set(w) == _W1174_KEYS, "witness keyset")
+    _1174_require(type(w["origin"]) is str and w["origin"] in ("fresh_init", "imported_lineage")
+                  and type(w["phase"]) is str and w["phase"] in ("reserved", "initialized"), "witness origin/phase")
+    _1174_require(type(w["enrollment_id"]) is str and w["enrollment_id"] == enrollment_id
+                  and _1174_hash(w["binding_sha256"]) and w["binding_sha256"] == binding_sha256,
+                  "witness enrollment binding")
+    _1174_require(_1174_int(w["active_generation"]) and _1174_int(w["witness_revision"]), "witness integer types")
+    _1174_require(type(w["suspended"]) is bool, "witness suspended type")
+    history = _1174_history(w["history"], g0)
+    if w["pending_adoption"] is not None:
+        _1174_pending(w["pending_adoption"], pending)
+    adopted = [n for n in history if n["terminal_kind"] == "adopted"]
+    _1174_require(w["suspended"] == bool(history and history[-1]["terminal_kind"] in
+                  ("aborted", "aborted_intent")), "suspended does not match terminal history")
+    if w["phase"] == "reserved":
+        _1174_require(w["high_water"] is None and w["active_generation"] == g0 and not adopted,
+                      "reserved active/high_water/history")
+        if w["origin"] == "fresh_init":
+            _1174_require(raw == _1174_bytes(_1174_reserved(enrollment_id, binding_sha256, g0)),
+                          "fresh reserved exact image")
+        else:
+            _1174_require(bool(history) or w["pending_adoption"] is not None, "imported reserved needs pending")
+            if not history:
+                _1174_require(w["pending_adoption"]["cutover_started"] is False or w["witness_revision"] > 0,
+                              "initial imported intent must be false")
+    else:
+        water = w["high_water"]
+        _1174_require(type(water) is dict and set(water) == {"generation", "state_revision", "state_sha256"}
+                      and _1174_int(water["generation"]) and _1174_int(water["state_revision"])
+                      and _1174_hash(water["state_sha256"]) and water["generation"] == w["active_generation"],
+                      "initialized high_water")
+        _1174_require(w["witness_revision"] >= 1 and
+                      w["active_generation"] == (adopted[-1]["generation"] if adopted else g0)
+                      and (w["origin"] != "imported_lineage" or bool(adopted)), "initialized active generation")
+    if w["pending_adoption"] is not None:
+        node = _1174_pending(w["pending_adoption"], pending)
+        _1174_require(node["generation"] > max([w["active_generation"], *[n["generation"] for n in history]])
+                      and all(node[k] != old[k] for old in history for k in ("canonical_path", "adoption_id")),
+                      "pending collides with lineage")
+    else:
+        _1174_require(pending is None, "resolved pending missing")
+    return w
+
+
+def _1174_tombstone(packet, source_generation, target_generation, adoption_id, source_sha256, binding_sha256):
+    _1174_require(type(packet) is int and packet > 0 and _1174_int(source_generation)
+                  and _1174_int(target_generation) and target_generation > source_generation, "tombstone generations")
+    _1174_require(type(adoption_id) is str and re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,127}", adoption_id,
+                  re.ASCII) is not None and _1174_hash(source_sha256) and _1174_hash(binding_sha256), "tombstone identity")
+    return _1174_bytes(dict(format="packet_state_retired.v1", packet_id=packet, from_generation=source_generation,
+                           to_generation=target_generation, adoption_id=adoption_id,
+                           source_sha256=source_sha256, binding_sha256=binding_sha256))
+
+
+def _1174_witness_transition(before, after, enrollment_id, binding_sha256, g0, action):
+    """Prevalidate the exact witness proposal; callers must separately validate target proposals.
+
+    This is a pure predicate. A valid transition has neither write nor dispatch authority.
+    """
+    new = _1174_witness(after, enrollment_id, binding_sha256, g0)
+    if before is None:
+        _1174_require(action in ("fresh_enrollment", "imported_enrollment") and
+                      new["witness_revision"] == 0 and new["phase"] == "reserved" and
+                      new["active_generation"] == g0 and not new["history"] and not new["suspended"],
+                      "initial witness publication")
+        _1174_require((action == "fresh_enrollment" and new["origin"] == "fresh_init") or
+                      (action == "imported_enrollment" and new["origin"] == "imported_lineage" and
+                       new["pending_adoption"] is not None and new["pending_adoption"]["cutover_started"] is False),
+                      "initial witness origin/pending")
+        return new
+    old = _1174_witness(before, enrollment_id, binding_sha256, g0)
+    _1174_require(new["witness_revision"] == old["witness_revision"] + 1, "witness revision step")
+    _1174_require(all(new[k] == old[k] for k in ("origin", "enrollment_id", "binding_sha256")),
+                  "immutable witness enrollment")
+    changed = {k for k in _W1174_KEYS if new[k] != old[k]} - {"witness_revision"}
+    _1174_require(new["history"][:len(old["history"])] == old["history"], "append-only history")
+    if action == "resume_init":
+        _1174_require(old["origin"] == "fresh_init" and old["phase"] == "reserved" and
+                      new["phase"] == "initialized" and new["high_water"]["state_revision"] == 0 and
+                      changed == {"phase", "high_water"}, "resume initialization transition")
+    elif action == "adopt_pending":
+        _1174_require(old["pending_adoption"] is None and (old["phase"] == "initialized" or
+                      (old["origin"] == "imported_lineage" and old["phase"] == "reserved" and
+                       bool(old["history"]) and old["suspended"])) and new["pending_adoption"] is not None and
+                      new["pending_adoption"]["cutover_started"] is False and changed == {"pending_adoption"},
+                      "adoption initial whitelist")
+    elif action == "cutover_intent":
+        p, q = old["pending_adoption"], new["pending_adoption"]
+        _1174_require(p is not None and p["cutover_started"] is False and
+                      q == dict(p, cutover_started=True) and changed == {"pending_adoption"}, "monotonic cutover intent")
+    elif action in ("abandon_before_prepare", "abandon_before_cutover", "adopt_finalize"):
+        p = old["pending_adoption"]
+        _1174_require(p is not None and new["pending_adoption"] is None and
+                      len(new["history"]) == len(old["history"]) + 1, "terminal history append")
+        node = new["history"][-1]
+        _1174_require(all(node[k] == p[k] for k in ("adoption_id", "binding_sha256", "generation", "canonical_path")),
+                      "terminal operation binding")
+        if action == "adopt_finalize":
+            water = new["high_water"]
+            _1174_require(p["cutover_started"] is True and node["terminal_kind"] == "adopted" and
+                          new["phase"] == "initialized" and new["active_generation"] == p["generation"] and
+                          water == dict(generation=p["generation"], state_revision=node["as_of_revision"],
+                                        state_sha256=node["as_of_sha256"]) and not new["suspended"] and
+                          changed <= {"phase", "active_generation", "high_water", "pending_adoption", "history", "suspended"},
+                          "adoption finalize transition")
+        else:
+            _1174_require(p["cutover_started"] is False and node["terminal_disposition"] == action and
+                          changed <= {"pending_adoption", "history", "suspended"} and new["suspended"],
+                          "abandon transition")
+    elif action == "ordinary":
+        _1174_require(old["phase"] == "initialized" and old["pending_adoption"] is None and not old["suspended"] and
+                      new["high_water"]["state_revision"] == old["high_water"]["state_revision"] + 1 and
+                      changed == {"high_water"}, "ordinary high_water transition")
+    else:
+        raise ValueError("WP1174 UNKNOWN: unknown witness action")
+    return new
+
+
+def _1174_read(path):
+    """Read one regular file without following the leaf; reject observed identity drift."""
+    import stat
+    path = Path(path)
+    _1174_require(hasattr(os, "O_NOFOLLOW"), "O_NOFOLLOW unavailable")
+    entry = path.lstat()
+    _1174_require(stat.S_ISREG(entry.st_mode), "nonregular file")
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+    try:
+        opened = os.fstat(fd)
+        identity = lambda s: (s.st_dev, s.st_ino, s.st_size, s.st_mtime_ns, s.st_ctime_ns)
+        _1174_require(stat.S_ISREG(opened.st_mode) and identity(entry) == identity(opened), "file identity at open")
+        with os.fdopen(fd, "rb", closefd=False) as stream:
+            raw = stream.read()
+        _1174_require(identity(opened) == identity(os.fstat(fd)) == identity(path.lstat()), "file identity after read")
+        return raw
+    finally:
+        os.close(fd)
+
+
+def _1174_fsyncdir(path):
+    fd = os.open(path, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW)
+    try:
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+
+
+def _1174_persist(path, raw, *, create):
+    """Durable complete-temp publication. The transaction must hold its fixed lock.
+
+    Failure deliberately leaves the durable prefix; the caller must not dispatch or retry.
+    Only create uses hard-link no-replace; updates never unlink the final path.
+    """
+    import stat
+    path = Path(path)
+    _1174_require(type(raw) is bytes and type(create) is bool, "persist bytes/mode")
+    if not create:
+        _1174_require(stat.S_ISREG(path.lstat().st_mode), "update target regular file")
+    else:
+        try:
+            path.lstat()
+        except FileNotFoundError:
+            pass
+        else:
+            raise FileExistsError(str(path))
+    temporary = None
+    try:
+        fd, temporary = tempfile.mkstemp(prefix=".wp1174-", dir=path.parent)
+        with os.fdopen(fd, "wb") as stream:
+            stream.write(raw)
+            stream.flush()
+            os.fsync(stream.fileno())
+        _1174_fsyncdir(path.parent)
+        if create:
+            os.link(temporary, path, follow_symlinks=False)
+        else:
+            os.replace(temporary, path)
+            temporary = None
+        _1174_fsyncdir(path.parent)
+        if temporary is not None:
+            os.unlink(temporary)
+            temporary = None
+            _1174_fsyncdir(path.parent)
+        _1174_require(_1174_read(path) == raw, "persist exact readback")
+    finally:
+        if temporary is not None:
+            # Only our unlinked temporary image is removed, never a published final image.
+            os.unlink(temporary)
+
+
+@contextlib.contextmanager
+def _1174_lock(path):
+    import fcntl
+    import stat
+    fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_CLOEXEC | os.O_NOFOLLOW, 0o600)
+    try:
+        _1174_require(stat.S_ISREG(os.fstat(fd).st_mode), "fixed lock must be regular")
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        _1174_require((os.fstat(fd).st_dev, os.fstat(fd).st_ino) ==
+                      (Path(path).lstat().st_dev, Path(path).lstat().st_ino), "fixed lock identity")
+        yield fd
+    finally:
+        os.close(fd)
+
+
+def _1174_platform(os_name, fs_name, magic):
+    return os_name == "Linux" and (fs_name, magic) in (("ext4", 0xEF53), ("xfs", 0x58465342))
+
+
+def _1174_mount(path):
+    """Return measured mountinfo and statfs facts; no name-only filesystem inference."""
+    import ctypes
+    path = Path(path)
+    _1174_require(platform.system() == "Linux" and path.is_absolute() and path.resolve() == path,
+                  "native Linux canonical path required")
+    matches = []
+    for line in Path("/proc/self/mountinfo").read_text(encoding="utf-8").splitlines():
+        left, right = line.split(" - ", 1)
+        fields = left.split()
+        mountpoint = re.sub(r"\\([0-7]{3})", lambda m: chr(int(m[1], 8)), fields[4])
+        if Path(mountpoint) == path or Path(mountpoint) in path.parents:
+            matches.append((len(Path(mountpoint).parts), fields[0], fields[2], mountpoint, right.split()[0]))
+    _1174_require(bool(matches), "mountinfo path unresolved")
+    _, mount_id, device, mountpoint, fs_name = max(matches)
+    # Linux statfs starts with a native signed long f_type. Oversized aligned storage
+    # avoids depending on libc's architecture-specific trailing statfs fields.
+    buffer = (ctypes.c_long * 64)()
+    libc = ctypes.CDLL(None, use_errno=True)
+    libc.statfs.argtypes = (ctypes.c_char_p, ctypes.c_void_p)
+    libc.statfs.restype = ctypes.c_int
+    if libc.statfs(os.fsencode(path), ctypes.byref(buffer)) != 0:
+        raise OSError(ctypes.get_errno(), "statfs")
+    return dict(mount_id=mount_id, device=device, mountpoint=mountpoint, filesystem=fs_name,
+                magic=int(buffer[0]), st_dev=path.stat().st_dev)
+
+
+def _1174_probe(root):
+    """Native capability measurements; an unsupported mount is an error, never a skip."""
+    root = Path(root)
+    facts = _1174_mount(root)
+    _1174_require(_1174_platform(platform.system(), facts["filesystem"], facts["magic"]),
+                  "unsupported native filesystem: " + facts["filesystem"])
+    outcomes = {}
+    with tempfile.TemporaryDirectory(prefix=".wp1174-probe-", dir=root) as temporary:
+        directory = Path(temporary)
+        _1174_require(_1174_mount(directory) == facts, "probe mount identity")
+        first, second, lock = (directory / n for n in ("first", "second", "lock"))
+        _1174_persist(first, b"complete-one\n", create=True)
+        outcomes["file_fsync_directory_fsync_readback"] = _1174_read(first) == b"complete-one\n"
+        os.link(first, second, follow_symlinks=False)
+        try:
+            os.link(first, second, follow_symlinks=False)
+        except FileExistsError:
+            outcomes["link_no_replace_eexist"] = _1174_read(second) == b"complete-one\n"
+        else:
+            outcomes["link_no_replace_eexist"] = False
+        _1174_persist(first, b"complete-two\n", create=False)
+        outcomes["replace"] = _1174_read(first) == b"complete-two\n" and _1174_read(second) == b"complete-one\n"
+        with _1174_lock(lock) as fd:
+            outcomes["cloexec"] = not os.get_inheritable(fd)
+            code = ("import fcntl,os,sys; f=os.open(sys.argv[1],os.O_RDWR); "
+                    "\ntry: fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB)"
+                    "\nexcept BlockingIOError: sys.exit(23)"
+                    "\nsys.exit(24)")
+            child = subprocess.run([sys.executable, "-B", "-c", code, str(lock)],
+                                   capture_output=True, timeout=10, close_fds=True)
+            outcomes["lock_contention_process"] = child.returncode == 23 and not child.stdout and not child.stderr
+        outcomes["fixed_lock_retained"] = lock.is_file()
+        outcomes["mount_identity"] = _1174_mount(directory) == facts
+        outcomes["tripwire"] = _1174_read(first) == b"complete-two\n"
+    _1174_require(all(outcomes.values()), "native capability probe failed: " + repr(outcomes))
+    return dict(facts=facts, outcomes=outcomes, native_seam_used=False)
+
+
+def _1174_status(status, guard=False):
+    """Closed result table; only one pair of status/rc can authorize dispatch."""
+    success = {"completed_no_dispatch", "already_completed_no_dispatch", "reserved_for_dispatch"}
+    rejected = {"UNKNOWN", "durability_unknown", "legacy_changed", "revision_rejected", "admission_rejected"}
+    if guard:
+        _1174_require(status in {"PASS", "FAIL", "UNKNOWN", "admission_rejected"}, "unknown guard status")
+        return (0 if status == "PASS" else 12), False
+    _1174_require(status in success | rejected | {"input_rejected", "quota_exhausted"}, "unknown mutator status")
+    rc = 0 if status in success else 2 if status == "input_rejected" else 3 if status == "quota_exhausted" else 8
+    return rc, status == "reserved_for_dispatch"
+
+
+_1174_REPO = "ducthangho/tra-luat"
+_1174_REGISTRATION_KEYS = frozenset(("schema", "mission", "mission_revision", "mission_plan_sha256",
+    "packet", "revision", "generation", "spec_ref", "spec_path", "spec_sha256", "admission_ref",
+    "admission_path", "admission_sha256", "enrollment_id", "binding_sha256", "expires_utc", "revoked"))
+_1174_ADMISSION_KEYS = frozenset(("schema", "mission", "mission_revision", "mission_plan_sha256", "packet",
+    "contract_id", "revision", "generation", "base", "enrollment", "lineage", "operation", "allowance", "expires_utc"))
+
+
+def _1174_time(value):
+    _1174_require(type(value) is str and re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z", value),
+                  "UTC timestamp required")
+    return datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+
+
+def _1174_registration(value, packet, revision, generation, now):
+    _1174_require(type(value) is dict and set(value) == _1174_REGISTRATION_KEYS, "registration keyset")
+    _1174_require(value["schema"] == "wp1174_registration.v1" and type(value["revoked"]) is bool and
+                  not value["revoked"] and _1174_time(value["expires_utc"]) > now, "expired/revoked registration")
+    _1174_require(value["mission"] == 1172 and type(value["mission"]) is int and all(
+        type(value[k]) is int and value[k] > 0 for k in ("packet", "revision", "generation", "mission_revision")) and
+        (value["packet"], value["revision"], value["generation"]) == (packet, revision, generation), "registration scope")
+    _1174_require(all(_1174_hash(value[k]) for k in ("mission_plan_sha256", "spec_sha256", "admission_sha256", "binding_sha256"))
+                  and type(value["enrollment_id"]) is str and bool(value["enrollment_id"]), "registration hashes/enrollment")
+    for prefix in ("spec", "admission"):
+        ref, path = value[prefix + "_ref"], value[prefix + "_path"]
+        _1174_require(type(ref) is str and re.fullmatch(r"refs/heads/[A-Za-z0-9._/-]+@[0-9a-f]{40}", ref)
+                      and ".." not in ref and type(path) is str and path and not PurePosixPath(path).is_absolute()
+                      and ".." not in PurePosixPath(path).parts and str(PurePosixPath(path)) == path, "immutable descriptor")
+    return value
+
+
+def _1174_admission(raw, registration, now):
+    """Closed payload validation after immutable-byte and current-authority verification."""
+    a = _1174_json(raw)
+    _1174_require(type(a) is dict and set(a) == _1174_ADMISSION_KEYS and a["schema"] == "wp1174_admission.v1",
+                  "admission keyset/schema")
+    for key in ("mission", "mission_revision", "packet", "revision", "generation", "mission_plan_sha256"):
+        _1174_require(type(a[key]) is type(registration[key]) and a[key] == registration[key], "admission scope " + key)
+    _1174_require(type(a["contract_id"]) is str and a["contract_id"] and type(a["base"]) is str and
+                  SHA_RE.fullmatch(a["base"]) and _1174_time(a["expires_utc"]) > now and
+                  _1174_time(a["expires_utc"]) <= _1174_time(registration["expires_utc"]), "admission contract/base/expiry")
+    e = a["enrollment"]
+    _1174_require(type(e) is dict and set(e) == {"id", "binding_sha256", "coordinator_id", "boot_id", "root",
+                  "root_device", "root_inode", "mount_id", "mount_device", "filesystem", "magic", "state_path",
+                  "witness_path", "lock_path", "initial_state_path", "legacy_source_path", "legacy_source_sha256",
+                  "g0", "origin", "initial_state", "producer_handoffs", "quiescent"},
+                  "enrollment keyset")
+    _1174_require(e["id"] == registration["enrollment_id"] and e["binding_sha256"] == registration["binding_sha256"]
+                  and all(type(e[k]) is str and e[k] for k in ("id", "coordinator_id", "boot_id", "mount_id", "mount_device"))
+                  and all(_1174_int(e[k]) for k in ("root_device", "root_inode", "magic", "g0")) and
+                  e["origin"] in ("fresh_init", "imported_lineage") and type(e["quiescent"]) is bool and e["quiescent"]
+                  and type(e["producer_handoffs"]) is list and bool(e["producer_handoffs"]) and all(
+                      type(x) is str and x for x in e["producer_handoffs"]), "enrollment identity/quiescence")
+    for key in ("root", "state_path", "witness_path", "lock_path"):
+        _1174_require(type(e[key]) is str and Path(e[key]).is_absolute() and str(Path(e[key])) == e[key]
+                      and ".." not in Path(e[key]).parts, "enrollment canonical paths")
+    _1174_require(len({e[k] for k in ("state_path", "witness_path", "lock_path")}) == 3 and all(
+        Path(e[k]).parent == Path(e["root"]) for k in ("state_path", "witness_path", "lock_path")), "enrollment fixed sibling paths")
+    lineage = a["lineage"]
+    _1174_require(type(lineage) is dict and set(lineage) == {"predecessor_generation", "source_path", "source_sha256"}, "lineage keyset")
+    if lineage["predecessor_generation"] is None:
+        _1174_require(lineage["source_path"] is None and lineage["source_sha256"] is None and
+                      e["origin"] == "fresh_init" and a["generation"] == e["g0"], "fresh lineage sentinel")
+    else:
+        _1174_require(_1174_int(lineage["predecessor_generation"]) and
+                      lineage["predecessor_generation"] < a["generation"] and _1174_hash(lineage["source_sha256"])
+                      and type(lineage["source_path"]) is str and Path(lineage["source_path"]).is_absolute(), "predecessor binding")
+    operation = a["operation"]
+    _1174_require(operation is None or (type(operation) is dict and set(operation) == _P1174_KEYS), "operation schema")
+    if operation is not None:
+        _1174_pending(operation)
+        _1174_require(operation["generation"] == a["generation"] and operation["canonical_path"] == e["state_path"] and
+                      operation["source_sha256"] == lineage["source_sha256"] and not operation["cutover_started"], "operation source/generation")
+    allowance = a["allowance"]
+    _1174_require(type(allowance) is dict and set(allowance) == {"window_id", "starts_utc", "ends_utc", "attempts_limit",
+                  "review_rounds_limit", "codex_review_calls_limit"} and type(allowance["window_id"]) is str and allowance["window_id"] and
+                  _1174_time(allowance["starts_utc"]) <= now < _1174_time(allowance["ends_utc"]) <= _1174_time(a["expires_utc"])
+                  and all(type(allowance[k]) is int and allowance[k] > 0 for k in
+                      ("attempts_limit", "review_rounds_limit", "codex_review_calls_limit")), "allowance window/limits")
+    return a
+
+
+def _1174_source_binding(witness, admission, observed_path, raw):
+    """Read-only initial-adoption source predicate; no high_water repair is allowed."""
+    e, lineage = admission["enrollment"], admission["lineage"]
+    digest = hashlib.sha256(raw).hexdigest()
+    _1174_require(digest == lineage["source_sha256"] and observed_path == lineage["source_path"], "source immutable bytes/path")
+    if witness is not None and witness["phase"] == "initialized":
+        adopted = [n for n in witness["history"] if n["terminal_kind"] == "adopted"]
+        active_path = adopted[-1]["canonical_path"] if adopted else e["initial_state_path"]
+        water = witness["high_water"]
+        _1174_require(witness["pending_adoption"] is None and lineage["predecessor_generation"] == witness["active_generation"]
+                      and observed_path == active_path and digest == water["state_sha256"], "initialized source high_water/path")
+        state = _1174_json(raw)
+        _1174_require(type(state) is dict and type(state.get("schema_version")) is int and state["schema_version"] == 3
+                      and type(state.get("packet")) is int and state["packet"] == admission["packet"]
+                      and type(state.get("mission")) is int and state["mission"] == admission["mission"]
+                      and _1174_int(state.get("generation")) and state["generation"] == witness["active_generation"]
+                      and _1174_int(state.get("state_revision")) and state["state_revision"] == water["state_revision"],
+                      "initialized source state generation/revision/identity")
+    else:
+        _1174_require(e["origin"] == "imported_lineage" and lineage["predecessor_generation"] == e["g0"]
+                      and observed_path == e["legacy_source_path"] and digest == e["legacy_source_sha256"], "legacy enrollment source")
+        if witness is not None:
+            _1174_require(witness["origin"] == "imported_lineage" and witness["phase"] == "reserved" and
+                          witness["pending_adoption"] is None and witness["suspended"] and bool(witness["history"])
+                          and all(n["terminal_kind"] in ("aborted", "aborted_intent") for n in witness["history"]), "legacy retry branch")
+        state = json.loads(raw.decode("utf-8"), object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json)
+        _1174_require(type(state) is dict and type(state.get("schema_version")) is int and state["schema_version"] == 2
+                      and type(state.get("packet")) is int and state["packet"] == admission["packet"]
+                      and type(state.get("mission")) is int and state["mission"] == admission["mission"], "legacy source v2 identity")
+    return state
+
+
+def _1174_comments(lp, packet):
+    started, count, comments = time.monotonic(), 0, []
+    for page in range(1, 101):
+        _1174_require(time.monotonic() - started < 120, "authority collection deadline")
+        batch = lp._doc_gh("current authority comments", f"repos/{_1174_REPO}/issues/{packet}/comments?per_page=100&page={page}")
+        _1174_require(type(batch) is list and len(batch) <= 100 and all(type(c) is dict for c in batch), "authority pagination")
+        count += len(json.dumps(batch).encode("utf-8"))
+        _1174_require(count <= 30 * 1024 * 1024, "authority collection byte budget")
+        comments.extend(batch)
+        if len(batch) < 100:
+            return comments
+    raise ValueError("WP1174 UNKNOWN: authority pagination incomplete")
+
+
+def _1174_installed_mission(comments, admission, now):
+    """Read the existing installed-decision wrapper; frozen proposed fields stay unchanged."""
+    installed = []
+    for c in comments:
+        body = c.get("body")
+        if not (type(body) is str and body.startswith("## Mission #1172 — Installed revision ") and
+                c.get("user", {}).get("login") == CHU_KHO and c.get("user", {}).get("type") == "User" and
+                c.get("author_association") == "OWNER"):
+            continue
+        ident = c.get("id")
+        _1174_require(type(ident) is int and ident > 0 and c.get("issue_url") ==
+            f"https://api.github.com/repos/{_1174_REPO}/issues/1172" and c.get("html_url") ==
+            f"https://github.com/{_1174_REPO}/issues/1172#issuecomment-{ident}", "Mission installed decision origin")
+        heading = re.match(r"## Mission #1172 — Installed revision ([1-9][0-9]*)\n", body)
+        hashes = re.findall(r"Plan SHA256 `([0-9a-f]{64})`", body)
+        blocks = re.findall(r"(?m)^```json\n(.*?)^```[ \t]*$", body, re.S)
+        _1174_require(heading is not None and len(hashes) == len(blocks) == 1, "Mission installed wrapper")
+        raw = blocks[0].encode("utf-8")
+        _1174_require(hashlib.sha256(raw).hexdigest() == hashes[0], "Mission installed exact plan bytes")
+        plan = json.loads(raw.decode("utf-8"), object_pairs_hook=_cam_khoa_trung,
+                          parse_constant=lambda _: (_ for _ in ()).throw(ValueError("nonfinite plan")))
+        _1174_require(type(plan) is dict and type(plan.get("revision")) is int and
+                      plan["revision"] == int(heading[1]) and plan.get("mission_id") == "gh-1172", "Mission installed identity")
+        installed.append((_1174_time(c.get("updated_at")), ident, hashes[0], plan))
+    _1174_require(bool(installed), "no current installed Mission decision")
+    _, ident, digest, plan = max(installed, key=lambda row: row[:2])
+    _1174_require(plan["revision"] == admission["mission_revision"] and digest == admission["mission_plan_sha256"],
+                  "Mission installed revision/hash")
+    graph = plan.get("packet_graph")
+    _1174_require(type(graph) is list and all(type(row) is dict for row in graph), "Mission registered graph")
+    matches = [row for row in graph if type(row.get("packet")) is int and row["packet"] == admission["packet"]]
+    _1174_require(len(matches) == 1 and all(type(matches[0].get(k)) is type(admission[k]) and
+                  matches[0][k] == admission[k] for k in ("revision", "generation", "contract_id")), "Mission registered Packet")
+    exception = plan.get("routing_history", {}).get("previous_exception", {})
+    _1174_require(exception.get("actual_human_audit_required") is True and
+                  _1174_time(exception.get("hard_expiry_utc")) > now, "Mission route expiry/human requirement")
+    return plan, ident
+
+
+def _1174_resolve(root, packet, revision, generation, admission_file):
+    """Discover the existing canonical lease/spec chain; FILE is only a byte copy.
+
+    There is no separate enrollment registry. A Packet with no admitted descriptor
+    in its current immutable spec remains blocked, including the source WP1174 lease.
+    """
+    root = Path(root)
+    rc, endpoint = _git_do(root, "remote", "get-url", "origin")
+    _1174_require(rc == 0 and endpoint.strip() in (b"https://github.com/ducthangho/tra-luat.git",
+                  b"https://github.com/ducthangho/tra-luat", b"git@github.com:ducthangho/tra-luat.git"), "canonical endpoint")
+    _1174_require(_git_do(root, "fetch", "-q", "origin", "+refs/heads/*:refs/remotes/origin/*")[0] == 0, "canonical fetch")
+    rc, remote = _git_do(root, "ls-remote", "origin", "refs/heads/master")
+    lc, local = _git_do(root, "rev-parse", "refs/remotes/origin/master")
+    _1174_require(rc == lc == 0 and remote.split() == [local.strip(), b"refs/heads/master"], "current canonical ref")
+    with _canon(root) as canonical:
+        lp = _nap(canonical, "lease_publish")
+        repo = lp._doc_gh("canonical repository", f"repos/{_1174_REPO}")
+        _1174_require(type(repo) is dict and repo.get("full_name") == _1174_REPO and repo.get("default_branch") == "master",
+                      "canonical GitHub identity")
+        permission = lp._doc_gh("owner permission", f"repos/{_1174_REPO}/collaborators/{CHU_KHO}/permission")
+        _1174_require(type(permission) is dict and permission.get("permission") in ("admin", "maintain") and
+                      permission.get("user", {}).get("login") == CHU_KHO, "owner maintain permission")
+        comments = _1174_comments(lp, packet)
+        all_leases = lp._quet_lease_toan_kho(root, chan_nhanh_tut_sau=True)
+        _1174_require(type(all_leases) is list and all(type(row) is dict and type(row.get("lease")) is dict
+                      for row in all_leases), "canonical lease collection")
+        registered = [row for row in all_leases if all(type(row["lease"].get(k)) is int and row["lease"][k] == v
+            for k, v in (("packet_issue", packet), ("revision", revision), ("generation", generation))) and
+            lp._phan_loai_lease(row["lease"]) == "CÒN_HẠN" and lp._bia_mo_doi_xung(row["lease"], all_leases) is False]
+        _1174_require(len(registered) == 1, "no unique current canonical Packet lease/spec")
+        row, now = registered[0], datetime.now(timezone.utc)
+        lease = row["lease"]
+        _1174_require(type(lease.get("spec_ref")) is str and "@" in lease["spec_ref"], "canonical immutable spec required")
+        spec = _spec_merge(root, None, lease.get("spec_path"), lease)
+        visible, errors = _che_khong_render(spec.decode("utf-8"))
+        _1174_require(not errors, "canonical spec render")
+        descriptor = {}
+        for key in ("ref", "path", "sha256"):
+            values = re.findall(rf"(?m)^admission_{key}: ([^\s]+)$", visible)
+            _1174_require(len(values) == 1, "no unique admission descriptor in canonical spec")
+            descriptor["admission_" + key] = values[0]
+        ref, separator, oid = descriptor["admission_ref"].partition("@")
+        _1174_require(separator == "@" and SHA_RE.fullmatch(oid) and _git_do(root, "check-ref-format", ref)[0] == 0,
+                      "admission immutable ref")
+        rc, raw = _git_do(root, "show", f"{oid}:{descriptor['admission_path']}")
+        _1174_require(rc == 0 and hashlib.sha256(raw).hexdigest() == descriptor["admission_sha256"], "immutable descriptor blob/hash")
+        payload = _1174_json(raw)
+        _1174_require(type(payload) is dict and type(payload.get("enrollment")) is dict, "admission payload identity")
+        registration = dict(schema="wp1174_registration.v1", **{k: payload.get(k) for k in
+            ("mission", "mission_revision", "mission_plan_sha256", "packet", "revision", "generation")},
+            spec_ref=lease["spec_ref"], spec_path=lease["spec_path"], spec_sha256=lease["spec_hash"], **descriptor,
+            enrollment_id=payload["enrollment"].get("id"), binding_sha256=payload["enrollment"].get("binding_sha256"),
+            expires_utc=lease.get("lease_expires_at_utc"), revoked=False)
+        # The closed intermediate below is derived from the verified spec graph,
+        # never accepted as a caller-provided registration or a new trust root.
+        _1174_registration(registration, packet, revision, generation, now)
+        _1174_require(Path(admission_file).read_bytes() == raw, "FILE differs from immutable admission")
+        admission = _1174_admission(raw, registration, now)
+        _1174_require(re.findall(r"\bcontract_id: ([A-Za-z0-9_.-]+)", visible) == [admission["contract_id"]] and
+                      re.findall(r"\bmission_plan_sha256: ([0-9a-f]{64})", visible) == [admission["mission_plan_sha256"]],
+                      "spec contract/Mission binding")
+        # Reuse the canonical I2 H/Đ/R path with a transient in-memory sink. It
+        # verifies current remote ref, allowlist, grant, overlap and bot readback.
+        global _1174_TRANSACTION
+        previous = globals().get("_1174_TRANSACTION")
+        with tempfile.TemporaryDirectory(prefix="wp1174-authority-") as td:
+            directory = Path(td).resolve()
+            readback = directory / "comments.json"
+            readback.write_bytes(_1174_bytes(comments))
+            st = dict(packet=packet, history=[])
+            _1174_TRANSACTION = dict(directory=directory, state=st, proposal=None)
+            remote_ref = re.sub(r"^refs/(?:remotes/origin|heads)/", "", row["ref"])
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    rc = _record_lease_ref(argparse.Namespace(root=str(root), lease_ref="origin/" + remote_ref,
+                        lease_path=row["path"], lease_comments=str(readback)), directory, st)
+                _1174_require(rc == 0 and _1174_TRANSACTION["proposal"] is not None, "canonical lease verification")
+            except SystemExit as ex:
+                raise ValueError("WP1174 UNKNOWN: canonical I2 verification rc=" + str(ex.code)) from ex
+            finally:
+                _1174_TRANSACTION = previous
+        _, installed_id = _1174_installed_mission(_1174_comments(lp, 1172), admission, now)
+        return admission, dict(canonical_oid=local.decode().strip(), spec_sha256=registration["spec_sha256"],
+                               admission_sha256=registration["admission_sha256"], mission_install_id=installed_id,
+                               lease_id=lease["lease_id"])
+
+
+_1174_MUTATORS = ("init", "record-lease", "begin-attempt", "void-attempt", "record-review", "transition",
+    "record-codex-call", "nang-tran", "record-rescue", "record-post", "accept", "mo-lai", "chu-kho-duyet", "adopt-state")
+_1174_IMPLEMENTATION_COMPLETE = False
+
+
+def _1174_state(raw, admission, generation=None):
+    """Validate the complete legacy payload as well as the v3 binding before use."""
+    global _1174_TRANSACTION
+    state = _1174_json(raw)
+    e = admission["enrollment"]
+    _1174_require(type(state) is dict and state.get("schema_version") == 3 and type(state["schema_version"]) is int and
+        state.get("enrollment_id") == e["id"] and state.get("binding_sha256") == e["binding_sha256"] and
+        type(state.get("generation")) is int and state["generation"] == (admission["generation"] if generation is None else generation) and
+        _1174_int(state.get("state_revision")) and state.get("mission") == admission["mission"], "state v3 binding")
+    _1174_require(set(state) == set(e["initial_state"]), "state complete granted keyset")
+    previous = globals().get("_1174_TRANSACTION")
+    directory = Path(e["root"])
+    _1174_TRANSACTION = dict(directory=directory, state=state, proposal=None)
+    try:
+        _load(directory, admission["packet"])
+    except SystemExit as ex:
+        raise ValueError("WP1174 UNKNOWN: full state validation rc=" + str(ex.code)) from ex
+    finally:
+        _1174_TRANSACTION = previous
+    return state
+
+
+def _1174_runtime(a, admission):
+    e, root = admission["enrollment"], Path(admission["enrollment"]["root"])
+    _1174_require(str(root.resolve(strict=True)) == str(root) and root.is_dir(), "root canonical directory")
+    observed = root.stat()
+    _1174_require((observed.st_dev, observed.st_ino) == (e["root_device"], e["root_inode"]), "root identity")
+    _1174_require(Path("/proc/sys/kernel/random/boot_id").read_text().strip() == e["boot_id"] and
+                  a.coordinator_id == e["coordinator_id"], "boot/coordinator readmission")
+    mount = _1174_mount(root)
+    _1174_require(_1174_platform(platform.system(), mount["filesystem"], mount["magic"]) and all(
+        mount[k] == e[v] for k, v in (("mount_id", "mount_id"), ("device", "mount_device"),
+        ("filesystem", "filesystem"), ("magic", "magic"))), "enrolled native mount")
+    for key in ("state_path", "witness_path", "lock_path", "initial_state_path"):
+        path = Path(e[key])
+        _1174_require(str(path.resolve(strict=False)) == str(path) and path.parent == root and
+                      _1174_mount(path.parent) == mount, "path topology drift")
+    return mount
+
+
+def _1174_pair(admission, witness, raw):
+    e = admission["enrollment"]
+    state = _1174_state(raw, admission)
+    _1174_require(witness["phase"] == "initialized" and witness["active_generation"] == admission["generation"] and
+        witness["pending_adoption"] is None and not witness["suspended"] and witness["high_water"] == dict(
+        generation=state["generation"], state_revision=state["state_revision"], state_sha256=hashlib.sha256(raw).hexdigest()),
+        "state/witness high_water mismatch")
+    active = next((n["canonical_path"] for n in reversed(witness["history"]) if n["terminal_kind"] == "adopted"), e["initial_state_path"])
+    _1174_require(e["state_path"] == active, "active target path")
+    return state
+
+
+def _1174_commit_witness(before, after, admission, action):
+    e = admission["enrollment"]
+    raw = _1174_bytes(after)
+    _1174_witness_transition(before, raw, e["id"], e["binding_sha256"], e["g0"], action)
+    return raw
+
+
+def _1174_initialize(a, admission, witness_raw):
+    e = admission["enrollment"]
+    _1174_require(admission["lineage"] == dict(predecessor_generation=None, source_path=None, source_sha256=None) and
+                  admission["operation"] is None and e["origin"] == "fresh_init", "init predecessor/history")
+    target, witness_path = Path(e["state_path"]), Path(e["witness_path"])
+    initial = _1174_bytes(e["initial_state"])
+    state = _1174_state(initial, admission)
+    _1174_require(state["state"] == "awaiting_lease" and state["state_revision"] == 0 and state["generation"] == e["g0"] and
+                  state["lease"] is None and not state["attempt_open"] and state["history"] == [], "granted initial image")
+    _1174_require(a.mission == admission["mission"] and all(state[k] == admission["allowance"][k] for k in
+                  ("attempts_limit", "review_rounds_limit", "codex_review_calls_limit")), "init granted allowance/Mission")
+    for role in ("executor", "reviewer"):
+        identity = _identity(getattr(a, role), getattr(a, role + "_model_family"),
+                             getattr(a, role + "_execution_surface"), getattr(a, role + "_transport"))
+        _1174_require(identity == state[role + "_identity"] and state[role] == getattr(a, role), "init granted provider identity")
+    reserved = _1174_reserved(e["id"], e["binding_sha256"], e["g0"])
+    reserved_raw = _1174_bytes(reserved)
+    exists = os.path.lexists(target)
+    if a.mode == "fresh":
+        _1174_require(a.expected_revision == "absent" and a.expected_witness_revision is None and
+                      witness_raw is None and not exists, "fresh init absence/revision")
+    else:
+        _1174_require(a.expected_revision is None and a.expected_witness_revision == "0" and witness_raw == reserved_raw and
+                      (not exists or _1174_read(target) == initial), "resume-init exact reserved/full target")
+    final = dict(reserved, phase="initialized", witness_revision=1, high_water=dict(generation=e["g0"],
+        state_revision=0, state_sha256=hashlib.sha256(initial).hexdigest()))
+    first = _1174_commit_witness(None, reserved, admission, "fresh_enrollment")
+    last = _1174_commit_witness(reserved_raw, final, admission, "resume_init")
+    _1174_probe(Path(e["root"]))
+    if witness_raw is None:
+        _1174_persist(witness_path, first, create=True)
+    if not exists:
+        _1174_persist(target, initial, create=True)
+    _1174_persist(witness_path, last, create=False)
+    _1174_pair(admission, _1174_witness(_1174_read(witness_path), e["id"], e["binding_sha256"], e["g0"]), _1174_read(target))
+    return "completed_no_dispatch"
+
+
+def _1174_ordinary(a, directory, admission, witness_raw):
+    global _1174_TRANSACTION
+    e = admission["enrollment"]
+    _1174_require(witness_raw is not None and a.expected_witness_revision is None and
+                  type(a.expected_revision) is str and re.fullmatch(r"0|[1-9][0-9]*", a.expected_revision), "ordinary revision namespace")
+    witness = _1174_witness(witness_raw, e["id"], e["binding_sha256"], e["g0"])
+    state = _1174_pair(admission, witness, _1174_read(Path(e["state_path"])))
+    _1174_require(state["state_revision"] == int(a.expected_revision), "stale state revision")
+    # Adoption fencing and advisory→human acceptance require their dedicated
+    # implementations; never run a legacy writer over an imported journal.
+    _1174_require(e["legacy_source_path"] is None and not witness["history"], "adopted legacy tripwire unavailable")
+    _1174_require(a.cmd not in ("record-review", "accept"), "scoped advisory/human lifecycle unavailable")
+    _1174_require(a.cmd != "record-lease" or a.lease_ref is not None, "scoped lease requires canonical I2")
+    previous = globals().get("_1174_TRANSACTION")
+    tx = dict(directory=directory, state=state, proposal=None)
+    _1174_TRANSACTION = tx
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            try:
+                rc = a.fn(a, directory)
+            except SystemExit as ex:
+                rc = ex.code
+        _1174_require(type(rc) is int and rc in (0, 3) and tx["proposal"] is not None, "legacy predicate rejected")
+        new = tx["proposal"]
+        new.update(schema_version=3, state_revision=state["state_revision"] + 1)
+        raw = _1174_bytes(new)
+        _1174_state(raw, admission)
+        after = dict(witness, witness_revision=witness["witness_revision"] + 1, high_water=dict(
+            generation=admission["generation"], state_revision=new["state_revision"], state_sha256=hashlib.sha256(raw).hexdigest()))
+        water = _1174_commit_witness(witness_raw, after, admission, "ordinary")
+        _1174_require(_1174_read(Path(e["witness_path"])) == witness_raw, "witness changed during preflight")
+        _1174_probe(directory)
+        _1174_persist(Path(e["state_path"]), raw, create=False)
+        _1174_persist(Path(e["witness_path"]), water, create=False)
+        _1174_pair(admission, _1174_witness(_1174_read(Path(e["witness_path"])), e["id"], e["binding_sha256"], e["g0"]),
+                      _1174_read(Path(e["state_path"])))
+        return "quota_exhausted" if rc == 3 else "reserved_for_dispatch" if a.cmd in ("begin-attempt", "record-codex-call") else "completed_no_dispatch"
+    finally:
+        _1174_TRANSACTION = previous
+
+
+def _1174_command(a, state_dir):
+    status, detail = "UNKNOWN", None
+    try:
+        _1174_require(platform.system() == "Linux", "unsupported native operating system")
+        _1174_require(_1174_IMPLEMENTATION_COMPLETE,
+                      "implementation incomplete: adoption/recovery, advisory/human lifecycle and native evidence pending")
+        admission, _ = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission)
+        e = admission["enrollment"]
+        directory = Path(e["root"])
+        _1174_require(state_dir.resolve() == directory, "state directory differs from enrollment")
+        _1174_runtime(a, admission)
+        with _1174_lock(Path(e["lock_path"])):
+            current, _ = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission)
+            _1174_require(current == admission, "authority changed under lock")
+            witness_raw = _1174_read(Path(e["witness_path"])) if os.path.lexists(e["witness_path"]) else None
+            if a.cmd == "init":
+                status = _1174_initialize(a, admission, witness_raw)
+            elif a.cmd == "adopt-state":
+                raise ValueError("WP1174 UNKNOWN: adoption/recovery implementation unavailable")
+            else:
+                status = _1174_ordinary(a, directory, admission, witness_raw)
+    except (ValueError, OSError, KeyError, TypeError, AttributeError, RecursionError) as ex:
+        detail = f"{type(ex).__name__}: {ex}"
+        status = "durability_unknown" if isinstance(ex, OSError) else "UNKNOWN"
+    rc, dispatch = _1174_status(status)
+    print(json.dumps(dict(status=status, dispatch_allowed=dispatch, detail=detail), ensure_ascii=False, sort_keys=True))
+    return rc
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="packet_loop.py",
@@ -3729,6 +4554,27 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--dot-bien-du-jobs", action="append", help="#1120 K7: readback trang `actions/runs/<id>/jobs`; lặp")
     q.set_defaults(fn=cmd_kiem_merge)
 
+    q = sub.add_parser("adopt-state", help="scoped adoption management; incomplete recovery stays UNKNOWN")
+    q.add_argument("--packet", type=int, required=True)
+    q.add_argument("--root", default=".")
+    q.add_argument("--mode", choices=("initial", "recovery"), required=True)
+    q.add_argument("--adoption-id", required=True)
+    q.add_argument("--expected-source-sha256")
+    q.add_argument("--target-generation", type=int)
+    q.add_argument("--disposition", choices=("resume_forward", "abandon_before_cutover", "abandon_before_prepare"))
+    q.set_defaults(fn=None)
+    for name in _1174_MUTATORS:
+        command = sub.choices[name]
+        for flag in ("--admission", "--expected-revision", "--expected-witness-revision", "--coordinator-id"):
+            command.add_argument(flag)
+        command.add_argument("--revision", type=int)
+        command.add_argument("--generation", type=int)
+        if name == "init":
+            command.add_argument("--root", default=".")
+            command.add_argument("--mode", choices=("fresh", "resume-initialization"), default="fresh")
+        elif not any(option.dest == "root" for option in command._actions):
+            command.add_argument("--root", default=".")
+
     q = sub.add_parser("kiem-dong-wp", help="#1106 ADR-0060 M8: biên bản sổ sách + lease đủ để đóng WP? (D1–D4, không state)")
     q.add_argument("--root", default=".")
     q.add_argument("--bien-ban", required=True, help="khối YAML của biên bản M8")
@@ -3754,6 +4600,12 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv=None) -> int:
     _cung_hoa_stdout()
     a = build_parser().parse_args(argv)
+    if a.cmd in _1174_MUTATORS and getattr(a, "admission", None) is not None:
+        if not all((a.revision, a.generation, a.coordinator_id)):
+            _die(RC_ARG, "scoped mutator requires revision/generation/coordinator-id")
+        return _1174_command(a, Path(a.state_dir))
+    if a.cmd == "adopt-state":
+        _die(RC_ARG, "adopt-state requires --admission")
     return a.fn(a, Path(a.state_dir))
 
 

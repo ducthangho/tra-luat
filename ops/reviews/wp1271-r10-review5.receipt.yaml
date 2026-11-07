@@ -1,0 +1,28 @@
+schema_version: 2
+receipt_id: wp1271-r10-review5-616c0f3d
+kind: review_delivery_receipt
+packet_id: wp1271
+reviewed_sha: d2fecaa1516cbc8c20b70331a45c8c728e59ddce
+verdict: approved
+verdict_path: ops/reviews/wp1271-r10-review5/verdict.md
+verdict_sha256: cede716db8a9ede3c59b30a4b2e0a46ab2daa1911f8c43ed7daed6e9dce010e0
+evidence_url: https://github.com/ducthangho/tra-luat/blob/9dffdafcc635942aeb1955f71dbbcf8a45dbd4ed/ops/reviews/wp1271-r10-review5/verdict.md
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: 616c0f3dc54a40fd88a2b0a693648b99
+  model: gpt-6.1-sol
+  effort: xhigh
+  evidence_ref: ops/reviews/wp1271-r10-review5/run.json
+github_submitter_identity:
+  actor: ducthangho
+  note: Observed transport actor on original verdict comment6713611050; exact UTF8
+    body/hash readback verified; not model identity or human audit
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: Content-addressed metadata-control-ref ancestry only; not canonical master,
+    requiredcheck or merge authority.
+assurance: cross_approved
+independent_from_executor_session: true

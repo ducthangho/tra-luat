@@ -69,3 +69,6 @@ effective_write_set:
 - .agents/skills/proxima-control/scripts/ProximaConfig.psm1
 - .agents/skills/proxima-control/config.example.json
 - .agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1
+da_bi_thay_the: wp1271-r2-g2-claude
+superseded_reason: AGY admission cannot establish serving family; authorized single-family
+  Claude reroute, no product writes

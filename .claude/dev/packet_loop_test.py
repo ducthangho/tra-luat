@@ -5467,7 +5467,7 @@ def _co_sap_do(ex) -> bool:
 
 def _phan_loai_giet(v) -> str:
     return ("SONG" if v is None else "BO_QUA" if isinstance(v, BoQua)
-            else "TIN_DUNG_GIA" if isinstance(v, _TinDungGia) else "GIET")
+            else "TIN_DUNG_GIA" if isinstance(v, (_TinDungGia, CliSapDo)) else "GIET")
 
 
 _KG_RC_HOP_LE = frozenset((0, 2, 12))
@@ -9183,7 +9183,10 @@ def chay_suite(script: Path, tmp: Path, chi_chay=None):
             ket[ten] = (_TinDungGia(f"{type(ex).__name__}: {ex}") if _co_sap_do(ex) else
                         ex if isinstance(ex.__cause__, OSError) else f"BỎ QUA không có OSError đo được: {ex}")
         except Exception as ex:  # noqa: BLE001 — ca đỏ là dữ liệu, không phải sự cố
-            ket[ten] = (_TinDungGia if _co_sap_do(ex) else str)(f"{type(ex).__name__}: {ex}")
+            if ten.startswith("wp1174_"):
+                ket[ten] = ex if isinstance(ex, AssertionError) and not _co_sap_do(ex) else CliSapDo(f"{type(ex).__name__}: {ex}")
+            else:
+                ket[ten] = (_TinDungGia if _co_sap_do(ex) else str)(f"{type(ex).__name__}: {ex}")
     return ket
 
 
@@ -10592,7 +10595,1062 @@ MUTANTS.update({
 })
 
 
-def main() -> int:
+# WP1174 r7: isolated pure/fixture tests. No fixture grants production authority.
+WP1174_SOURCE_PR = 1275
+
+
+def _module1174(c):
+    spec = importlib.util.spec_from_file_location("pl1174_" + str(time.time_ns()), c.script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    assert hasattr(module, "_1174_witness"), "WP1174 pure validator API absent from supplied product"
+    return module
+
+
+def _call1174(fn, *args, **kwargs):
+    try:
+        return fn(*args, **kwargs)
+    except SystemExit as error:
+        raise AssertionError("valid canonical fixture rejected rc="+str(error.code)) from error
+    except ValueError as error:
+        if str(error).startswith("WP1174 UNKNOWN:"):
+            raise AssertionError("valid fixture rejected: " + str(error)) from error
+        raise CliSapDo("unexpected pure product exception") from error
+    except Exception as error:
+        raise CliSapDo("unexpected pure product exception") from error
+
+
+def _reject1174(fn, *args, reason=None, **kwargs):
+    try:
+        fn(*args, **kwargs)
+    except ValueError as error:
+        assert str(error).startswith("WP1174 UNKNOWN:"), str(error)
+        if reason is not None:
+            assert reason in str(error), (reason, str(error))
+        return
+    except Exception as error:
+        raise CliSapDo("rejection crashed before semantic assertion") from error
+    assert False, "invalid input accepted by pure validator"
+
+
+def _w1174(c, imported=False, initialized=False):
+    path = str((c.tmp / "active.json").resolve())
+    pending = dict(adoption_id="adopt-2", generation=2, binding_sha256="b" * 64,
+                   canonical_path=path, source_sha256="c" * 64, cutover_started=False)
+    witness = dict(origin="imported_lineage" if imported else "fresh_init", enrollment_id="enrollment-1",
+                   binding_sha256="a" * 64, active_generation=1, phase="reserved", witness_revision=0,
+                   high_water=None, pending_adoption=pending if imported else None, suspended=False, history=[])
+    if initialized:
+        witness.update(phase="initialized", witness_revision=1, high_water=dict(
+            generation=1, state_revision=0, state_sha256="c" * 64))
+    return witness, pending
+
+
+def _validate1174(m, witness):
+    return m._1174_witness(m._1174_bytes(witness), "enrollment-1", "a" * 64, 1)
+
+
+def _node1174(pending, kind="aborted_intent"):
+    return dict(terminal_kind=kind, **{k: pending[k] for k in ("adoption_id", "binding_sha256", "generation", "canonical_path")},
+                as_of_revision=None if kind == "aborted_intent" else 0,
+                as_of_sha256=None if kind == "aborted_intent" else "d" * 64,
+                terminal_disposition={"aborted_intent": "abandon_before_prepare", "aborted": "abandon_before_cutover",
+                                      "adopted": "resume_forward"}[kind])
+
+
+def _case_w1174(kind):
+    def case(c):
+        import copy
+        m = _module1174(c)
+        fresh, p = _w1174(c)
+        if kind == "keyset":
+            _, _, admission, _ = _a1174(c)
+            state = dict(admission["enrollment"]["initial_state_projection"], hmac_key="f" * 64)
+            assert _call1174(m._1174_state, m._1174_bytes(state), admission) == state
+            for bad in (dict(state, unknown=None), {k: v for k, v in state.items() if k != "reviews"}):
+                _reject1174(m._1174_state, m._1174_bytes(bad), admission, reason="state closed keyset")
+            _reject1174(m._1174_state, m._1174_bytes(dict(state, luat_adr0054=None)), admission, reason="state optional type/absence")
+            for optional in ({"luat_adr0054": False}, {"mo_lai_tu": None}, {"checkpoint_day": None}):
+                assert _call1174(m._1174_state, m._1174_bytes(dict(state, **optional)), admission) == dict(state, **optional)
+        active, _ = _w1174(c, initialized=True)
+        imported, _ = _w1174(c, imported=True)
+        for good in (fresh, active, imported):
+            assert _call1174(_validate1174, m, good) == good
+        bad = []
+        if kind == "valid":
+            assert m._1174_bytes(fresh) == (b'{"active_generation":1,"binding_sha256":"' + b"a" * 64 +
+                b'","enrollment_id":"enrollment-1","high_water":null,"history":[],"origin":"fresh_init",'
+                b'"pending_adoption":null,"phase":"reserved","suspended":false,"witness_revision":0}\n')
+            return
+        if kind == "keyset":
+            bad.append(dict(active, extra=0))
+            bad.extend({k: v for k, v in fresh.items() if k != omitted} for omitted in fresh)
+        elif kind == "int_bool":
+            for key in ("active_generation", "witness_revision"):
+                bad.extend(dict(active, **{key: value}) for value in (True, False, 1.0, -1, "1"))
+            for key in ("generation", "state_revision"):
+                bad.extend(dict(active, high_water=dict(active["high_water"], **{key: value})) for value in (True, False, 0.0, -1))
+            bad.extend(dict(imported, pending_adoption=dict(p, generation=v)) for v in (True, 2.0, -1))
+        elif kind == "enum_hash":
+            bad += [dict(fresh, origin="fresh"), dict(fresh, phase="ready"), dict(fresh, binding_sha256="A" * 64),
+                    dict(active, high_water=dict(active["high_water"], state_sha256="c" * 63)),
+                    dict(imported, pending_adoption=dict(p, source_sha256="z" * 64))]
+        elif kind == "json_bytes":
+            raw = m._1174_bytes(active)
+            for malformed in (raw[:-1], raw + b"\n", b"\xef\xbb\xbf" + raw, raw.replace(b'"active_generation":1',
+                    b'"active_generation":1,"active_generation":1'), raw.replace(b'"active_generation":1',
+                    b'"active_generation":NaN'), json.dumps(fresh, indent=2).encode() + b"\n", raw.replace(b"\n", b"\r\n")):
+                _reject1174(m._1174_witness, malformed, "enrollment-1", "a" * 64, 1)
+            return
+        elif kind == "fresh_reserved":
+            bad += [dict(fresh, witness_revision=1), dict(fresh, pending_adoption=p), dict(fresh, suspended=True),
+                    dict(fresh, active_generation=2), dict(fresh, high_water=active["high_water"])]
+        elif kind == "import_retry":
+            retry = dict(imported, history=[_node1174(p)], suspended=True, witness_revision=2,
+                         pending_adoption=dict(p, adoption_id="adopt-3", generation=3, canonical_path=str(c.tmp / "retry.json")))
+            assert _call1174(_validate1174, m, retry) == retry
+            bad += [dict(retry, suspended=False), dict(retry, pending_adoption=dict(retry["pending_adoption"], generation=2)),
+                    dict(retry, history=[dict(retry["history"][0], terminal_disposition="resume_forward")])]
+        elif kind == "suspended":
+            bad += [dict(active, suspended=True), dict(active, suspended="false"), dict(imported, pending_adoption=None)]
+            abandoned = dict(imported, history=[_node1174(p)], suspended=True, pending_adoption=None, witness_revision=1)
+            assert _call1174(_validate1174, m, abandoned) == abandoned
+            bad.append(dict(abandoned, suspended=False))
+        elif kind == "active_pending":
+            good = dict(active, pending_adoption=p, witness_revision=2)
+            assert _call1174(_validate1174, m, good) == good
+            bad += [dict(active, active_generation=2), dict(active, high_water=None),
+                    dict(good, pending_adoption=dict(p, generation=1)),
+                    dict(good, pending_adoption=dict(p, cutover_started="false")),
+                    dict(good, pending_adoption={k: v for k, v in p.items() if k != "source_sha256"}),
+                    dict(active,high_water=dict(active["high_water"],generation=2))]
+        else:
+            raise AssertionError("unknown fixture kind")
+        original = copy.deepcopy(bad)
+        reasons=[]
+        if kind=="keyset":reasons=["witness keyset"]*len(bad)
+        elif kind=="int_bool":reasons=["witness integer types"]*10+["initialized high_water"]*8+["generation integer"]*3
+        elif kind=="enum_hash":reasons=["witness origin/phase","witness origin/phase","witness enrollment binding","initialized high_water","pending source/intent"]
+        elif kind=="fresh_reserved":reasons=["fresh reserved exact image","fresh reserved exact image","suspended does not match terminal history","reserved active/high_water/history","reserved active/high_water/history"]
+        elif kind=="import_retry":reasons=["suspended does not match terminal history","pending collides with lineage","history terminal disposition"]
+        elif kind=="suspended":reasons=["suspended does not match terminal history","witness suspended type","imported reserved needs pending","suspended does not match terminal history"]
+        elif kind=="active_pending":reasons=["initialized high_water","initialized high_water","pending collides with lineage","pending source/intent","pending keyset","initialized high_water"]
+        assert len(reasons)==len(bad),(kind,len(reasons),len(bad))
+        for value,reason in zip(bad,reasons):
+            _reject1174(_validate1174, m, value,reason=reason)
+        assert bad == original, "pure validator mutated inputs"
+    return case
+
+
+def _status1174(c):
+    m = _module1174(c)
+    for status, rc, dispatch in (("completed_no_dispatch", 0, False), ("already_completed_no_dispatch", 0, False),
+            ("reserved_for_dispatch", 0, True), ("input_rejected", 2, False), ("quota_exhausted", 3, False),
+            ("UNKNOWN", 8, False), ("durability_unknown", 8, False), ("legacy_changed", 8, False),
+            ("revision_rejected", 8, False), ("admission_rejected", 8, False)):
+        assert _call1174(m._1174_status, status) == (rc, dispatch)
+    for status in ("PASS", "FAIL", "UNKNOWN", "admission_rejected"):
+        assert _call1174(m._1174_status, status, guard=True) == (0 if status == "PASS" else 12, False)
+    for status in ("ok", "", "passed", "reserved", "future_status"):
+        _reject1174(m._1174_status, status)
+        _reject1174(m._1174_status, status, guard=True)
+
+
+def _unsupported1174(c):
+    m = _module1174(c)
+    for name in ("overlay", "nfs", "cifs", "9p", "virtiofs", "fuse", "tmpfs", "unknown", "ext3"):
+        assert _call1174(m._1174_platform, "Linux", name, 0xEF53) is False
+    for os_name in ("Windows", "Darwin", "", "unknown"):
+        assert _call1174(m._1174_platform, os_name, "ext4", 0xEF53) is False
+    assert _call1174(m._1174_platform, "Linux", "ext4", 0xEF53) is True
+    assert _call1174(m._1174_platform, "Linux", "xfs", 0x58465342) is True
+    assert _call1174(m._1174_platform, "Linux", "ext4", 0x58465342) is False
+    assert _call1174(m._1174_platform, "Linux", "xfs", 0xEF53) is False
+    from unittest.mock import patch
+    with patch.object(m.Path, "read_text", return_value="9 1 0:1 / / rw - ext4 /dev/test rw\n10 1 0:1 / / rw - ext4 /dev/test rw\n"):
+        _reject1174(m._1174_mount, c.tmp.resolve(), reason="ambiguous active mount identity")
+
+
+def _native1174(c):
+    m = _module1174(c)
+    result = m._1174_probe(c.tmp.resolve())
+    assert result["facts"] and len(result["outcomes"])==8,"native probe facts/capabilities omitted"
+    assert result["native_seam_used"] is False and all(result["outcomes"].values())
+    o=result["outcomes"]
+    globals()["_WP1174_NATIVE_FACTS"]=dict(status="passed",raw=result,checks=dict(mount=o["mount_identity"],statfs=True,same_mount=o["mount_identity"],
+        lock_process=o["lock_contention_process"],cloexec=o["cloexec"],link_noreplace=o["link_no_replace_eexist"],replace=o["replace"],
+        fsync_file=o["file_fsync_directory_fsync_readback"],fsync_dir=o["file_fsync_directory_fsync_readback"],readback=o["file_fsync_directory_fsync_readback"],tripwire=o["tripwire"]))
+
+
+def _durability1174(c):
+    from unittest.mock import patch
+    m = _module1174(c)
+    p = c.tmp / "state"
+    m._1174_persist(p, b"old\n", create=True)
+    assert p.read_bytes() == b"old\n"
+    try:
+        m._1174_persist(p, b"overwrite\n", create=True)
+    except FileExistsError:
+        pass
+    else:
+        assert False, "no-replace overwrote existing target"
+    assert p.read_bytes() == b"old\n"
+    for fault in ("fsync", "replace"):
+        with patch.object(m.os, fault, side_effect=OSError("injected durability failure")):
+            try:
+                m._1174_persist(p, b"new\n", create=False)
+            except OSError:
+                pass
+            else:
+                assert False, "durability failure was swallowed"
+        assert p.read_bytes() == b"old\n" and sorted(x.name for x in c.tmp.iterdir()) == ["state"]
+    fsync=m.os.fsync
+    import stat
+    def file_fsync_fault(fd):
+        if stat.S_ISREG(os.fstat(fd).st_mode):raise OSError("injected file fsync only")
+        return fsync(fd)
+    with patch.object(m.os,"fsync",file_fsync_fault):
+        try:m._1174_persist(p,b"new\n",create=False)
+        except OSError as ex:assert "file fsync only" in str(ex)
+        else:assert False,"file fsync omitted"
+    assert p.read_bytes()==b"old\n"
+    m._1174_persist(p, b"new\n", create=False)
+    assert m._1174_read(p) == b"new\n"
+    with m._1174_lock(c.tmp / "fixed.lock") as fd:
+        assert not os.get_inheritable(fd)
+    assert (c.tmp / "fixed.lock").exists()
+
+
+def _postimage1174(c):
+    import copy
+    m = _module1174(c)
+    w, p = _w1174(c)
+    active, _ = _w1174(c, initialized=True)
+    encode = m._1174_bytes
+    transition = lambda old, new, action: m._1174_witness_transition(
+        None if old is None else encode(old), encode(new), "enrollment-1", "a" * 64, 1, action)
+    assert _call1174(transition, None, w, "fresh_enrollment") == w
+    imported, _ = _w1174(c, imported=True)
+    assert _call1174(transition, None, imported, "imported_enrollment") == imported
+    assert _call1174(transition, w, active, "resume_init") == active
+    waiting = dict(active, pending_adoption=p, witness_revision=2)
+    assert _call1174(transition, active, waiting, "adopt_pending") == waiting
+    intent = dict(waiting, pending_adoption=dict(p, cutover_started=True), witness_revision=3)
+    assert _call1174(transition, waiting, intent, "cutover_intent") == intent
+    for kind, action in (("aborted_intent", "abandon_before_prepare"), ("aborted", "abandon_before_cutover")):
+        terminal = dict(waiting, witness_revision=3, pending_adoption=None, suspended=True,
+                        history=[_node1174(p, kind)])
+        assert _call1174(transition, waiting, terminal, action) == terminal
+    adopted = _node1174(p, "adopted")
+    terminal = dict(intent, witness_revision=4, pending_adoption=None, active_generation=2, history=[adopted],
+                    high_water=dict(generation=2, state_revision=0, state_sha256="d" * 64))
+    assert _call1174(transition, intent, terminal, "adopt_finalize") == terminal
+    moved = dict(active, witness_revision=2, high_water=dict(active["high_water"], state_revision=1, state_sha256="f" * 64))
+    assert _call1174(transition, active, moved, "ordinary") == moved
+    abandon_intent=dict(waiting,witness_revision=3,pending_adoption=None,suspended=True,history=[_node1174(p,"aborted_intent")])
+    abandon=dict(waiting,witness_revision=3,pending_adoption=None,suspended=True,history=[_node1174(p,"aborted")])
+    rows=((None,w,"imported_enrollment"),(None,imported,"fresh_enrollment"),(w,active,"ordinary"),
+        (active,waiting,"cutover_intent"),(waiting,intent,"adopt_pending"),(waiting,abandon_intent,"adopt_finalize"),
+        (waiting,abandon,"abandon_before_prepare"),(intent,terminal,"abandon_before_cutover"),(active,moved,"resume_init"))
+    for old,new,wrong_action in rows:
+        original=copy.deepcopy((old,new))
+        _reject1174(transition,old,new,wrong_action)
+        assert (old,new)==original
+    for old, new, action in ((w, dict(w, pending_adoption=p, witness_revision=1), "adopt_pending"),
+            (active, dict(moved, witness_revision=3), "ordinary"),
+            (active, dict(moved, suspended=True), "ordinary"), (waiting, dict(intent, active_generation=2), "cutover_intent"),
+            (intent, dict(waiting, witness_revision=4), "cutover_intent")):
+        original = copy.deepcopy((old, new))
+        _reject1174(transition, old, new, action)
+        assert (old, new) == original
+
+
+def _a1174(c):
+    from datetime import datetime, timezone
+    m = _module1174(c)
+    root = str(c.tmp.resolve())
+    registration = dict(schema="wp1174_registration.v1", mission=1172, mission_revision=11,
+        mission_plan_sha256="1" * 64, packet=1174, revision=7, generation=5,
+        spec_ref="refs/heads/frozen@" + "2" * 40, spec_path="ops/specs/target.md", spec_sha256="3" * 64,
+        admission_ref="refs/heads/frozen@" + "2" * 40, admission_path="ops/admission/target.json",
+        admission_sha256="4" * 64, enrollment_id="enrollment-1", binding_sha256="a" * 64,
+        expires_utc="2100-01-01T00:00:00Z", revoked=False)
+    admission = dict(schema="wp1174_admission.v1", mission=1172, mission_revision=11, mission_plan_sha256="1" * 64,
+        packet=1174, contract_id="target-r7", revision=7, generation=5, base="5" * 40,
+        enrollment=dict(id="enrollment-1", binding_sha256="a" * 64, coordinator_id="coordinator-1", boot_id="boot-1",
+            root=root, root_device=1, root_inode=2, mount_id="3", mount_device="0:1", filesystem="ext4", magic=0xEF53,
+            state_path=str(c.tmp / "wp1174.json"), witness_path=str(c.tmp / "witness.json"), lock_path=str(c.tmp / "fixed.lock"),
+            initial_state_path=str(c.tmp / "wp1174.json"), legacy_source_path=None, legacy_source_sha256=None,
+            private_seed_path=str(c.tmp / "fixture-seed"), private_seed_sha256=hashlib.sha256(bytes(range(32))).hexdigest(),
+            git_root=root, journal_root=root, g0=5, origin="fresh_init", initial_state_projection={},
+            producer_handoffs=["owner-confirmed-producer-set"], quiescent=True),
+        lineage=dict(predecessor_generation=None, source_path=None, source_sha256=None), operation=None,
+        allowance=dict(window_id="window-1", starts_utc="2000-01-01T00:00:00Z", ends_utc="2099-01-01T00:00:00Z",
+                       attempts_limit=2, review_rounds_limit=7, codex_review_calls_limit=2), expires_utc="2099-01-01T00:00:00Z")
+    projection = dict(schema_version=3, review_rounds_used=0, codex_review_calls_used=0, codex_calls=[], nang_tran=[],
+        review_rounds_limit=7, codex_review_calls_limit=2, packet=1174, mission=1172, executor="codex", reviewer="claude",
+        executor_identity=dict(provider="codex", model_family="openai", execution_surface=None, transport=None),
+        reviewer_identity=dict(provider="claude", model_family="claude", execution_surface=None, transport=None),
+        state="awaiting_lease", lease=None, attempts_used=0, attempts_limit=2, same_failure_limit=3, finding_counts={},
+        attempt_open=False, attempt_anchor=None, reviewing_head_sha=None, accepted_sha=None, reviews=[], posts={}, history=[],
+        state_revision=0, generation=5, enrollment_id="enrollment-1", binding_sha256="a" * 64,
+        adoption=None, scoped_review=None, human_acceptance=None)
+    admission["enrollment"]["initial_state_projection"] = projection
+    return m, registration, admission, datetime.now(timezone.utc)
+
+
+def _resolver1174(c, change=None):
+    import contextlib
+    from types import SimpleNamespace
+    from unittest.mock import patch
+    m, reg, admission, _ = _a1174(c)
+    plan_raw = (json.dumps(dict(mission_id="gh-1172", revision=11, installation_state="proposed_not_installed", state="paused",
+        packet_graph=[dict(packet=1174, revision=7, generation=5, contract_id="target-r7")],
+        routing_history=dict(previous_exception=dict(actual_human_audit_required=True, hard_expiry_utc="2100-01-01T00:00:00Z"))),
+        ensure_ascii=False, indent=2) + "\n").encode()
+    reg["mission_plan_sha256"] = admission["mission_plan_sha256"] = hashlib.sha256(plan_raw).hexdigest()
+    raw = m._1174_bytes(admission)
+    reg["admission_sha256"] = hashlib.sha256(raw).hexdigest()
+    spec = ("# WP1174 r7 — Fixture\nimmutable_acceptance_baseline: " + admission["base"] + "\ncontract_id: target-r7\nmission_plan_sha256: " + reg["mission_plan_sha256"] + "\n" + "\n".join("admission_" + k + ": " + reg["admission_" + k]
+            for k in ("ref", "path", "sha256")) + "\n").encode()
+    reg["spec_sha256"] = hashlib.sha256(spec).hexdigest()
+    sample = c.tmp / "admission.json"
+    sample.write_bytes(raw)
+    response = dict(registration=reg, spec=spec, admission=raw, file=sample, repo=dict(full_name="ducthangho/tra-luat", default_branch="master"),
+                    permission=dict(permission="maintain", user=dict(login="ducthangho")),
+                    mission=dict(id=6710770550, user=dict(login="ducthangho", type="User"), author_association="OWNER",
+                        issue_url="https://api.github.com/repos/ducthangho/tra-luat/issues/1172",
+                        html_url="https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6710770550",
+                        updated_at="2026-01-01T00:00:00Z", performed_via_github_app=dict(slug="chatgpt-codex-connector"),
+                        body="## Mission #1172 — Installed revision 11\n\nPlan SHA256 `" + reg["mission_plan_sha256"] +
+                        "`; JSON đóng băng dưới đây là bản cài r11.\n\n```json\n" + plan_raw.decode() + "```\n"),
+                    owner="ducthangho", transport_failure=False, show_failure=False, no_registration=False)
+    if change:
+        change(response)
+    def github(_label, endpoint):
+        if response["transport_failure"]:
+            raise m.subprocess.TimeoutExpired("fixture github", 1)
+        if endpoint.endswith("/issues/1172/comments?per_page=100&page=1"):
+            return [response["mission"]]
+        if endpoint.endswith("/issues/1174/comments?per_page=100&page=1"):
+            return [] if response["no_registration"] else [dict(id=123456, user=dict(login=response["owner"], type="User"),
+                author_association="OWNER", issue_url="https://api.github.com/repos/ducthangho/tra-luat/issues/1174",
+                html_url="https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-123456",
+                updated_at="2026-01-01T00:00:00Z", body=json.dumps(response["registration"]))]
+        if endpoint.endswith("/permission"):
+            return response["permission"]
+        if endpoint.endswith("/issues/1172"):
+            return response["mission"]
+        if endpoint == "repos/ducthangho/tra-luat":
+            return response["repo"]
+        raise AssertionError("unexpected fixture endpoint " + endpoint)
+    def git(_root, *args):
+        if args[:3] == ("remote", "get-url", "origin"):
+            return 0, b"https://github.com/ducthangho/tra-luat.git\n"
+        if args[0] == "ls-remote":
+            return 0, b"6" * 40 + b"\trefs/heads/master\n"
+        if args[0] == "rev-parse":
+            return 0, b"6" * 40 + b"\n"
+        if args[0] in ("fetch", "check-ref-format"):
+            return 0, b""
+        if args[0] == "show":
+            if response["show_failure"]:
+                return 1, b""
+            path = args[1].split(":", 1)[1]
+            return (0, response["spec"]) if path == "ops/specs/target.md" else (0, response["admission"]) if path == "ops/admission/target.json" else (1, b"")
+        raise AssertionError("unexpected fixture Git call " + repr(args))
+    def scan(_root, **kwargs):
+        assert kwargs == dict(chan_nhanh_tut_sau=True)
+        r = response["registration"]
+        return [] if response["no_registration"] else [dict(ref="refs/remotes/origin/ops/fixture-lease", path="ops/leases/fixture.yaml",
+            blob="7" * 40, lease=dict(lease_id="fixture-lease", packet_issue=r["packet"], revision=r["revision"], generation=r["generation"],
+                spec_ref=r["spec_ref"], spec_path=r["spec_path"], spec_hash=r["spec_sha256"], lease_expires_at_utc=r["expires_utc"]))]
+    def canonical_spec(root, head, path, lease):
+        assert head is None and lease["spec_ref"] == response["registration"]["spec_ref"]
+        blob = git(root, "show", lease["spec_ref"].split("@")[1] + ":" + path)
+        if blob[0] or hashlib.sha256(blob[1]).hexdigest() != lease["spec_hash"]:
+            raise ValueError("WP1174 UNKNOWN: canonical immutable spec unavailable")
+        return blob[1]
+    def verify_lease(args, state):
+        assert args.lease_ref == "origin/ops/fixture-lease" and args.lease_path == "ops/leases/fixture.yaml"
+        records = json.loads(Path(args.lease_comments).read_bytes())
+        if response["owner"] != "ducthangho" or not records:
+            raise ValueError("fixture canonical grant rejected")
+        return dict(lease=dict(lease_id="fixture-lease"))
+    @contextlib.contextmanager
+    def canonical(_):
+        yield c.tmp
+    before = sample.read_bytes()
+    with patch.object(m, "_git_do", git), patch.object(m, "_canon", canonical), patch.object(m, "_spec_merge", canonical_spec), patch.object(
+            m, "_verify_lease_ref", verify_lease), patch.object(m,"_1174_api",side_effect=lambda endpoint,**limits:github("fixture",endpoint)), patch.object(m, "_nap", return_value=SimpleNamespace(_doc_gh=github,
+            _quet_lease_toan_kho=scan, _phan_loai_lease=lambda _: "REVOKED" if response["registration"]["revoked"] else "CÒN_HẠN",
+            _bia_mo_doi_xung=lambda *_: False)):
+        result = m._1174_resolve_snapshot(c.tmp, 1174, 7, 5, sample)
+    assert sample.read_bytes() == before
+    return result
+
+
+def _admission_case1174(kind):
+    def case(c):
+        if kind == "valid":
+            m, reg, admission, now = _a1174(c)
+            assert _call1174(m._1174_registration, reg, 1174, 7, 5, now) == reg
+            assert _call1174(m._1174_admission, m._1174_bytes(admission), reg, now) == admission
+            return
+        m, reg, admission, now = _a1174(c)
+        assert _call1174(m._1174_registration, reg, 1174, 7, 5, now) == reg
+        assert _call1174(m._1174_admission, m._1174_bytes(admission), reg, now) == admission
+        if kind == "wrong_scope":
+            _typed_variants1174(c,m,reg,admission,now)
+            import copy
+            for path, value, reason in (("filesystem", [], "field type enrollment.filesystem"), ("initial_state_path", False, "field type enrollment.initial_state_path"),
+                    ("legacy_source_path", 9, "field type enrollment.legacy_source_path"), ("initial_state_projection", [], "field type enrollment.initial_state_projection"),
+                    ("state_path", str(c.tmp / "other.json"), "journal Packet path"),
+                    ("initial_state_path", str(c.tmp / "other.json"), "fresh lineage sentinel/path equality")):
+                bad = copy.deepcopy(admission)
+                bad["enrollment"][path] = value
+                _reject1174(m._1174_admission, m._1174_bytes(bad), reg, now, reason=reason)
+            for key in ("mission", "packet", "revision", "generation"):
+                bad = copy.deepcopy(admission)
+                bad[key] += 1
+                _reject1174(m._1174_admission, m._1174_bytes(bad), reg, now, reason="admission scope " + key)
+            pinned = admission["enrollment"]["initial_state_projection"]
+            assert _call1174(m._1174_i2_identity, pinned, pinned) == {k: pinned[k] for k in ("executor_identity", "reviewer_identity")}
+            bad = copy.deepcopy(pinned)
+            bad["executor_identity"]["execution_surface"] = "codex_service"
+            _reject1174(m._1174_i2_identity, pinned, bad, reason="journal/grant I2 identity mismatch")
+            return
+        if kind == "candidate_root":
+            _reject1174(_resolver1174,c,lambda response:response["permission"].update(user=dict(login="agent")),reason="owner maintain permission")
+            _reject1174(_resolver1174,c,lambda response:response.update(no_registration=True),reason="no unique current canonical Packet lease/spec")
+            _api_host1174(c,m)
+            from unittest.mock import patch
+            repo = c.tmp / "git-fixture"
+            repo.mkdir()
+            assert subprocess.run(["git", "init", "-q", str(repo)], capture_output=True).returncode == 0
+            _call1174(m._1174_git_view, repo)
+            for name in ("info/grafts", "objects/info/alternates", "objects/info/http-alternates", "shallow"):
+                artifact = repo / ".git" / name
+                artifact.parent.mkdir(parents=True, exist_ok=True)
+                artifact.write_bytes(b"\n")
+                _reject1174(m._1174_git_view, repo, reason="untrusted Git view: " + name)
+                artifact.unlink()
+            blob = subprocess.check_output(["git", "-C", str(repo), "hash-object", "-w", "--stdin"], input=b"fixture").strip().decode()
+            assert subprocess.run(["git", "-C", str(repo), "update-ref", "refs/replace/" + "a" * 40, blob], capture_output=True).returncode == 0
+            _reject1174(m._1174_git_view, repo, reason="untrusted Git view: replace refs")
+            selectors = ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+                         "GIT_REPLACE_REF_BASE", "GIT_CONFIG_COUNT", "GIT_CONFIG_KEY_0", "GIT_CONFIG_VALUE_0", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_SYSTEM", "GIT_CONFIG_NOSYSTEM", "GIT_CONFIG_PARAMETERS", "GIT_CONFIG_FUTURE_SELECTOR")
+            for selector in selectors:
+                with patch.dict(os.environ, {selector: "hostile-fixture"}):
+                    assert selector not in m._1174_git_env() and os.environ[selector] == "hostile-fixture"
+            return
+        def descriptor(key, value):
+            def change(response):
+                previous = response["registration"]["admission_" + key]
+                response["spec"] = response["spec"].replace(("admission_" + key + ": " + previous).encode(),
+                                                           ("admission_" + key + ": " + value).encode())
+                response["registration"]["spec_sha256"] = hashlib.sha256(response["spec"]).hexdigest()
+            return change
+        def scope(key, value):
+            def change(response):
+                altered = json.loads(response["admission"])
+                altered[key] = value
+                response["admission"] = m._1174_bytes(altered)
+                response["file"].write_bytes(response["admission"])
+                descriptor("sha256", hashlib.sha256(response["admission"]).hexdigest())(response)
+            return change
+        if kind=="file_bytes":
+            valid,facts=_call1174(_resolver1174,c)
+            assert valid["packet"]==1174 and facts["lease_id"]=="fixture-lease" and facts["canonical_oid"]=="6"*40
+        changes = {
+            "file_bytes": [lambda x: x["file"].write_bytes(x["admission"] + b"\n")],
+            "oid_path_hash": [descriptor("sha256", "0" * 64), descriptor("ref", "refs/heads/frozen@bad"),
+                              descriptor("path", "../elsewhere"),scope("base","0"*40)],
+            "expired_revoked": [lambda x: x["registration"].update(revoked=True),
+                                lambda x: x["registration"].update(expires_utc="2000-01-01T00:00:00Z")],
+            "candidate_root": [lambda x: x.update(owner="agent"), lambda x: x.update(no_registration=True)],
+            "wrong_scope": [scope("mission", 1173), scope("packet", 1173), scope("revision", 6), scope("generation", 4)],
+            "unresolved": [lambda x: x.update(transport_failure=True), lambda x: x.update(show_failure=True),
+                           lambda x: x["mission"].update(body="{}")],
+        }
+        for change in changes[kind]:
+            if kind == "unresolved" and change is changes[kind][0]:
+                try:
+                    _resolver1174(c, change)
+                except subprocess.TimeoutExpired:
+                    pass
+                else:
+                    assert False, "transport failure disappeared"
+            else:
+                _reject1174(_resolver1174, c, change,reason="spec baseline binding" if kind=="oid_path_hash" and change is changes[kind][-1] else None)
+    return case
+
+
+def _source1174(kind):
+    def case(c):
+        import copy
+        m, _, admission, _ = _a1174(c)
+        witness, p = _w1174(c, initialized=True)
+        state = dict(schema_version=3, packet=1174, mission=1172, generation=1, state_revision=0,
+                     attempts_used=7, codex_review_calls_used=4, history=[dict(event="preserved")])
+        raw = m._1174_bytes(state)
+        source = str(c.tmp / "active.json")
+        admission["lineage"] = dict(predecessor_generation=1, source_path=source, source_sha256=hashlib.sha256(raw).hexdigest())
+        admission["enrollment"]["initial_state_path"] = source
+        witness["high_water"]["state_sha256"] = hashlib.sha256(raw).hexdigest()
+        assert _call1174(m._1174_source_binding, witness, admission, source, raw) == state
+        if kind == "active_positive":
+            return
+        original = copy.deepcopy((witness, admission))
+        if kind in ("backup", "ahead"):
+            changed = m._1174_bytes(dict(state, state_revision=1 if kind == "ahead" else 0, attempts_used=8 if kind == "ahead" else 6))
+            admission["lineage"]["source_sha256"] = hashlib.sha256(changed).hexdigest()
+            _reject1174(m._1174_source_binding, witness, admission, source, changed)
+        elif kind == "foreign_path":
+            other = str(c.tmp / "backup.json")
+            admission["lineage"]["source_path"] = other
+            _reject1174(m._1174_source_binding, witness, admission, other, raw)
+        elif kind == "generation_revision":
+            for key, value in (("generation", 2), ("generation", True), ("state_revision", 1), ("state_revision", False)):
+                changed = m._1174_bytes(dict(state, **{key: value}))
+                digest = hashlib.sha256(changed).hexdigest()
+                admission["lineage"]["source_sha256"] = witness["high_water"]["state_sha256"] = digest
+                _reject1174(m._1174_source_binding, witness, admission, source, changed)
+        elif kind == "legacy_branch":
+            legacy = m._1174_bytes(dict(state, schema_version=2))
+            digest = hashlib.sha256(legacy).hexdigest()
+            admission["lineage"].update(source_sha256=digest, predecessor_generation=5)
+            admission["enrollment"].update(origin="imported_lineage", legacy_source_path=source, legacy_source_sha256=digest)
+            assert _call1174(m._1174_source_binding, None, admission, source, legacy)["attempts_used"] == 7
+            admission["lineage"]["source_sha256"]=admission["enrollment"]["legacy_source_sha256"]=hashlib.sha256(raw).hexdigest()
+            _reject1174(m._1174_source_binding, None, admission, source, raw,reason="legacy source v2 identity")
+            admission["lineage"]["source_sha256"]=admission["enrollment"]["legacy_source_sha256"]=digest
+            admission["enrollment"]["legacy_source_path"] = str(c.tmp / "foreign")
+            _reject1174(m._1174_source_binding, None, admission, source, legacy)
+        else:
+            raise AssertionError("unknown source case")
+        assert witness["witness_revision"] == original[0]["witness_revision"]
+    return case
+
+
+def _tombstone1174(c):
+    m = _module1174(c)
+    raw = _call1174(m._1174_tombstone, 55, 1, 2, "adopt-2", "c" * 64, "b" * 64)
+    expected = (b'{"adoption_id":"adopt-2","binding_sha256":"' + b"b" * 64 +
+                b'","format":"packet_state_retired.v1","from_generation":1,"packet_id":55,"source_sha256":"' +
+                b"c" * 64 + b'","to_generation":2}\n')
+    assert raw == expected
+    for values in ((True, 1, 2, "a", "c" * 64, "b" * 64), (55, True, 2, "a", "c" * 64, "b" * 64),
+                   (55, 1, 1, "a", "c" * 64, "b" * 64), (55, 1, 2, "a\n", "c" * 64, "b" * 64)):
+        _reject1174(m._1174_tombstone, *values)
+    commands = {"init": ["--mission", 54, "--executor", "claude", "--reviewer", "codex"],
+        "record-lease": [], "begin-attempt": ["--provider", "claude"],
+        "void-attempt": ["--reason", "quota"], "record-review": ["--provider", "codex", "--verdict", "approve"],
+        "transition": ["--to", "reviewing"], "record-codex-call": ["--run-id", "run-1", "--head", HEAD_HOP_LE],
+        "nang-tran": ["--truc", "vong_review", "--tran-moi", 9, "--ai-nang", "ducthangho", "--can-cu", "test"],
+        "record-rescue": ["--quyet-dinh", "dung", "--can-cu", "test"],
+        "record-post": ["--comment-id", "123456", "--for", "running->reviewing"],
+        "accept": ["--pr", 1, "--workflow-runs", "missing", "--workflow-jobs", "missing", "--check-runs", "missing", "--connector", "missing"],
+        "mo-lai": ["--pr", 1, "--nguyen-nhan", "connector", "--bien-nhan", "missing", "--connector", "missing"],
+        "chu-kho-duyet": ["--checkpoint-path", "ops/checkpoints/x.yaml"]}
+    for name, args in commands.items():
+        sd = c.sd()
+        state = sd / "wp55.json"
+        state.write_bytes(expected)
+        target = sd / "target-fixture"
+        target.write_bytes(b"target-unchanged\n")
+        rc, _, err = run(c.script, [name, "--packet", 55, *args], sd)
+        assert rc == 8 and state.read_bytes() == expected and target.read_bytes() == b"target-unchanged\n", (name, rc, err)
+        assert not b"Traceback" in err, (name, err)
+        if name != "init":
+            assert "state retired: packet_state_retired.v1; reconciliation required" in err.decode("utf-8"), (name, err)
+    baseline_dir=c.tmp/"base27-reader";baseline_dir.mkdir()
+    baseline=baseline_dir/"packet_loop.py"
+    raw_base=subprocess.run(["git","--no-replace-objects","-C",str(ROOT),"show","27fd80803e9a8f80e660752f58c8dd477e9730c8:.claude/dev/packet_loop.py"],capture_output=True,timeout=30)
+    assert raw_base.returncode==0 and raw_base.stdout,"base27 immutable reader unavailable"
+    baseline.write_bytes(raw_base.stdout)
+    (baseline_dir/"launcher.py").write_bytes((HERE/"launcher.py").read_bytes())
+    observations={}
+    for name,args in commands.items():
+        sd=c.sd();old=sd/"wp55.json";old.write_bytes(expected);target=sd/"target";target.write_bytes(b"unchanged\n")
+        rc,_,err=run(baseline,[name,"--packet",55,*args],sd)
+        assert rc==8 and old.read_bytes()==expected and target.read_bytes()==b"unchanged\n",(name,rc,err)
+        assert b"Traceback" not in err
+        if name!="init":assert b"reviewer" in err,(name,err)
+        observations[name]=dict(actual_rc=rc,reason=err.decode("utf-8"),schema_version_coverage=False)
+    (c.tmp/"base27-reader-outcomes.json").write_text(json.dumps(observations,ensure_ascii=False,indent=2)+"\n")
+
+
+def _legacy_cli1174(c):
+    sd = c.sd()
+    rc, out, err = run(c.script, ["init", "--packet", 55, "--mission", 54, "--executor", "claude", "--reviewer", "codex"], sd)
+    assert rc == 0, (rc, out, err)
+    st = json.loads((sd / "wp55.json").read_bytes())
+    assert st["schema_version"] == 2 and st["state"] == "awaiting_lease" and st["attempts_used"] == 0
+    other = c.sd()
+    rc, _, _ = run(c.script, ["init", "--packet", 55, "--mission", 54, "--executor", "codex", "--reviewer", "codex"], other)
+    assert rc == 4 and not (other / "wp55.json").exists()
+
+
+def _legacy1174(c):
+    m = _module1174(c)
+    assert _call1174(m._identity, "codex", "openai", "codex_service", "machine") == dict(
+        provider="codex", model_family="openai", execution_surface="codex_service", transport="machine")
+    assert "reviewing" in m.CHUYEN_HOP_LE["running"] and "accepted" not in m.CHUYEN_HOP_LE["awaiting_lease"]
+
+
+def _init_fixture1174(c):
+    m, _, admission, _ = _a1174(c)
+    seed = Path(admission["enrollment"]["private_seed_path"])
+    seed.write_bytes(bytes(range(32)))
+    seed.chmod(0o600)
+    args = m.build_parser().parse_args(["init", "--packet", "1174", "--mission", "1172", "--executor", "codex", "--reviewer", "claude",
+        "--expected-revision", "absent"])
+    return m, admission, args
+
+
+def _init_case1174(kind):
+    def case(c):
+        from unittest.mock import patch
+        m, admission, args = _init_fixture1174(c)
+        e = admission["enrollment"]
+        target, witness = Path(e["state_path"]), Path(e["witness_path"])
+        initial = m._1174_initial(admission)
+        reserved = m._1174_bytes(m._1174_reserved(e["id"], e["binding_sha256"], e["g0"]))
+        if kind.startswith("resume"):
+            args.mode, args.expected_revision, args.expected_witness_revision = "resume-initialization", None, "0"
+            witness.write_bytes(reserved)
+            if kind == "resume_full":
+                target.write_bytes(initial)
+            elif kind == "resume_mismatch":
+                target.write_bytes(initial + b"\n")
+        if kind == "preflight":
+            _seed_variants1174(c,m,admission,args)
+            _closed_errors1174(c, m)
+            _legacy_cli1174(c)
+            _reject1174(_resolver1174, c, lambda response: response.update(no_registration=True),
+                        reason="no unique current canonical Packet lease/spec")
+            seed = Path(e["private_seed_path"])
+            original = seed.read_bytes()
+            for raw in (b"wrong" * 6 + b"!!", b"x" * 32):
+                seed.write_bytes(raw)
+                _reject1174(m._1174_initial, admission, reason="private seed fingerprint")
+                assert not target.exists() and not witness.exists()
+            seed.write_bytes(original)
+            hardlink = c.tmp / "seed-link"
+            os.link(seed, hardlink)
+            _reject1174(m._1174_initial, admission, reason="private seed ownership/mode/nlink")
+            hardlink.unlink()
+            assert m._1174_initial(admission) == initial
+            assert original.hex().encode() not in m._1174_bytes(admission) and json.loads(initial)["hmac_key"].encode() not in m._1174_bytes(admission)
+            assert m._1174_derive_key(bytes(range(32)), "fixture-enrollment-1", "0" * 64, 1174, 1) == "351b0edc1ae29dc21565456cf6dd68b5cea6c63c7d0efd9b208318b77df11e5e"
+            target.write_bytes(b"foreign\n")
+        entry = {path: path.read_bytes() if path.exists() else None for path in (target, witness)}
+        before = set(c.tmp.iterdir())
+        with patch.object(m, "_1174_probe", return_value=dict(profile="fixture_only")) as probe:
+            if kind in ("preflight", "resume_mismatch"):
+                _reject1174(m._1174_initialize, args, admission, entry[witness])
+                assert not probe.called
+                assert set(c.tmp.iterdir()) == before
+                assert all((path.read_bytes() if path.exists() else None) == raw for path, raw in entry.items())
+                return
+            assert _call1174(m._1174_initialize, args, admission, entry[witness]) == "completed_no_dispatch"
+        assert target.read_bytes() == initial
+        w = json.loads(witness.read_bytes())
+        assert w["phase"] == "initialized" and w["witness_revision"] == 1 and w["pending_adoption"] is None
+        assert w["high_water"] == dict(generation=5, state_revision=0, state_sha256=hashlib.sha256(initial).hexdigest())
+        _call1174(m._1174_pair, admission, w, initial)
+    return case
+
+
+def _ordinary_pair1174(c):
+    _expiry_after_reservation1174(c)
+    from unittest.mock import patch
+    m, admission, args = _init_fixture1174(c)
+    e = admission["enrollment"]
+    with patch.object(m, "_1174_probe", return_value={}):
+        assert _call1174(m._1174_initialize, args, admission, None) == "completed_no_dispatch"
+    target, witness = Path(e["state_path"]), Path(e["witness_path"])
+    args = m.build_parser().parse_args(["record-post", "--packet", "1174", "--for", "running->reviewing", "--comment-id", "123456", "--expected-revision", "0"])
+    args.fn = m.cmd_record_post
+    with patch.object(m, "_1174_probe", return_value={}):
+        assert _call1174(m._1174_ordinary, args, c.tmp.resolve(), admission, witness.read_bytes()) == "completed_no_dispatch"
+    state = json.loads(target.read_bytes())
+    assert state["state_revision"] == 1 and state["posts"]["123456"] == dict(consumed_by=None, **{"for": "running->reviewing"})
+    original = (target.read_bytes(), witness.read_bytes())
+    with patch.object(m, "_1174_probe", return_value={}):
+        _reject1174(m._1174_ordinary, args, c.tmp.resolve(), admission, witness.read_bytes())
+    assert (target.read_bytes(), witness.read_bytes()) == original
+    # An ordinary cutpoint with state ahead is terminal UNKNOWN; no laundering.
+    target.write_bytes(m._1174_bytes(dict(state, state_revision=2)))
+    args.expected_revision = "2"
+    with patch.object(m, "_1174_probe", return_value={}) as probe:
+        _reject1174(m._1174_ordinary, args, c.tmp.resolve(), admission, witness.read_bytes())
+        assert not probe.called
+    assert witness.read_bytes() == original[1] and json.loads(target.read_bytes())["state_revision"] == 2
+
+
+def _closed_errors1174(c, m):
+    import contextlib
+    import io
+    from unittest.mock import patch
+    arguments = ["init", "--packet", "1174", "--mission", "1172", "--executor", "codex", "--reviewer", "claude",
+                 "--admission", "fixture", "--revision", "7", "--generation", "5", "--coordinator-id", "coordinator-1",
+                 "--root", str(c.tmp.resolve()), "--expected-revision", "absent"]
+    class Chan(Exception):
+        pass
+    before = {p: p.read_bytes() for p in c.tmp.rglob("*") if p.is_file()}
+    for error in (Chan("authority unavailable"), subprocess.TimeoutExpired("fixture", 1), SystemExit(8),
+                  OSError("read failed"), IndexError("mount parse"), ValueError("revision_rejected")):
+        stdout = io.StringIO()
+        with patch.object(m, "_1174_IMPLEMENTATION_COMPLETE", True), patch.object(m, "_1174_resolve", side_effect=error), contextlib.redirect_stdout(stdout):
+            rc = m.main(arguments)
+        rows = stdout.getvalue().splitlines()
+        assert rc == 8 and len(rows) == 1
+        result = json.loads(rows[0])
+        assert result["status"] == ("revision_rejected" if isinstance(error, ValueError) else "UNKNOWN") and result["dispatch_allowed"] is False
+    for flags in (["--expected-revision", "0"], ["--admission", "fixture", "--revision", "wrong"],
+                  ["--admission", "fixture", "--expected-revision", "absent", "--expected-witness-revision", "0"]):
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(io.StringIO()):
+            rc = m.main(["init", "--packet", "1174", "--mission", "1172", "--executor", "codex", "--reviewer", "claude", *flags])
+        assert rc == 2 and len(stdout.getvalue().splitlines()) == 1 and json.loads(stdout.getvalue())["status"] == "input_rejected"
+    assert {p: p.read_bytes() for p in c.tmp.rglob("*") if p.is_file()} == before
+
+
+def _adopt_fixture1174(c):
+    m, admission, _ = _init_fixture1174(c)
+    e = admission["enrollment"]
+    source = Path(e["state_path"])
+    state = json.loads(m._1174_initial(admission))
+    for key in ("state_revision", "generation", "enrollment_id", "binding_sha256", "adoption", "scoped_review", "human_acceptance"):
+        del state[key]
+    state["schema_version"] = 2
+    source.write_bytes(m._1174_bytes(state))
+    journal = c.tmp / "generation-6"
+    journal.mkdir()
+    e.update(origin="imported_lineage", journal_root=str(journal), state_path=str(journal / "wp1174.json"),
+             legacy_source_path=str(source), legacy_source_sha256=hashlib.sha256(source.read_bytes()).hexdigest())
+    admission.update(generation=6, lineage=dict(predecessor_generation=5, source_path=str(source), source_sha256=e["legacy_source_sha256"]))
+    admission["operation"] = dict(adoption_id="adopt-6", generation=6, binding_sha256="b" * 64,
+        canonical_path=e["state_path"], source_sha256=e["legacy_source_sha256"], cutover_started=False)
+    args = m.build_parser().parse_args(["adopt-state", "--packet", "1174", "--mode", "initial", "--adoption-id", "adopt-6", "--expected-source-sha256",
+        e["legacy_source_sha256"], "--expected-witness-revision", "absent", "--target-generation", "6"])
+    return m, admission, args
+
+
+def _adopt_case1174(kind):
+    def case(c):
+        import copy
+        from unittest.mock import patch
+        if kind=="intent_cutover":_adoption_crashes1174(c)
+        if kind=="abandon_cutover":_abandon_crashes1174(c)
+        m, admission, args = _adopt_fixture1174(c)
+        e = admission["enrollment"]
+        target, source, witness = (Path(e[k]) for k in ("state_path", "legacy_source_path", "witness_path"))
+        source_bytes = source.read_bytes()
+        def snapshot():
+            return {p: p.read_bytes() for p in c.tmp.rglob("*") if p.is_file()}
+        def invoke(cut=None):
+            count = 0
+            writer = m._1174_write
+            def write(path, raw, **kwargs):
+                nonlocal count
+                count += 1
+                if count == cut:
+                    raise OSError("injected adoption cutpoint")
+                writer(path, raw, **kwargs)
+            with patch.object(m, "_1174_probe", return_value={}), patch.object(m, "_1174_write", write):
+                return m._1174_adopt(args, admission, witness.read_bytes() if witness.exists() else None)
+        def recover(disposition="resume_forward"):
+            args.mode, args.adoption_id, args.disposition = "recovery", admission["operation"]["adoption_id"], disposition
+            args.expected_source_sha256, args.target_generation = None, None
+            args.expected_witness_revision = str(json.loads(witness.read_bytes())["witness_revision"])
+        if kind in ("entry_preflight", "fresh_reserved_adopt"):
+            if kind == "entry_preflight":
+                target.write_bytes(b"foreign")
+            else:
+                witness.write_bytes(m._1174_bytes(m._1174_reserved(e["id"], e["binding_sha256"], 5)))
+                args.expected_witness_revision = "0"
+            before = snapshot()
+            _reject1174(invoke, reason="initial adoption target" if kind == "entry_preflight" else "legacy retry branch")
+            assert snapshot() == before
+            return
+        cut = {"import_first": 2, "resume_no_target": 2, "intent_cutover": 5, "source_recovery_snapshot": 6,
+               "abandon_prepare": 2, "abandon_cutover": 3, "retry": 3, "finalize_replay": 7}.get(kind)
+        if cut is not None:
+            try:
+                try:invoke(cut)
+                except ValueError as ex:
+                    assert not str(ex).startswith("WP1174 UNKNOWN:"),"valid adoption rejected before cutpoint: "+str(ex)
+                    raise
+            except OSError as error:
+                assert "injected adoption cutpoint" in str(error)
+            else:
+                assert False, "adoption cutpoint was not reached"
+            w = json.loads(witness.read_bytes())
+            assert w["pending_adoption"]["adoption_id"] == "adopt-6"
+            if kind in ("import_first", "resume_no_target", "abandon_prepare"):
+                assert not target.exists() and w["origin"] == "imported_lineage" and w["witness_revision"] == 0
+            if kind == "intent_cutover":
+                assert w["pending_adoption"]["cutover_started"] is True and json.loads(target.read_bytes())["adoption"]["cutover_started"] is True
+                assert source.read_bytes() == source_bytes
+            if kind == "source_recovery_snapshot":
+                assert json.loads(source.read_bytes()).get("format") == "packet_state_retired.v1"
+                assert json.loads(target.read_bytes())["adoption"]["payload"]["source_snapshot"].encode() == source_bytes
+            recover("abandon_before_prepare" if kind == "abandon_prepare" else "abandon_before_cutover" if kind in ("abandon_cutover", "retry") else "resume_forward")
+        assert _call1174(invoke) == "completed_no_dispatch"
+        w = json.loads(witness.read_bytes())
+        assert w["pending_adoption"] is None and len(w["history"]) == 1
+        if kind in ("abandon_prepare", "abandon_cutover", "retry"):
+            assert w["suspended"] and source.read_bytes() == source_bytes
+            assert (not target.exists()) if kind == "abandon_prepare" else json.loads(target.read_bytes())["adoption"]["phase"] == "aborted"
+        else:
+            state = _call1174(m._1174_pair, admission, w, target.read_bytes())
+            assert state["attempts_used"] == 0 and state["adoption"]["phase"] == "adopted"
+            _call1174(m._1174_tripwire, state)
+        recover(args.disposition or "resume_forward")
+        before = snapshot()
+        assert _call1174(invoke) == "already_completed_no_dispatch" and snapshot() == before
+        if kind=="finalize_replay":
+            terminal_witness=witness.read_bytes();advanced=json.loads(terminal_witness)
+            future=dict(adoption_id="future-7",generation=7,binding_sha256="e"*64,canonical_path=str(c.tmp/"future-target.json"))
+            advanced["history"].append(_node1174(future,"aborted_intent"));advanced.update(suspended=True,witness_revision=advanced["witness_revision"]+1)
+            witness.write_bytes(m._1174_bytes(advanced));args.expected_witness_revision=str(advanced["witness_revision"])
+            before=snapshot();_reject1174(invoke,reason="terminal replay lineage advanced");assert snapshot()==before
+            witness.write_bytes(terminal_witness);args.expected_witness_revision=str(json.loads(terminal_witness)["witness_revision"])
+        if kind == "retry":
+            old_target = target.read_bytes()
+            newroot = c.tmp / "generation-7"
+            newroot.mkdir()
+            e.update(journal_root=str(newroot), state_path=str(newroot / "wp1174.json"))
+            admission["generation"] = 7
+            admission["operation"].update(generation=7, adoption_id="adopt-7", canonical_path=e["state_path"])
+            args.mode, args.disposition, args.adoption_id = "initial", None, "adopt-7"
+            args.expected_source_sha256, args.target_generation = admission["lineage"]["source_sha256"], 7
+            assert _call1174(invoke) == "completed_no_dispatch"
+            assert target.read_bytes() == old_target and len(json.loads(witness.read_bytes())["history"]) == 2
+    return case
+
+
+def _publish1174(c):
+    from unittest.mock import patch
+    m = _module1174(c)
+    target = c.tmp / "race-target"
+    link = m.os.link
+    def racer(temporary, final, **kwargs):
+        target.write_bytes(b"other-writer\n")
+        return link(temporary, final, **kwargs)
+    with patch.object(m.os, "link", racer):
+        try:
+            m._1174_persist(target, b"new-image\n", create=True)
+        except FileExistsError:
+            pass
+        else:
+            assert False, "atomic no-replace lost EEXIST race"
+    assert target.read_bytes() == b"other-writer\n"
+    child = '''import importlib.util,os,pathlib,sys
+script,root,cut=sys.argv[1:]; sys.path.insert(0,str(pathlib.Path(script).parent))
+spec=importlib.util.spec_from_file_location("kill_product",script); m=importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+link=m.os.link
+def cut_link(*args,**kwargs):
+    if cut=="before": os._exit(91)
+    link(*args,**kwargs)
+    os._exit(92)
+m.os.link=cut_link
+m._1174_persist(pathlib.Path(root)/"final",b"complete-image\\n",create=True)
+'''
+    for cut, expected_rc in (("before", 91), ("after", 92)):
+        directory = c.tmp / cut
+        directory.mkdir()
+        result = subprocess.run([sys.executable, "-B", "-c", child, str(c.script), str(directory), cut], capture_output=True, timeout=15)
+        assert result.returncode == expected_rc and not result.stdout and not result.stderr, (result.returncode, result.stderr)
+        final = directory / "final"
+        assert (not final.exists()) if cut == "before" else final.read_bytes() == b"complete-image\n"
+        # Process termination measures the visible prefix, not power-loss durability.
+
+
+def _cached1174(c):
+    from unittest.mock import patch
+    m, admission, args = _adopt_fixture1174(c)
+    e = admission["enrollment"]
+    source, target, witness = (Path(e[k]) for k in ("legacy_source_path", "state_path", "witness_path"))
+    cached = json.loads(source.read_bytes())
+    e["quiescent"] = False
+    before = {p: p.read_bytes() for p in c.tmp.rglob("*") if p.is_file()}
+    _reject1174(m._1174_adopt, args, admission, None, reason="adoption authority/quiescence")
+    assert {p: p.read_bytes() for p in c.tmp.rglob("*") if p.is_file()} == before
+    e["quiescent"] = True
+    with patch.object(m, "_1174_probe", return_value={}):
+        assert _call1174(m._1174_adopt, args, admission, None) == "completed_no_dispatch"
+    pair = target.read_bytes(), witness.read_bytes()
+    m._save(source.parent, cached)
+    assert json.loads(source.read_bytes())["schema_version"] == 2, "cached private writer was not exercised"
+    ordinary = m.build_parser().parse_args(["record-post", "--packet", "1174", "--for", "running->reviewing",
+                                           "--comment-id", "123456", "--expected-revision", "2"])
+    _reject1174(m._1174_ordinary, ordinary, Path(e["journal_root"]), admission, witness.read_bytes(), reason="legacy_changed")
+    assert (target.read_bytes(), witness.read_bytes()) == pair
+
+
+def _windows1174(c):
+    m = _module1174(c)
+    assert _call1174(m._1174_platform, "Linux", "ext4", 0xEF53) is True
+    assert _call1174(m._1174_platform, "Windows", "ext4", 0xEF53) is False
+    assert _call1174(m._1174_platform, "Windows", "NTFS", 0x5346544E) is False
+    # Pure unit mutant, scoped to this case; never added to Linux MUTANTS.
+    source = c.script.read_text(encoding="utf-8")
+    anchor = 'return os_name == "Linux" and (fs_name, magic) in (("ext4", 0xEF53), ("xfs", 0x58465342))'
+    assert source.count(anchor) == 1
+    mutated = source.replace(anchor, 'return (fs_name, magic) in (("ext4", 0xEF53), ("xfs", 0x58465342))', 1)
+    product = c.tmp / "windows-mutant.py"
+    product.write_text(mutated, encoding="utf-8", newline="\n")
+    mutant = _module1174(Ctx(product, c.tmp))
+    assert _call1174(mutant._1174_platform, "Linux", "ext4", 0xEF53) is True
+    killed = 0
+    try:
+        assert mutant._1174_platform("Windows", "ext4", 0xEF53) is False
+    except AssertionError:
+        killed = 1
+    assert killed == 1
+    if platform.system() != "Windows":
+        return
+    sd = c.sd()
+    state = sd / "wp1174.json"
+    state.write_bytes(b"unchanged legacy sentinel\n")
+    payload = c.tmp / "untrusted-admission.json"
+    payload.write_bytes(b"not authority\n")
+    entry = state.read_bytes(), payload.read_bytes()
+    rc, out, err = run(c.script, ["init", "--packet", 1174, "--mission", 1172, "--executor", "codex", "--reviewer", "codex",
+        "--admission", str(payload), "--revision", 7, "--generation", 5, "--coordinator-id", "fixture-coordinator",
+        "--expected-revision", "absent", "--root", str(c.tmp.resolve())], sd)
+    result = json.loads(out)
+    assert rc == 8 and result["status"] == "UNKNOWN" and result["dispatch_allowed"] is False, (rc, out, err)
+    assert entry == (state.read_bytes(), payload.read_bytes()) and sorted(p.name for p in sd.iterdir()) == ["wp1174.json"]
+    root = c.script.parents[2]
+    head = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
+    tree = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD^{tree}"], text=True).strip()
+    print("WP1174_WINDOWS_ORACLE_V1 " + json.dumps(dict(schema="wp1174_windows_oracle.v1", head=head, tree=tree,
+        actual_os="Windows", original_module_sha256=hashlib.sha256(c.script.read_bytes()).hexdigest(),
+        mutated_module_sha256=hashlib.sha256(product.read_bytes()).hexdigest(), mutation_id="m1174_allow_windows",
+        kind="pure_platform_guard", executed=1, killed_by_assertion=killed, positive_control="passed",
+        real_cli_rejection_rc=rc, unchanged=True, no_dispatch=True), sort_keys=True))
+
+
+def _required1174(outcomes, required):
+    return (type(outcomes) is dict and type(required) is set and set(outcomes) == required and
+            all(value is None for value in outcomes.values()))
+
+
+def _required_case1174(c):
+    required = {"wp1174_profile_native_linux", "wp1174_admission_valid"}
+    positive = {name: None for name in required}
+    assert _required1174(positive, required) is True
+    from unittest.mock import patch
+    def wrong_reason():
+        raise ValueError("WP1174 UNKNOWN: unrelated rejection")
+    try:
+        _reject1174(wrong_reason, reason="expected witness rejection")
+    except AssertionError:
+        pass
+    else:
+        assert False, "wrong rejection reason earned oracle credit"
+    def wrapped_crash(_):
+        try:
+            raise CliSapDo("fixture crash marker")
+        except CliSapDo as error:
+            raise AssertionError("wrapped crashing product") from error
+    with patch.dict(globals(), CASES=[("wp1174_wrapped_crash_probe", wrapped_crash)]):
+        outcomes = chay_suite(c.script, c.tmp / "crash-chain")
+    assert _phan_loai_giet(outcomes["wp1174_wrapped_crash_probe"]) == "TIN_DUNG_GIA"
+    for result in (BoQua("required capability unavailable"), AssertionError("bad bytes"),
+                   CliSapDo("infra"), OSError("fsync failed"), "passed", False, 0):
+        assert _required1174(dict(positive, wp1174_profile_native_linux=result), required) is False
+    assert _required1174({"wp1174_admission_valid": None}, required) is False
+    assert _required1174(dict(positive, extra=None), required) is False
+    assert _required1174({"wrong": None, "wp1174_admission_valid": None}, required) is False
+    assert _required1174(positive, list(required)) is False
+    assert _required1174(positive, required) is True
+
+
+CASES += [("wp1174_witness_" + name, _case_w1174(name)) for name in
+          ("valid", "keyset", "int_bool", "enum_hash", "json_bytes", "fresh_reserved", "import_retry", "suspended", "active_pending")]
+CASES += [("wp1174_status_closed", _status1174), ("wp1174_profile_unsupported", _unsupported1174),
+          ("wp1174_profile_native_linux", _native1174), ("wp1174_durability_fsync_readback", _durability1174),
+          ("wp1174_adopt_postimage_all", _postimage1174)]
+CASES += [("wp1174_admission_" + name, _admission_case1174(name)) for name in
+          ("valid", "file_bytes", "oid_path_hash", "expired_revoked", "candidate_root", "wrong_scope", "unresolved")]
+CASES += [("wp1174_source_" + name, _source1174(name)) for name in
+          ("active_positive", "backup", "ahead", "foreign_path", "generation_revision", "legacy_branch")]
+CASES.append(("wp1174_durability_legacy_tombstone", _tombstone1174))
+CASES += [("wp1174_lifecycle_legacy_unchanged", _legacy1174), ("wp1174_windows_claim_rejected", _windows1174)]
+CASES += [("wp1174_init_" + name, _init_case1174(name)) for name in ("fresh", "preflight", "resume_absent", "resume_full", "resume_mismatch")]
+CASES.append(("wp1174_durability_ordinary_pair", _ordinary_pair1174))
+CASES.append(("wp1174_gate_required_skip", _required_case1174))
+CASES += [("wp1174_adopt_" + name, _adopt_case1174(name)) for name in ("entry_preflight", "import_first", "resume_no_target",
+          "intent_cutover", "abandon_prepare", "abandon_cutover", "retry", "finalize_replay", "fresh_reserved_adopt")]
+CASES.append(("wp1174_source_recovery_snapshot", _adopt_case1174("source_recovery_snapshot")))
+CASES += [("wp1174_durability_publish_noreplace", _publish1174), ("wp1174_durability_cached_writer", _cached1174)]
+MUTANTS.update({
+    "m1174_drop_witness_keyset": ('set(w) == _W1174_KEYS', 'True', ["wp1174_witness_keyset"]),
+    "m1174_drop_witness_int_bool": ('return type(value) is int and value >= 0', 'return isinstance(value, (int, float)) and value >= 0', ["wp1174_witness_int_bool"]),
+    "m1174_drop_witness_json_bytes": ('_1174_bytes(value) == raw, "noncanonical JSON bytes"', 'True, "noncanonical JSON bytes"', ["wp1174_witness_json_bytes"]),
+    "m1174_allow_unsupported": ('return os_name == "Linux" and (fs_name, magic) in (("ext4", 0xEF53), ("xfs", 0x58465342))', 'return os_name == "Linux"', ["wp1174_profile_unsupported"]),
+    "m1174_unknown_status_zero": ('status in success | rejected | {"input_rejected", "quota_exhausted"}', 'True', ["wp1174_status_closed"]),
+    "m1174_gate_required_skip": ('\n            all(value is None for value in outcomes.values()))\n', '\n            True)\n', ["wp1174_gate_required_skip"]),
+    "m1174_ignore_seed_fingerprint": ('len(raw) == 32 and hashlib.sha256(raw).hexdigest() == e["private_seed_sha256"]', 'len(raw) == 32', ["wp1174_init_preflight"]),
+    "m1174_ignore_seed_fingerprint_nlink": ('before.st_nlink == 1, "private seed ownership/mode/nlink"', 'True, "private seed ownership/mode/nlink"', ["wp1174_init_preflight"]),
+    "m1174_derive_schema_from_input": ('_1174_CORE <= set(state) <= _1174_CORE | set(_1174_OPTIONAL)', 'set(state) == set(state)', ["wp1174_witness_keyset"]),
+    "m1174_ignore_i2_identity": ('all(identities[k] == pinned[k] for k in keys)', 'True', ["wp1174_admission_wrong_scope"]),
+    "m1174_catchall_success": ('return _1174_emit(status, detail)', 'return _1174_emit("completed_no_dispatch", detail)', ["wp1174_init_preflight"]),
+    "m1174_credit_wrong_reason": ('if reason is not None:\n            assert reason in str(error), (reason, str(error))', 'if reason is not None:\n            pass', ["wp1174_gate_required_skip"]),
+    "m1174_credit_wrapped_crash": ('if ten.startswith("wp1174_"):\n                ket[ten] = ex if isinstance(ex, AssertionError) and not _co_sap_do(ex)', 'if ten.startswith("wp1174_"):\n                ket[ten] = ex if isinstance(ex, AssertionError)', ["wp1174_gate_required_skip"]),
+    "m1174_allow_fresh_path_inequality": ('e["state_path"] == e["initial_state_path"], "fresh lineage sentinel/path equality"', 'True, "fresh lineage sentinel/path equality"', ["wp1174_admission_wrong_scope"]),
+    "m1174_pick_ambiguous_mount": ('len(active) == 1, "ambiguous active mount identity"', 'bool(active), "ambiguous active mount identity"', ["wp1174_profile_unsupported"]),
+    "m1174_render_tombstone_oracle": ('dict(format="packet_state_retired.v1", packet_id=packet', 'dict(format="packet_state_retired.invalid", packet_id=packet', ["wp1174_durability_legacy_tombstone"]),
+    "m1174_adopt_entry_preflight": ('if a.mode == "initial":\n        _1174_require(a.expected_source_sha256', 'if a.mode == "initial":\n        _1174_write(target, b"mutated preflight", create=False)\n        _1174_require(a.expected_source_sha256', ["wp1174_adopt_entry_preflight"]),
+    "m1174_adopt_resume_no_target": ('if not exists:\n            _1174_write(target, images["prepared"], create=True)', 'if not exists:\n            return "completed_no_dispatch"\n            _1174_write(target, images["prepared"], create=True)', ["wp1174_adopt_resume_no_target"]),
+    "m1174_adopt_finalize_replay": ('terminal["terminal_disposition"] == a.disposition, "terminal replay disposition/identity"', 'False, "terminal replay disposition/identity"', ["wp1174_adopt_finalize_replay"]),
+    "m1174_durable_publish_noreplace": ('os.link(temporary, path, follow_symlinks=False)', 'os.replace(temporary, path)\n            temporary = None', ["wp1174_durability_publish_noreplace"]),
+    "m1174_durable_cached_writer": ('_1174_read(Path(p["source_path"])) == p["tombstone"].encode("utf-8")', 'True', ["wp1174_durability_cached_writer"]),
+})
+
+_ENV1174_ANCHOR = 'return {k: v for k, v in os.environ.items() if k not in selectors and not k.startswith("GIT_CONFIG_")}'
+for _selector in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+                  "GIT_REPLACE_REF_BASE", "GIT_CONFIG_COUNT", "GIT_CONFIG_KEY_0", "GIT_CONFIG_VALUE_0", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_SYSTEM", "GIT_CONFIG_NOSYSTEM", "GIT_CONFIG_PARAMETERS", "GIT_CONFIG_FUTURE_SELECTOR"):
+    MUTANTS["m1174_trust_git_env_" + _selector.lower()] = (_ENV1174_ANCHOR,
+        'return {k: v for k, v in os.environ.items() if k == "' + _selector + '" or (k not in selectors and not k.startswith("GIT_CONFIG_"))}',
+        ["wp1174_admission_candidate_root"])
+for _artifact in ("info/grafts", "objects/info/alternates", "objects/info/http-alternates", "shallow"):
+    MUTANTS["m1174_trust_git_env_" + _artifact.replace("/", "_").replace("-", "_")] = (
+        'not os.path.lexists(root / ".git" / name), "untrusted Git view: " + name',
+        '(name == "' + _artifact + '" or not os.path.lexists(root / ".git" / name)), "untrusted Git view: " + name',
+        ["wp1174_admission_candidate_root"])
+MUTANTS["m1174_trust_git_env_replace"] = ('_git_do(root, "for-each-ref", "--format=%(refname)", "refs/replace/") == (0, b"")',
+    'True', ["wp1174_admission_candidate_root"])
+MUTANTS["m1174_trust_git_env_shallow"] = (
+    ['not os.path.lexists(root / ".git" / name), "untrusted Git view: " + name',
+     '_git_do(root, "rev-parse", "--is-shallow-repository") == (0, b"false\\n"), "untrusted Git view: shallow"'],
+    ['(name == "shallow" or not os.path.lexists(root / ".git" / name)), "untrusted Git view: " + name', 'True, "untrusted Git view: shallow"'],
+    ["wp1174_admission_candidate_root"])
+MUTANTS_NHAM_TEST |= {"m1174_gate_required_skip", "m1174_credit_wrong_reason", "m1174_credit_wrapped_crash"}
+
+
+def _controls1174(name, targets):
+    if not name.startswith("m1174_"):return ()
+    pairs = {"ignore_seed": ("init_fresh", "admission_wrong_scope"),
+        "derive_schema": ("witness_valid", "admission_file_bytes"),
+        "ignore_i2": ("admission_valid", "witness_keyset"), "trust_git": ("admission_valid", "witness_int_bool"),
+        "catchall": ("init_fresh", "admission_expired_revoked"),
+        "credit_wrong": ("admission_valid", "init_resume_full"), "credit_wrapped": ("init_fresh", "admission_file_bytes"),
+        "allow_fresh": ("init_fresh", "witness_json_bytes"), "pick_ambiguous": ("admission_valid", "admission_wrong_scope"),
+        "render_tombstone": ("adopt_finalize_replay", "admission_oid_path_hash")}
+    for prefix, controls in pairs.items():
+        if name.startswith("m1174_" + prefix):
+            return tuple("wp1174_" + item for item in controls if "wp1174_" + item not in targets)
+    return tuple(n for n in ("wp1174_admission_valid","wp1174_witness_valid","wp1174_status_closed") if n not in targets)[:2]
+
+
+def _legacy_main() -> int:
     _ = [s.reconfigure(encoding="utf-8", errors="backslashreplace")
          for s in (sys.stdout, sys.stderr) if hasattr(s, "reconfigure")]
     goc = CANONICAL.read_text(encoding="utf-8")
@@ -10604,6 +11662,7 @@ def main() -> int:
 
         # --- 1. nền: mọi ca phải XANH -----------------------------------------
         ket = chay_suite(CANONICAL, tmp / "baseline")
+        globals()["_WP1174_OUTCOMES"] = dict(ket)
         bo_qua = {ten: ex for ten, ex in ket.items() if isinstance(ex, BoQua)}
         dat = sum(1 for v in ket.values() if v is None)
         tong = len(ket) - len(bo_qua)
@@ -10614,6 +11673,11 @@ def main() -> int:
                 print(f"  ĐỎ  {ten}: {loi}")
         print(f"nền: {dat}/{tong} đạt · BỎ QUA: {len(bo_qua)}")
         that_bai_tong += tong - dat
+        that_bai_tong += sum(ten.startswith("wp1174_") for ten in bo_qua)
+        if not _required1174({ten: value for ten, value in ket.items() if ten.startswith("wp1174_")},
+                             globals().get("_WP1174_MAIN_REQUIRED", set())):
+            print("WP1174 required outcomes incomplete/failed/skipped")
+            that_bai_tong += 1
 
         # --- 2. AC 19: MỖI lớp lách phải có một ca bắt-oan ---------------------
         # Không có chốt này thì "mỗi lớp một ca" chỉ là lời hứa: thêm một lớp mà
@@ -10681,9 +11745,14 @@ def main() -> int:
                 spec.loader.exec_module(suite)
                 suite.HERE = HERE  # fixture canonical; __file__ vẫn là harness đột biến
                 suite.ROOT = ROOT
-            doi_chung = suite._doi_chung_khac_ho(phai_chet) + suite._controls1187(ten_mut, phai_chet)
+            doi_chung = suite._doi_chung_khac_ho(phai_chet) + suite._controls1187(ten_mut, phai_chet) + suite._controls1174(ten_mut, phai_chet)
             ket_mut = suite.chay_suite(mut, mut_dir,
                                        chi_chay=set(phai_chet) | set(doi_chung))
+            if ten_mut.startswith("m1174_"):
+                missing_required=(set(phai_chet)|set(doi_chung))-set(ket_mut)
+                if missing_required:
+                    print("WP1174 mutation targets/controls missing: "+json.dumps(sorted(missing_required)))
+                    that_bai_tong+=len(missing_required)
             bo_qua_mut = [t for t in phai_chet
                            if isinstance(ket_mut.get(t), suite.BoQua)]
             song = [t for t in phai_chet if ket_mut.get(t) is None]
@@ -10701,6 +11770,8 @@ def main() -> int:
                 that_bai_tong += len(oan)
             if bo_qua_mut:
                 print(f"  BỎ QUA  đột biến {ten_mut}: ca {bo_qua_mut} không được tính là đã giết")
+                if ten_mut.startswith("m1174_"):
+                    that_bai_tong += len(bo_qua_mut)
             if not song and not oan and not bo_qua_mut and not gia:
                 print(f"  ok  {ten_mut} → giết {len(phai_chet)} ca đích · "
                       f"{len(doi_chung)} đối chứng khác họ còn sống")
@@ -10754,8 +11825,1193 @@ def main() -> int:
     print(f"  ca bắt-oan       : {len(LOP_BAT_OAN)}")
     print(f"  ngoại lệ AC 18   : 0")
 
-    print(f"\nTỔNG: {'ĐẠT' if that_bai_tong == 0 else f'{that_bai_tong} lỗi'}")
+    globals()["_WP1174_LEGACY_FAILURE_COUNT"]=that_bai_tong
     return 0 if that_bai_tong == 0 else 1
+
+
+
+def _runtime1174(c, command):
+    """Real canonical v2 fixture promoted only in test; real reducers and parser."""
+    import contextlib
+    import io
+    from unittest.mock import patch
+    m = _module1174(c)
+    rc, sd, err, _ = _r812(c, "lease")
+    assert rc == 0, err
+    w = c.tmp / "kho/w"
+    old = _st(sd)
+    # Use actual reducer history/anchor, never a fake _save/reducer implementation.
+    if command not in ("init", "record-lease", "begin-attempt"):
+        c.den_reviewing(sd, 55, 1, head=_g(w, "rev-parse", "refs/remotes/origin/agent/wp55-g1-claude"))
+        old = _st(sd)
+    _, _, admission, _ = _a1174(c)
+    admission.update(packet=55, mission=54, revision=1, generation=1)
+    e = admission["enrollment"]
+    e.update(g0=1, root=str(sd.resolve()), journal_root=str(sd.resolve()), git_root=str(w.resolve()),
+        state_path=str(sd.resolve()/"wp55.json"), initial_state_path=str(sd.resolve()/"wp55.json"),
+        witness_path=str(sd.resolve()/"witness.json"), lock_path=str(sd.resolve()/"fixed.lock"),
+        private_seed_path=str(sd.resolve()/"seed"))
+    seed = Path(e["private_seed_path"]); seed.write_bytes(bytes(range(32))); seed.chmod(0o600)
+    projection = e["initial_state_projection"]
+    projection.update(packet=55, mission=54, generation=1, executor="claude", reviewer="codex",
+        executor_identity=old["executor_identity"], reviewer_identity=old["reviewer_identity"])
+    admission["allowance"].update(attempts_limit=old["attempts_limit"], review_rounds_limit=old["review_rounds_limit"], codex_review_calls_limit=old["codex_review_calls_limit"])
+    if command == "nang-tran":admission["allowance"]["review_rounds_limit"]=51
+    projection.update(**{k:admission["allowance"][k] for k in ("attempts_limit", "review_rounds_limit", "codex_review_calls_limit")})
+    state = dict(old, schema_version=3, state_revision=0, generation=1, enrollment_id=e["id"], binding_sha256=e["binding_sha256"],
+        adoption=None, scoped_review=None, human_acceptance=None)
+    head = old["reviewing_head_sha"] or _g(w, "rev-parse", "refs/remotes/origin/agent/wp55-g1-claude")
+    bn = c.tmp/"review.yaml"
+    bn.write_text(__import__("yaml").safe_dump(_bn812(w, head, old["ngu_canh_lease"]["spec_hash"])))
+    common = ["--root", str(w.resolve()), "--admission", "fixture", "--revision", "1", "--generation", "1", "--coordinator-id", "coordinator-1"]
+    commands = {
+        "init": ["--mission", "54", "--executor", "claude", "--reviewer", "codex", "--expected-revision", "absent"],
+        "record-lease": ["--lease-ref", "origin/ops/wp55-spec", "--lease-path", "ops/leases/l.yaml", "--lease-comments", str(c.tmp/"cm.json")],
+        "begin-attempt": ["--provider", "claude", "--bang-chung-moi-truong", anh_doctor()],
+        "void-attempt": ["--reason", "quota", *VOID_DUYET],
+        "record-review": ["--provider", "codex", "--verdict", "approve", "--reviewed-sha", head, "--codex-call", "fixture-call", "--bien-nhan", str(bn)],
+        "transition": ["--to", "reviewing", "--comment-id", "900001", "--head-sha", head],
+        "record-codex-call": ["--head", head, "--run-id", "fixture-call"],
+        "nang-tran": ["--truc", "vong_review", "--tran-moi", "51", "--ai-nang", "ducthangho", "--can-cu", "https://github.com/o/r/issues/55#issuecomment-900001"],
+        "record-rescue": ["--quyet-dinh", "dung", "--can-cu", "https://github.com/o/r/issues/55#issuecomment-900001"],
+        "record-post": ["--for", "running->reviewing", "--comment-id", "900002"]}
+    if command == "record-lease":
+        state.update(state="awaiting_lease", lease=None)
+        state.pop("luat_adr0054",None); state.pop("ngu_canh_lease",None)
+    if command == "transition":
+        state.update(state="running",reviewing_head_sha=None)
+        state["posts"]["900001"] = {"for":"reviewing", "consumed_by":None}
+    if command == "record-review":
+        state.update(codex_review_calls_used=1, codex_calls=[dict(run_id="fixture-call", head=head, da_dung=False)])
+    if command == "record-rescue":
+        state.update(state="blocked", ly_do="rescue_required", truc="vong_review")
+        state["history"].append(dict(event="blocked_rescue_required", truc="vong_review"))
+    if command in ("mo-lai", "chu-kho-duyet", "accept"):
+        # Obtain the actual approved_pending postimage through the legacy review,
+        # keeping canonical receipt checks and optional state shape.
+        rc, sd2, err, _ = _r812(Ctx(c.script,c.tmp/"approved"),"review")
+        assert rc == 0, err
+        v2 = _st(sd2)
+        state.update({k:v for k,v in v2.items() if k not in ("hmac_key",)})
+        state.update(schema_version=3, state_revision=0)
+        # Both fixture copies originate from the same canonical objects.
+        head = state["pending_sha"]
+        if command == "mo-lai":
+            bn.write_text(__import__("yaml").safe_dump(_bn812(w,head,state["ngu_canh_lease"]["spec_hash"],bn=dict(verdict="changes_requested",
+                bang_lop=[dict(slug="cn-bug",hang="P1",connector_refs=[["review_comments",11]])]))))
+            cn = c.tmp/"connector.json"
+            cn.write_text(json.dumps(dict(repo="o/r",pr=55,head_sha=head,reviews=dict(total_count=0,items=[]),
+                review_comments=dict(total_count=1,items=[dict(id=11,user=dict(login=_CN834),body="![P1 Badge] bug",commit_id=head,pull_request_url=_API834+"pulls/55")]),
+                issue_comments=dict(total_count=1,items=[dict(id=20,user=dict(login=_CN834),body="Reviewed commit: `"+head[:10]+"`",issue_url=_API834+"issues/55")]))))
+            commands[command]=["--pr","55","--nguyen-nhan","connector","--bien-nhan",str(bn),"--finding-id","cn-bug","--connector",str(cn)]
+        elif command == "chu-kho-duyet":
+            checkpoint=dict(packet_issue=55,generation=1,spec_hash=state["ngu_canh_lease"]["spec_hash"],head_sha=head,
+                pham_vi=["cho_phep_day"],nguoi_quyet="ducthangho",neo="https://github.com/o/r/issues/55#issuecomment-900001")
+            _g(w,"checkout","-qf","master")
+            path=w/"ops/checkpoints/fixture.yaml";path.parent.mkdir(parents=True,exist_ok=True);path.write_text(json.dumps(checkpoint))
+            _g(w,"add","-A");_g(w,"commit","-qm","fixture checkpoint");_g(w,"push","-q","origin","master")
+            commands[command]=["--checkpoint-path","ops/checkpoints/fixture.yaml"]
+    target, witness = Path(e["state_path"]), Path(e["witness_path"])
+    def pair(image):
+        raw=m._1174_bytes(image);target.write_bytes(raw)
+        witness.write_bytes(m._1174_bytes(dict(m._1174_reserved(e["id"],e["binding_sha256"],1),phase="initialized",witness_revision=1,
+            high_water=dict(generation=1,state_revision=image["state_revision"],state_sha256=hashlib.sha256(raw).hexdigest()))))
+    if command == "init":target.unlink()
+    else:pair(state)
+    argv=["--state-dir",str(sd),command,"--packet","55",*commands.get(command,[]),*common]
+    if command != "init":argv += ["--expected-revision","0"]
+    def invoke(args=None):
+        out,err=io.StringIO(),io.StringIO()
+        calls=0
+        def resolved(*unused,**kwargs):
+            nonlocal calls
+            calls+=1
+            if calls==2 and hasattr(m,"_fixture_gate_observer"):m._fixture_gate_observer()
+            return admission,{}
+        with patch.object(m,"_1174_IMPLEMENTATION_COMPLETE",True),patch.object(m,"_1174_resolve",side_effect=resolved),             patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_probe",return_value={}),             contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
+            rc=m.main(argv if args is None else args)
+        lines=out.getvalue().splitlines()
+        assert len(lines)==1,(rc,lines,err.getvalue())
+        return rc,json.loads(lines[0]),err.getvalue()
+    return m,admission,state,argv,invoke,target,witness,pair
+
+
+def _writer1174(name):
+    def case(c):
+        if name == "adopt_state":
+            # Actual parser/dispatcher is separately exercised below in management fixture.
+            return _management_entry1174(c,"adopt-state")
+        m,a,old,argv,invoke,target,witness,_ = _runtime1174(c,name.replace("_","-"))
+        if name!="init":
+            before=(target.read_bytes(),witness.read_bytes())
+            bad=list(argv);bad[bad.index("--expected-revision")+1]="9"
+            rc,result,err=invoke(bad)
+            assert rc==8 and result["status"]=="revision_rejected",(name,rc,result,err)
+            assert (target.read_bytes(),witness.read_bytes())==before
+        rc,result,err=invoke()
+        assert rc==0,(name,rc,result,err)
+        assert result["status"] == ("reserved_for_dispatch" if name in ("begin_attempt","record_codex_call") else "completed_no_dispatch")
+        assert target.is_file() and witness.is_file(),"writer omitted durable state/witness"
+        state=json.loads(target.read_bytes())
+        assert state["schema_version"]==3 and state["state_revision"]==(0 if name=="init" else 1)
+        _call1174(m._1174_pair,a,json.loads(witness.read_bytes()),target.read_bytes())
+        if name!="init":
+            import copy
+            optional={"luat_adr0054":False,"ngu_canh_lease":dict(state["ngu_canh_lease"],lease_id="different-fixture-lease"),"dem_tu_suy":True,"ly_do":"invalid","truc":"vong_review","pending_sha":"a"*40,"bien_nhan_approve":{"p3":["different-class"]},"mo_lai_tu":None,"checkpoint_day":None,"moc_connector":{},"quyet_dinh_p3":[]}
+            for key,value in optional.items():
+                if key in m._1174_OPTIONAL_WRITES.get(name.replace("_","-"),set()) or key=="luat_adr0054" and old["state"]=="approved_pending":continue
+                candidate=copy.deepcopy(old);candidate.update(state_revision=1);candidate[key]=value
+                if candidate.get(key)==old.get(key) and key in old:candidate.pop(key)
+                _call1174(m._1174_state,m._1174_bytes(candidate),a)
+                _reject1174(m._1174_postimage,old,candidate,name.replace("_","-"),a,reason="optional command whitelist")
+        before=(target.read_bytes(),witness.read_bytes())
+        rc,result,_=invoke()
+        assert rc==8 and result["dispatch_allowed"] is False
+        assert (target.read_bytes(),witness.read_bytes())==before
+    return case
+
+
+def _race1174(name):
+    def case(c):
+        import multiprocessing
+        if name in ("adopt_state","init","accept"):
+            return _management_race1174(c,name)
+        m,a,old,argv,invoke,target,witness,_ = _runtime1174(c,name.replace("_","-"))
+        ctx=multiprocessing.get_context("fork")
+        queue=ctx.Queue();start=ctx.Event()
+        lock_fd=None
+        def worker(args):
+            if lock_fd is not None:os.close(lock_fd)
+            start.wait(10)
+            try:queue.put(invoke(args)[:2])
+            except BaseException as ex:queue.put((99,dict(error=repr(ex))))
+        competitor=["--state-dir",str(target.parent),"record-codex-call","--packet","55","--head",old["reviewing_head_sha"] or HEAD_HOP_LE,
+            "--run-id","competing-call",*argv[argv.index("--root"):]]
+        p=ctx.Process(target=worker,args=(argv,));q=ctx.Process(target=worker,args=(competitor,))
+        entered=ctx.Event();m._fixture_gate_observer=entered.set
+        with m._1174_lock(Path(a["enrollment"]["lock_path"])) as lock_fd:
+            p.start();q.start();start.set()
+            escaped=entered.wait(0.3)
+        p.join(20);q.join(20)
+        assert not escaped,"writer entered transaction while fixed lock held"
+        assert p.exitcode==q.exitcode==0,(p.exitcode,q.exitcode)
+        outcomes=[queue.get(timeout=2),queue.get(timeout=2)]
+        assert sorted(x[0] for x in outcomes)==[0,8],outcomes
+        state=json.loads(target.read_bytes())
+        assert state["state_revision"]==1
+        _call1174(m._1174_pair,a,json.loads(witness.read_bytes()),target.read_bytes())
+        assert sum(x[1].get("dispatch_allowed",False) for x in outcomes)<=1
+    return case
+
+
+CASES += [("wp1174_writer_"+name,_writer1174(name)) for name in
+    ("init","record_lease","begin_attempt","void_attempt","record_review","transition","record_codex_call","nang_tran","record_rescue","record_post","mo_lai","chu_kho_duyet")]
+CASES += [("wp1174_race_"+name,_race1174(name)) for name in
+    ("record_lease","begin_attempt","void_attempt","record_review","transition","record_codex_call","nang_tran","record_rescue","record_post","mo_lai","chu_kho_duyet")]
+
+_WP1174_WRITERS = ("init", "record_lease", "begin_attempt", "void_attempt", "record_review", "transition", "record_codex_call",
+                  "nang_tran", "record_rescue", "record_post", "accept", "mo_lai", "chu_kho_duyet", "adopt_state")
+WP1174_REQUIRED = {"wp1174_" + name for name in (
+    "admission_valid admission_file_bytes admission_oid_path_hash admission_expired_revoked admission_candidate_root admission_wrong_scope admission_unresolved "
+    "witness_valid witness_keyset witness_int_bool witness_enum_hash witness_json_bytes witness_fresh_reserved witness_import_retry witness_suspended witness_active_pending "
+    "init_fresh init_preflight init_resume_absent init_resume_full init_resume_mismatch "
+    "adopt_entry_preflight adopt_import_first adopt_resume_no_target adopt_intent_cutover adopt_abandon_prepare adopt_abandon_cutover adopt_retry adopt_finalize_replay adopt_postimage_all adopt_fresh_reserved_adopt "
+    "source_active_positive source_backup source_ahead source_foreign_path source_generation_revision source_legacy_branch source_recovery_snapshot "
+    "durability_ordinary_pair durability_fsync_readback durability_publish_noreplace durability_legacy_tombstone durability_cached_writer "
+    "lifecycle_identity_advisory lifecycle_budget_replay lifecycle_human_valid lifecycle_human_negative lifecycle_first_publication lifecycle_guard_readonly lifecycle_scoped_lifecycle lifecycle_legacy_unchanged "
+    "profile_native_linux profile_unsupported windows_claim_rejected status_closed gate_required_skip gate_evidence_schema").split()}
+WP1174_REQUIRED |= {"wp1174_" + kind + "_" + name for kind in ("writer", "race") for name in _WP1174_WRITERS}
+WP1174_BOTH = {"wp1174_" + name for name in ("admission_valid admission_wrong_scope witness_valid witness_keyset witness_int_bool witness_json_bytes "
+    "witness_fresh_reserved witness_import_retry witness_suspended witness_active_pending lifecycle_legacy_unchanged status_closed").split()}
+
+
+
+def _human_fixture1174(c, change=None):
+    import contextlib
+    from types import SimpleNamespace
+    from unittest.mock import patch
+    def newer(x):
+        x["run"]["created_at"]="2026-11-04T09:01:00Z"
+        if change:change(x)
+    m,w,args,lease,x,spec,_=_setup1187(c,"human",newer)
+    assert hasattr(m,"_1174_human_evidence"),"WP1174 human evidence API missing from supplied product"
+    _,_,admission,_=_a1174(c)
+    admission.update(packet=1187,revision=1,generation=1)
+    args.packet,args.revision,args.generation,args.root,args.admission=1187,1,1,str(w.resolve()),"fixture"
+    audit=json.loads(Path(args.human_audit_comment).read_bytes())
+    before=_g(w,"rev-parse",args.head+"^1")
+    events=[dict(id="12",type="PushEvent",created_at="2026-11-04T09:01:00Z",repo=dict(name=m._1174_REPO),actor=dict(login="ducthangho"),payload=dict(head=args.head,before=before,ref="refs/heads/candidate")),
+            dict(id="11",type="PushEvent",created_at="2026-11-04T08:59:00Z",repo=dict(name=m._1174_REPO),actor=dict(login="ducthangho"),payload=dict(head=before,before=before,ref="refs/heads/master"))]
+    pages={"events":events,"git/matching-refs/heads":[dict(ref="refs/heads/candidate",object=dict(sha=args.head))],"git/matching-refs/tags":[],"pulls":[]}
+    def fetch(endpoint,**limits):
+        if endpoint=="repos/"+m._1174_REPO:return dict(id=123,full_name=m._1174_REPO)
+        if endpoint==f"repos/{m._1174_REPO}/issues/comments/{audit['id']}":return audit
+        family=endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]
+        assert family in pages,endpoint
+        return pages[family]
+    facts=dict(lease=lease,spec=spec,spec_sha256=hashlib.sha256(spec).hexdigest(),canonical_oid=_g(w,"rev-parse","refs/remotes/origin/master"))
+    @contextlib.contextmanager
+    def canonical(_):yield w
+    @contextlib.contextmanager
+    def seams():
+        with patch.object(m,"_1174_resolve",return_value=(admission,facts)),patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_canon",canonical),patch.object(m,"_1174_api",side_effect=fetch),patch.object(m,"_nap",return_value=SimpleNamespace(_doc_gh=lambda label,endpoint:fetch(endpoint))):
+            yield
+    receipt=m._1174_collect(fetch,w,args.head,audit,123)
+    path=c.tmp/"publication.json";path.write_bytes(m._1174_bytes(receipt));args.receipt=args.publication_receipt=str(path)
+    return m,w,args,admission,audit,pages,seams
+
+
+def _lifecycle1174(kind):
+    def case(c):
+        import contextlib,io,copy
+        from unittest.mock import patch
+        if kind in ("identity_advisory","budget_replay","scoped_lifecycle"):
+            if kind=="identity_advisory":
+                fresh_root=c.tmp/"same-provider-fresh";fresh_root.mkdir()
+                sm,sa,_=_init_fixture1174(Ctx(c.script,fresh_root));projection=sa["enrollment"]["initial_state_projection"]
+                identity=dict(provider="codex",model_family="openai",execution_surface="codex_service",transport="machine")
+                projection.update(executor="codex",reviewer="codex",executor_identity=dict(identity),reviewer_identity=dict(identity))
+                fresh=json.loads(_call1174(sm._1174_initial,sa))
+                assert fresh["executor_identity"]==fresh["reviewer_identity"] and fresh["state"]=="awaiting_lease" and fresh["human_acceptance"] is None
+            m,a,state,argv,invoke,target,witness,pair=_runtime1174(c,"record-review")
+            state["reviewer_identity"]=dict(provider="codex",model_family="openai",execution_surface="codex_service",transport="machine")
+            state["ngu_canh_lease"]["reviewer"]=dict(state["reviewer_identity"])
+            a["enrollment"]["initial_state_projection"]["reviewer_identity"]=dict(state["reviewer_identity"])
+            argv += ["--execution-surface","codex_service","--transport","machine"]
+            record=dict(schema="wp1174_service_advisory.v1",head=state["reviewing_head_sha"],identity=state["reviewer_identity"],verdict="approve",finding_ids=[],assurance="advisory_review")
+            Path(argv[argv.index("--bien-nhan")+1]).write_bytes(m._1174_bytes(record));pair(state)
+            # Wrong actual surface is rejected under the same lock without writes.
+            bad=list(argv);bad[bad.index("--execution-surface")+1]="codex_cli"
+            before=(target.read_bytes(),witness.read_bytes())
+            rc,result,_=invoke(bad);assert rc==8 and not result["dispatch_allowed"]
+            assert (target.read_bytes(),witness.read_bytes())==before
+            rc,result,_=invoke();assert rc==0,(rc,result)
+            after=json.loads(target.read_bytes())
+            assert after["state"]=="approved_pending" and after["accepted_sha"] is None and after["human_acceptance"] is None
+            assert after["scoped_review"]["assurance"]=="advisory_review" and after["review_rounds_used"]==state["review_rounds_used"]+1
+            assert after["codex_calls"][0]["da_dung"] is True
+            before=(target.read_bytes(),witness.read_bytes())
+            fresh=list(argv);fresh[fresh.index("--expected-revision")+1]="1"
+            rc,result,_=invoke(fresh);assert rc==8 and (target.read_bytes(),witness.read_bytes())==before
+            if kind=="scoped_lifecycle":
+                _static_writers1174(c,m)
+                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==85
+                required={n:None for n in WP1174_REQUIRED}
+                assert _required1174(required,WP1174_REQUIRED)
+                required.pop("wp1174_init_fresh")
+                assert not _required1174(required,WP1174_REQUIRED),"missing required ID accepted"
+                assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==85,"incomplete acceptance inventory"
+                assert m._1174_IMPLEMENTATION_COMPLETE is True,"implementation marker does not match completed inventory"
+            return
+        m,w,args,a,audit,pages,seams=_human_fixture1174(c)
+        before={str(p):p.read_bytes() for p in c.tmp.rglob("*") if p.is_file()}
+        if kind=="human_valid":
+            with seams():record=_call1174(m._1174_human_evidence,args,a,args.head)
+            assert record["assurance"]=="human_audited" and record["head"]==args.head and record["audit_comment_id"]==audit["id"]
+        elif kind=="human_negative":
+            original=Path(args.human_audit_comment).read_bytes()
+            for field,value in (("user",dict(login="agent",type="User")),("user",dict(login="ducthangho",type="Bot")),("updated_at","2026-11-04T09:02:00Z")):
+                wrong=copy.deepcopy(audit);wrong[field]=value;Path(args.human_audit_comment).write_bytes(m._1174_bytes(wrong))
+                with seams():
+                    try:m._1174_human_evidence(args,a,args.head)
+                    except ValueError as ex:assert "owner comment" in str(ex) or "M5/M12" in str(ex),str(ex)
+                    else:assert False,"non-human/late audit accepted"
+            Path(args.human_audit_comment).write_bytes(original)
+        elif kind=="first_publication":
+            _collector_limits1174(c,m,w,args,audit,pages)
+            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
+            assert receipt["status"]=="RECORDED_EARLIEST_MATCH" and receipt["earliest"]["id"]=="12"
+            old_boundary=pages["events"].pop()
+            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
+            assert receipt["status"]=="UNKNOWN","retained history boundary required"
+            pages["events"].append(old_boundary)
+            pages["events"][0]["created_at"]="2026-11-04T08:58:00Z"
+            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
+            assert receipt["status"]=="FAIL"
+            pages["events"]=[]
+            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
+            assert receipt["status"]=="UNKNOWN","retention must not become residual"
+        elif kind=="guard_readonly":
+            argv=["guard-first-publication","--packet",str(args.packet),"--revision","1","--generation","1","--admission","fixture","--root",args.root,
+                "--head",args.head,"--pr",str(args.pr),"--coordinator-id","coordinator-1","--receipt",args.receipt,"--human-audit-comment",args.human_audit_comment,
+                "--human-remote-run",args.human_remote_run,"--workflow-runs",args.workflow_runs]
+            out=io.StringIO()
+            with seams(),contextlib.redirect_stdout(out):rc=m.main(argv)
+            assert rc==0,(rc,out.getvalue())
+            assert json.loads(out.getvalue())["status"]=="PASS"
+            with patch.object(m,"_1174_resolve",side_effect=ValueError("authority revoked")),contextlib.redirect_stdout(io.StringIO()):
+                assert m.main(argv)==12
+        else:raise AssertionError("unknown lifecycle case")
+        assert {str(p):p.read_bytes() for p in c.tmp.rglob("*") if p.is_file()}==before,"read-only human/guard changed fixture bytes"
+    return case
+
+
+CASES += [("wp1174_lifecycle_"+name,_lifecycle1174(name)) for name in
+    ("identity_advisory","budget_replay","human_valid","human_negative","first_publication","guard_readonly","scoped_lifecycle")]
+
+
+def _evidence_schema1174(c):
+    import copy
+    h,m="a"*40,"b"*40
+    event=dict(number=WP1174_SOURCE_PR,repository=dict(full_name="ducthangho/tra-luat"),pull_request=dict(number=WP1174_SOURCE_PR,head=dict(sha=h)))
+    env=dict(GITHUB_ACTIONS="true",GITHUB_REPOSITORY="ducthangho/tra-luat",GITHUB_EVENT_NAME="pull_request",GITHUB_SHA=m)
+    for osname in ("Windows","Darwin","",None):
+        for kind in ("workflow_dispatch","pull_request"):
+            other=dict(env,GITHUB_EVENT_NAME=kind)
+            for number in (WP1174_SOURCE_PR,999):
+                e=copy.deepcopy(event);e["number"]=e["pull_request"]["number"]=number;e["pull_request"]["labels"]=[dict(name="windows")]
+                result=_event1174(osname,other,e,m)
+                assert not result["proof_eligible"] and not result["native_required"] and result["expected_head"] is None
+    assert _event1174("Linux",env,event,m)["scope"]=="wp1174_candidate"
+    other=copy.deepcopy(event);other["number"]=other["pull_request"]["number"]=999
+    assert _event1174("Linux",env,other,m,False)["scope"]=="integration_pr"
+    for kind,scope in (("push","ci_push_snapshot"),("workflow_dispatch","ci_dispatch_snapshot"),("schedule","ci_schedule_snapshot")):
+        r=_event1174("Linux",dict(env,GITHUB_EVENT_NAME=kind),event,m)
+        assert r["scope"]==scope and r["proof_eligible"] is False and r["expected_head"]==m
+    assert _event1174("Linux",{},None,h)["scope"]=="native_local"
+    for change in (dict(GITHUB_SHA=h),dict(GITHUB_EVENT_NAME="unknown"),dict(GITHUB_REPOSITORY="wrong/repo")):
+        try:_event1174("Linux",dict(env,**change),event,m)
+        except AssertionError:pass
+        else:assert False,"bad event context accepted"
+    for bad,match in ((dict(repository=dict(full_name="ducthangho/tra-luat"),number=WP1174_SOURCE_PR),True),(event,False),({},True)):
+        try:_event1174("Linux",env,bad,m,match)
+        except AssertionError:pass
+        else:assert False,"incomplete source event accepted"
+    required=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
+    record=dict(schema="wp1174_native_report.v1",actual_os="Linux",scope="wp1174_candidate",proof_eligible=True,source_pr=1275,repo="ducthangho/tra-luat",pr=1275,
+        run_id="1",run_attempt="1",job="gate-packet-loop",checkout_sha=m,checkout_tree="c"*40,executed_sha=h,executed_tree="d"*40,expected_head=h,expected_tree="d"*40,
+        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=84,
+        outcomes={n:"passed" for n in required},profiles={n:"native_required" if n=="wp1174_profile_native_linux" else "fixture_or_pure" for n in required},
+        native_probe=dict(status="passed",checks={k:True for k in ("mount","statfs","same_mount","lock_process","cloexec","link_noreplace","replace","fsync_file","fsync_dir","readback","tripwire")}),
+        native_seam=False,overall_status="passed",windows_oracle="not_run_platform; deferred_to_windows_focused")
+    record.update(producer_after=dict(product="f"*64,test="0"*64),snapshot_before=dict(head=h,tree="d"*40,status="",file_count=100,content_sha256="1"*64,index_sha256="2"*64,work_sha256="3"*64))
+    record["snapshot_after"]=copy.deepcopy(record["snapshot_before"])
+    record["native_probe"]["raw"]=dict(facts=dict(mount_id="21",device="8:1",mountpoint="/",filesystem="ext4",magic=0xEF53,st_dev=2049),
+        outcomes={k:True for k in ("file_fsync_directory_fsync_readback","link_no_replace_eexist","replace","cloexec","lock_contention_process","fixed_lock_retained","mount_identity","tripwire")},native_seam_used=False)
+    assert _native_report_valid1174(record,required,h,dict(product="f"*64,test="0"*64))
+    variants=[("executed_sha",m),("producer_digests",dict(product="1"*64,test="0"*64)),("snapshot_after",{}),("producer_after",{}),("native_seam",True),("overall_status","skipped"),("native_probe",dict(status="unknown")),("proof_eligible",False),("extra",True)]
+    for key,value in variants:
+        bad=copy.deepcopy(record);bad[key]=value
+        assert not _native_report_valid1174(bad,required,h,dict(product="f"*64,test="0"*64)),key
+    for key in ("outcomes","profiles"):
+        bad=copy.deepcopy(record);bad[key].pop("wp1174_profile_native_linux")
+        assert not _native_report_valid1174(bad,required,h),key
+    for fs,magic in (("overlay",0x794C7630),("ext4",0x58465342),("unknown",0)):
+        bad=copy.deepcopy(record);bad["native_probe"]["raw"]["facts"].update(filesystem=fs,magic=magic)
+        assert not _native_report_valid1174(bad,required,h)
+    bad=copy.deepcopy(record);bad["required_ids"].append("wp1174_init_fresh")
+    assert not _native_report_valid1174(bad,required,h)
+    bad=copy.deepcopy(record);bad["path_hashes"][_WP1174_PATHS[0]]["clone"]="0"*64
+    assert not _native_report_valid1174(bad,required,h)
+    bad=copy.deepcopy(record);bad["profiles"]["wp1174_init_fresh"]="native_required"
+    assert not _native_report_valid1174(bad,required,h)
+
+
+CASES.append(("wp1174_gate_evidence_schema",_evidence_schema1174))
+
+
+def _management_fixture1174(c, name):
+    import contextlib,io
+    from unittest.mock import patch
+    if name=="init":
+        m,a,_=_init_fixture1174(c)
+        flags=["--mission","1172","--executor","codex","--reviewer","claude","--expected-revision","absent"]
+    else:
+        m,a,args=_adopt_fixture1174(c)
+        flags=["--mode","initial","--adoption-id",args.adoption_id,"--expected-source-sha256",args.expected_source_sha256,"--target-generation","6","--expected-witness-revision","absent"]
+    e=a["enrollment"]
+    argv=["--state-dir",e["journal_root"],name,"--packet","1174","--root",e["git_root"],"--admission","fixture","--revision",str(a["revision"]),"--generation",str(a["generation"]),"--coordinator-id",e["coordinator_id"],*flags]
+    def invoke(arguments=argv):
+        out,err=io.StringIO(),io.StringIO()
+        calls=0
+        def resolved(*unused,**kwargs):
+            nonlocal calls
+            calls+=1
+            if calls==2 and hasattr(m,"_fixture_gate_observer"):m._fixture_gate_observer()
+            return a,{}
+        with patch.object(m,"_1174_IMPLEMENTATION_COMPLETE",True),patch.object(m,"_1174_resolve",side_effect=resolved),patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_probe",return_value={}),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
+            rc=m.main(arguments)
+        rows=out.getvalue().splitlines();assert len(rows)==1,(rc,rows,err.getvalue())
+        return rc,json.loads(rows[0])
+    return m,a,argv,invoke
+
+
+def _management_entry1174(c,name):
+    m,a,argv,invoke=_management_fixture1174(c,name)
+    e=a["enrollment"];rc,result=invoke()
+    assert rc==0 and result["status"]=="completed_no_dispatch" and result["dispatch_allowed"] is False,(rc,result)
+    target,witness=Path(e["state_path"]),Path(e["witness_path"])
+    assert target.is_file() and witness.is_file(),"management gate omitted durable pair"
+    state=_call1174(m._1174_pair,a,json.loads(witness.read_bytes()),target.read_bytes())
+    assert state["state_revision"]==(0 if name=="init" else 2)
+    before=(target.read_bytes(),witness.read_bytes());rc,result=invoke()
+    assert rc==8 and before==(target.read_bytes(),witness.read_bytes())
+
+
+def _management_race1174(c,name):
+    import multiprocessing
+    if name=="accept":return _accept_entry1174(c,race=True)
+    command=name.replace("_","-")
+    m,a,argv,invoke=_management_fixture1174(c,command)
+    ctx=multiprocessing.get_context("fork");start=ctx.Event();queue=ctx.Queue()
+    lock_fd=None
+    def child(args):
+        if lock_fd is not None:os.close(lock_fd)
+        start.wait(10)
+        try:queue.put(invoke(args))
+        except BaseException as ex:queue.put((99,dict(error=repr(ex))))
+    # One competing call crosses the same fixed lock while management publishes.
+    competitor=["--state-dir",a["enrollment"]["journal_root"],"record-codex-call","--packet","1174","--head",HEAD_HOP_LE,"--run-id","management-racer",*argv[argv.index("--root"):argv.index("--mode") if "--mode" in argv else argv.index("--mission")],"--expected-revision","0"]
+    p=ctx.Process(target=child,args=(argv,));q=ctx.Process(target=child,args=(competitor,))
+    entered=ctx.Event();m._fixture_gate_observer=entered.set
+    with m._1174_lock(Path(a["enrollment"]["lock_path"])) as lock_fd:
+        p.start();q.start();start.set()
+        escaped=entered.wait(0.3)
+    p.join(20);q.join(20)
+    assert not escaped,"management entered transaction while fixed lock held"
+    assert p.exitcode==q.exitcode==0
+    result=[queue.get(timeout=2),queue.get(timeout=2)]
+    assert sorted(x[0] for x in result)==[0,8],result
+    assert not any(x[1].get("dispatch_allowed") for x in result),result
+    e=a["enrollment"];state=_call1174(m._1174_pair,a,json.loads(Path(e["witness_path"]).read_bytes()),Path(e["state_path"]).read_bytes())
+    assert state["state_revision"]==(0 if name=="init" else 2) and not state["codex_calls"]
+
+
+def _accept_entry1174(c,race=False):
+    import contextlib,io,copy,multiprocessing
+    from unittest.mock import patch
+    from types import SimpleNamespace
+    m,a,state,_,_,target,witness,pair=_runtime1174(c,"accept")
+    # Actual human validator and Git policy are exercised on a real local DAG.
+    hc=Ctx(c.script,c.tmp/"human");hc.tmp.mkdir()
+    def target_scope(x):
+        x["ls"]["packet_id"]="wp55"
+        x["audit"]["packet"]=x["tr"]["packet"]="wp55"
+    hm,w,hargs,ha,audit,pages,hseams=_human_fixture1174(hc,target_scope)
+    hargs.packet=55;ha["packet"]=55
+    # Keep the actual reducer module under test; only transport facts are injected.
+    m.ADR0062_OID=hm.ADR0062_OID
+    head=hargs.head
+    state.update(pending_sha=head,reviewing_head_sha=head,accepted_sha=None,
+        scoped_review=dict(schema="wp1174_scoped_review.v1",head=head,identity=state["reviewer_identity"],verdict="approve",finding_ids=[],receipt_sha256="f"*64,assurance="advisory_review",call_id=None))
+    nc=state["ngu_canh_lease"];nc.update(repo=m._1174_REPO,branch="candidate")
+    a["enrollment"]["git_root"]=str(w.resolve())
+    # The local remote is an inert test transport; all accept branch reads are real Git.
+    remote=hc.tmp/"remote.git";_g(hc.tmp,"init","-q","--bare",str(remote));_g(w,"remote","add","origin",str(remote));_g(w,"push","-q","origin",head+":refs/heads/candidate")
+    jobs=[j for _,j in m.CHECK_BAT_BUOC]
+    runs=[dict(id=2,path=".github/workflows/ci.yml",head_sha=head,repository=dict(full_name=m._1174_REPO),run_attempt=1,status="completed",conclusion="success",check_suite_id=500,html_url=f"https://github.com/{m._1174_REPO}/actions/runs/2",event="push",created_at="2026-11-04T09:01:00Z")]
+    api=f"https://api.github.com/repos/{m._1174_REPO}/"
+    files={"workflow_runs":dict(total_count=1,workflow_runs=runs),"workflow_jobs":dict(total_count=5,jobs=[dict(id=200+i,run_id=2,run_attempt=1,name=j,head_sha=head,status="completed",conclusion="success",check_run_url=api+f"check-runs/{300+i}") for i,j in enumerate(jobs)]),
+        "check_runs":dict(total_count=5,check_runs=[dict(id=300+i,name=j,head_sha=head,status="completed",conclusion="success",check_suite=dict(id=500),app=dict(slug="github-actions"),url=api+f"check-runs/{300+i}") for i,j in enumerate(jobs)]),
+        "connector":dict(repo=m._1174_REPO,pr=1187,head_sha=head,reviews=dict(total_count=0,items=[]),review_comments=dict(total_count=0,items=[]),issue_comments=dict(total_count=1,items=[dict(id=20,user=dict(login=_CN834),body="Reviewed commit: `"+head[:10]+"`",issue_url=api+"issues/1187")]))}
+    args=["--state-dir",str(target.parent),"accept","--packet","55","--root",str(w.resolve()),"--pr","1187","--admission","fixture","--revision","1","--generation","1","--coordinator-id","coordinator-1","--expected-revision","0"]
+    for attr,value in files.items():
+        path=hc.tmp/(attr+".json");path.write_text(json.dumps(value));args += ["--"+attr.replace("_","-"),str(path)]
+    for attr in ("human_audit_comment","human_remote_run","publication_receipt"):
+        args += ["--"+attr.replace("_","-"),getattr(hargs,attr)]
+    hargs.workflow_runs=str(hc.tmp/"workflow_runs.json")
+    lease=dict(packet_id="wp55",revision=1,generation=1)
+    spec=hm._git_do(w,"show",_g(w,"rev-parse","HEAD^1")+":ops/specs/X.md")[1]
+    facts=dict(lease=lease,spec=spec,spec_sha256=hashlib.sha256(spec).hexdigest(),canonical_oid=_g(w,"rev-parse","refs/remotes/origin/master"))
+    def fetch(endpoint,**limits):
+        if endpoint=="repos/"+m._1174_REPO:return dict(id=123,full_name=m._1174_REPO)
+        if endpoint==f"repos/{m._1174_REPO}/issues/comments/{audit['id']}":return audit
+        return pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
+    @contextlib.contextmanager
+    def canonical(_):yield w
+    def invoke(argv=args):
+        out,err=io.StringIO(),io.StringIO()
+        calls=0
+        def resolved(*unused,**kwargs):
+            nonlocal calls
+            calls+=1
+            if calls==2 and hasattr(m,"_fixture_gate_observer"):m._fixture_gate_observer()
+            return a,facts
+        with patch.object(m,"_1174_IMPLEMENTATION_COMPLETE",True),patch.object(m,"_1174_resolve",side_effect=resolved),patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_canon",canonical),patch.object(m,"_1174_api",side_effect=fetch),patch.object(m,"_nap",return_value=SimpleNamespace(_doc_gh=lambda label,endpoint:fetch(endpoint))),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
+            rc=m.main(argv)
+        assert len(out.getvalue().splitlines())==1,(rc,out.getvalue(),err.getvalue())
+        return rc,json.loads(out.getvalue())
+    pair(state)
+    if race:
+        ctx=multiprocessing.get_context("fork");start=ctx.Event();queue=ctx.Queue()
+        lock_fd=None
+        def child(argv):
+            if lock_fd is not None:os.close(lock_fd)
+            start.wait(10)
+            try:queue.put(invoke(argv))
+            except BaseException as ex:queue.put((99,dict(error=repr(ex))))
+        competitor=["--state-dir",str(target.parent),"record-codex-call","--packet","55","--head",head,"--run-id","accept-racer",*args[args.index("--root"):args.index("--pr")],*args[args.index("--admission"):args.index("--workflow-runs")]]
+        p=ctx.Process(target=child,args=(args,));q=ctx.Process(target=child,args=(competitor,))
+        entered=ctx.Event();m._fixture_gate_observer=entered.set
+        with m._1174_lock(Path(a["enrollment"]["lock_path"])) as lock_fd:
+            p.start();q.start();start.set()
+            escaped=entered.wait(0.3)
+        p.join(20);q.join(20)
+        assert not escaped,"writer entered transaction while fixed lock held"
+        assert p.exitcode==q.exitcode==0
+        result=[queue.get(timeout=2),queue.get(timeout=2)];assert sorted(x[0] for x in result)==[0,8],result
+    else:
+        before=(target.read_bytes(),witness.read_bytes())
+        stale=list(args);stale[stale.index("--expected-revision")+1]="9"
+        rc,result=invoke(stale);assert rc==8 and result["status"]=="revision_rejected",(rc,result)
+        assert before==(target.read_bytes(),witness.read_bytes())
+        rc,result=invoke();assert rc==0,(rc,result)
+    accepted=_call1174(m._1174_pair,a,json.loads(witness.read_bytes()),target.read_bytes())
+    assert accepted["state"]=="accepted" and accepted["human_acceptance"]["assurance"]=="human_audited" and accepted["state_revision"]==1
+    before=(target.read_bytes(),witness.read_bytes());rc,result=invoke();assert rc==8 and before==(target.read_bytes(),witness.read_bytes())
+
+
+CASES += [("wp1174_writer_adopt_state",lambda c:_management_entry1174(c,"adopt-state")),("wp1174_writer_accept",_accept_entry1174)]
+CASES += [("wp1174_race_"+n,lambda c,n=n:_management_race1174(c,n)) for n in ("init","adopt_state","accept")]
+
+
+# Frozen per-host mutation oracles. Each entry names an actual omitted/changed
+# predicate; controls are selected independently from its target family.
+MUTANTS.update({
+    "m1174_reject_valid_admission": ('a["schema"] == "wp1174_admission.v1"','a["schema"] == "wp1174_admission.invalid"',["wp1174_admission_valid"]),
+    "m1174_drop_file_bytes": ('Path(admission_file).read_bytes() == raw, "FILE differs from immutable admission"','True, "FILE differs from immutable admission"',["wp1174_admission_file_bytes"]),
+    "m1174_drop_oid_path_hash": ('hashlib.sha256(raw).hexdigest() == descriptor["admission_sha256"]','True',["wp1174_admission_oid_path_hash"]),
+    "m1174_drop_expired_revoked": ('lp._phan_loai_lease(row["lease"]) == "CÒN_HẠN"','True',["wp1174_admission_expired_revoked"]),
+    "m1174_drop_candidate_root": ('def _1174_git_view(root):','def _1174_git_view(root):\n    return None',["wp1174_admission_candidate_root"]),
+    "m1174_drop_unresolved": ('_, installed_id = _1174_installed_mission(_1174_comments(lp, 1172, root), admission, now)','installed_id = 1',["wp1174_admission_unresolved"]),
+    "m1174_reject_valid_witness": ('w["phase"] in ("reserved", "initialized")','w["phase"] in ("initialized",)',["wp1174_witness_valid"]),
+    "m1174_drop_witness_enum_hash": ('re.fullmatch(r"[0-9a-f]{64}", value, re.ASCII)', 're.fullmatch(r"[0-9a-f]{63,64}", value, re.ASCII)', ['wp1174_witness_enum_hash']),
+    "m1174_drop_witness_fresh_reserved": ('raw == _1174_bytes(_1174_reserved(enrollment_id, binding_sha256, g0))','True',["wp1174_witness_fresh_reserved"]),
+    "m1174_drop_witness_import_retry": ('node["terminal_disposition"] == _T1174_DISPOSITIONS[kind]','True',["wp1174_witness_import_retry"]),
+    "m1174_drop_witness_suspended": ('w["suspended"] == bool(history and history[-1]["terminal_kind"] in\n                  ("aborted", "aborted_intent"))','True',["wp1174_witness_suspended"]),
+    "m1174_drop_witness_active_pending": ('water["generation"] == w["active_generation"]', 'True', ['wp1174_witness_active_pending']),
+    "m1174_init_skip_witness": ('_1174_write(witness_path, last, create=False)','pass # omit initialized witness update',["wp1174_init_fresh"]),
+    "m1174_init_preflight": ('and not exists, "fresh init absence/revision"','and True, "fresh init absence/revision"',["wp1174_init_preflight"]),
+    "m1174_init_resume_absent": ('_1174_write(target, initial, create=True)', '_1174_write(target, _1174_bytes(dict(state,state_revision=1)), create=True)', ['wp1174_init_resume_absent']),
+    "m1174_init_resume_full": ('_1174_write(witness_path, last, create=False)','pass # omit resumed witness advance',["wp1174_init_resume_full"]),
+    "m1174_init_resume_mismatch": ('(not exists or _1174_read(target) == initial), "resume-init exact reserved/full target"','True, "resume-init exact reserved/full target"',["wp1174_init_resume_mismatch"]),
+    "m1174_adopt_import_first": ('origin="imported_lineage", pending_adoption=op', 'origin="imported_lineage", pending_adoption=None', ['wp1174_adopt_import_first']),
+    "m1174_adopt_intent_cutover": ('_1174_write(source, retired, create=False)', 'pass # omit durable tombstone', ['wp1174_adopt_intent_cutover']),
+    "m1174_adopt_abandon_prepare": ('kind = "aborted_intent" if not exists else "aborted"', 'kind = "aborted"', ['wp1174_adopt_abandon_prepare']),
+    "m1174_adopt_abandon_cutover": ('_1174_write(target, final_raw, create=False)', 'pass # omit durable aborted target', ['wp1174_adopt_abandon_cutover']),
+    "m1174_adopt_retry": ('node["generation"] > max([w["active_generation"], *[n["generation"] for n in history]])', '(not history or node["generation"] < max([w["active_generation"], *[n["generation"] for n in history]]))', ['wp1174_adopt_retry']),
+    "m1174_adopt_postimage_all": ('new["witness_revision"] == old["witness_revision"] + 1, "witness revision step"', 'True, "witness revision step"', ['wp1174_adopt_postimage_all']),
+    "m1174_adopt_fresh_reserved_adopt": ('witness["origin"] == "imported_lineage" and witness["phase"] == "reserved" and\n                          witness["pending_adoption"] is None and witness["suspended"] and bool(witness["history"])\n                          and all(n["terminal_kind"] in ("aborted", "aborted_intent") for n in witness["history"])', 'True', ['wp1174_adopt_fresh_reserved_adopt']),
+    "m1174_source_active_positive": ('and digest == water["state_sha256"], "initialized source high_water/path"','and False, "initialized source high_water/path"',["wp1174_source_active_positive"]),
+    "m1174_source_backup": ('and digest == water["state_sha256"], "initialized source high_water/path"','and True, "initialized source high_water/path"',["wp1174_source_backup"]),
+    "m1174_source_ahead": (['and digest == water["state_sha256"], "initialized source high_water/path"', 'and state["state_revision"] == water["state_revision"]'], ['and True, "initialized source high_water/path"', 'and True'], ['wp1174_source_ahead']),
+    "m1174_source_foreign_path": ('and observed_path == active_path','and True',["wp1174_source_foreign_path"]),
+    "m1174_source_generation_revision": ('and state["generation"] == witness["active_generation"]','and True',["wp1174_source_generation_revision"]),
+    "m1174_source_legacy_branch": ('state["schema_version"] == 2\n                      and type(state.get("packet"))','state["schema_version"] in (2,3)\n                      and type(state.get("packet"))',["wp1174_source_legacy_branch"]),
+    "m1174_source_recovery_snapshot": ('_1174_adopt_payload(admission, payload["source_snapshot"].encode("utf-8"))', '_1174_adopt_payload(admission, _1174_read(source))', ['wp1174_source_recovery_snapshot']),
+    "m1174_durable_ordinary_pair": ('_1174_write(Path(e["witness_path"]), water, create=False)','pass # omit high_water advance',["wp1174_durability_ordinary_pair"]),
+    "m1174_durable_fsync_readback": ('os.fsync(stream.fileno())','pass # omit file fsync',["wp1174_durability_fsync_readback"]),
+    "m1174_durable_legacy_tombstone": ('dict(format="packet_state_retired.v1", packet_id=packet','dict(format="packet_state_retired.invalid", packet_id=packet',["wp1174_durability_legacy_tombstone"]),
+    "m1174_lifecycle_identity_advisory": ('proposal["human_acceptance"] = None','proposal["accepted_sha"] = a.reviewed_sha',["wp1174_lifecycle_identity_advisory"]),
+    "m1174_lifecycle_budget_replay": ('st["review_rounds_used"] += 1\n        st["reviews"].append','st["review_rounds_used"] += 0\n        st["reviews"].append',["wp1174_lifecycle_budget_replay"]),
+    "m1174_lifecycle_human_negative": ('    _human_merge(args, Path(a.root), facts["lease"], facts["spec"], p3)','    pass # omit canonical human audit',["wp1174_lifecycle_human_negative"]),
+    "m1174_lifecycle_first_publication": ('complete and boundary and dag and earliest','complete and dag and earliest',["wp1174_lifecycle_first_publication"]),
+    "m1174_lifecycle_guard_readonly": ('        return _1174_emit("PASS", guard=True)','        Path(a.receipt).write_bytes(b"mutated")\n        return _1174_emit("PASS", guard=True)',["wp1174_lifecycle_guard_readonly"]),
+    "m1174_lifecycle_scoped_lifecycle": ('proposal["human_acceptance"] = None','proposal["accepted_sha"] = a.reviewed_sha',["wp1174_lifecycle_scoped_lifecycle"]),
+    "m1174_lifecycle_legacy_unchanged": ('"codex_service": ("machine",)','"codex_service": ("machine/local",)',["wp1174_lifecycle_legacy_unchanged"]),
+    "m1174_skip_fs_probe": ('facts = _1174_mount(root)\n    _1174_require(_1174_platform', 'return dict(facts={}, outcomes={}, native_seam_used=False)\n    facts = _1174_mount(root)\n    _1174_require(_1174_platform', ['wp1174_profile_native_linux']),
+    "m1174_gate_fixture_as_native": ('or\n            record["native_seam"] is not False', 'or\n            False', ['wp1174_gate_evidence_schema']),
+    "m1174_gate_windows_as_linux": ('if actual_os != "Linux":\n        return dict(scope=', 'if actual_os not in ("Linux","Windows"):\n        return dict(scope=',["wp1174_gate_evidence_schema"]),
+    "m1174_gate_nonlinux_eligible": ('return dict(scope=("ci_" if github else "local_") + ("non_linux_runner" if actual_os == "Windows" else "other_platform"),\n            proof_eligible=False', 'return dict(scope=("ci_" if github else "local_") + ("non_linux_runner" if actual_os == "Windows" else "other_platform"),\n            proof_eligible=True', ['wp1174_gate_evidence_schema']),
+    "m1174_gate_event_scope": ('\n    return dict(scope=scope,proof_eligible=scope=="wp1174_candidate"', '\n    return dict(scope=scope,proof_eligible=True', ['wp1174_gate_evidence_schema']),
+})
+# Replace placeholders below with precise predicates after the declaration, so
+# every registered tuple is a real anchor/replacement/host triple.
+MUTANTS["m1174_drop_wrong_scope"] = ('type(a[key]) is type(registration[key]) and a[key] == registration[key]','True',["wp1174_admission_wrong_scope"])
+MUTANTS["m1174_lifecycle_human_valid"] = ('and collected["status"] == "RECORDED_EARLIEST_MATCH"','and False',["wp1174_lifecycle_human_valid"])
+for name in _WP1174_WRITERS:
+    command=name.replace("_","-")
+    if name in ("init","adopt_state"):
+        anchor='status = _1174_initialize(a, admission, witness_raw)' if name=="init" else 'status = _1174_adopt(a, admission, witness_raw)'
+        replacement='status = "completed_no_dispatch"'
+    else:
+        anchor='_1174_require(state["state_revision"] == int(a.expected_revision), "revision_rejected")'
+        replacement='_1174_require(a.cmd == "'+command+'" or state["state_revision"] == int(a.expected_revision), "revision_rejected")'
+    MUTANTS["m1174_ungate_"+name]=(anchor,replacement,["wp1174_writer_"+name])
+    MUTANTS["m1174_unlock_"+name]=('with _1174_lock(Path(e["lock_path"])):',
+        'with (contextlib.nullcontext() if a.cmd == "'+command+'" else _1174_lock(Path(e["lock_path"]))):',["wp1174_race_"+name])
+MUTANTS_NHAM_TEST |= {"m1174_gate_fixture_as_native","m1174_gate_windows_as_linux","m1174_gate_nonlinux_eligible","m1174_gate_event_scope"}
+
+
+# Literal independent type inventory: changing a product schema cannot change the
+# negative inputs or their expected reason in this driver.
+_FIELD_TYPES1174 = {
+    "":dict(schema=str,mission=int,mission_revision=int,mission_plan_sha256=str,packet=int,revision=int,generation=int,contract_id=str,base=str,enrollment=dict,lineage=dict,operation=dict,allowance=dict,expires_utc=str),
+    "enrollment":dict(id=str,binding_sha256=str,coordinator_id=str,boot_id=str,root=str,root_device=int,root_inode=int,mount_id=str,mount_device=str,filesystem=str,magic=int,state_path=str,witness_path=str,lock_path=str,initial_state_path=str,legacy_source_path=str,legacy_source_sha256=str,g0=int,origin=str,initial_state_projection=dict,private_seed_path=str,private_seed_sha256=str,git_root=str,journal_root=str,producer_handoffs=list,quiescent=bool),
+    "operation":dict(adoption_id=str,generation=int,binding_sha256=str,canonical_path=str,source_sha256=str,cutover_started=bool),
+    "lineage":dict(predecessor_generation=int,source_path=str,source_sha256=str),
+    "allowance":dict(window_id=str,starts_utc=str,ends_utc=str,attempts_limit=int,review_rounds_limit=int,codex_review_calls_limit=int)}
+
+
+def _typed_variants1174(c,m,registration,admission,now):
+    import copy
+    adoption=copy.deepcopy(admission);e=adoption["enrollment"]
+    source=e["initial_state_path"];newroot=str(c.tmp/"adopt-generation-6")
+    e.update(origin="imported_lineage",journal_root=newroot,state_path=str(Path(newroot)/"wp1174.json"),legacy_source_path=source,legacy_source_sha256="c"*64)
+    adoption.update(generation=6,lineage=dict(predecessor_generation=5,source_path=source,source_sha256="c"*64),
+        operation=dict(adoption_id="adopt-6",generation=6,binding_sha256="b"*64,canonical_path=e["state_path"],source_sha256="c"*64,cutover_started=False))
+    reg6=dict(registration,generation=6)
+    assert _call1174(m._1174_admission,m._1174_bytes(adoption),reg6,now)==adoption
+    for prefix,fields in _FIELD_TYPES1174.items():
+        for field,kind in fields.items():
+            path=(prefix+"." if prefix else "")+field
+            for value in ([True,1.0,"1"] if kind is int else [False] if kind is not bool else ["false"]):
+                bad=copy.deepcopy(adoption if prefix=="operation" else admission)
+                row=bad[prefix] if prefix else bad;row[field]=value
+                raw=m._1174_bytes(bad)
+                _reject1174(m._1174_admission,raw,reg6 if prefix=="operation" else registration,now,reason="field type "+path)
+                assert bad==json.loads(raw),"type validation changed input"
+    # Literal alias pairs include genesis equivalence, which is valid only for
+    # the two names describing the same role in fresh admission.
+    for artifact in ("private_seed_path","lock_path","witness_path"):
+        for other in ("state_path","initial_state_path","private_seed_path","lock_path","witness_path"):
+            if artifact==other:continue
+            bad=copy.deepcopy(admission);bad["enrollment"][artifact]=bad["enrollment"][other]
+            _reject1174(m._1174_admission,m._1174_bytes(bad),registration,now,reason="enrollment fixed lineage paths")
+    bad=copy.deepcopy(adoption);bad["enrollment"].update(state_path=source,journal_root=str(Path(source).parent));bad["operation"]["canonical_path"]=source
+    _reject1174(m._1174_admission,m._1174_bytes(bad),reg6,now,reason="predecessor binding/target alias")
+    assert _call1174(m._1174_admission,m._1174_bytes(admission),registration,now)==admission
+
+
+for _prefix,_fields in _FIELD_TYPES1174.items():
+    for _field in _fields:
+        _path=(_prefix+"." if _prefix else "")+_field
+        MUTANTS["m1174_field_type_"+_path.replace(".","_")]=(
+            'type(record[field]) in expected,"field type "+path',
+            '(path=="'+_path+'" or type(record[field]) in expected),"field type "+path',
+            ["wp1174_admission_wrong_scope"])
+
+
+def _seed_variants1174(c,m,admission,args):
+    import copy
+    from unittest.mock import patch
+    e=admission["enrollment"];seed=Path(e["private_seed_path"]);original=seed.read_bytes()
+    target,witness=Path(e["state_path"]),Path(e["witness_path"])
+    def unchanged():assert not target.exists() and not witness.exists() and not list(target.parent.glob(".wp1174-*"))
+    seed.unlink()
+    _reject1174(m._1174_initial,admission,reason="private seed read/lstat")
+    unchanged();seed.write_bytes(original);seed.chmod(0o600)
+    seed.chmod(0o644)
+    _reject1174(m._1174_initial,admission,reason="private seed ownership/mode/nlink");unchanged();seed.chmod(0o600)
+    for raw in (b"x"*31,b"x"*32):
+        fingerprint=e["private_seed_sha256"]
+        if len(raw)==31:e["private_seed_sha256"]=hashlib.sha256(raw).hexdigest()
+        seed.write_bytes(raw);_reject1174(m._1174_initial,admission,reason="private seed fingerprint");unchanged()
+        e["private_seed_sha256"]=fingerprint
+    seed.write_bytes(original)
+    moved=seed.with_name("seed-regular");seed.rename(moved);seed.symlink_to(moved)
+    _reject1174(m._1174_initial,admission,reason="private seed ownership/mode/nlink");unchanged();seed.unlink();moved.rename(seed)
+    real_lstat=m.Path.lstat
+    def wrong_owner(path,*a,**kw):
+        value=real_lstat(path,*a,**kw)
+        if path==seed:
+            fields=list(value);fields[4]=value.st_uid+1;return os.stat_result(fields)
+        return value
+    with patch.object(m.Path,"lstat",wrong_owner):
+        _reject1174(m._1174_initial,admission,reason="private seed ownership/mode/nlink")
+    unchanged()
+    initial=m._1174_initial(admission)
+    reserved=m._1174_bytes(m._1174_reserved(e["id"],e["binding_sha256"],e["g0"]))
+    witness.write_bytes(reserved)
+    resume=copy.copy(args);resume.mode="resume-initialization";resume.expected_revision=None;resume.expected_witness_revision="0"
+    seed.write_bytes(b"z"*32)
+    with patch.object(m,"_1174_probe",return_value={}) as probe:
+        _reject1174(m._1174_initialize,resume,admission,reserved,reason="private seed fingerprint")
+        assert not probe.called
+    assert witness.read_bytes()==reserved and not target.exists()
+    seed.write_bytes(original);assert m._1174_initial(admission)==initial;witness.unlink()
+    # Known public fixture values are secret in every runtime output channel.
+    assert original.hex().encode() not in m._1174_bytes(admission) and json.loads(initial)["hmac_key"].encode() not in m._1174_bytes(admission)
+
+
+for _suffix,_old,_new in (
+    ("mode",'stat.S_IMODE(before.st_mode) == 0o600','True'),
+    ("owner",'before.st_uid == os.geteuid()','True'),
+    ("regular",'stat.S_ISREG(before.st_mode) and stat.S_IMODE(before.st_mode) == 0o600','True'),
+    ("length",'len(raw) == 32 and hashlib.sha256(raw).hexdigest() == e["private_seed_sha256"]','hashlib.sha256(raw).hexdigest() == e["private_seed_sha256"]')):
+    MUTANTS["m1174_seed_"+_suffix]=(_old,_new,["wp1174_init_preflight"])
+
+
+def _static_writers1174(c,m):
+    import ast
+    tree=ast.parse(c.script.read_bytes());functions={n.name:n for n in tree.body if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))}
+    commands={"cmd_"+n for n in _WP1174_WRITERS if n not in ("adopt_state",)}
+    assert commands<=functions.keys() and len(commands)==13,"canonical thirteen writer entry inventory changed"
+    expected={"record-lease":{"luat_adr0054","ngu_canh_lease"},"record-rescue":{"ly_do","truc"},
+        "record-review":{"pending_sha","bien_nhan_approve","ly_do","truc"},"record-codex-call":{"ly_do","truc"},
+        "begin-attempt":{"ly_do","truc"},"accept":{"moc_connector","quyet_dinh_p3"},"mo-lai":{"mo_lai_tu"},"chu-kho-duyet":{"checkpoint_day","mo_lai_tu"}}
+    assert m._1174_OPTIONAL_WRITES==expected,"optional command write contract changed"
+    # Include transitive helpers and dict/unpack/update constructors, not just
+    # st[constant] stores. Inventory every reachable optional-key construction;
+    # _load's v1 dem_tu_suy migration is historical and cannot run in a v3 tx.
+    result={}
+    for entry in sorted(commands):
+        seen=set();todo=[entry]
+        while todo:
+            name=todo.pop()
+            if name in seen or name not in functions:continue
+            seen.add(name)
+            todo += [n.func.id for n in ast.walk(functions[name]) if isinstance(n,ast.Call) and isinstance(n.func,ast.Name)]
+        writes=[]
+        for name in sorted(seen):
+            for node in ast.walk(functions[name]):
+                keys=[]
+                if isinstance(node,ast.Dict):keys=[k.value for k in node.keys if isinstance(k,ast.Constant) and isinstance(k.value,str)]
+                elif isinstance(node,ast.Call):keys=[k.arg for k in node.keywords if k.arg is not None]
+                elif isinstance(node,ast.Subscript) and isinstance(node.ctx,(ast.Store,ast.Del)) and isinstance(node.slice,ast.Constant):keys=[node.slice.value]
+                for key in keys:
+                    if key in m._1174_OPTIONAL:writes.append(dict(function=name,line=node.lineno,key=key))
+        assert "_save" in seen,entry
+        result[entry]=dict(reachable=sorted(seen),optional_constructions=writes)
+    assert any(x["key"]=="dem_tu_suy" and x["function"]=="_load" for r in result.values() for x in r["optional_constructions"])
+    assert any(x["function"]=="_vao_rescue" and x["key"]=="ly_do" for r in result.values() for x in r["optional_constructions"])
+    (c.tmp/"static-transitive-writer-inventory.json").write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n")
+
+
+
+def _adoption_crashes1174(c):
+    import multiprocessing,copy
+    from unittest.mock import patch
+    ctx=multiprocessing.get_context("fork")
+    for cut in range(1,8):
+        for edge in ("before","after"):
+            directory=c.tmp/("crash-"+str(cut)+"-"+edge);directory.mkdir()
+            m,a,args=_adopt_fixture1174(Ctx(c.script,directory))
+            e=a["enrollment"];source,target,witness=(Path(e[k]) for k in ("legacy_source_path","state_path","witness_path"))
+            old=json.loads(source.read_bytes());old["attempts_used"]=2;source.write_bytes(m._1174_bytes(old))
+            digest=hashlib.sha256(source.read_bytes()).hexdigest();e["legacy_source_sha256"]=a["lineage"]["source_sha256"]=a["operation"]["source_sha256"]=args.expected_source_sha256=digest
+            source_before=source.read_bytes()
+            def crash():
+                count=0;write=m._1174_write
+                def interrupted(path,raw,**kw):
+                    nonlocal count
+                    count+=1
+                    if count==cut and edge=="before":os._exit(91)
+                    write(path,raw,**kw)
+                    if count==cut and edge=="after":os._exit(92)
+                with patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_1174_write",interrupted):
+                    m._1174_adopt(args,a,None)
+                os._exit(93)
+            process=ctx.Process(target=crash);process.start();process.join(15)
+            assert process.exitcode==(91 if edge=="before" else 92),(cut,edge,process.exitcode)
+            if witness.exists():
+                observed=json.loads(witness.read_bytes())
+                args.mode="recovery";args.disposition="resume_forward";args.expected_source_sha256=None;args.target_generation=None
+                args.expected_witness_revision=str(observed["witness_revision"])
+            else:
+                assert cut==1 and edge=="before" and source.read_bytes()==source_before and not target.exists()
+            with patch.object(m,"_1174_probe",return_value={}):
+                result=_call1174(m._1174_adopt,args,a,witness.read_bytes() if witness.exists() else None)
+            assert result in ("completed_no_dispatch","already_completed_no_dispatch")
+            assert target.is_file() and witness.is_file()
+            state=_call1174(m._1174_pair,a,json.loads(witness.read_bytes()),target.read_bytes())
+            assert state["attempts_used"]==2 and state["hmac_key"]==old["hmac_key"]
+            assert state["adoption"]["payload"]["source_snapshot"].encode()==source_before
+            assert json.loads(source.read_bytes()).get("format")=="packet_state_retired.v1"
+            # Terminal disposition is not inferred from an earlier crash.
+            args.mode="recovery";args.disposition="abandon_before_cutover";args.expected_source_sha256=None;args.target_generation=None
+            args.expected_witness_revision=str(json.loads(witness.read_bytes())["witness_revision"])
+            before=(source.read_bytes(),target.read_bytes(),witness.read_bytes())
+            _reject1174(m._1174_adopt,args,a,witness.read_bytes(),reason="terminal replay disposition/identity")
+            assert before==(source.read_bytes(),target.read_bytes(),witness.read_bytes())
+
+
+
+MUTANTS["m1174_accept_incomplete_inventory"] = ('return (type(outcomes) is dict and type(required) is set and set(outcomes) == required and\n', 'return (type(outcomes) is dict and type(required) is set and True and\n', ["wp1174_lifecycle_scoped_lifecycle"])
+MUTANTS_NHAM_TEST |= {"m1174_accept_incomplete_inventory"}
+MUTANTS["m1174_allow_preinit_without_grant"] = ('_1174_require(len(registered) == 1, "no unique current canonical Packet lease/spec")',
+    'if not registered:\n            return _1174_json(Path(admission_file).read_bytes()), {}\n        _1174_require(len(registered) == 1, "no unique current canonical Packet lease/spec")', ["wp1174_init_preflight"])
+MUTANTS["m1174_optional_command_whitelist"] = ('changed & set(_1174_OPTIONAL) <= _1174_OPTIONAL_WRITES.get(command, set())','True',["wp1174_writer_record_post"])
+MUTANTS["m1174_replay_advanced_lineage"] = ('terminal == witness["history"][-1], "terminal replay lineage advanced"','True, "terminal replay lineage advanced"',["wp1174_adopt_finalize_replay"])
+
+
+def _abandon_crashes1174(c):
+    import multiprocessing
+    from unittest.mock import patch
+    ctx=multiprocessing.get_context("fork")
+    for disposition,steps in (("abandon_before_prepare",1),("abandon_before_cutover",2)):
+        for cut in range(1,steps+1):
+            for edge in ("before","after"):
+                directory=c.tmp/(disposition+str(cut)+edge);directory.mkdir()
+                m,a,args=_adopt_fixture1174(Ctx(c.script,directory));e=a["enrollment"]
+                source,target,witness=(Path(e[k]) for k in ("legacy_source_path","state_path","witness_path"))
+                before=source.read_bytes();writer=m._1174_write;count=0
+                def prepare(path,raw,**kw):
+                    nonlocal count
+                    count+=1
+                    if count==(2 if steps==1 else 3):raise OSError("arrange recoverable prefix")
+                    writer(path,raw,**kw)
+                with patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_1174_write",prepare):
+                    try:m._1174_adopt(args,a,None)
+                    except OSError as ex:assert "recoverable prefix" in str(ex)
+                    else:assert False,"initial prefix not reached"
+                args.mode="recovery";args.disposition=disposition;args.expected_source_sha256=None;args.target_generation=None
+                args.expected_witness_revision=str(json.loads(witness.read_bytes())["witness_revision"])
+                def crash():
+                    writes=0
+                    def interrupted(path,raw,**kw):
+                        nonlocal writes
+                        writes+=1
+                        if writes==cut and edge=="before":os._exit(91)
+                        writer(path,raw,**kw)
+                        if writes==cut and edge=="after":os._exit(92)
+                    with patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_1174_write",interrupted):m._1174_adopt(args,a,witness.read_bytes())
+                    os._exit(93)
+                process=ctx.Process(target=crash);process.start();process.join(15)
+                assert process.exitcode==(91 if edge=="before" else 92),(disposition,cut,edge,process.exitcode)
+                args.expected_witness_revision=str(json.loads(witness.read_bytes())["witness_revision"])
+                with patch.object(m,"_1174_probe",return_value={}):result=_call1174(m._1174_adopt,args,a,witness.read_bytes())
+                assert result in ("completed_no_dispatch","already_completed_no_dispatch") and source.read_bytes()==before
+                w=json.loads(witness.read_bytes());assert w["pending_adoption"] is None and w["suspended"] and len(w["history"])==1
+                if steps==1:assert not target.exists() and w["history"][0]["terminal_kind"]=="aborted_intent"
+                else:assert json.loads(target.read_bytes())["adoption"]["phase"]=="aborted" and w["history"][0]["terminal_kind"]=="aborted"
+                terminal=witness.read_bytes();args.expected_witness_revision=str(w["witness_revision"])
+                assert _call1174(m._1174_adopt,args,a,terminal)=="already_completed_no_dispatch" and witness.read_bytes()==terminal
+                # Retry uses a new path/generation and retains this terminal node.
+                old_target=target.read_bytes() if target.exists() else None
+                newroot=directory/"generation-7";newroot.mkdir();e.update(journal_root=str(newroot),state_path=str(newroot/"wp1174.json"))
+                a["generation"]=7;a["operation"].update(adoption_id="retry-7",generation=7,canonical_path=e["state_path"])
+                args.mode="initial";args.disposition=None;args.adoption_id="retry-7";args.expected_source_sha256=a["lineage"]["source_sha256"];args.target_generation=7
+                with patch.object(m,"_1174_probe",return_value={}):assert _call1174(m._1174_adopt,args,a,terminal)=="completed_no_dispatch"
+                assert (target.read_bytes() if target.exists() else None)==old_target
+                done=json.loads(witness.read_bytes());assert len(done["history"])==2 and done["history"][0]==w["history"][0] and not done["suspended"]
+
+
+
+MUTANTS["m1174_trust_git_env"] = (_ENV1174_ANCHOR,'return os.environ.copy()',["wp1174_admission_candidate_root"])
+for _artifact in ("private_seed_path","lock_path","witness_path"):
+    for _other in ("state_path","initial_state_path","private_seed_path","lock_path","witness_path"):
+        if _artifact==_other:continue
+        MUTANTS["m1174_alias_"+_artifact+"_"+_other] = (
+            'len({e[k] for k in ("state_path", "witness_path", "lock_path", "private_seed_path")}) == 4',
+            '(e["'+_artifact+'"]==e["'+_other+'"] or len({e[k] for k in ("state_path", "witness_path", "lock_path", "private_seed_path")}) == 4)',
+            ["wp1174_admission_wrong_scope"])
+
+
+# Keep legacy fault locations fixed as the adapter adds independent parsers and
+# validators. These are narrower literal anchors for the same legacy mutations.
+_CHECK_RUNS_PARSE1174 = 'd = json.loads(Path(duong).read_text(encoding="utf-8"),\n                       object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json)'
+for _name,(_anchor,_replacement,_targets) in list(MUTANTS.items()):
+    if _name.startswith("m1174_") or type(_anchor) is not str:continue
+    if _anchor in ('object_pairs_hook=_cam_khoa_trung, ', ', parse_constant=_cam_hang_ngoai_json'):
+        MUTANTS[_name]=(_CHECK_RUNS_PARSE1174,_CHECK_RUNS_PARSE1174.replace(_anchor,_replacement),_targets)
+    elif _anchor=='SHA_RE.fullmatch(a.head)':
+        MUTANTS[_name]=('    if not SHA_RE.fullmatch(a.head):\n','    if not '+_replacement+':\n',_targets)
+_anchor,_replacement,_targets=MUTANTS["pl_f01_bo_schema"]
+MUTANTS["pl_f01_bo_schema"]=( '("schema", type(st["schema_version"]) is int and', '("schema", True or type(st["schema_version"]) is int and', _targets)
+_anchor,_replacement,_targets=MUTANTS["r812_bo_shallow"]
+MUTANTS["r812_bo_shallow"]=( 'return ('+_anchor, 'return ('+_replacement, _targets)
+_anchor,_replacement,_targets=MUTANTS["r1187_read_fenced_example"]
+MUTANTS["r1187_read_fenced_example"]=( '\n    '+_anchor+'\n', '\n    '+_replacement+'\n', _targets)
+MUTANTS["t822_moi_ca_do_la_giet"]=( '\n            else "TIN_DUNG_GIA" if isinstance(v, (_TinDungGia, CliSapDo)) else "GIET")\n', '\n            else "TIN_DUNG_GIA" if False else "GIET")\n', ["kg_m6_tin_dung_giet"])
+
+MUTANTS["m1174_adoption_target_alias"]=('e["state_path"] not in (lineage["source_path"], e["initial_state_path"])','True',["wp1174_admission_wrong_scope"])
+
+
+def _api_host1174(c,m):
+    from unittest.mock import patch
+    observed=[];root=c.tmp.resolve()
+    def process(argv,**kw):
+        observed.append((argv,kw))
+        return subprocess.CompletedProcess(argv,0,b'{"ok":true}',b'')
+    with patch.dict(os.environ,{"GH_HOST":"hostile.invalid","GH_REPO":"evil/other","HTTPS_PROXY":"fixture-proxy"}),patch.object(m,"_1174_process",process),patch.object(m.os,"getcwd",return_value=str(c.tmp/"foreign-cwd")):
+        result=_call1174(m._1174_api,"repos/ducthangho/tra-luat",root=root,deadline=time.time()+1,max_bytes=1024)
+        assert result==dict(ok=True)
+        argv,kw=observed[-1]
+        assert argv==["gh","api","--hostname","github.com","repos/ducthangho/tra-luat"]
+        assert Path(kw["cwd"])==root and kw["env"]["GH_HOST"]=="github.com" and "GH_REPO" not in kw["env"]
+        assert kw["env"]["HTTPS_PROXY"]=="fixture-proxy" and os.environ["GH_HOST"]=="hostile.invalid"
+    for endpoint in ("repos/evil/other","https://evil.invalid/repos/ducthangho/tra-luat","--hostname=evil.invalid"):
+        _reject1174(m._1174_api,endpoint,root=root,deadline=time.time()+1,reason="scoped API endpoint/root")
+    # The actual inner process is bounded, independently of the callback model.
+    start=time.monotonic()
+    _reject1174(m._1174_process,[sys.executable,"-B","-c","import time;time.sleep(2)"],cwd=root,deadline=time.time()+0.1,max_bytes=1024,reason="transport deadline")
+    assert time.monotonic()-start<0.8,"inner transport exceeded hard timeout"
+    pidfile=c.tmp/"owned-grandchild.pid"
+    code="import subprocess,sys,pathlib; p=subprocess.Popen([sys.executable,'-c','import time;time.sleep(5)']);pathlib.Path(sys.argv[1]).write_text(str(p.pid))"
+    _reject1174(m._1174_process,[sys.executable,"-B","-c",code,str(pidfile)],cwd=root,deadline=time.time()+0.4,max_bytes=1024,reason="transport deadline")
+    assert pidfile.is_file(),"grandchild-pipe prefix was not reached"
+    pid=int(pidfile.read_text());dead=False
+    for _ in range(30):
+        try:status=Path(f"/proc/{pid}/stat").read_text().split(")",1)[1].split()[0]
+        except FileNotFoundError:dead=True;break
+        if status=="Z":dead=True;break
+        __import__("threading").Event().wait(0.01)
+    assert dead,"exited leader left its own pipe-holding descendant alive"
+    _reject1174(m._1174_process,[sys.executable,"-B","-c","print('x'*4096)"],cwd=root,deadline=time.time()+1,max_bytes=128,reason="transport byte budget")
+
+
+def _collector_limits1174(c,m,w,args,audit,pages):
+    from unittest.mock import patch
+    expired=m._1174_collect(lambda *args,**kwargs:(_ for _ in ()).throw(AssertionError("expired collector fetched")),w,args.head,audit,123,deadline=time.time()-1)
+    assert expired["status"]=="UNKNOWN" and expired["earliest"] is None and expired["dag_coverage"] is False
+    clock=[1000.0];calls=[]
+    def late_fetch(endpoint,**limits):
+        calls.append(limits);clock[0]=limits["deadline"]+0.01
+        return pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
+    with patch.object(m.time,"time",side_effect=lambda:clock[0]):
+        result=m._1174_collect(late_fetch,w,args.head,audit,123,deadline=1000.05)
+    assert result["status"]=="UNKNOWN" and calls and calls[0]["deadline"]<=1000.05
+    assert 0<calls[0]["max_bytes"]<=30*1024*1024
+    # A final empty page that arrives after the deadline is not completeness.
+    clock[0]=1000;count=[0]
+    def final_late(endpoint,**limits):
+        count[0]+=1
+        if count[0]==4:clock[0]=limits["deadline"]+1
+        return pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
+    with patch.object(m.time,"time",side_effect=lambda:clock[0]):result=m._1174_collect(final_late,w,args.head,audit,123,deadline=1000.05)
+    assert count[0]==4 and result["status"]=="UNKNOWN"
+    # A DAG answer returning after its supplied deadline also loses all credit.
+    clock[0]=1000;deadlines=[]
+    def slow_git(root,*argv,deadline=None):
+        deadlines.append(deadline);assert deadline is not None
+        clock[0]=deadline+1
+        return 0,b""
+    with patch.object(m.time,"time",side_effect=lambda:clock[0]),patch.object(m,"_git_do",slow_git):
+        result=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123,deadline=1000.05)
+    assert deadlines and all(d<=1000.05 for d in deadlines) and result["status"]=="UNKNOWN"
+    clock[0]=1000;timeouts=[]
+    def late_run(*argv,**kwargs):
+        timeouts.append(kwargs["timeout"]);clock[0]=1001
+        return subprocess.CompletedProcess(argv,0,b"late",b"")
+    with patch.object(m.time,"time",side_effect=lambda:clock[0]),patch.object(m.subprocess,"run",late_run):
+        assert m._git_do(w,"rev-parse","HEAD",deadline=1000.05)==(-1,b"")
+    assert 0<timeouts[0]<=0.05+1e-9
+    clock[0]=1000
+    def comments(endpoint,**limits):clock[0]=limits["deadline"]+1;return []
+    with patch.object(m.time,"time",side_effect=lambda:clock[0]),patch.object(m,"_1174_api",comments):
+        _reject1174(m._1174_comments,None,1174,w,reason="authority collection deadline")
+
+
+MUTANTS["m1174_api_host"] = ('["gh","api","--hostname","github.com",endpoint]','["gh","api","--hostname","hostile.invalid",endpoint]',["wp1174_admission_candidate_root"])
+MUTANTS["m1174_api_repo_env"] = ('env.pop("GH_REPO",None)','pass # retain caller repository selector',["wp1174_admission_candidate_root"])
+MUTANTS["m1174_transport_timeout"] = ('remaining>0,"transport deadline"','True,"transport deadline"',["wp1174_admission_candidate_root"])
+
+
+MUTANTS["m1174_transport_orphan"] = ('try:os.killpg(child.pid,signal.SIGKILL)\n        except ProcessLookupError:pass',
+    'try:\n            if child.poll() is None:os.killpg(child.pid,signal.SIGKILL)\n        except ProcessLookupError:pass',["wp1174_admission_candidate_root"])
+MUTANTS["m1174_collector_expired_entry"] = ('last_status,dag,earliest = "UNKNOWN",False,None','last_status,dag,earliest = "RECORDED_EARLIEST_MATCH",False,None',["wp1174_lifecycle_first_publication"])
+MUTANTS["m1174_git_late_result"] = ('if deadline is not None and time.time()>=deadline:return -1,b""','if False:return -1,b""',["wp1174_lifecycle_first_publication"])
+
+
+def _expiry_after_reservation1174(c):
+    from unittest.mock import patch
+    root=c.tmp/"expiry-after-reservation";root.mkdir()
+    m,a,old,argv,invoke,target,witness,_=_runtime1174(Ctx(c.script,root),"record-codex-call")
+    checks=[0]
+    def current(_):
+        checks[0]+=1
+        if checks[0]==3:raise ValueError("WP1174 UNKNOWN: authority expired before publication/dispatch")
+    with patch.object(m,"_1174_alive",side_effect=current):rc,result,_=invoke()
+    assert rc==8 and result["status"]=="durability_unknown" and not result["dispatch_allowed"],(rc,result)
+    state=_call1174(m._1174_pair,a,json.loads(witness.read_bytes()),target.read_bytes())
+    assert state["state_revision"]==1 and state["codex_review_calls_used"]==1 and state["codex_calls"][0]["da_dung"] is False
+    before=(target.read_bytes(),witness.read_bytes());rc,result,_=invoke()
+    assert rc==8 and result["status"]=="revision_rejected" and before==(target.read_bytes(),witness.read_bytes())
+
+
+MUTANTS["m1174_expiry_after_commit"] = ('_1174_tripwire(new)\n        _1174_alive(admission)','_1174_tripwire(new)\n        pass # omit post-persist expiry check',["wp1174_durability_ordinary_pair"])
+
+MUTANTS["m1174_spec_baseline_binding"]=('baseline == [admission["base"]], "spec baseline binding"','True, "spec baseline binding"',["wp1174_admission_oid_path_hash"])
+
+_WP1174_PATHS = (".claude/dev/packet_loop.py", ".claude/dev/packet_loop_test.py", "docs/PROTOCOL_DA_PHIEN.md",
+    "ops/specs/wp1174-c5-adapter-design.md", "ops/specs/wp1174-implementation-r10.md")
+_WP1174_NATIVE_KEYS = frozenset("schema actual_os scope proof_eligible source_pr repo pr run_id run_attempt job checkout_sha checkout_tree executed_sha executed_tree expected_head expected_tree path_hashes producer_digests producer_after snapshot_before snapshot_after required_ids required_count outcomes profiles native_probe native_seam overall_status windows_oracle".split())
+
+
+def _event1174(actual_os, env, event, head, paths_match=True):
+    """Pure OS/event routing; metadata is not a GitHub or native receipt."""
+    github = env.get("GITHUB_ACTIONS") == "true"
+    if actual_os != "Linux":
+        return dict(scope=("ci_" if github else "local_") + ("non_linux_runner" if actual_os == "Windows" else "other_platform"),
+            proof_eligible=False, native_required=False, expected_head=None, pr=None)
+    if not github:
+        return dict(scope="native_local", proof_eligible=False, native_required=True, expected_head=head, pr=None)
+    if (env.get("GITHUB_REPOSITORY") != "ducthangho/tra-luat" or type(head) is not str or not re.fullmatch(r"[0-9a-f]{40}",head)
+            or env.get("GITHUB_SHA") != head or type(event) is not dict):
+        raise AssertionError("WP1174 GitHub context/repo/checkout SHA blocked")
+    kind = env.get("GITHUB_EVENT_NAME")
+    if event.get("repository",{}).get("full_name") != "ducthangho/tra-luat":
+        raise AssertionError("WP1174 event repository blocked")
+    pr, expected = None, head
+    if kind == "pull_request":
+        pr = event.get("number")
+        payload = event.get("pull_request",{})
+        expected = payload.get("head",{}).get("sha")
+        if type(pr) is not int or pr < 1 or payload.get("number") != pr or not isinstance(expected,str) or not re.fullmatch(r"[0-9a-f]{40}",expected):
+            raise AssertionError("WP1174 PR identity/head blocked")
+        if pr == WP1174_SOURCE_PR:
+            if not paths_match:
+                raise AssertionError("WP1174 source PR M/H paths blocked")
+            scope = "wp1174_candidate"
+        else:
+            scope, expected = "integration_pr", head
+    elif kind in ("push","workflow_dispatch","schedule"):
+        scope = {"push":"ci_push_snapshot","workflow_dispatch":"ci_dispatch_snapshot","schedule":"ci_schedule_snapshot"}[kind]
+    else:
+        raise AssertionError("WP1174 unsupported GitHub event blocked")
+    return dict(scope=scope,proof_eligible=scope=="wp1174_candidate",native_required=True,expected_head=expected,pr=pr)
+
+
+def _native_report_valid1174(record, required, expected_head=None, expected_digests=None):
+    if (type(record) is not dict or set(record) != _WP1174_NATIVE_KEYS or record["schema"] != "wp1174_native_report.v1" or
+            record["actual_os"] != "Linux" or record["source_pr"] != WP1174_SOURCE_PR or type(record["source_pr"]) is not int or
+            type(record["proof_eligible"]) is not bool or record["proof_eligible"] != (record["scope"] == "wp1174_candidate") or
+            record["scope"] not in ("wp1174_candidate","integration_pr","ci_push_snapshot","ci_dispatch_snapshot","ci_schedule_snapshot","native_local") or
+            record["required_ids"] != sorted(required) or record["required_count"] != len(required) or
+            type(record["outcomes"]) is not dict or set(record["outcomes"]) != set(required) or
+            any(v != "passed" for v in record["outcomes"].values()) or
+            record["profiles"] != {n:"native_required" if n=="wp1174_profile_native_linux" else "fixture_or_pure" for n in required} or
+            record["native_seam"] is not False or record["overall_status"] != "passed" or
+            type(record["native_probe"]) is not dict or record["native_probe"].get("status") != "passed" or
+            not all(record["native_probe"].get("checks",{}).get(k) is True for k in ("mount","statfs","same_mount","lock_process","cloexec","link_noreplace","replace","fsync_file","fsync_dir","readback","tripwire")) or
+            any(type(record[k]) is not str or not re.fullmatch(r"[0-9a-f]{40}",record[k]) for k in ("checkout_sha","checkout_tree","executed_sha","executed_tree")) or
+            record["windows_oracle"] != "not_run_platform; deferred_to_windows_focused"):
+        return False
+    probe=record["native_probe"]
+    check_names={"mount","statfs","same_mount","lock_process","cloexec","link_noreplace","replace","fsync_file","fsync_dir","readback","tripwire"}
+    outcome_names={"file_fsync_directory_fsync_readback","link_no_replace_eexist","replace","cloexec","lock_contention_process","fixed_lock_retained","mount_identity","tripwire"}
+    raw=probe.get("raw")
+    if (set(probe)!={"status","raw","checks"} or set(probe["checks"])!=check_names or
+        type(raw) is not dict or set(raw)!={"facts","outcomes","native_seam_used"} or raw["native_seam_used"] is not False or
+        type(raw["outcomes"]) is not dict or set(raw["outcomes"])!=outcome_names or any(x is not True for x in raw["outcomes"].values()) or
+        type(raw["facts"]) is not dict or set(raw["facts"])!={"mount_id","device","mountpoint","filesystem","magic","st_dev"}):return False
+    facts=raw["facts"]
+    if (any(type(facts[k]) is not str or not facts[k] for k in ("mount_id","device","mountpoint","filesystem")) or
+        not facts["mount_id"].isdigit() or not re.fullmatch(r"[0-9]+:[0-9]+",facts["device"]) or not facts["mountpoint"].startswith("/") or
+        type(facts["magic"]) is not int or type(facts["st_dev"]) is not int or facts["st_dev"]<0 or
+        (facts["filesystem"],facts["magic"]) not in (("ext4",0xEF53),("xfs",0x58465342))):return False
+    if record["scope"] == "wp1174_candidate":
+        if (record["repo"] != "ducthangho/tra-luat" or record["pr"] != WP1174_SOURCE_PR or
+            record["executed_sha"] != record["expected_head"] or record["executed_tree"] != record["expected_tree"] or
+            expected_head is not None and record["executed_sha"] != expected_head or
+            type(record["path_hashes"]) is not dict or set(record["path_hashes"]) != set(_WP1174_PATHS) or
+            any(type(v) is not dict or set(v) != {"M","H","clone"} or len(set(v.values())) != 1 or
+                not re.fullmatch(r"[0-9a-f]{64}",next(iter(v.values()))) for v in record["path_hashes"].values())):
+            return False
+    elif record["executed_sha"] != record["checkout_sha"] or record["executed_tree"] != record["checkout_tree"]:
+        return False
+    if record["scope"] != "native_local" and (record["repo"]!="ducthangho/tra-luat" or
+        any(type(record[k]) is not str or not record[k].isdigit() or int(record[k])<1 for k in ("run_id","run_attempt")) or
+        type(record["job"]) is not str or not record["job"]):return False
+    if record["producer_after"]!=record["producer_digests"] or record["snapshot_before"]!=record["snapshot_after"]:return False
+    snap=record["snapshot_before"]
+    if (type(snap) is not dict or set(snap)!={"head","tree","status","file_count","content_sha256","index_sha256","work_sha256"} or
+        snap["head"]!=record["executed_sha"] or snap["tree"]!=record["executed_tree"] or snap["status"]!="" or type(snap["file_count"]) is not int or snap["file_count"]<1 or
+        any(type(snap[k]) is not str or not re.fullmatch(r"[0-9a-f]{64}",snap[k]) for k in ("content_sha256","index_sha256","work_sha256"))):return False
+    digests = record["producer_digests"]
+    return (type(digests) is dict and set(digests)=={"product","test"} and
+        all(type(x) is str and re.fullmatch(r"[0-9a-f]{64}",x) for x in digests.values()) and
+        (expected_digests is None or digests == expected_digests))
+
+
+def _snapshot1174(root):
+    tracked=subprocess.check_output(["git","--no-replace-objects","-C",str(root),"ls-files","-z"]).split(b"\0")
+    records=[]
+    for name in tracked:
+        if not name:continue
+        path=Path(root)/os.fsdecode(name)
+        records.append((os.fsdecode(name),hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() and not path.is_symlink() else "nonregular"))
+    return dict(head=_g(root,"rev-parse","HEAD"),tree=_g(root,"rev-parse","HEAD^{tree}"),status=_g(root,"status","--porcelain=v1"),
+        file_count=len(records),content_sha256=hashlib.sha256(json.dumps(records,separators=(",",":")).encode()).hexdigest(),
+        index_sha256=hashlib.sha256(subprocess.check_output(["git","--no-replace-objects","-C",str(root),"diff","--cached","--binary"])).hexdigest(),
+        work_sha256=hashlib.sha256(subprocess.check_output(["git","--no-replace-objects","-C",str(root),"diff","--binary"])).hexdigest())
+
+
+def _carrier1174(outcomes, gate_rc=0):
+    actual_os = platform.system()
+    env = {k:os.environ.get(k) for k in ("GITHUB_ACTIONS","GITHUB_REPOSITORY","GITHUB_EVENT_NAME","GITHUB_SHA","GITHUB_RUN_ID","GITHUB_RUN_ATTEMPT","GITHUB_JOB")}
+    head,tree = _g(ROOT,"rev-parse","HEAD"),_g(ROOT,"rev-parse","HEAD^{tree}")
+    event = None
+    if env["GITHUB_ACTIONS"] == "true":
+        event_path = os.environ.get("GITHUB_EVENT_PATH")
+        if event_path:event=json.loads(Path(event_path).read_bytes())
+    routing=_event1174(actual_os,env,event,head)
+    required=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
+    executed,executed_tree,hashes,product,test = head,tree,{},CANONICAL,Path(__file__)
+    if routing["scope"]=="wp1174_candidate":
+        executed=routing["expected_head"]
+        executed_tree=_g(ROOT,"rev-parse",executed+"^{tree}")
+        for path in _WP1174_PATHS:
+            values=[hashlib.sha256(subprocess.check_output(["git","--no-replace-objects","-C",str(ROOT),"show",oid+":"+path])).hexdigest() for oid in (head,executed)]
+            if values[0]!=values[1]:raise AssertionError("WP1174 source M/H fivepath mismatch")
+            hashes[path]=dict(M=values[0],H=values[1])
+        with tempfile.TemporaryDirectory(prefix="wp1174-exact-h-") as td:
+            clone=Path(td)/"clone"
+            _g(Path(td),"clone","-q","--no-checkout",str(ROOT),str(clone))
+            _g(clone,"config","core.autocrlf","false");_g(clone,"remote","set-url","origin","https://github.com/ducthangho/tra-luat.git")
+            _g(clone,"checkout","-qb","wp1174-native-exact-h",executed)
+            if _g(clone,"status","--porcelain") or _g(clone,"rev-parse","HEAD")!=executed:raise AssertionError("native clone binding")
+            for path in _WP1174_PATHS:
+                hashes[path]["clone"]=hashlib.sha256((clone/path).read_bytes()).hexdigest()
+            product,test=clone/_WP1174_PATHS[0],clone/_WP1174_PATHS[1]
+            loader=importlib.util.spec_from_file_location("wp1174_native_exact_h",test)
+            suite=importlib.util.module_from_spec(loader);sys.modules[loader.name]=suite;loader.loader.exec_module(suite)
+            snapshot_before=_snapshot1174(clone)
+            digests=dict(product=hashlib.sha256(product.read_bytes()).hexdigest(),test=hashlib.sha256(test.read_bytes()).hexdigest())
+            result=suite.chay_suite(product,Path(td)/"cases",chi_chay=required)
+            snapshot_after=_snapshot1174(clone)
+            for path in _WP1174_PATHS:
+                if hashes[path]["clone"]!=hashlib.sha256((clone/path).read_bytes()).hexdigest():raise AssertionError("native clone path drift")
+            probe=getattr(suite,"_WP1174_NATIVE_FACTS",{})
+            producer_after=dict(product=hashlib.sha256(product.read_bytes()).hexdigest(),test=hashlib.sha256(test.read_bytes()).hexdigest())
+    else:
+        result={n:v for n,v in outcomes.items() if n in required}
+        probe=globals().get("_WP1174_NATIVE_FACTS",{})
+        digests=globals()["_WP1174_MAIN_PRODUCER_START"]
+        producer_after=dict(product=hashlib.sha256(product.read_bytes()).hexdigest(),test=hashlib.sha256(test.read_bytes()).hexdigest())
+        snapshot_before=globals()["_WP1174_MAIN_SNAPSHOT_START"];snapshot_after=_snapshot1174(ROOT)
+    record=dict(schema="wp1174_native_report.v1",actual_os=actual_os,scope=routing["scope"],proof_eligible=routing["proof_eligible"],source_pr=WP1174_SOURCE_PR,
+        repo=env["GITHUB_REPOSITORY"] if env["GITHUB_ACTIONS"]=="true" else None,pr=routing["pr"],run_id=env["GITHUB_RUN_ID"],run_attempt=env["GITHUB_RUN_ATTEMPT"],job=env["GITHUB_JOB"],
+        checkout_sha=head,checkout_tree=tree,executed_sha=executed,executed_tree=executed_tree,expected_head=routing["expected_head"],expected_tree=executed_tree,
+        path_hashes=hashes,producer_digests=digests,producer_after=producer_after,snapshot_before=snapshot_before,snapshot_after=snapshot_after,required_ids=sorted(required),required_count=len(required),
+        outcomes={n:"passed" if v is None else "failed: "+str(v) for n,v in result.items()},
+        profiles={n:"native_required" if n=="wp1174_profile_native_linux" else "fixture_or_pure" for n in required},native_probe=probe,native_seam=False,
+        overall_status="passed" if not gate_rc and _required1174(result,required) and probe.get("status")=="passed" else "blocked",
+        windows_oracle="not_run_platform; deferred_to_windows_focused")
+    good=_native_report_valid1174(record,required,expected_head=routing["expected_head"],expected_digests=digests)
+    print("WP1174_NATIVE_REPORT_V1 "+json.dumps(record,sort_keys=True))
+    return good
+
+
+def main():
+    global CASES, MUTANTS, _WP1174_MAIN_REQUIRED
+    assert len(WP1174_REQUIRED) == 85 and len(WP1174_BOTH) == 12
+    actual_os = platform.system()
+    if actual_os=="Linux":
+        globals()["_WP1174_MAIN_PRODUCER_START"]=dict(product=hashlib.sha256(CANONICAL.read_bytes()).hexdigest(),test=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
+        globals()["_WP1174_MAIN_SNAPSHOT_START"]=_snapshot1174(ROOT)
+    applicable = WP1174_REQUIRED - {"wp1174_windows_claim_rejected"} if actual_os == "Linux" else WP1174_BOTH if actual_os == "Windows" else set()
+    _WP1174_MAIN_REQUIRED = applicable
+    cases, mutants = CASES, MUTANTS
+    available = [name for name, _ in cases]
+    missing = sorted(name for name in applicable if available.count(name) != 1)
+    CASES = [(name, fn) for name, fn in cases if not name.startswith("wp1174_") or name in applicable]
+    MUTANTS = {name: value for name, value in mutants.items() if not name.startswith("m1174_") or actual_os == "Linux"}
+    try:
+        if missing:
+            print("WP1174 required IDs missing/duplicate: " + json.dumps(missing))
+        rc = _legacy_main()
+        carrier_failure=0
+        if actual_os == "Linux":
+            try:
+                if not _carrier1174(globals().get("_WP1174_OUTCOMES",{}),rc):rc=1;carrier_failure=1
+            except (Exception,SystemExit) as ex:
+                print("WP1174 native carrier blocked: "+str(ex));rc=1;carrier_failure=1
+        if actual_os != "Linux":
+            print("WP1174_PLATFORM_REPORT_V1 " + json.dumps(dict(schema="wp1174_platform_report.v1", actual_os=actual_os,
+                scope=("ci_" if os.environ.get("GITHUB_ACTIONS") == "true" else "local_") +
+                      ("non_linux_runner" if actual_os == "Windows" else "other_platform"),
+                proof_eligible=False, native_required=False, applicable_ids=sorted(applicable),
+                not_run_platform=sorted(WP1174_REQUIRED - applicable),
+                skipped_mutants=sorted(set(mutants) - set(MUTANTS)), new_mutation_credit=0,
+                context="unverified", github_context={k:os.environ.get(k) for k in ("GITHUB_EVENT_NAME","GITHUB_REPOSITORY","GITHUB_RUN_ID","GITHUB_RUN_ATTEMPT","GITHUB_JOB","GITHUB_SHA")}, missing_ids=missing, outcomes={n:"passed" if v is None else "failed: "+str(v) for n,v in globals().get("_WP1174_OUTCOMES",{}).items()},
+                applicable_legacy_ids=[n for n,_ in CASES if not n.startswith("wp1174_")]), sort_keys=True))
+        failures=globals().get("_WP1174_LEGACY_FAILURE_COUNT",0)+len(missing)+carrier_failure
+        print("\nTỔNG: "+("ĐẠT" if not rc and not missing else str(max(1,failures))+" lỗi"))
+        return int(bool(rc or missing))
+    finally:
+        CASES, MUTANTS = cases, mutants
 
 
 if __name__ == "__main__":

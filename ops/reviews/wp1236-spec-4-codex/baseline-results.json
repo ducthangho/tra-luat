@@ -1,0 +1,48 @@
+[
+  {
+    "cmd": [
+      "python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r4-codex/repo/ops/land_evidence_nguon.py",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r4-codex/repo"
+    ],
+    "rc": 0,
+    "output_tail": [
+      "ĐẠT ops/land/pr997-wp978-land-evidence.yaml",
+      "land_evidence_nguon: 98 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 123",
+      "TỔNG: ĐẠT"
+    ]
+  },
+  {
+    "cmd": [
+      "python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r4-codex/repo/ops/kiem_ho_so_land.py",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r4-codex/repo"
+    ],
+    "rc": 0,
+    "output_tail": [
+      "BO_QUA ops/land/pr995-wp960-land-evidence.yaml — trang_thai_packet.landed = False, không phải True; không khối landed_<ngày> nào landed True",
+      "DAT ops/land/pr997-wp978-land-evidence.yaml — đủ authorized_head_sha và authorization_url (landed đọc từ trang_thai_packet.landed)",
+      "TỔNG: 49/49 hồ sơ landed True đạt · 0 miễn trừ · rc=0"
+    ]
+  },
+  {
+    "cmd": [
+      "python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r4-codex/repo/.claude/dev/packet_loop.py",
+      "--state-dir",
+      "/tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r4-codex/work/packet-state",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r4-codex/repo"
+    ],
+    "rc": 0,
+    "output_tail": [
+      "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine"
+    ]
+  }
+]

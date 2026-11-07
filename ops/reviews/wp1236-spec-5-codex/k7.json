@@ -1,0 +1,354 @@
+{
+  "rows": [
+    {
+      "job": "gate-ops (ubuntu-latest)",
+      "step": "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-ops (ubuntu-latest)",
+      "step": "bien-nhan v2 selftest",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-ops (ubuntu-latest)",
+      "step": "lease-publish selftest (đo lại setup sau G5)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-ops (ubuntu-latest)",
+      "step": "don-nhanh selftest (chốt xoá nhánh)",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-ops (ubuntu-latest)",
+      "step": "bo ca gate chay TRONG cgroup duoc uy quyen (Linux)",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "codex credential selftest (packet #300)",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "idiom-ba-ten selftest",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "eol-policy selftest",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "pre-push selftest",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "eol-policy survey",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "bundled-fragment check (topology gói)",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "gen_instructions selftest",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "command-registry unit test (AG-T0-03)",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "tl selftest (co bang chung exact-identity)",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "workflow-audit strict",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "golden-test",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "doc-claims-check strict",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "determinism-audit strict",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "ci-phamvi guard (bang phu thuoc khop ma)",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "ci-phamvi selftest (phan chung — cong co rang)",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "release-check full",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "release-verify strict (lane LAND — manifest committed)",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "release-bundle x2 cùng SHA-256",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-packet-loop (ubuntu-latest)",
+      "step": "packet-loop selftest",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 5)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 6)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 3)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 0)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 1)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 4)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 7)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 3)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 4)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 5)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 1)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 6)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 0)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 7)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 2)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 2)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-nhanh-gop (ubuntu-latest)",
+      "step": "gộp mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "hits": 1,
+      "old_chan_buoc": false,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-registry (ubuntu-latest)",
+      "step": "test registry (phạm vi + các bộ chưa được nối)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    },
+    {
+      "job": "gate-cong-cu-gop (ubuntu-latest)",
+      "step": "G5 gom manh ban kinh dot bien (#668)",
+      "hits": 1,
+      "old_chan_buoc": true,
+      "new_reasons": [],
+      "no_pipefail": false
+    }
+  ],
+  "steps": 43,
+  "jobs": 22,
+  "bad_match": 0,
+  "old_blocked_jobs": 19,
+  "new_blocked_steps": 0,
+  "no_pipefail_steps": 0
+}

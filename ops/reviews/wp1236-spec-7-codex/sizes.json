@@ -1,0 +1,44 @@
+{
+  "measured_at": "2026-11-06T04:13:39.584622+00:00",
+  "created": [
+    {
+      "path": "ops/ci_provenance.py",
+      "commit": "fe7522eb104daf93d0a8a5f37f0ee774e62a7846",
+      "numstat": "393\t0\tops/ci_provenance.py"
+    },
+    {
+      "path": "ops/ci_provenance_test.py",
+      "commit": "fe7522eb104daf93d0a8a5f37f0ee774e62a7846",
+      "numstat": "656\t0\tops/ci_provenance_test.py"
+    },
+    {
+      "path": "ops/land_evidence_nguon.py",
+      "commit": "8ff40b14c241c506bdcafbed414fe6edf9544c28",
+      "numstat": "279\t0\tops/land_evidence_nguon.py"
+    },
+    {
+      "path": "ops/land_evidence_nguon_test.py",
+      "commit": "8ff40b14c241c506bdcafbed414fe6edf9544c28",
+      "numstat": "318\t0\tops/land_evidence_nguon_test.py"
+    },
+    {
+      "path": "ops/kiem_ho_so_land.py",
+      "commit": "52082546818b812dd826ac23b198d0b5ebd784a4",
+      "numstat": "140\t0\tops/kiem_ho_so_land.py"
+    },
+    {
+      "path": "ops/kiem_ho_so_land_test.py",
+      "commit": "52082546818b812dd826ac23b198d0b5ebd784a4",
+      "numstat": "263\t0\tops/kiem_ho_so_land_test.py"
+    }
+  ],
+  "prototypes": {
+    "ops/land/pr1231-wp1105-provenance/danh_gia_gate.py": 196,
+    "ops/land/pr1127-wp1120-provenance/ci/tom_gate_output.py": 103
+  },
+  "r7_component_sum": 891,
+  "r7_deltas_module": 40,
+  "r7_deltas_test": 155,
+  "r6_component_plus_r7_deltas": 896,
+  "upper_margin": 50
+}

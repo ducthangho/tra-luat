@@ -1,0 +1,85 @@
+[
+  {
+    "method": "source_spec",
+    "rc": 0,
+    "result": {
+      "opened": [
+        "ops/__pycache__/kiem_ho_so_land.cpython-313.pyc"
+      ],
+      "layers12_caught": true,
+      "r6_audit_caught": false,
+      "r6_all_caught": true,
+      "r7_audit_caught": true,
+      "r7_all_caught": true,
+      "violations": [
+        "ops/__pycache__/kiem_ho_so_land.cpython-313.pyc"
+      ]
+    }
+  },
+  {
+    "method": "runpy_source",
+    "rc": 0,
+    "result": {
+      "opened": [
+        "ops/kiem_ho_so_land.py"
+      ],
+      "layers12_caught": false,
+      "r6_audit_caught": true,
+      "r6_all_caught": true,
+      "r7_audit_caught": true,
+      "r7_all_caught": true,
+      "violations": [
+        "ops/kiem_ho_so_land.py"
+      ]
+    }
+  },
+  {
+    "method": "runpy_pyc",
+    "rc": 0,
+    "result": {
+      "opened": [
+        "ops/__pycache__/kiem_ho_so_land.cpython-313.pyc"
+      ],
+      "layers12_caught": false,
+      "r6_audit_caught": false,
+      "r6_all_caught": false,
+      "r7_audit_caught": true,
+      "r7_all_caught": true,
+      "violations": [
+        "ops/__pycache__/kiem_ho_so_land.cpython-313.pyc"
+      ]
+    }
+  },
+  {
+    "method": "import_pyc",
+    "rc": 0,
+    "result": {
+      "opened": [
+        "ops/__pycache__/kiem_ho_so_land.cpython-313.pyc"
+      ],
+      "layers12_caught": true,
+      "r6_audit_caught": false,
+      "r6_all_caught": true,
+      "r7_audit_caught": true,
+      "r7_all_caught": true,
+      "violations": [
+        "ops/__pycache__/kiem_ho_so_land.cpython-313.pyc"
+      ]
+    }
+  },
+  {
+    "method": "allowed_pyc",
+    "rc": 0,
+    "result": {
+      "opened": [
+        "ops/__pycache__/ci_provenance.cpython-313.pyc"
+      ],
+      "layers12_caught": false,
+      "r6_audit_caught": false,
+      "r6_all_caught": false,
+      "r7_audit_caught": false,
+      "r7_all_caught": false,
+      "violations": []
+    }
+  }
+]

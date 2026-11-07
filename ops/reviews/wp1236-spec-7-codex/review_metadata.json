@@ -1,0 +1,31 @@
+{
+  "provider": "openai_codex",
+  "execution_surface": "codex_service",
+  "transport": "machine",
+  "model": "KHONG_DO_DUOC",
+  "effort": "KHONG_DO_DUOC",
+  "requested_review_run": "29de5724 (prompt.snapshot path; not independently authenticated runtime identity)",
+  "sandbox": "workspace-write; approval never; task read-only repo, scratch work only",
+  "limitations": [
+    "No network used",
+    "Only master and origin/master refs supplied: cannot remeasure 768-branch lease census at 04:00–04:05Z",
+    "New module absent: contract models and Python-loading probes are not implementation acceptance tests",
+    "A1 720–900 remains an estimate; measured component arithmetic and historical numstat only"
+  ],
+  "read_only_evidence": {
+    "at": "2026-11-06T04:20:11.422757+00:00",
+    "head": "b4041b94df07f0187811a2834b885c83d3943d81",
+    "tree": "b52b723df453cb03cea2f289f286007a588cd1fe",
+    "base": "b7962596ac5e0d97fd1f180462bdf0ee13b83526",
+    "entries_before": 12599,
+    "entries_after": 12599,
+    "changed": [],
+    "git_status": "",
+    "spec_sha256": "31415a8a840c63c3b3a16eefe83dc90739698c3d10afb2348b5e7c5011ae26ba",
+    "repo_spec_sha256": "31415a8a840c63c3b3a16eefe83dc90739698c3d10afb2348b5e7c5011ae26ba",
+    "refs": [
+      "refs/heads/master",
+      "refs/remotes/origin/master"
+    ]
+  }
+}

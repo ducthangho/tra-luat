@@ -1,0 +1,68 @@
+{
+  "measured_at": "2026-11-06T04:18:57.850202+00:00",
+  "scope": "abstract spec model; not implementation tests",
+  "K3": [
+    {
+      "pair": "m-A3d/j",
+      "baseline_status": "not_measured",
+      "mutant_status": "passed",
+      "baseline_missing": 8,
+      "mutant_missing": 0,
+      "reason_assertion_distinguishes": true
+    },
+    {
+      "pair": "m-A3e/j",
+      "baseline_status": "not_measured",
+      "mutant_status": "not_measured",
+      "baseline_missing": 8,
+      "mutant_missing": 0,
+      "reason_assertion_distinguishes": true
+    },
+    {
+      "pair": "m-A3k/k",
+      "baseline_status": "not_measured",
+      "mutant_status": "not_measured",
+      "baseline_missing": 8,
+      "mutant_missing": 0,
+      "reason_assertion_distinguishes": true
+    },
+    {
+      "pair": "m-A3e/k",
+      "baseline_status": "not_measured",
+      "mutant_status": "not_measured",
+      "baseline_missing": 8,
+      "mutant_missing": 0,
+      "reason_assertion_distinguishes": true
+    },
+    {
+      "pair": "m-A3f/j-prime",
+      "baseline_status": "not_measured",
+      "mutant_status": "passed",
+      "reason_assertion_distinguishes": true
+    },
+    {
+      "pair": "m-A3g/j-double-prime",
+      "baseline_status": "not_measured",
+      "mutant_status": "not_measured",
+      "reason_assertion_distinguishes": true
+    }
+  ],
+  "registry_coverage": [
+    {
+      "omitted_predicate": "unique_required",
+      "A20a_to_e_observations_unchanged": true
+    },
+    {
+      "omitted_predicate": "contains_check5",
+      "A20a_to_e_observations_unchanged": true
+    },
+    {
+      "omitted_predicate": "one_rule_per_name",
+      "A20a_to_e_observations_unchanged": true
+    }
+  ],
+  "A16": {
+    "chuan_bi_STEP": "dinh_dang -> removed K9 predicate: no violation, with other inputs valid",
+    "Windows_STEP": "dinh_dang -> removed K9 predicate: no violation, with other inputs valid"
+  }
+}

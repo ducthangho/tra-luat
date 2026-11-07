@@ -1,0 +1,2049 @@
+{
+  "time": "2026-11-06T01:55:56.149031+00:00",
+  "counts": {
+    "l5_match": 25,
+    "l5_lost": 3,
+    "records": 126,
+    "merge_commit_root": 121,
+    "records_with_claims": 49,
+    "l8_red": 39,
+    "l6_BO_QUA": 74,
+    "landed_no_claims": 17,
+    "records_with_prov": 31,
+    "prov_files": 37,
+    "claim_measured": 47,
+    "l6_DAT": 52,
+    "claim_not_measured": 3,
+    "claim_passed": 1,
+    "claim_other": 1,
+    "claim_mapping": 9,
+    "claim_list": 6
+  },
+  "details": [
+    {
+      "path": "plat-x8-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": true
+    },
+    {
+      "path": "pr1013-land-evidence-l7-r2-land-evidence.yaml",
+      "claims": [],
+      "provs": [
+        "ops/land/pr1013-land-evidence-l7-r2-provenance/ci-provenance-40842340568/provenance.yaml"
+      ],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr1022-windows-local-r1-land-evidence.yaml",
+      "claims": [],
+      "provs": [
+        "ops/land/pr1022-windows-local-r1-provenance/ci-provenance-40867518266/provenance.yaml"
+      ],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr1023-wp1009-r4-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.pre_merge_checks[1].moc_gate_output",
+          "kind": "measured"
+        },
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1029-windows-local-r2-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.gate_hau_merge_attempt2_20261030.moc_10_2_2.gate_output",
+          "kind": "not_measured"
+        },
+        {
+          "path": "$.moc_10_2_2_bo_sung_20261030.gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1029-windows-local-r2-provenance/gate-hau-merge-attempt2-20261030/ci-provenance-41004317229-a2/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr1040-wp1021-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.landed_20261031.bon_moc_10_2_2.gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1041-wp1037-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr1042-pr1068-cloud-setup-p2-spec-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.pre_merge_checks[1].moc_gate_output",
+          "kind": "measured"
+        },
+        {
+          "path": "$.pre_merge_checks[4].moc_gate_output",
+          "kind": "measured"
+        },
+        {
+          "path": "$.pre_merge_checks[7].moc_gate_output",
+          "kind": "measured"
+        },
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        },
+        {
+          "path": "$.post_merge_checks[1].moc_gate_output",
+          "kind": "measured"
+        },
+        {
+          "path": "$.post_merge_checks[5].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1046-wp1030-r6-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[1].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [],
+      "l8_red": true,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr1047-wp1045-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr1048-claude-md-powershell-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].bon_moc_10_2_2.gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [],
+      "l8_red": true,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr1051-wp1006-t27-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.moc_10_2_2.gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1051-wp1006-t27-provenance/gate-hau-merge-20261105/ci-provenance-41397090825/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr1055-wp1052-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1063-wp1038-r1-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.pre_merge_checks[1].moc_gate_output",
+          "kind": "measured"
+        },
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1064-windows-local-r3-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.moc_10_2_2.gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1064-windows-local-r3-provenance/gate-hau-merge-20261031/ci-provenance-41191196998/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1073-wp1039-r1-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1080-wp1077-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1080-wp1077-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1095-pr1101-cloud-setup-p3-p3b-spec-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[1].moc_gate_output",
+          "kind": "measured"
+        },
+        {
+          "path": "$.post_merge_checks[3].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1095-pr1101-cloud-setup-p3-p3b-spec-provenance/ci-41398722520/provenance.yaml",
+        "ops/land/pr1095-pr1101-cloud-setup-p3-p3b-spec-provenance/ci-41398738297/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr1097-wp1078-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1097-wp1078-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1100-wp1089-r2-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1100-wp1089-r2-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1109-spec-ci-lan-luu-tru-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "not_measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1109-spec-ci-lan-luu-tru-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr1115-wp1079-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        },
+        {
+          "path": "$.landed_20261102.windows_sau_va.moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1115-wp1079-provenance/ci/provenance.yaml",
+        "ops/land/pr1115-wp1079-provenance/windows-41365578430/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1118-ghi-so-bo-sung-1065-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1127-wp1120-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1127-wp1120-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1128-wp1113-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1128-wp1113-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1130-wp1122-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1130-wp1122-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1137-wp1134-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "not_measured"
+        }
+      ],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1138-wp825-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1138-wp825-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1141-wp1132-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1141-wp1132-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1142-wp1117-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1142-wp1117-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1155-wp1143-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.moc_10_2_2.gate_output",
+          "kind": "passed"
+        },
+        {
+          "path": "$.post_merge_provenance.gate_output",
+          "kind": "other"
+        }
+      ],
+      "provs": [],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1192-wp1147-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1192-wp1147-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1193-wp1189-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.moc_10_2_2.gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1193-wp1189-provenance/gate-hau-merge-20261105/ci-provenance-41965501823/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr1197-wp1099-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.moc_10_2_2.gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1197-wp1099-provenance/gate-hau-merge-20261105/ci-provenance-42058119067/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1198-wp1195-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1198-wp1195-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1229-wp1223-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1229-wp1223-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1230-wp1224-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1230-wp1224-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1231-wp1105-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1231-wp1105-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr1242-wp1237-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.moc_10_2_2.gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr1242-wp1237-provenance/gate-hau-merge-20261105/ci-provenance-42083807690/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr468-hoso-4-packet-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": true
+    },
+    {
+      "path": "pr477-dung-goi-review-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": true
+    },
+    {
+      "path": "pr478-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": true
+    },
+    {
+      "path": "pr480-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": true
+    },
+    {
+      "path": "pr487-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": true
+    },
+    {
+      "path": "pr489-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": true
+    },
+    {
+      "path": "pr491-r358-ghi-so-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr493-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": true
+    },
+    {
+      "path": "pr554-wp541-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": true
+    },
+    {
+      "path": "pr594-wp578-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.danh_tinh_CI_10_2_2.post_merge.gate_output",
+          "kind": "mapping"
+        },
+        {
+          "path": "$.danh_tinh_CI_10_2_2.pre_merge.gate_output",
+          "kind": "mapping"
+        },
+        {
+          "path": "$.danh_tinh_CI_10_2_2.pre_merge_thu_hoi.gate_output",
+          "kind": "mapping"
+        },
+        {
+          "path": "$.danh_tinh_CI_10_2_2.pre_merge_mo.gate_output",
+          "kind": "mapping"
+        }
+      ],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": true
+    },
+    {
+      "path": "pr621-skill-bai-hoc-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": true
+    },
+    {
+      "path": "pr631-doctrine-rest-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.moc_10_2_2.gate_output",
+          "kind": "measured"
+        },
+        {
+          "path": "$.landed_20261105.moc_10_2_2.gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr631-doctrine-rest-provenance/gate-hau-merge-20261105/ci-provenance-41397085109/provenance.yaml",
+        "ops/land/pr631-doctrine-rest-provenance/gate-hau-merge-20261105b/ci-provenance-42018846747/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr666-wp650-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": true
+    },
+    {
+      "path": "pr672-wp574-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr679-wp678-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "list"
+        }
+      ],
+      "provs": [],
+      "l8_red": true,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr680-wp676-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[1].moc_gate_output",
+          "kind": "mapping"
+        }
+      ],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": true
+    },
+    {
+      "path": "pr684-wp677-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.pre_merge_checks[1].moc_gate_output",
+          "kind": "mapping"
+        },
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "mapping"
+        }
+      ],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": true
+    },
+    {
+      "path": "pr689-wp677-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.pre_merge_checks[0].moc_gate_output",
+          "kind": "mapping"
+        },
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "list"
+        }
+      ],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": true
+    },
+    {
+      "path": "pr696-wp668-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "list"
+        }
+      ],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": true
+    },
+    {
+      "path": "pr701-wp687-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.pre_merge_checks[0].moc_gate_output",
+          "kind": "mapping"
+        },
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "list"
+        }
+      ],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": true
+    },
+    {
+      "path": "pr703-wp674-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "list"
+        }
+      ],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": true
+    },
+    {
+      "path": "pr707-wp705-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "list"
+        }
+      ],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": true
+    },
+    {
+      "path": "pr714-wp710-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": true
+    },
+    {
+      "path": "pr718-wp678-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": true
+    },
+    {
+      "path": "pr721-wp698-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": true
+    },
+    {
+      "path": "pr732-wp685-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": true
+    },
+    {
+      "path": "pr759-no-p3-ho-so-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": true
+    },
+    {
+      "path": "pr765-wp743-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": true
+    },
+    {
+      "path": "pr772-wp766-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr778-wp773-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr779-wp775-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr791-wp782-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.danh_tinh_CI_10_2_2.gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [],
+      "l8_red": true,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr792-wp484-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr793-wp784-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.danh_tinh_CI_10_2_2.gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [],
+      "l8_red": true,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr800-wp794-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr801-wp795-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr818-wp788-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr823-wp802-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr832-wp831-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr836-wp812-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr838-wp671-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr846-wp845-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr848-wp744-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr849-wp748-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr851-wp822-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr862-wp748-r21-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr864-wp858-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr866-wp856-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr869-wp748-r22-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr870-claude-md-bai-hoc-c-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.cap_nhat_20261026.bon_moc_10_2_2.gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr872-wp871-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr873-wp868-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr877-wp854-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr880-wp878-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr881-wp852-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr882-wp748-r23-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr883-wp879-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr888-wp886-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr889-claude-md-bai-hoc-c-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.cap_nhat_20261026.bon_moc_10_2_2.gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr894-wp748-r24-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr895-wp892-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.cap_nhat_20261026.bon_moc_10_2_2.gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr907-wp906-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr908-no-p3-spec-r4-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr909-wp748-r25-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr913-wp910-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr917-wp910-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr924-wp923-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr926-wp919-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr930-wp752-wp763-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr931-wp835-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr932-wp748-r26-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr933-wp929-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr945-wp899-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.bon_moc_10_2_2.gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr945-wp899-provenance/do-1026-cebb5b2/ci-provenance-40268583877.yaml",
+        "ops/land/pr945-wp899-provenance/do-1026-cebb5b2/ci-provenance-40268583940.yaml"
+      ],
+      "l8_red": true,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr950-wp834-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr957-wp748-r27-land-evidence.yaml",
+      "claims": [],
+      "provs": [
+        "ops/land/pr957-wp748-r27-provenance/ci-provenance-40437650174/provenance.yaml",
+        "ops/land/pr957-wp748-r27-provenance/ci-provenance-40437650224/provenance.yaml"
+      ],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr963-wp943-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "DAT",
+      "l5_match": false
+    },
+    {
+      "path": "pr964-wp748-r28-land-evidence.yaml",
+      "claims": [],
+      "provs": [
+        "ops/land/pr964-wp748-r28-provenance/ci-provenance-40454280949/provenance.yaml",
+        "ops/land/pr964-wp748-r28-provenance/ci-provenance-40454280983/provenance.yaml"
+      ],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr969-wp813-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr983-wp923-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr990-wp981-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr991-wp987-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr992-wp923-r3-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr994-land-81-ha-cap-r2-land-evidence.yaml",
+      "claims": [],
+      "provs": [
+        "ops/land/pr994-land-81-ha-cap-r2-provenance/ci-provenance-40830701116/provenance.yaml"
+      ],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr995-wp960-land-evidence.yaml",
+      "claims": [],
+      "provs": [],
+      "l8_red": false,
+      "l6": "BO_QUA",
+      "l5_match": false
+    },
+    {
+      "path": "pr997-wp978-land-evidence.yaml",
+      "claims": [
+        {
+          "path": "$.post_merge_checks[0].moc_gate_output",
+          "kind": "measured"
+        }
+      ],
+      "provs": [
+        "ops/land/pr997-wp978-provenance/ci/provenance.yaml"
+      ],
+      "l8_red": true,
+      "l6": "DAT",
+      "l5_match": false
+    }
+  ],
+  "provenance": [
+    {
+      "path": "ops/land/pr1013-land-evidence-l7-r2-provenance/ci-provenance-40842340568/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 40842340568,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "e9967f07b95c6458afc63dabf4a5c0494e90eca7",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 110706790661,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40842340568",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1022-windows-local-r1-provenance/ci-provenance-40867518266/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 40867518266,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "d31df1eb84c31514537d08f51ecb9a20b3cc07fc",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 110775807197,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40867518266",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1029-windows-local-r2-provenance/gate-hau-merge-attempt2-20261030/ci-provenance-41004317229-a2/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41004317229,
+        "run_attempt": 2,
+        "event": "push",
+        "head_sha": "eaf83fd78ad3a85a6758d0e81be233b5fedcdf6c",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 111151493381,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41004317229",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1051-wp1006-t27-provenance/gate-hau-merge-20261105/ci-provenance-41397090825/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41397090825,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "68fa6a1c6a629d0a623661ae1032532280598e58",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 112184632260,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41397090825",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1064-windows-local-r3-provenance/gate-hau-merge-20261031/ci-provenance-41191196998/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41191196998,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "086f1b7343fc1d778e50797e6c9ca0964b11a755",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 111656406191,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41191196998",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1080-wp1077-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41259734324,
+        "run_attempt": 2,
+        "event": "push",
+        "head_sha": "9ced16f3764aed80a3f2ac21ca3db475cbf8aea5",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 111833829437,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41259734324",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1095-pr1101-cloud-setup-p3-p3b-spec-provenance/ci-41398722520/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41398722520,
+        "run_attempt": 1,
+        "event": "workflow_dispatch",
+        "head_sha": "47ee1b206d284c82d16036972b82b17196cd8dc7",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 112188941987,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41398722520",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 37
+    },
+    {
+      "path": "ops/land/pr1095-pr1101-cloud-setup-p3-p3b-spec-provenance/ci-41398738297/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41398738297,
+        "run_attempt": 1,
+        "event": "workflow_dispatch",
+        "head_sha": "8f123b27b338e5e173a668209eb4904f49dd611b",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 112188979843,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41398738297",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 37
+    },
+    {
+      "path": "ops/land/pr1097-wp1078-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41279007434,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "7eeb1d9a10aea8e1805b66fbf3d68549eb6778da",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 111882600302,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41279007434",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1100-wp1089-r2-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41271627232,
+        "run_attempt": 2,
+        "event": "push",
+        "head_sha": "e4fdab583a33b08f364a9daa30035d48416190bf",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 111863903805,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41271627232",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1109-spec-ci-lan-luu-tru-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41290009265,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 111910372535,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41290009265",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1115-wp1079-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41322980582,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "c82047da4d6f9546ce1d68282c37acf9567b74bc",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 111995030819,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41322980582",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1115-wp1079-provenance/windows-41365578430/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41365578430,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "c7174bfe03b3acd22cfa055b5fce176129d29542",
+        "loi_khai_rest_path": ".github/workflows/launcher-windows.yml",
+        "check_suite_id": 112104771781,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41365578430",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 2
+    },
+    {
+      "path": "ops/land/pr1127-wp1120-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41356691133,
+        "run_attempt": 1,
+        "event": "workflow_dispatch",
+        "head_sha": "f2102fc388a884d994f7bfeb29ef6863b9972b66",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 112082061848,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41356691133",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 37
+    },
+    {
+      "path": "ops/land/pr1128-wp1113-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41361081437,
+        "run_attempt": 1,
+        "event": "workflow_dispatch",
+        "head_sha": "c165a5d0d4048e10e7da875f2ba7524136fb5735",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 112093327016,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41361081437",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 37
+    },
+    {
+      "path": "ops/land/pr1130-wp1122-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41365578445,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "c7174bfe03b3acd22cfa055b5fce176129d29542",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 112104771824,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41365578445",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1138-wp825-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41389693283,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "e007a318ffbd0079380a72d9f74df8a401028ae4",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 112165678575,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41389693283",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1141-wp1132-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41397085109,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "b3249c3e8a5a8f3af5691160493b8ab3d52db99c",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 112184617115,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41397085109",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1142-wp1117-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41399706045,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "279a39e34c26027ad792008962859aa79c16e35c",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 112191466330,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41399706045",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1192-wp1147-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41949673119,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "9a5b462b6731c13f9f2c72b9d9774e58acb850f1",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 113674362936,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41949673119",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1193-wp1189-provenance/gate-hau-merge-20261105/ci-provenance-41965501823/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41965501823,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "f2e33bc3ae9763e394cc34bb7ff644edb0b7f4bb",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 113715571842,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41965501823",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1197-wp1099-provenance/gate-hau-merge-20261105/ci-provenance-42058119067/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 42058119067,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "b255b0b7131da7f6e026639f6b0da0a06cc68a44",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 113966991573,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/42058119067",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1198-wp1195-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41959407371,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "4d258cc8831b5c6169114d1e8e88a8782096d6f6",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 113699600722,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41959407371",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1229-wp1223-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 42073104862,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "50baf894216504d4bb975690ceb9dee4835a2ad7",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 114007315828,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/42073104862",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1230-wp1224-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 42086637029,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "825eb3561a94e05c36045d2c981b4108c523e31c",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 114044302440,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/42086637029",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1231-wp1105-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 42032872356,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "fe84620f897913c7f6c2ce5a0c7316a49655e82f",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 113896344540,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/42032872356",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr1242-wp1237-provenance/gate-hau-merge-20261105/ci-provenance-42083807690/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 42083807690,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "801042cbf6ccc00a4da37ed2a62a61bac10bae02",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 114036642006,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/42083807690",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr631-doctrine-rest-provenance/gate-hau-merge-20261105/ci-provenance-41397085109/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41397085109,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "b3249c3e8a5a8f3af5691160493b8ab3d52db99c",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 112184617115,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41397085109",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr631-doctrine-rest-provenance/gate-hau-merge-20261105b/ci-provenance-42018846747/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 42018846747,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "a57eade23dd5b54564be47d4f124511cf87aa1fa",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 113857969110,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/42018846747",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr945-wp899-provenance/do-1026-cebb5b2/ci-provenance-40268583877.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 40268583877,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "cebb5b22e1ebf369a70234662b7e9355bdd5095e",
+        "loi_khai_rest_path": ".github/workflows/launcher-windows.yml",
+        "check_suite_id": 109137079816,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40268583877",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 2
+    },
+    {
+      "path": "ops/land/pr945-wp899-provenance/do-1026-cebb5b2/ci-provenance-40268583940.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 40268583940,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "cebb5b22e1ebf369a70234662b7e9355bdd5095e",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 109137079963,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40268583940",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr957-wp748-r27-provenance/ci-provenance-40437650174/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 40437650174,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "06152341f461eedd97f1b95a2ae7bd9cb2f2e174",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 109600471019,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40437650174",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr957-wp748-r27-provenance/ci-provenance-40437650224/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 40437650224,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "06152341f461eedd97f1b95a2ae7bd9cb2f2e174",
+        "loi_khai_rest_path": ".github/workflows/launcher-windows.yml",
+        "check_suite_id": 109600471181,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40437650224",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 2
+    },
+    {
+      "path": "ops/land/pr964-wp748-r28-provenance/ci-provenance-40454280949/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 40454280949,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "a195b958cdf371de5723251d7f20bd6ff348a1b2",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 109644454133,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40454280949",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr964-wp748-r28-provenance/ci-provenance-40454280983/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 40454280983,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "a195b958cdf371de5723251d7f20bd6ff348a1b2",
+        "loi_khai_rest_path": ".github/workflows/launcher-windows.yml",
+        "check_suite_id": 109644454220,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40454280983",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 2
+    },
+    {
+      "path": "ops/land/pr994-land-81-ha-cap-r2-provenance/ci-provenance-40830701116/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 40830701116,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "0a8f4d78d30854247a7147e45f5586bf856925da",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 110675488089,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40830701116",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    },
+    {
+      "path": "ops/land/pr997-wp978-provenance/ci/provenance.yaml",
+      "run": {
+        "repo": "ducthangho/tra-luat",
+        "run_id": 41396264926,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "02ddeb4e9ea9c130d935adc4d5bce4f11db7d6a0",
+        "loi_khai_rest_path": ".github/workflows/ci.yml",
+        "check_suite_id": 112182458915,
+        "nguon": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41396264926",
+        "thieu": [],
+        "lech": [],
+        "trang_thai": "passed"
+      },
+      "jobs": 23
+    }
+  ],
+  "land_diff_4f03566_HEAD": ""
+}

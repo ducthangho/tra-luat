@@ -1,0 +1,41 @@
+RECORDS 123 PROVENANCE_RECORDS 28 PROVENANCE_FILES 34
+KEYS {'moc_gate_output': 42, 'gate_output': 22, 'gate_output_nguon_va_gioi_han': 1, 'moc_gate_output_rc_disposition': 2, 'gate_output_nguon': 1}
+KINDS {'measured': 44, 'not_measured': 3, 'passed': 1, 'chuoi_khac': 1, 'dict': 9, 'list': 6}
+JOB_STATES {'not_measured': 753, 'failed': 1}
+CLAIMS_RECORDS 46 ACTIVE_RECORDS 44 ACTIVE_CLAIMS 61
+ACTIVE_WITH_PROV 22 ACTIVE_NO_PROV 22 ACTIVE_L5 8
+L8_ROWS 36
+L8_TABLE_DIFF [{'spec': None, 'actual': ['pr679-wp678', '0', 'BO_QUA', '1', 'list', 'ĐỎ', 'MIỄN']}] EXTRA_ROWS []
+L7_LANDED 49 WITH_CLAIM 32 WITHOUT_CLAIM 17
+PROVENANCE_JOB_SET_DIFF []
+POSITIVE_ANCHORS 45 NO_RUN 15 WITH_HEAD 45
+ANCHOR pr1023-wp1009-r4-land-evidence.yaml $.pre_merge_checks[1].moc_gate_output run= 41004664516 head= {'sha': '5b76266d391695940c449497bfbf0acbdfb7d499'}
+ANCHOR pr1023-wp1009-r4-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41017062295 head= {'sha': '09e059457a033de769f7cb789edc20810f4b95f5'}
+ANCHOR pr1042-pr1068-cloud-setup-p2-spec-land-evidence.yaml $.pre_merge_checks[1].moc_gate_output run= 41154566783 head= {'sha': 'eb7242561f5dd99071991cbc38528bdb3cb1cf52'}
+ANCHOR pr1042-pr1068-cloud-setup-p2-spec-land-evidence.yaml $.pre_merge_checks[4].moc_gate_output run= 41177514143 head= {'sha': '780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3'}
+ANCHOR pr1042-pr1068-cloud-setup-p2-spec-land-evidence.yaml $.pre_merge_checks[7].moc_gate_output run= 41190930302 head= {'sha': '019d044739068d393e7067d3b88250e90c492713'}
+ANCHOR pr1042-pr1068-cloud-setup-p2-spec-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41168732673 head= {'sha': '01ff65035c8b0833fa521b93239931772c14dffd'}
+ANCHOR pr1042-pr1068-cloud-setup-p2-spec-land-evidence.yaml $.post_merge_checks[1].moc_gate_output run= 41183079664 head= {'sha': '97120d3c76ebb7c3eda4b585ff46f1c51e30c91b'}
+ANCHOR pr1042-pr1068-cloud-setup-p2-spec-land-evidence.yaml $.post_merge_checks[5].moc_gate_output run= 41198029007 head= {'sha': '1bc4684571db74de9a607d6a1267df6506fa4a0d'}
+ANCHOR pr1046-wp1030-r6-land-evidence.yaml $.post_merge_checks[1].moc_gate_output run= 41094993408 head= {'sha': '8cdb15a786304bab084b43c8b30c127ae87e2594'}
+ANCHOR pr1048-claude-md-powershell-land-evidence.yaml $.post_merge_checks[0].bon_moc_10_2_2.gate_output run= 41161511121 head= {'merge_commit': 'b653574b117fa1496fbf58f09a22a8cbed5cc5dc'}
+ANCHOR pr1063-wp1038-r1-land-evidence.yaml $.pre_merge_checks[1].moc_gate_output run= 41160377869 head= {'sha': '08baebb25b54ce343c9ad56df5f4c389a6241c7e'}
+ANCHOR pr1063-wp1038-r1-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41168708394 head= {'sha': '69dcfee9274aae12ca27dfecc22a980e560cc3bc'}
+ANCHOR pr1073-wp1039-r1-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41209445414 head= {'sha': 'a253c169ed79617b8d1a4754867c336ac72c72c5'}
+ANCHOR pr1080-wp1077-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41259734324 head= {'sha': '9ced16f3764aed80a3f2ac21ca3db475cbf8aea5'}
+ANCHOR pr1095-pr1101-cloud-setup-p3-p3b-spec-land-evidence.yaml $.post_merge_checks[1].moc_gate_output run= 41398738297 head= {'sha': '8f123b27b338e5e173a668209eb4904f49dd611b'}
+ANCHOR pr1095-pr1101-cloud-setup-p3-p3b-spec-land-evidence.yaml $.post_merge_checks[3].moc_gate_output run= 41398722520 head= {'sha': '47ee1b206d284c82d16036972b82b17196cd8dc7'}
+ANCHOR pr1097-wp1078-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41279007434 head= {'sha': '7eeb1d9a10aea8e1805b66fbf3d68549eb6778da'}
+ANCHOR pr1100-wp1089-r2-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41271627232 head= {'sha': 'e4fdab583a33b08f364a9daa30035d48416190bf'}
+ANCHOR pr1115-wp1079-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41322980582 head= {'sha': 'c82047da4d6f9546ce1d68282c37acf9567b74bc'}
+ANCHOR pr1115-wp1079-land-evidence.yaml $.landed_20261102.windows_sau_va.moc_gate_output run= 41365578430 head= {'sha': 'c7174bfe03b3acd22cfa055b5fce176129d29542'}
+ANCHOR pr1127-wp1120-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41356691133 head= {'sha': 'f2102fc388a884d994f7bfeb29ef6863b9972b66'}
+ANCHOR pr1128-wp1113-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41361081437 head= {'sha': 'c165a5d0d4048e10e7da875f2ba7524136fb5735'}
+ANCHOR pr1130-wp1122-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41365578445 head= {'sha': 'c7174bfe03b3acd22cfa055b5fce176129d29542'}
+ANCHOR pr1138-wp825-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41389693283 head= {'sha': 'e007a318ffbd0079380a72d9f74df8a401028ae4'}
+ANCHOR pr1141-wp1132-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41397085109 head= {'sha': 'b3249c3e8a5a8f3af5691160493b8ab3d52db99c'}
+ANCHOR pr1142-wp1117-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41399706045 head= {'sha': '279a39e34c26027ad792008962859aa79c16e35c'}
+ANCHOR pr1192-wp1147-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41949673119 head= {'sha': '9a5b462b6731c13f9f2c72b9d9774e58acb850f1'}
+ANCHOR pr1198-wp1195-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41959407371 head= {'sha': '4d258cc8831b5c6169114d1e8e88a8782096d6f6'}
+ANCHOR pr1231-wp1105-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 42032872356 head= {'sha': 'fe84620f897913c7f6c2ce5a0c7316a49655e82f'}
+ANCHOR pr997-wp978-land-evidence.yaml $.post_merge_checks[0].moc_gate_output run= 41396264926 head= {'sha': '02ddeb4e9ea9c130d935adc4d5bce4f11db7d6a0'}

@@ -1,0 +1,17 @@
+bb47274 CMD: python -B /tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r1-codex/repo/ops/land_evidence_nguon.py --root /tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r1-codex/work/bb47274 --tep /tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r1-codex/work/bb47274/ops/land/pr1127-wp1120-land-evidence.yaml rc= 0
+ĐẠT ops/land/pr1127-wp1120-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+bb47274 kiem_ho_so_land._xet_mot_tep= ('DAT', 'đủ authorized_head_sha và authorization_url, landed_20261105.quyet_dinh_chu_kho (landed đọc từ trang_thai_packet.landed, landed_20261105.landed)', True)
+936744e CMD: python -B /tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r1-codex/repo/ops/land_evidence_nguon.py --root /tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r1-codex/work/936744e --tep /tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r1-codex/work/936744e/ops/land/pr1127-wp1120-land-evidence.yaml rc= 0
+ĐẠT ops/land/pr1127-wp1120-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+936744e kiem_ho_so_land._xet_mot_tep= ('DAT', 'đủ authorized_head_sha và authorization_url, landed_20261105.quyet_dinh_chu_kho (landed đọc từ trang_thai_packet.landed, landed_20261105.landed)', True)
+936744e gate-output-41356691133.txt jobs= 37 without_OK= 37 gate_ubuntu_markers= [0]
+7f22121 CMD: python -B /tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r1-codex/repo/ops/land_evidence_nguon.py --root /tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r1-codex/work/7f22121 --tep /tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r1-codex/work/7f22121/ops/land/pr1127-wp1120-land-evidence.yaml rc= 0
+ĐẠT ops/land/pr1127-wp1120-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+7f22121 kiem_ho_so_land._xet_mot_tep= ('DAT', 'đủ authorized_head_sha và authorization_url, landed_20261105.quyet_dinh_chu_kho (landed đọc từ trang_thai_packet.landed, landed_20261105.landed)', True)
+7f22121 gate-output-41356691133.txt jobs= 37 without_OK= 1 gate_ubuntu_markers= [7]

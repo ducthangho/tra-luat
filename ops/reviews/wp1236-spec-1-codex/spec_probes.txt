@@ -1,0 +1,30 @@
+NON_SCALAR_GATE_KEYS: 15 keys in 9 records
+pr594-wp578-land-evidence.yaml $.danh_tinh_CI_10_2_2.post_merge.gate_output dict
+pr594-wp578-land-evidence.yaml $.danh_tinh_CI_10_2_2.pre_merge.gate_output dict
+pr594-wp578-land-evidence.yaml $.danh_tinh_CI_10_2_2.pre_merge_thu_hoi.gate_output dict
+pr594-wp578-land-evidence.yaml $.danh_tinh_CI_10_2_2.pre_merge_mo.gate_output dict
+pr679-wp678-land-evidence.yaml $.post_merge_checks[0].moc_gate_output list
+pr680-wp676-land-evidence.yaml $.post_merge_checks[1].moc_gate_output dict
+pr684-wp677-land-evidence.yaml $.pre_merge_checks[1].moc_gate_output dict
+pr684-wp677-land-evidence.yaml $.post_merge_checks[0].moc_gate_output dict
+pr689-wp677-land-evidence.yaml $.pre_merge_checks[0].moc_gate_output dict
+pr689-wp677-land-evidence.yaml $.post_merge_checks[0].moc_gate_output list
+pr696-wp668-land-evidence.yaml $.post_merge_checks[0].moc_gate_output list
+pr701-wp687-land-evidence.yaml $.pre_merge_checks[0].moc_gate_output dict
+pr701-wp687-land-evidence.yaml $.post_merge_checks[0].moc_gate_output list
+pr703-wp674-land-evidence.yaml $.post_merge_checks[0].moc_gate_output list
+pr707-wp705-land-evidence.yaml $.post_merge_checks[0].moc_gate_output list
+LUAT: 10 job types, 31 steps, 36 patterns
+LUAT_SPECIAL: {'CUOI': 6, 'KHONG': 1, 'JSON_OK': 8}
+A5 full fullmatch= True search= True
+A5 cut fullmatch= False search= False
+PREFIX_RULE_ON_REAL_LINE: '^cong_cu_test: (\\d+)/\\1 đạt;' fullmatch= False search= True
+HASH_MATCH_BUT_NOT_EXACT_HEAD: ops/land/pr1095-pr1101-cloud-setup-p3-p3b-spec-provenance/gate-output-41398738297.txt jobs= 37 header= # Gate output run 41398738297 attempt 1 (workflow_dispatch, nhanh claude/gate-hau-merge-8f123b27, head 8f123b27) — log REST tung job, 2026-11-04
+HASH_MATCH_BUT_NOT_EXACT_HEAD: ops/land/pr1095-pr1101-cloud-setup-p3-p3b-spec-provenance/gate-output-41398722520.txt jobs= 37 header= # Gate output run 41398722520 attempt 1 (workflow_dispatch, nhanh claude/gate-hau-merge-47ee1b20, head 47ee1b20) — log REST tung job, 2026-11-04
+HASH_MATCH_BUT_NOT_EXACT_HEAD: ops/land/pr1127-wp1120-provenance/ci/gate-output-41356691133.txt jobs= 37 header= # Gate output run 41356691133 attempt 1 (workflow_dispatch, nhanh tam ops/ci-f2102fc, head f2102fc3) — log REST tung job, do 2026-11-05; sinh bang tom_gate_output.py tom, tu kiem bang tom_gate_output.py kiem
+HASH_MATCH_BUT_NOT_EXACT_HEAD: ops/land/pr1128-wp1113-provenance/gate-output-41361081437.txt jobs= 37 header= # Gate output run 41361081437 attempt 1 (workflow_dispatch, nhanh claude/gate-hau-merge-c165a5d0, head c165a5d0) — log REST tung job, 2026-11-02
+HASH_MATCH_BUT_NOT_EXACT_HEAD: ops/land/pr1130-wp1122-provenance/gate-output-41365578445.txt jobs= 23 header= # Gate output run 41365578445 attempt 1 (push gate, nhanh master, head c7174bfe) — log REST tung job, 2026-11-02
+HASH_MATCH_BUT_NOT_EXACT_HEAD: ops/land/pr1138-wp825-provenance/gate-output-41389693283.txt jobs= 23 header= # Gate output run 41389693283 attempt 1 (push, nhanh master, head e007a318) — log REST tung job, 2026-11-02
+HASH_MATCH_BUT_NOT_EXACT_HEAD: ops/land/pr1141-wp1132-provenance/gate-output-41397085109.txt jobs= 23 header= # Gate output run 41397085109 attempt 1 (push master, head b3249c3) — log REST tung job, do 2026-11-05T04:15:30Z
+HISTORY 936744e jobs= 37 empty_total= 18 empty_gate_only= 17 gate_ubuntu_OK= [0]
+HISTORY 7f22121 jobs= 37 empty_total= 0 empty_gate_only= 0 gate_ubuntu_OK= [7]

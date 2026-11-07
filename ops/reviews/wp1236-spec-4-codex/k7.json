@@ -1,0 +1,472 @@
+{
+  "checkout": "fe84620f897913c7f6c2ce5a0c7316a49655e82f",
+  "T": 23,
+  "J": 22,
+  "matched_steps": 43,
+  "unpaired": [],
+  "env_differences": [],
+  "old_blocked_jobs": 19,
+  "old_blocked_steps": 20,
+  "r4_blocked_jobs": 0,
+  "r4_blocked_steps": 0,
+  "pipe_steps": [
+    [
+      "gate-ops (ubuntu-latest)",
+      "bo ca gate chay TRONG cgroup duoc uy quyen (Linux)",
+      null,
+      false
+    ]
+  ],
+  "unique_env_sets": [
+    [
+      "G5 gom manh ban kinh dot bien (#668)",
+      [
+        "CONG_CU_TEST_GOP_CHE_DO"
+      ]
+    ],
+    [
+      "G5 manh ban kinh dot bien (#668)",
+      [
+        "CONG_CU_TEST_MANH",
+        "CONG_CU_TEST_MANH_RA"
+      ]
+    ],
+    [
+      "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      [
+        "NHANH_DON_DUOC_DICH",
+        "NHANH_DON_DUOC_DICH_RA"
+      ]
+    ],
+    [
+      "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)",
+      [
+        "CI_DUONG_NHANH_CHE_DO"
+      ]
+    ],
+    [
+      "lease-publish selftest (đo lại setup sau G5)",
+      [
+        "AL_VER"
+      ]
+    ],
+    [
+      "test registry (phạm vi + các bộ chưa được nối)",
+      [
+        "CI_DANG_KY_DAU",
+        "CI_DANG_KY_DOT_BIEN_MANH",
+        "CI_DANG_KY_GOC",
+        "CI_DANG_KY_GOP_KQ",
+        "CI_DANG_KY_SU_KIEN",
+        "CI_DANG_KY_WORKERS"
+      ]
+    ]
+  ],
+  "details": [
+    {
+      "job": "gate-ops (ubuntu-latest)",
+      "step": "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)",
+      "env_keys": [
+        "CI_DUONG_NHANH_CHE_DO"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-ops (ubuntu-latest)",
+      "step": "bien-nhan v2 selftest",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-ops (ubuntu-latest)",
+      "step": "lease-publish selftest (đo lại setup sau G5)",
+      "env_keys": [
+        "AL_VER"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-ops (ubuntu-latest)",
+      "step": "don-nhanh selftest (chốt xoá nhánh)",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-ops (ubuntu-latest)",
+      "step": "bo ca gate chay TRONG cgroup duoc uy quyen (Linux)",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "codex credential selftest (packet #300)",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "idiom-ba-ten selftest",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "eol-policy selftest",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "pre-push selftest",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "eol-policy survey",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "bundled-fragment check (topology gói)",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "gen_instructions selftest",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "command-registry unit test (AG-T0-03)",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "tl selftest (co bang chung exact-identity)",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "workflow-audit strict",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "golden-test",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "doc-claims-check strict",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "determinism-audit strict",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "ci-phamvi guard (bang phu thuoc khop ma)",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "ci-phamvi selftest (phan chung — cong co rang)",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "release-check full",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "release-verify strict (lane LAND — manifest committed)",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "release-bundle x2 cùng SHA-256",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-packet-loop (ubuntu-latest)",
+      "step": "packet-loop selftest",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 5)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "env_keys": [
+        "NHANH_DON_DUOC_DICH",
+        "NHANH_DON_DUOC_DICH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 6)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "env_keys": [
+        "NHANH_DON_DUOC_DICH",
+        "NHANH_DON_DUOC_DICH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 3)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "env_keys": [
+        "NHANH_DON_DUOC_DICH",
+        "NHANH_DON_DUOC_DICH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 0)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "env_keys": [
+        "NHANH_DON_DUOC_DICH",
+        "NHANH_DON_DUOC_DICH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 1)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "env_keys": [
+        "CONG_CU_TEST_MANH",
+        "CONG_CU_TEST_MANH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 4)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "env_keys": [
+        "CONG_CU_TEST_MANH",
+        "CONG_CU_TEST_MANH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 7)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "env_keys": [
+        "CONG_CU_TEST_MANH",
+        "CONG_CU_TEST_MANH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 3)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "env_keys": [
+        "CONG_CU_TEST_MANH",
+        "CONG_CU_TEST_MANH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 4)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "env_keys": [
+        "NHANH_DON_DUOC_DICH",
+        "NHANH_DON_DUOC_DICH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 5)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "env_keys": [
+        "CONG_CU_TEST_MANH",
+        "CONG_CU_TEST_MANH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 1)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "env_keys": [
+        "NHANH_DON_DUOC_DICH",
+        "NHANH_DON_DUOC_DICH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 6)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "env_keys": [
+        "CONG_CU_TEST_MANH",
+        "CONG_CU_TEST_MANH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 0)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "env_keys": [
+        "CONG_CU_TEST_MANH",
+        "CONG_CU_TEST_MANH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 7)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "env_keys": [
+        "NHANH_DON_DUOC_DICH",
+        "NHANH_DON_DUOC_DICH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 2)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "env_keys": [
+        "NHANH_DON_DUOC_DICH",
+        "NHANH_DON_DUOC_DICH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 2)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "env_keys": [
+        "CONG_CU_TEST_MANH",
+        "CONG_CU_TEST_MANH_RA"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-nhanh-gop (ubuntu-latest)",
+      "step": "gộp mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "env_keys": [],
+      "old_block": false,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-registry (ubuntu-latest)",
+      "step": "test registry (phạm vi + các bộ chưa được nối)",
+      "env_keys": [
+        "CI_DANG_KY_DAU",
+        "CI_DANG_KY_DOT_BIEN_MANH",
+        "CI_DANG_KY_GOC",
+        "CI_DANG_KY_GOP_KQ",
+        "CI_DANG_KY_SU_KIEN",
+        "CI_DANG_KY_WORKERS"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    },
+    {
+      "job": "gate-cong-cu-gop (ubuntu-latest)",
+      "step": "G5 gom manh ban kinh dot bien (#668)",
+      "env_keys": [
+        "CONG_CU_TEST_GOP_CHE_DO"
+      ],
+      "old_block": true,
+      "r4_block": [],
+      "pipe": false
+    }
+  ]
+}

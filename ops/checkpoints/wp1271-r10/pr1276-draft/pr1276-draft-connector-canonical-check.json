@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "actual_consumer": "canonical C _doc_connector",
+  "head": "d2fecaa1516cbc8c20b70331a45c8c728e59ddce",
+  "result": [
+    [],
+    {
+      "reviews": null,
+      "review_comments": null,
+      "issue_comments": 6713671526
+    }
+  ],
+  "source": "/workspace/scratch/proxima-p1-s1-20261107/pr1276-state-2212/connector.json",
+  "receipt_comment": 6713671526
+}

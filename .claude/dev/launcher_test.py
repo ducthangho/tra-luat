@@ -14142,7 +14142,8 @@ DOT_BIEN = [
     # #1252 lượt Codex offline 1 (run e9e4e6ce): mỗi finding F1–F7 một chốt, một đột biến.
     ("r1252_ghi_de_dich_truc_tiep", ('                os.replace(tam, duong.name, src_dir_fd=dfd, dst_dir_fd=dfd)\n',
                                      '                os.unlink(tam, dir_fd=dfd)\n                with open(duong, "wb") as g:\n                    g.write(data)\n'),
-     ["r1252_ghi_bang_chung_an_toan"]),
+     ["r1252_ghi_bang_chung_an_toan"],
+     ("posix", "nhanh dir_fd cua _ghi_tep_0600 khong chay tren Windows (_CO_DIR_FD False)")),
     ("r1252_nuot_loi_ghi_bang_chung",
      ('                    kq_chup.update(snapshot_ket_qua="khong_do_duoc", snapshot_ly_do="chup_loi")', '                    pass'),
      ["r1252_ghi_bang_chung_an_toan"]),

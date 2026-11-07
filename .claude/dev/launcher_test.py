@@ -128,15 +128,36 @@ def tao_worktree(goc: Path) -> Path:
     return wt
 
 
-def tao_claude_gia(goc: Path) -> Path:
-    dich = goc / ("claude.exe" if LA_WINDOWS else "claude")
+def _bin_python_gia(dich: Path) -> Path:
+    """Dựng một CLI giả bằng cách đặt bản thông dịch Python dưới tên khác (`codex`, `claude`).
+
+    Đo 07-11-2026 (container Claude Code web): Python ở đó là bản đóng gói RỜI, biên dịch với
+    prefix `/install` (không tồn tại); bản THẬT tìm ra stdlib nhờ dò mốc quanh chính đường dẫn của
+    nó, còn bản link/copy sang thư mục tạm dò trượt, lùi về `/install` rồi chết
+    `No module named 'encodings'`, rc=1, KHÔNG in gì ra stdout. Mười ca `run` đỏ vì vậy — kể cả
+    trên master — trong khi CI xanh, vì Python của runner nằm đúng prefix nó được biên dịch.
+    Lỗi của FIXTURE (giả định "link trình thông dịch đi đâu cũng chạy"), không phải của launcher.
+
+    Chữa bằng đúng cơ chế venv: `pyvenv.cfg` cạnh bản sao, `home` trỏ thư mục của bản thật.
+    Chỉ trên POSIX — lane Windows đang xanh với cách cũ, không có bằng chứng nào đòi đổi nó.
+    """
+    goc = Path(PY).resolve()
     try:
-        os.link(Path(PY).resolve(), dich)
+        os.link(goc, dich)
     except OSError:
-        shutil.copy2(Path(PY).resolve(), dich)
+        shutil.copy2(goc, dich)
     if not LA_WINDOWS:
         dich.chmod(0o755)
+        cfg = dich.parent / "pyvenv.cfg"
+        noi_dung = f"home = {goc.parent}\ninclude-system-site-packages = true\n"
+        if cfg.exists() and cfg.read_text(encoding="utf-8") != noi_dung:
+            raise AssertionError(f"pyvenv.cfg khac da co o {cfg}: hai CLI gia cung thu muc, khac goc")
+        cfg.write_text(noi_dung, encoding="utf-8")
     return dich
+
+
+def tao_claude_gia(goc: Path) -> Path:
+    return _bin_python_gia(goc / ("claude.exe" if LA_WINDOWS else "claude"))
 
 
 def head_cua(d: Path) -> str:
@@ -6556,13 +6577,7 @@ def r14_run_json_bam_lai_dung_hai_log():
 @ca
 def r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh():
     with San() as s:
-        repo = tao_repo(s); cli = s / ("codex.exe" if LA_WINDOWS else "codex")
-        try:
-            os.link(Path(PY).resolve(), cli)
-        except OSError:
-            shutil.copy2(Path(PY).resolve(), cli)
-        if not LA_WINDOWS:
-            cli.chmod(0o755)
+        repo = tao_repo(s); cli = _bin_python_gia(s / ("codex.exe" if LA_WINDOWS else "codex"))
         ds = []
         for i in range(2):
             rr = s / f"runs-{i}"
@@ -6592,14 +6607,28 @@ def _r25_khung(loai, rid, model, target="tungstenite::protocol", truoc=""):
 
 
 def _r25_codex_gia(s):
-    cli = s / ("codex.exe" if LA_WINDOWS else "codex")
-    try:
-        os.link(Path(PY).resolve(), cli)
-    except OSError:
-        shutil.copy2(Path(PY).resolve(), cli)
-    if not LA_WINDOWS:
-        cli.chmod(0o755)
-    return cli
+    return _bin_python_gia(s / ("codex.exe" if LA_WINDOWS else "codex"))
+
+
+@ca
+def r20261107_cli_gia_bang_python_phai_CHAY_DUOC_that():
+    """Fixture "CLI giả = trình thông dịch Python đổi tên" phải tự chứng minh nó chạy được.
+
+    Thiếu ca này, một fixture hỏng KHÔNG đỏ ở chỗ hỏng mà đỏ ở mười ca `run` khác dưới dạng
+    `launcher rc=1` stderr rỗng — trông y hệt một hồi quy của launcher (đo 07-11-2026). Ca này
+    chỉ PHÂN BIỆT được trên nền có Python không di dời được (bản đóng gói rời, prefix biên dịch
+    không tồn tại); trên runner CI nó xanh cả với fixture cũ — đó là giới hạn đã biết, không phải
+    bằng chứng fixture cũ đúng.
+    """
+    with San() as s:
+        for ten in ("codex", "claude"):
+            d = s / ten
+            d.mkdir()
+            cli = _bin_python_gia(d / (ten + (".exe" if LA_WINDOWS else "")))
+            r = subprocess.run([str(cli), "-c", "import encodings, json; print('CLI-GIA-SONG')"],
+                               capture_output=True, text=True, timeout=60)
+            bang(r.returncode == 0 and "CLI-GIA-SONG" in r.stdout,
+                 f"CLI gia {ten} khong chay duoc: rc={r.returncode} {r.stderr[-300:]!r}")
 
 
 def _r25_chay(s, noi_dung_err, sau="", them=(), env=None):

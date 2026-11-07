@@ -18,7 +18,10 @@ $script:Fields = @('schemaVersion', 'targetId', 'mode', 'basePath', 'connectionU
 # everywhere (Test-PxFieldName), never collation; keys are never trimmed, stripped or normalized into allowed names.
 $script:FieldSet = [Collections.Generic.HashSet[string]]::new([string[]]$script:Fields, [StringComparer]::Ordinal)
 $script:RemoteOnly = @('connectionUri', 'configurationName')
-$script:SecretKey = '(?i)pass|pwd|secret|token|credential|cookie|api.?key|auth|bearer|private|cert'
+# r10 (native H6: '(?i)' follows the CURRENT culture; tr-TR folds 'I' to dotless U+0131, so basePath C:\conin$ was ACCEPTED and
+# key PRIVATE was UnknownField): case-insensitive rules are CultureInvariant regexes; the caller's culture is never read or set.
+$script:SecretKey = [regex]::new('pass|pwd|secret|token|credential|cookie|api.?key|auth|bearer|private|cert', [Text.RegularExpressions.RegexOptions]'IgnoreCase, CultureInvariant')
+$script:ReDevice = [regex]::new('^(?:CON|PRN|AUX|NUL|CONIN\$|CONOUT\$|(?:COM|LPT)[0-9' + [char]0xB9 + [char]0xB2 + [char]0xB3 + '])(?:\..*)?\z', [Text.RegularExpressions.RegexOptions]'IgnoreCase, CultureInvariant')
 # ReparsePoint 0x400 | Offline 0x1000 | RecallOnOpen 0x40000 | RecallOnDataAccess 0x400000 (cloud placeholders).
 $script:BadAttr = 0x441400
 $script:MaxBytes = 65536
@@ -48,17 +51,17 @@ function New-PxError([string]$Code, [string]$Field) {
     if ($Code -cnotmatch '^[A-Za-z]{1,40}\z') { $Code = 'Internal' }
     $msg = "Config rejected: $Code."
     if (Test-PxFieldName $Field) { $msg += " Field: $Field." }
-    $cat = $(if ($Code -like '*NotFound') { 'ObjectNotFound' } else { 'InvalidData' })
+    $cat = $(if ($Code -clike '*NotFound') { 'ObjectNotFound' } else { 'InvalidData' })
     return [Management.Automation.ErrorRecord]::new([InvalidOperationException]::new("ProximaConfig: $msg"), "ProximaConfig.$Code", $cat, $null)
 }
-# Syntax only, no filesystem access: X:\seg\seg with no empty, dot, trailing-dot/space, device or stream
-# segment. Rejects relative, drive-relative (C:x), rooted (\x), UNC/device (\\x) and forward-slash forms.
+# Syntax only, no filesystem access: X:\seg\seg (X literal ASCII, case-sensitive match) with no empty, dot, trailing-dot/space,
+# stream or device segment (any case/culture; COM/LPT + 0-9 or superscript 1-3). Rejects relative, C:x, \x, \\x and '/' forms.
 function Test-PxPathSyntax([string]$Path) {
-    if ($Path.Length -gt 32000 -or $Path -notmatch '^[A-Za-z]:\\') { return $false }
+    if ($Path.Length -gt 32000 -or $Path -cnotmatch '^[A-Za-z]:\\') { return $false }
     if ($Path.Length -eq 3) { return $true }
     foreach ($seg in $Path.Substring(3).Split([char]'\')) {
-        if ($seg.Length -eq 0 -or $seg -match '[\x00-\x1f<>:"/|?*]|[. ]\z' -or
-            $seg -match '^(?i:CON|PRN|AUX|NUL|CONIN\$|CONOUT\$|COM[0-9]|LPT[0-9])(\..*)?\z') { return $false }
+        if ($seg.Length -eq 0 -or $seg -cmatch '[\x00-\x1f<>:"/|?*]|[. ]\z' -or
+            $script:ReDevice.IsMatch($seg)) { return $false }
     }
     return $true
 }
@@ -106,8 +109,8 @@ function Get-PxVolumePaths([string]$Volume) {
 function Open-PxRoot([string]$Drive, $Ctx, [int]$Depth) {
     if ($Depth -gt 8) { Stop-Px Unverifiable }
     $target = Get-PxDosTarget $Drive; $Ctx.Recheck.Add(@('dos', $Drive, $target)); $want = $null
-    if ($target.StartsWith('\??\')) { $want = Get-PxBackingFinal $target.Substring(4) $Ctx $Depth }
-    elseif (-not $target.StartsWith('\Device\')) { Stop-Px Unverifiable }
+    if ($target.StartsWith('\??\', [StringComparison]::Ordinal)) { $want = Get-PxBackingFinal $target.Substring(4) $Ctx $Depth }
+    elseif (-not $target.StartsWith('\Device\', [StringComparison]::Ordinal)) { Stop-Px Unverifiable }
     $node = Open-PxNode "$Drive\" 3 'Unverifiable' $Ctx
     if ($null -eq $want) { $want = $script:ReVolume.Match($node.Final).Value }
     if (-not $node.Final.Equals($want, [StringComparison]::OrdinalIgnoreCase)) { Stop-Px Unverifiable }
@@ -231,7 +234,7 @@ function Get-PxField($o, [string]$Name, [string]$Kind, [scriptblock]$Valid) {
     return $o[$Name].V
 }
 function ConvertTo-PxConfig($o) {
-    foreach ($k in $o.Keys) { if (-not (Test-PxFieldName $k) -and $k -match $script:SecretKey) { Stop-Px SecretField } }
+    foreach ($k in $o.Keys) { if (-not (Test-PxFieldName $k) -and $script:SecretKey.IsMatch($k)) { Stop-Px SecretField } }
     foreach ($k in $o.Keys) { if (-not (Test-PxFieldName $k)) { Stop-Px UnknownField } }
     $null = Get-PxField $o 'schemaVersion' 'number' { $args[0] -ceq '1' }
     $out = [ordered]@{ schemaVersion = 1 }

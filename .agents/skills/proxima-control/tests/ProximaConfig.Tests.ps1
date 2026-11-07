@@ -3,7 +3,9 @@
 #   powershell.exe|pwsh.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File <copy>\ProximaConfig.Tests.ps1 `
 #     -ModulePath <tree>\.agents\skills\proxima-control\scripts\ProximaConfig.psm1 -RepositoryRoot <tree> `
 #     -ScratchRoot <existing dir outside the tree> -ReportPath <json outside the tree> [-VhdFixture] `
-#     [-Counterexamples [-EvidenceRoot <durable dir outside the tree; default ScratchRoot>]]
+#     [-Counterexamples [-EvidenceRoot <durable dir outside the tree; default ScratchRoot>]] [-TestCulture en-US|tr-TR]
+# r10: -TestCulture (default en-US) is set for THIS process before module import/any regex, recorded as measured, checked before
+# every case, forwarded to every child; under tr-TR A2-04 'basePath reserved conin$' and A4-01 'PRIVATE upper' prove invariance.
 # rc 0: every required ID ran once and passed AND cleanup was verified. rc 1: a case failed (an absent module/API fails
 # each case with API_ABSENT; every case still executes). rc 2: setup or cleanup error - never a test outcome; the report
 # is written on every path. Required: 21 mandatory IDs, plus closure A3-08 with -VhdFixture (r4 acceptance runs give
@@ -16,7 +18,7 @@
 [CmdletBinding()]
 param([Parameter(Mandatory = $true)][string]$ModulePath, [Parameter(Mandatory = $true)][string]$ScratchRoot,
     [string]$ReportPath = '', [string]$RepositoryRoot = '', [string]$SamplePath = '', [string]$EvidenceRoot = '',
-    [switch]$Counterexamples, [switch]$VhdFixture, [switch]$InjectCleanupFailure)
+    [switch]$Counterexamples, [switch]$VhdFixture, [switch]$InjectCleanupFailure, [ValidateSet('en-US', 'tr-TR', IgnoreCase = $false)][string]$TestCulture = 'en-US')
 Set-StrictMode -Version 3.0
 $ErrorActionPreference = 'Stop'
 $Ids = 'A1-01', 'A1-02', 'A2-01', 'A2-02', 'A2-03', 'A2-04', 'A2-05', 'A2-06', 'A2-07', 'A3-01', 'A3-02', 'A3-03', 'A3-04', 'A3-05', 'A3-06',
@@ -26,7 +28,7 @@ $Results = [Collections.Generic.List[object]]::new()
 $Cleanup = [ordered]@{ status = 'not_run'; errors = [Collections.Generic.List[string]]::new(); subst = [Collections.Generic.List[object]]::new(); vhd = $null
     tree_removed = $false; keep_sentinel_intact = $null; mappings_before = $null; mappings_after = $null }
 $Report = [ordered]@{ schema = 'proxima_config_tests.v3'; ps_version = "$($PSVersionTable.PSVersion)"; ps_edition = "$($PSVersionTable.PSEdition)"
-    module_path = $ModulePath; module_sha256 = $null; sample_sha256 = $null; harness_sha256 = $null; api_state = 'unknown'
+    test_culture_requested = $TestCulture; test_culture = $null; test_ui_culture = $null; test_culture_probe = $null; module_path = $ModulePath; module_sha256 = $null; sample_sha256 = $null; harness_sha256 = $null; api_state = 'unknown'
     alias_r = $null; subst_drive = $null; subst_junction_drive = $null; short_name_alias = $null; vhd_fixture = [bool]$VhdFixture; setup_error = $null
     mandatory_ids = $Ids; optional_ids = @('A3-07'); closure_ids = $Closure; counterexample_ids = @(); scratch = $null; evidence_dir = $null; snapshot_exclusions = @()
     key_identity_observations = $null; total = 0; passed = 0; failed = 0; failed_ids = @(); setup_error_ids = @(); unavailable_ids = @(); cases = $Results
@@ -219,6 +221,7 @@ function Assert-Accepted($X, [string]$TargetId, [string]$Label) {
 function Invoke-Case([string]$Id, [string[]]$Needs, [scriptblock]$Body) {
     $script:CaseFail = [Collections.Generic.List[string]]::new(); $why = $null; $outcome = 'passed'
     try {
+        if ([Globalization.CultureInfo]::CurrentCulture.Name -cne $TestCulture) { throw "CULTURE_CHANGED[$([Globalization.CultureInfo]::CurrentCulture.Name)] before this case, run under $TestCulture" }
         if ($Needs -contains 'api' -and -not $ApiPresent) { throw "API_ABSENT: Read-ProximaConfig not available from ModulePath ($($Report.api_state))" }
         if ($Needs -contains 'module' -and -not [IO.File]::Exists($ModulePath)) { throw 'API_ABSENT: module file absent' }
         if ($Needs -contains 'sample' -and -not [IO.File]::Exists($SamplePath)) { throw 'API_ABSENT: sample file absent' }
@@ -239,6 +242,11 @@ function Get-Kill($Rep, [string[]]$Want) {
     return , $hit
 }
 # ---- setup: any failure here is rc 2 ----
+# r10: culture FIRST (nothing above imported the module or evaluated a regex); this process only, thread + new threads.
+$Tc = [Globalization.CultureInfo]::GetCultureInfo($TestCulture); [Threading.Thread]::CurrentThread.CurrentCulture = $Tc; [Threading.Thread]::CurrentThread.CurrentUICulture = $Tc
+[Globalization.CultureInfo]::DefaultThreadCurrentCulture = $Tc; [Globalization.CultureInfo]::DefaultThreadCurrentUICulture = $Tc; $Report.test_culture = [Globalization.CultureInfo]::CurrentCulture.Name; $Report.test_ui_culture = [Globalization.CultureInfo]::CurrentUICulture.Name
+$LowI = [int]('I'.ToLower()[0]); $ReI = 'i' -match '^I\z'; $Report.test_culture_probe = 'lower(I)=U+{0:X4}; i -match I={1}' -f $LowI, $ReI
+if ($Report.test_culture -cne $TestCulture -or ($LowI -eq 0x131) -ne ($TestCulture -ceq 'tr-TR') -or $ReI -eq ($TestCulture -ceq 'tr-TR')) { throw "test culture $TestCulture not in effect: $($Report.test_culture); $($Report.test_culture_probe)" }
 if ([Environment]::OSVersion.Platform -ne 'Win32NT') { throw 'Windows host required' }
 $Helpers = @(Get-Command -CommandType Function | Where-Object { $_.ScriptBlock.File -eq $PSCommandPath } | ForEach-Object { $_.Name })
 $shadowed = @($Helpers | Where-Object { Get-Alias -Name $_ -ErrorAction SilentlyContinue })
@@ -371,6 +379,22 @@ Invoke-Case 'A2-04' api {
         }
         Assert-Rejected (Invoke-GuardedRead (Write-Fixture 'ext1\t.json' (New-ConfigJson -Drop $f))) 'InvalidField' "missing $f"
     }
+    # r10 (native H6: tr-TR ACCEPTED basePath C:\conin$): profile + reserved devices (any case/culture, superscript COM/LPT), both
+    # routes; ordinary controls return exactly. Written with '/' (made '\') and [char]. Label '<route> basePath <kind>'.
+    $big = 'C:/' + 'x' * 31997; $c = [char[]](0xB9, 0xB2, 0xB3, 0x212A, 0x130, 0x131, 0x1EEF, 0x1EC7, 0xFF23)
+    $ok = [ordered]@{ 'ordinary Unicode' = "z:/D$($c[6]) li$($c[7])u/$($c[4])stanbul/$($c[5])"; 'device-like ordinary names' = 'C:/console/COM10/nul1/LPT0x/conin$x/auxiliary/CON_'; 'drive root' = 'D:/'; 'max length' = $big }
+    $no = [ordered]@{ 'reserved conin$' = 'C:/conin$'; 'reserved CONOUT$ extension' = 'C:/px/CONOUT$.log'; 'reserved nul extension' = 'C:/px/nul.txt'
+        'reserved Com1' = 'C:/px/Com1'; 'reserved lpt9' = 'c:/lpt9'; 'reserved aux' = 'C:/aux'; 'reserved prn extensions' = 'C:/px/prn.a.b'
+        'superscript COM1' = "C:/px/COM$($c[0])"; 'superscript lpt2 extension' = "C:/px/lpt$($c[1]).log"; 'superscript com3' = "C:/com$($c[2])"
+        'Unicode drive Kelvin' = "$($c[3]):/px"; 'Unicode drive dotted I' = "$($c[4]):/px"; 'Unicode drive fullwidth C' = "$($c[8]):/px"
+        'over max length' = $big + 'x'; 'trailing dot segment' = 'C:/px/a.'; 'trailing space segment' = 'C:/px/a '; 'empty segment' = 'C:/px//a'; 'dot segment' = 'C:/px/./a' }
+    foreach ($rm in $false, $true) {
+        $md = $(if ($rm) { 'Remote' } else { 'Local' }); foreach ($k in @($ok.Keys) + @($no.Keys)) {
+            $p = "$($ok[$k])$($no[$k])".Replace('/', $B); $r = Invoke-GuardedRead (Write-Fixture 'ext1\t.json' (New-ConfigJson -Remote:$rm @{ basePath = '"' + $p.Replace($B, $B + $B) + '"' }))
+            if ($ok.Contains($k)) { Assert-Accepted $r $(if ($rm) { 'tgt-two' } else { 'tgt-one' }) "$md basePath $k"; if ($r.Out -and -not (Test-SameText $r.Out.basePath $p)) { Add-Fail "ALTERED_VALID[$md basePath $k]" } }
+            else { Assert-Rejected $r 'InvalidField' "$md basePath $k"; if ($r.Err -and $r.Err.Exception.Message -notlike '*Field: basePath.*') { Add-Fail "FIELD_NOT_NAMED[$md basePath $k]" } }
+        }
+    }
 }
 Invoke-Case 'A2-05' api {
     Assert-Rejected (Invoke-GuardedRead (Write-Fixture 'ext1\u.json' (New-ConfigJson @{ extra = '1' }))) 'UnknownField' 'unknown field'
@@ -468,6 +492,7 @@ Invoke-Case 'A4-01' api {
     $all = @(@('password', 'SecretField', (New-ConfigJson @{ password = $q })), @('apiToken', 'SecretField', (New-ConfigJson @{ apiToken = $q })),
         @('Client_Secret', 'SecretField', (New-ConfigJson @{ Client_Secret = $q })), @('cookie', 'SecretField', (New-ConfigJson @{ cookie = $q })),
         @('credential', 'SecretField', (New-ConfigJson @{ credential = '{"u":' + $q + '}' })), @('notes', 'UnknownField', (New-ConfigJson @{ notes = $q })),
+        @('PRIVATE upper', 'SecretField', (New-ConfigJson @{ PRIVATE = $q })),
         @('targetId', 'InvalidField', (New-ConfigJson @{ targetId = '[' + $q + ']' })), @('mode', 'InvalidField', (New-ConfigJson @{ mode = $q })),
         @('uri userinfo', 'InvalidField', (New-ConfigJson -Remote @{ connectionUri = '"https://u:' + $z + '@gw.example.invalid/"' })),
         @('uri query', 'InvalidField', (New-ConfigJson -Remote @{ connectionUri = '"https://gw.example.invalid/?k=' + $z + '"' })),
@@ -547,6 +572,9 @@ $Cx = @(@{ n = 'default-config'; e = @('$repo = Open-PxChain', "$Default; `$repo
     # r9: H6's culture-aware membership restored in the one Ordinal helper must ACCEPT every U+0000 extra-key variant.
     @{ n = 'cultural-key-membership'; e = @('return $script:FieldSet.Contains($Name)', 'return $script:Fields -ccontains $Name')
         red = @(foreach ($md in 'Local', 'Remote') { foreach ($f in $KeyNames) { foreach ($p in 'prefix', 'infix', 'suffix') { "A2-05:ACCEPTED_INVALID[$md $f NUL $p]" } } }) },
+    # r10: H7's culture-following device rule restored must ACCEPT conin$ on both routes under tr-TR (focused runs; en-US: no credit).
+    @{ n = 'cultural-reserved-device'; e = @('$script:ReDevice.IsMatch($seg)', '$seg -match ''^(?i:CON|PRN|AUX|NUL|CONIN\$|CONOUT\$|COM[0-9]|LPT[0-9])(\..*)?\z''')
+        red = @('A2-04:ACCEPTED_INVALID[Local basePath reserved conin$]', 'A2-04:ACCEPTED_INVALID[Remote basePath reserved conin$]') },
     @{ n = 'echo-raw'; e = @('$msg = "Config rejected: $Code."', '$msg = "Config rejected: $Code." + $Field', '(New-PxError $code $field)', '(New-PxError $code ([string]$text))')
         red = @('A4-01:SENTINEL_ECHOED[password]') },
     @{ n = 'side-effect'; e = @('$repo = Open-PxChain', 'Invoke-WebRequest -Uri https://side-effect.invalid/ -UseBasicParsing | Out-Null; $repo = Open-PxChain'); red = @('A5-03:SIDE_EFFECT_HITS[') },
@@ -561,6 +589,7 @@ function Test-Counterexample($M, [int]$Rc, $Rec) {
     if (-not [IO.File]::Exists($Rec.report_path)) { throw "child report absent (rc=$Rc)" }
     $rep = [IO.File]::ReadAllText($Rec.report_path) | ConvertFrom-Json
     $state = "rc=$Rc setup_error=$($rep.setup_error) cleanup=$($rep.cleanup.status) [$($rep.cleanup.errors -join '; ')]"
+    if ("$($rep.test_culture)" -cne $TestCulture) { throw "child measured culture '$($rep.test_culture)', parent runs $TestCulture ($state)" }
     if ($M.k -eq 'i') {
         $kept = @($rep.cleanup.subst | Where-Object { -not $_.removed })
         $bad = $Rc -ne 2 -or $rep.setup_error -or $rep.failed -or $rep.passed -ne $rep.total -or $rep.total -lt $Ids.Count -or $kept.Count
@@ -593,7 +622,7 @@ if ($Counterexamples) {
             }
             $d = "$S\cx\$($m.n)"; $null = [IO.Directory]::CreateDirectory($d)
             $argv = [Collections.Generic.List[string]]@('-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $PSCommandPath, '-ModulePath', $mp,
-                '-SamplePath', $sp, '-RepositoryRoot', $RepositoryRoot, '-ScratchRoot', $d, '-ReportPath', "$tag.report.json")
+                '-SamplePath', $sp, '-RepositoryRoot', $RepositoryRoot, '-ScratchRoot', $d, '-ReportPath', "$tag.report.json", '-TestCulture', $TestCulture)
             if ($m.vhd) { $argv.Add('-VhdFixture') }; if ($m.k -eq 'i') { $argv.Add('-InjectCleanupFailure') }
             $run = Invoke-Native $Exe @($argv); [IO.File]::WriteAllText("$tag.output.txt", "$($run.out)", $Utf8)
             # Hashes are taken right after the child exits, before anything else reads or removes anything.

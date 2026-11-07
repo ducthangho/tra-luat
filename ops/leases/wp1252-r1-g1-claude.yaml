@@ -22,8 +22,23 @@ recorder_ghi_chu: 'Phien session_015GtxraXfMD1t2FJLzzGDr4 soan spec, ghi lease v
 
 leased_at_utc: '2026-11-06T07:09:00Z'
 heartbeat_at: '2026-11-06T07:09:00Z'
-lease_until: '2026-11-07T19:12:00Z'
-lease_expires_at_utc: '2026-11-07T19:12:00Z'
+lease_until: '2026-11-07T10:00:00Z'
+lease_expires_at_utc: '2026-11-07T10:00:00Z'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-07T19:12:00Z'
+  han_moi_utc: '2026-11-07T10:00:00Z'
+  chi_thi: >-
+    Phien dieu phoi #1206 session_015GtxrYPjZCTZeRiazdssgq giao executor session_015GtxraXfMD1t2FJLzzGDr4 (2026-11-07 09:44Z,
+    send_message) phan sau merge: theo doi CI master, ho so land, M8/A14, thu hoi lease (het han 19:12Z).
+  ly_do: >-
+    Packet #1252 (LAUNCHER-READONLY-IGNORED r1) da MERGE: PR #1267 (head e6c65057) merge bang merge commit
+    27fd80803e9a8f80e660752f58c8dd477e9730c8 (cha 132d376c + e6c65057), merged_by ducthangho luc 2026-11-07T09:43:59Z
+    (REST GET pulls/1267). Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: >-
+    Khong co lease ke nhiem (thay_the_cho rong). Rut han dung co che da cai (tien le #1240 17255e6). Han moi dat SAU luc push
+    de luot dang lease con thay lease song, tranh rc=8 che rc=9.
+  nguoi_rut: 'executor session_015GtxraXfMD1t2FJLzzGDr4 theo giao viec cua phien dieu phoi #1206'
+  nghiem_thu: 'ai-dang-giu cho 3 duong dan write set sau 10:00Z phai ra NGUOI_GIU 0.'
 
 packet_id: LAUNCHER-READONLY-IGNORED
 packet_slug: launcher-readonly-ignored

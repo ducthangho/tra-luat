@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "event": "lease_granted_under_owner_delegation",
+  "event": "lease_terminated_for_authorized_revision",
   "packet_issue": 1174,
   "packet_id": "WP1174",
   "revision": 7,
@@ -91,8 +91,8 @@
   },
   "leased_at_utc": "2026-11-07T17:39:22.559785Z",
   "heartbeat_at": "2026-11-07T17:39:22.559785Z",
-  "lease_until": "2026-11-08T08:03:01Z",
-  "lease_expires_at_utc": "2026-11-08T08:03:01Z",
+  "lease_until": "2026-11-07T18:49:13.493829Z",
+  "lease_expires_at_utc": "2026-11-07T18:49:13.493829Z",
   "heartbeat_required_minutes": 360,
   "max_lease_hours": 24,
   "hard_not_after": "2026-11-08T08:03:01Z",
@@ -130,5 +130,10 @@
   "pull_request": 1275,
   "source_pr": 1275,
   "metadata_review_disposition": "P6 native approve retained; P7 governance-only reanchor approved under delegation, not relabelled native approve; source H native review mandatory",
-  "assurance_enum_correction": "Before record-lease/begin-attempt; canonical packet_loop closed enum; cross-provider code review + separate required actual human gate unchanged. Prior commit/history retained."
+  "assurance_enum_correction": "Before record-lease/begin-attempt; canonical packet_loop closed enum; cross-provider code review + separate required actual human gate unchanged. Prior commit/history retained.",
+  "posted_comment_id": 6710890401,
+  "termination_authority": "https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6711562416",
+  "terminated_at_utc": "2026-11-07T18:49:13.493829Z",
+  "termination_reason": "Executor handed off frozen incomplete H1; native changes_requested12 findings; stop R7 before size cap, await R8/gen6 grant. No resurrection/counter reset.",
+  "source_handoff_sha": "3193ba7a2d44a9ee21b95d2ecb0ee0cf0904c0a2"
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "event": "lease_granted_under_owner_delegation",
+  "event": "lease_terminated_for_authorized_revision",
   "packet_issue": 1174,
   "packet_id": "WP1174",
   "revision": 9,
@@ -89,9 +89,9 @@
     ]
   },
   "leased_at_utc": "2026-11-07T20:23:01.477087+00:00",
-  "heartbeat_at": "2026-11-07T20:23:01.477087+00:00",
-  "lease_until": "2026-11-07T23:23:01.477087+00:00",
-  "lease_expires_at_utc": "2026-11-07T23:23:01.477087+00:00",
+  "heartbeat_at": "2026-11-07T21:11:04.416123+00:00",
+  "lease_until": "2026-11-07T21:11:04.416123+00:00",
+  "lease_expires_at_utc": "2026-11-07T21:11:04.416123+00:00",
   "heartbeat_required_minutes": 360,
   "max_lease_hours": 24,
   "hard_not_after": "2026-11-08T08:03:01Z",
@@ -140,5 +140,7 @@
     "history": "preserve original H1 ancestry by executor merge only after grant; old generation5 journal/ledger retained, no candidate self-authorization"
   },
   "source_audit_policy": "Source-only r20 section9 override: actual native cross K4 plus independent AI delegated_owner_audit; never human-labelled; target actual-human unchanged",
-  "source_authority_url": "https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6712558645"
+  "source_authority_url": "https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6712558645",
+  "termination_authority": "https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6713061086",
+  "termination_reason": "H2 incomplete frozen; source worker quiescent; R10 rescue pending; no attempt refund"
 }

@@ -1,21 +1,21 @@
 dieu_kien_merge: ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 
-# WP1174 r7 — Thi công adapter theo thiết kế r20
+# WP1174 r8 — Thi công adapter theo thiết kế r20
 
-- packet_id: WP1174; revision: 7;
-- mission_issue: 1172; mission_revision: 11; mission_plan_sha256: c229dc9a955310dba085494e06ea1b33381da62db871082a88cef8a2f4aa241b
-- contract_id: WP1174-r7-C6; generation: 5; review_class: sensitive
+- packet_id: WP1174; revision: 8;
+- mission_issue: 1172; mission_revision: 12; mission_plan_sha256: 47871a14f209e2b5baf27bfdb97a1d5c8a967e968c39d8e830c7f3d4a6268808
+- contract_id: WP1174-r8-C6; generation: 6; review_class: sensitive
 - executor: codex; execution_surface: codex_service; model_family: openai; transport: machine
 - source reviewer: claude; execution_surface: claude_code; model_family: claude; transport: machine/local
-- immutable_acceptance_baseline: 27fd80803e9a8f80e660752f58c8dd477e9730c8
-- metadata_parent: bed192ab70d05ddb6319dc13c307a30daca8f83d; code continuation là exact metadata commit chứa spec này, ghi ở lease sau khi commit có OID
+- immutable_acceptance_baseline: c6afde62c846f1ef3d6a83c14459966849edf756
+- metadata_parent: ee6192b27cdebe59d7bdd6691fd271d8ce1a6bd0; code continuation là exact metadata commit chứa spec này, ghi ở lease sau khi commit có OID
 
 ## 1. Hiệu lực, nguồn và outcome
 
-Đây là hợp đồng trình duyệt. Chỉ có hiệu lực sau owner duyệt exact bundle, cài/readback Mission r11, publish metadata immutable và lease exclusive hợp lệ. Chưa source work/grant/CI/activation qua việc tạo file này.
+Đây là hợp đồng trình duyệt. Chỉ có hiệu lực sau owner duyệt exact bundle, cài/readback Mission r12, publish metadata immutable và lease exclusive hợp lệ. Chưa source work/grant/CI/activation qua việc tạo file này.
 
-Design normative là ops/specs/wp1174-c5-adapter-design.md, bytes SHA256 5a749f921de112565779b8b1e42a2324e8efbc1e5e053d11919d30d8cf20a117 tại design head c172150d64c4fa1382469c81a658410c85aff88d; native Claude review technical approve, 0 P1/P2/P3 ở #1174 comment6679977538. Không đổi bytes r20 để ghi source approval. Metadata contract r7 không tự nhận approval r20 trên SHA mới.
+Design normative là ops/specs/wp1174-c5-adapter-design.md, bytes SHA256 5a749f921de112565779b8b1e42a2324e8efbc1e5e053d11919d30d8cf20a117 tại design head c172150d64c4fa1382469c81a658410c85aff88d; native Claude review technical approve, 0 P1/P2/P3 ở #1174 comment6679977538. Không đổi bytes r20 để ghi source approval. Metadata contract r8 không tự nhận approval r20 trên SHA mới.
 
 Outcome: hiện thực r20 trong packet-loop, giữ legacy ngoài scope; chứng minh admission/init/lease/advisory review/actual-human/accept và source/high_water/recovery bằng đúng profile. Adapter hỗ trợ Mission #1172/registered Packets theo authority canonical, không activate route toàn kho, không generic controller/registry.
 
@@ -26,21 +26,22 @@ Write set exact, cũng là effective set CHỈ sau khi owner duyệt scoped manu
 - .claude/dev/packet_loop_test.py
 - docs/PROTOCOL_DA_PHIEN.md
 - ops/specs/wp1174-c5-adapter-design.md
-- ops/specs/wp1174-implementation-r7.md
+- ops/specs/wp1174-implementation-r8.md
 
 Không workflow, ruleset, credential, launcher, release manifest, ADR0041/0045 hoặc code Packet khác. New helper writer command thứ15 bị cấm. Giữ13mutator + adopt-state (2mode cùngcommand), guard-first-publication read-only. Canonical ADR0065 và URL-human identity delta ở base mới phải giữ; không cherry-pick code C5 cũ đè lên canonical.
 
-R20 review base 825eb3561a94e05c36045d2c981b4108c523e31c khác source base này. Drift đã đọc: packet_loop 8 dòng, tests 119 dòng, protocol 17 dòng, ADR0065; source full diff đo từ 27fd80803e9a8f80e660752f58c8dd477e9730c8, không đo từ H rework mới để giấu scope. Metadata parent merge chỉ mang r20MD vào nền canonical; chưa product source changes.
+R20 review base 825eb3561a94e05c36045d2c981b4108c523e31c khác source base này. Drift đã đọc: packet_loop 8 dòng, tests 119 dòng, protocol 17 dòng, ADR0065; source full diff đo từ c6afde62c846f1ef3d6a83c14459966849edf756, không đo từ H rework mới để giấu scope. Metadata parent merge chỉ mang r20MD vào nền canonical; chưa product source changes.
 
-## 3. Bootstrap và P→H
+## 3. Bootstrap, continuation và publication
 
-1. Sau owner C6 approval, metadata ref ops/spec-wp1174-r7 được publish đúng candidate metadata commit của bundle, không product code. Authority là quyết định owner, không file candidate tự cấp. Canonical ADR0063 cho spec_ref immutable; ledger C2/C3/C5 giữ nguyên.
-2. Fresh all-ref/normalized+symlink/prefix overlap check, actor allowlist+maintain proof và lease publication/readback phải đạt trước source. Bootstrap dùng canonical v2 codex_service/claude_code lane đã probe fixture init rc0→awaiting_lease, begin nolease rc8; không dùng r20 candidate để tự record/accept.
-3. P7 là metadata governance-only tái neo source trước khi có bất kỳ product code/lease. Giữ nguyên native P6 technical approve và không gọi đó là approve P7. Owner delegate phê duyệt exact P7/hash và publish bằng làn sổ sách ADR0060; không thêm standalone model call cho P7. Native full H review từ baseline mới phải đọc cả metadata r7 và toàn code trước first product publication. Draft PR1275 đã có, actual PRID được cấp qua lease/handoff, không tự đoán. Đây là ngoại lệ scoped cho lần tái neo trước source, không bỏ independent review của code hoặc mở routing.
-4. Executor cùng Packet tạo H từ P; native source review trọn base→H, không chỉ P→H. Windows focused và gates địa phương exact H trước push. Nếu rework thì H mới/review mới; Giữ P r2/r3/r4 rounds 1/2/3 đã dùng; P r5 round 4 đã dùng; P r6 round5 đã dùng; H và một H rework còn trong trần mới. P7 là governance-only, không reset hoặc gọi thêm metadata review. Không reset lịch sử. Coordinator ghi checkpoint hữu hạn theo ủy quyền owner thay vì hỏi lại.
-5. Actual owner human audit schema v1 cho PRID/H/tree/spec/revision/gen TRƯỚC first publication H. Agent repost không phải human audit. CLI/source-native receipts khai đúng serving/sandbox/provider. K4 native và human truyền cùng thì cả hai phải hợp lệ. Giữ canonical human timing/URL identity, earliest remote run đầy đủ; candidate guard chỉ là code được test, không tự cấp source authority.
-6. Controlled publish H một lần chính theo M5; automatic Ubuntu CI, Linux full M9 applicable, connector draft review và K0-K7 canonical. Formal GitHub Approve/land authorization exact H cần owner riêng ở thời điểm đó. Chưa grant trong C6.
-7. Chỉ sau land/readback mới canary target route bằng canonical đã land, descriptor/grant thật, native Linux profile đã đo và **một phiên Codex service reviewer mới**, actual human K4 thật. Reserved canary call không phải code-review approval và không được fake CLI. Thiếu host/grant/human/budget thì canary blocked, #1174 chưa complete và PR0 chưa tiếp nhận.
+1. R7/generation5 đã dừng ở H1 cục bộ, native Claude changes_requested; giữ toàn bộ commit, journal, 12 finding và counter. Lease cũ phải kết thúc và được đọc lại trước khi sửa metadata đang thuộc phạm vi đó. Không hồi sinh generation5.
+2. R8/generation6 chỉ có hiệu lực sau quyết định theo ủy quyền gắn exact P8/spec hash/Mission r12 hash, install/readback r12 và native metadata review exact P8 trước publication. P8 chỉ chứa hai MD; không chứa code H1. Không gọi approve metadata là approve source.
+3. Giữ PR1275 và branch vật lý agent/wp1174-g5-codex để không force push hoặc mất lịch sử. Tên branch là lịch sử; generation có thẩm quyền là6 trong lease/state/handoff. Spec ref immutable ops/spec-wp1174-r8@P8, path và hash được cấp sau khi P8 có OID thật.
+4. Cấp lease mới exclusive sau fresh all-ref/normalized/symlink/prefix checks, issuer/authority, canonical check và workflow bot readback. Bootstrap source dùng canonical v2 Codex service/Claude Code hiện có, không dùng v3 candidate tự cấp quyền. Journal generation5 giữ nguyên. Generation6 dùng state riêng có tối đa1 source attempt và1 source review còn lại; evidence phải luôn ghi cumulative C6 đã dùng7 calls,6 native reviews và1 executor, không khai aggregate bằng0.
+5. Executor phiên mới bắt đầu P8 sau begin-attempt hợp lệ, tích hợp H1 từ private handoff bằng merge giữ ancestry, rồi làm đủ contract. Immutable acceptance baseline mới là canonical c6afde6 theo quyết định revision này; không dùng H1/P8 làm baseline. Canonical27→c6 chỉ đổi launcher.py và launcher_test.py (+170/−23), ba source path Packet byte-identical; đây không làm mất bất kỳ source work H1 nào. Giữ raw27→H1, raw27→H2 bao gồm upstream và rawc6→H2 để đối soát; chỉ rawc6→H2 đo own scope5/4000. Hai MD mới giữ bytes đóng băng; source chỉ ba path đã cấp. H1 hoặc ancestor chưa đủ điều kiện không được publish riêng.
+6. Native source review trọn baseline c6→H2, đọc thêm toàn H1 finding/diff và canonical launcher delta, gồm r20, r8 và mọi code, trên clone/context độc lập. Nếu H2 đổi thì review/gate/hash cũ stale. Local gates và Windows focused exact H2 trước first code publication. Theo chỉ thị trực tiếp cho phép AI audit thay chủ kho ở phiên khác executor, riêng source WP1174 r8 dùng independent delegated_owner_audit trên exact H2 trước publication, tách khỏi executor và verdict native. Audit này khai đúng AI/provider/session, không phải human_exact_head_audit hoặc human_audited. Formal K4 source vẫn phải là native Claude cross-provider thật và đầy đủ, không dùng delegated audit thay K4. Đây là ngoại lệ source-only, không đổi actual-human semantics của target r20 hoặc giả agent repost thành human.
+7. Controlled publication H2 sau đủ pre-push gates; automatic Ubuntu CI, native report, full Linux M9, connector và canonical K0–K7 cần đạt. Formal GitHub Approve/land authorization exact H vẫn riêng theo protocol; không auto-merge/bỏ draft khi thiếu gate.
+8. Sau land/readback mới canary bằng canonical đã land, target descriptor/grant riêng, private coordinator seed đã provision và native Linux profile đo thật. Codex service reviewer mới, requested model hoặc effort cao hơn, vẫn advisory và cần actual human riêng. Thiếu host/grant/human/budget thì canary blocked, không đóng1174 hoặc nhận PR0 đã qua dependency.
 
 ## 4. Source predicates / transactions
 
@@ -156,7 +157,7 @@ Pre-push fixture pass là `prepush_fixture_passed_native_pending`; Windows là `
 
 ## 5.2. Carrier native Linux là main hiện có trong CI, không sửa workflow
 
-Workflow `.github/workflows/ci.yml`, job `gate-packet-loop (ubuntu-latest)`, step `packet-loop selftest` hiện gọi `python .claude/dev/packet_loop_test.py`. R7 giao chính `packet_loop_test.py main()` (đã nằm trong write set) chạy và tổng hợp native gate. Không thêm workflow, dependency hoặc manual ci.yml dispatch. Đường hồ sơ P chỉ là metadata, không nhận native/source acceptance từ job fastlane bỏ bước nặng. Gate nguồn H phải chạy thật bước này và có log dương.
+Workflow `.github/workflows/ci.yml`, job `gate-packet-loop (ubuntu-latest)`, step `packet-loop selftest` hiện gọi `python .claude/dev/packet_loop_test.py`. R8 giao chính `packet_loop_test.py main()` (đã nằm trong write set) chạy và tổng hợp native gate. Không thêm workflow, dependency hoặc manual ci.yml dispatch. Đường hồ sơ P chỉ là metadata, không nhận native/source acceptance từ job fastlane bỏ bước nặng. Gate nguồn H phải chạy thật bước này và có log dương.
 
 Trên Linux, main bắt buộc đủ 84 ID không Windows: 83 fixture/pure cộng một native profile. Missing/duplicate required ID, `BoQua`, timeout, infra, error hoặc thiếu report hợp lệ làm `that_bai_tong` tăng và exit nonzero. Không chỉ in BỎ QUA rồi trả xanh. Required mutant target hoặc cross-family control áp dụng trên Linux bị BoQua/missing cũng làm tổng đỏ; Windows-only oracle được phân tách rõ ở §5.3; không có fake kill credit. Giữ toàn legacy baseline, mutations và controls, không thêm fail-fast hoặc bỏ acceptance cũ. Hai ca harness mới dùng literal inputs độc lập để bắt missing/skip và report sai, không chỉ gọi renderer rồi so chính nó.
 
@@ -219,15 +220,25 @@ Trước snapshot và test Windows: private bundle SHA256 phải được verify
 - Native Windows: ưu tiên device f7281f27-f79f-40a2-a2f5-b454b58a166a (TRA-LUAT-WIN/tlcommander; Python 3.12/Git/PS 5.1 probe dương); ASUS fallback khi readiness dương. Hai device VM khác account tladmin không dùng để cần quyền cao hơn. Normal clone riêng .git directory, private bundle exact H verifySHA khi H chưa GitHub; outputs/cache/tmp ngoài checkout. Không đụng process/lock #1124/#564. Host offline tối đa 10 phút điều phối rồi đổi host hợp lệ hoặc blocked, không chờ vô hạn/không thay failed thành pass.
 - Global source gates không được lấy approve Markdown làm evidence. Human code audit/connector/K0-K7/full M9/Linux/native Windows/exact H land vẫn riêng.
 
-## 7. Review Rescue C6-R3 theo ủy quyền owner, có giới hạn
+## 7. Bounded rescue R8 và ngân sách
 
-Owner đã giao toàn quyền điều phối cần thiết tới merge tại #1172 issuecomment6709698499, không hỏi lại các quyền đã giao. Coordinator ghi quyết định governance có exact package hash và cài/readback revision mới trước dispatch; không giả human code audit/Approve hoặc bỏ gate. C6 đã dùng5 native metadata reviews P r2/r3/r4/r5/r6, giữ verdict/counters. Trần tổng10 calls =2 Codex executor (<=60 phút/run),7 native Claude reviews (đã dùng5; còn H và một H rework, <=10 phút/run),1 Codex service canary reviewer độc lập (<=10 phút). Trần rounds cùng PR7. Optional reserve không phải nghĩa vụ gọi hết. Requested source Opus5.5/high, Codex executor high; serving không đo được ghi KHONG_DO_DUOC, provider/session/run/sandbox phải thật.
+R8 thay R7 trước continuation; theo ủy quyền chủ kho1172/comment6709698499, điều phối phải ghi quyết định exact package và install/readback, không hỏi lại quyền thường lệ. Không giả human hoặc bỏ gate.
 
-Active cloud<=330 phút, giữ checkpoint 90/150/180/210/240, thêm 270/300/330. User idle không tính active; lease/expiry vẫn wall clock. Trước dispatch đo used + bounded remaining deadlines + coordinator/tests <=330; worst remaining trước source là175 phút (2 executor ×55 +2 review ×10 +1 canary ×10 +35 điều phối/focused). Thiếu thì siết deadline run đã đặt hoặc checkpoint hữu hạn có audit, không zero lịch sử/không vay C2 unknown/C3/C5. Tối đa4 Ubuntu CI head/attempt, 2 Linux M9 chỉ relevant change, 24 runner-giờ, 2 native Windows focused runs/tổng 60 phút, 1 writer. Không paid/AGY/CI Windows/full Windows matrix/project/registry hoặc đổi credentials/security.
+H1 full baseline27→H1:5 tệp,+2132/−5; metadata563, còn468 dưới cap2600. Phần còn thiếu ước850–1200 dòng, chưa tính hết sửa12 finding. Trần mới5 tệp/4000 dòng thêm tính toàn baseline27→H2; không nén code/bỏ tests hoặc giấu metadata. Vì transaction, witness, adoption và postimage dùng cùng invariants, không tách hai PR chồng seam chưa land. Reviewer phải đo numstat và kiểm khai nâng trần trước review.
 
-nang_tran (pending owner exact package): ai_nang=ducthangho; tran_cu=6files/450added; tran_moi=5files/2600added; can_cu=state/transaction/lifecycle và tests coupled, source additions hiện0, metadata count đo riêng. Đo actual full base→H numstat TRƯỚC review, vượt2600 hoặc 5files stop để replan, không bỏ tests. Đây là proposed ceiling chứ chưa số đo source.
+```yaml
+nang_tran:
+  ai_nang: ducthangho
+  can_cu: owner delegation6709698499; H1 native review3d4daf09; exact MCR decision recorded before source grant
+  tran_cu: {files: 5, added_lines: 2600}
+  tran_moi: {files: 5, added_lines: 4000}
+```
 
-ADR0032 policy/schema vắng ở baseline. Xin scoped manual closure exception WP1174-R7-CLOSURE-EXCEPTION (payload SHA256 5e585e4f5f5db7dc15eae17b2b5359427f10bfe5d4d5e429611341ddc9016196), đúng 5 path, required native Linux gate và mọi K0–K7/M9/human giữ nguyên, owner ducthangho, expires 2026-11-08T08:03:01Z. Thiếu exact owner approval hoặc impact_hint/companion/symlink/prefix overlap mới thì blocked/revision; không bịa canonical policy SHA hoặc sửa policy toàn kho.
+C6 cap11 model calls =2 Codex source runs,8 native Claude reviews,1 Codex canary review. Đã dùng7:5 metadata reviews,1 source executor,1 H1 native review; native đã dùng6/8. Còn đúng P8 metadata, source continuation, final H2 native review và canary. Mỗi source run≤55 phút; mỗi review≤10 phút. Không mở invocation ngoài sổ hoặc reset lịch sử C2/C3/C5/C6/PR1275.
+
+Active C6≤420 phút, tính cả active đã dùng; đây không phải cấp thêm420 phút từ0. Trước dispatch phải đo actual used + remaining bounded deadlines + coordinator/tests≤420. User idle không tính active; lease/hard expiry vẫn wall clock. Hard expiry giữ2026-11-08T08:03:01Z. Tối đa7 ci.yml head/attempt gồm hai metadata đã chạy, P8, H2, hậu merge, canary metadata nếu cần và một contingency; mọi auto run/retry đều ghi. Hai full Linux M9,24 runner-giờ, hai Windows focused runs≤15 phút/run trong cap tổng60 phút. Operational lease workflows ghi riêng nhưng vẫn tính runner/time thật. Không mua credits, không AGY, không Windows CI/full Windows mutant.
+
+Scoped manual closure exception WP1174-R8-CLOSURE-EXCEPTION SHA256 7b181eaf4725010a1b2ac74f7fcba47881b8d9bbaf80169502a982140d44d3da vì policy/schema ADR0032 chưa có tại baseline27. Exact five paths và mọi K0–K7/M9/native Windows/human giữ nguyên. Ngoài closure, stale/unknown source hoặc thiếu lease đều blocked. Trần mới không cấp quyền thêm file, provider, LIVE hoặc security configuration.
 
 ## 8. Acceptance và rollback
 
@@ -243,16 +254,54 @@ Reviewer session mới read-only clone riêng exact H; hai trục Spec và Stand
 
 Spec/prompt này materialize đúng bytes từ metadata source. Lease prompt_path trỏ chính file này và prompt_sha256_required=spec_hash; launcher outer instruction chỉ chọn vai và expected-head/ref, không đổi frozen bytes. Lease reviewer assignment/expectedH ghi sau code H có thật, không đặt futureH giả vào lease.
 
-## 10. Lịch sử và thay đổi cách kiểm chứng
+## 10. H1 findings và tiêu chuẩn đóng trong R8
 
-Giữ toàn bộ P r2/r3/r4/r5 verdicts/counters và28 ID thiết kế r20. P5 review4 xác nhận P4-01/P2 và P4-02/P3/P4-03/P3/P4-04/P3 fixed; mới C6-P5-01/P2 về actual runner OS. R6 thêm OS trước event table, tách chính sách không trigger Windows của Mission khỏi hành vi legacy Windows ở Packet khác, không xóa hoặc hạ severity. R6 chỉ proposed remediation tới khi independent review xác nhận.
+Native H1 run3d4daf0932d3433aa69ee8f8ffabb4f7, actual rc0, changes_requested:2P1/5P2/5P3. Raw verdict và mọi nguồn giữ nguyên; không hạ severity hoặc tự đánh dấu đã đóng. Final H2 reviewer phải xác nhận từng F1–F12 theo slug cũ. H1 subset35/35, regression267/267, selftest1777/1777, ADR64/64 không thay85/native/M9. Frozen83 đã rc2 vì thiếu ID. Mutation subset6 reports phải kiểm lại vì finding crash-chain oracle.
 
-Checkpoint lớp dispatch-durability-order tái diễn: dùng ma trận OS×event×entry và exact applicable case/mutant/control sets thay vì chỉ prose cho happy-path PR. Design model có counterexamples OS/event, không gọi là product proof hoặc closure. Source vẫn chưa được cấp qua việc chuẩn bị r6; giữ85 IDs/13 Windows focused, không CI Windows của Mission. Trần metadata rounds dự phòng đã được dùng: nếu r6 vẫn có finding phải checkpoint hữu hạn, không gọi thêm dưới tên khác hoặc âm thầm vay code-review slots.
+### 10.1 F2 — private HMAC và deterministic initialization
 
-## 11. Quyết định tái neo source trước first executor
+Admission A và spec S không chứa seed hoặc hmac_key. Trước khi cấp A, operator provision một seed ngẫu nhiên32 byte ở file riêng trên enrolled native mount, regular, owner hiện hành, mode0600, O_NOFOLLOW, không alias journal/witness/lock/source. Đây là artifact enrollment ngoài Git, không command writer thứ15, không registry hoặc credential provider. Worker chỉ dùng fixture seed, không đọc seed thật của điều phối.
 
-Run42395443877/job128471704241 từ CI metadata P6 đỏ rc12 vì base27 không là tổ tiên P6. Không đổi checker, không chạy lại SHA cũ hoặc khai đỏ thành pass. Trước source đã merge canonical27 vào lịch sử P6 rồi tạo P7 metadata. Baseline08 cũ được giữ làm preparation reference cùng mọi commit/review/counter; đã xác minh0product source changes và0source leases/attempts. Theo protocol §3.2.1 và owner delegation, immutable SOURCE acceptance baseline đổi chính thức sang27 trước source, không làm biến mất work của executor. Drift08→27 gồm253 path canonical đã land (nhiều sổ sách), không thuộc work Packet; artifact numstat/hash giữ toàn bộ. Ba file packet_loop.py/test/protocol nguyên bytes giữa08 và27; dependency launcher thay đổi nên không dùng ngoại lệ không regate §5.1. Source H sẽ được native review và chạy lại toàn gate từ base27. Không cấp quyền worker sửa launcher hoặc workflow.
+A đóng thêm private_seed_path và private_seed_sha256 (fingerprint SHA256), thay initial_state bằng initial_state_projection không chứa hmac_key. Projection phải khớp canonical fresh initializer và approved allowance, không tự quyết định schema từ A. Fresh có state awaiting_lease, counter/history/reviews/calls rỗng đúng grant lineage mới, chưa quyền lease/dispatch. Optional keys vắng giữ vắng.
 
-Revision7/generation5: giữ generation5 vì chưa hề cấp lease hoặc mở attempt g5; không hồi sinh hoặc reset state cũ. New source lease ID r7/g5, exact P7/spec/PR1275. Effective set vẫn5 path, max2600added đo toàn base27→H, design r20 giữ byte. Scope thuật toán/OS/event/85IDs/13Windows của r6 giữ nguyên. P7 chỉ đổi anchor/governance fields và bỏ duplicate standalone metadata review; independent native CODE H review/human timing/CI/M9/Windows/canonicalK0–K7 giữ nguyên.
+Derivation dùng HKDF-SHA256, output32 byte rồi lowercase hex: extract với salt ASCII tra-luat/WP1174/v3-hmac-key/HKDF-SHA256/v1 và IKM seed; expand một block với info là canonical UTF8 JSON của {enrollment_id,binding_sha256,packet,g0}, sort_keys=True,separators=(',',':'),ensure_ascii=False,một LF, rồi byte0x01. binding_sha256 là immutable lineage binding, không hash của A đang chứa chính nó. Không dùng boot/time/random mới trong initial image; reboot cần readmission như r20.
 
-Cap cloud tăng300→330 và ci.yml head/attempt2→4 dưới owner delegation để giữ cả P6 metadata, P7 metadata, H và tối đa một CI-only rework; không free/reset/cancel history. 10model calls/native7/rounds7,executor2,canary1 và mọi cap khác giữ nguyên. Source runs đặt tối đa55 phút mỗi run; Windows focused≤15phút/run trong cap tổng60. Chưa có P7 native approve và không được giả; code H first publish vẫn cần offline native approve và đủ local/Windows/human gates.
+Mọi lstat/O_NOFOLLOW/fstat/fingerprint/type/default/projection checks và derive/validate full bytes xong trước witness/target/temp publication. Fresh/resume đọc cùng seed và grant cho byte-identical image. Seed thiếu/sai trước publication: rc8/no write. Sau reserved publication: UNKNOWN, giữ witness, không generate key mới. Rotation cần enrollment/reconciliation mới. Legacy adoption giữ hmac_key từ source snapshot private đã hash/validate, không rederive hoặc đưa source bytes vào Git A.
+
+Oracle tính secret fixture values để khẳng định chúng không xuất hiện trong A/S/stdout; không cấm mọi chuỗi64hex vì fingerprint và hash vẫn là64hex hợp lệ. Thêm wrong/missing/changed seed, resume byte equality và no-write assertions trong các init/preflight ID hiện có.
+
+### 10.2 F3 — canonical state v3 và optional keys
+
+Schema lấy từ code canonical cố định, không set(initial_state). Required legacy core có 27 key: schema_version,review_rounds_used,codex_review_calls_used,codex_calls,nang_tran,review_rounds_limit,codex_review_calls_limit,packet,mission,executor,reviewer,executor_identity,reviewer_identity,state,lease,attempts_used,attempts_limit,same_failure_limit,finding_counts,attempt_open,attempt_anchor,hmac_key,reviewing_head_sha,accepted_sha,reviews,posts,history.
+
+V3 đổi schema_version=3 và thêm required state_revision,generation,enrollment_id,binding_sha256,adoption,scoped_review,human_acceptance. Ba field cuối null ở fresh và là closed typed records ở các phase áp dụng. Optional legacy allowlist chính xác: luat_adr0054,ngu_canh_lease,dem_tu_suy,ly_do,truc,pending_sha,bien_nhan_approve,mo_lai_tu,checkpoint_day,moc_connector,quyet_dinh_p3. Mọi key khác bị chặn. Mỗi optional có kiểu/absent-null semantics và cross-field predicate của canonical legacy; không preseed null để giả absent. Static inventory phải bao gồm helper/transitive dict construction, không chỉ st[key] assignments.
+
+Postimage table theo command chỉ cho phép core transitions đã khai và optional writes thực tế: record-lease luat_adr0054/ngu_canh_lease; rescue ly_do/truc với delete hợp lệ; review pending_sha/bien_nhan_approve khi đúng lane; accept moc_connector/quyet_dinh_p3; mo-lai mo_lai_tu; chu-kho-duyet checkpoint_day/mo_lai_tu. Optional migration dem_tu_suy không được tự clear. Counter không giảm; history/calls/reviews giữ prefix, chỉ thao tác void hợp lệ của canonical có phép hoàn attempt theo bằng chứng thật. Không dùng câu monotonic chung để vô hiệu void contract.
+
+Factor invariant validation thuần dùng preimage/postimage thật; legacy v2 ngoài scope giữ nguyên. Không đổi schema trong file, normalize optional hoặc giả identity để qua loader. HMAC bất biến sau initial creation; full anchor/counter/history predicates của legacy giữ hiệu lực. Profile đầu chỉ cam kết adoption giữ executor/reviewer identity tuple; tuple khác hoặc counters lịch sử không chứng minh được thì UNKNOWN và cần migration/reconciliation riêng, không relabel records/reset counts.
+
+Adoption record phải đóng phase,payload,payload_sha256,cutover_started. Immutable payload chứa source snapshot/hash, target core projection (không chứa chính adoption record), tombstone bytes/hash, IDs/generations/paths/binding/lineage. Hash chỉ projection immutable, không hash tự tham chiếu hoặc mutable phase/revision. Final target được dẫn xuất từ projection rồi thêm adoption record; giữ snapshot để recovery sau tombstone. Full keysets/types cho payload và scoped_review/human_acceptance phải được khai tập trung trong code và được literal negative fixtures kiểm; không lấy schema từ input hoặc renderer. Ordinary current high_water không bị ép bằng as-of adoption hash sau mutation.
+
+### 10.3 F4/F5 — source authority và Git view
+
+Không gọi _record_lease_ref bằng state giả hoặc monkeypatch _save để tạo authority. Tách verifier I2 thuần khỏi transition/commit, trả verified lease/spec/identity facts. Fresh init dùng identity pinned trong grant; ordinary dùng identity thật từ journal dưới lock và phải khớp grant. Legacy record-lease tái dùng verifier rồi tự commit state như trước. Không phát log state leased khi journal chưa ghi.
+
+Scoped root phải khai explicit, khớp enrolled identity; không default cwd. Git reads dùng no-replace-objects; reject replace/graft/alternates/shallow hoặc object/config view không đo được. Root/object/remote identity phải được kiểm bằng nguồn canonical đã ghim, không caller FILE. Scratch fetch/verification ngoài enrolled repo/journal được phép để lấy current facts; guard không đổi refs/index/worktrees của enrolled repo, journal/witness hoặc dispatch. Không gọi prompt read-only là OS isolation.
+
+Consumer scoped phải đã land trên first-parent canonical và code đang chạy phải khớp canonical snapshot hiện hành đã xác minh; candidate chưa land không tự activate qua descriptor/grant. Fixture chỉ monkeypatch adapter nội bộ trong driver cô lập, không thêm argv/env/schema flag để bỏ rollout. Native CI capability probe đo kernel/filesystem thật nhưng không là enrollment hoặc quyền activate consumer candidate.
+
+Profile này cần current remote canonical executor grant/spec để resolve admission trước init; journal vẫn chưa record lease/attempt. Khi chưa có grant remote, init bị chặn. Đây là giới hạn triển khai đầu của F12, không tuyên bố đã hỗ trợ mọi pre-lease source có thể có trong r20. Không tạo registration record mới hoặc mở trust fallback để lấp nguồn chưa có verifier. Registered Packet lấy từ installed Mission packet_graph cùng current canonical grant, owner instruction và bot readback đủ trang.
+
+### 10.4 F6/F7/F8/F9/F10/F11 — closed errors và independent oracles
+
+Scoped flags không admission, namespace thiếu/trộn/sai mode hoặc syntax sai: rc2,input_rejected. Stale revision hợp lệ: rc8,revision_rejected. Quota: rc3,quota_exhausted. Authority/state/profile mismatch hoặc unknown trước write: rc8,UNKNOWN (guard rc12,admission_rejected). Durability_unknown chỉ sau khả năng đã ghi journal/witness; giữ reservation, không retry. Legacy_changed rc8. Success đúng ba status r20; chỉ reserved_for_dispatch có dispatch_allowed=true. Guard PASS0,FAIL/UNKNOWN/admission_rejected12; mọi stdout status đúng một JSON record, không helper print giả. Catch đúng Chan/SystemExit/TimeoutExpired/parse/I/O classes, không biến KeyboardInterrupt/process kill thành pass. Legacy ngoài scope giữ codes cũ.
+
+Admission phải đóng kiểu mọi field và pin base đúng spec. Phân biệt git_root explicit của code với journal root của generation và lineage root cố định chứa seed/lock/witness. state_path=journal_root/wp{packet}.json; CLI state-dir phải khớp journal root đã cấp. initial_state_path là genesis journal path được authority ghim: fresh cho phép state_path bằng initial_state_path; adoption bắt buộc target khác source/genesis và mọi target lịch sử. Source g0 có thể bằng initial_state_path. Seed/lock/witness không alias journal nào; không áp một blanket inequality sai cho hai tên cùng vai trò genesis. Target journal root mới phải được enrollment trước và cùng mount; fixed lineage lock/witness không đổi qua generation. Wrong schema phải bị đúng validator/reason; không nhận OS/network rejection làm schema proof. Mock raise exception thật; assert reason, unchanged entry bytes và positive/cross-family control. Mọi exception chain có crash marker không được kill credit, kể cả AssertionError bọc crash. Không bỏ _co_sap_do cho WP1174.
+
+Mount selection không so mount IDs như chuỗi. Khi có nhiều entry cùng mountpoint và không đo được active mount identity, UNKNOWN; không giả thứ tự mountinfo là proof. Probe magic/name/mount identity và mọi capability r20 vẫn bắt buộc.
+
+Tombstone golden là literal exact bytes độc lập renderer. Chạy13 legacy entries trên đúng bytes, kiểm cả old path và target fixture unchanged. Base27 old reader có thể chặn ở missing reviewer trước schema; phải ghi đúng reason quan sát, không gọi đó schema_version coverage. Current reader có thể nhận exact retired-format sớm rồi reject rõ, nhưng không mở reader v2 hợp lệ cho payload retired hoặc giả đã sửa cached old reader.
+
+### 10.5 F1 — toàn bộ source acceptance vẫn bắt buộc
+
+Không giữ hardcoded incomplete flag rồi báo hoàn thành. Chỉ bỏ chặn sau khi14 actual entry/race, adoption/recovery, lifecycle/advisory/human/collector,84-ID native/event reports và toàn mutants/controls hoàn chỉnh. Frozen85 ID và13 Windows giữ nguyên; bổ sung stimulus/oracle trong các ID hiện hữu cho12 finding, không rename/placeholder hoặc skip acceptance. Native H2 reviewer xác nhận closure trên exact H2; metadata approval không đóng code findings.

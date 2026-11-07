@@ -370,6 +370,21 @@
    "rc_bash": 1,
    "da_chay_ct_hong": true
   },
+  "g_bom_dau": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 127,
+   "da_chay_ct_hong": false
+  },
+  "g_python_hoa": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 127,
+   "da_chay_ct_hong": false
+  },
+  "g_hoac_hai_cham": {
+   "grammar": "lenh_ngoai_cu_phap",
+   "rc_bash": 0,
+   "da_chay_ct_hong": true
+  },
   "g_hai_lenh_hop_le": {
    "grammar": "lenh_ngoai_cu_phap",
    "rc_bash": 1,

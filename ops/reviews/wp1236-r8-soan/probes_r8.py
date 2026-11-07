@@ -84,7 +84,10 @@ AM = {  # nhãn: (thân run, shell)
  "g_P_gach_dau": ("python -x.py\n", None),
  "g_python_khong_duoi": ("python ops/x\n", None),
  "g_bash_duoi_py": ("bash ops/x.py\n", None),
- "g_ong_khong_cach": (f"{X}|{Y}\n", "bash"),   # H04 (Codex r8 vòng 1): thứ tự bước 1–2 phân biệt được
+ "g_ong_khong_cach": (f"{X}|{Y}\n", "bash"),
+ "g_bom_dau": (f"\ufeff{X}\n", None),   # Codex I01 vòng 4: tiền xử lý bỏ BOM
+ "g_python_hoa": ("Python ops/hong_test.py\n", None),   # Codex I01 vòng 4: hạ chữ đầu lệnh
+ "g_hoac_hai_cham": (f"{X} || :\n", None),   # Claude K01 vòng 4: removesuffix(" || :")   # H04 (Codex r8 vòng 1): thứ tự bước 1–2 phân biệt được
  "g_hai_lenh_hop_le": (f"{X}\n{Y}\n", None),
  "g_python_c_tran": ("python -c pass\n", None),
  "g_bash_c_tran": ("bash -c true\n", None),

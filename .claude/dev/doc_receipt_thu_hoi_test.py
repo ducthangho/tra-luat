@@ -1064,6 +1064,48 @@ for _ten, _sau, _mong in (("g_r_e", "G0", V(**dict.fromkeys(G_[1:9], "k"))), ("g
     cg(_ten)(_f)
 
 
+def _shim(t):
+    """PATH có shim ĐỨNG GIỮA (giống `cmd\\git.exe` của Windows): kill shim thì git con vẫn sống, giữ ống. Trên Windows dùng
+    chính shim của Git for Windows trên PATH (đo A16 07-11); POSIX dựng `sh` KHÔNG `exec`."""
+    if os.name == "nt":
+        return os.environ["PATH"]
+    d = pathlib.Path(t) / "shim"
+    d.mkdir()
+    (d / "git").write_text(f'#!/bin/sh\n"{subprocess.run(["git", "--exec-path"], capture_output=True, text=True).stdout.strip()}/git" "$@"\n')
+    (d / "git").chmod(0o755)
+    return f"{d}{os.pathsep}{os.environ['PATH']}"
+
+
+@cg("g_r_shim")  # reader chết THẬT và Timer deadline gỡ ĐÚNG tiến trình giữ ống, kể cả khi PATH có shim
+def _g_r_shim(m, t, ten):
+    F, cu = dung(t), os.environ["PATH"]
+    gac_chung(ten, F, "G6", ("tree", F["tA"]), {"G6", "G7", "G8"})
+    con = []
+
+    def han(g, d):  # deadline 0.3 s đồng hồ thật: đợi Timer nổ rồi đo ỐNG GHI — còn người đọc nghĩa là chỉ giết trung gian
+        if g == "G1":
+            d.hen.join(10)
+            try:
+                d.p.wait(3)
+            except subprocess.TimeoutExpired:
+                pass
+            try:
+                os.write(d.p.stdin.fileno(), b"\n")
+                con.append("ong ghi con nguoi doc")
+            except (OSError, ValueError):
+                pass
+    os.environ["PATH"] = _shim(t)
+    try:
+        kq = chay(m, F, **giet_sau("G5"))
+        kq2 = chay(m, F, ngan_sach={"deadline_giay": 0.3}, _seam={"sau_luat": han})
+    finally:
+        os.environ["PATH"] = cu
+    can(ten, kq, V(G6="k", G7="k", G8="k"))
+    can(ten, kq2, V(**dict.fromkeys(G_[2:], "k")))
+    if con:
+        raise TinHieuChotCa(f"{ten}: Timer deadline khong go tien trinh giu ong: {con}")
+
+
 @cg("g_r_g")
 def _g_r_g(m, t, ten):
     F = dung(t)
@@ -1523,8 +1565,11 @@ DBG = [
     ("A11e", "G8 so sha256", "bo_sha", "hashlib.sha256(b).hexdigest() == sha", "True", "g_g8"),
     ("A11f", "so OID trước khi đọc blob (F6)", "doc_blob_truoc", "        if e[2] != oid:\n", '        s.doc(e[2], "blob")\n        if e[2] != oid:\n', "g_g7"),
     ("A12a", "băm lại mọi object", "bo_bam", r'        if hashlib.sha1(f"{loai} {n}\0".encode("ascii") + than).hexdigest() != oid:', "        if False:", "g_r_b"),
-    ("A12b", "không theo refs/replace", "bo_replace", ('"git", "--no-replace-objects", "-C", str(s.goc), "cat-file"', 'GIT_NO_REPLACE_OBJECTS="1", '),
-     ('"git", "-C", str(s.goc), "cat-file"', ""), "g_r_c"),
+    ("A12b", "không theo refs/replace", "bo_replace", ('_git_exe(), "--no-replace-objects", "-C", str(s.goc), "cat-file"', 'GIT_NO_REPLACE_OBJECTS="1", '),
+     ('_git_exe(), "-C", str(s.goc), "cat-file"', ""), "g_r_c"),
+    ("A12l", "reader là git THẬT, không qua shim PATH", "git_qua_path", "    return _GIT[0]", '    return "git"', "g_r_shim"),
+    ("A12m", "Timer deadline giết tiến trình giữ ống", "timer_rong", "threading.Timer(s.ns[\"deadline_giay\"], s.p.kill)",
+     "threading.Timer(s.ns[\"deadline_giay\"], lambda: None)", "g_r_shim"),
     ("A12c", "lọc GIT_* thừa kế", "bo_loc_git", '    e = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}', "    e = dict(os.environ)", "g_r_d"),
     ("A12d", "reader chết không khởi động lại", "khoi_dong_lai", "        s.chet = True  #", '        s._mo()\n        raise SuKien("E_reader_chet: mo lai")  #', "g_r_e"),
     ("A12e", "reader chết là sự kiện CHUNG", "chet_cuc_bo", '            s._chet(f"dong dau sai dang {dau[:60]!r}")', '            raise SuKien("E_reader_chet: cuc bo")', "g_r_h"),

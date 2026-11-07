@@ -44,8 +44,23 @@ def _env():
     return e
 
 
+_GIT = []
+
+
+def _git_exe():
+    """Git THẬT trong `--exec-path`, không qua shim trên PATH: `cmd\\git.exe` của Windows sinh git con, nên kill shim KHÔNG giết
+    tiến trình đang giữ ống — reader chết giả và Timer deadline không gỡ được `cat-file` treo (đo A16 07-11). Không có thì `git`."""
+    if not _GIT:
+        try:
+            ep = subprocess.run(["git", "--exec-path"], capture_output=True, text=True, env=_env(), timeout=60).stdout.strip()
+        except (OSError, subprocess.SubprocessError):
+            ep = ""
+        _GIT.append(next((c for c in (os.path.join(ep, "git.exe"), os.path.join(ep, "git")) if ep and os.path.isfile(c)), "git"))
+    return _GIT[0]
+
+
 def _git(goc, *a, timeout=60.0):
-    return subprocess.run(["git", "--no-replace-objects", "-C", str(goc), *a], capture_output=True, env=_env(), timeout=timeout)
+    return subprocess.run([_git_exe(), "--no-replace-objects", "-C", str(goc), *a], capture_output=True, env=_env(), timeout=timeout)
 
 
 def doc_ref(goc, nhanh, timeout=60.0):
@@ -71,7 +86,7 @@ class Doc:
         s._mo()
 
     def _mo(s):
-        s.p = subprocess.Popen(["git", "--no-replace-objects", "-C", str(s.goc), "cat-file", "--batch"], stdin=subprocess.PIPE,
+        s.p = subprocess.Popen([_git_exe(), "--no-replace-objects", "-C", str(s.goc), "cat-file", "--batch"], stdin=subprocess.PIPE,
                                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, env=_env())
         s.ra = s.seam.get("ra", lambda f: f)(s.p.stdout)
         s.hen = threading.Timer(s.ns["deadline_giay"], s.p.kill)  # tiến trình treo không giữ được caller quá hạn
@@ -80,6 +95,10 @@ class Doc:
 
     def dong(s):
         s.hen.cancel()
+        try:
+            s.p.stdin.close()  # EOF trước: cat-file thoát cả khi có tiến trình trung gian
+        except OSError:
+            pass
         if s.p.poll() is None:
             s.p.kill()
         s.p.wait()

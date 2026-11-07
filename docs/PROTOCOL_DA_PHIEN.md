@@ -1560,3 +1560,46 @@ Liệt kê TỪNG SỐ, không dùng phạm vi: một phạm vi là thứ vừa 
   bằng `Superseded` nhưng ADR ấy **vẫn còn hiệu lực một phần**. Vì vậy cổng ở đây cố ý KHÔNG phán
   xử hiệu lực từ chuỗi trạng thái; nó chỉ đòi **có mặt trong bảng**. Phán xử hiệu lực bằng cách
   khớp tiền tố chuỗi là đúng hình dạng lỗi *"phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN"*.
+# WP1174 r9 — checkpoint thi công chưa hoàn tất
+
+Source hiện tại là phần triển khai chưa hoàn tất của contract
+`ops/specs/wp1174-implementation-r9.md`; không phải bằng chứng nghiệm thu hoặc
+quyền activate routing. CLI scoped đang chặn bằng `UNKNOWN`, rc8,
+`dispatch_allowed=false`. Không có cờ argv/env/descriptor để mở chốt này.
+Runtime14 writer/race, advisory review → actual human → accept, collector first
+publication và native evidence carrier đầy đủ vẫn phải được hoàn tất và review.
+
+Phần đã có để kiểm chứng bằng fixture gồm grammar witness/pending/history,
+whitelist post-image, immutable source/high_water predicates, exact tombstone,
+native profile probes, durable publication, fresh/resume initialization và
+ordinary state/witness commit. Fixture không cấp enrollment, lease hay dispatch.
+Checkpoint r9 bổ sung private seed/HKDF và public initial projection không có
+HMAC key; schema v3 có core/optional allowlist cố định, I2 verifier không ghi
+transition, Git view sạch và resolution trong scratch. Adoption có immutable
+source snapshot, prepared/intent/tombstone/adopted, abandon/retry/replay cùng
+prevalidated witness transitions. Các phép này mới có fixture evidence; chưa
+được nghiệm thu như production adoption hoặc source acceptance.
+Production resolver lấy current lease/spec từ canonical all-ref/I2 và ADR0063,
+đọc descriptor từ immutable spec rồi đối chiếu FILE; không nhận registration
+JSON do caller tự khai làm nguồn thẩm quyền. Mission installed decision giữ
+nguyên JSON frozen `proposed_not_installed`/`paused`; outer installed wrapper,
+exact plan hash và registered Packet graph được kiểm riêng.
+
+`--admission FILE` là bản đối chiếu bytes. Các đối số scoped
+`--revision`, `--generation`, `--coordinator-id` và expected revision chỉ dùng
+đối chiếu nguồn đã được cấp. Ordinary dùng `--expected-revision N`; fresh init
+dùng `--expected-revision absent`; resume initialization dùng
+`--mode resume-initialization --expected-witness-revision N`. Không tự suy
+revision thiếu thành 0. `adopt-state` có namespace management riêng và hiện
+chưa được mở cho production.
+
+Linux main phải báo đỏ khi thiếu required IDs hoặc required case bị skip.
+Windows main giữ legacy và 12 ca pure áp dụng; Windows focused có 13 ca riêng.
+Native Linux/canary pending không được ghi thành pass từ fixture hoặc overlay.
+
+Seed enrollment phải do operator provision/fsync trước khi cấp grant; consumer
+chỉ kiểm metadata/fingerprint và derive key, không chứng minh ngược một lần
+fsync lịch sử. Init vẫn cần current canonical remote executor grant/spec theo
+giới hạn profile r9; không có registry hoặc pre-lease fallback. Cached private
+v2 writer vẫn có thể ghi lại old path: tripwire chặn ordinary sau khi quan sát
+drift, không phải fencing tuyệt đối hoặc bằng chứng quiescence.

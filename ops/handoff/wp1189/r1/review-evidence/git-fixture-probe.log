@@ -1,0 +1,40 @@
+[
+  {
+    "args": [
+      "init",
+      "-q"
+    ],
+    "rc": 0,
+    "out": "",
+    "err": ""
+  },
+  {
+    "args": [
+      "add",
+      "-A"
+    ],
+    "rc": 0,
+    "out": "",
+    "err": ""
+  },
+  {
+    "args": [
+      "commit",
+      "-q",
+      "-m",
+      "fixture"
+    ],
+    "rc": 128,
+    "out": "",
+    "err": "error: Debug: Namespace set to \"git\" (ignored)\nDebug: Key file set to \"/home/claude/.ssh/commit_signing_key.pub\" (ignored, using server key)\nMCP server request failed (attempt 1/3), retrying in 114.921958ms: failed to send request: Post \"http://127.0.0.1:35089/mcp\": dial tcp 127.0.0.1:35089: socket: operation not permitted\nMCP server request failed (attempt 2/3), retrying in 246.258802ms: failed to send request: Post \"http://127.0.0.1:35089/mcp\": dial tcp 127.0.0.1:35089: socket: operation not permitted\nError: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post \"http://127.0.0.1:35089/mcp\": dial tcp 127.0.0.1:35089: socket: operation not permitted\nUsage:\n  environment-runner code-sign [flags]\n\nFlags:\n  -h, --help   help for code-sign\n\nError: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post \"http://127.0.0.1:35089/mcp\": dial tcp 127.0.0.1:35089: socket: operation not permitted\n\nfatal: failed to write commit object\n"
+  },
+  {
+    "args": [
+      "rev-parse",
+      "HEAD"
+    ],
+    "rc": 128,
+    "out": "HEAD\n",
+    "err": "fatal: ambiguous argument 'HEAD': unknown revision or path not in the working tree.\nUse '--' to separate paths from revisions, like this:\n'git <command> [<revision>...] -- [<file>...]'\n"
+  }
+]

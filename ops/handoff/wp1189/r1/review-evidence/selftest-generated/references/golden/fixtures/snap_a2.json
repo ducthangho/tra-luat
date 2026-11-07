@@ -1,0 +1,15 @@
+{
+ "auth": {
+  "gws_credentials": {
+   "age_days": 4.794,
+   "present": true
+  }
+ },
+ "registry": {
+  "rows": 745
+ },
+ "schema": "live_state_snapshot.v1",
+ "volatile": {
+  "generatedAt": "2026-07-09T11:11:11Z"
+ }
+}

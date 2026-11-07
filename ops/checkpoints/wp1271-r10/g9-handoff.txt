@@ -1,0 +1,34 @@
+I've made the fix in the module and harness, but none of it has been run: no PowerShell exists here, and I used only Read, Grep and Edit. The sample is unchanged, nothing was staged or committed, and I wrote nothing outside the three allowed paths.
+
+## Module (`ProximaConfig.psm1`)
+- **The bug:** the two field-guard loops used `-cnotcontains`, which treats `"target<NUL>Id"` as equal to `"targetId"`. An extra key like that got past both guards and was then silently ignored.
+- **The fix:** a new set, `$script:FieldSet`, built with `[StringComparer]::Ordinal`, and one helper, `Test-PxFieldName`, that checks membership in it. The secret-field guard, the unknown-field guard and the field name shown in error messages (`New-PxError`) now all go through that helper.
+- **What stays the same:**
+  - Keys are not trimmed, stripped or normalized, and the parser's Ordinal dictionary still keeps distinct keys distinct.
+  - Duplicate keys and case-variant keys (`Mode`) are still rejected the same way.
+  - Secret-field classification, cleaned-up error messages, and the rule that name values only need to be non-empty valid Unicode are unchanged.
+- **One more change of the same kind:** the drive-mapping/mount-list recheck after reading (`-cne`) now compares Ordinal. This only adds rejections; it never lets anything new through.
+
+## Harness (`ProximaConfig.Tests.ps1`)
+- **A2-05 now also covers extra keys.** For both Local and Remote, a valid canonical config with all required fields passes. Then, for each of the 6 allowed field names, I insert a NUL, a soft hyphen or a zero-width joiner at the start, middle or end of the name. Each variant goes in as one extra JSON-escaped key, which must give `UnknownField` with no config returned. That is 108 checks. The labels look like `Local targetId NUL prefix`.
+- **Observations:** 54 entries record what the harness's own `-ccontains` and Ordinal comparisons say for each variant. They are stored in a new report field, `key_identity_observations`. They are recorded only, never asserted, so nothing assumes how collation treats the soft hyphen or zero-width joiner.
+- **One new mutant, `cultural-key-membership`:** it uses one anchor, which appears exactly once in the module, and puts `-ccontains` back inside the helper. To get credit it must produce all 36 `A2-05:ACCEPTED_INVALID[<Local|Remote> <field> NUL <prefix|infix|suffix>]` failures.
+- **Everything else is unchanged:** all 24 earlier CX IDs and their anchors (I checked the anchors are still unique), the physical, cleanup, snapshot and VHD logic, and the no-credit control. The total should be 25 CX IDs (23 mutants, 1 no-credit control, 1 cleanup fault) and 21 mandatory IDs plus A3-08 and the optional A3-07.
+
+## What I actually checked vs what wasn't run
+- **Checked statically:**
+  - Line counts are 294 + 614 + 8 = **916** (+31 over H6, ceiling 950).
+  - No trailing whitespace, checked by grep rather than `git diff --check`.
+  - The new anchor appears once and the old ones are still unique.
+  - The module contains no new A5-01 forbidden tokens and no "example".
+- **Not run:** PS5.1 or PS7 in any form (normal, focused or paired with C), Linux selftest, Ruff delta, manifest, git numstat, and `git diff --check`. Nothing has passed yet.
+- **Runtime:** every harness run, including each mutant child, now does about 110 more guarded reads. I estimate that adds a few minutes per runtime; that is a guess, not a measurement.
+
+## Culture-sensitive comparisons I looked at but left alone
+These are outside the field-name issue, untested, and for the reviewer or dispatcher to decide:
+- **Secret-key regex:** its `(?i)` matching follows the current culture. Under something like Turkish (tr-TR), a key such as `PRIVATE` would be reported as `UnknownField` instead of `SecretField`. It is still rejected either way.
+- **Reserved device names in `Test-PxPathSyntax`:** the same casing issue means a lowercase `conin$` path segment could get past this check under tr-TR. This is a path value, not a field name. `\\?\` opens use the literal name, but a returned `basePath` could carry it.
+- **Left as is:** the parser's `switch -CaseSensitive` on single characters, `schemaVersion -ceq '1'`, mode, and URI scheme. All of these compare values that the grammar or a regex has already checked.
+
+## Where the approach came from
+The mechanism, the start/middle/end insertion positions, and the Local+Remote structure came from the review4 verdict and the native H6 advisory probe and receipt. Those runs showed 36 of 36 extra keys accepted and all 18 `-ccontains` checks true while Ordinal was false. I worked out the helper, set and mutant design myself; no patch was supplied. This was attempt 8 of 8. Any further model call needs a dispatcher checkpoint.

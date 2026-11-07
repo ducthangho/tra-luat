@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "spec_oid": "cb27d456577609fe6cfbbea8e261bbf3604fea2f",
+  "spec_sha256": "313ece86f69081e6a35e6c18c46be65f9ddb45f5611ee991160ad10ef739ff55",
+  "packet": "wp1271",
+  "revision": 10,
+  "head": "2b485a4fc0483973bd78c9236971e9ec63f86719"
+}

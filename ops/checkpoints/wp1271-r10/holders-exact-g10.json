@@ -1,0 +1,218 @@
+{
+  ".agents/skills/proxima-control/scripts/ProximaConfig.psm1": [
+    {
+      "lease_id": "wp1271-r1-g1-agy",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "H\u1ebeT_H\u1ea0N",
+      "retired": "wp1271-r2-g2-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r10-g10-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": null,
+      "reciprocal": null
+    },
+    {
+      "lease_id": "wp1271-r2-g2-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "H\u1ebeT_H\u1ea0N",
+      "retired": "wp1271-r3-g3-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r3-g3-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "H\u1ebeT_H\u1ea0N",
+      "retired": "wp1271-r4-g4-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r4-g4-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r5-g5-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r5-g5-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r6-g6-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r6-g6-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r7-g7-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r7-g7-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r8-g8-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r8-g8-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r9-g9-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r9-g9-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r10-g10-claude",
+      "reciprocal": true
+    }
+  ],
+  ".agents/skills/proxima-control/config.example.json": [
+    {
+      "lease_id": "wp1271-r1-g1-agy",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "H\u1ebeT_H\u1ea0N",
+      "retired": "wp1271-r2-g2-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r10-g10-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": null,
+      "reciprocal": null
+    },
+    {
+      "lease_id": "wp1271-r2-g2-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "H\u1ebeT_H\u1ea0N",
+      "retired": "wp1271-r3-g3-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r3-g3-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "H\u1ebeT_H\u1ea0N",
+      "retired": "wp1271-r4-g4-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r4-g4-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r5-g5-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r5-g5-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r6-g6-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r6-g6-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r7-g7-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r7-g7-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r8-g8-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r8-g8-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r9-g9-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r9-g9-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r10-g10-claude",
+      "reciprocal": true
+    }
+  ],
+  ".agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1": [
+    {
+      "lease_id": "wp1271-r1-g1-agy",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "H\u1ebeT_H\u1ea0N",
+      "retired": "wp1271-r2-g2-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r10-g10-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": null,
+      "reciprocal": null
+    },
+    {
+      "lease_id": "wp1271-r2-g2-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "H\u1ebeT_H\u1ea0N",
+      "retired": "wp1271-r3-g3-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r3-g3-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "H\u1ebeT_H\u1ea0N",
+      "retired": "wp1271-r4-g4-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r4-g4-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r5-g5-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r5-g5-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r6-g6-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r6-g6-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r7-g7-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r7-g7-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r8-g8-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r8-g8-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r9-g9-claude",
+      "reciprocal": true
+    },
+    {
+      "lease_id": "wp1271-r9-g9-claude",
+      "ref": "refs/heads/ops/wp1271-spec",
+      "state": "C\u00d2N_H\u1ea0N",
+      "retired": "wp1271-r10-g10-claude",
+      "reciprocal": true
+    }
+  ]
+}

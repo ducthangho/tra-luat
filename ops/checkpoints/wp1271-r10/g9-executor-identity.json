@@ -1,0 +1,14 @@
+{
+  "provider": "anthropic_claude",
+  "execution_surface": "claude_code",
+  "transport": "machine/local",
+  "session_id": "2c5e88ca-cbe5-4686-88d5-c60c90fa3cca",
+  "family": "claude",
+  "family_basis": "single-family provider identity ADR0065",
+  "requested_model": "opus",
+  "requested_effort": "high",
+  "attempt": 8,
+  "attempt_limit": 8,
+  "live_credentials_removed": true,
+  "prompt_hash": "c235cec4f301a90591f9e960da07231c666363e5014163bf7fcd8afdf713616f"
+}

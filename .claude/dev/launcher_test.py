@@ -13460,7 +13460,7 @@ def r1252_ghi_tep_ignored():
         repo = _r1252_kho(s)
         rc, so, _ = _r1252_run(repo, s / "runs", "open('.tl_state/x','w').write('1')")
         bang(rc == 16 and so["trang_thai"] == "ghi_workspace" and so["ma_thoat"] == 0,
-             f"ghi tep ignored phai ra ghi_workspace/16: rc={rc} {so.get('trang_thai')}")
+             f"ghi tep ignored phai ra ghi_workspace/16: rc={rc} {so.get('trang_thai')} {so.get('snapshot_ly_do')}")
         bang(so["tep_doi"] == [{"duong_dan": ".tl_state/x", "doi": "them"}] and so["tep_doi_tong"] == 1,
              f"tep_doi sai: {so['tep_doi']}")
         rc, so, _ = _r1252_run(repo, s / "runs2", "open('.tl_state/x','w').write('2')")
@@ -13566,6 +13566,9 @@ def r1252_khong_do_duoc():
                                   (object(), None, False)):
                 m._pid_trong_job = lambda _j, ds=ds: ds
                 bang(m._cay_da_chet(1, job) is mong, f"(d') windows job={job is not None} ds={ds}: phai {mong}")
+            tre = iter(([7], [7], []))   # A10: job báo trễ rồi mới rỗng ⇒ phải chờ, không vội kết luận chưa chết
+            m._pid_trong_job = lambda _j: next(tre)
+            bang(m._cay_da_chet(1, object()) is True, "(d') windows: job cap nhat tre phai duoc cho")
             m.platform = types.SimpleNamespace(system=lambda: "Linux")
             for ds, mong in (([], True), ([7], False), (None, False)):
                 m._thanh_vien_nhom = lambda _p, ds=ds: ds
@@ -13898,13 +13901,15 @@ def r1252_doi_to_tien_thu_muc_luot():
             os.symlink(s, s / "thu-lk")
         except OSError:
             return "bo qua: nen khong tao duoc symlink"
-    for che_do in (["dir_fd"] if m._CO_DIR_FD else []) + ["du_phong"]:   # connector P2: cả nhánh không dir_fd
+    khong_dung, ds_che_do = 0, (["dir_fd"] if m._CO_DIR_FD else []) + ["du_phong"]
+    for che_do in ds_che_do:   # connector P2: cả nhánh không dir_fd
       with San() as s:
         repo = _r1252_kho(s)
         goc = s / "rr" / "runs"
-        con = (f"import glob,os\nR = {str(goc)!r}\nsid = os.path.basename(glob.glob(R + '/*/')[0].rstrip('/'))\n"
+        kl = s / "khong-lai-duoc"   # A10: Windows từ chối đổi tên thư mục đang mở tệp ⇒ đòn không dựng được
+        con = (f"import glob,os\nR = {str(goc)!r}\nKL = {str(kl)!r}\nsid = os.path.basename(glob.glob(R + '/*/')[0].rstrip('/'))\n"
                f"gia = {str(repo / '.tl_state' / 'gia')!r}\nos.makedirs(os.path.join(gia, sid))\n"
-               "os.rename(R, R + '-goc')\nos.symlink(gia, R)\n")
+               "try:\n    os.rename(R, R + '-goc')\nexcept PermissionError:\n    open(KL, 'w').close(); raise SystemExit(0)\nos.symlink(gia, R)\n")
         cu = m._CO_DIR_FD
         m._CO_DIR_FD = cu and che_do == "dir_fd"
         try:
@@ -13913,8 +13918,14 @@ def r1252_doi_to_tien_thu_muc_luot():
             m._CO_DIR_FD = cu
         gia = repo / ".tl_state" / "gia" / so["short_id"]
         bang(not list(gia.glob("snapshot-*.txt")), f"{che_do}: tep chup bi ghi theo duong dan da bi lai vao workspace")
+        if kl.exists():   # chỉ Windows được phép từ chối, và khi ấy không có gì bị lái
+            bang(os.name == "nt" and rc == 16 and not so.get("snapshot_tep_chup_bo_qua"), f"{che_do}: tu choi rename ngoai Windows")
+            khong_dung += 1
+            continue
         bang(rc == 17 and so["snapshot_ly_do"] == "chup_loi" and so.get("snapshot_tep_chup_bo_qua") == "thu_muc_luot_bi_doi",
              f"{che_do}: phai ra 17/chup_loi/thu_muc_luot_bi_doi: rc={rc} {so.get('snapshot_tep_chup_bo_qua')}")
+    if khong_dung == len(ds_che_do):
+        return "bo qua: nen tu choi doi ten thu muc luot dang mo tep (do A10)"
 
 
 
@@ -14087,7 +14098,9 @@ DOT_BIEN = [
      ["r1252_khong_do_duoc"]),
     ("r1252_none_la_chet", ('        return _thanh_vien_nhom(pid) == []', '        return not _thanh_vien_nhom(pid)'),
      ["r1252_khong_do_duoc"]),
-    ("r1252_windows_khong_dung_job", ('        return job is not None and _pid_trong_job(job) == []', '        return False'),
+    ("r1252_windows_khong_dung_job", ('                return ds == []', '                return False'),
+     ["r1252_khong_do_duoc"]),
+    ("r1252_windows_khong_cho_job", ('        for _ in range(20):   # A10', '        for _ in range(1):   # A10'),
      ["r1252_khong_do_duoc"]),
     ("r1252_mac_dinh_bat", ('    r.add_argument("--chup-workspace", action="store_true",',
                             '    r.add_argument("--chup-workspace", action="store_true", default=True,'),

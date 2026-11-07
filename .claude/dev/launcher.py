@@ -972,7 +972,12 @@ def _cay_da_chet(pid: int, job) -> bool:
     `None` (không đo được) KHÔNG phải rỗng. Windows: `_thanh_vien_nhom` luôn `None`, nên dùng job."""
     he = platform.system()
     if he == "Windows":
-        return job is not None and _pid_trong_job(job) == []
+        for _ in range(20):   # A10: job Windows cập nhật danh sách TRỄ sau khi con thoát; chờ có hạn, [] mới là bằng chứng
+            ds = _pid_trong_job(job) if job is not None else None
+            if ds is None or ds == []:
+                return ds == []
+            time.sleep(0.1)
+        return False
     if he in ("Linux", "Darwin"):
         return _thanh_vien_nhom(pid) == []
     return False

@@ -1,0 +1,9 @@
+{
+  "run_id": 42352790095,
+  "run_attempt": 1,
+  "event": "pull_request",
+  "definition_oid": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "workflow_path": ".github/workflows/ci.yml",
+  "sha256": "aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67",
+  "provenance": "GraphQL WorkflowRun.file.repositoryFileUrl exactrepo/OID/path verified"
+}

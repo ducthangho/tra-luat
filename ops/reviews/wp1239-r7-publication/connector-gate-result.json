@@ -1,0 +1,14 @@
+{
+  "gate": "K3 connector / ADR0060 M6",
+  "head": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "rc": 12,
+  "endpoint_counts": {
+    "reviews": 0,
+    "review_comments": 0,
+    "issue_comments": 0
+  },
+  "status": "blocked_no_connector_review_on_exact_H",
+  "codex_budget_used": 3,
+  "codex_budget_limit": 3,
+  "no_extra_call": true
+}

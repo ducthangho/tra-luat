@@ -1,0 +1,26 @@
+{
+  "h0": "ba0126bd20c99669264b788e15da2b6ebcda0fd7",
+  "outside_scope_equal_S_final": true,
+  "ok": true,
+  "head": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb",
+  "baseline": "9607e3eba96b2ce091e34196cbb8ede31a521ff9",
+  "paths": [
+    "docs/research/2026-11-05-proxima-playwright-p0.md",
+    "ops/plans/PROXIMA-PLAYWRIGHT-v1.md"
+  ],
+  "added_lines": 293,
+  "report_lines": 97,
+  "files_checked": 2,
+  "source_sha256": "5c0c1fa6ad465eaf2037031b79e05f3740118dbbe01fc48ce8278f27f6db9ebb",
+  "integrity_negative_checks": {
+    "one_byte_rejected": true,
+    "crlf_rejected": true
+  },
+  "N1": "passed",
+  "N2": "passed",
+  "N3": "passed",
+  "N4": "passed",
+  "manual_R1_R4": "pending_independent_review",
+  "runtime_tests": "not_run"
+}

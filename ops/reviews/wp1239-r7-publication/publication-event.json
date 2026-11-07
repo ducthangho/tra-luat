@@ -1,0 +1,19 @@
+{
+  "event": "owner_waived_candidate_published_existing_PR",
+  "packet": 1239,
+  "head": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb",
+  "old_PR_head": "ba0126bd20c99669264b788e15da2b6ebcda0fd7",
+  "publication": "normal_fast_forward",
+  "authority_comment": 6704099531,
+  "owner_waiver_comment": 6704067442,
+  "raw_verdict": "blocked",
+  "finding_disposition": "owner_waived_F1_F2_only",
+  "no_model_calls_added": true,
+  "no_merge_land_deploy": true,
+  "admission_run": 42352790162,
+  "admission_conclusion": "success",
+  "linux_gate_run": 42352790095,
+  "linux_gate_status": "in_progress",
+  "windows_ci_requested": false
+}

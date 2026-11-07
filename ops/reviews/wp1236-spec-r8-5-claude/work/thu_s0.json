@@ -1,0 +1,106 @@
+{
+ "A_decorator_removesuffix": {
+  "kiem_s0_script": "DAT",
+  "ve4_van_ban": "DO",
+  "hanh_vi_lech": 3,
+  "vao": 128,
+  "vi_du_lech": [
+   "('python ops/hong_test.py || exit 0', None, None, 'lenh_ngoai_cu_phap')",
+   "('python ops/hong_test.py || exit 0', 'bash', None, 'lenh_ngoai_cu_phap')"
+  ]
+ },
+ "A_gan_lai_ten": {
+  "kiem_s0_script": "DAT",
+  "ve4_van_ban": "DAT",
+  "hanh_vi_lech": 118,
+  "vao": 128,
+  "vi_du_lech": [
+   "('if false; then set -o pipefail; fi\\npython ops/hong_test.py | python ops/qua.py\\n', None, None, 'lenh_ngoai_cu_phap')",
+   "('f() { set -o pipefail; }\\npython ops/hong_test.py | python ops/qua.py\\n', None, None, 'lenh_ngoai_cu_phap')"
+  ]
+ },
+ "A_hai_def": {
+  "kiem_s0_script": "DAT",
+  "ve4_van_ban": "DAT",
+  "hanh_vi_lech": 118,
+  "vao": 128,
+  "vi_du_lech": [
+   "('if false; then set -o pipefail; fi\\npython ops/hong_test.py | python ops/qua.py\\n', None, None, 'lenh_ngoai_cu_phap')",
+   "('f() { set -o pipefail; }\\npython ops/hong_test.py | python ops/qua.py\\n', None, None, 'lenh_ngoai_cu_phap')"
+  ]
+ },
+ "A_doi_code": {
+  "kiem_s0_script": "DAT",
+  "ve4_van_ban": "DAT",
+  "hanh_vi_lech": 118,
+  "vao": 128,
+  "vi_du_lech": [
+   "('if false; then set -o pipefail; fi\\npython ops/hong_test.py | python ops/qua.py\\n', None, None, 'lenh_ngoai_cu_phap')",
+   "('f() { set -o pipefail; }\\npython ops/hong_test.py | python ops/qua.py\\n', None, None, 'lenh_ngoai_cu_phap')"
+  ]
+ },
+ "A_builtins": {
+  "kiem_s0_script": "DAT",
+  "ve4_van_ban": "DAT",
+  "hanh_vi_lech": 13,
+  "vao": 128,
+  "vi_du_lech": [
+   "('python ops/hong_test.py | python ops/qua.py\\n', None, 'lenh_ngoai_cu_phap', 'ong_khong_bash_tuong_minh')",
+   "('python ops/hong_test.py | python ops/qua.py\\n', 'sh', 'lenh_ngoai_cu_phap', 'ong_khong_bash_tuong_minh')"
+  ]
+ },
+ "A_boc_gan_lai_tinh_vi": {
+  "kiem_s0_script": "DAT",
+  "ve4_van_ban": "DAT",
+  "hanh_vi_lech": 3,
+  "vao": 128,
+  "vi_du_lech": [
+   "('python ops/hong_test.py || exit 0', None, None, 'lenh_ngoai_cu_phap')",
+   "('python ops/hong_test.py || exit 0', 'bash', None, 'lenh_ngoai_cu_phap')"
+  ]
+ },
+ "A_defaults_ham": {
+  "kiem_s0_script": "DAT",
+  "ve4_van_ban": "DAT",
+  "hanh_vi_lech": 0,
+  "vao": 128,
+  "vi_du_lech": []
+ },
+ "B_return_annotation": {
+  "kiem_s0_script": "DAT",
+  "ve4_van_ban": "DO",
+  "hanh_vi_lech": 0,
+  "vao": 128,
+  "vi_du_lech": []
+ },
+ "B_param_annotation": {
+  "kiem_s0_script": [
+   "ast_ham"
+  ],
+  "ve4_van_ban": "DO",
+  "hanh_vi_lech": 0,
+  "vao": 128,
+  "vi_du_lech": []
+ },
+ "B_future_annotations": {
+  "kiem_s0_script": "DAT",
+  "ve4_van_ban": "DAT",
+  "hanh_vi_lech": 0,
+  "vao": 128,
+  "vi_du_lech": []
+ },
+ "B_nhay_don_ngoac": {
+  "kiem_s0_script": "DAT",
+  "ve4_van_ban": "DAT",
+  "hanh_vi_lech": 0,
+  "vao": 128,
+  "vi_du_lech": []
+ },
+ "B_type_trong_ham_khac": {
+  "kiem_s0_script": "DAT",
+  "ve4_van_ban": "DAT",
+  "hanh_vi_lech": 0,
+  "vao": 128,
+  "vi_du_lech": []
+ }
+}

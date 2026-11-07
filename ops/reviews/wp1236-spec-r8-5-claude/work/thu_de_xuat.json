@@ -1,0 +1,33 @@
+{
+ "A_decorator_removesuffix": [
+  "closure_defaults",
+  "ast_doi_tuong"
+ ],
+ "A_gan_lai_ten": [
+  "ast_doi_tuong"
+ ],
+ "A_hai_def": [
+  "ast_doi_tuong"
+ ],
+ "A_doi_code": [
+  "ast_doi_tuong"
+ ],
+ "A_builtins": [
+  "builtins"
+ ],
+ "A_boc_gan_lai_tinh_vi": [
+  "ast_doi_tuong"
+ ],
+ "A_defaults_ham": [
+  "closure_defaults"
+ ],
+ "B_return_annotation": [],
+ "B_param_annotation": [
+  "ast_doi_tuong"
+ ],
+ "B_future_annotations": [],
+ "B_nhay_don_ngoac": [],
+ "B_type_trong_ham_khac": [],
+ "goc": [],
+ "dinh_dang_chu_thich": []
+}

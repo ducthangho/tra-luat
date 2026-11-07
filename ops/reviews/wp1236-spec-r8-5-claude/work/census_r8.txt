@@ -1,0 +1,21 @@
+luat_sha256 ee0f2db86fc579ff236ff0417de0658a184a4ed4871468c90a2f0c42417037cc · so ten buoc luat 30
+{"ref": "d26b36f", "buoc_luat": 30, "ten_khac_nhau": 30, "do_duoc": 24, "dat_theo_shell_lenh": {"None|python": 23, "bash|python": 1}}
+   KHONG {"job": "gate", "buoc": "tl selftest (co bang chung exact-identity)", "shell": "bash", "so_dong": 29, "ly_do": "lenh_ngoai_cu_phap"}
+   KHONG {"job": "gate", "buoc": "release-bundle x2 cùng SHA-256", "shell": "bash", "so_dong": 8, "ly_do": "lenh_ngoai_cu_phap"}
+   KHONG {"job": "gate-cong-cu", "buoc": "G5 manh ban kinh dot bien (#668)", "shell": "bash", "so_dong": 2, "ly_do": "lenh_ngoai_cu_phap"}
+   KHONG {"job": "gate-ops", "buoc": "lease-publish selftest (đo lại setup sau G5)", "shell": "bash", "so_dong": 5, "ly_do": "lenh_ngoai_cu_phap"}
+   KHONG {"job": "gate-ops", "buoc": "don-nhanh selftest (chốt xoá nhánh)", "shell": "pwsh", "so_dong": 1, "ly_do": "shell_ngoai_cu_phap"}
+   KHONG {"job": "gate-ops", "buoc": "bo ca gate chay TRONG cgroup duoc uy quyen (Linux)", "shell": null, "so_dong": 38, "ly_do": "lenh_ngoai_cu_phap"}
+{"ref": "fe84620", "buoc_luat": 30, "ten_khac_nhau": 30, "do_duoc": 24, "dat_theo_shell_lenh": {"None|python": 23, "bash|python": 1}}
+   KHONG {"job": "gate", "buoc": "tl selftest (co bang chung exact-identity)", "shell": "bash", "so_dong": 29, "ly_do": "lenh_ngoai_cu_phap"}
+   KHONG {"job": "gate", "buoc": "release-bundle x2 cùng SHA-256", "shell": "bash", "so_dong": 8, "ly_do": "lenh_ngoai_cu_phap"}
+   KHONG {"job": "gate-cong-cu", "buoc": "G5 manh ban kinh dot bien (#668)", "shell": "bash", "so_dong": 2, "ly_do": "lenh_ngoai_cu_phap"}
+   KHONG {"job": "gate-ops", "buoc": "lease-publish selftest (đo lại setup sau G5)", "shell": "bash", "so_dong": 5, "ly_do": "lenh_ngoai_cu_phap"}
+   KHONG {"job": "gate-ops", "buoc": "don-nhanh selftest (chốt xoá nhánh)", "shell": "pwsh", "so_dong": 1, "ly_do": "shell_ngoai_cu_phap"}
+   KHONG {"job": "gate-ops", "buoc": "bo ca gate chay TRONG cgroup duoc uy quyen (Linux)", "shell": null, "so_dong": 38, "ly_do": "lenh_ngoai_cu_phap"}
+{"ref": "8983e1b", "buoc_luat": 30, "ten_khac_nhau": 30, "do_duoc": 25, "dat_theo_shell_lenh": {"None|python": 23, "bash|python": 1, "bash|bash": 1}}
+   KHONG {"job": "gate", "buoc": "tl selftest (co bang chung exact-identity)", "shell": "bash", "so_dong": 29, "ly_do": "lenh_ngoai_cu_phap"}
+   KHONG {"job": "gate", "buoc": "release-bundle x2 cùng SHA-256", "shell": "bash", "so_dong": 8, "ly_do": "lenh_ngoai_cu_phap"}
+   KHONG {"job": "gate-cong-cu", "buoc": "G5 manh ban kinh dot bien (#668)", "shell": "bash", "so_dong": 2, "ly_do": "lenh_ngoai_cu_phap"}
+   KHONG {"job": "gate-ops", "buoc": "don-nhanh selftest (chốt xoá nhánh)", "shell": "pwsh", "so_dong": 1, "ly_do": "shell_ngoai_cu_phap"}
+   KHONG {"job": "gate-ops", "buoc": "bo ca gate chay TRONG cgroup duoc uy quyen (Linux)", "shell": null, "so_dong": 38, "ly_do": "lenh_ngoai_cu_phap"}

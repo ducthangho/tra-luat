@@ -1,0 +1,18 @@
+{
+  "artifact_id": 13568758371,
+  "zip_sha256": "a1d5089584fa4889626671f8ea7c67b7bda3076c3f037eb61be2225e4978b965",
+  "matches_GitHub_artifact_digest": true,
+  "source_definition_tested_commit": "132d376cbbfea0692ff6db284753b33f437c637a",
+  "tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb",
+  "output_sha256": "d6b492c5b530df6daaf965d89d808267462d6c7ef4682d1e631a8b4cc49a9a8e",
+  "positive_evidence": "1777/1777",
+  "returncode": 0,
+  "identity_before_after_equal": true,
+  "actual_system": "Linux",
+  "actual_system_release": "7.0.0-1019-azure",
+  "actual_Python": "3.12.16",
+  "CI_overall": "pending_other_jobs",
+  "actual_runner_code_hash_matches_M": true,
+  "command_hash_matches": true,
+  "catalog_policy_hash_matches": true
+}

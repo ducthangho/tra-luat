@@ -77,3 +77,6 @@ packet_budget_carryover:
   codex_review_calls_limit: 8
   review_rounds_used: 0
   review_rounds_limit: 3
+da_bi_thay_the: wp1271-r3-g3-claude
+superseded_reason: Terminal Claude H0 handed off; consolidated actual Windows defects
+  and explicit r3 design/host/budget correction under delegation

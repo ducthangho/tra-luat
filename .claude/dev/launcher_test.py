@@ -128,15 +128,36 @@ def tao_worktree(goc: Path) -> Path:
     return wt
 
 
-def tao_claude_gia(goc: Path) -> Path:
-    dich = goc / ("claude.exe" if LA_WINDOWS else "claude")
+def _bin_python_gia(dich: Path) -> Path:
+    """Dựng một CLI giả bằng cách đặt bản thông dịch Python dưới tên khác (`codex`, `claude`).
+
+    Đo 07-11-2026 (container Claude Code web): Python ở đó là bản đóng gói RỜI, biên dịch với
+    prefix `/install` (không tồn tại); bản THẬT tìm ra stdlib nhờ dò mốc quanh chính đường dẫn của
+    nó, còn bản link/copy sang thư mục tạm dò trượt, lùi về `/install` rồi chết
+    `No module named 'encodings'`, rc=1, KHÔNG in gì ra stdout. Mười ca `run` đỏ vì vậy — kể cả
+    trên master — trong khi CI xanh, vì Python của runner nằm đúng prefix nó được biên dịch.
+    Lỗi của FIXTURE (giả định "link trình thông dịch đi đâu cũng chạy"), không phải của launcher.
+
+    Chữa bằng đúng cơ chế venv: `pyvenv.cfg` cạnh bản sao, `home` trỏ thư mục của bản thật.
+    Chỉ trên POSIX — lane Windows đang xanh với cách cũ, không có bằng chứng nào đòi đổi nó.
+    """
+    goc = Path(PY).resolve()
     try:
-        os.link(Path(PY).resolve(), dich)
+        os.link(goc, dich)
     except OSError:
-        shutil.copy2(Path(PY).resolve(), dich)
+        shutil.copy2(goc, dich)
     if not LA_WINDOWS:
         dich.chmod(0o755)
+        cfg = dich.parent / "pyvenv.cfg"
+        noi_dung = f"home = {goc.parent}\ninclude-system-site-packages = true\n"
+        if cfg.exists() and cfg.read_text(encoding="utf-8") != noi_dung:
+            raise AssertionError(f"pyvenv.cfg khac da co o {cfg}: hai CLI gia cung thu muc, khac goc")
+        cfg.write_text(noi_dung, encoding="utf-8")
     return dich
+
+
+def tao_claude_gia(goc: Path) -> Path:
+    return _bin_python_gia(goc / ("claude.exe" if LA_WINDOWS else "claude"))
 
 
 def head_cua(d: Path) -> str:
@@ -5512,6 +5533,90 @@ def t98_CO_CREDENTIAL_khong_duoc_thanh_kha_dung_o_tang_doctor():
 
 
 @ca
+def r20261107_doctor_SAP_HET_HAN_da_kiem_song_dat_la_da_chung_minh():
+    """`--kiem-song` ĐẠT mà KET LUAN vẫn ghi "chưa ai gọi thật" là doctor tự mâu thuẫn.
+
+    Đo 07-11-2026 (phiên remote): `doctor --kiem-song` in cho codex
+    `SAP_HET_HAN ... kiem song: rc=0, có TRALUAT-CRED-OK (VAN dung duoc)` rồi ngay dưới
+    phần KET LUAN lại liệt `codex` vào `CHUA CHUNG MINH KHA DUNG (co mat, chua ai goi
+    that)`, kèm `--kiem-song DA chay ma van chua co bang chung`. Nhãn `SAP_HET_HAN` phải
+    GIỮ (t96 ghim: cảnh báo sớm không được mất), nên bằng chứng đi kênh thứ ba của `do`.
+
+    Ranh giới, không được nới: (b) không có bằng chứng thì `SAP_HET_HAN` vẫn chưa chứng
+    minh (t98 (d)); (c) chỉ `True` THẬT mới tính; (d) bằng chứng không nâng được nhãn
+    ngoài danh sách trắng `DA_CHUNG_MINH_KHI_KIEM_SONG`.
+    """
+    m = _tai_launcher_thu()
+    m.CONG_CU = []
+
+    class DoiSo:
+        json = True
+        workspace = None
+        kiem_song = True
+        doi_kha_dung = True
+
+    def chay(kq):
+        m.KHA_NANG = [{"ten": "codex", "do": lambda ws, ks=False: kq,
+                       "vi_sao": "v", "khac_phuc": "k"}]
+        cu = sys.stdout
+        sys.stdout = io.StringIO()
+        try:
+            ma = m.lenh_doctor(DoiSo())
+            return ma, json.loads(sys.stdout.getvalue())
+        finally:
+            sys.stdout = cu
+
+    # (a) SAP_HET_HAN + loi goi that DAT => da chung minh
+    ma, d = chay(("SAP_HET_HAN", "x", True))
+    bang("codex" not in d["chua_chung_minh"],
+         f"kiem song DAT ma van 'chua chung minh': {d['chua_chung_minh']}")
+    bang(d["ok_kha_dung"] is True, f"kiem song DAT ma ok_kha_dung={d['ok_kha_dung']}")
+    bang(ma == MA_OK, f"--doi-kha-dung voi bang chung song phai 0, duoc {ma}")
+    bang(d["kha_nang"][0]["trang_thai"] == "SAP_HET_HAN",
+         "nhan canh bao som bi doi — t96 se mat tac dung")
+    bang(d["kha_nang"][0]["kiem_song_dat"] is True, "JSON khong phoi kiem_song_dat")
+
+    # (b) SAP_HET_HAN khong kem bang chung => van CHUA chung minh, fail-closed
+    ma, d = chay(("SAP_HET_HAN", "x"))
+    bang("codex" in d["chua_chung_minh"], "khong co bang chung ma van nang nhan")
+    bang(ma == MA_CHUA_XAC_THUC, f"--doi-kha-dung phai chan, duoc {ma}")
+
+    # (c) truthy KHONG phai True => khong tinh
+    ma, d = chay(("SAP_HET_HAN", "x", "co"))
+    bang("codex" in d["chua_chung_minh"], "chuoi truthy duoc tinh la bang chung song")
+
+    # (d) bang chung khong nang duoc nhan ngoai danh sach trang
+    for nhan in ("CO_CREDENTIAL", "KHONG_DO_DUOC"):
+        ma, d = chay((nhan, "x", True))
+        bang("codex" in d["chua_chung_minh"], f"{nhan} + True bi nang thanh da chung minh")
+        bang(ma == MA_CHUA_XAC_THUC, f"{nhan} + True ma --doi-kha-dung thoat {ma}")
+
+    # (e) phep do THAT trong KHA_NANG phai bao bang chung khi va CHI khi goi that dat
+    m2 = _tai_launcher_thu()
+    m2._dang_cho_snapshot = lambda home: False
+    m2._codex_home_hieu_luc = lambda: Path("INERT-HOME")
+    m2.shutil.which = lambda t: "/usr/bin/codex" if t == "codex" else None
+
+    class P:
+        returncode = 0
+        stdout = "Logged in using ChatGPT\n"
+        stderr = ""
+    m2.subprocess.run = lambda *_a, **_k: P()
+    m2._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
+                                   "tuoi_anh_chup_gio": 40.0,
+                                   "gio_con_lai": {"access_token": 199.0}}
+    do = [k for k in m2.KHA_NANG if k["ten"] == "codex"][0]["do"]
+    m2._do_codex_song = lambda *_a, **_k: (True, "rc=0")
+    kq = do(None, True)
+    bang(kq[0] == "SAP_HET_HAN" and kq[2] is True, f"song DAT ma do bao {kq}")
+    kq = do(None, False)
+    bang(kq[0] == "SAP_HET_HAN" and kq[2] is False, f"KHONG kiem song ma do bao song: {kq}")
+    m2._do_codex_song = lambda *_a, **_k: (False, "token_revoked")
+    kq = do(None, True)
+    bang(kq[0] == "CHUA_XAC_THUC" and kq[2] is False, f"song HONG ma do bao {kq}")
+
+
+@ca
 def t97_nap_ban_sao_khong_duoc_an_phai_BYTECODE_CU():
     """Cổng đột biến phải chấm điểm ĐÚNG BẢN nó vừa ghi, không phải bản trước đó.
 
@@ -6472,13 +6577,7 @@ def r14_run_json_bam_lai_dung_hai_log():
 @ca
 def r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh():
     with San() as s:
-        repo = tao_repo(s); cli = s / ("codex.exe" if LA_WINDOWS else "codex")
-        try:
-            os.link(Path(PY).resolve(), cli)
-        except OSError:
-            shutil.copy2(Path(PY).resolve(), cli)
-        if not LA_WINDOWS:
-            cli.chmod(0o755)
+        repo = tao_repo(s); cli = _bin_python_gia(s / ("codex.exe" if LA_WINDOWS else "codex"))
         ds = []
         for i in range(2):
             rr = s / f"runs-{i}"
@@ -6508,14 +6607,28 @@ def _r25_khung(loai, rid, model, target="tungstenite::protocol", truoc=""):
 
 
 def _r25_codex_gia(s):
-    cli = s / ("codex.exe" if LA_WINDOWS else "codex")
-    try:
-        os.link(Path(PY).resolve(), cli)
-    except OSError:
-        shutil.copy2(Path(PY).resolve(), cli)
-    if not LA_WINDOWS:
-        cli.chmod(0o755)
-    return cli
+    return _bin_python_gia(s / ("codex.exe" if LA_WINDOWS else "codex"))
+
+
+@ca
+def r20261107_cli_gia_bang_python_phai_CHAY_DUOC_that():
+    """Fixture "CLI giả = trình thông dịch Python đổi tên" phải tự chứng minh nó chạy được.
+
+    Thiếu ca này, một fixture hỏng KHÔNG đỏ ở chỗ hỏng mà đỏ ở mười ca `run` khác dưới dạng
+    `launcher rc=1` stderr rỗng — trông y hệt một hồi quy của launcher (đo 07-11-2026). Ca này
+    chỉ PHÂN BIỆT được trên nền có Python không di dời được (bản đóng gói rời, prefix biên dịch
+    không tồn tại); trên runner CI nó xanh cả với fixture cũ — đó là giới hạn đã biết, không phải
+    bằng chứng fixture cũ đúng.
+    """
+    with San() as s:
+        for ten in ("codex", "claude"):
+            d = s / ten
+            d.mkdir()
+            cli = _bin_python_gia(d / (ten + (".exe" if LA_WINDOWS else "")))
+            r = subprocess.run([str(cli), "-c", "import encodings, json; print('CLI-GIA-SONG')"],
+                               capture_output=True, text=True, timeout=60)
+            bang(r.returncode == 0 and "CLI-GIA-SONG" in r.stdout,
+                 f"CLI gia {ten} khong chay duoc: rc={r.returncode} {r.stderr[-300:]!r}")
 
 
 def _r25_chay(s, noi_dung_err, sau="", them=(), env=None):

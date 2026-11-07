@@ -1,0 +1,37 @@
+{
+  "head": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "workflow_run": 42352790095,
+  "attempt": 1,
+  "conclusion": "success",
+  "all_23_jobs_success": true,
+  "all_Ubuntu": true,
+  "all_check_runs_count": 26,
+  "required_checks": {
+    "gate (ubuntu-latest)": [
+      128344358009
+    ],
+    "gate-cong-cu-gop (ubuntu-latest)": [
+      128348843328
+    ],
+    "gate-ops (ubuntu-latest)": [
+      128344357974
+    ],
+    "gate-packet-loop (ubuntu-latest)": [
+      128344358019
+    ],
+    "gate-registry (ubuntu-latest)": [
+      128344730124
+    ],
+    "thu-hoi": [
+      128348184767,
+      128344428918,
+      128344314049
+    ]
+  },
+  "source_definition_tested_binding": "ci-source-definition-tested-binding.json",
+  "ready_exception_checkpoint": 6704355356,
+  "owner_grant": "latest owner reply \u0110\u1ed3ng \u00fd",
+  "gate_exception": "M6/K3 + existingCLIreview/owner_F1_F2_waiver_for_K4 only",
+  "no_model_calls_added": true,
+  "no_merge_land_deploy": true
+}

@@ -1,0 +1,20 @@
+{
+  "event": "owner_authorized_ready_exception_applied",
+  "packet_issue": 1239,
+  "mission_issue": 1238,
+  "head": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb",
+  "owner_grant_comment": 6704747095,
+  "checkpoint_comment": 6704355356,
+  "CI_run": 42352790095,
+  "CI_jobs_success": 23,
+  "CI_jobs_total": 23,
+  "F1_F2_disposition": "owner_waived",
+  "raw_reviewer_verdict": "blocked",
+  "K3_K4": "owner_scoped_exception_not_machine_pass",
+  "PR_draft": false,
+  "PR_merged": false,
+  "auto_merge": false,
+  "models_called": false,
+  "merge_land_deploy_authorized": false
+}

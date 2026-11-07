@@ -1,0 +1,20 @@
+{
+  "purpose": "Advisory native primitive probe of g10 handoff's unmeasured dotted-I risk; not public API gate or code approval",
+  "tested_regex": "^CONIN\\$\\z",
+  "options": "IgnoreCase,CultureInvariant",
+  "input_codepoints": "con U+0130 n$",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[Reading 2 new lines (total: 2 lines)]\n\nps=5.1.26100.9711 invariant_dottedI_reserved=False ordinal_dottedI_reserved=False\r\nps=7.6.9 invariant_dottedI_reserved=False ordinal_dottedI_reserved=False\r\n✅ Process completed with exit code 0 (runtime: 2.85s)"
+      },
+      {
+        "type": "text",
+        "text": "\n[executed on device: DESKTOP-T9R33P2 (a5f7076e-a491-4f84-829b-8d1fbcc1c767)]"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  }
+}

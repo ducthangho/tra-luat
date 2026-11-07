@@ -1,0 +1,56 @@
+I've made the locale fix in the module and the harness, but none of it has been run: no PowerShell is available here and the shell was denied, so I used only Read, Grep and Edit. Nothing is staged or committed, `config.example.json` is unchanged, and I wrote nothing outside the three allowed paths.
+
+## Module (`ProximaConfig.psm1`)
+- **Drive letter:** `-notmatch '^[A-Za-z]:\\'` became `-cnotmatch`. The case-insensitive form also let non-ASCII letters through as drive letters, such as the Kelvin sign (U+212A) or, under tr-TR, the dotted capital I (U+0130). I worked this out from how .NET folds case; it has not been measured.
+- **Reserved devices:** a new `$script:ReDevice` regex, built once at import with `IgnoreCase, CultureInvariant`. It covers CON, PRN, AUX, NUL, CONIN$, CONOUT$, and COM/LPT followed by 0-9 or superscript 1, 2 or 3, all with optional extensions.
+  - The superscript characters are built with `[char]0xB9/0xB2/0xB3`, so the module stays pure ASCII and Windows PowerShell 5.1 reads it correctly.
+  - The segment character check became `-cmatch`; the behaviour is the same.
+- **Secret keys:** `$script:SecretKey` is now a CultureInvariant regex object called with `.IsMatch($k)`, so `PRIVATE` is classified as a secret field under tr-TR too.
+- **Small culture fixes of the same kind:** `$Code -clike '*NotFound'`, and the two `$target.StartsWith(...)` checks now use Ordinal. These can only reject more, never accept more.
+- The module never reads or sets the culture.
+- **Left as they were:**
+  - `Test-PxText` only checks surrogates, which have no case.
+  - `Test-PxUri` still uses `-match '(?i:https)'`, but `[Uri]` and `-ceq 'https'` check the result again, and two mutants depend on its exact text.
+
+## Harness (`ProximaConfig.Tests.ps1`)
+- **New `-TestCulture` parameter:** case-sensitive choice of `en-US` or `tr-TR`, default `en-US`.
+  - It is set as the first setup step, before the module import or any regex, for the current thread and as the process default for new threads.
+  - The report records the requested culture, the actual `test_culture` and `test_ui_culture`, and a probe of how lowercase `I` and `'i' -match '^I\z'` behave.
+  - A mismatch, or a probe result that doesn't fit the culture, is a setup error (rc 2).
+  - Every case first checks the culture is unchanged and fails with `CULTURE_CHANGED` otherwise.
+  - Every child, including the no-credit control and the cleanup-fault child, receives `-TestCulture`, and the parent refuses a child report whose measured culture doesn't match its own.
+- **A2-04, new path-profile checks on both Local and Remote** (labels look like `<route> basePath <kind>`):
+  - Accepted and returned exactly: an ordinary Unicode path, ordinary names that look like devices, a drive root, and a 32,000-character path.
+  - Rejected as `InvalidField` (with the field name checked): `conin$`, `CONOUT$.log`, `nul.txt`, `Com1`, `lpt9`, `aux`, `prn.a.b`, three superscript COM/LPT names, three Unicode drive letters (Kelvin, dotted I, fullwidth C), a 32,001-character path, and trailing-dot, trailing-space, empty and `.` segments.
+  - All paths are built from `/` and `[char]`, so the edit tool had no escape sequences it could decode.
+- **A4-01:** new check `PRIVATE upper`, which must be `SecretField` with no echo.
+- **New mutant `cultural-reserved-device`:** it restores H7's device rule (`$seg -match '^(?i:…)'`). It earns credit only if both `A2-04:ACCEPTED_INVALID[Local basePath reserved conin$]` and `A2-04:ACCEPTED_INVALID[Remote basePath reserved conin$]` appear, which can only happen under tr-TR. Under en-US it stays red.
+- **Unchanged:**
+  - The 21 mandatory IDs, required A3-08 and optional A3-07.
+  - The 25 existing CX IDs and their anchors. I checked by Grep that each anchor still appears once.
+  - The 108 extra-key regressions and the `cultural-key-membership` mutant.
+- **Expected counts:** 26 CX IDs (24 mutants, 1 no-credit control, 1 cleanup fault). A normal run should give 23 and a focused run 49 when A3-07 is observed.
+
+## Checked here vs not run
+- **Checked statically:**
+  - Line counts are 297 + 643 + 8 = **948** (ceiling 950). C has none of these files, so the line count is the addition count.
+  - All three files are ASCII-only with no trailing whitespace, checked by Grep.
+  - The module still contains no A5-01 forbidden tokens and no "example".
+  - I read back every line that contains a backslash and they were written exactly.
+- **Not run:**
+  - PowerShell 5.1 or 7 in any form: normal en-US, focused tr-TR, or paired with C.
+  - The Linux selftest, Ruff delta, manifest, `git diff --numstat` and `git diff --check`.
+  - Nothing has passed yet.
+
+## Limits and risks
+- The harness assumes the culture set at the start of the script lasts for the whole `-File` run on 5.1. The dispatcher's single-command evidence supports that, and if it doesn't hold the per-case check fails rather than passing silently.
+- On 5.1, CultureInvariant may still fold `İ` to `i`, so a name like `conİn$` could be rejected there. That only rejects more, and no test asserts that path either way.
+- Each harness run, including each child, now does 44 more guarded reads. The extra runtime is a guess, not a measurement.
+
+## Where the approach came from
+- The dispatcher's native H6 public evidence, `receipt.json` and `culture-path-public-v2.py`: under tr-TR, `conin$` was accepted and `conout$`, `nul` and `com1` were rejected.
+- The g9 handoff, which first raised the issue.
+- From the receipt I worked out that only the uppercase `I` in the pattern is affected, and CONIN is the only device name containing `I`, so lowercase `conin$` is the case that gets through. I also re-derived the drive-letter issue myself.
+- I designed the fix and the tests myself; no patch was supplied.
+
+Budget: this was attempt 9 of 9, and the fresh review5 slot has not been used.

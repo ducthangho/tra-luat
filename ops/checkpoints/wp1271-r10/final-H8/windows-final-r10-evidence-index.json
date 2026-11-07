@@ -1,0 +1,64 @@
+{
+  "gate_status": "passed",
+  "head": "d2fecaa1516cbc8c20b70331a45c8c728e59ddce",
+  "tree": "818cb867ad28eb26e00d1f8d14ea847316205d94",
+  "base": "c6afde62c846f1ef3d6a83c14459966849edf756",
+  "archive_sha256": "8de22f58c3e9278c19069fece6427ffdb858cfc720f42cad38feb32a7e1ad1ca",
+  "archive_bytes": 767716,
+  "source_files_verified": 280,
+  "children_verified": 52,
+  "phases": {
+    "baseline-ps51": {
+      "rc": 1,
+      "passed": 0,
+      "total": 23,
+      "test_culture": "en-US",
+      "counterexample_children": 0
+    },
+    "candidate-ps51": {
+      "rc": 0,
+      "passed": 23,
+      "total": 23,
+      "test_culture": "en-US",
+      "counterexample_children": 0
+    },
+    "baseline-ps7": {
+      "rc": 1,
+      "passed": 0,
+      "total": 23,
+      "test_culture": "en-US",
+      "counterexample_children": 0
+    },
+    "candidate-ps7": {
+      "rc": 0,
+      "passed": 23,
+      "total": 23,
+      "test_culture": "en-US",
+      "counterexample_children": 0
+    },
+    "candidate-ps51-counterexamples": {
+      "rc": 0,
+      "passed": 49,
+      "total": 49,
+      "test_culture": "tr-TR",
+      "counterexample_children": 26
+    },
+    "candidate-ps7-counterexamples": {
+      "rc": 0,
+      "passed": 49,
+      "total": 49,
+      "test_culture": "tr-TR",
+      "counterexample_children": 26
+    }
+  },
+  "operator_sha256": "ccc229e7982d00c26525d37f94c0e4f6d420a135f478c302e74e77dece750de9",
+  "source_path": "/workspace/scratch/proxima-p1-s1-20261107/windows-d2fecaa1516c-final-evidence",
+  "terminal_transport_note": "Actual operator terminal transport saved separately before review",
+  "terminal_transport": {
+    "path": "/workspace/scratch/proxima-p1-s1-20261107/windows-d2fecaa1516c-terminal-transport.json",
+    "sha256": "2b4253a43e7d5cf02cfc5bbf18b3b87213592c84231ce90d9cbedc49d7b17b45",
+    "pid": 21204,
+    "actual_exit": 0,
+    "runtime_seconds": 806.72
+  }
+}

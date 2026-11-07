@@ -1,0 +1,23 @@
+{
+  "head": "d2fecaa1516cbc8c20b70331a45c8c728e59ddce",
+  "tree": "818cb867ad28eb26e00d1f8d14ea847316205d94",
+  "parents": [
+    "2b485a4fc0483973bd78c9236971e9ec63f86719"
+  ],
+  "base": "c6afde62c846f1ef3d6a83c14459966849edf756",
+  "run": "543dc17c54de467fb356eeb01675fc25",
+  "session": "4dedbedf-f225-4b57-8a85-fd0d0f3c22f3",
+  "model_init": "claude-opus-5-5",
+  "provider": "anthropic_claude",
+  "surface": "claude_code",
+  "transport": "machine/local",
+  "packaged_by": "dispatcher mechanical Git only",
+  "actual_test_status": "not_run_on_new_head",
+  "file_sha256": {
+    ".agents/skills/proxima-control/scripts/ProximaConfig.psm1": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d",
+    ".agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1": "ee3bc46e89cadbba56373570c6aa4ae244e997e7789240f0f1e25c5ac0031ded",
+    ".agents/skills/proxima-control/config.example.json": "ddc7a15c729c579ec0d068912a8880da5ad4c0ed6e9826ba1ba60088abe1fa92"
+  },
+  "numstat": "8\t0\t.agents/skills/proxima-control/config.example.json\n297\t0\t.agents/skills/proxima-control/scripts/ProximaConfig.psm1\n643\t0\t.agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1",
+  "at": "2026-11-07T21:30:00.302770+00:00"
+}

@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "head": "d2fecaa1516cbc8c20b70331a45c8c728e59ddce",
+  "base": "c6afde62c846f1ef3d6a83c14459966849edf756",
+  "spec_sha256": "313ece86f69081e6a35e6c18c46be65f9ddb45f5611ee991160ad10ef739ff55",
+  "checker_path": "/workspace/scratch/wp1271-canonical-c6afde6/.claude/dev/packet_loop.py",
+  "checker_sha256": "2aced17b136132f7216056b39a253656ce251a9520752f8091138f39e0077a92",
+  "checker_canonical_sha": "c6afde62c846f1ef3d6a83c14459966849edf756",
+  "actual_function": "_spec_merge",
+  "spec_oid": "cb27d456577609fe6cfbbea8e261bbf3604fea2f"
+}

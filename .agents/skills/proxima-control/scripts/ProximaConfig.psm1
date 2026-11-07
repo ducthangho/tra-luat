@@ -206,10 +206,12 @@ function Read-PxContainer($s, [int]$Depth, [string]$Close) {
         return , $o
     }
 }
-# targetId/configurationName: any Unicode text without whitespace, control characters or unpaired surrogates;
-# no ASCII-only or length rule (the file itself is bounded). Values are returned exactly as given.
+# targetId/configurationName: any nonempty Unicode text - spaces allowed anywhere - that is not blank (whitespace only
+# counts as empty) and has no control characters or unpaired surrogates; no ASCII-only or length rule (the file itself is
+# bounded). Values are returned exactly as given: never trimmed, normalized or truncated.
+# r7 (review 42c31cf4: valid 'Target West'/'Endpoint West' rejected; the schema has no whitespace-free token rule).
 function Test-PxText([string]$V) {
-    return $V.Length -gt 0 -and $V -notmatch '[\s\p{Cc}]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]'
+    return $V.Length -gt 0 -and $V -match '\S' -and $V -notmatch '\p{Cc}|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]'
 }
 # Absolute HTTPS URI (scheme case-insensitive) with a host. Userinfo, query and fragment are forbidden so no auth
 # material can live in the JSON. Only the AUTHORITY excludes '@'; a path may contain it (r4: https://h/a@b is valid).

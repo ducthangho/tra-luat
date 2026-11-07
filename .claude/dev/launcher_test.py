@@ -5512,6 +5512,90 @@ def t98_CO_CREDENTIAL_khong_duoc_thanh_kha_dung_o_tang_doctor():
 
 
 @ca
+def r20261107_doctor_SAP_HET_HAN_da_kiem_song_dat_la_da_chung_minh():
+    """`--kiem-song` ĐẠT mà KET LUAN vẫn ghi "chưa ai gọi thật" là doctor tự mâu thuẫn.
+
+    Đo 07-11-2026 (phiên remote): `doctor --kiem-song` in cho codex
+    `SAP_HET_HAN ... kiem song: rc=0, có TRALUAT-CRED-OK (VAN dung duoc)` rồi ngay dưới
+    phần KET LUAN lại liệt `codex` vào `CHUA CHUNG MINH KHA DUNG (co mat, chua ai goi
+    that)`, kèm `--kiem-song DA chay ma van chua co bang chung`. Nhãn `SAP_HET_HAN` phải
+    GIỮ (t96 ghim: cảnh báo sớm không được mất), nên bằng chứng đi kênh thứ ba của `do`.
+
+    Ranh giới, không được nới: (b) không có bằng chứng thì `SAP_HET_HAN` vẫn chưa chứng
+    minh (t98 (d)); (c) chỉ `True` THẬT mới tính; (d) bằng chứng không nâng được nhãn
+    ngoài danh sách trắng `DA_CHUNG_MINH_KHI_KIEM_SONG`.
+    """
+    m = _tai_launcher_thu()
+    m.CONG_CU = []
+
+    class DoiSo:
+        json = True
+        workspace = None
+        kiem_song = True
+        doi_kha_dung = True
+
+    def chay(kq):
+        m.KHA_NANG = [{"ten": "codex", "do": lambda ws, ks=False: kq,
+                       "vi_sao": "v", "khac_phuc": "k"}]
+        cu = sys.stdout
+        sys.stdout = io.StringIO()
+        try:
+            ma = m.lenh_doctor(DoiSo())
+            return ma, json.loads(sys.stdout.getvalue())
+        finally:
+            sys.stdout = cu
+
+    # (a) SAP_HET_HAN + loi goi that DAT => da chung minh
+    ma, d = chay(("SAP_HET_HAN", "x", True))
+    bang("codex" not in d["chua_chung_minh"],
+         f"kiem song DAT ma van 'chua chung minh': {d['chua_chung_minh']}")
+    bang(d["ok_kha_dung"] is True, f"kiem song DAT ma ok_kha_dung={d['ok_kha_dung']}")
+    bang(ma == MA_OK, f"--doi-kha-dung voi bang chung song phai 0, duoc {ma}")
+    bang(d["kha_nang"][0]["trang_thai"] == "SAP_HET_HAN",
+         "nhan canh bao som bi doi — t96 se mat tac dung")
+    bang(d["kha_nang"][0]["kiem_song_dat"] is True, "JSON khong phoi kiem_song_dat")
+
+    # (b) SAP_HET_HAN khong kem bang chung => van CHUA chung minh, fail-closed
+    ma, d = chay(("SAP_HET_HAN", "x"))
+    bang("codex" in d["chua_chung_minh"], "khong co bang chung ma van nang nhan")
+    bang(ma == MA_CHUA_XAC_THUC, f"--doi-kha-dung phai chan, duoc {ma}")
+
+    # (c) truthy KHONG phai True => khong tinh
+    ma, d = chay(("SAP_HET_HAN", "x", "co"))
+    bang("codex" in d["chua_chung_minh"], "chuoi truthy duoc tinh la bang chung song")
+
+    # (d) bang chung khong nang duoc nhan ngoai danh sach trang
+    for nhan in ("CO_CREDENTIAL", "KHONG_DO_DUOC"):
+        ma, d = chay((nhan, "x", True))
+        bang("codex" in d["chua_chung_minh"], f"{nhan} + True bi nang thanh da chung minh")
+        bang(ma == MA_CHUA_XAC_THUC, f"{nhan} + True ma --doi-kha-dung thoat {ma}")
+
+    # (e) phep do THAT trong KHA_NANG phai bao bang chung khi va CHI khi goi that dat
+    m2 = _tai_launcher_thu()
+    m2._dang_cho_snapshot = lambda home: False
+    m2._codex_home_hieu_luc = lambda: Path("INERT-HOME")
+    m2.shutil.which = lambda t: "/usr/bin/codex" if t == "codex" else None
+
+    class P:
+        returncode = 0
+        stdout = "Logged in using ChatGPT\n"
+        stderr = ""
+    m2.subprocess.run = lambda *_a, **_k: P()
+    m2._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
+                                   "tuoi_anh_chup_gio": 40.0,
+                                   "gio_con_lai": {"access_token": 199.0}}
+    do = [k for k in m2.KHA_NANG if k["ten"] == "codex"][0]["do"]
+    m2._do_codex_song = lambda *_a, **_k: (True, "rc=0")
+    kq = do(None, True)
+    bang(kq[0] == "SAP_HET_HAN" and kq[2] is True, f"song DAT ma do bao {kq}")
+    kq = do(None, False)
+    bang(kq[0] == "SAP_HET_HAN" and kq[2] is False, f"KHONG kiem song ma do bao song: {kq}")
+    m2._do_codex_song = lambda *_a, **_k: (False, "token_revoked")
+    kq = do(None, True)
+    bang(kq[0] == "CHUA_XAC_THUC" and kq[2] is False, f"song HONG ma do bao {kq}")
+
+
+@ca
 def t97_nap_ban_sao_khong_duoc_an_phai_BYTECODE_CU():
     """Cổng đột biến phải chấm điểm ĐÚNG BẢN nó vừa ghi, không phải bản trước đó.
 

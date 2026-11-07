@@ -4324,7 +4324,8 @@ def _do_codex_song(han_giay: int = 90, duong_dan: str | None = None) -> tuple[bo
 
 
 
-def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
+def _do_codex(kiem_song: bool = False,
+              bang_chung_song: list | None = None) -> tuple[str, str]:
     """Đo `codex` bằng MÃ THOÁT, không bằng dòng đầu của đầu ra.
 
     ĐÃ ĐO: `codex login status` trả `rc=1` + `Not logged in` khi chưa xác thực,
@@ -4414,12 +4415,19 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
                 if not song:
                     return ("CHUA_XAC_THUC", f"kiem song HONG: {ly_do} · {chi_tiet}")
                 vi_sao.append(f"kiem song: {ly_do} (VAN dung duoc)")
+                # Nhãn VẪN là SAP_HET_HAN (cảnh báo sớm không được mất), nhưng lời gọi
+                # thật đã ĐẠT — báo bằng KÊNH RIÊNG cho tầng gom, đừng để nó dò chữ
+                # trong `mo_ta` (phân loại bằng văn bản tự do là ĐOÁN, không phải ĐO).
+                if bang_chung_song is not None:
+                    bang_chung_song.append(True)
             return ("SAP_HET_HAN", " · ".join(vi_sao) + f" · {chi_tiet}")
         if not kiem_song:
             return ("CO_CREDENTIAL",
                     f"{chi_tiet} · CHUA chung minh dung duoc (them --kiem-song de goi that)")
         song, vi_sao = _do_codex_song(duong_dan=duong_codex)
         if song:
+            if bang_chung_song is not None:
+                bang_chung_song.append(True)
             return ("DUNG_DUOC", f"{chi_tiet} · kiem song: {vi_sao}")
         return ("CHUA_XAC_THUC", f"kiem song HONG: {vi_sao} · {chi_tiet}")
     if os.environ.get("CODEX_AUTH_JSON"):
@@ -5318,8 +5326,20 @@ def _kiem_tra_duong_dan_kho(ws: str | None) -> tuple[bool, str]:
     return False, ""
 
 
+def _do_codex_kem_bang_chung(kiem_song: bool = False) -> tuple[str, str, bool]:
+    """`_do_codex` + cờ "lời gọi thật đã ĐẠT trong CHÍNH lượt đo này".
+
+    Giữ `_do_codex` trả 2 phần tử (các ca test và người gọi cũ unpack đúng hai); phép
+    đo trong `KHA_NANG` thì trả ba để tầng gom phân biệt `SAP_HET_HAN` đã kiểm sống
+    với `SAP_HET_HAN` chỉ là lời khai offline.
+    """
+    bc: list = []
+    tt, mo_ta = _do_codex(kiem_song, bang_chung_song=bc)
+    return tt, mo_ta, bool(bc)
+
+
 KHA_NANG = [
-    {"ten": "codex", "do": lambda ws, ks=False: _do_codex(ks),
+    {"ten": "codex", "do": lambda ws, ks=False: _do_codex_kem_bang_chung(ks),
      "vi_sao": "reviewer cross-provider (§8) — executor claude thi reviewer PHAI la codex",
      "khac_phuc": "launcher.py chuan-bi   (hoac: codex login --device-auth)"},
     {"ten": "claude", "do": lambda ws, ks=False: _do_claude(),
@@ -5390,6 +5410,13 @@ def lenh_chuan_bi(a) -> int:
 # `CO_CREDENTIAL` kèm cảnh báo, và hạn lấy từ JWT KHÔNG xác thực chữ ký — lời khai đó
 # đủ để HẠ nhãn (fail-closed), không đủ để NÂNG.
 DA_CHUNG_MINH_KHA_DUNG = frozenset({"DUNG_DUOC"})
+
+# Nhãn "còn dùng được" mà CHỈ được tính là đã chứng minh khi phép đo báo một lời gọi
+# thật ĐẠT ngay trong lượt này (kênh thứ ba của `do`). Cũng là danh sách TRẮNG.
+# Đo 07-11-2026: `doctor --kiem-song` in `kiem song: rc=0 ... (VAN dung duoc)` cho codex
+# mà phần KET LUAN vẫn xếp codex vào "CHUA CHUNG MINH KHA DUNG (chua ai goi that)" —
+# tự mâu thuẫn trong cùng một màn hình, và `ok_kha_dung` sai theo chiều fail-closed.
+DA_CHUNG_MINH_KHI_KIEM_SONG = frozenset({"SAP_HET_HAN"})
 
 
 def _ma_doctor(thieu_bat_buoc, chua_xac_thuc, doi_kha_dung: bool,
@@ -5616,16 +5643,23 @@ def lenh_doctor(a) -> int:
                              "vi_sao": k["vi_sao"], "khac_phuc": k.get("khac_phuc", "")})
             chua_chung_minh.append(k["ten"])
             continue
+        kiem_song_dat = False
         try:
-            tt, mo_ta = k["do"](ws, getattr(a, "kiem_song", False))
+            kq = k["do"](ws, getattr(a, "kiem_song", False))
+            tt, mo_ta = kq[0], kq[1]
+            # Chỉ True THẬT mới tính — giá trị truthy khác (chuỗi, số) không được nâng nhãn.
+            kiem_song_dat = len(kq) > 2 and kq[2] is True
         except Exception as e:           # doctor KHÔNG được chết vì một phép đo
             tt, mo_ta = "KHONG_DO_DUOC", f"{type(e).__name__}"
         kha_nang.append({"ten": k["ten"], "trang_thai": tt, "chi_tiet": mo_ta,
-                         "vi_sao": k["vi_sao"], "khac_phuc": k.get("khac_phuc", "")})
+                         "vi_sao": k["vi_sao"], "khac_phuc": k.get("khac_phuc", ""),
+                         "kiem_song_dat": kiem_song_dat})
         if k["ten"] == "hook-da-chay" and tt == "DA_CHAY":
             pass
         elif tt in ("CHUA_XAC_THUC", "CAN_CHUAN_BI"):
             chua_xac_thuc.append(k["ten"])
+        elif tt in DA_CHUNG_MINH_KHI_KIEM_SONG and kiem_song_dat:
+            pass
         elif tt not in DA_CHUNG_MINH_KHA_DUNG:
             chua_chung_minh.append(k["ten"])
     # --- MODULE PYTHON. Đo bằng `find_spec`, KHÔNG bằng `import`: một module hỏng

@@ -1,0 +1,441 @@
+{
+  "packet_id": "wp1271",
+  "revision": 7,
+  "generation": 7,
+  "reviewed_sha": "2d4ba724deddf8276e5ca3f0159f432d9a1f7fcc",
+  "reviewed_tree": "25aa4cb78b96ca9bfd4911d482dc9b9ae27ff616",
+  "base_sha": "c6afde62c846f1ef3d6a83c14459966849edf756",
+  "spec_sha256": "6f2423f451008366368d73c2c28f2c2d76120b748fad9156012d3b0d16114325",
+  "verdict": "changes_requested",
+  "review_class": "sensitive",
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "review_scope": "Independently reviewed the entire C..H5 diff: exactly three authorized files, 860 additions and zero deletions. The assigned checkout remained clean at the exact head and tree.",
+  "findings": [
+    {
+      "stableid": "wp1271-text-field-overrestriction",
+      "class_slug": "schema_overrestriction1",
+      "severity": "P2",
+      "path": ".agents/skills/proxima-control/scripts/ProximaConfig.psm1",
+      "line": 214,
+      "evidence": {
+        "requirement": "The frozen schema and operative r7 decision require nonempty strings for targetId and configurationName. They do not define whitespace-only strings as empty or prohibit escaped control characters in these fields. The historical control-character restriction at spec line 230 concerns connectionUri.",
+        "remaining_manifestations": [
+          "The shared '-match \\S' condition rejects targetId=\" \" in both Local and Remote configurations and configurationName=\" \" in Remote configurations.",
+          "The same condition rejects the nonempty Unicode string consisting of U+00A0 followed by U+3000.",
+          "The '\\p{Cc}' condition rejects otherwise nonempty, validly escaped JSON strings such as targetId=\"A\\tB\" and configurationName=\"A\\u0001B\"."
+        ],
+        "independent_measurement": "An in-memory source-predicate probe confirmed these rejections while accepting ordinary internal-space Unicode names. This was source-predicate verification, not native PowerShell execution.",
+        "fixture_contract": "A2-04 at harness line 345 and A2-06 at line 364 explicitly require these additional rejections. Those cases pass in both retained exact-H native reports, so the green harness enforces the narrower contract.",
+        "fixed_manifestations": "The three requested internal-space preservation cases are fixed. Both native whitespace-free mutant reports contain all three designated A1-02 REJECTED_VALID tokens.",
+        "surrogate_assessment": "Unpaired-surrogate rejection protects Unicode validity and is not the basis of this finding. Valid surrogate-pair preservation remains covered."
+      },
+      "remedy": {
+        "where": "Test-PxText, its callers at module lines 232 and 240, its contract comments, and the A2-04/A2-06 fixtures.",
+        "approach": "Make the shared predicate implement the frozen nonempty-string contract and preserve accepted values exactly. If nonblank or control-free names are intended requirements, obtain that explicit contract decision through the required Rescue Checkpoint and publish revised bindings instead of treating implementation comments as authority.",
+        "regression_risks": "Trimming or normalization can change target identity. Preserve wrong-type, empty-string, Unicode-validity, URI, secret-field and error-redaction checks."
+      },
+      "closure_probe": "On native PS5.1 and PS7, verify exact preservation of nonempty whitespace-only ASCII and Unicode values in Local/Remote targetId and Remote configurationName, plus validly escaped controls under the current contract. Retain empty/wrong-type rejection. Focused mutants restoring each unsupported restriction must fail the corresponding named positive assertions.",
+      "recurrence": 3
+    },
+    {
+      "stableid": "wp1271-frozen-spec-identity-grammar",
+      "class_slug": "spec_identity_grammar1",
+      "severity": "P2",
+      "path": "/workspace/scratch/wp1271-spec-publish/ops/specs/wp1271-r7.md",
+      "line": 1,
+      "evidence": {
+        "scope": "Frozen orchestration input outside the three-file product diff.",
+        "measurement": "Independently invoked the exact-C packet_loop.py _spec_merge function with the authoritative r7 lease and publisher object store. It returned ValueError: spec identity H1 sai grammar; command rc1.",
+        "canonical_checker_sha256": "2aced17b136132f7216056b39a253656ce251a9520752f8091138f39e0077a92",
+        "mechanism": "The frozen heading '# PROXIMA-P1-S1 — wp1271 r7 approved under delegated authority' does not satisfy the canonical identity grammar. Hash agreement therefore does not establish that the merge consumer accepts this spec.",
+        "gate_boundary": "This is a measured local merge-consumer failure. No GitHub CI execution or failure is claimed."
+      },
+      "remedy": {
+        "where": "The authoritative spec publication and its lease/hash bindings.",
+        "approach": "At the Rescue Checkpoint, publish a corrected frozen revision whose heading and identity declarations satisfy the canonical consumer, then refresh dependent bindings. Preserve historical measurements and decisions.",
+        "regression_risks": "Do not loosen the canonical parser, overwrite frozen evidence, or rewrite historical identity and budget facts."
+      },
+      "closure_probe": "Run the unmodified pinned canonical _spec_merge consumer against the newly published spec and lease. Require successful byte/hash and packet/revision validation."
+    }
+  ],
+  "prior_class_dispositions": [
+    {
+      "class_slug": "alias_collision1",
+      "status": "fixed",
+      "manifestations": [
+        {
+          "manifestation": "Helper R shadowed by the default r alias",
+          "status": "fixed",
+          "evidence": "Descriptive helpers and alias-shadowing admission remain present. Both native runtimes retain alias_r=Invoke-History and execute the required cases."
+        }
+      ]
+    },
+    {
+      "class_slug": "physical_containment_bypass1",
+      "prior_finding": "wp1271-physical-alias-containment",
+      "status": "fixed",
+      "manifestations": [
+        {
+          "manifestation": "Direct and case-variant containment",
+          "status": "fixed",
+          "evidence": "A3-01/A3-02 pass on both runtimes; textual-prefix mutants retain named forbidden-acceptance evidence."
+        },
+        {
+          "manifestation": "Ordinary SUBST aliases in either argument",
+          "status": "fixed",
+          "evidence": "A3-05 passes, including the safe external SUBST control; display-path-containment and reject-external-subst mutants fail their designated behavioral assertions."
+        },
+        {
+          "manifestation": "Hidden junction in ConfigPath SUBST backing ancestors",
+          "status": "fixed",
+          "evidence": "Both ignore-subst-backing children record ACCEPTED_INVALID[SUBST backing through junction]."
+        },
+        {
+          "manifestation": "Hidden junction in RepositoryRoot SUBST backing ancestors",
+          "status": "fixed",
+          "evidence": "Both ignore-subst-backing children separately record ACCEPTED_INVALID[repository root as SUBST through junction]."
+        },
+        {
+          "manifestation": "Volume also mounted inside RepositoryRoot",
+          "status": "fixed",
+          "evidence": "Required A3-08 passes with the owned VHD on both runtimes; ignore-mount-topology children record the named forbidden acceptance."
+        },
+        {
+          "manifestation": "Junction ancestors, junction repository root and mount-folder path",
+          "status": "fixed",
+          "evidence": "A3-04/A3-08 pass; accept-reparse and accept-reparse-attr children retain actual forbidden-acceptance tokens."
+        },
+        {
+          "manifestation": "Hardlink aliases and multiply-linked external files",
+          "status": "fixed",
+          "evidence": "A3-06 passes on both runtimes; retained accept-multilink reports expose forbidden acceptance."
+        },
+        {
+          "manifestation": "8.3 aliases in both arguments",
+          "status": "fixed",
+          "evidence": "A3-07 actually executes and passes; short_name_alias=observed on both runtimes."
+        },
+        {
+          "manifestation": "Ordinary external and same-prefix sibling positive controls",
+          "status": "fixed",
+          "evidence": "A1-01, A3-03, A3-05, A3-07 and A3-08 retain the required positive controls."
+        }
+      ]
+    },
+    {
+      "class_slug": "cleanup_report_lifecycle1",
+      "prior_finding": "wp1271-cleanup-destroys-negative-evidence",
+      "status": "fixed",
+      "manifestations": [
+        {
+          "manifestation": "Child reports lost during outer cleanup",
+          "status": "fixed",
+          "evidence": "All 44 child records, reports and outputs survive outside deletable fixture trees; hashes and exact outer/child record bindings were independently checked."
+        },
+        {
+          "manifestation": "Nested, cyclic and dangling junction cleanup",
+          "status": "fixed",
+          "evidence": "Committed fixtures retain these forms. Both focused outer runs return rc0 with tree_removed=true and intact outside sentinels; cleanup removes reparse entries without traversing targets."
+        },
+        {
+          "manifestation": "Unverified SUBST removal or lost ownership",
+          "status": "fixed",
+          "evidence": "Parent and child records preserve ownership, deletion rc0 and removed=true; before/after mapping snapshots agree."
+        },
+        {
+          "manifestation": "Cleanup fault hidden or evidence discarded",
+          "status": "fixed",
+          "evidence": "Both injected children return rc2, identify pxlocked.bin, preserve their report and scratch at child classification, retain the outside sentinel and remove owned SUBST mappings. Durable child evidence survives subsequent outer fixture cleanup."
+        },
+        {
+          "manifestation": "Unrelated mapping damaged",
+          "status": "fixed",
+          "evidence": "Retained operational readbacks show unchanged P: target and marker, followed by separate owner cleanup rc0."
+        }
+      ],
+      "historical_limit": "The original H1 report loss remains historical and is not repaired by current evidence."
+    },
+    {
+      "class_slug": "counterexample_wrong_reason1",
+      "prior_finding": "wp1271-reparse-mutant-wrong-reason",
+      "status": "fixed",
+      "manifestations": [
+        {
+          "manifestation": "Diagnostic mismatch credited as behavioral kill",
+          "status": "fixed",
+          "evidence": "Both control-reparse-code children retain WRONG_CODE failures, no ACCEPTED_INVALID token, credited=false and CONTROL_NO_CREDIT."
+        },
+        {
+          "manifestation": "Earlier mismatch suppresses later probes",
+          "status": "fixed",
+          "evidence": "Assertions accumulate failures; accept-reparse-attr reports retain earlier diagnostics and the later actual junction-repository-root forbidden acceptance."
+        },
+        {
+          "manifestation": "Import/setup failure earns credit",
+          "status": "fixed",
+          "evidence": "Every credited child has api_state=present, no setup_error, rc1, verified cleanup and all designated behavioral tokens."
+        }
+      ]
+    },
+    {
+      "class_slug": "schema_overrestriction1",
+      "status": "open",
+      "manifestations": [
+        {
+          "manifestation": "URI path containing @",
+          "status": "fixed",
+          "evidence": "A2-06 preserves the valid URI; uri-path-at-rejected mutants fail the named positive case on both runtimes. Userinfo/query/fragment controls remain."
+        },
+        {
+          "manifestation": "ASCII-only, length and valid Unicode restrictions",
+          "status": "fixed",
+          "evidence": "A1-02 retains Unicode names, a 300-character targetId and valid surrogate-pair preservation; ascii-only-text mutants fail the designated assertion."
+        },
+        {
+          "manifestation": "Local targetId with internal spaces",
+          "status": "fixed",
+          "evidence": "Exact preservation passes; both whitespace-free mutant reports contain its named REJECTED_VALID token."
+        },
+        {
+          "manifestation": "Remote targetId with internal and boundary spaces",
+          "status": "fixed",
+          "evidence": "Exact Unicode/boundary-space preservation passes; both whitespace-free mutant reports contain its named REJECTED_VALID token."
+        },
+        {
+          "manifestation": "Remote configurationName with internal spaces",
+          "status": "fixed",
+          "evidence": "Exact preservation passes; both whitespace-free mutant reports contain its named REJECTED_VALID token."
+        },
+        {
+          "manifestation": "Redaction fixture depended on rejecting a valid space-containing target",
+          "status": "fixed",
+          "evidence": "A4-01 now uses an array containing the sentinel, an actual wrong-type value. Error-redaction cases and echo-raw counterexamples remain effective."
+        },
+        {
+          "manifestation": "Nonempty whitespace-only strings and escaped controls",
+          "status": "open",
+          "evidence": "Shared predicate and contradictory negative fixtures remain; see wp1271-text-field-overrestriction."
+        }
+      ]
+    },
+    {
+      "class_slug": "fixture_snapshot_live_vhd_container1",
+      "status": "fixed",
+      "manifestations": [
+        {
+          "manifestation": "Hashing the attached owned VHD container",
+          "status": "fixed",
+          "evidence": "The exact committed harness excludes only the verified owned attached container by identity. Each acceptance phase records exactly one exclusion."
+        },
+        {
+          "manifestation": "Overbroad exclusion or lost logical-file invariance",
+          "status": "fixed",
+          "evidence": "Mounted logical /px files remain byte-hashed. There is no extension-wide exclusion or catch-and-ignore path; ordinary file errors remain errors."
+        }
+      ],
+      "historical_limit": "Original H3 failures remain failed evidence; diagnostic altered-harness runs were not substituted."
+    }
+  ],
+  "convergence": {
+    "previous_open_classes": [
+      "schema_overrestriction1"
+    ],
+    "independently_closed_previous_classes": [],
+    "F": 0,
+    "U": 1,
+    "closure_ratio": "0/1",
+    "schema_class_appearances": 3,
+    "new_classes": [
+      "spec_identity_grammar1"
+    ],
+    "rescue_checkpoint_required": true,
+    "reason": "Third review remains changes_requested and schema_overrestriction1 appears for the third review. Preserve history and enter the checkpoint before another code/review run."
+  },
+  "measured_tests": {
+    "independently_run": [
+      {
+        "command": "git diff --check c6afde62c846f1ef3d6a83c14459966849edf756 HEAD",
+        "rc": 0,
+        "status": "passed"
+      },
+      {
+        "command": "git merge-base --is-ancestor c6afde62c846f1ef3d6a83c14459966849edf756 HEAD",
+        "rc": 0,
+        "status": "passed"
+      },
+      {
+        "command": "git diff --numstat c6afde62c846f1ef3d6a83c14459966849edf756 HEAD",
+        "rc": 0,
+        "status": "passed",
+        "positive_evidence": "Three authorized files: 8 + 284 + 568 = 860 additions, zero deletions, within 900."
+      },
+      {
+        "command": "python -B -",
+        "procedure": "In-memory Git, authoritative spec/lease, archive, command-log, report, child-record, source-byte and operational-readback verification.",
+        "rc": 0,
+        "status": "passed",
+        "positive_evidence": "248 source-manifest entries, 34 Windows command logs, six acceptance reports and 44 retained child records validated. Corresponding mutant source bytes match across runtimes."
+      },
+      {
+        "command": "python -B -",
+        "procedure": "runpy.run_path('.claude/dev/ci_dang_ky_test.py')['loi_ruff_ci']()",
+        "rc": 0,
+        "status": "passed",
+        "positive_evidence": "RUFF_CONTRACT 3 []"
+      },
+      {
+        "command": "python -m ruff check --no-cache --select F --output-format json --stdin-filename scripts/tl.py -",
+        "inputs": "Exact C and H scripts/tl.py bytes in one paired invocation.",
+        "baseline_rc": 1,
+        "candidate_rc": 1,
+        "bare_lint_status": "failed",
+        "delta_requirement_status": "passed",
+        "positive_evidence": "Ruff 0.15.15; identical arrays of 12 F821 diagnostics; delta zero.",
+        "output_sha256_each": "3888b61101338ce2ad15d4a3aa38475fe8ee4113f36ac68585e0cd94e03318b5"
+      },
+      {
+        "command": "python -B -",
+        "procedure": "Exact-C packet_loop.py _spec_merge with authoritative r7 lease and publisher object store.",
+        "rc": 1,
+        "status": "failed",
+        "positive_failure_evidence": "ValueError: spec identity H1 sai grammar"
+      }
+    ],
+    "linux_full_selftest": {
+      "status": "passed",
+      "method": "Independently validated and reused exact-H retained evidence; heavy suite not rerun.",
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12 -B scripts/tl.py --selftest",
+      "rc": 0,
+      "positive_evidence": "== tl selftest 1777/1777 ==",
+      "output_sha256": "83546703ef3619856e60b6c1cf76d26ef5bc58447237bbc72a9292f4d1809f03",
+      "receipt_sha256": "6805c471fd24bd6022da39de3af041108100dfb1436d3c651b2ece3c7c9e9ac1",
+      "validation": "Verified H/tree/C, all seven raw command-log hashes and sizes, command hash, runtime executable hash, pinned canonical lifecycle runner, catalog identity, positive marker and identical clean before/after identities."
+    },
+    "linux_other_gates": {
+      "canonical_admission": {
+        "status": "passed",
+        "rc": 0,
+        "checker_blob": "f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1"
+      },
+      "temporary_manifest": {
+        "status": "passed",
+        "rc": 0,
+        "positive_evidence": "Strict verification ok=true, expected=checked=184, errors=[]; all 184 entries independently rehashed."
+      }
+    },
+    "windows": {
+      "method": "Independently validated retained native evidence; no native execution by this reviewer.",
+      "commands_source": "/workspace/scratch/proxima-p1-s1-20261107/windows-2d4ba724-final-evidence/measurement.json",
+      "host": "DESKTOP-T9R33P2",
+      "account": "ThangHD",
+      "device": "a5f7076e-a491-4f84-829b-8d1fbcc1c767",
+      "ps51": {
+        "version": "5.1.26100.9711",
+        "baseline": "0/23, rc1; every case explicitly API_ABSENT",
+        "candidate": "23/23, rc0",
+        "focused": "45/45, rc0",
+        "whitespace_mutant_child_rc": 1,
+        "whitespace_mutant_report_sha256": "ce4ee1d169834ecf4e30a6e1398c535e23bf3637b5cddedd25a836cb611889eb"
+      },
+      "ps7": {
+        "version": "7.6.9",
+        "baseline": "0/23, rc1; every case explicitly API_ABSENT",
+        "candidate": "23/23, rc0",
+        "focused": "45/45, rc0",
+        "whitespace_mutant_child_rc": 1,
+        "whitespace_mutant_report_sha256": "afdb9920156104056ed1558107f03799592b223f10a50e4eb01b71f084a79109"
+      },
+      "classification_per_runtime": {
+        "credited_behavioral_mutants": 20,
+        "diagnostic_controls_without_credit": 1,
+        "cleanup_fault_probes": 1
+      },
+      "operational_evidence": "Verified Online input binding, actual Git identities, common committed harness, unchanged checkout file hashes, lock acquisition/release, six heartbeats with maximum gap 60.433 seconds, load records, six ledger rows and unrelated mapping preservation.",
+      "archive_sha256": "30d4a51b7cd3495a53ad99723896f19512c03358e84ecb8cba8904b47c778231",
+      "archive_bytes": 581287,
+      "source_manifest_sha256": "f590589e85d017dcc956d3228aca82bbc098fec8170d9b3847512cedaef0daea"
+    },
+    "skipped_required_tests_counted_as_pass": 0
+  },
+  "evidence": {
+    "spec_source": "9c84bf054123f421df8be995269f6fde276a1ac7:ops/specs/wp1271-r7.md",
+    "spec_validation": "Authoritative Git blob and full assigned outside-checkout copy match spec_sha256.",
+    "lease_source": "ddbeb6e94b7f84114fd94952e8e0e3e9b2e3c6e9:ops/leases/wp1271-r7-g7-claude.yaml",
+    "effective_write_set_hash": "04d57e780264d849b74493bb839b05547534c22110d4aff3343178a07699cb10",
+    "write_set_validation": "Independently recomputed and matched; scoped r7 manual descriptor exception applies while canonical policy/schema remain absent.",
+    "product_producer": {
+      "provider": "anthropic_claude",
+      "execution_surface": "claude_code",
+      "transport": "machine/local",
+      "run": "ed64c73f8e2a4361a0d26c2c8e4a9f8f",
+      "session": "7c060dfe-316c-42fe-95cc-8c1c9214162e",
+      "observed_model": "claude-opus-5-5",
+      "evidence": "Retained launcher metadata, runtime init and modelUsage; mechanical Git packaging is separately identified."
+    },
+    "module_sha256": "bd6ddf50cbf47421e06e4bf9838ccab9033fb1718b1a0bf0d659f6b5e00cc4aa",
+    "harness_sha256": "6581a0439ef3ed6dd709025373c47018fb0f9127a2470859f9fb010c1f822e01",
+    "sample_sha256": "ddc7a15c729c579ec0d068912a8880da5ad4c0ed6e9826ba1ba60088abe1fa92",
+    "workflow_sha256": "aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67",
+    "commit_message_preflight": "No CI skip markers found in C..H messages.",
+    "checkout_integrity": "Final head/tree unchanged; tracked/index diffs, untracked files and ignored files empty."
+  },
+  "unmeasured": [
+    {
+      "property": "Direct native PowerShell execution by this reviewer",
+      "status": "not_run",
+      "blocks_approval": false,
+      "reason": "Neither PowerShell executable is available locally. Native conclusions use independently validated retained receipts."
+    },
+    {
+      "property": "Native positive closure for whitespace-only and escaped-control text values",
+      "status": "not_run",
+      "blocks_approval": true,
+      "required_probe": "The named public-API preservation probes in wp1271-text-field-overrestriction after the required contract/checkpoint decision."
+    },
+    {
+      "property": "Applicable Ubuntu CI, connector review and branch-protection checks",
+      "status": "not_run",
+      "blocks_merge": true,
+      "reason": "Post-push obligations; no nonexistent pre-push CI result is demanded or claimed."
+    },
+    {
+      "property": "Concurrent topology ABA, additional native mapping-cycle and Offline/Recall fault injection",
+      "status": "not_measured",
+      "blocks_approval": false,
+      "reason": "Static safeguards were inspected; no universal race-proof or native-interception claim is made."
+    },
+    {
+      "property": "Independent transport-level confirmation of operator PID terminal rc and exact runtime",
+      "status": "not_measured",
+      "blocks_approval": false,
+      "reason": "The index reports PID22376, rc0 and 355.62 seconds. Independently validated evidence establishes the six native command outcomes and cleanup/readbacks; the terminal transport result itself was not separately reproduced."
+    },
+    {
+      "property": "Final parent-launcher completion metadata",
+      "status": "KHONG_DO_DUOC",
+      "reason": "The reviewer run remains active while this verdict is emitted; final completion, model/effort and snapshot measurements belong to the parent launcher."
+    }
+  ],
+  "risks": [
+    "A5 sentinels and snapshots have scoped coverage. Static inspection found no product network, process, compiler, temporary-file, settings or filesystem-write path.",
+    "The module explicitly excludes discovery of arbitrary outward junctions elsewhere inside the repository; supplied path ancestors and required mount/mapping topology were reviewed.",
+    "Observed clean endpoints do not prove the absence of every transient historical write. The active filesystem policy is read-only.",
+    "No code approval, human audit, merge, publication, runtime activation or LIVE action is granted by this review."
+  ],
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "role": "reviewer",
+  "independent_from_executor_session": true,
+  "run": "0fcd56b75d484379af27afbb49e50326",
+  "session": "KHONG_DO_DUOC",
+  "model": "KHONG_DO_DUOC",
+  "effort": "KHONG_DO_DUOC",
+  "identity_source": "Active assigned launcher run.json confirms run/provider/surface/transport; serving model, effort and session were not exposed in its active metadata.",
+  "sandbox": "read-only",
+  "checkout_modifications": false,
+  "other_model_calls": 0
+}

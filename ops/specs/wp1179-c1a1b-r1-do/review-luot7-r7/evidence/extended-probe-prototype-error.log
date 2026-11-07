@@ -1,0 +1,38 @@
+A20b_t1_no_nul_G6 {"name": "A20b_t1_no_nul_G6", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "khong_do_duoc", "G7": "qua", "G8": "qua", "G9": "qua"}, "bytes": 131746, "count": 12}
+A20b_t1_no_nul_G7 {"name": "A20b_t1_no_nul_G7", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "khong_do_duoc", "G8": "qua", "G9": "qua"}, "bytes": 19914, "count": 11}
+A20b_t1_no_nul_G8 {"name": "A20b_t1_no_nul_G8", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "khong_do_duoc", "G9": "qua"}, "bytes": 120305, "count": 11}
+A20b_t1_short_oid_G6 {"name": "A20b_t1_short_oid_G6", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "khong_do_duoc", "G7": "qua", "G8": "qua", "G9": "qua"}, "bytes": 131751, "count": 12}
+A20b_t1_short_oid_G7 {"name": "A20b_t1_short_oid_G7", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "khong_do_duoc", "G8": "qua", "G9": "qua"}, "bytes": 19919, "count": 11}
+A20b_t1_short_oid_G8 {"name": "A20b_t1_short_oid_G8", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "khong_do_duoc", "G9": "qua"}, "bytes": 120310, "count": 11}
+A20b_t2_no_space_G6 {"name": "A20b_t2_no_space_G6", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "khong_do_duoc", "G7": "qua", "G8": "qua", "G9": "qua"}, "bytes": 131762, "count": 12}
+A20b_t2_no_space_G7 {"name": "A20b_t2_no_space_G7", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "khong_do_duoc", "G8": "qua", "G9": "qua"}, "bytes": 19930, "count": 11}
+A20b_t2_no_space_G8 {"name": "A20b_t2_no_space_G8", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "khong_do_duoc", "G9": "qua"}, "bytes": 120321, "count": 11}
+A20b_t3_bad_mode_G6 {"name": "A20b_t3_bad_mode_G6", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "khong_do_duoc", "G7": "qua", "G8": "qua", "G9": "qua"}, "bytes": 131767, "count": 12}
+A20b_t3_bad_mode_G7 {"name": "A20b_t3_bad_mode_G7", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "khong_do_duoc", "G8": "qua", "G9": "qua"}, "bytes": 19935, "count": 11}
+A20b_t3_bad_mode_G8 {"name": "A20b_t3_bad_mode_G8", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "khong_do_duoc", "G9": "qua"}, "bytes": 120326, "count": 11}
+A20b_t4_bad_utf8_G6 {"name": "A20b_t4_bad_utf8_G6", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "khong_do_duoc", "G7": "qua", "G8": "qua", "G9": "qua"}, "bytes": 131764, "count": 12}
+A20b_t4_bad_utf8_G7 {"name": "A20b_t4_bad_utf8_G7", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "khong_do_duoc", "G8": "qua", "G9": "qua"}, "bytes": 19932, "count": 11}
+A20b_t4_bad_utf8_G8 {"name": "A20b_t4_bad_utf8_G8", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "khong_do_duoc", "G9": "qua"}, "bytes": 120323, "count": 11}
+A20b_t5_empty_G6 {"name": "A20b_t5_empty_G6", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "khong_do_duoc", "G7": "qua", "G8": "qua", "G9": "qua"}, "bytes": 131763, "count": 12}
+A20b_t5_empty_G7 {"name": "A20b_t5_empty_G7", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "khong_do_duoc", "G8": "qua", "G9": "qua"}, "bytes": 19931, "count": 11}
+A20b_t5_empty_G8 {"name": "A20b_t5_empty_G8", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "khong_do_duoc", "G9": "qua"}, "bytes": 120322, "count": 11}
+A20b_t10_duplicate_G6 {"name": "A20b_t10_duplicate_G6", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "khong_do_duoc", "G7": "qua", "G8": "qua", "G9": "qua"}, "bytes": 131799, "count": 12}
+A20b_t10_duplicate_G7 {"name": "A20b_t10_duplicate_G7", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "khong_do_duoc", "G8": "qua", "G9": "qua"}, "bytes": 19967, "count": 11}
+A20b_t10_duplicate_G8 {"name": "A20b_t10_duplicate_G8", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "khong_do_duoc", "G9": "qua"}, "bytes": 120358, "count": 11}
+A20b_c1_missing_tree {"name": "A20b_c1_missing_tree", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "khong_do_duoc", "G4": "khong_do_duoc", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "qua", "G9": "qua"}, "bytes": 134322, "count": 13}
+A20b_c1_bad_tree {"name": "A20b_c1_bad_tree", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "khong_do_duoc", "G4": "khong_do_duoc", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "qua", "G9": "qua"}, "bytes": 134348, "count": 13}
+A20b_c2_bad_parent {"name": "A20b_c2_bad_parent", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "khong_do_duoc", "G4": "khong_do_duoc", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "qua", "G9": "qua"}, "bytes": 134348, "count": 13}
+A20b_t6_t7_t8_t9 NOT_RUN: special/path-escape name payloads described in verdict only
+PARSER_EQUIVALENCE 100644 ['E_hong', 'E_hong', 'accepted']
+PARSER_EQUIVALENCE 100755 ['E_hong', 'E_hong', 'accepted']
+PARSER_EQUIVALENCE 120000 ['E_hong', 'E_hong', 'accepted']
+PARSER_EQUIVALENCE 160000 ['E_hong', 'E_hong', 'accepted']
+PARSER_EQUIVALENCE 40000 ['E_hong', 'E_hong', 'accepted']
+PARSER_EQUIVALENCE bad ['E_hong', 'E_hong', 'accepted']
+A7_B {"name": "A7_B", "states": {"G0": "qua", "G1": "qua", "G2": "qua", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "qua", "G9": "qua"}, "bytes": 134396, "count": 12}
+A7_MOC {"name": "A7_MOC", "states": {"G0": "qua", "G1": "do", "G2": "do", "G3": "qua", "G4": "qua", "G5": "qua", "G6": "qua", "G7": "qua", "G8": "qua", "G9": "qua"}, "bytes": 5248315, "count": 2481}
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv7/sandbox/more_probes.py", line 103, in <module>
+    assert got['states'][g] == state
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

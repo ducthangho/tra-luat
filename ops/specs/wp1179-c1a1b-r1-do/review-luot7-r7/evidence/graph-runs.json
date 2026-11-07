@@ -1,0 +1,4642 @@
+[
+  {
+    "name": "positive",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "qua",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 134396,
+    "count": 12,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": []
+  },
+  {
+    "name": "A12a",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "khong_do_duoc",
+      "G4": "khong_do_duoc",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "qua",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 134184,
+    "count": 11,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": [
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6",
+        "E_vang"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6",
+        "E_vang"
+      ]
+    ]
+  },
+  {
+    "name": "A12b",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "khong_do_duoc",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 22604,
+    "count": 11,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": [
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190",
+        "E_bam_lech"
+      ]
+    ]
+  },
+  {
+    "name": "A12b_mut_no_hash",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "qua",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 134396,
+    "count": 12,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": []
+  },
+  {
+    "name": "A12e",
+    "states": {
+      "G0": "qua",
+      "G1": "khong_do_duoc",
+      "G2": "khong_do_duoc",
+      "G3": "khong_do_duoc",
+      "G4": "khong_do_duoc",
+      "G5": "khong_do_duoc",
+      "G6": "khong_do_duoc",
+      "G7": "khong_do_duoc",
+      "G8": "khong_do_duoc",
+      "G9": "qua"
+    },
+    "bytes": 0,
+    "count": 0,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ]
+    ],
+    "reads": [],
+    "events": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf",
+        "E_reader_chet"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48",
+        "E_reader_chet"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6",
+        "E_reader_chet"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6",
+        "E_reader_chet"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67",
+        "E_reader_chet"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67",
+        "E_reader_chet"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48",
+        "E_reader_chet"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48",
+        "E_reader_chet"
+      ]
+    ]
+  },
+  {
+    "name": "A12f",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "khong_do_duoc",
+      "G7": "khong_do_duoc",
+      "G8": "khong_do_duoc",
+      "G9": "qua"
+    },
+    "bytes": 896,
+    "count": 4,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ]
+    ],
+    "events": [
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31",
+        "E_reader_chet"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0",
+        "E_reader_chet"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0",
+        "E_reader_chet"
+      ]
+    ]
+  },
+  {
+    "name": "A12g",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "khong_do_duoc",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 19871,
+    "count": 10,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": [
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190",
+        "E_framing_lech"
+      ]
+    ]
+  },
+  {
+    "name": "A12h",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "khong_do_duoc",
+      "G8": "khong_do_duoc",
+      "G9": "qua"
+    },
+    "bytes": 5629,
+    "count": 7,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ]
+    ],
+    "events": [
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190",
+        "E_reader_chet"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98",
+        "E_reader_chet"
+      ]
+    ]
+  },
+  {
+    "name": "A12e_mut_restart",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "qua",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 134396,
+    "count": 12,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": []
+  },
+  {
+    "name": "A12e_mut_local",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "qua",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 134396,
+    "count": 12,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": []
+  },
+  {
+    "name": "A12f_mut_clear_memo",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "khong_do_duoc",
+      "G7": "khong_do_duoc",
+      "G8": "khong_do_duoc",
+      "G9": "qua"
+    },
+    "bytes": 896,
+    "count": 4,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ]
+    ],
+    "events": [
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67",
+        "E_reader_chet"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48",
+        "E_reader_chet"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48",
+        "E_reader_chet"
+      ]
+    ]
+  },
+  {
+    "name": "A12g_mut_fatal",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "khong_do_duoc",
+      "G8": "khong_do_duoc",
+      "G9": "qua"
+    },
+    "bytes": 5629,
+    "count": 7,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ]
+    ],
+    "events": [
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190",
+        "E_reader_chet"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98",
+        "E_reader_chet"
+      ]
+    ]
+  },
+  {
+    "name": "A12h_mut_restart",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "khong_do_duoc",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 19871,
+    "count": 10,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": [
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190",
+        "E_reader_chet"
+      ]
+    ]
+  },
+  {
+    "name": "A13_total",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "khong_do_duoc",
+      "G7": "khong_do_duoc",
+      "G8": "khong_do_duoc",
+      "G9": "qua"
+    },
+    "bytes": 896,
+    "count": 4,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ]
+    ],
+    "events": [
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31",
+        "E_ngan_sach"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0",
+        "E_ngan_sach"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0",
+        "E_ngan_sach"
+      ]
+    ]
+  },
+  {
+    "name": "A13_total_mut_reset",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "khong_do_duoc",
+      "G7": "khong_do_duoc",
+      "G8": "khong_do_duoc",
+      "G9": "qua"
+    },
+    "bytes": 896,
+    "count": 4,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ]
+    ],
+    "events": [
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31",
+        "E_ngan_sach"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0",
+        "E_ngan_sach"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0",
+        "E_ngan_sach"
+      ]
+    ]
+  },
+  {
+    "name": "A13_deadline",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "khong_do_duoc",
+      "G5": "khong_do_duoc",
+      "G6": "khong_do_duoc",
+      "G7": "khong_do_duoc",
+      "G8": "khong_do_duoc",
+      "G9": "khong_do_duoc"
+    },
+    "bytes": 896,
+    "count": 4,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ]
+    ],
+    "events": []
+  },
+  {
+    "name": "A13_deadline_mut_memo",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "khong_do_duoc",
+      "G7": "khong_do_duoc",
+      "G8": "khong_do_duoc",
+      "G9": "qua"
+    },
+    "bytes": 896,
+    "count": 4,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ]
+    ],
+    "events": []
+  },
+  {
+    "name": "A13_walk",
+    "states": {
+      "G0": "qua",
+      "G1": "khong_do_duoc",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "qua",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 134396,
+    "count": 12,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": []
+  },
+  {
+    "name": "A13_walk_mut_do",
+    "states": {
+      "G0": "qua",
+      "G1": "do",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "qua",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 134396,
+    "count": 12,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": []
+  },
+  {
+    "name": "A13_per_walk",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "qua",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 134396,
+    "count": 12,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": []
+  },
+  {
+    "name": "A13_per_walk_mut_global",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "khong_do_duoc",
+      "G3": "khong_do_duoc",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "qua",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 134396,
+    "count": 12,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": []
+  },
+  {
+    "name": "A13_mut_no_memo",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "qua",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 136688,
+    "count": 19,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        4,
+        "commit",
+        "6f0d49007d27f0d6fcab4ba34868e9778f702ff6"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": []
+  },
+  {
+    "name": "A13_object",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "khong_do_duoc",
+      "G4": "khong_do_duoc",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "qua",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 134184,
+    "count": 11,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "7588627ae4b22cfeac282b771cc97ee0f0839ae2"
+      ],
+      [
+        4,
+        "commit",
+        "7588627ae4b22cfeac282b771cc97ee0f0839ae2"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "7588627ae4b22cfeac282b771cc97ee0f0839ae2"
+      ],
+      [
+        4,
+        "commit",
+        "7588627ae4b22cfeac282b771cc97ee0f0839ae2"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": [
+      [
+        3,
+        "commit",
+        "7588627ae4b22cfeac282b771cc97ee0f0839ae2",
+        "E_ngan_sach"
+      ],
+      [
+        4,
+        "commit",
+        "7588627ae4b22cfeac282b771cc97ee0f0839ae2",
+        "E_ngan_sach"
+      ]
+    ]
+  },
+  {
+    "name": "A13_object_mut_removed",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "qua",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 434396,
+    "count": 12,
+    "requests": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        2,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        3,
+        "commit",
+        "7588627ae4b22cfeac282b771cc97ee0f0839ae2"
+      ],
+      [
+        4,
+        "commit",
+        "7588627ae4b22cfeac282b771cc97ee0f0839ae2"
+      ],
+      [
+        5,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        8,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "22c9e730d9605c7ae50400ede5d76dc82241fdcf"
+      ],
+      [
+        1,
+        "commit",
+        "c7472777889e9e0dc9b8bfc90361489607d7af48"
+      ],
+      [
+        1,
+        "commit",
+        "9d7b2196c5f7b891dc6f0488618e9c0cb7d12d67"
+      ],
+      [
+        3,
+        "commit",
+        "7588627ae4b22cfeac282b771cc97ee0f0839ae2"
+      ],
+      [
+        6,
+        "tree",
+        "3519263482b206c2b5a898189473069cca402c31"
+      ],
+      [
+        6,
+        "tree",
+        "5073acfd1d1126abedc41c0558dc9efb0ab6cb75"
+      ],
+      [
+        7,
+        "tree",
+        "bf0dc1291ddc147670e8d70fe98bfcda416e9aa0"
+      ],
+      [
+        7,
+        "tree",
+        "cc40e8cc36f278d1277a53696a5fd3b2e3bf5190"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": []
+  },
+  {
+    "name": "A23_alias_literal_delete",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "qua",
+      "G7": "qua",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 131743,
+    "count": 11,
+    "requests": [
+      [
+        1,
+        "commit",
+        "6c680a7d21c98008474de9882bd2bfe0ed5f1d5a"
+      ],
+      [
+        1,
+        "commit",
+        "17a216bfb544e607d9958d05b2c809e3f257de59"
+      ],
+      [
+        1,
+        "commit",
+        "a708d4ee0c0aa3e29698f1f49d248888bc1770c7"
+      ],
+      [
+        2,
+        "commit",
+        "17a216bfb544e607d9958d05b2c809e3f257de59"
+      ],
+      [
+        3,
+        "commit",
+        "2d523606c05ab3bf5c1807edcb907ade819217e1"
+      ],
+      [
+        4,
+        "commit",
+        "2d523606c05ab3bf5c1807edcb907ade819217e1"
+      ],
+      [
+        5,
+        "commit",
+        "a708d4ee0c0aa3e29698f1f49d248888bc1770c7"
+      ],
+      [
+        6,
+        "commit",
+        "a708d4ee0c0aa3e29698f1f49d248888bc1770c7"
+      ],
+      [
+        6,
+        "tree",
+        "0d8694118a2b0a8217252e2e1306b597e674c2e1"
+      ],
+      [
+        6,
+        "tree",
+        "d7a9de07a99585b13f133306a605b031b1ce0e05"
+      ],
+      [
+        7,
+        "commit",
+        "17a216bfb544e607d9958d05b2c809e3f257de59"
+      ],
+      [
+        7,
+        "tree",
+        "464befc33a8d02a35dd72e52d8842ebde0e1e5a7"
+      ],
+      [
+        7,
+        "tree",
+        "d7a9de07a99585b13f133306a605b031b1ce0e05"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "commit",
+        "17a216bfb544e607d9958d05b2c809e3f257de59"
+      ],
+      [
+        8,
+        "tree",
+        "464befc33a8d02a35dd72e52d8842ebde0e1e5a7"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "6c680a7d21c98008474de9882bd2bfe0ed5f1d5a"
+      ],
+      [
+        1,
+        "commit",
+        "17a216bfb544e607d9958d05b2c809e3f257de59"
+      ],
+      [
+        1,
+        "commit",
+        "a708d4ee0c0aa3e29698f1f49d248888bc1770c7"
+      ],
+      [
+        3,
+        "commit",
+        "2d523606c05ab3bf5c1807edcb907ade819217e1"
+      ],
+      [
+        6,
+        "tree",
+        "0d8694118a2b0a8217252e2e1306b597e674c2e1"
+      ],
+      [
+        6,
+        "tree",
+        "d7a9de07a99585b13f133306a605b031b1ce0e05"
+      ],
+      [
+        7,
+        "tree",
+        "464befc33a8d02a35dd72e52d8842ebde0e1e5a7"
+      ],
+      [
+        7,
+        "blob",
+        "5e811ebbf89c0d439776dd8fbaff694a4dce6650"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": []
+  },
+  {
+    "name": "A23_repaired_missing",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "khong_do_duoc",
+      "G7": "khong_do_duoc",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 17298,
+    "count": 9,
+    "requests": [
+      [
+        1,
+        "commit",
+        "014bddcadae8985954b68feb13716629045bb4d2"
+      ],
+      [
+        1,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        1,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        2,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        3,
+        "commit",
+        "45aaf7549bac51f9194ef8c0bea8a3de064003b2"
+      ],
+      [
+        4,
+        "commit",
+        "45aaf7549bac51f9194ef8c0bea8a3de064003b2"
+      ],
+      [
+        5,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        6,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        6,
+        "tree",
+        "ea0a232e8d07565c4a4b04d4783b5d85c5c23e26"
+      ],
+      [
+        6,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834"
+      ],
+      [
+        7,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        7,
+        "tree",
+        "36efe773c7ff8dbf72d7668e4fd416a1d5ae8079"
+      ],
+      [
+        7,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834"
+      ],
+      [
+        8,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        8,
+        "tree",
+        "36efe773c7ff8dbf72d7668e4fd416a1d5ae8079"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "014bddcadae8985954b68feb13716629045bb4d2"
+      ],
+      [
+        1,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        1,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        3,
+        "commit",
+        "45aaf7549bac51f9194ef8c0bea8a3de064003b2"
+      ],
+      [
+        6,
+        "tree",
+        "ea0a232e8d07565c4a4b04d4783b5d85c5c23e26"
+      ],
+      [
+        6,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834"
+      ],
+      [
+        7,
+        "tree",
+        "36efe773c7ff8dbf72d7668e4fd416a1d5ae8079"
+      ],
+      [
+        7,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": [
+      [
+        6,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834",
+        "E_vang"
+      ],
+      [
+        7,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834",
+        "E_vang"
+      ]
+    ]
+  },
+  {
+    "name": "A23_repaired_missing_mut_empty",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "khong_do_duoc",
+      "G7": "do",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 17298,
+    "count": 9,
+    "requests": [
+      [
+        1,
+        "commit",
+        "014bddcadae8985954b68feb13716629045bb4d2"
+      ],
+      [
+        1,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        1,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        2,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        3,
+        "commit",
+        "45aaf7549bac51f9194ef8c0bea8a3de064003b2"
+      ],
+      [
+        4,
+        "commit",
+        "45aaf7549bac51f9194ef8c0bea8a3de064003b2"
+      ],
+      [
+        5,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        6,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        6,
+        "tree",
+        "ea0a232e8d07565c4a4b04d4783b5d85c5c23e26"
+      ],
+      [
+        6,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834"
+      ],
+      [
+        7,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        7,
+        "tree",
+        "36efe773c7ff8dbf72d7668e4fd416a1d5ae8079"
+      ],
+      [
+        7,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834"
+      ],
+      [
+        8,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        8,
+        "tree",
+        "36efe773c7ff8dbf72d7668e4fd416a1d5ae8079"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "014bddcadae8985954b68feb13716629045bb4d2"
+      ],
+      [
+        1,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        1,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        3,
+        "commit",
+        "45aaf7549bac51f9194ef8c0bea8a3de064003b2"
+      ],
+      [
+        6,
+        "tree",
+        "ea0a232e8d07565c4a4b04d4783b5d85c5c23e26"
+      ],
+      [
+        6,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834"
+      ],
+      [
+        7,
+        "tree",
+        "36efe773c7ff8dbf72d7668e4fd416a1d5ae8079"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": [
+      [
+        6,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834",
+        "E_vang"
+      ]
+    ]
+  },
+  {
+    "name": "A23_repaired_hash",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "khong_do_duoc",
+      "G7": "khong_do_duoc",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 22700,
+    "count": 11,
+    "requests": [
+      [
+        1,
+        "commit",
+        "014bddcadae8985954b68feb13716629045bb4d2"
+      ],
+      [
+        1,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        1,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        2,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        3,
+        "commit",
+        "45aaf7549bac51f9194ef8c0bea8a3de064003b2"
+      ],
+      [
+        4,
+        "commit",
+        "45aaf7549bac51f9194ef8c0bea8a3de064003b2"
+      ],
+      [
+        5,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        6,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        6,
+        "tree",
+        "ea0a232e8d07565c4a4b04d4783b5d85c5c23e26"
+      ],
+      [
+        6,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834"
+      ],
+      [
+        7,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        7,
+        "tree",
+        "36efe773c7ff8dbf72d7668e4fd416a1d5ae8079"
+      ],
+      [
+        7,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834"
+      ],
+      [
+        8,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        8,
+        "tree",
+        "36efe773c7ff8dbf72d7668e4fd416a1d5ae8079"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "014bddcadae8985954b68feb13716629045bb4d2"
+      ],
+      [
+        1,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        1,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        3,
+        "commit",
+        "45aaf7549bac51f9194ef8c0bea8a3de064003b2"
+      ],
+      [
+        6,
+        "tree",
+        "ea0a232e8d07565c4a4b04d4783b5d85c5c23e26"
+      ],
+      [
+        6,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834"
+      ],
+      [
+        7,
+        "tree",
+        "36efe773c7ff8dbf72d7668e4fd416a1d5ae8079"
+      ],
+      [
+        7,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": [
+      [
+        6,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834",
+        "E_bam_lech"
+      ],
+      [
+        7,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834",
+        "E_bam_lech"
+      ]
+    ]
+  },
+  {
+    "name": "A23_repaired_hash_mut_empty",
+    "states": {
+      "G0": "qua",
+      "G1": "qua",
+      "G2": "qua",
+      "G3": "qua",
+      "G4": "qua",
+      "G5": "qua",
+      "G6": "khong_do_duoc",
+      "G7": "do",
+      "G8": "qua",
+      "G9": "qua"
+    },
+    "bytes": 19999,
+    "count": 10,
+    "requests": [
+      [
+        1,
+        "commit",
+        "014bddcadae8985954b68feb13716629045bb4d2"
+      ],
+      [
+        1,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        1,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        2,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        3,
+        "commit",
+        "45aaf7549bac51f9194ef8c0bea8a3de064003b2"
+      ],
+      [
+        4,
+        "commit",
+        "45aaf7549bac51f9194ef8c0bea8a3de064003b2"
+      ],
+      [
+        5,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        6,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        6,
+        "tree",
+        "ea0a232e8d07565c4a4b04d4783b5d85c5c23e26"
+      ],
+      [
+        6,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834"
+      ],
+      [
+        7,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        7,
+        "tree",
+        "36efe773c7ff8dbf72d7668e4fd416a1d5ae8079"
+      ],
+      [
+        7,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834"
+      ],
+      [
+        8,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        8,
+        "tree",
+        "36efe773c7ff8dbf72d7668e4fd416a1d5ae8079"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "reads": [
+      [
+        1,
+        "commit",
+        "014bddcadae8985954b68feb13716629045bb4d2"
+      ],
+      [
+        1,
+        "commit",
+        "12224ef95fd999e525da409b9c580c317d2d0677"
+      ],
+      [
+        1,
+        "commit",
+        "41d5b89071419fdb789ba06d5bb4f72e82e76c99"
+      ],
+      [
+        3,
+        "commit",
+        "45aaf7549bac51f9194ef8c0bea8a3de064003b2"
+      ],
+      [
+        6,
+        "tree",
+        "ea0a232e8d07565c4a4b04d4783b5d85c5c23e26"
+      ],
+      [
+        6,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834"
+      ],
+      [
+        7,
+        "tree",
+        "36efe773c7ff8dbf72d7668e4fd416a1d5ae8079"
+      ],
+      [
+        8,
+        "tree",
+        "ef442502f1e7d7390afaaebf4036098742160c98"
+      ],
+      [
+        8,
+        "tree",
+        "eb1211ee4990343bc541c57ede49da141f61bd20"
+      ],
+      [
+        8,
+        "blob",
+        "277df262ff3f7bc6bc0be839be6419f6db441f5a"
+      ]
+    ],
+    "events": [
+      [
+        6,
+        "tree",
+        "f4f2e0b5214ffd56f182cd3b46413fec4c202834",
+        "E_bam_lech"
+      ]
+    ]
+  }
+]

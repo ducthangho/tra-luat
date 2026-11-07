@@ -1,0 +1,5 @@
+# 2026-11-06T07:25:56Z sau fetch --unshallow + git branch -f master origin/master; ls-remote 776 = for-each-ref 776, thieu 0 thua 0
+.claude/dev/doc_receipt_thu_hoi_git.py rc=0 NGƯỜI_GIỮ 0: không có
+.claude/dev/doc_receipt_thu_hoi_test.py rc=0 NGƯỜI_GIỮ 0: không có
+.claude/dev/doc_receipt_thu_hoi.py rc=0 NGƯỜI_GIỮ 0: không có
+.claude/dev/ci_dang_ky_test.py rc=11 NGƯỜI_GIỮ 1: wp1236-a1-r7-g1-claude-remote-20261106

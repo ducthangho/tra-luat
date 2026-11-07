@@ -1,0 +1,10 @@
+argv=('init', '--packet', '11790001', '--mission', '499', '--executor', 'claude', '--reviewer', 'codex', '--codex-review-calls-limit', '4'); rc=0; stdout='đã khởi tạo packet 11790001 (mission 499) — executor claude, reviewer codex, state awaiting_lease'; stderr=''
+exact_U=6: initialized local_used=0; local_limit=4; effective_total=6+local_used
+argv=('record-codex-call', '--packet', '11790001', '--head', '735a0ef8480f62b9a5f003135ee5fcbf4bd0bd54', '--run-id', 'reviewer-probe-1'); rc=0; stdout='đã ghi lời gọi codex reviewer-probe-1 — 1/4'; stderr=''
+argv=('record-codex-call', '--packet', '11790001', '--head', '735a0ef8480f62b9a5f003135ee5fcbf4bd0bd54', '--run-id', 'reviewer-probe-2'); rc=0; stdout='đã ghi lời gọi codex reviewer-probe-2 — 2/4'; stderr=''
+argv=('record-codex-call', '--packet', '11790001', '--head', '735a0ef8480f62b9a5f003135ee5fcbf4bd0bd54', '--run-id', 'reviewer-probe-3'); rc=0; stdout='đã ghi lời gọi codex reviewer-probe-3 — 3/4'; stderr=''
+argv=('record-codex-call', '--packet', '11790001', '--head', '735a0ef8480f62b9a5f003135ee5fcbf4bd0bd54', '--run-id', 'reviewer-probe-4'); rc=0; stdout='đã ghi lời gọi codex reviewer-probe-4 — 4/4'; stderr=''
+argv=('record-codex-call', '--packet', '11790001', '--head', '735a0ef8480f62b9a5f003135ee5fcbf4bd0bd54', '--run-id', 'reviewer-probe-5'); rc=3; stdout=''; stderr='lời gọi codex bị CHẶN TRƯỚC: codex_review_calls 4/4 — Review Rescue Checkpoint: dừng, hỏi chủ kho'
+final: local_used=4; effective_total=10; state=blocked
+Boundary: U=10 -> remaining=0; init requires positive limit. Correct handling is STOP before init/call, not default 2 or reset.
+Unknown history: U>=6 does NOT establish U=6. Exact 10-U and actual remaining calls are KHONG_DO_DUOC until reconciled; hypothetical U=7 with mistaken limit4 would permit total11.

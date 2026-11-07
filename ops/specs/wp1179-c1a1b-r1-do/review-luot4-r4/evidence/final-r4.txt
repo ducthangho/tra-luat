@@ -1,0 +1,34 @@
+COMMAND ['git', 'rev-parse', 'HEAD', 'HEAD^{tree}']
+rc=0
+stdout='3646365f965478fbe79be4a975f4eb3075ab405d\n90f2f210cc18aebd7db10e857eab117bea2174e3\n'
+stderr=''
+COMMAND ['git', 'diff', '--exit-code']
+rc=0
+stdout=''
+stderr=''
+COMMAND ['git', 'diff', '--cached', '--exit-code']
+rc=0
+stdout=''
+stderr=''
+COMMAND ['git', 'status', '--porcelain=v1', '--untracked-files=all']
+rc=0
+stdout=''
+stderr=''
+COMMAND ['git', 'ls-files', '--others', '--ignored', '--exclude-standard']
+rc=0
+stdout=''
+stderr=''
+spec_sha256=348340b05edf987d6de1ac504407c9065bfcd2c2c3db15c5f029126596d40188
+ops/specs/wp1179-c1a1b-r2.md sha256=04fa50683c44f3db093ab2396ebef7e0a12b88740eb35745da39c8016e9d108d
+ops/specs/wp1179-c1a1b-r3.md sha256=779f9384cf87aacd9bbe3c5737c9585ef4c408178df8fc7b4c3121fa31aab039
+review-luot1: {'verdict_sha256': 'f77f269f1d67dfb0525c26c8bbb22a8ed7c666e74fa68350a872dd1e51c0b8de', 'models': ['gpt-6-astra'], 'effort': ['xhigh'], 'model_status': 'DO_DUOC', 'effort_status': 'DO_DUOC', 'sandbox_status': 'DO_DUOC'}
+review-luot2-r2: {'verdict_sha256': '8f4039c3865cbbdfbd7220790b413ac69e5a611804f6b90f4fc760bea1e46f13', 'models': ['gpt-6-astra'], 'effort': ['xhigh'], 'model_status': 'DO_DUOC', 'effort_status': 'DO_DUOC', 'sandbox_status': 'DO_DUOC'}
+review-luot3-r3: {'verdict_sha256': 'aa5b899fff7fa5a6e3649f9a3fb7448b7a27efaccda4bc0e414e636aabddade6', 'models': ['gpt-6-astra'], 'effort': ['xhigh'], 'model_status': 'DO_DUOC', 'effort_status': 'DO_DUOC', 'sandbox_status': 'KHONG_DO_DUOC'}
+final probes TMPDIR=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/sandbox/tmp; tempfile.tempdir=/tmp/claude-0/-home-user-tra-luat/d7b87c96-c2e1-5bd3-a704-d216f478ee91/scratchpad/rv4/sandbox/tmp
+LIMITATION: initial baseline/producer/A18 runs used default tempfile placement outside sandbox under /tmp. They were rerun with sandbox TMPDIR; no claim of full-turn scratch confinement. Reviewed repository has no tracked/untracked/ignored delta at final check.
+evidence metrics-r4.txt sha256=b8b9415082f40edfc1b5c8c48ac11695493b19c0bd6e311e222a4eec85437df8
+evidence json-baseline-r4.txt sha256=e8c72257d35202a8a6e3d5b0df3bcfeed1425de4e8b6dd606c8c641a3ae9ed60
+evidence budget-r4.txt sha256=1dea255fe1de9ab7d3dd02e2b7ec007ad911bc5e52740ed723fba86ae6f8053f
+evidence graph-r4.txt sha256=ece505f8fe9ac85437832272548b1a1c30b1e3bcd190089d488406874d1dcac1
+evidence acceptance-r4.txt sha256=a2d6aa8b02280c2a2c741461f25a1f01f2bd89c567cef7038a64be112898dbe5
+evidence commands-r4.txt sha256=4d6773b128976de80dd82cbaea4abc2d3ed636a132bc893bd0e3e1af70bab2ff

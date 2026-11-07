@@ -1,0 +1,11 @@
+{
+  "oid_positive": true,
+  "oid_negative_rejected": true,
+  "storage_positive": true,
+  "storage_negative_rejected": true,
+  "total_negative_rejected": true,
+  "object_negative_rejected": true,
+  "memo_positive": true,
+  "memo_negative_rejected": true,
+  "three_trees_negative_rejected": true
+}

@@ -1,0 +1,20 @@
+$ git ['rev-list', '--first-parent', '889334fb']
+rc=0
+[full list counted below]
+$ git ['rev-list', '889334fb']
+rc=0
+[full list counted below]
+$ git ['log', '--format=%H', '889334fb', '--', 'ops/lease_publish.py']
+rc=0
+[full list counted below]
+current S4: all=5444 first_parent=1084 off_first_parent=4360 touching_lease_publish=64
+$ git ['rev-parse', '889334fb:.claude/dev/doc_receipt_thu_hoi.py']
+rc=0
+3490ea0ee40081c0eba2d121f5b19a67a021a54b
+
+$ git ['diff', '--exit-code', '889334fb', '735a0ef8480f62b9a5f003135ee5fcbf4bd0bd54', '--', '.claude/dev/doc_receipt_thu_hoi.py', '.claude/dev/doc_receipt_thu_hoi_test.py', '.claude/dev/ci_dang_ky_test.py']
+rc=0
+
+$ git ['diff', '--numstat', '889334fb', '735a0ef8480f62b9a5f003135ee5fcbf4bd0bd54']
+rc=0
+[full list counted below]

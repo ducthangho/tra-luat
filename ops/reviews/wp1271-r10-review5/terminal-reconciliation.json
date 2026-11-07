@@ -1,0 +1,19 @@
+{
+  "reviewed_sha": "d2fecaa1516cbc8c20b70331a45c8c728e59ddce",
+  "terminal_rc": 0,
+  "original_stdout_sha256": "1266c2da635c78052288417b30e0ad38b83b72b382e9d6b3aa5cd56f9f5da597",
+  "original_lastline": "KET_LUAN: approve",
+  "original_verdict_sha256": "cede716db8a9ede3c59b30a4b2e0a46ab2daa1911f8c43ed7daed6e9dce010e0",
+  "snapshot_final": "sach",
+  "snapshot_before": "8d8fd781c9617031d3efea571f82f4b0ea9932ca61890da85b34b0be52fc1eac",
+  "snapshot_after": "8d8fd781c9617031d3efea571f82f4b0ea9932ca61890da85b34b0be52fc1eac",
+  "changed_nodes": 0,
+  "observed_models": [
+    "gpt-6.1-sol"
+  ],
+  "observed_efforts": [
+    "xhigh"
+  ],
+  "sandbox_status": "DO_DUOC",
+  "note": "Final parent observations resolve active-run unknowns without modifying original verdict"
+}

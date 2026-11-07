@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1239",
+  "generation": 5,
+  "provider": "codex",
+  "role": "reviewer",
+  "session_id": "aaa0d07fb5194eeca8521d0345b7af0b",
+  "model_reviewer_identity": {
+    "provider": "openai",
+    "model": "gpt-6.1-sol",
+    "session": "aaa0d07fb5194eeca8521d0345b7af0b"
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "tests": [
+    {
+      "name": "git_identity_and_cleanliness",
+      "status": "passed",
+      "evidence": "{\"name\": \"git_identity_and_cleanliness\", \"commands\": [\"git rev-parse HEAD HEAD^{tree}\", \"git status --porcelain=v1 --untracked-files=all --ignored=matching\", \"git diff --binary\", \"git diff --cached --binary\"], \"status\": \"passed\", \"exit_code\": 0, \"positive_evidence\": \"Assigned H7/tree matched at start and end; tracked/untracked/ignored and index/worktree deltas were empty.\"}"
+    },
+    {
+      "name": "spec_source_and_bundle_integrity",
+      "status": "passed",
+      "evidence": "{\"name\": \"spec_source_and_bundle_integrity\", \"command\": \"python -B -\", \"script_source\": \"Same-run tool transcript: authoritative Git blob and bundle-manifest verification probes.\", \"status\": \"passed\", \"exit_code\": 0, \"positive_evidence\": \"Authoritative r7 bytes/hash matched; all 32 bundle files matched their manifest sizes and hashes.\"}"
+    },
+    {
+      "name": "independent_acceptance_and_negatives",
+      "status": "passed",
+      "evidence": "{\"name\": \"independent_acceptance_and_negatives\", \"command\": \"GIT_OPTIONAL_LOCKS=0 python -B -\", \"script_source\": \"Same-run tool transcript: acceptance probe ending ACCEPTANCE_CHECKS 41/41.\", \"status\": \"passed\", \"exit_code\": 0, \"positive_evidence\": \"41/41 checks passed, including real diff, ancestry, source fidelity, outside-scope equality and five integrity negatives.\"}"
+    },
+    {
+      "name": "diff_whitespace",
+      "status": "passed",
+      "evidence": "{\"name\": \"diff_whitespace\", \"command\": \"git diff --check 9607e3eba96b2ce091e34196cbb8ede31a521ff9 4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa\", \"status\": \"passed\", \"exit_code\": 0, \"positive_evidence\": \"Empty diagnostic output; scope independently measured as two files and 293 added lines.\"}"
+    },
+    {
+      "name": "historical_metadata_and_classifier",
+      "status": "passed",
+      "evidence": "{\"name\": \"historical_metadata_and_classifier\", \"command\": \"GIT_OPTIONAL_LOCKS=0 python -B -\", \"script_source\": \"Same-run tool transcript: METADATA_AUDIT probe.\", \"status\": \"passed\", \"exit_code\": 0, \"positive_evidence\": \"Eleven explicit blob/hash bindings, historical r1-r3 spec hashes, lease/prompt/tombstones and policy absence matched. Five classifier inputs returned sensitive; r6 ADR-0053 declaration count was zero.\"}"
+    },
+    {
+      "name": "ruff_pin_probe_contract",
+      "status": "passed",
+      "evidence": "{\"name\": \"ruff_pin_probe_contract\", \"command\": \"python -B -\", \"script_source\": \"runpy.run_path('.claude/dev/ci_dang_ky_test.py'); loi_ruff_ci()\", \"status\": \"passed\", \"exit_code\": 0, \"positive_evidence\": \"RUFF_CONTRACT 3 []; this validates the pin/probe contract.\"}"
+    },
+    {
+      "name": "bare_ruff_lint",
+      "status": "failed",
+      "evidence": "{\"name\": \"bare_ruff_lint\", \"command\": \"python -B -m ruff check --no-cache --select F --output-format json /workspace/scratch/wp1239-r6-g5-review/scripts/tl.py\", \"status\": \"failed\", \"exit_code\": 1, \"positive_evidence\": \"12 F821 diagnostics. Equivalent stdin runs on S7 and H7 produced identical diagnostics: baseline delta zero.\", \"regression\": false}"
+    },
+    {
+      "name": "credential_material_review",
+      "status": "passed",
+      "evidence": "{\"name\": \"credential_material_review\", \"command\": \"python -B -\", \"script_source\": \"Same-run tool transcript: repository secret patterns plus five additional material/canary patterns, limited to the two reviewed files.\", \"status\": \"passed\", \"exit_code\": 0, \"positive_evidence\": \"11 patterns across 28904 bytes; zero hits; manual privacy inspection completed.\"}"
+    },
+    {
+      "name": "supplied_linux_full_selftest",
+      "status": "not_run",
+      "evidence": "{\"name\": \"supplied_linux_full_selftest\", \"execution\": \"supplied_dispatcher_run\", \"status\": \"not_measured\", \"reported_exit_code\": 0, \"positive_evidence\": \"Verified 1777 main OK lines, final 1777/1777 marker, 12 nested transport OK lines and manifest-bound log hash.\", \"log_sha256\": \"3352113dca96b876d651899d76163e56bc0bbc32359d7e74bfd2db3dd10e9f06\", \"limitation\": \"Complete original execution identity is missing; see F2. Reviewer did not rerun the full suite.\"}"
+    },
+    {
+      "name": "canonical_admission_independent_attempt",
+      "status": "not_run",
+      "evidence": "{\"name\": \"canonical_admission_independent_attempt\", \"command\": \"python -B -\", \"script_source\": \"Same-run tool transcript: compile exact S7 ops/lease_publish.py blob and invoke main(['kiem-thu-hoi-github', H7, '--canonical-base', S7, '--nhanh-mac-dinh', 'master', '--root', review_root]).\", \"status\": \"not_measured\", \"exit_code\": 1, \"positive_evidence\": \"Canonical checker blob f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1 and SHA256 a4bf95b539e077edbb706afee6fc37b157815c0c246ca1bb01b307106d7be480 matched before invocation.\", \"error\": \"FileNotFoundError: no usable temporary directory; admission did not reach its positive marker.\", \"supplied_evidence\": \"admission.json correctly binds S7/H7/tree and TAP_THU_HOI_RONG; handoff reports rc0. This was not relabelled as an independently completed execution.\"}"
+    },
+    {
+      "name": "final_content_snapshot",
+      "status": "passed",
+      "evidence": "{\"name\": \"final_content_snapshot\", \"command\": \"GIT_OPTIONAL_LOCKS=0 python -B -\", \"script_source\": \"Same-run tool transcript: compare every tracked file SHA256 with review-before.json, then inspect Git state.\", \"status\": \"passed\", \"exit_code\": 0, \"positive_evidence\": \"All 12938 tracked file hashes unchanged; no untracked/ignored files or index/worktree deltas; final H7/tree unchanged.\"}"
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "sensitive-assurance-unproven-executor-family",
+      "severity": "P1",
+      "path": "/workspace/scratch/proxima-p0-20261105/r7-runtime/review-input/assignment.json",
+      "line": 25,
+      "evidence": "The assignment explicitly records executor serving family as KHONG_DO_DUOC. ACP model selection and process linkage establish configuration and transport limits, not served inference family. No independent audited family attestation or exact-H7 human audit was supplied. ADR-0065 permits provider-derived family for Codex, but gives no unique family mapping for Antigravity.",
+      "recommendation": "Fix: Preserve the frozen product bytes. Supply same-session serving-family evidence, or an independently audited family attestation explicitly labelled weaker than machine measurement. Alternatively obtain a protocol-compliant independent human audit of the exact H7/spec/diff. Dispatcher publication identity and owner packaging approval cannot substitute for that audit. Test: Bind evidence to the executor session and frozen source hashes, then verify that configuration-only evidence, absent audit identity, and mismatched session/SHA are rejected. No additional model call is authorized by this receipt. Regression risk: Relabelling configured Gemini settings or the GitHub submitter as serving proof/human audit would create false cross_approved assurance."
+    },
+    {
+      "finding_id": "full-gate-execution-binding-incomplete",
+      "severity": "P2",
+      "path": "/workspace/scratch/proxima-p0-20261105/r7-runtime/review-input/linux-selftest-result.json",
+      "line": 2,
+      "evidence": "The full-selftest result records only head, rc and duration. The manifest binds the supplied log, and its 1777/1777 main and 12/12 nested markers were verified. However, the original command argv and runner/OS/Python runtime identity are absent from the supplied execution evidence. Protocol §10.1 requires those identities before reuse. The independent admission attempt also could not complete because the read-only sandbox has no usable temporary directory.",
+      "recommendation": "Fix: Recover the original H7 full-selftest execution record outside the product checkout, including actual command, checkout SHA/tree/base, runner/OS/runtime, relevant code identities, rc and output hash. If unavailable, an authorized runner must produce complete evidence on unchanged H7. Provide scratch capability for canonical admission or retain a complete independently verifiable original admission execution record. Test: Validate recovered evidence against H7/tree/S7 and log SHA256 3352113dca96b876d651899d76163e56bc0bbc32359d7e74bfd2db3dd10e9f06. Missing runtime fields, stale SHA or altered output hash must prevent reuse. Canonical admission must complete with rc0 and its positive marker. Regression risk: Backfilling historical execution metadata from the current reviewer environment would falsely certify an unobserved run. Avoid repeating the heavy suite if the original complete receipt can be recovered."
+    }
+  ],
+  "verdict": "blocked",
+  "assurance": "review_deferred",
+  "evidence_url": "https://github.com/ducthangho/tra-luat/issues/1239#issuecomment-6700336747"
+}

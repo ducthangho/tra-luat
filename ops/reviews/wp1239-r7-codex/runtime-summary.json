@@ -1,0 +1,25 @@
+{
+  "run_id": "aaa0d07fb5194eeca8521d0345b7af0b",
+  "trang_thai": "xong",
+  "ma_thoat": 0,
+  "model_phuc_vu_trang_thai": "DO_DUOC",
+  "effort_phuc_vu": [
+    "xhigh"
+  ],
+  "effort_phuc_vu_trang_thai": "DO_DUOC",
+  "sandbox_trang_thai": "DO_DUOC",
+  "integrity_checks": {
+    "signature_valid": true,
+    "stdout_hash_valid": true,
+    "stderr_hash_valid": true,
+    "review_snapshot_equal": true,
+    "source_snapshot_equal": true,
+    "input_bundle_unchanged": true
+  },
+  "observation_limit": "Snapshot equality observes endpoints, not absence of transient writes.",
+  "served_models": [
+    "gpt-6.1-sol"
+  ],
+  "actual_sandbox": "codex-linux-sandbox/bwrap, root read-only, network restricted; machine observed",
+  "raw_verdict_sha256": "35a787b1d5f3d84c6e063350c986dda22259d1c87fc32c3173bb64909ff3b26a"
+}

@@ -1,0 +1,6 @@
+{
+  "raw_sha256": "35a787b1d5f3d84c6e063350c986dda22259d1c87fc32c3173bb64909ff3b26a",
+  "canonical_sha256": "32c54642f04e7dd1516e8f48e8d3ca17807d4a65d7ab57f9811e1f30a8f88d24",
+  "normalization": "Transport/schema projection only; unchanged verdict/finding substance; raw receipt retained. F1/F2 IDs mapped to reviewer-declared class slugs because schema requires lowercase kebab-case. Actual reviewer runtime supplied separately by dispatcher from same-run machine observation, not rewriting raw reviewer identity claim. Test not_measured mapped to not_run retaining verbatim details.",
+  "schema_validation": "passed"
+}

@@ -1,0 +1,35 @@
+{
+  "head": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb",
+  "base": "9607e3eba96b2ce091e34196cbb8ede31a521ff9",
+  "cwd": "/workspace/scratch/wp1239-r6-g5-validation",
+  "runner": {
+    "hostname": "64fa810a0be4",
+    "os": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "uname": [
+      "Linux",
+      "64fa810a0be4",
+      "6.18.57",
+      "#1 SMP Tue Oct 20 21:56:04 UTC 2026",
+      "x86_64",
+      ""
+    ],
+    "pid": 247572,
+    "python_executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+    "python_executable_sha256": "fa67443527ed9647f760d807e2a38f26340757123e643c4639cf273ed15d5ea7",
+    "python_version": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "git_version": "git version 2.52.0"
+  },
+  "harness": {
+    "path": "/workspace/scratch/proxima-p0-20261105/r7-runtime/run-bound-gates.py",
+    "sha256": "481433b0249c7c809624596517dc7d1a0dc18614551b4a668d49c616e32411b2"
+  },
+  "code_identity": {
+    "tl_py_sha256": "88ac0b1418b87be67cb742d46adb08ac79ad44b9691f10d0bb7c54543e6c29b9",
+    "lease_publish_py_sha256": "a4bf95b539e077edbb706afee6fc37b157815c0c246ca1bb01b307106d7be480",
+    "git_tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb"
+  },
+  "reason": "F2 from independent blocked review: produce complete gate execution identity on unchanged H7; no model call",
+  "start_utc": "2026-11-07T01:27:32.698764+00:00",
+  "operations": []
+}

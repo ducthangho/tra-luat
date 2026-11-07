@@ -1,0 +1,348 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1239",
+  "mission_issue": 1238,
+  "revision": 7,
+  "generation": 5,
+  "provider": "codex",
+  "actual_provider": "openai_codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "session_id": "aaa0d07fb5194eeca8521d0345b7af0b",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "reviewed_sha": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "reviewed_tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb",
+  "baseline_sha": "9607e3eba96b2ce091e34196cbb8ede31a521ff9",
+  "baseline_tree": "61d4e36331b067ef539728a5830cfad4179fc443",
+  "scope": [
+    "ops/plans/PROXIMA-PLAYWRIGHT-v1.md",
+    "docs/research/2026-11-05-proxima-playwright-p0.md"
+  ],
+  "effective_review_class": "sensitive",
+  "verdict": "blocked",
+  "summary": "The two documents passed content and integrity review. Sensitive assurance remains unestablished, and the supplied full-selftest evidence lacks the execution identity required for reuse.",
+  "assurance": "review_deferred",
+  "assurance_status": "not_established",
+  "identity_evidence_level": "khong_do_duoc",
+  "model_reviewer_identity": {
+    "provider": "openai_codex",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "session_id": "aaa0d07fb5194eeca8521d0345b7af0b",
+    "model_family_basis": "Codex provider mapping under ADR-0065",
+    "served_model": null,
+    "served_effort": null,
+    "serving_measurement_status": "KHONG_DO_DUOC",
+    "sandbox_mode": "read-only",
+    "runtime_source": "/workspace/scratch/proxima-p0-20261105/r7-runtime/runs/aaa0d07f/run.json",
+    "sandbox_source": "Same-run dispatch argv and active runtime permissions"
+  },
+  "executor_identity": {
+    "provider": "google_antigravity",
+    "execution_surface": "antigravity",
+    "transport": "machine/local",
+    "session_id": "02aa8d9c-a873-4f9c-8574-9bdd5c6d9e3d",
+    "declared_model_family": "gemini",
+    "configured_session_model": "gemini-4-argon",
+    "configured_effort": "high",
+    "served_model_family": null,
+    "serving_evidence_level": "khong_do_duoc",
+    "launcher_direct_child": "Python ACP bridge, recorded as local_process/subprocess/machine",
+    "separate_process_evidence": "Supplied process snapshot links python.exe PID 8740 to agy.EXE PID 21752.",
+    "limits": "Process linkage and session configuration do not establish the family serving inference requests. Native signature verification is a dispatcher attestation; signing material was neither supplied nor accessed."
+  },
+  "github_submitter_identity": null,
+  "evidence_url": null,
+  "preflight": {
+    "authority_and_git_identity": "passed",
+    "review_root": "/workspace/scratch/wp1239-r6-g5-review",
+    "checkout": "Detached HEAD at the assigned H7; non-shallow; canonical origin URL; core.abbrev=7.",
+    "spec_source": "12e5a471ca02b929f2f7ad06a1e36884eaabac60:ops/specs/PROXIMA-PLAYWRIGHT-P0-r7.md",
+    "spec_blob": "1484b32e45a75d3d5d4d92a383af6810179b721c",
+    "spec_sha256": "031c3e0dd1d3e748e0246976d6a52ef70e1270aec1bdb961e639f9f358949a28",
+    "spec_copy_matches": true,
+    "owner_authority_url": "https://github.com/ducthangho/tra-luat/issues/1239#issuecomment-6700112030",
+    "owner_grant_readback": "Supplied GitHub body exactly matches r7-owner-grant.md. This is packaging/review authority, not an independent human audit.",
+    "historical_executor_lease": "Expired 2026-11-06T21:32:48Z; executor stopped. Review proceeds under the separate r7 grant without reviving execution.",
+    "budget": {
+      "attempts_used": 5,
+      "attempts_limit": 5,
+      "codex_calls_reserved_including_this_call": 3,
+      "codex_calls_limit": 3,
+      "counter_reset": false
+    },
+    "capability_limit": "The filesystem sandbox also prevents creating external temporary directories needed by canonical admission."
+  },
+  "N1_N4": {
+    "N1": {
+      "status": "passed",
+      "evidence": "M1 equals the supplied source byte-for-byte: 9990 bytes, 196 LF lines, UTF-8, no BOM or CR.",
+      "sha256": "5c0c1fa6ad465eaf2037031b79e05f3740118dbbe01fc48ce8278f27f6db9ebb"
+    },
+    "N2": {
+      "status": "passed",
+      "evidence": "Actual S7..H7 diff contains exactly the two approved new files. All 12936 entries outside those paths match S7 by mode, type and object ID."
+    },
+    "N3": {
+      "status": "passed",
+      "evidence": "H0, H_pack, S6 and S7 are ancestors of H7. Bound trees match. H7 ordered parents are H_pack and S7. S6..S7 contains exactly 192 paths, all under ops/specs/wp1179-*."
+    },
+    "N4": {
+      "status": "passed",
+      "evidence": "Both files are nonempty UTF-8/LF without BOM. M2 has 97 lines. Actual numstat is +293/-0. git diff --check returned rc0 on two paths and 293 added lines.",
+      "report_sha256": "fcd8387aeed9082b4a7397005ab95381d80037fcafd7096dce0d6a7d503777aa"
+    },
+    "negative_integrity": {
+      "status": "passed",
+      "rejected": [
+        "M1 one-byte mutation",
+        "M1 LF-to-CRLF mutation",
+        "Third changed path",
+        "Non-ancestor baseline: S7 -> H0, actual Git rc1",
+        "Empty report"
+      ],
+      "evidence": "5/5 rejected; mutations were evaluated in memory."
+    }
+  },
+  "R1_R4": {
+    "R1": {
+      "status": "passed",
+      "evidence": "M2 contains sections (a)-(i), D1-D7, proposed P1 slices, U1-U12 with owner/closure/deadline, and unknown-to-packet gates. Future behavioral tests correctly gate acceptance rather than lease of unimplemented work."
+    },
+    "R2": {
+      "status": "passed",
+      "evidence": "Datums retain their supplied source and observation limits. VM corroboration is not promoted to identity; bundle environment is not treated as remote authentication; incomplete probes remain incomplete. Historical S6/r6/g5 metadata is preserved as required by r7. Git-addressable hashes and counts checked independently matched."
+    },
+    "R3": {
+      "status": "passed",
+      "evidence": "Manual inspection and 11 credential-material patterns across both files found zero hits or credential/profile dumps. Generic token/profile field names were not treated as secrets.",
+      "limit": "This bounded check does not guarantee detection of every possible secret."
+    },
+    "R4": {
+      "status": "passed",
+      "evidence": "M2 contains no installation/activation commands or invented network results. CLI-first/MCP-on-demand, optional independent skills, no core dependency, explicit targets, no automatic inference retry/fallback and prompt-free healthchecks are preserved."
+    }
+  },
+  "findings": [
+    {
+      "finding_id": "F1",
+      "severity": "P1",
+      "class_slug": "sensitive-assurance-unproven-executor-family",
+      "category": "assurance_evidence",
+      "location": {
+        "path": "/workspace/scratch/proxima-p0-20261105/r7-runtime/review-input/assignment.json",
+        "line": 25
+      },
+      "related_product_location": {
+        "path": "docs/research/2026-11-05-proxima-playwright-p0.md",
+        "line": 3
+      },
+      "evidence": "The assignment explicitly records executor serving family as KHONG_DO_DUOC. ACP model selection and process linkage establish configuration and transport limits, not served inference family. No independent audited family attestation or exact-H7 human audit was supplied. ADR-0065 permits provider-derived family for Codex, but gives no unique family mapping for Antigravity.",
+      "impact": "The required cross-family assurance for this sensitive packet cannot be granted.",
+      "concrete_fix": "Preserve the frozen product bytes. Supply same-session serving-family evidence, or an independently audited family attestation explicitly labelled weaker than machine measurement. Alternatively obtain a protocol-compliant independent human audit of the exact H7/spec/diff. Dispatcher publication identity and owner packaging approval cannot substitute for that audit.",
+      "test": "Bind evidence to the executor session and frozen source hashes, then verify that configuration-only evidence, absent audit identity, and mismatched session/SHA are rejected. No additional model call is authorized by this receipt.",
+      "regression_risk": "Relabelling configured Gemini settings or the GitHub submitter as serving proof/human audit would create false cross_approved assurance."
+    },
+    {
+      "finding_id": "F2",
+      "severity": "P2",
+      "class_slug": "full-gate-execution-binding-incomplete",
+      "category": "gate_evidence",
+      "location": {
+        "path": "/workspace/scratch/proxima-p0-20261105/r7-runtime/review-input/linux-selftest-result.json",
+        "line": 2
+      },
+      "evidence": "The full-selftest result records only head, rc and duration. The manifest binds the supplied log, and its 1777/1777 main and 12/12 nested markers were verified. However, the original command argv and runner/OS/Python runtime identity are absent from the supplied execution evidence. Protocol §10.1 requires those identities before reuse. The independent admission attempt also could not complete because the read-only sandbox has no usable temporary directory.",
+      "impact": "The positive selftest output is verified as supplied evidence, but a complete reusable execution receipt is not established.",
+      "concrete_fix": "Recover the original H7 full-selftest execution record outside the product checkout, including actual command, checkout SHA/tree/base, runner/OS/runtime, relevant code identities, rc and output hash. If unavailable, an authorized runner must produce complete evidence on unchanged H7. Provide scratch capability for canonical admission or retain a complete independently verifiable original admission execution record.",
+      "test": "Validate recovered evidence against H7/tree/S7 and log SHA256 3352113dca96b876d651899d76163e56bc0bbc32359d7e74bfd2db3dd10e9f06. Missing runtime fields, stale SHA or altered output hash must prevent reuse. Canonical admission must complete with rc0 and its positive marker.",
+      "regression_risk": "Backfilling historical execution metadata from the current reviewer environment would falsely certify an unobserved run. Avoid repeating the heavy suite if the original complete receipt can be recovered."
+    }
+  ],
+  "class_table": [
+    {
+      "class_slug": "sensitive-assurance-unproven-executor-family",
+      "finding_ids": ["F1"],
+      "highest_open_severity": "P1",
+      "source_sha": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+      "status": "open",
+      "common_remediation": "Establish serving-family evidence or independent exact-H7 human audit.",
+      "closure_check": "Protocol §8 assurance validation."
+    },
+    {
+      "class_slug": "full-gate-execution-binding-incomplete",
+      "finding_ids": ["F2"],
+      "highest_open_severity": "P2",
+      "source_sha": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+      "status": "open",
+      "common_remediation": "Recover complete original gate execution identity or produce complete evidence on unchanged H7.",
+      "closure_check": "Protocol §10.1 execution-identity and positive-output validation."
+    }
+  ],
+  "prior_review_comparison": {
+    "source": "1ea88cae7e668110fca65129908bea7a7e1f2907:ops/reviews/wp1239-p0-ba0126b-codex.md",
+    "prior_reviewed_sha": "ba0126bd20c99669264b788e15da2b6ebcda0fd7",
+    "prior_open_findings": [],
+    "result": "No prior open findings to classify. The H0 approval was not reused for H7."
+  },
+  "tests": [
+    {
+      "name": "git_identity_and_cleanliness",
+      "commands": [
+        "git rev-parse HEAD HEAD^{tree}",
+        "git status --porcelain=v1 --untracked-files=all --ignored=matching",
+        "git diff --binary",
+        "git diff --cached --binary"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "positive_evidence": "Assigned H7/tree matched at start and end; tracked/untracked/ignored and index/worktree deltas were empty."
+    },
+    {
+      "name": "spec_source_and_bundle_integrity",
+      "command": "python -B -",
+      "script_source": "Same-run tool transcript: authoritative Git blob and bundle-manifest verification probes.",
+      "status": "passed",
+      "exit_code": 0,
+      "positive_evidence": "Authoritative r7 bytes/hash matched; all 32 bundle files matched their manifest sizes and hashes."
+    },
+    {
+      "name": "independent_acceptance_and_negatives",
+      "command": "GIT_OPTIONAL_LOCKS=0 python -B -",
+      "script_source": "Same-run tool transcript: acceptance probe ending ACCEPTANCE_CHECKS 41/41.",
+      "status": "passed",
+      "exit_code": 0,
+      "positive_evidence": "41/41 checks passed, including real diff, ancestry, source fidelity, outside-scope equality and five integrity negatives."
+    },
+    {
+      "name": "diff_whitespace",
+      "command": "git diff --check 9607e3eba96b2ce091e34196cbb8ede31a521ff9 4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+      "status": "passed",
+      "exit_code": 0,
+      "positive_evidence": "Empty diagnostic output; scope independently measured as two files and 293 added lines."
+    },
+    {
+      "name": "historical_metadata_and_classifier",
+      "command": "GIT_OPTIONAL_LOCKS=0 python -B -",
+      "script_source": "Same-run tool transcript: METADATA_AUDIT probe.",
+      "status": "passed",
+      "exit_code": 0,
+      "positive_evidence": "Eleven explicit blob/hash bindings, historical r1-r3 spec hashes, lease/prompt/tombstones and policy absence matched. Five classifier inputs returned sensitive; r6 ADR-0053 declaration count was zero."
+    },
+    {
+      "name": "ruff_pin_probe_contract",
+      "command": "python -B -",
+      "script_source": "runpy.run_path('.claude/dev/ci_dang_ky_test.py'); loi_ruff_ci()",
+      "status": "passed",
+      "exit_code": 0,
+      "positive_evidence": "RUFF_CONTRACT 3 []; this validates the pin/probe contract."
+    },
+    {
+      "name": "bare_ruff_lint",
+      "command": "python -B -m ruff check --no-cache --select F --output-format json /workspace/scratch/wp1239-r6-g5-review/scripts/tl.py",
+      "status": "failed",
+      "exit_code": 1,
+      "positive_evidence": "12 F821 diagnostics. Equivalent stdin runs on S7 and H7 produced identical diagnostics: baseline delta zero.",
+      "regression": false
+    },
+    {
+      "name": "credential_material_review",
+      "command": "python -B -",
+      "script_source": "Same-run tool transcript: repository secret patterns plus five additional material/canary patterns, limited to the two reviewed files.",
+      "status": "passed",
+      "exit_code": 0,
+      "positive_evidence": "11 patterns across 28904 bytes; zero hits; manual privacy inspection completed."
+    },
+    {
+      "name": "supplied_linux_full_selftest",
+      "execution": "supplied_dispatcher_run",
+      "status": "not_measured",
+      "reported_exit_code": 0,
+      "positive_evidence": "Verified 1777 main OK lines, final 1777/1777 marker, 12 nested transport OK lines and manifest-bound log hash.",
+      "log_sha256": "3352113dca96b876d651899d76163e56bc0bbc32359d7e74bfd2db3dd10e9f06",
+      "limitation": "Complete original execution identity is missing; see F2. Reviewer did not rerun the full suite."
+    },
+    {
+      "name": "canonical_admission_independent_attempt",
+      "command": "python -B -",
+      "script_source": "Same-run tool transcript: compile exact S7 ops/lease_publish.py blob and invoke main(['kiem-thu-hoi-github', H7, '--canonical-base', S7, '--nhanh-mac-dinh', 'master', '--root', review_root]).",
+      "status": "not_measured",
+      "exit_code": 1,
+      "positive_evidence": "Canonical checker blob f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1 and SHA256 a4bf95b539e077edbb706afee6fc37b157815c0c246ca1bb01b307106d7be480 matched before invocation.",
+      "error": "FileNotFoundError: no usable temporary directory; admission did not reach its positive marker.",
+      "supplied_evidence": "admission.json correctly binds S7/H7/tree and TAP_THU_HOI_RONG; handoff reports rc0. This was not relabelled as an independently completed execution."
+    },
+    {
+      "name": "final_content_snapshot",
+      "command": "GIT_OPTIONAL_LOCKS=0 python -B -",
+      "script_source": "Same-run tool transcript: compare every tracked file SHA256 with review-before.json, then inspect Git state.",
+      "status": "passed",
+      "exit_code": 0,
+      "positive_evidence": "All 12938 tracked file hashes unchanged; no untracked/ignored files or index/worktree deltas; final H7/tree unchanged."
+    }
+  ],
+  "verification_notes": [
+    "One reviewer helper exited rc1 because it incorrectly required unique printed selftest names. Inspection found one repeated name. The corrected helper counted main and nested cases separately and exited rc0. This was a helper assertion error, not a product finding."
+  ],
+  "results": {
+    "passed": [
+      "N1-N4 and five integrity negatives",
+      "R1-R4 content review",
+      "Authoritative spec and bundle hashes",
+      "Git-addressable metadata and scope checks",
+      "Ruff pin/probe contract",
+      "Final checkout preservation"
+    ],
+    "failed": [
+      "Bare Ruff lint: rc1, 12 existing F821 diagnostics, delta zero"
+    ],
+    "skipped": [],
+    "not_measured": [
+      "Executor served model family",
+      "Complete reusable full-selftest execution identity",
+      "Independent canonical admission completion"
+    ],
+    "not_run": [
+      "Reviewer full selftest",
+      "Windows CI and full mutant Windows CI, per owner directive",
+      "Installation, activation, gateway/model probes, LIVE operations",
+      "Additional model calls, GitHub publication, push, merge, land or deploy"
+    ]
+  },
+  "environment": {
+    "os": "Linux x86_64, kernel 6.18.57, glibc 2.41",
+    "python": "3.12.14",
+    "git": "2.52.0",
+    "ruff": "0.15.15",
+    "codex_cli": "0.163.0",
+    "sandbox": "read-only"
+  },
+  "uncertainty": [
+    "Historical Windows observations, bundle internals and upstream readings were assessed against supplied evidence/spec labels; no fresh environment or network results were invented.",
+    "Historical native process, timestamp, preservation and signature claims could not all be independently reconstructed from the frozen Git mirror.",
+    "Same-run reviewer serving model/effort are inaccessible. These optional reviewer fields are not the basis of F1.",
+    "Launcher terminal rc and stable final output hash are unavailable until this review process exits; dispatcher must validate them separately without rewriting this verdict.",
+    "Clean snapshots establish no observed endpoint delta, not a complete history of every attempted filesystem operation."
+  ],
+  "required_remaining_checks": [
+    "Resolve F1 through valid serving-family evidence/audit or an independent exact-H7 human audit.",
+    "Resolve F2 with complete gate execution evidence and canonical admission completion.",
+    "Validate this review's terminal launcher/runtime receipt and stable output hash.",
+    "Before any separately authorized publication, recheck live canonical equals S7, policy remains absent and H7 remains unchanged.",
+    "Applicable Linux CI on the exact published candidate remains required. Branch-protection readback is still HTTP403 and blocks merge.",
+    "No additional model call, executor restart, attempt reset or successor authorization follows from this receipt."
+  ],
+  "review_end_utc": "2026-11-07T01:24:43.643666+00:00",
+  "authorization": {
+    "approval_granted": false,
+    "merge_land_deploy_authorized": false,
+    "mission_complete_claimed": false,
+    "reviewed_checkout_modified": false
+  }
+}

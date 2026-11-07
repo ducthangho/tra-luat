@@ -1,0 +1,58 @@
+{
+ "goc": {
+  "kiem_s0_v5": [],
+  "hanh_vi": {
+   "am_exit0": "lenh_ngoai_cu_phap",
+   "duong": null,
+   "am_exit0_lf": "lenh_ngoai_cu_phap"
+  },
+  "de_xuat": []
+ },
+ "W1_functools_wraps": {
+  "kiem_s0_v5": [],
+  "hanh_vi": {
+   "am_exit0": null,
+   "duong": null,
+   "am_exit0_lf": "lenh_ngoai_cu_phap"
+  },
+  "de_xuat": [
+   "A_dict_khong_rong",
+   "B_ast_code"
+  ]
+ },
+ "W2_wrapped_tay": {
+  "kiem_s0_v5": [],
+  "hanh_vi": {
+   "am_exit0": null,
+   "duong": null,
+   "am_exit0_lf": "lenh_ngoai_cu_phap"
+  },
+  "de_xuat": [
+   "A_dict_khong_rong",
+   "B_ast_code",
+   "khong_lay_nguon:StopIteration"
+  ]
+ },
+ "W3_co_firstlineno": {
+  "kiem_s0_v5": [],
+  "hanh_vi": {
+   "am_exit0": null,
+   "duong": null,
+   "am_exit0_lf": "lenh_ngoai_cu_phap"
+  },
+  "de_xuat": [
+   "C_co_code"
+  ]
+ },
+ "W4_linecache": {
+  "kiem_s0_v5": [],
+  "hanh_vi": {
+   "am_exit0": null,
+   "duong": null,
+   "am_exit0_lf": "lenh_ngoai_cu_phap"
+  },
+  "de_xuat": [
+   "C_co_code"
+  ]
+ }
+}

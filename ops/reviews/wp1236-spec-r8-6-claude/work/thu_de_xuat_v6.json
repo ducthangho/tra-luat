@@ -1,0 +1,222 @@
+{
+ "v4_goc": {
+  "v5": [],
+  "de_xuat": [],
+  "tong": []
+ },
+ "v4_dinh_dang_chu_thich": {
+  "v5": [],
+  "de_xuat": [],
+  "tong": []
+ },
+ "v4_bom": {
+  "v5": [
+   "ast_doi_tuong"
+  ],
+  "de_xuat": [
+   "ast"
+  ],
+  "tong": [
+   "ast"
+  ]
+ },
+ "v4_ha_chu": {
+  "v5": [
+   "ast_doi_tuong"
+  ],
+  "de_xuat": [
+   "ast"
+  ],
+  "tong": [
+   "ast"
+  ]
+ },
+ "v4_removesuffix": {
+  "v5": [
+   "ast_doi_tuong"
+  ],
+  "de_xuat": [
+   "ast"
+  ],
+  "tong": [
+   "ast"
+  ]
+ },
+ "v4_match": {
+  "v5": [
+   "ast_doi_tuong"
+  ],
+  "de_xuat": [
+   "ast"
+  ],
+  "tong": [
+   "ast"
+  ]
+ },
+ "v4_wrapper": {
+  "v5": [
+   "kieu:RE_DON"
+  ],
+  "de_xuat": [],
+  "tong": [
+   "kieu:RE_DON"
+  ]
+ },
+ "v4_bong_type": {
+  "v5": [
+   "bong_ten:type"
+  ],
+  "de_xuat": [],
+  "tong": [
+   "bong_ten:type"
+  ]
+ },
+ "v4_rstrip": {
+  "v5": [
+   "ast_doi_tuong"
+  ],
+  "de_xuat": [
+   "ast"
+  ],
+  "tong": [
+   "ast"
+  ]
+ },
+ "v5_chu_thich_tra_ve": {
+  "v5": [],
+  "de_xuat": [],
+  "tong": []
+ },
+ "v5_future_tra_ve_docstring": {
+  "v5": [],
+  "de_xuat": [],
+  "tong": []
+ },
+ "v5_chu_thich_tham_so": {
+  "v5": [
+   "ast_doi_tuong"
+  ],
+  "de_xuat": [
+   "ast"
+  ],
+  "tong": [
+   "ast"
+  ]
+ },
+ "v5_gan_lai_ten": {
+  "v5": [
+   "ast_doi_tuong"
+  ],
+  "de_xuat": [
+   "code_khong_khop_tep",
+   "khong_dung_mot_def_tai_dong"
+  ],
+  "tong": [
+   "code_khong_khop_tep",
+   "khong_dung_mot_def_tai_dong"
+  ]
+ },
+ "v5_hai_def": {
+  "v5": [
+   "ast_doi_tuong"
+  ],
+  "de_xuat": [
+   "ast"
+  ],
+  "tong": [
+   "ast"
+  ]
+ },
+ "v5_decorator": {
+  "v5": [
+   "closure_defaults",
+   "ast_doi_tuong"
+  ],
+  "de_xuat": [
+   "code_khong_khop_tep",
+   "khong_dung_mot_def_tai_dong"
+  ],
+  "tong": [
+   "closure_defaults",
+   "code_khong_khop_tep",
+   "khong_dung_mot_def_tai_dong"
+  ]
+ },
+ "v5_doi_code": {
+  "v5": [
+   "ast_doi_tuong"
+  ],
+  "de_xuat": [
+   "code_khong_khop_tep",
+   "khong_dung_mot_def_tai_dong"
+  ],
+  "tong": [
+   "code_khong_khop_tep",
+   "khong_dung_mot_def_tai_dong"
+  ]
+ },
+ "v5_defaults": {
+  "v5": [
+   "closure_defaults",
+   "ast_doi_tuong"
+  ],
+  "de_xuat": [
+   "ast"
+  ],
+  "tong": [
+   "closure_defaults",
+   "ast"
+  ]
+ },
+ "v6_W1_functools_wraps": {
+  "v5": [],
+  "de_xuat": [
+   "dict_ham",
+   "ast"
+  ],
+  "tong": [
+   "dict_ham",
+   "ast"
+  ]
+ },
+ "v6_W2_wrapped_tay": {
+  "v5": [],
+  "de_xuat": [
+   "dict_ham",
+   "code_khong_khop_tep",
+   "khong_dung_mot_def_tai_dong"
+  ],
+  "tong": [
+   "dict_ham",
+   "code_khong_khop_tep",
+   "khong_dung_mot_def_tai_dong"
+  ]
+ },
+ "v6_W3_co_firstlineno": {
+  "v5": [],
+  "de_xuat": [
+   "code_khong_khop_tep"
+  ],
+  "tong": [
+   "code_khong_khop_tep"
+  ]
+ },
+ "v6_W4_linecache": {
+  "v5": [],
+  "de_xuat": [
+   "ast"
+  ],
+  "tong": [
+   "ast"
+  ]
+ },
+ "v6_W5_co_consts": {
+  "v5": [],
+  "de_xuat": [
+   "code_khong_khop_tep"
+  ],
+  "tong": [
+   "code_khong_khop_tep"
+  ]
+ }
+}

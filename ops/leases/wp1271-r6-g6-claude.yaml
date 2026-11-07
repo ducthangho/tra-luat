@@ -89,3 +89,6 @@ nang_tran:
   tran_cu: previous Packet r3 <=3 exactfiles/650 additions, attempts5,calls8,rounds3
     (ADR0053 default6files/450 additions)
   tran_moi: Packet r4 <=3 exactfiles/850 additions, attempts5,calls8,rounds3 unchanged
+da_bi_thay_the: wp1271-r7-g7-claude
+superseded_reason: g6 terminal H4 review2 requests genuine textschema P2 correction;
+  r7 delegated checkpoint, counters retained

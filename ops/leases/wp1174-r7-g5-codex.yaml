@@ -1,0 +1,133 @@
+{
+  "schema_version": 2,
+  "event": "lease_granted_under_owner_delegation",
+  "packet_issue": 1174,
+  "packet_id": "WP1174",
+  "revision": 7,
+  "generation": 5,
+  "lease_id": "wp1174-r7-g5-codex",
+  "role": "executor",
+  "executor": "codex",
+  "provider": "openai_codex",
+  "model_family": "openai",
+  "execution_surface": "codex_service",
+  "transport": "machine",
+  "reviewer_provider": "anthropic_claude",
+  "reviewer_execution_surface": "claude_code",
+  "reviewer_model_family": "claude",
+  "reviewer_transport": "machine/local",
+  "review_class": "sensitive",
+  "effective_review_class": "sensitive",
+  "assurance_target": "cross_approved_or_human_audited",
+  "branch": "agent/wp1174-g5-codex",
+  "granted_by": "ducthangho",
+  "granted_on_instruction": "https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6710785136",
+  "authority_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6710766323",
+  "recorded_by": "Codex coordinator acting under recorded owner delegation6709698499",
+  "spec_path": "ops/specs/wp1174-implementation-r7.md",
+  "spec_hash": "d1218ea470ac2216809088646a9631f2b99ed1015cd5abd484d60978a43db5cb",
+  "spec_sha256_required": "d1218ea470ac2216809088646a9631f2b99ed1015cd5abd484d60978a43db5cb",
+  "spec_ref": "refs/heads/ops/spec-wp1174-r7@7350247ca57fc57523b0249089626819f9486c35",
+  "prompt_path": "ops/specs/wp1174-implementation-r7.md",
+  "prompt_sha256_required": "d1218ea470ac2216809088646a9631f2b99ed1015cd5abd484d60978a43db5cb",
+  "base_sha": "27fd80803e9a8f80e660752f58c8dd477e9730c8",
+  "start_from_sha": "7350247ca57fc57523b0249089626819f9486c35",
+  "reviewed_sha_required": "b2a3b78e5a77683193c59273b4c6f75465860b21",
+  "write_set": [
+    ".claude/dev/packet_loop.py",
+    ".claude/dev/packet_loop_test.py",
+    "docs/PROTOCOL_DA_PHIEN.md",
+    "ops/specs/wp1174-c5-adapter-design.md",
+    "ops/specs/wp1174-implementation-r7.md"
+  ],
+  "effective_write_set": [
+    ".claude/dev/packet_loop.py",
+    ".claude/dev/packet_loop_test.py",
+    "docs/PROTOCOL_DA_PHIEN.md",
+    "ops/specs/wp1174-c5-adapter-design.md",
+    "ops/specs/wp1174-implementation-r7.md"
+  ],
+  "write_set_hash": "edadf3a6b8d6f962145f23bd841616dd31312fdccc8b381a24aea218bc8348ff",
+  "change_policy_sha": null,
+  "change_policy_exception": {
+    "id": "WP1174-R7-CLOSURE-EXCEPTION",
+    "decision": "approved_under_owner_delegation",
+    "owner": "ducthangho",
+    "reason": "ADR0032 policy and schema absent at pinned canonical; no silent empty-policy default",
+    "expires_at": "2026-11-08T08:03:01Z",
+    "scope": "only wp1174 revision7 generation5 source C6; no previous generation5 lease existed",
+    "effective_write_set": [
+      ".claude/dev/packet_loop.py",
+      ".claude/dev/packet_loop_test.py",
+      "docs/PROTOCOL_DA_PHIEN.md",
+      "ops/specs/wp1174-c5-adapter-design.md",
+      "ops/specs/wp1174-implementation-r7.md"
+    ],
+    "canonical_policy_sha": null,
+    "rule": "exact closed set + NFC/casefold/symlink/prefix overlap against all live refs; every impact_hint/outside companion blocks and needs approved revision",
+    "required_checks": [
+      "selftest N/N",
+      "packet_loop baseline+mutation controls",
+      "registry+full Linux M9",
+      "native Windows focused",
+      "canonical K0-K7",
+      "actual human exactH audit",
+      "required native Linux profile on exact H via existing ci.yml gate-packet-loop main()",
+      "WP1174_NATIVE_REPORT_V1 complete schema/required outcomes and source/provenance binding; missing/BoQua/infra != pass",
+      "Windows focused one unit mutant m1174_allow_windows with raw oracle record; no full Windows suite"
+    ],
+    "land_obligations": [
+      "canonical release/manifest only by land operator, not worker"
+    ],
+    "never_waived": [
+      "source authority",
+      "exclusive lease",
+      "K0-K7",
+      "human audit",
+      "M9",
+      "unknown=>blocked"
+    ],
+    "decision_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6710766323"
+  },
+  "leased_at_utc": "2026-11-07T17:39:22.559785Z",
+  "heartbeat_at": "2026-11-07T17:39:22.559785Z",
+  "lease_until": "2026-11-08T08:03:01Z",
+  "lease_expires_at_utc": "2026-11-08T08:03:01Z",
+  "heartbeat_required_minutes": 360,
+  "max_lease_hours": 24,
+  "hard_not_after": "2026-11-08T08:03:01Z",
+  "nang_tran": {
+    "ai_nang": "ducthangho",
+    "can_cu": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6710766323; 5 files/2600 added measured from base27 to full H",
+    "tran_cu": {
+      "files": 6,
+      "added_lines": 450
+    },
+    "tran_moi": {
+      "files": 5,
+      "added_lines": 2600
+    }
+  },
+  "nang_tran_review_rounds": {
+    "ai_nang": "ducthangho",
+    "tran_cu": 5,
+    "tran_moi": 7,
+    "can_cu": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6710766323; five metadata reviews retained plus sourceH and one rework"
+  },
+  "thay_the_cho": [],
+  "template_only": false,
+  "guard": "valid only after canonical checks and workflow bot readback",
+  "spec_source_oid": "7350247ca57fc57523b0249089626819f9486c35",
+  "spec_sha256": "d1218ea470ac2216809088646a9631f2b99ed1015cd5abd484d60978a43db5cb",
+  "runtime_preconditions": {
+    "source_test_processes": "do not expose TL_TOKEN/TL_WEBAPP/TL_MASTER_KEY/TL_AGENT_CREDS_FILEID or other LIVE/Drive/GAS/NLM credentials; probe absence as booleans, never values",
+    "publishing": "only canonical publisher after gates; worker cannot authorize land",
+    "canary_profile": "native Linux ext4/XFS positive must be measured; cloud overlay and unverified WSL not supported; no security/WSL installs authorized",
+    "Windows": "known tlcommander device; normal clone, private bundle, no shared locks"
+  },
+  "exception_approval_comment_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6710766323",
+  "reviewer": "claude",
+  "pull_request": 1275,
+  "source_pr": 1275,
+  "metadata_review_disposition": "P6 native approve retained; P7 governance-only reanchor approved under delegation, not relabelled native approve; source H native review mandatory"
+}

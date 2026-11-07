@@ -1,0 +1,14 @@
+{
+  "P0_merge_commit": "132d376cbbfea0692ff6db284753b33f437c637a",
+  "current_canonical": "27fd80803e9a8f80e660752f58c8dd477e9730c8",
+  "first_parent_contains_M": true,
+  "independent_post_merge_PR": 1267,
+  "changed_paths_since_M": [
+    ".claude/dev/launcher.py",
+    ".claude/dev/launcher_test.py"
+  ],
+  "P0_paths_and_policy_unchanged": true,
+  "CI_used_for_P0_land": 42358749773,
+  "CI_tested_commit": "132d376cbbfea0692ff6db284753b33f437c637a",
+  "scope": "Record independent canonical progress under protocol5.1; no candidate substitution or new source mutation authorized"
+}

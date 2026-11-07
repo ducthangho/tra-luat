@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "python",
+    "-B",
+    "/workspace/scratch/wp1239-r6-g5-validation/.claude/dev/packet_loop.py",
+    "kiem-dong-wp",
+    "--root",
+    "/workspace/scratch/wp1239-r6-g5-validation",
+    "--bien-ban",
+    "/workspace/scratch/proxima-p0-20261105/r7-runtime/land-M8-final.yaml",
+    "--lease",
+    "/workspace/scratch/proxima-p0-20261105/r7-runtime/land-lease-normalized.yaml"
+  ],
+  "rc": 0,
+  "positive_output": "\u0110\u00d3NG \u0110\u01af\u1ee2C WP wp1239 \u2014 merge 132d376cbbfea0692ff6db284753b33f437c637a\n",
+  "receipt_sha256": "ab038719e106b9e338ef64066fd231620e1685ce09fad11e143611c69a67b01a"
+}

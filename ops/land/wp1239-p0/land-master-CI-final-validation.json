@@ -1,0 +1,45 @@
+{
+  "head": "132d376cbbfea0692ff6db284753b33f437c637a",
+  "run_id": 42358749773,
+  "attempt": 1,
+  "jobs_total": 23,
+  "all_jobs_success": true,
+  "all_required_checks_success": true,
+  "required_check_ids": {
+    "gate (ubuntu-latest)": [
+      128362476912
+    ],
+    "gate-cong-cu-gop (ubuntu-latest)": [
+      128367035643
+    ],
+    "gate-ops (ubuntu-latest)": [
+      128362476857
+    ],
+    "gate-packet-loop (ubuntu-latest)": [
+      128362476898
+    ],
+    "gate-registry (ubuntu-latest)": [
+      128362871448
+    ]
+  },
+  "all_Ubuntu": true,
+  "actual_tested_commit": "132d376cbbfea0692ff6db284753b33f437c637a",
+  "actual_tested_tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb",
+  "workflow_definition_commit": "132d376cbbfea0692ff6db284753b33f437c637a",
+  "positive_output": "1777/1777",
+  "runtime_identity": {
+    "catalog_policy_sha256": "e8b7be5e7f1f77a4d4d065d49dbd616a6e9b5260541e61debfe7d5d62638c679",
+    "head_sha": "132d376cbbfea0692ff6db284753b33f437c637a",
+    "machine": "x86_64",
+    "python_implementation": "CPython",
+    "python_version": "3.12.16",
+    "runner_sha256": "637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810",
+    "system": "Linux",
+    "system_release": "7.0.0-1019-azure",
+    "tracked_clean": true,
+    "tree_sha": "539a02f355c4ade3cee7c99efa327a4a729e79bb",
+    "worktree_clean": true
+  },
+  "actual_output_sha256": "d6b492c5b530df6daaf965d89d808267462d6c7ef4682d1e631a8b4cc49a9a8e",
+  "observed_utc": "2026-11-07T10:15:38.558781+00:00"
+}

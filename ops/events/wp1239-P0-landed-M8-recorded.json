@@ -1,0 +1,29 @@
+{
+  "event": "P0_landed_M8_bookkeeping_verified",
+  "packet_issue": 1239,
+  "revision": 7,
+  "generation": 5,
+  "merge_commit": "132d376cbbfea0692ff6db284753b33f437c637a",
+  "head": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb",
+  "ci_master": {
+    "run_id": 42358749773,
+    "conclusion": "success",
+    "jobs_success": 23,
+    "jobs_total": 23
+  },
+  "M8_url": "https://github.com/ducthangho/tra-luat/issues/1239#issuecomment-6705526770",
+  "M8_readback_exact": true,
+  "M8_yaml_sha256": "ab038719e106b9e338ef64066fd231620e1685ce09fad11e143611c69a67b01a",
+  "closure_check_rc": 0,
+  "F1_F2": "owner_waived",
+  "K3_K4": "owner_scoped_exception",
+  "raw_review_verdict": "blocked_unchanged",
+  "lease_last": "wp1239-r6-g5-agy",
+  "lease_expired": true,
+  "landed": true,
+  "packet_close_authorized_after_record": true,
+  "mission_complete": false,
+  "no_new_models": true,
+  "no_deploy_or_P1_P6": true
+}

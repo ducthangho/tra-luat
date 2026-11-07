@@ -132,8 +132,7 @@ class Doc:
         if s.het_tong:
             raise SuKien("E_ngan_sach: tong byte")
         try:
-            s.p.stdin.write(oid.encode("ascii") + b"\n")
-            s.p.stdin.flush()
+            os.write(s.p.stdin.fileno(), oid.encode("ascii") + b"\n")  # không qua bộ đệm: đóng ống không còn byte chờ flush
             dau = s.ra.readline()
         except (OSError, ValueError) as e:
             s._chet(repr(e))

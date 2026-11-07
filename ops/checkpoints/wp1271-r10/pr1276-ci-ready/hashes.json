@@ -1,0 +1,18 @@
+{
+  "pr1276-K0-K7-before-ready-measured.json": "5f157abb03d75bcda80251c6524c93ba09cd87725bc1bb1477daf6773ae05704",
+  "pr1276-K0-K7-before-ready-measured.log": "dc129301d798978d069f0ace8d985ec70dc2d4ed45e3a70c1fc8027517bbd613",
+  "pr1276-ci-auditor-final.txt": "f24bb101964eea29c45a590cae706f1c2443cdc6f74151c855bffd96c7c8667a",
+  "README.md": "361114e959961b984f55031e7f7e1c1f16a74ccf7c04d1b2cfc64799f24141fe",
+  "pr1276-role-guard.log": "d1df84da96f573159c699a002b0600553ea939e55f549552202f3be3eb47c64a",
+  "pr1276-four-anchors-final.json": "8bf43f6311b5df6406a336388bfebcbd4e6031e6334313da68fcb8ae7c08785f",
+  "pr-ci-source-evidence.zip": "394421989b086f502f693e7d21a4f020e23a99001697c1f355a180e212de9f3c",
+  "pr1276-conditional-merge-land-grant.json": "ba17c6ada91ebb7a1091aa9a4f1c21caa8912e4037c906088167b86cc4bdeef3",
+  "pr1276-conditional-merge-land-grant.md": "ce17296d9baec51d9884293a0014a22dd5fee1f3ee004ce2cf59d405ec064c19",
+  "pr1276-conditional-grant-transport.json": "6bd6920c38cb601a933871a1a36da5033d3bac3f66d352cb932dc0080b74895b",
+  "pr1276-authority-ledger-command.log": "3ae41b9fe00b8bd3dfa540ee1ebec6365c77bc75f3151911012209f0095e54ba",
+  "pr1276-ci-auditor-receipt.json": "bade903da3b4c175faa831cb6e555c54cafeca0c00375a33f39dd5c669191511",
+  "pr1276-conditional-grant-readback.json": "bbec2c1b7c222036345ff0aa2f7b9925c1601ac3624034904b06762357b211d4",
+  "collect-ci-final-evidence.py": "fdf1643db374ef7b4d031a475214cbcab44e4eb85c40bf0ecc7e8237d3984de4",
+  "run-pr1276-merge-gate.py": "a1d643f219e051e9cbd97a8f88c3fb6b708f137fac5738d25a92840f40d1a99a",
+  "pr1276-role-authority-receipt.json": "cfef1769f54a704c5c9c47336f5421e1693bef0ec356856690605dcf1b52d982"
+}

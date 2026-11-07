@@ -1,0 +1,11 @@
+{
+  "at": "2026-11-07T22:54:35.943146+00:00",
+  "guard_actual_rc": 7,
+  "guard_status": "role-only reminder; source explicitly says not an authority check and never unlocks",
+  "operator_role": "dispatcher acts as delegated Land Operator, not product Executor or independent Reviewer",
+  "external_owner_grant": "https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6714107843",
+  "external_grant_exact_readback": "pr1276-conditional-grant-transport.json",
+  "ledger_command_actual_rc": 0,
+  "meaning": "Counts a declared authorization only; not human audit or proof by itself; no guard/gate code changed",
+  "merge_exercised": false
+}

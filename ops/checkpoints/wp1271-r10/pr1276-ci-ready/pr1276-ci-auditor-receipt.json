@@ -1,0 +1,29 @@
+{
+  "head": "d2fecaa1516cbc8c20b70331a45c8c728e59ddce",
+  "run_id": 42419093844,
+  "attempt": 1,
+  "agent": "/root/tl_auditor",
+  "provider": "openai_codex",
+  "surface": "codex_service",
+  "transport": "collaboration",
+  "model": "KHONG_DO_DUOC",
+  "shared_call": 14,
+  "result": "no_material_inconsistency",
+  "all23logs_verified": true,
+  "required_positive_outputs": {
+    "gate": "1777/1777",
+    "packet_loop": "1359/1359;one declared Windows-only case not_run",
+    "ops": "118/118;98/98;285/285;48/48;21/21;28/28",
+    "cong_cu_gop": "8/8 shards;61cases;490mutants;0mutanterrors",
+    "registry": "29/29;15/15suitesrc0"
+  },
+  "four_source_anchors": "passed independent actual-source audit; raw boundedconsumer unknowns remain unknown",
+  "limits": [
+    "One Windows-onlycase+associatedmutant skipped and not countedpassed",
+    "CanonicalboundedMOI observations23not_measured preserved",
+    "PRnolifecycleartifact byworkflowdesign",
+    "HashesreceivedUTF8decodedtext notremote rawbytes",
+    "Not codeapproval"
+  ],
+  "note_sha256": "f24bb101964eea29c45a590cae706f1c2443cdc6f74151c855bffd96c7c8667a"
+}

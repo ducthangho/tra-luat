@@ -1,0 +1,18 @@
+{
+  "head": "d2fecaa1516cbc8c20b70331a45c8c728e59ddce",
+  "run_id": 42419093844,
+  "attempt": 1,
+  "source_validation_sha256": "6f86ebcbadc3117efa69dfae1a53be9023b2ad4a7d40ba6ea53fb7d9b36f8ad4",
+  "auditor_receipt_sha256": "bade903da3b4c175faa831cb6e555c54cafeca0c00375a33f39dd5c669191511",
+  "four_anchors": {
+    "run": "passed",
+    "checkout": "passed",
+    "workflow_definition": "passed",
+    "gate_output": "passed"
+  },
+  "basis": "Actual source observations plus independent mandatory CI audit14, not reinterpretation of bounded canonical unknowns",
+  "all_required_jobs_success": true,
+  "actual_checkout": "3cc8d776c1241e26f934f3a5726357f0af996bc8",
+  "tree": "818cb867ad28eb26e00d1f8d14ea847316205d94",
+  "at": "2026-11-07T23:13:58.681472+00:00"
+}

@@ -1,0 +1,7 @@
+# PR1276 exact-H CI/Ready preparation
+
+H d2fecaa1516cbc8c20b70331a45c8c728e59ddce, CI42419093844/attempt1 pull_request SUCCESS23/23Ubuntu. Executed syntheticmerge3cc8d776c1241e26f934f3a5726357f0af996bc8 parentsC/H,treeH; actualGraphQLWDdefinesH withci.yml blob/hash matched. Core1777/1777/CPython3.12.16. Mandatory readonlyaudit14 validated full23receivedlogtext/source-record hashes and required positive outputs. Final derivedfour-anchorindex references rawmeasurements+audit; canonicalboundedMOI23not_measured andWDslotunknown remain unchanged. No inheritedP0waiver or fakeautomationpass.
+
+PRworkflow intentionally no lifecycleartifact; non-PRpush produces one. Transport archivesreceivedGitHubplugindecodedUTF8logs, not asserted originalremoterawbyteidentity. Packet-loop1359executedbaselinepass plusoneWindows-onlycase/mutantskipped (notcountedpass). Allrequiredjobstepsactualsuccess/no continue-on-error. Otherpositivecounts/limits retained in audit.
+
+Unmodifiedcanonical K0-K7 actualrc0 beforeReady. ConditionalexactHmerge/landbindingIssue1271comment6714107843,readbackexact,validuntil2026-11-08T02:52:37Z. Role-onlyguard returns7bydesign andexplicitlynotauthoritychecker; realownerdelegation/conditionalbindingrecordedseparately withcanonicalghi-uy-quyenrc0. No guardcodechanged or reminderdeclaredpass. No Ready/merge/land asserted by this checkpoint: freshfence/rules and any Readyautomaticreview still required.

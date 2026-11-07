@@ -1,0 +1,11 @@
+hành vi 'merge' KHÔNG được phép ở vai executor.
+
+ĐÂY LÀ LỜI NHẮC, KHÔNG PHẢI PHÉP KIỂM THẨM QUYỀN. Cổng này chặn một NHÃN VAI; nó
+KHÔNG phân biệt được uỷ quyền thật với một phiên tự cho phép mình, vì phiên chạy
+bằng credential của chủ kho (đo 2026-08-26: `get_me` -> ducthangho). Cơ chế còn
+thiếu là TÁCH DANH TÍNH — xem #338, và xem chú thích ngay trên hàm này.
+
+Được chủ kho uỷ quyền thật thì ghi lại cho ĐẾM ĐƯỢC:
+  packet_loop.py ghi-uy-quyen --action merge --nguoi-cap <ai> \
+      --bang-chung <url> --head-sha <sha40>
+Ghi xong cổng này VẪN trả 7 — nó không mở khoá được thứ nó không kiểm được.

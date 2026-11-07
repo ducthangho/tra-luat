@@ -519,6 +519,7 @@ MODUN_GIT, MOC, BK, WF = GOC / "doc_receipt_thu_hoi_git.py", S, "ops/lease_publi
 _EG = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
 GOC_KHO = os.environ.get("DRTH_GOC_KHO") or subprocess.run(["git", "-C", str(GOC), "rev-parse", "--show-toplevel"], capture_output=True,
                                                          text=True, env=_EG).stdout.strip()
+NHE = bool(os.environ.get("DRTH_E2E_NHE")) and bool(os.environ.get("DRTH_KHONG_E2E"))  # chỉ child e2e: mỗi bảng đột biến 1 dòng
 G_, TT, NHAN, Z20 = tuple(f"G{i}" for i in range(10)), {"q": "qua", "d": "do", "k": "khong_do_duoc", "c": "khong_chay"}, ("100644", "100755", "120000"), bytes(20)
 OID_WF, SHA_WF = FIX["workflow_definition_blob"], FIX["workflow_definition_sha256"]
 
@@ -1473,7 +1474,7 @@ def _g_dong_tong(m, t, ten):
                          ("db_git_0", ((3, 3), (2, 2), (1, 1), (0, 0)), False), ("git_vang", ((3, 3), (2, 2), None, None), False),
                          ("ca_hong", ((3, 3), (2, 2), (0, 1), (1, 1)), False)):
         d = dong_tong(*a)
-        if bool(d and re.fullmatch(MAU, d)) != dat or re.fullmatch(MAU, dong_nhom("git", (3, 3), (2, 2), 0)):
+        if bool(d and re.fullmatch(MAU, d)) != dat or re.fullmatch(MAU, dong_nhom("git", (3, 3), (2, 2), 0)) or (NHE and not os.environ.get("DRTH_KHONG_E2E")):
             raise TinHieuChotCa(f"{ten}:{nhan}: {d!r}")
 
 
@@ -1484,12 +1485,15 @@ if not os.environ.get("DRTH_KHONG_E2E"):
         for p in (pathlib.Path(__file__), MODUN, MODUN_GIT, GOC / "ci_dang_ky_test.py"):
             (T / p.name).write_bytes(p.read_bytes())
         mau = _nap(T / "ci_dang_ky_test.py", "e2e_ci_dang_ky").MOI[".claude/dev/doc_receipt_thu_hoi_test.py"]
+        e = {**os.environ, "DRTH_GOC_KHO": GOC_KHO, "DRTH_KHONG_E2E": "1", "DRTH_E2E_NHE": "1"}  # child NHẸ: A16 Windows hết 3600 s
         con = lambda: subprocess.run([sys.executable, "-B", str(T / pathlib.Path(__file__).name)], cwd=T, capture_output=True, text=True,
-                                     timeout=3600, env={**os.environ, "DRTH_GOC_KHO": GOC_KHO, "DRTH_KHONG_E2E": "1"})
+                                     timeout=3600, env=e)
+        if e.get("DRTH_E2E_NHE") != "1":  # đo TRƯỚC khi chạy: child đầy đủ trên Windows quá hạn, thành lỗi vô can
+            raise TinHieuChotCa(f"{ten}: child e2e khong chay ban nhe")
         r = con()  # (0) child DƯƠNG trước trên đúng setup
         ds = r.stdout.splitlines()
         if r.returncode or not any(x.startswith("nhom json: ") for x in ds) or not any(x.startswith("nhom git: ") for x in ds) \
-                or not any(re.fullmatch(mau, x) for x in ds):
+                or not any(re.fullmatch(mau, x) and x.endswith(" · 2/2 dot bien GIET") for x in ds):
             raise LoiDo(f"{ten}: child duong hong rc={r.returncode}: {r.stdout[-300:]} {r.stderr[-300:]}")
         for nhan, noi, dau in (("import", 'raise ImportError("c1a1b-e2e")\n', "ImportError: c1a1b-e2e"), ("cu_phap", "def (:\n", "SyntaxError"),
                                ("vang", None, "FileNotFoundError")):
@@ -1628,6 +1632,8 @@ DBH = [
      ("    try:\n    " + _NAP + "\n    except Exception:\n        mg = None", "    ng, mgd, hong_g = nhom_git(mg) if mg else (None, None, [])",
       '    d = dong_tong(nj, mj_, ng, mgd) if mg else f"doc_receipt_thu_hoi tests: {nj[0]}/{nj[1]} ca QUA · {mj_[0]}/{mj_[1]} dot bien GIET"'),
      "g_dong_tong_e2e"),
+    ("H14", "child e2e chạy bản nhẹ (A16 Windows)", "bo_co_nhe", ', "DRTH_E2E_NHE": "1"}', "}", "g_dong_tong_e2e"),
+    ("H15", "cờ nhẹ không làm CHA nhẹ đi", "co_lot_sang_cha", 'NHE = bool(os.environ.get("DRTH_E2E_NHE")) and bool(os.environ.get("DRTH_KHONG_E2E"))', "NHE = True", "g_dong_tong"),
     ("H2", "dòng tổng đòi N_git ≥ 1", "bo_n_git", " or ng[1] < 1 or mg[1] < 1:", " or mg[1] < 1:", "g_dong_tong"),
     ("H3", "dòng tổng đòi M_git ≥ 1", "bo_m_git", " or ng[1] < 1 or mg[1] < 1:", " or ng[1] < 1:", "g_dong_tong"),
     ("H4", "A9 assert ba tree khác nhau", "bo_assert_cay", '    if len({F["tA"], F["tH"], F["tB"]}) != 3:', "    if False:", "g_fixture"),
@@ -1699,7 +1705,7 @@ def nhom_git(mg):
             chay_g(mg, {ten})
         except (TinHieuChotCa, LoiDo) as e:
             hc.append(str(e))
-    bang, nguon = [(d, False) for d in DBG] + [(d, True) for d in DBH if d[5] in CG], MODUN_GIT.read_text(encoding="utf-8")
+    bang, nguon = ([(d, False) for d in DBG] + [(d, True) for d in DBH if d[5] in CG])[:1 if NHE else None], MODUN_GIT.read_text(encoding="utf-8")
     for dong, suite in bang:
         disp, gc = chay_db_git(pathlib.Path(__file__).read_text(encoding="utf-8") if suite else nguon, dong, suite)
         dem[disp] += 1
@@ -1718,7 +1724,7 @@ def main():
             chay_ca(m, MODUN, {c[0]})
         except (TinHieuChotCa, LoiDo) as e:
             hong_ca.append(str(e))
-    nguon, dem, bang = MODUN.read_text(encoding="utf-8"), dict.fromkeys(("witness_killed", "equivalent_verified", "unresolved"), 0), DB + _theo_truong()
+    nguon, dem, bang = MODUN.read_text(encoding="utf-8"), dict.fromkeys(("witness_killed", "equivalent_verified", "unresolved"), 0), (DB + _theo_truong())[:1 if NHE else None]
     for dong in bang:
         disp, ghi_chu = chay_dot_bien(nguon, dong)
         dem[disp] += 1

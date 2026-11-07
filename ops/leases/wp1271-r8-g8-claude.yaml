@@ -1,0 +1,86 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1271
+packet_id: wp1271
+mission_issue: 1238
+revision: 8
+generation: 8
+lease_id: wp1271-r8-g8-claude
+role: executor
+provider: claude
+executor: claude
+model: opus
+effort: high
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1271-r8.md
+spec_ref: refs/heads/ops/wp1271-spec@9156719b1a323753fd612a26d0375ebdf1012cc0
+spec_sha256_required: 9a8d3783f252505a0cc48fbc0dd80799bc63ad82026ff2d7ab6b7f25797371ab
+spec_hash: 9a8d3783f252505a0cc48fbc0dd80799bc63ad82026ff2d7ab6b7f25797371ab
+prompt_path: ops/prompts/wp1271-r8-g8-claude.md
+prompt_sha256_required: 3fffd2d28a6e9639e631a28c12d69b572e37bb15f242b37854822e85e6357d7f
+write_set:
+- .agents/skills/proxima-control/scripts/ProximaConfig.psm1
+- .agents/skills/proxima-control/config.example.json
+- .agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1
+write_set_hash: 04d57e780264d849b74493bb839b05547534c22110d4aff3343178a07699cb10
+change_policy_sha: null
+required_checks:
+- A1-A7 focused PS5.1 and PS7
+- Linux tl selftest N/N before primary push
+- Ruff F delta zero
+- independent Codex CLI exact SHA sensitive review
+- applicable Ubuntu CI and required branch checks
+land_obligations: []
+branch: agent/wp1271-g8-claude
+base_sha: c6afde62c846f1ef3d6a83c14459966849edf756
+start_from_sha: 2d4ba724deddf8276e5ca3f0159f432d9a1f7fcc
+reviewed_sha_required: c6afde62c846f1ef3d6a83c14459966849edf756
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6708576608
+recorded_by: openai_codex/codex_service dispatcher, delegated owner authority
+recorder_is_executor: false
+heartbeat_required_minutes: 360
+leased_at_utc: '2026-11-07T19:53:06Z'
+heartbeat_at: '2026-11-07T19:53:06Z'
+lease_until: '2026-11-07T23:53:06Z'
+lease_expires_at_utc: '2026-11-07T23:53:06Z'
+run_minutes: 90
+attempts_limit: 7
+review_rounds_limit: 4
+codex_review_calls_limit: 12
+same_failure_limit: 2
+requires_live: false
+uy_quyen_merge: false
+authority_note: Owner full delegation; explicitRescueCheckpoint schema-first rework
+  and correctedconsumerbindings. Executor has no merge/deploy authority.
+effective_write_set:
+- .agents/skills/proxima-control/scripts/ProximaConfig.psm1
+- .agents/skills/proxima-control/config.example.json
+- .agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1
+thay_the_cho:
+- wp1271-r7-g7-claude
+packet_budget_carryover:
+  attempts_used: 6
+  attempts_limit: 7
+  codex_review_calls_used: 8
+  codex_review_calls_limit: 12
+  review_rounds_used: 3
+  review_rounds_limit: 4
+nang_tran:
+  ai_nang: ducthangho via full delegation, dispatcher records
+  can_cu: mandatoryRescue after thirdclassappearance; originalnonemptyUnicode schema
+    correction, canonicalK1/K4 bindings, newnative/Linuxgate+auxlog+review4+connector
+    reservations; countersnotreset
+  tran_cu: 3files/900additions,attempts6,calls10,rounds3
+  tran_moi: same3files/900additions,attempts7,calls12,rounds4

@@ -83,3 +83,6 @@ nang_tran:
     and review3+connector reservations; no counter reset
   tran_cu: 3files/850additions,attempts5,calls8,rounds3
   tran_moi: same3files/900additions,attempts6,calls10,rounds3
+da_bi_thay_the: wp1271-r8-g8-claude
+superseded_reason: review3terminalchanges_requested, schema recurrence3 and actualK1
+  grammar failure; explicit delegatedRescueCheckpoint r8

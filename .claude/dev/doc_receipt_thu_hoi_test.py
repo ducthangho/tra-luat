@@ -18,6 +18,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 import traceback
 import zlib
 
@@ -733,6 +734,9 @@ class Ra:
                 than = s.f.read(int(c[2]) + 1)[:-1]
                 s.buf, s.eof = {"cut": than[:s.k], "lf": than + b"X", "eof_lf": than}[s.kieu], s.kieu != "lf"  # 'lf': luồng chạy tiếp
                 return d
+            if s.kieu == "treo":  # nuốt phản hồi rồi chờ ống: cat-file treo thật cho tới khi Timer giết nó (F6)
+                s.f.read(int(c[2]) + 1)
+                return s.f.readline()
             if s.kieu == "han":  # lật đồng hồ seam đúng lúc đọc object này (deadline GIỮA luật)
                 s.cb()
                 return d
@@ -1107,6 +1111,80 @@ def _g_r_shim(m, t, ten):
         raise TinHieuChotCa(f"{ten}: Timer deadline khong go tien trinh giu ong: {con}")
 
 
+class _Sp:
+    """Proxy `subprocess` CHỈ cho module đang kiểm: `--exec-path` chậm `cham` giây (tôn trọng timeout) hoặc lỗi `loi`; ghi timeout."""
+
+    def __init__(s, cham=0.0, loi=None):
+        s.cham, s.loi, s.goi = cham, loi, []
+
+    def __getattr__(s, k):
+        return getattr(subprocess, k)
+
+    def run(s, a, **kw):
+        s.goi.append((a, kw.get("timeout")))
+        if "--exec-path" in a and s.loi is not None:
+            if s.loi == "rong":
+                return subprocess.CompletedProcess(a, 0, "", "")
+            raise s.loi
+        if "--exec-path" in a:
+            time.sleep(min(s.cham, kw["timeout"]))
+            if kw["timeout"] < s.cham:
+                raise subprocess.TimeoutExpired(a, kw["timeout"])
+        return subprocess.run(a, **kw)
+
+
+def _lanh(m, sp, f):  # cache git thật LẠNH + proxy; luôn hoàn nguyên, cache được tìm lại ở lần sau
+    cu, m.subprocess = m.subprocess, sp
+    m._GIT.clear()
+    try:
+        return f()
+    finally:
+        m.subprocess = cu
+        m._GIT.clear()
+
+
+@cg("g_git_han")  # F6: tìm git chậm 0,6 s ăn vào hạn 1,2 s; reader treo ⇒ Timer chỉ còn phần hạn lại (F7 timer_late)
+def _g_git_han(m, t, ten):
+    F, t0 = dung(t), time.monotonic()
+    kq = _lanh(m, _Sp(cham=0.6), lambda: chay(m, F, ngan_sach={"deadline_giay": 1.2}, **ra(F["D"], "treo")))
+    can(ten, kq, V(**dict.fromkeys(G_[1:], "k")))
+    if time.monotonic() - t0 > 1.5:
+        raise TinHieuChotCa(f"{ten}: tra ve sau {time.monotonic() - t0:.2f} s > han 1,2 s")
+
+
+@cg("g_git_cham")  # F6: tìm git vượt cả hạn ⇒ dừng ở hạn; lệnh git (ref) chỉ nhận phần hạn còn lại sau bước tìm
+def _g_git_cham(m, t, ten):
+    F, t0 = dung(t), time.monotonic()
+    can(ten, _lanh(m, _Sp(cham=3.0), lambda: chay(m, F, ngan_sach={"deadline_giay": 0.5})), V(**dict.fromkeys(G_[1:], "k")))
+    sp = _Sp(cham=0.3)
+    _lanh(m, sp, lambda: m._git(F["k"], "for-each-ref", timeout=1.0))
+    if time.monotonic() - t0 > 2.5 or not sp.goi[-1][1] <= 0.8:
+        raise TinHieuChotCa(f"{ten}: tim git/lenh git vuot han: {time.monotonic() - t0:.2f} s, timeout lenh {sp.goi[-1][1]}")
+
+
+@cg("g_git_loi")  # F6: tìm git lỗi/rỗng ⇒ mọi luật khong_do_duoc, KHÔNG lùi về `git` (shim) của PATH, không cache lỗi
+def _g_git_loi(m, t, ten):
+    F = dung(t)
+    for loi in (OSError("c1a1b"), "rong"):
+        can(f"{ten}:{loi}", _lanh(m, _Sp(loi=loi), lambda: chay(m, F)), V(**dict.fromkeys(G_[1:], "k")))
+
+
+@cg("g_git_env")  # F7: bước tìm git chạy với env ĐÃ LỌC — GIT_EXEC_PATH thừa kế không chọn được git giả
+def _g_git_env(m, t, ten):
+    gia = pathlib.Path(t) / "gia"
+    gia.mkdir()
+    for n in ("git", "git.exe"):
+        (gia / n).write_text("gia")
+    cu = os.environ.get("GIT_EXEC_PATH")
+    os.environ["GIT_EXEC_PATH"] = str(gia)
+    try:
+        exe = _lanh(m, _Sp(), m._git_exe)
+    finally:
+        os.environ.pop("GIT_EXEC_PATH") if cu is None else os.environ.__setitem__("GIT_EXEC_PATH", cu)
+    if exe is None or pathlib.Path(exe).parent == gia:
+        raise TinHieuChotCa(f"{ten}: chon git {exe!r} tu GIT_EXEC_PATH thua ke")
+
+
 @cg("g_r_g")
 def _g_r_g(m, t, ten):
     F = dung(t)
@@ -1436,6 +1514,9 @@ def _g_guard(m, t, ten):
     _phai_loi_do(f"{ten}:max_object", lambda: gac_obj(G))  # không phóng to H1
     _phai_loi_do(f"{ten}:su_kien_chung", lambda: gac_chung(ten, G, "G7", ("tree", _oid(G, "opsB")), {"G7"}))  # G8 còn đọc
     _phai_loi_do(f"{ten}:tran_phep_di", lambda: gac_walk(ten, G, 2, {"G1", "G3"}))
+    _loose(G, OID).parent.mkdir(exist_ok=True)  # F7: object có CẢ loose lẫn alternate — _mo_ghi phải gọi guard trước chmod/ghi
+    _loose(G, OID).write_bytes(zlib.compress(b"blob %d\0" % len(_raw(G["k"], OID)[1]) + _raw(G["k"], OID)[1]))
+    _phai_loi_do(f"{ten}:mo_ghi", lambda: ghi_de(G, OID, "blob"))
 
 
 # A20 (F3): MỘT ô cho mỗi (luật × sự kiện E mà luật ấy gặp được), mỗi ô một ca đích; mỗi ô một đột biến riêng (`DBG`).
@@ -1569,11 +1650,16 @@ DBG = [
     ("A11e", "G8 so sha256", "bo_sha", "hashlib.sha256(b).hexdigest() == sha", "True", "g_g8"),
     ("A11f", "so OID trước khi đọc blob (F6)", "doc_blob_truoc", "        if e[2] != oid:\n", '        s.doc(e[2], "blob")\n        if e[2] != oid:\n', "g_g7"),
     ("A12a", "băm lại mọi object", "bo_bam", r'        if hashlib.sha1(f"{loai} {n}\0".encode("ascii") + than).hexdigest() != oid:', "        if False:", "g_r_b"),
-    ("A12b", "không theo refs/replace", "bo_replace", ('_git_exe(), "--no-replace-objects", "-C", str(s.goc), "cat-file"', 'GIT_NO_REPLACE_OBJECTS="1", '),
-     ('_git_exe(), "-C", str(s.goc), "cat-file"', ""), "g_r_c"),
-    ("A12l", "reader là git THẬT, không qua shim PATH", "git_qua_path", "    return _GIT[0]", '    return "git"', "g_r_shim"),
-    ("A12m", "Timer deadline giết tiến trình giữ ống", "timer_rong", "threading.Timer(s.ns[\"deadline_giay\"], s.p.kill)",
-     "threading.Timer(s.ns[\"deadline_giay\"], lambda: None)", "g_r_shim"),
+    ("A12b", "không theo refs/replace", "bo_replace", ('[exe, "--no-replace-objects", "-C", str(s.goc), "cat-file"', 'GIT_NO_REPLACE_OBJECTS="1", '),
+     ('[exe, "-C", str(s.goc), "cat-file"', ""), "g_r_c"),
+    ("A12l", "reader là git THẬT, không qua shim PATH", "git_qua_path", "    return _GIT[0] if _GIT else None", '    return "git"', "g_r_shim"),
+    ("A12n", "tìm git lỗi KHÔNG lùi về git của PATH (F6)", "lui_ve_git", "return _GIT[0] if _GIT else None", 'return _GIT[0] if _GIT else "git"', "g_git_loi"),
+    ("A12o", "Timer chỉ nhận phần hạn còn lại (F6)", "timer_nguyen_han", "max(0.0, s.han_that - time.monotonic()), s.p.kill", 's.ns["deadline_giay"], s.p.kill', "g_git_han"),
+    ("A12p", "Timer không trễ (F7 timer_late)", "timer_late", "max(0.0, s.han_that - time.monotonic()), s.p.kill", "1.0 + max(0.0, s.han_that - time.monotonic()), s.p.kill", "g_git_han"),
+    ("A12q", "tìm git trong phần hạn còn lại (F6)", "tim_khong_han", "timeout=max(timeout, 0.001)).stdout", "timeout=60).stdout", "g_git_cham"),
+    ("A12r", "lệnh git trừ thời gian tìm (F6)", "lenh_nguyen_han", "timeout=max(het - time.monotonic(), 0.001))", "timeout=timeout)", "g_git_cham"),
+    ("A12s", "tìm git với env đã lọc (F7 discovery_env)", "discovery_env", "text=True, env=_env(), timeout=max(", "text=True, timeout=max(", "g_git_env"),
+    ("A12m", "Timer deadline giết tiến trình giữ ống", "timer_rong", "time.monotonic()), s.p.kill)", "time.monotonic()), lambda: None)", "g_r_shim"),
     ("A12c", "lọc GIT_* thừa kế", "bo_loc_git", '    e = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}', "    e = dict(os.environ)", "g_r_d"),
     ("A12d", "reader chết không khởi động lại", "khoi_dong_lai", "        s.chet = True  #", '        s._mo()\n        raise SuKien("E_reader_chet: mo lai")  #', "g_r_e"),
     ("A12e", "reader chết là sự kiện CHUNG", "chet_cuc_bo", '            s._chet(f"dong dau sai dang {dau[:60]!r}")', '            raise SuKien("E_reader_chet: cuc bo")', "g_r_h"),
@@ -1634,6 +1720,7 @@ DBH = [
      "g_dong_tong_e2e"),
     ("H14", "child e2e chạy bản nhẹ (A16 Windows)", "bo_co_nhe", ', "DRTH_E2E_NHE": "1"}', "}", "g_dong_tong_e2e"),
     ("H15", "cờ nhẹ không làm CHA nhẹ đi", "co_lot_sang_cha", 'NHE = bool(os.environ.get("DRTH_E2E_NHE")) and bool(os.environ.get("DRTH_KHONG_E2E"))', "NHE = True", "g_dong_tong"),
+    ("H16", "_mo_ghi gọi guard trước chmod/ghi (F7)", "mo_ghi_no_guard", "    gac_luu(F, o)\n    _loose(F, o).chmod(0o644)", "    _loose(F, o).chmod(0o644)", "g_guard"),
     ("H2", "dòng tổng đòi N_git ≥ 1", "bo_n_git", " or ng[1] < 1 or mg[1] < 1:", " or mg[1] < 1:", "g_dong_tong"),
     ("H3", "dòng tổng đòi M_git ≥ 1", "bo_m_git", " or ng[1] < 1 or mg[1] < 1:", " or ng[1] < 1:", "g_dong_tong"),
     ("H4", "A9 assert ba tree khác nhau", "bo_assert_cay", '    if len({F["tA"], F["tH"], F["tB"]}) != 3:', "    if False:", "g_fixture"),

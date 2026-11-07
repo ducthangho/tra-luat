@@ -47,20 +47,25 @@ def _env():
 _GIT = []
 
 
-def _git_exe():
+def _git_exe(timeout=60.0):
     """Git THẬT trong `--exec-path`, không qua shim trên PATH: `cmd\\git.exe` của Windows sinh git con, nên kill shim KHÔNG giết
-    tiến trình đang giữ ống — reader chết giả và Timer deadline không gỡ được `cat-file` treo (đo A16 07-11). Không có thì `git`."""
+    tiến trình đang giữ ống — reader chết giả và Timer deadline không gỡ được `cat-file` treo (đo A16 07-11). Tìm lỗi, quá
+    `timeout` (phần hạn còn lại) hay không có tệp ⇒ None, KHÔNG lùi về `git` của PATH (F6, Codex lượt 3); chỉ cache thành công."""
     if not _GIT:
         try:
-            ep = subprocess.run(["git", "--exec-path"], capture_output=True, text=True, env=_env(), timeout=60).stdout.strip()
+            ep = subprocess.run(["git", "--exec-path"], capture_output=True, text=True, env=_env(), timeout=max(timeout, 0.001)).stdout.strip()
         except (OSError, subprocess.SubprocessError):
-            ep = ""
-        _GIT.append(next((c for c in (os.path.join(ep, "git.exe"), os.path.join(ep, "git")) if ep and os.path.isfile(c)), "git"))
-    return _GIT[0]
+            return None
+        _GIT.extend(c for c in (os.path.join(ep, "git.exe"), os.path.join(ep, "git")) if ep and os.path.isfile(c))
+    return _GIT[0] if _GIT else None
 
 
 def _git(goc, *a, timeout=60.0):
-    return subprocess.run([_git_exe(), "--no-replace-objects", "-C", str(goc), *a], capture_output=True, env=_env(), timeout=timeout)
+    het, exe = time.monotonic() + timeout, _git_exe(timeout)  # một hạn cho cả tìm git lẫn lệnh (F6)
+    if exe is None:
+        return subprocess.CompletedProcess([], 127, b"", b"khong tim duoc git that")
+    return subprocess.run([exe, "--no-replace-objects", "-C", str(goc), *a], capture_output=True, env=_env(),
+                          timeout=max(het - time.monotonic(), 0.001))
 
 
 def doc_ref(goc, nhanh, timeout=60.0):
@@ -83,17 +88,24 @@ class Doc:
         s.het_tong = s.chet = False
         s.dong_ho = seam.get("dong_ho", time.monotonic)
         s.han = s.dong_ho() + ns["deadline_giay"]
+        s.han_that = time.monotonic() + ns["deadline_giay"]  # MỘT hạn tuyệt đối thật: tìm git → cat-file → Timer (F6)
         s._mo()
 
     def _mo(s):
-        s.p = subprocess.Popen([_git_exe(), "--no-replace-objects", "-C", str(s.goc), "cat-file", "--batch"], stdin=subprocess.PIPE,
+        s.p, exe = None, _git_exe(s.han_that - time.monotonic())
+        if exe is None:  # không tìm được git thật: reader coi như chết, mọi lần đọc ⇒ E_reader_chet
+            s.chet = True
+            return
+        s.p = subprocess.Popen([exe, "--no-replace-objects", "-C", str(s.goc), "cat-file", "--batch"], stdin=subprocess.PIPE,
                                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, env=_env())
         s.ra = s.seam.get("ra", lambda f: f)(s.p.stdout)
-        s.hen = threading.Timer(s.ns["deadline_giay"], s.p.kill)  # tiến trình treo không giữ được caller quá hạn
+        s.hen = threading.Timer(max(0.0, s.han_that - time.monotonic()), s.p.kill)  # chỉ phần hạn CÒN LẠI (F6)
         s.hen.daemon = True
         s.hen.start()
 
     def dong(s):
+        if s.p is None:
+            return
         s.hen.cancel()
         try:
             s.p.stdin.close()  # EOF trước: cat-file thoát cả khi có tiến trình trung gian

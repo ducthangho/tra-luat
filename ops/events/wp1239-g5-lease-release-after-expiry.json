@@ -1,0 +1,18 @@
+{
+  "event": "P0_executor_lease_release_acknowledged_after_expiry",
+  "packet_issue": 1239,
+  "generation": 5,
+  "lease_id": "wp1239-r6-g5-agy",
+  "original_expiry_utc": "2026-11-06T21:32:48Z",
+  "observed_utc": "2026-11-07T09:16:52.175606+00:00",
+  "source_lease_sha256": "c80bf065841f950d0afe245bbfb7a77064ae067d37936eebde7f588327e8d4c6",
+  "active_holders_per_path": {
+    "ops/plans/PROXIMA-PLAYWRIGHT-v1.md": 0,
+    "docs/research/2026-11-05-proxima-playwright-p0.md": 0
+  },
+  "scan_scope": "all refs/heads in synchronized mirror per canonical ai-dang-giu; full global ref fence recorded separately",
+  "no_lease_extended": true,
+  "no_worker_restarted": true,
+  "history_preserved": true,
+  "evidence_authority": "https://github.com/ducthangho/tra-luat/issues/1239#issuecomment-6704865424"
+}

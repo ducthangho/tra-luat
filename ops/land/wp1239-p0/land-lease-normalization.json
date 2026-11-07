@@ -1,0 +1,9 @@
+{
+  "source_path": "/workspace/scratch/proxima-p0-20261105/g5-runtime/lease.yaml",
+  "source_sha256": "c80bf065841f950d0afe245bbfb7a77064ae067d37936eebde7f588327e8d4c6",
+  "normalized_sha256": "c3166d6aa57c6639c25f7d2b210992f8f4ed6e738cd90ac6de64e5a794ae5738",
+  "semantic_equality": true,
+  "only_expands_YAML_aliases": true,
+  "new_lease": false,
+  "new_authority": false
+}

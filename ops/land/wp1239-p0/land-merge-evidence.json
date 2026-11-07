@@ -1,0 +1,32 @@
+{
+  "merged_commit": "132d376cbbfea0692ff6db284753b33f437c637a",
+  "parents": [
+    "9607e3eba96b2ce091e34196cbb8ede31a521ff9",
+    "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa"
+  ],
+  "tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb",
+  "head_candidate": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "base_before_merge": "9607e3eba96b2ce091e34196cbb8ede31a521ff9",
+  "source_tree_equal_candidate": true,
+  "master_readback": "132d376cbbfea0692ff6db284753b33f437c637a",
+  "merged_at": "2026-11-07T09:12:34Z",
+  "full_ref_delta": [
+    {
+      "ref": "HEAD",
+      "old": "9607e3eba96b2ce091e34196cbb8ede31a521ff9",
+      "new": "132d376cbbfea0692ff6db284753b33f437c637a"
+    },
+    {
+      "ref": "refs/heads/master",
+      "old": "9607e3eba96b2ce091e34196cbb8ede31a521ff9",
+      "new": "132d376cbbfea0692ff6db284753b33f437c637a"
+    },
+    {
+      "ref": "refs/pull/1261/merge",
+      "old": "0eda0d2b3f28c723828b7e78692589176df57f35",
+      "new": null
+    }
+  ],
+  "status": "merged_post_merge_gates_pending",
+  "not_yet_landed": true
+}

@@ -1,0 +1,12 @@
+{
+  "authority_url": "https://github.com/ducthangho/tra-luat/issues/1239#issuecomment-6704865424",
+  "owner_source": "Duy\u1ec7t \u1ee7y quy\u1ec1n merge/land P0 theo b\u1ea3n n\u00e0y.",
+  "start_utc": "2026-11-07T09:07:37+00:00",
+  "expires_utc": "2026-11-07T13:07:37+00:00",
+  "authorized_head": "4c319cc4f71b2f9a5c69a4b1be75e1add5f8aeaa",
+  "authorized_tree": "539a02f355c4ade3cee7c99efa327a4a729e79bb",
+  "target_base": "9607e3eba96b2ce091e34196cbb8ede31a521ff9",
+  "merge_method": "merge",
+  "proposal_sha256": "50c89b907d4f7d7be8765134cb3224f55a42019df8e22cec995079f89132f2e7",
+  "status": "approved_preflight_pending_protection"
+}

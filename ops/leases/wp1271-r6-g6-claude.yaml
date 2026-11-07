@@ -1,0 +1,91 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1271
+packet_id: wp1271
+mission_issue: 1238
+revision: 6
+generation: 6
+lease_id: wp1271-r6-g6-claude
+role: executor
+provider: claude
+executor: claude
+model: opus
+effort: high
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1271-r6.md
+spec_ref: refs/heads/ops/wp1271-spec@cbed6d0658be8408ffca00631d54771b0c8f553b
+spec_sha256_required: b34acaa04a6a220260eb49e122112413b813402a4d5f0a0addef3e281885804e
+spec_hash: b34acaa04a6a220260eb49e122112413b813402a4d5f0a0addef3e281885804e
+prompt_path: ops/prompts/wp1271-r6-g6-claude.md
+prompt_sha256_required: 62d880449687c001c6f80647d808a77d6dd3154f97b818eb27f131a478bfaf39
+write_set:
+- .agents/skills/proxima-control/scripts/ProximaConfig.psm1
+- .agents/skills/proxima-control/config.example.json
+- .agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1
+write_set_hash: 04d57e780264d849b74493bb839b05547534c22110d4aff3343178a07699cb10
+change_policy_sha: null
+required_checks:
+- A1-A7 focused PS5.1 and PS7
+- Linux tl selftest N/N before primary push
+- Ruff F delta zero
+- independent Codex CLI exact SHA sensitive review
+- applicable Ubuntu CI and required branch checks
+land_obligations: []
+branch: agent/wp1271-g6-claude
+base_sha: c6afde62c846f1ef3d6a83c14459966849edf756
+start_from_sha: 43f5c92a0c329c37b37face4e3ae7cdea46f3b18
+reviewed_sha_required: c6afde62c846f1ef3d6a83c14459966849edf756
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6708576608
+recorded_by: openai_codex/codex_service dispatcher, delegated owner authority
+recorder_is_executor: false
+heartbeat_required_minutes: 360
+leased_at_utc: '2026-11-07T18:34:01.657887+00:00'
+heartbeat_at: '2026-11-07T18:34:01.657887+00:00'
+lease_until: '2026-11-07T22:34:01.657887+00:00'
+lease_expires_at_utc: '2026-11-07T22:34:01.657887+00:00'
+run_minutes: 90
+attempts_limit: 5
+review_rounds_limit: 3
+codex_review_calls_limit: 8
+same_failure_limit: 2
+requires_live: false
+uy_quyen_merge: false
+authority_note: Ownerfull delegation authorizesactualClaude narrowtestharnessrepair
+  r6; sourceproducerClaudeg4plusmechanicalg5 preserved. No mergePR/deploy authority
+  for Executor.
+effective_write_set:
+- .agents/skills/proxima-control/scripts/ProximaConfig.psm1
+- .agents/skills/proxima-control/config.example.json
+- .agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1
+thay_the_cho:
+- wp1271-r5-g5-claude
+packet_budget_carryover:
+  attempts_used: 4
+  attempts_limit: 5
+  codex_review_calls_used: 4
+  codex_review_calls_limit: 8
+  review_rounds_used: 1
+  review_rounds_limit: 3
+nang_tran:
+  ai_nang: ducthangho through full delegation comment6708576608 and latest session
+    full authorization, dispatcher records scoped implementation
+  can_cu: H1 measured3 files+576/-0; independent4 root classes require drive/volume
+    topology verification plus actual native regressions, reparse-safe cleanup and
+    durable negative evidence within inseparable reader/harness contract. No additional
+    product paths.850 is a bounded forecast ceiling, not an actual numstat claim;
+    measure before review.
+  tran_cu: previous Packet r3 <=3 exactfiles/650 additions, attempts5,calls8,rounds3
+    (ADR0053 default6files/450 additions)
+  tran_moi: Packet r4 <=3 exactfiles/850 additions, attempts5,calls8,rounds3 unchanged

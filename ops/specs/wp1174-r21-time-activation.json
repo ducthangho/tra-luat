@@ -1,0 +1,24 @@
+{
+  "mission": 1172,
+  "mission_revision": 26,
+  "packet": 1174,
+  "revision": 21,
+  "generation": 18,
+  "authority_url": "https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6728589869",
+  "effective_time_envelope": {
+    "schema_version": 1,
+    "T0": "2026-11-08T23:20:32+00:00",
+    "U0": 1915,
+    "cloud_cap_minutes": 2815,
+    "hard_deadline": "2026-11-09T14:20:32+00:00",
+    "remaining_minutes_at_T0": 900,
+    "mandatory_reserved_minutes": 695,
+    "contingency_minutes": 205,
+    "approval": "User directed publication and no repeated questions after concrete amendment request",
+    "amendment_sha256": "08a8076a0d6ded58c3433872238997933be7564cee5e1f6448a1519fd92320ba",
+    "E2_sha256": "aff74d2a7eb69f08d067be0b94f7f2d48f6cd9fccba579cd50b146b3ac872430",
+    "history_preserved": true
+  },
+  "immutable_spec_sha256": "0e5b03b860a778d9b59ae4290b00ed205c8d690cf7e083037ea8634d7336a33b",
+  "rule": "Only time fields superseded; original immutable metadata retained as provenance; all other E2 caps/gates unchanged"
+}

@@ -1160,15 +1160,26 @@ def _g_git_cham(m, t, ten):
     can(ten, _lanh(m, _Sp(cham=3.0), lambda: chay(m, F, ngan_sach={"deadline_giay": 0.5})), V(**dict.fromkeys(G_[1:], "k")))
     sp = _Sp(cham=0.3)
     _lanh(m, sp, lambda: m._git(F["k"], "for-each-ref", timeout=1.0))
-    if time.monotonic() - t0 > 2.5 or not sp.goi[-1][1] <= 0.8:
-        raise TinHieuChotCa(f"{ten}: tim git/lenh git vuot han: {time.monotonic() - t0:.2f} s, timeout lenh {sp.goi[-1][1]}")
+    sp2 = _Sp(cham=3.0)  # F8: `_git` lạnh, tìm git lâu hơn CHÍNH timeout của `_git` ⇒ bước tìm nhận đúng timeout ấy, trả 127
+    try:  # tìm git ngốn hết hạn thì lệnh còn ~0 s và NÉM: đó chính là triệu chứng, chốt dưới đọc timeout bước tìm để kết luận
+        r = _lanh(m, sp2, lambda: m._git(F["k"], "for-each-ref", timeout=0.3)).returncode
+    except subprocess.TimeoutExpired:
+        r = "TimeoutExpired"
+    if time.monotonic() - t0 > 2.5 or not sp.goi[-1][1] <= 0.8 or r != 127 or sp2.goi[0][1] > 0.3:
+        raise TinHieuChotCa(f"{ten}: tim git/lenh git vuot han: {time.monotonic() - t0:.2f} s, timeout {sp.goi[-1][1]} {sp2.goi[0][1]}")
 
 
 @cg("g_git_loi")  # F6: tìm git lỗi/rỗng ⇒ mọi luật khong_do_duoc, KHÔNG lùi về `git` (shim) của PATH, không cache lỗi
 def _g_git_loi(m, t, ten):
     F = dung(t)
     for loi in (OSError("c1a1b"), "rong"):
-        can(f"{ten}:{loi}", _lanh(m, _Sp(loi=loi), lambda: chay(m, F)), V(**dict.fromkeys(G_[1:], "k")))
+        sp = _Sp(loi=loi)
+
+        def loi_roi_phuc_hoi():  # F8: CÙNG cache qua lỗi → phục hồi; assert TRƯỚC khi `_lanh` dọn cache
+            can(f"{ten}:{loi}", chay(m, F), V(**dict.fromkeys(G_[1:], "k")))
+            sp.loi = None
+            can(f"{ten}:{loi}:phuc_hoi", chay(m, F), V())
+        _lanh(m, sp, loi_roi_phuc_hoi)
 
 
 @cg("g_git_env")  # F7: bước tìm git chạy với env ĐÃ LỌC — GIT_EXEC_PATH thừa kế không chọn được git giả
@@ -1518,7 +1529,11 @@ def _g_guard(m, t, ten):
     _phai_loi_do(f"{ten}:tran_phep_di", lambda: gac_walk(ten, G, 2, {"G1", "G3"}))
     _loose(G, OID).parent.mkdir(exist_ok=True)  # F7: object có CẢ loose lẫn alternate — _mo_ghi phải gọi guard trước chmod/ghi
     _loose(G, OID).write_bytes(zlib.compress(b"blob %d\0" % len(_raw(G["k"], OID)[1]) + _raw(G["k"], OID)[1]))
+    _loose(G, OID).chmod(0o444)  # F8: bit ghi S_IWRITE (0o200) là phần mode mọi nền đều có nghĩa (Windows: read-only)
+    truoc = (_loose(G, OID).read_bytes(), _loose(G, OID).stat().st_mode & 0o200)
     _phai_loi_do(f"{ten}:mo_ghi", lambda: ghi_de(G, OID, "blob"))
+    if (_loose(G, OID).read_bytes(), _loose(G, OID).stat().st_mode & 0o200) != truoc:
+        raise TinHieuChotCa(f"{ten}:mo_ghi: bytes/bit ghi doi TRUOC guard")
 
 
 # A20 (F3): MỘT ô cho mỗi (luật × sự kiện E mà luật ấy gặp được), mỗi ô một ca đích; mỗi ô một đột biến riêng (`DBG`).
@@ -1661,6 +1676,9 @@ DBG = [
     ("A12q", "tìm git trong phần hạn còn lại (F6)", "tim_khong_han", "timeout=max(timeout, 0.001)).stdout", "timeout=60).stdout", "g_git_cham"),
     ("A12r", "lệnh git trừ thời gian tìm (F6)", "lenh_nguyen_han", "timeout=max(het - time.monotonic(), 0.001))", "timeout=timeout)", "g_git_cham"),
     ("A12s", "tìm git với env đã lọc (F7 discovery_env)", "discovery_env", "text=True, env=_env(), timeout=max(", "text=True, timeout=max(", "g_git_env"),
+    ("A12t", "_git truyền timeout cho bước tìm git (F8)", "helper_discovery_no_timeout", "+ timeout, _git_exe(timeout)", "+ timeout, _git_exe()", "g_git_cham"),
+    ("A12u", "lỗi tìm git không bị cache (F8)", "cache_error", "        return None\n        _GIT.extend", "        _GIT.append(None)\n            return None\n        _GIT.extend", "g_git_loi"),
+    ("A12v", "kết quả tìm rỗng không bị cache (F8)", "cache_empty", "return _GIT[0] if _GIT else None", "return _GIT[0] if _GIT else _GIT.append(None)", "g_git_loi"),
     ("A12m", "Timer deadline giết tiến trình giữ ống", "timer_rong", "time.monotonic()), s.p.kill)", "time.monotonic()), lambda: None)", "g_r_shim"),
     ("A12c", "lọc GIT_* thừa kế", "bo_loc_git", '    e = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}', "    e = dict(os.environ)", "g_r_d"),
     ("A12d", "reader chết không khởi động lại", "khoi_dong_lai", "        s.chet = True  #", '        s._mo()\n        raise SuKien("E_reader_chet: mo lai")  #', "g_r_e"),
@@ -1723,6 +1741,7 @@ DBH = [
     ("H14", "child e2e chạy bản nhẹ (A16 Windows)", "bo_co_nhe", ', "DRTH_E2E_NHE": "1"}', "}", "g_dong_tong_e2e"),
     ("H15", "cờ nhẹ không làm CHA nhẹ đi", "co_lot_sang_cha", 'NHE = bool(os.environ.get("DRTH_E2E_NHE")) and bool(os.environ.get("DRTH_KHONG_E2E"))', "NHE = True", "g_dong_tong"),
     ("H16", "_mo_ghi gọi guard trước chmod/ghi (F7)", "mo_ghi_no_guard", "    gac_luu(F, o)\n    _loose(F, o).chmod(0o644)", "    _loose(F, o).chmod(0o644)", "g_guard"),
+    ("H17", "_mo_ghi gọi guard TRƯỚC chmod (F8)", "guard_after_chmod", "    gac_luu(F, o)\n    _loose(F, o).chmod(0o644)", "    _loose(F, o).chmod(0o644)\n    gac_luu(F, o)", "g_guard"),
     ("H2", "dòng tổng đòi N_git ≥ 1", "bo_n_git", " or ng[1] < 1 or mg[1] < 1:", " or mg[1] < 1:", "g_dong_tong"),
     ("H3", "dòng tổng đòi M_git ≥ 1", "bo_m_git", " or ng[1] < 1 or mg[1] < 1:", " or ng[1] < 1:", "g_dong_tong"),
     ("H4", "A9 assert ba tree khác nhau", "bo_assert_cay", '    if len({F["tA"], F["tH"], F["tB"]}) != 3:', "    if False:", "g_fixture"),

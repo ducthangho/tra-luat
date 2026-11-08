@@ -1,0 +1,7 @@
+{
+  "expected_rejection": true,
+  "reason": "MISSING_NESTED_ARTIFACT:endpoint-report:child\\endpoint-out-0.json",
+  "deleted_copy_relative": "evidence/candidate-ps51/pxctl-evid-4d589501a5c9/child/endpoint-out-0.json",
+  "original_sha256_unchanged": "46b53d267d77485ca50e793680bf2d0cc128938d25561e9648106bc6ba89a1ab",
+  "verifier_sha256": "2fb474d8ae29826ec28d72ace2bfb2a4f6bda5c5f4bd6a71e0336cd55bc54143"
+}

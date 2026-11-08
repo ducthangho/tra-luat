@@ -1,0 +1,3 @@
+528	0	.agents/skills/proxima-control/scripts/ProximaControl.psm1
+30	0	.agents/skills/proxima-control/scripts/Run-Px.ps1
+1095	0	.agents/skills/proxima-control/tests/ProximaControl.Tests.ps1

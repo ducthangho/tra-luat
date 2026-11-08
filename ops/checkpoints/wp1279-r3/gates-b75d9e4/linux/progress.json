@@ -1,0 +1,170 @@
+{
+  "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+  "tree": "fbd7b8407eaa6ce08eb475e74b07546abe09a0a7",
+  "base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "cwd": "/workspace/scratch/wp1279-g3-claude",
+  "runner": {
+    "host": "64fa810a0be4",
+    "os": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "python": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+    "python_version": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "python_sha256": "fa67443527ed9647f760d807e2a38f26340757123e643c4639cf273ed15d5ea7",
+    "git": "git version 2.52.0"
+  },
+  "operator_sha256": "ac4bee463060f7b7f439fe2728261589a117d1be6a673fe31fe85581a368879a",
+  "started_at": "2026-11-08T06:37:54.677088+00:00",
+  "commands": [
+    {
+      "label": "admission",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-B",
+        "/workspace/scratch/proxima-p1-s2-canonical/ops/lease_publish.py",
+        "kiem-thu-hoi-github",
+        "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+        "--canonical-base",
+        "c15603dcf537fa4beb753b263398d6e6b8c92019",
+        "--nhanh-mac-dinh",
+        "master",
+        "--root",
+        "/workspace/scratch/wp1279-g3-claude",
+        "--receipt",
+        "/workspace/scratch/proxima-p1-s2-20261108/linux-final-b75d9e4e61e5/admission.json"
+      ],
+      "cwd": "/workspace/scratch/wp1279-g3-claude",
+      "rc": 0,
+      "seconds": 0.1796697009995114,
+      "log_sha256": "24cf0a24811ce9537723025f6307a680959a81fa185ff06d4e9d50b337b07747",
+      "log_size": 139
+    },
+    {
+      "label": "diff-check",
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "c15603dcf537fa4beb753b263398d6e6b8c92019",
+        "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766"
+      ],
+      "cwd": "/workspace/scratch/wp1279-g3-claude",
+      "rc": 0,
+      "seconds": 0.0028061929915565997,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log_size": 0
+    },
+    {
+      "label": "numstat",
+      "command": [
+        "git",
+        "diff",
+        "--numstat",
+        "c15603dcf537fa4beb753b263398d6e6b8c92019",
+        "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766"
+      ],
+      "cwd": "/workspace/scratch/wp1279-g3-claude",
+      "rc": 0,
+      "seconds": 0.0035882719967048615,
+      "log_sha256": "ece1ae23c9fb9809153ffd5f7188173ccf4b3816bbacfeef518cd34ac7d2baf6",
+      "log_size": 189
+    },
+    {
+      "label": "ruff",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "--output-format",
+        "json",
+        "scripts/tl.py"
+      ],
+      "cwd": "/workspace/scratch/wp1279-g3-claude",
+      "rc": 1,
+      "seconds": 0.058626363024814054,
+      "log_sha256": "5a213887a54e75444af534b40218b4f6b0f6786a9171bbb213c99e282c89fdc0",
+      "log_size": 5035
+    },
+    {
+      "label": "worker-manifest",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-B",
+        "scripts/tl.py",
+        "release-manifest",
+        "--root",
+        "/workspace/scratch/wp1279-g3-claude",
+        "--out",
+        "/workspace/scratch/proxima-p1-s2-20261108/linux-final-b75d9e4e61e5/worker-manifest.json"
+      ],
+      "cwd": "/workspace/scratch/wp1279-g3-claude",
+      "rc": 0,
+      "seconds": 0.9818179860012606,
+      "log_sha256": "66718b6d622f749f2dc3a1bf896d19a7b81562fc0a3bdf7fd671acae522cf58a",
+      "log_size": 31007
+    },
+    {
+      "label": "worker-release-verify",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-B",
+        "scripts/tl.py",
+        "release-verify",
+        "/workspace/scratch/proxima-p1-s2-20261108/linux-final-b75d9e4e61e5/worker-manifest.json",
+        "--root",
+        "/workspace/scratch/wp1279-g3-claude",
+        "--strict"
+      ],
+      "cwd": "/workspace/scratch/wp1279-g3-claude",
+      "rc": 0,
+      "seconds": 1.0283466299879365,
+      "log_sha256": "0968bbd87b9c51b89131cdfd9433c26b4392a6c87ee138746fad5bb4a66873bc",
+      "log_size": 20803
+    },
+    {
+      "label": "full-selftest-lifecycle",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-B",
+        "/workspace/scratch/proxima-p1-s2-canonical/.claude/dev/gate_lifecycle.py",
+        "run",
+        "--kind",
+        "heavy",
+        "--name",
+        "wp1279-final-prepush",
+        "--repo",
+        "/workspace/scratch/wp1279-g3-claude",
+        "--evidence",
+        "/workspace/scratch/proxima-p1-s2-20261108/linux-final-b75d9e4e61e5/full-selftest-evidence.json",
+        "--output",
+        "/workspace/scratch/proxima-p1-s2-20261108/linux-final-b75d9e4e61e5/full-selftest.log",
+        "--expected-head",
+        "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+        "--base-sha",
+        "c15603dcf537fa4beb753b263398d6e6b8c92019",
+        "--selected-test",
+        "full-legacy-selftest",
+        "--require-clean",
+        "--wait-seconds",
+        "0",
+        "--timeout-seconds",
+        "5400",
+        "--quiet",
+        "--positive-regex",
+        "== tl selftest ([1-9][0-9]*)/\\1 ==",
+        "--",
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-B",
+        "scripts/tl.py",
+        "--selftest"
+      ],
+      "cwd": "/workspace/scratch/wp1279-g3-claude",
+      "rc": 0,
+      "seconds": 188.85185067600105,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log_size": 0
+    }
+  ]
+}

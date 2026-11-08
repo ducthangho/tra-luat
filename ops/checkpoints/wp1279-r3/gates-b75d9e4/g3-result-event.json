@@ -1,0 +1,128 @@
+{
+  "duration_api_ms": 647441,
+  "stop_reason": "end_turn",
+  "session_id": "d0fad79b-8f11-44ec-a925-f738a4b05573",
+  "total_cost_usd": 4.4505408,
+  "usage": {
+    "input_tokens": 54,
+    "cache_creation_input_tokens": 255379,
+    "cache_read_input_tokens": 4935664,
+    "output_tokens": 71008,
+    "output_tokens_details": {
+      "thinking_tokens": 50546
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 255379,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 5088,
+        "cache_read_input_tokens": 253277,
+        "cache_creation_input_tokens": 7250,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 7250
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 54,
+      "outputTokens": 71008,
+      "cacheReadInputTokens": 4935664,
+      "cacheCreationInputTokens": 255379,
+      "webSearchRequests": 0,
+      "costUSD": 4.4505408,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 50546,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 255379,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01Ka9FyThWr9tLxAMYQ29xbz",
+      "tool_input": {
+        "command": "date -u +%FT%TZ && git status --short && git log --oneline -3 && git rev-parse HEAD HEAD^{tree} && git diff --numstat c15603dcf537fa4beb753b263398d6e6b8c92019 HEAD | awk '{a+=$1;d+=$2;print} END{print \"TOTAL\",a,d}'; ls /workspace/scratch/wp1279-spec-publish/ops/specs/ /workspace/scratch/wp1279-spec-publish/ops/reviews/wp1279-r2-review1/",
+        "description": "Check repo state and diff size vs baseline"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 50,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've written the changes to the three assigned files. I couldn't test anything: Bash is denied here, so I ran no PowerShell, git, ruff, selftest, hashing or numstat. Every result below comes from reading the code, not from running it.\n\n## Changed files (the 3 assigned paths; nothing staged or committed)\n| File | Lines (from line numbers) | Change |\n|---|---|---|\n| `.agents/skills/proxima-control/scripts/ProximaControl.psm1` | 528 (was 527) | F01 only: the endpoint device-name pattern plus one comment line |\n| `.agents/skills/proxima-control/scripts/Run-Px.ps1` | 30 | unchanged |\n| `.agents/skills/proxima-control/tests/ProximaControl.Tests.ps1` | 1095 (was 1027) | F01 subcases and F02 evidence retention |\n\n- **Size:** about 1653 additions vs B (cap 1800, about 147 lines left). This is an estimate, not a numstat.\n- **S1:** S1 files were not edited; their hash was not measured.\n- **ASCII:** a search for any non-ASCII byte in `.agents/skills/proxima-control/` now finds 0 matches.\n\n## F01 \u2014 endpoint path check depended on source encoding\n- **Cause:** the only non-ASCII bytes in the S2 files were the literal superscripts in the EndpointBody pattern (old line 356).\n- **Fix:** the pattern now builds them from `[char]0xB9 + [char]0xB2 + [char]0xB3`. The resulting text is character-for-character the same as S1's `$script:ReDevice`. Nothing else in the product changed; no locale, code page, culture or BOM change.\n- **New subcases inside X4-02**, with every value built from code points:\n  - A real deployed endpoint under `$S\\rv\\COM<U+00C2>\\LPT<U+00C2>` (copies of the module under test and S1) must handshake through the real serialized endpoint in every child runtime. Failure token: `ENDPOINT_VALID_PATH_REJECTED[<edition> \u2026 parent_codepage= child_codepage=]`.\n  - Bases `COM<U+00B9>` and `LPT<U+00B2>` must be rejected with `RequestInvalid` and no import. Failure token: `ENDPOINT_ACCEPTED_INVALID[\u2026 reserved-*]`.\n  - S1's own path check must agree with all three fixtures; if not, the case is a setup error.\n- **Diagnostics added:** `default_codepage` in the parent report and in both child reports; `endpoint_body_nonascii` (the body text as this host decoded it). Both are visible in the retained `endpoint-in.xml`.\n- **Expected results (not run):**\n  - Old H2 on PS5.1 / code page 1252: the valid-path assertion fails in both children, because the body text comes from the parent's decoding.\n  - H3: passes.\n  - Old H2 on PS7: the valid-path assertion passes, which is correct and is not a kill.\n- **\u26a0 Something you might not expect:** I added a byte-level check `SOURCE_NOT_ASCII[file]` on the module, wrapper and S1. It guards the whole class, but it means **old H2 on PS7 also turns X4-02 red, through this static check only.** Do not count that as a behavioural kill.\n\n## F02 \u2014 nested child evidence was deleted before review\n- **Where evidence lives:** `$Evid` = `<EvidenceRoot or ScratchRoot>\\pxctl-evid-<run>`. It is now created on every run (before, only with `-Counterexamples`). It sits outside `$S` and outside the measured tree.\n- **Children run in place:** child scripts, `endpoint-in.xml`, `endpoint-out-N.json`, `wa-*.xml`, `wo-*.json` and the conflict pre-import module are written to `$Evid` and executed from there. The recorded commands are the real durable paths; nothing is copied after execution.\n- **Captured output:** each child's full output is written to `c<idx>.output.txt`, whose hash equals `output_sha256`. The capture boundary is stated in the report: this is decoded text (`2>&1 | Out-String`), not the raw child bytes.\n- **Report schema `px.evidence.v1`:**\n  - `evidence.artifacts[]` holds `{role, child, path, rel, present, bytes, sha256}`.\n  - Each `children[]` entry gains `index`, `codepage` and a list of artifact `rel` paths.\n  - Each CX record gains `source_dir`, `nested_evidence_root` and `child_index`.\n- **CX children (the trap you flagged):** each CX child now gets `-EvidenceRoot \"$Evid\\CXnn.nested\"`. That is a sibling of its measured source copy `$Evid\\CXnn` and lies outside the parent's `$S`. The measured-tree check was not relaxed.\n- **Checked again after cleanup:** `Test-Evidence` runs after `$S` is removed. It covers the parent's own artifacts and each CX child's nested set, read from its retained report. Any of these makes the run end with rc 2:\n  - `EVIDENCE_MISSING_OR_CHANGED[role path]`\n  - `EVIDENCE_IN_DELETED_OR_MEASURED_TREE[...]`\n  - `EVIDENCE_NESTED_UNRESOLVED[CXnn]`\n  - `EVIDENCE_ROLE_MISSING[...]` (checked when rc is 0)\n- **CX credit:** a CX is now refused credit (`NESTED_EVIDENCE_NOT_RETAINED[...]`) unless its nested root is in the right place, its own post-cleanup check is `ok`, and every required role is present, with one endpoint report per runtime.\n- **Your copy-and-delete negative test:** deleting one artifact should produce `EVIDENCE_MISSING_OR_CHANGED`. Paths in a copy resolve through `rel` against `evidence.dir`. For nested sets, take `nested.dir` relative to the parent's `evidence.dir`.\n\n## What stayed the same\n- The 25 X IDs, CX00 and CX01\u2013CX10 definitions and anchors are unchanged; my edits touch no anchor text.\n- Fakes, primitive assertions, cleanup no-follow/sentinel checks, the scope-shadowing guard with its positive control, the X3-02 token scan and the X6-02 non-vacuity check are unchanged.\n- I checked by reading that no new inner variable reuses a top-level name. No new parameters.\n\n## Limits\n- Fixture trees in `$S` (`rbase`, `rbad`, `rdep`, `rv`) are still deleted. Their contents are only referenced by path and hash inside the envelopes.\n- `default_codepage` on PS7 reports 65001, not the system ANSI code page, so the operator must still record the ACP separately.\n- A path import of a second same-named module in the endpoint child is expected to load a fresh instance. If PowerShell reuses the first one instead, the assertion is still meaningful, because path validation runs before import.\n\n## Tests\n- **Run by me:** none.\n- **Not run:** native PS5.1/PS7 (normal, tr-TR focused, CX, and the old-H2 vs H3 check), Linux selftest, ruff, manifest, git numstat/diff-check, hashes.\n\nThis is not an approval. A fresh, independent Codex review of everything from B to H3 is still required.",
+  "ttft_ms": 1967,
+  "type": "result",
+  "duration_ms": 649119,
+  "uuid": "96cf04ef-460b-4c6b-9f69-58ac5e65bd50",
+  "ttft_stream_ms": 1538,
+  "time_to_request_ms": 252,
+  "first_content_frame_ms": 1538,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 54,
+      "outputTokens": 71008,
+      "cacheReadInputTokens": 4935664,
+      "cacheCreationInputTokens": 255379,
+      "webSearchRequests": 0,
+      "costUSD": 4.4505408,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 50546,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 255379,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+I've written the changes to the three assigned files. I couldn't test anything: Bash is denied here, so I ran no PowerShell, git, ruff, selftest, hashing or numstat. Every result below comes from reading the code, not from running it.
+
+## Changed files (the 3 assigned paths; nothing staged or committed)
+| File | Lines (from line numbers) | Change |
+|---|---|---|
+| `.agents/skills/proxima-control/scripts/ProximaControl.psm1` | 528 (was 527) | F01 only: the endpoint device-name pattern plus one comment line |
+| `.agents/skills/proxima-control/scripts/Run-Px.ps1` | 30 | unchanged |
+| `.agents/skills/proxima-control/tests/ProximaControl.Tests.ps1` | 1095 (was 1027) | F01 subcases and F02 evidence retention |
+
+- **Size:** about 1653 additions vs B (cap 1800, about 147 lines left). This is an estimate, not a numstat.
+- **S1:** S1 files were not edited; their hash was not measured.
+- **ASCII:** a search for any non-ASCII byte in `.agents/skills/proxima-control/` now finds 0 matches.
+
+## F01 — endpoint path check depended on source encoding
+- **Cause:** the only non-ASCII bytes in the S2 files were the literal superscripts in the EndpointBody pattern (old line 356).
+- **Fix:** the pattern now builds them from `[char]0xB9 + [char]0xB2 + [char]0xB3`. The resulting text is character-for-character the same as S1's `$script:ReDevice`. Nothing else in the product changed; no locale, code page, culture or BOM change.
+- **New subcases inside X4-02**, with every value built from code points:
+  - A real deployed endpoint under `$S\rv\COM<U+00C2>\LPT<U+00C2>` (copies of the module under test and S1) must handshake through the real serialized endpoint in every child runtime. Failure token: `ENDPOINT_VALID_PATH_REJECTED[<edition> … parent_codepage= child_codepage=]`.
+  - Bases `COM<U+00B9>` and `LPT<U+00B2>` must be rejected with `RequestInvalid` and no import. Failure token: `ENDPOINT_ACCEPTED_INVALID[… reserved-*]`.
+  - S1's own path check must agree with all three fixtures; if not, the case is a setup error.
+- **Diagnostics added:** `default_codepage` in the parent report and in both child reports; `endpoint_body_nonascii` (the body text as this host decoded it). Both are visible in the retained `endpoint-in.xml`.
+- **Expected results (not run):**
+  - Old H2 on PS5.1 / code page 1252: the valid-path assertion fails in both children, because the body text comes from the parent's decoding.
+  - H3: passes.
+  - Old H2 on PS7: the valid-path assertion passes, which is correct and is not a kill.
+- **⚠ Something you might not expect:** I added a byte-level check `SOURCE_NOT_ASCII[file]` on the module, wrapper and S1. It guards the whole class, but it means **old H2 on PS7 also turns X4-02 red, through this static check only.** Do not count that as a behavioural kill.
+
+## F02 — nested child evidence was deleted before review
+- **Where evidence lives:** `$Evid` = `<EvidenceRoot or ScratchRoot>\pxctl-evid-<run>`. It is now created on every run (before, only with `-Counterexamples`). It sits outside `$S` and outside the measured tree.
+- **Children run in place:** child scripts, `endpoint-in.xml`, `endpoint-out-N.json`, `wa-*.xml`, `wo-*.json` and the conflict pre-import module are written to `$Evid` and executed from there. The recorded commands are the real durable paths; nothing is copied after execution.
+- **Captured output:** each child's full output is written to `c<idx>.output.txt`, whose hash equals `output_sha256`. The capture boundary is stated in the report: this is decoded text (`2>&1 | Out-String`), not the raw child bytes.
+- **Report schema `px.evidence.v1`:**
+  - `evidence.artifacts[]` holds `{role, child, path, rel, present, bytes, sha256}`.
+  - Each `children[]` entry gains `index`, `codepage` and a list of artifact `rel` paths.
+  - Each CX record gains `source_dir`, `nested_evidence_root` and `child_index`.
+- **CX children (the trap you flagged):** each CX child now gets `-EvidenceRoot "$Evid\CXnn.nested"`. That is a sibling of its measured source copy `$Evid\CXnn` and lies outside the parent's `$S`. The measured-tree check was not relaxed.
+- **Checked again after cleanup:** `Test-Evidence` runs after `$S` is removed. It covers the parent's own artifacts and each CX child's nested set, read from its retained report. Any of these makes the run end with rc 2:
+  - `EVIDENCE_MISSING_OR_CHANGED[role path]`
+  - `EVIDENCE_IN_DELETED_OR_MEASURED_TREE[...]`
+  - `EVIDENCE_NESTED_UNRESOLVED[CXnn]`
+  - `EVIDENCE_ROLE_MISSING[...]` (checked when rc is 0)
+- **CX credit:** a CX is now refused credit (`NESTED_EVIDENCE_NOT_RETAINED[...]`) unless its nested root is in the right place, its own post-cleanup check is `ok`, and every required role is present, with one endpoint report per runtime.
+- **Your copy-and-delete negative test:** deleting one artifact should produce `EVIDENCE_MISSING_OR_CHANGED`. Paths in a copy resolve through `rel` against `evidence.dir`. For nested sets, take `nested.dir` relative to the parent's `evidence.dir`.
+
+## What stayed the same
+- The 25 X IDs, CX00 and CX01–CX10 definitions and anchors are unchanged; my edits touch no anchor text.
+- Fakes, primitive assertions, cleanup no-follow/sentinel checks, the scope-shadowing guard with its positive control, the X3-02 token scan and the X6-02 non-vacuity check are unchanged.
+- I checked by reading that no new inner variable reuses a top-level name. No new parameters.
+
+## Limits
+- Fixture trees in `$S` (`rbase`, `rbad`, `rdep`, `rv`) are still deleted. Their contents are only referenced by path and hash inside the envelopes.
+- `default_codepage` on PS7 reports 65001, not the system ANSI code page, so the operator must still record the ACP separately.
+- A path import of a second same-named module in the endpoint child is expected to load a fresh instance. If PowerShell reuses the first one instead, the assertion is still meaningful, because path validation runs before import.
+
+## Tests
+- **Run by me:** none.
+- **Not run:** native PS5.1/PS7 (normal, tr-TR focused, CX, and the old-H2 vs H3 check), Linux selftest, ruff, manifest, git numstat/diff-check, hashes.
+
+This is not an approval. A fresh, independent Codex review of everything from B to H3 is still required.

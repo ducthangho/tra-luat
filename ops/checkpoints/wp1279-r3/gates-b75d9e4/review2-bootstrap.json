@@ -1,0 +1,13 @@
+{
+  "recorded_at": "2026-11-08T07:06:15.890732+00:00",
+  "clone": "/workspace/scratch/wp1279-code-review-b75d9e4",
+  "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+  "tree": "fbd7b8407eaa6ce08eb475e74b07546abe09a0a7",
+  "canonical_K1": "passed unmodified pinnedB _spec_merge",
+  "spec_sha256": "6cb7a575192aebcb79d5825daf9d867cc790dac2528e954fcd6ea13c903b2fac",
+  "ref_mirror": "/workspace/scratch/proxima-p1-s2-20261108/review2-ref-mirror.git",
+  "ref_mirror_heads_sha256": "ef8d3b432f5e8105eb6c5fc2e2812b53d4bd11101c9763c1b1bbf6a413f3720a",
+  "ref_mirror_head_count": 741,
+  "model_invoked": false,
+  "control_preflight_first_failed": "canonical import missing launcher searchpath; before model; fixed only process sys.path"
+}

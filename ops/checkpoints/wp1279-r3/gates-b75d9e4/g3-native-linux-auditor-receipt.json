@@ -1,0 +1,554 @@
+{
+  "schema": "auxiliary-native-linux-log-audit/1",
+  "formal_code_approval": false,
+  "audited_at_utc": "2026-11-08T07:07:16.418744+00:00",
+  "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+  "tree": "fbd7b8407eaa6ce08eb475e74b07546abe09a0a7",
+  "base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "scope": "Read-only source/log audit of exact H3; no tests rerun or current worker files read; immutable Git blobs used for source reconstruction.",
+  "material_issues": [],
+  "linux": {
+    "receipt_sha256": "d26fce9ab91494d24ba43a652e210d94fbd880e9fb19e0cbc3ca660deb17d20f",
+    "evidence_sha256": "372e31536aa0124edc5b1657c9c8119cf3fe4da70dcbbb31d508fb2d6f6c7471",
+    "selftest_output_sha256": "d35d4186fa9f0b0eb2d4b61dadea76c6dc82ce61389f32dec9b0918d8d54dd38",
+    "selftest_marker": "1777/1777",
+    "child_rc": 0,
+    "before_after_clean_equal": true,
+    "runner_catalog_runtime_command_hashes_verified": true,
+    "ruff_existing_F821": 12,
+    "ruff_rc": 1,
+    "ruff_delta": 0,
+    "release_strict": "184/184 rc0",
+    "admission": "exact H/B; canonical B checker blob matched; rc0",
+    "command_logs": [
+      {
+        "label": "admission",
+        "rc": 0,
+        "sha256": "24cf0a24811ce9537723025f6307a680959a81fa185ff06d4e9d50b337b07747",
+        "bytes": 139
+      },
+      {
+        "label": "diff-check",
+        "rc": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "label": "numstat",
+        "rc": 0,
+        "sha256": "ece1ae23c9fb9809153ffd5f7188173ccf4b3816bbacfeef518cd34ac7d2baf6",
+        "bytes": 189
+      },
+      {
+        "label": "ruff",
+        "rc": 1,
+        "sha256": "5a213887a54e75444af534b40218b4f6b0f6786a9171bbb213c99e282c89fdc0",
+        "bytes": 5035
+      },
+      {
+        "label": "worker-manifest",
+        "rc": 0,
+        "sha256": "66718b6d622f749f2dc3a1bf896d19a7b81562fc0a3bdf7fd671acae522cf58a",
+        "bytes": 31007
+      },
+      {
+        "label": "worker-release-verify",
+        "rc": 0,
+        "sha256": "0968bbd87b9c51b89131cdfd9433c26b4392a6c87ee138746fad5bb4a66873bc",
+        "bytes": 20803
+      },
+      {
+        "label": "full-selftest-lifecycle",
+        "rc": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    ]
+  },
+  "native": {
+    "archive_path": "/workspace/scratch/proxima-p1-s2-20261108/windows-b75d9e4e61e5-g3-evidence.zip",
+    "archive_sha256": "bf06d8aafce34287d5c8b443a6692bbb036d70086234012798a901092e8bef92",
+    "archive_bytes": 1576954,
+    "source_files_verified": 1031,
+    "xml_files_verified": 168,
+    "source_manifest_sha256": "42530420e9021f9e55380684c2ed3b005aa69a772d38a2dc91cb32784c73b0a0",
+    "measurement_sha256": "819a296e7f529a6e733592ff4d4cf7477e885685e89815df73bb052a9e88fc38",
+    "command_receipts_sha256": "f7110892e293e50c1366bb22c13af9253713e92275a3dc40459a9f04e321b706",
+    "all_command_log_hashes_verified": true,
+    "phases": [
+      {
+        "phase": "baseline-ps51",
+        "rc": 1,
+        "passed": 0,
+        "total": 25,
+        "failed_ids": [
+          "X1-01",
+          "X1-02",
+          "X1-03",
+          "X2-01",
+          "X2-02",
+          "X2-03",
+          "X2-04",
+          "X2-05",
+          "X2-06",
+          "X2-07",
+          "X3-01",
+          "X3-02",
+          "X4-01",
+          "X4-02",
+          "X4-03",
+          "X5-01",
+          "X5-02",
+          "X5-03",
+          "X5-04",
+          "X5-05",
+          "X5-06",
+          "X5-07",
+          "X5-08",
+          "X6-01",
+          "X6-02"
+        ],
+        "culture": "en-US",
+        "runtime": "5.1.26100.9711",
+        "report_sha256": "9bb86f5714b3ca944596e4213d6784a299ebf74e4ebb8a341187f19f6c2598e9"
+      },
+      {
+        "phase": "candidate-ps51",
+        "rc": 0,
+        "passed": 25,
+        "total": 25,
+        "failed_ids": [],
+        "culture": "en-US",
+        "runtime": "5.1.26100.9711",
+        "report_sha256": "884df8c0b1f310bcbf6fd91f2eb7b64f744f84eecc72758bd2f0ed1e5b1cf333"
+      },
+      {
+        "phase": "baseline-ps7",
+        "rc": 1,
+        "passed": 0,
+        "total": 25,
+        "failed_ids": [
+          "X1-01",
+          "X1-02",
+          "X1-03",
+          "X2-01",
+          "X2-02",
+          "X2-03",
+          "X2-04",
+          "X2-05",
+          "X2-06",
+          "X2-07",
+          "X3-01",
+          "X3-02",
+          "X4-01",
+          "X4-02",
+          "X4-03",
+          "X5-01",
+          "X5-02",
+          "X5-03",
+          "X5-04",
+          "X5-05",
+          "X5-06",
+          "X5-07",
+          "X5-08",
+          "X6-01",
+          "X6-02"
+        ],
+        "culture": "en-US",
+        "runtime": "7.6.9",
+        "report_sha256": "a3d46d34ef003983a03c08de65e16b6839476d8b1c4759d3a245b75d325ff9e7"
+      },
+      {
+        "phase": "candidate-ps7",
+        "rc": 0,
+        "passed": 25,
+        "total": 25,
+        "failed_ids": [],
+        "culture": "en-US",
+        "runtime": "7.6.9",
+        "report_sha256": "ebae8abe84e4a19948721aa79e40705ded4a7e37217dafbdde62e03eed304c46"
+      },
+      {
+        "phase": "old-h2-ps51",
+        "rc": 1,
+        "passed": 24,
+        "total": 25,
+        "failed_ids": [
+          "X4-02"
+        ],
+        "culture": "en-US",
+        "runtime": "5.1.26100.9711",
+        "report_sha256": "f6f83439c65a2fea4f6b07ce9d0c40569c956759d04170ab676300bad16b406f"
+      },
+      {
+        "phase": "old-h2-ps7",
+        "rc": 1,
+        "passed": 24,
+        "total": 25,
+        "failed_ids": [
+          "X4-02"
+        ],
+        "culture": "en-US",
+        "runtime": "7.6.9",
+        "report_sha256": "510547d353f05e89dc54d9468ba2176d72c42c4fb418c5a621d70524bbf96d74"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "rc": 0,
+        "passed": 36,
+        "total": 36,
+        "failed_ids": [],
+        "culture": "tr-TR",
+        "runtime": "5.1.26100.9711",
+        "report_sha256": "03d654e1ac1667a30b6fa985965861fa3c55668366ee3bd3f5a7b3b2619cb07b"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "rc": 0,
+        "passed": 36,
+        "total": 36,
+        "failed_ids": [],
+        "culture": "tr-TR",
+        "runtime": "7.6.9",
+        "report_sha256": "5ab31b5d33c19300767863c310a3ff5c21114e55cfdead66033d54acf2033999"
+      }
+    ],
+    "counterexample_children_verified": 22,
+    "counterexamples": [
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX00",
+        "rc": 0,
+        "source_reconstructed": true,
+        "named_required": [],
+        "report_sha256": "4da4cc8a1baf0299ea38a875faf655592d7fea9da4e264757b571b539cc90a0a",
+        "output_sha256": "38c2db3851233a3f66861e7fb50b24641e1c07a80877c3d6075d1ae13bfe3c9e",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX01",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X2-01:WHATIF_SIDE_EFFECT[use WhatIf+Force]",
+          "X2-01:WHATIF_SIDE_EFFECT[connect WhatIf+Force]"
+        ],
+        "report_sha256": "14ee6071c9c54f02b11804a5027ca5cf4cc98c4d0686ae5885ac3c4de74ef5ac",
+        "output_sha256": "ac2bdd8b5cac6bfecf0b7ed3889198d0dac0e3917b7ddbb2e10d6af037006a57",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX02",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X2-03:WRAPPER_WHATIF_LOST[wrapper status]"
+        ],
+        "report_sha256": "69381ce578fe1b8c49a5e42f02f8f17c5efa44b6d5990ba60fb18c157dc3d110",
+        "output_sha256": "1ec9f5a3eee8966c8ef4b8aceda867d0920fc7221cdf9b9ae45950f711426aa6",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX03",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X2-04:ENDPOINT_WHATIF_LOST["
+        ],
+        "report_sha256": "c90c139518756ca14fc74e4b363f2ce17596e254bcdf14e65f16520301aec47d",
+        "output_sha256": "afb40215c921e0c434be73c9c270123d45bc8aae691c8096533b82dc9e472680",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX04",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X3-01:SELECTION_LEAK["
+        ],
+        "report_sha256": "d16e86915301491b64f83d4cb7f4fec920234151988eb75fbfb92787bafdc6ab",
+        "output_sha256": "6d1a37fe4037ce7acd9d49493ff4c67219197947745adda1fa1326fb5a941080",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX05",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X4-02:HASH_BEFORE_IMPORT["
+        ],
+        "report_sha256": "3162c1786ae361c0aa3a00373e9c45ee14a8cf38cb011c2190cf54607a650c0d",
+        "output_sha256": "f6e3e4730f69016b88f0404bfaecccf8fa538716c2b98b50343fa6973dd00556",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX06",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-01:INFERENCE_RETRIED[wire 500]"
+        ],
+        "report_sha256": "02023d53fdd325027558565de486235700e9b3367d903653d45acc306e4d8064",
+        "output_sha256": "0489fa7cce909e197fc2f75700b5402af0e2830d8eedee2f828b792128cc1ef1",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX07",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-02:MODEL_MATCH_NOT_ORDINAL[case alias]"
+        ],
+        "report_sha256": "73f71c2d793fb76ea3a570ceda3a92154f9c874f865de0588d1506da654d4c7d",
+        "output_sha256": "d584ec92bc6324b17eead51910706a843d069dfdafdd105f7c59d017bed91880",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX08",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-03:PENDING_GUARD_BYPASS[malformed]"
+        ],
+        "report_sha256": "05d21549ed93e19fc9ef716e49f7dacb799809ab06bee0c931606b42e8598bbd",
+        "output_sha256": "db44e908965e17509cff39043b0816e40cb69442da32bcd90bef785f0567cf52",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX09",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-07:SERVICE_BINDING_BYPASS[nssm wrapper start]"
+        ],
+        "report_sha256": "a41689ef89aa4eb4e9db123df39152ae4cc403c0444953222a1e61b30977be18",
+        "output_sha256": "abdabf3b9cb8b6237f375ba0fe7c9e2ac00c7f6e70f2f11607ae979afde75e03",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX10",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-08:UNVERIFIED_RUNTIME_USED[unreadable status]"
+        ],
+        "report_sha256": "33af6deaa4e79cd01b31872d8a16d0115b5a9823ab777ffb3bc8b96b64cef7f4",
+        "output_sha256": "1a56f160ef20d26d7e07a242768c8dc09448e9d0263dc3b5319e788c494fd535",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX00",
+        "rc": 0,
+        "source_reconstructed": true,
+        "named_required": [],
+        "report_sha256": "ec91af242e1c522493198b72528f317d506c2d63a4d921bae82dff70f272a840",
+        "output_sha256": "2b5d4b02815c1155f8202021886e1e24f42f24f32a7fea52d0aef80123d6cc0e",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX01",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X2-01:WHATIF_SIDE_EFFECT[use WhatIf+Force]",
+          "X2-01:WHATIF_SIDE_EFFECT[connect WhatIf+Force]"
+        ],
+        "report_sha256": "b2b5e4a3f9352ee109657b7326d4079c9d8c51fbee9c769020893560076bc542",
+        "output_sha256": "ac5385c831b7d5b681b07d52f6c83cd26270e296e7aac6a85ea15a4640ff79f1",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX02",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X2-03:WRAPPER_WHATIF_LOST[wrapper status]"
+        ],
+        "report_sha256": "9274a20e8cdab80f76f668307292605132a03d82cf04a66d3a3d741749984678",
+        "output_sha256": "2291ae14314af0262626b591203bd7a65eb9e2753cd51a610bd768a475b953d3",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX03",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X2-04:ENDPOINT_WHATIF_LOST["
+        ],
+        "report_sha256": "49b6848b9654d6db16af0cbab3faaf7a8064b282baf12d61663b377fc6d5b82e",
+        "output_sha256": "53add131db4c7309eca8715fea0a11922835bc839a4b7ae98d141c234e635d4e",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX04",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X3-01:SELECTION_LEAK["
+        ],
+        "report_sha256": "8cd41c979f7761cc8815cdd59a2f89ddcb78b13e27aac101f2653c8636a36f23",
+        "output_sha256": "dd7729712fa249fab9fec8c4d7c75736172155615eda21257bcc0f1f71d8851a",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX05",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X4-02:HASH_BEFORE_IMPORT["
+        ],
+        "report_sha256": "69d0a39ca1614180eea60fecf3d319fed188da51292c76dee23f0926e1e21013",
+        "output_sha256": "196853a2060759ae6c83011d89a60cddaf07fc7091331932573de66dff1f40fa",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX06",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-01:INFERENCE_RETRIED[wire 500]"
+        ],
+        "report_sha256": "7bb5cc73ff16b7a17ea9c8ca65b4b9919241ec3c345afaac47ed5b66ed5fb313",
+        "output_sha256": "ac412d7898b589b7bbd9b7247519d30b0966aaf973f3abfe929eb78a040c1228",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX07",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-02:MODEL_MATCH_NOT_ORDINAL[case alias]"
+        ],
+        "report_sha256": "5ee23391c75afc0b8b74dc9d46d05e59c7f5415b92d15d274493ad7ab4734221",
+        "output_sha256": "a872e474ebb58ba3514798c678323de76e1b9894c6a77301e837fde19512ef28",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX08",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-03:PENDING_GUARD_BYPASS[malformed]"
+        ],
+        "report_sha256": "30a9fb3b5d4d021297eeeeba119a1fe067dfe717ab75fad080023b9e9b50ed56",
+        "output_sha256": "7bce50c9736c1171aa4e92127a46f5f49b45270f8715d935b947bb3c8a3f1b3f",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX09",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-07:SERVICE_BINDING_BYPASS[nssm wrapper start]"
+        ],
+        "report_sha256": "68afd38531c93ac0fb14d4a7b46f372853dfd4a17ccf7c93303eaebda4d75ca6",
+        "output_sha256": "5a4208624e335f2aa344464d01bd300ff7eb63e4858863819e21f2add4acbe94",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX10",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-08:UNVERIFIED_RUNTIME_USED[unreadable status]"
+        ],
+        "report_sha256": "62e7b3db25a3ad6f88d85e00b4b55f3331da38a4b536e5a08f1dbe9ad68d21f0",
+        "output_sha256": "dff14519a4112a356bc296506363a897e4606b6de9102127f12934a36f15a3df",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      }
+    ],
+    "nested_sets_independently_verified": 28,
+    "nested_artifact_entries_verified": 922,
+    "nested_checks": "Read helper source and called its read-only verification over all 28 sets, actual CLIXML typed Booleans, body, early no-import WhatIf rows, valid handshake hashes, raw report/runtime/codepage and durable role/index/path/hash/size/command links. Reconstructed each CX module/wrapper/config source from immutable H3 blobs and declared single replacement; checked output rc markers and named required failures.",
+    "cleanup": "Measured source byte maps equal before/after; Git statuses clean; candidate parent fixture trees removed; durable nested evidence outside cleanup paths retained; keep sentinels intact, wires stopped, lock released empty.",
+    "lock_release_sha256": "7d9e9f67f31ea6fe7dc23b63d19c43fcab1975befc50ddc409f66462ba0c6c96"
+  },
+  "F01": {
+    "old_H2_PS51": "24/25 rc1, X4-02: actual valid COM-U00C2/LPT-U00C2 handshake rejection under parent ACP1252 for both endpoint runtimes, plus static SOURCE_NOT_ASCII diagnostic",
+    "old_H2_PS7": "24/25 rc1, static SOURCE_NOT_ASCII only; raw valid-path handshakes succeeded, NOT a behavioral kill",
+    "H3": "Both normal 25/25 en-US and focused 36/36 tr-TR rc0, endpoint body non-ASCII list empty, actual retained endpoint positive rows verified."
+  },
+  "F02": {
+    "negative": {
+      "expected_rejection": true,
+      "reason": "MISSING_NESTED_ARTIFACT:endpoint-report:child\\endpoint-out-0.json",
+      "deleted_copy_relative": "evidence/candidate-ps51/pxctl-evid-4d589501a5c9/child/endpoint-out-0.json",
+      "original_sha256_unchanged": "46b53d267d77485ca50e793680bf2d0cc128938d25561e9648106bc6ba89a1ab",
+      "verifier_sha256": "2fb474d8ae29826ec28d72ace2bfb2a4f6bda5c5f4bd6a71e0336cd55bc54143"
+    },
+    "negative_result_sha256": "3f753deeaf92df8bcda72655566e4b27ce95e573f6a3c626814be517d7fd5be4",
+    "independent_readonly_recheck": "Existing private copy rejected with exact MissingNestedArtifact endpoint-report token; original endpoint report hash unchanged."
+  },
+  "limits": [
+    "Auxiliary log/source evidence audit, not formal code review or approval; formal review2 remains separate.",
+    "Isolated native language/serialization/owned fixtures only; no actual live WinRM/service/gateway/auth/provenance/activation or Windows CI measured.",
+    "Decoded merged child output is received text capture, not an assertion of original OS raw output bytes. Script/input/XML/report files checked as original retained bytes.",
+    "Host preflight records Win32 GetACP=1252; host-after lacks that field. This does not establish post-run ACP equality; other recorded host fields agree.",
+    "Named baseline API_ABSENT and old-H2 negative outcomes are expected evidence, not candidate failures or setup failures."
+  ]
+}

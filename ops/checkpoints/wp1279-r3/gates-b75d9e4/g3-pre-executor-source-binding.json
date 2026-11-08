@@ -1,0 +1,20 @@
+{
+  "at": "2026-11-08T06:18:56.173234+00:00",
+  "metadata_commit": "fdf7834dc53a38ea88cd6956503f5366b6367e81",
+  "remote_files": {
+    "ops/specs/wp1279-r3.md": "6cb7a575192aebcb79d5825daf9d867cc790dac2528e954fcd6ea13c903b2fac",
+    "ops/leases/wp1279-r3-g3-claude.yaml": "951483280d6c488635d71d479e190ec12085685feaf0b68602eba7c346832ec4",
+    "ops/prompts/wp1279-r3-g3-claude.md": "f06443ec2a3f8ad83f21c293a5001829e46270c5cafef963dae65a6bb7927abe",
+    "ops/leases/wp1279-r2-g2-claude.yaml": "00f2d2508b0349b625ba938ee8f28dd928595f9f3de9ebca5124e24b206081ee"
+  },
+  "worker_head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+  "worker_branch": "agent/wp1279-g3-claude",
+  "baseline": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "actual_claude_cli_version": "2.1.318 (Claude Code)",
+  "6718073094_readback_exact": true,
+  "6718134677_readback_exact": true,
+  "actual_canonical_consumer": "unmodified _spec_merge passed",
+  "checker_sha256": "2aced17b136132f7216056b39a253656ce251a9520752f8091138f39e0077a92",
+  "holder_scan": "g3-holders-before-executor.json",
+  "old_writers_terminal": "run04b271dbterminal0; b4d36a7ckernelZexit0 independentlyreconciled; no liveg2writer"
+}

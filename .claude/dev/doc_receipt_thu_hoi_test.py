@@ -1090,6 +1090,8 @@ def _g_r_shim(m, t, ten):
     def han(g, d):  # deadline 0.3 s đồng hồ thật: đợi Timer nổ rồi đo ỐNG GHI — còn người đọc nghĩa là chỉ giết trung gian
         if g == "G1":
             d.hen.join(10)
+            while d.dong_ho() < d.han:  # Timer Windows có thể nổ sớm vài ms so với đồng hồ hạn ⇒ chờ hạn qua thật, G2–G9 mới chắc k
+                time.sleep(0.005)
             try:
                 d.p.wait(3)
             except subprocess.TimeoutExpired:

@@ -13,7 +13,8 @@
 # process. -Counterexamples: CX00 unmodified control + CX01-CX10 single-anchor mutants of COPIES in <EvidenceRoot>\pxctl-evid-<run>,
 # each rerunning this harness; credit only for rc 1 with the named behavioural token in the named case (setup/import/wrong-rc
 # earn nothing; a surviving mutant is reported, never credited). Evidence is never deleted. Helpers are alias-free and no
-# automatic variable (args, PID, HOME, PROFILE) is assigned. 'All streams' = output/error/warning/verbose/debug/information plus
+# automatic variable (args, PID, HOME, PROFILE) is assigned; setup refuses any inner binding that reuses a top-level name
+# (Find-ScopeShadowing: PowerShell resolves helper names through the caller's scopes, case-insensitively). 'All streams' = output/error/warning/verbose/debug/information plus
 # the terminating error record; $global:Error history (which keeps the fakes' own raw backend exceptions) is not a product stream.
 [CmdletBinding()]
 param([Parameter(Mandatory = $true)][string]$ModulePath, [Parameter(Mandatory = $true)][string]$ScratchRoot, [string]$ReportPath = '',
@@ -186,7 +187,7 @@ function Get-ModState {
         $rows.Sort([StringComparer]::Ordinal); $rows -join "`n"
     }
 }
-function Get-Bound([string]$Fp) { & $script:Mod { param($f) $s = $null; if ($script:Sessions.TryGetValue($f, [ref]$s)) { $s.PxFakeSession } } $Fp }
+function Get-Bound([string]$Fp) { & $script:Mod { param($f) $sess = $null; if ($script:Sessions.TryGetValue($f, [ref]$sess)) { $sess.PxFakeSession } } $Fp }
 function Get-OrphanIds { @(& $script:Mod { foreach ($o in $script:Orphans) { $o.session.PxFakeSession } }) -join ',' }
 # One product call: new primitive calls, module state and fixture tree change, all streams and the terminating error as text.
 function Invoke-Guarded([scriptblock]$Call) {
@@ -322,6 +323,29 @@ function Get-RecordState([string]$Base, [string]$Id) {
     return "$(([IO.File]::ReadAllText($p) | ConvertFrom-Json).state)"
 }
 function Clear-Journal([string]$Base) { if ([IO.Directory]::Exists("$Base\results")) { $e = [Collections.Generic.List[string]]::new(); Remove-OwnedTree "$Base\results" $e; if ($e.Count) { throw "SETUP: journal reset failed: $($e -join '; ')" } } }
+# Dynamic scope: an unqualified name a helper does not bind itself ($S, $Sha, $Keep, $Repo, $Tg ...) resolves through its CALLER's
+# scopes, case-insensitively, so a case/handler/helper binding such as $s, $sha, $keep or $repo silently replaces the script value
+# for every helper it calls (g2 native run: X5-03 relative junction target, X5-05 [string].ComputeHash, X6-02 WhatIf calls with
+# a snapshot string as RepositoryRoot). Returns each non-top-level binding (assignment target, foreach variable, parameter) that
+# reuses the name of a top-level binding; the setup refuses to run a harness that has one.
+function Find-ScopeShadowing($Root) {
+    $top = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase); $inner = [Collections.Generic.List[object]]::new()
+    foreach ($v in $Root.FindAll({ param($node) $node -is [Management.Automation.Language.VariableExpressionAst] }, $true)) {
+        $name = $v.VariablePath.UserPath
+        if (-not $v.VariablePath.IsUnqualified -or [string]::Equals($name, 'null', [StringComparison]::OrdinalIgnoreCase) -or $name.EndsWith('Preference', [StringComparison]::OrdinalIgnoreCase)) { continue }
+        $up = $v; $pa = $v.Parent
+        while ($pa -is [Management.Automation.Language.ConvertExpressionAst] -or $pa -is [Management.Automation.Language.ArrayLiteralAst]) { $up = $pa; $pa = $pa.Parent }
+        if (-not (($pa -is [Management.Automation.Language.AssignmentStatementAst] -and [object]::ReferenceEquals($pa.Left, $up)) -or
+                ($pa -is [Management.Automation.Language.ForEachStatementAst] -and [object]::ReferenceEquals($pa.Variable, $v)) -or
+                ($pa -is [Management.Automation.Language.ParameterAst] -and [object]::ReferenceEquals($pa.Name, $v)))) { continue }
+        $isInner = $false
+        for ($an = $v.Parent; $null -ne $an; $an = $an.Parent) {
+            if ($an -is [Management.Automation.Language.FunctionDefinitionAst] -or ($an -is [Management.Automation.Language.ScriptBlockAst] -and $null -ne $an.Parent)) { $isInner = $true; break }
+        }
+        if ($isInner) { $inner.Add($v) } else { $null = $top.Add($name) }
+    }
+    return @(foreach ($v in $inner) { if ($top.Contains($v.VariablePath.UserPath)) { '{0}@{1}' -f $v.VariablePath.UserPath, $v.Extent.StartLineNumber } })
+}
 
 # ---- setup: any failure here is rc 2 ----
 $Tc = [Globalization.CultureInfo]::GetCultureInfo($TestCulture); [Threading.Thread]::CurrentThread.CurrentCulture = $Tc; [Threading.Thread]::CurrentThread.CurrentUICulture = $Tc
@@ -334,6 +358,10 @@ $Helpers = @(Get-Command -CommandType Function | Where-Object { $_.ScriptBlock.F
 $shadowed = @($Helpers | Where-Object { Get-Alias -Name $_ -ErrorAction SilentlyContinue })
 if ($Helpers.Count -lt 30 -or $shadowed.Count) { throw "helper alias check failed: $($Helpers.Count) helpers, shadowed: $($shadowed -join ',')" }
 if ([IO.File]::ReadAllText($PSCommandPath) -match '(?i)\$(args|pid|home|profile)\s*=[^=]') { throw 'harness assigns an automatic variable' }
+# Positive control first (the g2 bug shapes must be found), then this harness itself must have none.
+$probeHits = @(Find-ScopeShadowing ([Management.Automation.Language.Parser]::ParseInput('$S = 1; function f { foreach ($s in 1) { } }; & { $sha = 2 }; $Sha = 3', [ref]$null, [ref]$null)))
+$selfHits = @(Find-ScopeShadowing ([Management.Automation.Language.Parser]::ParseFile($PSCommandPath, [ref]$null, [ref]$null)))
+if (($probeHits -join ',') -cne 's@1,sha@1' -or $selfHits.Count) { throw "scope shadowing check failed: probe=[$($probeHits -join ',')] harness=[$($selfHits -join ',')]" }
 $Report.alias_r = "$(@(Get-Alias -Name r -ErrorAction SilentlyContinue | ForEach-Object { $_.Definition }))"
 $ModulePath = [IO.Path]::GetFullPath($ModulePath); $Report.module_path = $ModulePath; $ModDir = [IO.Path]::GetDirectoryName($ModulePath)
 $WrapperPath = "$ModDir\Run-Px.ps1"; $CfgModPath = "$ModDir\ProximaConfig.psm1"
@@ -341,14 +369,14 @@ $Suffix = '\.agents\skills\proxima-control\scripts'
 $TreeRoot = $(if ($ModDir.EndsWith($Suffix, [StringComparison]::OrdinalIgnoreCase)) { $ModDir.Substring(0, $ModDir.Length - $Suffix.Length) } else { $ModDir })
 # Byte-compared product area: the skill directory of a repository tree, or the isolated source copy of a counterexample.
 $MeasuredRoot = $(if ($TreeRoot -cne $ModDir) { [IO.Path]::GetDirectoryName($ModDir) } else { $ModDir })
-foreach ($p in $ScratchRoot, $ReportPath, $EvidenceRoot) {
-    if ($p -and ([IO.Path]::GetFullPath($p).TrimEnd('\') + '\').StartsWith($TreeRoot.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'ScratchRoot/ReportPath/EvidenceRoot must be outside the measured tree' }
+foreach ($outPath in $ScratchRoot, $ReportPath, $EvidenceRoot) {
+    if ($outPath -and ([IO.Path]::GetFullPath($outPath).TrimEnd('\') + '\').StartsWith($TreeRoot.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'ScratchRoot/ReportPath/EvidenceRoot must be outside the measured tree' }
 }
 if (-not [IO.Directory]::Exists($ScratchRoot)) { throw 'ScratchRoot must be an existing directory' }
 $Report.wrapper_sha256 = Get-FileSha256 $WrapperPath; $Report.config_module_sha256 = Get-FileSha256 $CfgModPath
 if (Get-Command -Name git -CommandType Application -ErrorAction SilentlyContinue) {
-    $g = Invoke-Native 'git' @('-C', $TreeRoot, 'rev-parse', 'HEAD', 'HEAD^{tree}')
-    if ($g.rc -eq 0) { $gl = @($g.out.Trim() -split '\s+'); if ($gl.Count -eq 2) { $Report.git_head = $gl[0]; $Report.git_tree = $gl[1] } }
+    $gitRun = Invoke-Native 'git' @('-C', $TreeRoot, 'rev-parse', 'HEAD', 'HEAD^{tree}')
+    if ($gitRun.rc -eq 0) { $gitOut = @($gitRun.out.Trim() -split '\s+'); if ($gitOut.Count -eq 2) { $Report.git_head = $gitOut[0]; $Report.git_tree = $gitOut[1] } }
 }
 $SelfExe = [Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
 $OtherExe = $(if ($PSVersionTable.PSEdition -ceq 'Core') { "$([Environment]::GetEnvironmentVariable('SystemRoot'))\System32\WindowsPowerShell\v1.0\powershell.exe" } else { "$(@(Get-Command -Name pwsh.exe -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1 | ForEach-Object { $_.Source }))" })
@@ -356,7 +384,7 @@ $ChildExes = @($SelfExe) + @($(if ($OtherExe -and [IO.File]::Exists($OtherExe)) 
 $Report.child_exes = $ChildExes
 $FullScratch = [IO.Path]::GetFullPath($ScratchRoot).TrimEnd('\'); $RunId = [guid]::NewGuid().ToString('N').Substring(0, 12)
 $S = "$FullScratch\pxctl-$RunId"; $Report.scratch = $S; $Repo = "$S\repo"
-foreach ($d in 'repo', 'cfg', 'child', 'cx', 'conflict', 'journal-target') { $null = [IO.Directory]::CreateDirectory("$S\$d") }
+foreach ($fixDir in 'repo', 'cfg', 'child', 'cx', 'conflict', 'journal-target') { $null = [IO.Directory]::CreateDirectory("$S\$fixDir") }
 $Keep = "$FullScratch\pxctl-keep-$RunId"; $null = [IO.Directory]::CreateDirectory($Keep); [IO.File]::WriteAllText("$Keep\keep.txt", $RunId, $Utf8); $KeepSha = Get-FileSha256 "$Keep\keep.txt"
 $Evid = "$(if ($EvidenceRoot) { [IO.Path]::GetFullPath($EvidenceRoot).TrimEnd('\') } else { $FullScratch })\pxctl-evid-$RunId"
 if ($Counterexamples) { $null = [IO.Directory]::CreateDirectory($Evid); $Report.evidence_dir = $Evid }
@@ -385,10 +413,10 @@ $Tg.R2 = New-Target 'r2' 'tgt-remote' "$S\rbase" 0 'https://127.0.0.1:59862/wsma
 $Tg.Rc = New-Target 'rc' 'tgt-rc' "$S\rbase" 0 'https://127.0.0.1:59863/ws@man' (' px' + [char]9 + 'E ')
 $Tg.Rd = New-Target 'rd' 'tgt-rd' "$S\rbase" 0 'https://127.0.0.1:59864/wsman' 'px.test'
 # Deployed endpoint trees: rbase = the module under test + S1; rbad = benign wrong code (own sentinel); rdep = S1 altered.
-foreach ($b in 'rbase', 'rbad', 'rdep') { $null = [IO.Directory]::CreateDirectory("$S\$b\control") }
+foreach ($epTree in 'rbase', 'rbad', 'rdep') { $null = [IO.Directory]::CreateDirectory("$S\$epTree\control") }
 if ([IO.File]::Exists($ModulePath)) { [IO.File]::Copy($ModulePath, "$S\rbase\control\ProximaControl.psm1"); [IO.File]::Copy($ModulePath, "$S\rdep\control\ProximaControl.psm1") }
 if ([IO.File]::Exists($CfgModPath)) {
-    foreach ($b in 'rbase', 'rbad') { [IO.File]::Copy($CfgModPath, "$S\$b\control\ProximaConfig.psm1") }
+    foreach ($epTree in 'rbase', 'rbad') { [IO.File]::Copy($CfgModPath, "$S\$epTree\control\ProximaConfig.psm1") }
     [IO.File]::WriteAllBytes("$S\rdep\control\ProximaConfig.psm1", [byte[]](@([IO.File]::ReadAllBytes($CfgModPath)) + @(13, 10, 35, 10)))
 }
 $null = Write-Fixture "$S\rbad\control\ProximaControl.psm1" "[IO.File]::WriteAllText((Join-Path `$PSScriptRoot 'imported.txt'), 'imported')`nfunction Invoke-ProximaOperation { 'benign' }`n"
@@ -632,9 +660,21 @@ Invoke-Case 'X3-01' {
     $x = Invoke-Px (New-PxArgs 'status' $Tg.R1); if ($x.R) { Add-Fail 'STATE_SURVIVED_REIMPORT[session]' } else { Assert-Code $x 'NotConnected' 'session after reimport' }
 }
 Invoke-Case 'X3-02' {
-    $x = Invoke-Px (New-PxArgs 'status' $Tg.R1); Assert-Code $x 'NotConnected' 'status without connect'
-    if ($x.Calls.Count) { Add-Fail "AUTOCONNECT[$($x.Calls -join ';')]" }
-    foreach ($tok in 'Get-PSSession', 'Connect-PSSession', 'Enter-PSSession') { if ($ModSource.IndexOf($tok, [StringComparison]::OrdinalIgnoreCase) -ge 0) { Add-Fail "IMPLICIT_SESSION_LOOKUP[$tok]" } }
+    $adopt = 'Get-PSSession', 'Connect-PSSession', 'Enter-PSSession'
+    # Static: no NON-comment token (call, module-qualified name, or string usable with & / Get-Command) names an adoption command.
+    # Comments are prose, not calls (the module header documents "no Get-PSSession adoption"); New-PSSession proves code is scanned.
+    $toks = $null; $null = [Management.Automation.Language.Parser]::ParseInput($ModSource, [ref]$toks, [ref]$null)
+    $code = @($toks | Where-Object { $_.Kind -ne [Management.Automation.Language.TokenKind]::Comment } | ForEach-Object { $_.Text }) -join "`n"
+    if ($code.IndexOf('New-PSSession', [StringComparison]::Ordinal) -lt 0) { Add-Fail 'TOKEN_SCAN_VACUOUS[New-PSSession not seen]' }
+    foreach ($tok in $adopt) { if ($code.IndexOf($tok, [StringComparison]::OrdinalIgnoreCase) -ge 0) { Add-Fail "IMPLICIT_SESSION_LOOKUP[$tok]" } }
+    # Behavioural: unqualified adoption commands resolve to recording global shims while px and the in-process wrapper run.
+    try {
+        foreach ($tok in $adopt) { Set-Item -Path "function:global:$tok" -Value ([scriptblock]::Create("`$global:PxcT.Calls.Add('Adopt:$tok')")) }
+        $x = Invoke-Px (New-PxArgs 'status' $Tg.R1); Assert-Code $x 'NotConnected' 'status without connect'
+        if ($x.Calls.Count) { Add-Fail "AUTOCONNECT[$($x.Calls -join ';')]" }
+        $x = Invoke-Wrapper (New-PxArgs 'status' $Tg.R1); Assert-Code $x 'NotConnected' 'wrapper status without connect'
+        if ($x.Calls.Count) { Add-Fail "AUTOCONNECT[wrapper $($x.Calls -join ';')]" }
+    } finally { foreach ($tok in $adopt) { if (Test-Path -Path "function:global:$tok") { Remove-Item -Path "function:global:$tok" } } }
     Assert-Ok (Invoke-Px (New-PxArgs 'connect' $Tg.R1 @{ Credential = $Cred })) 'parent connect R1'
     $w = Invoke-WrapperChild @{ Action = 'status'; ConfigPath = $Tg.R1.Cfg; RepositoryRoot = $Repo; TargetId = $Tg.R1.Tid }
     if ($w.Rc -eq 0 -or -not $w.Rep -or "$($w.Rep.fqid)" -cnotmatch '^ProximaControl\.NotConnected') { Add-Fail "FRESH_PROCESS_REUSED[rc=$($w.Rc) fqid=$(if ($w.Rep) { $w.Rep.fqid })]" }
@@ -750,11 +790,11 @@ Invoke-Case 'X5-03' {
         @('malformed', 'stop', @{ "$($g[0]).json" = '{"state":' }), @('malformed restart', 'restart', @{ "$($g[0]).json" = '[1,2' }),
         @('non-record entry', 'stop', @{ 'junk.txt' = 'x'; "$($g[1]).json" = '{"state":"completed"}' }), @('state case alias', 'stop', @{ "$($g[0]).json" = '{"state":"Completed"}' }),
         @('unreadable', 'stop', @{ "$($g[2]).json" = '{"state":"completed"}' }))
-    foreach ($s in $subs) {
-        Clear-Journal $base; foreach ($k in $s[2].Keys) { $null = Write-Fixture "$dir\$k" $s[2][$k] }
-        $lock = $(if ($s[0] -ceq 'unreadable') { [IO.File]::Open("$dir\$($g[2]).json", 'Open', 'ReadWrite', 'None') })
-        try { $x = Invoke-Px (New-PxArgs $s[1] $Tg.Svc) } finally { if ($lock) { $lock.Dispose() } }
-        if (Get-CallCount $x 'ServiceControl') { Add-Fail "PENDING_GUARD_BYPASS[$($s[0])]" } else { Assert-Code $x 'PendingRequests' $s[0] }
+    foreach ($sub in $subs) {
+        Clear-Journal $base; foreach ($k in $sub[2].Keys) { $null = Write-Fixture "$dir\$k" $sub[2][$k] }
+        $lock = $(if ($sub[0] -ceq 'unreadable') { [IO.File]::Open("$dir\$($g[2]).json", 'Open', 'ReadWrite', 'None') })
+        try { $x = Invoke-Px (New-PxArgs $sub[1] $Tg.Svc) } finally { if ($lock) { $lock.Dispose() } }
+        if (Get-CallCount $x 'ServiceControl') { Add-Fail "PENDING_GUARD_BYPASS[$($sub[0])]" } else { Assert-Code $x 'PendingRequests' $sub[0] }
     }
     Clear-Journal $base; $null = [IO.Directory]::CreateDirectory("$base\results"); $null = New-Item -ItemType Junction -Path $dir -Value "$S\journal-target"
     $x = Invoke-Px (New-PxArgs 'stop' $Tg.Svc @{ Force = $false })
@@ -779,23 +819,24 @@ Invoke-Case 'X5-04' {
     $global:PxcT.UiHandler = { 0 }; Assert-Calls (Invoke-Px (New-PxArgs 'start' $Tg.Svc)) @('UiSessions', 'GetService', 'ServiceControl:Start') 'no UI'
 }
 Invoke-Case 'X5-05' {
-    $keepBefore = Get-TreeSnapshot $Keep -Hash
-    $null = New-Item -ItemType Junction -Path "$($Tg.J4.Base)\results" -Value $Keep
-    $null = [IO.Directory]::CreateDirectory("$($Tg.J5.Base)\results"); $null = New-Item -ItemType Junction -Path "$($Tg.J5.Base)\results\px-active" -Value $Keep
-    $null = [IO.Directory]::CreateDirectory("$S\gone"); $null = New-Item -ItemType Junction -Path "$($Tg.J6.Base)\results" -Value "$S\gone"; [IO.Directory]::Delete("$S\gone")
-    foreach ($c in @(@('base inside ProtectedRoot', $Tg.In), @('results junction', $Tg.J4), @('px-active junction', $Tg.J5), @('dangling results junction', $Tg.J6))) {
-        $x = Invoke-Px (New-PxArgs 'ask' $c[1] @{ Provider = 'prov'; Value = 'p'; Model = 'prov/m1' })
-        if (Get-CallCount $x 'Http:POST') { Add-Fail "JOURNAL_POST[$($c[0])]" } else { Assert-Code $x 'JournalUnsafe' $c[0] }
-    }
-    if ((Get-TreeSnapshot $Keep -Hash) -cne $keepBefore -or [IO.Directory]::Exists("$S\gone")) { Add-Fail 'OUTSIDE_CHANGED[journal followed a junction]' }
-    if ([IO.Directory]::Exists("$($Tg.In.Base)\results")) { Add-Fail 'JOURNAL_CREATED_INSIDE_PROTECTED_ROOT' }
-    $id = [guid]::NewGuid().ToString('D'); $occ = Write-Fixture "$($Tg.L1.Base)\results\px-active\$id.json" 'occupied'; $sha = Get-FileSha256 $occ
-    $global:PxcT.IdHandler = [scriptblock]::Create("'$id'")
-    $x = Invoke-Px (New-PxArgs 'ask' $Tg.L1 @{ Provider = 'prov'; Value = 'p'; Model = 'prov/m1' })
-    if (Get-CallCount $x 'Http:POST') { Add-Fail 'JOURNAL_POST[GUID collision]' } else { Assert-Code $x 'JournalFailed' 'GUID collision' }
-    if ((Get-FileSha256 $occ) -cne $sha) { Add-Fail 'RECORD_OVERWRITTEN[GUID collision]' }
-    [IO.File]::Delete($occ)
-    foreach ($j in "$($Tg.J4.Base)\results", "$($Tg.J5.Base)\results\px-active", "$($Tg.J6.Base)\results") { [IO.Directory]::Delete($j) }
+    $keepBefore = Get-TreeSnapshot $Keep -Hash; $links = [Collections.Generic.List[string]]::new()
+    try {
+        $null = New-Item -ItemType Junction -Path "$($Tg.J4.Base)\results" -Value $Keep; $links.Add("$($Tg.J4.Base)\results")
+        $null = [IO.Directory]::CreateDirectory("$($Tg.J5.Base)\results"); $null = New-Item -ItemType Junction -Path "$($Tg.J5.Base)\results\px-active" -Value $Keep; $links.Add("$($Tg.J5.Base)\results\px-active")
+        $null = [IO.Directory]::CreateDirectory("$S\gone"); $null = New-Item -ItemType Junction -Path "$($Tg.J6.Base)\results" -Value "$S\gone"; $links.Add("$($Tg.J6.Base)\results"); [IO.Directory]::Delete("$S\gone")
+        foreach ($c in @(@('base inside ProtectedRoot', $Tg.In), @('results junction', $Tg.J4), @('px-active junction', $Tg.J5), @('dangling results junction', $Tg.J6))) {
+            $x = Invoke-Px (New-PxArgs 'ask' $c[1] @{ Provider = 'prov'; Value = 'p'; Model = 'prov/m1' })
+            if (Get-CallCount $x 'Http:POST') { Add-Fail "JOURNAL_POST[$($c[0])]" } else { Assert-Code $x 'JournalUnsafe' $c[0] }
+        }
+        if ((Get-TreeSnapshot $Keep -Hash) -cne $keepBefore -or [IO.Directory]::Exists("$S\gone")) { Add-Fail 'OUTSIDE_CHANGED[journal followed a junction]' }
+        if ([IO.Directory]::Exists("$($Tg.In.Base)\results")) { Add-Fail 'JOURNAL_CREATED_INSIDE_PROTECTED_ROOT' }
+        $id = [guid]::NewGuid().ToString('D'); $occ = Write-Fixture "$($Tg.L1.Base)\results\px-active\$id.json" 'occupied'; $occSha = Get-FileSha256 $occ
+        $global:PxcT.IdHandler = [scriptblock]::Create("'$id'")
+        $x = Invoke-Px (New-PxArgs 'ask' $Tg.L1 @{ Provider = 'prov'; Value = 'p'; Model = 'prov/m1' })
+        if (Get-CallCount $x 'Http:POST') { Add-Fail 'JOURNAL_POST[GUID collision]' } else { Assert-Code $x 'JournalFailed' 'GUID collision' }
+        if ((Get-FileSha256 $occ) -cne $occSha) { Add-Fail 'RECORD_OVERWRITTEN[GUID collision]' }
+        [IO.File]::Delete($occ)
+    } finally { foreach ($j in $links) { [IO.Directory]::Delete($j) } }
 }
 Invoke-Case 'X5-06' {
     $w = Start-WireServer @{ 'GET /api/status' = @(200, '{"ok":true}') }; $savedKey = [Environment]::GetEnvironmentVariable('PROXIMA_API_KEY')
@@ -816,7 +857,7 @@ Invoke-Case 'X5-07' {
     $bad = @(@('nssm wrapper', { [pscustomobject]@{ Name = 'ProximaGateway'; PathName = 'C:\nssm\nssm.exe' } }), @('quoted with args', { [pscustomobject]@{ Name = 'ProximaGateway'; PathName = '"' + $global:PxcT.ServiceExe + '" --service' } }),
         @('other exe', { [pscustomobject]@{ Name = 'ProximaGateway'; PathName = '"C:\other\Proxima.exe"' } }), @('name case', { [pscustomobject]@{ Name = 'proximagateway'; PathName = '"' + $global:PxcT.ServiceExe + '"' } }),
         @('other name', { [pscustomobject]@{ Name = 'ProximaGatewayX'; PathName = '"' + $global:PxcT.ServiceExe + '"' } }), @('CIM denied', { throw [UnauthorizedAccessException]::new('denied') }),
-        @('two services', { $s = [pscustomobject]@{ Name = 'ProximaGateway'; PathName = '"' + $global:PxcT.ServiceExe + '"' }; $s; $s }), @('no service', { }))
+        @('two services', { $svcRow = [pscustomobject]@{ Name = 'ProximaGateway'; PathName = '"' + $global:PxcT.ServiceExe + '"' }; $svcRow; $svcRow }), @('no service', { }))
     $global:PxcT.UiHandler = { 0 }
     foreach ($b in $bad) {
         $global:PxcT.SvcHandler = $b[1]
@@ -891,14 +932,18 @@ Invoke-Case 'X6-02' {
     if ($TreeAfterImport -cne $TreeBeforeImport -or $UserAfterImport -cne $UserBefore) { Add-Fail 'IMPORT_SIDE_EFFECT[fixture tree or user state]' }
     Assert-Ok (Invoke-Px (New-PxArgs 'connect' $Tg.R1 @{ Credential = $Cred })) 'fixture connect R1'
     Assert-Ok (Invoke-Px (New-PxArgs 'use' $Tg.L1 @{ Provider = 'prov'; Value = 'prov/m1' })) 'fixture use L1'
-    $tree = Get-TreeSnapshot $S -Hash; $user = Get-UserStateSnapshot; $repo = Get-TreeSnapshot $MeasuredRoot -Hash; $keep = Get-TreeSnapshot $Keep -Hash; $st = Get-ModState; $n = $global:PxcT.Calls.Count
+    $treeSnap = Get-TreeSnapshot $S -Hash; $userSnap = Get-UserStateSnapshot; $measuredSnap = Get-TreeSnapshot $MeasuredRoot -Hash; $keepSnap = Get-TreeSnapshot $Keep -Hash
+    $st = Get-ModState; $n = $global:PxcT.Calls.Count; $dry = 0
     foreach ($t in $Tg.L1, $Tg.R1, $Tg.Svc) {
         foreach ($a in 'config', 'status', 'models', 'use', 'ask', 'start', 'stop', 'restart', 'connect', 'disconnect') {
-            $null = Invoke-Px (New-PxArgs $a $t @{ Provider = 'prov'; Value = 'prov/m2'; Model = 'prov/m1'; Credential = $Cred; Force = $true; WhatIf = $true })
+            $x = Invoke-Px (New-PxArgs $a $t @{ Provider = 'prov'; Value = 'prov/m2'; Model = 'prov/m1'; Credential = $Cred; Force = $true; WhatIf = $true })
+            if ($x.R -and $x.R.dryRun -eq $true) { $dry++ }
         }
     }
+    # Non-vacuous: the WhatIf matrix must reach real dry runs (a bad RepositoryRoot once made every call fail validation).
+    if ($dry -lt 10) { Add-Fail "WHATIF_MATRIX_VACUOUS[dry runs=$dry]" }
     if ($global:PxcT.Calls.Count -ne $n -or (Get-ModState) -cne $st) { Add-Fail 'WHATIF_STATE_CHANGED[primitive calls or session/selection]' }
-    if ((Get-TreeSnapshot $S -Hash) -cne $tree -or (Get-UserStateSnapshot) -cne $user -or (Get-TreeSnapshot $MeasuredRoot -Hash) -cne $repo -or (Get-TreeSnapshot $Keep -Hash) -cne $keep) { Add-Fail 'WHATIF_STATE_CHANGED[fixture, user state, measured tree or outside sentinel]' }
+    if ((Get-TreeSnapshot $S -Hash) -cne $treeSnap -or (Get-UserStateSnapshot) -cne $userSnap -or (Get-TreeSnapshot $MeasuredRoot -Hash) -cne $measuredSnap -or (Get-TreeSnapshot $Keep -Hash) -cne $keepSnap) { Add-Fail 'WHATIF_STATE_CHANGED[fixture, user state, measured tree or outside sentinel]' }
     if ((Get-TreeSnapshot $MeasuredRoot -Hash) -cne $RepoTreeBefore) { Add-Fail 'MEASURED_TREE_CHANGED' }
     $probe = "$S\cleanup-probe"; $null = Write-Fixture "$probe\a.txt" 'a'; $null = New-Item -ItemType Junction -Path "$probe\jout" -Value $Keep
     $errs = [Collections.Generic.List[string]]::new(); Remove-OwnedTree $probe $errs
@@ -944,31 +989,31 @@ function Test-Counterexample($M, [int]$Rc, $Rec) {
     $Rec.credited = $true; return 'KILLED: every named behavioural failure observed in the named case'
 }
 if ($Counterexamples) {
-    foreach ($m in $Cx) {
-        Invoke-Case $m.id -NoApi {
+    foreach ($cxCase in $Cx) {
+        Invoke-Case $cxCase.id -NoApi {
             if (-not $ApiPresent) { throw "API_ABSENT: counterexamples need the candidate module ($($Report.api_state))" }
-            $dir = "$Evid\$($m.id)"; $null = [IO.Directory]::CreateDirectory($dir)
+            $dir = "$Evid\$($cxCase.id)"; $null = [IO.Directory]::CreateDirectory($dir)
             foreach ($f in 'ProximaControl.psm1', 'Run-Px.ps1', 'ProximaConfig.psm1') { [IO.File]::Copy("$ModDir\$f", "$dir\$f") }
-            if ($m.file) {
-                $src = [IO.File]::ReadAllText("$dir\$($m.file)")
-                for ($i = 0; $i -lt $m.e.Count; $i += 2) {
-                    $at = $src.IndexOf($m.e[$i], [StringComparison]::Ordinal)
-                    if ($at -lt 0 -or $src.IndexOf($m.e[$i], $at + 1, [StringComparison]::Ordinal) -ge 0) { throw "ANCHOR: mutation anchor absent or not unique: $($m.e[$i])" }
-                    $src = $src.Substring(0, $at) + $m.e[$i + 1] + $src.Substring($at + $m.e[$i].Length)
+            if ($cxCase.file) {
+                $src = [IO.File]::ReadAllText("$dir\$($cxCase.file)")
+                for ($i = 0; $i -lt $cxCase.e.Count; $i += 2) {
+                    $at = $src.IndexOf($cxCase.e[$i], [StringComparison]::Ordinal)
+                    if ($at -lt 0 -or $src.IndexOf($cxCase.e[$i], $at + 1, [StringComparison]::Ordinal) -ge 0) { throw "ANCHOR: mutation anchor absent or not unique: $($cxCase.e[$i])" }
+                    $src = $src.Substring(0, $at) + $cxCase.e[$i + 1] + $src.Substring($at + $cxCase.e[$i].Length)
                 }
-                [IO.File]::WriteAllText("$dir\$($m.file)", $src, $Utf8)
+                [IO.File]::WriteAllText("$dir\$($cxCase.file)", $src, $Utf8)
             }
-            $cs = "$S\cx\$($m.id)"; $null = [IO.Directory]::CreateDirectory($cs)
+            $cs = "$S\cx\$($cxCase.id)"; $null = [IO.Directory]::CreateDirectory($cs)
             # Report/output/record sit NEXT TO the source copy: the child measures $dir byte-for-byte and rejects outputs inside it.
-            $ev = "$Evid\$($m.id)"
+            $ev = "$Evid\$($cxCase.id)"
             $argv = @('-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $PSCommandPath, '-ModulePath', "$dir\ProximaControl.psm1", '-ScratchRoot', $cs, '-ReportPath', "$ev.report.json", '-TestCulture', $TestCulture)
-            $c = Invoke-ChildPs $SelfExe $argv "counterexample $($m.id)"; [IO.File]::WriteAllText("$ev.output.txt", "$($c.Run.out)", $Utf8)
-            $rec = [ordered]@{ id = $m.id; mutated_file = $m.file; anchor = $(if ($m.e.Count) { $m.e[0] }); replacement = $(if ($m.e.Count) { $m.e[1] }); command = @($SelfExe) + $argv; rc = $c.Run.rc
+            $c = Invoke-ChildPs $SelfExe $argv "counterexample $($cxCase.id)"; [IO.File]::WriteAllText("$ev.output.txt", "$($c.Run.out)", $Utf8)
+            $rec = [ordered]@{ id = $cxCase.id; mutated_file = $cxCase.file; anchor = $(if ($cxCase.e.Count) { $cxCase.e[0] }); replacement = $(if ($cxCase.e.Count) { $cxCase.e[1] }); command = @($SelfExe) + $argv; rc = $c.Run.rc
                 module_sha256 = (Get-FileSha256 "$dir\ProximaControl.psm1"); wrapper_sha256 = (Get-FileSha256 "$dir\Run-Px.ps1"); config_module_sha256 = (Get-FileSha256 "$dir\ProximaConfig.psm1")
                 report_path = "$ev.report.json"; report_sha256 = (Get-FileSha256 "$ev.report.json"); output_path = "$ev.output.txt"; output_sha256 = (Get-FileSha256 "$ev.output.txt")
-                required = $m.red; matched = @(); credited = $false; verdict = $null }
+                required = $cxCase.red; matched = @(); credited = $false; verdict = $null }
             $Report.counterexample_evidence.Add($rec)
-            try { $rec.verdict = Test-Counterexample $m $c.Run.rc $rec } catch { $rec.verdict = "NOT_ACCEPTED: $($_.Exception.Message)"; throw }
+            try { $rec.verdict = Test-Counterexample $cxCase $c.Run.rc $rec } catch { $rec.verdict = "NOT_ACCEPTED: $($_.Exception.Message)"; throw }
             finally { [IO.File]::WriteAllText("$ev.record.json", ($rec | ConvertTo-Json -Depth 6), $Utf8) }
         }
     }
@@ -978,5 +1023,5 @@ $Report.required_ids = $required
 $missing = @($required | Where-Object { $i = $_; @($Results | Where-Object { $_.id -ceq $i }).Count -ne 1 })
 if ($missing.Count) { throw "IDs not executed exactly once: $($missing -join ',')" }
 $notPassed = @($Results | Where-Object { $required -ccontains $_.id -and $_.outcome -ne 'passed' })
-$rc = $(if (@(Get-OutcomeIds 'setup_error').Count) { 2 } elseif ($notPassed.Count) { 1 } else { 0 })
-Complete-Run $rc
+$finalRc = $(if (@(Get-OutcomeIds 'setup_error').Count) { 2 } elseif ($notPassed.Count) { 1 } else { 0 })
+Complete-Run $finalRc

@@ -1,0 +1,20 @@
+{
+  "at": "2026-11-08T09:37:59.026480+00:00",
+  "clone": "/workspace/scratch/wp1279-code-review-bc16ccf",
+  "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "tree": "30cbf51650d88f05c0fcae977dd9df286a089204",
+  "base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "actual_canonical_K1": "unmodified pinnedB _spec_merge passed",
+  "spec_sha256": "71d8f3bf6523c3428e86868085c6fc3263fdbb6e8936de48d953dfd6ad1ea3b3",
+  "mirror": "/workspace/scratch/proxima-p1-s2-20261108/review3-ref-mirror.git",
+  "mirror_head_count": 745,
+  "observed_remote_head_count": 744,
+  "mirror_extra_bootstrap_local_heads": {
+    "refs/heads/agent/wp1279-g4-claude": "bc16ccff3601fabeeb783f41b52360ef5851838a"
+  },
+  "all_observed_remote_heads_name_and_OID_match": true,
+  "mirror_head_bytes_sha256": "10ad61cf81304b26c81d13ac02cdb6e1718bfb0dba525f19bb17c1d7ac871324",
+  "observed_remote_head_bytes_sha256": "c73668dedbfee57b8c3c3178143a306fcb8c5e9e1c17652d2fc7ce8658059f6d",
+  "refs_limitation": "Frozen historical capability mirror, includes explicitlylisted localunpublishedcandidatehead; not a currentremote-fence or mergeauthorization claim",
+  "model_invoked": false
+}

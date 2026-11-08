@@ -1,0 +1,79 @@
+{
+  "at": "2026-11-08T08:54:49.572861+00:00",
+  "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "tree": "30cbf51650d88f05c0fcae977dd9df286a089204",
+  "parents": [
+    "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766"
+  ],
+  "base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "additions": 1773,
+  "deletions": 0,
+  "file_sha256": {
+    ".agents/skills/proxima-control/scripts/ProximaControl.psm1": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+    ".agents/skills/proxima-control/scripts/Run-Px.ps1": "03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354",
+    ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1": "75b565e50cebf73f2a1a8a9787e0b8d35fe239db928253ba5c66fcde7ee1121b"
+  },
+  "snapshot_changes": [
+    {
+      "path": ".agents/skills/proxima-control/scripts/ProximaControl.psm1",
+      "before": [
+        "F",
+        "e26ddca8bd50d9247e54a480d72e882a193bfbb1e1be30ecf1f9328c005fd2b5"
+      ],
+      "after": [
+        "F",
+        "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668"
+      ]
+    },
+    {
+      "path": ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1",
+      "before": [
+        "F",
+        "f874bf2fc3850ccaf6e668d48434aed2f7116d25538a0e8d6968f3e9ad0c9638"
+      ],
+      "after": [
+        "F",
+        "75b565e50cebf73f2a1a8a9787e0b8d35fe239db928253ba5c66fcde7ee1121b"
+      ]
+    },
+    {
+      "path": ".claude/.packet_state/session-start.ran",
+      "before": [
+        "F",
+        "285c7bcee71dd93d929a0b5e3885a2811dcb4635bf1aaaae89f198963e638afa"
+      ],
+      "after": [
+        "F",
+        "9a45cd683b219ce699cdcfdd5ce9446c2ee2786f04195a8374d33840e6bbb178"
+      ]
+    }
+  ],
+  "terminal": {
+    "launcher_exit": 0,
+    "snapshot_before": "bbb9b51ec41ee2aeb82db7bdf70e73d776d4972a3fd7fb0c7a5781e015d5a9db",
+    "snapshot_after": "151d656cb8fc1d69845d59a687caf8f137e6791e641aa5a5495a340bdf9c9e17",
+    "session_id": "f62b3797-3c33-4383-891e-e8e41e642b41",
+    "finished_at": "2026-11-08T08:51:37.153040+00:00"
+  },
+  "run_id": "0f391189d42c4d1db34bd4827f566862",
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 42,
+      "outputTokens": 76840,
+      "cacheReadInputTokens": 3853158,
+      "cacheCreationInputTokens": 253969,
+      "webSearchRequests": 0,
+      "costUSD": 4.3393516000000005,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 54880,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 253969,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "source": "exact original actual Claude writes, mechanical dispatcher Git only",
+  "tests": "not_run on newH; old H3 approval/gates retained, new listener-owner P1 requires new evidence"
+}

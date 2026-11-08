@@ -1,0 +1,1435 @@
+{
+  "schema": "auxiliary-native-linux-source-audit/1",
+  "formal_code_approval": false,
+  "audited_at_utc": "2026-11-08T09:36:39.141433+00:00",
+  "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "tree": "30cbf51650d88f05c0fcae977dd9df286a089204",
+  "base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "material_issues": [],
+  "native": {
+    "archive_sha256": "bbaf43d863292ca6b126013da451c17ae25bf363fb2e61d2fe4bc6a5004fe663",
+    "archive_bytes": 1824347,
+    "source_files_verified": 1183,
+    "xml_files_verified": 180,
+    "nested_sets_verified": 30,
+    "nested_artifact_entries_verified": 990,
+    "counterexample_children_verified": 24,
+    "committed_definitions_checked": 11,
+    "listener_default_CIM_probes_verified": 28,
+    "source_manifest_sha256": "eef462888d7c0ff70a2f5f4a833fb7d68bec9f13d7e83d22e41a0476e08d66c8",
+    "measurement_sha256": "4fb33d0be7b7c859d8e929be8ffa945e529e31f9a87b418444396a4d78fa6975",
+    "all_original_command_log_hashes_verified": true,
+    "all_report_source_hashes_verified": true,
+    "archive_extracted_bytes_match": true,
+    "operator_inputs": {
+      "count": 5,
+      "file_hashes": {
+        "operator-inputs/windows-compare-g4.py": "21bf1fae2609ded62fe28517ec205785eea5cb92e17c26dc5bf30da6c8f5f394",
+        "operator-inputs/g4-candidate.bundle.b64": "14be0b6abf54c5d87159240a746f20cc19f1744980b2e6e380acc9931e1de91c",
+        "operator-inputs/device-online.json": "f4674fa2ae08c563ca3897368a11df71e88b2ad2457117917e17d21de8d94ba5",
+        "operator-inputs/g4_native_evidence.py": "9c535fa03c9f752f351481c755a5c81bcc9ff70ead112c5bf3dc8e5a496ade8f",
+        "operator-inputs/g4-candidate-manifest.json": "35febe57e9c697f1d097df782f988a99ebcf0fccf26d49d1a5629fda97105189"
+      },
+      "decoded_bundle_sha256": "73a4d04f969b2b53fd8856e821c754c2b298f45dbb4fa6a4bd31d6e0218e12d8"
+    },
+    "phases": [
+      {
+        "phase": "baseline-ps51",
+        "rc": 1,
+        "passed": 0,
+        "total": 26,
+        "failed_ids": [
+          "X1-01",
+          "X1-02",
+          "X1-03",
+          "X2-01",
+          "X2-02",
+          "X2-03",
+          "X2-04",
+          "X2-05",
+          "X2-06",
+          "X2-07",
+          "X3-01",
+          "X3-02",
+          "X4-01",
+          "X4-02",
+          "X4-03",
+          "X5-01",
+          "X5-02",
+          "X5-03",
+          "X5-04",
+          "X5-05",
+          "X5-06",
+          "X5-07",
+          "X5-08",
+          "X5-09",
+          "X6-01",
+          "X6-02"
+        ],
+        "runtime": "5.1.26100.9711",
+        "culture": "en-US",
+        "report_sha256": "d94e23ad08800babb6740180514236673f6e685c6c4656a332041e5f52c72cb9"
+      },
+      {
+        "phase": "candidate-ps51",
+        "rc": 0,
+        "passed": 26,
+        "total": 26,
+        "failed_ids": [],
+        "runtime": "5.1.26100.9711",
+        "culture": "en-US",
+        "report_sha256": "e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77"
+      },
+      {
+        "phase": "baseline-ps7",
+        "rc": 1,
+        "passed": 0,
+        "total": 26,
+        "failed_ids": [
+          "X1-01",
+          "X1-02",
+          "X1-03",
+          "X2-01",
+          "X2-02",
+          "X2-03",
+          "X2-04",
+          "X2-05",
+          "X2-06",
+          "X2-07",
+          "X3-01",
+          "X3-02",
+          "X4-01",
+          "X4-02",
+          "X4-03",
+          "X5-01",
+          "X5-02",
+          "X5-03",
+          "X5-04",
+          "X5-05",
+          "X5-06",
+          "X5-07",
+          "X5-08",
+          "X5-09",
+          "X6-01",
+          "X6-02"
+        ],
+        "runtime": "7.6.9",
+        "culture": "en-US",
+        "report_sha256": "7ed856dcc0de5328156a0c1fc1b1ca7994282448053b0be63c7296a17cdf62f0"
+      },
+      {
+        "phase": "candidate-ps7",
+        "rc": 0,
+        "passed": 26,
+        "total": 26,
+        "failed_ids": [],
+        "runtime": "7.6.9",
+        "culture": "en-US",
+        "report_sha256": "2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934"
+      },
+      {
+        "phase": "old-h3-ps51",
+        "rc": 1,
+        "passed": 23,
+        "total": 26,
+        "failed_ids": [
+          "X5-06",
+          "X5-09",
+          "X6-01"
+        ],
+        "runtime": "5.1.26100.9711",
+        "culture": "en-US",
+        "report_sha256": "a0f6fd18632f9f148824d041927a5d2bc0e972b82e0bdea216c7d9191bc3fb0e"
+      },
+      {
+        "phase": "old-h3-ps7",
+        "rc": 1,
+        "passed": 23,
+        "total": 26,
+        "failed_ids": [
+          "X5-06",
+          "X5-09",
+          "X6-01"
+        ],
+        "runtime": "7.6.9",
+        "culture": "en-US",
+        "report_sha256": "699fd8b29e426aeb6aa41ccd2f4f3f3ffc429e66ec4f7ec3d9a56031b48cc225"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "rc": 0,
+        "passed": 38,
+        "total": 38,
+        "failed_ids": [],
+        "runtime": "5.1.26100.9711",
+        "culture": "tr-TR",
+        "report_sha256": "3e3f03bea6848a19a54953b194c3d2a0290a371ce0d3a519be62621c99f3241c"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "rc": 0,
+        "passed": 38,
+        "total": 38,
+        "failed_ids": [],
+        "runtime": "7.6.9",
+        "culture": "tr-TR",
+        "report_sha256": "2f066e37317283b5936d242e2ccf7928e0b9408ac982be3a192f807069a9ff01"
+      }
+    ],
+    "counterexamples": [
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX00",
+        "rc": 0,
+        "source_reconstructed": true,
+        "named_required": [],
+        "report_sha256": "ee1110117e1adf5cec73dc812d5ce5f3b83f96ada965760365565c7f5597a6af",
+        "output_sha256": "1dbd6cabb2d45a78b6ac3c1304f3fa7e93e638f6a7726cc03a7cf07bedf2a94a",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX01",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X2-01:WHATIF_SIDE_EFFECT[use WhatIf+Force]",
+          "X2-01:WHATIF_SIDE_EFFECT[connect WhatIf+Force]"
+        ],
+        "report_sha256": "1e2ff2448b492454f7414e4a3cdd8e731aea36130ff129f4145a19f55592bf35",
+        "output_sha256": "73b5a82bb179366103619bc0e7e3e85602034e095e0506abcc03436122d5b0c2",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX02",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X2-03:WRAPPER_WHATIF_LOST[wrapper status]"
+        ],
+        "report_sha256": "e1b53ceaa78a510f2a39490adb1dd6ca0325f9bd15ebb126121d6471a05949bd",
+        "output_sha256": "a2cfcff0d0f4fdb1bbdc1ddac31397a7be13d4fcf9b176ac67ac84f66fb1b5b0",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX03",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X2-04:ENDPOINT_WHATIF_LOST["
+        ],
+        "report_sha256": "6c5f7a410096f098fc3ab4f64cce7fb74b6ecaab07e0290d726f5a00b28b2221",
+        "output_sha256": "81a60a34d1ba199abca246a3387caec4eea3527f2df6f01562d17c17e2a26d82",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX04",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X3-01:SELECTION_LEAK["
+        ],
+        "report_sha256": "d78498bbe47a1587b06f448f8ed6d764a23c000f9ae3f785b6e1f03c793c328e",
+        "output_sha256": "0a6b9041b79004bc4b940162c4c805e1d0c54e00148072da550620ec2e4ad76c",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX05",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X4-02:HASH_BEFORE_IMPORT["
+        ],
+        "report_sha256": "0476ed27ccc4e30f8aa0c8e8d30fd441f10f134c2cb9dab0d9974a9c367b4d80",
+        "output_sha256": "88f766da14cf61705debd5989067ad6d65c659b8577227f59a7a4089b34681f8",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX06",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-01:INFERENCE_RETRIED[wire 500]"
+        ],
+        "report_sha256": "cd3cea68d887549a75e8198a84745eaa6cbb6b2ebfbb39354204657204e24d04",
+        "output_sha256": "ac64bbc42159977c2d006474ebdd22cb3a9df4b18f41cbff8a8f07f6330df909",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX07",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-02:MODEL_MATCH_NOT_ORDINAL[case alias]"
+        ],
+        "report_sha256": "c5cf2ec0bf79eae2e43c52326fb62febe85b7211fbd7ea88304e1273b42df7d2",
+        "output_sha256": "e5ae05909cfc5142d55b4f1e24ac67e1ca3dbab1ce88597cd2249ead987842de",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX08",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-03:PENDING_GUARD_BYPASS[malformed]"
+        ],
+        "report_sha256": "0cb6832863c0bbfa481f4e5c1967e92969bbbde94d0b09775e4b651e8f74f1fe",
+        "output_sha256": "36ce596eb3fee7d4546e8fa3061f4e5473c5fdb0106d6e28092e34d68b085f7a",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX09",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-07:SERVICE_BINDING_BYPASS[nssm wrapper start]"
+        ],
+        "report_sha256": "b0033331bbc46dba529049d9893aa4a38a111ced9361acf35c2ed2bbc954630f",
+        "output_sha256": "f262421407110b38ad9ee369c1e61d463c938285ee7f864017dfca90a1895dc1",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX10",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-08:UNVERIFIED_RUNTIME_USED[unreadable status]"
+        ],
+        "report_sha256": "e71a1b578b4388347aa710595aafc5325f1c73fdbd2a0f3b8ea1de8c7b866eca",
+        "output_sha256": "afa9612e8074cb0cf0cbd9447a07b61db175fea5665d3d1a5498944a807f8e07",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "id": "CX11",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-09:LISTENER_OWNERSHIP_BYPASS[wrong owner px models]",
+          "X5-09:LISTENER_OWNERSHIP_BYPASS[wire px models]"
+        ],
+        "report_sha256": "1e450dbf75f5d315834541eaed54f4bd996042f7fd7f44ab34b2f8fb4a2a0369",
+        "output_sha256": "570955fe8834959fcb3bafa050ae72ba7bba0ceb27745bd6e9478b7b06c5d59a",
+        "actual_ps_edition": "Desktop",
+        "actual_ps_version": "5.1.26100.9711",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX00",
+        "rc": 0,
+        "source_reconstructed": true,
+        "named_required": [],
+        "report_sha256": "f646998b3d6d6240034db40fc7deb8e62c513f1b0f0a2225de0f97ec715f9da6",
+        "output_sha256": "287beb1e1644aa1f18ad0e8d66435befdcb86f0a4adbe0a4a28a9fab7ad20651",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX01",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X2-01:WHATIF_SIDE_EFFECT[use WhatIf+Force]",
+          "X2-01:WHATIF_SIDE_EFFECT[connect WhatIf+Force]"
+        ],
+        "report_sha256": "c027b0c11b1da172442ec75b8eb0f24431b9e5f21eebfaec5da8c8d8f4e4bf5d",
+        "output_sha256": "6eb403134056f6d1845498c16e404e0b248feed880dc39f66137f635fc3e17cd",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX02",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X2-03:WRAPPER_WHATIF_LOST[wrapper status]"
+        ],
+        "report_sha256": "c81ebb1c5dd43817f30443a6feb3b148667078bd69c009a5c4aa0e55e1c0fc91",
+        "output_sha256": "108aaae0378dcf7c0f665778e2e7f6a22b4f1899eedb8a196f20ed20d686b212",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX03",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X2-04:ENDPOINT_WHATIF_LOST["
+        ],
+        "report_sha256": "7fe46fae2ce5618334b725a78e4dabb3ec21976a13934216754f9f7dcf01f09f",
+        "output_sha256": "adf981c7ff778c3891cf19d248e55606cb48209f4ed1c762b4d9bd3f17675228",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX04",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X3-01:SELECTION_LEAK["
+        ],
+        "report_sha256": "71f89207c7dfdef8ccc932b5663df127c9df75593cbed412000bf58cfd53b62d",
+        "output_sha256": "736237fa117ede3a8f792a0277725cff707b6c17666d9062a6ff80f3f54324be",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX05",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X4-02:HASH_BEFORE_IMPORT["
+        ],
+        "report_sha256": "42fbbe33ab449de42360c4440478d1b90b6a7eb84820c49a5312b3002500ef20",
+        "output_sha256": "4092258b80deae45d5ceff7c8642f6d7b934516412e8b6197671a0156aca6259",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX06",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-01:INFERENCE_RETRIED[wire 500]"
+        ],
+        "report_sha256": "ebb1de56af200f1a7f6a9197e2df3ed84784344188ab74c31cd64e90ee4bfbce",
+        "output_sha256": "0cbad5c7f6bdbdc4325bf7d207468a61c4059351fb330e8a6a34e749f6ebf439",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX07",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-02:MODEL_MATCH_NOT_ORDINAL[case alias]"
+        ],
+        "report_sha256": "80af5535d11ab1f97f0cfdac5fe671f23eb27154ea174c85d41af6d5afd8aa50",
+        "output_sha256": "551402d92fedcba7cd00b568925b0d3a15a93d5e87d024fdd6b4256879aea0c8",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX08",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-03:PENDING_GUARD_BYPASS[malformed]"
+        ],
+        "report_sha256": "5592fa70acb622d9281a75127f9cdf025b9368addb867538fac84ecf6c9c8798",
+        "output_sha256": "b2cc0d9bfcfe041ed5d92aa8335465ddb91c5ae4df25f8295f1946f43be6a8e7",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX09",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-07:SERVICE_BINDING_BYPASS[nssm wrapper start]"
+        ],
+        "report_sha256": "021445e00cbcde2fa406780f528f459f28199a34a7693e644573077673b1480a",
+        "output_sha256": "3c7ee9fa457f9f4c275662b3ed34aac23df103f38caadf369fe70569c26d823b",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX10",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-08:UNVERIFIED_RUNTIME_USED[unreadable status]"
+        ],
+        "report_sha256": "ed583d3a8fba45454c460ffd85a3a12f83bbe11f945345ccb536de6ccf1c5e51",
+        "output_sha256": "872e245986f0ee0703761637debc42ebb3157da2acf893bbc0f827399df5a20b",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "id": "CX11",
+        "rc": 1,
+        "source_reconstructed": true,
+        "named_required": [
+          "X5-09:LISTENER_OWNERSHIP_BYPASS[wrong owner px models]",
+          "X5-09:LISTENER_OWNERSHIP_BYPASS[wire px models]"
+        ],
+        "report_sha256": "88d281fe9c66d0a27b2d5fcd2e611c42d13964a890eb69b2b758aeb300f7affc",
+        "output_sha256": "2f5080e299a0ad7f974016f75339314663c5d0c5fbdd5493970e5e8c46b6364c",
+        "actual_ps_edition": "Core",
+        "actual_ps_version": "7.6.9",
+        "actual_culture": "tr-TR"
+      }
+    ],
+    "CIM_observations": [
+      {
+        "phase": "candidate-ps51",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 49652,
+          "harness_pid": 15080,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:49652",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:15080"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps7",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 55928,
+          "harness_pid": 18704,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:55928",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:55928",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:18704"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 56463,
+          "harness_pid": 17728,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:56463",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:56463",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:17728"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples/CX00",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 64456,
+          "harness_pid": 3280,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:64456",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:64456",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:3280"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples/CX01",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 57513,
+          "harness_pid": 19856,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:57513",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:57513",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:19856"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples/CX02",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 61542,
+          "harness_pid": 7788,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:61542",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:61542",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:7788"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples/CX03",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 65095,
+          "harness_pid": 19308,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:65095",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:65095",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:19308"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples/CX04",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 51023,
+          "harness_pid": 13028,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:51023",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:13028"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:51023",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples/CX05",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 51572,
+          "harness_pid": 22524,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:51572",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:51572",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:22524"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples/CX06",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 59364,
+          "harness_pid": 2284,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:59364",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:59364",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:2284"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples/CX07",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 57453,
+          "harness_pid": 16904,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:57453",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:57453",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:16904"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples/CX08",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 64900,
+          "harness_pid": 10724,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:64900",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:10724"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:64900",
+              "State": "System.Byte:9",
+              "OwningProcess": "System.UInt32:10724"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples/CX09",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 52915,
+          "harness_pid": 2980,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:52915",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:52915",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:2980"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples/CX10",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 64652,
+          "harness_pid": 4452,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:64652",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:64652",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:4452"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps51-counterexamples/CX11",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 56446,
+          "harness_pid": 18664,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:56446",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:56446",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:56446",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:56446",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:56446",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:56446",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:56446",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:56446",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:18664"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 60650,
+          "harness_pid": 11260,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:60650",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:60650",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:11260"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples/CX00",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 54561,
+          "harness_pid": 21636,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:54561",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:54561",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:21636"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples/CX01",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 53683,
+          "harness_pid": 22356,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:53683",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:53683",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:22356"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples/CX02",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 56448,
+          "harness_pid": 19688,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:56448",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:56448",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:19688"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples/CX03",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 51806,
+          "harness_pid": 18188,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:51806",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:51806",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:18188"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples/CX04",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 62200,
+          "harness_pid": 20020,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:62200",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:62200",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:20020"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples/CX05",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 51362,
+          "harness_pid": 21516,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:51362",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:51362",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:21516"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples/CX06",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 51738,
+          "harness_pid": 15572,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:51738",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:51738",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:15572"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples/CX07",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 52515,
+          "harness_pid": 13560,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:52515",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:52515",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:13560"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples/CX08",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 61434,
+          "harness_pid": 8860,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:61434",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:61434",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:8860"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples/CX09",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 61452,
+          "harness_pid": 14124,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:61452",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:14124"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:61452",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples/CX10",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 50774,
+          "harness_pid": 21556,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:50774",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:50774",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:21556"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      },
+      {
+        "phase": "candidate-ps7-counterexamples/CX11",
+        "actual_probe": {
+          "command": "param($Port) CimCmdlets\\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop",
+          "port": 60841,
+          "harness_pid": 2336,
+          "rc": "ok",
+          "error": null,
+          "records": [
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:60841",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:60841",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:60841",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:60841",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:60841",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:60841",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:60841",
+              "State": "System.Byte:11",
+              "OwningProcess": "System.UInt32:0"
+            },
+            {
+              "LocalAddress": "System.String:127.0.0.1",
+              "LocalPort": "System.UInt16:60841",
+              "State": "System.Byte:2",
+              "OwningProcess": "System.UInt32:2336"
+            }
+          ],
+          "verdict": "owned_listener_observed"
+        },
+        "limit": "owned-loopback readonly defaultquery onthisnativeuser only; notsession0remote/realProxima/auth/deployment assurance"
+      }
+    ],
+    "F03_old_H3_behavior": [
+      {
+        "phase": "old-h3-ps51",
+        "actual_wrong_owner_token_present": true,
+        "wire_px_models_requests": 1,
+        "wire_px_models_auth": 1,
+        "uncredited_diagnostic_failures": [
+          "X5-06",
+          "X6-01"
+        ]
+      },
+      {
+        "phase": "old-h3-ps7",
+        "actual_wrong_owner_token_present": true,
+        "wire_px_models_requests": 1,
+        "wire_px_models_auth": 1,
+        "uncredited_diagnostic_failures": [
+          "X5-06",
+          "X6-01"
+        ]
+      }
+    ],
+    "F01": "H4 retained raw endpoint valid COM-U00C2/LPT-U00C2 handshakes, typedWhatIf/ambientfalse/earlynoimport/positivehashes checked on both runtimes via all30nestedsets.",
+    "F02": {
+      "negative": {
+        "expected_rejection": true,
+        "strict_checker_child_rc": 1,
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+          "-B",
+          "/workspace/scratch/proxima-p1-s2-20261108/g4-f02-negative-check.py"
+        ],
+        "reason": "g4_native_evidence.MissingNestedArtifact: MISSING_NESTED_ARTIFACT:endpoint-report:child\\endpoint-out-0.json",
+        "deleted_copy_relative": "evidence/candidate-ps51/pxctl-evid-689d691b9b58/child/endpoint-out-0.json",
+        "original_sha256_unchanged": "93093d7d66a7d401bdaf7bc319345d10cab4df0030cb93abbb11755c3e44468f",
+        "negative_script_sha256": "c16fbee04f192a5dbada5f8abdb8b6dd31381b685848b274c2d27c4f25916576",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "ce5e34b7dd92d72b908d312e2841ef179643036d63ec0adbc7db1240289bdff1",
+        "parent_verifier_sha256": "a2becc5081281208d6ec262fd7e51e4df997a380a5d034b85761340244ef4b23"
+      },
+      "result_sha256": "d2cac04c76314b7fd79e202e92e94b8853c546f5b0c25bb0ebc342cf26a0a878",
+      "independent_readonly_check": "Existing deleted private copy rejected exact MissingNestedArtifact endpoint-report token; child rc1/stdout/stderr hashes and unchanged original endpoint report verified."
+    },
+    "cleanup": "Measured byte maps equal before/after; clean Git statuses; candidate fixture trees removed; durable nested proof retained outside cleanup ancestors; sentinels intact, wires stopped, lock released empty.",
+    "host": "Preflight/after records identical; ACP1252 both; ProximaGateway service0 and Proxima process0.",
+    "lock_release_sha256": "934e470fa80cba9767199cb85dc59622c6980cbee5146976986bc92eab1865ac"
+  },
+  "linux": {
+    "receipt_sha256": "212a23fe758404227ea6b053a303e7d1c3dcc2048e7efdf3591200e0d42d3523",
+    "evidence_sha256": "e738962cb5f999c916a83e1185a07973f979133ba8bddb7e4950e81b4e1f8135",
+    "output_sha256": "7a1acba3bd10c8fc794e61cc9f2e42d0a2c593c3d3c570ffb37c70bda5268e55",
+    "actual_child_rc": 0,
+    "positive": "1777/1777",
+    "before_after_identity_clean_equal": true,
+    "runner_catalog_command_binary_hashes_checked": true,
+    "ruff": "12 existing F821, bare rc1, delta0",
+    "release_strict": "184/184 rc0",
+    "admission": "exact H/B, pinned canonical B checkerblob match, rc0",
+    "commands": [
+      {
+        "label": "admission",
+        "rc": 0,
+        "log_sha256": "c2fb18cfbd8f1e249ea525601b84bf6e76fb7b6925c292d84b2e1590a6b0c2b3",
+        "log_bytes": 140
+      },
+      {
+        "label": "diff-check",
+        "rc": 0,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "log_bytes": 0
+      },
+      {
+        "label": "numstat",
+        "rc": 0,
+        "log_sha256": "0956b2fdc1aa5e1bcff4ddfe5e0b24d97d87a117e3a65ec49001b0c95e63d719",
+        "log_bytes": 189
+      },
+      {
+        "label": "ruff",
+        "rc": 1,
+        "log_sha256": "5835093cb70b78d86e5313c6730bbe6db9d096cd5963f54707aa58cbe97cb425",
+        "log_bytes": 5035
+      },
+      {
+        "label": "worker-manifest",
+        "rc": 0,
+        "log_sha256": "66718b6d622f749f2dc3a1bf896d19a7b81562fc0a3bdf7fd671acae522cf58a",
+        "log_bytes": 31007
+      },
+      {
+        "label": "worker-release-verify",
+        "rc": 0,
+        "log_sha256": "0968bbd87b9c51b89131cdfd9433c26b4392a6c87ee138746fad5bb4a66873bc",
+        "log_bytes": 20803
+      },
+      {
+        "label": "full-selftest-lifecycle",
+        "rc": 0,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "log_bytes": 0
+      }
+    ]
+  },
+  "preflight": {
+    "source_sha256": "5cbd13dc3ff163c2c45ced0a546f93fa8953982d43f7284bba55863a5bab1597",
+    "tool_stdout_sha256": "7334959034b6ce0e0e00a3ce14ed652a713f3645ec47e511fdfd0a737126421b",
+    "tool_rc": 0,
+    "recorded_before_linux_heavy": true,
+    "prospective_CI_plan_only": true
+  },
+  "handoff_sha256": "b95404162058dc126ccd8ded785058ba93ce62bfd7c05db996d75f562e16a9db",
+  "method": "Read CONTINUE-R4/handoff/checker source; executed only checker pure-read prefix with immutable Git blob replacements, independently checked ZIP/manifest/logs/output markers/negative existing copy. Did not run one-shot verifier, negative child, product tests, models, remote probes or mutate any source.",
+  "limits": [
+    "Auxiliary source/log audit only; formal_code_approval=false. F03 has native test evidence; fresh formal review3 remains required. Prior H3 approval is not H4 approval.",
+    "Author handoff explicitly says every author test NOT_RUN. Later dispatcher/native/Linux evidence is separate and does not rewrite that history.",
+    "Actual default CIM observations concern only an owned 127.0.0.1 listener under this native user. They do not prove remote WinRM/session0 permissions or real Proxima deployment/listener layout.",
+    "No Windows CI, activation, actual Proxima gateway/service/auth changes or LIVE measured. Wire tests use owned fixtures/dummy credentials.",
+    "IPv6-only listener unsupported; listener ownership check is a snapshot and TOCTOU remains a declared limitation.",
+    "Decoded merged child output is text capture, not original OS raw-byte output identity. Retained scripts/inputCLIXML/rawreports verified as file bytes.",
+    "Old H3 primitive-table/count/static diagnostics are not behavioral kill credit. Baseline API_ABSENT failures have no setup error and are expected controls."
+  ],
+  "digest_sha256": "b89ff8c54e5087fda8dbcc831ed1ba1ab800cc331d4f1d055dfd72bd1ec8661c"
+}

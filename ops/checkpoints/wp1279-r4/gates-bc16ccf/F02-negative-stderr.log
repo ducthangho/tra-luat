@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspace/scratch/proxima-p1-s2-20261108/g4-f02-negative-check.py", line 8, in <module>
+    verify_nested(rep,mapped,True)
+  File "/workspace/scratch/proxima-p1-s2-20261108/g4_native_evidence.py", line 36, in verify_nested
+    if not p.is_file():raise MissingNestedArtifact('MISSING_NESTED_ARTIFACT:'+a['role']+':'+a['rel'])
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+g4_native_evidence.MissingNestedArtifact: MISSING_NESTED_ARTIFACT:endpoint-report:child\endpoint-out-0.json

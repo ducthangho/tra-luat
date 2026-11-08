@@ -1,0 +1,16 @@
+{
+  "expected_rejection": true,
+  "strict_checker_child_rc": 1,
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "-B",
+    "/workspace/scratch/proxima-p1-s2-20261108/g4-f02-negative-check.py"
+  ],
+  "reason": "g4_native_evidence.MissingNestedArtifact: MISSING_NESTED_ARTIFACT:endpoint-report:child\\endpoint-out-0.json",
+  "deleted_copy_relative": "evidence/candidate-ps51/pxctl-evid-689d691b9b58/child/endpoint-out-0.json",
+  "original_sha256_unchanged": "93093d7d66a7d401bdaf7bc319345d10cab4df0030cb93abbb11755c3e44468f",
+  "negative_script_sha256": "c16fbee04f192a5dbada5f8abdb8b6dd31381b685848b274c2d27c4f25916576",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "ce5e34b7dd92d72b908d312e2841ef179643036d63ec0adbc7db1240289bdff1",
+  "parent_verifier_sha256": "a2becc5081281208d6ec262fd7e51e4df997a380a5d034b85761340244ef4b23"
+}

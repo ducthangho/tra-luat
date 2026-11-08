@@ -11399,12 +11399,17 @@ def _init_case1174(kind):
             assert m._1174_initial(admission) == initial
             assert original.hex().encode() not in m._1174_bytes(admission) and json.loads(initial)["hmac_key"].encode() not in m._1174_bytes(admission)
             assert m._1174_derive_key(bytes(range(32)), "fixture-enrollment-1", "0" * 64, 1174, 1) == "351b0edc1ae29dc21565456cf6dd68b5cea6c63c7d0efd9b208318b77df11e5e"
+            target.write_bytes(initial)
+            exact_existing = target.read_bytes()
+            with patch.object(m, "_1174_probe", return_value={}) as preflight_probe:
+                _reject1174(m._1174_initialize, args, admission, None, reason="fresh init absence/revision")
+            assert not preflight_probe.called and target.read_bytes() == exact_existing and not witness.exists()
             target.write_bytes(b"foreign\n")
         entry = {path: path.read_bytes() if path.exists() else None for path in (target, witness)}
         before = set(c.tmp.iterdir())
         with patch.object(m, "_1174_probe", return_value=dict(profile="fixture_only")) as probe:
             if kind in ("preflight", "resume_mismatch"):
-                _reject1174(m._1174_initialize, args, admission, entry[witness])
+                _reject1174(m._1174_initialize, args, admission, entry[witness], reason="fresh init absence/revision" if kind == "preflight" else "resume-init exact reserved/full target")
                 assert not probe.called
                 assert set(c.tmp.iterdir()) == before
                 assert all((path.read_bytes() if path.exists() else None) == raw for path, raw in entry.items())
@@ -12709,7 +12714,7 @@ MUTANTS.update({
     "m1174_init_preflight": ('and not exists, "fresh init absence/revision"','and True, "fresh init absence/revision"',["wp1174_init_preflight"]),
     "m1174_init_resume_absent": ('_1174_write(target, initial, create=True)', '_1174_write(target, _1174_bytes(dict(state,state_revision=1)), create=True)', ['wp1174_init_resume_absent']),
     "m1174_init_resume_full": ('_1174_write(witness_path, last, create=False)','pass # omit resumed witness advance',["wp1174_init_resume_full"]),
-    "m1174_init_resume_mismatch": ('(not exists or _1174_read(target) == initial), "resume-init exact reserved/full target"','True, "resume-init exact reserved/full target"',["wp1174_init_resume_mismatch"]),
+    "m1174_init_resume_mismatch": (['(not exists or _1174_read(target) == initial), "resume-init exact reserved/full target"', '_1174_recheck_durable(target, initial)'], ['True, "resume-init exact reserved/full target"', 'pass # omit reused-target byte/durability recheck'], ["wp1174_init_resume_mismatch"]),
     "m1174_adopt_import_first": ('origin="imported_lineage", pending_adoption=op', 'origin="imported_lineage", pending_adoption=None', ['wp1174_adopt_import_first']),
     "m1174_adopt_intent_cutover": ('_1174_write(source, retired, create=False)', 'pass # omit durable tombstone', ['wp1174_adopt_intent_cutover']),
     "m1174_adopt_abandon_prepare": ('kind = "aborted_intent" if not exists else "aborted"', 'kind = "aborted"', ['wp1174_adopt_abandon_prepare']),

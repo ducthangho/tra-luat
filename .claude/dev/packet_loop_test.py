@@ -11722,6 +11722,10 @@ def _cached1174(c):
     assert (target.read_bytes(), witness.read_bytes()) == pair
 
 
+def _windows_oracle_emit1174(record):
+    print("WP1174_WINDOWS_ORACLE_V1 " + json.dumps(record, sort_keys=True))
+
+
 def _windows1174(c):
     m = _module1174(c)
     assert _call1174(m._1174_platform, "Linux", "ext4", 0xEF53) is True
@@ -11759,11 +11763,11 @@ def _windows1174(c):
     root = c.script.parents[2]
     head = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
     tree = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD^{tree}"], text=True).strip()
-    print("WP1174_WINDOWS_ORACLE_V1 " + json.dumps(dict(schema="wp1174_windows_oracle.v1", head=head, tree=tree,
+    _windows_oracle_emit1174(dict(schema="wp1174_windows_oracle.v1", head=head, tree=tree,
         actual_os="Windows", original_module_sha256=hashlib.sha256(c.script.read_bytes()).hexdigest(),
         mutated_module_sha256=hashlib.sha256(product.read_bytes()).hexdigest(), mutation_id="m1174_allow_windows",
         kind="pure_platform_guard", executed=1, killed_by_assertion=killed, positive_control="passed",
-        real_cli_rejection_rc=rc, unchanged=True, no_dispatch=True), sort_keys=True))
+        real_cli_rejection_rc=rc, unchanged=True, no_dispatch=True))
 
 
 def _required1174(outcomes, required):
@@ -12935,15 +12939,15 @@ def _secret_channels1174(c):
         finally:
             if old_facts is None:globals().pop("_WP1174_NATIVE_FACTS",None)
             else:globals()["_WP1174_NATIVE_FACTS"]=old_facts
-    # The existing Windows unit oracle owns its single platform mutant. Capture
-    # its real emission path here with fixture Git identity on the Linux host.
-    directory=c.tmp/"secret-windows";directory.mkdir();out,err=io.StringIO(),io.StringIO()
-    check_output=subprocess.check_output
-    def git_identity(argv,*args,**kw):
-        if argv[:1]==["git"] and argv[-2:-1]==["rev-parse"]:return "1"*40+"\n"
-        return check_output(argv,*args,**kw)
-    with patch.object(platform,"system",return_value="Windows"),patch.object(subprocess,"check_output",side_effect=git_identity),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
-        _windows1174(Ctx(c.script,directory))
+    # Exercise the same serializer as the native Windows-only unit record.
+    # These are fixture fields; no Windows unit mutant or CLI runs on Linux.
+    out,err=io.StringIO(),io.StringIO()
+    windows=dict(schema="wp1174_windows_oracle.v1",head="1"*40,tree="2"*40,actual_os="Windows",
+        original_module_sha256=hashlib.sha256(c.script.read_bytes()).hexdigest(),mutated_module_sha256="3"*64,
+        mutation_id="m1174_allow_windows",kind="pure_platform_guard",executed=1,killed_by_assertion=1,
+        positive_control="passed",real_cli_rejection_rc=8,unchanged=True,no_dispatch=True)
+    with contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
+        _windows_oracle_emit1174(windows)
     assert "WP1174_WINDOWS_ORACLE_V1 " in out.getvalue()
     channels.update(windows_unit_record=out.getvalue(),windows_stderr_traceback=err.getvalue())
     _secret_absence1174(seed,key,**channels)

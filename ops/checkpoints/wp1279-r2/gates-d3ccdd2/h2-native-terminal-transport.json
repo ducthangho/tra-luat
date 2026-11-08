@@ -1,0 +1,14 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "[Reading 16 new lines (total: 67 lines)]\n\n{\"finished\": \"candidate-ps51\", \"rc\": 0, \"seconds\": 39.203}\r\n{\"start\": \"baseline-ps7\"}\r\n{\"finished\": \"baseline-ps7\", \"rc\": 1, \"seconds\": 1.234}\r\n{\"start\": \"candidate-ps7\"}\r\n{\"finished\": \"candidate-ps7\", \"rc\": 0, \"seconds\": 16.797}\r\n{\"start\": \"candidate-ps51-counterexamples\"}\r\n{\"finished\": \"candidate-ps51-counterexamples\", \"rc\": 0, \"seconds\": 216.484}\r\n{\"start\": \"candidate-ps7-counterexamples\"}\r\n{\"finished\": \"candidate-ps7-counterexamples\", \"rc\": 0, \"seconds\": 226.734}\r\n{\"start\": \"baseline-status-after\"}\r\n{\"finished\": \"baseline-status-after\", \"rc\": 0, \"seconds\": 0.297}\r\n{\"start\": \"candidate-status-after\"}\r\n{\"finished\": \"candidate-status-after\", \"rc\": 0, \"seconds\": 0.094}\r\n{\"start\": \"host-after\"}\r\n{\"finished\": \"host-after\", \"rc\": 0, \"seconds\": 1.485}\r\n{\"measurement\": \"C:\\\\tl-win\\\\wp1279-r2-g2\\\\measure2-d3ccdd215a43\\\\measurement.json\", \"normal_comparison_passed\": true, \"counterexamples_passed\": true}\r\n✅ Process completed with exit code 0 (runtime: 528.80s)"
+    },
+    {
+      "type": "text",
+      "text": "\n[executed on device: DESKTOP-T9R33P2 (a5f7076e-a491-4f84-829b-8d1fbcc1c767)]"
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

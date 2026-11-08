@@ -1,0 +1,325 @@
+{
+  "gate_status": "passed",
+  "formal_code_approval": false,
+  "head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+  "tree": "876ddb578234a9c990e1a2989a5859023fbbc0b4",
+  "base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "archive_sha256": "a0affc9e01eab7a7de2a4e4be85ba676a4c1da5f01891706b301e6725a0a7d46",
+  "archive_bytes": 760277,
+  "source_files_verified": 257,
+  "operator_input_harness_sha256": "035db643109fbfb693de6244d01122c2b576c33c3f69baa3f1d4cb34c31f00f3",
+  "verified_counterexample_children": [
+    {
+      "phase": "candidate-ps51-counterexamples",
+      "id": "CX00",
+      "rc": 0,
+      "source_reconstructed": true,
+      "named_required": [],
+      "report_sha256": "2d4992a5cd8054d89fea2dbf98aed79682389d13ead156ce60036b6e18e2d29b",
+      "output_sha256": "fa0071a64f984374d45b8a2f328b655294a17539c1ee4326e144b97760385893",
+      "actual_ps_edition": "Desktop",
+      "actual_ps_version": "5.1.26100.9711",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps51-counterexamples",
+      "id": "CX01",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X2-01:WHATIF_SIDE_EFFECT[use WhatIf+Force]",
+        "X2-01:WHATIF_SIDE_EFFECT[connect WhatIf+Force]"
+      ],
+      "report_sha256": "b3072a14587a085305c387f71cdf0c0abb0201bcc936ee87527acd682fc10dda",
+      "output_sha256": "2c4424a4fa3d3723846cc392d08703b0fb990d4f6a8f9744e4b01157b8ab12ca",
+      "actual_ps_edition": "Desktop",
+      "actual_ps_version": "5.1.26100.9711",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps51-counterexamples",
+      "id": "CX02",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X2-03:WRAPPER_WHATIF_LOST[wrapper status]"
+      ],
+      "report_sha256": "147f252045a9d608ba98b97f94641cb5ec9c4ab04acdd556057b65ad019ba29d",
+      "output_sha256": "2f5a22be55330d2e4e3e4f2ee5b70da73905885752d47f294e50bd3ae3adf44e",
+      "actual_ps_edition": "Desktop",
+      "actual_ps_version": "5.1.26100.9711",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps51-counterexamples",
+      "id": "CX03",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X2-04:ENDPOINT_WHATIF_LOST["
+      ],
+      "report_sha256": "47d9edbfe904e303f7b651fbfb91c98e46d68e82d35e06c6dcea1990cecef545",
+      "output_sha256": "ea08040e80732d8e201951ec22745b403002bcca2a7b60bdb31b448a2f206450",
+      "actual_ps_edition": "Desktop",
+      "actual_ps_version": "5.1.26100.9711",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps51-counterexamples",
+      "id": "CX04",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X3-01:SELECTION_LEAK["
+      ],
+      "report_sha256": "34174ad73bd4feb705a2c2c4d4ae8c1a710733b9f703c3d551ac07a620ae5ce8",
+      "output_sha256": "f28aa6ddc650d5e061ee666bbbfe1a006d0a12f85df429f6fa7be076e984a087",
+      "actual_ps_edition": "Desktop",
+      "actual_ps_version": "5.1.26100.9711",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps51-counterexamples",
+      "id": "CX05",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X4-02:HASH_BEFORE_IMPORT["
+      ],
+      "report_sha256": "9d4b886d1fc80c6444d377cc84180cd0646307170a70a370348d66e34cea5992",
+      "output_sha256": "a2da39ae17d988020d3cca01ca52301e9e8a1e178e4d97aef6e29fc5ac13b113",
+      "actual_ps_edition": "Desktop",
+      "actual_ps_version": "5.1.26100.9711",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps51-counterexamples",
+      "id": "CX06",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X5-01:INFERENCE_RETRIED[wire 500]"
+      ],
+      "report_sha256": "c33d6d03efb1ff0f6302ef5b941b6ce2f9fe0e5bb2eabfc48de88d0e660472a6",
+      "output_sha256": "62e166e8f6429ffea3e19e01bdbea2b32e4baee3d8937dc7ee00bf17bb585a82",
+      "actual_ps_edition": "Desktop",
+      "actual_ps_version": "5.1.26100.9711",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps51-counterexamples",
+      "id": "CX07",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X5-02:MODEL_MATCH_NOT_ORDINAL[case alias]"
+      ],
+      "report_sha256": "70d0dfa5bfd71ec5b22c195e0b71bd4da7023d5dae941725ef77d678195ca332",
+      "output_sha256": "55e4485fd60781832583388cbcbef5ae7f5315c2f6c25be7ae979bd494ae7aa7",
+      "actual_ps_edition": "Desktop",
+      "actual_ps_version": "5.1.26100.9711",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps51-counterexamples",
+      "id": "CX08",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X5-03:PENDING_GUARD_BYPASS[malformed]"
+      ],
+      "report_sha256": "e43a9e001fd39e9412885f7fd3675da3ba8e71d0309a4b060b7e0ac8457b6a6d",
+      "output_sha256": "65ebfa58b10594903365f35d62acfaf129caa5837df0c81beedd7ed232ba6295",
+      "actual_ps_edition": "Desktop",
+      "actual_ps_version": "5.1.26100.9711",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps51-counterexamples",
+      "id": "CX09",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X5-07:SERVICE_BINDING_BYPASS[nssm wrapper start]"
+      ],
+      "report_sha256": "7d398676b304e113b6902c0d4ecb0372500d288958ea31a8ece76b208bb18033",
+      "output_sha256": "1bd939e2509d94d7d5a23fe5d45999b9ede54b250d79b87afd62b202366a00a2",
+      "actual_ps_edition": "Desktop",
+      "actual_ps_version": "5.1.26100.9711",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps51-counterexamples",
+      "id": "CX10",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X5-08:UNVERIFIED_RUNTIME_USED[unreadable status]"
+      ],
+      "report_sha256": "aa2a6dab4c4d85444df40626768f0074d9539563cfc28cb3c696b97d1c4fd5bc",
+      "output_sha256": "a492d515a2104173d1f0071275a24aaf361a0cc1c58da441fe766d6fff79a52b",
+      "actual_ps_edition": "Desktop",
+      "actual_ps_version": "5.1.26100.9711",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps7-counterexamples",
+      "id": "CX00",
+      "rc": 0,
+      "source_reconstructed": true,
+      "named_required": [],
+      "report_sha256": "b90992199fa15e5db3517aebe62e1df8a5890f8aceb0b4800f30441aff7c4054",
+      "output_sha256": "a702d386d323e367a22c49e1308934427bb6f86c5645b94bfab0c62d34f18217",
+      "actual_ps_edition": "Core",
+      "actual_ps_version": "7.6.9",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps7-counterexamples",
+      "id": "CX01",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X2-01:WHATIF_SIDE_EFFECT[use WhatIf+Force]",
+        "X2-01:WHATIF_SIDE_EFFECT[connect WhatIf+Force]"
+      ],
+      "report_sha256": "53ef8b05e0b020eb4d8b1750857ceaf03523dfe4e63143ffacdbc21c746aa644",
+      "output_sha256": "04adc77f11806afda1d7a8575d2d49c73debdee969770b9933a1175a89813104",
+      "actual_ps_edition": "Core",
+      "actual_ps_version": "7.6.9",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps7-counterexamples",
+      "id": "CX02",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X2-03:WRAPPER_WHATIF_LOST[wrapper status]"
+      ],
+      "report_sha256": "a2ffdd75a345a22ccb7d3d3dd158f807c05423c1c27c19218ca2fe2e5a9a4c80",
+      "output_sha256": "ff6dc01589c62092e72a2e459ac09f0c6312513efb7f96e90de73b9025a6fd82",
+      "actual_ps_edition": "Core",
+      "actual_ps_version": "7.6.9",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps7-counterexamples",
+      "id": "CX03",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X2-04:ENDPOINT_WHATIF_LOST["
+      ],
+      "report_sha256": "83e1f0276b188d451ccbed9ba4c5da3a3aa1950144d92b312c6fa4ec357570bb",
+      "output_sha256": "ba103d413955bfdc2fcd50c7a19b956536c68c0f687e47c83bcdf492cd686e1e",
+      "actual_ps_edition": "Core",
+      "actual_ps_version": "7.6.9",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps7-counterexamples",
+      "id": "CX04",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X3-01:SELECTION_LEAK["
+      ],
+      "report_sha256": "45ad6b755895fb3ea97f20a1f977dfba617bc4443d68785bd48821a5bc673df1",
+      "output_sha256": "6280eaec7dd41e213631c10611b2f5461b0d725d746e5165b3e0698d80157adb",
+      "actual_ps_edition": "Core",
+      "actual_ps_version": "7.6.9",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps7-counterexamples",
+      "id": "CX05",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X4-02:HASH_BEFORE_IMPORT["
+      ],
+      "report_sha256": "7986633cb42951ac426827278d60d5fddccdc4369c6049c9d2d4040c1397898c",
+      "output_sha256": "4aede019a91173b34df015b38f6a4e94e3e467d020d49f3f609b9c1de1d9c5cf",
+      "actual_ps_edition": "Core",
+      "actual_ps_version": "7.6.9",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps7-counterexamples",
+      "id": "CX06",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X5-01:INFERENCE_RETRIED[wire 500]"
+      ],
+      "report_sha256": "ecb55a6a80197c180a6b951353359507b3b0f7daaad106c4c5d3cc4b24ce0969",
+      "output_sha256": "88bf64ac6c13c33d42ecc215916f1cf3a8a5e7eb29e4704bd4c8afa1a2188b29",
+      "actual_ps_edition": "Core",
+      "actual_ps_version": "7.6.9",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps7-counterexamples",
+      "id": "CX07",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X5-02:MODEL_MATCH_NOT_ORDINAL[case alias]"
+      ],
+      "report_sha256": "fda66554cff0d5da96277d94da6dbea3338ed1ed7c88fc3f1ba31ba8521ccc5a",
+      "output_sha256": "3f1c3da63787b56bcfe0a04937b3cda5f78de379b161a665c24e8fd9f04a988d",
+      "actual_ps_edition": "Core",
+      "actual_ps_version": "7.6.9",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps7-counterexamples",
+      "id": "CX08",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X5-03:PENDING_GUARD_BYPASS[malformed]"
+      ],
+      "report_sha256": "b91dcaa3e3768b79c645d01160cb4328b02cfa2ceb734ac9728a974c93d023f9",
+      "output_sha256": "469b58fff8ee6fce2f9e877f8f82996a990bdcd7f48df970f024722850098488",
+      "actual_ps_edition": "Core",
+      "actual_ps_version": "7.6.9",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps7-counterexamples",
+      "id": "CX09",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X5-07:SERVICE_BINDING_BYPASS[nssm wrapper start]"
+      ],
+      "report_sha256": "7f9a50078ae058a1d8907e8c3b9e10cd1ba62a9b3dd833c4e5e33199efef8950",
+      "output_sha256": "f6f34d01cd8ca826c93c410987fedd5cdf4e5b60634105ff72d8d00aef90f1a4",
+      "actual_ps_edition": "Core",
+      "actual_ps_version": "7.6.9",
+      "actual_culture": "tr-TR"
+    },
+    {
+      "phase": "candidate-ps7-counterexamples",
+      "id": "CX10",
+      "rc": 1,
+      "source_reconstructed": true,
+      "named_required": [
+        "X5-08:UNVERIFIED_RUNTIME_USED[unreadable status]"
+      ],
+      "report_sha256": "e4084eb63def8e418e392e6477efb4952880ffdcc8dfc360cc50d1d0b5679a65",
+      "output_sha256": "381d4f53dfcacac316448d8ad1f5b3a2405ecf29af6c6207838023d704f658ba",
+      "actual_ps_edition": "Core",
+      "actual_ps_version": "7.6.9",
+      "actual_culture": "tr-TR"
+    }
+  ],
+  "normal": "both25/25rc0/en-US;baselineboth25API_ABSENTrc1/no setup",
+  "focused": "both36/36rc0/tr-TR; unmodifiedcontrolplus10actualnamedkillsperruntime",
+  "cleanup": "before/after measuredGit/filesystembytes identical; parenttree removed, sentinel intact, wires stopped, lockreleasedempty",
+  "measured_at": "2026-11-08T05:42:15.018304+00:00",
+  "verifier_sha256": "cb37a5e1e522600804c7540ed498bdd6c24b313b2c21c4efcf0c1c0380c4a5c2",
+  "limitations": "Native isolated language/serialization/ownedfixtures only, no realWinRM/service/gateway/auth/provenance/activation; modelreview pending. Archive source-byte hashes are native retained original file bytes; DesktopCommander terminal transport is received Unicode serialization, no remote raw-byte claim."
+}

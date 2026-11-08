@@ -1,0 +1,16 @@
+{
+  "recorded_at": "2026-11-08T05:36:27.690772+00:00",
+  "clone": "/workspace/scratch/wp1279-code-review-d3ccdd2",
+  "head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+  "tree": "876ddb578234a9c990e1a2989a5859023fbbc0b4",
+  "base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "canonical_K1": "unmodified pinnedB _spec_merge accepted exactfrozenr2source",
+  "spec_sha256": "489419bf05bbd416f5aafcf0f134aade59d96f9781244535c0dd1ddf5f68100c",
+  "ref_mirror": "/workspace/scratch/proxima-p1-s2-20261108/review1-ref-mirror.git",
+  "ref_mirror_heads_sha256": "a727e6756435b56c9ae5bc2f6c783621c990ed016fa7bc7c1e7bc1bb0cc85122",
+  "ref_mirror_head_count": 738,
+  "cli": "codex-cli0.163.0",
+  "login_status": "Logged in using ChatGPT",
+  "requested_reviewer": "gpt-6.1-sol/xhigh; actualheader/runtime evidence pending",
+  "model_invoked": false
+}

@@ -1,0 +1,32 @@
+{
+  "kind": "dispatcher_recorded_summary_of_actual_aux_auditor_final",
+  "agent": "/root/tl_auditor",
+  "provider": "openai_codex",
+  "execution_surface": "codex_service",
+  "transport": "managed collaboration subagent",
+  "actual_model": "KHONG_DO_DUOC",
+  "formal_code_approval": false,
+  "shared_call": 2,
+  "head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+  "tree": "876ddb578234a9c990e1a2989a5859023fbbc0b4",
+  "base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "recorded_at": "2026-11-08T05:45:46.756810+00:00",
+  "results": {
+    "linux": "1777/1777 childrc0;7logs hashes/sizes match",
+    "ruff": "12existingF821 rc1 delta0",
+    "admission": "exactH/base/canonicalchecker rc0",
+    "strictmanifest": "184/184 rc0",
+    "nativebaseline": "both25API_ABSENTrc1 no setup",
+    "nativecandidate": "both25/25en-USrc0",
+    "nativefocused": "both36/36tr-TRrc0;none not_run withinfocused scope",
+    "verified_children": 22,
+    "source_reconstruction": "fromH2blobs everymutant byteexact;commands/record/report/output/culture/runtime/hash allmatch",
+    "positive_control": "CX00perruntime25/25rc0,notkill",
+    "named_kills": "CX01-CX10bothrc1 withmandatoryfailedcaseandtoken",
+    "priorfourXIDs": "allpassedatH2",
+    "source_archive": "760277bytes SHAa0affc9e01eab7a7de2a4e4be85ba676a4c1da5f01891706b301e6725a0a7d46;257/257manifest+extractedbytesmatch",
+    "cleanup": "cleanmeasuredidentity/filesystembytes unchanged,sentinelintact,wiresstopped,lockreleased;candidatefixturetreegone;CXsource/report/output/recordoutsidecleanupretained"
+  },
+  "findings": "no material evidence discrepancy seen; NOT codeapproval",
+  "limits": "isolatedfixtures; no realWinRM/service/gateway proof. H1Get-PSSessionmarkerwascommentfalsepositive,notactualinvocation. This file is dispatcher summary of actual delivered auxiliary final, not a claimed byte-original model verdict file."
+}

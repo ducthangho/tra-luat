@@ -1,0 +1,33 @@
+{
+  "packet": 1285,
+  "revision": 4,
+  "generation": 5,
+  "owner_instruction": "Chuy\u1ec3n agy sang codex l\u00e0m executore v\u00e0 reviewer. Reviewer ch\u1ecdn m\u00f4 h\u00ecnh ho\u1eb7c effort cao h\u01a1n",
+  "scope": "same3paths450, B fixed H2continuation, no lateAGY import",
+  "executor": {
+    "provider": "codex",
+    "model": "gpt-6.1-sol",
+    "effort": "high"
+  },
+  "reviewer": {
+    "provider": "codex",
+    "model": "gpt-6.1-sol",
+    "effort": "xhigh",
+    "independence": "fresh context/read-only separate clone/no fork"
+  },
+  "assurance": "same_provider only; sensitive promotion HOLD, no cross_approved/human_audited fabrication",
+  "nang_tran": {
+    "ai_nang": "ducthangho via standing full scoped delegation plus latest explicit Codex replacement instruction",
+    "can_cu": "AGY actualgeneration unknown; conservative costreserve1 retained, one replacement Codex invocation needed",
+    "tran_cu": "product3/formal3/shared10/push1/3paths450",
+    "tran_moi": "product4TOTAL/formal3/shared10/push1/3paths450"
+  },
+  "actual_author_runs_known": 2,
+  "agy_generation": "UNKNOWN reserve1",
+  "codex_replacement_invocations_allowed": 1,
+  "used_formal": 2,
+  "used_shared": 4,
+  "used_primarypush": 0,
+  "old_generation_output": "quarantined; never import staleAGY afterrevocation",
+  "stop_request": "only PID29460 exact creation/exe/command identity, outcome pending; transport failure not deadproof"
+}

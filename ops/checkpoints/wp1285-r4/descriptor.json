@@ -1,0 +1,32 @@
+{
+  "packet_id": "wp1285",
+  "revision": 4,
+  "generation": 5,
+  "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "continuation": "883d37826f443ce9301dd0bcd40cd5f97f1adf0e",
+  "spec_sha256": "d4d77fed9885697eec38e34513e7e3df2e914c38435ce3c11b4b2da1ba4d61df",
+  "effective_write_set": [
+    ".agents/skills/proxima-control/scripts/ProximaControl.psd1",
+    ".agents/skills/proxima-control/SKILL.md",
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+  ],
+  "write_set_hash": "0bbe3df51f38b0d334fcb5e35ada62ac95ac3eb1b1e28b4e9b5385a396a002aa",
+  "effective_review_class": "sensitive",
+  "change_policy_sha": null,
+  "land_obligations": [],
+  "authority": "NEW manual descriptor only r4, owner explicit Codexpair/higherrevieweffort; sameproviderassurance HOLD",
+  "nang_tran": {
+    "ai_nang": "ducthangho via standing full scoped delegation plus latest explicit Codex replacement instruction",
+    "can_cu": "AGY actualgeneration unknown; conservative costreserve1 retained, one replacement Codex invocation needed",
+    "tran_cu": "product3/formal3/shared10/push1/3paths450",
+    "tran_moi": "product4TOTAL/formal3/shared10/push1/3paths450"
+  },
+  "limits": {
+    "paths": 3,
+    "additions_and_total": 450,
+    "attempts": 4,
+    "formal": 3,
+    "shared": 10,
+    "primarypush": 1
+  }
+}

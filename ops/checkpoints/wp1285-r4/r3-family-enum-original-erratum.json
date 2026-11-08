@@ -1,0 +1,9 @@
+{
+  "discovered_at_utc": "2026-11-08T18:23:39.892086+00:00",
+  "original_spec": "a51578915747f8973cf961f9561967e906163a06:ops/specs/wp1285-r3.md",
+  "original_sha256": "b0ec721acafaa2452ba175dd00a7960434f73754af18db2760b0b1ac561cb978",
+  "issue": "Frozen prose incorrectly names model_family google; canonical enum is gemini. Actual requested model gemini-4-argon-high/high, provider google_antigravity/surface antigravity/transport machine/local unchanged and valid in published g4lease.",
+  "current_valid_lease_source": "591490c6cec33fbfb04b4e918bc8e092ae63f52d:ops/leases/wp1285-r3-g4-agy.yaml",
+  "promotion_hold": true,
+  "remedy": "Retain original r3 and active/unknown g4 artifacts. After confirmed terminal, publish narrowly corrected successor revision and cold-adopt exact terminal H under reciprocal successor lease; preserve author/review costs, no extra author invocation or acceptance/model/provider/scope/budget change. No product push or review approval until coherent new frozen binding. Never rewrite old source/hash or route duplicate writer while unknown."
+}

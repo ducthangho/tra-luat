@@ -1,0 +1,35 @@
+{
+  "endpoint": "https://github.com/ducthangho/tra-luat.git",
+  "at": "2026-11-08T07:22:15.631565+00:00",
+  "rc": 0,
+  "canonicalization": "UTF8 OID TAB ref LF sorted by ref Unicode codepoint; ALL refs inclHEAD/tags/pull",
+  "sha256": "d7cbb36974d3e0f67be088249b6689f881f558d5dcd54ee13606bcb779b045a7",
+  "count": 1738,
+  "deltas": [
+    {
+      "ref": "refs/heads/agent/wp1279-g3-claude",
+      "old": null,
+      "new": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766"
+    },
+    {
+      "ref": "refs/pull/1280/head",
+      "old": null,
+      "new": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766"
+    },
+    {
+      "ref": "refs/pull/1280/merge",
+      "old": null,
+      "new": "ee78c4fda563abb6a39a8f0ac7fff9142cb2ab60"
+    }
+  ],
+  "classification": "only authorized primarybranch and PR1280head/synthetic merge added; no otherrefdelta",
+  "synthetic": {
+    "sha": "ee78c4fda563abb6a39a8f0ac7fff9142cb2ab60",
+    "parents": [
+      "c15603dcf537fa4beb753b263398d6e6b8c92019",
+      "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766"
+    ],
+    "tree": "fbd7b8407eaa6ce08eb475e74b07546abe09a0a7"
+  },
+  "six_drift_triggers": "master unchanged B, no drift"
+}

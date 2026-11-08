@@ -1,0 +1,364 @@
+{
+  "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+  "spec_sha256": "6cb7a575192aebcb79d5825daf9d867cc790dac2528e954fcd6ea13c903b2fac",
+  "candidate_acceptance_only": true,
+  "postmerge_ci_and_M8": "pending, not passed",
+  "groups": {
+    "X1": {
+      "status": "passed",
+      "direct_case_evidence": [
+        {
+          "phase": "candidate-ps51",
+          "report_sha256": "884df8c0b1f310bcbf6fd91f2eb7b64f744f84eecc72758bd2f0ed1e5b1cf333",
+          "ids": [
+            "X1-01",
+            "X1-02",
+            "X1-03"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps7",
+          "report_sha256": "ebae8abe84e4a19948721aa79e40705ded4a7e37217dafbdde62e03eed304c46",
+          "ids": [
+            "X1-01",
+            "X1-02",
+            "X1-03"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps51-counterexamples",
+          "report_sha256": "03d654e1ac1667a30b6fa985965861fa3c55668366ee3bd3f5a7b3b2619cb07b",
+          "ids": [
+            "X1-01",
+            "X1-02",
+            "X1-03"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps7-counterexamples",
+          "report_sha256": "5ab31b5d33c19300767863c310a3ff5c21114e55cfdead66033d54acf2033999",
+          "ids": [
+            "X1-01",
+            "X1-02",
+            "X1-03"
+          ],
+          "actual_rc": 0
+        }
+      ],
+      "independent_formal_review": "review2 exactH3 approved wholeB..H3;0openfindings"
+    },
+    "X2": {
+      "status": "passed",
+      "direct_case_evidence": [
+        {
+          "phase": "candidate-ps51",
+          "report_sha256": "884df8c0b1f310bcbf6fd91f2eb7b64f744f84eecc72758bd2f0ed1e5b1cf333",
+          "ids": [
+            "X2-01",
+            "X2-02",
+            "X2-03",
+            "X2-04",
+            "X2-05",
+            "X2-06",
+            "X2-07"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps7",
+          "report_sha256": "ebae8abe84e4a19948721aa79e40705ded4a7e37217dafbdde62e03eed304c46",
+          "ids": [
+            "X2-01",
+            "X2-02",
+            "X2-03",
+            "X2-04",
+            "X2-05",
+            "X2-06",
+            "X2-07"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps51-counterexamples",
+          "report_sha256": "03d654e1ac1667a30b6fa985965861fa3c55668366ee3bd3f5a7b3b2619cb07b",
+          "ids": [
+            "X2-01",
+            "X2-02",
+            "X2-03",
+            "X2-04",
+            "X2-05",
+            "X2-06",
+            "X2-07"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps7-counterexamples",
+          "report_sha256": "5ab31b5d33c19300767863c310a3ff5c21114e55cfdead66033d54acf2033999",
+          "ids": [
+            "X2-01",
+            "X2-02",
+            "X2-03",
+            "X2-04",
+            "X2-05",
+            "X2-06",
+            "X2-07"
+          ],
+          "actual_rc": 0
+        }
+      ],
+      "independent_formal_review": "review2 exactH3 approved wholeB..H3;0openfindings"
+    },
+    "X3": {
+      "status": "passed",
+      "direct_case_evidence": [
+        {
+          "phase": "candidate-ps51",
+          "report_sha256": "884df8c0b1f310bcbf6fd91f2eb7b64f744f84eecc72758bd2f0ed1e5b1cf333",
+          "ids": [
+            "X3-01",
+            "X3-02"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps7",
+          "report_sha256": "ebae8abe84e4a19948721aa79e40705ded4a7e37217dafbdde62e03eed304c46",
+          "ids": [
+            "X3-01",
+            "X3-02"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps51-counterexamples",
+          "report_sha256": "03d654e1ac1667a30b6fa985965861fa3c55668366ee3bd3f5a7b3b2619cb07b",
+          "ids": [
+            "X3-01",
+            "X3-02"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps7-counterexamples",
+          "report_sha256": "5ab31b5d33c19300767863c310a3ff5c21114e55cfdead66033d54acf2033999",
+          "ids": [
+            "X3-01",
+            "X3-02"
+          ],
+          "actual_rc": 0
+        }
+      ],
+      "independent_formal_review": "review2 exactH3 approved wholeB..H3;0openfindings"
+    },
+    "X4": {
+      "status": "passed",
+      "direct_case_evidence": [
+        {
+          "phase": "candidate-ps51",
+          "report_sha256": "884df8c0b1f310bcbf6fd91f2eb7b64f744f84eecc72758bd2f0ed1e5b1cf333",
+          "ids": [
+            "X4-01",
+            "X4-02",
+            "X4-03"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps7",
+          "report_sha256": "ebae8abe84e4a19948721aa79e40705ded4a7e37217dafbdde62e03eed304c46",
+          "ids": [
+            "X4-01",
+            "X4-02",
+            "X4-03"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps51-counterexamples",
+          "report_sha256": "03d654e1ac1667a30b6fa985965861fa3c55668366ee3bd3f5a7b3b2619cb07b",
+          "ids": [
+            "X4-01",
+            "X4-02",
+            "X4-03"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps7-counterexamples",
+          "report_sha256": "5ab31b5d33c19300767863c310a3ff5c21114e55cfdead66033d54acf2033999",
+          "ids": [
+            "X4-01",
+            "X4-02",
+            "X4-03"
+          ],
+          "actual_rc": 0
+        }
+      ],
+      "independent_formal_review": "review2 exactH3 approved wholeB..H3;0openfindings"
+    },
+    "X5": {
+      "status": "passed",
+      "direct_case_evidence": [
+        {
+          "phase": "candidate-ps51",
+          "report_sha256": "884df8c0b1f310bcbf6fd91f2eb7b64f744f84eecc72758bd2f0ed1e5b1cf333",
+          "ids": [
+            "X5-01",
+            "X5-02",
+            "X5-03",
+            "X5-04",
+            "X5-05",
+            "X5-06",
+            "X5-07",
+            "X5-08"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps7",
+          "report_sha256": "ebae8abe84e4a19948721aa79e40705ded4a7e37217dafbdde62e03eed304c46",
+          "ids": [
+            "X5-01",
+            "X5-02",
+            "X5-03",
+            "X5-04",
+            "X5-05",
+            "X5-06",
+            "X5-07",
+            "X5-08"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps51-counterexamples",
+          "report_sha256": "03d654e1ac1667a30b6fa985965861fa3c55668366ee3bd3f5a7b3b2619cb07b",
+          "ids": [
+            "X5-01",
+            "X5-02",
+            "X5-03",
+            "X5-04",
+            "X5-05",
+            "X5-06",
+            "X5-07",
+            "X5-08"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps7-counterexamples",
+          "report_sha256": "5ab31b5d33c19300767863c310a3ff5c21114e55cfdead66033d54acf2033999",
+          "ids": [
+            "X5-01",
+            "X5-02",
+            "X5-03",
+            "X5-04",
+            "X5-05",
+            "X5-06",
+            "X5-07",
+            "X5-08"
+          ],
+          "actual_rc": 0
+        }
+      ],
+      "independent_formal_review": "review2 exactH3 approved wholeB..H3;0openfindings"
+    },
+    "X6": {
+      "status": "passed",
+      "direct_case_evidence": [
+        {
+          "phase": "candidate-ps51",
+          "report_sha256": "884df8c0b1f310bcbf6fd91f2eb7b64f744f84eecc72758bd2f0ed1e5b1cf333",
+          "ids": [
+            "X6-01",
+            "X6-02"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps7",
+          "report_sha256": "ebae8abe84e4a19948721aa79e40705ded4a7e37217dafbdde62e03eed304c46",
+          "ids": [
+            "X6-01",
+            "X6-02"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps51-counterexamples",
+          "report_sha256": "03d654e1ac1667a30b6fa985965861fa3c55668366ee3bd3f5a7b3b2619cb07b",
+          "ids": [
+            "X6-01",
+            "X6-02"
+          ],
+          "actual_rc": 0
+        },
+        {
+          "phase": "candidate-ps7-counterexamples",
+          "report_sha256": "5ab31b5d33c19300767863c310a3ff5c21114e55cfdead66033d54acf2033999",
+          "ids": [
+            "X6-01",
+            "X6-02"
+          ],
+          "actual_rc": 0
+        }
+      ],
+      "independent_formal_review": "review2 exactH3 approved wholeB..H3;0openfindings"
+    }
+  },
+  "M1": "review2 0openP0-P3 and Draftconnector nofindings; Ready review pending",
+  "M2": {
+    "source": {
+      "reviewed_sha": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+      "original_verdict": "a7f51d0c70016e0e53afe40e256a819835eb6a52:ops/reviews/wp1279-r2-review1/verdict.md",
+      "receipt": "4c7b557035a0957fef32277f0d176f94635a72eb:ops/reviews/wp1279-r2-review1.receipt.yaml",
+      "history": "Read the complete original changes_requested verdict. Both classes had one prior formal occurrence and remained open entering this review."
+    },
+    "classes": [
+      {
+        "stableid": "WP1279-R1-F01",
+        "class_slug": "encoding-dependent-endpoint-path-validation",
+        "disposition": "ĐÃ VÁ THẬT",
+        "path": ".agents/skills/proxima-control/scripts/ProximaControl.psm1",
+        "line": 357,
+        "evidence": "The reserved-device pattern now constructs superscripts from code points, matching pinned S1 semantics. Independently matched retained serialized endpoint bodies to their actual source and checked code-point-generated path inputs. Native host GetACP was 1252; Desktop children report codepage 1252. With the common H3 harness, old H2 under the PS5.1 parent produces the named ENDPOINT_VALID_PATH_REJECTED failure for COM-U00C2/LPT-U00C2. Current H succeeds in normal en-US and focused tr-TR runs on both runtimes; COM-U00B9/LPT-U00B2 remain rejected.",
+        "negative_control_limit": "Old H2 under the PS7 parent fails only SOURCE_NOT_ASCII; its valid-path handshakes succeed. That static diagnostic was not credited as a behavioral kill.",
+        "remaining_manifestations": []
+      },
+      {
+        "stableid": "WP1279-R1-F02",
+        "class_slug": "nested-child-evidence-deleted-before-review",
+        "disposition": "ĐÃ VÁ THẬT",
+        "path": ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1",
+        "line": 280,
+        "evidence": "Verified all 28 retained report sets and 922 artifact links, including endpoint and fresh-wrapper scripts, CLIXML inputs, raw reports, captured output, commands, actual return codes, runtime and culture. Checked that nested artifacts lie outside their own measured/cleanup roots and parent cleanup ancestors. Actual payloads contain Boolean WhatIf=true; raw rows show System.Boolean, ambient false, early dry-run and zero imports. Positive handshakes retain both expected hashes. All 22 CX source/report/output/record sets resolve.",
+        "negative_control": "Independently compared the existing owned private copy with the original manifest: exactly one endpoint report is absent. Read-only validation reproduced MISSING_NESTED_ARTIFACT:endpoint-report:child\\endpoint-out-0.json. The original report remains byte-identical.",
+        "capture_limit": "Merged child output is decoded text captured by the parent, not raw OS stdout bytes. Original script, XML and report file bytes are retained and verified.",
+        "remaining_manifestations": []
+      }
+    ],
+    "h1_history": {
+      "sha": "24cc13bb536386d0662927e9c94331eb8713bab8",
+      "disposition": "Historical native failures are not formal findings or current acceptance evidence.",
+      "verification": "Inspected the comment-aware token scan, case-insensitive dynamic-scope collision fixes, scope-shadowing positive control and nonvacuous WhatIf assertions. The original 25 IDs and ten semantic CX obligations remain; the four historically failing IDs pass in current retained native reports."
+    },
+    "s1_history": "No S1/P0 waiver or approval was reused. S1 bytes and dependency SHA256 59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d remain unchanged.",
+    "auxiliary_audit": "Validated g3-native-linux-auditor-receipt.json against the underlying artifacts. It is an auxiliary evidence digest, not code approval."
+  },
+  "M3": {
+    "native": "bothPS5.1/7 normal25/25focused36/36",
+    "archive_sha256": "bf06d8aafce34287d5c8b443a6692bbb036d70086234012798a901092e8bef92",
+    "windows_ci": "not_run per owner"
+  },
+  "F02_negative": {
+    "expected_rejection": true,
+    "reason": "MISSING_NESTED_ARTIFACT:endpoint-report:child\\endpoint-out-0.json",
+    "deleted_copy_relative": "evidence/candidate-ps51/pxctl-evid-4d589501a5c9/child/endpoint-out-0.json",
+    "original_sha256_unchanged": "46b53d267d77485ca50e793680bf2d0cc128938d25561e9648106bc6ba89a1ab",
+    "verifier_sha256": "2fb474d8ae29826ec28d72ace2bfb2a4f6bda5c5f4bd6a71e0336cd55bc54143"
+  },
+  "Linux": "actual1777/1777+strict184/184+Ruff12F821delta0"
+}

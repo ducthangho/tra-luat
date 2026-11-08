@@ -1,0 +1,12 @@
+{
+  "command": [
+    "python",
+    "-B",
+    "/workspace/scratch/proxima-p1-s2-canonical/ops/bien_nhan_v2.py",
+    "--root",
+    "/workspace/scratch/wp1279-spec-publish"
+  ],
+  "actual_exit_code": 0,
+  "received_stdout": "\nbien_nhan_v2: 299 \u0110\u1ea0T v2 \u00b7 11/11 mi\u1ec5n tr\u1eeb legacy (b\u0103m kh\u1edbp) \u00b7 42 N\u1ee2 \u0111\u00f3ng b\u0103ng \u00b7 0 vi ph\u1ea1m \u00b7 0 KH\u00d4NG \u0110O \u0110\u01af\u1ee2C \u00b7 t\u1ed5ng 352\nc\u00e2u l\u1ecbch s\u1eed: n\u1ee3 L-REVIEW 1 \u00b7 L-ANCESTRY 60 \u00b7 L-SURFACE 0 \u00b7 L-SURFACE chua_do_duoc 0\nT\u1ed4NG: \u0110\u1ea0T\n",
+  "stderr": ""
+}

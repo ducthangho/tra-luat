@@ -1,0 +1,497 @@
+{
+  "sha": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+  "os": "Windows",
+  "tests": [
+    {
+      "id": "candidate-ps51:X1-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X1-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X1-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X2-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X2-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X2-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X2-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X2-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X2-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X2-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X3-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X3-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X4-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X4-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X4-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-08",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X6-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X6-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X1-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X1-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X1-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X2-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X2-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X2-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X2-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X2-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X2-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X2-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X3-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X3-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X4-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X4-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X4-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-08",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X6-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X6-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X1-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X1-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X1-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X2-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X2-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X2-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X2-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X2-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X2-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X2-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X3-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X3-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X4-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X4-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X4-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-08",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X6-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X6-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX00",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX08",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX09",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX10",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X1-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X1-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X1-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X2-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X2-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X2-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X2-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X2-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X2-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X2-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X3-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X3-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X4-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X4-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X4-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-08",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X6-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X6-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX00",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX08",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX09",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX10",
+      "ket_qua": "passed"
+    }
+  ],
+  "evidence_index": "windows-b75d9e4e61e5-g3-evidence-index.json",
+  "native_archive_sha256": "bf06d8aafce34287d5c8b443a6692bbb036d70086234012798a901092e8bef92",
+  "note": "Derived K6 projection; exactnativebytes/commands/rc/versions/rawnestedreports in source ZIP. Not Windows CI."
+}

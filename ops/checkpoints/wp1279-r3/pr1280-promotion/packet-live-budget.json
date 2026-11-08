@@ -1,0 +1,173 @@
+{
+  "packet": "wp1279",
+  "revision": 3,
+  "generation": 3,
+  "as_of": "2026-11-08T06:21:05.158986+00:00",
+  "attempts_used": 3,
+  "attempts_limit": 3,
+  "codex_review_calls_used": 7,
+  "codex_review_calls_limit": 10,
+  "code_review_rounds_used": 2,
+  "code_review_rounds_limit": 3,
+  "primary_product_pushes_used": 1,
+  "primary_product_pushes_limit": 1,
+  "design_advisory_calls_used": 1,
+  "design_advisory_calls_limit": 1,
+  "design_actual_run": "6af19f41eb9440378081779412139918",
+  "design_preflight_before_model_not_charged": "e838232a996b46d9a715bd2c2a1d66a6",
+  "attempts": [
+    {
+      "n": 1,
+      "generation": 2,
+      "executor": "actual Claude Code",
+      "session_id": "9165bca9-d622-47d8-9814-a0ef344fda49",
+      "state": "terminal_success_recovered",
+      "purpose": "full P1-S2 frozen r2 implementation",
+      "baseline": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+      "deadline_utc": "2026-11-08T04:41:22.348070+00:00",
+      "reconciliation": "g2-recovery-reconciliation.json"
+    },
+    {
+      "n": 2,
+      "generation": 2,
+      "executor": "actual Claude Code",
+      "session_id": "cd9a883b-a95f-4901-a876-9cab4968245d",
+      "state": "terminal_success",
+      "purpose": "repair measured four native case failures without weakening acceptance",
+      "start_from": "24cc13bb536386d0662927e9c94331eb8713bab8",
+      "baseline": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+      "deadline_utc": "2026-11-08T06:02:11.497346+00:00",
+      "prompt_sha256": "4efe3e53112b0430f6a29aac845ea7b857481dfd67cbf5579a0c56fe7e28eec7",
+      "head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+      "run_id": "04b271dbab314dfe86ffcd60f7d1a21a"
+    },
+    {
+      "n": 3,
+      "generation": 3,
+      "executor": "actual Claude Code",
+      "session_id": "d0fad79b-8f11-44ec-a925-f738a4b05573",
+      "state": "terminal_success",
+      "purpose": "close F01/F02 under frozen r3, last ordinary attempt3/3",
+      "baseline": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+      "deadline_utc": "2026-11-08T07:06:05.158986+00:00",
+      "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+      "run_id": "a636c745a52a40bd9913e7a3f6f88df1"
+    }
+  ],
+  "codex_calls": [
+    {
+      "n": 1,
+      "purpose": "mandatory_readonly_native_and_Linux_longlog_digest_of_failed_candidate24cc13b",
+      "head": "24cc13bb536386d0662927e9c94331eb8713bab8",
+      "state": "terminal_aux_digest",
+      "at": "2026-11-08T05:17:16.079206+00:00",
+      "formal_code_approval": false,
+      "receipt": "g2-native-linux-auditor-receipt.json"
+    },
+    {
+      "n": 2,
+      "purpose": "mandatory_readonly_exactH2_native_and_Linux_longlog_digest",
+      "head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+      "state": "terminal_aux_digest",
+      "at": "2026-11-08T05:42:23.361640+00:00",
+      "formal_code_approval": false,
+      "receipt": "h2-native-linux-auditor-receipt.json"
+    },
+    {
+      "n": 3,
+      "purpose": "fresh_independent_exactH_sensitive_formal_review1",
+      "head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+      "state": "terminal_validated_changes_requested",
+      "reserved_at": "2026-11-08T05:46:34.607248+00:00",
+      "requested_model": "gpt-6.1-sol",
+      "requested_effort": "xhigh",
+      "surface": "codex_cli",
+      "sandbox": "read-only",
+      "run_id": "454049296eb249c79881c81f394a8c3b",
+      "actual_model_generation": true,
+      "model_samples": 34
+    },
+    {
+      "n": 4,
+      "purpose": "mandatory_readonly_exactH3_native_Linux_F01_F02_longlog_digest",
+      "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+      "state": "terminal_aux_digest",
+      "at": "2026-11-08T07:04:58.696767+00:00",
+      "formal_code_approval": false,
+      "receipt": "g3-native-linux-auditor-receipt.json"
+    },
+    {
+      "n": 5,
+      "purpose": "fresh_independent_exactH_sensitive_formal_review2",
+      "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+      "state": "terminal_validated_approved",
+      "reserved_at": "2026-11-08T07:08:00.143657+00:00",
+      "requested_model": "gpt-6.1-sol",
+      "requested_effort": "xhigh",
+      "surface": "codex_cli",
+      "sandbox": "read-only",
+      "actual_model_generation": true,
+      "run_id": "5b2e879ec91c4970bd5ecd56207297a2",
+      "model_samples": 47
+    },
+    {
+      "n": 6,
+      "purpose": "Draft exactH connector review",
+      "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+      "state": "dispatching",
+      "pr": 1280,
+      "at": "2026-11-08T07:21:27.104999+00:00"
+    },
+    {
+      "n": 7,
+      "purpose": "mandatory read-only PR1280 CI evidence collection and completed longlog audit",
+      "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+      "state": "active_waiting_actual_CI_terminal",
+      "pr": 1280,
+      "run_id": 42458434996,
+      "at": "2026-11-08T07:30:23.480037+00:00",
+      "formal_code_approval": false
+    }
+  ],
+  "formal_reviews": [
+    {
+      "round_proposed": 1,
+      "head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+      "state": "terminal_validated_changes_requested",
+      "verdict": "changes_requested",
+      "run_id": "454049296eb249c79881c81f394a8c3b",
+      "round": 1,
+      "receipt": "ops/reviews/wp1279-r2-review1.receipt.yaml",
+      "metadata_commit": "4c7b557035a0957fef32277f0d176f94635a72eb"
+    },
+    {
+      "round_proposed": 2,
+      "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+      "state": "terminal_validated_approved",
+      "round": 2,
+      "verdict": "approved",
+      "run_id": "5b2e879ec91c4970bd5ecd56207297a2",
+      "receipt": "ops/reviews/wp1279-r3-review2.receipt.yaml"
+    }
+  ],
+  "note": "NewplannedS2notS1remediation; g1nevergranted/run; r1K1failurepreserved. Aggregate historical Missiontokens/cloudminutes not claimed measured.",
+  "open_finding_classes": [
+    {
+      "id": "WP1279-R1-F01",
+      "class": "encoding-dependent-endpoint-path-validation",
+      "formal_occurrences": 1,
+      "status": "closed_by_independent_review2_H3"
+    },
+    {
+      "id": "WP1279-R1-F02",
+      "class": "nested-child-evidence-deleted-before-review",
+      "formal_occurrences": 1,
+      "status": "closed_by_independent_review2_H3"
+    }
+  ],
+  "primary_push": {
+    "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+    "at": "2026-11-08T07:20:54.947326+00:00",
+    "rc": 0
+  }
+}

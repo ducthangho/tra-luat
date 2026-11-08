@@ -1,0 +1,12 @@
+{
+  "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+  "verdict": "approved",
+  "original_commit": "4e0c84ed3f56df672cc7e32e14c181566f941d36",
+  "receipt_commit": "b39d75aca19c1b507655191c27c89c17daadfc58",
+  "receipt_path": "ops/reviews/wp1279-r3-review2.receipt.yaml",
+  "issue_comment": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6718663536",
+  "issue_comment_id": 6718663536,
+  "original_body_exact": true,
+  "v2_rc": 0,
+  "remote_blobs_exact": true
+}

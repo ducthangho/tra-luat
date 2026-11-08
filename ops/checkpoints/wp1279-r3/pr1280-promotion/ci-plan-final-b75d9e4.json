@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "packet": "wp1279",
+  "revision": 3,
+  "recorded_at": "2026-11-08T07:11:24.636478+00:00",
+  "acceptance_base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "candidate": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+  "workflow": {
+    "path": ".github/workflows/ci.yml",
+    "definition_at_base_sha256": "aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67",
+    "unchanged_at_H": true
+  },
+  "events": [
+    "pull_request",
+    "push canonical master after merge"
+  ],
+  "required_ruleset_contexts": [
+    "gate (ubuntu-latest)",
+    "gate-cong-cu-gop (ubuntu-latest)",
+    "gate-ops (ubuntu-latest)",
+    "gate-packet-loop (ubuntu-latest)"
+  ],
+  "required_jobs": "all applicable mandatory Ubuntu jobs",
+  "windows_ci": "excluded by owner; focused native local tests only",
+  "commit_messages_skip_markers": "none on actual B..H commits",
+  "commit_messages_sha256": "772d9ff22b22fb486cee0c5491b5ba074bf668c87e06f06d6cc044c7249400d5",
+  "authority": "https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6708576608",
+  "status": "prospective PR/master CI, no CI yet",
+  "timing_limit": "This consolidated machine-readable CI plan is recorded after local H3 heavy gates and final-review dispatch; no retrospective claim of earlier recording. Earlier operative spec freezes commands/runtime/events/noWindows and source identities. Native/Linux actual preflights preserved independently."
+}

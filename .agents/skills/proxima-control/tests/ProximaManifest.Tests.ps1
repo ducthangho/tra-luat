@@ -3,9 +3,7 @@
 #     -ScratchRoot <existing dir outside the repository> -ReportPath <json outside the add-on> [-Counterexamples]
 # rc 0: PM01..PM07 (+CX00..CX04) passed, evidence re-verified. rc 1: a property failed (no manifest/SKILL => all seven run and fail
 # MANIFEST_ABSENT/SKILL_ABSENT). rc 2: setup error or unavailable runtime only. PM01/PM02 judge the manifest STATICALLY (AST + SafeGetValue);
-# only then do FRESH children import it (this process never loads Proxima): 'runtime' = PM03+PM06, 'tamper' = PM04 (see $ChildScript).
-# Help calls only: no config, network, gateway, service, session or credential. <ScratchRoot>\pm-<run> keeps every child script, argv, raw
-# stdout/stderr, output, private copy and mutation; nothing is deleted, all is re-hashed at the end. Children inherit the caller's policy.
+# Fresh children call help only: 'runtime' = PM03+PM06, 'tamper' = PM04. Evidence is retained and re-hashed; children inherit policy.
 using namespace System.Management.Automation.Language
 [CmdletBinding()]
 param([Parameter(Mandatory = $true)][string]$AddonRoot, [Parameter(Mandatory = $true)][string]$ScratchRoot,
@@ -40,7 +38,6 @@ function Invoke-Case([string]$Id, [scriptblock]$Body) {
     try { $caseRec.detail = & $Body } catch { $caseRec.reason = "$($_.Exception.Message)"; $caseRec.outcome = $(if ($_.Exception.Data.Contains('pm')) { 'failed' } else { 'setup_error' }) }
     $Results.Add([pscustomobject]$caseRec)
 }
-# Every file under the add-on root -> sha256 (reparse points recorded, never followed).
 function Get-Snapshot([string]$Base) {
     $map = [Collections.Generic.SortedDictionary[string, string]]::new([StringComparer]::Ordinal); $todo = [Collections.Generic.Stack[string]]::new(); $todo.Push($Base)
     while ($todo.Count) {
@@ -52,7 +49,6 @@ function Get-Snapshot([string]$Base) {
     return , $map
 }
 function ConvertTo-ArgText([string]$T) { if ($T -cmatch '^[A-Za-z0-9_.:/\\-]+$') { return $T }; '"' + (($T -replace '(\\*)"', '$1$1\"') -replace '(\\+)$', '$1$1') + '"' }
-# Fresh child of this same executable; argv, command line, raw stdout/stderr bytes and rc are kept. A timeout is a setup error.
 function Start-Child([string]$Role, [string[]]$ArgList, [int]$TimeoutSec) {
     $base = [IO.Path]::Combine($Run, ('child{0:d2}-{1}' -f $Children.Count, $Role))
     $psi = [Diagnostics.ProcessStartInfo]::new($SelfExe); $psi.Arguments = @($ArgList | ForEach-Object { ConvertTo-ArgText $_ }) -join ' '
@@ -81,7 +77,6 @@ function Read-Skill([string]$Path) {
     for (; $i -lt $lines.Count; $i++) {
         $l = $lines[$i]
         if ($l -cmatch '^```(\S*)') { $lang = $(if ($null -eq $lang) { $Matches[1] }); continue }
-        # '## Heading (Tag)' -> tag 'Tag'; a heading without a trailing '(...)' gets an empty tag.
         if ($null -eq $lang -and $l -cmatch '^## (?:.*\(([^()]+)\)\s*|.*)$') { $cur = [pscustomobject]@{ tag = "$($Matches[1])"; body = [Collections.Generic.List[string]]::new() }; $doc.sections.Add($cur); continue }
         if ($lang -ceq 'powershell') { $doc.code.Add($l) }
         if ($null -ne $cur) { $cur.body.Add($l) }
@@ -89,7 +84,6 @@ function Read-Skill([string]$Path) {
     return [pscustomobject]$doc
 }
 function Get-Section([string]$Tag) { (@($Doc.sections | Where-Object { $_.tag -ceq $Tag } | ForEach-Object { $_.body }) -join "`n") }
-# First command of each non-comment powershell code line: name, positional action, -Parameter -> following value (or $null).
 function Get-DocCommands {
     foreach ($line in $Doc.code) {
         if (-not $line.Trim() -or $line.TrimStart().StartsWith('#')) { continue }
@@ -124,7 +118,6 @@ function Complete-Run([int]$Rc) {
     exit $Rc
 }
 trap { $Report.setup_error = "$($_.Exception.Message)"; Write-Host "SETUP_ERROR $($Report.setup_error)"; Complete-Run 2 }
-# ---- child script (written into the evidence dir per phase, executed there, kept) ----
 $ChildScript = @'
 # runtime (PM03+PM06): Test-ModuleManifest, manifest import, px help, then the UNCHANGED Run-Px.ps1 help in this same process with a test-owned
 # in-memory sentinel in the module. tamper (PM04): import a private copy whose ProximaConfig.psm1 has a harmless sentinel line; S2 must reject it.
@@ -163,7 +156,6 @@ function Invoke-Phase([string]$Role, [string[]]$More) {
     $c = Start-Child $Role (@('-NoProfile', '-NonInteractive', '-File', $s, '-Mode', $Role, '-OutPath', $o) + $More) 300
     if (-not [IO.File]::Exists($o)) { throw "$Role child wrote no output (rc=$($c.rc))" }; Add-Artifact "$Role-output" $o; return ([IO.File]::ReadAllText($o, $Utf8) | ConvertFrom-Json)
 }
-# ---- setup (any failure here is rc 2) ----
 $Root = [IO.Path]::GetFullPath($AddonRoot).TrimEnd([char]'\', [char]'/'); $Scratch = [IO.Path]::GetFullPath($ScratchRoot); $ReportPath = [IO.Path]::GetFullPath($ReportPath)
 if (-not [IO.Directory]::Exists($Root) -or -not [IO.Directory]::Exists($Scratch)) { throw 'AddonRoot and ScratchRoot must be existing directories' }
 foreach ($rel in $Legacy) { if (-not [IO.File]::Exists((Join-Addon $Root $rel))) { throw "S1/S2 file missing: $rel (not a proxima-control add-on tree)" } }
@@ -184,12 +176,23 @@ if ($SkillPresent) { $Doc = Read-Skill $SkillPath; $DocCommands = @(Get-DocComma
 Invoke-Case 'PM01' {
     if (-not $ManifestPresent) { Stop-Case 'MANIFEST_ABSENT: scripts/ProximaControl.psd1' }
     $tk = $null; $er = $null; $ast = [Parser]::ParseFile($ManifestPath, [ref]$tk, [ref]$er); if (@($er).Count) { Stop-Case "PARSE_ERROR: $(@($er)[0].Message)" }
-    # WP1285-R1-F01 allow-list: a plain UNNAMED end block only. Any other Ast-valued or non-empty collection root property (param, begin, process,
-    # dynamicparam, PS7 clean, using, attributes) rejects; read by reflection, so PS5.1 StrictMode never touches a CleanBlock property it lacks.
-    $extra = @(foreach ($pr in $ast.GetType().GetProperties([Reflection.BindingFlags]'Public, Instance')) {
-        if ($pr.Name -cnotin 'Parent', 'EndBlock') { $v = $pr.GetValue($ast); if ($v -is [Ast] -or ($v -is [Collections.ICollection] -and $v.Count)) { $pr.Name } } })
-    if (@($tk | Where-Object { $_.Kind -eq [TokenKind]::Comment -and $_.Text -imatch '^#\s*requires' }).Count -or $extra.Count -or $null -eq $ast.EndBlock -or
-        -not $ast.EndBlock.Unnamed -or $ast.EndBlock.Traps) { Stop-Case "EXECUTABLE_STATEMENT: requires/param/named or extra block/using/trap [$($extra -join ',')]" }
+    # WP1285-R1-F01: allow data nodes and child edges throughout the tree, before SafeGetValue. Reflection feature-detects PS7 properties on PS5.1.
+    # All execution flags must be false except the root end block's Unnamed; comments and literal string characters are not executable structure.
+    $shape = @{ ScriptBlockAst = @('EndBlock'); NamedBlockAst = @('Statements'); PipelineAst = @('PipelineElements')
+        CommandExpressionAst = @('Expression'); HashtableAst = @('KeyValuePairs'); StatementBlockAst = @('Statements')
+        ArrayExpressionAst = @('SubExpression'); ArrayLiteralAst = @('Elements'); StringConstantExpressionAst = @() }
+    if (@($tk | Where-Object { $_.Kind -eq [TokenKind]::Comment -and $_.Text -imatch '^#\s*requires' }).Count -or $null -eq $ast.EndBlock -or
+        -not $ast.EndBlock.Unnamed -or $ast.EndBlock.Traps) { Stop-Case 'EXECUTABLE_STATEMENT: requires/named block/trap' }
+    foreach ($node in $ast.FindAll({ param($n) $true }, $true)) {
+        $kind = $node.GetType().Name; if (-not $shape.ContainsKey($kind)) { Stop-Case "EXECUTABLE_STATEMENT: node $kind" }
+        if ($node -is [PipelineAst] -and @($node.PipelineElements).Count -ne 1) { Stop-Case 'EXECUTABLE_STATEMENT: chained pipeline' }
+        foreach ($pr in $node.GetType().GetProperties([Reflection.BindingFlags]'Public, Instance')) {
+            if ($pr.Name -ceq 'Parent') { continue }; $v = $pr.GetValue($node)
+            if ($pr.Name -ceq 'Background') { if ($v) { Stop-Case 'EXECUTABLE_STATEMENT: background pipeline' }; continue }
+            if (($pr.PropertyType -eq [bool] -and $v -ne ($kind -ceq 'NamedBlockAst' -and $pr.Name -ceq 'Unnamed')) -or
+                (($v -is [Ast] -or ($v -is [Collections.ICollection] -and $v.Count)) -and $pr.Name -cnotin $shape[$kind])) { Stop-Case "EXECUTABLE_STATEMENT: $kind.$($pr.Name)" }
+        }
+    }
     $st = @(if ($ast.EndBlock) { $ast.EndBlock.Statements })
     $ce = $(if ($st.Count -eq 1 -and $st[0] -is [PipelineAst] -and @($st[0].PipelineElements).Count -eq 1) { $st[0].PipelineElements[0] })
     if ($ce -isnot [CommandExpressionAst] -or @($ce.Redirections).Count -or $ce.Expression -isnot [HashtableAst]) { Stop-Case "NOT_SINGLE_HASHTABLE: $($st.Count) top-level statement(s)" }
@@ -216,7 +219,6 @@ Invoke-Case 'PM02' {
     if ($bad.Count) { Stop-Case ($bad -join '; ') }
     $script:SchemaOk = $true; 'nine allowed keys exactly; RootModule/ModuleVersion/GUID/PS metadata and Ordinal export arrays as specified; no wildcard'
 }
-# ---- fresh children, only after the static gate ----
 $RtOut = $null; $TaOut = $null; $RtSetup = $null; $TaSetup = $null; $Tamper = $null
 if ($SchemaOk) {
     try { $RtOut = Invoke-Phase 'runtime' @('-ManifestPath', $ManifestPath) } catch { $RtSetup = "$($_.Exception.Message)" }
@@ -288,7 +290,6 @@ Invoke-Case 'PM06' {
     if (-not $kept) { Stop-Case "SILENT_RESET_OR_REIMPORT[$state]" }
     "Run-Px help reused the manifest-imported instance; test-owned sentinel intact ($state)"
 }
-# ---- counterexamples: single-anchor semantic mutants of COPIES, each rerunning this harness in a fresh child ----
 $CxCases = @(@{ id = 'CX00'; file = ''; anchor = ''; replacement = ''; want = ''; before_import = $false },
     @{ id = 'CX01'; file = 'scripts/ProximaControl.psd1'; anchor = '    AliasesToExport'; want = 'PM02:UNEXPECTED_KEY[ScriptsToProcess]'; before_import = $true
         replacement = "    ScriptsToProcess     = @('cx01-never-run.ps1')`r`n    AliasesToExport" },
@@ -335,7 +336,6 @@ if ($Counterexamples) {
         }
     }
 }
-# ---- PM07 (last): optional publication, examples, file references, and add-on bytes unchanged by this whole run ----
 Invoke-Case 'PM07' {
     $bad = [Collections.Generic.List[string]]::new()
     if (-not $SkillPresent) { $bad.Add('SKILL_ABSENT: SKILL.md') }

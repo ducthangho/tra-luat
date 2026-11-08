@@ -1,0 +1,109 @@
+I wrote the three files, but nothing has been run: Bash is denied in this session, so no parse check or test happened here. All tests below are `not_run`. I also could not compute the spec's SHA256. I read the spec at `/workspace/scratch/wp1279-spec-publish/ops/specs/wp1279-r2.md` and its text matches the frozen contract in the prompt, but hash `489419bf…f68100c` is not verified. No git, commit, push, gh, network or model calls were made. No S1 or out-of-set file was touched.
+
+## Files written (all new, under `.agents/skills/proxima-control/`)
+
+| File | Lines |
+|---|---|
+| `scripts/ProximaControl.psm1` | 527 |
+| `scripts/Run-Px.ps1` | 30 |
+| `tests/ProximaControl.Tests.ps1` | 982 |
+| **Total added** | **1539** (cap 1800, 0 deletions) |
+
+`.agents` is in `_RELEASE_EXCLUDE_DIRS` (`scripts/tl_core/release.py:395`), so these files don't enter the release manifest.
+
+## Implementation notes
+
+**Module (`ProximaControl.psm1`)**
+- **Exports:** exactly `px` and `Invoke-ProximaOperation`, both SupportsShouldProcess with ConfirmImpact Medium. No aliases or variables are exported.
+- **Errors:** every error is `ProximaControl.<Code>` with a fixed message, no inner exception and a null TargetObject. S1 errors (`ProximaConfig.*`) are passed through unchanged.
+- **S1 dependency:** the sibling `ProximaConfig.psm1` is hashed against the pinned `59abfa86…` before it is imported, then used only through the pinned module object. S1's private helpers run inside that module's scope: path syntax, `Open-PxChain`, `Assert-PxOutside`, `Get-PxNode`, `Test-PxChild` and the strict JSON reader.
+- **Target check:** every action except `help` requires `-ConfigPath`, `-RepositoryRoot` and `-TargetId`. Each call reads the config through S1, then requires an Ordinal exact match on `targetId`, under `-WhatIf` too.
+- **Fingerprint:** SHA256 over a tagged, fixed-order encoding of the six fields, each with a 4-byte big-endian length prefix. A missing field is byte 0, which keeps it distinct from an empty one. The display shows only `px target <12 hex>`.
+- **Gate order:** `ShouldProcess` runs after pure validation and before any query, selection change, session, journal, process, service or network effect. `-Force` only affects the pending-record guard on stop/restart.
+- **Selection:** stored as Selection[fingerprint][provider] in Ordinal dictionaries, keyed through `Get-PxcSelectionKey`.
+- **Model membership:** a model id belongs to provider P only if it starts with `P/` and is advertised verbatim (both Ordinal).
+- **Endpoint:** one constant `$script:EndpointBody` with a fixed set of 11 keys, checked with Ordinal comparison and real `bool`/`int` types. Effective WhatIf is ambient OR envelope, and it returns before any filesystem access. Then: path syntax, then both `.psm1` hashes, then `Import-Module` by exact path, then a call through the module object.
+- **Backend:** primitives sit in a private `$script:Prim` table: NewSession, RemoveSession, InvokeRemote, Http, GetProcess, UiSessions, GetService, ServiceControl, NewId. Defaults use module-qualified commands. HTTP uses one HttpClient per request: no proxy, no redirects, no cookies, Expect-Continue off, no retry.
+- **Journal:**
+  - Containment outside ProtectedRoot is proven for the base before any directory is created, and each level is reopened and checked after creation.
+  - The record file is created with CreateNew, then its handle is checked with S1 (links = 1, direct child of the journal directory) and held until finalisation.
+  - The record says `pending` before the POST. Any non-200 or exception becomes `unknown`.
+  - The pending guard blocks unless every directory entry is a GUID-named `.json` whose `state` is exactly `completed`.
+- **Service:** only a quoted exact `<base>\runtime\Proxima.exe`, or the unquoted path when it has no spaces, under the exact name `ProximaGateway`. Anything else fails closed as `ServiceIdentityUnverified`.
+
+**Wrapper (`Run-Px.ps1`)**
+- Reuses a loaded `ProximaControl` only from the same path and never re-imports with `-Force`; a module from another path fails with `ModuleConflict`.
+- Forwards only bound parameters, an explicit `WhatIf = [bool]$WhatIfPreference`, and `-Confirm` if bound.
+
+**Choices you should know about**
+- Any non-200 answer to the POST, including 4xx, is recorded as `unknown`. This is conservative: it blocks stop/restart until `-Force`.
+- Completed records are kept; there is no housekeeping.
+- The check of "all streams" in X2-07 does not include `$global:Error` history, which holds the fakes' own raw exceptions.
+
+## IDs
+
+- **Normal (25):** X1-01..03, X2-01..07, X3-01..02, X4-01..03, X5-01..08, X6-01..02.
+- **With `-Counterexamples`:** CX00 (unmodified positive control, must give rc 0 and 25/25) plus CX01–CX10.
+
+**Counterexample anchors** (single-line, Ordinal, must occur exactly once in the copied file → expected kill token):
+
+| CX | Anchor (file) | Replacement | Expected token |
+|---|---|---|---|
+| 01 | `if (-not $PSCmdlet.ShouldProcess($display, $Action)) {` (psm1) | `$Force -or ShouldProcess` | `X2-01:WHATIF_SIDE_EFFECT[use WhatIf+Force]` and `[connect WhatIf+Force]` |
+| 02 | `$pxArgs['WhatIf'] = [bool]$WhatIfPreference` (Run-Px) | `$null = $WhatIfPreference` | `X2-03:WRAPPER_WHATIF_LOST[wrapper status]` |
+| 03 | `if ([bool]$WhatIfPreference -or $v['WhatIf']) {` | `if ($false) {` | `X2-04:ENDPOINT_WHATIF_LOST[` (seen in the real child) |
+| 04 | `function Get-PxcSelectionKey($Cfg, [string]$Fp) { return $Fp }` | `return [string]$Cfg.targetId` | `X3-01:SELECTION_LEAK[` |
+| 05 | `if ($got -cne $want[$i]) { & $fail 'EndpointCodeMismatch' }` | `$null = $got` | `X4-02:HASH_BEFORE_IMPORT[` (benign module's `imported.txt` appears) |
+| 06 | `try { $resp = Invoke-PxcHttp $url 'POST' … } catch { $resp = $null }` | retry when status ≥ 500 | `X5-01:INFERENCE_RETRIED[wire 500]` (real wire POST count 2) |
+| 07 | `… [string]::Equals($i, $Model, [StringComparison]::Ordinal) …` | `$i -eq $Model` | `X5-02:MODEL_MATCH_NOT_ORDINAL[case alias]` |
+| 08 | `} catch { return $false } # malformed/unreadable record: never settled` | `return $true` | `X5-03:PENDING_GUARD_BYPASS[malformed]` |
+| 09 | `if ($ok -ne $true) { Stop-Pxc 'ServiceIdentityUnverified' }` | `$null = $ok` | `X5-07:SERVICE_BINDING_BYPASS[nssm wrapper start]` |
+| 10 | `if ([string]::IsNullOrEmpty($exePath)) { throw 'unreadable' }` | `{ $exePath = $expected }` | `X5-08:UNVERIFIED_RUNTIME_USED[unreadable status]` |
+
+CX10 was designed so a later guard does not hide the mutation. For the others I did not find an inner guard that would make the mutation equivalent, but none of this has been measured.
+
+## How the harness works
+
+- **Exit codes:** rc 0 when all required IDs pass and cleanup is verified; rc 1 when a case fails (an absent module gives `API_ABSENT` in every case, and every case still runs); rc 2 for setup or cleanup errors. The last stdout line is `RESULT N/T passed; …`.
+- **Report schema `proxima_control_tests.v1`:**
+  - `cases[]` with `{id, outcome, reason}`; `mandatory_ids`, `required_ids`, `passed`, `failed`, `failed_ids`, `setup_error_ids`
+  - PowerShell version and edition, requested and measured culture plus a probe, `child_exes`
+  - `children[]`: kind, exe, command, rc, output SHA, and the child's version, edition and cultures
+  - Hashes of the module, wrapper, S1 and harness; best-effort `git_head`/`git_tree`
+  - `primitives_replaced` (9/9 asserted before any product call), `counterexample_evidence[]`, `cleanup`
+- **Fixture:** `<ScratchRoot>\pxctl-<run>`, deleted only on rc 0 by a delete that never follows junctions. The outside sentinel is `<ScratchRoot>\pxctl-keep-<run>\keep.txt`. The report path and the evidence directory are never deleted.
+- **Counterexample evidence**, in `<EvidenceRoot|ScratchRoot>\pxctl-evid-<run>\`:
+  - `CXnn\` holds copies of the three sources, with the mutated one
+  - Beside it: `CXnn.report.json`, `CXnn.output.txt`, `CXnn.record.json` (command, rc, anchor, replacement, hashes, matched tokens, verdict)
+  - Credit requires rc 1 and the named token in a failed case. The child must also report: same source hash, `api_state=present`, no setup error, clean cleanup, matching culture. rc 0 is reported as `SURVIVED` with no credit.
+- **Child processes:**
+  - The endpoint child replays the product's own captured handshake envelope and the exact `EndpointBody` object via CLIXML. It runs with ambient WhatIf false under this exe and, if installed, the other PowerShell edition. It covers 14 items: WhatIf, shape, protocol, hash, benign wrong code, S1 mismatch and positive handshake.
+  - The fresh-process wrapper child receives its arguments through CLIXML.
+  - `-TestCulture` is forwarded to every child, and each child's measured culture is checked.
+- **Wire tests:** X5-01 and X5-06 use a TcpListener on an ephemeral `127.0.0.1` port in an owned runspace. Only in those cases is the real Http primitive restored; credentials are dummy.
+
+## Proposed commands (run on the selected Desktop host after verifying no live ProximaGateway service or Proxima process)
+
+```
+<exe> -NoProfile -NonInteractive -ExecutionPolicy Bypass -File <harness copy>\ProximaControl.Tests.ps1 -ModulePath <B tree>\.agents\skills\proxima-control\scripts\ProximaControl.psm1 -ScratchRoot <dir> -ReportPath <B.json>        # expect rc 1, 25 API_ABSENT
+<exe> … -ModulePath <H tree>\…\ProximaControl.psm1 -ScratchRoot <dir> -ReportPath <H.json>                                         # expect rc 0, 25/25
+<exe> … -ModulePath <H>… -ScratchRoot <dir> -ReportPath <Htr.json> -TestCulture tr-TR -Counterexamples -EvidenceRoot <evid>       # expect rc 0, 36/36
+```
+
+`<exe>` is `powershell.exe` and then `pwsh.exe`. Run a parse check with `[Parser]::ParseFile` on all three files first.
+
+## Tests
+
+`not_run`: parse check, PS5.1 and PS7 baseline/candidate/tr-TR/counterexample runs, Linux `tl.py --selftest`, ruff F delta, strict manifest check, review. Nothing was executed in this session.
+
+## Remaining risks (unmeasured PowerShell behaviour I relied on)
+
+1. **Syntax:** the files have never been parsed; a typo would cause setup or import failure.
+2. **OnRemove:** assumed to fire on `Import-Module -Force` (X3-01).
+3. **Scope of fake handlers:** they reach `$DefaultHttp`/`$DefaultRemote` through dynamic scope from module-invoked scriptblocks.
+4. **`Remove-PSSession`:** assumed to accept `-WhatIf`/`-Confirm`. If it doesn't, the real default primitive breaks, though tests use fakes.
+5. **Import failure surface:** the shape of the `DependencyMismatch` error after a failed `Import-Module` is unknown; X4-02 accepts either FQID or message.
+6. **WhatIf text:** may be localized, so the tests look only for the fingerprint prefix.
+7. **HttpClient and the wire server:** PS5.1 HttpClient and Expect-Continue behaviour against the hand-rolled server is assumed, not measured.
+8. **Real primitives in children:** endpoint and fresh-wrapper children use real primitives. I checked by reading that all their paths, including under each mutant, stop before any hazardous call. This should be verified statically.
+9. **Pre-existing state:** the base directory must already exist for the journal and guard to work; a missing base fails closed.

@@ -1,0 +1,51 @@
+{
+  "at": "2026-11-08T05:06:37.009996+00:00",
+  "run_id": "b4d36a7cbae44b1eb1edd637ba13f7a1",
+  "original_controller_result": "absent; controller lost in cloud outage",
+  "original_run_json": "unchanged dangling dang_chay; not authoritative terminal",
+  "terminal_evidence": "Linux zombie /proc/564584/stat original field52; independently recovered, not original controller exit",
+  "process_state": "Z",
+  "kernel_exit_status": 0,
+  "actual_child_exit": 0,
+  "result_event_sha256": "1455f5943649d3d429f330693c19736a5f20428561580e58021c847f1e6dc03a",
+  "snapshot_after_measured_at_recovery": true,
+  "snapshot_before_sha256": "022ce26365291badb89ce80319e6fd49f050fcbfca76c612a7c96ea05e317e2f",
+  "snapshot_after_sha256": "45a5bb459f7088bcba80f426e4473d2f5bb984e815cda057f6a52ae7f28e4f43",
+  "changes": [
+    {
+      "path": ".agents/skills/proxima-control/scripts/ProximaControl.psm1",
+      "before": null,
+      "after": [
+        "F",
+        "b89057f61d699e1c5fe7005b89db94874956a20fd66023cebb7c9c6cbd3e7438"
+      ]
+    },
+    {
+      "path": ".agents/skills/proxima-control/scripts/Run-Px.ps1",
+      "before": null,
+      "after": [
+        "F",
+        "03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354"
+      ]
+    },
+    {
+      "path": ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1",
+      "before": null,
+      "after": [
+        "F",
+        "68857443b658211f31db3a2ecd2ba51f5ff2e5ac2318da1d7a4936c3c5b0ca1f"
+      ]
+    },
+    {
+      "path": ".claude/.packet_state/session-start.ran",
+      "before": [
+        "F",
+        "af824e32709c042605f3dcd0ce50892c81df624f6d6c6f28d1d7a6235fe86f9c"
+      ],
+      "after": [
+        "F",
+        "dfc25bc122f3c6ddbfca76233b086b5795e0c696e96a17f335f7ce99e946c659"
+      ]
+    }
+  ]
+}

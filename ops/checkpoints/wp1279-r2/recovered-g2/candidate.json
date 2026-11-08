@@ -1,0 +1,12 @@
+{
+  "recorded_at": "2026-11-08T05:08:09.134132+00:00",
+  "head": "24cc13bb536386d0662927e9c94331eb8713bab8",
+  "tree": "891ae31324d00e876f9e53979606e0aa77eb9324",
+  "base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "source": "exact original actual Claude writes, mechanical dispatcher commit",
+  "numstat": "527\t0\t.agents/skills/proxima-control/scripts/ProximaControl.psm1\n30\t0\t.agents/skills/proxima-control/scripts/Run-Px.ps1\n982\t0\t.agents/skills/proxima-control/tests/ProximaControl.Tests.ps1\n",
+  "tests": "not_run; native harness gates next",
+  "run_json_limit": "original controller lost during cloud outage; original run.json preserved unchanged; independent kernel zombie status recovered actual child exit 0",
+  "snapshot_limit": "after snapshot measured at recovery, not child terminal time",
+  "raw_result_sha256": "1455f5943649d3d429f330693c19736a5f20428561580e58021c847f1e6dc03a"
+}

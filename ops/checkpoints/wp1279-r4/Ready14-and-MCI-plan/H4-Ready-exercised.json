@@ -1,0 +1,30 @@
+{
+  "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "current_target_D": "c4978cd756dac4bd99127fc50a0dab6eed133a3e",
+  "command": [
+    "/workspace/scratch/proxima-p0-tools/gh",
+    "pr",
+    "ready",
+    "1280",
+    "--repo",
+    "ducthangho/tra-luat"
+  ],
+  "started_at": "2026-11-08T12:12:14.753791+00:00",
+  "state": "Ready_actual_readback_confirmed_not_merged",
+  "conditional_authority": {
+    "metadata_commit": "c1126784549c73cce31ee13f6b24f7d0b783771f",
+    "conditional_authority_path": "ops/land/wp1279-r4-pr1280-conditional-authority-basec4978cd.json",
+    "current_canonical": "c4978cd756dac4bd99127fc50a0dab6eed133a3e",
+    "immutable_B": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+    "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+    "valid_until": "2026-11-08T15:51:27Z",
+    "comment": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6721130447",
+    "comment_id": 6721130447,
+    "exact_body": true,
+    "remote_blobs_exact": true
+  },
+  "preconditions": "H4review3/v2/M12+native/Linux+Draftconnector+CI2all23/4anchors/AUX13+K0K7rc0+freshrefs/rules/onlyg4verified",
+  "command_exit": 0,
+  "finished_at": "2026-11-08T12:12:17.188230+00:00",
+  "draft": false
+}

@@ -1,0 +1,12 @@
+{
+  "metadata_commit": "c1126784549c73cce31ee13f6b24f7d0b783771f",
+  "conditional_authority_path": "ops/land/wp1279-r4-pr1280-conditional-authority-basec4978cd.json",
+  "current_canonical": "c4978cd756dac4bd99127fc50a0dab6eed133a3e",
+  "immutable_B": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "valid_until": "2026-11-08T15:51:27Z",
+  "comment": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6721130447",
+  "comment_id": 6721130447,
+  "exact_body": true,
+  "remote_blobs_exact": true
+}

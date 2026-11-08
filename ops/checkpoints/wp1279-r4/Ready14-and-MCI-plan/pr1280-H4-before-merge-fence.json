@@ -1,0 +1,9 @@
+{
+  "endpoint": "https://github.com/ducthangho/tra-luat.git",
+  "at": "2026-11-08T12:17:09.155606+00:00",
+  "rc": 0,
+  "canonicalization": "UTF8 OID TAB ref LF sorted by ref Unicode codepoint; ALL refs inclHEAD/tags/pull",
+  "sha256": "fe2710f8ea513e3f76d01b2447d3c88f9c1f46441dbe4ad2ecb7c51788d23cfb",
+  "count": 1748,
+  "deltas": []
+}

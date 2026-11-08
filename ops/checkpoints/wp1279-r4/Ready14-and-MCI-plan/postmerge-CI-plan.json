@@ -1,0 +1,65 @@
+{
+  "status": "prospective_before_actualmerge_NOTRUN",
+  "packet": "wp1279",
+  "head_H4": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "immutable_B": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "current_target_D": "c4978cd756dac4bd99127fc50a0dab6eed133a3e",
+  "expected_merge_parents": [
+    "c4978cd756dac4bd99127fc50a0dab6eed133a3e",
+    "bc16ccff3601fabeeb783f41b52360ef5851838a"
+  ],
+  "expected_clean_merge_tree_probe": "3822761c513a7ba5b85df8f00d4cfdb7e47434e5",
+  "actual_merge_oid": null,
+  "operation": [
+    "gh",
+    "pr",
+    "merge",
+    "1280",
+    "--repo",
+    "ducthangho/tra-luat",
+    "--merge",
+    "--match-head-commit",
+    "bc16ccff3601fabeeb783f41b52360ef5851838a",
+    "--body-file",
+    "H4-merge-body.md"
+  ],
+  "authority": "c1126784549c73cce31ee13f6b24f7d0b783771f:ops/land/wp1279-r4-pr1280-conditional-authority-basec4978cd.json",
+  "CI_after_merge": {
+    "category": "automatic_gate_from_authorized_normalmerge",
+    "event": "push",
+    "branch": "master",
+    "used": 0,
+    "reserved": 1,
+    "limit_initial_runs": 1,
+    "actual_head": "M_notyetallocated",
+    "actual_workflow_definition": "mustmeasureGraphQLMrun; expectedbytesmatchcurrentD/H4, notassumedOID",
+    "expected_definition_blob": "2b2c9aa25ad1c136e44cba457d9ae765d2544fc2",
+    "expected_definition_sha256": "aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67",
+    "required_OS": "UbuntuONLY, noWindowsCI/fullWindowsmutantCI",
+    "requirements": [
+      "All23actualMjobs/required4contexts app15368success",
+      "Fouractualsourceanchors withactualMparents/tree/currentdefinitionOID/blob/bytes",
+      "Officialgate-evidence-ubuntu-latest-attemptZIP/APIartifactdigest/childlifecycle1777of1777actualrc0/runner/catalog/outputhash/cleanbeforeafter",
+      "Mandatoryread-onlyfullsourceCIlogAUX15beforelanded",
+      "M8exactIssuepost/readback/allacceptance/actualstrictUTCZleaseretirement/D1D4rc0beforePacketclosure"
+    ],
+    "no_implicit_rerun": true
+  },
+  "next_model_reservation": {
+    "actual_n": 15,
+    "purpose": "mandatory canonicalMCI log/source audit",
+    "invoked": false,
+    "charged": false,
+    "shared_used_now": 14,
+    "shared_cap": 16,
+    "remaining_after15": 1,
+    "formalrounds": "3/3 unchanged"
+  },
+  "Ready14": {
+    "actual_provider_activity": "ReadyRunning12:12:26Z->completedexactH4noissues",
+    "new_receipt_or_review_object": "No new standalone receipt observed; currentactualsummaryterminal separatelyverified, not oldreceipt-only inference",
+    "tokens_and_servedidentity": "KHONG_DO_DUOC; conservativeoneprovideractivitycall14charged",
+    "formal_round": false
+  },
+  "recorded_at": "2026-11-08T12:21:02.042220+00:00"
+}

@@ -1,0 +1,80 @@
+{
+  "metadata_commit": "d5d5c96b917922d71bb43e3fa2851d5bea1de18d",
+  "path": "ops/checkpoints/wp1279-r4/PR1280-H4-CI-ready",
+  "comment": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6721303241",
+  "comment_id": 6721303241,
+  "exact_body": true,
+  "remote_blobs_exact": true,
+  "index": {
+    "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+    "tree": "30cbf51650d88f05c0fcae977dd9df286a089204",
+    "current_canonical_target": "c4978cd756dac4bd99127fc50a0dab6eed133a3e",
+    "run_id": 42469501853,
+    "attempt": 2,
+    "event": "pull_request",
+    "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884",
+    "parents": [
+      "c15603dcf537fa4beb753b263398d6e6b8c92019",
+      "bc16ccff3601fabeeb783f41b52360ef5851838a"
+    ],
+    "all23Ubuntu_jobs": "success",
+    "positive_output": "1777/1777",
+    "four_anchors_derived": {
+      "run": "passed",
+      "checkout": "passed",
+      "workflow_definition": "passed",
+      "gate_output": "passed"
+    },
+    "gate_output_support": "separate complete AUX13sourceaudit, not edited rawboundedconsumer",
+    "raw_bounded_gate_output_states_preserved": [
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured",
+      "not_measured"
+    ],
+    "raw_WD_slot_preserved": "not_measured",
+    "actual_GraphQL_WD_source": "pr1280-H4-attempt2-workflow-definition.json",
+    "AUX13_receipt_sha256": "4f1f05dada67af6af86e26c2339f2d39afd93f1ae88047d48fa32ce559074d50",
+    "archive_sha256": "6379b6929250a147709f53a49e99e7cd0d726beee6f6db5c0280292a4fdf4d9f",
+    "archive_bytes": 1617880,
+    "members": 108,
+    "canonical_K0_K7_rc": 0,
+    "original_offline_review3": "2a51a4727c042164decb787447f2037877b47b9d:ops/reviews/wp1279-r4-review3",
+    "review3v2": "30508a9227e2a3b021a4cfa68b8529b1718c3287:ops/reviews/wp1279-r4-review3.receipt.yaml",
+    "known_failure_rechecks": {
+      "actionlint": "All11 actual c\u00e0i actionlint cho G5 steps successful in attempt2; no prior failedjob substituted.",
+      "registry": "True13/13 cases and13/13intendedkills; clean suite rc0, noTimeoutExpiredfalsecredit/leftover-descendant message; all15suites rc0.",
+      "aggregate": "Complete8/8 including2/6,61cases/490mutants/0errors."
+    },
+    "limitations": [
+      "Auxiliary CI source/log audit only; formal_code_approval=false and merge_authority=false. Model identity KHONG_DO_DUOC on codex_service/machine; not inferred from parent or account.",
+      "All23 raw canonical gate_output job observations remain not_measured and raw workflow_definition slot remains not_measured. Separate actual GraphQL do-wd plus source audit support derived four anchors; not a fully passed bounded consumer.",
+      "Actual tested checkout2b40120d576c1de13e1cb3f4330608695ec7b884 has parents acceptanceB/H4 and treeH4. This does not measure integration with later canonical master D=c4978cd756dac4bd99127fc50a0dab6eed133a3e; actual merge-commit CI is future work.",
+      "Packet-loop declares1360cases but executes1359/1359 plus one namedWindows-onlyskip; associated mutant skipped/not credited among1523declaredmutants. Neither skip is a pass or killed mutant.",
+      "PR workflow deliberately runs direct selftest and produces no lifecycle artifact/standalone child-rc receipt. Successful required command step and actual1777/1777 output are verified; no invented lock/catalog/clean-before-after artifact.",
+      "Official plugin source hashes identify received UTF8 decoded text, not remote original OS log bytes. No Windows CI/native/live remeasurement.",
+      "Attempt1 failed history and AUX12 partial handoff remain immutable. Retry2 remeasures failed criteria; it does not erase attempt1 or prove the registry timeout underlying cause transient. One Root-authorized retry used1/1; auditor executed no CI action."
+    ],
+    "status": "Readyprerequisitesmeasured; stillDraft/noReady/merge/land asserted atpublication",
+    "at": "2026-11-08T12:09:21.045313+00:00"
+  }
+}

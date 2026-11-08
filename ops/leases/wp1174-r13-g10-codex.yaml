@@ -1,0 +1,157 @@
+schema_version: 2
+event: lease_granted_under_owner_delegation
+packet_issue: 1174
+packet_id: WP1174
+revision: 13
+generation: 10
+lease_id: wp1174-r13-g10-codex
+role: executor
+executor: codex
+provider: openai_codex
+model_family: openai
+execution_surface: codex_service
+transport: machine
+reviewer_provider: anthropic_claude
+reviewer_execution_surface: claude_code
+reviewer_model_family: claude
+reviewer_transport: machine/local
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+branch: agent/wp1174-g5-codex
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6716497540
+authority_url: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6716487067
+recorded_by: Codex coordinator acting under standing owner delegation; exact C9/Mission17/source
+  authority, no human signature
+spec_path: ops/specs/wp1174-implementation-r13.md
+spec_hash: 2cdd95dbf1b5e3a390882c99b3357c219974959827ef69bba6b412da36f86e6f
+spec_sha256_required: 2cdd95dbf1b5e3a390882c99b3357c219974959827ef69bba6b412da36f86e6f
+spec_ref: refs/heads/ops/spec-wp1174-r13@42a8c75f703b7ee56b38ce658887c764b803c7d5
+prompt_path: ops/specs/wp1174-implementation-r13.md
+prompt_sha256_required: 2cdd95dbf1b5e3a390882c99b3357c219974959827ef69bba6b412da36f86e6f
+base_sha: 42a8c75f703b7ee56b38ce658887c764b803c7d5
+start_from_sha: 42a8c75f703b7ee56b38ce658887c764b803c7d5
+reviewed_sha_required: 42a8c75f703b7ee56b38ce658887c764b803c7d5
+write_set: &id001
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/specs/wp1174-c5-adapter-design.md
+- ops/specs/wp1174-implementation-r13.md
+effective_write_set: *id001
+write_set_hash: e3d1ca5594fc60ef29b1a6c7e98703ff6ac7a8533800e0261db2ab1249cb62f3
+change_policy_sha: null
+change_policy_exception:
+  id: WP1174-R13-CLOSURE-EXCEPTION
+  decision: pending_replacement_owner_approval
+  owner: ducthangho
+  reason: ADR0032 policy and schema absent at pinned canonical; no silent empty-policy
+    default
+  expires_at: '2026-11-08T08:03:01Z'
+  scope: Only R13/g10 metadata binding integration from669; product digest fixed;
+    composite source native review delivery C9, no target/global exception
+  effective_write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - docs/PROTOCOL_DA_PHIEN.md
+  - ops/specs/wp1174-c5-adapter-design.md
+  - ops/specs/wp1174-implementation-r13.md
+  canonical_policy_sha: null
+  rule: exact closed set + NFC/casefold/symlink/prefix overlap against all live refs;
+    every impact_hint/outside companion blocks and needs approved revision
+  required_checks:
+  - selftest N/N
+  - packet_loop baseline+mutation controls
+  - registry+full Linux M9
+  - native Windows focused
+  - canonical K0-K7
+  - source delegated owner audit plus real native cross K4; target actual-human unchanged
+  - required native Linux profile on exact H via existing ci.yml gate-packet-loop
+    main()
+  - WP1174_NATIVE_REPORT_V1 complete schema/required outcomes and source/provenance
+    binding; missing/BoQua/infra != pass
+  - Windows focused one unit mutant m1174_allow_windows with raw oracle record; no
+    full Windows suite
+  land_obligations:
+  - canonical release/manifest only by land operator, not worker
+  never_waived:
+  - source authority
+  - exclusive lease
+  - K0-K7
+  - target actual-human when using target same-provider advisory path
+  - M9
+  - unknown=>blocked
+leased_at_utc: '2026-11-08T03:12:06.493578+00:00'
+heartbeat_at: '2026-11-08T03:12:06.493578+00:00'
+lease_until: '2026-11-08T08:03:01Z'
+lease_expires_at_utc: '2026-11-08T08:03:01Z'
+heartbeat_required_minutes: 360
+max_lease_hours: 24
+hard_not_after: '2026-11-08T08:03:01Z'
+nang_tran:
+  ai_nang: ducthangho under recorded delegation
+  can_cu: Exact C9 decision6716487067; same5/6000, source7/native17/connector2 globally;
+    source15 only metadata/spec integration, product digest fixed
+  tran_cu:
+    files: 6
+    added_lines: 450
+  tran_moi:
+    files: 5
+    added_lines: 6000
+  previous_approved_exception:
+    files: 5
+    added_lines: 6000
+nang_tran_review_rounds:
+  ai_nang: ducthangho under recorded delegation
+  tran_cu: 12
+  tran_moi: 17
+  can_cu: Exact C9 decision6716487067; four native parts plus native integrator, all
+    five calls counted, same exact finalH and complete coverage union
+thay_the_cho: null
+template_only: false
+guard: No source dispatch until actual C9/Mission17/P13, g9 ended, canonical checks/bot/I2/doctor/begin
+  succeed
+spec_source_oid: 42a8c75f703b7ee56b38ce658887c764b803c7d5
+spec_sha256: 2cdd95dbf1b5e3a390882c99b3357c219974959827ef69bba6b412da36f86e6f
+runtime_preconditions:
+  source_test_processes: do not expose TL_TOKEN/TL_WEBAPP/TL_MASTER_KEY/TL_AGENT_CREDS_FILEID
+    or other LIVE/Drive/GAS/NLM credentials; probe absence as booleans, never values
+  publishing: only canonical publisher after gates; worker cannot authorize land
+  canary_profile: native Linux ext4/XFS positive must be measured; cloud overlay and
+    unverified WSL not supported; no security/WSL installs authorized
+  Windows: Owner online host, frozen13 pair only, cumulative5runs/60minutes, prior3/26;
+    no Windows CI/main/full suites
+  C9_accounting: Source7/native17/connector2 cumulative, C9source1/native5; shared960
+    inclusive old used, hard08:03:01UTC; no extra call under C9
+exception_approval_comment_url: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6716487067
+reviewer: claude
+pull_request: 1275
+source_pr: 1275
+metadata_review_disposition: P13 exact C9 delegated metadata decision6716487067 plus
+  selftest1777 rc0; no standalone native metadata claim. Fresh composite full final-H
+  native review mandatory.
+metadata_approval_pending: false
+continuation_source:
+  history: Normal finalH preserves H1-H5/196/275/669/P13; native275 blocked/context
+    and all old costs retained; no refund
+  public_H5: 6e74d677899217b7a29762b2eef42a48eaaf333a
+  previous_source_lease_ended_oid: 147eadbb58d210935bd2ed69c24ae910e181e2a4
+  mutable_source_paths:
+  - .claude/dev/packet_loop_test.py
+  - docs/PROTOCOL_DA_PHIEN.md
+  frozen_spec_paths:
+  - ops/specs/wp1174-c5-adapter-design.md
+  - ops/specs/wp1174-implementation-r13.md
+  private_source669: 6692082917429bd366f30c5c320a823513f60028
+  product_sha256_required: ade7bac84b7465ae7bef10b25d10aef0bc8b79d296cb780a1aa6b4afde5848fe
+source_audit_policy: 'Source-only r20 section9 override: real native cross K4 plus
+  independent delegated_owner_audit AI; target actual-human unchanged'
+source_authority_url: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6716497540
+source_run_windows_minutes:
+- 15
+new_native_review_minutes: 15
+native_P11_approval_claim: false
+new_native_integrator_minutes: 10
+native_part_count: 4
+native_parallel_limit: 2

@@ -1,0 +1,26 @@
+I made the structural fix for **WP1285-R1-F01**, all in PM01 of `ProximaManifest.Tests.ps1`. No tests were run (NOT_RUN): I had no Bash, PowerShell or Git access here.
+
+## The fix
+The old PM01 listed the blocks it rejected one by one. It never required the end block to be unnamed and never looked at the PowerShell 7 `clean` block. So on PS7, wrapping the manifest as `end { @{…} } clean {…}` passed PM01, and two runtime children ran before any rejection.
+
+PM01 now accepts only one shape, and does this before any import:
+- **Only a plain unnamed end block is allowed.** It reads every public property of the parsed script's root by reflection, skipping only `Parent` and `EndBlock`. Any property that holds a syntax-tree node or a non-empty collection gets its name added to `$extra`. That covers param, begin, process, dynamicparam, the PS7 clean block, using statements, attributes and any future block type, without listing them by name.
+- **It rejects** when `$extra` is non-empty, when there is no end block, when the end block is named (`end {…}`), when there are traps, or when there is a `#requires` line. The reason reads `EXECUTABLE_STATEMENT: … [<offending property names>]`, so it names the case. All of this happens before the static schema check (PM02) can pass, so no runtime child or PM04 tamper child starts.
+- **Everything after that is unchanged:** exactly one pipeline holding one hashtable expression with no redirections, then `SafeGetValue`.
+
+**PS5.1 compatibility:** the code never reads a `CleanBlock` property directly. Reflection only lists the properties the running parser actually has, so PS5.1 under `Set-StrictMode -Version 3.0` doesn't error on the missing property and a good PS5.1 run doesn't turn into a setup failure. On PS5.1, a manifest with a `clean` block is still a parse error, and a named `end` block is rejected by the unnamed check.
+
+## Scope
+- Only `.agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1` changed: 2 lines became 6, and the last two lines of PM01 were merged into one. The manifest and `SKILL.md` are byte-identical to H1; no PM01 reason is mentioned in them.
+- B..new H is now **450 additions, 0 deletions** (373 + 13 + 64). That is exactly the cap, so there is no room left.
+- The 7 PM IDs, CX00–CX04, the parent count of 12, the schema, rc rules and the PM04 zero-import rule are unchanged. No assertions were removed or weakened.
+- **I did not add in-harness negative evidence.** A new CX would change the counts, and a PM01 self-check would need about 5 more lines, which the cap doesn't allow. The operator's own probes on owned manifest copies are the negative evidence.
+
+## Uncertainties
+- **Not run on either runtime.** I assume a plain `.psd1` root has no public property other than `EndBlock` that holds a syntax-tree node or a non-empty collection, on both PS5.1 and PS7.x. If that's wrong, the normal case fails PM01 and the reason lists the property name; it would not pass silently. Candidate 7/7 rc0 on both runtimes is still needed.
+- **I didn't check this before deciding:** I assumed `Traps` and the other collection properties are either null or empty collections that read as false. The `Traps` check is unchanged from H1, which passed natively.
+- **Mutation check not done:** removing the new `$extra` and unnamed checks should make the PS7 end+clean probe pass PM01 again. Neither the probe nor that mutation has been run.
+
+```json
+{"packet":"wp1285","revision":2,"generation":3,"provider":"anthropic","surface":"claude_code","model":"claude-opus-5-5","session":"unknown","attempt":"2/3","immutable_B":"bf9914cb1a8e6f5047468f4d130b587015f8d73f","continuation_H":"4196fbaaeb13b4d26d5f4f452b6c1a8b26150489","branch":"agent/wp1285-g3-claude","status":"authored_uncommitted","changed_paths":[".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"],"unchanged_in_write_set":[".agents/skills/proxima-control/scripts/ProximaControl.psd1",".agents/skills/proxima-control/SKILL.md"],"diff_vs_B_expected":{"new_files":3,"additions":450,"deletions":0,"cap":450},"findings_addressed":[{"id":"WP1285-R1-F01","class":"manifest-ast-ignores-executable-blocks","fix":"PM01 accepts only a plain unnamed end block: reflection rejects any Ast-valued or non-empty collection root property except EndBlock (covers PS7 CleanBlock, param, begin, process, dynamicparam, using, attributes); also rejects a named or missing end block, traps and #requires, before SchemaOk and before any import","ps51_compat":"no direct CleanBlock property access; reflection only lists properties the running parser has, so StrictMode 3.0 cannot throw"}],"preserved":["PM01-PM07 ids","CX00-CX04 and parent 12","report schema","rc 0/1/2","PM04 zero-import rule","doc validation","no new Bypass"],"in_harness_negative_added":false,"in_harness_negative_reason":"cap reached (450/450); a new CX would change the count","tests":"NOT_RUN","uncertainties":["root ScriptBlockAst public-property assumption unmeasured on PS5.1 and PS7","native positives 7/7 rc0 on both runtimes and the PS7 end+clean / named-end closure probes not run","mutation (remove the new check, probe must fail) not run"],"next_role":"root operator: commit exact H, native PS5.1/7 positives + CX00-04 + operator closure probes + mutation, Linux gates, then fresh independent formal review 2"}
+```

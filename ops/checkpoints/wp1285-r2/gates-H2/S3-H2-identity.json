@@ -1,0 +1,27 @@
+{
+  "candidate": "883d37826f443ce9301dd0bcd40cd5f97f1adf0e",
+  "tree": "8bb2149f025966ba09a351d5c60b5fd954d960b6",
+  "baseline": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "continuation": "4196fbaaeb13b4d26d5f4f452b6c1a8b26150489",
+  "parents": [
+    "4196fbaaeb13b4d26d5f4f452b6c1a8b26150489"
+  ],
+  "numstat": [
+    "64\t0\t.agents/skills/proxima-control/SKILL.md",
+    "13\t0\t.agents/skills/proxima-control/scripts/ProximaControl.psd1",
+    "373\t0\t.agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+  ],
+  "additions": 450,
+  "deletions": 0,
+  "author_run": "52efda0981d24f4589b888e235a31f0e",
+  "author_session": "9e143387-f4f8-47be-a6f9-7995d8e6be6f",
+  "tests_author": "NOT_RUN",
+  "finding": "WP1285-R1-F01 open pendingactualclosure/freshreview2",
+  "file_sha256": {
+    ".agents/skills/proxima-control/SKILL.md": "7d4dfd01706991d7d3475d0829583aac53d216d5c68c12e1b44bffb9f3ac6fb1",
+    ".agents/skills/proxima-control/scripts/ProximaControl.psd1": "0c76190d73e2126e2de69185020607f04ef0fb5507836bee211ebdc5d8f2bab6",
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1": "ea56e0eb710cdb8db9de5df6d3142476be55aeaf4ea2cc2e16821275a7ceba91"
+  },
+  "mechanical_commit_only": true,
+  "at": "2026-11-08T16:46:44.010997+00:00"
+}

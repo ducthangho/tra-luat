@@ -1,0 +1,701 @@
+{
+  "status": "complete_source_audit_no_material_inconsistency",
+  "formal_code_approval": false,
+  "head": "883d37826f443ce9301dd0bcd40cd5f97f1adf0e",
+  "tree": "8bb2149f025966ba09a351d5c60b5fd954d960b6",
+  "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "completed_at": "2026-11-08T17:05:02.157575+00:00",
+  "material_issues": [],
+  "native": {
+    "F01_closure": {
+      "finding": "WP1285-R1-F01",
+      "candidate": "883d37826f443ce9301dd0bcd40cd5f97f1adf0e",
+      "positive_control": "original7of7/12of12both remain mandatory",
+      "negatives": [
+        {
+          "label": "F01-named-end-ps51",
+          "shape": "named-end",
+          "PM01": {
+            "id": "PM01",
+            "outcome": "failed",
+            "reason": "EXECUTABLE_STATEMENT: requires/param/named or extra block/using/trap []",
+            "detail": null
+          },
+          "runtime_children": 0,
+          "before_import_rejection": true,
+          "manifest_sha256": "d5804f3c31b066ecae6b0601029946bce9f792606c0574d6a6759116086b272c",
+          "replacement": "end {\n# ProximaControl.psd1 - wp1285 r1 (PROXIMA-P1-S3). Pure data manifest for the sibling ProximaControl.psm1 (S2): nine keys only.\n# No NestedModules/RequiredModules/ScriptsToProcess: S1 ProximaConfig.psm1 is still loaded only by the S2 hash-before-import guard.\n@{\n    RootModule           = 'ProximaControl.psm1'\n    ModuleVersion        = '2.0.0'\n    GUID                 = '7f7055d6-51e3-4fb8-bbeb-7851a739bfb6'\n    PowerShellVersion    = '5.1'\n    CompatiblePSEditions = @('Desktop', 'Core')\n    FunctionsToExport    = @('px', 'Invoke-ProximaOperation')\n    CmdletsToExport      = @()\n    VariablesToExport    = @()\n    AliasesToExport      = @()\n}\n\n}\n",
+          "report": "C:\\tl-win\\wp1285-H2-native\\reports\\F01-named-end-ps51.json"
+        },
+        {
+          "label": "F01-named-end-ps7",
+          "shape": "named-end",
+          "PM01": {
+            "id": "PM01",
+            "outcome": "failed",
+            "reason": "EXECUTABLE_STATEMENT: requires/param/named or extra block/using/trap []",
+            "detail": null
+          },
+          "runtime_children": 0,
+          "before_import_rejection": true,
+          "manifest_sha256": "d5804f3c31b066ecae6b0601029946bce9f792606c0574d6a6759116086b272c",
+          "replacement": "end {\n# ProximaControl.psd1 - wp1285 r1 (PROXIMA-P1-S3). Pure data manifest for the sibling ProximaControl.psm1 (S2): nine keys only.\n# No NestedModules/RequiredModules/ScriptsToProcess: S1 ProximaConfig.psm1 is still loaded only by the S2 hash-before-import guard.\n@{\n    RootModule           = 'ProximaControl.psm1'\n    ModuleVersion        = '2.0.0'\n    GUID                 = '7f7055d6-51e3-4fb8-bbeb-7851a739bfb6'\n    PowerShellVersion    = '5.1'\n    CompatiblePSEditions = @('Desktop', 'Core')\n    FunctionsToExport    = @('px', 'Invoke-ProximaOperation')\n    CmdletsToExport      = @()\n    VariablesToExport    = @()\n    AliasesToExport      = @()\n}\n\n}\n",
+          "report": "C:\\tl-win\\wp1285-H2-native\\reports\\F01-named-end-ps7.json"
+        },
+        {
+          "label": "F01-end-clean-ps51",
+          "shape": "end-clean",
+          "PM01": {
+            "id": "PM01",
+            "outcome": "failed",
+            "reason": "PARSE_ERROR: Unexpected token 'clean' in expression or statement.",
+            "detail": null
+          },
+          "runtime_children": 0,
+          "before_import_rejection": true,
+          "manifest_sha256": "53ee36aa845a5a9cbb1381592e3b68706a058b39beeb38a56ee9eaaedbf2ca3b",
+          "replacement": "end {\n# ProximaControl.psd1 - wp1285 r1 (PROXIMA-P1-S3). Pure data manifest for the sibling ProximaControl.psm1 (S2): nine keys only.\n# No NestedModules/RequiredModules/ScriptsToProcess: S1 ProximaConfig.psm1 is still loaded only by the S2 hash-before-import guard.\n@{\n    RootModule           = 'ProximaControl.psm1'\n    ModuleVersion        = '2.0.0'\n    GUID                 = '7f7055d6-51e3-4fb8-bbeb-7851a739bfb6'\n    PowerShellVersion    = '5.1'\n    CompatiblePSEditions = @('Desktop', 'Core')\n    FunctionsToExport    = @('px', 'Invoke-ProximaOperation')\n    CmdletsToExport      = @()\n    VariablesToExport    = @()\n    AliasesToExport      = @()\n}\n\n}\nclean { 'PM01_CLEAN_PROBE' }\n",
+          "report": "C:\\tl-win\\wp1285-H2-native\\reports\\F01-end-clean-ps51.json"
+        },
+        {
+          "label": "F01-end-clean-ps7",
+          "shape": "end-clean",
+          "PM01": {
+            "id": "PM01",
+            "outcome": "failed",
+            "reason": "EXECUTABLE_STATEMENT: requires/param/named or extra block/using/trap [CleanBlock]",
+            "detail": null
+          },
+          "runtime_children": 0,
+          "before_import_rejection": true,
+          "manifest_sha256": "53ee36aa845a5a9cbb1381592e3b68706a058b39beeb38a56ee9eaaedbf2ca3b",
+          "replacement": "end {\n# ProximaControl.psd1 - wp1285 r1 (PROXIMA-P1-S3). Pure data manifest for the sibling ProximaControl.psm1 (S2): nine keys only.\n# No NestedModules/RequiredModules/ScriptsToProcess: S1 ProximaConfig.psm1 is still loaded only by the S2 hash-before-import guard.\n@{\n    RootModule           = 'ProximaControl.psm1'\n    ModuleVersion        = '2.0.0'\n    GUID                 = '7f7055d6-51e3-4fb8-bbeb-7851a739bfb6'\n    PowerShellVersion    = '5.1'\n    CompatiblePSEditions = @('Desktop', 'Core')\n    FunctionsToExport    = @('px', 'Invoke-ProximaOperation')\n    CmdletsToExport      = @()\n    VariablesToExport    = @()\n    AliasesToExport      = @()\n}\n\n}\nclean { 'PM01_CLEAN_PROBE' }\n",
+          "report": "C:\\tl-win\\wp1285-H2-native\\reports\\F01-end-clean-ps7.json"
+        }
+      ],
+      "rollback_mutant": {
+        "original_H1_harness_sha256": "54f69dd8000fd36937f84dc2192bcf865299772a3d4956bebc4f2b5668c75aed",
+        "PM01": {
+          "id": "PM01",
+          "outcome": "passed",
+          "reason": null,
+          "detail": "exactly one hashtable data expression, no executable statement, SafeGetValue accepted"
+        },
+        "runtime_children": 2,
+        "actual_rc": 1,
+        "new_beforeimport_property_failed": true,
+        "not_arbitrary_code_execution_claim": true
+      }
+    },
+    "passed": true,
+    "source_files_verified": 433,
+    "commands_verified": 37,
+    "S3_artifact_refs_verified": 175,
+    "phases": [
+      "F01-end-clean-ps51",
+      "F01-end-clean-ps7",
+      "F01-named-end-ps51",
+      "F01-named-end-ps7",
+      "F01-rollback-H1-ps7",
+      "baseline-ps51",
+      "baseline-ps7",
+      "candidate-ps51",
+      "candidate-ps51-CX",
+      "candidate-ps7",
+      "candidate-ps7-CX",
+      "legacy-S2-ps51",
+      "legacy-S2-ps7"
+    ],
+    "counterexamples": [
+      {
+        "runtime": "5.1.26100.9711",
+        "id": "CX01",
+        "rc": 1,
+        "matched": "PM02: UNEXPECTED_KEY[ScriptsToProcess]"
+      },
+      {
+        "runtime": "5.1.26100.9711",
+        "id": "CX02",
+        "rc": 1,
+        "matched": "PM02: WILDCARD_EXPORT[FunctionsToExport]; VALUE[FunctionsToExport]"
+      },
+      {
+        "runtime": "5.1.26100.9711",
+        "id": "CX03",
+        "rc": 1,
+        "matched": "PM02: UNEXPECTED_KEY[NestedModules]"
+      },
+      {
+        "runtime": "5.1.26100.9711",
+        "id": "CX04",
+        "rc": 1,
+        "matched": "PM05: DOC_VERSION_MISMATCH[frontmatter=2.0.1 manifest=2.0.0]; DOC_VERSION_MISMATCH[stray 2.0.1]"
+      },
+      {
+        "runtime": "7.6.9",
+        "id": "CX01",
+        "rc": 1,
+        "matched": "PM02: UNEXPECTED_KEY[ScriptsToProcess]"
+      },
+      {
+        "runtime": "7.6.9",
+        "id": "CX02",
+        "rc": 1,
+        "matched": "PM02: WILDCARD_EXPORT[FunctionsToExport]; VALUE[FunctionsToExport]"
+      },
+      {
+        "runtime": "7.6.9",
+        "id": "CX03",
+        "rc": 1,
+        "matched": "PM02: UNEXPECTED_KEY[NestedModules]"
+      },
+      {
+        "runtime": "7.6.9",
+        "id": "CX04",
+        "rc": 1,
+        "matched": "PM05: DOC_VERSION_MISMATCH[frontmatter=2.0.1 manifest=2.0.0]; DOC_VERSION_MISMATCH[stray 2.0.1]"
+      }
+    ],
+    "legacy_nested": [
+      {
+        "artifacts_verified": 29,
+        "direct_children_verified": [
+          {
+            "kind": "fresh-process wrapper",
+            "index": 0,
+            "roles": [
+              "output",
+              "wrapper-input",
+              "wrapper-report",
+              "wrapper-script"
+            ],
+            "rc": 0
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "index": 1,
+            "roles": [
+              "output",
+              "wrapper-input",
+              "wrapper-report",
+              "wrapper-script"
+            ],
+            "rc": 0
+          },
+          {
+            "kind": "endpoint",
+            "index": 2,
+            "roles": [
+              "endpoint-input",
+              "endpoint-report",
+              "endpoint-script",
+              "output"
+            ],
+            "rc": 0
+          },
+          {
+            "kind": "endpoint",
+            "index": 3,
+            "roles": [
+              "endpoint-input",
+              "endpoint-report",
+              "endpoint-script",
+              "output"
+            ],
+            "rc": 0
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "index": 4,
+            "roles": [
+              "output",
+              "wrapper-input",
+              "wrapper-report",
+              "wrapper-script"
+            ],
+            "rc": 0
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "index": 5,
+            "roles": [
+              "output",
+              "wrapper-input",
+              "wrapper-report",
+              "wrapper-script"
+            ],
+            "rc": 1
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "index": 6,
+            "roles": [
+              "output",
+              "wrapper-input",
+              "wrapper-preimport",
+              "wrapper-report",
+              "wrapper-script"
+            ],
+            "rc": 1
+          }
+        ],
+        "endpoint_observations": [
+          {
+            "runtime": "Desktop",
+            "version": "5.1.26100.9711",
+            "codepage": 1252,
+            "valid_path_result": {
+              "schema": "px.result.v1",
+              "action": "handshake",
+              "targetFingerprint": "744765351bdf36eee3cd038a1d7e4a1f70227cb673e9055a071e96bcf2f69b35",
+              "mode": "Endpoint",
+              "dryRun": false,
+              "dispatched": false,
+              "outcome": "ok",
+              "data": {
+                "protocolVersion": 1,
+                "moduleSha256": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+                "configModuleSha256": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d"
+              }
+            },
+            "valid_path_fqid": null,
+            "whatif_rows": {
+              "whatif-handshake": {
+                "name": "whatif-handshake",
+                "ambient_whatif": false,
+                "received_whatif": "True",
+                "received_whatif_type": "System.Boolean",
+                "fqid": null,
+                "message": null,
+                "result": {
+                  "schema": "px.result.v1",
+                  "action": "handshake",
+                  "targetFingerprint": "744765351bdf36eee3cd038a1d7e4a1f70227cb673e9055a071e96bcf2f69b35",
+                  "mode": "Remote",
+                  "dryRun": true,
+                  "dispatched": false,
+                  "outcome": "whatif",
+                  "data": null
+                },
+                "imported_before": 0,
+                "imported_after": 0
+              },
+              "whatif-status": {
+                "name": "whatif-status",
+                "ambient_whatif": false,
+                "received_whatif": "True",
+                "received_whatif_type": "System.Boolean",
+                "fqid": null,
+                "message": null,
+                "result": {
+                  "schema": "px.result.v1",
+                  "action": "status",
+                  "targetFingerprint": "744765351bdf36eee3cd038a1d7e4a1f70227cb673e9055a071e96bcf2f69b35",
+                  "mode": "Remote",
+                  "dryRun": true,
+                  "dispatched": false,
+                  "outcome": "whatif",
+                  "data": null
+                },
+                "imported_before": 0,
+                "imported_after": 0
+              }
+            },
+            "payload_body_sha256": "665a73d63a0d7faff86e0439620694f37a21ca609a44968f4005994aeafee3bb",
+            "raw_report_sha256": "0c91c14dff139ca22b7a07c923542ca21fbbbbefabb9511a8267e008f855c952"
+          },
+          {
+            "runtime": "Core",
+            "version": "7.6.9",
+            "codepage": 65001,
+            "valid_path_result": {
+              "schema": "px.result.v1",
+              "action": "handshake",
+              "targetFingerprint": "744765351bdf36eee3cd038a1d7e4a1f70227cb673e9055a071e96bcf2f69b35",
+              "mode": "Endpoint",
+              "dryRun": false,
+              "dispatched": false,
+              "outcome": "ok",
+              "data": {
+                "protocolVersion": 1,
+                "moduleSha256": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+                "configModuleSha256": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d"
+              }
+            },
+            "valid_path_fqid": null,
+            "whatif_rows": {
+              "whatif-handshake": {
+                "name": "whatif-handshake",
+                "ambient_whatif": false,
+                "received_whatif": "True",
+                "received_whatif_type": "System.Boolean",
+                "fqid": null,
+                "message": null,
+                "result": {
+                  "schema": "px.result.v1",
+                  "action": "handshake",
+                  "targetFingerprint": "744765351bdf36eee3cd038a1d7e4a1f70227cb673e9055a071e96bcf2f69b35",
+                  "mode": "Remote",
+                  "dryRun": true,
+                  "dispatched": false,
+                  "outcome": "whatif",
+                  "data": null
+                },
+                "imported_before": 0,
+                "imported_after": 0
+              },
+              "whatif-status": {
+                "name": "whatif-status",
+                "ambient_whatif": false,
+                "received_whatif": "True",
+                "received_whatif_type": "System.Boolean",
+                "fqid": null,
+                "message": null,
+                "result": {
+                  "schema": "px.result.v1",
+                  "action": "status",
+                  "targetFingerprint": "744765351bdf36eee3cd038a1d7e4a1f70227cb673e9055a071e96bcf2f69b35",
+                  "mode": "Remote",
+                  "dryRun": true,
+                  "dispatched": false,
+                  "outcome": "whatif",
+                  "data": null
+                },
+                "imported_before": 0,
+                "imported_after": 0
+              }
+            },
+            "payload_body_sha256": "665a73d63a0d7faff86e0439620694f37a21ca609a44968f4005994aeafee3bb",
+            "raw_report_sha256": "27abce52a3506b7bdbaa3676b363464c550e34eb7ce78c7cd1679a62f14b8ff5"
+          }
+        ]
+      },
+      {
+        "artifacts_verified": 29,
+        "direct_children_verified": [
+          {
+            "kind": "fresh-process wrapper",
+            "index": 0,
+            "roles": [
+              "output",
+              "wrapper-input",
+              "wrapper-report",
+              "wrapper-script"
+            ],
+            "rc": 0
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "index": 1,
+            "roles": [
+              "output",
+              "wrapper-input",
+              "wrapper-report",
+              "wrapper-script"
+            ],
+            "rc": 0
+          },
+          {
+            "kind": "endpoint",
+            "index": 2,
+            "roles": [
+              "endpoint-input",
+              "endpoint-report",
+              "endpoint-script",
+              "output"
+            ],
+            "rc": 0
+          },
+          {
+            "kind": "endpoint",
+            "index": 3,
+            "roles": [
+              "endpoint-input",
+              "endpoint-report",
+              "endpoint-script",
+              "output"
+            ],
+            "rc": 0
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "index": 4,
+            "roles": [
+              "output",
+              "wrapper-input",
+              "wrapper-report",
+              "wrapper-script"
+            ],
+            "rc": 0
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "index": 5,
+            "roles": [
+              "output",
+              "wrapper-input",
+              "wrapper-report",
+              "wrapper-script"
+            ],
+            "rc": 1
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "index": 6,
+            "roles": [
+              "output",
+              "wrapper-input",
+              "wrapper-preimport",
+              "wrapper-report",
+              "wrapper-script"
+            ],
+            "rc": 1
+          }
+        ],
+        "endpoint_observations": [
+          {
+            "runtime": "Core",
+            "version": "7.6.9",
+            "codepage": 65001,
+            "valid_path_result": {
+              "schema": "px.result.v1",
+              "action": "handshake",
+              "targetFingerprint": "dafb3161d47113cc2b7e283f7708105542fd962e40ecc840f202c472142f5fbb",
+              "mode": "Endpoint",
+              "dryRun": false,
+              "dispatched": false,
+              "outcome": "ok",
+              "data": {
+                "protocolVersion": 1,
+                "moduleSha256": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+                "configModuleSha256": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d"
+              }
+            },
+            "valid_path_fqid": null,
+            "whatif_rows": {
+              "whatif-handshake": {
+                "name": "whatif-handshake",
+                "ambient_whatif": false,
+                "received_whatif": "True",
+                "received_whatif_type": "System.Boolean",
+                "fqid": null,
+                "message": null,
+                "result": {
+                  "schema": "px.result.v1",
+                  "action": "handshake",
+                  "targetFingerprint": "dafb3161d47113cc2b7e283f7708105542fd962e40ecc840f202c472142f5fbb",
+                  "mode": "Remote",
+                  "dryRun": true,
+                  "dispatched": false,
+                  "outcome": "whatif",
+                  "data": null
+                },
+                "imported_before": 0,
+                "imported_after": 0
+              },
+              "whatif-status": {
+                "name": "whatif-status",
+                "ambient_whatif": false,
+                "received_whatif": "True",
+                "received_whatif_type": "System.Boolean",
+                "fqid": null,
+                "message": null,
+                "result": {
+                  "schema": "px.result.v1",
+                  "action": "status",
+                  "targetFingerprint": "dafb3161d47113cc2b7e283f7708105542fd962e40ecc840f202c472142f5fbb",
+                  "mode": "Remote",
+                  "dryRun": true,
+                  "dispatched": false,
+                  "outcome": "whatif",
+                  "data": null
+                },
+                "imported_before": 0,
+                "imported_after": 0
+              }
+            },
+            "payload_body_sha256": "665a73d63a0d7faff86e0439620694f37a21ca609a44968f4005994aeafee3bb",
+            "raw_report_sha256": "1bbd269cec4970c3d3fa26b131e417865a69917190aa773c706cb4df1b92bae6"
+          },
+          {
+            "runtime": "Desktop",
+            "version": "5.1.26100.9711",
+            "codepage": 1252,
+            "valid_path_result": {
+              "schema": "px.result.v1",
+              "action": "handshake",
+              "targetFingerprint": "dafb3161d47113cc2b7e283f7708105542fd962e40ecc840f202c472142f5fbb",
+              "mode": "Endpoint",
+              "dryRun": false,
+              "dispatched": false,
+              "outcome": "ok",
+              "data": {
+                "protocolVersion": 1,
+                "moduleSha256": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+                "configModuleSha256": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d"
+              }
+            },
+            "valid_path_fqid": null,
+            "whatif_rows": {
+              "whatif-handshake": {
+                "name": "whatif-handshake",
+                "ambient_whatif": false,
+                "received_whatif": "True",
+                "received_whatif_type": "System.Boolean",
+                "fqid": null,
+                "message": null,
+                "result": {
+                  "schema": "px.result.v1",
+                  "action": "handshake",
+                  "targetFingerprint": "dafb3161d47113cc2b7e283f7708105542fd962e40ecc840f202c472142f5fbb",
+                  "mode": "Remote",
+                  "dryRun": true,
+                  "dispatched": false,
+                  "outcome": "whatif",
+                  "data": null
+                },
+                "imported_before": 0,
+                "imported_after": 0
+              },
+              "whatif-status": {
+                "name": "whatif-status",
+                "ambient_whatif": false,
+                "received_whatif": "True",
+                "received_whatif_type": "System.Boolean",
+                "fqid": null,
+                "message": null,
+                "result": {
+                  "schema": "px.result.v1",
+                  "action": "status",
+                  "targetFingerprint": "dafb3161d47113cc2b7e283f7708105542fd962e40ecc840f202c472142f5fbb",
+                  "mode": "Remote",
+                  "dryRun": true,
+                  "dispatched": false,
+                  "outcome": "whatif",
+                  "data": null
+                },
+                "imported_before": 0,
+                "imported_after": 0
+              }
+            },
+            "payload_body_sha256": "665a73d63a0d7faff86e0439620694f37a21ca609a44968f4005994aeafee3bb",
+            "raw_report_sha256": "35a7b8c71b89f71975a674d794cf76192e67e54ff4e63fdc26240ae93dcb2bc5"
+          }
+        ]
+      }
+    ]
+  },
+  "archive_sha256": "86c03853d2a2a5ac69aa041d5227c1e206c700cedd668cbd08ceb510c0621e21",
+  "archive_bytes": 2127773,
+  "zip_entries": 434,
+  "linux": {
+    "command_logs": [
+      {
+        "label": "admission",
+        "rc": 0,
+        "sha256": "485103aa2824a3e1355b256af04bbf6af34745ae7f95fef0b9ecb192ab5eda1a",
+        "bytes": 139
+      },
+      {
+        "label": "diff-check",
+        "rc": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "label": "numstat",
+        "rc": 0,
+        "sha256": "fed03968d5e23ea2f7d6ec8001ca43d21cb1764413a5996840a2b0e9dd7b82e8",
+        "bytes": 178
+      },
+      {
+        "label": "doctrine-scan",
+        "rc": 0,
+        "sha256": "d5d6962e60a7ce2002d5eab3678ab78bb53688c8cfac22735ab088ab8381ead3",
+        "bytes": 70
+      },
+      {
+        "label": "adr-song",
+        "rc": 0,
+        "sha256": "0f64eed52c99c602f15e179ff897f74c58c29ad5cf8c741fae11bf4c3fd5fa59",
+        "bytes": 113
+      },
+      {
+        "label": "doc-claims",
+        "rc": 0,
+        "sha256": "b37e7fd5ffe060e7f10645e945156d1226f404d448add1dbf41042e4f76a4d86",
+        "bytes": 73082
+      },
+      {
+        "label": "ruff",
+        "rc": 1,
+        "sha256": "5835093cb70b78d86e5313c6730bbe6db9d096cd5963f54707aa58cbe97cb425",
+        "bytes": 5035
+      },
+      {
+        "label": "worker-manifest",
+        "rc": 0,
+        "sha256": "66718b6d622f749f2dc3a1bf896d19a7b81562fc0a3bdf7fd671acae522cf58a",
+        "bytes": 31007
+      },
+      {
+        "label": "worker-release-verify",
+        "rc": 0,
+        "sha256": "0968bbd87b9c51b89131cdfd9433c26b4392a6c87ee138746fad5bb4a66873bc",
+        "bytes": 20803
+      },
+      {
+        "label": "full-selftest-lifecycle",
+        "rc": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    ],
+    "child_rc": 0,
+    "positive": "1777/1777",
+    "output_sha256": "0b28029fffe4f30a7ab7d04234f478010d85473af29472092166a3decda1f972",
+    "before_after_identity": {
+      "catalog_policy_sha256": "e8b7be5e7f1f77a4d4d065d49dbd616a6e9b5260541e61debfe7d5d62638c679",
+      "head_sha": "883d37826f443ce9301dd0bcd40cd5f97f1adf0e",
+      "machine": "x86_64",
+      "python_implementation": "CPython",
+      "python_version": "3.12.14",
+      "runner_sha256": "637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810",
+      "system": "Linux",
+      "system_release": "6.18.57",
+      "tracked_clean": true,
+      "tree_sha": "8bb2149f025966ba09a351d5c60b5fd954d960b6",
+      "worktree_clean": true
+    },
+    "python_binary_sha256": "fa67443527ed9647f760d807e2a38f26340757123e643c4639cf273ed15d5ea7",
+    "ruff_existing_F821": 12,
+    "ruff_bare_rc": 1,
+    "ruff_delta": 0,
+    "strict_manifest": "184/184",
+    "canonical_checker_blob": "f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1"
+  },
+  "source_hashes": {
+    "S3-H2-AUX3-assignment-binding.json": "ab82ba050dad91c49efc63d5b3df29d40547feed7489f001e55411ee45350566",
+    "verify-S3-H2-native.py": "c7ac0f09d998bec31290e517a9293dbb3df11257390a0423e01c40b663046555",
+    "S3-H2-native-ONCE-verifier-receipt.json": "c343b70af3ad158d24d90df9cb9afa433460667abf2eb989fc148747cf72637a",
+    "native-S3-H2/extracted/measurement.json": "05da52c4dbd65176c539d4e84606712540072ac10ddfdccb4600ca4e8d0938ad",
+    "native-S3-H2/extracted/source-byte-manifest.json": "0ae7ae14df2456121609273bdf6d1afd9d2ed72243ee73af1fba6f0ff42370e2",
+    "native-S3-H2/extracted/lock-release.json": "b5195ccac743370b961316a72ef8f8301ee424fbcaedbcd2567c88a7be5fe5a0",
+    "native-S3-H2/extracted/host-before.json": "8ed6f2907828e16d37f8090e4a9378af4b78e570e824da47aad9c1a3c1e2754b",
+    "native-S3-H2/extracted/host-after.json": "752d285c3348f17091b4e7944d4b51ccd03ccc0e764a324983218860785d48b7",
+    "linux-final-883d37826f44/receipt.json": "9496180dbfdf98041501fe960e81b9dab7022ff0e64adebcf4d06cf8fd70810b",
+    "linux-final-883d37826f44/full-selftest-evidence.json": "38dc5c1d004b6c37e9fc1bd1f3685d1f850ded26bc040cc792e8ca23ad4d949d"
+  },
+  "limits": [
+    "Source/log AUX only; F01 remains pending separate formal review2; no code approval.",
+    "PS5.1 end-clean rejects via PARSE_ERROR; PS7 CleanBlock behavioral rejection measured. H1 rollback PM01 passes/runtime2 but overall rc1; no arbitrary-code-execution claim.",
+    "14 unchanged legacy internal Bypass children expressly disclosed/allowed r2; new S3 children inherit RemoteSigned with no override.",
+    "Baseline absent cases are expected red without setup errors. CX12 means normal7 plus CX00 positive and four semantic negatives per runtime.",
+    "Cleanup retains fixtures; source-before/after identical and lock released. No deployed gateway/auth/remote WinRM/WindowsCI/LIVE measured.",
+    "Original H1 operator bootstrap/resource/ref failures remain NOT_RUN; observational H1 repro is not full promotion gate.",
+    "Read-only verifier function imported, not main; no tests/network/device/new models/agents. Readonly is scope, not sandbox-enforcement claim.",
+    "Byte-level archive/source hashes authoritative. Mutation text reconstruction normalizes line endings; no claim LF projections match raw original bytes.",
+    "Actual Claude attempt2 ended16:38 before later owner model preference; model identity not independently measured."
+  ],
+  "digest_sha256": "2e2b2b4e6f51873f01e4512b307dda0a704fac5ef933c1b89b4eb4810a0a6106"
+}

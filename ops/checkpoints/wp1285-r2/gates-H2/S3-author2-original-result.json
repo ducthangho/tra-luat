@@ -1,0 +1,119 @@
+{
+  "duration_api_ms": 171891,
+  "stop_reason": "end_turn",
+  "session_id": "9e143387-f4f8-47be-a6f9-7995d8e6be6f",
+  "total_cost_usd": 1.4475928,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 118623,
+    "cache_read_input_tokens": 624664,
+    "output_tokens": 18681,
+    "output_tokens_details": {
+      "thinking_tokens": 14349
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 118623,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 2756,
+        "cache_read_input_tokens": 120645,
+        "cache_creation_input_tokens": 1785,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1785
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 18681,
+      "cacheReadInputTokens": 624664,
+      "cacheCreationInputTokens": 118623,
+      "webSearchRequests": 0,
+      "costUSD": 1.4475928,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 14349,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 118623,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 14,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I made the structural fix for **WP1285-R1-F01**, all in PM01 of `ProximaManifest.Tests.ps1`. No tests were run (NOT_RUN): I had no Bash, PowerShell or Git access here.\n\n## The fix\nThe old PM01 listed the blocks it rejected one by one. It never required the end block to be unnamed and never looked at the PowerShell 7 `clean` block. So on PS7, wrapping the manifest as `end { @{\u2026} } clean {\u2026}` passed PM01, and two runtime children ran before any rejection.\n\nPM01 now accepts only one shape, and does this before any import:\n- **Only a plain unnamed end block is allowed.** It reads every public property of the parsed script's root by reflection, skipping only `Parent` and `EndBlock`. Any property that holds a syntax-tree node or a non-empty collection gets its name added to `$extra`. That covers param, begin, process, dynamicparam, the PS7 clean block, using statements, attributes and any future block type, without listing them by name.\n- **It rejects** when `$extra` is non-empty, when there is no end block, when the end block is named (`end {\u2026}`), when there are traps, or when there is a `#requires` line. The reason reads `EXECUTABLE_STATEMENT: \u2026 [<offending property names>]`, so it names the case. All of this happens before the static schema check (PM02) can pass, so no runtime child or PM04 tamper child starts.\n- **Everything after that is unchanged:** exactly one pipeline holding one hashtable expression with no redirections, then `SafeGetValue`.\n\n**PS5.1 compatibility:** the code never reads a `CleanBlock` property directly. Reflection only lists the properties the running parser actually has, so PS5.1 under `Set-StrictMode -Version 3.0` doesn't error on the missing property and a good PS5.1 run doesn't turn into a setup failure. On PS5.1, a manifest with a `clean` block is still a parse error, and a named `end` block is rejected by the unnamed check.\n\n## Scope\n- Only `.agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1` changed: 2 lines became 6, and the last two lines of PM01 were merged into one. The manifest and `SKILL.md` are byte-identical to H1; no PM01 reason is mentioned in them.\n- B..new H is now **450 additions, 0 deletions** (373 + 13 + 64). That is exactly the cap, so there is no room left.\n- The 7 PM IDs, CX00\u2013CX04, the parent count of 12, the schema, rc rules and the PM04 zero-import rule are unchanged. No assertions were removed or weakened.\n- **I did not add in-harness negative evidence.** A new CX would change the counts, and a PM01 self-check would need about 5 more lines, which the cap doesn't allow. The operator's own probes on owned manifest copies are the negative evidence.\n\n## Uncertainties\n- **Not run on either runtime.** I assume a plain `.psd1` root has no public property other than `EndBlock` that holds a syntax-tree node or a non-empty collection, on both PS5.1 and PS7.x. If that's wrong, the normal case fails PM01 and the reason lists the property name; it would not pass silently. Candidate 7/7 rc0 on both runtimes is still needed.\n- **I didn't check this before deciding:** I assumed `Traps` and the other collection properties are either null or empty collections that read as false. The `Traps` check is unchanged from H1, which passed natively.\n- **Mutation check not done:** removing the new `$extra` and unnamed checks should make the PS7 end+clean probe pass PM01 again. Neither the probe nor that mutation has been run.\n\n```json\n{\"packet\":\"wp1285\",\"revision\":2,\"generation\":3,\"provider\":\"anthropic\",\"surface\":\"claude_code\",\"model\":\"claude-opus-5-5\",\"session\":\"unknown\",\"attempt\":\"2/3\",\"immutable_B\":\"bf9914cb1a8e6f5047468f4d130b587015f8d73f\",\"continuation_H\":\"4196fbaaeb13b4d26d5f4f452b6c1a8b26150489\",\"branch\":\"agent/wp1285-g3-claude\",\"status\":\"authored_uncommitted\",\"changed_paths\":[\".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1\"],\"unchanged_in_write_set\":[\".agents/skills/proxima-control/scripts/ProximaControl.psd1\",\".agents/skills/proxima-control/SKILL.md\"],\"diff_vs_B_expected\":{\"new_files\":3,\"additions\":450,\"deletions\":0,\"cap\":450},\"findings_addressed\":[{\"id\":\"WP1285-R1-F01\",\"class\":\"manifest-ast-ignores-executable-blocks\",\"fix\":\"PM01 accepts only a plain unnamed end block: reflection rejects any Ast-valued or non-empty collection root property except EndBlock (covers PS7 CleanBlock, param, begin, process, dynamicparam, using, attributes); also rejects a named or missing end block, traps and #requires, before SchemaOk and before any import\",\"ps51_compat\":\"no direct CleanBlock property access; reflection only lists properties the running parser has, so StrictMode 3.0 cannot throw\"}],\"preserved\":[\"PM01-PM07 ids\",\"CX00-CX04 and parent 12\",\"report schema\",\"rc 0/1/2\",\"PM04 zero-import rule\",\"doc validation\",\"no new Bypass\"],\"in_harness_negative_added\":false,\"in_harness_negative_reason\":\"cap reached (450/450); a new CX would change the count\",\"tests\":\"NOT_RUN\",\"uncertainties\":[\"root ScriptBlockAst public-property assumption unmeasured on PS5.1 and PS7\",\"native positives 7/7 rc0 on both runtimes and the PS7 end+clean / named-end closure probes not run\",\"mutation (remove the new check, probe must fail) not run\"],\"next_role\":\"root operator: commit exact H, native PS5.1/7 positives + CX00-04 + operator closure probes + mutation, Linux gates, then fresh independent formal review 2\"}\n```",
+  "ttft_ms": 1623,
+  "type": "result",
+  "duration_ms": 172499,
+  "uuid": "dff51257-6e88-434d-8fec-05aab3527d85",
+  "ttft_stream_ms": 1385,
+  "time_to_request_ms": 205,
+  "first_content_frame_ms": 1385,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 18681,
+      "cacheReadInputTokens": 624664,
+      "cacheCreationInputTokens": 118623,
+      "webSearchRequests": 0,
+      "costUSD": 1.4475928,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 14349,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 118623,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

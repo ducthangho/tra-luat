@@ -1,0 +1,33 @@
+{
+  "role": "reviewer",
+  "packet_id": "wp1285",
+  "revision": 2,
+  "generation": 3,
+  "source_executor_lease_id": "wp1285-r2-g3-claude",
+  "reviewed_sha": "883d37826f443ce9301dd0bcd40cd5f97f1adf0e",
+  "reviewed_tree": "8bb2149f025966ba09a351d5c60b5fd954d960b6",
+  "base_sha": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "spec_sha256": "ce8052af41a74a30089067f8976e1fc5a66767261275044681cdde2eb9a0f2dd",
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "requested_model": "gpt-6.1-sol",
+  "requested_effort": "xhigh",
+  "sandbox": "read-only",
+  "review_class": "sensitive",
+  "prompt_path": "ops/prompts/wp1285-r2-review2-codex.md",
+  "prompt_sha256": "3e697fe238e1e31719163251f79f8f590b72913cd09f9b86539b1b44c0e9bd4f",
+  "recorded_at": "2026-11-08T17:15:54Z",
+  "expires_utc": "2026-11-08T20:15:31Z",
+  "review_sla": "2026-11-08T19:15:54Z",
+  "run_minutes": 60,
+  "budget": "product2/3, AUX3/8terminal, formalcall4reserved/8, formalround2pendingvaliddelivery/2, push0/1",
+  "authority": "ownerstandingfullremainingworkdirective; notcodeapproval/waiver/humanaudit",
+  "read_scope": [
+    "/workspace/scratch/wp1285-review1-H1",
+    "/workspace/scratch/proxima-rest-20261108",
+    "/workspace/scratch/wp1285-spec-publish",
+    "/workspace/scratch/wp1279-g4-claude"
+  ],
+  "evidence": "Linux1777/1777 strict184/184 Ruffbare12F821rc1delta0; nativeboth7/7+CX12/12+legacyS2normal26/26;433sourcefiles/175S3artifactrefs/58legacyartifactentries/missingdependencynegative; mandatoryAUXterminalnotformalapproval"
+}

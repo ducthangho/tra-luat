@@ -1,0 +1,10 @@
+{
+  "head": "883d37826f443ce9301dd0bcd40cd5f97f1adf0e",
+  "tree": "8bb2149f025966ba09a351d5c60b5fd954d960b6",
+  "spec_sha256": "ce8052af41a74a30089067f8976e1fc5a66767261275044681cdde2eb9a0f2dd",
+  "K1": "unmodified canonical _spec_merge passed",
+  "actual_canonical": "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+  "source_lease": "2351a83ab3bb6727fa71536c46264134bd9af7b9:ops/leases/wp1285-r2-g3-claude.yaml",
+  "model_invoked": false,
+  "at": "2026-11-08T17:15:14.733557+00:00"
+}

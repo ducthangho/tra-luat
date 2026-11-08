@@ -1,0 +1,5 @@
+H2 883d37826f443ce9301dd0bcd40cd5f97f1adf0e — AUX hoàn tất; không thấy mâu thuẫn trọng yếu trong nguồn/log đã kiểm.
+Linux: actual child rc0,1777/1777; 10 logs hash/size/rc đúng; Ruff12 F821 cũ rc1/delta0; strict184/184; admission checker ghim B.
+Native:433 nguồn/434 ZIP entries,37 logs,13 phases. Hai runtime normal7/7,CX12/12,legacy26/26. Tám semantic negatives đúng named failures; F01 bốn negatives runtime0. PS5.1 clean là PARSE_ERROR; PS7 CleanBlock bị chặn. Rollback H1 PM01 passed/runtime2 đo thuộc tính trước-import thất bại, không chứng minh arbitrary code execution.
+14 legacy internal Bypass được công khai; S3 mới RemoteSigned. Nested artifacts/CLIXML/source/hash/lock/cleanup đã đối chiếu; fixture được giữ. Lịch sử operator NOT_RUN được bảo toàn.
+Không phải formal code approval; F01 chờ fresh formal review2. Không đo LIVE/remote WinRM/Windows CI.

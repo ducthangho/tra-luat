@@ -1,0 +1,108 @@
+{
+  "packet": "wp1285",
+  "revision": 2,
+  "generation": 3,
+  "immutable_B": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "attempts_used": 2,
+  "attempts_limit": 3,
+  "attempt1": {
+    "state": "terminal_controller_observed",
+    "session_id": "280501dd-09ec-4f9e-addf-8a476222dd10",
+    "started_at_utc": "2026-11-08T14:18:02.701812+00:00",
+    "deadline_utc": "2026-11-08T15:03:02.701812+00:00",
+    "actual_model_generation": true,
+    "run_id": "1c887f43",
+    "launcher_rc": 0
+  },
+  "codex_review_calls_used": 3,
+  "codex_review_calls_limit": 8,
+  "code_review_rounds_used": 1,
+  "code_review_rounds_limit": 2,
+  "primary_product_pushes_used": 0,
+  "primary_product_pushes_limit": 1,
+  "design_advisory_calls_used": 1,
+  "design_advisory_calls_limit": 1,
+  "mission_historical_costs": "KHONG_DO_DUOC beyondpreservedperPacketreceipts; notreset/zero",
+  "source_lease": {
+    "metadata_commit": "2351a83ab3bb6727fa71536c46264134bd9af7b9",
+    "lease_path": "ops/leases/wp1285-r2-g3-claude.yaml",
+    "prompt_path": "ops/prompts/wp1285-r2-g3-claude.md",
+    "spec_sha256": "ce8052af41a74a30089067f8976e1fc5a66767261275044681cdde2eb9a0f2dd",
+    "prompt_sha256": "eb5e6ff9720e8dd4417f2563117d7666afd65c0be46f1d6db3bc2b8807aaefd1",
+    "comment": "https://github.com/ducthangho/tra-luat/issues/1285#issuecomment-6724075436",
+    "local_check_rc": 0,
+    "github_check_rc": 0,
+    "remote_blobs_exact": true,
+    "model_invoked": false
+  },
+  "as_of": "2026-11-08T17:15:54.922149+00:00",
+  "current_H": "883d37826f443ce9301dd0bcd40cd5f97f1adf0e",
+  "current_lease": "wp1285-r2-g3-claude",
+  "code_author_revision_generation": "r1g1",
+  "g2_actual_model_invocations": 0,
+  "codex_calls": [
+    {
+      "n": 1,
+      "role": "mandatorynativeLinuxsourceaudit",
+      "state": "terminal_aux_digest",
+      "formal_code_approval": false,
+      "H": "4196fbaaeb13b4d26d5f4f452b6c1a8b26150489",
+      "deadline": "2026-11-08T16:39:07Z",
+      "source": "Issue1285comment6723147019 + tl_auditor actualack",
+      "at": "2026-11-08T15:12:16.476097+00:00",
+      "receipt": "S3-native-linux-auditor-receipt.json",
+      "receipt_sha256": "bd880c1b7517ffb094414e1bbb500e2fb64c727b7a989cc04e537f4483d94efa"
+    },
+    {
+      "n": 2,
+      "purpose": "freshindependentformalreview1",
+      "head": "4196fbaaeb13b4d26d5f4f452b6c1a8b26150489",
+      "state": "terminal_validated_changes_requested",
+      "started_at": "2026-11-08T16:10:24.726075+00:00",
+      "deadline": "2026-11-08T17:10:24.726075+00:00",
+      "requested_model": "gpt-6.1-sol",
+      "requested_effort": "xhigh",
+      "surface": "codex_cli",
+      "sandbox": "read-only",
+      "run_id": "6808623e5e964f64964490da986439b2"
+    },
+    {
+      "n": 3,
+      "purpose": "H2mandatorynativeLinuxfullsourceaudit",
+      "state": "terminal_aux_digest",
+      "H": "883d37826f443ce9301dd0bcd40cd5f97f1adf0e",
+      "deadline": "2026-11-08T18:25:41Z",
+      "at": "2026-11-08T16:56:34.876382+00:00",
+      "receipt": "S3-H2-native-linux-auditor-receipt.json",
+      "receipt_sha256": "d1696d61484c6ade06fdff7c338300670a6f77e7902dc6f0831ac8015a39925b"
+    }
+  ],
+  "open_finding_classes": [
+    {
+      "stableid": "WP1285-R1-F01",
+      "class_slug": "manifest-ast-ignores-executable-blocks",
+      "severity": "P2",
+      "formal_occurrences": 1,
+      "state": "open"
+    }
+  ],
+  "attempt2": {
+    "state": "terminal_controller_observed",
+    "session_id": "9e143387-f4f8-47be-a6f9-7995d8e6be6f",
+    "started_at_utc": "2026-11-08T16:35:33.308282+00:00",
+    "deadline_utc": "2026-11-08T17:20:33.308282+00:00",
+    "continuation_H1": "4196fbaaeb13b4d26d5f4f452b6c1a8b26150489",
+    "actual_model_generation": true,
+    "launcher_rc": 0
+  },
+  "executor_preference": "Ownerlatest: AGY4.0Argon for further fixes when functional; no new Claude calls",
+  "forecast_remaining_shared_calls": {
+    "AUX3": 3,
+    "formal2": 4,
+    "Draftconnector": 5,
+    "PRCIaudit": 6,
+    "Readyauto_ifactual": 7,
+    "MCIaudit": 8,
+    "reserve": 0
+  }
+}

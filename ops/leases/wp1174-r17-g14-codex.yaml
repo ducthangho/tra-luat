@@ -84,11 +84,11 @@ change_policy_exception:
   - unknown=>blocked
 leased_at_utc: '2026-11-08T10:36:09.636096+00:00'
 heartbeat_at: '2026-11-08T10:36:09.636096+00:00'
-lease_until: '2026-11-08T18:03:01Z'
-lease_expires_at_utc: '2026-11-08T18:03:01Z'
+lease_until: '2026-11-08T15:13:22.629641+00:00'
+lease_expires_at_utc: '2026-11-08T15:13:22.629641+00:00'
 heartbeat_required_minutes: 360
 max_lease_hours: 24
-hard_not_after: '2026-11-08T18:03:01Z'
+hard_not_after: '2026-11-08T15:13:22.629641+00:00'
 nang_tran:
   ai_nang: ducthangho under recorded delegation
   can_cu: 'Exact C13 after approval: verified current-policy P1 product class only,
@@ -155,3 +155,7 @@ native_P11_approval_claim: false
 new_native_integrator_minutes: 10
 native_part_count: 4
 native_parallel_limit: 2
+ended_at_utc: '2026-11-08T15:13:22.629641+00:00'
+ended_reason: C15 approved successor R18/g15; source11 terminal, head920 history preserved;
+  new retired-lineage P1 blocks C14; release only, no grant here
+ended_on_instruction: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6723113364

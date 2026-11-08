@@ -142,11 +142,12 @@ chờ cả daemon con). Lỗi giữa chừng ⇒ Cleanup.
 export TL_PW_URL='<https://nguon-cong-khai/duong-dan>' TL_PW_SESSION="tl-pw-$(od -An -N6 -tx1 /dev/urandom | tr -d ' \n')"
 export TL_PW_RUN="$TL_PW_ROOT/runs/$(date -u +%Y%m%dT%H%M%SZ)-$TL_PW_SESSION"; mkdir "$TL_PW_RUN"
 chay_ghi() { local ten=$1 rc; shift
-  printf '%s\t%s\t' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$ten" >> "$TL_PW_RUN/commands.tsv"
-  printf '%q ' "$TL_PW_NODE" "$TL_PW_CLI" "--session=$TL_PW_SESSION" "$@" --json >> "$TL_PW_RUN/commands.tsv"
+  printf '%s\t%s\t' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$ten" >> "$TL_PW_RUN/commands.tsv" || return 70
+  printf '%q ' "$TL_PW_NODE" "$TL_PW_CLI" "--session=$TL_PW_SESSION" "$@" --json >> "$TL_PW_RUN/commands.tsv" || return 70
   (cd "$TL_PW_ROOT/work" && "$TL_PW_NODE" "$TL_PW_CLI" "--session=$TL_PW_SESSION" "$@" --json \
     > "$TL_PW_RUN/$ten.json" 2> "$TL_PW_RUN/$ten.err") && rc=0 || rc=$?
-  printf '\trc=%s\t%s\n' "$rc" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$TL_PW_RUN/commands.tsv"; return "$rc"; }
+  printf '\trc=%s\t%s\n' "$rc" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$TL_PW_RUN/commands.tsv" || return 70
+  return "$rc"; }
 # Chạy khối Kiểm pin bash ở trên dạng: ( … ) 2>&1 | tee "$TL_PW_RUN/00-pins.log"
 ( set -Eeu; trap 'echo "STOP: $BASH_COMMAND — chạy Cleanup" >&2' ERR
   [ "$(tail -n 1 "$TL_PW_RUN/00-pins.log")" = 'PIN OK' ]; case "$TL_PW_URL" in http://*|https://*) ;; *) false;; esac
@@ -164,12 +165,24 @@ function Invoke-PwGhi([string]$Ten, [string[]]$Argv, [switch]$PhaiLoi) {
   $all = @($env:TL_PW_CLI, "--session=$env:TL_PW_SESSION") + $Argv + '--json'
   Need (-not ($all | Where-Object { $_ -match '"' -or $_ -match '\\$' })) 'đối số có dấu nháy kép hoặc \ ở cuối'
   $line = ($all | ForEach-Object { '"' + $_ + '"' }) -join ' '; $t0 = [DateTime]::UtcNow.ToString('o')
-  $p = Start-Process -FilePath $env:TL_PW_NODE -ArgumentList $line -WorkingDirectory "$env:TL_PW_ROOT\work" -NoNewWindow `
-    -PassThru -RedirectStandardOutput "$env:TL_PW_RUN\$Ten.json" -RedirectStandardError "$env:TL_PW_RUN\$Ten.err"
+  Add-Content -LiteralPath "$env:TL_PW_RUN\commands.tsv" -Encoding UTF8 -ErrorAction Stop `
+    -Value "$t0`t$Ten`t$env:TL_PW_NODE $line`trc=PENDING"
+  $p = $null
+  try {
+    $p = Start-Process -FilePath $env:TL_PW_NODE -ArgumentList $line -WorkingDirectory "$env:TL_PW_ROOT\work" -NoNewWindow `
+      -PassThru -RedirectStandardOutput "$env:TL_PW_RUN\$Ten.json" -RedirectStandardError "$env:TL_PW_RUN\$Ten.err" -ErrorAction Stop
+  } catch {
+    Add-Content -LiteralPath "$env:TL_PW_RUN\commands.tsv" -Encoding UTF8 -ErrorAction Stop `
+      -Value "$t0`t$Ten`t$env:TL_PW_NODE $line`trc=NOT_MEASURED`tstart_failed=$($_.Exception.Message)"
+    throw
+  }
+  Need ($p -is [Diagnostics.Process]) "$Ten thiếu process thật"
   $null = $p.Handle; $p.WaitForExit()
-  Add-Content -LiteralPath "$env:TL_PW_RUN\commands.tsv" -Encoding UTF8 `
-    -Value "$t0`t$Ten`t$env:TL_PW_NODE $line`trc=$($p.ExitCode)`t$([DateTime]::UtcNow.ToString('o'))"
-  Need (($p.ExitCode -eq 0) -ne [bool]$PhaiLoi) "$Ten rc=$($p.ExitCode) — chạy Cleanup" }
+  $rc = $p.ExitCode; Need ($p.HasExited -and $rc -is [int]) "$Ten thiếu exit code thật"
+  Add-Content -LiteralPath "$env:TL_PW_RUN\commands.tsv" -Encoding UTF8 -ErrorAction Stop `
+    -Value "$t0`t$Ten`t$env:TL_PW_NODE $line`trc=$rc`t$([DateTime]::UtcNow.ToString('o'))"
+  $expectedRc = 0; if ($PhaiLoi) { $expectedRc = 1 }
+  Need ($rc -eq $expectedRc) "$Ten rc=$rc — chạy Cleanup" }
 # Chạy khối Kiểm pin PowerShell ở trên dạng: & { … } *>&1 | Tee-Object -FilePath "$env:TL_PW_RUN\00-pins.log"
 & { Need ((Get-Content -LiteralPath "$env:TL_PW_RUN\00-pins.log" -Tail 1) -eq 'PIN OK') 'Kiểm pin'
   Need ($env:TL_PW_URL -match '^https?://') 'URL chỉ http(s)'
@@ -223,14 +236,79 @@ SHA256; đường dẫn tuyệt đối + SHA256 của PNG/PDF; `00-pins.log`; `b
 
 ## Cleanup
 Chỉ SAU khi lưu bằng chứng và soát riêng tư (URL, ảnh, PDF, snapshot `.yml` có thể chứa dữ liệu cá nhân); chỉ phiên
-của mình, không bao giờ xoá run, phiên khác, profile hay dữ liệu Proxima. `delete-data --json` báo `"deleted": false`
-khi không còn gì của phiên để xoá (thường gặp với phiên isolated sau `close`), vẫn rc 0; `tab-list` sau đó phải LỖI.
+của mình, không bao giờ xoá run, phiên khác, profile hay dữ liệu Proxima. Giữ đúng nonce của Capture hiện tại,
+không thay bằng tên phiên khác. Dán nguyên khối Cleanup sau khi đã nạp hàm ghi của shell tương ứng ở Capture.
+`close` phải rc 0 + `session` đúng nonce + `status: closed`; `delete-data` phải rc 0 + cùng `session` + `deleted`
+kiểu boolean (`false` cũng hợp lệ: không còn dữ liệu của phiên isolated sau close). Cả hai phải có stderr rỗng.
+Chỉ nhận `tab-list` rc 1, stderr rỗng, `isError: true` và `error` ĐÚNG thông báo phiên của mình chưa mở dưới đây.
+So nguyên byte với JSON CLI đã đo (LF, thứ tự trường như mẫu), chỉ thế nonce đã kiểm; không thêm parser/tool.
+Lỗi khởi chạy/rc khác, vẫn mở (rc 0), JSON rỗng/hỏng/khác mẫu, sai nonce hoặc thiếu output ⇒ Cleanup THẤT BẠI,
+mã thoát khác 0, không `CLEANUP OK`. Khác định dạng cũng dừng để kiểm tra thủ công; chưa kiểm xong là pending,
+không tự đổi mẫu/nhận mọi lỗi là đóng phiên. Giữ nguyên JSON/stderr/command/rc và cập nhật hash SAU Cleanup.
+Tên output Cleanup phải chưa tồn tại; không ghi đè bằng chứng cũ hoặc lấy output cũ làm kết quả lệnh mới.
+Nếu dừng sớm, operator lưu hash các output mới và `commands.tsv` vào biên nhận thất bại, không chạy lại để ghi đè.
 ```bash
-( set -u; chay_ghi 08-close close; chay_ghi 09-delete-data delete-data
-  if chay_ghi 10-verify tab-list; then echo "STOP: phiên $TL_PW_SESSION vẫn mở"; else echo "CLEANUP OK"; fi )
+( set -u
+  [[ "$TL_PW_SESSION" =~ ^tl-pw-[0-9a-f]{12}$ ]] || { echo 'STOP: nonce không hợp lệ' >&2; exit 1; }
+  for ten in 08-close 09-delete-data 10-verify; do
+    for ext in json err; do
+      [ ! -e "$TL_PW_RUN/$ten.$ext" ] && [ ! -L "$TL_PW_RUN/$ten.$ext" ] ||
+        { echo "STOP: output cũ $ten.$ext, không ghi đè" >&2; exit 1; }
+    done
+  done
+  chay_ghi 08-close close || { rc=$?; echo "STOP: close rc=$rc" >&2; exit "$rc"; }
+  [ -f "$TL_PW_RUN/08-close.err" ] && [ ! -s "$TL_PW_RUN/08-close.err" ] &&
+    cmp -s -- "$TL_PW_RUN/08-close.json" <(printf '{\n  "session": "%s",\n  "status": "closed"\n}\n' "$TL_PW_SESSION") ||
+    { echo 'STOP: close thiếu/sai phản hồi' >&2; exit 1; }
+  chay_ghi 09-delete-data delete-data || { rc=$?; echo "STOP: delete-data rc=$rc" >&2; exit "$rc"; }
+  [ -f "$TL_PW_RUN/09-delete-data.err" ] && [ ! -s "$TL_PW_RUN/09-delete-data.err" ] ||
+    { echo 'STOP: delete-data thiếu/có stderr' >&2; exit 1; }
+  if cmp -s -- "$TL_PW_RUN/09-delete-data.json" <(printf '{\n  "session": "%s",\n  "deleted": false\n}\n' "$TL_PW_SESSION"); then
+    :
+  elif cmp -s -- "$TL_PW_RUN/09-delete-data.json" <(printf '{\n  "session": "%s",\n  "deleted": true\n}\n' "$TL_PW_SESSION"); then
+    :
+  else echo 'STOP: delete-data thiếu/sai phản hồi' >&2; exit 1; fi
+  if chay_ghi 10-verify tab-list; then rc=0; else rc=$?; fi
+  [ "$rc" -eq 1 ] || { echo "STOP: tab-list rc=$rc, chưa chứng minh đóng phiên" >&2; exit 1; }
+  [ -f "$TL_PW_RUN/10-verify.err" ] && [ ! -s "$TL_PW_RUN/10-verify.err" ] &&
+    cmp -s -- "$TL_PW_RUN/10-verify.json" <(printf '{\n  "isError": true,\n  "error": "The browser '\''%s'\'' is not open, please run open first"\n}\n' "$TL_PW_SESSION") ||
+    { echo 'STOP: thiếu/sai bằng chứng đóng đúng phiên' >&2; exit 1; }
+  find "$TL_PW_RUN" -type f ! -name SHA256SUMS -exec sha256sum {} + > "$TL_PW_RUN/SHA256SUMS" ||
+    { echo 'STOP: chưa lưu đủ hash Cleanup' >&2; exit 1; }
+  echo 'CLEANUP OK' )
 ```
 ```powershell
-& { Invoke-PwGhi 08-close @('close'); Invoke-PwGhi 09-delete-data @('delete-data'); Invoke-PwGhi 10-verify @('tab-list') -PhaiLoi; 'CLEANUP OK' }
+& { $ErrorActionPreference = 'Stop'
+  $session = $env:TL_PW_SESSION
+  Need ($session -cmatch '\Atl-pw-[0-9a-f]{12}\z') 'nonce không hợp lệ'
+  foreach ($ten in '08-close', '09-delete-data', '10-verify') {
+    foreach ($ext in 'json', 'err') {
+      Need (-not (Test-Path -LiteralPath "$env:TL_PW_RUN\$ten.$ext")) "output cũ $ten.$ext, không ghi đè"
+    }
+  }
+  # Chỉ so nguyên byte các phản hồi cố định; không phân tích JSON/trang.
+  function Assert-PwCleanupOutput([string]$Ten, [string[]]$Expected) {
+    $outPath = "$env:TL_PW_RUN\$Ten.json"; $errPath = "$env:TL_PW_RUN\$Ten.err"
+    Need ((Test-Path -LiteralPath $outPath -PathType Leaf) -and
+      (Test-Path -LiteralPath $errPath -PathType Leaf)) "$Ten thiếu output"
+    Need (([IO.File]::ReadAllBytes($errPath)).Length -eq 0) "$Ten có stderr"
+    $actual = [Convert]::ToBase64String([IO.File]::ReadAllBytes($outPath))
+    $matchedOutputs = @($Expected | Where-Object {
+      [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($_)) -ceq $actual })
+    Need ($matchedOutputs.Count -eq 1) "$Ten thiếu/sai phản hồi đúng phiên"
+  }
+  Invoke-PwGhi 08-close @('close')
+  Assert-PwCleanupOutput 08-close @("{`n  `"session`": `"$session`",`n  `"status`": `"closed`"`n}`n")
+  Invoke-PwGhi 09-delete-data @('delete-data')
+  Assert-PwCleanupOutput 09-delete-data @(
+    "{`n  `"session`": `"$session`",`n  `"deleted`": false`n}`n",
+    "{`n  `"session`": `"$session`",`n  `"deleted`": true`n}`n")
+  Invoke-PwGhi 10-verify @('tab-list') -PhaiLoi
+  Assert-PwCleanupOutput 10-verify @("{`n  `"isError`": true,`n  `"error`": `"The browser '$session' is not open, please run open first`"`n}`n")
+  $h = Get-ChildItem -Force -File -LiteralPath $env:TL_PW_RUN | Where-Object Name -ne 'SHA256SUMS.csv' |
+    Select-Object FullName, Length, @{ n = 'SHA256'; e = { (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash } }
+  $h | Export-Csv -LiteralPath "$env:TL_PW_RUN\SHA256SUMS.csv" -NoTypeInformation -Encoding UTF8 -ErrorAction Stop
+  'CLEANUP OK' }
 ```
 Gỡ bản cài: kiểm không còn tiến trình dùng nó (`pgrep -af "$TL_PW_ROOT"`; `Get-CimInstance Win32_Process | Where-Object
 CommandLine -like "*$env:TL_PW_ROOT*"`; chỉ đọc, không giết), rồi xoá đúng `install/<rev>` + `browsers/<rev>` của revision

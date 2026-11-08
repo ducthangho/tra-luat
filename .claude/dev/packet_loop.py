@@ -686,10 +686,10 @@ def _load(state_dir: Path, packet: int) -> dict:
             ("dem-goi", len({g["run_id"] for g in goi}) == len(goi) <= st["codex_review_calls_used"] >= can_duoi + sum(not g["da_dung"] for g in goi)),
             ("dem-vong", st["review_rounds_used"] == len(st["reviews"])),
             ("adr0054", type(st.get("luat_adr0054", False)) is bool and (st.get("luat_adr0054") is not True or type(st.get("ngu_canh_lease")) is dict)
-                        and (st["state"] != "approved_pending" or st["luat_adr0054"] and SHA_RE.match(str(st.get("pending_sha"))) and type(st.get("bien_nhan_approve")) is dict)
+                        and (st["state"] != "approved_pending" or _pending_human_lane(st) and SHA_RE.match(str(st.get("pending_sha"))) and type(st.get("bien_nhan_approve")) is dict)
                         and (st.get("luat_adr0054") is not True or _nc_hop_le(st["ngu_canh_lease"]))),
             ("mo-lai", _quyen_hop_le(st.get("mo_lai_tu"), "nguyen_nhan", NGUYEN_NHAN_MO_LAI) and _quyen_hop_le(st.get("checkpoint_day"), "sha256", None)
-                       and (st["state"] != "cho_chu_kho" or st.get("luat_adr0054") is True and (st.get("mo_lai_tu") or {}).get("nguyen_nhan") == "connector")),
+                       and (st["state"] != "cho_chu_kho" or _pending_human_lane(st) and (st.get("mo_lai_tu") or {}).get("nguyen_nhan") == "connector")),
             ("checkpoint", pending == (st.get("ly_do") == "rescue_required")), ("truc", st.get("ly_do") != "rescue_required" or st["state"] == "blocked" and st["truc"] in TRUC_TRAN and st["truc"] == next(  # mốc chạm trần MỚI NHẤT
                 h["truc"] for h in reversed(st["history"]) if h.get("event") == "blocked_rescue_required"))) if not dung]
     except (ValueError, TypeError, KeyError, AttributeError, StopIteration) as e:
@@ -1148,6 +1148,24 @@ def cmd_chup_anh_doctor(a, state_dir: Path) -> int:
     return RC_OK
 
 
+def _pending_human_lane(st):
+    """Historical activation or the current admission already verified under lock.
+
+    The transaction admission comes from the canonical resolver, never a stored
+    opt-in bit. Keep the observed global ADR-0054 policy unchanged in the journal.
+    """
+    tx = globals().get("_1174_TRANSACTION")
+    admission = tx.get("admission") if type(tx) is dict else None
+    scoped = (type(admission) is dict and st.get("schema_version") == 3 and
+        all(st.get(k) == admission[k] for k in ("packet", "mission", "generation")) and
+        st.get("enrollment_id") == admission["enrollment"]["id"] and
+        st.get("binding_sha256") == admission["enrollment"]["binding_sha256"] and
+        _nc_hop_le(st.get("ngu_canh_lease")) and
+        st["ngu_canh_lease"]["generation"] == admission["generation"] and
+        type(st.get("lease")) is dict and st["lease"]["lease_id"] == st["ngu_canh_lease"]["lease_id"])
+    return st.get("luat_adr0054") is True or scoped
+
+
 def cmd_record_review(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
     if st["state"] != "reviewing":
@@ -1213,7 +1231,7 @@ def cmd_record_review(a, state_dir: Path) -> int:
             )
 
     # #812 M2: packet áp ADR-0054 ghi MỌI verdict qua biên nhận H; `--verdict` một mình không đủ.
-    bn = _du_dieu_kien_approve(st, a) if st.get("luat_adr0054") is True else None
+    bn = _du_dieu_kien_approve(st, a) if _pending_human_lane(st) else None
     _xet_dung(state_dir, st, "record-review")  # I4: chỉ sau khi MỌI đầu vào đã được xác thực
 
     # (c) cùng ID lặp TRONG MỘT review chỉ tính MỘT lần: dedup trước khi đếm.
@@ -2963,7 +2981,7 @@ def cmd_accept(a, state_dir: Path) -> int:
     """M1: (Đ) đầu nhánh lease trên remote = `pending_sha`; CI bắt buộc xanh (I7); connector xong, không P0–P2; mọi P3 còn mở (offline +
     connector, slug từ H) có ĐÚNG một quyết định đủ trường + lý do. Mọi đầu vào xác thực TRƯỚC `_xet_dung` và trước lần ghi duy nhất (I4/I5)."""
     st = _load(state_dir, a.packet)
-    if st["state"] != "approved_pending" or st.get("luat_adr0054") is not True:
+    if st["state"] != "approved_pending" or not _pending_human_lane(st):
         _die(RC_STATE, f"accept chỉ chạy từ 'approved_pending' của packet áp ADR-0054 (đang {st['state']!r})")
     nc, h, root, p3_off = st["ngu_canh_lease"], st["pending_sha"], Path(a.root), st["bien_nhan_approve"].get("p3")
     if not {tuple(x) for x in CHECK_BAT_BUOC} <= {tuple(x) for x in nc["required_checks"]} or type(p3_off) is not list \
@@ -3014,7 +3032,7 @@ def cmd_mo_lai(a, state_dir: Path) -> int:
     sau_ml = next((st["history"][i:] for i in range(len(st["history"]) - 1, -1, -1) if st["history"][i].get("event") == "mo_lai"), [])
     tu_ci = connector and st["state"] == "running" and ml is not None and ml["nguyen_nhan"] == "ci-do" and ml["generation"] == (nc or {}).get("generation") \
         and not any(x.get("event") == "begin_attempt" for x in sau_ml)  # connector PR #969: quyền ci-do hết dùng được khi đã mở lượt mới
-    if st.get("luat_adr0054") is not True or not (st["state"] == "approved_pending" or tu_ci):
+    if not _pending_human_lane(st) or not (st["state"] == "approved_pending" or tu_ci):
         _die(RC_STATE, f"mo-lai {a.nguyen_nhan} không chạy từ {st['state']!r} (đòi approved_pending của packet áp ADR-0054"
                        + (", hoặc running mở lại bằng ci-do cùng generation, chưa mở lượt mới)" if connector else ")"))
     h = ml["sha"] if tu_ci else st["pending_sha"]
@@ -3059,7 +3077,7 @@ def cmd_chu_kho_duyet(a, state_dir: Path) -> int:
     import yaml
     st, root = _load(state_dir, a.packet), Path(a.root)
     pv = {"cho_chu_kho": "cho_phep_va", "approved_pending": "cho_phep_day"}.get(st["state"])
-    if st.get("luat_adr0054") is not True or pv is None:
+    if not _pending_human_lane(st) or pv is None:
         _die(RC_STATE, f"chu-kho-duyet chỉ chạy ở cho_chu_kho / approved_pending của packet áp ADR-0054 (đang {st['state']!r})")
     p = PurePosixPath(a.checkpoint_path)
     if p.parts[:2] != ("ops", "checkpoints") or len(p.parts) < 3 or ".." in p.parts or p.suffix != ".yaml":
@@ -3105,7 +3123,7 @@ def _xet_dung(state_dir: Path, st: dict, cua: str, a=None, cham_tran=()) -> None
         st.update(state="blocked", history=[*st["history"], {"event": "blocked_attempts_exhausted", "at_attempt": st["attempts_used"]}])
         _save(state_dir, st)
         _die(RC_TRAN, f"đã dùng hết {st['attempts_used']}/{st['attempts_limit']} lượt — packet về blocked. Ghi failure evidence + handoff rồi dừng; reroute là việc của bên điều phối.")
-    if cua == "record-review" and a is None and st.get("luat_adr0054") is not True:
+    if cua == "record-review" and a is None and not _pending_human_lane(st):
         if st["review_rounds_used"] >= st["review_rounds_limit"]:  # review MỚI khi trần vòng đã chạm (state v1 cũ / sửa tay) ⇒ rescue, kể cả approve
             _vao_rescue(state_dir, st, "vong_review", "review vượt trần vòng")
     if cua in CUA_DI_TIEP and not cham_tran:  # #813 M1: bộ đếm đã chạm (kể cả vừa cộng ở `mo-lai`) chặn cửa đi tiếp; cửa khép không ở đây
@@ -4491,7 +4509,7 @@ def _1174_state(raw, admission, generation=None):
                       state[role + "_identity"] == e["initial_state_projection"][role + "_identity"], "state immutable provider identity")
     previous = globals().get("_1174_TRANSACTION")
     directory = Path(e["journal_root"])
-    _1174_TRANSACTION = dict(directory=directory, state=state, proposal=None)
+    _1174_TRANSACTION = dict(directory=directory, state=state, proposal=None, admission=admission)
     try:
         _load(directory, admission["packet"])
     except SystemExit as ex:
@@ -4812,7 +4830,7 @@ def _1174_ordinary(a, directory, admission, witness_raw, facts=None):
     _1174_tripwire(state)
     _1174_require(a.cmd != "record-lease" or a.lease_ref is not None, "scoped lease requires canonical I2")
     previous = globals().get("_1174_TRANSACTION")
-    tx = dict(directory=directory, state=state, proposal=None)
+    tx = dict(directory=directory, state=state, proposal=None, admission=admission)
     _1174_TRANSACTION = tx
     try:
         with contextlib.redirect_stdout(io.StringIO()):
@@ -4925,7 +4943,7 @@ def _1174_lifecycle_records(state, admission):
 
 def _1174_review(a, directory, admission):
     st = _load(directory, a.packet)
-    _1174_require(st.get("luat_adr0054") is True,"scoped review requires canonical pending/human lane")
+    _1174_require(_pending_human_lane(st),"scoped review requires canonical pending/human lane")
     _1174_require(type(a.bien_nhan) is str and bool(a.bien_nhan), "review receipt required")
     receipt_path = Path(a.bien_nhan)
     before = receipt_path.stat()
@@ -4966,7 +4984,7 @@ def _1174_review(a, directory, admission):
         _xet_dung(directory, st, "record-review", a, [x for x in record["finding_ids"] if st["finding_counts"][x] >= st["same_failure_limit"]])
         st["state"] = {"approve": "approved_pending", "changes_requested": "running", "blocked": "blocked"}[a.verdict]
         if a.verdict == "approve":
-            _1174_require(st.get("luat_adr0054") is True, "advisory canonical lease required")
+            _1174_require(_pending_human_lane(st), "advisory canonical lease required")
             st.update(pending_sha=a.reviewed_sha, bien_nhan_approve=dict(p3=[]))
         st["history"].append(dict(event="record_review", verdict=a.verdict, reviewed_sha=a.reviewed_sha, finding_ids=record["finding_ids"]))
         _save(directory, st)

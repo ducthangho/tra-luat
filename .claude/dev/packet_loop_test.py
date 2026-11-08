@@ -7818,8 +7818,8 @@ def _kho812(c: Ctx, bien: str = "") -> Path:
             L = ghi(adr, "adr54")
             L = {"oid_khong_dua_vao": ghi({"docs/z.md": "z\n"}, "noop"), "oid_khong_chua": B0}.get(bien, L)
         spec = f"# spec\nluat_push_va_dung_va: ADR-0054@{L}\n" * (2 if bien == "hai_dong" else 1)
-        V = ghi({"ops/specs/wp55.md": spec, "ops/specs/wp55-prompt.md": "prompt\n", "ops/reviews/v.md": "Verdict: approve\n", "docs/PROTOCOL_DA_PHIEN.md": pr.replace("chưa kích hoạt", "đã kích hoạt"),
-                 **({} if bien == "khong_kich_hoat" else {"docs/adr/0099-kich-hoat-adr-0054.md": "kích hoạt `ADR-0054`\n"})}, "act")
+        V = ghi({"ops/specs/wp55.md": spec, "ops/specs/wp55-prompt.md": "prompt\n", "ops/reviews/v.md": "Verdict: approve\n", "docs/PROTOCOL_DA_PHIEN.md": pr if bien == "current_policy" else pr.replace("chưa kích hoạt", "đã kích hoạt"),
+                 **({} if bien in ("khong_kich_hoat","current_policy") else {"docs/adr/0099-kich-hoat-adr-0054.md": "kích hoạt `ADR-0054`\n"})}, "act")
         sh, han = __import__("hashlib").sha256(spec.encode()).hexdigest(), time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() + 6 * 3600))
         lease = {**_R812_LEASE, "spec_hash": sh, "prompt_sha256_required": __import__("hashlib").sha256(b"prompt\n").hexdigest(), "base_sha": L, "reviewed_sha_required": L, "lease_until": han,
                  "lease_expires_at_utc": han, **({"required_checks": False} if bien == "rc_falsy" else {})}
@@ -7862,13 +7862,13 @@ def _bn812(w: Path, h: str, sh: str, lop=(), bn=None) -> dict:
             "model_reviewer_identity": {"provider": "openai_codex", "surface": "codex_cli", "transport": "machine", "session_run_id": "s1"}, **(bn or {})}
 
 
-def _r812(c: Ctx, den: str, bien="", comment=True, bn=None, lop=(), verdict="approve", ids=(), env=None, truoc_lease=None, rv=()):
+def _r812(c: Ctx, den: str, bien="", comment=True, bn=None, lop=(), verdict="approve", ids=(), env=None, truoc_lease=None, rv=(), comment_repo="o/r"):
     """Baseline dương tới `den` (lease · review); mỗi tham số đổi ĐÚNG một yếu tố. Trả (rc, sd, err, bytes state NGAY TRƯỚC bước cuối)."""
     w, sd, f = _kho812(c, bien), c.sd(), c.tmp
     buoc = lambda *l: (lambda truoc: (*run(c.script, [l[0], "--packet", 55, *l[1:], "--root", w], sd, env)[::2], truoc))((sd / "wp55.json").read_bytes())  # noqa: E731
     _doi(0, *c.init(sd, lease=False)[::2], "init")
     (f / "cm.json").write_text(json.dumps([{"user": {"login": "github-actions[bot]"}, "body": "```yaml\nlease_id: wp55-r1-g1-claude\n```",
-                                            "issue_url": "https://api.github.com/repos/o/r/issues/55"}][:int(comment)]))
+                                            "issue_url": f"https://api.github.com/repos/{comment_repo}/issues/55"}][:int(comment)]))
     (truoc_lease or (lambda w: None))(w)
     rc, e, truoc = buoc("record-lease", "--lease-ref", "origin/ops/wp55-spec", "--lease-path", "ops/leases/l.yaml", "--lease-comments", f / "cm.json")
     if den == "lease" or rc:
@@ -8188,8 +8188,8 @@ MUTANTS.update({
     "r812_canon_suy_giam": ("if bnv.PROVIDER_NGUON_HONG is not None or ", "if False or ", ["r812_canon_thieu_nguon"]),
     "r812_bo_neo_git": ("+ neo[0] + neo[1] +", "+", ["r812_verdict_blob_khong_co"]),
     "r812_duong_cu_ghi_true": ('st["luat_adr0054"] = False  # I9', 'st["luat_adr0054"] = None  # I9', ["r812_duong_cu_luon_false"]),
-    "r812_bn_chi_cho_approve": ('if st.get("luat_adr0054") is True else None', 'if st.get("luat_adr0054") is True and a.verdict == "approve" else None', ["r812_slug_ngoai_bang_lop"]),
-    "r812_approve_cu_cho_adr0054": ('if st.get("luat_adr0054") is True else None', "if False else None", ["r812_approve_kem_lop_p1", "r812_duong_moi_du_dieu_kien"]),
+    "r812_bn_chi_cho_approve": ('if _pending_human_lane(st) else None', 'if _pending_human_lane(st) and a.verdict == "approve" else None', ["r812_slug_ngoai_bang_lop"]),
+    "r812_approve_cu_cho_adr0054": ('if _pending_human_lane(st) else None', "if False else None", ["r812_approve_kem_lop_p1", "r812_duong_moi_du_dieu_kien"]),
     "r812_bo_chan_p0_p2": ('("con-P0-P2", lop_ok and (', '("con-P0-P2", True or (', ["r812_approve_kem_lop_p1"]),
     "r812_mien_hang_mo": ("\n                                           and x.get(\"hang\") in HANG_LOP for x in lop)", " for x in lop)", ["r812_hang_px"]),
     "r812_slug_match_thay_fullmatch": ('SLUG_RE.fullmatch(x["slug"])', 'SLUG_RE.match(x["slug"])', ["r812_slug_xuong_dong"]),
@@ -8219,7 +8219,7 @@ MUTANTS.update({
     "r812_bo_provider_executor": ('("provider-executor", p_chuan(', '("provider-executor", True or p_chuan(', ["r812_executor_provider_lech_lease"]),
     "r812_bo_surface_executor": ('("executor-surface-transport", all(', '("executor-surface-transport", True or all(', ["r812_executor_surface_lech_lease"]),
     "r812_bo_thieu": ("list(bnv._thieu(d) if d else [])", "list([])", ["r812_schema_h_bat_buoc"]),
-    "r812_tran_vong_chan_cua_khep": (' and a is None and st.get("luat_adr0054") is not True:', " and a is None:", ["r812_tran_vong_cua_khep_ghi_ket_qua"]),
+    "r812_tran_vong_chan_cua_khep": (' and a is None and not _pending_human_lane(st):', " and a is None:", ["r812_tran_vong_cua_khep_ghi_ket_qua"]),
     "r812_dung_truoc_H": ("    bn = _du_dieu_kien_approve(st, a) if", '    _xet_dung(state_dir, st, "record-review", a)\n    bn = _du_dieu_kien_approve(st, a) if', ["r812_tran_vong_dau_vao_hong_khong_ghi"]),
     "r812_khong_don_tam": ("        shutil.rmtree(td, ignore_errors=True)", "        pass", ["r812_don_thu_muc_tam"]),
     "r812_nc_chi_tap_khoa": ('_nc_hop_le(st["ngu_canh_lease"])', 'set(st["ngu_canh_lease"]) == set(KHOA_NGU_CANH)', ["r812_ngu_canh_long_sai_hinh"]),
@@ -9186,7 +9186,7 @@ MUTANTS.update({
     "r813_bo_head_checkpoint": ('("head_sha", d["head_sha"] == h)', '("head_sha", True)', ["r813_checkpoint_head_lech"]),
     "r813_bo_generation_checkpoint": ('("generation", d["generation"] == st["ngu_canh_lease"]["generation"])', '("generation", True)', ["r813_checkpoint_generation"]),
     "r813_bo_nguoi_quyet": ('("nguoi_quyet", d["nguoi_quyet"] in NGUOI_CO_THAM_QUYEN)', '("nguoi_quyet", True)', ["r813_checkpoint_nguoi_quyet"]),
-    "r813_cho_chu_kho_khong_quyen": (' and (st["state"] != "cho_chu_kho" or st.get("luat_adr0054") is True and (st.get("mo_lai_tu") or {}).get("nguyen_nhan") == "connector")),', '),',
+    "r813_cho_chu_kho_khong_quyen": (' and (st["state"] != "cho_chu_kho" or _pending_human_lane(st) and (st.get("mo_lai_tu") or {}).get("nguyen_nhan") == "connector")),', '),',
                                      ["r813_state_cho_chu_kho_mat_quyen"]),
     "r813_m5_bo_head_sha": ('is str and type(r.get("head_sha")) is str and isinstance', 'is str and isinstance', ["r813_m5_run_head_sai_kieu"]),
 })
@@ -12065,16 +12065,24 @@ def _legacy_main() -> int:
 
 
 
-def _runtime1174(c, command):
+def _runtime1174(c, command, current_policy=False, service=False):
     """Real canonical v2 fixture promoted only in test; real reducers and parser."""
     import contextlib
     import io
     from unittest.mock import patch
     m = _module1174(c)
-    rc, sd, err, _ = _r812(c, "lease")
+    variant = "current_policy" if current_policy else ""
+    def current_lease(w):
+        _r812_doi_lease(w,dict(granted_on_instruction=f"https://github.com/{m._1174_REPO}/issues/55#issuecomment-5281636040",reviewer_execution_surface="codex_service" if service else "codex_cli"))
+    rc, sd, err, _ = _r812(c, "lease", bien=variant,
+        truoc_lease=current_lease if current_policy else None,comment_repo=m._1174_REPO if current_policy else "o/r")
     assert rc == 0, err
-    w = c.tmp / "kho/w"
+    w = c.tmp / ("kho"+variant) / "w"
+    if current_policy:
+        assert _st(sd)["luat_adr0054"] is False, "canonical inactive policy fixture activated"
     old = _st(sd)
+    if current_policy:
+        for role in ("executor","reviewer"):old[role+"_identity"]=dict(old["ngu_canh_lease"][role])
     # Use actual reducer history/anchor, never a fake _save/reducer implementation.
     if command not in ("init", "record-lease", "begin-attempt"):
         c.den_reviewing(sd, 55, 1, head=_g(w, "rev-parse", "refs/remotes/origin/agent/wp55-g1-claude"))
@@ -12159,7 +12167,7 @@ def _runtime1174(c, command):
     if command == "record-lease":
         ns = m.build_parser().parse_args(argv)
         verified = m._verify_lease_ref(ns, state)
-        full_lease = json.loads(_g(w,"show","refs/remotes/origin/ops/wp55-spec:ops/leases/l.yaml"))
+        full_lease = __import__("yaml").safe_load(_g(w,"show","refs/remotes/origin/ops/wp55-spec:ops/leases/l.yaml"))
         comments = json.loads((c.tmp/"cm.json").read_bytes())
         verified["comments_sha256"] = hashlib.sha256(m._1174_bytes(comments)).hexdigest()
         lease_facts = dict(verified_i2=verified, lease=full_lease, lease_id=full_lease["lease_id"],
@@ -12178,6 +12186,63 @@ def _runtime1174(c, command):
         assert len(lines)==1,(rc,lines,err.getvalue())
         return rc,json.loads(lines[0]),err.getvalue()
     return m,admission,state,argv,invoke,target,witness,pair
+
+
+def _current_policy1174(c, service=False):
+    """Actual inactive canonical policy/I2 lease, sequential ordinary writers.
+
+    Resolver/runtime/filesystem transport seams are fixture-only; reducers, native
+    receipt validator, journal/witness and policy calculation execute unchanged.
+    """
+    import copy
+    m,a,initial,argv,invoke,target,witness,pair=_runtime1174(c,"record-lease",current_policy=True,service=service)
+    w=Path(a["enrollment"]["git_root"])
+    head=_g(w,"rev-parse","refs/remotes/origin/agent/wp55-g1-claude")
+    common=argv[argv.index("--root"):argv.index("--expected-revision")]
+    trace=[]
+    def command(name,*flags):
+        image=json.loads(target.read_bytes())
+        args=["--state-dir",str(target.parent),name,"--packet","55",*map(str,flags),*common,"--expected-revision",str(image["state_revision"])]
+        return args
+    def success(args):
+        rc,r,e=invoke(args);assert rc==0,(rc,r,e)
+        image=json.loads(target.read_bytes())
+        assert image["luat_adr0054"] is False and image["human_acceptance"] is None
+        assert r["dispatch_allowed"] is (args[2] in ("begin-attempt","record-codex-call"))
+        trace.append(dict(command=args[2],state=image["state"],flag=image["luat_adr0054"],revision=image["state_revision"],head=image.get("pending_sha") or image.get("reviewing_head_sha"),review_rounds=image["review_rounds_used"],codex_calls=image["codex_review_calls_used"],dispatch_allowed=r["dispatch_allowed"]))
+        return image
+    def denied(args):
+        before=(target.read_bytes(),witness.read_bytes())
+        rc,r,e=invoke(args)
+        assert rc==8 and not r["dispatch_allowed"] and before==(target.read_bytes(),witness.read_bytes()),(rc,r,e)
+    image=success(argv)
+    assert image["ngu_canh_lease"]["lease_id"]==image["lease"]["lease_id"]
+    success(command("begin-attempt","--provider","claude","--execution-surface","claude_code","--transport","machine/local","--bang-chung-moi-truong",anh_doctor()))
+    success(command("record-post","--for","reviewing","--comment-id","900002"))
+    success(command("transition","--to","reviewing","--comment-id","900002","--head-sha",head))
+    success(command("record-codex-call","--head",head,"--run-id","current-call"))
+    image=json.loads(target.read_bytes());receipt=c.tmp/"current-review.json"
+    record=(dict(schema="wp1174_service_advisory.v1",head=head,identity=image["reviewer_identity"],verdict="approve",finding_ids=[],assurance="advisory_review") if service else _bn812(w,head,image["ngu_canh_lease"]["spec_hash"]))
+    receipt.write_bytes(m._1174_bytes(record))
+    args=command("record-review","--provider","codex","--verdict","approve","--reviewed-sha",head,"--codex-call","current-call","--bien-nhan",receipt)
+    args += ["--execution-surface","codex_service" if service else "codex_cli","--transport","machine"]
+    missing=list(args);i=missing.index("--bien-nhan");del missing[i:i+2];denied(missing)
+    for flag,value in (("--codex-call","unreserved-call"),("--reviewed-sha","f"*40),("--provider","claude"),("--execution-surface","claude_code"),("--expected-revision","99")):
+        bad=list(args);bad[bad.index(flag)+1]=value;denied(bad)
+    for field,value in (("head" if service else "reviewed_sha","f"*40),("identity" if service else "model_reviewer_identity",{})):
+        bad=copy.deepcopy(record);bad[field]=value;receipt.write_bytes(m._1174_bytes(bad));denied(args)
+    receipt.write_bytes(m._1174_bytes(record))
+    pending=success(args)
+    assert pending["state"]=="approved_pending" and pending["pending_sha"]==head and pending["accepted_sha"] is None
+    assert pending["scoped_review"]["head"]==head and pending["scoped_review"]["call_id"]=="current-call"
+    assert pending["scoped_review"]["receipt_sha256"]==hashlib.sha256(receipt.read_bytes()).hexdigest()
+    assert pending["codex_calls"][-1]["da_dung"] and pending["review_rounds_used"]==1
+    denied(command("record-review",*args[args.index("--provider"):args.index("--root")]))
+    denied(command("accept","--pr","55","--workflow-runs",receipt,"--workflow-jobs",receipt,"--check-runs",receipt,"--connector",receipt))
+    # Reuse this exact pending journal/head for the real human accept reducer.
+    accepted=_accept_entry1174(Ctx(c.script,c.tmp/"human-chain"),chain=(m,a,pending,target,witness,pair,w))
+    trace.append(dict(command="accept",state=accepted["state"],flag=accepted["luat_adr0054"],revision=accepted["state_revision"],head=accepted["accepted_sha"],assurance=accepted["human_acceptance"]["assurance"],dispatch_allowed=False))
+    (c.tmp/"current-policy-chain.json").write_text(json.dumps(dict(lane="service" if service else "native",canonical_policy=False,reviewer=pending["ngu_canh_lease"]["reviewer"],steps=trace),indent=2)+"\n")
 
 
 def _writer1174(name):
@@ -12465,6 +12530,9 @@ def _lifecycle1174(kind):
             fresh=list(argv);fresh[fresh.index("--expected-revision")+1]="1"
             rc,result,_=invoke(fresh);assert rc==8 and (target.read_bytes(),witness.read_bytes())==before
             if kind=="scoped_lifecycle":
+                for service in (False,True):
+                    d=c.tmp/("current-service" if service else "current-native");d.mkdir()
+                    _current_policy1174(Ctx(c.script,d),service)
                 _static_writers1174(c,m)
                 assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==85
                 required={n:None for n in WP1174_REQUIRED}
@@ -12666,41 +12734,66 @@ def _management_race1174(c,name):
     assert state["state_revision"]==(0 if name=="init" else 2) and not state["codex_calls"]
 
 
-def _accept_entry1174(c,race=False,snapshot=False):
+def _accept_entry1174(c,race=False,snapshot=False,chain=None):
     import contextlib,io,copy,multiprocessing
     from unittest.mock import patch
     from types import SimpleNamespace
-    m,a,state,_,_,target,witness,pair=_runtime1174(c,"accept")
+    c.tmp.mkdir(parents=True,exist_ok=True)
+    if chain is None:
+        m,a,state,_,_,target,witness,pair=_runtime1174(c,"accept")
+        chain_root=None
+        current_policy=False
+    else:
+        m,a,state,target,witness,pair,chain_root=chain
+        current_policy=True
+    if current_policy:assert state["luat_adr0054"] is False
     # Actual human validator and Git policy are exercised on a real local DAG.
     hc=Ctx(c.script,c.tmp/"human");hc.tmp.mkdir()
     def target_scope(x):
         x["ls"]["packet_id"]="wp55"
         x["audit"]["packet"]=x["tr"]["packet"]="wp55"
+        if chain_root is not None:
+            h=state["pending_sha"];_g(x["w"],"fetch","-q",str(chain_root),h)
+            spec=_g(chain_root,"show","refs/remotes/origin/ops/wp55-spec:ops/specs/wp55.md").encode()+b"\n"
+            x["spec"]=spec;x["a"].head=h;x["run"]["head_sha"]=h
+            for rec in (x["audit"],x["tr"]):rec.update(reviewed_sha=h,reviewed_tree=_g(chain_root,"rev-parse",h+"^{tree}"),spec_sha256=hashlib.sha256(spec).hexdigest())
     hm,w,hargs,ha,audit,pages,hseams=_human_fixture1174(hc,target_scope)
     hargs.packet=55;ha["packet"]=55
     # Keep the actual reducer module under test; only transport facts are injected.
     m.ADR0062_OID=hm.ADR0062_OID
     head=hargs.head
-    state.update(pending_sha=head,reviewing_head_sha=head,accepted_sha=None,
+    if chain_root is None:state.update(pending_sha=head,reviewing_head_sha=head,accepted_sha=None,
         scoped_review=dict(schema="wp1174_scoped_review.v1",head=head,identity=state["reviewer_identity"],verdict="approve",finding_ids=[],receipt_sha256="f"*64,assurance="advisory_review",call_id=None))
-    nc=state["ngu_canh_lease"];nc.update(repo=m._1174_REPO,branch="candidate")
-    a["enrollment"]["git_root"]=str(w.resolve())
+    nc=state["ngu_canh_lease"]
+    if chain_root is None:
+        nc.update(repo=m._1174_REPO,branch="candidate")
+        a["enrollment"]["git_root"]=str(w.resolve())
+    else:
+        # Policy ancestry is a local canonical fixture; add the exact policy
+        # anchors to the runtime repository without changing the reviewed head.
+        policy=chain_root/m.ADR0063_TEP;policy.parent.mkdir(parents=True,exist_ok=True)
+        policy.write_text("\n".join(m.ADR0063_ANCHORS)+"\n")
+        _g(chain_root,"add",str(policy));_g(chain_root,"commit","-qm","fixture human policy")
+        _g(chain_root,"push","-q","origin","master")
+        w=chain_root
+    ci_repo=nc["repo"]
     # The local remote is an inert test transport; all accept branch reads are real Git.
-    remote=hc.tmp/"remote.git";_g(hc.tmp,"init","-q","--bare",str(remote));_g(w,"remote","add","origin",str(remote));_g(w,"push","-q","origin",head+":refs/heads/candidate")
+    if chain_root is None:
+        remote=hc.tmp/"remote.git";_g(hc.tmp,"init","-q","--bare",str(remote));_g(w,"remote","add","origin",str(remote));_g(w,"push","-q","origin",head+":refs/heads/candidate")
     jobs=[j for _,j in m.CHECK_BAT_BUOC]
-    runs=[dict(id=2,path=".github/workflows/ci.yml",head_sha=head,repository=dict(full_name=m._1174_REPO),run_attempt=1,status="completed",conclusion="success",check_suite_id=500,html_url=f"https://github.com/{m._1174_REPO}/actions/runs/2",event="push",created_at="2026-11-04T09:01:00Z")]
-    api=f"https://api.github.com/repos/{m._1174_REPO}/"
+    runs=[dict(id=2,path=".github/workflows/ci.yml",head_sha=head,repository=dict(full_name=ci_repo),run_attempt=1,status="completed",conclusion="success",check_suite_id=500,html_url=f"https://github.com/{ci_repo}/actions/runs/2",event="push",created_at="2026-11-04T09:01:00Z")]
+    api=f"https://api.github.com/repos/{ci_repo}/"
     files={"workflow_runs":dict(total_count=1,workflow_runs=runs),"workflow_jobs":dict(total_count=5,jobs=[dict(id=200+i,run_id=2,run_attempt=1,name=j,head_sha=head,status="completed",conclusion="success",check_run_url=api+f"check-runs/{300+i}") for i,j in enumerate(jobs)]),
         "check_runs":dict(total_count=5,check_runs=[dict(id=300+i,name=j,head_sha=head,status="completed",conclusion="success",check_suite=dict(id=500),app=dict(slug="github-actions"),url=api+f"check-runs/{300+i}") for i,j in enumerate(jobs)]),
-        "connector":dict(repo=m._1174_REPO,pr=1187,head_sha=head,reviews=dict(total_count=0,items=[]),review_comments=dict(total_count=0,items=[]),issue_comments=dict(total_count=1,items=[dict(id=20,user=dict(login=_CN834),body="Reviewed commit: `"+head[:10]+"`",issue_url=api+"issues/1187")]))}
-    args=["--state-dir",str(target.parent),"accept","--packet","55","--root",str(w.resolve()),"--pr","1187","--admission","fixture","--revision","1","--generation","1","--coordinator-id","coordinator-1","--expected-revision","0"]
+        "connector":dict(repo=ci_repo,pr=1187,head_sha=head,reviews=dict(total_count=0,items=[]),review_comments=dict(total_count=0,items=[]),issue_comments=dict(total_count=1,items=[dict(id=20,user=dict(login=_CN834),body="Reviewed commit: `"+head[:10]+"`",issue_url=api+"issues/1187")]))}
+    args=["--state-dir",str(target.parent),"accept","--packet","55","--root",str(w.resolve()),"--pr","1187","--admission","fixture","--revision","1","--generation","1","--coordinator-id","coordinator-1","--expected-revision",str(state["state_revision"])]
     for attr,value in files.items():
         path=hc.tmp/(attr+".json");path.write_text(json.dumps(value));args += ["--"+attr.replace("_","-"),str(path)]
     for attr in ("human_audit_comment","human_remote_run","publication_receipt"):
         args += ["--"+attr.replace("_","-"),getattr(hargs,attr)]
     hargs.workflow_runs=str(hc.tmp/"workflow_runs.json")
     lease=dict(packet_id="wp55",revision=1,generation=1)
-    spec=hm._git_do(w,"show",_g(w,"rev-parse","HEAD^1")+":ops/specs/X.md")[1]
+    spec=(hm._git_do(w,"show",_g(w,"rev-parse","HEAD^1")+":ops/specs/X.md")[1] if chain_root is None else _g(w,"show","refs/remotes/origin/ops/wp55-spec:ops/specs/wp55.md").encode()+b"\n")
     facts=dict(lease=lease,spec=spec,spec_sha256=hashlib.sha256(spec).hexdigest(),canonical_oid=_g(w,"rev-parse","refs/remotes/origin/master"))
     def fetch(endpoint,**limits):
         if endpoint=="repos/"+m._1174_REPO:return dict(id=123,full_name=m._1174_REPO)
@@ -12746,6 +12839,10 @@ def _accept_entry1174(c,race=False,snapshot=False):
         stale=list(args);stale[stale.index("--expected-revision")+1]="9"
         rc,result=invoke(stale);assert rc==8 and result["status"]=="revision_rejected",(rc,result)
         assert before==(target.read_bytes(),witness.read_bytes())
+        if chain_root is not None:
+            missing_human=list(args);i=missing_human.index("--human-audit-comment");del missing_human[i:i+2]
+            rc,result=invoke(missing_human)
+            assert rc==8 and not result["dispatch_allowed"] and before==(target.read_bytes(),witness.read_bytes()),(rc,result)
         if snapshot:
             parser=m._doc_json
             inputs={str(hc.tmp/(key+".json")): (hc.tmp/(key+".json")).read_bytes() for key in files}
@@ -12762,8 +12859,13 @@ def _accept_entry1174(c,race=False,snapshot=False):
         else:
             rc,result=invoke();assert rc==0,(rc,result)
     accepted=_call1174(m._1174_pair,a,json.loads(witness.read_bytes()),target.read_bytes())
-    assert accepted["state"]=="accepted" and accepted["human_acceptance"]["assurance"]=="human_audited" and accepted["state_revision"]==1
+    assert accepted["state"]=="accepted" and accepted["human_acceptance"]["assurance"]=="human_audited" and accepted["state_revision"]==state["state_revision"]+1
+    if current_policy:
+        assert accepted["luat_adr0054"] is False and accepted["accepted_sha"]==state["pending_sha"]
+        assert accepted["review_rounds_used"]==accepted["codex_review_calls_used"]==accepted["attempts_used"]==1
+        assert m._che_do_0054(w,spec) is False
     before=(target.read_bytes(),witness.read_bytes());rc,result=invoke();assert rc==8 and before==(target.read_bytes(),witness.read_bytes())
+    return accepted
 
 
 CASES += [("wp1174_writer_adopt_state",lambda c:_management_entry1174(c,"adopt-state")),("wp1174_writer_accept",_accept_entry1174)]
@@ -13613,7 +13715,7 @@ MUTANTS.update({
 MUTANTS_NHAM_TEST |= {"m1174_secret_channel_probe_facts"}
 
 _WP1174_PATHS = (".claude/dev/packet_loop.py", ".claude/dev/packet_loop_test.py", "docs/PROTOCOL_DA_PHIEN.md",
-    "ops/specs/wp1174-c5-adapter-design.md", "ops/specs/wp1174-implementation-r16.md")
+    "ops/specs/wp1174-c5-adapter-design.md", "ops/specs/wp1174-implementation-r17.md")
 _WP1174_NATIVE_KEYS = frozenset("schema actual_os scope proof_eligible source_pr repo pr run_id run_attempt job checkout_sha checkout_tree executed_sha executed_tree expected_head expected_tree path_hashes producer_digests producer_after snapshot_before snapshot_after required_ids required_count outcomes profiles native_probe native_seam overall_status windows_oracle".split())
 
 
@@ -13810,6 +13912,23 @@ def main():
         return int(bool(rc or missing))
     finally:
         CASES, MUTANTS = cases, mutants
+
+
+
+MUTANTS["m1174_r17_dormant_flag_dependency"] = (
+    'return st.get("luat_adr0054") is True or scoped',
+    'return st.get("luat_adr0054") is True',
+    ["wp1174_lifecycle_scoped_lifecycle"])
+MUTANTS["m1174_r17_native_receipt_omitted"] = (
+    'bn = _du_dieu_kien_approve(st, a) if _pending_human_lane(st) else None',
+    'bn = dict(tep=str(a.bien_nhan), sha256=hashlib.sha256(Path(a.bien_nhan).read_bytes()).hexdigest(), p3=[], lop=[])',
+    ["wp1174_lifecycle_scoped_lifecycle"])
+
+
+MUTANTS["m1174_r17_human_gate_omitted"] = (
+    'human = _1174_human_evidence(a, admission, st["pending_sha"])',
+    'human = dict(schema="wp1174_human_acceptance.v1",head=st["pending_sha"],tree=_git_do(Path(a.root),"rev-parse",st["pending_sha"]+"^{tree}")[1].decode().strip(),pr=a.pr,spec_sha256="f"*64,audit_comment_id=1,audit_updated_at="2026-11-04T09:00:00Z",audit_sha256="f"*64,collector_sha256="f"*64,assurance="human_audited")',
+    ["wp1174_lifecycle_scoped_lifecycle"])
 
 
 if __name__ == "__main__":

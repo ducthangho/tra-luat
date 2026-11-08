@@ -1659,3 +1659,16 @@ và `.` phải absolute độc lập với validator trên host. Vector slash-pr
 vẫn được giữ; trên Windows enrollment nhận đúng `legacy source types` trước
 canonical guard, lineage vẫn nhận `source canonical paths`; trên POSIX cả hai
 nhận `source canonical paths`. Không đổi predicate sản phẩm hoặc target authority.
+
+
+WP1174 R17/C13 (generation14, Mission21) giữ ADR-0054 ở trạng thái canonical
+hiện hành, kể cả `luat_adr0054: false`. Tuyến scoped dùng admission đã xác minh
+và ngữ cảnh lease I2 trong giao dịch dưới khóa để chọn lifecycle pending/human;
+không lấy một cờ opt-in trong journal làm authority và không kích hoạt luật global.
+Native review vẫn qua canonical receipt validator; service receipt vẫn advisory.
+Cả hai tiêu đúng call/review budget, giữ exact head ở `approved_pending`, rồi
+chỉ `accept` với actual-human audit/CI/connector/first-publication hợp lệ mới ghi
+`accepted`. State/witness invalid hoặc evidence thiếu, sai head/danh tính/call
+đều bị từ chối trước persist/dispatch. Historical activated fixtures là control
+riêng; current-policy subcases giữ False qua lease, begin/call, review và accept.
+Các transport/authority fixture seams không thay bằng chứng lifecycle production.

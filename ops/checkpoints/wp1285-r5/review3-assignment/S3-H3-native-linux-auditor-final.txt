@@ -1,0 +1,5 @@
+H3 53b175c40254b0e64a011ef6d0f70207fd2f933e — AUX hoàn tất; không thấy mâu thuẫn trọng yếu trong nguồn/log.
+Native455 nguồn/456 ZIP entries,39commandlogs,15phases: hai runtime normal7/7,CX12/12,legacy26/26. Sáu AST negatives runtime0; PS5.1 clean/background là parse errors. Background-only rollback đúng một check: PS7PM01passes/runtime2 nhưng overallrc1; không tuyên bố arbitrary code execution.
+Linux childrc0 1777/1777;10logs hash/size/rc; strict184/184; Ruff12cũ bare1/delta0; canonicalB admission.
+175S3refs/hai legacy29refs/typedCLIXML/sourcebeforeafter/lock/missingdependencynegative đã kiểm. 14legacyBypass công khai, no newS3override. Host snapshots chỉ khác harness; nguồn gốc sáu child-view directories vẫn chưa đo.
+formal_code_approval=false; F01 chờ fresh xhighCLI review; same-provider sensitive assurance HOLD.

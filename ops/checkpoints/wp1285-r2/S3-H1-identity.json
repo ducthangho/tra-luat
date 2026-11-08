@@ -1,0 +1,38 @@
+{
+  "H": "4196fbaaeb13b4d26d5f4f452b6c1a8b26150489",
+  "tree": "abd231e82afb2745279a5ce49c6ab11f0eb21005",
+  "parent_B": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "author": "actual Claude Code run1c887f43/session280501dd-09ec-4f9e-addf-8a476222dd10",
+  "actual_served_model": "claude-opus-5-5",
+  "code_authored_under_spec_r1": "100a37a9389d3955280b572ebe1c55f96ebca0bb:ops/specs/wp1285-r1.md",
+  "mechanical_git_actor": "root dispatcher, no productpatch",
+  "write_set": [
+    ".agents/skills/proxima-control/scripts/ProximaControl.psd1",
+    ".agents/skills/proxima-control/SKILL.md",
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+  ],
+  "numstat": [
+    [
+      "64",
+      "0",
+      ".agents/skills/proxima-control/SKILL.md"
+    ],
+    [
+      "13",
+      "0",
+      ".agents/skills/proxima-control/scripts/ProximaControl.psd1"
+    ],
+    [
+      "370",
+      "0",
+      ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+    ]
+  ],
+  "additions": 447,
+  "deletions": 0,
+  "author_tests": "NOT_RUN originalhandoff preserved; operator gates pending",
+  "code_review": "NOT_RUN",
+  "primary_pushes": 0,
+  "S1S2_bytes_unchanged": true,
+  "at": "2026-11-08T14:47:39.416736+00:00"
+}

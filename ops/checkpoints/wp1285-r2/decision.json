@@ -1,0 +1,20 @@
+{
+  "kind": "r1_native_legacy_command_wording_conflict_r2_clarification",
+  "source": "unchanged S2test child argv includes process-scopedBypass; newS3harness inheritscallerpolicy/noBypass. Originalr1 text forbadeBypass while requiring unchangedS2normal run.",
+  "authority": "latest owner continue-allremainingwork directive + prior fullfocusednative permission/sourceunchangedS2procedure",
+  "decision": "Explicitlyscope noNEWBypass tobootstrap/probes/S3harness, retain fixed legacyharness argv withfullmodeproof/GPOUndefined/no persistentchanges. No tests waived or removed.",
+  "new_revision": 2,
+  "new_generation": 2,
+  "unchanged_H1": "4196fbaaeb13b4d26d5f4f452b6c1a8b26150489",
+  "size": 447,
+  "attempts_used": 1,
+  "attempts_limit": 3,
+  "shared_calls_used": 0,
+  "shared_limit": 8,
+  "formal_used": 0,
+  "formal_limit": 2,
+  "push_used": 0,
+  "push_limit": 1,
+  "no_author_model_reinvocation_for_adoption": true,
+  "at": "2026-11-08T14:53:58.545163+00:00"
+}

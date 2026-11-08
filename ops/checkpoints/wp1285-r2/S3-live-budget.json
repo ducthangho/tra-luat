@@ -1,0 +1,42 @@
+{
+  "packet": "wp1285",
+  "revision": 1,
+  "generation": 1,
+  "immutable_B": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "attempts_used": 1,
+  "attempts_limit": 3,
+  "attempt1": {
+    "state": "terminal_controller_observed",
+    "session_id": "280501dd-09ec-4f9e-addf-8a476222dd10",
+    "started_at_utc": "2026-11-08T14:18:02.701812+00:00",
+    "deadline_utc": "2026-11-08T15:03:02.701812+00:00",
+    "actual_model_generation": true,
+    "run_id": "1c887f43",
+    "launcher_rc": 0
+  },
+  "codex_review_calls_used": 0,
+  "codex_review_calls_limit": 8,
+  "code_review_rounds_used": 0,
+  "code_review_rounds_limit": 2,
+  "primary_product_pushes_used": 0,
+  "primary_product_pushes_limit": 1,
+  "design_advisory_calls_used": 1,
+  "design_advisory_calls_limit": 1,
+  "mission_historical_costs": "KHONG_DO_DUOC beyondpreservedperPacketreceipts; notreset/zero",
+  "source_lease": {
+    "metadata_commit": "0622e6a43a003d1f3bf3bf0b0f43f0538bb81b53",
+    "lease_path": "ops/leases/wp1285-r1-g1-claude.yaml",
+    "prompt_path": "ops/prompts/wp1285-r1-g1-claude.md",
+    "spec_source": "refs/heads/ops/wp1285-spec@100a37a9389d3955280b572ebe1c55f96ebca0bb",
+    "spec_sha256": "f6a28e87a99748fc2161fcce38f5e362da3f0a32353fbd11c59d8a5a14c34fb6",
+    "prompt_sha256": "88c76df4954cab11e511ce033258d9aac2d398bad8a6b3034da29b86bdadc43c",
+    "comment": "https://github.com/ducthangho/tra-luat/issues/1285#issuecomment-6722576438",
+    "comment_id": 6722576438,
+    "exact_body": true,
+    "remote_blobs_exact": true,
+    "local_check_rc": 0,
+    "github_check_rc": 0,
+    "model_invoked": false
+  },
+  "as_of": "2026-11-08T14:18:28.997786+00:00"
+}

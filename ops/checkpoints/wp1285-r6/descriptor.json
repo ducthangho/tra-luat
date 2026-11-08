@@ -1,0 +1,33 @@
+{
+  "packet_id": "wp1285",
+  "revision": 6,
+  "generation": 7,
+  "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "continuation": "53b175c40254b0e64a011ef6d0f70207fd2f933e",
+  "spec_sha256": "e6ecd8256339c5ee1e67bb11fe362a64e6f6e697e02997f9a8f51e0976db9ccb",
+  "effective_write_set": [
+    ".agents/skills/proxima-control/scripts/ProximaControl.psd1",
+    ".agents/skills/proxima-control/SKILL.md",
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+  ],
+  "write_set_hash": "0bbe3df51f38b0d334fcb5e35ada62ac95ac3eb1b1e28b4e9b5385a396a002aa",
+  "effective_review_class": "sensitive",
+  "change_policy_sha": null,
+  "land_obligations": [],
+  "authority": "NEW r6 bounded canonical-base correction under explicit latest owner instruction; not a finding waiver/human audit",
+  "nang_tran": {
+    "ai_nang": "ducthangho via explicit resume instruction and full scoped delegation, dispatcher records concrete bounded exercise",
+    "can_cu": "One necessary canonical ancestry correction after actual CI admission failure; immutable code blobs unchanged, old review stale on new SHA",
+    "tran_cu": "product5TOTAL/formal3TOTAL/shared10TOTAL/push1TOTAL/3paths450",
+    "tran_moi": "product5TOTAL unchanged/formal4TOTAL/shared14TOTAL/push2TOTAL/3paths450 unchanged"
+  },
+  "limits": {
+    "paths": 3,
+    "additions_and_total": 450,
+    "attempts": 5,
+    "formal": 4,
+    "shared": 14,
+    "primarypush": 2
+  },
+  "admission_base": "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee"
+}

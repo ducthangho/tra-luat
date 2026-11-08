@@ -1,0 +1,12 @@
+[
+  {
+    "path": "docs/adr/0052-tran-loi-goi-codex-len-tam.md",
+    "land": "8ab100793df9831505f495543a74044b91c2c9ab",
+    "all_three_passed": true
+  },
+  {
+    "path": "docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md",
+    "land": "8ab100793df9831505f495543a74044b91c2c9ab",
+    "all_three_passed": true
+  }
+]

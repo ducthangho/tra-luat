@@ -1,0 +1,27 @@
+{
+  "role": "auxiliary_readonly_evidence_audit",
+  "provider": "openai_codex",
+  "surface": "codex_service",
+  "transport": "machine",
+  "model_identity": "notindependentlymeasured bydispatcher; do not claim CodexCLI identity",
+  "packet": "wp1285",
+  "revision": 2,
+  "generation": 3,
+  "H": "883d37826f443ce9301dd0bcd40cd5f97f1adf0e",
+  "tree": "8bb2149f025966ba09a351d5c60b5fd954d960b6",
+  "spec_sha256": "ce8052af41a74a30089067f8976e1fc5a66767261275044681cdde2eb9a0f2dd",
+  "finding": "WP1285-R1-F01 openpendingindependentformal2",
+  "deadline_utc": "2026-11-08T18:25:41Z",
+  "read_scope": [
+    "/workspace/scratch/proxima-rest-20261108",
+    "/workspace/scratch/wp1279-g4-claude",
+    "/workspace/scratch/wp1285-spec-publish"
+  ],
+  "write_scope": [
+    "/workspace/scratch/proxima-rest-20261108/S3-H2-native-linux-auditor-receipt.json",
+    "/workspace/scratch/proxima-rest-20261108/S3-H2-native-linux-auditor-final.txt"
+  ],
+  "formal_code_approval": false,
+  "cost": "sharedcall3/8; no formalround or productattempt",
+  "requirements": "Verify native13phases/433sourcefiles/allnestedproof and exactF01oldH1reproduction/H2beforeimportclosure/rollbackmutant; actualLinuxreceipt+rawlog/lifecycleH2 whenready. No rerun heavy/tests/owncopycreation, no repo/model/agent/network/hostmutations. PreserveoriginalNOTRUN/history/launchpolicy/BareRuffrc1. If deadline noLinuxproof returnpartialNOTRUN, noextension."
+}

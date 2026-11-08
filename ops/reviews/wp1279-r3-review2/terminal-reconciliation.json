@@ -1,0 +1,69 @@
+{
+  "reviewed_sha": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+  "reviewed_tree": "fbd7b8407eaa6ce08eb475e74b07546abe09a0a7",
+  "terminal_rc": 0,
+  "original_stdout_sha256": "d0202f42a05107c35d342b2e7442485b3ff288aaec5f226f42b92e0da6c0f08d",
+  "original_lastline": "KET_LUAN: approve",
+  "original_verdict_sha256": "c8689520a78a93751a477763b2e22c1b088d5ec5adcb0710dba32d336a6577ca",
+  "snapshot_final": "sach",
+  "controller_snapshots": {
+    "review": {
+      "sha256": "4a21f98f82db417dee429de38511f713de75a4187f64d3075338eaca5939ed6d",
+      "same_as_before": true
+    },
+    "source": {
+      "sha256": "a91f8908e8a2676ba05b24f787130c9a2fb7339a8a11af97e71b6c35d3372ced",
+      "same_as_before": true
+    }
+  },
+  "observed_models": [
+    "gpt-6.1-sol"
+  ],
+  "effort_samples": [
+    "xhigh"
+  ],
+  "model_samples": 47,
+  "sandbox_status": "DO_DUOC",
+  "sandbox_limits": "lay mau /proc tu ben ngoai moi 0.2s: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. Lech danh tinh tien trinh (#1105): chuyen cha khi cha cu da mat/Z va cha moi la to tien da xac thuc thi duoc tha; moi lech khac (ke ca chuyen ra ngoai cay hay PID 1) => KHONG_DO_DUOC: co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do",
+  "verdict": "approved",
+  "findings": [],
+  "prior_class_dispositions": {
+    "source": {
+      "reviewed_sha": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+      "original_verdict": "a7f51d0c70016e0e53afe40e256a819835eb6a52:ops/reviews/wp1279-r2-review1/verdict.md",
+      "receipt": "4c7b557035a0957fef32277f0d176f94635a72eb:ops/reviews/wp1279-r2-review1.receipt.yaml",
+      "history": "Read the complete original changes_requested verdict. Both classes had one prior formal occurrence and remained open entering this review."
+    },
+    "classes": [
+      {
+        "stableid": "WP1279-R1-F01",
+        "class_slug": "encoding-dependent-endpoint-path-validation",
+        "disposition": "ĐÃ VÁ THẬT",
+        "path": ".agents/skills/proxima-control/scripts/ProximaControl.psm1",
+        "line": 357,
+        "evidence": "The reserved-device pattern now constructs superscripts from code points, matching pinned S1 semantics. Independently matched retained serialized endpoint bodies to their actual source and checked code-point-generated path inputs. Native host GetACP was 1252; Desktop children report codepage 1252. With the common H3 harness, old H2 under the PS5.1 parent produces the named ENDPOINT_VALID_PATH_REJECTED failure for COM-U00C2/LPT-U00C2. Current H succeeds in normal en-US and focused tr-TR runs on both runtimes; COM-U00B9/LPT-U00B2 remain rejected.",
+        "negative_control_limit": "Old H2 under the PS7 parent fails only SOURCE_NOT_ASCII; its valid-path handshakes succeed. That static diagnostic was not credited as a behavioral kill.",
+        "remaining_manifestations": []
+      },
+      {
+        "stableid": "WP1279-R1-F02",
+        "class_slug": "nested-child-evidence-deleted-before-review",
+        "disposition": "ĐÃ VÁ THẬT",
+        "path": ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1",
+        "line": 280,
+        "evidence": "Verified all 28 retained report sets and 922 artifact links, including endpoint and fresh-wrapper scripts, CLIXML inputs, raw reports, captured output, commands, actual return codes, runtime and culture. Checked that nested artifacts lie outside their own measured/cleanup roots and parent cleanup ancestors. Actual payloads contain Boolean WhatIf=true; raw rows show System.Boolean, ambient false, early dry-run and zero imports. Positive handshakes retain both expected hashes. All 22 CX source/report/output/record sets resolve.",
+        "negative_control": "Independently compared the existing owned private copy with the original manifest: exactly one endpoint report is absent. Read-only validation reproduced MISSING_NESTED_ARTIFACT:endpoint-report:child\\endpoint-out-0.json. The original report remains byte-identical.",
+        "capture_limit": "Merged child output is decoded text captured by the parent, not raw OS stdout bytes. Original script, XML and report file bytes are retained and verified.",
+        "remaining_manifestations": []
+      }
+    ],
+    "h1_history": {
+      "sha": "24cc13bb536386d0662927e9c94331eb8713bab8",
+      "disposition": "Historical native failures are not formal findings or current acceptance evidence.",
+      "verification": "Inspected the comment-aware token scan, case-insensitive dynamic-scope collision fixes, scope-shadowing positive control and nonvacuous WhatIf assertions. The original 25 IDs and ten semantic CX obligations remain; the four historically failing IDs pass in current retained native reports."
+    },
+    "s1_history": "No S1/P0 waiver or approval was reused. S1 bytes and dependency SHA256 59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d remain unchanged.",
+    "auxiliary_audit": "Validated g3-native-linux-auditor-receipt.json against the underlying artifacts. It is an auxiliary evidence digest, not code approval."
+  },
+  "note": "Original verdict unchanged; parent machine observations resolve identity separately. Snapshot equality only at two observed points."
+}

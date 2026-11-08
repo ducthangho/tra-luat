@@ -1,0 +1,28 @@
+# lenh: python3 ops/ci_provenance.py thu --repo ducthangho/tra-luat --run 42483433610 --attempt 1 --out ops/land/pr1270-wp1179-provenance/ci --wd-run 42487322479 (clone tai bf9914c, 2026-11-08 ~13:59Z) ; rc=0
+RUN: passed (run_attempt 1, yeu cau 1)
+JOB 128740073225 chuan-bi: checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740140914 gate (ubuntu-latest): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740140928 gate-ops (ubuntu-latest): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740140957 gate-packet-loop (ubuntu-latest): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740140977 gate-cong-cu (ubuntu-latest, 1): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740140992 gate-nhanh-manh (ubuntu-latest, 1): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740141004 gate-nhanh-manh (ubuntu-latest, 3): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740141006 gate-cong-cu (ubuntu-latest, 6): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740141008 gate-cong-cu (ubuntu-latest, 4): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740141009 gate-nhanh-manh (ubuntu-latest, 6): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740141012 gate-cong-cu (ubuntu-latest, 3): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740141029 gate-nhanh-manh (ubuntu-latest, 4): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740141042 gate-nhanh-manh (ubuntu-latest, 7): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740141063 gate-cong-cu (ubuntu-latest, 5): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740141070 gate-nhanh-manh (ubuntu-latest, 2): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740141074 gate-cong-cu (ubuntu-latest, 7): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740141086 gate-cong-cu (ubuntu-latest, 2): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740141098 gate-nhanh-manh (ubuntu-latest, 5): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740141106 gate-cong-cu (ubuntu-latest, 0): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740141118 gate-nhanh-manh (ubuntu-latest, 0): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740520794 gate-nhanh-gop (ubuntu-latest): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128740577946 gate-registry (ubuntu-latest): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+JOB 128745451917 gate-cong-cu-gop (ubuntu-latest): checkout=passed bf9914cb1a8e6f5047468f4d130b587015f8d73f gate=not_measured
+WORKFLOW_DEFINITION: passed (wd-run)
+provenance.yaml sha256 da1b4ee54b8e1ab9fe481bd4503e35bfc477e65a3959845ccd8981f1052c8e2c
+NOT_MEASURED: 23

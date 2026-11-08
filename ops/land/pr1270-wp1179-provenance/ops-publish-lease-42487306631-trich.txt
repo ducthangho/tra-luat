@@ -1,0 +1,22 @@
+# trich log job 128751877015 (ops-publish-lease run 42487306631, push fcea24a len ops/wp1179-r9-g1-lease), log_sha256 c21a82969bbe7d8e6a7f2b91fbb023ca9c800fe63a8a740844650eb369481f4f, 367223 byte
+2026-11-08T14:03:48.1738305Z shell: /usr/bin/bash -e {0}
+2026-11-08T14:03:48.1738564Z env:
+2026-11-08T14:03:48.1738847Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-08T14:03:48.1739316Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-08T14:03:48.1739769Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-08T14:03:48.1740163Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-08T14:03:48.1740555Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-08T14:03:48.1740966Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-08T14:03:48.1741317Z   NEO: /home/runner/work/_temp/neo
+2026-11-08T14:03:48.1744152Z   GH_TOKEN: ***
+2026-11-08T14:03:48.1744379Z   REPO: ducthangho/tra-luat
+2026-11-08T14:03:48.1744620Z ##[endgroup]
+2026-11-08T14:03:48.1819124Z ##[group]ops/leases/wp1179-r9-g1-claude-remote-20261106.yaml
+2026-11-08T14:03:48.7883376Z CHAN [9]: lease 'wp1179-r9-g1-claude-remote-20261106' đã có comment 6693204644 trên issue #1179 — bỏ qua
+2026-11-08T14:03:48.7980331Z đã đăng trước đó — bỏ qua
+2026-11-08T14:03:48.7981224Z ##[endgroup]
+2026-11-08T14:03:48.8079822Z Post job cleanup.
+2026-11-08T14:03:48.9369497Z (node:34853) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-08T14:03:48.9370370Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-08T14:03:48.9554945Z Post job cleanup.
+2026-11-08T14:03:49.0608677Z [command]/usr/bin/git version

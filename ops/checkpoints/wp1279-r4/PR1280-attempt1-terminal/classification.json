@@ -1,0 +1,321 @@
+{
+  "formal_code_approval": false,
+  "run_id": 42469501853,
+  "attempt": 1,
+  "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "event": "pull_request",
+  "status": "completed",
+  "conclusion": "failure",
+  "jobs_total": 23,
+  "jobs_success": 18,
+  "jobs_failed": 5,
+  "jobs_skipped": 0,
+  "jobs_cancelled": 0,
+  "all23_source_logs_collected": true,
+  "failures": [
+    {
+      "job_id": 128696795044,
+      "name": "gate (ubuntu-latest)",
+      "failed_steps": [
+        "c\u00e0i actionlint cho G5"
+      ],
+      "errors": [
+        "2026-11-08T10:02:23.9765508Z ##[error]Process completed with exit code 4."
+      ],
+      "class": "dependency_download_transport_failure",
+      "command": "bash ops/cai_actionlint.sh",
+      "HTTP504_count": 9,
+      "actual_step_rc": 4,
+      "source_blob_unchanged_B_H3_H4": "03d98e236f28d8bd07c1ee01ee1810d17387dfee"
+    },
+    {
+      "job_id": 128696795169,
+      "name": "gate-cong-cu (ubuntu-latest, 2)",
+      "failed_steps": [
+        "c\u00e0i actionlint cho G5"
+      ],
+      "errors": [
+        "2026-11-08T10:02:30.8073936Z ##[error]Process completed with exit code 4."
+      ],
+      "class": "dependency_download_transport_failure",
+      "command": "bash ops/cai_actionlint.sh",
+      "HTTP504_count": 9,
+      "actual_step_rc": 4,
+      "source_blob_unchanged_B_H3_H4": "03d98e236f28d8bd07c1ee01ee1810d17387dfee"
+    },
+    {
+      "job_id": 128696795235,
+      "name": "gate-cong-cu (ubuntu-latest, 6)",
+      "failed_steps": [
+        "c\u00e0i actionlint cho G5"
+      ],
+      "errors": [
+        "2026-11-08T10:02:19.7168417Z ##[error]Process completed with exit code 4."
+      ],
+      "class": "dependency_download_transport_failure",
+      "command": "bash ops/cai_actionlint.sh",
+      "HTTP504_count": 9,
+      "actual_step_rc": 4,
+      "source_blob_unchanged_B_H3_H4": "03d98e236f28d8bd07c1ee01ee1810d17387dfee"
+    },
+    {
+      "job_id": 128697201468,
+      "name": "gate-registry (ubuntu-latest)",
+      "failed_steps": [
+        "test registry (ph\u1ea1m vi + c\u00e1c b\u1ed9 ch\u01b0a \u0111\u01b0\u1ee3c n\u1ed1i)"
+      ],
+      "errors": [
+        "2026-11-08T10:21:05.3695265Z ##[error]Process completed with exit code 1."
+      ],
+      "class": "undetermined_timing_dependency_process_cleanup_failure",
+      "command": "python .claude/dev/ci_dang_ky_test.py --chay",
+      "suite": "ops/codex_cloud_setup_test.py",
+      "observed_suite": "12/13; source_cung_chay_main TimeoutExpired not credited as intended kill; leftover-descendant ChildProcessError",
+      "actual_step_rc": 1,
+      "cause_limit": "Mutated source executes real installer path with60s subprocess timeout; exact child stderr/network cause unavailable. Not demonstrated to be sameHTTP504, not a pass, not a demonstrated Proxima product regression.",
+      "runner_comparison": "Both H3 successful and H4 failed: runner2.338.2 Ubuntu26.04.1 image20261101.186.1 CPython3.12.16; region differs only; no image-migration evidence."
+    },
+    {
+      "job_id": 128701958518,
+      "name": "gate-cong-cu-gop (ubuntu-latest)",
+      "failed_steps": [
+        "G5 gom manh ban kinh dot bien (#668)"
+      ],
+      "errors": [
+        "2026-11-08T10:22:41.8619223Z ##[error]Process completed with exit code 1."
+      ],
+      "class": "required_shards_missing_consequence",
+      "command": "python ops/cong_cu_test.py --gop manh",
+      "missing_shards": [
+        2,
+        6
+      ],
+      "actual_step_rc": 1,
+      "retained_exact_raw_diagnostic_line": "2026-11-08T10:22:41.8441293Z   \u0110\u1ece  gom [G-tap]: t\u1eadp m\u1ea3nh [0, 1, 3, 4, 5, 7] \u2260 0..7",
+      "prior_v3_diagnostic_label": "Compact semantic rendering, not byte-exactquote; original rawlog unchanged"
+    }
+  ],
+  "logs": [
+    {
+      "job_id": 128696750141,
+      "name": "chuan-bi",
+      "conclusion": "success",
+      "source_record_sha256": "68ab9787dcaadc93772757805387a46a30c61465465442ab84dd9c7580239659",
+      "received_UTF8_sha256": "293ec463f72f815d5f15fb191f51442c225d69ad03c0c4924dd4935a04947173",
+      "bytes": 110191,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795044,
+      "name": "gate (ubuntu-latest)",
+      "conclusion": "failure",
+      "source_record_sha256": "e07f2c943be6f3bb1eadb63e80e4b7d2022090f2320db8eb67e1264b6d3a62b7",
+      "received_UTF8_sha256": "882ea35223984f407f21a270127e6b2cac287ea3d90d6ef4b45940bda41c1ac2",
+      "bytes": 114878,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795069,
+      "name": "gate-ops (ubuntu-latest)",
+      "conclusion": "success",
+      "source_record_sha256": "408f956c4bc8b4647c20d9cf840b342ded37d5e220ca5504693e866fbfcad451",
+      "received_UTF8_sha256": "942c709bbcfaa422750cda4682518f775d96fab5271362985ecd4d562aceff0f",
+      "bytes": 489754,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795071,
+      "name": "gate-packet-loop (ubuntu-latest)",
+      "conclusion": "success",
+      "source_record_sha256": "07d0d7b3ece3710c5f143414a38c0c329502c73b2bfc4f8b08c11d02218a19ce",
+      "received_UTF8_sha256": "700e06f0755f8e4c8e8205b3abefd0b13a240b6c2414d6db66f4f7ebd7528927",
+      "bytes": 330780,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795106,
+      "name": "gate-nhanh-manh (ubuntu-latest, 4)",
+      "conclusion": "success",
+      "source_record_sha256": "5af41501a6a5f6673dcaeab32739ff70ee74345039a84842c67f2758c1c698b0",
+      "received_UTF8_sha256": "274470d26d6ef2b56d7d04c6fb36c996dbfa5dbc48167d2fc7f3c3d6b47ae0d0",
+      "bytes": 122632,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795113,
+      "name": "gate-nhanh-manh (ubuntu-latest, 0)",
+      "conclusion": "success",
+      "source_record_sha256": "8dcd2847872709ae0e9b4805bd61b88ffee1d6f0fbdf3d65329b067be38cc7d6",
+      "received_UTF8_sha256": "fda9795788672eb92a6f1fce8a42c3982a7c28666f71b51e1a88ca36680b8df4",
+      "bytes": 122514,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795115,
+      "name": "gate-nhanh-manh (ubuntu-latest, 3)",
+      "conclusion": "success",
+      "source_record_sha256": "d686b900d292362c88983e26735287038347d5c48026f28f40954db7a1f1b8b1",
+      "received_UTF8_sha256": "964f85b21b46d9db709eb02f0f4c38456c784ad883ec9a77dd02ff801d2b618b",
+      "bytes": 122934,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795140,
+      "name": "gate-cong-cu (ubuntu-latest, 1)",
+      "conclusion": "success",
+      "source_record_sha256": "afb0284f2e6ea8204f670b17cb44124a4e383d5e1721e74ad8adc637c73e3f63",
+      "received_UTF8_sha256": "d753bc03c2c7cc2d8eb984d97ef6c0d8ab78140f50b756dc58de7d8924e78d5f",
+      "bytes": 134958,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795144,
+      "name": "gate-nhanh-manh (ubuntu-latest, 2)",
+      "conclusion": "success",
+      "source_record_sha256": "d0751faaea5a99fe97dc687921bc5fd7ae0ab589def7348dca8c527cc331933f",
+      "received_UTF8_sha256": "e44e7bd2fb71deed05792630ebd1a95a2bfb978f6ed4327e49d596d3035e30ef",
+      "bytes": 122721,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795154,
+      "name": "gate-nhanh-manh (ubuntu-latest, 5)",
+      "conclusion": "success",
+      "source_record_sha256": "e302cdb85974ec6a073f9e4df56c9e6004de302d9b45779fe66ef5241e889ffb",
+      "received_UTF8_sha256": "f3365d8b3c703a04b753ef565b5429c4971f3ac856c3726c553d18deb9490570",
+      "bytes": 123388,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795169,
+      "name": "gate-cong-cu (ubuntu-latest, 2)",
+      "conclusion": "failure",
+      "source_record_sha256": "497d8997e93927e8e6d2543b1284826c4fe6f67af7221f41de0f23862e58e367",
+      "received_UTF8_sha256": "5857aefb643393448e76c58a2695f366af9047ba70db08f327b7ad7fce18eb40",
+      "bytes": 112004,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795179,
+      "name": "gate-cong-cu (ubuntu-latest, 0)",
+      "conclusion": "success",
+      "source_record_sha256": "e25c78f48656782bccb2825be267060b5e6cfd8108c3bf8fd3d4a407edeceb0e",
+      "received_UTF8_sha256": "d005f9ff11dc1c802e04703bd04700e6f7574eb6866e5ce88bc78b862ba22fc2",
+      "bytes": 135428,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795184,
+      "name": "gate-cong-cu (ubuntu-latest, 5)",
+      "conclusion": "success",
+      "source_record_sha256": "8d02408af2e3e547dbf7231df41665353f239aef21a8bfee3d9db9687630e4e5",
+      "received_UTF8_sha256": "b4aab4f101d84475ba4a2785598505f65dd0a81b1562b50d13bd89d43fa86d04",
+      "bytes": 135140,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795196,
+      "name": "gate-cong-cu (ubuntu-latest, 4)",
+      "conclusion": "success",
+      "source_record_sha256": "e5c244633378b173b9367a90ab4b6318ff3be88b2f49d2073c9614398717fb10",
+      "received_UTF8_sha256": "a4c5c08ef7fa2d207cb6e10001a2748df9584d319a0ccdb8b4f1dd6e400074de",
+      "bytes": 135613,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795211,
+      "name": "gate-nhanh-manh (ubuntu-latest, 6)",
+      "conclusion": "success",
+      "source_record_sha256": "ec3891e17961597ae6569ba44804c44449f2359cb3a80451491921980a5e0a5d",
+      "received_UTF8_sha256": "0540eeadea3e41743b1ab7b8b23f69599630e34e29d03718a73e9a1832c28393",
+      "bytes": 123281,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795235,
+      "name": "gate-cong-cu (ubuntu-latest, 6)",
+      "conclusion": "failure",
+      "source_record_sha256": "e9abdfbc120603735363dd51e70f9b4c1714926df112173a0cf0506065960c80",
+      "received_UTF8_sha256": "3a0881800bfbf9ce1bd78f2ee8b7f41ed0da6dcae4b4b006433163644b2f9b83",
+      "bytes": 111748,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795243,
+      "name": "gate-nhanh-manh (ubuntu-latest, 7)",
+      "conclusion": "success",
+      "source_record_sha256": "7d5ed8e4ddfceb81b29f845a4d2b8a3bb663ceb2e6b3d1e15e53b6d253fd6824",
+      "received_UTF8_sha256": "f2ee8b1bae2c47e8e5c00ba9bbd4b0f878ed063a330496de90dbb55cf4f9a9cd",
+      "bytes": 123633,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795250,
+      "name": "gate-nhanh-manh (ubuntu-latest, 1)",
+      "conclusion": "success",
+      "source_record_sha256": "3a05381de1ff2e38d1ea5e5efbcc155cb860253ef4fcbf63787f799071a4719c",
+      "received_UTF8_sha256": "727d340025d5627ee70743a570f93fca22d3d772bba368a0e85001716c18915b",
+      "bytes": 123447,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795290,
+      "name": "gate-cong-cu (ubuntu-latest, 7)",
+      "conclusion": "success",
+      "source_record_sha256": "e029139219810816f37c7c88fc0f1e0192e5525b023bf51591946b71ca681c30",
+      "received_UTF8_sha256": "a8b9d942a1543b00450d8486d4d1dcf3fabd06b7d0eb3510723aeb52c8089e02",
+      "bytes": 135210,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128696795310,
+      "name": "gate-cong-cu (ubuntu-latest, 3)",
+      "conclusion": "success",
+      "source_record_sha256": "32b841c8970bc3d3606c5f0b4ab41f298c100071e2ca5bffe7ae20421c10d0f3",
+      "received_UTF8_sha256": "7f29c737ccdaab33769f603045d3f19e5b93633add7201a234337298f0995015",
+      "bytes": 134731,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128697140799,
+      "name": "gate-nhanh-gop (ubuntu-latest)",
+      "conclusion": "success",
+      "source_record_sha256": "a2f852be6c95a4f390db148069c1d59284284bd8e2ace6e01d64e8af4e6c18c3",
+      "received_UTF8_sha256": "4acda217e6e00764b10e1a41a2634b3d49818f5a90269298ffd0a140877ce0f4",
+      "bytes": 118341,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128697201468,
+      "name": "gate-registry (ubuntu-latest)",
+      "conclusion": "failure",
+      "source_record_sha256": "fda1e98d14b16bdc671c905b8a9aed3356b412d84e5929291e18cfe0231c3195",
+      "received_UTF8_sha256": "da31b324f57a7e0a5ac173bdee33e9efd7d0d82d80a7e706617ca81d8d221523",
+      "bytes": 247612,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128701958518,
+      "name": "gate-cong-cu-gop (ubuntu-latest)",
+      "conclusion": "failure",
+      "source_record_sha256": "9ee40fbb3becbb5ae37618a10d15e89b60190f9213139eede77ee05aad9557d0",
+      "received_UTF8_sha256": "0ce11cb3452e87a64c0f3b9a2b7fbe3440623564568a4a271fb642f7c22ef098",
+      "bytes": 24343,
+      "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    }
+  ],
+  "packet_loop_positive": "1359/1359 with1namedWindows-onlyskip; terminalT\u1ed4NG: \u0110\u1ea0T; successfuljob, not entireCIpass",
+  "raw_api_sha256": {
+    "run.json": "ccb22e2746661e119237c57a39d5ed5c787cbdbe61f429017be3c30968a66872",
+    "jobs-pages.json": "903eb0fc11ca95f63a3f37991d11915cc4f1e911d8967520d20705c3eb5ff277",
+    "artifacts-pages.json": "a618148104926edb05655c2ee7ae5cf1c8356e9805a55c3c04ceb7f80f4da209"
+  },
+  "retry_action_taken_by_auditor": false,
+  "recorded_at": "2026-11-08T11:05:28.189730+00:00",
+  "all_failed_jobs_accounted": true,
+  "operator_verification": "All23wrapper/contenthashes and5namedfailuremanifestations verified againstretainedofficialsource; actualsyntheticB/H4parents/tree verified, notcurrentCintegrationproof",
+  "source_aux_receipt": "pr1280-H4-ci-attempt1-failed/classification.json",
+  "source_aux_sha256": "e490f106aa2d726c2a9ada282fc25a44babad17eb3fbc71e9c6137621dc652c3",
+  "operator_at": "2026-11-08T11:08:18.219181+00:00",
+  "retry_source": "b439b14c5231adac220639520577d1da17bd74c6:ops/checkpoints/wp1279-r4/H4-metadata-drift-and-CI-retry-v3/retry-plan-v3.json"
+}

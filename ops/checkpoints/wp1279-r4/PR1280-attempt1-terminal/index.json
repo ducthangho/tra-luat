@@ -1,0 +1,35 @@
+{
+  "run_id": 42469501853,
+  "attempt": 1,
+  "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "event": "pull_request",
+  "status": "completed",
+  "conclusion": "failure",
+  "jobs": {
+    "success": 18,
+    "failure": 5,
+    "total": 23,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "all_failure_classes_accounted": true,
+  "actual_checkout": "2b40120d576c1de13e1cb3f4330608695ec7b884",
+  "actual_checkout_parents": [
+    "c15603dcf537fa4beb753b263398d6e6b8c92019",
+    "bc16ccff3601fabeeb783f41b52360ef5851838a"
+  ],
+  "current_master": "3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4",
+  "checkout_scope": "Original B/H4 synthetic, not currentC integration",
+  "packet_loop": "1359/1359+namedWindows-onlycase/mutantskip, terminalpass; skippedcase/mutantnotcredited",
+  "raw_diagnostic_correction": "Prior compact G-tap label in v3 was semantic rendering not byte-exactquote; finalclassification now retains actualrawtimestampedline inclspaces, original logunchanged. Rootinitialliteralspacingprobe failure retained, semanticarrayverifiedfromrawsource; no product/gatepatch.",
+  "archive": "pr1280-H4-attempt1-failed-evidence.zip",
+  "archive_sha256": "a32efa9890e9487d55848fa0f6326f8066cd2d085c61bedd485aa8e0b9a4e71b",
+  "archive_bytes": 711704,
+  "members": 38,
+  "raw_source_log_records": 23,
+  "captured_at": "2026-11-08T11:08:59.455880+00:00",
+  "retry": "v3 SINGLE fullUbuntu allowance remains0used/1limit until actualrequest; noactionyet",
+  "no_pass_inferred": true,
+  "formal_code_approval": false,
+  "limitations": "Officialplugin logs identify receivedUTF8decodedtext, notoriginalOSrawbytes; registry timing/dependency/process cause undetermined, notassumed504/transient"
+}

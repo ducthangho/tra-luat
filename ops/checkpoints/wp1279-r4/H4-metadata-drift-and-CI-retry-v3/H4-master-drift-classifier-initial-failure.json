@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-08T10:22:58.594871+00:00",
+  "actual_rc": 1,
+  "reason": "Operator assumed live PR merge ref must already use latest canonical; actual asynchronous ref has a historical canonical ancestor parent. No product/gate failure. Actualparents recorded; classifier corrected to ancestry/actualbase evidence rather than currentref assumption.",
+  "synthetic": "2b40120d576c1de13e1cb3f4330608695ec7b884",
+  "actual_parents": [
+    "c15603dcf537fa4beb753b263398d6e6b8c92019",
+    "bc16ccff3601fabeeb783f41b52360ef5851838a"
+  ]
+}

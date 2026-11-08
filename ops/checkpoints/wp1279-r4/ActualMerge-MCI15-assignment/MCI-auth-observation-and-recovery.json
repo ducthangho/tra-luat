@@ -1,0 +1,9 @@
+{
+  "at": "2026-11-08T12:30:16.462383+00:00",
+  "failure": "Inherited GH_TOKEN produced HTTP401 on first postmergeCIquery; gh auth metadata tokenSourceGH_TOKEN/stateerror",
+  "recovery": "Alreadyconfigured GITHUB_PAT validated child GitHubCLI userlogin ducthangho; bind ONLYchild GH_TOKEN fromexistingconfiguredcredential, no secretvalue output or auth/profile/loginchange",
+  "alternate": "ConnectedGitHubplugin independentlyworks asducthangho/adminmaintainrepo; genericgithub_fetch usedactualMpushrun42480052990",
+  "stored_cli_probe": "No valid existingstored auth, rc4; no login attempted",
+  "model_identity_effect": "none; submitteraccount remainsducthangho, notmodelreviewer/humanaudit",
+  "CI_status": "not inferred pass, actualMCIpending"
+}

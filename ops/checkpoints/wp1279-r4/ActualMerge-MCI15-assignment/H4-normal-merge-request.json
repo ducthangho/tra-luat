@@ -1,0 +1,51 @@
+{
+  "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "target_D": "c4978cd756dac4bd99127fc50a0dab6eed133a3e",
+  "command": [
+    "/workspace/scratch/proxima-p0-tools/gh",
+    "pr",
+    "merge",
+    "1280",
+    "--repo",
+    "ducthangho/tra-luat",
+    "--merge",
+    "--match-head-commit",
+    "bc16ccff3601fabeeb783f41b52360ef5851838a",
+    "--body-file",
+    "/workspace/scratch/proxima-p1-s2-20261108/H4-merge-body.md"
+  ],
+  "started_at": "2026-11-08T12:23:44.699455+00:00",
+  "state": "merged_verified_readback_not_landed",
+  "authority": {
+    "metadata_commit": "c1126784549c73cce31ee13f6b24f7d0b783771f",
+    "conditional_authority_path": "ops/land/wp1279-r4-pr1280-conditional-authority-basec4978cd.json",
+    "current_canonical": "c4978cd756dac4bd99127fc50a0dab6eed133a3e",
+    "immutable_B": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+    "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+    "valid_until": "2026-11-08T15:51:27Z",
+    "comment": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6721130447",
+    "comment_id": 6721130447,
+    "exact_body": true,
+    "remote_blobs_exact": true
+  },
+  "CI_plan_source": {
+    "metadata_commit": "2dceee78a6f8b8effccd95e0bc193ca895f647a3",
+    "path": "ops/checkpoints/wp1279-r4/Ready14-and-MCI-plan",
+    "comment": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6721417967",
+    "exact_body": true,
+    "remote_blobs_exact": true,
+    "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+    "target_D": "c4978cd756dac4bd99127fc50a0dab6eed133a3e",
+    "actual_merge_not_yet": true
+  },
+  "command_exit": 0,
+  "finished_at": "2026-11-08T12:23:49.752784+00:00",
+  "merge_commit": "0166d30611617ac2ed4f79ada92f950d4edeb824",
+  "actual_parents": [
+    "c4978cd756dac4bd99127fc50a0dab6eed133a3e",
+    "bc16ccff3601fabeeb783f41b52360ef5851838a"
+  ],
+  "actual_tree": "3822761c513a7ba5b85df8f00d4cfdb7e47434e5",
+  "merged_at": "2026-11-08T12:23:48Z",
+  "postmerge_CI": "pending"
+}

@@ -1,0 +1,17 @@
+{
+  "head_H4": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "tree_H4": "30cbf51650d88f05c0fcae977dd9df286a089204",
+  "merge_commit": "0166d30611617ac2ed4f79ada92f950d4edeb824",
+  "parents": [
+    "c4978cd756dac4bd99127fc50a0dab6eed133a3e",
+    "bc16ccff3601fabeeb783f41b52360ef5851838a"
+  ],
+  "tree_M": "3822761c513a7ba5b85df8f00d4cfdb7e47434e5",
+  "canonical_firstparent_verified": true,
+  "merge_method": "normalmergecommit",
+  "no_admin_or_bypass": true,
+  "no_branch_deletion": true,
+  "landed": false,
+  "canonical_CI": "not_yet_measured",
+  "recorded_at": "2026-11-08T12:23:54.151926+00:00"
+}

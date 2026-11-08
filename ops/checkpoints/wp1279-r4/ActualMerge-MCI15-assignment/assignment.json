@@ -1,0 +1,55 @@
+{
+  "role": "auxiliary_readonly_canonical_CI_source_auditor",
+  "actual_call_ordinal": 15,
+  "packet": "wp1279",
+  "revision": 4,
+  "generation": 4,
+  "reviewed_product_head_H4": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "canonical_merge_M": "0166d30611617ac2ed4f79ada92f950d4edeb824",
+  "merge_parents": [
+    "c4978cd756dac4bd99127fc50a0dab6eed133a3e",
+    "bc16ccff3601fabeeb783f41b52360ef5851838a"
+  ],
+  "merge_tree": "3822761c513a7ba5b85df8f00d4cfdb7e47434e5",
+  "run_id": 42480052990,
+  "attempt": 1,
+  "event": "push",
+  "provider": "openai_codex",
+  "execution_surface": "codex_service",
+  "transport": "machine",
+  "model_identity": "KHONG_DO_DUOC unlessactuallymeasured; noaccount/headerinference",
+  "repo_write_set": [],
+  "own_scratch_root": "/workspace/scratch/proxima-p1-s2-20261108",
+  "authority": "fullownergrant6708576608/r4Rescue16cap/c112678exactconditionalgrantD/2dceee78prospectiveMCIplan/CLAUDEstep5",
+  "recorded_at": "2026-11-08T12:38:58Z",
+  "absolute_deadline": "2026-11-08T14:08:58Z",
+  "run_limit_minutes": 90,
+  "objectives": [
+    "Collect officialAPI/currentattempt23joblogs intoMCI-plugin-logs; actualcheckoutM/parents/tree, noH4historicalsuccesssubstitution",
+    "ActualMCIworkflowdefinitionGraphQLpassedMCI-workflow-definition.json; verifyactualM/blob2b2/SHAaed andactualrun/attempt/event/head",
+    "NotifyRoot whenofficialgate-evidence-ubuntu-latest-1artifactavailable so Root canprivatelydownload/verifyofficialAPI.digest beforefinalcollector; no signedURLsprinted/published",
+    "OnlywhenALL23actualsuccess+alllogsready notifyRoot forONCEcollect-ci-final-evidence.py andMCIartifactlifecyclevalidation; doNOTrunRootcollector unlessinstructed",
+    "KeepTHISrunactiveawaitingRootvalidationthenindependentlyauditALLsource/4anchors/officialartifactdigest/lifecyclecommand/rc0/1777of1777/runner/catalog/outputhash/cleanbeforeafter/policyidentity/skips",
+    "WritefinalMCI-auditor-receipt.json/digest onlywithcompletesource; codeapprovalfalse/mergeauthorityfalse. Anyred/deadline=>notify+boundedpartialhandoff, nofakepass/retry/reset"
+  ],
+  "credential_capability_note": "InheritedGH_TOKENexpired401aftermerge. ExistingconfiguredGITHUB_PATvalidsameownerducthangho, child-onlyGH_TOKENbinding wrapperS/use-configured-gh.py worksREST/GraphQL/Git; noauth/profile/loginchanges orsecretvaluesreadout. ConnectedGitHubpluginalsoworksowneradmin. UsewrapperforCLIonly, neverprintcredentials.",
+  "constraints": [
+    "No Git/source/Pmetadatawrites/othermodels/agents/CIrerun/dispatch/cancel/nativeWindows/LIVE",
+    "Mandatoryall23Ubuntuandrequired4contexts; noWindowsCI/fullWindowsmutantCI",
+    "Rawboundedconsumerunknownsremainraw; separatefullsourceauditderivedanchors",
+    "OriginalH4review/native/Linux/PRCIandallfailurehistorypreserved, actualMCIrequiredseparately",
+    "Hard90minabsolute, no silentextension; reserve16onlyifRootconcretecontinuationneededbeforeadditionalmodel"
+  ],
+  "formal_code_approval": false,
+  "merge_authority": false,
+  "actual_invoked": false,
+  "budget": {
+    "shared_used_before_generation": 14,
+    "shared_limit": 16,
+    "after_MCI15_ifactual": 15,
+    "remaining_reserve16": 1,
+    "formal_rounds": "3/3unchanged",
+    "product_attempts": "4/4unchanged",
+    "primarypushes": "2/2unchanged"
+  }
+}

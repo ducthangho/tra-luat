@@ -1,0 +1,701 @@
+{
+  "status": "complete_source_audit_no_material_inconsistency",
+  "formal_code_approval": false,
+  "OP_F01_formal_closure": "PENDING_SEPARATE_XHIGH_CLI_REVIEW",
+  "native_browser_compatibility": "U10OPEN",
+  "same_provider_sensitive_assurance": "HOLD",
+  "head": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+  "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "completed_at": "2026-11-08T19:39:42.260420+00:00",
+  "material_issues": [],
+  "identity": {
+    "packet": "wp1287",
+    "revision": 3,
+    "generation": 3,
+    "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+    "H": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+    "tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+    "parents": [
+      "eff711e075f538d5f012f728451b75207a7f6140"
+    ],
+    "file_sha256": {
+      ".agents/skills/playwright-browser/package.json": "d52eb0465ee3717bb541ce12c4542ed594712123f3fec1a003268fa3ba96977a",
+      ".agents/skills/playwright-browser/package-lock.json": "0da56e1ee6b81ad9226f000a917f6153b95e861ed41811d5eca7deb01bbb8ede",
+      ".agents/skills/playwright-browser/SKILL.md": "7b48630edb6c2bf9fed335bcdafe00cac4e5f2db3b326734aab949ee5b0fc350"
+    },
+    "additions": 377,
+    "deletions": 0,
+    "new_paths": 3,
+    "author_provider": "openai_codex",
+    "author_surface": "codex_cli",
+    "author_transport": "machine",
+    "requested_model": "gpt-6.1-sol",
+    "requested_effort": "high",
+    "served_model_effort": "KHONG_DO_DUOC",
+    "original_handoff": "P2-codex-capability-original-handoff.md",
+    "controller": "P2-codex-capability-controller-result.json",
+    "author_tests": "NOT_RUN",
+    "commit_role": "root mechanical Git only; no root product edits",
+    "host_snapshot_changed_only": [
+      ".agents/skills/playwright-browser/SKILL.md"
+    ],
+    "frozen_at_utc": "2026-11-08T18:56:47.052431+00:00",
+    "product_pushes": 0,
+    "formal_approval": false,
+    "native_compatibility": "U10OPEN",
+    "assurance": "sameprovider sensitiveHOLD"
+  },
+  "cleanup_matrix": {
+    "actual_cases": 49,
+    "per_shell": {
+      "bash": 15,
+      "ps51": 17,
+      "ps7": 17
+    },
+    "positive_cases": 6,
+    "negative_cases": 43,
+    "all_retained_scripts_reconstructed_from_exact_H2_fenced_examples": true,
+    "stdout_stderr_source_hashes_and_traces_verified": true,
+    "rows": [
+      {
+        "shell": "bash",
+        "case": "positive-false",
+        "actual_rc": 0,
+        "cleanup_ok": true,
+        "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5",
+        "stdout_sha256": "16d98f4d88690c18b616c5026cb0cb6c75043882d46d0a71a9fb3ecf0c5a6eee",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "shell": "bash",
+        "case": "positive-true",
+        "actual_rc": 0,
+        "cleanup_ok": true,
+        "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5",
+        "stdout_sha256": "16d98f4d88690c18b616c5026cb0cb6c75043882d46d0a71a9fb3ecf0c5a6eee",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "shell": "bash",
+        "case": "close-fails",
+        "actual_rc": 17,
+        "cleanup_ok": false,
+        "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "c896358cfa0abc5affa2ce458f0213fd86b54b9c34151d66a7e3ed3525180799"
+      },
+      {
+        "shell": "bash",
+        "case": "delete-fails",
+        "actual_rc": 18,
+        "cleanup_ok": false,
+        "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "24cbc477fbe7ca52f584d9b5dddad678ec8e9c75fdae76dfcf55c108e38d9407"
+      },
+      {
+        "shell": "bash",
+        "case": "verify-unrelated-one",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "91a8f8f4c6e4ac256d3245a8c6c5067ce324cf18178d8a985ef82186b232bc11"
+      },
+      {
+        "shell": "bash",
+        "case": "verify-unrelated-nineteen",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "88566b1ca9f3f512ade029ee39698158cb09fab57a17fe5d6d07fee4de007b97"
+      },
+      {
+        "shell": "bash",
+        "case": "verify-still-open",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "b2a1725ea098e56db43ee5af829bc74ab28fa24c7251b0849b522761a7314db7"
+      },
+      {
+        "shell": "bash",
+        "case": "empty-verify",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "91a8f8f4c6e4ac256d3245a8c6c5067ce324cf18178d8a985ef82186b232bc11"
+      },
+      {
+        "shell": "bash",
+        "case": "malformed-close",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "bca66d8577b5a3d67c2a3be4fd0072cfac97ffe9abd624df112b236faa7f3d44"
+      },
+      {
+        "shell": "bash",
+        "case": "wrong-close-nonce",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "bca66d8577b5a3d67c2a3be4fd0072cfac97ffe9abd624df112b236faa7f3d44"
+      },
+      {
+        "shell": "bash",
+        "case": "wrong-delete-nonce",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "a405ba60effd49fcb35656bb72cb0f83b5b33261eeb112af9daa8fbddd8ba0e5"
+      },
+      {
+        "shell": "bash",
+        "case": "wrong-closed-nonce",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "91a8f8f4c6e4ac256d3245a8c6c5067ce324cf18178d8a985ef82186b232bc11"
+      },
+      {
+        "shell": "bash",
+        "case": "unexpected-stderr",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "91a8f8f4c6e4ac256d3245a8c6c5067ce324cf18178d8a985ef82186b232bc11"
+      },
+      {
+        "shell": "bash",
+        "case": "start-failure",
+        "actual_rc": 127,
+        "cleanup_ok": false,
+        "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "3ce83d4dd747a4d007328065d3ae042d0fdcce760eddf816a8ad13609ff8fc99"
+      },
+      {
+        "shell": "bash",
+        "case": "stale-output",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "35be81b58417fe26c7eb16fde727b842b22bea27b1e20639972bbde77e56460a"
+      },
+      {
+        "shell": "ps51",
+        "case": "positive-false",
+        "actual_rc": 0,
+        "cleanup_ok": true,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "f6c6d8b841ac4eef105bd4975c54f9f100706313cb986ff09583cc4667de5f04",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "shell": "ps51",
+        "case": "positive-true",
+        "actual_rc": 0,
+        "cleanup_ok": true,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "f6c6d8b841ac4eef105bd4975c54f9f100706313cb986ff09583cc4667de5f04",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "shell": "ps51",
+        "case": "close-fails",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "7da66220628c7551e37bd9c344135b69ba0d5e6395bf9c1c63ee42c363a9eddb"
+      },
+      {
+        "shell": "ps51",
+        "case": "delete-fails",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "c96ce5a0107a5fa74dc7369b1f0d1869b55e8c12d91177de7a31455d1a16cc5a"
+      },
+      {
+        "shell": "ps51",
+        "case": "verify-unrelated-one",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "afd750fc41b04aeab8a81108b32ac179decf4b899c6b8e610501f66fe125ae44"
+      },
+      {
+        "shell": "ps51",
+        "case": "verify-unrelated-nineteen",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "bc491ade56228352cb2a1c1d95800754b651ee019dc642f9ae1598afc9291d0b"
+      },
+      {
+        "shell": "ps51",
+        "case": "verify-still-open",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "6f158317af76d78d99701b5327a6fb11ef33f7fbcc15b08862a7634a0c55376c"
+      },
+      {
+        "shell": "ps51",
+        "case": "empty-verify",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "bc79a2425c98cbb38824dcb3a17f8c83921dd6fa8b8c84261255b82f2700aedd"
+      },
+      {
+        "shell": "ps51",
+        "case": "malformed-close",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "f615ed10f54d26d1afdf2bf2cd78583690bc4cfa6c5c4cafc4c4c845834daa2a"
+      },
+      {
+        "shell": "ps51",
+        "case": "wrong-close-nonce",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "314c5821402a2a242107fa378db212d3e7c8389ff30e171c913d9271c074244d"
+      },
+      {
+        "shell": "ps51",
+        "case": "wrong-delete-nonce",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "a8b191c50f53c669d64a855ee4c034772b6922584e95f57c69f4ccbb2317a673"
+      },
+      {
+        "shell": "ps51",
+        "case": "wrong-closed-nonce",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "321e87a844036b1e036c909f4be1331847884db54cf8bb7296cf18d8cafef21f"
+      },
+      {
+        "shell": "ps51",
+        "case": "unexpected-stderr",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "af9be69145faa6d63d3e66c8cc7f79a880ca8fa7b34b6204e8c6dfdd52deaed5"
+      },
+      {
+        "shell": "ps51",
+        "case": "start-failure",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "703a00a0d206774cbd2f1cbcd3ae95ef79c03a076e854811b0a33905cc1ae6c7"
+      },
+      {
+        "shell": "ps51",
+        "case": "stale-output",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "0a92e574cc660580cc5fc8e5fe30f90ea8f84b053c3db22564cabb2415bf7566"
+      },
+      {
+        "shell": "ps51",
+        "case": "null-process",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "62c3822aa4bf2a612429b6bc52b09a9ae44b6d165ac3caecd7136547b7d1b81b",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "99ea06dde491e5622df4ef534c055dc511c349171d2ce7d315eddf8cfe73f179"
+      },
+      {
+        "shell": "ps51",
+        "case": "unstarted-process",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "dba663743e5038e0d8f1c7841361b0a34088d2f5bd5bbdaf258c29925415a744",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "1f7027c5fea9baf6e072d729c2efbeef8a076617fce917681fd86b25a2b033c6"
+      },
+      {
+        "shell": "ps7",
+        "case": "positive-false",
+        "actual_rc": 0,
+        "cleanup_ok": true,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "f6c6d8b841ac4eef105bd4975c54f9f100706313cb986ff09583cc4667de5f04",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "shell": "ps7",
+        "case": "positive-true",
+        "actual_rc": 0,
+        "cleanup_ok": true,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "f6c6d8b841ac4eef105bd4975c54f9f100706313cb986ff09583cc4667de5f04",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "shell": "ps7",
+        "case": "close-fails",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "aca1fbaa89f053d82f3845a8be0743263504540ee2e2abe61659682b533a393f"
+      },
+      {
+        "shell": "ps7",
+        "case": "delete-fails",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "c8af2e35ba5a5fbf40c3df727250928a3d5a76e0153b1450adf442750cc3ee67"
+      },
+      {
+        "shell": "ps7",
+        "case": "verify-unrelated-one",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "c6d441de1ab093b58af078a9e39a90f782f7d8ea5f47d1f2d2fd81c89163e5be"
+      },
+      {
+        "shell": "ps7",
+        "case": "verify-unrelated-nineteen",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "7d76e672b73b087d26fa639dc40287345b9dfe54b0212acb6242358d1381c955"
+      },
+      {
+        "shell": "ps7",
+        "case": "verify-still-open",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "df708e3cf2541abb0fb71d82fe308fb2718b741352772200596506b4cd6c1632"
+      },
+      {
+        "shell": "ps7",
+        "case": "empty-verify",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "de2d7d5baf566684fd1fdba053470d66fe1afdb76bd4dfb693620a5b271930a5"
+      },
+      {
+        "shell": "ps7",
+        "case": "malformed-close",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "623cd856116f504ca0ce9b499b40d5dd13b9f70797e7985a63c7053bcf4e7d97"
+      },
+      {
+        "shell": "ps7",
+        "case": "wrong-close-nonce",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "958f82d66e921b7245d047607a742dc2a63e9c16f93f29403fa3c86220773186"
+      },
+      {
+        "shell": "ps7",
+        "case": "wrong-delete-nonce",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "6ef172efd11f282de987b0054466c63b064c23391e832b1d64bb24097037cbe3"
+      },
+      {
+        "shell": "ps7",
+        "case": "wrong-closed-nonce",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "de27178f765ccb4bc226df384adea1fa57d5e636625d9a2d9576330e80660d79"
+      },
+      {
+        "shell": "ps7",
+        "case": "unexpected-stderr",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "cb1d0a784f57fb196f23fcf48e10e3ea31a63a3641d58e2d378d4105b382013e"
+      },
+      {
+        "shell": "ps7",
+        "case": "start-failure",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "cfdb6218f5289f5a419f3f19a75ecca818e8b4f11b84602fed260be2af9c9b40"
+      },
+      {
+        "shell": "ps7",
+        "case": "stale-output",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "938509f2961e61704ebb11f433f5b2a9807ed21467c9df736c7e19c2a44e8afa",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "cc1fd190b9d760768e54d9ba7911d0ca57eb4993b4e0bdd23f54e24f9c4407e6"
+      },
+      {
+        "shell": "ps7",
+        "case": "null-process",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "62c3822aa4bf2a612429b6bc52b09a9ae44b6d165ac3caecd7136547b7d1b81b",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "81a91f480094db12d400224ee67901fbbd928a74859119b3926a40564a7c1676"
+      },
+      {
+        "shell": "ps7",
+        "case": "unstarted-process",
+        "actual_rc": 1,
+        "cleanup_ok": false,
+        "source_script_sha256": "dba663743e5038e0d8f1c7841361b0a34088d2f5bd5bbdaf258c29925415a744",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "f2077a94674026622045e02db784854d7b266e3f329c257b297c242ac3d808f0"
+      }
+    ]
+  },
+  "native_archive_retention": {
+    "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+    "native_runs": [
+      {
+        "run": "initial",
+        "zip_sha256": "b2c248089c490c43051ff4f6d584d36bfed56925847c3b7674606a85fb894507",
+        "bytes": 33052,
+        "source_files": 17,
+        "status": "NOT_RUN zero test cases: Rootpolicyprobe module path preflight failure",
+        "product_failure": false
+      },
+      {
+        "run": "recovery2",
+        "zip_sha256": "4f3cd1aa9ec180504a6389bf81f7bb4ed7af80a247af9925c88a49bd2ad4bf35",
+        "bytes": 210738,
+        "source_files": 359,
+        "status": "passed",
+        "focused_cases": 34,
+        "source_skill_sha256": "7b48630edb6c2bf9fed335bcdafe00cac4e5f2db3b326734aab949ee5b0fc350"
+      }
+    ],
+    "Linux_bash_focused": 15,
+    "native_PS51_PS7_focused": 34,
+    "total_documented_cleanup_cases": 49,
+    "actual_source_examples_passed": true,
+    "native_browser_compatibility": "NOT_MEASURED by fixtures / U10OPEN",
+    "formal_code_approval": false
+  },
+  "linux": {
+    "actual_child_rc": 0,
+    "selftest": "1777/1777",
+    "full_output_sha256": "7efd3ea123211ca105b5d600649adce865e22432e8e8253a1b38a06c35ec1655",
+    "all10_command_log_hash_size_rc_verified": true,
+    "strict_manifest": "184/184",
+    "Ruff_bare_rc": 1,
+    "Ruff_existing_F821": 12,
+    "Ruff_delta": 0,
+    "before_after_clean_exactH": true,
+    "browser_flow_commands": [
+      [
+        "node-version",
+        0
+      ],
+      [
+        "npm-version",
+        0
+      ],
+      [
+        "npm-ci",
+        0
+      ],
+      [
+        "npm-signatures",
+        0
+      ],
+      [
+        "browser-install",
+        0
+      ],
+      [
+        "browser-binary-version",
+        0
+      ],
+      [
+        "open",
+        0
+      ],
+      [
+        "goto",
+        0
+      ],
+      [
+        "tabs",
+        0
+      ],
+      [
+        "requests",
+        0
+      ],
+      [
+        "response-body",
+        0
+      ],
+      [
+        "screenshot",
+        0
+      ],
+      [
+        "pdf",
+        0
+      ],
+      [
+        "documented-cleanup",
+        0
+      ]
+    ],
+    "browser_artifacts": {
+      "source.html": {
+        "bytes": 153,
+        "sha256": "60da0098adf9db186ec35b0e0bdca65a116a190fb3be2f702c0f9e333aba6ef0"
+      },
+      "screen.png": {
+        "bytes": 7739,
+        "sha256": "7801f749968eb3e392d1a1cd560f14c612eab75f2dddc418926b4ef34fa1f254"
+      },
+      "page.pdf": {
+        "bytes": 8365,
+        "sha256": "33add6e67b41f21c2ce8d28d327c6e430dccb1c4736f80ace7b65dbf60987140"
+      },
+      "pdf-text.txt": {
+        "bytes": 34,
+        "sha256": "53b6b7a12db57dbdc51083ba8fe51c5814e964fc2802b064481d40c4d3f8316b"
+      }
+    },
+    "actual_documented_cleanup": {
+      "close": {
+        "session": "tl-pw-e777851ccba9",
+        "status": "closed"
+      },
+      "delete_data": {
+        "session": "tl-pw-e777851ccba9",
+        "deleted": false
+      },
+      "session": "tl-pw-e777851ccba9",
+      "exact_documented_H2_cleanup_executed": true,
+      "source_script": "/workspace/scratch/proxima-rest-20261108/P2-H2-Linux-flow/documented-cleanup.bash",
+      "source_script_sha256": "1808429c985f74e3ac3a2dc3750c7a54345a5229e2c72422d0fb01af648f54b5"
+    },
+    "verify_actual_rc_from_commands_tsv": 1,
+    "verify_specific_closed_nonce": {
+      "isError": true,
+      "error": "The browser 'tl-pw-e777851ccba9' is not open, please run open first"
+    },
+    "after_browser_processes": []
+  },
+  "core_reuse": {
+    "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+    "parent": "eff711e075f538d5f012f728451b75207a7f6140",
+    "core_outside_agents_exact_blob_identity": true,
+    "core_paths": 13141,
+    "core_catalog_sha256": "37bbef0a3059f664fcc38d64662116918d267985e2eed8ee88e1f5eafa191d0f",
+    "current_both_source": "linux-final-2a5803e17b7c/receipt.json actual1777/1777",
+    "historical_reused": [
+      "none",
+      "proxima",
+      "playwright"
+    ],
+    "historical_source": "P2-core-combinations/receipt.json",
+    "not_claimed_new_H2_runs": true,
+    "reason": "OnlyoptionalSKILLchanged; exactentire non.agents Gitcatalog/S1S2/package+lock unchanged; spec allows core-byte identity reuse. NewH2bothselftest actuallyrerun."
+  },
+  "core_reuse_independently_checked": {
+    "non_agents_paths": 13141,
+    "H1_H2_blob_catalog_identical": true,
+    "historical_three_actual1777_childrc0_outputs_verified": true,
+    "new_H2_both_is_main_clean_gate": true
+  },
+  "prior0122": {
+    "audited": true,
+    "archive_sha256": "4d1b26bbfa2ab7ed505ffaa5571d51c7fcb410489a5b0b4afd1f8dcb29636bf5",
+    "archive_bytes": 362563,
+    "source_files": 50,
+    "all_original_bytes_manifest_command_hashes_verified": true,
+    "terminal_rc": 2,
+    "open_rc": 1,
+    "candidate_gate_eligible": false,
+    "not_U10_pass": true
+  },
+  "source_hashes": {
+    "P2-H2-AUX2-assignment.json": "67ee9fc52068b74eb3d4cb59166807350c5db0ed9b9ef3577d929499d185cfe1",
+    "P2-H2-identity.json": "5688931bdef610e6e19d9a321f0d06aa831ffb32344a177ee03293f63952326a",
+    "P2-H2-cleanup-source-retention-receipt.json": "ae5079bb3236f1374982bba263c11f2309f6f402da52ae7823ac6a5e3cd55e52",
+    "P2-cleanup-focused-matrix.py": "e88bd81e28ac29fe24a8c6716c0c5a2d77bd7fab0e00c31b4f2f18510969731f",
+    "P2-H2-cleanup-Linux/receipt.json": "569fc253cbe3c2a28af67cb4f033b7abdfd8ef3b18cc4ede6a79c17b77a2e4e6",
+    "P2-H2-cleanup-native-initial/source-byte-manifest.json": "f64485ae50c976916dd962255b1ef166367e547793020a6bd08f8e405d6cfc69",
+    "P2-H2-cleanup-native-recovery2/source-byte-manifest.json": "760874e84387fd519a2c7c7fea9f4c318a8fa7c1b0a90c41bfd96812770321e3",
+    "P2-H2-cleanup-native-recovery2/cleanup/receipt.json": "7bfe50d70237868bc1c7431abf61b5b9130adef848c9de93a437a47f2e2ef95f",
+    "P2-H2-core-combinations-identity-reuse.json": "b2ca129490377c40cf4c60654062a771b6ea60aa77e1ded4c4eda63b12195305",
+    "P2-H2-Linux-flow/browser-evidence/receipt.json": "14a067efd2d22042e113217c3546b56aabcde5c8d82fada47fc1c22a00e9e9b1",
+    "P2-H2-Linux-flow/browser-evidence/command-receipts.json": "1616c63cacbcf93ef1c8666a2d0940b05395f55ac95d922aefbc2039fa44ed5f",
+    "P2-H2-Linux-flow/browser-evidence/commands.tsv": "ae5ff8a84866487c0dbd048b6933cd16fef16aaa8b7a9c68d6c6551322348bb1",
+    "P2-H2-Linux-flow/browser-evidence/SHA256SUMS": "983e1378109f43aaec60d6f749b1cbac53ff7e42ee51c78e84f7ea657639afb1",
+    "linux-final-2a5803e17b7c/receipt.json": "c6f79dbd8352da12fd6eb23ef4376c9762e13af5eb0b18faf2de97b5206c3f78",
+    "linux-final-2a5803e17b7c/full-selftest-evidence.json": "be37c204602a74f05346de7f858c716e3dd13ddaaf747a4c8e6b1526e5c94138",
+    "P2-prior0122-source-retention-receipt.json": "ffb50cf47a568758b650ecc055a35f0a340b28305a18b053f4c3dbda26ed59e2"
+  },
+  "limits": [
+    "AUX source/log audit, no formal code correctness approval or OP-F01 closure; fresh separate xhigh CLI review required.",
+    "Native recovery2 focused cleanup uses controlled Node outputs, real process launches and exact documented source, not browser compatibility; U10OPEN/sameprovider sensitiveHOLD.",
+    "Initial native archive17files rc2 module-path policy-probe preflight failure has zero tests; recovery359files/34 cases separate, no failure erased.",
+    "Three historical addon-removal combos reused through exact13141-path core identity; not newH2 executions. NewH2both selftest actual fresh.",
+    "Package/lock unchanged H1->H2; prior0.1.22 is different official diagnostic only, failed launch, no pin promotion or OOM inference.",
+    "Linux controlled redirect/decodedHTML/PNG/PDF fixture text only; no legal authenticity/rawTLS/remoteoriginalbyte claim.",
+    "Actual cleanup accepts boolean deleted=false as supported nonpersistent-session result; does not claim physical data deletion.",
+    "Read-only source/hash/JSON parsing only, no network/native/browser/tests/models/subagents/product edits. Requested authorCLI high recorded; served model/effort not independently measurable."
+  ],
+  "digest_sha256": "fd839c4c868c568d82bc58da83a62ab582ad174924f52e226da56ef73b03641b"
+}

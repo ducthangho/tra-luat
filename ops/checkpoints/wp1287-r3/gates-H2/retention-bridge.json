@@ -1,0 +1,8 @@
+{
+  "retained_file_count": 225,
+  "archive_sha256": "002433153fa0936cf4f4efb5cf5b3db488a3cf954a82dbdc3dfa0d1478774f78",
+  "exclusions": "reproducible npm cache/node_modules/pycache only; installation identified by original pinned manifests and signatures",
+  "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "U10": "OPEN",
+  "formal_review": "NOT_RUN; fresh independent gpt-6.1-sol/xhigh selected, executor gpt-6.1-sol/high; missing native fullflow gate is not a pass"
+}

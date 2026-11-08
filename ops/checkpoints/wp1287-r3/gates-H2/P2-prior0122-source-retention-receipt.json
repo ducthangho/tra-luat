@@ -1,0 +1,11 @@
+{
+  "archive_sha256": "4d1b26bbfa2ab7ed505ffaa5571d51c7fcb410489a5b0b4afd1f8dcb29636bf5",
+  "source_files_verified": 50,
+  "terminal": {
+    "rc": 2,
+    "at": "2026-11-08T19:28:51.774339+00:00",
+    "candidate": "NOT_A_PRODUCT_CANDIDATE__OFFICIAL_CLI0122"
+  },
+  "candidate_gate_eligible": false,
+  "result": "FAILED launch; STOP branch; U10 OPEN; no product pin change"
+}

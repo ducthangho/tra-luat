@@ -1,0 +1,5 @@
+P2 H2 2a5803e17b7ca4910c7188bfcc2276190e2d0b4b — AUX hoàn tất, không thấy mâu thuẫn trọng yếu trong nguồn/log đã kiểm.
+Linux mới:1777/1777 childrc0,strict184/184,Ruff12cũ bare1/delta0; flow H2 HTML/PNG/PDF và cleanup script đúng nguồn:close0/delete0/verify1 đúng nonce not-open, processafter[].
+Cleanup49ca: Bash15,PS5.1=17,PS7=17. Đã dựng lại script từ H2 và kiểm rawstdout/stderr/hash/trace/rc;6positive/43negative, negativekhông CLEANUP OK. Nativeinitial17files/0test rc2 preflight lỗi module-path giữ riêng; recovery359files/34ca pass.
+Core3combo là lịch sử H1 với13141 non.agents blobs đồng nhất; H2both là lần main mới. Package/lock không đổi. Prior0.1.22 ZIP50files kiểm đủ nhưng openrc1/terminal2, không candidatePASS.
+formal_code_approval=false; OP-F01 chờ review riêng; U10OPEN và sameprovider sensitiveHOLD.

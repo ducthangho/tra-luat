@@ -1,0 +1,29 @@
+{
+  "purpose": "Preserve original control-helper failures byte-for-byte while keeping raw log terminal blanklines out of Git text whitespace checking; no original evidence edited",
+  "archive": "original-control-failure-evidence.zip",
+  "sha256": "2ee2411d7720111fb7b933d480498357dcd05894281de8440e7d63f0e6af16e3",
+  "bytes": 8129,
+  "originals": {
+    "land-M8-final.log": {
+      "sha256": "630609b246253656880ffe9264af969ab104cc98e7a8d84704a007e9d5c33c01",
+      "bytes": 1182
+    },
+    "M8-before-alias-correction.yaml": {
+      "sha256": "b67367c913dc7d864221521b48c7aa3458cccf207dd6d8d64dc854b31f65bd3e",
+      "bytes": 22900
+    },
+    "M8-D1D4-prepublication-failed-yaml-alias.log": {
+      "sha256": "28fc286e950ea56754d72bba48eceb10203b0edb1434ab7125d789be46943269",
+      "bytes": 76
+    },
+    "close-Packet1279-final.log": {
+      "sha256": "56eb3cb2273a92849c4d924088a3bf2c1027a05b68a86f3ac540dde2f7d86447",
+      "bytes": 1343
+    }
+  },
+  "observations": [
+    "First M8 publication stopped before commit/comment because canonicalchecker rejected YAML object anchor/alias; corrected decoded data serialization only. Originalretirement timestamp preserved.",
+    "Closure issue/mission/PR mutations and exactreadbacks succeeded; final receipt Gitdiffcheck rejected terminal blankline of originalfailurelog. That original log is now ZIP-preserved, not stripped. This resumes ONLY unexecuted final Git delivery tail."
+  ],
+  "at": "2026-11-08T13:25:31.823274+00:00"
+}

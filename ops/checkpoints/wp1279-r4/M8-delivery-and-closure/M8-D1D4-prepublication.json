@@ -1,0 +1,20 @@
+{
+  "command": [
+    "python",
+    "-B",
+    "/workspace/scratch/proxima-p1-s2-canonical/.claude/dev/packet_loop.py",
+    "kiem-dong-wp",
+    "--root",
+    "/workspace/scratch/wp1279-spec-publish",
+    "--bien-ban",
+    "/workspace/scratch/wp1279-spec-publish/ops/land/pr1280-wp1279-r4-land-evidence.yaml",
+    "--lease",
+    "/workspace/scratch/wp1279-spec-publish/ops/leases/wp1279-r4-g4-claude.yaml"
+  ],
+  "rc": 0,
+  "checker_sha256": "2aced17b136132f7216056b39a253656ce251a9520752f8091138f39e0077a92",
+  "checker_exact_B": true,
+  "M8_sha256": "1c4f9386407b0bb48ae2400a7cb4a9ae3136835d883f2187ad0b8bfe8432bc4a",
+  "lease_sha256": "7b5efd1094a3b9318b73d7037f2fb83da3fff9e4c8fd008accc7e8df7eb0b052",
+  "at": "2026-11-08T13:23:30.637394+00:00"
+}

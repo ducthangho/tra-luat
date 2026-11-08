@@ -1,0 +1,15 @@
+{
+  "metadata_commit": "abe1def0b87e56fe7d9a00b02983542a7f21253a",
+  "land_path": "ops/land/pr1280-wp1279-r4-land-evidence.yaml",
+  "lease_path": "ops/leases/wp1279-r4-g4-claude.yaml",
+  "comment": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6722039866",
+  "comment_id": 6722039866,
+  "body_sha256": "399296ed35b0a27ec188f8434bc2fcb889fe4b2efe18f43da0715c9b3dcdf4f8",
+  "readback_body_sha256": "399296ed35b0a27ec188f8434bc2fcb889fe4b2efe18f43da0715c9b3dcdf4f8",
+  "exact_body": true,
+  "remote_blobs_exact": true,
+  "retired_at": "2026-11-08T13:22:19Z",
+  "M8_sha256": "1c4f9386407b0bb48ae2400a7cb4a9ae3136835d883f2187ad0b8bfe8432bc4a",
+  "lease_sha256": "7b5efd1094a3b9318b73d7037f2fb83da3fff9e4c8fd008accc7e8df7eb0b052",
+  "recorded_at": "2026-11-08T13:23:37.826760+00:00"
+}

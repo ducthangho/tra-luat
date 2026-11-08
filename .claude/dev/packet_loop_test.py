@@ -11758,8 +11758,8 @@ MUTANTS.update({
     "m1174_adopt_finalize_replay": ('terminal["terminal_disposition"] == a.disposition, "terminal replay disposition/identity"', 'False, "terminal replay disposition/identity"', ["wp1174_adopt_finalize_replay"]),
     "m1174_durable_publish_noreplace": ('os.link(temporary, path, follow_symlinks=False)', 'os.replace(temporary, path)\n            temporary = None', ["wp1174_durability_publish_noreplace"]),
     "m1174_durable_cached_writer": ('_1174_read(Path(p["source_path"])) == p["tombstone"].encode("utf-8")', 'True', ["wp1174_durability_cached_writer"]),
-    "m1174_recovery_skip_source_durability": ('_1174_confirm_durable(source, retired)', 'pass # skip reused tombstone durability', ["wp1174_durability_fsync_readback"]),
-    "m1174_recovery_skip_high_water": ('_1174_recovery_high_water(witness, payload, admission)', 'pass # skip predecessor high_water binding', ["wp1174_adopt_postimage_all"]),
+    "m1174_recovery_skip_source_durability": ('    _1174_fsyncdir(path.parent)\n    _1174_require(_1174_read(path) == expected, "durability confirmation readback")', '    pass # skip reused-image durability confirmation', ["wp1174_durability_fsync_readback"]),
+    "m1174_recovery_skip_high_water": ('        water == dict(generation=payload["predecessor_generation"],\n                      state_revision=state.get("state_revision"),\n                      state_sha256=hashlib.sha256(source).hexdigest()),', '        True,', ["wp1174_adopt_postimage_all"]),
 })
 
 _ENV1174_ANCHOR = 'return {k: v for k, v in os.environ.items() if k not in selectors and not k.startswith("GIT_CONFIG_")}'

@@ -12384,7 +12384,9 @@ def _lifecycle1174(kind):
                 assert _required1174(required,WP1174_REQUIRED)
                 required.pop("wp1174_init_fresh")
                 assert not _required1174(required,WP1174_REQUIRED),"missing required ID accepted"
-                assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==85,"incomplete acceptance inventory"
+                inventory = {n for n, _ in CASES if n in WP1174_REQUIRED}
+                expected_inventory = globals().get("_WP1174_MAIN_REQUIRED", WP1174_REQUIRED)
+                assert inventory == expected_inventory, "incomplete acceptance inventory"
                 assert m._1174_IMPLEMENTATION_COMPLETE is True,"implementation marker does not match completed inventory"
             return
         if kind=="human_negative":

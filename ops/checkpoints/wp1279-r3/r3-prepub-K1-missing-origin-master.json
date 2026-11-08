@@ -1,0 +1,8 @@
+{
+  "actual_exit": 1,
+  "phase": "r3 canonical K1 beforepublication, no model/lease granted",
+  "failure": "ValueError: ADR0063 first-parent history không đo được",
+  "cause": "new local sourceclone did not yet have origin/master; actual preflight failed, not specgrammar failure",
+  "resolution": "fetch real origin master, require exactB then rerun unmodifiedconsumer",
+  "at": "2026-11-08T06:11:25.065617+00:00"
+}

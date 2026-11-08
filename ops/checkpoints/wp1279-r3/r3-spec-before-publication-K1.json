@@ -1,0 +1,12 @@
+{
+  "source_oid": "4511028989b4a7fe57a1d003ae5abdce7acaf592",
+  "source_path": "ops/specs/wp1279-r3.md",
+  "spec_sha256": "6cb7a575192aebcb79d5825daf9d867cc790dac2528e954fcd6ea13c903b2fac",
+  "source_blob": "4b4c946eea40904de084765d6e5783ccd8b16a52",
+  "checker_sha256": "2aced17b136132f7216056b39a253656ce251a9520752f8091138f39e0077a92",
+  "actual_canonical_K1": "passed unmodified _spec_merge BEFOREr3sourcepublication",
+  "worker_head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+  "worker_branch": "agent/wp1279-g3-claude",
+  "origin_master": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "model_invoked": false
+}

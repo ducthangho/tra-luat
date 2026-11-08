@@ -1,0 +1,14 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Process started with PID 16564 (shell: powershell.exe)\nInitial output:\n{\"ps\":\"5.1.26100.9711\",\"dotnet_default_codepage\":1252,\"windows_ansi_codepage\":\"1252\",\"lock\":\"\",\"gateway_service\":0,\"proxima_process\":0}\r\n\n✅ Process 16564 has finished execution"
+    },
+    {
+      "type": "text",
+      "text": "\n[executed on device: DESKTOP-T9R33P2 (a5f7076e-a491-4f84-829b-8d1fbcc1c767)]"
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

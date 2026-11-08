@@ -72,14 +72,22 @@ same_failure_limit: 2
 requires_live: false
 uy_quyen_merge: false
 thay_the_cho: []
-authority_note: NoExecutorapproval/merge; futureexactHconditionalgrantseparate. NEWwp1279r2manualdescriptoronly. Officialfoldertrustsetup
-  authorized ONLYforverifiedisolated /workspace/scratch/wp1279-g2-claude, noauth/hookchanges. AllS1productbytesreadonly.
+authority_note: NoExecutorapproval/merge; futureexactHconditionalgrantseparate. NEWwp1279r2manualdescriptoronly.
+  Officialfoldertrustsetup authorized ONLYforverifiedisolated /workspace/scratch/wp1279-g2-claude,
+  noauth/hookchanges. AllS1productbytesreadonly.
 nang_tran:
   ai_nang: ducthangho through full scoped delegation, dispatcher records
-  can_cu: Originalmodule200+wrapper30/S1harness643measured; readonlydesignestimate1150-1510notnewnumstat; coherentfullShouldProcess/remoting+sharednativeharness,
-    extra service/runtime safeguards; mandatoryauxCI/LINUX/connectorcalls reserved
+  can_cu: Originalmodule200+wrapper30/S1harness643measured; readonlydesignestimate1150-1510notnewnumstat;
+    coherentfullShouldProcess/remoting+sharednativeharness, extra service/runtime
+    safeguards; mandatoryauxCI/LINUX/connectorcalls reserved
   tran_cu: sensitive6files450additions;ordinary6files1000total;Codexcalls8
   tran_moi: same3exactfiles1800additionsANDtotal;attempts3;rounds3;sharedCodexcalls10;run90min;primarypush1
-preflight_holder_source: ops/checkpoints/wp1279-r1/design/holders-before-lease.json; refreshimmediatelybeforewrite/invocation
-generation_note: g1 was prepared locally only, nevergranted/published/run; r1identityfailedbeforelease; g2firstactualproductlease,
-  attempt1/3, nohistoryreset
+preflight_holder_source: ops/checkpoints/wp1279-r1/design/holders-before-lease.json;
+  refreshimmediatelybeforewrite/invocation
+generation_note: g1 was prepared locally only, nevergranted/published/run; r1identityfailedbeforelease;
+  g2firstactualproductlease, attempt1/3, nohistoryreset
+da_bi_thay_the: wp1279-r3-g3-claude
+replaced_at_utc: '2026-11-08T06:13:43Z'
+terminal_head: d3ccdd215a43b7e8ac574eed8f493998c736aba4
+replacement_reason: Bothg2writers terminal and formalreview1changes_requested2P2;
+  r3/g3 separatelyauthorized underfullownergrant; immutableoriginallease6e6e5c2retainedhistorically.

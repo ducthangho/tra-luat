@@ -89,11 +89,11 @@ change_policy_exception:
   - unknown=>blocked
 leased_at_utc: '2026-11-08T18:19:41.079515+00:00'
 heartbeat_at: '2026-11-08T18:19:41.079515+00:00'
-lease_until: '2026-11-09T07:03:01Z'
-lease_expires_at_utc: '2026-11-09T07:03:01Z'
+lease_until: '2026-11-08T18:39:53.525483+00:00'
+lease_expires_at_utc: '2026-11-08T18:39:53.525483+00:00'
 heartbeat_required_minutes: 360
 max_lease_hours: 24
-hard_not_after: '2026-11-09T07:03:01Z'
+hard_not_after: '2026-11-08T18:39:53.525483+00:00'
 nang_tran:
   ai_nang: ducthangho under recorded delegation
   can_cu: Exact C15 approval https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6723113364;
@@ -181,3 +181,7 @@ packet_budget_carryover:
   effective_envelope_max_attempts_per_packet: 13
   counters_reset: false
   external_source_attribution: UNKNOWN separatelyretained
+ended_at_utc: '2026-11-08T18:39:53.525483+00:00'
+ended_reason: Actual source13 terminated on unavailable CLI authentication before
+  reads/edits; source13 charged, no refund/retry or successor grant
+ended_on_instruction: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6725249382

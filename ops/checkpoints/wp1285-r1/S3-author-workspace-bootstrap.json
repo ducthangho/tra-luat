@@ -1,0 +1,11 @@
+{
+  "physical_executor_workspace": "/workspace/scratch/wp1279-g4-claude",
+  "old_packet1279": "closed/lease retired; noactivewriter",
+  "old_head_preserved": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "old_local_branch": "agent/wp1279-g4-claude retained",
+  "old_bundle_sha256": "f591e4fd900c04fe474536c3df604c6e9faaac5fbd10e5ff6538707a2d4cdff6",
+  "new_packet1285_branch": "agent/wp1285-g1-claude",
+  "new_head": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "why_reuse": "alreadytrusted exactdirectory, freshCLI session, no trust setting changes or path aliases; preserve oldS2history before mechanial cleancheckout",
+  "at": "2026-11-08T14:12:31.853645+00:00"
+}

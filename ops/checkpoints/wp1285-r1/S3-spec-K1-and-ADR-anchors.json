@@ -1,0 +1,23 @@
+{
+  "canonical_consumer": "unmodified _spec_merge",
+  "passed": true,
+  "spec_source": "100a37a9389d3955280b572ebe1c55f96ebca0bb:ops/specs/wp1285-r1.md",
+  "spec_hash": "f6a28e87a99748fc2161fcce38f5e362da3f0a32353fbd11c59d8a5a14c34fb6",
+  "ADR_anchors": [
+    {
+      "path": "docs/adr/0052-tran-loi-goi-codex-len-tam.md",
+      "landOID": "8ab100793df9831505f495543a74044b91c2c9ab",
+      "contains_rc": 0,
+      "firstparent_absent_rc": 128,
+      "canonical_firstparent": true
+    },
+    {
+      "path": "docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md",
+      "landOID": "8ab100793df9831505f495543a74044b91c2c9ab",
+      "contains_rc": 0,
+      "firstparent_absent_rc": 128,
+      "canonical_firstparent": true
+    }
+  ],
+  "product_model_invoked": false
+}

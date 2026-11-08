@@ -1,5 +1,5 @@
 schema_version: 2
-event: executor_lease_granted
+event: executor_lease_retired
 packet_issue: 1279
 packet_id: wp1279
 mission_issue: 1238
@@ -62,8 +62,8 @@ recorder_is_executor: false
 leased_at_utc: '2026-11-08T08:34:26Z'
 heartbeat_at: '2026-11-08T08:34:26Z'
 heartbeat_required_minutes: 360
-lease_until: '2026-11-08T14:34:26Z'
-lease_expires_at_utc: '2026-11-08T14:34:26Z'
+lease_until: '2026-11-08T13:22:19Z'
+lease_expires_at_utc: '2026-11-08T13:22:19Z'
 run_minutes: 45
 attempts_limit: 4
 review_rounds_limit: 3
@@ -90,3 +90,12 @@ generation_note: Oneexplicitrescueattempt4/4afternewReadyP1F03;used3attempts/8ca
 primary_product_pushes_limit: 2
 size_cap_additions_and_total_vs_B: 1950
 eventual_ff_push_target: refs/heads/agent/wp1279-g3-claude
+status: retired
+retired_at: '2026-11-08T13:22:19Z'
+retired_at_utc: '2026-11-08T13:22:19Z'
+original_lease_until: '2026-11-08T14:34:26Z'
+original_lease_source: 70a82931eb090f102da92ced8085d2f958c368de:ops/leases/wp1279-r4-g4-claude.yaml
+retirement_reason: Claude terminal; exactH4review and actualcanonicalM CI/fullsourceaudit
+  complete; release all executor write claims under delegated land authority
+retired_by: openai_codex/codex_service dispatcher under owner delegated land authority
+remaining_active_write_claims: []

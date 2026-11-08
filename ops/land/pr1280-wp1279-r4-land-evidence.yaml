@@ -1,0 +1,625 @@
+packet: wp1279
+revision: 4
+generation: 4
+spec_hash: 71d8f3bf6523c3428e86868085c6fc3263fdbb6e8936de48d953dfd6ad1ea3b3
+head_da_review: bc16ccff3601fabeeb783f41b52360ef5851838a
+tree_h: 30cbf51650d88f05c0fcae977dd9df286a089204
+immutable_acceptance_base: c15603dcf537fa4beb753b263398d6e6b8c92019
+review:
+  verdict: approve
+  open_findings:
+    P0: 0
+    P1: 0
+    P2: 0
+    P3: 0
+  verdict_url: https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6720089491
+  receipt: 30508a9227e2a3b021a4cfa68b8529b1718c3287:ops/reviews/wp1279-r4-review3.receipt.yaml
+  executor: actual Claude Code run0f391189d42c4d1db34bd4827f566862
+  reviewer: fresh actual Codex CLI run7da16bbe3971485fa4488c30378f2c09
+  human_audited: false
+  prior_class_closures:
+    WP1279-R1-F01: ĐÃ VÁ THẬT
+    WP1279-R1-F02: ĐÃ VÁ THẬT
+    WP1279-R3-F03: ĐÃ VÁ THẬT
+  assurance: cross_approved
+  original_verdict_source: 2a51a4727c042164decb787447f2037877b47b9d:ops/reviews/wp1279-r4-review3
+  model_measurement_limits: Original reviewer self unknown preserved; parent measured49servedgpt-6.1-sol/xhigh/sandboxDO_DUOC;
+    not inferred from GitHub submitter.
+windows:
+  status: passed
+  head: bc16ccff3601fabeeb783f41b52360ef5851838a
+  native: PS5.1.26100.9711 and PS7.6.9
+  normal_each: 26/26 en-US
+  focused_each: 38/38 tr-TR
+  child_records_verified: 24
+  archive_sha256: bbaf43d863292ca6b126013da451c17ae25bf363fb2e61d2fe4bc6a5004fe663
+  source_files_verified: 1183
+  nested_sets: 30
+  nested_entries: 990
+  typed_owned_CIM_probes: 28
+  windows_ci: not_run per owner instruction
+  limitations: Isolated owned fixtures/language/serialization, not realWinRM/session0/gateway/auth/activation
+linux:
+  status: passed_under_packet_criterion
+  selftest: 1777/1777 childrc0
+  strict_manifest: 184/184 oktrue
+  bare_ruff: rc1 12F821 delta0vsB
+  source: linux-final-bc16ccff3601/receipt.json
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6721130447
+current_conditional_target_base: c4978cd756dac4bd99127fc50a0dab6eed133a3e
+ci_pr:
+  run_id: 42469501853
+  attempt: 2
+  conclusion: success
+  jobs: 23/23Ubuntu
+  actual_checkout: 2b40120d576c1de13e1cb3f4330608695ec7b884
+  parents:
+  - c15603dcf537fa4beb753b263398d6e6b8c92019
+  - bc16ccff3601fabeeb783f41b52360ef5851838a
+  tree: 30cbf51650d88f05c0fcae977dd9df286a089204
+  proof: https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6721303241
+  retry_used: 1
+  retry_limit: 1
+  attempt1: failure18success/5failure; source/classification retained, not pass
+  four_anchors_derived: passed by actualWD2 and completeAUX13sourceaudit; rawunknowns
+    preserved
+merge_commit: 0166d30611617ac2ed4f79ada92f950d4edeb824
+tree_m: 3822761c513a7ba5b85df8f00d4cfdb7e47434e5
+ci_master:
+  run_id: 42480052990
+  attempt: 1
+  event: push
+  conclusion: success
+  head: 0166d30611617ac2ed4f79ada92f950d4edeb824
+  actual_checkout: 0166d30611617ac2ed4f79ada92f950d4edeb824
+  parents:
+  - c4978cd756dac4bd99127fc50a0dab6eed133a3e
+  - bc16ccff3601fabeeb783f41b52360ef5851838a
+  tree: 3822761c513a7ba5b85df8f00d4cfdb7e47434e5
+  jobs: 23/23Ubuntu
+  source: ecfb5dacc80e9fa19e090fd267b38cfb56c717f6:ops/checkpoints/wp1279-r4/MCI-final
+  proof_url: https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6722023922
+  official_artifact:
+    id: 13617636308
+    name: gate-evidence-ubuntu-latest-1
+    sha256: 06a3236eb23b676a66aa098f4a5e8d9f205a85d0765922b928d41f53f1c1ebc3
+    matches_GitHub_artifact_digest: true
+  lifecycle:
+    status: passed
+    identity:
+      catalog_policy_sha256: e8b7be5e7f1f77a4d4d065d49dbd616a6e9b5260541e61debfe7d5d62638c679
+      head_sha: 0166d30611617ac2ed4f79ada92f950d4edeb824
+      machine: x86_64
+      python_implementation: CPython
+      python_version: 3.12.16
+      runner_sha256: 637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810
+      system: Linux
+      system_release: 7.0.0-1019-azure
+      tracked_clean: true
+      tree_sha: 3822761c513a7ba5b85df8f00d4cfdb7e47434e5
+      worktree_clean: true
+    command_hash_verified: true
+    runner_code_hash_verified: true
+    catalog_policy_hash_verified: true
+    output_sha256: 9d65fd64bc594c03c7c247491a77fca985511ac91e78fded55c17dba5fee28a4
+    actual_rc: 0
+  actual_workflow_definition:
+    schema: wd/1
+    repo: ducthangho/tra-luat
+    run_id: 42480052990
+    loi_graphql: []
+    nguon: ops/ci_provenance.py do-wd
+    run_attempt_luc_do: 1
+    event: push
+    node_id: WFR_kwLOTNeRjc8AAAAJ5AIq_g
+    head_sha_rest: 0166d30611617ac2ed4f79ada92f950d4edeb824
+    run_number: 4311
+    created_at: '2026-11-08T12:23:51Z'
+    path: .github/workflows/ci.yml
+    repository_file_url: https://github.com/ducthangho/tra-luat/blob/0166d30611617ac2ed4f79ada92f950d4edeb824/.github/workflows/ci.yml
+    check_suite_commit: 0166d30611617ac2ed4f79ada92f950d4edeb824
+    oid_dinh_nghia: 0166d30611617ac2ed4f79ada92f950d4edeb824
+    blob: 2b2c9aa25ad1c136e44cba457d9ae765d2544fc2
+    sha256: aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67
+    trang_thai: passed
+    ly_do: null
+  AUX15_sha256: 2bd558ccb1017d6a5a082ed0167d22b02933aefad94ec1adfa12d43513f00717
+  four_anchors_derived:
+    run: passed
+    checkout: passed
+    workflow_definition: passed
+    gate_output: passed
+  raw_consumer_unknowns_preserved: true
+  positive_counts:
+    core:
+      selftest: 1777/1777
+      actual_child_rc: 0
+      runtime: CPython3.12.16/Linux
+      strict_committed_manifest: 184/184; LAND step success
+      worker_temporary_manifest_lane: skipped by event, not execution
+    registry:
+      registration: 29/29
+      executed_suites: 15
+      all_suite_rc: 0
+      cloud_setup_cases: 13/13
+      cloud_setup_intended_mutant_kills: 13/13
+      cloud_setup_rc: 0
+      TimeoutExpired_false_credit_present: false
+      leftover_descendant_error_present: false
+    tool_aggregate:
+      shards: 8/8
+      cases: 61
+      mutants: 490
+      mutant_errors: 0
+    packet_loop:
+      executed_baseline: 1359/1359
+      declared_cases: 1360
+      named_case_skipped: luong_canonical_chay_that
+      declared_mutants: 1523
+      named_mutant_skipped_not_credited: luong_canonical_chay_that_dao_os_name
+      terminal: 'TỔNG: ĐẠT'
+    ops:
+      classification: 118/118
+      receipts: 98/98
+      receipt_mutants: 153/153
+      lease_publish: 285/285
+      updater: 48/48
+      cleanup: 21/21
+      lifecycle_tests: 28/28,0skipped/0failed
+    targeted_aggregate:
+      shards: 8/8
+      cases: 56/56
+      targeted_self_mutants: 255/255
+      product_mutants: 10/10
+nghiem_thu:
+  M1: passed
+  M2: passed
+  M3: passed
+  X1: passed
+  X2: passed
+  X3: passed
+  X4: passed
+  X5: passed
+  X6: passed
+acceptance_ids_by_Xgroup:
+  X1:
+  - X1-01
+  - X1-02
+  - X1-03
+  X2:
+  - X2-01
+  - X2-02
+  - X2-03
+  - X2-04
+  - X2-05
+  - X2-06
+  - X2-07
+  X3:
+  - X3-01
+  - X3-02
+  X4:
+  - X4-01
+  - X4-02
+  - X4-03
+  X5:
+  - X5-01
+  - X5-02
+  - X5-03
+  - X5-04
+  - X5-05
+  - X5-06
+  - X5-07
+  - X5-08
+  - X5-09
+  X6:
+  - X6-01
+  - X6-02
+lease_cuoi: wp1279-r4-g4-claude
+lease_retirement:
+  status: retired
+  actual_retired_at_utc: '2026-11-08T13:22:19Z'
+  original_lease_until: '2026-11-08T14:34:26Z'
+  final_lease_until: '2026-11-08T13:22:19Z'
+  source: 70a82931eb090f102da92ced8085d2f958c368de:ops/leases/wp1279-r4-g4-claude.yaml
+  no_extension_or_backdating: true
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed
+scope_limits:
+- No LIVE/runtimeactivation/deploy
+- S2 only; S3/optionalPlaywrightP2 later
+- Listenerquery/send and hash/import/adminABA snapshots, not atomic attestation
+- CIinfrastructure failures are NOT passes; no findingwaiver
+- Auxiliary canonical CI source/log audit only; formal_code_approval=false and merge_authority=false.
+  Provideropenai_codex/codex_service/machine; modelidentityKHONG_DO_DUOC, no account/header
+  inference.
+- All23 raw bounded-consumer gate-output observations remain not_measured and raw
+  workflow-definition slot remains not_measured. Separate actual GraphQL do-wd and
+  full source audit support the derived four anchors; raw consumer outputs unchanged.
+- Packet-loop executed1359/1359 from1360declaredcases; namedWindows-only luong_canonical_chay_that
+  skipped. Associated luong_canonical_chay_that_dao_os_name mutant skipped/notcredited
+  among1523declaredmutants. Neither skip is a pass/kill.
+- Lifecycle records tree-scan isolation quet-cay and heavy lock path. This artifact
+  audit did not independently test lock enforcement or deliberate containment escape.
+- Official plugin log hashes identify receivedUTF8decodedtext, not remote originalOSlogbytes.
+  Official artifact ZIP bytes independently match GitHubAPI digest; artifact file/output
+  bytes checked separately.
+- No WindowsCI/native/LIVE reruns or actual service/gateway/auth measurement performed.
+  No CIactions/Git/source/Pmetadatawrites/model/subagentcalls by auditor.
+- Prior PR failure/retry/partial-handoff history preserved. This is actual canonical
+  mergeM evidence, separate from H4 historical PR synthetic checkout; no substitution.
+budget_current:
+  attempts: 4/4terminal
+  shared_codex_calls: 15/16terminal; reserve16unused
+  offline_review_rounds: 3/3review3approvedH4
+  primary_pushes: 2/2
+  design_advisory: 1/1
+  PRCI_authorized_retry: 1/1
+  MCI: automaticpushrun1/attempt1; no rerun
+  historical_cloud_minutes_tokens: KHONG_DO_DUOC; no claim0
+schema_version: 1
+mission_id: gh-1238
+provider: codex
+role: land_operator
+model_family: openai
+execution_surface: codex_service
+transport: machine
+session_id: wp1279-r4-root-dispatcher-land-M0166d306
+input_packet_generations:
+- packet_issue: 1279
+  packet_id: wp1279
+  revision: 4
+  generation: 4
+  lease_id: wp1279-r4-g4-claude
+authorized_head_sha: bc16ccff3601fabeeb783f41b52360ef5851838a
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6721130447
+land_operator: openai_codex/codex_service dispatcher; GitHub transport actor ducthangho,
+  not independent human auditor
+merge_method: merge
+merge_commit_parents:
+- c4978cd756dac4bd99127fc50a0dab6eed133a3e
+- bc16ccff3601fabeeb783f41b52360ef5851838a
+merge_commit_tree: 3822761c513a7ba5b85df8f00d4cfdb7e47434e5
+spec_source: f054490a2f44330fff05bfb43eb1bef584fed18b:ops/specs/wp1279-r4.md
+recorded_at_utc: '2026-11-08T13:22:19Z'
+canonical_product_readback:
+  merge_M: 0166d30611617ac2ed4f79ada92f950d4edeb824
+  reviewed_H4: bc16ccff3601fabeeb783f41b52360ef5851838a
+  products:
+  - path: .agents/skills/proxima-control/scripts/ProximaControl.psm1
+    canonical_blob: 02f0b2f210ba9a5dec4988b7836588abf5765fc9
+    sha256: 527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668
+    bytes: 42396
+    exact_approved_H4: true
+  - path: .agents/skills/proxima-control/scripts/Run-Px.ps1
+    canonical_blob: 0d48c409d4e35226579ac8996db5f6c82abc87c9
+    sha256: 03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354
+    bytes: 2371
+    exact_approved_H4: true
+  - path: .agents/skills/proxima-control/tests/ProximaControl.Tests.ps1
+    canonical_blob: 6ba24a2cef30e5032bb1d6790a370fc49903d149
+    sha256: 75b565e50cebf73f2a1a8a9787e0b8d35fe239db928253ba5c66fcde7ee1121b
+    bytes: 118482
+    exact_approved_H4: true
+  S1_paths_unchanged_vs_B:
+  - .agents/skills/proxima-control/scripts/ProximaConfig.psm1
+  - .agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1
+  no_runtime_activation_measured_or_requested: true
+  at: '2026-11-08T12:50:43.881547+00:00'
+pre_merge_checks:
+- name: canonical K0-K7
+  rc: 0
+  source: pr1280-H4-K0-K7-final-before-merge.json
+- name: PRCI attempt2/AUX13
+  status: passed
+  proof: https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6721303241
+- name: Ready14 automatic connector
+  status: completed_no_findings
+  head: bc16ccff3601fabeeb783f41b52360ef5851838a
+  measurement: Actualprovideractivitychargedonecall; servedidentity/tokensKHONG_DO_DUOC;
+    no new formalround
+- name: nativeWindows/Linux exactH4
+  status: passed_under_packet_criteria
+  proof: 0cf8530ae5787ed5459c2235aca669ad2446449e:ops/checkpoints/wp1279-r4/gates-bc16ccf
+post_merge_checks:
+- name: canonicalM CI/fullsourceaudit/officialartifact
+  status: passed
+  proof: https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6722023922
+acceptance_evidence_by_id:
+  X1-01:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X1-02:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X1-03:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X2-01:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X2-02:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X2-03:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X2-04:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X2-05:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X2-06:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X2-07:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X3-01:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X3-02:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X4-01:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X4-02:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X4-03:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X5-01:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X5-02:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X5-03:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X5-04:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X5-05:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X5-06:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X5-07:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X5-08:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X5-09:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X6-01:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+  X6-02:
+    status: passed
+    native_normal_reports:
+      candidate-ps51:
+        outcome: passed
+        report_sha256: e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77
+      candidate-ps7:
+        outcome: passed
+        report_sha256: 2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934
+deliverable_acceptance:
+  M1:
+    status: passed
+    path: .agents/skills/proxima-control/scripts/ProximaControl.psm1
+    evidence: all26normalIDs/bothnativeversions+CX01..CX11/24actualchildren/fullB..H4review3
+      includingallF01F02F03manifestations
+  M2:
+    status: passed
+    path: .agents/skills/proxima-control/scripts/Run-Px.ps1
+    evidence: X2-03/X3-02/X6-01 exactreports plusindependentreview3
+  M3:
+    status: passed
+    path: .agents/skills/proxima-control/tests/ProximaControl.Tests.ps1
+    evidence: baseline26API_ABSENTboth, candidate26normal+38focusedboth;24childsource/1183file/180XML/30nested990links;
+      oldH3behavior/F02deletionnegative/cleanup verified
+lease_required_checks_acceptance:
+- requirement: 26normal and38focusedtrTR withCX00plus11semanticCX bothnativePS51/7;
+    commonH4harness B/H3/H4 namedF03oldbehavior
+  status: passed
+  evidence: Native26+38both/24CX/oldH3wrong-ownerbehavior evidence0cf8530
+- requirement: F01validACP1252Unicode andF02allnestedCLIXML/artifactretention+privatecopydeletion
+  status: passed
+  evidence: F01ACP1252both andF02allnestedartifactretention/privatecopychildrc1 evidence0cf8530
+- requirement: Linux1777/1777exactH4/Ruff12F821delta0/strict184/admission
+  status: passed
+  evidence: Linux1777/1777 rc0/strict184/Ruff12F821delta0/admission0 evidence0cf8530
+- requirement: mandatoryAUX/freshindependentformalreview3/v2/M12beforeadditionalFFpush
+  status: passed
+  evidence: AUX9/actualindependentreview3/v230508a9/Issue6720089491beforeFFpush2
+- requirement: Draftconnector/newH4PRCI4anchors+AUX/Readyauto/K0K7/fullrefs/currentrules/newexactH4conditionalgrant
+  status: passed
+  evidence: DraftH4/Ready14zeroopen/currentrules/fullrefs/K0K7rc0/exactgrant6721130447/PRCI23of23+AUX13
+- requirement: actualMpushCI4anchors+artifact/AUX/M8/D1D4/terminalleaseUTCZ
+  status: passed
+  evidence: ActualMCI23of23/AUX15/artifact sourcehttps://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6722023922;
+    M8actualUTCZretirement/readback/D1D4 deliveryreceipt kept separately
+bookkeeping:
+- M8finalIssuepost andexactdecodedUTF8bodyreadback
+- Finalg4retired atactualUTCZ, noactiveclaims; original70lease preserved
+- UnmodifiedBcanonicalpacket_loop kiem-dong-wp D1-D4 required beforePacketclosure
+- ClosePacket1279ONLY; Mission1238 remainsin_progress/S3/P2/laterphasesOPEN
+canonical_tip_at_bookkeeping: bf9914cb1a8e6f5047468f4d130b587015f8d73f
+post_merge_other_packet_drift:
+  source_PR: 1270
+  canonical_tip: bf9914cb1a8e6f5047468f4d130b587015f8d73f
+  changed_paths:
+  - .claude/dev/doc_receipt_thu_hoi_git.py
+  - .claude/dev/doc_receipt_thu_hoi_test.py
+  classification: OtherPacketcode landed after our normalmerge; P1-S2threeproducts/S1/workflow/provenanceconsumer/D1D4checker
+    unchanged. ExactM remainscanonicalfirstparent and approvedH4CI evidence unchanged.
+    Thisrecord claims CI forM, not fullCI for later tip. No rebase/merge/review/Rerun/candidate
+    substitution.
+bookkeeping_serialization_correction:
+  original_check: M8-D1D4-prepublication-failed-yaml-alias.log
+  original_result: checker rejected shared-object YAML anchor/alias before publication;
+    helper assertionrc1, checkerargumenterror2
+  correction: deep JSON clone before safe YAML dump removes serialization aliases;
+    no product/gates/review/lease expiry reset
+  source_preserved: M8-before-alias-correction.yaml

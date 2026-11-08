@@ -1,0 +1,294 @@
+# Đặc tả packet — `THU-HOI-ADMISSION-MERGE-BASE-A` (revision 10)
+
+- `packet_id`: **THU-HOI-ADMISSION-MERGE-BASE-A** · `revision`: **10** · trạng thái: nháp, chờ chủ kho duyệt băm.
+  Thay `ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r9.md` (sha256
+  `f8e412899e82f5f6edae378c8d6d21dc8978733895d95bb7ea0e444972a18460`), r8 (sha256
+  `722750798f4d9f5c15e948167c6b020521518752d1e75590956751872d7dd31e`), r7 (sha256
+  `bb1ddb6b6b1ff9667958e70418081ea912c55b183e270ab952bcfd9cfad5a9b6`), r6 (sha256
+  `7dcd8e26ccc21ca4d802560b0a601613cc7c9d2515edf3bc94b3d2582fbf427c`), r5 (sha256
+  `82e4b5a58758f05b62ed8da910ddb0aea03dd7a388a9c3170399912911a5d78b`), r4 (sha256
+  `3698490c7c1b41b1885084408d717e95af447143f99f478ac8f236ee11a65d0a`), r3 (sha256
+  `55c44dd50fcc8bed9af386356a061214c2f4d50418aff381e1a8e11b8f8c9758`), r2 (sha256
+  `ea713edbce5afc04289e6dd8c492a5f5e013f2de871cd849d6fd7893f2ea5b03`) và r1 (sha256
+  `7ed6a49c123744e122c84f92c1e9ff26b2d3ec0913dc3e0791bfb1891e0b4b67`); cả chín chưa từng được duyệt và giữ nguyên trong
+  kho để verdict của từng lượt review vẫn tra được theo băm. Thay đổi so với r9: mục 8.
+- Review Rescue Checkpoint (`ADR-0037`), ba lần trong ngày 07-11-2026:
+  - lần 1, sau review lượt 2 trên r2 (F11 là biểu hiện mới của lớp kế thừa `phan-loai-vang-va-khong-do-duoc`, ở packet
+    B): chủ kho chọn **sửa thành r3, giữ thiết kế merge-base**; phương án bỏ merge-base đã được nêu và không chọn;
+  - lần 2, sau review lượt 3 trên r3 (F14 là lần thứ ba của hình dạng `canary-thieu-dieu-kien-chon`, ở packet B): chủ
+    kho chọn **sửa thành r4, đổi gốc của canary** — chọn PR canary theo điều kiện "vùng vắng hẳn" thay cho bộ tiền đề
+    đoán kết quả của bộ kiểm;
+  - lần 3, sau review lượt 4 trên r4 (F16 là lần thứ tư của hình dạng canary và biểu hiện thứ sáu của lớp kế thừa
+    `phan-loai-vang-va-khong-do-duoc`, ở packet B): chủ kho chọn **làm r5 theo phương án đã ghi sẵn ở r4** — B17/B18
+    không còn đoán trước kết quả, mà xếp kết quả theo nguyên nhân có xác nhận độc lập.
+- Sau review lượt 5 trên r5 (F18 là lần thứ năm của hình dạng canary, F19 là hình dạng mới, cả hai ở packet B), **phiên
+  soạn spec tự quyết, không hỏi chủ kho**, theo chỉ đạo chủ kho trong phiên ngày 07-11-2026: *"chỉ hỏi những vấn đề thực
+  sự quan trọng như hướng đi bế tắc, không đủ tài nguyên để chạy, hoặc có phát hiện đảo ngược chỉ đạo của tôi"*. B r6 ghi
+  lý do: đo lại trên Linux cho thấy thiết kế merge-base chạy được trên đường thật, và B17 có lối ra đã đo được (đầu vào
+  ghim). Văn bản ADR của packet A không đổi. Chủ kho có quyền bác khi duyệt băm. Cùng ngày chủ kho nâng trần review đặc
+  tả lên **10** lời gọi mà không cần hỏi lại từng lượt (mục 6).
+- Sau review lượt 6 trên r6 (F20, lần thứ sáu của hình dạng canary, ở packet B), phiên soạn spec lại tự quyết theo luật
+  dừng ở mục 5: B17 kiểm receipt CLI bằng một vị từ đã chạy trước khi đóng băng, và B18 trở lại là tiêu chí nghiệm thu
+  sau land (B r7 mục 5, 7, 10). Văn bản ADR của packet A không đổi.
+- Sau review lượt 7 trên r7 (F21, lần thứ bảy của hình dạng canary; F22, P3; cả hai ở packet B), phiên soạn spec xét lại
+  cách kiểm chính vị từ của B17 và giao người đo B18 (B r8 mục 5, 7, 10). Văn bản ADR của packet A không đổi.
+- Sau review lượt 8 trên r8 (F23, lần thứ tám của hình dạng canary, ở packet B), phiên soạn spec giữ vị từ B17 ở một dạng
+  duy nhất là khối mã chép nguyên văn, thu hẹp bề mặt, và kiểm chứng theo danh sách chốt đóng (B r9 mục 5, 7, 10). Văn
+  bản ADR của packet A không đổi.
+- **Checkpoint lần 4** (08-11-2026, trước lời gọi review thứ 9): một phép tấn công độc lập vẫn tìm được kẽ hở ở vị từ B17
+  của r9, sau tám lần cùng hình dạng và khi chỉ còn 2/10 lời gọi; phiên soạn spec hỏi chủ kho, và chủ kho chọn *"Rút về
+  đo hiệu năng"* — phương án đã ghi sẵn từ r5 (B r10 mục 5, 7, 10). Văn bản ADR của packet A không đổi.
+- `packet_issue`: **#1265** (sub-issue của Mission #1264). Issue không tự cấp việc (protocol §3.2, §4). Packet
+  anh em: `THU-HOI-ADMISSION-MERGE-BASE-B` #1266 (mã, đặc tả `ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r10.md`). B
+  phụ thuộc A: base của B phải chứa commit land của A.
+- `nguon_cap_viec`: quyết định chủ kho trong phiên soạn spec ngày 06-11-2026 (Claude Code desktop): vòng 1
+  Q1–Q7 và vòng 2 Q8–Q13, chủ kho trả lời cả hai vòng *"Theo khuyến nghị"*. Căn cứ phân tích: tài liệu
+  https://claude.ai/artifact/Au5vgKvAZWdqGDHMvkU4cW, mục *"Phương án hợp nhất: tích hợp và admission"*, điểm 4–6.
+  Không có dòng kế hoạch trong `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md`. Bản ghi bền của hai vòng quyết định nằm
+  trong thân Mission #1264, do phiên soạn spec đăng theo yêu cầu của chủ kho ngày 06-11-2026. Thẩm quyền ràng buộc là
+  comment duyệt băm đặc tả này do chính chủ kho đăng trên #1265.
+- `review_class`: **sensitive** — đổi governance của một cổng đọc lease (`ADR-0047`) và bảng §20 của protocol
+  (protocol §8).
+- Base dự kiến: `origin/master` lúc cấp lease (đo 09:43Z 07-11-2026: `132d376c`).
+- Executor **Claude**; reviewer **Codex** độc lập (phiên riêng); mức bảo đảm `human_audited` trên exact head
+  trước merge (vòng 1 Q6). Điều kiện merge theo `ADR-0060` (mặc định từ `ADR-0062`, không cần dòng khai).
+
+tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
+tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
+
+(OID là commit LAND trên first-parent master, đo 08:2xZ 06-11 bằng
+`git log --first-parent --diff-merges=first-parent --diff-filter=A`: `ADR-0055` ⇒ `d2e3052d…` ngày 25-10,
+`ADR-0053` ⇒ `8ab10079…` ngày 17-10. Review lượt 1 đo lại ba phép `cat-file -e L:ADR` rc 0, `cat-file -e L^1:ADR`
+rc 128, L nằm trên first-parent, cho cả hai.)
+
+## 0. Vấn đề
+
+Bộ kiểm `kiem-thu-hoi-github` (`ops/lease_publish.py`, hàm `lenh_kiem_thu_hoi_github`) đòi S = `base.sha` là tổ
+tiên của head H, rồi kiểm trên T = tree(H). Chủ kho giữ điều kiện ấy ngày 24-09-2026 (#618,
+https://github.com/ducthangho/tra-luat/issues/618#issuecomment-5819533474) với lý do: nếu H không chứa S, một
+bản thu hồi thêm vào master sau khi nhánh rẽ sẽ vắng trong T, và bộ kiểm *"không phân biệt được 'PR xoá
+revocation' với 'PR chưa thấy nó'"*. Đặc tả cha `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` r9 (sha256
+`465538364b1a3f9477782fba79869bbd1c9351140e3fa9df50451baae22f9c79`) ghi cùng ý ở gạch *"Strict up-to-date: S tổ
+tiên H, merge giữ tree H … Không áp §5.1"*.
+
+Hệ quả đo được. Phép đo: `git log --merges --since=2026-10-16T00:00:00Z --until=2026-11-06T08:25:00Z 08bcb51f`
+(ngày commit), giữ commit có tiêu đề chứa nguyên chuỗi `origin/master`; "có thân" là `%b` còn ký tự sau khi bỏ khoảng
+trắng; "nhắc thu-hoi" là tiêu đề hoặc thân chứa `thu-hoi`. Kết quả (đo 07-11-2026, khớp số review lượt 1 đo độc lập):
+trong 571 commit merge của cửa sổ, **206** commit merge `origin/master` vào nhánh; **121** có thân; **58** nhắc
+`thu-hoi`. (r1 ghi 202/117/56 từ một bộ lọc không ghi lại lệnh, nên không tái lập được; r2 thay bằng số có lệnh.)
+Mỗi lần merge như vậy tạo head mới và làm mất hiệu lực mọi bằng chứng neo SHA. Trong khi đó vùng mà bộ kiểm đọc —
+`ops/thu-hoi/**` và `.github/coordination/change-impact.v1.json` — có **0** commit first-parent từng chạm, trong toàn
+lịch sử (`git log --first-parent --format=%H origin/master -- ops/thu-hoi/ .github/coordination/change-impact.v1.json`,
+đo 01:14Z 07-11-2026 trên `9607e3eb`; sổ rỗng, tệp policy chưa tồn tại).
+
+## 1. write_set
+
+- `docs/adr/0066-admission-thu-hoi-theo-merge-base.md` — MỚI.
+- `docs/PROTOCOL_DA_PHIEN.md` — chỉ thêm **một** dòng vào bảng §20.
+
+Điều kiện cấp lease: không lease nào còn hiệu lực giữ một đường dẫn của write set, đo bằng
+`ops/lease_publish.py ai-dang-giu <đường dẫn>` trên một kho có `refs/heads/*` khớp máy chủ (so tập tên
+`git ls-remote --heads origin` với tập ref cục bộ, lệch phía "thiếu cục bộ" phải bằng 0). Đo 06-11-2026:
+`docs/PROTOCOL_DA_PHIEN.md` ⇒ `NGƯỜI_GIỮ 0` (lượt quét bắt đầu 15:10Z);
+`docs/adr/0066-admission-thu-hoi-theo-merge-base.md` ⇒ `NGƯỜI_GIỮ 0` (17:08Z). Hai lượt trước đó bị chốt fail-close
+chặn vì máy chủ thêm nhánh giữa lượt quét; làm mới cache rồi chạy lại ngay thì ra kết quả trên. r2 và r3 không quét lại.
+Người cấp lease đo lại ngay trước khi cấp (L5), và chỉ cấp khi cả hai ra `NGƯỜI_GIỮ 0`.
+
+Số ADR: không ref nào có tệp mang tiền tố `docs/adr/0066-` (đo 01:46Z 07-11-2026 bằng
+`git log --remotes=origin --format= --name-only -- 'docs/adr/0066-*'` sau khi fetch đủ 787/787 nhánh, tập tên khớp
+`git ls-remote --heads origin`, thiếu cục bộ 0). Bị chiếm ⇒ DỪNG, revision mới đổi số; không tự chọn số khác.
+
+**Va chạm đã biết với WP1174 (#1174).** Bộ duyệt C6 của WP1174 có `docs/PROTOCOL_DA_PHIEN.md` trong write set, lease dự
+kiến tối đa 24 giờ, hạn cứng `2026-11-08T08:03:01Z`. Đo 15:0xZ 06-11-2026: WP1174 chưa được cấp lease, chưa có nhánh,
+commit metadata P chưa có trên máy chủ. Write set của WP1174 không có `docs/adr/**`, nên không tranh số ADR. Thứ tự đề
+xuất: cấp lease A **trước** khi cấp lease WP1174, vì A chỉ 2 tệp và khoảng nửa ngày. Nếu WP1174 được cấp trước thì A
+chờ lease ấy nhả, không xin chia tệp.
+
+## 2. ngoai_pham_vi
+
+- Mã của bộ kiểm, test, workflow, validator receipt: thuộc packet B.
+- `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` r9 và `ops/specs/LAND-DOC-RECEIPT-THU-HOI-C1a1a.md` r5: đã đóng băng,
+  không sửa. ADR-0066 chỉ ghi rằng nó thay một điểm của r9.
+- Bản nháp `ops/specs/THU-HOI-LEASE-A1b.md` (#656) và đặc tả #1179 (C1a1b): không sửa; ADR-0066 ghi nghĩa vụ cho
+  hai packet ấy (mục tiêu 1f).
+- Luật theo ID lease (lease đã thu hồi, phủ write set bằng lease còn hiệu lực) và việc kiểm lại lúc land: thuộc
+  A1b và bên tiêu thụ receipt (#499 C1, #1179), theo vòng 1 Q5.
+- Các câu của protocol về đo ancestry ở phần preflight admission: vẫn đúng nguyên văn, không sửa.
+
+## 3. muc_tieu
+
+1. `docs/adr/0066-admission-thu-hoi-theo-merge-base.md` — ADR mới, có đủ:
+   - a. **Quyết định**, gồm đúng năm câu dưới đây, chép **nguyên văn** (giữ dấu `` ` ``), mỗi câu nằm trọn trong một
+     đoạn của mục Quyết định; được ngắt dòng tuỳ ý trong đoạn:
+     - R1: *"Bộ kiểm admission thu-hoi không còn đòi S là tổ tiên của H."*
+     - R2: *"Nếu S là tổ tiên của H, bộ kiểm chạy mọi phép kiểm trước ADR này và không so vùng; ngoài các phép đọc
+       trước ADR này, nó chỉ đọc thêm các commit cần để xác định quan hệ giữa S và H."*
+     - R3: *"Nếu S không phải tổ tiên của H, với mọi merge-base B của (S, H), vùng bộ kiểm đọc tại B phải giống hệt
+       vùng ấy tại S; sau đó mọi phép kiểm hiện có chạy trên T = tree(H)."*
+     - R4: *"Vùng gồm bản đồ `ops/thu-hoi/**` (đường dẫn → mode, kiểu, OID) và mục
+       `.github/coordination/change-impact.v1.json` (vắng, hoặc mode, kiểu, OID)."*
+     - R5: *"Một merge-base có vùng khác vùng tại S, không có merge-base, vượt ngân sách duyệt, thiếu object, object
+       băm không khớp tên hoặc header commit không đọc được ⇒ rc 12."*
+   - b. **Vì sao đủ**, trả lời đúng lý do #618: khi vùng tại B bằng vùng tại S, một bản ghi bị PR xoá phải có mặt
+     tại B nên cũng có tại S, và phép append-only S→T hiện có bắt nó; một bản ghi "PR chưa thấy" chỉ tồn tại khi
+     master đổi vùng sau B, tức vùng tại S khác B, và cổng trả 12 — buộc hoà base đúng lúc cần, không sớm hơn.
+   - c. **Thay đúng hai điểm**: (i) gạch *"Strict up-to-date: S tổ tiên H, merge giữ tree H …"* của r9 (sha256 ở
+     mục 0), phần áp cho bộ kiểm admission; (ii) quyết định (a) ở #618 `issuecomment-5819533474`.
+   - d. **Giữ nguyên**: S là tổ tiên của C (chống lùi định nghĩa); mã canonical từ `workflow_sha`; H tải về phải
+     bằng `pull_request.head.sha`; T = tree(H); append-only S→T; validator toàn namespace T; chế độ chưa kích hoạt
+     đòi tập revocation rỗng ở S và T; `SO_THU_HOI_KICH_HOAT = False`; bộ đọc object có băm lại, bỏ qua
+     `refs/replace` và graft của kho nguồn. Ba phép đọc tại S của bộ kiểm nền giữ nguyên ở **cả hai** chế độ (đo
+     07-11-2026 trên `9607e3eb`, `ops/lease_publish.py`): bản đồ sổ `ops/thu-hoi` tại S cho append-only (dòng 2364);
+     mục policy tại S khi T có marker mới, theo Q13 (dòng 2400); OID của bộ kiểm tại S cho receipt (dòng 2411). Câu R2
+     chỉ cho đọc thêm các commit của bước xác định quan hệ, và không cấm ba phép đọc ấy. Hệ quả của việc đọc thêm, nêu
+     đủ ở ADR: (i) các con số đo tài nguyên (`object đã băm` trên dòng `THU_HOI_ADMISSION`, `so_object_da_doc`,
+     `tong_bytes`) có thể lớn hơn nền; (ii) ngân sách của bộ đọc dùng chung cho mọi bước, nên bộ kiểm mới có thể chạm
+     trần ở chỗ nền không chạm; (iii) một commit chỉ được đọc thêm để xác định quan hệ mà header không đọc được (ví dụ
+     dòng `committer` hỏng) cũng làm bộ kiểm mới trả 12 ở chỗ nền trả 0. Cả (ii) lẫn (iii) cho rc 12 theo R5 — chặt hơn
+     nền, không bao giờ lỏng hơn. Receipt lên `schema_version` 2 và khoá `ngan_sach` có thêm `max_commits_merge_base`;
+     hợp đồng so với nền nằm ở packet B, mục tiêu 4.
+   - e. **Hiệu lực**, một đoạn trong mục Hiệu lực của ADR chứa nguyên văn câu R6: *"Luật này có hiệu lực từ commit
+     land của packet `THU-HOI-ADMISSION-MERGE-BASE-B` trên first-parent master; trước commit ấy luật cũ giữ nguyên, và
+     luật không hồi tố."*
+   - f. **Nghĩa vụ cho packet khác**: #1179 (C1a1b) thay G3 *"S ≤ H"* bằng hợp đồng mới trước khi đóng băng; G4
+     *"tree(H) = T"* **giữ nguyên** — bỏ G3 không cho phép bỏ ràng buộc T với H. Bên kiểm lúc land (#499 C1/C1b) so
+     vùng của tree(M) với vùng của T và `M^2 == H`. A1b (#656) khi bật sổ phải mở rộng vùng sang những gì bộ kiểm mới
+     đọc (lease theo ID) và quyết lại dòng *"Q3-diễn giải"* (strict up-to-date) — strict không còn cần cho mục đích
+     của bộ kiểm này.
+   - g. **Cưỡng chế**: một dòng cho **từng** vị trí cổng mà §20 của protocol liệt kê (mục *Cột "cổng đã ĐO" nghĩa là
+     gì*): `ops/lease_publish.py`, `.claude/dev/packet_loop.py`, `.claude/dev/launcher.py`,
+     `.claude/dev/gate_lifecycle.py`, `.github/workflows/ci.yml`, `.github/workflows/ops-publish-lease.yml`. Mỗi dòng
+     ghi lệnh (`git show <base>:<tệp> | grep -c 'ADR-0066'`), số dòng của tệp đã đọc (để phân biệt "đọc được, 0 lần"
+     với "không đọc được") và kết quả. Đo trên base của lease; kỳ vọng 0 ở cả sáu (đo thử 07-11-2026 trên `9607e3eb`:
+     cả sáu ra 0, số dòng 2604 · 3761 · 5611 · 1688 · 1184 · 277). Ghi rằng sau khi B land, cổng đọc luật là
+     `ops/lease_publish.py` `kiem-thu-hoi-github`, và lời khai ấy chỉ đúng khi có phản chứng của B (ca B1–B9).
+   - h. **Phương án bị loại** kèm lý do: giữ "S tổ tiên H"; strict up-to-date trên ruleset; merge ba chiều trong
+     vùng sổ; tính toàn bộ cây merge-tree(S, H) bằng Git plumbing (trái thiết kế bộ đọc có băm); merge queue
+     native (kho thuộc User; workflow `merge_group` lấy định nghĩa từ commit nhóm merge nên PR sửa được).
+   - i. Dòng **Trạng thái** dẫn comment duyệt của chủ kho trên Issue packet (neo băm đặc tả này), không phải
+     phiên chat.
+2. `docs/PROTOCOL_DA_PHIEN.md` — thêm đúng một dòng bảng §20 (bảng A, ngay sau dòng `ADR-0065`), nguyên văn:
+
+   ```
+   | `ADR-0066` | Admission thu-hoi: bỏ 'S tổ tiên H', thay bằng cổng vùng bằng nhau ở mọi merge-base | Accepted — hiệu lực từ land `THU-HOI-ADMISSION-MERGE-BASE-B` | 0 cổng (đo lúc land A); sau land B: `ops/lease_publish.py` `kiem-thu-hoi-github` |
+   ```
+
+   Cột cổng ghi `0 cổng` vì đó là giá trị đo được lúc A land (mục tiêu 1g); vế "sau land B" là lời khai về tương lai,
+   không phải `có nhắc` hay phép đo.
+
+## 4. nghiem_thu
+
+Mọi phép khớp chuỗi dưới đây đo trên văn bản Markdown thô (giữ dấu `` ` ``) **đã nối dòng trong phạm vi từng đoạn**
+(gộp mọi chuỗi khoảng trắng thành một dấu cách, không nối qua dòng trống), khớp **toàn bộ** câu (L6 b).
+
+| # | tiêu chí | phép đo làm nó ĐỎ | đột biến phải làm nó đổi màu |
+|---|---|---|---|
+| A1 | `python .claude/dev/packet_loop.py adr-song --root .` rc 0 trên head | rc ≠ 0 | xoá dòng §20 vừa thêm ⇒ rc 9 |
+| A2 | Mục Quyết định của ADR chứa nguyên câu R1 | không khớp | bỏ chữ *"không còn"* ⇒ không khớp; ngắt dòng lại mà giữ nguyên chữ ⇒ vẫn khớp |
+| A3 | ADR chứa cả hai định danh bị thay: `465538364b1a3f9477782fba79869bbd1c9351140e3fa9df50451baae22f9c79` và `issuecomment-5819533474`, mỗi cái ≥ 1 lần (đếm từng định danh) | thiếu một | xoá một định danh ⇒ 0 |
+| A4 | Mục Quyết định chứa nguyên từng câu R2, R3, R4, R5, và mục Hiệu lực chứa nguyên câu R6 — **năm** phép khớp riêng, mỗi câu một vị trí (L6 c) | một câu không khớp | mỗi đột biến sau phải làm đúng câu của nó đỏ: R2 bỏ *"và không so vùng"*, hoặc đổi *"chỉ đọc thêm các commit cần để xác định quan hệ giữa S và H"* thành *"đọc thêm vùng tại S"*; R6 đổi `THU-HOI-ADMISSION-MERGE-BASE-B` thành `THU-HOI-ADMISSION-MERGE-BASE-A`; R3 đổi *"giống hệt"* thành *"chứa"*, đổi *"mọi merge-base"* thành *"merge-base đầu tiên"*, đổi *"T = tree(H)"* thành *"tree(S)"*; R4 bỏ cụm mục `.github/coordination/change-impact.v1.json`; R5 đổi *"rc 12"* thành *"rc 0"*. Ngắt dòng lại trong đoạn ⇒ vẫn khớp |
+| A5 | Bảng §20 có đúng **một** dòng có ô đầu là `` `ADR-0066` ``, và dòng ấy bằng nguyên văn dòng ở mục tiêu 2 (so sau khi gộp khoảng trắng) | 0 hoặc ≥ 2 dòng; hoặc lệch nội dung | nhân đôi dòng ⇒ 2; đổi cột cổng thành `có nhắc: lease_publish.py×1` ⇒ lệch |
+| A6 | Mục *Cưỡng chế* của ADR có một dòng cho **từng** vị trí trong sáu vị trí ở mục tiêu 1g, mỗi dòng có lệnh, số dòng đã đọc và kết quả (L6 e) | thiếu vị trí nào, hoặc thiếu số dòng | bỏ dòng `gate_lifecycle.py` ⇒ đỏ khi đối chiếu danh sách sáu vị trí |
+| A7 | `python .claude/dev/packet_loop.py doctrine-scan --root .` rc 0 | rc ≠ 0 | bất biến, xanh sẵn trên nền; răng không thuộc packet này |
+| A8 | Kích thước theo `git diff --numstat origin/master...HEAD`: ≤ 2 tệp, ≤ 450 dòng thêm | vượt | — (đo, không cần đột biến) |
+| A9 | Không tệp nào ngoài `write_set` đổi (`git diff --name-only origin/master...HEAD`) | có tệp lạ | thêm một tệp ⇒ đỏ |
+| A10 | CI required xanh trên exact head; điều kiện `ADR-0060` (0 P0–P2 mở, P3 đóng có bằng chứng hoặc chủ kho miễn, connector đã review đúng commit, human audit trên H) | thiếu điều kiện nào | — |
+
+**Năm vế L6 cho các tiêu chí khớp chuỗi** (vế không áp dụng ghi lý do):
+
+| tiêu chí | (a) dương / âm | (b) trọn mệnh đề, nối đoạn | (c) từng vị trí | (d) chữ / số | (e) đủ vị trí cổng |
+|---|---|---|---|---|---|
+| A2 | dương; âm không áp ở A: câu cũ nằm trong chú thích workflow, thuộc B10 | trọn câu R1, nối đoạn | một câu | không có số | không phải lời khai về cổng |
+| A3 | dương; không xoá nguồn cũ nên không có âm | hai định danh là token trọn vẹn, không bị ngắt dòng giữa token | đếm từng định danh | không có ngưỡng số | không áp |
+| A4 | dương; âm thuộc B10 | trọn từng câu R2–R6, nối đoạn | năm câu, năm phép khớp (R6 ở mục Hiệu lực, không ở mục Quyết định) | R5 viết `rc 12` bằng chữ số; đột biến `rc 0` đo đúng dạng ấy | không áp |
+| A5 | dương (đúng một dòng, đúng nội dung) | so nguyên dòng bảng | một dòng | số `0` ở cột cổng là giá trị đo, không phải ngưỡng | cột cổng ghi giá trị đo theo mục tiêu 1g |
+| A6 | dương | mỗi dòng là một vị trí, không khớp cụm | sáu vị trí, đếm riêng | kết quả ghi bằng chữ số | đủ sáu vị trí của §20 |
+
+Chạy thử trên nền:
+
+- A1 (worktree tách ở `08bcb51f`, 08:3xZ 06-11-2026): `adr-song` rc 0 — *"64 ADR trên đĩa, 64 dòng trong §20, khớp
+  1–1"*. Răng đã đo: thêm riêng tệp `docs/adr/0066-admission-thu-hoi-theo-merge-base.md` mà không thêm dòng §20 ⇒
+  rc **9**, *"có tệp … mà KHÔNG có dòng nào trong §20"*. Review lượt 1 đo thêm: thêm cả ADR giả lập lẫn dòng liền bảng
+  ⇒ 65/65, rc 0. Đo lại 07-11-2026 trên cây `354d538b` (nội dung `docs/` bằng `9607e3eb`): rc 0, 64/64.
+- A7: `doctrine-scan` rc 0 — *"đã quét 10 tệp, 0 chỗ chép doctrine"* (07-11-2026; bất biến, xanh sẵn).
+- A2–A6: đỏ trên nền vì ADR-0066 chưa tồn tại — đúng màu "chưa làm".
+
+## 5. hinh_dang_ke_thua
+
+Không phải packet khắc phục; chép tự nguyện các lớp cùng họ từ đặc tả #1179 r1 §7 (nhánh
+`claude/spec-1179-c1a1b`, commit `7cfb4d7`) và quyết định chủ kho ở #1179 ngày 06-11-2026 07:58Z:
+
+| lớp | số đếm | nguồn | áp ở packet này |
+|---|---|---|---|
+| `phan-loai-vang-va-khong-do-duoc` | **6**: 4 từ #1179, cộng F11 (review lượt 2) và F16 (review lượt 4) — cả hai là điều kiện chọn canary coi "Git không thấy" là đủ trong khi bộ đọc báo không đo được | #1179 r1 lượt 1 F4; verdict lượt 2 và 4 của PR #1268 | ADR phải nói rõ ba trạng thái (là tổ tiên · không phải · không đo được ⇒ 12) |
+| `nguon-duoc-tin-ma-chua-xac-minh` | 7 (chuỗi thu hồi) | spec C1a1a r5 §6, chép ở #1179 r1 §7 | ADR không tin `base.sha` hay tên nhánh làm bằng chứng quan hệ |
+
+Ngoài hai lớp kế thừa, tám lượt review của Mission này đã ghi các hình dạng lỗi sau (đếm theo verdict lượt 8):
+`canary-thieu-dieu-kien-chon` **tám** lần (F06, F11, F14, F16, F18, F20, F21, F23 — đã gây checkpoint lần 2 và 3; lần thứ
+năm tới thứ tám xử lý theo luật dừng dưới đây, cơ chế chung ghi ở B r10 mục 7; sau lần thứ tám, checkpoint lần 4 rút B17 về
+đo hiệu năng); `uoc-luong-doc-do-thi-bang-hieu-tap-commit`
+một lần (F19); `canary-sau-land-thieu-nguoi-do` một lần (F22);
+`ngan-sach-tien-xu-ly-pha-tuong-thich` hai lần (F15, F17); `receipt-moi-lam-doi-nhanh-cu` (F01, F09),
+`nghiem-thu-do-nham-chot` (F03, F10), `dem-ca-bang-mau-ten` (F02, F13), `dem-sai-ngoai-le-closure` (F07, F12), mỗi hình
+dạng hai lần; `phep-khop-khong-phu-menh-de` (F05) một lần. Ở A, ba hình dạng chạm tới văn bản ADR:
+`receipt-moi-lam-doi-nhanh-cu` và `ngan-sach-tien-xu-ly-pha-tuong-thich` (câu R2, R5 và mục tiêu 1d),
+`phep-khop-khong-phu-menh-de` (mục 4).
+
+Luật dừng (r6): một biểu hiện mới của lớp kế thừa thứ nhất, hay lần thứ ba của một hình dạng (`ADR-0037`), ở bất kỳ
+lượt review nào của packet này ⇒ dừng vá theo chỗ bị chỉ và xét lại cách làm, không chỉ sửa câu chữ. Phiên đang giữ
+việc ghi gốc rễ, phương án chọn và phép đo chống đỡ vào revision kế tiếp hay handoff. Chỉ hỏi chủ kho khi không còn
+phương án có phép đo chống đỡ, khi thiếu tài nguyên, hoặc khi phương án đảo một quyết định của chủ kho (luật đầy đủ:
+B r6 mục 7). r5 trở về trước đòi báo chủ kho ở mọi lần chạm luật; r6 thay theo chỉ đạo ghi ở đầu tệp.
+
+## 6. Review và ngân sách
+
+**Review đặc tả, trước khi chủ kho duyệt băm:** review độc lập của chính đặc tả này (Codex, ≤ 2 lời gọi, chủ kho nâng
+thành 3 rồi 4, rồi **10** ngày 07-11-2026 mà không hỏi lại từng lượt; tính trên PR đưa đặc tả vào kho, chung cho A và
+B). Mọi lượt chạy offline trên commit cục bộ; nhánh đặc tả chỉ được đẩy lại khi review approve. Finding P0–P2 ⇒ sửa đặc tả và tính băm mới trước khi duyệt.
+Lịch sử: lượt 0 (06-11-2026 17:54:25Z–17:54:41Z) dừng trước khi model chạy, HTTP 400 `model_not_found`; lượt 1
+(17:56:04Z–18:31:15Z) review r1, `changes_requested`, 7 P2 + 1 P3, verdict chiếu ở
+https://github.com/ducthangho/tra-luat/pull/1268#issuecomment-6700056296. Chủ kho cho chạy lượt 2 và không tính lượt 0
+(07-11-2026). Lượt 2 (07-11-2026 02:03:57Z–02:28:59Z, chạy với tính năng `memories` của Codex đã tắt) review r2,
+`changes_requested`, 3 P2 + 2 P3 (F09–F13), F11 chạm điều kiện dừng ⇒ checkpoint lần 1. Chủ kho nâng trần thêm một lời
+gọi (thành 3). Lượt 3 (07-11-2026 02:56:26Z–03:17:24Z, memories tắt) review r3, `changes_requested`, 2 P2 (F14, F15),
+F14 là lần thứ ba của hình dạng canary ⇒ checkpoint lần 2. Chủ kho nâng trần thành 4. Lượt 4 (07-11-2026
+09:11:42Z–09:28:23Z, memories tắt) review r4, `changes_requested`, 2 P2 (F16, F17), F16 là lần thứ tư của canary và
+biểu hiện thứ sáu của lớp kế thừa ⇒ checkpoint lần 3. Chủ kho nâng trần thành 10. Lượt 5 (07-11-2026
+16:17:16Z–16:34:02Z, memories tắt) review r5, `changes_requested`, 2 P2 (F18, F19); F18 là lần thứ năm của canary, xử lý
+theo luật dừng mới ở mục 5 (B r6 mục 7 và mục 10). Lượt 6 (07-11-2026 16:56:51Z–17:16:47Z, memories tắt, trên commit
+cục bộ `74072f5a` chưa đẩy) review r6, `changes_requested`, 1 P2 (F20, lần thứ sáu của canary), xử lý theo cùng luật
+(B r7 mục 7 và 10). Lượt 7 (07-11-2026 17:32:47Z–17:49:18Z, memories tắt, trên commit cục bộ `a476f89a` chưa đẩy)
+review r7, `changes_requested`, 1 P2 (F21, lần thứ bảy của canary) và 1 P3 (F22), xử lý theo cùng luật (B r8 mục 7 và
+10). Lượt 8 (07-11-2026 23:21:56Z–23:39:08Z, memories tắt, trên commit cục bộ `45338e64` chưa đẩy) review r8,
+`changes_requested`, 1 P2 (F23, lần thứ tám của canary), xử lý theo cùng luật (B r9 mục 7 và 10). Trước lời gọi thứ 9,
+một phiên Claude độc lập tấn công vị từ của r9 (không tính là lượt review, không tốn lời gọi Codex) và tìm thêm kẽ hở ⇒
+checkpoint lần 4. Đã dùng 8/10 lời gọi. Verdict lượt 2–8 chưa được đăng lên PR #1268 lúc viết.
+
+**Review mã:** reviewer Codex độc lập, trần 10 lời gọi theo dòng khai `ADR-0055` ở đầu tệp; đếm **trước** mỗi lời
+gọi. Không có ngân sách mềm: lượt thứ hai trở đi theo điều kiện của `ADR-0052`, không cần hỏi chủ kho; Review Rescue
+Checkpoint khi hết trần mà chưa approve (`ADR-0037`), hoặc theo luật dừng ở mục 5. Connector `@codex review`
+trên PR draft theo `ADR-0060` M6.
+
+**Phân loại theo `ADR-0060`:** M3 Windows = `not_required` (bước 3: mọi tệp của diff là `*.md`); M9
+`full_mutant_audit` không áp (diff không chạm `.claude/dev/**`, `ops/**/*.py`, `.github/workflows/**`).
+
+**Ngân sách đóng của PR** (đề xuất trong đặc tả; chủ kho chốt khi duyệt băm): ≤ 2 lượt CI Ubuntu (head hoặc attempt,
+rerun cũng tính); 1 phiên executor; không gắn nhãn `windows`, không gọi tay `ci.yml`, không Windows CI. Hết trần
+hoặc không biết mức đã dùng ⇒ dừng ở checkpoint chủ kho.
+
+## 7. chua_do_duoc
+
+- Kết quả `ai-dang-giu` (mục 1) đúng tới lúc đo, 15:10Z–17:08Z 06-11-2026; nó cũ đi theo từng nhánh mới, nên người cấp
+  lease phải đo lại.
+- Lời khai *"0 commit chạm vùng"* đúng tới 09:43Z 07-11-2026 trên `132d376c`; đo lại khi viết ADR.
+- Comment duyệt băm của chủ kho trên #1265: chưa có lúc viết.
+- r10 chưa được review lúc viết (mục 6).
+
+## 8. Thay đổi so với r9
+
+Thay đổi r1→r2 … r8→r9 ghi ở mục 8 của từng revision ấy. Từ r9 sang r10: văn bản ADR (mục 2–4) **không đổi**; thay đổi
+thuộc packet B (B r10 mục 10).
+
+| nguồn | thay đổi |
+|---|---|
+| checkpoint lần 4 (chủ kho, 08-11-2026) | đầu tệp ghi quyết định; mục 5 ghi checkpoint lần 4; mục 6 ghi phép tấn công trước lời gọi thứ 9 |

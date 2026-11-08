@@ -1,0 +1,24 @@
+{
+  "packet": 1285,
+  "revision": 6,
+  "generation": 7,
+  "shared_call": 8,
+  "purpose": "mandatory read-only native/Linux/source large-output digest, NOT formalcodeapproval",
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+  "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "assigned_at": "2026-11-08T23:57:22.144208+00:00",
+  "absolute_deadline_utc": "2026-11-09T01:27:22.144208+00:00",
+  "read_scope": [
+    "native-S3-H4/original-evidence.zip/extracted all455sourcefiles/39commands/15phases",
+    "verify-S3-H4-native.py/S3-H4-native-ONCE-verifier-receipt.json/missingdependencynegative",
+    "linux-final-ecd8cee3ea6d",
+    "S3-H4-identity.json/S3-codex-capability-original-handoff.md/controller/snapshots",
+    "historicalH2 background repro for A/B"
+  ],
+  "write_scope": [
+    "/workspace/scratch/proxima-rest-20261108/S3-H4-native-linux-auditor-receipt.json",
+    "/workspace/scratch/proxima-rest-20261108/S3-H4-native-linux-auditor-final.txt"
+  ],
+  "constraints": "Local readonly evidence digest only, no product edits/Windows/browser/tests/modelcalls/subagents/network. ActualCodexhigh authored H3 product; root mechanical E base merge only on H4; no newauthor. Admission uses E ancestor. Formalxhigh freshCLI later. Sameprovider sensitiveHOLD, H3 F01 closed historically, no automatic H4formalclosure or codeapprovalclaim."
+}

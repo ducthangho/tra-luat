@@ -1,0 +1,76 @@
+{
+  "packet": "wp1285",
+  "revision": 6,
+  "generation": 7,
+  "baseline": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "candidate": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "baseline_tree": "247971f6c723cc17de3632e4eaba2019545b356b",
+  "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+  "baseline_parents": [
+    "0166d30611617ac2ed4f79ada92f950d4edeb824",
+    "5824094e78a0afe9d0af8866df45c50b24334767"
+  ],
+  "parents": [
+    "53b175c40254b0e64a011ef6d0f70207fd2f933e",
+    "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee"
+  ],
+  "baseline_file_sha256": {
+    ".agents/skills/proxima-control/config.example.json": "ddc7a15c729c579ec0d068912a8880da5ad4c0ed6e9826ba1ba60088abe1fa92",
+    ".agents/skills/proxima-control/scripts/ProximaConfig.psm1": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d",
+    ".agents/skills/proxima-control/scripts/ProximaControl.psm1": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+    ".agents/skills/proxima-control/scripts/Run-Px.ps1": "03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354",
+    ".agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1": "ee3bc46e89cadbba56373570c6aa4ae244e997e7789240f0f1e25c5ac0031ded",
+    ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1": "75b565e50cebf73f2a1a8a9787e0b8d35fe239db928253ba5c66fcde7ee1121b"
+  },
+  "file_sha256": {
+    ".agents/skills/proxima-control/SKILL.md": "7d4dfd01706991d7d3475d0829583aac53d216d5c68c12e1b44bffb9f3ac6fb1",
+    ".agents/skills/proxima-control/config.example.json": "ddc7a15c729c579ec0d068912a8880da5ad4c0ed6e9826ba1ba60088abe1fa92",
+    ".agents/skills/proxima-control/scripts/ProximaConfig.psm1": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d",
+    ".agents/skills/proxima-control/scripts/ProximaControl.psd1": "0c76190d73e2126e2de69185020607f04ef0fb5507836bee211ebdc5d8f2bab6",
+    ".agents/skills/proxima-control/scripts/ProximaControl.psm1": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+    ".agents/skills/proxima-control/scripts/Run-Px.ps1": "03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354",
+    ".agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1": "ee3bc46e89cadbba56373570c6aa4ae244e997e7789240f0f1e25c5ac0031ded",
+    ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1": "75b565e50cebf73f2a1a8a9787e0b8d35fe239db928253ba5c66fcde7ee1121b",
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1": "f230c95b1f36b558b2f58439f8ea64cc6f77a876c1d74cc8c9baf1634cc9f864"
+  },
+  "bundle_sha256": "801e6ffc6d9c6d4bf2e35ef9cdc120347b5347882382a6f753dd4ec660948fd2",
+  "bundle_ref": "refs/heads/agent/wp1285-r5-g6-codex",
+  "normal_ids": [
+    "PM01",
+    "PM02",
+    "PM03",
+    "PM04",
+    "PM05",
+    "PM06",
+    "PM07"
+  ],
+  "CXids": [
+    "CX00",
+    "CX01",
+    "CX02",
+    "CX03",
+    "CX04"
+  ],
+  "native_device": "a5f7076e-a491-4f84-829b-8d1fbcc1c767",
+  "Windows_source_repo": "C:\\tl-win\\wp1285-r2-g2\\H4196fbaaeb13-recovery4\\candidate",
+  "native_root": "C:\\tl-win\\wp1285-H4-native",
+  "native_inputs": "C:\\tl-win\\wp1285-H4-inputs",
+  "at": "2026-11-08T23:52:49.972307+00:00",
+  "operator_admission_correction": {
+    "source": "ADR0057 \u00a74,0058,0059",
+    "unsupported_threshold_removed": 1500000,
+    "resource_probe": "actual before/after memory incl commit headroom; Python PIDs/creation/command; sequential focused only",
+    "prior_run": "recovery2 rc2 zero test phases remains NOT_RUN"
+  },
+  "operator_import_correction": "Bundle import uses new unique branch, not inherited checked-out measured-candidate; recovery3 fetch rc128/0phases preserved",
+  "finding": "WP1285-R1-F01",
+  "old_H1_harness_sha256": "54f69dd8000fd36937f84dc2192bcf865299772a3d4956bebc4f2b5668c75aed",
+  "author": "Retained actual Codex CLI high H3 product blobs; root mechanical canonical-base merge only; no new author model invocation",
+  "additional_shapes": [
+    "named-end",
+    "end-clean",
+    "background"
+  ],
+  "rollback_property": "remove ONLY Background guard in private H3harness, require beforeimportrejection property to fail onPS7",
+  "admission_base": "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee"
+}

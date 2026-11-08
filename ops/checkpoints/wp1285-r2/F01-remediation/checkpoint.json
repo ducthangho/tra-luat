@@ -1,0 +1,12 @@
+{
+  "finding": "WP1285-R1-F01",
+  "status": "open, authorremediationnotclosure",
+  "originalspecunchanged": true,
+  "B": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "continuation": "4196fbaaeb13b4d26d5f4f452b6c1a8b26150489",
+  "generation": 3,
+  "before_reproduction": "H1 PS7 PM01pass/runtime_children2, PS51 parseReject/runtime0",
+  "probe_limit": "Isolated benign finding reproduction; no realgateway orarbitrarycode, notfullcandidatepromotiongate; fullH2admission/load/lock/normal/CX/Linux required",
+  "budget": "attempt1used/3, nextactual2;shared2/8;formal1/2;push0/1;no reset",
+  "at": "2026-11-08T16:33:04Z"
+}

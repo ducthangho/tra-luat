@@ -1710,6 +1710,13 @@ def _han_tuong_lai(gio: int = 4) -> str:
 LENH_KHONG_CO_STDOUT = {
     "guard": "luôn thoát 7 và chỉ in stderr — không có đường thành công để đo",
 }
+# These scoped commands emit closed-schema ASCII JSON.  Their byte/output
+# contracts are exercised by the WP1174 lifecycle and management fixtures;
+# they deliberately do not traverse the localized legacy stdout formatter.
+LENH_STDOUT_JSON_ASCII = {
+    "adopt-state": "wp1174 management/adoption fixtures validate the JSON result",
+    "guard-first-publication": "wp1174 guard fixture validates PASS/FAIL JSON",
+}
 
 
 def _lenh_con_tu_parser(script: Path) -> list:
@@ -1842,12 +1849,13 @@ def _kich_ban_in(c: Ctx, codepage: str):
     # tường minh là không có stdout. Không có chốt này thì thêm lệnh con mới là mất
     # phủ trong im lặng — đúng cách `void-attempt` lọt qua generation 4.
     tat_ca = _lenh_con_tu_parser(c.script)
-    thieu = [x for x in tat_ca if x not in da_phu and x not in LENH_KHONG_CO_STDOUT]
+    thieu = [x for x in tat_ca if x not in da_phu and x not in LENH_KHONG_CO_STDOUT and x not in LENH_STDOUT_JSON_ASCII]
     if thieu:
         raise AssertionError(
             f"[{codepage}] ma trận codepage THIẾU PHỦ lệnh con {thieu} — thêm vào kịch "
             f"bản, hoặc khai trong LENH_KHONG_CO_STDOUT kèm lý do")
     thua = [x for x in LENH_KHONG_CO_STDOUT if x not in tat_ca]
+    thua += [x for x in LENH_STDOUT_JSON_ASCII if x not in tat_ca]
     if thua:
         raise AssertionError(
             f"LENH_KHONG_CO_STDOUT khai {thua} nhưng parser không có lệnh ấy — "
@@ -11468,7 +11476,9 @@ def _adopt_case1174(kind):
     def case(c):
         import copy
         from unittest.mock import patch
-        if kind=="intent_cutover":_adoption_crashes1174(c)
+        if kind=="intent_cutover":
+            _adoption_crashes1174(c)
+            _adoption_recovery_high_water1174(c)
         if kind=="abandon_cutover":_abandon_crashes1174(c)
         m, admission, args = _adopt_fixture1174(c)
         e = admission["enrollment"]
@@ -11524,7 +11534,14 @@ def _adopt_case1174(kind):
                 assert json.loads(source.read_bytes()).get("format") == "packet_state_retired.v1"
                 assert json.loads(target.read_bytes())["adoption"]["payload"]["source_snapshot"].encode() == source_bytes
             recover("abandon_before_prepare" if kind == "abandon_prepare" else "abandon_before_cutover" if kind in ("abandon_cutover", "retry") else "resume_forward")
-        assert _call1174(invoke) == "completed_no_dispatch"
+        if kind == "source_recovery_snapshot":
+            barriers=[];fsyncdir=m._1174_fsyncdir
+            def measured(path):barriers.append(Path(path));return fsyncdir(path)
+            with patch.object(m,"_1174_fsyncdir",side_effect=measured):
+                assert _call1174(invoke) == "completed_no_dispatch"
+            assert Path(e["legacy_source_path"]).parent in barriers,"recovery did not re-establish source directory durability"
+        else:
+            assert _call1174(invoke) == "completed_no_dispatch"
         w = json.loads(witness.read_bytes())
         assert w["pending_adoption"] is None and len(w["history"]) == 1
         if kind in ("abandon_prepare", "abandon_cutover", "retry"):
@@ -12394,6 +12411,16 @@ def _lifecycle1174(kind):
             _collector_limits1174(c,m,w,args,audit,pages)
             receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
             assert receipt["status"]=="RECORDED_EARLIEST_MATCH" and receipt["earliest"]["id"]=="12"
+            # A force-removal before the audit is still prior publication:
+            # PushEvent.before is the old ref value even though after no
+            # longer contains H.  Republishing H later cannot launder it.
+            removal=copy.deepcopy(pages["events"][0])
+            removal.update(id="10",created_at="2026-11-04T08:58:30Z")
+            removal["payload"].update(before=args.head,head=before)
+            pages["events"].insert(1,removal)
+            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
+            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="10","PushEvent preimage publication missed"
+            pages["events"].pop(1)
             old_boundary=pages["events"].pop()
             receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
             assert receipt["status"]=="UNKNOWN","retained history boundary required"
@@ -12897,6 +12924,45 @@ def _adoption_crashes1174(c):
             assert before==(source.read_bytes(),target.read_bytes(),witness.read_bytes())
 
 
+def _adoption_recovery_high_water1174(c):
+    """A pending successor cannot rewrite its predecessor witness binding."""
+    import copy
+    from unittest.mock import patch
+    m,a,args=_adopt_fixture1174(c);e=a["enrollment"]
+    with patch.object(m,"_1174_probe",return_value={}):
+        assert _call1174(m._1174_adopt,args,a,None)=="completed_no_dispatch"
+    old_target=Path(e["state_path"]);witness=Path(e["witness_path"])
+    source_raw=old_target.read_bytes();newroot=c.tmp/"generation-7-high-water";newroot.mkdir()
+    e.update(journal_root=str(newroot),state_path=str(newroot/"wp1174.json"))
+    a.update(generation=7,lineage=dict(predecessor_generation=6,source_path=str(old_target),
+        source_sha256=hashlib.sha256(source_raw).hexdigest()))
+    a["operation"]=dict(adoption_id="adopt-7-high-water",generation=7,binding_sha256="e"*64,
+        canonical_path=e["state_path"],source_sha256=a["lineage"]["source_sha256"],cutover_started=False)
+    args=m.build_parser().parse_args(["adopt-state","--packet","1174","--mode","initial","--adoption-id",
+        "adopt-7-high-water","--expected-source-sha256",a["lineage"]["source_sha256"],
+        "--expected-witness-revision",str(json.loads(witness.read_bytes())["witness_revision"]),"--target-generation","7"])
+    writer=m._1174_write;count=[0]
+    def cut(path,raw,**kw):
+        count[0]+=1
+        if count[0]==2:raise OSError("pending-only cut")
+        writer(path,raw,**kw)
+    with patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_1174_write",side_effect=cut):
+        try:m._1174_adopt(args,a,witness.read_bytes())
+        except OSError as ex:assert "pending-only" in str(ex)
+        else:assert False,"pending cutpoint not reached"
+    original=witness.read_bytes();pending=json.loads(original)
+    assert pending["phase"]=="initialized" and pending["pending_adoption"] is not None
+    args.mode,args.disposition="recovery","resume_forward";args.expected_source_sha256=args.target_generation=None
+    for field,value in (("state_sha256","f"*64),("state_revision",pending["high_water"]["state_revision"]+1)):
+        changed=copy.deepcopy(pending);changed["high_water"][field]=value
+        witness.write_bytes(m._1174_bytes(changed));args.expected_witness_revision=str(changed["witness_revision"])
+        before={p:p.read_bytes() for p in c.tmp.rglob("*") if p.is_file()}
+        with patch.object(m,"_1174_probe",return_value={}):
+            _reject1174(m._1174_adopt,args,a,witness.read_bytes(),reason="recovery predecessor high_water mismatch")
+        assert {p:p.read_bytes() for p in c.tmp.rglob("*") if p.is_file()}==before
+    witness.write_bytes(original)
+
+
 
 MUTANTS["m1174_accept_incomplete_inventory"] = ('return (type(outcomes) is dict and type(required) is set and set(outcomes) == required and\n', 'return (type(outcomes) is dict and type(required) is set and True and\n', ["wp1174_lifecycle_scoped_lifecycle"])
 MUTANTS_NHAM_TEST |= {"m1174_accept_incomplete_inventory"}
@@ -13073,6 +13139,12 @@ MUTANTS["m1174_transport_orphan"] = ('try:os.killpg(child.pid,signal.SIGKILL)\n 
     'try:\n            if child.poll() is None:os.killpg(child.pid,signal.SIGKILL)\n        except ProcessLookupError:pass',["wp1174_admission_candidate_root"])
 MUTANTS["m1174_collector_expired_entry"] = ('last_status,dag,earliest = "UNKNOWN",False,None','last_status,dag,earliest = "RECORDED_EARLIEST_MATCH",False,None',["wp1174_lifecycle_first_publication"])
 MUTANTS["m1174_git_late_result"] = ('if deadline is not None and time.time()>=deadline:return -1,b""','if False:return -1,b""',["wp1174_lifecycle_first_publication"])
+MUTANTS["m1174_publication_preimage"] = ('candidates = [("after", after)] + ([] if before == zero else [("before", before)])',
+    'candidates = [("after", after)] # omit PushEvent preimage publication evidence',["wp1174_lifecycle_first_publication"])
+MUTANTS["m1174_recovery_predecessor_water"] = ('_1174_require(water == dict(generation=lineage["predecessor_generation"],',
+    '_1174_require(True or water == dict(generation=lineage["predecessor_generation"],',["wp1174_adopt_intent_cutover"])
+MUTANTS["m1174_recovery_tombstone_fsync"] = ('_1174_fsyncdir(source.parent)\n        if target_raw != images["adopted"]:',
+    'pass # omit recovery durability barrier\n        if target_raw != images["adopted"]:',["wp1174_source_recovery_snapshot"])
 
 
 MUTANTS["m1174_resolver_none_head"] = ('_spec_merge(root, spec_oid, lease.get("spec_path"), lease)', '_spec_merge(root, None, lease.get("spec_path"), lease)', ["wp1174_admission_file_bytes"])

@@ -10,3 +10,14 @@ rc=12
   THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
 CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
 rc=12
+
+# LAN 3 (sau khi nap log goc may chu kho vao winlogs/: #1252 A10 passed; #1272 A1 passed, landed true)
+# checkout: 3adf5ba7fcaf1003c8137edc98e7a77e4d98ae82 (+ thay doi chua commit trong ops/land) ; origin/master: c15603dcf537fa4beb753b263398d6e6b8c92019 ; luc: 2026-11-08T09:44:29Z
+ĐÓNG ĐƯỢC WP HOTFIX-R1252-POSIX — merge c15603dcf537fa4beb753b263398d6e6b8c92019
+rc=0
+
+# LAN 4 (ha landed false: ops/kiem_ho_so_land.py TRUOT L-6 o authorization_url khi landed true — khong co comment uy quyen land cua chu kho)
+# checkout: 3adf5ba7fcaf1003c8137edc98e7a77e4d98ae82 (+ thay doi chua commit trong ops/land) ; luc: 2026-11-08T09:45:14Z
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12

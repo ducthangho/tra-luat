@@ -1,0 +1,4 @@
+# ops/kiem_ho_so_land.py --root . khi pr1277-wp1272-land-evidence.yaml mang trang_thai_packet.landed true (2026-11-08 ~09:44Z, cay lam viec tren 3adf5ba)
+TRUOT ops/land/pr1277-wp1272-land-evidence.yaml — trượt L-6 ở authorization_url (landed đọc từ trang_thai_packet.landed)
+TỔNG: 54/55 hồ sơ landed True đạt · 0 miễn trừ · rc=1
+# => ha landed false (kiem-dong-wp-m8.txt LAN 4).

@@ -3,7 +3,8 @@
 #
 # TRANG THAI: merged (27fd808), CHUA LANDED (landed: false). Bon moc §10.2.2 cua ci.yml 42360967767 nay DU (workflow_definition
 # do bang wd-run 42467652116, do PHIEN DIEU PHOI dispatch 09:33:00Z; artifact wd.json run_id 42360967767 da doi chieu). Con thieu:
-#   (1) nghiem thu chua du: A10 (lane Windows may chu kho) thuat_lai, A14 chi do mot phan => bien ban ghi not_measured.
+#   (1) nghiem thu chua du: A14 chi do mot phan => bien ban ghi not_measured. (A10 nay co log goc may chu kho, bam khop:
+#       winlogs/diag-1252-a10-e6c6505.log — loi_khai_co_neo, bien ban ghi passed.)
 #   (2) launcher-windows.yml tren DUNG merge SHA 27fd808 (run 42360967762) FAILURE: dot bien r1252_ghi_de_dich_truc_tiep SAI giet 0/1,
 #       520/521. Khac phuc bang packet rieng #1272 (PR #1277, merge c15603d): launcher-windows 42439410853 tren c15603d success.
 #       Nghia la land do Windows LUC MERGE, da khac phuc o commit sau — KHONG phai xanh tren chinh 27fd808.
@@ -175,7 +176,7 @@ trang_thai_packet:
     comment approve_merge. (6) muc tieu packet: xem nghiem_thu. (7) ADR-0060 M1 P3: khong co P3 mo nao trong ho so (luot 9 approve
     0 finding chan; connector sach) — phien nay khong do P3 tung luot 1–8.
   de_nang_landed_true_can: >-
-    (a) nghiem thu A10/A14 co bang chung do duoc (log lane Windows may chu kho; duong dan launcher.py da goi o luot 9) hoac chu kho
+    (a) nghiem thu A14 co bang chung do duoc (duong dan launcher.py da goi o luot 9) hoac chu kho
     chap nhan/mien; (b) quyet dinh cua chu kho/phien dieu phoi: launcher-windows do tren chinh 27fd808 va
     duoc khac phuc o c15603d co du cho dieu kien gate §10.2.4 hay khong — phien ghi so KHONG tu quyet.
 
@@ -210,10 +211,18 @@ nghiem_thu:
     314/314 hong 0; 25/25 dot bien ten §4 (ke ca de_trang_thai cua A8) "OK giet 1/1" tren Windows. Day la CI Windows tu chay khi push master
     (launcher-windows.yml), KHONG phai lane chu kho chi dinh.
   A10: >-
-    thuat_lai/loi_khai_co_neo — lane tap trung tren may chu kho (log C:\work\diag-1252-a10-e6c6505.log, KHONG co trong container):
-    lan 1 @9e564d4 do 2/22 (r1252_doi_to_tien_thu_muc_luot PermissionError 13; r1252_ghi_tep_ignored chap chon 1/33 — nguon:
-    readback-tran-issuecomment-6700587203.json, agent dang ho) -> va dd2a820; lan 2 @e6c6505: 22 ca x 3 = 51 qua, 15 bo qua co ly do,
-    0 hong (thuat_lai tu phien dieu phoi). Bo sung measured o dong tren (CI Windows sau merge).
+    loi_khai_co_neo — winlogs/diag-1252-a10-e6c6505.log (8005 B, sha256 77d844b5dee5bce542be8e8b5d498190ff0964bdf12a3b4603255a79e2f1a02c;
+    chuoi van chuyen: may tra-luat-win -> phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq (tinh sha256/byte bang .NET tren Windows) -> base64 qua send_message -> phien nay giai ma, sha256 KHOP. Byte chep nguyen (CRLF, BOM; winlogs/.gitattributes `* -text -whitespace`). Phien nay KHONG chay lai duoc noi dung (can Windows); nhan loi_khai_co_neo = hien vat co bam, khong phai phep do cua phien nay). Noi dung: `HEAD e6c650573452ad98c3055f5147eeacfb4767f119`, `Python 3.12.10`, 22 dong LAP (--lap-ca x3), moi khoi
+    `rc=0`, `SECONDS 365`. MUOI ca A10 cua spec (ghi_tep_ignored, ghi_trong_git, khong_ghi_thi_sach,
+    run_root_trong_workspace_bi_loai, khong_do_duoc, tat_co_giu_nguyen, gioi_han_khai, cat_50, bieu_dien_khong_nhap_nhang,
+    bo_dem_stat_lam_moi_truoc_chup) deu `3/3 qua, 0 bo qua, 0 hong`. Tong 22 ca: 51 qua, 15 bo qua (5 ca ngoai danh sach A10:
+    ghi_qua_dir_fd, status_va_chu_ky_byte_la, doi_to_tien_thu_muc_luot, mo_thu_muc_luot_dung_mot_lan, bam_tep_khong_theo_lien_ket
+    — moi ca 0/3, ly do nen Windows), 0 hong. Gioi han: log khong ghi khoa C:/tl-win/KHOA.txt, khong ghi gio bat dau.
+    Lan do @9e564d4 TRUOC va (do 2/22): log diag-1252-a10-9e564d4.log KHONG duoc gui/luu => not_measured; chi co
+    readback-tran-issuecomment-6700587203.json (agent dang ho). Chan doan sau lan do: winlogs/diag-1252-chan-doan.log (904 B, sha256
+    d10e090ff2b4910e4e499ccf8b47ae451b6a58d82d86dbfbc9c9761df65d3c87; cung chuoi van chuyen): `HEAD 9e564d4…`, ghi_tep_ignored 10/10
+    `rc=16 ok`, vay du phong doi_to_tien: `rename LOI PermissionError(13, 'Access is denied')` -> dan toi va dd2a820. Bo sung
+    measured o dong tren (CI Windows sau merge).
   A11: >-
     owner_waived measured (6704885217, app null, neo e6c6505) + bien nhan Linux loi_khai_co_neo (a11e-dotbien.out.txt: sha256
     12c29bd3e995cbed52ac8a8ca4075525f3bfc1a3557adca581eb30e9396dc46b khop 6701483778; `DOT BIEN: 655/655 dat (4 khong do duoc)`;
@@ -231,7 +240,7 @@ nghiem_thu:
   A8: 'measured — nghiem-thu-ca-va-dot-bien-ci-ubuntu-128369080136.txt muc A8 (linux-only): r1252_de_trang_thai OK giet 1/1.'
 
 khong_do_duoc:
-  - 'Log A10 Windows tren may chu kho (C:\work\diag-1252-a10-*.log) — ngoai container.'
+  - 'Log lan do A10 @9e564d4 (diag-1252-a10-9e564d4.log) — khong gui, khong luu.'
   - 'Hien vat luot 7, 8 Codex offline: khong co trong handoff 814a00e (ung vien cu e0aeb97) va khong chep vao ho so nay.'
   - 'Ai bam merge PR #1267 (#566).'
   - 'Readback comment dang lease 6679448617 (chi co trich log rc 9).'

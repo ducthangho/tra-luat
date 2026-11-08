@@ -1,6 +1,6 @@
 # Bien ban M8 (ADR-0060) dong WP #1272 HOTFIX-R1252-POSIX r1 — kiem bang packet_loop.py kiem-dong-wp
-# Nhan nguon tung muc: ops/land/pr1277-wp1272-land-evidence.yaml. landed false: bon moc §10.2.2 du (wd-run 42467654305); con
-# nghiem thu A1 not_measured — lane chu kho la thuat_lai (buoc (3) do that chi o CI sau merge).
+# Nhan nguon tung muc: ops/land/pr1277-wp1272-land-evidence.yaml. landed false (L-6: thieu comment uy quyen); bon moc §10.2.2 du (wd-run 42467654305);
+# A1 tu log goc may chu kho winlogs/diag-1272-do.log (bam khop, loi_khai_co_neo) — kem su co thu tuc, xem land evidence.
 packet: HOTFIX-R1252-POSIX
 revision: 1
 generation: 1
@@ -22,14 +22,14 @@ ci_master:
   conclusion: success
   ghi_chu: 'ci.yml; launcher-windows 42439410853 cung SHA = success'
 nghiem_thu:
-  A1: not_measured   # lane chu kho thuat_lai; Windows that cho buoc (3) chi co o CI sau merge (passed o hoan_tat)
+  A1: passed   # loi_khai_co_neo: winlogs/diag-1272-do.log (_CO_DIR_FD False, ca dich QUA, SAI giet 0/1); log dung truoc buoc (3)
   A2: passed
   A3: passed
   A4: passed
   A5: passed
   hoan_tat_s5: passed
 lease_cuoi: hotfix-r1252-posix-r1-g1-claude
-landed: false
+landed: false  # kiem-dong-wp rc 0 khi true (LAN 3) nhung L-6 truot: thieu comment uy quyen land cua chu kho
 moc_10_2_2:
   run: passed
   checkout: passed

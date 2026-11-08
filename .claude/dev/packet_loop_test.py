@@ -11535,11 +11535,14 @@ def _adopt_case1174(kind):
                 assert json.loads(target.read_bytes())["adoption"]["payload"]["source_snapshot"].encode() == source_bytes
             recover("abandon_before_prepare" if kind == "abandon_prepare" else "abandon_before_cutover" if kind in ("abandon_cutover", "retry") else "resume_forward")
         if kind == "source_recovery_snapshot":
-            barriers=[];fsyncdir=m._1174_fsyncdir
-            def measured(path):barriers.append(Path(path));return fsyncdir(path)
-            with patch.object(m,"_1174_fsyncdir",side_effect=measured):
+            events=[];fsyncdir=m._1174_fsyncdir;writer=m._1174_write
+            def measured(path):
+                events.append(("fsync",Path(path)));return fsyncdir(path)
+            def measured_write(path,raw,**kw):
+                events.append(("write",Path(path)));return writer(path,raw,**kw)
+            with patch.object(m,"_1174_fsyncdir",side_effect=measured), patch.object(m,"_1174_write",side_effect=measured_write):
                 assert _call1174(invoke) == "completed_no_dispatch"
-            assert Path(e["legacy_source_path"]).parent in barriers,"recovery did not re-establish source directory durability"
+            assert events and events[0] == ("fsync",Path(e["legacy_source_path"]).parent),"recovery did not re-establish source directory durability before terminal writes"
         else:
             assert _call1174(invoke) == "completed_no_dispatch"
         w = json.loads(witness.read_bytes())
@@ -12374,11 +12377,11 @@ def _lifecycle1174(kind):
             if kind=="scoped_lifecycle":
                 _static_writers1174(c,m)
                 assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==85
-                required={n:None for n in WP1174_REQUIRED}
-                assert _required1174(required,WP1174_REQUIRED)
+                required={n:None for n in _WP1174_MAIN_REQUIRED}
+                assert _required1174(required,_WP1174_MAIN_REQUIRED)
                 required.pop("wp1174_init_fresh")
-                assert not _required1174(required,WP1174_REQUIRED),"missing required ID accepted"
-                assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==85,"incomplete acceptance inventory"
+                assert not _required1174(required,_WP1174_MAIN_REQUIRED),"missing required ID accepted"
+                assert {n for n,_ in CASES if n in _WP1174_MAIN_REQUIRED}==_WP1174_MAIN_REQUIRED,"incomplete acceptance inventory"
                 assert m._1174_IMPLEMENTATION_COMPLETE is True,"implementation marker does not match completed inventory"
             return
         if kind=="human_negative":
@@ -12416,7 +12419,7 @@ def _lifecycle1174(kind):
             # longer contains H.  Republishing H later cannot launder it.
             removal=copy.deepcopy(pages["events"][0])
             removal.update(id="10",created_at="2026-11-04T08:58:30Z")
-            removal["payload"].update(before=args.head,head=before)
+            removal["payload"].update(before=args.head,head=_g(w,"rev-parse",args.head+"^1"))
             pages["events"].insert(1,removal)
             receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
             assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="10","PushEvent preimage publication missed"
@@ -12928,7 +12931,8 @@ def _adoption_recovery_high_water1174(c):
     """A pending successor cannot rewrite its predecessor witness binding."""
     import copy
     from unittest.mock import patch
-    m,a,args=_adopt_fixture1174(c);e=a["enrollment"]
+    root=Path(tempfile.mkdtemp(prefix="high-water-", dir=c.tmp))
+    m,a,args=_adopt_fixture1174(Ctx(c.script,root));e=a["enrollment"]
     with patch.object(m,"_1174_probe",return_value={}):
         assert _call1174(m._1174_adopt,args,a,None)=="completed_no_dispatch"
     old_target=Path(e["state_path"]);witness=Path(e["witness_path"])

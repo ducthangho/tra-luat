@@ -1,0 +1,112 @@
+[
+  {
+    "type": "message",
+    "id": "msg_01a1bc75-07a2-74c3-8c2e-74a41f7286e9",
+    "role": "developer",
+    "content": [
+      {
+        "type": "input_text",
+        "text": "<skills_instructions>\n## Skills\nA skill is a set of local instructions to follow that is stored in a `SKILL.md` file. Below is the list of skills that can be used. Each entry includes a name, description, and a short path that can be expanded into an absolute path using the skill roots table.\n### Skill roots\n- `r0` = `/home/agent/.codex/skills`\n- `r1` = `/home/agent/.codex/skills/.system`\n- `r2` = `/workspace/scratch/wp1285-r4-g5-codex/.agents/skills`\n### Available skills\n- imagegen: Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas. (file: r1/imagegen/SKILL.md)\n- openai-docs: Use for Codex models/pricing, scheduled tasks, skills, settings, setup, troubleshooting, customization, automations, and self-knowledge—including 'you,' 'your,' 'this app,' or 'this coding agent' when they refer to Codex—and for OpenAI APIs/products and ChatGPT Work. Also use for model choice/migration, prompting, SDKs, Responses, Realtime, agents, evals, and Chat/Work/Codex comparisons. Do not use for generic app/software tasks that merely mention Codex. (file: r1/openai-docs/SKILL.md)\n- skill-creator: Create or update a Codex skill with appropriately scoped instructions and any needed supporting resources. (file: r1/skill-creator/SKILL.md)\n- skill-installer: Install Codex skills into $CODEX_HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos). (file: r1/skill-installer/SKILL.md)\n- cross-review: Adapter review packet trên Codex CLI với checkout/context được cấp riêng. Assurance và hợp đồng evidence lấy từ docs/PROTOCOL_DA_PHIEN.md; cung cấp cú pháp PowerShell. (file: r2/cross-review/SKILL.md)\n- land-packets: Adapter chuẩn bị land khi người dùng giao việc trên Codex CLI. Authority, trigger và tiêu chí hoàn tất nằm trong docs/PROTOCOL_DA_PHIEN.md; cung cấp cú pháp PowerShell và con trỏ. (file: r2/land-packets/SKILL.md)\n- proxima-control: Điều khiển MỘT đích Proxima khai báo tường minh qua px hoặc Run-Px.ps1 (trợ giúp, cấu hình, trạng thái, model, hỏi, start/stop/restart, connect/disconnect), luôn kèm ConfigPath, RepositoryRoot, TargetId và dùng -WhatIf để xem trước. (file: r2/proxima-control/SKILL.md)\n- work-packet: Adapter thực thi work packet trên Codex CLI. Đọc docs/PROTOCOL_DA_PHIEN.md và Packet được giao; tệp này cung cấp cú pháp PowerShell và con trỏ công cụ. (file: r2/work-packet/SKILL.md)\n- Presentations: Read, create or edit PowerPoint or Google Slides decks. Use for presentation, slide deck, PowerPoint, PPT, PPTX, or Google Slides requests. (file: r0/builtins/presentations/SKILL.md)\n- Spreadsheets: Use skill when user requests to create, modify, analyze, visualize, or work with spreadsheet files (`.xlsx`, `.xls`, `.csv`, `.tsv`) or Google Sheets with formulas, formatting, charts, tables, and recalculation. (file: r0/builtins/spreadsheets/SKILL.md)\n- documents: Create, edit, redline, and comment on `.docx`, Word, and Google Docs-targeted document artifacts inside the container, with a strict render-and-verify workflow. Use `render_docx.py` to generate page PNGs (and optional PDF) for visual QA, then iterate until layout is flawless before delivering the final document. (file: r0/builtins/documents/SKILL.md)\n- pdf: Read, create, inspect, render, and verify PDF files where visual layout matters, including fillable AcroForms. Use Poppler rendering plus Python tools such as reportlab, pdfplumber, and pypdf for generation and extraction. (file: r0/builtins/pdf/SKILL.md)\n</skills_instructions>"
+      },
+      {
+        "type": "input_text",
+        "text": "<permissions instructions>\nFilesystem sandboxing defines which files can be read or written. `sandbox_mode` is `workspace-write`: The sandbox permits reading files, and editing files in `cwd` and `writable_roots`. Editing files in other directories requires approval. Network access is restricted.\n# Escalation Requests\n\nCommands are run outside the sandbox if they are approved by the user, or match an existing rule that allows it to run unrestricted. The command string is split into independent command segments at shell control operators, including but not limited to:\n\n- Pipes: |\n- Logical operators: &&, ||\n- Command separators: ;\n- Subshell boundaries: (...), $(...)\n\nEach resulting segment is evaluated independently for sandbox restrictions and approval requirements.\n\nExample:\n\ngit pull | tee output.txt\n\nThis is treated as two command segments:\n\n[\"git\", \"pull\"]\n\n[\"tee\", \"output.txt\"]\n\nCommands that use more advanced shell features like redirection (>, >>, <), substitutions ($(...), ...), environment variables (FOO=bar), or wildcard patterns (*, ?) will not be evaluated against rules, to limit the scope of what an approved rule allows.\n\n## How to request escalation\n\nIMPORTANT: To request approval to execute a command that will require escalated privileges:\n\n- Provide the `sandbox_permissions` parameter with the value `\"require_escalated\"`\n- Include a short question asking the user if they want to allow the action in `justification` parameter. e.g. \"Do you want to download and install dependencies for this project?\"\n- Optionally suggest a `prefix_rule` - this will be shown to the user with an option to persist the rule approval for future sessions.\n\nIf you run a command that is important to solving the user's query, but it fails because of sandboxing or with a likely sandbox-related network error (for example DNS/host resolution, registry/index access, or dependency download failure), rerun the command with \"require_escalated\". ALWAYS proceed to use the `justification` parameter - do not message the user before requesting approval for the command.\n\n## When to request escalation\n\nWhile commands are running inside the sandbox, here are some scenarios that will require escalation outside the sandbox:\n\n- You need to run a command that writes to a directory that requires it (e.g. running tests that write to /var)\n- You need to run a GUI app (e.g., open/xdg-open/osascript) to open browsers or files.\n- If you run a command that is important to solving the user's query, but it fails because of sandboxing or with a likely sandbox-related network error (for example DNS/host resolution, registry/index access, or dependency download failure), rerun the command with `require_escalated`. ALWAYS proceed to use the `sandbox_permissions` and `justification` parameters. do not message the user before requesting approval for the command.\n- You are about to take a potentially destructive action such as an `rm` or `git reset` that the user did not explicitly ask for.\n- Be judicious with escalating, but if completing the user's request requires it, you should do so - don't try and circumvent approvals by using other tools.\n\n## prefix_rule guidance\n\nWhen choosing a `prefix_rule`, request one that will allow you to fulfill similar requests from the user in the future without re-requesting escalation. It should be categorical and reasonably scoped to similar capabilities. You should rarely pass the entire command into `prefix_rule`.\n\n### Banned prefix_rules \nAvoid requesting overly broad prefixes that the user would be ill-advised to approve. For example, do not request [\"python3\"], [\"python\", \"-\"], or other similar prefixes that would allow arbitrary scripting.\nNEVER provide a prefix_rule argument for destructive commands like rm.\nNEVER provide a prefix_rule if your command uses a heredoc or herestring. \n\n### Examples\nGood examples of prefixes:\n- [\"npm\", \"run\", \"dev\"]\n- [\"gh\", \"pr\", \"check\"]\n- [\"cargo\", \"test\"]\n The writable roots are `/tmp`, `/workspace/scratch/wp1285-r4-g5-codex`, `/workspace/scratch/wp1285-r4-g5-codex/.agents/skills/proxima-control`.\n</permissions instructions>"
+      },
+      {
+        "type": "input_text",
+        "text": "<collaboration_mode># Collaboration Mode: Default\n\nYou are now in Default mode. Any previous instructions for other modes (e.g. Plan mode) are no longer active.\n\nYour active mode changes only when new developer instructions with a different `<collaboration_mode>...</collaboration_mode>` change it; user requests or tool descriptions do not change mode by themselves. Known mode names are Default and Plan.\n\n## request_user_input availability\n\nUse the `request_user_input` tool only when it is listed in the available tools for this turn.\n\nIn Default mode, strongly prefer making reasonable assumptions and executing the user's request rather than stopping to ask questions.\n\nUse the `request_user_input` tool only for optional questions where the answer would materially improve the quality of the work.\n\nIf `request_user_input` returns no answers, continue with best judgment instead of asking again or treating the turn as blocked.\n\nNever use the `request_user_input` tool for permission requests or permission-related escalations.\n</collaboration_mode>"
+      },
+      {
+        "type": "input_text",
+        "text": "<recommended_plugins>\nHere is a list of plugins that are available but not installed.\n\n- Dropbox (app-69b31dc2110c8191b8b47dc98fe5a052@openai-curated-remote)\n- Box (box@openai-curated-remote)\n- Codex Security (codex-security@openai-curated-remote)\n- Figma (figma@openai-curated-remote)\n- GitHub (github@openai-curated-remote)\n- Gmail (gmail@openai-curated-remote)\n- Google Calendar (google-calendar@openai-curated-remote)\n- Google Drive (google-drive@openai-curated-remote)\n- Linear (linear@openai-curated-remote)\n- Notion (notion@openai-curated-remote)\n- OpenAI Developers (openai-developers@openai-curated-remote)\n- Outlook Calendar (outlook-calendar@openai-curated-remote)\n- Outlook Email (outlook-email@openai-curated-remote)\n- SharePoint (sharepoint@openai-curated-remote)\n- Slack (slack@openai-curated-remote)\n- Teams (teams@openai-curated-remote)\n</recommended_plugins>"
+      }
+    ],
+    "internal_chat_message_metadata_passthrough": {
+      "turn_id": "auto-compact-0",
+      "create_time": 1794163148.7067313,
+      "content_item_kinds": [
+        "host_skills.instructions",
+        "permissions.instructions",
+        "collaboration_mode.instructions",
+        "plugins.recommendations"
+      ]
+    }
+  },
+  {
+    "type": "message",
+    "id": "msg_01a1bc75-07a2-74c3-8c2e-74bd45727390",
+    "role": "developer",
+    "content": [
+      {
+        "type": "input_text",
+        "text": "<multi_agent_role>You are `/root`, the primary agent in a team of agents collaborating to fulfill the user's goals.\n\nAt the start of your turn, you are the active agent.\nYou can spawn sub-agents to handle subtasks, and those sub-agents can spawn their own sub-agents.\nAll agents in the team, including the agents that you can assign tasks to, are equally intelligent and capable, and have access to the same set of tools.\n\nYou can use `spawn_agent` to create a new agent, `followup_task` to give an existing agent a new task and trigger a turn, and `send_message` to pass a message to a running agent without triggering a turn.\n`send_message` calls may be read by a human, so ensure they are legible. Always put proper spaces between words and/or numbers.\nChild agents can also spawn their own sub-agents.\nYou can decide how much context you want to propagate to your sub-agents with the `fork_turns` parameter.\n\nYou will receive messages in the analysis channel in the form:\n```\nMessage Type: MESSAGE | FINAL_ANSWER\nTask name: <recipient>\nSender: <author>\nPayload:\n<payload text>\n```\nThey may be addressed as to=/root\n\nNote that collaboration tools cannot be called from inside `functions.exec`. Call `spawn_agent`, `send_message`, `followup_task`, `wait_agent`, `interrupt_agent`, and `list_agents` only as direct tool calls using the recipient shown in their tool definitions, such as `to=functions.collaboration.spawn_agent`, since they are intentionally absent from the `functions.exec` `tools.*` namespace. Available tools in `functions.exec` are explicitly described with a `tools` namespace in the developer message.\n\nAll agents share the same directory. In detail:\n- All agents have access to the same container and filesystem as you.\n- All agents use the same current working directory.\n- As a result, edits made by one agent are immediately visible to all other agents.\n\nWhen calling `wait_agent`, prefer longer waits (minutes) to avoid busy polling.\n\nThere are 4 available concurrency slots, meaning that up to 4 agents can be active at once, including you.\n\nFull-history forks (`fork_turns` omitted or `\"all\"`) inherit the parent model and reasoning effort and do not accept overrides. Only set `model` or `reasoning_effort` when explicitly requested by the user, applicable `AGENTS.md` instructions, or skill instructions; when doing so, set `fork_turns` to `\"none\"`.</multi_agent_role>"
+      }
+    ],
+    "internal_chat_message_metadata_passthrough": {
+      "turn_id": "auto-compact-0",
+      "create_time": 1794163148.7067356,
+      "content_item_kinds": [
+        "multi_agent.role_instructions"
+      ]
+    }
+  },
+  {
+    "type": "message",
+    "id": "msg_01a1bc75-07a2-74c3-8c2e-74cda5276ea0",
+    "role": "developer",
+    "content": [
+      {
+        "type": "input_text",
+        "text": "<multi_agent_mode>Any earlier instruction enabling proactive multi-agent delegation no longer applies. Do not spawn sub-agents unless the user or applicable AGENTS.md/skill instructions explicitly ask for sub-agents, delegation, or parallel agent work.</multi_agent_mode>"
+      }
+    ],
+    "internal_chat_message_metadata_passthrough": {
+      "turn_id": "auto-compact-0",
+      "create_time": 1794163148.7067358,
+      "content_item_kinds": [
+        "multi_agent.mode_instructions"
+      ]
+    }
+  },
+  {
+    "type": "message",
+    "id": "msg_01a1bc75-07a2-74c3-8c2e-74d548b9d34d",
+    "role": "user",
+    "content": [
+      {
+        "type": "input_text",
+        "text": "# AGENTS.md instructions for /workspace/scratch/wp1285-r4-g5-codex\n\n<INSTRUCTIONS>\n# tra-luat — Agent Entry Point\n\n> File này chỉ là CON TRỎ. Không định nghĩa lại protocol, legal doctrine,\n> review budget, schema hay release gate.\n\n## 1. Đọc trước khi làm việc\n\nTheo thứ tự:\n\n1. `CONTEXT.md` — từ vựng chung.\n2. `docs/PROTOCOL_DA_PHIEN.md` — vai trò, state, review, handoff và stop condition.\n3. `CLAUDE.md` — quy tắc phát triển, test và deploy của repository.\n4. Packet Issue/Spec hiện hành hoặc chỉ thị điều phối bền của người có thẩm quyền —\n   objective, revision, generation, base SHA, write set, acceptance, risk và authority.\n5. `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` — chính sách provider chuyển tiếp.\n6. Hợp đồng provider tương ứng:\n   - `ops/KE_HOACH_THI_CONG_ANTIGRAVITY.md` cho lịch sử và phạm vi AG;\n   - `ops/chatgpt_review/README.md` khi dùng ChatGPT Pro qua Web.\n7. `SKILL.md` — bắt buộc khi Packet liên quan pháp luật, corpus, Drive,\n   NotebookLM, registry hoặc hành vi runtime của skill.\n\nĐọc được kế hoạch không đồng nghĩa được giao việc. Không có Packet Spec hoặc\nauthority được protocol hiện hành thừa nhận thì dừng.\n\n## 2. Preflight bắt buộc\n\nTrước khi sửa hoặc review:\n\n- xác minh đúng repository, branch/worktree và exact base Git OID;\n- xác minh Packet revision/spec hash/generation;\n- xác minh effective write set;\n- xác minh Review Class và capability cần thiết;\n- xác minh provider và execution surface thực tế;\n- giữ worktree sạch ngoài thay đổi thuộc Packet.\n\nLệch một điều kiện trên thì không tự sửa cho khớp; báo người điều phối.\n\n## 3. Ranh giới vai trò\n\n### Executor\n\n- chỉ ghi trong effective write set;\n- phiên Executor không chuyển vai sang Reviewer trong cùng session/run;\n- không tự approve, merge, land, deploy hoặc gọi LIVE;\n- không tự cấp lease hoặc mở rộng Packet;\n- tạo handoff neo exact head/tree và bằng chứng test.\n\n### Reviewer\n\n- dùng session/context độc lập, không fork hoặc tái sử dụng context Executor;\n- checkout/worktree đang được review phải được đối xử read-only;\n- scratch hoặc bản sao phục vụ phản chứng phải nằm ngoài repository được review;\n- không sửa branch Executor;\n- verdict phải neo exact `reviewed_sha` bằng Git OID đầy đủ, khớp head hiện hành;\n- khai đúng model, provider, execution surface và transport thực tế;\n- không suy model reviewer identity từ tài khoản dùng để đăng verdict lên GitHub.\n\n### Approver / Land Operator\n\n- chỉ thao tác trên exact SHA đã được ủy quyền bền;\n- approval, audit và thao tác land là các vai độc lập;\n- merge không tự đồng nghĩa `landed` hoặc Mission `complete`.\n\n## 4. Provider, transport và assurance\n\nAssurance được suy từ cặp Executor–Reviewer, evidence và protocol hiện hành;\nkhông gắn cố định theo tên agent hoặc tên công cụ.\n\n### Google Antigravity\n\nAntigravity có thể làm Executor hoặc Reviewer theo Packet. AG–AG là\nsame-provider review.\n\n### ChatGPT Pro qua Web\n\nKhi dùng ChatGPT Pro qua Web, phải khai:\n\n```yaml\nprovider: openai_chatgpt\nexecution_surface: chatgpt_web\ntransport: human_mediated\n```\n\nChatGPT Web có thể:\n\n- review một review bundle đóng băng;\n- đề xuất finding, test và remediation;\n- sinh patch hoặc patch plan cho tác vụ nhỏ.\n\nChatGPT Web không được:\n\n- trực tiếp ghi repository;\n- chạy shell hoặc công cụ cục bộ;\n- tự khai đã chạy test;\n- commit, push, merge, land hoặc gọi LIVE;\n- tự tạo `cross_approved`, `same_provider_approved` hoặc `human_audited`.\n\nReview của ChatGPT Web được ghi là `advisory_review`. Local validator chỉ xác minh\nschema, bundle hash và exact SHA; nó không chứng minh model/session identity.\n\nKhông khai AG hoặc ChatGPT Web thành Claude/Codex để đi qua state machine.\n\n## 5. Gate và bằng chứng\n\nChạy đúng gate do Packet Spec, `CLAUDE.md` và phạm vi thay đổi yêu cầu.\n\nKhông tự sửa release manifest, golden, workflow, security path hoặc land-only\nartifact ngoài write set.\n\nBáo cáo phải ghi:\n\n- exact head SHA và tree hash;\n- command;\n- mã thoát thật;\n- bằng chứng dương;\n- `passed`, `failed`, `skipped`, `not_run` tách riêng;\n- provider, execution surface và transport;\n- môi trường và phần chưa đo được.\n\nRequired check bị `skipped`, không được tạo, chạy trên SHA khác hoặc thiếu\npositive evidence không được coi là pass. Không chạy hoặc không đo được không\nphải là pass.\n\n## 6. Dừng ngay khi\n\n- thiếu hoặc stale Packet/lease/spec/generation;\n- head SHA đổi sau review hoặc sau CI; review, gate và authorization cũ đều stale;\n- provider hoặc transport khác Packet Spec;\n- cần ghi ngoài write set;\n- cần secret, LIVE, merge, deploy hoặc authority chưa được cấp;\n- reviewer phải sửa branch mới có thể tiếp tục;\n- ChatGPT review note không khớp bundle hoặc exact SHA;\n- ChatGPT output khai đã chạy test nhưng không có bằng chứng độc lập;\n- gate thiếu bằng chứng dương;\n- cùng finding lặp đến stop condition;\n- tài liệu tại đây mâu thuẫn protocol.\n\nKhi mâu thuẫn, nguồn có thẩm quyền theo loại quyết định thắng file này:\n`SKILL.md` cho legal/safety, protocol và Packet Spec cho orchestration,\nGitHub facts/verified receipts cho authority, và Git commit/manifest cho\nphiên bản cùng tính toàn vẹn.\n\n</INSTRUCTIONS>"
+      },
+      {
+        "type": "input_text",
+        "text": "<environment_context>\n  <cwd>/workspace/scratch/wp1285-r4-g5-codex</cwd>\n  <shell>bash</shell>\n  <current_date>2026-11-08</current_date>\n  <timezone>Etc/UTC</timezone>\n  <filesystem><workspace_roots><root>/workspace/scratch/wp1285-r4-g5-codex</root><root>/workspace/scratch/wp1285-r4-g5-codex/.agents/skills/proxima-control</root></workspace_roots><permission_profile type=\"managed\"><file_system type=\"restricted\"><entry access=\"read\"><special>:root</special></entry><entry access=\"write\"><path>/workspace/scratch/wp1285-r4-g5-codex</path></entry><entry access=\"write\"><path>/workspace/scratch/wp1285-r4-g5-codex/.agents/skills/proxima-control</path></entry><entry access=\"write\"><special>:slash_tmp</special></entry><entry access=\"write\"><special>:tmpdir</special></entry><entry access=\"read\"><path>/workspace/scratch/wp1285-r4-g5-codex/.git</path></entry><entry access=\"read\"><path>/workspace/scratch/wp1285-r4-g5-codex/.agents/skills/proxima-control/.git</path></entry><entry access=\"read\"><path>/workspace/scratch/wp1285-r4-g5-codex/.agents</path></entry><entry access=\"read\"><path>/workspace/scratch/wp1285-r4-g5-codex/.agents/skills/proxima-control/.agents</path></entry><entry access=\"read\"><path>/workspace/scratch/wp1285-r4-g5-codex/.codex</path></entry><entry access=\"read\"><path>/workspace/scratch/wp1285-r4-g5-codex/.agents/skills/proxima-control/.codex</path></entry><entry access=\"read\"><path>/workspace/scratch/wp1285-r4-g5-codex/.aws</path></entry><entry access=\"read\"><path>/workspace/scratch/wp1285-r4-g5-codex/.agents/skills/proxima-control/.aws</path></entry></file_system></permission_profile></filesystem>\n</environment_context>"
+      }
+    ],
+    "internal_chat_message_metadata_passthrough": {
+      "turn_id": "auto-compact-0",
+      "create_time": 1794163148.7067358,
+      "content_item_kinds": [
+        "agents_md.instructions",
+        "environments.environment_context"
+      ]
+    }
+  },
+  {
+    "type": "message",
+    "id": "msg_01a1bc75-07a3-75d1-9aa3-cf27ac561c42",
+    "role": "user",
+    "content": [
+      {
+        "type": "input_text",
+        "text": "permission capability inspection only, no model invocation"
+      }
+    ],
+    "internal_chat_message_metadata_passthrough": {
+      "turn_id": "auto-compact-0",
+      "create_time": 1794163148.7071795,
+      "content_item_kinds": [
+        "user.text"
+      ]
+    }
+  }
+]

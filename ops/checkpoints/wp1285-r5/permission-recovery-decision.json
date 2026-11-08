@@ -1,0 +1,46 @@
+{
+  "descriptor": {
+    "packet_id": "wp1285",
+    "revision": 5,
+    "generation": 6,
+    "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+    "continuation": "883d37826f443ce9301dd0bcd40cd5f97f1adf0e",
+    "spec_sha256": "d76da91f3c9a3303a9579578e8e671360656d0312479f67c8554d4fe6ce7016d",
+    "effective_write_set": [
+      ".agents/skills/proxima-control/scripts/ProximaControl.psd1",
+      ".agents/skills/proxima-control/SKILL.md",
+      ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+    ],
+    "write_set_hash": "0bbe3df51f38b0d334fcb5e35ada62ac95ac3eb1b1e28b4e9b5385a396a002aa",
+    "effective_review_class": "sensitive",
+    "change_policy_sha": null,
+    "land_obligations": [],
+    "authority": "NEWr5manualdescriptor only, exactsame3paths450; scopednormalCLIwrite capability correction, no bypass/human audit/assurance waiver",
+    "nang_tran": {
+      "ai_nang": "ducthangho via standingfullscope + explicitCodex executor/reviewer instruction",
+      "can_cu": "ActualCodexg5 apply_patch permissionfailure, no changes, normal scoped writable-root correction",
+      "tran_cu": "product4TOTAL/formal3/shared10/push1/3paths450",
+      "tran_moi": "product5TOTAL ONLY/formal3/shared10/push1/3paths450 unchanged"
+    },
+    "limits": {
+      "paths": 3,
+      "additions_and_total": 450,
+      "attempts": 5,
+      "formal": 3,
+      "shared": 10,
+      "primarypush": 1
+    }
+  },
+  "known_actual_authors": 3,
+  "uncertain_AGY_reserved": 1,
+  "one_more_author_only": true,
+  "actual_edit_capability_fixed": "NOT_YET_MEASURED",
+  "author_flags": [
+    "--sandbox workspace-write",
+    "--add-dir /workspace/scratch/wp1285-r4-g5-codex/.agents/skills/proxima-control",
+    "--cd /workspace/scratch/wp1285-r4-g5-codex"
+  ],
+  "write_set_unchanged": true,
+  "reviewer_effort": "xhigh>high",
+  "assurance": "sameprovider sensitiveHOLD"
+}

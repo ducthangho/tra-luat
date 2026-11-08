@@ -1,7 +1,9 @@
-# K3-CONNECTOR-STATE-V1 r1 — K3 của kiem-merge đọc comment tóm tắt `codex-review-state:v1`
+# K3-CONNECTOR-STATE-V1 r2 — K3 của kiem-merge đọc comment tóm tắt `codex-review-state:v1`
 
 - packet_id: K3-CONNECTOR-STATE-V1
-- revision: 1
+- revision: 2
+- Thay r1 (sha256 26e9697e…288a, @6eb1163): r1 coi `null` ở hai cờ là sai kiểu, nhưng connector dùng đúng `null` khi
+  `status` là `"running"` (đo trên PR #1286, issuecomment-6722995278, 14:54:58Z). r2 sửa B2(e)/(g) và thêm ca C2.
 - Issue: #1288 · tracker #1206
 - Chủ kho duyệt mở packet ngày 2026-11-08 (phiên điều phối session_015GtxrYPjZCTZeRiazdssgq).
 - Executor: Google Antigravity CLI `agy`, model `gemini-4-argon-high`. Reviewer: Codex.
@@ -37,9 +39,10 @@ B2. Có marker thì:
 - (c) `code_review.commit_sha` không phải chuỗi khớp `SHA_RE` (40 hex thường) ⇒ `"hong"`.
   KHÔNG nhận tiền tố, chữ hoa hay khoảng trắng.
 - (d) `commit_sha != head` ⇒ `"cu"`.
-- (e) `commit_sha == head` thì `status`, `has_any_findings` và `has_unresolved_findings` phải đúng kiểu:
-  - `status` là chuỗi; hai cờ là `bool` THẬT. `0`, `1`, `"false"` hay `null` đều là sai kiểu.
-  - Sai kiểu ⇒ `"hong"`.
+- (e) `commit_sha == head` thì kiểm kiểu như sau. Sai kiểu ⇒ `"hong"`.
+  - `status` phải là chuỗi.
+  - Khi `status == "completed"`: hai cờ phải là `bool` THẬT. `0`, `1`, `"false"` hay `null` đều là sai kiểu.
+  - Khi `status != "completed"` (ví dụ `"running"`): mỗi cờ là `bool` hoặc `null`. Kiểu khác là sai kiểu.
 - (f) `commit_sha == head`, đúng kiểu, `status == "completed"`, cả hai cờ đều `False` ⇒ kết luận SẠCH trên head.
   Kết luận này đếm như `"hien"` cho điều kiện "connector đã xong" ở `_doc_connector`.
 - (g) `commit_sha == head`, đúng kiểu, nhưng `status != "completed"` HOẶC một trong hai cờ là `True` ⇒
@@ -67,7 +70,8 @@ B5. `has_unresolved_findings == True` trên head KHÔNG được đọc thành s
 C1. Ca dương: comment tóm tắt hợp lệ trên head, không có review hay `Reviewed commit:` nào ⇒ `kiem-merge` qua được
 K3. Dựng fixture từ đúng thân comment 6721722576, chỉ thay `commit_sha` bằng head của fixture.
 
-C2. Mỗi nhánh B2(a)–(h) và B5 có ít nhất một ca. Ca nào cũng phải khẳng định THÔNG ĐIỆP hoặc mã cụ thể,
+C2. Mỗi nhánh B2(a)–(h) và B5 có ít nhất một ca. Bắt buộc có ca `status: "running"` với hai cờ `null` trên head
+(mẫu thật: PR #1286 issuecomment-6722995278 lúc running). Ca này phải ra "chưa xong", KHÔNG ra `"hong"`. Ca nào cũng phải khẳng định THÔNG ĐIỆP hoặc mã cụ thể,
 không chỉ `rc != 0`. Đây là bài học "ca có MẶT khác ca có ĐO" trong CLAUDE.md.
 
 C3. Hồi quy:

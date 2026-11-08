@@ -1,0 +1,257 @@
+{
+  "packet": "wp1271",
+  "revision": 10,
+  "generation": 10,
+  "as_of": "2026-11-08T00:04:21.009922+00:00",
+  "attempts_used": 9,
+  "attempts_limit": 9,
+  "codex_review_calls_used": 16,
+  "codex_review_calls_limit": 16,
+  "code_review_rounds_used": 5,
+  "code_review_rounds_limit": 5,
+  "attempts": [
+    {
+      "n": 1,
+      "executor": "AGY",
+      "run": "233de6e2a30e4204920d06f8f1bd9142",
+      "state": "terminal_no_product_serving_family_unknown"
+    },
+    {
+      "n": 2,
+      "executor": "Claude Code",
+      "run": "68816b84b7ab4f4188c8b31c20fd6c93",
+      "head": "5f9ff6ca1f629310d84b4b8126d463ece22b009d",
+      "state": "terminal_remediation_required"
+    },
+    {
+      "n": 3,
+      "executor": "Claude Code",
+      "run": "a1d64fd5c18d4d6ba67c9835990964ed",
+      "session": "f3be83ef-fedf-4071-90e3-48d739ea70d1",
+      "state": "terminal_handoff",
+      "head": "ab0bbea700c091bd03b5f15bc9ce3aed0f695fb9"
+    },
+    {
+      "n": 4,
+      "executor": "Claude Code",
+      "run": "3a7e08f72d24418fbd3b67b5d9fb801a",
+      "session": "f3bbbdd4-c2dd-4ffb-a6d9-644135d7adf5",
+      "state": "terminal_handoff",
+      "generation": 4,
+      "head": "3467ca6ce185872a11851801315e218f6fe24057"
+    },
+    {
+      "n": 5,
+      "executor": "Claude Code",
+      "generation": 6,
+      "run": "effb1b62d4e943cabe20ccad7b403b15",
+      "session": "ba52873d-3a4f-4f37-bce6-b8b7d0aff933",
+      "state": "terminal_handoff",
+      "purpose": "narrow owned live VHD snapshot repair",
+      "head": "2678598cf7690982e4497853ff991fbc30eb3c4e"
+    },
+    {
+      "n": 6,
+      "executor": "Claude Code",
+      "generation": 7,
+      "run": "ed64c73f8e2a4361a0d26c2c8e4a9f8f",
+      "state": "terminal_handoff",
+      "head": "2d4ba724deddf8276e5ca3f0159f432d9a1f7fcc"
+    },
+    {
+      "n": 7,
+      "executor": "Claude Code",
+      "generation": 8,
+      "run": "ff612cc183994c9d85aea8d8797542fa",
+      "state": "terminal_handoff",
+      "purpose": "Rescue schema-first literal nonempty Unicode correction",
+      "head": "d047452486663c5e9c3bf234f3a62a3254213065"
+    },
+    {
+      "n": 8,
+      "executor": "Claude Code",
+      "generation": 9,
+      "run": "026971f67c944ed183befca7289e692d",
+      "state": "terminal_handoff",
+      "purpose": "Ordinal field-name identity after nativeconfirmedP2",
+      "head": "2b485a4fc0483973bd78c9236971e9ec63f86719"
+    },
+    {
+      "n": 9,
+      "executor": "Claude Code",
+      "generation": 10,
+      "run": "543dc17c54de467fb356eeb01675fc25",
+      "state": "terminal_handoff",
+      "purpose": "native-confirmed locale invariant path validation before review5",
+      "head": "d2fecaa1516cbc8c20b70331a45c8c728e59ddce"
+    }
+  ],
+  "codex_calls": [
+    {
+      "n": 1,
+      "run": "c56c818c7e8a443caee93e057ac4a0fc",
+      "purpose": "admission_audit",
+      "verdict": "blocked",
+      "code_review_round": false
+    },
+    {
+      "n": 2,
+      "run": "/root/tl_auditor",
+      "purpose": "auxiliary_readonly_long_gate_log_audit_CLAUDE_step5",
+      "state": "terminal_auxiliary_audit_passed",
+      "code_review_round": false,
+      "transport": "codex_service collaboration",
+      "identity_note": "No formal code approval; conservatively charged shared Codex call budget",
+      "conclusion": "No material Linux receipt inconsistency; not independent code approval"
+    },
+    {
+      "n": 3,
+      "purpose": "independent_exact_H_sensitive_code_review_round1",
+      "head": "ab0bbea700c091bd03b5f15bc9ce3aed0f695fb9",
+      "state": "terminal_changes_requested",
+      "run": "9e799cda45944fed953cfa45ff5f9a8e",
+      "open_classes": 4
+    },
+    {
+      "n": 4,
+      "purpose": "auxiliary_readonly_long_log_audit_newH_CLAUDEstep5",
+      "run": "/root/tl_auditor followup",
+      "head": "43f5c92a0c329c37b37face4e3ae7cdea46f3b18",
+      "code_review_round": false,
+      "state": "terminal_auxiliary_audit_passed",
+      "conclusion": "ExactnewH/baseC Linux1777/1777 and all bound receipts validated; not codeapproval"
+    },
+    {
+      "n": 5,
+      "purpose": "auxiliary_readonly_long_log_audit_finalH_CLAUDEstep5",
+      "run": "/root/tl_auditor followup3",
+      "head": "2678598cf7690982e4497853ff991fbc30eb3c4e",
+      "code_review_round": false,
+      "state": "terminal_auxiliary_audit_passed"
+    },
+    {
+      "n": 6,
+      "purpose": "independent_exact_H_sensitive_code_review_round2",
+      "head": "2678598cf7690982e4497853ff991fbc30eb3c4e",
+      "state": "terminal_changes_requested",
+      "run": "42c31cf474534a92968b90ba196ca7b1",
+      "open_classes": 1
+    },
+    {
+      "n": 7,
+      "purpose": "auxiliary_readonly_long_log_audit_newH_CLAUDEstep5",
+      "run": "/root/tl_auditor followup4",
+      "head": "2d4ba724deddf8276e5ca3f0159f432d9a1f7fcc",
+      "code_review_round": false,
+      "state": "terminal_auxiliary_audit_passed",
+      "conclusion": "H5 Linux1777/1777 exactC/identity/all7loghashes/Ruffdelta0/manifest184 verified; no material inconsistencies; not codeapproval"
+    },
+    {
+      "n": 8,
+      "purpose": "independent_exact_H_sensitive_code_review_round3",
+      "head": "2d4ba724deddf8276e5ca3f0159f432d9a1f7fcc",
+      "state": "terminal_changes_requested",
+      "run": "0fcd56b75d484379af27afbb49e50326",
+      "open_classes": [
+        "schema_overrestriction1",
+        "spec_identity_grammar1"
+      ]
+    },
+    {
+      "n": 9,
+      "purpose": "auxiliary_readonly_long_log_audit_R8newH_CLAUDEstep5",
+      "run": "/root/tl_auditor followup5",
+      "head": "d047452486663c5e9c3bf234f3a62a3254213065",
+      "code_review_round": false,
+      "state": "terminal_auxiliary_audit_passed",
+      "conclusion": "ExactH6 all7loghashes/selftest1777/1777/runtime/catalog/admissionC/Ruffdelta0/strictmanifest184 validated; no material inconsistency, not codeapproval"
+    },
+    {
+      "n": 10,
+      "purpose": "independent_exact_H_sensitive_code_review_round4",
+      "head": "d047452486663c5e9c3bf234f3a62a3254213065",
+      "state": "terminal_changes_requested",
+      "run": "09287a70c8c243f1a0410f19067f4118",
+      "closed_previous_classes": [
+        "schema_overrestriction1",
+        "spec_identity_grammar1"
+      ],
+      "new_open_class": "schema_unknown_field_bypass1"
+    },
+    {
+      "n": 11,
+      "purpose": "CLAUDE_step5_required_readonly_longlog_digest_R10H8",
+      "head": "d2fecaa1516cbc8c20b70331a45c8c728e59ddce",
+      "run": "/root/tl_auditor followup6",
+      "code_review_round": false,
+      "state": "terminal_auxiliary_audit_passed",
+      "conclusion": "H8 exactC/tree/runtime/binary/7loghashes/1777/1777/admission/Ruffdelta0/strict184 validated; not codeapproval"
+    },
+    {
+      "n": 12,
+      "purpose": "independent_exact_H_sensitive_code_review_round5",
+      "head": "d2fecaa1516cbc8c20b70331a45c8c728e59ddce",
+      "state": "terminal_approved",
+      "run": "616c0f3dc54a40fd88a2b0a693648b99",
+      "closed_classes": [
+        "schema_unknown_field_bypass1",
+        "reserved_device_locale_bypass1"
+      ],
+      "open_findings": 0
+    },
+    {
+      "n": 13,
+      "purpose": "Draft PR exact-H connector review",
+      "head": "d2fecaa1516cbc8c20b70331a45c8c728e59ddce",
+      "pr": 1276,
+      "code_review_round": false,
+      "provider": "openai_codex",
+      "surface": "codex_service",
+      "model": "KHONG_DO_DUOC",
+      "state": "terminal_no_findings",
+      "request_comment": 6713655008,
+      "service_summary_comment": 6713656775,
+      "receipt_comment": 6713671526
+    },
+    {
+      "n": 14,
+      "purpose": "CLAUDE_step5 mandatory PRCI long-log digest, waits for final CI source before conclusion",
+      "pr": 1276,
+      "head": "d2fecaa1516cbc8c20b70331a45c8c728e59ddce",
+      "run": "/root/tl_auditor followup7",
+      "code_review_round": false,
+      "state": "terminal_auxiliary_ci_audit_passed",
+      "must_not_finalize_before": "pr1276-final-ci-pointer.json",
+      "conclusion": "23Ubuntu/alllogs hashes/requiredpositiveoutputs/actualfouranchorsverified, boundedunknowns/skipsnotcountedpass;notcodeapproval"
+    },
+    {
+      "n": 15,
+      "purpose": "Observed automatic connector review after Draft marked Ready",
+      "head": "d2fecaa1516cbc8c20b70331a45c8c728e59ddce",
+      "pr": 1276,
+      "code_review_round": false,
+      "provider": "openai_codex",
+      "surface": "codex_service",
+      "model": "KHONG_DO_DUOC",
+      "state": "terminal_no_findings",
+      "source_comment": 6713656775,
+      "trigger": "Draft marked ready",
+      "observed_start": "2026-11-07T23:15:42.438278Z",
+      "completed_at": "2026-11-07T23:17:12.752325Z"
+    },
+    {
+      "n": 16,
+      "purpose": "mandatory_readonly_canonical_CI_long_log_audit_CLAUDE_step5",
+      "run": "/root/tl_auditor followup canonical M",
+      "head": "efebadf83409a81e42e6c97f1b7255ede76110f5",
+      "run_id": 42424728996,
+      "code_review_round": false,
+      "state": "terminal_auxiliary_audit_passed",
+      "note": "Same turn waits for final pointer; not code approval; no additional model call allocated.",
+      "receipt_sha256": "96a2df9be386f97e6d837c7c3d714956421f540172852fa915ff480f762a8a30",
+      "conclusion": "No material inconsistency; all23logs/officialartifact/4sourceanchors; notcodeapproval"
+    }
+  ],
+  "primary_product_pushes_used": 1,
+  "primary_product_pushes_limit": 1
+}

@@ -1,0 +1,5 @@
+Canonical M efebadf83409a81e42e6c97f1b7255ede76110f5: actual automatic push run42424728996/attempt1,23/23Ubuntu SUCCESS. All four source anchors independently audited; original bounded-consumer unknowns remain unknown, never recast as automated pass. Official artifact13595253034 SHA0821a2d3313313b74e98d726ebc36eda3e90bea6678dd4a47d8ee5aaf1ea55c6 matches GitHub digest; actual1777/1777,rc0, CPython3.12.16/Linux exactM cleanidentity and command/output/runner/catalog hashes verified.
+
+Original auxiliary conclusion/receipt retained, not formal code approval or human audit. Packet-loop Windows-only case/mutant skips remain skips, no WindowsCI/fullWindowsmutation rerun. NativeH8 evidence from final-H8 checkpoint remains measured native evidence, not inferred from equal trees.
+
+Full ref-fence deltas classified using actual diffs and reconstructed synthetic merge trees; other lease write sets do not overlap. Actual terminal lease retirement recorded UTCZ; canonical unmodified D1–D4 returned rc0. M8 Issue publication/readback and closure receipts follow separately. No product edits, no LIVE/runtime activation, no recursive bookkeeping PR.

@@ -1,0 +1,11 @@
+Canonical automatic push CI source audit: no material inconsistency found.
+Run 42424728996 / attempt 1 / push / master tested exact M efebadf83409a81e42e6c97f1b7255ede76110f5; 23/23 Ubuntu jobs completed success. All 23 decoded-log/source-record hashes and sizes match. Actual checkout M has parents C/H and tree 818cb867ad28eb26e00d1f8d14ea847316205d94.
+Official artifact 13595253034 gate-evidence-ubuntu-latest-1 matches GitHub SHA-256 0821a2d3313313b74e98d726ebc36eda3e90bea6678dd4a47d8ee5aaf1ea55c6. Its full selftest child rc is 0 with actual 1777/1777 output; command/output/runner/catalog hashes match, before/after exact-M clean identities agree, runtime is CPython 3.12.16 on Linux. Artifact base_sha=M follows the frozen workflow merge-base recipe.
+Required positive evidence: core 1777/1777; packet-loop baseline 1359/1359 with one named Windows-only skip (1360 declared), terminal TỔNG: ĐẠT, 1523 declared mutants with one named associated mutant skipped; ops 118/118, receipts 98/98 and 153/153 mutants, lease 285/285, updater 48/48, cleanup 21/21, lifecycle 28/28; tool aggregate 8/8 shards, 61 cases/490 mutants/0 mutant errors; registry 29/29 registration and 15/15 executed suites rc0. Targeted aggregate additionally has 8/8 shards, 56/56 cases, 255/255 targeted self-mutants and 10/10 product mutants.
+All four anchors have actual source evidence: run/API bindings, all-job exact-M checkout observations, actual GraphQL workflow-definition with matching Git blob/hash, and gate command/step success plus positive outputs and official lifecycle artifact. Required test steps have no continue-on-error.
+Limits:
+- All 23 raw canonical gate-output job observations remain not_measured; the raw workflow-definition slot remains not_measured. This source audit supplies a separate derived four-anchor conclusion, not an automated consumer pass.
+- Packet-loop skips one named Windows-only case and its associated mutant; skips are not passes or killed mutants.
+- Log hashes identify official plugin received UTF-8 decoded text; original remote raw-byte identity is not asserted.
+- Lifecycle records quet-cay and a lock path; lock enforcement was not independently tested by this audit.
+- Native Windows was not rerun. This is auxiliary canonical CI evidence auditing, not formal code approval.

@@ -1,5 +1,5 @@
 schema_version: 2
-event: executor_lease_granted
+event: executor_lease_retired
 packet_issue: 1271
 packet_id: wp1271
 mission_issue: 1238
@@ -53,8 +53,8 @@ recorder_is_executor: false
 heartbeat_required_minutes: 360
 leased_at_utc: '2026-11-07T21:13:52Z'
 heartbeat_at: '2026-11-07T21:13:52Z'
-lease_until: '2026-11-08T01:13:52Z'
-lease_expires_at_utc: '2026-11-08T01:13:52Z'
+lease_until: '2026-11-08T00:04:21Z'
+lease_expires_at_utc: '2026-11-08T00:04:21Z'
 run_minutes: 90
 attempts_limit: 9
 review_rounds_limit: 5
@@ -83,3 +83,9 @@ nang_tran:
     allreview/CIlog/connectorallowances unchanged
   tran_cu: same3files950,attempts8,calls16,rounds5
   tran_moi: same3files950,attempts9,calls16,rounds5
+status: retired
+retired_at_utc: '2026-11-08T00:04:21Z'
+retired_reason: exact_H_merged_canonical_CI_23_of_23_passed_no_remaining_executor_work
+final_head: d2fecaa1516cbc8c20b70331a45c8c728e59ddce
+final_merge: efebadf83409a81e42e6c97f1b7255ede76110f5
+retirement_authority: https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6714107843

@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "-B",
+    "/workspace/scratch/wp1271-canonical-c6afde6/.claude/dev/packet_loop.py",
+    "--state-dir",
+    "/workspace/scratch/proxima-p1-s1-20261107/pr1276-land-operator-state",
+    "kiem-dong-wp",
+    "--root",
+    "/workspace/scratch/wp1271-spec-publish",
+    "--bien-ban",
+    "/workspace/scratch/proxima-p1-s1-20261107/wp1271-M8-final.yaml",
+    "--lease",
+    "/workspace/scratch/wp1271-spec-publish/ops/leases/wp1271-r10-g10-claude.yaml"
+  ],
+  "rc": 0,
+  "checker_sha256": "2aced17b136132f7216056b39a253656ce251a9520752f8091138f39e0077a92",
+  "M8_sha256": "cec05b875a448502659be34920f07df6beb06b518fb7b95ff2f2aece343365cc",
+  "lease_sha256": "b68746efb153691d66705352f0f15577949e41856c667dfdfc3f7f92576a775a",
+  "output_sha256": "5a811ab58873b80e39883b3a2adcd3f3936173e27b5e8a1d0ade2ce3b59da7ab",
+  "at": "2026-11-08T00:04:34.691982+00:00"
+}

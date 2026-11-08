@@ -1,0 +1,25 @@
+{
+  "merge_commit": "efebadf83409a81e42e6c97f1b7255ede76110f5",
+  "run_id": 42424728996,
+  "attempt": 1,
+  "source_validation_sha256": "e9f8822a0ec51ce5ae195cdf86dc4c5dec371984bbde2f0bbe7649f5b29f5f2c",
+  "auditor_receipt_sha256": "96a2df9be386f97e6d837c7c3d714956421f540172852fa915ff480f762a8a30",
+  "four_anchors": {
+    "run": "passed",
+    "checkout": "passed",
+    "workflow_definition": "passed",
+    "gate_output": "passed"
+  },
+  "actual_checkout": "efebadf83409a81e42e6c97f1b7255ede76110f5",
+  "actual_tree": "818cb867ad28eb26e00d1f8d14ea847316205d94",
+  "all_required_jobs_success": true,
+  "basis": "Measured original API/log/artifact sources plus mandatory independent auxiliary call16; raw bounded consumer unknowns remain unknown.",
+  "limits": [
+    "All 23 raw canonical gate-output job observations remain not_measured; the raw workflow-definition slot remains not_measured. This source audit supplies a separate derived four-anchor conclusion, not an automated consumer pass.",
+    "Packet-loop skips one named Windows-only case and its associated mutant; skips are not passes or killed mutants.",
+    "Log hashes identify official plugin received UTF-8 decoded text; original remote raw-byte identity is not asserted.",
+    "Lifecycle records quet-cay and a lock path; lock enforcement was not independently tested by this audit.",
+    "Native Windows was not rerun. This is auxiliary canonical CI evidence auditing, not formal code approval."
+  ],
+  "at": "2026-11-08T00:04:21.004910+00:00"
+}

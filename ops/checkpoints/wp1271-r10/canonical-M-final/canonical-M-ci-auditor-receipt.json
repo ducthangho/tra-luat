@@ -1,0 +1,378 @@
+{
+  "schema": "auxiliary-ci-log-audit/1",
+  "audited_at_utc": "2026-11-08T00:03:20.527403+00:00",
+  "scope": "canonical automatic push CI evidence only; not formal code review or approval",
+  "run_id": 42424728996,
+  "attempt": 1,
+  "event": "push",
+  "head": "efebadf83409a81e42e6c97f1b7255ede76110f5",
+  "parents": [
+    "c6afde62c846f1ef3d6a83c14459966849edf756",
+    "d2fecaa1516cbc8c20b70331a45c8c728e59ddce"
+  ],
+  "tree": "818cb867ad28eb26e00d1f8d14ea847316205d94",
+  "source_directory": "/workspace/scratch/proxima-p1-s1-20261107/canonical-M-ci-final",
+  "validation_sha256": "e9f8822a0ec51ce5ae195cdf86dc4c5dec371984bbde2f0bbe7649f5b29f5f2c",
+  "pointer_sha256": "b5b9b06e8806214ba9e55fbea6db53da8606f42bedbfb08b329f93971951a9a3",
+  "official_api_sources": {
+    "run.json": "38ace922688bd7909d32a1926337086e8b412e0fcd90e2f384c9712e9bf0d255",
+    "jobs-pages.json": "65d6e193b12475f3597a7c0f29ae157020dac9c4229ee81f6edcfd07f1eea5f8",
+    "artifacts-pages.json": "eef0c260ab6ef98a540f40fe83d013f4f070a88a27278234d71daa5bf45952c1"
+  },
+  "jobs_total": 23,
+  "jobs_success": 23,
+  "logs_verified": 23,
+  "source_log_hashes": [
+    {
+      "job_id": 128560452664,
+      "name": "chuan-bi",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "f85eff49a9ff1c44fca0cab738f093c6f2337ce7700fbdec5a9a4fd9ae9921a9",
+      "bytes": 107224,
+      "source_record_sha256": "7aba3cc30ee307f95e1270d6ec4f3cae2adabb66d43c714c4406f0f39dc1cca0",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502303,
+      "name": "gate (ubuntu-latest)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "8ba16014ec00952e55577176ccd0f18e034a2cf9155a4fd9116e3a774b689c4a",
+      "bytes": 696804,
+      "source_record_sha256": "bc6b36d5ac98c0ca9ca7c0d5f7eb3034c3a85578d445c964c292ab03ff63c16c",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502310,
+      "name": "gate-ops (ubuntu-latest)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "7dd8a4566f79f3223b6877fbeeec50fb234ce65bf19026cfc3ad2a486294ad59",
+      "bytes": 487165,
+      "source_record_sha256": "3156a10c6d836710e050cbfda86ca64f63f21f26afe6b5438a806851a77f11d2",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502333,
+      "name": "gate-packet-loop (ubuntu-latest)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "29f18fa7498a244c95cc49de39e87274bdf102364af833e0107a8f6ebf40d185",
+      "bytes": 327093,
+      "source_record_sha256": "1c92a5a32583a11bdd1d8ff7b30a7cb298e1f0c86261a1923df52969c6309c33",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502348,
+      "name": "gate-cong-cu (ubuntu-latest, 3)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "c5aaf09c4c8599a0ee22c75943925c0d9eeca77d2ccf527508b3351ec98922dc",
+      "bytes": 132087,
+      "source_record_sha256": "17592b633912123fcbdd466bfea91396d965db32cbfcdd96dc7684a267dcbcab",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502354,
+      "name": "gate-nhanh-manh (ubuntu-latest, 0)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "58c304575366e6330942018228afadd7dfb8e180b049f7bf603eaa846de84cd4",
+      "bytes": 119677,
+      "source_record_sha256": "7b3578d4dff8bdbc3f2e1e7db7f534589da61f6a8e4a7d7243bee594266733c2",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502355,
+      "name": "gate-nhanh-manh (ubuntu-latest, 3)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "75e48d4766e55726284f74c26f06eaf53418327c5266a10b55b464bb9c4eb11d",
+      "bytes": 120554,
+      "source_record_sha256": "07cffe574f6e7d8426cc638bdb58532df4b04b52385e6898dad92d2b31f8c57e",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502364,
+      "name": "gate-cong-cu (ubuntu-latest, 0)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "8c4b900fda84aff758ea132541ea5c305f3e670826e0666c0e7121bcb889c1f4",
+      "bytes": 132578,
+      "source_record_sha256": "08913552445dc9d62490b11fba701b5366317b8ce5285fe7c248a62076b0a256",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502380,
+      "name": "gate-nhanh-manh (ubuntu-latest, 6)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "9239411406d8dc9aad6ab186761444a459b47ef453f99679b5fe25b36b8a6155",
+      "bytes": 120444,
+      "source_record_sha256": "ef96ce1f574e44ff0d2eabb148f3e563eaffd6755e8869f8066f0f1d78846fc3",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502381,
+      "name": "gate-cong-cu (ubuntu-latest, 7)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "77fceddad81ba2289c6a53e3215f2ec23b992be9270f84127ae20900fc736b89",
+      "bytes": 132360,
+      "source_record_sha256": "38ec80a0e1fba8ab0f02e3c81b49eebeb485a8e4313c76e2d68636eb1b62fccc",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502385,
+      "name": "gate-cong-cu (ubuntu-latest, 5)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "7616e65d5e125b08f8f27c2a8a87478c2e6b6cdfa1e477a783862e09d75f324a",
+      "bytes": 131792,
+      "source_record_sha256": "78c8b4062fdd9e98d60557e393afce928137bfcd35ffbae647f223d8f4cea0dc",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502402,
+      "name": "gate-cong-cu (ubuntu-latest, 6)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "2380c3f4953ff6824f67a18da92e2a94ac696fd1a1463ea84a24ec18132c7ba5",
+      "bytes": 132273,
+      "source_record_sha256": "43b690370da1ac1caf4b98771a4fed051621a866bb59028d64624e4afa4b5df0",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502433,
+      "name": "gate-cong-cu (ubuntu-latest, 4)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "e96e5981bf128c86f45ef3918fd4aae3d4b7d5681aba1856f354ebf7b60f0f19",
+      "bytes": 131931,
+      "source_record_sha256": "98ff21325ec581b1831bd2142d41365ac6dfa7faba052512255dae25bfc7c3ca",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502435,
+      "name": "gate-nhanh-manh (ubuntu-latest, 1)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "6a36c2325ef7ca50d3b639e5372015f163b7e42d19435a40a5f41ffc43c541f7",
+      "bytes": 120863,
+      "source_record_sha256": "2050064115bedfb34b2482dd078a05cfc772c04dcf0684a6c107b3b32171af30",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502436,
+      "name": "gate-nhanh-manh (ubuntu-latest, 5)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "d75f87f10dc7da4c7e4c93a3b26f7781c67c531cb0c3ad3f09153920799219f6",
+      "bytes": 120551,
+      "source_record_sha256": "b630d13dae0f92b0cc6671d95f35716ebe419813eba7a32de9cb12ae2a265a9d",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502442,
+      "name": "gate-nhanh-manh (ubuntu-latest, 7)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "015ace1feb087fd3761b1d0f279316d0e832ee27399407b30138489b0ab8b567",
+      "bytes": 121248,
+      "source_record_sha256": "aa5dc5677bc3f72ad92610e07d0e4a0c9b5fa4eee66caddf775f9ab4eef22f3e",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502451,
+      "name": "gate-cong-cu (ubuntu-latest, 1)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "31fe10c43da904d66e51f7ef189523f220d988ca6b30c6b19aba91977814d23e",
+      "bytes": 132119,
+      "source_record_sha256": "e0db86308a62576dca00445d25b4f9dee34db047935d550b1497409c59075cce",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502455,
+      "name": "gate-nhanh-manh (ubuntu-latest, 2)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "41284d7f39a0e8b2077351cc2bf63609a1a55975abd65b4f87f70d475bc56372",
+      "bytes": 119886,
+      "source_record_sha256": "01595c4bc5c279a8a8f860f5d0293bb02e692d6fb23e804fd20fbc12332ae19e",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560502482,
+      "name": "gate-cong-cu (ubuntu-latest, 2)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "b176d5e3875620f56c95f25139c2fe1252bff354e26b1df93f7090b6a7f14ee2",
+      "bytes": 131965,
+      "source_record_sha256": "d3f8077957701851f2837f972ae089fdd6aaa9ea4194c5094075409ece45ed53",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560503097,
+      "name": "gate-nhanh-manh (ubuntu-latest, 4)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "efd34aaa4da0947945b3db87487f0816fccd1463c1ea64107787cc209c450dc9",
+      "bytes": 120250,
+      "source_record_sha256": "83cd25061dd617d86b4a095b88e83c205b2ed16ec240f3b94d314008d4fd46c3",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560907554,
+      "name": "gate-nhanh-gop (ubuntu-latest)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "c5650c3f43eb7f45b3c07787188401acb2e3af6fc9e338bf6b960eb5a34ec6e0",
+      "bytes": 115949,
+      "source_record_sha256": "a994cdb60f9e2a87346e82b3b60994a3ae2c90608f5978fac896ef34daebf387",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128560963945,
+      "name": "gate-registry (ubuntu-latest)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "e43295325f26a8154a8545fc039a68afaa98db95b23fb75cda0401e421678d4c",
+      "bytes": 245037,
+      "source_record_sha256": "8ec03056ce747be7a101359cfebd81533759aa1b030351c9b9530b11835db70e",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 128565321744,
+      "name": "gate-cong-cu-gop (ubuntu-latest)",
+      "conclusion": "success",
+      "sha256_of_received_UTF8_text": "91e3d3c36288708f657a7cb888f387aeb7397fd2932b4569fe8f2b52e1c6b151",
+      "bytes": 98283,
+      "source_record_sha256": "3449b3c4c7497bec2e7d4cf53924766626c408f065929f2d370a384c537af652",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    }
+  ],
+  "artifact": {
+    "id": 13595253034,
+    "name": "gate-evidence-ubuntu-latest-1",
+    "bytes": 25038,
+    "sha256": "0821a2d3313313b74e98d726ebc36eda3e90bea6678dd4a47d8ee5aaf1ea55c6",
+    "github_digest_match": true,
+    "evidence_json_sha256": "621347e8439f52d700799902b012069aea883a96f67c275b505a0edd8e2f891d",
+    "output_sha256": "66ab563cea74d841acad085ce610932c55248ceff289563b9170372066b4c1e3",
+    "child_rc": 0,
+    "identity_before_after_equal": true,
+    "base_sha": "efebadf83409a81e42e6c97f1b7255ede76110f5",
+    "runtime": {
+      "catalog_policy_sha256": "e8b7be5e7f1f77a4d4d065d49dbd616a6e9b5260541e61debfe7d5d62638c679",
+      "head_sha": "efebadf83409a81e42e6c97f1b7255ede76110f5",
+      "machine": "x86_64",
+      "python_implementation": "CPython",
+      "python_version": "3.12.16",
+      "runner_sha256": "637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810",
+      "system": "Linux",
+      "system_release": "7.0.0-1019-azure",
+      "tracked_clean": true,
+      "tree_sha": "818cb867ad28eb26e00d1f8d14ea847316205d94",
+      "worktree_clean": true
+    }
+  },
+  "workflow_definition": {
+    "schema": "wd/1",
+    "repo": "ducthangho/tra-luat",
+    "run_id": 42424728996,
+    "loi_graphql": [],
+    "nguon": "ops/ci_provenance.py do-wd",
+    "run_attempt_luc_do": 1,
+    "event": "push",
+    "node_id": "WFR_kwLOTNeRjc8AAAAJ4LX9pA",
+    "head_sha_rest": "efebadf83409a81e42e6c97f1b7255ede76110f5",
+    "run_number": 4291,
+    "created_at": "2026-11-07T23:19:34Z",
+    "path": ".github/workflows/ci.yml",
+    "repository_file_url": "https://github.com/ducthangho/tra-luat/blob/efebadf83409a81e42e6c97f1b7255ede76110f5/.github/workflows/ci.yml",
+    "check_suite_commit": "efebadf83409a81e42e6c97f1b7255ede76110f5",
+    "oid_dinh_nghia": "efebadf83409a81e42e6c97f1b7255ede76110f5",
+    "blob": "2b2c9aa25ad1c136e44cba457d9ae765d2544fc2",
+    "sha256": "aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67",
+    "trang_thai": "passed",
+    "ly_do": null
+  },
+  "required_positive_counts": {
+    "gate": {
+      "selftest": "1777/1777",
+      "child_rc": 0
+    },
+    "gate-packet-loop": {
+      "baseline": "1359/1359",
+      "declared_cases": 1360,
+      "named_windows_case_skipped": 1,
+      "declared_mutants": 1523,
+      "named_windows_mutant_skipped": 1,
+      "terminal": "TỔNG: ĐẠT"
+    },
+    "gate-ops": {
+      "classification": "118/118",
+      "receipts": "98/98",
+      "receipt_mutants": "153/153",
+      "lease_publish": "285/285",
+      "updater": "48/48",
+      "cleanup": "21/21",
+      "lifecycle": "28/28"
+    },
+    "gate-cong-cu-gop": {
+      "shards": "8/8",
+      "cases": 61,
+      "mutants": 490,
+      "mutant_errors": 0
+    },
+    "gate-registry": {
+      "registration": "29/29",
+      "executed_suites": 15,
+      "suite_rcs": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "gate-nhanh-gop": {
+      "shards": "8/8",
+      "base_cases": "56/56",
+      "targeted_self_mutants": "255/255",
+      "product_mutants": "10/10"
+    }
+  },
+  "derived_four_anchors": {
+    "run": "source_supported",
+    "checkout": "source_supported",
+    "workflow_definition": "source_supported",
+    "gate_output": "source_supported_by_auxiliary_audit"
+  },
+  "raw_consumer_gate_job_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured"
+  ],
+  "raw_consumer_workflow_definition_state": "not_measured",
+  "material_issues": [],
+  "limits": [
+    "All 23 raw canonical gate-output job observations remain not_measured; the raw workflow-definition slot remains not_measured. This source audit supplies a separate derived four-anchor conclusion, not an automated consumer pass.",
+    "Packet-loop skips one named Windows-only case and its associated mutant; skips are not passes or killed mutants.",
+    "Log hashes identify official plugin received UTF-8 decoded text; original remote raw-byte identity is not asserted.",
+    "Lifecycle records quet-cay and a lock path; lock enforcement was not independently tested by this audit.",
+    "Native Windows was not rerun. This is auxiliary canonical CI evidence auditing, not formal code approval."
+  ],
+  "conclusion": "No material inconsistency found; canonical Ubuntu CI source evidence supports all four anchors within the stated measured scope.",
+  "conclusion_file_sha256": "b7784b7bc0582d6c0c722c38aa47f64d4e7ad04d622f5f99a4503ad8fe6f1165"
+}

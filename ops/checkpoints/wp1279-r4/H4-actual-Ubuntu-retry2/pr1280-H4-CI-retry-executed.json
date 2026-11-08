@@ -1,0 +1,35 @@
+{
+  "run_id": 42469501853,
+  "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "old_attempt": 1,
+  "next_attempt_requested": 2,
+  "plan": {
+    "metadata_commit": "b439b14c5231adac220639520577d1da17bd74c6",
+    "retry_path": "ops/checkpoints/wp1279-r4/H4-metadata-drift-and-CI-retry-v3/retry-plan-v3.json",
+    "conditional_authority_path": "ops/land/wp1279-r4-pr1280-conditional-authority-base3cc0bc7.json",
+    "conditional_valid_until": "2026-11-08T14:25:49Z",
+    "current_canonical": "3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4",
+    "comment": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6720336629",
+    "comment_id": 6720336629,
+    "exact_body": true,
+    "remote_blobs_exact": true,
+    "retry_used": 0,
+    "retry_limit": 1
+  },
+  "started_at": "2026-11-08T11:09:30.330009+00:00",
+  "command": [
+    "/workspace/scratch/proxima-p0-tools/gh",
+    "run",
+    "rerun",
+    "42469501853",
+    "--repo",
+    "ducthangho/tra-luat"
+  ],
+  "state": "request_accepted",
+  "allowance_used": 1,
+  "allowance_limit": 1,
+  "request_exit": 0,
+  "finished_at": "2026-11-08T11:09:34.468143+00:00",
+  "observed_run_attempt": 2,
+  "observed_status": "queued"
+}

@@ -1,0 +1,135 @@
+{
+  "endpoint": "https://github.com/ducthangho/tra-luat.git",
+  "at": "2026-11-08T11:05:21.721330+00:00",
+  "rc": 0,
+  "canonicalization": "UTF8 OID TAB ref LF sorted by ref Unicode codepoint; ALL refs inclHEAD/tags/pull",
+  "sha256": "40c4f833cfa178b5658385f2e7e988363b91c14d96f77dd23d0b95aa23c0d256",
+  "count": 1749,
+  "deltas": [
+    {
+      "ref": "refs/heads/ops/land-1272-landed",
+      "old": null,
+      "new": "b45f6bde07bec62127323131985bf5852829ab5d"
+    },
+    {
+      "ref": "refs/heads/ops/wp1179-r9-g1-lease",
+      "old": "e5650426eb3069ea02e6c5f028799e87f449c475",
+      "new": "737daddf1527d0894e1f884184f0985a1fca64ef"
+    },
+    {
+      "ref": "refs/heads/ops/wp1279-spec",
+      "old": "b439b14c5231adac220639520577d1da17bd74c6",
+      "new": "b90e70c30562d81b6dcc9bedb5aa65a6c518c2ac"
+    },
+    {
+      "ref": "refs/pull/1283/head",
+      "old": null,
+      "new": "b45f6bde07bec62127323131985bf5852829ab5d"
+    },
+    {
+      "ref": "refs/pull/1283/merge",
+      "old": null,
+      "new": "b5e1fed537e0e684dbc3769c88d468aa2fc5b51b"
+    }
+  ],
+  "classifications": [
+    {
+      "ref": "refs/heads/ops/land-1272-landed",
+      "old": null,
+      "new": "b45f6bde07bec62127323131985bf5852829ab5d",
+      "comparison_start": "3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4",
+      "changed_paths": [
+        "ops/land/pr1267-wp1252-land-evidence.yaml",
+        "ops/land/pr1267-wp1252-provenance/SHA256SUMS",
+        "ops/land/pr1267-wp1252-provenance/bien-ban-m8.yaml",
+        "ops/land/pr1267-wp1252-provenance/kiem-dong-wp-m8.txt",
+        "ops/land/pr1267-wp1252-provenance/readback-chu-kho-approve-merge-issuecomment-6720621366.json",
+        "ops/land/pr1267-wp1252-provenance/readback-chu-kho-mien-a14-issuecomment-6720449021.json",
+        "ops/land/pr1267-wp1252-provenance/readback-issuecomment-6720413056.json",
+        "ops/land/pr1277-wp1272-land-evidence.yaml",
+        "ops/land/pr1277-wp1272-provenance/SHA256SUMS",
+        "ops/land/pr1277-wp1272-provenance/bien-ban-m8.yaml",
+        "ops/land/pr1277-wp1272-provenance/kiem-dong-wp-m8.txt",
+        "ops/land/pr1277-wp1272-provenance/readback-chu-kho-approve-merge-issuecomment-6720439348.json"
+      ],
+      "overlap": [],
+      "classification": "independent lease/land-metadata progress, disjointS2"
+    },
+    {
+      "ref": "refs/heads/ops/wp1179-r9-g1-lease",
+      "old": "e5650426eb3069ea02e6c5f028799e87f449c475",
+      "new": "737daddf1527d0894e1f884184f0985a1fca64ef",
+      "comparison_start": "e5650426eb3069ea02e6c5f028799e87f449c475",
+      "changed_paths": [
+        "ops/leases/wp1179-r9-g1-claude-remote-20261106.yaml"
+      ],
+      "overlap": [],
+      "classification": "independent lease/land-metadata progress, disjointS2"
+    },
+    {
+      "ref": "refs/heads/ops/wp1279-spec",
+      "old": "b439b14c5231adac220639520577d1da17bd74c6",
+      "new": "b90e70c30562d81b6dcc9bedb5aa65a6c518c2ac",
+      "comparison_start": "b439b14c5231adac220639520577d1da17bd74c6",
+      "changed_paths": [
+        "ops/checkpoints/wp1279-r4/H4-CI-audit-wall-plan/audit-wall-plan.json"
+      ],
+      "overlap": [],
+      "classification": "ownauthorizedAUXwallplanmetadata"
+    },
+    {
+      "ref": "refs/pull/1283/head",
+      "old": null,
+      "new": "b45f6bde07bec62127323131985bf5852829ab5d",
+      "comparison_start": "3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4",
+      "changed_paths": [
+        "ops/land/pr1267-wp1252-land-evidence.yaml",
+        "ops/land/pr1267-wp1252-provenance/SHA256SUMS",
+        "ops/land/pr1267-wp1252-provenance/bien-ban-m8.yaml",
+        "ops/land/pr1267-wp1252-provenance/kiem-dong-wp-m8.txt",
+        "ops/land/pr1267-wp1252-provenance/readback-chu-kho-approve-merge-issuecomment-6720621366.json",
+        "ops/land/pr1267-wp1252-provenance/readback-chu-kho-mien-a14-issuecomment-6720449021.json",
+        "ops/land/pr1267-wp1252-provenance/readback-issuecomment-6720413056.json",
+        "ops/land/pr1277-wp1272-land-evidence.yaml",
+        "ops/land/pr1277-wp1272-provenance/SHA256SUMS",
+        "ops/land/pr1277-wp1272-provenance/bien-ban-m8.yaml",
+        "ops/land/pr1277-wp1272-provenance/kiem-dong-wp-m8.txt",
+        "ops/land/pr1277-wp1272-provenance/readback-chu-kho-approve-merge-issuecomment-6720439348.json"
+      ],
+      "overlap": [],
+      "classification": "independent lease/land-metadata progress, disjointS2"
+    },
+    {
+      "ref": "refs/pull/1283/merge",
+      "old": null,
+      "new": "b5e1fed537e0e684dbc3769c88d468aa2fc5b51b",
+      "comparison_start": "3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4",
+      "changed_paths": [
+        "ops/land/pr1267-wp1252-land-evidence.yaml",
+        "ops/land/pr1267-wp1252-provenance/SHA256SUMS",
+        "ops/land/pr1267-wp1252-provenance/bien-ban-m8.yaml",
+        "ops/land/pr1267-wp1252-provenance/kiem-dong-wp-m8.txt",
+        "ops/land/pr1267-wp1252-provenance/readback-chu-kho-approve-merge-issuecomment-6720621366.json",
+        "ops/land/pr1267-wp1252-provenance/readback-chu-kho-mien-a14-issuecomment-6720449021.json",
+        "ops/land/pr1267-wp1252-provenance/readback-issuecomment-6720413056.json",
+        "ops/land/pr1277-wp1272-land-evidence.yaml",
+        "ops/land/pr1277-wp1272-provenance/SHA256SUMS",
+        "ops/land/pr1277-wp1272-provenance/bien-ban-m8.yaml",
+        "ops/land/pr1277-wp1272-provenance/kiem-dong-wp-m8.txt",
+        "ops/land/pr1277-wp1272-provenance/readback-chu-kho-approve-merge-issuecomment-6720439348.json"
+      ],
+      "overlap": [],
+      "classification": "new PR1283landmetadata synthetic; parents/currentC and ownhead verified; not PR1280CIproof",
+      "actual_parents": [
+        "3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4",
+        "b45f6bde07bec62127323131985bf5852829ab5d"
+      ],
+      "actual_tree": "4c0132e251dddb760ff3a62cd874a0bd0c2f72b4"
+    }
+  ],
+  "current_canonical": "3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4",
+  "master_drift_since_last_classification": "none",
+  "prior201metadata_drift_source": "H4-master-drift-classification.json",
+  "holders_source": "holders-H4-CI-retry-dispatch.json",
+  "recorded_at": "2026-11-08T11:08:18.193314+00:00"
+}

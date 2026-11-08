@@ -1,0 +1,69 @@
+{
+  "manifest": {
+    "baseline": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+    "baseline_tree": "46d05062cad4f3ca6629931ebc6a4cd0535358f3",
+    "baseline_parents": [
+      "efebadf83409a81e42e6c97f1b7255ede76110f5",
+      "fc6fbc7c07351ea75ece6a0a25a96262225bef03"
+    ],
+    "candidate": "24cc13bb536386d0662927e9c94331eb8713bab8",
+    "tree": "891ae31324d00e876f9e53979606e0aa77eb9324",
+    "parents": [
+      "c15603dcf537fa4beb753b263398d6e6b8c92019"
+    ],
+    "file_sha256": {
+      ".agents/skills/proxima-control/scripts/ProximaControl.psm1": "b89057f61d699e1c5fe7005b89db94874956a20fd66023cebb7c9c6cbd3e7438",
+      ".agents/skills/proxima-control/scripts/Run-Px.ps1": "03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354",
+      ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1": "68857443b658211f31db3a2ecd2ba51f5ff2e5ac2318da1d7a4936c3c5b0ca1f",
+      ".agents/skills/proxima-control/scripts/ProximaConfig.psm1": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d"
+    },
+    "bundle_sha256": "c48f9d751ab03cb9b33c4cb924f3601aa6622363dc650398d0389fa01831369c",
+    "mandatory_ids": [
+      "X1-01",
+      "X1-02",
+      "X1-03",
+      "X2-01",
+      "X2-02",
+      "X2-03",
+      "X2-04",
+      "X2-05",
+      "X2-06",
+      "X2-07",
+      "X3-01",
+      "X3-02",
+      "X4-01",
+      "X4-02",
+      "X4-03",
+      "X5-01",
+      "X5-02",
+      "X5-03",
+      "X5-04",
+      "X5-05",
+      "X5-06",
+      "X5-07",
+      "X5-08",
+      "X6-01",
+      "X6-02"
+    ]
+  },
+  "actual": {
+    "baseline": {
+      "sha": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+      "tree": "46d05062cad4f3ca6629931ebc6a4cd0535358f3",
+      "parents": [
+        "efebadf83409a81e42e6c97f1b7255ede76110f5",
+        "fc6fbc7c07351ea75ece6a0a25a96262225bef03"
+      ]
+    },
+    "candidate": {
+      "sha": "24cc13bb536386d0662927e9c94331eb8713bab8",
+      "tree": "891ae31324d00e876f9e53979606e0aa77eb9324",
+      "parents": [
+        "c15603dcf537fa4beb753b263398d6e6b8c92019"
+      ]
+    }
+  },
+  "host": "DESKTOP-T9R33P2",
+  "account": "ThangHD",
+  "lock_session": "wp1279-g2-24cc13bb5363"
+}

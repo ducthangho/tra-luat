@@ -1,0 +1,62 @@
+[
+  {
+    "thoi_diem": "2026-11-08T05:12:15.698191+00:00",
+    "session": "wp1279-g2-24cc13bb5363",
+    "packet": "wp1279",
+    "sha": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+    "bo_test": "baseline-ps51",
+    "dat": "0",
+    "tong": "25",
+    "ca_do": "X1-01|X1-02|X1-03|X2-01|X2-02|X2-03|X2-04|X2-05|X2-06|X2-07|X3-01|X3-02|X4-01|X4-02|X4-03|X5-01|X5-02|X5-03|X5-04|X5-05|X5-06|X5-07|X5-08|X6-01|X6-02",
+    "thoi_luong_s": "1.671",
+    "phat_hien_boi": "focused-local",
+    "loi_that": "not_classified",
+    "da_va": "no",
+    "ghi_chu": "may=DESKTOP-T9R33P2;device=a5f7076e-a491-4f84-829b-8d1fbcc1c767;ngat=khong;rc=1"
+  },
+  {
+    "thoi_diem": "2026-11-08T05:12:46.363179+00:00",
+    "session": "wp1279-g2-24cc13bb5363",
+    "packet": "wp1279",
+    "sha": "24cc13bb536386d0662927e9c94331eb8713bab8",
+    "bo_test": "candidate-ps51",
+    "dat": "21",
+    "tong": "25",
+    "ca_do": "X3-02|X5-03|X5-05|X6-02",
+    "thoi_luong_s": "30.656",
+    "phat_hien_boi": "focused-local",
+    "loi_that": "not_classified",
+    "da_va": "no",
+    "ghi_chu": "may=DESKTOP-T9R33P2;device=a5f7076e-a491-4f84-829b-8d1fbcc1c767;ngat=khong;rc=1"
+  },
+  {
+    "thoi_diem": "2026-11-08T05:12:47.543706+00:00",
+    "session": "wp1279-g2-24cc13bb5363",
+    "packet": "wp1279",
+    "sha": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+    "bo_test": "baseline-ps7",
+    "dat": "0",
+    "tong": "25",
+    "ca_do": "X1-01|X1-02|X1-03|X2-01|X2-02|X2-03|X2-04|X2-05|X2-06|X2-07|X3-01|X3-02|X4-01|X4-02|X4-03|X5-01|X5-02|X5-03|X5-04|X5-05|X5-06|X5-07|X5-08|X6-01|X6-02",
+    "thoi_luong_s": "1.172",
+    "phat_hien_boi": "focused-local",
+    "loi_that": "not_classified",
+    "da_va": "no",
+    "ghi_chu": "may=DESKTOP-T9R33P2;device=a5f7076e-a491-4f84-829b-8d1fbcc1c767;ngat=khong;rc=1"
+  },
+  {
+    "thoi_diem": "2026-11-08T05:13:14.215029+00:00",
+    "session": "wp1279-g2-24cc13bb5363",
+    "packet": "wp1279",
+    "sha": "24cc13bb536386d0662927e9c94331eb8713bab8",
+    "bo_test": "candidate-ps7",
+    "dat": "21",
+    "tong": "25",
+    "ca_do": "X3-02|X5-03|X5-05|X6-02",
+    "thoi_luong_s": "26.656",
+    "phat_hien_boi": "focused-local",
+    "loi_that": "not_classified",
+    "da_va": "no",
+    "ghi_chu": "may=DESKTOP-T9R33P2;device=a5f7076e-a491-4f84-829b-8d1fbcc1c767;ngat=khong;rc=1"
+  }
+]

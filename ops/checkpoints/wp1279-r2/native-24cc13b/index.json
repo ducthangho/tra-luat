@@ -1,0 +1,11 @@
+{
+  "zip_sha256": "c25fc00c1ca987623ed0d54e0cca9eab78179c80c0210040969932000fce09aa",
+  "transport": "DesktopCommander read_file base64; decoded archive verified against native archive report; every retained source file checked against native byte manifest",
+  "archive_bytes": 283975,
+  "source_files": 233,
+  "gate_status": "failed",
+  "normal": "both versions21/25; baselineboth0/25allAPI_ABSENT rc1",
+  "counterexamples": "not_run blocked by normal failure",
+  "root_authored_product_patch": false,
+  "operator_preflight_error": "First controller misunderstood Undefined ExecutionPolicy numeric5 as0; failed before cloning/testing. Original preflight evidence retained; lockreleased; second controller corrected enum check, new output directory, no product edit."
+}

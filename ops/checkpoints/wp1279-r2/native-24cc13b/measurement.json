@@ -1,0 +1,1954 @@
+{
+  "candidate": "24cc13bb536386d0662927e9c94331eb8713bab8",
+  "normal_comparison_passed": false,
+  "counterexamples_passed": false,
+  "counterexamples_not_run_reason": "normal comparison failed; blocked",
+  "phases": {
+    "baseline-ps51": {
+      "rc": 1,
+      "report": {
+        "schema": "proxima_control_tests.v1",
+        "ps_version": "5.1.26100.9711",
+        "ps_edition": "Desktop",
+        "test_culture_requested": "en-US",
+        "test_culture": "en-US",
+        "test_ui_culture": "en-US",
+        "test_culture_probe": "lower(I)=U+0069",
+        "module_path": "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline\\.agents\\skills\\proxima-control\\scripts\\ProximaControl.psm1",
+        "module_sha256": null,
+        "wrapper_sha256": null,
+        "config_module_sha256": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d",
+        "harness_sha256": "68857443b658211f31db3a2ecd2ba51f5ff2e5ac2318da1d7a4936c3c5b0ca1f",
+        "git_head": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+        "git_tree": "46d05062cad4f3ca6629931ebc6a4cd0535358f3",
+        "api_state": "module_absent",
+        "alias_r": "Invoke-History",
+        "setup_error": null,
+        "mandatory_ids": [
+          "X1-01",
+          "X1-02",
+          "X1-03",
+          "X2-01",
+          "X2-02",
+          "X2-03",
+          "X2-04",
+          "X2-05",
+          "X2-06",
+          "X2-07",
+          "X3-01",
+          "X3-02",
+          "X4-01",
+          "X4-02",
+          "X4-03",
+          "X5-01",
+          "X5-02",
+          "X5-03",
+          "X5-04",
+          "X5-05",
+          "X5-06",
+          "X5-07",
+          "X5-08",
+          "X6-01",
+          "X6-02"
+        ],
+        "required_ids": [
+          "X1-01",
+          "X1-02",
+          "X1-03",
+          "X2-01",
+          "X2-02",
+          "X2-03",
+          "X2-04",
+          "X2-05",
+          "X2-06",
+          "X2-07",
+          "X3-01",
+          "X3-02",
+          "X4-01",
+          "X4-02",
+          "X4-03",
+          "X5-01",
+          "X5-02",
+          "X5-03",
+          "X5-04",
+          "X5-05",
+          "X5-06",
+          "X5-07",
+          "X5-08",
+          "X6-01",
+          "X6-02"
+        ],
+        "counterexample_ids": [
+          "CX00",
+          "CX01",
+          "CX02",
+          "CX03",
+          "CX04",
+          "CX05",
+          "CX06",
+          "CX07",
+          "CX08",
+          "CX09",
+          "CX10"
+        ],
+        "primitive_keys": [
+          "GetProcess",
+          "GetService",
+          "Http",
+          "InvokeRemote",
+          "NewId",
+          "NewSession",
+          "RemoveSession",
+          "ServiceControl",
+          "UiSessions"
+        ],
+        "primitives_replaced": null,
+        "child_exes": [
+          "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
+        ],
+        "scratch": "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\baseline-ps51\\pxctl-cd71496d3c93",
+        "evidence_dir": null,
+        "total": 25,
+        "passed": 0,
+        "failed": 25,
+        "failed_ids": [
+          "X1-01",
+          "X1-02",
+          "X1-03",
+          "X2-01",
+          "X2-02",
+          "X2-03",
+          "X2-04",
+          "X2-05",
+          "X2-06",
+          "X2-07",
+          "X3-01",
+          "X3-02",
+          "X4-01",
+          "X4-02",
+          "X4-03",
+          "X5-01",
+          "X5-02",
+          "X5-03",
+          "X5-04",
+          "X5-05",
+          "X5-06",
+          "X5-07",
+          "X5-08",
+          "X6-01",
+          "X6-02"
+        ],
+        "setup_error_ids": [],
+        "cases": [
+          {
+            "id": "X1-01",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X1-02",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X1-03",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X2-01",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X2-02",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X2-03",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X2-04",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X2-05",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X2-06",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X2-07",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X3-01",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X3-02",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X4-01",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X4-02",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X4-03",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-01",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-02",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-03",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-04",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-05",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-06",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-07",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-08",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X6-01",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X6-02",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          }
+        ],
+        "children": [],
+        "counterexample_evidence": [],
+        "cleanup": {
+          "status": "ok",
+          "errors": [],
+          "tree_removed": false,
+          "keep_sentinel_intact": true,
+          "wire_servers_stopped": true
+        }
+      },
+      "report_sha256": "a46022ad301ac8bbeed0bd2b6afdebea1d7e8037aa202c4cbac39efec66d6a37",
+      "operator_validated": true
+    },
+    "candidate-ps51": {
+      "rc": 1,
+      "report": {
+        "schema": "proxima_control_tests.v1",
+        "ps_version": "5.1.26100.9711",
+        "ps_edition": "Desktop",
+        "test_culture_requested": "en-US",
+        "test_culture": "en-US",
+        "test_ui_culture": "en-US",
+        "test_culture_probe": "lower(I)=U+0069",
+        "module_path": "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\ProximaControl.psm1",
+        "module_sha256": "b89057f61d699e1c5fe7005b89db94874956a20fd66023cebb7c9c6cbd3e7438",
+        "wrapper_sha256": "03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354",
+        "config_module_sha256": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d",
+        "harness_sha256": "68857443b658211f31db3a2ecd2ba51f5ff2e5ac2318da1d7a4936c3c5b0ca1f",
+        "git_head": "24cc13bb536386d0662927e9c94331eb8713bab8",
+        "git_tree": "891ae31324d00e876f9e53979606e0aa77eb9324",
+        "api_state": "present",
+        "alias_r": "Invoke-History",
+        "setup_error": null,
+        "mandatory_ids": [
+          "X1-01",
+          "X1-02",
+          "X1-03",
+          "X2-01",
+          "X2-02",
+          "X2-03",
+          "X2-04",
+          "X2-05",
+          "X2-06",
+          "X2-07",
+          "X3-01",
+          "X3-02",
+          "X4-01",
+          "X4-02",
+          "X4-03",
+          "X5-01",
+          "X5-02",
+          "X5-03",
+          "X5-04",
+          "X5-05",
+          "X5-06",
+          "X5-07",
+          "X5-08",
+          "X6-01",
+          "X6-02"
+        ],
+        "required_ids": [
+          "X1-01",
+          "X1-02",
+          "X1-03",
+          "X2-01",
+          "X2-02",
+          "X2-03",
+          "X2-04",
+          "X2-05",
+          "X2-06",
+          "X2-07",
+          "X3-01",
+          "X3-02",
+          "X4-01",
+          "X4-02",
+          "X4-03",
+          "X5-01",
+          "X5-02",
+          "X5-03",
+          "X5-04",
+          "X5-05",
+          "X5-06",
+          "X5-07",
+          "X5-08",
+          "X6-01",
+          "X6-02"
+        ],
+        "counterexample_ids": [
+          "CX00",
+          "CX01",
+          "CX02",
+          "CX03",
+          "CX04",
+          "CX05",
+          "CX06",
+          "CX07",
+          "CX08",
+          "CX09",
+          "CX10"
+        ],
+        "primitive_keys": [
+          "GetProcess",
+          "GetService",
+          "Http",
+          "InvokeRemote",
+          "NewId",
+          "NewSession",
+          "RemoveSession",
+          "ServiceControl",
+          "UiSessions"
+        ],
+        "primitives_replaced": "9/9 asserted before any product call",
+        "child_exes": [
+          "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
+        ],
+        "scratch": "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd",
+        "evidence_dir": null,
+        "total": 25,
+        "passed": 21,
+        "failed": 4,
+        "failed_ids": [
+          "X3-02",
+          "X5-03",
+          "X5-05",
+          "X6-02"
+        ],
+        "setup_error_ids": [],
+        "cases": [
+          {
+            "id": "X1-01",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X1-02",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X1-03",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X2-01",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X2-02",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X2-03",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X2-04",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X2-05",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X2-06",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X2-07",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X3-01",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X3-02",
+            "outcome": "failed",
+            "reason": "IMPLICIT_SESSION_LOOKUP[Get-PSSession]"
+          },
+          {
+            "id": "X4-01",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X4-02",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X4-03",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X5-01",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X5-02",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X5-03",
+            "outcome": "failed",
+            "reason": "Cannot find path 'C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\unreadable stop System.Collections.Hashtable\\journal-target' because it does not exist."
+          },
+          {
+            "id": "X5-04",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X5-05",
+            "outcome": "failed",
+            "reason": "Method invocation failed because [System.String] does not contain a method named 'ComputeHash'."
+          },
+          {
+            "id": "X5-06",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X5-07",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X5-08",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X6-01",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X6-02",
+            "outcome": "failed",
+            "reason": "WHATIF_STATE_CHANGED[fixture, user state, measured tree or outside sentinel] | Illegal characters in path."
+          }
+        ],
+        "children": [
+          {
+            "kind": "fresh-process wrapper",
+            "exe": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "command": [
+              "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+              "-NoProfile",
+              "-NonInteractive",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\child-wrapper.ps1",
+              "-Wrapper",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\Run-Px.ps1",
+              "-ArgsFile",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\wa-5cfd76f6.xml",
+              "-Out",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\wo-5cfd76f6.json",
+              "-Culture",
+              "en-US"
+            ],
+            "rc": 0,
+            "output_sha256": "b2ab10928b84675c7e33dd194335bd5c9711e6ea7d4614d76e9d8a6392925285",
+            "ps_version": "5.1.26100.9711",
+            "ps_edition": "Desktop",
+            "culture": "en-US",
+            "ui_culture": "en-US"
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "exe": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "command": [
+              "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+              "-NoProfile",
+              "-NonInteractive",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\child-wrapper.ps1",
+              "-Wrapper",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\Run-Px.ps1",
+              "-ArgsFile",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\wa-647e4a6a.xml",
+              "-Out",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\wo-647e4a6a.json",
+              "-Culture",
+              "en-US"
+            ],
+            "rc": 0,
+            "output_sha256": "50f194e104e8f4e2a1438737962983397233af2f7daa5d6a17be67258837d3c8",
+            "ps_version": "5.1.26100.9711",
+            "ps_edition": "Desktop",
+            "culture": "en-US",
+            "ui_culture": "en-US"
+          },
+          {
+            "kind": "endpoint",
+            "exe": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "command": [
+              "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+              "-NoProfile",
+              "-NonInteractive",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\child-endpoint.ps1",
+              "-In",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\endpoint-in.xml",
+              "-Out",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\endpoint-out-0.json",
+              "-Culture",
+              "en-US"
+            ],
+            "rc": 0,
+            "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "ps_version": "5.1.26100.9711",
+            "ps_edition": "Desktop",
+            "culture": "en-US",
+            "ui_culture": "en-US"
+          },
+          {
+            "kind": "endpoint",
+            "exe": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "command": [
+              "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+              "-NoProfile",
+              "-NonInteractive",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\child-endpoint.ps1",
+              "-In",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\endpoint-in.xml",
+              "-Out",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\endpoint-out-1.json",
+              "-Culture",
+              "en-US"
+            ],
+            "rc": 0,
+            "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "ps_version": "7.6.9",
+            "ps_edition": "Core",
+            "culture": "en-US",
+            "ui_culture": "en-US"
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "exe": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "command": [
+              "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+              "-NoProfile",
+              "-NonInteractive",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\child-wrapper.ps1",
+              "-Wrapper",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\Run-Px.ps1",
+              "-ArgsFile",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\wa-1cc8be0b.xml",
+              "-Out",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\wo-1cc8be0b.json",
+              "-Culture",
+              "en-US"
+            ],
+            "rc": 0,
+            "output_sha256": "bac041205bb47fc08aa317247623af04cf2a7bfa6e272bb3dd7e3dd76093bead",
+            "ps_version": "5.1.26100.9711",
+            "ps_edition": "Desktop",
+            "culture": "en-US",
+            "ui_culture": "en-US"
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "exe": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "command": [
+              "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+              "-NoProfile",
+              "-NonInteractive",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\child-wrapper.ps1",
+              "-Wrapper",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\Run-Px.ps1",
+              "-ArgsFile",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\wa-255e2e4e.xml",
+              "-Out",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\wo-255e2e4e.json",
+              "-Culture",
+              "en-US"
+            ],
+            "rc": 1,
+            "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "ps_version": "5.1.26100.9711",
+            "ps_edition": "Desktop",
+            "culture": "en-US",
+            "ui_culture": "en-US"
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "exe": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "command": [
+              "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+              "-NoProfile",
+              "-NonInteractive",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\child-wrapper.ps1",
+              "-Wrapper",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\Run-Px.ps1",
+              "-ArgsFile",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\wa-704a9395.xml",
+              "-Out",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\child\\wo-704a9395.json",
+              "-Culture",
+              "en-US",
+              "-PreImport",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51\\pxctl-35c4f7c226bd\\conflict\\ProximaControl.psm1"
+            ],
+            "rc": 1,
+            "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "ps_version": "5.1.26100.9711",
+            "ps_edition": "Desktop",
+            "culture": "en-US",
+            "ui_culture": "en-US"
+          }
+        ],
+        "counterexample_evidence": [],
+        "cleanup": {
+          "status": "ok",
+          "errors": [],
+          "tree_removed": false,
+          "keep_sentinel_intact": true,
+          "wire_servers_stopped": true
+        }
+      },
+      "report_sha256": "84888b59db1666c72363c9ca1ddf3f45d13e42f4e21bf8bfdc0fc9f5189fe0c7",
+      "operator_validated": false
+    },
+    "baseline-ps7": {
+      "rc": 1,
+      "report": {
+        "schema": "proxima_control_tests.v1",
+        "ps_version": "7.6.9",
+        "ps_edition": "Core",
+        "test_culture_requested": "en-US",
+        "test_culture": "en-US",
+        "test_ui_culture": "en-US",
+        "test_culture_probe": "lower(I)=U+0069",
+        "module_path": "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline\\.agents\\skills\\proxima-control\\scripts\\ProximaControl.psm1",
+        "module_sha256": null,
+        "wrapper_sha256": null,
+        "config_module_sha256": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d",
+        "harness_sha256": "68857443b658211f31db3a2ecd2ba51f5ff2e5ac2318da1d7a4936c3c5b0ca1f",
+        "git_head": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+        "git_tree": "46d05062cad4f3ca6629931ebc6a4cd0535358f3",
+        "api_state": "module_absent",
+        "alias_r": "Invoke-History",
+        "setup_error": null,
+        "mandatory_ids": [
+          "X1-01",
+          "X1-02",
+          "X1-03",
+          "X2-01",
+          "X2-02",
+          "X2-03",
+          "X2-04",
+          "X2-05",
+          "X2-06",
+          "X2-07",
+          "X3-01",
+          "X3-02",
+          "X4-01",
+          "X4-02",
+          "X4-03",
+          "X5-01",
+          "X5-02",
+          "X5-03",
+          "X5-04",
+          "X5-05",
+          "X5-06",
+          "X5-07",
+          "X5-08",
+          "X6-01",
+          "X6-02"
+        ],
+        "required_ids": [
+          "X1-01",
+          "X1-02",
+          "X1-03",
+          "X2-01",
+          "X2-02",
+          "X2-03",
+          "X2-04",
+          "X2-05",
+          "X2-06",
+          "X2-07",
+          "X3-01",
+          "X3-02",
+          "X4-01",
+          "X4-02",
+          "X4-03",
+          "X5-01",
+          "X5-02",
+          "X5-03",
+          "X5-04",
+          "X5-05",
+          "X5-06",
+          "X5-07",
+          "X5-08",
+          "X6-01",
+          "X6-02"
+        ],
+        "counterexample_ids": [
+          "CX00",
+          "CX01",
+          "CX02",
+          "CX03",
+          "CX04",
+          "CX05",
+          "CX06",
+          "CX07",
+          "CX08",
+          "CX09",
+          "CX10"
+        ],
+        "primitive_keys": [
+          "GetProcess",
+          "GetService",
+          "Http",
+          "InvokeRemote",
+          "NewId",
+          "NewSession",
+          "RemoveSession",
+          "ServiceControl",
+          "UiSessions"
+        ],
+        "primitives_replaced": null,
+        "child_exes": [
+          "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+          "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+        ],
+        "scratch": "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\baseline-ps7\\pxctl-7d1e476ccfae",
+        "evidence_dir": null,
+        "total": 25,
+        "passed": 0,
+        "failed": 25,
+        "failed_ids": [
+          "X1-01",
+          "X1-02",
+          "X1-03",
+          "X2-01",
+          "X2-02",
+          "X2-03",
+          "X2-04",
+          "X2-05",
+          "X2-06",
+          "X2-07",
+          "X3-01",
+          "X3-02",
+          "X4-01",
+          "X4-02",
+          "X4-03",
+          "X5-01",
+          "X5-02",
+          "X5-03",
+          "X5-04",
+          "X5-05",
+          "X5-06",
+          "X5-07",
+          "X5-08",
+          "X6-01",
+          "X6-02"
+        ],
+        "setup_error_ids": [],
+        "cases": [
+          {
+            "id": "X1-01",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X1-02",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X1-03",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X2-01",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X2-02",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X2-03",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X2-04",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X2-05",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X2-06",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X2-07",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X3-01",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X3-02",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X4-01",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X4-02",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X4-03",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-01",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-02",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-03",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-04",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-05",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-06",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-07",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X5-08",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X6-01",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          },
+          {
+            "id": "X6-02",
+            "outcome": "failed",
+            "reason": "API_ABSENT: px/Invoke-ProximaOperation not available from ModulePath (module_absent)"
+          }
+        ],
+        "children": [],
+        "counterexample_evidence": [],
+        "cleanup": {
+          "status": "ok",
+          "errors": [],
+          "tree_removed": false,
+          "keep_sentinel_intact": true,
+          "wire_servers_stopped": true
+        }
+      },
+      "report_sha256": "fc1ddf788edea0a45d0f06ef151fd7d049b4151485677bbe8aa149ca4f49c3e1",
+      "operator_validated": true
+    },
+    "candidate-ps7": {
+      "rc": 1,
+      "report": {
+        "schema": "proxima_control_tests.v1",
+        "ps_version": "7.6.9",
+        "ps_edition": "Core",
+        "test_culture_requested": "en-US",
+        "test_culture": "en-US",
+        "test_ui_culture": "en-US",
+        "test_culture_probe": "lower(I)=U+0069",
+        "module_path": "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\ProximaControl.psm1",
+        "module_sha256": "b89057f61d699e1c5fe7005b89db94874956a20fd66023cebb7c9c6cbd3e7438",
+        "wrapper_sha256": "03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354",
+        "config_module_sha256": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d",
+        "harness_sha256": "68857443b658211f31db3a2ecd2ba51f5ff2e5ac2318da1d7a4936c3c5b0ca1f",
+        "git_head": "24cc13bb536386d0662927e9c94331eb8713bab8",
+        "git_tree": "891ae31324d00e876f9e53979606e0aa77eb9324",
+        "api_state": "present",
+        "alias_r": "Invoke-History",
+        "setup_error": null,
+        "mandatory_ids": [
+          "X1-01",
+          "X1-02",
+          "X1-03",
+          "X2-01",
+          "X2-02",
+          "X2-03",
+          "X2-04",
+          "X2-05",
+          "X2-06",
+          "X2-07",
+          "X3-01",
+          "X3-02",
+          "X4-01",
+          "X4-02",
+          "X4-03",
+          "X5-01",
+          "X5-02",
+          "X5-03",
+          "X5-04",
+          "X5-05",
+          "X5-06",
+          "X5-07",
+          "X5-08",
+          "X6-01",
+          "X6-02"
+        ],
+        "required_ids": [
+          "X1-01",
+          "X1-02",
+          "X1-03",
+          "X2-01",
+          "X2-02",
+          "X2-03",
+          "X2-04",
+          "X2-05",
+          "X2-06",
+          "X2-07",
+          "X3-01",
+          "X3-02",
+          "X4-01",
+          "X4-02",
+          "X4-03",
+          "X5-01",
+          "X5-02",
+          "X5-03",
+          "X5-04",
+          "X5-05",
+          "X5-06",
+          "X5-07",
+          "X5-08",
+          "X6-01",
+          "X6-02"
+        ],
+        "counterexample_ids": [
+          "CX00",
+          "CX01",
+          "CX02",
+          "CX03",
+          "CX04",
+          "CX05",
+          "CX06",
+          "CX07",
+          "CX08",
+          "CX09",
+          "CX10"
+        ],
+        "primitive_keys": [
+          "GetProcess",
+          "GetService",
+          "Http",
+          "InvokeRemote",
+          "NewId",
+          "NewSession",
+          "RemoveSession",
+          "ServiceControl",
+          "UiSessions"
+        ],
+        "primitives_replaced": "9/9 asserted before any product call",
+        "child_exes": [
+          "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+          "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+        ],
+        "scratch": "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e",
+        "evidence_dir": null,
+        "total": 25,
+        "passed": 21,
+        "failed": 4,
+        "failed_ids": [
+          "X3-02",
+          "X5-03",
+          "X5-05",
+          "X6-02"
+        ],
+        "setup_error_ids": [],
+        "cases": [
+          {
+            "id": "X1-01",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X1-02",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X1-03",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X2-01",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X2-02",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X2-03",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X2-04",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X2-05",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X2-06",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X2-07",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X3-01",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X3-02",
+            "outcome": "failed",
+            "reason": "IMPLICIT_SESSION_LOOKUP[Get-PSSession]"
+          },
+          {
+            "id": "X4-01",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X4-02",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X4-03",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X5-01",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X5-02",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X5-03",
+            "outcome": "failed",
+            "reason": "Creating a junction requires an absolute path for the target."
+          },
+          {
+            "id": "X5-04",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X5-05",
+            "outcome": "failed",
+            "reason": "Method invocation failed because [System.String] does not contain a method named 'ComputeHash'."
+          },
+          {
+            "id": "X5-06",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X5-07",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X5-08",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X6-01",
+            "outcome": "passed",
+            "reason": null
+          },
+          {
+            "id": "X6-02",
+            "outcome": "failed",
+            "reason": "WHATIF_STATE_CHANGED[fixture, user state, measured tree or outside sentinel] | The filename, directory name, or volume label syntax is incorrect. : 'C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-keep-4c92c466f90e\\keep.txt|0b09822ea4f75a696bc0d79658d5895a91e05eb1533a335ad348855e4438b8b6'."
+          }
+        ],
+        "children": [
+          {
+            "kind": "fresh-process wrapper",
+            "exe": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "command": [
+              "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+              "-NoProfile",
+              "-NonInteractive",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\child-wrapper.ps1",
+              "-Wrapper",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\Run-Px.ps1",
+              "-ArgsFile",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\wa-a48b4d22.xml",
+              "-Out",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\wo-a48b4d22.json",
+              "-Culture",
+              "en-US"
+            ],
+            "rc": 0,
+            "output_sha256": "3059f4a5f264a2d472db2974a4e4d6d6b6e4a37d647b44db44ea6660ce4878f3",
+            "ps_version": "7.6.9",
+            "ps_edition": "Core",
+            "culture": "en-US",
+            "ui_culture": "en-US"
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "exe": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "command": [
+              "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+              "-NoProfile",
+              "-NonInteractive",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\child-wrapper.ps1",
+              "-Wrapper",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\Run-Px.ps1",
+              "-ArgsFile",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\wa-4e4e2cf9.xml",
+              "-Out",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\wo-4e4e2cf9.json",
+              "-Culture",
+              "en-US"
+            ],
+            "rc": 0,
+            "output_sha256": "6cfe8fde9e7376becedb8b2aeb9fb470a2f0c053b38059f0d2a89808890cab49",
+            "ps_version": "7.6.9",
+            "ps_edition": "Core",
+            "culture": "en-US",
+            "ui_culture": "en-US"
+          },
+          {
+            "kind": "endpoint",
+            "exe": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "command": [
+              "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+              "-NoProfile",
+              "-NonInteractive",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\child-endpoint.ps1",
+              "-In",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\endpoint-in.xml",
+              "-Out",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\endpoint-out-0.json",
+              "-Culture",
+              "en-US"
+            ],
+            "rc": 0,
+            "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "ps_version": "7.6.9",
+            "ps_edition": "Core",
+            "culture": "en-US",
+            "ui_culture": "en-US"
+          },
+          {
+            "kind": "endpoint",
+            "exe": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "command": [
+              "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+              "-NoProfile",
+              "-NonInteractive",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\child-endpoint.ps1",
+              "-In",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\endpoint-in.xml",
+              "-Out",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\endpoint-out-1.json",
+              "-Culture",
+              "en-US"
+            ],
+            "rc": 0,
+            "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "ps_version": "5.1.26100.9711",
+            "ps_edition": "Desktop",
+            "culture": "en-US",
+            "ui_culture": "en-US"
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "exe": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "command": [
+              "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+              "-NoProfile",
+              "-NonInteractive",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\child-wrapper.ps1",
+              "-Wrapper",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\Run-Px.ps1",
+              "-ArgsFile",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\wa-f884aca1.xml",
+              "-Out",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\wo-f884aca1.json",
+              "-Culture",
+              "en-US"
+            ],
+            "rc": 0,
+            "output_sha256": "019ca67566ea9a41d7ddf2719bdc10890311deaa2a1a4e1657916ab4b33d46b6",
+            "ps_version": "7.6.9",
+            "ps_edition": "Core",
+            "culture": "en-US",
+            "ui_culture": "en-US"
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "exe": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "command": [
+              "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+              "-NoProfile",
+              "-NonInteractive",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\child-wrapper.ps1",
+              "-Wrapper",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\Run-Px.ps1",
+              "-ArgsFile",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\wa-6a0e3d5c.xml",
+              "-Out",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\wo-6a0e3d5c.json",
+              "-Culture",
+              "en-US"
+            ],
+            "rc": 1,
+            "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "ps_version": "7.6.9",
+            "ps_edition": "Core",
+            "culture": "en-US",
+            "ui_culture": "en-US"
+          },
+          {
+            "kind": "fresh-process wrapper",
+            "exe": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "command": [
+              "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+              "-NoProfile",
+              "-NonInteractive",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\child-wrapper.ps1",
+              "-Wrapper",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\Run-Px.ps1",
+              "-ArgsFile",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\wa-7c2bdab3.xml",
+              "-Out",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\child\\wo-7c2bdab3.json",
+              "-Culture",
+              "en-US",
+              "-PreImport",
+              "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7\\pxctl-4c92c466f90e\\conflict\\ProximaControl.psm1"
+            ],
+            "rc": 1,
+            "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "ps_version": "7.6.9",
+            "ps_edition": "Core",
+            "culture": "en-US",
+            "ui_culture": "en-US"
+          }
+        ],
+        "counterexample_evidence": [],
+        "cleanup": {
+          "status": "ok",
+          "errors": [],
+          "tree_removed": false,
+          "keep_sentinel_intact": true,
+          "wire_servers_stopped": true
+        }
+      },
+      "report_sha256": "6a26f7e538b7d7e057d16269819040cae7e8ed3cd56adba8abd7ec2309af847c",
+      "operator_validated": false
+    }
+  },
+  "identities": {
+    "baseline": {
+      "sha": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+      "tree": "46d05062cad4f3ca6629931ebc6a4cd0535358f3",
+      "parents": [
+        "efebadf83409a81e42e6c97f1b7255ede76110f5",
+        "fc6fbc7c07351ea75ece6a0a25a96262225bef03"
+      ]
+    },
+    "candidate": {
+      "sha": "24cc13bb536386d0662927e9c94331eb8713bab8",
+      "tree": "891ae31324d00e876f9e53979606e0aa77eb9324",
+      "parents": [
+        "c15603dcf537fa4beb753b263398d6e6b8c92019"
+      ]
+    }
+  },
+  "dirty": {
+    "baseline": "",
+    "candidate": ""
+  },
+  "commands": [
+    {
+      "label": "host-preflight",
+      "command": [
+        "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "-NoProfile",
+        "-NonInteractive",
+        "-Command",
+        "$ErrorActionPreference='Stop'; $env:PSModulePath=(Join-Path $PSHOME 'Modules')+';C:\\Program Files\\WindowsPowerShell\\Modules'; [pscustomobject]@{ host=$env:COMPUTERNAME; service=@(Get-CimInstance Win32_Service -Filter \"Name='ProximaGateway'\").Count; process=@(Get-CimInstance Win32_Process -Filter \"Name='Proxima.exe'\").Count; python=@(Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | Select-Object ProcessId,ParentProcessId,CreationDate); policy=@(Get-ExecutionPolicy -List) } | ConvertTo-Json -Depth 4 -Compress"
+      ],
+      "rc": 0,
+      "seconds": 0.485,
+      "log_sha256": "8688499f243fbe2b9286b306cb20c3cbf3bb5929dc3aa22ffa8148070d04cf1a"
+    },
+    {
+      "label": "clone-baseline",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-c",
+        "core.autocrlf=false",
+        "clone",
+        "--no-checkout",
+        "--single-branch",
+        "--branch",
+        "master",
+        "https://github.com/ducthangho/tra-luat.git",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline"
+      ],
+      "rc": 0,
+      "seconds": 16.39,
+      "log_sha256": "2e08b4baf60a5342b913d94443bd5bc0b8b8d3e38f5ae1eb5a714902b3881c02"
+    },
+    {
+      "label": "fetch-base-exact",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline",
+        "fetch",
+        "origin",
+        "c15603dcf537fa4beb753b263398d6e6b8c92019"
+      ],
+      "rc": 0,
+      "seconds": 1.547,
+      "log_sha256": "7afa2b91026f254c617c29a4afdce3dea091f3c49ae52d793a8c9102c2e6f80b"
+    },
+    {
+      "label": "clone-candidate",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "clone",
+        "--no-hardlinks",
+        "--no-checkout",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate"
+      ],
+      "rc": 0,
+      "seconds": 1.437,
+      "log_sha256": "780439f456f5fa0a835dd07bc7c390c4b272d4cac833e08b7001aae20f3c6821"
+    },
+    {
+      "label": "baseline-core.autocrlf",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline",
+        "config",
+        "core.autocrlf",
+        "false"
+      ],
+      "rc": 0,
+      "seconds": 0.063,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "baseline-core.eol",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline",
+        "config",
+        "core.eol",
+        "lf"
+      ],
+      "rc": 0,
+      "seconds": 0.031,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "baseline-core.abbrev",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline",
+        "config",
+        "core.abbrev",
+        "7"
+      ],
+      "rc": 0,
+      "seconds": 0.047,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "baseline-sparse",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline",
+        "sparse-checkout",
+        "set",
+        "--no-cone",
+        "/.gitattributes",
+        "/.agents/skills/proxima-control/"
+      ],
+      "rc": 0,
+      "seconds": 0.109,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "candidate-core.autocrlf",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate",
+        "config",
+        "core.autocrlf",
+        "false"
+      ],
+      "rc": 0,
+      "seconds": 0.032,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "candidate-core.eol",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate",
+        "config",
+        "core.eol",
+        "lf"
+      ],
+      "rc": 0,
+      "seconds": 0.047,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "candidate-core.abbrev",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate",
+        "config",
+        "core.abbrev",
+        "7"
+      ],
+      "rc": 0,
+      "seconds": 0.046,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "candidate-sparse",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate",
+        "sparse-checkout",
+        "set",
+        "--no-cone",
+        "/.gitattributes",
+        "/.agents/skills/proxima-control/"
+      ],
+      "rc": 0,
+      "seconds": 0.063,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "checkout-base",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline",
+        "checkout",
+        "--detach",
+        "c15603dcf537fa4beb753b263398d6e6b8c92019"
+      ],
+      "rc": 0,
+      "seconds": 0.156,
+      "log_sha256": "d9bc54f897de1df637f338517a78ed4ba4d78e27849aa1b08c307d1405510659"
+    },
+    {
+      "label": "bundle-verify",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate",
+        "bundle",
+        "verify",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate.bundle"
+      ],
+      "rc": 0,
+      "seconds": 0.078,
+      "log_sha256": "146cf65ebdc7889801d088c3a593d6e31f80d625c3b151755cf51d3cfd69e878"
+    },
+    {
+      "label": "import-candidate",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate",
+        "fetch",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate.bundle",
+        "HEAD:refs/heads/measured-candidate"
+      ],
+      "rc": 0,
+      "seconds": 0.188,
+      "log_sha256": "73b4ee6bf62603b6b356b45bfb6f672a3d8dc42f6d720fa764ddf41a4dd04420"
+    },
+    {
+      "label": "checkout-candidate",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate",
+        "checkout",
+        "--detach",
+        "24cc13bb536386d0662927e9c94331eb8713bab8"
+      ],
+      "rc": 0,
+      "seconds": 0.109,
+      "log_sha256": "3c0117e3f15bf8a58158addd42ea88d127047918a12b150dc74b2cd8a6a92d16"
+    },
+    {
+      "label": "baseline-sha",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline",
+        "rev-parse",
+        "HEAD"
+      ],
+      "rc": 0,
+      "seconds": 0.031,
+      "log_sha256": "ea1e11726e8b708bba40f5c6aa6448747eb6a03ef97efe732e3f1a9d34eb6434"
+    },
+    {
+      "label": "baseline-tree",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "rc": 0,
+      "seconds": 0.047,
+      "log_sha256": "2d0613326f9c93783d50a99742743c0d6b5f8a05e45677044aab9a43b371a6f7"
+    },
+    {
+      "label": "baseline-parents",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline",
+        "show",
+        "-s",
+        "--format=%P",
+        "HEAD"
+      ],
+      "rc": 0,
+      "seconds": 0.047,
+      "log_sha256": "d32697d7461c4952373c5934b48cd985b99e29eeb74102a0a5bf84722ca97d0d"
+    },
+    {
+      "label": "candidate-sha",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate",
+        "rev-parse",
+        "HEAD"
+      ],
+      "rc": 0,
+      "seconds": 0.032,
+      "log_sha256": "ac33c3b7d846e555b09ab0448bbd3c4645f232a705c86927bd4a6642fc179f50"
+    },
+    {
+      "label": "candidate-tree",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "rc": 0,
+      "seconds": 0.031,
+      "log_sha256": "6812b4aef54f288c00a1634f80cf5061bf04699317e30a6b20187ca7b06a73cb"
+    },
+    {
+      "label": "candidate-parents",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate",
+        "show",
+        "-s",
+        "--format=%P",
+        "HEAD"
+      ],
+      "rc": 0,
+      "seconds": 0.032,
+      "log_sha256": "ea1e11726e8b708bba40f5c6aa6448747eb6a03ef97efe732e3f1a9d34eb6434"
+    },
+    {
+      "label": "parse-ps51",
+      "command": [
+        "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "-NoProfile",
+        "-NonInteractive",
+        "-Command",
+        "$ErrorActionPreference='Stop'; $env:PSModulePath=(Join-Path $PSHOME 'Modules')+';C:\\Program Files\\WindowsPowerShell\\Modules'; $bad=0; foreach($f in @('C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\ProximaControl.psm1','C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\Run-Px.ps1','C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\tests\\ProximaControl.Tests.ps1')){ $t=$null;$e=$null;[void][Management.Automation.Language.Parser]::ParseFile($f,[ref]$t,[ref]$e); foreach($x in $e){Write-Output ($f+':'+$x.Extent.StartLineNumber+':'+$x.Message);$bad++}}; Write-Output ('PARSE_ERRORS='+$bad);if($bad){exit 1}"
+      ],
+      "rc": 0,
+      "seconds": 0.297,
+      "log_sha256": "76c636e29e39288e36b24774f36b7710a40b7ee5684e92e6e52c88f455788d9f"
+    },
+    {
+      "label": "parse-ps7",
+      "command": [
+        "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "-NoProfile",
+        "-NonInteractive",
+        "-Command",
+        "$ErrorActionPreference='Stop'; $env:PSModulePath=(Join-Path $PSHOME 'Modules')+';C:\\Program Files\\WindowsPowerShell\\Modules'; $bad=0; foreach($f in @('C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\ProximaControl.psm1','C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\Run-Px.ps1','C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\tests\\ProximaControl.Tests.ps1')){ $t=$null;$e=$null;[void][Management.Automation.Language.Parser]::ParseFile($f,[ref]$t,[ref]$e); foreach($x in $e){Write-Output ($f+':'+$x.Extent.StartLineNumber+':'+$x.Message);$bad++}}; Write-Output ('PARSE_ERRORS='+$bad);if($bad){exit 1}"
+      ],
+      "rc": 0,
+      "seconds": 1.11,
+      "log_sha256": "76c636e29e39288e36b24774f36b7710a40b7ee5684e92e6e52c88f455788d9f"
+    },
+    {
+      "label": "baseline-ps51",
+      "command": [
+        "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\harness\\ProximaControl.Tests.ps1",
+        "-ModulePath",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline\\.agents\\skills\\proxima-control\\scripts\\ProximaControl.psm1",
+        "-ScratchRoot",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\baseline-ps51",
+        "-ReportPath",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\reports\\baseline-ps51.json",
+        "-EvidenceRoot",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\evidence\\baseline-ps51",
+        "-TestCulture",
+        "en-US"
+      ],
+      "rc": 1,
+      "seconds": 1.671,
+      "log_sha256": "a01ed8978641ba17fc50ca73b6dd71cac8c78584690496b4ff82110ab501e0a8"
+    },
+    {
+      "label": "candidate-ps51",
+      "command": [
+        "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\harness\\ProximaControl.Tests.ps1",
+        "-ModulePath",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\ProximaControl.psm1",
+        "-ScratchRoot",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps51",
+        "-ReportPath",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\reports\\candidate-ps51.json",
+        "-EvidenceRoot",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\evidence\\candidate-ps51",
+        "-TestCulture",
+        "en-US"
+      ],
+      "rc": 1,
+      "seconds": 30.641,
+      "log_sha256": "0ab0f0ecbc4649e8136a573f46c8b1ecac4759262f8dfab4fb7db4e627e9f058"
+    },
+    {
+      "label": "baseline-ps7",
+      "command": [
+        "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\harness\\ProximaControl.Tests.ps1",
+        "-ModulePath",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline\\.agents\\skills\\proxima-control\\scripts\\ProximaControl.psm1",
+        "-ScratchRoot",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\baseline-ps7",
+        "-ReportPath",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\reports\\baseline-ps7.json",
+        "-EvidenceRoot",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\evidence\\baseline-ps7",
+        "-TestCulture",
+        "en-US"
+      ],
+      "rc": 1,
+      "seconds": 1.172,
+      "log_sha256": "dbe924939591fe4417ec1782cc75c68f39541bbc0842c932ebbd95789a8cf47b"
+    },
+    {
+      "label": "candidate-ps7",
+      "command": [
+        "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\harness\\ProximaControl.Tests.ps1",
+        "-ModulePath",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate\\.agents\\skills\\proxima-control\\scripts\\ProximaControl.psm1",
+        "-ScratchRoot",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\scratch\\candidate-ps7",
+        "-ReportPath",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\reports\\candidate-ps7.json",
+        "-EvidenceRoot",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\evidence\\candidate-ps7",
+        "-TestCulture",
+        "en-US"
+      ],
+      "rc": 1,
+      "seconds": 26.656,
+      "log_sha256": "c004616d47b87252cbb563185975ebee70ee4f3aab2c603c01934648a28ce03f"
+    },
+    {
+      "label": "baseline-status-after",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\baseline",
+        "status",
+        "--porcelain",
+        "--untracked-files=all"
+      ],
+      "rc": 0,
+      "seconds": 0.109,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "candidate-status-after",
+      "command": [
+        "C:\\tl-win\\wp1271-tools\\mingit-2.56.0.4\\cmd\\git.exe",
+        "-C",
+        "C:\\tl-win\\wp1279-r2-g2\\measure2-24cc13bb5363\\candidate",
+        "status",
+        "--porcelain",
+        "--untracked-files=all"
+      ],
+      "rc": 0,
+      "seconds": 0.078,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "host-after",
+      "command": [
+        "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "-NoProfile",
+        "-NonInteractive",
+        "-Command",
+        "$ErrorActionPreference='Stop'; $env:PSModulePath=(Join-Path $PSHOME 'Modules')+';C:\\Program Files\\WindowsPowerShell\\Modules'; [pscustomobject]@{ host=$env:COMPUTERNAME; service=@(Get-CimInstance Win32_Service -Filter \"Name='ProximaGateway'\").Count; process=@(Get-CimInstance Win32_Process -Filter \"Name='Proxima.exe'\").Count; python=@(Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | Select-Object ProcessId,ParentProcessId,CreationDate); policy=@(Get-ExecutionPolicy -List) } | ConvertTo-Json -Depth 4 -Compress"
+      ],
+      "rc": 0,
+      "seconds": 0.969,
+      "log_sha256": "8688499f243fbe2b9286b306cb20c3cbf3bb5929dc3aa22ffa8148070d04cf1a"
+    }
+  ],
+  "finished_at": "2026-11-08T05:13:15.420533+00:00"
+}

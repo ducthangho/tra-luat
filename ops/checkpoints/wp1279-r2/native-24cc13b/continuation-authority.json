@@ -1,0 +1,25 @@
+{
+  "event": "executor_continuation_authorized",
+  "recorded_at": "2026-11-08T05:15:04Z",
+  "packet_id": "wp1279",
+  "revision": 2,
+  "generation": 2,
+  "lease_id": "wp1279-r2-g2-claude",
+  "lease_until": "2026-11-08T07:06:08Z",
+  "authority": "https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6708576608",
+  "recorded_by": "openai_codex/codex_service dispatcher under owner full scoped delegation",
+  "role": "executor Claude Code opus/high",
+  "start_from_sha": "24cc13bb536386d0662927e9c94331eb8713bab8",
+  "acceptance_baseline": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "original_lease_immutable": true,
+  "supplemental_prompt": "ops/prompts/wp1279-r2-g2-attempt2-claude.md",
+  "supplemental_prompt_sha256": "4efe3e53112b0430f6a29aac845ea7b857481dfd67cbf5579a0c56fe7e28eec7",
+  "changes": "fix measured native harness/runtime defects within same3-pathscope and cap1800; no acceptance relaxation",
+  "run_minutes": 45,
+  "budget": "productattempt2/3; formal0/3; sharedCodex0/10; primarypush0/1",
+  "requires_before_model": [
+    "previousLinuxgate terminal to prevent overlapping dirty-tree measurement",
+    "fresh source/head/lease/spec/holder/drift validation",
+    "snapshotcleanworker exactH"
+  ]
+}

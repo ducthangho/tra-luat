@@ -12,3 +12,8 @@ rc=0
 BO_QUA ops/land/pr1270-wp1179-land-evidence.yaml — trang_thai_packet.landed = False, không phải True; không khối landed_<ngày> nào landed True
 TỔNG: 56/56 hồ sơ landed True đạt · 0 miễn trừ · rc=0
 rc=0
+
+# LAN sau mien_A21 (2026-11-08T15:04:15Z)
+DAT ops/land/pr1270-wp1179-land-evidence.yaml — đủ authorized_head_sha và authorization_url (landed đọc từ trang_thai_packet.landed)
+TỔNG: 57/57 hồ sơ landed True đạt · 0 miễn trừ · rc=0
+rc=0

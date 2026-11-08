@@ -15,3 +15,9 @@ rc=0
 land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
 TỔNG: ĐẠT
 rc=0
+
+# LAN sau mien_A21 (2026-11-08T15:04:15Z)
+ĐẠT ops/land/pr1270-wp1179-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+rc=0

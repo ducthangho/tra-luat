@@ -12377,11 +12377,12 @@ def _lifecycle1174(kind):
             if kind=="scoped_lifecycle":
                 _static_writers1174(c,m)
                 assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==85
-                required={n:None for n in _WP1174_MAIN_REQUIRED}
-                assert _required1174(required,_WP1174_MAIN_REQUIRED)
+                applicable=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
+                required={n:None for n in applicable}
+                assert _required1174(required,applicable)
                 required.pop("wp1174_init_fresh")
-                assert not _required1174(required,_WP1174_MAIN_REQUIRED),"missing required ID accepted"
-                assert {n for n,_ in CASES if n in _WP1174_MAIN_REQUIRED}==_WP1174_MAIN_REQUIRED,"incomplete acceptance inventory"
+                assert not _required1174(required,applicable),"missing required ID accepted"
+                assert {n for n,_ in CASES if n in applicable}==applicable,"incomplete acceptance inventory"
                 assert m._1174_IMPLEMENTATION_COMPLETE is True,"implementation marker does not match completed inventory"
             return
         if kind=="human_negative":

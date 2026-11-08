@@ -353,7 +353,8 @@ $script:EndpointBody = {
             dryRun = $true; dispatched = $false; outcome = 'whatif'; data = $null }
     }
     $b = $v['BasePath']
-    $dev = [regex]::new('^(?:CON|PRN|AUX|NUL|CONIN\$|CONOUT\$|(?:COM|LPT)[0-9¹²³])(?:\..*)?\z', [Text.RegularExpressions.RegexOptions]'IgnoreCase, CultureInvariant')
+    # Superscripts 1-3 from code points (as S1 does): the pattern must not depend on how this BOM-less file is decoded (PS5.1: ANSI).
+    $dev = [regex]::new('^(?:CON|PRN|AUX|NUL|CONIN\$|CONOUT\$|(?:COM|LPT)[0-9' + [char]0xB9 + [char]0xB2 + [char]0xB3 + '])(?:\..*)?\z', [Text.RegularExpressions.RegexOptions]'IgnoreCase, CultureInvariant')
     $okPath = $null -ne $b -and $b.Length -le 32000 -and $b -cmatch '^[A-Za-z]:\\'
     if ($okPath -and $b.Length -gt 3) { foreach ($seg in $b.Substring(3).Split([char]'\')) { if ($seg.Length -eq 0 -or $seg -cmatch '[\x00-\x1f<>:"/|?*]|[. ]\z' -or $dev.IsMatch($seg)) { $okPath = $false } } }
     if (-not $okPath) { & $fail 'RequestInvalid' }

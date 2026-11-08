@@ -1,8 +1,8 @@
-# ProximaControl.Tests.ps1 - wp1279 r2 (PROXIMA-P1-S2) focused harness for ProximaControl.psm1 + Run-Px.ps1; self-contained, no Pester.
+# ProximaControl.Tests.ps1 - wp1279 r3 (PROXIMA-P1-S2) focused harness for ProximaControl.psm1 + Run-Px.ps1; self-contained, no Pester.
 # The SAME harness and ID set run against any tree (baseline B without S2, candidate H) through an explicit -ModulePath:
 #   powershell.exe|pwsh.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File <copy>\ProximaControl.Tests.ps1 `
 #     -ModulePath <tree>\.agents\skills\proxima-control\scripts\ProximaControl.psm1 -ScratchRoot <existing dir outside the tree> `
-#     -ReportPath <json outside the tree> [-Counterexamples [-EvidenceRoot <durable dir outside the tree>]] [-TestCulture en-US|tr-TR]
+#     -ReportPath <json outside the tree> [-EvidenceRoot <durable dir outside the tree>] [-Counterexamples] [-TestCulture en-US|tr-TR]
 # rc 0: all 25 mandatory IDs (with -Counterexamples also CX00-CX10) passed and cleanup was verified. rc 1: a case failed - an absent
 # module fails EVERY case with API_ABSENT while every case still executes. rc 2: setup or cleanup error, never a test outcome.
 # Safety: every hazardous backend binding (session, remote invoke, HTTP, CIM process/service, service control, id) is replaced in
@@ -10,7 +10,10 @@
 # in wire cases and only towards an owned 127.0.0.1 TcpListener; dummy credentials only; no real gateway, service or WinRM.
 # Children (all receive -TestCulture; parent and child cultures are recorded): the constant endpoint body + CLIXML request run out
 # of process (this exe, plus the other PowerShell edition when installed) with ambient WhatIf false; Run-Px.ps1 runs in a fresh
-# process. -Counterexamples: CX00 unmodified control + CX01-CX10 single-anchor mutants of COPIES in <EvidenceRoot>\pxctl-evid-<run>,
+# process. Evidence (r3 F02): <EvidenceRoot or ScratchRoot>\pxctl-evid-<run> sits OUTSIDE the deleted fixture tree; every child's
+# script, serialized input, raw report and captured output are written/kept there in place, linked by role/path/hash, and re-verified
+# AFTER cleanup (missing/changed/inside a deleted or measured tree => rc 2); each CX child gets its own sibling <CXnn>.nested root.
+# -Counterexamples: CX00 unmodified control + CX01-CX10 single-anchor mutants of COPIES in <EvidenceRoot>\pxctl-evid-<run>,
 # each rerunning this harness; credit only for rc 1 with the named behavioural token in the named case (setup/import/wrong-rc
 # earn nothing; a surviving mutant is reported, never credited). Evidence is never deleted. Helpers are alias-free and no
 # automatic variable (args, PID, HOME, PROFILE) is assigned; setup refuses any inner binding that reuses a top-level name
@@ -31,9 +34,13 @@ $Report = [ordered]@{ schema = 'proxima_control_tests.v1'; ps_version = "$($PSVe
     module_sha256 = $null; wrapper_sha256 = $null; config_module_sha256 = $null; harness_sha256 = $null; git_head = 'not_measured'; git_tree = 'not_measured'
     api_state = 'unknown'; alias_r = $null; setup_error = $null; mandatory_ids = $Ids; required_ids = @(); counterexample_ids = @(); primitive_keys = $PrimKeys
     primitives_replaced = $null; child_exes = @(); scratch = $null; evidence_dir = $null; total = 0; passed = 0; failed = 0; failed_ids = @(); setup_error_ids = @()
-    cases = $Results; children = [Collections.Generic.List[object]]::new(); counterexample_evidence = [Collections.Generic.List[object]]::new(); cleanup = $Cleanup }
+    default_codepage = [Text.Encoding]::Default.CodePage; endpoint_body_nonascii = $null
+    cases = $Results; children = [Collections.Generic.List[object]]::new(); counterexample_evidence = [Collections.Generic.List[object]]::new(); cleanup = $Cleanup
+    evidence = [ordered]@{ schema = 'px.evidence.v1'; dir = $null; artifacts = [Collections.Generic.List[object]]::new(); check = $null
+        capture = 'output: child stdout+stderr merged (2>&1) and DECODED by the parent (Out-String, console encoding), stored UTF-8 without BOM; raw child bytes are NOT captured. script/input/report: the exact files the child executed/read/wrote, hashed in place (no copies, commands unchanged).' } }
+$EvidRoles = 'endpoint-script', 'endpoint-input', 'endpoint-report', 'wrapper-script', 'wrapper-input', 'wrapper-report', 'output'
 $Utf8 = [Text.UTF8Encoding]::new($false); $Sha = [Security.Cryptography.SHA256]::Create(); $Inv = [Globalization.CultureInfo]::InvariantCulture
-$S = $null; $FullScratch = $null; $Keep = $null; $KeepSha = $null; $Evid = $null; $Completing = $false; $ApiPresent = $false
+$S = $null; $FullScratch = $null; $Keep = $null; $KeepSha = $null; $Evid = $null; $Completing = $false; $ApiPresent = $false; $TreeRoot = $null
 $Mod = $null; $PxCmd = $null; $OpCmd = $null; $OrigPrim = $null; $EpRun = $null; $Wires = [Collections.Generic.List[object]]::new()
 function Get-FileSha256([string]$P) { if ($P -and [IO.File]::Exists($P)) { ([BitConverter]::ToString($Sha.ComputeHash([IO.File]::ReadAllBytes($P))) -replace '-', '').ToLowerInvariant() } }
 function Get-TextSha256([string]$T) { ([BitConverter]::ToString($Sha.ComputeHash($Utf8.GetBytes($T))) -replace '-', '').ToLowerInvariant() }
@@ -73,6 +80,37 @@ function Get-UserStateSnapshot {
     return ((@($rows) + @("cwd=$([Environment]::CurrentDirectory)", (Get-EnvSnapshot))) -join "`n")
 }
 function Get-OutcomeIds([string]$Outcome) { @($Results | Where-Object { $_.outcome -eq $Outcome } | ForEach-Object { $_.id }) }
+function Add-Evidence([string]$Role, [string]$Path, [int]$ChildIndex) {
+    $fi = [IO.FileInfo]::new($Path); $full = $fi.FullName
+    $art = [ordered]@{ role = $Role; child = $ChildIndex; path = $full; rel = $(if ($full.StartsWith($Evid + '\', [StringComparison]::OrdinalIgnoreCase)) { $full.Substring($Evid.Length + 1) })
+        present = $fi.Exists; bytes = $(if ($fi.Exists) { $fi.Length }); sha256 = (Get-FileSha256 $full) }
+    $Report.evidence.artifacts.Add($art); return $art
+}
+# Required nested roles, and one endpoint report per child runtime (a pass/credit never rests on aggregate counts alone).
+function Get-MissingRoles($Arts, [int]$Runtimes) {
+    $have = @(@($Arts) | Where-Object { $_.present } | ForEach-Object { [string]$_.role })
+    return @(@($EvidRoles | Where-Object { $have -cnotcontains $_ }) + @($(if (@($have -ceq 'endpoint-report').Count -ne $Runtimes) { "endpoint-report x$Runtimes" })))
+}
+# AFTER cleanup: every recorded artifact (own children + each CX child's own nested set read from its retained report) must resolve
+# with its recorded bytes, outside this run's fixture tree, the measured tree and, for nested sets, that CX's measured source copy.
+function Test-Evidence($Errors, [bool]$NeedRoles) {
+    $e0 = $Errors.Count; $n = 0; $sets = [Collections.Generic.List[object]]::new(); $sets.Add(@(@($Report.evidence.artifacts), @($S, $TreeRoot)))
+    if ($NeedRoles) { foreach ($m in Get-MissingRoles $Report.evidence.artifacts $ChildExes.Count) { $Errors.Add("EVIDENCE_ROLE_MISSING[$m]") } }
+    foreach ($cxr in $Report.counterexample_evidence) {
+        $nested = $null; try { $nested = ([IO.File]::ReadAllText($cxr.report_path) | ConvertFrom-Json).evidence } catch { $nested = $null }
+        if ($null -eq $nested -or -not "$($nested.dir)".StartsWith($cxr.nested_evidence_root + '\', [StringComparison]::OrdinalIgnoreCase)) { $Errors.Add("EVIDENCE_NESTED_UNRESOLVED[$($cxr.id)]"); continue }
+        $sets.Add(@(@($nested.artifacts), @($S, $TreeRoot, $cxr.source_dir)))
+    }
+    foreach ($set in $sets) {
+        foreach ($art in $set[0]) {
+            if (-not $art.present) { continue }
+            $n++; $full = [IO.Path]::GetFullPath([string]$art.path) + '\'
+            foreach ($fb in $set[1]) { if ($fb -and $full.StartsWith($fb.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) { $Errors.Add("EVIDENCE_IN_DELETED_OR_MEASURED_TREE[$($art.role) $($art.path)]") } }
+            if (-not $art.sha256 -or (Get-FileSha256 ([string]$art.path)) -cne [string]$art.sha256) { $Errors.Add("EVIDENCE_MISSING_OR_CHANGED[$($art.role) $($art.path)]") }
+        }
+    }
+    $Report.evidence.check = [ordered]@{ status = $(if ($Errors.Count -gt $e0) { 'failed' } else { 'ok' }); verified = $n; sets = $sets.Count; when = 'after cleanup' }
+}
 function Stop-WireServer($W) {
     if ($W['Stopped']) { return }
     try { $W.Listener.Stop() } catch { $null = $_ }
@@ -95,6 +133,7 @@ function Complete-Run([int]$Rc) {
             elseif ($c.tree_removed) { Remove-OwnedTree $Keep $c.errors }
         }
     } catch { $c.errors.Add("$($_.Exception.Message)") }
+    try { Test-Evidence $c.errors ($Rc -eq 0 -and $ApiPresent) } catch { $c.errors.Add("EVIDENCE_CHECK_ERROR $($_.Exception.Message)") }
     $c.status = $(if ($c.errors.Count) { 'failed' } else { 'ok' }); if ($c.errors.Count) { $Rc = 2 }
     $Report.failed_ids = @(Get-OutcomeIds 'failed'); $Report.setup_error_ids = @(Get-OutcomeIds 'setup_error')
     $Report.passed = @(Get-OutcomeIds 'passed').Count; $Report.failed = $Report.failed_ids.Count; $Report.total = $Results.Count
@@ -236,24 +275,31 @@ function Invoke-Case([string]$Id, [scriptblock]$Body, [switch]$NoApi) {
     Write-Host ('{0} {1}{2}' -f $outcome.ToUpperInvariant(), $Id, $(if ($why) { " :: $why" }))
 }
 # ---- out-of-process children ----
-function Invoke-ChildPs([string]$Exe, [string[]]$ArgList, [string]$Kind) {
-    $run = Invoke-Native $Exe $ArgList
-    $rec = [ordered]@{ kind = $Kind; exe = $Exe; command = @($Exe) + $ArgList; rc = $run.rc; output_sha256 = (Get-TextSha256 "$($run.out)"); ps_version = $null; ps_edition = $null; culture = $null; ui_culture = $null }
-    $Report.children.Add($rec); return @{ Run = $run; Rec = $rec }
+# $Files = role,path pairs the child executed/read/wrote IN $Evid (actual paths, nothing copied); the complete captured output is
+# stored as c<index>.output.txt (its hash = output_sha256). Each is linked to this record by role/child index/path/rel/hash.
+function Invoke-ChildPs([string]$Exe, [string[]]$ArgList, [string]$Kind, [string[]]$Files = @()) {
+    $run = Invoke-Native $Exe $ArgList; $ci = $Report.children.Count
+    $rec = [ordered]@{ index = $ci; kind = $Kind; exe = $Exe; command = @($Exe) + $ArgList; rc = $run.rc; output_sha256 = (Get-TextSha256 "$($run.out)"); ps_version = $null; ps_edition = $null
+        culture = $null; ui_culture = $null; codepage = $null; artifacts = [Collections.Generic.List[string]]::new() }
+    $Report.children.Add($rec); $op = "$Evid\child\c$ci.output.txt"; [IO.File]::WriteAllText($op, "$($run.out)", $Utf8)
+    for ($i = 0; $i -lt $Files.Count; $i += 2) { $rec.artifacts.Add((Add-Evidence $Files[$i] $Files[$i + 1] $ci).rel) }
+    $rec.artifacts.Add((Add-Evidence 'output' $op $ci).rel)
+    return @{ Run = $run; Rec = $rec }
 }
 function Read-ChildJson([string]$Path, $Rec) {
     if (-not [IO.File]::Exists($Path)) { return $null }
     $rep = [IO.File]::ReadAllText($Path) | ConvertFrom-Json
-    $Rec.ps_version = "$($rep.ps_version)"; $Rec.ps_edition = "$($rep.ps_edition)"; $Rec.culture = "$($rep.culture)"; $Rec.ui_culture = "$($rep.ui_culture)"
+    $Rec.ps_version = "$($rep.ps_version)"; $Rec.ps_edition = "$($rep.ps_edition)"; $Rec.culture = "$($rep.culture)"; $Rec.ui_culture = "$($rep.ui_culture)"; $Rec.codepage = "$($rep.codepage)"
     if ($Rec.culture -cne $TestCulture) { throw "child measured culture '$($Rec.culture)', parent runs $TestCulture" }
     return $rep
 }
 function Invoke-WrapperChild([hashtable]$WArgs, [string]$PreImport = '') {
-    $n = [guid]::NewGuid().ToString('N').Substring(0, 8); $af = "$S\child\wa-$n.xml"; $of = "$S\child\wo-$n.json"
+    $n = [guid]::NewGuid().ToString('N').Substring(0, 8); $af = "$Evid\child\wa-$n.xml"; $of = "$Evid\child\wo-$n.json"; $sc = "$Evid\child\child-wrapper.ps1"
     $null = Write-Fixture $af ([Management.Automation.PSSerializer]::Serialize($WArgs))
-    $al = @('-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', "$S\child\child-wrapper.ps1", '-Wrapper', $WrapperPath, '-ArgsFile', $af, '-Out', $of, '-Culture', $TestCulture)
-    if ($PreImport) { $al += @('-PreImport', $PreImport) }
-    $c = Invoke-ChildPs $SelfExe $al 'fresh-process wrapper'
+    $al = @('-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $sc, '-Wrapper', $WrapperPath, '-ArgsFile', $af, '-Out', $of, '-Culture', $TestCulture)
+    $fl = @('wrapper-script', $sc, 'wrapper-input', $af, 'wrapper-report', $of)
+    if ($PreImport) { $al += @('-PreImport', $PreImport); $fl += @('wrapper-preimport', $PreImport) }
+    $c = Invoke-ChildPs $SelfExe $al 'fresh-process wrapper' $fl
     return @{ Rc = $c.Run.rc; Out = "$($c.Run.out)"; Rep = (Read-ChildJson $of $c.Rec) }
 }
 function Copy-Envelope($E, [hashtable]$Set = @{}, [string[]]$Drop = @()) {
@@ -275,14 +321,15 @@ function Get-EndpointRun {
         @{ Name = 'alias-key'; Envelope = (Copy-Envelope $hs @{ whatIf = $false } @('WhatIf')) }, @{ Name = 'extra-key'; Envelope = (Copy-Envelope $hs @{ Extra = 'x' }) },
         @{ Name = 'string-force'; Envelope = (Copy-Envelope $hs @{ Force = 'False' }) }, @{ Name = 'bad-fingerprint'; Envelope = (Copy-Envelope $hs @{ TargetFingerprint = 'ABC' }) },
         @{ Name = 'relative-base'; Envelope = (Copy-Envelope $hs @{ BasePath = 'rbase' }) }, @{ Name = 'wrong-config-hash'; Envelope = (Copy-Envelope $hs @{ ConfigModuleSha256 = $z64 }) },
+        @{ Name = 'reserved-com-sup1'; Envelope = (Copy-Envelope $hs @{ BasePath = $EpSup1 }) }, @{ Name = 'reserved-lpt-sup2'; Envelope = (Copy-Envelope $hs @{ BasePath = $EpSup2 }) },
         @{ Name = 'wrong-module-hash'; Envelope = (Copy-Envelope $hs @{ ModuleSha256 = $z64 }) }, @{ Name = 'benign-wrong-code'; Envelope = (Copy-Envelope $hs @{ BasePath = "$S\rbad" }) },
         @{ Name = 'dependency-mismatch'; Envelope = (Copy-Envelope $hs @{ BasePath = "$S\rdep"; ConfigModuleSha256 = (Get-FileSha256 "$S\rdep\control\ProximaConfig.psm1") }) },
-        @{ Name = 'positive-handshake'; Envelope = (Copy-Envelope $hs) })
-    $in = Write-Fixture "$S\child\endpoint-in.xml" ([Management.Automation.PSSerializer]::Serialize([pscustomobject]@{ Body = $body.ToString(); Items = $items }, 6))
-    $runs = [Collections.Generic.List[object]]::new()
+        @{ Name = 'positive-handshake'; Envelope = (Copy-Envelope $hs) }, @{ Name = 'valid-com-lpt-handshake'; Envelope = (Copy-Envelope $hs @{ BasePath = $EpValid }) })
+    $in = Write-Fixture "$Evid\child\endpoint-in.xml" ([Management.Automation.PSSerializer]::Serialize([pscustomobject]@{ Body = $body.ToString(); Items = $items }, 6))
+    $runs = [Collections.Generic.List[object]]::new(); $sc = "$Evid\child\child-endpoint.ps1"
     foreach ($exe in $ChildExes) {
-        $of = "$S\child\endpoint-out-$($runs.Count).json"
-        $c = Invoke-ChildPs $exe @('-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', "$S\child\child-endpoint.ps1", '-In', $in, '-Out', $of, '-Culture', $TestCulture) 'endpoint'
+        $of = "$Evid\child\endpoint-out-$($runs.Count).json"
+        $c = Invoke-ChildPs $exe @('-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $sc, '-In', $in, '-Out', $of, '-Culture', $TestCulture) 'endpoint' @('endpoint-script', $sc, 'endpoint-input', $in, 'endpoint-report', $of)
         $runs.Add(@{ Exe = $exe; Rc = $c.Run.rc; Out = "$($c.Run.out)"; Rep = (Read-ChildJson $of $c.Rec); Sentinel = [IO.File]::Exists("$S\rbad\control\imported.txt") })
         if ([IO.File]::Exists("$S\rbad\control\imported.txt")) { [IO.File]::Delete("$S\rbad\control\imported.txt") }
     }
@@ -384,10 +431,10 @@ $ChildExes = @($SelfExe) + @($(if ($OtherExe -and [IO.File]::Exists($OtherExe)) 
 $Report.child_exes = $ChildExes
 $FullScratch = [IO.Path]::GetFullPath($ScratchRoot).TrimEnd('\'); $RunId = [guid]::NewGuid().ToString('N').Substring(0, 12)
 $S = "$FullScratch\pxctl-$RunId"; $Report.scratch = $S; $Repo = "$S\repo"
-foreach ($fixDir in 'repo', 'cfg', 'child', 'cx', 'conflict', 'journal-target') { $null = [IO.Directory]::CreateDirectory("$S\$fixDir") }
+foreach ($fixDir in 'repo', 'cfg', 'cx', 'journal-target') { $null = [IO.Directory]::CreateDirectory("$S\$fixDir") }
 $Keep = "$FullScratch\pxctl-keep-$RunId"; $null = [IO.Directory]::CreateDirectory($Keep); [IO.File]::WriteAllText("$Keep\keep.txt", $RunId, $Utf8); $KeepSha = Get-FileSha256 "$Keep\keep.txt"
 $Evid = "$(if ($EvidenceRoot) { [IO.Path]::GetFullPath($EvidenceRoot).TrimEnd('\') } else { $FullScratch })\pxctl-evid-$RunId"
-if ($Counterexamples) { $null = [IO.Directory]::CreateDirectory($Evid); $Report.evidence_dir = $Evid }
+$null = [IO.Directory]::CreateDirectory("$Evid\child"); $Report.evidence_dir = $Evid; $Report.evidence.dir = $Evid
 $global:PxcT = @{ Calls = [Collections.Generic.List[string]]::new(); HttpReqs = [Collections.Generic.List[object]]::new(); Envelopes = [Collections.Generic.List[object]]::new()
     Bodies = [Collections.Generic.List[object]]::new(); SessReqs = [Collections.Generic.List[object]]::new(); RemoveFail = [Collections.Generic.HashSet[int]]::new(); Pids = @{}
     SessSeq = 0; NewSessionFail = $false; Sentinel = ''; SelfSha = (Get-FileSha256 $ModulePath); CfgSha = (Get-FileSha256 $CfgModPath); Models = ''; ServiceExe = '' }
@@ -420,8 +467,12 @@ if ([IO.File]::Exists($CfgModPath)) {
     [IO.File]::WriteAllBytes("$S\rdep\control\ProximaConfig.psm1", [byte[]](@([IO.File]::ReadAllBytes($CfgModPath)) + @(13, 10, 35, 10)))
 }
 $null = Write-Fixture "$S\rbad\control\ProximaControl.psm1" "[IO.File]::WriteAllText((Join-Path `$PSScriptRoot 'imported.txt'), 'imported')`nfunction Invoke-ProximaOperation { 'benign' }`n"
-$null = Write-Fixture "$S\conflict\ProximaControl.psm1" "function px { 'conflict' }`n"
-$null = Write-Fixture "$S\child\child-endpoint.ps1" @'
+# F01 fixtures from code points (no source-decoding dependency): COM/LPT + U+00C2 are S1-valid segments, so a real deployed endpoint
+# under them must handshake; COM + U+00B9 and LPT + U+00B2 are reserved devices and must stay rejected.
+$EpValid = "$S\rv\COM$([char]0xC2)\LPT$([char]0xC2)"; $EpSup1 = "$S\rv\COM$([char]0xB9)"; $EpSup2 = "$S\rv\LPT$([char]0xB2)"
+$null = [IO.Directory]::CreateDirectory("$EpValid\control"); foreach ($epFile in $ModulePath, $CfgModPath) { if ([IO.File]::Exists($epFile)) { [IO.File]::Copy($epFile, "$EpValid\control\$([IO.Path]::GetFileName($epFile))") } }
+$null = Write-Fixture "$Evid\conflict\ProximaControl.psm1" "function px { 'conflict' }`n"
+$null = Write-Fixture "$Evid\child\child-endpoint.ps1" @'
 param([string]$In, [string]$Out, [string]$Culture)
 Set-StrictMode -Version 3.0
 $ErrorActionPreference = 'Stop'
@@ -440,10 +491,10 @@ foreach ($it in $x.Items) {
     $rows.Add([pscustomobject]$row)
 }
 $rep = [ordered]@{ ps_version = "$($PSVersionTable.PSVersion)"; ps_edition = "$($PSVersionTable.PSEdition)"; culture = [Globalization.CultureInfo]::CurrentCulture.Name
-    ui_culture = [Globalization.CultureInfo]::CurrentUICulture.Name; rows = $rows }
+    ui_culture = [Globalization.CultureInfo]::CurrentUICulture.Name; codepage = [Text.Encoding]::Default.CodePage; rows = $rows }
 [IO.File]::WriteAllText($Out, ($rep | ConvertTo-Json -Depth 8), [Text.UTF8Encoding]::new($false))
 '@
-$null = Write-Fixture "$S\child\child-wrapper.ps1" @'
+$null = Write-Fixture "$Evid\child\child-wrapper.ps1" @'
 param([string]$Wrapper, [string]$ArgsFile, [string]$Out, [string]$Culture, [string]$PreImport = '')
 Set-StrictMode -Version 3.0
 $ErrorActionPreference = 'Stop'
@@ -452,7 +503,7 @@ $WhatIfPreference = $false
 $a = [Management.Automation.PSSerializer]::Deserialize([IO.File]::ReadAllText($ArgsFile)); $h = @{}; foreach ($k in $a.Keys) { $h[[string]$k] = $a[$k] }
 if ($PreImport) { $null = Import-Module -Name $PreImport -DisableNameChecking -Global }
 $row = [ordered]@{ ps_version = "$($PSVersionTable.PSVersion)"; ps_edition = "$($PSVersionTable.PSEdition)"; culture = [Globalization.CultureInfo]::CurrentCulture.Name
-    ui_culture = [Globalization.CultureInfo]::CurrentUICulture.Name; fqid = $null; result = $null }
+    ui_culture = [Globalization.CultureInfo]::CurrentUICulture.Name; codepage = [Text.Encoding]::Default.CodePage; fqid = $null; result = $null }
 try { $row.result = @(& $Wrapper @h) } catch { $row.fqid = [string]$_.FullyQualifiedErrorId }
 [IO.File]::WriteAllText($Out, ($row | ConvertTo-Json -Depth 8), [Text.UTF8Encoding]::new($false))
 if ($row.fqid) { exit 1 }
@@ -678,7 +729,7 @@ Invoke-Case 'X3-02' {
     Assert-Ok (Invoke-Px (New-PxArgs 'connect' $Tg.R1 @{ Credential = $Cred })) 'parent connect R1'
     $w = Invoke-WrapperChild @{ Action = 'status'; ConfigPath = $Tg.R1.Cfg; RepositoryRoot = $Repo; TargetId = $Tg.R1.Tid }
     if ($w.Rc -eq 0 -or -not $w.Rep -or "$($w.Rep.fqid)" -cnotmatch '^ProximaControl\.NotConnected') { Add-Fail "FRESH_PROCESS_REUSED[rc=$($w.Rc) fqid=$(if ($w.Rep) { $w.Rep.fqid })]" }
-    $w = Invoke-WrapperChild @{ Action = 'help' } "$S\conflict\ProximaControl.psm1"
+    $w = Invoke-WrapperChild @{ Action = 'help' } "$Evid\conflict\ProximaControl.psm1"
     if ($w.Rc -eq 0 -or -not $w.Rep -or "$($w.Rep.fqid)" -cnotmatch '^ProximaControl\.ModuleConflict') { Add-Fail "MODULE_CONFLICT_ACCEPTED[rc=$($w.Rc)]" }
 }
 Invoke-Case 'X4-01' {
@@ -710,8 +761,14 @@ Invoke-Case 'X4-02' {
     Assert-Code (Invoke-Px (New-PxArgs 'connect' $Tg.R1 @{ Credential = $Cred })) 'HandshakeFailed' 'protocol as string'
     $body = (& $Mod { $script:EndpointBody }).ToString()
     if ($body.IndexOf('EndpointCodeMismatch', [StringComparison]::Ordinal) -lt 0 -or $body.IndexOf('EndpointCodeMismatch', [StringComparison]::Ordinal) -gt $body.IndexOf('Import-Module', [StringComparison]::Ordinal)) { Add-Fail 'HASH_CHECK_ORDER' }
+    # F01 (encoding-dependent endpoint path validation). Diagnostic: non-ASCII chars in the body AS THIS HOST DECODED the module.
+    $Report.endpoint_body_nonascii = @($body.ToCharArray() | Where-Object { [int]$_ -gt 0x7E } | ForEach-Object { 'U+{0:X4}' -f [int]$_ })
+    # Static class guard on BYTES: a non-ASCII literal in a BOM-less product file decodes differently on PS5.1 (ANSI) and PS7 (UTF-8).
+    foreach ($pf in $ModulePath, $WrapperPath, $CfgModPath) { if (@([IO.File]::ReadAllBytes($pf) -gt 127).Count) { Add-Fail "SOURCE_NOT_ASCII[$([IO.Path]::GetFileName($pf))]" } }
+    foreach ($pv in @(@($EpValid, $true), @($EpSup1, $false), @($EpSup2, $false))) { if ((& $Mod { param($p) Test-PxcPath $p } $pv[0]) -ne $pv[1]) { throw "SETUP: S1 path verdict differs from the F01 fixture expectation ($($pv[1]))" } }
     $want = [ordered]@{ 'bad-protocol' = 'ProtocolMismatch'; 'string-protocol' = 'ProtocolMismatch'; 'alias-key' = 'RequestInvalid'; 'extra-key' = 'RequestInvalid'; 'string-force' = 'RequestInvalid'
-        'bad-fingerprint' = 'RequestInvalid'; 'relative-base' = 'RequestInvalid'; 'wrong-config-hash' = 'EndpointCodeMismatch'; 'wrong-module-hash' = 'EndpointCodeMismatch'; 'benign-wrong-code' = 'EndpointCodeMismatch' }
+        'bad-fingerprint' = 'RequestInvalid'; 'relative-base' = 'RequestInvalid'; 'wrong-config-hash' = 'EndpointCodeMismatch'; 'wrong-module-hash' = 'EndpointCodeMismatch'; 'benign-wrong-code' = 'EndpointCodeMismatch'
+        'reserved-com-sup1' = 'RequestInvalid'; 'reserved-lpt-sup2' = 'RequestInvalid' }
     foreach ($run in (Get-EndpointRun).Runs) {
         $ed = "$(if ($run.Rep) { $run.Rep.ps_edition } else { $run.Exe })"
         if ($run.Sentinel) { Add-Fail "HASH_BEFORE_IMPORT[$ed benign wrong code executed]" }
@@ -722,6 +779,10 @@ Invoke-Case 'X4-02' {
         }
         $row = Get-EpRow $run 'dependency-mismatch'
         if (-not $row -or $row.result -or "$($row.fqid) $($row.message)" -notmatch 'DependencyMismatch') { Add-Fail "S1_HASH_NOT_CHECKED_ON_ENDPOINT[$ed]" }
+        $row = Get-EpRow $run 'valid-com-lpt-handshake'
+        if (-not $row -or -not $row.result -or "$($row.result.outcome)" -cne 'ok' -or $row.result.dryRun -ne $false -or $row.ambient_whatif -ne $false -or $row.received_whatif -cne 'False' -or
+            "$($row.result.data.moduleSha256)" -cne $global:PxcT.SelfSha -or "$($row.result.data.configModuleSha256)" -cne $global:PxcT.CfgSha) {
+            Add-Fail "ENDPOINT_VALID_PATH_REJECTED[$ed COM+U00C2\LPT+U00C2 parent_codepage=$($Report.default_codepage) child_codepage=$($run.Rep.codepage)] fqid=$(if ($row) { $row.fqid })" }
     }
 }
 Invoke-Case 'X4-03' {
@@ -978,6 +1039,9 @@ function Test-Counterexample($M, [int]$Rc, $Rec) {
     $state = "rc=$Rc api=$($rep.api_state) setup_error=$($rep.setup_error) cleanup=$($rep.cleanup.status) passed=$($rep.passed)/$($rep.total)"
     if ("$($rep.test_culture)" -cne $TestCulture) { throw "child measured culture '$($rep.test_culture)', parent runs $TestCulture ($state)" }
     if ("$($rep.module_sha256)" -cne $Rec.module_sha256 -or "$($rep.api_state)" -cne 'present' -or $rep.setup_error -or $rep.cleanup.status -ne 'ok') { throw "child did not measure this source cleanly ($state)" }
+    # No credit without the child's own nested evidence: durable sibling root, self-verified after its cleanup, every required role.
+    $miss = @(Get-MissingRoles $rep.evidence.artifacts @($rep.child_exes).Count)
+    if (-not "$($rep.evidence.dir)".StartsWith($Rec.nested_evidence_root + '\', [StringComparison]::OrdinalIgnoreCase) -or "$($rep.evidence.check.status)" -cne 'ok' -or $miss.Count) { throw "NESTED_EVIDENCE_NOT_RETAINED[$($miss -join ',')] ($state)" }
     if ($M.id -ceq 'CX00') {
         if ($Rc -ne 0 -or $rep.failed -or $rep.passed -ne $Ids.Count -or $rep.total -ne $Ids.Count) { throw "unmodified positive control did not pass ($state)" }
         return 'CONTROL_PASSED: unmodified copy, every mandatory ID passed, rc 0'
@@ -1005,12 +1069,16 @@ if ($Counterexamples) {
             }
             $cs = "$S\cx\$($cxCase.id)"; $null = [IO.Directory]::CreateDirectory($cs)
             # Report/output/record sit NEXT TO the source copy: the child measures $dir byte-for-byte and rejects outputs inside it.
+            # Its nested evidence root is a durable SIBLING too ($ev.nested): its default under -ScratchRoot $cs would die with $S.
             $ev = "$Evid\$($cxCase.id)"
-            $argv = @('-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $PSCommandPath, '-ModulePath', "$dir\ProximaControl.psm1", '-ScratchRoot', $cs, '-ReportPath', "$ev.report.json", '-TestCulture', $TestCulture)
-            $c = Invoke-ChildPs $SelfExe $argv "counterexample $($cxCase.id)"; [IO.File]::WriteAllText("$ev.output.txt", "$($c.Run.out)", $Utf8)
+            $argv = @('-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $PSCommandPath, '-ModulePath', "$dir\ProximaControl.psm1", '-ScratchRoot', $cs, '-ReportPath', "$ev.report.json",
+                '-EvidenceRoot', "$ev.nested", '-TestCulture', $TestCulture)
+            $c = Invoke-ChildPs $SelfExe $argv "counterexample $($cxCase.id)" @('cx-module', "$dir\ProximaControl.psm1", 'cx-wrapper', "$dir\Run-Px.ps1", 'cx-config-module', "$dir\ProximaConfig.psm1", 'cx-report', "$ev.report.json")
+            [IO.File]::WriteAllText("$ev.output.txt", "$($c.Run.out)", $Utf8)
             $rec = [ordered]@{ id = $cxCase.id; mutated_file = $cxCase.file; anchor = $(if ($cxCase.e.Count) { $cxCase.e[0] }); replacement = $(if ($cxCase.e.Count) { $cxCase.e[1] }); command = @($SelfExe) + $argv; rc = $c.Run.rc
                 module_sha256 = (Get-FileSha256 "$dir\ProximaControl.psm1"); wrapper_sha256 = (Get-FileSha256 "$dir\Run-Px.ps1"); config_module_sha256 = (Get-FileSha256 "$dir\ProximaConfig.psm1")
                 report_path = "$ev.report.json"; report_sha256 = (Get-FileSha256 "$ev.report.json"); output_path = "$ev.output.txt"; output_sha256 = (Get-FileSha256 "$ev.output.txt")
+                source_dir = $dir; nested_evidence_root = "$ev.nested"; child_index = $c.Rec.index
                 required = $cxCase.red; matched = @(); credited = $false; verdict = $null }
             $Report.counterexample_evidence.Add($rec)
             try { $rec.verdict = Test-Counterexample $cxCase $c.Run.rc $rec } catch { $rec.verdict = "NOT_ACCEPTED: $($_.Exception.Message)"; throw }

@@ -1,6 +1,6 @@
 # Bien ban M8 (ADR-0060) dong WP #1179 wp1179 / LAND-DOC-RECEIPT-THU-HOI-C1a1b r9 g1 — kiem bang packet_loop.py kiem-dong-wp
-# Nhan nguon tung muc: ops/land/pr1270-wp1179-land-evidence.yaml. landed true theo L-6 (human audit chu kho 6720906163, KHONG co
-# approve_merge rieng — xem canh_bao_cho_chu_kho cua land evidence); bon moc §10.2.2 du (wd-run 42487322479).
+# Nhan nguon tung muc: ops/land/pr1270-wp1179-land-evidence.yaml. landed true theo L-6 (approve_merge chu kho tu dang 6722745114, sau
+# merge nhu #1272; truoc merge human audit 6720906163); bon moc §10.2.2 du (wd-run 42487322479).
 packet: wp1179
 revision: 9
 generation: 1
@@ -19,8 +19,8 @@ ci_pr:
   run_id: 42476182401
   conclusion: success
   ghi_chu: 'attempt 2 23/23; attempt 1 gate-registry do loi ha tang codex_cloud_setup_test.py; K7 ci-dot-bien-du 42476206603 success'
-duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1270#issuecomment-6720906163
-duyet_chu_kho_ghi_chu: 'verdict human audit approve neo 5824094, truoc merge; duyet merge qua AskUserQuestion phien dieu phoi la loi khai; k3 chap-nhan 6721869249 truoc merge 32 giay.'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1270#issuecomment-6722745114
+duyet_chu_kho_ghi_chu: 'approve_merge 5824094 chu kho tu dang 14:31:28Z (app null), SAU merge 13:07:22Z; truoc merge: verdict human audit approve neo 5824094, truoc merge; duyet merge qua AskUserQuestion phien dieu phoi la loi khai; k3 chap-nhan 6721869249 truoc merge 32 giay.'
 merge_commit: bf9914cb1a8e6f5047468f4d130b587015f8d73f
 cha_merge: [0166d30611617ac2ed4f79ada92f950d4edeb824, 5824094e78a0afe9d0af8866df45c50b24334767]
 tree_m: 247971f6c723cc17de3632e4eaba2019545b356b
@@ -55,7 +55,7 @@ nghiem_thu:
   A23: passed
 lease_cuoi: wp1179-r9-g1-claude-remote-20261106
 nha_lease: 'rut han fcea24a: lease_until 2026-11-08T14:20:00Z; ops-publish-lease 42487306631 rc 9; ai-dang-giu sau 14:20Z: xem ai-dang-giu-sau-rut-han.txt'
-landed: true  # L-6 bang human audit 6720906163; khong co approve_merge rieng — chu kho co the yeu cau ha
+landed: true  # L-6 bang approve_merge chu kho 6722745114 (sau merge, nhu #1272)
 moc_10_2_2:
   run: passed
   checkout: passed

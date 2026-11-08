@@ -3,3 +3,9 @@
 land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
 TỔNG: ĐẠT
 rc=0
+
+# LAN sau approve_merge 6722745114 (2026-11-08T14:32:33Z): python3 ops/land_evidence_nguon.py --root . --tep ops/land/pr1270-wp1179-land-evidence.yaml
+ĐẠT ops/land/pr1270-wp1179-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+rc=0

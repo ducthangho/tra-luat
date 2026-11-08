@@ -1,5 +1,5 @@
 358f8f250d93a40c72ccbe2cded1f9d08d96d88cf11eed020bc89801421bdf8d  ./ai-dang-giu-sau-rut-han.txt
-c99bb44340ed614c202e2b3f38214ed41f3086fa8ca770cd71d4ad890ee2a023  ./bien-ban-m8.yaml
+ed5428add1770824d8a78cf12bf5d6aa46e08729c067392badb1d7b85a7d0994  ./bien-ban-m8.yaml
 cf21cd219dd6b8d8f21bc3ac1a4aa4e2f01b2de0c6ce87c84d673825e48531c2  ./ci/jobs.json
 8a4a90c2d68de13f4fcaad0f6287e509a3cf45f9f426d342b7d96cac159b61dc  ./ci/jobs/128740073225.trich.txt
 c6d84e1cf84b04044df080880ae2adb199e3ccc5b4cf27d2c787902f5ff50dc2  ./ci/jobs/128740140914.trich.txt
@@ -29,8 +29,8 @@ da1b4ee54b8e1ab9fe481bd4503e35bfc477e65a3959845ccd8981f1052c8e2c  ./ci/provenanc
 574c84a07a6aef3663d8b28a26b654c0a51ad2e054d7bea3423e2a6d2c3ed7da  ./ci_provenance.out.txt
 0f45f224d2f355906dce2ad484c0a908e55bb0e723e18fc58c9474b879d884e4  ./danh-gia-gate-output-42483433610.txt
 b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd  ./danh_gia_gate.py
-51d7c1f1ea23f36f028629672c855c6d2cb5f3738f2e7d3960bdfca069abbf12  ./kiem-dong-wp-m8.txt
-721deb4e95352346a40dd91f2056b9c0cc6939120a356c3c2af0e7df25bad6fa  ./kiem-ho-so-land.txt
+1038684d4dc43c53b47ee545d67f5a2a00cec446c9a551933f515772f2667fd1  ./kiem-dong-wp-m8.txt
+f7825804f23d579fe62ee1ae621035c31527528f96ab66d8b738a46f77c9309d  ./kiem-ho-so-land.txt
 4c4dfd2bec3176035c54899d56ee349cf5e19972b074f659583a969795bd41d9  ./kiem-merge/audit.json
 7e66d381c1091eceb8529f49c332dbe7b24c210916feb4e28620d38328046d60  ./kiem-merge/check-runs.json
 e8f0783a74b8887158be4f573f32ab8fbce0888e8c596fa2109e1734591ef72c  ./kiem-merge/chu-kho.json
@@ -47,7 +47,7 @@ fe13e9d28fe693a130383847c052305c20b13dbae572e0fdaa74641b51a999b2  ./kiem-merge/l
 14aad0d0dfc771732764ba8a3581fdf8ef7850d32daebc2551efda1c85a8b0fc  ./kiem-merge/remote-run-som.json
 cec19f8bbe2a3ca7a0fa2ad8d59563f63fa31c022343192a790eacd1c921f999  ./kiem-merge/runs.json
 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945  ./kiem-merge/rv.json
-584711117981d45319206e819669346ce67f77a39578d1c87a11a53cd8884d87  ./land-evidence-nguon.txt
+8ad05fd626b4159703b3129e090a571832e1f323d5a73fd378430ceacecd544a  ./land-evidence-nguon.txt
 a91d8a2d2771d2a6b7996ef484ae4819482675d8d14b4b7cc2368cfd85b5d37c  ./launcher-windows-128740073022.trich.txt
 5fdafa8ca9666756a8e8c1886394ef304fa6cbd3232639b30b089c7d5fe7ac35  ./lease-wp1179-r9-g1-claude-remote-20261106-sau-rut-han.yaml.txt
 016e4ee51776ae9435c0ca1f4f11772426fd5baf2c9907492a6f21cdcc65a20c  ./merge-va-diff.txt
@@ -57,6 +57,7 @@ fe00aba19e587e5aa6d94ea47bd87deeaa3fcf0ba72a777dc03b48a67c03f77f  ./nghiem-thu-a
 ed5c6c66e2f9bd2d367dbdd4031fd138b5dcb3e2a99654d1f89d1622667b7c76  ./ops-publish-lease-42487306631-trich.txt
 f6d0c36d10e17ee844a4113f01cbc4d0ac94446d52c8956d669b87fb2bc3f568  ./phan-chung-buoc-42483433610.txt
 bd8625d8f7a07ae8c5e44710dfa291ff6fb400baea5d7fa19051351b32a08756  ./pr-ci-42476182401-a1-gate-registry-128718523392.trich.txt
+bbc2b2cca8e1b91451518709129f0b51a5c29fef6c947b06e60eb2b31da2528a  ./readback-chu-kho-approve-merge-issuecomment-6722745114.json
 4c4dfd2bec3176035c54899d56ee349cf5e19972b074f659583a969795bd41d9  ./readback-chu-kho-human-audit-issuecomment-6720906163.json
 a881df3b54bd80988cb3e90f39925b11bf448e09330c2a9aaeb5c36508b0cdbc  ./readback-chu-kho-k3-issuecomment-6721869249.json
 e8f0783a74b8887158be4f573f32ab8fbce0888e8c596fa2109e1734591ef72c  ./readback-chu-kho-mien-windows-issuecomment-6720945568.json

@@ -2,9 +2,9 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2; dieu kien landed §10.2.4; so sach ADR-0060 M8.
 #
 # TRANG THAI: merged (bf9914c, 2026-11-08T13:07:22Z), LANDED (landed: true). Bon moc §10.2.2 cua ci.yml 42483433610 DU
-# (wd-run 42487322479). Uy quyen: human_exact_head_audit.v1 `approve` chu kho TU DANG (performed_via_github_app null) neo dung
-# 5824094 TRUOC merge (6720906163); KHONG co comment `approve_merge:` rieng — lan duyet merge dung SHA la loi_khai_co_neo (AskUserQuestion
-# trong phien dieu phoi). Xem trang_thai_packet.canh_bao_cho_chu_kho.
+# (wd-run 42487322479). Uy quyen: `approve_merge: 5824094…` chu kho TU DANG (performed_via_github_app null) issuecomment-6722745114
+# (14:31:28Z) — dang SAU merge (13:07:22Z) ~1,4 gio, nhu tien le #1272. Truoc merge: human_exact_head_audit.v1 `approve` chu kho tu
+# dang neo dung 5824094 (6720906163); lan duyet merge truoc merge qua AskUserQuestion phien dieu phoi la loi_khai_co_neo.
 # K3 (connector) TRUOT o kiem-merge vi TROI DINH DANG connector (codex-review-state:v1, khong co dong `Reviewed commit:`); chu kho chap
 # nhan K3 tay (6721869249) truoc merge. Tai lap kiem-merge cua executor trong phien nay: rc 12, chi K3, output BYTE-TRUNG (measured).
 # NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured (nhu khuon).
@@ -25,13 +25,18 @@ tracker_issue: 1206
 authorized_head_sha: 5824094e78a0afe9d0af8866df45c50b24334767
 authorized_head_tree: 5af7905b39091319e3399accfe89b0a940b36415
 approver: ducthangho
-authorization_url: https://github.com/ducthangho/tra-luat/pull/1270#issuecomment-6720906163
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1270#issuecomment-6722745114
 authorization_ghi_chu: >-
+  measured — readback-chu-kho-approve-merge-issuecomment-6722745114.json: PR #1270, user ducthangho, author_association OWNER,
+  performed_via_github_app null, created_at = updated_at = 2026-11-08T14:31:28Z, than mot dong `approve_merge:
+  5824094e78a0afe9d0af8866df45c50b24334767` (= authorized_head_sha). UY QUYEN DANG SAU MERGE (~1,4 gio sau merged_at 13:07:22Z):
+  no ghi lai, khong chung minh, rang chu kho da duyet truoc merge — phan "truoc merge" la cac dong duoi. Chu kho dang theo
+  canh_bao (i) cua ban dau ho so nay (lich_su_nhan). Truoc merge:
   measured — readback-chu-kho-human-audit-issuecomment-6720906163.json: PR #1270, user ducthangho, author_association OWNER,
   performed_via_github_app null, created_at 2026-11-08T11:27:30Z, updated_at 2026-11-08T11:31:16Z; than JSON
   schema human_exact_head_audit.v1, packet wp1179, revision 9, generation 1, reviewed_sha 5824094 (= authorized_head_sha),
   reviewed_tree 5af7905b (= tree 5824094, merge-va-diff.txt), spec_sha256 c9bc8aca (= spec.sha256), verdict approve, assurance
-  human_audited, open_findings []. Comment nay la VERDICT AUDIT neo exact SHA, KHONG phai comment `approve_merge:` rieng; PR #1270 va
+  human_audited, open_findings []. Comment nay la VERDICT AUDIT neo exact SHA, KHONG phai comment `approve_merge:` rieng; TRUOC merge (va toi 14:2xZ) PR #1270 va
   Issue #1179 khong co comment `approve_merge:` nao (kiem-merge/ic.json: 5 issue comment cua PR, kiem-merge/rv.json: 0 review;
   readback-issue-1179-comments.json: 29 comment cua Issue, trang 2 rong; khong than nao chua chuoi `approve_merge`). Lan duyet merge dung SHA 5824094 la loi_khai_co_neo — lease-wp1179-r9-g1-claude-remote-20261106-sau-rut-han.yaml.txt
   thu_hoi_bang_rut_han.ly_do ("chu kho duyet merge dung SHA 5824094 (AskUserQuestion phien dieu phoi)"); khong co tren GitHub.
@@ -194,17 +199,14 @@ trang_thai_packet:
     launcher-windows cung SHA success. (2) lease nha: DAT sau 14:20Z (ai-dang-giu-sau-rut-han.txt). (3) bookkeeping: ho so nay + bien ban
     M8 (kiem-dong-wp-m8.txt); dang M8 len Issue va dong Issue la viec phien dieu phoi. (4) review neo 5824094: human audit chu kho approve
     (measured) + connector sach theo noi dung (measured; K3 parser THIEU, chu kho chap nhan tay). (5) uy quyen: L-6 DAT bang human audit
-    chu kho tu dang neo 5824094 truoc merge (kiem-ho-so-land.txt); KHONG co `approve_merge:` rieng — xem canh_bao. (6) muc tieu: A1–A23
+    approve_merge chu kho tu dang 6722745114 neo 5824094 (sau merge, nhu #1272); truoc merge human audit 6720906163 (kiem-ho-so-land.txt). (6) muc tieu: A1–A23
     xem nghiem_thu (A16 owner_waived; A21 lech cap 4 co chu kho cho phep). (7) tran: kich thuoc +1718 <= 1760; Codex 4/4 khong vuot.
   canh_bao_cho_chu_kho: >-
-    (i) UY QUYEN: authorization_url tro VERDICT human audit (approve) cua chu kho, khong phai mot comment `approve_merge:`. Tien le #1272
-    (ops/land/pr1277-wp1272-land-evidence.yaml) chi nang landed true sau khi chu kho tu dang `approve_merge: <sha>`. Neu chu kho muon
-    cung chuan ay: dang tren PR #1270 mot comment mot dong
-    `approve_merge: 5824094e78a0afe9d0af8866df45c50b24334767` (tu dang, khong qua app); phien ghi so se doi authorization_url sang comment
-    ay. Neu chu kho KHONG coi human audit la duyet merge thi ha landed false. (ii) K3: kiem-merge rc 12 vi parser connector khong doc dinh
+    (i) UY QUYEN: da GIAI — chu kho tu dang `approve_merge: 5824094…` (6722745114, sau merge, nhu tien le #1272); authorization_url doi
+    sang comment ay. (ii) K3: kiem-merge rc 12 vi parser connector khong doc dinh
     dang codex-review-state:v1; chu kho chap nhan tay 6721869249 — can packet sua `_neo_connector`. (iii) A21: cap 4 thay vi 3 (chu kho cap
     them 1 luot); A21(b) va state that khong do. (iv) A16: chi co mien + ban chep ket qua; log Windows goc khong nap.
-  lich_su_nhan: 'Ban dau (phien ghi so nay): landed true. kiem-dong-wp-m8.txt LAN 1 (14:10Z, truoc han lease) rc 12 chi D4; LAN 2 (14:21Z) rc 0 "ĐÓNG ĐƯỢC WP wp1179"; kiem-ho-so-land.txt L-6 DAT, 57/57, rc 0; land-evidence-nguon.txt.'
+  lich_su_nhan: 'Ban dau (phien ghi so nay): landed true. kiem-dong-wp-m8.txt LAN 1 (14:10Z, truoc han lease) rc 12 chi D4; LAN 2 (14:21Z) rc 0 "ĐÓNG ĐƯỢC WP wp1179"; kiem-ho-so-land.txt L-6 DAT, 57/57, rc 0; land-evidence-nguon.txt. Sau do chu kho tu dang approve_merge 6722745114 (14:31:28Z) theo canh_bao (i); phien dieu phoi doi authorization_url sang comment ay va chay lai ba bo kiem (cac tep *.txt ghi them LAN sau cung).'
 review:
   so_loi_goi_codex: 'loi_khai_co_neo 4/4 pha thi cong (lease ngan_sach_thi_cong.da_dung 4, cap 4; da_dung_runs a4bceca6, ec20186a, ef67aa49, ea8f7f1f) + 1 luot connector dong goi (connector_dong_goi). Khong goi them sau 4/4.'
   ket_qua_theo_luot: 'thuat_lai — luot 1–3 changes_requested (F1–F7), luot 4 tren 7e1d2dd changes_requested 1 P2 F8 (chi test), va o 0ef6b2c; dong bang human audit chu kho (approve, measured) + connector sach tren 5824094 (measured noi dung, parser K3 THIEU).'

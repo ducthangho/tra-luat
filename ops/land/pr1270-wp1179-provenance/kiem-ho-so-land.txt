@@ -2,3 +2,8 @@
 DAT ops/land/pr1270-wp1179-land-evidence.yaml — đủ authorized_head_sha và authorization_url (landed đọc từ trang_thai_packet.landed)
 TỔNG: 57/57 hồ sơ landed True đạt · 0 miễn trừ · rc=0
 rc=0
+
+# LAN sau approve_merge 6722745114 (phien dieu phoi, 2026-11-08T14:32:33Z): python3 ops/kiem_ho_so_land.py --root .
+DAT ops/land/pr1270-wp1179-land-evidence.yaml — đủ authorized_head_sha và authorization_url (landed đọc từ trang_thai_packet.landed)
+TỔNG: 57/57 hồ sơ landed True đạt · 0 miễn trừ · rc=0
+rc=0

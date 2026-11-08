@@ -1,0 +1,334 @@
+{
+  "version": "1.5.0",
+  "run_id": "454049296eb249c79881c81f394a8c3b",
+  "short_id": "45404929",
+  "ten": "wp1279-r2-review1-call3",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 11,
+    "van_tay": "4ce3496312029579"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-11-08T05:46:34.861437+00:00",
+  "ket_thuc_utc": "2026-11-08T05:55:28.076429+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 574163,
+  "khoa_danh_tinh": "linux:22587446",
+  "workspace": "/workspace/scratch/wp1279-code-review-d3ccdd2",
+  "head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "da5a81bbb1a964d987268de8cea74fb18ed732ed2335182534ccc4bd0d84a02e",
+  "deadline_utc": "2026-11-08T06:46:34.607248+00:00",
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "chup_workspace": true,
+  "snapshot_gioi_han": "chi so hai moc truoc/sau; ghi roi hoan nguyen giua hai moc thi khong thay; chau tu setsid hoac sinh truoc khi gan job thi khong chung minh duoc",
+  "snapshot_truoc_sha256": "31625b36c79596448e09aa36f46d28d02d6ed5fdbb846767c12bc1b6e66e618d",
+  "snapshot_sau_sha256": "31625b36c79596448e09aa36f46d28d02d6ed5fdbb846767c12bc1b6e66e618d",
+  "snapshot_so_muc": {
+    "truoc": 14092,
+    "sau": 14092
+  },
+  "tep_doi_tong": 0,
+  "tep_doi_bi_cat": false,
+  "tep_doi": [],
+  "snapshot_ket_qua": "sach",
+  "snapshot_ly_do": null,
+  "checkpoint_sha256": "64d26058d2f4357c283fd32d381a46d84dd1c382d32aba3f817f59f2ef6e6364",
+  "prompt_ban_chup": "/workspace/scratch/proxima-p1-s2-20261108/code-review-runs/45404929/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "model_phuc_vu_rust_log_ke_thua_bi_ghi_de": true,
+  "model_phuc_vu": [
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00cbe3f9887d28d1098dfb462d00f",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00cbec65087d2b4e4a868aa72adfe",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00cc23d9487d2881d034c5dd6fe61",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00cc4acf087d2af19b2ddcac75171",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00cced91087d29f1687ab21226e46",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00cd4d61487d28886f566f049f329",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00cd8fc7887d28c513ed18309ca00",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00cdd25a487d28f16cb3fc8a0b698",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00ce0e69c87d2aa83d0e7f9df730f",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00ce9335087d289bde4311143bac9",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00cf9ef4c87d284ddc05c8783b3dc",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00d01e2f487d292f6acbad718e9f8",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00d09b54087d2934f6799ba6b8147",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00d0f1e4887d2a4a1d106522e5cd1",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00d29f8a887d2819ea4bfb186527b",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00d3babc487d2b9507806ee656431",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00d4e154887d2acae5e8f6b75bc90",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00d7a829487d2bf34f4991e7041a6",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00d88320487d29a81b92f20cbbbfa",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00d8d8a9087d287bd3116c8dc6e55",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00d99e33c87d28accb27599ea3a49",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00da164f087d298194dd3883b382c",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00dccdac487d2b8c4a7f64fc38302",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00dd62cd487d2b16c6970eb2ff3de",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00deebb7887d2aa2b0fac5728cb89",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00dff4f0887d296edc92cdcb6fde1",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00e0e22e887d2a2c028f3e2a9a917",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00e12aeb887d29f868f13e9fd8439",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00e28748c87d2ba27dcdcdec58880",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00e385d9487d2b7860f7e7a479069",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00e49813487d287294b8f6581b65e",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00e4cfc3487d288fcce1c5139e700",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00e5057cc87d2ad96b37bab937654",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_06e22b08f0f9f061016af00e783ae887d2aeecaa9c0ce41fdd",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    }
+  ],
+  "model_phuc_vu_trang_thai": "DO_DUOC",
+  "stderr_bo_dong": 225703,
+  "stderr_bo_byte": 26212980,
+  "effort_phuc_vu": [
+    "xhigh"
+  ],
+  "effort_phuc_vu_trang_thai": "DO_DUOC",
+  "sandbox_quan_sat": [
+    {
+      "chuong_trinh": "bwrap",
+      "co": [
+        "--unshare-net",
+        "--unshare-user"
+      ],
+      "gan": [
+        [
+          "--ro-bind",
+          "/"
+        ]
+      ],
+      "so_lan": 1
+    },
+    {
+      "chuong_trinh": "bwrap",
+      "co": [
+        "--cap-drop=ALL",
+        "--die-with-parent",
+        "--new-session",
+        "--unshare-ipc",
+        "--unshare-net",
+        "--unshare-pid",
+        "--unshare-user"
+      ],
+      "gan": [
+        [
+          "--ro-bind",
+          "/"
+        ]
+      ],
+      "so_lan": 12
+    },
+    {
+      "chuong_trinh": "codex-linux-sandbox",
+      "co": [
+        "--apply-seccomp-then-exec",
+        "--command-cwd=workspace",
+        "--sandbox-policy-cwd=workspace"
+      ],
+      "permission_profile": {
+        "file_system": "restricted",
+        "loai": "managed",
+        "muc": [
+          [
+            "root",
+            "read"
+          ]
+        ],
+        "network": "restricted"
+      },
+      "so_lan": 12
+    },
+    {
+      "chuong_trinh": "codex-linux-sandbox",
+      "co": [
+        "--command-cwd=workspace",
+        "--sandbox-policy-cwd=workspace"
+      ],
+      "permission_profile": {
+        "file_system": "restricted",
+        "loai": "managed",
+        "muc": [
+          [
+            "root",
+            "read"
+          ]
+        ],
+        "network": "restricted"
+      },
+      "so_lan": 2
+    }
+  ],
+  "sandbox_lech": {
+    "chuyen_cha_trong_cay": 0,
+    "chuyen_cha_ngoai_cay": 0,
+    "cha_con_song": 0,
+    "tai_dung": 0,
+    "to_tien_doi": 0
+  },
+  "sandbox_trang_thai": "DO_DUOC",
+  "sandbox_gioi_han": "lay mau /proc tu ben ngoai moi 0.2s: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. Lech danh tinh tien trinh (#1105): chuyen cha khi cha cu da mat/Z va cha moi la to tien da xac thuc thi duoc tha; moi lech khac (ke ca chuyen ra ngoai cay hay PID 1) => KHONG_DO_DUOC: co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do",
+  "thoi_luong_giay": 533.215,
+  "stdout_byte": 12608,
+  "stdout_sha256": "9c0a2aa9797a1704d218480202a4811bd94ff2569f95be5b0f62818e6dd528d8",
+  "stderr_byte": 39,
+  "stderr_sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+}

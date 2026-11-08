@@ -1,0 +1,41 @@
+{
+  "reviewed_sha": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+  "terminal_rc": 0,
+  "original_stdout_sha256": "9c0a2aa9797a1704d218480202a4811bd94ff2569f95be5b0f62818e6dd528d8",
+  "original_lastline": "KET_LUAN: changes_requested",
+  "original_verdict_sha256": "f276072cc69d6a971925d0a2034d48c9123429691046e65d935dc15e07d4e159",
+  "snapshot_final": "sach",
+  "controller_snapshots": {
+    "review": {
+      "sha256": "31625b36c79596448e09aa36f46d28d02d6ed5fdbb846767c12bc1b6e66e618d",
+      "same_as_before": true
+    },
+    "source": {
+      "sha256": "36905aa8b296c2fe31e21e26de8a6c12ea95997c1b94f79ea3eb04e754997fd0",
+      "same_as_before": true
+    }
+  },
+  "observed_models": [
+    "gpt-6.1-sol"
+  ],
+  "observed_efforts": [
+    "xhigh"
+  ],
+  "model_samples": 34,
+  "sandbox_status": "DO_DUOC",
+  "sandbox_limits": "lay mau /proc tu ben ngoai moi 0.2s: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. Lech danh tinh tien trinh (#1105): chuyen cha khi cha cu da mat/Z va cha moi la to tien da xac thuc thi duoc tha; moi lech khac (ke ca chuyen ra ngoai cay hay PID 1) => KHONG_DO_DUOC: co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do",
+  "verdict": "changes_requested",
+  "open_findings": [
+    {
+      "id": "WP1279-R1-F01",
+      "class": "encoding-dependent-endpoint-path-validation",
+      "severity": "P2"
+    },
+    {
+      "id": "WP1279-R1-F02",
+      "class": "nested-child-evidence-deleted-before-review",
+      "severity": "P2"
+    }
+  ],
+  "note": "Terminal parent machine observations resolve active/model self-report identity unknowns; original verdict unchanged. Snapshot equality is two-point evidence, not universal no-transient-write proof."
+}

@@ -1,0 +1,1 @@
+Original independent Codex CLI review1 of exactH2 returned changes_requested with twoP2classes. No approval/waiver. Original verdict/stdout/prompt/run retained unmodified; parent terminal observations separately resolve servedidentity/sandbox. This metadata control ref is not canonicalmaster or a requiredcheck.

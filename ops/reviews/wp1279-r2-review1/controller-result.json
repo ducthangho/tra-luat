@@ -1,0 +1,19 @@
+{
+  "launcher_exit": 0,
+  "finished_at": "2026-11-08T05:55:28.089514+00:00",
+  "deadline": "2026-11-08T06:46:34.607248+00:00",
+  "prompt_sha256": "da5a81bbb1a964d987268de8cea74fb18ed732ed2335182534ccc4bd0d84a02e",
+  "head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+  "tree": "876ddb578234a9c990e1a2989a5859023fbbc0b4",
+  "post_snapshots": {
+    "review": {
+      "sha256": "31625b36c79596448e09aa36f46d28d02d6ed5fdbb846767c12bc1b6e66e618d",
+      "same_as_before": true
+    },
+    "source": {
+      "sha256": "36905aa8b296c2fe31e21e26de8a6c12ea95997c1b94f79ea3eb04e754997fd0",
+      "same_as_before": true
+    }
+  },
+  "ref_mirror_unchanged": true
+}

@@ -1,0 +1,115 @@
+{
+  "executor_provider": "anthropic_claude",
+  "surface": "claude_code",
+  "transport": "machine/local",
+  "current_handoff_run": "04b271dbab314dfe86ffcd60f7d1a21a",
+  "source_head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+  "observed_model": "claude-opus-5-5",
+  "model_family": "claude",
+  "model_evidence": "do_may",
+  "last_run_model_usage": {
+    "claude-opus-5-5": {
+      "inputTokens": 60,
+      "outputTokens": 78379,
+      "cacheReadInputTokens": 5662422,
+      "cacheCreationInputTokens": 254592,
+      "webSearchRequests": 0,
+      "costUSD": 4.7370404,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 58970,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 254592,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "initial_module_wrapper_writer_run": "b4d36a7cbae44b1eb1edd637ba13f7a1",
+  "initial_model_usage": {
+    "claude-opus-5-5": {
+      "inputTokens": 46,
+      "outputTokens": 248570,
+      "cacheReadInputTokens": 5762582,
+      "cacheCreationInputTokens": 394741,
+      "webSearchRequests": 0,
+      "costUSD": 9.2820284,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 160869,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 394741,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "candidate_identity": {
+    "at": "2026-11-08T05:29:34.619675+00:00",
+    "head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+    "tree": "876ddb578234a9c990e1a2989a5859023fbbc0b4",
+    "parents": [
+      "24cc13bb536386d0662927e9c94331eb8713bab8"
+    ],
+    "base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+    "additions": 1584,
+    "deletions": 0,
+    "file_sha256": {
+      ".agents/skills/proxima-control/scripts/ProximaControl.psm1": "b89057f61d699e1c5fe7005b89db94874956a20fd66023cebb7c9c6cbd3e7438",
+      ".agents/skills/proxima-control/scripts/Run-Px.ps1": "03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354",
+      ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1": "035db643109fbfb693de6244d01122c2b576c33c3f69baa3f1d4cb34c31f00f3"
+    },
+    "snapshot_changes": [
+      {
+        "path": ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1",
+        "before": [
+          "F",
+          "68857443b658211f31db3a2ecd2ba51f5ff2e5ac2318da1d7a4936c3c5b0ca1f"
+        ],
+        "after": [
+          "F",
+          "035db643109fbfb693de6244d01122c2b576c33c3f69baa3f1d4cb34c31f00f3"
+        ]
+      },
+      {
+        "path": ".claude/.packet_state/session-start.ran",
+        "before": [
+          "F",
+          "dfc25bc122f3c6ddbfca76233b086b5795e0c696e96a17f335f7ce99e946c659"
+        ],
+        "after": [
+          "F",
+          "abd08aa19ecf5e1717bd13a354bd03e6e9676032e527ee8cfb2dd6c194aae9e1"
+        ]
+      }
+    ],
+    "terminal": {
+      "launcher_exit": 0,
+      "snapshot_before": "7cfedca90c5e35819f90226db3766d26a3fb36282db914ea4797ec2dbe4da942",
+      "snapshot_after": "aa951efc69ff035780557b51839c14bcf2d69272f5474d5cf1845b687484f318",
+      "session_id": "cd9a883b-a95f-4901-a876-9cab4968245d",
+      "finished_at": "2026-11-08T05:28:52.356414+00:00"
+    },
+    "run_id": "04b271dbab314dfe86ffcd60f7d1a21a",
+    "modelUsage": {
+      "claude-opus-5-5": {
+        "inputTokens": 60,
+        "outputTokens": 78379,
+        "cacheReadInputTokens": 5662422,
+        "cacheCreationInputTokens": 254592,
+        "webSearchRequests": 0,
+        "costUSD": 4.7370404,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "thinkingTokens": 58970,
+        "cacheCreationEphemeral5mInputTokens": 0,
+        "cacheCreationEphemeral1hInputTokens": 254592,
+        "canonicalModel": "claude-opus-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "source": "exact original actual Claude writes, mechanical dispatcher Git only",
+    "tests": "not_run on newH; old gates on24cc13b retained but insufficient"
+  }
+}

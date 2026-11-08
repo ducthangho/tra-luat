@@ -1640,9 +1640,9 @@ Scoped human snapshot kiểm exact verified bytes sau canonical verifier, trư�
 scoped accept dùng cùng snapshot bytes trong RAM cho CI/connector validation và hashes.
 Các fault injection là fixture thuật toán, không phải native profile hay mất điện.
 
-WP1174 R14/C10 dùng composite native delivery SOURCE-ONLY trên exact final head/tree
+WP1174 R15/C11 dùng composite native delivery SOURCE-ONLY trên exact final head/tree
 và năm file hashes: bốn part A–D đọc coverage manifest đã đóng băng, rồi integrator E
-kiểm coverage union, interfaces và raw reports theo `ops/specs/wp1174-implementation-r14.md`. Mỗi lời gọi vẫn được đếm;
+kiểm coverage union, interfaces và raw reports theo `ops/specs/wp1174-implementation-r15.md`. Mỗi lời gọi vẫn được đếm;
 chỉ composite đủ bằng chứng mới có thể tạo verdict cho source đó. Authority,
 provider assurance và actual-human của target giữ theo các hợp đồng hiện hành.
 

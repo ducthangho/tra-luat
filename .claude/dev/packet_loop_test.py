@@ -13160,7 +13160,7 @@ for _artifact in ("private_seed_path","lock_path","witness_path"):
 
 # Keep legacy fault locations fixed as the adapter adds independent parsers and
 # validators. These are narrower literal anchors for the same legacy mutations.
-_CHECK_RUNS_PARSE1174 = 'd = json.loads(Path(duong).read_text(encoding="utf-8"),\n                       object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json)'
+_CHECK_RUNS_PARSE1174 = 'd = json.loads(raw.decode("utf-8"),\n                       object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json)'
 for _name,(_anchor,_replacement,_targets) in list(MUTANTS.items()):
     if _name.startswith("m1174_") or type(_anchor) is not str:continue
     if _anchor in ('object_pairs_hook=_cam_khoa_trung, ', ', parse_constant=_cam_hang_ngoai_json'):
@@ -13601,7 +13601,7 @@ MUTANTS.update({
 MUTANTS_NHAM_TEST |= {"m1174_secret_channel_probe_facts"}
 
 _WP1174_PATHS = (".claude/dev/packet_loop.py", ".claude/dev/packet_loop_test.py", "docs/PROTOCOL_DA_PHIEN.md",
-    "ops/specs/wp1174-c5-adapter-design.md", "ops/specs/wp1174-implementation-r14.md")
+    "ops/specs/wp1174-c5-adapter-design.md", "ops/specs/wp1174-implementation-r15.md")
 _WP1174_NATIVE_KEYS = frozenset("schema actual_os scope proof_eligible source_pr repo pr run_id run_attempt job checkout_sha checkout_tree executed_sha executed_tree expected_head expected_tree path_hashes producer_digests producer_after snapshot_before snapshot_after required_ids required_count outcomes profiles native_probe native_seam overall_status windows_oracle".split())
 
 

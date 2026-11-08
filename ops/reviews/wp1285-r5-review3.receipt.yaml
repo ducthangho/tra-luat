@@ -1,0 +1,42 @@
+schema_version: 2
+receipt_id: wp1285-r5-review3-d51d9a03
+kind: review_delivery_receipt
+packet_id: wp1285
+reviewed_sha: 53b175c40254b0e64a011ef6d0f70207fd2f933e
+verdict: approved
+verdict_path: ops/reviews/wp1285-r5-review3/verdict.md
+verdict_sha256: 7452398c8fcaaa7a6f58a7b33b12513c1c5681538156b482305fc9c3fe724511
+evidence_url: https://github.com/ducthangho/tra-luat/blob/e254c81cd5f308bf821961d53ec3f9a3e9fab1eb/ops/reviews/wp1285-r5-review3/verdict.md
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: d51d9a03e1ca4edbac0873b4d9d56dbc
+  model: gpt-6.1-sol
+  effort: xhigh
+  evidence_ref: ops/reviews/wp1285-r5-review3/run.json
+  model_evidence: do_may
+  model_evidence_ref: ops/reviews/wp1285-r5-review3/run.json
+github_submitter_identity:
+  actor: ducthangho
+  note: Originalreviewcomment6725935521 exactbodyreadback; transportactor is not modelreviewer
+    or human audit
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: Content-addressed metadata-control-ref ancestry only; not canonicalmaster/requiredcheck/merge
+    authority.
+assurance: same_provider_approved
+independent_from_executor_session: true
+model_executor_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: 20260d0a7fc04c3680020e40531cec9c
+  model: gpt-6.1-sol
+  model_evidence: do_may
+  model_evidence_ref: ops/reviews/wp1285-r5-review3/executor-run.json
+  effort: high
+promotion_eligible: false
+promotion_hold: 'Protocol sensitive assurance: sameproviderdoesnotreplacecross/humanindependentaudit;
+  no exactHmergegrant/primarypush/PRyet'

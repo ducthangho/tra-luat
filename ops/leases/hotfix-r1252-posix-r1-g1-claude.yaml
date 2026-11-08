@@ -25,8 +25,22 @@ recorder_ghi_chu: 'Phien dieu phoi #1206 session_015GtxrYPjZCTZeRiazdssgq soan s
 
 leased_at_utc: '2026-11-07T14:50:00Z'
 heartbeat_at: '2026-11-07T14:50:00Z'
-lease_until: '2026-11-08T14:50:00Z'
-lease_expires_at_utc: '2026-11-08T14:50:00Z'
+lease_until: '2026-11-08T02:55:00Z'
+lease_expires_at_utc: '2026-11-08T02:55:00Z'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-08T14:50:00Z'
+  han_moi_utc: '2026-11-08T02:55:00Z'
+  chi_thi: >-
+    Phien dieu phoi #1206 session_015GtxrYPjZCTZeRiazdssgq giao executor session_015GtxraXfMD1t2FJLzzGDr4 (2026-11-08 02:38Z,
+    send_message): sau merge thu hoi lease hotfix-r1252-posix-r1-g1-claude bang rut han.
+  ly_do: >-
+    Packet #1272 (HOTFIX-R1252-POSIX r1) da MERGE: PR #1277 (head fc6fbc7c) merge commit
+    c15603dcf537fa4beb753b263398d6e6b8c92019, chu kho duyet dung SHA fc6fbc7. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: >-
+    Khong co lease ke nhiem (thay_the_cho rong). Rut han theo tien le #1252 e9e1c01. Han moi dat SAU luc push de luot dang lease
+    con thay lease song, tranh rc=8 che rc=9.
+  nguoi_rut: 'executor session_015GtxraXfMD1t2FJLzzGDr4 theo giao viec cua phien dieu phoi #1206'
+  nghiem_thu: 'ai-dang-giu .claude/dev/launcher_test.py sau 02:55Z phai ra NGUOI_GIU 0.'
 
 packet_id: HOTFIX-R1252-POSIX
 packet_slug: hotfix-r1252-posix

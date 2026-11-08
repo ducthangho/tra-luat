@@ -1,0 +1,13 @@
+S3 H1 — auxiliary native/Linux source audit complete
+
+Exact H4196fbaaeb13b4d26d5f4f452b6c1a8b26150489 / treeabd231e82afb2745279a5ce49c6ab11f0eb21005 / Bbf9914cb1a8e6f5047468f4d130b587015f8d73f. Three new files,447 additions/0 deletions; all six original S1/S2 files byte-identical. No material proof inconsistency found. Not formal code approval.
+
+Native recovery4: both PS5.1 andPS7 baseline seven ABSENT failures rc1/no setup error; H seven normal PM IDs7/7rc0; CX parent12/12rc0 (seven PM + CX00..04). Each runtime has unchanged CX00 positive7/7rc0 and four actual semantic named-property negativesrc1; no setup/unrelated diagnostic credited. CX01..03 rejected before imports; PM04 has NOT_EXECUTED reason there, not a tamper execution. Candidate PM03 actual import/twoexports/help succeeds, PM06 actually reuses the same instance/sentinel, PM04 tampered-S1 copy rejects DependencyMismatch before sentinel and leaves no module loaded.
+
+Verified originalZIP3192051bytes/SHA0379bc7d748aad413448c144f7dda476f8f7f1c130cec466652be2988bd5f260,407sourcefiles,32commandlogs,16S3reports/26childrecords/16rawruntime-tamper outputs,162S3artifactrefs and10CXsourcecopies. Legacy S2normal26/26rc0 both,2nestedsets/29artifactseach. Private-copy deletion of actual endpoint-input.xml detected; originalarchive unchanged.
+
+New S3 parent launches processRemoteSigned, children inherit without ExecutionPolicy argv. Actual14 fixed legacy S2 childBypass argv are disclosed under exact r2/GPOUndefined allowance, not a new S3override. S3culture en-AU; legacyregression en-US. S3retainsall evidence/privatecopies/deleted0; legacycleans itsfixturetrees but durableproof/sentinels/wires checks pass; sourcebyte maps unchanged and lockreleasedempty.
+
+Linux exactH1777/1777 actualchildrc0; all10commandhashes/sizesmatch, runner/catalog/command/binary identities verified; Ruff12existingF821rc1delta0; strict184/184; pinnedB admission/doctrine/ADR/docclaims gates rc0.
+
+Historical alias/lock/self-imposedmemoryguard/bundle-ref operator stops had0testphases and remain NOT_RUN, not productfailures/passes. Unsupported1.5GB admission assertion removal was an operator correction under actual ADR0057load-observation rule, not a PM/CX/S2test relaxation. Originalauthor testsNOT_RUN preserved. This measures isolated local fixture/import/help/document properties, not deployment/realWinRM/gateway/auth/runtimeFileVersion or WindowsCI. Fresh independent formal review remains separate.

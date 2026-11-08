@@ -1,0 +1,835 @@
+{
+  "schema": "auxiliary-native-linux-source-audit/1",
+  "status": "complete_source_audit_no_material_inconsistency",
+  "formal_code_approval": false,
+  "merge_authority": false,
+  "packet": "wp1285",
+  "revision": 2,
+  "generation": 2,
+  "actual_shared_call_ordinal": 1,
+  "provider": "openai_codex",
+  "execution_surface": "codex_service",
+  "model_identity": "KHONG_DO_DUOC",
+  "absolute_deadline": "2026-11-08T16:39:07Z",
+  "audited_at_utc": "2026-11-08T16:08:59.541098+00:00",
+  "head": "4196fbaaeb13b4d26d5f4f452b6c1a8b26150489",
+  "tree": "abd231e82afb2745279a5ce49c6ab11f0eb21005",
+  "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "assignment_sha256": "5ad78500437e703e219705c21a3be6e587891726e0fac8338cedf9c3ab1e9871",
+  "assignment_binding_sha256": "a70e10f9d44e7224fb859520c3566fb236646fbc7dd27c74cccbffe04f7ee70a",
+  "spec_source": "aa1d59871e9c37fcc527147ec6b551096a6e0af6:ops/specs/wp1285-r2.md",
+  "spec_sha256": "ce8052af41a74a30089067f8976e1fc5a66767261275044681cdde2eb9a0f2dd",
+  "source_scope": {
+    "new_files": 3,
+    "additions": 447,
+    "deletions": 0,
+    "numstat": [
+      [
+        "64",
+        "0",
+        ".agents/skills/proxima-control/SKILL.md"
+      ],
+      [
+        "13",
+        "0",
+        ".agents/skills/proxima-control/scripts/ProximaControl.psd1"
+      ],
+      [
+        "370",
+        "0",
+        ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+      ]
+    ],
+    "six_original_S1S2_files_unchanged_B_to_H": true,
+    "actual_r1_code_adopted_unchanged_r2": "same exactH1; no new author model invocation claimed"
+  },
+  "author_handoff": {
+    "path": "/workspace/scratch/proxima-rest-20261108/S3-author1-original-handoff.md",
+    "sha256": "6d840dc36bf04a82ea50a62f88a9d79db2c63a60f09f45dc7307d9faf11cabc4",
+    "author_tests": "NOT_RUN preserved; operator results separate"
+  },
+  "native": {
+    "head": "4196fbaaeb13b4d26d5f4f452b6c1a8b26150489",
+    "tree": "abd231e82afb2745279a5ce49c6ab11f0eb21005",
+    "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+    "archive_sha256": "0379bc7d748aad413448c144f7dda476f8f7f1c130cec466652be2988bd5f260",
+    "archive_bytes": 3192051,
+    "ZIP_entries": 408,
+    "source_files_verified": 407,
+    "command_logs_verified": 32,
+    "S3_artifact_refs_verified": 162,
+    "S3_reports_verified": 16,
+    "S3_child_records_verified": 26,
+    "S3_runtime_tamper_raw_reports": 16,
+    "CX_children_verified": 10,
+    "semantic_negative_kills": 8,
+    "positive_CX_controls": 2,
+    "phase_results": [
+      {
+        "phase": "baseline-ps51",
+        "kind": "S3normal",
+        "rc": 1,
+        "passed": 0,
+        "total": 7,
+        "runtime": "5.1.26100.9711",
+        "edition": "Desktop",
+        "culture": "en-AU",
+        "report_sha256": "b6dead42c9820f4d9968cde4e9854213ffc62578398e03e3e669b46791aec550"
+      },
+      {
+        "phase": "candidate-ps51",
+        "kind": "S3normal",
+        "rc": 0,
+        "passed": 7,
+        "total": 7,
+        "runtime": "5.1.26100.9711",
+        "edition": "Desktop",
+        "culture": "en-AU",
+        "report_sha256": "669ebe6b86a2401c98213e79a3b2b4eec24d5c4d0455e4c12dd64332b695fac4"
+      },
+      {
+        "phase": "baseline-ps7",
+        "kind": "S3normal",
+        "rc": 1,
+        "passed": 0,
+        "total": 7,
+        "runtime": "7.6.9",
+        "edition": "Core",
+        "culture": "en-AU",
+        "report_sha256": "c107c96e30a1ffc5e6fa6543c26b5ad240e0fb6dad1e18416bb34271ae547bd9"
+      },
+      {
+        "phase": "candidate-ps7",
+        "kind": "S3normal",
+        "rc": 0,
+        "passed": 7,
+        "total": 7,
+        "runtime": "7.6.9",
+        "edition": "Core",
+        "culture": "en-AU",
+        "report_sha256": "bba099a3ccee6177ab7f605454868b728fb3427d731ad39712b31dd325425c74"
+      },
+      {
+        "phase": "candidate-ps51-CX",
+        "kind": "S3CX",
+        "rc": 0,
+        "passed": 12,
+        "total": 12,
+        "runtime": "5.1.26100.9711",
+        "edition": "Desktop",
+        "culture": "en-AU",
+        "report_sha256": "bd2da72292e332ca3a879c32b9e21b181f607733397de521119ac8e5eab5820e"
+      },
+      {
+        "phase": "candidate-ps7-CX",
+        "kind": "S3CX",
+        "rc": 0,
+        "passed": 12,
+        "total": 12,
+        "runtime": "7.6.9",
+        "edition": "Core",
+        "culture": "en-AU",
+        "report_sha256": "1bf461ce9ee385c5280a31d199d4da1590fa332c5d23f4ffee58a74d2f510b37"
+      },
+      {
+        "phase": "legacy-S2-ps51",
+        "kind": "legacyS2normal",
+        "rc": 0,
+        "passed": 26,
+        "total": 26,
+        "runtime": "5.1.26100.9711",
+        "edition": "Desktop",
+        "culture": "en-US",
+        "report_sha256": "0b1356b56c9a1ef15400ecad6286cf803d82a6ddfa9aa04afb63e634b5fb0b5a"
+      },
+      {
+        "phase": "legacy-S2-ps7",
+        "kind": "legacyS2normal",
+        "rc": 0,
+        "passed": 26,
+        "total": 26,
+        "runtime": "7.6.9",
+        "edition": "Core",
+        "culture": "en-US",
+        "report_sha256": "6bb6ea0fed41fc0bb9320323f3408c8908b925060cc2d9529f571a9ec169186e"
+      }
+    ],
+    "CX_records": [
+      {
+        "phase": "candidate-ps51-CX",
+        "id": "CX00",
+        "rc": 0,
+        "credited": false,
+        "matched": null,
+        "want": "",
+        "report_sha256": "962feadbbb66086060cdfc9c0f32d383ae9c4cae26fb67888ec39b911ae8b6be",
+        "all9source_files_reconstructed": true,
+        "runtime_children": 2
+      },
+      {
+        "phase": "candidate-ps51-CX",
+        "id": "CX01",
+        "rc": 1,
+        "credited": true,
+        "matched": "PM02: UNEXPECTED_KEY[ScriptsToProcess]",
+        "want": "PM02:UNEXPECTED_KEY[ScriptsToProcess]",
+        "report_sha256": "9ad9d96ea5a998651976ae3d6ee28a05a5f9762798861a5f9bfeaccca93acf67",
+        "all9source_files_reconstructed": true,
+        "runtime_children": 0
+      },
+      {
+        "phase": "candidate-ps51-CX",
+        "id": "CX02",
+        "rc": 1,
+        "credited": true,
+        "matched": "PM02: WILDCARD_EXPORT[FunctionsToExport]; VALUE[FunctionsToExport]",
+        "want": "PM02:WILDCARD_EXPORT[FunctionsToExport]",
+        "report_sha256": "53f563818e7ac33ee8f2d1d5443f388e7d170f440c499325bc94e252921874cf",
+        "all9source_files_reconstructed": true,
+        "runtime_children": 0
+      },
+      {
+        "phase": "candidate-ps51-CX",
+        "id": "CX03",
+        "rc": 1,
+        "credited": true,
+        "matched": "PM02: UNEXPECTED_KEY[NestedModules]",
+        "want": "PM02:UNEXPECTED_KEY[NestedModules]",
+        "report_sha256": "f322aac4cd04d80247bb01362b8b91b6dc547c7ecbaa3d222a30d12d5a00d3b2",
+        "all9source_files_reconstructed": true,
+        "runtime_children": 0
+      },
+      {
+        "phase": "candidate-ps51-CX",
+        "id": "CX04",
+        "rc": 1,
+        "credited": true,
+        "matched": "PM05: DOC_VERSION_MISMATCH[frontmatter=2.0.1 manifest=2.0.0]; DOC_VERSION_MISMATCH[stray 2.0.1]",
+        "want": "PM05:DOC_VERSION_MISMATCH[frontmatter",
+        "report_sha256": "8ef5d12f8c1056b7a7740ceb8cbb2af7a871f7ed4e1e52c43ef38ddc154761bd",
+        "all9source_files_reconstructed": true,
+        "runtime_children": 2
+      },
+      {
+        "phase": "candidate-ps7-CX",
+        "id": "CX00",
+        "rc": 0,
+        "credited": false,
+        "matched": null,
+        "want": "",
+        "report_sha256": "c9dadc6df6a26506a4d83ffe8bd5e4da603b13ba499a2847a01c442778950a67",
+        "all9source_files_reconstructed": true,
+        "runtime_children": 2
+      },
+      {
+        "phase": "candidate-ps7-CX",
+        "id": "CX01",
+        "rc": 1,
+        "credited": true,
+        "matched": "PM02: UNEXPECTED_KEY[ScriptsToProcess]",
+        "want": "PM02:UNEXPECTED_KEY[ScriptsToProcess]",
+        "report_sha256": "58491fba89f538f21f0a6d5c7241f3389076051342a4fa2f99bd6cb7ee031887",
+        "all9source_files_reconstructed": true,
+        "runtime_children": 0
+      },
+      {
+        "phase": "candidate-ps7-CX",
+        "id": "CX02",
+        "rc": 1,
+        "credited": true,
+        "matched": "PM02: WILDCARD_EXPORT[FunctionsToExport]; VALUE[FunctionsToExport]",
+        "want": "PM02:WILDCARD_EXPORT[FunctionsToExport]",
+        "report_sha256": "6c2831cb085b70a3e03a5f82c1f36931fb439356c54abec7bfd9f5cb417e5f93",
+        "all9source_files_reconstructed": true,
+        "runtime_children": 0
+      },
+      {
+        "phase": "candidate-ps7-CX",
+        "id": "CX03",
+        "rc": 1,
+        "credited": true,
+        "matched": "PM02: UNEXPECTED_KEY[NestedModules]",
+        "want": "PM02:UNEXPECTED_KEY[NestedModules]",
+        "report_sha256": "169cb42c43214c7ce84841438a1b4e6bf9f541a24901a89b8ca15087170d22b3",
+        "all9source_files_reconstructed": true,
+        "runtime_children": 0
+      },
+      {
+        "phase": "candidate-ps7-CX",
+        "id": "CX04",
+        "rc": 1,
+        "credited": true,
+        "matched": "PM05: DOC_VERSION_MISMATCH[frontmatter=2.0.1 manifest=2.0.0]; DOC_VERSION_MISMATCH[stray 2.0.1]",
+        "want": "PM05:DOC_VERSION_MISMATCH[frontmatter",
+        "report_sha256": "f404679e750b6572cdd6178fe271e0e107a6ad0e20ab08ccd3473c2f66505537",
+        "all9source_files_reconstructed": true,
+        "runtime_children": 2
+      }
+    ],
+    "raw_runtime_tamper_observations": [
+      {
+        "where": "candidate-ps51",
+        "role": "runtime",
+        "runtime": "5.1.26100.9711",
+        "edition": "Desktop",
+        "culture": "en-AU",
+        "raw_report_sha256": "bf559ef7a836f060762c4dcc5983cbd1eeb1dc77a6f8adf33992af8795a68473",
+        "module_path": "C:\\tl-win\\wp1285-r2-g2\\H4196fbaaeb13-recovery4\\candidate\\.agents\\skills\\proxima-control\\scripts\\ProximaControl.psm1",
+        "wrapper_same_instance": true,
+        "tamper_rejected": null
+      },
+      {
+        "where": "candidate-ps51",
+        "role": "tamper",
+        "runtime": "5.1.26100.9711",
+        "edition": "Desktop",
+        "culture": "en-AU",
+        "raw_report_sha256": "bf733bdf09eacaa7b9fcbdb1f2c1357ce6b43a77f6a45af547c39530a14a6e19",
+        "module_path": null,
+        "wrapper_same_instance": null,
+        "tamper_rejected": true
+      },
+      {
+        "where": "candidate-ps7",
+        "role": "runtime",
+        "runtime": "7.6.9",
+        "edition": "Core",
+        "culture": "en-AU",
+        "raw_report_sha256": "ce6dc8606494991704c8814704eff1378741dae6d77450139828215695cd8c60",
+        "module_path": "C:\\tl-win\\wp1285-r2-g2\\H4196fbaaeb13-recovery4\\candidate\\.agents\\skills\\proxima-control\\scripts\\ProximaControl.psm1",
+        "wrapper_same_instance": true,
+        "tamper_rejected": null
+      },
+      {
+        "where": "candidate-ps7",
+        "role": "tamper",
+        "runtime": "7.6.9",
+        "edition": "Core",
+        "culture": "en-AU",
+        "raw_report_sha256": "88f68135501333ab5f6f148d28cf63c3074d24c18a949a3bb0ac27f16381998c",
+        "module_path": null,
+        "wrapper_same_instance": null,
+        "tamper_rejected": true
+      },
+      {
+        "where": "candidate-ps51-CX",
+        "role": "runtime",
+        "runtime": "5.1.26100.9711",
+        "edition": "Desktop",
+        "culture": "en-AU",
+        "raw_report_sha256": "bf559ef7a836f060762c4dcc5983cbd1eeb1dc77a6f8adf33992af8795a68473",
+        "module_path": "C:\\tl-win\\wp1285-r2-g2\\H4196fbaaeb13-recovery4\\candidate\\.agents\\skills\\proxima-control\\scripts\\ProximaControl.psm1",
+        "wrapper_same_instance": true,
+        "tamper_rejected": null
+      },
+      {
+        "where": "candidate-ps51-CX",
+        "role": "tamper",
+        "runtime": "5.1.26100.9711",
+        "edition": "Desktop",
+        "culture": "en-AU",
+        "raw_report_sha256": "bf733bdf09eacaa7b9fcbdb1f2c1357ce6b43a77f6a45af547c39530a14a6e19",
+        "module_path": null,
+        "wrapper_same_instance": null,
+        "tamper_rejected": true
+      },
+      {
+        "where": "candidate-ps51-CX/CX00",
+        "role": "runtime",
+        "runtime": "5.1.26100.9711",
+        "edition": "Desktop",
+        "culture": "en-AU",
+        "raw_report_sha256": "b5dff2e4483735d3261972793248a8c003ba20da297ae5ec4cb659e7966fb7d1",
+        "module_path": "C:\\tl-win\\wp1285-r2-g2\\H4196fbaaeb13-recovery4\\scratch\\candidate-ps51-CX\\pm-20261108T155605Z-0452f570\\CX00\\addon\\scripts\\ProximaControl.psm1",
+        "wrapper_same_instance": true,
+        "tamper_rejected": null
+      },
+      {
+        "where": "candidate-ps51-CX/CX00",
+        "role": "tamper",
+        "runtime": "5.1.26100.9711",
+        "edition": "Desktop",
+        "culture": "en-AU",
+        "raw_report_sha256": "bf733bdf09eacaa7b9fcbdb1f2c1357ce6b43a77f6a45af547c39530a14a6e19",
+        "module_path": null,
+        "wrapper_same_instance": null,
+        "tamper_rejected": true
+      },
+      {
+        "where": "candidate-ps51-CX/CX04",
+        "role": "runtime",
+        "runtime": "5.1.26100.9711",
+        "edition": "Desktop",
+        "culture": "en-AU",
+        "raw_report_sha256": "9df2f57f2c25d5b4759c1752f159570eab76d64f8b58c2315423f23f552c95cb",
+        "module_path": "C:\\tl-win\\wp1285-r2-g2\\H4196fbaaeb13-recovery4\\scratch\\candidate-ps51-CX\\pm-20261108T155605Z-0452f570\\CX04\\addon\\scripts\\ProximaControl.psm1",
+        "wrapper_same_instance": true,
+        "tamper_rejected": null
+      },
+      {
+        "where": "candidate-ps51-CX/CX04",
+        "role": "tamper",
+        "runtime": "5.1.26100.9711",
+        "edition": "Desktop",
+        "culture": "en-AU",
+        "raw_report_sha256": "bf733bdf09eacaa7b9fcbdb1f2c1357ce6b43a77f6a45af547c39530a14a6e19",
+        "module_path": null,
+        "wrapper_same_instance": null,
+        "tamper_rejected": true
+      },
+      {
+        "where": "candidate-ps7-CX",
+        "role": "runtime",
+        "runtime": "7.6.9",
+        "edition": "Core",
+        "culture": "en-AU",
+        "raw_report_sha256": "ce6dc8606494991704c8814704eff1378741dae6d77450139828215695cd8c60",
+        "module_path": "C:\\tl-win\\wp1285-r2-g2\\H4196fbaaeb13-recovery4\\candidate\\.agents\\skills\\proxima-control\\scripts\\ProximaControl.psm1",
+        "wrapper_same_instance": true,
+        "tamper_rejected": null
+      },
+      {
+        "where": "candidate-ps7-CX",
+        "role": "tamper",
+        "runtime": "7.6.9",
+        "edition": "Core",
+        "culture": "en-AU",
+        "raw_report_sha256": "88f68135501333ab5f6f148d28cf63c3074d24c18a949a3bb0ac27f16381998c",
+        "module_path": null,
+        "wrapper_same_instance": null,
+        "tamper_rejected": true
+      },
+      {
+        "where": "candidate-ps7-CX/CX00",
+        "role": "runtime",
+        "runtime": "7.6.9",
+        "edition": "Core",
+        "culture": "en-AU",
+        "raw_report_sha256": "d7302199101bec2b62ecf1c3ec5f0d19c18221f991bee7d8f00d24e23040a87f",
+        "module_path": "C:\\tl-win\\wp1285-r2-g2\\H4196fbaaeb13-recovery4\\scratch\\candidate-ps7-CX\\pm-20261108T155622Z-19bec240\\CX00\\addon\\scripts\\ProximaControl.psm1",
+        "wrapper_same_instance": true,
+        "tamper_rejected": null
+      },
+      {
+        "where": "candidate-ps7-CX/CX00",
+        "role": "tamper",
+        "runtime": "7.6.9",
+        "edition": "Core",
+        "culture": "en-AU",
+        "raw_report_sha256": "88f68135501333ab5f6f148d28cf63c3074d24c18a949a3bb0ac27f16381998c",
+        "module_path": null,
+        "wrapper_same_instance": null,
+        "tamper_rejected": true
+      },
+      {
+        "where": "candidate-ps7-CX/CX04",
+        "role": "runtime",
+        "runtime": "7.6.9",
+        "edition": "Core",
+        "culture": "en-AU",
+        "raw_report_sha256": "04f8eb7cab7426f5f5cc8fd77cb3cc5d0ef63587a67b3de166770758103a1bd2",
+        "module_path": "C:\\tl-win\\wp1285-r2-g2\\H4196fbaaeb13-recovery4\\scratch\\candidate-ps7-CX\\pm-20261108T155622Z-19bec240\\CX04\\addon\\scripts\\ProximaControl.psm1",
+        "wrapper_same_instance": true,
+        "tamper_rejected": null
+      },
+      {
+        "where": "candidate-ps7-CX/CX04",
+        "role": "tamper",
+        "runtime": "7.6.9",
+        "edition": "Core",
+        "culture": "en-AU",
+        "raw_report_sha256": "88f68135501333ab5f6f148d28cf63c3074d24c18a949a3bb0ac27f16381998c",
+        "module_path": null,
+        "wrapper_same_instance": null,
+        "tamper_rejected": true
+      }
+    ],
+    "legacy_nested_counts": [
+      {
+        "artifacts_verified": 29,
+        "children_verified": 7
+      },
+      {
+        "artifacts_verified": 29,
+        "children_verified": 7
+      }
+    ],
+    "legacy_internal_Bypass_argv_count": 14,
+    "legacy_flags_disclosed": [
+      {
+        "phase": "legacy-S2-ps51",
+        "kind": "fresh-process wrapper",
+        "mode": "unchanged legacy S2 internal Bypass argv"
+      },
+      {
+        "phase": "legacy-S2-ps51",
+        "kind": "fresh-process wrapper",
+        "mode": "unchanged legacy S2 internal Bypass argv"
+      },
+      {
+        "phase": "legacy-S2-ps51",
+        "kind": "endpoint",
+        "mode": "unchanged legacy S2 internal Bypass argv"
+      },
+      {
+        "phase": "legacy-S2-ps51",
+        "kind": "endpoint",
+        "mode": "unchanged legacy S2 internal Bypass argv"
+      },
+      {
+        "phase": "legacy-S2-ps51",
+        "kind": "fresh-process wrapper",
+        "mode": "unchanged legacy S2 internal Bypass argv"
+      },
+      {
+        "phase": "legacy-S2-ps51",
+        "kind": "fresh-process wrapper",
+        "mode": "unchanged legacy S2 internal Bypass argv"
+      },
+      {
+        "phase": "legacy-S2-ps51",
+        "kind": "fresh-process wrapper",
+        "mode": "unchanged legacy S2 internal Bypass argv"
+      },
+      {
+        "phase": "legacy-S2-ps7",
+        "kind": "fresh-process wrapper",
+        "mode": "unchanged legacy S2 internal Bypass argv"
+      },
+      {
+        "phase": "legacy-S2-ps7",
+        "kind": "fresh-process wrapper",
+        "mode": "unchanged legacy S2 internal Bypass argv"
+      },
+      {
+        "phase": "legacy-S2-ps7",
+        "kind": "endpoint",
+        "mode": "unchanged legacy S2 internal Bypass argv"
+      },
+      {
+        "phase": "legacy-S2-ps7",
+        "kind": "endpoint",
+        "mode": "unchanged legacy S2 internal Bypass argv"
+      },
+      {
+        "phase": "legacy-S2-ps7",
+        "kind": "fresh-process wrapper",
+        "mode": "unchanged legacy S2 internal Bypass argv"
+      },
+      {
+        "phase": "legacy-S2-ps7",
+        "kind": "fresh-process wrapper",
+        "mode": "unchanged legacy S2 internal Bypass argv"
+      },
+      {
+        "phase": "legacy-S2-ps7",
+        "kind": "fresh-process wrapper",
+        "mode": "unchanged legacy S2 internal Bypass argv"
+      }
+    ],
+    "native_parent_launch_mode": "RemoteSigned",
+    "new_S3_child_launch_mode": "inherits caller RemoteSigned; no ExecutionPolicy argv",
+    "S3_actual_culture": "en-AU",
+    "missing_dependency_negative_independently_detected": "evidence/legacy-S2-ps51/pxctl-evid-d19f67cf09f4/child/endpoint-in.xml",
+    "Root_once_receipt_sha256": "489899b65ec58ae478879b681173ea3603b0cead5ecc7c124e0fc013a870d54f",
+    "native_manifest_sha256": "28d53d71bbe40a1eb7ede6e7b81621d3ce29875e2ec2428115f21a1c8ae6d818",
+    "native_measurement_sha256": "0b26d4ef44fa619ed7169bd975c7d954646968f74510cb3c8834d537232219d9",
+    "lock_release_sha256": "3ba9090a5527fc844982511bdca8a61179e0f92f3ff434a1e5e016dd03901c5b"
+  },
+  "native_source_paths": {
+    "archive": "/workspace/scratch/proxima-rest-20261108/native-S3-recovery4/original-evidence.zip",
+    "extracted": "/workspace/scratch/proxima-rest-20261108/native-S3-recovery4/extracted",
+    "Root_ONCE_verifier": "/workspace/scratch/proxima-rest-20261108/verify-S3-native.py",
+    "Root_ONCE_verifier_sha256": "70e2dd9e69da84e6c61413371e27fc27eb225c6e922c8fd633ee0a24cba1ce77",
+    "Root_ONCE_receipt": "/workspace/scratch/proxima-rest-20261108/S3-native-ONCE-verifier-receipt.json"
+  },
+  "required_positive_counts": {
+    "baseline": {
+      "PS51": "0/7;7namedABSENT propertyfailures;rc1;no setup errors",
+      "PS7": "0/7;7namedABSENT propertyfailures;rc1;no setup errors"
+    },
+    "S3_normal": {
+      "PS51": "7/7rc0",
+      "PS7": "7/7rc0",
+      "actual_culture": "en-AU"
+    },
+    "S3_CX_parents": {
+      "PS51": "12/12rc0",
+      "PS7": "12/12rc0",
+      "composition": "7normalPM IDs + CX00..04, not12normalcases"
+    },
+    "CX_children": {
+      "positive_controls": 2,
+      "controls": "CX00 unchanged7/7rc0 perruntime, notkillcredit",
+      "intended_semantic_negative_rejections": 8,
+      "negative_criteria": "CX01ScriptsToProcess PM02, CX02wildcard PM02, CX03NestedModules PM02, CX04docversion PM05;eachrc1/namedreason/no setup error"
+    },
+    "legacy_S2_normal": {
+      "PS51": "26/26rc0",
+      "PS7": "26/26rc0",
+      "new_focused38_rerun": "NOT_RUN/notclaimed; unchanged context only"
+    },
+    "linux": {
+      "full_selftest": "1777/1777 actualchildrc0",
+      "Ruff": "12existingF821,bare rc1,delta0",
+      "strict_manifest": "184/184rc0",
+      "doctrine": "11files/0copies",
+      "adr_song": "64ADR/64rows;canonical tolerated status0016 retained",
+      "doc_claims": "strict rc0"
+    }
+  },
+  "measured_vs_retained": {
+    "S3_reports_checked": 16,
+    "S3_child_records_checked": 26,
+    "raw_runtime_tamper_JSON_outputs_checked": 16,
+    "S3_artifact_references_checked": 162,
+    "legacy_nested_sets": 2,
+    "legacy_artifacts_per_set": 29,
+    "raw_CX_source_copy_reconstructions": 10,
+    "mutated_cases": 8,
+    "original_archive_manifest_files": 407,
+    "ZIP_file_entries": 408,
+    "retention": "Every listed source artifact present/hash-verified; S3 raw stdout/stderr .bin/commands/private copies retained; new S3 deletesnothing. Legacy cleanup retained all durable role links and typedCLIXML."
+  },
+  "policy_disclosure": {
+    "new_S3_children_ExecutionPolicy_argv": 0,
+    "native_parent_mode": "RemoteSigned",
+    "actual_legacy_S2_internal_Bypass_argv_count": 14,
+    "source_unchanged": true,
+    "GPO_MachinePolicy_UserPolicy": "Undefined before/after",
+    "authorization": "exact r2 fixedlegacy-regression-only exception, not new S3bypass or persistent/GPO policy change"
+  },
+  "native_host_observations": {
+    "before": {
+      "host": "DESKTOP-T9R33P2",
+      "service": 0,
+      "process": 0,
+      "python": [
+        {
+          "ProcessId": 18864,
+          "CreationDate": "/Date(1794153348872)/",
+          "CommandLine": "\"C:\\tl-win\\wp1271-tools\\python-3.12.10\\python.exe\" -B C:\\tl-win\\wp1285-r2-g2-inputs\\S3-native-controller-recovery4.py"
+        }
+      ],
+      "policy": [
+        {
+          "Scope": 4,
+          "ExecutionPolicy": 5
+        },
+        {
+          "Scope": 3,
+          "ExecutionPolicy": 5
+        },
+        {
+          "Scope": 0,
+          "ExecutionPolicy": 5
+        },
+        {
+          "Scope": 1,
+          "ExecutionPolicy": 5
+        },
+        {
+          "Scope": 2,
+          "ExecutionPolicy": 5
+        }
+      ],
+      "memory": [
+        {
+          "FreePhysicalMemory": 532092,
+          "TotalVisibleMemorySize": 8148012,
+          "FreeVirtualMemory": 1709008,
+          "TotalVirtualMemorySize": 20569492
+        }
+      ],
+      "GetACP": 1252
+    },
+    "after": {
+      "host": "DESKTOP-T9R33P2",
+      "service": 0,
+      "process": 0,
+      "python": [
+        {
+          "ProcessId": 18864,
+          "CreationDate": "/Date(1794153348872)/",
+          "CommandLine": "\"C:\\tl-win\\wp1271-tools\\python-3.12.10\\python.exe\" -B C:\\tl-win\\wp1285-r2-g2-inputs\\S3-native-controller-recovery4.py"
+        }
+      ],
+      "policy": [
+        {
+          "Scope": 4,
+          "ExecutionPolicy": 5
+        },
+        {
+          "Scope": 3,
+          "ExecutionPolicy": 5
+        },
+        {
+          "Scope": 0,
+          "ExecutionPolicy": 5
+        },
+        {
+          "Scope": 1,
+          "ExecutionPolicy": 5
+        },
+        {
+          "Scope": 2,
+          "ExecutionPolicy": 5
+        }
+      ],
+      "memory": [
+        {
+          "FreePhysicalMemory": 683692,
+          "TotalVisibleMemorySize": 8148012,
+          "FreeVirtualMemory": 1747532,
+          "TotalVirtualMemorySize": 20569492
+        }
+      ]
+    },
+    "service_and_Proxima_process_counts_zero": true
+  },
+  "historical_operator_stops": [
+    {
+      "stage": "initial executable resolution",
+      "actual_rc": 1,
+      "outcome": "NOT_RUN",
+      "reason": "WindowsStore python alias; controller body/tests not entered",
+      "source": "/workspace/scratch/proxima-rest-20261108/S3-native-python-alias-failure.json",
+      "source_sha256": "184f844b1e756cd9b8ab32f93c3ebc300f531a51dfbe4d73be1b684e82d417b0"
+    },
+    {
+      "stage": "pinned Python first controller",
+      "actual_rc": 2,
+      "test_phases": 0,
+      "outcome": "NOT_RUN",
+      "reason": "Operator SID-newline lacked TAB ownership record; corrected only operator; archive hash reported by Root, not independently downloaded here",
+      "Root_reported_archive_sha256": "4768cd99b2f4bf6fbbe7f4ed38b559c5e04592b1b261c2571e45991e035ba954"
+    },
+    {
+      "stage": "recovery2",
+      "actual_rc": 2,
+      "test_phases": 0,
+      "outcome": "NOT_RUN",
+      "reason": "Operator-added unsupported freeRAM>1500000KiB assertion stopped after host-before rc0, observed301708KiB. ADR0057§4 has load observation but no such numeric gate; assertion removed only in operator.",
+      "source": "/workspace/scratch/proxima-rest-20261108/S3-native-recovery2-failure-readback.json",
+      "source_sha256": "cfd58ddb46fafb7fc2849a240172d4bf21a2edc7a424dfdff1b1a1f527aa6fb8",
+      "Root_reported_archive_sha256": "6fff9067d0db643b7494c8d58d863cdee4785035e81259f14d30b2cb8b1fbee5"
+    },
+    {
+      "stage": "recovery3",
+      "actual_rc": 128,
+      "test_phases": 0,
+      "outcome": "NOT_RUN",
+      "reason": "Operator bundle fetch targeted inherited checked-out measured-candidate ref; fresh unique wp1285-import-H1 used in recovery4. Root-reported history, recorded in retained recovery4 input manifest."
+    }
+  ],
+  "private_copy_negative": {
+    "Root_receipt": {
+      "detected": true,
+      "deleted_path": "evidence/legacy-S2-ps51/pxctl-evid-d19f67cf09f4/child/endpoint-in.xml",
+      "error": "evidence/legacy-S2-ps51/pxctl-evid-d19f67cf09f4/child/endpoint-in.xml"
+    },
+    "independent_readonly_recheck": "Existing private copy rejected MissingNestedArtifact for same endpoint-in.xml dependency; original native archive unchangedSHA",
+    "negative_original_file_sha256": "deab1691afb8f9c0faa58a20108ed012b60a44f5cb0b492ca3dd51769defedfe"
+  },
+  "linux": {
+    "receipt_path": "/workspace/scratch/proxima-rest-20261108/linux-final-4196fbaaeb13/receipt.json",
+    "receipt_sha256": "4b3523c8f6dc887fa5134a2e05a113a8a12229b6f823e90f6dbad7407c7989f9",
+    "lifecycle_evidence_sha256": "94b30f916987fbaebc8206aea148d66ccb9f8c6cf1544716a52438dcd0123c96",
+    "output_sha256": "6c189ca90416e45a331cd8a28b130a002a40772ce168961e459cd9845f5c74e7",
+    "actual_child_rc": 0,
+    "positive_match": "== tl selftest 1777/1777 ==",
+    "identity_before_after_equal": true,
+    "clean_flags": {
+      "catalog_policy_sha256": "e8b7be5e7f1f77a4d4d065d49dbd616a6e9b5260541e61debfe7d5d62638c679",
+      "head_sha": "4196fbaaeb13b4d26d5f4f452b6c1a8b26150489",
+      "machine": "x86_64",
+      "python_implementation": "CPython",
+      "python_version": "3.12.14",
+      "runner_sha256": "637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810",
+      "system": "Linux",
+      "system_release": "6.18.57",
+      "tracked_clean": true,
+      "tree_sha": "abd231e82afb2745279a5ce49c6ab11f0eb21005",
+      "worktree_clean": true
+    },
+    "runner_catalog_command_binary_hashes_verified": true,
+    "admission": "exactH/B/tree;canonicalB checkerblob matched;rc0",
+    "commands": [
+      {
+        "label": "admission",
+        "rc": 0,
+        "log_sha256": "fcce5bc99c1d00c366cf1443bf1d5a2d80e20bb1af2d014000df220f0b2959dc",
+        "log_bytes": 139
+      },
+      {
+        "label": "diff-check",
+        "rc": 0,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "log_bytes": 0
+      },
+      {
+        "label": "numstat",
+        "rc": 0,
+        "log_sha256": "e307c307d773a4dee30aee12d6e92eca8393287fdd31fca9ad341e9625352dbc",
+        "log_bytes": 178
+      },
+      {
+        "label": "doctrine-scan",
+        "rc": 0,
+        "log_sha256": "d5d6962e60a7ce2002d5eab3678ab78bb53688c8cfac22735ab088ab8381ead3",
+        "log_bytes": 70
+      },
+      {
+        "label": "adr-song",
+        "rc": 0,
+        "log_sha256": "0f64eed52c99c602f15e179ff897f74c58c29ad5cf8c741fae11bf4c3fd5fa59",
+        "log_bytes": 113
+      },
+      {
+        "label": "doc-claims",
+        "rc": 0,
+        "log_sha256": "b37e7fd5ffe060e7f10645e945156d1226f404d448add1dbf41042e4f76a4d86",
+        "log_bytes": 73082
+      },
+      {
+        "label": "ruff",
+        "rc": 1,
+        "log_sha256": "5835093cb70b78d86e5313c6730bbe6db9d096cd5963f54707aa58cbe97cb425",
+        "log_bytes": 5035
+      },
+      {
+        "label": "worker-manifest",
+        "rc": 0,
+        "log_sha256": "66718b6d622f749f2dc3a1bf896d19a7b81562fc0a3bdf7fd671acae522cf58a",
+        "log_bytes": 31007
+      },
+      {
+        "label": "worker-release-verify",
+        "rc": 0,
+        "log_sha256": "0968bbd87b9c51b89131cdfd9433c26b4392a6c87ee138746fad5bb4a66873bc",
+        "log_bytes": 20803
+      },
+      {
+        "label": "full-selftest-lifecycle",
+        "rc": 0,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "log_bytes": 0
+      }
+    ]
+  },
+  "material_issues": [],
+  "limits": [
+    "Auxiliary source/log audit only, formal_code_approval=false; fresh independent formal code review remains separate. Auditor model identity KHONG_DO_DUOC; not inferred from provider/account.",
+    "Native results are isolated fixture/import/help/document properties on selected DESKTOP-T9R33P2 only. They do not measure deployed installation/activation, real WinRM authentication, gateway runtime FileVersion, external service/account/profile changes, upstream identity or Mission completion.",
+    "New S3 parent phases explicitly use process RemoteSigned and S3 children inherit it without ExecutionPolicy argv. This is not a default-policy pass. Fourteen unchanged legacy-S2 internal child Bypass argv were actually observed and are disclosed under exact r2 permission, after GPO MachinePolicy/UserPolicy Undefined; no new S3 bypass is claimed.",
+    "PM06 measured actual wrapper reuse with one module instance/test sentinel intact on both runtimes. The alternative accepted ModuleConflict path was not exercised by these S3 runtime observations.",
+    "CX01..03 are intended semantic manifest-property rejections by PM02, before runtime imports; PM04 outcome is failed with NOT_EXECUTED reason in those negative children, not an executed tamper test. CX04 is intended PM05 document-version mismatch. No setup/unrelated source diagnostic credited as a kill.",
+    "S3 retention is retain_all/deleted0, including private tamper copies and raw child stdout/stderr files. Legacy S2 fixture trees are removed with durable nested proof retained separately. Empty baseline evidence directories have no file dependencies and are not ZIP file entries; this is not missing required evidence.",
+    "Original ZIP/extracted file bytes are SHA-verified; DesktopCommander readback JSON/terminal transport is received text, not a claim of original remote OS transport bytes. Native child .bin files themselves are retained file bytes.",
+    "Before/after native Python PID/creation/command/load and memory telemetry are retained, not a universal memory-availability guarantee. ACP1252 is recorded before; the after JSON lacks ACP, so post-run ACP equality is not claimed.",
+    "Operator bootstrap/admission/import failures had zero test phases and remain NOT_RUN histories, not product failures or passes. Recovery4 alone supplies executed native gate evidence. Removing the self-imposed1.5GB assertion was an operator correction, not a PM/CX/S2-test relaxation.",
+    "Linux lifecycle records heavy lock/tree-scan isolation; this audit did not independently test enforcement or deliberate escape. No WindowsCI, additional native tests, CI actions, source/Git/lease mutations or model/subagent calls by auditor."
+  ],
+  "method": "Read exact committed3files/r2spec/originalhandoff/operator/checker sources. Independently verified ZIP/manifest/rawdata/commands/source reconstructions/runtime and tamper results, plus called only read-only verifier function (not its one-shot main/copy deletion). No product/heavy/native tests rerun. Baseline empty-directory assumption corrected in auxiliary reader without producer/source change.",
+  "digest_sha256": "1156c430e0c469ae71d1342c8ce9d5f250caea7f0169c006213aef177ba7cd82"
+}

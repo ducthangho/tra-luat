@@ -1,0 +1,503 @@
+{
+  "passed": true,
+  "source_files_verified": 407,
+  "commands_verified": 32,
+  "S3_artifact_refs_verified": 162,
+  "phases": [
+    "baseline-ps51",
+    "baseline-ps7",
+    "candidate-ps51",
+    "candidate-ps51-CX",
+    "candidate-ps7",
+    "candidate-ps7-CX",
+    "legacy-S2-ps51",
+    "legacy-S2-ps7"
+  ],
+  "counterexamples": [
+    {
+      "runtime": "5.1.26100.9711",
+      "id": "CX01",
+      "rc": 1,
+      "matched": "PM02: UNEXPECTED_KEY[ScriptsToProcess]"
+    },
+    {
+      "runtime": "5.1.26100.9711",
+      "id": "CX02",
+      "rc": 1,
+      "matched": "PM02: WILDCARD_EXPORT[FunctionsToExport]; VALUE[FunctionsToExport]"
+    },
+    {
+      "runtime": "5.1.26100.9711",
+      "id": "CX03",
+      "rc": 1,
+      "matched": "PM02: UNEXPECTED_KEY[NestedModules]"
+    },
+    {
+      "runtime": "5.1.26100.9711",
+      "id": "CX04",
+      "rc": 1,
+      "matched": "PM05: DOC_VERSION_MISMATCH[frontmatter=2.0.1 manifest=2.0.0]; DOC_VERSION_MISMATCH[stray 2.0.1]"
+    },
+    {
+      "runtime": "7.6.9",
+      "id": "CX01",
+      "rc": 1,
+      "matched": "PM02: UNEXPECTED_KEY[ScriptsToProcess]"
+    },
+    {
+      "runtime": "7.6.9",
+      "id": "CX02",
+      "rc": 1,
+      "matched": "PM02: WILDCARD_EXPORT[FunctionsToExport]; VALUE[FunctionsToExport]"
+    },
+    {
+      "runtime": "7.6.9",
+      "id": "CX03",
+      "rc": 1,
+      "matched": "PM02: UNEXPECTED_KEY[NestedModules]"
+    },
+    {
+      "runtime": "7.6.9",
+      "id": "CX04",
+      "rc": 1,
+      "matched": "PM05: DOC_VERSION_MISMATCH[frontmatter=2.0.1 manifest=2.0.0]; DOC_VERSION_MISMATCH[stray 2.0.1]"
+    }
+  ],
+  "legacy_nested": [
+    {
+      "artifacts_verified": 29,
+      "direct_children_verified": [
+        {
+          "kind": "fresh-process wrapper",
+          "index": 0,
+          "roles": [
+            "output",
+            "wrapper-input",
+            "wrapper-report",
+            "wrapper-script"
+          ],
+          "rc": 0
+        },
+        {
+          "kind": "fresh-process wrapper",
+          "index": 1,
+          "roles": [
+            "output",
+            "wrapper-input",
+            "wrapper-report",
+            "wrapper-script"
+          ],
+          "rc": 0
+        },
+        {
+          "kind": "endpoint",
+          "index": 2,
+          "roles": [
+            "endpoint-input",
+            "endpoint-report",
+            "endpoint-script",
+            "output"
+          ],
+          "rc": 0
+        },
+        {
+          "kind": "endpoint",
+          "index": 3,
+          "roles": [
+            "endpoint-input",
+            "endpoint-report",
+            "endpoint-script",
+            "output"
+          ],
+          "rc": 0
+        },
+        {
+          "kind": "fresh-process wrapper",
+          "index": 4,
+          "roles": [
+            "output",
+            "wrapper-input",
+            "wrapper-report",
+            "wrapper-script"
+          ],
+          "rc": 0
+        },
+        {
+          "kind": "fresh-process wrapper",
+          "index": 5,
+          "roles": [
+            "output",
+            "wrapper-input",
+            "wrapper-report",
+            "wrapper-script"
+          ],
+          "rc": 1
+        },
+        {
+          "kind": "fresh-process wrapper",
+          "index": 6,
+          "roles": [
+            "output",
+            "wrapper-input",
+            "wrapper-preimport",
+            "wrapper-report",
+            "wrapper-script"
+          ],
+          "rc": 1
+        }
+      ],
+      "endpoint_observations": [
+        {
+          "runtime": "Desktop",
+          "version": "5.1.26100.9711",
+          "codepage": 1252,
+          "valid_path_result": {
+            "schema": "px.result.v1",
+            "action": "handshake",
+            "targetFingerprint": "51752cfbdd60871574729e1c8c707318a76de2e0be9f7c66b00a49327e7dbea3",
+            "mode": "Endpoint",
+            "dryRun": false,
+            "dispatched": false,
+            "outcome": "ok",
+            "data": {
+              "protocolVersion": 1,
+              "moduleSha256": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+              "configModuleSha256": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d"
+            }
+          },
+          "valid_path_fqid": null,
+          "whatif_rows": {
+            "whatif-handshake": {
+              "name": "whatif-handshake",
+              "ambient_whatif": false,
+              "received_whatif": "True",
+              "received_whatif_type": "System.Boolean",
+              "fqid": null,
+              "message": null,
+              "result": {
+                "schema": "px.result.v1",
+                "action": "handshake",
+                "targetFingerprint": "51752cfbdd60871574729e1c8c707318a76de2e0be9f7c66b00a49327e7dbea3",
+                "mode": "Remote",
+                "dryRun": true,
+                "dispatched": false,
+                "outcome": "whatif",
+                "data": null
+              },
+              "imported_before": 0,
+              "imported_after": 0
+            },
+            "whatif-status": {
+              "name": "whatif-status",
+              "ambient_whatif": false,
+              "received_whatif": "True",
+              "received_whatif_type": "System.Boolean",
+              "fqid": null,
+              "message": null,
+              "result": {
+                "schema": "px.result.v1",
+                "action": "status",
+                "targetFingerprint": "51752cfbdd60871574729e1c8c707318a76de2e0be9f7c66b00a49327e7dbea3",
+                "mode": "Remote",
+                "dryRun": true,
+                "dispatched": false,
+                "outcome": "whatif",
+                "data": null
+              },
+              "imported_before": 0,
+              "imported_after": 0
+            }
+          },
+          "payload_body_sha256": "665a73d63a0d7faff86e0439620694f37a21ca609a44968f4005994aeafee3bb",
+          "raw_report_sha256": "06c520dd169c57f4c7cb5357fd63ac752733a6d64a173e6c58f8af049ce9ea2d"
+        },
+        {
+          "runtime": "Core",
+          "version": "7.6.9",
+          "codepage": 65001,
+          "valid_path_result": {
+            "schema": "px.result.v1",
+            "action": "handshake",
+            "targetFingerprint": "51752cfbdd60871574729e1c8c707318a76de2e0be9f7c66b00a49327e7dbea3",
+            "mode": "Endpoint",
+            "dryRun": false,
+            "dispatched": false,
+            "outcome": "ok",
+            "data": {
+              "protocolVersion": 1,
+              "moduleSha256": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+              "configModuleSha256": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d"
+            }
+          },
+          "valid_path_fqid": null,
+          "whatif_rows": {
+            "whatif-handshake": {
+              "name": "whatif-handshake",
+              "ambient_whatif": false,
+              "received_whatif": "True",
+              "received_whatif_type": "System.Boolean",
+              "fqid": null,
+              "message": null,
+              "result": {
+                "schema": "px.result.v1",
+                "action": "handshake",
+                "targetFingerprint": "51752cfbdd60871574729e1c8c707318a76de2e0be9f7c66b00a49327e7dbea3",
+                "mode": "Remote",
+                "dryRun": true,
+                "dispatched": false,
+                "outcome": "whatif",
+                "data": null
+              },
+              "imported_before": 0,
+              "imported_after": 0
+            },
+            "whatif-status": {
+              "name": "whatif-status",
+              "ambient_whatif": false,
+              "received_whatif": "True",
+              "received_whatif_type": "System.Boolean",
+              "fqid": null,
+              "message": null,
+              "result": {
+                "schema": "px.result.v1",
+                "action": "status",
+                "targetFingerprint": "51752cfbdd60871574729e1c8c707318a76de2e0be9f7c66b00a49327e7dbea3",
+                "mode": "Remote",
+                "dryRun": true,
+                "dispatched": false,
+                "outcome": "whatif",
+                "data": null
+              },
+              "imported_before": 0,
+              "imported_after": 0
+            }
+          },
+          "payload_body_sha256": "665a73d63a0d7faff86e0439620694f37a21ca609a44968f4005994aeafee3bb",
+          "raw_report_sha256": "774a115daba486749dedcca4672c0ac59b8ffcf5b0081b1b87c2ebbb2cba8e37"
+        }
+      ]
+    },
+    {
+      "artifacts_verified": 29,
+      "direct_children_verified": [
+        {
+          "kind": "fresh-process wrapper",
+          "index": 0,
+          "roles": [
+            "output",
+            "wrapper-input",
+            "wrapper-report",
+            "wrapper-script"
+          ],
+          "rc": 0
+        },
+        {
+          "kind": "fresh-process wrapper",
+          "index": 1,
+          "roles": [
+            "output",
+            "wrapper-input",
+            "wrapper-report",
+            "wrapper-script"
+          ],
+          "rc": 0
+        },
+        {
+          "kind": "endpoint",
+          "index": 2,
+          "roles": [
+            "endpoint-input",
+            "endpoint-report",
+            "endpoint-script",
+            "output"
+          ],
+          "rc": 0
+        },
+        {
+          "kind": "endpoint",
+          "index": 3,
+          "roles": [
+            "endpoint-input",
+            "endpoint-report",
+            "endpoint-script",
+            "output"
+          ],
+          "rc": 0
+        },
+        {
+          "kind": "fresh-process wrapper",
+          "index": 4,
+          "roles": [
+            "output",
+            "wrapper-input",
+            "wrapper-report",
+            "wrapper-script"
+          ],
+          "rc": 0
+        },
+        {
+          "kind": "fresh-process wrapper",
+          "index": 5,
+          "roles": [
+            "output",
+            "wrapper-input",
+            "wrapper-report",
+            "wrapper-script"
+          ],
+          "rc": 1
+        },
+        {
+          "kind": "fresh-process wrapper",
+          "index": 6,
+          "roles": [
+            "output",
+            "wrapper-input",
+            "wrapper-preimport",
+            "wrapper-report",
+            "wrapper-script"
+          ],
+          "rc": 1
+        }
+      ],
+      "endpoint_observations": [
+        {
+          "runtime": "Core",
+          "version": "7.6.9",
+          "codepage": 65001,
+          "valid_path_result": {
+            "schema": "px.result.v1",
+            "action": "handshake",
+            "targetFingerprint": "50fd8ebcd766835dc1005aa05071a3fb902d04dc4d0ccd3eec9c31c4f2b73a1d",
+            "mode": "Endpoint",
+            "dryRun": false,
+            "dispatched": false,
+            "outcome": "ok",
+            "data": {
+              "protocolVersion": 1,
+              "moduleSha256": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+              "configModuleSha256": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d"
+            }
+          },
+          "valid_path_fqid": null,
+          "whatif_rows": {
+            "whatif-handshake": {
+              "name": "whatif-handshake",
+              "ambient_whatif": false,
+              "received_whatif": "True",
+              "received_whatif_type": "System.Boolean",
+              "fqid": null,
+              "message": null,
+              "result": {
+                "schema": "px.result.v1",
+                "action": "handshake",
+                "targetFingerprint": "50fd8ebcd766835dc1005aa05071a3fb902d04dc4d0ccd3eec9c31c4f2b73a1d",
+                "mode": "Remote",
+                "dryRun": true,
+                "dispatched": false,
+                "outcome": "whatif",
+                "data": null
+              },
+              "imported_before": 0,
+              "imported_after": 0
+            },
+            "whatif-status": {
+              "name": "whatif-status",
+              "ambient_whatif": false,
+              "received_whatif": "True",
+              "received_whatif_type": "System.Boolean",
+              "fqid": null,
+              "message": null,
+              "result": {
+                "schema": "px.result.v1",
+                "action": "status",
+                "targetFingerprint": "50fd8ebcd766835dc1005aa05071a3fb902d04dc4d0ccd3eec9c31c4f2b73a1d",
+                "mode": "Remote",
+                "dryRun": true,
+                "dispatched": false,
+                "outcome": "whatif",
+                "data": null
+              },
+              "imported_before": 0,
+              "imported_after": 0
+            }
+          },
+          "payload_body_sha256": "665a73d63a0d7faff86e0439620694f37a21ca609a44968f4005994aeafee3bb",
+          "raw_report_sha256": "1cd061ee105d267e75a88ce1ea4a180a2e5a010b69cdd4a419af0ef697d10e5f"
+        },
+        {
+          "runtime": "Desktop",
+          "version": "5.1.26100.9711",
+          "codepage": 1252,
+          "valid_path_result": {
+            "schema": "px.result.v1",
+            "action": "handshake",
+            "targetFingerprint": "50fd8ebcd766835dc1005aa05071a3fb902d04dc4d0ccd3eec9c31c4f2b73a1d",
+            "mode": "Endpoint",
+            "dryRun": false,
+            "dispatched": false,
+            "outcome": "ok",
+            "data": {
+              "protocolVersion": 1,
+              "moduleSha256": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+              "configModuleSha256": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d"
+            }
+          },
+          "valid_path_fqid": null,
+          "whatif_rows": {
+            "whatif-handshake": {
+              "name": "whatif-handshake",
+              "ambient_whatif": false,
+              "received_whatif": "True",
+              "received_whatif_type": "System.Boolean",
+              "fqid": null,
+              "message": null,
+              "result": {
+                "schema": "px.result.v1",
+                "action": "handshake",
+                "targetFingerprint": "50fd8ebcd766835dc1005aa05071a3fb902d04dc4d0ccd3eec9c31c4f2b73a1d",
+                "mode": "Remote",
+                "dryRun": true,
+                "dispatched": false,
+                "outcome": "whatif",
+                "data": null
+              },
+              "imported_before": 0,
+              "imported_after": 0
+            },
+            "whatif-status": {
+              "name": "whatif-status",
+              "ambient_whatif": false,
+              "received_whatif": "True",
+              "received_whatif_type": "System.Boolean",
+              "fqid": null,
+              "message": null,
+              "result": {
+                "schema": "px.result.v1",
+                "action": "status",
+                "targetFingerprint": "50fd8ebcd766835dc1005aa05071a3fb902d04dc4d0ccd3eec9c31c4f2b73a1d",
+                "mode": "Remote",
+                "dryRun": true,
+                "dispatched": false,
+                "outcome": "whatif",
+                "data": null
+              },
+              "imported_before": 0,
+              "imported_after": 0
+            }
+          },
+          "payload_body_sha256": "665a73d63a0d7faff86e0439620694f37a21ca609a44968f4005994aeafee3bb",
+          "raw_report_sha256": "1cef1ddf5399bb4e64eaba7294cd3cba81418e01695fa382dac599977f41a033"
+        }
+      ]
+    }
+  ],
+  "missing_dependency_negative": {
+    "detected": true,
+    "deleted_path": "evidence/legacy-S2-ps51/pxctl-evid-d19f67cf09f4/child/endpoint-in.xml",
+    "error": "evidence/legacy-S2-ps51/pxctl-evid-d19f67cf09f4/child/endpoint-in.xml"
+  },
+  "at": "2026-11-08T16:01:38.275824+00:00",
+  "candidate": "4196fbaaeb13b4d26d5f4f452b6c1a8b26150489",
+  "baseline": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "original_archive_sha256": "0379bc7d748aad413448c144f7dda476f8f7f1c130cec466652be2988bd5f260"
+}

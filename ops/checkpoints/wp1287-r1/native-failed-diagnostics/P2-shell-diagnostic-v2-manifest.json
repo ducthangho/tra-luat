@@ -1,0 +1,26 @@
+{
+  "candidate": "eff711e075f538d5f012f728451b75207a7f6140",
+  "tree": "b83af7498be2f26b58f103fe79db9119815c278b",
+  "baseline": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "root": "C:\\tl-win\\wp1287-shell-diagnostic-v2",
+  "source_file_sha256": {
+    "package.json": "d52eb0465ee3717bb541ce12c4542ed594712123f3fec1a003268fa3ba96977a",
+    "package-lock.json": "0da56e1ee6b81ad9226f000a917f6153b95e861ed41811d5eca7deb01bbb8ede",
+    "SKILL.md": "b71957b0e673afbd39b4e4a7b38195071272c08dba5849a6bdb7099d94a2e43c"
+  },
+  "inputs": {
+    "package.json": "d52eb0465ee3717bb541ce12c4542ed594712123f3fec1a003268fa3ba96977a",
+    "package-lock.json": "0da56e1ee6b81ad9226f000a917f6153b95e861ed41811d5eca7deb01bbb8ede",
+    "SKILL.md": "b71957b0e673afbd39b4e4a7b38195071272c08dba5849a6bdb7099d94a2e43c",
+    "pypdf-6.10.0-py3-none-any.whl": "90005e959e1596c6e6c84c8b0ad383285b3e17011751cedd17f2ce8fcdfc86de",
+    "P2-browser-measure-shell-diagnostic-v2.py": "c50253e0724af199107b1b0ec599bb00be05316b87d902007ea57f69a53ad8b0",
+    "P2-native-shell-diagnostic-v2.py": "7862ee071e8da68447286c0706ade2d8aed105c4b7f8cadd8555ad901012caaa"
+  },
+  "proof_scope": "Nativehashbridge to rootGit H/tree, not a claimed nativeGit checkout; independent candidate CLI package+browser measurement; no deployment/Proxima change",
+  "operator_diagnostic": "Original shell diagnostic did NOT launch browser: headless shell PE FileVersion/ProductVersion absent. Preserve original rc2. Supported --version actual rc0 reports Google Chrome for Testing157.0.8103.15, hash221fd6916ef2646d1f838470422a7caa1205d3d10ef99de2ca39bc37deeebce8. Measurement correction uses same existing shell cache and validates supported version, first actual shell browser launch; diagnostic only, not r1candidate acceptance.",
+  "diagnostic_only": true,
+  "candidate_gate_eligible": false,
+  "artifact": "officialchromium-headless-shell1252",
+  "checkpoint": "https://github.com/ducthangho/tra-luat/issues/1287#issuecomment-6724675093",
+  "reuse_browser_cache": "C:\\tl-win\\wp1287-shell-diagnostic\\browser-cache"
+}

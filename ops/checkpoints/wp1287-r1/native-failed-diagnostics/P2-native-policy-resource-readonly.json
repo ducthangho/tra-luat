@@ -1,0 +1,14 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Process started with PID 16528 (shell: powershell.exe)\nInitial output:\n{\"host\":\"DESKTOP-T9R33P2\",\"policies\":[],\"ownedChromeProcesses\":[],\"memory\":{\"FreePhysicalMemory\":1737132,\"FreeVirtualMemory\":9261740},\"callerSession\":1,\"query\":\"readonly relevantChrome policy and ownprocess only, no new launch or registrychange\"}\r\n\n✅ Process 16528 has finished execution"
+    },
+    {
+      "type": "text",
+      "text": "\n[executed on device: DESKTOP-T9R33P2 (a5f7076e-a491-4f84-829b-8d1fbcc1c767)]"
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

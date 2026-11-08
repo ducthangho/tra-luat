@@ -62,8 +62,8 @@ recorder_is_executor: false
 leased_at_utc: '2026-11-08T16:00:59Z'
 heartbeat_at: '2026-11-08T16:00:59Z'
 heartbeat_required_minutes: 360
-lease_until: '2026-11-08T22:00:59Z'
-lease_expires_at_utc: '2026-11-08T22:00:59Z'
+lease_until: '2026-11-08T18:35:52Z'
+lease_expires_at_utc: '2026-11-08T18:35:52Z'
 run_minutes: 45
 attempts_limit: 3
 review_rounds_limit: 2
@@ -77,3 +77,11 @@ executor_workspace: /workspace/scratch/wp1271-g10-claude
 authority_note: P2only/noproductscopewaivers/freshsession in verifiedalreadytrustedexactphysicaldirectory
   afterclosedS2; no trust/pathpermissionchange; no AGYauth generation; codeWriter
   notapprover orLandOperator
+status: retired
+retired_at: '2026-11-08T18:35:52Z'
+retired_at_utc: '2026-11-08T18:35:52Z'
+original_lease_until: '2026-11-08T22:00:59Z'
+da_bi_thay_the: wp1287-r2-g2-codex
+replaced_at_utc: '2026-11-08T18:35:52Z'
+replacement_reason: Owner explicitly Codex executor+reviewer, priorClaude1 terminal,
+  coherent r2cleanup/freshcloudworkspace

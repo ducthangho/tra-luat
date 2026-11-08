@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "actual_consumer": "unmodified canonical _spec_merge",
+  "canonical_checker_sha": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "checker_sha256": "2aced17b136132f7216056b39a253656ce251a9520752f8091138f39e0077a92",
+  "source_commit": "2d57097b505e610601a634f23b3142d603fe853e",
+  "path": "ops/specs/wp1279-r2.md",
+  "spec_sha256": "489419bf05bbd416f5aafcf0f134aade59d96f9781244535c0dd1ddf5f68100c",
+  "revision": 2,
+  "generation": 2,
+  "head": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "prompt_sha256": "b4a61408e465ebf0935b1176592741d564d56bedf268c570ce36c210f267351c",
+  "at": "2026-11-08T03:03:55.647690+00:00"
+}

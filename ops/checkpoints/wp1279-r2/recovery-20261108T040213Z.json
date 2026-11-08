@@ -1,0 +1,123 @@
+{
+  "schema": "dispatcher_execution_environment_blocked.v1",
+  "recorded_at_utc": "2026-11-08 04:02:13 UTC",
+  "packet": "wp1279",
+  "revision": 2,
+  "generation": 2,
+  "mission_issue": 1238,
+  "state": "blocked_execution_transport",
+  "authority": "Standing full scoped owner delegation remains valid; no repeat approval requested. No gate/finding waiver.",
+  "spec": {
+    "commit": "2d57097b505e610601a634f23b3142d603fe853e",
+    "path": "ops/specs/wp1279-r2.md",
+    "sha256": "489419bf05bbd416f5aafcf0f134aade59d96f9781244535c0dd1ddf5f68100c"
+  },
+  "metadata_commit_before_recovery": "6e6e5c29457b179ee78bd919a5cb79779d84fb48",
+  "baseline": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "lease": {
+    "id": "wp1279-r2-g2-claude",
+    "until_utc": "2026-11-08T07:06:08Z",
+    "projection": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6716526635",
+    "retired": false,
+    "reassigned": false
+  },
+  "executor": {
+    "provider": "anthropic_claude",
+    "surface": "claude_code",
+    "run_id": "b4d36a7cbae44b1eb1edd637ba13f7a1",
+    "requested_model": "opus",
+    "requested_effort": "high",
+    "observed_init_model": "claude-opus-5-5",
+    "terminal_rc": "NOT_MEASURED_AFTER_TRANSPORT_LOSS",
+    "final_model_usage": "NOT_MEASURED",
+    "deadline_utc": "2026-11-08T04:41:22.348070Z",
+    "controller_exec_session": 40364,
+    "worker": "/workspace/scratch/wp1279-g2-claude",
+    "branch": "agent/wp1279-g2-claude"
+  },
+  "last_observations": [
+    {
+      "at_utc": "2026-11-08T03:31:08.629057+00:00",
+      "run_state": "dang_chay",
+      "file": "scripts/ProximaControl.psm1",
+      "bytes": 39030
+    },
+    {
+      "at_utc": "2026-11-08T03:31:08.629057+00:00",
+      "file": "scripts/Run-Px.ps1",
+      "bytes": 2371
+    },
+    {
+      "at_utc": "2026-11-08T03:43:05.974969+00:00",
+      "run_state": "dang_chay",
+      "file": "tests/ProximaControl.Tests.ps1",
+      "bytes": 93170
+    }
+  ],
+  "source_limit": "Observed Write/file presence is not a handoff, candidate commit, complete implementation, line-cap compliance or passing test result. Current bytes/terminal/process survival cannot be read.",
+  "environment": {
+    "id": "ccarenv_b64_Y2NhcmVudl9mMDU1NGY3YjI1NjA4MTkxOTBjY2M5NWRiOTNjMjBjMw",
+    "execution_context_state": "unavailable",
+    "exec_failures": [
+      "Failed to create unified exec process: exec-server transport disconnected; failed to resume exec-server session: recovery timed out after 45s",
+      "No usable execution environment is available. Wait for an environment to become available before using this tool."
+    ],
+    "management_api": {
+      "observations_current": true,
+      "observed_phase": "running",
+      "desired_phase": "running",
+      "connectivity": "connected",
+      "failure": null,
+      "network_policy_state": "enforced"
+    },
+    "desktop_capability": {
+      "enabled": true,
+      "state": "unknown",
+      "cua_js_tool_offered": false,
+      "cloud_desktop_open_target_offered": false
+    },
+    "diagnostic_capture_metadata": {
+      "history_status": "not_found",
+      "records": 0
+    },
+    "limits": "Configuration/readiness API does not prove exec-server reachability, process survival or workspace retention. No raw network/credential logs accessed; no secret values or networking changes."
+  },
+  "budget": {
+    "product_attempts_used": 1,
+    "attempt_limit": 3,
+    "product_attempt_state": "last_known_active_current_unknown",
+    "design_claude_calls_used": 1,
+    "design_limit": 1,
+    "codex_calls_used": 0,
+    "codex_call_limit": 10,
+    "formal_review_rounds_used": 0,
+    "formal_round_limit": 3,
+    "dispatcher_primary_product_pushes": 0,
+    "primary_push_limit": 1
+  },
+  "gates": {
+    "candidate_head": "NOT_CREATED_BY_DISPATCHER",
+    "handoff": "NOT_READ",
+    "native_windows": "NOT_RUN",
+    "linux_full_selftest": "NOT_RUN",
+    "independent_codex_review": "NOT_RUN",
+    "PR": "NOT_CREATED",
+    "merge": "NOT_DONE",
+    "landed": false,
+    "baseline_ruff": "Measured B:12 F821, rc1; not new-candidate gate result"
+  },
+  "fallback_metadata": {
+    "desktop": "a5f7076e-a491-4f84-829b-8d1fbcc1c767: previously Online/no ProximaGateway service/no Proxima process/empty machine lock at03:14:53Z; must recheck before any native pair. Node/npm present; no claude/codex on PATH; WSL reports not installed.",
+    "vm": "f7281f27-f79f-40a2-a2f5-b454b58a166a: metadata-only query confirms Claude Code2.1.319/CodexCLI0.167.0/git/node present. WSL probe exit1/usage, no Linux runtime verified. Provider auth not probed, no new model run or credential transfer.",
+    "no_failover_started": true
+  },
+  "resume": [
+    "Recover access to the same cloud workspace first; inspect g2-executor-runs/b4d36a7c/run.json, g2-controller-result.json, stdout result event and actual source files before any restart.",
+    "Do not infer completion or loss from management API. No duplicate Claude invocation while old run is unresolved; any irrecoverable failover needs explicit durable generation/lease fencing under existing full authority and preserve attempt1/history.",
+    "If actual Claude handoff and source recover, reconcile original snapshots/scope: exactly3newproductfiles, allS1bytes unchanged, <=1800 actualaddedANDtotal vsB, no fake line-count/test pass claims. Dispatcher only mechanically commits exact model writes after validation.",
+    "Original local continuation S=/workspace/scratch/proxima-p1-s2-20261108/CONTINUE.md and controllers are on unavailable workspace. Metadata/spec/prompt/lease/adviser history remain durable on ops/wp1279-spec.",
+    "Then safe paired native PS5.1/PS7 originalcommonHharness against B/H, actual25XIDs and10CX+positivecontrol/retainedchildproof, fresh Desktop lock/load/serviceabsence checks. Never run service fixtures on live gateway VM. No Windows CI/full Windows mutant CI.",
+    "Need verified actual Linux execution for full prepush selftest/Ruffdelta/temporarymanifest/admission, mandatory log audit, fresh independent CodexCLI exactH review/v2M12beforeoneprimarypush, Draftconnector/UbuntuPRCI4anchors/K0-K7/exactHconditionalgrant, masterCI/M8/readback/actualUTClease-retirement/D1-D4 beforeclosure.",
+    "No code review/merge based on file-size observations or prior S1 gates; no inherited P0 waiver, no LIVE/runtime activation. Mission remains open."
+  ]
+}

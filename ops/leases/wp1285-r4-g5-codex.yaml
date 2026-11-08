@@ -62,8 +62,8 @@ recorder_is_executor: false
 leased_at_utc: '2026-11-08T18:30:20Z'
 heartbeat_at: '2026-11-08T18:30:20Z'
 heartbeat_required_minutes: 360
-lease_until: '2026-11-09T00:30:20Z'
-lease_expires_at_utc: '2026-11-09T00:30:20Z'
+lease_until: '2026-11-08T18:45:05Z'
+lease_expires_at_utc: '2026-11-08T18:45:05Z'
 run_minutes: 45
 attempts_limit: 4
 review_rounds_limit: 3
@@ -78,7 +78,7 @@ authority_note: Owner explicit Codex executor+reviewer, reviewer higher effort h
   One replacement invocation; AGY unknown conservative reserve not erased. Separate
   cloud clone; old ASUS generation quarantined. Sensitive same-provider promotion
   HOLD, no false cross/humanaudit
-status: leased
+status: retired
 thay_the_cho:
 - wp1285-r3-g4-agy
 nang_tran:
@@ -90,3 +90,10 @@ nang_tran:
   tran_moi: product4TOTAL/formal3/shared10/push1/3paths450
 reviewer_model: gpt-6.1-sol
 reviewer_effort: xhigh
+retired_at: '2026-11-08T18:45:05Z'
+retired_at_utc: '2026-11-08T18:45:05Z'
+original_lease_until: '2026-11-09T00:30:20Z'
+da_bi_thay_the: wp1285-r5-g6-codex
+replaced_at_utc: '2026-11-08T18:45:05Z'
+replacement_reason: PreviousactualCodex terminalBLOCKED/no sourcechange, normal scoped
+  writecapability checkpoint/ownerstandingfullscope; no costreset

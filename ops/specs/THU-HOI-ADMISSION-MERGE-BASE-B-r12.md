@@ -54,7 +54,7 @@
   `amb-m02`, `amb-m05`, `amb-m06` làm bằng chứng cho khẳng định giá trị, và chưa ca nào đo đường dẫn lệch trong thông báo
   `VUNG_LECH`; lần thứ tư của `nghiem-thu-do-nham-chot`. F27, P3: số chưa đồng bộ), phiên soạn spec xét lại theo luật dừng:
   ma trận tách **đột biến chỉ đổi giá trị phát ra** khỏi **đột biến chức năng**, và mỗi khẳng định giá trị phải có ít
-  nhất một đột biến loại đầu. r12 chưa được review vì trần đã hết; cách kiểm r12 do chủ kho quyết (mục 8).
+  nhất một đột biến loại đầu. Trần 10 đã hết; chủ kho chọn *"Nâng trần +1"* (08-11-2026) để review r12 bằng Codex (mục 8).
 - `packet_issue`: **#1266** (sub-issue của Mission #1264). Issue không tự cấp việc (protocol §3.2, §4).
 - **Phụ thuộc:** packet `THU-HOI-ADMISSION-MERGE-BASE-A` #1265 (ADR-0066 và dòng §20, đặc tả
   `ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r12.md`) đã land. Base của B phải chứa commit land của A; đo bằng
@@ -579,8 +579,8 @@ trước đòi báo chủ kho ở mọi lần chạm luật; r6 thay luật ấy
 
 **Review đặc tả, trước khi chủ kho duyệt băm:** Codex, tính trên PR đưa đặc tả vào kho, chung cho A và B; trần ban đầu
 ≤ 2 lời gọi, chủ kho nâng thành 3 rồi 4, rồi **10** ngày 07-11-2026 mà không hỏi lại từng lượt; đã dùng 10/10 (lượt 1–10 trên
-r1–r8, r10 và r11; lượt 0 không tính theo chủ kho). Lịch sử: mục 6 của đặc tả A r12. Trần đã hết: review r12 cần chủ kho
-quyết — nâng trần thêm lời gọi Codex, hoặc nhận một review độc lập không dùng Codex. Mọi lượt chạy offline trên commit cục bộ; nhánh
+r1–r8, r10 và r11; lượt 0 không tính theo chủ kho). Lịch sử: mục 6 của đặc tả A r12. Trần 10 đã hết; chủ kho
+nâng trần thành **11** ngày 08-11-2026 (*"Nâng trần +1"*) cho review r12. Mọi lượt chạy offline trên commit cục bộ; nhánh
 đặc tả chỉ được đẩy lại khi review approve.
 
 **Review mã:** reviewer Codex độc lập, phiên riêng; trần 10 lời gọi theo dòng khai `ADR-0055` ở đầu tệp, đếm
@@ -621,7 +621,7 @@ không vay ngân sách của packet khác.
 - Các trần ở mục 8 là đề xuất; chưa có số đo mức dùng thực của một packet cỡ này để biện hộ từng con số.
 - Canary B18: chỉ đo được sau land.
 - Số dòng thực tế: mới là ước lượng (khối `nang_tran`); trần 780 là đề xuất, chưa được chủ kho chốt.
-- r12 chưa được review lúc viết; trần review đặc tả đã hết (mục 8).
+- r12 chưa được review lúc viết; lời gọi thứ 11, do chủ kho nâng trần, dành cho nó (mục 8).
 
 ## 10. Thay đổi so với r11
 

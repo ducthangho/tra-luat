@@ -45,7 +45,7 @@
   bản ADR của packet A không đổi.
 - Sau review lượt 10 trên r11 — lời gọi cuối của trần 10 (F26, P2, lần thứ tư của `nghiem-thu-do-nham-chot`; F27, P3; F26
   ở packet B, F27 ở cả hai), phiên soạn spec sửa thành r12 (B r12 mục 5, 7, 10). Văn bản ADR của packet A không đổi.
-  r12 chưa được review vì trần đã hết; cách kiểm r12 do chủ kho quyết (mục 6).
+  Trần 10 đã hết; chủ kho chọn *"Nâng trần +1"* (08-11-2026) để review r12 bằng Codex (mục 6).
 - `packet_issue`: **#1265** (sub-issue của Mission #1264). Issue không tự cấp việc (protocol §3.2, §4). Packet
   anh em: `THU-HOI-ADMISSION-MERGE-BASE-B` #1266 (mã, đặc tả `ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r12.md`). B
   phụ thuộc A: base của B phải chứa commit land của A.
@@ -273,8 +273,8 @@ một phiên Claude độc lập tấn công vị từ của r9 (không tính l�
 checkpoint lần 4. Lượt 9 (08-11-2026 03:36:41Z–03:53:53Z, memories tắt, trên commit cục bộ `522089d2` chưa đẩy)
 review r10, `changes_requested`, 1 P2 (F24) và 1 P3 (F25), F23 không còn áp; xử lý theo luật dừng (B r11 mục 7 và 10).
 Lượt 10 (08-11-2026 05:03:57Z–07:25:05Z, memories tắt, trên commit cục bộ `19780165` chưa đẩy) review r11,
-`changes_requested`, 1 P2 (F26) và 1 P3 (F27); F24, F25 đã sửa. **Đã dùng 10/10 lời gọi — trần đã hết.** Review r12 cần
-chủ kho quyết: nâng trần thêm lời gọi Codex, hoặc nhận một review độc lập không dùng Codex. Verdict lượt 2–10 chưa được
+`changes_requested`, 1 P2 (F26) và 1 P3 (F27); F24, F25 đã sửa. **Đã dùng 10/10 lời gọi — trần đã hết;** chủ kho nâng trần
+thành **11** ngày 08-11-2026 (*"Nâng trần +1"*) cho review r12. Verdict lượt 2–10 chưa được
 đăng lên PR #1268 lúc viết.
 
 **Review mã:** reviewer Codex độc lập, trần 10 lời gọi theo dòng khai `ADR-0055` ở đầu tệp; đếm **trước** mỗi lời
@@ -295,7 +295,7 @@ hoặc không biết mức đã dùng ⇒ dừng ở checkpoint chủ kho.
   lease phải đo lại.
 - Lời khai *"0 commit chạm vùng"* đúng tới 09:43Z 07-11-2026 trên `132d376c`; đo lại khi viết ADR.
 - Comment duyệt băm của chủ kho trên #1265: chưa có lúc viết.
-- r12 chưa được review lúc viết; trần review đặc tả đã hết (mục 6).
+- r12 chưa được review lúc viết; lời gọi thứ 11, do chủ kho nâng trần, dành cho nó (mục 6).
 
 ## 8. Thay đổi so với r11
 

@@ -13,7 +13,7 @@ model: gemini-4-argon-high
 effort: high
 model_family: gemini
 execution_surface: antigravity
-transport: machine
+transport: machine/local
 environment: windows
 reviewer: codex
 reviewer_model_family: openai

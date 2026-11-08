@@ -1,0 +1,27 @@
+{
+  "status": "proposed_concrete_correction_not_executed",
+  "packet": 1285,
+  "head": "53b175c40254b0e64a011ef6d0f70207fd2f933e",
+  "immutable_original_acceptance_base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "current_PR_base": "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+  "reason": "Original local admission used B, PR-target admission used E and requires E ancestor H; original preflight did not cover this ancestry condition",
+  "operator_error_acknowledged": true,
+  "source_code_finding": false,
+  "original_CI_failure_retained": true,
+  "next_steps": [
+    "Freeze successor revision with explicit current canonical base while retaining original B/history, remeasure no runtime/policy drift",
+    "Prepare mechanical base synchronization preserving all three reviewed product blobs; no product patch by dispatcher",
+    "Reconcile product push budget1/1 and validformal3/3 through explicit bounded checkpoint BEFORE next push/review; no silent reset",
+    "Repeat applicable exact-new-SHA gates, fresh independent Codex CLI xhigh review; keep Codex high executor provenance truthful",
+    "One bounded corrective push only after new exact-SHA offline approve and gates; retain Draft and sensitive assurance HOLD"
+  ],
+  "not_authorized_by_this_record": [
+    "additional product push",
+    "formal review4",
+    "Ready",
+    "merge",
+    "land",
+    "LIVE"
+  ],
+  "same_provider_assurance": "HOLD under protocol §8; higher effort does not create cross/human audit"
+}

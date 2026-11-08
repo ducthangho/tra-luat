@@ -374,9 +374,10 @@ kết quả khác "đạt" đều là đỏ.
   | `canh_ancestry` | `to_tien` / `merge_base` | B1 (= 1) / B2 (`null`) | độ dài đường parent mà fixture dựng | `amb-m23-canh-hang-0` / `amb-m24-canh-so-o-merge-base` (phát 0) |
   | `ngan_sach.max_commits_merge_base` = 50000 | cả hai | B1 | hằng số hợp đồng | `amb-m27-receipt-bo-khoa-ngan-sach-moi` |
   | token `quan_he=<giá trị>` trên dòng `THU_HOI_ADMISSION` | cả hai | B1 (`quan_he=to_tien`), B2 (`quan_he=merge_base`) | chế độ do fixture dựng; tách dòng theo khoảng trắng, đếm đúng một token | `amb-m21-bo-token-quan-he` |
+  | nhãn lỗi `VUNG_LECH` / `KHONG_CO_MERGE_BASE` trong thông báo rc 12 | `merge_base`, đường thất bại | B3, B3b, B5 / B6; âm: B9 (không được có hai nhãn) | vùng lệch hay không chung gốc do fixture dựng | `amb-m03`, `amb-m05` / `amb-m06`; `amb-m09` |
 
   Ba phép đọc tại S và các khoá v1 còn lại giữ hợp đồng của nền (bất biến tương thích, mục tiêu 4); ma trận này chỉ
-  phủ phần v2 thêm hay đổi.
+  phủ phần v2 thêm hay đổi: tám đầu ra, gồm hai nhãn lỗi mới.
 - Ghi kèm: rc, toàn bộ stderr, dòng `THU_HOI_ADMISSION`, receipt, thời gian, `so_object_da_doc`, `tong_bytes`, số commit
   bước tô màu đã đọc, nền, phiên bản Python và Git.
 
@@ -610,7 +611,7 @@ Thay đổi r1→r2 … r9→r10 ghi ở mục 10 của từng revision ấy. T�
 
 | nguồn | thay đổi |
 |---|---|
-| F24 `nghiem-thu-do-nham-chot`, lần thứ ba (P2): không ca nào đo giá trị `vung_tai_S` và token `quan_he=` do producer phát ra; lời khai "bảo đảm nằm ở" gộp producer với consumer | ma trận nghĩa vụ đầu ra mới ở mục 5: bảy đầu ra v2, mỗi đầu ra có ca đo giá trị, oracle độc lập và đột biến tại chỗ phát (chín đột biến mới `amb-m19`…`amb-m27`); B1 và B2 thêm khẳng định giá trị; ca mới B2b với vùng không rỗng dựng từ S2 của fixture t133 (t133 đã đo cặp (S2, `H_them_tren_S2`) ra rc 0 trên mã nền); lời khai "bảo đảm nằm ở" viết lại theo bốn vai |
+| F24 `nghiem-thu-do-nham-chot`, lần thứ ba (P2): không ca nào đo giá trị `vung_tai_S` và token `quan_he=` do producer phát ra; lời khai "bảo đảm nằm ở" gộp producer với consumer | ma trận nghĩa vụ đầu ra mới ở mục 5: tám đầu ra v2 (gồm hai nhãn lỗi đã có ca), mỗi đầu ra có ca đo giá trị, oracle độc lập và đột biến tại chỗ phát (chín đột biến mới `amb-m19`…`amb-m27`); B1 và B2 thêm khẳng định giá trị; ca mới B2b với vùng không rỗng dựng từ S2 của fixture t133 (t133 đã đo cặp (S2, `H_them_tren_S2`) ra rc 0 trên mã nền); lời khai "bảo đảm nằm ở" viết lại theo bốn vai |
 | F25 `mo-ta-thu-thap-lan-voi-dieu-kien-dat` (P3) | mục 5: B17 không dùng stdout để quyết định đạt; stdout vẫn được thu để ghi kèm |
 | phép tấn công trên r9, ý về token (P3) | mục tiêu 4 nói rõ `quan_he=<giá trị>` là một token đứng riêng |
 | số đếm | hàng nghiệm thu 20 (18 thuộc `ops/lease_publish_test.py`); ước lượng 590–760 dòng; đề xuất trần 760, chủ kho chốt khi duyệt băm |

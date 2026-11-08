@@ -12858,9 +12858,21 @@ def _typed_variants1174(c,m,registration,admission,now):
     reg6=dict(registration,generation=6)
     assert _call1174(m._1174_admission,m._1174_bytes(adoption),reg6,now)==adoption
     for owner,key in (("lineage","source_path"),("enrollment","legacy_source_path")):
-        for value in (str(c.tmp)+"/unused/../legacy.json",str(c.tmp)+"//legacy.json","/"+str(c.tmp)+"/legacy.json"):
+        for suffix in ("/unused/../legacy.json","//legacy.json","/./legacy.json"):
+            value=str(c.tmp)+suffix
+            # Check the stimulus independently of the admission implementation:
+            # it must reach the canonical-spelling guard on either host.
+            assert os.path.isabs(value),"canonical-path negative must be absolute"
+            assert any(part in (".","..","") for part in suffix[1:].split("/"))
             bad=copy.deepcopy(adoption);bad[owner][key]=value
             _reject1174(m._1174_admission,m._1174_bytes(bad),reg6,now,reason="source canonical paths")
+        # Retain the original slash-prefix vector. On Windows it has no drive
+        # root; enrollment rejects it before the shared canonical-path guard.
+        value="/"+str(c.tmp)+"/legacy.json"
+        assert Path(value).is_absolute() == (os.name != "nt"),"slash-prefix host precondition"
+        bad=copy.deepcopy(adoption);bad[owner][key]=value
+        reason="legacy source types" if os.name=="nt" and owner=="enrollment" else "source canonical paths"
+        _reject1174(m._1174_admission,m._1174_bytes(bad),reg6,now,reason=reason)
     for prefix,fields in _FIELD_TYPES1174.items():
         for field,kind in fields.items():
             path=(prefix+"." if prefix else "")+field
@@ -13601,7 +13613,7 @@ MUTANTS.update({
 MUTANTS_NHAM_TEST |= {"m1174_secret_channel_probe_facts"}
 
 _WP1174_PATHS = (".claude/dev/packet_loop.py", ".claude/dev/packet_loop_test.py", "docs/PROTOCOL_DA_PHIEN.md",
-    "ops/specs/wp1174-c5-adapter-design.md", "ops/specs/wp1174-implementation-r15.md")
+    "ops/specs/wp1174-c5-adapter-design.md", "ops/specs/wp1174-implementation-r16.md")
 _WP1174_NATIVE_KEYS = frozenset("schema actual_os scope proof_eligible source_pr repo pr run_id run_attempt job checkout_sha checkout_tree executed_sha executed_tree expected_head expected_tree path_hashes producer_digests producer_after snapshot_before snapshot_after required_ids required_count outcomes profiles native_probe native_seam overall_status windows_oracle".split())
 
 

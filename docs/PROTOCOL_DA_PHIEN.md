@@ -1639,3 +1639,9 @@ Lỗi durability giữ rc8/no dispatch; readback riêng không chứng minh dura
 Scoped human snapshot kiểm exact verified bytes sau canonical verifier, trước collector;
 scoped accept dùng cùng snapshot bytes trong RAM cho CI/connector validation và hashes.
 Các fault injection là fixture thuật toán, không phải native profile hay mất điện.
+
+WP1174 R13/C9 dùng composite native delivery SOURCE-ONLY trên exact final head/tree
+và năm file hashes: bốn part A–D đọc coverage manifest đã đóng băng, rồi integrator E
+kiểm coverage union, interfaces và raw reports theo R13. Mỗi lời gọi vẫn được đếm;
+chỉ composite đủ bằng chứng mới có thể tạo verdict cho source đó. Authority,
+provider assurance và actual-human của target giữ theo các hợp đồng hiện hành.

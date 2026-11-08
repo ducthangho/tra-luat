@@ -13446,7 +13446,7 @@ MUTANTS_NHAM_TEST |= {"m1174_r12_platform_inventory"}
 _WP1174_FULL_CASE_IDS = tuple(name for name,_ in CASES if name in WP1174_REQUIRED)
 
 _WP1174_PATHS = (".claude/dev/packet_loop.py", ".claude/dev/packet_loop_test.py", "docs/PROTOCOL_DA_PHIEN.md",
-    "ops/specs/wp1174-c5-adapter-design.md", "ops/specs/wp1174-implementation-r12.md")
+    "ops/specs/wp1174-c5-adapter-design.md", "ops/specs/wp1174-implementation-r13.md")
 _WP1174_NATIVE_KEYS = frozenset("schema actual_os scope proof_eligible source_pr repo pr run_id run_attempt job checkout_sha checkout_tree executed_sha executed_tree expected_head expected_tree path_hashes producer_digests producer_after snapshot_before snapshot_after required_ids required_count outcomes profiles native_probe native_seam overall_status windows_oracle".split())
 
 

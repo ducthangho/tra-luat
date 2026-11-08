@@ -1,0 +1,13 @@
+# phan chung danh_gia_gate.py (sha256 b87f9697) tren run 42439410815: xoa DAU HIEU cua mot buoc => phai not_measured (rc 0); passed => rc 1. rc la ma thoat cua chinh danh_gia_gate.py (khong qua ong).
+## --am-buoc 'gate-ops' 'ops/chay_lease_publish_test.sh'
+MOC_GATE_OUTPUT: not_measured (0/1 job co dau hieu duong)
+rc=0
+## --am-buoc 'gate-ops' 'ops/bien_nhan_v2_test.py'
+MOC_GATE_OUTPUT: not_measured (0/1 job co dau hieu duong)
+rc=0
+## --am-buoc 'gate-registry' '.claude/dev/ci_dang_ky_test.py --chay'
+MOC_GATE_OUTPUT: not_measured (0/1 job co dau hieu duong)
+rc=0
+## --am-buoc 'gate (' 'scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json'
+MOC_GATE_OUTPUT: not_measured (0/1 job co dau hieu duong)
+rc=0

@@ -1,0 +1,60 @@
+# Ca launcher_test.py bi BO QUA tren windows-latest, job 128369080234 (run 42360967762, head 27fd808), buoc 'python .claude/dev/launcher_test.py'
+# log_sha256 dacc09a4267343729dc68df7cea3bf4e2af49b68c41007a7123d94a66f867c7e (log goc co CRLF; trich nay da bo \r cuoi dong)
+tong dong BO QUA trong log: 84
+## dong BO QUA cua ca r1252_*:
+  BO QUA r1252_ghi_qua_dir_fd: bo qua: nen khong co dir_fd/O_NOFOLLOW (Windows dung nhanh du phong, xem _ghi_tep_0600)
+  BO QUA r1252_status_va_chu_ky_byte_la: bo qua ve status: Windows khong tao duoc ten tep byte khong phai UTF-8
+  BO QUA r1252_doi_to_tien_thu_muc_luot: bo qua: nen tu choi doi ten thu muc luot dang mo tep (do A10)
+  BO QUA r1252_mo_thu_muc_luot_dung_mot_lan: bo qua: nen khong co dir_fd
+  BO QUA r1252_bam_tep_khong_theo_lien_ket: bo qua: nen khong co FIFO/O_NOFOLLOW
+## 10 ca A10 (spec §4) — co trong danh sach BO QUA?
+r1252_ghi_tep_ignored bo_qua=0
+r1252_ghi_trong_git bo_qua=0
+r1252_khong_ghi_thi_sach bo_qua=0
+r1252_run_root_trong_workspace_bi_loai bo_qua=0
+r1252_khong_do_duoc bo_qua=0
+r1252_tat_co_giu_nguyen bo_qua=0
+r1252_gioi_han_khai bo_qua=0
+r1252_cat_50 bo_qua=0
+r1252_bieu_dien_khong_nhap_nhang bo_qua=0
+r1252_bo_dem_stat_lam_moi_truoc_chup bo_qua=0
+314/314 ca DA CHAY QUA (tong 397, bo qua 83, hong 0) - KHONG DU: 83 ca BO QUA, chua do gi
+def r1252_ghi_tep_ignored trong 27fd808:.claude/dev/launcher_test.py: 1
+def r1252_ghi_trong_git trong 27fd808:.claude/dev/launcher_test.py: 1
+def r1252_khong_ghi_thi_sach trong 27fd808:.claude/dev/launcher_test.py: 1
+def r1252_run_root_trong_workspace_bi_loai trong 27fd808:.claude/dev/launcher_test.py: 1
+def r1252_khong_do_duoc trong 27fd808:.claude/dev/launcher_test.py: 1
+def r1252_tat_co_giu_nguyen trong 27fd808:.claude/dev/launcher_test.py: 1
+def r1252_gioi_han_khai trong 27fd808:.claude/dev/launcher_test.py: 1
+def r1252_cat_50 trong 27fd808:.claude/dev/launcher_test.py: 1
+def r1252_bieu_dien_khong_nhap_nhang trong 27fd808:.claude/dev/launcher_test.py: 1
+def r1252_bo_dem_stat_lam_moi_truoc_chup trong 27fd808:.claude/dev/launcher_test.py: 1
+## dot bien ten trong §4 spec — ket qua tren windows-latest cung job (buoc --dot-bien):
+  r1252_bam_khac_tep           OK  giet 1/1: r1252_khong_ghi_thi_sach
+  r1252_bi_cat_luon_false      OK  giet 1/1: r1252_cat_50
+  r1252_bo_cat                 OK  giet 1/1: r1252_cat_50
+  r1252_bo_cum_setsid          OK  giet 1/1: r1252_gioi_han_khai
+  r1252_bo_tep_ignored         OK  giet 1/1: r1252_ghi_tep_ignored
+  r1252_bo_thu_muc_git         OK  giet 1/1: r1252_ghi_trong_git
+  r1252_cat_49                 OK  giet 1/1: r1252_cat_50
+  r1252_cat_ca_tep_chup        OK  giet 1/1: r1252_cat_50
+  r1252_cat_hau_to_gioi_han    OK  giet 1/1: r1252_gioi_han_khai
+  r1252_chot_sach_khong_ghi_index OK  giet 1/1: r1252_bo_dem_stat_lam_moi_truoc_chup
+  r1252_chup_truoc_chot        OK  giet 1/1: r1252_bo_dem_stat_lam_moi_truoc_chup
+  r1252_dao_thu_tu_phan_loai   OK  giet 1/1: r1252_khong_do_duoc
+  r1252_de_trang_thai          OK  giet 1/1: r1252_trang_thai_khac_khong_bi_de
+  r1252_ghi_chu_khi_utf8       OK  giet 1/1: r1252_bieu_dien_khong_nhap_nhang
+  r1252_khong_loai_run_root    OK  giet 1/1: r1252_run_root_trong_workspace_bi_loai
+  r1252_khong_sap              OK  giet 1/1: r1252_bieu_dien_khong_nhap_nhang
+  r1252_loai_ca_thu_muc_cha    OK  giet 1/1: r1252_run_root_trong_workspace_bi_loai
+  r1252_luon_bao_lech          OK  giet 1/1: r1252_khong_ghi_thi_sach
+  r1252_mac_dinh_bat           OK  giet 1/1: r1252_tat_co_giu_nguyen
+  r1252_none_la_chet           OK  giet 1/1: r1252_khong_do_duoc
+  r1252_nuot_muc_loi           OK  giet 1/1: r1252_khong_do_duoc
+  r1252_tab_xuong_dong         OK  giet 1/1: r1252_bieu_dien_khong_nhap_nhang
+  r1252_tin_me_chet            OK  giet 1/1: r1252_khong_do_duoc
+  r1252_tong_sau_cat           OK  giet 1/1: r1252_cat_50
+  r1252_windows_khong_dung_job OK  giet 1/1: r1252_khong_do_duoc
+  (ca ten ca dich khong phai dot bien thi khong co dong)
+  r1252_ghi_de_dich_truc_tiep  SAI  giet 0/1: (khong ca nao chet)
+  DOT BIEN: 520/521 dat  (138 khong do duoc tren nen nay)

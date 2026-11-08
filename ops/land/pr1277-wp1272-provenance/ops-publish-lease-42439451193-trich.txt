@@ -1,0 +1,16 @@
+# trich log job 128605337771 (ops-publish-lease run 42439451193), log_sha256 006e960e09929f4784cbfe145da687477962c0674e73b70eaa13ef7eb5e50dd5
+3258:[36;1m  if [ "$rc" = "9" ]; then echo "đã đăng trước đó — bỏ qua"; echo "::endgroup::"; continue; fi[0m
+3260:[36;1m    bao_chan "cổng chặn (rc=$rc)"[0m
+3266:[36;1m  rc=$?[0m
+3269:[36;1m    bao_chan "không đọc được packet_issue (rc=$rc)"[0m
+3275:[36;1m  python3 "$NEO/ops/lease_publish.py" body "$tep" > than.md[0m
+3276:[36;1m  rc=$?[0m
+3279:[36;1m    bao_chan "không dựng được thân comment (rc=$rc)"[0m
+3286:[36;1m  rc=$?[0m
+3289:[36;1m    bao_chan "không dựng được payload (rc=$rc)"[0m
+3295:[36;1m  rc=$?[0m
+3298:[36;1m    bao_chan "đăng comment hỏng (rc=$rc)"[0m
+3308:[36;1mif [ "$BI_CHAN" != "0" ]; then exit 1; fi[0m
+3322:CHAN [9]: lease 'hotfix-r1252-posix-r1-g1-claude' đã có comment 6708573405 trên issue #1272 — bỏ qua
+3323:đã đăng trước đó — bỏ qua
+3326:(node:34698) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.

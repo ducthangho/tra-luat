@@ -1,0 +1,47 @@
+# do 2026-11-08 tren mirror day du ref (ops/land-1252-1272 @ origin/master c15603d)
+$ git rev-parse 27fd808^1 27fd808^2 27fd808^{tree} e6c6505^{tree}
+132d376cbbfea0692ff6db284753b33f437c637a
+e6c650573452ad98c3055f5147eeacfb4767f119
+d8503020f3f27a147e2292cab3e259fbc2179aef
+7acc44ba56991945262c7f023b9ec7fcbd539b90
+$ git merge-base --is-ancestor 27fd808 origin/master; rc
+rc=0
+$ git rev-list --first-parent origin/master | grep -c 27fd808
+1
+$ git diff --stat 27fd808^1 27fd808
+ .claude/dev/launcher.py      | 359 ++++++++++++++++++++-
+ .claude/dev/launcher_test.py | 728 +++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 1079 insertions(+), 8 deletions(-)
+$ git diff --numstat 9607e3e e6c6505 (base PR luc merge)
+351	8	.claude/dev/launcher.py
+728	0	.claude/dev/launcher_test.py
+$ git diff --stat 9607e3e 132d376 (master tien truoc merge, #1261)
+ docs/research/2026-11-05-proxima-playwright-p0.md |  97 +++++++++++
+ ops/plans/PROXIMA-PLAYWRIGHT-v1.md                | 196 ++++++++++++++++++++++
+ 2 files changed, 293 insertions(+)
+$ spec: git rev-parse 27fd808:ops/specs/launcher-readonly-ignored-r1.md; sha256
+8f7f5e19efd9a4831daecf4ead12184888411157
+b2c52a9aaf4a347dc212ad26d4b0ff83fb9cd58a70252e42f66d81b4d8d897cf  -
+$ blob launcher.py tai e6c6505 va 27fd808; sha256
+7b089dd42d2247732d2966cfc777fe1227c19ea0
+7b089dd42d2247732d2966cfc777fe1227c19ea0
+bced1af439e082ff7f8f6ed5b402519ec6e7403610accda74726e39ef59d9853  -
+bced1af439e082ff7f8f6ed5b402519ec6e7403610accda74726e39ef59d9853  -
+$ git diff --numstat 889334f e6c6505 -- .claude/dev/launcher.py .claude/dev/launcher_test.py (A13 tren write set; nhanh da merge master 2 lan: fc1232e, 77f638d, nen diff hai cham toan cay keo theo thay doi cua master)
+351	8	.claude/dev/launcher.py
+728	0	.claude/dev/launcher_test.py
+$ git diff --shortstat 889334f e6c6505 (toan cay, de doi chieu: gom thay doi master)
+ 252 files changed, 62273 insertions(+), 100 deletions(-)
+$ git log --oneline --first-parent 889334f..e6c6505
+e6c6505 test(launcher): khoa khoang cho poll job Windows (#1252, Codex luot 8 F11)
+77f638d Merge origin/master (9607e3e, PR #1262 spec #1179 r9) vao agent/wp1252-g1-claude
+dd2a820 fix(launcher): A10 Windows — cho job cap nhat tre; ca doi_to_tien nhan nen tu choi rename (#1252)
+9e564d4 test(launcher): khoa bam moc chup dau tren duong Popen loi va qua han (#1252)
+fc1232e Merge origin/master (d26b36f) vao agent/wp1252-g1-claude de sua check thu-hoi
+8cb2938 fix(launcher): va 3 P2 connector PR #1267 cho run --chup-workspace (#1252)
+e0aeb97 test(launcher): F10 khoa nhanh tat co tren duong ket thuc som (#1252)
+c9588aa fix(launcher): F8 moi duong ket thuc som + F9 rang cho fd ghim, theo Codex offline luot 5 (#1252)
+39f0c97 fix(launcher): F1 theo kien truc + F8 theo Codex offline luot 4 cho run --chup-workspace (#1252)
+a719391 fix(launcher): va r3 theo Codex offline luot 2 cho run --chup-workspace (#1252)
+df86dbe fix(launcher): va 7 finding Codex offline luot 1 cho run --chup-workspace (#1252)
+79df689 feat(launcher): run --chup-workspace chup sha256 workspace truoc/sau luot chay (#1252)

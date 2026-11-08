@@ -43,6 +43,8 @@ MÃ THOÁT — mỗi chốt một mã, để phía gọi xử lý được mà k
   13  công cụ CÓ MẶT nhưng CHƯA DÙNG ĐƯỢC — thiếu xác thực (xem `doctor`, `chuan-bi`)
   14  workspace là git worktree — phải dùng clone độc lập
   15  probe năng lực ĐỎ hoặc KHÔNG ĐO ĐƯỢC
+  16  `run --chup-workspace`: lượt chạy ĐÃ GHI vào workspace (`trang_thai=ghi_workspace`)
+  17  `run --chup-workspace`: KHÔNG ĐO ĐƯỢC workspace (`trang_thai=khong_do_duoc_workspace`)
   124 quá hạn trong lúc chạy (giống `timeout(1)`) — VÀ đã giết được
   125 quá hạn NHƯNG KHÔNG giết được: tiến trình còn sống, cần người can thiệp
   130 bị ngắt (Ctrl-C) — đã giết con
@@ -107,8 +109,9 @@ def ky_ban_ghi_luot(ban_ghi: dict, khoa_hex: str) -> str:
     Khoá nằm trong state chỉ mua integrity, không mua authenticity.
     """
     than = {k: v for k, v in ban_ghi.items() if k != "chu_ky"}
-    raw = json.dumps(than, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
-                     allow_nan=False).encode("utf-8")
+    # #1252 Codex lượt 2 F7: tên tệp byte lạ (surrogate) không được làm vỡ phép ký; bản ghi thường giữ
+    # NGUYÊN byte cũ (`ensure_ascii=False`), nên chữ ký cũ vẫn kiểm được.
+    raw = _json_an_toan(than, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
     return hmac.new(bytes.fromhex(khoa_hex), raw, hashlib.sha256).hexdigest()
 
 # launcher-nang-luc: so-dinh-luong module-python hook-phien moi-truong chuan-bi tu-cu probe-qua-han-ba-trang-thai mcp-endpoint van-chuyen-prompt
@@ -142,6 +145,8 @@ MA_THIEU_CONG_CU = 12
 MA_CHUA_XAC_THUC = 13
 MA_WORKTREE = 14
 MA_PROBE = 15
+MA_GHI_WORKSPACE = 16        # #1252: run --chup-workspace thấy workspace đổi giữa hai mốc
+MA_KHONG_DO_WORKSPACE = 17   # #1252: run --chup-workspace không chứng minh được sạch
 
 
 # Một provider chỉ có MỘT contract vận chuyển. Tên executable được chuẩn hoá bỏ
@@ -237,7 +242,8 @@ TY_LE_DOT_BIEN_TOI_THIEU_PHAN_MUOI = 7
 # hệ thống ngoài cây không còn làm hỏng ảnh của cây vô can.
 
 # Trạng thái CUỐI của một lượt chạy — `stop` không được ghi đè lên chúng.
-TRANG_THAI_KET_THUC = {"xong", "qua_han", "bi_ngat", "hong", "da_dung"}
+TRANG_THAI_KET_THUC = {"xong", "qua_han", "bi_ngat", "hong", "da_dung",
+                       "ghi_workspace", "khong_do_duoc_workspace"}   # #1252 (Codex F4)
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 # git@host:owner/repo.git  —  dạng kiểu scp, KHÔNG phải URL nên urlparse đọc sai
@@ -844,6 +850,261 @@ def _pid_trong_job(job) -> list[int] | None:
         return None
     except (OSError, AttributeError, ValueError):
         return None
+
+
+# ------------------------------------------------- #1252: chụp workspace trước/sau
+
+# Spec `ops/specs/launcher-readonly-ignored-r1.md` (#1252): `chot_sach` chỉ đo MỘT mốc trước khi sinh con, không
+# đo tệp ignored hay `.git` — #1224 `a8d7350a` (11 tệp) và #1240 `bc004964` (20 tệp) đã lọt qua.
+_TEP_DOI_TRAN = 50
+_SNAPSHOT_GIOI_HAN = ("chi so hai moc truoc/sau; ghi roi hoan nguyen giua hai moc thi khong thay; "
+                      "chau tu setsid hoac sinh truoc khi gan job thi khong chung minh duoc")
+
+
+def _bieu_dien_chuan(muc) -> bytes:
+    """Hàm THUẦN (spec §2.2): mỗi phần tử `(loai, gia_tri, duong_dan_bytes)` một dòng JSON, đường dẫn
+    LUÔN mã hoá hex theo một quy tắc — tên có xuống dòng/tab, hay trùng chữ một tiền tố, không thể sinh
+    cùng dòng với tên khác (connector P2 4489586579). Sắp theo byte của đường dẫn."""
+    return b"".join(
+        (json.dumps([loai, gia_tri, duong.hex()], separators=(",", ":")) + "\n").encode("utf-8")
+        for loai, gia_tri, duong in sorted(muc, key=lambda x: x[2]))
+
+
+def _duong_tuong_doi(goc: str, duong: str) -> bytes:
+    rel = os.path.relpath(duong, goc)
+    if os.sep != "/":
+        rel = rel.replace(os.sep, "/")
+    return os.fsencode(rel)
+
+
+def _bam_tep(duong: str) -> str:
+    """Connector P2 (PR #1267): mở KHÔNG theo symlink, KHÔNG chặn trên FIFO, rồi xét loại trên CHÍNH fd đã mở —
+    hậu duệ còn sống có thể tráo tệp giữa `lstat` và lúc mở."""
+    fd = os.open(duong, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0))
+    if not stat.S_ISREG(os.fstat(fd).st_mode):
+        os.close(fd)
+        raise OSError("khong_phai_tep_thuong")
+    h = hashlib.sha256()
+    with os.fdopen(fd, "rb") as f:
+        for khoi in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(khoi)
+    return h.hexdigest()
+
+
+def _chup_workspace(goc, loai_tru=None) -> list:
+    """Spec §2.2: mọi mục dưới `goc` — gồm `.git/**`, untracked, ignored — trừ ĐÚNG cây con `loai_tru`.
+    `F` tệp thường (sha256 nội dung) · `L` symlink (sha256 chuỗi đích, không đi theo) · `D` thư mục ·
+    `?` không đọc được (tên lớp ngoại lệ). Tệp đặc biệt (FIFO, socket, thiết bị) KHÔNG được mở — mở
+    FIFO là treo — nên vào `?`, tức fail-closed."""
+    goc = os.path.realpath(str(goc))
+    bo = os.path.realpath(str(loai_tru)) if loai_tru is not None else None
+    muc = []
+
+    def loi_liet_ke(e):
+        muc.append(("?", type(e).__name__, _duong_tuong_doi(goc, e.filename or goc)))
+
+    for thu_muc, ds_con, ds_tep in os.walk(goc, topdown=True, onerror=loi_liet_ke, followlinks=False):
+        giu = []
+        for ten in ds_con:
+            d = os.path.join(thu_muc, ten)
+            if bo is not None and os.path.realpath(d) == bo and not os.path.islink(d):
+                continue                                 # cây con --run-root: launcher tự ghi vào đó
+            if os.path.islink(d):
+                ds_tep.append(ten)                       # symlink tới thư mục: chụp như `L`, không đi vào
+                continue
+            muc.append(("D", "", _duong_tuong_doi(goc, d)))
+            giu.append(ten)
+        ds_con[:] = giu
+        for ten in ds_tep:
+            d = os.path.join(thu_muc, ten)
+            rel = _duong_tuong_doi(goc, d)
+            try:
+                st = os.lstat(d)
+                if stat.S_ISLNK(st.st_mode):
+                    muc.append(("L", hashlib.sha256(os.fsencode(os.readlink(d))).hexdigest(), rel))
+                elif stat.S_ISREG(st.st_mode):
+                    muc.append(("F", _bam_tep(d), rel))
+                else:
+                    muc.append(("?", "tep_dac_biet", rel))
+            except OSError as e:
+                muc.append(("?", type(e).__name__, rel))
+    return muc
+
+
+def _so_snapshot(truoc: list, sau: list) -> list:
+    """`[(duong_bytes, doi)]` sắp theo byte; doi ∈ them · xoa · sua · doi_loai."""
+    a = {d: (l, g) for l, g, d in truoc}
+    b = {d: (l, g) for l, g, d in sau}
+    ra = []
+    for d in sorted(set(a) | set(b)):
+        if d not in b:
+            ra.append((d, "xoa"))
+        elif d not in a:
+            ra.append((d, "them"))
+        elif a[d][0] != b[d][0]:
+            ra.append((d, "doi_loai"))
+        elif a[d][1] != b[d][1]:
+            ra.append((d, "sua"))
+    return ra
+
+
+def _hien_thi_duong(d: bytes) -> str:
+    """Spec §2.4: `os.fsdecode`, đơn ánh (Codex F7); surrogate do `_json_an_toan` thoát khi tuần tự hoá."""
+    try:
+        return os.fsdecode(d)
+    except UnicodeDecodeError:          # Windows: fsdecode là utf-8/surrogatepass, không nhận byte lẻ
+        return d.decode("utf-8", "surrogateescape")
+
+
+def _json_an_toan(obj, **kw) -> str:
+    """`ensure_ascii=False` cho dễ đọc; chuỗi có surrogate (tên tệp byte lạ) thì `ensure_ascii=True`,
+    để tệp UTF-8 và stdout không ném `UnicodeEncodeError`. Cả hai là JSON hợp lệ, `json.loads` hoàn nguyên."""
+    s = json.dumps(obj, ensure_ascii=False, **kw)
+    try:
+        s.encode("utf-8")
+        return s
+    except UnicodeEncodeError:
+        return json.dumps(obj, ensure_ascii=True, **kw)
+
+
+def _cay_da_chet(pid: int, job) -> bool:
+    """Spec §2.3: CHỨNG MINH không còn hậu duệ sống. `p.poll()` (mẹ đã thoát) KHÔNG phải bằng chứng;
+    `None` (không đo được) KHÔNG phải rỗng. Windows: `_thanh_vien_nhom` luôn `None`, nên dùng job."""
+    he = platform.system()
+    if he == "Windows":
+        for _ in range(20):   # A10: job Windows cập nhật danh sách TRỄ sau khi con thoát; chờ có hạn, [] mới là bằng chứng
+            ds = _pid_trong_job(job) if job is not None else None
+            if ds is None or ds == []:
+                return ds == []
+            time.sleep(0.1)
+        return False
+    if he in ("Linux", "Darwin"):
+        return _thanh_vien_nhom(pid) == []
+    return False
+
+
+def _ket_qua_snapshot(truoc, sau, cay_chet: bool) -> dict:
+    """Spec §2.4: thứ tự phân loại chup_loi → cây chưa chứng minh chết → mục `?` → tep_doi → sach.
+    `truoc`/`sau` là `(muc, bytes)` hoặc None khi lần chụp ấy ném lỗi."""
+    kq = {"chup_workspace": True, "snapshot_gioi_han": _SNAPSHOT_GIOI_HAN,
+          "snapshot_truoc_sha256": hashlib.sha256(truoc[1]).hexdigest() if truoc else None,
+          "snapshot_sau_sha256": hashlib.sha256(sau[1]).hexdigest() if sau else None,
+          "snapshot_so_muc": {"truoc": len(truoc[0]) if truoc else 0, "sau": len(sau[0]) if sau else 0}}
+    doi = _so_snapshot(truoc[0], sau[0]) if truoc and sau else []
+    kq["tep_doi_tong"] = len(doi)
+    kq["tep_doi_bi_cat"] = len(doi) > _TEP_DOI_TRAN
+    kq["tep_doi"] = [{"duong_dan": _hien_thi_duong(d), "doi": x} for d, x in doi[:_TEP_DOI_TRAN]]
+    if truoc is None or sau is None:
+        ket, ly = "khong_do_duoc", "chup_loi"
+    elif not cay_chet:
+        ket, ly = "khong_do_duoc", "cay_chua_chung_minh_chet"
+    elif any(m[0] == "?" for m in truoc[0]) or any(m[0] == "?" for m in sau[0]):
+        ket, ly = "khong_do_duoc", "muc_khong_doc_duoc"
+    elif doi:
+        ket, ly = "ghi_workspace", "tep_doi"
+    else:
+        ket, ly = "sach", None
+    kq["snapshot_ket_qua"] = ket
+    kq["snapshot_ly_do"] = ly
+    return kq
+
+
+def _khoa_chup_som(bat: bool, chup_truoc) -> dict:
+    """Codex lượt 4–5 F8: mọi đường kết thúc sớm khi bật cờ vẫn đủ khoá §2.4 (`khong_do_duoc`/`chup_loi`)."""
+    return {"chup_workspace": True, **_ket_qua_snapshot(chup_truoc, None, False)} if bat else {"chup_workspace": False}
+
+
+def _danh_tinh(duong):
+    """(dev, inode, realpath) của thư mục, `None` nếu không đo được — dùng cho nhánh không có dir_fd."""
+    try:
+        st = os.stat(duong)
+        return (st.st_dev, st.st_ino, os.path.realpath(duong))
+    except OSError:
+        return None
+
+
+def _cung_thu_muc(duong, dfd) -> bool:
+    """Đường dẫn `duong` hôm nay còn trỏ đúng thư mục đã ghim bằng `dfd` không (dev, inode)."""
+    if dfd is None:
+        return False
+    try:
+        a, b = os.stat(duong), os.fstat(dfd)
+    except OSError:
+        return False
+    return (a.st_dev, a.st_ino) == (b.st_dev, b.st_ino)
+
+
+def _nam_trong(con, cha) -> bool:
+    """`con` nằm TRONG `cha` (không phải chính nó) sau `realpath`."""
+    try:
+        c = os.path.realpath(str(con)); g = os.path.realpath(str(cha))
+        return c != g and os.path.commonpath([c, g]) == g
+    except ValueError:              # Windows: khác ổ đĩa
+        return False
+
+
+def _chup_an_toan(goc, loai_tru):
+    """`(muc, bytes)` hoặc None nếu lần chụp ném lỗi (spec §2.4: `chup_loi`, không traceback)."""
+    try:
+        muc = _chup_workspace(goc, loai_tru)
+        return muc, _bieu_dien_chuan(muc)
+    except Exception:   # noqa: BLE001 - mọi lỗi của bộ chụp là KHÔNG ĐO ĐƯỢC, không phải traceback
+        return None
+
+
+# `os.replace` không nằm trong `os.supports_dir_fd` (nó nhận src_dir_fd/dst_dir_fd), nên chỉ hỏi open/unlink:
+# hai hàm ấy có dir_fd nghĩa là nền có họ *at(2), tức renameat cũng có.
+_CO_DIR_FD = (os.open in os.supports_dir_fd and os.unlink in os.supports_dir_fd
+              and hasattr(os, "O_NOFOLLOW") and hasattr(os, "O_DIRECTORY"))
+
+
+def _mo_thu_muc_luot(duong):
+    """Codex lượt 4 F1: mở fd thư mục lượt `O_NOFOLLOW` TRƯỚC khi sinh con — lúc ấy chưa ai đổi được tổ tiên nào —
+    rồi giữ nó tới lúc ghi tệp chụp. `None` khi nền không có họ *at(2) (Windows)."""
+    if not _CO_DIR_FD:
+        return None
+    return os.open(duong, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+
+
+def _ghi_tep_0600(duong: Path, data: bytes, dfd=None) -> None:
+    """Codex F1: KHÔNG mở lại đích (con có thể đặt sẵn symlink/hardlink/tệp 0644); tạo tệp MỚI 0600 rồi `os.replace`."""
+    cha = duong.parent
+    if _CO_DIR_FD:
+        # Codex lượt 2/4 F1: mọi bước tạo/đổi tên/dọn đi qua fd thư mục đã ghim, không qua đường dẫn.
+        rieng = dfd is None
+        if rieng:
+            dfd = _mo_thu_muc_luot(cha)
+        tam = f".chup-{secrets.token_hex(8)}"
+        try:
+            fd = os.open(tam, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=dfd)
+            try:
+                with os.fdopen(fd, "wb") as f:
+                    f.write(data)
+                    f.flush()
+                    os.fsync(f.fileno())
+                os.replace(tam, duong.name, src_dir_fd=dfd, dst_dir_fd=dfd)
+            except BaseException:
+                with contextlib.suppress(OSError):
+                    os.unlink(tam, dir_fd=dfd)
+                raise
+        finally:
+            if rieng:
+                os.close(dfd)
+        return
+    # Windows (không có dir_fd): còn khe giữa kiểm và tạo; launcher chỉ ghi khi đã chứng minh cây chết (lenh_run).
+    if cha.is_symlink():
+        raise OSError(f"thu muc luot la symlink: {cha}")
+    fd, tam = tempfile.mkstemp(prefix=".chup-", dir=str(cha))
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(data)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tam, duong)
+    except BaseException:
+        with contextlib.suppress(OSError):
+            os.unlink(tam)
+        raise
 
 
 def _giet_windows(pid: int, khoa: str | None = None,
@@ -1501,7 +1762,7 @@ def _ghi_so(thu_muc: Path, ban_ghi: dict, khoa_ky: str | None = None) -> None:
     # ngay vòng đầu (audit codex đo được khi stress hai writer).
     tam = thu_muc / f"run.json.{os.getpid()}.{uuid.uuid4().hex[:8]}.tmp"
     try:
-        tam.write_text(json.dumps(ban_ghi, ensure_ascii=False, indent=2), encoding="utf-8")
+        tam.write_text(_json_an_toan(ban_ghi, indent=2), encoding="utf-8")
         os.replace(tam, thu_muc / "run.json")
     finally:
         try:
@@ -2271,6 +2532,7 @@ def lenh_run(a) -> int:
             "ly_do_dung": e.thong_diep, "pid": None, "khoa_danh_tinh": None,
             **kq, **_dinh_danh_van_chuyen(a.lenh),
             "probe": _probe_cho_so(e.probe), "bo_qua_probe_ly_do": None,
+            **_khoa_chup_som(getattr(a, "chup_workspace", False), None),   # Codex lượt 5 F8
         })
         raise
     kq.update(probe=_probe_cho_so(probe), bo_qua_probe_ly_do=ly_do_bo_qua)
@@ -2306,6 +2568,7 @@ def lenh_run(a) -> int:
         "bat_dau_utc": _bay_gio().isoformat(), "ket_thuc_utc": None,
         "ma_thoat": None, "ly_do_dung": None, "pid": None, "khoa_danh_tinh": None,
         **kq, **_dinh_danh_van_chuyen(a.lenh),
+        **_khoa_chup_som(bool(getattr(a, "chup_workspace", False)), None),   # F8 kiến trúc: mọi đường thoát sớm đủ khoá
     }
     if neo:
         ban_ghi.update(nonce=neo["nonce"], attempt=neo["attempt"], void_reason=a.void_reason)
@@ -2382,6 +2645,34 @@ def lenh_run(a) -> int:
     else:
         # nhóm tiến trình riêng: điều kiện CẦN để giết được cả con cháu sau này
         them["start_new_session"] = True
+    # #1252 §2.3: mốc chụp đầu SAU mọi chốt/probe — `chot_sach` (git status) đã làm mới bộ đệm stat của
+    # `.git/index` (S6) — và ngay trước khi sinh con. Không được dời lên trước `chay_cac_chot` (A17).
+    # Codex F3: loại CẢ cây --run-root (spec §2.2), không chỉ thư mục lượt này.
+    loai_tru = run_root if _nam_trong(run_root, kq["workspace"]) else None
+    chup_truoc = None
+    if ban_ghi["chup_workspace"]:
+        try:
+            chup_truoc = _chup_an_toan(kq["workspace"], loai_tru)
+        except KeyboardInterrupt:      # Codex F5: ngắt khi chụp đầu ⇒ chưa sinh con, sổ phải KẾT THÚC
+            ban_ghi.update(_ket_qua_snapshot(None, None, False), trang_thai="bi_ngat",
+                           ly_do_dung="bi ngat trong luc chup workspace truoc; chua sinh con",
+                           ket_thuc_utc=_bay_gio().isoformat())
+            _ghi_so(thu_muc, ban_ghi, khoa_ky)
+            f_out.close(); f_err.close()
+            return 130
+        han_chup = _doc_iso(kq["deadline_utc"]) if kq["deadline_utc"] else None
+        if han_chup is not None and _bay_gio() >= han_chup:   # Codex F6: chụp chậm không được sinh con quá hạn
+            ban_ghi.update(_khoa_chup_som(True, chup_truoc))   # Codex lượt 4 F8: đủ khoá snapshot §2.4
+            ban_ghi.update(trang_thai="hong", ly_do_dung="han chot da qua sau khi chup workspace; khong sinh con",
+                           ket_thuc_utc=_bay_gio().isoformat())
+            _ghi_so(thu_muc, ban_ghi, khoa_ky)
+            f_out.close(); f_err.close()
+            raise Chan(MA_HAN, "han chot da qua sau khi chup workspace; khong sinh con")
+    dfd_luot = None
+    danh_tinh_luot = _danh_tinh(thu_muc)   # Connector P2: nhánh dự phòng (không dir_fd) đối chiếu danh tính này
+    if ban_ghi["chup_workspace"]:
+        with contextlib.suppress(OSError):
+            dfd_luot = _mo_thu_muc_luot(thu_muc)
     try:
         p = subprocess.Popen(lenh_con, cwd=kq["workspace"],
                              stdout=f_out, stderr=subprocess.PIPE if do_model else f_err,
@@ -2395,9 +2686,12 @@ def lenh_run(a) -> int:
         if isinstance(e, ValueError):
             ban_ghi.pop("void_reason", None)
         ban_ghi.update(trang_thai="hong", ly_do_dung=f"khong chay duoc lenh: {e}",
-                       ket_thuc_utc=_bay_gio().isoformat())
+                       ket_thuc_utc=_bay_gio().isoformat(),
+                       **_khoa_chup_som(ban_ghi["chup_workspace"], chup_truoc))   # Codex lượt 5 F8
         _ghi_so(thu_muc, ban_ghi, khoa_ky)
         f_out.close(); f_err.close()
+        if dfd_luot is not None:
+            os.close(dfd_luot)
         raise Chan(MA_THAM_SO, f"khong chay duoc lenh: {e}")
 
     # Once a child has started, a timeout/nonzero exit does not prove its cause.
@@ -2466,6 +2760,36 @@ def lenh_run(a) -> int:
         bo_loc.ghi_so(ban_ghi)
     if sandbox is not None:
         sandbox.ghi_so(ban_ghi, thu_muc / "stdout.log")
+    kq_chup = None
+    ngat_khi_chup = False
+    if ban_ghi["chup_workspace"]:
+        # Codex F5 (lượt 1 + lượt 2): vùng bắt ngắt phủ TỪ chụp sau TỚI hết ghi tệp bằng chứng.
+        try:
+            cay_chet = _cay_da_chet(p.pid, job)
+            chup_sau = _chup_an_toan(kq["workspace"], loai_tru)
+            kq_chup = _ket_qua_snapshot(chup_truoc, chup_sau, cay_chet)
+            for ten, ban in (("snapshot-truoc.txt", chup_truoc), ("snapshot-sau.txt", chup_sau)):
+                if ban is None:
+                    continue
+                if not cay_chet:       # Codex lượt 2 F1: còn hậu duệ sống thì không ghi gì vào thư mục lượt
+                    kq_chup["snapshot_tep_chup_bo_qua"] = "cay_chua_chung_minh_chet"
+                    continue
+                if not (_cung_thu_muc(thu_muc, dfd_luot) if _CO_DIR_FD
+                        else danh_tinh_luot is not None and _danh_tinh(thu_muc) == danh_tinh_luot):   # đường dẫn bị lái
+                    kq_chup.update(snapshot_ket_qua="khong_do_duoc", snapshot_ly_do="chup_loi",
+                                   snapshot_tep_chup_bo_qua="thu_muc_luot_bi_doi")
+                    continue
+                try:
+                    _ghi_tep_0600(thu_muc / ten, ban[1], dfd_luot)
+                except OSError:        # Codex F2: thiếu tệp bằng chứng thì KHÔNG công bố sạch
+                    kq_chup.update(snapshot_ket_qua="khong_do_duoc", snapshot_ly_do="chup_loi")
+        except KeyboardInterrupt:
+            ngat_khi_chup = True
+            kq_chup = _ket_qua_snapshot(chup_truoc, None, False)
+        finally:
+            if dfd_luot is not None:
+                os.close(dfd_luot)
+        ban_ghi.update(kq_chup)
 
     if khoa is None and qua_han:
         # không giết được vì không có khoá: nói thẳng, đừng báo "đã dừng"
@@ -2492,6 +2816,18 @@ def lenh_run(a) -> int:
         # `status` liệt kê — nói là kết thúc bình thường. Cùng lớp lỗi với t50.
         ban_ghi["trang_thai"] = ("bi_ngat" if bi_ngat
                                  else "qua_han" if qua_han else "xong")
+    # #1252 §2.4: chỉ thay `xong`; qua_han/bi_ngat/da_dung giữ nguyên (A8). `ma_thoat` vẫn là mã THẬT.
+    if ngat_khi_chup and ban_ghi["trang_thai"] == "xong":
+        ban_ghi["trang_thai"] = "bi_ngat"
+        ban_ghi["ly_do_dung"] = "bi ngat trong luc chup workspace sau"
+        ma = 130
+    if kq_chup is not None and ban_ghi["trang_thai"] == "xong":
+        if kq_chup["snapshot_ket_qua"] == "ghi_workspace":
+            ban_ghi["trang_thai"] = "ghi_workspace"
+            ma = MA_GHI_WORKSPACE
+        elif kq_chup["snapshot_ket_qua"] == "khong_do_duoc":
+            ban_ghi["trang_thai"] = "khong_do_duoc_workspace"
+            ma = MA_KHONG_DO_WORKSPACE
     # Wrapper thoát KHÔNG có nghĩa bản chụp đã hết việc: nó có thể vừa
     # sinh cháu, và cháu mới là người mở {PROMPT_FILE}. Xoá ngay khi p.wait()
     # trả về tạo một TOCTOU do chính launcher gây ra: sổ báo xong/rc=0
@@ -2544,7 +2880,7 @@ def lenh_run(a) -> int:
             ban_ghi[ten_bam] = None
     _ghi_so(thu_muc, ban_ghi, khoa_ky)
     if a.json:
-        print(json.dumps(ban_ghi, ensure_ascii=False))
+        print(_json_an_toan(ban_ghi))
     else:
         print(f"trang thai: {ban_ghi['trang_thai']}  ma_thoat={ma}")
         # In CẠNH nhau, không để người đọc phải mở sổ mới thấy: "xong ma_thoat=0"
@@ -2566,7 +2902,7 @@ def lenh_status(a) -> int:
         so = _doc_so(thu_muc)
         if so is None:
             raise Chan(MA_THAM_SO, f"so luot chay hong: {thu_muc}")
-        _in_an_toan(json.dumps(so, ensure_ascii=False, indent=2))
+        _in_an_toan(_json_an_toan(so, indent=2))   # #1252 F7: không để stdout thay byte lạ bằng "?"
         return MA_OK
     ds = []
     hong = False
@@ -3988,7 +4324,8 @@ def _do_codex_song(han_giay: int = 90, duong_dan: str | None = None) -> tuple[bo
 
 
 
-def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
+def _do_codex(kiem_song: bool = False,
+              bang_chung_song: list | None = None) -> tuple[str, str]:
     """Đo `codex` bằng MÃ THOÁT, không bằng dòng đầu của đầu ra.
 
     ĐÃ ĐO: `codex login status` trả `rc=1` + `Not logged in` khi chưa xác thực,
@@ -4078,12 +4415,19 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
                 if not song:
                     return ("CHUA_XAC_THUC", f"kiem song HONG: {ly_do} · {chi_tiet}")
                 vi_sao.append(f"kiem song: {ly_do} (VAN dung duoc)")
+                # Nhãn VẪN là SAP_HET_HAN (cảnh báo sớm không được mất), nhưng lời gọi
+                # thật đã ĐẠT — báo bằng KÊNH RIÊNG cho tầng gom, đừng để nó dò chữ
+                # trong `mo_ta` (phân loại bằng văn bản tự do là ĐOÁN, không phải ĐO).
+                if bang_chung_song is not None:
+                    bang_chung_song.append(True)
             return ("SAP_HET_HAN", " · ".join(vi_sao) + f" · {chi_tiet}")
         if not kiem_song:
             return ("CO_CREDENTIAL",
                     f"{chi_tiet} · CHUA chung minh dung duoc (them --kiem-song de goi that)")
         song, vi_sao = _do_codex_song(duong_dan=duong_codex)
         if song:
+            if bang_chung_song is not None:
+                bang_chung_song.append(True)
             return ("DUNG_DUOC", f"{chi_tiet} · kiem song: {vi_sao}")
         return ("CHUA_XAC_THUC", f"kiem song HONG: {vi_sao} · {chi_tiet}")
     if os.environ.get("CODEX_AUTH_JSON"):
@@ -4982,8 +5326,20 @@ def _kiem_tra_duong_dan_kho(ws: str | None) -> tuple[bool, str]:
     return False, ""
 
 
+def _do_codex_kem_bang_chung(kiem_song: bool = False) -> tuple[str, str, bool]:
+    """`_do_codex` + cờ "lời gọi thật đã ĐẠT trong CHÍNH lượt đo này".
+
+    Giữ `_do_codex` trả 2 phần tử (các ca test và người gọi cũ unpack đúng hai); phép
+    đo trong `KHA_NANG` thì trả ba để tầng gom phân biệt `SAP_HET_HAN` đã kiểm sống
+    với `SAP_HET_HAN` chỉ là lời khai offline.
+    """
+    bc: list = []
+    tt, mo_ta = _do_codex(kiem_song, bang_chung_song=bc)
+    return tt, mo_ta, bool(bc)
+
+
 KHA_NANG = [
-    {"ten": "codex", "do": lambda ws, ks=False: _do_codex(ks),
+    {"ten": "codex", "do": lambda ws, ks=False: _do_codex_kem_bang_chung(ks),
      "vi_sao": "reviewer cross-provider (§8) — executor claude thi reviewer PHAI la codex",
      "khac_phuc": "launcher.py chuan-bi   (hoac: codex login --device-auth)"},
     {"ten": "claude", "do": lambda ws, ks=False: _do_claude(),
@@ -5054,6 +5410,13 @@ def lenh_chuan_bi(a) -> int:
 # `CO_CREDENTIAL` kèm cảnh báo, và hạn lấy từ JWT KHÔNG xác thực chữ ký — lời khai đó
 # đủ để HẠ nhãn (fail-closed), không đủ để NÂNG.
 DA_CHUNG_MINH_KHA_DUNG = frozenset({"DUNG_DUOC"})
+
+# Nhãn "còn dùng được" mà CHỈ được tính là đã chứng minh khi phép đo báo một lời gọi
+# thật ĐẠT ngay trong lượt này (kênh thứ ba của `do`). Cũng là danh sách TRẮNG.
+# Đo 07-11-2026: `doctor --kiem-song` in `kiem song: rc=0 ... (VAN dung duoc)` cho codex
+# mà phần KET LUAN vẫn xếp codex vào "CHUA CHUNG MINH KHA DUNG (chua ai goi that)" —
+# tự mâu thuẫn trong cùng một màn hình, và `ok_kha_dung` sai theo chiều fail-closed.
+DA_CHUNG_MINH_KHI_KIEM_SONG = frozenset({"SAP_HET_HAN"})
 
 
 def _ma_doctor(thieu_bat_buoc, chua_xac_thuc, doi_kha_dung: bool,
@@ -5280,16 +5643,23 @@ def lenh_doctor(a) -> int:
                              "vi_sao": k["vi_sao"], "khac_phuc": k.get("khac_phuc", "")})
             chua_chung_minh.append(k["ten"])
             continue
+        kiem_song_dat = False
         try:
-            tt, mo_ta = k["do"](ws, getattr(a, "kiem_song", False))
+            kq = k["do"](ws, getattr(a, "kiem_song", False))
+            tt, mo_ta = kq[0], kq[1]
+            # Chỉ True THẬT mới tính — giá trị truthy khác (chuỗi, số) không được nâng nhãn.
+            kiem_song_dat = len(kq) > 2 and kq[2] is True
         except Exception as e:           # doctor KHÔNG được chết vì một phép đo
             tt, mo_ta = "KHONG_DO_DUOC", f"{type(e).__name__}"
         kha_nang.append({"ten": k["ten"], "trang_thai": tt, "chi_tiet": mo_ta,
-                         "vi_sao": k["vi_sao"], "khac_phuc": k.get("khac_phuc", "")})
+                         "vi_sao": k["vi_sao"], "khac_phuc": k.get("khac_phuc", ""),
+                         "kiem_song_dat": kiem_song_dat})
         if k["ten"] == "hook-da-chay" and tt == "DA_CHAY":
             pass
         elif tt in ("CHUA_XAC_THUC", "CAN_CHUAN_BI"):
             chua_xac_thuc.append(k["ten"])
+        elif tt in DA_CHUNG_MINH_KHI_KIEM_SONG and kiem_song_dat:
+            pass
         elif tt not in DA_CHUNG_MINH_KHA_DUNG:
             chua_chung_minh.append(k["ten"])
     # --- MODULE PYTHON. Đo bằng `find_spec`, KHÔNG bằng `import`: một module hỏng
@@ -5499,7 +5869,10 @@ def _them_chot(p):
 
 
 def build_parser():
-    ap = argparse.ArgumentParser(prog="launcher.py", description=__doc__.split("\n")[0])
+    ap = argparse.ArgumentParser(
+        prog="launcher.py", description=__doc__.split("\n")[0],
+        epilog="ma thoat rieng cua run --chup-workspace: 16 MA_GHI_WORKSPACE, 17 MA_KHONG_DO_WORKSPACE "
+               "(bang day du: dau tep launcher.py)")
     ap.add_argument("--version", action="version", version=VERSION)
     sub = ap.add_subparsers(dest="lenh_con", required=True)
     cs = sub.add_parser("credential-status", help="chốt offline: có đang chờ snapshot mới không")
@@ -5520,6 +5893,10 @@ def build_parser():
                    help="lý do được buộc nguyên khối vào run.json của lượt")
     r.add_argument("--giu-ban-chup", action="store_true",
                    help="giu prompt.snapshot sau khi con thoat (mac dinh XOA: no chua noi dung prompt)")
+    r.add_argument("--chup-workspace", action="store_true",
+                   help="#1252: chup sha256 moi tep cua workspace (ke ca .git, tep ignored) truoc/sau luot chay; "
+                        "lech => trang_thai ghi_workspace, thoat 16 (MA_GHI_WORKSPACE); khong do duoc => "
+                        "khong_do_duoc_workspace, thoat 17 (MA_KHONG_DO_WORKSPACE)")
     r.add_argument("--bo-qua-probe", metavar="LY_DO",
                    help="cho run tiep khi probe hong; bat buoc ghi ly do vao run.json")
     r.add_argument("lenh", nargs=argparse.REMAINDER)

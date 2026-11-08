@@ -1,0 +1,200 @@
+# HO SO LAND — packet #1272 HOTFIX-R1252-POSIX r1, lease g1, qua PR #1277. Khuon: ops/land/pr1249-wp1240-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
+#
+# TRANG THAI: merged (c15603d), CHUA LANDED (landed: false). Bon moc §10.2.2 cua ci.yml 42439410815 DU (workflow_definition do bang
+# wd-run 42467654305, do PHIEN DIEU PHOI dispatch 09:33:02Z; artifact wd.json run_id 42439410815 da doi chieu). Nghiem thu A1 nay co
+# log goc may chu kho (winlogs/diag-1272-do.log, bam khop; loi_khai_co_neo) kem su co thu tuc, xem nghiem_thu.A1. kiem-dong-wp voi
+# landed true cho rc 0 (kiem-dong-wp-m8.txt LAN 3), NHUNG ops/kiem_ho_so_land.py (luat L-6) TRUOT o authorization_url: ho so landed
+# phai co authorization_url la comment (#issuecomment-/#pullrequestreview-/#discussion_r) cua chu kho, ma ho so nay khong co comment
+# approve_merge nao (chi co thao tac merge + comment mien K6/K7). Phien ghi so KHONG dung comment mien lam uy quyen land => giu landed
+# false (LAN 4 rc 12). Xem trang_thai_packet.lich_su_nhan.
+# launcher-windows tren DUNG merge SHA xanh (run 42439410853) — dieu kien hoan tat §5 cua spec.
+# Packet nay khac phuc launcher-windows do cua #1252 tren 27fd808 (ops/land/pr1267-wp1252-land-evidence.yaml).
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured (nhu khuon).
+# Readback tho: ops/land/pr1277-wp1272-provenance/ (SHA256SUMS kem). REST GET qua proxy phien bang GITHUB_PAT, 2026-11-08T09:0x–09:3xZ.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxraXfMD1t2FJLzzGDr4
+input_packet_generations:
+  - {packet_issue: 1272, packet_id: HOTFIX-R1252-POSIX, revision: 1, generation: 1, lease_id: hotfix-r1252-posix-r1-g1-claude, ghi_chu: 'lease duy nhat; rut han sau merge (xem lease.thu_hoi_cuoi).'}
+authorized_head_sha: fc6fbc7c07351ea75ece6a0a25a96262225bef03
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1277
+authorization_ghi_chu: >-
+  measured — readback-pr-1277.json: merged true, merged_by ducthangho, merged_at 2026-11-08T02:38:37Z, head fc6fbc7, base efebadf.
+  Khong co comment approve_merge rieng; mien K6/K7 tu dang: readback-chu-kho-mien-issuecomment-6716241960.json (PR #1277, OWNER,
+  2026-11-08T02:35:28Z, created_at = updated_at, performed_via_github_app null, than `windows: fc6fbc7… mien` +
+  `full_mutant_audit: fc6fbc7… mien`) — truoc merge ~3 phut, neo dung authorized_head_sha. "Chu kho duyet dung SHA fc6fbc7": lease
+  thu_hoi_bang_rut_han.ly_do (loi khai phien executor). CAVEAT #566: ai bam merge khong do duoc.
+land_operator: 'measured — readback-pr-1277.json: merged_by ducthangho, merge_commit_sha c15603d (ai thao tac: not_measured, #566).'
+merge_method: merge
+merge_commit: c15603dcf537fa4beb753b263398d6e6b8c92019
+merge_commit_tree: 46d05062cad4f3ca6629931ebc6a4cd0535358f3
+merge_commit_parents: [efebadf83409a81e42e6c97f1b7255ede76110f5, fc6fbc7c07351ea75ece6a0a25a96262225bef03]
+pre_merge_checks:
+  - name: 'kiem-merge K0–K7 tren head cuoi'
+    sha: fc6fbc7c07351ea75ece6a0a25a96262225bef03
+    conclusion: 'rc 0 — "ĐỦ ĐIỀU KIỆN MERGE trên fc6fbc7c07351ea75ece6a0a25a96262225bef03"'
+    nguon: 'provenance/kiem-merge/out2.txt (+ lease.yaml, wr.json, wj.json, cr.json, cn.json, off.json, off.log, mien.json; kiem-merge/SHA256SUMS)'
+    ghi_chu: >-
+      loi_khai_co_neo — phien nay KHONG chay lai kiem-merge (chep tu scratchpad km1272/). Lan 1 (out1.txt) CHUA DU: thieu K4, K6, K7.
+      Doi chieu measured: kiem-merge/lease.yaml cmp KHOP 6347e36:ops/leases/hotfix-r1252-posix-r1-g1-claude.yaml; off.json/off.log
+      cmp KHOP review-offline-l2/run.json, stdout.log; mien.json cmp KHOP readback-chu-kho-mien-issuecomment-6716241960.json.
+      Merge commit co cha mot efebadf = cha cua fc6fbc7 (khong co master tien giua chung).
+  - name: 'review offline Codex luot 2 (run 36b85068) tren head cuoi'
+    sha: fc6fbc7c07351ea75ece6a0a25a96262225bef03
+    conclusion: 'approve (dong cuoi KET_LUAN: approve)'
+    nguon: 'provenance/review-offline-l2/ (run.json, stdout.log, stderr.log, checkpoint.json, prompt-l2.md)'
+    ghi_chu: >-
+      measured — review-offline-l2/run.json: run_id 36b85068…, head fc6fbc7, trang_thai xong, ma_thoat 0, 1993.0 s (01:14:16Z–01:47:29Z 2026-11-08),
+      stdout_sha256 3c5b8c75… = sha256 review-offline-l2/stdout.log, prompt_sha256 94627429… = sha256 review-offline-l2/prompt-l2.md; model DO_DUOC gpt-6.1-sol,
+      effort DO_DUOC [xhigh], sandbox DO_DUOC; chup_workspace true, snapshot_ket_qua sach (truoc = sau = e45eb005…), tep_doi_tong 0.
+      workspace rvh1272w2 HEAD fc6fbc7 (do lai 2026-11-08).
+  - name: 'review offline Codex luot 1 (run e1695761) tren head cuoi'
+    sha: fc6fbc7c07351ea75ece6a0a25a96262225bef03
+    conclusion: 'request_changes — 1 P2 MOI TRUONG (suite Linux trong sandbox reviewer 376/389, hong 13 o ca base lan ung vien, delta 0)'
+    nguon: 'provenance/review-offline-l1/'
+    ghi_chu: >-
+      measured — review-offline-l1/run.json: run_id e1695761…, head fc6fbc7, xong, ma_thoat 0, 1346.8 s, stdout_sha256 775f748b… = sha256 stdout.log,
+      prompt_sha256 0ccbd199… = sha256 prompt-l1.md; sandbox_trang_thai KHONG_DO_DUOC; snapshot sach. Finding la ve moi truong
+      sandbox (/var/tmp chi doc, /tmp/.git), khong ve ban va; dong bang luot 2 + A4 (xem nghiem_thu).
+  - name: 'Codex connector tren head cuoi'
+    sha: fc6fbc7c07351ea75ece6a0a25a96262225bef03
+    conclusion: 'sach'
+    ghi_chu: 'measured — readback-connector-issuecomment-6714571624.json (chatgpt-codex-connector[bot], 2026-11-07T23:39:43Z): "Didn''t find any major issues", "Reviewed commit: fc6fbc7c07".'
+  - name: 'Windows K6 / K7'
+    sha: fc6fbc7c07351ea75ece6a0a25a96262225bef03
+    conclusion: 'mien (owner tu dang 6716241960)'
+    ghi_chu: 'measured — readback-chu-kho-mien-issuecomment-6716241960.json (xem authorization_ghi_chu). Lane Windows that cua spec A1: thuat_lai (xem nghiem_thu.A1).'
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA'
+    run_id: 42439410815
+    run_attempt: 1
+    sha: c15603dcf537fa4beb753b263398d6e6b8c92019
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, danh-gia-gate-output-42439410815.txt, danh_gia_gate.py, phan-chung-buoc-42439410815.txt, release-verify-land-128605265063.txt]
+    moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha c15603d, run_attempt 1; ci/jobs.json 23/23 job success, nhan ubuntu-latest, runner_id khac 0.'
+    moc_checkout: 'measured — ci/provenance.yaml: 23/23 job checkout passed c15603dcf537fa4beb753b263398d6e6b8c92019.'
+    moc_workflow_definition: >-
+      measured — ci/provenance.yaml moc.workflow_definition: passed; path .github/workflows/ci.yml, oid c15603d, blob 2b2c9aa2 (=
+      git rev-parse c15603d:.github/workflows/ci.yml), sha256 aed785d6…; wd_run_id 42467654305, artifact 13612750292 (artifact_sha256
+      84af542c…). Anh xa doi chieu bang noi dung artifact: wd-42467654305-artifact-13612750292.json co run_id 42439410815,
+      head_sha_rest = check_suite_commit = oid_dinh_nghia = c15603d, trang_thai passed, loi_graphql []. readback-run-42467654305.json:
+      workflow_dispatch tren master c15603d, success, tao 09:33:02Z; readback-jobs-42467654305.json: do-wd success, runner_id khac 0.
+      Dispatch do phien dieu phoi (thuat_lai ve nguoi dispatch).
+    moc_gate_output: >-
+      measured — danh-gia-gate-output-42439410815.txt (danh_gia_gate.py sha256 b87f9697): passed, 23/23 job co dau hieu duong (tl
+      selftest 1777/1777). release-verify-land-128605265063.txt (log sha256 2716a5d4…): ok true, strict true, 184/184, failed [].
+      phan-chung-buoc-42439410815.txt: 4 buoc bi xoa dau hieu => not_measured, rc 0.
+  - name: 'launcher-windows.yml push master tren DUNG merge SHA (dieu kien hoan tat spec §5)'
+    run_id: 42439410853
+    run_attempt: 1
+    sha: c15603dcf537fa4beb753b263398d6e6b8c92019
+    conclusion: success
+    nguon: [readback-run-42439410853.json, readback-jobs-42439410853.json, launcher-windows-128605212485.trich.txt]
+    ghi_chu: >-
+      measured — launcher-windows-128605212485.trich.txt + readback-jobs-42439410853.json: job windows-latest 128605212485 success (log sha256 2184d539…, byte-trung tep win3.log cua scratchpad executor): buoc khong
+      dot bien 316/316 (tong 399, bo qua 83, hong 0); `r1252_ghi_de_dich_truc_tiep KHONG DO DUOC tren nen nay (nhanh dir_fd cua
+      _ghi_tep_0600 khong chay tren Windows (_CO_DIR_FD False))`; `DOT BIEN: 520/520 dat (139 khong do duoc)`. Job ubuntu-latest
+      128605212486 success: 397/397 (tong 399, bo qua 2, hong 0), DOT BIEN 655/655 (4 khong do duoc), dong
+      `r1252_ghi_de_dich_truc_tiep OK giet 1/1: r1252_ghi_bang_chung_an_toan`. Day la phep do Windows THAT dau tien cho buoc (3)
+      (dot bien + nhan posix) — xem nghiem_thu.A1.
+bookkeeping:
+  - {item: 'rut han lease hotfix-r1252-posix-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', ket_qua: 'not_measured — chua push; nhanh cuc bo ops/land-1252-1272.'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — provenance/bien-ban-m8.yaml + kiem-dong-wp-m8.txt (rc 12, thieu D2 — dung nhu do).'}
+  - {item: 'handoff', ket_qua: 'not_measured — ops/handoff/hotfix-r1252-posix-g1.md (trong write set) KHONG co tren origin/ops/hotfix-r1252-posix-lease@50e3065 (git ls-tree); hien vat review/kiem-merge chep tu scratchpad.'}
+  - {item: 'dong Issue #1272 (va #1273 trung)', ket_qua: 'not_measured — viec cua phien dieu phoi.'}
+# ---- het truong chuan
+packet_id: HOTFIX-R1252-POSIX
+packet_issue: 1272
+revision: 1
+generation: 1
+pham_vi_land: dev-tooling (.claude/dev/launcher_test.py, 1 muc DOT_BIEN)
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session — phien GHI SO (subagent) do phien session_015GtxraXfMD1t2FJLzzGDr4 (executor) giao; KHONG push, KHONG dang gi
+  len GitHub.
+
+spec:
+  path: ops/specs/hotfix-r1252-posix-r1.md
+  ref: refs/heads/ops/hotfix-r1252-posix-lease@318c7b42a64e46f1e63b5a715dff579234f34d8a
+  blob: efd3c723c9cbe74efc257c6d73d72c0f6f7de074
+  sha256: 4133641145d1a595439aab30dd02f2d991f211258d9cd274917f3ff8a946e65b
+  nguon: 'measured — merge-va-diff.txt: git show origin/ops/hotfix-r1252-posix-lease:<spec> | sha256sum = 41336411…5b, blob efd3c723 (git ls-tree); khop spec_hash lease. Spec KHONG vao master (chi nhanh lease).'
+
+lease:
+  lease_id: hotfix-r1252-posix-r1-g1-claude
+  path: ops/leases/hotfix-r1252-posix-r1-g1-claude.yaml (nhanh ops/hotfix-r1252-posix-lease)
+  dang: 'loi_khai_co_neo — ops-publish-lease-42439451193-trich.txt: "CHAN [9]: lease hotfix-r1252-posix-r1-g1-claude da co comment 6708573405 tren issue #1272" (phien nay khong readback 6708573405).'
+  write_set_so_tep: 2
+  thu_hoi_cuoi: >-
+    DA NHA bang RUT HAN sau merge: lease_until 2026-11-08T14:50:00Z -> 2026-11-08T02:55:00Z (commit 50e3065, cha 6347e36,
+    2026-11-08T02:39:14Z); tep: lease-hotfix-r1252-posix-r1-g1-claude-sau-rut-han.yaml.txt. ops-publish-lease run 42439451193 success
+    (readback-run-42439451193.json; readback-jobs-42439451193.json: job dang 128605337771 success, runner_id khac 0, moi buoc success),
+    di dung nhanh rc 9. Sau 02:55Z: ai-dang-giu-sau-rut-han.txt (2026-11-08T09:11:35Z, thieu 0 / thua 0 / 743 nhanh):
+    .claude/dev/launcher_test.py va ops/handoff/hotfix-r1252-posix-g1.md NGUOI_GIU 0, rc 0; lease HET_HAN. Khong bia mo.
+  diff_do: 'measured — git diff --stat efebadf c15603d = 1 tep .claude/dev/launcher_test.py +2/-1 (= diff fc6fbc7^..fc6fbc7); tree c15603d = tree fc6fbc7 (46d05062).'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-1277.json merged true; readback-commit-c15603d.json cha efebadf + fc6fbc7, tree 46d05062.'
+  landed: false
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA c15603d: DAT — du bon moc measured passed; launcher-windows cung SHA success. (2) lease nha: DAT. (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp LAN 3 rc 0 khi landed true; LAN 4 rc 12 sau khi ha);
+    handoff khong co. (4) review neo fc6fbc7: DAT — offline L2 approve + connector sach. (5) uy quyen: merge cua tai khoan chu kho +
+    mien K6/K7 tu dang truoc merge — CHUA DAT luat L-6 (kiem_ho_so_land): khong co comment uy quyen land cua chu kho. (6) muc tieu: DAT — nghiem_thu A1–A5 + hoan_tat_s5 (A1 loi_khai_co_neo, kem su co thu tuc).
+    (7) tran Codex 3/3 (spec §3): dung du, khong vuot.
+  canh_bao_cho_chu_kho: >-
+    A1 tinh 'passed' theo NOI DUNG do (gia thuyet §1 duoc xac nhan tren Windows TRUOC khi va). Hai lech thu tuc ghi ro de chu kho
+    quyet neu khong dong y: (i) buoc (2) lo chay full mutant tren Windows (trai "chi chay tap trung"); (ii) log dung truoc buoc (3),
+    khong co rc. Neu chu kho coi A1 chua dat thi ghi A1 not_measured trong bien ban.
+  de_nang_landed_true_can: >-
+    Mot comment cua chu kho TU dang (performed_via_github_app null) tren PR #1277 hoac Issue #1272 uy quyen/xac nhan land neo
+    fc6fbc7c07351ea75ece6a0a25a96262225bef03 (tien le pr1249: `approve_merge: <sha>`), roi phien ghi so readback, dat
+    authorization_url, nang landed true va chay lai kiem-dong-wp + kiem_ho_so_land.
+  lich_su_nhan: >-
+    966dda0: landed false (workflow_definition not_measured; A1 not_measured). 3adf5ba: workflow_definition passed (wd-run 42467654305),
+    landed van false vi A1. Commit tiep: nap log goc may chu kho winlogs/diag-1272-do.log (bam khop) => A1 passed; thu landed true:
+    kiem-dong-wp rc 0 nhung kiem_ho_so_land TRUOT L-6 (authorization_url khong phai comment) => ha lai landed false, kiem-dong-wp
+    LAN 4 rc 12.
+review:
+  so_loi_goi_codex: 'measured 3/3 — readback-connector-issuecomment-6714571624.json (connector 1) + review-offline-l1/run.json, review-offline-l2/run.json (offline 2: e1695761, 36b85068). Tran spec §3: toi da 3.'
+  ket_qua_theo_luot: 'connector fc6fbc7 sach · offline L1 fc6fbc7 request_changes 1 P2 moi truong · offline L2 fc6fbc7 approve.'
+
+nghiem_thu:
+  A1: >-
+    loi_khai_co_neo — winlogs/diag-1272-do.log (8811 B, sha256 d4b34e66f3d3fd244b859012c59db384adaa4181dad366e1cea286938519bc08, BOM
+    UTF-8 + CRLF; chuoi van chuyen: may tra-luat-win -> phien dieu phoi session_015GtxrYPjZCTZeRiazdssgq (tinh sha256/byte bang .NET tren Windows) -> base64 qua send_message -> phien nay giai ma, sha256 KHOP. Byte chep nguyen (CRLF, BOM; winlogs/.gitattributes `* -text -whitespace`). Phien nay KHONG chay lai duoc noi dung (can Windows); nhan loi_khai_co_neo = hien vat co bam, khong phai phep do cua phien nay). Noi dung: dong 1 `bat dau (chay song song voi A16 #1179, cung khoa cua phien dieu phoi)
+    2026-11-08T06:18:49+07:00` (= 2026-11-07T23:18:49Z, TRUOC commit va fc6fbc7 23:38:21Z — measured: git show -s); `sha256=2535bbd6…`
+    = sha256 do_1273.py trong provenance (measured); `HEAD 27fd808…`; `platform Windows 2022Server | python 3.12.10`;
+    `os.open in supports_dir_fd: False`; `launcher._CO_DIR_FD = False`; `dong dich co trong launcher.py: 1`; buoc (1)
+    `ca r1252_ghi_bang_chung_an_toan: QUA`; buoc (2) `r1252_ghi_de_dich_truc_tiep  SAI  giet 0/1: (khong ca nao chet)` => gia
+    thuyet spec §1 DUNG. SU CO: buoc (2) chay ca DOT_BIEN_HOOK/HARNESS (92 dong ket qua dot bien trong log, gom wp802_/wp1078_/wp1122_
+    …) vi do_1273.py chi loc lt.DOT_BIEN (measured bang doc script; phan chung Linux do_1273-linux.out.txt, HEAD f644d9e trong log ay
+    khong co trong mirror) — trai spec A1 "chi chay tap trung, KHONG --dot-bien toan bo". Log DUNG GIUA CHUNG (phien dieu phoi giet
+    tien trinh): khong co dong rc=, khong co buoc (3). Gioi han: lan chay chung khoa voi A16 #1179 (theo dong 1 cua log).
+    Thay cho buoc (3) tren Windows: CI launcher-windows 42439410853 job 128605212485 tren c15603d (measured, post_merge_checks) —
+    sau merge. Script sua do1_1272.py (sha256 dae131e1…, xoa ca ba bang) measured tren Linux clone fc6fbc7
+    (do1_1272-linux-fc6fbc7.out.txt): DOT_BIEN/HOOK/HARNESS = 1/0/0, `OK giet 1/1`; voi --gia-windows `KHONG DO DUOC`.
+    Bo sung measured: launcher-windows-128369080234.trich.txt (job windows 27fd808): dot bien `SAI giet 0/1`.
+  A2: 'measured — merge-va-diff.txt (git diff fc6fbc7^ fc6fbc7): entry r1252_ghi_de_dich_truc_tiep them phan tu thu tu ("posix", "nhanh dir_fd cua _ghi_tep_0600 khong chay tren Windows (_CO_DIR_FD False)"), +2/-1.'
+  A3: 'measured — do1_1272-linux-fc6fbc7.out.txt (OK giet 1/1) va CI ubuntu 128605212486 tren c15603d (OK giet 1/1).'
+  A4: >-
+    measured — nghiem-thu-a4-ab.txt: nen efebadf va ung vien fc6fbc7 dung trong MOT lenh: ca hai `397/397 ca DA CHAY QUA (tong 399,
+    bo qua 2, hong 0)`, rc 0, cung 2 ca bo qua (t62 fixture Windows, r484_g4 SID Windows) => khong them/bot ca. Khop CI ubuntu
+    128605212486 tren c15603d (cung tree) 397/397 va bien nhan executor a4-fc6fbc7.out.txt (sha256 946987cc…) 397/397.
+  A5: 'measured — merge-va-diff.txt: diff c15603d^1..c15603d chi 1 tep launcher_test.py, 1 entry DOT_BIEN; blob launcher.py efebadf = c15603d = 37086cbc (khong doi).'
+  hoan_tat_s5: 'measured — readback-run-42439410853.json + launcher-windows-128605212485.trich.txt: launcher-windows 42439410853 tren c15603d success; ly do do cu khong con (KHONG DO DUOC thay cho SAI).'
+
+khong_do_duoc:
+  - 'Buoc (3) cua A1 tren may chu kho (log dung truoc buoc (3); chi co CI sau merge) va rc cua lan chay do_1273.py.'
+  - 'Handoff ops/handoff/hotfix-r1252-posix-g1.md (khong ton tai tren nhanh lease).'
+  - 'Ai bam merge PR #1277 (#566).'

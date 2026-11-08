@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "targetId": "example-target",
+  "mode": "Remote",
+  "basePath": "C:\\ProximaExample",
+  "connectionUri": "https://gateway.example.invalid:5986/wsman",
+  "configurationName": "Example.Endpoint"
+}

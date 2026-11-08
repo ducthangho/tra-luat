@@ -1,0 +1,218 @@
+HEAD e6c650573452ad98c3055f5147eeacfb4767f119
+Python 3.12.10
+
+=== r1252_ghi_tep_ignored rc=0
+moi truong: pid=8000 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_ghi_tep_ignored: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_ghi_trong_git rc=0
+moi truong: pid=11504 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_ghi_trong_git: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_khong_ghi_thi_sach rc=0
+moi truong: pid=4960 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_khong_ghi_thi_sach: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_run_root_trong_workspace_bi_loai rc=0
+moi truong: pid=9140 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_run_root_trong_workspace_bi_loai: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_khong_do_duoc rc=0
+moi truong: pid=6348 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_khong_do_duoc: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_tat_co_giu_nguyen rc=0
+moi truong: pid=896 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_tat_co_giu_nguyen: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_trang_thai_khac_khong_bi_de rc=0
+moi truong: pid=1720 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_trang_thai_khac_khong_bi_de: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_gioi_han_khai rc=0
+moi truong: pid=6160 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_gioi_han_khai: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_cat_50 rc=0
+moi truong: pid=3428 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_cat_50: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_bieu_dien_khong_nhap_nhang rc=0
+moi truong: pid=7696 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_bieu_dien_khong_nhap_nhang: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_bo_dem_stat_lam_moi_truoc_chup rc=0
+moi truong: pid=2188 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_bo_dem_stat_lam_moi_truoc_chup: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_ghi_bang_chung_an_toan rc=0
+moi truong: pid=4888 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_ghi_bang_chung_an_toan: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_stop_giu_trang_thai_ket_thuc rc=0
+moi truong: pid=5672 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_stop_giu_trang_thai_ket_thuc: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_ngat_khi_chup rc=0
+moi truong: pid=8028 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_ngat_khi_chup: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_han_sau_khi_chup rc=0
+moi truong: pid=3980 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_han_sau_khi_chup: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_hien_thi_duong_dan_don_anh rc=0
+moi truong: pid=12256 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_hien_thi_duong_dan_don_anh: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_ghi_qua_dir_fd rc=0
+moi truong: pid=5248 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  BO QUA r1252_ghi_qua_dir_fd: bo qua: nen khong co dir_fd/O_NOFOLLOW (Windows dung nhanh du phong, xem _ghi_tep_0600)
+  lan 1/3: BO QUA
+  BO QUA r1252_ghi_qua_dir_fd: bo qua: nen khong co dir_fd/O_NOFOLLOW (Windows dung nhanh du phong, xem _ghi_tep_0600)
+  lan 2/3: BO QUA
+  BO QUA r1252_ghi_qua_dir_fd: bo qua: nen khong co dir_fd/O_NOFOLLOW (Windows dung nhanh du phong, xem _ghi_tep_0600)
+  lan 3/3: BO QUA
+
+LAP r1252_ghi_qua_dir_fd: 0/3 qua, 3 bo qua, 0 hong
+
+=== r1252_status_va_chu_ky_byte_la rc=0
+moi truong: pid=7720 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  BO QUA r1252_status_va_chu_ky_byte_la: bo qua ve status: Windows khong tao duoc ten tep byte khong phai UTF-8
+  lan 1/3: BO QUA
+  BO QUA r1252_status_va_chu_ky_byte_la: bo qua ve status: Windows khong tao duoc ten tep byte khong phai UTF-8
+  lan 2/3: BO QUA
+  BO QUA r1252_status_va_chu_ky_byte_la: bo qua ve status: Windows khong tao duoc ten tep byte khong phai UTF-8
+  lan 3/3: BO QUA
+
+LAP r1252_status_va_chu_ky_byte_la: 0/3 qua, 3 bo qua, 0 hong
+
+=== r1252_doi_to_tien_thu_muc_luot rc=0
+moi truong: pid=12984 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  BO QUA r1252_doi_to_tien_thu_muc_luot: bo qua: nen tu choi doi ten thu muc luot dang mo tep (do A10)
+  lan 1/3: BO QUA
+  BO QUA r1252_doi_to_tien_thu_muc_luot: bo qua: nen tu choi doi ten thu muc luot dang mo tep (do A10)
+  lan 2/3: BO QUA
+  BO QUA r1252_doi_to_tien_thu_muc_luot: bo qua: nen tu choi doi ten thu muc luot dang mo tep (do A10)
+  lan 3/3: BO QUA
+
+LAP r1252_doi_to_tien_thu_muc_luot: 0/3 qua, 3 bo qua, 0 hong
+
+=== r1252_ket_thuc_som_du_khoa rc=0
+moi truong: pid=4204 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  lan 1/3: qua
+  lan 2/3: qua
+  lan 3/3: qua
+
+LAP r1252_ket_thuc_som_du_khoa: 3/3 qua, 0 bo qua, 0 hong
+
+=== r1252_mo_thu_muc_luot_dung_mot_lan rc=0
+moi truong: pid=7000 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  BO QUA r1252_mo_thu_muc_luot_dung_mot_lan: bo qua: nen khong co dir_fd
+  lan 1/3: BO QUA
+  BO QUA r1252_mo_thu_muc_luot_dung_mot_lan: bo qua: nen khong co dir_fd
+  lan 2/3: BO QUA
+  BO QUA r1252_mo_thu_muc_luot_dung_mot_lan: bo qua: nen khong co dir_fd
+  lan 3/3: BO QUA
+
+LAP r1252_mo_thu_muc_luot_dung_mot_lan: 0/3 qua, 3 bo qua, 0 hong
+
+=== r1252_bam_tep_khong_theo_lien_ket rc=0
+moi truong: pid=8052 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  BO QUA r1252_bam_tep_khong_theo_lien_ket: bo qua: nen khong co FIFO/O_NOFOLLOW
+  lan 1/3: BO QUA
+  BO QUA r1252_bam_tep_khong_theo_lien_ket: bo qua: nen khong co FIFO/O_NOFOLLOW
+  lan 2/3: BO QUA
+  BO QUA r1252_bam_tep_khong_theo_lien_ket: bo qua: nen khong co FIFO/O_NOFOLLOW
+  lan 3/3: BO QUA
+
+LAP r1252_bam_tep_khong_theo_lien_ket: 0/3 qua, 3 bo qua, 0 hong
+
+
+SECONDS 365

@@ -1,0 +1,18 @@
+# lenh: python3 .claude/dev/packet_loop.py kiem-dong-wp --root . --bien-ban ops/land/pr1267-wp1252-provenance/bien-ban-m8.yaml --lease ops/land/pr1267-wp1252-provenance/lease-wp1252-r1-g1-claude-sau-rut-han.yaml.txt
+# checkout: c15603dcf537fa4beb753b263398d6e6b8c92019 (+ thay doi chua commit trong ops/land) ; origin/master: c15603dcf537fa4beb753b263398d6e6b8c92019 ; luc: 2026-11-08T09:19:31Z
+# lease sau rut han cmp origin/ops/wp1252-r1-g1-lease:ops/leases/wp1252-r1-g1-claude.yaml: khop
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12
+
+# LAN 2 (sau wd-run do phien dieu phoi dispatch: moc_10_2_2.workflow_definition passed; landed van false theo nghiem thu)
+# checkout: 966dda064c00cbba3daa9ec2db0befc1ce87fd59 (+ thay doi chua commit trong ops/land) ; origin/master: c15603dcf537fa4beb753b263398d6e6b8c92019 ; luc: 2026-11-08T09:35:46Z
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12
+
+# LAN 3 (sau khi nap log goc may chu kho vao winlogs/: #1252 A10 passed; #1272 A1 passed, landed true)
+# checkout: 3adf5ba7fcaf1003c8137edc98e7a77e4d98ae82 (+ thay doi chua commit trong ops/land) ; origin/master: c15603dcf537fa4beb753b263398d6e6b8c92019 ; luc: 2026-11-08T09:44:29Z
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12

@@ -1,0 +1,49 @@
+# Bien ban M8 (ADR-0060) dong WP #1252 LAUNCHER-READONLY-IGNORED r1 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1267-wp1252-land-evidence.yaml (post_merge_checks, nghiem_thu, trang_thai_packet).
+# landed false: bon moc §10.2.2 du (wd-run 42467652116); nghiem thu A14 not_measured; launcher-windows 42360967762 tren 27fd808 FAILURE
+# (khac phuc o c15603d bang #1272). Nghiem thu khong phai passed het (A14 mot phan; A10 nay passed tu log goc may chu kho).
+packet: LAUNCHER-READONLY-IGNORED
+revision: 1
+generation: 1
+spec_hash: b2c52a9aaf4a347dc212ad26d4b0ff83fb9cd58a70252e42f66d81b4d8d897cf
+head_da_review: e6c650573452ad98c3055f5147eeacfb4767f119
+tree_h: 7acc44ba56991945262c7f023b9ec7fcbd539b90
+review:
+  offline: 'run c5e6acc9 (luot 9/10) approve tren e6c6505, chup_workspace sach (model/effort/sandbox DO_DUOC); chay SAU push (lech M12, tu khai 6701561649)'
+  connector: 'issuecomment-6701195358 sach tren e6c6505; tom tat 6687753674 has_any_findings false'
+windows:
+  phan_loai: required
+  nguon: 'mien chu kho tu dang issuecomment-6704885217 "windows: e6c6505… mien"; A10 tap trung tren may chu kho (winlogs/diag-1252-a10-e6c6505.log)'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1267
+duyet_chu_kho_ghi_chu: 'merged_by ducthangho 09:43:59Z; khong co comment approve_merge; mien K6/K7 6704885217 tu dang 09:09:40Z.'
+merge_commit: 27fd80803e9a8f80e660752f58c8dd477e9730c8
+tree_m: d8503020f3f27a147e2292cab3e259fbc2179aef
+ci_master:
+  run_id: 42360967767
+  conclusion: success
+  ghi_chu: 'ci.yml; launcher-windows 42360967762 cung SHA = failure'
+nghiem_thu:
+  A1: passed
+  A2: passed
+  A3: passed
+  A4: passed
+  A5: passed
+  A6: passed
+  A7: passed
+  A8: passed
+  A9: passed
+  A10: passed   # loi_khai_co_neo: winlogs/diag-1252-a10-e6c6505.log — 10 ca A10 deu 3/3 qua, 0 hong
+  A11: owner_waived
+  A12: passed
+  A13: passed
+  A14: not_measured   # duong dan launcher.py da goi chi la loi khai; snapshot_ket_qua sach measured
+  A15: passed
+  A16: passed
+  A17: passed
+lease_cuoi: wp1252-r1-g1-claude
+landed: false
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

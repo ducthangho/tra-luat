@@ -1,0 +1,272 @@
+{
+  "schema_version": 1,
+  "mission_id": "gh-1172",
+  "base_sha": "c6afde62c846f1ef3d6a83c14459966849edf756",
+  "objective": "Thi công tối ưu mutation testing PR0–PR8 qua protocol canonical ADR-0063: Codex executor/reviewer độc lập và actual human audit.",
+  "source_plan_sha256": "f4611b0f0c79f33d56b293f5fcb854eeeae2fcbb6acbdfd59d6134dcbfbdcb8f",
+  "routing_proposal_sha256": "48eb4164b073e4f0e3622b02b4ea79dd356a29c73a833ce0f563f1b20a71bbd1",
+  "risk": "sensitive",
+  "requires_live": false,
+  "acceptance_criteria": [
+    "Giữ acceptance của kế hoạch nguồn r2, full reference/M9 và staged rollout/rollback",
+    "Codex executor và reviewer riêng; same-model/higher requested effort hoặc higher model được hỗ trợ, báo cáo service advisory đúng provenance; actual serving thiếu vẫn unknown. Formal assurance qua human K4 canonical ADR-0063.",
+    "Human audit và exact-head land authorization riêng; không ghi machine audit thành human",
+    "Linux contract gates and native Windows focused only; zeroP0-P2, P3 only exact-head owner disposition; no CI Windows/full Windows project or mutant gate",
+    "Không tự activate policy hoặc merge/land qua code của candidate",
+    "Source-only WP1174 r14 exception: explicit r20 section9 override under standing user delegation requires independent AI delegated_owner_audit plus actual native cross-provider K4. Target Codex same-provider advisory path and its actual-human tests/gates remain unchanged; never machine-as-human."
+  ],
+  "packet_graph": [
+    {
+      "packet": 1174,
+      "role": "minimal_canonical_lifecycle_adapter",
+      "depends_on": [],
+      "prerequisite": "landed ADR0063 and separately admitted new reduced-scope Packet",
+      "revision": 19,
+      "generation": 16,
+      "contract_id": "WP1174-r19-C15-B-AGY"
+    },
+    {
+      "packet": 1166,
+      "role": "PR0",
+      "depends_on": [
+        1174
+      ],
+      "adoption": "pending_history_and_usage_import"
+    },
+    {
+      "packet": null,
+      "role": "PR1",
+      "depends_on_roles": [],
+      "dispatch_after_roles": [
+        "PR0"
+      ]
+    },
+    {
+      "packet": null,
+      "role": "PR2",
+      "depends_on_roles": [
+        "PR1"
+      ]
+    },
+    {
+      "packet": null,
+      "role": "PR3",
+      "depends_on_roles": [
+        "PR1",
+        "PR2"
+      ]
+    },
+    {
+      "packet": null,
+      "role": "PR4",
+      "depends_on_roles": [
+        "PR1",
+        "PR2"
+      ]
+    },
+    {
+      "packet": null,
+      "role": "PR5",
+      "depends_on_roles": [
+        "PR0",
+        "PR1",
+        "PR2"
+      ]
+    },
+    {
+      "packet": null,
+      "role": "PR6",
+      "depends_on_roles": [
+        "PR4",
+        "PR5"
+      ]
+    },
+    {
+      "packet": null,
+      "role": "PR7",
+      "depends_on_roles": [
+        "PR3",
+        "PR6"
+      ]
+    },
+    {
+      "packet": null,
+      "role": "PR8",
+      "depends_on_roles": [
+        "PR7"
+      ],
+      "owner_residual_risk_decision_required": true
+    }
+  ],
+  "retired_required_packets": [
+    {
+      "packet": 1173,
+      "preserve_code_findings_and_counters": true,
+      "github_issue_or_PR_closure": false,
+      "state": "cancelled_superseded_for_Mission1172",
+      "reason": "standalone verifier removed from required outcome by approved C4; code/findings retained",
+      "decision_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6654694338"
+    },
+    {
+      "packet": 1176,
+      "preserve_code_findings_and_counters": true,
+      "github_issue_or_PR_closure": false,
+      "state": "cancelled_superseded_for_Mission1172",
+      "reason": "standalone verifier removed from required outcome by approved C4; code/findings retained",
+      "decision_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6654694338"
+    }
+  ],
+  "routing_history": {
+    "previous_exception": {
+      "id": "MCR-1172-C1",
+      "decision": "approved_for_implementation",
+      "decision_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6612730723",
+      "scope": "Only Mission1172 and valid registered Packets; WP1166 requires history/usage adoption",
+      "hard_expiry_utc": "2026-11-17T18:53:00Z",
+      "reviewer_surface": "codex_service",
+      "transport": "machine",
+      "identity_evidence": "configured_higher_effort; actual_serving_unknown_if_unmeasured",
+      "actual_human_audit_required": true,
+      "canonical_implementation_readback_required": true,
+      "production_active": false,
+      "old_receipts_relabelled": false
+    },
+    "previous_candidate_binding_limit": {
+      "candidate_head_before_metadata_fix": "328b2d49a66e425b294e18dcfb225280e869557a",
+      "frozen_c1_supported_mission_revision": 3,
+      "frozen_c1_supported_plan_sha256": "a54e24a0473d93dd312c461d274f56876b83fb9a8aca9ced0d6e91ef9ab9ac71",
+      "source_contract_unchanged": true,
+      "focused_fixtures": "Synthetic revision3 only; not evidence of production dispatch for revision4",
+      "production_activation": "blocked until separately scoped implementation/review reconciles current Mission binding and consumer lifecycle; no revision3 policy relabeled as revision4",
+      "reason": "C3 authorizes metadata-only repair, not routing source changes or production activation"
+    },
+    "old_helper_runtime_support": "Historical r3 only; unused by new manual route, not upgraded to r5"
+  },
+  "windows_policy": {
+    "scope": "Mission1172 successor/currently adopted Packets with corresponding frozen spec/generation; not a global workflow change",
+    "owner_decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6654694338",
+    "github_actions_windows_ci": "prohibited",
+    "windows_full_mutant_matrix": "prohibited",
+    "windows_full_registry_or_project_gate": "prohibited",
+    "native_focused_windows": "required_when_relevant; exact H and predeclared focused command/test IDs with actual rc and unambiguous outcomes",
+    "trigger_preflight": [
+      "No windows label causing PR matrix Windows",
+      "Do not dispatch ci.yml: existing runner_set choices both include Windows",
+      "No Windows runner workflow dispatch",
+      "Use automatic PR/master Ubuntu CI where verified eligible"
+    ],
+    "linux_full_M9": "unchanged and required by applicable contract",
+    "history": "Do not relabel previous full Windows evidence or cancel unrelated Mission runs",
+    "unknown_or_missing_required_evidence": "blocked, never pass"
+  },
+  "revision": 24,
+  "supersedes_revision": 23,
+  "change_request": "MCR-1172-C15-B-AGY-R19",
+  "decision_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6724070591",
+  "decision_source": "owner exact C15 approval recorded by coordinator under delegation",
+  "installation_state": "prepared_not_installed",
+  "state": "running",
+  "inheritance": {
+    "mission21_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6720395202",
+    "mission21_sha256": "5b0940a157903eed78cd3b57269edba3a8bec99488a08bc11789591f36058638",
+    "rule": "All unchanged functional requirements, graph, history and debts inherit exactly; only C15 operational source scope/caps supersede C13/C14. Mission22 was approved but never installed.",
+    "C14_decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6721738886",
+    "C14_installed": false
+  },
+  "envelope": {
+    "max_packets": 20,
+    "max_successor_depth": 5,
+    "max_attempts_per_packet": 12,
+    "max_run_minutes": 45,
+    "same_failure_limit": 2,
+    "max_parallel_workers": 2,
+    "max_agent_invocations": 55,
+    "max_cloud_minutes": 2400,
+    "max_inbox_backlog": 100,
+    "provider_budgets": {
+      "paid_credit_purchase_allowed": false,
+      "codex_executor_share_ceiling": 1
+    }
+  },
+  "current_C15": {
+    "approved_proposal_sha256": "49bd421248a45fdf62b921e61878cc4e416455d100e294b134ae233fc02b4ef2",
+    "source_revision": 19,
+    "generation": 16,
+    "source_cap": 12,
+    "source_used_known": 11,
+    "new_source_calls": 1,
+    "source_minutes": 45,
+    "native_cap": 33,
+    "native_used": 28,
+    "new_native_contexts": 5,
+    "native_parallel_limit": 1,
+    "native_part_minutes": 15,
+    "native_integrator_minutes": 10,
+    "connector_cap": 7,
+    "connector_observed": 6,
+    "canary_cap": 1,
+    "canary_used": 0,
+    "scratch_cap": 2,
+    "scratch_used": 2,
+    "total_role_cap": 55,
+    "cloud_cap": 2400,
+    "hard_expiry_utc": "2026-11-09T06:03:01Z",
+    "Windows_cap_runs": 11,
+    "Windows_cap_minutes": 95,
+    "Windows_used_runs": 9,
+    "Windows_used_minutes": 46.03406546666667,
+    "Windows_pair_minutes": [
+      15,
+      10
+    ],
+    "CI_cap": 16,
+    "CI_observed_including_external": 12,
+    "M9_cap": 2,
+    "M9_used": 1,
+    "M9_runner_hours_cap": 24,
+    "external_source_attribution": "UNKNOWN retained separately, no inference from submitter and no free-call assumption",
+    "accounting_formula": "51+ceil((nowUTC-2026-11-07T16:17:24Z)/60); all waits retained",
+    "full_reservation_minutes": 780,
+    "component_subtotal_minutes": 680,
+    "contingency_minutes": 100,
+    "no_counter_reset": true,
+    "no_paid_purchase": true,
+    "stop_rule": "Any new P0-P2, incomplete/failed native context, out-of-scope write or first cap/deadline blocks; no extra source or native call",
+    "source_executor": "google_antigravity",
+    "source_model_family": "gemini",
+    "source_model_requested": "gemini-4-argon",
+    "source_effort_requested": "high",
+    "reviewer": "codex",
+    "historical_native_provider": "claude",
+    "historical_native_used": 28,
+    "new_native_provider": "codex"
+  },
+  "source_bootstrap": {
+    "packet": 1174,
+    "revision": 19,
+    "generation": 16,
+    "baseline": "c6afde62c846f1ef3d6a83c14459966849edf756",
+    "continuation": "17d563d2025694e97a247f62fe926f539dedded7",
+    "normal_merge_predecessor": "92018d818ae4ca358c0caa5b7b41d21c308f650e",
+    "spec_path": "ops/specs/wp1174-implementation-r19.md",
+    "spec_sha256": "fcba1e8c4f49fa97501d1cfb8796e032354558fd0148849c22bd6cf79152cb90",
+    "effective_write_set": [
+      ".claude/dev/packet_loop.py",
+      ".claude/dev/packet_loop_test.py",
+      "docs/PROTOCOL_DA_PHIEN.md",
+      "ops/specs/wp1174-c5-adapter-design.md",
+      "ops/specs/wp1174-implementation-r17.md"
+    ],
+    "source_route": "AGY Gemini Argon4 high executor, fresh independent Codex contexts, independent delegated owner audit; target unchanged",
+    "current_public_head": "7ae5ca43e4970e43addc3ac98ac241927bb23534"
+  },
+  "constraints": [
+    "C15 approval is not a lease, test result, review verdict or exact-head merge authority.",
+    "Preserve all prior histories, debt, counters and failed/stale/unknown evidence. No head evidence transfer.",
+    "No paid purchase, LIVE, credential/security/ruleset/workflow/global changes or global ADR0054 activation.",
+    "Windows focused13/rawunit only; no Windows CI, main or full suite. Linux full M9 and native84 remain required.",
+    "No source publication before actual prepublication gates, native cross K4, independent source audit and exact-head P3 disposition.",
+    "Normal expected-head merge/postmerge/bookkeeping only after actual exact-head authority and K0-K7; target actual human/canary and PR0-PR8 remain separate.",
+    "AGY source provider change approved explicitly; no fallback, extra source call or refund; old provider-bound lease cannot authorize AGY."
+  ]
+}

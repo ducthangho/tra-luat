@@ -1,0 +1,34 @@
+{
+  "id": "WP1174-C15-B-R19-CLOSURE",
+  "owner": "ducthangho",
+  "decision_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6724070591",
+  "reason": "Approved C15 remediations, imported-harness false-kill P1, CI13 and provider-bound unused source slot successor",
+  "expires_at": "2026-11-09T06:03:01Z",
+  "canonical_policy_sha": null,
+  "effective_write_set": [
+    ".claude/dev/packet_loop.py",
+    ".claude/dev/packet_loop_test.py",
+    "docs/PROTOCOL_DA_PHIEN.md",
+    "ops/specs/wp1174-c5-adapter-design.md",
+    "ops/specs/wp1174-implementation-r17.md"
+  ],
+  "source_max_paths": 5,
+  "source_max_added_lines": 6000,
+  "rule": "Exact closed set plus canonical NFC/casefold/symlink/prefix/all-ref overlap; every outside impact_hint blocks; no empty-policy fallback",
+  "frozen_source_specs": {
+    "ops/specs/wp1174-c5-adapter-design.md": "5a749f921de112565779b8b1e42a2324e8efbc1e5e053d11919d30d8cf20a117",
+    "ops/specs/wp1174-implementation-r17.md": "52c0064b44389164573d248a1c6f8cb55ac78da32b974db3ac6c22ab92becba0"
+  },
+  "never_waived": [
+    "source authority",
+    "exclusive lease",
+    "all prepublication gates",
+    "native cross K4",
+    "Windows focused13/rawunit",
+    "native Linux84 provenance",
+    "full Linux M9",
+    "K0-K7",
+    "target actual human",
+    "unknown or failed not pass"
+  ]
+}

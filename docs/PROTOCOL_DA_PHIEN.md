@@ -1560,3 +1560,88 @@ Liệt kê TỪNG SỐ, không dùng phạm vi: một phạm vi là thứ vừa 
   bằng `Superseded` nhưng ADR ấy **vẫn còn hiệu lực một phần**. Vì vậy cổng ở đây cố ý KHÔNG phán
   xử hiệu lực từ chuỗi trạng thái; nó chỉ đòi **có mặt trong bảng**. Phán xử hiệu lực bằng cách
   khớp tiền tố chuỗi là đúng hình dạng lỗi *"phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN"*.
+# WP1174 r10 — adapter scoped, chờ gate native và review độc lập
+
+H1 và H2 là hai checkpoint private chưa hoàn tất; giữ nguyên ancestry và finding
+history. Source r10 bổ sung 14 writer entries và 14 race cases, lifecycle advisory
+→ actual human → accept, collector bounded và native evidence carrier. Marker
+implementation không cấp enrollment, lease, quyền publish hoặc activation.
+Consumer chỉ chạy khi exact code đã land trên canonical, current grant/spec và
+Mission registration còn hiệu lực, cùng enrolled Linux ext4/XFS đúng boot/mount.
+Candidate private hoặc FILE do caller tự khai không tự mở route này.
+
+`--admission FILE` chỉ đối chiếu exact immutable bytes. Resolver lấy descriptor
+qua current canonical lease/spec, I2 và installed Mission wrapper; không thêm
+registry hoặc pre-lease fallback. Giữ nguyên JSON frozen của Mission; wrapper,
+plan hash và Packet graph được xác minh riêng. Git children loại object/config
+selectors trong env copy, không sửa `os.environ` hoặc global Git configuration.
+API scoped pin `github.com`, repo và cwd explicit; giữ trusted auth/proxy/CA,
+không nhận `GH_HOST`/`GH_REPO` của caller làm nguồn thẩm quyền.
+
+Ordinary dùng `--expected-revision N`; fresh init dùng `absent`; resume-init và
+adoption dùng witness revision namespace riêng. Fixed lock/O_CLOEXEC giữ qua
+preflight, persist, fsync/readback và tripwire lần hai. State/witness ordinary
+mismatch là UNKNOWN; không rollback counter, tự retry hoặc restore backup.
+Chỉ rc0 + `reserved_for_dispatch` + `dispatch_allowed=true` cấp dispatch right.
+Init, adoption, replay và guard luôn không dispatch.
+
+Seed do operator provision/fsync trước grant; consumer kiểm no-follow regular
+owner/mode/nlink/fingerprint và HKDF, không chứng minh ngược historical fsync.
+Public projection không chứa seed/HMAC key. Adoption giữ immutable source snapshot,
+prepared/intent/tombstone/adopted, abandon/retry/replay và append-only lineage.
+Cached private v2 writer vẫn có thể ghi old path: tripwire không là fencing tuyệt đối.
+
+Service review là advisory, giữ call/review budget và không tự tạo human approval.
+Scoped accept tái dùng canonical actual-human validator, re-fetch audit comment,
+kiểm exact H/tree/spec/PR, CI/connector và first-publication receipt. Collector có
+ba pass tối đa trong 180 giây, mỗi pass tối đa 100 trang/120 giây/30 MiB; inner
+API/Git calls dùng remaining deadline, output cap và hậu-call checks. Thiếu page,
+DAG hoặc retention coverage là UNKNOWN; không đổi thành residual. Guard chỉ đọc
+và trả PASS0 hoặc FAIL/UNKNOWN/admission_rejected12; lỗi argv trả2.
+
+Linux main giữ legacy và bắt buộc 84 IDs, required mutants/controls cùng một native
+profile thực; source PR1275 chạy exact-H clone và đối chiếu năm path M/H/clone.
+Native report nằm trong log step hiện có trước tổng cuối, kèm producer/snapshot
+before/after và capability facts. Windows main giữ legacy +12 pure IDs; focused
+Windows có13 IDs và một pure unit oracle riêng. Non-Linux report luôn ineligible.
+Fixture/overlay pass không thay native Linux proof, Windows proof, independent
+review/audit, K0–K7, full Linux M9 hoặc target canary sau land.
+
+
+<!-- WP1174 scoped consumer: implementation notes, authority remains the frozen contract. -->
+Trong tuyến scoped WP1174, resolver ghim OID bất biến của spec và giữ nguyên
+canonical I2 facts sau lần xác minh dưới khóa. `record-lease` chỉ ghi lease đó;
+ref, OID, path, revision, generation và comments phải khớp authority đã đọc qua API.
+Human audit đọc lại remote run và toàn bộ tập workflow runs qua API giới hạn
+thời gian, dung lượng và số trang trước khi chạy canonical human predicate.
+Biên nhận review được đọc một lần; hash lấy từ chính bytes đã xác minh.
+Lỗi sau khi bắt đầu ghi trả `durability_unknown`, không cho dispatch; lỗi có
+kiểu xác định trạng thái, nội dung chuỗi lỗi không cấp authority.
+Git environment hardening chỉ áp dụng trong scoped context, giữ hành vi legacy.
+Human audit scoped WP1174 dùng cùng snapshot comments đã API readback cho
+canonical verifier, collector và record; transition cũng được snapshot khi có.
+Caller file thay đổi sau snapshot không thay authority; server drift bị chặn.
+M5/M12 xác định trả typed FAIL; receipt provenance giữ caller path ban đầu.
+
+
+WP1174 R12 bổ sung kiểm chứng recovery và first publication trong cùng adapter:
+collector xét cả `PushEvent.before` lẫn `head`, bao gồm descendant của H; zero OID
+là absence khi tạo/xóa ref. Preimage trước hoặc tại audit chứng minh publication
+sớm và trả FAIL; preimage sau audit phải có introduction trước đó trong evidence,
+không tự trở thành bằng chứng thời điểm first publication. Thiếu object vẫn UNKNOWN.
+Recovery đối chiếu immutable source snapshot với predecessor active path/generation,
+full high_water hash/revision và Packet/Mission/lineage trước probe/temp/write; imported
+v2 giữ predicate riêng. Mọi reused source/tombstone, target và witness được fsync file,
+fsync parent và kiểm identity/readback dưới fixed lock trước advance/finalize; terminal
+replay cũng xác nhận durability, giữ nguyên journal/history/counters. Ordinary reservation
+của adopted state kiểm lại durability tombstone và cặp target/witness trước dispatch.
+Lỗi durability giữ rc8/no dispatch; readback riêng không chứng minh durability.
+Scoped human snapshot kiểm exact verified bytes sau canonical verifier, trước collector;
+scoped accept dùng cùng snapshot bytes trong RAM cho CI/connector validation và hashes.
+Các fault injection là fixture thuật toán, không phải native profile hay mất điện.
+
+WP1174 R13/C9 dùng composite native delivery SOURCE-ONLY trên exact final head/tree
+và năm file hashes: bốn part A–D đọc coverage manifest đã đóng băng, rồi integrator E
+kiểm coverage union, interfaces và raw reports theo R13. Mỗi lời gọi vẫn được đếm;
+chỉ composite đủ bằng chứng mới có thể tạo verdict cho source đó. Authority,
+provider assurance và actual-human của target giữ theo các hợp đồng hiện hành.

@@ -1,0 +1,85 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1287
+packet_id: wp1287
+mission_issue: 1238
+revision: 3
+generation: 3
+lease_id: wp1287-r3-g3-codex
+role: executor
+provider: codex
+executor: codex
+model: gpt-6.1-sol
+effort: high
+model_family: openai
+execution_surface: codex_cli
+transport: machine
+environment: linux
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1287-r3.md
+spec_ref: refs/heads/ops/wp1287-spec@3d633584f9da9b8847d92d06d4a47104ccdbf21a
+spec_sha256_required: 9b8deaee351417aaf3e417b553bf5817c477aad6fdd811ab0711541c4eea5625
+spec_hash: 9b8deaee351417aaf3e417b553bf5817c477aad6fdd811ab0711541c4eea5625
+prompt_path: ops/prompts/wp1287-r3-g3-codex.md
+prompt_sha256_required: 9ba1545065f95c601493dc5d3237aa672ce4127afd7b776a77022447b283042a
+write_set:
+- .agents/skills/playwright-browser/package.json
+- .agents/skills/playwright-browser/package-lock.json
+- .agents/skills/playwright-browser/SKILL.md
+write_set_hash: b2e55ca302ead71f6493d482b732348dc9d2a3f7089ef90aad82cf234b1f7a2d
+effective_write_set:
+- .agents/skills/playwright-browser/package.json
+- .agents/skills/playwright-browser/package-lock.json
+- .agents/skills/playwright-browser/SKILL.md
+change_policy_sha: null
+required_checks:
+- ActualcandidateLinux+DesktoppinnedCLIinstall/signatures/browser1252/sourcebytes/redirect/PNG/PDF/cleanup/fullsource
+- FouroptionalcorecombinationsNofN/absent+corruptoptionalonly/scope3newpaths450total
+- Linuxfullselftest/strictmanifest/Ruffdelta0/doctrine/claims/admission
+- IndependentfreshCodexCLIentireB..H/v2/IssueM12beforeONEpush
+- Draftconnector/UbuntuPRCI4anchors/fullsourceAUX/Readyauto/K0K7/exactHgrant
+- ActualMCI4anchors/officialartifact/fullsourceAUX/M8/readback/UTCZretirement/D1D4beforeclosure
+land_obligations: []
+branch: agent/wp1287-r3-g3-codex
+base_sha: bf9914cb1a8e6f5047468f4d130b587015f8d73f
+start_from_sha: eff711e075f538d5f012f728451b75207a7f6140
+reviewed_sha_required: eff711e075f538d5f012f728451b75207a7f6140
+reviewed_sha_required_note: Continuation H1 only, newH2 needs fresh review; H1 not
+  approved
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1287#issuecomment-6725510059
+standing_authority: https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6708576608
+recorded_by: openai_codex/codex_service dispatcher under latest owner fullremainingwork
+  directive
+recorder_is_executor: false
+leased_at_utc: '2026-11-08T18:45:26Z'
+heartbeat_at: '2026-11-08T18:45:26Z'
+heartbeat_required_minutes: 360
+lease_until: '2026-11-09T00:45:26Z'
+lease_expires_at_utc: '2026-11-09T00:45:26Z'
+run_minutes: 45
+attempts_limit: 3
+review_rounds_limit: 2
+codex_review_calls_limit: 8
+same_failure_limit: 2
+requires_live: false
+uy_quyen_merge: false
+primary_product_pushes_limit: 1
+size_cap_additions_and_total_vs_B: 450
+executor_workspace: /workspace/scratch/wp1287-r2-g2-codex
+authority_note: Owner scoped normal Codex capability recovery; explicit per-run add-dir/cd,
+  no bypass/globalchange; actualpreviouscall charged/no sourcechange; readonlyindependent
+  xhighreviewer > highexecutor; sameprovider sensitiveassurance HOLD
+reviewer_model: gpt-6.1-sol
+reviewer_effort: xhigh
+status: leased
+thay_the_cho:
+- wp1287-r2-g2-codex
+scoped_cli_writable_root: /workspace/scratch/wp1287-r2-g2-codex/.agents/skills/playwright-browser

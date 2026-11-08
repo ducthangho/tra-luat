@@ -62,8 +62,8 @@ recorder_is_executor: false
 leased_at_utc: '2026-11-08T18:35:52Z'
 heartbeat_at: '2026-11-08T18:35:52Z'
 heartbeat_required_minutes: 360
-lease_until: '2026-11-09T00:35:52Z'
-lease_expires_at_utc: '2026-11-09T00:35:52Z'
+lease_until: '2026-11-08T18:45:26Z'
+lease_expires_at_utc: '2026-11-08T18:45:26Z'
 run_minutes: 45
 attempts_limit: 3
 review_rounds_limit: 2
@@ -79,6 +79,13 @@ authority_note: Owner explicit bothCodex/highervrevieweffort; fresh independentc
   pinchange/extra Windowsretry/waiver
 reviewer_model: gpt-6.1-sol
 reviewer_effort: xhigh
-status: leased
+status: retired
 thay_the_cho:
 - wp1287-r1-g1-claude
+retired_at: '2026-11-08T18:45:26Z'
+retired_at_utc: '2026-11-08T18:45:26Z'
+original_lease_until: '2026-11-09T00:35:52Z'
+da_bi_thay_the: wp1287-r3-g3-codex
+replaced_at_utc: '2026-11-08T18:45:26Z'
+replacement_reason: PreviousactualCodex terminalBLOCKED/no sourcechange, normal scoped
+  writecapability checkpoint/ownerstandingfullscope; no costreset

@@ -1,0 +1,52 @@
+{
+  "recorded_at": "2026-11-08T11:03:23Z",
+  "packet": "wp1279",
+  "revision": 4,
+  "generation": 4,
+  "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "authority": "r4Rescue already permits shared16; existing full scoped owner delegation; CLAUDEstep5 mandatory long-log audit",
+  "current_call12": {
+    "role": "auxiliary CI evidence collection and longlog audit, not formal code approval",
+    "actual_start": "2026-11-08T10:02:34.309596Z",
+    "hard_deadline": "2026-11-08T11:32:34Z",
+    "run_limit_minutes": 90,
+    "status": "active; original attempt1 remainsinprogress, no CIretry dispatched",
+    "deadline_action": "Preserve full source/partial findings/checkpoint, stop actualAUX12; no implicit extension/reset/pass"
+  },
+  "conditional_reservation": {
+    "call_id": 15,
+    "purpose": "Continue PR1280 H4 CI evidence collection/audit ONLY if AUX12 cannot finish before harddeadline",
+    "actual_invocation": false,
+    "charged": false,
+    "maximum_calls": 1,
+    "run_limit_minutes": 90,
+    "before_dispatch": "AUX12 terminalcheckpoint/actual CIstate and remaining budget must be read; record newactualcall before model; keep failurehistory/spec/H4 unchanged"
+  },
+  "budget_projection": {
+    "shared_used": 12,
+    "shared_limit": 16,
+    "Ready_auto13_if_actual": 1,
+    "canonical_M_CI_AUX14": 1,
+    "PR_CI_continuation15_if_needed": 1,
+    "projected_total_if_all_used": 15,
+    "reserve16_unused": 1,
+    "offline_rounds": "3/3 unchanged",
+    "product_attempts": "4/4 unchanged",
+    "product_pushes": "2/2 unchanged"
+  },
+  "measurements": {
+    "historical_H3_packet_loop_job": 128662364182,
+    "historical_duration_seconds": 3118,
+    "historical_conclusion": "success",
+    "H4_run_id": 42469501853,
+    "H4_attempt": 1,
+    "status": "in_progress per freshAPI, lastpacketloop jobrunning",
+    "meaning": "Preserve90min modelrun boundary while existing finite Ubuntu retry and required audit complete; no CIpass or mergeauthorization inferred"
+  },
+  "exclusions": [
+    "No new product/model Executor/code/formalreviewround/push",
+    "No WindowsCI/rules/workflow/code change",
+    "No new sharedcallcap or silent quotareset",
+    "No automatic modelcontinuation; dispatch onlyifneeded afteractualcheckpoint"
+  ]
+}

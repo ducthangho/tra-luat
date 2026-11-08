@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "/workspace/scratch/proxima-rest-20261108/P2-H1-Linux-recovery3/installation/node_modules/@playwright/cli/playwright-cli.js",
+    "-s=tl-p2-c822fb9be3c845b9",
+    "tab-list",
+    "--json"
+  ],
+  "actual_rc": 1,
+  "stdout_sha256": "d671d516c68384e50eddaa0530605e6ae617b1e61ac677bb320076c18d7cce7a",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout": "{\n  \"isError\": true,\n  \"error\": \"The browser 'tl-p2-c822fb9be3c845b9' is not open, please run open first\"\n}\n",
+  "session_was_measured_closed": "tl-p2-c822fb9be3c845b9",
+  "negative_has_no_browserlaunch": true
+}

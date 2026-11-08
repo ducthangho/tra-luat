@@ -1,0 +1,1224 @@
+{
+  "status": "complete_diagnostic_source_audit_with_retained_advisory",
+  "formal_code_approval": false,
+  "head": "eff711e075f538d5f012f728451b75207a7f6140",
+  "tree": "b83af7498be2f26b58f103fe79db9119815c278b",
+  "completed_at": "2026-11-08T18:24:05.788255+00:00",
+  "assignment_sha256": "d65e4df6615412cd2bbb3406415fa88e462d068fa2d36cf213482d4d90c43327",
+  "native_originals": [
+    {
+      "name": "P2-native-recovery2",
+      "zip_sha256": "fe44d1c68015379c8d35dc0c197c6cf3bc4857ab97e47db42c76edde3429925b",
+      "bytes": 378387,
+      "verified_source_files": 50,
+      "terminal": {
+        "rc": 2,
+        "at": "2026-11-08T16:40:53.391701+00:00",
+        "candidate": "eff711e075f538d5f012f728451b75207a7f6140"
+      },
+      "source_manifest_sha256": "34e4faadcdb17737925392bd07a90136981e42276d100219ad5cfa518b7eb707",
+      "operator_command": {
+        "command": [
+          "C:\\tl-win\\wp1271-tools\\python-3.12.10\\python.exe",
+          "-B",
+          "C:\\tl-win\\wp1287-H1-native-recovery2\\inputs\\P2-browser-measure.py",
+          "C:\\tl-win\\wp1287-H1-native-recovery2\\measure-manifest.json"
+        ],
+        "actual_rc": 2,
+        "stdout_sha256": "c9306e26f96e463b104123b42f26d25decc7bc76cc9feb7fd759d90ad21e1c40"
+      },
+      "commands": [
+        {
+          "label": "node-version",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "--version"
+          ],
+          "rc": 0,
+          "seconds": 0.063,
+          "stdout_sha256": "00c8158eb097d27ae16774d820ae2feb3526c7057b57b63426401bfba18be8a8",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T16:40:03.252241+00:00"
+        },
+        {
+          "label": "npm-version",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "--version"
+          ],
+          "rc": 0,
+          "seconds": 0.797,
+          "stdout_sha256": "6784d6c924df1c8341f9f841f5b5b20c37255de3d34f923baebc0a557d5d5201",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T16:40:04.046880+00:00"
+        },
+        {
+          "label": "npm-ci",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "ci",
+            "--ignore-scripts",
+            "--no-audit",
+            "--no-fund"
+          ],
+          "rc": 0,
+          "seconds": 2.844,
+          "stdout_sha256": "c59541a7d8bfc9987c0aa47adf2cdd2858be8b66de5abc0331d5a6484ae63ab6",
+          "stderr_sha256": "babae101a7f2d37fcab069f23ed116c4cb452de35420e0ac9ec5a408f949444b",
+          "finished_utc": "2026-11-08T16:40:06.928081+00:00"
+        },
+        {
+          "label": "npm-signatures",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "audit",
+            "signatures",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 6.328,
+          "stdout_sha256": "539ea4684b22e24869bace50b48bda695776477f892861b08d51d219f0d08faf",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T16:40:13.259009+00:00"
+        },
+        {
+          "label": "browser-install",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-H1-native-recovery2\\installation\\node_modules\\playwright\\cli.js",
+            "install",
+            "--no-shell",
+            "chromium"
+          ],
+          "rc": 0,
+          "seconds": 0.641,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T16:40:13.889465+00:00"
+        },
+        {
+          "label": "browser-binary-version",
+          "command": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-EncodedCommand",
+            "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAJABQAHIAbwBnAHIAZQBzAHMAUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQAnADsAJABmAD0ARwBlAHQALQBJAHQAZQBtACAALQBMAGkAdABlAHIAYQBsAFAAYQB0AGgAIAAnAEMAOgBcAHQAbAAtAHcAaQBuAFwAdwBwADEAMgA4ADcALQBIADEALQBuAGEAdABpAHYAZQAtAHIAZQBjAG8AdgBlAHIAeQAyAFwAYgByAG8AdwBzAGUAcgAtAGMAYQBjAGgAZQBcAGMAaAByAG8AbQBpAHUAbQAtADEAMgA1ADIAXABjAGgAcgBvAG0AZQAtAHcAaQBuADYANABcAGMAaAByAG8AbQBlAC4AZQB4AGUAJwA7AFsAcABzAGMAdQBzAHQAbwBtAG8AYgBqAGUAYwB0AF0AQAB7AHAAYQB0AGgAPQAkAGYALgBGAHUAbABsAE4AYQBtAGUAOwBGAGkAbABlAFYAZQByAHMAaQBvAG4APQAkAGYALgBWAGUAcgBzAGkAbwBuAEkAbgBmAG8ALgBGAGkAbABlAFYAZQByAHMAaQBvAG4AOwBQAHIAbwBkAHUAYwB0AFYAZQByAHMAaQBvAG4APQAkAGYALgBWAGUAcgBzAGkAbwBuAEkAbgBmAG8ALgBQAHIAbwBkAHUAYwB0AFYAZQByAHMAaQBvAG4AfQB8AEMAbwBuAHYAZQByAHQAVABvAC0ASgBzAG8AbgAgAC0AQwBvAG0AcAByAGUAcwBzAA=="
+          ],
+          "rc": 0,
+          "seconds": 0.843,
+          "stdout_sha256": "a565bafc6460484d3307d38dbaf48bc94630359e29647b2723e4b57d0c546189",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T16:40:14.750921+00:00"
+        },
+        {
+          "label": "browser-processes-before",
+          "command": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-EncodedCommand",
+            "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAJABQAHIAbwBnAHIAZQBzAHMAUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQAnADsAJABlAG4AdgA6AFAAUwBNAG8AZAB1AGwAZQBQAGEAdABoAD0AKABKAG8AaQBuAC0AUABhAHQAaAAgACQAUABTAEgATwBNAEUAIAAnAE0AbwBkAHUAbABlAHMAJwApACsAJwA7AEMAOgBcAFAAcgBvAGcAcgBhAG0AIABGAGkAbABlAHMAXABXAGkAbgBkAG8AdwBzAFAAbwB3AGUAcgBTAGgAZQBsAGwAXABNAG8AZAB1AGwAZQBzACcAOwAgAEAAKABHAGUAdAAtAEMAaQBtAEkAbgBzAHQAYQBuAGMAZQAgAFcAaQBuADMAMgBfAFAAcgBvAGMAZQBzAHMAIAAtAEYAaQBsAHQAZQByACAAIgBOAGEAbQBlAD0AJwBjAGgAcgBvAG0AZQAuAGUAeABlACcAIgAgAC0ARQByAHIAbwByAEEAYwB0AGkAbwBuACAAUwB0AG8AcAAgAHwAIABXAGgAZQByAGUALQBPAGIAagBlAGMAdAAgAHsAJABfAC4ARQB4AGUAYwB1AHQAYQBiAGwAZQBQAGEAdABoACAALQBhAG4AZAAgACQAXwAuAEUAeABlAGMAdQB0AGEAYgBsAGUAUABhAHQAaAAuAFMAdABhAHIAdABzAFcAaQB0AGgAKAAnAEMAOgBcAHQAbAAtAHcAaQBuAFwAdwBwADEAMgA4ADcALQBIADEALQBuAGEAdABpAHYAZQAtAHIAZQBjAG8AdgBlAHIAeQAyAFwAYgByAG8AdwBzAGUAcgAtAGMAYQBjAGgAZQAnACwAWwBTAHQAcgBpAG4AZwBDAG8AbQBwAGEAcgBpAHMAbwBuAF0AOgA6AE8AcgBkAGkAbgBhAGwASQBnAG4AbwByAGUAQwBhAHMAZQApAH0AIAB8ACAAUwBlAGwAZQBjAHQALQBPAGIAagBlAGMAdAAgAFAAcgBvAGMAZQBzAHMASQBkACwAUABhAHIAZQBuAHQAUAByAG8AYwBlAHMAcwBJAGQALABFAHgAZQBjAHUAdABhAGIAbABlAFAAYQB0AGgALABDAG8AbQBtAGEAbgBkAEwAaQBuAGUAKQB8AEMAbwBuAHYAZQByAHQAVABvAC0ASgBzAG8AbgAgAC0ARABlAHAAdABoACAANAAgAC0AQwBvAG0AcAByAGUAcwBzAA=="
+          ],
+          "rc": 0,
+          "seconds": 0.484,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T16:40:15.247488+00:00"
+        },
+        {
+          "label": "open",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-H1-native-recovery2\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-7a0e08bf181747df",
+            "open",
+            "about:blank",
+            "--config",
+            "C:\\tl-win\\wp1287-H1-native-recovery2\\browser-evidence\\browser.json",
+            "--json"
+          ],
+          "rc": 1,
+          "seconds": 32.141,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "6fa370b03fb5ba9eb13ed893295d9e0a848440305fa61ec71391888d9862f241",
+          "finished_utc": "2026-11-08T16:40:47.419243+00:00"
+        },
+        {
+          "label": "failure-close",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-H1-native-recovery2\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-7a0e08bf181747df",
+            "close",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 0.265,
+          "stdout_sha256": "f7f7dd7429717228601166082459934dcebfaec11720ad4f9ea6f1277ac2b19c",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T16:40:47.698117+00:00"
+        },
+        {
+          "label": "failure-delete-data",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-H1-native-recovery2\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-7a0e08bf181747df",
+            "delete-data",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 1.297,
+          "stdout_sha256": "5ac2f74848ac323d36f9d38d97a3bae537d220c11eb2f748f1a0af0734127b5c",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T16:40:48.988180+00:00"
+        }
+      ],
+      "browser_binary_identity": {
+        "path": "C:\\tl-win\\wp1287-H1-native-recovery2\\browser-cache\\chromium-1252\\chrome-win64\\chrome.exe",
+        "sha256": "7ca0cf1b2cba9b9ec812a8e3df2cb92a5ddbea8c7013b8d71d589a43589fad21",
+        "bytes": 4105728,
+        "actual_version": {
+          "path": "C:\\tl-win\\wp1287-H1-native-recovery2\\browser-cache\\chromium-1252\\chrome-win64\\chrome.exe",
+          "FileVersion": "157.0.8103.15",
+          "ProductVersion": "157.0.8103.15"
+        },
+        "required_browser": {
+          "name": "chromium",
+          "revision": "1252",
+          "installByDefault": true,
+          "browserVersion": "157.0.8103.15",
+          "title": "Chrome for Testing"
+        }
+      },
+      "PDF": "NOT_RUN",
+      "screenshot": "NOT_RUN"
+    },
+    {
+      "name": "P2-node24-diagnostic",
+      "zip_sha256": "d07598e60d812568af2b85d996952f3f82e71316f5871126dd68ed586efdc11c",
+      "bytes": 379540,
+      "verified_source_files": 51,
+      "terminal": {
+        "rc": 2,
+        "at": "2026-11-08T17:08:22.189748+00:00",
+        "candidate": "eff711e075f538d5f012f728451b75207a7f6140"
+      },
+      "source_manifest_sha256": "c0049774193004d3fc1c9b5916c61948feae681d01d033550be6d6597dfb2aa0",
+      "operator_command": {
+        "command": [
+          "C:\\tl-win\\wp1271-tools\\python-3.12.10\\python.exe",
+          "-B",
+          "C:\\tl-win\\wp1287-node24-diagnostic\\inputs\\P2-browser-measure.py",
+          "C:\\tl-win\\wp1287-node24-diagnostic\\measure-manifest.json"
+        ],
+        "actual_rc": 2,
+        "stdout_sha256": "d58e7f2d6126a2e25490c2b1a17ab9ec877369d7e5cc1a66ab5f3cfc96f603aa"
+      },
+      "commands": [
+        {
+          "label": "node-version",
+          "command": [
+            "C:\\tl-win\\wp1287-node24-diagnostic\\node-tools\\node-v24.19.0-win-x64\\node.exe",
+            "--version"
+          ],
+          "rc": 0,
+          "seconds": 2.078,
+          "stdout_sha256": "bc697de995dc791df53d688ef69c08994cdffc8ce30c906b1ffc65b131ccd0eb",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T17:07:06.059100+00:00"
+        },
+        {
+          "label": "npm-version",
+          "command": [
+            "C:\\tl-win\\wp1287-node24-diagnostic\\node-tools\\node-v24.19.0-win-x64\\node.exe",
+            "C:\\tl-win\\wp1287-node24-diagnostic\\node-tools\\node-v24.19.0-win-x64\\node_modules\\npm\\bin\\npm-cli.js",
+            "--version"
+          ],
+          "rc": 0,
+          "seconds": 1.906,
+          "stdout_sha256": "a38e383f1e9080b0dd9001481f6e56b341000de90a05061b66734350ad3adc41",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T17:07:07.957188+00:00"
+        },
+        {
+          "label": "npm-ci",
+          "command": [
+            "C:\\tl-win\\wp1287-node24-diagnostic\\node-tools\\node-v24.19.0-win-x64\\node.exe",
+            "C:\\tl-win\\wp1287-node24-diagnostic\\node-tools\\node-v24.19.0-win-x64\\node_modules\\npm\\bin\\npm-cli.js",
+            "ci",
+            "--ignore-scripts",
+            "--no-audit",
+            "--no-fund"
+          ],
+          "rc": 0,
+          "seconds": 16.656,
+          "stdout_sha256": "6a94ef7bb8dae4f2ff25ef26cf5385ea15aac4d728c66c2e74b20b1295baf7d7",
+          "stderr_sha256": "799f544422ef20e84949c8feabb844390db9306ac5cf97419981d0291eb45156",
+          "finished_utc": "2026-11-08T17:07:24.606837+00:00"
+        },
+        {
+          "label": "npm-signatures",
+          "command": [
+            "C:\\tl-win\\wp1287-node24-diagnostic\\node-tools\\node-v24.19.0-win-x64\\node.exe",
+            "C:\\tl-win\\wp1287-node24-diagnostic\\node-tools\\node-v24.19.0-win-x64\\node_modules\\npm\\bin\\npm-cli.js",
+            "audit",
+            "signatures",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 6.141,
+          "stdout_sha256": "539ea4684b22e24869bace50b48bda695776477f892861b08d51d219f0d08faf",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T17:07:30.768098+00:00"
+        },
+        {
+          "label": "browser-install",
+          "command": [
+            "C:\\tl-win\\wp1287-node24-diagnostic\\node-tools\\node-v24.19.0-win-x64\\node.exe",
+            "C:\\tl-win\\wp1287-node24-diagnostic\\installation\\node_modules\\playwright\\cli.js",
+            "install",
+            "--no-shell",
+            "chromium"
+          ],
+          "rc": 0,
+          "seconds": 0.656,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T17:07:31.425565+00:00"
+        },
+        {
+          "label": "browser-binary-version",
+          "command": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-EncodedCommand",
+            "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAJABQAHIAbwBnAHIAZQBzAHMAUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQAnADsAJABmAD0ARwBlAHQALQBJAHQAZQBtACAALQBMAGkAdABlAHIAYQBsAFAAYQB0AGgAIAAnAEMAOgBcAHQAbAAtAHcAaQBuAFwAdwBwADEAMgA4ADcALQBuAG8AZABlADIANAAtAGQAaQBhAGcAbgBvAHMAdABpAGMAXABiAHIAbwB3AHMAZQByAC0AYwBhAGMAaABlAFwAYwBoAHIAbwBtAGkAdQBtAC0AMQAyADUAMgBcAGMAaAByAG8AbQBlAC0AdwBpAG4ANgA0AFwAYwBoAHIAbwBtAGUALgBlAHgAZQAnADsAWwBwAHMAYwB1AHMAdABvAG0AbwBiAGoAZQBjAHQAXQBAAHsAcABhAHQAaAA9ACQAZgAuAEYAdQBsAGwATgBhAG0AZQA7AEYAaQBsAGUAVgBlAHIAcwBpAG8AbgA9ACQAZgAuAFYAZQByAHMAaQBvAG4ASQBuAGYAbwAuAEYAaQBsAGUAVgBlAHIAcwBpAG8AbgA7AFAAcgBvAGQAdQBjAHQAVgBlAHIAcwBpAG8AbgA9ACQAZgAuAFYAZQByAHMAaQBvAG4ASQBuAGYAbwAuAFAAcgBvAGQAdQBjAHQAVgBlAHIAcwBpAG8AbgB9AHwAQwBvAG4AdgBlAHIAdABUAG8ALQBKAHMAbwBuACAALQBDAG8AbQBwAHIAZQBzAHMA"
+          ],
+          "rc": 0,
+          "seconds": 0.515,
+          "stdout_sha256": "952271a559827c35198e83c17fe3e6b28f50d6e7adcbf9b4dbe11ed2b5084bb7",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T17:07:31.947368+00:00"
+        },
+        {
+          "label": "browser-processes-before",
+          "command": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-EncodedCommand",
+            "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAJABQAHIAbwBnAHIAZQBzAHMAUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQAnADsAJABlAG4AdgA6AFAAUwBNAG8AZAB1AGwAZQBQAGEAdABoAD0AKABKAG8AaQBuAC0AUABhAHQAaAAgACQAUABTAEgATwBNAEUAIAAnAE0AbwBkAHUAbABlAHMAJwApACsAJwA7AEMAOgBcAFAAcgBvAGcAcgBhAG0AIABGAGkAbABlAHMAXABXAGkAbgBkAG8AdwBzAFAAbwB3AGUAcgBTAGgAZQBsAGwAXABNAG8AZAB1AGwAZQBzACcAOwAgAEAAKABHAGUAdAAtAEMAaQBtAEkAbgBzAHQAYQBuAGMAZQAgAFcAaQBuADMAMgBfAFAAcgBvAGMAZQBzAHMAIAAtAEYAaQBsAHQAZQByACAAIgBOAGEAbQBlAD0AJwBjAGgAcgBvAG0AZQAuAGUAeABlACcAIgAgAC0ARQByAHIAbwByAEEAYwB0AGkAbwBuACAAUwB0AG8AcAAgAHwAIABXAGgAZQByAGUALQBPAGIAagBlAGMAdAAgAHsAJABfAC4ARQB4AGUAYwB1AHQAYQBiAGwAZQBQAGEAdABoACAALQBhAG4AZAAgACQAXwAuAEUAeABlAGMAdQB0AGEAYgBsAGUAUABhAHQAaAAuAFMAdABhAHIAdABzAFcAaQB0AGgAKAAnAEMAOgBcAHQAbAAtAHcAaQBuAFwAdwBwADEAMgA4ADcALQBuAG8AZABlADIANAAtAGQAaQBhAGcAbgBvAHMAdABpAGMAXABiAHIAbwB3AHMAZQByAC0AYwBhAGMAaABlACcALABbAFMAdAByAGkAbgBnAEMAbwBtAHAAYQByAGkAcwBvAG4AXQA6ADoATwByAGQAaQBuAGEAbABJAGcAbgBvAHIAZQBDAGEAcwBlACkAfQAgAHwAIABTAGUAbABlAGMAdAAtAE8AYgBqAGUAYwB0ACAAUAByAG8AYwBlAHMAcwBJAGQALABQAGEAcgBlAG4AdABQAHIAbwBjAGUAcwBzAEkAZAAsAEUAeABlAGMAdQB0AGEAYgBsAGUAUABhAHQAaAAsAEMAbwBtAG0AYQBuAGQATABpAG4AZQApAHwAQwBvAG4AdgBlAHIAdABUAG8ALQBKAHMAbwBuACAALQBEAGUAcAB0AGgAIAA0ACAALQBDAG8AbQBwAHIAZQBzAHMA"
+          ],
+          "rc": 0,
+          "seconds": 0.547,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T17:07:32.507617+00:00"
+        },
+        {
+          "label": "open",
+          "command": [
+            "C:\\tl-win\\wp1287-node24-diagnostic\\node-tools\\node-v24.19.0-win-x64\\node.exe",
+            "C:\\tl-win\\wp1287-node24-diagnostic\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-12ee68ff92244105",
+            "open",
+            "about:blank",
+            "--config",
+            "C:\\tl-win\\wp1287-node24-diagnostic\\browser-evidence\\browser.json",
+            "--json"
+          ],
+          "rc": 1,
+          "seconds": 44.187,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "451e30041272c7fcebc2cedffebdeefe30a9f77a4b6f7f60d22c8e961da5e565",
+          "finished_utc": "2026-11-08T17:08:16.736409+00:00"
+        },
+        {
+          "label": "failure-close",
+          "command": [
+            "C:\\tl-win\\wp1287-node24-diagnostic\\node-tools\\node-v24.19.0-win-x64\\node.exe",
+            "C:\\tl-win\\wp1287-node24-diagnostic\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-12ee68ff92244105",
+            "close",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 0.953,
+          "stdout_sha256": "c2b946f6160e62611aea030d8fb2425ec25340a0a52411225c1c0a6b4da590c3",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T17:08:17.691925+00:00"
+        },
+        {
+          "label": "failure-delete-data",
+          "command": [
+            "C:\\tl-win\\wp1287-node24-diagnostic\\node-tools\\node-v24.19.0-win-x64\\node.exe",
+            "C:\\tl-win\\wp1287-node24-diagnostic\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-12ee68ff92244105",
+            "delete-data",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 0.282,
+          "stdout_sha256": "c79001bd95b3099aa7d60d6a36fd9b92cbbed3b6e34d6565ba3e04b78ea5a830",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T17:08:17.968403+00:00"
+        }
+      ],
+      "browser_binary_identity": {
+        "path": "C:\\tl-win\\wp1287-node24-diagnostic\\browser-cache\\chromium-1252\\chrome-win64\\chrome.exe",
+        "sha256": "7ca0cf1b2cba9b9ec812a8e3df2cb92a5ddbea8c7013b8d71d589a43589fad21",
+        "bytes": 4105728,
+        "actual_version": {
+          "path": "C:\\tl-win\\wp1287-node24-diagnostic\\browser-cache\\chromium-1252\\chrome-win64\\chrome.exe",
+          "FileVersion": "157.0.8103.15",
+          "ProductVersion": "157.0.8103.15"
+        },
+        "required_browser": {
+          "name": "chromium",
+          "revision": "1252",
+          "installByDefault": true,
+          "browserVersion": "157.0.8103.15",
+          "title": "Chrome for Testing"
+        }
+      },
+      "PDF": "NOT_RUN",
+      "screenshot": "NOT_RUN"
+    },
+    {
+      "name": "P2-shell-diagnostic",
+      "zip_sha256": "22fa64368216fb5551d41db2a41be84f2f7bc7de0c5df3a481970190ba5eff83",
+      "bytes": 373709,
+      "verified_source_files": 40,
+      "terminal": {
+        "rc": 2,
+        "at": "2026-11-08T17:34:15.392186+00:00",
+        "candidate": "eff711e075f538d5f012f728451b75207a7f6140"
+      },
+      "source_manifest_sha256": "9ece6831f6136b39ca52c309206acdebe9202510b660e550e17c921b8012f06d",
+      "operator_command": {
+        "command": [
+          "C:\\tl-win\\wp1271-tools\\python-3.12.10\\python.exe",
+          "-B",
+          "C:\\tl-win\\wp1287-shell-diagnostic\\inputs\\P2-browser-measure-shell-diagnostic.py",
+          "C:\\tl-win\\wp1287-shell-diagnostic\\measure-manifest.json"
+        ],
+        "actual_rc": 2,
+        "stdout_sha256": "1a1fe53c123c26e339c106e21c6e1d5693a234fc00214a9c4de21559e589a277"
+      },
+      "commands": [
+        {
+          "label": "node-version",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "--version"
+          ],
+          "rc": 0,
+          "seconds": 0.032,
+          "stdout_sha256": "00c8158eb097d27ae16774d820ae2feb3526c7057b57b63426401bfba18be8a8",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T17:29:00.017289+00:00"
+        },
+        {
+          "label": "npm-version",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "--version"
+          ],
+          "rc": 0,
+          "seconds": 0.187,
+          "stdout_sha256": "6784d6c924df1c8341f9f841f5b5b20c37255de3d34f923baebc0a557d5d5201",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T17:29:00.207086+00:00"
+        },
+        {
+          "label": "npm-ci",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "ci",
+            "--ignore-scripts",
+            "--no-audit",
+            "--no-fund"
+          ],
+          "rc": 0,
+          "seconds": 5.531,
+          "stdout_sha256": "4aa58ccb0519e77c156ff4277fda981d4476eafad8c6bc594bd8fff0abd053ee",
+          "stderr_sha256": "babae101a7f2d37fcab069f23ed116c4cb452de35420e0ac9ec5a408f949444b",
+          "finished_utc": "2026-11-08T17:29:05.763700+00:00"
+        },
+        {
+          "label": "npm-signatures",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "audit",
+            "signatures",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 9.656,
+          "stdout_sha256": "539ea4684b22e24869bace50b48bda695776477f892861b08d51d219f0d08faf",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T17:29:15.438997+00:00"
+        },
+        {
+          "label": "browser-install",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic\\installation\\node_modules\\playwright\\cli.js",
+            "install",
+            "--only-shell",
+            "chromium"
+          ],
+          "rc": 0,
+          "seconds": 298.063,
+          "stdout_sha256": "0938021be363c739e3c3df031137808a2c28a77f107dd3277c97ae10ed9741ca",
+          "stderr_sha256": "8fe96e2a26a5f6dea4f60c521f281d49033dfdb41377d282e3f5e56f7b555fc3",
+          "finished_utc": "2026-11-08T17:34:13.546921+00:00"
+        },
+        {
+          "label": "browser-binary-version",
+          "command": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-EncodedCommand",
+            "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAJABQAHIAbwBnAHIAZQBzAHMAUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQAnADsAJABmAD0ARwBlAHQALQBJAHQAZQBtACAALQBMAGkAdABlAHIAYQBsAFAAYQB0AGgAIAAnAEMAOgBcAHQAbAAtAHcAaQBuAFwAdwBwADEAMgA4ADcALQBzAGgAZQBsAGwALQBkAGkAYQBnAG4AbwBzAHQAaQBjAFwAYgByAG8AdwBzAGUAcgAtAGMAYQBjAGgAZQBcAGMAaAByAG8AbQBpAHUAbQBfAGgAZQBhAGQAbABlAHMAcwBfAHMAaABlAGwAbAAtADEAMgA1ADIAXABjAGgAcgBvAG0AZQAtAGgAZQBhAGQAbABlAHMAcwAtAHMAaABlAGwAbAAtAHcAaQBuADYANABcAGMAaAByAG8AbQBlAC0AaABlAGEAZABsAGUAcwBzAC0AcwBoAGUAbABsAC4AZQB4AGUAJwA7AFsAcABzAGMAdQBzAHQAbwBtAG8AYgBqAGUAYwB0AF0AQAB7AHAAYQB0AGgAPQAkAGYALgBGAHUAbABsAE4AYQBtAGUAOwBGAGkAbABlAFYAZQByAHMAaQBvAG4APQAkAGYALgBWAGUAcgBzAGkAbwBuAEkAbgBmAG8ALgBGAGkAbABlAFYAZQByAHMAaQBvAG4AOwBQAHIAbwBkAHUAYwB0AFYAZQByAHMAaQBvAG4APQAkAGYALgBWAGUAcgBzAGkAbwBuAEkAbgBmAG8ALgBQAHIAbwBkAHUAYwB0AFYAZQByAHMAaQBvAG4AfQB8AEMAbwBuAHYAZQByAHQAVABvAC0ASgBzAG8AbgAgAC0AQwBvAG0AcAByAGUAcwBzAA=="
+          ],
+          "rc": 0,
+          "seconds": 0.656,
+          "stdout_sha256": "725faaa4bf063f5176495dcf63ad8f071251bbfe88303677399a87abe87f0baa",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T17:34:14.206376+00:00"
+        }
+      ],
+      "browser_binary_identity": null,
+      "PDF": "NOT_RUN",
+      "screenshot": "NOT_RUN"
+    },
+    {
+      "name": "P2-shell-diagnostic-v2",
+      "zip_sha256": "487e712904a65139dc2e6527a2d6e565f669fa2375ef973572dcec44396f28e7",
+      "bytes": 385466,
+      "verified_source_files": 68,
+      "terminal": {
+        "rc": 2,
+        "at": "2026-11-08T18:06:46.364790+00:00",
+        "candidate": "eff711e075f538d5f012f728451b75207a7f6140"
+      },
+      "source_manifest_sha256": "09d8a7a3669a2b7a6e7b4b6ca519982d68f57e952fe569c37a0dd4bb5ede5348",
+      "operator_command": {
+        "command": [
+          "C:\\tl-win\\wp1271-tools\\python-3.12.10\\python.exe",
+          "-B",
+          "C:\\tl-win\\wp1287-shell-diagnostic-v2\\inputs\\P2-browser-measure-shell-diagnostic-v2.py",
+          "C:\\tl-win\\wp1287-shell-diagnostic-v2\\measure-manifest.json"
+        ],
+        "actual_rc": 2,
+        "stdout_sha256": "5e2abd296776c509097df2b81b5253579ffe1df77ed06f922a14bc208b338061"
+      },
+      "commands": [
+        {
+          "label": "node-version",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "--version"
+          ],
+          "rc": 0,
+          "seconds": 0.094,
+          "stdout_sha256": "00c8158eb097d27ae16774d820ae2feb3526c7057b57b63426401bfba18be8a8",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:05:39.848642+00:00"
+        },
+        {
+          "label": "npm-version",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "--version"
+          ],
+          "rc": 0,
+          "seconds": 0.25,
+          "stdout_sha256": "6784d6c924df1c8341f9f841f5b5b20c37255de3d34f923baebc0a557d5d5201",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:05:40.100218+00:00"
+        },
+        {
+          "label": "npm-ci",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "ci",
+            "--ignore-scripts",
+            "--no-audit",
+            "--no-fund"
+          ],
+          "rc": 0,
+          "seconds": 2.828,
+          "stdout_sha256": "88b9141cb58f11737b41844c74cbe5d9637404f57b3afb015ee2f41ab63691cd",
+          "stderr_sha256": "babae101a7f2d37fcab069f23ed116c4cb452de35420e0ac9ec5a408f949444b",
+          "finished_utc": "2026-11-08T18:05:42.946978+00:00"
+        },
+        {
+          "label": "npm-signatures",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "audit",
+            "signatures",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 5.344,
+          "stdout_sha256": "539ea4684b22e24869bace50b48bda695776477f892861b08d51d219f0d08faf",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:05:48.285771+00:00"
+        },
+        {
+          "label": "browser-install",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v2\\installation\\node_modules\\playwright\\cli.js",
+            "install",
+            "--only-shell",
+            "chromium"
+          ],
+          "rc": 0,
+          "seconds": 0.453,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:05:48.733705+00:00"
+        },
+        {
+          "label": "browser-binary-version",
+          "command": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-EncodedCommand",
+            "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAJABQAHIAbwBnAHIAZQBzAHMAUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQAnADsAJABmAD0ARwBlAHQALQBJAHQAZQBtACAALQBMAGkAdABlAHIAYQBsAFAAYQB0AGgAIAAnAEMAOgBcAHQAbAAtAHcAaQBuAFwAdwBwADEAMgA4ADcALQBzAGgAZQBsAGwALQBkAGkAYQBnAG4AbwBzAHQAaQBjAC0AdgAyAFwAYgByAG8AdwBzAGUAcgAtAGMAYQBjAGgAZQBcAGMAaAByAG8AbQBpAHUAbQBfAGgAZQBhAGQAbABlAHMAcwBfAHMAaABlAGwAbAAtADEAMgA1ADIAXABjAGgAcgBvAG0AZQAtAGgAZQBhAGQAbABlAHMAcwAtAHMAaABlAGwAbAAtAHcAaQBuADYANABcAGMAaAByAG8AbQBlAC0AaABlAGEAZABsAGUAcwBzAC0AcwBoAGUAbABsAC4AZQB4AGUAJwA7AFsAcABzAGMAdQBzAHQAbwBtAG8AYgBqAGUAYwB0AF0AQAB7AHAAYQB0AGgAPQAkAGYALgBGAHUAbABsAE4AYQBtAGUAOwBGAGkAbABlAFYAZQByAHMAaQBvAG4APQAkAGYALgBWAGUAcgBzAGkAbwBuAEkAbgBmAG8ALgBGAGkAbABlAFYAZQByAHMAaQBvAG4AOwBQAHIAbwBkAHUAYwB0AFYAZQByAHMAaQBvAG4APQAkAGYALgBWAGUAcgBzAGkAbwBuAEkAbgBmAG8ALgBQAHIAbwBkAHUAYwB0AFYAZQByAHMAaQBvAG4AfQB8AEMAbwBuAHYAZQByAHQAVABvAC0ASgBzAG8AbgAgAC0AQwBvAG0AcAByAGUAcwBzAA=="
+          ],
+          "rc": 0,
+          "seconds": 0.312,
+          "stdout_sha256": "8f2faf8f034ffde8ddf1f51aa8ace3576664b5051169ddaafb0fb55046358fe1",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:05:49.075898+00:00"
+        },
+        {
+          "label": "browser-supported-version",
+          "command": [
+            "C:\\tl-win\\wp1287-shell-diagnostic-v2\\browser-cache\\chromium_headless_shell-1252\\chrome-headless-shell-win64\\chrome-headless-shell.exe",
+            "--version"
+          ],
+          "rc": 0,
+          "seconds": 28.344,
+          "stdout_sha256": "66e962c8385bade132211c3da334a81734503581c2ad298e6b083e22a143ba86",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:06:17.422500+00:00"
+        },
+        {
+          "label": "browser-processes-before",
+          "command": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-EncodedCommand",
+            "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAJABQAHIAbwBnAHIAZQBzAHMAUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQAnADsAJABlAG4AdgA6AFAAUwBNAG8AZAB1AGwAZQBQAGEAdABoAD0AKABKAG8AaQBuAC0AUABhAHQAaAAgACQAUABTAEgATwBNAEUAIAAnAE0AbwBkAHUAbABlAHMAJwApACsAJwA7AEMAOgBcAFAAcgBvAGcAcgBhAG0AIABGAGkAbABlAHMAXABXAGkAbgBkAG8AdwBzAFAAbwB3AGUAcgBTAGgAZQBsAGwAXABNAG8AZAB1AGwAZQBzACcAOwAgAEAAKABHAGUAdAAtAEMAaQBtAEkAbgBzAHQAYQBuAGMAZQAgAFcAaQBuADMAMgBfAFAAcgBvAGMAZQBzAHMAIAAtAEYAaQBsAHQAZQByACAAIgBOAGEAbQBlAD0AJwBjAGgAcgBvAG0AZQAtAGgAZQBhAGQAbABlAHMAcwAtAHMAaABlAGwAbAAuAGUAeABlACcAIgAgAC0ARQByAHIAbwByAEEAYwB0AGkAbwBuACAAUwB0AG8AcAAgAHwAIABXAGgAZQByAGUALQBPAGIAagBlAGMAdAAgAHsAJABfAC4ARQB4AGUAYwB1AHQAYQBiAGwAZQBQAGEAdABoACAALQBhAG4AZAAgACQAXwAuAEUAeABlAGMAdQB0AGEAYgBsAGUAUABhAHQAaAAuAFMAdABhAHIAdABzAFcAaQB0AGgAKAAnAEMAOgBcAHQAbAAtAHcAaQBuAFwAdwBwADEAMgA4ADcALQBzAGgAZQBsAGwALQBkAGkAYQBnAG4AbwBzAHQAaQBjAC0AdgAyAFwAYgByAG8AdwBzAGUAcgAtAGMAYQBjAGgAZQAnACwAWwBTAHQAcgBpAG4AZwBDAG8AbQBwAGEAcgBpAHMAbwBuAF0AOgA6AE8AcgBkAGkAbgBhAGwASQBnAG4AbwByAGUAQwBhAHMAZQApAH0AIAB8ACAAUwBlAGwAZQBjAHQALQBPAGIAagBlAGMAdAAgAFAAcgBvAGMAZQBzAHMASQBkACwAUABhAHIAZQBuAHQAUAByAG8AYwBlAHMAcwBJAGQALABFAHgAZQBjAHUAdABhAGIAbABlAFAAYQB0AGgALABDAG8AbQBtAGEAbgBkAEwAaQBuAGUAKQB8AEMAbwBuAHYAZQByAHQAVABvAC0ASgBzAG8AbgAgAC0ARABlAHAAdABoACAANAAgAC0AQwBvAG0AcAByAGUAcwBzAA=="
+          ],
+          "rc": 0,
+          "seconds": 0.5,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:06:18.452002+00:00"
+        },
+        {
+          "label": "open",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v2\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-4997e90b0c064651",
+            "open",
+            "about:blank",
+            "--config",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v2\\browser-evidence\\browser.json",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 2.016,
+          "stdout_sha256": "e6c2791f0d8d26026ede6b4e96ba41de3f6413ea01a298c2f4cc85f697a8e66a",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:06:20.482852+00:00"
+        },
+        {
+          "label": "browser-processes-live",
+          "command": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-EncodedCommand",
+            "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAJABQAHIAbwBnAHIAZQBzAHMAUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQAnADsAJABlAG4AdgA6AFAAUwBNAG8AZAB1AGwAZQBQAGEAdABoAD0AKABKAG8AaQBuAC0AUABhAHQAaAAgACQAUABTAEgATwBNAEUAIAAnAE0AbwBkAHUAbABlAHMAJwApACsAJwA7AEMAOgBcAFAAcgBvAGcAcgBhAG0AIABGAGkAbABlAHMAXABXAGkAbgBkAG8AdwBzAFAAbwB3AGUAcgBTAGgAZQBsAGwAXABNAG8AZAB1AGwAZQBzACcAOwAgAEAAKABHAGUAdAAtAEMAaQBtAEkAbgBzAHQAYQBuAGMAZQAgAFcAaQBuADMAMgBfAFAAcgBvAGMAZQBzAHMAIAAtAEYAaQBsAHQAZQByACAAIgBOAGEAbQBlAD0AJwBjAGgAcgBvAG0AZQAtAGgAZQBhAGQAbABlAHMAcwAtAHMAaABlAGwAbAAuAGUAeABlACcAIgAgAC0ARQByAHIAbwByAEEAYwB0AGkAbwBuACAAUwB0AG8AcAAgAHwAIABXAGgAZQByAGUALQBPAGIAagBlAGMAdAAgAHsAJABfAC4ARQB4AGUAYwB1AHQAYQBiAGwAZQBQAGEAdABoACAALQBhAG4AZAAgACQAXwAuAEUAeABlAGMAdQB0AGEAYgBsAGUAUABhAHQAaAAuAFMAdABhAHIAdABzAFcAaQB0AGgAKAAnAEMAOgBcAHQAbAAtAHcAaQBuAFwAdwBwADEAMgA4ADcALQBzAGgAZQBsAGwALQBkAGkAYQBnAG4AbwBzAHQAaQBjAC0AdgAyAFwAYgByAG8AdwBzAGUAcgAtAGMAYQBjAGgAZQAnACwAWwBTAHQAcgBpAG4AZwBDAG8AbQBwAGEAcgBpAHMAbwBuAF0AOgA6AE8AcgBkAGkAbgBhAGwASQBnAG4AbwByAGUAQwBhAHMAZQApAH0AIAB8ACAAUwBlAGwAZQBjAHQALQBPAGIAagBlAGMAdAAgAFAAcgBvAGMAZQBzAHMASQBkACwAUABhAHIAZQBuAHQAUAByAG8AYwBlAHMAcwBJAGQALABFAHgAZQBjAHUAdABhAGIAbABlAFAAYQB0AGgALABDAG8AbQBtAGEAbgBkAEwAaQBuAGUAKQB8AEMAbwBuAHYAZQByAHQAVABvAC0ASgBzAG8AbgAgAC0ARABlAHAAdABoACAANAAgAC0AQwBvAG0AcAByAGUAcwBzAA=="
+          ],
+          "rc": 0,
+          "seconds": 0.328,
+          "stdout_sha256": "312abef43adb23c4aa3b0d23d0a41910cd0e3d6dc71272e4defbf93527008eff",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:06:20.821537+00:00"
+        },
+        {
+          "label": "goto",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v2\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-4997e90b0c064651",
+            "goto",
+            "http://127.0.0.1:55458/redirect",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 0.39,
+          "stdout_sha256": "825f74a754d5b8937023cf74cd3f80f323698da9608c892fff2786a850e46278",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:06:21.249866+00:00"
+        },
+        {
+          "label": "tabs",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v2\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-4997e90b0c064651",
+            "tab-list",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 0.703,
+          "stdout_sha256": "10c9a0c931b2bfd0948b7db7e5136597e9b203728dde67060a6aa83facac9710",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:06:21.969112+00:00"
+        },
+        {
+          "label": "requests",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v2\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-4997e90b0c064651",
+            "requests",
+            "--static",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 0.922,
+          "stdout_sha256": "5b370d3f47af69a3a2d3c74a39b80af36e5b3f273f375e100ae252d14304620c",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:06:22.897290+00:00"
+        },
+        {
+          "label": "response-body",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v2\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-4997e90b0c064651",
+            "response-body",
+            "2",
+            "--filename",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v2\\browser-evidence\\source.html",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 0.812,
+          "stdout_sha256": "438d5e27043ff0c368e91b93d5d203b7a73385b59bea00c12856468b7c0da385",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:06:23.719297+00:00"
+        },
+        {
+          "label": "screenshot",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v2\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-4997e90b0c064651",
+            "screenshot",
+            "--filename",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v2\\browser-evidence\\screen.png",
+            "--full-page",
+            "--json"
+          ],
+          "rc": 1,
+          "seconds": 6.844,
+          "stdout_sha256": "f68a303412a3bc97515aedc61fd39388857e71ccc0ed739b6d4f213f7d6922c2",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:06:30.593281+00:00"
+        },
+        {
+          "label": "failure-close",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v2\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-4997e90b0c064651",
+            "close",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 14.485,
+          "stdout_sha256": "3c6f745b03f4721d5dfcc725d10113412a8d428bc0836c411039294e48576570",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:06:45.301373+00:00"
+        },
+        {
+          "label": "failure-delete-data",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v2\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-4997e90b0c064651",
+            "delete-data",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 0.265,
+          "stdout_sha256": "166f44cc985bf16815150724f3f64d9a8fc98ec0cd488e240b605b0de34b64b6",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:06:45.563825+00:00"
+        }
+      ],
+      "browser_binary_identity": {
+        "path": "C:\\tl-win\\wp1287-shell-diagnostic-v2\\browser-cache\\chromium_headless_shell-1252\\chrome-headless-shell-win64\\chrome-headless-shell.exe",
+        "sha256": "221fd6916ef2646d1f838470422a7caa1205d3d10ef99de2ca39bc37deeebce8",
+        "bytes": 220415488,
+        "actual_version": {
+          "path": "C:\\tl-win\\wp1287-shell-diagnostic-v2\\browser-cache\\chromium_headless_shell-1252\\chrome-headless-shell-win64\\chrome-headless-shell.exe",
+          "FileVersion": null,
+          "ProductVersion": null,
+          "supported_cli_version": "Google Chrome for Testing 157.0.8103.15"
+        },
+        "required_browser": {
+          "name": "chromium-headless-shell",
+          "revision": "1252",
+          "installByDefault": true,
+          "browserVersion": "157.0.8103.15",
+          "title": "Chrome Headless Shell"
+        }
+      },
+      "PDF": "NOT_RUN",
+      "screenshot": "FAIL_TIMEOUT_5000ms"
+    },
+    {
+      "name": "P2-shell-diagnostic-v3",
+      "zip_sha256": "80bb0196bed1fd4999051917b5734ead59c3ea1a29d9e5c8cbefb2c0004c9a17",
+      "bytes": 385362,
+      "verified_source_files": 68,
+      "terminal": {
+        "rc": 2,
+        "at": "2026-11-08T18:12:22.850982+00:00",
+        "candidate": "eff711e075f538d5f012f728451b75207a7f6140"
+      },
+      "source_manifest_sha256": "3d50a5fa1c01ce2c44fc7f22b2702a3918978396638f4aad3c33a023408d4d22",
+      "operator_command": {
+        "command": [
+          "C:\\tl-win\\wp1271-tools\\python-3.12.10\\python.exe",
+          "-B",
+          "C:\\tl-win\\wp1287-shell-diagnostic-v3\\inputs\\P2-browser-measure-shell-diagnostic-v3.py",
+          "C:\\tl-win\\wp1287-shell-diagnostic-v3\\measure-manifest.json"
+        ],
+        "actual_rc": 2,
+        "stdout_sha256": "779bae2bad1a53daba24d8baf657d1bfc6511f2d7d69fece53debb2ae505800a"
+      },
+      "commands": [
+        {
+          "label": "node-version",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "--version"
+          ],
+          "rc": 0,
+          "seconds": 0.016,
+          "stdout_sha256": "00c8158eb097d27ae16774d820ae2feb3526c7057b57b63426401bfba18be8a8",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:11:04.055818+00:00"
+        },
+        {
+          "label": "npm-version",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "--version"
+          ],
+          "rc": 0,
+          "seconds": 0.219,
+          "stdout_sha256": "6784d6c924df1c8341f9f841f5b5b20c37255de3d34f923baebc0a557d5d5201",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:11:04.273623+00:00"
+        },
+        {
+          "label": "npm-ci",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "ci",
+            "--ignore-scripts",
+            "--no-audit",
+            "--no-fund"
+          ],
+          "rc": 0,
+          "seconds": 3.031,
+          "stdout_sha256": "88b9141cb58f11737b41844c74cbe5d9637404f57b3afb015ee2f41ab63691cd",
+          "stderr_sha256": "babae101a7f2d37fcab069f23ed116c4cb452de35420e0ac9ec5a408f949444b",
+          "finished_utc": "2026-11-08T18:11:07.296804+00:00"
+        },
+        {
+          "label": "npm-signatures",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "audit",
+            "signatures",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 5.672,
+          "stdout_sha256": "539ea4684b22e24869bace50b48bda695776477f892861b08d51d219f0d08faf",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:11:12.980525+00:00"
+        },
+        {
+          "label": "browser-install",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v3\\installation\\node_modules\\playwright\\cli.js",
+            "install",
+            "--only-shell",
+            "chromium"
+          ],
+          "rc": 0,
+          "seconds": 0.859,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:11:13.827045+00:00"
+        },
+        {
+          "label": "browser-binary-version",
+          "command": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-EncodedCommand",
+            "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAJABQAHIAbwBnAHIAZQBzAHMAUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQAnADsAJABmAD0ARwBlAHQALQBJAHQAZQBtACAALQBMAGkAdABlAHIAYQBsAFAAYQB0AGgAIAAnAEMAOgBcAHQAbAAtAHcAaQBuAFwAdwBwADEAMgA4ADcALQBzAGgAZQBsAGwALQBkAGkAYQBnAG4AbwBzAHQAaQBjAC0AdgAzAFwAYgByAG8AdwBzAGUAcgAtAGMAYQBjAGgAZQBcAGMAaAByAG8AbQBpAHUAbQBfAGgAZQBhAGQAbABlAHMAcwBfAHMAaABlAGwAbAAtADEAMgA1ADIAXABjAGgAcgBvAG0AZQAtAGgAZQBhAGQAbABlAHMAcwAtAHMAaABlAGwAbAAtAHcAaQBuADYANABcAGMAaAByAG8AbQBlAC0AaABlAGEAZABsAGUAcwBzAC0AcwBoAGUAbABsAC4AZQB4AGUAJwA7AFsAcABzAGMAdQBzAHQAbwBtAG8AYgBqAGUAYwB0AF0AQAB7AHAAYQB0AGgAPQAkAGYALgBGAHUAbABsAE4AYQBtAGUAOwBGAGkAbABlAFYAZQByAHMAaQBvAG4APQAkAGYALgBWAGUAcgBzAGkAbwBuAEkAbgBmAG8ALgBGAGkAbABlAFYAZQByAHMAaQBvAG4AOwBQAHIAbwBkAHUAYwB0AFYAZQByAHMAaQBvAG4APQAkAGYALgBWAGUAcgBzAGkAbwBuAEkAbgBmAG8ALgBQAHIAbwBkAHUAYwB0AFYAZQByAHMAaQBvAG4AfQB8AEMAbwBuAHYAZQByAHQAVABvAC0ASgBzAG8AbgAgAC0AQwBvAG0AcAByAGUAcwBzAA=="
+          ],
+          "rc": 0,
+          "seconds": 0.469,
+          "stdout_sha256": "a4786e9256eabb1a7b1a7f167535519d732c039c2a2b0387cf24dba3b92fb4cb",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:11:14.365814+00:00"
+        },
+        {
+          "label": "browser-supported-version",
+          "command": [
+            "C:\\tl-win\\wp1287-shell-diagnostic-v3\\browser-cache\\chromium_headless_shell-1252\\chrome-headless-shell-win64\\chrome-headless-shell.exe",
+            "--version"
+          ],
+          "rc": 0,
+          "seconds": 14.141,
+          "stdout_sha256": "66e962c8385bade132211c3da334a81734503581c2ad298e6b083e22a143ba86",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:11:28.514826+00:00"
+        },
+        {
+          "label": "browser-processes-before",
+          "command": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-EncodedCommand",
+            "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAJABQAHIAbwBnAHIAZQBzAHMAUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQAnADsAJABlAG4AdgA6AFAAUwBNAG8AZAB1AGwAZQBQAGEAdABoAD0AKABKAG8AaQBuAC0AUABhAHQAaAAgACQAUABTAEgATwBNAEUAIAAnAE0AbwBkAHUAbABlAHMAJwApACsAJwA7AEMAOgBcAFAAcgBvAGcAcgBhAG0AIABGAGkAbABlAHMAXABXAGkAbgBkAG8AdwBzAFAAbwB3AGUAcgBTAGgAZQBsAGwAXABNAG8AZAB1AGwAZQBzACcAOwAgAEAAKABHAGUAdAAtAEMAaQBtAEkAbgBzAHQAYQBuAGMAZQAgAFcAaQBuADMAMgBfAFAAcgBvAGMAZQBzAHMAIAAtAEYAaQBsAHQAZQByACAAIgBOAGEAbQBlAD0AJwBjAGgAcgBvAG0AZQAtAGgAZQBhAGQAbABlAHMAcwAtAHMAaABlAGwAbAAuAGUAeABlACcAIgAgAC0ARQByAHIAbwByAEEAYwB0AGkAbwBuACAAUwB0AG8AcAAgAHwAIABXAGgAZQByAGUALQBPAGIAagBlAGMAdAAgAHsAJABfAC4ARQB4AGUAYwB1AHQAYQBiAGwAZQBQAGEAdABoACAALQBhAG4AZAAgACQAXwAuAEUAeABlAGMAdQB0AGEAYgBsAGUAUABhAHQAaAAuAFMAdABhAHIAdABzAFcAaQB0AGgAKAAnAEMAOgBcAHQAbAAtAHcAaQBuAFwAdwBwADEAMgA4ADcALQBzAGgAZQBsAGwALQBkAGkAYQBnAG4AbwBzAHQAaQBjAC0AdgAzAFwAYgByAG8AdwBzAGUAcgAtAGMAYQBjAGgAZQAnACwAWwBTAHQAcgBpAG4AZwBDAG8AbQBwAGEAcgBpAHMAbwBuAF0AOgA6AE8AcgBkAGkAbgBhAGwASQBnAG4AbwByAGUAQwBhAHMAZQApAH0AIAB8ACAAUwBlAGwAZQBjAHQALQBPAGIAagBlAGMAdAAgAFAAcgBvAGMAZQBzAHMASQBkACwAUABhAHIAZQBuAHQAUAByAG8AYwBlAHMAcwBJAGQALABFAHgAZQBjAHUAdABhAGIAbABlAFAAYQB0AGgALABDAG8AbQBtAGEAbgBkAEwAaQBuAGUAKQB8AEMAbwBuAHYAZQByAHQAVABvAC0ASgBzAG8AbgAgAC0ARABlAHAAdABoACAANAAgAC0AQwBvAG0AcAByAGUAcwBzAA=="
+          ],
+          "rc": 0,
+          "seconds": 0.656,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:11:29.732018+00:00"
+        },
+        {
+          "label": "open",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v3\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-47ef67631d0b446b",
+            "open",
+            "about:blank",
+            "--config",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v3\\browser-evidence\\browser.json",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 1.813,
+          "stdout_sha256": "6efa601b559d93f7ac82c8e4a026984a36784b81e23b9736c4eea1b76757b5cf",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:11:31.554527+00:00"
+        },
+        {
+          "label": "browser-processes-live",
+          "command": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-EncodedCommand",
+            "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAJABQAHIAbwBnAHIAZQBzAHMAUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQAnADsAJABlAG4AdgA6AFAAUwBNAG8AZAB1AGwAZQBQAGEAdABoAD0AKABKAG8AaQBuAC0AUABhAHQAaAAgACQAUABTAEgATwBNAEUAIAAnAE0AbwBkAHUAbABlAHMAJwApACsAJwA7AEMAOgBcAFAAcgBvAGcAcgBhAG0AIABGAGkAbABlAHMAXABXAGkAbgBkAG8AdwBzAFAAbwB3AGUAcgBTAGgAZQBsAGwAXABNAG8AZAB1AGwAZQBzACcAOwAgAEAAKABHAGUAdAAtAEMAaQBtAEkAbgBzAHQAYQBuAGMAZQAgAFcAaQBuADMAMgBfAFAAcgBvAGMAZQBzAHMAIAAtAEYAaQBsAHQAZQByACAAIgBOAGEAbQBlAD0AJwBjAGgAcgBvAG0AZQAtAGgAZQBhAGQAbABlAHMAcwAtAHMAaABlAGwAbAAuAGUAeABlACcAIgAgAC0ARQByAHIAbwByAEEAYwB0AGkAbwBuACAAUwB0AG8AcAAgAHwAIABXAGgAZQByAGUALQBPAGIAagBlAGMAdAAgAHsAJABfAC4ARQB4AGUAYwB1AHQAYQBiAGwAZQBQAGEAdABoACAALQBhAG4AZAAgACQAXwAuAEUAeABlAGMAdQB0AGEAYgBsAGUAUABhAHQAaAAuAFMAdABhAHIAdABzAFcAaQB0AGgAKAAnAEMAOgBcAHQAbAAtAHcAaQBuAFwAdwBwADEAMgA4ADcALQBzAGgAZQBsAGwALQBkAGkAYQBnAG4AbwBzAHQAaQBjAC0AdgAzAFwAYgByAG8AdwBzAGUAcgAtAGMAYQBjAGgAZQAnACwAWwBTAHQAcgBpAG4AZwBDAG8AbQBwAGEAcgBpAHMAbwBuAF0AOgA6AE8AcgBkAGkAbgBhAGwASQBnAG4AbwByAGUAQwBhAHMAZQApAH0AIAB8ACAAUwBlAGwAZQBjAHQALQBPAGIAagBlAGMAdAAgAFAAcgBvAGMAZQBzAHMASQBkACwAUABhAHIAZQBuAHQAUAByAG8AYwBlAHMAcwBJAGQALABFAHgAZQBjAHUAdABhAGIAbABlAFAAYQB0AGgALABDAG8AbQBtAGEAbgBkAEwAaQBuAGUAKQB8AEMAbwBuAHYAZQByAHQAVABvAC0ASgBzAG8AbgAgAC0ARABlAHAAdABoACAANAAgAC0AQwBvAG0AcAByAGUAcwBzAA=="
+          ],
+          "rc": 0,
+          "seconds": 0.531,
+          "stdout_sha256": "02fcc6f1ff73f716c304b953d98560ac888abaa7cb7e107b0c0db0dc984b4ad7",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:11:32.098160+00:00"
+        },
+        {
+          "label": "goto",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v3\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-47ef67631d0b446b",
+            "goto",
+            "http://127.0.0.1:55707/redirect",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 0.907,
+          "stdout_sha256": "ab186763fb7a5086bb59b28e67c3b73bfe82f2d0d8251278465464a87e5193cb",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:11:33.017237+00:00"
+        },
+        {
+          "label": "tabs",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v3\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-47ef67631d0b446b",
+            "tab-list",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 0.781,
+          "stdout_sha256": "f7789d7d2930fd9b6435be8b28c6aad43e540b00f9222ff3d0764a4b9b69f519",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:11:33.819415+00:00"
+        },
+        {
+          "label": "requests",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v3\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-47ef67631d0b446b",
+            "requests",
+            "--static",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 0.657,
+          "stdout_sha256": "e59d50706061e531e9d31219ee57ab986ecae88a51bc938af20503cc7b1cda19",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:11:34.482350+00:00"
+        },
+        {
+          "label": "response-body",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v3\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-47ef67631d0b446b",
+            "response-body",
+            "2",
+            "--filename",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v3\\browser-evidence\\source.html",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 0.282,
+          "stdout_sha256": "438d5e27043ff0c368e91b93d5d203b7a73385b59bea00c12856468b7c0da385",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:11:34.779377+00:00"
+        },
+        {
+          "label": "screenshot",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v3\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-47ef67631d0b446b",
+            "screenshot",
+            "--filename",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v3\\browser-evidence\\screen.png",
+            "--full-page",
+            "--json"
+          ],
+          "rc": 1,
+          "seconds": 30.266,
+          "stdout_sha256": "a9df273f89d11c632fe7dd14250fa63ee6d5ee09846571b1b6ad24d9f5d58d99",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:12:05.079136+00:00"
+        },
+        {
+          "label": "failure-close",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v3\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-47ef67631d0b446b",
+            "close",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 15.641,
+          "stdout_sha256": "6473fc0ae15cdde2b39237b54218c70e84b94055ed14ab0c7c53a439eff9a09e",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:12:20.905316+00:00"
+        },
+        {
+          "label": "failure-delete-data",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\tl-win\\wp1287-shell-diagnostic-v3\\installation\\node_modules\\@playwright\\cli\\playwright-cli.js",
+            "-s=tl-p2-47ef67631d0b446b",
+            "delete-data",
+            "--json"
+          ],
+          "rc": 0,
+          "seconds": 0.25,
+          "stdout_sha256": "ee47a3717cf5b7d5c9ddc1b7d89d0fe2d9bb700a639b0cbe13fd43aab86e77a2",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "finished_utc": "2026-11-08T18:12:21.167508+00:00"
+        }
+      ],
+      "browser_binary_identity": {
+        "path": "C:\\tl-win\\wp1287-shell-diagnostic-v3\\browser-cache\\chromium_headless_shell-1252\\chrome-headless-shell-win64\\chrome-headless-shell.exe",
+        "sha256": "221fd6916ef2646d1f838470422a7caa1205d3d10ef99de2ca39bc37deeebce8",
+        "bytes": 220415488,
+        "actual_version": {
+          "path": "C:\\tl-win\\wp1287-shell-diagnostic-v3\\browser-cache\\chromium_headless_shell-1252\\chrome-headless-shell-win64\\chrome-headless-shell.exe",
+          "FileVersion": null,
+          "ProductVersion": null,
+          "supported_cli_version": "Google Chrome for Testing 157.0.8103.15"
+        },
+        "required_browser": {
+          "name": "chromium-headless-shell",
+          "revision": "1252",
+          "installByDefault": true,
+          "browserVersion": "157.0.8103.15",
+          "title": "Chrome Headless Shell"
+        }
+      },
+      "PDF": "NOT_RUN",
+      "screenshot": "FAIL_TIMEOUT_30000ms"
+    }
+  ],
+  "source_files_verified": 277,
+  "all_five_archives_bytes_and_extraction_verified": true,
+  "linux_browser": {
+    "receipt_sha256": "6cc7905529594ac45b0d002f566066bf914125f813e795f2a982842b667799e3",
+    "commands_verified": 15,
+    "artifacts_verified": {
+      "source.html": {
+        "bytes": 153,
+        "sha256": "60da0098adf9db186ec35b0e0bdca65a116a190fb3be2f702c0f9e333aba6ef0"
+      },
+      "screen.png": {
+        "bytes": 7739,
+        "sha256": "7801f749968eb3e392d1a1cd560f14c612eab75f2dddc418926b4ef34fa1f254"
+      },
+      "page.pdf": {
+        "bytes": 8365,
+        "sha256": "e60e4db982fb86ea9b02ea3cb7da3fd7fd5ff8bd2c04be15890e28b6c9ccb8f7"
+      },
+      "pdf-text.txt": {
+        "bytes": 34,
+        "sha256": "53b6b7a12db57dbdc51083ba8fe51c5814e964fc2802b064481d40c4d3f8316b"
+      }
+    },
+    "positive": [
+      "redirect/final URL",
+      "exact decoded HTML",
+      "PNG1280x720",
+      "PDF signature and retained extracted fixture text"
+    ],
+    "cleanup": {
+      "close": {
+        "session": "tl-p2-c822fb9be3c845b9",
+        "status": "closed"
+      },
+      "delete_data": {
+        "session": "tl-p2-c822fb9be3c845b9",
+        "deleted": false
+      },
+      "scope": "only exact owned nonce",
+      "session": "tl-p2-c822fb9be3c845b9"
+    }
+  },
+  "linux_main": {
+    "receipt_sha256": "c5e3c5d2800cf08d63255bbc31dbb84ded400555f6a8187d701247ca2c974793",
+    "evidence_sha256": "cb4d40113138439396fc1bd503804949cca46d671f23dde386a7f213f0ee7b74",
+    "all_command_logs_hash_size_verified": true,
+    "positive": "1777/1777",
+    "actual_child_rc": 0
+  },
+  "core_combinations": {
+    "receipt_sha256": "c791d5ffceaad71ac672e555423b7203acf7384036562769309019b7b5831808",
+    "none_proxima_playwright": "each1777/1777 actualrc0 outputhash matches lifecycle",
+    "both": "reuses exactH main gate; no repeat claimed"
+  },
+  "material_issues": [
+    {
+      "id": "WP1287-OP-F01",
+      "status": "reproduced_not_waived",
+      "scope": "documented shell cleanup reporting",
+      "evidence": "controlled close17/delete-data18/tab-list19 yields childrc0 CLEANUP OK; no real browser invoked",
+      "limitation": "probe uses controlled command substitution; actual Linux owned session closed observation is separate and specific"
+    }
+  ],
+  "cleanup_probe": {
+    "finding": "WP1287-OP-F01",
+    "class_slug": "cleanup-accepts-command-failures-and-unrelated-negative",
+    "severity": "P2 advisory beforeformal",
+    "candidate": "eff711e075f538d5f012f728451b75207a7f6140",
+    "source_file": "/workspace/scratch/wp1271-g10-claude/.agents/skills/playwright-browser/SKILL.md",
+    "source_sha256": "b71957b0e673afbd39b4e4a7b38195071272c08dba5849a6bdb7099d94a2e43c",
+    "exact_cleanup_block": "( set -u; chay_ghi 08-close close; chay_ghi 09-delete-data delete-data\n  if chay_ghi 10-verify tab-list; then echo \"STOP: phiên $TL_PW_SESSION vẫn mở\"; else echo \"CLEANUP OK\"; fi )",
+    "controlled_substitution": "chay_ghi returns17 close,18 delete-data,19 verify: all CLIoperationsfail; no realbrowser/hostmutation",
+    "command": [
+      "bash",
+      "--noprofile",
+      "--norc",
+      "/workspace/scratch/proxima-rest-20261108/P2-OP-F01-cleanup-failure-probe/probe.bash"
+    ],
+    "actual_child_rc": 0,
+    "actual_stdout": "CLEANUP OK\n",
+    "expected_safe_behavior": "cleanup failure mustnot be labeled CLEANUP OK; unrelated verification error notproofsessionclosed",
+    "status": "reproduced_not_waived",
+    "at": "2026-11-08T17:04:28.793637+00:00"
+  },
+  "actual_closed_session_negative": {
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "/workspace/scratch/proxima-rest-20261108/P2-H1-Linux-recovery3/installation/node_modules/@playwright/cli/playwright-cli.js",
+      "-s=tl-p2-c822fb9be3c845b9",
+      "tab-list",
+      "--json"
+    ],
+    "actual_rc": 1,
+    "stdout_sha256": "d671d516c68384e50eddaa0530605e6ae617b1e61ac677bb320076c18d7cce7a",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout": "{\n  \"isError\": true,\n  \"error\": \"The browser 'tl-p2-c822fb9be3c845b9' is not open, please run open first\"\n}\n",
+    "session_was_measured_closed": "tl-p2-c822fb9be3c845b9",
+    "negative_has_no_browserlaunch": true
+  },
+  "limits": [
+    "NOT formal code review/approval; no native acceptance or artifact pin promotion.",
+    "All five native outer controllers rc2. Full CFT open failed under Node26 and Node24; cause undetermined, no OOM causal inference.",
+    "First shell diagnostic stopped at operator assertion on null PE FileVersion before browser open. V2/V3 supported CLI version measured but diagnostic-only, no full archive provenance claim.",
+    "V2/V3 screenshot failed at5000/30000ms; PDF NOT_RUN. Earlier successful stages do not establish full Windows flow.",
+    "Native failure-close/delete-data rc0 and exact owned nonce verified; deleted=false is legitimate preserve/nonpersistent outcome, not evidence of deletion. Post-failure browser-process absence not independently recorded by these failed runs.",
+    "277 source files and five original ZIP bytes verified locally; browser binaries not retained in source ZIP, recorded binary identity is observation not independent rehash of remote binary.",
+    "Historical Linux flow and core successes bind H1 only. Three addon-removal combinations intentionally dirty and not clean promotion receipts; both reuses main exactH gate.",
+    "Controlled local HTTP fixture/decoded HTML, screenshot/PDF fixture text only; no legal authenticity or raw TLS/network-byte claim.",
+    "No tests, network, browser, device, models, subagents or product changes performed."
+  ],
+  "digest_sha256": "7221f28eda02a0debf5954c25324a6082c1c8fe83e2414ef1815354618d13636"
+}

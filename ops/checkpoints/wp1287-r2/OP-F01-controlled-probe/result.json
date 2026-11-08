@@ -1,0 +1,21 @@
+{
+  "finding": "WP1287-OP-F01",
+  "class_slug": "cleanup-accepts-command-failures-and-unrelated-negative",
+  "severity": "P2 advisory beforeformal",
+  "candidate": "eff711e075f538d5f012f728451b75207a7f6140",
+  "source_file": "/workspace/scratch/wp1271-g10-claude/.agents/skills/playwright-browser/SKILL.md",
+  "source_sha256": "b71957b0e673afbd39b4e4a7b38195071272c08dba5849a6bdb7099d94a2e43c",
+  "exact_cleanup_block": "( set -u; chay_ghi 08-close close; chay_ghi 09-delete-data delete-data\n  if chay_ghi 10-verify tab-list; then echo \"STOP: phi\u00ean $TL_PW_SESSION v\u1eabn m\u1edf\"; else echo \"CLEANUP OK\"; fi )",
+  "controlled_substitution": "chay_ghi returns17 close,18 delete-data,19 verify: all CLIoperationsfail; no realbrowser/hostmutation",
+  "command": [
+    "bash",
+    "--noprofile",
+    "--norc",
+    "/workspace/scratch/proxima-rest-20261108/P2-OP-F01-cleanup-failure-probe/probe.bash"
+  ],
+  "actual_child_rc": 0,
+  "actual_stdout": "CLEANUP OK\n",
+  "expected_safe_behavior": "cleanup failure mustnot be labeled CLEANUP OK; unrelated verification error notproofsessionclosed",
+  "status": "reproduced_not_waived",
+  "at": "2026-11-08T17:04:28.793637+00:00"
+}

@@ -1,0 +1,57 @@
+[
+  {
+    "name": "P2-native-recovery2",
+    "zip_sha256": "fe44d1c68015379c8d35dc0c197c6cf3bc4857ab97e47db42c76edde3429925b",
+    "bytes": 378387,
+    "verified_source_files": 50,
+    "terminal": {
+      "rc": 2,
+      "at": "2026-11-08T16:40:53.391701+00:00",
+      "candidate": "eff711e075f538d5f012f728451b75207a7f6140"
+    }
+  },
+  {
+    "name": "P2-node24-diagnostic",
+    "zip_sha256": "d07598e60d812568af2b85d996952f3f82e71316f5871126dd68ed586efdc11c",
+    "bytes": 379540,
+    "verified_source_files": 51,
+    "terminal": {
+      "rc": 2,
+      "at": "2026-11-08T17:08:22.189748+00:00",
+      "candidate": "eff711e075f538d5f012f728451b75207a7f6140"
+    }
+  },
+  {
+    "name": "P2-shell-diagnostic",
+    "zip_sha256": "22fa64368216fb5551d41db2a41be84f2f7bc7de0c5df3a481970190ba5eff83",
+    "bytes": 373709,
+    "verified_source_files": 40,
+    "terminal": {
+      "rc": 2,
+      "at": "2026-11-08T17:34:15.392186+00:00",
+      "candidate": "eff711e075f538d5f012f728451b75207a7f6140"
+    }
+  },
+  {
+    "name": "P2-shell-diagnostic-v2",
+    "zip_sha256": "487e712904a65139dc2e6527a2d6e565f669fa2375ef973572dcec44396f28e7",
+    "bytes": 385466,
+    "verified_source_files": 68,
+    "terminal": {
+      "rc": 2,
+      "at": "2026-11-08T18:06:46.364790+00:00",
+      "candidate": "eff711e075f538d5f012f728451b75207a7f6140"
+    }
+  },
+  {
+    "name": "P2-shell-diagnostic-v3",
+    "zip_sha256": "80bb0196bed1fd4999051917b5734ead59c3ea1a29d9e5c8cbefb2c0004c9a17",
+    "bytes": 385362,
+    "verified_source_files": 68,
+    "terminal": {
+      "rc": 2,
+      "at": "2026-11-08T18:12:22.850982+00:00",
+      "candidate": "eff711e075f538d5f012f728451b75207a7f6140"
+    }
+  }
+]

@@ -1,0 +1,5 @@
+P2 H1 eff711e075f538d5f012f728451b75207a7f6140 — AUX nguồn/log hoàn tất; không phê duyệt code.
+Đã kiểm5 ZIP gốc và277 sourcefiles, hash/size/extracted bytes, terminal và command stdout/stderr hashes. Native cả5 controller rc2: full CFT Node26/24 open thất bại; shell đầu dừng ở assertion null PE version; shellv2/v3 open/redirect/HTML thành công nhưng screenshot timeout5000/30000ms, PDF NOT_RUN. Không suy luận OOM hay WindowsPASS.
+Linux H1: flow HTML/PNG1280x720/PDF fixture text và core1777/1777 có nguồn dương tính. Ba addon-removal fixtures cố ý dirty; both tái dùng main gate.
+WP1287-OP-F01 còn nguyên: controlled close17/delete18/verify19 vẫn trảrc0+CLEANUP OK. Negative thực tế phiên Linux đã đóng có thông báo cụ thể not open; không dùng lỗi bất kỳ làm proof cleanup. Native cleanup đúng ownednonce/rc0, deleted=false hợp lệ nhưng không chứng minh đã xóa hay không còn process sau failure.
+Phạm vi fixture/diagnostic, không artifact promotion/full browser ZIP provenance/formal approval.

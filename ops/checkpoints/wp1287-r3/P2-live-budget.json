@@ -1,0 +1,64 @@
+{
+  "packet": "wp1287",
+  "revision": 2,
+  "generation": 2,
+  "immutable_B": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "attempts_used": 2,
+  "attempts_limit": 3,
+  "attempt1": {
+    "state": "terminal_controller_observed",
+    "session_id": "068afe17-7d10-4bcd-a99a-5dcb05e0b90e",
+    "started_at_utc": "2026-11-08T16:02:28.213780+00:00",
+    "deadline_utc": "2026-11-08T16:47:28.213780+00:00",
+    "run_id": "fc0e13a0931b4e5dac7a5d6218144dbb",
+    "actual_model_generation": true,
+    "launcher_rc": 0
+  },
+  "codex_review_calls_used": 1,
+  "codex_review_calls_limit": 8,
+  "code_review_rounds_used": 0,
+  "code_review_rounds_limit": 2,
+  "primary_product_pushes_used": 0,
+  "primary_product_pushes_limit": 1,
+  "design_advisory_calls_used": 0,
+  "design_advisory_calls_limit": 1,
+  "mission_historical_costs": "KHONG_DO_DUOC beyondpreservedperPacketreceipts; notreset/zero",
+  "source_lease": {
+    "metadata_commit": "35eda202babcedbdd687d909a3552a6bda01e1db",
+    "lease_path": "ops/leases/wp1287-r2-g2-codex.yaml",
+    "prompt_path": "ops/prompts/wp1287-r2-g2-codex.md",
+    "spec_sha256": "d7f1dba18e94da772d299d5a8400f67636405ad5e508f4fc81240f3ea890b935",
+    "prompt_sha256": "dffdd1f68dee2adc24221ea2f8d674444487f99a3590de2151f908a27895f56f"
+  },
+  "design_advisory_note": "Existing Mission S3design run1f4b4258 reused as reference; charged to S3, no new P2 advisorymodel",
+  "as_of": "2026-11-08T18:21:52.323555+00:00",
+  "codex_calls": [
+    {
+      "n": 1,
+      "purpose": "AUX1 diagnostic original-source evidence digest, NOT formal code review or approval",
+      "state": "terminal_aux_digest",
+      "assignment_commit": "5e9073621f7e253aafb6db2672428e72e0bbc69e",
+      "deadline_utc": "2026-11-08T19:51:52.323555+00:00",
+      "receipt": "P2-native-failure-auditor-receipt.json",
+      "receipt_sha256": "9f0f8ab8c8ef4bd6447064c092be5521dfd25485390e7bbaf28dfcfd44d7a0fb"
+    }
+  ],
+  "forecast_remaining_shared_calls": {
+    "2": "candidateH2AUX",
+    "3": "formalreview",
+    "4": "Draft",
+    "5": "PRCIaudit",
+    "6": "actualReadyauto",
+    "7": "MCIaudit",
+    "reserve": 1
+  },
+  "current_lease": "wp1287-r2-g2-codex",
+  "status": "g2leased_before_model",
+  "codex_remediation": {
+    "state": "terminal_observed",
+    "started_at": "2026-11-08T18:36:49.161631+00:00",
+    "deadline_utc": "2026-11-08T19:21:49.161631+00:00",
+    "actual_generation": true,
+    "launcher_rc": 0
+  }
+}

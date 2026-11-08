@@ -4631,6 +4631,20 @@ def _1174_adopt(a, admission, witness_raw):
             _1174_require(target_raw == _1174_adopt_image(payload, record["phase"], record["cutover_started"],
                 {("prepared", False): 0, ("prepared", True): 1, ("adopted", True): 2, ("aborted", False): 1}.get(
                 (record["phase"], record["cutover_started"]), -1), admission), "recovery exact target image")
+        # A pending recovery must remain anchored to the predecessor snapshot
+        # recorded by the witness.  The target carries a copy of that snapshot,
+        # but it must not be allowed to overwrite or silently supersede the
+        # predecessor high-water binding.
+        if witness["phase"] == "initialized":
+            predecessor = json.loads(payload["source_snapshot"], object_pairs_hook=_cam_khoa_trung,
+                                     parse_constant=_cam_hang_ngoai_json)
+            water = witness["high_water"]
+            adopted = [n for n in witness["history"] if n["terminal_kind"] == "adopted"]
+            active_path = adopted[-1]["canonical_path"] if adopted else e["initial_state_path"]
+            _1174_require(water == dict(generation=lineage["predecessor_generation"],
+                state_revision=predecessor.get("state_revision"), state_sha256=payload["source_sha256"]) and
+                lineage["source_path"] == active_path and predecessor.get("generation") == water["generation"],
+                "recovery predecessor high_water mismatch")
     images = {key: _1174_adopt_image(payload, phase, intent, revision, admission) for key, phase, intent, revision in
               (("prepared", "prepared", False, 0), ("intent", "prepared", True, 1), ("adopted", "adopted", True, 2), ("aborted", "aborted", False, 1))}
     old_source, retired = payload["source_snapshot"].encode("utf-8"), payload["tombstone"].encode("utf-8")
@@ -4693,6 +4707,12 @@ def _1174_adopt(a, admission, witness_raw):
             _1174_write(target, images["intent"], create=False)
         if source_now == old_source:
             _1174_write(source, retired, create=False)
+        else:
+            # A prior process may have died after replacing the source but
+            # before its directory fsync completed.  Readable tombstone bytes
+            # alone do not prove that rename durable; re-establish the barrier
+            # before publishing the terminal witness.
+            _1174_fsyncdir(source.parent)
         if target_raw != images["adopted"]:
             _1174_write(target, images["adopted"], create=False)
     elif final_raw is not None and target_raw != final_raw:
@@ -4984,15 +5004,27 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
             if not (type(after) is str and SHA_RE.fullmatch(after) and type(before) is str and SHA_RE.fullmatch(before)):
                 dag = False
                 continue
-            rc, _ = _git_do(root, "cat-file", "-e", after + "^{commit}",deadline=pass_end)
-            if rc:
+            zero = "0" * 40
+            candidates = [("after", after)] + ([] if before == zero else [("before", before)])
+            relations = {}
+            for side, oid in candidates:
+                rc, _ = _git_do(root, "cat-file", "-e", oid + "^{commit}", deadline=pass_end)
+                if rc:
+                    dag = False
+                    break
+                relation, _ = _git_do(root, "merge-base", "--is-ancestor", head, oid, deadline=pass_end)
+                if relation not in (0, 1):
+                    dag = False
+                    break
+                relations[side] = relation
+            if not dag:
                 dag = False
                 continue
-            relation, _ = _git_do(root, "merge-base", "--is-ancestor", head, after,deadline=pass_end)
             if time.time()>=pass_end:dag=False;complete=False;break
-            if relation not in (0, 1):
-                dag = False
-            elif relation == 0:
+            # `before` is the ref value immediately before the push.  A force
+            # removal followed by republication is therefore publication
+            # evidence even when `after` no longer contains the candidate.
+            if any(value == 0 for value in relations.values()):
                 introductions.append(dict(id=event["id"], time=event["created_at"], ref=payload.get("ref"),
                     actor=event.get("actor", {}).get("login"), before=before, after=after))
         # Every currently observable ref/PR must be accounted for by the DAG;

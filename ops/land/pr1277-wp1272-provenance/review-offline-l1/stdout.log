@@ -1,0 +1,28 @@
+**P2 — Chưa có bằng chứng suite Linux đạt N/N với đúng 2 ca bỏ qua.** Candidate và base đều trả rc=1, cùng `376/389`, tổng 399, bỏ qua 10, hỏng 13; delta lỗi bằng 0. Các lỗi liên quan `/var/tmp` chỉ đọc và credential guard gặp `/tmp/.git`; tám ca bỏ qua thêm do venv/pip.
+
+Cần sửa bootstrap sandbox: cấp vùng tạm ghi được ngoài tổ tiên có `.git`, cung cấp wheel offline, rồi chạy lại đúng SHA đến `397/397`, bỏ qua 2. Giữ nguyên các guard và ca kiểm tra.
+
+Phần hotfix đạt:
+
+- HEAD `fc6fbc7c07351ea75ece6a0a25a96262225bef03`; tree `46d05062cad4f3ca6629931ebc6a4cd0535358f3`.
+- Spec hash khớp. Diff đúng một tệp, một mục, `+2/-1`; AST còn lại giữ nguyên.
+- Nhãn dùng đúng `muc[3]`. Khi `_CO_DIR_FD=False`, dòng bị đột biến không chạy; nhãn không che phép đo Windows hữu ích.
+- Các mục POSIX tương tự đã có ca đích tự bỏ qua khi thiếu `dir_fd`.
+
+Các lệnh đã chạy, với `TMPDIR=/tmp/rvh1272-tmp`, `PYTHONDONTWRITEBYTECODE=1`:
+
+| Bản sao | Lệnh | Kết quả |
+|---|---|---|
+| `/tmp/rvh1272-copy` | `python -B /tmp/rvh1272-tmp/focused.py` | rc=0; đúng một dòng kết quả, `OK giet 1/1`; ba bảng `1/0/0` |
+| Cùng bản sao | Lệnh trên thêm `windows` | rc=0; đúng một dòng `KHONG DO DUOC tren nen nay` |
+| Cùng bản sao | `python .claude/dev/launcher_test.py` | rc=1; kết quả nêu trên |
+| `/tmp/rvh1272-base` | `python .claude/dev/launcher_test.py --nhat-ky /tmp/rvh1272-tmp/full-base.journal` | rc=1; cùng 13 ca hỏng và 10 ca bỏ qua |
+| Cả hai | `python -m ruff check --no-cache --select F --output-format json .claude/dev/launcher_test.py scripts/tl.py` | rc=1; cùng 17 chẩn đoán nền, **delta 0** |
+
+Workspace gốc không có delta nội dung/quyền qua snapshot; `.aws/` và `.codex/` vẫn rỗng. Windows thật với nhãn mới và log CI chưa được tự xác minh trong lượt offline này.
+
+Identity: `openai_codex / openai / codex_cli / machine`; sandbox `workspace-write`; Python 3.13.17; model/effort `KHONG_DO_DUOC`.
+
+[Lệnh, rc, hash output và finding đầy đủ](/tmp/rvh1272-tmp/review-evidence.json).
+
+KET_LUAN: request_changes

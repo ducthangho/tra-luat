@@ -1,0 +1,28 @@
+Không còn phát hiện P0–P3. P2 lượt trước về A4 được đóng bằng phép đo delta độc lập; SHA không đổi.
+
+- HEAD: `fc6fbc7c07351ea75ece6a0a25a96262225bef03`
+- Base: `efebadf83409a81e42e6c97f1b7255ede76110f5`
+- Tree: `46d05062cad4f3ca6629931ebc6a4cd0535358f3`
+
+Diff đúng một tệp, thêm 2 dòng/xoá 1 dòng, chỉ bổ sung phần tử thứ tư cho `r1252_ghi_de_dich_truc_tiep`. AST còn lại giống nền hoàn toàn; vẫn 399 ca.
+
+Nhãn dùng đúng `muc[3]`: `(nen == "posix") == LA_WINDOWS` bỏ qua trên Windows. Khi `_CO_DIR_FD=False`, dòng bị đột biến không chạy; nhánh dự phòng dùng `os.replace(tam, duong)` riêng. Không thấy phép đo Windows có ý nghĩa bị che. Các mục POSIX liên quan khác có ca đích tự bỏ qua hoặc mô phỏng nhánh cần đo.
+
+| Lệnh/phép kiểm | Bản sao, CWD | Kết quả |
+|---|---|---|
+| `python -B /tmp/rvh1272b-tmp/focus.py` | `/tmp/rvh1272b-copy` | rc=0; Linux đúng **1 dòng `OK giet 1/1`**; mô phỏng Windows đúng **1 dòng `KHONG DO DUOC tren nen nay`** |
+| `python .claude/dev/launcher_test.py` | `/tmp/rvh1272b-offline-base` | rc=1; **376/389**, tổng 399, bỏ qua 10, hỏng 13 |
+| Cùng lệnh suite | `/tmp/rvh1272b-offline-candidate` | rc=1; **cùng số lượng và đúng tập hỏng/bỏ qua** |
+| Ruff F, `--no-cache --select F` | Hai clone offline trên | rc=1 mỗi scope; cùng 12 F821 ở `scripts/tl.py`, cùng 5 F841 ở hai tệp launcher; **delta=0** |
+| Ruff pin/probe contract | Hai clone offline trên | rc=0; `RUFF_CONTRACT 3 []` |
+| `git diff --check` giữa hai OID | `/tmp/rvh1272b-copy` | rc=0 |
+
+**A4 đạt, delta=0.** Suite vẫn đỏ tuyệt đối trong sandbox; 10 ca bỏ qua gồm 2 ca nền tảng và 8 ca venv/pip, không được tính là qua.
+
+Cấu hình đo chốt: Python 3.13.17, `TMPDIR=/tmp/rvh1272b-tmp`, `PIP_NO_INDEX=1`, không đặt `GIT_OPTIONAL_LOCKS`. HEAD/tree cuối giữ nguyên. Bản sao review chính sạch; các clone chạy suite có `.claude/.packet_state/` ignored. Không có lệnh ghi nhắm workspace gốc.
+
+Reviewer: `openai_codex / openai / codex_cli / machine`; sandbox `workspace-write`; model/effort phục vụ `KHONG_DO_DUOC`. Windows thật, CI từ xa và hash blob spec nguồn chưa được xác minh độc lập trong lượt offline.
+
+[Lệnh, rc, danh sách ca và SHA-256 log](/tmp/rvh1272b-tmp/evidence.json).
+
+KET_LUAN: approve

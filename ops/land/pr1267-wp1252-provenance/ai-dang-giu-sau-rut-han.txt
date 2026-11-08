@@ -1,0 +1,22 @@
+# ai-dang-giu write set sau rut han; fetch +refs/heads/*:refs/remotes/origin/* --prune; git branch -f master origin/master (c15603d); ls-remote so for-each-ref theo TAP TEN
+thieu=0 thua=0 / may chu 743
+2026-11-08T09:11:35Z
+## .claude/dev/launcher.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0
+so dong HET_HAN: 53
+HẾT_HẠN	wp1252-r1-g1-claude	refs/remotes/origin/ops/wp1252-r1-g1-lease:ops/leases/wp1252-r1-g1-claude.yaml
+## .claude/dev/launcher_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0
+so dong HET_HAN: 78
+HẾT_HẠN	hotfix-r1252-posix-r1-g1-claude	refs/remotes/origin/ops/hotfix-r1252-posix-lease:ops/leases/hotfix-r1252-posix-r1-g1-claude.yaml
+HẾT_HẠN	wp1252-r1-g1-claude	refs/remotes/origin/ops/wp1252-r1-g1-lease:ops/leases/wp1252-r1-g1-claude.yaml
+## ops/handoff/wp1252-g1-claude.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0
+so dong HET_HAN: 1
+HẾT_HẠN	wp1252-r1-g1-claude	refs/remotes/origin/ops/wp1252-r1-g1-lease:ops/leases/wp1252-r1-g1-claude.yaml

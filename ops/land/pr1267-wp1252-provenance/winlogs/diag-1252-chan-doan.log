@@ -1,0 +1,20 @@
+HEAD 9e564d41a347410d5c52aa77a8dfda4a2edde3c2
+SHA fc909e5a406bd1e0f440bcfa982902aec3b7373b3f5de3cb99b5a58003917e2b
+
+RC 0
+== A: ghi_tep_ignored x 10
+lan 1: rc=16 ok
+lan 2: rc=16 ok
+lan 3: rc=16 ok
+lan 4: rc=16 ok
+lan 5: rc=16 ok
+lan 6: rc=16 ok
+lan 7: rc=16 ok
+lan 8: rc=16 ok
+lan 9: rc=16 ok
+lan 10: rc=16 ok
+== B: doi_to_tien du_phong x 1
+rc 16 {"trang_thai": "ghi_workspace", "ma_thoat": 0, "snapshot_ket_qua": "ghi_workspace", "snapshot_ly_do": "tep_doi", "snapshot_tep_chup_bo_qua": null, "tep_doi": [{"duong_dan": ".tl_state/gia", "doi": "them"}, {"duong_dan": ".tl_state/gia/9240bac3", "doi": "them"}], "tep_doi_tong": 2}
+C:\Users\tladmin\AppData\Local\Temp\lt_uwq02b47\rr\runs\9240bac3\stderr.log :: rename LOI PermissionError(13, 'Access is denied')
+symlink LOI FileExistsError(17, 'Cannot create a file when that file already exists')
+R-goc ton tai: False | R la symlink: False

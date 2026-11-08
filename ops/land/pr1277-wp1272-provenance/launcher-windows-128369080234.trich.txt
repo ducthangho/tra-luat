@@ -1,0 +1,6 @@
+# trich log job 128369080234 launcher (windows-latest), run 42360967762 attempt 1, head 27fd808; REST GET actions/jobs/128369080234/logs (redirect theo tay, khong mang token)
+# log_sha256 dacc09a4267343729dc68df7cea3bf4e2af49b68c41007a7123d94a66f867c7e bytes 138261 (log goc co CRLF; trich nay da bo \r cuoi dong)
+587:2026-11-07T09:52:01.5895168Z 314/314 ca DA CHAY QUA (tong 397, bo qua 83, hong 0) - KHONG DU: 83 ca BO QUA, chua do gi
+614:2026-11-07T09:54:10.7251400Z   r1252_ghi_de_dich_truc_tiep  SAI  giet 0/1: (khong ca nao chet)
+1299:2026-11-07T10:00:51.4572966Z DOT BIEN: 520/521 dat  (138 khong do duoc tren nen nay)
+1300:2026-11-07T10:00:51.6089262Z ##[error]Process completed with exit code 1.

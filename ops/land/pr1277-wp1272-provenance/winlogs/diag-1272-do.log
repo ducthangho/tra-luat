@@ -1,0 +1,104 @@
+﻿bat dau (chay song song voi A16 #1179, cung khoa cua phien dieu phoi) 2026-11-08T06:18:49.2652284+07:00
+sha256=2535bbd6f8205ac86fadcd8b590c5ccf19290d23949329767489c4e22ba4fed5
+HEAD 27fd80803e9a8f80e660752f58c8dd477e9730c8
+platform Windows 2022Server | python 3.12.10
+os.open in supports_dir_fd: False | os.unlink in supports_dir_fd: False
+hasattr O_NOFOLLOW: False | hasattr O_DIRECTORY: False
+launcher._CO_DIR_FD = False
+dong dich co trong launcher.py: 1
+== 1: ca dich tren ban goc
+ca r1252_ghi_bang_chung_an_toan: QUA
+== 2: dot bien nhu tren master (khong nhan)
+so muc: 1 | so phan tu: 3
+  r1252_ghi_de_dich_truc_tiep  SAI  giet 0/1: (khong ca nao chet)
+  wp802_hook_co_thay_co_chay   KHONG DO DUOC tren nen nay (ca dich bo qua: r802_hook_linux_rg_hong_van_thu_cargo)
+  wp802_hook_windows_roi_vao_apt KHONG DO DUOC tren nen nay (ca dich bo qua: r802_hook_windows_khong_cai_in_dung_lenh)
+  wp802_hook_lenh_windows_lech_yaml OK  giet 1/1: r802_bang_cai_rg_khop_cong_cu_yaml
+  wp802_yaml_bo_ung_vien_winget_links OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp802_hook_windows_probe_hai_lan KHONG DO DUOC tren nen nay (ca dich bo qua: r802_hook_windows_khong_cai_in_dung_lenh)
+  wp1078_chon_bang_command_v   OK  giet 1/1: r1078_hinh_dang_chon_python_bang_type_P
+  wp1078_goi_ham_python_thua   KHONG DO DUOC tren nen nay (ca dich bo qua: r1078_ham_python_khong_phai_python_khong_duoc_goi)
+  wp1078_chot_chi_nhanh_chon_moi KHONG DO DUOC tren nen nay (ca dich bo qua: r1078_py_dung_lai_khong_tuyet_doi_phai_thoat_4)
+  wp1078_bo_chot_tuyet_doi     OK  giet 1/1: r1078_hinh_dang_chon_python_bang_type_P
+  wp831_yaml_linux_bo_ung_vien_usrbin OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp831_yaml_macos_bo_ung_vien_brew OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp858_yaml_git_linux_ve_dirname OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp858_yaml_bash_macos_bo_ung_vien_brew OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp858_yaml_shellcheck_windows_bo_ung_vien_choco OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp858_yaml_python_linux_ve_dirname OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp858_sh_bo_kiem_ten_tran    OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp858_sh_chon_theo_ma_thoat  OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp1045_sh_ten_tran_ve_rc     OK  giet 1/1: r1045_hinh_dang_dat_theo_trang_thai
+  wp1045_sh_ung_vien_ve_rc     OK  giet 1/1: r1045_hinh_dang_dat_theo_trang_thai
+  wp1045_sh_cong_cu_dat_bo_trang_thai OK  giet 1/1: r1045_hinh_dang_dat_theo_trang_thai
+  wp1045_sh_bo_thoat_3         OK  giet 1/1: r1045_hinh_dang_dat_theo_trang_thai
+  wp1045_sh_source_tuy_chon_hong_van_dung OK  giet 1/1: r1045_hinh_dang_dat_theo_trang_thai
+  wp1045_sh_source_bat_buoc_hong_van_di_tiep OK  giet 1/1: r1045_hinh_dang_dat_theo_trang_thai
+  wp1045_sh_kiem_cuoi_tran_duoi_errexit OK  giet 1/1: r1045_hinh_dang_dat_theo_trang_thai
+  wp1045_sh_eval_trong_ngu_canh_dieu_kien OK  giet 1/1: r1045_hinh_dang_dat_theo_trang_thai
+  wp1045_sh_source_khong_don_tam KHONG DO DUOC tren nen nay (ca dich bo qua: r1045_bat_buoc_cong_cu_tuy_chon_thieu_khong_chan_cong_cu_sau)
+  wp1045_sh_rc_cai_mat_ma      KHONG DO DUOC tren nen nay (ca dich bo qua: r1045_bat_buoc_cong_cu_bat_buoc_hong_van_dung)
+  wp1045_sh_errexit_tat_sau_eval KHONG DO DUOC tren nen nay (ca dich bo qua: r1045_bat_buoc_kiem_cuoi_luot_source_hong_thi_dung_ca_loat)
+  wp1045_sh_kiem_cuoi_source_nuot_loi KHONG DO DUOC tren nen nay (ca dich bo qua: r1045_bat_buoc_kiem_cuoi_luot_source_hong_thi_dung_ca_loat)
+  wp1045_sh_thoat_3_ca_luot_source OK  giet 1/1: r1045_hinh_dang_dat_theo_trang_thai
+  wp858_sh_khong_ung_vien_van_rc0 OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp858_sh_github_path_khong_qua_cygpath OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp858_sh_bo_cygpath_u        OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp858_sh_nuot_loi_cygpath_w  OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp858_sh_nuot_loi_ghi_github_path OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp858_sh_bo_dong_canh_giu_path OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp858_sh_cygpath_u_hong_khong_tra_loi OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp858_sh_dong_canh_la_ten_thu_muc OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp858_sh_dong_canh_khong_tach_dong OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp858_sh_cygpath_u_chi_khi_ghi_path OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp858_sh_github_path_vang_khong_mac_dinh OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp868_sh_ham_in_stdout_thay_kenh OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp868_sh_doc_stdout_thay_kenh OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp868_sh_kenh_export         OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp868_sh_cho_eof_stdout      OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp868_sh_bo_duong_lui_dong_cuoi OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp868_sh_doc_kenh_nuot_loi   OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp868_sh_bo_trap_exit        OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp868_sh_duong_lui_bo_cat_cr OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp868_sh_ghi_giu_path_nuot_loi OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp868_sh_ghi_dich_nuot_loi   OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp868_sh_kenh_rac_rc0        OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp868_sh_tam_export          OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp868_sh_bo_rm_tuong_minh    OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp868_sh_gan_lai_kenh_sau_go_export OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp868_sh_gan_lai_tam_sau_go_export OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp868_sh_go_trap_sau_eval    OK  giet 1/1: r868_hinh_dang_kenh_ket_qua
+  wp868_sh_chi_duyet_hai_ung_vien OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp868_sh_bo_break            OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp868_yaml_rg_linux_ve_bo_chon_rieng OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+  wp886_cc_ve_sys_executable   OK  giet 2/2: r886_n1_ten_tran_theo_path_moi_nen, r886_n2_python_hong_dau_path_khong_DAT
+  wp886_cc_python3_truoc_python OK  giet 2/2: r886_n2_python_hong_dau_path_khong_DAT, r886_ten_python_khop_cai_cong_cu_sh
+  wp886_cc_bo_python3          OK  giet 1/1: r886_ten_python_khop_cai_cong_cu_sh
+  wp886_cc_py_mat_tru_3        OK  giet 2/2: r886_n6_giai_ten_tinh_windows_va_posix, r886_ten_python_khop_cai_cong_cu_sh
+  wp886_cc_khong_ten_roi_ve_sys_executable OK  giet 1/1: r886_n4_khong_ten_nao_noi_ro_thieu_gi
+  wp886_cc_bo_ly_do_thieu_ten  OK  giet 1/1: r886_n4_khong_ten_nao_noi_ro_thieu_gi
+  wp886_cc_windows_nhan_ten_tran OK  giet 1/1: r886_n6_giai_ten_tinh_windows_va_posix
+  wp886_cc_bo_muc_PATH_rong    OK  giet 1/1: r886_n6_giai_ten_tinh_windows_va_posix
+  wp886_cc_bo_X_OK             KHONG DO DUOC tren nen nay (ca dich bo qua: r886_n1_bo_qua_tep_khong_thuc_thi)
+  wp886_cc_dao_thu_tu_PATH     OK  giet 1/1: r886_n6_giai_ten_tinh_windows_va_posix
+  wp886_cc_path_truoc_ten      OK  giet 1/1: r886_n6_giai_ten_tinh_windows_va_posix
+  wp858_selftest_editskill_ten_co_dinh OK  giet 1/1: r858_selftest_editskill_thu_muc_rieng
+  wp1079_cc_bo_kiem_kieu       OK  giet 1/1: r1079_cc_test_chi_chot_cua_suite_la_do
+  wp1079_cc_bo_kiem_tep        OK  giet 1/1: r1079_cc_test_chi_chot_cua_suite_la_do
+  wp1079_cc_bo_kiem_dong_assert OK  giet 1/1: r1079_cc_test_chi_chot_cua_suite_la_do
+  wp1079_cc_ten_do_bo_loai     OK  giet 1/1: r1079_cc_test_chi_chot_cua_suite_la_do
+  wp1079_cc_bo_kiem_ca_khac    OK  giet 1/1: r1079_review_credential_chot_ca_khac_khong_la_giet
+  wp1079_cc_cho_trung_ma       OK  giet 1/1: r1079_ca_trung_ma_bi_tu_choi_luc_dang_ky
+  wp1079_cc_chay_suite_bo_ten_do OK  giet 1/1: r1079_cc_chay_suite_phai_do_hanh_vi
+  wp1122_assertion_dinh_dang_lai_sau_map OK  giet 1/1: r1122_nhat_ky_giu_loai_va_thong_diep_160
+  wp1122_assertion_map_truoc_dinh_dang OK  giet 1/1: r1122_nhat_ky_giu_loai_va_thong_diep_160
+  wp1117_runner_doc_map_toan_cuc OK  giet 1/1: r1122_kenh_loi_phai_thuoc_luot_ngoai
+  wp1117_runner_map_de_ket_qua_qua OK  giet 1/1: r1122_kenh_ca_qua_khong_mang_chi_tiet_cu
+  wp1117_lap_ca_bo_chi_tiet_loi OK  giet 1/1: r1122_kenh_loi_phai_thuoc_luot_ngoai
+  wp1122_dinh_dang_lai_sau_ghi_map OK  giet 1/1: r1122_nhat_ky_giu_loai_va_thong_diep_160
+  wp1122_nhat_ky_loi_io_khong_cat OK  giet 1/1: r1122_nhat_ky_loi_io_khong_in_traceback_dai
+  wp1122_nhat_ky_loi_io_bo_reporter OK  giet 1/1: r1122_nhat_ky_loi_io_khong_in_traceback_dai
+  wp1122_tach_nhom_mat_chi_tiet OK  giet 1/1: r1122_tach_nhom_loi_giu_loai_va_thong_diep_160
+  wp1122_tach_nhom_khong_cat   OK  giet 1/1: r1122_tach_nhom_loi_giu_loai_va_thong_diep_160
+  wp1122_stdout_bo_utf8        OK  giet 1/1: r1122_reporter_unicode_console_khong_utf8
+  wp1122_stdout_dung_ascii     OK  giet 1/1: r1122_reporter_unicode_console_khong_utf8

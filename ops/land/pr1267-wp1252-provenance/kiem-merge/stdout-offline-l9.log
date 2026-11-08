@@ -1,0 +1,30 @@
+Không phát hiện P0/P1/P2/P3 mới trong phạm vi đã kiểm.
+
+- Reviewed SHA: `e6c650573452ad98c3055f5147eeacfb4767f119`
+- Tree: `7acc44ba56991945262c7f023b9ec7fcbd539b90`
+- Hash spec khớp. Diff `.claude/dev/**`: **2 tệp, +1079/−8**, trong trần 1080.
+- Reviewer: `openai_codex / openai / codex_cli / machine`; model/effort phục vụ: `KHONG_DO_DUOC`; sandbox: `workspace-write`.
+
+**Đối chiếu lượt trước:** F11, lớp `windows-poll-khong-khoa-khoang-cho`, **ĐÃ VÁ THẬT**. Đột biến bỏ ngủ bị giết đúng ca `r1252_khong_do_duoc`. F1–F10 và ba P2 connector giữ đóng trong phạm vi Linux đã đo; [bảng đối chiếu từng finding](/tmp/rv1252i-copy/review-evidence/doi-chieu-findings.md) ghi ca và đột biến tương ứng.
+
+Poll chỉ trả True khi job rỗng. Thiếu job, `None` hoặc còn PID đều không thành bằng chứng cây chết. Thời gian ngủ tối đa danh nghĩa là **2 giây**, cộng chi phí query/lập lịch; mức này chấp nhận được ở bước hậu xử lý. Bản vá giữ quyết định kill-tree, mã quá hạn và trạng thái ngắt.
+
+Nhánh bỏ qua mới của fixture bị khóa bằng `os.name == "nt"`: trên Linux/macOS, gặp dấu `KL` sẽ làm assertion đỏ. Nhánh bỏ qua khi không tạo được symlink đã có từ trước. Khi Windows từ chối rename, ca vẫn kiểm rc 16 và không ghi snapshot vào workspace, rồi báo bỏ qua phép đo đổi tổ tiên.
+
+Các lệnh dưới chạy với `TMPDIR=/tmp/rv1252i-tmp`, `PYTHONDONTWRITEBYTECODE=1`:
+
+| Lệnh / bản sao | Kết quả | rc |
+|---|---|---:|
+| `python3 -B review-evidence/run_prefix.py cases` tại `/tmp/rv1252i-copy` | **22/22 qua**, 0 bỏ qua | 0 |
+| `python3 -B review-evidence/run_prefix.py mutants` tại bản sao ấy | **53/53 giết đúng ca đích** | 0 |
+| `python3 -B review-evidence/run_patch_mutants.py` tại bản sao ấy | **3/3 đột biến một dòng bổ sung bị giết** | 0 |
+| `launcher_test.py --nhat-ky …`, ứng viên | 374 qua / 13 hỏng / 10 bỏ qua | 1 |
+| Cùng lệnh tại `review-evidence/base`, SHA `889334f` | 352 qua / 13 hỏng / 10 bỏ qua | 1 |
+
+**A1 không đạt pass tuyệt đối trong sandbox này.** Hai bản có cùng danh sách ca hỏng/bỏ qua; toàn bộ 375 ca cũ giữ trạng thái, chỉ thêm 22 ca qua. Lỗi nền liên quan `/var/tmp` chỉ đọc và `/tmp/.git`. Ruff rc 1 ở cả hai, cùng 5 F841, **delta 0**. `doctrine-scan` và `git diff --check` đều rc 0.
+
+Clone/config/checkout, runner, đột biến và hiện vật chỉ thực hiện trong bản sao/sân tạm. Không ghi workspace gốc; `.aws/` và `.codex/` vẫn rỗng. **A10/A11/A14: `chua_do_duoc`**; không nhận kết quả launcher ngoài làm bằng chứng đã tự đo.
+
+[Lệnh, mã thoát và kết quả](/tmp/rv1252i-copy/review-evidence/verification.json); [manifest hash](/tmp/rv1252i-copy/review-evidence/SHA256SUMS) đã xác minh **20/20** hiện vật, rc 0.
+
+KET_LUAN: approve

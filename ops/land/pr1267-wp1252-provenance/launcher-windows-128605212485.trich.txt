@@ -1,0 +1,5 @@
+# trich log job 128605212485 launcher (windows-latest), run 42439410853 attempt 1, head c15603d; REST GET actions/jobs/128605212485/logs (redirect theo tay, khong mang token)
+# log_sha256 2184d53986786b5d1a412ea08307bf32e143d0b793df6b394b0d6495ea226dc5 bytes 153807 (log goc co CRLF; trich nay da bo \r cuoi dong)
+575:2026-11-08T02:45:25.0198941Z 316/316 ca DA CHAY QUA (tong 399, bo qua 83, hong 0) - KHONG DU: 83 ca BO QUA, chua do gi
+602:2026-11-08T02:47:25.3680471Z   r1252_ghi_de_dich_truc_tiep  KHONG DO DUOC tren nen nay (nhanh dir_fd cua _ghi_tep_0600 khong chay tren Windows (_CO_DIR_FD False))
+1287:2026-11-08T02:53:06.6686559Z DOT BIEN: 520/520 dat  (139 khong do duoc tren nen nay)

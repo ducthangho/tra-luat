@@ -1,6 +1,6 @@
 # Bien ban M8 (ADR-0060) dong WP #1252 LAUNCHER-READONLY-IGNORED r1 — kiem bang packet_loop.py kiem-dong-wp
 # Nhan nguon tung muc: ops/land/pr1267-wp1252-land-evidence.yaml (post_merge_checks, nghiem_thu, trang_thai_packet).
-# landed false: moc workflow_definition not_measured (GraphQL 403, chua co wd-run); launcher-windows 42360967762 tren 27fd808 FAILURE
+# landed false: bon moc §10.2.2 du (wd-run 42467652116); nghiem thu A10/A14 not_measured; launcher-windows 42360967762 tren 27fd808 FAILURE
 # (khac phuc o c15603d bang #1272). Nghiem thu khong phai passed het (A10 thuat_lai, A14 mot phan).
 packet: LAUNCHER-READONLY-IGNORED
 revision: 1
@@ -45,5 +45,5 @@ landed: false
 moc_10_2_2:
   run: passed
   checkout: passed
-  workflow_definition: not_measured
+  workflow_definition: passed
   gate_output: passed

@@ -1,6 +1,6 @@
 # Bien ban M8 (ADR-0060) dong WP #1272 HOTFIX-R1252-POSIX r1 — kiem bang packet_loop.py kiem-dong-wp
-# Nhan nguon tung muc: ops/land/pr1277-wp1272-land-evidence.yaml. landed false: moc workflow_definition not_measured (GraphQL 403,
-# chua co wd-run cho run 42439410815). A1 lane chu kho la thuat_lai (buoc (3) do that chi o CI sau merge).
+# Nhan nguon tung muc: ops/land/pr1277-wp1272-land-evidence.yaml. landed false: bon moc §10.2.2 du (wd-run 42467654305); con
+# nghiem thu A1 not_measured — lane chu kho la thuat_lai (buoc (3) do that chi o CI sau merge).
 packet: HOTFIX-R1252-POSIX
 revision: 1
 generation: 1
@@ -33,5 +33,5 @@ landed: false
 moc_10_2_2:
   run: passed
   checkout: passed
-  workflow_definition: not_measured
+  workflow_definition: passed
   gate_output: passed

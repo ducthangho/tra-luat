@@ -1,10 +1,9 @@
 # HO SO LAND — packet #1252 LAUNCHER-READONLY-IGNORED r1, lease g1, qua PR #1267. Khuon: ops/land/pr1249-wp1240-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac"; moc gate §10.2.2.
 #
-# TRANG THAI: merged (27fd808), CHUA LANDED (landed: false). Thieu:
-#   (1) moc Workflow definition §10.2.2 cua run push master 42360967762/42360967767: not_measured — can GraphQL WorkflowRun.file
-#       (403 trong phien Claude Code), va CHUA co luot ops-do-workflow-definition.yml nao cho run 42360967767 (REST GET 2026-11-08:
-#       lan gan nhat 42186220787 tren 08bcb51). Phien ghi so KHONG dispatch workflow (chi thi: khong dang/ghi gi len GitHub).
+# TRANG THAI: merged (27fd808), CHUA LANDED (landed: false). Bon moc §10.2.2 cua ci.yml 42360967767 nay DU (workflow_definition
+# do bang wd-run 42467652116, do PHIEN DIEU PHOI dispatch 09:33:00Z; artifact wd.json run_id 42360967767 da doi chieu). Con thieu:
+#   (1) nghiem thu chua du: A10 (lane Windows may chu kho) thuat_lai, A14 chi do mot phan => bien ban ghi not_measured.
 #   (2) launcher-windows.yml tren DUNG merge SHA 27fd808 (run 42360967762) FAILURE: dot bien r1252_ghi_de_dich_truc_tiep SAI giet 0/1,
 #       520/521. Khac phuc bang packet rieng #1272 (PR #1277, merge c15603d): launcher-windows 42439410853 tren c15603d success.
 #       Nghia la land do Windows LUC MERGE, da khac phuc o commit sau — KHONG phai xanh tren chinh 27fd808.
@@ -92,9 +91,13 @@ post_merge_checks:
     moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha 27fd808, run_attempt 1; ci/jobs.json 23/23 job success, nhan ubuntu-latest, runner_id khac 0.'
     moc_checkout: 'measured — ci/provenance.yaml: 23/23 job checkout passed 27fd80803e9a8f80e660752f58c8dd477e9730c8 (cha 132d376 + e6c6505, tree d8503020).'
     moc_workflow_definition: >-
-      not_measured — ci/provenance.yaml moc.workflow_definition: not_measured, ly_do graphql_bi_chan_trong_phien_claude; cho P-B;
-      loi_khai_rest_path .github/workflows/ci.yml. Duong dong: dispatch .github/workflows/ops-do-workflow-definition.yml voi run_id
-      42360967767 roi `ops/ci_provenance.py thu --wd-run <id>` (tien le pr1249: wd-run 42151025945). Phien nay KHONG dispatch.
+      measured — ci/provenance.yaml moc.workflow_definition: passed; path .github/workflows/ci.yml, oid 27fd808, blob 2b2c9aa2 (=
+      git rev-parse 27fd808:.github/workflows/ci.yml), sha256 aed785d6…; wd_run_id 42467652116, artifact 13612392020 (artifact_sha256
+      408dae5f…). Anh xa doi chieu bang chinh noi dung artifact, KHONG theo thu tu dispatch: wd-42467652116-artifact-13612392020.json
+      co run_id 42360967767, head_sha_rest = check_suite_commit = oid_dinh_nghia = 27fd808, trang_thai passed, loi_graphql [].
+      readback-run-42467652116.json: ops-do-workflow-definition.yml, workflow_dispatch tren master c15603d, success, tao 09:33:00Z
+      2026-11-08; readback-jobs-42467652116.json: job do-wd success, runner_id khac 0. Dispatch do phien dieu phoi (thuat_lai ve
+      nguoi dispatch); phien ghi so chi doc.
     moc_gate_output: >-
       measured — danh-gia-gate-output-42360967767.txt (danh_gia_gate.py chep nguyen tu pr1249, sha256 b87f9697, luat THEO BUOC):
       MOC_GATE_OUTPUT passed, 23/23 job co dau hieu duong (gom tl selftest 1777/1777). Lane LAND: release-verify-land-128369135884.txt
@@ -164,16 +167,16 @@ trang_thai_packet:
   merged_nguon: 'measured — readback-pr-1267.json merged true; readback-commit-27fd808.json cha 132d376 + e6c6505, tree d8503020; merge-va-diff.txt: 27fd808 nam tren first-parent origin/master.'
   landed: false
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren merge SHA 27fd808: CHUA DAT — ci.yml 42360967767 du ba moc run/checkout/gate_output, moc
-    workflow_definition not_measured; them nua launcher-windows 42360967762 tren chinh 27fd808 FAILURE (khac phuc o c15603d bang #1272,
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 27fd808: ci.yml 42360967767 DU bon moc (run/checkout/workflow_definition/gate_output
+    measured passed); NHUNG launcher-windows 42360967762 tren chinh 27fd808 FAILURE (khac phuc o c15603d bang #1272,
     khong lam xanh 27fd808). (2) lease nha: DAT (lease.thu_hoi_cuoi). (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp rc 12,
     thieu D2). (4) review neo dung authorized_head e6c6505: DAT ve noi dung (offline luot 9 approve, connector sach) nhung luot 9 SAU
     push (lech M12, tu khai). (5) uy quyen land: thao tac merge cua tai khoan chu kho + mien K6/K7 tu dang truoc merge; khong co
     comment approve_merge. (6) muc tieu packet: xem nghiem_thu. (7) ADR-0060 M1 P3: khong co P3 mo nao trong ho so (luot 9 approve
     0 finding chan; connector sach) — phien nay khong do P3 tung luot 1–8.
   de_nang_landed_true_can: >-
-    (a) moc workflow_definition cho run 42360967767 (dispatch ops-do-workflow-definition.yml + thu --wd-run, hoac lenh `gh api graphql`
-    chu kho chay tren may minh theo CLAUDE.md); (b) quyet dinh cua chu kho/phien dieu phoi: launcher-windows do tren chinh 27fd808 va
+    (a) nghiem thu A10/A14 co bang chung do duoc (log lane Windows may chu kho; duong dan launcher.py da goi o luot 9) hoac chu kho
+    chap nhan/mien; (b) quyet dinh cua chu kho/phien dieu phoi: launcher-windows do tren chinh 27fd808 va
     duoc khac phuc o c15603d co du cho dieu kien gate §10.2.4 hay khong — phien ghi so KHONG tu quyet.
 
 review:
@@ -228,7 +231,6 @@ nghiem_thu:
   A8: 'measured — nghiem-thu-ca-va-dot-bien-ci-ubuntu-128369080136.txt muc A8 (linux-only): r1252_de_trang_thai OK giet 1/1.'
 
 khong_do_duoc:
-  - 'Moc Workflow definition §10.2.2 cua run 42360967767 (GraphQL 403; chua co wd-run).'
   - 'Log A10 Windows tren may chu kho (C:\work\diag-1252-a10-*.log) — ngoai container.'
   - 'Hien vat luot 7, 8 Codex offline: khong co trong handoff 814a00e (ung vien cu e0aeb97) va khong chep vao ho so nay.'
   - 'Ai bam merge PR #1267 (#566).'

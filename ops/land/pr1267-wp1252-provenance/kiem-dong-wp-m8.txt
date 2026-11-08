@@ -4,3 +4,9 @@
   THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
 CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
 rc=12
+
+# LAN 2 (sau wd-run do phien dieu phoi dispatch: moc_10_2_2.workflow_definition passed; landed van false theo nghiem thu)
+# checkout: 966dda064c00cbba3daa9ec2db0befc1ce87fd59 (+ thay doi chua commit trong ops/land) ; origin/master: c15603dcf537fa4beb753b263398d6e6b8c92019 ; luc: 2026-11-08T09:35:46Z
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12

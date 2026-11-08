@@ -1,0 +1,255 @@
+{
+  "reviewed_sha": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "reviewed_tree": "30cbf51650d88f05c0fcae977dd9df286a089204",
+  "base_sha": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "spec_sha256": "71d8f3bf6523c3428e86868085c6fc3263fdbb6e8936de48d953dfd6ad1ea3b3",
+  "packet_id": "wp1279",
+  "revision": 4,
+  "generation": 4,
+  "verdict": "approved",
+  "review_class": "sensitive",
+  "review_axes": ["spec", "standards_security"],
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "identity": {
+    "session_run_id": "7da16bbe3971485fa4488c30378f2c09",
+    "model_family": "openai",
+    "model": "KHONG_DO_DUOC",
+    "effort": "KHONG_DO_DUOC",
+    "sandbox": "read-only",
+    "independent_from_executor_session": true,
+    "github_submitter_identity": null,
+    "evidence": "Current enforced permissions and matching code-review-runs/7da16bbe/run.json. Requested model settings were not treated as served-model evidence. Parent terminal telemetry remains separate."
+  },
+  "scope": {
+    "files_reviewed": [
+      ".agents/skills/proxima-control/scripts/ProximaControl.psm1",
+      ".agents/skills/proxima-control/scripts/Run-Px.ps1",
+      ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1"
+    ],
+    "reviewed_entire_base_to_head_implementation": true,
+    "additions": 1773,
+    "deletions": 0,
+    "write_set_hash": "92211ad4ed211a39980c65742bb6d6df228ce975f920bc753ab786d41e62a054",
+    "s1_bytes_unchanged": true,
+    "repository_modifications": false,
+    "other_model_calls": 0,
+    "network_calls": 0,
+    "approval_scope": "Independent exact-head code review and offline acceptance evidence. Publication, receipt validation and promotion remain separate."
+  },
+  "axis_results": {
+    "spec": "No unresolved finding identified. Reviewed explicit S1 target validation, six-field fingerprints, Ordinal identities, ShouldProcess propagation, wrapper persistence, owned sessions, constant endpoint requests, dependency hashes, HTTP paths, model selection, journal lifecycle and service guards against the complete r4 spec.",
+    "standards_security": "No unresolved finding identified within r4 offline acceptance. Reviewed concrete qualified primitives, listener ownership and types, failure paths, sanitized errors, credential handling, harness isolation, mutation evidence, nested artifact retention and declared race boundaries."
+  },
+  "findings": [],
+  "finding_classes": {
+    "open_classes": 0,
+    "open_manifestations": 0,
+    "prior_classes_verified_closed": 3,
+    "exact_head_owner_dispositions_used": []
+  },
+  "prior_class_dispositions": [
+    {
+      "stableid": "WP1279-R1-F01",
+      "class_slug": "encoding-dependent-endpoint-path-validation",
+      "historical_severity": "P2",
+      "disposition": "ĐÃ VÁ THẬT",
+      "sourcehistory": {
+        "original": "a7f51d0c70016e0e53afe40e256a819835eb6a52:ops/reviews/wp1279-r2-review1/verdict.md",
+        "previous_closure": "4e0c84ed3f56df672cc7e32e14c181566f941d36:ops/reviews/wp1279-r3-review2/verdict.md",
+        "previous_receipt": "b39d75aca19c1b507655191c27c89c17daadfc58:ops/reviews/wp1279-r3-review2.receipt.yaml",
+        "prior_formal_occurrences": 1
+      },
+      "positive": "H4 constructs reserved-device superscripts from code points at module line 387, matching pinned S1 semantics. Independently matched all 60 retained endpoint bodies to their corresponding sources. Current positive raw reports preserve successful COM-U00C2/LPT-U00C2 handshakes and rejection of COM-U00B9/LPT-U00B2 on both runtimes, including tr-TR. Native host ACP is 1252 before and after; Desktop child reports retain codepage 1252.",
+      "negative": "Read the original finding and historical raw H2 reports. H2 under the PS5.1 parent has actual ENDPOINT_VALID_PATH_REJECTED failures. H2 under the PS7 parent has only SOURCE_NOT_ASCII; that static diagnostic was not credited as a behavioral kill.",
+      "remaining_manifestations": []
+    },
+    {
+      "stableid": "WP1279-R1-F02",
+      "class_slug": "nested-child-evidence-deleted-before-review",
+      "historical_severity": "P2",
+      "disposition": "ĐÃ VÁ THẬT",
+      "sourcehistory": {
+        "original": "a7f51d0c70016e0e53afe40e256a819835eb6a52:ops/reviews/wp1279-r2-review1/verdict.md",
+        "previous_closure": "4e0c84ed3f56df672cc7e32e14c181566f941d36:ops/reviews/wp1279-r3-review2/verdict.md",
+        "prior_formal_occurrences": 1
+      },
+      "positive": "Verified all 30 report sets and 990 artifact links, covering parent and every CX child's endpoint and fresh-wrapper scripts, CLIXML inputs, raw reports, decoded merged outputs, commands, return codes, runtime, culture, roles, paths, sizes and hashes. Verified locations outside measured source copies and cleanup ancestors. Matched 210 actual child scripts to the committed harness. Raw positive payloads and reports preserve Boolean WhatIf, System.Boolean, ambient false, early dry-run, zero imports and both dependency hashes. All 24 control/mutant source-report-output-record sets resolve.",
+      "negative": "Compared the existing private copy with all original manifest entries: exactly one endpoint report is absent. Read-only strict validation reproduced MISSING_NESTED_ARTIFACT:endpoint-report:child\\endpoint-out-0.json. Retained negative child rc1 and output hashes match; the original endpoint report remains SHA256 93093d7d66a7d401bdaf7bc319345d10cab4df0030cb93abbb11755c3e44468f.",
+      "capture_limit": "Merged child output is decoded text captured by the parent. Script, CLIXML and raw-report file bytes are retained; no raw OS stdout-byte identity is claimed.",
+      "remaining_manifestations": []
+    },
+    {
+      "stableid": "WP1279-R3-F03",
+      "class_slug": "unbound-loopback-listener-owner",
+      "historical_severity": "P1",
+      "disposition": "ĐÃ VÁ THẬT",
+      "sourcehistory": {
+        "original": "/workspace/scratch/wp1279-spec-publish/ops/checkpoints/wp1279-r4/connector-F03-original.json",
+        "source_url": "https://github.com/ducthangho/tra-luat/pull/1280#discussion_r4505544562",
+        "source_review_id": 5817175363,
+        "source_sha": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+        "prior_connector_occurrences": 1,
+        "prior_formal_occurrences": 0,
+        "history_preserved": "H3 review2 approval remains historical. Its later promotion was blocked by the new P1; it was not reused as H4 approval."
+      },
+      "positive": "Get-PxcGateway validates metadata, process session/path and listener records before returning the fixed loopback URL. Traced status, models, use and ask through local and remote-export dispatch, including both ask sends. Applicable owners must equal the bounded metadata PID; port equality enforces metadata port bounds. Native integer checks exclude Boolean, string, floating-point, decimal, enum and null coercion. Only Listen records can authorize HTTP. Plain IPv4 loopback/wildcard positives work; applicable IPv6/mapped conflicts reject; IPv6-only fails closed. Denied, empty, null, malformed, port-mismatched and conflicting-owner controls block HTTP. WhatIf returns before listener queries. Retained X5-09 passes on both runtimes, and 28 actual default-CIM probes retain typed records for harness-owned sockets.",
+      "negative": "Old H3 on both runtimes exhibits both required named X5-09 failures, including actual wire px models requests=1/auth=1 with dummy credentials. Reconstructed CX11 from the committed unique ownership-check anchor on both runtimes; both children return rc1 with the required wrong-owner mock and actual-wire failure tokens. CX00 controls pass 26/26, and legitimate owned-listener controls remain active.",
+      "uncertainty_judgments": [
+        "Accepting the exact historical nine-key table permits H3 behavioral comparison. Every table is subsequently replaced and asserted as ten bindings; missing candidate listener enforcement still fails nonvacuous query/count and ownership controls.",
+        "Well-formed non-applicable states and addresses cannot authorize HTTP. At least one applicable native IPv4 listener is required, and every applicable owner must match.",
+        "IPAddress.TryParse leniency can classify additional textual forms as applicable, adding ownership checks rather than bypassing them.",
+        "Ownership is a snapshot. Ask reuses the validated URL across its models GET, journal work and POST; ownership is not revalidated between those sends. This is within the explicitly declared r4 timing limitation, not an atomic ownership claim."
+      ],
+      "remaining_manifestations": []
+    }
+  ],
+  "measuredtests": [
+    {
+      "command": "python -B -: execute unmodified canonical B _spec_merge and its required functions/constants against the original r4 lease",
+      "measurement_source": "personally_executed",
+      "actualrc": 0,
+      "status": "passed",
+      "hash": "2aced17b136132f7216056b39a253656ce251a9520752f8091138f39e0077a92",
+      "hash_scope": "Canonical packet_loop.py source",
+      "evidence": "Verified immutable spec blob/hash, revision/generation, prompt SHA256 and effective write set without parser or metadata repairs."
+    },
+    {
+      "command": "git diff --check B H; git merge-base --is-ancestor B H; exact-head/tree, numstat, status and S1 byte comparisons",
+      "measurement_source": "personally_executed",
+      "actualrc": 0,
+      "status": "passed",
+      "hash": "0956b2fdc1aa5e1bcff4ddfe5e0b24d97d87a117e3a65ec49001b0c95e63d719",
+      "hash_scope": "Numstat output",
+      "evidence": "Exactly three authorized new files, 1773 additions/0 deletions; B is an ancestor; pinned S1 module, sample and tests are unchanged."
+    },
+    {
+      "command": "python -B -: read-only native-verifier prefix plus independent ZIP, manifest, XML, command-log and source checks",
+      "measurement_source": "personally_executed_validation_of_retained_native_execution",
+      "actualrc": 0,
+      "status": "passed",
+      "hash": "bbaf43d863292ca6b126013da451c17ae25bf363fb2e61d2fe4bc6a5004fe663",
+      "hash_scope": "Original native ZIP, 1824347 bytes",
+      "evidence": "Compared all 1190 archived files with extracted bytes; verified 1183 manifest entries, 180 XML files, 45 command logs and five operator inputs. Reconstructed all 24 CX source sets from committed definitions. Verified actual Git identities, reports, cultures, cleanup, sentinels, wire shutdown, lock release and 28 typed default-CIM probe observations. The one-shot mutating verifier was not run."
+    },
+    {
+      "command": "python -B -: independently match captured endpoint bodies and child scripts; validate the existing F02 negative copy read-only",
+      "measurement_source": "personally_executed",
+      "actualrc": 0,
+      "status": "passed",
+      "hash": "d2cac04c76314b7fd79e202e92e94b8853c546f5b0c25bb0ebc342cf26a0a878",
+      "hash_scope": "Retained F02 negative-result JSON",
+      "evidence": "60 endpoint bodies and 210 child scripts matched their actual sources. Exactly one copied endpoint report is missing; strict validation rejects that exact role and path. Original report bytes remain unchanged."
+    },
+    {
+      "command": "python -B -: validate retained exact-H Linux lifecycle evidence, admission, seven command logs, catalog identity and strict manifest output",
+      "measurement_source": "personally_executed_validation_of_retained_execution",
+      "actualrc": 0,
+      "status": "passed",
+      "hash": "7a1acba3bd10c8fc794e61cc9f2e42d0a2c593c3d3c570ffb37c70bda5268e55",
+      "hash_scope": "Actual retained full-selftest output",
+      "evidence": "Verified child rc0 and positive 1777/1777, equal clean before/after identity, runner/catalog hashes and all seven log hashes/sizes. Strict verification reports ok=true and 184/184. Admission binds B/H/tree and canonical checker blob f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1. No full selftest rerun."
+    },
+    {
+      "command": "python -B -: run loi_ruff_ci pin/probe contract",
+      "measurement_source": "personally_executed",
+      "actualrc": 0,
+      "status": "passed",
+      "hash": "aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67",
+      "hash_scope": "Verified workflow bytes",
+      "evidence": "Three contract checks, no errors. This is separate from bare lint."
+    },
+    {
+      "command": "python -B -m ruff check --no-cache --select F --output-format json /workspace/scratch/wp1279-code-review-bc16ccf/scripts/tl.py",
+      "measurement_source": "personally_executed",
+      "actualrc": 1,
+      "status": "failed",
+      "hash": "657bb0d7a1ae24f08a3ef043d952e97d7b30d502f5c88355329046d2cd9d9a6b",
+      "hash_scope": "Reviewer bare-Ruff stdout",
+      "evidence": "Ruff 0.15.15 reports twelve F821 diagnostics. scripts/tl.py is byte-identical to B, so delta=0 under the packet criterion. Bare lint is not labeled passed."
+    },
+    {
+      "command": "python -B -: compare complete review/source snapshots and frozen mirror refs; final exact-head/tree checks",
+      "measurement_source": "personally_executed",
+      "actualrc": 0,
+      "status": "passed",
+      "hash": "76c98dd958710145444a7b877cc7fae27eaf0e04c625924ead0ff67941069f1c",
+      "hash_scope": "Review snapshot matched entry-for-entry",
+      "evidence": "All 14127 review entries and 14158 source entries remain unchanged, including Git, untracked and ignored content. Source snapshot SHA256 is 66d62048a68c198fa92074e5c6855f3e1185bd1ddd8e9eaaaafa2a766e0351d9. Both heads/trees still match H4. Frozen mirror has 745 heads, matching all 744 observed remote heads plus the explicitly unpublished candidate head."
+    }
+  ],
+  "retained_execution_results": {
+    "native_versions": {
+      "Desktop": "5.1.26100.9711",
+      "Core": "7.6.9"
+    },
+    "baseline_both": {
+      "actualrc": 1,
+      "result": "26 API_ABSENT failures per runtime; no setup failure"
+    },
+    "old_h3_both": {
+      "actualrc": 1,
+      "result": "Named wrong-owner mock and actual-wire bypasses; static/count diagnostics receive no behavioral kill credit"
+    },
+    "h4_normal_both": {
+      "actualrc": 0,
+      "result": "26/26, en-US"
+    },
+    "h4_focused_both": {
+      "actualrc": 0,
+      "result": "38/38, tr-TR"
+    },
+    "cx00_both": {
+      "actualrc": 0,
+      "result": "26/26 unmodified controls"
+    },
+    "cx01_through_cx11_each_runtime": {
+      "actualrc": 1,
+      "result": "All required named behavioral failures verified in reconstructed source/report/output/record sets"
+    },
+    "linux_full_selftest": {
+      "actualrc": 0,
+      "result": "1777/1777"
+    },
+    "author_handoff": "Original author tests remain NOT_RUN. Later operator measurements do not rewrite that history.",
+    "auxiliary_audit": "AUX9 receipt SHA256 2873f9905eba3e118cd1b7461fb1adfe85cdf2e4fe10daf25a30b949effea472 was checked against underlying evidence; it is not formal code approval."
+  },
+  "reviewer_probe_diagnostics": [
+    {
+      "actualrc": 1,
+      "cause": "Initial validation assumed a command-receipt log field; retained receipts identify logs by label.",
+      "corrected_actualrc": 0
+    },
+    {
+      "actualrc": 1,
+      "cause": "Initial child-script comparison included the newline excluded by PowerShell here-string delimiters.",
+      "corrected_actualrc": 0
+    },
+    {
+      "actualrc": 1,
+      "cause": "Initial snapshot check assumed source ignored paths were absent; their content is instead present and unchanged in the baseline snapshot.",
+      "corrected_actualrc": 0
+    },
+    {
+      "actualrc": 1,
+      "cause": "Initial mirror comparison assumed a different serialization; saved and actual show-ref name/OID pairs match.",
+      "corrected_actualrc": 0
+    }
+  ],
+  "unmeasured": [
+    "Direct native PowerShell execution by this reviewer: NOT_RUN. command -v pwsh and command -v powershell each returned rc1; no installation or bypass was attempted.",
+    "Real WinRM authentication, session-0/non-admin CIM permissions, actual Proxima listener layout, installed service layout, binary provenance, activation and quota remain outside the offline acceptance measurements.",
+    "Current remote refs/rules, H4 product push, H4 PR CI, connector, Ready, merge, land and M8 remain not_run/pending; none is labeled passed.",
+    "Served reviewer model and effort remain KHONG_DO_DUOC.",
+    "No required check was treated as passed through a skipped result."
+  ],
+  "risks": [
+    "Listener ownership checking is a snapshot; process/port changes between query and send, including between ask GET and POST, remain possible. No atomic ownership guarantee is claimed.",
+    "Compatibility hashes are not endpoint attestation. Declared hash/import and administrator ABA limitations remain.",
+    "IPv6-only listeners are explicitly unsupported and fail closed; actual deployment compatibility remains for later acceptance.",
+    "Two-point snapshot equality proves no observed content delta, not absence of every possible transient write.",
+    "This verdict does not grant merge authority, waive findings, establish human audit or complete the Packet/Mission."
+  ]
+}
+KET_LUAN: approve

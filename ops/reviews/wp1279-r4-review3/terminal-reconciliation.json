@@ -1,0 +1,87 @@
+{
+  "reviewed_sha": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "reviewed_tree": "30cbf51650d88f05c0fcae977dd9df286a089204",
+  "terminal_rc": 0,
+  "original_stdout_sha256": "8ddaa08cd247026fb601274558ac6e00d28151d95071147858ee30ab8c2d1a90",
+  "original_lastline": "KET_LUAN: approve",
+  "original_verdict_sha256": "d33fb3a8cb90df10a45999f792ab97614d3424155649c8b5a303314c69609779",
+  "snapshot_final": "sach",
+  "controller_snapshots": {
+    "review": {
+      "sha256": "76c98dd958710145444a7b877cc7fae27eaf0e04c625924ead0ff67941069f1c",
+      "same_as_before": true
+    },
+    "source": {
+      "sha256": "66d62048a68c198fa92074e5c6855f3e1185bd1ddd8e9eaaaafa2a766e0351d9",
+      "same_as_before": true
+    }
+  },
+  "observed_models": [
+    "gpt-6.1-sol"
+  ],
+  "effort_samples": [
+    "xhigh"
+  ],
+  "model_samples": 49,
+  "sandbox_status": "DO_DUOC",
+  "sandbox_limits": "lay mau /proc tu ben ngoai moi 0.2s: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. Lech danh tinh tien trinh (#1105): chuyen cha khi cha cu da mat/Z va cha moi la to tien da xac thuc thi duoc tha; moi lech khac (ke ca chuyen ra ngoai cay hay PID 1) => KHONG_DO_DUOC: co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do",
+  "verdict": "approved",
+  "findings": [],
+  "prior_class_dispositions": [
+    {
+      "stableid": "WP1279-R1-F01",
+      "class_slug": "encoding-dependent-endpoint-path-validation",
+      "historical_severity": "P2",
+      "disposition": "ĐÃ VÁ THẬT",
+      "sourcehistory": {
+        "original": "a7f51d0c70016e0e53afe40e256a819835eb6a52:ops/reviews/wp1279-r2-review1/verdict.md",
+        "previous_closure": "4e0c84ed3f56df672cc7e32e14c181566f941d36:ops/reviews/wp1279-r3-review2/verdict.md",
+        "previous_receipt": "b39d75aca19c1b507655191c27c89c17daadfc58:ops/reviews/wp1279-r3-review2.receipt.yaml",
+        "prior_formal_occurrences": 1
+      },
+      "positive": "H4 constructs reserved-device superscripts from code points at module line 387, matching pinned S1 semantics. Independently matched all 60 retained endpoint bodies to their corresponding sources. Current positive raw reports preserve successful COM-U00C2/LPT-U00C2 handshakes and rejection of COM-U00B9/LPT-U00B2 on both runtimes, including tr-TR. Native host ACP is 1252 before and after; Desktop child reports retain codepage 1252.",
+      "negative": "Read the original finding and historical raw H2 reports. H2 under the PS5.1 parent has actual ENDPOINT_VALID_PATH_REJECTED failures. H2 under the PS7 parent has only SOURCE_NOT_ASCII; that static diagnostic was not credited as a behavioral kill.",
+      "remaining_manifestations": []
+    },
+    {
+      "stableid": "WP1279-R1-F02",
+      "class_slug": "nested-child-evidence-deleted-before-review",
+      "historical_severity": "P2",
+      "disposition": "ĐÃ VÁ THẬT",
+      "sourcehistory": {
+        "original": "a7f51d0c70016e0e53afe40e256a819835eb6a52:ops/reviews/wp1279-r2-review1/verdict.md",
+        "previous_closure": "4e0c84ed3f56df672cc7e32e14c181566f941d36:ops/reviews/wp1279-r3-review2/verdict.md",
+        "prior_formal_occurrences": 1
+      },
+      "positive": "Verified all 30 report sets and 990 artifact links, covering parent and every CX child's endpoint and fresh-wrapper scripts, CLIXML inputs, raw reports, decoded merged outputs, commands, return codes, runtime, culture, roles, paths, sizes and hashes. Verified locations outside measured source copies and cleanup ancestors. Matched 210 actual child scripts to the committed harness. Raw positive payloads and reports preserve Boolean WhatIf, System.Boolean, ambient false, early dry-run, zero imports and both dependency hashes. All 24 control/mutant source-report-output-record sets resolve.",
+      "negative": "Compared the existing private copy with all original manifest entries: exactly one endpoint report is absent. Read-only strict validation reproduced MISSING_NESTED_ARTIFACT:endpoint-report:child\\endpoint-out-0.json. Retained negative child rc1 and output hashes match; the original endpoint report remains SHA256 93093d7d66a7d401bdaf7bc319345d10cab4df0030cb93abbb11755c3e44468f.",
+      "capture_limit": "Merged child output is decoded text captured by the parent. Script, CLIXML and raw-report file bytes are retained; no raw OS stdout-byte identity is claimed.",
+      "remaining_manifestations": []
+    },
+    {
+      "stableid": "WP1279-R3-F03",
+      "class_slug": "unbound-loopback-listener-owner",
+      "historical_severity": "P1",
+      "disposition": "ĐÃ VÁ THẬT",
+      "sourcehistory": {
+        "original": "/workspace/scratch/wp1279-spec-publish/ops/checkpoints/wp1279-r4/connector-F03-original.json",
+        "source_url": "https://github.com/ducthangho/tra-luat/pull/1280#discussion_r4505544562",
+        "source_review_id": 5817175363,
+        "source_sha": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+        "prior_connector_occurrences": 1,
+        "prior_formal_occurrences": 0,
+        "history_preserved": "H3 review2 approval remains historical. Its later promotion was blocked by the new P1; it was not reused as H4 approval."
+      },
+      "positive": "Get-PxcGateway validates metadata, process session/path and listener records before returning the fixed loopback URL. Traced status, models, use and ask through local and remote-export dispatch, including both ask sends. Applicable owners must equal the bounded metadata PID; port equality enforces metadata port bounds. Native integer checks exclude Boolean, string, floating-point, decimal, enum and null coercion. Only Listen records can authorize HTTP. Plain IPv4 loopback/wildcard positives work; applicable IPv6/mapped conflicts reject; IPv6-only fails closed. Denied, empty, null, malformed, port-mismatched and conflicting-owner controls block HTTP. WhatIf returns before listener queries. Retained X5-09 passes on both runtimes, and 28 actual default-CIM probes retain typed records for harness-owned sockets.",
+      "negative": "Old H3 on both runtimes exhibits both required named X5-09 failures, including actual wire px models requests=1/auth=1 with dummy credentials. Reconstructed CX11 from the committed unique ownership-check anchor on both runtimes; both children return rc1 with the required wrong-owner mock and actual-wire failure tokens. CX00 controls pass 26/26, and legitimate owned-listener controls remain active.",
+      "uncertainty_judgments": [
+        "Accepting the exact historical nine-key table permits H3 behavioral comparison. Every table is subsequently replaced and asserted as ten bindings; missing candidate listener enforcement still fails nonvacuous query/count and ownership controls.",
+        "Well-formed non-applicable states and addresses cannot authorize HTTP. At least one applicable native IPv4 listener is required, and every applicable owner must match.",
+        "IPAddress.TryParse leniency can classify additional textual forms as applicable, adding ownership checks rather than bypassing them.",
+        "Ownership is a snapshot. Ask reuses the validated URL across its models GET, journal work and POST; ownership is not revalidated between those sends. This is within the explicitly declared r4 timing limitation, not an atomic ownership claim."
+      ],
+      "remaining_manifestations": []
+    }
+  ],
+  "note": "Original verdict unchanged; parent machine observations resolve identity separately. Snapshot equality only at two observed points."
+}

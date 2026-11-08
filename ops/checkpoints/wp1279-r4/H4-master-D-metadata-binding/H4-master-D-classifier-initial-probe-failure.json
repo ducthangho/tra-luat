@@ -1,0 +1,5 @@
+{
+  "at": "2026-11-08T11:50:03.296163+00:00",
+  "actual_rc": 1,
+  "reason": "REST PR base.sha was older C while actual synthetic firstparent already D. Operator wrongly used RESTbase.sha as currenttargettip. Preservefailure; use independentlycaptured complete remote-ref map for targetcurrentOID, retain bothAPI/sourcefacts. No product/gatefailure or mutation."
+}

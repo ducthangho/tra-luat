@@ -1,0 +1,11 @@
+{
+  "metadata_commit": "ed9a9385ce56952b27a4f2376a5b0882db637194",
+  "path": "ops/checkpoints/wp1279-r4/AUX13-PRCI-continuation",
+  "comment": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6720934933",
+  "exact_body": true,
+  "remote_blobs_exact": true,
+  "actual_call_n": 13,
+  "reserved_forecast_slot_id": 15,
+  "absolute_deadline": "2026-11-08T13:00:30Z",
+  "actual_invoked": false
+}

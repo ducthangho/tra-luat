@@ -1,0 +1,83 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1285
+packet_id: wp1285
+mission_issue: 1238
+revision: 2
+generation: 2
+lease_id: wp1285-r2-g2-claude
+role: executor
+provider: claude
+executor: claude
+model: opus
+effort: high
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1285-r2.md
+spec_ref: refs/heads/ops/wp1285-spec@aa1d59871e9c37fcc527147ec6b551096a6e0af6
+spec_sha256_required: ce8052af41a74a30089067f8976e1fc5a66767261275044681cdde2eb9a0f2dd
+spec_hash: ce8052af41a74a30089067f8976e1fc5a66767261275044681cdde2eb9a0f2dd
+prompt_path: ops/prompts/wp1285-r2-g2-claude.md
+prompt_sha256_required: 64c48e6eb285c4a92ac6b8189cdb03eae1b3c5b49b56d26d70732500c3ce2978
+write_set:
+- .agents/skills/proxima-control/scripts/ProximaControl.psd1
+- .agents/skills/proxima-control/SKILL.md
+- .agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1
+write_set_hash: 0bbe3df51f38b0d334fcb5e35ada62ac95ac3eb1b1e28b4e9b5385a396a002aa
+effective_write_set:
+- .agents/skills/proxima-control/scripts/ProximaControl.psd1
+- .agents/skills/proxima-control/SKILL.md
+- .agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1
+change_policy_sha: null
+required_checks:
+- ActualnativePS51/7commonHharnessbaseline7red/candidate7of7/CX00positive+4namedkills/fullsourceartefactretention
+- S1S2bytesunchanged/size3newpaths450addsANDtotal/manifestwrapperreuse/S2normal26bothfocusedWindows
+- LinuxfullselftestNofN/strictmanifest/RuffFdelta0/doctrine/claims/admission/diffcheck
+- FreshindependentCodexCLIofflineapproveENTIREB..H/v2receipt/IssueM12beforeONEprimarypush
+- Draftconnector/exactHUbuntuPRCIallrequired4anchors/fullsourceAUX/Readyauto/currentrules/fullrefs/K0K7/newexactHgrant
+- ActualMcanonicalUbuntuCI4anchors/officialartifact/fullsourceAUX/M8/readback/actualUTCZretirement/D1D4beforeclosure
+land_obligations: []
+branch: agent/wp1285-g2-claude
+base_sha: bf9914cb1a8e6f5047468f4d130b587015f8d73f
+start_from_sha: 4196fbaaeb13b4d26d5f4f452b6c1a8b26150489
+reviewed_sha_required: 4196fbaaeb13b4d26d5f4f452b6c1a8b26150489
+reviewed_sha_required_note: ColdH1authoredr1g1adoptedforr2; pendingfreshindependentformalreview,
+  notanapproval
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1285#issuecomment-6722985152
+standing_authority: https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6708576608
+recorded_by: openai_codex/codex_service dispatcher under latest owner fullremainingwork
+  directive
+recorder_is_executor: false
+leased_at_utc: '2026-11-08T15:01:42Z'
+heartbeat_at: '2026-11-08T15:01:42Z'
+heartbeat_required_minutes: 360
+lease_until: '2026-11-08T20:15:31Z'
+lease_expires_at_utc: '2026-11-08T20:15:31Z'
+run_minutes: 45
+attempts_limit: 3
+review_rounds_limit: 2
+codex_review_calls_limit: 8
+same_failure_limit: 2
+requires_live: false
+uy_quyen_merge: false
+primary_product_pushes_limit: 1
+size_cap_additions_and_total_vs_B: 450
+executor_workspace: /workspace/scratch/wp1279-g4-claude
+authority_note: r2coldadoptionofexactH1; no newproductwrite/model; focusednative/legacyfixedtestmodeperr2,
+  no persistentpolicychange; capsandhistoryunchanged
+status: cold_handoff_adopted_no_new_model
+thay_the_cho:
+- wp1285-r1-g1-claude
+source_author_run: 1c887f4341d346a39b7dd68b35d694b0
+source_author_session: 280501dd-09ec-4f9e-addf-8a476222dd10

@@ -1,5 +1,5 @@
 schema_version: 2
-event: executor_lease_granted
+event: executor_lease_retired
 packet_issue: 1285
 packet_id: wp1285
 mission_issue: 1238
@@ -62,8 +62,8 @@ recorder_is_executor: false
 leased_at_utc: '2026-11-08T14:15:31Z'
 heartbeat_at: '2026-11-08T14:15:31Z'
 heartbeat_required_minutes: 360
-lease_until: '2026-11-08T20:15:31Z'
-lease_expires_at_utc: '2026-11-08T20:15:31Z'
+lease_until: '2026-11-08T15:01:42Z'
+lease_expires_at_utc: '2026-11-08T15:01:42Z'
 run_minutes: 45
 attempts_limit: 3
 review_rounds_limit: 2
@@ -77,3 +77,11 @@ executor_workspace: /workspace/scratch/wp1279-g4-claude
 authority_note: S3only/noproductscopewaivers/freshsession in verifiedalreadytrustedexactphysicaldirectory
   afterclosedS2; no trust/pathpermissionchange; no AGYauth generation; codeWriter
   notapprover orLandOperator
+status: retired
+retired_at: '2026-11-08T15:01:42Z'
+retired_at_utc: '2026-11-08T15:01:42Z'
+original_lease_until: '2026-11-08T20:15:31Z'
+da_bi_thay_the: wp1285-r2-g2-claude
+replaced_at_utc: '2026-11-08T15:01:42Z'
+replacement_reason: r1author terminalH1; r2operator legacy-argv clarification; coldadoptiononly,
+  samecode/caps, no newmodel

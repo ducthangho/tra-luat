@@ -1,0 +1,11 @@
+{
+  "head": "883d37826f443ce9301dd0bcd40cd5f97f1adf0e",
+  "verdict": "changes_requested",
+  "original_commit": "5ed966499e50dffe198509b669f412431ad9014e",
+  "receipt_commit": "80d3b0e69df0fc67327aa6e0193809a8de2eab80",
+  "receipt_path": "ops/reviews/wp1285-r2-review2.receipt.yaml",
+  "issue_comment": "https://github.com/ducthangho/tra-luat/issues/1285#issuecomment-6724767145",
+  "original_body_exact": true,
+  "v2_rc": 0,
+  "open_finding": "WP1285-R1-F01"
+}

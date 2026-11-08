@@ -1,0 +1,16 @@
+{
+  "source": "Actual completed DesktopCommander get_tool_result 11f8566b-c124-4d92-b231-ecb6fc6313c3, ASUS models.stdout",
+  "index_kind": "derivedcatalogindex, originaltransport retained in chat not falsely claimed bytehash",
+  "device_id": "7404cfba-9034-4787-b46b-7c358126a411",
+  "host": "ASUS-LAPTOP",
+  "CLI": "1.5.3",
+  "model_selectors": [
+    "gemini-4-argon-low",
+    "gemini-4-argon-medium",
+    "gemini-4-argon-high"
+  ],
+  "selected": "gemini-4-argon-high",
+  "requested_effort": "high",
+  "actual_model_generation": false,
+  "limits": "Authenticatedcatalog availability only, no actualservedmodel or quota claim; model listing actualchildrc not captured by StartProcessfileprobe; needs freshrun provenance"
+}

@@ -1,0 +1,32 @@
+{
+  "packet_id": "wp1285",
+  "revision": 3,
+  "generation": 4,
+  "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "continuation": "883d37826f443ce9301dd0bcd40cd5f97f1adf0e",
+  "spec_sha256": "b0ec721acafaa2452ba175dd00a7960434f73754af18db2760b0b1ac561cb978",
+  "effective_write_set": [
+    ".agents/skills/proxima-control/scripts/ProximaControl.psd1",
+    ".agents/skills/proxima-control/SKILL.md",
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+  ],
+  "write_set_hash": "0bbe3df51f38b0d334fcb5e35ada62ac95ac3eb1b1e28b4e9b5385a396a002aa",
+  "effective_review_class": "sensitive",
+  "change_policy_sha": null,
+  "land_obligations": [],
+  "authority": "NEWmanualdescriptorONLYr3; no inheritedwaivers/parentbudgetreset",
+  "nang_tran": {
+    "ai_nang": "ducthangho through full scoped delegation, dispatcher records explicit bounded exercise",
+    "can_cu": "Formal2F01notclosed; twoordinaryrounds exhausted; owner explicitly AGYexecutor; newwholeAST/modecontract and nativecounterexample evidence beforepromotion",
+    "tran_cu": "3paths450adds+total;product3TOTAL;formal2;shared8TOTAL;push1TOTAL",
+    "tran_moi": "same3paths450/product3/push1UNCHANGED;formal3TOTAL(one rescueformal3);shared10TOTAL minimumcompleteforecast"
+  },
+  "limits": {
+    "paths": 3,
+    "additions_and_total": 450,
+    "attempts": 3,
+    "formal": 3,
+    "shared": 10,
+    "primarypush": 1
+  }
+}

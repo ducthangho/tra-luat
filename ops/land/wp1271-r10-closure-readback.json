@@ -1,0 +1,130 @@
+{
+  "1271": {
+    "url": "https://github.com/ducthangho/tra-luat/issues/1271",
+    "state": "closed",
+    "title": "[packet][landed] PROXIMA-P1-S1 r10/g10 — PR #1276; M8 complete",
+    "body_sha256": "50952fab75ef9160029781c6c0f9259b50099f7c59b8ce495915c982a6c0eb72",
+    "readback_exact_UTF8": true,
+    "closed_at": "2026-11-08T00:07:03Z"
+  },
+  "1238": {
+    "url": "https://github.com/ducthangho/tra-luat/issues/1238",
+    "state": "open",
+    "title": "[mission][in_progress] PROXIMA-PLAYWRIGHT — P0 và P1-S1 landed; add-on tùy chọn",
+    "body_sha256": "69b6443914b80d1e996ae0c5173ab1cedcdbe914582f3fe64040baadefe52559",
+    "readback_exact_UTF8": true,
+    "closed_at": null
+  },
+  "final_authoritative_lease_scan": {
+    "at": "2026-11-08T00:08:03.718348+00:00",
+    "count": 10,
+    "active_holders": 0,
+    "leases": [
+      {
+        "path": "ops/leases/wp1271-r1-g1-agy.yaml",
+        "id": "wp1271-r1-g1-agy",
+        "until": "2026-11-07T19:01:20.614221+00:00",
+        "superseded_by": "wp1271-r2-g2-claude",
+        "reciprocal_verified": true,
+        "status": null,
+        "active": false,
+        "sha256": "d2cfc44907d01c0b75ca9d7d30128a7091398a5db0c145ead60e1db44c0ed74a"
+      },
+      {
+        "path": "ops/leases/wp1271-r10-g10-claude.yaml",
+        "id": "wp1271-r10-g10-claude",
+        "until": "2026-11-08T00:04:21Z",
+        "superseded_by": null,
+        "reciprocal_verified": false,
+        "status": "retired",
+        "active": false,
+        "sha256": "b68746efb153691d66705352f0f15577949e41856c667dfdfc3f7f92576a775a"
+      },
+      {
+        "path": "ops/leases/wp1271-r2-g2-claude.yaml",
+        "id": "wp1271-r2-g2-claude",
+        "until": "2026-11-07T19:31:23.811904+00:00",
+        "superseded_by": "wp1271-r3-g3-claude",
+        "reciprocal_verified": true,
+        "status": null,
+        "active": false,
+        "sha256": "5079e39f56a4147cb7ccdae0fde994d21384bf985d3244876e47e7da86fa7245"
+      },
+      {
+        "path": "ops/leases/wp1271-r3-g3-claude.yaml",
+        "id": "wp1271-r3-g3-claude",
+        "until": "2026-11-07T20:44:10.503165+00:00",
+        "superseded_by": "wp1271-r4-g4-claude",
+        "reciprocal_verified": true,
+        "status": null,
+        "active": false,
+        "sha256": "68d8f84c26278b77b397ab8b8f360cc42e57eae19413fac87768e0965c782505"
+      },
+      {
+        "path": "ops/leases/wp1271-r4-g4-claude.yaml",
+        "id": "wp1271-r4-g4-claude",
+        "until": "2026-11-07T21:28:32.710017+00:00",
+        "superseded_by": "wp1271-r5-g5-claude",
+        "reciprocal_verified": true,
+        "status": null,
+        "active": false,
+        "sha256": "f495babe5656ce463f048908dc55d5d0acf1ed9b2b305d2723dfa08c51c3bc8c"
+      },
+      {
+        "path": "ops/leases/wp1271-r5-g5-claude.yaml",
+        "id": "wp1271-r5-g5-claude",
+        "until": "2026-11-07T22:05:48.251004+00:00",
+        "superseded_by": "wp1271-r6-g6-claude",
+        "reciprocal_verified": true,
+        "status": null,
+        "active": false,
+        "sha256": "eade7d74c8a4671f4210012683330caf1364013993201bb747f0590983ded8ca"
+      },
+      {
+        "path": "ops/leases/wp1271-r6-g6-claude.yaml",
+        "id": "wp1271-r6-g6-claude",
+        "until": "2026-11-07T22:34:01.657887+00:00",
+        "superseded_by": "wp1271-r7-g7-claude",
+        "reciprocal_verified": true,
+        "status": null,
+        "active": false,
+        "sha256": "9b4c9d3bb65c4c8a6c0b2cf729f832c11f0a3accb054c923165470d6d13095fd"
+      },
+      {
+        "path": "ops/leases/wp1271-r7-g7-claude.yaml",
+        "id": "wp1271-r7-g7-claude",
+        "until": "2026-11-07T23:23:14.216848+00:00",
+        "superseded_by": "wp1271-r8-g8-claude",
+        "reciprocal_verified": true,
+        "status": null,
+        "active": false,
+        "sha256": "88a2d3585dfed1b89eaf2f70199d491754587927aa4466a220742b728f49a81d"
+      },
+      {
+        "path": "ops/leases/wp1271-r8-g8-claude.yaml",
+        "id": "wp1271-r8-g8-claude",
+        "until": "2026-11-07T23:53:06Z",
+        "superseded_by": "wp1271-r9-g9-claude",
+        "reciprocal_verified": true,
+        "status": null,
+        "active": false,
+        "sha256": "5009a609deb0fb6911cf7000e6737842867a745c1a228f8f8ef9067100b9a872"
+      },
+      {
+        "path": "ops/leases/wp1271-r9-g9-claude.yaml",
+        "id": "wp1271-r9-g9-claude",
+        "until": "2026-11-08T00:40:57Z",
+        "superseded_by": "wp1271-r10-g10-claude",
+        "reciprocal_verified": true,
+        "status": null,
+        "active": false,
+        "sha256": "b7b1ff2dbd3c7c4616c123d7c8c7d6eb0c0f9f7fca8778881fca8bd817e37951"
+      }
+    ],
+    "note": "Retirement includes reciprocal supersession, not expiry alone. Initial expiry-only assertion correctly found g9 original future deadline; g9 is reciprocally superseded by retired g10, not active."
+  },
+  "M8_url": "https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6714823786",
+  "D1_D4_after_M8_readback_rc": 0,
+  "landed": true,
+  "mission_complete": false
+}

@@ -62,8 +62,8 @@ recorder_is_executor: false
 leased_at_utc: '2026-11-08T18:45:05Z'
 heartbeat_at: '2026-11-08T18:45:05Z'
 heartbeat_required_minutes: 360
-lease_until: '2026-11-09T00:45:05Z'
-lease_expires_at_utc: '2026-11-09T00:45:05Z'
+lease_until: '2026-11-08T23:50:46Z'
+lease_expires_at_utc: '2026-11-08T23:50:46Z'
 run_minutes: 45
 attempts_limit: 5
 review_rounds_limit: 3
@@ -77,7 +77,7 @@ executor_workspace: /workspace/scratch/wp1285-r4-g5-codex
 authority_note: Owner scoped normal Codex capability recovery; explicit per-run add-dir/cd,
   no bypass/globalchange; actualpreviouscall charged/no sourcechange; readonlyindependent
   xhighreviewer > highexecutor; sameprovider sensitiveassurance HOLD
-status: leased
+status: retired
 thay_the_cho:
 - wp1285-r4-g5-codex
 nang_tran:
@@ -89,3 +89,10 @@ nang_tran:
 reviewer_model: gpt-6.1-sol
 reviewer_effort: xhigh
 scoped_cli_writable_root: /workspace/scratch/wp1285-r4-g5-codex/.agents/skills/proxima-control
+retired_at: '2026-11-08T23:50:46Z'
+retired_at_utc: '2026-11-08T23:50:46Z'
+original_lease_until: '2026-11-09T00:45:05Z'
+da_bi_thay_the: wp1285-r6-g7-codex
+replaced_at_utc: '2026-11-08T23:50:46Z'
+replacement_reason: Owner resumes one bounded canonical ancestry correction; old Codex
+  writer/reviewer terminal, source readonly; no costreset

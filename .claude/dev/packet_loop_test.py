@@ -1709,6 +1709,8 @@ def _han_tuong_lai(gio: int = 4) -> str:
 # Lệnh con KHÔNG có đường thành công in stdout — khai TƯỜNG MINH kèm lý do.
 LENH_KHONG_CO_STDOUT = {
     "guard": "luôn thoát 7 và chỉ in stderr — không có đường thành công để đo",
+    "adopt-state": "đường scoped cần authority native, đã được phủ trong WP1174; legacy luôn rc=2",
+    "guard-first-publication": "guard scoped cần snapshot GitHub/authority đóng băng, đã được phủ trong WP1174",
 }
 
 
@@ -10816,6 +10818,11 @@ def _durability1174(c):
     assert p.read_bytes()==b"old\n"
     m._1174_persist(p, b"new\n", create=False)
     assert m._1174_read(p) == b"new\n"
+    with patch.object(m, "_1174_fsyncdir", side_effect=OSError("directory still not durable")):
+        try:m._1174_confirm_durable(p,b"new\n")
+        except OSError as ex:assert "still not durable" in str(ex)
+        else:assert False,"visible cached image bypassed durability confirmation"
+    m._1174_confirm_durable(p,b"new\n")
     with m._1174_lock(c.tmp / "fixed.lock") as fd:
         assert not os.get_inheritable(fd)
     assert (c.tmp / "fixed.lock").exists()
@@ -10863,6 +10870,20 @@ def _postimage1174(c):
         original = copy.deepcopy((old, new))
         _reject1174(transition, old, new, action)
         assert (old, new) == original
+    _, _, admission, _ = _a1174(c)
+    source_path = admission["enrollment"]["initial_state_path"]
+    source_state = dict(schema_version=3, packet=1174, mission=1172, generation=1, state_revision=7)
+    source_raw = m._1174_bytes(source_state)
+    payload = dict(source_snapshot=source_raw.decode(), predecessor_generation=1, source_path=source_path)
+    predecessor = dict(active, high_water=dict(generation=1, state_revision=7,
+        state_sha256=hashlib.sha256(source_raw).hexdigest()))
+    _call1174(m._1174_recovery_high_water, predecessor, payload, admission)
+    for changed in (dict(state_revision=8), dict(state_sha256="e" * 64), dict(generation=2)):
+        bad = dict(predecessor, high_water=dict(predecessor["high_water"], **changed))
+        _reject1174(m._1174_recovery_high_water, bad, payload, admission,
+                    reason="recovery predecessor high_water mismatch")
+    _reject1174(m._1174_recovery_high_water, predecessor, dict(payload, source_path=str(c.tmp/"foreign")), admission,
+                reason="recovery predecessor high_water mismatch")
 
 
 def _a1174(c):
@@ -11737,6 +11758,8 @@ MUTANTS.update({
     "m1174_adopt_finalize_replay": ('terminal["terminal_disposition"] == a.disposition, "terminal replay disposition/identity"', 'False, "terminal replay disposition/identity"', ["wp1174_adopt_finalize_replay"]),
     "m1174_durable_publish_noreplace": ('os.link(temporary, path, follow_symlinks=False)', 'os.replace(temporary, path)\n            temporary = None', ["wp1174_durability_publish_noreplace"]),
     "m1174_durable_cached_writer": ('_1174_read(Path(p["source_path"])) == p["tombstone"].encode("utf-8")', 'True', ["wp1174_durability_cached_writer"]),
+    "m1174_recovery_skip_source_durability": ('_1174_confirm_durable(source, retired)', 'pass # skip reused tombstone durability', ["wp1174_durability_fsync_readback"]),
+    "m1174_recovery_skip_high_water": ('_1174_recovery_high_water(witness, payload, admission)', 'pass # skip predecessor high_water binding', ["wp1174_adopt_postimage_all"]),
 })
 
 _ENV1174_ANCHOR = 'return {k: v for k, v in os.environ.items() if k not in selectors and not k.startswith("GIT_CONFIG_")}'
@@ -12398,6 +12421,21 @@ def _lifecycle1174(kind):
             receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
             assert receipt["status"]=="UNKNOWN","retained history boundary required"
             pages["events"].append(old_boundary)
+            original_events=copy.deepcopy(pages["events"])
+            parent=_g(w,"rev-parse",args.head+"^1")
+            pages["events"]=[
+                dict(id="13",type="PushEvent",created_at="2026-11-04T09:01:00Z",repo=dict(name=m._1174_REPO),
+                     actor=dict(login="ducthangho"),payload=dict(head=args.head,before=parent,ref="refs/heads/candidate")),
+                dict(id="12",type="PushEvent",created_at="2026-11-04T08:59:00Z",repo=dict(name=m._1174_REPO),
+                     actor=dict(login="ducthangho"),payload=dict(head=parent,before=args.head,ref="refs/heads/candidate")),
+            ]
+            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
+            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="12",receipt
+            pages["events"]=copy.deepcopy(original_events)
+            pages["events"][0]["payload"]["before"]="0"*40
+            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
+            assert receipt["status"]=="RECORDED_EARLIEST_MATCH",receipt
+            pages["events"]=original_events
             pages["events"][0]["created_at"]="2026-11-04T08:58:00Z"
             receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
             assert receipt["status"]=="FAIL"

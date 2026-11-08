@@ -3810,6 +3810,29 @@ def _1174_fsyncdir(path):
         os.close(fd)
 
 
+def _1174_confirm_durable(path, expected):
+    """Re-establish durability for an image reused after an interrupted write.
+
+    A previous replace may have made the expected bytes visible while the
+    directory fsync subsequently failed.  Merely reading those bytes on
+    recovery does not prove that the directory entry is durable.  Fsync the
+    opened regular file and its parent, then perform the same identity-safe
+    readback used by normal publication before the transaction can finalize.
+    """
+    import stat
+    path = Path(path)
+    _1174_require(type(expected) is bytes and stat.S_ISREG(path.lstat().st_mode),
+                  "durability confirmation target")
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+    try:
+        _1174_require(stat.S_ISREG(os.fstat(fd).st_mode), "durability confirmation regular file")
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+    _1174_fsyncdir(path.parent)
+    _1174_require(_1174_read(path) == expected, "durability confirmation readback")
+
+
 def _1174_persist(path, raw, *, create):
     """Durable complete-temp publication. The transaction must hold its fixed lock.
 
@@ -4573,6 +4596,28 @@ def _1174_adopt_image(payload, phase, intent, revision, admission):
     return raw
 
 
+def _1174_recovery_high_water(witness, payload, admission):
+    """Bind a pending v3 adoption snapshot to its predecessor witness."""
+    water = witness["high_water"]
+    if water is None:
+        # Imported v2 lineage starts from a reserved witness and has no v3
+        # predecessor high-water.  Its immutable lineage hash is validated by
+        # _1174_adoption_record/_1174_adopt_payload instead.
+        return
+    source = payload["source_snapshot"].encode("utf-8")
+    state = json.loads(source.decode("utf-8"), object_pairs_hook=_cam_khoa_trung,
+                       parse_constant=_cam_hang_ngoai_json)
+    adopted = [node for node in witness["history"] if node["terminal_kind"] == "adopted"]
+    active_path = adopted[-1]["canonical_path"] if adopted else admission["enrollment"]["initial_state_path"]
+    _1174_require(type(state) is dict and state.get("schema_version") == 3 and
+        state.get("packet") == admission["packet"] and state.get("mission") == admission["mission"] and
+        payload["source_path"] == active_path and
+        water == dict(generation=payload["predecessor_generation"],
+                      state_revision=state.get("state_revision"),
+                      state_sha256=hashlib.sha256(source).hexdigest()),
+        "recovery predecessor high_water mismatch")
+
+
 def _1174_tripwire(state):
     if state["adoption"] is not None:
         p = state["adoption"]["payload"]
@@ -4631,6 +4676,7 @@ def _1174_adopt(a, admission, witness_raw):
             _1174_require(target_raw == _1174_adopt_image(payload, record["phase"], record["cutover_started"],
                 {("prepared", False): 0, ("prepared", True): 1, ("adopted", True): 2, ("aborted", False): 1}.get(
                 (record["phase"], record["cutover_started"]), -1), admission), "recovery exact target image")
+        _1174_recovery_high_water(witness, payload, admission)
     images = {key: _1174_adopt_image(payload, phase, intent, revision, admission) for key, phase, intent, revision in
               (("prepared", "prepared", False, 0), ("intent", "prepared", True, 1), ("adopted", "adopted", True, 2), ("aborted", "aborted", False, 1))}
     old_source, retired = payload["source_snapshot"].encode("utf-8"), payload["tombstone"].encode("utf-8")
@@ -4687,12 +4733,16 @@ def _1174_adopt(a, admission, witness_raw):
         if not exists:
             _1174_write(target, images["prepared"], create=True)
             target_raw = images["prepared"]
+        else:
+            _1174_confirm_durable(target, target_raw)
         if intent_raw is not None:
             _1174_write(wp, intent_raw, create=False)
         if target_raw == images["prepared"]:
             _1174_write(target, images["intent"], create=False)
         if source_now == old_source:
             _1174_write(source, retired, create=False)
+        else:
+            _1174_confirm_durable(source, retired)
         if target_raw != images["adopted"]:
             _1174_write(target, images["adopted"], create=False)
     elif final_raw is not None and target_raw != final_raw:
@@ -4984,15 +5034,22 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
             if not (type(after) is str and SHA_RE.fullmatch(after) and type(before) is str and SHA_RE.fullmatch(before)):
                 dag = False
                 continue
-            rc, _ = _git_do(root, "cat-file", "-e", after + "^{commit}",deadline=pass_end)
-            if rc:
-                dag = False
-                continue
-            relation, _ = _git_do(root, "merge-base", "--is-ancestor", head, after,deadline=pass_end)
-            if time.time()>=pass_end:dag=False;complete=False;break
-            if relation not in (0, 1):
-                dag = False
-            elif relation == 0:
+            zero = "0" * 40
+            matched = False
+            for oid in (before, after):
+                if oid == zero:
+                    continue
+                rc, _ = _git_do(root, "cat-file", "-e", oid + "^{commit}", deadline=pass_end)
+                if rc:
+                    dag = False
+                    continue
+                relation, _ = _git_do(root, "merge-base", "--is-ancestor", head, oid, deadline=pass_end)
+                if time.time()>=pass_end:dag=False;complete=False;break
+                if relation not in (0, 1):
+                    dag = False
+                elif relation == 0:
+                    matched = True
+            if matched:
                 introductions.append(dict(id=event["id"], time=event["created_at"], ref=payload.get("ref"),
                     actor=event.get("actor", {}).get("login"), before=before, after=after))
         # Every currently observable ref/PR must be accounted for by the DAG;

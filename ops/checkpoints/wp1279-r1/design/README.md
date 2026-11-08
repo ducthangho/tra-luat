@@ -1,0 +1,5 @@
+P1-S2 wp1279 design checkpoint, not product implementation or formal code approval. Actual Claude Code adviser completed one model call; preflight blocked before model is separately retained. Full original2611word advice preserved, not rewritten into approval. Final chosen contract in ops/specs/wp1279-r1.md resolves its open decisions and declares new bounded caps/manual descriptor under standing owner full delegation. Source historical module bytes were read only, never imported or executed.
+
+Advice source was S1 merge efebadf; before initialfreeze master advanced c15603d through PR1277, only launcher_test.py +2/-1. S1/governance/CI bytes unchanged, fresh initial acceptance baseline explicitly c15603d. No product lease yet.
+
+Adviser workspace snapshots differ in CLI hook marker plus parent dispatcher Python cache import; tracked product remained unchanged. This is not an identical-workspace or formal readonly code-review claim. No real WinRM/gateway/service/auth/credential/profile tests. Raw Claude stream transcript not published; original final result and measured identity records retained.

@@ -1,0 +1,64 @@
+{
+  "role": "readonly_design_advisory_not_code_approval",
+  "provider": "anthropic_claude",
+  "surface": "claude_code",
+  "transport": "machine/local",
+  "actual_run_id": "6af19f41eb9440378081779412139918",
+  "actual_session": "1ccc8a59-f949-446e-ab23-f7685da45421",
+  "requested_model": "opus",
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 22,
+      "outputTokens": 22082,
+      "cacheReadInputTokens": 965049,
+      "cacheCreationInputTokens": 107477,
+      "webSearchRequests": 0,
+      "costUSD": 1.4945538,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 12911,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 107477,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "init_model": "claude-opus-5-5",
+  "rc": 0,
+  "words": 2611,
+  "word_limit_requested": 1800,
+  "original_result_sha256": "063238dd612ada135a7c27e267036db62542740f111cd9bb190f1c0692f3ad0f",
+  "raw_stdout_sha256": "7243663788d5b8ab18ee7f0fa3994015b5dfc8dd1a1ef02dc112cbe19acafa59",
+  "snapshot_identical": false,
+  "nonproduct_snapshot_delta": [
+    {
+      "kind": "D",
+      "sha256": "",
+      "path": "ops/__pycache__"
+    },
+    {
+      "kind": "F",
+      "sha256": "06d7313b9342b981f50dec960783ec8086adda874221465edb1ef563b29f0023",
+      "path": ".claude/.packet_state/session-start.ran"
+    },
+    {
+      "kind": "F",
+      "sha256": "119e77cdf2bc229ff9083d52f2fbb057e87c88d899051c2afdabfe9f8b78aafe",
+      "path": ".claude/.packet_state/session-start.ran"
+    },
+    {
+      "kind": "F",
+      "sha256": "91bf1972eda28f934acfe5def9eddbdb9aa13cda7996f2dbd005555fdb6cc39b",
+      "path": "ops/__pycache__/lease_publish.cpython-312.pyc"
+    }
+  ],
+  "delta_attribution": "CLI session-start hook marker changed; dispatcher scan-holders.py imported canonical lease_publish.py without -B, creating ignored ops/__pycache__ during adviser turn. Parent-authored cache; not identical-workspace assurance. All tracked product bytes unchanged; adviser tools only Read/Glob/Grep. No formal readonly code-review claim.",
+  "tracked_status": "",
+  "limits": [
+    "Adviser explicitly only listed protocol headings; dispatcher independently reads governing sections.",
+    "Size estimates are estimates, not actual numstat.",
+    "Remote auth, service installation and runtime provenance not tested.",
+    "Preflight e838232a failed rc15 before Claude started; preserved separately and not charged a model call."
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "measured_at_utc": "2026-11-08T02:55:46.646256+00:00",
+  "remote_heads": 733,
+  "remote_heads_sha256": "3ec8acf21d406c465829c3a9781a7b35e280a21cdceda03b573be33aca0e81e5",
+  "source_consumer_sha256": "a4bf95b539e077edbb706afee6fc37b157815c0c246ca1bb01b307106d7be480",
+  "lease_blob_path_pairs": 879,
+  "write_set": [
+    ".agents/skills/proxima-control/scripts/ProximaControl.psm1",
+    ".agents/skills/proxima-control/scripts/Run-Px.ps1",
+    ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1"
+  ],
+  "class": "sensitive",
+  "paths": {
+    ".agents/skills/proxima-control/scripts/ProximaControl.psm1": [],
+    ".agents/skills/proxima-control/scripts/Run-Px.ps1": [],
+    ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1": []
+  },
+  "active_holders": 0
+}

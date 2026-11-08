@@ -1,0 +1,42 @@
+{
+  "measured_at_utc": "2026-11-08T02:57:07.713260+00:00",
+  "baseline": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "tree": "46d05062cad4f3ca6629931ebc6a4cd0535358f3",
+  "policy": {
+    ".github/coordination/change-impact.v1.json": {
+      "present": false,
+      "rc": 128
+    },
+    ".github/coordination/schemas/change-impact.v1.schema.json": {
+      "present": false,
+      "rc": 128
+    }
+  },
+  "adr_opt_in": {
+    "docs/adr/0052-tran-loi-goi-codex-len-tam.md": {
+      "land_oid": "8ab100793df9831505f495543a74044b91c2c9ab",
+      "present_at_land_rc": 0,
+      "absent_in_first_parent_rc": 128,
+      "on_fresh_canonical_first_parent": true
+    },
+    "docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md": {
+      "land_oid": "8ab100793df9831505f495543a74044b91c2c9ab",
+      "present_at_land_rc": 0,
+      "absent_in_first_parent_rc": 128,
+      "on_fresh_canonical_first_parent": true
+    }
+  },
+  "write_set": [
+    ".agents/skills/proxima-control/scripts/ProximaControl.psm1",
+    ".agents/skills/proxima-control/scripts/Run-Px.ps1",
+    ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1"
+  ],
+  "write_set_hash": "92211ad4ed211a39980c65742bb6d6df228ce975f920bc753ab786d41e62a054",
+  "workflow_sha256": "aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67",
+  "fresh_remote_master": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "initial_proposed_base": "efebadf83409a81e42e6c97f1b7255ede76110f5",
+  "baseline_refresh_diff_paths": [
+    ".claude/dev/launcher_test.py"
+  ],
+  "baseline_refresh_diff": "diff --git a/.claude/dev/launcher_test.py b/.claude/dev/launcher_test.py\nindex 1c3603c..83a295d 100644\n--- a/.claude/dev/launcher_test.py\n+++ b/.claude/dev/launcher_test.py\n@@ -14142,7 +14142,8 @@ DOT_BIEN = [\n     # #1252 l\u01b0\u1ee3t Codex offline 1 (run e9e4e6ce): m\u1ed7i finding F1\u2013F7 m\u1ed9t ch\u1ed1t, m\u1ed9t \u0111\u1ed9t bi\u1ebfn.\n     (\"r1252_ghi_de_dich_truc_tiep\", ('                os.replace(tam, duong.name, src_dir_fd=dfd, dst_dir_fd=dfd)\\n',\n                                      '                os.unlink(tam, dir_fd=dfd)\\n                with open(duong, \"wb\") as g:\\n                    g.write(data)\\n'),\n-     [\"r1252_ghi_bang_chung_an_toan\"]),\n+     [\"r1252_ghi_bang_chung_an_toan\"],\n+     (\"posix\", \"nhanh dir_fd cua _ghi_tep_0600 khong chay tren Windows (_CO_DIR_FD False)\")),\n     (\"r1252_nuot_loi_ghi_bang_chung\",\n      ('                    kq_chup.update(snapshot_ket_qua=\"khong_do_duoc\", snapshot_ly_do=\"chup_loi\")', '                    pass'),\n      [\"r1252_ghi_bang_chung_an_toan\"]),\n"
+}

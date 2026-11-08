@@ -1,0 +1,28 @@
+{
+  "role": "design_only_not_code_approval",
+  "spec_sha256": "b353c1a6de2f729275f06aeeceb89f052b5891b32913ad3836ff960e6df8d9fd",
+  "evidence_archive_sha256": "002a0a5221b755223b5c9f9483abea3811ad5844f0b27d72d78a843c81818bc7",
+  "files": {
+    "legacy-source/ProximaControl.psm1": "ef4821cc14ba7234705c42b470d502ceea93982c379871e292d7e7f830ca1344",
+    "legacy-source/Run-Px.ps1": "e1ff7f32d981d6f23a354cb8d69a1594d063af4d9b2aad596731c0c100d4ed94",
+    "legacy-source/ProximaControl.psd1": "3f2ac59e201128f03d047da69698567b75675917687d75e8312fd7e34f14ee77",
+    "legacy-source-index.json": "1a3bcc55e847467a5e99d6cac3b7cf764bf7d4c44e53d4bfb4fe5358ecc96f72",
+    "design-advisory-prompt.md": "857f9e3418c048ae4d6ccc565a6051e3eadd84cad1a6bc48b37002192fb3a7e3",
+    "design-advisory-result-event.json": "c2b698f3929c3753b92f7b3994d5c51e2214bef80c509bdce617777b25aca524",
+    "design-runs/e838232a/run.json": "cfdf6b8cc6f13ab685c047cc067eb044284dfdd36a0cf31bbb729ade55bd3296",
+    "design-runs/6af19f41/run.json": "dd72477c0974ea608efc5ef5ba9a8c6b6175fece539de64c53e712256525da15",
+    "design-controller-result.json": "ff16808d9ffa1f4e5d4f58565430d62aa95a2ba64bd6393750767f679efbbdc6",
+    "design-trust-receipt.json": "e7bd8356ef9efe211bb7d3e05f3ab351d7c545919904b70d6cc6bfe780055315",
+    "design-snapshot-before.txt": "bdb0289143ac20c5f4a51cfef36151f4ea1577e7739b882df988b1c0c8d513c3",
+    "design-snapshot-after.txt": "af532ba547956d190fcca592e5ef9e7276e718c5034917bef83da3d76ec7ec2c",
+    "holder-remote-heads.raw": "3ec8acf21d406c465829c3a9781a7b35e280a21cdceda03b573be33aca0e81e5",
+    "admission-initial-M.json": "3edf1ff9956de4636fc4aa2d2d69e07ca0309722d93fae4b6744aacec2b8e885",
+    "standing-owner-full-grant-readback.json": "884a84a5afbe894863aac8995ec8cf918b3d66abd53691a6941ec5ede2ccaf4e",
+    "scan-holders.py": "05ed1109b329408cdbdbd47c35039cb884fda14dd73aa94d2f2b8ff7db1c374c",
+    "spec-proposed-before-baseline-refresh.md": "4c75c8ebf4262655787569c1d5f6127ee6d796b4c69607f3b0d7924c5070c103"
+  },
+  "actual_design_call": "6af19f41eb9440378081779412139918",
+  "product_attempts_used": 0,
+  "codex_calls_used": 0,
+  "baseline": "c15603dcf537fa4beb753b263398d6e6b8c92019"
+}

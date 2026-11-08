@@ -7,5 +7,7 @@
   "normal": "both versions21/25; baselineboth0/25allAPI_ABSENT rc1",
   "counterexamples": "not_run blocked by normal failure",
   "root_authored_product_patch": false,
-  "operator_preflight_error": "First controller misunderstood Undefined ExecutionPolicy numeric5 as0; failed before cloning/testing. Original preflight evidence retained; lockreleased; second controller corrected enum check, new output directory, no product edit."
+  "operator_preflight_error": "First controller misunderstood Undefined ExecutionPolicy numeric5 as0; failed before cloning/testing. Original preflight evidence retained; lockreleased; second controller corrected enum check, new output directory, no product edit.",
+  "published_jsons": "Content projections through Git CRLF-to-LF normalization; never claimed byte-identical to original Windows JSON. Original archive below is immutable byte authority.",
+  "original_archive": "windows-24cc13bb5363-g2-evidence.zip"
 }

@@ -1,0 +1,67 @@
+{
+  "at": "2026-11-08T05:16:55.395634+00:00",
+  "head": "24cc13bb536386d0662927e9c94331eb8713bab8",
+  "metadata_commit": "09f47637143ef5e9a23c36f0bce94ceea575932a",
+  "original_lease_immutable": true,
+  "remote_files": {
+    "ops/leases/wp1279-r2-g2-claude.yaml": "8c516133b8bb9ff9f4a2f4d0da3d1d0d35274c4c58aeb542e9bf8b442809064c",
+    "ops/prompts/wp1279-r2-g2-attempt2-claude.md": "4efe3e53112b0430f6a29aac845ea7b857481dfd67cbf5579a0c56fe7e28eec7",
+    "ops/checkpoints/wp1279-r2/native-24cc13b/continuation-authority.json": "b23d5e06466ac184f2a232f205cdc0276c741e1e4d63045f9f7bba5a51d8371c"
+  },
+  "continuation_issue_readback_exact": true,
+  "issue_state": "open",
+  "canonical_K1": "passed unmodified pinned _spec_merge",
+  "holders": {
+    "measured_at_utc": "2026-11-08T05:17:11.133415+00:00",
+    "remote_heads": 736,
+    "remote_heads_sha256": "3bdea4fee4eed1e7b19f0038f23f1f995143f629f6f7ffd1e5d81b6c4fe9c60a",
+    "source_consumer_sha256": "a4bf95b539e077edbb706afee6fc37b157815c0c246ca1bb01b307106d7be480",
+    "lease_blob_path_pairs": 881,
+    "write_set": [
+      ".agents/skills/proxima-control/scripts/ProximaControl.psm1",
+      ".agents/skills/proxima-control/scripts/Run-Px.ps1",
+      ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1"
+    ],
+    "class": "sensitive",
+    "paths": {
+      ".agents/skills/proxima-control/scripts/ProximaControl.psm1": [
+        {
+          "lease_id": "wp1279-r2-g2-claude",
+          "ref": "refs/heads/ops/wp1279-spec",
+          "path": "ops/leases/wp1279-r2-g2-claude.yaml",
+          "blob": "7e4d6761a6499c0e926fbfa800eb7926d5976270",
+          "state": "C\u00d2N_H\u1ea0N",
+          "reciprocal_retired": null,
+          "active": true
+        }
+      ],
+      ".agents/skills/proxima-control/scripts/Run-Px.ps1": [
+        {
+          "lease_id": "wp1279-r2-g2-claude",
+          "ref": "refs/heads/ops/wp1279-spec",
+          "path": "ops/leases/wp1279-r2-g2-claude.yaml",
+          "blob": "7e4d6761a6499c0e926fbfa800eb7926d5976270",
+          "state": "C\u00d2N_H\u1ea0N",
+          "reciprocal_retired": null,
+          "active": true
+        }
+      ],
+      ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1": [
+        {
+          "lease_id": "wp1279-r2-g2-claude",
+          "ref": "refs/heads/ops/wp1279-spec",
+          "path": "ops/leases/wp1279-r2-g2-claude.yaml",
+          "blob": "7e4d6761a6499c0e926fbfa800eb7926d5976270",
+          "state": "C\u00d2N_H\u1ea0N",
+          "reciprocal_retired": null,
+          "active": true
+        }
+      ]
+    },
+    "active_lease_ids": [
+      "wp1279-r2-g2-claude"
+    ],
+    "active_path_claims": 3,
+    "active_holders": 1
+  }
+}

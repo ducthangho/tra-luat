@@ -1,0 +1,53 @@
+{
+  "measured_at_utc": "2026-11-08T05:17:11.133415+00:00",
+  "remote_heads": 736,
+  "remote_heads_sha256": "3bdea4fee4eed1e7b19f0038f23f1f995143f629f6f7ffd1e5d81b6c4fe9c60a",
+  "source_consumer_sha256": "a4bf95b539e077edbb706afee6fc37b157815c0c246ca1bb01b307106d7be480",
+  "lease_blob_path_pairs": 881,
+  "write_set": [
+    ".agents/skills/proxima-control/scripts/ProximaControl.psm1",
+    ".agents/skills/proxima-control/scripts/Run-Px.ps1",
+    ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1"
+  ],
+  "class": "sensitive",
+  "paths": {
+    ".agents/skills/proxima-control/scripts/ProximaControl.psm1": [
+      {
+        "lease_id": "wp1279-r2-g2-claude",
+        "ref": "refs/heads/ops/wp1279-spec",
+        "path": "ops/leases/wp1279-r2-g2-claude.yaml",
+        "blob": "7e4d6761a6499c0e926fbfa800eb7926d5976270",
+        "state": "CÒN_HẠN",
+        "reciprocal_retired": null,
+        "active": true
+      }
+    ],
+    ".agents/skills/proxima-control/scripts/Run-Px.ps1": [
+      {
+        "lease_id": "wp1279-r2-g2-claude",
+        "ref": "refs/heads/ops/wp1279-spec",
+        "path": "ops/leases/wp1279-r2-g2-claude.yaml",
+        "blob": "7e4d6761a6499c0e926fbfa800eb7926d5976270",
+        "state": "CÒN_HẠN",
+        "reciprocal_retired": null,
+        "active": true
+      }
+    ],
+    ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1": [
+      {
+        "lease_id": "wp1279-r2-g2-claude",
+        "ref": "refs/heads/ops/wp1279-spec",
+        "path": "ops/leases/wp1279-r2-g2-claude.yaml",
+        "blob": "7e4d6761a6499c0e926fbfa800eb7926d5976270",
+        "state": "CÒN_HẠN",
+        "reciprocal_retired": null,
+        "active": true
+      }
+    ]
+  },
+  "active_lease_ids": [
+    "wp1279-r2-g2-claude"
+  ],
+  "active_path_claims": 3,
+  "active_holders": 1
+}

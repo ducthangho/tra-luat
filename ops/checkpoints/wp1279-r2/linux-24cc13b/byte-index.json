@@ -1,0 +1,19 @@
+{
+  "full-selftest.log": "c6f1d0b9d0b753677ce68ab838694444c6ab85e1801323d691d4fcf586e6ad80",
+  "numstat.log": "cc9c639a96faa4b3fbf00431c2ba3ab370ba93ee499cb99217c0142439690ad0",
+  "worker-manifest.log": "66718b6d622f749f2dc3a1bf896d19a7b81562fc0a3bdf7fd671acae522cf58a",
+  "holders-before-attempt2.json": "7f51e6fa3c8d0d5d54e05ab2e9fc82966cb8cbfa11e4e3e6879f722718a8f03f",
+  "admission.json": "23eff295452c5ea0b2117072df2ee22698f8027e1e25a0ffdf8f21ac75e59d8f",
+  "diff-check.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "receipt.json": "30b213c4eb08effcb5872e5bbf25803c8aff6d93a867dc02e66455f5d3f03ee6",
+  "worker-release-verify.log": "0968bbd87b9c51b89131cdfd9433c26b4392a6c87ee138746fad5bb4a66873bc",
+  "full-selftest-evidence.json": "2eae768bfc7f8e909c22b4c1760f3a2f743734b66d61596dfc84d244d7d6d0d0",
+  "progress.json": "064d879ba360198343fa488bb18729f2c1bca35e0877c89c91fd97a7f120e0aa",
+  "start.json": "bd35181d9f9d0fc8cc216a0c5fadb186221bd77f7b57a24503d03ec32c1568d8",
+  "g2-native-linux-auditor-receipt.json": "61f2a0c4a778f594655346f6f55651a91ecb289d80456dcc56230c4ce34cd101",
+  "full-selftest-lifecycle.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "admission.log": "c0c5da1b4ba0aaed53fbc55f65fa461c36373a005ce083dd17c1774f6c96990c",
+  "ruff.log": "abfe006382f119f28b0716ba017d25e6e9f75ceac48630b782262f1f0bf14953",
+  "g2-attempt2-preflight.json": "bfd6c584115380adc3b561455a6feb043e625203678a1d953e0b4ff3d2e332d2",
+  "worker-manifest.json": "30155ff83d1a6a185b39c7370f3e1b764b507ccf3313b3829abd3c377ebfc4be"
+}

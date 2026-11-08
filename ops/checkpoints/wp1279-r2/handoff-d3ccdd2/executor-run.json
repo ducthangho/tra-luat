@@ -1,0 +1,63 @@
+{
+  "version": "1.5.0",
+  "run_id": "04b271dbab314dfe86ffcd60f7d1a21a",
+  "short_id": "04b271db",
+  "ten": "wp1279-r2-g2-claude-attempt2",
+  "lenh": {
+    "chuong_trinh": "claude",
+    "so_doi_so": 45,
+    "van_tay": "ef6b023025c767ea"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-11-08T05:17:11.640282+00:00",
+  "ket_thuc_utc": "2026-11-08T05:28:51.993320+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 569624,
+  "khoa_danh_tinh": "linux:22411091",
+  "workspace": "/workspace/scratch/wp1279-g2-claude",
+  "head": "24cc13bb536386d0662927e9c94331eb8713bab8",
+  "ref": "agent/wp1279-g2-claude",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "4efe3e53112b0430f6a29aac845ea7b857481dfd67cbf5579a0c56fe7e28eec7",
+  "deadline_utc": "2026-11-08T06:02:11.497346+00:00",
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=22B"
+    },
+    "claude_trust": {
+      "trang_thai": "DAT",
+      "chi_tiet": "Claude trust=true"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "anthropic_claude",
+  "execution_surface": "claude_code",
+  "transport": "machine/local",
+  "transport_sha256": "0e640cb9f149f9a47671c9519f633637fe54e4b07a2fda4bea63302e4e0d1f1b",
+  "chup_workspace": false,
+  "checkpoint_sha256": "836ef6ac36a698076fe695e81b250534f79e3d61c933664f4665d7059959e34f",
+  "prompt_ban_chup": "/workspace/scratch/proxima-p1-s2-20261108/g2-attempt2-executor-runs/04b271db/prompt.snapshot",
+  "prompt_kin_hoan_toan": false,
+  "thoi_luong_giay": 700.353,
+  "stdout_byte": 2542222,
+  "stdout_sha256": "5440271f826cd5fe7c8e6c8ad107ec55d2ff16ecc02e8a1566043b6f2c2201be",
+  "stderr_byte": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

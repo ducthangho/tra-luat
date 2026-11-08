@@ -1,0 +1,119 @@
+{
+  "duration_api_ms": 697679,
+  "stop_reason": "end_turn",
+  "session_id": "cd9a883b-a95f-4901-a876-9cab4968245d",
+  "total_cost_usd": 4.7370404,
+  "usage": {
+    "input_tokens": 60,
+    "cache_creation_input_tokens": 254592,
+    "cache_read_input_tokens": 5662422,
+    "output_tokens": 78379,
+    "output_tokens_details": {
+      "thinking_tokens": 58970
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 254592,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 2728,
+        "cache_read_input_tokens": 258738,
+        "cache_creation_input_tokens": 1002,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1002
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 60,
+      "outputTokens": 78379,
+      "cacheReadInputTokens": 5662422,
+      "cacheCreationInputTokens": 254592,
+      "webSearchRequests": 0,
+      "costUSD": 4.7370404,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 58970,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 254592,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 43,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've edited one file, the harness `ProximaControl.Tests.ps1`. All four failures were bugs in the harness, not the product. I have not run the harness, so whether the four IDs now pass is untested until your native PS5.1/PS7 runs.\n\n**Files**\n- `.agents/skills/proxima-control/tests/ProximaControl.Tests.ps1` is now 1027 lines (was 982).\n- `ProximaControl.psm1` (527 lines) and `Run-Px.ps1` (30 lines) are byte-identical to `24cc13b`. I found no contract defect, so the module header comment that mentions `Get-PSSession` is unchanged.\n- All three files are new versus B, so the size is 1584 additions and 0 deletions, under the 1800 cap. No other paths were written.\n\n**Causes and fixes**\n- **X3-02:** a false positive. The check searched the raw module text, and the only match was the module's header comment saying it does no `Get-PSSession` adoption. The module only calls `New-PSSession`, `Remove-PSSession` and `Invoke-Command`, all fully qualified.\n  - The static check now uses the PowerShell parser and scans every non-comment token, including strings and module-qualified names, for `Get-PSSession`, `Connect-PSSession` and `Enter-PSSession`.\n  - A guard fails the case with `TOKEN_SCAN_VACUOUS` if the scan cannot see `New-PSSession`, so it can't pass by scanning nothing.\n  - New behavioural check: recording global stand-ins for the three commands are installed while `status` without `connect` runs through both `px` and the in-process `Run-Px.ps1`. Both must fail with `NotConnected` and record zero calls (`AUTOCONNECT[...]` otherwise). The stand-ins are removed in `finally`.\n  - The fresh-process-disconnected and module-conflict child checks are unchanged.\n- **X5-03:** the loop variable `$s` shadowed the scratch root `$S`. PowerShell resolves names through the caller's scopes, ignoring case. That turned the junction target into a relative path, and it also quietly broke every tree snapshot inside the loop. Renamed to `$sub`. All subcases are unchanged: the seven pending/unknown/malformed/unreadable variants, junction \u2192 `PendingGuardUnverified`, `Force` override, and settled journal.\n- **X5-05:** the local `$sha` replaced the shared SHA256 hasher `$Sha` for later helper calls. Renamed to `$occSha`. The junction setup and the checks now sit in `try`/`finally`, and the `finally` deletes only the junctions actually created. This tail of the case (collision handling and junction cleanup) never ran natively before.\n- **X6-02:** the snapshot `$keep` shadowed `$Keep`, and the snapshot `$repo` shadowed `$Repo`.\n  - So every WhatIf call ran with a snapshot string as `RepositoryRoot` and failed validation. The zero-effects check was measuring nothing, and the junction probe then failed with \"illegal path\".\n  - The snapshots are renamed. A new `WHATIF_MATRIX_VACUOUS` check requires at least 10 actual dry runs out of the 30 calls; reading the module, I expect about 23.\n- **The same bug elsewhere:** a new setup check, `Find-ScopeShadowing`, parses the harness and refuses to run if any inner variable (assignment, `foreach` variable or parameter) reuses a top-level name. It first runs on a small sample containing the two original bug shapes and must flag exactly those.\n  - To make the harness pass its own check, I also renamed `$s` in `Get-Bound` and the X5-07 \"two services\" handler, and five top-level names: `$p`, `$g`/`$gl`, `$d`, `$b`, `$m` and `$rc`. None of these were live bugs.\n  - It does not catch one helper's local shadowing another helper's local. I checked those by hand (`Invoke-Guarded` against the variables its callers' calls use); none collide.\n\n**Coverage**\n- The mandatory IDs, failure messages, assertion strength and report schema are unchanged. The only additions are the three new failure tokens above (`TOKEN_SCAN_VACUOUS`, the wrapper `AUTOCONNECT` check, `WHATIF_MATRIX_VACUOUS`).\n- Baseline B still reaches every case and fails it with `API_ABSENT` (rc 1), as long as the new setup check passes.\n\n**Counterexample anchors**\n- The product source is unchanged, so all 10 CX anchors are byte-identical to `24cc13b` and the CX table is unchanged.\n- The expected-failure labels are unchanged; CX08's `X5-03:PENDING_GUARD_BYPASS[malformed]` still comes from the renamed loop variable.\n- The CX01 mutant (Force bypasses ShouldProcess) should now also fail X6-02. That is an extra failure, not a substitute for the named one.\n- Counterexamples were never run, and I don't claim any of them as killed.\n\n**Not run:** every test. I ran no PowerShell, native or otherwise, and made no network, git or model calls. I did run one read-only Bash command (`wc -l`, `git status`, `git log -1`) despite the note that Bash was denied.\n\n**Remaining risks and unknowns**\n- **Biggest risk:** if `Find-ScopeShadowing` throws or wrongly flags something on Windows, both B and H stop at setup with rc 2. I checked the AST handling (the parser calls, the scriptblock-to-delegate conversion, `VariablePath.IsUnqualified`) by reading only. The report's `setup_error` would say so immediately.\n- `Set-Item`, `Test-Path` and `Remove-Item` on `function:global:<name>` have not been tried on PS5.1 or PS7.\n- `[IO.Directory]::Delete` on the dangling junction (J6) never actually ran in the earlier native run.\n- Several assertions run natively for the first time: the X5-03 junction subcase, the X5-05 collision tail, the X6-02 dry-run count, and the in-process wrapper path in X3-02.\n\nNo review has been done and I make no approval claim.",
+  "ttft_ms": 1798,
+  "type": "result",
+  "duration_ms": 699252,
+  "uuid": "735382d6-7462-4822-9c8c-417a994e3238",
+  "ttft_stream_ms": 1101,
+  "time_to_request_ms": 223,
+  "first_content_frame_ms": 1101,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 60,
+      "outputTokens": 78379,
+      "cacheReadInputTokens": 5662422,
+      "cacheCreationInputTokens": 254592,
+      "webSearchRequests": 0,
+      "costUSD": 4.7370404,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 58970,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 254592,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

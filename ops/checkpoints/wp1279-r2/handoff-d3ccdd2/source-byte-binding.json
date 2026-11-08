@@ -1,0 +1,8 @@
+{
+  "stdout_sha256": "5440271f826cd5fe7c8e6c8ad107ec55d2ff16ecc02e8a1566043b6f2c2201be",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "before_snapshot_sha256": "7cfedca90c5e35819f90226db3766d26a3fb36282db914ea4797ec2dbe4da942",
+  "after_snapshot_sha256": "aa951efc69ff035780557b51839c14bcf2d69272f5474d5cf1845b687484f318",
+  "scope_only_test_and_ignored_hook": true,
+  "provenance_note": "Actual Claude handoff says read-only Bash wc/gitstatus/gitlog did run despite prompt note saying Bash denied. Snapshot confirms no out-of-scope product writes. No raw thinking stream published. Complete source logs retained locally for identity/byte audit."
+}

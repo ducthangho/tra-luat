@@ -1,0 +1,89 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1285
+packet_id: wp1285
+mission_issue: 1238
+revision: 3
+generation: 4
+lease_id: wp1285-r3-g4-agy
+role: executor
+provider: google_antigravity
+executor: google_antigravity
+model: gemini-4-argon-high
+effort: high
+model_family: google
+execution_surface: antigravity
+transport: machine/local
+environment: windows
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1285-r3.md
+spec_ref: refs/heads/ops/wp1285-spec@a51578915747f8973cf961f9561967e906163a06
+spec_sha256_required: b0ec721acafaa2452ba175dd00a7960434f73754af18db2760b0b1ac561cb978
+spec_hash: b0ec721acafaa2452ba175dd00a7960434f73754af18db2760b0b1ac561cb978
+prompt_path: ops/prompts/wp1285-r3-g4-agy.md
+prompt_sha256_required: 5f78c6968fc0723077c4689b8117d3022e26332f936c79735e42df05a9dd69fb
+write_set:
+- .agents/skills/proxima-control/scripts/ProximaControl.psd1
+- .agents/skills/proxima-control/SKILL.md
+- .agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1
+write_set_hash: 0bbe3df51f38b0d334fcb5e35ada62ac95ac3eb1b1e28b4e9b5385a396a002aa
+effective_write_set:
+- .agents/skills/proxima-control/scripts/ProximaControl.psd1
+- .agents/skills/proxima-control/SKILL.md
+- .agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1
+change_policy_sha: null
+required_checks:
+- ActualnativePS51/7commonHharnessbaseline7red/candidate7of7/CX00positive+4namedkills/fullsourceartefactretention
+- S1S2bytesunchanged/size3newpaths450addsANDtotal/manifestwrapperreuse/S2normal26bothfocusedWindows
+- LinuxfullselftestNofN/strictmanifest/RuffFdelta0/doctrine/claims/admission/diffcheck
+- FreshindependentCodexCLIofflineapproveENTIREB..H/v2receipt/IssueM12beforeONEprimarypush
+- Draftconnector/exactHUbuntuPRCIallrequired4anchors/fullsourceAUX/Readyauto/currentrules/fullrefs/K0K7/newexactHgrant
+- ActualMcanonicalUbuntuCI4anchors/officialartifact/fullsourceAUX/M8/readback/actualUTCZretirement/D1D4beforeclosure
+land_obligations: []
+branch: agent/wp1285-r3-g4-agy
+base_sha: bf9914cb1a8e6f5047468f4d130b587015f8d73f
+start_from_sha: 883d37826f443ce9301dd0bcd40cd5f97f1adf0e
+reviewed_sha_required: 883d37826f443ce9301dd0bcd40cd5f97f1adf0e
+reviewed_sha_required_note: ContinuationH2only; freshentireB..actualH3review3 required,
+  H2notapproved
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1285#issuecomment-6724931931
+standing_authority: https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6708576608
+recorded_by: openai_codex/codex_service dispatcher under latest owner fullremainingwork
+  directive
+recorder_is_executor: false
+leased_at_utc: '2026-11-08T17:58:54Z'
+heartbeat_at: '2026-11-08T17:58:54Z'
+heartbeat_required_minutes: 360
+lease_until: '2026-11-08T23:58:54Z'
+lease_expires_at_utc: '2026-11-08T23:58:54Z'
+run_minutes: 45
+attempts_limit: 3
+review_rounds_limit: 3
+codex_review_calls_limit: 10
+same_failure_limit: 2
+requires_live: false
+uy_quyen_merge: false
+primary_product_pushes_limit: 1
+size_cap_additions_and_total_vs_B: 450
+executor_workspace: C:\Users\admin\tl-work\wp1285-r3-g4-agy-executor
+authority_note: Concreteowner-delegatedRescue r3 plus latestexplicitAGY4Argon executorrequest;
+  oneactualauthorattempt3, no newClaude, no reset/waiver/pushincrease
+status: leased
+thay_the_cho:
+- wp1285-r2-g3-claude
+nang_tran:
+  ai_nang: ducthangho through full scoped delegation, dispatcher records explicit
+    bounded exercise
+  can_cu: Formal2F01notclosed; twoordinaryrounds exhausted; owner explicitly AGYexecutor;
+    newwholeAST/modecontract and nativecounterexample evidence beforepromotion
+  tran_cu: 3paths450adds+total;product3TOTAL;formal2;shared8TOTAL;push1TOTAL
+  tran_moi: same3paths450/product3/push1UNCHANGED;formal3TOTAL(one rescueformal3);shared10TOTAL
+    minimumcompleteforecast

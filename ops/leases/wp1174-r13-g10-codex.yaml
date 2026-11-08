@@ -84,8 +84,8 @@ change_policy_exception:
   - unknown=>blocked
 leased_at_utc: '2026-11-08T03:12:06.493578+00:00'
 heartbeat_at: '2026-11-08T03:12:06.493578+00:00'
-lease_until: '2026-11-08T08:03:01Z'
-lease_expires_at_utc: '2026-11-08T08:03:01Z'
+lease_until: '2026-11-08T05:07:48.874118+00:00'
+lease_expires_at_utc: '2026-11-08T05:07:48.874118+00:00'
 heartbeat_required_minutes: 360
 max_lease_hours: 24
 hard_not_after: '2026-11-08T08:03:01Z'
@@ -155,3 +155,7 @@ native_P11_approval_claim: false
 new_native_integrator_minutes: 10
 native_part_count: 4
 native_parallel_limit: 2
+ended_at_utc: '2026-11-08T05:07:49.874118+00:00'
+ended_reason: G10 source quiescent53; all four native parts terminal, actual A/C P2;
+  preserve all history and stop publication pending exact successor authority
+ended_on_instruction: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6717287742

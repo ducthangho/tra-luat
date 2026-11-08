@@ -1,0 +1,8 @@
+{
+  "source": "unmodified canonical _spec_merge",
+  "spec": "38c4cb94fde73449e7366fffe2d323210a05b9de:ops/specs/wp1279-r1.md",
+  "at": "2026-11-08T03:03:05.538680+00:00",
+  "status": "failed",
+  "error": "spec identity declaration sai grammar",
+  "error_type": "ValueError"
+}

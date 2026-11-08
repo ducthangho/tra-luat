@@ -1,0 +1,9 @@
+{
+  "command": "claude auth status with same isolated executor credential environment",
+  "rc": 0,
+  "loggedIn": true,
+  "authMethod": "oauth_token",
+  "apiProvider": "firstParty",
+  "version": "2.1.318 (Claude Code)",
+  "at": "2026-11-08T08:38:07.481056+00:00"
+}

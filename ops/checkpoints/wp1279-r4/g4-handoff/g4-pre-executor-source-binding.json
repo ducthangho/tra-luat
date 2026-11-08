@@ -1,0 +1,58 @@
+{
+  "metadata_commit": "70a82931eb090f102da92ced8085d2f958c368de",
+  "spec_source_oid": "f054490a2f44330fff05bfb43eb1bef584fed18b",
+  "files": {
+    "ops/specs/wp1279-r4.md": {
+      "blob": "656982639a62a22a467c6d3fe1ac8cf156e48858",
+      "sha256": "71d8f3bf6523c3428e86868085c6fc3263fdbb6e8936de48d953dfd6ad1ea3b3"
+    },
+    "ops/prompts/wp1279-r4-g4-claude.md": {
+      "blob": "d791876567e16b16969af887d0fb55471a4d8533",
+      "sha256": "5f63a1384752ba61668bef30464e7aac40b8f3ce97a744d5cc3383f3499ae856"
+    },
+    "ops/leases/wp1279-r4-g4-claude.yaml": {
+      "blob": "328dc9a33d15885f076ffd6afebdc052c30762e9",
+      "sha256": "9781a84c4e07724f2d44099f490d243d9f42ce4b62872047a6f046f6868bd424"
+    },
+    "ops/leases/wp1279-r3-g3-claude.yaml": {
+      "blob": "0a248a6c164195c22ffca78468ce8fd09ae9370c",
+      "sha256": "1855668937555cf969cb6c98863bb1ea876c111f58745fddd3aa04fdc0bd3662"
+    }
+  },
+  "actual_canonical_consumer": "unmodified _spec_merge passed",
+  "holder_lease_ids": [
+    "wp1279-r4-g4-claude"
+  ],
+  "worker_head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+  "worker_tree": "fbd7b8407eaa6ce08eb475e74b07546abe09a0a7",
+  "branch": "agent/wp1279-g4-claude",
+  "base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "scope": [
+    ".agents/skills/proxima-control/scripts/ProximaControl.psm1",
+    ".agents/skills/proxima-control/scripts/Run-Px.ps1",
+    ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1"
+  ],
+  "lease_projection_exact": true,
+  "rescue_decision_exact": true,
+  "official_trust": {
+    "folder": "/workspace/scratch/wp1279-g4-claude",
+    "trust": true,
+    "mechanism": "official interactive exactfolder UI Yes, GitHubMCP declined, /exit before any model prompt, trustprocess exit0",
+    "authority": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6719263578",
+    "actual_code_attempt_started": false,
+    "ui_default_model_not_execution": "Sonnet5.5/medium UI only, actual executor will request opus/high",
+    "auth_metadata": "g4-cli-auth-metadata.json firstParty/oauth_token/loggedIn",
+    "at": "2026-11-08T08:38:41.592662+00:00"
+  },
+  "cli_auth_metadata": {
+    "command": "claude auth status with same isolated executor credential environment",
+    "rc": 0,
+    "loggedIn": true,
+    "authMethod": "oauth_token",
+    "apiProvider": "firstParty",
+    "version": "2.1.318 (Claude Code)",
+    "at": "2026-11-08T08:38:07.481056+00:00"
+  },
+  "at": "2026-11-08T08:38:41.597865+00:00",
+  "model_invoked": false
+}

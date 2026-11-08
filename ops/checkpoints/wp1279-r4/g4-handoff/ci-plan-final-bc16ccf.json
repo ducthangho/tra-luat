@@ -1,0 +1,43 @@
+{
+  "packet": "wp1279",
+  "revision": 4,
+  "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "tree": "30cbf51650d88f05c0fcae977dd9df286a089204",
+  "acceptance_base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "canonical_remote_observed": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "recorded_at": "2026-11-08T09:00:36.537167+00:00",
+  "tools_actual_rc": 0,
+  "tools_stdout_sha256": "7334959034b6ce0e0e00a3ce14ed652a713f3645ec47e511fdfd0a737126421b",
+  "tools_canonical_source_sha256": "386c70ffeb9d47f595b521dd95f503e7b9559862c6f8839bcccfefe9cc50e168",
+  "runtime": {
+    "python": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+    "python_version": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "git": "git version 2.52.0"
+  },
+  "workflow": {
+    "path": ".github/workflows/ci.yml",
+    "blob": "2b2c9aa25ad1c136e44cba457d9ae765d2544fc2",
+    "sha256": "aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67",
+    "unchanged_at_H4": true
+  },
+  "required_ruleset_contexts": [
+    "gate (ubuntu-latest)",
+    "gate-cong-cu-gop (ubuntu-latest)",
+    "gate-ops (ubuntu-latest)",
+    "gate-packet-loop (ubuntu-latest)"
+  ],
+  "events": [
+    "pull_request synchronize existingPR1280 after reviewed FFpush2",
+    "push canonical master after normal merge"
+  ],
+  "trigger_filter": "Defaultpull_request events include synchronize; push master. No paths filter; allB..H4commitmessages scanned noCIskipmarker. Ubuntu only perowner; noWindowslabel/dispatch.",
+  "budget_used": {
+    "attempts": "4/4terminal",
+    "sharedcalls": "8/16",
+    "formalrounds": "2/3",
+    "primarypush": "1/2"
+  },
+  "authority": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6719263578",
+  "before_heavy_and_final_review": true,
+  "promotion_status": "NOT_RUN/newH4native/Linux/formalreview3/push2/PRCI/merge/MCI/M8pending"
+}

@@ -1,0 +1,10 @@
+{
+  "folder": "/workspace/scratch/wp1279-g4-claude",
+  "trust": true,
+  "mechanism": "official interactive exactfolder UI Yes, GitHubMCP declined, /exit before any model prompt, trustprocess exit0",
+  "authority": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6719263578",
+  "actual_code_attempt_started": false,
+  "ui_default_model_not_execution": "Sonnet5.5/medium UI only, actual executor will request opus/high",
+  "auth_metadata": "g4-cli-auth-metadata.json firstParty/oauth_token/loggedIn",
+  "at": "2026-11-08T08:38:41.592662+00:00"
+}

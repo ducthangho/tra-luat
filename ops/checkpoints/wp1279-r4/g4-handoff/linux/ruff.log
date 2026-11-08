@@ -1,0 +1,218 @@
+[
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 32,
+      "row": 286
+    },
+    "filename": "/workspace/scratch/wp1279-g4-claude/scripts/tl.py",
+    "fix": null,
+    "location": {
+      "column": 15,
+      "row": 286
+    },
+    "message": "Undefined name `_reassemble_parts`",
+    "noqa_row": 286,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 28,
+      "row": 307
+    },
+    "filename": "/workspace/scratch/wp1279-g4-claude/scripts/tl.py",
+    "fix": null,
+    "location": {
+      "column": 11,
+      "row": 307
+    },
+    "message": "Undefined name `_reassemble_parts`",
+    "noqa_row": 307,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 26,
+      "row": 328
+    },
+    "filename": "/workspace/scratch/wp1279-g4-claude/scripts/tl.py",
+    "fix": null,
+    "location": {
+      "column": 15,
+      "row": 328
+    },
+    "message": "Undefined name `_cache_file`",
+    "noqa_row": 328,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 23,
+      "row": 361
+    },
+    "filename": "/workspace/scratch/wp1279-g4-claude/scripts/tl.py",
+    "fix": null,
+    "location": {
+      "column": 8,
+      "row": 361
+    },
+    "message": "Undefined name `_active_profile`",
+    "noqa_row": 361,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 41,
+      "row": 379
+    },
+    "filename": "/workspace/scratch/wp1279-g4-claude/scripts/tl.py",
+    "fix": null,
+    "location": {
+      "column": 26,
+      "row": 379
+    },
+    "message": "Undefined name `_active_profile`",
+    "noqa_row": 379,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 31,
+      "row": 474
+    },
+    "filename": "/workspace/scratch/wp1279-g4-claude/scripts/tl.py",
+    "fix": null,
+    "location": {
+      "column": 17,
+      "row": 474
+    },
+    "message": "Undefined name `_dang_bare_key`",
+    "noqa_row": 474,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 23,
+      "row": 894
+    },
+    "filename": "/workspace/scratch/wp1279-g4-claude/scripts/tl.py",
+    "fix": null,
+    "location": {
+      "column": 12,
+      "row": 894
+    },
+    "message": "Undefined name `norm_sohieu`",
+    "noqa_row": 894,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 55,
+      "row": 895
+    },
+    "filename": "/workspace/scratch/wp1279-g4-claude/scripts/tl.py",
+    "fix": null,
+    "location": {
+      "column": 40,
+      "row": 895
+    },
+    "message": "Undefined name `_entry_drive_id`",
+    "noqa_row": 895,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 99,
+      "row": 895
+    },
+    "filename": "/workspace/scratch/wp1279-g4-claude/scripts/tl.py",
+    "fix": null,
+    "location": {
+      "column": 82,
+      "row": 895
+    },
+    "message": "Undefined name `_sohieu_key_entry`",
+    "noqa_row": 895,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 28,
+      "row": 1157
+    },
+    "filename": "/workspace/scratch/wp1279-g4-claude/scripts/tl.py",
+    "fix": null,
+    "location": {
+      "column": 16,
+      "row": 1157
+    },
+    "message": "Undefined name `_sha256_file`",
+    "noqa_row": 1157,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 22,
+      "row": 1321
+    },
+    "filename": "/workspace/scratch/wp1279-g4-claude/scripts/tl.py",
+    "fix": null,
+    "location": {
+      "column": 10,
+      "row": 1321
+    },
+    "message": "Undefined name `build_parser`",
+    "noqa_row": 1321,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 19,
+      "row": 1337
+    },
+    "filename": "/workspace/scratch/wp1279-g4-claude/scripts/tl.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 1337
+    },
+    "message": "Undefined name `load_creds`",
+    "noqa_row": 1337,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  }
+]

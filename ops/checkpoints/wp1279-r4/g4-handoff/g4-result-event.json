@@ -1,0 +1,119 @@
+{
+  "duration_api_ms": 671272,
+  "stop_reason": "end_turn",
+  "session_id": "f62b3797-3c33-4383-891e-e8e41e642b41",
+  "total_cost_usd": 4.3393516000000005,
+  "usage": {
+    "input_tokens": 42,
+    "cache_creation_input_tokens": 253969,
+    "cache_read_input_tokens": 3853158,
+    "output_tokens": 76840,
+    "output_tokens_details": {
+      "thinking_tokens": 54880
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 253969,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 4569,
+        "cache_read_input_tokens": 255971,
+        "cache_creation_input_tokens": 1805,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1805
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 42,
+      "outputTokens": 76840,
+      "cacheReadInputTokens": 3853158,
+      "cacheCreationInputTokens": 253969,
+      "webSearchRequests": 0,
+      "costUSD": 4.3393516000000005,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 54880,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 253969,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 44,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I made the F03 fix in two of the three allowed files; `Run-Px.ps1` is unchanged. **Nothing has been run.** I had no shell on this session, and there's no PowerShell 5.1/7 on this Linux surface, so the parse, the scope-shadowing self-check, the native runs and the numstat are all unmeasured. Nothing is committed, pushed or approved; that's left for Root and the fresh Codex review.\n\n## Changed files\n| path | lines (all three files are new at B, so adds = lines, 0 deletions) |\n|---|---|\n| `.agents/skills/proxima-control/scripts/ProximaControl.psm1` | 559 (H3: 528) |\n| `.agents/skills/proxima-control/scripts/Run-Px.ps1` | 30 (unchanged) |\n| `.agents/skills/proxima-control/tests/ProximaControl.Tests.ps1` | 1184 (H3: 1095) |\n| **total** | **1773 \u2264 1950** (a line count from grep, not `git --numstat`) |\n\nI estimated \u22481740 before the first edit. Grep finds no non-ASCII bytes in any of the three files, and the CX01\u2013CX11 anchors each appear exactly once.\n\n## How F03 is closed\n**Cause:** `Get-PxcGateway` checked that the PID in the metadata belonged to the right process, but never checked who was actually listening on the advertised port.\n\n**Fix:** a new step in `Get-PxcGateway` (`ProximaControl.psm1:165-186`). It runs after the metadata, session-0 and runtime-path checks and before the URL is returned. Every HTTP call (status, models, use via models, ask) gets its URL only from this function, on both the local path and the exported `Invoke-ProximaOperation` that the remote endpoint runs. So the API key and the prompt can't be sent until the check passes. Any failure gives the fixed code `ProximaControl.ListenerUnverified`.\n\n**Listener record rules:**\n- **Every returned record** must have:\n  - `LocalPort` as a native integer equal to the metadata port;\n  - `State` and `OwningProcess` as native integers (via the new `Get-PxcInt`, which accepts byte, sbyte, int16, uint16, int, uint32, long and uint64, and rejects bool, string, float, decimal, enum and null);\n  - `LocalAddress` as a string that `[Net.IPAddress]::TryParse` accepts.\n\n  Otherwise the request is rejected.\n- **Applicable records** are `State == 2` (Listen) on `127.0.0.1` or `0.0.0.0`, on `::`, or on the IPv4-mapped forms of those (`::ffff:\u2026`).\n  - Every applicable record must be owned by the validated PID.\n  - At least one must be a plain IPv4 record (`127.0.0.1` or `0.0.0.0`).\n- **Ignored records:** other states (for example TimeWait with owner 0), `::1`, `127.0.0.2` and other addresses. A Listen or TimeWait record that isn't applicable doesn't reject the request on its own; the request fails only if no applicable record remains.\n- **Rejected:** an empty result, a denied or failed query, a null or malformed record, a port mismatch, a wrong owner, conflicting applicable owners, or a listener only on IPv6 or `::`.\n\n**The 10th private primitive:** `GetTcpListener` runs `CimCmdlets\\Get-CimInstance -Namespace ROOT/StandardCimv2 -ClassName MSFT_NetTCPConnection -Filter LocalPort=<n>` with `-ErrorAction Stop`. It only reads. There's no fallback and no public callback.\n\n**Everything else is unchanged:** the fixed `127.0.0.1` URL, no proxy/redirect/cookies, exactly one POST with no retry, and the journal, service, session, fingerprint and WhatIf guards. WhatIf still returns before `Get-PxcGateway`, so it makes no listener query.\n\n## Harness\n**The 10 primitive bindings** are `GetProcess, GetService, GetTcpListener, Http, InvokeRemote, NewId, NewSession, RemoveSession, ServiceControl, UiSessions`. All 10 are replaced and checked by reference before any product call, plus a new check that the table has exactly 10 entries.\n- The listener fake `$DefaultListen` returns a `127.0.0.1` Listen record with native types (`[uint16]`, `[byte]2`, `[uint32]`), owned by the PID that `Set-RestPort` wrote for that port. Fixture ports now equal the fixture PIDs.\n- `Set-RealListen` swaps the real query back in only for X5-09's own probe. `Invoke-Case`'s `finally` swaps the fake back.\n\n**Normal run is 26 IDs:** the original 25 plus X5-09. The exact call-sequence checks in X5-06 and X6-01 now expect `GetTcpListener` between `GetProcess` and the first HTTP call.\n\n**X5-09 subcases** (each run through px models, px ask, export status and export ask):\n- **Should pass (listener must be queried exactly once, then HTTP):**\n  - owned loopback;\n  - owned wildcard with int32/int64 types;\n  - owned plus records that don't apply;\n  - owned IPv4 plus owned `::`.\n- **Should fail closed with 0 HTTP and `ListenerUnverified`:**\n  - wrong owner, and wrong owner on the wildcard address;\n  - a conflicting owner on `127.0.0.1`, on `::`, or on the mapped address;\n  - denied query, empty result, null record;\n  - null, string or boolean owner (the boolean is tested against metadata PID 1, so only the type rule can catch it), string state, double port, port mismatch;\n  - null address, address that won't parse, IPv6-only, not in Listen state, `127.0.0.2`.\n- **WhatIf:** a dry run with 0 listener queries and no side effects.\n- **Wire:** a real HTTP send to a harness-owned 127.0.0.1 TcpListener while the fake listener record names PID 4999. This must produce 0 requests. With the owned record, exactly one GET with the dummy key must arrive.\n- **Real read-only CIM probe**, only on the harness listener's port:\n  - It stores the command text, ok/error, and each raw record with its type names in `report.listener_probe`.\n  - If it sees the harness PID listening, the product must accept that real owned listener. Using fake PID 4108 against the real records must then fail closed.\n  - If the query is unavailable, both calls must fail closed and the probe is recorded as unmeasured for real deployment.\n\n**CX11:** in `ProximaControl.psm1`, `if ($own -ne $meta['pid']) { throw 'owner' }` is replaced with `$null = $own`. It only counts as a kill if X5-09 fails with both `LISTENER_OWNERSHIP_BYPASS[wrong owner px models]` (fake HTTP) and `LISTENER_OWNERSHIP_BYPASS[wire px models]` (an actual wire request). The owned-listener positive cases keep working under this mutant. The focused run is 38 = 26 normal + CX00 + CX01\u2013CX11, and CX00 expects 26/26.\n\n**What old H3 should show under this harness:**\n- `Install-Fakes` accepts exactly the old 9-key table and adds the listener fake, so H3 gets a behavioural failure rather than a setup error. `report.primitive_table` records which table was found.\n- X5-09 should fail with `LISTENER_OWNERSHIP_BYPASS[...]`: the mock subcases, and the wire send with `requests\u22651 auth=1`.\n- These diagnostics are honest but earn no kill credit: `LISTENER_NOT_QUERIED_OR_UNUSED`, `LISTENER_PRIMITIVE_ABSENT`, and the `PRIMITIVE_COUNTS` failures in X5-06 and X6-01.\n- B should still fail every ID with API_ABSENT.\n\n**What's preserved:**\n- **F01:** the endpoint path pattern stays built from code points and all source is ASCII.\n- **F02:** the evidence schema, sibling EvidenceRoot, `Test-Evidence` and the CX record files are untouched; CX11 goes through the same `$Cx` loop.\n\n## Not run (all of it)\n- **Native runs:** PS5.1 and PS7, normal en-US, focused tr-TR, and the same harness against B, H3 and H4.\n- **Root's checks:** the artifact verifier and the private-copy deletion negative.\n- **Linux gates:** full tl selftest, Ruff F delta, strict manifest.\n- **Measurements:** numstat and SHA256 of the three files.\n\n## Uncertainties to check before calling this fixed\n1. **Two approved rules are now looser.** `Install-Fakes` now also accepts the exact pre-r4 9-key table, so old H3 can't fail only on setup. This trades against \"exact count assertions never weakened\". A candidate can't reach 26/26 that way, but a reviewer should judge it.\n2. **Listener permissions are untested.** Whether a non-admin user, or the session-0 remote endpoint, can read MSFT_NetTCPConnection with owner PIDs is unknown. If not, every gateway call fails closed.\n3. **A real Proxima listening only on dual-stack `::` would be denied** on every call. Its real listening layout is unknown.\n4. **Records that aren't applicable** (other state or address) are ignored rather than rejected. Only malformed records or a port mismatch reject the request outright. Please confirm this reading of \"mismatched state/address\".\n5. **`IPAddress.TryParse` is lenient** for IPv4 strings. This can only make more records applicable, so it errs on the strict side.\n6. **Harness dynamic scope is unmeasured.** The listener handlers call the script-scope `New-ListenRec` from inside a module call. Existing handlers resolve `$DefaultHttp` the same way, but this exact path hasn't been run. The `Find-ScopeShadowing` self-check also hasn't been run on the new code.\n7. **The check is a snapshot, not atomic.** An administrator or port-reuse swap between the query and the HTTP send is a declared race and is noted in the module header.\n\nI'm stopping here.",
+  "ttft_ms": 2166,
+  "type": "result",
+  "duration_ms": 672728,
+  "uuid": "dd826f57-bc7c-4439-8a09-ea0c544df1b3",
+  "ttft_stream_ms": 1148,
+  "time_to_request_ms": 264,
+  "first_content_frame_ms": 1148,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 42,
+      "outputTokens": 76840,
+      "cacheReadInputTokens": 3853158,
+      "cacheCreationInputTokens": 253969,
+      "webSearchRequests": 0,
+      "costUSD": 4.3393516000000005,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 54880,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 253969,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

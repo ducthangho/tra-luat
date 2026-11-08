@@ -1,0 +1,386 @@
+{
+  "packet": "wp1279",
+  "revision": 4,
+  "generation": 4,
+  "as_of": "2026-11-08T12:09:20.934456+00:00",
+  "attempts_used": 4,
+  "attempts_limit": 4,
+  "codex_review_calls_used": 13,
+  "codex_review_calls_limit": 16,
+  "code_review_rounds_used": 3,
+  "code_review_rounds_limit": 3,
+  "primary_product_pushes_used": 2,
+  "primary_product_pushes_limit": 2,
+  "design_advisory_calls_used": 1,
+  "design_advisory_calls_limit": 1,
+  "design_actual_run": "6af19f41eb9440378081779412139918",
+  "design_preflight_before_model_not_charged": "e838232a996b46d9a715bd2c2a1d66a6",
+  "attempts": [
+    {
+      "n": 1,
+      "generation": 2,
+      "executor": "actual Claude Code",
+      "session_id": "9165bca9-d622-47d8-9814-a0ef344fda49",
+      "state": "terminal_success_recovered",
+      "purpose": "full P1-S2 frozen r2 implementation",
+      "baseline": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+      "deadline_utc": "2026-11-08T04:41:22.348070+00:00",
+      "reconciliation": "g2-recovery-reconciliation.json"
+    },
+    {
+      "n": 2,
+      "generation": 2,
+      "executor": "actual Claude Code",
+      "session_id": "cd9a883b-a95f-4901-a876-9cab4968245d",
+      "state": "terminal_success",
+      "purpose": "repair measured four native case failures without weakening acceptance",
+      "start_from": "24cc13bb536386d0662927e9c94331eb8713bab8",
+      "baseline": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+      "deadline_utc": "2026-11-08T06:02:11.497346+00:00",
+      "prompt_sha256": "4efe3e53112b0430f6a29aac845ea7b857481dfd67cbf5579a0c56fe7e28eec7",
+      "head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+      "run_id": "04b271dbab314dfe86ffcd60f7d1a21a"
+    },
+    {
+      "n": 3,
+      "generation": 3,
+      "executor": "actual Claude Code",
+      "session_id": "d0fad79b-8f11-44ec-a925-f738a4b05573",
+      "state": "terminal_success",
+      "purpose": "close F01/F02 under frozen r3, last ordinary attempt3/3",
+      "baseline": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+      "deadline_utc": "2026-11-08T07:06:05.158986+00:00",
+      "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+      "run_id": "a636c745a52a40bd9913e7a3f6f88df1"
+    },
+    {
+      "n": 4,
+      "generation": 4,
+      "executor": "actual Claude Code",
+      "session_id": "f62b3797-3c33-4383-891e-e8e41e642b41",
+      "state": "terminal_success",
+      "purpose": "close new listener-owner P1 F03 under explicit r4 Rescue, one rescue attempt4/4",
+      "baseline": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+      "deadline_utc": "2026-11-08T09:25:22.604597+00:00",
+      "actual_model_generation": true,
+      "run_id": "0f391189d42c4d1db34bd4827f566862",
+      "head": "bc16ccff3601fabeeb783f41b52360ef5851838a"
+    }
+  ],
+  "codex_calls": [
+    {
+      "n": 1,
+      "purpose": "mandatory_readonly_native_and_Linux_longlog_digest_of_failed_candidate24cc13b",
+      "head": "24cc13bb536386d0662927e9c94331eb8713bab8",
+      "state": "terminal_aux_digest",
+      "at": "2026-11-08T05:17:16.079206+00:00",
+      "formal_code_approval": false,
+      "receipt": "g2-native-linux-auditor-receipt.json"
+    },
+    {
+      "n": 2,
+      "purpose": "mandatory_readonly_exactH2_native_and_Linux_longlog_digest",
+      "head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+      "state": "terminal_aux_digest",
+      "at": "2026-11-08T05:42:23.361640+00:00",
+      "formal_code_approval": false,
+      "receipt": "h2-native-linux-auditor-receipt.json"
+    },
+    {
+      "n": 3,
+      "purpose": "fresh_independent_exactH_sensitive_formal_review1",
+      "head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+      "state": "terminal_validated_changes_requested",
+      "reserved_at": "2026-11-08T05:46:34.607248+00:00",
+      "requested_model": "gpt-6.1-sol",
+      "requested_effort": "xhigh",
+      "surface": "codex_cli",
+      "sandbox": "read-only",
+      "run_id": "454049296eb249c79881c81f394a8c3b",
+      "actual_model_generation": true,
+      "model_samples": 34
+    },
+    {
+      "n": 4,
+      "purpose": "mandatory_readonly_exactH3_native_Linux_F01_F02_longlog_digest",
+      "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+      "state": "terminal_aux_digest",
+      "at": "2026-11-08T07:04:58.696767+00:00",
+      "formal_code_approval": false,
+      "receipt": "g3-native-linux-auditor-receipt.json"
+    },
+    {
+      "n": 5,
+      "purpose": "fresh_independent_exactH_sensitive_formal_review2",
+      "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+      "state": "terminal_validated_approved",
+      "reserved_at": "2026-11-08T07:08:00.143657+00:00",
+      "requested_model": "gpt-6.1-sol",
+      "requested_effort": "xhigh",
+      "surface": "codex_cli",
+      "sandbox": "read-only",
+      "actual_model_generation": true,
+      "run_id": "5b2e879ec91c4970bd5ecd56207297a2",
+      "model_samples": 47
+    },
+    {
+      "n": 6,
+      "purpose": "Draft exactH connector review",
+      "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+      "state": "terminal_connector_no_findings_at_H3",
+      "pr": 1280,
+      "at": "2026-11-08T07:21:27.104999+00:00",
+      "receipt_comment": 6718696630,
+      "history_note": "Original DraftH3review terminalnofindings; laterReadycall8foundF03. Historypreserved, not currentH4approval."
+    },
+    {
+      "n": 7,
+      "purpose": "mandatory read-only PR1280 CI evidence collection and completed longlog audit",
+      "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+      "state": "terminal_aux_digest",
+      "pr": 1280,
+      "run_id": 42458434996,
+      "at": "2026-11-08T07:30:23.480037+00:00",
+      "formal_code_approval": false,
+      "receipt": "pr1280-ci-auditor-receipt.json"
+    },
+    {
+      "n": 8,
+      "purpose": "Ready-triggered automatic exactH connector review, not new offline formal round",
+      "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+      "state": "terminal_connector_P1_finding",
+      "pr": 1280,
+      "source": "pr1280-after-ready-state1/connector.json summary6718685067 Draftmarkedready actual08:17:39.887550Z",
+      "at": "2026-11-08T08:18:10.503209+00:00",
+      "review_id": 5817175363,
+      "finding_comment_id": 4505544562
+    },
+    {
+      "n": 9,
+      "purpose": "mandatory read-only H4 native/Linux/F03/F01/F02 longlog source audit",
+      "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+      "state": "terminal_aux_digest",
+      "at": "2026-11-08T09:33:47.617536+00:00",
+      "formal_code_approval": false,
+      "receipt": "g4-native-linux-auditor-receipt.json",
+      "receipt_sha256": "2873f9905eba3e118cd1b7461fb1adfe85cdf2e4fe10daf25a30b949effea472"
+    },
+    {
+      "n": 10,
+      "purpose": "fresh_independent_exactH_sensitive_formal_review3",
+      "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+      "state": "terminal_validated_approved",
+      "reserved_at": "2026-11-08T09:45:01.962969+00:00",
+      "requested_model": "gpt-6.1-sol",
+      "requested_effort": "xhigh",
+      "surface": "codex_cli",
+      "sandbox": "read-only",
+      "actual_model_generation": true,
+      "run_id": "7da16bbe3971485fa4488c30378f2c09",
+      "model_samples": 49
+    },
+    {
+      "n": 11,
+      "purpose": "Draft exactH4 connector review",
+      "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+      "state": "terminal_connector_no_findings",
+      "pr": 1280,
+      "at": "2026-11-08T10:00:23.475666+00:00",
+      "actual_model_generation": true,
+      "source": "pr1280-H4-connector-summary-observation2.json exactH4completed has_any_findingsfalse/unresolvedfalse"
+    },
+    {
+      "n": 12,
+      "purpose": "mandatory read-only H4 PR1280 Ubuntu CI source collection and long-log audit",
+      "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+      "state": "terminal_aux_partial_handoff",
+      "pr": 1280,
+      "run_id": 42469501853,
+      "at": "2026-11-08T10:02:34.309596+00:00",
+      "formal_code_approval": false,
+      "actual_model_generation": true,
+      "source": "tl_auditor actual active message confirmed run42469501853/attempt1/H4 on2026-11-08",
+      "receipt": "aux12-attempt2-partial-handoff.json",
+      "receipt_sha256": "e91c05180734102e25d8284f16a14e5baaf95258987e63a3e2863762b9f264b0",
+      "final_CI_audit": false,
+      "terminal_observed_at": "2026-11-08T11:30:30.670977+00:00"
+    },
+    {
+      "n": 13,
+      "purpose": "mandatory PRCI attempt2 source collection/final longlog audit continuation after boundedAUX12",
+      "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+      "state": "terminal_aux_complete_source_audit",
+      "reservation_plan_slot_id": 15,
+      "actual_invocation_ordinal": 13,
+      "run_id": 42469501853,
+      "attempt": 2,
+      "at": "2026-11-08T11:30:30.670977+00:00",
+      "formal_code_approval": false,
+      "actual_model_generation": true,
+      "source": "tl_auditor actual AUX13 acknowledgement plus21/23sourcecollection messages; assignmented9a938/Issue6720934933",
+      "absolute_deadline": "2026-11-08T13:00:30Z",
+      "receipt": "pr1280-H4-ci-auditor-receipt.json",
+      "receipt_sha256": "4f1f05dada67af6af86e26c2339f2d39afd93f1ae88047d48fa32ce559074d50",
+      "final_CI_audit": true
+    }
+  ],
+  "formal_reviews": [
+    {
+      "round_proposed": 1,
+      "head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+      "state": "terminal_validated_changes_requested",
+      "verdict": "changes_requested",
+      "run_id": "454049296eb249c79881c81f394a8c3b",
+      "round": 1,
+      "receipt": "ops/reviews/wp1279-r2-review1.receipt.yaml",
+      "metadata_commit": "4c7b557035a0957fef32277f0d176f94635a72eb"
+    },
+    {
+      "round_proposed": 2,
+      "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+      "state": "terminal_validated_approved",
+      "round": 2,
+      "verdict": "approved",
+      "run_id": "5b2e879ec91c4970bd5ecd56207297a2",
+      "receipt": "ops/reviews/wp1279-r3-review2.receipt.yaml"
+    },
+    {
+      "round_proposed": 3,
+      "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+      "state": "terminal_validated_approved",
+      "round": 3,
+      "verdict": "approved",
+      "run_id": "7da16bbe3971485fa4488c30378f2c09",
+      "receipt": "ops/reviews/wp1279-r4-review3.receipt.yaml"
+    }
+  ],
+  "note": "Aggregate history retained; product4/4terminal, shared12/16inclactiveAUX12, validformal3/3review3approvedH4, primarypush2/2. H4CIattempt1FAILED18/23 andfiveclassifiedcauses, authorizedfullUbuntu retry2actual/used1of1; no WindowsCI/code edits. Conditionalcall15reserve notinvoked. HistoricalMissioncloudminutes/tokensnotclaimedmeasured.",
+  "open_finding_classes": [
+    {
+      "id": "WP1279-R1-F01",
+      "class": "encoding-dependent-endpoint-path-validation",
+      "formal_occurrences": 1,
+      "status": "closed_by_independent_review3_H4"
+    },
+    {
+      "id": "WP1279-R1-F02",
+      "class": "nested-child-evidence-deleted-before-review",
+      "formal_occurrences": 1,
+      "status": "closed_by_independent_review3_H4"
+    },
+    {
+      "id": "WP1279-R3-F03",
+      "class": "unbound-loopback-listener-owner",
+      "formal_occurrences": 0,
+      "connector_occurrences": 1,
+      "status": "closed_by_independent_review3_H4",
+      "source": "https://github.com/ducthangho/tra-luat/pull/1280#discussion_r4505544562"
+    }
+  ],
+  "primary_push": {
+    "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+    "at": "2026-11-08T07:20:54.947326+00:00",
+    "rc": 0
+  },
+  "ordinary_attempts_limit": 3,
+  "rescue_decision": {
+    "metadata_commit": "a83d829b1f413378e121a1479ce0f5e9896b829f",
+    "issue_comment": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6719263578",
+    "issue_comment_id": 6719263578,
+    "exact_body_readback": true,
+    "decision_path": "ops/checkpoints/wp1279-r4/review-rescue-decision.json"
+  },
+  "primary_push_H4": {
+    "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+    "old": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+    "at": "2026-11-08T09:59:48.146454+00:00",
+    "command": [
+      "git",
+      "-C",
+      "/workspace/scratch/wp1279-g4-claude",
+      "push",
+      "origin",
+      "bc16ccff3601fabeeb783f41b52360ef5851838a:refs/heads/agent/wp1279-g3-claude"
+    ],
+    "rc": 0,
+    "remote_readback_exact": true
+  },
+  "ci_H4_PR": {
+    "run_id": 42469501853,
+    "attempt": 2,
+    "event": "pull_request",
+    "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+    "category": "authorized_measurement",
+    "status": "completed",
+    "source": "pr1280-H4-attempt2-ci-final/validation.json",
+    "retry_used": 1,
+    "retry_limit": 1,
+    "windows_ci": "not_run per owner",
+    "conclusion": "success",
+    "auxiliary_receipt": "pr1280-H4-ci-auditor-receipt.json"
+  },
+  "conditional_ci_aux_continuation_reservation": {
+    "call_id": 15,
+    "used": 1,
+    "limit": 1,
+    "binding": {
+      "metadata_commit": "b90e70c30562d81b6dcc9bedb5aa65a6c518c2ac",
+      "path": "ops/checkpoints/wp1279-r4/H4-CI-audit-wall-plan/audit-wall-plan.json",
+      "comment": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6720679771",
+      "exact_body": true,
+      "remote_blob_exact": true,
+      "actual_call15_invoked": false
+    },
+    "allocated_to_actual_n": 13,
+    "planned_forecast_slot_id": 15,
+    "actual_invocation": true,
+    "actual_call_n": 13
+  },
+  "ci_H4_PR_attempt1": {
+    "run_id": 42469501853,
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "failure",
+    "classified_source": "H4-attempt1-final-classification.json",
+    "not_passed": true
+  },
+  "ci_H4_PR_retry": {
+    "run_id": 42469501853,
+    "requested_attempt": 2,
+    "category": "authorized_measurement",
+    "used": 1,
+    "limit": 1,
+    "plan_source": {
+      "metadata_commit": "b439b14c5231adac220639520577d1da17bd74c6",
+      "retry_path": "ops/checkpoints/wp1279-r4/H4-metadata-drift-and-CI-retry-v3/retry-plan-v3.json",
+      "conditional_authority_path": "ops/land/wp1279-r4-pr1280-conditional-authority-base3cc0bc7.json",
+      "conditional_valid_until": "2026-11-08T14:25:49Z",
+      "current_canonical": "3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4",
+      "comment": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6720336629",
+      "comment_id": 6720336629,
+      "exact_body": true,
+      "remote_blobs_exact": true,
+      "retry_used": 0,
+      "retry_limit": 1
+    },
+    "state": "request_accepted",
+    "head": "bc16ccff3601fabeeb783f41b52360ef5851838a"
+  },
+  "ci_H4_PR_automatic_attempt1": {
+    "run_id": 42469501853,
+    "attempt": 1,
+    "event": "pull_request",
+    "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+    "category": "automatic_gate",
+    "status": "completed",
+    "windows_ci": "not_run per owner",
+    "conclusion": "failure",
+    "source": "H4-attempt1-final-classification.json"
+  },
+  "future_call_forecast": {
+    "Ready_auto_next_actual_n_if_starts": 14,
+    "canonical_M_CI_audit_next_actual_n_if_Ready_starts": 15,
+    "reserve16": 1,
+    "mapping_note": "Original wallplan forecastslot15usedby actualAUX13; allactualcounts/historysequential, noreset"
+  }
+}

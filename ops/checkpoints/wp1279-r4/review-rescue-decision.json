@@ -1,0 +1,80 @@
+{
+  "event": "review_rescue_checkpoint_owner_delegated_decision",
+  "packet_id": "wp1279",
+  "mission_issue": 1238,
+  "revision": 4,
+  "generation": 4,
+  "pr": 1280,
+  "head_before_rescue": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+  "immutable_acceptance_base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "state": "approved bounded remediation design; no new model or product writing until r4 spec/K1/lease/prompt published and unique-holder verified",
+  "authority_source": "https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6708576608",
+  "authority_quote": "Bạn hỏi quá nhiều, tôi ủy quyền cho bạn toàn quyền làm tới khi merge được",
+  "granted_by": "ducthangho through existing durable full scoped delegation",
+  "recorded_by": "openai_codex/codex_service dispatcher, not product Executor or independent approver",
+  "human_audit_claimed": false,
+  "finding": {
+    "id": "WP1279-R3-F03",
+    "class_slug": "unbound-loopback-listener-owner",
+    "severity": "P1",
+    "status": "open",
+    "connector_occurrences": 1,
+    "formal_occurrences": 0,
+    "source_review_id": 5817175363,
+    "source_comment_id": 4505544562,
+    "source_url": "https://github.com/ducthangho/tra-luat/pull/1280#discussion_r4505544562",
+    "cause": "Get-PxcGateway verifies metadata PID executable/session but never establishes advertised IPv4 TCP listener ownership; wrong listener may receive endpoint API key/prompt"
+  },
+  "prior_classes": "F01/F02 independently closed on H3 by review2; preserve all history and recheck on H4, no waiver inherited",
+  "decision": "Do not merge H3; PR returned to draft. One coherent remediation in same three paths; no stable slice because local/remote HTTP credential boundary is crosscutting. Actual Claude authors, fresh independent Codex CLI reviews entire B..H4. No finding waiver or gate weakening.",
+  "remedy_contract": [
+    "Before returning or using any gateway URL, require readable applicable listening TCP record(s) for the metadata port owned by the already validated Proxima PID; malformed/unknown/mismatched/denied/ambiguous applicable owners fail closed before ANY HTTP",
+    "Fixed IPv4 loopback URL remains unchanged; no URI override, credential forwarding or discovery. Listener reads use replaceable private primitive; all hazardous bindings replaced before harness product calls",
+    "Preserve all original25 normal IDs and10 semantic CX. Add X5-09 listener ownership positive and negative subcases plus CX11 bypassed ownership with valid process and unrelated listener: named actual HTTP-dispatch failure, never setup-as-kill",
+    "Normal26/26 on both nativePS51/7; focused38/38 trTR =26normal+CX00control+11semanticCX. Same original H4 harness against B/H3/H4 in one owned operator; oldH3 must show named listener-ownership behavioral failure, not just static/setup diagnostic",
+    "Retain F01 ACP1252-valid-path and F02 nested-child byte/command/rc/CLIXML proofs plus strict private-copy deletion negative; all source/harness/runtime and byte mappings exact",
+    "Repeat exactH4 Linux1777/1777, Ruff existingdelta0, strict manifest/admission; mandatory AUX, formalreview3/v2/M12 before one additional FF product push to existing PR branch; fresh Draftconnector/PRCI/Readyauto/currentrules/fullrefs/K0K7/newexactH4grant/MCI/M8/D1D4"
+  ],
+  "write_set": [
+    ".agents/skills/proxima-control/scripts/ProximaControl.psm1",
+    ".agents/skills/proxima-control/scripts/Run-Px.ps1",
+    ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1"
+  ],
+  "size_cap_additions_and_total_vs_B": 1950,
+  "new_worker": "/workspace/scratch/wp1279-g4-claude",
+  "worker_branch": "agent/wp1279-g4-claude",
+  "eventual_ff_push_target": "refs/heads/agent/wp1279-g3-claude",
+  "official_trust_scope": "Only new verified isolated g4 clone through official Claude UI under full delegation; no global auth/hook/profile changes",
+  "manual_descriptor": "NEW r4-only exception while policy/schema absent at B; sensitive/nullpolicy/[]land_obligations, recheck before lease/merge",
+  "nang_tran": {
+    "ai_nang": "ducthangho through full scoped delegation, dispatcher records explicit exercise",
+    "can_cu": "New real P1 source5817175363/4505544562 after Ready automatic review, ordinaryattempts3 exhausted; same coherent offline control boundary must bind process to listener and add26thnormal/11thsemanticnegative before any further authoring/review/push",
+    "tran_cu": "same3paths1800addsANDtotal; attempts3total; sharedCodexcalls10; formaloffline rounds3; primarypush1total",
+    "tran_moi": "same3paths1950addsANDtotal; attempts4TOTAL(one rescue attempt4); sharedCodexcalls16TOTAL; formaloffline rounds3UNCHANGED; primarypush2TOTAL(one additionalFFonly after freshH4approval/receipt)"
+  },
+  "used_preserved_before_new_models": {
+    "product_attempts": 3,
+    "shared_codex_calls": 8,
+    "formal_offline_rounds": 2,
+    "primary_product_pushes": 1,
+    "design_advisory_calls": 1
+  },
+  "forecast_shared_calls": {
+    "9": "H4 native/Linux AUX",
+    "10": "fresh exactH4 formalreview3",
+    "11": "Draft connector H4",
+    "12": "PRCI AUX H4",
+    "13": "possible actual Ready auto H4",
+    "14": "canonicalMCI AUX",
+    "15-16": "reserve, never charged if unused"
+  },
+  "run_limit": "45min new Claude;60min formal reviewer; all <=90min absolute; same-failurelimit2, no provider/budget reset",
+  "old_authority": "H3 conditional grant6718716552 is blocked by new openP1; never reuse forH4. New exactH4conditional authority only after candidate/review/gates.",
+  "exclusions": [
+    "No WindowsCI/fullWindowsmutantCI; focused native allowed",
+    "No LIVE/realgateway/service/auth/profilechanges or privilege relaxation",
+    "No S1/release/core/specparser/workflow writes by Executor",
+    "No extra productattempt after4 without another concrete Rescue"
+  ],
+  "recorded_at_utc": "2026-11-08T08:27:33Z"
+}

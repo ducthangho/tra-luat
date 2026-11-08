@@ -1,0 +1,48 @@
+{
+ "_trich": "cat tu REST GET /repos/ducthangho/tra-luat/commits/bf9914cb1a8e6f5047468f4d130b587015f8d73f (2026-11-08); bo patch tung tep; sha256 phan hoi day du 2c881181bcc20e747ab417077ae56b022288fc40962803c8247f31d2cca1a8ab, 109250 byte",
+ "sha": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+ "tree": "247971f6c723cc17de3632e4eaba2019545b356b",
+ "parents": [
+  "0166d30611617ac2ed4f79ada92f950d4edeb824",
+  "5824094e78a0afe9d0af8866df45c50b24334767"
+ ],
+ "author": {
+  "name": "ducthangho",
+  "email": "ducthangho@gmail.com",
+  "date": "2026-11-08T13:07:21Z"
+ },
+ "committer": {
+  "name": "GitHub",
+  "email": "noreply@github.com",
+  "date": "2026-11-08T13:07:21Z"
+ },
+ "message": "Merge pull request #1270 from ducthangho/claude/wp1179-r9-g1\n\nwp1179 r9 g1: C1a1b — kiểm receipt thu hồi trên đồ thị Git (doc_receipt_thu_hoi_git.py)",
+ "verification": {
+  "verified": true,
+  "reason": "valid",
+  "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq8HQJCRC1aQ7uu5UhlAAAitIQAIjWSnTUTxX3Am3TLY/B7Nf0\nJczRbXZTrpMgc0+R9uFIS1HLjHH4H/A0alDlOvWVdxjmbUfldr+DgT8okJ8KekQD\nekx0UF3jH7kN19NV6TpH1wVf7V4nE85nwNbB2pdGqJUnMv+Vl3SJc0JorRzo0Eu8\nVgSujXhVt3ZFzFr5uetpzu+/0COEpgLiKFFCDWFM9VCX/DLdSVJJs8SVYHPPCXQL\nABrO+xcFsZa57mFa4240nmWd1gwIhyTjV32fshbiMG/XyCubcq/jzta8VHELG2DS\nSVWZ/ia4s0Xrv4bdXxGy3ZhuRfYUPeSPP98HFSsUzQRCoZTl4VP/U4CbbWPR7Epr\nXbVVAy1mpfZBQzMxMwg/+1dGYCaLSiNV3sq6PvGd/HjRhZMcPfQVU0SU4OujcIxm\nLF7PxWP80WAcyqMg82lKC6uHOE8P4XTvUdxI77a4Pw2GLpZhtBRwGBtJMdZjhMYD\nrlMVoAhCjdyCb2C+eSxiDHJGzZr4SSCimwI7uWbDGvbwZqBb74cAo7xdNUyq4hDg\nAHOL2ZLr76NGGkyTrfCtFJzLdiOw+dfrSYITLxKJNrwyAkYzx9DW/ZDAfT1CMM5a\n6mQllSdY0v5JT1tAQEXbUIo4ruflZaH++pnnuPgXJcRHPXbXDP8QcoNA0KeqVN1U\ndA6hPUkdEJ1X0lRZ4xyU\n=m0XN\n-----END PGP SIGNATURE-----\n",
+  "payload": "tree 247971f6c723cc17de3632e4eaba2019545b356b\nparent 0166d30611617ac2ed4f79ada92f950d4edeb824\nparent 5824094e78a0afe9d0af8866df45c50b24334767\nauthor ducthangho <ducthangho@gmail.com> 1794143241 +0700\ncommitter GitHub <noreply@github.com> 1794143241 +0700\n\nMerge pull request #1270 from ducthangho/claude/wp1179-r9-g1\n\nwp1179 r9 g1: C1a1b — kiểm receipt thu hồi trên đồ thị Git (doc_receipt_thu_hoi_git.py)",
+  "verified_at": "2026-11-08T13:07:22Z"
+ },
+ "stats": {
+  "total": 1725,
+  "additions": 1718,
+  "deletions": 7
+ },
+ "files": [
+  {
+   "filename": ".claude/dev/doc_receipt_thu_hoi_git.py",
+   "status": "added",
+   "additions": 391,
+   "deletions": 0,
+   "sha": "7d8015ee298b9f7febe58950769c26023b3df60c"
+  },
+  {
+   "filename": ".claude/dev/doc_receipt_thu_hoi_test.py",
+   "status": "modified",
+   "additions": 1327,
+   "deletions": 7,
+   "sha": "2ac7b7d424391a06283f12e678257208e8871899"
+  }
+ ]
+}

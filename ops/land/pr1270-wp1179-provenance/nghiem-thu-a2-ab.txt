@@ -1,0 +1,29 @@
+# A2/A18 do trong MOT lenh (tools/a2.sh duoi day), bat dau 2026-11-08T14:03:30Z; hai worktree tach roi cua clone nay: nen 3cc0bc7, ung vien 5824094; /tmp/.git vang
+```
+D=/tmp/claude-0/-home-user-tra-luat/106ffbc6-673d-5f5d-bb08-b10ee601e8e4/scratchpad/land1179
+for pair in "nen:$D/wtBase" "sau:$D/wtH"; do n=${pair%%:*}; w=${pair#*:}; echo "## $n $(git -C $w rev-parse HEAD) python .claude/dev/doc_receipt_thu_hoi_test.py"; (cd $w && python3 .claude/dev/doc_receipt_thu_hoi_test.py > $D/a2-$n.log 2>&1; echo "rc=$?"); grep -n "nhom json\|nhom git\|doc_receipt_thu_hoi tests\|BỎ QUA\|BO QUA" $D/a2-$n.log; done
+```
+## nen 3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4 python .claude/dev/doc_receipt_thu_hoi_test.py
+rc=0
+2:doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET
+## sau 5824094e78a0afe9d0af8866df45c50b24334767 python .claude/dev/doc_receipt_thu_hoi_test.py
+rc=0
+2:nhom json: 156/156 ca QUA · 162/162 dot bien GIET · equivalent_verified 9
+3:nhom git: 114/114 ca QUA · 156/156 dot bien GIET · equivalent_verified 3
+4:doc_receipt_thu_hoi tests: 270/270 ca QUA · 318/318 dot bien GIET
+## a2-nen.log (toan van)
+nghia vu: witness_killed 162 · equivalent_verified 9 · unresolved 0
+doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET
+## a2-sau.log (toan van)
+nghia vu json: witness_killed 162 · equivalent_verified 9 · unresolved 0
+nhom json: 156/156 ca QUA · 162/162 dot bien GIET · equivalent_verified 9
+nhom git: 114/114 ca QUA · 156/156 dot bien GIET · equivalent_verified 3
+doc_receipt_thu_hoi tests: 270/270 ca QUA · 318/318 dot bien GIET
+## ci_dang_ky_test.py che do kiem so tren ung vien 5824094
+ĐỘT BIẾN p643-A4-bo-env: ĐỎ đúng
+ĐỘT BIẾN p643-A4-hai-buoc-registry: ĐỎ đúng
+PHẢN CHỨNG: 1070/1070 đỏ đúng
+TỔNG: ĐẠT
+rc=0
+## tep *_test.py moi duoi .claude/dev/ (3cc0bc7..5824094, --diff-filter=A)
+(het danh sach)

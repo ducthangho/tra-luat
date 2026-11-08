@@ -1,0 +1,47 @@
+# lenh: bash <script chep nguyen duoi day> <worktree tach roi tai 9607e3e> — chay trong phien ghi so
+```
+# A21(c) + A22: parser that cua base lease 9607e3e (worktree tach roi), state-dir TAM moi (khong phai state that cua executor).
+set -u
+T=$(mktemp -d); W=$1; cd "$W"; echo "# HEAD $(git rev-parse HEAD) ; state-dir tam $T ; $(date -u +%FT%TZ)"
+PL="python3 -B .claude/dev/packet_loop.py --state-dir $T"
+run(){ echo "\$ $*"; "$@" 2>&1 | grep -v '^\s*\[' ; echo "rc=${PIPESTATUS[0]}"; echo; }
+run $PL init --packet 1179 --executor claude --reviewer codex --codex-review-calls-limit 3
+run $PL init --packet 1179 --mission 499 --executor claude --reviewer codex --codex-review-calls-limit 3
+echo "\$ $PL status --packet 1179 | grep codex_review_calls_limit"; $PL status --packet 1179 | grep codex_review_calls_limit; echo
+run $PL init --packet 1180 --mission 499 --executor claude --reviewer codex --codex-review-calls-limit 0
+echo "# dung TAY trang thai blocked/rescue_required trong state TAM (sua JSON: state, ly_do, truc, history) — khong qua duong record-codex-call"
+python3 - "$T/wp1179.json" <<'PY'
+import json,sys
+p=sys.argv[1]; d=json.load(open(p)); d['codex_review_calls_used']=3
+d.update(state='blocked', ly_do='rescue_required', truc='codex_review_calls')
+d['history'].append({"event":"blocked_rescue_required","truc":"codex_review_calls","used":3,"limit":3}); json.dump(d,open(p,'w'),ensure_ascii=False,indent=2)
+PY
+run $PL record-rescue --packet 1179 --quyet-dinh revision --can-cu 6686369822
+run $PL record-rescue --packet 1179 --quyet-dinh revision --can-cu https://github.com/ducthangho/tra-luat/issues/1179#issuecomment-6686369822
+```
+# HEAD 9607e3eba96b2ce091e34196cbb8ede31a521ff9 ; state-dir tam /tmp/tmp.Y8nJ8ezW9R ; 2026-11-08T14:08:00Z
+$ python3 -B .claude/dev/packet_loop.py --state-dir /tmp/tmp.Y8nJ8ezW9R init --packet 1179 --executor claude --reviewer codex --codex-review-calls-limit 3
+usage: packet_loop.py init [-h] --packet PACKET --mission MISSION
+                           --executor EXECUTOR --reviewer REVIEWER
+packet_loop.py init: error: the following arguments are required: --mission
+rc=2
+
+$ python3 -B .claude/dev/packet_loop.py --state-dir /tmp/tmp.Y8nJ8ezW9R init --packet 1179 --mission 499 --executor claude --reviewer codex --codex-review-calls-limit 3
+đã khởi tạo packet 1179 (mission 499) — executor claude, reviewer codex, state awaiting_lease
+rc=0
+
+$ python3 -B .claude/dev/packet_loop.py --state-dir /tmp/tmp.Y8nJ8ezW9R status --packet 1179 | grep codex_review_calls_limit
+  "codex_review_calls_limit": 3,
+
+$ python3 -B .claude/dev/packet_loop.py --state-dir /tmp/tmp.Y8nJ8ezW9R init --packet 1180 --mission 499 --executor claude --reviewer codex --codex-review-calls-limit 0
+--review-rounds-limit/--codex-review-calls-limit phải là số nguyên DƯƠNG
+rc=2
+
+# dung TAY trang thai blocked/rescue_required trong state TAM (sua JSON: state, ly_do, truc, history) — khong qua duong record-codex-call
+$ python3 -B .claude/dev/packet_loop.py --state-dir /tmp/tmp.Y8nJ8ezW9R record-rescue --packet 1179 --quyet-dinh revision --can-cu 6686369822
+--can-cu '6686369822' phải là URL issuecomment GitHub
+rc=2
+
+$ python3 -B .claude/dev/packet_loop.py --state-dir /tmp/tmp.Y8nJ8ezW9R record-rescue --packet 1179 --quyet-dinh revision --can-cu https://github.com/ducthangho/tra-luat/issues/1179#issuecomment-6686369822
+đã ghi rescue revision — state blocked
+rc=0

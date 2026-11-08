@@ -1,0 +1,37 @@
+# do 2026-11-08T14:03:40Z clone tai bf9914c (core.abbrev 7); nen 3cc0bc7 (= base PR #1270) / 0166d30 (cha 1 merge); ung vien 5824094 / merge bf9914c
+## A1 git diff --exit-code 3cc0bc7 5824094 -- .claude/dev/doc_receipt_thu_hoi.py
+rc=0
+## A1 git diff --exit-code 0166d30 bf9914c -- .claude/dev/doc_receipt_thu_hoi.py
+rc=0
+## A1 git diff --exit-code 9607e3e 5824094 -- .claude/dev/doc_receipt_thu_hoi.py (base_sha lease)
+rc=0
+## A15 git diff --numstat 3cc0bc7 5824094
+391	0	.claude/dev/doc_receipt_thu_hoi_git.py
+1327	7	.claude/dev/doc_receipt_thu_hoi_test.py
+rc=0
+## A15 git diff --numstat 0166d30 bf9914c
+391	0	.claude/dev/doc_receipt_thu_hoi_git.py
+1327	7	.claude/dev/doc_receipt_thu_hoi_test.py
+rc=0
+## A15 git status --porcelain (cay sach truoc khi tinh; ngoai tru ops/land cua ho so nay)
+rc_grep=1 (1 = khong dong nao ngoai ops/land/pr1270-wp1179*)
+## A19 git diff --check 3cc0bc7 5824094
+rc=0
+## A19 python3 .claude/dev/packet_loop.py doctrine-scan --root . (tai bf9914c)
+doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine
+rc=0
+## A19 python3 .claude/dev/packet_loop.py adr-song --root . (tai bf9914c)
+adr-song: sạch — 64 ADR trên đĩa, 64 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## A19 ruff --version
+/usr/local/bin/python3: No module named ruff
+rc=1
+## A19 ruff 0.15.15 (venv tam, cung ban ci.yml ghim) — ruff check --select F hai tep, nen 3cc0bc7 va ung vien 5824094 trong MOT lenh
+### nen 3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4
+warning: Failed to lint .claude/dev/doc_receipt_thu_hoi_git.py: No such file or directory (os error 2)
+All checks passed!
+rc=0
+### sau 5824094e78a0afe9d0af8866df45c50b24334767
+All checks passed!
+rc=0
+# => F delta = 0 (nen: tep _git.py chua ton tai, tep test sach; ung vien: ca hai sach)

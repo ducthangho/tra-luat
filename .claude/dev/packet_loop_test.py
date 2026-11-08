@@ -10785,7 +10785,76 @@ def _status1174(c):
         _reject1174(m._1174_status, status, guard=True)
 
 
+def _source_topology1174(c):
+    """Real journal/lock operations with explicitly fixture mount authority."""
+    import contextlib, copy, io
+    from unittest.mock import patch
+    for origin in ("imported", "initialized", "latest"):
+        for kind in ("same", "device", "mount_id", "symlink", "refresh", "legacy_only"):
+            directory=c.tmp/("topology-"+origin+"-"+kind);directory.mkdir()
+            ctx=Ctx(c.script,directory)
+            if origin=="imported":
+                m,a,args=_adopt_fixture1174(ctx)
+            else:
+                m,a,init=_init_fixture1174(ctx)
+                with patch.object(m,"_1174_probe",return_value={}):
+                    assert _call1174(m._1174_initialize,init,a,None)=="completed_no_dispatch"
+                for step in range(2 if origin=="latest" else 1):
+                    e=a["enrollment"];source=Path(e["state_path"]);digest=hashlib.sha256(source.read_bytes()).hexdigest()
+                    journal=directory/("next-"+str(step));journal.mkdir();generation=a["generation"]+1
+                    a.update(generation=generation,lineage=dict(predecessor_generation=generation-1,source_path=str(source),source_sha256=digest))
+                    e.update(state_path=str(journal/source.name),journal_root=str(journal))
+                    a["operation"]=dict(adoption_id="topology-"+str(step),generation=generation,binding_sha256=e["binding_sha256"],canonical_path=e["state_path"],source_sha256=digest,cutover_started=False)
+                    args=m.build_parser().parse_args(["adopt-state","--packet","1174","--mode","initial","--adoption-id",a["operation"]["adoption_id"],"--expected-source-sha256",digest,"--expected-witness-revision",str(json.loads(Path(e["witness_path"]).read_bytes())["witness_revision"]),"--target-generation",str(generation)])
+                    if origin=="latest" and step==0:
+                        with patch.object(m,"_1174_probe",return_value={}):
+                            assert _call1174(m._1174_adopt,args,a,Path(e["witness_path"]).read_bytes())=="completed_no_dispatch"
+            e=a["enrollment"];source=Path(a["lineage"]["source_path"])
+            foreign=directory/"foreign";foreign.mkdir()
+            if origin in ("imported","initialized"):
+                moved=foreign/source.name;source.rename(moved)
+                a["lineage"]["source_path"]=str(moved);source=moved
+                if origin=="imported":e["legacy_source_path"]=str(moved)
+                else:e["initial_state_path"]=str(moved)
+            # An independent legacy reference must be admitted even when the
+            # initialized source has evolved beyond the enrollment's genesis.
+            if kind=="legacy_only":
+                legacy=foreign/"other-legacy.json";legacy.write_bytes(b"legacy reference\n")
+                e.update(legacy_source_path=str(legacy),legacy_source_sha256=hashlib.sha256(legacy.read_bytes()).hexdigest())
+            watched=Path(e["legacy_source_path"]) if kind=="legacy_only" else source
+            if kind=="symlink":
+                link=directory/"linked-source";link.symlink_to(source.parent,target_is_directory=True)
+                a["lineage"]["source_path"]=str(link/source.name)
+                if origin=="imported":e["legacy_source_path"]=a["lineage"]["source_path"]
+            observed=directory.stat()
+            e.update(root_device=observed.st_dev,root_inode=observed.st_ino,boot_id=Path("/proc/sys/kernel/random/boot_id").read_text().strip())
+            mount=dict(mount_id=e["mount_id"],device=e["mount_device"],filesystem=e["filesystem"],magic=e["magic"])
+            args.root,args.admission,args.revision,args.generation,args.coordinator_id=e["root"],"fixture",a["revision"],a["generation"],e["coordinator_id"]
+            resolves=[0]
+            def resolve(*unused,**kw):resolves[0]+=1;return copy.deepcopy(a),{}
+            def mount_at(path):
+                if Path(path)==watched.parent and (kind in ("device","mount_id","legacy_only") or kind=="refresh" and resolves[0]>=2):
+                    return dict(mount,**({"device":"fixture:other"} if kind=="device" else {"mount_id":"fixture-other"}))
+                return mount
+            # Existing lock ensures the refreshed rejection can compare the
+            # exact entry snapshot, including lock bytes, after lock acquisition.
+            if kind=="refresh":Path(e["lock_path"]).touch()
+            def snapshot():return {str(p):p.read_bytes() for p in directory.rglob("*") if p.is_file()}
+            before=snapshot();out=io.StringIO()
+            with patch.object(m,"_1174_resolve",side_effect=resolve),patch.object(m,"_1174_mount",side_effect=mount_at),patch.object(m,"_1174_probe",return_value={}) as probe,patch.object(m,"_1174_write",wraps=m._1174_write) as writes,contextlib.redirect_stdout(out):
+                rc=m._1174_command(args,Path(e["journal_root"]))
+            result=json.loads(out.getvalue())
+            if kind=="same":
+                assert rc==0 and result["status"]=="completed_no_dispatch" and not result["dispatch_allowed"],(origin,kind,rc,result)
+            else:
+                assert rc==8 and result["status"]=="UNKNOWN" and not result["dispatch_allowed"] and "path topology drift" in result["detail"],(origin,kind,rc,result)
+                assert snapshot()==before and not writes.called and not probe.called,"topology rejection mutated entry"
+                assert resolves[0]==(2 if kind=="refresh" else 1)
+                assert Path(e["lock_path"]).exists()==(kind=="refresh")
+
+
 def _unsupported1174(c):
+    _source_topology1174(c)
     m = _module1174(c)
     for name in ("overlay", "nfs", "cifs", "9p", "virtiofs", "fuse", "tmpfs", "unknown", "ext3"):
         assert _call1174(m._1174_platform, "Linux", name, 0xEF53) is False
@@ -11380,6 +11449,7 @@ def _init_case1174(kind):
                 target.write_bytes(initial + b"\n")
         if kind == "preflight":
             _seed_variants1174(c,m,admission,args)
+            _secret_channels1174(c)
             _closed_errors1174(c, m)
             _legacy_cli1174(c)
             _legacy_env1174(c,m)
@@ -11397,7 +11467,7 @@ def _init_case1174(kind):
             _reject1174(m._1174_initial, admission, reason="private seed ownership/mode/nlink")
             hardlink.unlink()
             assert m._1174_initial(admission) == initial
-            assert original.hex().encode() not in m._1174_bytes(admission) and json.loads(initial)["hmac_key"].encode() not in m._1174_bytes(admission)
+            _secret_absence1174(original, json.loads(initial)["hmac_key"], admission=m._1174_bytes(admission))
             assert m._1174_derive_key(bytes(range(32)), "fixture-enrollment-1", "0" * 64, 1174, 1) == "351b0edc1ae29dc21565456cf6dd68b5cea6c63c7d0efd9b208318b77df11e5e"
             target.write_bytes(initial)
             exact_existing = target.read_bytes()
@@ -11797,7 +11867,8 @@ MUTANTS_NHAM_TEST |= {"m1174_gate_required_skip", "m1174_credit_wrong_reason", "
 
 def _controls1174(name, targets):
     if not name.startswith("m1174_"):return ()
-    pairs = {"ignore_seed": ("init_fresh", "admission_wrong_scope"),
+    pairs = {"secret_channel": ("init_fresh", "admission_wrong_scope"),
+        "ignore_seed": ("init_fresh", "admission_wrong_scope"),
         "derive_schema": ("witness_valid", "admission_file_bytes"),
         "ignore_i2": ("admission_valid", "witness_keyset"), "trust_git": ("admission_valid", "witness_int_bool"),
         "catchall": ("init_fresh", "admission_expired_revoked"),
@@ -12782,6 +12853,10 @@ def _typed_variants1174(c,m,registration,admission,now):
         operation=dict(adoption_id="adopt-6",generation=6,binding_sha256="b"*64,canonical_path=e["state_path"],source_sha256="c"*64,cutover_started=False))
     reg6=dict(registration,generation=6)
     assert _call1174(m._1174_admission,m._1174_bytes(adoption),reg6,now)==adoption
+    for owner,key in (("lineage","source_path"),("enrollment","legacy_source_path")):
+        for value in (str(c.tmp)+"/unused/../legacy.json",str(c.tmp)+"//legacy.json","/"+str(c.tmp)+"/legacy.json"):
+            bad=copy.deepcopy(adoption);bad[owner][key]=value
+            _reject1174(m._1174_admission,m._1174_bytes(bad),reg6,now,reason="source canonical paths")
     for prefix,fields in _FIELD_TYPES1174.items():
         for field,kind in fields.items():
             path=(prefix+"." if prefix else "")+field
@@ -12810,6 +12885,68 @@ for _prefix,_fields in _FIELD_TYPES1174.items():
             'type(record[field]) in expected,"field type "+path',
             '(path=="'+_path+'" or type(record[field]) in expected),"field type "+path',
             ["wp1174_admission_wrong_scope"])
+
+
+def _secret_absence1174(seed, key, **channels):
+    for name,value in channels.items():
+        raw=value if isinstance(value,bytes) else (value.encode() if isinstance(value,str) else json.dumps(value,sort_keys=True).encode())
+        for secret in (seed,seed.hex().encode(),key.encode()):
+            assert secret not in raw,"fixture secret leaked in "+name
+
+
+def _secret_channels1174(c):
+    """Capture real CLI and report serializers; authority/native facts are fixtures."""
+    import contextlib,io
+    from unittest.mock import patch
+    channels={}
+    for failure in (False,True):
+        directory=c.tmp/("secret-cli-"+str(failure));directory.mkdir()
+        m,a,args=_init_fixture1174(Ctx(c.script,directory));e=a["enrollment"]
+        seed=bytes(range(32));key=json.loads(m._1174_initial(a))["hmac_key"]
+        channels["admission"]=m._1174_bytes(a)
+        out,err=io.StringIO(),io.StringIO()
+        argv=["--state-dir",e["journal_root"],"init","--packet","1174","--mission","1172","--executor","codex","--reviewer","claude",
+            "--expected-revision","absent","--root",e["root"],"--admission","fixture","--revision",str(a["revision"]),"--generation",str(a["generation"]),"--coordinator-id",e["coordinator_id"]]
+        with patch.object(m,"_1174_resolve",return_value=(a,{})),patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_probe",side_effect=OSError("fixture probe failure") if failure else None,return_value={}),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
+            rc=m.main(argv)
+        assert rc==(8 if failure else 0)
+        channels["cli_stdout_"+str(failure)]=out.getvalue()
+        channels["cli_stderr_traceback_"+str(failure)]=err.getvalue()
+    directory=c.tmp/"secret-spec";directory.mkdir()
+    def capture(response):channels.update(spec=response["spec"],immutable_admission=response["admission"])
+    _resolver1174(Ctx(c.script,directory),capture)
+    # Exercise the native facts producer and the actual carrier serializer,
+    # without claiming the fixture capabilities are native measurements.
+    raw=dict(facts=dict(mount_id="3",device="0:1",mountpoint="/fixture",filesystem="ext4",magic=0xEF53,st_dev=1),
+        outcomes={n:True for n in ("mount_identity","lock_contention_process","cloexec","link_no_replace_eexist","replace","file_fsync_directory_fsync_readback","tripwire","fixed_lock_retained")},native_seam_used=False)
+    directory=c.tmp/"secret-native";directory.mkdir()
+    native=_module1174(Ctx(c.script,directory))
+    with patch.dict(globals(),{},clear=False):
+        old_facts=globals().get("_WP1174_NATIVE_FACTS",None)
+        try:
+            with patch(__name__+"._module1174",return_value=native),patch.object(native,"_1174_probe",return_value=raw):
+                _native1174(Ctx(c.script,directory))
+            channels["native_facts"]=globals()["_WP1174_NATIVE_FACTS"]
+            snap=_snapshot1174(ROOT);out,err=io.StringIO(),io.StringIO()
+            digests=dict(product=hashlib.sha256(CANONICAL.read_bytes()).hexdigest(),test=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
+            with patch.dict(os.environ,{"GITHUB_ACTIONS":"false"}),patch.dict(globals(),_WP1174_MAIN_PRODUCER_START=digests,_WP1174_MAIN_SNAPSHOT_START=snap),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
+                _carrier1174({})
+            channels.update(native_report_stdout=out.getvalue(),native_report_stderr_traceback=err.getvalue())
+        finally:
+            if old_facts is None:globals().pop("_WP1174_NATIVE_FACTS",None)
+            else:globals()["_WP1174_NATIVE_FACTS"]=old_facts
+    # The existing Windows unit oracle owns its single platform mutant. Capture
+    # its real emission path here with fixture Git identity on the Linux host.
+    directory=c.tmp/"secret-windows";directory.mkdir();out,err=io.StringIO(),io.StringIO()
+    check_output=subprocess.check_output
+    def git_identity(argv,*args,**kw):
+        if argv[:1]==["git"] and argv[-2:-1]==["rev-parse"]:return "1"*40+"\n"
+        return check_output(argv,*args,**kw)
+    with patch.object(platform,"system",return_value="Windows"),patch.object(subprocess,"check_output",side_effect=git_identity),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
+        _windows1174(Ctx(c.script,directory))
+    assert "WP1174_WINDOWS_ORACLE_V1 " in out.getvalue()
+    channels.update(windows_unit_record=out.getvalue(),windows_stderr_traceback=err.getvalue())
+    _secret_absence1174(seed,key,**channels)
 
 
 def _seed_variants1174(c,m,admission,args):
@@ -12850,8 +12987,7 @@ def _seed_variants1174(c,m,admission,args):
         assert not probe.called
     assert witness.read_bytes()==reserved and not target.exists()
     seed.write_bytes(original);assert m._1174_initial(admission)==initial;witness.unlink()
-    # Known public fixture values are secret in every runtime output channel.
-    assert original.hex().encode() not in m._1174_bytes(admission) and json.loads(initial)["hmac_key"].encode() not in m._1174_bytes(admission)
+    _secret_absence1174(original, json.loads(initial)["hmac_key"], admission=m._1174_bytes(admission))
 
 
 for _suffix,_old,_new in (
@@ -13445,8 +13581,23 @@ MUTANTS_NHAM_TEST |= {"m1174_r12_platform_inventory"}
 
 _WP1174_FULL_CASE_IDS = tuple(name for name,_ in CASES if name in WP1174_REQUIRED)
 
+MUTANTS.update({
+    "m1174_source_topology_lineage": ('(admission["lineage"]["source_path"], e["legacy_source_path"]) if source is not None',
+        '(None, e["legacy_source_path"]) if source is not None',["wp1174_profile_unsupported"]),
+    "m1174_source_topology_legacy": ('(admission["lineage"]["source_path"], e["legacy_source_path"]) if source is not None',
+        '(admission["lineage"]["source_path"], None) if source is not None',["wp1174_profile_unsupported"]),
+    "m1174_source_topology_refresh": ('            _1174_runtime(a, current)\n','',["wp1174_profile_unsupported"]),
+    "m1174_source_canonical_lineage": ('for source in (lineage["source_path"], e["legacy_source_path"]):',
+        'for source in (None, e["legacy_source_path"]):',["wp1174_admission_wrong_scope"]),
+    "m1174_source_canonical_legacy": ('for source in (lineage["source_path"], e["legacy_source_path"]):',
+        'for source in (lineage["source_path"], None):',["wp1174_admission_wrong_scope"]),
+    "m1174_secret_channel_probe_facts": ('\n    globals()["_WP1174_NATIVE_FACTS"]=dict(status="passed",raw=result,checks=',
+        '\n    globals()["_WP1174_NATIVE_FACTS"]=dict(fixture_leak=m._1174_derive_key(bytes(range(32)),"enrollment-1","a"*64,1174,5),status="passed",raw=result,checks=',["wp1174_init_preflight"]),
+})
+MUTANTS_NHAM_TEST |= {"m1174_secret_channel_probe_facts"}
+
 _WP1174_PATHS = (".claude/dev/packet_loop.py", ".claude/dev/packet_loop_test.py", "docs/PROTOCOL_DA_PHIEN.md",
-    "ops/specs/wp1174-c5-adapter-design.md", "ops/specs/wp1174-implementation-r13.md")
+    "ops/specs/wp1174-c5-adapter-design.md", "ops/specs/wp1174-implementation-r14.md")
 _WP1174_NATIVE_KEYS = frozenset("schema actual_os scope proof_eligible source_pr repo pr run_id run_attempt job checkout_sha checkout_tree executed_sha executed_tree expected_head expected_tree path_hashes producer_digests producer_after snapshot_before snapshot_after required_ids required_count outcomes profiles native_probe native_seam overall_status windows_oracle".split())
 
 

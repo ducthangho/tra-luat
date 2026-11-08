@@ -4071,6 +4071,10 @@ def _1174_admission(raw, registration, now):
                    and _1174_hash(e["legacy_source_sha256"])), "legacy source types")
     lineage = a["lineage"]
     _1174_require(type(lineage) is dict and set(lineage) == {"predecessor_generation", "source_path", "source_sha256"}, "lineage keyset")
+    for source in (lineage["source_path"], e["legacy_source_path"]):
+        _1174_require(source is None or (type(source) is str and Path(source).is_absolute()
+                      and str(Path(source)) == source and ".." not in Path(source).parts and "//" not in source),
+                      "source canonical paths")
     if lineage["predecessor_generation"] is None:
         _1174_require(lineage["source_path"] is None and lineage["source_sha256"] is None and
                       e["origin"] == "fresh_init" and a["generation"] == e["g0"] and
@@ -4515,8 +4519,10 @@ def _1174_runtime(a, admission):
         mount[k] == e[v] for k, v in (("mount_id", "mount_id"), ("device", "mount_device"),
         ("filesystem", "filesystem"), ("magic", "magic"))), "enrolled native mount")
     _1174_require(str(Path(e["journal_root"]).resolve(strict=True)) == e["journal_root"], "journal root canonical")
-    for key in ("state_path", "witness_path", "lock_path", "initial_state_path", "private_seed_path"):
-        path = Path(e[key])
+    paths = [e[key] for key in ("state_path", "witness_path", "lock_path", "initial_state_path", "private_seed_path")]
+    paths.extend(source for source in (admission["lineage"]["source_path"], e["legacy_source_path"]) if source is not None)
+    for value in paths:
+        path = Path(value)
         _1174_require(str(path.resolve(strict=False)) == str(path) and
                       _1174_mount(path.parent) == mount, "path topology drift")
     return mount
@@ -5304,6 +5310,7 @@ def _1174_command(a, state_dir):
                           a.cmd not in ("init", "adopt-state") else None)
             current, facts = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission, identities)
             _1174_require(current == admission, "authority changed under lock")
+            _1174_runtime(a, current)
             witness_raw = _1174_read(Path(e["witness_path"])) if os.path.lexists(e["witness_path"]) else None
             if a.cmd == "init":
                 status = _1174_initialize(a, admission, witness_raw)

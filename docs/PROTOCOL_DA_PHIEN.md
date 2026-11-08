@@ -1640,8 +1640,16 @@ Scoped human snapshot kiểm exact verified bytes sau canonical verifier, trư�
 scoped accept dùng cùng snapshot bytes trong RAM cho CI/connector validation và hashes.
 Các fault injection là fixture thuật toán, không phải native profile hay mất điện.
 
-WP1174 R13/C9 dùng composite native delivery SOURCE-ONLY trên exact final head/tree
+WP1174 R14/C10 dùng composite native delivery SOURCE-ONLY trên exact final head/tree
 và năm file hashes: bốn part A–D đọc coverage manifest đã đóng băng, rồi integrator E
-kiểm coverage union, interfaces và raw reports theo R13. Mỗi lời gọi vẫn được đếm;
+kiểm coverage union, interfaces và raw reports theo `ops/specs/wp1174-implementation-r14.md`. Mỗi lời gọi vẫn được đếm;
 chỉ composite đủ bằng chứng mới có thể tạo verdict cho source đó. Authority,
 provider assurance và actual-human của target giữ theo các hợp đồng hiện hành.
+
+Mọi nonnull lineage.source_path và enrollment.legacy_source_path phải có spelling
+canonical, không `..` hoặc slash lặp; runtime kiểm resolve không symlink parent và
+exact mount trước fixed lock, rồi kiểm lại authority/topology dưới lock trước
+recovery/probe/temp/write. Initial-state guards và fresh null source giữ nguyên.
+Oracle fixture quét seed/key cụ thể trong A/S, stdout/stderr/traceback, native facts,
+native report và Windows unit record; fixture serializer coverage không là native
+mount proof hoặc Windows host proof.

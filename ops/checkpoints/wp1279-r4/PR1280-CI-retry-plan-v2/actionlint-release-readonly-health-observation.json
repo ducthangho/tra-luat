@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-08T10:09:33.716497+00:00",
+  "source_url": "https://github.com/rhysd/actionlint/releases/download/v1.7.7/actionlint_1.7.7_linux_amd64.tar.gz",
+  "method": "GET_read_first256bytes",
+  "environment": "cloud, not GitHub runner",
+  "claim": "Reachability observation only, not dependency installation/hash verification or runner availability",
+  "status": 200,
+  "final_hostname": "release-assets.githubusercontent.com",
+  "bytes_read": 256
+}

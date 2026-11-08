@@ -1,0 +1,98 @@
+{
+  "schema": "bounded_ci_infrastructure_retry.v2",
+  "recorded_at": "2026-11-08T10:12:25Z",
+  "repo": "ducthangho/tra-luat",
+  "packet": "wp1279",
+  "pr": 1280,
+  "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "run_id": 42469501853,
+  "failed_attempt": 1,
+  "category": "authorized_measurement_not_automatic_gate",
+  "authority_source": "https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6708576608",
+  "recorded_by": "dispatcher under existing full scoped owner delegation; not code approval or findingwaiver",
+  "objective": "Recover actual required H4 Ubuntu CI after unchanged pinned dependency installer HTTP504 failures, retain complete original failure evidence",
+  "allowance": {
+    "unit": "ONE additional FULL Ubuntu workflow attempt; no Windows",
+    "used": 0,
+    "reserved": 1,
+    "limit": 1,
+    "next_attempt": 2,
+    "all_existing_product_review_push_budgets_unchanged": true
+  },
+  "identified_failures": [
+    {
+      "job_id": 128696795044,
+      "failed_command": "bash ops/cai_actionlint.sh",
+      "exit_code": 4,
+      "http504_count": 9,
+      "received_decoded_log_sha256": "882ea35223984f407f21a270127e6b2cac287ea3d90d6ef4b45940bda41c1ac2",
+      "source_wrapper_sha256": "e07f2c943be6f3bb1eadb63e80e4b7d2022090f2320db8eb67e1264b6d3a62b7"
+    },
+    {
+      "job_id": 128696795169,
+      "failed_command": "bash ops/cai_actionlint.sh",
+      "exit_code": 4,
+      "http504_count": 9,
+      "received_decoded_log_sha256": "5857aefb643393448e76c58a2695f366af9047ba70db08f327b7ad7fce18eb40",
+      "source_wrapper_sha256": "497d8997e93927e8e6d2543b1284826c4fe6f67af7221f41de0f23862e58e367"
+    },
+    {
+      "job_id": 128696795235,
+      "failed_command": "bash ops/cai_actionlint.sh",
+      "exit_code": 4,
+      "http504_count": 9,
+      "received_decoded_log_sha256": "3a0881800bfbf9ce1bd78f2ee8b7f41ed0da6dcae4b4b006433163644b2f9b83",
+      "source_wrapper_sha256": "e9abdfbc120603735363dd51e70f9b4c1714926df112173a0cf0506065960c80"
+    }
+  ],
+  "source_blobs_equal_B_H3_H4": {
+    "ops/cai_actionlint.sh": {
+      "c15603dcf537fa4beb753b263398d6e6b8c92019": "03d98e236f28d8bd07c1ee01ee1810d17387dfee",
+      "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766": "03d98e236f28d8bd07c1ee01ee1810d17387dfee",
+      "bc16ccff3601fabeeb783f41b52360ef5851838a": "03d98e236f28d8bd07c1ee01ee1810d17387dfee"
+    },
+    ".github/workflows/ci.yml": {
+      "c15603dcf537fa4beb753b263398d6e6b8c92019": "2b2c9aa25ad1c136e44cba457d9ae765d2544fc2",
+      "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766": "2b2c9aa25ad1c136e44cba457d9ae765d2544fc2",
+      "bc16ccff3601fabeeb783f41b52360ef5851838a": "2b2c9aa25ad1c136e44cba457d9ae765d2544fc2"
+    }
+  },
+  "execution_guards": [
+    "Wait attempt1 terminal and inspect ALL failed/cancelled/skipped jobs; every independent failure must be explained by these actionlint downloads, aggregate failures only by those dependencies",
+    "Same exactH4 and original workflow definition; zero code/workflow/runnerpolicy/dependencyhash changes",
+    "Official full rerun ONCE so all required contexts can provide actual latest-attempt job records; retain every original attempt1 failed/success/skipped record. No rewriting jobattempts or bypassing canonical K2.",
+    "No WindowsCI/fullWindowsmutantCI or new product/model/push retry",
+    "If another independent cause appears, preserve evidence and classify before proceeding; no silent additional allowance",
+    "Attempt2 must meet all required contexts/fouranchors/positive outputs and mandatory AUX audit before promotion; attempt1 failure remains failed"
+  ],
+  "command": [
+    "gh",
+    "run",
+    "rerun",
+    "42469501853",
+    "--repo",
+    "ducthangho/tra-luat"
+  ],
+  "status": "Replaces unexercised failed-only plan BEFORE action; still ONE retry reserved/0used. Attempt1 terminal classification remains mandatory; no CIpass/Ready/merge.",
+  "supersedes_unexercised_plan": {
+    "metadata_commit": "19e3be861f73a6abbdb6425f3ed2db7dae54093d",
+    "path": "ops/checkpoints/wp1279-r4/PR1280-CI-attempt1-infrastructure/retry-plan.json",
+    "comment": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6720159207",
+    "exact_body": true,
+    "remote_blob_exact": true,
+    "used": 0,
+    "limit": 1
+  },
+  "reason_for_amendment": "Unmodified canonical B _kiem_ci explicitly selects every required context using (run_id, latest_run_attempt, head_sha, context_name), and rejects if missing. Failed-only rerun cannot be assumed to populate latest-attempt records for already-successful gate-ops/gate-packet-loop. One full Ubuntu attempt avoids an unusable selective retry and no second implicit allowance.",
+  "canonical_consumer": {
+    "source": "c15603dcf537fa4beb753b263398d6e6b8c92019:.claude/dev/packet_loop.py",
+    "sha256": "2aced17b136132f7216056b39a253656ce251a9520752f8091138f39e0077a92",
+    "function": "_kiem_ci",
+    "lines": [
+      2876,
+      2879
+    ],
+    "required_behavior": "latest run/latest attempt exacthead required jobs, no fabricated or retagged earlier job records"
+  }
+}

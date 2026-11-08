@@ -1,5 +1,5 @@
 # Bien ban M8 (ADR-0060) dong WP #1272 HOTFIX-R1252-POSIX r1 — kiem bang packet_loop.py kiem-dong-wp
-# Nhan nguon tung muc: ops/land/pr1277-wp1272-land-evidence.yaml. landed false (L-6: thieu comment uy quyen); bon moc §10.2.2 du (wd-run 42467654305);
+# Nhan nguon tung muc: ops/land/pr1277-wp1272-land-evidence.yaml. landed true (uy quyen dang SAU merge: 6720439348); bon moc §10.2.2 du (wd-run 42467654305);
 # A1 tu log goc may chu kho winlogs/diag-1272-do.log (bam khop, loi_khai_co_neo) — kem su co thu tuc, xem land evidence.
 packet: HOTFIX-R1252-POSIX
 revision: 1
@@ -13,8 +13,8 @@ review:
 windows:
   phan_loai: required
   nguon: 'mien chu kho tu dang issuecomment-6716241960 "windows: fc6fbc7… mien"; CI launcher-windows 42439410853 tren c15603d success'
-duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1277
-duyet_chu_kho_ghi_chu: 'merged_by ducthangho 02:38:37Z; mien K6/K7 6716241960 tu dang 02:35:28Z; khong co comment approve_merge.'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1277#issuecomment-6720439348
+duyet_chu_kho_ghi_chu: 'uy quyen dang SAU merge: approve_merge fc6fbc7 chu kho tu dang 10:37:28Z (app null), merge 02:38:37Z; truoc merge: mien K6/K7 6716241960 tu dang 02:35:28Z.'
 merge_commit: c15603dcf537fa4beb753b263398d6e6b8c92019
 tree_m: 46d05062cad4f3ca6629931ebc6a4cd0535358f3
 ci_master:
@@ -29,7 +29,7 @@ nghiem_thu:
   A5: passed
   hoan_tat_s5: passed
 lease_cuoi: hotfix-r1252-posix-r1-g1-claude
-landed: false  # kiem-dong-wp rc 0 khi true (LAN 3) nhung L-6 truot: thieu comment uy quyen land cua chu kho
+landed: true  # uy quyen dang sau merge (6720439348); canh bao A1 o land evidence
 moc_10_2_2:
   run: passed
   checkout: passed

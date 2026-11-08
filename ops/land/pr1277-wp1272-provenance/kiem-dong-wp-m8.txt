@@ -21,3 +21,8 @@ rc=0
   THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
 CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
 rc=12
+
+# LAN 5 (sau approve_merge chu kho tu dang issuecomment-6720439348, dang SAU merge; landed true)
+# checkout: 3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4 (+ thay doi chua commit trong ops/land) ; origin/master: 3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4 ; luc: 2026-11-08T10:40:34Z
+ĐÓNG ĐƯỢC WP HOTFIX-R1252-POSIX — merge c15603dcf537fa4beb753b263398d6e6b8c92019
+rc=0

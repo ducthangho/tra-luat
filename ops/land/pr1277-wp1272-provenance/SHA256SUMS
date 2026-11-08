@@ -1,6 +1,6 @@
 946987cc875773884b27ed12734dd333afec0b57e5f2b764e7b0f278974c76df  ./a4-fc6fbc7.out.txt
 a39a850bae507d744b4f110be7a750dbea0f7ef99cc45bb282cfa251b9407fff  ./ai-dang-giu-sau-rut-han.txt
-248720db9e18d25c4c0f2dc8ae6c3fdf9e64be408f1c078ba4c8fd9f1d7e916c  ./bien-ban-m8.yaml
+998b121cf8bb57e2d4197a5f77a37455f1dc8c7774357a2229c1909cbdabb6f7  ./bien-ban-m8.yaml
 456bbc8fb50b42cfbd7d6a6b6614c0029268946b339d7ce26a578d274a11b1bd  ./ci/jobs.json
 3c66720093823d2f28cbdf571d4fb9fae4ebbe66a7479a37e0c01a4ce8c0cdf2  ./ci/jobs/128605212183.trich.txt
 6eae0d3e6fb0cd8aa7a4a62ecb6e3bbc3ebfd19bc9e4a088fab504834bcdd5cc  ./ci/jobs/128605264988.trich.txt
@@ -33,7 +33,7 @@ b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd  ./danh_gia_gat
 dae131e1a3c30a5c9af4cf1d0ef51205e11a6f39281a8dbae240857e2cf7a3e8  ./do1_1272.py
 ffdfa65d52942e728984ee381a95eaad83e36641a2e0dbf9eead1fc35813b8a8  ./do_1273-linux.out.txt
 2535bbd6f8205ac86fadcd8b590c5ccf19290d23949329767489c4e22ba4fed5  ./do_1273.py
-ad85bb5bf5f052b4a9f59a9ce2b7dd744204815b3d7f02c2eae43c864e3d1e4c  ./kiem-dong-wp-m8.txt
+2d5251511eb45e682b7abc372f4cb46dee7dd7bdfc32a6c6dfa607550ea718c8  ./kiem-dong-wp-m8.txt
 a0dc67a4c449c32e2c2d2f93252c6751b4097a9e53498e28ceab501ed472f5b6  ./kiem-ho-so-land-thu-landed-true.txt
 9bc2ca3c51f7baad4ff4a1e276a8cc02a82797492d07db404f83883ee565a2c9  ./kiem-merge/SHA256SUMS
 b249c2ee8840e06d0b6f3d20826c4617c958dfe4207930418994020d8064db06  ./kiem-merge/cn.json
@@ -53,6 +53,7 @@ d9d9738925843369a15c1c4d384c7e10bd21df62cd4619b2d62ddb02e99dbe83  ./launcher-win
 ccc65d33d3c84a61f7ad04c3a4672b59c200045c7eb6c0e8b8c1b2d5c15e2c1a  ./nghiem-thu-a4-ab.txt
 d298311a6d95a9693ef65947ce2e80db6085fd81112dd4e11baec36057a5ec1a  ./ops-publish-lease-42439451193-trich.txt
 606354f55e5a1e9bea82abea0cc2a5582a9267dbef3bf4b06258902106f450f0  ./phan-chung-buoc-42439410815.txt
+d50c249475ea285e73974d3021a3778bc319d2ec4295b789e558feed2672596e  ./readback-chu-kho-approve-merge-issuecomment-6720439348.json
 2c19031940ce4357c5adc29f47c59705162543e40d3b5b2750d4ee231a26cf7b  ./readback-chu-kho-mien-issuecomment-6716241960.json
 8b2c6c7d3da5d719c81cc4d27909590d3ebe73fdcc6748698c40c0f63e471fbb  ./readback-commit-c15603d.json
 2fbfe2fbf1badd1d134c88b552fb5356dccd44d0eb4670b69337d701b17132c3  ./readback-connector-issuecomment-6714571624.json

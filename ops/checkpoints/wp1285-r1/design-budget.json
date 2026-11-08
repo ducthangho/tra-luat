@@ -1,0 +1,20 @@
+{
+  "packet": "wp1285",
+  "design_advisory_calls_used": 1,
+  "design_advisory_calls_limit": 1,
+  "product_attempts_used": 0,
+  "formal_code_review_calls_used": 0,
+  "started_at_utc": "2026-11-08T13:53:44.010128+00:00",
+  "deadline_utc": "2026-11-08T14:13:44.010128+00:00",
+  "session_id": "b3f186df-fee3-43cf-9f16-563859280e2a",
+  "authority": "Issue1285proposedreadback + latest fullremainingwork userdirective; not productlease",
+  "provider": "anthropic_claude",
+  "execution_surface": "claude_code",
+  "requested_model": "opus",
+  "requested_effort": "high",
+  "role": "readonly_design_adviser_not_code_reviewer",
+  "tooling_workspace_head": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "survey_target_head": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "trust": "existing tooling exactpath true, survey target Read only, no trust setting changed",
+  "mission_historical_calls_minutes": "KHONG_DO_DUOC; not reset or claimed0"
+}

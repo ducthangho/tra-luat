@@ -1,0 +1,35 @@
+{
+  "packet_id": "wp1285",
+  "revision": 1,
+  "generation": 1,
+  "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "tree_B": "247971f6c723cc17de3632e4eaba2019545b356b",
+  "spec_sha256": "f6a28e87a99748fc2161fcce38f5e362da3f0a32353fbd11c59d8a5a14c34fb6",
+  "effective_write_set": [
+    ".agents/skills/proxima-control/scripts/ProximaControl.psd1",
+    ".agents/skills/proxima-control/SKILL.md",
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+  ],
+  "write_set_hash": "0bbe3df51f38b0d334fcb5e35ada62ac95ac3eb1b1e28b4e9b5385a396a002aa",
+  "effective_review_class": "sensitive",
+  "change_policy_sha": null,
+  "land_obligations": [],
+  "descriptor_authority": "NEWmanualdescriptorONLYwp1285r1 underlatestfullownerremainingworkdirective; no inheritedwaivers",
+  "caps": {
+    "new_product_paths": 3,
+    "additions_and_total": 450,
+    "ADR0053_optin": true,
+    "product_attempts": 3,
+    "formal_rounds": 2,
+    "shared_Codex_calls": 8,
+    "primary_productpushes": 1
+  },
+  "design_advisory": {
+    "run": "1f4b425867654330bb6cd30f86ea5628",
+    "actual_calls_used": 1,
+    "limit": 1,
+    "formal_code_approval": false
+  },
+  "product_model_invoked": false,
+  "at": "2026-11-08T14:10:45.900884+00:00"
+}

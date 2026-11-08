@@ -1,0 +1,63 @@
+{
+  "version": "1.5.0",
+  "run_id": "1f4b425867654330bb6cd30f86ea5628",
+  "short_id": "1f4b4258",
+  "ten": "wp1285-remaining-readonly-design",
+  "lenh": {
+    "chuong_trinh": "claude",
+    "so_doi_so": 29,
+    "van_tay": "1782ad0a5a21e8f1"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-11-08T13:53:44.152585+00:00",
+  "ket_thuc_utc": "2026-11-08T13:57:46.806288+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 642747,
+  "khoa_danh_tinh": "linux:25510342",
+  "workspace": "/workspace/scratch/proxima-p1-s2-canonical",
+  "head": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "6f1fb855dce7ce8bd2d3d6b4b191e6c783c87879fded54670d56c634d40d2fa8",
+  "deadline_utc": "2026-11-08T14:13:44.010128+00:00",
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=22B"
+    },
+    "claude_trust": {
+      "trang_thai": "DAT",
+      "chi_tiet": "Claude trust=true"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "anthropic_claude",
+  "execution_surface": "claude_code",
+  "transport": "machine/local",
+  "transport_sha256": "0e640cb9f149f9a47671c9519f633637fe54e4b07a2fda4bea63302e4e0d1f1b",
+  "chup_workspace": false,
+  "checkpoint_sha256": "83cd926096c4145fb6d5e6693e1b88044841ce42950257eeca95df556570842a",
+  "prompt_ban_chup": "/workspace/scratch/proxima-rest-20261108/design-runs/1f4b4258/prompt.snapshot",
+  "prompt_kin_hoan_toan": false,
+  "thoi_luong_giay": 242.654,
+  "stdout_byte": 470055,
+  "stdout_sha256": "931c25008b704d238b94a2bed16f03a56b397ac5df7b082cf992e924948e82ee",
+  "stderr_byte": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

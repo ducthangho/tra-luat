@@ -1,0 +1,29 @@
+{
+  "measured_at": "2026-11-08T14:10:45.900306+00:00",
+  "source": "Actual DesktopCommander read-only host/framework probes in currentdispatcher turn; originaltasktoolresponses retained by chat, thisis derivedfactindex not independentlyhashedrawtransport",
+  "device": "a5f7076e-a491-4f84-829b-8d1fbcc1c767",
+  "host": "DESKTOP-T9R33P2",
+  "gateway_services": [],
+  "Proxima_processes": [],
+  "AGY_version": "1.5.1",
+  "AGY_models_agents": "Please sign in; no modelgeneration",
+  "PS51": "5.1.26100.9711",
+  "PS7": "7.6.9",
+  "framework_probe_root": "C:\\tl-win\\wp1285-manifest-path-420fdd3c8ac74f2eb99e283672a9d1f8",
+  "PS51_default_File_probe": "failed script policy denial; not pass",
+  "PS51_policy_command_autoload": "failed with inherited PSModulePath; perprocess PSHOME Modules bootstrap restoredGetExecutionPolicy read",
+  "PS51_policy_all_scopes": "Undefined inclMachinePolicy/UserPolicy, no persistentchanges",
+  "explicit_process_only_RemoteSigned_PS51_probe": {
+    "rc": 0,
+    "ModulePath_suffix": "Probe.psm1",
+    "version": "2.0.0",
+    "Value": 42
+  },
+  "PS7_default_probe": {
+    "rc": 0,
+    "ModulePath_suffix": "Probe.psm1",
+    "version": "2.0.0",
+    "Value": 42
+  },
+  "limits": "Frameworkdummyonly; not candidate tests, not realgateway/WinRM/activation"
+}

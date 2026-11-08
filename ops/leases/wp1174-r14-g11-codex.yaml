@@ -85,8 +85,8 @@ change_policy_exception:
   - unknown=>blocked
 leased_at_utc: '2026-11-08T05:17:43.798595+00:00'
 heartbeat_at: '2026-11-08T05:17:43.798595+00:00'
-lease_until: '2026-11-08T08:03:01Z'
-lease_expires_at_utc: '2026-11-08T08:03:01Z'
+lease_until: '2026-11-08T06:38:04.677158+00:00'
+lease_expires_at_utc: '2026-11-08T06:38:04.677158+00:00'
 heartbeat_required_minutes: 360
 max_lease_hours: 24
 hard_not_after: '2026-11-08T08:03:01Z'
@@ -155,3 +155,8 @@ native_P11_approval_claim: false
 new_native_integrator_minutes: 10
 native_part_count: 4
 native_parallel_limit: 2
+ended_at_utc: '2026-11-08T06:38:05.677158+00:00'
+ended_reason: G11 source terminal C4, full fixture gate collected read-only; C11 exact
+  owner decision authorizes test-only successor, no source8 extension or fake native
+  verdict
+ended_on_instruction: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6718301317

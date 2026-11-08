@@ -1,0 +1,38 @@
+schema_version: 2
+receipt_id: wp1279-r4-review3-7da16bbe
+kind: review_delivery_receipt
+packet_id: wp1279
+reviewed_sha: bc16ccff3601fabeeb783f41b52360ef5851838a
+verdict: approved
+verdict_path: ops/reviews/wp1279-r4-review3/verdict.md
+verdict_sha256: d33fb3a8cb90df10a45999f792ab97614d3424155649c8b5a303314c69609779
+evidence_url: https://github.com/ducthangho/tra-luat/blob/2a51a4727c042164decb787447f2037877b47b9d/ops/reviews/wp1279-r4-review3/verdict.md
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: 7da16bbe3971485fa4488c30378f2c09
+  model: gpt-6.1-sol
+  effort: xhigh
+  evidence_ref: ops/reviews/wp1279-r4-review3/run.json
+  model_evidence: do_may
+  model_evidence_ref: ops/reviews/wp1279-r4-review3/run.json
+github_submitter_identity:
+  actor: ducthangho
+  note: Observed original verdict comment6720089491 exactbody/hash readback; submitter
+    not model identity or human audit
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: Content-addressed metadata-control-ref ancestry only; not canonicalmaster/requiredcheck/merge
+    authority.
+assurance: cross_approved
+independent_from_executor_session: true
+model_executor_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  session_run_id: 0f391189d42c4d1db34bd4827f566862
+  model: claude-opus-5-5
+  model_evidence: do_may
+  model_evidence_ref: ops/reviews/wp1279-r4-review3/executor-telemetry.json

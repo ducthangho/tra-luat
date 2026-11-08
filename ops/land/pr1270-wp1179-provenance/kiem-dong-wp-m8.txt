@@ -14,3 +14,8 @@ rc=0
 # LAN sau approve_merge 6722745114 (2026-11-08T14:32:33Z), checkout bf9914c + thay doi chua commit trong ops/land
 ĐÓNG ĐƯỢC WP wp1179 — merge bf9914cb1a8e6f5047468f4d130b587015f8d73f
 rc=0
+
+# LAN sau sua A21 not_measured (2026-11-08T14:58:12Z)
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12

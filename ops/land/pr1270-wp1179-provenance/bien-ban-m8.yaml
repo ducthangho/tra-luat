@@ -1,5 +1,5 @@
 # Bien ban M8 (ADR-0060) dong WP #1179 wp1179 / LAND-DOC-RECEIPT-THU-HOI-C1a1b r9 g1 — kiem bang packet_loop.py kiem-dong-wp
-# Nhan nguon tung muc: ops/land/pr1270-wp1179-land-evidence.yaml. landed true theo L-6 (approve_merge chu kho tu dang 6722745114, sau
+# Nhan nguon tung muc: ops/land/pr1270-wp1179-land-evidence.yaml. landed FALSE (A21 not_measured); uy quyen L-6 (approve_merge chu kho tu dang 6722745114, sau
 # merge nhu #1272; truoc merge human audit 6720906163); bon moc §10.2.2 du (wd-run 42487322479).
 packet: wp1179
 revision: 9
@@ -50,12 +50,12 @@ nghiem_thu:
   A19: passed
   A20: passed
   A20b: passed
-  A21: passed  # cap 4 (chu kho cap them 1); A21(b) va state that khong do — canh bao o land evidence
+  A21: not_measured  # (b) va state that executor chua do; cap 4 (chu kho cap them 1). Connector P1 PR #1286 r4506641299
   A22: passed
   A23: passed
 lease_cuoi: wp1179-r9-g1-claude-remote-20261106
 nha_lease: 'rut han fcea24a: lease_until 2026-11-08T14:20:00Z; ops-publish-lease 42487306631 rc 9; ai-dang-giu sau 14:20Z: xem ai-dang-giu-sau-rut-han.txt'
-landed: true  # L-6 bang approve_merge chu kho 6722745114 (sau merge, nhu #1272)
+landed: false  # A21 not_measured; cho mien_A21 chu kho. Uy quyen L-6: approve_merge 6722745114
 moc_10_2_2:
   run: passed
   checkout: passed

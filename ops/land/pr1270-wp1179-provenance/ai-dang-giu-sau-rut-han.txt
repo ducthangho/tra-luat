@@ -1,0 +1,15 @@
+# ai-dang-giu write set sau rut han; fetch +refs/heads/*:refs/remotes/origin/* --prune; git branch -f master origin/master (bf9914c); ls-remote so for-each-ref theo TAP TEN
+thieu=0 thua=0 / may chu 750
+2026-11-08T14:20:43Z
+## .claude/dev/doc_receipt_thu_hoi_git.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0
+so dong HET_HAN: 1
+HẾT_HẠN	wp1179-r9-g1-claude-remote-20261106	refs/remotes/origin/ops/wp1179-r9-g1-lease:ops/leases/wp1179-r9-g1-claude-remote-20261106.yaml
+## .claude/dev/doc_receipt_thu_hoi_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0
+so dong HET_HAN: 24
+HẾT_HẠN	wp1179-r9-g1-claude-remote-20261106	refs/remotes/origin/ops/wp1179-r9-g1-lease:ops/leases/wp1179-r9-g1-claude-remote-20261106.yaml

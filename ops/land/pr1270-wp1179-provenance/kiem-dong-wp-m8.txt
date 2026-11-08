@@ -1,0 +1,12 @@
+# lenh: python3 .claude/dev/packet_loop.py kiem-dong-wp --root . --bien-ban ops/land/pr1270-wp1179-provenance/bien-ban-m8.yaml --lease ops/land/pr1270-wp1179-provenance/lease-wp1179-r9-g1-claude-remote-20261106-sau-rut-han.yaml.txt
+# LAN 1 (TRUOC 14:20Z — lease chua het han, D4 phai THIEU)
+# checkout: bf9914cb1a8e6f5047468f4d130b587015f8d73f (+ thay doi chua commit trong ops/land) ; origin/master: bf9914cb1a8e6f5047468f4d130b587015f8d73f ; luc: 2026-11-08T14:10:15Z
+# lease sau rut han cmp origin/ops/wp1179-r9-g1-lease:ops/leases/wp1179-r9-g1-claude-remote-20261106.yaml: khop
+  THIẾU  D4 lease: không khớp lease_cuoi/packet/generation hoặc lease_until chưa qua
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D4
+rc=12
+
+# LAN 2 (SAU 14:20Z — lease het han; ai-dang-giu-sau-rut-han.txt NGUOI_GIU 0)
+# checkout: bf9914cb1a8e6f5047468f4d130b587015f8d73f (+ thay doi chua commit trong ops/land) ; origin/master: bf9914cb1a8e6f5047468f4d130b587015f8d73f ; luc: 2026-11-08T14:21:20Z
+ĐÓNG ĐƯỢC WP wp1179 — merge bf9914cb1a8e6f5047468f4d130b587015f8d73f
+rc=0

@@ -1,0 +1,159 @@
+{
+  "canonical_M": "0166d30611617ac2ed4f79ada92f950d4edeb824",
+  "product_H4": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "actual_checkout": "0166d30611617ac2ed4f79ada92f950d4edeb824",
+  "parents": [
+    "c4978cd756dac4bd99127fc50a0dab6eed133a3e",
+    "bc16ccff3601fabeeb783f41b52360ef5851838a"
+  ],
+  "tree_M": "3822761c513a7ba5b85df8f00d4cfdb7e47434e5",
+  "run_id": 42480052990,
+  "attempt": 1,
+  "event": "push",
+  "all23Ubuntu_jobs": "success",
+  "positive_output": "1777/1777",
+  "lifecycle": {
+    "status": "passed",
+    "identity": {
+      "catalog_policy_sha256": "e8b7be5e7f1f77a4d4d065d49dbd616a6e9b5260541e61debfe7d5d62638c679",
+      "head_sha": "0166d30611617ac2ed4f79ada92f950d4edeb824",
+      "machine": "x86_64",
+      "python_implementation": "CPython",
+      "python_version": "3.12.16",
+      "runner_sha256": "637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810",
+      "system": "Linux",
+      "system_release": "7.0.0-1019-azure",
+      "tracked_clean": true,
+      "tree_sha": "3822761c513a7ba5b85df8f00d4cfdb7e47434e5",
+      "worktree_clean": true
+    },
+    "command_hash_verified": true,
+    "runner_code_hash_verified": true,
+    "catalog_policy_hash_verified": true,
+    "output_sha256": "9d65fd64bc594c03c7c247491a77fca985511ac91e78fded55c17dba5fee28a4",
+    "actual_rc": 0
+  },
+  "official_artifact": {
+    "id": 13617636308,
+    "name": "gate-evidence-ubuntu-latest-1",
+    "sha256": "06a3236eb23b676a66aa098f4a5e8d9f205a85d0765922b928d41f53f1c1ebc3",
+    "matches_GitHub_artifact_digest": true
+  },
+  "four_anchors_derived": {
+    "run": "passed",
+    "checkout": "passed",
+    "workflow_definition": "passed",
+    "gate_output": "passed"
+  },
+  "gate_output_support": "complete AUX15fullsourceaudit; rawboundedconsumerunknowns preserved",
+  "raw_gate_output_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured"
+  ],
+  "raw_WD_slot": "not_measured",
+  "actual_GraphQL_WD": {
+    "schema": "wd/1",
+    "repo": "ducthangho/tra-luat",
+    "run_id": 42480052990,
+    "loi_graphql": [],
+    "nguon": "ops/ci_provenance.py do-wd",
+    "run_attempt_luc_do": 1,
+    "event": "push",
+    "node_id": "WFR_kwLOTNeRjc8AAAAJ5AIq_g",
+    "head_sha_rest": "0166d30611617ac2ed4f79ada92f950d4edeb824",
+    "run_number": 4311,
+    "created_at": "2026-11-08T12:23:51Z",
+    "path": ".github/workflows/ci.yml",
+    "repository_file_url": "https://github.com/ducthangho/tra-luat/blob/0166d30611617ac2ed4f79ada92f950d4edeb824/.github/workflows/ci.yml",
+    "check_suite_commit": "0166d30611617ac2ed4f79ada92f950d4edeb824",
+    "oid_dinh_nghia": "0166d30611617ac2ed4f79ada92f950d4edeb824",
+    "blob": "2b2c9aa25ad1c136e44cba457d9ae765d2544fc2",
+    "sha256": "aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67",
+    "trang_thai": "passed",
+    "ly_do": null
+  },
+  "AUX15_receipt_sha256": "2bd558ccb1017d6a5a082ed0167d22b02933aefad94ec1adfa12d43513f00717",
+  "archive_sha256": "e30ca86906d3036ad54a5b965d4800608da5187c402ee3297a8341a5a01274e0",
+  "archive_bytes": 1496254,
+  "members": 87,
+  "positive_counts": {
+    "core": {
+      "selftest": "1777/1777",
+      "actual_child_rc": 0,
+      "runtime": "CPython3.12.16/Linux",
+      "strict_committed_manifest": "184/184; LAND step success",
+      "worker_temporary_manifest_lane": "skipped by event, not execution"
+    },
+    "registry": {
+      "registration": "29/29",
+      "executed_suites": 15,
+      "all_suite_rc": 0,
+      "cloud_setup_cases": "13/13",
+      "cloud_setup_intended_mutant_kills": "13/13",
+      "cloud_setup_rc": 0,
+      "TimeoutExpired_false_credit_present": false,
+      "leftover_descendant_error_present": false
+    },
+    "tool_aggregate": {
+      "shards": "8/8",
+      "cases": 61,
+      "mutants": 490,
+      "mutant_errors": 0
+    },
+    "packet_loop": {
+      "executed_baseline": "1359/1359",
+      "declared_cases": 1360,
+      "named_case_skipped": "luong_canonical_chay_that",
+      "declared_mutants": 1523,
+      "named_mutant_skipped_not_credited": "luong_canonical_chay_that_dao_os_name",
+      "terminal": "T\u1ed4NG: \u0110\u1ea0T"
+    },
+    "ops": {
+      "classification": "118/118",
+      "receipts": "98/98",
+      "receipt_mutants": "153/153",
+      "lease_publish": "285/285",
+      "updater": "48/48",
+      "cleanup": "21/21",
+      "lifecycle_tests": "28/28,0skipped/0failed"
+    },
+    "targeted_aggregate": {
+      "shards": "8/8",
+      "cases": "56/56",
+      "targeted_self_mutants": "255/255",
+      "product_mutants": "10/10"
+    }
+  },
+  "limitations": [
+    "Auxiliary canonical CI source/log audit only; formal_code_approval=false and merge_authority=false. Provideropenai_codex/codex_service/machine; modelidentityKHONG_DO_DUOC, no account/header inference.",
+    "All23 raw bounded-consumer gate-output observations remain not_measured and raw workflow-definition slot remains not_measured. Separate actual GraphQL do-wd and full source audit support the derived four anchors; raw consumer outputs unchanged.",
+    "Packet-loop executed1359/1359 from1360declaredcases; namedWindows-only luong_canonical_chay_that skipped. Associated luong_canonical_chay_that_dao_os_name mutant skipped/notcredited among1523declaredmutants. Neither skip is a pass/kill.",
+    "Lifecycle records tree-scan isolation quet-cay and heavy lock path. This artifact audit did not independently test lock enforcement or deliberate containment escape.",
+    "Official plugin log hashes identify receivedUTF8decodedtext, not remote originalOSlogbytes. Official artifact ZIP bytes independently match GitHubAPI digest; artifact file/output bytes checked separately.",
+    "No WindowsCI/native/LIVE reruns or actual service/gateway/auth measurement performed. No CIactions/Git/source/Pmetadatawrites/model/subagentcalls by auditor.",
+    "Prior PR failure/retry/partial-handoff history preserved. This is actual canonical mergeM evidence, separate from H4 historical PR synthetic checkout; no substitution."
+  ],
+  "status": "canonicalCIcomplete; M8/lease retirement/D1D4/closure pending",
+  "at": "2026-11-08T13:21:53.942058+00:00"
+}

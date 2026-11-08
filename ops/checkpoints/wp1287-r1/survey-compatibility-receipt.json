@@ -1,0 +1,41 @@
+{
+  "status": "passed_controlled_local_CLI_compatibility_survey",
+  "not_product_candidate_or_legal_verification": true,
+  "CLI": "0.1.23",
+  "playwright_packages": "1.65.0-alpha-2026-10-30",
+  "Node": "24.19.0",
+  "browser": "Chromium1252/157.0.8103.15",
+  "profile": "isolated true, ownnamed session, noexistingprofile",
+  "requested_url": "http://127.0.0.1:32869/redirect",
+  "final_url": "http://127.0.0.1:32869/source.html",
+  "recorded_utc": "2026-11-08T14:34:29.763369+00:00",
+  "requests": "302 then200 verifiedCLIrequests--static",
+  "source_bytes_exact_expected": true,
+  "source_sha256": "ed1bf17ffabca3ebe549911c124f3025eb1a9b65e0e09f160b158eda5283aac3",
+  "screenshot_png": true,
+  "pdf_verified_literal_fixture_text": true,
+  "artifacts": [
+    {
+      "path": "/workspace/scratch/proxima-rest-20261108/CLI-live-survey/source.html",
+      "bytes": 142,
+      "sha256": "ed1bf17ffabca3ebe549911c124f3025eb1a9b65e0e09f160b158eda5283aac3"
+    },
+    {
+      "path": "/workspace/scratch/proxima-rest-20261108/CLI-live-survey/screen.png",
+      "bytes": 7665,
+      "sha256": "9520a4ff319adfa8b94640dd54df08cae3a40155336ba60266902e133cfc28eb"
+    },
+    {
+      "path": "/workspace/scratch/proxima-rest-20261108/CLI-live-survey/page.pdf",
+      "bytes": 8324,
+      "sha256": "ce7bcccef6279343f4cfff805a96098d891d97f4b9bf225058ecd7fa92a84a0c"
+    }
+  ],
+  "path_resolution_correction": {
+    "initial_operator_assertion": "looked for responsebody under configuredoutputDir/artifacts; file was actually at explicitcommandcwd/source.html",
+    "actual_cli": "response-body rc0/valid file; operator path assertion wasfailed, no passreceipt producedthen",
+    "observation": "snapshot follows outputDir; explicitrelative--filename screenshot/pdf/responsebody resolvescommandcwd. ProductSKILL mustmandateabsoluteartifactfilenames andownexternalcwd.",
+    "no_source_bytes_edited": true
+  },
+  "limits": "Controlledfixture only, no legalcontentverified. CLIresponsebodypostHTTPbytes, notrawTLSwirebytes. Windows/P2candidate notyettested."
+}

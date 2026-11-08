@@ -1,0 +1,26 @@
+{
+  "design_run": "1f4b425867654330bb6cd30f86ea5628",
+  "role": "readonly advisory; not codeapproval",
+  "actual_model": "claude-opus-5-5",
+  "result": "terminalchildrc0/notiserror; survey target snapshot identical",
+  "tooling_snapshot_delta": {
+    "path": ".claude/.packet_state/session-start.ran",
+    "tracked": false,
+    "cause": "Claude session-start hook marker changed; source hook code and beforeafter snapshots retained; not an entirely unchanged toolingworktree claim"
+  },
+  "dispatcher_corrections": [
+    "Actual do-wd GraphQL succeeded on S2 PR and exactM; advisory assertion web GraphQL403 is stale documentation, not current inability or blocker. Must still measure each new CI run.",
+    "P0D1CLI-first retained, no switchto library. CurrentCLI0.1.23 deps1.65.0-alpha-2026-10-30 musttestasactual ratherthanoverride toguessedstable.",
+    "S3rootmanifest scripts/ProximaControl.psd1 version2.0.0; endpointversion identity uses hashhandshake, runtimeFileVersion explicitly notmeasured untilruntimephase. ThisclarifiesexistingS3scope, no sourceguard edits.",
+    "Manifest wildcardexportsCX cannot rely solelyon actualexports because S2 already ExportModuleMember restricts2; declaredschema case must reject wildcard.Ordinal exactschema counters.",
+    "NestedModulesCX mustbe rejected atschema beforeimport; do notclaim empiricalhashbypass ifharnessstoppedbefore execution.",
+    "No need repeat all24S2mutantchildren38focused whereS1S2bytesunchanged; reuse original H4receipts as unchanged-code context only; newS3nativeandS2normalthroughmanifest paths plusmeaningful4CX.",
+    "Mission historical costs unknown remainunknown; thisdesignactual1call doesnot reset previousS2caps. Product/review budgets must beconcretebeforemodel."
+  ],
+  "AGY": {
+    "ASUS_probe": "MCPtimeout, nofunctionalproof",
+    "Desktop_version": "1.5.1",
+    "Desktop_models_agents": "Please sign in; not authenticated, no modelgeneration; use actualClaude fallback"
+  },
+  "at": "2026-11-08T14:00:20.246812+00:00"
+}

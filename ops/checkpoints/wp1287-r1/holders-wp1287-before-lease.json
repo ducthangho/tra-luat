@@ -1,0 +1,21 @@
+{
+  "measured_at_utc": "2026-11-08T15:57:33.538489+00:00",
+  "remote_heads": 755,
+  "remote_heads_sha256": "4f0758646a91fdbaf15c0bc0f557d9e8a6df0179033b3d3d2cb39c60bc165e46",
+  "source_consumer_sha256": "a4bf95b539e077edbb706afee6fc37b157815c0c246ca1bb01b307106d7be480",
+  "lease_blob_path_pairs": 890,
+  "write_set": [
+    ".agents/skills/playwright-browser/package.json",
+    ".agents/skills/playwright-browser/package-lock.json",
+    ".agents/skills/playwright-browser/SKILL.md"
+  ],
+  "class": "sensitive",
+  "paths": {
+    ".agents/skills/playwright-browser/package.json": [],
+    ".agents/skills/playwright-browser/package-lock.json": [],
+    ".agents/skills/playwright-browser/SKILL.md": []
+  },
+  "active_lease_ids": [],
+  "active_path_claims": 0,
+  "active_holders": 0
+}

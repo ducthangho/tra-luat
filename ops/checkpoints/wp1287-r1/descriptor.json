@@ -1,0 +1,30 @@
+{
+  "packet_id": "wp1287",
+  "revision": 1,
+  "generation": 1,
+  "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "effective_write_set": [
+    ".agents/skills/playwright-browser/package.json",
+    ".agents/skills/playwright-browser/package-lock.json",
+    ".agents/skills/playwright-browser/SKILL.md"
+  ],
+  "write_set_hash": "b2e55ca302ead71f6493d482b732348dc9d2a3f7089ef90aad82cf234b1f7a2d",
+  "effective_review_class": "sensitive",
+  "change_policy_sha": null,
+  "land_obligations": [],
+  "manual_descriptor": "NEW only r1 no inherited waivers",
+  "caps": {
+    "files": 3,
+    "additions_and_total": 300,
+    "product_attempts": 3,
+    "formal_rounds": 2,
+    "shared_Codex_calls": 8,
+    "primary_pushes": 1
+  },
+  "models_invoked": 0,
+  "canonical_drift": {
+    "current": "eefce7f",
+    "classification": "96 ops/land-only files since B; no product/protocol/policy/runtime change; immutable acceptance B retained"
+  },
+  "at": "2026-11-08T15:59:18.292401+00:00"
+}

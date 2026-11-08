@@ -1,0 +1,6 @@
+{
+  "initial_operator_assertion": "looked for responsebody under configuredoutputDir/artifacts; file was actually at explicitcommandcwd/source.html",
+  "actual_cli": "response-body rc0/valid file; operator path assertion wasfailed, no passreceipt producedthen",
+  "observation": "snapshot follows outputDir; explicitrelative--filename screenshot/pdf/responsebody resolvescommandcwd. ProductSKILL mustmandateabsoluteartifactfilenames andownexternalcwd.",
+  "no_source_bytes_edited": true
+}

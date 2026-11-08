@@ -1,0 +1,76 @@
+{
+  "installed_package": "@playwright/cli@0.1.23",
+  "engines": "playwrightdependenciesrequireNode>=20, testedNode24.19.0/npm11.9.0",
+  "installation": "--ignore-scripts/no browserautodownload",
+  "signatures_command_rc": 0,
+  "signatures_invalid": [],
+  "signatures_missing": [],
+  "surface": [
+    {
+      "command": [
+        "node",
+        "/workspace/scratch/proxima-rest-20261108/playwright-cli-survey/node_modules/@playwright/cli/playwright-cli.js",
+        "--help"
+      ],
+      "actual_rc": 0,
+      "output": "CLI-help.log",
+      "sha256": "1d2512ca7ac970fbad9aacf973bbf285293ec2b125f5d47ec355c2ebf191f4dc"
+    },
+    {
+      "command": [
+        "node",
+        "/workspace/scratch/proxima-rest-20261108/playwright-cli-survey/node_modules/@playwright/cli/playwright-cli.js",
+        "--help",
+        "open"
+      ],
+      "actual_rc": 0,
+      "output": "CLI-help-open.log",
+      "sha256": "b8667c35ffb3f20a68fb37af1242330f86b019e1931a9ea647aa240e0df6b4ac"
+    },
+    {
+      "command": [
+        "node",
+        "/workspace/scratch/proxima-rest-20261108/playwright-cli-survey/node_modules/@playwright/cli/playwright-cli.js",
+        "--help",
+        "requests"
+      ],
+      "actual_rc": 0,
+      "output": "CLI-help-requests.log",
+      "sha256": "66c95c9730bbddac04be67ca350031fad30845904b722e02b14af8b7c873006f"
+    },
+    {
+      "command": [
+        "node",
+        "/workspace/scratch/proxima-rest-20261108/playwright-cli-survey/node_modules/@playwright/cli/playwright-cli.js",
+        "--help",
+        "response-body"
+      ],
+      "actual_rc": 0,
+      "output": "CLI-help-response-body.log",
+      "sha256": "80a6e4509176263c74f1bd66a870bb4d12a0fcabfc1a7fafee28bfb075dd9e57"
+    },
+    {
+      "command": [
+        "node",
+        "/workspace/scratch/proxima-rest-20261108/playwright-cli-survey/node_modules/@playwright/cli/playwright-cli.js",
+        "--help",
+        "screenshot"
+      ],
+      "actual_rc": 0,
+      "output": "CLI-help-screenshot.log",
+      "sha256": "2868fb13eaaee6c66500667f8f1b14c82c7ac5752a3f5dc282d7c7c4592b23cb"
+    },
+    {
+      "command": [
+        "node",
+        "/workspace/scratch/proxima-rest-20261108/playwright-cli-survey/node_modules/@playwright/cli/playwright-cli.js",
+        "--help",
+        "tab-list"
+      ],
+      "actual_rc": 0,
+      "output": "CLI-help-tab-list.log",
+      "sha256": "8c1d2d8c4cfc36b3ad05c5ce681f26976c58940ed17b143fad0328ed102958b1"
+    }
+  ],
+  "not_runtime_browser_test": true
+}

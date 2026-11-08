@@ -1,0 +1,12 @@
+{
+  "physical_workspace": "/workspace/scratch/wp1271-g10-claude",
+  "old_packet1271_closed": true,
+  "old_head_preserved": "d2fecaa1516cbc8c20b70331a45c8c728e59ddce",
+  "old_branch_preserved": "agent/wp1271-g10-claude",
+  "bundle_sha256": "eed6a31aea22ab742c0087317e4f57505c80f59e7cf477a04c2ca1692db8bcfd",
+  "new_packet": "wp1287",
+  "new_branch": "agent/wp1287-g1-claude",
+  "B": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "trust": "exactalreadytrustedphysicalpath, no trustsettingschange",
+  "at": "2026-11-08T14:55:05.078751+00:00"
+}

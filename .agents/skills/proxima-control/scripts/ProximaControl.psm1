@@ -14,11 +14,14 @@
 #   removed or re-imported (OnRemove releases owned sessions only). Nothing is written to config/settings/profile.
 # - Remote requests are DATA (fixed key/type set) run by one constant endpoint scriptblock. Hashes bind compatibility; they
 #   are not server attestation or hostile-endpoint security. Hash-then-import is a declared race.
-# - Backend primitives (session, remote invoke, HTTP, CIM, service, id) live in a private table that only an isolated test
-#   harness replaces through module scope. There is no public callback/executor.
+# - Backend primitives (session, remote invoke, HTTP, CIM process/TCP listener, service, id) live in a private table that only an
+#   isolated test harness replaces through module scope. There is no public callback/executor.
+# - r4 (F03): before ANY gateway HTTP the metadata port must be LISTENed on by the already validated Proxima PID (read-only CIM
+#   MSFT_NetTCPConnection snapshot; rules at Get-PxcGateway). Query failure/denial is fail-closed, never a fallback.
 # - Model ids: an advertised id belongs to provider P only if it starts with 'P/' (Ordinal) and is advertised verbatim.
 # Not proven: runtime provenance/version/quota, real WinRM auth, model identity (answers are untrusted data), installed
-# service wrapper layouts (NSSM and the like fail closed), admin ABA races, outward junctions elsewhere in a repository.
+# service wrapper layouts (NSSM and the like fail closed), admin ABA races, outward junctions elsewhere in a repository, and
+# atomic listener ownership: the port check is a snapshot, so a process/port swap between it and the HTTP send is a declared race.
 # Remote ProtectedRoot protects only the deployed control tree. Completed journal records are kept (no housekeeping).
 Set-StrictMode -Version 3.0
 $ErrorActionPreference = 'Stop'
@@ -159,7 +162,34 @@ function Get-PxcGateway([string]$Base) {
         if ([string]::IsNullOrEmpty($exePath)) { throw 'unreadable' }
         if (-not (Test-PxcPath $exePath) -or -not [string]::Equals([IO.Path]::GetFullPath($exePath), [IO.Path]::GetFullPath($expected), [StringComparison]::OrdinalIgnoreCase)) { throw 'path' }
     }
+    # r4 (F03) listener ownership, AFTER the process checks and BEFORE any HTTP. Every returned record must be well formed: native
+    # integer LocalPort equal to the metadata port, integer State and OwningProcess, LocalAddress an IP string. Applicable = State 2
+    # (Listen) on an address that can take 127.0.0.1: 127.0.0.1 or 0.0.0.0, or '::' / IPv4-mapped forms (dual-stack). EVERY applicable
+    # owner must be the validated PID and at least one native IPv4 applicable record must exist. Ignored (not applicable): other
+    # states (TimeWait owner 0 ...), ::1, 127.0.0.2 and other addresses. Fails closed (ListenerUnverified): empty, denied/failed
+    # query, null/malformed record, port mismatch, wrong or conflicting owner, IPv6-only. Unsupported: listeners visible only on '::'.
+    Invoke-PxcStep 'ListenerUnverified' {
+        $v4 = 0
+        foreach ($rec in @(& $script:Prim.GetTcpListener $meta['port'])) {
+            $lp = Get-PxcInt (Get-PxcProp $rec 'LocalPort'); $st = Get-PxcInt (Get-PxcProp $rec 'State'); $own = Get-PxcInt (Get-PxcProp $rec 'OwningProcess')
+            $la = Get-PxcProp $rec 'LocalAddress'; $ip = $null
+            if ($lp -ne $meta['port'] -or $la -isnot [string] -or -not [Net.IPAddress]::TryParse($la, [ref]$ip)) { throw 'listener' }
+            if ($st -ne 2) { continue }
+            $fam4 = $ip.AddressFamily -eq [Net.Sockets.AddressFamily]::InterNetwork
+            if ($ip.IsIPv4MappedToIPv6) { $ip = $ip.MapToIPv4() }
+            $hit = $ip.Equals([Net.IPAddress]::Loopback) -or $ip.Equals([Net.IPAddress]::Any)
+            if (-not $hit -and -not $ip.Equals([Net.IPAddress]::IPv6Any)) { continue }
+            if ($own -ne $meta['pid']) { throw 'owner' }
+            if ($hit -and $fam4) { $v4++ }
+        }
+        if ($v4 -lt 1) { throw 'listener' }
+    }
     return 'http://127.0.0.1:' + $meta['port'].ToString([Globalization.CultureInfo]::InvariantCulture)
+}
+# Native fixed-width integer only (CIM uint8/uint16/uint32 ...); bool, string, float, decimal, enum and null are malformed.
+function Get-PxcInt($V) {
+    if ($V -is [byte] -or $V -is [sbyte] -or $V -is [int16] -or $V -is [uint16] -or $V -is [int] -or $V -is [uint32] -or $V -is [long] -or $V -is [uint64]) { return [decimal]$V }
+    throw 'integer'
 }
 # Exactly one primitive send; the API key is read from THIS endpoint's environment and only when $Auth.
 function Invoke-PxcHttp([string]$Url, [string]$Method, [string]$Path, $Body, [int]$Timeout, [bool]$Auth) {
@@ -511,6 +541,7 @@ $script:Prim = @{
     InvokeRemote   = { param($Session, $Body, $Envelope) Microsoft.PowerShell.Core\Invoke-Command -Session $Session -ScriptBlock $Body -ArgumentList (, $Envelope) -ErrorAction Stop }
     Http           = { param($Req) Invoke-PxcHttpDefault $Req }
     GetProcess     = { param($ProcessId) CimCmdlets\Get-CimInstance -ClassName Win32_Process -Filter ('ProcessId=' + ([long]$ProcessId).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop }
+    GetTcpListener = { param($Port) CimCmdlets\Get-CimInstance -Namespace 'ROOT/StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter ('LocalPort=' + ([long]$Port).ToString([Globalization.CultureInfo]::InvariantCulture)) -ErrorAction Stop }
     UiSessions     = { @(CimCmdlets\Get-CimInstance -ClassName Win32_Process -Filter "Name='Proxima.exe'" -ErrorAction Stop | ForEach-Object { $_.SessionId }) }
     GetService     = { CimCmdlets\Get-CimInstance -ClassName Win32_Service -Filter "Name='ProximaGateway'" -ErrorAction Stop }
     ServiceControl = { param($Verb)

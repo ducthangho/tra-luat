@@ -3,17 +3,19 @@
 #   powershell.exe|pwsh.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File <copy>\ProximaControl.Tests.ps1 `
 #     -ModulePath <tree>\.agents\skills\proxima-control\scripts\ProximaControl.psm1 -ScratchRoot <existing dir outside the tree> `
 #     -ReportPath <json outside the tree> [-EvidenceRoot <durable dir outside the tree>] [-Counterexamples] [-TestCulture en-US|tr-TR]
-# rc 0: all 25 mandatory IDs (with -Counterexamples also CX00-CX10) passed and cleanup was verified. rc 1: a case failed - an absent
+# rc 0: all 26 mandatory IDs (with -Counterexamples also CX00-CX11) passed and cleanup was verified. rc 1: a case failed - an absent
 # module fails EVERY case with API_ABSENT while every case still executes. rc 2: setup or cleanup error, never a test outcome.
-# Safety: every hazardous backend binding (session, remote invoke, HTTP, CIM process/service, service control, id) is replaced in
-# the module's private table BEFORE any product call, and the replacement is asserted. HTTP is re-bound to the real default only
-# in wire cases and only towards an owned 127.0.0.1 TcpListener; dummy credentials only; no real gateway, service or WinRM.
+# Safety: every hazardous backend binding (session, remote invoke, HTTP, CIM process/service/TCP listener, service control, id) is
+# replaced in the module's private table BEFORE any product call, and the replacement is asserted. HTTP is re-bound to the real
+# default only in wire cases and only towards an owned 127.0.0.1 TcpListener; dummy credentials only; no real gateway, service or
+# WinRM. The real listener query is re-bound only in X5-09 and only for the port of that harness-owned TcpListener (read-only).
+# A pre-r4 module table (the 9 keys without GetTcpListener) still gets all 10 fakes, so its listener BEHAVIOUR is observed in X5-09.
 # Children (all receive -TestCulture; parent and child cultures are recorded): the constant endpoint body + CLIXML request run out
 # of process (this exe, plus the other PowerShell edition when installed) with ambient WhatIf false; Run-Px.ps1 runs in a fresh
 # process. Evidence (r3 F02): <EvidenceRoot or ScratchRoot>\pxctl-evid-<run> sits OUTSIDE the deleted fixture tree; every child's
 # script, serialized input, raw report and captured output are written/kept there in place, linked by role/path/hash, and re-verified
 # AFTER cleanup (missing/changed/inside a deleted or measured tree => rc 2); each CX child gets its own sibling <CXnn>.nested root.
-# -Counterexamples: CX00 unmodified control + CX01-CX10 single-anchor mutants of COPIES in <EvidenceRoot>\pxctl-evid-<run>,
+# -Counterexamples: CX00 unmodified control + CX01-CX11 single-anchor mutants of COPIES in <EvidenceRoot>\pxctl-evid-<run>,
 # each rerunning this harness; credit only for rc 1 with the named behavioural token in the named case (setup/import/wrong-rc
 # earn nothing; a surviving mutant is reported, never credited). Evidence is never deleted. Helpers are alias-free and no
 # automatic variable (args, PID, HOME, PROFILE) is assigned; setup refuses any inner binding that reuses a top-level name
@@ -25,15 +27,15 @@ param([Parameter(Mandatory = $true)][string]$ModulePath, [Parameter(Mandatory = 
 Set-StrictMode -Version 3.0
 $ErrorActionPreference = 'Stop'
 $Ids = 'X1-01', 'X1-02', 'X1-03', 'X2-01', 'X2-02', 'X2-03', 'X2-04', 'X2-05', 'X2-06', 'X2-07', 'X3-01', 'X3-02', 'X4-01', 'X4-02', 'X4-03',
-'X5-01', 'X5-02', 'X5-03', 'X5-04', 'X5-05', 'X5-06', 'X5-07', 'X5-08', 'X6-01', 'X6-02'
-$PrimKeys = 'GetProcess', 'GetService', 'Http', 'InvokeRemote', 'NewId', 'NewSession', 'RemoveSession', 'ServiceControl', 'UiSessions'
+'X5-01', 'X5-02', 'X5-03', 'X5-04', 'X5-05', 'X5-06', 'X5-07', 'X5-08', 'X5-09', 'X6-01', 'X6-02'
+$PrimKeys = 'GetProcess', 'GetService', 'GetTcpListener', 'Http', 'InvokeRemote', 'NewId', 'NewSession', 'RemoveSession', 'ServiceControl', 'UiSessions'
 $Results = [Collections.Generic.List[object]]::new()
 $Cleanup = [ordered]@{ status = 'not_run'; errors = [Collections.Generic.List[string]]::new(); tree_removed = $false; keep_sentinel_intact = $null; wire_servers_stopped = $null }
 $Report = [ordered]@{ schema = 'proxima_control_tests.v1'; ps_version = "$($PSVersionTable.PSVersion)"; ps_edition = "$($PSVersionTable.PSEdition)"
     test_culture_requested = $TestCulture; test_culture = $null; test_ui_culture = $null; test_culture_probe = $null; module_path = $ModulePath
     module_sha256 = $null; wrapper_sha256 = $null; config_module_sha256 = $null; harness_sha256 = $null; git_head = 'not_measured'; git_tree = 'not_measured'
     api_state = 'unknown'; alias_r = $null; setup_error = $null; mandatory_ids = $Ids; required_ids = @(); counterexample_ids = @(); primitive_keys = $PrimKeys
-    primitives_replaced = $null; child_exes = @(); scratch = $null; evidence_dir = $null; total = 0; passed = 0; failed = 0; failed_ids = @(); setup_error_ids = @()
+    primitives_replaced = $null; primitive_table = $null; listener_probe = $null; child_exes = @(); scratch = $null; evidence_dir = $null; total = 0; passed = 0; failed = 0; failed_ids = @(); setup_error_ids = @()
     default_codepage = [Text.Encoding]::Default.CodePage; endpoint_body_nonascii = $null
     cases = $Results; children = [Collections.Generic.List[object]]::new(); counterexample_evidence = [Collections.Generic.List[object]]::new(); cleanup = $Cleanup
     evidence = [ordered]@{ schema = 'px.evidence.v1'; dir = $null; artifacts = [Collections.Generic.List[object]]::new(); check = $null
@@ -164,10 +166,12 @@ function New-Target([string]$Name, [string]$Tid, [string]$Base, [int]$ProcId = 0
     $j = '{"schemaVersion":1,"targetId":' + (ConvertTo-JsonText $Tid) + ',"mode":' + $(if ($Uri) { '"Remote"' } else { '"Local"' }) + ',"basePath":' + (ConvertTo-JsonText $Base)
     if ($Uri) { $j += ',"connectionUri":' + (ConvertTo-JsonText $Uri) + ',"configurationName":' + (ConvertTo-JsonText $Endpoint) }
     $cfg = Write-Fixture "$S\cfg\$Name.json" ($j + '}')
-    if ($ProcId) { $null = [IO.Directory]::CreateDirectory("$Base\runtime"); Set-RestPort $Base $ProcId 1; $global:PxcT.Pids["$ProcId"] = "$Base\runtime\Proxima.exe" }
+    if ($ProcId) { $null = [IO.Directory]::CreateDirectory("$Base\runtime"); Set-RestPort $Base $ProcId $ProcId; $global:PxcT.Pids["$ProcId"] = "$Base\runtime\Proxima.exe" }
     return @{ Name = $Name; Cfg = $cfg; Tid = $Tid; Base = $Base; ProcId = $ProcId; Fp = $null }
 }
-function Set-RestPort([string]$Base, [int]$ProcId, [int]$Port) { $null = Write-Fixture "$Base\profile\rest-port.json" ('{"pid":' + $ProcId + ',"port":' + $Port + '}') }
+# Metadata pid/port; the default listener fake models that port as LISTENed on 127.0.0.1 by that pid (Ports map). Port = pid by default.
+function Set-RestPort([string]$Base, [int]$ProcId, [int]$Port) { $null = Write-Fixture "$Base\profile\rest-port.json" ('{"pid":' + $ProcId + ',"port":' + $Port + '}'); $global:PxcT.Ports["$Port"] = $ProcId }
+function New-ListenRec($LAddr, $LPort, $LState, $LOwner) { [pscustomobject]@{ LocalAddress = $LAddr; LocalPort = $LPort; State = $LState; OwningProcess = $LOwner } }
 function New-Cred([string]$Password) { $sec = [Security.SecureString]::new(); foreach ($ch in $Password.ToCharArray()) { $sec.AppendChar($ch) }; return [pscredential]::new('pxdummy', $sec) }
 function New-PxArgs([string]$Action, $Tgt, [hashtable]$More = @{}) {
     $h = @{ Action = $Action; ConfigPath = $Tgt.Cfg; RepositoryRoot = $Repo; TargetId = $Tgt.Tid }
@@ -182,6 +186,7 @@ $DefaultHttp = { param($Req) $p = ([Uri]$Req['Uri']).AbsolutePath; $m = $Req['Me
     return @{ Status = 404; Body = '' } }
 $DefaultProc = { param($ProcId) [pscustomobject]@{ SessionId = [uint32]0; ExecutablePath = $global:PxcT.Pids["$ProcId"] } }
 $DefaultSvc = { [pscustomobject]@{ Name = 'ProximaGateway'; PathName = '"' + $global:PxcT.ServiceExe + '"' } }
+$DefaultListen = { param($Port) $o = $global:PxcT.Ports["$Port"]; if ($null -ne $o) { New-ListenRec '127.0.0.1' ([uint16]$Port) ([byte]2) ([uint32]$o) } }
 $DefaultRemote = { param($Session, $Envelope) $T = $global:PxcT; $a = $Envelope['Action']; $d = $null
     if ($a -ceq 'handshake') { $d = @{ protocolVersion = 1; moduleSha256 = $T.SelfSha; configModuleSha256 = $T.CfgSha } }
     elseif ($a -ceq 'models') { $d = @{ models = @('prov/m1', 'prov/m2'); modelState = 'advertised_not_execution_tested' } }
@@ -193,6 +198,7 @@ $Fakes = @{
     InvokeRemote   = { param($Session, $Body, $Envelope) $T = $global:PxcT; $T.Calls.Add("InvokeRemote:$($Envelope['Action']):$($Session.PxFakeSession)"); $T.Envelopes.Add($Envelope); $T.Bodies.Add($Body); & $T.RemoteHandler $Session $Envelope }
     Http           = { param($Req) $T = $global:PxcT; $T.Calls.Add("Http:$($Req['Method']) $(([Uri]$Req['Uri']).AbsolutePath)"); $T.HttpReqs.Add($Req); & $T.HttpHandler $Req }
     GetProcess     = { param($ProcId) $T = $global:PxcT; $T.Calls.Add('GetProcess'); & $T.ProcHandler $ProcId }
+    GetTcpListener = { param($Port) $T = $global:PxcT; $T.Calls.Add('GetTcpListener'); & $T.ListenHandler $Port }
     UiSessions     = { $T = $global:PxcT; $T.Calls.Add('UiSessions'); & $T.UiHandler }
     GetService     = { $T = $global:PxcT; $T.Calls.Add('GetService'); & $T.SvcHandler }
     ServiceControl = { param($Verb) $T = $global:PxcT; $T.Calls.Add("ServiceControl:$Verb") }
@@ -201,18 +207,23 @@ $Fakes = @{
 function Install-Fakes {
     $script:OrigPrim = & $script:Mod { $script:Prim.Clone() }
     $keys = @($script:OrigPrim.Keys | ForEach-Object { [string]$_ }); [Array]::Sort($keys, [StringComparer]::Ordinal)
-    if (($keys -join ',') -cne ($PrimKeys -join ',')) { throw "primitive table keys differ from the replaced set: $($keys -join ',')" }
+    # Exactly the r4 set, or exactly the pre-r4 set (old H3: no listener primitive; X5-09 then fails on BEHAVIOUR, never setup).
+    $pre = @($PrimKeys | Where-Object { $_ -cne 'GetTcpListener' }) -join ','
+    if (($keys -join ',') -cne ($PrimKeys -join ',') -and ($keys -join ',') -cne $pre) { throw "primitive table keys differ from the replaced set: $($keys -join ',')" }
+    $Report.primitive_table = $(if (($keys -join ',') -ceq $pre) { 'pre-r4 (9 keys, GetTcpListener absent; fake added by harness)' } else { 'r4 (10 keys)' })
     & $script:Mod { param($f) foreach ($k in @($f.Keys)) { $script:Prim[$k] = $f[$k] } } $Fakes
     $now = & $script:Mod { $script:Prim }
+    if ($now.Count -ne $PrimKeys.Count) { throw "primitive table has $($now.Count) entries after replacement" }
     foreach ($k in $PrimKeys) { if (-not [object]::ReferenceEquals($now[$k], $Fakes[$k])) { throw "primitive $k not replaced" } }
     $Report.primitives_replaced = "$($PrimKeys.Count)/$($PrimKeys.Count) asserted before any product call"
     $script:PxCmd = $script:Mod.ExportedCommands['px']; $script:OpCmd = $script:Mod.ExportedCommands['Invoke-ProximaOperation']
 }
 function Set-RealHttp([bool]$Real) { $sb = $(if ($Real) { $script:OrigPrim['Http'] } else { $Fakes['Http'] }); & $script:Mod { param($b) $script:Prim['Http'] = $b } $sb }
+function Set-RealListen([bool]$Real) { $sb = $(if ($Real) { $script:OrigPrim['GetTcpListener'] } else { $Fakes['GetTcpListener'] }); & $script:Mod { param($b) $script:Prim['GetTcpListener'] = $b } $sb }
 function Reset-T {
     $T = $global:PxcT
     foreach ($l in $T.Calls, $T.HttpReqs, $T.Envelopes, $T.Bodies, $T.SessReqs) { $l.Clear() }
-    $T.RemoveFail.Clear(); $T.NewSessionFail = $false; $T.SessSeq = 0; $T.HttpHandler = $DefaultHttp; $T.RemoteHandler = $DefaultRemote; $T.ProcHandler = $DefaultProc
+    $T.RemoveFail.Clear(); $T.NewSessionFail = $false; $T.SessSeq = 0; $T.HttpHandler = $DefaultHttp; $T.RemoteHandler = $DefaultRemote; $T.ProcHandler = $DefaultProc; $T.ListenHandler = $DefaultListen
     $T.UiHandler = { }; $T.SvcHandler = $DefaultSvc; $T.IdHandler = { [guid]::NewGuid().ToString('D') }; $T.ServiceExe = "$($Tg.Svc.Base)\runtime\Proxima.exe"
     $T.Models = '{"data":[{"id":"prov/m1"},{"id":"prov/m2"},{"id":"prov/Model-X"},{"id":"prov/TITLE"},{"id":"other/m9"}]}'
     if ($script:Mod) { & $script:Mod { $script:Sessions.Clear(); $script:Selection.Clear(); $script:Orphans.Clear() } }
@@ -268,7 +279,7 @@ function Invoke-Case([string]$Id, [scriptblock]$Body, [switch]$NoApi) {
             Reset-T
         }
         Set-TestLocation $S; & $Body
-    } catch { $script:CaseFail.Add("$($_.Exception.Message)") } finally { Set-TestLocation $S; if ($ApiPresent) { Set-RealHttp $false } }
+    } catch { $script:CaseFail.Add("$($_.Exception.Message)") } finally { Set-TestLocation $S; if ($ApiPresent) { Set-RealHttp $false; Set-RealListen $false } }
     if ($script:CaseFail.Count) { $why = $script:CaseFail -join ' | ' }
     if ($why) { $outcome = $(if ($why.StartsWith('SETUP:')) { 'setup_error' } else { 'failed' }) }
     $Results.Add([pscustomobject]@{ id = $Id; outcome = $outcome; reason = $why })
@@ -436,7 +447,7 @@ $Keep = "$FullScratch\pxctl-keep-$RunId"; $null = [IO.Directory]::CreateDirector
 $Evid = "$(if ($EvidenceRoot) { [IO.Path]::GetFullPath($EvidenceRoot).TrimEnd('\') } else { $FullScratch })\pxctl-evid-$RunId"
 $null = [IO.Directory]::CreateDirectory("$Evid\child"); $Report.evidence_dir = $Evid; $Report.evidence.dir = $Evid
 $global:PxcT = @{ Calls = [Collections.Generic.List[string]]::new(); HttpReqs = [Collections.Generic.List[object]]::new(); Envelopes = [Collections.Generic.List[object]]::new()
-    Bodies = [Collections.Generic.List[object]]::new(); SessReqs = [Collections.Generic.List[object]]::new(); RemoveFail = [Collections.Generic.HashSet[int]]::new(); Pids = @{}
+    Bodies = [Collections.Generic.List[object]]::new(); SessReqs = [Collections.Generic.List[object]]::new(); RemoveFail = [Collections.Generic.HashSet[int]]::new(); Pids = @{}; Ports = @{}; ListenHandler = $null
     SessSeq = 0; NewSessionFail = $false; Sentinel = ''; SelfSha = (Get-FileSha256 $ModulePath); CfgSha = (Get-FileSha256 $CfgModPath); Models = ''; ServiceExe = '' }
 $Cred = New-Cred 'dummy-not-a-secret'
 $Tg = @{}
@@ -821,7 +832,7 @@ Invoke-Case 'X5-01' {
         $x = Invoke-Px (New-PxArgs 'ask' $Tg.Pos @{ Provider = 'prov'; Value = 'second'; Model = 'prov/m1' })
         if (-not $x.R -or "$($x.R.outcome)" -cne 'ok' -or "$($x.R.data.requestedModel)" -cne 'prov/m1' -or "$($x.R.data.reportedModel)" -cne 'prov/served' -or "$($x.R.data.answer)" -cne 'wire-answer') { Add-Fail "WIRE_POSITIVE[$($x.Id)]" }
         if ($w.Log.Count - $before -ne 2) { Add-Fail "WIRE_COUNTS[200] $($w.Log.Count - $before)" }
-    } finally { Set-RealHttp $false; Stop-WireServer $w; Set-RestPort $Tg.Pos.Base $Tg.Pos.ProcId 1; [Environment]::SetEnvironmentVariable('PROXIMA_API_KEY', $savedKey) }
+    } finally { Set-RealHttp $false; Stop-WireServer $w; Set-RestPort $Tg.Pos.Base $Tg.Pos.ProcId $Tg.Pos.ProcId; [Environment]::SetEnvironmentVariable('PROXIMA_API_KEY', $savedKey) }
     foreach ($c in @(@('timeout', { param($Req) if ($Req['Method'] -ceq 'POST') { throw [TimeoutException]::new('timeout') }; & $DefaultHttp $Req }),
             @('503', { param($Req) if ($Req['Method'] -ceq 'POST') { return @{ Status = 503; Body = 'x' } }; & $DefaultHttp $Req }))) {
         $global:PxcT.HttpHandler = $c[1]
@@ -909,8 +920,8 @@ Invoke-Case 'X5-06' {
         if (@($w.Log | ForEach-Object { $_.Headers } | Where-Object { $_ -match '^(?i)authorization:' }).Count) { Add-Fail 'STATUS_AUTH_SENT[wire]' }
         if (@($w.Log | Where-Object { $_.Method -cne 'GET' }).Count) { Add-Fail 'STATUS_POST[wire]' }
         if ((Get-CallCount $x 'GetService') + (Get-CallCount $x 'ServiceControl') + (Get-CallCount $x 'UiSessions')) { Add-Fail 'STATUS_SCM_QUERY' }
-    } finally { Set-RealHttp $false; Stop-WireServer $w; Set-RestPort $Tg.Pos.Base $Tg.Pos.ProcId 1; [Environment]::SetEnvironmentVariable('PROXIMA_API_KEY', $savedKey) }
-    $x = Invoke-Px (New-PxArgs 'status' $Tg.L1); Assert-Calls $x @('GetProcess', 'Http:GET /api/status') 'mock status'
+    } finally { Set-RealHttp $false; Stop-WireServer $w; Set-RestPort $Tg.Pos.Base $Tg.Pos.ProcId $Tg.Pos.ProcId; [Environment]::SetEnvironmentVariable('PROXIMA_API_KEY', $savedKey) }
+    $x = Invoke-Px (New-PxArgs 'status' $Tg.L1); Assert-Calls $x @('GetProcess', 'GetTcpListener', 'Http:GET /api/status') 'mock status'
     if (@($global:PxcT.HttpReqs | Where-Object { $_['Headers'].Contains('Authorization') }).Count) { Add-Fail 'STATUS_AUTH_SENT[mock]' }
 }
 Invoke-Case 'X5-07' {
@@ -953,18 +964,95 @@ Invoke-Case 'X5-08' {
             $null = Write-Fixture $rp $m[1]; $x = Invoke-Px (New-PxArgs 'status' $Tg.L1)
             if ($x.Calls.Count) { Add-Fail "METADATA_COERCED[$($m[0])] $($x.Calls -join ';')" } else { Assert-Code $x 'GatewayMetadataInvalid' $m[0] }
         }
-    } finally { Set-RestPort $Tg.L1.Base $Tg.L1.ProcId 1 }
+    } finally { Set-RestPort $Tg.L1.Base $Tg.L1.ProcId $Tg.L1.ProcId }
+}
+# F03: valid metadata and a VALIDATED process (fake CIM: session 0, exact runtime path); only the listener records differ. The guard is
+# shared by px Local dispatch and the exported Invoke-ProximaOperation (what the remote endpoint runs): 0 HTTP on denial, 0 queries on WhatIf.
+Invoke-Case 'X5-09' {
+    $T = $global:PxcT; $fp = Get-Fp $Tg.Pos
+    $ops = @(@('px models', 'P', 'models', @{ Provider = 'prov' }), @('px ask', 'P', 'ask', @{ Provider = 'prov'; Value = 'p'; Model = 'prov/m1' }),
+        @('export status', 'O', 'status', @{}), @('export ask', 'O', 'ask', @{ Provider = 'prov'; Model = 'prov/m1'; Prompt = 'p' }))
+    $run = { param($o, [hashtable]$more) $h = @{}; foreach ($k in @($o[3].Keys) + @($more.Keys)) { $h[$k] = $(if ($more.ContainsKey($k)) { $more[$k] } else { $o[3][$k] }) }
+        if ($o[1] -ceq 'P') { return (Invoke-Px (New-PxArgs $o[2] $Tg.Pos $h)) }
+        $h.Action = $o[2]; $h.BasePath = $Tg.Pos.Base; $h.TargetFingerprint = $fp; $h.ProtectedRoot = $Repo; return (Invoke-Op $h) }
+    $sub = @(@('owned loopback', $true, { param($Port) New-ListenRec '127.0.0.1' ([uint16]$Port) ([byte]2) ([uint32]4108) }),
+        @('owned wildcard int32/int64', $true, { param($Port) New-ListenRec '0.0.0.0' ([int]$Port) ([int]2) ([long]4108) }),
+        @('owned plus non-applicable others', $true, { param($Port) New-ListenRec '127.0.0.1' ([uint16]$Port) ([byte]2) ([uint32]4108); New-ListenRec '127.0.0.1' ([uint16]$Port) ([byte]11) ([uint32]0)
+            foreach ($na in '10.0.0.5', '127.0.0.2', '::1') { New-ListenRec $na ([uint16]$Port) ([byte]2) ([uint32]4999) } }),
+        @('owned IPv4 and owned ::', $true, { param($Port) New-ListenRec '0.0.0.0' ([uint16]$Port) ([byte]2) ([uint32]4108); New-ListenRec '::' ([uint16]$Port) ([byte]2) ([uint32]4108) }),
+        @('wrong owner', $false, { param($Port) New-ListenRec '127.0.0.1' ([uint16]$Port) ([byte]2) ([uint32]4999) }),
+        @('wrong owner wildcard', $false, { param($Port) New-ListenRec '0.0.0.0' ([uint16]$Port) ([byte]2) ([uint32]4999) }),
+        @('conflicting 127.0.0.1 owner', $false, { param($Port) New-ListenRec '0.0.0.0' ([uint16]$Port) ([byte]2) ([uint32]4108); New-ListenRec '127.0.0.1' ([uint16]$Port) ([byte]2) ([uint32]4999) }),
+        @('conflicting :: owner', $false, { param($Port) New-ListenRec '127.0.0.1' ([uint16]$Port) ([byte]2) ([uint32]4108); New-ListenRec '::' ([uint16]$Port) ([byte]2) ([uint32]4999) }),
+        @('conflicting mapped owner', $false, { param($Port) New-ListenRec '127.0.0.1' ([uint16]$Port) ([byte]2) ([uint32]4108); New-ListenRec '::ffff:127.0.0.1' ([uint16]$Port) ([byte]2) ([uint32]4999) }),
+        @('denied', $false, { param($Port) throw [UnauthorizedAccessException]::new('denied') }), @('empty', $false, { param($Port) }), @('null record', $false, { param($Port) $null }),
+        @('null owner', $false, { param($Port) New-ListenRec '127.0.0.1' ([uint16]$Port) ([byte]2) $null }),
+        @('string owner', $false, { param($Port) New-ListenRec '127.0.0.1' ([uint16]$Port) ([byte]2) '4108' }),
+        @('string state', $false, { param($Port) New-ListenRec '127.0.0.1' ([uint16]$Port) '2' ([uint32]4108) }),
+        @('double port', $false, { param($Port) New-ListenRec '127.0.0.1' ([double]$Port) ([byte]2) ([uint32]4108) }),
+        @('port mismatch', $false, { param($Port) New-ListenRec '127.0.0.1' ([uint16]($Port + 1)) ([byte]2) ([uint32]4108) }),
+        @('null address', $false, { param($Port) New-ListenRec $null ([uint16]$Port) ([byte]2) ([uint32]4108) }),
+        @('unparsable address', $false, { param($Port) New-ListenRec 'localhost' ([uint16]$Port) ([byte]2) ([uint32]4108) }),
+        @('IPv6 any only', $false, { param($Port) New-ListenRec '::' ([uint16]$Port) ([byte]2) ([uint32]4108) }),
+        @('not listening', $false, { param($Port) New-ListenRec '127.0.0.1' ([uint16]$Port) ([byte]5) ([uint32]4108) }),
+        @('other loopback address', $false, { param($Port) New-ListenRec '127.0.0.2' ([uint16]$Port) ([byte]2) ([uint32]4108) }))
+    foreach ($sc in $sub) {
+        $T.ListenHandler = $sc[2]
+        foreach ($op in $ops) {
+            $x = & $run $op @{}; $lbl = "$($sc[0]) $($op[0])"; $q = Get-CallCount $x 'GetTcpListener'; $hc = Get-CallCount $x 'Http:'
+            if ($sc[1]) { Assert-Ok $x "owned listener $lbl"; if ($q -ne 1 -or -not $hc) { Add-Fail "LISTENER_NOT_QUERIED_OR_UNUSED[$lbl] $($x.Calls -join ';')" } }
+            elseif ($hc) { Add-Fail "LISTENER_OWNERSHIP_BYPASS[$lbl] $($x.Calls -join ';')" }
+            else { Assert-Code $x 'ListenerUnverified' $lbl; if ($q -ne 1) { Add-Fail "LISTENER_NOT_QUERIED[$lbl]" } }
+        }
+    }
+    # Boolean owner vs metadata pid 1: only the native-integer rule (not the value) can reject it, since [decimal]$true -eq 1.
+    $T.Pids['1'] = $T.Pids['4108']; $T.ListenHandler = { param($Port) New-ListenRec '127.0.0.1' ([uint16]$Port) ([byte]2) $true }
+    try { Set-RestPort $Tg.Pos.Base 1 4108; $x = & $run $ops[0] @{} } finally { Set-RestPort $Tg.Pos.Base 4108 4108; $T.Pids.Remove('1') }
+    if (Get-CallCount $x 'Http:') { Add-Fail 'LISTENER_OWNERSHIP_BYPASS[boolean owner, pid 1]' } else { Assert-Code $x 'ListenerUnverified' 'boolean owner, pid 1' }
+    $T.ListenHandler = { param($Port) New-ListenRec '127.0.0.1' ([uint16]$Port) ([byte]2) ([uint32]4999) }
+    foreach ($op in $ops) {
+        $x = & $run $op @{ WhatIf = $true }; Assert-DryRun $x "WhatIf $($op[0])"; Assert-NoEffect $x 'WHATIF_SIDE_EFFECT' "listener WhatIf $($op[0])"
+        if (Get-CallCount $x 'GetTcpListener') { Add-Fail "LISTENER_QUERY_UNDER_WHATIF[$($op[0])]" }
+    }
+    # Wire: the real HTTP primitive towards an owned 127.0.0.1 TcpListener; the fake listener record names ANOTHER process.
+    $w = Start-WireServer @{ 'GET /api/status' = @(200, '{"ok":true}'); 'GET /v1/models' = @(200, '{"data":[{"id":"prov/m1"}]}'); 'POST /v1/chat/completions' = @(200, '{"model":"prov/m1","choices":[{"message":{"content":"a"}}]}') }
+    $savedKey = [Environment]::GetEnvironmentVariable('PROXIMA_API_KEY'); $me = [Diagnostics.Process]::GetCurrentProcess().Id
+    try {
+        [Environment]::SetEnvironmentVariable('PROXIMA_API_KEY', 'dummy-test-key'); Set-RestPort $Tg.Pos.Base 4108 $w.Port; Set-RealHttp $true
+        foreach ($op in $ops) {
+            $x = & $run $op @{}
+            if ($w.Log.Count) { Add-Fail "LISTENER_OWNERSHIP_BYPASS[wire $($op[0])] requests=$($w.Log.Count) auth=$(@($w.Log | ForEach-Object { $_.Headers } | Where-Object { $_ -match '^(?i)authorization:' }).Count)"; $w.Log.Clear() }
+            else { Assert-Code $x 'ListenerUnverified' "wire $($op[0])" }
+        }
+        $T.ListenHandler = $DefaultListen; $x = & $run $ops[0] @{}; Assert-Ok $x 'wire owned listener'
+        if ($w.Log.Count -ne 1 -or (Get-WireCount $w 'GET' '/v1/models') -ne 1 -or @($w.Log[0].Headers | Where-Object { $_ -ceq 'Authorization: Bearer dummy-test-key' }).Count -ne 1) { Add-Fail "WIRE_OWNED_LISTENER[requests=$($w.Log.Count)]" }
+        if (-not $OrigPrim.ContainsKey('GetTcpListener')) { $Report.listener_probe = 'primitive_absent'; Add-Fail 'LISTENER_PRIMITIVE_ABSENT[static diagnostic only]' }
+        else {
+            # Owned-loopback READ-ONLY probe of the real default primitive, only for the port of the harness-owned TcpListener (no gateway).
+            $pr = [ordered]@{ command = "$($OrigPrim['GetTcpListener'])".Trim(); port = $w.Port; harness_pid = $me; rc = 'ok'; error = $null; records = @(); verdict = 'unmeasured_fail_closed_expected' }
+            $raw = @(); try { $raw = @(& $OrigPrim['GetTcpListener'] $w.Port) } catch { $pr.rc = 'error'; $pr.error = $_.Exception.GetType().FullName }
+            $pr.records = @(foreach ($rr in $raw) { $row = [ordered]@{}; foreach ($pn in 'LocalAddress', 'LocalPort', 'State', 'OwningProcess') { $pv = $(if ($null -ne $rr) { $rr.PSObject.Properties[$pn] }); $row[$pn] = $(if ($pv -and $null -ne $pv.Value) { "$($pv.Value.GetType().FullName):$($pv.Value)" }) }; $row })
+            $mine = @($raw | Where-Object { $null -ne $_ -and "$($_.LocalAddress)" -ceq '127.0.0.1' -and "$($_.State)" -ceq '2' -and "$($_.OwningProcess)" -ceq "$me" }).Count
+            if ($mine) { $pr.verdict = 'owned_listener_observed' }
+            $Report.listener_probe = $pr; $T.Pids["$me"] = $T.Pids['4108']; Set-RealListen $true
+            Set-RestPort $Tg.Pos.Base $me $w.Port; $n0 = $w.Log.Count; $x = & $run $ops[0] @{}
+            if ($mine) { Assert-Ok $x 'real CIM, harness-owned listener'; if ($w.Log.Count - $n0 -ne 1) { Add-Fail 'REAL_OWNED_LISTENER_NOT_USED' } }
+            elseif ($x.R -or $w.Log.Count -ne $n0) { Add-Fail 'LISTENER_OWNERSHIP_BYPASS[real CIM, ownership unmeasured]' } else { Assert-Code $x 'ListenerUnverified' 'real CIM, ownership unmeasured' }
+            Set-RestPort $Tg.Pos.Base 4108 $w.Port; $n0 = $w.Log.Count; $x = & $run $ops[0] @{}
+            if ($w.Log.Count -ne $n0) { Add-Fail 'LISTENER_OWNERSHIP_BYPASS[real CIM, validated pid 4108 + harness listener]' } else { Assert-Code $x 'ListenerUnverified' 'real CIM, other owner' }
+        }
+    } finally { Set-RealHttp $false; Set-RealListen $false; Stop-WireServer $w; Set-RestPort $Tg.Pos.Base 4108 4108; [Environment]::SetEnvironmentVariable('PROXIMA_API_KEY', $savedKey); $T.Pids.Remove("$me") }
 }
 Invoke-Case 'X6-01' {
     $h = Invoke-Px @{ Action = 'help' }; if (-not $h.R -or @($h.R.data).Count -lt 3) { Add-Fail 'HELP_EMPTY' }
     $x = Invoke-Px (New-PxArgs 'config' $Tg.L1); if (-not $x.R -or "$($x.R.data.basePath)" -cne $Tg.L1.Base -or $x.Calls.Count) { Add-Fail 'CONFIG_POSITIVE' }
-    $x = Invoke-Px (New-PxArgs 'status' $Tg.Pos); Assert-Calls $x @('GetProcess', 'Http:GET /api/status') 'status'
+    $x = Invoke-Px (New-PxArgs 'status' $Tg.Pos); Assert-Calls $x @('GetProcess', 'GetTcpListener', 'Http:GET /api/status') 'status'
     if (-not $x.R -or "$($x.R.outcome)" -cne 'ok' -or "$($x.R.mode)" -cne 'Local') { Add-Fail 'STATUS_POSITIVE' }
-    $x = Invoke-Px (New-PxArgs 'models' $Tg.Pos @{ Provider = 'prov' }); Assert-Calls $x @('GetProcess', 'Http:GET /v1/models') 'models'
+    $x = Invoke-Px (New-PxArgs 'models' $Tg.Pos @{ Provider = 'prov' }); Assert-Calls $x @('GetProcess', 'GetTcpListener', 'Http:GET /v1/models') 'models'
     if (-not $x.R -or (@($x.R.data.models) -join ',') -cne 'prov/m1,prov/m2,prov/Model-X,prov/TITLE' -or "$($x.R.data.modelState)" -cne 'advertised_not_execution_tested') { Add-Fail 'MODELS_POSITIVE' }
-    $x = Invoke-Px (New-PxArgs 'use' $Tg.Pos @{ Provider = 'prov'; Value = 'prov/m2' }); Assert-Calls $x @('GetProcess', 'Http:GET /v1/models') 'use'
+    $x = Invoke-Px (New-PxArgs 'use' $Tg.Pos @{ Provider = 'prov'; Value = 'prov/m2' }); Assert-Calls $x @('GetProcess', 'GetTcpListener', 'Http:GET /v1/models') 'use'
     if (-not $x.R -or "$($x.R.outcome)" -cne 'selected') { Add-Fail 'USE_POSITIVE' }
-    $x = Invoke-Px (New-PxArgs 'ask' $Tg.Pos @{ Provider = 'prov'; Value = 'hello' }); Assert-Calls $x @('GetProcess', 'Http:GET /v1/models', 'NewId', 'Http:POST /v1/chat/completions') 'ask'
+    $x = Invoke-Px (New-PxArgs 'ask' $Tg.Pos @{ Provider = 'prov'; Value = 'hello' }); Assert-Calls $x @('GetProcess', 'GetTcpListener', 'Http:GET /v1/models', 'NewId', 'Http:POST /v1/chat/completions') 'ask'
     if (-not $x.R -or "$($x.R.outcome)" -cne 'ok' -or "$($x.R.data.requestedModel)" -cne 'prov/m2' -or "$($x.R.data.reportedModel)" -cne 'prov/served' -or "$($x.R.data.answer)" -cne 'answer-text' -or "$($x.R.data.answerTrust)" -cne 'untrusted_data') { Add-Fail 'ASK_POSITIVE' }
     elseif ((Get-RecordState $Tg.Pos.Base $x.R.data.recordId) -cne 'completed') { Add-Fail 'ASK_RECORD_NOT_COMPLETED' }
     Clear-Journal $Tg.Svc.Base; $global:PxcT.UiHandler = { 0 }
@@ -972,7 +1060,7 @@ Invoke-Case 'X6-01' {
     Assert-Calls (Invoke-Px (New-PxArgs 'stop' $Tg.Svc)) @('GetService', 'ServiceControl:Stop') 'stop'
     Assert-Calls (Invoke-Px (New-PxArgs 'restart' $Tg.Svc)) @('UiSessions', 'GetService', 'ServiceControl:Restart') 'restart'
     $fp = Get-Fp $Tg.Pos
-    $x = Invoke-Op @{ Action = 'status'; BasePath = $Tg.Pos.Base; TargetFingerprint = $fp; ProtectedRoot = $Repo; Confirm = $false }; Assert-Calls $x @('GetProcess', 'Http:GET /api/status') 'direct export status'
+    $x = Invoke-Op @{ Action = 'status'; BasePath = $Tg.Pos.Base; TargetFingerprint = $fp; ProtectedRoot = $Repo; Confirm = $false }; Assert-Calls $x @('GetProcess', 'GetTcpListener', 'Http:GET /api/status') 'direct export status'
     $x = Invoke-Px (New-PxArgs 'connect' $Tg.R1 @{ Credential = $Cred }); Assert-Calls $x @('NewSession', 'InvokeRemote:handshake:1') 'connect'
     if (-not $x.R -or "$($x.R.outcome)" -cne 'connected') { Add-Fail 'CONNECT_POSITIVE' }
     $x = Invoke-Px (New-PxArgs 'status' $Tg.R1); Assert-Calls $x @('InvokeRemote:status:1') 'remote status'
@@ -1023,7 +1111,8 @@ $Cx = @(@{ id = 'CX00'; file = ''; e = @(); red = @() },
     @{ id = 'CX07'; file = 'ProximaControl.psm1'; e = @('foreach ($i in $Ids) { if ([string]::Equals($i, $Model, [StringComparison]::Ordinal)) { return $true } }', 'foreach ($i in $Ids) { if ($i -eq $Model) { return $true } }'); red = @('X5-02:MODEL_MATCH_NOT_ORDINAL[case alias]') },
     @{ id = 'CX08'; file = 'ProximaControl.psm1'; e = @('} catch { return $false } # malformed/unreadable record: never settled', '} catch { return $true } # malformed/unreadable record: never settled'); red = @('X5-03:PENDING_GUARD_BYPASS[malformed]') },
     @{ id = 'CX09'; file = 'ProximaControl.psm1'; e = @('if ($ok -ne $true) { Stop-Pxc ''ServiceIdentityUnverified'' }', '$null = $ok'); red = @('X5-07:SERVICE_BINDING_BYPASS[nssm wrapper start]') },
-    @{ id = 'CX10'; file = 'ProximaControl.psm1'; e = @('if ([string]::IsNullOrEmpty($exePath)) { throw ''unreadable'' }', 'if ([string]::IsNullOrEmpty($exePath)) { $exePath = $expected }'); red = @('X5-08:UNVERIFIED_RUNTIME_USED[unreadable status]') })
+    @{ id = 'CX10'; file = 'ProximaControl.psm1'; e = @('if ([string]::IsNullOrEmpty($exePath)) { throw ''unreadable'' }', 'if ([string]::IsNullOrEmpty($exePath)) { $exePath = $expected }'); red = @('X5-08:UNVERIFIED_RUNTIME_USED[unreadable status]') },
+    @{ id = 'CX11'; file = 'ProximaControl.psm1'; e = @('if ($own -ne $meta[''pid'']) { throw ''owner'' }', '$null = $own'); red = @('X5-09:LISTENER_OWNERSHIP_BYPASS[wrong owner px models]', 'X5-09:LISTENER_OWNERSHIP_BYPASS[wire px models]') })
 $Report.counterexample_ids = @($Cx | ForEach-Object { $_.id })
 function Get-Kill($Rep, [string[]]$Want) {
     $hit = [Collections.Generic.List[object]]::new()

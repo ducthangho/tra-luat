@@ -1622,3 +1622,20 @@ Human audit scoped WP1174 dùng cùng snapshot comments đã API readback cho
 canonical verifier, collector và record; transition cũng được snapshot khi có.
 Caller file thay đổi sau snapshot không thay authority; server drift bị chặn.
 M5/M12 xác định trả typed FAIL; receipt provenance giữ caller path ban đầu.
+
+
+WP1174 R12 bổ sung kiểm chứng recovery và first publication trong cùng adapter:
+collector xét cả `PushEvent.before` lẫn `head`, bao gồm descendant của H; zero OID
+là absence khi tạo/xóa ref. Preimage trước hoặc tại audit chứng minh publication
+sớm và trả FAIL; preimage sau audit phải có introduction trước đó trong evidence,
+không tự trở thành bằng chứng thời điểm first publication. Thiếu object vẫn UNKNOWN.
+Recovery đối chiếu immutable source snapshot với predecessor active path/generation,
+full high_water hash/revision và Packet/Mission/lineage trước probe/temp/write; imported
+v2 giữ predicate riêng. Mọi reused source/tombstone, target và witness được fsync file,
+fsync parent và kiểm identity/readback dưới fixed lock trước advance/finalize; terminal
+replay cũng xác nhận durability, giữ nguyên journal/history/counters. Ordinary reservation
+của adopted state kiểm lại durability tombstone và cặp target/witness trước dispatch.
+Lỗi durability giữ rc8/no dispatch; readback riêng không chứng minh durability.
+Scoped human snapshot kiểm exact verified bytes sau canonical verifier, trước collector;
+scoped accept dùng cùng snapshot bytes trong RAM cho CI/connector validation và hashes.
+Các fault injection là fixture thuật toán, không phải native profile hay mất điện.

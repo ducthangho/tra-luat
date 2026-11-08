@@ -11204,6 +11204,7 @@ def _source1174(kind):
         m, _, admission, _ = _a1174(c)
         witness, p = _w1174(c, initialized=True)
         state = dict(schema_version=3, packet=1174, mission=1172, generation=1, state_revision=0,
+                     enrollment_id=admission["enrollment"]["id"], binding_sha256=admission["enrollment"]["binding_sha256"],
                      attempts_used=7, codex_review_calls_used=4, history=[dict(event="preserved")])
         raw = m._1174_bytes(state)
         source = str(c.tmp / "active.json")
@@ -12556,7 +12557,7 @@ def _management_race1174(c,name):
     assert state["state_revision"]==(0 if name=="init" else 2) and not state["codex_calls"]
 
 
-def _accept_entry1174(c,race=False):
+def _accept_entry1174(c,race=False,snapshot=False):
     import contextlib,io,copy,multiprocessing
     from unittest.mock import patch
     from types import SimpleNamespace
@@ -12636,7 +12637,21 @@ def _accept_entry1174(c,race=False):
         stale=list(args);stale[stale.index("--expected-revision")+1]="9"
         rc,result=invoke(stale);assert rc==8 and result["status"]=="revision_rejected",(rc,result)
         assert before==(target.read_bytes(),witness.read_bytes())
-        rc,result=invoke();assert rc==0,(rc,result)
+        if snapshot:
+            parser=m._doc_json
+            inputs={str(hc.tmp/(key+".json")): (hc.tmp/(key+".json")).read_bytes() for key in files}
+            def swapped(path,*values):
+                parsed=parser(path,*values)
+                if str(path) in inputs:Path(path).write_bytes(b"{}\n")
+                return parsed
+            with patch.object(m,"_doc_json",side_effect=swapped):rc,result=invoke()
+            assert rc==0,(rc,result)
+            event=json.loads(target.read_bytes())["history"][-1]
+            for key in ("workflow_runs","check_runs","connector"):
+                assert event[key+"_sha256"]==hashlib.sha256(inputs[str(hc.tmp/(key+".json"))]).hexdigest(),key
+            assert event["workflow_jobs_sha256"]==[hashlib.sha256(inputs[str(hc.tmp/"workflow_jobs.json")]).hexdigest()]
+        else:
+            rc,result=invoke();assert rc==0,(rc,result)
     accepted=_call1174(m._1174_pair,a,json.loads(witness.read_bytes()),target.read_bytes())
     assert accepted["state"]=="accepted" and accepted["human_acceptance"]["assurance"]=="human_audited" and accepted["state_revision"]==1
     before=(target.read_bytes(),witness.read_bytes());rc,result=invoke();assert rc==8 and before==(target.read_bytes(),witness.read_bytes())
@@ -13122,8 +13137,255 @@ MUTANTS["m1174_expiry_after_commit"] = ('_1174_tripwire(new)\n        _1174_aliv
 
 MUTANTS["m1174_spec_baseline_binding"]=('baseline == [admission["base"]], "spec baseline binding"','True, "spec baseline binding"',["wp1174_admission_oid_path_hash"])
 
+
+def _r12_publication1174(c):
+    import copy, contextlib, io
+    from unittest.mock import patch
+    m,w,args,a,audit,pages,seams=_human_fixture1174(c)
+    original=copy.deepcopy(pages["events"])
+    parent=_g(w,"rev-parse",args.head+"^1")
+    _g(w,"checkout","-qb","publication-descendant",args.head)
+    (w/"descendant.txt").write_text("descendant\n")
+    _g(w,"add","descendant.txt");_g(w,"commit","-qm","descendant control")
+    descendant=_g(w,"rev-parse","HEAD")
+    fetch=lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
+    argv=["guard-first-publication","--packet",str(args.packet),"--revision","1","--generation","1","--admission","fixture","--root",args.root,
+        "--head",args.head,"--pr",str(args.pr),"--coordinator-id","coordinator-1","--receipt",args.receipt,
+        "--human-audit-comment",args.human_audit_comment,"--human-remote-run",args.human_remote_run,"--workflow-runs",args.workflow_runs]
+    for before,after,when,status in ((args.head,parent,"08:59:30","FAIL"),(descendant,parent,"08:59:30","FAIL"),
+            (args.head,"0"*40,"08:59:30","FAIL"),("f"*40,parent,"08:59:30","UNKNOWN"),
+            (parent,"f"*40,"08:59:30","UNKNOWN"),("0"*40,args.head,"09:01:00","RECORDED_EARLIEST_MATCH"),
+            (parent,descendant,"09:01:00","RECORDED_EARLIEST_MATCH")):
+        pages["events"]=copy.deepcopy(original)
+        pages["git/matching-refs/heads"][0]["object"]["sha"]=after if status=="RECORDED_EARLIEST_MATCH" else args.head
+        event=dict(id="13",type="PushEvent",created_at="2026-11-04T"+when+"Z",repo=dict(name=m._1174_REPO),
+            actor=dict(login="ducthangho"),payload=dict(before=before,head=after,ref="refs/heads/candidate"))
+        if status=="RECORDED_EARLIEST_MATCH":pages["events"][0]=event
+        else:pages["events"].append(event)
+        receipt=m._1174_collect(fetch,w,args.head,audit,123)
+        assert receipt["status"]==status,(before,after,status,receipt)
+        Path(args.receipt).write_bytes(m._1174_bytes(receipt))
+        out=io.StringIO()
+        with seams(),contextlib.redirect_stdout(out):rc=m.main(argv)
+        result=json.loads(out.getvalue())
+        assert rc==(0 if status=="RECORDED_EARLIEST_MATCH" else 12),(rc,result)
+        assert result["status"]==("PASS" if rc==0 else "FAIL" if status=="FAIL" else "UNKNOWN"),(rc,result)
+    pages["git/matching-refs/heads"][0]["object"]["sha"]=descendant
+    # A post-audit preimage without an earlier observed introduction cannot
+    # establish first publication, even when its postimage is a descendant.
+    pages["events"]=copy.deepcopy(original)
+    pages["events"][0]["payload"].update(before=args.head,head=descendant)
+    assert m._1174_collect(fetch,w,args.head,audit,123)["status"]=="UNKNOWN"
+    # A fully observed chain provides the earlier after-image evidence.
+    pages["events"]=copy.deepcopy(original)
+    later=copy.deepcopy(original[0]);later.update(id="14",created_at="2026-11-04T09:02:00Z")
+    later["payload"].update(before=args.head,head=descendant)
+    pages["events"].append(later)
+    assert m._1174_collect(fetch,w,args.head,audit,123)["status"]=="RECORDED_EARLIEST_MATCH"
+
+
+def _r12_recover_args1174(m,a,args,witness):
+    args.mode,args.disposition="recovery","resume_forward"
+    args.expected_source_sha256,args.target_generation=None,None
+    args.expected_witness_revision=str(json.loads(witness.read_bytes())["witness_revision"])
+    args.revision,args.generation,args.admission= a["revision"],a["generation"],"fixture"
+    args.root,args.coordinator_id=a["enrollment"]["root"],a["enrollment"]["coordinator_id"]
+
+
+def _r12_durability1174(c):
+    import contextlib,io
+    from unittest.mock import patch
+    for stage in ("source_retired","target_prepared","target_intent","target_adopted","witness_intent","witness_final"):
+        directory=c.tmp/("recheck-"+stage);directory.mkdir()
+        m,a,args=_adopt_fixture1174(Ctx(c.script,directory));e=a["enrollment"]
+        source,target=Path(e["legacy_source_path"]),Path(e["state_path"])
+        old_witness=Path(e["witness_path"]);parent=directory/"witness-only";parent.mkdir()
+        witness=parent/old_witness.name;e["witness_path"]=str(witness)
+        assert len({source.parent,target.parent,witness.parent})==3
+        fault_path=source if stage.startswith("source") else target if stage.startswith("target") else witness
+        sync=m._1174_fsyncdir;armed=[False];attempts=[]
+        def faulty(path):
+            if Path(path)==fault_path.parent and fault_path.exists():
+                value=json.loads(fault_path.read_bytes())
+                record=value.get("adoption") or {}
+                hit=(stage=="source_retired" and value.get("format")=="packet_state_retired.v1" or
+                    stage=="target_prepared" and record.get("phase")=="prepared" and not record["cutover_started"] or
+                    stage=="target_intent" and record.get("phase")=="prepared" and record["cutover_started"] or
+                    stage=="target_adopted" and record.get("phase")=="adopted" or
+                    stage=="witness_intent" and value.get("pending_adoption") is not None and value["pending_adoption"]["cutover_started"] or
+                    stage=="witness_final" and value.get("phase")=="initialized")
+                if hit:armed[0]=True
+                if armed[0]:attempts.append(str(path));raise OSError("persistent after-publication fsyncdir fault")
+            return sync(path)
+        with patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_1174_fsyncdir",side_effect=faulty):
+            try:m._1174_adopt(args,a,None)
+            except OSError:pass
+            else:assert False,("fault not reached",stage)
+            assert armed[0] and attempts
+            _r12_recover_args1174(m,a,args,witness)
+            before={p:p.read_bytes() for p in (source,target,witness) if p.exists()}
+            out=io.StringIO();count=len(attempts)
+            with patch.object(m,"_1174_resolve",return_value=(a,{})),patch.object(m,"_1174_runtime",return_value={}),contextlib.redirect_stdout(out):
+                rc=m._1174_command(args,Path(e["journal_root"]))
+            result=json.loads(out.getvalue())
+            assert rc==8 and result["status"] in ("UNKNOWN","durability_unknown") and not result["dispatch_allowed"],(stage,rc,result)
+            assert len(attempts)>count and {p:p.read_bytes() for p in before}==before,(stage,"advanced during fault")
+        with patch.object(m,"_1174_probe",return_value={}):
+            assert _call1174(m._1174_adopt,args,a,witness.read_bytes()) in ("completed_no_dispatch","already_completed_no_dispatch")
+        final=(source.read_bytes(),target.read_bytes(),witness.read_bytes())
+        _r12_recover_args1174(m,a,args,witness)
+        with patch.object(m,"_1174_probe",return_value={}):
+            assert _call1174(m._1174_adopt,args,a,witness.read_bytes())=="already_completed_no_dispatch"
+        assert final==(source.read_bytes(),target.read_bytes(),witness.read_bytes()),"terminal replay rewrote journal"
+        # Once adopted, a real reservation router must recheck the reused
+        # tombstone before it can grant dispatch under the same persistent fault.
+        ordinary=m.build_parser().parse_args(["record-codex-call","--packet",str(a["packet"]),"--head","a"*40,
+            "--run-id","r12-reservation","--expected-revision","2","--revision",str(a["revision"]),"--generation",str(a["generation"]),
+            "--admission","fixture","--root",e["root"],"--coordinator-id",e["coordinator_id"]])
+        if stage=="source_retired":
+            out=io.StringIO()
+            with patch.object(m,"_1174_resolve",return_value=(a,{})),patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_fsyncdir",side_effect=faulty),contextlib.redirect_stdout(out):
+                rc=m._1174_command(ordinary,Path(e["journal_root"]))
+            result=json.loads(out.getvalue());assert rc==8 and not result["dispatch_allowed"],(rc,result)
+            assert final==(source.read_bytes(),target.read_bytes(),witness.read_bytes())
+
+
+    directory=c.tmp/"ordinary-durability";directory.mkdir()
+    m,a,state,argv,_,source,old_witness,_=_runtime1174(Ctx(c.script,directory),"record-codex-call")
+    e=a["enrollment"];digest=hashlib.sha256(source.read_bytes()).hexdigest()
+    parent=directory/"ordinary-witness";parent.mkdir();witness=parent/old_witness.name
+    witness.write_bytes(old_witness.read_bytes());old_witness.unlink();e["witness_path"]=str(witness)
+    journal=directory/"ordinary-next";journal.mkdir();target=journal/source.name
+    e.update(state_path=str(target),journal_root=str(journal))
+    a.update(generation=2,lineage=dict(predecessor_generation=1,source_path=str(source),source_sha256=digest))
+    a["operation"]=dict(adoption_id="ordinary-next",generation=2,binding_sha256=e["binding_sha256"],canonical_path=str(target),source_sha256=digest,cutover_started=False)
+    args=m.build_parser().parse_args(["adopt-state","--packet",str(a["packet"]),"--mode","initial","--adoption-id","ordinary-next","--expected-source-sha256",digest,"--expected-witness-revision",str(json.loads(witness.read_bytes())["witness_revision"]),"--target-generation","2"])
+    with patch.object(m,"_1174_probe",return_value={}):assert _call1174(m._1174_adopt,args,a,witness.read_bytes())=="completed_no_dispatch"
+    reservation=m.build_parser().parse_args(argv);reservation.generation=2;reservation.expected_revision="2"
+    before=(source.read_bytes(),target.read_bytes(),witness.read_bytes());sync=m._1174_fsyncdir;attempts=[]
+    def fault(path):
+        if Path(path)==source.parent:attempts.append(str(path));raise OSError("persistent retired source durability fault")
+        return sync(path)
+    with patch.object(m,"_1174_resolve",return_value=(a,{})),patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_probe",return_value={}):
+        out=io.StringIO()
+        with patch.object(m,"_1174_fsyncdir",side_effect=fault),contextlib.redirect_stdout(out):rc=m._1174_command(reservation,journal)
+        result=json.loads(out.getvalue())
+        assert attempts and rc==8 and not result["dispatch_allowed"] and result["status"]=="durability_unknown",(rc,result,attempts)
+        assert before==(source.read_bytes(),target.read_bytes(),witness.read_bytes())
+        out=io.StringIO()
+        with contextlib.redirect_stdout(out):rc=m._1174_command(reservation,journal)
+        result=json.loads(out.getvalue());assert rc==0 and result["status"]=="reserved_for_dispatch" and result["dispatch_allowed"],(rc,result)
+
+
+def _r12_water1174(c):
+    import copy
+    from unittest.mock import patch
+    for target_present in (False,True):
+        for variant in ("control","hash","revision","path","generation","packet","mission","lineage","binding","state_generation"):
+            directory=c.tmp/("water-"+str(target_present)+"-"+variant);directory.mkdir()
+            m,a,init=_init_fixture1174(Ctx(c.script,directory));e=a["enrollment"]
+            with patch.object(m,"_1174_probe",return_value={}):m._1174_initialize(init,a,None)
+            source,witness=Path(e["state_path"]),Path(e["witness_path"])
+            raw=source.read_bytes();digest=hashlib.sha256(raw).hexdigest();oldgen=a["generation"]
+            journal=directory/"next";journal.mkdir();target=journal/source.name
+            e.update(journal_root=str(journal),state_path=str(target))
+            a.update(generation=oldgen+1,lineage=dict(predecessor_generation=oldgen,source_path=str(source),source_sha256=digest))
+            a["operation"]=dict(adoption_id="water-next",generation=oldgen+1,binding_sha256=e["binding_sha256"],canonical_path=str(target),source_sha256=digest,cutover_started=False)
+            args=m.build_parser().parse_args(["adopt-state","--packet",str(a["packet"]),"--mode","initial","--adoption-id","water-next","--expected-source-sha256",digest,"--expected-witness-revision",str(json.loads(witness.read_bytes())["witness_revision"]),"--target-generation",str(oldgen+1)])
+            writer=m._1174_write
+            def cut(path,value,**kw):
+                writer(path,value,**kw)
+                if Path(path)==(source if target_present else witness):raise OSError("cut after snapshot binding")
+            with patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_1174_write",side_effect=cut):
+                try:m._1174_adopt(args,a,witness.read_bytes())
+                except OSError:pass
+                else:assert False,"cut not reached"
+            water=json.loads(witness.read_bytes())
+            if variant=="hash":water["high_water"]["state_sha256"]="c"*64
+            elif variant=="revision":water["high_water"]["state_revision"]+=1
+            elif variant=="path":e["initial_state_path"]=str(directory/"foreign-active")
+            elif variant=="generation":a["lineage"]["predecessor_generation"]-=1
+            elif variant in ("packet","mission","lineage","binding","state_generation"):
+                # Isolate predecessor identity from target projection checks:
+                # a grammar-valid snapshot is pinned below to both hashes.
+                state=json.loads(raw)
+                if variant=="lineage":state["enrollment_id"]="foreign-enrollment"
+                elif variant=="binding":state["binding_sha256"]="c"*64
+                elif variant=="state_generation":state["generation"]+=1
+                else:state[variant]+=1
+                raw=m._1174_bytes(state)
+            witness.write_bytes(m._1174_bytes(water))
+            _r12_recover_args1174(m,a,args,witness)
+            before={p:p.read_bytes() for p in directory.rglob("*") if p.is_file()}
+            with patch.object(m,"_1174_probe",return_value={}) as probe,patch.object(m,"_1174_recheck_durable",wraps=m._1174_recheck_durable) as sync:
+                if variant=="control":assert _call1174(m._1174_adopt,args,a,witness.read_bytes())=="completed_no_dispatch"
+                elif variant in ("packet","mission","lineage","binding","state_generation"):
+                    bound=copy.deepcopy(a);bound["lineage"]["source_sha256"]=hashlib.sha256(raw).hexdigest()
+                    water["high_water"]["state_sha256"]=bound["lineage"]["source_sha256"]
+                    _reject1174(m._1174_source_binding,water,bound,str(source),raw,recovery=True,reason="initialized source lineage identity" if variant in ("lineage","binding") else "initialized source state generation/revision/identity")
+                else:
+                    _reject1174(m._1174_adopt,args,a,witness.read_bytes(),reason="initialized source high_water/path" if variant in ("hash","path","generation") and not(target_present and variant=="generation") else "adoption immutable binding/projection" if target_present and variant=="generation" else "initialized source state generation/revision/identity")
+                if variant!="control":
+                    assert not probe.called and not sync.called
+                    assert {p:p.read_bytes() for p in directory.rglob("*") if p.is_file()}==before
+
+
+def _r12_private_snapshot1174(c):
+    import contextlib,io,copy
+    from unittest.mock import patch
+    m,w,args,a,audit,pages,seams=_human_fixture1174(c)
+    original=m._human_merge
+    def swap(*values,**kwargs):
+        result=original(*values,**kwargs)
+        wrong=copy.deepcopy(audit);wrong["updated_at"]="2026-11-04T08:58:00Z"
+        Path(values[0].human_audit_comment).write_bytes(m._1174_bytes(wrong))
+        return result
+    with seams(),patch.object(m,"_human_merge",side_effect=swap):
+        _reject1174(m._1174_human_evidence,args,a,args.head,reason="verified human snapshot changed")
+
+
+def _r12_accept_snapshot1174(c):
+    _accept_entry1174(c,snapshot=True)
+
+
+# R12 adds adversarial stimuli to the frozen IDs without changing the inventory.
+_r12_hosts={"wp1174_lifecycle_first_publication":_r12_publication1174,
+    "wp1174_durability_fsync_readback":_r12_durability1174,
+    "wp1174_source_recovery_snapshot":_r12_water1174,
+    "wp1174_lifecycle_human_negative":_r12_private_snapshot1174,
+    "wp1174_writer_accept":_r12_accept_snapshot1174}
+def _r12_extend1174(original,additional):
+    def case(c):
+        original(c)
+        directory=c.tmp/"r12-stimuli";directory.mkdir()
+        additional(Ctx(c.script,directory))
+    return case
+CASES=[(name,_r12_extend1174(case,_r12_hosts[name]) if name in _r12_hosts else case) for name,case in CASES]
+MUTANTS.update({
+    "m1174_r12_push_preimage":('matches.get("after") or matches.get("before") and preaudit','matches.get("after")',["wp1174_lifecycle_first_publication"]),
+    "m1174_r12_postaudit_preimage":('if not any(x["after"] == oid and _1174_time(x["time"]) < _1174_time(observed_at) for x in introductions):','if False:',["wp1174_lifecycle_first_publication"]),
+    "m1174_r12_reused_source_sync":('_1174_recheck_durable(source, source_now)','pass # omit recovery source durability',["wp1174_durability_fsync_readback"]),
+    "m1174_r12_reused_target_sync":('_1174_recheck_durable(target, target_raw)\n        _1174_recheck_durable(wp, witness_raw)','pass # omit recovery target durability\n        _1174_recheck_durable(wp, witness_raw)',["wp1174_durability_fsync_readback"]),
+    "m1174_r12_reused_witness_sync":('_1174_recheck_durable(wp, witness_raw)\n    _1174_probe','pass # omit recovery witness durability\n    _1174_probe',["wp1174_durability_fsync_readback"]),
+    "m1174_r12_terminal_sync":('_1174_recheck_durable(wp, witness_raw)\n            _1174_alive','pass # omit terminal witness durability\n            _1174_alive',["wp1174_durability_fsync_readback"]),
+    "m1174_r12_recovery_water":('_1174_source_binding(witness, admission, payload["source_path"],\n                             payload["source_snapshot"].encode("utf-8"), recovery=True)','pass # omit predecessor recovery binding',["wp1174_source_recovery_snapshot"]),
+    "m1174_r12_private_snapshot":(['Path(getattr(args, field)).read_bytes() == verified_raw','_1174_bytes(audit) == snapshots["human_audit_comment"][0]'],['True','True'],["wp1174_lifecycle_human_negative"]),
+    "m1174_r12_accept_snapshot":('_1174_TRANSACTION["input_snapshots"] = snapshots','_1174_TRANSACTION["input_snapshots"] = {}',["wp1174_writer_accept"]),
+})
+
+MUTANTS.update({
+    "m1174_r12_recovery_hash":('and digest == water["state_sha256"], "initialized source high_water/path"','and True, "initialized source high_water/path"',["wp1174_source_recovery_snapshot"]),
+    "m1174_r12_recovery_revision":('and state["state_revision"] == water["state_revision"]','and True',["wp1174_source_recovery_snapshot"]),
+    "m1174_r12_recovery_path":('and observed_path == active_path','and True',["wp1174_source_recovery_snapshot"]),
+    "m1174_r12_recovery_generation":('lineage["predecessor_generation"] == witness["active_generation"]','True',["wp1174_source_recovery_snapshot"]),
+    "m1174_r12_recovery_packet":('state["schema_version"] == 3\n                      and type(state.get("packet")) is int and state["packet"] == admission["packet"]','state["schema_version"] == 3',["wp1174_source_recovery_snapshot"]),
+    "m1174_r12_recovery_mission":('state["mission"] == admission["mission"]\n                      and _1174_int(state.get("generation"))','True\n                      and _1174_int(state.get("generation"))',["wp1174_source_recovery_snapshot"]),
+    "m1174_r12_recovery_lineage":('state.get("enrollment_id") == e["id"] and state.get("binding_sha256") == e["binding_sha256"],\n                      "initialized source lineage identity"','True,\n                      "initialized source lineage identity"',["wp1174_source_recovery_snapshot"]),
+    "m1174_r12_ordinary_source_sync":('_1174_recheck_durable(Path(payload["source_path"]), payload["tombstone"].encode("utf-8"))','pass # omit reservation source durability',["wp1174_durability_fsync_readback"]),
+})
+
 _WP1174_PATHS = (".claude/dev/packet_loop.py", ".claude/dev/packet_loop_test.py", "docs/PROTOCOL_DA_PHIEN.md",
-    "ops/specs/wp1174-c5-adapter-design.md", "ops/specs/wp1174-implementation-r11.md")
+    "ops/specs/wp1174-c5-adapter-design.md", "ops/specs/wp1174-implementation-r12.md")
 _WP1174_NATIVE_KEYS = frozenset("schema actual_os scope proof_eligible source_pr repo pr run_id run_attempt job checkout_sha checkout_tree executed_sha executed_tree expected_head expected_tree path_hashes producer_digests producer_after snapshot_before snapshot_after required_ids required_count outcomes profiles native_probe native_seam overall_status windows_oracle".split())
 
 

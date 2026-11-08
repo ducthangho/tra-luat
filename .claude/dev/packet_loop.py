@@ -2306,7 +2306,9 @@ def _doc_check_runs(duong: str) -> list[dict]:
         _die(RC_GATE, f"KHÔNG ĐO ĐƯỢC: {duong}: {ly_do}")
 
     try:
-        d = json.loads(Path(duong).read_text(encoding="utf-8"),
+        snapshots = (globals().get("_1174_TRANSACTION") or {}).get("input_snapshots", {})
+        raw = snapshots[str(duong)] if str(duong) in snapshots else Path(duong).read_bytes()
+        d = json.loads(raw.decode("utf-8"),
                        object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json)
     except (OSError, UnicodeDecodeError, ValueError, RecursionError) as ex:
         hong(f"không đọc được như JSON ({type(ex).__name__}: {ex})")
@@ -2814,7 +2816,8 @@ BADGE_RE = re.compile(r"!\[([^\]]*?)\s*Badge\]", re.I)  # nhận diện TRƯỜN
 
 def _doc_json(duong: str, rc: int) -> tuple:
     try:
-        b = Path(duong).read_bytes()
+        snapshots = (globals().get("_1174_TRANSACTION") or {}).get("input_snapshots", {})
+        b = snapshots[str(duong)] if str(duong) in snapshots else Path(duong).read_bytes()
         return json.JSONDecoder(parse_constant=_cam_hang_ngoai_json, object_pairs_hook=_cam_khoa_trung).decode(b.decode("utf-8")), hashlib.sha256(b).hexdigest()
     except (OSError, ValueError, RecursionError) as ex:  # UnicodeDecodeError là ValueError
         _die(rc, f"KHÔNG ĐO ĐƯỢC: {duong}: {type(ex).__name__}: {ex}")
@@ -3810,6 +3813,26 @@ def _1174_fsyncdir(path):
         os.close(fd)
 
 
+
+def _1174_recheck_durable(path, raw):
+    """Re-establish file and parent durability of a visible reused image under lock."""
+    global _1174_IO_STARTED
+    path = Path(path)
+    _1174_require(_1174_read(path) == raw, "reused artifact bytes changed")
+    _1174_IO_STARTED = True
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+    try:
+        before = path.lstat()
+        opened = os.fstat(fd)
+        _1174_require((before.st_dev, before.st_ino) == (opened.st_dev, opened.st_ino), "reused artifact identity")
+        os.fsync(fd)
+        _1174_fsyncdir(path.parent)
+        _1174_require((opened.st_dev, opened.st_ino) == (path.lstat().st_dev, path.lstat().st_ino) and
+                      _1174_read(path) == raw, "reused artifact durable readback")
+    finally:
+        os.close(fd)
+
+
 def _1174_persist(path, raw, *, create):
     """Durable complete-temp publication. The transaction must hold its fixed lock.
 
@@ -4074,7 +4097,7 @@ def _1174_admission(raw, registration, now):
     return a
 
 
-def _1174_source_binding(witness, admission, observed_path, raw):
+def _1174_source_binding(witness, admission, observed_path, raw, *, recovery=False):
     """Read-only initial-adoption source predicate; no high_water repair is allowed."""
     e, lineage = admission["enrollment"], admission["lineage"]
     digest = hashlib.sha256(raw).hexdigest()
@@ -4083,7 +4106,7 @@ def _1174_source_binding(witness, admission, observed_path, raw):
         adopted = [n for n in witness["history"] if n["terminal_kind"] == "adopted"]
         active_path = adopted[-1]["canonical_path"] if adopted else e["initial_state_path"]
         water = witness["high_water"]
-        _1174_require(witness["pending_adoption"] is None and lineage["predecessor_generation"] == witness["active_generation"]
+        _1174_require((recovery or witness["pending_adoption"] is None) and lineage["predecessor_generation"] == witness["active_generation"]
                       and observed_path == active_path and digest == water["state_sha256"], "initialized source high_water/path")
         state = _1174_json(raw)
         _1174_require(type(state) is dict and type(state.get("schema_version")) is int and state["schema_version"] == 3
@@ -4092,11 +4115,17 @@ def _1174_source_binding(witness, admission, observed_path, raw):
                       and _1174_int(state.get("generation")) and state["generation"] == witness["active_generation"]
                       and _1174_int(state.get("state_revision")) and state["state_revision"] == water["state_revision"],
                       "initialized source state generation/revision/identity")
+        _1174_require(state.get("enrollment_id") == e["id"] and state.get("binding_sha256") == e["binding_sha256"],
+                      "initialized source lineage identity")
     else:
         _1174_require(e["origin"] == "imported_lineage" and lineage["predecessor_generation"] == e["g0"]
                       and observed_path == e["legacy_source_path"] and digest == e["legacy_source_sha256"], "legacy enrollment source")
         if witness is not None:
-            _1174_require(witness["origin"] == "imported_lineage" and witness["phase"] == "reserved" and
+            if recovery:
+                _1174_require(witness["origin"] == "imported_lineage" and witness["phase"] == "reserved" and
+                    all(n["terminal_kind"] in ("aborted", "aborted_intent") for n in witness["history"]), "legacy recovery branch")
+            else:
+                _1174_require(witness["origin"] == "imported_lineage" and witness["phase"] == "reserved" and
                           witness["pending_adoption"] is None and witness["suspended"] and bool(witness["history"])
                           and all(n["terminal_kind"] in ("aborted", "aborted_intent") for n in witness["history"]), "legacy retry branch")
         state = json.loads(raw.decode("utf-8"), object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json)
@@ -4614,6 +4643,10 @@ def _1174_adopt(a, admission, witness_raw):
                 if terminal["terminal_kind"] == "adopted":
                     _1174_pair(admission, witness, target_raw)
                     _1174_tripwire(st)
+            _1174_recheck_durable(source, _1174_read(source))
+            if exists:
+                _1174_recheck_durable(target, target_raw)
+            _1174_recheck_durable(wp, witness_raw)
             _1174_alive(admission)
             return "already_completed_no_dispatch"
         _1174_pending(pending, dict(op, cutover_started=pending["cutover_started"]))
@@ -4631,6 +4664,8 @@ def _1174_adopt(a, admission, witness_raw):
             _1174_require(target_raw == _1174_adopt_image(payload, record["phase"], record["cutover_started"],
                 {("prepared", False): 0, ("prepared", True): 1, ("adopted", True): 2, ("aborted", False): 1}.get(
                 (record["phase"], record["cutover_started"]), -1), admission), "recovery exact target image")
+        _1174_source_binding(witness, admission, payload["source_path"],
+                             payload["source_snapshot"].encode("utf-8"), recovery=True)
     images = {key: _1174_adopt_image(payload, phase, intent, revision, admission) for key, phase, intent, revision in
               (("prepared", "prepared", False, 0), ("intent", "prepared", True, 1), ("adopted", "adopted", True, 2), ("aborted", "aborted", False, 1))}
     old_source, retired = payload["source_snapshot"].encode("utf-8"), payload["tombstone"].encode("utf-8")
@@ -4679,6 +4714,11 @@ def _1174_adopt(a, admission, witness_raw):
         final.update(phase="initialized", active_generation=op["generation"], high_water=dict(generation=op["generation"],
                      state_revision=2, state_sha256=node["as_of_sha256"]))
     final_witness = _1174_commit_witness(current_raw, final, admission, action)
+    if a.mode == "recovery":
+        _1174_recheck_durable(source, source_now)
+        if target_raw is not None:
+            _1174_recheck_durable(target, target_raw)
+        _1174_recheck_durable(wp, witness_raw)
     _1174_probe(Path(e["root"]))
     _1174_alive(admission)
     for raw, create in chain:
@@ -4735,6 +4775,10 @@ def _1174_initialize(a, admission, witness_raw):
         state_revision=0, state_sha256=hashlib.sha256(initial).hexdigest()))
     first = _1174_commit_witness(None, reserved, admission, "fresh_enrollment")
     last = _1174_commit_witness(reserved_raw, final, admission, "resume_init")
+    if witness_raw is not None:
+        _1174_recheck_durable(witness_path, witness_raw)
+    if exists:
+        _1174_recheck_durable(target, initial)
     _1174_probe(Path(e["root"]))
     _1174_alive(admission)
     if witness_raw is None:
@@ -4781,6 +4825,11 @@ def _1174_ordinary(a, directory, admission, witness_raw, facts=None):
             generation=admission["generation"], state_revision=new["state_revision"], state_sha256=hashlib.sha256(raw).hexdigest()))
         water = _1174_commit_witness(witness_raw, after, admission, "ordinary")
         _1174_require(_1174_read(Path(e["witness_path"])) == witness_raw, "witness changed during preflight")
+        if state["adoption"] is not None:
+            payload = state["adoption"]["payload"]
+            _1174_recheck_durable(Path(payload["source_path"]), payload["tombstone"].encode("utf-8"))
+        _1174_recheck_durable(Path(e["state_path"]), _1174_bytes(state))
+        _1174_recheck_durable(Path(e["witness_path"]), witness_raw)
         _1174_probe(directory)
         _1174_alive(admission)
         _1174_write(Path(e["state_path"]), raw, create=False)
@@ -4971,6 +5020,7 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
         events = snapshots.get("events", [])
         boundary = any(type(x) is dict and _1174_time(x.get("created_at")) <= _1174_time(audit["updated_at"]) for x in events)
         dag = True
+        preimages = []
         for event in events:
             if time.time()>=pass_end:dag=False;complete=False;break
             _1174_require(type(event) is dict and type(event.get("id")) is str and
@@ -4984,17 +5034,30 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
             if not (type(after) is str and SHA_RE.fullmatch(after) and type(before) is str and SHA_RE.fullmatch(before)):
                 dag = False
                 continue
-            rc, _ = _git_do(root, "cat-file", "-e", after + "^{commit}",deadline=pass_end)
-            if rc:
-                dag = False
-                continue
-            relation, _ = _git_do(root, "merge-base", "--is-ancestor", head, after,deadline=pass_end)
-            if time.time()>=pass_end:dag=False;complete=False;break
-            if relation not in (0, 1):
-                dag = False
-            elif relation == 0:
+            # Zero is the absence of a ref at creation/deletion, never a commit.
+            # A preimage proves publication no later than this event, so it can
+            # reject an earlier audit but cannot establish a first-push timestamp.
+            matches = {}
+            for side, oid in (("before", before), ("after", after)):
+                if oid == "0" * 40:
+                    matches[side] = False
+                    continue
+                rc, _ = _git_do(root, "cat-file", "-e", oid + "^{commit}", deadline=pass_end)
+                relation, _ = _git_do(root, "merge-base", "--is-ancestor", head, oid, deadline=pass_end) if rc == 0 else (-1, b"")
+                if time.time() >= pass_end:
+                    dag = False; complete = False; break
+                if relation not in (0, 1):
+                    dag = False
+                matches[side] = relation == 0
+            preaudit = _1174_time(event["created_at"]) <= _1174_time(audit["updated_at"])
+            if matches.get("after") or matches.get("before") and preaudit:
                 introductions.append(dict(id=event["id"], time=event["created_at"], ref=payload.get("ref"),
                     actor=event.get("actor", {}).get("login"), before=before, after=after))
+            if matches.get("before") and not preaudit:
+                preimages.append((before, event["created_at"]))
+        for oid, observed_at in preimages:
+            if not any(x["after"] == oid and _1174_time(x["time"]) < _1174_time(observed_at) for x in introductions):
+                dag = False
         # Every currently observable ref/PR must be accounted for by the DAG;
         # unsupported introductions cannot silently be called server residuals.
         for family in scope[1:]:
@@ -5139,6 +5202,9 @@ def _1174_human_evidence(a, admission, head):
         _human_merge(args, Path(args.root), facts["lease"], facts["spec"], p3)
         _1174_require(not p3, "human findings remain")
         _, audit, _ = _owner_record(args.human_audit_comment, _1174_REPO, args.pr, "human_exact_head_audit.v1")
+        for field, (verified_raw, _) in snapshots.items():
+            _1174_require(Path(getattr(args, field)).read_bytes() == verified_raw, "verified human snapshot changed")
+        _1174_require(_1174_bytes(audit) == snapshots["human_audit_comment"][0], "verified audit snapshot changed")
     repo = _1174_api("repos/" + _1174_REPO,root=Path(a.root),deadline=collection_end)
     _1174_require(type(repo.get("id")) is int and repo["id"] > 0 and repo.get("full_name") == _1174_REPO, "collector repository")
     collected = _1174_collect(lambda endpoint,**limits: _1174_api(endpoint,root=Path(a.root),**limits), Path(a.root), head, audit, repo["id"],
@@ -5164,7 +5230,14 @@ def _1174_accept(a, directory, admission):
     _1174_require(st["state"] == "approved_pending" and st["scoped_review"] is not None and
         st["scoped_review"]["head"] == st.get("pending_sha") and st["scoped_review"]["verdict"] == "approve", "accept requires scoped review")
     human = _1174_human_evidence(a, admission, st["pending_sha"])
-    rc = cmd_accept(a, directory)
+    fields = ("workflow_runs", "check_runs", "connector", "bien_nhan_connector", "quyet_dinh_p3")
+    paths = [getattr(a, field, None) for field in fields] + list(a.workflow_jobs or [])
+    snapshots = {str(path): Path(path).read_bytes() for path in paths if path is not None}
+    _1174_TRANSACTION["input_snapshots"] = snapshots
+    try:
+        rc = cmd_accept(a, directory)
+    finally:
+        _1174_TRANSACTION.pop("input_snapshots", None)
     _1174_TRANSACTION["proposal"]["human_acceptance"] = human
     return rc
 

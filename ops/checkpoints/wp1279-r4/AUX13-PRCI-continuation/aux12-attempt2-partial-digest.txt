@@ -1,0 +1,3 @@
+AUX12 bounded PARTIAL handoff, not final CI audit/Ready/code approval.
+Attempt1: completed failure,18success/5failure,all23logsretained/classified. Attempt2: actualsnapshotin_progress,16success/22jobsobserved,16completedofficiallogsretainedwithsourcehashes. Core1777/1777 CPython3.12.16. Registry now SUCCESS with true13/13cases+13/13intendedmutantkills, setupsuiterc0 and noTimeoutExpiredfalsecredit/leftovererror. Toolaggregate and packetloop final guards remain pending. No new failures observed; Rootone-retryallowanceused1/1.
+AbsoluteAUXdeadline11:32:34Z; this task stops with preserved source/API snapshot for separately assigned boundedcontinuation.

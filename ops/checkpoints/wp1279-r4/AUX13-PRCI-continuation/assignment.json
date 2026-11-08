@@ -1,0 +1,48 @@
+{
+  "role": "auxiliary_readonly_CI_evidence_auditor",
+  "packet": "wp1279",
+  "revision": 4,
+  "generation": 4,
+  "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "run_id": 42469501853,
+  "attempt": 2,
+  "provider": "openai_codex",
+  "execution_surface": "codex_service",
+  "transport": "machine",
+  "model_identity": "KHONG_DO_DUOC; do not infer served model from parent/account/request",
+  "effective_repo_write_set": [],
+  "own_scratch_root": "/workspace/scratch/proxima-p1-s2-20261108",
+  "actual_call_ordinal": 13,
+  "reserved_forecast_slot_id": 15,
+  "mapping_note": "Wallplan forecast15 reserve is consumed by nextactualordinal13 because PRCI continuation occurs BEFOREReady/MCI. Calls1-12/history/countersNOTrenumbered/reset. Future Ready/MCI get nextactualordinals onlyifinvoked; projectedtotal15/16 unchanged.",
+  "authority": "existing r4Rescue16cap/fullownergrant + CLAUDEstep5 + b90e70c30562d81b6dcc9bedb5aa65a6c518c2ac:ops/checkpoints/wp1279-r4/H4-CI-audit-wall-plan/audit-wall-plan.json",
+  "recorded_at": "2026-11-08T11:30:30Z",
+  "absolute_deadline": "2026-11-08T13:00:30Z",
+  "run_limit_minutes": 90,
+  "AUX12_terminal_handoff": "aux12-attempt2-partial-handoff.json",
+  "AUX12_handoff_sha256": "e91c05180734102e25d8284f16a14e5baaf95258987e63a3e2863762b9f264b0",
+  "objective": "Finish ONLY source collection/independentCIlogdigestion on exactH4/attempt2, preservingfailedattempt1/history/partialhandoff; NOTformalcodeapproval",
+  "tasks": [
+    "Read actualattempt2API/allremainingjoblogs into pr1280-H4-ci-attempt2-plugin-logs; no historical successsubstitution",
+    "WhenALL23actualsuccess notifyRootbeforefinalaudit so root runscollect-ci-final-evidence.py ONCE withactualWD2/objects; auditor doesNOTrun successcollector withoutinstruction",
+    "Afterrootvalidationpathavailable verify all4sourceanchors, everycommand/positivecount/runtime/actualcheckoutB-H4parents/tree/workflowOID/blob/bytes; registry13/13intendedkills/noTimeoutExpiredfalsecredit/noleftoverrc, toolaggregate8/8/61cases490mutants0errors, packetlooppositive/namedWindowscaseskipNOTpass",
+    "Preserve rawcanonicallegacyunknowns; supply separate derivedfouranchors, not rawconsumerpass",
+    "Write final pr1280-H4-ci-auditor-receipt.json/digest ONLYcomplete; ifred/deadline notify+partialhandoff, doNOTwaive/retry/reset"
+  ],
+  "constraints": [
+    "No CI dispatch/rerun/cancel, no Git/source/Pmetadata writes, no code/provider/model/otheragentcalls",
+    "NoWindowsCI/LIVE/native reruns; zeroformalcodeapproval ormergeauthority",
+    "PRdirectselftest intentionallynoLifecycleartifact; actualMCIstillfuture",
+    "LoghashesofficialpluginreceiveddecodedUTF8, not originalOSrawbytes"
+  ],
+  "budget": {
+    "shared_used_before_actual_generation": 12,
+    "shared_limit": 16,
+    "one_continuation_reserved": 1,
+    "projected_after_continuation_Ready_ifactual_MCI_audit": 15,
+    "formal_rounds": "3/3 unchanged",
+    "product_attempts": "4/4 unchanged",
+    "primary_pushes": "2/2 unchanged"
+  },
+  "actual_invocation": false
+}

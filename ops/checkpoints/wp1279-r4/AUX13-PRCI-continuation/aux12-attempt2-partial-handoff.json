@@ -1,0 +1,301 @@
+{
+  "schema": "aux12-bounded-partial-handoff/1",
+  "formal_code_approval": false,
+  "final_CI_audit": false,
+  "ready_for_merge": false,
+  "status": "partial_at_absolute_aux_wall",
+  "recorded_at_utc": "2026-11-08T11:27:45.747139+00:00",
+  "absolute_aux_deadline_utc": "2026-11-08T11:32:34Z",
+  "run_id": 42469501853,
+  "attempt": 2,
+  "head": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "actual_run_status": "in_progress",
+  "actual_run_conclusion": null,
+  "jobs_observed": 22,
+  "total_count_API": 22,
+  "completed_success_count": 16,
+  "failed_jobs": [],
+  "pending_jobs": [
+    {
+      "id": 128712712733,
+      "name": "gate-cong-cu (ubuntu-latest, 0)",
+      "status": "in_progress",
+      "active_steps": [
+        "G5 manh ban kinh dot bien (#668)"
+      ]
+    },
+    {
+      "id": 128712712739,
+      "name": "gate-ops (ubuntu-latest)",
+      "status": "in_progress",
+      "active_steps": [
+        "lease-publish selftest (đo lại setup sau G5)"
+      ]
+    },
+    {
+      "id": 128712712743,
+      "name": "gate-cong-cu (ubuntu-latest, 5)",
+      "status": "in_progress",
+      "active_steps": [
+        "G5 manh ban kinh dot bien (#668)"
+      ]
+    },
+    {
+      "id": 128712712747,
+      "name": "gate-cong-cu (ubuntu-latest, 4)",
+      "status": "in_progress",
+      "active_steps": [
+        "G5 manh ban kinh dot bien (#668)"
+      ]
+    },
+    {
+      "id": 128712712763,
+      "name": "gate-packet-loop (ubuntu-latest)",
+      "status": "in_progress",
+      "active_steps": [
+        "packet-loop selftest"
+      ]
+    },
+    {
+      "id": 128712712779,
+      "name": "gate-cong-cu (ubuntu-latest, 2)",
+      "status": "in_progress",
+      "active_steps": [
+        "G5 manh ban kinh dot bien (#668)"
+      ]
+    }
+  ],
+  "collected_logs_count": 16,
+  "collected_log_sources": [
+    {
+      "job_id": 128712665465,
+      "name": "chuan-bi",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128712665465.json",
+      "source_record_sha256": "27e01848412f1ffa0c725889ddbcae57d1d1600b89f064d7fa2becf93180c5ac",
+      "received_UTF8_sha256": "2c970088c75f510348f9cef1019fd025e0ccddb05f5376e9ed2c491e667090f0",
+      "received_UTF8_bytes": 110528,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128712712734,
+      "name": "gate-cong-cu (ubuntu-latest, 1)",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128712712734.json",
+      "source_record_sha256": "36963033903b88aa6998a8f9179a17d6009d70126edd57a160127ca7fdb14c79",
+      "received_UTF8_sha256": "7a52d8c1c45789664f34898257c61627a19378a066140cc7a43063a54952facd",
+      "received_UTF8_bytes": 135293,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128712712773,
+      "name": "gate (ubuntu-latest)",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128712712773.json",
+      "source_record_sha256": "ba398c1a72cf1e5ef01ef7b3de51b44794fd3f87668d657239b439ee38818762",
+      "received_UTF8_sha256": "8cec2c5fec6f8e410e72f1ad3fe61878fa2419c6fec7535db97d998f9db9479e",
+      "received_UTF8_bytes": 649304,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128712712791,
+      "name": "gate-nhanh-manh (ubuntu-latest, 4)",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128712712791.json",
+      "source_record_sha256": "a2ef66ca5fdfd5a9bcfdbfd2d7cb49533ac8afdc680a9f4a7ea0ad3c8179a30d",
+      "received_UTF8_sha256": "99bffe207c8862016ba006da33f327cad7a4d7c48291385726f75fe60651aa00",
+      "received_UTF8_bytes": 123417,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128712712813,
+      "name": "gate-nhanh-manh (ubuntu-latest, 7)",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128712712813.json",
+      "source_record_sha256": "c212853b178d28d0ae9e26aea2687cbdfb8c2f02a5c93d2bbafed5d61c8b1ba4",
+      "received_UTF8_sha256": "21257a33b5078c290d09d6bf2386e66406ca39a1aa0c9fc6923b6d60cb0b5544",
+      "received_UTF8_bytes": 124416,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128712712819,
+      "name": "gate-nhanh-manh (ubuntu-latest, 3)",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128712712819.json",
+      "source_record_sha256": "9593eb6a813b21a1b67542f8e1ca86bba2ec424e0aefb9a2a28568e02448f753",
+      "received_UTF8_sha256": "410ad9085116a91ae9b1ed0e63016650b0bb55997a1932f5d67ea9595b123d6b",
+      "received_UTF8_bytes": 123789,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128712712821,
+      "name": "gate-nhanh-manh (ubuntu-latest, 2)",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128712712821.json",
+      "source_record_sha256": "c99ed5035bb500892f0f5beddb26f502363249bbed8635d5b10233f83ff311fd",
+      "received_UTF8_sha256": "dd2ef96db4111628c56b50daef355160fdaf6302087db5cfd3e0106c8797379d",
+      "received_UTF8_bytes": 123641,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128712712835,
+      "name": "gate-nhanh-manh (ubuntu-latest, 6)",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128712712835.json",
+      "source_record_sha256": "1c40fb72d9708653df66fdea62fb19faf47a6b6c89e81f22eb5c5f478b63ea7f",
+      "received_UTF8_sha256": "3de03727de08e333ad4cce68070ff8a97f38082c173d17bc5fc1ac28944245ec",
+      "received_UTF8_bytes": 123157,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128712712861,
+      "name": "gate-cong-cu (ubuntu-latest, 7)",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128712712861.json",
+      "source_record_sha256": "c655c895d1697c03898b9111ca73a1562247139505a8d4396a5d05aa5de9071a",
+      "received_UTF8_sha256": "d2fce4a04e1f8dae4282bbc1d5c1e066fcff4163f44273f82c6baf3926629668",
+      "received_UTF8_bytes": 135079,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128712712872,
+      "name": "gate-nhanh-manh (ubuntu-latest, 0)",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128712712872.json",
+      "source_record_sha256": "3897f3810d2f64392c3c708ee2b35e5145d56b03a5a64ed39de705c81e7c918e",
+      "received_UTF8_sha256": "ee1e3727f9ab240847337be59e24fd5edb8d309ffedc47815ab2f00d4cfe8021",
+      "received_UTF8_bytes": 123298,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128712712912,
+      "name": "gate-nhanh-manh (ubuntu-latest, 5)",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128712712912.json",
+      "source_record_sha256": "70723241956064555bd572c2684fcdd9b7e29acebbeb0479a4b641edc0b50a0e",
+      "received_UTF8_sha256": "49e299e5a9417a3c96ee040ff5f7c1106c72514e1a8b86a816491de623c72132",
+      "received_UTF8_bytes": 124180,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128712712979,
+      "name": "gate-nhanh-manh (ubuntu-latest, 1)",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128712712979.json",
+      "source_record_sha256": "d98226d14cde3c713ead3b31f89caeecbefab436ed04d8de191c28bc380c3b0a",
+      "received_UTF8_sha256": "5e0e24f8d582793435ff2cae6fc82ff2834f2b01e25d23ad72134529d7fc8391",
+      "received_UTF8_bytes": 124038,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128713114975,
+      "name": "gate-nhanh-gop (ubuntu-latest)",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128713114975.json",
+      "source_record_sha256": "169999df276a0a3b77f62a0c0f627c73390637446aaabf84dc443bab7089fb61",
+      "received_UTF8_sha256": "2b72ded6495ec5ce34e3f49c643bd88f43db415f0de9cdd33d0f3a2a4c5bf9a8",
+      "received_UTF8_bytes": 118669,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128712712729,
+      "name": "gate-cong-cu (ubuntu-latest, 6)",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128712712729.json",
+      "source_record_sha256": "2546694568fa1e7a9ed500e704a34f287da717512e3b49c0b83305a270724e42",
+      "received_UTF8_sha256": "83cf7fc0dd76c49ae0dcef22a618c92ca8fdf468f8fb6b94654de1e4a9198d75",
+      "received_UTF8_bytes": 134979,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128713172836,
+      "name": "gate-registry (ubuntu-latest)",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128713172836.json",
+      "source_record_sha256": "ad0959e9b082449331d49d421558103f37945bd579be3cd5513e1752afb42591",
+      "received_UTF8_sha256": "4e7244094f1c387187daf94943938db340180e141d0281e3d76a1a039b4e4ad4",
+      "received_UTF8_bytes": 247756,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    },
+    {
+      "job_id": 128712712738,
+      "name": "gate-cong-cu (ubuntu-latest, 3)",
+      "conclusion": "success",
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs/128712712738.json",
+      "source_record_sha256": "53bbf6657a60370cee850eeb57ff9f6866865af875107d792ee9aeb1a58ac132",
+      "received_UTF8_sha256": "20eb5cb89f8d5ee374b94c2db45509454691fa57246122f247838b66f9edc3d7",
+      "received_UTF8_bytes": 135055,
+      "actual_checkout_from_job_log": "2b40120d576c1de13e1cb3f4330608695ec7b884"
+    }
+  ],
+  "core_preliminary": {
+    "job_id": 128712712773,
+    "positive": "1777/1777",
+    "runtime": "CPython3.12.16",
+    "successful_API_step": "success",
+    "limit": "Direct PR command positive output/step success; no separately captured lifecycle child rc/artifact."
+  },
+  "actual_checkout_observations": [
+    "2b40120d576c1de13e1cb3f4330608695ec7b884"
+  ],
+  "workflow_definition_source": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-attempt2-workflow-definition.json",
+  "workflow_definition_sha256": "f547ed7b921c6c5fc66ee54d411d37003b476c137efc5d79a07c6f9672da680d",
+  "workflow_definition_actual_attempt": 2,
+  "current_API_sources": {
+    "run.json": {
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/aux12-attempt2-partial-sources/run.json",
+      "sha256": "11f9a96929ecea4dff66287e9deaa0c6de1e37dcb0ba6701d8ab3d5e59d26d59"
+    },
+    "jobs-pages.json": {
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/aux12-attempt2-partial-sources/jobs-pages.json",
+      "sha256": "0629bc6220cc2d7b8ca8a6d3bddbe953924dba96a7477dedfda5bd05e9e42f72"
+    }
+  },
+  "attempt1": {
+    "status": "completed failure",
+    "jobs": "18success/5failure/0skipped/0cancelled",
+    "all23_logs_retained": true,
+    "classification_path": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt1-failed/classification.json",
+    "classification_sha256": "e490f106aa2d726c2a9ada282fc25a44babad17eb3fbc71e9c6137621dc652c3",
+    "failure_classes": [
+      "3 actionlint dependency downloads:9HTTP504 each, installer rc4",
+      "registry:12/13; source_cung_chay_main TimeoutExpired not intended kill, leftover descendant ChildProcessError; exact root cause undetermined",
+      "tool aggregate rc1 missing shards2/6"
+    ],
+    "historical_environment_comparison": "H3pass/H4fail both runner2.338.2 Ubuntu26.04.1 image20261101.186.1 CPython3.12.16; no image migration demonstrated."
+  },
+  "retry_allowance": {
+    "used": 1,
+    "limit": 1,
+    "auditor_requested_or_executed_retry": false,
+    "root_execution_marker": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-CI-retry-executed.json"
+  },
+  "required_failure_rechecks": {
+    "actionlint": "Core now successful; all setup failures cannot yet be declared closed across everyjob until final23sourceaudit.",
+    "registry": "MEASURED: attempt2registryjobSUCCESS; actual13/13cases, DOT BIEN13/13intendedkills, setup suiteĐẠTrc0; noTimeoutExpiredfalsecredit/no leftover-descendant message. FullCIauditstillpending.",
+    "tool_aggregate": "PENDING: requirecomplete8/8shards and61cases/490mutants/0errors.",
+    "packet_loop": "PENDING actual completed job/positiveoutputs; namedWindows-onlyskip notpass."
+  },
+  "remaining_work": [
+    "Wait retryattempt2 actual terminal; promptly classify anyred. Do notrequestanotherretry.",
+    "Fetch official decoded logs for everyremaining finaljob into NEW attempt2folder, retaining requestbindings. Query currentattempt2jobs fullpages inclaggregate; no historicalsuccesssubstitution.",
+    "Onlyafterall23success notifyRoot to run successcollector ONCE with frozenH4 and actualattempt2WD/syntheticGitobjects. Do notauditorruncollector withoutRootinstruction.",
+    "Independentlyauditfinal23logs/APIbindings/checkouts/parents/tree/WD/commands/positivecounts/skips. Historicalcheckout from eachlog; do notusecurrentpullmergeref orassume currentmasterintegration measured.",
+    "Keep rawcanonicallegacygateunknowns andrawWDnotmeasured unchanged; separate derivedfouranchors need fullsourceaudit.",
+    "Write final pr1280-H4-ci-auditor-receipt.json/digest onlyaftercomplete sources; thispartialhandoff is NOTfinalaudit/Ready/codeapproval."
+  ],
+  "tool_paths": {
+    "github_cli": "/workspace/scratch/proxima-p0-tools/gh",
+    "log_plugin": "mcp__codex_apps__github_fetch_workflow_job_logs(repo_full_name,job_id)",
+    "collector": "/workspace/scratch/proxima-p1-s2-20261108/collect-ci-final-evidence.py",
+    "git_object_repo": "/workspace/scratch/wp1279-spec-publish",
+    "attempt2_log_dir": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-attempt2-plugin-logs",
+    "attempt1_log_dir": "/workspace/scratch/proxima-p1-s2-20261108/pr1280-H4-ci-plugin-logs"
+  },
+  "limits": [
+    "No CI rerun/dispatch/cancel, Git/source/metadata edits or modelcalls performed by auditor.",
+    "Hashes identifyofficialpluginreceivedUTF8decodedtext, not originalremoterawlogbytes.",
+    "NoWindowsCI/live/native remeasurement. PRworkflowdirectselftest intentionallynolifecycleartifact.",
+    "Currentmasterdriftisnotinferredas measured byhistoricalPRcheckout; requireactualMCI later."
+  ]
+}

@@ -1,0 +1,284 @@
+{
+  "reviewed_sha": "53b175c40254b0e64a011ef6d0f70207fd2f933e",
+  "reviewed_tree": "8727d7b893a8e3d7157dd4a5ca6879014915fcd5",
+  "base_sha": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "spec_sha256": "d76da91f3c9a3303a9579578e8e671360656d0312479f67c8554d4fe6ce7016d",
+  "verdict": "approved",
+  "review_class": "sensitive",
+  "review_axes": ["spec", "standards_security"],
+  "packet": "wp1285",
+  "revision": 5,
+  "generation": 6,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "model_family": "openai",
+  "session_run_id": "d51d9a03e1ca4edbac0873b4d9d56dbc",
+  "requested_model": "gpt-6.1-sol",
+  "requested_effort": "xhigh",
+  "executor_requested_effort": "high",
+  "served_model": "KHONG_DO_DUOC",
+  "served_effort": "KHONG_DO_DUOC",
+  "independent_from_executor_session": true,
+  "sandbox": {
+    "active_policy": "read-only",
+    "terminal_launcher_observation": "pending"
+  },
+  "assurance_same_provider_only": true,
+  "promotion_eligible": false,
+  "promotion_status": "HOLD: this code-correctness approval supplies neither sufficient independent sensitive assurance nor exact-H merge authority.",
+  "preflight": {
+    "exact_head_tree_and_parent_verified": true,
+    "entire_B_to_H3_reviewed": true,
+    "authoritative_spec_source": "b5f359e50e4d43adc2f17f5e256922aabb69db82:ops/specs/wp1285-r5.md",
+    "local_spec_matches_authoritative_blob": true,
+    "unmodified_canonical_spec_merge": "passed",
+    "canonical_code_source": "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+    "canonical_packet_loop_sha256": "2aced17b136132f7216056b39a253656ce251a9520752f8091138f39e0077a92",
+    "lease_source": "6bae5be8c9f109faa2a1141bbaf66e7868a510bb:ops/leases/wp1285-r5-g6-codex.yaml",
+    "executor_prompt_sha256": "316758972a34dcdaed85c64038bbc664f92236adf5d574a1e27a2dec9eba75d4",
+    "review_prompt_snapshot_sha256": "c2bfe1850eb3f219dfcf70a5c48370a108c1a9f033623fdda216a8f6ef95f47d",
+    "review_assignment_binding_verified": true,
+    "effective_write_set": [
+      ".agents/skills/proxima-control/scripts/ProximaControl.psd1",
+      ".agents/skills/proxima-control/SKILL.md",
+      ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+    ],
+    "new_files": 3,
+    "additions": 450,
+    "deletions": 0,
+    "six_S1_S2_files_byte_identical": true,
+    "change_policy_sha": null,
+    "land_obligations": [],
+    "policy_and_schema_absent_at_B_H3_and_observed_canonical": true,
+    "ADR0052_ADR0053_three_anchors": "passed: present at declared land OID, absent at its first parent, and on non-shallow canonical first-parent history",
+    "canonical_drift": "96 ops/land-only paths; immutable B preserved; governing source and required-gate code unchanged"
+  },
+  "findings": [],
+  "prior_class_dispositions": [
+    {
+      "stableid": "WP1285-R1-F01",
+      "class_slug": "manifest-ast-ignores-executable-blocks",
+      "historical_severity": "P2",
+      "historical_formal_occurrences": 2,
+      "history": [
+        {
+          "reviewed_sha": "4196fbaaeb13b4d26d5f4f452b6c1a8b26150489",
+          "source": "aae600b1b30468a81f8d8e2072539ed2f8a6c823:ops/reviews/wp1285-r2-review1/verdict.md",
+          "verdict": "changes_requested"
+        },
+        {
+          "reviewed_sha": "883d37826f443ce9301dd0bcd40cd5f97f1adf0e",
+          "source": "5ed966499e50dffe198509b669f412431ad9014e:ops/reviews/wp1285-r2-review2/verdict.md",
+          "disposition": "VÁ HỜ",
+          "verdict": "changes_requested"
+        }
+      ],
+      "original_verdict_bytes_verified_against_Git": true,
+      "disposition": "ĐÃ VÁ THẬT",
+      "whole_class_closed": true,
+      "independent_source_analysis": [
+        "PM01 validates the complete FindAll traversal before assigning ManifestAst or ManifestData. Unknown node kinds fail closed.",
+        "Public instance property inspection rejects unexpected retained Ast edges and nonempty collections. Parent is excluded as a back-reference. Parser-owned getters do not evaluate manifest expressions.",
+        "Boolean flags must be false except NamedBlockAst.Unnamed. Background is explicitly rejected before continuing property inspection. Every pipeline must contain exactly one element.",
+        "The root requires one unnamed end block, no traps or requirements, and exactly one CommandExpressionAst containing a HashtableAst. Redirections are rejected before SafeGetValue.",
+        "Commands, invocation, pipeline chains, expandable expressions, variables, conversions, attributes, using statements, executable blocks and other non-allowlisted AST forms cannot reach SchemaOk.",
+        "The permitted enum modes do not introduce an execution route: named block placement is constrained by root and child-edge checks, and StringConstantExpressionAst remains literal data. Optional parser properties are reflected rather than directly accessed under PS5.1 StrictMode.",
+        "Ordinary literal strings, arrays and comments remain compatible with the permitted data shape; exact nine-key, type, value and Ordinal export checks remain after SafeGetValue."
+      ],
+      "verified_positive_controls": [
+        "Native PS5.1 and PS7 candidate PM01–PM07: 7/7, rc0, no setup errors.",
+        "Native counterexample parents: 12/12 on each runtime, including CX00 positive controls.",
+        "Eight retained runtime/tamper pairs independently checked for actual manifest import, two exports, px help, same module object, intact sentinel and DependencyMismatch before sentinel execution.",
+        "Unchanged S2 normal regression: 26/26 on each runtime."
+      ],
+      "verified_negative_controls": [
+        "Six named-end/end-clean/background probes: actual rc1, named PM01 rejection, runtime_children=0, PM04 NOT_EXECUTED, no setup errors.",
+        "PS5.1 clean/background syntax receives parser rejection; no unsupported-syntax behavioral credit claimed.",
+        "PS7 background-only rollback removes exactly the new Background rejection while retaining its property continue and all other H3 checks. PM01 then passes and runtime_children=2. Overall rc1 arises later and is not credited as a before-import kill."
+      ],
+      "rollback_mutant_sha256": "1c73439c657c671a11c7e1759593e4df4871e7a2de3bdf8c84411f7e00cc36a0",
+      "remaining_manifestations": [],
+      "closure_basis": "Independent whole-class source analysis plus independently validated retained native positive, negative and isolated rollback evidence.",
+      "claim_limit": "No arbitrary-code execution, exhaustive future-runtime compatibility or sensitive promotion authority is claimed."
+    }
+  ],
+  "measuredtests": {
+    "personally_executed": [
+      {
+        "name": "Canonical spec resolution, scope, ADR anchors and final Git identity",
+        "command": "python -B -",
+        "script_source": "Review tool transcript; compile unchanged canonical launcher/packet_loop blobs, invoke _spec_merge, compare authoritative bytes and native sparse-copy Git identities.",
+        "actual_rc": 0,
+        "status": "passed",
+        "spec_sha256": "d76da91f3c9a3303a9579578e8e671360656d0312479f67c8554d4fe6ce7016d",
+        "native_bundle_sha256": "e0f46ce0d70ae965d12bb0eb5073a285f316aa74b195d2ffa57a187568dbbecf",
+        "positive_evidence": "Exact r5/g6 spec and prompt; three new files, 450/0; six unchanged S1/S2 files; both ADR three-anchor checks; native B/H3 source bytes and final SHA/tree match."
+      },
+      {
+        "name": "Read-only native archive and nested evidence verification",
+        "command": "python -B -",
+        "script_source": "Review tool transcript; import verifier without executing its mutating __main__, call verify(root), verify existing missing-dependency copy, and compare ZIP members.",
+        "actual_rc": 0,
+        "status": "passed",
+        "verifier_sha256": "fb261a56fa212141b4c15d2a413c583b8e6d1d2f6518a2e4c72672025f37d9a7",
+        "archive_sha256": "71a7ec66fe1f3789530761decffac1bc2ead97af9a9dc9ff7336c39897cd57c2",
+        "archive_bytes": 2343722,
+        "zip_entries_byte_equal": 456,
+        "source_files_verified": 455,
+        "command_logs_verified": 39,
+        "S3_artifact_references_verified": 175,
+        "legacy_artifacts_per_set": [29, 29],
+        "missing_dependency_negative": "Rejected the existing private copy missing endpoint-in.xml."
+      },
+      {
+        "name": "Native raw positive outputs and policy disclosure",
+        "command": "python -B -",
+        "script_source": "Review tool transcript; independently inspect runtime/tamper outputs, class reports, child exit codes and launch policies.",
+        "actual_rc": 0,
+        "status": "passed",
+        "measurement_sha256": "1af03b2e0ab63ad93942cabc8b2935868beb48adf2eb075862de5120db8434b4",
+        "positive_evidence": "Eight positive runtime/tamper pairs verified; six class rejections verified; S3 inherits RemoteSigned with no child ExecutionPolicy arguments; all recorded GPO entries Undefined; 14 unchanged legacy Bypass arguments disclosed."
+      },
+      {
+        "name": "Retained Linux execution verification",
+        "command": "python -B -",
+        "script_source": "Review tool transcript; verify all ten command-log hashes/sizes, lifecycle identity and current catalog/runtime identity.",
+        "actual_rc": 0,
+        "status": "passed",
+        "receipt_sha256": "cea96fd785b43fe22fdfde24a6dde8ddbba88c863eed88239d3303978e3920a1",
+        "lifecycle_sha256": "089c92a985df2112a9a41215c0eec89e1944bf956a16e47a9d547d34fe2b25b6",
+        "positive_evidence": "Current identity equals retained before/after identity; actual selftest child rc0 and 1777/1777; strict temporary manifest 184/184."
+      },
+      {
+        "name": "Ruff pin/probe contract",
+        "command": "python -B -; invoke unchanged ci_dang_ky_test.py loi_ruff_ci()",
+        "actual_rc": 0,
+        "status": "passed",
+        "positive_evidence": "3 checks; errors=[]"
+      },
+      {
+        "name": "Bare Ruff candidate and baseline",
+        "commands": [
+          "python -B -m ruff check --no-cache --select F --output-format json scripts/tl.py",
+          "python -B -m ruff check --no-cache --select F --output-format json --stdin-filename scripts/tl.py -"
+        ],
+        "baseline_stdin": "Exact B:scripts/tl.py blob",
+        "actual_rc": [1, 1],
+        "status": "failed",
+        "tool_version": "ruff 0.15.15",
+        "positive_evidence": "Identical 12 F821 diagnostics; delta versus B=0.",
+        "stdout_sha256_both": "c690770a98560c8597ac6012a3a28bc538ce7f6fdc5fcd832f5894b50864f585"
+      },
+      {
+        "name": "Diff whitespace",
+        "command": "git diff --check bf9914cb1a8e6f5047468f4d130b587015f8d73f HEAD",
+        "actual_rc": 0,
+        "status": "passed",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "Review/source snapshot comparison",
+        "command": "python -B -",
+        "actual_rc": 0,
+        "status": "passed",
+        "positive_evidence": "Review inventory 14688 entries; source inventory 14715 entries; no added or missing paths and no measured hash changes, including Git metadata. HEAD/tree and tracked/index diffs unchanged. Source has only its pre-existing ignored fixtures/state.",
+        "limit": "Five historical token-named logs per tree were not reread. Parent terminal full snapshots remain pending; two-point equality does not establish continuous immutability."
+      }
+    ],
+    "retained_execution_independently_verified": {
+      "native": {
+        "source": "/workspace/scratch/proxima-rest-20261108/native-S3-H3/extracted/measurement.json",
+        "runtimes": ["5.1.26100.9711", "7.6.9"],
+        "baseline": {
+          "actual_rc": [1, 1],
+          "status": "failed",
+          "expected": true,
+          "positive_evidence": "All seven IDs RED on both runtimes with MANIFEST_ABSENT/SKILL_ABSENT; no setup errors."
+        },
+        "candidate": {
+          "actual_rc": [0, 0],
+          "status": "passed",
+          "counts": ["7/7", "7/7"]
+        },
+        "counterexamples": {
+          "parent_actual_rc": [0, 0],
+          "status": "passed",
+          "parent_counts": ["12/12", "12/12"],
+          "CX00": "7/7 rc0 on both runtimes",
+          "CX01_CX02_CX03": "Named PM02 property failures, actual child rc1, runtime_children=0 and PM04 NOT_EXECUTED.",
+          "CX04": "Named PM05 DOC_VERSION_MISMATCH, actual child rc1.",
+          "mutations_reconstructed": true
+        },
+        "legacy_S2_normal": {
+          "actual_rc": [0, 0],
+          "status": "passed",
+          "counts": ["26/26", "26/26"]
+        },
+        "F01_class_negatives": {
+          "actual_rc": [1, 1, 1, 1, 1, 1],
+          "status": "failed",
+          "expected": true,
+          "before_import_property": "passed for all six"
+        },
+        "background_only_rollback": {
+          "actual_rc": 1,
+          "status": "failed",
+          "expected": true,
+          "PM01": "passed",
+          "runtime_children": 2,
+          "interpretation": "Before-import assertion fails; later import failures receive no kill credit."
+        }
+      },
+      "linux": {
+        "source": "/workspace/scratch/proxima-rest-20261108/linux-final-53b175c40254/receipt.json",
+        "full_selftest_command": "python3.12 -B scripts/tl.py --selftest",
+        "actual_child_rc": 0,
+        "status": "passed",
+        "positive_evidence": "1777/1777",
+        "output_sha256": "41b62b4889cb238aaca5c07ac2acaf52a9f477ad89378a1908d8ec633bda0542",
+        "other_results": "Admission, doctrine-scan, adr-song, documentation claims and strict temporary verification rc0; strict 184/184. Bare Ruff rc1, delta0."
+      },
+      "auxiliary_audit": {
+        "receipt_sha256": "54a62109b821c132409f969a32194f8cb84d67f820636a9612f1b126bd914f2c",
+        "formal_code_approval": false,
+        "used_as_F01_closure_authority": false
+      }
+    },
+    "review_diagnostic_corrections": [
+      {
+        "actual_rc": 1,
+        "reason": "Initial Linux verifier used expected/checked instead of the report's expected_file_count/checked_file_count.",
+        "corrected_actual_rc": 0
+      },
+      {
+        "actual_rc": 1,
+        "reason": "Initial positive-child check included intentional CX negative children; corrected to runtime/tamper roles.",
+        "corrected_actual_rc": 0
+      }
+    ],
+    "not_run": [
+      "Native product tests personally: no pwsh, powershell or dotnet executable is available locally.",
+      "Author tests remain NOT_RUN; retained operator executions are separate.",
+      "Redundant heavy Linux selftest rerun.",
+      "Future push, PR CI, connector/Ready review, merge, land and post-merge gates."
+    ],
+    "skipped": []
+  },
+  "unmeasured": [
+    "Served reviewer and executor model/effort beyond requested CLI configuration.",
+    "Terminal launcher outcome, final delivery receipt and parent post-run full snapshots.",
+    "Fresh remote ref observation during this review, because network access was prohibited.",
+    "Real WinRM authentication, gateway FileVersion, upstream model identity, Windows CI, full Windows mutant CI and deployed activation.",
+    "Origin of the six author child-view protected directories; retained host evidence shows them absent and does not establish continuous sandbox attestation."
+  ],
+  "risks": [
+    "Code approval is limited to exact H3 and does not authorize sensitive promotion or merge.",
+    "Native evidence demonstrates isolated fixture/import/help/documentation behavior, not LIVE operation or deployment.",
+    "Historical failed infrastructure attempts remain failed or NOT_RUN; no budgets or prior verdicts were reset."
+  ],
+  "repository_modifications": false,
+  "network_calls": false,
+  "other_model_or_agent_calls": false
+}
+KET_LUAN: approve

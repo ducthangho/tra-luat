@@ -1,0 +1,543 @@
+{
+  "sha": "bc16ccff3601fabeeb783f41b52360ef5851838a",
+  "os": "Windows",
+  "tests": [
+    {
+      "id": "candidate-ps51:X1-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X1-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X1-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X2-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X2-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X2-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X2-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X2-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X2-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X2-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X3-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X3-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X4-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X4-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X4-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-08",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X5-09",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X6-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51:X6-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X1-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X1-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X1-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X2-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X2-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X2-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X2-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X2-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X2-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X2-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X3-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X3-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X4-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X4-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X4-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-08",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X5-09",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X6-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7:X6-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X1-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X1-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X1-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X2-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X2-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X2-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X2-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X2-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X2-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X2-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X3-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X3-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X4-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X4-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X4-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-08",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X5-09",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X6-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:X6-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX00",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX08",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX09",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX10",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps51-counterexamples:CX11",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X1-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X1-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X1-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X2-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X2-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X2-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X2-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X2-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X2-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X2-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X3-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X3-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X4-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X4-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X4-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-08",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X5-09",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X6-01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:X6-02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX00",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX01",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX02",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX03",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX04",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX05",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX06",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX07",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX08",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX09",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX10",
+      "ket_qua": "passed"
+    },
+    {
+      "id": "candidate-ps7-counterexamples:CX11",
+      "ket_qua": "passed"
+    }
+  ],
+  "evidence_index": "windows-bc16ccff3601-g4-evidence-index.json",
+  "native_archive_sha256": "bbaf43d863292ca6b126013da451c17ae25bf363fb2e61d2fe4bc6a5004fe663",
+  "source_reports": [
+    {
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/windows-bc16ccff3601-g4-evidence/reports/candidate-ps51.json",
+      "sha256": "e562dd4b20028b423a163da201fb23fa6b8294173666e5b5951aca9e99851b77",
+      "cases": 26
+    },
+    {
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/windows-bc16ccff3601-g4-evidence/reports/candidate-ps7.json",
+      "sha256": "2874c8ae5807a07d6b3fadde67806c654a90851635949204697722d3039fd934",
+      "cases": 26
+    },
+    {
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/windows-bc16ccff3601-g4-evidence/reports/candidate-ps51-counterexamples.json",
+      "sha256": "3e3f03bea6848a19a54953b194c3d2a0290a371ce0d3a519be62621c99f3241c",
+      "cases": 38
+    },
+    {
+      "path": "/workspace/scratch/proxima-p1-s2-20261108/windows-bc16ccff3601-g4-evidence/reports/candidate-ps7-counterexamples.json",
+      "sha256": "2f066e37317283b5936d242e2ccf7928e0b9408ac982be3a192f807069a9ff01",
+      "cases": 38
+    }
+  ],
+  "note": "Derived K6 projection from original retained reports; exactnativebytes/commands/rc/versions/rawnestedreports in ZIP. Not Windows CI; not formal code approval."
+}

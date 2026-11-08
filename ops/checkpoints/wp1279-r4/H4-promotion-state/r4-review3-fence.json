@@ -1,0 +1,55 @@
+{
+  "endpoint": "https://github.com/ducthangho/tra-luat.git",
+  "at": "2026-11-08T09:56:22.978563+00:00",
+  "rc": 0,
+  "canonicalization": "UTF8 OID TAB ref LF sorted by ref Unicode codepoint; ALL refs inclHEAD/tags/pull",
+  "sha256": "032817c6292a4a5bc3547eb8baa169880a4ec8ef68a22957118fde97c7202e5a",
+  "count": 1746,
+  "deltas": [
+    {
+      "ref": "refs/heads/codex/wp1174-h5-remediation",
+      "old": null,
+      "new": "cdfe17a3e546ce824aaf5d7f8a36bdea61a5242b"
+    },
+    {
+      "ref": "refs/heads/ops/land-1252-1272",
+      "old": null,
+      "new": "53b9e66cac5b71d4d2859971f5c122400c0c7203"
+    },
+    {
+      "ref": "refs/heads/ops/spec-wp1174-r16",
+      "old": null,
+      "new": "9941d8af52aeede1c78ea4e232fbe9a8d5272033"
+    },
+    {
+      "ref": "refs/heads/ops/wp1174-r16-g13-lease",
+      "old": null,
+      "new": "3560b4a77d0f07fd988df161044d4cd6b4f1637a"
+    },
+    {
+      "ref": "refs/heads/ops/wp1279-spec",
+      "old": "576ae2b1e4c5eab228736ff537b81c34b79fc688",
+      "new": "0cf8530ae5787ed5459c2235aca669ad2446449e"
+    },
+    {
+      "ref": "refs/pull/1281/head",
+      "old": null,
+      "new": "53b9e66cac5b71d4d2859971f5c122400c0c7203"
+    },
+    {
+      "ref": "refs/pull/1281/merge",
+      "old": null,
+      "new": "55e2f16a5df6a0b3e1f197eb81ea66c990e091be"
+    },
+    {
+      "ref": "refs/pull/1282/head",
+      "old": null,
+      "new": "cdfe17a3e546ce824aaf5d7f8a36bdea61a5242b"
+    },
+    {
+      "ref": "refs/pull/1282/merge",
+      "old": null,
+      "new": "04360a205dc4318d563cc14b6c6cc8b3c114f695"
+    }
+  ]
+}

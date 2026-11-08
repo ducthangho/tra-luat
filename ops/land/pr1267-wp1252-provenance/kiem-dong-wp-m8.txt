@@ -22,3 +22,8 @@ rc=12
   THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
 CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
 rc=12
+
+# LAN 5 (sau approve_merge e6c6505 chu kho tu dang issuecomment-6720621366, dang SAU merge; landed true)
+# checkout: 6e633911fbf7d698704cea033a338c137eee929c (+ thay doi chua commit trong ops/land) ; origin/master: 3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4 ; luc: 2026-11-08T10:58:20Z
+ĐÓNG ĐƯỢC WP LAUNCHER-READONLY-IGNORED — merge 27fd80803e9a8f80e660752f58c8dd477e9730c8
+rc=0

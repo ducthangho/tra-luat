@@ -1,6 +1,6 @@
 # Bien ban M8 (ADR-0060) dong WP #1252 LAUNCHER-READONLY-IGNORED r1 — kiem bang packet_loop.py kiem-dong-wp
 # Nhan nguon tung muc: ops/land/pr1267-wp1252-land-evidence.yaml (post_merge_checks, nghiem_thu, trang_thai_packet).
-# landed false: CHI thieu approve_merge chu kho tu dang (L-6). Bon moc §10.2.2 du (wd-run 42467652116); nghiem thu du (A10 passed tu
+# landed true: uy quyen DANG SAU MERGE (approve_merge e6c6505 chu kho tu dang 6720621366, 2026-11-08T10:57:12Z; merge 2026-11-07T09:43:59Z). Bon moc §10.2.2 du (wd-run 42467652116); nghiem thu du (A10 passed tu
 # log goc may chu kho; A14 owner_waived 6720449021); launcher-windows 27fd808 do: chu kho chap nhan §10.2.4 (6720449021).
 packet: LAUNCHER-READONLY-IGNORED
 revision: 1
@@ -14,8 +14,8 @@ review:
 windows:
   phan_loai: required
   nguon: 'mien chu kho tu dang issuecomment-6704885217 "windows: e6c6505… mien"; A10 tap trung tren may chu kho (winlogs/diag-1252-a10-e6c6505.log)'
-duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1267
-duyet_chu_kho_ghi_chu: 'merged_by ducthangho 09:43:59Z; mien K6/K7 6704885217 tu dang 09:09:40Z; approve_merge chu kho TU dang: chua co (6720413056 do agent dang qua app claude, khong tinh).'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1267#issuecomment-6720621366
+duyet_chu_kho_ghi_chu: 'merged_by ducthangho 09:43:59Z; mien K6/K7 6704885217 tu dang 09:09:40Z; approve_merge chu kho TU dang 6720621366 10:57:12Z 2026-11-08 (SAU merge); 6720413056 do agent dang qua app claude, khong tinh.'
 merge_commit: 27fd80803e9a8f80e660752f58c8dd477e9730c8
 tree_m: d8503020f3f27a147e2292cab3e259fbc2179aef
 ci_master:
@@ -41,7 +41,7 @@ nghiem_thu:
   A16: passed
   A17: passed
 lease_cuoi: wp1252-r1-g1-claude
-landed: false  # thieu approve_merge chu kho tu dang (L-6); 6720413056 do agent dang qua app claude
+landed: true  # uy quyen sau merge 6720621366; A14 owner_waived 6720449021; §10.2.4 chu kho chap nhan 6720449021
 moc_10_2_2:
   run: passed
   checkout: passed

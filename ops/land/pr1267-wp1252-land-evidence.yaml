@@ -1,11 +1,11 @@
 # HO SO LAND — packet #1252 LAUNCHER-READONLY-IGNORED r1, lease g1, qua PR #1267. Khuon: ops/land/pr1249-wp1240-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac"; moc gate §10.2.2.
 #
-# TRANG THAI: merged (27fd808), CHUA LANDED (landed: false). Bon moc §10.2.2 cua ci.yml 42360967767 DU (wd-run 42467652116). Nghiem
-# thu du: A10 passed (log goc may chu kho, loi_khai_co_neo), A14 owner_waived (6720449021). Caveat launcher-windows 42360967762 do tren
-# 27fd808 (khac phuc o c15603d bang #1272): chu kho tu dang CHAP NHAN cho §10.2.4 (6720449021). CON THIEU DUY NHAT: uy quyen land
-# theo L-6 (ops/kiem_ho_so_land.py) — mot comment approve_merge neo e6c6505 do chu kho TU dang (performed_via_github_app null).
-# Comment 6720413056 (approve_merge e6c6505) do AGENT dang qua app claude => KHONG dung lam authorization_url.
+# TRANG THAI: merged (27fd808), LANDED (landed: true) tu 2026-11-08T10:58Z. Bon moc §10.2.2 cua ci.yml 42360967767 DU (wd-run
+# 42467652116). Nghiem thu du: A10 passed (log goc may chu kho, loi_khai_co_neo), A14 owner_waived (6720449021). Caveat
+# launcher-windows 42360967762 do tren 27fd808 (khac phuc o c15603d bang #1272): chu kho tu dang CHAP NHAN cho §10.2.4 (6720449021).
+# UY QUYEN DANG SAU MERGE: approve_merge e6c6505 chu kho tu dang issuecomment-6720621366 (2026-11-08T10:57:12Z, app null) — SAU merge
+# 27fd808 luc 2026-11-07T09:43:59Z (~25 gio). Comment 6720413056 (cung noi dung) do AGENT dang qua app claude => khong dung.
 # NHAN: measured (phien nay do lai, co tep nguon) / loi_khai_co_neo (lay tu hien vat/comment co neo, phien nay khong chay lai) /
 #       thuat_lai (chi co loi ke cua phien khac) / not_measured.
 # Readback tho: ops/land/pr1267-wp1252-provenance/ (SHA256SUMS kem). Moi phep do REST: GET qua proxy phien bang GITHUB_PAT,
@@ -23,11 +23,15 @@ input_packet_generations:
   - {packet_issue: 1252, packet_id: LAUNCHER-READONLY-IGNORED, revision: 1, generation: 1, lease_id: wp1252-r1-g1-claude, ghi_chu: 'lease duy nhat; rut han sau merge (xem lease.thu_hoi_cuoi).'}
 authorized_head_sha: e6c650573452ad98c3055f5147eeacfb4767f119
 approver: ducthangho
-authorization_url: https://github.com/ducthangho/tra-luat/pull/1267
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1267#issuecomment-6720621366
 authorization_ghi_chu: >-
-  measured — readback-pr-1267.json: merged true, merged_by ducthangho, merged_at 2026-11-07T09:43:59Z, head e6c6505. KHONG co
-  comment `approve_merge: e6c6505…` nao trong ho so; uy quyen land la chinh thao tac merge cua tai khoan chu kho (thuat_lai: phien
-  dieu phoi bao 'chu kho chon merge ngay' khi master da tien 9607e3e -> 132d376). CAVEAT #566: ai bam nut merge KHONG do duoc
+  measured — readback-chu-kho-approve-merge-issuecomment-6720621366.json: PR #1267, user ducthangho, author_association OWNER,
+  created_at = updated_at = 2026-11-08T10:57:12Z, performed_via_github_app null, than dung mot dong `approve_merge:
+  e6c650573452ad98c3055f5147eeacfb4767f119` (= authorized_head_sha). UY QUYEN DANG SAU MERGE: merge 27fd808 luc 2026-11-07T09:43:59Z,
+  comment ~25 gio sau; no ghi lai, khong chung minh, viec duyet truoc merge ('chu kho chon merge ngay' khi master da tien
+  9607e3e -> 132d376: thuat_lai phien dieu phoi). readback-issuecomment-6720413056.json (approve_merge e6c6505, 10:34:30Z) co
+  performed_via_github_app = claude, agent dang — KHONG dung lam uy quyen. readback-pr-1267.json: merged true, merged_by ducthangho,
+  merged_at 2026-11-07T09:43:59Z, head e6c6505. CAVEAT #566: ai bam nut merge KHONG do duoc
   (token chu kho). Mien K6/K7 tu dang: readback-chu-kho-mien-issuecomment-6704885217.json (PR #1267, OWNER, 2026-11-07T09:09:40Z,
   created_at = updated_at, performed_via_github_app null, than `windows: e6c6505… mien` + `full_mutant_audit: e6c6505… mien`) —
   dang TRUOC merge 34 phut, neo dung authorized_head_sha.
@@ -119,7 +123,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1252-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', ket_qua: 'not_measured — chua push; nhanh cuc bo ops/land-1252-1272 (chi cham ops/land/**).'}
-  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — provenance/bien-ban-m8.yaml + kiem-dong-wp-m8.txt (rc 12, thieu D2 — dung nhu do).'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — provenance/bien-ban-m8.yaml + kiem-dong-wp-m8.txt (LAN 1–4 rc 12; LAN 5 rc 0 sau approve_merge tu dang).'}
   - {item: 'ban giao hien vat', ket_qua: 'handoff ops/handoff/wp1252-g1-claude.md tren origin/ops/wp1252-r1-g1-lease@814a00e (blob 46083e7a, ung vien CU e0aeb97, nhung luot 1–6); luot 9 + kiem-merge chep tu scratchpad phien executor vao review-offline-l9/, kiem-merge/.'}
   - {item: 'dong Issue #1252', ket_qua: 'not_measured — viec cua phien dieu phoi.'}
 # ---- het truong chuan
@@ -164,21 +168,20 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-1267.json merged true; readback-commit-27fd808.json cha 132d376 + e6c6505, tree d8503020; merge-va-diff.txt: 27fd808 nam tren first-parent origin/master.'
-  landed: false
+  landed: true
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 27fd808: ci.yml 42360967767 DU bon moc (run/checkout/workflow_definition/gate_output
     measured passed); NHUNG launcher-windows 42360967762 tren chinh 27fd808 FAILURE (khac phuc o c15603d bang #1272,
     khong lam xanh 27fd808) — CHU KHO CHAP NHAN: 6720449021 dong 2 `chap_nhan_10_2_4: 27fd80803e9a8f80e660752f58c8dd477e9730c8
-    launcher-windows do da khac phuc o c15603d` (tu dang, app null, 10:38:31Z). (2) lease nha: DAT (lease.thu_hoi_cuoi). (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp rc 12,
-    thieu D2). (4) review neo dung authorized_head e6c6505: DAT ve noi dung (offline luot 9 approve, connector sach) nhung luot 9 SAU
-    push (lech M12, tu khai). (5) uy quyen land: CHUA DAT L-6 — thao tac merge cua tai khoan chu kho + mien K6/K7 tu dang truoc
-    merge; approve_merge duy nhat (readback-issuecomment-6720413056.json, 10:34:30Z) co performed_via_github_app = claude va tu khai
-    do agent dang theo chi thi chu kho => khong nhan lam authorization_url. (6) muc tieu packet: xem nghiem_thu. (7) ADR-0060 M1 P3: khong co P3 mo nao trong ho so (luot 9 approve
+    launcher-windows do da khac phuc o c15603d` (tu dang, app null, 10:38:31Z). (2) lease nha: DAT (lease.thu_hoi_cuoi). (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp LAN 5 rc 0).
+    (4) review neo dung authorized_head e6c6505: DAT ve noi dung (offline luot 9 approve, connector sach) nhung luot 9 SAU
+    push (lech M12, tu khai). (5) uy quyen land: DAT L-6 bang approve_merge chu kho tu dang 6720621366 neo e6c6505 — dang SAU merge;
+    truoc merge co mien K6/K7 tu dang 6704885217; 6720413056 (agent dang qua app claude) khong tinh. (6) muc tieu packet: xem nghiem_thu. (7) ADR-0060 M1 P3: khong co P3 mo nao trong ho so (luot 9 approve
     0 finding chan; connector sach) — phien nay khong do P3 tung luot 1–8.
-  de_nang_landed_true_can: >-
-    Chi con: mot comment chu kho TU dang (performed_via_github_app null) tren PR #1267 hoac Issue #1252 voi dong
-    `approve_merge: e6c650573452ad98c3055f5147eeacfb4767f119`; roi readback, dat authorization_url = comment ay, nang landed true va
-    chay lai kiem-dong-wp + kiem_ho_so_land. (A14 va §10.2.4 da dong boi 6720449021.)
+  lich_su_nhan: >-
+    966dda0/3adf5ba/53b9e66 (squash vao master 3cc0bc7 qua #1281): landed false (workflow_definition roi nghiem thu A10/A14).
+    6e63391: A14 owner_waived + §10.2.4 chap nhan (6720449021), landed van false vi thieu approve_merge tu dang (L-6). Commit nay:
+    approve_merge chu kho tu dang 6720621366 (sau merge) => authorization_url, landed true; kiem-dong-wp LAN 5 rc 0.
 
 review:
   so_loi_goi_codex: >-

@@ -1,0 +1,24 @@
+{
+  "packet": 1285,
+  "revision": 5,
+  "generation": 6,
+  "shared_call": 5,
+  "purpose": "mandatory read-only native/Linux/source large-output digest, NOT formalcodeapproval",
+  "head": "53b175c40254b0e64a011ef6d0f70207fd2f933e",
+  "tree": "8727d7b893a8e3d7157dd4a5ca6879014915fcd5",
+  "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "assigned_at": "2026-11-08T18:59:28.408892+00:00",
+  "absolute_deadline_utc": "2026-11-08T20:29:28.408892+00:00",
+  "read_scope": [
+    "native-S3-H3/original-evidence.zip/extracted all455sourcefiles/39commands/15phases",
+    "verify-S3-H3-native.py/S3-H3-native-ONCE-verifier-receipt.json/missingdependencynegative",
+    "linux-final-53b175c40254",
+    "S3-H3-identity.json/S3-codex-capability-original-handoff.md/controller/snapshots",
+    "historicalH2 background repro for A/B"
+  ],
+  "write_scope": [
+    "/workspace/scratch/proxima-rest-20261108/S3-H3-native-linux-auditor-receipt.json",
+    "/workspace/scratch/proxima-rest-20261108/S3-H3-native-linux-auditor-final.txt"
+  ],
+  "constraints": "Local readonly evidence digest only, no product edits/Windows/browser/tests/modelcalls/subagents/network. ActualCodexhigh authored; formalxhigh freshCLI later. Sameprovider sensitiveHOLD, no F01formalclosure or codeapprovalclaim."
+}

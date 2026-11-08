@@ -1,0 +1,44 @@
+{
+  "packet": "wp1285",
+  "revision": 5,
+  "generation": 6,
+  "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "H": "53b175c40254b0e64a011ef6d0f70207fd2f933e",
+  "tree": "8727d7b893a8e3d7157dd4a5ca6879014915fcd5",
+  "parents": [
+    "883d37826f443ce9301dd0bcd40cd5f97f1adf0e"
+  ],
+  "file_sha256": {
+    ".agents/skills/proxima-control/scripts/ProximaControl.psd1": "0c76190d73e2126e2de69185020607f04ef0fb5507836bee211ebdc5d8f2bab6",
+    ".agents/skills/proxima-control/SKILL.md": "7d4dfd01706991d7d3475d0829583aac53d216d5c68c12e1b44bffb9f3ac6fb1",
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1": "f230c95b1f36b558b2f58439f8ea64cc6f77a876c1d74cc8c9baf1634cc9f864"
+  },
+  "additions": 450,
+  "deletions": 0,
+  "new_paths": 3,
+  "author_provider": "openai_codex",
+  "author_surface": "codex_cli",
+  "author_transport": "machine",
+  "requested_model": "gpt-6.1-sol",
+  "requested_effort": "high",
+  "served_model_effort": "KHONG_DO_DUOC",
+  "original_handoff": "S3-codex-capability-original-handoff.md",
+  "controller": "S3-codex-capability-controller-result.json",
+  "author_tests": "NOT_RUN",
+  "commit_role": "root mechanical Git only; no root product edits",
+  "host_snapshot_changed_only": [
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+  ],
+  "author_child_view_extra_dirs_host_exists": {
+    ".aws": false,
+    ".codex": false,
+    ".agents/skills/proxima-control/.agents": false,
+    ".agents/skills/proxima-control/.aws": false,
+    ".agents/skills/proxima-control/.codex": false,
+    ".agents/skills/proxima-control/.git": false
+  },
+  "extra_dirs_disposition": "All six absent on host and no host snapshot entries added; child-view creation origin remains unmeasured, not claimed host modifications",
+  "frozen_at_utc": "2026-11-08T18:53:03.290035+00:00",
+  "product_pushes": 0,
+  "formal_approval": false
+}

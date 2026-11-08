@@ -1,0 +1,26 @@
+{
+  "event": "r3_g3_remediation_design_frozen",
+  "authority": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6718073094",
+  "standing_owner_grant": "https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6708576608",
+  "recorded_by": "openai_codex/codex_service dispatcher under fullowner scopeddelegation",
+  "spec_sha256": "6cb7a575192aebcb79d5825daf9d867cc790dac2528e954fcd6ea13c903b2fac",
+  "base": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "start_from": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+  "write_set_hash": "92211ad4ed211a39980c65742bb6d6df228ce975f920bc753ab786d41e62a054",
+  "size_cap": 1800,
+  "budget_used": {
+    "product_attempts": 2,
+    "formal_rounds": 1,
+    "shared_codex_calls": 3,
+    "primary_pushes": 0
+  },
+  "new_manual_descriptor": "ONLYr3;same3paths/sensitive/nullpolicy/[]landobligations",
+  "open_findings": [
+    "WP1279-R1-F01",
+    "WP1279-R1-F02"
+  ],
+  "no_waiver": true,
+  "trust_authorized_only": "/workspace/scratch/wp1279-g3-claude",
+  "source_both_claude_runs_terminal": true,
+  "recorded_at": "2026-11-08T06:10:55Z"
+}

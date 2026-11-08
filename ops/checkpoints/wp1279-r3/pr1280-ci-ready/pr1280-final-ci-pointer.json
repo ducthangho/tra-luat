@@ -1,0 +1,25 @@
+{
+  "head": "b75d9e4e61e5fd16aa9d4870f5fa844fb6029766",
+  "run_id": 42458434996,
+  "attempt": 1,
+  "actual_checkout": "ee78c4fda563abb6a39a8f0ac7fff9142cb2ab60",
+  "tree": "fbd7b8407eaa6ce08eb475e74b07546abe09a0a7",
+  "event": "pull_request",
+  "source_validation_sha256": "bf63337d9eb68b7ed48238e4229f07f873e076a751f92f23fbdf6cd937fd7f53",
+  "source_aux_sha256": "7dfa84e32bd936faaeb0869ac3fc3bdae350c706fa7ed8c8358435a934d11541",
+  "four_anchors": {
+    "run": "passed",
+    "checkout": "passed",
+    "workflow_definition": "passed",
+    "gate_output": "passed"
+  },
+  "derivation": "Actual do-wd plus complete source/log audit; raw bounded consumer unknowns unchanged",
+  "limits": [
+    "All23 raw canonical gate-output job observations remain not_measured; raw workflow-definition remains not_measured. Separate actual GraphQL do-wd and source audit support the derived four anchors, not a fully passed bounded consumer.",
+    "Packet-loop skips one named Windows-only case and its associated mutant. Neither is counted passed/killed.",
+    "PR workflow deliberately runs direct selftest on synthetic merge and produces no lifecycle artifact. Source supports command/positive output/GitHub successful step, not an invented lifecycle receipt or separately captured child rc field.",
+    "Runtime measured in logs is CPython3.12.16. No PR lifecycle catalog/clean-before-after artifact exists; no claim of those measurements is made.",
+    "Plugin log hashes identify received UTF8 decoded text, not remote original bytes. Initial10 source wrappers were supplied; remaining13 fetched in this audit with request_args preserved.",
+    "No Windows CI/live or native retest; auxiliary CI evidence audit only, formal_code_approval=false."
+  ]
+}

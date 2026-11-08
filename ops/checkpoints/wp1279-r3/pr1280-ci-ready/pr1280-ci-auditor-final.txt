@@ -1,0 +1,10 @@
+PR1280 CI source audit: no material inconsistencies found. Run42458434996/attempt1/pull_request completed SUCCESS, all23/23 Ubuntu jobs success. All23 decoded log sizes/SHA256 and wrapper source hashes verified. Actual checkout ee78c4fda563abb6a39a8f0ac7fff9142cb2ab60 has parents B/H3 and tree fbd7b8407eaa6ce08eb475e74b07546abe09a0a7. Core direct selftest1777/1777 with successful command step; CPython3.12.16.
+Required positives: packet1359/1359 plus1namedWindows-onlyskip, terminalTỔNG: ĐẠT; ops118/118,receipts98/98+153/153mutants,lease285/285,updater48/48,cleanup21/21,lifecycle28/28; tool8/8shards,61cases/490mutants/0errors; registry29/29 and15/15executed suitesrc0. Targetedaggregate8/8,56/56cases,255/255self-mutants,10/10productmutants.
+Four anchors have source evidence: run/API, actual all-job checkout, actual GraphQL workflow definition matchingGitblob/hash, and required successful command steps plus meaningful positive outputs. Required tests have no continue-on-error.
+Limits:
+- All23 raw canonical gate-output job observations remain not_measured; raw workflow-definition remains not_measured. Separate actual GraphQL do-wd and source audit support the derived four anchors, not a fully passed bounded consumer.
+- Packet-loop skips one named Windows-only case and its associated mutant. Neither is counted passed/killed.
+- PR workflow deliberately runs direct selftest on synthetic merge and produces no lifecycle artifact. Source supports command/positive output/GitHub successful step, not an invented lifecycle receipt or separately captured child rc field.
+- Runtime measured in logs is CPython3.12.16. No PR lifecycle catalog/clean-before-after artifact exists; no claim of those measurements is made.
+- Plugin log hashes identify received UTF8 decoded text, not remote original bytes. Initial10 source wrappers were supplied; remaining13 fetched in this audit with request_args preserved.
+- No Windows CI/live or native retest; auxiliary CI evidence audit only, formal_code_approval=false.

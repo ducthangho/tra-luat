@@ -1,0 +1,214 @@
+{
+  "endpoint": "https://github.com/ducthangho/tra-luat.git",
+  "at": "2026-11-08T08:14:41.089763+00:00",
+  "rc": 0,
+  "canonicalization": "UTF8 OID TAB ref LF sorted by ref Unicode codepoint; ALL refs inclHEAD/tags/pull",
+  "sha256": "e7e31361d38a9b996020cc5a4834d3be1d5771993bafd6a58ea55f5e39f34c1d",
+  "count": 1738,
+  "deltas": [
+    {
+      "ref": "refs/heads/claude/spec-admission-merge-base",
+      "old": "a98c8023708c765e122b30109ca0f5a7d1d0ab84",
+      "new": "78af6ccfcffbbeed02a0f23ce34dad0ad585bc94"
+    },
+    {
+      "ref": "refs/heads/claude/wp1179-r9-g1",
+      "old": "7e1d2ddb874ba5447b3b922bd6ecef1da4e5b145",
+      "new": "0ef6b2cc289b877c0a2e989ccefc182954ab2224"
+    },
+    {
+      "ref": "refs/heads/ops/wp1174-r15-g12-lease",
+      "old": "09289ca0eaaf06ca55fea69ff1ae722ee8996b2f",
+      "new": "c0d190329dd461d8b60ff561a4eaf42762c05a64"
+    },
+    {
+      "ref": "refs/heads/ops/wp1179-r9-g1-lease",
+      "old": "dda12ea16521a90fd248178e7b2b0f340618443f",
+      "new": "e5650426eb3069ea02e6c5f028799e87f449c475"
+    },
+    {
+      "ref": "refs/heads/ops/wp1279-spec",
+      "old": "b39d75aca19c1b507655191c27c89c17daadfc58",
+      "new": "fb63e24fd163d14e9e1552611c00af83382648a2"
+    },
+    {
+      "ref": "refs/pull/1268/head",
+      "old": "a98c8023708c765e122b30109ca0f5a7d1d0ab84",
+      "new": "78af6ccfcffbbeed02a0f23ce34dad0ad585bc94"
+    },
+    {
+      "ref": "refs/pull/1268/merge",
+      "old": "eb5f6c8a29de868c5fdaff89a257e9bbc2ba28c3",
+      "new": "3a04534f5d7f89dc33bb2748f1a4d46b286fbc6d"
+    },
+    {
+      "ref": "refs/pull/1270/head",
+      "old": "7e1d2ddb874ba5447b3b922bd6ecef1da4e5b145",
+      "new": "0ef6b2cc289b877c0a2e989ccefc182954ab2224"
+    },
+    {
+      "ref": "refs/pull/1270/merge",
+      "old": "7a5ca26c57faa43bc93ea606636a60b4e466a1e3",
+      "new": "63aaecb0afe7293aec71eef6bcd4906f5173a238"
+    }
+  ],
+  "classifications": [
+    {
+      "ref": "refs/heads/claude/spec-admission-merge-base",
+      "old": "a98c8023708c765e122b30109ca0f5a7d1d0ab84",
+      "new": "78af6ccfcffbbeed02a0f23ce34dad0ad585bc94",
+      "changed_paths": [
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r10.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r11.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r12.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r13.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r6.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r7.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r8.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r9.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r10.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r11.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r12.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r13.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r6.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r7.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r8.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r9.md"
+      ],
+      "write_set_overlap": [],
+      "classification": "independent packet branch or lease progress; paths disjoint from S2 write set, not canonical integration"
+    },
+    {
+      "ref": "refs/heads/claude/wp1179-r9-g1",
+      "old": "7e1d2ddb874ba5447b3b922bd6ecef1da4e5b145",
+      "new": "0ef6b2cc289b877c0a2e989ccefc182954ab2224",
+      "changed_paths": [
+        ".claude/dev/doc_receipt_thu_hoi_test.py"
+      ],
+      "write_set_overlap": [],
+      "classification": "independent packet branch or lease progress; paths disjoint from S2 write set, not canonical integration"
+    },
+    {
+      "ref": "refs/heads/ops/wp1174-r15-g12-lease",
+      "old": "09289ca0eaaf06ca55fea69ff1ae722ee8996b2f",
+      "new": "c0d190329dd461d8b60ff561a4eaf42762c05a64",
+      "changed_paths": [
+        "ops/leases/wp1174-r15-g12-codex.yaml"
+      ],
+      "write_set_overlap": [],
+      "classification": "independent packet branch or lease progress; paths disjoint from S2 write set, not canonical integration"
+    },
+    {
+      "ref": "refs/heads/ops/wp1179-r9-g1-lease",
+      "old": "dda12ea16521a90fd248178e7b2b0f340618443f",
+      "new": "e5650426eb3069ea02e6c5f028799e87f449c475",
+      "changed_paths": [
+        "ops/leases/wp1179-r9-g1-claude-remote-20261106.yaml"
+      ],
+      "write_set_overlap": [],
+      "classification": "independent packet branch or lease progress; paths disjoint from S2 write set, not canonical integration"
+    },
+    {
+      "ref": "refs/heads/ops/wp1279-spec",
+      "old": "b39d75aca19c1b507655191c27c89c17daadfc58",
+      "new": "fb63e24fd163d14e9e1552611c00af83382648a2",
+      "changed_paths": [
+        "ops/checkpoints/wp1279-r3/pr1280-promotion/after-draft-fence-classification.json",
+        "ops/checkpoints/wp1279-r3/pr1280-promotion/candidate-acceptance-map-H3.json",
+        "ops/checkpoints/wp1279-r3/pr1280-promotion/ci-plan-final-b75d9e4.json",
+        "ops/checkpoints/wp1279-r3/pr1280-promotion/packet-live-budget.json",
+        "ops/checkpoints/wp1279-r3/pr1280-promotion/pr1280-conditional-grant-transport.json",
+        "ops/checkpoints/wp1279-r3/pr1280-promotion/review2-v2-validation.json",
+        "ops/checkpoints/wp1279-r3/pr1280-promotion/review2-verdict-delivery-binding.json",
+        "ops/checkpoints/wp1279-r3/pr1280-promotion/windows-r3-projection.json",
+        "ops/land/wp1279-r3-pr1280-conditional-authority.json"
+      ],
+      "write_set_overlap": [],
+      "classification": "own authorized conditional grant and promotion evidence publication; no product changes"
+    },
+    {
+      "ref": "refs/pull/1268/head",
+      "old": "a98c8023708c765e122b30109ca0f5a7d1d0ab84",
+      "new": "78af6ccfcffbbeed02a0f23ce34dad0ad585bc94",
+      "changed_paths": [
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r10.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r11.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r12.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r13.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r6.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r7.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r8.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r9.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r10.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r11.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r12.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r13.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r6.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r7.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r8.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r9.md"
+      ],
+      "write_set_overlap": [],
+      "classification": "independent packet branch or lease progress; paths disjoint from S2 write set, not canonical integration"
+    },
+    {
+      "ref": "refs/pull/1268/merge",
+      "old": "eb5f6c8a29de868c5fdaff89a257e9bbc2ba28c3",
+      "new": "3a04534f5d7f89dc33bb2748f1a4d46b286fbc6d",
+      "changed_paths": [
+        ".claude/dev/launcher_test.py",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r10.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r11.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r12.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r13.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r6.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r7.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r8.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r9.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r10.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r11.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r12.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r13.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r6.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r7.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r8.md",
+        "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r9.md"
+      ],
+      "write_set_overlap": [],
+      "new_parents": [
+        "c15603dcf537fa4beb753b263398d6e6b8c92019",
+        "78af6ccfcffbbeed02a0f23ce34dad0ad585bc94"
+      ],
+      "new_tree": "a01d136311a411d68d85cff2ff50cddffe25b830",
+      "classification": "otherPR synthetic merge refreshed; actual parents/tree recorded, unrelated to PR1280 gate checkout"
+    },
+    {
+      "ref": "refs/pull/1270/head",
+      "old": "7e1d2ddb874ba5447b3b922bd6ecef1da4e5b145",
+      "new": "0ef6b2cc289b877c0a2e989ccefc182954ab2224",
+      "changed_paths": [
+        ".claude/dev/doc_receipt_thu_hoi_test.py"
+      ],
+      "write_set_overlap": [],
+      "classification": "independent packet branch or lease progress; paths disjoint from S2 write set, not canonical integration"
+    },
+    {
+      "ref": "refs/pull/1270/merge",
+      "old": "7a5ca26c57faa43bc93ea606636a60b4e466a1e3",
+      "new": "63aaecb0afe7293aec71eef6bcd4906f5173a238",
+      "changed_paths": [
+        ".claude/dev/doc_receipt_thu_hoi_test.py"
+      ],
+      "write_set_overlap": [],
+      "new_parents": [
+        "c15603dcf537fa4beb753b263398d6e6b8c92019",
+        "0ef6b2cc289b877c0a2e989ccefc182954ab2224"
+      ],
+      "new_tree": "9f2819f2c48350882aac757c45341371206cd9dd",
+      "classification": "otherPR synthetic merge refreshed; actual parents/tree recorded, unrelated to PR1280 gate checkout"
+    }
+  ],
+  "master_drift": "none; master B unchanged; six drift triggers not activated",
+  "own_head": "H3 unchanged",
+  "holder_scan": "holders-before-ready.json onlyg3active"
+}

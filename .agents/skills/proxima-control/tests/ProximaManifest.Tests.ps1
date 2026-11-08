@@ -184,14 +184,17 @@ if ($SkillPresent) { $Doc = Read-Skill $SkillPath; $DocCommands = @(Get-DocComma
 Invoke-Case 'PM01' {
     if (-not $ManifestPresent) { Stop-Case 'MANIFEST_ABSENT: scripts/ProximaControl.psd1' }
     $tk = $null; $er = $null; $ast = [Parser]::ParseFile($ManifestPath, [ref]$tk, [ref]$er); if (@($er).Count) { Stop-Case "PARSE_ERROR: $(@($er)[0].Message)" }
-    if (@($tk | Where-Object { $_.Kind -eq [TokenKind]::Comment -and $_.Text -imatch '^#\s*requires' }).Count -or $ast.ParamBlock -or $ast.BeginBlock -or
-        $ast.ProcessBlock -or $ast.DynamicParamBlock -or $ast.UsingStatements -or ($ast.EndBlock -and $ast.EndBlock.Traps)) { Stop-Case 'EXECUTABLE_STATEMENT: requires/param/block/using/trap' }
+    # WP1285-R1-F01 allow-list: a plain UNNAMED end block only. Any other Ast-valued or non-empty collection root property (param, begin, process,
+    # dynamicparam, PS7 clean, using, attributes) rejects; read by reflection, so PS5.1 StrictMode never touches a CleanBlock property it lacks.
+    $extra = @(foreach ($pr in $ast.GetType().GetProperties([Reflection.BindingFlags]'Public, Instance')) {
+        if ($pr.Name -cnotin 'Parent', 'EndBlock') { $v = $pr.GetValue($ast); if ($v -is [Ast] -or ($v -is [Collections.ICollection] -and $v.Count)) { $pr.Name } } })
+    if (@($tk | Where-Object { $_.Kind -eq [TokenKind]::Comment -and $_.Text -imatch '^#\s*requires' }).Count -or $extra.Count -or $null -eq $ast.EndBlock -or
+        -not $ast.EndBlock.Unnamed -or $ast.EndBlock.Traps) { Stop-Case "EXECUTABLE_STATEMENT: requires/param/named or extra block/using/trap [$($extra -join ',')]" }
     $st = @(if ($ast.EndBlock) { $ast.EndBlock.Statements })
     $ce = $(if ($st.Count -eq 1 -and $st[0] -is [PipelineAst] -and @($st[0].PipelineElements).Count -eq 1) { $st[0].PipelineElements[0] })
     if ($ce -isnot [CommandExpressionAst] -or @($ce.Redirections).Count -or $ce.Expression -isnot [HashtableAst]) { Stop-Case "NOT_SINGLE_HASHTABLE: $($st.Count) top-level statement(s)" }
     try { $data = $ce.Expression.SafeGetValue() } catch { Stop-Case "UNSAFE_VALUE: $($_.Exception.Message)" }
-    $script:ManifestAst = $ce.Expression; $script:ManifestData = $data
-    'exactly one hashtable data expression, no executable statement, SafeGetValue accepted'
+    $script:ManifestAst = $ce.Expression; $script:ManifestData = $data; 'plain unnamed end block with exactly one hashtable data expression; SafeGetValue accepted'
 }
 Invoke-Case 'PM02' {
     if (-not $ManifestPresent) { Stop-Case 'MANIFEST_ABSENT: scripts/ProximaControl.psd1' } elseif ($null -eq $ManifestAst) { Stop-Case 'NOT_EVALUATED: PM01 rejected the manifest' }

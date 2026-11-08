@@ -1,0 +1,14 @@
+{
+  "command": [
+    "python",
+    "-B",
+    "/workspace/scratch/proxima-p1-s2-canonical/ops/bien_nhan_v2.py",
+    "--root",
+    "/workspace/scratch/wp1279-spec-publish"
+  ],
+  "actual_exit_code": 0,
+  "received_stdout": "bien_nhan_v2: 298 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 351\ncâu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0\nTỔNG: ĐẠT\n",
+  "source": "Actual completed execsession39484 terminal output, summarized received Unicode; no original remote-byte claim",
+  "validator_sha256": "7f9a86f3fc07429877f2959ad2ecbe238ef145d08860b8f78197340a06e276a6",
+  "verdict": "changes_requested; cross_reviewed, not approved"
+}

@@ -1,0 +1,186 @@
+schema_version: 2
+event: lease_granted_under_owner_delegation
+packet_issue: 1174
+packet_id: WP1174
+revision: 19
+generation: 16
+lease_id: wp1174-r19-g16-agy
+role: executor
+executor: google_antigravity
+provider: google_antigravity
+model_family: gemini
+execution_surface: antigravity
+transport: machine/local
+reviewer_provider: openai_codex
+reviewer_execution_surface: codex_cli
+reviewer_model_family: openai
+reviewer_transport: machine
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+branch: agent/wp1174-g5-codex
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6724229331
+authority_url: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6724070591
+recorded_by: Codex coordinator acting under exact C15 owner approval; not actual-human
+  signature or audit
+spec_path: ops/specs/wp1174-implementation-r19.md
+spec_hash: fcba1e8c4f49fa97501d1cfb8796e032354558fd0148849c22bd6cf79152cb90
+spec_sha256_required: fcba1e8c4f49fa97501d1cfb8796e032354558fd0148849c22bd6cf79152cb90
+spec_ref: refs/heads/ops/spec-wp1174-r19@e342306802738c35cff2a26789327b156509ad39
+prompt_path: ops/specs/wp1174-implementation-r19.md
+prompt_sha256_required: fcba1e8c4f49fa97501d1cfb8796e032354558fd0148849c22bd6cf79152cb90
+base_sha: 17d563d2025694e97a247f62fe926f539dedded7
+start_from_sha: 17d563d2025694e97a247f62fe926f539dedded7
+reviewed_sha_required: 17d563d2025694e97a247f62fe926f539dedded7
+write_set: &id001
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/specs/wp1174-c5-adapter-design.md
+- ops/specs/wp1174-implementation-r17.md
+effective_write_set: *id001
+write_set_hash: 2f2c02976b0efd78e041a75028c378034be7d7bfef409817ad3adcafb1cf055c
+change_policy_sha: null
+change_policy_exception:
+  id: WP1174-C15-B-R19-CLOSURE
+  decision: approved_C15_B_provider_and_CI16
+  owner: ducthangho
+  reason: C15 P1/P2 plus imported harness false-kill P1; same closed source scope
+  expires_at: '2026-11-09T06:03:01Z'
+  scope: Only approved C15/R19/g16 source remediation;5paths/+6000; original frozen
+    specs unchanged
+  effective_write_set: *id001
+  canonical_policy_sha: null
+  rule: exact closed set + NFC/casefold/symlink/prefix overlap against all live refs;
+    every impact_hint/outside companion blocks and needs approved revision
+  required_checks:
+  - selftest N/N
+  - packet_loop baseline+mutation controls
+  - registry+full Linux M9
+  - native Windows focused
+  - canonical K0-K7
+  - source delegated owner audit plus real native cross K4; target actual-human unchanged
+  - required native Linux profile on exact H via existing ci.yml gate-packet-loop
+    main()
+  - WP1174_NATIVE_REPORT_V1 complete schema/required outcomes and source/provenance
+    binding; missing/BoQua/infra != pass
+  - Windows focused one unit mutant m1174_allow_windows with raw oracle record; no
+    full Windows suite
+  - Full registered-mutant unique-anchor baseline with adversarial checker control;
+    four legacy KG mutants assertion-killed and cross-family/positive controls passed
+    on exact final head
+  - Actual canonical inactive-policy lease-review-human-accept integration, service/native
+    paths, dormant-dependency and receipt/human gate mutants, unscoped frozen behavior
+  - Two fixture P1 complete named cases and assertion-killed mutants plus healthy
+    controls on final H
+  - All retired source bindings across immutable snapshot lineage before adoption/recovery/dispatch;
+    oldest/intermediate revival negatives and multigeneration controls
+  - Validated read-only status/next-comment for enrolled v3; no unscoped v3 writes
+    or retired-state loading
+  land_obligations:
+  - canonical release/manifest only by land operator, not worker
+  never_waived:
+  - source authority
+  - exclusive lease
+  - K0-K7
+  - target actual-human when using target same-provider advisory path
+  - M9
+  - unknown=>blocked
+leased_at_utc: '2026-11-08T16:48:06.713925+00:00'
+heartbeat_at: '2026-11-08T16:48:06.713937+00:00'
+lease_until: '2026-11-09T06:03:01Z'
+lease_expires_at_utc: '2026-11-09T06:03:01Z'
+heartbeat_required_minutes: 360
+max_lease_hours: 24
+hard_not_after: '2026-11-09T06:03:01Z'
+nang_tran:
+  ai_nang: ducthangho under recorded delegation
+  can_cu: Exact C15 approval https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6723113364;
+    same5/6000
+  tran_cu:
+    files: 6
+    added_lines: 450
+  tran_moi:
+    files: 5
+    added_lines: 6000
+  previous_approved_exception:
+    files: 5
+    added_lines: 6000
+nang_tran_review_rounds:
+  ai_nang: ducthangho under recorded delegation
+  tran_cu: 33
+  tran_moi: 33
+  can_cu: C15 https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6723113364;
+    actual28 and at most5 fresh complete native contexts; no refund
+thay_the_cho: null
+template_only: false
+guard: Only one unused global source slot12; actual AGY runtime/authority/bot/I2/doctor/begin
+  and whole remaining fit required; no fallback or counter reset
+spec_source_oid: e342306802738c35cff2a26789327b156509ad39
+spec_sha256: fcba1e8c4f49fa97501d1cfb8796e032354558fd0148849c22bd6cf79152cb90
+runtime_preconditions:
+  source_test_processes: Every project test/import must use explicit clean allowlist
+    excluding GEMINI_API_KEY, TL/GitHub/Claude/OpenAI/Google/AWS/NLM; no secret values
+    or bootstrap HMAC to source
+  publishing: only canonical publisher after gates; worker cannot authorize land
+  canary_profile: native Linux ext4/XFS positive must be measured; cloud overlay and
+    unverified WSL not supported; no security/WSL installs authorized
+  Windows: Only owner verified online host, exactly one fresh focused13+rawunit baseline<=15min/candidate<=10min
+    pair, cumulative11runs/95minutes; actual9/46.0340654667 retained. No WindowsCI/main/fullsuite.
+  C15_accounting: source12/native33/connector7/canary1/scratch2=55; historical Claude28
+    retained,5 unused Codex contexts; cloud2400inclusive; hard2026-11-09T06:03:01Z;
+    Windows11/95;CI16 observed12;M9cap2/24h
+  C15_reservation: 680 component minutes plus100 conservative contingency =780 before
+    source admission; all wait retained
+  AGY: actual models rc0 includes gemini-4-argon-high; ACP initialize protocol1 rc0
+    server1.5.3; requested family gemini; served KHONG_DO_DUOC unless attested; credential
+    via canonical RAM-only child injector, unrelated secrets stripped
+exception_approval_comment_url: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6724070591
+reviewer: codex
+pull_request: 1275
+source_pr: 1275
+metadata_review_disposition: Owner approved AGY/Codex successor and CI16; canonical
+  spec validation, actual clean metadata selftest; not native source approval
+metadata_approval_pending: false
+continuation_source:
+  history: Normal H17d→CB→7ae plus H920 preserves all histories; no reset/rebase/force
+    or evidence transfer
+  immutable_acceptance_baseline: c6afde62c846f1ef3d6a83c14459966849edf756
+  public_head: 7ae5ca43e4970e43addc3ac98ac241927bb23534
+  normal_merge_predecessor: 92018d818ae4ca358c0caa5b7b41d21c308f650e
+  previous_lease_ended_oid: 302055a098472ecd82d0f6230eed72b00fb0dd6b
+  mutable_source_paths:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - docs/PROTOCOL_DA_PHIEN.md
+  frozen_spec_paths:
+  - ops/specs/wp1174-c5-adapter-design.md
+  - ops/specs/wp1174-implementation-r17.md
+  final_product_hash_rule: Measure/freeze actual final product/test/protocol hashes;
+    all old head evidence historical only
+source_audit_policy: 'Source-only r20 section9 override: real native cross K4 plus
+  independent delegated_owner_audit AI; target actual-human unchanged'
+source_authority_url: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6724229331
+source_run_windows_minutes:
+- 45
+new_native_review_minutes: 15
+native_P11_approval_claim: false
+new_native_integrator_minutes: 10
+native_part_count: 4
+native_parallel_limit: 1
+model: gemini-4-argon-high
+effort: high
+packet_budget_carryover:
+  source_used_known: 11
+  source_cap: 12
+  new_source_remaining: 1
+  historical_Claude_review_contexts: 28
+  native_cap: 33
+  new_Codex_contexts_remaining: 5
+  connector_observed: 6
+  connector_cap: 7
+  CI_observed: 12
+  CI_cap: 16
+  counters_reset: false
+  external_source_attribution: UNKNOWN separately retained

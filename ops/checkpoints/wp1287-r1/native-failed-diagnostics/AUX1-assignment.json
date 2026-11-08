@@ -1,0 +1,22 @@
+{
+  "packet": 1287,
+  "purpose": "AUX1 diagnostic original-source evidence digest, NOT formal code review or approval",
+  "head": "eff711e075f538d5f012f728451b75207a7f6140",
+  "tree": "b83af7498be2f26b58f103fe79db9119815c278b",
+  "reviewer": "existing independent read-only tl_auditor",
+  "requested_at_utc": "2026-11-08T18:21:52.323555+00:00",
+  "absolute_deadline_utc": "2026-11-08T19:51:52.323555+00:00",
+  "write_scope": [
+    "/workspace/scratch/proxima-rest-20261108/P2-native-failure-auditor-receipt.json",
+    "/workspace/scratch/proxima-rest-20261108/P2-native-failure-auditor-final.txt"
+  ],
+  "read_scope": [
+    "native diagnostic5originalZIPs/sourcebyte277files",
+    "P2-native-diagnostics-retention-receipt.json",
+    "P2-H1-Linux-recovery3/browser-evidence",
+    "linux-final-eff711e075f5",
+    "P2-core-combinations",
+    "P2-OP-F01-cleanup-failure-probe"
+  ],
+  "constraints": "No product edits, models/subagents, Windows/CLI/browser/network calls; local readonly proof digest only. Do not claim nativepassed/formalapproval, fullZIP provenance beyond measuredsource, rootcauseOOM, compatibility or artifactpromotion."
+}

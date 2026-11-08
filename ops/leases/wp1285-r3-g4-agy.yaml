@@ -62,8 +62,8 @@ recorder_is_executor: false
 leased_at_utc: '2026-11-08T17:58:54Z'
 heartbeat_at: '2026-11-08T17:58:54Z'
 heartbeat_required_minutes: 360
-lease_until: '2026-11-08T23:58:54Z'
-lease_expires_at_utc: '2026-11-08T23:58:54Z'
+lease_until: '2026-11-08T18:30:20Z'
+lease_expires_at_utc: '2026-11-08T18:30:20Z'
 run_minutes: 45
 attempts_limit: 3
 review_rounds_limit: 3
@@ -76,7 +76,7 @@ size_cap_additions_and_total_vs_B: 450
 executor_workspace: C:\Users\admin\tl-work\wp1285-r3-g4-agy-executor
 authority_note: Concreteowner-delegatedRescue r3 plus latestexplicitAGY4Argon executorrequest;
   oneactualauthorattempt3, no newClaude, no reset/waiver/pushincrease
-status: leased
+status: revoked
 thay_the_cho:
 - wp1285-r2-g3-claude
 nang_tran:
@@ -87,3 +87,11 @@ nang_tran:
   tran_cu: 3paths450adds+total;product3TOTAL;formal2;shared8TOTAL;push1TOTAL
   tran_moi: same3paths450/product3/push1UNCHANGED;formal3TOTAL(one rescueformal3);shared10TOTAL
     minimumcompleteforecast
+retired_at: '2026-11-08T18:30:20Z'
+retired_at_utc: '2026-11-08T18:30:20Z'
+original_lease_until: '2026-11-08T23:58:54Z'
+da_bi_thay_the: wp1285-r4-g5-codex
+replaced_at_utc: '2026-11-08T18:30:20Z'
+replacement_reason: Owner expressly replaces AGY with Codex; old output/workspace
+  quarantined, raw generation/terminal unknown, stoprequest timeout NOT death proof;
+  no late handoff accepted

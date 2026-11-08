@@ -1,0 +1,8 @@
+{
+  "folder": "/workspace/scratch/wp1279-g2-claude",
+  "trust": true,
+  "mechanism": "official interactive CLI trust; githubMCPdeclined; /exit beforeanyprompt",
+  "authority": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6716496176",
+  "actual_code_attempt_started": false,
+  "at": "2026-11-08T03:07:23.314891+00:00"
+}

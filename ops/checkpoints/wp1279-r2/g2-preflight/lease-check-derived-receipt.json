@@ -1,0 +1,9 @@
+{
+  "command": "python -B ops/lease_publish.py check ops/leases/wp1279-r2-g2-claude.yaml --root .",
+  "exit_code": 0,
+  "actual_tool_chunk_id": "af50de",
+  "source": "Observed functions.exec tools.exec_command result; derived receipt, not reconstructed raw stdout",
+  "github_layers": "not_run by check; run kiem-github afterpublication",
+  "lease_sha256": "8c516133b8bb9ff9f4a2f4d0da3d1d0d35274c4c58aeb542e9bf8b442809064c",
+  "prompt_sha256": "b4a61408e465ebf0935b1176592741d564d56bedf268c570ce36c210f267351c"
+}

@@ -1,0 +1,85 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1279
+packet_id: wp1279
+mission_issue: 1238
+revision: 2
+generation: 2
+lease_id: wp1279-r2-g2-claude
+role: executor
+provider: claude
+executor: claude
+model: opus
+effort: high
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1279-r2.md
+spec_ref: refs/heads/ops/wp1279-spec@2d57097b505e610601a634f23b3142d603fe853e
+spec_sha256_required: 489419bf05bbd416f5aafcf0f134aade59d96f9781244535c0dd1ddf5f68100c
+spec_hash: 489419bf05bbd416f5aafcf0f134aade59d96f9781244535c0dd1ddf5f68100c
+prompt_path: ops/prompts/wp1279-r2-g2-claude.md
+prompt_sha256_required: b4a61408e465ebf0935b1176592741d564d56bedf268c570ce36c210f267351c
+write_set:
+- .agents/skills/proxima-control/scripts/ProximaControl.psm1
+- .agents/skills/proxima-control/scripts/Run-Px.ps1
+- .agents/skills/proxima-control/tests/ProximaControl.Tests.ps1
+write_set_hash: 92211ad4ed211a39980c65742bb6d6df228ce975f920bc753ab786d41e62a054
+effective_write_set:
+- .agents/skills/proxima-control/scripts/ProximaControl.psm1
+- .agents/skills/proxima-control/scripts/Run-Px.ps1
+- .agents/skills/proxima-control/tests/ProximaControl.Tests.ps1
+change_policy_sha: null
+required_checks:
+- 25 X normal and10 focusedsemanticCX withpositivecontrol onbothnativePS5.1/7
+- LinuxfulltlselftestN/Nbeforepush
+- RuffFdelta0vsB
+- temporarystrictmanifestanddiffscope/numstat
+- freshindependentCodexCLIexactHreviewandv2delivery
+- Draftconnector/applicableUbuntuPRCIandmasterCI4anchors
+- mandatoryreadonlylonglogdigests
+- K0-K7/exactHdelegatedmergegrant/M8readback/D1-D4
+land_obligations: []
+branch: agent/wp1279-g2-claude
+base_sha: c15603dcf537fa4beb753b263398d6e6b8c92019
+start_from_sha: c15603dcf537fa4beb753b263398d6e6b8c92019
+reviewed_sha_required: c15603dcf537fa4beb753b263398d6e6b8c92019
+reviewed_sha_required_note: Bootstrapbaseonly; futureverdictMUSTbindactualcandidateexactH/tree
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6716496176
+standing_authority: https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6708576608
+recorded_by: openai_codex/codex_service dispatcher under owner full scoped delegation
+recorder_is_executor: false
+leased_at_utc: '2026-11-08T03:06:08Z'
+heartbeat_at: '2026-11-08T03:06:08Z'
+heartbeat_required_minutes: 360
+lease_until: '2026-11-08T07:06:08Z'
+lease_expires_at_utc: '2026-11-08T07:06:08Z'
+run_minutes: 90
+attempts_limit: 3
+review_rounds_limit: 3
+codex_review_calls_limit: 10
+same_failure_limit: 2
+requires_live: false
+uy_quyen_merge: false
+thay_the_cho: []
+authority_note: NoExecutorapproval/merge; futureexactHconditionalgrantseparate. NEWwp1279r2manualdescriptoronly. Officialfoldertrustsetup
+  authorized ONLYforverifiedisolated /workspace/scratch/wp1279-g2-claude, noauth/hookchanges. AllS1productbytesreadonly.
+nang_tran:
+  ai_nang: ducthangho through full scoped delegation, dispatcher records
+  can_cu: Originalmodule200+wrapper30/S1harness643measured; readonlydesignestimate1150-1510notnewnumstat; coherentfullShouldProcess/remoting+sharednativeharness,
+    extra service/runtime safeguards; mandatoryauxCI/LINUX/connectorcalls reserved
+  tran_cu: sensitive6files450additions;ordinary6files1000total;Codexcalls8
+  tran_moi: same3exactfiles1800additionsANDtotal;attempts3;rounds3;sharedCodexcalls10;run90min;primarypush1
+preflight_holder_source: ops/checkpoints/wp1279-r1/design/holders-before-lease.json; refreshimmediatelybeforewrite/invocation
+generation_note: g1 was prepared locally only, nevergranted/published/run; r1identityfailedbeforelease; g2firstactualproductlease,
+  attempt1/3, nohistoryreset

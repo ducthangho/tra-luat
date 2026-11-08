@@ -1,0 +1,217 @@
+{
+  "head": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+  "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "cwd": "/workspace/scratch/wp1287-r2-g2-codex",
+  "runner": {
+    "host": "64fa810a0be4",
+    "os": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "python": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+    "python_version": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "python_sha256": "fa67443527ed9647f760d807e2a38f26340757123e643c4639cf273ed15d5ea7",
+    "git": "git version 2.52.0"
+  },
+  "operator_sha256": "dd491c75766f495f3a17495abd09f1f344eef83090e1cfe8697c3f0d25af2a68",
+  "started_at": "2026-11-08T19:00:41.048769+00:00",
+  "commands": [
+    {
+      "label": "admission",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-B",
+        "/workspace/scratch/proxima-remaining-canonical/ops/lease_publish.py",
+        "kiem-thu-hoi-github",
+        "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+        "--canonical-base",
+        "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+        "--nhanh-mac-dinh",
+        "master",
+        "--root",
+        "/workspace/scratch/wp1287-r2-g2-codex",
+        "--receipt",
+        "/workspace/scratch/proxima-rest-20261108/linux-final-2a5803e17b7c/admission.json"
+      ],
+      "cwd": "/workspace/scratch/wp1287-r2-g2-codex",
+      "rc": 0,
+      "seconds": 0.17433747398899868,
+      "log_sha256": "a9ddceb69d20e574e3c61a0d00e4dcdd04512cf9d9ee3739ad030aac0c907025",
+      "log_size": 139
+    },
+    {
+      "label": "diff-check",
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+        "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b"
+      ],
+      "cwd": "/workspace/scratch/wp1287-r2-g2-codex",
+      "rc": 0,
+      "seconds": 0.0018062120070680976,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log_size": 0
+    },
+    {
+      "label": "numstat",
+      "command": [
+        "git",
+        "diff",
+        "--numstat",
+        "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+        "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b"
+      ],
+      "cwd": "/workspace/scratch/wp1287-r2-g2-codex",
+      "rc": 0,
+      "seconds": 0.0023448370047844946,
+      "log_sha256": "ab7379dc490a90ca0c52f7d7b6355a11afb235ab4778ba4a990006c1350f3550",
+      "log_size": 158
+    },
+    {
+      "label": "doctrine-scan",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-B",
+        ".claude/dev/packet_loop.py",
+        "doctrine-scan",
+        "--root",
+        "/workspace/scratch/wp1287-r2-g2-codex"
+      ],
+      "cwd": "/workspace/scratch/wp1287-r2-g2-codex",
+      "rc": 0,
+      "seconds": 0.38380649202736095,
+      "log_sha256": "d5d6962e60a7ce2002d5eab3678ab78bb53688c8cfac22735ab088ab8381ead3",
+      "log_size": 70
+    },
+    {
+      "label": "adr-song",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-B",
+        ".claude/dev/packet_loop.py",
+        "adr-song",
+        "--root",
+        "/workspace/scratch/wp1287-r2-g2-codex"
+      ],
+      "cwd": "/workspace/scratch/wp1287-r2-g2-codex",
+      "rc": 0,
+      "seconds": 0.22892843798035756,
+      "log_sha256": "0f64eed52c99c602f15e179ff897f74c58c29ad5cf8c741fae11bf4c3fd5fa59",
+      "log_size": 113
+    },
+    {
+      "label": "doc-claims",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-B",
+        "scripts/tl.py",
+        "doc-claims-check",
+        "--strict"
+      ],
+      "cwd": "/workspace/scratch/wp1287-r2-g2-codex",
+      "rc": 0,
+      "seconds": 2.372593960026279,
+      "log_sha256": "f232d0844613b4db997fa36446eea8a4c8effa6757820eb2072f05c2167e9079",
+      "log_size": 73441
+    },
+    {
+      "label": "ruff",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "--output-format",
+        "json",
+        "scripts/tl.py"
+      ],
+      "cwd": "/workspace/scratch/wp1287-r2-g2-codex",
+      "rc": 1,
+      "seconds": 0.05984328698832542,
+      "log_sha256": "eb87bf0986aebdaf87473c6e138cdc5c7b6131a9c95ddfc6e35b0969766cb2d2",
+      "log_size": 5059
+    },
+    {
+      "label": "worker-manifest",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-B",
+        "scripts/tl.py",
+        "release-manifest",
+        "--root",
+        "/workspace/scratch/wp1287-r2-g2-codex",
+        "--out",
+        "/workspace/scratch/proxima-rest-20261108/linux-final-2a5803e17b7c/worker-manifest.json"
+      ],
+      "cwd": "/workspace/scratch/wp1287-r2-g2-codex",
+      "rc": 0,
+      "seconds": 1.0338810740504414,
+      "log_sha256": "66718b6d622f749f2dc3a1bf896d19a7b81562fc0a3bdf7fd671acae522cf58a",
+      "log_size": 31007
+    },
+    {
+      "label": "worker-release-verify",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-B",
+        "scripts/tl.py",
+        "release-verify",
+        "/workspace/scratch/proxima-rest-20261108/linux-final-2a5803e17b7c/worker-manifest.json",
+        "--root",
+        "/workspace/scratch/wp1287-r2-g2-codex",
+        "--strict"
+      ],
+      "cwd": "/workspace/scratch/wp1287-r2-g2-codex",
+      "rc": 0,
+      "seconds": 1.1000851090066135,
+      "log_sha256": "0968bbd87b9c51b89131cdfd9433c26b4392a6c87ee138746fad5bb4a66873bc",
+      "log_size": 20803
+    },
+    {
+      "label": "full-selftest-lifecycle",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-B",
+        "/workspace/scratch/proxima-remaining-canonical/.claude/dev/gate_lifecycle.py",
+        "run",
+        "--kind",
+        "heavy",
+        "--name",
+        "wp1287-H2-prepush",
+        "--repo",
+        "/workspace/scratch/wp1287-r2-g2-codex",
+        "--evidence",
+        "/workspace/scratch/proxima-rest-20261108/linux-final-2a5803e17b7c/full-selftest-evidence.json",
+        "--output",
+        "/workspace/scratch/proxima-rest-20261108/linux-final-2a5803e17b7c/full-selftest.log",
+        "--expected-head",
+        "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+        "--base-sha",
+        "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+        "--selected-test",
+        "full-legacy-selftest",
+        "--require-clean",
+        "--wait-seconds",
+        "0",
+        "--timeout-seconds",
+        "5400",
+        "--quiet",
+        "--positive-regex",
+        "== tl selftest ([1-9][0-9]*)/\\1 ==",
+        "--",
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-B",
+        "scripts/tl.py",
+        "--selftest"
+      ],
+      "cwd": "/workspace/scratch/wp1287-r2-g2-codex",
+      "rc": 0,
+      "seconds": 192.1013068750035,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log_size": 0
+    }
+  ]
+}

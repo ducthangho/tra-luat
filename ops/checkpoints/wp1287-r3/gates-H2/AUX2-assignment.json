@@ -1,0 +1,28 @@
+{
+  "packet": 1287,
+  "revision": 3,
+  "generation": 3,
+  "shared_call": 2,
+  "purpose": "Mandatory read-only full-source H2 gate digest; NOT formal code approval or native browser compatibility pass",
+  "head": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+  "assigned_at": "2026-11-08T19:37:02.246367+00:00",
+  "deadline_utc": "2026-11-08T21:07:02.246367+00:00",
+  "read_scope": [
+    "P2-H2-identity.json/P2-codex-capability-*",
+    "linux-final-2a5803e17b7c all logs/receipts",
+    "P2-H2-cleanup-Linux 15 actual cases",
+    "P2-H2-cleanup-native-initial.zip/extracted17sourcefiles zero tests failed root module-path preflight",
+    "P2-H2-cleanup-native-recovery2.zip/extracted359sourcefiles 34 actual cases",
+    "P2-H2-cleanup-source-retention-receipt.json/P2-cleanup-focused-matrix.py",
+    "P2-H2-Linux-flow browser-evidence all original bytes/actual documented H2 cleanup",
+    "P2-H2-core-combinations-identity-reuse.json and historical P2-core-combinations/receipt.json",
+    "Official prior0122 failed diagnostic only if download/extraction complete; never candidate PASS"
+  ],
+  "write_scope": [
+    "P2-H2-gates-auditor-receipt.json",
+    "P2-H2-gates-auditor-final.txt"
+  ],
+  "constraints": "No product edits/network/model calls/subagents/Windows/browser/heavy tests; verify raw source hashes/statuses/positive evidence; code correctness reviewed separately by fresh xhigh CLI. U10 OPEN, same-provider sensitive assurance HOLD."
+}

@@ -1,0 +1,28 @@
+{
+  "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "native_runs": [
+    {
+      "run": "initial",
+      "zip_sha256": "b2c248089c490c43051ff4f6d584d36bfed56925847c3b7674606a85fb894507",
+      "bytes": 33052,
+      "source_files": 17,
+      "status": "NOT_RUN zero test cases: Rootpolicyprobe module path preflight failure",
+      "product_failure": false
+    },
+    {
+      "run": "recovery2",
+      "zip_sha256": "4f3cd1aa9ec180504a6389bf81f7bb4ed7af80a247af9925c88a49bd2ad4bf35",
+      "bytes": 210738,
+      "source_files": 359,
+      "status": "passed",
+      "focused_cases": 34,
+      "source_skill_sha256": "7b48630edb6c2bf9fed335bcdafe00cac4e5f2db3b326734aab949ee5b0fc350"
+    }
+  ],
+  "Linux_bash_focused": 15,
+  "native_PS51_PS7_focused": 34,
+  "total_documented_cleanup_cases": 49,
+  "actual_source_examples_passed": true,
+  "native_browser_compatibility": "NOT_MEASURED by fixtures / U10OPEN",
+  "formal_code_approval": false
+}

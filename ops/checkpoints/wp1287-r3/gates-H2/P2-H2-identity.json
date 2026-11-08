@@ -1,0 +1,37 @@
+{
+  "packet": "wp1287",
+  "revision": 3,
+  "generation": 3,
+  "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "H": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+  "parents": [
+    "eff711e075f538d5f012f728451b75207a7f6140"
+  ],
+  "file_sha256": {
+    ".agents/skills/playwright-browser/package.json": "d52eb0465ee3717bb541ce12c4542ed594712123f3fec1a003268fa3ba96977a",
+    ".agents/skills/playwright-browser/package-lock.json": "0da56e1ee6b81ad9226f000a917f6153b95e861ed41811d5eca7deb01bbb8ede",
+    ".agents/skills/playwright-browser/SKILL.md": "7b48630edb6c2bf9fed335bcdafe00cac4e5f2db3b326734aab949ee5b0fc350"
+  },
+  "additions": 377,
+  "deletions": 0,
+  "new_paths": 3,
+  "author_provider": "openai_codex",
+  "author_surface": "codex_cli",
+  "author_transport": "machine",
+  "requested_model": "gpt-6.1-sol",
+  "requested_effort": "high",
+  "served_model_effort": "KHONG_DO_DUOC",
+  "original_handoff": "P2-codex-capability-original-handoff.md",
+  "controller": "P2-codex-capability-controller-result.json",
+  "author_tests": "NOT_RUN",
+  "commit_role": "root mechanical Git only; no root product edits",
+  "host_snapshot_changed_only": [
+    ".agents/skills/playwright-browser/SKILL.md"
+  ],
+  "frozen_at_utc": "2026-11-08T18:56:47.052431+00:00",
+  "product_pushes": 0,
+  "formal_approval": false,
+  "native_compatibility": "U10OPEN",
+  "assurance": "sameprovider sensitiveHOLD"
+}

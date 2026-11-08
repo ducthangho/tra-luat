@@ -1,0 +1,16 @@
+{
+  "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "parent": "eff711e075f538d5f012f728451b75207a7f6140",
+  "core_outside_agents_exact_blob_identity": true,
+  "core_paths": 13141,
+  "core_catalog_sha256": "37bbef0a3059f664fcc38d64662116918d267985e2eed8ee88e1f5eafa191d0f",
+  "current_both_source": "linux-final-2a5803e17b7c/receipt.json actual1777/1777",
+  "historical_reused": [
+    "none",
+    "proxima",
+    "playwright"
+  ],
+  "historical_source": "P2-core-combinations/receipt.json",
+  "not_claimed_new_H2_runs": true,
+  "reason": "OnlyoptionalSKILLchanged; exactentire non.agents Gitcatalog/S1S2/package+lock unchanged; spec allows core-byte identity reuse. NewH2bothselftest actuallyrerun."
+}

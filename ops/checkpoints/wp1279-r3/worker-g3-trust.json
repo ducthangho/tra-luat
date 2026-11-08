@@ -1,0 +1,11 @@
+{
+  "folder": "/workspace/scratch/wp1279-g3-claude",
+  "trust": true,
+  "mechanism": "officialinteractiveCLI exactfolderUI selectedYes, GitHubMCPdeclined, /exit beforeanymodelprompt",
+  "authority": "https://github.com/ducthangho/tra-luat/issues/1279#issuecomment-6718073094",
+  "actual_code_attempt_started": false,
+  "preflight_failure_preserved": "interactive --no-session-persistence rejected (requires--print), exited1 beforemodel; normalofficialUIretry succeeded",
+  "ui_default_model_not_execution": "Sonnet5.5/mediumUIonly; actualexecutorwillrequestopus/high",
+  "official_autoupdate_observed": "CLIUI auto-updater installed update andrequestedrestart; actualversionreprobedbeforemodel",
+  "at": "2026-11-08T06:16:48.155527+00:00"
+}

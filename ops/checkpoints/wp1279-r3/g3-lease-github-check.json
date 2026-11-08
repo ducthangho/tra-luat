@@ -1,0 +1,7 @@
+{
+  "command": "canonicalB lease_publish.py kiem-github ...wp1279-r3-g3-claude.yaml --root publisher; GITHUB_REPOSITORY set",
+  "actual_rc": 0,
+  "received_stdout": "hai lớp GitHub ĐÃ QUA cho lease wp1279-r3-g3-claude trên issue #1279",
+  "performed_before_projection_comment": true,
+  "canonical_B": "c15603dcf537fa4beb753b263398d6e6b8c92019"
+}

@@ -1,0 +1,18 @@
+{
+  "observed_at": "2026-11-08T06:25:32.660321+00:00",
+  "run_id": "a636c745a52a40bd9913e7a3f6f88df1",
+  "state_observed": "dang_chay",
+  "requested": "opus/high",
+  "actual_init_model": "claude-opus-5-5",
+  "surface": "claude_code",
+  "pid": 580565,
+  "deadline_utc": "2026-11-08T07:06:05.158986+00:00",
+  "lease_until": "2026-11-08T12:13:43Z",
+  "source_head": "d3ccdd215a43b7e8ac574eed8f493998c736aba4",
+  "budget": "attempt3/3active;formalround1/3;sharedcalls3/10;primarypush0/1",
+  "actual_terminal": "not_yet_observed",
+  "open_P2_classes": [
+    "WP1279-R1-F01",
+    "WP1279-R1-F02"
+  ]
+}

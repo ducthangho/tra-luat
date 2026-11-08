@@ -1,0 +1,160 @@
+schema_version: 2
+event: lease_granted_under_owner_delegation
+packet_issue: 1174
+packet_id: WP1174
+revision: 15
+generation: 12
+lease_id: wp1174-r15-g12-codex
+role: executor
+executor: codex
+provider: openai_codex
+model_family: openai
+execution_surface: codex_service
+transport: machine
+reviewer_provider: anthropic_claude
+reviewer_execution_surface: claude_code
+reviewer_model_family: claude
+reviewer_transport: machine/local
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+branch: agent/wp1174-g5-codex
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6718301317
+authority_url: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6718294600
+recorded_by: Codex coordinator acting under exact C11 owner decision and installed
+  Mission19; no human signature
+spec_path: ops/specs/wp1174-implementation-r15.md
+spec_hash: 87b07bb4fc81bc6e9c140e034b9bcf412aae542f1a08c5dfdce5fa10a1f0241d
+spec_sha256_required: 87b07bb4fc81bc6e9c140e034b9bcf412aae542f1a08c5dfdce5fa10a1f0241d
+spec_ref: refs/heads/ops/spec-wp1174-r15@9c3cbfef11dd9ca7729ed59a75b455607a9123a3
+prompt_path: ops/specs/wp1174-implementation-r15.md
+prompt_sha256_required: 87b07bb4fc81bc6e9c140e034b9bcf412aae542f1a08c5dfdce5fa10a1f0241d
+base_sha: 9c3cbfef11dd9ca7729ed59a75b455607a9123a3
+start_from_sha: 9c3cbfef11dd9ca7729ed59a75b455607a9123a3
+reviewed_sha_required: 9c3cbfef11dd9ca7729ed59a75b455607a9123a3
+write_set: &id001
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/specs/wp1174-c5-adapter-design.md
+- ops/specs/wp1174-implementation-r15.md
+effective_write_set: *id001
+write_set_hash: e7c0e7fe266fc777dbe2e7543fe4774e2fb064b30e65c2ba9719a4e27ba2e511
+change_policy_sha: null
+change_policy_exception:
+  id: WP1174-R15-CLOSURE-EXCEPTION
+  decision: pending_replacement_owner_approval
+  owner: ducthangho
+  reason: ADR0032 policy and schema absent at pinned canonical; no silent empty-policy
+    default
+  expires_at: '2026-11-08T11:03:01Z'
+  scope: Only WP1174 R15/g12 test-only legacy KG anchor repair, metadata binding and
+    required source gates; product fixed C4 digest, no target/global exception
+  effective_write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - docs/PROTOCOL_DA_PHIEN.md
+  - ops/specs/wp1174-c5-adapter-design.md
+  - ops/specs/wp1174-implementation-r15.md
+  canonical_policy_sha: null
+  rule: exact closed set + NFC/casefold/symlink/prefix overlap against all live refs;
+    every impact_hint/outside companion blocks and needs approved revision
+  required_checks:
+  - selftest N/N
+  - packet_loop baseline+mutation controls
+  - registry+full Linux M9
+  - native Windows focused
+  - canonical K0-K7
+  - source delegated owner audit plus real native cross K4; target actual-human unchanged
+  - required native Linux profile on exact H via existing ci.yml gate-packet-loop
+    main()
+  - WP1174_NATIVE_REPORT_V1 complete schema/required outcomes and source/provenance
+    binding; missing/BoQua/infra != pass
+  - Windows focused one unit mutant m1174_allow_windows with raw oracle record; no
+    full Windows suite
+  - Full registered-mutant unique-anchor baseline with adversarial checker control;
+    four legacy KG mutants assertion-killed and cross-family/positive controls passed
+    on exact final head
+  land_obligations:
+  - canonical release/manifest only by land operator, not worker
+  never_waived:
+  - source authority
+  - exclusive lease
+  - K0-K7
+  - target actual-human when using target same-provider advisory path
+  - M9
+  - unknown=>blocked
+leased_at_utc: '2026-11-08T06:51:34.406292+00:00'
+heartbeat_at: '2026-11-08T06:51:34.406292+00:00'
+lease_until: '2026-11-08T11:03:01Z'
+lease_expires_at_utc: '2026-11-08T11:03:01Z'
+heartbeat_required_minutes: 360
+max_lease_hours: 24
+hard_not_after: '2026-11-08T11:03:01Z'
+nang_tran:
+  ai_nang: ducthangho under recorded delegation
+  can_cu: Exact C11 decision after approval; product fixed C4, only legacy KG anchor
+    test fix + metadata, same5/6000
+  tran_cu:
+    files: 6
+    added_lines: 450
+  tran_moi:
+    files: 5
+    added_lines: 6000
+  previous_approved_exception:
+    files: 5
+    added_lines: 6000
+nang_tran_review_rounds:
+  ai_nang: ducthangho under recorded delegation
+  tran_cu: 21
+  tran_moi: 21
+  can_cu: Cumulative native cap stays21; actual16 and5 new fresh contexts, old C10
+    slots unused not refund
+thay_the_cho: null
+template_only: false
+guard: No source dispatch before actual R15/C11 exclusive lease bot/I2/doctor/begin
+  and measured budget/deadline admission
+spec_source_oid: 9c3cbfef11dd9ca7729ed59a75b455607a9123a3
+spec_sha256: 87b07bb4fc81bc6e9c140e034b9bcf412aae542f1a08c5dfdce5fa10a1f0241d
+runtime_preconditions:
+  source_test_processes: do not expose TL_TOKEN/TL_WEBAPP/TL_MASTER_KEY/TL_AGENT_CREDS_FILEID
+    or other LIVE/Drive/GAS/NLM credentials; probe absence as booleans, never values
+  publishing: only canonical publisher after gates; worker cannot authorize land
+  canary_profile: native Linux ext4/XFS positive must be measured; cloud overlay and
+    unverified WSL not supported; no security/WSL installs authorized
+  Windows: Owner online host, frozen13 pair only, cumulative5runs/60minutes, prior3/26;
+    no Windows CI/main/full suites
+  C11_accounting: source9/native21/connector2/canary1 plus2scratch=35, cloud1150 inclusive,
+    hard11:03:01, no paid purchase or Windows CI/full suite
+exception_approval_comment_url: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6718294600
+reviewer: claude
+pull_request: 1275
+source_pr: 1275
+metadata_review_disposition: P15 local metadata only; exact C11 owner decision plus
+  real selftest/readback, no native metadata approval claim; fresh final native composite
+  required
+metadata_approval_pending: false
+continuation_source:
+  history: Normal P15+C4 with all ancestry retained; no source8 continuation or counter
+    reset
+  public_H5: 6e74d677899217b7a29762b2eef42a48eaaf333a
+  previous_source_C4: c4d40f84db95666e546f679c1bfc40859b2de8e6
+  previous_source_lease_end_required: true
+  mutable_source_paths:
+  - .claude/dev/packet_loop_test.py
+  - docs/PROTOCOL_DA_PHIEN.md
+  frozen_spec_paths:
+  - ops/specs/wp1174-c5-adapter-design.md
+  - ops/specs/wp1174-implementation-r15.md
+  product_sha256_required: 0e356754a8919e3bc1ee946f18580ecdb88cdd8771d0b6536dc97b71eddc6dc4
+source_audit_policy: 'Source-only r20 section9 override: real native cross K4 plus
+  independent delegated_owner_audit AI; target actual-human unchanged'
+source_authority_url: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6718301317
+source_run_windows_minutes:
+- 15
+new_native_review_minutes: 15
+native_P11_approval_claim: false
+new_native_integrator_minutes: 10
+native_part_count: 4
+native_parallel_limit: 2

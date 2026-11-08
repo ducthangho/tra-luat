@@ -16,3 +16,9 @@ rc=12
   THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
 CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
 rc=12
+
+# LAN 4 (sau mien_A14 + chap_nhan_10_2_4 chu kho tu dang 6720449021; landed van false vi thieu approve_merge tu dang)
+# checkout: 3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4 (+ thay doi chua commit trong ops/land) ; origin/master: 3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4 ; luc: 2026-11-08T10:41:05Z
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12

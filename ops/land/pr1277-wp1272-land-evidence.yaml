@@ -1,13 +1,10 @@
 # HO SO LAND — packet #1272 HOTFIX-R1252-POSIX r1, lease g1, qua PR #1277. Khuon: ops/land/pr1249-wp1240-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
 #
-# TRANG THAI: merged (c15603d), CHUA LANDED (landed: false). Bon moc §10.2.2 cua ci.yml 42439410815 DU (workflow_definition do bang
-# wd-run 42467654305, do PHIEN DIEU PHOI dispatch 09:33:02Z; artifact wd.json run_id 42439410815 da doi chieu). Nghiem thu A1 nay co
-# log goc may chu kho (winlogs/diag-1272-do.log, bam khop; loi_khai_co_neo) kem su co thu tuc, xem nghiem_thu.A1. kiem-dong-wp voi
-# landed true cho rc 0 (kiem-dong-wp-m8.txt LAN 3), NHUNG ops/kiem_ho_so_land.py (luat L-6) TRUOT o authorization_url: ho so landed
-# phai co authorization_url la comment (#issuecomment-/#pullrequestreview-/#discussion_r) cua chu kho, ma ho so nay khong co comment
-# approve_merge nao (chi co thao tac merge + comment mien K6/K7). Phien ghi so KHONG dung comment mien lam uy quyen land => giu landed
-# false (LAN 4 rc 12). Xem trang_thai_packet.lich_su_nhan.
+# TRANG THAI: merged (c15603d), LANDED (landed: true) tu 2026-11-08T10:40Z. Bon moc §10.2.2 cua ci.yml 42439410815 DU (wd-run
+# 42467654305). A1 tu log goc may chu kho (winlogs/diag-1272-do.log, loi_khai_co_neo) kem su co thu tuc (canh_bao_cho_chu_kho).
+# UY QUYEN DANG SAU MERGE: approve_merge chu kho tu dang issuecomment-6720439348 (10:37:28Z) — SAU merge 02:38:37Z ~8 gio; duyet
+# SHA fc6fbc7 truoc merge chi la loi khai cua phien dieu phoi. Lich su nhan: trang_thai_packet.lich_su_nhan.
 # launcher-windows tren DUNG merge SHA xanh (run 42439410853) — dieu kien hoan tat §5 cua spec.
 # Packet nay khac phuc launcher-windows do cua #1252 tren 27fd808 (ops/land/pr1267-wp1252-land-evidence.yaml).
 # NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured (nhu khuon).
@@ -25,10 +22,14 @@ input_packet_generations:
   - {packet_issue: 1272, packet_id: HOTFIX-R1252-POSIX, revision: 1, generation: 1, lease_id: hotfix-r1252-posix-r1-g1-claude, ghi_chu: 'lease duy nhat; rut han sau merge (xem lease.thu_hoi_cuoi).'}
 authorized_head_sha: fc6fbc7c07351ea75ece6a0a25a96262225bef03
 approver: ducthangho
-authorization_url: https://github.com/ducthangho/tra-luat/pull/1277
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1277#issuecomment-6720439348
 authorization_ghi_chu: >-
-  measured — readback-pr-1277.json: merged true, merged_by ducthangho, merged_at 2026-11-08T02:38:37Z, head fc6fbc7, base efebadf.
-  Khong co comment approve_merge rieng; mien K6/K7 tu dang: readback-chu-kho-mien-issuecomment-6716241960.json (PR #1277, OWNER,
+  measured — readback-chu-kho-approve-merge-issuecomment-6720439348.json: PR #1277, user ducthangho, author_association OWNER,
+  created_at = updated_at = 2026-11-08T10:37:28Z, performed_via_github_app null, than mot dong `approve_merge:
+  fc6fbc7c07351ea75ece6a0a25a96262225bef03` (= authorized_head_sha). UY QUYEN DANG SAU MERGE (~8 gio sau 02:38:37Z): no ghi lai,
+  khong chung minh, rang chu kho da duyet truoc merge — "chu kho duyet SHA fc6fbc7 qua phien dieu phoi truoc merge" la loi_khai_co_neo
+  (lease thu_hoi_bang_rut_han.ly_do; tin nhan phien dieu phoi). CAVEAT #566 nhu khuon. readback-pr-1277.json: merged true, merged_by
+  ducthangho, merged_at 2026-11-08T02:38:37Z, head fc6fbc7, base efebadf. Truoc merge chi co mien K6/K7 tu dang: readback-chu-kho-mien-issuecomment-6716241960.json (PR #1277, OWNER,
   2026-11-08T02:35:28Z, created_at = updated_at, performed_via_github_app null, than `windows: fc6fbc7… mien` +
   `full_mutant_audit: fc6fbc7… mien`) — truoc merge ~3 phut, neo dung authorized_head_sha. "Chu kho duyet dung SHA fc6fbc7": lease
   thu_hoi_bang_rut_han.ly_do (loi khai phien executor). CAVEAT #566: ai bam merge khong do duoc.
@@ -146,25 +147,22 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-1277.json merged true; readback-commit-c15603d.json cha efebadf + fc6fbc7, tree 46d05062.'
-  landed: false
+  landed: true
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren merge SHA c15603d: DAT — du bon moc measured passed; launcher-windows cung SHA success. (2) lease nha: DAT. (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp LAN 3 rc 0 khi landed true; LAN 4 rc 12 sau khi ha);
-    handoff khong co. (4) review neo fc6fbc7: DAT — offline L2 approve + connector sach. (5) uy quyen: merge cua tai khoan chu kho +
-    mien K6/K7 tu dang truoc merge — CHUA DAT luat L-6 (kiem_ho_so_land): khong co comment uy quyen land cua chu kho. (6) muc tieu: DAT — nghiem_thu A1–A5 + hoan_tat_s5 (A1 loi_khai_co_neo, kem su co thu tuc).
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA c15603d: DAT — du bon moc measured passed; launcher-windows cung SHA success. (2) lease nha: DAT. (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp LAN 5 rc 0, kiem-dong-wp-m8.txt);
+    handoff khong co. (4) review neo fc6fbc7: DAT — offline L2 approve + connector sach. (5) uy quyen: DAT theo L-6 bang approve_merge chu kho tu
+    dang 6720439348 neo fc6fbc7 — dang SAU merge (xem authorization_ghi_chu); truoc merge co mien K6/K7 tu dang 6716241960. (6) muc tieu: DAT — nghiem_thu A1–A5 + hoan_tat_s5 (A1 loi_khai_co_neo, kem su co thu tuc).
     (7) tran Codex 3/3 (spec §3): dung du, khong vuot.
   canh_bao_cho_chu_kho: >-
     A1 tinh 'passed' theo NOI DUNG do (gia thuyet §1 duoc xac nhan tren Windows TRUOC khi va). Hai lech thu tuc ghi ro de chu kho
     quyet neu khong dong y: (i) buoc (2) lo chay full mutant tren Windows (trai "chi chay tap trung"); (ii) log dung truoc buoc (3),
     khong co rc. Neu chu kho coi A1 chua dat thi ghi A1 not_measured trong bien ban.
-  de_nang_landed_true_can: >-
-    Mot comment cua chu kho TU dang (performed_via_github_app null) tren PR #1277 hoac Issue #1272 uy quyen/xac nhan land neo
-    fc6fbc7c07351ea75ece6a0a25a96262225bef03 (tien le pr1249: `approve_merge: <sha>`), roi phien ghi so readback, dat
-    authorization_url, nang landed true va chay lai kiem-dong-wp + kiem_ho_so_land.
   lich_su_nhan: >-
     966dda0: landed false (workflow_definition not_measured; A1 not_measured). 3adf5ba: workflow_definition passed (wd-run 42467654305),
     landed van false vi A1. Commit tiep: nap log goc may chu kho winlogs/diag-1272-do.log (bam khop) => A1 passed; thu landed true:
     kiem-dong-wp rc 0 nhung kiem_ho_so_land TRUOT L-6 (authorization_url khong phai comment) => ha lai landed false, kiem-dong-wp
-    LAN 4 rc 12.
+    LAN 4 rc 12. Nang landed true sau approve_merge chu kho tu dang 6720439348 (10:37:28Z, sau merge): authorization_url doi sang
+    comment ay; kiem-dong-wp LAN 5 rc 0, kiem_ho_so_land DAT.
 review:
   so_loi_goi_codex: 'measured 3/3 — readback-connector-issuecomment-6714571624.json (connector 1) + review-offline-l1/run.json, review-offline-l2/run.json (offline 2: e1695761, 36b85068). Tran spec §3: toi da 3.'
   ket_qua_theo_luot: 'connector fc6fbc7 sach · offline L1 fc6fbc7 request_changes 1 P2 moi truong · offline L2 fc6fbc7 approve.'

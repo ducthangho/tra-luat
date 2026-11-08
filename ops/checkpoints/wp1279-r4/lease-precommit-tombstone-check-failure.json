@@ -1,0 +1,5 @@
+{
+  "command": "canonical lease_publish.py check g4 before atomic control commit",
+  "actual_rc": 8,
+  "cause": "working-tree reciprocal g3 tombstone not yet visible in committed Git refs; no publication or model occurred; atomic commit makes both sides visible without parser change"
+}

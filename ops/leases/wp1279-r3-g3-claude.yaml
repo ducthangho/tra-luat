@@ -87,3 +87,8 @@ nang_tran:
 preflight_holder_source: ops/checkpoints/wp1279-r3/holders-before-lease.json; refreshbeforemodel
 generation_note: g3successorremediationF01/F02aftervalidatedreview1; attempt3/3/calls3/10/formal1/3/push0/1;
   no waivedfindings/historyreset
+da_bi_thay_the: wp1279-r4-g4-claude
+replaced_at_utc: '2026-11-08T08:34:26Z'
+terminal_head: b75d9e4e61e5fd16aa9d4870f5fa844fb6029766
+replacement_reason: g3writer/review2/Readyauto terminal; newP1F03 requires separatelyauthorizedr4Rescue.
+  Originalfdf7834sourceimmutable;nooldwriterresurrection

@@ -1,0 +1,17 @@
+{
+  "head": "53b175c40254b0e64a011ef6d0f70207fd2f933e",
+  "verdict": "approved",
+  "assurance": "same_provider_approved",
+  "promotion_eligible": false,
+  "original_commit": "e254c81cd5f308bf821961d53ec3f9a3e9fab1eb",
+  "receipt_commit": "45963888c7cc3b3702d923ac68ebea161216b393",
+  "receipt_path": "ops/reviews/wp1285-r5-review3.receipt.yaml",
+  "issue_comment": "https://github.com/ducthangho/tra-luat/issues/1285#issuecomment-6725935521",
+  "original_body_exact": true,
+  "v2_rc": 0,
+  "F01": "closed onH3code",
+  "actual_reviewer_model": "gpt-6.1-sol",
+  "actual_reviewer_effort": "xhigh",
+  "actual_executor_effort": "high",
+  "actual_higher_effort_measured": true
+}

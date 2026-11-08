@@ -1838,6 +1838,35 @@ def _kich_ban_in(c: Ctx, codepage: str):
         if not o.strip():
             raise AssertionError(f"[{codepage}] lệnh {ten!r} rc=0 nhưng stdout RỖNG")
 
+    # Scoped management/guard return typed JSON on rejection. Exercise their
+    # actual parser/router and UTF-8 stdout in a subprocess with each codepage;
+    # only the authority transport is replaced by an explicit Unicode failure.
+    driver = c.tmp / "scoped-codepage.py"
+    driver.write_text("""import importlib.util,sys
+from pathlib import Path
+path=Path(sys.argv[1]);sys.path.insert(0,str(path.parent))
+spec=importlib.util.spec_from_file_location('scoped_codepage',path)
+m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+def unavailable(*args,**kwargs):raise ValueError('quyền chưa được xác minh — tiếng Việt')
+m._1174_resolve=unavailable
+m.platform.system=lambda: "Linux"  # codepage/router fixture, no native claim
+raise SystemExit(m.main(sys.argv[2:]))
+""", encoding="utf-8")
+    common=["--packet","1174","--admission","fixture","--revision","1","--generation","1",
+        "--coordinator-id","fixture-codepage","--root",str(c.tmp.resolve())]
+    commands=[("adopt-state",["--mode","initial","--adoption-id","codepage","--expected-source-sha256","c"*64,
+        "--expected-witness-revision","absent","--target-generation","1"],8,"UNKNOWN"),
+        ("guard-first-publication",["--head","a"*40,"--pr","55","--receipt","fixture",
+            "--human-audit-comment","fixture","--human-remote-run","fixture","--workflow-runs","fixture"],12,"admission_rejected")]
+    for command,flags,expected_rc,status in commands:
+        result=subprocess.run([sys.executable,"-B",str(driver),str(c.script),command,*common,*flags],
+            env=dict(os.environ,**env),capture_output=True,timeout=20)
+        assert result.returncode==expected_rc,(codepage,command,result.returncode,result.stderr)
+        lines=result.stdout.decode("utf-8").splitlines();assert len(lines)==1,(codepage,command,lines)
+        value=json.loads(lines[0])
+        assert value["status"]==status and not value["dispatch_allowed"] and "tiếng Việt" in value["detail"],value
+        da_phu.add(command)
+
     # CHỐT PHỦ: mọi lệnh con của parser phải nằm trong kịch bản, hoặc được khai
     # tường minh là không có stdout. Không có chốt này thì thêm lệnh con mới là mất
     # phủ trong im lặng — đúng cách `void-attempt` lọt qua generation 4.
@@ -12362,7 +12391,7 @@ def _lifecycle1174(kind):
                 assert _required1174(required,WP1174_REQUIRED)
                 required.pop("wp1174_init_fresh")
                 assert not _required1174(required,WP1174_REQUIRED),"missing required ID accepted"
-                assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==85,"incomplete acceptance inventory"
+                assert len(_WP1174_FULL_CASE_IDS)==85 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
                 assert m._1174_IMPLEMENTATION_COMPLETE is True,"implementation marker does not match completed inventory"
             return
         if kind=="human_negative":
@@ -13344,6 +13373,26 @@ def _r12_private_snapshot1174(c):
         _reject1174(m._1174_human_evidence,args,a,args.head,reason="verified human snapshot changed")
 
 
+def _r12_main_inventory1174(c):
+    import contextlib,io
+    from unittest.mock import patch
+    full=CASES
+    seen=[]
+    def selected_driver():
+        names=[name for name,_ in CASES if name in WP1174_REQUIRED]
+        assert len(names)==84 and "wp1174_windows_claim_rejected" not in names
+        dict(CASES)["wp1174_lifecycle_scoped_lifecycle"](c)
+        seen.append(tuple(names))
+        return 0
+    # Exercise the real main selection/composition only. The test seam replaces
+    # the expensive legacy runner and native carrier; this grants no native proof.
+    with patch.object(platform,"system",return_value="Linux"),patch.dict(globals(),
+            _legacy_main=selected_driver,_carrier1174=lambda *args:True,_snapshot1174=lambda *args:{}),contextlib.redirect_stdout(io.StringIO()):
+        assert main()==0
+    assert seen and CASES is full
+    assert len(_WP1174_FULL_CASE_IDS)==85 and len(set(_WP1174_FULL_CASE_IDS))==85
+
+
 def _r12_accept_snapshot1174(c):
     _accept_entry1174(c,snapshot=True)
 
@@ -13353,7 +13402,8 @@ _r12_hosts={"wp1174_lifecycle_first_publication":_r12_publication1174,
     "wp1174_durability_fsync_readback":_r12_durability1174,
     "wp1174_source_recovery_snapshot":_r12_water1174,
     "wp1174_lifecycle_human_negative":_r12_private_snapshot1174,
-    "wp1174_writer_accept":_r12_accept_snapshot1174}
+    "wp1174_writer_accept":_r12_accept_snapshot1174,
+    "wp1174_gate_required_skip":_r12_main_inventory1174}
 def _r12_extend1174(original,additional):
     def case(c):
         original(c)
@@ -13383,6 +13433,12 @@ MUTANTS.update({
     "m1174_r12_recovery_lineage":('state.get("enrollment_id") == e["id"] and state.get("binding_sha256") == e["binding_sha256"],\n                      "initialized source lineage identity"','True,\n                      "initialized source lineage identity"',["wp1174_source_recovery_snapshot"]),
     "m1174_r12_ordinary_source_sync":('_1174_recheck_durable(Path(payload["source_path"]), payload["tombstone"].encode("utf-8"))','pass # omit reservation source durability',["wp1174_durability_fsync_readback"]),
 })
+
+MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==85 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
+    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==85,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
+MUTANTS_NHAM_TEST |= {"m1174_r12_platform_inventory"}
+
+_WP1174_FULL_CASE_IDS = tuple(name for name,_ in CASES if name in WP1174_REQUIRED)
 
 _WP1174_PATHS = (".claude/dev/packet_loop.py", ".claude/dev/packet_loop_test.py", "docs/PROTOCOL_DA_PHIEN.md",
     "ops/specs/wp1174-c5-adapter-design.md", "ops/specs/wp1174-implementation-r12.md")

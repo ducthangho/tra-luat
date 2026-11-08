@@ -1,0 +1,106 @@
+{
+  "sha": "c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "node_id": "C_kwDOTNeRjdoAKGMxNTYwM2RjZjUzN2ZhNGJlYjc1M2IyNjMzOThkNmU2YjhjOTIwMTk",
+  "commit": {
+    "author": {
+      "name": "ducthangho",
+      "email": "ducthangho@gmail.com",
+      "date": "2026-11-08T02:38:37Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-11-08T02:38:37Z"
+    },
+    "message": "#1272 HOTFIX-R1252-POSIX r1: danh dau posix cho dot bien r1252_ghi_de_dich_truc_tiep (#1277)\n\nHOTFIX-R1252-POSIX r1: đánh dấu posix cho đột biến r1252_ghi_de_dich_truc_tiep (#1272)",
+    "tree": {
+      "sha": "46d05062cad4f3ca6629931ebc6a4cd0535358f3",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/46d05062cad4f3ca6629931ebc6a4cd0535358f3"
+    },
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/c15603dcf537fa4beb753b263398d6e6b8c92019",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq7+CtCRC1aQ7uu5UhlAAAYYkQADF1bJInJoB8nGppXobrMFYc\nuXbhQMfO6FTFF6yYypCcOXg6i7QRFmEUNJpVfZeR+yVBmMDh14834iYOAtBGe0RE\nl4HCm5YazZP0yE/u6/9nvwhl3XDb5GmoS6rI0N5/SlJlsixzlCtHn0D+mTIQHibL\nRwrCv+hj/oD+KImaegjA3AluDF0h+3o3uJu2Gu2b8qkdlIPo4ZjWdMZShioUhDGB\nlGrXS6vGeW3plHdI7iSOl1Y+uYiaKzGNFFen6N87gj5eWiGZb4/DmLgvyDcJKnsh\ni6FLcrABHsJ3gNvaG7f0ye3FQi9iGy0hJl46mAnEd+ZTQv4bdbVkGw3lzC9AiPO1\nTZ1lkA8bvZNsOnGcn99sOZnyWB6iOihcuarG3cxiP2WPiH8KPhn1fckCyP5yg/sg\nfa9YyREHKJkOI3ILcsVP7jabIZZApQbz+cGu8BAaSMdqenqbJLnlo/ioSMZ+GZ4f\nEgshbzJ86xDgPp0d6NGITRqde8506OJ9DwtbnxXzfP6MtcHvzz+vRsqoc82HWtGK\nm7ZM25ef7MItnf88na/0ZxD48y5OI0RVNfAcshDt4yCN6kaD4tu/xQX99Zad7z1e\n27EEHwlnF0o8Ybv0cA9phCr1zFFQZXwuDFhM3nMSZSzfkpo/qNn35dMqIl3g7PRA\nXMQOsMolVE+hmwK24s43\n=fH/t\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 46d05062cad4f3ca6629931ebc6a4cd0535358f3\nparent efebadf83409a81e42e6c97f1b7255ede76110f5\nparent fc6fbc7c07351ea75ece6a0a25a96262225bef03\nauthor ducthangho <ducthangho@gmail.com> 1794105517 +0700\ncommitter GitHub <noreply@github.com> 1794105517 +0700\n\n#1272 HOTFIX-R1252-POSIX r1: danh dau posix cho dot bien r1252_ghi_de_dich_truc_tiep (#1277)\n\nHOTFIX-R1252-POSIX r1: đánh dấu posix cho đột biến r1252_ghi_de_dich_truc_tiep (#1272)",
+      "verified_at": "2026-11-08T02:38:37Z"
+    }
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/c15603dcf537fa4beb753b263398d6e6b8c92019",
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/c15603dcf537fa4beb753b263398d6e6b8c92019/comments",
+  "author": {
+    "login": "ducthangho",
+    "id": 12748935,
+    "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+    "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/ducthangho",
+    "html_url": "https://github.com/ducthangho",
+    "followers_url": "https://api.github.com/users/ducthangho/followers",
+    "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+    "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+    "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+    "repos_url": "https://api.github.com/users/ducthangho/repos",
+    "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 19864447,
+    "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "efebadf83409a81e42e6c97f1b7255ede76110f5",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/efebadf83409a81e42e6c97f1b7255ede76110f5",
+      "html_url": "https://github.com/ducthangho/tra-luat/commit/efebadf83409a81e42e6c97f1b7255ede76110f5"
+    },
+    {
+      "sha": "fc6fbc7c07351ea75ece6a0a25a96262225bef03",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/fc6fbc7c07351ea75ece6a0a25a96262225bef03",
+      "html_url": "https://github.com/ducthangho/tra-luat/commit/fc6fbc7c07351ea75ece6a0a25a96262225bef03"
+    }
+  ],
+  "stats": {
+    "total": 3,
+    "additions": 2,
+    "deletions": 1
+  },
+  "files": [
+    {
+      "sha": "83a295d01250c7050744efbfa8b37deb44be5ebd",
+      "filename": ".claude/dev/launcher_test.py",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 1,
+      "changes": 3,
+      "blob_url": "https://github.com/ducthangho/tra-luat/blob/c15603dcf537fa4beb753b263398d6e6b8c92019/.claude%2Fdev%2Flauncher_test.py",
+      "raw_url": "https://github.com/ducthangho/tra-luat/raw/c15603dcf537fa4beb753b263398d6e6b8c92019/.claude%2Fdev%2Flauncher_test.py",
+      "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/.claude%2Fdev%2Flauncher_test.py?ref=c15603dcf537fa4beb753b263398d6e6b8c92019",
+      "patch": "@@ -14142,7 +14142,8 @@ def r1252_bam_tep_khong_theo_lien_ket():\n     # #1252 lượt Codex offline 1 (run e9e4e6ce): mỗi finding F1–F7 một chốt, một đột biến.\n     (\"r1252_ghi_de_dich_truc_tiep\", ('                os.replace(tam, duong.name, src_dir_fd=dfd, dst_dir_fd=dfd)\\n',\n                                      '                os.unlink(tam, dir_fd=dfd)\\n                with open(duong, \"wb\") as g:\\n                    g.write(data)\\n'),\n-     [\"r1252_ghi_bang_chung_an_toan\"]),\n+     [\"r1252_ghi_bang_chung_an_toan\"],\n+     (\"posix\", \"nhanh dir_fd cua _ghi_tep_0600 khong chay tren Windows (_CO_DIR_FD False)\")),\n     (\"r1252_nuot_loi_ghi_bang_chung\",\n      ('                    kq_chup.update(snapshot_ket_qua=\"khong_do_duoc\", snapshot_ly_do=\"chup_loi\")', '                    pass'),\n      [\"r1252_ghi_bang_chung_an_toan\"]),"
+    }
+  ]
+}

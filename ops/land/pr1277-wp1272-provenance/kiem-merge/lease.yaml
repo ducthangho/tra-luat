@@ -1,0 +1,98 @@
+# LEASE — HOTFIX-R1252-POSIX revision 1 / generation 1 — danh dau posix cho dot bien r1252_ghi_de_dich_truc_tiep
+# GHI HO theo chi thi CHU KHO trong phien dieu phoi #1206.
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 1272
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1272
+authority_url: https://github.com/ducthangho/tra-luat/issues/1272
+granted_on_instruction_nguyen_van: >-
+  Chu kho trong phien session_015GtxrYPjZCTZeRiazdssgq, 07-11-2026 ~14:3xZ, chon 'Mo packet hotfix (Recommended)' cho
+  launcher-windows do tren master 27fd808: mo Issue hotfix nho, write set chi .claude/dev/launcher_test.py, cap lease cho
+  XfMD sua 1 dong; truoc khi sua XfMD do tren tra-luat-win dung dot bien do de xac nhan nguyen nhan; sau do review va xin
+  chu kho duyet merge.
+authority_caveat: >-
+  Chi thi qua AskUserQuestion trong phien; Issue #1272 do phien agent dang bang token chu kho (#566).
+dieu_kien_cap_da_do: >-
+  Executor session_015GtxraXfMD1t2FJLzzGDr4 nhan vai (send_message 14:48Z). Lease #1252 wp1252-r1-g1-claude da rut han ve
+  2026-11-07T10:00Z (da qua) nen khong con nguoi giu launcher_test.py tu packet do. Issue trung #1273 do XfMD mo se dong
+  la duplicate cua #1272.
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'Phien dieu phoi #1206 session_015GtxrYPjZCTZeRiazdssgq soan spec va ghi lease; executor la XfMD.'
+
+leased_at_utc: '2026-11-07T14:50:00Z'
+heartbeat_at: '2026-11-07T14:50:00Z'
+lease_until: '2026-11-08T14:50:00Z'
+lease_expires_at_utc: '2026-11-08T14:50:00Z'
+
+packet_id: HOTFIX-R1252-POSIX
+packet_slug: hotfix-r1252-posix
+revision: 1
+generation: 1
+lease_id: hotfix-r1252-posix-r1-g1-claude
+thay_the_cho: []
+role: executor
+provider: anthropic_claude
+executor: claude
+executor_session: session_015GtxraXfMD1t2FJLzzGDr4
+surface: claude_code
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer_provider: openai_codex
+reviewer_surface: github_connector
+access: read-write
+
+spec_path: ops/specs/hotfix-r1252-posix-r1.md
+spec_ref: refs/heads/ops/hotfix-r1252-posix-lease@318c7b42a64e46f1e63b5a715dff579234f34d8a
+spec_source_oid: 318c7b42a64e46f1e63b5a715dff579234f34d8a
+spec_blob: efd3c723c9cbe74efc257c6d73d72c0f6f7de074
+spec_sha256: 4133641145d1a595439aab30dd02f2d991f211258d9cd274917f3ff8a946e65b
+spec_hash: 4133641145d1a595439aab30dd02f2d991f211258d9cd274917f3ff8a946e65b
+spec_sha256_required: 4133641145d1a595439aab30dd02f2d991f211258d9cd274917f3ff8a946e65b
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+
+branch: agent/hotfix-r1252-posix-g1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 27fd80803e9a8f80e660752f58c8dd477e9730c8
+start_from_sha: 27fd80803e9a8f80e660752f58c8dd477e9730c8
+immutable_acceptance_baseline: 27fd80803e9a8f80e660752f58c8dd477e9730c8
+reviewed_sha_required: 27fd80803e9a8f80e660752f58c8dd477e9730c8
+reviewed_sha_ghi_chu: 'chua co head code luc cap lease; moi luot review neo dung SHA cua luot.'
+
+write_set:
+  - .claude/dev/launcher_test.py
+  - ops/handoff/hotfix-r1252-posix-g1.md
+write_set_hash: 3422e5cfda8e82920a4f66461101cc4b0f5ae3558859ca04b44c06c9e131b633
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP (LC_ALL=C), noi bang LF, co LF cuoi, utf-8.'
+write_set_ghi_chu: 'Diff PR dung 1 tep launcher_test.py; handoff chi tren nhanh lease.'
+tran_kich_thuoc: 'spec §3: diff PR dung 1 tep, <= 15 dong them, <= 5 dong xoa.'
+tran_loi_goi_codex: 'spec §3: toi da 3 loi goi Codex; vuot => Review Rescue Checkpoint (ADR-0037), hoi chu kho.'
+ci_budget:
+  gate_tu_dong: 'CI PR tu dong (ubuntu) tren PR cua packet'
+  windows: 'Khong chay CI Windows; chi do tap trung tren tra-luat-win (spec A1), giu KHOA C:/tl-win/KHOA.txt.'
+  full_mutant: 'Khong chay toan bo dot bien tren Windows. Phan chung Linux theo spec A3.'
+dieu_kien_dung:
+  - 'S1 — can sua tep ngoai write set. DUNG, handoff.'
+  - 'S2 — vuot tran spec §3. DUNG, checkpoint chu kho.'
+  - 'S3 — so do Windows bac gia thuyet (spec A1). DUNG, bao phien dieu phoi.'
+  - 'S4 — het han lease => ngung ghi.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land
+  - Khong LIVE (Drive/NLM/webapp/registry), khong deploy, khong bump VERSION
+  - Khong doc/ghi credential that
+  - Khong force-push
+  - Khong viet chuoi bo-qua-CI nguyen van trong commit message
+
+coordination_paths:
+  - ops/leases/hotfix-r1252-posix-r1-g1-claude.yaml
+run_minutes: 1440
+heartbeat_required_minutes: 360

@@ -1,0 +1,17 @@
+# A12 do lai boi phien ghi so 2026-11-08, clone moi checkout e6c6505 (detached); nen = blob 889334f cua cung hai tep, do trong CUNG lenh
+$ ruff 0.15.15
+## ruff check --select F (nen)
+5	F841	unused-variable
+Found 5 errors.
+No fixes available (5 hidden fixes can be enabled with the `--unsafe-fixes` option).
+rc=1
+## ruff check --select F (ung)
+5	F841	unused-variable
+Found 5 errors.
+No fixes available (5 hidden fixes can be enabled with the `--unsafe-fixes` option).
+rc=1
+## doctrine-scan tai e6c6505
+doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine
+rc=0
+## git diff --check 889334f e6c6505 -- .claude/dev/launcher.py .claude/dev/launcher_test.py
+rc=0

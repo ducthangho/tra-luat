@@ -1,0 +1,37 @@
+# Bien ban M8 (ADR-0060) dong WP #1272 HOTFIX-R1252-POSIX r1 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1277-wp1272-land-evidence.yaml. landed false: moc workflow_definition not_measured (GraphQL 403,
+# chua co wd-run cho run 42439410815). A1 lane chu kho la thuat_lai (buoc (3) do that chi o CI sau merge).
+packet: HOTFIX-R1252-POSIX
+revision: 1
+generation: 1
+spec_hash: 4133641145d1a595439aab30dd02f2d991f211258d9cd274917f3ff8a946e65b
+head_da_review: fc6fbc7c07351ea75ece6a0a25a96262225bef03
+tree_h: 46d05062cad4f3ca6629931ebc6a4cd0535358f3
+review:
+  offline: 'run 36b85068 (luot 2) approve tren fc6fbc7, chup_workspace sach; luot 1 e1695761 request_changes 1 P2 moi truong'
+  connector: 'issuecomment-6714571624 sach tren fc6fbc7'
+windows:
+  phan_loai: required
+  nguon: 'mien chu kho tu dang issuecomment-6716241960 "windows: fc6fbc7… mien"; CI launcher-windows 42439410853 tren c15603d success'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1277
+duyet_chu_kho_ghi_chu: 'merged_by ducthangho 02:38:37Z; mien K6/K7 6716241960 tu dang 02:35:28Z; khong co comment approve_merge.'
+merge_commit: c15603dcf537fa4beb753b263398d6e6b8c92019
+tree_m: 46d05062cad4f3ca6629931ebc6a4cd0535358f3
+ci_master:
+  run_id: 42439410815
+  conclusion: success
+  ghi_chu: 'ci.yml; launcher-windows 42439410853 cung SHA = success'
+nghiem_thu:
+  A1: not_measured   # lane chu kho thuat_lai; Windows that cho buoc (3) chi co o CI sau merge (passed o hoan_tat)
+  A2: passed
+  A3: passed
+  A4: passed
+  A5: passed
+  hoan_tat_s5: passed
+lease_cuoi: hotfix-r1252-posix-r1-g1-claude
+landed: false
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: not_measured
+  gate_output: passed

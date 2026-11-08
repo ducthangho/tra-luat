@@ -1,0 +1,13 @@
+# do 2026-11-08 boi phien ghi so: clone moi tu mirror, checkout fc6fbc7 (detached), python3 3.13.17, Linux; do1_1272.py sha256 dae131e1a3c30a5c9af4cf1d0ef51205e11a6f39281a8dbae240857e2cf7a3e8
+### python3 do1_1272.py <clone fc6fbc7>
+so muc DOT_BIEN/HOOK/HARNESS: 1 0 0 | phan tu: 4
+so dong ket qua dot bien: 1
+  r1252_ghi_de_dich_truc_tiep  OK  giet 1/1: r1252_ghi_bang_chung_an_toan
+tra ve: (0, 0)
+rc_tail=0 (ma thoat cua tail trong ong, KHONG phai cua python)
+### python3 do1_1272.py <clone fc6fbc7> --gia-windows
+so muc DOT_BIEN/HOOK/HARNESS: 1 0 0 | phan tu: 4
+so dong ket qua dot bien: 1
+  r1252_ghi_de_dich_truc_tiep  KHONG DO DUOC tren nen nay (nhanh dir_fd cua _ghi_tep_0600 khong chay tren Windows (_CO_DIR_FD False))
+tra ve: (0, 1)
+rc_tail=0 (ma thoat cua tail trong ong, KHONG phai cua python)

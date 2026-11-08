@@ -1,0 +1,41 @@
+# do 2026-11-08 tren mirror day du ref (ops/land-1252-1272 @ origin/master c15603d)
+$ git rev-parse c15603d^1 c15603d^2 fc6fbc7^ c15603d^{tree} fc6fbc7^{tree}
+efebadf83409a81e42e6c97f1b7255ede76110f5
+fc6fbc7c07351ea75ece6a0a25a96262225bef03
+efebadf83409a81e42e6c97f1b7255ede76110f5
+46d05062cad4f3ca6629931ebc6a4cd0535358f3
+46d05062cad4f3ca6629931ebc6a4cd0535358f3
+$ git merge-base --is-ancestor c15603d origin/master; rc
+rc=0
+$ git rev-list --first-parent origin/master | grep -c ^c15603d
+1
+$ git diff --stat c15603d^1 c15603d
+ .claude/dev/launcher_test.py | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+$ git diff fc6fbc7^ fc6fbc7
+diff --git a/.claude/dev/launcher_test.py b/.claude/dev/launcher_test.py
+index 1c3603c..83a295d 100644
+--- a/.claude/dev/launcher_test.py
++++ b/.claude/dev/launcher_test.py
+@@ -14142,7 +14142,8 @@ DOT_BIEN = [
+     # #1252 lượt Codex offline 1 (run e9e4e6ce): mỗi finding F1–F7 một chốt, một đột biến.
+     ("r1252_ghi_de_dich_truc_tiep", ('                os.replace(tam, duong.name, src_dir_fd=dfd, dst_dir_fd=dfd)\n',
+                                      '                os.unlink(tam, dir_fd=dfd)\n                with open(duong, "wb") as g:\n                    g.write(data)\n'),
+-     ["r1252_ghi_bang_chung_an_toan"]),
++     ["r1252_ghi_bang_chung_an_toan"],
++     ("posix", "nhanh dir_fd cua _ghi_tep_0600 khong chay tren Windows (_CO_DIR_FD False)")),
+     ("r1252_nuot_loi_ghi_bang_chung",
+      ('                    kq_chup.update(snapshot_ket_qua="khong_do_duoc", snapshot_ly_do="chup_loi")', '                    pass'),
+      ["r1252_ghi_bang_chung_an_toan"]),
+$ git rev-parse efebadf:.claude/dev/launcher.py c15603d:.claude/dev/launcher.py (A5: launcher.py khong doi)
+37086cbc7b225b16b821e975b82e38c5dbf65a1a
+37086cbc7b225b16b821e975b82e38c5dbf65a1a
+$ spec tren nhanh lease: git rev-parse origin/ops/hotfix-r1252-posix-lease:ops/specs/hotfix-r1252-posix-r1.md; sha256
+efd3c723c9cbe74efc257c6d73d72c0f6f7de074
+4133641145d1a595439aab30dd02f2d991f211258d9cd274917f3ff8a946e65b  -
+$ git log --oneline -3 origin/ops/hotfix-r1252-posix-lease
+50e3065 lease(#1272): rut han hotfix-r1252-posix-r1-g1-claude ve 2026-11-08T02:55Z sau merge PR #1277 (c15603d)
+6347e36 ops(lease): HOTFIX-R1252-POSIX r1 g1 cho executor XfMD (#1272)
+318c7b4 ops(spec): HOTFIX-R1252-POSIX r1 (#1272)
+$ git ls-tree origin/ops/hotfix-r1252-posix-lease ops/handoff/hotfix-r1252-posix-g1.md (rong = khong co)
+(het)

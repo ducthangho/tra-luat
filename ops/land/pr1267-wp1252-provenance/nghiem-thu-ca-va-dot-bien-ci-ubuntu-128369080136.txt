@@ -1,0 +1,54 @@
+# Doi chieu bang §4 spec (blob 27fd808, sha256 b2c52a9a…) voi log job 128369080136 launcher (ubuntu-latest), run 42360967762, head 27fd808
+# log_sha256 136eede00e28bb9c4aa23681c9db8a39adbf2bbf57bfc80deceb159987872b7c — REST GET actions/jobs/128369080136/logs
+# Buoc 'python .claude/dev/launcher_test.py' chi in dong BO QUA + tong; ca KHONG in rieng => ca dat = khong co trong BO QUA va hong 0.
+# Buoc '--dot-bien' in mot dong moi dot bien: '<ten> OK giet k/n: <ca>'.
+TONG: 395/395 ca DA CHAY QUA (tong 397, bo qua 2, hong 0) - KHONG DU: 2 ca BO QUA, chua do gi
+TONG: DOT BIEN: 655/655 dat  (4 khong do duoc tren nen nay)
+BO QUA r1252_* tren Linux: khong co
+## A2 [nen: linux + windows]
+  ca r1252_ghi_tep_ignored: def=1, bo_qua_linux=khong
+  dot bien r1252_bo_tep_ignored: r1252_bo_tep_ignored         OK  giet 1/1: r1252_ghi_tep_ignored
+## A3 [nen: linux + windows]
+  ca r1252_ghi_trong_git: def=1, bo_qua_linux=khong
+  dot bien r1252_bo_thu_muc_git: r1252_bo_thu_muc_git         OK  giet 1/1: r1252_ghi_trong_git
+## A4 [nen: linux + windows]
+  ca r1252_khong_ghi_thi_sach: def=1, bo_qua_linux=khong
+  dot bien r1252_luon_bao_lech: r1252_luon_bao_lech          OK  giet 1/1: r1252_khong_ghi_thi_sach
+  dot bien r1252_bam_khac_tep: r1252_bam_khac_tep           OK  giet 1/1: r1252_khong_ghi_thi_sach
+## A5 [nen: linux + windows]
+  ca r1252_run_root_trong_workspace_bi_loai: def=1, bo_qua_linux=khong
+  dot bien r1252_khong_loai_run_root: r1252_khong_loai_run_root    OK  giet 1/1: r1252_run_root_trong_workspace_bi_loai
+  dot bien r1252_loai_ca_thu_muc_cha: r1252_loai_ca_thu_muc_cha    OK  giet 1/1: r1252_run_root_trong_workspace_bi_loai
+## A6 [nen: linux + windows (a, b, c, d, e)]
+  ca r1252_khong_do_duoc: def=1, bo_qua_linux=khong
+  dot bien r1252_nuot_muc_loi: r1252_nuot_muc_loi           OK  giet 1/1: r1252_khong_do_duoc
+  dot bien r1252_tin_me_chet: r1252_tin_me_chet            OK  giet 1/1: r1252_khong_do_duoc
+  dot bien r1252_none_la_chet: r1252_none_la_chet           OK  giet 1/1: r1252_khong_do_duoc
+  dot bien r1252_windows_khong_dung_job: r1252_windows_khong_dung_job OK  giet 1/1: r1252_khong_do_duoc
+  dot bien r1252_dao_thu_tu_phan_loai: r1252_dao_thu_tu_phan_loai   OK  giet 1/1: r1252_khong_do_duoc
+## A7 [nen: linux + windows]
+  ca r1252_tat_co_giu_nguyen: def=1, bo_qua_linux=khong
+  dot bien r1252_mac_dinh_bat: r1252_mac_dinh_bat           OK  giet 1/1: r1252_tat_co_giu_nguyen
+## A8 [nen: linux]
+  ca r1252_trang_thai_khac_khong_bi_de: def=1, bo_qua_linux=khong
+  dot bien r1252_de_trang_thai: r1252_de_trang_thai          OK  giet 1/1: r1252_trang_thai_khac_khong_bi_de
+## A9 [nen: linux + windows]
+  ca r1252_gioi_han_khai: def=1, bo_qua_linux=khong
+  dot bien r1252_cat_hau_to_gioi_han: r1252_cat_hau_to_gioi_han    OK  giet 1/1: r1252_gioi_han_khai
+  dot bien r1252_bo_cum_setsid: r1252_bo_cum_setsid          OK  giet 1/1: r1252_gioi_han_khai
+## A15 [nen: linux + windows]
+  ca r1252_cat_50: def=1, bo_qua_linux=khong
+  dot bien r1252_bo_cat: r1252_bo_cat                 OK  giet 1/1: r1252_cat_50
+  dot bien r1252_tong_sau_cat: r1252_tong_sau_cat           OK  giet 1/1: r1252_cat_50
+  dot bien r1252_bi_cat_luon_false: r1252_bi_cat_luon_false      OK  giet 1/1: r1252_cat_50
+  dot bien r1252_cat_49: r1252_cat_49                 OK  giet 1/1: r1252_cat_50
+  dot bien r1252_cat_ca_tep_chup: r1252_cat_ca_tep_chup        OK  giet 1/1: r1252_cat_50
+## A16 [nen: linux + windows]
+  ca r1252_bieu_dien_khong_nhap_nhang: def=1, bo_qua_linux=khong
+  dot bien r1252_ghi_chu_khi_utf8: r1252_ghi_chu_khi_utf8       OK  giet 1/1: r1252_bieu_dien_khong_nhap_nhang
+  dot bien r1252_tab_xuong_dong: r1252_tab_xuong_dong         OK  giet 1/1: r1252_bieu_dien_khong_nhap_nhang
+  dot bien r1252_khong_sap: r1252_khong_sap              OK  giet 1/1: r1252_bieu_dien_khong_nhap_nhang
+## A17 [nen: linux + windows]
+  ca r1252_bo_dem_stat_lam_moi_truoc_chup: def=1, bo_qua_linux=khong
+  dot bien r1252_chup_truoc_chot: r1252_chup_truoc_chot        OK  giet 1/1: r1252_bo_dem_stat_lam_moi_truoc_chup
+  dot bien r1252_chot_sach_khong_ghi_index: r1252_chot_sach_khong_ghi_index OK  giet 1/1: r1252_bo_dem_stat_lam_moi_truoc_chup

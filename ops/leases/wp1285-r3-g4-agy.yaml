@@ -11,9 +11,9 @@ provider: google_antigravity
 executor: google_antigravity
 model: gemini-4-argon-high
 effort: high
-model_family: google
+model_family: gemini
 execution_surface: antigravity
-transport: machine/local
+transport: machine
 environment: windows
 reviewer: codex
 reviewer_model_family: openai

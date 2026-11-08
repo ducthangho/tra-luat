@@ -89,11 +89,11 @@ change_policy_exception:
   - unknown=>blocked
 leased_at_utc: '2026-11-08T16:48:06.713925+00:00'
 heartbeat_at: '2026-11-08T16:48:06.713937+00:00'
-lease_until: '2026-11-09T06:03:01Z'
-lease_expires_at_utc: '2026-11-09T06:03:01Z'
+lease_until: '2026-11-08T17:08:13.937031+00:00'
+lease_expires_at_utc: '2026-11-08T17:08:13.937031+00:00'
 heartbeat_required_minutes: 360
 max_lease_hours: 24
-hard_not_after: '2026-11-09T06:03:01Z'
+hard_not_after: '2026-11-08T17:08:13.937031+00:00'
 nang_tran:
   ai_nang: ducthangho under recorded delegation
   can_cu: Exact C15 approval https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6723113364;
@@ -184,3 +184,9 @@ packet_budget_carryover:
   CI_cap: 16
   counters_reset: false
   external_source_attribution: UNKNOWN separately retained
+ended_at_utc: '2026-11-08T17:08:13.937031+00:00'
+ended_reason: Actual source slot12 terminated on provider quota unavailability before
+  source changes; no handoff/review/push/merge. Source12 charged, no retry/refund
+  or successor grant.
+ended_on_instruction: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6724229331
+ended_event_receipt: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6724448573

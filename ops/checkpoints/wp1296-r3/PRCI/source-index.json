@@ -1,0 +1,11 @@
+{
+  "at": "2026-11-09T09:14:39.905782+00:00",
+  "files": 95,
+  "zip_sha256": "ba8ecd896fba08e9491a033c0f216c47230c027fe711011f1c97b35eeeae9f04",
+  "rawsource_dir": "/workspace/scratch/proxima-remainder-20261109/r2/PRCI-complete-source",
+  "PR": 1301,
+  "H": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "AUX5": "assigned_notyetpassed",
+  "rawcanonicalstates": "preservednot_measured; actualWDseparate and gate_outputawaitmanualaudit",
+  "sensitive_assurance": "HOLDnewHactualhuman/crosspending"
+}

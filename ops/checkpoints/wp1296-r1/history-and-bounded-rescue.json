@@ -1,0 +1,30 @@
+{
+  "wp1285": {
+    "landed_M": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+    "AIformal": 5,
+    "human": 1,
+    "shared_used": 14,
+    "shared_cap": 14,
+    "productpushes": 2,
+    "actualauthors": 4,
+    "AGYunknownreserved": 1
+  },
+  "finding_history": [
+    "WP1285-R1-F01 block/background historical closures",
+    "WP1285-R7-F01 manifest-requires-guard-comment-regex P3 OPEN debt1295; conservative3relatedmanifestations"
+  ],
+  "inheritance": "No parentwaiver/humanaudit transferred, no reset or claim debtfixed",
+  "new_allowance": {
+    "authorized_by": "ducthangho latestexplicitcreatecorrectiveandfinishMissiondirective",
+    "authority": "https://github.com/ducthangho/tra-luat/issues/1296#issuecomment-6733713274",
+    "author_calls": 1,
+    "formal_rounds": 2,
+    "shared_Codex_calls": 8,
+    "primary_pushes": 1,
+    "author_minutes": 45,
+    "formal_minutes": 60,
+    "AUX_minutes": 90
+  },
+  "same_class_survival": "STOP/checkpoint if repair/review stillfails; no automatic extraauthor/ordinary repeatedreview",
+  "Mission_lifetime_cost": "Historical S1/S2/P0 and unresolved AGY cost remain separate; not measured as zero/newallowance is bounded successor only"
+}

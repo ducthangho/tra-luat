@@ -1,0 +1,42 @@
+{
+  "mission": 1238,
+  "existing_plan_unchanged": "ops/plans/PROXIMA-PLAYWRIGHT-v1.md",
+  "owner_request": "Tạo packet mới sửa các khoản nợ. Còn nội dung gì cần để hoàn thành Mission thì gom vào xử lý luôn.",
+  "phase_graph_change": false,
+  "packets": {
+    "P1-S4": 1296,
+    "P3": 1297,
+    "P4": 1298,
+    "P5": 1299,
+    "P6": 1300,
+    "P2_existing": 1287,
+    "debt_tracking": 1295
+  },
+  "order": [
+    "1296 correction/1295debt closure;1287P2U10 remediation independently after boundeddiagnosis",
+    "1297P3 Desktop canary afterP1/P2",
+    "1298P4 updater/rollback aftercanary",
+    "1299P5 ASUS thenVM afterP4",
+    "1300P6 finalacceptance/allleases/debts/evidence beforeMissioncomplete"
+  ],
+  "unknowns": {
+    "U1": "PS51/7 isolatedmodulecontrols passed, realendpointcompat not inferred",
+    "U2": "VM OSfingerprints measuredsame; exactconnection/capability select/recheck pendingP5",
+    "U3": "WhatIf isolatednative negativecontrols passedS2, no realhostmutationproof claimed",
+    "U4": "actualupdaterbehavior pendingP4",
+    "U5": "artifact provenance policy/proof pendingbeforeactivation; checksumnotattestation",
+    "U6": "ownerconfirmedpersonalnoncommercial6722499267",
+    "U7": "retention/soak/resource thresholds pendingP4",
+    "U8": "testprofile restoration pendingP4",
+    "U9": "ASUS freeD/ACL/cache/rollbackreserve freshmeasurement pendingP5",
+    "U10": "P2 fullCFTpinnednativeDesktop FAIL; originalCLI0123/node24/prior0122 diagnostics retained, no retrybranch",
+    "U11": "remoteauthentication notmeasured; pendingP3;OSfingerprints notauthproof",
+    "U12": "installedbinary5.5.0 tosourcecommit provenance pendingP4"
+  },
+  "other_debts": {
+    "P2_OP_F01": "cleanup patch tested49focusedcases, formalreview NOTRUN, onlycloseafteractualreview/CI/land1287",
+    "P0_F1_F2": "Historicalassurance/evidenceexceptions exactH7 4c319cc4, owner6704067442/land6704865424; not repairablebyinventingoldidentity. Keepwaived/recordlimits, no exception fornewSHA",
+    "passivearchive": "S3 M8authoritative andcontrolrefavailable; weeklypassivearchive lane nonblocking, not anewproduct defect"
+  },
+  "authority_limits": "NoLIVE/hostactivation/newendpoint/serviceaccount/profile/credentials/UAC/ACL inferred. Hostplan+existingauthority mustbechecked beforemutation, missingbinding blocksstage. NoWindowsCI/fullWindowsmutantCI; focusedWindows allowed. Max2productworkers; proposeddependentpackets do not acquirewrite rights."
+}

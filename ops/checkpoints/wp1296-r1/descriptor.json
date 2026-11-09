@@ -1,0 +1,23 @@
+{
+  "packet_id": "wp1296",
+  "revision": 1,
+  "generation": 1,
+  "base_sha": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "write_set": [
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+  ],
+  "effective_write_set": [
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+  ],
+  "change_policy_sha": null,
+  "effective_review_class": "sensitive",
+  "required_checks": [
+    "exactH nativePS51/7 parsersemantic baseline/candidate/comment/directiveculture/classnegative/rollback fulloriginalevidence",
+    "normal7/CXparent12/unchangedS2normal26 both; otherproductbytesunchanged",
+    "exactH Linuxfullselftest/strictmanifest/Ruffdelta0/admission/doctrine/scope/size",
+    "freshindependentCodexCLI xhigh wholeB..H/spec/security/v2prepush, sufficientactualsensitiveassurance separate",
+    "UbuntuPRCI/connector/Ready/currentrules/fullrefs/exactHownergrant/K0K7",
+    "actualcanonicalMCI4anchors/officialartifact/fullsourceAUX/M8/readback/realUTCretirement/D1D4"
+  ],
+  "land_obligations": []
+}

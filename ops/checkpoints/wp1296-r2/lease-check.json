@@ -1,5 +1,5 @@
 {
-  "rc": 8,
-  "stdout": "",
-  "stderr": "CHAN [8]: lease mới thay_the_cho=['wp1296-r1-g1-codex'], nhưng lease cũ ['wp1296-r1-g1-codex'] chưa mang dòng `da_bi_thay_the: wp1296-r2-g2-codex`; hãy thêm dòng ấy vào từng lease còn thiếu trước khi đăng lease mới (cổng không tự sửa hồ sơ cũ)\n"
+  "rc": 0,
+  "stdout": "LỆNH check KHÔNG CHẠY hai lớp GitHub: đo ISSUE/PR và dò comment; dùng `kiem-github`\nlease wp1296-r2-g2-codex ĐĂNG ĐƯỢC — issue #1296, neo 1013394e0f36, hết hạn 2026-11-09T12:51:38Z, prompt ops/prompts/wp1296-r2-g2-codex.md khớp băm 61661c6c484d\n",
+  "stderr": ""
 }

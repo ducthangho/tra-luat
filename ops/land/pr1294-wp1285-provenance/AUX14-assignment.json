@@ -1,0 +1,31 @@
+{
+  "role": "tl-auditor full original MCI source audit read-only; not code review/human audit",
+  "call": 14,
+  "deadline_minutes": 90,
+  "M": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "H4": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "run_id": 42564993334,
+  "source_archive_sha256": "49a5383c0de43655feea59261a65bf0e736f74c114e747fcc9ac0f28781513d2",
+  "required": [
+    "Read ALL23 complete original joblogs and official artifact, no excerpt/count-only proof",
+    "Verify run/event/master/M/attempt/all23Ubuntu success, actual checkoutM/parents/tree",
+    "Verify actual GraphQL WorkflowRun.file repository/path/OID/blob/hash vs Git",
+    "Official artifact digest/command/output/runner/catalogpolicy/identity beforeafter M Linuxclean; positive1777 and strict184",
+    "Evaluate all gate outputs and required5contexts, rawcanonical not_measured preserved; packet-loop1359executed+1namedplatformskip not1360",
+    "Four derived anchors with source-backed limits; no new tests/models/subagents/source edits"
+  ],
+  "allowed_outputs": [
+    "MCI-auditor-receipt.json",
+    "MCI-auditor-final.txt"
+  ],
+  "receipt_keys": [
+    "verdict",
+    "source_archive_sha256",
+    "run_id",
+    "merge_commit",
+    "all_original_job_logs_read",
+    "four_anchors",
+    "findings",
+    "limitations"
+  ]
+}

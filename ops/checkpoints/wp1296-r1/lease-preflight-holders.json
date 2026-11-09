@@ -1,0 +1,62 @@
+{
+  "at": "2026-11-09T06:29:35.807930+00:00",
+  "remote_heads": 758,
+  "lease_pairs": 904,
+  "active_holders": 0,
+  "matches": [
+    {
+      "lease": "wp1285-r1-g1-claude",
+      "ref": "refs/heads/ops/wp1285-spec",
+      "state": "HẾT_HẠN",
+      "active": false
+    },
+    {
+      "lease": "wp1285-r2-g2-claude",
+      "ref": "refs/heads/ops/wp1285-spec",
+      "state": "HẾT_HẠN",
+      "active": false
+    },
+    {
+      "lease": "wp1285-r2-g3-claude",
+      "ref": "refs/heads/ops/wp1285-spec",
+      "state": "HẾT_HẠN",
+      "active": false
+    },
+    {
+      "lease": "wp1285-r3-g4-agy",
+      "ref": "refs/heads/ops/wp1285-spec",
+      "state": "HẾT_HẠN",
+      "active": false
+    },
+    {
+      "lease": "wp1285-r4-g5-codex",
+      "ref": "refs/heads/ops/wp1285-spec",
+      "state": "HẾT_HẠN",
+      "active": false
+    },
+    {
+      "lease": "wp1285-r5-g6-codex",
+      "ref": "refs/heads/ops/wp1285-spec",
+      "state": "HẾT_HẠN",
+      "active": false
+    },
+    {
+      "lease": "wp1285-r6-g7-codex",
+      "ref": "refs/heads/ops/wp1285-spec",
+      "state": "HẾT_HẠN",
+      "active": false
+    },
+    {
+      "lease": "wp1285-r7-g8-codex",
+      "ref": "refs/heads/ops/wp1285-spec",
+      "state": "HẾT_HẠN",
+      "active": false
+    },
+    {
+      "lease": "wp1285-r8-g9-codex-human",
+      "ref": "refs/heads/ops/wp1285-spec",
+      "state": "HẾT_HẠN",
+      "active": false
+    }
+  ]
+}

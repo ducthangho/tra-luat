@@ -1,0 +1,15 @@
+{
+  "launcher_rc": 0,
+  "ended": "2026-11-09T08:03:40.089049+00:00",
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "post_snapshots": {
+    "source": {
+      "sha256": "d08eee45810a0eb52a767a74ccdf2c4a8eba9b0563687a4da494354138dd033f",
+      "same_as_before": true
+    },
+    "review": {
+      "sha256": "072972b3596a0a284ae6167a2f288de51b1e955b3d0a372a8e89f87f76dc5421",
+      "same_as_before": true
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-09T08:03:49.580053+00:00",
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "source_author_run": "b24840984f5c4686b3858034a78b84e9",
+  "reviewer_run": "c949f66c126a459c8751c0ac0f717edc",
+  "model_measured": "gpt-6.1-sol",
+  "author_effort_measured": "high",
+  "reviewer_effort_measured": "xhigh",
+  "higher_effort_measured": true,
+  "source_and_review_snapshots_unchanged": true,
+  "original_verdict_unchanged": true,
+  "assurance": "same_provider_approved",
+  "promotion_eligible": false,
+  "promotion_hold": "Protocol sensitive requires actualindependentcross/humanaudit onnewH2; oldH4 doesnottransfer"
+}

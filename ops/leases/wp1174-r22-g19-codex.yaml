@@ -27,7 +27,7 @@ recorded_by: Codex coordinator under explicit E2 owner delegation; no actual-hum
 spec_path: ops/specs/wp1174-implementation-r22.md
 spec_hash: 93014799f12143ad9114979744ccec08d5cc00dab2006b7e9412fd4663ebaf2c
 spec_sha256_required: 93014799f12143ad9114979744ccec08d5cc00dab2006b7e9412fd4663ebaf2c
-spec_ref: refs/heads/ops/spec-wp1174-r22@89a80dcde20b0826b4bbc24b7de651bc7d7bbcaa
+spec_ref: refs/heads/ops/spec-wp1174-r22@029b0c2a6ff23b6c5d55a34eb0027ad8cdc1ebf7
 prompt_path: ops/specs/wp1174-implementation-r22.md
 prompt_sha256_required: 93014799f12143ad9114979744ccec08d5cc00dab2006b7e9412fd4663ebaf2c
 base_sha: 222187c1d88fa6b51cf7fc93bf63a02122b8472d
@@ -90,7 +90,7 @@ change_policy_exception:
   - M9
   - unknown=>blocked
 leased_at_utc: '2026-11-09T01:08:54.585259+00:00'
-heartbeat_at: '2026-11-09T05:15:15.550155+00:00'
+heartbeat_at: '2026-11-09T06:00:32.420139+00:00'
 lease_until: '2026-11-09T18:05:32Z'
 lease_expires_at_utc: '2026-11-09T18:05:32Z'
 heartbeat_required_minutes: 360
@@ -115,11 +115,12 @@ nang_tran_review_rounds:
   can_cu: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6728589869
 thay_the_cho: null
 template_only: false
-guard: Source15 closed and original45min source deadline preserved. Owner-approved
-  G extends only parent gate/coordination time; fresh independent Codexhigh review
-  of final448 after authority/lease/secret/head/runtime/full-fit. No finished context
-  reuse, fakejournal/begin, gate waiver or candidate control authority.
-spec_source_oid: 89a80dcde20b0826b4bbc24b7de651bc7d7bbcaa
+guard: Source15 remains closed with original45min deadline; source16 is one fresh
+  test-only medium context within source18 after actual canonical H/Đ/R/secret/head/runtime/whole-fit
+  and legacyinitrc4. New operator supplement pinned, existing F/G owner authority
+  unchanged. No new quota, product/protocol edit, fakejournal/begin, actual-human/native
+  claim or finished-context reuse.
+spec_source_oid: 029b0c2a6ff23b6c5d55a34eb0027ad8cdc1ebf7
 spec_sha256: 93014799f12143ad9114979744ccec08d5cc00dab2006b7e9412fd4663ebaf2c
 runtime_preconditions:
   source_test_processes: Source runtime strips TL/GitHub/Claude/Gemini/Google/AWS/NLM
@@ -264,3 +265,30 @@ G_review_assignment:
   remaining_contexts: 5
   serving_identity: KHONG_DO_DUOC
   actual_context_ids: only recorded after real platform dispatch
+source16_supplement:
+  path: ops/specs/wp1174-r22-source16-test-repair.md
+  sha256: d9e635f5b32e8c281419a109fa12d727a49ad2becfae86c68963253980357dd4
+  metadata_oid: 029b0c2a6ff23b6c5d55a34eb0027ad8cdc1ebf7
+  authorization: Operator decision within existing owner F source18 and G clock; not
+    new claimed owner approval of unseen hash
+  owner_F_basis: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6729819560
+  owner_G_basis: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6732765461
+  source_used_before: 15
+  pending_source_slot: 16
+  max_context_minutes: 45
+  source15_closed: true
+  only_mutable_path: .claude/dev/packet_loop_test.py
+  input_head: 448d17baff13ae1beb869662a2ad81dd2d7aefde
+  new_final_head_not_yet_claimed: true
+source16_manual_offline_bootstrap:
+  authorized_under_existing_source18_delegation: true
+  source_slot: 16
+  fresh_context_only: true
+  legacy_init_expected_rc: 4
+  required_checks:
+  - current standalone H/Đ/R
+  - secret/runtime/clean/head
+  - whole remaining budget
+  no_journal_or_begin_claim: true
+  old_source15_bootstrap_not_reused: true
+source16_final_review_head_pending: true

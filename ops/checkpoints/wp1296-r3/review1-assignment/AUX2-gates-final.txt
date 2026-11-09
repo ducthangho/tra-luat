@@ -1,0 +1,5 @@
+Packet1296 AUX2: PASSED — chỉ gate-source, H2 15ad82f56924a0ccc99833ec73eec078ce00b726; không formalapproval/humanaudit/classclosure.
+Core88uniquephases/89observations;2runtime normal7/CX12/S2normal26;6commentpositives(42parentcases),57meaningfulbeforeimportrejections,3PS7inertnocredit,4parsecontrols,4historicalsemantic+2historicalparse,2baselinefalsepositive/4baselinebypass/2guardonlyrollback.
+r3clarification thêm6literalcontrols:PM01pass,PM02VALUE[RootModule]/rc1/runtime0/NULLmetadata,nokillcredit. Tổng94unique/95observations;1876nativeoriginalfiles/101logs,allnestedproof/sourcecopies/typedCLIXML/hash/rc kiểmđủ.18exporthashentries before/after khớpGitB/H2;95rawownedledgerrows khớp từngactualobservation.
+LinuxexactH2:1777/1777child0/cleanidentity/runnercatalogcommandhash;strict184/184;Ruffbare1/12F821/delta0;pinnedadmission/doctrine/ADR/docclaims0;scope1file+66-2/LF.
+H1APIpositivefailure,H2firstoracleSTOPrc2 và firstliteraloperatorrc2 giữnguyên/timestamps riêng. Không transferwaiverH4/claimWindowsCI/LIVE/CI/land; freshformalxhighreview/assurance còn pending.

@@ -1,0 +1,530 @@
+{
+  "verdict": "passed",
+  "status": "complete_native_and_Linux_gate_source_audit_under_frozen_r3_clarification",
+  "formal_code_approval": false,
+  "human_audit": false,
+  "class_closure": false,
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+  "base": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "effective_spec": "wp1296-r3, unchangedH2 read-only adoption; r1/r2history retained",
+  "completed_at": "2026-11-09T07:51:46.810417+00:00",
+  "findings": [],
+  "resolved_evidence_gaps": [
+    {
+      "gap": "Missing separate embeddedrequires-like literal fixture under ambiguousr1/r2 wording",
+      "resolution": "Published r3 clarification before measurement; six exactdataPM01positive/PM02strictschema-negative controls retained, no 7of7 or semanticnegativekill credit."
+    },
+    {
+      "gap": "After-input hashes previously only executedassertion; no rawselectedledger",
+      "resolution": "Final18-entry before/afterexporthash maps match immutableB/H2 and raw95ownedledgerrows+header retained/hashverified; original assertion strength not retroactively upgraded."
+    }
+  ],
+  "native_archives": [
+    {
+      "name": "H2-native-first",
+      "sha256": "a83e932f656b7d54c275704ba947f889f393b89fdea1725a644d1659be4121d1",
+      "bytes": 7370104,
+      "original_files": 1179,
+      "command_logs": 59,
+      "terminal": {
+        "rc": 2,
+        "at": "2026-11-09T07:05:29.116560+00:00",
+        "candidate": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+        "phase_count": 58
+      },
+      "source_manifest_sha256": "894073aec3e2cebe03b7758e2140586d4f1a552e9418c7f0ac556256a352829a",
+      "lock_release": {
+        "session": "wp1296-H2-native-15ad82f56924",
+        "released": true,
+        "at": "2026-11-09T07:05:29.116560+00:00",
+        "after": ""
+      }
+    },
+    {
+      "name": "H2-native-completion",
+      "sha256": "a203725bbfae0b38663b6f44f0d0c3272b52dc733c8aa0f954ad647b4320e3e1",
+      "bytes": 3482741,
+      "original_files": 542,
+      "command_logs": 33,
+      "terminal": {
+        "rc": 0,
+        "at": "2026-11-09T07:21:40.509823+00:00",
+        "candidate": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+        "phase_count": 31
+      },
+      "source_manifest_sha256": "9a26817cf5a3c456963724f4af931ce3654d36fe8a758022a67b0bf1377246cb",
+      "lock_release": {
+        "session": "wp1296-H2-completion-15ad82f56924",
+        "released": true,
+        "at": "2026-11-09T07:21:40.509823+00:00",
+        "after": ""
+      }
+    },
+    {
+      "name": "literal-first",
+      "sha256": "9cec6087a3ab01c13f3df0e8ab3d5abbb1ef23b627917324e4a13e6524388161",
+      "bytes": 358442,
+      "original_files": 49,
+      "command_logs": 2,
+      "terminal": {
+        "rc": 2,
+        "at": "2026-11-09T07:45:44.796699+00:00",
+        "candidate": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+        "phase_count": 1
+      },
+      "source_manifest_sha256": "ac9eb7e8ea85d641433cf57d29a657b4baf4b99caf6cce0eae4c49a07ef636f9",
+      "lock_release": {
+        "session": "wp1296-H2-literals-15ad82f56924",
+        "released": true,
+        "at": "2026-11-09T07:45:44.796699+00:00",
+        "after": ""
+      }
+    },
+    {
+      "name": "literal-remaining",
+      "sha256": "28f27d1a2b44f2827eb77325f8279b9b10d0683fa3796cdbd51e2cd3f41927d1",
+      "bytes": 745191,
+      "original_files": 106,
+      "command_logs": 7,
+      "terminal": {
+        "rc": 0,
+        "at": "2026-11-09T07:47:25.952267+00:00",
+        "candidate": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+        "phase_count": 5
+      },
+      "source_manifest_sha256": "2addcd32b3f6626d8211472251621a55fa20e7dc0611164aa0bd339c3d0eec43",
+      "lock_release": {
+        "session": "wp1296-H2-literals-remaining-15ad82f56924",
+        "released": true,
+        "at": "2026-11-09T07:47:25.952267+00:00",
+        "after": ""
+      }
+    }
+  ],
+  "native_totals": {
+    "core_unique_phases": 88,
+    "core_actual_observations": 89,
+    "literal_unique_phases": 6,
+    "all_unique_phases": 94,
+    "all_actual_observations": 95,
+    "core_original_files_verified": 1721,
+    "supplement_original_files_verified": 155,
+    "all_native_original_files_verified": 1876,
+    "all_native_command_logs_verified": 101,
+    "core_unique_top_level_explicit_path_sha_refs_verified": 382,
+    "recursive_S3_artifactrefs_all_observations": 370,
+    "legacy_nested_sets": [
+      {
+        "artifacts": 29,
+        "children": 7
+      },
+      {
+        "artifacts": 29,
+        "children": 7
+      }
+    ],
+    "recursive_S3_reports": 97,
+    "S3_child_commands": 58,
+    "raw_runtime_tamper_outputs": 48,
+    "CX_named_semantic_kills": 8
+  },
+  "native_outcomes": {
+    "positive_parent_phases": 12,
+    "positive_parent_cases": 132,
+    "meaningful_requirements_beforeimport_rejections": 57,
+    "parser_controls_no_semantic_credit": 4,
+    "historical_AST_semantic_rejections": 4,
+    "baseline_comment_falsepositives": 2,
+    "baseline_culture_bypasses": 4,
+    "guard_only_rollback_property_failures": 2,
+    "inert_PS7_controls_no_kill": 3
+  },
+  "literal_controls": [
+    {
+      "label": "literal-en-US-ps51",
+      "actual_rc": 1,
+      "parent_culture": "en-US",
+      "runtime": "ps51",
+      "PM01": "passed",
+      "PM02": "failed VALUE[RootModule]",
+      "runtime_children": 0,
+      "parser_requirements": null,
+      "semantic_kill_credit": false
+    },
+    {
+      "label": "literal-tr-TR-ps51",
+      "actual_rc": 1,
+      "parent_culture": "tr-TR",
+      "runtime": "ps51",
+      "PM01": "passed",
+      "PM02": "failed VALUE[RootModule]",
+      "runtime_children": 0,
+      "parser_requirements": null,
+      "semantic_kill_credit": false
+    },
+    {
+      "label": "literal-az-Latn-AZ-ps51",
+      "actual_rc": 1,
+      "parent_culture": "az-Latn-AZ",
+      "runtime": "ps51",
+      "PM01": "passed",
+      "PM02": "failed VALUE[RootModule]",
+      "runtime_children": 0,
+      "parser_requirements": null,
+      "semantic_kill_credit": false
+    },
+    {
+      "label": "literal-en-US-ps7",
+      "actual_rc": 1,
+      "parent_culture": "en-US",
+      "runtime": "ps7",
+      "PM01": "passed",
+      "PM02": "failed VALUE[RootModule]",
+      "runtime_children": 0,
+      "parser_requirements": null,
+      "semantic_kill_credit": false
+    },
+    {
+      "label": "literal-tr-TR-ps7",
+      "actual_rc": 1,
+      "parent_culture": "tr-TR",
+      "runtime": "ps7",
+      "PM01": "passed",
+      "PM02": "failed VALUE[RootModule]",
+      "runtime_children": 0,
+      "parser_requirements": null,
+      "semantic_kill_credit": false
+    },
+    {
+      "label": "literal-az-Latn-AZ-ps7",
+      "actual_rc": 1,
+      "parent_culture": "az-Latn-AZ",
+      "runtime": "ps7",
+      "PM01": "passed",
+      "PM02": "failed VALUE[RootModule]",
+      "runtime_children": 0,
+      "parser_requirements": null,
+      "semantic_kill_credit": false
+    }
+  ],
+  "source_after_evidence": {
+    "before_map_sha256": "6deedfbb61954ea664d4063afe668178f1da0baf1dfa50fb0f25e81b05a0f58b",
+    "after_map_sha256": "6deedfbb61954ea664d4063afe668178f1da0baf1dfa50fb0f25e81b05a0f58b",
+    "same18_base_candidate_export_entries": true,
+    "each_entry_matches_immutableGitB_or_H2": true,
+    "source_scope": "committed9fileaddon export forB/H2, not native fullGitcheckout"
+  },
+  "ledger": {
+    "owned_rows": 95,
+    "before_first_literal": 89,
+    "before_remaining": 90,
+    "after_remaining": 95,
+    "all95_session_label_SHA_pass_total_rc_match_actualphase": true,
+    "raw_prefixes_preserved": true,
+    "selected_after_sha256": "c2f78248d280cc4492e3a6ec1849c0f741613b66eabe9a4f044bcce0c2147776",
+    "selection_source_metadata": {
+      "source": "C:\\tl-win\\do-luong.csv",
+      "source_sha256": "c6cbcd95602e7cf9a02af704bcfbeabb545e05e8124ea169fbfe7b5bc80c6a23",
+      "selected_rows": 95,
+      "selected_sha256": "c2f78248d280cc4492e3a6ec1849c0f741613b66eabe9a4f044bcce0c2147776",
+      "session_ids": [
+        "wp1296-H2-completion-15ad82f56924",
+        "wp1296-H2-literals-15ad82f56924",
+        "wp1296-H2-literals-remaining-15ad82f56924",
+        "wp1296-H2-native-15ad82f56924"
+      ],
+      "other_rows_not_archived": true
+    },
+    "unrelated_user_rows": "not archived"
+  },
+  "Linux": {
+    "archive_sha256": "d912a46973fe00c5a0f8327fd83cbf81ee3ba8e87f4442742493a697398dc49b",
+    "archive_each_file_matches": true,
+    "commands": [
+      {
+        "label": "admission",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+          "-B",
+          "/workspace/scratch/wp1296-spec-publish/ops/lease_publish.py",
+          "kiem-thu-hoi-github",
+          "15ad82f56924a0ccc99833ec73eec078ce00b726",
+          "--canonical-base",
+          "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+          "--nhanh-mac-dinh",
+          "master",
+          "--root",
+          "/workspace/scratch/wp1296-r2-g2-codex",
+          "--receipt",
+          "/workspace/scratch/proxima-remainder-20261109/r2/linux-H2/admission.json"
+        ],
+        "rc": 0,
+        "seconds": 0.214076,
+        "log_sha256": "34409194ffaf5ccd4432390d3b9857bcfb5e87241042d44e812578889332f392",
+        "bytes": 139
+      },
+      {
+        "label": "diff-check",
+        "command": [
+          "git",
+          "diff",
+          "--check",
+          "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+          "15ad82f56924a0ccc99833ec73eec078ce00b726"
+        ],
+        "rc": 0,
+        "seconds": 0.003568,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "label": "numstat",
+        "command": [
+          "git",
+          "diff",
+          "--numstat",
+          "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+          "15ad82f56924a0ccc99833ec73eec078ce00b726"
+        ],
+        "rc": 0,
+        "seconds": 0.003442,
+        "log_sha256": "070da4105a0a5aa02dd0602e638f37efba07195df01871ee2578b51e95ad0887",
+        "bytes": 68
+      },
+      {
+        "label": "doctrine-scan",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+          "-B",
+          ".claude/dev/packet_loop.py",
+          "doctrine-scan",
+          "--root",
+          "/workspace/scratch/wp1296-r2-g2-codex"
+        ],
+        "rc": 0,
+        "seconds": 0.414773,
+        "log_sha256": "d5d6962e60a7ce2002d5eab3678ab78bb53688c8cfac22735ab088ab8381ead3",
+        "bytes": 70
+      },
+      {
+        "label": "adr-song",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+          "-B",
+          ".claude/dev/packet_loop.py",
+          "adr-song",
+          "--root",
+          "/workspace/scratch/wp1296-r2-g2-codex"
+        ],
+        "rc": 0,
+        "seconds": 0.264461,
+        "log_sha256": "0f64eed52c99c602f15e179ff897f74c58c29ad5cf8c741fae11bf4c3fd5fa59",
+        "bytes": 113
+      },
+      {
+        "label": "doc-claims",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+          "-B",
+          "scripts/tl.py",
+          "doc-claims-check",
+          "--strict"
+        ],
+        "rc": 0,
+        "seconds": 2.525961,
+        "log_sha256": "7090379550f5135a2cf6497a4ddc99e45a22e14795035197a3777f3786abbaa7",
+        "bytes": 73434
+      },
+      {
+        "label": "ruff",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+          "-m",
+          "ruff",
+          "check",
+          "--no-cache",
+          "--select",
+          "F",
+          "--output-format",
+          "json",
+          "scripts/tl.py"
+        ],
+        "rc": 1,
+        "seconds": 0.063943,
+        "log_sha256": "e00b66883eace89cdd66906c408263ae81d90fd512fffa30203fe09df69a90e9",
+        "bytes": 5059
+      },
+      {
+        "label": "worker-manifest",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+          "-B",
+          "scripts/tl.py",
+          "release-manifest",
+          "--root",
+          "/workspace/scratch/wp1296-r2-g2-codex",
+          "--out",
+          "/workspace/scratch/proxima-remainder-20261109/r2/linux-H2/worker-manifest.json"
+        ],
+        "rc": 0,
+        "seconds": 1.016015,
+        "log_sha256": "66718b6d622f749f2dc3a1bf896d19a7b81562fc0a3bdf7fd671acae522cf58a",
+        "bytes": 31007
+      },
+      {
+        "label": "worker-release-verify",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+          "-B",
+          "scripts/tl.py",
+          "release-verify",
+          "/workspace/scratch/proxima-remainder-20261109/r2/linux-H2/worker-manifest.json",
+          "--root",
+          "/workspace/scratch/wp1296-r2-g2-codex",
+          "--strict"
+        ],
+        "rc": 0,
+        "seconds": 1.065842,
+        "log_sha256": "0968bbd87b9c51b89131cdfd9433c26b4392a6c87ee138746fad5bb4a66873bc",
+        "bytes": 20803
+      },
+      {
+        "label": "full-selftest-lifecycle",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+          "-B",
+          "/workspace/scratch/wp1296-spec-publish/.claude/dev/gate_lifecycle.py",
+          "run",
+          "--kind",
+          "heavy",
+          "--name",
+          "wp1296-H2-prepush",
+          "--repo",
+          "/workspace/scratch/wp1296-r2-g2-codex",
+          "--evidence",
+          "/workspace/scratch/proxima-remainder-20261109/r2/linux-H2/full-selftest-evidence.json",
+          "--output",
+          "/workspace/scratch/proxima-remainder-20261109/r2/linux-H2/full-selftest.log",
+          "--expected-head",
+          "15ad82f56924a0ccc99833ec73eec078ce00b726",
+          "--base-sha",
+          "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+          "--selected-test",
+          "full-legacy-selftest",
+          "--require-clean",
+          "--wait-seconds",
+          "0",
+          "--timeout-seconds",
+          "5400",
+          "--quiet",
+          "--positive-regex",
+          "== tl selftest ([1-9][0-9]*)/\\1 ==",
+          "--",
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+          "-B",
+          "scripts/tl.py",
+          "--selftest"
+        ],
+        "rc": 0,
+        "seconds": 190.799818,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    ],
+    "actual_selftest_child_rc": 0,
+    "positive": "1777/1777",
+    "full_output_sha256": "46addaec96f9a66dbde5cbdd67e73bca1fe7c5455fb5bc1108b4b6094e832694",
+    "lifecycle_before_after_identity": {
+      "catalog_policy_sha256": "e8b7be5e7f1f77a4d4d065d49dbd616a6e9b5260541e61debfe7d5d62638c679",
+      "head_sha": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "machine": "x86_64",
+      "python_implementation": "CPython",
+      "python_version": "3.12.14",
+      "runner_sha256": "637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810",
+      "system": "Linux",
+      "system_release": "6.18.57",
+      "tracked_clean": true,
+      "tree_sha": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "worktree_clean": true
+    },
+    "command_runner_catalog_hashes_verified": true,
+    "admission": {
+      "H": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "S": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+      "T": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "canh_ancestry": 2,
+      "che_do": "chua_kich_hoat",
+      "descriptor_q13_ghim": "f974b6dba1bfccd4f6ec4315c00ece7868a045487ffbf6ae3d4df86fb4315153",
+      "discovery": "KHONG_CHAY: A0 chưa kích hoạt; PROFILE_ADAPTER_DA_DUYET rỗng (quyết định chủ kho)",
+      "event": "thu_hoi_admission_receipt",
+      "ket_luan": "TAP_THU_HOI_RONG",
+      "kho_canonical": "github.com/ducthangho/tra-luat",
+      "metadata_T": [],
+      "ngan_sach": {
+        "max_alternate_depth": 4,
+        "max_alternate_stores": 8,
+        "max_object_bytes": 8388608,
+        "max_parent_path_edges": 10000,
+        "max_reader_wall_seconds": 60.0,
+        "max_total_object_bytes": 134217728,
+        "max_tree_or_alias_edges": 128,
+        "max_unique_objects": 50000
+      },
+      "nhanh_mac_dinh": "master",
+      "oid_bo_kiem_tai_S": "f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1",
+      "policy_T": null,
+      "profile_digest": null,
+      "schema_version": 1,
+      "so_object_da_doc": 8,
+      "so_thu_hoi_S": {},
+      "so_thu_hoi_T": {},
+      "thoi_diem_utc": "2026-11-09T07:04:15Z",
+      "thu_hoi_moi": [],
+      "tong_bytes": 7993,
+      "tree_S": "f20cb1aa78756ae0a0b818c34e8d90f152b06a2f"
+    },
+    "strict_manifest": "184/184;oktrue;failed[];extra[]",
+    "Ruff_bare_rc": 1,
+    "Ruff_existing_F821": 12,
+    "Ruff_delta": 0,
+    "baseline_basis": "Normalized actual findings match retained earlier baseline; exactB/H2 scripts/tl.py and all lintconfig unchanged; no fresh B lint rerun claimed.",
+    "scope": "onefile+66/-2,total68; within<=200adds/<=300total; LF/noBOM checked"
+  },
+  "history_retained": {
+    "H1": "actualPS51normal1/7/runtime0 unsupportedRequiresPSSnapIns;terminalrc2 retained, notapproval",
+    "H2_first": "operatorrc2 expectation-reject failure; sameH2PS7snapinactualrc0/7of7 retained; neworacleinertcontrol no killcredit",
+    "literal_first": "operatorrc2 caused .values() on allowedNULL; actualfirstliteralPM01pass/PM02schemafail preserved; remaining5 measured separatelyrc0",
+    "old_H4_human_waiver": "not transferred to this H2; debt/class disposition remains separateformalreview"
+  },
+  "source_hashes": {
+    "/workspace/scratch/proxima-remainder-20261109/r2/AUX2-assignment.json": "90f6ad4b6abb836ec9409331c4bacb86585b7324eb129dcade5d066577016f75",
+    "/workspace/scratch/proxima-remainder-20261109/r2/H2-native-derived-receipt.json": "27ebda584700ed215638f0981244b1ab6edf9a0e1211215942015a088ab45ac3",
+    "/workspace/scratch/proxima-remainder-20261109/r2/combine-native.py": "4399e07d553a91d7697a728cb1d3b1ae75b7c9e0881de092de394f2ef8d680e7",
+    "/workspace/scratch/wp1296-spec-publish/ops/specs/wp1296-r1.md": "6874872dccb01e1a7d4c1d10b5e0612630bd0d54c9b0fa808816956ca2f187d3",
+    "/workspace/scratch/wp1296-spec-publish/ops/specs/wp1296-r2.md": "4df352b7c86003ee82423d750340625f84078c3a92483659ef079390da9f14ee",
+    "/workspace/scratch/wp1296-spec-publish/ops/specs/wp1296-r3.md": "780a5fa9b7cf86ec277e734bbbd43c9d1ef153b4750227ae173987a192fb39c4",
+    "/workspace/scratch/wp1296-spec-publish/ops/leases/wp1296-r3-g3-codex.yaml": "660a0b366e4a21d9dc56cb41a58c74e9545e742c3db44b879abfdf59efadd050",
+    "/workspace/scratch/proxima-remainder-20261109/r2/linux-H2/receipt.json": "07f517a7bc8e7a742c3c6634485585d22d5cd84fb5a1bfd45d3c14dde1c04783",
+    "/workspace/scratch/proxima-remainder-20261109/r2/linux-H2/full-selftest-evidence.json": "e1b356f464ff9d75febada27c6bb01a5614251ee08d87c14a5b24773094aeae8",
+    "/workspace/scratch/proxima-remainder-20261109/r2/literal-remaining-extracted/measurement.json": "c5e0ffa50b28b4b2e9a2d5fc7ce3811683a7ffbc1725544ea80ba8a0908c8c6e",
+    "/workspace/scratch/proxima-remainder-20261109/r2/literal-remaining-extracted/source-before-filehashes.json": "6deedfbb61954ea664d4063afe668178f1da0baf1dfa50fb0f25e81b05a0f58b",
+    "/workspace/scratch/proxima-remainder-20261109/r2/literal-remaining-extracted/source-after-filehashes.json": "6deedfbb61954ea664d4063afe668178f1da0baf1dfa50fb0f25e81b05a0f58b",
+    "/workspace/scratch/proxima-remainder-20261109/r2/literal-remaining-extracted/owned-ledger-after.csv": "c2f78248d280cc4492e3a6ec1849c0f741613b66eabe9a4f044bcce0c2147776",
+    "/workspace/scratch/proxima-remainder-20261109/r2/literal-first-extracted/operator-failure.json": "3865f30d91a438cc2f8616b208fb1a377612a306ecbc7b604b56dda61f4a6e8e"
+  },
+  "limitations": [
+    "This is gate-source audit only. No formal code correctness approval, human/cross assurance, finding/classclosure, waiver, push/Ready/CI/merge/MCI/M8/land/debtclosure claim. Fresh exactH2 independent xhigh review and sufficient assurance remain required.",
+    "Passed means requirednative+Linux evidence under explicitfrozenr3 clarification; original firstnative and firstliteraloperatorrc2 are not relabeled passed or erased.",
+    "57meaningful negatives reject PM01beforeimport. Four parseerrorcontrols include two malformed controls and two PS51historicalAST parse controls; latter overlap historical6shape set and are not double counted or semantic kills.",
+    "ThreePS7legacySnapin defaultcontrols carry no semantic killcredit. Sixliteral controls are PM01positive plus PM02fixedschema-negative, not fullnormal7 or requirementnegative kills.",
+    "Parentparser/harness cultures en-US/tr-TR/az-Latn-AZ measured; successful runtime/tamper children intentionally en-AU per unchanged script. No claim all importedchildren ran everyparentculture.",
+    "Source exports are committed scoped bytes/hashbridge, not a nativefullGitcheckout. Before/after snapshots are endpoint observations, not continuous attestation.",
+    "HostPythonPID/creation/executable census,GPOUndefined,lockownership/heartbeat/release and service/process0 observed; no persistentpolicy/service/auth changes claimed. Initialfailedrun lacks finalhostafter, latercompletion/supplement observations have their own timestamps.",
+    "Onlyselectedownedledger bytes independently hashed; whole-hostCSV source hash is recorded producerobservation because unrelatedrows intentionallynotarchived.",
+    "Ruffbare rc1/12F821/delta0 is not a general Ruffpassed or workflowpincontract claim.",
+    "Archive/source rawhashes authoritative; text mutation reconstruction normalizesCRLF/LF where Windowswriters differ.",
+    "No new tests, native/device/network/browser actions, models/subagents, code/Git/source edits performed; only twoassignedscratchoutputs written. Author2/2/formal0/2/shared2/8/push0/1 remain historicalbudgetcontext, not reset by diagnostic recoveries."
+  ],
+  "digest_sha256": "92f714c141625bb46d5f4bd8a852ff3b872dc11d1d7db80ff4b5acc7919b46fa"
+}

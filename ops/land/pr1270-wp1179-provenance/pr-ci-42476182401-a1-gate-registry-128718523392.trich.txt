@@ -1,0 +1,6 @@
+# trich log job 128718523392 gate-registry (ubuntu-latest), run 42476182401 attempt 1 (pull_request, head 5824094) — log_sha256 ddd08fb42a0c8fecb8c5721827d72ccf488718145c84c96e49396faa869aefbe, 248038 byte; dong 2586 va 2603-2604 nguyen van (cat dong 2602 JSON thoi gian bo, chi giu muc doc_receipt_thu_hoi_test.py va codex_cloud_setup_test.py)
+2026-11-08T11:56:00.5178617Z CI_DANG_KY ops/codex_cloud_setup_test.py: ĐỎ — LỖI HẠ TẦNG: khởi chạy/chờ thất bại: ChildProcessError: con cháu còn sống sau khi bộ thoát, rc=1
+2026-11-08T11:56:00.5196024Z TỔNG: ĐỎ
+2026-11-08T11:56:00.5329413Z ##[error]Process completed with exit code 1.
+{"duong_dan": ".claude/dev/doc_receipt_thu_hoi_test.py", "rc": 0, "giay": 144.918, "bat_dau_utc": "2026-11-08T11:37:35.523Z", "ket_thuc_utc": "2026-11-08T11:40:00.441Z", "che_do": "day_du"}
+{"duong_dan": "ops/codex_cloud_setup_test.py", "rc": 1, "giay": 60.614, "bat_dau_utc": "2026-11-08T11:38:49.364Z", "ket_thuc_utc": "2026-11-08T11:39:49.978Z", "che_do": "day_du"}

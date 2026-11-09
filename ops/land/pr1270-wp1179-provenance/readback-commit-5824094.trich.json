@@ -1,0 +1,1490 @@
+{
+ "_trich": "cat tu REST GET /repos/ducthangho/tra-luat/commits/5824094e78a0afe9d0af8866df45c50b24334767 (2026-11-08); bo patch tung tep; sha256 phan hoi day du 872f0cb024a716e777f6ed2c591d907fa208114acfc799fa95707d0d29199438, 1178652 byte",
+ "sha": "5824094e78a0afe9d0af8866df45c50b24334767",
+ "tree": "5af7905b39091319e3399accfe89b0a940b36415",
+ "parents": [
+  "0ef6b2cc289b877c0a2e989ccefc182954ab2224",
+  "3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4"
+ ],
+ "author": {
+  "name": "Claude",
+  "email": "noreply@anthropic.com",
+  "date": "2026-11-08T11:02:55Z"
+ },
+ "committer": {
+  "name": "Claude",
+  "email": "noreply@anthropic.com",
+  "date": "2026-11-08T11:02:55Z"
+ },
+ "message": "wp1179 r9 g1: gop origin/master 3cc0bc7 (base troi, duong dong goi human audit)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZNAaGP4K8HUy8WEp5",
+ "verification": {
+  "verified": true,
+  "reason": "valid",
+  "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQACbnuSA\ns4NqrA/Lg6j830M/PHSmkcd9N3tz2ut7AR+HSmJU+9m0rCCyJHCUJ7RDhnEz9NWj3IluJ5WJwzIi\nuQ8=\n-----END SSH SIGNATURE-----",
+  "payload": "tree 5af7905b39091319e3399accfe89b0a940b36415\nparent 0ef6b2cc289b877c0a2e989ccefc182954ab2224\nparent 3cc0bc7b1dd26955b6fd4cc96612d9fbacc8a8d4\nauthor Claude <noreply@anthropic.com> 1794135775 +0000\ncommitter Claude <noreply@anthropic.com> 1794135775 +0000\n\nwp1179 r9 g1: gop origin/master 3cc0bc7 (base troi, duong dong goi human audit)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZNAaGP4K8HUy8WEp5\n",
+  "verified_at": "2026-11-08T11:32:13Z"
+ },
+ "stats": {
+  "total": 52362,
+  "additions": 52331,
+  "deletions": 31
+ },
+ "files": [
+  {
+   "filename": ".agents/skills/proxima-control/config.example.json",
+   "status": "added",
+   "additions": 8,
+   "deletions": 0,
+   "sha": "40f8291303298a954998c7a7bdd636dba3262955"
+  },
+  {
+   "filename": ".agents/skills/proxima-control/scripts/ProximaConfig.psm1",
+   "status": "added",
+   "additions": 297,
+   "deletions": 0,
+   "sha": "8493ca82782a15651989e287ed9902564c58bcf3"
+  },
+  {
+   "filename": ".agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1",
+   "status": "added",
+   "additions": 643,
+   "deletions": 0,
+   "sha": "1da96f998b8b7e7686aad22af803e09220aefc6d"
+  },
+  {
+   "filename": ".claude/dev/launcher.py",
+   "status": "modified",
+   "additions": 389,
+   "deletions": 12,
+   "sha": "37086cbc7b225b16b821e975b82e38c5dbf65a1a"
+  },
+  {
+   "filename": ".claude/dev/launcher_test.py",
+   "status": "modified",
+   "additions": 861,
+   "deletions": 19,
+   "sha": "83a295d01250c7050744efbfa8b37deb44be5ebd"
+  },
+  {
+   "filename": "docs/research/2026-11-05-proxima-playwright-p0.md",
+   "status": "added",
+   "additions": 97,
+   "deletions": 0,
+   "sha": "087aff054c451ed3986ce7c086599861627318e3"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-land-evidence.yaml",
+   "status": "added",
+   "additions": 246,
+   "deletions": 0,
+   "sha": "feb270d9d789527053801f99370799ae2a8e7c97"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/SHA256SUMS",
+   "status": "added",
+   "additions": 90,
+   "deletions": 0,
+   "sha": "44ba5053fabb93c49cbe261cf349504b69f05539"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/a10-ci-windows-bo-qua-128369080234.txt",
+   "status": "added",
+   "additions": 60,
+   "deletions": 0,
+   "sha": "71483390d5d180d0cab4c09a88cb6cb843a0fd7c"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/a11e-dotbien.out.txt",
+   "status": "added",
+   "additions": 699,
+   "deletions": 0,
+   "sha": "f059185182e40198670b8b23621c67a22d17b6c7"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ai-dang-giu-sau-rut-han.txt",
+   "status": "added",
+   "additions": 22,
+   "deletions": 0,
+   "sha": "db30abbf8261ed518b2eddc70350af2e0bbf6efb"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/bien-ban-m8.yaml",
+   "status": "added",
+   "additions": 49,
+   "deletions": 0,
+   "sha": "6099bf836391ca2a36d4684f0cc27604f69141fb"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs.json",
+   "status": "added",
+   "additions": 3018,
+   "deletions": 0,
+   "sha": "a5b756ab72413bbe220af27745d5ceca26e56343"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369080651.trich.txt",
+   "status": "added",
+   "additions": 7,
+   "deletions": 0,
+   "sha": "63a79e818e9e0f0938671b562383f76c213a4cac"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369135868.trich.txt",
+   "status": "added",
+   "additions": 16,
+   "deletions": 0,
+   "sha": "28c52a0de70e0b3a34e92b96d380f4452be62523"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369135884.trich.txt",
+   "status": "added",
+   "additions": 35,
+   "deletions": 0,
+   "sha": "48b03de51fcfa3346964156c1a9cfcbfe867b327"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369135910.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "1dc6d460336d5e5c5ab9a5ec7414cc3df3890b1a"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369135912.trich.txt",
+   "status": "added",
+   "additions": 15,
+   "deletions": 0,
+   "sha": "135d1a87fe5ee1f133750fe5a557eaa1d178f3b7"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369135921.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "399e833e13db0ee0f479c44807abe7e5b02be655"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369135937.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "8884bf38c1e641a840d59086838c7694d07ade6b"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369135940.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "971e7199a53395321d62d29dab8642412d163bb5"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369135941.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "a7b3031730fd6165f9f7afef6c50e87ba528fbe9"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369135961.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "53f14a59b523b68f64ed3df947aabfbfa134c967"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369135962.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "af77a085c5ba3dda6553400aa4e29ff14bf0a33c"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369135963.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "6d61888ea8339b53555040e167d33d940bb71cbf"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369135966.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "62f43c907e891ec7ae3d4e1b58c3893a870435bb"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369135967.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "0a601b1906f8b25a98e644f44abde67886bbc863"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369135969.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "2d51a1f332b8b375129a259fb2410c534efd976f"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369135995.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "faa80bbdaf4f36f4200820b78ed7200a9fa2204c"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369136014.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "ffa5120273096fa18d04ef53a2e91373acb72acd"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369136016.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "348fdfa75ce35118c7b30088b7981de5dbcf12f1"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369136017.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "eb719173b82d8a540359d23f7c7693aeb7be38f6"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369136034.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "e0bbd9c743bb8e6bf0345ce85327e45c46557d1d"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369468540.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "910cf082f4c1cbeffc0e82d0905a78c039f20412"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128369513149.trich.txt",
+   "status": "added",
+   "additions": 15,
+   "deletions": 0,
+   "sha": "d536c9912c70e2f65deb34432672aa50d8a681a4"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/jobs/128373532075.trich.txt",
+   "status": "added",
+   "additions": 9,
+   "deletions": 0,
+   "sha": "c082e958c4907a40451addac260cf90f30281d02"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/provenance.yaml",
+   "status": "added",
+   "additions": 1599,
+   "deletions": 0,
+   "sha": "90c0dbf4df4a4791a0d0e349e8090f079a570acf"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ci/run.json",
+   "status": "added",
+   "additions": 1,
+   "deletions": 0,
+   "sha": "f31d7efdce548d3b5a24dc42c0f6c0f535efdb86"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/danh-gia-gate-output-42360967767.txt",
+   "status": "added",
+   "additions": 27,
+   "deletions": 0,
+   "sha": "33c54c61801818718cab025b36505571fbcfe894"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/danh_gia_gate.py",
+   "status": "added",
+   "additions": 196,
+   "deletions": 0,
+   "sha": "32faa7dfe297e7191e6662729e7df9695262621f"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/kiem-dong-wp-m8.txt",
+   "status": "added",
+   "additions": 18,
+   "deletions": 0,
+   "sha": "1a413e2e51c771d0a218c7a15e8d98f97ae07ef8"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/kiem-merge/SHA256SUMS",
+   "status": "added",
+   "additions": 12,
+   "deletions": 0,
+   "sha": "429c05bfe5d75766d7f4af6e18785109aa9d14cb"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/kiem-merge/chu-kho-mien.json",
+   "status": "added",
+   "additions": 47,
+   "deletions": 0,
+   "sha": "2b3d7b637bbcf9572bc963621b3201dd6eeb811d"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/kiem-merge/chu-kho.json",
+   "status": "added",
+   "additions": 115,
+   "deletions": 0,
+   "sha": "999130931f94625e30a7f268569b0765308555a7"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/kiem-merge/cn.json",
+   "status": "added",
+   "additions": 1,
+   "deletions": 0,
+   "sha": "6ad5002b1ca7475e9f70bcef2f683c2a73df12fd"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/kiem-merge/cr.json",
+   "status": "added",
+   "additions": 3480,
+   "deletions": 0,
+   "sha": "c1139af5729dbdfdbc055bd9e2d942054a4b2b87"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/kiem-merge/ddr.json",
+   "status": "added",
+   "additions": 6,
+   "deletions": 0,
+   "sha": "317633bc459c4f53ee9cd953822b1fa0022142b7"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/kiem-merge/lease.yaml",
+   "status": "added",
+   "additions": 115,
+   "deletions": 0,
+   "sha": "e221ccd073a92c7cb0b1858ddfd703d7a7ccf4eb"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/kiem-merge/output.txt",
+   "status": "added",
+   "additions": 3,
+   "deletions": 0,
+   "sha": "2da90f26389fe8e3c6cd32dbfbc596c67fa5d45d"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/kiem-merge/output2.txt",
+   "status": "added",
+   "additions": 1,
+   "deletions": 0,
+   "sha": "db6a49cc428ee33ba136301421a575f3d493469e"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/kiem-merge/run-offline-l9.json",
+   "status": "added",
+   "additions": 682,
+   "deletions": 0,
+   "sha": "f050a8ddacd6c855d5fa28fdbf8f84d920b462f3"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/kiem-merge/stdout-offline-l9.log",
+   "status": "added",
+   "additions": 30,
+   "deletions": 0,
+   "sha": "48f169ad434fe0e28a23f12bd4f1c60d70a7871c"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/kiem-merge/wj.json",
+   "status": "added",
+   "additions": 3017,
+   "deletions": 0,
+   "sha": "4348f54c943f2a68b95efcd9555ececc87167950"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/kiem-merge/wr.json",
+   "status": "added",
+   "additions": 755,
+   "deletions": 0,
+   "sha": "01d613949ecf7990a063a524c290cd3216d989f2"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/launcher-windows-128369080234.trich.txt",
+   "status": "added",
+   "additions": 6,
+   "deletions": 0,
+   "sha": "6739a9221e47cc04b2eb58331dc06cac8f41a40b"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/launcher-windows-128605212485.trich.txt",
+   "status": "added",
+   "additions": 5,
+   "deletions": 0,
+   "sha": "4d2ce313fc4491a0cfea3df8e7345cc631d329b8"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/lease-wp1252-r1-g1-claude-sau-rut-han.yaml.txt",
+   "status": "added",
+   "additions": 130,
+   "deletions": 0,
+   "sha": "d290988c7f8b20468af1417c9c37ccff230aa5e4"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/merge-va-diff.txt",
+   "status": "added",
+   "additions": 47,
+   "deletions": 0,
+   "sha": "9de3a6288e7618ca85482a021eb7b33de34e0625"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/nghiem-thu-a12.txt",
+   "status": "added",
+   "additions": 17,
+   "deletions": 0,
+   "sha": "9d7147c5eadfb046bcd1c2b183fda5bdc373552e"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/nghiem-thu-ca-va-dot-bien-ci-ubuntu-128369080136.txt",
+   "status": "added",
+   "additions": 54,
+   "deletions": 0,
+   "sha": "5f52a1418777195873cd38babed1e9fb309b30e2"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/ops-publish-lease-42361083711-trich.txt",
+   "status": "added",
+   "additions": 16,
+   "deletions": 0,
+   "sha": "15bd7e55b6711474b486a961226eb4287837bd84"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/phan-chung-buoc-42360967767.txt",
+   "status": "added",
+   "additions": 13,
+   "deletions": 0,
+   "sha": "e3a868164242aa7fc52a7f599777b37712cb749c"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-chu-kho-mien-issuecomment-6704885217.json",
+   "status": "added",
+   "additions": 47,
+   "deletions": 0,
+   "sha": "2b3d7b637bbcf9572bc963621b3201dd6eeb811d"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-commit-27fd808.json",
+   "status": "added",
+   "additions": 118,
+   "deletions": 0,
+   "sha": "4a5b8c75626ba4d0425f9546da33221cab3977e1"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-connector-issuecomment-6687753674.json",
+   "status": "added",
+   "additions": 103,
+   "deletions": 0,
+   "sha": "ae6b29b838a31263e1f281e36c61028739cdb9eb"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-connector-issuecomment-6701195358.json",
+   "status": "added",
+   "additions": 103,
+   "deletions": 0,
+   "sha": "7d1698915b1db3dce894acb08435d0e261971226"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-issuecomment-6701171909.json",
+   "status": "added",
+   "additions": 115,
+   "deletions": 0,
+   "sha": "e9df228bd95ed589ecec0e830b01751f9c67d063"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-issuecomment-6701483778.json",
+   "status": "added",
+   "additions": 115,
+   "deletions": 0,
+   "sha": "999130931f94625e30a7f268569b0765308555a7"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-issuecomment-6701561649.json",
+   "status": "added",
+   "additions": 115,
+   "deletions": 0,
+   "sha": "981e17f1dacd0d2c2793e0ad9e4fc532a6d97554"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-jobs-42360967762.json",
+   "status": "added",
+   "additions": 365,
+   "deletions": 0,
+   "sha": "e24b131f60279ae66368ead1d4736481a080254c"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-jobs-42361083711.json",
+   "status": "added",
+   "additions": 121,
+   "deletions": 0,
+   "sha": "a96db82a53c90269649407060129d4d6e2bca33a"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-jobs-42439410853.json",
+   "status": "added",
+   "additions": 365,
+   "deletions": 0,
+   "sha": "b86dc5f47f9ad196bd0db5728f32d045448d68ff"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-jobs-42467652116.json",
+   "status": "added",
+   "additions": 89,
+   "deletions": 0,
+   "sha": "239528a1a50066e526907ecee472c51dec95b769"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-pr-1267.json",
+   "status": "added",
+   "additions": 371,
+   "deletions": 0,
+   "sha": "dcb280a3230a539b14228b874141173ea008e308"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-reactions-issuecomment-6687753674.json",
+   "status": "added",
+   "additions": 3,
+   "deletions": 0,
+   "sha": "41b42e677b97324ff33450d619b6812449bc3abe"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-reactions-pr-1267.json",
+   "status": "added",
+   "additions": 29,
+   "deletions": 0,
+   "sha": "8a793bf97b7ec2d13f906e225a69b6292a9cc0c7"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-run-42270304084.json",
+   "status": "added",
+   "additions": 228,
+   "deletions": 0,
+   "sha": "3a43b4e45588003c19cffaa09af415a48bb74c7c"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-run-42360967762.json",
+   "status": "added",
+   "additions": 228,
+   "deletions": 0,
+   "sha": "4b2cfc2da126e9359fe66df89f607c6b83168fa8"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-run-42361083711.json",
+   "status": "added",
+   "additions": 228,
+   "deletions": 0,
+   "sha": "03014aa5628d5de0f363e9bbafb123fa4b60b15c"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-run-42439410853.json",
+   "status": "added",
+   "additions": 228,
+   "deletions": 0,
+   "sha": "aeecbcdfa77caf2727671ea0fd469b5dca189626"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-run-42467652116.json",
+   "status": "added",
+   "additions": 228,
+   "deletions": 0,
+   "sha": "5ea5e6a9e4b1a5b3474b3b454d7b736b38fcd48b"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-tran-issuecomment-6681166079.json",
+   "status": "added",
+   "additions": 115,
+   "deletions": 0,
+   "sha": "e8b959acdceec71b0f404c78a527af68d568798c"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-tran-issuecomment-6684786710.json",
+   "status": "added",
+   "additions": 115,
+   "deletions": 0,
+   "sha": "8c012033fd02e3e982ae06d6127c7c73b2350f65"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-tran-issuecomment-6686083268.json",
+   "status": "added",
+   "additions": 115,
+   "deletions": 0,
+   "sha": "299eb80ac27e951069c6ccbc1c8743bcfe657abf"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-tran-issuecomment-6687248525.json",
+   "status": "added",
+   "additions": 115,
+   "deletions": 0,
+   "sha": "aefe4745941be5fa6df005c74654841e77bb9f78"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-tran-issuecomment-6690446300.json",
+   "status": "added",
+   "additions": 115,
+   "deletions": 0,
+   "sha": "f94f4a9e67bff5af2b567a59262bf1ae316fbd0f"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/readback-tran-issuecomment-6700587203.json",
+   "status": "added",
+   "additions": 115,
+   "deletions": 0,
+   "sha": "980ffedeca3367dbbfa961f927bff946d21c48b3"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/release-verify-land-128369135884.txt",
+   "status": "added",
+   "additions": 984,
+   "deletions": 0,
+   "sha": "52f6cb039035f6ebc8e517c06da05bc53fcdfcc8"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/review-offline-l9/SHA256SUMS",
+   "status": "added",
+   "additions": 5,
+   "deletions": 0,
+   "sha": "f135db5769cc5223cf7f3cbed899547510ecd973"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/review-offline-l9/checkpoint.json",
+   "status": "added",
+   "additions": 1,
+   "deletions": 0,
+   "sha": "d77c0bc626d7968ab3af6fb6b4dcb53d19c2215b"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/review-offline-l9/prompt-l9.md",
+   "status": "added",
+   "additions": 70,
+   "deletions": 0,
+   "sha": "9792acb25fb5dc192b5f12d02b15cbbedc5e2cac"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/review-offline-l9/run.json",
+   "status": "added",
+   "additions": 682,
+   "deletions": 0,
+   "sha": "f050a8ddacd6c855d5fa28fdbf8f84d920b462f3"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/review-offline-l9/stderr.log",
+   "status": "added",
+   "additions": 1,
+   "deletions": 0,
+   "sha": "8efb88b305a995199132aa6aeaf9b9074a44b219"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/review-offline-l9/stdout.log",
+   "status": "added",
+   "additions": 30,
+   "deletions": 0,
+   "sha": "48f169ad434fe0e28a23f12bd4f1c60d70a7871c"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/wd-42467652116-artifact-13612392020.json",
+   "status": "added",
+   "additions": 21,
+   "deletions": 0,
+   "sha": "b5614d725c58513b6ef616c8f10c06e6f9ec72f4"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/winlogs/.gitattributes",
+   "status": "added",
+   "additions": 2,
+   "deletions": 0,
+   "sha": "be0b16e23a11007992fb6a991fe9561049d53c9a"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/winlogs/diag-1252-a10-e6c6505.log",
+   "status": "added",
+   "additions": 218,
+   "deletions": 0,
+   "sha": "575cd2ac90754a86ae7ca75163e8084ec52b3803"
+  },
+  {
+   "filename": "ops/land/pr1267-wp1252-provenance/winlogs/diag-1252-chan-doan.log",
+   "status": "added",
+   "additions": 20,
+   "deletions": 0,
+   "sha": "dd8300c43e5e04588521378f6fb38bd89c888c44"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-land-evidence.yaml",
+   "status": "added",
+   "additions": 200,
+   "deletions": 0,
+   "sha": "b5ed660de0bdaeb6dab53326bad383e1320ed302"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/SHA256SUMS",
+   "status": "added",
+   "additions": 81,
+   "deletions": 0,
+   "sha": "3714e0396c0d4e2d285471c9e5d2d3bc52a24ddf"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/a4-fc6fbc7.out.txt",
+   "status": "added",
+   "additions": 18,
+   "deletions": 0,
+   "sha": "e30caffe34964dbf9dbfb5cbca9fa52b194d45f8"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ai-dang-giu-sau-rut-han.txt",
+   "status": "added",
+   "additions": 16,
+   "deletions": 0,
+   "sha": "aaf3281aa3806d47cb6a5194775c3cf49fc44d31"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/bien-ban-m8.yaml",
+   "status": "added",
+   "additions": 37,
+   "deletions": 0,
+   "sha": "2fe5c9ce401904b1b3b16ebb57f1652f0be607bc"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs.json",
+   "status": "added",
+   "additions": 0,
+   "deletions": 0,
+   "sha": "0faec2f586c55787ec0a6141b2f8e041ba4034d8"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605212183.trich.txt",
+   "status": "added",
+   "additions": 7,
+   "deletions": 0,
+   "sha": "a1b5fd2d88a8364a6d68b5a269be67297b3bf5a5"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605264988.trich.txt",
+   "status": "added",
+   "additions": 16,
+   "deletions": 0,
+   "sha": "f6c15b4bec88837b77b9183a2cb46518c6a13291"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265050.trich.txt",
+   "status": "added",
+   "additions": 15,
+   "deletions": 0,
+   "sha": "4ba1982c4c968e2614b0e388e5cc5155a0059a21"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265063.trich.txt",
+   "status": "added",
+   "additions": 35,
+   "deletions": 0,
+   "sha": "3154a9c7acd7b1b97836e8fbc041b1802fd3dd31"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265086.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "28ca514c9fef61a7a0d6099d0efd40ba70b299bf"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265116.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "92f1b5d8bd59322e546d08fde18c3c7ed5ae1746"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265133.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "7fc9c8960d3a056067be1320e8fdd519fdd2f3ce"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265135.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "8eed9f8020e15ca7d288b953aac531e6622574ce"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265141.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "efdb4f6a2742ad7046f40fb6d55ed8e00e242486"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265142.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "2e8a297e3dd9ebc925e83df270f9ae7d6de22cf5"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265149.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "ab0fc7af5c9dde327c5205b426b6d201b0236798"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265159.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "26cf5f55f55c0fe38cad48697a34888472a23de0"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265169.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "f59db235cc9b75c66cb0e2c9f96a70643efb4991"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265188.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "be0eda790bfc1ce7f53415749fe5f28ea0bd162b"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265193.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "52972d131ef078d4eac649acfcf42dc4282cd42e"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265195.trich.txt",
+   "status": "added",
+   "additions": 14,
+   "deletions": 0,
+   "sha": "0f23dba1076653b88314b0a293ecd0a4e3943b0f"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265213.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "eb23ca5215cdabbfa0930d08d3c149f530f79fb8"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265228.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "e193dce4a64c52aea8a8e3ab2a261e9f2e55ace8"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265253.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "6d8460d0c8666903b4f50fe2fb920d684bd49a1f"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605265369.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "9fb1a8bf669c1d5b65eacadf9e494b997417afb6"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605581721.trich.txt",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "a77e514ae1c92fc017557d940c879c7d56bad68a"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128605643639.trich.txt",
+   "status": "added",
+   "additions": 15,
+   "deletions": 0,
+   "sha": "2f5659f104288dcc57877622a4f88c33687c59b3"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/jobs/128609632320.trich.txt",
+   "status": "added",
+   "additions": 9,
+   "deletions": 0,
+   "sha": "d7ed598d09fac6bd3400972ca5241f43e24ac5a3"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/provenance.yaml",
+   "status": "added",
+   "additions": 1599,
+   "deletions": 0,
+   "sha": "e214ac14f0a66c0d8d3925dfb25feefbc124196c"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ci/run.json",
+   "status": "added",
+   "additions": 1,
+   "deletions": 0,
+   "sha": "19fa7c93afb30c8ef1aca6eb8aacd5aa2c902791"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/danh-gia-gate-output-42439410815.txt",
+   "status": "added",
+   "additions": 27,
+   "deletions": 0,
+   "sha": "42045d4c3a74f7e9b2fd9d58b8c8e7a191ae6d7a"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/danh_gia_gate.py",
+   "status": "added",
+   "additions": 196,
+   "deletions": 0,
+   "sha": "32faa7dfe297e7191e6662729e7df9695262621f"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/do1_1272-linux-fc6fbc7.out.txt",
+   "status": "added",
+   "additions": 13,
+   "deletions": 0,
+   "sha": "34745448f8caf08db1fec45f488f4223364ae828"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/do1_1272.py",
+   "status": "added",
+   "additions": 30,
+   "deletions": 0,
+   "sha": "a0af7320a3ba6fd2673433d967cb702e73d32ad1"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/do_1273-linux.out.txt",
+   "status": "added",
+   "additions": 299,
+   "deletions": 0,
+   "sha": "90639602371ae95b7281e27c3570811f531e7190"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/do_1273.py",
+   "status": "added",
+   "additions": 43,
+   "deletions": 0,
+   "sha": "2838a80d3379236704bbcc45d04906b1be678c6b"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/kiem-dong-wp-m8.txt",
+   "status": "added",
+   "additions": 23,
+   "deletions": 0,
+   "sha": "c21f0ce60ee10304942d8d2c9f17ce07a14caa69"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/kiem-ho-so-land-thu-landed-true.txt",
+   "status": "added",
+   "additions": 4,
+   "deletions": 0,
+   "sha": "9d088862cffc7fcb492d9064be9008b5331d808d"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/kiem-merge/SHA256SUMS",
+   "status": "added",
+   "additions": 10,
+   "deletions": 0,
+   "sha": "70afa399d22be60ac9fc2db74a4f58d3492ac59b"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/kiem-merge/cn.json",
+   "status": "added",
+   "additions": 1,
+   "deletions": 0,
+   "sha": "c2ddcaed4d1b2a5fd157cc500a4aa8fb25229f13"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/kiem-merge/cr.json",
+   "status": "added",
+   "additions": 3480,
+   "deletions": 0,
+   "sha": "4dd19835a00d7c9146df0f34ae90bf2f84a621e8"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/kiem-merge/lease.yaml",
+   "status": "added",
+   "additions": 98,
+   "deletions": 0,
+   "sha": "a6585e7ff66f499e7938767bca186b0e48c872aa"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/kiem-merge/mien.json",
+   "status": "added",
+   "additions": 47,
+   "deletions": 0,
+   "sha": "6ca4fc506ede29992e375902b0930d10e3ae8f04"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/kiem-merge/off.json",
+   "status": "added",
+   "additions": 680,
+   "deletions": 0,
+   "sha": "529882985b6aea97d8ba0b23c1ee66538092c333"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/kiem-merge/off.log",
+   "status": "added",
+   "additions": 28,
+   "deletions": 0,
+   "sha": "2bfe98998bdb5974cef7cce3fdc72a732cbd2ce6"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/kiem-merge/out1.txt",
+   "status": "added",
+   "additions": 4,
+   "deletions": 0,
+   "sha": "91013bd33b9926eb9ab9f21938406ffd21386eca"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/kiem-merge/out2.txt",
+   "status": "added",
+   "additions": 1,
+   "deletions": 0,
+   "sha": "cba92d3028977d243401ca2ced0b6dd39cb190fe"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/kiem-merge/wj.json",
+   "status": "added",
+   "additions": 3017,
+   "deletions": 0,
+   "sha": "2a1e6749a132513e1af796843e9c468d0aece2c3"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/kiem-merge/wr.json",
+   "status": "added",
+   "additions": 755,
+   "deletions": 0,
+   "sha": "2b11ac9611990f1f5a65751c34db6ced0d053cbf"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/launcher-windows-128369080234.trich.txt",
+   "status": "added",
+   "additions": 6,
+   "deletions": 0,
+   "sha": "6739a9221e47cc04b2eb58331dc06cac8f41a40b"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/launcher-windows-128605212485.trich.txt",
+   "status": "added",
+   "additions": 5,
+   "deletions": 0,
+   "sha": "4d2ce313fc4491a0cfea3df8e7345cc631d329b8"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/lease-hotfix-r1252-posix-r1-g1-claude-sau-rut-han.yaml.txt",
+   "status": "added",
+   "additions": 112,
+   "deletions": 0,
+   "sha": "4fcdec8a5e8edd4a6669a95bb6d94fa388ebeb32"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/merge-va-diff.txt",
+   "status": "added",
+   "additions": 41,
+   "deletions": 0,
+   "sha": "1d4e79fbdff867c66fea033e4cca8dd29ee6ffb7"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/nghiem-thu-a4-ab.txt",
+   "status": "added",
+   "additions": 12,
+   "deletions": 0,
+   "sha": "9db180a5774946a1db9a2ff3b19d00f11b7c231f"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/ops-publish-lease-42439451193-trich.txt",
+   "status": "added",
+   "additions": 16,
+   "deletions": 0,
+   "sha": "14f25b64b4a46b8be99cde5d4b895b3000b3a677"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/phan-chung-buoc-42439410815.txt",
+   "status": "added",
+   "additions": 13,
+   "deletions": 0,
+   "sha": "0b89b0188c18edc1e09c03eeb171e48ac167a94b"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/readback-chu-kho-mien-issuecomment-6716241960.json",
+   "status": "added",
+   "additions": 47,
+   "deletions": 0,
+   "sha": "6ca4fc506ede29992e375902b0930d10e3ae8f04"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/readback-commit-c15603d.json",
+   "status": "added",
+   "additions": 106,
+   "deletions": 0,
+   "sha": "76ea1f5eba78a47de73948d38d257bec299b85bf"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/readback-connector-issuecomment-6714571624.json",
+   "status": "added",
+   "additions": 103,
+   "deletions": 0,
+   "sha": "bc7d23ece9228098f045663cfaaa4c52f1f8b2ec"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/readback-jobs-42439410853.json",
+   "status": "added",
+   "additions": 365,
+   "deletions": 0,
+   "sha": "b86dc5f47f9ad196bd0db5728f32d045448d68ff"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/readback-jobs-42439451193.json",
+   "status": "added",
+   "additions": 121,
+   "deletions": 0,
+   "sha": "744a976dc434dc382d69daa14d73f5cb5c975e26"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/readback-jobs-42467654305.json",
+   "status": "added",
+   "additions": 89,
+   "deletions": 0,
+   "sha": "af2f02a0b5605a27deb7039cf7c2103943bf9f66"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/readback-pr-1277.json",
+   "status": "added",
+   "additions": 371,
+   "deletions": 0,
+   "sha": "26cf27f50d678b84811a4f1832a5da8bf41d2e1c"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/readback-run-42439410853.json",
+   "status": "added",
+   "additions": 228,
+   "deletions": 0,
+   "sha": "aeecbcdfa77caf2727671ea0fd469b5dca189626"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/readback-run-42439451193.json",
+   "status": "added",
+   "additions": 228,
+   "deletions": 0,
+   "sha": "0b63b1b6de3d5a2212d3c3a6a2f5fadcca903e55"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/readback-run-42467654305.json",
+   "status": "added",
+   "additions": 228,
+   "deletions": 0,
+   "sha": "b199d66b04b63152bf052c60eaa3a3dc2586fbb0"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/release-verify-land-128605265063.txt",
+   "status": "added",
+   "additions": 984,
+   "deletions": 0,
+   "sha": "7a616f851e6a6ed900cc9185c49d4f473a99c7a6"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/review-offline-l1/SHA256SUMS",
+   "status": "added",
+   "additions": 5,
+   "deletions": 0,
+   "sha": "ccec71c5805e4aa67dbc75358bb45a3675058506"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/review-offline-l1/checkpoint.json",
+   "status": "added",
+   "additions": 1,
+   "deletions": 0,
+   "sha": "626f1ec8f3002a7112f160c4860550bdc0ad6d0d"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/review-offline-l1/prompt-l1.md",
+   "status": "added",
+   "additions": 23,
+   "deletions": 0,
+   "sha": "0f34ea44cf4e6c55b265d6dd693755e6e4e27b38"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/review-offline-l1/run.json",
+   "status": "added",
+   "additions": 641,
+   "deletions": 0,
+   "sha": "e74cd25b0e27b317f14e9016c7892653b7d6483f"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/review-offline-l1/stderr.log",
+   "status": "added",
+   "additions": 1,
+   "deletions": 0,
+   "sha": "8efb88b305a995199132aa6aeaf9b9074a44b219"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/review-offline-l1/stdout.log",
+   "status": "added",
+   "additions": 28,
+   "deletions": 0,
+   "sha": "8c7a85f331084e1a7b963f4c871d5559231b80c6"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/review-offline-l2/SHA256SUMS",
+   "status": "added",
+   "additions": 5,
+   "deletions": 0,
+   "sha": "c39ddcb7cf1de27e7ecb6f68796eed7ff6e7666f"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/review-offline-l2/checkpoint.json",
+   "status": "added",
+   "additions": 1,
+   "deletions": 0,
+   "sha": "d8f7f9eeef033bdec24ce004efe15c19e6bd4dd9"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/review-offline-l2/prompt-l2.md",
+   "status": "added",
+   "additions": 33,
+   "deletions": 0,
+   "sha": "736fa91c10c78bffdad515d3d3e7ec098a8b08f8"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/review-offline-l2/run.json",
+   "status": "added",
+   "additions": 680,
+   "deletions": 0,
+   "sha": "529882985b6aea97d8ba0b23c1ee66538092c333"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/review-offline-l2/stderr.log",
+   "status": "added",
+   "additions": 1,
+   "deletions": 0,
+   "sha": "8efb88b305a995199132aa6aeaf9b9074a44b219"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/review-offline-l2/stdout.log",
+   "status": "added",
+   "additions": 28,
+   "deletions": 0,
+   "sha": "2bfe98998bdb5974cef7cce3fdc72a732cbd2ce6"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/wd-42467654305-artifact-13612750292.json",
+   "status": "added",
+   "additions": 21,
+   "deletions": 0,
+   "sha": "a9fe5efecdb406d86e0c942cd2685e90ed55384a"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/winlogs/.gitattributes",
+   "status": "added",
+   "additions": 2,
+   "deletions": 0,
+   "sha": "be0b16e23a11007992fb6a991fe9561049d53c9a"
+  },
+  {
+   "filename": "ops/land/pr1277-wp1272-provenance/winlogs/diag-1272-do.log",
+   "status": "added",
+   "additions": 104,
+   "deletions": 0,
+   "sha": "a4394cb65404d1e89663a6f15fadc76d3dbe734e"
+  },
+  {
+   "filename": "ops/plans/PROXIMA-PLAYWRIGHT-v1.md",
+   "status": "added",
+   "additions": 196,
+   "deletions": 0,
+   "sha": "9800531f3a544c24dbbd167cf69d4b8c1663566f"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r1.md",
+   "status": "added",
+   "additions": 171,
+   "deletions": 0,
+   "sha": "5f7c15f7087c4c62a268c0b4bbe3bde1b4c531ff"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r10.md",
+   "status": "added",
+   "additions": 294,
+   "deletions": 0,
+   "sha": "81483ecd3a56acc4d3bdb0172e8a025bf63aa553"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r11.md",
+   "status": "added",
+   "additions": 302,
+   "deletions": 0,
+   "sha": "9f2d3113846a72056ed319678abbe89bc76e935d"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r12.md",
+   "status": "added",
+   "additions": 309,
+   "deletions": 0,
+   "sha": "af85f1992a8c5ef598ddec82c8fc584ebe4bd87c"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r13.md",
+   "status": "added",
+   "additions": 312,
+   "deletions": 0,
+   "sha": "21499190324b1962e103ea121c2b516bbe19b5ec"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r2.md",
+   "status": "added",
+   "additions": 221,
+   "deletions": 0,
+   "sha": "d8f8e0dcb8916390ff213b2b2ccd65dd69399064"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r3.md",
+   "status": "added",
+   "additions": 238,
+   "deletions": 0,
+   "sha": "aef9bfa06442ab5c0f09eacc967df21c2f4452fa"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r4.md",
+   "status": "added",
+   "additions": 248,
+   "deletions": 0,
+   "sha": "b48d511b6d580e0aada2129834254d8b76d5f4c5"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r5.md",
+   "status": "added",
+   "additions": 259,
+   "deletions": 0,
+   "sha": "8101a5d5ce937bf0689a6003ad237a94ae097524"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r6.md",
+   "status": "added",
+   "additions": 272,
+   "deletions": 0,
+   "sha": "6eec38b20b892598be5a9a6ca433ff834655a95c"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r7.md",
+   "status": "added",
+   "additions": 277,
+   "deletions": 0,
+   "sha": "d89d78b60f5e38a717887ecd99f5cf58407f9429"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r8.md",
+   "status": "added",
+   "additions": 283,
+   "deletions": 0,
+   "sha": "771ebb1e37ff0fbfd0b61ae455701291f3665a8a"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r9.md",
+   "status": "added",
+   "additions": 289,
+   "deletions": 0,
+   "sha": "43aea526d0693d0a64ed5465d99ec19b173a6707"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r1.md",
+   "status": "added",
+   "additions": 265,
+   "deletions": 0,
+   "sha": "99a8546ec5ad5295ade2f4545be04d08c0b7cff6"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r10.md",
+   "status": "added",
+   "additions": 589,
+   "deletions": 0,
+   "sha": "3dc24859ed209501fa2af3dcbda006533e430c09"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r11.md",
+   "status": "added",
+   "additions": 617,
+   "deletions": 0,
+   "sha": "46835aab1a07d1c232a3394d61b8fea7831a65a1"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r12.md",
+   "status": "added",
+   "additions": 634,
+   "deletions": 0,
+   "sha": "58e3a07cd84dda29597e4e7a98649a210a5b7989"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r13.md",
+   "status": "added",
+   "additions": 637,
+   "deletions": 0,
+   "sha": "b89346be1b679431c41952c0c44687f6c4f97610"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r2.md",
+   "status": "added",
+   "additions": 358,
+   "deletions": 0,
+   "sha": "32cef2e4a698ce55f18ec04240ecbacc3699496f"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r3.md",
+   "status": "added",
+   "additions": 434,
+   "deletions": 0,
+   "sha": "3905cca3ab9cf7714437eebe45672fb84b63991f"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r4.md",
+   "status": "added",
+   "additions": 481,
+   "deletions": 0,
+   "sha": "82d86f7901e7657809e22744e5c1faa55cc02e7d"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r5.md",
+   "status": "added",
+   "additions": 506,
+   "deletions": 0,
+   "sha": "317e675d52a3ed18eadd822839591ad95cc52ee3"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r6.md",
+   "status": "added",
+   "additions": 534,
+   "deletions": 0,
+   "sha": "16b7c9eb2bf92fbbcae437866b69a2b588771998"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r7.md",
+   "status": "added",
+   "additions": 570,
+   "deletions": 0,
+   "sha": "bd6fb61c1d2b9112c3bcd835ced446933ecc8dfc"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r8.md",
+   "status": "added",
+   "additions": 606,
+   "deletions": 0,
+   "sha": "f68ed06d29eac0e92c4ab28e4e27d499f81bbc89"
+  },
+  {
+   "filename": "ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r9.md",
+   "status": "added",
+   "additions": 661,
+   "deletions": 0,
+   "sha": "16f9ff7eaa1ee128aacc6e3751b64513c9aadc6d"
+  }
+ ]
+}

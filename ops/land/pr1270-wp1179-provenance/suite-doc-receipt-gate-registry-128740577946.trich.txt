@@ -1,0 +1,6 @@
+# trich log job 128740577946 gate-registry (ubuntu-latest), run 42483433610 attempt 1 (push master bf9914c) — log_sha256 eba8db9073413f09df9165464fc1ea7bb4de8ee5fae74c4faf2ba744da1b4e27, 247004 byte; moi dong nhac doc_receipt_thu_hoi (cat 200 ky tu) + dong TONG cuoi
+2328:2026-11-08T13:12:27.1230770Z nhom json: 156/156 ca QUA · 162/162 dot bien GIET · equivalent_verified 9
+2329:2026-11-08T13:12:27.1231374Z nhom git: 114/114 ca QUA · 156/156 dot bien GIET · equivalent_verified 3
+2330:2026-11-08T13:12:27.1231988Z doc_receipt_thu_hoi tests: 270/270 ca QUA · 318/318 dot bien GIET
+2331:2026-11-08T13:12:27.1232554Z CI_DANG_KY .claude/dev/doc_receipt_thu_hoi_test.py: ĐẠT rc=0
+2589:2026-11-08T13:28:35.3450047Z TỔNG: ĐẠT

@@ -1,0 +1,63 @@
+# Bien ban M8 (ADR-0060) dong WP #1179 wp1179 / LAND-DOC-RECEIPT-THU-HOI-C1a1b r9 g1 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1270-wp1179-land-evidence.yaml. landed true (A21 owner_waived 6723078914); uy quyen L-6 (approve_merge chu kho tu dang 6722745114, sau
+# merge nhu #1272; truoc merge human audit 6720906163); bon moc §10.2.2 du (wd-run 42487322479).
+packet: wp1179
+revision: 9
+generation: 1
+spec_hash: c9bc8acac6710f8395b4ca88c69ef39dfaa1b3acbf468aa0eea2b3f7d530ef74
+head_da_review: 5824094e78a0afe9d0af8866df45c50b24334767
+tree_h: 5af7905b39091319e3399accfe89b0a940b36415
+review:
+  human_audit: 'issuecomment-6720906163 human_exact_head_audit.v1 approve tren 5824094 (chu kho tu dang, app null)'
+  codex_offline: '4/4 pha thi cong (a4bceca6, ec20186a, ef67aa49, ea8f7f1f); luot 4 tren 7e1d2dd changes_requested F8 chi test, va o 0ef6b2c; dong bang human audit'
+  connector: 'issuecomment-6721722576 codex-review-state:v1 commit_sha 5824094, has_any_findings false, completed; kiem-merge K3 THIEU do troi dinh dang; chu kho chap nhan tay 6721869249'
+  kiem_merge: 'rc 12, chi K3 (tai lap trong phien ghi so, output byte-trung ban executor)'
+windows:
+  phan_loai: required
+  nguon: 'mien chu kho tu dang issuecomment-6720945568 / 6720969526 "windows: 5824094… mien"; A16 tren 0ef6b2c (cung blob) rc 0 270/270 · 318/318 la ban chep'
+ci_pr:
+  run_id: 42476182401
+  conclusion: success
+  ghi_chu: 'attempt 2 23/23; attempt 1 gate-registry do loi ha tang codex_cloud_setup_test.py; K7 ci-dot-bien-du 42476206603 success'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1270#issuecomment-6722745114
+duyet_chu_kho_ghi_chu: 'approve_merge 5824094 chu kho tu dang 14:31:28Z (app null), SAU merge 13:07:22Z; truoc merge: verdict human audit approve neo 5824094, truoc merge; duyet merge qua AskUserQuestion phien dieu phoi la loi khai; k3 chap-nhan 6721869249 truoc merge 32 giay.'
+merge_commit: bf9914cb1a8e6f5047468f4d130b587015f8d73f
+cha_merge: [0166d30611617ac2ed4f79ada92f950d4edeb824, 5824094e78a0afe9d0af8866df45c50b24334767]
+tree_m: 247971f6c723cc17de3632e4eaba2019545b356b
+ci_master:
+  run_id: 42483433610
+  conclusion: success
+  ghi_chu: 'ci.yml 23/23; launcher-windows 42483433553 cung SHA = success'
+nghiem_thu:
+  A1: passed
+  A2: passed
+  A3: passed
+  A4: passed
+  A5: passed   # linux measured; ve windows owner_waived (mien 6720945568)
+  A6: passed
+  A7: passed
+  A8: passed
+  A9: passed
+  A10: passed
+  A11: passed
+  A12: passed  # linux measured; ve windows owner_waived (mien 6720945568)
+  A13: passed
+  A14: passed
+  A15: passed
+  A16: owner_waived   # mien 6720945568 / 6720969526; ket qua 0ef6b2c la ban chep
+  A17: passed
+  A18: passed
+  A19: passed
+  A20: passed
+  A20b: passed
+  A21: owner_waived  # mien_A21 chu kho 6723078914; (b) va state that executor chua do; cap 4 (chu kho cap them 1). Connector P1 PR #1286 r4506641299
+  A22: passed
+  A23: passed
+lease_cuoi: wp1179-r9-g1-claude-remote-20261106
+nha_lease: 'rut han fcea24a: lease_until 2026-11-08T14:20:00Z; ops-publish-lease 42487306631 rc 9; ai-dang-giu sau 14:20Z: xem ai-dang-giu-sau-rut-han.txt'
+landed: true  # A21 owner_waived 6723078914; uy quyen L-6: approve_merge 6722745114 (sau merge, nhu #1272)
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

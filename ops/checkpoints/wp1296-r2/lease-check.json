@@ -1,0 +1,5 @@
+{
+  "rc": 8,
+  "stdout": "",
+  "stderr": "CHAN [8]: lease mới thay_the_cho=['wp1296-r1-g1-codex'], nhưng lease cũ ['wp1296-r1-g1-codex'] chưa mang dòng `da_bi_thay_the: wp1296-r2-g2-codex`; hãy thêm dòng ấy vào từng lease còn thiếu trước khi đăng lease mới (cổng không tự sửa hồ sơ cũ)\n"
+}

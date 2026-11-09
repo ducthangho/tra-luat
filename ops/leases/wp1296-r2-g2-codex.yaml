@@ -1,0 +1,80 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1296
+packet_id: wp1296
+mission_issue: 1238
+revision: 2
+generation: 2
+lease_id: wp1296-r2-g2-codex
+role: executor
+provider: codex
+executor: codex
+model: gpt-6.1-sol
+effort: high
+model_family: openai
+execution_surface: codex_cli
+transport: machine
+environment: linux
+reviewer: codex
+reviewer_model: gpt-6.1-sol
+reviewer_effort: xhigh
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1296-r2.md
+spec_ref: refs/heads/ops/wp1296-spec@66ea284971a5e153749910b0be8f42e2dba5c19f
+spec_hash: 4df352b7c86003ee82423d750340625f84078c3a92483659ef079390da9f14ee
+spec_sha256_required: 4df352b7c86003ee82423d750340625f84078c3a92483659ef079390da9f14ee
+prompt_path: ops/prompts/wp1296-r2-g2-codex.md
+prompt_sha256_required: 61661c6c484d798b213a6fcad99176da6760a30f7214545f7dbf6781c103a8b4
+write_set: &id001
+- .agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1
+effective_write_set: *id001
+write_set_hash: 780805b4a04247cddfbc989152adc43f528b3e23652e8ec0cdc3a0068a86292e
+change_policy_sha: null
+required_checks:
+- exactH nativePS51/7 parsersemantic baseline/candidate/comment/directiveculture/classnegative/rollback
+  fulloriginalevidence
+- normal7/CXparent12/unchangedS2normal26 both; otherproductbytesunchanged
+- exactH Linuxfullselftest/strictmanifest/Ruffdelta0/admission/doctrine/scope/size
+- freshindependentCodexCLI xhigh wholeB..H/spec/security/v2prepush, sufficientactualsensitiveassurance
+  separate
+- UbuntuPRCI/connector/Ready/currentrules/fullrefs/exactHownergrant/K0K7
+- actualcanonicalMCI4anchors/officialartifact/fullsourceAUX/M8/readback/realUTCretirement/D1D4
+land_obligations: []
+branch: agent/wp1296-r2-g2-codex
+base_sha: 91be484a05ab40adf6573f11ef6ec0264fc9a3aa
+start_from_sha: 1013394e0f36c44bbf7ffb9c95d7938af1a263b4
+reviewed_sha_required: 1013394e0f36c44bbf7ffb9c95d7938af1a263b4
+reviewed_sha_required_note: H1 failednative, notapproved; freshnewHreviewrequired
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1296#issuecomment-6733713274
+recorded_by: openai_codex/codex_service dispatcher
+recorder_is_executor: false
+executor_workspace: /workspace/scratch/wp1296-r2-g2-codex
+scoped_cli_writable_root: /workspace/scratch/wp1296-r2-g2-codex/.agents/skills/proxima-control
+leased_at_utc: '2026-11-09T06:51:38Z'
+heartbeat_at: '2026-11-09T06:51:38Z'
+heartbeat_required_minutes: 360
+lease_until: '2026-11-09T12:51:38Z'
+lease_expires_at_utc: '2026-11-09T12:51:38Z'
+run_minutes: 45
+attempts_limit: 2
+review_rounds_limit: 2
+codex_review_calls_limit: 8
+same_failure_limit: 2
+primary_product_pushes_limit: 1
+requires_live: false
+uy_quyen_merge: false
+status: leased
+assurance_target: same_provider_approved
+promotion_hold: Sensitive actual independent sufficient assurance on new exactH stillmandatory;
+  no inheritedhumanaudit or H4waiver
+history_source: R1actualauthor1/nativePS51fail plusparent1285closed/countersretained;
+  boundedONEcompatibilityauthor2, nofurtherretry
+thay_the_cho:
+- wp1296-r1-g1-codex

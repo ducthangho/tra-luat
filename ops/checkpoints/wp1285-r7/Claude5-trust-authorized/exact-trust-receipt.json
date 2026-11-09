@@ -1,0 +1,15 @@
+{
+  "owner": "ducthangho",
+  "owner_instruction": "Tôi đồng ý ủy quyền xác nhận Claude trust chỉ cho /workspace/scratch/wp1285-claude-cross-audit-H4. Claude review xanh xong thì merge",
+  "exact_path": "/workspace/scratch/wp1285-claude-cross-audit-H4",
+  "only_semantic_change": "projects[exact_path].hasTrustDialogAccepted=true",
+  "other_project_auth_hook_setting_changes": false,
+  "config_sha_before": "3e1cb7ce167437eb027137d4e705690b7838632ff918e0734d2bca6f969cda12",
+  "config_sha_after": "235b9022034feb7e557c91085f18c6720382d3368dcd3d386b212a40800b084f",
+  "canonical_probe": {
+    "trang_thai": "DAT",
+    "chi_tiet": "Claude trust=true"
+  },
+  "model_invoked": false,
+  "recorded_at": "2026-11-09T01:59:56.523254+00:00"
+}

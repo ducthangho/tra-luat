@@ -1,0 +1,25 @@
+{
+  "status": "owner_exact_trust_authorized_ready_to_dispatch",
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "spec_sha256": "17d0257fc4d127991f42f56d1fdc2eda2e1c479685b7262728792a09771b164d",
+  "prompt_sha256": "58fb24a1a4962826c3d53b66e1d2e1a9b60d334903cd63603eb3600962ad20ce",
+  "workspace": "/workspace/scratch/wp1285-claude-cross-audit-H4",
+  "requested_model": "opus",
+  "requested_effort": "max",
+  "requested_toolset": [
+    "Read",
+    "Glob",
+    "Grep"
+  ],
+  "permission_mode": "plan",
+  "trust_probe": {
+    "trang_thai": "DAT",
+    "chi_tiet": "Owner authorized exact clone trust, canonical probeDAT"
+  },
+  "model_invoked": false,
+  "Claude_calls_used": 0,
+  "formal_valid_count": 4,
+  "blocker": "Exact fresh clone lacks Claude trust key. Protocol8.1 forbids self-accept trust. Approved proposal excludes trust mutations. No bypass/alias workaround used.",
+  "at": "2026-11-09T02:01:13.073799+00:00",
+  "owner_merge_instruction": "Claude review xanh xong thì merge; standing conditional merge/land authority applies exactH4 when allgatespass"
+}

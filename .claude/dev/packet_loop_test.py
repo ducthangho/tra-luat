@@ -14061,6 +14061,13 @@ def _lineage14(c):
             assert rc == 0 and result["status"] == "completed_no_dispatch", (stage, generation, rc, result)
             retired[source] = source.read_bytes()
             source = Path(e["state_path"])
+        if stage == "ordinary":
+            for command in ("status","next-comment"):
+                out=io.StringIO();before=source.read_bytes()
+                with contextlib.redirect_stdout(out):
+                    assert m.main(["--state-dir",e["journal_root"],command,"--packet",str(a["packet"])])==0
+                _leak15(before,out.getvalue())
+                assert source.read_bytes()==before
         if stage in ("initial", "recovery", "finalize"):
             flags = prepare(5)
             if stage != "initial":
@@ -14091,6 +14098,25 @@ def _lineage14(c):
             assert rc == 0 and not result["dispatch_allowed"], (stage, rc, result)
 
 
+def _leak15(raw, output):
+    import base64
+    state=json.loads(raw)
+    keys=[]
+    def visit(value):
+        if isinstance(value,dict):
+            for k,v in value.items():
+                if k=="hmac_key":keys.append(v)
+                if k=="source_snapshot":visit(json.loads(v))
+                else:visit(v)
+        elif isinstance(value,list):
+            for child in value:visit(child)
+    visit(state)
+    assert keys, "fixture key oracle absent"
+    for key in keys:
+        variants=(key,key.upper(),base64.b64encode(key.encode()).decode(),key.encode().hex(),base64.b64encode(bytes.fromhex(key)).decode())
+        assert not any(v in output for v in variants), "fixture diagnostic secret disclosure"
+
+
 def _readers14(c):
     import contextlib, io
     from unittest.mock import patch
@@ -14109,13 +14135,16 @@ def _readers14(c):
             rc = m.main(args)
         assert rc == 0 and (json.loads(out.getvalue())["schema_version"] == 3 if command == "status" else "awaiting_lease" in out.getvalue()), (rc, out.getvalue())
         assert snapshot() == before
+        _leak15(target.read_bytes(), out.getvalue())
         local = ["--state-dir", str(target.parent), command, "--packet", str(a["packet"])]
-        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+        local_out = io.StringIO()
+        with contextlib.redirect_stdout(local_out), contextlib.redirect_stderr(io.StringIO()):
             try:
                 local_rc = m.main(local)
             except SystemExit as ex:
                 local_rc = ex.code
             assert local_rc == 0, ("unflagged v3 diagnostic view rejected", local_rc)
+        _leak15(target.read_bytes(), local_out.getvalue())
         assert snapshot() == before
         with patch.object(m, "_1174_resolve", side_effect=ValueError("unverified enrollment")), contextlib.redirect_stdout(io.StringIO()):
             assert m.main(args) == 8
@@ -14138,28 +14167,41 @@ def _owner_policy14(c):
     import copy
     from unittest.mock import patch
     m, a, _ = _init_fixture1174(c)
-    a.update(revision=21, generation=18)
+    a.update(revision=22, generation=19)
     e = a["enrollment"]
-    e["g0"] = 18
+    e["g0"] = 19
     identity = m._identity("codex", "openai", "codex_service", "machine")
-    e["initial_state_projection"].update(generation=18, executor="codex", reviewer="codex", executor_identity=identity, reviewer_identity=dict(identity))
-    lease = dict(lease_id="wp1174-r21-g18-codex", spec_ref="refs/heads/spec@"+"a"*40, spec_hash="0e5b03b860a778d9b59ae4290b00ed205c8d690cf7e083037ea8634d7336a33b", lease_expires_at_utc=a["expires_utc"])
-    source = dict(context_id="real-source-context", parent_context_id=None, checkout_id="source-checkout", read_only=False,
-        **identity, configured_model="configured-same-model", configured_effort="medium", evidence_id="platform-source-receipt")
-    reviewer = dict(source, context_id="real-review-context", checkout_id="review-checkout", read_only=True, configured_effort="high", evidence_id="platform-review-receipt")
-    policy = dict(schema="wp1174_owner_review_policy.v1", policy_id="WP1174-E2-R21-CODEX-PAIR", owner="ducthangho", packet=1174,
-        mission=1172, revision=21, generation=18, spec_ref=lease["spec_ref"], spec_sha256=lease["spec_hash"], lease_id=lease["lease_id"],
+    e["initial_state_projection"].update(generation=19, executor="codex", reviewer="codex", executor_identity=identity, reviewer_identity=dict(identity))
+    lease = dict(lease_id="wp1174-r22-g19-codex", spec_ref="refs/heads/spec@"+"a"*40, spec_hash="93014799f12143ad9114979744ccec08d5cc00dab2006b7e9412fd4663ebaf2c", lease_expires_at_utc=a["expires_utc"])
+    source = dict(context_id="real-source-context", parent_context_id=None, checkout_id=str(c.tmp), read_only=False,
+        **identity, configured_model="configured-same-model", configured_effort="medium", evidence_id="900002")
+    reviewer = dict(source, context_id="real-review-context", checkout_id="review-checkout", read_only=True, configured_effort="high", evidence_id="900003")
+    policy = dict(schema="wp1174_owner_review_policy.v1", policy_id="WP1174-F-R22-CODEX-PAIR", owner="ducthangho", packet=1174,
+        mission=1172, revision=22, generation=19, spec_ref=lease["spec_ref"], spec_sha256=lease["spec_hash"], lease_id=lease["lease_id"],
         expires_utc="2026-11-09T14:20:32Z", comparison="same_model_configured_effort_v1", source=source, reviewer=reviewer,
-        head="c"*40, tree="d"*40, assurance="same_provider_approved")
-    def resolve(value, owner="ducthangho", forged=False):
+        head="c"*40, tree="d"*40, assurance="same_provider_approved", journal_root=str(c.tmp/"source-journal"))
+    class Clock(m.datetime):
+        instant = m.datetime(2026, 11, 9, 1, tzinfo=m.timezone.utc)
+        @classmethod
+        def now(cls, tz=None):
+            return cls.instant
+    records = []
+    def resolve(value, owner="ducthangho", forged=False, when=None, review_hash="a"*64, output_hash="b"*64):
         raw = m._1174_bytes(value)
         digest = hashlib.sha256(raw).hexdigest()
         lease["owner_review_policy"] = dict(ref="refs/heads/policy@"+"e"*40, path="ops/policy.json", sha256="f"*64 if forged else digest, decision_id=900001)
         decision = dict(id=900001, user=dict(login=owner, type="User"), author_association="OWNER",
             issue_url="https://api.github.com/repos/ducthangho/tra-luat/issues/1174",
             html_url="https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-900001", body="WP1174_OWNER_POLICY_V1 sha256:"+digest)
-        with patch.object(m, "_git_do", side_effect=lambda root, *args: (0, raw if args[0]=="show" else b"")):
-            return m._1174_owner_policy(c.tmp, a, lease, lease["spec_hash"], [decision])
+        records[:] = [decision]
+        for role, context in (("source", value["source"]), ("reviewer", value["reviewer"])):
+            audit = dict(schema="wp1174_context_audit.v1", role=role, context={k:v for k,v in context.items() if k != "evidence_id"},
+                head=value["head"], tree=value["tree"], review_receipt_sha256=review_hash if role == "reviewer" else None,
+                raw_output_sha256=output_hash if role == "reviewer" else None)
+            records.append(dict(decision, id=int(context["evidence_id"]), html_url="https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-"+context["evidence_id"], body=m._1174_bytes(audit).decode()))
+        Clock.instant = when or m.datetime(2026, 11, 9, 1, tzinfo=m.timezone.utc)
+        with patch.object(m, "datetime", Clock), patch.object(m, "_git_do", side_effect=lambda root, *args: (0, raw if args[0]=="show" else b"")):
+            return m._1174_owner_policy(c.tmp, a, lease, lease["spec_hash"], records)
     _reject1174(m._1174_initial, a, reason="initial owner-scoped same-family policy required")
     authority = _call1174(resolve, policy)
     token = m._1174_OWNER_POLICY.set(authority)
@@ -14188,6 +14230,114 @@ def _owner_policy14(c):
     _reject1174(resolve, policy, owner="agent", reason="owner-scoped policy owner decision")
     _reject1174(resolve, policy, forged=True, reason="owner-scoped policy immutable bytes")
 
+    # Test-only before / exact / after expiry; production clock is untouched.
+    expiry = m._1174_time(policy["expires_utc"])
+    _call1174(resolve, policy, when=expiry-__import__("datetime").timedelta(microseconds=1))
+    for instant in (expiry, expiry+__import__("datetime").timedelta(microseconds=1)):
+        _reject1174(resolve, policy, when=instant, reason="owner-scoped policy expired")
+    import contextlib, io, argparse
+    journal = Path(policy["journal_root"]); journal.mkdir(); (journal/"source-policy.lock").touch()
+    _, _, ready, _, _, _, _, _ = _runtime1174(Ctx(c.script,c.tmp/"canonical-fixture"), "record-review", current_policy=True, service=True)
+    nc = ready["ngu_canh_lease"]
+    nc.update(lease_id=lease["lease_id"], generation=19, spec_hash=lease["spec_hash"], executor=dict(identity), reviewer=dict(identity), repo=m._1174_REPO)
+    verified = dict(lease=dict(lease_id=lease["lease_id"],granted_by="ducthangho",evidence="https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-900001",expires_utc=policy["expires_utc"]),
+        context=nc, mode=False, comments_sha256="a"*64, source_lease=dict(lease, revision=22,generation=19,spec_path="ops/specs/r22.md"), spec=b"verified source spec without admission descriptor")
+    raw_output = c.tmp/"raw-review.txt";raw_output.write_bytes(b"fixture independent review output")
+    receipt = c.tmp/"source-review.json"
+    record = dict(schema="wp1174_owner_scoped_review.v1",head=policy["head"],tree=policy["tree"],identity=identity,verdict="approve",finding_ids=[],assurance="same_provider_approved",
+        policy_sha256="",source_context_id=source["context_id"],reviewer_context_id=reviewer["context_id"])
+    def bind():
+        authority = resolve(policy)
+        record["policy_sha256"] = authority["sha256"]
+        receipt.write_bytes(m._1174_bytes(record))
+        authority = resolve(policy,review_hash=hashlib.sha256(receipt.read_bytes()).hexdigest(),output_hash=hashlib.sha256(raw_output.read_bytes()).hexdigest())
+        verified["source_lease"] = dict(lease,revision=22,generation=19,spec_path="ops/specs/r22.md")
+        return authority
+    authority=bind()
+    audited_records=copy.deepcopy(records)
+    audit=json.loads(records[2]["body"]);audit.update(review_receipt_sha256=None,raw_output_sha256=None);records[2]["body"]=m._1174_bytes(audit).decode()
+    common=["--root",str(c.tmp),"--source-lease-ref","origin/ops/source","--source-lease-path","ops/leases/source.yaml","--revision","22","--generation","19"]
+    def snapshot():return {str(p):p.read_bytes() for p in journal.rglob("*") if p.is_file()}
+    def invoke(command,flags=(),missing=False,stale=False,missing_audit=False,variant=None,forged=False,receipt_hash=None):
+        value=variant or policy
+        def git(root,*args):
+            if args[0]=="show":return 0,m._1174_bytes(value)
+            return 0, (("0"*40 if stale else policy["head"]) if args[-1]=="HEAD" else policy["tree"]).encode()
+        out=io.StringIO()
+        from contextlib import contextmanager
+        @contextmanager
+        def snapshot_git(root):yield root
+        facts=__import__("copy").deepcopy(verified)
+        current_records=copy.deepcopy(records)
+        digest=hashlib.sha256(m._1174_bytes(value)).hexdigest()
+        facts["source_lease"]["owner_review_policy"]["sha256"]="f"*64 if forged else digest
+        current_records[0]["body"]="WP1174_OWNER_POLICY_V1 sha256:"+digest
+        for row,role in zip(current_records[1:],("source","reviewer")):
+            audit=json.loads(row["body"]);audit.update(head=value["head"],tree=value["tree"],context={k:v for k,v in value[role].items() if k!="evidence_id"})
+            if role=="reviewer" and receipt_hash is not None:audit["review_receipt_sha256"]=receipt_hash
+            row["body"]=m._1174_bytes(audit).decode()
+        if missing:facts["source_lease"].pop("owner_review_policy",None)
+        with patch.object(m,"datetime",Clock), patch.object(m,"_1174_git_snapshot",snapshot_git), patch.object(m,"_1174_rollout"), \
+                patch.object(m,"_1174_comments",return_value=current_records[:1] if missing_audit else current_records), patch.object(m,"_1174_api",return_value=dict(permission="maintain",user=dict(login="ducthangho"))), \
+                patch.object(m,"_verify_lease_ref",return_value=facts),patch.object(m,"_spec_merge",return_value=facts["spec"]),patch.object(m,"_git_do",side_effect=git), \
+                contextlib.redirect_stdout(out),contextlib.redirect_stderr(io.StringIO()):
+            Clock.instant=m.datetime(2026,11,9,1,tzinfo=m.timezone.utc)
+            rc=m.main(["--state-dir",str(journal),command,"--packet","1174",*common,*flags])
+        return rc,json.loads(out.getvalue())
+    init=["--mission","1172","--executor","codex","--reviewer","codex","--executor-execution-surface","codex_service","--reviewer-execution-surface","codex_service","--executor-transport","machine","--reviewer-transport","machine"]
+    for options,reason in ((dict(missing=True),"descriptor required"),(dict(stale=True),"stale H/tree"),(dict(missing_audit=True),"context audit missing")):
+        before=snapshot();rc,result=invoke("init",init,**options)
+        assert rc==8 and reason in result["detail"] and snapshot()==before,(rc,result)
+    def policy_rejections(command, flags):
+        for field,value,reason in (("expires_utc","2000-01-01T00:00:00Z","expired"),("revision",21,"scope/spec/lease"),("head","f"*40,"stale H/tree")):
+            bad=copy.deepcopy(policy);bad[field]=value;before=snapshot();rc,result=invoke(command,flags,variant=bad)
+            assert rc==8 and reason in result["detail"] and snapshot()==before,(rc,result)
+        for field,value in (("configured_effort","medium"),("configured_effort","unknown"),("context_id",source["context_id"]),("parent_context_id",source["context_id"])):
+            bad=copy.deepcopy(policy);bad["reviewer"][field]=value;before=snapshot();rc,result=invoke(command,flags,variant=bad)
+            assert rc==8 and "owner-scoped policy" in result["detail"] and snapshot()==before,(rc,result)
+        before=snapshot();rc,result=invoke(command,flags,forged=True)
+        assert rc==8 and "immutable bytes" in result["detail"] and snapshot()==before,(rc,result)
+    policy_rejections("init",init)
+    rc,result=invoke("init",init);assert rc==0,(rc,result)
+    def unflagged(command,flags):
+        before=snapshot()
+        with contextlib.redirect_stdout(io.StringIO()),contextlib.redirect_stderr(io.StringIO()):
+            try:rc=m.main(["--state-dir",str(journal),command,"--packet","1174",*flags])
+            except SystemExit as ex:rc=ex.code
+        assert rc==4 and snapshot()==before,"unflagged source writer bypass"
+    unflagged("record-post",["--for","reviewing","--comment-id","900009"])
+    try:m._load(journal,1174)
+    except SystemExit as ex:assert ex.code==4
+    else:assert False,"source unscoped loader accepted"
+    before=snapshot();_reject1174(m._save,journal,json.loads((journal/"wp1174.json").read_bytes()),reason="source same-family policy required before save")
+    assert snapshot()==before
+    policy_rejections("record-post",["--for","reviewing","--comment-id","900008"])
+    rc,result=invoke("record-lease");assert rc==0,(rc,result)
+    rc,result=invoke("begin-attempt",["--provider","codex","--execution-surface","codex_service","--transport","machine","--bang-chung-moi-truong",anh_doctor()]);assert rc==0,(rc,result)
+    before=snapshot();rc,result=invoke("record-lease")
+    assert rc==8 and "source lease requires awaiting_lease" in result["detail"] and snapshot()==before,(rc,result)
+    rc,result=invoke("record-post",["--for","reviewing","--comment-id","900004"]);assert rc==0,(rc,result)
+    rc,result=invoke("transition",["--to","reviewing","--comment-id","900004","--head-sha",policy["head"]]);assert rc==0,(rc,result)
+    rc,result=invoke("record-codex-call",["--head",policy["head"],"--run-id","source-review"]);assert rc==0,(rc,result)
+    review=["--provider","codex","--execution-surface","codex_service","--transport","machine","--verdict","approve","--reviewed-sha",policy["head"],"--codex-call","source-review","--bien-nhan",str(receipt),"--source-output",str(raw_output)]
+    policy_rejections("record-review",review)
+    before=snapshot();rc,result=invoke("record-review",review)
+    assert rc==8 and "review output audit" in result["detail"] and snapshot()==before,(rc,result)
+    records[:]=audited_records
+    before=snapshot();rc,result=invoke("record-review",review,receipt_hash="e"*64)
+    assert rc==8 and "review output audit" in result["detail"] and snapshot()==before,(rc,result)
+    unflagged("record-review",review[:-2])
+    raw_output.write_bytes(b"forged output");before=snapshot();rc,result=invoke("record-review",review)
+    assert rc==8 and "raw review output" in result["detail"] and snapshot()==before,(rc,result)
+    raw_output.write_bytes(b"fixture independent review output")
+    receipt.write_bytes(m._1174_bytes(dict(record,reviewer_context_id=source["context_id"])));before=snapshot();rc,result=invoke("record-review",review)
+    assert rc==8 and "review output audit" in result["detail"] and snapshot()==before,(rc,result)
+    receipt.write_bytes(m._1174_bytes(record));rc,result=invoke("record-review",review);assert rc==0,(rc,result)
+    final=json.loads((journal/"wp1174.json").read_bytes())
+    assert final["state"]=="approved_pending" and final["accepted_sha"] is None and final["human_acceptance"] is None
+    assert final["review_rounds_used"]==1 and final["codex_review_calls_used"]==1 and final["codex_calls"][0]["da_dung"]
+    before=snapshot();rc,result=invoke("chu-kho-duyet",["--checkpoint-path","ops/checkpoints/fixture.yaml"]);assert rc==8 and "source publication/human transition unavailable" in result["detail"] and snapshot()==before
+
 
 _source14_hosts = {"wp1174_durability_cached_writer": _lineage14, "wp1174_lifecycle_guard_readonly": _readers14,
                    "wp1174_lifecycle_identity_advisory": _owner_policy14}
@@ -14210,7 +14360,17 @@ MUTANTS["m1174_publication_preimage"] = MUTANTS["m1174_r12_push_preimage"]
 MUTANTS["m1174_recovery_predecessor_water"] = MUTANTS["m1174_r12_recovery_water"]
 
 MUTANTS["m1174_local_view_denied"] = ('        _1174_tripwire(result)\n        return result', '        _1174_tripwire(result)\n        raise ValueError("local v3 view unavailable")', ["wp1174_lifecycle_guard_readonly"])
-MUTANTS["m1174_readonly_unscoped_mutation"] = ('(3 if tx is not None else 2)', '(3 if tx is not None or st.get("schema_version") == 3 else 2)', ["wp1174_lifecycle_guard_readonly"])
+MUTANTS["m1174_readonly_unscoped_mutation"] = ('(3 if tx is not None and not tx.get("source") else 2)', '(3 if tx is not None or st.get("schema_version") == 3 else 2)', ["wp1174_lifecycle_guard_readonly"])
+
+MUTANTS["m1174_diagnostic_projection_bypass"] = ('def cmd_status(a, state_dir: Path) -> int:\n    st = _1174_diagnostic(_reader_state(state_dir, a.packet))', 'def cmd_status(a, state_dir: Path) -> int:\n    st = _reader_state(state_dir, a.packet)', ["wp1174_lifecycle_guard_readonly", "wp1174_durability_cached_writer"])
+
+MUTANTS.update({
+    "m1174_source_load_policy": ('if tx is None and _1174_same_family(st):', 'if False:', ["wp1174_lifecycle_identity_advisory"]),
+    "m1174_source_save_policy": ('_1174_require(_1174_SOURCE_POLICY.get() is not None, "source same-family policy required before save")', '_1174_require(True, "source same-family policy required before save")', ["wp1174_lifecycle_identity_advisory"]),
+    "m1174_source_lease_state": ('state["state"] == "awaiting_lease", "source lease requires awaiting_lease"', 'True, "source lease requires awaiting_lease"', ["wp1174_lifecycle_identity_advisory"]),
+    "m1174_source_receipt_audit": ('hashlib.sha256(raw).hexdigest() == authority["review_audit"]["review_receipt_sha256"]', 'True', ["wp1174_lifecycle_identity_advisory"]),
+    "m1174_source_raw_output": ('bool(output) and hashlib.sha256(output).hexdigest() == authority["review_audit"]["raw_output_sha256"]', 'True', ["wp1174_lifecycle_identity_advisory"]),
+})
 
 if __name__ == "__main__":
     sys.exit(main())

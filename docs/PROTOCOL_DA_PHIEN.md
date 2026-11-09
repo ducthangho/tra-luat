@@ -1674,48 +1674,41 @@ riêng; current-policy subcases giữ False qua lease, begin/call, review và ac
 Các transport/authority fixture seams không thay bằng chứng lifecycle production.
 
 
-### WP1174 R21/g18: explicit owner-scoped Codex service review
+### WP1174 R22/g19: verified source policy and V3 diagnostics
 
-Same-family initialization remains denied by default. The enrolled v3 route may
-use the WP1174-E2-R21-CODEX-PAIR exception only for Packet1174/Mission1172,
-revision21/generation18, the pinned R21 spec and lease ID, before the approved
-expiry. Legacy unscoped init retains rc4. Candidate code never authorizes its own
-bootstrap, publication or land.
+Same-family source orchestration remains denied by default. The narrow
+WP1174-F-R22-CODEX-PAIR route is selected by --source-lease-ref/path and resolves
+current canonical I2 lease H/Đ/R, immutable R22 spec and owner API policy/audit
+records. It requires Packet1174/Mission1172/revision22/generation19, the exact
+lease/spec/expiry, H/tree, journal directory and source checkout. It does not
+require or manufacture target admission/enrollment. Candidate code cannot
+activate itself: the consumer must match current landed canonical bytes.
 
-The verified current canonical lease pins an immutable policy ref@OID/path/hash
-and owner decision ID. The resolver reads that object and the current owner API
-comment binding its exact hash. The policy binds exact H/tree, two independent
-source/reviewer context IDs, separate checkout and platform evidence IDs, null
-fork parents, a read-only reviewer and exact Codex/openai/service/machine tuples.
-These are owner-audited platform records; they do not measure the serving model
-or prove OS isolation. Missing, forged, revoked by changed owner decision,
-expired or out-of-scope evidence fails before persistence. Unknown context or
-comparison evidence cannot be replaced with a caller enable flag.
+An immutable policy binds distinct unforked source/reviewer context IDs, separate
+checkouts, read-only review, Codex/openai/service/machine identities and the same
+configured model with medium/high effort. Current owner context-audit records
+bind those facts to H/tree. This is owner-audited platform evidence; serving
+identity remains KHONG_DO_DUOC unless measured. Caller flags or booleans cannot
+supply that authority. Missing/forged/expired/wrong-scope/stale/self/fork/profile
+facts fail before journal publication. Reviewer receipt and nonempty raw output
+must match the owner-audited digests before review is recorded.
 
-The explicit comparison policy accepts the same configured model with source
-medium and reviewer high. Equal/lower/unknown effort and unranked model changes
-are denied. Another machine does not establish family independence. Review
-receipts bind the policy hash, both context IDs and exact tree/head; stale head,
-self/forked contexts or writable review are rejected. The assurance is
-same_provider_approved, never cross_approved or human_audited. Existing target
-actual-human acceptance, severity, history and counter obligations remain.
+The source transaction uses a preexisting fixed lock, revalidates canonical
+facts under lock and before publication, and stages the original reducers before
+durable complete-temp persistence. Lease recording retains awaiting_lease and
+budget preconditions. Unflagged same-family load/save remains denied; ordinary
+cross-family V2 behavior remains compatible. Approval records
+same_provider_approved and approved_pending, never cross_approved or
+human_audited. This route cannot perform accept/adoption/human publication
+transitions. Source publication/land still needs its separate authoritative gates
+or explicit exact-head owner resolution. Current runtime-policy metadata is
+inactive and this implementation is not a claim that canonical init now passes.
 
-For enrolled v3, status/next-comment accept the same admission/root/revision/
-generation/coordinator identity and validate current authority, witness/high-water
-and all retired ancestors under the existing lock. They use a read-only state
-context; they cannot grant an unscoped v3 writer or accept retired state.
-
-
-The original unflagged status/next-comment commands also support a local read-only
-v3 diagnostic view. They validate canonical closed v3 bytes, the complete legacy
-invariants and all retained immutable adoption links/live tombstones. This local
-view reports journal contents; it does not prove current grant/enrollment or
-create review/dispatch authority. Unscoped mutators retain the v2-only loader.
-Explicit admission inputs select the stronger current-authority reader above.
-
-
-Source R21 policy integration remains blocked in this candidate: the frozen R21
-spec has no target admission descriptor. The scoped target-policy validator above
-therefore does not implement an admission-independent source init/review route.
-That route and its complete parser/router policy evidence remain required; this
-candidate does not activate the exception or complete R21 acceptance.
+Target V3 authority, witness/high-water, complete retired-chain validation,
+actual-human acceptance and native/runtime gates remain independent. Both the
+enrolled and original unflagged status/next-comment readers support validated
+read-only V3 diagnostics. Their public projection exposes identity/state/counters
+only, omitting keys, history and adoption snapshots before rendering. V2 output
+stays compatible; unscoped V3 mutation and retired/malformed state remain denied.
+Test-only frozen clocks cover before/at/after expiry without changing production
+UTC checks or the host clock.

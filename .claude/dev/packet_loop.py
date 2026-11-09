@@ -663,6 +663,8 @@ def _load(state_dir: Path, packet: int) -> dict:
             identity = st.get(f"{role}_identity")
             if identity is not None and (type(identity) is not dict or role == "reviewer" and st["reviewer"] == "codex" and identity.get("model_family", PROVIDER_FAMILIES["codex"]) != "openai"):
                 raise ValueError(f"{role}_identity")
+        if tx is None and _1174_same_family(st):
+            _die(RC_PROVIDER, "source same-family policy required before load")
         can_duoi = _la_codex(st) * sum(r.get("provider") == st["reviewer"] for r in st["reviews"])
         if type(st["schema_version"]) is int and st["schema_version"] == 1 and not st.keys() & {"review_rounds_used", "review_rounds_limit", "codex_review_calls_used", "codex_review_calls_limit", "codex_calls", "nang_tran", "dem_tu_suy"}:  # M6: SUY bộ đếm = cận DƯỚI ở trên — suy 0 là fail-open
             st.update(schema_version=2, review_rounds_used=len(st["reviews"]), codex_review_calls_used=can_duoi,
@@ -671,7 +673,7 @@ def _load(state_dir: Path, packet: int) -> dict:
         goi, posts, anchor = st["codex_calls"], st["posts"], st.get("attempt_anchor")
         pending = next((h.get("event") != "record_rescue" or h.get("mo_lai") is not True for h in reversed(st["history"]) if h.get("event") in ("blocked_rescue_required", "record_rescue")), False)
         vi_pham = [ten for ten, dung in (  # mỗi bất biến MỘT phần tử ⇒ mỗi cái một đột biến riêng
-            ("schema", type(st["schema_version"]) is int and st["schema_version"] == (3 if tx is not None else 2) and type(st["packet"]) is int and st["packet"] == packet and st["state"] in CHUYEN_HOP_LE and type(st["mission"]) is int and st["executor"] in PROVIDERS and (st["reviewing_head_sha"] is None or SHA_RE.match(st["reviewing_head_sha"]))),
+            ("schema", type(st["schema_version"]) is int and st["schema_version"] == (3 if tx is not None and not tx.get("source") else 2) and type(st["packet"]) is int and st["packet"] == packet and st["state"] in CHUYEN_HOP_LE and type(st["mission"]) is int and st["executor"] in PROVIDERS and (st["reviewing_head_sha"] is None or SHA_RE.match(st["reviewing_head_sha"]))),
             ("bo-dem", all(type(st[k]) is int for k in ("attempts_used", "attempts_limit", "same_failure_limit")) and st["attempts_used"] >= 0 and all(type(st[u]) is int is type(st[t]) and st[u] >= 0 < st[t] for u, t in TRUC_TRAN.values())),
             ("so", all(type(st[k]) is list for k in ("codex_calls", "nang_tran", "reviews", "history"))
                    and all(r.get("provider") == st["reviewer"] and type(r.get("attempt")) is int for r in st["reviews"])
@@ -718,6 +720,8 @@ def _save(state_dir: Path, st: dict) -> None:
         _1174_require(Path(state_dir).resolve() == tx["directory"] and st["packet"] == tx["state"]["packet"], "transaction save namespace")
         tx["proposal"] = json.loads(_1174_bytes(st))
         return
+    if _1174_same_family(st):
+        _1174_require(_1174_SOURCE_POLICY.get() is not None, "source same-family policy required before save")
     state_dir.mkdir(parents=True, exist_ok=True)
     p = _state_path(state_dir, st["packet"])
     # Mọi lỗi serialization/encoding là lỗi đầu vào: đo TRƯỚC khi mở/truncate state.
@@ -788,7 +792,7 @@ def cmd_init(a, state_dir: Path) -> int:
     reviewer_identity = _identity(a.reviewer, a.reviewer_model_family,
                                   a.reviewer_execution_surface, a.reviewer_transport)
     # Cross-provider: chặn NGAY từ init, không đợi tới lúc ghi review.
-    if a.executor == a.reviewer or executor_identity["model_family"] == reviewer_identity["model_family"]:
+    if (a.executor == a.reviewer or executor_identity["model_family"] == reviewer_identity["model_family"]) and _1174_SOURCE_POLICY.get() is None:
         _die(
             RC_PROVIDER,
             f"executor và reviewer cùng là {a.executor!r} — mặc định phải khác nền "
@@ -1164,6 +1168,7 @@ def _pending_human_lane(st):
         _nc_hop_le(st.get("ngu_canh_lease")) and
         st["ngu_canh_lease"]["generation"] == admission["generation"] and
         type(st.get("lease")) is dict and st["lease"]["lease_id"] == st["ngu_canh_lease"]["lease_id"])
+    scoped = scoped or _1174_SOURCE_POLICY.get() is not None
     return st.get("luat_adr0054") is True or scoped
 
 
@@ -1432,7 +1437,7 @@ def _reader_state(state_dir, packet):
 
 
 def cmd_next_comment(a, state_dir: Path) -> int:
-    st = _reader_state(state_dir, a.packet)
+    st = _1174_diagnostic(_reader_state(state_dir, a.packet))
     print(
         f"### packet wp{st['packet']} · mission #{st['mission']}\n"
         f"\n"
@@ -2772,7 +2777,7 @@ def _verify_lease_ref(a, st: dict):
             _die(RC_PROVIDER, f"{vai} của lease {nc[vai]!r} khác state {st.get(f'{vai}_identity')!r}")
     lease = _kiem_luoc_do_lease({"lease_id": lid, "granted_by": l.get("granted_by"), "evidence": l["granted_on_instruction"], "expires_utc": l.get("lease_expires_at_utc")}, RC_ARG)
     che_do = _che_do_0054(root, spec)
-    return dict(lease=lease, context=nc, mode=che_do, comments_sha256=hashlib.sha256(raw_cm).hexdigest())
+    return dict(lease=lease, context=nc, mode=che_do, comments_sha256=hashlib.sha256(raw_cm).hexdigest(), source_lease=l, spec=spec)
 
 
 def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
@@ -3179,8 +3184,18 @@ def _xet_dung(state_dir: Path, st: dict, cua: str, a=None, cham_tran=()) -> None
                     _vao_rescue(state_dir, st, truc, f"review {a.verdict} chưa approve")
 
 
+def _1174_diagnostic(st):
+    # Allowlist public diagnostics: no key, history or immutable source snapshots,
+    # including JSON/base64/hex copies nested in adoption metadata.
+    if st.get("schema_version") != 3:
+        return st
+    return {k: st[k] for k in ("schema_version", "packet", "mission", "state", "executor", "reviewer",
+        "attempts_used", "attempts_limit", "review_rounds_used", "review_rounds_limit",
+        "codex_review_calls_used", "codex_review_calls_limit", "finding_counts", "generation", "state_revision")}
+
+
 def cmd_status(a, state_dir: Path) -> int:
-    st = _reader_state(state_dir, a.packet)
+    st = _1174_diagnostic(_reader_state(state_dir, a.packet))
     print(json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True))
     if st.get("dem_tu_suy"):
         print(CANH_BAO_V1, file=sys.stderr)
@@ -4356,7 +4371,8 @@ def _1174_resolve(root, packet, revision, generation, admission_file, identities
 
 def _1174_same_family(state):
     return (state["executor"] == state["reviewer"] or
-            state["executor_identity"]["model_family"] == state["reviewer_identity"]["model_family"])
+            (state.get("executor_identity") or {}).get("model_family", PROVIDER_FAMILIES[state["executor"]]) ==
+            (state.get("reviewer_identity") or {}).get("model_family", PROVIDER_FAMILIES[state["reviewer"]]))
 
 
 def _1174_owner_policy(root, admission, lease, spec_sha256, comments):
@@ -4377,14 +4393,14 @@ def _1174_owner_policy(root, admission, lease, spec_sha256, comments):
     _1174_require(rc == 0 and hashlib.sha256(raw).hexdigest() == descriptor["sha256"], "owner-scoped policy immutable bytes")
     policy = _1174_json(raw)
     keys = {"schema", "policy_id", "owner", "packet", "mission", "revision", "generation", "spec_ref", "spec_sha256",
-            "lease_id", "expires_utc", "comparison", "source", "reviewer", "head", "tree", "assurance"}
+            "lease_id", "expires_utc", "comparison", "source", "reviewer", "head", "tree", "assurance", "journal_root"}
     _1174_require(type(policy) is dict and set(policy) == keys and policy["schema"] == "wp1174_owner_review_policy.v1" and
-        policy["policy_id"] == "WP1174-E2-R21-CODEX-PAIR" and policy["owner"] == CHU_KHO and
+        policy["policy_id"] == "WP1174-F-R22-CODEX-PAIR" and policy["owner"] == CHU_KHO and
         all(type(policy[k]) is int and policy[k] == admission[k] == v for k, v in
-            (("packet", 1174), ("mission", 1172), ("revision", 21), ("generation", 18))) and
+            (("packet", 1174), ("mission", 1172), ("revision", 22), ("generation", 19))) and
         policy["spec_ref"] == lease["spec_ref"] and policy["spec_sha256"] == spec_sha256 == lease["spec_hash"] ==
-            "0e5b03b860a778d9b59ae4290b00ed205c8d690cf7e083037ea8634d7336a33b" and
-        policy["lease_id"] == lease["lease_id"] == "wp1174-r21-g18-codex" and policy["assurance"] == "same_provider_approved" and
+            "93014799f12143ad9114979744ccec08d5cc00dab2006b7e9412fd4663ebaf2c" and
+        policy["lease_id"] == lease["lease_id"] == "wp1174-r22-g19-codex" and policy["assurance"] == "same_provider_approved" and
         policy["comparison"] == "same_model_configured_effort_v1", "owner-scoped policy scope/spec/lease")
     now = datetime.now(timezone.utc)
     _1174_require(now < _1174_time(policy["expires_utc"]) <= _1174_time(lease["lease_expires_at_utc"]) and
@@ -4408,14 +4424,33 @@ def _1174_owner_policy(root, admission, lease, spec_sha256, comments):
             context["provider"] == "codex" and context["model_family"] == "openai" and
             context["execution_surface"] == "codex_service" and context["transport"] == "machine" and
             {k: context[k] for k in ("provider", "model_family", "execution_surface", "transport")} ==
-                admission["enrollment"]["initial_state_projection"][role + "_identity"], "owner-scoped policy context identity")
+                (admission["identities"] if "identities" in admission else admission["enrollment"]["initial_state_projection"])[role + "_identity"], "owner-scoped policy context identity")
+    _1174_require(type(policy["journal_root"]) is str and Path(policy["journal_root"]).is_absolute() and
+        str(Path(policy["journal_root"]).resolve()) == policy["journal_root"], "owner-scoped policy journal root")
+    audits = {}
+    for role, context in (("source", source), ("reviewer", reviewer)):
+        records = [c for c in comments if str(c.get("id")) == context["evidence_id"]]
+        _1174_require(len(records) == 1, "owner-scoped policy context audit missing")
+        record = records[0]
+        _1174_require(record.get("user") == decision["user"] and record.get("author_association") == "OWNER" and
+            record.get("issue_url") == decision["issue_url"] and record.get("html_url") ==
+            f"https://github.com/{_1174_REPO}/issues/1174#issuecomment-{context['evidence_id']}", "owner-scoped policy context audit owner")
+        audit = _1174_json(record.get("body", "").encode())
+        _1174_require(audit == dict(schema="wp1174_context_audit.v1", role=role,
+            context={k:v for k,v in context.items() if k != "evidence_id"}, head=policy["head"], tree=policy["tree"],
+            review_receipt_sha256=audit.get("review_receipt_sha256"), raw_output_sha256=audit.get("raw_output_sha256")) and
+            (role == "source" and audit["review_receipt_sha256"] is None and audit["raw_output_sha256"] is None or
+             role == "reviewer" and (all(audit[k] is None for k in ("review_receipt_sha256", "raw_output_sha256")) or
+                all(_1174_hash(audit[k]) for k in ("review_receipt_sha256", "raw_output_sha256")))),
+             "owner-scoped policy context audit binding")
+        audits[role] = audit
     _1174_require(source["context_id"] != reviewer["context_id"] and source["checkout_id"] != reviewer["checkout_id"] and
-        source["evidence_id"] != reviewer["evidence_id"] and reviewer["read_only"] is True and
+        source["evidence_id"] != reviewer["evidence_id"] and source["read_only"] is False and reviewer["read_only"] is True and
         source["configured_model"] == reviewer["configured_model"] and
         source["configured_effort"] == "medium" and reviewer["configured_effort"] == "high", "owner-scoped policy independent stronger reviewer")
     _1174_require(type(policy["head"]) is str and SHA_RE.fullmatch(policy["head"]) and
         type(policy["tree"]) is str and SHA_RE.fullmatch(policy["tree"]), "owner-scoped policy H/tree")
-    return dict(policy=policy, sha256=descriptor["sha256"])
+    return dict(policy=policy, sha256=descriptor["sha256"], review_audit=audits["reviewer"])
 
 
 def _1174_policy_head(root, authority, head=None):
@@ -4532,6 +4567,7 @@ _1174_MUTATORS = ("init", "record-lease", "begin-attempt", "void-attempt", "reco
     "record-codex-call", "nang-tran", "record-rescue", "record-post", "accept", "mo-lai", "chu-kho-duyet", "adopt-state")
 _1174_IMPLEMENTATION_COMPLETE = True
 _1174_OWNER_POLICY = contextvars.ContextVar("wp1174_owner_policy", default=None)
+_1174_SOURCE_POLICY = contextvars.ContextVar("wp1174_source_policy", default=None)
 _1174_VIEW_ONLY = contextvars.ContextVar("wp1174_view_only", default=False)
 
 _1174_CORE = frozenset("schema_version review_rounds_used codex_review_calls_used codex_calls nang_tran review_rounds_limit codex_review_calls_limit packet mission executor reviewer executor_identity reviewer_identity state lease attempts_used attempts_limit same_failure_limit finding_counts attempt_open attempt_anchor hmac_key reviewing_head_sha accepted_sha reviews posts history state_revision generation enrollment_id binding_sha256 adoption scoped_review human_acceptance".split())
@@ -5133,6 +5169,12 @@ def _1174_review(a, directory, admission):
     authority = _1174_OWNER_POLICY.get() if _1174_same_family(st) else None
     if authority is not None:
         _1174_policy_head(Path(a.root), authority, a.reviewed_sha)
+        _1174_require(hashlib.sha256(raw).hexdigest() == authority["review_audit"]["review_receipt_sha256"],
+                      "owner-scoped review output audit required")
+        _1174_require(type(getattr(a, "source_output", None)) is str, "owner-scoped raw review output required")
+        output = _1174_read(Path(a.source_output))
+        _1174_require(bool(output) and hashlib.sha256(output).hexdigest() == authority["review_audit"]["raw_output_sha256"],
+            "owner-scoped raw review output required")
     service = st["reviewer_identity"]["execution_surface"] == "codex_service"
     if not service:
         with tempfile.TemporaryDirectory(prefix="wp1174-receipt-") as temporary:
@@ -5573,6 +5615,87 @@ def _1174_command(a, state_dir):
     return _1174_emit(status, detail)
 
 
+@_1174_scoped
+def _1174_source_resolve(a, directory, state):
+    """Source orchestration uses I2/owner/spec facts, never target enrollment."""
+    root = Path(a.root)
+    with _1174_git_snapshot(root) as snapshot:
+        _1174_rollout(snapshot)
+        comments = _1174_comments(1174, snapshot)
+        permission = _1174_api(f"repos/{_1174_REPO}/collaborators/{CHU_KHO}/permission", root=snapshot, deadline=time.time()+120)
+        _1174_require(permission.get("permission") in ("admin", "maintain") and
+            permission.get("user", {}).get("login") == CHU_KHO, "source owner maintain permission")
+        with tempfile.TemporaryDirectory(prefix="wp1174-source-authority-") as td:
+            readback = Path(td)/"comments.json"
+            readback.write_bytes(_1174_bytes(comments))
+            args = argparse.Namespace(root=str(snapshot), lease_ref=a.source_lease_ref,
+                lease_path=a.source_lease_path, lease_comments=str(readback))
+            verified = _verify_lease_ref(args, state)
+        lease = verified["source_lease"]
+        _1174_require(lease.get("revision") == 22 and lease.get("generation") == 19 and
+            verified["context"]["repo"] == _1174_REPO, "source canonical lease scope")
+        spec = _spec_merge(snapshot, lease["spec_ref"].rsplit("@",1)[1], lease["spec_path"], lease)
+        # _spec_merge verifies the immutable spec bytes/hash through canonical Git.
+        facts = dict(packet=state["packet"], mission=state["mission"], revision=22, generation=19,
+            expires_utc=lease["lease_expires_at_utc"], identities={k:state[k] for k in ("executor_identity", "reviewer_identity")})
+        authority = _1174_owner_policy(snapshot, facts, lease, lease["spec_hash"], comments)
+        _1174_require(str(directory.resolve()) == authority["policy"]["journal_root"] and
+            authority["policy"]["source"]["checkout_id"] == str(root.resolve()), "source journal/checkout binding")
+        _1174_policy_head(root, authority)
+        return dict(authority=authority, verified=verified)
+
+
+@_1174_scoped
+def _1174_source_command(a, directory):
+    global _1174_TRANSACTION
+    previous = globals().get("_1174_TRANSACTION")
+    token, policy_token = _1174_SOURCE_POLICY.set(None), _1174_OWNER_POLICY.set(None)
+    try:
+        _1174_require(a.admission is None and a.packet == 1174 and a.revision == 22 and a.generation == 19 and
+            a.source_lease_ref and a.source_lease_path and directory.is_dir(), "source input scope/directory")
+        path = _state_path(directory, a.packet)
+        state = (dict(packet=a.packet, mission=a.mission, executor=a.executor, reviewer=a.reviewer,
+            **{role+"_identity":_identity(getattr(a,role), getattr(a,role+"_model_family"),
+                getattr(a,role+"_execution_surface"), getattr(a,role+"_transport")) for role in ("executor","reviewer")})
+            if a.cmd == "init" else json.loads(_1174_read(path)))
+        first = _1174_source_resolve(a, directory, state)
+        _1174_require((directory/"source-policy.lock").is_file(), "source preexisting fixed lock required")
+        with _1174_lock(directory/"source-policy.lock"):
+            current = _1174_source_resolve(a, directory, state)
+            _1174_require(current == first and (a.cmd == "init" and not path.exists() or
+                a.cmd != "init" and json.loads(_1174_read(path)) == state), "source authority/state changed under lock")
+            _1174_require(a.cmd in ("init", "record-lease") or state.get("lease") == current["verified"]["lease"] and
+                {k:v for k,v in state.get("ngu_canh_lease",{}).items() if k != "lease_oid"} ==
+                {k:v for k,v in current["verified"]["context"].items() if k != "lease_oid"}, "source journal/current lease binding")
+            _1174_SOURCE_POLICY.set(current)
+            _1174_OWNER_POLICY.set(current["authority"])
+            _1174_TRANSACTION = dict(directory=directory.resolve(), state=state, source=True, proposal=None)
+            with contextlib.redirect_stdout(io.StringIO()):
+                if a.cmd == "record-lease":
+                    state = _load(directory,a.packet)
+                    _xet_dung(directory,state,"record-lease")
+                    _1174_require(state["state"] == "awaiting_lease", "source lease requires awaiting_lease")
+                    rc = _apply_lease_ref(a, directory, state, current["verified"])
+                elif a.cmd == "record-review":
+                    rc = _1174_review(a, directory, None)
+                else:
+                    _1174_require(a.cmd not in ("accept", "adopt-state", "chu-kho-duyet"), "source publication/human transition unavailable")
+                    rc = a.fn(a, directory)
+            proposal = _1174_TRANSACTION["proposal"]
+            _1174_require(rc == 0 and type(proposal) is dict, "source reducer result")
+            _1174_TRANSACTION["state"] = proposal
+            _load(directory,a.packet)
+            _1174_require(_1174_source_resolve(a,directory,state) == current, "source final authority changed")
+            _1174_persist(path, _1174_bytes(proposal), create=a.cmd == "init")
+        return _1174_emit("completed_no_dispatch")
+    except (Exception, SystemExit) as ex:
+        return _1174_emit("UNKNOWN", f"{type(ex).__name__}: {ex}")
+    finally:
+        _1174_TRANSACTION = previous
+        _1174_SOURCE_POLICY.reset(token)
+        _1174_OWNER_POLICY.reset(policy_token)
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="packet_loop.py",
@@ -5824,6 +5947,8 @@ def build_parser() -> argparse.ArgumentParser:
     q.set_defaults(fn=None)
     for name in (*_1174_MUTATORS, "guard-first-publication"):
         command = sub.choices[name]
+        for flag in ("--source-lease-ref", "--source-lease-path", "--source-output"):
+            command.add_argument(flag)
         for flag in ("--admission", "--expected-revision", "--expected-witness-revision", "--coordinator-id"):
             command.add_argument(flag)
         command.add_argument("--revision", type=int)
@@ -5867,7 +5992,7 @@ def main(argv=None) -> int:
     _cung_hoa_stdout()
     arguments = list(sys.argv[1:] if argv is None else argv)
     scoped_syntax = any(arg.split("=", 1)[0] in {"--admission", "--revision", "--generation", "--coordinator-id",
-                        "--expected-revision", "--expected-witness-revision", "--mode"} for arg in arguments)
+                        "--expected-revision", "--expected-witness-revision", "--mode", "--source-lease-ref", "--source-lease-path", "--source-output"} for arg in arguments)
     try:
         a = build_parser().parse_args(arguments)
     except SystemExit as ex:
@@ -5880,6 +6005,8 @@ def main(argv=None) -> int:
         return _1174_emit("input_rejected", "scoped flags require admission")
     if a.cmd == "guard-first-publication":
         return _1174_guard(a)
+    if a.cmd in _1174_MUTATORS and getattr(a, "source_lease_ref", None) is not None:
+        return _1174_source_command(a, Path(a.state_dir))
     if a.cmd in _1174_MUTATORS and getattr(a, "admission", None) is not None:
         return _1174_command(a, Path(a.state_dir))
     if a.cmd in _1174_MUTATORS and scoped_syntax:

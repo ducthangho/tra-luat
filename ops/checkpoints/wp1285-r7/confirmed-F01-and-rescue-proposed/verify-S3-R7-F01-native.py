@@ -1,0 +1,21 @@
+from pathlib import Path,PurePosixPath
+import json,base64,hashlib,zipfile,datetime
+S=Path('/workspace/scratch/proxima-rest-20261108');W=S/'S3-R7-F01-native-retained';raw=base64.b64decode(''.join(''.join((W/'parts'/f'{n}.b64').read_text().split()) for n in [0,100,200,300,400]),validate=True);assert len(raw)==1347760 and hashlib.sha256(raw).hexdigest()=='bd1f9a882f3b0a91e358fbbaaff3f3ab9b4187ac10fd9cc15d9d030fd27dcf91';z=W/'original-evidence.zip';z.write_bytes(raw);D=W/'extracted';assert D.exists()
+with zipfile.ZipFile(z) as zz:
+ for f in zz.infolist():
+  p=PurePosixPath(f.filename);assert not p.is_absolute() and '..' not in p.parts
+ zz.extractall(D)
+m=json.loads((D/'source-byte-manifest.json').read_text());assert len(m)==251
+for path,v in m.items():
+ b=(D/path).read_bytes();assert len(b)==v['bytes'] and hashlib.sha256(b).hexdigest()==v['sha256'],path
+r=json.loads((D/'measurement.json').read_text());assert r['head']=='ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c' and r['harness_sha256']=='f230c95b1f36b558b2f58439f8ea64cc6f77a876c1d74cc8c9baf1634cc9f864';assert json.loads((D/'source-before.json').read_text())==json.loads((D/'source-after.json').read_text());assert json.loads((D/'lock-release.json').read_text())['after']=='' and json.loads((D/'terminal.json').read_text())['rc']==0;rows=[]
+for label,v in r['phases'].items():
+ q=v['report'];a=v['ast'];cases={x['id']:x for x in q['cases']};assert q['setup_error'] is None
+ if v['name']!='harmless-keyword-prefix':assert a['parse_errors']==[]
+ row={'label':label,'culture':v['culture'],'shell':v['shell'],'rc':v['rc'],'PM01':cases['PM01']['outcome'],'PM02':cases['PM02']['outcome'],'PM04':cases['PM04']['outcome'],'PM01_detail':cases['PM01'],'runtime_children':q['runtime_children'],'ScriptRequirementsPresent':a['ScriptRequirementsPresent'],'RequiredPSVersion':a['RequiredPSVersion'],'regex_matches':a['regex_matches']};rows.append(row)
+ if v['name']=='original':assert v['rc']==0 and q['passed']==q['total']==7 and not a['ScriptRequirementsPresent']
+ if v['name']=='harmless-space-comment':assert v['rc']==1 and cases['PM01']['outcome']=='failed' and q['runtime_children']==0 and not a['ScriptRequirementsPresent']
+ if v['name']=='harmless-keyword-prefix':assert v['rc']==1 and cases['PM01']['outcome']=='failed' and q['runtime_children']==0 and a['ScriptRequirementsPresent'] and a['parse_errors'] and cases['PM01']['reason'].startswith('PARSE_ERROR:')
+ if v['name']=='genuine-lower':assert v['rc']==1 and cases['PM01']['outcome']=='failed' and q['runtime_children']==0 and a['ScriptRequirementsPresent'] and a['RequiredPSVersion']=='5.1'
+ if v['name'].startswith('genuine-upper-'):assert v['rc']==0 and q['passed']==q['total']==7 and a['ScriptRequirementsPresent'] and a['RequiredPSVersion']=='5.1' and a['regex_matches']==[] and q['runtime_children']==2
+assert len(rows)==12;out={'head':r['head'],'finding':'WP1285-R7-F01','reviewer_severity':'P3','confirmed_by_operator_native_probe':True,'manifestation_A':'2 harmless-space-comment cases rejected beforeimport even though ASTScriptRequirementsabsent, x2runtimes; reviewer #requiresX example is NOT harmless on either runtime (parsererror), not counted as confirmation','manifestation_B':'4 genuineuppercase directives under trTR/azLatnAZ accepted normal7/7 despite ASTScriptRequirementsversion5.1; observed bothPS51/7, no arbitrarycodeexecution claim','positive_controls':'2 original enUS controls7/7; 2 lowercasegenuine directives rejected as expected; 2 #requiresX malformed directives correctly rejected by parser','rows':rows,'original_zip_sha256':hashlib.sha256(raw).hexdigest(),'source_files_verified':251,'source_repository_unchanged':True,'machine_lock_released_empty':True,'WindowsCI':False,'product_patch':False,'class_recurrence':'Potential related ScriptRequirements AST remnant now measured; historical block/background cases remainclosed. Dispatcher/owner to classify, do not autoerase/new id to evade sameclass stop.','status':'CONFIRMED open P3, no waiver, no merge','at':datetime.datetime.now(datetime.timezone.utc).isoformat()};(S/'S3-R7-F01-native-confirmation.json').write_text(json.dumps(out,indent=2)+'\n');print(json.dumps({k:v for k,v in out.items() if k!='rows'}));print(json.dumps([{k:v for k,v in x.items() if k not in ['PM01_detail']} for x in rows],ensure_ascii=False))

@@ -1,0 +1,47 @@
+{
+  "status": "actual_preflight_passed_NO_model_call",
+  "kernel_readonly_command": [
+    "bwrap",
+    "--bind",
+    "/",
+    "/",
+    "--ro-bind",
+    "/workspace/scratch/proxima-rest-20261108/S3-readonly-bootstrap-preflight/input",
+    "/workspace/scratch/proxima-rest-20261108/S3-readonly-bootstrap-preflight/input",
+    "--die-with-parent",
+    "--new-session",
+    "--",
+    "/usr/bin/python3",
+    "-B",
+    "-c",
+    "from pathlib import Path;import errno,json;p=Path('/workspace/scratch/proxima-rest-20261108/S3-readonly-bootstrap-preflight/input');assert (p/'readable.txt').read_text()=='readonly-probe\\n';\ntry:(p/'must-not-exist.txt').write_text('denied')\nexcept OSError as e: assert e.errno in [errno.EROFS,errno.EACCES];print(json.dumps({'read':True,'write_denied':True,'errno':e.errno}))\nelse:raise SystemExit('unsafe writable mount')"
+  ],
+  "kernel_rc": 0,
+  "kernel_result": {
+    "read": true,
+    "write_denied": true,
+    "errno": 30
+  },
+  "normal_unmodified_hook_command": [
+    "bwrap",
+    "--bind",
+    "/",
+    "/",
+    "--ro-bind",
+    "/workspace/scratch/wp1285-claude-cross-audit-H4",
+    "/workspace/scratch/wp1285-claude-cross-audit-H4",
+    "--die-with-parent",
+    "--new-session",
+    "--",
+    "/bin/bash",
+    "/workspace/scratch/wp1285-claude-cross-audit-H4/.claude/hooks/session-start.sh"
+  ],
+  "normal_hook_rc": 0,
+  "normal_hook_trace_write_denied": true,
+  "normal_hook_marker_bytes_unchanged": true,
+  "no_hooks_disabled_or_bypassed": true,
+  "no_original_failed_gate_relabelled": true,
+  "next_clone_exact_head_probe_still_required": true,
+  "model_invoked": false,
+  "at": "2026-11-09T02:25:06.465370+00:00"
+}

@@ -1,0 +1,104 @@
+{
+  "status": "PROPOSED_NOT_APPROVED_NOT_DISPATCHED",
+  "packet": "wp1285",
+  "prospective_revision": 8,
+  "prospective_generation": 9,
+  "current_H4": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "current_tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+  "admission_base": "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+  "original_B": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "reason": "Claude5 actual changes_requested; P3 confirmed on both native runtimes; no merge condition satisfied. Current r7 forbids new author/productpatch/push3/formal6; owner must approve bounded rescue, not another generic merge grant.",
+  "finding": {
+    "stableid": "WP1285-R7-F01",
+    "severity": "P3 retained from reviewer",
+    "same_class_conservative_treatment": "Count measured ScriptRequirements remnant conservatively with historical WP1285-R1-F01 AST-ignored-execution/requirements class; third measured manifestation requires explicit owner Rescue, no id/counterreset",
+    "confirmed": "Harmless # Requires comment rejected on both; genuine #REQUIRES accepted normal7/7 under trTR and azLatnAZ on both. #requiresX reviewerexample actually parsererror on both, not counted as harmless falsepositive.",
+    "new_arbitrary_code_execution_claim": false
+  },
+  "product_change": {
+    "actual_executor": "Fresh actual Codex CLI gpt-6.1-sol/high, one bounded 45min author invocation only",
+    "source_parent": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+    "write_set": [
+      ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+    ],
+    "remediation": "Replace free comment-regex requirements blacklist with complete parser-semantic, culture-independent requirement-state validation before SafeGetValue/import; preserve all AST node/edge/bool/background guards and exact PM01..PM07/CX00..CX04 behavior/counts. Address entire related class, not only uppercase spelling. No root productpatch.",
+    "preserve": "Manifest/SKILL/S1/S2/core/workflow/policy bytes unchanged; original full3path product cap450additions and total against current E unchanged.",
+    "no_new_outcome_or_runtime_or_LIVE": true
+  },
+  "gates_before_reviews_and_push": {
+    "Linux": "New exact-H full1777/1777, strict184, Ruffdelta0, doctrine/claims/ADR/diffcheck/admissionexplicitE. E must be current or driftSTOP/classify.",
+    "Windows": "Focused native PS51 and PS7 originalnormal7/CXparent12/S2normal26 each, all historical sixASTnegatives/background-onlyrollback retained on new exactH; harmless-spacecomment acceptedPM01/02; real directives lower/upper underenUS,trTR,azLatnAZ rejectPM01 beforeimport/runtime0/PM04NOT_EXECUTED/no setup; malformed#requiresX staysparserrejected. Genuine new requirement-rejection private rollback must fail beforeimport property; unrelated failures notcredit. Full source/nestedartifacts/lock/hostpolicy/sourcebeforeafter retained.",
+    "source_audit": "One mandatory complete native/Linux source AUX before formal reviews, reusing original failures honestly as historical controls",
+    "Windows_CI": "NOT_RUN per owner; no full Windows mutant CI"
+  },
+  "fresh_reviews": {
+    "primary": "Fresh actual independent Codex CLI gpt-6.1-sol/xhigh, full code/spec/security/currentexactH/F01class, 60min",
+    "supplemental_cross_family": "Fresh actual independent ClaudeCode firstParty Opus/max requested, full code/spec/security/wholeclass and materially complete retained gate evidence, 90min/no retry. Require original approve/fullscope_review_complete true and actual measured distinctfamilies, validatedv2 beforepromotion. Prior changes_requested/fullscopefalse not relabeled.",
+    "execution": "Independent clean clones/contexts, no fork/resume; actual OS read-only source mounts, normal hooks preserved, Python -B/cacheoutside, external evidence scratch; verify no writes before handoff. Actual no-model readonly+unmodifiedhook preflight already passed; original launcher16 remains failed. Any unsupportedcapability =>STOP, no bypass.",
+    "parallel_allowed": "The two independent reviewers may run concurrently after complete exact-H gates/sourceaudit; never share authorcontext or edit source"
+  },
+  "explicit_new_clone_trust_requested": {
+    "only_path": "/workspace/scratch/wp1285-claude-cross-audit-H5",
+    "condition": "Only after clean separate clone/canonical origin/current reviewed head/tree/fullobjects verified. Set only its exact project trust flag; no parent/symlink/global auth/hooks/settings changes. Existing H4trust grant not broadened implicitly."
+  },
+  "bounded_counter_changes": {
+    "author_limit": [
+      5,
+      6
+    ],
+    "knownauthors_before": 4,
+    "AGY_unknown_reserve": 1,
+    "one_new_Codex_author": 1,
+    "formal_review_limit": [
+      5,
+      7
+    ],
+    "formal_used_before": 5,
+    "fresh_Codex6_and_Claude7_only": true,
+    "Codex_shared_limit": [
+      14,
+      16
+    ],
+    "Codex_shared_used_before": 12,
+    "remaining_shared_forecast": {
+      "13": "new exact-H native/Linux source AUX",
+      "14": "fresh actual Codexxhigh formal6",
+      "15": "actualReadyautomaticconnector ifeligible",
+      "16": "canonicalMCI fullsource AUX"
+    },
+    "extra_Claude_assurance_limit": [
+      1,
+      2
+    ],
+    "extra_Claude_used_before": 1,
+    "primary_product_push_limit": [
+      2,
+      3
+    ],
+    "primary_product_push_used_before": 2,
+    "new_source_pushes_allowed": 1,
+    "reset_counters": false,
+    "no_reserve_or_automatic_new_attempt": true
+  },
+  "lease": {
+    "initial_hours": 6,
+    "granted_only_after_ownerapproval": true,
+    "one_conditional_readonly_successor_hours": 6,
+    "successor_only_if": "Waiting actual CI/land with all authors/reviewers terminal, exact candidate/head/scope/policy/budgets unchanged, no new productwrites/modelcall/retry granted; fullref/currentrules/soleholder check and reciprocalretirement required. This is explicit prospective approval request, not alreadygranted."
+  },
+  "promotion_and_land": "Original authority to merge/land retained, exact newhead grant readback and fresh master/rules/allrefs/solelease fences, one correctedpush then new exactH PRCI(all5canonicalcontexts/fouranchors/fullsource)/Draftconnector/Readyauto nofindings; normalmerge exacthead/noadmin/force; actualcanonicalMCI officialartifact/fullsourceAUX and M8 realUTC retirement/readbacks/D1D4 beforeclosure. No generic new mergepermission requested.",
+  "stop_conditions": "Any source finding after one remediation/new reviews, snapshotdrift, failedquota/capability, thirdclassremnant unresolved, budget exhausted or unexpected scope/masterdrift =>STOP/concretecheckpoint; no automatic secondauthor/reviewer/push or waiver.",
+  "not_granted_by_proposal": [
+    "productpatch",
+    "newauthor/modelcall",
+    "newreview",
+    "newpush",
+    "newclonetrust",
+    "lease",
+    "gatewaiver",
+    "merge",
+    "land",
+    "LIVE"
+  ],
+  "recorded_at": "2026-11-09T02:27:28.176352+00:00"
+}

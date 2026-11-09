@@ -1,0 +1,48 @@
+{
+  "run_id": "21ecdc2a52bb449a8bed4848e8d29918",
+  "session_id": "e1e04ee9-2119-4e46-af04-4c82507c84cb",
+  "actual_assistant_models": [
+    "claude-opus-5-5"
+  ],
+  "modelUsage_keys": [
+    "claude-opus-5-5"
+  ],
+  "requested_model": "opus",
+  "requested_effort": "max",
+  "served_effort": "NOT_MEASURED unless explicit source field; no inference from requested flag",
+  "permissionMode": "plan",
+  "toolset": [
+    "Glob",
+    "Grep",
+    "Read"
+  ],
+  "actual_model_tool_calls": 48,
+  "actual_tool_names": [
+    "Glob",
+    "Grep",
+    "Read"
+  ],
+  "model_evidence": "do_may",
+  "model_evidence_source": "Original stdout assistant.message.model and final result.modelUsage; not GitHub actor or merely request flag",
+  "stdout_sha256": "fafb2f6dadf853354a39cdb138092b686e9e2aa5f21ce44d50172b7d46d05b1c",
+  "result_subtype": "success",
+  "result_is_error": false,
+  "launcher_exit": 16,
+  "actual_child_rc": 0,
+  "run_state": "ghi_workspace",
+  "snapshot_ket_qua": "ghi_workspace",
+  "snapshot_ly_do": "tep_doi",
+  "root_controller_snapshots": {
+    "review": {
+      "sha256": "3a06204736fc7065b369922ba94c25d5d236e9898a690eaedb196625637a3993",
+      "same_as_before": false
+    },
+    "source": {
+      "sha256": "4138ce123b7796d37845e8230ff689aec2b94cdf0586933a64c076def4d67a06",
+      "same_as_before": true
+    }
+  },
+  "original_verdict": "changes_requested",
+  "model_code_verdict_is_not_overall_gate_pass": true,
+  "promotion_eligible": false
+}

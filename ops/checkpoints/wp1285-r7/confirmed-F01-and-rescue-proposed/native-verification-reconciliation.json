@@ -1,0 +1,9 @@
+{
+  "native_runs": 12,
+  "native_operator_rc": 0,
+  "native_initial_failures_retained": "Expected propertyfailures are observations, not product gatepass or killcredits",
+  "operator_verifier_initial_assertion": "Initial local verifier wrongly assumed every example had no parsererror, failed on #requiresX. Corrected verifier keeps actual #requiresX parsererrors and rejects reviewer harmlessclaim for this example; no native rerun/source patch.",
+  "verified_sources": 251,
+  "ZIP_sha256": "bd1f9a882f3b0a91e358fbbaaff3f3ab9b4187ac10fd9cc15d9d030fd27dcf91",
+  "snapshot_gate_original": "launcher16/ghi_workspace stillFAILED; no waiverproposed, future freshreadonlymount fixesbootstrap prospectively only"
+}

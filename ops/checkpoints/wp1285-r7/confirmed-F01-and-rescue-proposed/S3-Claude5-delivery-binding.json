@@ -1,0 +1,19 @@
+{
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "verdict": "changes_requested",
+  "original_commit": "a4a78b60cbb045235e878ab564347e52d506a202",
+  "receipt_commit": "ed2071597ab19b4d1f88e79ebae1cc4f37c30fbc",
+  "receipt_path": "ops/reviews/wp1285-r7-review5.receipt.yaml",
+  "issue_comment": "https://github.com/ducthangho/tra-luat/issues/1285#issuecomment-6730686786",
+  "original_body_exact": true,
+  "v2_rc": 0,
+  "fullscope_review_complete": false,
+  "launcher_rc": 16,
+  "child_rc": 0,
+  "assurance": "not_achieved",
+  "promotion_eligible": false,
+  "formal_used": 5,
+  "formal_limit": 5,
+  "shared_used": 12,
+  "Claude_used": 1
+}

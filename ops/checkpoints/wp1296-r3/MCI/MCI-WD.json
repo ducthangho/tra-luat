@@ -1,0 +1,21 @@
+{
+  "schema": "wd/1",
+  "repo": "ducthangho/tra-luat",
+  "run_id": 42595864844,
+  "loi_graphql": [],
+  "nguon": "ops/ci_provenance.py do-wd",
+  "run_attempt_luc_do": 1,
+  "event": "push",
+  "node_id": "WFR_kwLOTNeRjc8AAAAJ6ulRDA",
+  "head_sha_rest": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+  "run_number": 4334,
+  "created_at": "2026-11-09T09:45:42Z",
+  "path": ".github/workflows/ci.yml",
+  "repository_file_url": "https://github.com/ducthangho/tra-luat/blob/09643583d170c66ce3bcc74170d054d0f5ac9356/.github/workflows/ci.yml",
+  "check_suite_commit": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+  "oid_dinh_nghia": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+  "blob": "2b2c9aa25ad1c136e44cba457d9ae765d2544fc2",
+  "sha256": "aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67",
+  "trang_thai": "passed",
+  "ly_do": null
+}

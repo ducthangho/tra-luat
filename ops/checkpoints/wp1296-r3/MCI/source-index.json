@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-09T10:49:02.711524+00:00",
+  "M": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+  "H": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "run": 42595864844,
+  "attempt": 1,
+  "source_files": 138,
+  "source_zip_sha256": "ae1bf6b1388e33c565affcdca5412089f5707e6ae44f768033ab6f6dec5320dc",
+  "official_artifact": {
+    "id": 13663833311,
+    "name": "gate-evidence-ubuntu-latest-1",
+    "sha256": "dd113d49675c0b5d71a8f30af22c68d8f99e4b54efa7c8686a35ae247850377b",
+    "matches_GitHub_artifact_digest": true
+  },
+  "AUX8": "assigned_not_yetpassed",
+  "landed": false
+}

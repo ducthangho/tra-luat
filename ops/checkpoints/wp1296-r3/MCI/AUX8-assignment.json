@@ -1,0 +1,48 @@
+{
+  "at": "2026-11-09T10:49:02.566512+00:00",
+  "deadline_utc": "2026-11-09T12:19:02.566512+00:00",
+  "deadline_minutes": 90,
+  "call": 8,
+  "role": "mandatory final actualMCI complete-source audit read-only; NOT codeapproval/humanapproval/land",
+  "head": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+  "candidate_head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "PR": 1301,
+  "run_id": 42595864844,
+  "attempt": 1,
+  "expected": "ActualMpushCI all23Ubuntu/currentchecks/passedsameMcheckout; officialartifactAPIsha matchesZIP, nativeLifecycleidentity/head/tree/runner/catalog/command/output hashes and1777/1777. ALL23fulljoblogs read, noexcerpt-only pass. Fouranchors actualrun/checkout/WD/gate_output. Readall5premergeadmissionoriginalZIP/logs/receipts and sourceinvariant differences ifnotpreviousAUX5, preserveA0discoveryNOT_RUN. CurrentMparents[B,H2]/treeH2/Readyauto+ownergrants/authority bind.",
+  "source_roots": [
+    "MCI-final-evidence",
+    "MCI-logs",
+    "MCI-WD",
+    "premerge-admission-complete",
+    "merge-final-inputs",
+    "review1-transport-projection"
+  ],
+  "additional_files": [
+    "MCI-WD.json",
+    "MCI-official-artifact.zip",
+    "premerge-admission-derived.json",
+    "merge-binding.json",
+    "merge-K0-K7.json",
+    "merge-fence-classification.json",
+    "merge-rules.json",
+    "Ready-auto-terminal-comments.json",
+    "owner-H2-human-delivery-binding.json",
+    "land-authority-binding.json",
+    "land-authority-comment-readback.json",
+    "collect-PRCI-final.py"
+  ],
+  "outputs": [
+    "AUX8-MCI-receipt.json",
+    "AUX8-MCI-final.txt"
+  ],
+  "required_fields": [
+    "verdict",
+    "head=actualM",
+    "source_hashes",
+    "findings",
+    "limitations"
+  ],
+  "no_actions": "No newtests/network/models/subagents/Git/source/productwrites. Only twoassignedscratchoutputs. No rewritingrawcanonicalnot_measured or skipped into passed, no WindowsCI/LIVE. No formalnewreviewround/humanreadingcertification/Ready/merge/land/leaseclosureclaim.",
+  "budget": "Shared8/8 afterthis assignment; CLI1+human1/formal2/2,author2/2,push1/1; originalparentcosts unchanged. No additionalmodelcall forM8/closure."
+}

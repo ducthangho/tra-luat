@@ -1712,3 +1712,10 @@ invariants and all retained immutable adoption links/live tombstones. This local
 view reports journal contents; it does not prove current grant/enrollment or
 create review/dispatch authority. Unscoped mutators retain the v2-only loader.
 Explicit admission inputs select the stronger current-authority reader above.
+
+
+Source R21 policy integration remains blocked in this candidate: the frozen R21
+spec has no target admission descriptor. The scoped target-policy validator above
+therefore does not implement an admission-independent source init/review route.
+That route and its complete parser/router policy evidence remain required; this
+candidate does not activate the exception or complete R21 acceptance.

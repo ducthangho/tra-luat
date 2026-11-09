@@ -14190,10 +14190,10 @@ _source14_hosts = {"wp1174_durability_cached_writer": _lineage14, "wp1174_lifecy
 CASES = [(name, _r12_extend1174(case, _source14_hosts[name]) if name in _source14_hosts else case) for name, case in CASES]
 MUTANTS.update({
     "m1174_chain_depth_one": ('        current, path = predecessor, p["source_path"]', '        current, path = predecessor, p["source_path"]\n        return # omit older retired ancestors', ["wp1174_durability_cached_writer"]),
-    "m1174_chain_skip_ancestor": (['while current.get("adoption") is not None:', 'if g0 is not None and current.get("schema_version") == 3:'], ['while False:', 'if False:'], ["wp1174_durability_cached_writer"]),
+    "m1174_chain_skip_ancestor": ('_1174_read(Path(p["source_path"])) == p["tombstone"].encode("utf-8")', 'path is not None or _1174_read(Path(p["source_path"])) == p["tombstone"].encode("utf-8")', ["wp1174_durability_cached_writer"]),
     "m1174_readonly_save": ('not tx.get("read_only", False), "read-only state context"', 'True, "read-only state context"', ["wp1174_lifecycle_guard_readonly"]),
     "m1174_readonly_v3_denied": ('state = _1174_pair(current, witness, _1174_read(Path(e["state_path"])))', 'raise ValueError("read-only v3 unavailable")', ["wp1174_lifecycle_guard_readonly"]),
-    "m1174_owner_policy_missing": ('not _1174_same_family(p) or _1174_OWNER_POLICY.get() is not None,', 'True,', ["wp1174_lifecycle_identity_advisory"]),
+    "m1174_owner_policy_missing": (['not _1174_same_family(p) or _1174_OWNER_POLICY.get() is not None,', 'not _1174_same_family(state) or _1174_OWNER_POLICY.get() is not None or _1174_VIEW_ONLY.get(),'], ['True,', 'True,'], ["wp1174_lifecycle_identity_advisory"]),
     "m1174_owner_policy_strength": ('source["configured_effort"] == "medium" and reviewer["configured_effort"] == "high"', 'True', ["wp1174_lifecycle_identity_advisory"]),
     "m1174_owner_policy_self": ('source["context_id"] != reviewer["context_id"]', 'True', ["wp1174_lifecycle_identity_advisory"]),
     "m1174_owner_policy_owner": ('decision.get("user", {}).get("login") == CHU_KHO', 'True', ["wp1174_lifecycle_identity_advisory"]),
@@ -14204,6 +14204,9 @@ MUTANTS.update({
 
 MUTANTS["m1174_publication_preimage"] = MUTANTS["m1174_r12_push_preimage"]
 MUTANTS["m1174_recovery_predecessor_water"] = MUTANTS["m1174_r12_recovery_water"]
+
+MUTANTS["m1174_local_view_denied"] = ('        _1174_tripwire(result)\n        return result', '        _1174_tripwire(result)\n        raise ValueError("local v3 view unavailable")', ["wp1174_lifecycle_guard_readonly"])
+MUTANTS["m1174_readonly_unscoped_mutation"] = ('(3 if tx is not None else 2)', '(3 if tx is not None or st.get("schema_version") == 3 else 2)', ["wp1174_lifecycle_guard_readonly"])
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,0 +1,39 @@
+{
+  "call": 2,
+  "role": "tl_auditor mandatory full original native+Linux gate source audit read-only; notformalcodeapproval/humanaudit",
+  "deadline_minutes": 90,
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+  "base": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "source_roots": {
+    "first_native": "../H2-native-first/H2-native-first-original.zip",
+    "completion_native": "H2-native-completion-original.zip",
+    "Linux": "Linux-H2-original-output.zip"
+  },
+  "archive_hashes": {
+    "first": "a83e932f656b7d54c275704ba947f889f393b89fdea1725a644d1659be4121d1",
+    "completion": "a203725bbfae0b38663b6f44f0d0c3272b52dc733c8aa0f954ad647b4320e3e1"
+  },
+  "Linux_archive_sha256": "d912a46973fe00c5a0f8327fd83cbf81ee3ba8e87f4442742493a697398dc49b",
+  "expected": "88uniquephases/89actualobservations, originalfirstSTOPrc2kept, continuationrc0, derive actualsupportedper-runtime requirements plus inertPS7legacycontrols withno killcredit perAUX1",
+  "must_read": [
+    "all original88phase reports/commands/logs and originalnestedartifacts,1721originalfilehashes+indexes, no excerpt-only acceptance",
+    "57meaningfulbeforeimportrejections/4parseerrorcontrols/4ASTsemantic+2ASTparse/3inertCorecontrols, oldP3baseline2falsepositive+4bypass and2guardrollback",
+    "Normal7/CXparent12/S2normal26each runtime, sixcommentpositive controls; sourceexporthashbridge and Iunchangedafter/hostbeforeafter/no serviceauthmutation/lockreleased/ledger",
+    "ActualfullLinux1777lifecycleidentity/strict184/Ruffbare1delta0/admission/doctrine/ADR/docclaims/scope/size, unmodifiedcanonicalconsumers and exactH2clean",
+    "PSparentguardculturetested; runtimechildren enAU notrelabeled",
+    "OriginalH1PS51APIpositivefail kept; no sourcepatchbyroot or inheritedwaiver/humanreview"
+  ],
+  "outputs": [
+    "AUX2-gates-receipt.json",
+    "AUX2-gates-final.txt"
+  ],
+  "required_fields": [
+    "verdict",
+    "head",
+    "source_hashes",
+    "findings",
+    "limitations"
+  ],
+  "no_actions": "No newtests/network/models/subagents/source orGit mutation. Only two assigned scratch receipts. Gate-source evaluation maypass only ifcompleteactualevidence supports, otherwiseSTOP."
+}

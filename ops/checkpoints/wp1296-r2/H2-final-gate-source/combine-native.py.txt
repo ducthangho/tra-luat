@@ -1,0 +1,57 @@
+from common import *
+import zipfile,collections
+A=W/'H2-native-first-extracted';C=W/'H2-native-completion-extracted'
+first=json.loads((A/'phase-progress.json').read_text())['phases'];completion=json.loads((C/'measurement.json').read_text());last=completion['phases'];assert len(first)==58 and len(last)==31 and completion['passed'] and completion['subset_completion_only'] and completion['originals_unchanged'];assert json.loads((A/'terminal.json').read_text())['rc']==2 and json.loads((C/'terminal.json').read_text())['rc']==0
+assert json.loads((A/'lock-release.json').read_text())['released'] and json.loads((C/'lock-release.json').read_text())['released']
+ph={**first,**last};expected=set();directives=['version-lower','version-upper','version-mixed','version-zero','modules','assemblies','elevation','edition','shellid','snapin'];cultures=['en-US','tr-TR','az-Latn-AZ']
+for ps in ['ps51','ps7']:
+ expected.update(x+'-'+ps for x in ['normal','CX','legacy','malformed','baseline-comment','rollback'])
+ for shape in ['named-end','end-clean','background']:expected.add('historical-'+shape+'-'+ps)
+ for cu in ['tr-TR','az-Latn-AZ']:expected.add('baseline-upper-'+cu+'-'+ps)
+ for cu in cultures:
+  expected.add('comment-'+cu+'-'+ps)
+  expected.update(name+'-'+cu+'-'+ps for name in directives)
+assert len(expected)==88 and set(ph)==expected
+def pm(row,id):return next(x for x in row['report']['cases'] if x['id']==id)
+counts=collections.Counter();findings=[];artifact_refs=0
+for label,row in ph.items():
+ rr=row['report'];assert rr['setup_error'] is None and rr['ps_version']==('5.1.26100.9711' if row['shell']=='ps51' else '7.6.9')
+ if label.startswith(('normal-','comment-','CX-','legacy-')):
+  n=12 if label.startswith('CX-') else 26 if label.startswith('legacy-') else 7
+  assert row['rc']==0 and rr['passed']==rr['total']==n
+  counts['positive_parent_phases']+=1;counts['positive_parent_cases']+=n
+ elif label.startswith('baseline-upper-'):
+  assert row['rc']==0 and rr['passed']==rr['total']==7 and rr['runtime_children']==2;counts['historical_P3_bypass_reproductions']+=1
+ elif label.startswith('rollback-'):
+  assert pm(row,'PM01')['outcome']=='passed' and rr['runtime_children']==2;counts['guard_rollback_property_failures_demonstrated']+=1
+ elif label.startswith('snapin-') and row['shell']=='ps7':
+  ar=row['parser'];assert ar['requirements'] and all(v in [None,False,[], ''] for v in ar['requirements'].values()) and not ar['errors'];assert row['classification']=='inert_legacy_control' and row['credited_semantic_kill'] is False and row['rc']==0 and rr['passed']==rr['total']==7 and rr['runtime_children']==2;counts['inert_PS7_legacy_controls_not_kills']+=1
+ else:
+  assert row['rc']==1 and pm(row,'PM01')['outcome']=='failed' and rr['runtime_children']==0 and pm(row,'PM04')['reason'].startswith('NOT_EXECUTED:')
+  reason=pm(row,'PM01')['reason'];assert reason.startswith(('EXECUTABLE_STATEMENT:','PARSE_ERROR:'))
+  if label.startswith('baseline-comment-'):counts['historical_P3_falsepositive_reproductions']+=1
+  elif reason.startswith('PARSE_ERROR:'):counts['parser_error_controls_not_semantic_kills']+=1
+  elif label.startswith('historical-'):counts['historical_AST_beforeimport_rejections']+=1
+  else:
+   name=next(n for n in directives if label.startswith(n+'-'));key='RequiredPSVersion' if name.startswith('version-') else {'modules':'RequiredModules','assemblies':'RequiredAssemblies','elevation':'IsElevationRequired','edition':'RequiredPSEditions','shellid':'RequiredApplicationId','snapin':'RequiresPSSnapIns'}[name]
+   assert row['parser']['requirements'][key] not in [None,False,[], ''] and reason=='EXECUTABLE_STATEMENT: ScriptRequirements.'+key;counts['meaningful_parser_requirements_rejected_beforeimport']+=1
+ # All source/index bytes were separately verified when each ZIP was imported. Check every explicit artifact reference as well.
+ root=C if label in last else A;winroot=__import__('pathlib').PureWindowsPath('C:/tl-win/wp1296-H2-completion' if root==C else 'C:/tl-win/wp1296-H2-native')
+ def walk(v):
+  global artifact_refs
+  if isinstance(v,dict):
+   if isinstance(v.get('path'),str) and isinstance(v.get('sha256'),str):
+    p=__import__('pathlib').PureWindowsPath(v['path'])
+    try:rel=p.relative_to(winroot)
+    except ValueError:pass
+    else:
+     f=root.joinpath(*rel.parts);assert f.is_file() and sha(f)==v['sha256'],(label,str(f));artifact_refs+=1
+   for q in v.values():walk(q)
+  elif isinstance(v,list):
+   for q in v:walk(q)
+ walk(rr)
+for root in [A,C]:
+ m=json.loads((root/'operator-inputs/manifest.json').read_text());assert m['candidate']=='15ad82f56924a0ccc99833ec73eec078ce00b726'
+ for key,h in [('base',B),('candidate',m['candidate'])]:
+  for path,digest in m[key+'_files'].items():assert hashlib.sha256(gitb('show',h+':'+path,repo=R)).hexdigest()==digest and sha(root/'operator-inputs'/key/path)==digest
+out={'head':'15ad82f56924a0ccc99833ec73eec078ce00b726','tree':'50fbceb65cea60cc62222c3cd3a3651a6dd13981','base':B,'derived_native_acceptance':'passed_per_88_phases_and_audited_oracle; mandatoryfullsourceAUX2stillpending','unique_phases':len(ph),'actual_phase_observations':len(first)+len(last),'duplicate':'snapin-en-US-ps7 revalidation, originalexpected-reject mismatch staysfailed','original_run_rc':2,'continuation_rc':0,'original_operator_failure_preserved':True,'all_actual_phase_names':sorted(ph),'counts':dict(counts),'explicit_artifact_refs_verified':artifact_refs,'originalfiles_verified':1179+542,'archives':{'first':'a83e932f656b7d54c275704ba947f889f393b89fdea1725a644d1659be4121d1','completion':'a203725bbfae0b38663b6f44f0d0c3272b52dc733c8aa0f954ad647b4320e3e1'},'normal_cases':'7/7 eachPS51/7','CX_parent_cases':'12/12 each','S2normal_cases':'26/26 each','no_skips_as_pass':True,'culture_scope':'parent parser/harness culture, child culture enAU disclosed/not reassigned','native_source_scope':'Scoped committedsourceexport/hashbridge, not fullnativeGitcheckout','assurance':'not formalcodeapproval/humanaudit/classclosure','at':now()};save(W/'H2-native-derived-receipt.json',out);print(json.dumps(out),flush=True)

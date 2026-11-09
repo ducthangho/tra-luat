@@ -1,0 +1,23 @@
+from common import *
+import platform,re
+v=json.loads((W/'candidate-H2.json').read_text());H2=v['H'];D2=W/'linux-H2';D2.mkdir();assert git('rev-parse','HEAD',repo=R)==H2 and not git('status','--porcelain',repo=R)
+old=json.loads(Path('/workspace/scratch/proxima-rest-20261108/linux-final-ecd8cee3ea6d/receipt.json').read_text());oldR=old['cwd'];oldD='/workspace/scratch/proxima-rest-20261108/linux-final-ecd8cee3ea6d';oldH=old['head'];oldB=old['admission_base'];canonical='/workspace/scratch/proxima-remaining-canonical';records=[]
+for code in ['ops/lease_publish.py','.claude/dev/gate_lifecycle.py']:assert (P/code).read_bytes()==gitb('show',B+':'+code,repo=R)
+gate_env=env.copy()
+for k in list(gate_env):
+ if k.startswith('TL_') or k in ['CLAUDE_CODE_OAUTH_TOKEN','ANTHROPIC_API_KEY','OPENAI_API_KEY','CODEX_AUTH_JSON','PROXIMA_API_KEY']:gate_env.pop(k,None)
+gate_env['PYTHONPYCACHEPREFIX']=str(D2/'pycache')
+for item in old['commands']:
+ label=item['label'];cmd=[]
+ for a in item['command']:
+  a=a.replace(oldR,str(R)).replace(oldD,str(D2)).replace(canonical,str(P)).replace(oldH,H2).replace(oldB,B).replace('wp1285-H4-corrective-prepush','wp1296-H2-prepush')
+  if a==item['command'][0] and 'python' in a:a=sys.executable
+  cmd.append(a)
+ log=D2/(label+'.log');t=datetime.datetime.now(datetime.timezone.utc)
+ with log.open('wb') as out:q=subprocess.run(cmd,cwd=R,env=gate_env,stdout=out,stderr=subprocess.STDOUT,timeout=5400)
+ row={'label':label,'command':cmd,'rc':q.returncode,'seconds':(datetime.datetime.now(datetime.timezone.utc)-t).total_seconds(),'log_sha256':sha(log),'bytes':log.stat().st_size};records.append(row);save(D2/'progress.json',records);print(json.dumps(row),flush=True)
+ if label=='ruff':
+  assert q.returncode in [0,1];assert gitb('show',B+':scripts/tl.py',repo=R)==(R/'scripts/tl.py').read_bytes();raw=json.loads(log.read_text());save(D2/'ruff-baseline-identity.json',{'bare_rc':q.returncode,'findings':len(raw),'baseline_same_bytes':True,'delta':0,'B':B,'H':H2});continue
+ assert q.returncode==0,(label,q.returncode,log.read_text(errors='replace')[-1800:])
+e=json.loads((D2/'full-selftest-evidence.json').read_text());assert e['status']=='pass' and e['returncode']==0 and e['positive_verified'] and e['identity']==e['identity_after'] and e['identity']['head_sha']==H2 and e['identity']['tree_sha']==v['tree'];assert re.search('== tl selftest 1777/1777 ==',(D2/'full-selftest.log').read_text())
+save(D2/'receipt.json',{'head':H2,'tree':v['tree'],'base':B,'commands':records,'full_selftest':'1777/1777','rc':0,'Ruff_delta':0,'source_mutations':False,'runner':{'python':sys.executable,'version':sys.version,'platform':platform.platform()},'at':now()});print('ALL_EXACT_H2_LINUX_GATES_PASSED',flush=True)

@@ -1642,7 +1642,7 @@ Các fault injection là fixture thuật toán, không phải native profile hay
 
 WP1174 R16/C12 (generation13, Mission20) dùng composite native delivery SOURCE-ONLY trên exact final head/tree
 và năm file hashes: bốn part A–D đọc coverage manifest đã đóng băng, rồi integrator E
-kiểm coverage union, interfaces và raw reports theo `ops/specs/wp1174-implementation-r16.md`. Mỗi lời gọi vẫn được đếm;
+kiểm coverage union, interfaces và raw reports theo [spec R16 trên metadata commit bất biến](https://github.com/ducthangho/tra-luat/blob/9941d8af52aeede1c78ea4e232fbe9a8d5272033/ops/specs/wp1174-implementation-r16.md). Mỗi lời gọi vẫn được đếm;
 chỉ composite đủ bằng chứng mới có thể tạo verdict cho source đó. Authority,
 provider assurance và actual-human của target giữ theo các hợp đồng hiện hành.
 

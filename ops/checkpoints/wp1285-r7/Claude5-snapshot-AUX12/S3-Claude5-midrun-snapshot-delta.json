@@ -1,0 +1,49 @@
+{
+  "status": "observed_during_review_not_final",
+  "run": "21ecdc2a52bb449a8bed4848e8d29918",
+  "at": "2026-11-09T02:05:06.773831+00:00",
+  "changes": [
+    {
+      "path": ".claude/.packet_state",
+      "before": null,
+      "after": [
+        "D",
+        "",
+        "2e636c617564652f2e7061636b65745f7374617465"
+      ]
+    },
+    {
+      "path": ".claude/.packet_state/session-start.ran",
+      "before": null,
+      "after": [
+        "F",
+        "66241e5c0b4161c7cd8c1e9a5ce8ca7ca9481f73ac6365b2eca4411f9a9bedb5",
+        "2e636c617564652f2e7061636b65745f73746174652f73657373696f6e2d73746172742e72616e"
+      ]
+    },
+    {
+      "path": ".claude/dev/__pycache__",
+      "before": null,
+      "after": [
+        "D",
+        "",
+        "2e636c617564652f6465762f5f5f707963616368655f5f"
+      ]
+    },
+    {
+      "path": ".claude/dev/__pycache__/launcher.cpython-312.pyc",
+      "before": null,
+      "after": [
+        "F",
+        "3952896c455844c2f3471271b03232c9d6a217522bd258542a1f04a899b02a6f",
+        "2e636c617564652f6465762f5f5f707963616368655f5f2f6c61756e636865722e63707974686f6e2d3331322e707963"
+      ]
+    }
+  ],
+  "attribution": {
+    ".claude/.packet_state/session-start.ran": "Normal existing SessionStart hook. Explicit system hookresponse retained in original stream. Not productpatch.",
+    ".claude/dev/__pycache__/launcher.cpython-312.pyc": "Root diagnostic imported launcher without -B during audit. Root error, not modeltoolwrite; original toolcommand retained in conversation. No deletion/restoration attempted."
+  },
+  "preserved": "Do not delete artifacts to green snapshot; no source change or generated artifact is relabeled unchanged. Full launcher final outcome remains authoritative.",
+  "continuous_attestation": false
+}

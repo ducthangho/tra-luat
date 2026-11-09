@@ -1,0 +1,13 @@
+{
+  "id": "S3-Claude5-snapshot-source-AUX12",
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "role": "read-only evidence-source audit, NOT formalcodeapproval/cross/human assurance",
+  "purpose": "Independently classify exact ignored hook/root-generated snapshot deltas and whether protocol permits retaining original model verdict while enforcing failed workspace gate. Do not waive/relabel any gate.",
+  "deadline": "2026-11-09T02:36:04.649684+00:00",
+  "limits": "One AUX using existing bounded reserve, no code/model/runtime tests/network/subagents; only two assigned receipt files. Read original full snapshots/run/stream logs/midrun delta/protocol/spec, await final terminal before verdict.",
+  "ready_flag": "/workspace/scratch/proxima-rest-20261108/S3-Claude5-final-source-ready.json",
+  "outputs": [
+    "/workspace/scratch/proxima-rest-20261108/S3-Claude5-snapshot-AUX12-receipt.json",
+    "/workspace/scratch/proxima-rest-20261108/S3-Claude5-snapshot-AUX12-final.txt"
+  ]
+}

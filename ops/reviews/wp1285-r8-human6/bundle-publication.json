@@ -1,0 +1,33 @@
+{
+  "metadata_commit": "5dfbfb96b00402f53f1a72187ce98e944dcabfbc",
+  "report": "https://github.com/ducthangho/tra-luat/blob/5dfbfb96b00402f53f1a72187ce98e944dcabfbc/ops/checkpoints/wp1285-r8-human/audit-bundle/HUMAN-AUDIT.md",
+  "report_sha256": "8d375e17260e7e4f5cdeb8fa19b6f4e29f488611139e841fa28af3781c274505",
+  "spec_binding": {
+    "spec_commit": "03c626536460de0217b9de24c052fed202643a1e",
+    "spec_path": "ops/specs/wp1285-r8.md",
+    "spec_sha256": "d8195383ceed002d15b9db09e51cae1c4f2d90f0237ef33333cead4d629b26e9",
+    "lease_commit": "d2c22af20691fd6dffdd567cb96153c5ecf9f5b1",
+    "lease_path": "ops/leases/wp1285-r8-g9-codex-human.yaml",
+    "lease_id": "wp1285-r8-g9-codex-human",
+    "until": "2026-11-09T09:13:24Z",
+    "lease_checks_rc": 0,
+    "P3_waiver": "https://github.com/ducthangho/tra-luat/pull/1294#issuecomment-6731269220",
+    "debt": 1295,
+    "current_target_D": "4068b3a2a0087db287ea979eccbd372a7a0938d7",
+    "expected_merge_tree": "f20cb1aa78756ae0a0b818c34e8d90f152b06a2f",
+    "human_audit_completed": false,
+    "model_invoked": false
+  },
+  "status": "actual_human_audit_pending",
+  "machine_K0_K7_rc": 0,
+  "human_audited": false,
+  "Ready": false,
+  "merge": false,
+  "land": false,
+  "comment1285": "https://github.com/ducthangho/tra-luat/issues/1285#issuecomment-6731483674",
+  "comment1294": "https://github.com/ducthangho/tra-luat/pull/1294#issuecomment-6731484103",
+  "four_exact_body_readbacks": true,
+  "PR_draft_true_notmerged": true,
+  "manual_human_attestation_received": false,
+  "at": "2026-11-09T03:26:10.372567+00:00"
+}

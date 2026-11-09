@@ -1,0 +1,13 @@
+{
+  "human_self_read_attestation": "Explicit actualowner response in chat, recorded verbatim with authorization to post; not inferred merely from GitHub account/actor",
+  "measured_personal_reading": false,
+  "human_review_axes_approved": [
+    "spec",
+    "standards_security"
+  ],
+  "human_personally_executed_new_tests": "not_claimed",
+  "root_role": "machine recorder/publisher/landoperator, NOT humanreviewer",
+  "independence": "Human owner outside actual Codex model executor session; not independent machine measurement of tests",
+  "old_Claude5_failure": "unchanged, not madepass",
+  "postpush_human_only_K4": "not used/backdated; original actualCodex4 prepushK4 is retainedprimary, actualhuman supplementalassurance separate"
+}

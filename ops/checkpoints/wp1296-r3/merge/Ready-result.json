@@ -1,0 +1,14 @@
+{
+  "at": "2026-11-09T09:43:22.617174+00:00",
+  "command": [
+    "/workspace/scratch/proxima-p0-tools/gh",
+    "pr",
+    "ready",
+    "1301",
+    "--repo",
+    "ducthangho/tra-luat"
+  ],
+  "rc": 0,
+  "stdout": "",
+  "stderr": "✓ Pull request ducthangho/tra-luat#1301 is marked as \"ready for review\"\n"
+}

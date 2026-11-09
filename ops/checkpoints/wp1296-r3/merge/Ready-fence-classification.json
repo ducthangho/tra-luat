@@ -1,0 +1,46 @@
+{
+  "at": "2026-11-09T09:43:20.917566+00:00",
+  "full_ref_count": 1764,
+  "fullref_sha256": "a698fe3d90ad0d8f1bfee42c8f8723165d9e03faf7c216b654caec1ff986180c",
+  "deltas": [
+    {
+      "ref": "refs/heads/ops/wp1296-spec",
+      "old": "5d77077f8bf1f099a5260b987cf9c38645c0eb16",
+      "new": "b2e62c5f271b334fb411e6db120790214b3d2b56",
+      "paths": [
+        "ops/checkpoints/wp1296-r3/land-authority/AUX6-assignment.json",
+        "ops/checkpoints/wp1296-r3/land-authority/land-authority-fullrefs.raw",
+        "ops/checkpoints/wp1296-r3/land-authority/land-final-inputs/K0-K7-preReady.json",
+        "ops/checkpoints/wp1296-r3/land-authority/land-final-inputs/checks.json",
+        "ops/checkpoints/wp1296-r3/land-authority/land-final-inputs/connector.json",
+        "ops/checkpoints/wp1296-r3/land-authority/land-final-inputs/issue_comments-pages.json",
+        "ops/checkpoints/wp1296-r3/land-authority/land-final-inputs/jobs.json",
+        "ops/checkpoints/wp1296-r3/land-authority/land-final-inputs/review_comments-pages.json",
+        "ops/checkpoints/wp1296-r3/land-authority/land-final-inputs/reviews-pages.json",
+        "ops/checkpoints/wp1296-r3/land-authority/land-final-inputs/runs.json",
+        "ops/checkpoints/wp1296-r3/land-authority/land-final-inputs/windows.json",
+        "ops/checkpoints/wp1296-r3/land-authority/live-budget.json",
+        "ops/checkpoints/wp1296-r3/land-authority/owner-H2-human-delivery-binding.json",
+        "ops/checkpoints/wp1296-r3/land-authority/prepare-land-inputs.py",
+        "ops/checkpoints/wp1296-r3/land-authority/review1-transport-projection/derived-run-transport-view.json",
+        "ops/checkpoints/wp1296-r3/land-authority/review1-transport-projection/original-last-message.txt",
+        "ops/checkpoints/wp1296-r3/land-authority/review1-transport-projection/verification.json",
+        "ops/checkpoints/wp1296-r3/land-authority/scope.json",
+        "ops/checkpoints/wp1296-r3/land-ready/AUX6-transport-final.txt",
+        "ops/checkpoints/wp1296-r3/land-ready/AUX6-transport-receipt.json",
+        "ops/checkpoints/wp1296-r3/land-ready/land-authority-binding.json",
+        "ops/checkpoints/wp1296-r3/land-ready/land-authority-local-record.json",
+        "ops/checkpoints/wp1296-r3/land-ready/ready-H2.py"
+      ],
+      "classification": "ownauthorizedlandmetadataonly; no product/spec/policy/authorityscopechange"
+    }
+  ],
+  "sole_holder_ids": [
+    "wp1296-r3-g3-codex"
+  ],
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "base": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "rules_unchanged": true,
+  "real_human_receipt": "ops/reviews/wp1296-r3-human2.receipt.yaml",
+  "AUX6": "passed"
+}

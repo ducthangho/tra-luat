@@ -1,0 +1,106 @@
+{
+  "packet": 1296,
+  "author_used": 2,
+  "author_cap": 2,
+  "formal_used": 2,
+  "formal_cap": 2,
+  "shared_used": 7,
+  "shared_cap": 8,
+  "push_used": 1,
+  "push_cap": 1,
+  "parent1285_shared_closed": 14,
+  "class_manifestations_historical": 3,
+  "author_status": "terminal",
+  "author_started": "2026-11-09T06:55:33.321844+00:00",
+  "author_deadline": "2026-11-09T07:40:33.321844+00:00",
+  "actual_generation": true,
+  "revision": 3,
+  "generation": 3,
+  "shared_calls": [
+    {
+      "n": 1,
+      "purpose": "Independent full retained source diagnostic: PS7PSSnapin oracle vs actualsemanticguard, NOTformalcodeapproval",
+      "state": "terminal_source_digest_notformal",
+      "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "at": "2026-11-09T07:11:03.067382+00:00",
+      "deadline_minutes": 90,
+      "receipt": "AUX1-oracle-receipt.json",
+      "receipt_sha256": "11034d6870f1842f2265ea499e3ad166b1b51c58be183aeebfb76e380382cdef"
+    },
+    {
+      "n": 2,
+      "purpose": "Mandatory complete native+Linux source gate AUX before formalreview",
+      "state": "terminal_source_digest_notformal",
+      "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "at": "2026-11-09T07:30:40.932364+00:00",
+      "deadline_minutes": 90,
+      "receipt": "AUX2-gates-receipt.json",
+      "receipt_sha256": "faecb75ac26e7bb6ae8d0e498d2ed7bfedb4e179e4824858ca99d5353158b33a"
+    },
+    {
+      "n": 3,
+      "purpose": "Fresh independent CodexCLI xhigh formalreview1 wholeB..H2 spec+security",
+      "state": "terminal_validated_sameprovider_approved",
+      "at": "2026-11-09T07:52:20.706281+00:00",
+      "deadline": "2026-11-09T08:52:20.706281+00:00",
+      "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "run_id": "c949f66c126a459c8751c0ac0f717edc"
+    },
+    {
+      "n": 4,
+      "purpose": "Draft PR1301 exactH2 connector review",
+      "state": "terminal_connector_completed_nofindings",
+      "at": "2026-11-09T08:06:15.318044+00:00",
+      "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "deadline_minutes": 90,
+      "summary_comment": 6735226910,
+      "receipt_comment": 6735243094,
+      "completed_at": "2026-11-09T08:07:50.548431Z"
+    },
+    {
+      "n": 5,
+      "purpose": "mandatory tl_auditor complete PRCI source audit NOT formalcodeapproval/human",
+      "state": "terminal_passed_full_source_only",
+      "at": "2026-11-09T09:14:39.774791+00:00",
+      "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "deadline_minutes": 90,
+      "receipt": "AUX5-PRCI-receipt.json",
+      "receipt_sha256": "b14e5d7aad06c52c1793272fb05bb1955828eeb9ec5e988934abc8e164558346"
+    },
+    {
+      "n": 6,
+      "purpose": "Read-only independent provenance audit of lossless review JSON transport projection and preReady gate inputs, NOT another code review/formalround",
+      "state": "terminal_provenance_audit_passed",
+      "at": "2026-11-09T09:36:44.129039+00:00",
+      "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "deadline_minutes": 45,
+      "receipt_sha256": "78fefc3b373f8b7c51d0c84170ebd3102de0bd41d79d81abbc6b1bfe5790d001"
+    },
+    {
+      "n": 7,
+      "purpose": "Ready-triggered automatic exactH2 connector ifactualstarts; no newformalround",
+      "state": "terminal_actualReadyauto_nofindings",
+      "at": "2026-11-09T09:43:20.917904+00:00",
+      "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "started_at": "2026-11-09T09:43:27.940295Z",
+      "summary_comment": 6735226910,
+      "completed_at": "2026-11-09T09:44:18.650039Z"
+    }
+  ],
+  "current_lease": "wp1296-r3-g3-codex",
+  "formal_model_reviews_used": 1,
+  "human_audits_used": 1,
+  "formal_total_including_human": 2,
+  "human_audit": {
+    "comment": "https://github.com/ducthangho/tra-luat/pull/1301#issuecomment-6736642798",
+    "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+    "receipt_commit": "5d77077f8bf1f099a5260b987cf9c38645c0eb16",
+    "receipt_path": "ops/reviews/wp1296-r3-human2.receipt.yaml",
+    "v2_rc": 0,
+    "new_model_calls": 0
+  },
+  "remaining_shared_plan": {
+    "7": "Ready-triggered automatic connector ifactuallystarts",
+    "8": "mandatoryMCI fullsourceaudit"
+  }
+}

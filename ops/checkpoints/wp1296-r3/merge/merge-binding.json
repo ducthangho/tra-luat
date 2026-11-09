@@ -1,0 +1,18 @@
+{
+  "at": "2026-11-09T09:45:44.728244+00:00",
+  "PR": 1301,
+  "H": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "target_before": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "merge_commit": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+  "parents": [
+    "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+    "15ad82f56924a0ccc99833ec73eec078ce00b726"
+  ],
+  "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+  "merged": true,
+  "landed": false,
+  "merged_at": "2026-11-09T09:45:39Z",
+  "authority": "https://github.com/ducthangho/tra-luat/pull/1301#issuecomment-6736812696",
+  "MCI": "not_yet_verified",
+  "bookkeeping": "pending"
+}

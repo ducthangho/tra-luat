@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-09T06:11:33.955771+00:00",
+  "packet": 1285,
+  "PR": 1294,
+  "M": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "landed": true,
+  "M8_url": "https://github.com/ducthangho/tra-luat/issues/1285#issuecomment-6733549261",
+  "exact_post_readback": true,
+  "D1_D4_rc": 0,
+  "active_claims": 0,
+  "shared_calls": 14,
+  "P3_debt1295": "OPEN/notfixed",
+  "mission1238": "in_progress",
+  "packet_close_eligible": true,
+  "passive_archive": "weekly lane queued, notclosureblocking"
+}

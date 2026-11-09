@@ -1,0 +1,10 @@
+{
+  "launcher_rc": 0,
+  "actual_generation": true,
+  "ended": "2026-11-09T06:37:07.100710+00:00",
+  "head": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "status": "M .agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1",
+  "before_snapshot_sha256": "930ca40cbc8b638b3172775194cfb42ca49c09284a4a5a92eab8e9f4c94cfb60",
+  "after_snapshot_sha256": "d523eaaae11ea633f0578749bd2a05ee198274be1d0110758a385885709ac9b3",
+  "original_handoff": "/workspace/scratch/proxima-remainder-20261109/original-author-handoff.md"
+}

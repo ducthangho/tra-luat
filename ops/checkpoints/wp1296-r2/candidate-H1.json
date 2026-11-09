@@ -1,0 +1,23 @@
+{
+  "B": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "H": "1013394e0f36c44bbf7ffb9c95d7938af1a263b4",
+  "tree": "b4e2061d9cb50b6c7de82271647881db3a861a32",
+  "product_paths": [
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+  ],
+  "additions": 50,
+  "deletions": 2,
+  "actual_author": "CodexCLI run6d9667f3f1e94c3f85011a26c2771654 requestedgpt6.1sol/high actualservedunknown",
+  "mechanical_commit_by": "dispatcher only no productedits",
+  "snapshot_delta": {
+    "removed": [
+      "[\"F\",\"f230c95b1f36b558b2f58439f8ea64cc6f77a876c1d74cc8c9baf1634cc9f864\",\"2e6167656e74732f736b696c6c732f70726f78696d612d636f6e74726f6c2f74657374732f50726f78696d614d616e69666573742e54657374732e707331\"]"
+    ],
+    "added": [
+      "[\"F\",\"39edc477d9c65fb6bd4c571342a6817b32b65bc0f6eb407b6c970e270d688460\",\"2e6167656e74732f736b696c6c732f70726f78696d612d636f6e74726f6c2f74657374732f50726f78696d614d616e69666573742e54657374732e707331\"]"
+    ]
+  },
+  "tests": "NOT_RUN_YET",
+  "approval": false,
+  "push": false
+}

@@ -1,0 +1,18 @@
+{
+  "PR.json": {
+    "sha256": "b4c55ffb0076b8ff3c61ec63111e9de03ba89f9622b0a4697d7d8916700b7c80",
+    "bytes": 22354
+  },
+  "check-runs-pages.json": {
+    "sha256": "edf9fa291f59f496466b3d1253428a4becdfb56f6af6fee831db3b196016dbeb",
+    "bytes": 103956
+  },
+  "master-ref.raw": {
+    "sha256": "554ba2502c5c782657b9154efd9b6b7709bc4495dae51b39e800ff2b0af6f4ae",
+    "bytes": 59
+  },
+  "rules.json": {
+    "sha256": "98375da55de21811362a103b37a8aadcea2882f9646b704eb6270c2fd4650392",
+    "bytes": 1609
+  }
+}

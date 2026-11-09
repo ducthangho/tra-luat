@@ -1,0 +1,5 @@
+PR1294 H4 ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c — AUX11 hoàn tất, không thấy mâu thuẫn trọng yếu trong nguồn cuối.
+MainCI42539770394/attempt1/pull_request:23/23Ubuntu success;26checks gồm23main+3admission đều xanh.97sourcefiles/archive/hash và23log+API/checkout đối chiếu đủ. ActualS0fbb parents[E,H4],treeH4; actualGraphQLWD đúngH4.
+Dương tính:directselftest1777/1777;G5 8/8shards,61ca/490mutants/0errors;nhanh8/8,56ca/255selfmutants/10productmutants;registry13/13 đúngkills;packet-loop thực1359/1359,skipWindows luong_canonical_chay_that và mutant tương ứng không ghi công.5canonicalaggregators đều success dùGitHubrules4.
+Bốn anchors có nguồn thực để derivepassed; rawcanonical23gateoutputs và RESTWDslot giữnot_measured. PR không sinh lifecycleartifact theo thiết kế, không gán childrc giả. AdmissionE/rc0/TAP_THU_HOI_RONG, A0discoveryNOT_RUN.
+Không codeapproval/human/crossassurance,không WindowsCI/MCI claim; sameprovider sensitiveHOLD.

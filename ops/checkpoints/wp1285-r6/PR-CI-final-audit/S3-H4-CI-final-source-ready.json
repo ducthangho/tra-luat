@@ -1,0 +1,21 @@
+{
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+  "run": 42539770394,
+  "attempt": 1,
+  "main_jobs": 23,
+  "other_admissions": 3,
+  "all_current_checks_success": true,
+  "source_files": 97,
+  "archive_sha256": "b5ab3ab966f6f2a049c8ad92294d172380f64c435a329ce84d614828286b368a",
+  "archive_bytes": 1540472,
+  "independent_AUX11_complete": false,
+  "all4anchors_complete": "Run/checkout/WD passed; full gateoutput source-audit awaits AUX11. Original rawconsumer not_measured states preserved.",
+  "recorded_at": "2026-11-09T01:36:28.318307+00:00",
+  "metadata_commit": "d42e43bf0152cf95d196412161932396918043b3",
+  "archive_path": "ops/checkpoints/wp1285-r6/PR-CI-final-source/S3-H4-PRCI-complete-original-sources.zip",
+  "local_archive": "/workspace/scratch/proxima-rest-20261108/S3-H4-PRCI-complete-original-sources.zip",
+  "validation_path": "S3-H4-ci-final-evidence/validation.json",
+  "source_ready": true,
+  "no_assurance_or_formal_code_approval_claim": true
+}

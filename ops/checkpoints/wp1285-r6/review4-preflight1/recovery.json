@@ -1,0 +1,14 @@
+{
+  "actual_model_generation": false,
+  "first_launcher_exit": 11,
+  "reason": "Normal expected-repository preflight rejected local-origin alias before model invocation",
+  "normal_correction": "Only review-clone .git/config origin set to canonical; no permissions/bypass/product/context changes",
+  "before_origin": "/workspace/scratch/wp1285-r6-g7-base-sync",
+  "after_origin": "https://github.com/ducthangho/tra-luat.git",
+  "source_unchanged": true,
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "prompt_sha256_unchanged": "6a94a611d91b1bc3b6f21fbaaab8fe2c4d14eef51ae6978d7877f5496ba92f61",
+  "original_absolute_deadline_retained": "2026-11-09T01:01:21.020600+00:00",
+  "no_cost_reset": "No model invoked, shared8/formal3 retained; call9 still one actual model call pending",
+  "at": "2026-11-09T00:03:56.500797+00:00"
+}

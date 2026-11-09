@@ -1,0 +1,21 @@
+{
+  "launcher_exit": 11,
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "finished_at": "2026-11-09T00:01:21.317789+00:00",
+  "deadline": "2026-11-09T01:01:21.020600+00:00",
+  "prompt_sha256": "6a94a611d91b1bc3b6f21fbaaab8fe2c4d14eef51ae6978d7877f5496ba92f61",
+  "requested_model": "gpt-6.1-sol",
+  "requested_effort": "xhigh",
+  "executor_effort": "high",
+  "actual_cli_output": false,
+  "post_snapshots": {
+    "review": {
+      "sha256": "0c9b56d30237938483ff7901feff21370e0298d732db1a06cc5f452ae4c7005e",
+      "same_as_before": true
+    },
+    "source": {
+      "sha256": "cb9270d17c8adf52e5ba75bae8b2a25eb185fa3aee32dd4a7344a438d8c826bc",
+      "same_as_before": true
+    }
+  }
+}

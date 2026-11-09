@@ -1,0 +1,18 @@
+{
+  "at": "2026-11-09T11:13:29.210481+00:00",
+  "offline_ZIP": "/workspace/scratch/mission1238-P2-P6-handoff-20261109.zip",
+  "ZIP_bytes": 3605236,
+  "ZIP_sha256": "6ac46ac05b2cf1bc8393914e340848a6a2a331af4a04e97356bc47e73abbb8bc",
+  "manifest_files": 276,
+  "every_ZIPmember_hash_verified": true,
+  "bundle_verify_rc": 0,
+  "P2_candidate_H2": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "P2_tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+  "P2_primary_pushes_still": 0,
+  "portable_handoff_not_gatepass": true,
+  "handoff_source_commit": "9f7d36573e4e308727c355e65e100e6d029195ff",
+  "handoff_url": "https://github.com/ducthangho/tra-luat/blob/9f7d36573e4e308727c355e65e100e6d029195ff/ops/checkpoints/mission1238-p2-p6-handoff-20261109/HANDOFF.md",
+  "newsession_created_or_claimed": false,
+  "new_model_calls": 0,
+  "new_product_lease": false
+}

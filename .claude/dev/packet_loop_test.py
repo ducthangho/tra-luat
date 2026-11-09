@@ -14111,7 +14111,11 @@ def _readers14(c):
         assert snapshot() == before
         local = ["--state-dir", str(target.parent), command, "--packet", str(a["packet"])]
         with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
-            assert m.main(local) == 0, "unflagged v3 diagnostic view rejected"
+            try:
+                local_rc = m.main(local)
+            except SystemExit as ex:
+                local_rc = ex.code
+            assert local_rc == 0, ("unflagged v3 diagnostic view rejected", local_rc)
         assert snapshot() == before
         with patch.object(m, "_1174_resolve", side_effect=ValueError("unverified enrollment")), contextlib.redirect_stdout(io.StringIO()):
             assert m.main(args) == 8

@@ -1,0 +1,43 @@
+{
+  "changes": [
+    {
+      "path": ".claude/.packet_state",
+      "before": null,
+      "after": [
+        "D",
+        "",
+        "2e636c617564652f2e7061636b65745f7374617465"
+      ]
+    },
+    {
+      "path": ".claude/.packet_state/session-start.ran",
+      "before": null,
+      "after": [
+        "F",
+        "66241e5c0b4161c7cd8c1e9a5ce8ca7ca9481f73ac6365b2eca4411f9a9bedb5",
+        "2e636c617564652f2e7061636b65745f73746174652f73657373696f6e2d73746172742e72616e"
+      ]
+    },
+    {
+      "path": ".claude/dev/__pycache__",
+      "before": null,
+      "after": [
+        "D",
+        "",
+        "2e636c617564652f6465762f5f5f707963616368655f5f"
+      ]
+    },
+    {
+      "path": ".claude/dev/__pycache__/launcher.cpython-312.pyc",
+      "before": null,
+      "after": [
+        "F",
+        "3952896c455844c2f3471271b03232c9d6a217522bd258542a1f04a899b02a6f",
+        "2e636c617564652f6465762f5f5f707963616368655f5f2f6c61756e636865722e63707974686f6e2d3331322e707963"
+      ]
+    }
+  ],
+  "original_entries_changed": [],
+  "continuous_attestation": false,
+  "no_cleanup_or_restore_performed": true
+}

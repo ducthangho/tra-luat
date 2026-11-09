@@ -1,0 +1,37 @@
+{
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "session_id": "e1e04ee9-2119-4e46-af04-4c82507c84cb",
+  "started_at": "2026-11-09T02:01:43.587245+00:00",
+  "absolute_deadline": "2026-11-09T03:01:43.587245+00:00",
+  "requested_model": "opus",
+  "requested_effort": "max",
+  "tools": [
+    "Read",
+    "Glob",
+    "Grep"
+  ],
+  "permission_mode": "plan",
+  "state": "dispatching_NONREPEATABLE",
+  "actual_generation": "UNKNOWN_UNTIL_TELEMETRY_OR_TERMINAL",
+  "source_binding": {
+    "metadata_commit": "a81d14ac4dfbbb004973921434b3e141c00d9412",
+    "comment": "https://github.com/ducthangho/tra-luat/issues/1285#issuecomment-6730457030",
+    "issue_readback_exact": true,
+    "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+    "spec_sha256": "17d0257fc4d127991f42f56d1fdc2eda2e1c479685b7262728792a09771b164d",
+    "prompt_sha256": "58fb24a1a4962826c3d53b66e1d2e1a9b60d334903cd63603eb3600962ad20ce",
+    "model_invoked": false
+  },
+  "launcher_exit": 16,
+  "finished_at": "2026-11-09T02:14:59.298166+00:00",
+  "post_snapshots": {
+    "review": {
+      "sha256": "3a06204736fc7065b369922ba94c25d5d236e9898a690eaedb196625637a3993",
+      "same_as_before": false
+    },
+    "source": {
+      "sha256": "4138ce123b7796d37845e8230ff689aec2b94cdf0586933a64c076def4d67a06",
+      "same_as_before": true
+    }
+  }
+}

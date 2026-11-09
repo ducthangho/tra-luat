@@ -1,0 +1,15 @@
+{
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "code_verdict": "changes_requested",
+  "open_finding": "WP1285-R7-F01/P3; source-only pending operator nativeprobe",
+  "previous_class": "block/background manifestationsclosed, wholeclassnotestablished due requirements remnant; not counted measuredthirdrecurrence",
+  "fullscope_review_complete": false,
+  "child_rc": 0,
+  "launcher_rc": 16,
+  "workspace_gate": "FAILED, no waiver; rootcache+normalhook 4ADD, source delta0; no cleanup/relabel",
+  "assurance": "NOT_ACHIEVED",
+  "promotion_eligible": false,
+  "merge": false,
+  "land": false,
+  "snapshot_archive_sha256": "aa55bd6e9920c0e5e79d086f28fb956615e71cc6aa366ab5e3d4b44f100e8f73"
+}

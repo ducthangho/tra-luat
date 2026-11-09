@@ -1,0 +1,93 @@
+{
+  "version": "1.5.0",
+  "run_id": "21ecdc2a52bb449a8bed4848e8d29918",
+  "short_id": "21ecdc2a",
+  "ten": "wp1285-r7-review5-one-cross-family-audit",
+  "lenh": {
+    "chuong_trinh": "claude",
+    "so_doi_so": 44,
+    "van_tay": "da2a7ba817de1993"
+  },
+  "trang_thai": "ghi_workspace",
+  "bat_dau_utc": "2026-11-09T02:01:43.780016+00:00",
+  "ket_thuc_utc": "2026-11-09T02:14:59.282699+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 761987,
+  "khoa_danh_tinh": "linux:29878346",
+  "workspace": "/workspace/scratch/wp1285-claude-cross-audit-H4",
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "58fb24a1a4962826c3d53b66e1d2e1a9b60d334903cd63603eb3600962ad20ce",
+  "deadline_utc": "2026-11-09T03:01:43.587245+00:00",
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=22B"
+    },
+    "claude_trust": {
+      "trang_thai": "DAT",
+      "chi_tiet": "Claude trust=true"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "anthropic_claude",
+  "execution_surface": "claude_code",
+  "transport": "machine/local",
+  "transport_sha256": "0e640cb9f149f9a47671c9519f633637fe54e4b07a2fda4bea63302e4e0d1f1b",
+  "chup_workspace": true,
+  "snapshot_gioi_han": "chi so hai moc truoc/sau; ghi roi hoan nguyen giua hai moc thi khong thay; chau tu setsid hoac sinh truoc khi gan job thi khong chung minh duoc",
+  "snapshot_truoc_sha256": "3b989f075006c127f08a54357b5806a51a2167a7a7d83729c81fc6859f192dd1",
+  "snapshot_sau_sha256": "3a06204736fc7065b369922ba94c25d5d236e9898a690eaedb196625637a3993",
+  "snapshot_so_muc": {
+    "truoc": 14902,
+    "sau": 14906
+  },
+  "tep_doi_tong": 4,
+  "tep_doi_bi_cat": false,
+  "tep_doi": [
+    {
+      "duong_dan": ".claude/.packet_state",
+      "doi": "them"
+    },
+    {
+      "duong_dan": ".claude/.packet_state/session-start.ran",
+      "doi": "them"
+    },
+    {
+      "duong_dan": ".claude/dev/__pycache__",
+      "doi": "them"
+    },
+    {
+      "duong_dan": ".claude/dev/__pycache__/launcher.cpython-312.pyc",
+      "doi": "them"
+    }
+  ],
+  "snapshot_ket_qua": "ghi_workspace",
+  "snapshot_ly_do": "tep_doi",
+  "checkpoint_sha256": "6a19eb1d5439607510b245c3b734d24b7c8f32413f74acfb6c2958a5fb20d15f",
+  "prompt_ban_chup": "/workspace/scratch/proxima-rest-20261108/S3-Claude5-runs/21ecdc2a/prompt.snapshot",
+  "prompt_kin_hoan_toan": false,
+  "failure_class": "unknown",
+  "thoi_luong_giay": 795.503,
+  "stdout_byte": 1206604,
+  "stdout_sha256": "fafb2f6dadf853354a39cdb138092b686e9e2aa5f21ce44d50172b7d46d05b1c",
+  "stderr_byte": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

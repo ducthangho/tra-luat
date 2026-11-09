@@ -1,0 +1,294 @@
+schema_version: 1
+packet: wp1296
+packet_issue: 1296
+mission_issue: 1238
+revision: 3
+generation: 3
+spec_hash: 780a5fa9b7cf86ec277e734bbbd43c9d1ef153b4750227ae173987a192fb39c4
+spec_source: 552e80497c44d3f7a9b162875e86c02ffe2e6bb8:ops/specs/wp1296-r3.md
+head_da_review: 15ad82f56924a0ccc99833ec73eec078ce00b726
+tree_h: 50fbceb65cea60cc62222c3cd3a3651a6dd13981
+review:
+  assurance: human_audited
+  offline_CLI_review: https://github.com/ducthangho/tra-luat/issues/1296#issuecomment-6735182321
+  CLI_v2: f16c9dbc69809008ea4966516463ff6aa5a7c359:ops/reviews/wp1296-r3-review1.receipt.yaml
+  human_approval: https://github.com/ducthangho/tra-luat/pull/1301#issuecomment-6736642798
+  human_v2: 5d77077f8bf1f099a5260b987cf9c38645c0eb16:ops/reviews/wp1296-r3-human2.receipt.yaml
+  axes:
+  - spec
+  - standards_security
+  open_findings: []
+  finding_disposition:
+    WP1285-R7-F01: repaired onH2; independent wholeclassreview+nativebeforeimport/culture/baseline/guardrollback
+      proof
+    WP1296-NATIVE-F01: H1API mismatch repaired onH2; actualPS51/7API+normalpositive
+      pass
+    historical_P0_F1_F2: originalexactH7ownerexceptions unchanged, nottransferred
+      or fabricated
+windows:
+  status: passed_under_frozen_Packet_criteria
+  normal: 7/7each PS51/7
+  CXparent: 12/12each
+  S2normal: 26/26each
+  original_native_observations: 95
+  meaningful_requirements_rejections: 57
+  literal_controls: 6
+  PS7legacy_snapin_inert_controls: 3
+  baseline_and_historical_and_guardonlyrollback: actualsources/AUX2; no arbitrarycodeexecution
+    claim
+  full_source_AUX2_sha256: faecb75ac26e7bb6ae8d0e498d2ed7bfedb4e179e4824858ca99d5353158b33a
+  Windows_CI: not_run_per_standing_ownerinstruction
+  full_Windows_mutant_CI: not_run_per_standing_ownerinstruction
+  limits: scopedcommittedblobexports, not fullnativeGitcheckout; originaloperatorrc2s
+    andH1failure retained; negative/control/baseline runs notrelabeledallpositive
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1301#issuecomment-6736812696
+approver: ducthangho
+land_operator: Codex dispatcher underexplicituserinstruction
+canonical_product_readback:
+  M: 09643583d170c66ce3bcc74170d054d0f5ac9356
+  current_tip: 09643583d170c66ce3bcc74170d054d0f5ac9356
+  addon_diff_rc: 0
+  actual_MCI_tested_M_not_later_tip: true
+merge_method: normal merge commit
+merge_commit: 09643583d170c66ce3bcc74170d054d0f5ac9356
+merge_commit_parents:
+- 91be484a05ab40adf6573f11ef6ec0264fc9a3aa
+- 15ad82f56924a0ccc99833ec73eec078ce00b726
+tree_m: 50fbceb65cea60cc62222c3cd3a3651a6dd13981
+ci_pr:
+  run_id: 42583491058
+  attempt: 1
+  jobs: 23/23Ubuntu
+  conclusion: success
+  AUX5_sha256: b14e5d7aad06c52c1793272fb05bb1955828eeb9ec5e988934abc8e164558346
+  connector: exactH2Draft and actualReadyauto completednofindings
+  rawcanonical_unknowns_preserved: true
+ci_master:
+  run_id: 42595864844
+  attempt: 1
+  event: push
+  conclusion: success
+  head: 09643583d170c66ce3bcc74170d054d0f5ac9356
+  actual_checkout: 09643583d170c66ce3bcc74170d054d0f5ac9356
+  jobs: 23
+  positive_selftest: 1777/1777
+  official_artifact:
+    id: 13663833311
+    name: gate-evidence-ubuntu-latest-1
+    sha256: dd113d49675c0b5d71a8f30af22c68d8f99e4b54efa7c8686a35ae247850377b
+    matches_GitHub_artifact_digest: true
+  lifecycle:
+    status: passed
+    identity:
+      catalog_policy_sha256: e8b7be5e7f1f77a4d4d065d49dbd616a6e9b5260541e61debfe7d5d62638c679
+      head_sha: 09643583d170c66ce3bcc74170d054d0f5ac9356
+      machine: x86_64
+      python_implementation: CPython
+      python_version: 3.12.16
+      runner_sha256: 637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810
+      system: Linux
+      system_release: 7.0.0-1019-azure
+      tracked_clean: true
+      tree_sha: 50fbceb65cea60cc62222c3cd3a3651a6dd13981
+      worktree_clean: true
+    command_hash_verified: true
+    runner_code_hash_verified: true
+    catalog_policy_hash_verified: true
+    output_sha256: 31d8308d42f69f49e732f34cdb0d6e08c8d978403dd9074601142b60c72e4801
+    actual_rc: 0
+  workflow_definition:
+    schema: wd/1
+    repo: ducthangho/tra-luat
+    run_id: 42595864844
+    loi_graphql: []
+    nguon: ops/ci_provenance.py do-wd
+    run_attempt_luc_do: 1
+    event: push
+    node_id: WFR_kwLOTNeRjc8AAAAJ6ulRDA
+    head_sha_rest: 09643583d170c66ce3bcc74170d054d0f5ac9356
+    run_number: 4334
+    created_at: '2026-11-09T09:45:42Z'
+    path: .github/workflows/ci.yml
+    repository_file_url: https://github.com/ducthangho/tra-luat/blob/09643583d170c66ce3bcc74170d054d0f5ac9356/.github/workflows/ci.yml
+    check_suite_commit: 09643583d170c66ce3bcc74170d054d0f5ac9356
+    oid_dinh_nghia: 09643583d170c66ce3bcc74170d054d0f5ac9356
+    blob: 2b2c9aa25ad1c136e44cba457d9ae765d2544fc2
+    sha256: aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67
+    trang_thai: passed
+    ly_do: null
+  source:
+    metadata_commit: ff65aa4f9dbc316ca8040387058d3b64e22693f7
+    path: ops/checkpoints/wp1296-r3/MCI/final-evidence-index.json
+    comment: https://github.com/ducthangho/tra-luat/issues/1296#issuecomment-6738291792
+    comment_id: 6738291792
+    exact_body: true
+    remote_blobs_exact: true
+    M: 09643583d170c66ce3bcc74170d054d0f5ac9356
+    official_artifact_sha256: dd113d49675c0b5d71a8f30af22c68d8f99e4b54efa7c8686a35ae247850377b
+    AUX8_sha256: e2c8b6866900f55bcac02dee39d557c97c432002bb0828f5d0c0d6938ecd58b2
+  AUX8_sha256: e2c8b6866900f55bcac02dee39d557c97c432002bb0828f5d0c0d6938ecd58b2
+nghiem_thu:
+  onepath_scope_size_EOL: passed
+  parsersemantic_guard_and_actual_PS_API: passed
+  comments_and_null_default: passed
+  culture_case_requirements_beforeimport: passed
+  native_normal_CX_S2_and_literal_schema_properties: passed
+  historical_AST_baseline_reproduction_and_guardonlyrollback: passed
+  Linux1777_strict184_Ruffdelta0_admission: passed
+  actual_independent_offlineCLI_and_v2_beforepush: passed
+  actual_owner_two_axis_human_approval: passed
+  PRCI_fouranchors_complete_source_and_connector: passed
+  Readyauto_currentrules_fullrefs_K0K7: passed
+  normalmerge_exactparents_tree: passed
+  actualMCI_fouranchors_officialartifact_AUX8: passed
+  lease_retired_realUTC: passed
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed
+lease_cuoi: wp1296-r3-g3-codex
+lease_retirement:
+  actual_UTC: '2026-11-09T10:56:54Z'
+  original_until: '2026-11-09T13:39:47Z'
+  final_until: '2026-11-09T10:56:54Z'
+  no_extension_or_backdating: true
+landed: true
+recorded_at_utc: '2026-11-09T10:56:54Z'
+budget_current:
+  packet: 1296
+  author_used: 2
+  author_cap: 2
+  formal_used: 2
+  formal_cap: 2
+  shared_used: 8
+  shared_cap: 8
+  push_used: 1
+  push_cap: 1
+  parent1285_shared_closed: 14
+  class_manifestations_historical: 3
+  author_status: terminal
+  author_started: '2026-11-09T06:55:33.321844+00:00'
+  author_deadline: '2026-11-09T07:40:33.321844+00:00'
+  actual_generation: true
+  revision: 3
+  generation: 3
+  shared_calls:
+  - n: 1
+    purpose: 'Independent full retained source diagnostic: PS7PSSnapin oracle vs actualsemanticguard,
+      NOTformalcodeapproval'
+    state: terminal_source_digest_notformal
+    head: 15ad82f56924a0ccc99833ec73eec078ce00b726
+    at: '2026-11-09T07:11:03.067382+00:00'
+    deadline_minutes: 90
+    receipt: AUX1-oracle-receipt.json
+    receipt_sha256: 11034d6870f1842f2265ea499e3ad166b1b51c58be183aeebfb76e380382cdef
+  - n: 2
+    purpose: Mandatory complete native+Linux source gate AUX before formalreview
+    state: terminal_source_digest_notformal
+    head: 15ad82f56924a0ccc99833ec73eec078ce00b726
+    at: '2026-11-09T07:30:40.932364+00:00'
+    deadline_minutes: 90
+    receipt: AUX2-gates-receipt.json
+    receipt_sha256: faecb75ac26e7bb6ae8d0e498d2ed7bfedb4e179e4824858ca99d5353158b33a
+  - n: 3
+    purpose: Fresh independent CodexCLI xhigh formalreview1 wholeB..H2 spec+security
+    state: terminal_validated_sameprovider_approved
+    at: '2026-11-09T07:52:20.706281+00:00'
+    deadline: '2026-11-09T08:52:20.706281+00:00'
+    head: 15ad82f56924a0ccc99833ec73eec078ce00b726
+    run_id: c949f66c126a459c8751c0ac0f717edc
+  - n: 4
+    purpose: Draft PR1301 exactH2 connector review
+    state: terminal_connector_completed_nofindings
+    at: '2026-11-09T08:06:15.318044+00:00'
+    head: 15ad82f56924a0ccc99833ec73eec078ce00b726
+    deadline_minutes: 90
+    summary_comment: 6735226910
+    receipt_comment: 6735243094
+    completed_at: '2026-11-09T08:07:50.548431Z'
+  - n: 5
+    purpose: mandatory tl_auditor complete PRCI source audit NOT formalcodeapproval/human
+    state: terminal_passed_full_source_only
+    at: '2026-11-09T09:14:39.774791+00:00'
+    head: 15ad82f56924a0ccc99833ec73eec078ce00b726
+    deadline_minutes: 90
+    receipt: AUX5-PRCI-receipt.json
+    receipt_sha256: b14e5d7aad06c52c1793272fb05bb1955828eeb9ec5e988934abc8e164558346
+  - n: 6
+    purpose: Read-only independent provenance audit of lossless review JSON transport
+      projection and preReady gate inputs, NOT another code review/formalround
+    state: terminal_provenance_audit_passed
+    at: '2026-11-09T09:36:44.129039+00:00'
+    head: 15ad82f56924a0ccc99833ec73eec078ce00b726
+    deadline_minutes: 45
+    receipt_sha256: 78fefc3b373f8b7c51d0c84170ebd3102de0bd41d79d81abbc6b1bfe5790d001
+  - n: 7
+    purpose: Ready-triggered automatic exactH2 connector ifactualstarts; no newformalround
+    state: terminal_actualReadyauto_nofindings
+    at: '2026-11-09T09:43:20.917904+00:00'
+    head: 15ad82f56924a0ccc99833ec73eec078ce00b726
+    started_at: '2026-11-09T09:43:27.940295Z'
+    summary_comment: 6735226910
+    completed_at: '2026-11-09T09:44:18.650039Z'
+  - n: 8
+    purpose: mandatory final actualMCI complete-source audit read-only; NOT codeapproval/humanapproval/land
+    state: terminal_complete_source_audit_passed
+    at: '2026-11-09T10:49:02.566512+00:00'
+    head: 09643583d170c66ce3bcc74170d054d0f5ac9356
+    candidate_head: 15ad82f56924a0ccc99833ec73eec078ce00b726
+    deadline: '2026-11-09T12:19:02.566512+00:00'
+    receipt_sha256: e2c8b6866900f55bcac02dee39d557c97c432002bb0828f5d0c0d6938ecd58b2
+  current_lease: wp1296-r3-g3-codex
+  formal_model_reviews_used: 1
+  human_audits_used: 1
+  formal_total_including_human: 2
+  human_audit:
+    comment: https://github.com/ducthangho/tra-luat/pull/1301#issuecomment-6736642798
+    head: 15ad82f56924a0ccc99833ec73eec078ce00b726
+    receipt_commit: 5d77077f8bf1f099a5260b987cf9c38645c0eb16
+    receipt_path: ops/reviews/wp1296-r3-human2.receipt.yaml
+    v2_rc: 0
+    new_model_calls: 0
+  remaining_shared_plan:
+    '7': Ready-triggered automatic connector ifactuallystarts
+    '8': mandatoryMCI fullsourceaudit
+bookkeeping_scope: close1296 anddebt1295 afterM8readback/D1D4; Mission1238 remainsopen/P2..P6
+  pending
+limits:
+- NoLIVE/deploy/hostruntimeactivation
+- NoWindowsCI/fullWindowsmutantCI; focusednativeonly
+- Rawcanonicalnot_measured andA0discoveryNOT_RUN preserved; independentfullsourceaudit
+  separate
+- JSONreview transport projection byteexact and independentlyAUX6verified; originals
+  untouched; human supplementalnotbackdated
+- No newmodels/reviewPR/Windows gates forM8; passiveGitarchiveweeklylane notblockingclosure
+lease_required_checks_acceptance:
+- requirement: exactH nativePS51/7 parsersemantic baseline/candidate/comment/directiveculture/classnegative/rollback
+    fulloriginalevidence
+  status: passed
+  evidence: Actualnative95observations/1876sources/AUX2 and formalCLIclassclosure;
+    originalfailures retained
+- requirement: normal7/CXparent12/unchangedS2normal26 both; otherproductbytesunchanged
+  status: passed
+  evidence: Normal7/CXparent12/S2normal26each; oneproductpath66add2del; allotherproductbytesunchanged
+- requirement: exactH Linuxfullselftest/strictmanifest/Ruffdelta0/admission/doctrine/scope/size
+  status: passed
+  evidence: ExactH2Linux1777/strict184/Ruffdelta0/admission/doctrine/ADR/docclaims/scope/EOL
+    preserved
+- requirement: freshindependentCodexCLI xhigh wholeB..H/spec/security/v2prepush, sufficientactualsensitiveassurance
+    separate
+  status: passed
+  evidence: OriginalprepushindependentCLI1/xhigh/v2 plus actualownerhuman2/v2 onexactH2;
+    separatepostpushsupplement notbackdated
+- requirement: UbuntuPRCI/connector/Ready/currentrules/fullrefs/exactHownergrant/K0K7
+  status: passed
+  evidence: ActualPRCI23Ubuntu/AUX5/4anchors, draft+Readyautoconnector7 nofindings,
+    currentrules/fullrefs/ownergrant/K0K7rc0
+- requirement: actualcanonicalMCI4anchors/officialartifact/fullsourceAUX/M8/readback/realUTCretirement/D1D4
+  status: passed
+  evidence: ActualMCI23Ubuntu/officiallifecycleartifact/AUX8/fouranchors; realUTCretirement;
+    M8publication/readbackandpostpublicationD1D4boundbyexternaldeliveryreceipt beforeclosure
+M8_delivery_note: Authoritative onlyafterexactIssuebodyreadback; postpublicationD1D4
+  and zeroactiveclaims recorded in externalclosure receipts beforeIssueclosure; no
+  invented prepublicationdeliverytimestamp.

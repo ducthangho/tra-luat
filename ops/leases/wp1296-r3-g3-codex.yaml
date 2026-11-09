@@ -1,5 +1,5 @@
 schema_version: 2
-event: executor_lease_granted
+event: executor_lease_retired
 packet_issue: 1296
 packet_id: wp1296
 mission_issue: 1238
@@ -61,8 +61,8 @@ scoped_cli_writable_root: /workspace/scratch/wp1296-r2-g2-codex/.agents/skills/p
 leased_at_utc: '2026-11-09T07:39:47Z'
 heartbeat_at: '2026-11-09T07:39:47Z'
 heartbeat_required_minutes: 360
-lease_until: '2026-11-09T13:39:47Z'
-lease_expires_at_utc: '2026-11-09T13:39:47Z'
+lease_until: '2026-11-09T10:56:54Z'
+lease_expires_at_utc: '2026-11-09T10:56:54Z'
 run_minutes: 45
 attempts_limit: 2
 review_rounds_limit: 2
@@ -71,7 +71,7 @@ same_failure_limit: 2
 primary_product_pushes_limit: 1
 requires_live: false
 uy_quyen_merge: false
-status: leased
+status: retired
 assurance_target: same_provider_approved
 promotion_hold: Sensitive actual independent sufficient assurance on new exactH stillmandatory;
   no inheritedhumanaudit or H4waiver
@@ -81,3 +81,10 @@ thay_the_cho:
 - wp1296-r2-g2-codex
 authority_note: Latestownerfullcorrectiveworkdirective; no author3/capraise, read-onlyH2adoption
   and clarified literalAST/schema test only
+retired_at: '2026-11-09T10:56:54Z'
+retired_at_utc: '2026-11-09T10:56:54Z'
+original_lease_until: '2026-11-09T13:39:47Z'
+retirement_reason: ExactH2 review+human approval, normalmerge and actualMCI/officialartifact/AUX8
+  complete; release all claims under explicitownerlandauthority
+retired_by: Codex dispatcher Land Operator
+remaining_active_write_claims: []

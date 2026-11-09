@@ -14350,6 +14350,14 @@ def _owner_policy14(c):
     rc,result=invoke("begin-attempt",["--provider","codex","--execution-surface","codex_service","--transport","machine","--bang-chung-moi-truong",anh_doctor()])
     checkpoint=json.loads((journal/"wp1174.json").read_bytes())
     assert rc==3 and result["status"]=="quota_exhausted" and checkpoint["state"]=="blocked" and checkpoint["attempts_used"]==fixture["attempts_used"],(rc,result)
+    path=journal/"wp1174.json";valid=path.read_bytes()
+    invalid=(b'{"packet":0,'+valid[1:],valid.replace(b'"mission":1172',b'"mission":NaN',1),
+        (json.dumps(json.loads(valid),indent=2)+"\n").encode())
+    for malformed in invalid:
+        assert malformed!=valid
+        path.write_bytes(malformed);before=snapshot();rc,result=invoke("record-post",["--for","blocked","--comment-id","900777"])
+        assert rc==8 and not result["dispatch_allowed"] and snapshot()==before,"malformed source journal accepted or rewritten"
+        path.write_bytes(valid)
     before=snapshot();rc,result=invoke("chu-kho-duyet",["--checkpoint-path","ops/checkpoints/fixture.yaml"]);assert rc==8 and "source publication/human transition unavailable" in result["detail"] and snapshot()==before
 
 
@@ -14390,6 +14398,11 @@ MUTANTS.update({
     "m1174_source_limits": ('all((getattr(a,k) if a.cmd == "init" else state[k]) == v for k,v in limits.items())', 'True', ["wp1174_lifecycle_identity_advisory"]),
     "m1174_source_quota_checkpoint": ('if ex.code != RC_TRAN or type(_1174_TRANSACTION["proposal"]) is not dict:', 'if True:', ["wp1174_lifecycle_identity_advisory"]),
 })
+
+MUTANTS["m1174_source_journal_decoder"] = (
+    ['else _1174_json(_1174_read(path)))', 'a.cmd != "init" and _1174_json(_1174_read(path)) == state'],
+    ['else json.loads(_1174_read(path)))', 'a.cmd != "init" and json.loads(_1174_read(path)) == state'],
+    ["wp1174_lifecycle_identity_advisory"])
 
 if __name__ == "__main__":
     sys.exit(main())

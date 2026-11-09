@@ -5665,13 +5665,13 @@ def _1174_source_command(a, directory):
         state = (dict(packet=a.packet, mission=a.mission, executor=a.executor, reviewer=a.reviewer,
             **{role+"_identity":_identity(getattr(a,role), getattr(a,role+"_model_family"),
                 getattr(a,role+"_execution_surface"), getattr(a,role+"_transport")) for role in ("executor","reviewer")})
-            if a.cmd == "init" else json.loads(_1174_read(path)))
+            if a.cmd == "init" else _1174_json(_1174_read(path)))
         first = _1174_source_resolve(a, directory, state)
         _1174_require((directory/"source-policy.lock").is_file(), "source preexisting fixed lock required")
         with _1174_lock(directory/"source-policy.lock"):
             current = _1174_source_resolve(a, directory, state)
             _1174_require(current == first and (a.cmd == "init" and not path.exists() or
-                a.cmd != "init" and json.loads(_1174_read(path)) == state), "source authority/state changed under lock")
+                a.cmd != "init" and _1174_json(_1174_read(path)) == state), "source authority/state changed under lock")
             _1174_require(a.cmd in ("init", "record-lease") or state.get("lease") == current["verified"]["lease"] and
                 {k:v for k,v in state.get("ngu_canh_lease",{}).items() if k != "lease_oid"} ==
                 {k:v for k,v in current["verified"]["context"].items() if k != "lease_oid"}, "source journal/current lease binding")

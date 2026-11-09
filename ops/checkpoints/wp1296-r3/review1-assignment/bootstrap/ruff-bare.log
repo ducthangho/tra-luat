@@ -1,0 +1,123 @@
+F821 Undefined name `_reassemble_parts`
+   --> scripts/tl.py:286:15
+    |
+284 |             code = None
+285 |     if code is None:                                    # cắt cụt thật → thử ghép từ _parts
+286 |         asm = _reassemble_parts(name)
+    |               ^^^^^^^^^^^^^^^^^
+287 |         if asm is None:
+288 |             return None
+    |
+
+F821 Undefined name `_reassemble_parts`
+   --> scripts/tl.py:307:11
+    |
+305 |     src = HERE / f"{name}.py"
+306 |     raw = src.read_bytes() if src.exists() else None
+307 |     asm = _reassemble_parts(name)                  # nguồn CHÂN LÝ nếu có _parts (đã verify==gốc lúc đóng gói)
+    |           ^^^^^^^^^^^^^^^^^
+308 |     # bản gốc lành & sạch NUL & (nếu có parts) KHỚP parts → chạy thẳng, khỏi tạo temp.
+309 |     if raw is not None and b"\x00" not in raw:
+    |
+
+F821 Undefined name `_cache_file`
+   --> scripts/tl.py:328:15
+    |
+326 |         except SyntaxError:
+327 |             continue
+328 |         tmp = _cache_file(f"_healed_{name}.py")
+    |               ^^^^^^^^^^^
+329 |         tmp.parent.mkdir(parents=True, exist_ok=True)   # phiên trống: cache dir có thể chưa tồn tại
+330 |         tmp.write_text(code_src, encoding="utf-8")
+    |
+
+F821 Undefined name `_active_profile`
+   --> scripts/tl.py:361:8
+    |
+359 |     """Forward request scope của profile. rootFolderId/categoriesMode chỉ được server dùng để chặn
+360 |     regen2 quét nhầm cây kế thừa; organize vẫn có thể fallback category VBQPPL."""
+361 |     if _active_profile() == DEFAULT_PROFILE:
+    |        ^^^^^^^^^^^^^^^
+362 |         return {}
+363 |     out = {}
+    |
+
+F821 Undefined name `_active_profile`
+   --> scripts/tl.py:379:26
+    |
+377 |     if manifest_scope:
+378 |         out["manifestScope"] = manifest_scope
+379 |     out["profileName"] = _active_profile()
+    |                          ^^^^^^^^^^^^^^^
+380 |     return out
+    |
+
+F821 Undefined name `_dang_bare_key`
+   --> scripts/tl.py:474:17
+    |
+472 |     # (v1.34.41). Nhận đúng khuôn _dang_bare_key: fullmatch trên KHÓA CHUẨN HOÁ toàn truy vấn — truy vấn
+473 |     # tên/câu chữ không thể khớp (không phải substring), không nới gì thêm ở tầng khớp.
+474 |     return bool(_dang_bare_key((q or "").replace("_", "-")))
+    |                 ^^^^^^^^^^^^^^
+    |
+
+F821 Undefined name `norm_sohieu`
+   --> scripts/tl.py:894:12
+    |
+893 | def _source_find(entries: list, target: str):
+894 |     tkey = norm_sohieu(target.replace("_", "-")) if _looks_like_sohieu_query(target) else ""
+    |            ^^^^^^^^^^^
+895 |     return next((x for x in entries if _entry_drive_id(x) == target or (tkey and _sohieu_key_entry(x) == tkey)), None)
+    |
+
+F821 Undefined name `_entry_drive_id`
+   --> scripts/tl.py:895:40
+    |
+893 | def _source_find(entries: list, target: str):
+894 |     tkey = norm_sohieu(target.replace("_", "-")) if _looks_like_sohieu_query(target) else ""
+895 |     return next((x for x in entries if _entry_drive_id(x) == target or (tkey and _sohieu_key_entry(x) == tkey)), None)
+    |                                        ^^^^^^^^^^^^^^^
+    |
+
+F821 Undefined name `_sohieu_key_entry`
+   --> scripts/tl.py:895:82
+    |
+893 | def _source_find(entries: list, target: str):
+894 |     tkey = norm_sohieu(target.replace("_", "-")) if _looks_like_sohieu_query(target) else ""
+895 |     return next((x for x in entries if _entry_drive_id(x) == target or (tkey and _sohieu_key_entry(x) == tkey)), None)
+    |                                                                                  ^^^^^^^^^^^^^^^^^
+    |
+
+F821 Undefined name `_sha256_file`
+    --> scripts/tl.py:1157:16
+     |
+1155 |     try:
+1156 |         p = Path(path).expanduser()
+1157 |         return _sha256_file(p) if p.exists() and p.is_file() else ""
+     |                ^^^^^^^^^^^^
+1158 |     except Exception:
+1159 |         return ""
+     |
+
+F821 Undefined name `build_parser`
+    --> scripts/tl.py:1321:10
+     |
+1320 | def main(argv) -> int:
+1321 |     ap = build_parser()
+     |          ^^^^^^^^^^^^
+1322 |     a = ap.parse_args(argv)
+1323 |     global _TIMING_ON, _DETERMINISTIC_ON
+     |
+
+F821 Undefined name `load_creds`
+    --> scripts/tl.py:1337:9
+     |
+1335 |         ap.print_help(); return 1
+1336 |     if a.cmd not in _CREDS_LAZY_CMDS:   # ngoài nhóm này → nạp creds webapp (cần token)
+1337 |         load_creds(a.config, getattr(a, "profile", None))
+     |         ^^^^^^^^^^
+1338 |     # (v1.33.29 — log rà v1.33.28 báo 'sweep/review-queue --json rc=1 dù chạy OK' KHÔNG tái hiện được trên
+1339 |     # canonical [cả 2 return 0 vô điều kiện]; triệu chứng khớp `--json | head/jq-thoát-sớm` → BrokenPipeError
+     |
+
+Found 12 errors.

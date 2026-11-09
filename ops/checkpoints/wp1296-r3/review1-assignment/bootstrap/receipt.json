@@ -1,0 +1,57 @@
+{
+  "at": "2026-11-09T07:51:32.408359+00:00",
+  "commands": [
+    {
+      "label": "head",
+      "command": [
+        "/usr/bin/git",
+        "-C",
+        "/workspace/scratch/wp1296-review1-H2",
+        "rev-parse",
+        "HEAD",
+        "HEAD^{tree}"
+      ],
+      "rc": 0,
+      "sha256": "71603442de8a9138b94fac5b711a985bd44240b081b1ceae3ae83bd0736ad27b"
+    },
+    {
+      "label": "ruff-contract",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-B",
+        "-c",
+        "import pathlib,runpy,sys; m=runpy.run_path(str(pathlib.Path(sys.argv[1])/\".claude/dev/ci_dang_ky_test.py\")); e,n=m[\"loi_ruff_ci\"](); print(\"RUFF_CONTRACT\",n,e);sys.exit(bool(e) or n==0)",
+        "/workspace/scratch/wp1296-review1-H2"
+      ],
+      "rc": 0,
+      "sha256": "1069744e64ae4de530c2eb1c699b614c5404f7a707ecc67a3853e39ed9929d4a"
+    },
+    {
+      "label": "ruff-bare",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "/workspace/scratch/wp1296-review1-H2/scripts/tl.py"
+      ],
+      "rc": 1,
+      "sha256": "f8d12202ca651f7b91c3066518920cba78ea21657d93f7817ca29bc7197602c5"
+    },
+    {
+      "label": "docclaims",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-B",
+        "/workspace/scratch/wp1296-review1-H2/scripts/tl.py",
+        "doc-claims-check",
+        "--strict"
+      ],
+      "rc": 0,
+      "sha256": "7090379550f5135a2cf6497a4ddc99e45a22e14795035197a3777f3786abbaa7"
+    }
+  ]
+}

@@ -10797,7 +10797,7 @@ def _source_topology1174(c):
     """Real journal/lock operations with explicitly fixture mount authority."""
     import contextlib, copy, io
     from unittest.mock import patch
-    for origin in ("imported", "initialized", "latest"):
+    for origin in ("latest", "imported", "initialized"):
         for kind in ("same", "device", "mount_id", "symlink", "refresh", "legacy_only"):
             directory=c.tmp/("topology-"+origin+"-"+kind);directory.mkdir()
             ctx=Ctx(c.script,directory)
@@ -11343,6 +11343,9 @@ def _source1174(kind):
             admission["lineage"].update(source_sha256=digest, predecessor_generation=5)
             admission["enrollment"].update(origin="imported_lineage", legacy_source_path=source, legacy_source_sha256=digest)
             assert _call1174(m._1174_source_binding, None, admission, source, legacy)["attempts_used"] == 7
+            promoted=m._1174_bytes(dict(state,generation=5))
+            admission["lineage"]["source_sha256"]=admission["enrollment"]["legacy_source_sha256"]=hashlib.sha256(promoted).hexdigest()
+            _reject1174(m._1174_source_binding,None,admission,source,promoted,reason="legacy source v2 identity")
             admission["lineage"]["source_sha256"]=admission["enrollment"]["legacy_source_sha256"]=hashlib.sha256(raw).hexdigest()
             _reject1174(m._1174_source_binding, None, admission, source, raw,reason="legacy source v2 identity")
             admission["lineage"]["source_sha256"]=admission["enrollment"]["legacy_source_sha256"]=digest

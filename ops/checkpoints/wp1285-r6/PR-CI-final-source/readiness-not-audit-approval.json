@@ -1,0 +1,15 @@
+{
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+  "run": 42539770394,
+  "attempt": 1,
+  "main_jobs": 23,
+  "other_admissions": 3,
+  "all_current_checks_success": true,
+  "source_files": 97,
+  "archive_sha256": "b5ab3ab966f6f2a049c8ad92294d172380f64c435a329ce84d614828286b368a",
+  "archive_bytes": 1540472,
+  "independent_AUX11_complete": false,
+  "all4anchors_complete": "Run/checkout/WD passed; full gateoutput source-audit awaits AUX11. Original rawconsumer not_measured states preserved.",
+  "recorded_at": "2026-11-09T01:36:28.318307+00:00"
+}

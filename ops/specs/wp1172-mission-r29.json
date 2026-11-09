@@ -163,8 +163,8 @@
   "supersedes_revision": 28,
   "change_request": "MCR-1172-J-R24",
   "decision_url": "https://github.com/ducthangho/tra-luat/issues/1174",
-  "decision_source": "Proposed exact J checkpoint; no approval or activation yet",
-  "installation_state": "prepared_pending_exact_J",
+  "decision_source": "Proposed exact J2 checkpoint; no approval or activation yet",
+  "installation_state": "prepared_pending_exact_J2",
   "state": "running",
   "inheritance": {
     "mission21_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6720395202",
@@ -181,7 +181,7 @@
     "same_failure_limit": 2,
     "max_parallel_workers": 2,
     "max_agent_invocations": 67,
-    "max_cloud_minutes": 3450,
+    "max_cloud_minutes": 3540,
     "max_inbox_backlog": 100,
     "provider_budgets": {
       "paid_credit_purchase_allowed": false,
@@ -217,8 +217,8 @@
     "M9_used": 2,
     "M9_runner_hours_cap": 24,
     "total_role_cap": 67,
-    "cloud_cap": 3450,
-    "hard_expiry_utc": "2026-11-10T00:55:32Z",
+    "cloud_cap": 3540,
+    "hard_expiry_utc": "2026-11-10T02:25:32Z",
     "canary_cap": 1,
     "canary_used": 0,
     "scratch_cap": 2,
@@ -227,7 +227,7 @@
     "external_source_attribution": "UNKNOWN retained separately",
     "source_added_lines_cap": 6750,
     "M9_runner_hours_used": 8.525,
-    "approval_state": "prepared_pending_exact_J"
+    "approval_state": "prepared_pending_exact_J2"
   },
   "source_bootstrap": {
     "packet": 1174,
@@ -237,7 +237,7 @@
     "continuation": "5ad99bb58c5d48eed1543e62298176d014f85ed8",
     "normal_merge_predecessor": "92018d818ae4ca358c0caa5b7b41d21c308f650e",
     "spec_path": "ops/specs/wp1174-implementation-r24.md",
-    "spec_sha256": "0af52d8c45a0b0772adfcea002fc94b3b65881b68d76a0d226264a45cf376ac4",
+    "spec_sha256": "7fdb763ccb23944e9e3d32fa0bac9463cd4c83a2b04b575ac72caac6782bd661",
     "effective_write_set": [
       ".claude/dev/packet_loop.py",
       ".claude/dev/packet_loop_test.py",
@@ -257,11 +257,11 @@
     "SOURCE-ONLY conditional owner K4 alternative is not actual-human/native approval or target activation/Mission completion."
   ],
   "time_envelope_activation": {
-    "state": "proposed_J_not_active",
+    "state": "proposed_J2_not_active",
     "T0": "2026-11-08T23:20:32Z",
     "U0": 1915,
-    "cloud_cap": 3450,
-    "hard_expiry_utc": "2026-11-10T00:55:32Z",
+    "cloud_cap": 3540,
+    "hard_expiry_utc": "2026-11-10T02:25:32Z",
     "historic_costs_preserved": true,
     "clock_formula": "51+ceil((nowUTC-2026-11-07T16:17:24Z)/60)"
   },

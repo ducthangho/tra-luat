@@ -1,7 +1,7 @@
 {
-  "status": "proposed_pending_exact_J_owner_approval",
-  "proposal_sha256": "431a5e97d9137c79e8d6f9cf33d84c091bb97f26fd74348afb156d7d22fbeca5",
-  "public_body_sha256": "51bed1384519ffc8045241e6135e4915ae65602a846810c6263863980294fade",
+  "status": "proposed_pending_exact_J2_owner_approval",
+  "proposal_sha256": "efd565cd2178ae6c3d61262e4098ff3bcab36fac211f58a96244913ef8c6f6a6",
+  "public_body_sha256": "da52cc0d3a510e5325d0a860357f1dfc79656051e6d4f99a49fd1c925f377a32",
   "input_head": "5ad99bb58c5d48eed1543e62298176d014f85ed8",
   "source17_closed": true,
   "reviewA_verdict": "changes_requested",
@@ -19,5 +19,11 @@
   "native84_not_overall_gate_pass": true,
   "future_VM_coordination_exception_only_after_J_approval": true,
   "source18_not_dispatched": true,
-  "review34_history_retained": true
+  "review34_history_retained": true,
+  "J_original_metadata_oid": "529bd7262791babfabeed710a513770586f02dbd",
+  "J2_cloud_cap_proposed": 3540,
+  "J2_hard_deadline_proposed": "2026-11-10T02:25:32Z",
+  "J2_clock_used": 2693,
+  "J2_full_reserve": 762,
+  "J2_at_utc": "2026-11-09T12:19:19.037317+00:00"
 }

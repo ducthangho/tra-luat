@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-09T07:48:23.424421+00:00",
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "original_zip_sha256": "28f27d1a2b44f2827eb77325f8279b9b10d0683fa3796cdbd51e2cd3f41927d1",
+  "rawfiles": 106,
+  "first_literal_source": "24fcc9d73e474b376bc84461a2ad637ef6171bd9:ops/checkpoints/wp1296-r3/literal-first-operator-null/original-evidence.zip",
+  "normalized_json_are_convenience_only": "original ZIP preserves rawbytes independently indexed",
+  "observations": 6,
+  "existing_plus_literal_ledger": 95,
+  "product_changed": false,
+  "AUX2": "pending samecall"
+}

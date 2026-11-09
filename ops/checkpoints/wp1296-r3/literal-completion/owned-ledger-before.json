@@ -1,0 +1,13 @@
+{
+  "source": "C:\\tl-win\\do-luong.csv",
+  "source_sha256": "72f7e2addb9add94032f396821e5da23f6cd68918c9313f683161a70b8416797",
+  "selected_rows": 90,
+  "selected_sha256": "41e0953c566c1ad43388b89aad130a2ba27a19ad71580c31fedffdd6cd79cf4e",
+  "session_ids": [
+    "wp1296-H2-completion-15ad82f56924",
+    "wp1296-H2-literals-15ad82f56924",
+    "wp1296-H2-literals-remaining-15ad82f56924",
+    "wp1296-H2-native-15ad82f56924"
+  ],
+  "other_rows_not_archived": true
+}

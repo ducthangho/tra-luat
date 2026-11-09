@@ -1,0 +1,805 @@
+{
+  "candidate": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "baseline": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "source_export": "Gitcommitted scopedbytes with filehashmanifest; not a nativefullGitcheckout",
+  "phases": {
+    "literal-tr-TR-ps51": {
+      "rc": 1,
+      "report": {
+        "schema": "proxima_manifest_tests.v1",
+        "ps_version": "5.1.26100.9711",
+        "ps_edition": "Desktop",
+        "culture": "tr-TR",
+        "ui_culture": "tr-TR",
+        "launch": {
+          "exe": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "command_line": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned -File C:\\tl-win\\wp1296-H2-literals-remaining\\harness\\literal-tr-TR-ps51.ps1",
+          "execution_policy_preference": "RemoteSigned",
+          "repository": null
+        },
+        "addon_root": "C:\\tl-win\\wp1296-H2-literals-remaining\\scratch\\literal-tr-TR-ps51\\addon",
+        "harness_sha256": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e",
+        "git_head": "not_measured (no git in harness; the operator records H/tree)",
+        "source_hashes": {
+          "SKILL.md": "7d4dfd01706991d7d3475d0829583aac53d216d5c68c12e1b44bffb9f3ac6fb1",
+          "config.example.json": "ddc7a15c729c579ec0d068912a8880da5ad4c0ed6e9826ba1ba60088abe1fa92",
+          "scripts/ProximaConfig.psm1": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d",
+          "scripts/ProximaControl.psd1": "a9884c4d193190742829436ccb23e90f44bac633e380a00d126035f10415ed87",
+          "scripts/ProximaControl.psm1": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+          "scripts/Run-Px.ps1": "03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354",
+          "tests/ProximaConfig.Tests.ps1": "ee3bc46e89cadbba56373570c6aa4ae244e997e7789240f0f1e25c5ac0031ded",
+          "tests/ProximaControl.Tests.ps1": "75b565e50cebf73f2a1a8a9787e0b8d35fe239db928253ba5c66fcde7ee1121b",
+          "tests/ProximaManifest.Tests.ps1": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e"
+        },
+        "manifest_state": "present",
+        "skill_state": "present",
+        "setup_error": null,
+        "required_ids": [
+          "PM01",
+          "PM02",
+          "PM03",
+          "PM04",
+          "PM05",
+          "PM06",
+          "PM07"
+        ],
+        "total": 7,
+        "passed": 3,
+        "failed_ids": [
+          "PM02",
+          "PM03",
+          "PM04",
+          "PM06"
+        ],
+        "setup_error_ids": [],
+        "runtime_children": 0,
+        "tamper": null,
+        "cases": [
+          {
+            "id": "PM01",
+            "outcome": "passed",
+            "reason": null,
+            "detail": "plain unnamed end block with exactly one hashtable data expression; SafeGetValue accepted"
+          },
+          {
+            "id": "PM02",
+            "outcome": "failed",
+            "reason": "VALUE[RootModule]",
+            "detail": null
+          },
+          {
+            "id": "PM03",
+            "outcome": "failed",
+            "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+            "detail": null
+          },
+          {
+            "id": "PM04",
+            "outcome": "failed",
+            "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+            "detail": null
+          },
+          {
+            "id": "PM05",
+            "outcome": "passed",
+            "reason": null,
+            "detail": "name/description; version 2.0.0 in frontmatter and Versions (both directions); six headings; three version domains; 7 placeholder targets"
+          },
+          {
+            "id": "PM06",
+            "outcome": "failed",
+            "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+            "detail": null
+          },
+          {
+            "id": "PM07",
+            "outcome": "passed",
+            "reason": null,
+            "detail": "optional/excluded publication stated; 10 example lines valid; file refs resolve; 9 add-on files byte-identical before/after"
+          }
+        ],
+        "children": [],
+        "counterexamples": [],
+        "evidence": {
+          "dir": "C:\\tl-win\\wp1296-H2-literals-remaining\\scratch\\literal-tr-TR-ps51\\pm-20261109T074720Z-5cee8828",
+          "artifacts": [],
+          "check": {
+            "status": "ok",
+            "verified": 0,
+            "errors": [],
+            "scope": "own + nested CX artifacts, after all cases"
+          }
+        },
+        "cleanup": {
+          "status": "ok",
+          "policy": "retain_all: this run deletes nothing; evidence is re-hashed instead",
+          "deleted": 0,
+          "retained_dir": "C:\\tl-win\\wp1296-H2-literals-remaining\\scratch\\literal-tr-TR-ps51\\pm-20261109T074720Z-5cee8828"
+        }
+      },
+      "parser": {
+        "culture": "tr-TR",
+        "PSVersion": "5.1.26100.9711",
+        "errors": [],
+        "requirements": null,
+        "api_members": [
+          "RequiredApplicationId",
+          "RequiredPSVersion",
+          "RequiredPSEditions",
+          "RequiredModules",
+          "RequiresPSSnapIns",
+          "RequiredAssemblies",
+          "IsElevationRequired"
+        ]
+      },
+      "culture": "tr-TR",
+      "shell": "ps51",
+      "source_harness_sha256": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e",
+      "manifest_sha256": "a9884c4d193190742829436ccb23e90f44bac633e380a00d126035f10415ed87",
+      "prefix": "",
+      "shape": null,
+      "classification": "literal_data_PM01_positive_strictschema_PM02_negative",
+      "credited_semantic_kill": false
+    },
+    "literal-az-Latn-AZ-ps51": {
+      "rc": 1,
+      "report": {
+        "schema": "proxima_manifest_tests.v1",
+        "ps_version": "5.1.26100.9711",
+        "ps_edition": "Desktop",
+        "culture": "az-Latn-AZ",
+        "ui_culture": "az-Latn-AZ",
+        "launch": {
+          "exe": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "command_line": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned -File C:\\tl-win\\wp1296-H2-literals-remaining\\harness\\literal-az-Latn-AZ-ps51.ps1",
+          "execution_policy_preference": "RemoteSigned",
+          "repository": null
+        },
+        "addon_root": "C:\\tl-win\\wp1296-H2-literals-remaining\\scratch\\literal-az-Latn-AZ-ps51\\addon",
+        "harness_sha256": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e",
+        "git_head": "not_measured (no git in harness; the operator records H/tree)",
+        "source_hashes": {
+          "SKILL.md": "7d4dfd01706991d7d3475d0829583aac53d216d5c68c12e1b44bffb9f3ac6fb1",
+          "config.example.json": "ddc7a15c729c579ec0d068912a8880da5ad4c0ed6e9826ba1ba60088abe1fa92",
+          "scripts/ProximaConfig.psm1": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d",
+          "scripts/ProximaControl.psd1": "a9884c4d193190742829436ccb23e90f44bac633e380a00d126035f10415ed87",
+          "scripts/ProximaControl.psm1": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+          "scripts/Run-Px.ps1": "03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354",
+          "tests/ProximaConfig.Tests.ps1": "ee3bc46e89cadbba56373570c6aa4ae244e997e7789240f0f1e25c5ac0031ded",
+          "tests/ProximaControl.Tests.ps1": "75b565e50cebf73f2a1a8a9787e0b8d35fe239db928253ba5c66fcde7ee1121b",
+          "tests/ProximaManifest.Tests.ps1": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e"
+        },
+        "manifest_state": "present",
+        "skill_state": "present",
+        "setup_error": null,
+        "required_ids": [
+          "PM01",
+          "PM02",
+          "PM03",
+          "PM04",
+          "PM05",
+          "PM06",
+          "PM07"
+        ],
+        "total": 7,
+        "passed": 3,
+        "failed_ids": [
+          "PM02",
+          "PM03",
+          "PM04",
+          "PM06"
+        ],
+        "setup_error_ids": [],
+        "runtime_children": 0,
+        "tamper": null,
+        "cases": [
+          {
+            "id": "PM01",
+            "outcome": "passed",
+            "reason": null,
+            "detail": "plain unnamed end block with exactly one hashtable data expression; SafeGetValue accepted"
+          },
+          {
+            "id": "PM02",
+            "outcome": "failed",
+            "reason": "VALUE[RootModule]",
+            "detail": null
+          },
+          {
+            "id": "PM03",
+            "outcome": "failed",
+            "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+            "detail": null
+          },
+          {
+            "id": "PM04",
+            "outcome": "failed",
+            "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+            "detail": null
+          },
+          {
+            "id": "PM05",
+            "outcome": "passed",
+            "reason": null,
+            "detail": "name/description; version 2.0.0 in frontmatter and Versions (both directions); six headings; three version domains; 7 placeholder targets"
+          },
+          {
+            "id": "PM06",
+            "outcome": "failed",
+            "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+            "detail": null
+          },
+          {
+            "id": "PM07",
+            "outcome": "passed",
+            "reason": null,
+            "detail": "optional/excluded publication stated; 10 example lines valid; file refs resolve; 9 add-on files byte-identical before/after"
+          }
+        ],
+        "children": [],
+        "counterexamples": [],
+        "evidence": {
+          "dir": "C:\\tl-win\\wp1296-H2-literals-remaining\\scratch\\literal-az-Latn-AZ-ps51\\pm-20261109T074721Z-2cab7ec6",
+          "artifacts": [],
+          "check": {
+            "status": "ok",
+            "verified": 0,
+            "errors": [],
+            "scope": "own + nested CX artifacts, after all cases"
+          }
+        },
+        "cleanup": {
+          "status": "ok",
+          "policy": "retain_all: this run deletes nothing; evidence is re-hashed instead",
+          "deleted": 0,
+          "retained_dir": "C:\\tl-win\\wp1296-H2-literals-remaining\\scratch\\literal-az-Latn-AZ-ps51\\pm-20261109T074721Z-2cab7ec6"
+        }
+      },
+      "parser": {
+        "culture": "az-Latn-AZ",
+        "PSVersion": "5.1.26100.9711",
+        "errors": [],
+        "requirements": null,
+        "api_members": [
+          "RequiredApplicationId",
+          "RequiredPSVersion",
+          "RequiredPSEditions",
+          "RequiredModules",
+          "RequiresPSSnapIns",
+          "RequiredAssemblies",
+          "IsElevationRequired"
+        ]
+      },
+      "culture": "az-Latn-AZ",
+      "shell": "ps51",
+      "source_harness_sha256": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e",
+      "manifest_sha256": "a9884c4d193190742829436ccb23e90f44bac633e380a00d126035f10415ed87",
+      "prefix": "",
+      "shape": null,
+      "classification": "literal_data_PM01_positive_strictschema_PM02_negative",
+      "credited_semantic_kill": false
+    },
+    "literal-en-US-ps7": {
+      "rc": 1,
+      "report": {
+        "schema": "proxima_manifest_tests.v1",
+        "ps_version": "7.6.9",
+        "ps_edition": "Core",
+        "culture": "en-US",
+        "ui_culture": "en-US",
+        "launch": {
+          "exe": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+          "command_line": "\"C:\\Program Files\\PowerShell\\7\\pwsh.dll\" -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned -File C:\\tl-win\\wp1296-H2-literals-remaining\\harness\\literal-en-US-ps7.ps1",
+          "execution_policy_preference": "RemoteSigned",
+          "repository": null
+        },
+        "addon_root": "C:\\tl-win\\wp1296-H2-literals-remaining\\scratch\\literal-en-US-ps7\\addon",
+        "harness_sha256": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e",
+        "git_head": "not_measured (no git in harness; the operator records H/tree)",
+        "source_hashes": {
+          "SKILL.md": "7d4dfd01706991d7d3475d0829583aac53d216d5c68c12e1b44bffb9f3ac6fb1",
+          "config.example.json": "ddc7a15c729c579ec0d068912a8880da5ad4c0ed6e9826ba1ba60088abe1fa92",
+          "scripts/ProximaConfig.psm1": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d",
+          "scripts/ProximaControl.psd1": "a9884c4d193190742829436ccb23e90f44bac633e380a00d126035f10415ed87",
+          "scripts/ProximaControl.psm1": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+          "scripts/Run-Px.ps1": "03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354",
+          "tests/ProximaConfig.Tests.ps1": "ee3bc46e89cadbba56373570c6aa4ae244e997e7789240f0f1e25c5ac0031ded",
+          "tests/ProximaControl.Tests.ps1": "75b565e50cebf73f2a1a8a9787e0b8d35fe239db928253ba5c66fcde7ee1121b",
+          "tests/ProximaManifest.Tests.ps1": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e"
+        },
+        "manifest_state": "present",
+        "skill_state": "present",
+        "setup_error": null,
+        "required_ids": [
+          "PM01",
+          "PM02",
+          "PM03",
+          "PM04",
+          "PM05",
+          "PM06",
+          "PM07"
+        ],
+        "total": 7,
+        "passed": 3,
+        "failed_ids": [
+          "PM02",
+          "PM03",
+          "PM04",
+          "PM06"
+        ],
+        "setup_error_ids": [],
+        "runtime_children": 0,
+        "tamper": null,
+        "cases": [
+          {
+            "id": "PM01",
+            "outcome": "passed",
+            "reason": null,
+            "detail": "plain unnamed end block with exactly one hashtable data expression; SafeGetValue accepted"
+          },
+          {
+            "id": "PM02",
+            "outcome": "failed",
+            "reason": "VALUE[RootModule]",
+            "detail": null
+          },
+          {
+            "id": "PM03",
+            "outcome": "failed",
+            "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+            "detail": null
+          },
+          {
+            "id": "PM04",
+            "outcome": "failed",
+            "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+            "detail": null
+          },
+          {
+            "id": "PM05",
+            "outcome": "passed",
+            "reason": null,
+            "detail": "name/description; version 2.0.0 in frontmatter and Versions (both directions); six headings; three version domains; 7 placeholder targets"
+          },
+          {
+            "id": "PM06",
+            "outcome": "failed",
+            "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+            "detail": null
+          },
+          {
+            "id": "PM07",
+            "outcome": "passed",
+            "reason": null,
+            "detail": "optional/excluded publication stated; 10 example lines valid; file refs resolve; 9 add-on files byte-identical before/after"
+          }
+        ],
+        "children": [],
+        "counterexamples": [],
+        "evidence": {
+          "dir": "C:\\tl-win\\wp1296-H2-literals-remaining\\scratch\\literal-en-US-ps7\\pm-20261109T074722Z-ed7f7a50",
+          "artifacts": [],
+          "check": {
+            "status": "ok",
+            "verified": 0,
+            "errors": [],
+            "scope": "own + nested CX artifacts, after all cases"
+          }
+        },
+        "cleanup": {
+          "status": "ok",
+          "policy": "retain_all: this run deletes nothing; evidence is re-hashed instead",
+          "deleted": 0,
+          "retained_dir": "C:\\tl-win\\wp1296-H2-literals-remaining\\scratch\\literal-en-US-ps7\\pm-20261109T074722Z-ed7f7a50"
+        }
+      },
+      "parser": {
+        "culture": "en-US",
+        "PSVersion": "7.6.9",
+        "errors": [],
+        "requirements": null,
+        "api_members": [
+          "RequiredApplicationId",
+          "RequiredPSVersion",
+          "RequiredPSEditions",
+          "RequiredModules",
+          "RequiredAssemblies",
+          "IsElevationRequired"
+        ]
+      },
+      "culture": "en-US",
+      "shell": "ps7",
+      "source_harness_sha256": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e",
+      "manifest_sha256": "a9884c4d193190742829436ccb23e90f44bac633e380a00d126035f10415ed87",
+      "prefix": "",
+      "shape": null,
+      "classification": "literal_data_PM01_positive_strictschema_PM02_negative",
+      "credited_semantic_kill": false
+    },
+    "literal-tr-TR-ps7": {
+      "rc": 1,
+      "report": {
+        "schema": "proxima_manifest_tests.v1",
+        "ps_version": "7.6.9",
+        "ps_edition": "Core",
+        "culture": "tr-TR",
+        "ui_culture": "tr-TR",
+        "launch": {
+          "exe": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+          "command_line": "\"C:\\Program Files\\PowerShell\\7\\pwsh.dll\" -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned -File C:\\tl-win\\wp1296-H2-literals-remaining\\harness\\literal-tr-TR-ps7.ps1",
+          "execution_policy_preference": "RemoteSigned",
+          "repository": null
+        },
+        "addon_root": "C:\\tl-win\\wp1296-H2-literals-remaining\\scratch\\literal-tr-TR-ps7\\addon",
+        "harness_sha256": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e",
+        "git_head": "not_measured (no git in harness; the operator records H/tree)",
+        "source_hashes": {
+          "SKILL.md": "7d4dfd01706991d7d3475d0829583aac53d216d5c68c12e1b44bffb9f3ac6fb1",
+          "config.example.json": "ddc7a15c729c579ec0d068912a8880da5ad4c0ed6e9826ba1ba60088abe1fa92",
+          "scripts/ProximaConfig.psm1": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d",
+          "scripts/ProximaControl.psd1": "a9884c4d193190742829436ccb23e90f44bac633e380a00d126035f10415ed87",
+          "scripts/ProximaControl.psm1": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+          "scripts/Run-Px.ps1": "03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354",
+          "tests/ProximaConfig.Tests.ps1": "ee3bc46e89cadbba56373570c6aa4ae244e997e7789240f0f1e25c5ac0031ded",
+          "tests/ProximaControl.Tests.ps1": "75b565e50cebf73f2a1a8a9787e0b8d35fe239db928253ba5c66fcde7ee1121b",
+          "tests/ProximaManifest.Tests.ps1": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e"
+        },
+        "manifest_state": "present",
+        "skill_state": "present",
+        "setup_error": null,
+        "required_ids": [
+          "PM01",
+          "PM02",
+          "PM03",
+          "PM04",
+          "PM05",
+          "PM06",
+          "PM07"
+        ],
+        "total": 7,
+        "passed": 3,
+        "failed_ids": [
+          "PM02",
+          "PM03",
+          "PM04",
+          "PM06"
+        ],
+        "setup_error_ids": [],
+        "runtime_children": 0,
+        "tamper": null,
+        "cases": [
+          {
+            "id": "PM01",
+            "outcome": "passed",
+            "reason": null,
+            "detail": "plain unnamed end block with exactly one hashtable data expression; SafeGetValue accepted"
+          },
+          {
+            "id": "PM02",
+            "outcome": "failed",
+            "reason": "VALUE[RootModule]",
+            "detail": null
+          },
+          {
+            "id": "PM03",
+            "outcome": "failed",
+            "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+            "detail": null
+          },
+          {
+            "id": "PM04",
+            "outcome": "failed",
+            "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+            "detail": null
+          },
+          {
+            "id": "PM05",
+            "outcome": "passed",
+            "reason": null,
+            "detail": "name/description; version 2.0.0 in frontmatter and Versions (both directions); six headings; three version domains; 7 placeholder targets"
+          },
+          {
+            "id": "PM06",
+            "outcome": "failed",
+            "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+            "detail": null
+          },
+          {
+            "id": "PM07",
+            "outcome": "passed",
+            "reason": null,
+            "detail": "optional/excluded publication stated; 10 example lines valid; file refs resolve; 9 add-on files byte-identical before/after"
+          }
+        ],
+        "children": [],
+        "counterexamples": [],
+        "evidence": {
+          "dir": "C:\\tl-win\\wp1296-H2-literals-remaining\\scratch\\literal-tr-TR-ps7\\pm-20261109T074723Z-02de4d30",
+          "artifacts": [],
+          "check": {
+            "status": "ok",
+            "verified": 0,
+            "errors": [],
+            "scope": "own + nested CX artifacts, after all cases"
+          }
+        },
+        "cleanup": {
+          "status": "ok",
+          "policy": "retain_all: this run deletes nothing; evidence is re-hashed instead",
+          "deleted": 0,
+          "retained_dir": "C:\\tl-win\\wp1296-H2-literals-remaining\\scratch\\literal-tr-TR-ps7\\pm-20261109T074723Z-02de4d30"
+        }
+      },
+      "parser": {
+        "culture": "tr-TR",
+        "PSVersion": "7.6.9",
+        "errors": [],
+        "requirements": null,
+        "api_members": [
+          "RequiredApplicationId",
+          "RequiredPSVersion",
+          "RequiredPSEditions",
+          "RequiredModules",
+          "RequiredAssemblies",
+          "IsElevationRequired"
+        ]
+      },
+      "culture": "tr-TR",
+      "shell": "ps7",
+      "source_harness_sha256": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e",
+      "manifest_sha256": "a9884c4d193190742829436ccb23e90f44bac633e380a00d126035f10415ed87",
+      "prefix": "",
+      "shape": null,
+      "classification": "literal_data_PM01_positive_strictschema_PM02_negative",
+      "credited_semantic_kill": false
+    },
+    "literal-az-Latn-AZ-ps7": {
+      "rc": 1,
+      "report": {
+        "schema": "proxima_manifest_tests.v1",
+        "ps_version": "7.6.9",
+        "ps_edition": "Core",
+        "culture": "az-Latn-AZ",
+        "ui_culture": "az-Latn-AZ",
+        "launch": {
+          "exe": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+          "command_line": "\"C:\\Program Files\\PowerShell\\7\\pwsh.dll\" -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned -File C:\\tl-win\\wp1296-H2-literals-remaining\\harness\\literal-az-Latn-AZ-ps7.ps1",
+          "execution_policy_preference": "RemoteSigned",
+          "repository": null
+        },
+        "addon_root": "C:\\tl-win\\wp1296-H2-literals-remaining\\scratch\\literal-az-Latn-AZ-ps7\\addon",
+        "harness_sha256": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e",
+        "git_head": "not_measured (no git in harness; the operator records H/tree)",
+        "source_hashes": {
+          "SKILL.md": "7d4dfd01706991d7d3475d0829583aac53d216d5c68c12e1b44bffb9f3ac6fb1",
+          "config.example.json": "ddc7a15c729c579ec0d068912a8880da5ad4c0ed6e9826ba1ba60088abe1fa92",
+          "scripts/ProximaConfig.psm1": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d",
+          "scripts/ProximaControl.psd1": "a9884c4d193190742829436ccb23e90f44bac633e380a00d126035f10415ed87",
+          "scripts/ProximaControl.psm1": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+          "scripts/Run-Px.ps1": "03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354",
+          "tests/ProximaConfig.Tests.ps1": "ee3bc46e89cadbba56373570c6aa4ae244e997e7789240f0f1e25c5ac0031ded",
+          "tests/ProximaControl.Tests.ps1": "75b565e50cebf73f2a1a8a9787e0b8d35fe239db928253ba5c66fcde7ee1121b",
+          "tests/ProximaManifest.Tests.ps1": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e"
+        },
+        "manifest_state": "present",
+        "skill_state": "present",
+        "setup_error": null,
+        "required_ids": [
+          "PM01",
+          "PM02",
+          "PM03",
+          "PM04",
+          "PM05",
+          "PM06",
+          "PM07"
+        ],
+        "total": 7,
+        "passed": 3,
+        "failed_ids": [
+          "PM02",
+          "PM03",
+          "PM04",
+          "PM06"
+        ],
+        "setup_error_ids": [],
+        "runtime_children": 0,
+        "tamper": null,
+        "cases": [
+          {
+            "id": "PM01",
+            "outcome": "passed",
+            "reason": null,
+            "detail": "plain unnamed end block with exactly one hashtable data expression; SafeGetValue accepted"
+          },
+          {
+            "id": "PM02",
+            "outcome": "failed",
+            "reason": "VALUE[RootModule]",
+            "detail": null
+          },
+          {
+            "id": "PM03",
+            "outcome": "failed",
+            "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+            "detail": null
+          },
+          {
+            "id": "PM04",
+            "outcome": "failed",
+            "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+            "detail": null
+          },
+          {
+            "id": "PM05",
+            "outcome": "passed",
+            "reason": null,
+            "detail": "name/description; version 2.0.0 in frontmatter and Versions (both directions); six headings; three version domains; 7 placeholder targets"
+          },
+          {
+            "id": "PM06",
+            "outcome": "failed",
+            "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+            "detail": null
+          },
+          {
+            "id": "PM07",
+            "outcome": "passed",
+            "reason": null,
+            "detail": "optional/excluded publication stated; 10 example lines valid; file refs resolve; 9 add-on files byte-identical before/after"
+          }
+        ],
+        "children": [],
+        "counterexamples": [],
+        "evidence": {
+          "dir": "C:\\tl-win\\wp1296-H2-literals-remaining\\scratch\\literal-az-Latn-AZ-ps7\\pm-20261109T074724Z-f8fe7b1d",
+          "artifacts": [],
+          "check": {
+            "status": "ok",
+            "verified": 0,
+            "errors": [],
+            "scope": "own + nested CX artifacts, after all cases"
+          }
+        },
+        "cleanup": {
+          "status": "ok",
+          "policy": "retain_all: this run deletes nothing; evidence is re-hashed instead",
+          "deleted": 0,
+          "retained_dir": "C:\\tl-win\\wp1296-H2-literals-remaining\\scratch\\literal-az-Latn-AZ-ps7\\pm-20261109T074724Z-f8fe7b1d"
+        }
+      },
+      "parser": {
+        "culture": "az-Latn-AZ",
+        "PSVersion": "7.6.9",
+        "errors": [],
+        "requirements": null,
+        "api_members": [
+          "RequiredApplicationId",
+          "RequiredPSVersion",
+          "RequiredPSEditions",
+          "RequiredModules",
+          "RequiredAssemblies",
+          "IsElevationRequired"
+        ]
+      },
+      "culture": "az-Latn-AZ",
+      "shell": "ps7",
+      "source_harness_sha256": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e",
+      "manifest_sha256": "a9884c4d193190742829436ccb23e90f44bac633e380a00d126035f10415ed87",
+      "prefix": "",
+      "shape": null,
+      "classification": "literal_data_PM01_positive_strictschema_PM02_negative",
+      "credited_semantic_kill": false
+    }
+  },
+  "commands": [
+    {
+      "label": "host-before",
+      "command": [
+        "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "-NoProfile",
+        "-NonInteractive",
+        "-Command",
+        "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';$env:PSModulePath=(Join-Path $PSHOME 'Modules')+';C:\\Program Files\\WindowsPowerShell\\Modules';[pscustomobject]@{host=$env:COMPUTERNAME;service=@(Get-CimInstance Win32_Service -Filter \"Name='ProximaGateway'\").Count;process=@(Get-CimInstance Win32_Process -Filter \"Name='Proxima.exe'\").Count;python=@(Get-CimInstance Win32_Process -Filter \"Name='python.exe'\"|Select-Object ProcessId,ParentProcessId,CreationDate,ExecutablePath);policy=@(Get-ExecutionPolicy -List)}|ConvertTo-Json -Depth 5 -Compress"
+      ],
+      "rc": 0,
+      "seconds": 0.578,
+      "log_sha256": "6c52c6c864553f98d3ca4a48d547d62e35d3ff8e47ad45af068e5ebcf6f7063a"
+    },
+    {
+      "label": "literal-tr-TR-ps51",
+      "command": [
+        "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "C:\\tl-win\\wp1296-H2-literals-remaining\\harness\\literal-tr-TR-ps51.ps1"
+      ],
+      "rc": 1,
+      "seconds": 1.125,
+      "log_sha256": "c4864129565de52b9db478bb4e4b37f16a0e19951dd10ae5e07a988192b8af59"
+    },
+    {
+      "label": "literal-az-Latn-AZ-ps51",
+      "command": [
+        "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "C:\\tl-win\\wp1296-H2-literals-remaining\\harness\\literal-az-Latn-AZ-ps51.ps1"
+      ],
+      "rc": 1,
+      "seconds": 1.047,
+      "log_sha256": "c4864129565de52b9db478bb4e4b37f16a0e19951dd10ae5e07a988192b8af59"
+    },
+    {
+      "label": "literal-en-US-ps7",
+      "command": [
+        "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "C:\\tl-win\\wp1296-H2-literals-remaining\\harness\\literal-en-US-ps7.ps1"
+      ],
+      "rc": 1,
+      "seconds": 1.296,
+      "log_sha256": "921229d8a6b764ddcc1950d2ebda3b86da25452a5077fa9dbb33ded0a545b3fa"
+    },
+    {
+      "label": "literal-tr-TR-ps7",
+      "command": [
+        "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "C:\\tl-win\\wp1296-H2-literals-remaining\\harness\\literal-tr-TR-ps7.ps1"
+      ],
+      "rc": 1,
+      "seconds": 1.031,
+      "log_sha256": "921229d8a6b764ddcc1950d2ebda3b86da25452a5077fa9dbb33ded0a545b3fa"
+    },
+    {
+      "label": "literal-az-Latn-AZ-ps7",
+      "command": [
+        "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "C:\\tl-win\\wp1296-H2-literals-remaining\\harness\\literal-az-Latn-AZ-ps7.ps1"
+      ],
+      "rc": 1,
+      "seconds": 1.016,
+      "log_sha256": "921229d8a6b764ddcc1950d2ebda3b86da25452a5077fa9dbb33ded0a545b3fa"
+    },
+    {
+      "label": "host-after",
+      "command": [
+        "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "-NoProfile",
+        "-NonInteractive",
+        "-Command",
+        "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';$env:PSModulePath=(Join-Path $PSHOME 'Modules')+';C:\\Program Files\\WindowsPowerShell\\Modules';[pscustomobject]@{host=$env:COMPUTERNAME;service=@(Get-CimInstance Win32_Service -Filter \"Name='ProximaGateway'\").Count;process=@(Get-CimInstance Win32_Process -Filter \"Name='Proxima.exe'\").Count;python=@(Get-CimInstance Win32_Process -Filter \"Name='python.exe'\"|Select-Object ProcessId,ParentProcessId,CreationDate,ExecutablePath);policy=@(Get-ExecutionPolicy -List)}|ConvertTo-Json -Depth 5 -Compress"
+      ],
+      "rc": 0,
+      "seconds": 0.422,
+      "log_sha256": "6c52c6c864553f98d3ca4a48d547d62e35d3ff8e47ad45af068e5ebcf6f7063a"
+    }
+  ],
+  "originals_unchanged": true,
+  "passed": true,
+  "literal_schema_supplement_only": true,
+  "not_full7_positive_or_semantic_kill": true,
+  "carried_first_run_archive": "a83e932f656b7d54c275704ba947f889f393b89fdea1725a644d1659be4121d1",
+  "AUX1_oracle_disposition": "inert_legacy_control",
+  "no_network_inference_activation": true,
+  "finished": "2026-11-09T07:47:25.952267+00:00"
+}

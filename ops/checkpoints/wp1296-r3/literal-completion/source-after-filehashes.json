@@ -1,0 +1,24 @@
+{
+  "base": {
+    ".agents/skills/proxima-control/config.example.json": "ddc7a15c729c579ec0d068912a8880da5ad4c0ed6e9826ba1ba60088abe1fa92",
+    ".agents/skills/proxima-control/SKILL.md": "7d4dfd01706991d7d3475d0829583aac53d216d5c68c12e1b44bffb9f3ac6fb1",
+    ".agents/skills/proxima-control/scripts/ProximaConfig.psm1": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d",
+    ".agents/skills/proxima-control/scripts/ProximaControl.psd1": "0c76190d73e2126e2de69185020607f04ef0fb5507836bee211ebdc5d8f2bab6",
+    ".agents/skills/proxima-control/scripts/ProximaControl.psm1": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+    ".agents/skills/proxima-control/scripts/Run-Px.ps1": "03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354",
+    ".agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1": "ee3bc46e89cadbba56373570c6aa4ae244e997e7789240f0f1e25c5ac0031ded",
+    ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1": "75b565e50cebf73f2a1a8a9787e0b8d35fe239db928253ba5c66fcde7ee1121b",
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1": "f230c95b1f36b558b2f58439f8ea64cc6f77a876c1d74cc8c9baf1634cc9f864"
+  },
+  "candidate": {
+    ".agents/skills/proxima-control/config.example.json": "ddc7a15c729c579ec0d068912a8880da5ad4c0ed6e9826ba1ba60088abe1fa92",
+    ".agents/skills/proxima-control/SKILL.md": "7d4dfd01706991d7d3475d0829583aac53d216d5c68c12e1b44bffb9f3ac6fb1",
+    ".agents/skills/proxima-control/scripts/ProximaConfig.psm1": "59abfa860e59af7c596a9e3f60829f8dc1af4a853c5d4ac197c00cc033d76e7d",
+    ".agents/skills/proxima-control/scripts/ProximaControl.psd1": "0c76190d73e2126e2de69185020607f04ef0fb5507836bee211ebdc5d8f2bab6",
+    ".agents/skills/proxima-control/scripts/ProximaControl.psm1": "527734a060678f11c95b91c84a36b147f9f5faba0de4a0ff60e8874576f4f668",
+    ".agents/skills/proxima-control/scripts/Run-Px.ps1": "03f99881494329cea213714b5e603d83776a7fb57bb153e1a4431d4acc479354",
+    ".agents/skills/proxima-control/tests/ProximaConfig.Tests.ps1": "ee3bc46e89cadbba56373570c6aa4ae244e997e7789240f0f1e25c5ac0031ded",
+    ".agents/skills/proxima-control/tests/ProximaControl.Tests.ps1": "75b565e50cebf73f2a1a8a9787e0b8d35fe239db928253ba5c66fcde7ee1121b",
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e"
+  }
+}

@@ -15,7 +15,7 @@ Inherit R23 metadata4fec7dd379b97a29b9653d2c9ae7aaf350240847/specSHA2569238b10a6
 
 The following exact immutable proposal defines the requested successor scope; its original PROPOSED status does not substitute for a later real owner decision.
 
-# C15-J — một lượt source18 cuối để xử lý P2 và hai lỗi CI thực tế
+# C15-J2 — một lượt source18 cuối để xử lý P2 và hai lỗi CI thực tế
 
 PROPOSED, chưa duyệt/kích hoạt. Gói I đã được duyệt và công bố đúng payload sau PR1301; source17 và reviewA đã kết thúc. Không xin lại Codex medium/Codex high, source18 ceiling, CI16, M9three-runs24h, Windows18runs95min hoặc quyền normal merge có điều kiện. Các phần mới hữu hạn dưới đây cần quyết định cụ thể vì I chỉ cho sửa một dòng protocol và đã yêu cầu dừng khi có P0–P2.
 
@@ -49,7 +49,7 @@ Fresh manual OFFLINE bootstrap source18 chỉ sau actual canonical init result (
 
 Review cap **38→39**: đã dùng34, cần đúng5 fresh independent Codexhigh A–D≤15/E≤10 sequential trên final head mới và readonly clone riêng. Còn4 slot củaI giữ lịch sử, không đủ composite5; chỉ tăng1. Role cap67 không đổi: source18+review39+connector7+canary1+scratch2=67. Không reuse A changes_requested hoặc approvals0efc/C14 cho head mới; không sixth review/retry. Fresh toàn normative/whole-diff/interfaces/original findings/P3, measured EOF/union; P0–P2/incomplete=>checkpoint.
 
-Cloud cap **3300→3450phút**, hard **2026-11-09T22:25:32Z→2026-11-10T00:55:32Z** (07:55:32 ngày10/11 giờ Việt Nam). Clock51+ceil((nowUTC−2026-11-07T16:17:24Z)/60), mọi wait/lỗi/user-turn gap/history vẫn tính, không refund/reset/paid purchase. Tại 2026-11-09T11:21:46.936149+00:00, used2636; fresh complete reserve762, forecast3398/3450. Reserve: source45+local65+review70+Windows17+candidateCI180+postmergeCI180+M9queue60+connector30+canary10+bookkeeping15+metadata/VMprep30=762. Phải đo lại trước actual admission; không giản lược CI180 để làm vừa kế hoạch.
+Cloud cap **3300→3540phút**, hard **2026-11-09T22:25:32Z→2026-11-10T02:25:32Z** (09:25:32 ngày10/11 giờ Việt Nam). Clock51+ceil((nowUTC−2026-11-07T16:17:24Z)/60), mọi wait/lỗi/user-turn gap/history vẫn tính, không refund/reset/paid purchase. Tại 2026-11-09T11:21:46.936149+00:00, used2636; fresh complete reserve762, forecast3398/3450. Reserve: source45+local65+review70+Windows17+candidateCI180+postmergeCI180+M9queue60+connector30+canary10+bookkeeping15+metadata/VMprep30=762. Phải đo lại trước actual admission; không giản lược CI180 để làm vừa kế hoạch.
 
 Theo chỉ thị mới “chạy trên VM xem”: ưu tiên VM thường tlcommander cho một fresh focused13 baseline≤10/candidate≤7 pair trên finalH mới, cùng full-history normal clone/sparse materialization đã công bố scope, frozen runner/comparator/inventory, raw platform unit. Actual VM probe: usertlcommander/non-elevated, global C:\tl-win\KHOA.txt rỗng nhưng ownerAdministrators/Users ReadAndExecute; mở ReadWrite bị UnauthorizedAccess. Không phải attribute ReadOnly hoặc sharing; không test Windows mới nào được chạy. ASUSoffline/T9elevated được giữ là route constraints, không acceptance.
 
@@ -64,3 +64,9 @@ CI13/16; M9used2/3 và8.525/24h; connector6/7; Windows13/18 và77.87972841666668
 Sau fresh5reviews/full local/Windows/readback, cho source-only delegated audit/exact-newH P3 owner disposition và explicit K4 owner alternative nhưI, actual canonical K4 result ghi riêng, không native/HMAC/human/cross approval giả. K0/K1/K2/K3/K5/K6/K7 không waive. Public normal expected-old0efc→qualified newH, một final connector không manual+auto duplicate, actual newH CI/native84/fullmain/M9, expected-H normal merge/postmerge/readback/bookkeeping/lease closure; không Mission1172complete hoặc target enrollment/human/runtime activation/PR0–PR8.
 
 Để tránh hỏi lại công bố metadata, exact public body và immutable spec/Mission/lease commits được đóng gói cùng manifest củaJ, chỉ push/post sau actual owner approval của toàn bộ package; không credentials/deviceIDs/privatepaths/rawlogs/transcripts công khai. Các biên nhận actual head/run IDs/URLs sau này được ghi trong đúng refs/đích1174/1172/1275/1278, không bịa future outcomes/identity. Nếu auto-review chặn thì giữ rejection, không đi vòng.
+
+## J2 — cập nhật sau chuyển giao, chưa được duyệt
+
+Bản J gốc SHA256431a5e97d9137c79e8d6f9cf33d84c091bb97f26fd74348afb156d7d22fbeca5 và mọi commit/history giữ nguyên. Chỉ thay đề xuất cloud cap3450 bằng3540 và hard deadline bằng2026-11-10T02:25:32Z (09:25:32 Việt Nam). Các snapshot thời gian/forecast trong phần gốc là lịch sử. Tại 2026-11-09T12:19:19.037317+00:00, clock used2693; full reserve762; forecast3455/3540. Phần chênh còn lại là buffer hữu hạn cho quyết định/publication/preflight, không cho thêm source/review/CI/M9/Windows/connector, không retry hoặc tự gia hạn quá3540. Dừng trước admission nếu full-fit mất; không giảm bound gate.
+
+Chỉ thị mới của chủ kho ủy quyền coordinator tự làm copylist/checklist, đăng comment, gia hạn và hoàn tất các bước trong scope đã duyệt mà không xin lại từng thao tác. Chỉ thị đó không được tự ghi thành phê duyệt con số3540 hoặc ngoại lệ VM. Cần một quyết định rõ cho toàn bộ gói J2; sau đó các thao tác công bố, normal push/fast-forward metadata và lease, heartbeat/gia hạn trong hard deadline, exact-head conditional merge/land/bookkeeping thực hiện theo gate, không hỏi lại quyền chung. Nội dung còn lại của J giữ nguyên, bao gồm source18 cuối, review39,6750 additions, ngoại lệ VM chỉ hai file scheduling/nonsecret metadata và mọi project/test ordinary non-elevated.

@@ -25,11 +25,11 @@ authority_url: https://github.com/ducthangho/tra-luat/issues/1174
 recorded_by: Codex coordinator under explicit E2 owner delegation; no actual-human
   audit
 spec_path: ops/specs/wp1174-implementation-r24.md
-spec_hash: 0af52d8c45a0b0772adfcea002fc94b3b65881b68d76a0d226264a45cf376ac4
-spec_sha256_required: 0af52d8c45a0b0772adfcea002fc94b3b65881b68d76a0d226264a45cf376ac4
-spec_ref: refs/heads/ops/spec-wp1174-r24@529bd7262791babfabeed710a513770586f02dbd
+spec_hash: 7fdb763ccb23944e9e3d32fa0bac9463cd4c83a2b04b575ac72caac6782bd661
+spec_sha256_required: 7fdb763ccb23944e9e3d32fa0bac9463cd4c83a2b04b575ac72caac6782bd661
+spec_ref: refs/heads/ops/spec-wp1174-r24@f72b8bf02f86edf9307ef16710a737b1dcfb53fe
 prompt_path: ops/specs/wp1174-implementation-r24.md
-prompt_sha256_required: 0af52d8c45a0b0772adfcea002fc94b3b65881b68d76a0d226264a45cf376ac4
+prompt_sha256_required: 7fdb763ccb23944e9e3d32fa0bac9463cd4c83a2b04b575ac72caac6782bd661
 base_sha: 5ad99bb58c5d48eed1543e62298176d014f85ed8
 start_from_sha: 5ad99bb58c5d48eed1543e62298176d014f85ed8
 reviewed_sha_required: 5ad99bb58c5d48eed1543e62298176d014f85ed8
@@ -44,11 +44,11 @@ write_set_hash: 2f2c02976b0efd78e041a75028c378034be7d7bfef409817ad3adcafb1cf055c
 change_policy_sha: null
 change_policy_exception:
   id: WP1174-J-R24-POSTIMAGE-CI-RECOVERY
-  decision: proposed_pending_exact_J
+  decision: proposed_pending_exact_J2
   owner: ducthangho
   reason: Complete verified source policy, safe V3 diagnostics and deterministic test
     expiry; preserve all P1/P2
-  expires_at: '2026-11-10T00:55:32Z'
+  expires_at: '2026-11-10T02:25:32Z'
   scope: Same five source paths/6750 added lines; only product/test for three named
     defects; protocol/design/R17 frozen
   effective_write_set: *id001
@@ -92,11 +92,11 @@ change_policy_exception:
   - unknown=>blocked
 leased_at_utc: '2026-11-09T11:25:07.032862+00:00'
 heartbeat_at: '2026-11-09T11:25:07.032862+00:00'
-lease_until: '2026-11-10T00:55:32Z'
-lease_expires_at_utc: '2026-11-10T00:55:32Z'
+lease_until: '2026-11-10T02:25:32Z'
+lease_expires_at_utc: '2026-11-10T02:25:32Z'
 heartbeat_required_minutes: 360
 max_lease_hours: 24
-hard_not_after: '2026-11-10T00:55:32Z'
+hard_not_after: '2026-11-10T02:25:32Z'
 nang_tran:
   ai_nang: ducthangho under recorded delegation
   can_cu: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6728589869
@@ -119,8 +119,8 @@ template_only: false
 guard: 'Proposed J only: no source18 until exact actual owner/public activation/HDR/secret/head/runtime/full-fit;
   fresh source18<=45min, product/test three named defects only; source17/A terminal;
   no source19 or fake journal/native/human approval'
-spec_source_oid: 529bd7262791babfabeed710a513770586f02dbd
-spec_sha256: 0af52d8c45a0b0772adfcea002fc94b3b65881b68d76a0d226264a45cf376ac4
+spec_source_oid: f72b8bf02f86edf9307ef16710a737b1dcfb53fe
+spec_sha256: 7fdb763ccb23944e9e3d32fa0bac9463cd4c83a2b04b575ac72caac6782bd661
 exception_approval_comment_url: https://github.com/ducthangho/tra-luat/issues/1174
 reviewer: codex
 pull_request: 1275
@@ -344,9 +344,9 @@ J_historical_inherited_fields:
     only after fresh A–E/local/Windows/readback; actual canonical K4 result separately
     retained; no actual-human/native claim; other mandatory gates unchanged
 J_proposed_activation:
-  proposal_sha256: 431a5e97d9137c79e8d6f9cf33d84c091bb97f26fd74348afb156d7d22fbeca5
-  public_body_sha256: 51bed1384519ffc8045241e6135e4915ae65602a846810c6263863980294fade
-  checkpoint_metadata_oid: 529bd7262791babfabeed710a513770586f02dbd
+  proposal_sha256: efd565cd2178ae6c3d61262e4098ff3bcab36fac211f58a96244913ef8c6f6a6
+  public_body_sha256: da52cc0d3a510e5325d0a860357f1dfc79656051e6d4f99a49fd1c925f377a32
+  checkpoint_metadata_oid: f72b8bf02f86edf9307ef16710a737b1dcfb53fe
   source_slot: 18
   source_max_minutes: 45
   source17_closed: true
@@ -359,9 +359,9 @@ J_proposed_activation:
   actual_owner_approval_and_public_readback_required: true
   no_dispatch_yet: true
 approved_time_envelope:
-  state: proposed_J_not_active
-  cloud_cap_minutes: 3450
-  hard_deadline: '2026-11-10T00:55:32Z'
+  state: proposed_J2_not_active
+  cloud_cap_minutes: 3540
+  hard_deadline: '2026-11-10T02:25:32Z'
   original_clock: 51+ceil((nowUTC-2026-11-07T16:17:24Z)/60)
   all_prior_costs_retained: true
   mandatory_reserve: 762

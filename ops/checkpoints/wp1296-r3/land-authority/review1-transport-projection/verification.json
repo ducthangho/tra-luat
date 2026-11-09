@@ -1,0 +1,11 @@
+{
+  "at": "2026-11-09T09:35:10.736082+00:00",
+  "original_run_sha256": "4e61476600332d2e0cfb37f892e445dd63e72852b3d539522f6185268fc30272",
+  "original_stdout_sha256": "f030bb10379400b965578b32e0ba9d02a4abec84b6349d2ed1720dc46c011d3d",
+  "original_verdict_sha256": "8707361a844ed56f276e8b90b2fd66d93fa9fb9171dd2af61bbeffbcc1a61fa9",
+  "JSON_final_agentmessage_matches_original_lastmessage_bytes": true,
+  "originalrun_andstdout_untouched": true,
+  "actualreview_beforepush": true,
+  "not_human_only_K4": true,
+  "actualhuman_supplemental_source": "https://github.com/ducthangho/tra-luat/pull/1301#issuecomment-6736642798"
+}

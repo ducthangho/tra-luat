@@ -1,0 +1,32 @@
+{
+  "at": "2026-11-09T09:27:39.929927+00:00",
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+  "spec_sha256": "780a5fa9b7cf86ec277e734bbbd43c9d1ef153b4750227ae173987a192fb39c4",
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "approve",
+  "owner_quote_verbatim": "Tôi approve cả 2 trục, hãy đăng cho tôi.",
+  "comment": "https://github.com/ducthangho/tra-luat/pull/1301#issuecomment-6736642798",
+  "comment_id": 6736642798,
+  "body_exact_readback": true,
+  "actual_github_submitter": "ducthangho",
+  "human_auditor": "ducthangho",
+  "recorded_by": "Codex dispatcher under explicit user instruction",
+  "primary_prepush_M5": "existing actual independent Codex CLI approval, not postpushhumanbackdated",
+  "new_model_calls": 0,
+  "ready": false,
+  "merged": false,
+  "landed": false,
+  "receipt_commit": "5d77077f8bf1f099a5260b987cf9c38645c0eb16",
+  "receipt_path": "ops/reviews/wp1296-r3-human2.receipt.yaml",
+  "v2_rc": 0,
+  "formal_total_including_human": 2,
+  "formal_cap": 2,
+  "human_audits_used": 1,
+  "assurance": "human_audited",
+  "actual_reading_machine_observed": false,
+  "primary_M5_CLI_pre_push_unchanged": true
+}

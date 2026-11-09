@@ -1,0 +1,24 @@
+{
+  "at": "2026-11-09T09:36:44.130581+00:00",
+  "owner_instruction_verbatim": "Hãy merge, land và ghi sổ",
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "target": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "method": "normal merge commit; noadmin/force/deletebranch",
+  "until": "2026-11-09T13:39:47Z",
+  "scope": [
+    "Ready onlyafterallgates+actualhumanreceipt+transportAUX6pass",
+    "actualReadyautomaticreviewterminal beforemerge",
+    "normalmergeexactH2intoB/currentunchangedmaster",
+    "actualMCI/originalartifact/fullsourceAUX8/fouranchors",
+    "M8postreadback/retirelease/close1296+1295/D1D4/Missionregister"
+  ],
+  "not_authorized": [
+    "LIVE/deploy/runtimeactivation",
+    "sourceedits",
+    "rulesetmutation",
+    "newmodel/codeauthor/reviewcalls outside retainedcaps",
+    "branch/worktreedelete"
+  ],
+  "primary_M5": "original actualCLIreview beforepush, losslessdataadapter inspected separately, human supplemental realcurrenttime notbackdated",
+  "fullrefsnapshot_sha256": "5bd2bf5da3ac6b1e45760c1527819b6203cd70b7c92fecc2a99832aa3c46a925"
+}

@@ -1,0 +1,22 @@
+{
+  "at": "2026-11-09T09:36:44.129039+00:00",
+  "call": 6,
+  "role": "Read-only independent provenance audit of lossless review JSON transport projection and preReady gate inputs, NOT another code review/formalround",
+  "deadline_minutes": 45,
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "sources": [
+    "review1-runs/c949f66c/run.json",
+    "review1-runs/c949f66c/stdout.log",
+    "review1-verdict.md",
+    "review1-transport-projection",
+    "land-final-inputs",
+    "owner-H2-human-delivery-binding.json"
+  ],
+  "outputs": [
+    "AUX6-transport-receipt.json",
+    "AUX6-transport-final.txt"
+  ],
+  "must_verify": "Originalreview BEFOREpush, exactactualsessionidentity/head/exit unchanged; rawstdout hash; finalcompletedagentmessage exactbytes equal original--output-last-messagefile; derived NOT originalrun, onlystdout_sha256+stdout_byte adapted for plaintext transport and explicit provenanceadded; no originalrewrite/backdate/newmodel or contentfabrication. CanonicalK0K7 actualrc0 and currentH2/fullsourceCI/actualhumanv2 bind sameH2. No actualhumanreadingmeasurement or primaryhuman-onlypostpush fallback claimed. Evaluate whether any sourcefact false/semanticverdict changed; STOP ifso.",
+  "no_actions": "No newtests/network/models/subagents/Git/productwrites. Only assigned two scratchoutputs.",
+  "budget_reallocation": "Within sharedcap8 unchanged: AUX6 consumes formerreserve; Readyauto7 ifactuallystarts; MCIaudit8. FormalCLI1+human1=2/2 unchanged; author2/2/push1/1. No further ordinarycalls."
+}

@@ -1,8 +1,11 @@
 {
   "initial_check_rc": 8,
-  "initial_declared_transport": "machine",
-  "actual_transport": "local",
-  "reason": "Canonical Claude runtime capability contract allows local, not machine; correct declaration to actual local CLI. No permissions/trust/model/policy changed.",
+  "initial_declared_transport": [
+    "machine",
+    "local"
+  ],
+  "actual_transport": "machine/local",
+  "reason": "Canonical Claude runtime capability contract requires the literal machine/local; correct declaration to actual local CLI. No permissions/trust/model/policy changed.",
   "first_failure_log": "S3-g8-lease-check.json",
   "actual_model_invoked": false
 }

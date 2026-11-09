@@ -18,7 +18,7 @@ environment: linux
 reviewer: claude
 reviewer_model_family: anthropic
 reviewer_execution_surface: claude_code
-reviewer_transport: local
+reviewer_transport: machine/local
 risk: sensitive
 access: read-only
 review_class: sensitive

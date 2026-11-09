@@ -33,6 +33,54 @@ function Add-Artifact([string]$Role, [string]$Path) { $Artifacts.Add([ordered]@{
 function Save-Text([string]$Role, [string]$Path, [string]$Text) { [IO.File]::WriteAllText($Path, $Text, $Utf8); Add-Artifact $Role $Path }
 # Property failures carry a marker; any other exception inside a case is a setup/runtime error (rc 2), never a test outcome.
 function Stop-Case([string]$Reason) { $e = [Exception]::new($Reason); $e.Data['pm'] = 1; throw $e }
+function Assert-NoScriptRequirements([ScriptBlockAst]$Block) {
+    # WP1296 / WP1285-R7-F01: requirements are parser metadata, not AST children or comment spelling.
+    # Feature-detect the API under StrictMode; a null object and an object containing only defaults are both inert.
+    $flags = [Reflection.BindingFlags]'Public, Instance'
+    $rp = $Block.GetType().GetProperty('ScriptRequirements', $flags)
+    if ($null -eq $rp -or -not $rp.CanRead -or $rp.GetIndexParameters().Length -ne 0 -or
+        $rp.PropertyType.FullName -cne 'System.Management.Automation.Language.ScriptRequirements') {
+        Stop-Case 'EXECUTABLE_STATEMENT: ScriptRequirements API unavailable or unsupported'
+    }
+    try { $requirements = $rp.GetValue($Block) }
+    catch { Stop-Case 'EXECUTABLE_STATEMENT: ScriptRequirements metadata unreadable' }
+    if ($null -ne $requirements -and $requirements.GetType() -ne $rp.PropertyType) {
+        Stop-Case 'EXECUTABLE_STATEMENT: ScriptRequirements metadata type unsupported'
+    }
+    # ShellId is exposed as RequiredApplicationId. Snap-ins and PSEditions are runtime-dependent APIs.
+    # Unknown members fail closed even when null: a new metadata kind needs an explicit default policy.
+    $fieldTypes = @{
+        RequiredApplicationId = [string]; RequiredPSVersion = [version]; IsElevationRequired = [bool]
+        RequiredAssemblies = [Collections.ICollection]; RequiredModules = [Collections.ICollection]
+        RequiredPSSnapIns = [Collections.ICollection]; RequiredPSEditions = [Collections.ICollection]
+    }
+    $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    if ($rp.PropertyType.GetFields($flags).Length) { Stop-Case 'EXECUTABLE_STATEMENT: ScriptRequirements unexpected public field' }
+    foreach ($pr in $rp.PropertyType.GetProperties($flags)) {
+        $name = $pr.Name
+        if (-not $fieldTypes.ContainsKey($name) -or -not $seen.Add($name) -or -not $pr.CanRead -or
+            $pr.GetIndexParameters().Length -ne 0) { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements unsupported member $name" }
+        $expected = $fieldTypes[$name]
+        if (-not $expected.IsAssignableFrom($pr.PropertyType)) { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements unsupported type for $name" }
+        if ($null -eq $requirements) { continue }
+        try { $value = $pr.GetValue($requirements) }
+        catch { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements unreadable member $name" }
+        if ($null -eq $value) {
+            if ($expected -eq [bool]) { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements invalid default for $name" }
+            continue
+        }
+        if (-not $expected.IsInstanceOfType($value)) { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements invalid value for $name" }
+        $meaningful = $true
+        if ($expected -eq [string]) { $meaningful = $value.Length -ne 0 }
+        elseif ($expected -eq [bool]) { $meaningful = $value }
+        elseif ($expected -eq [Collections.ICollection]) { $meaningful = $value.Count -ne 0 }
+        # Every non-null Version is a requirement, including 0.0; collection entries are never evaluated.
+        if ($meaningful) { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements.$name" }
+    }
+    foreach ($name in 'RequiredApplicationId', 'RequiredPSVersion', 'IsElevationRequired', 'RequiredAssemblies', 'RequiredModules') {
+        if (-not $seen.Contains($name)) { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements missing member $name" }
+    }
+}
 function Invoke-Case([string]$Id, [scriptblock]$Body) {
     $caseRec = [ordered]@{ id = $Id; outcome = 'passed'; reason = $null; detail = $null }
     try { $caseRec.detail = & $Body } catch { $caseRec.reason = "$($_.Exception.Message)"; $caseRec.outcome = $(if ($_.Exception.Data.Contains('pm')) { 'failed' } else { 'setup_error' }) }
@@ -176,13 +224,13 @@ if ($SkillPresent) { $Doc = Read-Skill $SkillPath; $DocCommands = @(Get-DocComma
 Invoke-Case 'PM01' {
     if (-not $ManifestPresent) { Stop-Case 'MANIFEST_ABSENT: scripts/ProximaControl.psd1' }
     $tk = $null; $er = $null; $ast = [Parser]::ParseFile($ManifestPath, [ref]$tk, [ref]$er); if (@($er).Count) { Stop-Case "PARSE_ERROR: $(@($er)[0].Message)" }
+    Assert-NoScriptRequirements $ast
     # WP1285-R1-F01: allow data nodes and child edges throughout the tree, before SafeGetValue. Reflection feature-detects PS7 properties on PS5.1.
     # All execution flags must be false except the root end block's Unnamed; comments and literal string characters are not executable structure.
     $shape = @{ ScriptBlockAst = @('EndBlock'); NamedBlockAst = @('Statements'); PipelineAst = @('PipelineElements')
         CommandExpressionAst = @('Expression'); HashtableAst = @('KeyValuePairs'); StatementBlockAst = @('Statements')
         ArrayExpressionAst = @('SubExpression'); ArrayLiteralAst = @('Elements'); StringConstantExpressionAst = @() }
-    if (@($tk | Where-Object { $_.Kind -eq [TokenKind]::Comment -and $_.Text -imatch '^#\s*requires' }).Count -or $null -eq $ast.EndBlock -or
-        -not $ast.EndBlock.Unnamed -or $ast.EndBlock.Traps) { Stop-Case 'EXECUTABLE_STATEMENT: requires/named block/trap' }
+    if ($null -eq $ast.EndBlock -or -not $ast.EndBlock.Unnamed -or $ast.EndBlock.Traps) { Stop-Case 'EXECUTABLE_STATEMENT: named block/trap' }
     foreach ($node in $ast.FindAll({ param($n) $true }, $true)) {
         $kind = $node.GetType().Name; if (-not $shape.ContainsKey($kind)) { Stop-Case "EXECUTABLE_STATEMENT: node $kind" }
         if ($node -is [PipelineAst] -and @($node.PipelineElements).Count -ne 1) { Stop-Case 'EXECUTABLE_STATEMENT: chained pipeline' }

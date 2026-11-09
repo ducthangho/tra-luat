@@ -1,0 +1,28 @@
+from common import *
+import fnmatch
+body=(W/'M8-body.md').read_text();assert not(W/'M8-post-intent.json').exists(),'Do not repeat post; inspect exactbody comments first'
+save(W/'M8-post-intent.json',{'at':now(),'body_sha256':hashlib.sha256(body.encode()).hexdigest(),'status':'attempting_once'});save(W/'M8-payload.json',{'body':body})
+raw=subprocess.check_output([GH,'api','--method','POST','repos/ducthangho/tra-luat/issues/1285/comments','--input',str(W/'M8-payload.json')],env=env,timeout=120);(W/'M8-post-result.raw.json').write_bytes(raw);posted=json.loads(raw);assert posted['body']==body
+readback=api(f'repos/ducthangho/tra-luat/issues/comments/{posted["id"]}');assert readback['body']==body and readback['user']['login']=='ducthangho';save(W/'M8-exact-readback.json',readback)
+subprocess.run([GIT,'-C',str(MIRROR),'fetch','--prune','origin','+refs/heads/*:refs/heads/*'],env=env,check=True,capture_output=True,timeout=900)
+remote=gitb('ls-remote','--heads','origin',repo=MIRROR);full=gitb('ls-remote','origin',repo=MIRROR);local={ref:oid for oid,ref in(l.split() for l in git('show-ref','--heads',repo=MIRROR).splitlines())};assert all(local.get(ref)==oid for oid,ref in(l.split() for l in remote.decode().splitlines()))
+lp=load_module('lp_final',P/'ops/lease_publish.py');rows=lp._quet_lease_toan_kho(MIRROR);tm=datetime.datetime.now(datetime.timezone.utc);matches=[]
+paths=['.agents/skills/proxima-control/scripts/ProximaControl.psd1','.agents/skills/proxima-control/SKILL.md','.agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1']
+for row in rows:
+ d=row['lease'];overlap=False
+ for p in paths:
+  for ent in d.get('write_set',[]) if isinstance(d.get('write_set'),list) else []:
+   if isinstance(ent,str):
+    q=ent.removeprefix('planned:').strip().replace(chr(92),'/');overlap|=q==p or(q.endswith('/') and p.startswith(q)) or('*' in q and fnmatch.fnmatchcase(p,q))
+   elif isinstance(ent,dict) and isinstance(ent.get('path'),str):
+    q=ent['path'].rstrip('/');overlap|=p==q or(ent.get('type')=='prefix' and p.startswith(q+'/'))
+ if overlap:
+  state=lp._phan_loai_lease(d,tm);ret=lp._bia_mo_doi_xung(d,rows) if state=='CÒN_HẠN' else None;assert ret is not False
+  matches.append({'lease_id':d.get('lease_id'),'ref':row['ref'],'blob':row['blob'],'state':state,'reciprocal_retired':ret,'active':state=='CÒN_HẠN' and ret is not True})
+assert not[x for x in matches if x['active']],matches
+subprocess.run([GIT,'-C',str(P),'fetch','origin','master'],env=env,check=True,capture_output=True,timeout=300)
+X=P/'ops/land/pr1294-wp1285-provenance';(X/'final-remote-heads.raw').write_bytes(remote);(X/'final-full-refs.raw').write_bytes(full);save(X/'final-zero-active-claims.json',{'at':now(),'remote_heads':len(remote.splitlines()),'full_refs':len(full.splitlines()),'lease_pairs':len(rows),'active_claims':0,'matches':matches});save(X/'M8-exact-post-readback.json',readback)
+bp=P/'ops/land/pr1294-wp1285-land-evidence.yaml';lease=P/'ops/leases/wp1285-r8-g9-codex-human.yaml';q=subprocess.run([sys.executable,'-B',str(P/'.claude/dev/packet_loop.py'),'kiem-dong-wp','--root',str(P),'--bien-ban',str(bp),'--lease',str(lease)],env=env,capture_output=True);(X/'D1-D4-after-post.log').write_bytes(q.stdout+q.stderr);assert q.returncode==0,(q.stdout,q.stderr)
+result={'at':now(),'packet':1285,'PR':1294,'M':M,'landed':True,'M8_url':readback['html_url'],'exact_post_readback':True,'D1_D4_rc':0,'active_claims':0,'shared_calls':14,'P3_debt1295':'OPEN/notfixed','mission1238':'in_progress','packet_close_eligible':True,'passive_archive':'weekly lane queued, notclosureblocking'};save(X/'final-land-receipt.json',result);save(W/'final-land-receipt.json',result)
+subprocess.run([GIT,'-C',str(P),'add','--',str(X.relative_to(P))],env=env,check=True);subprocess.run([GIT,'-C',str(P),'diff','--cached','--check'],env=env,check=True);subprocess.run([GIT,'-C',str(P),'commit','-m','ops: retain exact M8 readback zero holders and final D1-D4 for S3'],env=env,check=True,capture_output=True);oid=git('rev-parse','HEAD');subprocess.run([GIT,'-C',str(P),'push','origin','HEAD:ops/wp1285-spec'],env=env,check=True,capture_output=True,timeout=120)
+result['final_metadata_commit']=oid;save(W/'final-land-receipt.json',result);print(json.dumps(result),flush=True)

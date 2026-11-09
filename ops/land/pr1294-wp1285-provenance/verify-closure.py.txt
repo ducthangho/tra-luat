@@ -1,0 +1,11 @@
+from common import *
+import shutil
+X=P/'ops/land/pr1294-wp1285-provenance'
+for name,ep in [('PR','pulls/1294'),('Mission','issues/1238'),('Packet','issues/1285')]:
+ expected=json.loads((W/(name+'-final-payload.json')).read_text());v=api('repos/ducthangho/tra-luat/'+ep);assert v['body']==expected['body'];assert 'title' not in expected or v['title']==expected['title'];assert v['state']==('open' if name=='Mission' else 'closed');save(X/(name+'-final-exact-readback.json'),v)
+ if name=='PR':assert v['merged'] and v['merge_commit_sha']==M and v['head']['sha']==H
+debt=api('repos/ducthangho/tra-luat/issues/1295');assert debt['state']=='open';save(X/'debt1295-final-open-readback.json',debt)
+for n in ['prepare-land.py','finalize-land.py','projection-bodies.py','verify-closure.py']:shutil.copyfile(W/n,X/(n+'.txt'))
+r=json.loads((W/'final-land-receipt.json').read_text());r.update(packet_closed=True,Packet_projection_exact_readback=True,Mission_projection_exact_readback=True,PR_projection_exact_readback=True,debt1295_still_open=True,closure_verified_at=now());save(X/'closure-readback-receipt.json',r)
+subprocess.run([GIT,'-C',str(P),'add','--',str(X.relative_to(P))],env=env,check=True);subprocess.run([GIT,'-C',str(P),'diff','--cached','--check'],env=env,check=True);subprocess.run([GIT,'-C',str(P),'commit','-m','ops: record S3 Packet closure and exact PR Mission debt readbacks'],env=env,check=True,capture_output=True);oid=git('rev-parse','HEAD');subprocess.run([GIT,'-C',str(P),'push','origin','HEAD:ops/wp1285-spec'],env=env,check=True,capture_output=True,timeout=120);assert not git('status','--porcelain')
+r['closure_metadata_commit']=oid;save(W/'closure-readback-receipt.json',r);print(json.dumps(r),flush=True)

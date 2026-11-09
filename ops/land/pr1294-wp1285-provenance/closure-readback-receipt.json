@@ -1,0 +1,23 @@
+{
+  "at": "2026-11-09T06:11:33.955771+00:00",
+  "packet": 1285,
+  "PR": 1294,
+  "M": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "landed": true,
+  "M8_url": "https://github.com/ducthangho/tra-luat/issues/1285#issuecomment-6733549261",
+  "exact_post_readback": true,
+  "D1_D4_rc": 0,
+  "active_claims": 0,
+  "shared_calls": 14,
+  "P3_debt1295": "OPEN/notfixed",
+  "mission1238": "in_progress",
+  "packet_close_eligible": true,
+  "passive_archive": "weekly lane queued, notclosureblocking",
+  "final_metadata_commit": "8b2c4d7d148ec3310d28c3df12b1acae6e8b7e1b",
+  "packet_closed": true,
+  "Packet_projection_exact_readback": true,
+  "Mission_projection_exact_readback": true,
+  "PR_projection_exact_readback": true,
+  "debt1295_still_open": true,
+  "closure_verified_at": "2026-11-09T06:13:17.303441+00:00"
+}

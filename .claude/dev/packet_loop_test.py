@@ -11586,6 +11586,9 @@ def _adopt_case1174(kind):
     def case(c):
         import copy
         from unittest.mock import patch
+        if kind=="source_recovery_snapshot":
+            directory=c.tmp/"source-sync-eio";directory.mkdir()
+            _source_sync_eio1174(Ctx(c.script,directory),"directory")
         if kind=="intent_cutover":
             _adoption_crashes1174(c)
             _adoption_recovery_high_water1174(c)
@@ -13457,8 +13460,9 @@ MUTANTS["m1174_publication_preimage"] = ('candidates = [("after", after)] + ([] 
     'candidates = [("after", after)] # omit PushEvent preimage publication evidence',["wp1174_lifecycle_first_publication"])
 MUTANTS["m1174_recovery_predecessor_water"] = ('_1174_require(water == dict(generation=lineage["predecessor_generation"],',
     '_1174_require(True or water == dict(generation=lineage["predecessor_generation"],',["wp1174_adopt_intent_cutover"])
-MUTANTS["m1174_recovery_tombstone_fsync"] = ('_1174_fsyncdir(source.parent)\n        if target_raw != images["adopted"]:',
-    'pass # omit recovery durability barrier\n        if target_raw != images["adopted"]:',["wp1174_source_recovery_snapshot"])
+# Both barriers protect the reused tombstone directory; either alone is redundant.
+MUTANTS["m1174_recovery_tombstone_fsync"] = (['_1174_fsyncdir(source.parent)\n        if target_raw != images["adopted"]:', '_1174_recheck_durable(source, source_now)'],
+    ['pass # omit recovery durability barrier\n        if target_raw != images["adopted"]:', 'pass # omit redundant source directory durability'],["wp1174_source_recovery_snapshot"])
 
 
 MUTANTS["m1174_resolver_none_head"] = ('_spec_merge(root, spec_oid, lease.get("spec_path"), lease)', '_spec_merge(root, None, lease.get("spec_path"), lease)', ["wp1174_admission_file_bytes"])
@@ -13563,7 +13567,67 @@ def _r12_recover_args1174(m,a,args,witness):
     args.root,args.coordinator_id=a["enrollment"]["root"],a["enrollment"]["coordinator_id"]
 
 
+def _source_sync_eio1174(c, fault_kind):
+    """Fault the reused source inode, independently of target/witness durability."""
+    import contextlib, errno, io
+    from unittest.mock import patch
+    for initialized in (False, True):
+        for retired in ((True,) if fault_kind=="directory" else (False, True)):
+            directory=c.tmp/("source-eio-"+fault_kind+str(initialized)+str(retired));directory.mkdir()
+            ctx=Ctx(c.script,directory)
+            if initialized:
+                m,a,args=_init_fixture1174(ctx);e=a["enrollment"]
+                with patch.object(m,"_1174_probe",return_value={}):m._1174_initialize(args,a,None)
+                source=Path(e["state_path"]);digest=hashlib.sha256(source.read_bytes()).hexdigest()
+                journal=directory/"next";journal.mkdir();target=journal/source.name
+                e.update(state_path=str(target),journal_root=str(journal))
+                a.update(generation=a["generation"]+1,lineage=dict(predecessor_generation=a["generation"],source_path=str(source),source_sha256=digest))
+                a["operation"]=dict(adoption_id="source-eio-next",generation=a["generation"],binding_sha256=e["binding_sha256"],canonical_path=str(target),source_sha256=digest,cutover_started=False)
+                args=m.build_parser().parse_args(["adopt-state","--packet",str(a["packet"]),"--mode","initial","--adoption-id",a["operation"]["adoption_id"],"--expected-source-sha256",digest,"--expected-witness-revision",str(json.loads(Path(e["witness_path"]).read_bytes())["witness_revision"]),"--target-generation",str(a["generation"])])
+            else:
+                m,a,args=_adopt_fixture1174(ctx);e=a["enrollment"]
+                source,target=Path(e["legacy_source_path"]),Path(e["state_path"])
+            old_witness=Path(e["witness_path"]);parent=directory/"witness-only";parent.mkdir()
+            witness=parent/old_witness.name;e["witness_path"]=str(witness)
+            if old_witness.exists():witness.write_bytes(old_witness.read_bytes());old_witness.unlink()
+            assert len({source.parent,target.parent,witness.parent})==3
+            writer=m._1174_write
+            def cut(path,raw,**kw):
+                if Path(path)==source and not retired:raise OSError("source EIO fixture cut")
+                writer(path,raw,**kw)
+                if Path(path)==source:raise OSError("source EIO fixture cut")
+            with patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_1174_write",side_effect=cut):
+                try:m._1174_adopt(args,a,witness.read_bytes() if witness.exists() else None)
+                except OSError as ex:assert str(ex)=="source EIO fixture cut"
+                else:assert False,"source cut not reached"
+            assert (json.loads(source.read_bytes()).get("format")=="packet_state_retired.v1")==retired
+            _r12_recover_args1174(m,a,args,witness)
+            before={p:p.read_bytes() for p in (source,target,witness)}
+            wanted=(source if fault_kind=="file" else source.parent).stat()
+            fsync=m.os.fsync;faults=[]
+            def eio(fd):
+                observed=m.os.fstat(fd)
+                if (observed.st_dev,observed.st_ino)==(wanted.st_dev,wanted.st_ino):
+                    faults.append(True);raise OSError(errno.EIO,"reused source "+fault_kind+" fsync")
+                return fsync(fd)
+            out=io.StringIO()
+            with patch.object(m,"_1174_resolve",return_value=(a,{})),patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_probe",return_value={}) as probe,patch.object(m,"_1174_write",wraps=writer) as writes,patch.object(m.os,"fsync",side_effect=eio),contextlib.redirect_stdout(out):
+                rc=m._1174_command(args,Path(e["journal_root"]))
+            result=json.loads(out.getvalue())
+            assert rc==8 and result["status"]=="durability_unknown" and not result["dispatch_allowed"],("source fsync EIO accepted",initialized,retired,fault_kind,rc,result)
+            assert faults and not probe.called and not writes.called,"source durability rejected after probe/write"
+            assert before=={p:p.read_bytes() for p in before},"source EIO changed snapshot/counters"
+            with patch.object(m,"_1174_probe",return_value={}):
+                assert _call1174(m._1174_adopt,args,a,witness.read_bytes())=="completed_no_dispatch"
+            _r12_recover_args1174(m,a,args,witness)
+            final={p:p.read_bytes() for p in before}
+            with patch.object(m,"_1174_probe",return_value={}):
+                assert _call1174(m._1174_adopt,args,a,witness.read_bytes())=="already_completed_no_dispatch"
+            assert final=={p:p.read_bytes() for p in final},"healthy terminal replay rewrote bytes"
+
+
 def _r12_durability1174(c):
+    _source_sync_eio1174(c,"file")
     import contextlib,io
     from unittest.mock import patch
     for stage in ("source_retired","target_prepared","target_intent","target_adopted","witness_intent","witness_final"):

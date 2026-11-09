@@ -1,0 +1,672 @@
+{
+  "sha": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+  "os": "Windows",
+  "tests": [
+    {
+      "id": "candidate-ps51/PM01",
+      "ket_qua": "passed",
+      "source_case_id": "PM01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51.json",
+      "report_sha256": "1d386aa90246366eb3a86b479361327da4712726c4cdb9ff7840ce1aa617cef9"
+    },
+    {
+      "id": "candidate-ps51/PM02",
+      "ket_qua": "passed",
+      "source_case_id": "PM02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51.json",
+      "report_sha256": "1d386aa90246366eb3a86b479361327da4712726c4cdb9ff7840ce1aa617cef9"
+    },
+    {
+      "id": "candidate-ps51/PM03",
+      "ket_qua": "passed",
+      "source_case_id": "PM03",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51.json",
+      "report_sha256": "1d386aa90246366eb3a86b479361327da4712726c4cdb9ff7840ce1aa617cef9"
+    },
+    {
+      "id": "candidate-ps51/PM04",
+      "ket_qua": "passed",
+      "source_case_id": "PM04",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51.json",
+      "report_sha256": "1d386aa90246366eb3a86b479361327da4712726c4cdb9ff7840ce1aa617cef9"
+    },
+    {
+      "id": "candidate-ps51/PM05",
+      "ket_qua": "passed",
+      "source_case_id": "PM05",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51.json",
+      "report_sha256": "1d386aa90246366eb3a86b479361327da4712726c4cdb9ff7840ce1aa617cef9"
+    },
+    {
+      "id": "candidate-ps51/PM06",
+      "ket_qua": "passed",
+      "source_case_id": "PM06",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51.json",
+      "report_sha256": "1d386aa90246366eb3a86b479361327da4712726c4cdb9ff7840ce1aa617cef9"
+    },
+    {
+      "id": "candidate-ps51/PM07",
+      "ket_qua": "passed",
+      "source_case_id": "PM07",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51.json",
+      "report_sha256": "1d386aa90246366eb3a86b479361327da4712726c4cdb9ff7840ce1aa617cef9"
+    },
+    {
+      "id": "candidate-ps7/PM01",
+      "ket_qua": "passed",
+      "source_case_id": "PM01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7.json",
+      "report_sha256": "06877e85a7f4d90859a1dd5006c2cec3f685dba43da99a31cbf85305ef672bec"
+    },
+    {
+      "id": "candidate-ps7/PM02",
+      "ket_qua": "passed",
+      "source_case_id": "PM02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7.json",
+      "report_sha256": "06877e85a7f4d90859a1dd5006c2cec3f685dba43da99a31cbf85305ef672bec"
+    },
+    {
+      "id": "candidate-ps7/PM03",
+      "ket_qua": "passed",
+      "source_case_id": "PM03",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7.json",
+      "report_sha256": "06877e85a7f4d90859a1dd5006c2cec3f685dba43da99a31cbf85305ef672bec"
+    },
+    {
+      "id": "candidate-ps7/PM04",
+      "ket_qua": "passed",
+      "source_case_id": "PM04",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7.json",
+      "report_sha256": "06877e85a7f4d90859a1dd5006c2cec3f685dba43da99a31cbf85305ef672bec"
+    },
+    {
+      "id": "candidate-ps7/PM05",
+      "ket_qua": "passed",
+      "source_case_id": "PM05",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7.json",
+      "report_sha256": "06877e85a7f4d90859a1dd5006c2cec3f685dba43da99a31cbf85305ef672bec"
+    },
+    {
+      "id": "candidate-ps7/PM06",
+      "ket_qua": "passed",
+      "source_case_id": "PM06",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7.json",
+      "report_sha256": "06877e85a7f4d90859a1dd5006c2cec3f685dba43da99a31cbf85305ef672bec"
+    },
+    {
+      "id": "candidate-ps7/PM07",
+      "ket_qua": "passed",
+      "source_case_id": "PM07",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7.json",
+      "report_sha256": "06877e85a7f4d90859a1dd5006c2cec3f685dba43da99a31cbf85305ef672bec"
+    },
+    {
+      "id": "candidate-ps51-CX/PM01",
+      "ket_qua": "passed",
+      "source_case_id": "PM01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51-CX.json",
+      "report_sha256": "03c4b71ca401bf69fff11651766e90ca99c503c5d085061d67d36da2656a19c4"
+    },
+    {
+      "id": "candidate-ps51-CX/PM02",
+      "ket_qua": "passed",
+      "source_case_id": "PM02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51-CX.json",
+      "report_sha256": "03c4b71ca401bf69fff11651766e90ca99c503c5d085061d67d36da2656a19c4"
+    },
+    {
+      "id": "candidate-ps51-CX/PM03",
+      "ket_qua": "passed",
+      "source_case_id": "PM03",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51-CX.json",
+      "report_sha256": "03c4b71ca401bf69fff11651766e90ca99c503c5d085061d67d36da2656a19c4"
+    },
+    {
+      "id": "candidate-ps51-CX/PM04",
+      "ket_qua": "passed",
+      "source_case_id": "PM04",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51-CX.json",
+      "report_sha256": "03c4b71ca401bf69fff11651766e90ca99c503c5d085061d67d36da2656a19c4"
+    },
+    {
+      "id": "candidate-ps51-CX/PM05",
+      "ket_qua": "passed",
+      "source_case_id": "PM05",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51-CX.json",
+      "report_sha256": "03c4b71ca401bf69fff11651766e90ca99c503c5d085061d67d36da2656a19c4"
+    },
+    {
+      "id": "candidate-ps51-CX/PM06",
+      "ket_qua": "passed",
+      "source_case_id": "PM06",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51-CX.json",
+      "report_sha256": "03c4b71ca401bf69fff11651766e90ca99c503c5d085061d67d36da2656a19c4"
+    },
+    {
+      "id": "candidate-ps51-CX/CX00",
+      "ket_qua": "passed",
+      "source_case_id": "CX00",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51-CX.json",
+      "report_sha256": "03c4b71ca401bf69fff11651766e90ca99c503c5d085061d67d36da2656a19c4"
+    },
+    {
+      "id": "candidate-ps51-CX/CX01",
+      "ket_qua": "passed",
+      "source_case_id": "CX01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51-CX.json",
+      "report_sha256": "03c4b71ca401bf69fff11651766e90ca99c503c5d085061d67d36da2656a19c4"
+    },
+    {
+      "id": "candidate-ps51-CX/CX02",
+      "ket_qua": "passed",
+      "source_case_id": "CX02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51-CX.json",
+      "report_sha256": "03c4b71ca401bf69fff11651766e90ca99c503c5d085061d67d36da2656a19c4"
+    },
+    {
+      "id": "candidate-ps51-CX/CX03",
+      "ket_qua": "passed",
+      "source_case_id": "CX03",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51-CX.json",
+      "report_sha256": "03c4b71ca401bf69fff11651766e90ca99c503c5d085061d67d36da2656a19c4"
+    },
+    {
+      "id": "candidate-ps51-CX/CX04",
+      "ket_qua": "passed",
+      "source_case_id": "CX04",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51-CX.json",
+      "report_sha256": "03c4b71ca401bf69fff11651766e90ca99c503c5d085061d67d36da2656a19c4"
+    },
+    {
+      "id": "candidate-ps51-CX/PM07",
+      "ket_qua": "passed",
+      "source_case_id": "PM07",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps51-CX.json",
+      "report_sha256": "03c4b71ca401bf69fff11651766e90ca99c503c5d085061d67d36da2656a19c4"
+    },
+    {
+      "id": "candidate-ps7-CX/PM01",
+      "ket_qua": "passed",
+      "source_case_id": "PM01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7-CX.json",
+      "report_sha256": "b089fd50d2455705f37f2203ac112515e38f22df224dbc595f79e7d7b87fca68"
+    },
+    {
+      "id": "candidate-ps7-CX/PM02",
+      "ket_qua": "passed",
+      "source_case_id": "PM02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7-CX.json",
+      "report_sha256": "b089fd50d2455705f37f2203ac112515e38f22df224dbc595f79e7d7b87fca68"
+    },
+    {
+      "id": "candidate-ps7-CX/PM03",
+      "ket_qua": "passed",
+      "source_case_id": "PM03",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7-CX.json",
+      "report_sha256": "b089fd50d2455705f37f2203ac112515e38f22df224dbc595f79e7d7b87fca68"
+    },
+    {
+      "id": "candidate-ps7-CX/PM04",
+      "ket_qua": "passed",
+      "source_case_id": "PM04",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7-CX.json",
+      "report_sha256": "b089fd50d2455705f37f2203ac112515e38f22df224dbc595f79e7d7b87fca68"
+    },
+    {
+      "id": "candidate-ps7-CX/PM05",
+      "ket_qua": "passed",
+      "source_case_id": "PM05",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7-CX.json",
+      "report_sha256": "b089fd50d2455705f37f2203ac112515e38f22df224dbc595f79e7d7b87fca68"
+    },
+    {
+      "id": "candidate-ps7-CX/PM06",
+      "ket_qua": "passed",
+      "source_case_id": "PM06",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7-CX.json",
+      "report_sha256": "b089fd50d2455705f37f2203ac112515e38f22df224dbc595f79e7d7b87fca68"
+    },
+    {
+      "id": "candidate-ps7-CX/CX00",
+      "ket_qua": "passed",
+      "source_case_id": "CX00",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7-CX.json",
+      "report_sha256": "b089fd50d2455705f37f2203ac112515e38f22df224dbc595f79e7d7b87fca68"
+    },
+    {
+      "id": "candidate-ps7-CX/CX01",
+      "ket_qua": "passed",
+      "source_case_id": "CX01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7-CX.json",
+      "report_sha256": "b089fd50d2455705f37f2203ac112515e38f22df224dbc595f79e7d7b87fca68"
+    },
+    {
+      "id": "candidate-ps7-CX/CX02",
+      "ket_qua": "passed",
+      "source_case_id": "CX02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7-CX.json",
+      "report_sha256": "b089fd50d2455705f37f2203ac112515e38f22df224dbc595f79e7d7b87fca68"
+    },
+    {
+      "id": "candidate-ps7-CX/CX03",
+      "ket_qua": "passed",
+      "source_case_id": "CX03",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7-CX.json",
+      "report_sha256": "b089fd50d2455705f37f2203ac112515e38f22df224dbc595f79e7d7b87fca68"
+    },
+    {
+      "id": "candidate-ps7-CX/CX04",
+      "ket_qua": "passed",
+      "source_case_id": "CX04",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7-CX.json",
+      "report_sha256": "b089fd50d2455705f37f2203ac112515e38f22df224dbc595f79e7d7b87fca68"
+    },
+    {
+      "id": "candidate-ps7-CX/PM07",
+      "ket_qua": "passed",
+      "source_case_id": "PM07",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\candidate-ps7-CX.json",
+      "report_sha256": "b089fd50d2455705f37f2203ac112515e38f22df224dbc595f79e7d7b87fca68"
+    },
+    {
+      "id": "legacy-S2-ps51/X1-01",
+      "ket_qua": "passed",
+      "source_case_id": "X1-01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X1-02",
+      "ket_qua": "passed",
+      "source_case_id": "X1-02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X1-03",
+      "ket_qua": "passed",
+      "source_case_id": "X1-03",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X2-01",
+      "ket_qua": "passed",
+      "source_case_id": "X2-01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X2-02",
+      "ket_qua": "passed",
+      "source_case_id": "X2-02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X2-03",
+      "ket_qua": "passed",
+      "source_case_id": "X2-03",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X2-04",
+      "ket_qua": "passed",
+      "source_case_id": "X2-04",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X2-05",
+      "ket_qua": "passed",
+      "source_case_id": "X2-05",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X2-06",
+      "ket_qua": "passed",
+      "source_case_id": "X2-06",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X2-07",
+      "ket_qua": "passed",
+      "source_case_id": "X2-07",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X3-01",
+      "ket_qua": "passed",
+      "source_case_id": "X3-01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X3-02",
+      "ket_qua": "passed",
+      "source_case_id": "X3-02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X4-01",
+      "ket_qua": "passed",
+      "source_case_id": "X4-01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X4-02",
+      "ket_qua": "passed",
+      "source_case_id": "X4-02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X4-03",
+      "ket_qua": "passed",
+      "source_case_id": "X4-03",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X5-01",
+      "ket_qua": "passed",
+      "source_case_id": "X5-01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X5-02",
+      "ket_qua": "passed",
+      "source_case_id": "X5-02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X5-03",
+      "ket_qua": "passed",
+      "source_case_id": "X5-03",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X5-04",
+      "ket_qua": "passed",
+      "source_case_id": "X5-04",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X5-05",
+      "ket_qua": "passed",
+      "source_case_id": "X5-05",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X5-06",
+      "ket_qua": "passed",
+      "source_case_id": "X5-06",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X5-07",
+      "ket_qua": "passed",
+      "source_case_id": "X5-07",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X5-08",
+      "ket_qua": "passed",
+      "source_case_id": "X5-08",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X5-09",
+      "ket_qua": "passed",
+      "source_case_id": "X5-09",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X6-01",
+      "ket_qua": "passed",
+      "source_case_id": "X6-01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps51/X6-02",
+      "ket_qua": "passed",
+      "source_case_id": "X6-02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps51.json",
+      "report_sha256": "467da8c0dadb861fa8ce4f562d4bbfbaf4a61daf11dffb0468c3eeabaf266558"
+    },
+    {
+      "id": "legacy-S2-ps7/X1-01",
+      "ket_qua": "passed",
+      "source_case_id": "X1-01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X1-02",
+      "ket_qua": "passed",
+      "source_case_id": "X1-02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X1-03",
+      "ket_qua": "passed",
+      "source_case_id": "X1-03",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X2-01",
+      "ket_qua": "passed",
+      "source_case_id": "X2-01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X2-02",
+      "ket_qua": "passed",
+      "source_case_id": "X2-02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X2-03",
+      "ket_qua": "passed",
+      "source_case_id": "X2-03",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X2-04",
+      "ket_qua": "passed",
+      "source_case_id": "X2-04",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X2-05",
+      "ket_qua": "passed",
+      "source_case_id": "X2-05",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X2-06",
+      "ket_qua": "passed",
+      "source_case_id": "X2-06",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X2-07",
+      "ket_qua": "passed",
+      "source_case_id": "X2-07",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X3-01",
+      "ket_qua": "passed",
+      "source_case_id": "X3-01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X3-02",
+      "ket_qua": "passed",
+      "source_case_id": "X3-02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X4-01",
+      "ket_qua": "passed",
+      "source_case_id": "X4-01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X4-02",
+      "ket_qua": "passed",
+      "source_case_id": "X4-02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X4-03",
+      "ket_qua": "passed",
+      "source_case_id": "X4-03",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X5-01",
+      "ket_qua": "passed",
+      "source_case_id": "X5-01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X5-02",
+      "ket_qua": "passed",
+      "source_case_id": "X5-02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X5-03",
+      "ket_qua": "passed",
+      "source_case_id": "X5-03",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X5-04",
+      "ket_qua": "passed",
+      "source_case_id": "X5-04",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X5-05",
+      "ket_qua": "passed",
+      "source_case_id": "X5-05",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X5-06",
+      "ket_qua": "passed",
+      "source_case_id": "X5-06",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X5-07",
+      "ket_qua": "passed",
+      "source_case_id": "X5-07",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X5-08",
+      "ket_qua": "passed",
+      "source_case_id": "X5-08",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X5-09",
+      "ket_qua": "passed",
+      "source_case_id": "X5-09",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X6-01",
+      "ket_qua": "passed",
+      "source_case_id": "X6-01",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    },
+    {
+      "id": "legacy-S2-ps7/X6-02",
+      "ket_qua": "passed",
+      "source_case_id": "X6-02",
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\legacy-S2-ps7.json",
+      "report_sha256": "145300126f88c9c1af9b5de4073182dcb904b10504bb1d943dd862e8f3f4cfc8"
+    }
+  ],
+  "baseline_rounds": [
+    {
+      "phase": "baseline-ps51",
+      "actual_rc": 1,
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\baseline-ps51.json",
+      "red_ids": [
+        "PM01",
+        "PM02",
+        "PM03",
+        "PM04",
+        "PM05",
+        "PM06",
+        "PM07"
+      ]
+    },
+    {
+      "phase": "baseline-ps7",
+      "actual_rc": 1,
+      "source_report": "C:\\tl-win\\wp1285-H4-native\\reports\\baseline-ps7.json",
+      "red_ids": [
+        "PM01",
+        "PM02",
+        "PM03",
+        "PM04",
+        "PM05",
+        "PM06",
+        "PM07"
+      ]
+    }
+  ],
+  "source_measurement_sha256": "7433dad49ad61d3acb17a77664b41e2ecabeb4c0cd87919e24a7405222234585",
+  "source_native_archive_sha256": "62698d77952f85554c4e25649af950edaed95aaeafa1ff0d9d4dad48f6ce0ec9",
+  "source_receipt": "S3-H4-native-ONCE-verifier-receipt.json",
+  "kind": "Truthful projection of actual positive parent test cases only for canonical M3 consumer; not a new run or Windows CI",
+  "additional_expected_failure_probes": "Six beforeimport class negatives and Background-only private rollback retained separately in raw phases/verifier; child intentional failed/NOT_EXECUTED cases are not relabeled passed."
+}

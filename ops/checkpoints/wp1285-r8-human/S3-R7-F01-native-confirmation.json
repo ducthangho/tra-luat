@@ -1,0 +1,260 @@
+{
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "finding": "WP1285-R7-F01",
+  "reviewer_severity": "P3",
+  "confirmed_by_operator_native_probe": true,
+  "manifestation_A": "2 harmless-space-comment cases rejected beforeimport even though ASTScriptRequirementsabsent, x2runtimes; reviewer #requiresX example is NOT harmless on either runtime (parsererror), not counted as confirmation",
+  "manifestation_B": "4 genuineuppercase directives under trTR/azLatnAZ accepted normal7/7 despite ASTScriptRequirementsversion5.1; observed bothPS51/7, no arbitrarycodeexecution claim",
+  "positive_controls": "2 original enUS controls7/7; 2 lowercasegenuine directives rejected as expected; 2 #requiresX malformed directives correctly rejected by parser",
+  "rows": [
+    {
+      "label": "original-ps51",
+      "culture": "en-US",
+      "shell": "ps51",
+      "rc": 0,
+      "PM01": "passed",
+      "PM02": "passed",
+      "PM04": "passed",
+      "PM01_detail": {
+        "id": "PM01",
+        "outcome": "passed",
+        "reason": null,
+        "detail": "plain unnamed end block with exactly one hashtable data expression; SafeGetValue accepted"
+      },
+      "runtime_children": 2,
+      "ScriptRequirementsPresent": false,
+      "RequiredPSVersion": null,
+      "regex_matches": []
+    },
+    {
+      "label": "harmless-keyword-prefix-ps51",
+      "culture": "en-US",
+      "shell": "ps51",
+      "rc": 1,
+      "PM01": "failed",
+      "PM02": "failed",
+      "PM04": "failed",
+      "PM01_detail": {
+        "id": "PM01",
+        "outcome": "failed",
+        "reason": "PARSE_ERROR: Cannot process the #requires statement because it is not in the correct format.\r\nThe #requires statement must be in one of the following formats:\r\n \"#requires -shellid <shellID>\"\r\n \"#requires -version <major.minor>\"\r\n \"#requires -psedition <edition>\"\r\n \"#requires -pssnapin <psSnapInName> [-version <major.minor>]\"\r\n \"#requires -modules <ModuleSpecification>\"\r\n \"#requires -runasadministrator\"",
+        "detail": null
+      },
+      "runtime_children": 0,
+      "ScriptRequirementsPresent": true,
+      "RequiredPSVersion": "",
+      "regex_matches": [
+        "#requiresX"
+      ]
+    },
+    {
+      "label": "harmless-space-comment-ps51",
+      "culture": "en-US",
+      "shell": "ps51",
+      "rc": 1,
+      "PM01": "failed",
+      "PM02": "failed",
+      "PM04": "failed",
+      "PM01_detail": {
+        "id": "PM01",
+        "outcome": "failed",
+        "reason": "EXECUTABLE_STATEMENT: requires/named block/trap",
+        "detail": null
+      },
+      "runtime_children": 0,
+      "ScriptRequirementsPresent": false,
+      "RequiredPSVersion": null,
+      "regex_matches": [
+        "# Requires the S2 hash guard"
+      ]
+    },
+    {
+      "label": "genuine-lower-ps51",
+      "culture": "en-US",
+      "shell": "ps51",
+      "rc": 1,
+      "PM01": "failed",
+      "PM02": "failed",
+      "PM04": "failed",
+      "PM01_detail": {
+        "id": "PM01",
+        "outcome": "failed",
+        "reason": "EXECUTABLE_STATEMENT: requires/named block/trap",
+        "detail": null
+      },
+      "runtime_children": 0,
+      "ScriptRequirementsPresent": true,
+      "RequiredPSVersion": "5.1",
+      "regex_matches": [
+        "#requires -Version 5.1"
+      ]
+    },
+    {
+      "label": "genuine-upper-tr-ps51",
+      "culture": "tr-TR",
+      "shell": "ps51",
+      "rc": 0,
+      "PM01": "passed",
+      "PM02": "passed",
+      "PM04": "passed",
+      "PM01_detail": {
+        "id": "PM01",
+        "outcome": "passed",
+        "reason": null,
+        "detail": "plain unnamed end block with exactly one hashtable data expression; SafeGetValue accepted"
+      },
+      "runtime_children": 2,
+      "ScriptRequirementsPresent": true,
+      "RequiredPSVersion": "5.1",
+      "regex_matches": []
+    },
+    {
+      "label": "genuine-upper-az-ps51",
+      "culture": "az-Latn-AZ",
+      "shell": "ps51",
+      "rc": 0,
+      "PM01": "passed",
+      "PM02": "passed",
+      "PM04": "passed",
+      "PM01_detail": {
+        "id": "PM01",
+        "outcome": "passed",
+        "reason": null,
+        "detail": "plain unnamed end block with exactly one hashtable data expression; SafeGetValue accepted"
+      },
+      "runtime_children": 2,
+      "ScriptRequirementsPresent": true,
+      "RequiredPSVersion": "5.1",
+      "regex_matches": []
+    },
+    {
+      "label": "original-ps7",
+      "culture": "en-US",
+      "shell": "ps7",
+      "rc": 0,
+      "PM01": "passed",
+      "PM02": "passed",
+      "PM04": "passed",
+      "PM01_detail": {
+        "id": "PM01",
+        "outcome": "passed",
+        "reason": null,
+        "detail": "plain unnamed end block with exactly one hashtable data expression; SafeGetValue accepted"
+      },
+      "runtime_children": 2,
+      "ScriptRequirementsPresent": false,
+      "RequiredPSVersion": null,
+      "regex_matches": []
+    },
+    {
+      "label": "harmless-keyword-prefix-ps7",
+      "culture": "en-US",
+      "shell": "ps7",
+      "rc": 1,
+      "PM01": "failed",
+      "PM02": "failed",
+      "PM04": "failed",
+      "PM01_detail": {
+        "id": "PM01",
+        "outcome": "failed",
+        "reason": "PARSE_ERROR: Cannot process the #requires statement because it is not in the correct format.\r\nThe #requires statement must be in one of the following formats:\r\n \"#requires -shellid <shellID>\"\r\n \"#requires -version <major.minor>\"\r\n \"#requires -psedition <edition>\"\r\n \"#requires -pssnapin <psSnapInName> [-version <major.minor>]\"\r\n \"#requires -modules <ModuleSpecification>\"\r\n \"#requires -runasadministrator\"",
+        "detail": null
+      },
+      "runtime_children": 0,
+      "ScriptRequirementsPresent": true,
+      "RequiredPSVersion": "",
+      "regex_matches": [
+        "#requiresX"
+      ]
+    },
+    {
+      "label": "harmless-space-comment-ps7",
+      "culture": "en-US",
+      "shell": "ps7",
+      "rc": 1,
+      "PM01": "failed",
+      "PM02": "failed",
+      "PM04": "failed",
+      "PM01_detail": {
+        "id": "PM01",
+        "outcome": "failed",
+        "reason": "EXECUTABLE_STATEMENT: requires/named block/trap",
+        "detail": null
+      },
+      "runtime_children": 0,
+      "ScriptRequirementsPresent": false,
+      "RequiredPSVersion": null,
+      "regex_matches": [
+        "# Requires the S2 hash guard"
+      ]
+    },
+    {
+      "label": "genuine-lower-ps7",
+      "culture": "en-US",
+      "shell": "ps7",
+      "rc": 1,
+      "PM01": "failed",
+      "PM02": "failed",
+      "PM04": "failed",
+      "PM01_detail": {
+        "id": "PM01",
+        "outcome": "failed",
+        "reason": "EXECUTABLE_STATEMENT: requires/named block/trap",
+        "detail": null
+      },
+      "runtime_children": 0,
+      "ScriptRequirementsPresent": true,
+      "RequiredPSVersion": "5.1",
+      "regex_matches": [
+        "#requires -Version 5.1"
+      ]
+    },
+    {
+      "label": "genuine-upper-tr-ps7",
+      "culture": "tr-TR",
+      "shell": "ps7",
+      "rc": 0,
+      "PM01": "passed",
+      "PM02": "passed",
+      "PM04": "passed",
+      "PM01_detail": {
+        "id": "PM01",
+        "outcome": "passed",
+        "reason": null,
+        "detail": "plain unnamed end block with exactly one hashtable data expression; SafeGetValue accepted"
+      },
+      "runtime_children": 2,
+      "ScriptRequirementsPresent": true,
+      "RequiredPSVersion": "5.1",
+      "regex_matches": []
+    },
+    {
+      "label": "genuine-upper-az-ps7",
+      "culture": "az-Latn-AZ",
+      "shell": "ps7",
+      "rc": 0,
+      "PM01": "passed",
+      "PM02": "passed",
+      "PM04": "passed",
+      "PM01_detail": {
+        "id": "PM01",
+        "outcome": "passed",
+        "reason": null,
+        "detail": "plain unnamed end block with exactly one hashtable data expression; SafeGetValue accepted"
+      },
+      "runtime_children": 2,
+      "ScriptRequirementsPresent": true,
+      "RequiredPSVersion": "5.1",
+      "regex_matches": []
+    }
+  ],
+  "original_zip_sha256": "bd1f9a882f3b0a91e358fbbaaff3f3ab9b4187ac10fd9cc15d9d030fd27dcf91",
+  "source_files_verified": 251,
+  "source_repository_unchanged": true,
+  "machine_lock_released_empty": true,
+  "WindowsCI": false,
+  "product_patch": false,
+  "class_recurrence": "Potential related ScriptRequirements AST remnant now measured; historical block/background cases remainclosed. Dispatcher/owner to classify, do not autoerase/new id to evade sameclass stop.",
+  "status": "CONFIRMED open P3, no waiver, no merge",
+  "at": "2026-11-09T02:22:46.006295+00:00"
+}

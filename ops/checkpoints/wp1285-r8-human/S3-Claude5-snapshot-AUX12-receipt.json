@@ -1,0 +1,141 @@
+{
+  "status": "complete_source_audit_STOP_no_cross_assurance",
+  "formal_code_approval": false,
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+  "run_id": "21ecdc2a52bb449a8bed4848e8d29918",
+  "completed_at": "2026-11-09T02:17:04.357616+00:00",
+  "promotion_eligible": false,
+  "cross_approved": false,
+  "human_audited": false,
+  "overall_decision": "STOP/concrete checkpoint; preserve original model verdict and failed workspace gate separately",
+  "actual_child_rc": 0,
+  "launcher_exit": 16,
+  "launcher_state": "ghi_workspace",
+  "snapshot_result": "ghi_workspace",
+  "snapshot_reason": "tep_doi",
+  "snapshots": {
+    "review": {
+      "before_entries": 14902,
+      "after_entries": 14906,
+      "before_sha256": "3b989f075006c127f08a54357b5806a51a2167a7a7d83729c81fc6859f192dd1",
+      "after_sha256": "3a06204736fc7065b369922ba94c25d5d236e9898a690eaedb196625637a3993",
+      "original_entries_changed": [],
+      "deltas": [
+        {
+          "path": ".claude/.packet_state",
+          "before": null,
+          "after": [
+            "D",
+            ""
+          ]
+        },
+        {
+          "path": ".claude/.packet_state/session-start.ran",
+          "before": null,
+          "after": [
+            "F",
+            "66241e5c0b4161c7cd8c1e9a5ce8ca7ca9481f73ac6365b2eca4411f9a9bedb5"
+          ]
+        },
+        {
+          "path": ".claude/dev/__pycache__",
+          "before": null,
+          "after": [
+            "D",
+            ""
+          ]
+        },
+        {
+          "path": ".claude/dev/__pycache__/launcher.cpython-312.pyc",
+          "before": null,
+          "after": [
+            "F",
+            "3952896c455844c2f3471271b03232c9d6a217522bd258542a1f04a899b02a6f"
+          ]
+        }
+      ]
+    },
+    "source": {
+      "before_entries": 14814,
+      "after_entries": 14814,
+      "before_sha256": "4138ce123b7796d37845e8230ff689aec2b94cdf0586933a64c076def4d67a06",
+      "after_sha256": "4138ce123b7796d37845e8230ff689aec2b94cdf0586933a64c076def4d67a06",
+      "original_entries_changed": [],
+      "deltas": []
+    }
+  },
+  "original_stdout_verdict_extraction_byte_exact": true,
+  "stdout_sha256": "fafb2f6dadf853354a39cdb138092b686e9e2aa5f21ce44d50172b7d46d05b1c",
+  "stdout_bytes": 1206604,
+  "original_verdict_sha256": "e7510c0b15765004606df88da0e803849d4b9a80c43c0aa1d85684ba7df3d09f",
+  "model_verdict": "changes_requested",
+  "model_fullscope_review_complete": false,
+  "new_finding_record": {
+    "stableid": "WP1285-R7-F01",
+    "class_slug": "manifest-requires-guard-comment-regex",
+    "severity": "P3",
+    "basis": "source-only model finding; no independent code correctness adjudication or runtime probe by AUX12",
+    "manifestation_B": "explicit NOT_MEASURED in original verdict",
+    "closure_probes": "NOT_RUN"
+  },
+  "actual_tool_calls": {
+    "Glob": 13,
+    "Read": 26,
+    "Grep": 9
+  },
+  "observed_assistant_models": [
+    "claude-opus-5-5"
+  ],
+  "result_modelUsage_keys": [
+    "claude-opus-5-5"
+  ],
+  "served_effort": "KHONG_DO_DUOC; max is requested only",
+  "permission_mode": "plan",
+  "attribution": {
+    "hook_stamp": "Consistent with original SessionStart hook event/response and unchanged hook source lines43-60 that create stamp even local mode; not a model Write tool.",
+    "pycache": "Root explicitly acknowledges diagnostic import without -B; pyc matching four added paths retained. Attribution relies on dispatcher statement plus artifacts, not standalone actor-forensic proof.",
+    "model": "48 observed tool calls Read/Glob/Grep only; no Write/Edit/Bash. This is observed toolset scope, not proof of no historical write by any actor."
+  },
+  "governing_rules": {
+    "protocol_8_1": "Terminal/actual child rc/launcher rc/permission/verdict/exactSHA/tree/output stability must be reconciled, not collapsed.",
+    "protocol_8_2": "Cache/output outside checkout or no-cache, including Python bytecode; tracked/untracked/ignored snapshots required. Two snapshots do not prove continuous invariance.",
+    "r7_stop": "Any finding/source drift/failed condition => STOP/concretecheckpoint; no source repair/gate relaxation/assurance waiver.",
+    "launcher_source": "_ket_qua_snapshot any observed delta => ghi_workspace; final wrapper override16 while actual child ma_thoat stays0. No actor-based exception in source."
+  },
+  "material_conditions": [
+    {
+      "id": "workspace_gate_failed",
+      "measured": true,
+      "detail": "Four added paths, zero original-entry changes; launcher16 preserved, not relabeled clean."
+    },
+    {
+      "id": "model_changes_requested",
+      "measured": true,
+      "detail": "Original changes_requested/P3, no waiver, fullscope false independently blocks approval even absent workspace delta."
+    }
+  ],
+  "source_hashes": {
+    "S3-Claude5-snapshot-AUX12-assignment.json": "75264d4e3e9025e0139f3a3f4a75f2f978af7c64d982358b8925886e74afd5c7",
+    "S3-Claude5-final-source-ready.json": "90fb86dcd28d2bf8bbfbf1ad4017d00ddf20d145d06e0f3e118091f120ba5c94",
+    "S3-Claude5-final-snapshot-delta.json": "4eab6465c8a80c25b0c0ca4c1db85070f9468cabb69e48a213f4a715a545a631",
+    "S3-Claude5-midrun-snapshot-delta.json": "e29c3110f16ddea427df18fba8b4f586d907f3cb76e35a1b0c8e598dc24a3fbf",
+    "S3-Claude5-terminal-measurement.json": "4121c291f8db341bd947fd4b2dddbc888847220d4b7b36840639f4ecf4520d94",
+    "S3-Claude5-controller-result.json": "19c00b08b1c61313e905b6383cf99642ab63cf6fae66476e597b85cf9678a8f1",
+    "S3-Claude5-original-verdict.md": "e7510c0b15765004606df88da0e803849d4b9a80c43c0aa1d85684ba7df3d09f",
+    "S3-Claude5-parsed-verdict.json": "4859dab530ea86c1f4a89f2add6f2dd3ce9aebd6e46dd00b2ebf96775d33cc78",
+    "S3-Claude5-prompt.md": "58fb24a1a4962826c3d53b66e1d2e1a9b60d334903cd63603eb3600962ad20ce",
+    "S3-Claude5-runs/21ecdc2a/run.json": "6384287bf71f98dfcc2ae4fcea09e430ef4b67dd5c8180d8c79ea8ea2f544716",
+    "S3-Claude5-runs/21ecdc2a/stdout.log": "fafb2f6dadf853354a39cdb138092b686e9e2aa5f21ce44d50172b7d46d05b1c",
+    "S3-Claude5-runs/21ecdc2a/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "limits": [
+    "Not a new formal code review or cross/human audit. No finding correctness adjudication, code patch, waiver, retry recommendation or runtime test.",
+    "Original model verdict remains useful retained source-review evidence and finding input; it cannot be transformed into approved/cross_approved or a successful execution receipt.",
+    "Source/product/.git original bytes unchanged at observed endpoints, but workspace changed; ignored hook/cache additions are real deltas. No cleanup/restore performed by this AUX.",
+    "No continuous attestation; endpoint equality cannot detect write-and-revert or rule out unobserved actors.",
+    "Served Claude model evidenced by assistant.message.model/resultmodelUsage; served effort not measured. Actual tool plan mode is not a filesystem-enforced immutable sandbox claim.",
+    "Controller dispatch-intent fields model_invokedfalse/UNKNOWN are historical requested-state fields retained; terminal actual events supersede them for outcome, without rewriting original artifacts."
+  ],
+  "digest_sha256": "fa92ee24122ea283bb720e74fd3a1cc8b2409635b7c7476764575f3fd5c4d207"
+}

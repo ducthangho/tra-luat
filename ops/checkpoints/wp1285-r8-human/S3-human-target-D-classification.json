@@ -1,0 +1,40 @@
+{
+  "head_H4": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "original_admission_E": "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+  "current_target_D": "4068b3a2a0087db287ea979eccbd372a7a0938d7",
+  "D_tree": "9708385af49b4c3d67e8bca1253eb03f46454d41",
+  "expected_merge_tree": "f20cb1aa78756ae0a0b818c34e8d90f152b06a2f",
+  "master_delta_paths": [
+    "ops/specs/GIAM-HOI-P1-SOAN-SPEC-r1.md",
+    "ops/specs/GIAM-HOI-P1-SOAN-SPEC-r2.md",
+    "ops/specs/GIAM-HOI-P1-SOAN-SPEC-r3.md",
+    "ops/specs/GIAM-HOI-P1-SOAN-SPEC-r4.md",
+    "ops/specs/GIAM-HOI-P1-SOAN-SPEC-r5.md",
+    "ops/specs/GIAM-HOI-P1-SOAN-SPEC-r6.md",
+    "ops/specs/GIAM-HOI-P1-SOAN-SPEC-r7.md",
+    "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r1.md",
+    "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r10.md",
+    "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r2.md",
+    "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r3.md",
+    "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r4.md",
+    "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r5.md",
+    "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r7.md",
+    "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r8.md",
+    "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r9.md"
+  ],
+  "classification": "16 existing unrelated GIAM-HOI proposed-spec markdown additions ONLY; no enforced protocol/ADR/workflow/code/runtime/catalog source change",
+  "product_paths_new_M_vs_D": [
+    ".agents/skills/proxima-control/SKILL.md",
+    ".agents/skills/proxima-control/scripts/ProximaControl.psd1",
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+  ],
+  "all_other_paths_unchanged": true,
+  "fresh_same_head_checks_success": 26,
+  "CI_carry_limit": "Prior PRCI actually tested synthetic [E,H4]/treeH4, not newD; exactcode/catalog/policy unchanged supports carry by classification. Actual canonicalMCI on real newM remains required beforeland, no MCI pass claimed. Do not rerun admission against newD unless newDancestorH; do not fake oldE=currentD.",
+  "human_only_K4_limit": "Do not backdate a human-only review to prepush. Retained genuine Codex4 prepush H4 run is canonicalK4 source; supplemental actualhuman audit is separately required for sensitive assurance. No human pass inferred from waiver/transport.",
+  "owner_waiver_comment": "https://github.com/ducthangho/tra-luat/pull/1294#issuecomment-6731269220",
+  "owner_waiver_exact_readback": true,
+  "debt": "https://github.com/ducthangho/tra-luat/issues/1295",
+  "actual_human_audit_completed": false,
+  "at": "2026-11-09T03:09:47.941878+00:00"
+}

@@ -1,0 +1,8 @@
+{
+  "commit": "414911fc9fc82d26dd60c479112c82fe427e1d0a",
+  "index": "https://github.com/ducthangho/tra-luat/blob/414911fc9fc82d26dd60c479112c82fe427e1d0a/ops/checkpoints/wp1285-r6/PR-CI-final-audit/acceptance-index.json",
+  "issue1285_exact_readback": true,
+  "mission1238_exact_readback": true,
+  "merge": false,
+  "land": false
+}

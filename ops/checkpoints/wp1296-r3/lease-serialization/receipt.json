@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-09T09:17:42.844412+00:00",
+  "before_sha256": "660a0b366e4a21d9dc56cb41a58c74e9545e742c3db44b879abfdf59efadd050",
+  "after_sha256": "5d25ea28de4e8e13bfaa43d69fdcc4e6583e0a6f69d4000e8b67b39c1d245dbc",
+  "values_equal": true,
+  "all_authority_scope_generation_expiry_and_spec_fields_unchanged": true,
+  "actual_product_head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "canonical_packetloop_aliasfree_parser_passed": true,
+  "reason": "SafeDumper emitted alias for equal list object; plain duplication preserves normativevalues without unsupported YAMLalias syntax. Dispatcher metadata only."
+}

@@ -31,9 +31,10 @@ spec_hash: 780a5fa9b7cf86ec277e734bbbd43c9d1ef153b4750227ae173987a192fb39c4
 spec_sha256_required: 780a5fa9b7cf86ec277e734bbbd43c9d1ef153b4750227ae173987a192fb39c4
 prompt_path: ops/prompts/wp1296-r3-g3-readonly-adoption.md
 prompt_sha256_required: 97d5967f33074bef47105968249c9f5cc84122704e76af41a29a277df780cc69
-write_set: &id001
+write_set:
 - .agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1
-effective_write_set: *id001
+effective_write_set:
+- .agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1
 write_set_hash: 780805b4a04247cddfbc989152adc43f528b3e23652e8ec0cdc3a0068a86292e
 change_policy_sha: null
 required_checks:

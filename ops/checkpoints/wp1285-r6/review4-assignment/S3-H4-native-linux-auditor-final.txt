@@ -1,0 +1,6 @@
+H4 ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c — AUX hoàn tất; không thấy mâu thuẫn trọng yếu trong nguồn/log.
+Merge cơ học:parentsH3/E;3productblobs giữ nguyên H3;96 inheritedpaths khớp B..E và ops/land. Admission thực sự ghim E/rc0, B giữ vai trò provenance.
+Native455sources/456ZIPentries,39logs,15phases: hai runtime baseline7RED,normal7/7,CX12/12,legacy26/26.175S3refs+58legacyrefs/typedCLIXML/sourcebeforeafter/lock/missingdependencynegative kiểm đủ.14legacyBypass công khai/no newS3override.
+Sáu AST negatives runtime0; PS5.1clean/background parse errors. Background-onlyrollbackPS7PM01passes/runtime2/overallrc1: không chứng minh arbitrary code execution.
+Linux exactH4 childrc0/1777/1777,10logs hashsize/rc,strict184/184,Ruff12cũ bare1/delta0.
+formal_code_approval=false; H4F01closure chờ freshreview4; sameprovider sensitiveHOLD/no human-or-crossassurance.

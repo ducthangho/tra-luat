@@ -1,0 +1,5 @@
+{
+  "at": "2026-11-09T07:46:56.199090+00:00",
+  "reason": "ScriptRequirements null is documented valid absence, firstactualPS51enUS hasPM01PASS/PM02VALUE[RootModule]/runtime0. Operator.values() assumption causedrc2, notproductfailure. Preserve49originalfiles/ZIPsha9cec6087a3ab01c13f3df0e8ab3d5abbb1ef23b627917324e4a13e6524388161. ContinueONLYremaining5, no oldphase rerun, ledger90before/95after. SameH2/noauthor/budgetchange.",
+  "operator_sha256": "366e5659c7f4485b557e524b9d3a032cbb57b9f196378afbbf379be8d38be948"
+}

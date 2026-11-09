@@ -1,0 +1,22 @@
+{
+  "schema": "wp1174_source_policy_requirements.v1",
+  "status": "requirements only, not runtime activation; exact C15-F approval pending",
+  "packet": 1174,
+  "mission": 1172,
+  "revision": 22,
+  "generation": 19,
+  "policy_id": "WP1174-F-R22-CODEX-PAIR",
+  "spec_sha256": "95679e6cc362529f717037c7ca19b596cd9d5e5a1c3425939421f177d6d74df0",
+  "executor": "Codexservice medium fresh forkNone",
+  "reviewer": "Codexhigh independent readonly",
+  "assurance": "same_provider_approved",
+  "source_route": "canonical lease/owner facts, independent of target admission descriptor",
+  "three_blockers": [
+    "actual source-init/write/review verification route incomplete",
+    "V3 derived-key diagnostic disclosure",
+    "positive policy fixture uses real expiry clock"
+  ],
+  "source_cap_proposed": 15,
+  "role_cap_proposed": 58,
+  "all_other_caps_unchanged": true
+}

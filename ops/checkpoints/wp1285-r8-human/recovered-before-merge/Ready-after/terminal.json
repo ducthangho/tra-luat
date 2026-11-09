@@ -1,0 +1,30 @@
+{
+  "at": "2026-11-09T04:44:01.737585+00:00",
+  "checks": 27,
+  "success": 27,
+  "pending": [],
+  "failed": [],
+  "new_admission_checks": [
+    128983488078
+  ],
+  "new_bot_activity": true,
+  "current_head_bot_states": [
+    {
+      "id": 6726128513,
+      "updated_at": "2026-11-09T04:40:55Z",
+      "commit_sha": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+      "has_any_findings": false,
+      "has_unresolved_findings": false,
+      "status": "completed"
+    }
+  ],
+  "terminal": "Readyauto_and_admission_currentH4_complete",
+  "connector_marks": {
+    "reviews": null,
+    "review_comments": null,
+    "issue_comments": 6731901025
+  },
+  "actual_auto_observation": "Newbotactivity observed currentH completed/no findings",
+  "merged": false,
+  "landed": false
+}

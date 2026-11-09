@@ -1,0 +1,104 @@
+{
+  "name": "master",
+  "commit": {
+    "sha": "4068b3a2a0087db287ea979eccbd372a7a0938d7",
+    "node_id": "C_kwDOTNeRjdoAKDQwNjhiM2EyYTAwODdkYjI4N2VhOTc5ZWNjYmQzNzJhN2EwOTM4ZDc",
+    "commit": {
+      "author": {
+        "name": "ducthangho",
+        "email": "ducthangho@gmail.com",
+        "date": "2026-11-09T02:17:32Z"
+      },
+      "committer": {
+        "name": "GitHub",
+        "email": "noreply@github.com",
+        "date": "2026-11-09T02:17:32Z"
+      },
+      "message": "Merge pull request #1293 from ducthangho/claude/brave-rosalind-730dc7\n\nops/specs(#1291, #1292): GIAM-HOI-P1 r7 và GIAM-HOI-P2 r10 — đã duyệt băm",
+      "tree": {
+        "sha": "9708385af49b4c3d67e8bca1253eb03f46454d41",
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/9708385af49b4c3d67e8bca1253eb03f46454d41"
+      },
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/4068b3a2a0087db287ea979eccbd372a7a0938d7",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq8S08CRC1aQ7uu5UhlAAARe0QAAhcwhGjHZ4ncat6bGjXHyr9\nMuCh7vIrxB9qfm0zyht4Q+3JsPPlWBgHTFPkQ8a5wuteDfqrjyOvJQUHnzGpbsL8\nyp72L1Hegp+/UiKW3DHDZJrTE5+OJ6csuezykyvUqXwriLtKtR3vw7AyMb+bgJCU\neLDKSmamywvsANGlPpUaA4lVYXgngP3q+BU+DXx9A81tXwF7YmPAdYbGDKeNRZDA\nDd4OZ/lZLKGyOiOddW3vHdx9wxYg9or7jnQbMJKSWLjYkXdguQ4lBgp7IDHNWmEH\nAodEvv8sSTjh8SN16Z+r1BZw/3hXRAmv8Qk6onegjSFtK5NTYKKQIZ+4WcyMJpgE\nfGEkWQ8g+W0yI2xBD6xXTUTErUb6JfNFiw1HTPdyYMY+0OhGA2o1mQEQ9lPbVYk+\n0mrTupbj6rGsmArVYs6InbaF85vb7mlEzqaBaFf8xtGTWowbmPcL5VSjBj9yipd3\n2RQKtgXz1Y88H0miWV1YL0dwKPmq9942jOhQdCIBkPJY+gMKcyceJ2yM0cYy2nJv\nrBJj01twnqaEAKrQ6+RA/sXgcTWkOGYIcMxZJ9kLLpqrrzZ+87TZV+4V6O3O6h2C\nyUvHT0CxUPSBX7+dbBNWW86tn7sbqoWFELVgwfv2C74mnFVKBWOsbl8wAMpmBQss\nlQcz6U3qIdXIsnsQ4OJv\n=+nRK\n-----END PGP SIGNATURE-----\n",
+        "payload": "tree 9708385af49b4c3d67e8bca1253eb03f46454d41\nparent eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee\nparent 709a7bfbeb0c1fe78d1b8cf481960cba744ceaba\nauthor ducthangho <ducthangho@gmail.com> 1794190652 +0700\ncommitter GitHub <noreply@github.com> 1794190652 +0700\n\nMerge pull request #1293 from ducthangho/claude/brave-rosalind-730dc7\n\nops/specs(#1291, #1292): GIAM-HOI-P1 r7 và GIAM-HOI-P2 r10 — đã duyệt băm",
+        "verified_at": "2026-11-09T02:17:33Z"
+      }
+    },
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/4068b3a2a0087db287ea979eccbd372a7a0938d7",
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/4068b3a2a0087db287ea979eccbd372a7a0938d7",
+    "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/4068b3a2a0087db287ea979eccbd372a7a0938d7/comments",
+    "author": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "web-flow",
+      "id": 19864447,
+      "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/web-flow",
+      "html_url": "https://github.com/web-flow",
+      "followers_url": "https://api.github.com/users/web-flow/followers",
+      "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+      "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+      "organizations_url": "https://api.github.com/users/web-flow/orgs",
+      "repos_url": "https://api.github.com/users/web-flow/repos",
+      "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/web-flow/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+        "html_url": "https://github.com/ducthangho/tra-luat/commit/eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee"
+      },
+      {
+        "sha": "709a7bfbeb0c1fe78d1b8cf481960cba744ceaba",
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/709a7bfbeb0c1fe78d1b8cf481960cba744ceaba",
+        "html_url": "https://github.com/ducthangho/tra-luat/commit/709a7bfbeb0c1fe78d1b8cf481960cba744ceaba"
+      }
+    ]
+  },
+  "_links": {
+    "self": "https://api.github.com/repos/ducthangho/tra-luat/branches/master",
+    "html": "https://github.com/ducthangho/tra-luat/tree/master"
+  },
+  "protected": true,
+  "protection": {
+    "enabled": true,
+    "required_status_checks": {
+      "enforcement_level": "off",
+      "contexts": [],
+      "checks": []
+    }
+  },
+  "protection_url": "https://api.github.com/repos/ducthangho/tra-luat/branches/master/protection"
+}

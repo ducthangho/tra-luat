@@ -1,0 +1,12 @@
+{
+  "status": "Readyactualverified_NOTmerged",
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "target_D": "4068b3a2a0087db287ea979eccbd372a7a0938d7",
+  "metadata_commit": "645a7ca2f4346fd7e733f5b8d69c7c54ac2368ab",
+  "all_preconditions": "human6/v2/P3waiver/fullPRCI/sourceAUX/nativeLinux/freshrefs/rules/solelease/connector/K0K7verified",
+  "at": "2026-11-09T04:37:53.985662+00:00",
+  "Ready_actual": true,
+  "merge": false,
+  "land": false,
+  "at_ready_readback": "2026-11-09T04:43:58.315149+00:00"
+}

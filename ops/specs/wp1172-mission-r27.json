@@ -189,7 +189,6 @@
     }
   },
   "current_C15": {
-    "approved_proposal_sha256": "49bd421248a45fdf62b921e61878cc4e416455d100e294b134ae233fc02b4ef2",
     "source_revision": 22,
     "generation": 19,
     "source_cap": 15,
@@ -226,9 +225,9 @@
     "M9_runner_hours_cap": 24,
     "external_source_attribution": "UNKNOWN retained separately, no inference from submitter and no free-call assumption",
     "accounting_formula": "51+ceil((nowUTC-2026-11-07T16:17:24Z)/60); all waits retained",
-    "full_reservation_minutes": 780,
-    "component_subtotal_minutes": 680,
-    "contingency_minutes": 100,
+    "full_reservation_minutes": 695,
+    "component_subtotal_minutes": 695,
+    "contingency_minutes": "derive actual remaining from fixed2815 cap and current full fit; no new contingency grant",
     "no_counter_reset": true,
     "no_paid_purchase": true,
     "stop_rule": "Any new P0-P2, incomplete/failed native context, out-of-scope write or first cap/deadline blocks; no extra source or native call",
@@ -242,7 +241,11 @@
     "new_native_provider": "codex",
     "source_addedline_cap": 6600,
     "assurance": "same_provider_approved; explicit owner-scoped WP1174 policy",
-    "M9_runner_hours_used": 4.233611111111111
+    "M9_runner_hours_used": 4.233611111111111,
+    "historical_C15_proposal_sha256": "49bd421248a45fdf62b921e61878cc4e416455d100e294b134ae233fc02b4ef2",
+    "approved_proposal_sha256": null,
+    "approval_state": "prepared_pending_exact_C15_F",
+    "new_review_contexts": 5
   },
   "source_bootstrap": {
     "packet": 1174,
@@ -264,14 +267,13 @@
     "current_public_head": "7ae5ca43e4970e43addc3ac98ac241927bb23534"
   },
   "constraints": [
-    "C15 approval is not a lease, test result, review verdict or exact-head merge authority.",
-    "Preserve all prior histories, debt, counters and failed/stale/unknown evidence. No head evidence transfer.",
-    "No paid purchase, LIVE, credential/security/ruleset/workflow/global changes or global ADR0054 activation.",
-    "Windows focused13/rawunit only; no Windows CI, main or full suite. Linux full M9 and native84 remain required.",
-    "No source publication before actual prepublication gates, native cross K4, independent source audit and exact-head P3 disposition.",
-    "Normal expected-head merge/postmerge/bookkeeping only after actual exact-head authority and K0-K7; target actual human/canary and PR0-PR8 remain separate.",
-    "AGY source provider change approved explicitly; no fallback, extra source call or refund; old provider-bound lease cannot authorize AGY.",
-    "Codex/Claude canonical pair and source13/role56/new hardexpiry need exact owner finite approval; same-family guard cannot be bypassed."
+    "Prepared revision27 is not installed or source15-authorized until exact C15-F approval and actual activation/grant/lease/HDR receipts.",
+    "Codex service medium source15 and independent Codex high reviews; same_provider_approved only, no human/cross assurance claim.",
+    "No source publication until all exact-head prepublication gates, applicable canonical K4 or explicit exact-head owner resolution, source audit and P3 dispositions.",
+    "Keep all original P1/P2/11P3, plus source-policy route, V3 derived-key disclosure and deterministic expiry fixture blockers until actually closed.",
+    "No source16, review6, refund, paid purchase, LIVE, global/credential/security/workflow changes or target schema-version relaxation.",
+    "Windows focused13/rawunit only, one15+10 pair; no Windows CI/main/full suite or manual ci.yml.",
+    "Source-only adapter land is not Mission complete; target actual-human/enrollment/canary and PR0–PR8 remain separate."
   ],
   "time_envelope_activation": {
     "state": "existing approved fixed time envelope retained; no time extension proposed",
@@ -280,5 +282,15 @@
     "cloud_cap": 2815,
     "hard_expiry_utc": "2026-11-09T14:20:32Z",
     "historic_costs_preserved": true
-  }
+  },
+  "historical_constraints_from_revision26": [
+    "C15 approval is not a lease, test result, review verdict or exact-head merge authority.",
+    "Preserve all prior histories, debt, counters and failed/stale/unknown evidence. No head evidence transfer.",
+    "No paid purchase, LIVE, credential/security/ruleset/workflow/global changes or global ADR0054 activation.",
+    "Windows focused13/rawunit only; no Windows CI, main or full suite. Linux full M9 and native84 remain required.",
+    "No source publication before actual prepublication gates, native cross K4, independent source audit and exact-head P3 disposition.",
+    "Normal expected-head merge/postmerge/bookkeeping only after actual exact-head authority and K0-K7; target actual human/canary and PR0-PR8 remain separate.",
+    "AGY source provider change approved explicitly; no fallback, extra source call or refund; old provider-bound lease cannot authorize AGY.",
+    "Codex/Claude canonical pair and source13/role56/new hardexpiry need exact owner finite approval; same-family guard cannot be bypassed."
+  ]
 }

@@ -1,0 +1,43 @@
+schema_version: 2
+receipt_id: wp1285-r7-review5-21ecdc2a
+kind: review_delivery_receipt
+packet_id: wp1285
+reviewed_sha: ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c
+verdict: changes_requested
+verdict_path: ops/reviews/wp1285-r7-review5/verdict.md
+verdict_sha256: e7510c0b15765004606df88da0e803849d4b9a80c43c0aa1d85684ba7df3d09f
+evidence_url: https://github.com/ducthangho/tra-luat/blob/a4a78b60cbb045235e878ab564347e52d506a202/ops/reviews/wp1285-r7-review5/verdict.md
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  session_run_id: 21ecdc2a52bb449a8bed4848e8d29918
+  model: claude-opus-5-5
+  effort: KHONG_DO_DUOC
+  evidence_ref: ops/reviews/wp1285-r7-review5/run.json
+  model_evidence: do_may
+  model_evidence_ref: ops/reviews/wp1285-r7-review5/terminal-measurement.json
+  effort_requested: max
+github_submitter_identity:
+  actor: ducthangho
+  note: Originalmodelverdict exactreadback; accounttransport is not reviewer/humanaudit,
+    failedsnapshotnotwaived
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: Content-addressed metadata-control-ref ancestry only; not canonicalmaster/requiredcheck/merge
+    authority.
+independent_from_executor_session: true
+model_executor_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: 20260d0a7fc04c3680020e40531cec9c
+  model: gpt-6.1-sol
+  model_evidence: do_may
+  model_evidence_ref: ops/reviews/wp1285-r7-review5/executor-run.json
+  effort: high
+promotion_eligible: false
+promotion_hold: 'STOP: actual changes_requested P3 WP1285-R7-F01/fullscopefalse; launcher16
+  workspacegateFAILED. No cross_approved/humanaudit/merge/land.'
+achieved_assurance: not_achieved

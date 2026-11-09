@@ -1,0 +1,29 @@
+{
+  "role": "tl_auditor read-only fullsource diagnostic",
+  "call": 1,
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "archive_sha256": "a83e932f656b7d54c275704ba947f889f393b89fdea1725a644d1659be4121d1",
+  "originalfiles": 1179,
+  "specific_question": "Is PS7 -PSSnapin ignored/inert default parser metadata (nativehasemptyScriptRequirements, noerrors, harness7/7/runtimechildren2), so operator expectation toreject iswrong, OR a real source/spec violation? CompareactualPS51/7 APIs/source/r1+r2spec; do not simplygreen failure.",
+  "required": [
+    "Verifyarchive1179originalhashes+index/full command/report/nested evidence relevant to allcompletedphases",
+    "Read original stoppedoperatorrc2/progress/PS7snapinparser+report+runtimechildresults andPS51snapinresult",
+    "No newtests/network/models/sourceedits; sourceanalysis only. If evidenceinsufficient ->not_measured",
+    "If oracleincorrect, specifyexact classification/case + evidence and whetherremainingmatrixcancontinueunchangedH2 withoutweakening frozenreal-parser requirementacceptance",
+    "PreserveH1nativefailure, H2partialfailure, unfinishedmatrix; no allgatespass/classclosure/codeapproval/Humanaudit/land claim"
+  ],
+  "outputs": [
+    "AUX1-oracle-receipt.json",
+    "AUX1-oracle-final.txt"
+  ],
+  "receipt_required": [
+    "verdict",
+    "oracle_disposition",
+    "head",
+    "archive_sha256",
+    "findings",
+    "evidence",
+    "limitations"
+  ],
+  "deadline_minutes": 90
+}

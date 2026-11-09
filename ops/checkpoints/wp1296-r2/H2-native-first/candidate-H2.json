@@ -1,0 +1,26 @@
+{
+  "B": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "H": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+  "product_paths": [
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+  ],
+  "additions": 66,
+  "deletions": 2,
+  "actual_author_run": "b24840984f5c4686b3858034a78b84e9",
+  "requested_model": "gpt-6.1-sol",
+  "requested_effort": "high",
+  "served_model_effort": "KHONG_DO_DUOC",
+  "snapshot_delta": {
+    "removed": [
+      "[\"F\",\"39edc477d9c65fb6bd4c571342a6817b32b65bc0f6eb407b6c970e270d688460\",\"2e6167656e74732f736b696c6c732f70726f78696d612d636f6e74726f6c2f74657374732f50726f78696d614d616e69666573742e54657374732e707331\"]"
+    ],
+    "added": [
+      "[\"F\",\"fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e\",\"2e6167656e74732f736b696c6c732f70726f78696d612d636f6e74726f6c2f74657374732f50726f78696d614d616e69666573742e54657374732e707331\"]"
+    ]
+  },
+  "mechanical_commit_by": "dispatcher only; no productpatch",
+  "tests": "NOT_RUN_H2_YET",
+  "review": false,
+  "push": false
+}

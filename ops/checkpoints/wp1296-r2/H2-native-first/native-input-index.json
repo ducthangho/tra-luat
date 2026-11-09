@@ -1,0 +1,8 @@
+{
+  "candidate": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "zip_bytes": 190151,
+  "sha256": "f8e5419187367704b88cf7ee4045adc55a8f9cd80be5de0ca454ecfb7644293f",
+  "flat_committed_source_export": true,
+  "operator": "same frozenmatrix; normal copies now preserve originalmanifestbytes(no no-optextnormalization)",
+  "tests": "not_run"
+}

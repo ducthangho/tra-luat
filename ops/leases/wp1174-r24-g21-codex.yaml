@@ -25,21 +25,26 @@ authority_url: https://github.com/ducthangho/tra-luat/issues/1174
 recorded_by: Codex coordinator under explicit E2 owner delegation; no actual-human
   audit
 spec_path: ops/specs/wp1174-implementation-r24.md
-spec_hash: 7fdb763ccb23944e9e3d32fa0bac9463cd4c83a2b04b575ac72caac6782bd661
-spec_sha256_required: 7fdb763ccb23944e9e3d32fa0bac9463cd4c83a2b04b575ac72caac6782bd661
-spec_ref: refs/heads/ops/spec-wp1174-r24@f72b8bf02f86edf9307ef16710a737b1dcfb53fe
+spec_hash: 5d8dae8cf517f5eebee171668cb37de4a3d81c4e17f74315101019fcd91f4b9a
+spec_sha256_required: 5d8dae8cf517f5eebee171668cb37de4a3d81c4e17f74315101019fcd91f4b9a
+spec_ref: refs/heads/ops/spec-wp1174-r24@05398ced4c209c8ec6542f70af9531884cb888a6
 prompt_path: ops/specs/wp1174-implementation-r24.md
-prompt_sha256_required: 7fdb763ccb23944e9e3d32fa0bac9463cd4c83a2b04b575ac72caac6782bd661
+prompt_sha256_required: 5d8dae8cf517f5eebee171668cb37de4a3d81c4e17f74315101019fcd91f4b9a
 base_sha: 5ad99bb58c5d48eed1543e62298176d014f85ed8
 start_from_sha: 5ad99bb58c5d48eed1543e62298176d014f85ed8
 reviewed_sha_required: 5ad99bb58c5d48eed1543e62298176d014f85ed8
-write_set: &id001
+write_set:
 - .claude/dev/packet_loop.py
 - .claude/dev/packet_loop_test.py
 - docs/PROTOCOL_DA_PHIEN.md
 - ops/specs/wp1174-c5-adapter-design.md
 - ops/specs/wp1174-implementation-r17.md
-effective_write_set: *id001
+effective_write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/specs/wp1174-c5-adapter-design.md
+- ops/specs/wp1174-implementation-r17.md
 write_set_hash: 2f2c02976b0efd78e041a75028c378034be7d7bfef409817ad3adcafb1cf055c
 change_policy_sha: null
 change_policy_exception:
@@ -51,7 +56,12 @@ change_policy_exception:
   expires_at: '2026-11-10T02:25:32Z'
   scope: Same five source paths/6750 added lines; only product/test for three named
     defects; protocol/design/R17 frozen
-  effective_write_set: *id001
+  effective_write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - docs/PROTOCOL_DA_PHIEN.md
+  - ops/specs/wp1174-c5-adapter-design.md
+  - ops/specs/wp1174-implementation-r17.md
   canonical_policy_sha: null
   rule: exact closed set + NFC/casefold/symlink/prefix overlap against all live refs;
     every impact_hint/outside companion blocks and needs approved revision
@@ -119,8 +129,8 @@ template_only: false
 guard: 'Proposed J only: no source18 until exact actual owner/public activation/HDR/secret/head/runtime/full-fit;
   fresh source18<=45min, product/test three named defects only; source17/A terminal;
   no source19 or fake journal/native/human approval'
-spec_source_oid: f72b8bf02f86edf9307ef16710a737b1dcfb53fe
-spec_sha256: 7fdb763ccb23944e9e3d32fa0bac9463cd4c83a2b04b575ac72caac6782bd661
+spec_source_oid: 05398ced4c209c8ec6542f70af9531884cb888a6
+spec_sha256: 5d8dae8cf517f5eebee171668cb37de4a3d81c4e17f74315101019fcd91f4b9a
 exception_approval_comment_url: https://github.com/ducthangho/tra-luat/issues/1174
 reviewer: codex
 pull_request: 1275

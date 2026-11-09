@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "-B",
+    "/workspace/scratch/wp1296-spec-publish/.claude/dev/packet_loop.py",
+    "--state-dir",
+    "/workspace/scratch/proxima-remainder-20261109/r2/land-operator-state",
+    "ghi-uy-quyen",
+    "--action",
+    "merge",
+    "--nguoi-cap",
+    "ducthangho",
+    "--bang-chung",
+    "https://github.com/ducthangho/tra-luat/pull/1301#issuecomment-6736812696",
+    "--head-sha",
+    "15ad82f56924a0ccc99833ec73eec078ce00b726"
+  ],
+  "rc": 0,
+  "stdout": "đã ghi KHAI BÁO uỷ quyền 'merge' cho head 15ad82f56924 (cấp bởi ducthangho) — đây là LỜI KHAI, không phải bằng chứng\n",
+  "stderr": "",
+  "guard7_is_advisory_rolelabel_not_authoritycheck": true
+}

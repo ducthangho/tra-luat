@@ -1,0 +1,5 @@
+Packet1296 AUX6: PASSED — chỉ mechanical transport/provenance, không formalcodeapproval/humanaudit.
+Originalreview1c949f66c finished08:03:40Z/child0/launcher0; exactverdictIssue08:03:56Z trướcpush08:05:38Z. Rawrun/JSONL1,099,912bytes khớpimmutableprepushcommit.
+Decodedlastcompletedagentmessage=6899bytes EXACT original--output-last-message vàplaintextprojection; không thêmnewline/marker/đổiverdict. Derivedrun chỉđổi stdoutbyte/hash vàthêm explicitDERIVEDprovenance; mọiidentity/timestamp/exit/head/model/sandbox fields giữnguyên, originals khôngđổi.
+CanonicalK0-K7recordrc0 dùngmodeloffline route/plaintext; khônghumanpostpushfallback. K4khôngtựchứngminh toànprovenance; AUXđãđốichiếu riêng. Human2approvalbothaxes làsupplementactualtime/H2, khôngbackdate và khôngclaimmachinemeasuredreading.
+Không blockingdiscrepancy trongbridge. Freshfence/rules/Readyauto/normalmerge/MCI/M8 vẫn làđiều kiện riêng; passnày khôngtựReady/merge/land.

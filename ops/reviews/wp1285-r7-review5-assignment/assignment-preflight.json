@@ -1,0 +1,24 @@
+{
+  "status": "prepared_NOT_dispatched",
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "spec_sha256": "17d0257fc4d127991f42f56d1fdc2eda2e1c479685b7262728792a09771b164d",
+  "prompt_sha256": "58fb24a1a4962826c3d53b66e1d2e1a9b60d334903cd63603eb3600962ad20ce",
+  "workspace": "/workspace/scratch/wp1285-claude-cross-audit-H4",
+  "requested_model": "opus",
+  "requested_effort": "max",
+  "requested_toolset": [
+    "Read",
+    "Glob",
+    "Grep"
+  ],
+  "permission_mode": "plan",
+  "trust_probe": {
+    "trang_thai": "KHONG_DO_DUOC",
+    "chi_tiet": "thieu khoa trust Claude"
+  },
+  "model_invoked": false,
+  "Claude_calls_used": 0,
+  "formal_valid_count": 4,
+  "blocker": "Exact fresh clone lacks Claude trust key. Protocol8.1 forbids self-accept trust. Approved proposal excludes trust mutations. No bypass/alias workaround used.",
+  "at": "2026-11-09T01:52:21.992064+00:00"
+}

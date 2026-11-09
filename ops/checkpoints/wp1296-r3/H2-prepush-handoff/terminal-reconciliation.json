@@ -1,0 +1,14 @@
+{
+  "at": "2026-11-09T07:58:26.161157+00:00",
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "original_candidate_report_unchanged": true,
+  "author_terminal_model_measured": "gpt-6.1-sol",
+  "author_terminal_effort_measured": "high",
+  "author_terminal_sandbox_measured": true,
+  "original_early_unknown_model_and_tests_notrun_are_historical": "do not rewrite author handoff or originalcandidate snapshot",
+  "subsequent_operator_gates": "AUX2 passed native95observations/Linux1777strict184; sameH2 scope1file66+2; original failures retained",
+  "formal_review": "running independent freshxhigh run c949f66c126a459c8751c0ac0f717edc",
+  "sensitive_promotion": "HOLD actual newHcross/human pending",
+  "bundle_sha256": "6705f492c251c5689f485fe8264ea9c79778f07d50a0942c18277e67a1435f28",
+  "primary_product_pushes_used": 0
+}

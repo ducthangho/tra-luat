@@ -1,7 +1,7 @@
 dieu_kien_merge: ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 
-# WP1174 R24/g21 — final bounded source18 repair checkpoint
+# WP1174 r24 — final bounded source18 repair checkpoint (g21)
 
 packet_id: WP1174
 revision: 24

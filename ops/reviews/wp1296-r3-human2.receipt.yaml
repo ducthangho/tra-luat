@@ -1,0 +1,56 @@
+schema_version: 2
+receipt_id: wp1296-r3-human2-ducthangho-H2
+kind: review_delivery_receipt
+packet_id: wp1296
+packet_issue: 1296
+revision: 3
+generation: 3
+reviewed_sha: 15ad82f56924a0ccc99833ec73eec078ce00b726
+verdict: approve
+verdict_path: ops/reviews/wp1296-r3-human2/verdict.md
+verdict_sha256: 36bb4af7a22b6cf7d3ab0e10da62340f0d6bd7f3fa31b7bb8b685d3a0dac6f7b
+evidence_url: https://github.com/ducthangho/tra-luat/blob/3593a1b9a1f8877c6fb8d9214839f29979100556/ops/reviews/wp1296-r3-human2/verdict.md
+provider: human
+role: auditor
+nguoi_audit: ducthangho
+assurance: human_audited
+review_axes:
+- spec
+- standards_security
+model_reviewer_identity:
+  provider: human
+  surface: manual_audit
+  transport: human
+  phien_doc_lap: true
+  phien_doc_lap_can_cu: Actualowner directly approves bothaxes inresponse to immutableH2
+    humanbundle and asks publication; humanoutside actualCodexCLIauthor session
+  human_github_identity: ducthangho
+  evidence_ref: ops/reviews/wp1296-r3-human2/owner-comment-readback.json
+  KHONG_do_duoc: Humanstatement transported underexplicitinstruction; GitHubactoralone
+    isnot proof. No machineobservedreading or personallyruntests claimed. Actualwords
+    preserved without extra inventedattestation.
+github_submitter_identity:
+  actor: ducthangho
+  recorded_by: Codex dispatcher under explicit publish instruction
+  note: Machine transports actual human conclusion, not owner-typedcomment or model
+    pretendinghuman
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: Contentaddressed metadata-control-ref ancestry and realownercomment, not
+    requiredcheck or mergefact.
+independent_from_executor_session: true
+model_executor_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: b24840984f5c4686b3858034a78b84e9
+  model: gpt-6.1-sol
+  effort: high
+  model_evidence: do_may
+  model_evidence_ref: ops/reviews/wp1296-r3-review1/executor-run.json
+owner_audit_source: https://github.com/ducthangho/tra-luat/pull/1301#issuecomment-6736642798
+no_new_findings_reported_in_owner_response: true
+promotion_eligible_for_assurance: true
+remaining_gates: Freshrefs/rules/lease/K0K7/Readyauto/normalmerge/MCI/M8; not yet
+  Ready/merged/landed

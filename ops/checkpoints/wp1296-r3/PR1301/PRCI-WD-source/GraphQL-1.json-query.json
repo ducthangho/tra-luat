@@ -1,0 +1,6 @@
+{
+  "query": "query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt file { path repositoryFileUrl } checkSuite { commit { oid } } } } }",
+  "variables": {
+    "id": "WFR_kwLOTNeRjc8AAAAJ6iyB8g"
+  }
+}

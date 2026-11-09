@@ -1,0 +1,30 @@
+{
+  "schema": "wp1174_source16_operator_supplement.v1",
+  "status": "authorized_within_existing_owner_delegation_pending_actual_preflight_and_dispatch",
+  "operator_decision_utc": "2026-11-09T05:55:14.504872+00:00",
+  "owner_F_source18_basis": "https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6729819560",
+  "owner_G_time_basis": "https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6732765461",
+  "frozen_R22_spec_sha256": "93014799f12143ad9114979744ccec08d5cc00dab2006b7e9412fd4663ebaf2c",
+  "supplement_path": "ops/specs/wp1174-r22-source16-test-repair.md",
+  "supplement_sha256": "d9e635f5b32e8c281419a109fa12d727a49ad2becfae86c68963253980357dd4",
+  "source_slot": 16,
+  "source_used_before": 15,
+  "source_cap": 18,
+  "known_role_cap": 61,
+  "max_context_minutes": 45,
+  "generation": 19,
+  "revision": 22,
+  "input_head": "448d17baff13ae1beb869662a2ad81dd2d7aefde",
+  "mutable_source_paths": [
+    ".claude/dev/packet_loop_test.py"
+  ],
+  "manual_offline_bootstrap_fresh_source16_only": true,
+  "source15_closed": true,
+  "actual_dispatch_not_yet_claimed": true,
+  "all_prior_costs_retained": true,
+  "cloud_cap": 3040,
+  "hard_deadline": "2026-11-09T18:05:32Z",
+  "whole_remaining_at_preparation": 710,
+  "cloud_used_at_preparation": 2309,
+  "no_owner_approval_of_unseen_package_hash_claim": true
+}

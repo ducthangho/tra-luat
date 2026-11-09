@@ -1,0 +1,22 @@
+{
+  "at": "2026-11-09T08:05:36.602568+00:00",
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "branch": "agent/wp1296-r3-g3-codex",
+  "primary_product_push_number": 1,
+  "approved_receipt": {
+    "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+    "verdict": "approved",
+    "assurance": "same_provider_approved",
+    "promotion_eligible": false,
+    "original_commit": "1a7025751946185e8ad2592a4add1de51df1b8fe",
+    "receipt_commit": "f16c9dbc69809008ea4966516463ff6aa5a7c359",
+    "receipt_path": "ops/reviews/wp1296-r3-review1.receipt.yaml",
+    "original_body_exact": true,
+    "comment": "https://github.com/ducthangho/tra-luat/issues/1296#issuecomment-6735182321",
+    "v2_rc": 0,
+    "model_measured": "gpt-6.1-sol",
+    "reviewer_effort_measured": "xhigh",
+    "executor_effort_measured": "high"
+  },
+  "no_force": true
+}

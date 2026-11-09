@@ -1,0 +1,56 @@
+{
+  "at": "2026-11-09T08:05:36.602230+00:00",
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "active_holder_ids": [
+    "wp1296-r3-g3-codex"
+  ],
+  "lease_checks": [
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-B",
+        "/workspace/scratch/wp1296-spec-publish/ops/lease_publish.py",
+        "check",
+        "/workspace/scratch/wp1296-spec-publish/ops/leases/wp1296-r3-g3-codex.yaml",
+        "--root",
+        "/workspace/scratch/wp1296-spec-publish"
+      ],
+      "rc": 0,
+      "stdout": "LỆNH check KHÔNG CHẠY hai lớp GitHub: đo ISSUE/PR và dò comment; dùng `kiem-github`\nlease wp1296-r3-g3-codex ĐĂNG ĐƯỢC — issue #1296, neo 15ad82f56924, hết hạn 2026-11-09T13:39:47Z, prompt ops/prompts/wp1296-r3-g3-readonly-adoption.md khớp băm 97d5967f3307\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-B",
+        "/workspace/scratch/wp1296-spec-publish/ops/lease_publish.py",
+        "kiem-github",
+        "/workspace/scratch/wp1296-spec-publish/ops/leases/wp1296-r3-g3-codex.yaml",
+        "--root",
+        "/workspace/scratch/wp1296-spec-publish"
+      ],
+      "rc": 9,
+      "stdout": "",
+      "stderr": "CHAN [9]: lease 'wp1296-r3-g3-codex' đã có comment 6734952241 trên issue #1296 — bỏ qua\n",
+      "existing_projection_verified_exact": true,
+      "meaning": "dedup publication guard, not invalid lease"
+    }
+  ],
+  "delivery": {
+    "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+    "verdict": "approved",
+    "assurance": "same_provider_approved",
+    "promotion_eligible": false,
+    "original_commit": "1a7025751946185e8ad2592a4add1de51df1b8fe",
+    "receipt_commit": "f16c9dbc69809008ea4966516463ff6aa5a7c359",
+    "receipt_path": "ops/reviews/wp1296-r3-review1.receipt.yaml",
+    "original_body_exact": true,
+    "comment": "https://github.com/ducthangho/tra-luat/issues/1296#issuecomment-6735182321",
+    "v2_rc": 0,
+    "model_measured": "gpt-6.1-sol",
+    "reviewer_effort_measured": "xhigh",
+    "executor_effort_measured": "high"
+  },
+  "sourceaudit_sha256": "faecb75ac26e7bb6ae8d0e498d2ed7bfedb4e179e4824858ca99d5353158b33a",
+  "same_product_H2": true
+}

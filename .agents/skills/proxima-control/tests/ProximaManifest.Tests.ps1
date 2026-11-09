@@ -47,12 +47,18 @@ function Assert-NoScriptRequirements([ScriptBlockAst]$Block) {
     if ($null -ne $requirements -and $requirements.GetType() -ne $rp.PropertyType) {
         Stop-Case 'EXECUTABLE_STATEMENT: ScriptRequirements metadata type unsupported'
     }
-    # ShellId is exposed as RequiredApplicationId. Snap-ins and PSEditions are runtime-dependent APIs.
+    # Native PS5.1/7 API: ShellId is RequiredApplicationId; RequiresPSSnapIns exists only on Desktop.
+    # Check collection definitions and element types without resolving the absent snap-in type on Core.
     # Unknown members fail closed even when null: a new metadata kind needs an explicit default policy.
     $fieldTypes = @{
         RequiredApplicationId = [string]; RequiredPSVersion = [version]; IsElevationRequired = [bool]
         RequiredAssemblies = [Collections.ICollection]; RequiredModules = [Collections.ICollection]
-        RequiredPSSnapIns = [Collections.ICollection]; RequiredPSEditions = [Collections.ICollection]
+        RequiresPSSnapIns = [Collections.ICollection]; RequiredPSEditions = [Collections.ICollection]
+    }
+    $collectionElements = @{
+        RequiredAssemblies = 'System.String'; RequiredPSEditions = 'System.String'
+        RequiredModules = 'Microsoft.PowerShell.Commands.ModuleSpecification'
+        RequiresPSSnapIns = 'System.Management.Automation.PSSnapInSpecification'
     }
     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     if ($rp.PropertyType.GetFields($flags).Length) { Stop-Case 'EXECUTABLE_STATEMENT: ScriptRequirements unexpected public field' }
@@ -61,7 +67,14 @@ function Assert-NoScriptRequirements([ScriptBlockAst]$Block) {
         if (-not $fieldTypes.ContainsKey($name) -or -not $seen.Add($name) -or -not $pr.CanRead -or
             $pr.GetIndexParameters().Length -ne 0) { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements unsupported member $name" }
         $expected = $fieldTypes[$name]
-        if (-not $expected.IsAssignableFrom($pr.PropertyType)) { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements unsupported type for $name" }
+        if ($expected -eq [Collections.ICollection]) {
+            $arguments = @($pr.PropertyType.GetGenericArguments())
+            if (-not $pr.PropertyType.IsGenericType -or
+                $pr.PropertyType.GetGenericTypeDefinition().FullName -cne 'System.Collections.ObjectModel.ReadOnlyCollection`1' -or
+                $arguments.Count -ne 1 -or $arguments[0].FullName -cne $collectionElements[$name]) {
+                Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements unsupported type for $name"
+            }
+        } elseif ($pr.PropertyType -ne $expected) { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements unsupported type for $name" }
         if ($null -eq $requirements) { continue }
         try { $value = $pr.GetValue($requirements) }
         catch { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements unreadable member $name" }
@@ -69,7 +82,7 @@ function Assert-NoScriptRequirements([ScriptBlockAst]$Block) {
             if ($expected -eq [bool]) { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements invalid default for $name" }
             continue
         }
-        if (-not $expected.IsInstanceOfType($value)) { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements invalid value for $name" }
+        if (-not $pr.PropertyType.IsInstanceOfType($value)) { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements invalid value for $name" }
         $meaningful = $true
         if ($expected -eq [string]) { $meaningful = $value.Length -ne 0 }
         elseif ($expected -eq [bool]) { $meaningful = $value }
@@ -77,8 +90,11 @@ function Assert-NoScriptRequirements([ScriptBlockAst]$Block) {
         # Every non-null Version is a requirement, including 0.0; collection entries are never evaluated.
         if ($meaningful) { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements.$name" }
     }
-    foreach ($name in 'RequiredApplicationId', 'RequiredPSVersion', 'IsElevationRequired', 'RequiredAssemblies', 'RequiredModules') {
+    foreach ($name in 'RequiredApplicationId', 'RequiredPSVersion', 'IsElevationRequired', 'RequiredAssemblies', 'RequiredModules', 'RequiredPSEditions') {
         if (-not $seen.Contains($name)) { Stop-Case "EXECUTABLE_STATEMENT: ScriptRequirements missing member $name" }
+    }
+    if ($PSVersionTable.PSEdition -ceq 'Desktop' -and -not $seen.Contains('RequiresPSSnapIns')) {
+        Stop-Case 'EXECUTABLE_STATEMENT: ScriptRequirements missing member RequiresPSSnapIns'
     }
 }
 function Invoke-Case([string]$Id, [scriptblock]$Body) {

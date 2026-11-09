@@ -60,8 +60,8 @@ scoped_cli_writable_root: /workspace/scratch/wp1296-r2-g2-codex/.agents/skills/p
 leased_at_utc: '2026-11-09T06:51:38Z'
 heartbeat_at: '2026-11-09T06:51:38Z'
 heartbeat_required_minutes: 360
-lease_until: '2026-11-09T12:51:38Z'
-lease_expires_at_utc: '2026-11-09T12:51:38Z'
+lease_until: '2026-11-09T07:39:47Z'
+lease_expires_at_utc: '2026-11-09T07:39:47Z'
 run_minutes: 45
 attempts_limit: 2
 review_rounds_limit: 2
@@ -70,7 +70,7 @@ same_failure_limit: 2
 primary_product_pushes_limit: 1
 requires_live: false
 uy_quyen_merge: false
-status: leased
+status: retired
 assurance_target: same_provider_approved
 promotion_hold: Sensitive actual independent sufficient assurance on new exactH stillmandatory;
   no inheritedhumanaudit or H4waiver
@@ -78,3 +78,10 @@ history_source: R1actualauthor1/nativePS51fail plusparent1285closed/countersreta
   boundedONEcompatibilityauthor2, nofurtherretry
 thay_the_cho:
 - wp1296-r1-g1-codex
+retired_at: '2026-11-09T07:39:47Z'
+retired_at_utc: '2026-11-09T07:39:47Z'
+original_lease_until: '2026-11-09T12:51:38Z'
+da_bi_thay_the: wp1296-r3-g3-codex
+replaced_at_utc: '2026-11-09T07:39:47Z'
+replacement_reason: ReadonlyH2adoption, literal/schemaacceptanceclarification and
+  sourceafter/ledger supplementalproof, no code/model author

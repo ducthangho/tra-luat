@@ -1,0 +1,20 @@
+{
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "current_target_D": "4068b3a2a0087db287ea979eccbd372a7a0938d7",
+  "merge_method": "normal merge commit, expectedhead; noadmin/force/branchdelete",
+  "expected_M_parents": [
+    "4068b3a2a0087db287ea979eccbd372a7a0938d7",
+    "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c"
+  ],
+  "expected_M_tree": "f20cb1aa78756ae0a0b818c34e8d90f152b06a2f",
+  "remaining_shared_calls": {
+    "13": "Ready automatic review conservatively reserved, no newformal",
+    "14": "Actual canonicalMCI complete source auditor"
+  },
+  "canonical_MCI": "Observe automatic master push on actualM, requireallUbuntu/allrequired5contexts/actualMcheckout/actualGraphQLWorkflowRun.file/officialartifact digest/lifecycleidentity/positive1777 and completeoriginal23logs/fullsourceaudit; do not relabel PRCI asMCI",
+  "M8": "Actual structuredrecord/lease retirement actualUTC/Issuepost/readback/D1D4; passiveonearchivalPR onlyops/land+reviews, no recursivebookkeeping review, no leases/specs inarchivallane",
+  "P3": "waivedexactH4 byowner6731269220/debt1295OPEN/notfixed",
+  "human_audit": "actualownerstatement6731901025, v2receipt183f00592b817a22fc5de9c2802d6721778c6c92",
+  "CI_Windows": "notrun perowner; no LIVE",
+  "prepared_at": "2026-11-09T04:37:47.228413+00:00"
+}

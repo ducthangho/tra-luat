@@ -1,0 +1,51 @@
+from common import *
+import concurrent.futures,fnmatch,yaml
+assert (W/'bootstrap-result.json').exists(),'bootstrap unfinished'
+stage=sys.argv[1];A=W/(stage+'-inputs');assert not A.exists();A.mkdir()
+assert git('rev-parse','HEAD') and not git('status','--porcelain')
+assert git('remote','get-url','origin')=='https://github.com/ducthangho/tra-luat.git'
+assert not(P/'.git/objects/info/alternates').exists()
+assert gitb('show',D+':.claude/dev/packet_loop.py')==(P/'.claude/dev/packet_loop.py').read_bytes()
+subprocess.run([GIT,'-C',str(MIRROR),'fetch','--prune','origin','+refs/heads/*:refs/heads/*'],env=env,check=True,timeout=900)
+subprocess.run([GIT,'-C',str(P),'fetch','origin','refs/heads/master:refs/remotes/origin/master'],env=env,check=True,timeout=900)
+assert git('rev-parse','origin/master')==D and git('rev-parse','refs/heads/agent/wp1285-r5-g6-codex',repo=MIRROR)==H
+remote=gitb('ls-remote','--heads','origin',repo=MIRROR);(A/'remote-heads.raw').write_bytes(remote)
+local={ref:oid for oid,ref in (l.split() for l in git('show-ref','--heads',repo=MIRROR).splitlines())}
+for l in remote.decode().splitlines():
+ oid,ref=l.split();assert local.get(ref)==oid,('stale',ref)
+lp=load_module('lp_recovery',P/'ops/lease_publish.py');leases=lp._quet_lease_toan_kho(MIRROR);paths=['.agents/skills/proxima-control/scripts/ProximaControl.psd1','.agents/skills/proxima-control/SKILL.md','.agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1'];matches={p:[] for p in paths};time=datetime.datetime.now(datetime.timezone.utc)
+for row in leases:
+ d=row['lease']
+ for p in paths:
+  overlap=False
+  for entry in d.get('write_set',[]) if isinstance(d.get('write_set'),list) else []:
+   if isinstance(entry,str):
+    q=entry.removeprefix('planned:').strip().replace(chr(92),'/');overlap|=q==p or (q.endswith('/') and p.startswith(q)) or ('*' in q and fnmatch.fnmatchcase(p,q))
+   elif isinstance(entry,dict) and isinstance(entry.get('path'),str):
+    q=entry['path'].rstrip('/');overlap|=p==q or (entry.get('type')=='prefix' and p.startswith(q+'/'))
+  if overlap:
+   state=lp._phan_loai_lease(d,time);ret=lp._bia_mo_doi_xung(d,leases) if state=='CÒN_HẠN' else None;assert ret is not False
+   matches[p].append({'lease_id':d.get('lease_id'),'ref':row['ref'],'blob':row['blob'],'state':state,'reciprocal_retired':ret,'active':state=='CÒN_HẠN' and ret is not True})
+ids=sorted({x['lease_id'] for v in matches.values() for x in v if x['active']});assert ids==['wp1285-r8-g9-codex-human'],ids
+holder={'measured_at_utc':now(),'remote_heads':len(remote.splitlines()),'remote_heads_sha256':hashlib.sha256(remote).hexdigest(),'source_consumer_sha256':sha(P/'ops/lease_publish.py'),'lease_blob_path_pairs':len(leases),'active_lease_ids':ids,'paths':matches};save(A/'holders.json',holder)
+rows=[('PR.json','repos/ducthangho/tra-luat/pulls/1294',False),('repository.json','repos/ducthangho/tra-luat',False),('master.json','repos/ducthangho/tra-luat/branches/master',False),('rules.json','repos/ducthangho/tra-luat/rules/branches/master',False),('check-runs.json',f'repos/ducthangho/tra-luat/commits/{H}/check-runs?per_page=100',True),('workflow-runs.json',f'repos/ducthangho/tra-luat/actions/runs?head_sha={H}&per_page=100',True),('jobs.json','repos/ducthangho/tra-luat/actions/runs/42539770394/attempts/1/jobs?per_page=100',True),('reviews-pages.json','repos/ducthangho/tra-luat/pulls/1294/reviews?per_page=100',True),('review_comments-pages.json','repos/ducthangho/tra-luat/pulls/1294/comments?per_page=100',True),('issue_comments-pages.json','repos/ducthangho/tra-luat/issues/1294/comments?per_page=100',True),('human.json','repos/ducthangho/tra-luat/issues/comments/6731901025',False),('P3-waiver.json','repos/ducthangho/tra-luat/issues/comments/6731269220',False)]
+def get(row):n,ep,pages=row;v=api(ep,pages);save(A/n,v);return n,v
+with concurrent.futures.ThreadPoolExecutor(max_workers=6) as ex:r=dict(ex.map(get,rows))
+pr=r['PR.json'];assert pr['head']['sha']==H and pr['state']=='open' and not pr['merged'];assert r['master.json']['commit']['sha']==D
+human=r['human.json'];assert human['user']['login']=='ducthangho' and human['body']==(P/'ops/reviews/wp1285-r8-human6/verdict.md').read_text(encoding='utf-8')
+waiver=r['P3-waiver.json'];assert waiver['user']['login']=='ducthangho'
+assert waiver['body']==json.loads((P/'ops/checkpoints/wp1285-r8-human/S3-P3-owner-waiver-comment-readback.json').read_text(encoding='utf-8'))['body']
+checks=[c for page in r['check-runs.json'] for c in page['check_runs']];assert checks and all(c['status']=='completed' and c['conclusion']=='success' for c in checks),[(c['name'],c['status'],c['conclusion']) for c in checks]
+required={'gate (ubuntu-latest)','gate-registry (ubuntu-latest)','gate-packet-loop (ubuntu-latest)','gate-ops (ubuntu-latest)','gate-cong-cu-gop (ubuntu-latest)'};live={v['context'] for rule in r['rules.json'] if rule['type']=='required_status_checks' for v in rule['parameters']['required_status_checks']};assert required|live<={c['name'] for c in checks};assert r['repository.json']['allow_merge_commit'] and not r['repository.json']['delete_branch_on_merge']
+connector={'repo':'ducthangho/tra-luat','pr':1294,'head_sha':H}
+for ep in ['reviews','review_comments','issue_comments']:
+ items=[x for page in r[ep+'-pages.json'] for x in page];connector[ep]={'total_count':len(items),'items':items}
+save(A/'connector.json',connector);sys.path.insert(0,str(P/'.claude/dev'));pl=load_module('pl_recovery',P/'.claude/dev/packet_loop.py');p3,marks=pl._doc_connector(str(A/'connector.json'),'ducthangho/tra-luat',1294,H);assert not p3
+v2=subprocess.run([sys.executable,'-B',str(P/'ops/bien_nhan_v2.py'),'--root',str(P)],env=env,capture_output=True);(A/'v2.stdout').write_bytes(v2.stdout);(A/'v2.stderr').write_bytes(v2.stderr);assert v2.returncode==0,(v2.stdout[-1500:],v2.stderr[-1000:])
+win=P/'ops/checkpoints/wp1285-r6/corrective-push2/S3-H4-windows-projection.json'
+assert win.is_file(),'frozen original Windows projection missing'
+cmd=[sys.executable,'-B',str(P/'.claude/dev/packet_loop.py'),'--state-dir',str(W/'land-state'),'kiem-merge','--root',str(P),'--repo','ducthangho/tra-luat','--head',H,'--base',E,'--spec','ops/specs/wp1285-r8.md','--lease',str(P/'ops/leases/wp1285-r8-g9-codex-human.yaml'),'--workflow-runs',str(A/'workflow-runs.json'),'--check-runs',str(A/'check-runs.json'),'--connector',str(A/'connector.json'),'--offline-run-json',str(P/'ops/reviews/wp1285-r6-review4/run.json'),'--offline-stdout',str(P/'ops/reviews/wp1285-r6-review4/stdout.log'),'--pr','1294','--workflow-jobs',str(A/'jobs.json'),'--windows-json',str(win),'--p3-offline','manifest-requires-guard-comment-regex','--chu-kho-comment',str(A/'P3-waiver.json')]
+q=subprocess.run(cmd,capture_output=True,env=env);(A/'K0-K7.log').write_bytes(q.stdout+q.stderr);assert q.returncode==0,(q.stdout[-2000:],q.stderr[-1000:])
+b=json.loads((P/'ops/checkpoints/wp1285-r8-human/S3-live-budget.json').read_text(encoding='utf-8'));b.update(code_review_rounds_used=6,human_audits_used=1,status='Human6 actualapprove/v2; recoveryfreshgatespassed, Ready/merge notyet',as_of=now());assert b['codex_review_calls_used']==12 and b['primary_product_pushes_used']==2 and b['supplemental_Claude_assurance_calls_used']==1
+if not(W/'budget.json').exists():save(W/'budget.json',b)
+out={'at':now(),'head':H,'current_target_D':D,'PR_event_base_sha':pr['base']['sha'],'draft':pr['draft'],'checks_success':len(checks),'required_canonical_plus_live':sorted(required|live),'connector_marks':marks,'connector_no_findings':True,'human_audited':True,'human_comment':human['html_url'],'P3_waiver_debt1295':True,'sole_holder':ids,'K0_K7_rc':0,'v2_rc':0,'source':'FreshASUSmechanicaldispatcher gates, no newmodel/WindowsCI/productpatch','Ready':False,'merged':False,'landed':False};save(A/'summary.json',out);print(json.dumps(out),flush=True)

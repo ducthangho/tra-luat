@@ -1,0 +1,21 @@
+from pathlib import Path
+import os,sys,json,subprocess,datetime,hashlib,importlib.util
+sys.dont_write_bytecode=True
+for stream in [sys.stdout,sys.stderr]:
+ if hasattr(stream,'reconfigure'):stream.reconfigure(encoding='utf-8',errors='backslashreplace')
+W=Path(r'C:\Users\admin\tl-work\wp1285-land-recovery');P=W/'control';MIRROR=W/'holder-cache.git'
+GIT=r'C:\Program Files\Git\cmd\git.exe';GH=r'C:\Program Files\GitHub CLI\gh.exe'
+H='ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c';E='eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee';D='4068b3a2a0087db287ea979eccbd372a7a0938d7'
+sys.path.insert(0,str(W/'deps'))
+env=os.environ.copy();env.update(PYTHONPATH=str(W/'deps'),PYTHONDONTWRITEBYTECODE='1',PYTHONUTF8='1',PYTHONIOENCODING='utf-8',PYTHONPYCACHEPREFIX=str(W/'runtime-cache'),GIT_TERMINAL_PROMPT='0',GH_PROMPT_DISABLED='1',PATH=str(Path(GIT).parent)+';'+str(Path(GH).parent)+';'+env.get('PATH',''))
+for k in list(env):
+ if k.startswith('TL_') or k in ['GH_DEBUG','GIT_TRACE','GIT_TRACE_CURL','GIT_TRACE_PACKET','GIT_CURL_VERBOSE','GIT_DIR','GIT_WORK_TREE','GIT_INDEX_FILE','GIT_OBJECT_DIRECTORY','GIT_ALTERNATE_OBJECT_DIRECTORIES','CODEX_AUTH_JSON','OPENAI_API_KEY','ANTHROPIC_API_KEY','CLAUDE_CODE_OAUTH_TOKEN','PROXIMA_API_KEY']:env.pop(k,None)
+env.update(GIT_CONFIG_COUNT='2',GIT_CONFIG_KEY_0='credential.helper',GIT_CONFIG_VALUE_0='',GIT_CONFIG_KEY_1='credential.helper',GIT_CONFIG_VALUE_1='!"C:/Program Files/GitHub CLI/gh.exe" auth git-credential')
+def now():return datetime.datetime.now(datetime.timezone.utc).isoformat()
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def save(p,v):p=Path(p);p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(v,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+def git(*a,repo=P):return subprocess.check_output([GIT,'-C',str(repo),*a],env=env,text=True,encoding='utf-8',timeout=120).strip()
+def gitb(*a,repo=P):return subprocess.check_output([GIT,'-C',str(repo),*a],env=env,timeout=120)
+def api(ep,pages=False):return json.loads(subprocess.check_output([GH,'api']+(['--paginate','--slurp'] if pages else [])+[ep],env=env,timeout=90))
+def load_module(name,path):
+ spec=importlib.util.spec_from_file_location(name,path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m

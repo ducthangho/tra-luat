@@ -1,0 +1,234 @@
+{
+  "measured_at_utc": "2026-11-09T04:31:10.344434+00:00",
+  "remote_heads": 757,
+  "remote_heads_sha256": "614b053b27179c1dca3422db04b8e2846eb36dfe3ea93698b526ca0afc27bef3",
+  "source_consumer_sha256": "a4bf95b539e077edbb706afee6fc37b157815c0c246ca1bb01b307106d7be480",
+  "lease_blob_path_pairs": 904,
+  "active_lease_ids": [
+    "wp1285-r8-g9-codex-human"
+  ],
+  "paths": {
+    ".agents/skills/proxima-control/scripts/ProximaControl.psd1": [
+      {
+        "lease_id": "wp1285-r1-g1-claude",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "8151cd68bed53b352426d2c409a405510822320c",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r2-g2-claude",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "4a9617369cfd146c5ba5ccf45830b0384945cb84",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r2-g3-claude",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "283a1cd60267a0165fcc82a161f181f855814caf",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r3-g4-agy",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "98250a93a7d36b2d426fe982a4ce425ff1074814",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r4-g5-codex",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "5e00875eff4a9e6afd851877869cc345c009cfc7",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r5-g6-codex",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "4d9207ee14d3f5be9358018a1a9b98262cdc260a",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r6-g7-codex",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "3341bd2950a63153c66f35f97df61729a43f84fe",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r7-g8-codex",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "954e220472e3c65486abc22bf21022afc4d49c77",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r8-g9-codex-human",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "f345639fcffb66a47c12a718ff5d3875f7a11781",
+        "state": "CÒN_HẠN",
+        "reciprocal_retired": null,
+        "active": true
+      }
+    ],
+    ".agents/skills/proxima-control/SKILL.md": [
+      {
+        "lease_id": "wp1285-r1-g1-claude",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "8151cd68bed53b352426d2c409a405510822320c",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r2-g2-claude",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "4a9617369cfd146c5ba5ccf45830b0384945cb84",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r2-g3-claude",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "283a1cd60267a0165fcc82a161f181f855814caf",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r3-g4-agy",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "98250a93a7d36b2d426fe982a4ce425ff1074814",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r4-g5-codex",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "5e00875eff4a9e6afd851877869cc345c009cfc7",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r5-g6-codex",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "4d9207ee14d3f5be9358018a1a9b98262cdc260a",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r6-g7-codex",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "3341bd2950a63153c66f35f97df61729a43f84fe",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r7-g8-codex",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "954e220472e3c65486abc22bf21022afc4d49c77",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r8-g9-codex-human",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "f345639fcffb66a47c12a718ff5d3875f7a11781",
+        "state": "CÒN_HẠN",
+        "reciprocal_retired": null,
+        "active": true
+      }
+    ],
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1": [
+      {
+        "lease_id": "wp1285-r1-g1-claude",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "8151cd68bed53b352426d2c409a405510822320c",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r2-g2-claude",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "4a9617369cfd146c5ba5ccf45830b0384945cb84",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r2-g3-claude",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "283a1cd60267a0165fcc82a161f181f855814caf",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r3-g4-agy",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "98250a93a7d36b2d426fe982a4ce425ff1074814",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r4-g5-codex",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "5e00875eff4a9e6afd851877869cc345c009cfc7",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r5-g6-codex",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "4d9207ee14d3f5be9358018a1a9b98262cdc260a",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r6-g7-codex",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "3341bd2950a63153c66f35f97df61729a43f84fe",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r7-g8-codex",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "954e220472e3c65486abc22bf21022afc4d49c77",
+        "state": "HẾT_HẠN",
+        "reciprocal_retired": null,
+        "active": false
+      },
+      {
+        "lease_id": "wp1285-r8-g9-codex-human",
+        "ref": "refs/heads/ops/wp1285-spec",
+        "blob": "f345639fcffb66a47c12a718ff5d3875f7a11781",
+        "state": "CÒN_HẠN",
+        "reciprocal_retired": null,
+        "active": true
+      }
+    ]
+  }
+}

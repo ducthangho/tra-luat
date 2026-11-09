@@ -1,0 +1,20 @@
+{
+  "at": "2026-11-09T04:26:59.727042+00:00",
+  "host": "ASUS-LAPTOP",
+  "mirror": "C:\\Users\\admin\\tl-work\\wp1285-land-recovery\\holder-cache.git",
+  "control": "C:\\Users\\admin\\tl-work\\wp1285-land-recovery\\control",
+  "Python": "C:\\Python313\\python.exe",
+  "Git": "C:\\Program Files\\Git\\cmd\\git.exe",
+  "GH": "C:\\Program Files\\GitHub CLI\\gh.exe",
+  "yaml_wheels_verified_against_PyPI": {
+    "pyyaml-6.0.3-cp313-cp313-win_amd64.whl": "79005a0d97d5ddabfeeea4cf676af11e647e41d81c9a7722a193022accdb6b7c"
+  },
+  "free_disk_before_remaining_work": 11408183296,
+  "environment_scope": "Only child Git credentialhelper/PYTHONPATH; no auth/globalsettings/hooks/trust changes",
+  "cloud_failure": "execserver disconnected/unavailable before Ready/merge; neither action sent",
+  "initial_bootstrap_dispatch_failure": "First write lacked parentdirectory and Python exited filemissing; no git/model/product activity; parentcreated and filewriteconfirmed before this invocation",
+  "source_head_H4": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "human6_receipt_source": "183f00592b817a22fc5de9c2802d6721778c6c92:ops/reviews/wp1285-r8-human6.receipt.yaml",
+  "productpatch": false,
+  "model_invoked": false
+}

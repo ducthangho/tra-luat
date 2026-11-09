@@ -1,0 +1,26 @@
+from pathlib import Path
+import os,sys,subprocess,json,datetime,hashlib,urllib.request,shutil
+W=Path(r'C:\Users\admin\tl-work\wp1285-land-recovery');GIT=r'C:\Program Files\Git\cmd\git.exe';GH=r'C:\Program Files\GitHub CLI\gh.exe'
+W.mkdir(exist_ok=True);assert not (W/'bootstrap-result.json').exists(),'alreadybootstrapped; do not repeat'
+(W/'logs').mkdir(exist_ok=True);env=os.environ.copy();env.update(PYTHONDONTWRITEBYTECODE='1',PYTHONUTF8='1',PYTHONIOENCODING='utf-8',GIT_TERMINAL_PROMPT='0',PATH=str(Path(GIT).parent)+';'+str(Path(GH).parent)+';'+env.get('PATH',''))
+for k in ['GH_DEBUG','GIT_TRACE','GIT_TRACE_CURL','GIT_TRACE_PACKET','GIT_CURL_VERBOSE']:env.pop(k,None)
+env.update(GIT_CONFIG_COUNT='2',GIT_CONFIG_KEY_0='credential.helper',GIT_CONFIG_VALUE_0='',GIT_CONFIG_KEY_1='credential.helper',GIT_CONFIG_VALUE_1='!"C:/Program Files/GitHub CLI/gh.exe" auth git-credential')
+def run(args,label,cwd=None,timeout=900):
+ q=subprocess.run(args,cwd=cwd,env=env,capture_output=True,timeout=timeout);(W/'logs'/(label+'.stdout')).write_bytes(q.stdout);(W/'logs'/(label+'.stderr')).write_bytes(q.stderr)
+ print(json.dumps({'label':label,'rc':q.returncode}),flush=True);assert q.returncode==0,(label,q.stderr[-600:].decode(errors='replace'));return q.stdout
+run([GH,'api','repos/ducthangho/tra-luat'],'repo-info')
+mirror=W/'holder-cache.git';control=W/'control';assert not mirror.exists() and not control.exists(),'existingclone, reconcile not recreate'
+run([GIT,'init','--bare',str(mirror)],'init');run([GIT,'-C',str(mirror),'remote','add','origin','https://github.com/ducthangho/tra-luat.git'],'remote')
+run([GIT,'-C',str(mirror),'fetch','--prune','origin','+refs/heads/*:refs/heads/*'],'fetchall',timeout=1800)
+run([GIT,'clone','--no-hardlinks','--no-checkout',str(mirror),str(control)],'controlclone')
+run([GIT,'-C',str(control),'config','core.autocrlf','false'],'autocrlf');run([GIT,'-C',str(control),'remote','set-url','origin','https://github.com/ducthangho/tra-luat.git'],'controlorigin')
+run([GIT,'-C',str(control),'checkout','-b','ops/wp1285-spec','origin/ops/wp1285-spec'],'checkoutcontrol')
+run([GIT,'-C',str(control),'config','user.name','Codex dispatcher'],'gitname');run([GIT,'-C',str(control),'config','user.email','codex@openai.com'],'gitemail')
+run([GIT,'-C',str(control),'fetch','origin','refs/heads/master:refs/remotes/origin/master'],'fetchmaster')
+deps=W/'deps';wheels=W/'wheels';wheels.mkdir()
+run([sys.executable,'-B','-m','pip','download','--disable-pip-version-check','--no-cache-dir','--only-binary=:all:','--no-deps','--index-url','https://pypi.org/simple','--dest',str(wheels),'PyYAML==6.0.3'],'yaml-download')
+info=json.load(urllib.request.urlopen('https://pypi.org/pypi/PyYAML/6.0.3/json',timeout=30));names={x['filename']:x['digests']['sha256'] for x in info['urls']};digests={}
+for p in wheels.iterdir():d=hashlib.sha256(p.read_bytes()).hexdigest();assert names[p.name]==d;digests[p.name]=d
+run([sys.executable,'-B','-m','pip','install','--disable-pip-version-check','--no-cache-dir','--no-index','--find-links',str(wheels),'--target',str(deps),'PyYAML==6.0.3'],'yaml-install')
+out={'at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'host':os.environ.get('COMPUTERNAME'),'mirror':str(mirror),'control':str(control),'Python':sys.executable,'Git':GIT,'GH':GH,'yaml_wheels_verified_against_PyPI':digests,'free_disk_before_remaining_work':shutil.disk_usage(W).free,'environment_scope':'Only child Git credentialhelper/PYTHONPATH; no auth/globalsettings/hooks/trust changes','cloud_failure':'execserver disconnected/unavailable before Ready/merge; neither action sent','initial_bootstrap_dispatch_failure':'First write lacked parentdirectory and Python exited filemissing; no git/model/product activity; parentcreated and filewriteconfirmed before this invocation','source_head_H4':'ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c','human6_receipt_source':'183f00592b817a22fc5de9c2802d6721778c6c92:ops/reviews/wp1285-r8-human6.receipt.yaml','productpatch':False,'model_invoked':False}
+(W/'bootstrap-result.json').write_text(json.dumps(out,indent=2)+'\n');print(json.dumps(out),flush=True)

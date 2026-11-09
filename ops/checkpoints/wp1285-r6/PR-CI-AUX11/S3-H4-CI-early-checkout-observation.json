@@ -1,0 +1,154 @@
+{
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "actual_synthetic_checkout": "0fbb45b745b26b28864c4e09492be2a29fc94b04",
+  "actual_parents": [
+    "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+    "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c"
+  ],
+  "actual_tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+  "completed_jobs_verified": 10,
+  "observations": [
+    {
+      "job_id": 128911866075,
+      "dong_sha": [
+        "0fbb45b745b26b28864c4e09492be2a29fc94b04"
+      ],
+      "sha": "0fbb45b745b26b28864c4e09492be2a29fc94b04",
+      "parents": [
+        "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+        "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c"
+      ],
+      "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 128911924610,
+      "dong_sha": [
+        "0fbb45b745b26b28864c4e09492be2a29fc94b04"
+      ],
+      "sha": "0fbb45b745b26b28864c4e09492be2a29fc94b04",
+      "parents": [
+        "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+        "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c"
+      ],
+      "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 128911924622,
+      "dong_sha": [
+        "0fbb45b745b26b28864c4e09492be2a29fc94b04"
+      ],
+      "sha": "0fbb45b745b26b28864c4e09492be2a29fc94b04",
+      "parents": [
+        "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+        "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c"
+      ],
+      "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 128911924627,
+      "dong_sha": [
+        "0fbb45b745b26b28864c4e09492be2a29fc94b04"
+      ],
+      "sha": "0fbb45b745b26b28864c4e09492be2a29fc94b04",
+      "parents": [
+        "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+        "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c"
+      ],
+      "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 128911924642,
+      "dong_sha": [
+        "0fbb45b745b26b28864c4e09492be2a29fc94b04"
+      ],
+      "sha": "0fbb45b745b26b28864c4e09492be2a29fc94b04",
+      "parents": [
+        "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+        "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c"
+      ],
+      "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 128911924659,
+      "dong_sha": [
+        "0fbb45b745b26b28864c4e09492be2a29fc94b04"
+      ],
+      "sha": "0fbb45b745b26b28864c4e09492be2a29fc94b04",
+      "parents": [
+        "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+        "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c"
+      ],
+      "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 128911924728,
+      "dong_sha": [
+        "0fbb45b745b26b28864c4e09492be2a29fc94b04"
+      ],
+      "sha": "0fbb45b745b26b28864c4e09492be2a29fc94b04",
+      "parents": [
+        "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+        "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c"
+      ],
+      "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 128911924734,
+      "dong_sha": [
+        "0fbb45b745b26b28864c4e09492be2a29fc94b04"
+      ],
+      "sha": "0fbb45b745b26b28864c4e09492be2a29fc94b04",
+      "parents": [
+        "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+        "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c"
+      ],
+      "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 128911924782,
+      "dong_sha": [
+        "0fbb45b745b26b28864c4e09492be2a29fc94b04"
+      ],
+      "sha": "0fbb45b745b26b28864c4e09492be2a29fc94b04",
+      "parents": [
+        "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+        "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c"
+      ],
+      "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 128912344931,
+      "dong_sha": [
+        "0fbb45b745b26b28864c4e09492be2a29fc94b04"
+      ],
+      "sha": "0fbb45b745b26b28864c4e09492be2a29fc94b04",
+      "parents": [
+        "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+        "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c"
+      ],
+      "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    }
+  ],
+  "not_final_CI_gate": "Only completed log subset; remaining jobs not asserted passed",
+  "preliminary_probe": "Initial helper imported canonical module whose default ROOT lacked CI synthetic object and correctly returned not_measured. Explicit goc=control repo fixes reader binding only; no product/test rerun or false pass."
+}

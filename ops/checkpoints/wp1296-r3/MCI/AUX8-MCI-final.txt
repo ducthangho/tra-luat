@@ -1,0 +1,5 @@
+Packet1296 AUX8: PASSED actualMCI source/provenance, M 09643583d170c66ce3bcc74170d054d0f5ac9356; không codeapproval/humanreadingcertification/landed.
+Pushmaster42595864844/attempt1:23/23Ubuntu success. Đã đọc toàn23log (44644dòng),kiểm138originalsources+4supplement riêng/hash/API/actualMcheckout/parents[B,H2]/treeH2.
+Bốn anchors có nguồn thực. Officialartifactdd113... khớpAPI; actualchild0/1777/1777,identityLinuxcleanM trước/sau,runner/catalog/command/outputhash;strict184/184. G5 8shards/61ca/490mutants/0errors;registry13/13 intendedkills;nhanh8/8,56base/255selfmutants/10productmutants. Packetloop1359/1359,Windowscase+mutantskipkhôngghi công.
+Cả5premergeadmissionfullsourceZIP/log/API/receipts khớpH2/B/checker0;A0discoveryNOT_RUN giữnguyên. FreshM23checks/master/mergedPR/currentrules khớp;Readyauto terminalnofindings trướcmerge. Rawcanonicalnot_measured giữnguyên,manualsourceanchors riêng.
+Khôngfindings trọngyếu vềsource. M8/ghi sổ/retire/D1D4/closure chưa đượcAUXnày tuyên bố hoàn tất.

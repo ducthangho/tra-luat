@@ -1,0 +1,128 @@
+{
+  "at": "2026-11-09T10:56:02.984206+00:00",
+  "head": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+  "candidate_head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "PR": 1301,
+  "run_id": 42595864844,
+  "attempt": 1,
+  "event": "push",
+  "actual_checkout": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+  "parents": [
+    "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+    "15ad82f56924a0ccc99833ec73eec078ce00b726"
+  ],
+  "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+  "all23Ubuntu_success": true,
+  "positive_selftest": "1777/1777",
+  "official_artifact": {
+    "id": 13663833311,
+    "name": "gate-evidence-ubuntu-latest-1",
+    "sha256": "dd113d49675c0b5d71a8f30af22c68d8f99e4b54efa7c8686a35ae247850377b",
+    "matches_GitHub_artifact_digest": true
+  },
+  "lifecycle": {
+    "status": "passed",
+    "identity": {
+      "catalog_policy_sha256": "e8b7be5e7f1f77a4d4d065d49dbd616a6e9b5260541e61debfe7d5d62638c679",
+      "head_sha": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+      "machine": "x86_64",
+      "python_implementation": "CPython",
+      "python_version": "3.12.16",
+      "runner_sha256": "637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810",
+      "system": "Linux",
+      "system_release": "7.0.0-1019-azure",
+      "tracked_clean": true,
+      "tree_sha": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "worktree_clean": true
+    },
+    "command_hash_verified": true,
+    "runner_code_hash_verified": true,
+    "catalog_policy_hash_verified": true,
+    "output_sha256": "31d8308d42f69f49e732f34cdb0d6e08c8d978403dd9074601142b60c72e4801",
+    "actual_rc": 0
+  },
+  "workflow_definition": {
+    "schema": "wd/1",
+    "repo": "ducthangho/tra-luat",
+    "run_id": 42595864844,
+    "loi_graphql": [],
+    "nguon": "ops/ci_provenance.py do-wd",
+    "run_attempt_luc_do": 1,
+    "event": "push",
+    "node_id": "WFR_kwLOTNeRjc8AAAAJ6ulRDA",
+    "head_sha_rest": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+    "run_number": 4334,
+    "created_at": "2026-11-09T09:45:42Z",
+    "path": ".github/workflows/ci.yml",
+    "repository_file_url": "https://github.com/ducthangho/tra-luat/blob/09643583d170c66ce3bcc74170d054d0f5ac9356/.github/workflows/ci.yml",
+    "check_suite_commit": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+    "oid_dinh_nghia": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+    "blob": "2b2c9aa25ad1c136e44cba457d9ae765d2544fc2",
+    "sha256": "aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67",
+    "trang_thai": "passed",
+    "ly_do": null
+  },
+  "four_anchors_derived": {
+    "run": "passed",
+    "checkout": "passed",
+    "workflow_definition": "passed",
+    "gate_output": "passed"
+  },
+  "AUX8_sha256": "e2c8b6866900f55bcac02dee39d557c97c432002bb0828f5d0c0d6938ecd58b2",
+  "rawcanonicalnot_measured_preserved": true,
+  "source_archive": {
+    "commit": "cfab6569f90484affec897cb337f5a84e26f0cb7",
+    "source_zip_sha256": "ae1bf6b1388e33c565affcdca5412089f5707e6ae44f768033ab6f6dec5320dc",
+    "source_files": 138,
+    "assignment": {
+      "at": "2026-11-09T10:49:02.566512+00:00",
+      "deadline_utc": "2026-11-09T12:19:02.566512+00:00",
+      "deadline_minutes": 90,
+      "call": 8,
+      "role": "mandatory final actualMCI complete-source audit read-only; NOT codeapproval/humanapproval/land",
+      "head": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+      "candidate_head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "PR": 1301,
+      "run_id": 42595864844,
+      "attempt": 1,
+      "expected": "ActualMpushCI all23Ubuntu/currentchecks/passedsameMcheckout; officialartifactAPIsha matchesZIP, nativeLifecycleidentity/head/tree/runner/catalog/command/output hashes and1777/1777. ALL23fulljoblogs read, noexcerpt-only pass. Fouranchors actualrun/checkout/WD/gate_output. Readall5premergeadmissionoriginalZIP/logs/receipts and sourceinvariant differences ifnotpreviousAUX5, preserveA0discoveryNOT_RUN. CurrentMparents[B,H2]/treeH2/Readyauto+ownergrants/authority bind.",
+      "source_roots": [
+        "MCI-final-evidence",
+        "MCI-logs",
+        "MCI-WD",
+        "premerge-admission-complete",
+        "merge-final-inputs",
+        "review1-transport-projection"
+      ],
+      "additional_files": [
+        "MCI-WD.json",
+        "MCI-official-artifact.zip",
+        "premerge-admission-derived.json",
+        "merge-binding.json",
+        "merge-K0-K7.json",
+        "merge-fence-classification.json",
+        "merge-rules.json",
+        "Ready-auto-terminal-comments.json",
+        "owner-H2-human-delivery-binding.json",
+        "land-authority-binding.json",
+        "land-authority-comment-readback.json",
+        "collect-PRCI-final.py"
+      ],
+      "outputs": [
+        "AUX8-MCI-receipt.json",
+        "AUX8-MCI-final.txt"
+      ],
+      "required_fields": [
+        "verdict",
+        "head=actualM",
+        "source_hashes",
+        "findings",
+        "limitations"
+      ],
+      "no_actions": "No newtests/network/models/subagents/Git/source/productwrites. Only twoassignedscratchoutputs. No rewritingrawcanonicalnot_measured or skipped into passed, no WindowsCI/LIVE. No formalnewreviewround/humanreadingcertification/Ready/merge/land/leaseclosureclaim.",
+      "budget": "Shared8/8 afterthis assignment; CLI1+human1/formal2/2,author2/2,push1/1; originalparentcosts unchanged. No additionalmodelcall forM8/closure."
+    }
+  },
+  "landed": false,
+  "remaining": "actualUTClease retirement/M8authoritativeIssuepostreadback/D1D4/close1296+1295/Missionregister"
+}

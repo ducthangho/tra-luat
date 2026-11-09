@@ -1,0 +1,1519 @@
+{
+  "verdict": "passed",
+  "status": "complete_actual_MCI_source_audit_no_material_inconsistency",
+  "formal_code_approval": false,
+  "human_reading_certification": false,
+  "landed_assertion": false,
+  "call": 8,
+  "head": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+  "candidate_head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "base": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+  "run_id": 42595864844,
+  "attempt": 1,
+  "event": "push",
+  "head_branch": "master",
+  "completed_at": "2026-11-09T10:55:16.405269+00:00",
+  "primary_source_archive": {
+    "commit": "cfab6569f90484affec897cb337f5a84e26f0cb7",
+    "sha256": "ae1bf6b1388e33c565affcdca5412089f5707e6ae44f768033ab6f6dec5320dc",
+    "original_files_verified": 138,
+    "all_original_index_hashes_sizes_and_bytes_match": true,
+    "unchanged_after_supplement": true
+  },
+  "supplemental_readbacks": {
+    "commit": "2d8f437d2888f2d27244dfd2288f5dad76e9122f",
+    "source_files_verified": 4,
+    "source_index_sha256": "5d6509c84616e21f86a569a9b9c2f463be172bcfd57f8523967661f5e425a1b8",
+    "current_master_raw": "09643583d170c66ce3bcc74170d054d0f5ac9356\trefs/heads/master",
+    "current_check_runs": "23/23completed success app15368,exactM,IDsboundtoactualMCIjobs",
+    "merged_PR": "1301observedmerged normalM parents[B,H2],treeH2",
+    "current_rules_match_premerge_rules": true,
+    "required_rule_raw_entries": 5,
+    "required_rule_unique_contexts": 4
+  },
+  "all23_complete_original_job_logs_read": 23,
+  "total_MCI_original_log_bytes_read": 4382551,
+  "total_MCI_original_log_lines_read": 44644,
+  "full_log_audit_method": "Entire23 log byte/line reads and full command-block parsing against APIsteps/frozenworkflow, positiveoutputs and negativefixture context, not excerpt-only or APIgreen-only.",
+  "four_anchors": {
+    "run": {
+      "verdict": "passed",
+      "evidence": "Actualrun42595864844/attempt1/push/master/M, allpages23uniqueUbuntu completed successjobs and freshcurrent23GitHubActionschecks boundto sameM/jobIDs."
+    },
+    "checkout": {
+      "verdict": "passed",
+      "evidence": "All23complete logs actualcheckoutM through canonical parser; immutableGit actualparents[B,H2],tree50fb...; supplemental masterref+mergedPRmatchM."
+    },
+    "workflow_definition": {
+      "verdict": "passed",
+      "evidence": "ActualGraphQLWorkflowRun.file repository/path/OIDM/checkSuiteM, rawRESTbase64bytes and blob2b2c9aa/SHAaed785... match immutableGitM."
+    },
+    "gate_output": {
+      "verdict": "passed_by_full_original_source_audit",
+      "evidence": "All23logs/validshellblocks and successfulmatchingAPIsteps/no testcontinue-on-error; actualpositive counts/8shardaggregates/namedskip; officialartifactactualchild0/1777 and command/output/runner/catalog/cleanMidentity beforeafter."
+    }
+  },
+  "jobs_success": 23,
+  "jobs_total": 23,
+  "required_canonical_five_contexts": [
+    "gate (ubuntu-latest)",
+    "gate-cong-cu-gop (ubuntu-latest)",
+    "gate-ops (ubuntu-latest)",
+    "gate-packet-loop (ubuntu-latest)",
+    "gate-registry (ubuntu-latest)"
+  ],
+  "positive_counts": {
+    "gate-cong-cu (ubuntu-latest, 3)": {
+      "cases": "61/61",
+      "mutants_killed": 61,
+      "mutants_total": 61
+    },
+    "gate-cong-cu (ubuntu-latest, 2)": {
+      "cases": "61/61",
+      "mutants_killed": 61,
+      "mutants_total": 61
+    },
+    "gate-cong-cu (ubuntu-latest, 1)": {
+      "cases": "61/61",
+      "mutants_killed": 62,
+      "mutants_total": 62
+    },
+    "gate-cong-cu (ubuntu-latest, 6)": {
+      "cases": "61/61",
+      "mutants_killed": 61,
+      "mutants_total": 61
+    },
+    "gate-nhanh-manh (ubuntu-latest, 1)": {
+      "reported_rc": 0,
+      "passed": 41,
+      "total": 41
+    },
+    "gate-cong-cu (ubuntu-latest, 7)": {
+      "cases": "61/61",
+      "mutants_killed": 61,
+      "mutants_total": 61
+    },
+    "gate-cong-cu (ubuntu-latest, 4)": {
+      "cases": "61/61",
+      "mutants_killed": 61,
+      "mutants_total": 61
+    },
+    "gate-cong-cu (ubuntu-latest, 5)": {
+      "cases": "61/61",
+      "mutants_killed": 61,
+      "mutants_total": 61
+    },
+    "gate-nhanh-manh (ubuntu-latest, 4)": {
+      "reported_rc": 0,
+      "passed": 39,
+      "total": 39
+    },
+    "gate-nhanh-manh (ubuntu-latest, 6)": {
+      "reported_rc": 0,
+      "passed": 39,
+      "total": 39
+    },
+    "gate-cong-cu (ubuntu-latest, 0)": {
+      "cases": "61/61",
+      "mutants_killed": 62,
+      "mutants_total": 62
+    },
+    "gate-nhanh-manh (ubuntu-latest, 5)": {
+      "reported_rc": 0,
+      "passed": 41,
+      "total": 41
+    },
+    "gate-nhanh-manh (ubuntu-latest, 3)": {
+      "reported_rc": 0,
+      "passed": 40,
+      "total": 40
+    },
+    "gate-nhanh-manh (ubuntu-latest, 0)": {
+      "reported_rc": 0,
+      "passed": 39,
+      "total": 39
+    },
+    "gate-nhanh-manh (ubuntu-latest, 2)": {
+      "reported_rc": 0,
+      "passed": 40,
+      "total": 40
+    },
+    "gate-nhanh-manh (ubuntu-latest, 7)": {
+      "reported_rc": 0,
+      "passed": 42,
+      "total": 42
+    },
+    "gate (ubuntu-latest)": {
+      "lifecycle_actual_child_rc": 0,
+      "selftest": "1777/1777",
+      "strict_committed_manifest": "184/184;oktrue;failed[];extra[]",
+      "runtime": "CPython3.12.16",
+      "tool_cases": "61/61",
+      "tool_mutant_execution": "delegated490 to eightshards, not coreprocess credit"
+    },
+    "gate-cong-cu-gop (ubuntu-latest)": {
+      "shards": "8/8",
+      "cases": 61,
+      "mutants": 490,
+      "mutant_errors": 0
+    },
+    "gate-nhanh-gop (ubuntu-latest)": {
+      "shards": "8/8",
+      "base_cases": "56/56",
+      "self_mutants": "255/255",
+      "product_mutants": "10/10"
+    },
+    "gate-ops (ubuntu-latest)": {
+      "ci_duong_nhanh": "118/118cases;431/431mutants",
+      "bien_nhan_v2": "98/98cases;153/153mutants;2/2controls",
+      "setup_selftest": "48/48",
+      "gate_lifecycle": "28/28;0skipped;0failed",
+      "Linux_cgroup_step": "APIstep success under unchanged workflow"
+    },
+    "gate-registry (ubuntu-latest)": {
+      "codex_cloud_setup": "13/13cases;13/13intendedkills",
+      "land_evidence": "23cases/116mutants",
+      "ci_provenance": "63cases/398mutants",
+      "cloud_agent_creds": "52cases/80mutants",
+      "named_suite_rc0_markers": [
+        ".claude/dev/doc_receipt_thu_hoi_test.py",
+        ".claude/dev/chon_reviewer_test.py",
+        ".claude/dev/gh_readback_test.py",
+        ".claude/dev/mcp_gh_test.py",
+        ".claude/dev/mcp_github_doc_test.py",
+        ".claude/dev/probe_mang_test.py",
+        ".claude/hooks/pretooluse_guard_test.py",
+        ".claude/hooks/subagent_ghi_detect_test.py",
+        "ops/nhanh_don_duoc_test.py",
+        "ops/kiem_ho_so_land_test.py",
+        "ops/kiem_nhan_hint_test.py",
+        "ops/codex_cloud_setup_test.py",
+        "ops/land_evidence_nguon_test.py",
+        "ops/ci_provenance_test.py",
+        "ops/cloud_agent_creds_test.py"
+      ]
+    },
+    "gate-packet-loop (ubuntu-latest)": {
+      "declared_cases": 1360,
+      "executed_passed": 1359,
+      "executed_total": 1359,
+      "named_skip": "luong_canonical_chay_that",
+      "reason": "Windows pwsh only",
+      "associated_mutant_not_credited": "luong_canonical_chay_that_dao_os_name",
+      "declared_mutants": 1523,
+      "overall": "TỔNG: ĐẠT"
+    }
+  },
+  "log_sources": [
+    {
+      "job_id": 129088204840,
+      "sha256_of_received_UTF8_text": "24366231db25778aad4a091cfbd5839cf323a0bacfb3639af3824e819701051e",
+      "bytes": 120050,
+      "source_record_sha256": "581d097ccb4a8cf152ffa3aaf69b1fd6a0dc81c7c10ff00f2661733b7233ff9a",
+      "name": "chuan-bi",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289641,
+      "sha256_of_received_UTF8_text": "bdca6a8d6c00f23490aedbe1f099120eed26f4fb2446c014497e3936ea42fa8c",
+      "bytes": 340430,
+      "source_record_sha256": "b7ed94f14158acfe7c746c2c24b2fc31930630c2d1aa20210961d8b47010fd7b",
+      "name": "gate-packet-loop (ubuntu-latest)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289648,
+      "sha256_of_received_UTF8_text": "3ef747ea6eb2edd668ffe52de941da9181f45b17acc6e18f83f0ffbb3433290f",
+      "bytes": 499523,
+      "source_record_sha256": "d07b1e1a103c78d8c8ba9ee7e644c9d5aa6b971c122132753123e9c9071b14ec",
+      "name": "gate-ops (ubuntu-latest)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289715,
+      "sha256_of_received_UTF8_text": "b84e60dfa225d0b40864a5cc7f4b368c99757768b5b5df2a0953aa83e7e171cb",
+      "bytes": 709776,
+      "source_record_sha256": "7cb2d7944e7adbe3114c9bd2dade2116dfa45905bf18b38441ae1f46d9496ed0",
+      "name": "gate (ubuntu-latest)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289784,
+      "sha256_of_received_UTF8_text": "7996dc2af227ac82ce58f271515fe844bc401503b152b56162a6e3d2597cb61b",
+      "bytes": 145226,
+      "source_record_sha256": "4d0c0011fe919e6c9f52bfe2107fdd1c544dfd520ff8a42275da05455560c55e",
+      "name": "gate-cong-cu (ubuntu-latest, 3)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289794,
+      "sha256_of_received_UTF8_text": "8fcd24169d5153d8b551ae30d857cb088e72d10c718ea76c10929b8922a3a4ea",
+      "bytes": 145034,
+      "source_record_sha256": "1f9e6f95ecdbc219b30b3435aad33317f7fb253a6c930020c2c90e2946851292",
+      "name": "gate-cong-cu (ubuntu-latest, 2)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289802,
+      "sha256_of_received_UTF8_text": "cb7494740094547cd88e29025af0cefd8dbf6cfdae61df1f2914f711a05f2fd8",
+      "bytes": 144934,
+      "source_record_sha256": "e6bf67a3434ad5792ce42827fda54961a96d329dcdb294bcdc457d99f8232b84",
+      "name": "gate-cong-cu (ubuntu-latest, 1)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289807,
+      "sha256_of_received_UTF8_text": "62311cdea9e3fcc5f300a2529d9c309b531ed82cc971dc69780f2892746448ba",
+      "bytes": 145214,
+      "source_record_sha256": "0c73dfa5d7ad164867d0c71c86e61b4d31bf561abb68152e5aa7bd286f75c0b2",
+      "name": "gate-cong-cu (ubuntu-latest, 6)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289821,
+      "sha256_of_received_UTF8_text": "5ee811faf01444d92afc9403391126b707fd8696cb17349b846b04c7b68908aa",
+      "bytes": 133804,
+      "source_record_sha256": "c9d4d6c21e755b5f481ecd01db5e9c867bb48a89b8d31c207b769ad623482d0a",
+      "name": "gate-nhanh-manh (ubuntu-latest, 1)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289823,
+      "sha256_of_received_UTF8_text": "0c49ade36e469ee0124f544598e1488d434766ff209beafe74d7c6eb5bde4167",
+      "bytes": 144718,
+      "source_record_sha256": "ac2ba8c9b5eea0ed388a1431804686e9525845473476616fb494d61cf3ac56de",
+      "name": "gate-cong-cu (ubuntu-latest, 7)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289851,
+      "sha256_of_received_UTF8_text": "1937ff0a883f311960814943e4fc49b15fcb751a64b2f11e77662668aa0db143",
+      "bytes": 144746,
+      "source_record_sha256": "7314363ba5b9e03bdb105d3f59567b25c79a549c547d7e77f5077b3b949980db",
+      "name": "gate-cong-cu (ubuntu-latest, 4)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289862,
+      "sha256_of_received_UTF8_text": "7b01a6fa0ccc7282001fdd3d7d9a6b9b7474d08d3990132ceef9f84f65177005",
+      "bytes": 145117,
+      "source_record_sha256": "765250ed3ce4b678d2b6ebedcfbe0e3111041e3918b812617675f9716312b13c",
+      "name": "gate-cong-cu (ubuntu-latest, 5)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289890,
+      "sha256_of_received_UTF8_text": "97168402d6b1b72d9971d0ce1bec42f5be00a1ca93a62e44618615e49fd91c85",
+      "bytes": 132610,
+      "source_record_sha256": "02f5ad4a57bca18470549850376d5e1182fd693e8efeedeec5da5756501b5201",
+      "name": "gate-nhanh-manh (ubuntu-latest, 4)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289893,
+      "sha256_of_received_UTF8_text": "d845145978b856ad21c6762c335d26a37bbda77041ae03ef9ed910a0db9855ec",
+      "bytes": 133324,
+      "source_record_sha256": "176b8170a53c5c793dd74f1b3ea3d81170a8d9e94c8e57bd2c2e7280d86902ee",
+      "name": "gate-nhanh-manh (ubuntu-latest, 6)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289925,
+      "sha256_of_received_UTF8_text": "a28d3128d943396655750ddc586b721e8e92434d2b2ad62bf83b9a02f9f138db",
+      "bytes": 145457,
+      "source_record_sha256": "87d2bcf2e5d626bc9f75900b078ed7c0a7b3378cfbd2531c92461d11e953b3c4",
+      "name": "gate-cong-cu (ubuntu-latest, 0)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289935,
+      "sha256_of_received_UTF8_text": "91682fc48224a49fd50ec936348b1acabd68b04878e57fd318562858abf764f3",
+      "bytes": 133366,
+      "source_record_sha256": "576c4b2aeae4b69bf6cb4e800c214f7b899651906dabf5dd70c2477f4553fe46",
+      "name": "gate-nhanh-manh (ubuntu-latest, 5)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289961,
+      "sha256_of_received_UTF8_text": "f9a7404582ba56c51517c0eb2f31cce881d4626b6ca0baf5bee8294777fea588",
+      "bytes": 133429,
+      "source_record_sha256": "8f2991a766b8379ed4828c2538f94759845258b6710c7409f4b2850796fb71db",
+      "name": "gate-nhanh-manh (ubuntu-latest, 3)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088289966,
+      "sha256_of_received_UTF8_text": "15583a5f8d308e6d93eaf4261364fb0c7b289a11f60ffea6be3962b05e76b407",
+      "bytes": 133016,
+      "source_record_sha256": "4ab6553593ea79bcc16d79dcff221b20479d348feb83b824a17bc8e54c64f543",
+      "name": "gate-nhanh-manh (ubuntu-latest, 0)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088290009,
+      "sha256_of_received_UTF8_text": "382c57c2e34c756236c1a4ccce79844473d6f4ac376b79ebabaa198d00aded2b",
+      "bytes": 133279,
+      "source_record_sha256": "da369a6891607e46f15bb5c35d6a01ac7d33f37c698d867948122cfb37c14cf3",
+      "name": "gate-nhanh-manh (ubuntu-latest, 2)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088290074,
+      "sha256_of_received_UTF8_text": "44d632aa2b074a8c1e89335c642061bb421339b155fa51fa7b9c68340641e5f7",
+      "bytes": 134196,
+      "source_record_sha256": "9cf7195a28cb0bf56e67072ac93482314dfbe5f94909a0b3fa52f32bc89da670",
+      "name": "gate-nhanh-manh (ubuntu-latest, 7)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129088993264,
+      "sha256_of_received_UTF8_text": "f8c95ee02bd9738aa55ebf01f5669c93a95ce6e3a08e773c7026c7e776f64a3c",
+      "bytes": 128890,
+      "source_record_sha256": "6ca062e864aa7af5c8e9be5abec27633bd1b3f327ed23b4f5ba03bedb10a2bd0",
+      "name": "gate-nhanh-gop (ubuntu-latest)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129089126012,
+      "sha256_of_received_UTF8_text": "2877952d47a804d8118c8b66d9aa2c3e3623353de21ddff514924c555c497ece",
+      "bytes": 258127,
+      "source_record_sha256": "ed6d5d6e94caf2158ff86ae6ee5535a15525d543e3976c6a292ae67fca88361f",
+      "name": "gate-registry (ubuntu-latest)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    {
+      "job_id": 129097071455,
+      "sha256_of_received_UTF8_text": "33b9caac66e3f8c2e373a3502242e47e48dba8c1055b40b63dcc05f9a666d54a",
+      "bytes": 98285,
+      "source_record_sha256": "0f7c889dbb66a2c6d69e83e212822daab547a5a0ae0167b65da88836b6c977fc",
+      "name": "gate-cong-cu-gop (ubuntu-latest)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    }
+  ],
+  "full_log_read_receipts": [
+    {
+      "job_id": 129088204840,
+      "name": "chuan-bi",
+      "entire_bytes_read": 120050,
+      "entire_lines_scanned": 992,
+      "command_blocks_parsed": 2,
+      "valid_shell_commands": [
+        "python3 ops/ci_duong_nhanh.py"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Run actions/checkout@v4",
+        "phan loai diff (duong nhanh ho so)",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": []
+    },
+    {
+      "job_id": 129088289641,
+      "name": "gate-packet-loop (ubuntu-latest)",
+      "entire_bytes_read": 340430,
+      "entire_lines_scanned": 2912,
+      "command_blocks_parsed": 10,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",
+        "bash ops/cai_actionlint.sh",
+        "bash ops/cai_cong_cu.sh shellcheck",
+        "bash ops/cai_cong_cu.sh rg",
+        "python ops/cong_cu.py kiem-tra --json",
+        "python -m pip install --quiet ruff==0.15.15",
+        "python .claude/dev/packet_loop_test.py"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+        "cài actionlint cho G5",
+        "cài shellcheck cho G5 (cài xong đo lại)",
+        "cài rg cho G5 (cài xong đo lại)",
+        "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+        "cài Ruff 0.15.15 và in probe dương",
+        "packet-loop selftest",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": [
+        "DUONG_NHANH - liet ke buoc bo qua (job gate-packet-loop)"
+      ]
+    },
+    {
+      "job_id": 129088289648,
+      "name": "gate-ops (ubuntu-latest)",
+      "entire_bytes_read": 499523,
+      "entire_lines_scanned": 4889,
+      "command_blocks_parsed": 11,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",
+        "bash ops/cai_cong_cu.sh shellcheck",
+        "bash ops/cai_cong_cu.sh rg",
+        "python ops/ci_duong_nhanh_test.py",
+        "python ops/bien_nhan_v2_test.py",
+        "set -euo pipefail",
+        "pwsh -NoProfile -File scripts/don-nhanh_test.ps1",
+        "set -euo pipefail"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+        "cài shellcheck cho G5 (cài xong đo lại)",
+        "cài rg cho G5 (cài xong đo lại)",
+        "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)",
+        "bien-nhan v2 selftest",
+        "lease-publish selftest (đo lại setup sau G5)",
+        "don-nhanh selftest (chốt xoá nhánh)",
+        "bo ca gate chay TRONG cgroup duoc uy quyen (Linux)",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": [
+        "DUONG_NHANH - liet ke buoc bo qua (job gate-ops)",
+        "DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)",
+        "gate lifecycle selftest (nen khong co cgroup)"
+      ]
+    },
+    {
+      "job_id": 129088289715,
+      "name": "gate (ubuntu-latest)",
+      "entire_bytes_read": 709776,
+      "entire_lines_scanned": 10841,
+      "command_blocks_parsed": 30,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",
+        "bash ops/cai_actionlint.sh",
+        "bash ops/cai_cong_cu.sh shellcheck",
+        "bash ops/cai_cong_cu.sh rg",
+        "python ops/cong_cu.py kiem-tra --json",
+        "python -m pip install --quiet ruff==0.15.15",
+        "python -m py_compile scripts/tl.py scripts/tl_boot.py scripts/gen_instructions.py scripts/tl_core/__init__.py scripts/tl_core/deterministic.py scripts/tl_core/jsonio.py scripts/tl_core/workflow.py scripts/tl_core/release.py scripts/tl_core/live.py scripts/tl_core/zip_ingest.py scripts/tl_core/ocr.py scripts/tl_core/chunking.py scripts/tl_core/command_registry.py",
+        "python .claude/dev/codex_cred_test.py",
+        "python .claude/dev/idiom_py_test.py",
+        "python .githooks/eol_policy_test.py",
+        "python .githooks/pre_push_test.py",
+        "python .githooks/eol_policy.py --all --json",
+        "python .github/checks/bundle_fragment_check.py --json",
+        "python scripts/gen_instructions.py --selftest",
+        "python scripts/tl_core/command_registry_test.py",
+        "set -euo pipefail",
+        "python scripts/tl.py workflow-audit --strict --json",
+        "python scripts/tl.py golden-test --json",
+        "python scripts/tl.py doc-claims-check --strict --json",
+        "python scripts/tl.py determinism-audit --strict --json",
+        "python .github/checks/ci_phamvi.py --kiem-bam",
+        "python .github/checks/ci_phamvi_test.py",
+        "python scripts/tl.py release-check --full --json",
+        "python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json",
+        "python scripts/tl.py release-bundle --out dist/a.zip --json > /dev/null",
+        "python scripts/tl_boot.py --version"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+        "cài actionlint cho G5",
+        "cài shellcheck cho G5 (cài xong đo lại)",
+        "cài rg cho G5 (cài xong đo lại)",
+        "G5 kiem ban ke cong cu + T1..T8 (packet",
+        "cài Ruff 0.15.15 và in probe dương",
+        "py_compile",
+        "codex credential selftest (packet #300)",
+        "idiom-ba-ten selftest",
+        "eol-policy selftest",
+        "pre-push selftest",
+        "eol-policy survey",
+        "bundled-fragment check (topology gói)",
+        "gen_instructions selftest",
+        "command-registry unit test (AG-T0-03)",
+        "tl selftest (co bang chung exact-identity)",
+        "tai len gate-evidence",
+        "workflow-audit strict",
+        "golden-test",
+        "doc-claims-check strict",
+        "determinism-audit strict",
+        "ci-phamvi guard (bang phu thuoc khop ma)",
+        "ci-phamvi selftest (phan chung — cong co rang)",
+        "release-check full",
+        "release-verify strict (lane LAND — manifest committed)",
+        "release-bundle x2 cùng SHA-256",
+        "tl_boot smoke",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": [
+        "DUONG_NHANH - liet ke buoc bo qua (job gate)",
+        "PR head contains required EOL base",
+        "tl selftest (luot PR — khong sinh bang chung)",
+        "release-verify strict (lane WORKER — manifest TẠM ngoài repo)"
+      ]
+    },
+    {
+      "job_id": 129088289784,
+      "name": "gate-cong-cu (ubuntu-latest, 3)",
+      "entire_bytes_read": 145226,
+      "entire_lines_scanned": 1358,
+      "command_blocks_parsed": 9,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",
+        "bash ops/cai_actionlint.sh",
+        "bash ops/cai_cong_cu.sh shellcheck",
+        "bash ops/cai_cong_cu.sh rg",
+        "python ops/cong_cu.py kiem-tra --json"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+        "cài actionlint cho G5",
+        "cài shellcheck cho G5 (cài xong đo lại)",
+        "cài rg cho G5 (cài xong đo lại)",
+        "G5 manh ban kinh dot bien (#668)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": []
+    },
+    {
+      "job_id": 129088289794,
+      "name": "gate-cong-cu (ubuntu-latest, 2)",
+      "entire_bytes_read": 145034,
+      "entire_lines_scanned": 1354,
+      "command_blocks_parsed": 9,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",
+        "bash ops/cai_actionlint.sh",
+        "bash ops/cai_cong_cu.sh shellcheck",
+        "bash ops/cai_cong_cu.sh rg",
+        "python ops/cong_cu.py kiem-tra --json"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+        "cài actionlint cho G5",
+        "cài shellcheck cho G5 (cài xong đo lại)",
+        "cài rg cho G5 (cài xong đo lại)",
+        "G5 manh ban kinh dot bien (#668)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": []
+    },
+    {
+      "job_id": 129088289802,
+      "name": "gate-cong-cu (ubuntu-latest, 1)",
+      "entire_bytes_read": 144934,
+      "entire_lines_scanned": 1351,
+      "command_blocks_parsed": 9,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",
+        "bash ops/cai_actionlint.sh",
+        "bash ops/cai_cong_cu.sh shellcheck",
+        "bash ops/cai_cong_cu.sh rg",
+        "python ops/cong_cu.py kiem-tra --json"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+        "cài actionlint cho G5",
+        "cài shellcheck cho G5 (cài xong đo lại)",
+        "cài rg cho G5 (cài xong đo lại)",
+        "G5 manh ban kinh dot bien (#668)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": []
+    },
+    {
+      "job_id": 129088289807,
+      "name": "gate-cong-cu (ubuntu-latest, 6)",
+      "entire_bytes_read": 145214,
+      "entire_lines_scanned": 1359,
+      "command_blocks_parsed": 9,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",
+        "bash ops/cai_actionlint.sh",
+        "bash ops/cai_cong_cu.sh shellcheck",
+        "bash ops/cai_cong_cu.sh rg",
+        "python ops/cong_cu.py kiem-tra --json"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+        "cài actionlint cho G5",
+        "cài shellcheck cho G5 (cài xong đo lại)",
+        "cài rg cho G5 (cài xong đo lại)",
+        "G5 manh ban kinh dot bien (#668)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": []
+    },
+    {
+      "job_id": 129088289821,
+      "name": "gate-nhanh-manh (ubuntu-latest, 1)",
+      "entire_bytes_read": 133804,
+      "entire_lines_scanned": 1215,
+      "command_blocks_parsed": 5,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python ops/nhanh_don_duoc_test.py"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": [
+        "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)"
+      ]
+    },
+    {
+      "job_id": 129088289823,
+      "name": "gate-cong-cu (ubuntu-latest, 7)",
+      "entire_bytes_read": 144718,
+      "entire_lines_scanned": 1350,
+      "command_blocks_parsed": 9,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",
+        "bash ops/cai_actionlint.sh",
+        "bash ops/cai_cong_cu.sh shellcheck",
+        "bash ops/cai_cong_cu.sh rg",
+        "python ops/cong_cu.py kiem-tra --json"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+        "cài actionlint cho G5",
+        "cài shellcheck cho G5 (cài xong đo lại)",
+        "cài rg cho G5 (cài xong đo lại)",
+        "G5 manh ban kinh dot bien (#668)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": []
+    },
+    {
+      "job_id": 129088289851,
+      "name": "gate-cong-cu (ubuntu-latest, 4)",
+      "entire_bytes_read": 144746,
+      "entire_lines_scanned": 1350,
+      "command_blocks_parsed": 9,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",
+        "bash ops/cai_actionlint.sh",
+        "bash ops/cai_cong_cu.sh shellcheck",
+        "bash ops/cai_cong_cu.sh rg",
+        "python ops/cong_cu.py kiem-tra --json"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+        "cài actionlint cho G5",
+        "cài shellcheck cho G5 (cài xong đo lại)",
+        "cài rg cho G5 (cài xong đo lại)",
+        "G5 manh ban kinh dot bien (#668)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": []
+    },
+    {
+      "job_id": 129088289862,
+      "name": "gate-cong-cu (ubuntu-latest, 5)",
+      "entire_bytes_read": 145117,
+      "entire_lines_scanned": 1358,
+      "command_blocks_parsed": 9,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",
+        "bash ops/cai_actionlint.sh",
+        "bash ops/cai_cong_cu.sh shellcheck",
+        "bash ops/cai_cong_cu.sh rg",
+        "python ops/cong_cu.py kiem-tra --json"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+        "cài actionlint cho G5",
+        "cài shellcheck cho G5 (cài xong đo lại)",
+        "cài rg cho G5 (cài xong đo lại)",
+        "G5 manh ban kinh dot bien (#668)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": []
+    },
+    {
+      "job_id": 129088289890,
+      "name": "gate-nhanh-manh (ubuntu-latest, 4)",
+      "entire_bytes_read": 132610,
+      "entire_lines_scanned": 1197,
+      "command_blocks_parsed": 5,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python ops/nhanh_don_duoc_test.py"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": [
+        "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)"
+      ]
+    },
+    {
+      "job_id": 129088289893,
+      "name": "gate-nhanh-manh (ubuntu-latest, 6)",
+      "entire_bytes_read": 133324,
+      "entire_lines_scanned": 1205,
+      "command_blocks_parsed": 5,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python ops/nhanh_don_duoc_test.py"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": [
+        "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)"
+      ]
+    },
+    {
+      "job_id": 129088289925,
+      "name": "gate-cong-cu (ubuntu-latest, 0)",
+      "entire_bytes_read": 145457,
+      "entire_lines_scanned": 1359,
+      "command_blocks_parsed": 9,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",
+        "bash ops/cai_actionlint.sh",
+        "bash ops/cai_cong_cu.sh shellcheck",
+        "bash ops/cai_cong_cu.sh rg",
+        "python ops/cong_cu.py kiem-tra --json"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+        "cài actionlint cho G5",
+        "cài shellcheck cho G5 (cài xong đo lại)",
+        "cài rg cho G5 (cài xong đo lại)",
+        "G5 manh ban kinh dot bien (#668)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": []
+    },
+    {
+      "job_id": 129088289935,
+      "name": "gate-nhanh-manh (ubuntu-latest, 5)",
+      "entire_bytes_read": 133366,
+      "entire_lines_scanned": 1204,
+      "command_blocks_parsed": 5,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python ops/nhanh_don_duoc_test.py"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": [
+        "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)"
+      ]
+    },
+    {
+      "job_id": 129088289961,
+      "name": "gate-nhanh-manh (ubuntu-latest, 3)",
+      "entire_bytes_read": 133429,
+      "entire_lines_scanned": 1209,
+      "command_blocks_parsed": 5,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python ops/nhanh_don_duoc_test.py"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": [
+        "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)"
+      ]
+    },
+    {
+      "job_id": 129088289966,
+      "name": "gate-nhanh-manh (ubuntu-latest, 0)",
+      "entire_bytes_read": 133016,
+      "entire_lines_scanned": 1208,
+      "command_blocks_parsed": 5,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python ops/nhanh_don_duoc_test.py"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": [
+        "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)"
+      ]
+    },
+    {
+      "job_id": 129088290009,
+      "name": "gate-nhanh-manh (ubuntu-latest, 2)",
+      "entire_bytes_read": 133279,
+      "entire_lines_scanned": 1204,
+      "command_blocks_parsed": 5,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python ops/nhanh_don_duoc_test.py"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": [
+        "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)"
+      ]
+    },
+    {
+      "job_id": 129088290074,
+      "name": "gate-nhanh-manh (ubuntu-latest, 7)",
+      "entire_bytes_read": 134196,
+      "entire_lines_scanned": 1219,
+      "command_blocks_parsed": 5,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python ops/nhanh_don_duoc_test.py"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "Run actions/upload-artifact@v4",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": [
+        "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)"
+      ]
+    },
+    {
+      "job_id": 129088993264,
+      "name": "gate-nhanh-gop (ubuntu-latest)",
+      "entire_bytes_read": 128890,
+      "entire_lines_scanned": 1109,
+      "command_blocks_parsed": 5,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python ops/nhanh_don_duoc_test.py --gop-dich manh"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "Run actions/download-artifact@v4",
+        "gộp mảnh nhanh_don_duoc (targeted_mutant_gate)",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": [
+        "DUONG_NHANH - gom KHONG DO (job gate-nhanh-gop)",
+        "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-gop)"
+      ]
+    },
+    {
+      "job_id": 129089126012,
+      "name": "gate-registry (ubuntu-latest)",
+      "entire_bytes_read": 258127,
+      "entire_lines_scanned": 2628,
+      "command_blocks_parsed": 10,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",
+        "bash ops/cai_actionlint.sh",
+        "bash ops/cai_cong_cu.sh shellcheck",
+        "bash ops/cai_cong_cu.sh rg",
+        "python ops/cong_cu.py kiem-tra --json",
+        "python -m pip install --quiet ruff==0.15.15",
+        "python .claude/dev/ci_dang_ky_test.py --chay"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+        "cài actionlint cho G5",
+        "cài shellcheck cho G5 (cài xong đo lại)",
+        "cài rg cho G5 (cài xong đo lại)",
+        "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+        "cài Ruff 0.15.15 và in probe dương",
+        "test registry (phạm vi + các bộ chưa được nối)",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": [
+        "DUONG_NHANH - liet ke buoc bo qua (job gate-registry)"
+      ]
+    },
+    {
+      "job_id": 129097071455,
+      "name": "gate-cong-cu-gop (ubuntu-latest)",
+      "entire_bytes_read": 98285,
+      "entire_lines_scanned": 773,
+      "command_blocks_parsed": 6,
+      "valid_shell_commands": [
+        "git config --global core.autocrlf false",
+        "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",
+        "python ops/cong_cu_test.py --gop manh"
+      ],
+      "successful_API_steps": [
+        "Set up job",
+        "Force LF checkout (hash parity với manifest)",
+        "Run actions/checkout@v4",
+        "Run actions/setup-python@v5",
+        "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+        "Run actions/download-artifact@v4",
+        "G5 gom manh ban kinh dot bien (#668)",
+        "Post Run actions/setup-python@v5",
+        "Post Run actions/checkout@v4",
+        "Complete job"
+      ],
+      "skipped_API_steps": []
+    }
+  ],
+  "workflow_definition": {
+    "schema": "wd/1",
+    "repo": "ducthangho/tra-luat",
+    "run_id": 42595864844,
+    "loi_graphql": [],
+    "nguon": "ops/ci_provenance.py do-wd",
+    "run_attempt_luc_do": 1,
+    "event": "push",
+    "node_id": "WFR_kwLOTNeRjc8AAAAJ6ulRDA",
+    "head_sha_rest": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+    "run_number": 4334,
+    "created_at": "2026-11-09T09:45:42Z",
+    "path": ".github/workflows/ci.yml",
+    "repository_file_url": "https://github.com/ducthangho/tra-luat/blob/09643583d170c66ce3bcc74170d054d0f5ac9356/.github/workflows/ci.yml",
+    "check_suite_commit": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+    "oid_dinh_nghia": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+    "blob": "2b2c9aa25ad1c136e44cba457d9ae765d2544fc2",
+    "sha256": "aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67",
+    "trang_thai": "passed",
+    "ly_do": null
+  },
+  "official_lifecycle_artifact": {
+    "id": 13663833311,
+    "name": "gate-evidence-ubuntu-latest-1",
+    "ZIP_sha256": "dd113d49675c0b5d71a8f30af22c68d8f99e4b54efa7c8686a35ae247850377b",
+    "ZIP_bytes": 25040,
+    "matches_API_digest_and_each_extracted_file": true,
+    "lifecycle_json_sha256": "2ddad518ac628faeb59d5c1c56149c82e8d99e42f4c94db189dc4cb27e46f4a4",
+    "output_sha256": "31d8308d42f69f49e732f34cdb0d6e08c8d978403dd9074601142b60c72e4801",
+    "actual_child_rc": 0,
+    "command": [
+      "python",
+      "scripts/tl.py",
+      "--selftest"
+    ],
+    "command_sha256": "a209ee5ce68b5b709e333e99ea0441d7427de238374d45b69916e4ba5d2c689b",
+    "runner_source_hash_and_catalogpolicy_hash_checked_against_GitM": true,
+    "base_sha": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+    "identity_before": {
+      "catalog_policy_sha256": "e8b7be5e7f1f77a4d4d065d49dbd616a6e9b5260541e61debfe7d5d62638c679",
+      "head_sha": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+      "machine": "x86_64",
+      "python_implementation": "CPython",
+      "python_version": "3.12.16",
+      "runner_sha256": "637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810",
+      "system": "Linux",
+      "system_release": "7.0.0-1019-azure",
+      "tracked_clean": true,
+      "tree_sha": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "worktree_clean": true
+    },
+    "identity_after": {
+      "catalog_policy_sha256": "e8b7be5e7f1f77a4d4d065d49dbd616a6e9b5260541e61debfe7d5d62638c679",
+      "head_sha": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+      "machine": "x86_64",
+      "python_implementation": "CPython",
+      "python_version": "3.12.16",
+      "runner_sha256": "637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810",
+      "system": "Linux",
+      "system_release": "7.0.0-1019-azure",
+      "tracked_clean": true,
+      "tree_sha": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "worktree_clean": true
+    },
+    "positive": "== tl selftest 1777/1777 =="
+  },
+  "all_five_premerge_admissions": [
+    {
+      "run_id": 42583491215,
+      "attempt": 1,
+      "event": "pull_request_target",
+      "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "job_id": 129047596311,
+      "all_original_log_bytes_read": 136015,
+      "all_original_log_lines_read": 1127,
+      "source_record_sha256": "f956a7ae558a5474ab0943953b977e9e4b91728d11bb8e0c054b258b58bd0939",
+      "received_UTF8_text_sha256": "cbeaf8c1f3501f1ff32b0ccf7550c91e7cb21d1088b79ab54059ff534e4ff68b",
+      "official_artifact_id": 13657972936,
+      "official_ZIP_sha256": "8ba00ce86d8b2131b8571d21ee4e4e8d6e129e253e6bf6faa7ec81950a63f31f",
+      "API_digest": "sha256:8ba00ce86d8b2131b8571d21ee4e4e8d6e129e253e6bf6faa7ec81950a63f31f",
+      "API_digest_and_extracted_receipt_bytes_verified": true,
+      "actual_checker_rc": 0,
+      "checker_commit": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+      "checker_blob": "f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1",
+      "B": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+      "H2": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "result": "TAP_THU_HOI_RONG",
+      "A0discovery": "KHONG_CHAY: A0 chưa kích hoạt; PROFILE_ADAPTER_DA_DUYET rỗng (quyết định chủ kho)",
+      "mode": "chua_kich_hoat"
+    },
+    {
+      "run_id": 42592889862,
+      "attempt": 1,
+      "event": "pull_request_target",
+      "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "job_id": 129078503288,
+      "all_original_log_bytes_read": 135952,
+      "all_original_log_lines_read": 1126,
+      "source_record_sha256": "482f08db0942e202ed55e276b8f82fd6ae761b9bf644ecf0bba19b9185c4b867",
+      "received_UTF8_text_sha256": "b2c6d30e1d6354c8a4b27eaf73940c15037ee2ee5cc192a4ebf6d9b5092a89b5",
+      "official_artifact_id": 13661542710,
+      "official_ZIP_sha256": "bab71f3977faa8239c037fb5ce4d80cca07894b2c313686c54389566c319ab0d",
+      "API_digest": "sha256:bab71f3977faa8239c037fb5ce4d80cca07894b2c313686c54389566c319ab0d",
+      "API_digest_and_extracted_receipt_bytes_verified": true,
+      "actual_checker_rc": 0,
+      "checker_commit": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+      "checker_blob": "f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1",
+      "B": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+      "H2": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "result": "TAP_THU_HOI_RONG",
+      "A0discovery": "KHONG_CHAY: A0 chưa kích hoạt; PROFILE_ADAPTER_DA_DUYET rỗng (quyết định chủ kho)",
+      "mode": "chua_kich_hoat"
+    },
+    {
+      "run_id": 42592986916,
+      "attempt": 1,
+      "event": "pull_request_target",
+      "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "job_id": 129078820758,
+      "all_original_log_bytes_read": 136016,
+      "all_original_log_lines_read": 1127,
+      "source_record_sha256": "b98ce6bc8066ce71897e50eaa4f472f52b149564e084412c928e6b028f16cac5",
+      "received_UTF8_text_sha256": "3453c1e91b8d29c65548d87d6d0a2d00e6d0afb0bf6b0113327308ce2e5cf13d",
+      "official_artifact_id": 13662800533,
+      "official_ZIP_sha256": "fc0915ed3179ca0e37e5b486ea14e04389d9af3b9f75f5ad247bc65b40faa037",
+      "API_digest": "sha256:fc0915ed3179ca0e37e5b486ea14e04389d9af3b9f75f5ad247bc65b40faa037",
+      "API_digest_and_extracted_receipt_bytes_verified": true,
+      "actual_checker_rc": 0,
+      "checker_commit": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+      "checker_blob": "f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1",
+      "B": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+      "H2": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "result": "TAP_THU_HOI_RONG",
+      "A0discovery": "KHONG_CHAY: A0 chưa kích hoạt; PROFILE_ADAPTER_DA_DUYET rỗng (quyết định chủ kho)",
+      "mode": "chua_kich_hoat"
+    },
+    {
+      "run_id": 42593878356,
+      "attempt": 1,
+      "event": "pull_request_target",
+      "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "job_id": 129081755785,
+      "all_original_log_bytes_read": 136023,
+      "all_original_log_lines_read": 1127,
+      "source_record_sha256": "0e2881a2e4effc21f4dfea087adb000a02348747219cba029e866ebacd3ac643",
+      "received_UTF8_text_sha256": "232f2275819790f33ee6251bb69403b71882c568b475701078262e0bf749571a",
+      "official_artifact_id": 13662606845,
+      "official_ZIP_sha256": "948e47ab6c3ec9f7fc5a2dd3d3ef8f79e3d9ff1703ac4a378471e226045db9b8",
+      "API_digest": "sha256:948e47ab6c3ec9f7fc5a2dd3d3ef8f79e3d9ff1703ac4a378471e226045db9b8",
+      "API_digest_and_extracted_receipt_bytes_verified": true,
+      "actual_checker_rc": 0,
+      "checker_commit": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+      "checker_blob": "f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1",
+      "B": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+      "H2": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "result": "TAP_THU_HOI_RONG",
+      "A0discovery": "KHONG_CHAY: A0 chưa kích hoạt; PROFILE_ADAPTER_DA_DUYET rỗng (quyết định chủ kho)",
+      "mode": "chua_kich_hoat"
+    },
+    {
+      "run_id": 42595572951,
+      "attempt": 1,
+      "event": "pull_request_target",
+      "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "job_id": 129087255680,
+      "all_original_log_bytes_read": 136079,
+      "all_original_log_lines_read": 1128,
+      "source_record_sha256": "457fbb4f774b0525b3e758393e26bd13d1fec058b63ce2c626680fb5c1c00d3d",
+      "received_UTF8_text_sha256": "1db516e919c9f8a9937177f1b2457c8f9b11fefef10f7cadda818616adc9b1d7",
+      "official_artifact_id": 13663905513,
+      "official_ZIP_sha256": "8190dcd91dc99798b03c1368e90cf004d54232385c67be73f6dffb98e710bf1d",
+      "API_digest": "sha256:8190dcd91dc99798b03c1368e90cf004d54232385c67be73f6dffb98e710bf1d",
+      "API_digest_and_extracted_receipt_bytes_verified": true,
+      "actual_checker_rc": 0,
+      "checker_commit": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+      "checker_blob": "f405aef1f17fa1a80b43ccb427d6dd9e9fcd1ec1",
+      "B": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+      "H2": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "result": "TAP_THU_HOI_RONG",
+      "A0discovery": "KHONG_CHAY: A0 chưa kích hoạt; PROFILE_ADAPTER_DA_DUYET rỗng (quyết định chủ kho)",
+      "mode": "chua_kich_hoat"
+    }
+  ],
+  "premerge_source_bindings": {
+    "Ready_actual_automatic_code_review": {
+      "summary_id": 6735226910,
+      "updated_at": "2026-11-09T09:44:19Z",
+      "state": {
+        "code_review": {
+          "commit_sha": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+          "has_any_findings": false,
+          "has_unresolved_findings": false,
+          "status": "completed"
+        },
+        "security_review": {
+          "commit_sha": null,
+          "has_any_findings": null,
+          "has_unresolved_findings": null,
+          "status": null
+        }
+      },
+      "trigger": "Draft marked ready",
+      "completed_before_actual_merge": true,
+      "model_identity": "not_measured; no cross/humanassurance frombot"
+    },
+    "human_H2_supplement": {
+      "binding_sha256": "47891a5e9d976075e6ac55338b823fd1f7247a84393da92526ce5b5840dd7467",
+      "real_owner_explicit_bothaxes_source": "6736642798/v2receipt5d77077",
+      "not_a_new_machine_humanreading_certification": true
+    },
+    "conditional_merge_authority": {
+      "source": "https://github.com/ducthangho/tra-luat/pull/1301#issuecomment-6736812696",
+      "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "target": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+      "until": "2026-11-09T13:39:47Z",
+      "body_exact": true,
+      "metadata_commit": "fee515dec38825b728f3115ebae2c33397560e52"
+    },
+    "merge_K0_K7_recorded_rc": 0,
+    "AUX6_transport_bridge": "derivedplaintextview remains explicitlyderived and originalrun unchanged, independentlyauditedAUX6; not a newreview/run",
+    "merge_observation": {
+      "at": "2026-11-09T09:45:44.728244+00:00",
+      "PR": 1301,
+      "H": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+      "target_before": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+      "merge_commit": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "merged": true,
+      "landed": false,
+      "merged_at": "2026-11-09T09:45:39Z",
+      "authority": "https://github.com/ducthangho/tra-luat/pull/1301#issuecomment-6736812696",
+      "MCI": "not_yet_verified",
+      "bookkeeping": "pending"
+    }
+  },
+  "raw_canonical_gate_output_states": [
+    {
+      "job_id": 129088204840,
+      "name": "chuan-bi",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289641,
+      "name": "gate-packet-loop (ubuntu-latest)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289648,
+      "name": "gate-ops (ubuntu-latest)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289715,
+      "name": "gate (ubuntu-latest)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289784,
+      "name": "gate-cong-cu (ubuntu-latest, 3)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289794,
+      "name": "gate-cong-cu (ubuntu-latest, 2)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289802,
+      "name": "gate-cong-cu (ubuntu-latest, 1)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289807,
+      "name": "gate-cong-cu (ubuntu-latest, 6)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289821,
+      "name": "gate-nhanh-manh (ubuntu-latest, 1)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289823,
+      "name": "gate-cong-cu (ubuntu-latest, 7)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289851,
+      "name": "gate-cong-cu (ubuntu-latest, 4)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289862,
+      "name": "gate-cong-cu (ubuntu-latest, 5)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289890,
+      "name": "gate-nhanh-manh (ubuntu-latest, 4)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289893,
+      "name": "gate-nhanh-manh (ubuntu-latest, 6)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289925,
+      "name": "gate-cong-cu (ubuntu-latest, 0)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289935,
+      "name": "gate-nhanh-manh (ubuntu-latest, 5)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289961,
+      "name": "gate-nhanh-manh (ubuntu-latest, 3)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088289966,
+      "name": "gate-nhanh-manh (ubuntu-latest, 0)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088290009,
+      "name": "gate-nhanh-manh (ubuntu-latest, 2)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088290074,
+      "name": "gate-nhanh-manh (ubuntu-latest, 7)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129088993264,
+      "name": "gate-nhanh-gop (ubuntu-latest)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129089126012,
+      "name": "gate-registry (ubuntu-latest)",
+      "trang_thai": "not_measured"
+    },
+    {
+      "job_id": 129097071455,
+      "name": "gate-cong-cu-gop (ubuntu-latest)",
+      "trang_thai": "not_measured"
+    }
+  ],
+  "raw_canonical_workflow_definition_state": "not_measured",
+  "raw_canonical_job_set": {
+    "trang_thai": "passed",
+    "total_count": 23,
+    "so_id": 23,
+    "truong_sai": []
+  },
+  "raw_canonical_artifact_set": {
+    "trang_thai": "passed",
+    "total_count": 17,
+    "so_id": 17,
+    "truong_sai": []
+  },
+  "source_hashes": {
+    "AUX8-assignment.json": "e2577abe6a80f5edafa3c56010280260100244954a785c193bf6203a41a270a0",
+    "MCI-final-evidence/run.json": "7a4f5065684360d270f7911d0d58a342013e227c086c02b9fd6f867a31e93765",
+    "MCI-final-evidence/jobs-pages.json": "766b29e855f58b59b2d289a6f8866f441c1f9b2283cf2324226da08f836d1d2d",
+    "MCI-final-evidence/artifacts-pages.json": "61a05707032ff1e2f97d0e89ca6b7db7059ec8db819762eadee75af1b8e3cae7",
+    "MCI-final-evidence/validation.json": "2edc2e70b2ad56905919ea642a917ffa10495c2939a2376742909d9e76ea1a17",
+    "MCI-WD.json": "cc748456f728fa93c499c0e36fbd5de526c0e25f88b477018a4c69164d650dcd",
+    "MCI-WD/GraphQL-1.json": "27a0a105ec0a76849910fd04da47ab8b341f6f665fdd286cfbbb467244447f2d",
+    "MCI-WD/REST-2.json": "001ba54f0ea50eb1d2fed4dbe9c3f7bc414b86338b91cebd5858b00407baca08",
+    "MCI-WD/receipt.json": "2be940ae63777061ea73d86af86b75bd9ad70a53329460f3892c8b542769726c",
+    "MCI-complete-source/source-byte-manifest.json": "a3509daee6d00e98c6e389c82a892a2048a8be4dcfd5b78b1e9b49acfe23ffeb",
+    "MCI-supplemental-readbacks/source-byte-manifest.json": "5d6509c84616e21f86a569a9b9c2f463be172bcfd57f8523967661f5e425a1b8",
+    "MCI-supplemental-readbacks/check-runs-pages.json": "edf9fa291f59f496466b3d1253428a4becdfb56f6af6fee831db3b196016dbeb",
+    "MCI-supplemental-readbacks/master-ref.raw": "554ba2502c5c782657b9154efd9b6b7709bc4495dae51b39e800ff2b0af6f4ae",
+    "MCI-supplemental-readbacks/rules.json": "98375da55de21811362a103b37a8aadcea2882f9646b704eb6270c2fd4650392",
+    "MCI-supplemental-readbacks/PR.json": "b4c55ffb0076b8ff3c61ec63111e9de03ba89f9622b0a4697d7d8916700b7c80",
+    "premerge-admission-derived.json": "69b22bc8ae3eea9d4312e7e791e53c78f02da8cfcf6d8bdfd18aeb8f4a58147a",
+    "Ready-auto-terminal-comments.json": "d59565697531727b841296dc57108df08174a08deae2f31d33bac37b0bca973a",
+    "merge-binding.json": "488211a0eb8b6cbf3afdef97c45144c92f0b8cab8b683d121769641f7dd1ea74",
+    "merge-K0-K7.json": "3841f77aca6813ddb68b9de8c5face813b365dce8acc3bd32666215e85ce46bd",
+    "merge-fence-classification.json": "44124aa4276cdfae52f88bc3d5029ca4cbc38459d33e3f6244ceae0f7413ddc9",
+    "owner-H2-human-delivery-binding.json": "47891a5e9d976075e6ac55338b823fd1f7247a84393da92526ce5b5840dd7467",
+    "land-authority-binding.json": "00ad94fb72e925c126921d2fe5120752ebdb1e1e27dfc841891d5f95f9d82e0e"
+  },
+  "findings": [],
+  "limitations": [
+    "FinalAUXgate-source/provenance/output only; not codeapproval, newformalround/humanreadingcertification, waiver, M8/lease/debt/Missionclosure or landedassertion. Actualmerge observed fromretainedGit/API is not an action by thisauditor.",
+    "Original138sourceZIPunchanged; supplementalcurrentreadbacks separatelyindexed/published and timequalified, not silently insertedinto originalarchive.",
+    "Rawcanonical23gate-outputstates and RESTworkflowdefinition slot remain not_measured. Separate complete-sourceaudit and actualGraphQLWD supply derivedanchors; no rawmachineunknown rewrittenpassed.",
+    "ReceivedGitHubpluginUTF8loghashes, not originalremoteOSrawbyteidentity. Officiallifecycle/admissionZIPbytes separately matchGitHubdigests.",
+    "Packet-loop declared1360cases includes namedWindows-onlyskip; actual1359/1359. Associatedmutant notcredited; declared1523mutants notclaimedallmeasuredkills.",
+    "AllUbuntu, noWindowsCI/fullWindowsmutantCI/remoteWinRM/LIVE/runtimeactivation claim. Historicalnative and originaloperatorfailures remain separate unchangedevidence.",
+    "Allfivepremergeadmissionchecker0/ancestry/TAP_THU_HOI_RONG do notactivateA0; discovery staysNOT_RUN/chua_kich_hoat. Differentrun/job/artifactIDs/timestamps retained, no collapsinginto one rerun.",
+    "Lifecyclebase_sha=M follows actualmastermergebase recipe, notB. Gitclean beforeafter is recordedidentity, notcontinuous/ignored-workspacesnapshot attestation.",
+    "CPython3.12.16 observed in setup/artifact; no remotePythonbinary rehash claimed. Runnercode/catalog/command/output hashes independentlychecked.",
+    "Canonicalrequires5contexts; currentGitHubrules have5rawentries/4unique with existing duplicatedG5aggregate; registryadditionalcanonicalcontextactuallypassed. No rulesmutation done.",
+    "SeventeenMCIartifacts completeAPIset/upload-download/aggregate evidence verified; onlyofficiallifecycleZIP and5admissionZIPbinarydigests independentlyhashed, not16shardZIPbinarybytes.",
+    "Readycode-reviewsummary fullH2completednofindings beforemerge; security_review statusnull/notrun and externalbotmodelunknown. Ownerstatement/v2/authoritysources are retained, actualhumanreading notmachineobserved or recertified here.",
+    "Skippedconditionalsteps/typedplatformskips remain skipped; expectednegativefixtureerror diagnostics not countedasCI failures or positivekillcredit.",
+    "No new tests,network,CI/Git/source/productwrites,native/browser,models/subagents; onlytwoassignedscratchoutputs. Parentbudgets/history not reset; mechanicalM8/D1D4/retirement/readbacks remainRoot work."
+  ],
+  "digest_sha256": "95e367fa590cdc62474a55d07ea3c0ada81ae28e0e361a84938f142e6655be07"
+}

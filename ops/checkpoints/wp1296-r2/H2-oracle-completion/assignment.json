@@ -1,0 +1,12 @@
+{
+  "H": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "harness_sha256": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e",
+  "source_sha256": "801561e8b180ba30e678f4cd32788ed4310479df03c66d2d9f9edf28ae9d4a1d",
+  "only_operator_oracle_changed": true,
+  "originalrc2_preserved": true,
+  "phases": "30remainingPS7+1revalidateinert; source/runtimeidentityrequired forcarry58",
+  "code_author_calls_added": 0,
+  "AUX1_disposition": "inert_legacy_control",
+  "spec_change": false,
+  "before_execution": "2026-11-09T07:19:46.953346+00:00"
+}

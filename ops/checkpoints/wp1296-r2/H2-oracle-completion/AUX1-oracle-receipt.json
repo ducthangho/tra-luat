@@ -1,0 +1,246 @@
+{
+  "verdict": "oracle_mismatch_confirmed; native_gate_partial_STOP_preserved",
+  "oracle_disposition": "inert_legacy_control",
+  "formal_code_approval": false,
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+  "base": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "archive_sha256": "a83e932f656b7d54c275704ba947f889f393b89fdea1725a644d1659be4121d1",
+  "completed_at": "2026-11-09T07:17:01.358008+00:00",
+  "findings": [
+    {
+      "id": "WP1296-AUX1-OP-ORACLE-SNAPIN-PS7",
+      "scope": "operator oracle, not formal product finding",
+      "location": "operator-inputs/controller.py:105 (reject at95)",
+      "description": "Every directive with no parse errors unconditionally requires semantic PM01 rejection; valid parse is not proof of meaningful parser metadata. PS7 legacy-PSSnapin yields default-only requirements and must not be counted as a semantic negative.",
+      "original_status": "operatorrc2/AssertionError preserved; snapin-en-US-ps7 actualrc0/7of7/runtime2 retained"
+    }
+  ],
+  "evidence": {
+    "original_archive": {
+      "bytes": 7370104,
+      "sourcefiles_hash_size_verified": 1179,
+      "zip_entries": 1180,
+      "each_archived_file_matches_extracted_original": true,
+      "commandlogs_full_hashes_verified": 59,
+      "completed_phases": 58,
+      "S3_reports_recursively_verified": 66,
+      "S3_nested_artifact_refs_verified": 266,
+      "S3_child_commands_verified": 42,
+      "raw_runtime_tamper_outputs_verified": 32,
+      "semantic_CX_named_negative_kills": 8,
+      "legacy_nested_sets": [
+        {
+          "artifacts": 29,
+          "children": 7
+        },
+        {
+          "artifacts": 29,
+          "children": 7
+        }
+      ]
+    },
+    "nativeAPI": {
+      "PS51": "5.1.26100.9711:RequiresPSSnapIns ReadOnlyCollection<PSSnapInSpecification> exists",
+      "PS7": "7.6.9:no snapinproperty; six other required metadata properties retained",
+      "original_API_tool_source_sha256": "a008789a18898fbf97950415aa86c5aa1c0870d67e61ba4e4d90801ea2907108"
+    },
+    "same_directive": "#requires -PSSnapin Microsoft.PowerShell.Core\n",
+    "PS7": {
+      "parent_parser_culture": "en-US",
+      "parser": {
+        "culture": "en-US",
+        "PSVersion": "7.6.9",
+        "errors": [],
+        "requirements": {
+          "RequiredApplicationId": null,
+          "RequiredPSVersion": null,
+          "RequiredPSEditions": [],
+          "RequiredModules": [],
+          "RequiredAssemblies": [],
+          "IsElevationRequired": false
+        }
+      },
+      "actual_rc": 0,
+      "runtime_children": 2,
+      "cases": [
+        {
+          "id": "PM01",
+          "outcome": "passed",
+          "reason": null,
+          "detail": "plain unnamed end block with exactly one hashtable data expression; SafeGetValue accepted"
+        },
+        {
+          "id": "PM02",
+          "outcome": "passed",
+          "reason": null,
+          "detail": "nine allowed keys exactly; RootModule/ModuleVersion/GUID/PS metadata and Ordinal export arrays as specified; no wildcard"
+        },
+        {
+          "id": "PM03",
+          "outcome": "passed",
+          "reason": null,
+          "detail": "fresh Core 7.6.9 [en-AU]: Test-ModuleManifest + import ok, path=C:\\tl-win\\wp1296-H2-native\\scratch\\snapin-en-US-ps7\\addon\\scripts\\ProximaControl.psm1 (root psm1: True), 2 exports, px help ok"
+        },
+        {
+          "id": "PM04",
+          "outcome": "passed",
+          "reason": null,
+          "detail": "DependencyMismatch before the sentinel line ran (Core 7.6.9); private copy and original S1 intact"
+        },
+        {
+          "id": "PM05",
+          "outcome": "passed",
+          "reason": null,
+          "detail": "name/description; version 2.0.0 in frontmatter and Versions (both directions); six headings; three version domains; 7 placeholder targets"
+        },
+        {
+          "id": "PM06",
+          "outcome": "passed",
+          "reason": null,
+          "detail": "Run-Px help reused the manifest-imported instance; test-owned sentinel intact (loaded_after=1 same_instance=True sentinel_intact=True)"
+        },
+        {
+          "id": "PM07",
+          "outcome": "passed",
+          "reason": null,
+          "detail": "optional/excluded publication stated; 10 example lines valid; file refs resolve; 9 add-on files byte-identical before/after"
+        }
+      ],
+      "manifest_sha256": "8e28ef365c315f48f6e1b9dd41db1725f2aac1f150f8043d098691ef53d2230d",
+      "harness_sha256": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e",
+      "explanation": "No parser errors and all reflected available metadata default; PM03 Test-ModuleManifest/import exact exports/help, PM04 DependencyMismatch before sentinel and PM06sameinstance succeed. This is measured inertness for parser requirements/import behavior of this exact prefix on PS7.6.9, not arbitrary text acceptance."
+    },
+    "PS51": {
+      "parent_parser_culture": "en-US",
+      "parser": {
+        "culture": "en-US",
+        "PSVersion": "5.1.26100.9711",
+        "errors": [],
+        "requirements": {
+          "RequiredApplicationId": null,
+          "RequiredPSVersion": null,
+          "RequiredPSEditions": [],
+          "RequiredModules": [],
+          "RequiresPSSnapIns": [
+            {
+              "Name": "Microsoft.PowerShell.Core",
+              "Version": null
+            }
+          ],
+          "RequiredAssemblies": [],
+          "IsElevationRequired": false
+        }
+      },
+      "actual_rc": 1,
+      "runtime_children": 0,
+      "PM01": {
+        "id": "PM01",
+        "outcome": "failed",
+        "reason": "EXECUTABLE_STATEMENT: ScriptRequirements.RequiresPSSnapIns",
+        "detail": null
+      },
+      "PM04": {
+        "id": "PM04",
+        "outcome": "failed",
+        "reason": "NOT_EXECUTED: manifest rejected by PM01/PM02 before any import",
+        "detail": null
+      },
+      "manifest_sha256": "8e28ef365c315f48f6e1b9dd41db1725f2aac1f150f8043d098691ef53d2230d"
+    },
+    "frozen_contract": {
+      "r1_r2_meaningful_rule": "Empty/default requirements allowed; meaningful metadata rejected independent of spelling/culture. Relevant parser kinds recognized by eachruntime, not guessed English spelling.",
+      "interpretation": "Syntactically accepted PS7 legacy-PSSnapin with defaultmetadata is an inert control, not malformed syntax and not a meaningful recognized requirement. No new regex rejection or unknown-member acceptance exception is justified.",
+      "API_failclosed_retained": "Unknown members/types/unreadable/defaultviolations and missing common required members remain reject; PS51RequiresPSSnapIns required on Desktop."
+    },
+    "status_by_runtime": {
+      "PS51": "44phases complete, including30directives across3cultures,normal7/CX12/S2normal26,harmlesscomments,parse/historical,bothbaselineculture reproductions,requirements-onlyrollback",
+      "PS7": "14phases recorded:normal7/CX12/S2normal26,harmlesscomment,en-US9semanticdirective rejects,and inert snapin control whose operatorexpectationfailed",
+      "PS7_remaining_NOT_RUN": [
+        "comment-tr-TR-ps7",
+        "version-lower-tr-TR-ps7",
+        "version-upper-tr-TR-ps7",
+        "version-mixed-tr-TR-ps7",
+        "version-zero-tr-TR-ps7",
+        "modules-tr-TR-ps7",
+        "assemblies-tr-TR-ps7",
+        "elevation-tr-TR-ps7",
+        "edition-tr-TR-ps7",
+        "shellid-tr-TR-ps7",
+        "snapin-tr-TR-ps7",
+        "comment-az-Latn-AZ-ps7",
+        "version-lower-az-Latn-AZ-ps7",
+        "version-upper-az-Latn-AZ-ps7",
+        "version-mixed-az-Latn-AZ-ps7",
+        "version-zero-az-Latn-AZ-ps7",
+        "modules-az-Latn-AZ-ps7",
+        "assemblies-az-Latn-AZ-ps7",
+        "elevation-az-Latn-AZ-ps7",
+        "edition-az-Latn-AZ-ps7",
+        "shellid-az-Latn-AZ-ps7",
+        "snapin-az-Latn-AZ-ps7",
+        "malformed-ps7",
+        "historical-named-end-ps7",
+        "historical-end-clean-ps7",
+        "historical-background-ps7",
+        "baseline-comment-ps7",
+        "baseline-upper-tr-TR-ps7",
+        "baseline-upper-az-Latn-AZ-ps7",
+        "rollback-ps7"
+      ],
+      "overall": "terminalrc2,phase_count58,no finalmeasurementpassed"
+    },
+    "lock_release": {
+      "session": "wp1296-H2-native-15ad82f56924",
+      "released": true,
+      "at": "2026-11-09T07:05:29.116560+00:00",
+      "after": ""
+    }
+  },
+  "continuation": {
+    "unchanged_H2_remaining_matrix_permitted": true,
+    "permission_scope": "Diagnostic supports operator continuation within existing authorized native acceptance scope/budget; AUX does not dispatch tests or confer code approval.",
+    "spec_change_needed": false,
+    "reason": "An operational oracle correction follows existing parsersemantic/default allowance, not a new exception or relaxed product acceptance. Publish exact corrected oracle/binding before execution; preserve original controller/archive/rc2.",
+    "exact_new_oracle": [
+      "PS51 snapin: require parser RequiresPSSnapIns nonempty with expected Name and namedPM01 EXECUTABLE_STATEMENT: ScriptRequirements.RequiresPSSnapIns,rc1,runtime0,PM04NOT_EXECUTED,no setuperror across all3cultures.",
+      "PS7.6.9 snapin: require parsererrors[]; API absence of snapinmember; exact six-member allnull/empty/false requirements; then classify inert_legacy_control and require ordinary normal7of7rc0/runtime2/PM01+PM02pass; record no creditedkill. Repeat remaining cultures without assuming results.",
+      "All other recognized directives: retain expected meaningful key/value in independent parserreceipt plus namedPM01reject/rc1/runtime0/PM04NOT_EXECUTED/no setuperror. NonnullVersion0.0 remains meaningful.",
+      "Actual parsererrors: retain PARSE_ERROR rejection, no semanticguardkillcredit. Any new unsupported member/type/nondefault or mismatch =>STOP, never broad default acceptance.",
+      "Preserve historicalASTnegatives,baselinecommentandtr/azreproduction,guard-onlyrollback,normal7/CX12/S2normal26; no case/test removal."
+    ],
+    "carry_completed_evidence": {
+      "allowed": true,
+      "conditions": "ExactH2+harness/source-copy/argv/parser/report/artifacthashes match retained archive and same measured runtimeAPI/version; retain originaltimestamps/cultures/rcs. Do not relabel failedparent run passed. New remaining measurements must have distinct source root/receipts linked to original58phasearchive.",
+      "completed_inert_enUS_PS7_control": "May carry as actualrc0/7of7 inertcontrol, while originalexpected-reject mismatch and operatorrc2 stayfailed.",
+      "not_an_all_gates_pass": true
+    }
+  },
+  "source_hashes": {
+    "AUX1-assignment.json": "f0b4b119c9c4c8a3a12859c19e3994cf88c1657c645b45857605e0d4e3b1149e",
+    "H2-native-first-extracted/source-byte-manifest.json": "894073aec3e2cebe03b7758e2140586d4f1a552e9418c7f0ac556256a352829a",
+    "H2-native-first-extracted/phase-progress.json": "7abda4e2bd05dbec12890dd9c04529f0428d58c6d47ba212496a1f5d21d82d54",
+    "H2-native-first-extracted/command-receipts.jsonl": "fe25890932b22fb9d75d4f43536d5380334350360ce54af229e7071508ecb168",
+    "H2-native-first-extracted/operator-inputs/controller.py": "fe3ac1ad9cf21be4abbf513d67ad71f82c05390079d195649958ea87d5c77a29",
+    "H2-native-first-extracted/operator-inputs/manifest.json": "097434963da3898837620c90ad6479cb204a75502988c1772eb553014a7ef52c",
+    "H2-native-first-extracted/reports/snapin-en-US-ps7-parser.json": "3d33b3da238d2981f153594dcfc04bea6ddf79d5a022df3c152eb3872865d070",
+    "H2-native-first-extracted/reports/snapin-en-US-ps7.json": "594c63e4ef8ee412e8d12a10a67d8d01e257331fdd6e1a43b8f3e84ff5a4e813",
+    "H2-native-first-extracted/reports/snapin-en-US-ps51-parser.json": "3a64fcc84dd9b9118c4f8357b081234ca9e0caa19be60525a2908e725bc78261",
+    "H2-native-first-extracted/reports/snapin-en-US-ps51.json": "4bd1525d0d77293a7d782ed718572b9af257e4fd13e1b1bc49be6121601b3fa0",
+    "H2-native-first-extracted/terminal.json": "00ff12cf2db71a8e8cee104978330f3a9c17e30ac68da15725bf5482484279d4",
+    "H2-native-first-extracted/operator-failure.json": "cf2dc39419d22b50501d68bf406600a8baeff9ff31c8018de47343b075286b2b",
+    "H2-native-first-extracted/rollback-only.json": "0260a2c76f4705af3b54437b01716960edccfa8d60a3efdc6543b99d2c1f4859",
+    "H2-native-first-extracted/lock-release.json": "9a318fb593ac56f08d32491884042d0890639d5e9bdbeabc47d52dd681493c2d"
+  },
+  "limitations": [
+    "Only exact measured PS7.6.9/nativePS5.1 case/API semantics; no universal claim that every legacy variant/PowerShellversion/feature is inert. No remote/native runtime executed during AUX.",
+    "PS7 runtime/tamper children report en-AU as unchanged childscript sets it; parser and PM01 harness culture is measured en-US. Remaining tr-TR/az-Latn-AZ parentguard cases remain NOT_RUN.",
+    "Native source export is committed scoped Gitbytes with hash bridge, not a full native Gitcheckout; local immutable H2/tree/scopedfiles checked.",
+    "Stopped run has no final passedmeasurement or host-after/sourceexport-after stage; perreportPM07 source hashes/retainedfixture checks and lockrelease are measured. Do not claim complete whole-run cleanup/hostafter attestation.",
+    "H1wrongAPIpositivefailure remains historical productfailure; H2oracle mismatch does not erase it or reset author/shared/formal budgets.",
+    "Linux1777/strict/Ruff reported separately but outside this oracle diagnostic; no Linuxgate/reviewapproval/classclosure/WindowsCI/land claim here.",
+    "Text reconstruction normalizes CRLF/LF where original Windows writers differ; original archive/file rawhashes independentlyverified.",
+    "No productpatch/specacceptanceweakening/waiver/author3, models/subagents/network/tests/Windows/browser/device calls. Only two assigned scratchoutputs written."
+  ],
+  "digest_sha256": "2df679f4d90780474fb8bdc3f141f7e9c58cb229e052383823f5c89da5c4efb7"
+}

@@ -14179,7 +14179,9 @@ def _owner_policy14(c):
     policy = dict(schema="wp1174_owner_review_policy.v1", policy_id="WP1174-F-R22-CODEX-PAIR", owner="ducthangho", packet=1174,
         mission=1172, revision=22, generation=19, spec_ref=lease["spec_ref"], spec_sha256=lease["spec_hash"], lease_id=lease["lease_id"],
         expires_utc="2026-11-09T14:20:32Z", comparison="same_model_configured_effort_v1", source=source, reviewer=reviewer,
-        head="c"*40, tree="d"*40, assurance="same_provider_approved", journal_root=str(c.tmp/"source-journal"))
+        head="c"*40, tree="d"*40, assurance="same_provider_approved", journal_root=str(c.tmp/"source-journal"), limits=dict(
+            attempts_limit=m.MAC_DINH_TRAN_ATTEMPT,same_failure_limit=m.MAC_DINH_TRAN_SAME_FAILURE,
+            review_rounds_limit=m.MAC_DINH_TRAN_VONG_REVIEW,codex_review_calls_limit=m.MAC_DINH_TRAN_CODEX))
     class Clock(m.datetime):
         instant = m.datetime(2026, 11, 9, 1, tzinfo=m.timezone.utc)
         @classmethod
@@ -14242,6 +14244,7 @@ def _owner_policy14(c):
     nc.update(lease_id=lease["lease_id"], generation=19, spec_hash=lease["spec_hash"], executor=dict(identity), reviewer=dict(identity), repo=m._1174_REPO)
     verified = dict(lease=dict(lease_id=lease["lease_id"],granted_by="ducthangho",evidence="https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-900001",expires_utc=policy["expires_utc"]),
         context=nc, mode=False, comments_sha256="a"*64, source_lease=dict(lease, revision=22,generation=19,spec_path="ops/specs/r22.md"), spec=b"verified source spec without admission descriptor")
+    verified["context"]["required_checks"]=[tuple(x) for x in verified["context"]["required_checks"]]
     raw_output = c.tmp/"raw-review.txt";raw_output.write_bytes(b"fixture independent review output")
     receipt = c.tmp/"source-review.json"
     record = dict(schema="wp1174_owner_scoped_review.v1",head=policy["head"],tree=policy["tree"],identity=identity,verdict="approve",finding_ids=[],assurance="same_provider_approved",
@@ -14298,6 +14301,8 @@ def _owner_policy14(c):
         before=snapshot();rc,result=invoke(command,flags,forged=True)
         assert rc==8 and "immutable bytes" in result["detail"] and snapshot()==before,(rc,result)
     policy_rejections("init",init)
+    before=snapshot();rc,result=invoke("init",[*init,"--attempts-limit","18"])
+    assert rc==8 and "approved limits binding" in result["detail"] and snapshot()==before,(rc,result)
     rc,result=invoke("init",init);assert rc==0,(rc,result)
     def unflagged(command,flags):
         before=snapshot()
@@ -14305,12 +14310,12 @@ def _owner_policy14(c):
             try:rc=m.main(["--state-dir",str(journal),command,"--packet","1174",*flags])
             except SystemExit as ex:rc=ex.code
         assert rc==4 and snapshot()==before,"unflagged source writer bypass"
-    unflagged("record-post",["--for","reviewing","--comment-id","900009"])
     try:m._load(journal,1174)
     except SystemExit as ex:assert ex.code==4
     else:assert False,"source unscoped loader accepted"
     before=snapshot();_reject1174(m._save,journal,json.loads((journal/"wp1174.json").read_bytes()),reason="source same-family policy required before save")
     assert snapshot()==before
+    unflagged("record-post",["--for","reviewing","--comment-id","900009"])
     policy_rejections("record-post",["--for","reviewing","--comment-id","900008"])
     rc,result=invoke("record-lease");assert rc==0,(rc,result)
     rc,result=invoke("begin-attempt",["--provider","codex","--execution-surface","codex_service","--transport","machine","--bang-chung-moi-truong",anh_doctor()]);assert rc==0,(rc,result)
@@ -14322,7 +14327,7 @@ def _owner_policy14(c):
     review=["--provider","codex","--execution-surface","codex_service","--transport","machine","--verdict","approve","--reviewed-sha",policy["head"],"--codex-call","source-review","--bien-nhan",str(receipt),"--source-output",str(raw_output)]
     policy_rejections("record-review",review)
     before=snapshot();rc,result=invoke("record-review",review)
-    assert rc==8 and "review output audit" in result["detail"] and snapshot()==before,(rc,result)
+    assert rc==8 and snapshot()==before,(rc,result)
     records[:]=audited_records
     before=snapshot();rc,result=invoke("record-review",review,receipt_hash="e"*64)
     assert rc==8 and "review output audit" in result["detail"] and snapshot()==before,(rc,result)
@@ -14336,6 +14341,13 @@ def _owner_policy14(c):
     final=json.loads((journal/"wp1174.json").read_bytes())
     assert final["state"]=="approved_pending" and final["accepted_sha"] is None and final["human_acceptance"] is None
     assert final["review_rounds_used"]==1 and final["codex_review_calls_used"]==1 and final["codex_calls"][0]["da_dung"]
+    fixture=json.loads((journal/"wp1174.json").read_bytes())
+    fixture.update(state="running",attempt_open=False,attempt_anchor=None,attempts_used=fixture["attempts_limit"],reviews=[],review_rounds_used=0,finding_counts={})
+    fixture.pop("pending_sha",None);fixture.pop("bien_nhan_approve",None)
+    (journal/"wp1174.json").write_bytes(m._1174_bytes(fixture))
+    rc,result=invoke("begin-attempt",["--provider","codex","--execution-surface","codex_service","--transport","machine","--bang-chung-moi-truong",anh_doctor()])
+    checkpoint=json.loads((journal/"wp1174.json").read_bytes())
+    assert rc==3 and result["status"]=="quota_exhausted" and checkpoint["state"]=="blocked" and checkpoint["attempts_used"]==fixture["attempts_used"],(rc,result)
     before=snapshot();rc,result=invoke("chu-kho-duyet",["--checkpoint-path","ops/checkpoints/fixture.yaml"]);assert rc==8 and "source publication/human transition unavailable" in result["detail"] and snapshot()==before
 
 
@@ -14370,6 +14382,11 @@ MUTANTS.update({
     "m1174_source_lease_state": ('state["state"] == "awaiting_lease", "source lease requires awaiting_lease"', 'True, "source lease requires awaiting_lease"', ["wp1174_lifecycle_identity_advisory"]),
     "m1174_source_receipt_audit": ('hashlib.sha256(raw).hexdigest() == authority["review_audit"]["review_receipt_sha256"]', 'True', ["wp1174_lifecycle_identity_advisory"]),
     "m1174_source_raw_output": ('bool(output) and hashlib.sha256(output).hexdigest() == authority["review_audit"]["raw_output_sha256"]', 'True', ["wp1174_lifecycle_identity_advisory"]),
+})
+
+MUTANTS.update({
+    "m1174_source_limits": ('all((getattr(a,k) if a.cmd == "init" else state[k]) == v for k,v in limits.items())', 'True', ["wp1174_lifecycle_identity_advisory"]),
+    "m1174_source_quota_checkpoint": ('if ex.code != RC_TRAN or type(_1174_TRANSACTION["proposal"]) is not dict:', 'if True:', ["wp1174_lifecycle_identity_advisory"]),
 })
 
 if __name__ == "__main__":

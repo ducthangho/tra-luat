@@ -1696,7 +1696,9 @@ must match the owner-audited digests before review is recorded.
 The source transaction uses a preexisting fixed lock, revalidates canonical
 facts under lock and before publication, and stages the original reducers before
 durable complete-temp persistence. Lease recording retains awaiting_lease and
-budget preconditions. Unflagged same-family load/save remains denied; ordinary
+budget preconditions and durable quota checkpoints. Initial and stored limits
+must match the owner policy; flags cannot enlarge them. Unflagged same-family
+load/save remains denied; ordinary
 cross-family V2 behavior remains compatible. Approval records
 same_provider_approved and approved_pending, never cross_approved or
 human_audited. This route cannot perform accept/adoption/human publication

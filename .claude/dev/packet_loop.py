@@ -4393,7 +4393,7 @@ def _1174_owner_policy(root, admission, lease, spec_sha256, comments):
     _1174_require(rc == 0 and hashlib.sha256(raw).hexdigest() == descriptor["sha256"], "owner-scoped policy immutable bytes")
     policy = _1174_json(raw)
     keys = {"schema", "policy_id", "owner", "packet", "mission", "revision", "generation", "spec_ref", "spec_sha256",
-            "lease_id", "expires_utc", "comparison", "source", "reviewer", "head", "tree", "assurance", "journal_root"}
+            "lease_id", "expires_utc", "comparison", "source", "reviewer", "head", "tree", "assurance", "journal_root", "limits"}
     _1174_require(type(policy) is dict and set(policy) == keys and policy["schema"] == "wp1174_owner_review_policy.v1" and
         policy["policy_id"] == "WP1174-F-R22-CODEX-PAIR" and policy["owner"] == CHU_KHO and
         all(type(policy[k]) is int and policy[k] == admission[k] == v for k, v in
@@ -4402,6 +4402,10 @@ def _1174_owner_policy(root, admission, lease, spec_sha256, comments):
             "93014799f12143ad9114979744ccec08d5cc00dab2006b7e9412fd4663ebaf2c" and
         policy["lease_id"] == lease["lease_id"] == "wp1174-r22-g19-codex" and policy["assurance"] == "same_provider_approved" and
         policy["comparison"] == "same_model_configured_effort_v1", "owner-scoped policy scope/spec/lease")
+    limits = policy["limits"]
+    _1174_require(type(limits) is dict and set(limits) == {"attempts_limit", "same_failure_limit", "review_rounds_limit", "codex_review_calls_limit"} and
+        all(type(v) is int and v > 0 for v in limits.values()) and limits["attempts_limit"] <= 18 and
+        limits["review_rounds_limit"] <= 33 and limits["codex_review_calls_limit"] <= 33, "owner-scoped policy limits")
     now = datetime.now(timezone.utc)
     _1174_require(now < _1174_time(policy["expires_utc"]) <= _1174_time(lease["lease_expires_at_utc"]) and
         _1174_time(policy["expires_utc"]) <= min(_1174_time(admission["expires_utc"]),
@@ -4432,7 +4436,7 @@ def _1174_owner_policy(root, admission, lease, spec_sha256, comments):
         records = [c for c in comments if str(c.get("id")) == context["evidence_id"]]
         _1174_require(len(records) == 1, "owner-scoped policy context audit missing")
         record = records[0]
-        _1174_require(record.get("user") == decision["user"] and record.get("author_association") == "OWNER" and
+        _1174_require(record.get("user") == decision["user"] and "OWNER" == record.get("author_association") and
             record.get("issue_url") == decision["issue_url"] and record.get("html_url") ==
             f"https://github.com/{_1174_REPO}/issues/1174#issuecomment-{context['evidence_id']}", "owner-scoped policy context audit owner")
         audit = _1174_json(record.get("body", "").encode())
@@ -5631,6 +5635,7 @@ def _1174_source_resolve(a, directory, state):
             args = argparse.Namespace(root=str(snapshot), lease_ref=a.source_lease_ref,
                 lease_path=a.source_lease_path, lease_comments=str(readback))
             verified = _verify_lease_ref(args, state)
+        verified = dict(verified, context=json.loads(_1174_bytes(verified["context"])))
         lease = verified["source_lease"]
         _1174_require(lease.get("revision") == 22 and lease.get("generation") == 19 and
             verified["context"]["repo"] == _1174_REPO, "source canonical lease scope")
@@ -5647,12 +5652,15 @@ def _1174_source_resolve(a, directory, state):
 
 @_1174_scoped
 def _1174_source_command(a, directory):
-    global _1174_TRANSACTION
+    global _1174_TRANSACTION, _1174_IO_STARTED
+    _1174_IO_STARTED = False
     previous = globals().get("_1174_TRANSACTION")
     token, policy_token = _1174_SOURCE_POLICY.set(None), _1174_OWNER_POLICY.set(None)
     try:
         _1174_require(a.admission is None and a.packet == 1174 and a.revision == 22 and a.generation == 19 and
-            a.source_lease_ref and a.source_lease_path and directory.is_dir(), "source input scope/directory")
+            a.source_lease_ref and a.source_lease_path and directory.is_dir() and
+            a.expected_revision is None and a.expected_witness_revision is None and a.coordinator_id is None and
+            (a.cmd != "init" or a.mode == "fresh"), "source input scope/directory")
         path = _state_path(directory, a.packet)
         state = (dict(packet=a.packet, mission=a.mission, executor=a.executor, reviewer=a.reviewer,
             **{role+"_identity":_identity(getattr(a,role), getattr(a,role+"_model_family"),
@@ -5667,29 +5675,37 @@ def _1174_source_command(a, directory):
             _1174_require(a.cmd in ("init", "record-lease") or state.get("lease") == current["verified"]["lease"] and
                 {k:v for k,v in state.get("ngu_canh_lease",{}).items() if k != "lease_oid"} ==
                 {k:v for k,v in current["verified"]["context"].items() if k != "lease_oid"}, "source journal/current lease binding")
+            limits = current["authority"]["policy"]["limits"]
+            _1174_require(all((getattr(a,k) if a.cmd == "init" else state[k]) == v for k,v in limits.items()),
+                          "source approved limits binding")
             _1174_SOURCE_POLICY.set(current)
             _1174_OWNER_POLICY.set(current["authority"])
             _1174_TRANSACTION = dict(directory=directory.resolve(), state=state, source=True, proposal=None)
-            with contextlib.redirect_stdout(io.StringIO()):
-                if a.cmd == "record-lease":
-                    state = _load(directory,a.packet)
-                    _xet_dung(directory,state,"record-lease")
-                    _1174_require(state["state"] == "awaiting_lease", "source lease requires awaiting_lease")
-                    rc = _apply_lease_ref(a, directory, state, current["verified"])
-                elif a.cmd == "record-review":
-                    rc = _1174_review(a, directory, None)
-                else:
-                    _1174_require(a.cmd not in ("accept", "adopt-state", "chu-kho-duyet"), "source publication/human transition unavailable")
-                    rc = a.fn(a, directory)
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    if a.cmd == "record-lease":
+                        state = _load(directory,a.packet)
+                        _xet_dung(directory,state,"record-lease")
+                        _1174_require(state["state"] == "awaiting_lease", "source lease requires awaiting_lease")
+                        rc = _apply_lease_ref(a, directory, state, current["verified"])
+                    elif a.cmd == "record-review":
+                        rc = _1174_review(a, directory, None)
+                    else:
+                        _1174_require(a.cmd not in ("accept", "adopt-state", "chu-kho-duyet"), "source publication/human transition unavailable")
+                        rc = a.fn(a, directory)
+            except SystemExit as ex:
+                if ex.code != RC_TRAN or type(_1174_TRANSACTION["proposal"]) is not dict:
+                    raise
+                rc = RC_TRAN  # Preserve the original reducer's durable quota checkpoint.
             proposal = _1174_TRANSACTION["proposal"]
-            _1174_require(rc == 0 and type(proposal) is dict, "source reducer result")
+            _1174_require(rc in (0, RC_TRAN) and type(proposal) is dict, "source reducer result")
             _1174_TRANSACTION["state"] = proposal
             _load(directory,a.packet)
             _1174_require(_1174_source_resolve(a,directory,state) == current, "source final authority changed")
-            _1174_persist(path, _1174_bytes(proposal), create=a.cmd == "init")
-        return _1174_emit("completed_no_dispatch")
+            _1174_write(path, _1174_bytes(proposal), create=a.cmd == "init")
+        return _1174_emit("quota_exhausted" if rc == RC_TRAN else "completed_no_dispatch")
     except (Exception, SystemExit) as ex:
-        return _1174_emit("UNKNOWN", f"{type(ex).__name__}: {ex}")
+        return _1174_emit("durability_unknown" if _1174_IO_STARTED else "UNKNOWN", f"{type(ex).__name__}: {ex}")
     finally:
         _1174_TRANSACTION = previous
         _1174_SOURCE_POLICY.reset(token)

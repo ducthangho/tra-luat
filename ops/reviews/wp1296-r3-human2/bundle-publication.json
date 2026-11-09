@@ -1,0 +1,14 @@
+{
+  "commit": "ab08513724c1c3f51095f153051fe9b92379e781",
+  "human_report": "https://github.com/ducthangho/tra-luat/blob/ab08513724c1c3f51095f153051fe9b92379e781/ops/checkpoints/wp1296-r3/human-audit-H2/HUMAN-AUDIT.md",
+  "evidence_index": "https://github.com/ducthangho/tra-luat/blob/ab08513724c1c3f51095f153051fe9b92379e781/ops/checkpoints/wp1296-r3/PRCI/final-evidence-index.json",
+  "comments": [
+    "https://github.com/ducthangho/tra-luat/pull/1301#issuecomment-6736539810",
+    "https://github.com/ducthangho/tra-luat/issues/1296#issuecomment-6736540471"
+  ],
+  "remote_blobs_exact": true,
+  "comment_bodies_exact": true,
+  "actual_human_verdict": null,
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "promotion_eligible": false
+}

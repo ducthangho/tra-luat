@@ -1,0 +1,9 @@
+{
+  "owner_statement_verbatim": "Tôi approve cả 2 trục, hãy đăng cho tôi.",
+  "scope_source": "Immediately preceding exactH2 immutable human-audit bundle and request for conclusions on spec+standards/security; user explicitly approves both and authorizes publication",
+  "root_role": "Machine recorder/publisher, not humanauditor",
+  "personal_reading_machine_measured": false,
+  "human_personally_executed_new_tests": "not_claimed",
+  "additional_personal_reading_or_own_reasoning_quote": "not added; preserve actualowner words without inventing further attestation",
+  "primary_prepush_M5_K4": "Original independent CodexCLI approval beforepush retained. Supplementalhuman audit is currentactualtime, not human-onlyprepush fallback or backdatedaudit."
+}

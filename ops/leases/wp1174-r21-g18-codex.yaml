@@ -91,11 +91,11 @@ change_policy_exception:
   - unknown=>blocked
 leased_at_utc: '2026-11-08T23:41:31.034422+00:00'
 heartbeat_at: '2026-11-08T23:41:31.034422+00:00'
-lease_until: '2026-11-09T14:20:32+00:00'
-lease_expires_at_utc: '2026-11-09T14:20:32+00:00'
+lease_until: '2026-11-09T00:35:30.595594+00:00'
+lease_expires_at_utc: '2026-11-09T00:35:30.595594+00:00'
 heartbeat_required_minutes: 360
 max_lease_hours: 24
-hard_not_after: '2026-11-09T14:20:32+00:00'
+hard_not_after: '2026-11-09T00:35:30.595594+00:00'
 nang_tran:
   ai_nang: ducthangho under recorded delegation
   can_cu: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6728589869
@@ -213,3 +213,8 @@ approved_time_envelope:
   amendment_sha256: 08a8076a0d6ded58c3433872238997933be7564cee5e1f6448a1519fd92320ba
   E2_sha256: aff74d2a7eb69f08d067be0b94f7f2d48f6cd9fccba579cd50b146b3ac872430
   history_preserved: true
+ended_at_utc: '2026-11-09T00:35:30.595594+00:00'
+ended_reason: Source14 service context terminal, blocked-partial; no further source
+  commands or successor grant
+ended_on_instruction: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6728589869
+source_final_head: 222187c1d88fa6b51cf7fc93bf63a02122b8472d

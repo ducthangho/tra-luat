@@ -1,0 +1,17 @@
+{
+  "packet": 1296,
+  "authoritative_M8": "https://github.com/ducthangho/tra-luat/issues/1296#issuecomment-6738308285",
+  "M": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+  "status": "passive_weekly_archive_queue_nonblocking",
+  "allowed_passive_paths": [
+    "ops/land/pr1301-wp1296-r3-land-evidence.yaml",
+    "ops/reviews/wp1296-r3-human2.receipt.yaml",
+    "ops/reviews/wp1296-r3-review1.receipt.yaml"
+  ],
+  "references_only_for_active_metadata": [
+    "ops/leases/wp1296-r3-g3-codex.yaml",
+    "ops/specs/wp1296-r3.md"
+  ],
+  "no_packet_specific_PR_model_review_or_Windows_gate": true,
+  "scope": "M8 already authoritative Issue/readback; not another authority or product change"
+}

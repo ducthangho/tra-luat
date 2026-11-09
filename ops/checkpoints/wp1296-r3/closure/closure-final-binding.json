@@ -1,0 +1,20 @@
+{
+  "at": "2026-11-09T10:57:59.564142+00:00",
+  "M": "09643583d170c66ce3bcc74170d054d0f5ac9356",
+  "H": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "M8": "https://github.com/ducthangho/tra-luat/issues/1296#issuecomment-6738308285",
+  "D1D4_rc": 0,
+  "active_packet_writeclaims": 0,
+  "retired_at": "2026-11-09T10:56:54Z",
+  "Packet1296": "closed_completed",
+  "debt1295": "closed_repaired",
+  "Mission1238": "open_in_progress",
+  "comments": {
+    "1296": "https://github.com/ducthangho/tra-luat/issues/1296#issuecomment-6738322955",
+    "1295": "https://github.com/ducthangho/tra-luat/issues/1295#issuecomment-6738323757",
+    "1301": "https://github.com/ducthangho/tra-luat/pull/1301#issuecomment-6738324452",
+    "1238": "https://github.com/ducthangho/tra-luat/issues/1238#issuecomment-6738325240"
+  },
+  "no_LIVE": true,
+  "new_model_calls_after_AUX8": 0
+}

@@ -1,0 +1,12 @@
+{
+  "metadata_commit": "95016cbb9809185708dfd24c01ed84f9ed8c9bbb",
+  "comment": "https://github.com/ducthangho/tra-luat/issues/1296#issuecomment-6738308285",
+  "comment_id": 6738308285,
+  "body_exact": true,
+  "remote_blobs_exact": true,
+  "retired_at": "2026-11-09T10:56:54Z",
+  "land_path": "ops/land/pr1301-wp1296-r3-land-evidence.yaml",
+  "lease_path": "ops/leases/wp1296-r3-g3-codex.yaml",
+  "M8_sha256": "ebf77446251681ff9e9fa532f0135d9893f6af0745be3ced874cd84170341374",
+  "lease_sha256": "f69e26249b16aede20400e79cfbcda02fe556c10250801968a92b2dfc4971915"
+}

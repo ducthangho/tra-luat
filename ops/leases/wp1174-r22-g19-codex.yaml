@@ -21,7 +21,7 @@ assurance_target: same_provider_approved
 branch: agent/wp1174-g5-codex
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6729819560
-authority_url: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6732765461
+authority_url: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6735522660
 recorded_by: Codex coordinator under explicit E2 owner delegation; no actual-human
   audit
 spec_path: ops/specs/wp1174-implementation-r22.md
@@ -32,7 +32,7 @@ prompt_path: ops/specs/wp1174-implementation-r22.md
 prompt_sha256_required: 93014799f12143ad9114979744ccec08d5cc00dab2006b7e9412fd4663ebaf2c
 base_sha: 222187c1d88fa6b51cf7fc93bf63a02122b8472d
 start_from_sha: 222187c1d88fa6b51cf7fc93bf63a02122b8472d
-reviewed_sha_required: 448d17baff13ae1beb869662a2ad81dd2d7aefde
+reviewed_sha_required: 0efc516a90167ee9b6740dcad9bf4d95b6ccc89b
 write_set: &id001
 - .claude/dev/packet_loop.py
 - .claude/dev/packet_loop_test.py
@@ -85,12 +85,13 @@ change_policy_exception:
   never_waived:
   - source authority
   - exclusive lease
-  - K0-K7
+  - K0/K1/K2/K3/K5/K6/K7; source-only K4 resolved explicitly by owner H, not native
+    rc0
   - target actual-human when using target same-provider advisory path
   - M9
   - unknown=>blocked
 leased_at_utc: '2026-11-09T01:08:54.585259+00:00'
-heartbeat_at: '2026-11-09T06:00:32.420139+00:00'
+heartbeat_at: '2026-11-09T08:24:54.188309+00:00'
 lease_until: '2026-11-09T18:05:32Z'
 lease_expires_at_utc: '2026-11-09T18:05:32Z'
 heartbeat_required_minutes: 360
@@ -115,11 +116,10 @@ nang_tran_review_rounds:
   can_cu: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6728589869
 thay_the_cho: null
 template_only: false
-guard: Source15 remains closed with original45min deadline; source16 is one fresh
-  test-only medium context within source18 after actual canonical H/Đ/R/secret/head/runtime/whole-fit
-  and legacyinitrc4. New operator supplement pinned, existing F/G owner authority
-  unchanged. No new quota, product/protocol edit, fakejournal/begin, actual-human/native
-  claim or finished-context reuse.
+guard: Source16 terminal, no new source/review contexts. H exact-head owner resolution
+  authorizes source-only K4 route and publication/conditional land only after actual
+  gates; Windows cap18/min95, one15+10min ASUS pair after fresh preflight. No tladmin/ACL/security
+  change or fake native/human evidence.
 spec_source_oid: 029b0c2a6ff23b6c5d55a34eb0027ad8cdc1ebf7
 spec_sha256: 93014799f12143ad9114979744ccec08d5cc00dab2006b7e9412fd4663ebaf2c
 runtime_preconditions:
@@ -129,8 +129,8 @@ runtime_preconditions:
   publishing: only canonical publisher after gates; worker cannot authorize land
   canary_profile: native Linux ext4/XFS positive must be measured; cloud overlay and
     unverified WSL not supported; no security/WSL installs authorized
-  Windows: Only owner verified online host, exactly one fresh focused13+rawunit baseline<=15min/candidate<=10min
-    pair, cumulative11runs/95minutes; actual9/46.0340654667 retained. No WindowsCI/main/fullsuite.
+  Windows: ASUS ordinary non-elevated owner host; frozen13+rawunit baseline<=15min/candidate<=10min;
+    cumulative18runs/95min; actual10/61.04362335 retained. No tladmin/ACL/security/WindowsCI/main/fullsuite.
   C15_accounting: G effective cloud3040/hard18:05:32Z; original clock and all waits/failures
     retained. Source15/18 (source15 closed), role61, review28/33,CI12/16,connector6/7,Windows9/11
     and46.0340654667/95min,M9used1/2 and4.2336111111/24h; canary0/1,scratch2/2. No
@@ -138,7 +138,7 @@ runtime_preconditions:
   C15_reservation: G mandatory remaining650 at approval preflight; release only actual
     terminal allocations; remeasure whole-fit before each applicable admission; no
     slide/refund/paidpurchase
-exception_approval_comment_url: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6732765461
+exception_approval_comment_url: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6735522660
 reviewer: codex
 pull_request: 1275
 source_pr: 1275
@@ -161,9 +161,10 @@ continuation_source:
   - ops/specs/wp1174-implementation-r17.md
   final_product_hash_rule: Measure/freeze actual final product/test/protocol hashes;
     all old head evidence historical only
-source_audit_policy: Independent Codex high source audit under owner-scoped same-provider
-  exception; all authoritative K0-K7 and target actual-human requirements retained
-source_authority_url: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6732765461
+source_audit_policy: Fresh exactH Codex high A-E union plus delegated AI source audit;
+  explicit owner H resolution for source-only K4; all other applicable authoritative
+  gates and target actual-human requirements retained.
+source_authority_url: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6735522660
 source_run_windows_minutes:
 - 45
 new_native_review_minutes: 15
@@ -172,10 +173,10 @@ new_native_integrator_minutes: 10
 native_part_count: 4
 native_parallel_limit: 1
 packet_budget_carryover:
-  source_used_known: 14
+  source_used_known: 16
   source_cap: 18
-  new_source_remaining: 4
-  native_used: 28
+  new_source_remaining: 2
+  native_used: 33
   native_cap: 33
   connector_observed: 6
   connector_cap: 7
@@ -185,7 +186,7 @@ packet_budget_carryover:
   effective_envelope_max_attempts_per_packet: 18
   counters_reset: false
   external_source_attribution: UNKNOWN separatelyretained
-  new_Codex_contexts_remaining: 5
+  new_Codex_contexts_remaining: 0
 owner_review_policy:
   policy_id: WP1174-F-R22-CODEX-PAIR
   path: ops/specs/wp1174-r22-owner-review-policy.json
@@ -291,4 +292,16 @@ source16_manual_offline_bootstrap:
   - whole remaining budget
   no_journal_or_begin_claim: true
   old_source15_bootstrap_not_reused: true
-source16_final_review_head_pending: true
+source16_final_review_head_pending: false
+H_owner_resolution:
+  proposal_sha256: 6f69346ae0baa45f6f0e05bc4ad96c8672c2b86588cbe559fa823ab3abfb7830
+  authority_url: https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-6735522660
+  head: 0efc516a90167ee9b6740dcad9bf4d95b6ccc89b
+  tree: 1d6ecdf16ebe1daca64d576791f00aacbeda3d2f
+  Windows_total_runs_cap: 18
+  Windows_minutes_cap: 95
+  Windows_used_runs: 10
+  Windows_used_minutes: 61.043623350000004
+  source_only_K4_resolved_by_explicit_owner: true
+  no_native_human_or_runtime_activation_claim: true
+  all_prior_costs_retained: true

@@ -1,0 +1,21 @@
+{
+  "observed_at_utc": "2026-11-09T09:35:58.266901+00:00",
+  "actual_user_text": "Tôi đồng ý duyệt gói I. Hãy tiếp tục triển khai, hạn chế hỏi, tôi ủy quyền cho bạn tự quyết tới xong nhiệm vụ",
+  "approved_proposal_sha256": "ca82175bedc21360a082899afcfd04a45fda27d2e66ef0ea167c066587012f95",
+  "source_cap": 18,
+  "review_cap": 38,
+  "known_role_cap": 67,
+  "M9_cap": 3,
+  "M9_runner_hours_cap": 24,
+  "cloud_cap_minutes": 3300,
+  "hard_deadline": "2026-11-09T22:25:32Z",
+  "CI_cap": 16,
+  "Windows_cap_runs": 18,
+  "Windows_cap_minutes": 95,
+  "source_used_before": 16,
+  "review_used_before": 33,
+  "no_new_invocation_yet": true,
+  "public_activation_blocked_by_auto_review": true,
+  "no_human_native_audit_claim": true,
+  "all_prior_costs_retained": true
+}

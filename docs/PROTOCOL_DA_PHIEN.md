@@ -1704,3 +1704,11 @@ For enrolled v3, status/next-comment accept the same admission/root/revision/
 generation/coordinator identity and validate current authority, witness/high-water
 and all retired ancestors under the existing lock. They use a read-only state
 context; they cannot grant an unscoped v3 writer or accept retired state.
+
+
+The original unflagged status/next-comment commands also support a local read-only
+v3 diagnostic view. They validate canonical closed v3 bytes, the complete legacy
+invariants and all retained immutable adoption links/live tombstones. This local
+view reports journal contents; it does not prove current grant/enrollment or
+create review/dispatch authority. Unscoped mutators retain the v2-only loader.
+Explicit admission inputs select the stronger current-authority reader above.

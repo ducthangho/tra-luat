@@ -11311,7 +11311,8 @@ def _source1174(kind):
         witness, p = _w1174(c, initialized=True)
         state = dict(schema_version=3, packet=1174, mission=1172, generation=1, state_revision=0,
                      enrollment_id=admission["enrollment"]["id"], binding_sha256=admission["enrollment"]["binding_sha256"],
-                     attempts_used=7, codex_review_calls_used=4, history=[dict(event="preserved")])
+                     attempts_used=7, codex_review_calls_used=4, history=[dict(event="preserved")], adoption=None)
+        admission["enrollment"]["g0"] = 1
         raw = m._1174_bytes(state)
         source = str(c.tmp / "active.json")
         admission["lineage"] = dict(predecessor_generation=1, source_path=source, source_sha256=hashlib.sha256(raw).hexdigest())
@@ -11336,6 +11337,7 @@ def _source1174(kind):
                 admission["lineage"]["source_sha256"] = witness["high_water"]["state_sha256"] = digest
                 _reject1174(m._1174_source_binding, witness, admission, source, changed)
         elif kind == "legacy_branch":
+            admission["enrollment"]["g0"] = 5
             legacy = m._1174_bytes(dict(state, schema_version=2))
             digest = hashlib.sha256(legacy).hexdigest()
             admission["lineage"].update(source_sha256=digest, predecessor_generation=5)
@@ -14107,6 +14109,10 @@ def _readers14(c):
             rc = m.main(args)
         assert rc == 0 and (json.loads(out.getvalue())["schema_version"] == 3 if command == "status" else "awaiting_lease" in out.getvalue()), (rc, out.getvalue())
         assert snapshot() == before
+        local = ["--state-dir", str(target.parent), command, "--packet", str(a["packet"])]
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            assert m.main(local) == 0, "unflagged v3 diagnostic view rejected"
+        assert snapshot() == before
         with patch.object(m, "_1174_resolve", side_effect=ValueError("unverified enrollment")), contextlib.redirect_stdout(io.StringIO()):
             assert m.main(args) == 8
         assert snapshot() == before
@@ -14139,7 +14145,7 @@ def _owner_policy14(c):
     reviewer = dict(source, context_id="real-review-context", checkout_id="review-checkout", read_only=True, configured_effort="high", evidence_id="platform-review-receipt")
     policy = dict(schema="wp1174_owner_review_policy.v1", policy_id="WP1174-E2-R21-CODEX-PAIR", owner="ducthangho", packet=1174,
         mission=1172, revision=21, generation=18, spec_ref=lease["spec_ref"], spec_sha256=lease["spec_hash"], lease_id=lease["lease_id"],
-        expires_utc="2026-11-09T14:20:32+00:00", comparison="same_model_configured_effort_v1", source=source, reviewer=reviewer,
+        expires_utc="2026-11-09T14:20:32Z", comparison="same_model_configured_effort_v1", source=source, reviewer=reviewer,
         head="c"*40, tree="d"*40, assurance="same_provider_approved")
     def resolve(value, owner="ducthangho", forged=False):
         raw = m._1174_bytes(value)
@@ -14183,15 +14189,15 @@ _source14_hosts = {"wp1174_durability_cached_writer": _lineage14, "wp1174_lifecy
                    "wp1174_lifecycle_identity_advisory": _owner_policy14}
 CASES = [(name, _r12_extend1174(case, _source14_hosts[name]) if name in _source14_hosts else case) for name, case in CASES]
 MUTANTS.update({
-    "m1174_chain_depth_one": ('        current, path = predecessor, p["source_path"]', '        break # omit older retired ancestors', ["wp1174_durability_cached_writer"]),
-    "m1174_chain_skip_ancestor": ('while current.get("adoption") is not None:', 'while False:', ["wp1174_durability_cached_writer"]),
+    "m1174_chain_depth_one": ('        current, path = predecessor, p["source_path"]', '        current, path = predecessor, p["source_path"]\n        return # omit older retired ancestors', ["wp1174_durability_cached_writer"]),
+    "m1174_chain_skip_ancestor": (['while current.get("adoption") is not None:', 'if g0 is not None and current.get("schema_version") == 3:'], ['while False:', 'if False:'], ["wp1174_durability_cached_writer"]),
     "m1174_readonly_save": ('not tx.get("read_only", False), "read-only state context"', 'True, "read-only state context"', ["wp1174_lifecycle_guard_readonly"]),
     "m1174_readonly_v3_denied": ('state = _1174_pair(current, witness, _1174_read(Path(e["state_path"])))', 'raise ValueError("read-only v3 unavailable")', ["wp1174_lifecycle_guard_readonly"]),
     "m1174_owner_policy_missing": ('not _1174_same_family(p) or _1174_OWNER_POLICY.get() is not None,', 'True,', ["wp1174_lifecycle_identity_advisory"]),
     "m1174_owner_policy_strength": ('source["configured_effort"] == "medium" and reviewer["configured_effort"] == "high"', 'True', ["wp1174_lifecycle_identity_advisory"]),
     "m1174_owner_policy_self": ('source["context_id"] != reviewer["context_id"]', 'True', ["wp1174_lifecycle_identity_advisory"]),
     "m1174_owner_policy_owner": ('decision.get("user", {}).get("login") == CHU_KHO', 'True', ["wp1174_lifecycle_identity_advisory"]),
-    "m1174_owner_policy_expiry": ('now < _1174_time(policy["expires_utc"])', 'True', ["wp1174_lifecycle_identity_advisory"]),
+    "m1174_owner_policy_expiry": ('now < _1174_time(policy["expires_utc"]) <= _1174_time(lease["lease_expires_at_utc"])', '_1174_time(policy["expires_utc"]) <= _1174_time(lease["lease_expires_at_utc"])', ["wp1174_lifecycle_identity_advisory"]),
 })
 
 

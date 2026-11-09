@@ -1394,8 +1394,45 @@ def cmd_record_post(a, state_dir: Path) -> int:
     return RC_OK
 
 
+def _reader_state(state_dir, packet):
+    """Local diagnostic view only: validates bytes, never grants mutation authority."""
+    if globals().get("_1174_TRANSACTION") is not None:
+        return _load(state_dir, packet)
+    path = _state_path(state_dir, packet)
+    try:
+        candidate = json.loads(path.read_bytes())
+    except (OSError, ValueError):
+        return _load(state_dir, packet)
+    if type(candidate) is not dict or candidate.get("schema_version") != 3:
+        return _load(state_dir, packet)
+    token = _1174_VIEW_ONLY.set(True)
+    try:
+        raw = _1174_read(path)
+        state = _1174_json(raw)
+        _1174_require(type(state.get("packet")) is int and state["packet"] == packet and
+            type(state.get("mission")) is int and state["mission"] > 0 and
+            type(state.get("enrollment_id")) is str and bool(state["enrollment_id"]) and
+            _1174_hash(state.get("binding_sha256")) and _1174_int(state.get("generation")) and
+            _1174_int(state.get("state_revision")), "read-only v3 local identity")
+        enrollment = dict(id=state["enrollment_id"], binding_sha256=state["binding_sha256"], journal_root=str(state_dir),
+            initial_state_projection={k: state[k] for k in ("executor", "reviewer", "executor_identity", "reviewer_identity")})
+        admission = dict(packet=packet, mission=state["mission"], generation=state["generation"], enrollment=enrollment)
+        if state.get("adoption") is not None:
+            payload = state["adoption"]["payload"]
+            admission.update(operation=payload["operation"], lineage={k: payload[k] for k in
+                ("source_path", "source_sha256", "predecessor_generation")})
+            _1174_require(state["adoption"]["phase"] == "adopted", "read-only active adoption required")
+        result = _1174_state(raw, admission)
+        _1174_tripwire(result)
+        return result
+    except (Exception, SystemExit) as ex:
+        _die(RC_STATE, f"state v3 read-only validation rejected: {type(ex).__name__}: {ex}")
+    finally:
+        _1174_VIEW_ONLY.reset(token)
+
+
 def cmd_next_comment(a, state_dir: Path) -> int:
-    st = _load(state_dir, a.packet)
+    st = _reader_state(state_dir, a.packet)
     print(
         f"### packet wp{st['packet']} · mission #{st['mission']}\n"
         f"\n"
@@ -3143,7 +3180,7 @@ def _xet_dung(state_dir: Path, st: dict, cua: str, a=None, cham_tran=()) -> None
 
 
 def cmd_status(a, state_dir: Path) -> int:
-    st = _load(state_dir, a.packet)
+    st = _reader_state(state_dir, a.packet)
     print(json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True))
     if st.get("dem_tu_suy"):
         print(CANH_BAO_V1, file=sys.stderr)
@@ -4352,7 +4389,7 @@ def _1174_owner_policy(root, admission, lease, spec_sha256, comments):
     now = datetime.now(timezone.utc)
     _1174_require(now < _1174_time(policy["expires_utc"]) <= _1174_time(lease["lease_expires_at_utc"]) and
         _1174_time(policy["expires_utc"]) <= min(_1174_time(admission["expires_utc"]),
-            _1174_time("2026-11-09T14:20:32+00:00")), "owner-scoped policy expired")
+            _1174_time("2026-11-09T14:20:32Z")), "owner-scoped policy expired")
     decisions = [c for c in comments if type(c) is dict and c.get("id") == descriptor["decision_id"]]
     _1174_require(len(decisions) == 1, "owner-scoped policy decision missing")
     decision = decisions[0]
@@ -4495,6 +4532,7 @@ _1174_MUTATORS = ("init", "record-lease", "begin-attempt", "void-attempt", "reco
     "record-codex-call", "nang-tran", "record-rescue", "record-post", "accept", "mo-lai", "chu-kho-duyet", "adopt-state")
 _1174_IMPLEMENTATION_COMPLETE = True
 _1174_OWNER_POLICY = contextvars.ContextVar("wp1174_owner_policy", default=None)
+_1174_VIEW_ONLY = contextvars.ContextVar("wp1174_view_only", default=False)
 
 _1174_CORE = frozenset("schema_version review_rounds_used codex_review_calls_used codex_calls nang_tran review_rounds_limit codex_review_calls_limit packet mission executor reviewer executor_identity reviewer_identity state lease attempts_used attempts_limit same_failure_limit finding_counts attempt_open attempt_anchor hmac_key reviewing_head_sha accepted_sha reviews posts history state_revision generation enrollment_id binding_sha256 adoption scoped_review human_acceptance".split())
 _1174_OPTIONAL = {"luat_adr0054": bool, "ngu_canh_lease": dict, "dem_tu_suy": bool,
@@ -4581,14 +4619,14 @@ def _1174_state(raw, admission, generation=None):
     _1174_require(_1174_hash(state["hmac_key"]), "state HMAC key")
     if state["adoption"] is not None:
         _1174_adoption_record(state["adoption"], admission)
-    _1174_require(not _1174_same_family(state) or _1174_OWNER_POLICY.get() is not None, "state owner-scoped same-family policy required")
+    _1174_require(not _1174_same_family(state) or _1174_OWNER_POLICY.get() is not None or _1174_VIEW_ONLY.get(), "state owner-scoped same-family policy required")
     _1174_lifecycle_records(state, admission)
     for role in ("executor", "reviewer"):
         _1174_require(state[role] == e["initial_state_projection"][role] and
                       state[role + "_identity"] == e["initial_state_projection"][role + "_identity"], "state immutable provider identity")
     previous = globals().get("_1174_TRANSACTION")
     directory = Path(e["journal_root"])
-    _1174_TRANSACTION = dict(directory=directory, state=state, proposal=None, admission=admission)
+    _1174_TRANSACTION = dict(directory=directory, state=state, proposal=None, admission=admission, read_only=_1174_VIEW_ONLY.get())
     try:
         _load(directory, admission["packet"])
     except SystemExit as ex:
@@ -4642,7 +4680,6 @@ def _1174_pair(admission, witness, raw):
     _1174_require(e["state_path"] == active, "active target path")
     _1174_require(not witness["history"] or state["adoption"] is not None and state["adoption"]["phase"] == "adopted",
                   "active adoption phase")
-    _1174_tripwire(state, e["g0"])
     return state
 
 
@@ -4719,6 +4756,10 @@ def _1174_tripwire(state, g0=None):
     Never derive the expected retired bytes from the live predecessor file.
     """
     current, path, seen = state, None, set()
+    if state.get("adoption") is None:
+        if g0 is not None and state.get("schema_version") == 3:
+            _1174_require(state.get("generation") == g0, "retired lineage genesis generation")
+        return
     identity = {k: state[k] for k in ("packet", "mission", "executor", "reviewer", "executor_identity", "reviewer_identity")}
     while current.get("adoption") is not None:
         record = current["adoption"]
@@ -5065,7 +5106,7 @@ def _1174_lifecycle_records(state, admission):
             type(review["finding_ids"]) is list and len(review["finding_ids"]) == len(set(review["finding_ids"])) and
             all(type(x) is str and SLUG_RE.fullmatch(x) for x in review["finding_ids"]) and
             _1174_hash(review["receipt_sha256"]) and (review["assurance"] == "advisory_review" or review["assurance"] == "same_provider_approved" and
-                _1174_OWNER_POLICY.get() is not None and review["head"] == _1174_OWNER_POLICY.get()["policy"]["head"]) and
+                (_1174_VIEW_ONLY.get() or _1174_OWNER_POLICY.get() is not None and review["head"] == _1174_OWNER_POLICY.get()["policy"]["head"])) and
             (review["call_id"] is None or type(review["call_id"]) is str and any(
                 x["run_id"] == review["call_id"] and x["head"] == review["head"] and x["da_dung"] for x in state["codex_calls"])),
             "scoped review closed record")

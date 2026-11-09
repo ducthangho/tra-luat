@@ -1,0 +1,1 @@
+Non-model read-only bootstrap test only. Run the unmodified existing local SessionStart hook within a read-only mount. Do not invoke any model or edit source.

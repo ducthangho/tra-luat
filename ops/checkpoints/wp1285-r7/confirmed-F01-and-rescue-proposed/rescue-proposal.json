@@ -18,12 +18,18 @@
   "product_change": {
     "actual_executor": "Fresh actual Codex CLI gpt-6.1-sol/high, one bounded 45min author invocation only",
     "source_parent": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
-    "write_set": [
-      ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
-    ],
     "remediation": "Replace free comment-regex requirements blacklist with complete parser-semantic, culture-independent requirement-state validation before SafeGetValue/import; preserve all AST node/edge/bool/background guards and exact PM01..PM07/CX00..CX04 behavior/counts. Address entire related class, not only uppercase spelling. No root productpatch.",
     "preserve": "Manifest/SKILL/S1/S2/core/workflow/policy bytes unchanged; original full3path product cap450additions and total against current E unchanged.",
-    "no_new_outcome_or_runtime_or_LIVE": true
+    "no_new_outcome_or_runtime_or_LIVE": true,
+    "executor_mutation_write_set": [
+      ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+    ],
+    "effective_packet_write_set_retained": [
+      ".agents/skills/proxima-control/scripts/ProximaControl.psd1",
+      ".agents/skills/proxima-control/SKILL.md",
+      ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+    ],
+    "write_set_clarification": "Packet adopts existing3productpaths; only new author mutation is tests/ProximaManifest.Tests.ps1. FullE..newH remains3paths450, manifest/SKILL hashes unchanged; canonical gates may use full adopted3paths, exactauthor delta must be1file."
   },
   "gates_before_reviews_and_push": {
     "Linux": "New exact-H full1777/1777, strict184, Ruffdelta0, doctrine/claims/ADR/diffcheck/admissionexplicitE. E must be current or driftSTOP/classify.",
@@ -35,7 +41,8 @@
     "primary": "Fresh actual independent Codex CLI gpt-6.1-sol/xhigh, full code/spec/security/currentexactH/F01class, 60min",
     "supplemental_cross_family": "Fresh actual independent ClaudeCode firstParty Opus/max requested, full code/spec/security/wholeclass and materially complete retained gate evidence, 90min/no retry. Require original approve/fullscope_review_complete true and actual measured distinctfamilies, validatedv2 beforepromotion. Prior changes_requested/fullscopefalse not relabeled.",
     "execution": "Independent clean clones/contexts, no fork/resume; actual OS read-only source mounts, normal hooks preserved, Python -B/cacheoutside, external evidence scratch; verify no writes before handoff. Actual no-model readonly+unmodifiedhook preflight already passed; original launcher16 remains failed. Any unsupportedcapability =>STOP, no bypass.",
-    "parallel_allowed": "The two independent reviewers may run concurrently after complete exact-H gates/sourceaudit; never share authorcontext or edit source"
+    "parallel_allowed": "The two independent reviewers may run concurrently after complete exact-H gates/sourceaudit; never share authorcontext or edit source",
+    "bootstrap_preflight_actual": "KernelRO mount denies writes (EROFS), unmodifiednormalhook rc0/tracewrite denied. Canonical unmodifiedlauncher non-model bwrap/hook trial3459dd62222d42df85f9e209b631fb17 returns0/snapshotsach; no model invoked and priorClaude5launcher16 unchanged. Both capability trials retained. Parent exact-clone canonical trustDAT required before futurewrapper; actual Claude process and servedAPI modeltelemetry must be separatelymeasured, raw launcher genericwrapper provider local_process preserved, never forged intoClaude. Primary actualCodex formalrun provides canonicalK0offline source, supplementalactualClaude/v2 provides crossassurance only if complete/approved."
   },
   "explicit_new_clone_trust_requested": {
     "only_path": "/workspace/scratch/wp1285-claude-cross-audit-H5",
@@ -100,5 +107,6 @@
     "land",
     "LIVE"
   ],
-  "recorded_at": "2026-11-09T02:27:28.176352+00:00"
+  "recorded_at": "2026-11-09T02:27:28.176352+00:00",
+  "updated_at": "2026-11-09T02:32:03.169132+00:00"
 }

@@ -1,0 +1,63 @@
+schema_version: 2
+receipt_id: wp1285-r8-human6-ducthangho-H4
+kind: review_delivery_receipt
+packet_id: wp1285
+packet_issue: 1285
+revision: 8
+generation: 9
+reviewed_sha: ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c
+verdict: approve
+verdict_path: ops/reviews/wp1285-r8-human6/verdict.md
+verdict_sha256: 1dc86fcb28343d5b70e54a86ade72d589bc6c76593d772150f050756e60351ea
+evidence_url: https://github.com/ducthangho/tra-luat/blob/c0ed4f198f7e34878e8b936d6bd1c37ab2f3b559/ops/reviews/wp1285-r8-human6/verdict.md
+provider: human
+role: auditor
+nguoi_audit: ducthangho
+assurance: human_audited
+review_axes:
+- spec
+- standards_security
+model_reviewer_identity:
+  provider: human
+  surface: manual_audit
+  transport: human
+  phien_doc_lap: true
+  phien_doc_lap_can_cu: Owner explicitly confirms personalreading and approval on
+    bothaxes in response to exactH4 immutablebundle; human outside actualCodexCLIauthorsession
+  human_github_identity: ducthangho
+  evidence_ref: ops/reviews/wp1285-r8-human6/owner-comment-readback.json
+  KHONG_do_duoc: Reading is human self-attestation, not machineobserved. GitHubowner
+    transport is NOT alone proof; actual userconfirmation and authorization to publish
+    is source. No model/sessionrun or personaltest execution claimed.
+github_submitter_identity:
+  actor: ducthangho
+  recorded_by: Codexdispatcher under explicit publish instruction
+  note: Machine transports real human statement; not owner-typed-GitHubcomment claim
+    or model pretending human
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: Contentaddressed metadata-control-ref ancestry; actual ownercomment is evidence
+    source. Not requiredcheck or merge fact.
+independent_from_executor_session: true
+model_executor_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: 20260d0a7fc04c3680020e40531cec9c
+  model: gpt-6.1-sol
+  effort: high
+  model_evidence: do_may
+  model_evidence_ref: ops/reviews/wp1285-r6-review4/executor-run.json
+owner_audit_source: https://github.com/ducthangho/tra-luat/pull/1294#issuecomment-6731901025
+accepted_P3:
+  finding: WP1285-R7-F01
+  slug: manifest-requires-guard-comment-regex
+  waiver: https://github.com/ducthangho/tra-luat/pull/1294#issuecomment-6731269220
+  debt: https://github.com/ducthangho/tra-luat/issues/1295
+  fixed: false
+  blanket_waiver: false
+no_unwaived_findings_reported: true
+promotion_eligible_for_assurance: true
+remaining_gates: Freshhead/master/rules/allrefs/solelease/currentconnector/K0K7/Readyauto;
+  merge/MCI/M8 not yet performed

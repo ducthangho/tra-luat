@@ -1,0 +1,70 @@
+{
+  "HUMAN-AUDIT.md": {
+    "sha256": "41c82c8ade21d6b73e388a944d9c091d24aba42e51297550a192ffbd10f60d13",
+    "bytes": 6325
+  },
+  "entire-product.diff": {
+    "sha256": "e0a1462f3d74dc8c37ea9109a104c64d501491f9a7f9a408d734d8d848781add",
+    "bytes": 7604
+  },
+  "evidence/AUX2-native-Linux.json": {
+    "sha256": "faecb75ac26e7bb6ae8d0e498d2ed7bfedb4e179e4824858ca99d5353158b33a",
+    "bytes": 22079
+  },
+  "evidence/AUX5-PRCI.json": {
+    "sha256": "b14e5d7aad06c52c1793272fb05bb1955828eeb9ec5e988934abc8e164558346",
+    "bytes": 51796
+  },
+  "evidence/AUX5-PRCI.txt": {
+    "sha256": "a779cfbea265f36cff014a456005d140330669711bb60696d9c28672425b80eb",
+    "bytes": 903
+  },
+  "evidence/Linux-receipt.json": {
+    "sha256": "07f517a7bc8e7a742c3c6634485585d22d5cd84fb5a1bfd45d3c14dde1c04783",
+    "bytes": 6289
+  },
+  "evidence/PRCI-derived.json": {
+    "sha256": "d0bc2a82a531e9163bc4c5ccfc4de747751b0529be41f61692ab4473e76ad9ec",
+    "bytes": 30858
+  },
+  "evidence/current-master-rules.json": {
+    "sha256": "cb077dd76788fdd45ca49a9846ce111de20adc00c2dbd01f6b4e6a2da2a948c4",
+    "bytes": 1156
+  },
+  "evidence/holders.json": {
+    "sha256": "2a267678221c9cefd0b932ab8d319563edd797bac770e2cbb8cad63283724ccc",
+    "bytes": 2016
+  },
+  "evidence/legacy-protection-403.json": {
+    "sha256": "e2373c984773dfee141aed6665a6497c3d7ae4022e643d1c860ab01b710aa23a",
+    "bytes": 167
+  },
+  "evidence/model-delivery.receipt.yaml": {
+    "sha256": "b2cd1553ad23c781ee833e18826e44d11caf63f8a5b4d9c18e7efc120a901174",
+    "bytes": 1696
+  },
+  "evidence/model-verdict.md": {
+    "sha256": "8707361a844ed56f276e8b90b2fd66d93fa9fb9171dd2af61bbeffbcc1a61fa9",
+    "bytes": 6899
+  },
+  "evidence/native-derived.json": {
+    "sha256": "27ebda584700ed215638f0981244b1ab6edf9a0e1211215942015a088ab45ac3",
+    "bytes": 4239
+  },
+  "evidence/preflight-pending-human.json": {
+    "sha256": "f915502565bb2ef6792146bbb538c945076e3100b925805521e7dcfeab0ad154",
+    "bytes": 1670
+  },
+  "human-verdict-template.json": {
+    "sha256": "bcb7c3d361e7920e319c4b58e348f75876bc34565536a358521713e2ac3bf4ba",
+    "bytes": 479
+  },
+  "product/ProximaManifest.Tests.ps1": {
+    "sha256": "fdc107fa980435d3e11789a621a7848c34f3943b33dc500bbc12cf097322658e",
+    "bytes": 43022
+  },
+  "spec/wp1296-r3.md": {
+    "sha256": "780a5fa9b7cf86ec277e734bbbd43c9d1ef153b4750227ae173987a192fb39c4",
+    "bytes": 9455
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "status": "TEMPLATE_ONLY_NOT_A_VERDICT",
+  "reviewed_sha": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "reviewed_tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+  "packet": "wp1296",
+  "revision": 3,
+  "generation": 3,
+  "spec_sha256": "780a5fa9b7cf86ec277e734bbbd43c9d1ef153b4750227ae173987a192fb39c4",
+  "personally_read_spec_and_entire_diff": null,
+  "spec_review_evidence": null,
+  "standards_security_review_evidence": null,
+  "findings": null,
+  "verdict": null
+}

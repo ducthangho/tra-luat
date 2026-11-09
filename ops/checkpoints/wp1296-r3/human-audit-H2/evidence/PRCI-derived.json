@@ -1,0 +1,822 @@
+{
+  "run_id": 42583491058,
+  "attempt": 1,
+  "event": "pull_request",
+  "api_head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "actual_checkout": "51a3fb14080c946397b506945caafc0618742393",
+  "checkout_parents": [
+    "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+    "15ad82f56924a0ccc99833ec73eec078ce00b726"
+  ],
+  "actual_tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+  "all_jobs_Ubuntu_success": true,
+  "jobs_total": 23,
+  "positive_output": "1777/1777",
+  "runtime_observations": [
+    "Successfully set up CPython (3.12.16)"
+  ],
+  "lifecycle": {
+    "status": "not_produced_by_PR_workflow_design",
+    "reason": "Exact frozen ci.yml runs direct selftest on synthetic merge and intentionally produces lifecycle artifact only for non-PR events; actual PR command/positive output/step success verified from logs, not replaced with API head."
+  },
+  "artifact": null,
+  "workflow_definition": {
+    "schema": "wd/1",
+    "repo": "ducthangho/tra-luat",
+    "run_id": 42583491058,
+    "loi_graphql": [],
+    "nguon": "ops/ci_provenance.py do-wd",
+    "run_attempt_luc_do": 1,
+    "event": "pull_request",
+    "node_id": "WFR_kwLOTNeRjc8AAAAJ6iyB8g",
+    "head_sha_rest": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+    "run_number": 4332,
+    "created_at": "2026-11-09T08:05:45Z",
+    "path": ".github/workflows/ci.yml",
+    "repository_file_url": "https://github.com/ducthangho/tra-luat/blob/15ad82f56924a0ccc99833ec73eec078ce00b726/.github/workflows/ci.yml",
+    "check_suite_commit": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+    "oid_dinh_nghia": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+    "blob": "2b2c9aa25ad1c136e44cba457d9ae765d2544fc2",
+    "sha256": "aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67",
+    "trang_thai": "passed",
+    "ly_do": null
+  },
+  "full_job_logs": {
+    "129047593866": {
+      "sha256_of_received_UTF8_text": "b2a907cb39427ebe88f45b37ace34ca6999a117f54a67bbdd49548a9d30f9cfe",
+      "bytes": 121067,
+      "source_record_sha256": "a2ba7b8ebf14c1f3a17e95ae09fbe0fa1d684b772c6435a2af8f04f8648f2ff4",
+      "name": "chuan-bi",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047688967": {
+      "sha256_of_received_UTF8_text": "2bda30d8aa248e73fd1da31b97ae63c5b1e8da99b81a5130a0dbb00aa1bdb409",
+      "bytes": 145559,
+      "source_record_sha256": "e56cc12348bc9cebe9cf553e34efd50e9d52e2fb8d48f69bed45aa75f39775a2",
+      "name": "gate-cong-cu (ubuntu-latest, 5)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689001": {
+      "sha256_of_received_UTF8_text": "e6e78035b5848629973e698b7fafef68c3ab07ed8b572a2039e8d943c81d113e",
+      "bytes": 146249,
+      "source_record_sha256": "8260bcea518fb14de3e1ef819790bdb0fc7203ee3337db971f5858e05c03ead7",
+      "name": "gate-cong-cu (ubuntu-latest, 4)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689006": {
+      "sha256_of_received_UTF8_text": "739f1013ebde04a5ba68ab9f10d7e006cb15345b549144b85630f73dedca6bec",
+      "bytes": 146350,
+      "source_record_sha256": "c069ca7fcf0631f387e7e906944ea8b2033a0dd10fc6182ef38337e2ea20bf38",
+      "name": "gate-cong-cu (ubuntu-latest, 0)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689009": {
+      "sha256_of_received_UTF8_text": "e75a1ddf2fbe2131cf2df4934983d4e29e7b64b705fe295afc1d0c646bb481f2",
+      "bytes": 146409,
+      "source_record_sha256": "8bad23323b882a083fd8ad028035897518b7ae2c9140b2c49b7dac163046e7eb",
+      "name": "gate-cong-cu (ubuntu-latest, 1)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689023": {
+      "sha256_of_received_UTF8_text": "73285992bb74582b124745bb2c6f81f7e3096e4be508f0f31ef4132bd6431eb3",
+      "bytes": 146223,
+      "source_record_sha256": "140065a1f667466d697fac270ae9cf81ecbbf21f3e8937e16e6245bf4d391ac0",
+      "name": "gate-cong-cu (ubuntu-latest, 7)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689034": {
+      "sha256_of_received_UTF8_text": "77783cf1021ca414d1ecec652e7d3edbc65503316763a277a16af2f2764a7a90",
+      "bytes": 341453,
+      "source_record_sha256": "b5e7526316946307a2f9151f3a8bef05e46c8f6d39dd6f625bf51d8d1eaa09ea",
+      "name": "gate-packet-loop (ubuntu-latest)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689047": {
+      "sha256_of_received_UTF8_text": "02c8ccc26be448a4537f72e82f26847d2b86879072b9fa57d2c833883e6834ae",
+      "bytes": 145740,
+      "source_record_sha256": "e9e31b9e4d8a0dd5efdd2d8b63f0a57cbdb89af57910215dd37552a42c874cca",
+      "name": "gate-cong-cu (ubuntu-latest, 6)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689054": {
+      "sha256_of_received_UTF8_text": "db260a81bebb2334589731247a43dfa271e45840ac121a928c4266d4d04985ea",
+      "bytes": 500937,
+      "source_record_sha256": "5699726982771ced5e7c733baa4aeab954158800beb3caa5acf5252c40cc33ba",
+      "name": "gate-ops (ubuntu-latest)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689059": {
+      "sha256_of_received_UTF8_text": "b9428a9ccba5bfa9c20eabaedb1f0acafdc641b4c8f9d93070d4cd26cb3d9a88",
+      "bytes": 133456,
+      "source_record_sha256": "02632dcb6fab2f051ce799350a3999d6f910a557a9062fe49f6ed43b45789823",
+      "name": "gate-nhanh-manh (ubuntu-latest, 0)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689073": {
+      "sha256_of_received_UTF8_text": "6b3b127417a5e18dee3f7b4eb743da80ebbed672b54407bd48fa2df0c290f8c2",
+      "bytes": 146187,
+      "source_record_sha256": "c15c31c68a60bcf51aad766d02bf18d5f117617e847e74cbad7313725543aff8",
+      "name": "gate-cong-cu (ubuntu-latest, 2)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689085": {
+      "sha256_of_received_UTF8_text": "ea1f4ca7f04929212cf455dce1e0d0b8bd0ab6a700849fe31108894962b3ca23",
+      "bytes": 134177,
+      "source_record_sha256": "bea40eea2ac360eb9de1e3b1ff7c92610e37a95394dfe5359313b78aff45a7fd",
+      "name": "gate-nhanh-manh (ubuntu-latest, 2)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689103": {
+      "sha256_of_received_UTF8_text": "635b7abb1892b3c782c335c4f8a409c35ce1e2cbbac04fee77e4af2fa805ed81",
+      "bytes": 134394,
+      "source_record_sha256": "3c5770056829ac462aca54c60456dde1a23d1f55761710f7b2c9be4039616c7b",
+      "name": "gate-nhanh-manh (ubuntu-latest, 3)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689186": {
+      "sha256_of_received_UTF8_text": "0fdc49ef2427a11b44ba5335c3fabd1029382b5dbfd67dd49bca95260e06bff4",
+      "bytes": 134763,
+      "source_record_sha256": "8327680c988131aa664e3335e5443a05617941a254a172f9820f57bd1593d4ab",
+      "name": "gate-nhanh-manh (ubuntu-latest, 1)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689210": {
+      "sha256_of_received_UTF8_text": "1e94423ff865dee5d47efef4e4644e09e75d68e4678ec0f120052b25369f1f2c",
+      "bytes": 660022,
+      "source_record_sha256": "49376a32f4804299d7b52eb0d728a7c85b47428efeb0e0cc1d37a6c241132c2e",
+      "name": "gate (ubuntu-latest)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689216": {
+      "sha256_of_received_UTF8_text": "1a694b7d72004ea69b03e50897697dfb1ae040649cecf738022e63eaf9f5c246",
+      "bytes": 146249,
+      "source_record_sha256": "3572af4c70df886a97cdeddf3919f36a038b58e2f7d2168ca52a6fba66b48e04",
+      "name": "gate-cong-cu (ubuntu-latest, 3)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689222": {
+      "sha256_of_received_UTF8_text": "49edecd297ae24fadbc0ebb7240a5bb6fc781b70f6d9396f5f0397d4a0cc646f",
+      "bytes": 133961,
+      "source_record_sha256": "8e4065ed729328f299ead3b0a116be3abafd7929c8b8c9ec95568b2c8679598a",
+      "name": "gate-nhanh-manh (ubuntu-latest, 6)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689250": {
+      "sha256_of_received_UTF8_text": "36fbd24bc8b5bb00868fb68eadbc5b1a20b8c0c6c527f762ec110411a55169e7",
+      "bytes": 134325,
+      "source_record_sha256": "725ee60615c01913d8b6f9e127f6f52ac76b1632a4cafecfa685aee3cfb3a34f",
+      "name": "gate-nhanh-manh (ubuntu-latest, 5)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689404": {
+      "sha256_of_received_UTF8_text": "ecb7cab7dc87364828c9a442fbef37789ee6c8c065cd1b292b1b23f64c6d83c7",
+      "bytes": 133574,
+      "source_record_sha256": "3d653af010beb545477cc644a6dd5f3dbb4a8ef4bf05285a13a8bef34289e9f0",
+      "name": "gate-nhanh-manh (ubuntu-latest, 4)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129047689406": {
+      "sha256_of_received_UTF8_text": "7daf23ff9bb55992b9704b9e76ece24f0a778932cc69a49b098da89731bc0224",
+      "bytes": 135085,
+      "source_record_sha256": "64f38c55448c35cd689d3c7cff06f282d88cbb5f849946b474000e9a04f13d3d",
+      "name": "gate-nhanh-manh (ubuntu-latest, 7)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129048330949": {
+      "sha256_of_received_UTF8_text": "1f49aebd9fd73b5766412881ca7310d44949e10754d7529c383908ee76113366",
+      "bytes": 129276,
+      "source_record_sha256": "78991d1b8209a04e2a58f3c48dccc0d8b2b2f13e512613d839f2c04191ee58eb",
+      "name": "gate-nhanh-gop (ubuntu-latest)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129048424101": {
+      "sha256_of_received_UTF8_text": "4dda03c0c3014e32f096c778a853d92a9a9d9b0bceeaa221b13cf4c27c451274",
+      "bytes": 259378,
+      "source_record_sha256": "a53d1b3f10987148c013b519e1d1fedde00d4cfef7f3389403a142a0b77627e3",
+      "name": "gate-registry (ubuntu-latest)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    },
+    "129056107497": {
+      "sha256_of_received_UTF8_text": "f0c4f1a0d3a6500e93d79580480b990125aee62b5a317bc16e1d89d4ae636505",
+      "bytes": 99364,
+      "source_record_sha256": "b0e91fd8fadeb00954ef4ddf0b715d9b3045f3ca716b8c2ff4714751caaab706",
+      "name": "gate-cong-cu-gop (ubuntu-latest)",
+      "transport": "GitHub plugin decoded logs; original remote raw-byte identity not independently asserted"
+    }
+  },
+  "all_checkout_observations": [
+    {
+      "job_id": 129047593866,
+      "name": "chuan-bi",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047688967,
+      "name": "gate-cong-cu (ubuntu-latest, 5)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689001,
+      "name": "gate-cong-cu (ubuntu-latest, 4)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689006,
+      "name": "gate-cong-cu (ubuntu-latest, 0)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689009,
+      "name": "gate-cong-cu (ubuntu-latest, 1)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689023,
+      "name": "gate-cong-cu (ubuntu-latest, 7)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689034,
+      "name": "gate-packet-loop (ubuntu-latest)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689047,
+      "name": "gate-cong-cu (ubuntu-latest, 6)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689054,
+      "name": "gate-ops (ubuntu-latest)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689059,
+      "name": "gate-nhanh-manh (ubuntu-latest, 0)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689073,
+      "name": "gate-cong-cu (ubuntu-latest, 2)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689085,
+      "name": "gate-nhanh-manh (ubuntu-latest, 2)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689103,
+      "name": "gate-nhanh-manh (ubuntu-latest, 3)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689186,
+      "name": "gate-nhanh-manh (ubuntu-latest, 1)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689210,
+      "name": "gate (ubuntu-latest)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689216,
+      "name": "gate-cong-cu (ubuntu-latest, 3)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689222,
+      "name": "gate-nhanh-manh (ubuntu-latest, 6)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689250,
+      "name": "gate-nhanh-manh (ubuntu-latest, 5)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689404,
+      "name": "gate-nhanh-manh (ubuntu-latest, 4)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129047689406,
+      "name": "gate-nhanh-manh (ubuntu-latest, 7)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129048330949,
+      "name": "gate-nhanh-gop (ubuntu-latest)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129048424101,
+      "name": "gate-registry (ubuntu-latest)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    },
+    {
+      "job_id": 129056107497,
+      "name": "gate-cong-cu-gop (ubuntu-latest)",
+      "dong_sha": [
+        "51a3fb14080c946397b506945caafc0618742393"
+      ],
+      "sha": "51a3fb14080c946397b506945caafc0618742393",
+      "parents": [
+        "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+        "15ad82f56924a0ccc99833ec73eec078ce00b726"
+      ],
+      "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+      "trang_thai": "passed",
+      "doi_chieu": "head_sha_trong_parents_merge_tong_hop"
+    }
+  ],
+  "four_anchors": {
+    "run": "passed",
+    "checkout": "passed",
+    "workflow_definition": "passed",
+    "gate_output": "awaiting_mandatory_auxiliary_log_audit"
+  },
+  "canonical_gate_output_observations": [
+    {
+      "job_id": 129047593866,
+      "name": "chuan-bi",
+      "trang_thai": "not_measured",
+      "dau_duong": [
+        {
+          "lenh": "python3 ops/ci_duong_nhanh.py",
+          "duong_dan": "ops/ci_duong_nhanh.py",
+          "trang_thai": "not_measured",
+          "ly_do": "khong_co_trong_MOI"
+        }
+      ]
+    },
+    {
+      "job_id": 129047688967,
+      "name": "gate-cong-cu (ubuntu-latest, 5)",
+      "trang_thai": "not_measured",
+      "dau_duong": []
+    },
+    {
+      "job_id": 129047689001,
+      "name": "gate-cong-cu (ubuntu-latest, 4)",
+      "trang_thai": "not_measured",
+      "dau_duong": []
+    },
+    {
+      "job_id": 129047689006,
+      "name": "gate-cong-cu (ubuntu-latest, 0)",
+      "trang_thai": "not_measured",
+      "dau_duong": []
+    },
+    {
+      "job_id": 129047689009,
+      "name": "gate-cong-cu (ubuntu-latest, 1)",
+      "trang_thai": "not_measured",
+      "dau_duong": []
+    },
+    {
+      "job_id": 129047689023,
+      "name": "gate-cong-cu (ubuntu-latest, 7)",
+      "trang_thai": "not_measured",
+      "dau_duong": []
+    },
+    {
+      "job_id": 129047689034,
+      "name": "gate-packet-loop (ubuntu-latest)",
+      "trang_thai": "not_measured",
+      "dau_duong": [
+        {
+          "lenh": "python .claude/dev/packet_loop_test.py",
+          "duong_dan": ".claude/dev/packet_loop_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "khong_co_trong_MOI"
+        }
+      ]
+    },
+    {
+      "job_id": 129047689047,
+      "name": "gate-cong-cu (ubuntu-latest, 6)",
+      "trang_thai": "not_measured",
+      "dau_duong": []
+    },
+    {
+      "job_id": 129047689054,
+      "name": "gate-ops (ubuntu-latest)",
+      "trang_thai": "not_measured",
+      "dau_duong": [
+        {
+          "lenh": "python ops/ci_duong_nhanh_test.py",
+          "duong_dan": "ops/ci_duong_nhanh_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "khong_co_trong_MOI"
+        },
+        {
+          "lenh": "python ops/bien_nhan_v2_test.py",
+          "duong_dan": "ops/bien_nhan_v2_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "khong_co_trong_MOI"
+        }
+      ]
+    },
+    {
+      "job_id": 129047689059,
+      "name": "gate-nhanh-manh (ubuntu-latest, 0)",
+      "trang_thai": "not_measured",
+      "dau_duong": [
+        {
+          "lenh": "python ops/nhanh_don_duoc_test.py",
+          "duong_dan": "ops/nhanh_don_duoc_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "che_do_khong_xac_dinh"
+        }
+      ]
+    },
+    {
+      "job_id": 129047689073,
+      "name": "gate-cong-cu (ubuntu-latest, 2)",
+      "trang_thai": "not_measured",
+      "dau_duong": []
+    },
+    {
+      "job_id": 129047689085,
+      "name": "gate-nhanh-manh (ubuntu-latest, 2)",
+      "trang_thai": "not_measured",
+      "dau_duong": [
+        {
+          "lenh": "python ops/nhanh_don_duoc_test.py",
+          "duong_dan": "ops/nhanh_don_duoc_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "che_do_khong_xac_dinh"
+        }
+      ]
+    },
+    {
+      "job_id": 129047689103,
+      "name": "gate-nhanh-manh (ubuntu-latest, 3)",
+      "trang_thai": "not_measured",
+      "dau_duong": [
+        {
+          "lenh": "python ops/nhanh_don_duoc_test.py",
+          "duong_dan": "ops/nhanh_don_duoc_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "che_do_khong_xac_dinh"
+        }
+      ]
+    },
+    {
+      "job_id": 129047689186,
+      "name": "gate-nhanh-manh (ubuntu-latest, 1)",
+      "trang_thai": "not_measured",
+      "dau_duong": [
+        {
+          "lenh": "python ops/nhanh_don_duoc_test.py",
+          "duong_dan": "ops/nhanh_don_duoc_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "che_do_khong_xac_dinh"
+        }
+      ]
+    },
+    {
+      "job_id": 129047689210,
+      "name": "gate (ubuntu-latest)",
+      "trang_thai": "not_measured",
+      "dau_duong": [
+        {
+          "lenh": "python .claude/dev/codex_cred_test.py",
+          "duong_dan": ".claude/dev/codex_cred_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "khong_co_trong_MOI"
+        },
+        {
+          "lenh": "python .claude/dev/idiom_py_test.py",
+          "duong_dan": ".claude/dev/idiom_py_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "khong_co_trong_MOI"
+        },
+        {
+          "lenh": "python .githooks/eol_policy_test.py",
+          "duong_dan": ".githooks/eol_policy_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "khong_co_trong_MOI"
+        },
+        {
+          "lenh": "python .githooks/pre_push_test.py",
+          "duong_dan": ".githooks/pre_push_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "khong_co_trong_MOI"
+        },
+        {
+          "lenh": "python scripts/tl_core/command_registry_test.py",
+          "duong_dan": "scripts/tl_core/command_registry_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "khong_co_trong_MOI"
+        },
+        {
+          "lenh": "python .github/checks/ci_phamvi_test.py",
+          "duong_dan": ".github/checks/ci_phamvi_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "khong_co_trong_MOI"
+        }
+      ]
+    },
+    {
+      "job_id": 129047689216,
+      "name": "gate-cong-cu (ubuntu-latest, 3)",
+      "trang_thai": "not_measured",
+      "dau_duong": []
+    },
+    {
+      "job_id": 129047689222,
+      "name": "gate-nhanh-manh (ubuntu-latest, 6)",
+      "trang_thai": "not_measured",
+      "dau_duong": [
+        {
+          "lenh": "python ops/nhanh_don_duoc_test.py",
+          "duong_dan": "ops/nhanh_don_duoc_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "che_do_khong_xac_dinh"
+        }
+      ]
+    },
+    {
+      "job_id": 129047689250,
+      "name": "gate-nhanh-manh (ubuntu-latest, 5)",
+      "trang_thai": "not_measured",
+      "dau_duong": [
+        {
+          "lenh": "python ops/nhanh_don_duoc_test.py",
+          "duong_dan": "ops/nhanh_don_duoc_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "che_do_khong_xac_dinh"
+        }
+      ]
+    },
+    {
+      "job_id": 129047689404,
+      "name": "gate-nhanh-manh (ubuntu-latest, 4)",
+      "trang_thai": "not_measured",
+      "dau_duong": [
+        {
+          "lenh": "python ops/nhanh_don_duoc_test.py",
+          "duong_dan": "ops/nhanh_don_duoc_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "che_do_khong_xac_dinh"
+        }
+      ]
+    },
+    {
+      "job_id": 129047689406,
+      "name": "gate-nhanh-manh (ubuntu-latest, 7)",
+      "trang_thai": "not_measured",
+      "dau_duong": [
+        {
+          "lenh": "python ops/nhanh_don_duoc_test.py",
+          "duong_dan": "ops/nhanh_don_duoc_test.py",
+          "trang_thai": "not_measured",
+          "ly_do": "che_do_khong_xac_dinh"
+        }
+      ]
+    },
+    {
+      "job_id": 129048330949,
+      "name": "gate-nhanh-gop (ubuntu-latest)",
+      "trang_thai": "not_measured",
+      "dau_duong": []
+    },
+    {
+      "job_id": 129048424101,
+      "name": "gate-registry (ubuntu-latest)",
+      "trang_thai": "not_measured",
+      "dau_duong": []
+    },
+    {
+      "job_id": 129056107497,
+      "name": "gate-cong-cu-gop (ubuntu-latest)",
+      "trang_thai": "not_measured",
+      "dau_duong": []
+    }
+  ],
+  "canonical_consumer_note": "Original REST provenance workflow_definition slot remains not_measured by tool design; separate actual do-wd result supplies the fourth anchor in this derived index. No raw consumer output edited.",
+  "at": "2026-11-09T09:12:27.752054+00:00"
+}

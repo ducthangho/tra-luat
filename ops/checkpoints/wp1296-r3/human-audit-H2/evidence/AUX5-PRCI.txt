@@ -1,0 +1,5 @@
+Packet1296 AUX5 PRCI: PASSED nguồn/provenance/output, exactH2 15ad82f56924a0ccc99833ec73eec078ce00b726.
+Run42583491058/attempt1:23/23Ubuntu,24/24currentchecks. Đã đọc đầyđủ23logs (43962dòng),95archive sources/hash/size/bytes/API+checkout. Synthetic51a3fb... parents[B,H2],treeH2;actualGraphQL/RESTWDblob/hash khớpGit.
+Dươngtính1777/1777;G5 8/8shards,61ca/490mutants/0errors;registry13/13 intendedkills;nhanh8/8,56basecases/255selfmutants/10productmutants. Packet-loop1359/1359,1Windowsnamedskip+mutantkhôngghi công.5canonicalcontexts đủ.
+AdmissionofficialZIP8ba00ce8... khớpAPI/checker0 nhưng A0discoveryNOT_RUN. Rawcanonicalnot_measured giữnguyên;PRkhôngsinh lifecycleartifact, MCIartifact còn bắtbuộc. ConnectorfullH2completed/nofindings,securityreviewnotrun.
+Không formalcodeapproval/humanaudit/Ready/merge/land; exactH2sensitiveassurance vẫnHOLD/noH4transfer.

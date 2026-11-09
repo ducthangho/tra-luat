@@ -1,0 +1,79 @@
+{
+  "sha": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "os": "Windows",
+  "tests": [
+    {
+      "id": "ps51-PM01",
+      "ket_qua": "passed",
+      "original_report_outcome": "passed"
+    },
+    {
+      "id": "ps51-PM02",
+      "ket_qua": "passed",
+      "original_report_outcome": "passed"
+    },
+    {
+      "id": "ps51-PM03",
+      "ket_qua": "passed",
+      "original_report_outcome": "passed"
+    },
+    {
+      "id": "ps51-PM04",
+      "ket_qua": "passed",
+      "original_report_outcome": "passed"
+    },
+    {
+      "id": "ps51-PM05",
+      "ket_qua": "passed",
+      "original_report_outcome": "passed"
+    },
+    {
+      "id": "ps51-PM06",
+      "ket_qua": "passed",
+      "original_report_outcome": "passed"
+    },
+    {
+      "id": "ps51-PM07",
+      "ket_qua": "passed",
+      "original_report_outcome": "passed"
+    },
+    {
+      "id": "ps7-PM01",
+      "ket_qua": "passed",
+      "original_report_outcome": "passed"
+    },
+    {
+      "id": "ps7-PM02",
+      "ket_qua": "passed",
+      "original_report_outcome": "passed"
+    },
+    {
+      "id": "ps7-PM03",
+      "ket_qua": "passed",
+      "original_report_outcome": "passed"
+    },
+    {
+      "id": "ps7-PM04",
+      "ket_qua": "passed",
+      "original_report_outcome": "passed"
+    },
+    {
+      "id": "ps7-PM05",
+      "ket_qua": "passed",
+      "original_report_outcome": "passed"
+    },
+    {
+      "id": "ps7-PM06",
+      "ket_qua": "passed",
+      "original_report_outcome": "passed"
+    },
+    {
+      "id": "ps7-PM07",
+      "ket_qua": "passed",
+      "original_report_outcome": "passed"
+    }
+  ],
+  "scope": "14 actualnormalpositive parentcases only; fullrequirednativeclassmatrix source/AUX2 separate, noWindowsCI claim",
+  "source": "H2-native-first-extracted/phase-progress.json",
+  "source_sha256": "7abda4e2bd05dbec12890dd9c04529f0428d58c6d47ba212496a1f5d21d82d54"
+}

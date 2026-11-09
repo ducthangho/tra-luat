@@ -1,0 +1,32 @@
+{
+  "at": "2026-11-09T09:21:51.818307+00:00",
+  "PR": 1301,
+  "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "base": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "actual_checkout": "51a3fb14080c946397b506945caafc0618742393",
+  "tree": "50fbceb65cea60cc62222c3cd3a3651a6dd13981",
+  "run_id": 42583491058,
+  "attempt": 1,
+  "jobs": "23/23Ubuntu",
+  "current_checks": "24/24success",
+  "positive_selftest": "1777/1777",
+  "four_anchors_derived": {
+    "run": "passed",
+    "checkout": "passed",
+    "workflow_definition": "passed",
+    "gate_output": "passed_by_AUX5_complete_originalsource_audit"
+  },
+  "raw_consumer_unchanged": true,
+  "source_archive_commit": "625c5013a34ba258649ea95e44d34f7c5d486253",
+  "source_archive_sha256": "ba8ecd896fba08e9491a033c0f216c47230c027fe711011f1c97b35eeeae9f04",
+  "AUX5_receipt_sha256": "b14e5d7aad06c52c1793272fb05bb1955828eeb9ec5e988934abc8e164558346",
+  "connector_exact_H2_nofindings": {
+    "summary": 6735226910,
+    "receipt": 6735243094
+  },
+  "promotion_eligible": false,
+  "blocking": "Actual sufficient human/cross audit newH2 perprotocol sensitive. K4humanroute pending; existing independentCLIapprove/v2 separate. OldH4audit/waiver notinherited.",
+  "ready": false,
+  "merged": false,
+  "landed": false
+}

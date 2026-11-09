@@ -60,10 +60,12 @@
     {
       "n": 5,
       "purpose": "mandatory tl_auditor complete PRCI source audit NOT formalcodeapproval/human",
-      "state": "assigned_before_dispatch",
+      "state": "terminal_passed_full_source_only",
       "at": "2026-11-09T09:14:39.774791+00:00",
       "head": "15ad82f56924a0ccc99833ec73eec078ce00b726",
-      "deadline_minutes": 90
+      "deadline_minutes": 90,
+      "receipt": "AUX5-PRCI-receipt.json",
+      "receipt_sha256": "b14e5d7aad06c52c1793272fb05bb1955828eeb9ec5e988934abc8e164558346"
     }
   ],
   "current_lease": "wp1296-r3-g3-codex"

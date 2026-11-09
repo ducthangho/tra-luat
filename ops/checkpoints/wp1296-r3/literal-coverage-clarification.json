@@ -1,0 +1,13 @@
+{
+  "at": "2026-11-09T07:39:44.629448+00:00",
+  "owner_scope": "Latest explicit debts+remainingMission instruction/standingfullscopeddelegation6733713274",
+  "reason": "AUX2 sourceaudit found no dedicated embeddedliteralfixture. r1/r2 wording conflated PM01puredata and PM02fixedschema; ninefixedvalues cannot include arbitraryrequiresliteral andremainPM02valid. Clarify exact requiredpositive/negative properties before measurement; no code/author/budget change.",
+  "H": "15ad82f56924a0ccc99833ec73eec078ce00b726",
+  "code_change": false,
+  "new_author_calls": 0,
+  "allowance_change": false,
+  "scope_change": false,
+  "old_failures_retained": true,
+  "supplement": "6cases PS51/7 x enUS/trTR/azLatnAZ: ownedRootModule string=#REQUIRES -Version5.1 =>PM01PASS/defaultrequirements,PM02FAIL exactlyVALUE[RootModule],runtime0/PM04NOTEXEC/no setup. Not full7pass/notsemanticnegativekill. Ordinaryvalidmanifest/comments stillPM01+PM02/full7.",
+  "additional_receipts": "Explicit sourceexports before/afterfilehashmaps and filteredrawownedledger rows89prior+6supplement, preserving all originalCSVrawbytes forownedrows only; no claims about otherwork."
+}

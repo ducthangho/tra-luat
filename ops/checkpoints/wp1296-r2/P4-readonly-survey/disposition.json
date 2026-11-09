@@ -1,0 +1,45 @@
+{
+  "observed_at": "2026-11-09T07:00:34.986428+00:00",
+  "classification": "read_api/doc_ma not actualinstalledbehavior",
+  "repo": "https://github.com/Zen4-bit/Proxima",
+  "release": "v5.5.0",
+  "tag_commit": "0e92241847c40d1c3b26b6785ab43dc8710888aa",
+  "asset": {
+    "id": 647970586,
+    "name": "Proxima-Setup-5.5.0.exe",
+    "bytes": 161754969,
+    "GitHub_digest": "sha256:959c14c1ba489deb53bdaa34e83939fb18f9d7ade58a48a03d361ad1dd12ebf8"
+  },
+  "code_source": {
+    "path": "electron/main-v2.cjs",
+    "sha256": "fdc8e7d572b7122827ad3709b267a7dd1b9abdc0b996c3166b80d897d7ab8fb2",
+    "blob": "ebef4cbb7d71533257893d6cc936bbab1b667698",
+    "lines": {
+      "16": "autoDownload=true",
+      "17": "autoInstallOnAppQuit=true",
+      "822-828": "packagedbuild condition",
+      "860-873": "renderer manualcheck and quitAndInstall handlers",
+      "876-881": "startupcheck delay5000ms"
+    }
+  },
+  "new_P4_design_finding": {
+    "id": "P4-DESIGN-F01",
+    "severity": "P2 design risk, doc_ma only",
+    "issue": 1298,
+    "problem": "No proven versionpin/idlelock/canary gate around packaged startupautodownload/onquitinstall in inspected entrypoint; actualinstalledcontrols stillnotmeasured",
+    "acceptance": "Show supported upstream control and actualfixture/sourceidentity beforeactivation, or explicitrevieweddesign resolving conflict without changing existinghostsilently. Do not replace provenancepolicy withchecksum."
+  },
+  "attestation": "API404 rc1 not_measured, not evidence of absence. SingleEXE releaseasset inventory contains no latest.yml; updatefeedactualbehavior not measured, do not infer updaterworks/fails.",
+  "still_open": [
+    "U4",
+    "U5",
+    "U7",
+    "U8",
+    "U9",
+    "U10",
+    "U11",
+    "U12"
+  ],
+  "license": "Same personalnoncommerciallicense; ownerU6alreadyconfirmed. No newpurposeassumed.",
+  "operations": "No EXEdownload/execute/install/model/browser/hostactivation; API/source reads only"
+}

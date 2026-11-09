@@ -1,0 +1,97 @@
+{
+  "status": "READY_FOR_ACTUAL_HUMAN_READING_NOT_AUDIT_APPROVAL",
+  "human_audit_completed": false,
+  "human_verdict": null,
+  "assurance_achieved": false,
+  "head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+  "revision": 8,
+  "generation": 9,
+  "spec_commit": "03c626536460de0217b9de24c052fed202643a1e",
+  "spec_sha256": "d8195383ceed002d15b9db09e51cae1c4f2d90f0237ef33333cead4d629b26e9",
+  "product_catalog": {
+    ".agents/skills/proxima-control/scripts/ProximaControl.psd1": {
+      "copy": "product/ProximaControl.psd1.txt",
+      "sha256": "0c76190d73e2126e2de69185020607f04ef0fb5507836bee211ebdc5d8f2bab6",
+      "lines": 13,
+      "exact_source": "https://github.com/ducthangho/tra-luat/blob/ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c/.agents/skills/proxima-control/scripts/ProximaControl.psd1"
+    },
+    ".agents/skills/proxima-control/SKILL.md": {
+      "copy": "product/SKILL.md.txt",
+      "sha256": "7d4dfd01706991d7d3475d0829583aac53d216d5c68c12e1b44bffb9f3ac6fb1",
+      "lines": 64,
+      "exact_source": "https://github.com/ducthangho/tra-luat/blob/ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c/.agents/skills/proxima-control/SKILL.md"
+    },
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1": {
+      "copy": "product/ProximaManifest.Tests.ps1.txt",
+      "sha256": "f230c95b1f36b558b2f58439f8ea64cc6f77a876c1d74cc8c9baf1634cc9f864",
+      "lines": 373,
+      "exact_source": "https://github.com/ducthangho/tra-luat/blob/ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c/.agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+    }
+  },
+  "diff_sha256": "5eb7a20150afe22b9ba2f211d3320c5bd7f38bc2abecd4d80b5dc4ffdf34ab4d",
+  "P3_accepted": {
+    "waiver": "https://github.com/ducthangho/tra-luat/pull/1294#issuecomment-6731269220",
+    "debt_packet": 1295,
+    "fixed": false,
+    "future_blanket_waiver": false
+  },
+  "machine_evidence": {
+    "Linux": "b07d6c67fbd9a80ddf2cb85b28fdde56fcfd2b8e:ops/checkpoints/wp1285-r6/gates-H4",
+    "native_zip_sha256": "62698d77952f85554c4e25649af950edaed95aaeafa1ff0d9d4dad48f6ce0ec9",
+    "native_source_files": 455,
+    "PR_CI_acceptance_index": "https://github.com/ducthangho/tra-luat/blob/414911fc9fc82d26dd60c479112c82fe427e1d0a/ops/checkpoints/wp1285-r6/PR-CI-final-audit/acceptance-index.json",
+    "PR_CI_all_original_source": "https://github.com/ducthangho/tra-luat/tree/d42e43bf0152cf95d196412161932396918043b3/ops/checkpoints/wp1285-r6/PR-CI-final-source",
+    "PR_CI_run": "https://github.com/ducthangho/tra-luat/actions/runs/42539770394",
+    "actual_PR_checkout": "0fbb45b745b26b28864c4e09492be2a29fc94b04",
+    "actual_PR_checkout_parents": [
+      "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+      "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c"
+    ],
+    "actual_PR_checkout_tree": "ebe647c4bc68fb75b3ad7319a79ad3bf0f143a70",
+    "original_Codex4_verdict": "https://github.com/ducthangho/tra-luat/issues/1285#issuecomment-6729249881",
+    "original_Claude5_changes_requested": "https://github.com/ducthangho/tra-luat/issues/1285#issuecomment-6730686786",
+    "native_P3_confirmation": "https://github.com/ducthangho/tra-luat/tree/7ad0c9d435d063d94b466024024b5c6afcfabbeb/ops/checkpoints/wp1285-r7/confirmed-F01-and-rescue-proposed"
+  },
+  "current_canonical_target": {
+    "head_H4": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+    "original_admission_E": "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee",
+    "current_target_D": "4068b3a2a0087db287ea979eccbd372a7a0938d7",
+    "D_tree": "9708385af49b4c3d67e8bca1253eb03f46454d41",
+    "expected_merge_tree": "f20cb1aa78756ae0a0b818c34e8d90f152b06a2f",
+    "master_delta_paths": [
+      "ops/specs/GIAM-HOI-P1-SOAN-SPEC-r1.md",
+      "ops/specs/GIAM-HOI-P1-SOAN-SPEC-r2.md",
+      "ops/specs/GIAM-HOI-P1-SOAN-SPEC-r3.md",
+      "ops/specs/GIAM-HOI-P1-SOAN-SPEC-r4.md",
+      "ops/specs/GIAM-HOI-P1-SOAN-SPEC-r5.md",
+      "ops/specs/GIAM-HOI-P1-SOAN-SPEC-r6.md",
+      "ops/specs/GIAM-HOI-P1-SOAN-SPEC-r7.md",
+      "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r1.md",
+      "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r10.md",
+      "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r2.md",
+      "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r3.md",
+      "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r4.md",
+      "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r5.md",
+      "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r7.md",
+      "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r8.md",
+      "ops/specs/GIAM-HOI-P2-ADR-E1-E5-r9.md"
+    ],
+    "classification": "16 existing unrelated GIAM-HOI proposed-spec markdown additions ONLY; no enforced protocol/ADR/workflow/code/runtime/catalog source change",
+    "product_paths_new_M_vs_D": [
+      ".agents/skills/proxima-control/SKILL.md",
+      ".agents/skills/proxima-control/scripts/ProximaControl.psd1",
+      ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+    ],
+    "all_other_paths_unchanged": true,
+    "fresh_same_head_checks_success": 26,
+    "CI_carry_limit": "Prior PRCI actually tested synthetic [E,H4]/treeH4, not newD; exactcode/catalog/policy unchanged supports carry by classification. Actual canonicalMCI on real newM remains required beforeland, no MCI pass claimed. Do not rerun admission against newD unless newDancestorH; do not fake oldE=currentD.",
+    "human_only_K4_limit": "Do not backdate a human-only review to prepush. Retained genuine Codex4 prepush H4 run is canonicalK4 source; supplemental actualhuman audit is separately required for sensitive assurance. No human pass inferred from waiver/transport.",
+    "owner_waiver_comment": "https://github.com/ducthangho/tra-luat/pull/1294#issuecomment-6731269220",
+    "owner_waiver_exact_readback": true,
+    "debt": "https://github.com/ducthangho/tra-luat/issues/1295",
+    "actual_human_audit_completed": false,
+    "at": "2026-11-09T03:09:47.941878+00:00"
+  },
+  "at": "2026-11-09T03:18:03.223955+00:00"
+}

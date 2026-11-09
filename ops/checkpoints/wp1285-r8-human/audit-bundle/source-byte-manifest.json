@@ -1,0 +1,46 @@
+{
+  "human-verdict-template.json": {
+    "bytes": 643,
+    "sha256": "c4e4095507dcbaedebc8d0a694b2fec72df60d2f624a32a2c9bc7ac2db6bb826"
+  },
+  "entire-product.diff": {
+    "bytes": 46013,
+    "sha256": "5eb7a20150afe22b9ba2f211d3320c5bd7f38bc2abecd4d80b5dc4ffdf34ab4d"
+  },
+  "HUMAN-AUDIT.md": {
+    "bytes": 8133,
+    "sha256": "8d375e17260e7e4f5cdeb8fa19b6f4e29f488611139e841fa28af3781c274505"
+  },
+  "evidence-index.json": {
+    "bytes": 5836,
+    "sha256": "1234a2fb4606bdcf22ebfdca4b0b12ecb6a02aac9f2538aa568cfbc8e5e58c29"
+  },
+  "product/ProximaControl.psd1.txt": {
+    "bytes": 651,
+    "sha256": "0c76190d73e2126e2de69185020607f04ef0fb5507836bee211ebdc5d8f2bab6"
+  },
+  "product/ProximaManifest.Tests.ps1.txt": {
+    "bytes": 38492,
+    "sha256": "f230c95b1f36b558b2f58439f8ea64cc6f77a876c1d74cc8c9baf1634cc9f864"
+  },
+  "product/SKILL.md.txt": {
+    "bytes": 5645,
+    "sha256": "7d4dfd01706991d7d3475d0829583aac53d216d5c68c12e1b44bffb9f3ac6fb1"
+  },
+  "spec-chain/wp1285-r8.md": {
+    "bytes": 7330,
+    "sha256": "d8195383ceed002d15b9db09e51cae1c4f2d90f0237ef33333cead4d629b26e9"
+  },
+  "spec-chain/wp1285-r7.md": {
+    "bytes": 6080,
+    "sha256": "17d0257fc4d127991f42f56d1fdc2eda2e1c479685b7262728792a09771b164d"
+  },
+  "spec-chain/wp1285-r6.md": {
+    "bytes": 6110,
+    "sha256": "e6ecd8256339c5ee1e67bb11fe362a64e6f6e697e02997f9a8f51e0976db9ccb"
+  },
+  "spec-chain/wp1285-r5.md": {
+    "bytes": 26158,
+    "sha256": "d76da91f3c9a3303a9579578e8e671360656d0312479f67c8554d4fe6ce7016d"
+  }
+}

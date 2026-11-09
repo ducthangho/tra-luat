@@ -1,0 +1,21 @@
+{
+  "status": "bundle_ready_actual_human_audit_pending",
+  "machine_K0_K7_rc": 0,
+  "P3_waiver_recorded": true,
+  "debt": 1295,
+  "sole_holder": [
+    "wp1285-r8-g9-codex-human"
+  ],
+  "current_target_D": "4068b3a2a0087db287ea979eccbd372a7a0938d7",
+  "source_head": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "report_sha256": "8d375e17260e7e4f5cdeb8fa19b6f4e29f488611139e841fa28af3781c274505",
+  "source_catalog_verified": true,
+  "remote_lease_prompt_blobs_exact": true,
+  "manual_verdict": null,
+  "human_audited": false,
+  "Ready": false,
+  "merged": false,
+  "landed": false,
+  "no_new_model_or_productpush": true,
+  "at": "2026-11-09T03:23:25.251807+00:00"
+}

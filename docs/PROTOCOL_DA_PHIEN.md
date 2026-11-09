@@ -1622,3 +1622,85 @@ Human audit scoped WP1174 dùng cùng snapshot comments đã API readback cho
 canonical verifier, collector và record; transition cũng được snapshot khi có.
 Caller file thay đổi sau snapshot không thay authority; server drift bị chặn.
 M5/M12 xác định trả typed FAIL; receipt provenance giữ caller path ban đầu.
+
+
+WP1174 R12 bổ sung kiểm chứng recovery và first publication trong cùng adapter:
+collector xét cả `PushEvent.before` lẫn `head`, bao gồm descendant của H; zero OID
+là absence khi tạo/xóa ref. Preimage trước hoặc tại audit chứng minh publication
+sớm và trả FAIL; preimage sau audit phải có introduction trước đó trong evidence,
+không tự trở thành bằng chứng thời điểm first publication. Thiếu object vẫn UNKNOWN.
+Recovery đối chiếu immutable source snapshot với predecessor active path/generation,
+full high_water hash/revision và Packet/Mission/lineage trước probe/temp/write; imported
+v2 giữ predicate riêng. Mọi reused source/tombstone, target và witness được fsync file,
+fsync parent và kiểm identity/readback dưới fixed lock trước advance/finalize; terminal
+replay cũng xác nhận durability, giữ nguyên journal/history/counters. Ordinary reservation
+của adopted state kiểm lại durability tombstone và cặp target/witness trước dispatch.
+Lỗi durability giữ rc8/no dispatch; readback riêng không chứng minh durability.
+Scoped human snapshot kiểm exact verified bytes sau canonical verifier, trước collector;
+scoped accept dùng cùng snapshot bytes trong RAM cho CI/connector validation và hashes.
+Các fault injection là fixture thuật toán, không phải native profile hay mất điện.
+
+WP1174 R16/C12 (generation13, Mission20) dùng composite native delivery SOURCE-ONLY trên exact final head/tree
+và năm file hashes: bốn part A–D đọc coverage manifest đã đóng băng, rồi integrator E
+kiểm coverage union, interfaces và raw reports theo `ops/specs/wp1174-implementation-r16.md`. Mỗi lời gọi vẫn được đếm;
+chỉ composite đủ bằng chứng mới có thể tạo verdict cho source đó. Authority,
+provider assurance và actual-human của target giữ theo các hợp đồng hiện hành.
+
+Mọi nonnull lineage.source_path và enrollment.legacy_source_path phải có spelling
+canonical, không `..` hoặc slash lặp; runtime kiểm resolve không symlink parent và
+exact mount trước fixed lock, rồi kiểm lại authority/topology dưới lock trước
+recovery/probe/temp/write. Initial-state guards và fresh null source giữ nguyên.
+Oracle fixture quét seed/key cụ thể trong A/S, stdout/stderr/traceback, native facts,
+native report và Windows unit record; fixture serializer coverage không là native
+mount proof hoặc Windows host proof.
+
+WP1174 R16 source-only sửa oracle đường dẫn Windows: các vector `..`, slash lặp
+và `.` phải absolute độc lập với validator trên host. Vector slash-prefix cũ
+vẫn được giữ; trên Windows enrollment nhận đúng `legacy source types` trước
+canonical guard, lineage vẫn nhận `source canonical paths`; trên POSIX cả hai
+nhận `source canonical paths`. Không đổi predicate sản phẩm hoặc target authority.
+
+
+WP1174 R17/C13 (generation14, Mission21) giữ ADR-0054 ở trạng thái canonical
+hiện hành, kể cả `luat_adr0054: false`. Tuyến scoped dùng admission đã xác minh
+và ngữ cảnh lease I2 trong giao dịch dưới khóa để chọn lifecycle pending/human;
+không lấy một cờ opt-in trong journal làm authority và không kích hoạt luật global.
+Native review vẫn qua canonical receipt validator; service receipt vẫn advisory.
+Cả hai tiêu đúng call/review budget, giữ exact head ở `approved_pending`, rồi
+chỉ `accept` với actual-human audit/CI/connector/first-publication hợp lệ mới ghi
+`accepted`. State/witness invalid hoặc evidence thiếu, sai head/danh tính/call
+đều bị từ chối trước persist/dispatch. Historical activated fixtures là control
+riêng; current-policy subcases giữ False qua lease, begin/call, review và accept.
+Các transport/authority fixture seams không thay bằng chứng lifecycle production.
+
+
+### WP1174 R21/g18: explicit owner-scoped Codex service review
+
+Same-family initialization remains denied by default. The enrolled v3 route may
+use the WP1174-E2-R21-CODEX-PAIR exception only for Packet1174/Mission1172,
+revision21/generation18, the pinned R21 spec and lease ID, before the approved
+expiry. Legacy unscoped init retains rc4. Candidate code never authorizes its own
+bootstrap, publication or land.
+
+The verified current canonical lease pins an immutable policy ref@OID/path/hash
+and owner decision ID. The resolver reads that object and the current owner API
+comment binding its exact hash. The policy binds exact H/tree, two independent
+source/reviewer context IDs, separate checkout and platform evidence IDs, null
+fork parents, a read-only reviewer and exact Codex/openai/service/machine tuples.
+These are owner-audited platform records; they do not measure the serving model
+or prove OS isolation. Missing, forged, revoked by changed owner decision,
+expired or out-of-scope evidence fails before persistence. Unknown context or
+comparison evidence cannot be replaced with a caller enable flag.
+
+The explicit comparison policy accepts the same configured model with source
+medium and reviewer high. Equal/lower/unknown effort and unranked model changes
+are denied. Another machine does not establish family independence. Review
+receipts bind the policy hash, both context IDs and exact tree/head; stale head,
+self/forked contexts or writable review are rejected. The assurance is
+same_provider_approved, never cross_approved or human_audited. Existing target
+actual-human acceptance, severity, history and counter obligations remain.
+
+For enrolled v3, status/next-comment accept the same admission/root/revision/
+generation/coordinator identity and validate current authority, witness/high-water
+and all retired ancestors under the existing lock. They use a read-only state
+context; they cannot grant an unscoped v3 writer or accept retired state.

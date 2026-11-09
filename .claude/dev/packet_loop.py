@@ -686,10 +686,10 @@ def _load(state_dir: Path, packet: int) -> dict:
             ("dem-goi", len({g["run_id"] for g in goi}) == len(goi) <= st["codex_review_calls_used"] >= can_duoi + sum(not g["da_dung"] for g in goi)),
             ("dem-vong", st["review_rounds_used"] == len(st["reviews"])),
             ("adr0054", type(st.get("luat_adr0054", False)) is bool and (st.get("luat_adr0054") is not True or type(st.get("ngu_canh_lease")) is dict)
-                        and (st["state"] != "approved_pending" or st["luat_adr0054"] and SHA_RE.match(str(st.get("pending_sha"))) and type(st.get("bien_nhan_approve")) is dict)
+                        and (st["state"] != "approved_pending" or _pending_human_lane(st) and SHA_RE.match(str(st.get("pending_sha"))) and type(st.get("bien_nhan_approve")) is dict)
                         and (st.get("luat_adr0054") is not True or _nc_hop_le(st["ngu_canh_lease"]))),
             ("mo-lai", _quyen_hop_le(st.get("mo_lai_tu"), "nguyen_nhan", NGUYEN_NHAN_MO_LAI) and _quyen_hop_le(st.get("checkpoint_day"), "sha256", None)
-                       and (st["state"] != "cho_chu_kho" or st.get("luat_adr0054") is True and (st.get("mo_lai_tu") or {}).get("nguyen_nhan") == "connector")),
+                       and (st["state"] != "cho_chu_kho" or _pending_human_lane(st) and (st.get("mo_lai_tu") or {}).get("nguyen_nhan") == "connector")),
             ("checkpoint", pending == (st.get("ly_do") == "rescue_required")), ("truc", st.get("ly_do") != "rescue_required" or st["state"] == "blocked" and st["truc"] in TRUC_TRAN and st["truc"] == next(  # mốc chạm trần MỚI NHẤT
                 h["truc"] for h in reversed(st["history"]) if h.get("event") == "blocked_rescue_required"))) if not dung]
     except (ValueError, TypeError, KeyError, AttributeError, StopIteration) as e:
@@ -714,6 +714,7 @@ def _vao_rescue(state_dir: Path, st: dict, truc: str, ngu_canh: str) -> None:
 def _save(state_dir: Path, st: dict) -> None:
     tx = globals().get("_1174_TRANSACTION")
     if tx is not None:
+        _1174_require(not tx.get("read_only", False), "read-only state context")
         _1174_require(Path(state_dir).resolve() == tx["directory"] and st["packet"] == tx["state"]["packet"], "transaction save namespace")
         tx["proposal"] = json.loads(_1174_bytes(st))
         return
@@ -1148,6 +1149,24 @@ def cmd_chup_anh_doctor(a, state_dir: Path) -> int:
     return RC_OK
 
 
+def _pending_human_lane(st):
+    """Historical activation or the current admission already verified under lock.
+
+    The transaction admission comes from the canonical resolver, never a stored
+    opt-in bit. Keep the observed global ADR-0054 policy unchanged in the journal.
+    """
+    tx = globals().get("_1174_TRANSACTION")
+    admission = tx.get("admission") if type(tx) is dict else None
+    scoped = (type(admission) is dict and st.get("schema_version") == 3 and
+        all(st.get(k) == admission[k] for k in ("packet", "mission", "generation")) and
+        st.get("enrollment_id") == admission["enrollment"]["id"] and
+        st.get("binding_sha256") == admission["enrollment"]["binding_sha256"] and
+        _nc_hop_le(st.get("ngu_canh_lease")) and
+        st["ngu_canh_lease"]["generation"] == admission["generation"] and
+        type(st.get("lease")) is dict and st["lease"]["lease_id"] == st["ngu_canh_lease"]["lease_id"])
+    return st.get("luat_adr0054") is True or scoped
+
+
 def cmd_record_review(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
     if st["state"] != "reviewing":
@@ -1213,7 +1232,7 @@ def cmd_record_review(a, state_dir: Path) -> int:
             )
 
     # #812 M2: packet áp ADR-0054 ghi MỌI verdict qua biên nhận H; `--verdict` một mình không đủ.
-    bn = _du_dieu_kien_approve(st, a) if st.get("luat_adr0054") is True else None
+    bn = _du_dieu_kien_approve(st, a) if _pending_human_lane(st) else None
     _xet_dung(state_dir, st, "record-review")  # I4: chỉ sau khi MỌI đầu vào đã được xác thực
 
     # (c) cùng ID lặp TRONG MỘT review chỉ tính MỘT lần: dedup trước khi đếm.
@@ -2306,7 +2325,9 @@ def _doc_check_runs(duong: str) -> list[dict]:
         _die(RC_GATE, f"KHÔNG ĐO ĐƯỢC: {duong}: {ly_do}")
 
     try:
-        d = json.loads(Path(duong).read_text(encoding="utf-8"),
+        snapshots = (globals().get("_1174_TRANSACTION") or {}).get("input_snapshots", {})
+        raw = snapshots[str(duong)] if str(duong) in snapshots else Path(duong).read_bytes()
+        d = json.loads(raw.decode("utf-8"),
                        object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json)
     except (OSError, UnicodeDecodeError, ValueError, RecursionError) as ex:
         hong(f"không đọc được như JSON ({type(ex).__name__}: {ex})")
@@ -2814,7 +2835,8 @@ BADGE_RE = re.compile(r"!\[([^\]]*?)\s*Badge\]", re.I)  # nhận diện TRƯỜN
 
 def _doc_json(duong: str, rc: int) -> tuple:
     try:
-        b = Path(duong).read_bytes()
+        snapshots = (globals().get("_1174_TRANSACTION") or {}).get("input_snapshots", {})
+        b = snapshots[str(duong)] if str(duong) in snapshots else Path(duong).read_bytes()
         return json.JSONDecoder(parse_constant=_cam_hang_ngoai_json, object_pairs_hook=_cam_khoa_trung).decode(b.decode("utf-8")), hashlib.sha256(b).hexdigest()
     except (OSError, ValueError, RecursionError) as ex:  # UnicodeDecodeError là ValueError
         _die(rc, f"KHÔNG ĐO ĐƯỢC: {duong}: {type(ex).__name__}: {ex}")
@@ -2960,7 +2982,7 @@ def cmd_accept(a, state_dir: Path) -> int:
     """M1: (Đ) đầu nhánh lease trên remote = `pending_sha`; CI bắt buộc xanh (I7); connector xong, không P0–P2; mọi P3 còn mở (offline +
     connector, slug từ H) có ĐÚNG một quyết định đủ trường + lý do. Mọi đầu vào xác thực TRƯỚC `_xet_dung` và trước lần ghi duy nhất (I4/I5)."""
     st = _load(state_dir, a.packet)
-    if st["state"] != "approved_pending" or st.get("luat_adr0054") is not True:
+    if st["state"] != "approved_pending" or not _pending_human_lane(st):
         _die(RC_STATE, f"accept chỉ chạy từ 'approved_pending' của packet áp ADR-0054 (đang {st['state']!r})")
     nc, h, root, p3_off = st["ngu_canh_lease"], st["pending_sha"], Path(a.root), st["bien_nhan_approve"].get("p3")
     if not {tuple(x) for x in CHECK_BAT_BUOC} <= {tuple(x) for x in nc["required_checks"]} or type(p3_off) is not list \
@@ -3011,7 +3033,7 @@ def cmd_mo_lai(a, state_dir: Path) -> int:
     sau_ml = next((st["history"][i:] for i in range(len(st["history"]) - 1, -1, -1) if st["history"][i].get("event") == "mo_lai"), [])
     tu_ci = connector and st["state"] == "running" and ml is not None and ml["nguyen_nhan"] == "ci-do" and ml["generation"] == (nc or {}).get("generation") \
         and not any(x.get("event") == "begin_attempt" for x in sau_ml)  # connector PR #969: quyền ci-do hết dùng được khi đã mở lượt mới
-    if st.get("luat_adr0054") is not True or not (st["state"] == "approved_pending" or tu_ci):
+    if not _pending_human_lane(st) or not (st["state"] == "approved_pending" or tu_ci):
         _die(RC_STATE, f"mo-lai {a.nguyen_nhan} không chạy từ {st['state']!r} (đòi approved_pending của packet áp ADR-0054"
                        + (", hoặc running mở lại bằng ci-do cùng generation, chưa mở lượt mới)" if connector else ")"))
     h = ml["sha"] if tu_ci else st["pending_sha"]
@@ -3056,7 +3078,7 @@ def cmd_chu_kho_duyet(a, state_dir: Path) -> int:
     import yaml
     st, root = _load(state_dir, a.packet), Path(a.root)
     pv = {"cho_chu_kho": "cho_phep_va", "approved_pending": "cho_phep_day"}.get(st["state"])
-    if st.get("luat_adr0054") is not True or pv is None:
+    if not _pending_human_lane(st) or pv is None:
         _die(RC_STATE, f"chu-kho-duyet chỉ chạy ở cho_chu_kho / approved_pending của packet áp ADR-0054 (đang {st['state']!r})")
     p = PurePosixPath(a.checkpoint_path)
     if p.parts[:2] != ("ops", "checkpoints") or len(p.parts) < 3 or ".." in p.parts or p.suffix != ".yaml":
@@ -3102,7 +3124,7 @@ def _xet_dung(state_dir: Path, st: dict, cua: str, a=None, cham_tran=()) -> None
         st.update(state="blocked", history=[*st["history"], {"event": "blocked_attempts_exhausted", "at_attempt": st["attempts_used"]}])
         _save(state_dir, st)
         _die(RC_TRAN, f"đã dùng hết {st['attempts_used']}/{st['attempts_limit']} lượt — packet về blocked. Ghi failure evidence + handoff rồi dừng; reroute là việc của bên điều phối.")
-    if cua == "record-review" and a is None and st.get("luat_adr0054") is not True:
+    if cua == "record-review" and a is None and not _pending_human_lane(st):
         if st["review_rounds_used"] >= st["review_rounds_limit"]:  # review MỚI khi trần vòng đã chạm (state v1 cũ / sửa tay) ⇒ rescue, kể cả approve
             _vao_rescue(state_dir, st, "vong_review", "review vượt trần vòng")
     if cua in CUA_DI_TIEP and not cham_tran:  # #813 M1: bộ đếm đã chạm (kể cả vừa cộng ở `mo-lai`) chặn cửa đi tiếp; cửa khép không ở đây
@@ -3810,6 +3832,26 @@ def _1174_fsyncdir(path):
         os.close(fd)
 
 
+
+def _1174_recheck_durable(path, raw):
+    """Re-establish file and parent durability of a visible reused image under lock."""
+    global _1174_IO_STARTED
+    path = Path(path)
+    _1174_require(_1174_read(path) == raw, "reused artifact bytes changed")
+    _1174_IO_STARTED = True
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+    try:
+        before = path.lstat()
+        opened = os.fstat(fd)
+        _1174_require((before.st_dev, before.st_ino) == (opened.st_dev, opened.st_ino), "reused artifact identity")
+        os.fsync(fd)
+        _1174_fsyncdir(path.parent)
+        _1174_require((opened.st_dev, opened.st_ino) == (path.lstat().st_dev, path.lstat().st_ino) and
+                      _1174_read(path) == raw, "reused artifact durable readback")
+    finally:
+        os.close(fd)
+
+
 def _1174_persist(path, raw, *, create):
     """Durable complete-temp publication. The transaction must hold its fixed lock.
 
@@ -4048,6 +4090,10 @@ def _1174_admission(raw, registration, now):
                    and _1174_hash(e["legacy_source_sha256"])), "legacy source types")
     lineage = a["lineage"]
     _1174_require(type(lineage) is dict and set(lineage) == {"predecessor_generation", "source_path", "source_sha256"}, "lineage keyset")
+    for source in (lineage["source_path"], e["legacy_source_path"]):
+        _1174_require(source is None or (type(source) is str and Path(source).is_absolute()
+                      and str(Path(source)) == source and ".." not in Path(source).parts and "//" not in source),
+                      "source canonical paths")
     if lineage["predecessor_generation"] is None:
         _1174_require(lineage["source_path"] is None and lineage["source_sha256"] is None and
                       e["origin"] == "fresh_init" and a["generation"] == e["g0"] and
@@ -4074,7 +4120,7 @@ def _1174_admission(raw, registration, now):
     return a
 
 
-def _1174_source_binding(witness, admission, observed_path, raw):
+def _1174_source_binding(witness, admission, observed_path, raw, *, recovery=False):
     """Read-only initial-adoption source predicate; no high_water repair is allowed."""
     e, lineage = admission["enrollment"], admission["lineage"]
     digest = hashlib.sha256(raw).hexdigest()
@@ -4083,7 +4129,7 @@ def _1174_source_binding(witness, admission, observed_path, raw):
         adopted = [n for n in witness["history"] if n["terminal_kind"] == "adopted"]
         active_path = adopted[-1]["canonical_path"] if adopted else e["initial_state_path"]
         water = witness["high_water"]
-        _1174_require(witness["pending_adoption"] is None and lineage["predecessor_generation"] == witness["active_generation"]
+        _1174_require((recovery or witness["pending_adoption"] is None) and lineage["predecessor_generation"] == witness["active_generation"]
                       and observed_path == active_path and digest == water["state_sha256"], "initialized source high_water/path")
         state = _1174_json(raw)
         _1174_require(type(state) is dict and type(state.get("schema_version")) is int and state["schema_version"] == 3
@@ -4092,17 +4138,24 @@ def _1174_source_binding(witness, admission, observed_path, raw):
                       and _1174_int(state.get("generation")) and state["generation"] == witness["active_generation"]
                       and _1174_int(state.get("state_revision")) and state["state_revision"] == water["state_revision"],
                       "initialized source state generation/revision/identity")
+        _1174_require(state.get("enrollment_id") == e["id"] and state.get("binding_sha256") == e["binding_sha256"],
+                      "initialized source lineage identity")
     else:
         _1174_require(e["origin"] == "imported_lineage" and lineage["predecessor_generation"] == e["g0"]
                       and observed_path == e["legacy_source_path"] and digest == e["legacy_source_sha256"], "legacy enrollment source")
         if witness is not None:
-            _1174_require(witness["origin"] == "imported_lineage" and witness["phase"] == "reserved" and
+            if recovery:
+                _1174_require(witness["origin"] == "imported_lineage" and witness["phase"] == "reserved" and
+                    all(n["terminal_kind"] in ("aborted", "aborted_intent") for n in witness["history"]), "legacy recovery branch")
+            else:
+                _1174_require(witness["origin"] == "imported_lineage" and witness["phase"] == "reserved" and
                           witness["pending_adoption"] is None and witness["suspended"] and bool(witness["history"])
                           and all(n["terminal_kind"] in ("aborted", "aborted_intent") for n in witness["history"]), "legacy retry branch")
         state = json.loads(raw.decode("utf-8"), object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json)
         _1174_require(type(state) is dict and type(state.get("schema_version")) is int and state["schema_version"] == 2
                       and type(state.get("packet")) is int and state["packet"] == admission["packet"]
                       and type(state.get("mission")) is int and state["mission"] == admission["mission"], "legacy source v2 identity")
+    _1174_tripwire(state, e["g0"])
     return state
 
 
@@ -4259,7 +4312,81 @@ def _1174_resolve(root, packet, revision, generation, admission_file, identities
         _1174_rollout(snapshot)
         admission, facts = _1174_resolve_snapshot(snapshot, packet, revision, generation, admission_file, identities)
         _1174_require(admission["enrollment"]["git_root"] == str(root), "enrolled Git root identity")
+        if _1174_same_family(admission["enrollment"]["initial_state_projection"]):
+            _1174_policy_head(root, facts["owner_policy"])
         return admission, facts
+
+
+def _1174_same_family(state):
+    return (state["executor"] == state["reviewer"] or
+            state["executor_identity"]["model_family"] == state["reviewer_identity"]["model_family"])
+
+
+def _1174_owner_policy(root, admission, lease, spec_sha256, comments):
+    """Resolve an immutable policy through the verified lease and owner API fact.
+
+    Context/profile records are owner-audited platform evidence, not measured
+    serving-model identity. Neither FILE nor a caller boolean can supply them.
+    """
+    descriptor = lease.get("owner_review_policy")
+    _1174_require(type(descriptor) is dict and set(descriptor) == {"ref", "path", "sha256", "decision_id"},
+                  "owner-scoped policy descriptor required")
+    ref, sep, oid = descriptor["ref"].partition("@") if type(descriptor.get("ref")) is str else ("", "", "")
+    _1174_require(sep == "@" and SHA_RE.fullmatch(oid) and _git_do(root, "check-ref-format", ref)[0] == 0 and
+        type(descriptor["path"]) is str and not PurePosixPath(descriptor["path"]).is_absolute() and
+        ".." not in PurePosixPath(descriptor["path"]).parts and _1174_hash(descriptor["sha256"]) and
+        type(descriptor["decision_id"]) is int and descriptor["decision_id"] > 0, "owner-scoped policy descriptor")
+    rc, raw = _git_do(root, "show", oid + ":" + descriptor["path"])
+    _1174_require(rc == 0 and hashlib.sha256(raw).hexdigest() == descriptor["sha256"], "owner-scoped policy immutable bytes")
+    policy = _1174_json(raw)
+    keys = {"schema", "policy_id", "owner", "packet", "mission", "revision", "generation", "spec_ref", "spec_sha256",
+            "lease_id", "expires_utc", "comparison", "source", "reviewer", "head", "tree", "assurance"}
+    _1174_require(type(policy) is dict and set(policy) == keys and policy["schema"] == "wp1174_owner_review_policy.v1" and
+        policy["policy_id"] == "WP1174-E2-R21-CODEX-PAIR" and policy["owner"] == CHU_KHO and
+        all(type(policy[k]) is int and policy[k] == admission[k] == v for k, v in
+            (("packet", 1174), ("mission", 1172), ("revision", 21), ("generation", 18))) and
+        policy["spec_ref"] == lease["spec_ref"] and policy["spec_sha256"] == spec_sha256 == lease["spec_hash"] ==
+            "0e5b03b860a778d9b59ae4290b00ed205c8d690cf7e083037ea8634d7336a33b" and
+        policy["lease_id"] == lease["lease_id"] == "wp1174-r21-g18-codex" and policy["assurance"] == "same_provider_approved" and
+        policy["comparison"] == "same_model_configured_effort_v1", "owner-scoped policy scope/spec/lease")
+    now = datetime.now(timezone.utc)
+    _1174_require(now < _1174_time(policy["expires_utc"]) <= _1174_time(lease["lease_expires_at_utc"]) and
+        _1174_time(policy["expires_utc"]) <= min(_1174_time(admission["expires_utc"]),
+            _1174_time("2026-11-09T14:20:32+00:00")), "owner-scoped policy expired")
+    decisions = [c for c in comments if type(c) is dict and c.get("id") == descriptor["decision_id"]]
+    _1174_require(len(decisions) == 1, "owner-scoped policy decision missing")
+    decision = decisions[0]
+    _1174_require(decision.get("user", {}).get("login") == CHU_KHO and decision.get("user", {}).get("type") == "User" and
+        decision.get("author_association") == "OWNER" and
+        decision.get("issue_url") == f"https://api.github.com/repos/{_1174_REPO}/issues/1174" and
+        decision.get("html_url") == f"https://github.com/{_1174_REPO}/issues/1174#issuecomment-{descriptor['decision_id']}" and
+        decision.get("body") == "WP1174_OWNER_POLICY_V1 sha256:" + descriptor["sha256"], "owner-scoped policy owner decision")
+    context_keys = {"context_id", "parent_context_id", "checkout_id", "read_only", "provider", "model_family",
+                    "execution_surface", "transport", "configured_model", "configured_effort", "evidence_id"}
+    source, reviewer = policy["source"], policy["reviewer"]
+    for role, context in (("executor", source), ("reviewer", reviewer)):
+        _1174_require(type(context) is dict and set(context) == context_keys and
+            all(type(context[k]) is str and bool(context[k].strip()) for k in context_keys - {"parent_context_id", "read_only"}) and
+            context["parent_context_id"] is None and type(context["read_only"]) is bool and
+            context["provider"] == "codex" and context["model_family"] == "openai" and
+            context["execution_surface"] == "codex_service" and context["transport"] == "machine" and
+            {k: context[k] for k in ("provider", "model_family", "execution_surface", "transport")} ==
+                admission["enrollment"]["initial_state_projection"][role + "_identity"], "owner-scoped policy context identity")
+    _1174_require(source["context_id"] != reviewer["context_id"] and source["checkout_id"] != reviewer["checkout_id"] and
+        source["evidence_id"] != reviewer["evidence_id"] and reviewer["read_only"] is True and
+        source["configured_model"] == reviewer["configured_model"] and
+        source["configured_effort"] == "medium" and reviewer["configured_effort"] == "high", "owner-scoped policy independent stronger reviewer")
+    _1174_require(type(policy["head"]) is str and SHA_RE.fullmatch(policy["head"]) and
+        type(policy["tree"]) is str and SHA_RE.fullmatch(policy["tree"]), "owner-scoped policy H/tree")
+    return dict(policy=policy, sha256=descriptor["sha256"])
+
+
+def _1174_policy_head(root, authority, head=None):
+    policy = authority["policy"]
+    rc, actual = _git_do(root, "rev-parse", "HEAD")
+    tc, tree = _git_do(root, "rev-parse", policy["head"] + "^{tree}")
+    _1174_require(rc == tc == 0 and actual.decode().strip() == policy["head"] and
+        tree.decode().strip() == policy["tree"] and (head is None or head == policy["head"]), "owner-scoped policy stale H/tree")
 
 
 def _1174_i2_identity(pinned, identities):
@@ -4359,12 +4486,15 @@ def _1174_resolve_snapshot(root, packet, revision, generation, admission_file, i
                                admission_sha256=registration["admission_sha256"], mission_install_id=installed_id,
                                lease_id=lease["lease_id"], lease=lease, spec=spec, verified_i2=verified,
                                lease_oid=lease_oid,
-                               lease_ref="origin/" + remote_ref, lease_path=row["path"], comments=comments)
+                               lease_ref="origin/" + remote_ref, lease_path=row["path"], comments=comments,
+                               owner_policy=(_1174_owner_policy(root, admission, lease, registration["spec_sha256"], comments)
+                                   if _1174_same_family(pinned) else None))
 
 
 _1174_MUTATORS = ("init", "record-lease", "begin-attempt", "void-attempt", "record-review", "transition",
     "record-codex-call", "nang-tran", "record-rescue", "record-post", "accept", "mo-lai", "chu-kho-duyet", "adopt-state")
 _1174_IMPLEMENTATION_COMPLETE = True
+_1174_OWNER_POLICY = contextvars.ContextVar("wp1174_owner_policy", default=None)
 
 _1174_CORE = frozenset("schema_version review_rounds_used codex_review_calls_used codex_calls nang_tran review_rounds_limit codex_review_calls_limit packet mission executor reviewer executor_identity reviewer_identity state lease attempts_used attempts_limit same_failure_limit finding_counts attempt_open attempt_anchor hmac_key reviewing_head_sha accepted_sha reviews posts history state_revision generation enrollment_id binding_sha256 adoption scoped_review human_acceptance".split())
 _1174_OPTIONAL = {"luat_adr0054": bool, "ngu_canh_lease": dict, "dem_tu_suy": bool,
@@ -4430,9 +4560,8 @@ def _1174_initial(admission):
         _1174_require(type(ident) is dict and set(ident) == {"provider", "model_family", "execution_surface", "transport"}
                       and ident == _identity(p[role], ident["model_family"], ident["execution_surface"], ident["transport"]),
                       "initial projection identity")
-    _1174_require((p["executor"] != p["reviewer"] and p["executor_identity"]["model_family"] !=
-                  p["reviewer_identity"]["model_family"]) or
-                  p["reviewer_identity"]["execution_surface"] == "codex_service", "initial review identity lane")
+    _1174_require(not _1174_same_family(p) or _1174_OWNER_POLICY.get() is not None,
+                  "initial owner-scoped same-family policy required")
     state = dict(p, hmac_key=_1174_derive_key(_1174_seed(e), e["id"], e["binding_sha256"], admission["packet"], e["g0"]))
     return _1174_bytes(_1174_state(_1174_bytes(state), admission))
 
@@ -4452,13 +4581,14 @@ def _1174_state(raw, admission, generation=None):
     _1174_require(_1174_hash(state["hmac_key"]), "state HMAC key")
     if state["adoption"] is not None:
         _1174_adoption_record(state["adoption"], admission)
+    _1174_require(not _1174_same_family(state) or _1174_OWNER_POLICY.get() is not None, "state owner-scoped same-family policy required")
     _1174_lifecycle_records(state, admission)
     for role in ("executor", "reviewer"):
         _1174_require(state[role] == e["initial_state_projection"][role] and
                       state[role + "_identity"] == e["initial_state_projection"][role + "_identity"], "state immutable provider identity")
     previous = globals().get("_1174_TRANSACTION")
     directory = Path(e["journal_root"])
-    _1174_TRANSACTION = dict(directory=directory, state=state, proposal=None)
+    _1174_TRANSACTION = dict(directory=directory, state=state, proposal=None, admission=admission)
     try:
         _load(directory, admission["packet"])
     except SystemExit as ex:
@@ -4469,6 +4599,12 @@ def _1174_state(raw, admission, generation=None):
 
 
 def _1174_alive(admission):
+    authority = _1174_OWNER_POLICY.get()
+    if _1174_same_family(admission["enrollment"]["initial_state_projection"]):
+        _1174_require(authority is not None and all(authority["policy"][k] == admission[k]
+            for k in ("packet", "mission", "revision", "generation")), "owner-scoped policy active binding")
+        _1174_require(datetime.now(timezone.utc) < _1174_time(authority["policy"]["expires_utc"]), "owner-scoped policy expired")
+        _1174_policy_head(Path(admission["enrollment"]["git_root"]), authority)
     now=datetime.now(timezone.utc)
     _1174_require(now < _1174_time(admission["expires_utc"]) and
         _1174_time(admission["allowance"]["starts_utc"]) <= now < _1174_time(admission["allowance"]["ends_utc"]),"authority expired before publication/dispatch")
@@ -4486,8 +4622,10 @@ def _1174_runtime(a, admission):
         mount[k] == e[v] for k, v in (("mount_id", "mount_id"), ("device", "mount_device"),
         ("filesystem", "filesystem"), ("magic", "magic"))), "enrolled native mount")
     _1174_require(str(Path(e["journal_root"]).resolve(strict=True)) == e["journal_root"], "journal root canonical")
-    for key in ("state_path", "witness_path", "lock_path", "initial_state_path", "private_seed_path"):
-        path = Path(e[key])
+    paths = [e[key] for key in ("state_path", "witness_path", "lock_path", "initial_state_path", "private_seed_path")]
+    paths.extend(source for source in (admission["lineage"]["source_path"], e["legacy_source_path"]) if source is not None)
+    for value in paths:
+        path = Path(value)
         _1174_require(str(path.resolve(strict=False)) == str(path) and
                       _1174_mount(path.parent) == mount, "path topology drift")
     return mount
@@ -4504,6 +4642,7 @@ def _1174_pair(admission, witness, raw):
     _1174_require(e["state_path"] == active, "active target path")
     _1174_require(not witness["history"] or state["adoption"] is not None and state["adoption"]["phase"] == "adopted",
                   "active adoption phase")
+    _1174_tripwire(state, e["g0"])
     return state
 
 
@@ -4573,10 +4712,54 @@ def _1174_adopt_image(payload, phase, intent, revision, admission):
     return raw
 
 
-def _1174_tripwire(state):
-    if state["adoption"] is not None:
-        p = state["adoption"]["payload"]
+def _1174_tripwire(state, g0=None):
+    """Validate the entire immutable predecessor chain and every live tombstone.
+
+    The active record alone cannot fence a cached writer of an older generation.
+    Never derive the expected retired bytes from the live predecessor file.
+    """
+    current, path, seen = state, None, set()
+    identity = {k: state[k] for k in ("packet", "mission", "executor", "reviewer", "executor_identity", "reviewer_identity")}
+    while current.get("adoption") is not None:
+        record = current["adoption"]
+        _1174_require(type(record) is dict and set(record) == {"phase", "payload", "payload_sha256", "cutover_started"}
+            and record["phase"] == "adopted" and record["cutover_started"] is True, "retired lineage record")
+        p = record["payload"]
+        _1174_require(type(p) is dict and set(p) == _1174_PAYLOAD_KEYS and
+            _1174_hash(record["payload_sha256"]) and hashlib.sha256(_1174_bytes(p)).hexdigest() == record["payload_sha256"],
+            "retired lineage payload hash/keyset")
+        _1174_pending(p["operation"])
+        op = p["operation"]
+        _1174_require(type(p["source_path"]) is str and Path(p["source_path"]).is_absolute() and
+            str(Path(p["source_path"])) == p["source_path"] and p["source_path"] not in seen and
+            _1174_int(p["predecessor_generation"]) and _1174_int(current.get("generation")) and
+            p["predecessor_generation"] < current["generation"] == op["generation"] and
+            (path is None or op["canonical_path"] == path), "retired lineage path/generation/operation")
+        seen.add(p["source_path"])
+        _1174_require(type(p["source_snapshot"]) is str and type(p["tombstone"]) is str and
+            hashlib.sha256(p["source_snapshot"].encode("utf-8")).hexdigest() == p["source_sha256"] == op["source_sha256"] and
+            hashlib.sha256(p["tombstone"].encode("utf-8")).hexdigest() == p["tombstone_sha256"] and
+            p["tombstone"].encode("utf-8") == _1174_tombstone(state["packet"], p["predecessor_generation"], op["generation"],
+                op["adoption_id"], p["source_sha256"], op["binding_sha256"]), "retired lineage snapshot/tombstone binding")
+        source_raw = p["source_snapshot"].encode("utf-8")
+        predecessor = json.loads(source_raw, object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json)
+        _1174_require(type(predecessor) is dict and type(predecessor.get("schema_version")) is int and
+            predecessor["schema_version"] in (2, 3) and all(predecessor.get(k) == v for k, v in identity.items()),
+            "retired lineage source identity/schema")
+        if predecessor["schema_version"] == 3:
+            _1174_require(_1174_bytes(predecessor) == source_raw and
+                _1174_CORE <= set(predecessor) <= _1174_CORE | set(_1174_OPTIONAL) and
+                predecessor["generation"] == p["predecessor_generation"] and _1174_int(predecessor["generation"]) and
+                _1174_int(predecessor["state_revision"]) and predecessor["enrollment_id"] == state["enrollment_id"] and
+                predecessor["binding_sha256"] == state["binding_sha256"], "retired lineage v3 binding")
+        projection = dict(predecessor, schema_version=3, generation=current["generation"], state_revision=0,
+            enrollment_id=state["enrollment_id"], binding_sha256=state["binding_sha256"], scoped_review=None, human_acceptance=None)
+        projection.pop("adoption", None)
+        _1174_require(p["target_projection"] == projection, "retired lineage deterministic projection")
         _1174_require(_1174_read(Path(p["source_path"])) == p["tombstone"].encode("utf-8"), "legacy_changed")
+        current, path = predecessor, p["source_path"]
+    if g0 is not None and current.get("schema_version") == 3:
+        _1174_require(current.get("generation") == g0, "retired lineage genesis generation")
 
 
 def _1174_adopt(a, admission, witness_raw):
@@ -4611,9 +4794,14 @@ def _1174_adopt(a, admission, witness_raw):
                 _1174_require(exists and hashlib.sha256(target_raw).hexdigest() == terminal["as_of_sha256"] or
                     terminal["terminal_kind"] == "adopted" and exists, "terminal target hash")
                 st = _1174_state(target_raw, admission)
+                _1174_tripwire(json.loads(st["adoption"]["payload"]["source_snapshot"], object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json))
                 if terminal["terminal_kind"] == "adopted":
                     _1174_pair(admission, witness, target_raw)
                     _1174_tripwire(st)
+            _1174_recheck_durable(source, _1174_read(source))
+            if exists:
+                _1174_recheck_durable(target, target_raw)
+            _1174_recheck_durable(wp, witness_raw)
             _1174_alive(admission)
             return "already_completed_no_dispatch"
         _1174_pending(pending, dict(op, cutover_started=pending["cutover_started"]))
@@ -4631,20 +4819,8 @@ def _1174_adopt(a, admission, witness_raw):
             _1174_require(target_raw == _1174_adopt_image(payload, record["phase"], record["cutover_started"],
                 {("prepared", False): 0, ("prepared", True): 1, ("adopted", True): 2, ("aborted", False): 1}.get(
                 (record["phase"], record["cutover_started"]), -1), admission), "recovery exact target image")
-        # A pending recovery must remain anchored to the predecessor snapshot
-        # recorded by the witness.  The target carries a copy of that snapshot,
-        # but it must not be allowed to overwrite or silently supersede the
-        # predecessor high-water binding.
-        if witness["phase"] == "initialized":
-            predecessor = json.loads(payload["source_snapshot"], object_pairs_hook=_cam_khoa_trung,
-                                     parse_constant=_cam_hang_ngoai_json)
-            water = witness["high_water"]
-            adopted = [n for n in witness["history"] if n["terminal_kind"] == "adopted"]
-            active_path = adopted[-1]["canonical_path"] if adopted else e["initial_state_path"]
-            _1174_require(water == dict(generation=lineage["predecessor_generation"],
-                state_revision=predecessor.get("state_revision"), state_sha256=payload["source_sha256"]) and
-                lineage["source_path"] == active_path and predecessor.get("generation") == water["generation"],
-                "recovery predecessor high_water mismatch")
+        _1174_source_binding(witness, admission, payload["source_path"],
+                             payload["source_snapshot"].encode("utf-8"), recovery=True)
     images = {key: _1174_adopt_image(payload, phase, intent, revision, admission) for key, phase, intent, revision in
               (("prepared", "prepared", False, 0), ("intent", "prepared", True, 1), ("adopted", "adopted", True, 2), ("aborted", "aborted", False, 1))}
     old_source, retired = payload["source_snapshot"].encode("utf-8"), payload["tombstone"].encode("utf-8")
@@ -4693,6 +4869,11 @@ def _1174_adopt(a, admission, witness_raw):
         final.update(phase="initialized", active_generation=op["generation"], high_water=dict(generation=op["generation"],
                      state_revision=2, state_sha256=node["as_of_sha256"]))
     final_witness = _1174_commit_witness(current_raw, final, admission, action)
+    if a.mode == "recovery":
+        _1174_recheck_durable(source, source_now)
+        if target_raw is not None:
+            _1174_recheck_durable(target, target_raw)
+        _1174_recheck_durable(wp, witness_raw)
     _1174_probe(Path(e["root"]))
     _1174_alive(admission)
     for raw, create in chain:
@@ -4717,6 +4898,8 @@ def _1174_adopt(a, admission, witness_raw):
             _1174_write(target, images["adopted"], create=False)
     elif final_raw is not None and target_raw != final_raw:
         _1174_write(target, final_raw, create=False)
+    if kind == "adopted":
+        _1174_tripwire(_1174_json(final_raw))
     _1174_write(wp, final_witness, create=False)
     _1174_require(_1174_read(wp) == final_witness and (final_raw is None or _1174_read(target) == final_raw), "adoption final readback")
     _1174_alive(admission)
@@ -4755,6 +4938,10 @@ def _1174_initialize(a, admission, witness_raw):
         state_revision=0, state_sha256=hashlib.sha256(initial).hexdigest()))
     first = _1174_commit_witness(None, reserved, admission, "fresh_enrollment")
     last = _1174_commit_witness(reserved_raw, final, admission, "resume_init")
+    if witness_raw is not None:
+        _1174_recheck_durable(witness_path, witness_raw)
+    if exists:
+        _1174_recheck_durable(target, initial)
     _1174_probe(Path(e["root"]))
     _1174_alive(admission)
     if witness_raw is None:
@@ -4782,7 +4969,7 @@ def _1174_ordinary(a, directory, admission, witness_raw, facts=None):
     _1174_tripwire(state)
     _1174_require(a.cmd != "record-lease" or a.lease_ref is not None, "scoped lease requires canonical I2")
     previous = globals().get("_1174_TRANSACTION")
-    tx = dict(directory=directory, state=state, proposal=None)
+    tx = dict(directory=directory, state=state, proposal=None, admission=admission)
     _1174_TRANSACTION = tx
     try:
         with contextlib.redirect_stdout(io.StringIO()):
@@ -4801,6 +4988,11 @@ def _1174_ordinary(a, directory, admission, witness_raw, facts=None):
             generation=admission["generation"], state_revision=new["state_revision"], state_sha256=hashlib.sha256(raw).hexdigest()))
         water = _1174_commit_witness(witness_raw, after, admission, "ordinary")
         _1174_require(_1174_read(Path(e["witness_path"])) == witness_raw, "witness changed during preflight")
+        if state["adoption"] is not None:
+            payload = state["adoption"]["payload"]
+            _1174_recheck_durable(Path(payload["source_path"]), payload["tombstone"].encode("utf-8"))
+        _1174_recheck_durable(Path(e["state_path"]), _1174_bytes(state))
+        _1174_recheck_durable(Path(e["witness_path"]), witness_raw)
         _1174_probe(directory)
         _1174_alive(admission)
         _1174_write(Path(e["state_path"]), raw, create=False)
@@ -4872,7 +5064,8 @@ def _1174_lifecycle_records(state, admission):
             review["identity"] == state["reviewer_identity"] and review["verdict"] in ("approve", "changes_requested", "blocked") and
             type(review["finding_ids"]) is list and len(review["finding_ids"]) == len(set(review["finding_ids"])) and
             all(type(x) is str and SLUG_RE.fullmatch(x) for x in review["finding_ids"]) and
-            _1174_hash(review["receipt_sha256"]) and review["assurance"] == "advisory_review" and
+            _1174_hash(review["receipt_sha256"]) and (review["assurance"] == "advisory_review" or review["assurance"] == "same_provider_approved" and
+                _1174_OWNER_POLICY.get() is not None and review["head"] == _1174_OWNER_POLICY.get()["policy"]["head"]) and
             (review["call_id"] is None or type(review["call_id"]) is str and any(
                 x["run_id"] == review["call_id"] and x["head"] == review["head"] and x["da_dung"] for x in state["codex_calls"])),
             "scoped review closed record")
@@ -4890,12 +5083,15 @@ def _1174_lifecycle_records(state, admission):
 
 def _1174_review(a, directory, admission):
     st = _load(directory, a.packet)
-    _1174_require(st.get("luat_adr0054") is True,"scoped review requires canonical pending/human lane")
+    _1174_require(_pending_human_lane(st),"scoped review requires canonical pending/human lane")
     _1174_require(type(a.bien_nhan) is str and bool(a.bien_nhan), "review receipt required")
     receipt_path = Path(a.bien_nhan)
     before = receipt_path.stat()
     raw = receipt_path.read_bytes()
     signature = lambda st: (st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns, st.st_ctime_ns)
+    authority = _1174_OWNER_POLICY.get() if _1174_same_family(st) else None
+    if authority is not None:
+        _1174_policy_head(Path(a.root), authority, a.reviewed_sha)
     service = st["reviewer_identity"]["execution_surface"] == "codex_service"
     if not service:
         with tempfile.TemporaryDirectory(prefix="wp1174-receipt-") as temporary:
@@ -4915,6 +5111,11 @@ def _1174_review(a, directory, admission):
         record = _1174_json(raw)
         expected = dict(schema="wp1174_service_advisory.v1", head=a.reviewed_sha,
             identity=st["reviewer_identity"], verdict=a.verdict, finding_ids=sorted(set(a.finding_id or [])), assurance="advisory_review")
+        if authority is not None:
+            policy = authority["policy"]
+            expected.update(schema="wp1174_owner_scoped_review.v1", assurance="same_provider_approved",
+                policy_sha256=authority["sha256"], tree=policy["tree"], source_context_id=policy["source"]["context_id"],
+                reviewer_context_id=policy["reviewer"]["context_id"])
         _1174_require(type(record) is dict and record == expected and set(record) == set(expected) and
             all(type(x) is str and SLUG_RE.fullmatch(x) for x in record["finding_ids"]) and
             (a.verdict != "changes_requested" or bool(record["finding_ids"])), "advisory receipt closed bindings")
@@ -4931,7 +5132,7 @@ def _1174_review(a, directory, admission):
         _xet_dung(directory, st, "record-review", a, [x for x in record["finding_ids"] if st["finding_counts"][x] >= st["same_failure_limit"]])
         st["state"] = {"approve": "approved_pending", "changes_requested": "running", "blocked": "blocked"}[a.verdict]
         if a.verdict == "approve":
-            _1174_require(st.get("luat_adr0054") is True, "advisory canonical lease required")
+            _1174_require(_pending_human_lane(st), "advisory canonical lease required")
             st.update(pending_sha=a.reviewed_sha, bien_nhan_approve=dict(p3=[]))
         st["history"].append(dict(event="record_review", verdict=a.verdict, reviewed_sha=a.reviewed_sha, finding_ids=record["finding_ids"]))
         _save(directory, st)
@@ -4939,7 +5140,7 @@ def _1174_review(a, directory, admission):
     _1174_require(signature(receipt_path.stat()) == signature(before), "review receipt changed during validation")
     proposal["scoped_review"] = dict(schema="wp1174_scoped_review.v1", head=a.reviewed_sha,
         identity=st["reviewer_identity"], verdict=a.verdict, finding_ids=sorted(set(a.finding_id or [])),
-        receipt_sha256=hashlib.sha256(raw).hexdigest(), assurance="advisory_review", call_id=a.codex_call)
+        receipt_sha256=hashlib.sha256(raw).hexdigest(), assurance="same_provider_approved" if authority is not None else "advisory_review", call_id=a.codex_call)
     proposal["human_acceptance"] = None
     return rc
 
@@ -4991,6 +5192,7 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
         events = snapshots.get("events", [])
         boundary = any(type(x) is dict and _1174_time(x.get("created_at")) <= _1174_time(audit["updated_at"]) for x in events)
         dag = True
+        preimages = []
         for event in events:
             if time.time()>=pass_end:dag=False;complete=False;break
             _1174_require(type(event) is dict and type(event.get("id")) is str and
@@ -5004,29 +5206,30 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
             if not (type(after) is str and SHA_RE.fullmatch(after) and type(before) is str and SHA_RE.fullmatch(before)):
                 dag = False
                 continue
-            zero = "0" * 40
-            candidates = [("after", after)] + ([] if before == zero else [("before", before)])
-            relations = {}
-            for side, oid in candidates:
+            # Zero is the absence of a ref at creation/deletion, never a commit.
+            # A preimage proves publication no later than this event, so it can
+            # reject an earlier audit but cannot establish a first-push timestamp.
+            matches = {}
+            for side, oid in (("before", before), ("after", after)):
+                if oid == "0" * 40:
+                    matches[side] = False
+                    continue
                 rc, _ = _git_do(root, "cat-file", "-e", oid + "^{commit}", deadline=pass_end)
-                if rc:
-                    dag = False
-                    break
-                relation, _ = _git_do(root, "merge-base", "--is-ancestor", head, oid, deadline=pass_end)
+                relation, _ = _git_do(root, "merge-base", "--is-ancestor", head, oid, deadline=pass_end) if rc == 0 else (-1, b"")
+                if time.time() >= pass_end:
+                    dag = False; complete = False; break
                 if relation not in (0, 1):
                     dag = False
-                    break
-                relations[side] = relation
-            if not dag:
-                dag = False
-                continue
-            if time.time()>=pass_end:dag=False;complete=False;break
-            # `before` is the ref value immediately before the push.  A force
-            # removal followed by republication is therefore publication
-            # evidence even when `after` no longer contains the candidate.
-            if any(value == 0 for value in relations.values()):
+                matches[side] = relation == 0
+            preaudit = _1174_time(event["created_at"]) <= _1174_time(audit["updated_at"])
+            if matches.get("after") or matches.get("before") and preaudit:
                 introductions.append(dict(id=event["id"], time=event["created_at"], ref=payload.get("ref"),
                     actor=event.get("actor", {}).get("login"), before=before, after=after))
+            if matches.get("before") and not preaudit:
+                preimages.append((before, event["created_at"]))
+        for oid, observed_at in preimages:
+            if not any(x["after"] == oid and _1174_time(x["time"]) < _1174_time(observed_at) for x in introductions):
+                dag = False
         # Every currently observable ref/PR must be accounted for by the DAG;
         # unsupported introductions cannot silently be called server residuals.
         for family in scope[1:]:
@@ -5171,6 +5374,9 @@ def _1174_human_evidence(a, admission, head):
         _human_merge(args, Path(args.root), facts["lease"], facts["spec"], p3)
         _1174_require(not p3, "human findings remain")
         _, audit, _ = _owner_record(args.human_audit_comment, _1174_REPO, args.pr, "human_exact_head_audit.v1")
+        for field, (verified_raw, _) in snapshots.items():
+            _1174_require(Path(getattr(args, field)).read_bytes() == verified_raw, "verified human snapshot changed")
+        _1174_require(_1174_bytes(audit) == snapshots["human_audit_comment"][0], "verified audit snapshot changed")
     repo = _1174_api("repos/" + _1174_REPO,root=Path(a.root),deadline=collection_end)
     _1174_require(type(repo.get("id")) is int and repo["id"] > 0 and repo.get("full_name") == _1174_REPO, "collector repository")
     collected = _1174_collect(lambda endpoint,**limits: _1174_api(endpoint,root=Path(a.root),**limits), Path(a.root), head, audit, repo["id"],
@@ -5196,7 +5402,14 @@ def _1174_accept(a, directory, admission):
     _1174_require(st["state"] == "approved_pending" and st["scoped_review"] is not None and
         st["scoped_review"]["head"] == st.get("pending_sha") and st["scoped_review"]["verdict"] == "approve", "accept requires scoped review")
     human = _1174_human_evidence(a, admission, st["pending_sha"])
-    rc = cmd_accept(a, directory)
+    fields = ("workflow_runs", "check_runs", "connector", "bien_nhan_connector", "quyet_dinh_p3")
+    paths = [getattr(a, field, None) for field in fields] + list(a.workflow_jobs or [])
+    snapshots = {str(path): Path(path).read_bytes() for path in paths if path is not None}
+    _1174_TRANSACTION["input_snapshots"] = snapshots
+    try:
+        rc = cmd_accept(a, directory)
+    finally:
+        _1174_TRANSACTION.pop("input_snapshots", None)
     _1174_TRANSACTION["proposal"]["human_acceptance"] = human
     return rc
 
@@ -5244,16 +5457,53 @@ def _1174_emit(status, detail=None, guard=False):
 
 
 @_1174_scoped
+def _1174_readonly(a, state_dir):
+    """Read enrolled v3 through the same authority/pair validators, without a writer."""
+    global _1174_TRANSACTION
+    previous = globals().get("_1174_TRANSACTION")
+    policy_token = _1174_OWNER_POLICY.set(None)
+    try:
+        _1174_require(a.expected_revision is None and a.expected_witness_revision is None,
+                      "read-only revision namespace")
+        _1174_require(all(type(getattr(a, k, None)) is int and getattr(a, k) > 0
+            for k in ("packet", "revision", "generation")) and type(a.root) is str and Path(a.root).is_absolute(),
+            "read-only scoped identity/root")
+        admission, first_facts = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission)
+        _1174_OWNER_POLICY.set(first_facts.get("owner_policy"))
+        e = admission["enrollment"]
+        _1174_require(state_dir.resolve() == Path(e["journal_root"]) and os.path.lexists(e["lock_path"]),
+                      "read-only enrolled directory/lock")
+        _1174_runtime(a, admission)
+        with _1174_lock(Path(current_lock := e["lock_path"])):
+            current, facts = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission)
+            _1174_require(current == admission and facts.get("owner_policy") == first_facts.get("owner_policy"), "authority changed under lock")
+            _1174_runtime(a, admission)
+            witness = _1174_witness(_1174_read(Path(e["witness_path"])), e["id"], e["binding_sha256"], e["g0"])
+            state = _1174_pair(current, witness, _1174_read(Path(e["state_path"])))
+            _1174_tripwire(state)
+            _1174_alive(admission)
+            _1174_TRANSACTION = dict(directory=state_dir.resolve(), state=state, proposal=None, admission=admission, read_only=True)
+            return a.fn(a, state_dir)
+    except (Exception, SystemExit) as ex:
+        return _1174_emit("UNKNOWN", f"{type(ex).__name__}: {ex}")
+    finally:
+        _1174_TRANSACTION = previous
+        _1174_OWNER_POLICY.reset(policy_token)
+
+
+@_1174_scoped
 def _1174_command(a, state_dir):
     global _1174_IO_STARTED
     _1174_IO_STARTED = False
     status, detail = "UNKNOWN", None
+    policy_token = _1174_OWNER_POLICY.set(None)
     try:
         _1174_input(a)
         _1174_require(platform.system() == "Linux", "unsupported native operating system")
         _1174_require(_1174_IMPLEMENTATION_COMPLETE,
                       "implementation inventory unavailable")
-        admission, _ = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission)
+        admission, first_facts = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission)
+        _1174_OWNER_POLICY.set(first_facts.get("owner_policy"))
         e = admission["enrollment"]
         directory = Path(e["journal_root"])
         _1174_require(state_dir.resolve() == directory, "state directory differs from enrollment")
@@ -5262,7 +5512,8 @@ def _1174_command(a, state_dir):
             identities = (_1174_state(_1174_read(Path(e["state_path"])), admission) if
                           a.cmd not in ("init", "adopt-state") else None)
             current, facts = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission, identities)
-            _1174_require(current == admission, "authority changed under lock")
+            _1174_require(current == admission and facts.get("owner_policy") == first_facts.get("owner_policy"), "authority changed under lock")
+            _1174_runtime(a, current)
             witness_raw = _1174_read(Path(e["witness_path"])) if os.path.lexists(e["witness_path"]) else None
             if a.cmd == "init":
                 status = _1174_initialize(a, admission, witness_raw)
@@ -5276,6 +5527,8 @@ def _1174_command(a, state_dir):
         detail = f"{type(ex).__name__}: {ex}"
         status = ("durability_unknown" if _1174_IO_STARTED else ex.status if isinstance(ex, _1174Error) and
                   ex.status in ("input_rejected", "revision_rejected", "legacy_changed") else "UNKNOWN")
+    finally:
+        _1174_OWNER_POLICY.reset(policy_token)
     return _1174_emit(status, detail)
 
 
@@ -5558,6 +5811,13 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--packet", type=int, required=True)
     q.set_defaults(fn=cmd_status)
 
+    for name in ("status", "next-comment"):
+        command = sub.choices[name]
+        for flag in ("--admission", "--expected-revision", "--expected-witness-revision", "--coordinator-id"):
+            command.add_argument(flag)
+        command.add_argument("--root", default=".")
+        command.add_argument("--revision", type=int)
+        command.add_argument("--generation", type=int)
     sub.add_parser("where", help="in thư mục state").set_defaults(fn=cmd_where)
     return p
 
@@ -5573,6 +5833,10 @@ def main(argv=None) -> int:
         if scoped_syntax and ex.code != 0:
             return _1174_emit("input_rejected", "scoped argument syntax")
         raise
+    if a.cmd in ("status", "next-comment") and getattr(a, "admission", None) is not None:
+        return _1174_readonly(a, Path(a.state_dir))
+    if a.cmd in ("status", "next-comment") and scoped_syntax:
+        return _1174_emit("input_rejected", "scoped flags require admission")
     if a.cmd == "guard-first-publication":
         return _1174_guard(a)
     if a.cmd in _1174_MUTATORS and getattr(a, "admission", None) is not None:

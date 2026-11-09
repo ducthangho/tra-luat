@@ -5699,6 +5699,8 @@ def _1174_source_command(a, directory):
                 rc = RC_TRAN  # Preserve the original reducer's durable quota checkpoint.
             proposal = _1174_TRANSACTION["proposal"]
             _1174_require(rc in (0, RC_TRAN) and type(proposal) is dict, "source reducer result")
+            _1174_require(all(proposal[k] == v for k,v in limits.items()),
+                          "source approved postimage limits binding")
             _1174_TRANSACTION["state"] = proposal
             _load(directory,a.packet)
             _1174_require(_1174_source_resolve(a,directory,state) == current, "source final authority changed")

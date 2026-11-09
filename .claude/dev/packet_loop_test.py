@@ -7656,8 +7656,16 @@ def case_pl_m2_loi_goi(c: Ctx):
     c.den_reviewing(sd, 55, 1)
     _pl(c, sd, _goi("g1", _H2, 5), _goi("g1", _H1), _goi("g1", _H1, 2), _goi("a b", _H1, 2), _goi("g2", _H1), _goi("g3", _H1, 3))
     _kiem(sd, "chặn TRƯỚC khi ghi", truc="codex_review_calls", codex_review_calls_used=2, **_RESCUE)
-    (sd / "wp55.json").write_text(json.dumps({**_st(sd), "reviewer": "claude", "reviewer_identity": None}))
-    _pl(c, sd, _goi("g9", _H1, 4))  # reviewer khác codex ⇒ RC_PROVIDER, không phải RC_STATE/RC_TRAN
+    # Fresh cross-family state reaches the reviewer predicate before any quota.
+    sd = _reviewing(c)
+    path = sd / "wp55.json"
+    path.write_text(json.dumps({**_st(sd), "executor": "codex", "executor_identity": None,
+                               "reviewer": "claude", "reviewer_identity": None}))
+    _pl(c, sd, (0, "record-post", "--for", "reviewing", "--comment-id", "900999"))
+    before = path.read_bytes()
+    rc, _, err = run(c.script, ["record-codex-call", "--packet", 55, "--run-id", "g9", "--head", _H1], sd)
+    _doi(4, rc, err, "cross-family reviewer khác codex")
+    assert "reviewer 'claude' không phải codex" in err.decode() and path.read_bytes() == before
 
 
 def case_pl_m3_neo_loi_goi(c: Ctx):
@@ -13082,14 +13090,14 @@ def _secret_channels1174(c):
     with patch.dict(globals(),{},clear=False):
         old_facts=globals().get("_WP1174_NATIVE_FACTS",None)
         try:
-            with patch(__name__+"._module1174",return_value=native),patch.object(native,"_1174_probe",return_value=raw):
+            with patch.dict(globals(),_module1174=lambda c: native),patch.object(native,"_1174_probe",return_value=raw):
                 _native1174(Ctx(c.script,directory))
-            channels["native_facts"]=globals()["_WP1174_NATIVE_FACTS"]
-            snap=_snapshot1174(ROOT);out,err=io.StringIO(),io.StringIO()
-            digests=dict(product=hashlib.sha256(CANONICAL.read_bytes()).hexdigest(),test=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
-            with patch.dict(os.environ,{"GITHUB_ACTIONS":"false"}),patch.dict(globals(),_WP1174_MAIN_PRODUCER_START=digests,_WP1174_MAIN_SNAPSHOT_START=snap),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
-                _carrier1174({})
-            channels.update(native_report_stdout=out.getvalue(),native_report_stderr_traceback=err.getvalue())
+                channels["native_facts"]=globals()["_WP1174_NATIVE_FACTS"]
+                snap=_snapshot1174(ROOT);out,err=io.StringIO(),io.StringIO()
+                digests=dict(product=hashlib.sha256(CANONICAL.read_bytes()).hexdigest(),test=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
+                with patch.dict(os.environ,{"GITHUB_ACTIONS":"false"}),patch.dict(globals(),_WP1174_MAIN_PRODUCER_START=digests,_WP1174_MAIN_SNAPSHOT_START=snap),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
+                    _carrier1174({})
+                channels.update(native_report_stdout=out.getvalue(),native_report_stderr_traceback=err.getvalue())
         finally:
             if old_facts is None:globals().pop("_WP1174_NATIVE_FACTS",None)
             else:globals()["_WP1174_NATIVE_FACTS"]=old_facts
@@ -14371,7 +14379,13 @@ def _owner_policy14(c):
         assert rc==8 and "immutable bytes" in result["detail"] and snapshot()==before,(rc,result)
     policy_rejections("init",init)
     before=snapshot();rc,result=invoke("init",[*init,"--attempts-limit","18"])
-    assert rc==8 and "approved limits binding" in result["detail"] and snapshot()==before,(rc,result)
+    assert rc==8 and any(reason in result["detail"] for reason in ("source approved limits binding", "source approved postimage limits binding")) and snapshot()==before,(rc,result)
+    approved_attempts=policy["limits"]["attempts_limit"]
+    policy["limits"]["attempts_limit"]=18
+    rc,result=invoke("init",[*init,"--attempts-limit","18"])
+    assert rc==0 and json.loads((journal/"wp1174.json").read_bytes())["attempts_limit"]==18,(rc,result)
+    (journal/"wp1174.json").unlink()  # Independent default-policy lifecycle below.
+    policy["limits"]["attempts_limit"]=approved_attempts
     rc,result=invoke("init",init);assert rc==0,(rc,result)
     def unflagged(command,flags):
         before=snapshot()
@@ -14387,6 +14401,17 @@ def _owner_policy14(c):
     unflagged("record-post",["--for","reviewing","--comment-id","900009"])
     policy_rejections("record-post",["--for","reviewing","--comment-id","900008"])
     rc,result=invoke("record-lease");assert rc==0,(rc,result)
+    path=journal/"wp1174.json";pristine=path.read_bytes()
+    for axis,field in (("vong_review","review_rounds_limit"),("codex_review_calls","codex_review_calls_limit")):
+        before=snapshot();old=json.loads(pristine)[field]
+        flags=["--truc",axis,"--tran-moi",str(old+1),"--ai-nang","ducthangho",
+               "--can-cu","https://github.com/ducthangho/tra-luat/issues/1174#issuecomment-900877"]
+        rc,result=invoke("nang-tran",flags)
+        assert rc==8 and "source approved postimage limits binding" in result["detail"],(axis,rc,result)
+        assert not result["dispatch_allowed"] and snapshot()==before,"source policy limit persisted"
+        rc,result=invoke("record-post",["--for","reviewing","--comment-id","900878"])
+        assert rc==0 and not result["dispatch_allowed"],(rc,result)
+        path.write_bytes(pristine)
     rc,result=invoke("begin-attempt",["--provider","codex","--execution-surface","codex_service","--transport","machine","--bang-chung-moi-truong",anh_doctor()]);assert rc==0,(rc,result)
     before=snapshot();rc,result=invoke("record-lease")
     assert rc==8 and "source lease requires awaiting_lease" in result["detail"] and snapshot()==before,(rc,result)
@@ -14462,7 +14487,10 @@ MUTANTS.update({
 })
 
 MUTANTS.update({
-    "m1174_source_limits": ('all((getattr(a,k) if a.cmd == "init" else state[k]) == v for k,v in limits.items())', 'True', ["wp1174_lifecycle_identity_advisory"]),
+    # Preimage and postimage limit checks overlap at init; mutate both for this class.
+    "m1174_source_limits": (['all((getattr(a,k) if a.cmd == "init" else state[k]) == v for k,v in limits.items())',
+        'all(proposal[k] == v for k,v in limits.items())'], ['True','True'], ["wp1174_lifecycle_identity_advisory"]),
+    "m1174_source_postimage_limits": ('all(proposal[k] == v for k,v in limits.items())', 'True', ["wp1174_lifecycle_identity_advisory"]),
     "m1174_source_quota_checkpoint": ('if ex.code != RC_TRAN or type(_1174_TRANSACTION["proposal"]) is not dict:', 'if True:', ["wp1174_lifecycle_identity_advisory"]),
 })
 

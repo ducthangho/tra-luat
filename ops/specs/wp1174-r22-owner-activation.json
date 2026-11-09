@@ -1,0 +1,12 @@
+{
+  "approved_F_sha256": "d9ab8a8a38e48eae160883d47eea68ab74f020094ca381ec09a1a555f058a259",
+  "owner_approval_observed_utc": "2026-11-09T01:05:20+00:00",
+  "immutable_spec_sha256": "93014799f12143ad9114979744ccec08d5cc00dab2006b7e9412fd4663ebaf2c",
+  "source_cap": 18,
+  "source_used": 14,
+  "known_role_cap": 61,
+  "next_source_slot": 15,
+  "next_context_max_minutes": 45,
+  "all_other_F_caps_and_deadline_unchanged": true,
+  "scope": "Owner amendment supersedes source15-only/role58 proposal clauses; further slots only after fresh authority/lease/whole-fit; no source19 or automatic dispatch"
+}

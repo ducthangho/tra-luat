@@ -1,0 +1,5 @@
+AUX14 nguồn MCI: PASSED trong phạm vi provenance/output; không codeapproval/humanaudit.
+ActualM91be484a05ab40adf6573f11ef6ec0264fc9a3aa, parents[D4068b3a...,H4ecd8...],treef20cb1.... Pushmaster run42564993334/attempt1:23/23Ubuntu success. Đã đọc đầy đủ23log (44563dòng), kiểm97tệp archive/index/hash/size và actualcheckout từngjob.
+Bốn anchors có nguồn thực: run/checkout/actualGraphQLWD/gateoutput. OfficialartifactSHA0f16b6... khớpAPI; actualchildrc0/1777/1777,command/runner/catalog/outputhash và LinuxcleanM trước/sau khớp. Strict184/184. G5 đủ8shards/61cases/490mutants/0errors;registry13/13 đúngkills;nhanh8/8,56cases/255selfmutants/10productmutants.
+Packet-loop thực1359/1359;skipWindows luong_canonical_chay_that và associatedmutant không ghi công.5requiredcontexts đều success. Rawcanonical23gateoutputs/RESTWDslot vẫnnot_measured; derivedsourceaudit riêng, không sửa máy thànhpass.
+Không findings về provenance. Loghash là receiveddecodedUTF8,khôngremoteOSrawbytes. Không WindowsCI/LIVE/M8/landed hay waiver mới; debt1295OPEN thuộc hồ sơ riêng.

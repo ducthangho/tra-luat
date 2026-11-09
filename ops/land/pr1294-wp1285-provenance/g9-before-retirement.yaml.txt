@@ -1,0 +1,87 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1285
+packet_id: wp1285
+mission_issue: 1238
+revision: 8
+generation: 9
+lease_id: wp1285-r8-g9-codex-human
+role: executor
+provider: codex
+executor: codex
+model: gpt-6.1-sol
+effort: high
+model_family: openai
+execution_surface: codex_cli
+transport: machine
+environment: linux
+reviewer: human
+reviewer_execution_surface: manual_audit
+reviewer_transport: human
+risk: sensitive
+access: read-only
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1285-r8.md
+spec_ref: refs/heads/ops/wp1285-spec@03c626536460de0217b9de24c052fed202643a1e
+spec_sha256_required: d8195383ceed002d15b9db09e51cae1c4f2d90f0237ef33333cead4d629b26e9
+spec_hash: d8195383ceed002d15b9db09e51cae1c4f2d90f0237ef33333cead4d629b26e9
+prompt_path: ops/prompts/wp1285-r8-g9-codex-human.md
+prompt_sha256_required: 4b8a03e5b9dd35ef0930e96ae4aae17e0ef1a0ba84274b19b541c6cbe73e61d9
+write_set:
+- .agents/skills/proxima-control/scripts/ProximaControl.psd1
+- .agents/skills/proxima-control/SKILL.md
+- .agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1
+write_set_hash: 0bbe3df51f38b0d334fcb5e35ada62ac95ac3eb1b1e28b4e9b5385a396a002aa
+effective_write_set:
+- .agents/skills/proxima-control/scripts/ProximaControl.psd1
+- .agents/skills/proxima-control/SKILL.md
+- .agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1
+change_policy_sha: null
+required_checks:
+- ActualnativePS51/7commonHharnessbaseline7red/candidate7of7/CX00positive+4namedkills/fullsourceartefactretention
+- S1S2bytesunchanged/size3newpaths450addsANDtotal/manifestwrapperreuse/S2normal26bothfocusedWindows
+- LinuxfullselftestNofN/strictmanifest/RuffFdelta0/doctrine/claims/admission/diffcheck
+- FreshindependentCodexCLIofflineapproveENTIREB..H/v2receipt/IssueM12beforeONEprimarypush
+- Draftconnector/exactHUbuntuPRCIallrequired4anchors/fullsourceAUX/Readyauto/currentrules/fullrefs/K0K7/newexactHgrant
+- ActualMcanonicalUbuntuCI4anchors/officialartifact/fullsourceAUX/M8/readback/actualUTCZretirement/D1D4beforeclosure
+land_obligations: []
+branch: agent/wp1285-r5-g6-codex
+base_sha: bf9914cb1a8e6f5047468f4d130b587015f8d73f
+start_from_sha: ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c
+reviewed_sha_required: ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c
+reviewed_sha_required_note: Exact frozenH4; actualhumanmanualaudit pending, not a
+  claim approved
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/pull/1294#issuecomment-6731269220
+standing_authority: https://github.com/ducthangho/tra-luat/issues/1271#issuecomment-6708576608
+recorded_by: openai_codex/codex_service dispatcher under latest owner fullremainingwork
+  directive
+recorder_is_executor: false
+leased_at_utc: '2026-11-09T03:13:24Z'
+heartbeat_at: '2026-11-09T03:13:24Z'
+heartbeat_required_minutes: 360
+lease_until: '2026-11-09T09:13:24Z'
+lease_expires_at_utc: '2026-11-09T09:13:24Z'
+run_minutes: 45
+attempts_limit: 5
+review_rounds_limit: 6
+codex_review_calls_limit: 14
+same_failure_limit: 2
+requires_live: false
+uy_quyen_merge: false
+primary_product_pushes_limit: 2
+size_cap_additions_and_total_vs_B: 450
+executor_workspace: /workspace/scratch/wp1285-r6-g7-base-sync
+authority_note: OwnerP3deferral/debt1295 and actualhumanreview route; readonlyH4adoption,
+  no source/model/extra productpush, humanpassNOTyetreceived
+status: leased
+thay_the_cho:
+- wp1285-r7-g8-codex
+assurance_target: human_audited
+primary_Codex_review_retained: f293b6a84c384e03a2db2fe1168b6cf0; actualgpt6.1sol/xhigh
+AI_review_rounds_limit: 5
+human_review_rounds_limit: 1
+supplemental_Claude_assurance_calls_limit: 1
+proposed_human_auditor_github: ducthangho
+actual_human_audit_completed: false

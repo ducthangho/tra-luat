@@ -1,0 +1,59 @@
+{
+  "M": "91be484a05ab40adf6573f11ef6ec0264fc9a3aa",
+  "H4": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "four_derived_anchors": {
+    "run": "passed",
+    "checkout": "passed",
+    "workflow_definition": "passed",
+    "gate_output": "passed"
+  },
+  "fullsource_archive_sha256": "49a5383c0de43655feea59261a65bf0e736f74c114e747fcc9ac0f28781513d2",
+  "AUX14": "passed",
+  "nghiem_thu": {
+    "M1_manifest_PM01_PM02_PM03_PM04_PM06": "passed",
+    "M2_Vietnamese_SKILL_PM05_PM06_PM07": "passed",
+    "M3_seven_cases_four_CX_retained_evidence": "passed",
+    "scope_three_new_450additions_total_S1S2unchanged": "passed",
+    "AST_block_background_controls_and_rollback": "passed",
+    "known_requires_guard_P3_debt1295": "owner_waived",
+    "Linux_exactH_and_M_CI": "passed",
+    "independent_primary_review_and_real_human_audit": "passed",
+    "PRCI_Ready_connector_and_fresh_merge_gates": "passed",
+    "actualM_23Ubuntu_fouranchors_officialartifact_AUX14": "passed"
+  },
+  "required_checks_individual": [
+    {
+      "requirement": "ActualnativePS51/7commonHharnessbaseline7red/candidate7of7/CX00positive+4namedkills/fullsourceartefactretention",
+      "acceptance": "passed",
+      "evidence": "Native exactH originalarchive, 7baselineRED/7candidate/CX12 each, acceptedP3 separate"
+    },
+    {
+      "requirement": "S1S2bytesunchanged/size3newpaths450addsANDtotal/manifestwrapperreuse/S2normal26bothfocusedWindows",
+      "acceptance": "passed",
+      "evidence": "Exact3paths450 and H3blobs unchanged, S2normal26 each, no core activation"
+    },
+    {
+      "requirement": "LinuxfullselftestNofN/strictmanifest/RuffFdelta0/doctrine/claims/admission/diffcheck",
+      "acceptance": "passed",
+      "evidence": "ExactH Linux1777/strict184/Ruffdelta0/admission/doctrine retained"
+    },
+    {
+      "requirement": "FreshindependentCodexCLIofflineapproveENTIREB..H/v2receipt/IssueM12beforeONEprimarypush",
+      "acceptance": "passed",
+      "evidence": "ActualCodex4 prepush/v2/Issue sources preserved; actualhuman6 supplemental"
+    },
+    {
+      "requirement": "Draftconnector/exactHUbuntuPRCIallrequired4anchors/fullsourceAUX/Readyauto/currentrules/fullrefs/K0K7/newexactHgrant",
+      "acceptance": "passed",
+      "evidence": "PRCI23jobs+Readyadmission/all27checks/K0K7/refence/realowner"
+    },
+    {
+      "requirement": "ActualMcanonicalUbuntuCI4anchors/officialartifact/fullsourceAUX/M8/readback/actualUTCZretirement/D1D4beforeclosure",
+      "acceptance": "passed",
+      "evidence": "ActualMCI42564993334 officialZIP+97sourcefiles/full23logs/actualWD/AUX14; M8 retirement beforeclosure"
+    }
+  ],
+  "original_not_measured_preserved": true,
+  "knownP3": "waivedexactH4/debt1295OPEN/notfixed",
+  "at": "2026-11-09T06:10:46.296308+00:00"
+}

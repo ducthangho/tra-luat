@@ -61,8 +61,8 @@ recorder_is_executor: false
 leased_at_utc: '2026-11-09T03:13:24Z'
 heartbeat_at: '2026-11-09T03:13:24Z'
 heartbeat_required_minutes: 360
-lease_until: '2026-11-09T09:13:24Z'
-lease_expires_at_utc: '2026-11-09T09:13:24Z'
+lease_until: '2026-11-09T06:10:46Z'
+lease_expires_at_utc: '2026-11-09T06:10:46Z'
 run_minutes: 45
 attempts_limit: 5
 review_rounds_limit: 6
@@ -75,7 +75,7 @@ size_cap_additions_and_total_vs_B: 450
 executor_workspace: /workspace/scratch/wp1285-r6-g7-base-sync
 authority_note: OwnerP3deferral/debt1295 and actualhumanreview route; readonlyH4adoption,
   no source/model/extra productpush, humanpassNOTyetreceived
-status: leased
+status: retired
 thay_the_cho:
 - wp1285-r7-g8-codex
 assurance_target: human_audited
@@ -84,4 +84,13 @@ AI_review_rounds_limit: 5
 human_review_rounds_limit: 1
 supplemental_Claude_assurance_calls_limit: 1
 proposed_human_auditor_github: ducthangho
-actual_human_audit_completed: false
+actual_human_audit_completed: true
+original_lease_until: '2026-11-09T09:13:24Z'
+retired_at: '2026-11-09T06:10:46Z'
+retired_at_utc: '2026-11-09T06:10:46Z'
+thu_hoi_bang_rut_han:
+  luc: '2026-11-09T06:10:46Z'
+  lease_until_cu: '2026-11-09T09:13:24Z'
+  ly_do: ExactH4 human audit realapprove, actual normalmerge and canonicalMCI/fullsourceAUX14
+    passed; retire under standing owner land authority
+  nguoi_thu_hoi: dispatcher for ducthangho

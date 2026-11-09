@@ -1,0 +1,9 @@
+{
+  "source_commit": "f1bfa48e3b615b85b2ee23ca9fad39a52606039b",
+  "archive_sha256": "49a5383c0de43655feea59261a65bf0e736f74c114e747fcc9ac0f28781513d2",
+  "files": 97,
+  "shared_calls_used": 14,
+  "audit_pending": true,
+  "landed": false,
+  "at": "2026-11-09T06:06:21.403572+00:00"
+}

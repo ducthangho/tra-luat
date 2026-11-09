@@ -16,7 +16,7 @@ execution_surface: codex_cli
 transport: machine
 environment: linux
 reviewer: claude
-reviewer_model_family: anthropic
+reviewer_model_family: claude
 reviewer_execution_surface: claude_code
 reviewer_transport: machine/local
 risk: sensitive

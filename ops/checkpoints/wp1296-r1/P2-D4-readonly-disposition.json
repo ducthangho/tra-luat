@@ -1,0 +1,18 @@
+{
+  "source": "P2-D4-readonly-source.json",
+  "target": "DESKTOP-T9R33P2/devicea5f7076e-a491-4f84-829b-8d1fbcc1c767",
+  "observed_at": "2026-11-09T06:33:44.8867407Z",
+  "facts": {
+    "session": 1,
+    "OS": "Windows11Pro10.0.26300",
+    "free_physical_KiB": 1193208,
+    "total_physical_KiB": 8148012,
+    "owned_Chrome_processes": 0,
+    "matching_application_events": 0,
+    "CFT_version": "157.0.8103.15",
+    "CFT_sha256": "7ca0cf1b2cba9b9ec812a8e3df2cb92a5ddbea8c7013b8d71d589a43589fad21"
+  },
+  "causality": "UNKNOWN; current memory snapshot isnot failuretime evidence/no crash event not proof of no crash",
+  "compatibility": "U10OPEN, no browser rerun/version/pinchange or passed claim",
+  "next": "Hypothesis-driven native runtime diagnostic must explicitly freeze criteria/runtime/stopconditions, include resource preflight; no blindretry"
+}

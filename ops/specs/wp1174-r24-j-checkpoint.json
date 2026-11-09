@@ -1,0 +1,23 @@
+{
+  "status": "proposed_pending_exact_J_owner_approval",
+  "proposal_sha256": "431a5e97d9137c79e8d6f9cf33d84c091bb97f26fd74348afb156d7d22fbeca5",
+  "public_body_sha256": "51bed1384519ffc8045241e6135e4915ae65602a846810c6263863980294fade",
+  "input_head": "5ad99bb58c5d48eed1543e62298176d014f85ed8",
+  "source17_closed": true,
+  "reviewA_verdict": "changes_requested",
+  "reviewA_report_sha256": "5d6d8b528ae3d2951edd4eabe915cdb9afd479a6bbcde134b496e588793d175d",
+  "new_P2": "wp1174-source-policy-postimage-limits",
+  "counterexample_report_sha256": "7197b07c73ac0974980731e40dc2b64271afa84d7344444ce174b78c258521b7",
+  "actual_counterexample_reproduced": true,
+  "fixture_only_not_real_authority_or_quota_overrun": true,
+  "CI_run": 42591430312,
+  "CI_job": 129073802182,
+  "CI_mutation_failures": [
+    "pl_m2_bo_kiem_reviewer_codex",
+    "m1174_secret_channel_probe_facts"
+  ],
+  "native84_not_overall_gate_pass": true,
+  "future_VM_coordination_exception_only_after_J_approval": true,
+  "source18_not_dispatched": true,
+  "review34_history_retained": true
+}

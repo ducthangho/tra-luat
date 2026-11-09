@@ -1,0 +1,34 @@
+{
+  "packet_id": "wp1285",
+  "revision": 7,
+  "generation": 8,
+  "base": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "continuation": "ecd8cee3ea6da6513a37a9b9aa6c9db65472e41c",
+  "spec_sha256": "17d0257fc4d127991f42f56d1fdc2eda2e1c479685b7262728792a09771b164d",
+  "effective_write_set": [
+    ".agents/skills/proxima-control/scripts/ProximaControl.psd1",
+    ".agents/skills/proxima-control/SKILL.md",
+    ".agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1"
+  ],
+  "write_set_hash": "0bbe3df51f38b0d334fcb5e35ada62ac95ac3eb1b1e28b4e9b5385a396a002aa",
+  "effective_review_class": "sensitive",
+  "change_policy_sha": null,
+  "land_obligations": [],
+  "authority": "Explicit owner approval of exact one-Claude audit; no productpatch/waiver",
+  "nang_tran": {
+    "ai_nang": "ducthangho explicit T\u00f4i \u0111\u1ed3ng \u00fd b\u1ed5 sung",
+    "can_cu": "Exact bounded supplemental cross-family audit proposal approved",
+    "tran_cu": "formal4/Codexshared14/author5/push2",
+    "tran_moi": "formal5 ONLY oneClaudeaudit/Codexshared14 unchanged/author5 unchanged/push2 unchanged/extraClaudeauditcap1"
+  },
+  "limits": {
+    "paths": 3,
+    "additions_and_total": 450,
+    "attempts": 5,
+    "formal": 5,
+    "shared": 14,
+    "primarypush": 2,
+    "extra_Claude_assurance": 1
+  },
+  "admission_base": "eefce7fe828a68a13b4b7e3b1e17c1ddb2b6deee"
+}

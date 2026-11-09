@@ -4,7 +4,7 @@ Owner yêu cầu09/11: tạo Packet sửa nợ, gom các việc cần để hoà
 
 | Việc | Packet | Trạng thái thật / điều kiện đóng |
 |---|---|---|
-| Guard ScriptRequirements / debt1295 | #1296 | r2/g2 một tệp. H1 Linux1777đạt nhưng PS51normal1/7FAILED vì tên RequiresPSSnapIns; r2 sửa theo actual API probe. Chưa review/CI/land, debt1295OPEN. |
+| Guard ScriptRequirements / debt1295 | #1296 | r3/g3 tiếp nhận read-only H2 `15ad82f56924a0ccc99833ec73eec078ce00b726`, một tệp +66/-2. H1 PS51 lỗi API được giữ lịch sử; H2 Linux1777/1777, native normal7/CX12/S2normal26 trên cả hai runtime và ma trận semantic guard đã đo. Sáu literal controls đạt PM01/PM02 đúng r3, CSV95row được lưu. AUX2 đang chốt nguồn, formal review xhigh chưa chạy; CI/land chưa chạy, debt1295OPEN. |
 | Playwright optional + cleanup OP-F01 | #1287 | H2cleanup49focusedđạt, formalNOTRUN; U10 fullCFTnativeDesktopFAILED. D4readonly mới không chứng minh nguyênnhân. R4 cần giảthuyết/checkpoint/frozenallowance, không blindretry hoặc đổi pin/timeout/target. |
 | Desktop combined canary | #1297 | proposed, chờP1/P2/corrective. Thu bytes/URL/time/hash → tra-luatverify; Proxima chỉkhiđượcyêucầu, khônghealthcheckinference/retry/fallback. U11auth/U2ifVM phảiđo. |
 | Updater/rollback | #1298 | proposed. Sourcev5.5.0 vẫn autoDownload/onquitinstall; P4-DESIGN-F01 chưachứngminhpin/idle/canarycontrol. U4/U5/U7/U8/U12 chặnactivation. Verify binary+data/testprofile rollback/failurepause/locks/busy/diskfull; sourcepolicy khôngtựhạ. |

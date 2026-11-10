@@ -1,5 +1,5 @@
 {
-  "status": "launch2_readback_timeout_actual_child_unknown",
+  "status": "native_transport_blocked_after_launch2",
   "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
   "formal_used": 1,
   "formal_reserved": 1,
@@ -22,5 +22,8 @@
   "native_launcher_pid_launch2": 5768,
   "last_observed_launcher_started": true,
   "last_readback_error": "MCP request timed out",
-  "last_status_recorded_utc": "2026-11-10T10:06:30.403864+00:00"
+  "last_status_recorded_utc": "2026-11-10T10:06:30.403864+00:00",
+  "actual_reviewer_child": "UNKNOWN",
+  "last_native_status_probe": "MCP request timed out",
+  "host_cleanup_verified": false
 }

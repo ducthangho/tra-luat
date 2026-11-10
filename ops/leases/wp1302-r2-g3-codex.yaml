@@ -1,0 +1,41 @@
+schema_version: 2
+event: executor_lease_granted_under_owner_diagnostic_delegation
+packet_issue: 1302
+packet_id: WP1302
+revision: 2
+generation: 3
+lease_id: wp1302-r2-g3-codex
+role: executor
+provider: openai_codex
+executor: codex
+execution_surface: codex_service
+transport: machine
+model_family: openai
+reviewer_provider: openai_codex
+reviewer_execution_surface: codex_service
+reviewer_transport: machine
+reviewer_model_family: openai
+review_class: sensitive
+effective_review_class: sensitive
+granted_by: ducthangho
+authority_url: https://github.com/ducthangho/tra-luat/issues/1302
+recorded_by: Sole dispatcher under actual owner request to try isolated GitHub Linux;
+  no target grant or human audit
+branch: ops/wp1302-linux-profile-r1
+spec_ref: refs/heads/ops/spec-wp1302-r1@0659ef70147e9207ee145032c8e11ff974481140
+spec_path: ops/specs/mission1172-linux-profile-r1.md
+spec_hash: bd11b7958f8055f0d59ad2d0e20b802903254e6023e691beff17017161e462e1
+prompt_path: ops/specs/mission1172-linux-profile-r1.md
+prompt_sha256_required: bd11b7958f8055f0d59ad2d0e20b802903254e6023e691beff17017161e462e1
+base_sha: 67102dc8b7e9175dda56028f21460a165b574136
+start_from_sha: 0659ef70147e9207ee145032c8e11ff974481140
+write_set:
+- .github/workflows/mission1172-linux-profile-r1.yml
+- ops/probes/mission1172_linux_profile_r1.py
+heartbeat_at: '2026-11-10T13:57:35Z'
+lease_until: '2026-11-10T16:02:56Z'
+lease_expires_at_utc: '2026-11-10T16:02:56Z'
+max_run_minutes: 15
+no_target_enrollment_or_activation: true
+reviewed_sha_required: 67102dc8b7e9175dda56028f21460a165b574136
+thay_the_cho: wp1302-r1-g2-codex

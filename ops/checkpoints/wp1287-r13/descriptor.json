@@ -30,5 +30,6 @@
   },
   "status": "preparing_no_model_invoked",
   "assurance": "HOLD_sensitive_same_provider",
-  "bootstrap_sha256": "f461b2d755eab4f6c8c07d89a5ebbaf5f188653531a9a88f4bbd93ebbb549c4c"
+  "bootstrap_sha256": "f461b2d755eab4f6c8c07d89a5ebbaf5f188653531a9a88f4bbd93ebbb549c4c",
+  "run_review_sha256": "a619be24af35151f2cafad7e0b86e5c1aecf3a2d5e705d54062558d52996ea46"
 }

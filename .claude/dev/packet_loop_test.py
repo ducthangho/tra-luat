@@ -12833,8 +12833,9 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,
         # anchors to the runtime repository without changing the reviewed head.
         policy=chain_root/m.ADR0063_TEP;policy.parent.mkdir(parents=True,exist_ok=True)
         policy.write_text("\n".join(m.ADR0063_ANCHORS)+"\n")
-        _g(chain_root,"add",str(policy));_g(chain_root,"commit","-qm","fixture human policy")
-        _g(chain_root,"push","-q","origin","master")
+        if target_facts is None:
+            _g(chain_root,"add",str(policy));_g(chain_root,"commit","-qm","fixture human policy")
+            _g(chain_root,"push","-q","origin","master")
         w=chain_root
     ci_repo=nc["repo"]
     # The local remote is an inert test transport; all accept branch reads are real Git.
@@ -12912,7 +12913,7 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,
         with patch.object(m,"_1174_IMPLEMENTATION_COMPLETE",True),patch.object(m,"_1174_resolve",side_effect=resolved),patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_canon",canonical),patch.object(m,"_1174_api",side_effect=fetch),patch.object(m,"_nap",return_value=SimpleNamespace(_doc_gh=lambda label,endpoint:fetch(endpoint))),workflow_seams(),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
             rc=m.main(argv)
         assert len(out.getvalue().splitlines())==1,(rc,out.getvalue(),err.getvalue())
-        if workflow_case:flow["errors"].append(err.getvalue())
+        if workflow_case or target_facts is not None:flow["errors"].append(err.getvalue())
         return rc,json.loads(out.getvalue())
     pair(state)
     if race:
@@ -12971,7 +12972,7 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,
                 expected={"owner":"owner comment origin/identity","head":"human audit exact bindings","tree":"human audit exact bindings",
                     "spec":"human audit exact bindings","late":"human review trước push","publication":"collector receipt closed bindings",
                     "ci":"gate KHÔNG xanh","connector":"readback connector không neo đúng"}[defect]
-                assert expected in result["detail"] or defect=="ci" and "legacy predicate rejected" in result["detail"],(defect,result)
+                assert expected in result["detail"] or expected in flow["errors"][-1],(defect,result,flow["errors"][-1])
                 audit.clear();audit.update(copy.deepcopy(audit_saved));audit_path.write_bytes(original_audit)
                 if changed is not None:changed.write_bytes(saved)
         if workflow_case:workflow_path.write_bytes(original_workflow)
@@ -14841,11 +14842,23 @@ def _target_context1303(c):
     from datetime import timedelta
     from unittest.mock import patch
     m,_,a,now=_a1174(c)
+    identity=m._identity("codex","openai","codex_service","machine")
+    a["enrollment"]["initial_state_projection"].update(executor="codex",reviewer="codex",executor_identity=identity,reviewer_identity=dict(identity))
     proof=m._1174TargetProof(m._1174_bytes(a),b"synthetic verified I2", "a"*40,1,now+timedelta(hours=1))
     assert m._1174_target_matches(a) is False
     token=m._1174_TARGET_AUTHORITY.set(proof)
     try:
         assert m._1174_target_matches(a) is True
+        with patch.object(m,"_1174_seed",return_value=bytes(range(32))):raw=m._1174_initial(a)
+        assert m._1174_state(raw,a)["state"]=="awaiting_lease"
+        m._1174_alive(a)
+        for absent in (None,proof._replace(admission=b"wrong binding")):
+            absent_token=m._1174_TARGET_AUTHORITY.set(absent)
+            try:
+                for fn,args in ((m._1174_initial,(a,)),(m._1174_state,(raw,a)),(m._1174_alive,(a,))):
+                    _reject1174(fn,*args,reason="same-family policy required" if absent is None and fn is not m._1174_alive else
+                        "owner-scoped policy active binding" if absent is None else "target proof scope/context mismatch")
+            finally:m._1174_TARGET_AUTHORITY.reset(absent_token)
         for key,value in (("packet",55),("generation",6),("mission_plan_sha256","b"*64)):
             bad=copy.deepcopy(a);bad[key]=value
             _reject1174(m._1174_target_matches,bad,reason="target proof scope/context mismatch")

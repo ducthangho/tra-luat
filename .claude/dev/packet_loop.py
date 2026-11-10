@@ -5229,6 +5229,8 @@ def _1174_lifecycle_records(state, admission):
 
 def _1174_review(a, directory, admission):
     st = _load(directory, a.packet)
+    _1174_require(admission is None or _1174_target_matches(admission) or not _1174_same_family(st),
+        "current target review proof required")
     _1174_require(_pending_human_lane(st),"scoped review requires canonical pending/human lane")
     _1174_require(type(a.bien_nhan) is str and bool(a.bien_nhan), "review receipt required")
     receipt_path = Path(a.bien_nhan)
@@ -6122,6 +6124,7 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
+@_1174_target_entry
 def main(argv=None) -> int:
     _cung_hoa_stdout()
     arguments = list(sys.argv[1:] if argv is None else argv)

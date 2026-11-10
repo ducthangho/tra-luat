@@ -1,5 +1,5 @@
 {
-  "status": "source_sandbox_pass_credential_file_acl_recovery",
+  "status": "vm_bootstrap_pass_launcher_running_child_pending",
   "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
   "source_write_set": [],
   "vm_device": "810f79bb-c01e-4157-a5f2-9562ac6d551d",
@@ -11,7 +11,7 @@
   "shared_conservative_used": 5,
   "shared_reserved": 1,
   "shared_limit": 8,
-  "model_invoked": false,
+  "model_invoked": null,
   "asus_cleanup": "UNKNOWN",
   "lease_expires_at_utc": "2026-11-10T15:13:23.129325+00:00",
   "prompt_sha256": "62e5083272907a769f9c74d1a1007e59e030b64367c5cb16047bee868cf36176",
@@ -22,5 +22,11 @@
   "private_credential_gate_sha256": "f43feffb53c3f45eade7dd5dd30b43285523402304aee302d81fdcef0e35a96a",
   "readonly_vm_alias": "f7281f27-f79f-40a2-a2f5-b454b58a166a",
   "first_bootstrap_model_invoked": false,
-  "first_bootstrap_error": "Shared lock permission denied under non-admin existing VM endpoint; no source or lock created"
+  "first_bootstrap_error": "Shared lock permission denied under non-admin existing VM endpoint; no source or lock created",
+  "native_operator_pid": 9136,
+  "native_launcher_pid": 5204,
+  "deadline_utc": "2026-11-10T14:41:48Z",
+  "credential_gate_rc": 0,
+  "published_lease_duplicate_rc9": true,
+  "published_lease_comment": 6769068260
 }

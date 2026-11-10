@@ -5523,6 +5523,8 @@ def _1174_human_runs(a, head, deadline):
 def _1174_human_evidence(a, admission, head):
     current, facts = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission)
     _1174_require(current == admission, "human authority changed")
+    _1174_require(_1174_TARGET_AUTHORITY.get() is None or facts.get("target_authority") == _1174_TARGET_AUTHORITY.get(),
+        "human target authority changed")
     args = argparse.Namespace(**vars(a))
     args.head, args.repo = head, _1174_REPO
     p3 = []

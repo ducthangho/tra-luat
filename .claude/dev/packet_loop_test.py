@@ -12909,6 +12909,8 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,
             nonlocal calls
             calls+=1
             if calls==2 and hasattr(m,"_fixture_gate_observer"):m._fixture_gate_observer()
+            if target_facts is not None and getattr(m,"_fixture_target_authority_drift",False) and calls>=3:
+                return a,dict(facts,target_authority=facts["target_authority"]._replace(mission_install_id=-1))
             return a,facts
         with patch.object(m,"_1174_IMPLEMENTATION_COMPLETE",True),patch.object(m,"_1174_resolve",side_effect=resolved),patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_canon",canonical),patch.object(m,"_1174_api",side_effect=fetch),patch.object(m,"_nap",return_value=SimpleNamespace(_doc_gh=lambda label,endpoint:fetch(endpoint))),workflow_seams(),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
             rc=m.main(argv)
@@ -12948,7 +12950,7 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,
             import yaml
             audit_path=Path(hargs.human_audit_comment)
             audit_saved=copy.deepcopy(audit)
-            for defect in ("owner","head","tree","spec","late","publication","ci","connector"):
+            for defect in ("owner","head","tree","spec","late","publication","ci","connector","authority"):
                 original_audit=audit_path.read_bytes()
                 changed=None
                 if defect=="owner":audit["user"]["login"]="agent"
@@ -12957,6 +12959,7 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,
                     field={"head":"reviewed_sha","tree":"reviewed_tree","spec":"spec_sha256"}[defect]
                     body[field]="f"*(64 if defect=="spec" else 40);audit["body"]=yaml.safe_dump(body)
                 elif defect=="late":audit["updated_at"]="2026-11-04T09:02:00Z"
+                elif defect=="authority":m._fixture_target_authority_drift=True
                 else:
                     field={"publication":"publication_receipt","ci":"check_runs","connector":"connector"}[defect]
                     changed=Path(args[args.index("--"+field.replace("_","-"))+1]);saved=changed.read_bytes()
@@ -12971,8 +12974,9 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,
                 assert rc==8 and not result["dispatch_allowed"] and not writes.called and before==(target.read_bytes(),witness.read_bytes()),("target human/accept rejection",defect,rc,result)
                 expected={"owner":"owner comment origin/identity","head":"human audit exact bindings","tree":"human audit exact bindings",
                     "spec":"human audit exact bindings","late":"human review trước push","publication":"collector receipt closed bindings",
-                    "ci":"gate KHÔNG xanh","connector":"readback connector không neo đúng"}[defect]
+                    "ci":"gate KHÔNG xanh","connector":"readback connector không neo đúng","authority":"human target authority changed"}[defect]
                 assert expected in result["detail"] or expected in flow["errors"][-1],(defect,result,flow["errors"][-1])
+                m._fixture_target_authority_drift=False
                 audit.clear();audit.update(copy.deepcopy(audit_saved));audit_path.write_bytes(original_audit)
                 if changed is not None:changed.write_bytes(saved)
         if workflow_case:workflow_path.write_bytes(original_workflow)

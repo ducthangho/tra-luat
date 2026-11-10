@@ -39,8 +39,8 @@ authority_note: Owner explicitly orders immediate permanent repair; normal per-r
   within original caps
 leased_at_utc: '2026-11-10T15:33:51.341205+00:00'
 heartbeat_at: '2026-11-10T15:33:51.341205+00:00'
-lease_until: '2026-11-10T17:03:51.341205+00:00'
-lease_expires_at_utc: '2026-11-10T17:03:51.341205+00:00'
+lease_until: '2026-11-10T16:21:00.742111+00:00'
+lease_expires_at_utc: '2026-11-10T16:21:00.742111+00:00'
 run_minutes: 45
 attempts_limit: 3
 attempts_used: 3
@@ -48,7 +48,7 @@ diagnostic_limit: 0
 diagnostic_used: 0
 requires_live: false
 uy_quyen_merge: false
-status: reviewing
+status: retired
 thay_the_cho:
 - wp1287-r17-g17-review-vm
 reviewer: codex
@@ -62,7 +62,7 @@ review_read_scope:
 assurance_target: review_deferred_sensitive_same_provider
 formal_limit: 2
 formal_used: 1
-formal_reserved: 1
+formal_reserved: 0
 shared_limit: 8
 shared_used: 6
 shared_reserved: 0
@@ -70,3 +70,8 @@ shared_confirmed_used: 6
 shared_uncertain_asus_charge: 0
 formal_counter_definition: accepted_review_rounds_not_physical_model_calls
 actual_model_output_observed: true
+original_lease_deadline: '2026-11-10T17:03:51.341205+00:00'
+formal_rounds_received_or_pending: 2
+formal_budget_available: 0
+retirement_reason: Read-policy repair verified; structured candidate verdict requests
+  source changes; no approval or further invocation granted.

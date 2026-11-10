@@ -1,0 +1,20 @@
+{
+  "bootstrap_read_policy": "resolved",
+  "regression_controls": {
+    "old_backend_absent_read": "policy_denied",
+    "enabled_backend_public_read": "child_rc_0",
+    "read_only_write_canary": "child_rc_1_permission_denied"
+  },
+  "live_reviewer_read": "passed",
+  "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "source_verdict": "changes_requested",
+  "P2_findings": [
+    "WP1287-R18-PREFLIGHT-001",
+    "WP1287-R18-CONFIG-001"
+  ],
+  "raw_verdict_sha256": "4432b81b6f0ecf7d890c092d3dd5514ee7c05d8f540d8bf08f62627e4238bd19",
+  "public_receipt_admission": "pending",
+  "candidate_approval": false,
+  "assurance": "HOLD",
+  "summary_kind": "dispatcher_code_acceptance_summary_full_operational_data_kept_local"
+}

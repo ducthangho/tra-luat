@@ -48,7 +48,7 @@ diagnostic_limit: 0
 diagnostic_used: 0
 requires_live: false
 uy_quyen_merge: false
-status: preparing_guarded_read_policy_repair
+status: reviewing
 thay_the_cho:
 - wp1287-r17-g17-review-vm
 reviewer: codex
@@ -64,8 +64,9 @@ formal_limit: 2
 formal_used: 1
 formal_reserved: 1
 shared_limit: 8
-shared_used: 5
-shared_reserved: 1
-shared_confirmed_used: 5
+shared_used: 6
+shared_reserved: 0
+shared_confirmed_used: 6
 shared_uncertain_asus_charge: 0
 formal_counter_definition: accepted_review_rounds_not_physical_model_calls
+actual_model_output_observed: true

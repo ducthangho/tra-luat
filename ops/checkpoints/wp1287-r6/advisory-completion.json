@@ -1,0 +1,63 @@
+{
+  "schema": "wp1287.operational_advisory_receipt.v1",
+  "kind": "diagnostic_advisory_not_formal_product_review",
+  "run_id": "8e843b37bb8a42dd9fe6fbd0656dbcec",
+  "rc": 0,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "requested_model_original": "gpt-6.1-sol",
+  "requested_model_current": "gpt-6-astra",
+  "requested_effort": "xhigh",
+  "served_model": "gpt-6-astra",
+  "served_effort": "xhigh",
+  "model_evidence": "canonical launcher response.created frames and effort observation",
+  "response_created_frames": 2,
+  "operator_invocations_with_generation": 1,
+  "input_files": 5,
+  "input_bytes": 20731,
+  "input_git_head": "46233233442a176058a1744bb7594e9d44714607",
+  "original_input_prompt_sha256": "64a355540de3aa6886b2de48fa6fd756ccb7bcb47b36fe32f7bcbd29df4c99f8",
+  "current_prompt_sha256": "7f34340a9e0adb491524b924c42a90c4a499b073aafac6aa220cfc46de0c9c19",
+  "native_answer_sha256": "f141c784086d20d06b31009c00f1a4d9f6fdd9eaeff451b4aaa5d80d7f0ccd3f",
+  "answer_copy_byte_verified_locally": true,
+  "user_authorized_current_model": "Direct current chat reply Cho phép gpt-6-astra/xhigh",
+  "workspace_before_sha256": "fb6a2ade9f6fd5d618b18097053f84b84af2f274a79e8f2a517e36a019faa613",
+  "workspace_after_sha256": "fb6a2ade9f6fd5d618b18097053f84b84af2f274a79e8f2a517e36a019faa613",
+  "changed_files": 0,
+  "command_execution_seen": false,
+  "elapsed_seconds": 178.517,
+  "finished_utc": "2026-11-10T02:17:32.449734Z",
+  "bootstrap_gate_passed": true,
+  "shared": {
+    "used": 3,
+    "reserved": 0,
+    "limit": 8
+  },
+  "design_advisory": {
+    "used": 1,
+    "reserved": 0,
+    "limit": 1
+  },
+  "formal": {
+    "used": 0,
+    "limit": 2
+  },
+  "product_authors": {
+    "used": 3,
+    "limit": 3
+  },
+  "product_pushes": {
+    "used": 0,
+    "limit": 1
+  },
+  "historical_failures_preserved": true,
+  "native_raw_independently_verified": false,
+  "formal_approval": false,
+  "native_fullflow_pass": false,
+  "recommendation": "Technical STOP on repeating current measurement; revise instrumentation to distinguish module enumeration failures from actual absence and prove readiness independently of CLI rc; keep startup/cleanup results separate",
+  "U10": "OPEN",
+  "OP-F01": "formal_OPEN",
+  "no_active_run": true,
+  "sensitive_assurance": "HOLD"
+}

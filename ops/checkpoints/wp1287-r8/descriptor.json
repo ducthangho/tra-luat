@@ -1,6 +1,6 @@
 {
   "schema": "wp1287.corrected_native_measurement.v1",
-  "status": "implementation_preparation_only",
+  "status": "prepared_pending_final_native_hash_selfcheck",
   "mode": "candidate_native_fullflow",
   "control_base": "6831e401c82754ffd748c1f56d6d10e5abd48da8",
   "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",

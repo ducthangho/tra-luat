@@ -1,0 +1,3 @@
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN	wp1287-r8-g8-operator	refs/heads/ops/wp1287-r4-diagnostic:ops/leases/wp1287-r8-g8-operator.yaml
+NGƯỜI_GIỮ 1: wp1287-r8-g8-operator

@@ -1,0 +1,28 @@
+{
+  "schema": "wp1287.operator_execution_grant.v1",
+  "authority": "Owner direct delegation and approved R7 correction; current instruction continue autonomously",
+  "issued_by_role": "dispatcher",
+  "operator": "openai_codex/codex_service/machine",
+  "mode": "candidate_native_fullflow",
+  "one_open_limit": 1,
+  "used": 0,
+  "helper_sha256": {
+    "contract.py": "1946dc4482ff604c1a757c1177968681149a503733da84a87cb422a3cd4f917f",
+    "native_flow.py": "d684340927d794b3bd8fe7741e3e6a719efca50d6891e499ee39c01fb8504648",
+    "native_observer.py": "562d55dc484368b1cabdfe6b02a370b5200b90da2fec6e0932af6c65a1970150",
+    "test_contract.py": "96eb611692f113673713d44db5148e8a57dbac9f9b7c90e7f8cfd90e04e2fe7d"
+  },
+  "spec_sha256": "3dfc01124c94848a9654564369b04d4df14e8dc6efa76c6dd22c88049d150a54",
+  "control_sha": "49308b0ed1d073b8976a5e4ce0aa52f1715e4561",
+  "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "expires_at": "2026-11-10T05:04:36.172204+00:00",
+  "counterexamples_passed": 11,
+  "native_abi_passed": true,
+  "fresh_candidate_install_and_signatures_passed": true,
+  "product_write_set": [],
+  "no_model_call": true,
+  "browser_termination_allowed": false,
+  "direct_owned_popen_watchdog_allowed": true,
+  "cleanup_timeout_seconds": 20,
+  "U10_closure": false
+}

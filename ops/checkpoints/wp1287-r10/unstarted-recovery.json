@@ -1,0 +1,19 @@
+{
+  "at": {
+    "utc": "2026-11-10T06:35:23.022563+00:00",
+    "mono_ns": 590710875000000
+  },
+  "original_operator_child_rc": 1,
+  "original_transport_shell_rc": 1,
+  "planned_terminal_rc_not_actual": 2,
+  "original_cleanup": "failed",
+  "recovery": "preexecution_failure_no_CLI_or_browser_started",
+  "browser_opens_actual": 0,
+  "owned_remaining": 0,
+  "ownership_gaps": 0,
+  "lock_readback_empty": true,
+  "ps7": "not_run",
+  "recovery_rc": 0,
+  "original_terminal_sha256": "ece5e38fde951abb556e0f5db80dc84bf471c3ed5f35b3d1d42da7efaca39c01",
+  "no_policy_or_process_changes": true
+}

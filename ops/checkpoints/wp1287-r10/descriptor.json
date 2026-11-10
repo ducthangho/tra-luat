@@ -16,10 +16,11 @@
   },
   "spec_sha256": "9bab1064d21630a87651c75428a2509228a6a7305ec64a3a5d77058b59515710",
   "allowance": {
-    "used": 0,
+    "used": 1,
     "reserved": 0,
     "limit": 2,
-    "per_shell_limit": 1
+    "browser_opens_actual": 0,
+    "PS7": "not_run"
   },
   "product_write_set": [],
   "counterexamples_Linux": "13/13",
@@ -34,5 +35,9 @@
     "formal": "0/2",
     "productpush": "0/1"
   },
-  "status": "prepared_not_run"
+  "status": "terminal_preexecution_transport_failure",
+  "recovery": "unstarted-recovery.json",
+  "original_child_rc": 1,
+  "original_shell_rc": 1,
+  "lock_readback_empty": true
 }

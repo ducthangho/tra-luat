@@ -12224,7 +12224,7 @@ def _runtime1174(c, command, current_policy=False, service=False):
     return m,admission,state,argv,invoke,target,witness,pair
 
 
-def _current_policy1174(c, service=False):
+def _current_policy1174(c, service=False, workflow_case=None):
     """Actual inactive canonical policy/I2 lease, sequential ordinary writers.
 
     Resolver/runtime/filesystem transport seams are fixture-only; reducers, native
@@ -12276,7 +12276,8 @@ def _current_policy1174(c, service=False):
     denied(command("record-review",*args[args.index("--provider"):args.index("--root")]))
     denied(command("accept","--pr","55","--workflow-runs",receipt,"--workflow-jobs",receipt,"--check-runs",receipt,"--connector",receipt))
     # Reuse this exact pending journal/head for the real human accept reducer.
-    accepted=_accept_entry1174(Ctx(c.script,c.tmp/"human-chain"),chain=(m,a,pending,target,witness,pair,w))
+    accepted=_accept_entry1174(Ctx(c.script,c.tmp/"human-chain"),chain=(m,a,pending,target,witness,pair,w),workflow_case=workflow_case)
+    if workflow_case and accepted["state"]!="accepted":return
     trace.append(dict(command="accept",state=accepted["state"],flag=accepted["luat_adr0054"],revision=accepted["state_revision"],head=accepted["accepted_sha"],assurance=accepted["human_acceptance"]["assurance"],dispatch_allowed=False))
     (c.tmp/"current-policy-chain.json").write_text(json.dumps(dict(lane="service" if service else "native",canonical_policy=False,reviewer=pending["ngu_canh_lease"]["reviewer"],steps=trace),indent=2)+"\n")
 
@@ -12780,7 +12781,7 @@ def _management_race1174(c,name):
     assert state["state_revision"]==(0 if name=="init" else 2) and not state["codex_calls"]
 
 
-def _accept_entry1174(c,race=False,snapshot=False,chain=None):
+def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None):
     import contextlib,io,copy,multiprocessing
     from unittest.mock import patch
     from types import SimpleNamespace
@@ -12832,6 +12833,15 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None):
     files={"workflow_runs":dict(total_count=1,workflow_runs=runs),"workflow_jobs":dict(total_count=5,jobs=[dict(id=200+i,run_id=2,run_attempt=1,name=j,head_sha=head,status="completed",conclusion="success",check_run_url=api+f"check-runs/{300+i}") for i,j in enumerate(jobs)]),
         "check_runs":dict(total_count=5,check_runs=[dict(id=300+i,name=j,head_sha=head,status="completed",conclusion="success",check_suite=dict(id=500),app=dict(slug="github-actions"),url=api+f"check-runs/{300+i}") for i,j in enumerate(jobs)]),
         "connector":dict(repo=ci_repo,pr=1187,head_sha=head,reviews=dict(total_count=0,items=[]),review_comments=dict(total_count=0,items=[]),issue_comments=dict(total_count=1,items=[dict(id=20,user=dict(login=_CN834),body="Reviewed commit: `"+head[:10]+"`",issue_url=api+"issues/1187")]))}
+    if workflow_case in ("omit", "change", "failed", "latest_green", "attempt"):
+        newer=copy.deepcopy(runs[0]);newer.update(id=3,conclusion="failure",check_suite_id=501,html_url=f"https://github.com/{ci_repo}/actions/runs/3",created_at="2026-11-04T09:02:00Z")
+        if workflow_case=="attempt":newer.update(id=2,run_attempt=2,html_url=runs[0]["html_url"],created_at=runs[0]["created_at"])
+        if workflow_case=="latest_green":runs[0]["conclusion"]="failure";newer["conclusion"]="success"
+        files["workflow_runs"]=dict(total_count=1 if workflow_case=="attempt" else 2,workflow_runs=[newer] if workflow_case=="attempt" else [runs[0],newer])
+        if workflow_case in ("change", "failed", "latest_green"):
+            for job in files["workflow_jobs"]["jobs"]:job["run_id"]=3
+            for check in files["check_runs"]["check_runs"]:check["check_suite"]["id"]=501
+    flow=dict(human=0,ci=[],effects=[],errors=[])
     args=["--state-dir",str(target.parent),"accept","--packet","55","--root",str(w.resolve()),"--pr","1187","--admission","fixture","--revision","1","--generation","1","--coordinator-id","coordinator-1","--expected-revision",str(state["state_revision"])]
     for attr,value in files.items():
         path=hc.tmp/(attr+".json");path.write_text(json.dumps(value));args += ["--"+attr.replace("_","-"),str(path)]
@@ -12845,8 +12855,35 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None):
         if endpoint=="repos/"+m._1174_REPO:return dict(id=123,full_name=m._1174_REPO)
         if endpoint==f"repos/{m._1174_REPO}/issues/comments/{audit['id']}":return audit
         if endpoint.endswith("/actions/runs/2"):return json.loads(Path(hargs.human_remote_run).read_bytes())
-        if "/actions/runs?" in endpoint:return files["workflow_runs"]
+        if "/actions/runs?" in endpoint:
+            if workflow_case=="api_swap":Path(hargs.workflow_runs).write_bytes(b"{}\n")
+            return files["workflow_runs"]
         return pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
+    workflow_path=Path(hargs.workflow_runs)
+    original_workflow=workflow_path.read_bytes()
+    if workflow_case=="bytes":
+        original_workflow=json.dumps(files["workflow_runs"],indent=3).encode()+b"\n"
+        workflow_path.write_bytes(original_workflow)
+    human_check,ci_check,write=m._1174_human_evidence,m._kiem_ci,m._1174_write
+    def verified_human(*values,**kw):
+        result=human_check(*values,**kw);flow["human"]+=1
+        changed=copy.deepcopy(files["workflow_runs"])
+        if workflow_case=="omit":changed=dict(total_count=1,workflow_runs=[runs[0]])
+        elif workflow_case=="change":changed["workflow_runs"][-1]["conclusion"]="success"
+        elif workflow_case=="attempt":changed=dict(total_count=1,workflow_runs=[runs[0]])
+        if workflow_case in ("omit", "change", "attempt"):workflow_path.write_bytes(m._1174_bytes(changed))
+        elif workflow_case=="bytes":workflow_path.write_bytes(b" "+original_workflow)
+        return result
+    def checked_ci(*values,**kw):
+        flow["ci"].append(m._doc_json(values[0].workflow_runs,m.RC_GATE)[0])
+        return ci_check(*values,**kw)
+    def recorded_write(*values,**kw):
+        flow["effects"].append("write");return write(*values,**kw)
+    @contextlib.contextmanager
+    def workflow_seams():
+        if not workflow_case:yield;return
+        with patch.object(m,"_1174_human_evidence",side_effect=verified_human),patch.object(m,"_kiem_ci",side_effect=checked_ci),patch.object(m,"_1174_write",side_effect=recorded_write),patch.object(m,"_1174_probe",side_effect=lambda *v:flow["effects"].append("probe")):
+            yield
     @contextlib.contextmanager
     def canonical(_):yield w
     def invoke(argv=args):
@@ -12857,9 +12894,10 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None):
             calls+=1
             if calls==2 and hasattr(m,"_fixture_gate_observer"):m._fixture_gate_observer()
             return a,facts
-        with patch.object(m,"_1174_IMPLEMENTATION_COMPLETE",True),patch.object(m,"_1174_resolve",side_effect=resolved),patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_canon",canonical),patch.object(m,"_1174_api",side_effect=fetch),patch.object(m,"_nap",return_value=SimpleNamespace(_doc_gh=lambda label,endpoint:fetch(endpoint))),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
+        with patch.object(m,"_1174_IMPLEMENTATION_COMPLETE",True),patch.object(m,"_1174_resolve",side_effect=resolved),patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_canon",canonical),patch.object(m,"_1174_api",side_effect=fetch),patch.object(m,"_nap",return_value=SimpleNamespace(_doc_gh=lambda label,endpoint:fetch(endpoint))),workflow_seams(),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
             rc=m.main(argv)
         assert len(out.getvalue().splitlines())==1,(rc,out.getvalue(),err.getvalue())
+        if workflow_case:flow["errors"].append(err.getvalue())
         return rc,json.loads(out.getvalue())
     pair(state)
     if race:
@@ -12889,6 +12927,17 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None):
             missing_human=list(args);i=missing_human.index("--human-audit-comment");del missing_human[i:i+2]
             rc,result=invoke(missing_human)
             assert rc==8 and not result["dispatch_allowed"] and before==(target.read_bytes(),witness.read_bytes()),(rc,result)
+        if workflow_case:workflow_path.write_bytes(original_workflow)
+        if workflow_case in ("omit", "change", "failed", "attempt"):
+            entries=sorted(str(p) for p in target.parent.rglob("*"))
+            rc,result=invoke()
+            failed=2 if workflow_case=="attempt" else 3
+            assert rc==8 and result["status"]=="UNKNOWN" and not result["dispatch_allowed"],("workflow snapshot accepted stale CI",workflow_case,rc,result)
+            assert flow["human"]==1 and flow["ci"]==[files["workflow_runs"]],(workflow_case,flow)
+            assert any(f"run {failed} " in error for error in flow["errors"]),(workflow_case,flow)
+            assert not flow["effects"] and before==(target.read_bytes(),witness.read_bytes()) and entries==sorted(str(p) for p in target.parent.rglob("*")),("workflow rejection effects",workflow_case,flow)
+            (c.tmp/"workflow-snapshot-trace.json").write_text(json.dumps(dict(case=workflow_case,rc=rc,result=result,**flow),indent=2)+"\n")
+            return state
         if snapshot:
             parser=m._doc_json
             inputs={str(hc.tmp/(key+".json")): (hc.tmp/(key+".json")).read_bytes() for key in files}
@@ -12903,9 +12952,13 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None):
                 assert event[key+"_sha256"]==hashlib.sha256(inputs[str(hc.tmp/(key+".json"))]).hexdigest(),key
             assert event["workflow_jobs_sha256"]==[hashlib.sha256(inputs[str(hc.tmp/"workflow_jobs.json")]).hexdigest()]
         else:
-            rc,result=invoke();assert rc==0,(rc,result)
+            rc,result=invoke();assert rc==0,(workflow_case,rc,result,flow)
     accepted=_call1174(m._1174_pair,a,json.loads(witness.read_bytes()),target.read_bytes())
     assert accepted["state"]=="accepted" and accepted["human_acceptance"]["assurance"]=="human_audited" and accepted["state_revision"]==state["state_revision"]+1
+    if workflow_case:
+        assert flow["human"]==1 and flow["ci"]==[files["workflow_runs"]],(workflow_case,flow)
+        assert accepted["history"][-1]["workflow_runs_sha256"]==hashlib.sha256(original_workflow).hexdigest(),("workflow original byte binding",workflow_case)
+        (c.tmp/"workflow-snapshot-trace.json").write_text(json.dumps(dict(case=workflow_case,rc=rc,result=result,**flow),indent=2)+"\n")
     if current_policy:
         assert accepted["luat_adr0054"] is False and accepted["accepted_sha"]==state["pending_sha"]
         assert accepted["review_rounds_used"]==accepted["codex_review_calls_used"]==accepted["attempts_used"]==1
@@ -14704,6 +14757,29 @@ MUTANTS.update({
     "m1174_r25_pr_observation": ('preimages.append((oid, event["created_at"]))', 'pass # omit unresolved PR observation', ["wp1174_lifecycle_first_publication"]),
     "m1174_r25_event_time": ('_1174_require(_1174_time(event.get("created_at")) <= start, "collector event time")', 'pass # omit event timestamp validation', ["wp1174_lifecycle_first_publication"]),
     "m1174_r25_pr_identity": ('pr.get("html_url") == f"https://github.com/{_1174_REPO}/pull/{number}" and', 'True and', ["wp1174_lifecycle_first_publication"]),
+})
+
+def _r26_workflows1174(c):
+    """Keep API verification, latest CI selection and persisted source hashes joined.
+
+    Each case uses the actual inactive-policy lease/review/accept router chain.
+    Only external API, runtime and authority transports are synthetic fixtures;
+    the canonical human validator, CI reducer, state and witness checks execute.
+    """
+    for kind in ("omit", "change", "failed", "attempt", "latest_green", "bytes", "api_swap"):
+        directory=c.tmp/kind;directory.mkdir()
+        _current_policy1174(Ctx(c.script,directory),service=True,workflow_case=kind)
+
+_r26_original_accept1174=dict(CASES)["wp1174_writer_accept"]
+def _r26_accept1174(c):
+    directory=c.tmp/"r26-workflows";directory.mkdir()
+    _r26_workflows1174(Ctx(c.script,directory))
+    _r26_original_accept1174(c)
+CASES=[(name,_r26_accept1174 if name=="wp1174_writer_accept" else case) for name,case in CASES]
+MUTANTS.update({
+    "m1174_r26_workflow_probe_early": ('# Verification, CI and recorded hashes share the original caller bytes.', '# Verification, CI and recorded hashes share the original caller bytes.\n    _1174_probe(directory)', ["wp1174_writer_accept"]),
+    "m1174_r26_workflow_reread": ('human = _1174_human_evidence(a, admission, st["pending_sha"])\n        rc = cmd_accept(a, directory)', 'human = _1174_human_evidence(a, admission, st["pending_sha"])\n        snapshots[str(a.workflow_runs)] = Path(a.workflow_runs).read_bytes()\n        rc = cmd_accept(a, directory)', ["wp1174_writer_accept"]),
+    "m1174_r26_workflow_verify_path": ('_trang_du(_doc_json(a.workflow_runs, RC_GATE)[0], "workflow_runs", "scoped human workflow_runs")', '_trang_du(_1174_read_json(a.workflow_runs), "workflow_runs", "scoped human workflow_runs")', ["wp1174_writer_accept"]),
 })
 
 if __name__ == "__main__":

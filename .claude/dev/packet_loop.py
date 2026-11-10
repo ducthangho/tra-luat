@@ -5471,7 +5471,7 @@ def _1174_human_runs(a, head, deadline):
             break
     _1174_require(len(rows) == total and all(type(x) is dict and type(x.get("id")) is int for x in rows) and
         len({x["id"] for x in rows}) == total, "human run pagination incomplete")
-    caller = _trang_du(_1174_read_json(a.workflow_runs), "workflow_runs", "scoped human workflow_runs")
+    caller = _trang_du(_doc_json(a.workflow_runs, RC_GATE)[0], "workflow_runs", "scoped human workflow_runs")
     key = lambda row: row["id"]
     _1174_require(_1174_bytes(sorted(rows, key=key)) == _1174_bytes(sorted(caller, key=key)),
         "human workflow set current readback mismatch")
@@ -5558,12 +5558,13 @@ def _1174_accept(a, directory, admission):
     st = _load(directory, a.packet)
     _1174_require(st["state"] == "approved_pending" and st["scoped_review"] is not None and
         st["scoped_review"]["head"] == st.get("pending_sha") and st["scoped_review"]["verdict"] == "approve", "accept requires scoped review")
-    human = _1174_human_evidence(a, admission, st["pending_sha"])
     fields = ("workflow_runs", "check_runs", "connector", "bien_nhan_connector", "quyet_dinh_p3")
     paths = [getattr(a, field, None) for field in fields] + list(a.workflow_jobs or [])
     snapshots = {str(path): Path(path).read_bytes() for path in paths if path is not None}
+    # Verification, CI and recorded hashes share the original caller bytes.
     _1174_TRANSACTION["input_snapshots"] = snapshots
     try:
+        human = _1174_human_evidence(a, admission, st["pending_sha"])
         rc = cmd_accept(a, directory)
     finally:
         _1174_TRANSACTION.pop("input_snapshots", None)

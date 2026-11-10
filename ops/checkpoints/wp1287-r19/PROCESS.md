@@ -1,6 +1,6 @@
 # Quy trình vá và review theo lớp lỗi — pilot WP1287
 
-1. Đóng băng SHA cũ, SHA mới và ledger. Một lớp nguyên nhân có stable slug/ID; các biểu hiện có file:line riêng. Chốt tất cả vị trí tương tự trong write set trước khi sửa.
+1. Đóng băng SHA cũ, SHA mới và ledger. Prompt/spec phải giữ nguyên byte UTF-8 canonical: dùng binary writer và kiểm hash ở máy nhận với hash từ control; không tính lại hash sau khi writer tự đổi newline rồi coi là khớp. Dùng helper/đối chứng `../wp1287-r21/freeze_packet.py` và `test_freeze_packet.py`; mismatch dừng trước model. Bootstrap phải thử đúng đường tool và mọi native capability cần cho delta, giữ sandbox/read-only/never. Một lớp nguyên nhân có stable slug/ID; các biểu hiện có file:line riêng. Chốt tất cả vị trí tương tự trong write set trước khi sửa.
 2. Vá cả lớp, chạy đối chứng dương/âm và mutant khôi phục từng cơ chế cũ. Ghi đúng shell/nền đã chạy, không dùng tổng suite để thay bằng chứng đóng lớp.
 3. Lượt đầu đọc full diff. Từ lượt sau, discovery chỉ đọc diff SHA đã review → SHA mới, đọc ngữ cảnh cần thiết để hiểu thay đổi. Kiểm lỗi cũ bằng regression và bảng trạng thái ID cũ; không phát hành lại thành finding mới.
 4. Finding mới bắt buộc: ID, pattern, severity, file, dòng đầu/cuối tại exact SHA, trigger/evidence, hướng vá chung, test khóa và rủi ro. Lỗi cũ chưa sửa tiếp tục chặn theo ID cũ; lỗi do patch sinh ra dùng ID mới chỉ khi cơ chế mới.

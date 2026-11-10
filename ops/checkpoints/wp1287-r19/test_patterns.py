@@ -66,6 +66,23 @@ for lang in languages:
         held="$held=[IO.File]::Open($env:TL_PW_INSTALL+'\\package-lock.json',[IO.FileMode]::Open,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None)\n"
         run(tag+'-hash-unreadable-file',held+wrapper(hashcode),lang,1,marker='PIN OK')
     clean()
+    if windows:
+        queries=[line for block in b[:2] for line in block.splitlines() if "'node'" in line or "'npm'" in line or "'cli'" in line]
+        assert len(queries)==5
+        for i,line in enumerate(queries):
+            version='0.1.23' if "'cli'" in line else '11.20.0' if "'npm'" in line else 'v26.13.0'
+            for rc in [0,17]:
+                pre="function versionprobe { $global:LASTEXITCODE="+str(rc)+"; '"+version+"' }; $env:TL_PW_NODE='versionprobe'\n"
+                run(tag+'-version-'+str(i)+'-rc'+str(rc),need+pre+line+"\n'VERSION OK'",lang,0 if rc==0 else 1,marker='VERSION OK')
+        target='\n'.join(b[1].splitlines()[1:3])
+        (root/'TARGET_ID').write_bytes(b'')
+        run(tag+'-empty-target',need+"& { $ErrorActionPreference='Stop'\n"+target+"\n'PIN OK' }",lang,1,{'TL_PW_TARGET_ID':''},'PIN OK')
+    else:
+        browser=scratch/'browser'/'chromium-1252'/'chrome-linux64'/'chrome';browser.parent.mkdir(parents=True)
+        probe=next(line for line in b[1].splitlines() if '/chrome" --version' in line).split(';')[0]
+        for rc in [0,17]:
+            browser.write_text('#!/bin/sh\necho "Google Chrome 157.0.8103.15"\nexit '+str(rc)+'\n');browser.chmod(0o755)
+            run(tag+'-browser-version-rc'+str(rc),b[1].splitlines()[0]+'\nB="'+str(scratch/'browser')+'"\n'+probe+'\necho "VERSION OK" )',lang,0 if rc==0 else 1,marker='VERSION OK')
     outside=scratch/'outside'/'never-created'/'leaf'
     for case,path,expect in [('outside',outside,0),('inside-existing',repo,1),('inside-nonexistent',repo/'new'/'leaf',1),('bare',bare,1)]:
         run(tag+'-git-'+case,guardwrap(guard),lang,expect,{'TL_PW_ROOT':str(path)},'GUARD OK')

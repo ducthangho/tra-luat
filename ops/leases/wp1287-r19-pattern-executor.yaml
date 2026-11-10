@@ -42,8 +42,8 @@ authority_note: Current owner explicitly directs continued pattern fixes and cha
   not an automatic budget reset
 leased_at_utc: '2026-11-10T16:52:30.741574+00:00'
 heartbeat_at: '2026-11-10T16:52:30.741574+00:00'
-lease_until: '2026-11-10T18:22:30.741574+00:00'
-lease_expires_at_utc: '2026-11-10T18:22:30.741574+00:00'
+lease_until: '2026-11-10T17:00:24.630392+00:00'
+lease_expires_at_utc: '2026-11-10T17:00:24.630392+00:00'
 run_minutes: 90
 attempts_limit: 1
 attempts_used: 1
@@ -55,5 +55,7 @@ shared_reserved: 1
 primary_product_pushes_used: 0
 requires_live: false
 uy_quyen_merge: false
-status: running
+status: retired
 reviewed_sha_required: 2a5803e17b7ca4910c7188bfcc2276190e2d0b4b
+retired_at_utc: '2026-11-10T17:00:24.630392+00:00'
+candidate_head: 9296eb8ecb1533f6739c422fd20f131e04f1591d

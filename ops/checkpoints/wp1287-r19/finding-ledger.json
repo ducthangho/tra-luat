@@ -1,0 +1,148 @@
+{
+  "previous_review_sha": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "candidate_sha": "9296eb8ecb1533f6739c422fd20f131e04f1591d",
+  "candidate_tree": "24cb6f2f5961548a31b8eb2e4eecf795c110054c",
+  "source_sha256": "325d927d9381c7870999cb3743ee179f67645b383a0a40c6316a4ed1720bf8be",
+  "classes": [
+    {
+      "id": "WP1287-R18-PREFLIGHT-001",
+      "class_slug": "preflight-errors-accepted-as-success",
+      "old_manifestations": 3,
+      "status": "executor_remediated_pending_independent_delta_review",
+      "changed_analogous_sites": [
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 48
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 52
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 66
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 83
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 88
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 93
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 95
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 101
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 102
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 109
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 111
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 121
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 125
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 137
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 138
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 140
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 141
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 143
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 144
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 146
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 149
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 173
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 208
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 225
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 237
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 304
+        }
+      ]
+    },
+    {
+      "id": "WP1287-R18-CONFIG-001",
+      "class_slug": "documented-config-does-not-match-native-acceptance",
+      "old_manifestations": 2,
+      "status": "executor_remediated_pending_independent_delta_review",
+      "changed_analogous_sites": [
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 175
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "line": 212
+        }
+      ]
+    }
+  ],
+  "known_obligations": [
+    {
+      "id": "WP1287-OP-F01",
+      "status": "full_negative_matrix_still_pending"
+    },
+    {
+      "id": "U10",
+      "status": "full_exact_candidate_browser_acceptance_still_pending"
+    }
+  ],
+  "new_finding_count": null,
+  "duplicate_new_findings": null
+}

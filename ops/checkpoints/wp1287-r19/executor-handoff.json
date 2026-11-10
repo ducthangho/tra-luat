@@ -1,0 +1,27 @@
+{
+  "head": "9296eb8ecb1533f6739c422fd20f131e04f1591d",
+  "tree": "24cb6f2f5961548a31b8eb2e4eecf795c110054c",
+  "tests": {
+    "bash_linux": {
+      "checks": 25,
+      "passed": 25,
+      "rc": 0
+    },
+    "native_powershell_51_and_7": {
+      "checks": 70,
+      "passed": 70,
+      "rc": 0
+    },
+    "core_selftest": {
+      "passed": 1777,
+      "total": 1777,
+      "rc": 0
+    }
+  },
+  "source_component_scope": "extracted guards, required hashes, version failures, literal config emitters and selected mutation controls; not full browser/Setup/cleanup acceptance",
+  "product_pushes": 0,
+  "shared_external_calls_used": 6,
+  "shared_external_review_reserved": 1,
+  "source_approval": false,
+  "assurance": "HOLD"
+}

@@ -1,0 +1,1 @@
+Deterministic operator only. Read ops/specs/wp1287-r8.md and frozen descriptor/helper hashes. Stage exact H2 metadata outside source; run 11 counterexamples and own-process native ABI check. ONE browser open after native hash/grant/host/GitHub fences only. No model call, product edit, retry or approval. Preserve paused lock on unverified cleanup.

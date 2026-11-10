@@ -37,16 +37,21 @@ granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1238#issue
 authority_note: Owner approved corrected design and instructed autonomous completion;
   bounded corrected one-open measurement, no new product/model cost
 leased_at_utc: '2026-11-10T04:13:48.253697+00:00'
-heartbeat_at: '2026-11-10T04:13:48.253697+00:00'
+heartbeat_at: '2026-11-10T04:25:04.231693+00:00'
 lease_until: '2026-11-10T05:43:48.253697+00:00'
 lease_expires_at_utc: '2026-11-10T05:43:48.253697+00:00'
 run_minutes: 8
 attempts_limit: 3
 attempts_used: 3
 diagnostic_limit: 1
-diagnostic_used: 0
+diagnostic_used: 1
 requires_live: false
 uy_quyen_merge: false
-status: active
+status: retired
 thay_the_cho:
 - wp1287-r6-g6-diagnostic
+retired_at_utc: '2026-11-10T04:25:04.231693+00:00'
+retired_at: '2026-11-10T04:25:04.231693+00:00'
+retirement_reason: 'One corrected native fullflow: readiness verified, screenshot
+  timeout5000, PDF not_run; reporting error recovered append-only, named cleanup/census
+  verified, lock released. No retry; U10 OPEN.'

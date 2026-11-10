@@ -35,3 +35,18 @@ def cleanup(nonce,rows,remaining,ownership_unknown=False):
 
 def terminal(fullflow,clean,operator_rc,shell_rc=None):
     return {'success':fullflow=='passed' and clean=='verified' and operator_rc==0,'release_lock':clean=='verified','operator_child_rc':operator_rc,'transport_shell_rc':shell_rc}
+
+
+def load_module_probes(directory):
+    """Ignore schedule/identity sidecars; malformed actual probes stay unavailable."""
+    import re
+    from pathlib import Path
+    result=[]
+    for p in sorted(Path(directory).glob('probe-*.json')):
+        if not re.fullmatch(r'probe-[0-9]+\.json',p.name):continue
+        try:
+            value=json.loads(p.read_text(encoding='utf-8'))
+            if not isinstance(value,dict) or 'state' not in value:raise ValueError('invalid probe record')
+        except (OSError,ValueError):value={'state':'unavailable','reporting_error':'invalid_probe_record'}
+        result.append(value)
+    return result

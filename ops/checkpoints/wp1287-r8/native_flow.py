@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent))
-from contract import same_identity,readiness,cleanup,terminal
+from contract import same_identity,readiness,cleanup,terminal,load_module_probes
 from native_observer import K,identity,census,stamp,memory_sample
 ROOT=Path(r'C:\tl-win\wp1287-r8-fullflow-20261110');INSTALL=ROOT/'installation';E=ROOT/'evidence'
 CACHE=Path(r'C:\tl-win\wp1287-H1-native-recovery2\browser-cache')
@@ -210,11 +210,7 @@ def flow():
         if server:server.shutdown();server.server_close()
         rc=0 if full=='passed' and clean=='verified' else 2
         save(E/'observer-overhead.json',{'samples':MEMORY,'census_mono_ns':CENSUS_TIMES,'worker_limit_seconds':3,'workers_serial':True,'limits':'Observer timings and memory observations only, no causal A/B claim'})
-        states=[]
-        for p in E.glob('probe-*.json'):
-            if p.name.endswith('-identity.json'):continue
-            try:states.append(json.loads(p.read_text()).get('state','unavailable'))
-            except (OSError,ValueError):states.append('unavailable')
+        states=[p['state'] for p in load_module_probes(E)]
         quality='complete_walk' if states and all(x=='complete_walk' for x in states) and not any(x.get('state')=='deadline_exhausted' for x in PROBES) else 'partial' if states else 'unavailable'
         result={**terminal(full,clean,rc),'at':stamp(),'observer_quality':quality,'module_walk_states':states,'startup':startup,'open_cli_rc':openrc,'readiness':ready,'fullflow':full,'cleanup':clean,'error':error,'allowance_used':int(attempted),'limit':1,'U10':'OPEN_pending_documented_shell_proofs_and_formal_review','OP-F01':'formal_OPEN','candidate':H2,'no_automatic_retry':True}
         if clean=='verified':release()

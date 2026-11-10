@@ -4,7 +4,7 @@ import json,unittest
 import sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent))
-from contract import same_identity,module_state,presence,bridge,readiness,cleanup,terminal
+from contract import same_identity,module_state,presence,bridge,readiness,cleanup,terminal,load_module_probes
 class Counterexamples(unittest.TestCase):
     def test_first_false_18(self):
         s=module_state(True,False,18,None,[],True,False)
@@ -38,4 +38,19 @@ class Counterexamples(unittest.TestCase):
         values=[(0,{'session':'n','status':'closed'}),(0,{'session':'n','deleted':False}),(1,{'isError':True,'error':"The browser 'n' is not open, please run open first"})]
         rows=[{'rc':rc,'stdout':json.dumps(v).encode(),'stderr':b''} for rc,v in values]
         self.assertEqual(cleanup('n',rows,[]),'verified')
+class ProbeFileRegression(unittest.TestCase):
+    def test_schedule_and_identity_do_not_enter_module_results(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)
+            for name,value in {'probe-schedule.json':[], 'probe-0-identity.json':{'pid':1}, 'probe-0.json':{'state':'complete_walk'}}.items():
+                (root/name).write_text(json.dumps(value),encoding='utf-8')
+            self.assertEqual(load_module_probes(root),[{'state':'complete_walk'}])
+    def test_malformed_probe_cannot_crash_cleanup_reporting(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d)/'probe-0.json').write_text('[]',encoding='utf-8')
+            self.assertEqual(load_module_probes(d)[0]['state'],'unavailable')
 if __name__=='__main__':unittest.main(verbosity=2)

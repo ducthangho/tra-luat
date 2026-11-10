@@ -1,24 +1,18 @@
 {
   "schema": "wp1287.corrected_native_measurement.v1",
-  "status": "prepared_pending_final_native_hash_selfcheck",
+  "status": "terminal_fullflow_failed_cleanup_verified",
   "mode": "candidate_native_fullflow",
   "control_base": "6831e401c82754ffd748c1f56d6d10e5abd48da8",
   "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
   "tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
   "spec_sha256": "3dfc01124c94848a9654564369b04d4df14e8dc6efa76c6dd22c88049d150a54",
-  "helper_sha256": {
-    "contract.py": "1946dc4482ff604c1a757c1177968681149a503733da84a87cb422a3cd4f917f",
-    "native_flow.py": "d684340927d794b3bd8fe7741e3e6a719efca50d6891e499ee39c01fb8504648",
-    "native_observer.py": "562d55dc484368b1cabdfe6b02a370b5200b90da2fec6e0932af6c65a1970150",
-    "test_contract.py": "96eb611692f113673713d44db5148e8a57dbac9f9b7c90e7f8cfd90e04e2fe7d"
-  },
   "counterexamples": {
     "passed": 11,
     "total": 11,
     "native_browser_proof": false
   },
   "measurement": {
-    "used": 0,
+    "used": 1,
     "reserved": 0,
     "limit": 1
   },
@@ -50,5 +44,43 @@
     "signature_audit_rc": 0,
     "browser_install_rc": 0,
     "native_source_hashes_match": true
-  }
+  },
+  "executed_helper_sha256": {
+    "contract.py": "1946dc4482ff604c1a757c1177968681149a503733da84a87cb422a3cd4f917f",
+    "native_flow.py": "d684340927d794b3bd8fe7741e3e6a719efca50d6891e499ee39c01fb8504648",
+    "native_observer.py": "562d55dc484368b1cabdfe6b02a370b5200b90da2fec6e0932af6c65a1970150",
+    "test_contract.py": "96eb611692f113673713d44db5148e8a57dbac9f9b7c90e7f8cfd90e04e2fe7d"
+  },
+  "post_run_helper_sha256": {
+    "contract.py": "edb3d772e36a20acadfddca78cdd2585b28973b790d6a863d7f88b12153ff8e4",
+    "native_flow.py": "ff6c25b6e870e4a47aab3cd335680ed478ae0e9985ee57fcd304aaa8a1594bd4",
+    "native_observer.py": "562d55dc484368b1cabdfe6b02a370b5200b90da2fec6e0932af6c65a1970150",
+    "recover_terminal.py": "0aca447ad21150782e94dfacdeb62d2caa5e9f763233203b1e8432db4d160359",
+    "test_contract.py": "e4c297b70a6a031c6250681c95c521ae33b2f6deff7130406a95eb510bd89bee"
+  },
+  "post_run_regression_tests": {
+    "Linux_passed": 13,
+    "Linux_total": 13,
+    "native_before_execution_passed": 11,
+    "native_before_execution_total": 11,
+    "browser_rerun": false
+  },
+  "receipt_path": "ops/checkpoints/wp1287-r8/native-summary.json",
+  "receipt_projection_sha256": "11d9ed0c86fd478dacdab880a17f45ea323a68cfcd9b9938288f9184322f9691",
+  "formal_approval": false,
+  "U10": "OPEN",
+  "OP-F01": "formal_OPEN",
+  "sensitive_assurance": "HOLD",
+  "original_actual_operator_child_rc": 1,
+  "original_transport_shell_rc": 1,
+  "planned_failure_rc_not_actual": 2,
+  "recovery_child_rc": 0,
+  "recovery_transport_shell_rc": 0,
+  "native_receipt_sha256": "c2e29c44683da5537fdca77ac025b11dfd5fd35580381b7d3bed79762bca8937",
+  "screenshot_call_log_categories": [
+    "taking page screenshot",
+    "waiting for fonts",
+    "fonts loaded"
+  ],
+  "lock_readback_empty": true
 }

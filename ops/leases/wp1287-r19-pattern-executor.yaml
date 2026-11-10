@@ -1,0 +1,59 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1287
+packet_id: wp1287
+mission_issue: 1238
+revision: 19
+generation: 19
+lease_id: wp1287-r19-pattern-executor
+role: executor
+provider: codex
+executor: codex
+model_family: openai
+execution_surface: codex_service
+transport: machine
+environment: linux-and-native-windows
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1287-r19.md
+spec_hash: fa1748882fe620cb7d2e2f9b07697d9807203aab9c88132afd0ecbbbd86802b8
+spec_sha256_required: fa1748882fe620cb7d2e2f9b07697d9807203aab9c88132afd0ecbbbd86802b8
+prompt_path: ops/prompts/wp1287-r19-executor.md
+prompt_sha256_required: 331f1a4509028f8fdea75dafaba1247cd1e222d9620dabf1a7e82006671c00d7
+write_set:
+- .agents/skills/playwright-browser/SKILL.md
+- .agents/skills/playwright-browser/package.json
+- .agents/skills/playwright-browser/package-lock.json
+effective_write_set:
+- .agents/skills/playwright-browser/SKILL.md
+- .agents/skills/playwright-browser/package.json
+- .agents/skills/playwright-browser/package-lock.json
+change_policy_sha: null
+land_obligations: []
+branch: agent/wp1287-r19-pattern-remediation
+base_sha: bf9914cb1a8e6f5047468f4d130b587015f8d73f
+start_from_sha: 2a5803e17b7ca4910c7188bfcc2276190e2d0b4b
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1287#issuecomment-6773433608
+authority_note: Current owner explicitly directs continued pattern fixes and changed
+  review process; this is the concrete successor rescue after historical author3/3,
+  not an automatic budget reset
+leased_at_utc: '2026-11-10T16:52:30.741574+00:00'
+heartbeat_at: '2026-11-10T16:52:30.741574+00:00'
+lease_until: '2026-11-10T18:22:30.741574+00:00'
+lease_expires_at_utc: '2026-11-10T18:22:30.741574+00:00'
+run_minutes: 90
+attempts_limit: 1
+attempts_used: 1
+historical_author_attempts_before: 3
+historical_author_attempts_total: 4
+shared_limit: 8
+shared_used: 6
+shared_reserved: 1
+primary_product_pushes_used: 0
+requires_live: false
+uy_quyen_merge: false
+status: running
+reviewed_sha_required: 2a5803e17b7ca4910c7188bfcc2276190e2d0b4b

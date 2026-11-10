@@ -1,0 +1,1 @@
+Apply only the pattern remediation and exact-source regression work in ops/specs/wp1287-r19.md. Owner current instruction is the successor rescue authority. Preserve all counters and same-provider HOLD; do not claim independent review.

@@ -1,0 +1,13 @@
+{
+  "at": "2026-11-10T08:47:43.432618+00:00",
+  "same_scope_direct_confirmation_recorded": true,
+  "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+  "clone_clean": true,
+  "inputs_verified": 20,
+  "source_hashes_match": true,
+  "launcher_and_cli_hashes_match": true,
+  "prior_model_invocations": 0,
+  "deadline_utc": "2026-11-10T09:32:43Z",
+  "model_invoked": false
+}

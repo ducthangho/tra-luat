@@ -31,5 +31,6 @@
     "productpush": "0/1"
   },
   "status": "preparing_after_direct_user_confirmation",
-  "assurance": "HOLD_sensitive_same_provider"
+  "assurance": "HOLD_sensitive_same_provider",
+  "prepare_sha256": "dec50edcc9e5bd82d99c1a4b6412346bd16c5cb5ddcc291f71101aff9c08f910"
 }

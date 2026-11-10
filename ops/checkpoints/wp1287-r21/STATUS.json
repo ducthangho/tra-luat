@@ -1,0 +1,48 @@
+{
+  "head": "0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2",
+  "records": [
+    {
+      "name": "diff-check",
+      "rc": 0,
+      "positive": true
+    },
+    {
+      "name": "claims",
+      "rc": 0,
+      "positive": true
+    },
+    {
+      "name": "doctrine",
+      "rc": 0,
+      "positive": true
+    },
+    {
+      "name": "manifest",
+      "rc": 0,
+      "positive": true
+    },
+    {
+      "name": "release-verify",
+      "rc": 0,
+      "positive": true
+    }
+  ],
+  "core_selftest": "reused1777/1777 on exact unchanged core source",
+  "ruff": "prior bare rc1/12F821, delta0 because core source unchanged",
+  "shared_used": 7,
+  "shared_reserved": 1,
+  "shared_limit": 8,
+  "new_hash_collection_checks": {
+    "native_ps51_and_ps7": 32,
+    "passed": 32,
+    "rc": 0,
+    "scope": "helper and extracted collection/export, not full browser/cleanup"
+  },
+  "reused_components": {
+    "native_original_checks": 70,
+    "bash_checks": 35,
+    "proof": "component-evidence-reuse.json"
+  },
+  "source_approval": false,
+  "assurance": "HOLD"
+}

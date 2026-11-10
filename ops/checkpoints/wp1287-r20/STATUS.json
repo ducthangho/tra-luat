@@ -45,5 +45,11 @@
   "shared_limit": 8,
   "source_approval": false,
   "assurance": "HOLD",
-  "independent_review": "running_delta_only"
+  "independent_review": "completed_changes_requested",
+  "new_findings": 0,
+  "known_class_statuses": {
+    "WP1287-R18-PREFLIGHT-001": "VA_HO_required_capture_hashes_in_calculated_property",
+    "WP1287-R18-CONFIG-001": "alignment_present_independent_coverage_incomplete"
+  },
+  "raw_verdict_sha256": "f3b961433af58793d2013dfc1f383e7530163f84de3e578dc34207553e361f35"
 }

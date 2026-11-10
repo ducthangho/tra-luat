@@ -1,0 +1,31 @@
+{
+  "at": {
+    "utc": "2026-11-10T06:49:47.551385+00:00",
+    "mono_ns": 591575406000000
+  },
+  "actual_child_rc": 2,
+  "actual_shell_rc": 2,
+  "original_cleanup": "failed",
+  "original_input_error": "PS5 JSON array flattened into one command argument",
+  "browser_opens_actual": 0,
+  "owned_remaining": 0,
+  "ownership_gaps": 0,
+  "named_recovery": [
+    {
+      "action": "recovery-delete",
+      "rc": 0,
+      "stdout_sha256": "b681b00864c7e17794c09f91657b1ec49ed40ae038b21b586421820b5f2f99aa",
+      "stderr_empty": true
+    },
+    {
+      "action": "recovery-verify",
+      "rc": 1,
+      "stdout_sha256": "89ba167b15b41d8f99af1acf3bedb1ed54674482e9ccece0c7605a467a11f49c",
+      "stderr_empty": true
+    }
+  ],
+  "lock_readback_empty": true,
+  "ps7": "not_run",
+  "recovery_rc": 0,
+  "no_policy_or_browser_changes": true
+}

@@ -16,12 +16,11 @@
   },
   "spec_sha256": "cd006665d78ce96e242f23373ee213a65272ddd2df99c80383f44ca9f456286e",
   "allowance": {
-    "used": 0,
+    "used": 1,
     "reserved": 0,
     "limit": 2,
-    "per_shell_limit": 1,
-    "R10_unstarted_operator_attempt_retained": 1,
-    "R10_browser_opens_actual": 0
+    "browser_opens_actual": 0,
+    "PS7": "not_run"
   },
   "product_write_set": [],
   "counterexamples_Linux": "13/13",
@@ -36,7 +35,7 @@
     "formal": "0/2",
     "productpush": "0/1"
   },
-  "status": "prepared_not_run",
+  "status": "terminal_operator_input_failure",
   "native_inline_preflight": {
     "PS51": {
       "version": "5.1.26100.9711",
@@ -61,5 +60,9 @@
     "browser_opens": 0,
     "allowance_reserved_or_used": 0,
     "fix": "import invocation only after adding isolated operator directory to sys.path"
-  }
+  },
+  "recovery": "input-failure-recovery.json",
+  "original_child_rc": 2,
+  "original_shell_rc": 2,
+  "lock_readback_empty": true
 }

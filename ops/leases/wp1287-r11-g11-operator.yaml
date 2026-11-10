@@ -38,16 +38,23 @@ authority_note: Original required native PS positives using documented inline in
   after -File preexecution failure; previous failure retained, no policy/model/product
   change
 leased_at_utc: '2026-11-10T06:38:17.312348+00:00'
-heartbeat_at: '2026-11-10T06:38:17.312348+00:00'
-lease_until: '2026-11-10T08:08:17.312348+00:00'
-lease_expires_at_utc: '2026-11-10T08:08:17.312348+00:00'
+heartbeat_at: '2026-11-10T06:51:07.500892+00:00'
+lease_until: '2026-11-10T06:51:07.500892+00:00'
+lease_expires_at_utc: '2026-11-10T06:51:07.500892+00:00'
 run_minutes: 8
 attempts_limit: 3
 attempts_used: 3
 diagnostic_limit: 2
-diagnostic_used: 0
+diagnostic_used: 1
 requires_live: false
 uy_quyen_merge: false
-status: active
+status: retired
 thay_the_cho:
 - wp1287-r10-g10-operator
+original_lease_until: '2026-11-10T08:08:17.312348+00:00'
+original_lease_expires_at_utc: '2026-11-10T08:08:17.312348+00:00'
+retired_at: '2026-11-10T06:51:07.500892+00:00'
+retired_at_utc: '2026-11-10T06:51:07.500892+00:00'
+retirement_reason: PS5 operator JSON-array input joined into one Unknown command;
+  actual browser opens0, PS7not_run; child/shell2 and cleanup fail retained; separate
+  named delete/closed-query/census recovery verified lock release

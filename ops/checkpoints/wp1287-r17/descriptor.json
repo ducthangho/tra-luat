@@ -1,17 +1,17 @@
 {
-  "status": "vm_bootstrap_pass_launcher_running_child_pending",
+  "status": "vm_reviewer_model_output_observed",
   "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
   "source_write_set": [],
   "vm_device": "810f79bb-c01e-4157-a5f2-9562ac6d551d",
   "formal_rounds_used": 1,
   "formal_rounds_reserved": 1,
   "formal_rounds_limit": 2,
-  "shared_confirmed_used": 4,
+  "shared_confirmed_used": 5,
   "shared_uncertain_asus_charge": 1,
-  "shared_conservative_used": 5,
-  "shared_reserved": 1,
+  "shared_conservative_used": 6,
+  "shared_reserved": 0,
   "shared_limit": 8,
-  "model_invoked": null,
+  "model_invoked": true,
   "asus_cleanup": "UNKNOWN",
   "lease_expires_at_utc": "2026-11-10T15:13:23.129325+00:00",
   "prompt_sha256": "62e5083272907a769f9c74d1a1007e59e030b64367c5cb16047bee868cf36176",
@@ -28,5 +28,9 @@
   "deadline_utc": "2026-11-10T14:41:48Z",
   "credential_gate_rc": 0,
   "published_lease_duplicate_rc9": true,
-  "published_lease_comment": 6769068260
+  "published_lease_comment": 6769068260,
+  "native_reviewer_pid": 5440,
+  "native_thread_id": "01a1c5c6-d62c-7151-a468-d65ae7e870c8",
+  "formal_model_calls_confirmed": 2,
+  "formal_asus_model_call_uncertain": 1
 }

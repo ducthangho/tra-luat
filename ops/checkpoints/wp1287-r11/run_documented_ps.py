@@ -1,9 +1,11 @@
 """Run actual documented PS helper/cleanup in each native shell; no product adapter."""
 import sys,json,datetime,hashlib
-from inline_transport import invocation
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 import native_flow as M
+from inline_transport import invocation
+if '--import-check' in sys.argv:
+    print(json.dumps({'isolated_imports_passed':True,'no_browser':True}));sys.exit(0)
 kind=sys.argv[1];assert kind in ('ps51','ps7')
 BASE=Path(r'C:\tl-win\wp1287-r11-ps-inline-20261110');ROOT=BASE/kind;E=ROOT/'evidence';INSTALL=Path(r'C:\tl-win\wp1287-r9-timeout-20261110\installation')
 SHELL=r'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe' if kind=='ps51' else r'C:\Program Files\PowerShell\7\pwsh.exe'

@@ -1,0 +1,116 @@
+{
+  "schema": "wp1287.loader_diagnostic.v1",
+  "frozen_commit": "7a27e766bda90fcb343459320e134b0f8d68555a",
+  "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+  "run_started_utc": "2026-11-10T01:13:22.569043Z",
+  "last_sample_utc": "2026-11-10T01:13:53.566502Z",
+  "terminal_utc": "2026-11-10T01:14:13.618002Z",
+  "samples": 57,
+  "loader_probe_rows": 9,
+  "loader_probe_seconds": [
+    5,
+    15,
+    25
+  ],
+  "unique_browser_pids_probed": 3,
+  "chrome_dll_present_at_probe_times": false,
+  "chrome_elf_present": true,
+  "uvh64_present_in_two_browser_processes": true,
+  "wct_errors": [],
+  "wct_node_types": [
+    8
+  ],
+  "wct_statuses": [
+    2,
+    3
+  ],
+  "cycle_observed": false,
+  "interpretation": "Observed loader stage before chrome.dll at5/15/25s. No lock-object edge or causal proof. Module presence alone does not prove fault. Later startup outcome differs from r4.",
+  "open_cli_rc": 0,
+  "stdout_json_keys": [
+    "session",
+    "pid",
+    "result"
+  ],
+  "session_nonce_matches": true,
+  "result_shape": {
+    "result": [
+      "snapshot"
+    ],
+    "snapshot": [
+      "file"
+    ]
+  },
+  "snapshot_reference_relative": true,
+  "snapshot_in_owned_root": true,
+  "snapshot_file_bytes": 0,
+  "url_aboutblank_independently_proved": false,
+  "open_stderr_bytes": 0,
+  "operator_rc": 2,
+  "operator_wrapper_rc": 1,
+  "operator_failure": "cleanup close timed out20s; not startup CLI failure",
+  "initial_cleanup_remaining_owned_browser_count": 3,
+  "cleanup_recovery": {
+    "forced_termination_executed": false,
+    "reason": "PIDs no longer matched/live at identity fence, no processes touched",
+    "final_owned_browser_count": 0,
+    "named_close_rc": 0,
+    "named_delete_data_rc": 0,
+    "lock_empty": true
+  },
+  "cleanup_close_stdout_sha256": "918cbf1f2c9fecb8313e9476729395423401cf11077637e222ee6bae247de5e8",
+  "cleanup_delete_stdout_sha256": "7b86f55f8c8f04b2f5f60bd09c993e9cda27db916f5b7041190a1341fc711ff4",
+  "resource_samples": [
+    {
+      "second": 0,
+      "free_ram": 1066012672,
+      "free_commit": 6835159040
+    },
+    {
+      "second": 5,
+      "free_ram": 187072512,
+      "free_commit": 6059163648
+    },
+    {
+      "second": 15,
+      "free_ram": 523083776,
+      "free_commit": 6057562112
+    },
+    {
+      "second": 25,
+      "free_ram": 342454272,
+      "free_commit": 6063054848
+    },
+    {
+      "second": 30,
+      "free_ram": 726421504,
+      "free_commit": 6232608768
+    }
+  ],
+  "minimum_free_ram": 164438016,
+  "oom_causal_proof": false,
+  "native_manifest_sha256": "5ffa957fc2a79d3f1a70d595395b6c10f23f8173a8cc9157e0915c4c6bfdea48",
+  "native_loader_probes_sha256": "60ca86459ba5492bb2bbdd9cb7456f73d9e6aae60b9049978a0d69a48035421e",
+  "raw_retained_native": true,
+  "raw_exported": false,
+  "installed_candidate_module_metadata": {
+    "name": "uvh64.dll",
+    "sha256": "b6409bfd227e8f54264dca364e3a7a6c635e25995c41a8c6f55675aee3636489",
+    "authenticode": "NotSigned",
+    "version_metadata": null,
+    "exact_loaded_path_correspondence": "NOT_MEASURED; browser already exited before path/hash bridge"
+  },
+  "diagnostic_allowance": {
+    "used": 1,
+    "reserved": 0,
+    "limit": 1
+  },
+  "author_used": 3,
+  "formal_used": 0,
+  "shared_used": 2,
+  "product_push_used": 0,
+  "U10": "OPEN_fullflow_not_run",
+  "OP-F01": "formal_OPEN",
+  "next": "Readonly design/resource readiness; no attribution to UltraViewer or RAM without control; no blind startup retry, pin/timeout/host-global changes"
+}

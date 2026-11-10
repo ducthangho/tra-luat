@@ -44,9 +44,13 @@ run_minutes: 5
 attempts_limit: 3
 attempts_used: 3
 diagnostic_limit: 1
-diagnostic_used: 0
+diagnostic_used: 1
 requires_live: false
 uy_quyen_merge: false
-status: leased
+status: retired
 thay_the_cho:
 - wp1287-r4-g4-diagnostic
+retired_at_utc: '2026-11-10T01:21:43Z'
+retired_at: '2026-11-10T01:21:43Z'
+retirement_reason: One loader/WCT run complete; initial cleanup timeout retained,
+  later own close/delete rc0, no remaining owned browser; U10 fullflow remains open

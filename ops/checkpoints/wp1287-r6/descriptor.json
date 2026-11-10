@@ -2,7 +2,7 @@
   "spec_sha256": "7e63961eae0ada407b25d6543c65d41a96561d7397714fe08054ea399218ab63",
   "script_sha256": "74490cf5682e4dc19a83afafcad91bc667208e427e54dd90e0f430f110d12998",
   "diagnostic": {
-    "used": 0,
+    "used": 1,
     "reserved": 0,
     "limit": 1
   },
@@ -35,5 +35,6 @@
     "modules": 29,
     "threads": 4,
     "WCT_session_error": null
-  }
+  },
+  "status": "terminal_open_rc0_cleanup_timeout_recovery_complete"
 }

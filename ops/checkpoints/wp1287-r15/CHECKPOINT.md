@@ -15,3 +15,5 @@ Native Python readback confirms old g14 lock empty, cleanup receipt exists, invo
 
 ## Public bootstrap PASS and launcher accepted 09:28Z
 Native bootstrap rc0:15 anonymous public inputs verified, exact H2/tree, clean clone, no private local Git objects copied. New deadline10:12:03Z. Public-only reviewer action accepted; operator PID26700 / canonical launcher PID18008 started. Actual model spawn/identity pending telemetry, do not infer from flags. One invocation guard active; no retry.
+
+Native run.json confirms actual reviewer child PID16572, state dang_chay. Charge formal1/2/shared4/8, reservations0; author3/3/design1/1 unchanged. Actual served model/effort still pending terminal telemetry.

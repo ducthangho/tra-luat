@@ -48,7 +48,7 @@ diagnostic_limit: 0
 diagnostic_used: 0
 requires_live: false
 uy_quyen_merge: false
-status: preparing_public_source_only
+status: reviewer_running
 thay_the_cho:
 - wp1287-r14-g14-review-1
 reviewer: codex
@@ -61,8 +61,8 @@ review_read_scope:
 - .agents/skills/playwright-browser/SKILL.md
 assurance_target: review_deferred_sensitive_same_provider
 formal_limit: 2
-formal_used: 0
-formal_reserved: 1
+formal_used: 1
+formal_reserved: 0
 shared_limit: 8
-shared_used: 3
-shared_reserved: 1
+shared_used: 4
+shared_reserved: 0

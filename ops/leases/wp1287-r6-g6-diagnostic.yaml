@@ -1,0 +1,52 @@
+schema_version: 2
+event: diagnostic_lease_granted
+packet_issue: 1287
+packet_id: wp1287
+mission_issue: 1238
+revision: 6
+generation: 6
+lease_id: wp1287-r6-g6-diagnostic
+role: operator
+provider: codex
+executor: codex
+model_family: openai
+execution_surface: codex_service
+transport: machine
+environment: cloud
+risk: sensitive
+access: operator-diagnostic-only
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1287-r6.md
+spec_hash: 7e63961eae0ada407b25d6543c65d41a96561d7397714fe08054ea399218ab63
+spec_sha256_required: 7e63961eae0ada407b25d6543c65d41a96561d7397714fe08054ea399218ab63
+prompt_path: ops/prompts/wp1287-r6-g6-diagnostic.md
+prompt_sha256_required: 27448c22012c009f470a3c25bafe775211cff261c9d73e665424756fd201b686
+write_set:
+- ops/checkpoints/wp1287-r6/
+effective_write_set:
+- ops/checkpoints/wp1287-r6/
+change_policy_sha: null
+land_obligations: []
+branch: ops/wp1287-r4-diagnostic
+base_sha: bf9914cb1a8e6f5047468f4d130b587015f8d73f
+start_from_sha: 2a5803e17b7ca4910c7188bfcc2276190e2d0b4b
+reviewed_sha_required: 2a5803e17b7ca4910c7188bfcc2276190e2d0b4b
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1238#issuecomment-6754755237
+authority_note: Owner direct continuation; distinct bounded owned-process loader/WCT
+  observation, no new product/model allowance
+leased_at_utc: '2026-11-10T01:12:16Z'
+heartbeat_at: '2026-11-10T01:12:16Z'
+lease_until: '2026-11-10T01:57:16Z'
+lease_expires_at_utc: '2026-11-10T01:57:16Z'
+run_minutes: 5
+attempts_limit: 3
+attempts_used: 3
+diagnostic_limit: 1
+diagnostic_used: 0
+requires_live: false
+uy_quyen_merge: false
+status: leased
+thay_the_cho:
+- wp1287-r4-g4-diagnostic

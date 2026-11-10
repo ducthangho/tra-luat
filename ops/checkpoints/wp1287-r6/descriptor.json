@@ -1,0 +1,39 @@
+{
+  "spec_sha256": "7e63961eae0ada407b25d6543c65d41a96561d7397714fe08054ea399218ab63",
+  "script_sha256": "74490cf5682e4dc19a83afafcad91bc667208e427e54dd90e0f430f110d12998",
+  "diagnostic": {
+    "used": 0,
+    "reserved": 0,
+    "limit": 1
+  },
+  "r4_diagnostic_used": 1,
+  "product_authors": {
+    "used": 3,
+    "limit": 3
+  },
+  "formal": {
+    "used": 0,
+    "limit": 2
+  },
+  "shared": {
+    "used": 2,
+    "limit": 8
+  },
+  "push": {
+    "used": 0,
+    "limit": 1
+  },
+  "product_write_set": [],
+  "effective_review_class": "sensitive",
+  "change_policy_sha": null,
+  "land_obligations": [],
+  "selfcheck": {
+    "rc": 0,
+    "browser": false,
+    "WN_bytes": 280,
+    "ME_bytes": 1080,
+    "modules": 29,
+    "threads": 4,
+    "WCT_session_error": null
+  }
+}

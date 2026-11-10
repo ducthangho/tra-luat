@@ -1,0 +1,27 @@
+{
+  "checkpoint_comment": 6755955881,
+  "utc": "2026-11-10T01:09:25.1057132Z",
+  "rc": 0,
+  "browser_launched": false,
+  "current_session_zero": false,
+  "os_version": "10.0.26300.0",
+  "runtime_files_present": [
+    "chrome.exe",
+    "chrome.dll",
+    "chrome_elf.dll",
+    "icudtl.dat",
+    "resources.pak",
+    "v8_context_snapshot.bin"
+  ],
+  "exe_dll_version": "157.0.8103.15",
+  "exe_dll_authenticode": "NotSigned",
+  "zone_identifier_present": false,
+  "event_logs": [
+    "Application",
+    "Microsoft-Windows-CodeIntegrity/Operational",
+    "Microsoft-Windows-AppLocker/EXE and DLL"
+  ],
+  "events_result": "NoMatchingEventsFound in r4 window; no proof policy absent",
+  "source_or_host_changes": false,
+  "U10": "OPEN"
+}

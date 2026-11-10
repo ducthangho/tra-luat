@@ -45,7 +45,7 @@ export TL_PW_NPM_CLI='</abs/node-v24.19.0-linux-x64/lib/node_modules/npm/bin/npm
 export TL_PW_SRC='</abs/checkout-tra-luat>/.agents/skills/playwright-browser'
 export TL_PW_INSTALL="$TL_PW_ROOT/install/0.1.0" PLAYWRIGHT_BROWSERS_PATH="$TL_PW_ROOT/browsers/0.1.0"
 export TL_PW_CLI="$TL_PW_INSTALL/node_modules/@playwright/cli/playwright-cli.js" PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 NO_UPDATE_NOTIFIER=1
-( set -Eeu; trap 'echo "STOP[PLAYWRIGHT_ADDON_UNAVAILABLE]: $BASH_COMMAND" >&2' ERR
+( set -Eeuo pipefail; trap 'echo "STOP[PLAYWRIGHT_ADDON_UNAVAILABLE]: $BASH_COMMAND" >&2' ERR
   for p in "$TL_PW_ROOT" "$TL_PW_NODE" "$TL_PW_NPM_CLI" "$TL_PW_SRC"; do case "$p" in /*) ;; *) false;; esac; done
   case "$TL_PW_ROOT" in *[!A-Za-z0-9._/-]*) false;; esac; [ -n "$TL_PW_TARGET_ID" ]; [ ! -e "$TL_PW_INSTALL" ]
   [ -z "$(env | grep -E '^(PLAYWRIGHT_|PWTEST_)' | grep -vE '^PLAYWRIGHT_(BROWSERS_PATH|SKIP_BROWSER_DOWNLOAD)=' || true)" ]
@@ -98,8 +98,8 @@ function Test-PwEnv { -not (Get-ChildItem Env: | Where-Object { $_.Name -match '
     "$($observation[0])" -ceq 'fatal: not a git repository (or any of the parent directories): .git') 'không chứng minh ngoài Git'
   foreach ($d in 'install\0.1.0', 'browsers\0.1.0', 'npm-cache', 'work', 'runs') {
     New-Item -ItemType Directory -Force -Path "$env:TL_PW_ROOT\$d" -ErrorAction Stop | Out-Null }
-  Need ((& $env:TL_PW_NODE --version) -eq 'v26.13.0') 'node'
-  Need ((& $env:TL_PW_NODE $env:TL_PW_NPM_CLI --version) -eq '11.20.0') 'npm'
+  Need (((& $env:TL_PW_NODE --version) -eq 'v26.13.0') -and $LASTEXITCODE -eq 0) 'node'
+  Need (((& $env:TL_PW_NODE $env:TL_PW_NPM_CLI --version) -eq '11.20.0') -and $LASTEXITCODE -eq 0) 'npm'
   [IO.File]::WriteAllText("$env:TL_PW_ROOT\npmrc-empty", ''); [IO.File]::WriteAllText("$env:TL_PW_ROOT\TARGET_ID", $env:TL_PW_TARGET_ID)
   Copy-Item -LiteralPath "$env:TL_PW_SRC\package.json", "$env:TL_PW_SRC\package-lock.json" -Destination $env:TL_PW_INSTALL -ErrorAction Stop
   $h0 = (Get-FileHash -LiteralPath "$env:TL_PW_INSTALL\package-lock.json" -Algorithm SHA256).Hash
@@ -118,7 +118,7 @@ ký registry KHÔNG chứng minh SLSA, build tái lập hay danh tính người 
 lần Capture; dòng cuối phải đúng `PIN OK`, khác ⇒ DỪNG. `~/.playwright/cli.config.json` và biến `PLAYWRIGHT_MCP_*` bị
 CLI gộp vào cấu hình: gặp thì DỪNG, đừng xoá đồ của người khác.
 ```bash
-( set -Eeu; trap 'echo "STOP[PLAYWRIGHT_ADDON_UNAVAILABLE]: $BASH_COMMAND" >&2' ERR
+( set -Eeuo pipefail; trap 'echo "STOP[PLAYWRIGHT_ADDON_UNAVAILABLE]: $BASH_COMMAND" >&2' ERR
   echo "target $TL_PW_TARGET_ID"; [ -n "$TL_PW_TARGET_ID" ]; target=$(cat "$TL_PW_ROOT/TARGET_ID"); [ "$target" = "$TL_PW_TARGET_ID" ]
   v=$("$TL_PW_NODE" --version); echo "node $v"; [ "$v" = v24.19.0 ]
   v=$("$TL_PW_NODE" "$TL_PW_NPM_CLI" --version); echo "npm $v"; [ "$v" = 11.9.0 ]
@@ -135,9 +135,10 @@ CLI gộp vào cấu hình: gặp thì DỪNG, đừng xoá đồ của người
 ```
 ```powershell
 & { $ErrorActionPreference = 'Stop'
-  "target $env:TL_PW_TARGET_ID"; Need ((Get-Content -Raw -LiteralPath "$env:TL_PW_ROOT\TARGET_ID") -eq $env:TL_PW_TARGET_ID) 'TargetId'
-  $v = & $env:TL_PW_NODE --version; "node $v"; Need ($v -eq 'v26.13.0') 'node'
-  $v = & $env:TL_PW_NODE $env:TL_PW_NPM_CLI --version; "npm $v"; Need ($v -eq '11.20.0') 'npm'
+  "target $env:TL_PW_TARGET_ID"; Need (-not [string]::IsNullOrWhiteSpace($env:TL_PW_TARGET_ID)) 'TargetId rỗng'
+  Need ((Get-Content -Raw -LiteralPath "$env:TL_PW_ROOT\TARGET_ID") -eq $env:TL_PW_TARGET_ID) 'TargetId'
+  $v = & $env:TL_PW_NODE --version; "node $v"; Need ($v -eq 'v26.13.0' -and $LASTEXITCODE -eq 0) 'node'
+  $v = & $env:TL_PW_NODE $env:TL_PW_NPM_CLI --version; "npm $v"; Need ($v -eq '11.20.0' -and $LASTEXITCODE -eq 0) 'npm'
   $h = (Get-FileHash -LiteralPath "$env:TL_PW_INSTALL\package-lock.json" -Algorithm SHA256).Hash; "lock $h"
   $expectedHash = Get-Content -Raw -LiteralPath "$env:TL_PW_ROOT\install\0.1.0.lock.sha256" -ErrorAction Stop
   Need ($h -cmatch '\A[0-9A-F]{64}\z' -and $expectedHash -cmatch '\A[0-9A-F]{64}\z' -and $h -ceq $expectedHash) 'lock'
@@ -145,7 +146,7 @@ CLI gộp vào cấu hình: gặp thì DỪNG, đừng xoá đồ của người
   Need ($LASTEXITCODE -eq 0) 'npm ls'; $l
   foreach ($x in '@playwright/cli@0.1.23', 'playwright@1.65.0-alpha-2026-10-30', 'playwright-core@1.65.0-alpha-2026-10-30') {
     Need (($l -join "`n").Contains($x)) $x }
-  $v = & $env:TL_PW_NODE $env:TL_PW_CLI --version; "cli $v"; Need ($v -eq '0.1.23') 'cli'
+  $v = & $env:TL_PW_NODE $env:TL_PW_CLI --version; "cli $v"; Need ($v -eq '0.1.23' -and $LASTEXITCODE -eq 0) 'cli'
   $b = $env:PLAYWRIGHT_BROWSERS_PATH; Need (Test-Path -LiteralPath "$b\chromium-1252\INSTALLATION_COMPLETE") 'chromium-1252'
   Need (-not (Test-Path -LiteralPath "$b\chromium_headless_shell-1252")) 'headless shell'
   $v = (Get-Item -LiteralPath "$b\chromium-1252\chrome-win64\chrome.exe").VersionInfo.ProductVersion; "browser $v"
@@ -169,7 +170,7 @@ chay_ghi() { local ten=$1 rc; shift
   printf '\trc=%s\t%s\n' "$rc" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$TL_PW_RUN/commands.tsv" || return 70
   return "$rc"; }
 # Chạy khối Kiểm pin bash ở trên dạng: ( … ) 2>&1 | tee "$TL_PW_RUN/00-pins.log"
-( set -Eeu; trap 'echo "STOP: $BASH_COMMAND — chạy Cleanup" >&2' ERR
+( set -Eeuo pipefail; trap 'echo "STOP: $BASH_COMMAND — chạy Cleanup" >&2' ERR
   [ "$(tail -n 1 "$TL_PW_RUN/00-pins.log")" = 'PIN OK' ]; case "$TL_PW_URL" in http://*|https://*) ;; *) false;; esac
   printf '{"browser":{"browserName":"chromium","isolated":true,"launchOptions":{"channel":"chromium","headless":true,"timeout":30000}},"timeouts":{"action":10000},"outputDir":"%s","outputMode":"file"}\n' \
     "$TL_PW_RUN" > "$TL_PW_RUN/browser.json"
@@ -221,7 +222,7 @@ function Invoke-PwGhi([string]$Ten, [string[]]$Argv, [switch]$PhaiLoi) {
   nguyên chuỗi chuyển hướng 3xx. Chỉ số chỉ đúng cho phiên + lần điều hướng này. 0 hoặc nhiều dòng khớp ⇒ DỪNG.
 ```bash
 export TL_PW_IDX='<N đọc từ 04-requests.json>'
-( set -Eeu; trap 'echo "STOP: $BASH_COMMAND — chạy Cleanup" >&2' ERR
+( set -Eeuo pipefail; trap 'echo "STOP: $BASH_COMMAND — chạy Cleanup" >&2' ERR
   case "$TL_PW_IDX" in ''|*[!0-9]*) false;; esac
   chay_ghi 05-response-body response-body "$TL_PW_IDX" --filename "$TL_PW_RUN/source.body"
   chay_ghi 06-screenshot screenshot --full-page --filename "$TL_PW_RUN/page.png"

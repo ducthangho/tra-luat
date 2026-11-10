@@ -37,16 +37,23 @@ granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1238#issue
 authority_note: Latest owner explicitly authorizes doubled timeout after R8 failure;
   action5000 to10000, one open, no new model/product allowance
 leased_at_utc: '2026-11-10T06:13:58.315314+00:00'
-heartbeat_at: '2026-11-10T06:13:58.315314+00:00'
-lease_until: '2026-11-10T07:43:58.315314+00:00'
-lease_expires_at_utc: '2026-11-10T07:43:58.315314+00:00'
+heartbeat_at: '2026-11-10T06:23:06.828930+00:00'
+lease_until: '2026-11-10T06:23:06.828930+00:00'
+lease_expires_at_utc: '2026-11-10T06:23:06.828930+00:00'
 run_minutes: 8
 attempts_limit: 3
 attempts_used: 3
 diagnostic_limit: 1
-diagnostic_used: 0
+diagnostic_used: 1
 requires_live: false
 uy_quyen_merge: false
-status: active
+status: retired
 thay_the_cho:
 - wp1287-r8-g8-operator
+original_lease_until: '2026-11-10T07:43:58.315314+00:00'
+original_lease_expires_at_utc: '2026-11-10T07:43:58.315314+00:00'
+retired_at: '2026-11-10T06:23:06.828930+00:00'
+retired_at_utc: '2026-11-10T06:23:06.828930+00:00'
+retirement_reason: 'One doubled-action-timeout fullflow PASS: nonce body, PNG1280x720,
+  parsed PDF nonce, cleanup verified, host lock released; original failures retained;
+  no automatic U10/formal closure'

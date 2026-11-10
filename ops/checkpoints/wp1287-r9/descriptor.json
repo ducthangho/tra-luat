@@ -25,7 +25,7 @@
     "native": 13
   },
   "measurement": {
-    "used": 0,
+    "used": 1,
     "reserved": 0,
     "limit": 1
   },
@@ -40,7 +40,7 @@
     "formal": "0/2",
     "productpush": "0/1"
   },
-  "status": "prepared_pending_final_native_hash",
+  "status": "operator_fullflow_passed_pending_documented_shells_and_formal",
   "stage": {
     "passed": true,
     "npm_ci_rc": 0,
@@ -56,5 +56,9 @@
     }
   },
   "ownership_scan": "Exactly one active holder: wp1287-r9-g9-operator; fullrefs refreshed",
-  "github_lease_gate": "passed"
+  "github_lease_gate": "passed",
+  "native_receipt_sha256": "b140bb8adf494b34de4d08d55521d453c8a001492dde56f5641c9b82a25e5072",
+  "U10": "OPEN_pending_documented_shell_proofs_and_formal_review",
+  "OP_F01": "formal_OPEN",
+  "sensitive_assurance": "HOLD"
 }

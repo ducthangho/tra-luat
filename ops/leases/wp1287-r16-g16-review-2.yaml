@@ -48,7 +48,7 @@ diagnostic_limit: 0
 diagnostic_used: 0
 requires_live: false
 uy_quyen_merge: false
-status: preparing_corrected_public_review
+status: superseded_asus_host_unreachable_cleanup_unknown
 thay_the_cho:
 - wp1287-r15-g15-review-1
 reviewer: codex
@@ -66,3 +66,8 @@ formal_reserved: 1
 shared_limit: 8
 shared_used: 4
 shared_reserved: 1
+da_bi_thay_the: wp1287-r17-g17-review-vm
+superseded_at_utc: '2026-11-10T13:43:23.129325+00:00'
+host_cleanup_verified: false
+model_invoked: UNKNOWN
+uncertain_shared_call_conservatively_charged: true

@@ -79,6 +79,16 @@ $env:TL_PW_INSTALL = "$env:TL_PW_ROOT\install\0.1.0"; $env:PLAYWRIGHT_BROWSERS_P
 $env:TL_PW_CLI = "$env:TL_PW_INSTALL\node_modules\@playwright\cli\playwright-cli.js"
 $env:PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = '1'; $env:NO_UPDATE_NOTIFIER = '1'
 function Need($Ok, $Msg) { if (-not $Ok) { throw "STOP[PLAYWRIGHT_ADDON_UNAVAILABLE]: $Msg" } }
+function Get-PwHashes($Files) {
+  $ErrorActionPreference = 'Stop'
+  foreach ($file in $Files) {
+    $digest = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256 -ErrorAction Stop).Hash
+    Need ($digest -cmatch '\A[0-9A-F]{64}\z') "SHA256 không hợp lệ: $($file.FullName)"
+    $row = $file | Select-Object FullName, Length
+    Add-Member -InputObject $row -NotePropertyName SHA256 -NotePropertyValue $digest -ErrorAction Stop
+    $row
+  }
+}
 function Test-PwEnv { -not (Get-ChildItem Env: | Where-Object { $_.Name -match '^(PLAYWRIGHT_|PWTEST_)' -and
   $_.Name -notmatch '^PLAYWRIGHT_(BROWSERS_PATH|SKIP_BROWSER_DOWNLOAD)$' }) }
 & { $ErrorActionPreference = 'Stop'
@@ -243,8 +253,7 @@ $env:TL_PW_IDX = '<N đọc từ 04-requests.json>'
   Need ((Get-Item -LiteralPath "$env:TL_PW_RUN\source.body").Length -gt 0) 'source.body rỗng'
   Need (([IO.File]::ReadAllBytes("$env:TL_PW_RUN\page.png")[0..3] -join ',') -eq '137,80,78,71') 'PNG'
   Need ([Text.Encoding]::ASCII.GetString([IO.File]::ReadAllBytes("$env:TL_PW_RUN\page.pdf"), 0, 5) -eq '%PDF-') 'PDF'
-  $h = Get-ChildItem -Force -File -LiteralPath $env:TL_PW_RUN | Select-Object FullName, Length,
-    @{ n = 'SHA256'; e = { (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash } }
+  $h = @(Get-PwHashes (Get-ChildItem -Force -File -LiteralPath $env:TL_PW_RUN))
   $h | Export-Csv -LiteralPath "$env:TL_PW_RUN\SHA256SUMS.csv" -NoTypeInformation -Encoding UTF8; $h }
 ```
 ## Evidence
@@ -329,8 +338,8 @@ Nếu dừng sớm, operator lưu hash các output mới và `commands.tsv` vào
     "{`n  `"session`": `"$session`",`n  `"deleted`": true`n}`n")
   Invoke-PwGhi 10-verify @('tab-list') -PhaiLoi
   Assert-PwCleanupOutput 10-verify @("{`n  `"isError`": true,`n  `"error`": `"The browser '$session' is not open, please run open first`"`n}`n")
-  $h = Get-ChildItem -Force -File -LiteralPath $env:TL_PW_RUN | Where-Object Name -ne 'SHA256SUMS.csv' |
-    Select-Object FullName, Length, @{ n = 'SHA256'; e = { (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash } }
+  $files = Get-ChildItem -Force -File -LiteralPath $env:TL_PW_RUN | Where-Object Name -ne 'SHA256SUMS.csv'
+  $h = @(Get-PwHashes $files)
   $h | Export-Csv -LiteralPath "$env:TL_PW_RUN\SHA256SUMS.csv" -NoTypeInformation -Encoding UTF8 -ErrorAction Stop
   'CLEANUP OK' }
 ```

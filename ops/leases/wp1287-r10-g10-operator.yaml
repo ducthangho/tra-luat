@@ -1,0 +1,52 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1287
+packet_id: wp1287
+mission_issue: 1238
+revision: 10
+generation: 10
+lease_id: wp1287-r10-g10-operator
+role: operator
+provider: codex
+executor: codex
+model_family: openai
+execution_surface: codex_service
+transport: machine
+environment: cloud
+risk: sensitive
+access: operator-measurement-only
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1287-r10.md
+spec_hash: 9bab1064d21630a87651c75428a2509228a6a7305ec64a3a5d77058b59515710
+spec_sha256_required: 9bab1064d21630a87651c75428a2509228a6a7305ec64a3a5d77058b59515710
+prompt_path: ops/prompts/wp1287-r10-g10-operator.md
+prompt_sha256_required: 8aeca1171372f0eaa9f840e2c18ccdd457490da200905ed2769914174b20588f
+write_set:
+- ops/checkpoints/wp1287-r10/
+effective_write_set:
+- ops/checkpoints/wp1287-r10/
+change_policy_sha: null
+land_obligations: []
+branch: ops/wp1287-r4-diagnostic
+base_sha: bf9914cb1a8e6f5047468f4d130b587015f8d73f
+start_from_sha: 2a5803e17b7ca4910c7188bfcc2276190e2d0b4b
+reviewed_sha_required: 2a5803e17b7ca4910c7188bfcc2276190e2d0b4b
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1238#issuecomment-6754755237
+authority_note: Original required native PS5.1/7 positive acceptance after R9 PASS
+  under explicit doubled-timeout permission; one open each, no new model/product cost
+leased_at_utc: '2026-11-10T06:26:24.281856+00:00'
+heartbeat_at: '2026-11-10T06:26:24.281856+00:00'
+lease_until: '2026-11-10T07:56:24.281856+00:00'
+lease_expires_at_utc: '2026-11-10T07:56:24.281856+00:00'
+run_minutes: 8
+attempts_limit: 3
+attempts_used: 3
+diagnostic_limit: 2
+diagnostic_used: 0
+requires_live: false
+uy_quyen_merge: false
+status: active
+thay_the_cho:
+- wp1287-r9-g9-operator

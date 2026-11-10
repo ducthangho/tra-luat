@@ -1,0 +1,25 @@
+{
+  "schema": "wp1287.operator_execution_grant.v1",
+  "authority": "Original PS5.1/7 required positive proof under continuing owner delegation and explicit action-timeout doubling",
+  "mode": "candidate_native_fullflow",
+  "one_open_limit": 1,
+  "total_shell_positive_limit": 2,
+  "helper_sha256": {
+    "source-excerpts.json": "36010e6325571d35aab3fbba64d7da2886461384e24e07952032dc524ec5dde9",
+    "contract.py": "edb3d772e36a20acadfddca78cdd2585b28973b790d6a863d7f88b12153ff8e4",
+    "native_flow.py": "82731046675002833144f08c6255fad7a74469f4d4aa17ce70124c5c2cfc1a83",
+    "documented-helper.ps1": "51275f5478f6de6dd80b7736b1f39e66e2d52f03d9e527b41b66a91f8e7d6251",
+    "native_observer.py": "562d55dc484368b1cabdfe6b02a370b5200b90da2fec6e0932af6c65a1970150",
+    "test_contract.py": "e4c297b70a6a031c6250681c95c521ae33b2f6deff7130406a95eb510bd89bee",
+    "run_documented_ps.py": "7d54d5bbc2f65811402518db460e3295c1228874bb4fd5db712f295b27611da4",
+    "documented-cleanup.ps1": "672dd903bcc4f8fda39fb83281273d3554e310227821d22a3773f4cfc6a25c1a",
+    "invoke-documented.ps1": "10528c88cd24edffbc18d67a350b096a6083ec1e4fd20dd9430546dde203f1f0"
+  },
+  "expires_at": "2026-11-10T07:26:24.281856+00:00",
+  "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "action_timeout_ms": 10000,
+  "launch_timeout_ms": 30000,
+  "cleanup_per_command_seconds": 20,
+  "no_browser_termination": true,
+  "product_write_set": []
+}

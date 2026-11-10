@@ -1,0 +1,15 @@
+{
+  "status": "preparing",
+  "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "formal_used": 1,
+  "formal_reserved": 1,
+  "shared_used": 4,
+  "shared_reserved": 1,
+  "model_invoked": false,
+  "lease_expires_at_utc": "2026-11-10T11:23:27.528717+00:00",
+  "prompt_sha256": "1f8705cfd91a18365751542268aa514940518cc2e44a1d2401ba04437d911007",
+  "spec_sha256": "833e5d6f51b9a4e03671cc6ba3ff39eb6ad064c13e83cbdcd4104fe371600be7",
+  "run_review_sha256": "d6757592835915bef3b0197436e10a780daf76ac5644ab8efc3a5e58841c5885",
+  "sandbox_preflight_sha256": "4d0b189c913c3ab7eb0b24c4ede2509ba47f9f6dd595da49da317c77e8731015",
+  "public_provenance_sha256": "da813bcf1d44bc2aba420b48d86d4b5b3eeb7c4abf066a463ddfb3e4f9e375e0"
+}

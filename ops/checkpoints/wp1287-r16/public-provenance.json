@@ -1,0 +1,159 @@
+{
+  "repository": {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat",
+    "status": 200,
+    "authentication_supplied": false,
+    "private": false,
+    "visibility": "public"
+  },
+  "handoff_archive": {
+    "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/1643c31d06c784eca93e8ae38a05e29f33ad654a/ops/checkpoints/mission1238-p2-p6-handoff-20261109/artifacts/mission1238-P2-P6-handoff-20261109.zip",
+    "status": 200,
+    "authentication_supplied": false,
+    "bytes": 3605236,
+    "sha256": "6ac46ac05b2cf1bc8393914e340848a6a2a331af4a04e97356bc47e73abbb8bc",
+    "extracted_member": "P2/candidate-H2.bundle",
+    "bundle_sha256": "bc8bdaacfb1fefb5b540eb945185027c2ece0a8301589c793ff11b3aeda6c84f"
+  },
+  "files": [
+    {
+      "name": "r10-CHECKPOINT.md",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/f8c73612939710cf73143ffb4f8ff0995c4a0a96/ops/checkpoints/wp1287-r10/CHECKPOINT.md",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 1230,
+      "sha256": "74b461ae87b69c18c8c75103512f6ecdf9315eb93bee20b45260f2ffb3df4dbf"
+    },
+    {
+      "name": "r10-source-excerpts.json",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/f8c73612939710cf73143ffb4f8ff0995c4a0a96/ops/checkpoints/wp1287-r10/source-excerpts.json",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 729,
+      "sha256": "36010e6325571d35aab3fbba64d7da2886461384e24e07952032dc524ec5dde9"
+    },
+    {
+      "name": "r10-unstarted-recovery.json",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/f8c73612939710cf73143ffb4f8ff0995c4a0a96/ops/checkpoints/wp1287-r10/unstarted-recovery.json",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 587,
+      "sha256": "3adfc7b6f68668ac70c94892d3fbd7a993c352cc87320d74a619a5a4ae10a040"
+    },
+    {
+      "name": "r11-CHECKPOINT.md",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/f8c73612939710cf73143ffb4f8ff0995c4a0a96/ops/checkpoints/wp1287-r11/CHECKPOINT.md",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 1328,
+      "sha256": "dfadc3e0a490c271e69627a31b91d7df44f2f809669130edb94e8b2bf9b5b928"
+    },
+    {
+      "name": "r11-input-failure-recovery.json",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/f8c73612939710cf73143ffb4f8ff0995c4a0a96/ops/checkpoints/wp1287-r11/input-failure-recovery.json",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 831,
+      "sha256": "6b01387a2133486509d457b7667c297e9c42ee2a7f195e49094d92fc28d81d70"
+    },
+    {
+      "name": "r11-source-excerpts.json",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/f8c73612939710cf73143ffb4f8ff0995c4a0a96/ops/checkpoints/wp1287-r11/source-excerpts.json",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 729,
+      "sha256": "36010e6325571d35aab3fbba64d7da2886461384e24e07952032dc524ec5dde9"
+    },
+    {
+      "name": "r12-CHECKPOINT.md",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/f8c73612939710cf73143ffb4f8ff0995c4a0a96/ops/checkpoints/wp1287-r12/CHECKPOINT.md",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 3004,
+      "sha256": "2eed8227a085ea2627bb67bdf5601b100351ceb469c235468a334ec50cd417e0"
+    },
+    {
+      "name": "r12-native-summary.json",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/f8c73612939710cf73143ffb4f8ff0995c4a0a96/ops/checkpoints/wp1287-r12/native-summary.json",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 31273,
+      "sha256": "d345f090719a74decf4fdb129b1a63d64cf31877d5ca0444bdf9db65592150e0"
+    },
+    {
+      "name": "r12-source-excerpts.json",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/f8c73612939710cf73143ffb4f8ff0995c4a0a96/ops/checkpoints/wp1287-r12/source-excerpts.json",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 729,
+      "sha256": "36010e6325571d35aab3fbba64d7da2886461384e24e07952032dc524ec5dde9"
+    },
+    {
+      "name": "r8-CHECKPOINT.md",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/f8c73612939710cf73143ffb4f8ff0995c4a0a96/ops/checkpoints/wp1287-r8/CHECKPOINT.md",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 4550,
+      "sha256": "03e7f627d5efc9d704e341e3e8eea1ee759a2e98642823ef425c435b19f1492d"
+    },
+    {
+      "name": "r8-native-summary.json",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/f8c73612939710cf73143ffb4f8ff0995c4a0a96/ops/checkpoints/wp1287-r8/native-summary.json",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 13216,
+      "sha256": "11d9ed0c86fd478dacdab880a17f45ea323a68cfcd9b9938288f9184322f9691"
+    },
+    {
+      "name": "r9-CHECKPOINT.md",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/f8c73612939710cf73143ffb4f8ff0995c4a0a96/ops/checkpoints/wp1287-r9/CHECKPOINT.md",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 2183,
+      "sha256": "83e7e8183a66ecde666db7a379aceb6fefa88cd66bf7a49dc43c36721391b532"
+    },
+    {
+      "name": "r9-native-summary.json",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/f8c73612939710cf73143ffb4f8ff0995c4a0a96/ops/checkpoints/wp1287-r9/native-summary.json",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 13781,
+      "sha256": "dddeefd8dd0617b06931fd4e1f7e45f930055ca20d125199e5339fa28f4a00e7"
+    },
+    {
+      "name": "SPEC-r3.md",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/3d633584f9da9b8847d92d06d4a47104ccdbf21a/ops/specs/wp1287-r3.md",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 20850,
+      "sha256": "9b8deaee351417aaf3e417b553bf5817c477aad6fdd811ab0711541c4eea5625"
+    },
+    {
+      "name": "r15-verdict.json",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/b33447f/ops/checkpoints/wp1287-r15/verdict.json",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 7417,
+      "sha256": "e3d6c38fa7242b887c93bf4d370656041b8637822117e12feb19d1a372f11bd4"
+    },
+    {
+      "name": "r15-verdict.receipt.yaml",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/b33447f/ops/checkpoints/wp1287-r15/verdict.receipt.yaml",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 2108,
+      "sha256": "260127aa8c129c072c2b9c114e6d0ac6635538d4471a109160de85617c493ee3"
+    },
+    {
+      "name": "r15-sandbox-git-preflight.json",
+      "url": "https://raw.githubusercontent.com/ducthangho/tra-luat/b33447f/ops/checkpoints/wp1287-r15/sandbox-git-preflight.json",
+      "status": 200,
+      "authentication_supplied": false,
+      "bytes": 2214,
+      "sha256": "0db180038ae081ff4b181f344465aca7331f1738e44baaee6356fb9011cd7be7"
+    }
+  ],
+  "public_downloaded_file_count": 18,
+  "no_local_private_clone_or_logs_copied": true,
+  "model_invoked": false
+}

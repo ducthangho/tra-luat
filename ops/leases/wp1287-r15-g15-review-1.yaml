@@ -70,3 +70,4 @@ retired_at_utc: '2026-11-10T09:46:00.880210+00:00'
 original_lease_deadline: '2026-11-10T10:50:31.681088+00:00'
 retirement_reason: Actual formal reviewer blocked on sandbox Git ownership; output
   preserved; no automatic retry; native snapshot clean and lock released
+da_bi_thay_the: wp1287-r16-g16-review-2

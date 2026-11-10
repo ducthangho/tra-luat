@@ -102,9 +102,9 @@ change_policy_exception:
   - M9
   - unknown=>blocked
 leased_at_utc: '2026-11-10T00:27:43Z'
-heartbeat_at: '2026-11-10T00:27:43Z'
-lease_until: '2026-11-10T15:25:32Z'
-lease_expires_at_utc: '2026-11-10T15:25:32Z'
+heartbeat_at: '2026-11-10T02:56:12Z'
+lease_until: '2026-11-10T02:56:12Z'
+lease_expires_at_utc: '2026-11-10T02:56:12Z'
 heartbeat_required_minutes: 360
 max_lease_hours: 24
 hard_not_after: '2026-11-10T15:25:32Z'
@@ -616,3 +616,8 @@ routine_role_arithmetic_correction:
   owner_basis: Explicit routine-cap delegation in R25 owner reply; actual public correction
     readback required before source19
   component_caps_unchanged: true
+da_bi_thay_the: wp1174-r26-g23-codex
+ended_by_R26_delegated_successor:
+  at: '2026-11-10T02:56:12Z'
+  successor: wp1174-r26-g23-codex
+  no_landed_or_pass_claim: true

@@ -39,8 +39,8 @@ authority_note: Original independent review remains authorized; materially safer
   local private clone reused
 leased_at_utc: '2026-11-10T09:20:31.681088+00:00'
 heartbeat_at: '2026-11-10T09:20:31.681088+00:00'
-lease_until: '2026-11-10T10:50:31.681088+00:00'
-lease_expires_at_utc: '2026-11-10T10:50:31.681088+00:00'
+lease_until: '2026-11-10T09:46:00.880210+00:00'
+lease_expires_at_utc: '2026-11-10T09:46:00.880210+00:00'
 run_minutes: 45
 attempts_limit: 3
 attempts_used: 3
@@ -48,7 +48,7 @@ diagnostic_limit: 0
 diagnostic_used: 0
 requires_live: false
 uy_quyen_merge: false
-status: reviewer_running
+status: retired
 thay_the_cho:
 - wp1287-r14-g14-review-1
 reviewer: codex
@@ -66,3 +66,7 @@ formal_reserved: 0
 shared_limit: 8
 shared_used: 4
 shared_reserved: 0
+retired_at_utc: '2026-11-10T09:46:00.880210+00:00'
+original_lease_deadline: '2026-11-10T10:50:31.681088+00:00'
+retirement_reason: Actual formal reviewer blocked on sandbox Git ownership; output
+  preserved; no automatic retry; native snapshot clean and lock released

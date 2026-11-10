@@ -12,7 +12,7 @@
   "provenance_sha256": "e46b4455c3a7c344e8b508d124aea178bed043d41682c344def07881a95384a1",
   "requested_model": "gpt-6-astra",
   "requested_effort": "xhigh",
-  "status": "formal_reviewer_running",
+  "status": "formal_review_blocked_bootstrap",
   "model_invoked": true,
   "source_write_set": [],
   "budgets": {
@@ -31,10 +31,19 @@
     "productpush": "0/1"
   },
   "assurance": "HOLD_sensitive_same_provider",
-  "active_lease": "wp1287-r15-g15-review-1",
+  "active_lease": null,
   "control_base": "21261f62018bd49b59e797418fc188399c835e23",
   "native_operator_pid": 26700,
   "native_launcher_pid": 18008,
   "deadline_utc": "2026-11-10T10:12:03Z",
-  "native_reviewer_pid": 16572
+  "native_reviewer_pid": 16572,
+  "actual_model": "gpt-6-astra",
+  "actual_effort": "xhigh",
+  "actual_identity_measurement": "DO_DUOC",
+  "native_run_id": "77106877b84e42b69fb5e36e23396244",
+  "reviewer_verdict": "blocked",
+  "code_correctness_assessed": false,
+  "exclusive_public_read_boundary": false,
+  "read_boundary_reason": "An initial keyword search read the memory registry outside the assigned roots under inherited memory instructions. Its results were not used as review evidence. Consequently, this run cannot claim exclusive reads from the assigned public workspace.",
+  "host_lock_released": true
 }

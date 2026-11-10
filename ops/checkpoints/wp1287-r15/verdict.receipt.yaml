@@ -1,0 +1,63 @@
+schema_version: 2
+kind: review_delivery_receipt
+receipt_id: wp1287-r15-g15-review-1-77106877
+packet_id: wp1287
+packet_issue: 1287
+mission_issue: 1238
+revision: 15
+generation: 15
+lease_id: wp1287-r15-g15-review-1
+role: reviewer
+provider: codex
+executor_provider: codex
+cross_provider: false
+review_class: sensitive
+assurance: review_deferred
+verdict: blocked
+code_correctness_verdict: not_assessed
+reviewed_sha: 2a5803e17b7ca4910c7188bfcc2276190e2d0b4b
+reviewed_tree: bfb2fad8df2634ae8dd4c839a4565b76d1cfae45
+independent_from_executor_session: true
+review_axes:
+- spec
+- standards_security
+model_reviewer_identity:
+  provider: codex
+  model_family: openai
+  execution_surface: codex_cli
+  transport: machine
+  session_run_id: 77106877b84e42b69fb5e36e23396244
+  thread_id: 01a1c4ce-12d0-7630-ba04-f552c0696d08
+  model_served: gpt-6-astra
+  effort_served: xhigh
+  measurement: DO_DUOC
+  source: 'terminal-telemetry.json: response.created/launcher effort measurement'
+github_submitter_identity:
+  actor: ducthangho
+  role: transporter_only
+verdict_path: ops/checkpoints/wp1287-r15/verdict.json
+verdict_bytes: 7417
+verdict_sha256: e3d6c38fa7242b887c93bf4d370656041b8637822117e12feb19d1a372f11bd4
+launcher_rc: 0
+child_rc: 0
+stdout_sha256: eb4877c26e44985ef4e1e3c8df2a1677f84ef1bb95593679a88f8803d6b18e69
+sandbox_requested: read-only
+sandbox_observation: KHONG_DO_DUOC on Windows launcher monitor
+snapshot_result: sach
+changed_files: 0
+lock_released: true
+review_input_boundary: 'not_exclusive: inherited memory read disclosed; contents not
+  exported'
+candidate_identity_by_reviewer: 'not_measured: Git trust failed'
+candidate_identity_by_operator: exact SHA/tree independently verified before/after
+open_findings:
+- id: WP1287-R15-BOOTSTRAP-001
+  severity: P2
+  category: review_capability
+usage_caveats:
+- Actual CLI rc0 is not candidate approval; reviewer verdict blocked.
+- Full diff and both review axes incomplete; OP-F01/U10 unresolved.
+- Same-provider sensitive assurance HOLD.
+- Native raw logs remain on ASUS; only hashes, unchanged verdict and allowlisted telemetry
+  exported.
+raw_logs_exported: false

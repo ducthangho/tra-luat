@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1287",
+  "generation": 15,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "session_id": "wp1287-r15-g15-review-1",
+  "model_reviewer_identity": {
+    "requested_model": "gpt-6-astra",
+    "requested_effort": "xhigh",
+    "actual_model": null,
+    "actual_effort": null,
+    "measurement": "Not observable here; external launcher telemetry required."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "reviewed_tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+  "candidate_identity_verification": {
+    "status": "not_measured",
+    "note": "SHA and tree above identify the assigned target only. Git preflight failed before independent verification."
+  },
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "tests": [
+    {
+      "name": "Assigned input integrity",
+      "command": "C:\\Python313\\python.exe -I -B -",
+      "method": "Read inputs/MANIFEST.json; calculate hashlib.sha256 and byte length for each listed file.",
+      "exit_code": 0,
+      "status": "passed",
+      "result": "All 15 files matched their recorded SHA-256 and size.",
+      "limits": "Local integrity against the supplied manifest; anonymous download provenance was read, not independently reverified online."
+    },
+    {
+      "name": "Frozen assignment hashes",
+      "command": "C:\\Python313\\python.exe -I -B -",
+      "exit_code": 0,
+      "status": "passed",
+      "result": {
+        "SPEC-r15.md": "f8d4bfe8ca7a4bf7960db33387e6603d547647a455ddc4c2d53f609b12a1b228",
+        "prompt.snapshot": "ac2793136003111827b5c6ab2ca59015d9248cd175043fbb479e5ccda6ebb17c"
+      },
+      "limits": "Computed hashes only; dispatcher grant/hash validation was not independently observed."
+    },
+    {
+      "name": "Git preflight",
+      "command_prefix": "C:\\Program Files\\Git\\cmd\\git.exe --no-optional-locks -c core.fsmonitor=false -C D:\\tl-win\\wp1287-public-review-20261110\\repo",
+      "process_environment": {
+        "SystemRoot": "C:\\Windows",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_CONFIG_GLOBAL": "NUL"
+      },
+      "commands": [
+        {
+          "arguments": "rev-parse --show-toplevel HEAD HEAD^{tree} bf9914cb1a8e6f5047468f4d130b587015f8d73f^{tree}",
+          "exit_code": 128
+        },
+        {
+          "arguments": "symbolic-ref -q HEAD",
+          "exit_code": 128
+        },
+        {
+          "arguments": "merge-base --is-ancestor bf9914cb1a8e6f5047468f4d130b587015f8d73f 2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+          "exit_code": 128
+        },
+        {
+          "arguments": "status --porcelain=v1 --untracked-files=all --ignored=matching",
+          "exit_code": 128
+        }
+      ],
+      "status": "failed",
+      "result": "Git rejected the clone as dubious ownership: repository owner ASUS-LAPTOP/admin differs from runtime user ASUS-LAPTOP/CodexSandboxOffline.",
+      "limits": "This establishes failure under the explicitly isolated Git configuration, not absence of a trust exception in configurations that were excluded."
+    },
+    {
+      "name": "Candidate diff inspection",
+      "command_prefix": "Same isolated Git invocation",
+      "commands": [
+        "diff --no-ext-diff --no-textconv --check bf9914cb1a8e6f5047468f4d130b587015f8d73f 2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+        "diff --no-ext-diff --no-textconv --numstat bf9914cb1a8e6f5047468f4d130b587015f8d73f 2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+        "diff --no-ext-diff --no-textconv bf9914cb1a8e6f5047468f4d130b587015f8d73f 2a5803e17b7ca4910c7188bfcc2276190e2d0b4b"
+      ],
+      "exit_codes": [1, 1, 1],
+      "status": "failed",
+      "result": "Each reported Could not access the baseline OID. No diff was obtained.",
+      "limits": "The enclosing Python process returned 0; that does not make its failed Git subprocesses pass."
+    },
+    {
+      "name": "Source correctness, cleanup counterexamples and runtime gates",
+      "command": null,
+      "status": "not_run",
+      "result": "Stopped at failed preflight. OP-F01, U10, native summaries, package coherence, setup/capture behavior and optional/core isolation were not adjudicated. Historical test counts are not reviewer results."
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "WP1287-R15-BOOTSTRAP-001",
+      "class_slug": "review-bootstrap-git-trust-unverified",
+      "severity": "P2",
+      "category": "review_capability",
+      "source_anchor": "docs/PROTOCOL_DA_PHIEN.md:752-758; assigned prompt TARGET preflight",
+      "evidence": "The actual sandbox Git invocation returned rc128 for identity, ancestry and clean-state probes. The required exact-state preflight therefore remains unverified. This is a review-environment blocker, not an established candidate defect.",
+      "remediation": {
+        "where_and_why": "Dispatcher-owned reviewer bootstrap: trust and Git capability must work under the actual sandbox identity before handing over the read-only clone.",
+        "direction": "Reconcile the restriction on global/profile reads with an explicitly authorized Git configuration for this exact clone. Validate the ordinary read-only preflight before any newly authorized review. The reviewer must not add a trust exception or change permissions.",
+        "locking_test_or_mutant": "Under the same sandbox identity and permitted configuration, require successful exact HEAD/tree, ancestry, status and B..H2 diff probes. A fixture lacking the required trust must remain a reported preflight failure.",
+        "regression_risk": "Broad trust exceptions or loading unrelated configuration could weaken the public-source boundary. Preserve exact-path scope and distinguish bootstrap success from candidate correctness."
+      }
+    }
+  ],
+  "scope_disclosure": {
+    "candidate_modifications": "None performed.",
+    "accounts_or_services_accessed": "None.",
+    "additional_local_read": "An initial keyword search read the memory registry outside the assigned roots under inherited memory instructions. Its results were not used as review evidence. Consequently, this run cannot claim exclusive reads from the assigned public workspace.",
+    "trust_changes": "None performed."
+  },
+  "verdict": "blocked",
+  "code_correctness_verdict": "not_assessed",
+  "assurance": "review_deferred",
+  "evidence_url": null,
+  "summary": "Input integrity passed, but mandatory Git preflight failed. The full candidate diff and both review axes remain incomplete; OP-F01 and U10 remain unresolved by this review. No approval, release assurance or completion is claimed.",
+  "next_role": "human",
+  "manual_next_action": "Dispatcher: preserve this blocked output and actual subprocess results, resolve bootstrap capability and review-input isolation, and reconcile the existing lease and budget before any further invocation. No automatic retry.",
+  "copyable_prompt": "Preserve WP1287 r15/g15 review-1 as blocked. Resolve exact-clone Git trust under the actual sandbox identity and prevent reads outside the assigned public inputs. Validate HEAD/tree, baseline ancestry, clean state and the complete B..H2 diff before handing over another review. Retain all prior failures and counters; do not infer candidate approval or authorize an automatic second model call."
+}

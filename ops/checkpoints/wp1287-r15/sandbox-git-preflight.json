@@ -1,0 +1,92 @@
+{
+  "actual_sandbox_user": "CodexSandboxOffline",
+  "model_invoked": false,
+  "global_configuration_modified": false,
+  "candidate_modified": false,
+  "results": [
+    {
+      "exact_path_command_scope_trust": false,
+      "test": "head",
+      "rc": 128,
+      "stdout": "",
+      "dubious_ownership": true
+    },
+    {
+      "exact_path_command_scope_trust": false,
+      "test": "tree",
+      "rc": 128,
+      "stdout": "",
+      "dubious_ownership": true
+    },
+    {
+      "exact_path_command_scope_trust": false,
+      "test": "ancestry",
+      "rc": 128,
+      "stdout": "",
+      "dubious_ownership": true
+    },
+    {
+      "exact_path_command_scope_trust": false,
+      "test": "status",
+      "rc": 128,
+      "stdout": "",
+      "dubious_ownership": true
+    },
+    {
+      "exact_path_command_scope_trust": false,
+      "test": "scope",
+      "rc": 1,
+      "stdout": "",
+      "dubious_ownership": false
+    },
+    {
+      "exact_path_command_scope_trust": false,
+      "test": "diffcheck",
+      "rc": 1,
+      "stdout": "",
+      "dubious_ownership": false
+    },
+    {
+      "exact_path_command_scope_trust": true,
+      "test": "head",
+      "rc": 0,
+      "stdout": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+      "dubious_ownership": false
+    },
+    {
+      "exact_path_command_scope_trust": true,
+      "test": "tree",
+      "rc": 0,
+      "stdout": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+      "dubious_ownership": false
+    },
+    {
+      "exact_path_command_scope_trust": true,
+      "test": "ancestry",
+      "rc": 0,
+      "stdout": "",
+      "dubious_ownership": false
+    },
+    {
+      "exact_path_command_scope_trust": true,
+      "test": "status",
+      "rc": 0,
+      "stdout": "",
+      "dubious_ownership": false
+    },
+    {
+      "exact_path_command_scope_trust": true,
+      "test": "scope",
+      "rc": 0,
+      "stdout": ".agents/skills/playwright-browser/SKILL.md\n.agents/skills/playwright-browser/package-lock.json\n.agents/skills/playwright-browser/package.json",
+      "dubious_ownership": false
+    },
+    {
+      "exact_path_command_scope_trust": true,
+      "test": "diffcheck",
+      "rc": 0,
+      "stdout": "",
+      "dubious_ownership": false
+    }
+  ]
+}

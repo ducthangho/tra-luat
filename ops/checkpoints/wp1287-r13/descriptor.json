@@ -28,8 +28,23 @@
     "design": "1/1",
     "productpush": "0/1"
   },
-  "status": "preparing_no_model_invoked",
+  "status": "ready_reserved_one_review",
   "assurance": "HOLD_sensitive_same_provider",
   "bootstrap_sha256": "f461b2d755eab4f6c8c07d89a5ebbaf5f188653531a9a88f4bbd93ebbb549c4c",
-  "run_review_sha256": "a619be24af35151f2cafad7e0b86e5c1aecf3a2d5e705d54062558d52996ea46"
+  "run_review_sha256": "a619be24af35151f2cafad7e0b86e5c1aecf3a2d5e705d54062558d52996ea46",
+  "bootstrap": {
+    "rc": 0,
+    "independent_clone": true,
+    "clean": true,
+    "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+    "tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+    "input_manifest_members_verified": 20,
+    "source_hashes_match": true,
+    "launcher_hash_matches": true,
+    "offline_readiness": true,
+    "codex_version": "0.155.1",
+    "python_version": "3.13.1",
+    "deadline_utc": "2026-11-10T08:38:53Z",
+    "model_invoked": false
+  }
 }

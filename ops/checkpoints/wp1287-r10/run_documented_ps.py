@@ -23,6 +23,14 @@ def command(label,args,timeout=90,track=True):
     if args[:2]!=[M.NODE,str(M.CLI)]:return original(label,args,timeout,track)
     if label in alias:
         if not cache:
+            # Freeze diagnostic writers before the verbatim cleanup computes file hashes.
+            if M.WORKER:
+                proc,_,record=M.WORKER
+                if proc.poll() is None:proc.terminate();proc.wait(timeout=3)
+                record.update(worker_rc=proc.returncode,state='stopped_for_cleanup',end=M.stamp());M.PROBES.append(record);M.WORKER=None
+            for scheduled,x,ispost in M.QUEUE:M.PROBES.append({'scheduled_offset_ns':scheduled,'post_open':ispost,'state':'not_run_cleanup_priority'})
+            M.QUEUE.clear();M.save(E/'probe-schedule.json',M.PROBES)
+            M.observer_tick=lambda post=False:M.observe()
             result=original('documented-cleanup',[SHELL,'-NoProfile','-NonInteractive','-File',str(BASE/'invoke-documented.ps1'),'cleanup','unused'],60,True)
             for name,step in alias.items():
                 try:

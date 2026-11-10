@@ -10,7 +10,7 @@
     "documented-helper.ps1": "51275f5478f6de6dd80b7736b1f39e66e2d52f03d9e527b41b66a91f8e7d6251",
     "native_observer.py": "562d55dc484368b1cabdfe6b02a370b5200b90da2fec6e0932af6c65a1970150",
     "test_contract.py": "e4c297b70a6a031c6250681c95c521ae33b2f6deff7130406a95eb510bd89bee",
-    "run_documented_ps.py": "7d54d5bbc2f65811402518db460e3295c1228874bb4fd5db712f295b27611da4",
+    "run_documented_ps.py": "c5cf6cf6b80b521f20c06ae6b2f41c39da179e0e59072962d999b4d41eca0576",
     "documented-cleanup.ps1": "672dd903bcc4f8fda39fb83281273d3554e310227821d22a3773f4cfc6a25c1a",
     "invoke-documented.ps1": "10528c88cd24edffbc18d67a350b096a6083ec1e4fd20dd9430546dde203f1f0"
   },

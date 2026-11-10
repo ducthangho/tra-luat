@@ -1,0 +1,41 @@
+{
+  "schema": "wp1287.documented_ps_literal_positive.v1",
+  "control_base": "7eed4209a528117d6f766a7f3793eed89b4cadaa",
+  "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+  "helper_sha256": {
+    "source-excerpts.json": "36010e6325571d35aab3fbba64d7da2886461384e24e07952032dc524ec5dde9",
+    "contract.py": "edb3d772e36a20acadfddca78cdd2585b28973b790d6a863d7f88b12153ff8e4",
+    "native_flow.py": "46be9f654955481211b9789b54791be15b175d4a112b9fae72977eaa80e9ab99",
+    "documented-helper.ps1": "51275f5478f6de6dd80b7736b1f39e66e2d52f03d9e527b41b66a91f8e7d6251",
+    "native_observer.py": "562d55dc484368b1cabdfe6b02a370b5200b90da2fec6e0932af6c65a1970150",
+    "test_contract.py": "e4c297b70a6a031c6250681c95c521ae33b2f6deff7130406a95eb510bd89bee",
+    "run_documented_ps.py": "6a71503431bb51e216f54a5a290a26c448ac650747ce27e9b7b9571454a42e4b",
+    "inline_transport.py": "1c8ac6b3216501be6489a319f74963318f792164976d4c0336ee64238e7f9851",
+    "documented-cleanup.ps1": "672dd903bcc4f8fda39fb83281273d3554e310227821d22a3773f4cfc6a25c1a"
+  },
+  "spec_sha256": "72b809b97f8bacbc46e90acc6363ec6a0ccd267599b2144553fa2c619f4e638e",
+  "allowance": {
+    "used": 0,
+    "reserved": 0,
+    "limit": 2,
+    "per_shell_limit": 1,
+    "R10_wrapper_attempts_retained": 1,
+    "R11_wrapper_attempts_retained": 1,
+    "R10_R11_actual_browser_opens": 0
+  },
+  "product_write_set": [],
+  "counterexamples_Linux": "13/13",
+  "native_argv_proof": "not_run",
+  "effective_review_class": "sensitive",
+  "change_policy_sha": null,
+  "land_obligations": [],
+  "counters": {
+    "authors": "3/3",
+    "shared": "3/8",
+    "design": "1/1",
+    "formal": "0/2",
+    "productpush": "0/1"
+  },
+  "status": "prepared_not_run"
+}

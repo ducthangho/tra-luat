@@ -1,4 +1,4 @@
-# WP1302 r1/g1 — Mission1172 GitHub Linux profile diagnostic
+# WP1302 r1 — Mission1172 GitHub Linux profile diagnostic
 
 Objective: one isolated Ubuntu GitHub Actions native capability probe of unchanged landed code, not target activation or acceptance. Owner explicitly said “Vậy thử đi” after the ephemeral-runner caveat; public Packet1302 records bounded scope. Dispatcher acts under existing Packet/lease/routine-cap delegation; no actual-human code audit claimed. Historical source budgets and all costs remain intact.
 
@@ -15,3 +15,5 @@ Acceptance for diagnostic: YAML/actionlint and syntax clean, diff closedset and 
 New diagnostic limits: author1/1<=15min, reviewer1/1<=15min, probejob1/1<=10runner-minutes, prep/evidence/book30; cloud forecast70minutes including no reset. Existing cloud4500/hard2026-11-10T17:05:32Z and original51+ceil((nowUTC-2026-11-07T16:17:24Z)/60) retained. WP1174source20/20,review49/49,PRCodex9/9,sourceCI16/16,M9four/four16.49416666666667/24h,Windows19/20,scratch2/2 unchanged. Automatic metadata publisher costs tracked separately. No paid purchase, old failure refund or source/CI budget borrowing.
 
 Review class sensitive for workflow/auth boundary; no actual-human/formal/cross assurance fabricated. No target or production promotion permitted. If workflow/token/platform/publication restrictions require an additional exact decision, prepare actual artifact and stop there. Deadline/unknown/extra call/Windows runner/unexpected code delta stops before side effect. This Packet does not waive repository protocol or target human/admission requirements.
+
+Metadata correction generation2: canonical H1 identity grammar required r1 without slash-generation. Generation1 source/review calls0; same scope/caps/deadline, superseding lease with symmetric tombstone; no target grant.

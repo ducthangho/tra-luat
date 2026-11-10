@@ -1,0 +1,68 @@
+schema_version: 2
+event: review_lease_granted
+packet_issue: 1287
+packet_id: wp1287
+mission_issue: 1238
+revision: 14
+generation: 14
+lease_id: wp1287-r14-g14-review-1
+role: reviewer
+provider: codex
+executor: codex
+model_family: openai
+execution_surface: codex_cli
+transport: machine
+environment: windows-asus
+risk: sensitive
+access: read-only-candidate-owned-output
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1287-r14.md
+spec_hash: 08b274d9706c73bdb501a67592b122aeca391d1434af99ab59aee0350110d169
+spec_sha256_required: 08b274d9706c73bdb501a67592b122aeca391d1434af99ab59aee0350110d169
+prompt_path: ops/prompts/wp1287-r14-g14-review-1.md
+prompt_sha256_required: b552c2bf744854c49a7e16e0d3b9ec9a268939a090d3c30ad91d1ee0ca827811
+write_set:
+- ops/checkpoints/wp1287-r14/
+effective_write_set:
+- ops/checkpoints/wp1287-r14/
+change_policy_sha: null
+land_obligations: []
+branch: ops/wp1287-r4-diagnostic
+base_sha: bf9914cb1a8e6f5047468f4d130b587015f8d73f
+start_from_sha: 2a5803e17b7ca4910c7188bfcc2276190e2d0b4b
+reviewed_sha_required: 2a5803e17b7ca4910c7188bfcc2276190e2d0b4b
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1238#issuecomment-6754755237
+authority_note: Latest direct user reply to exact expanded review-payload question
+  reaffirms prior independent-review authorization; same OpenAI/CodexCLI gpt-6-astra/xhigh/H2+20file
+  scope, no repeated question
+leased_at_utc: '2026-11-10T08:44:54.631129+00:00'
+heartbeat_at: '2026-11-10T08:44:54.631129+00:00'
+lease_until: '2026-11-10T10:14:54.631129+00:00'
+lease_expires_at_utc: '2026-11-10T10:14:54.631129+00:00'
+run_minutes: 45
+attempts_limit: 3
+attempts_used: 3
+diagnostic_limit: 0
+diagnostic_used: 0
+requires_live: false
+uy_quyen_merge: false
+status: preparing
+thay_the_cho:
+- wp1287-r13-g13-review-1
+reviewer: codex
+model: gpt-6-astra
+effort: xhigh
+source_write_set: []
+review_read_scope:
+- .agents/skills/playwright-browser/package.json
+- .agents/skills/playwright-browser/package-lock.json
+- .agents/skills/playwright-browser/SKILL.md
+assurance_target: review_deferred_sensitive_same_provider
+formal_limit: 2
+formal_used: 0
+formal_reserved: 1
+shared_limit: 8
+shared_used: 3
+shared_reserved: 1

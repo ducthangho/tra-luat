@@ -46,6 +46,7 @@ import sys
 import tempfile
 import time
 import unicodedata
+from collections import namedtuple
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 
@@ -4364,8 +4365,6 @@ def _1174_resolve(root, packet, revision, generation, admission_file, identities
         _1174_rollout(snapshot)
         admission, facts = _1174_resolve_snapshot(snapshot, packet, revision, generation, admission_file, identities)
         _1174_require(admission["enrollment"]["git_root"] == str(root), "enrolled Git root identity")
-        if _1174_same_family(admission["enrollment"]["initial_state_projection"]):
-            _1174_policy_head(root, facts["owner_policy"])
         return admission, facts
 
 
@@ -4557,14 +4556,18 @@ def _1174_resolve_snapshot(root, packet, revision, generation, admission_file, i
                     verified["context"]["lease_oid"] == lease_oid, "canonical lease verification")
             except SystemExit as ex:
                 raise ValueError("WP1174 UNKNOWN: canonical I2 verification rc=" + str(ex.code)) from ex
-        _, installed_id = _1174_installed_mission(_1174_comments(1172, root), admission, now)
+        plan, installed_id = _1174_installed_mission(_1174_comments(1172, root), admission, now)
+        # Only the complete current canonical target chain can mint this proof.
+        # The retired F/R22 source exception is resolved exclusively by source mode.
+        target = _1174TargetProof(raw, _1174_bytes(verified), local.decode().strip(), installed_id,
+            min(_1174_time(admission["expires_utc"]), _1174_time(lease["lease_expires_at_utc"]),
+                _1174_time(plan["routing_history"]["previous_exception"]["hard_expiry_utc"])))
         return admission, dict(canonical_oid=local.decode().strip(), spec_sha256=registration["spec_sha256"],
                                admission_sha256=registration["admission_sha256"], mission_install_id=installed_id,
                                lease_id=lease["lease_id"], lease=lease, spec=spec, verified_i2=verified,
                                lease_oid=lease_oid,
                                lease_ref="origin/" + remote_ref, lease_path=row["path"], comments=comments,
-                               owner_policy=(_1174_owner_policy(root, admission, lease, registration["spec_sha256"], comments)
-                                   if _1174_same_family(pinned) else None))
+                               owner_policy=None, target_authority=target)
 
 
 _1174_MUTATORS = ("init", "record-lease", "begin-attempt", "void-attempt", "record-review", "transition",
@@ -4573,6 +4576,38 @@ _1174_IMPLEMENTATION_COMPLETE = True
 _1174_OWNER_POLICY = contextvars.ContextVar("wp1174_owner_policy", default=None)
 _1174_SOURCE_POLICY = contextvars.ContextVar("wp1174_source_policy", default=None)
 _1174_VIEW_ONLY = contextvars.ContextVar("wp1174_view_only", default=False)
+_1174_TARGET_AUTHORITY = contextvars.ContextVar("wp1174_target_authority", default=None)
+_1174TargetProof = namedtuple("_1174TargetProof", "admission verified_i2 canonical_oid mission_install_id expires")
+
+
+def _1174_target_matches(admission):
+    """Transaction-local immutable proof, minted after canonical I2/Mission checks.
+
+    No stored flag, source policy or read-only diagnostic can grant this lane.
+    A present but mismatched proof is an error, never a fallback to source policy.
+    """
+    proof = _1174_TARGET_AUTHORITY.get()
+    if proof is None:
+        return False
+    _1174_require(type(proof) is _1174TargetProof and proof.admission == _1174_bytes(admission) and
+        _1174_SOURCE_POLICY.get() is None and _1174_OWNER_POLICY.get() is None and not _1174_VIEW_ONLY.get(),
+        "target proof scope/context mismatch")
+    _1174_require(datetime.now(timezone.utc) < proof.expires, "target proof expired")
+    return True
+
+
+def _1174_target_entry(fn):
+    """Separate every public target entry, including failures, from source/diagnostic contexts."""
+    @functools.wraps(fn)
+    def entry(*args, **kwargs):
+        variables = (_1174_TARGET_AUTHORITY, _1174_SOURCE_POLICY, _1174_OWNER_POLICY, _1174_VIEW_ONLY)
+        tokens = [var.set(False if var is _1174_VIEW_ONLY else None) for var in variables]
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            for var, token in reversed(list(zip(variables, tokens))):
+                var.reset(token)
+    return entry
 
 _1174_CORE = frozenset("schema_version review_rounds_used codex_review_calls_used codex_calls nang_tran review_rounds_limit codex_review_calls_limit packet mission executor reviewer executor_identity reviewer_identity state lease attempts_used attempts_limit same_failure_limit finding_counts attempt_open attempt_anchor hmac_key reviewing_head_sha accepted_sha reviews posts history state_revision generation enrollment_id binding_sha256 adoption scoped_review human_acceptance".split())
 _1174_OPTIONAL = {"luat_adr0054": bool, "ngu_canh_lease": dict, "dem_tu_suy": bool,
@@ -4638,8 +4673,9 @@ def _1174_initial(admission):
         _1174_require(type(ident) is dict and set(ident) == {"provider", "model_family", "execution_surface", "transport"}
                       and ident == _identity(p[role], ident["model_family"], ident["execution_surface"], ident["transport"]),
                       "initial projection identity")
-    _1174_require(not _1174_same_family(p) or _1174_OWNER_POLICY.get() is not None,
-                  "initial owner-scoped same-family policy required")
+    if not _1174_target_matches(admission):
+        _1174_require(not _1174_same_family(p) or _1174_OWNER_POLICY.get() is not None,
+                      "initial owner-scoped same-family policy required")
     state = dict(p, hmac_key=_1174_derive_key(_1174_seed(e), e["id"], e["binding_sha256"], admission["packet"], e["g0"]))
     return _1174_bytes(_1174_state(_1174_bytes(state), admission))
 
@@ -4659,7 +4695,8 @@ def _1174_state(raw, admission, generation=None):
     _1174_require(_1174_hash(state["hmac_key"]), "state HMAC key")
     if state["adoption"] is not None:
         _1174_adoption_record(state["adoption"], admission)
-    _1174_require(not _1174_same_family(state) or _1174_OWNER_POLICY.get() is not None or _1174_VIEW_ONLY.get(), "state owner-scoped same-family policy required")
+    if not _1174_target_matches(admission):
+        _1174_require(not _1174_same_family(state) or _1174_OWNER_POLICY.get() is not None or _1174_VIEW_ONLY.get(), "state owner-scoped same-family policy required")
     _1174_lifecycle_records(state, admission)
     for role in ("executor", "reviewer"):
         _1174_require(state[role] == e["initial_state_projection"][role] and
@@ -4678,7 +4715,7 @@ def _1174_state(raw, admission, generation=None):
 
 def _1174_alive(admission):
     authority = _1174_OWNER_POLICY.get()
-    if _1174_same_family(admission["enrollment"]["initial_state_projection"]):
+    if not _1174_target_matches(admission) and _1174_same_family(admission["enrollment"]["initial_state_projection"]):
         _1174_require(authority is not None and all(authority["policy"][k] == admission[k]
             for k in ("packet", "mission", "revision", "generation")), "owner-scoped policy active binding")
         _1174_require(datetime.now(timezone.utc) < _1174_time(authority["policy"]["expires_utc"]), "owner-scoped policy expired")
@@ -5573,6 +5610,7 @@ def _1174_accept(a, directory, admission):
 
 
 @_1174_scoped
+@_1174_target_entry
 def _1174_guard(a):
     try:
         _1174_require(type(a.packet) is int and a.packet > 0 and type(a.revision) is int and a.revision > 0 and
@@ -5615,6 +5653,7 @@ def _1174_emit(status, detail=None, guard=False):
 
 
 @_1174_scoped
+@_1174_target_entry
 def _1174_readonly(a, state_dir):
     """Read enrolled v3 through the same authority/pair validators, without a writer."""
     global _1174_TRANSACTION
@@ -5627,14 +5666,16 @@ def _1174_readonly(a, state_dir):
             for k in ("packet", "revision", "generation")) and type(a.root) is str and Path(a.root).is_absolute(),
             "read-only scoped identity/root")
         admission, first_facts = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission)
-        _1174_OWNER_POLICY.set(first_facts.get("owner_policy"))
+        _1174_TARGET_AUTHORITY.set(first_facts.get("target_authority"))
+        _1174_require(not _1174_same_family(admission["enrollment"]["initial_state_projection"]) or
+            _1174_target_matches(admission), "current target proof required")
         e = admission["enrollment"]
         _1174_require(state_dir.resolve() == Path(e["journal_root"]) and os.path.lexists(e["lock_path"]),
                       "read-only enrolled directory/lock")
         _1174_runtime(a, admission)
         with _1174_lock(Path(current_lock := e["lock_path"])):
             current, facts = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission)
-            _1174_require(current == admission and facts.get("owner_policy") == first_facts.get("owner_policy"), "authority changed under lock")
+            _1174_require(current == admission and facts.get("target_authority") == first_facts.get("target_authority"), "authority changed under lock")
             _1174_runtime(a, admission)
             witness = _1174_witness(_1174_read(Path(e["witness_path"])), e["id"], e["binding_sha256"], e["g0"])
             state = _1174_pair(current, witness, _1174_read(Path(e["state_path"])))
@@ -5650,6 +5691,7 @@ def _1174_readonly(a, state_dir):
 
 
 @_1174_scoped
+@_1174_target_entry
 def _1174_command(a, state_dir):
     global _1174_IO_STARTED
     _1174_IO_STARTED = False
@@ -5661,7 +5703,9 @@ def _1174_command(a, state_dir):
         _1174_require(_1174_IMPLEMENTATION_COMPLETE,
                       "implementation inventory unavailable")
         admission, first_facts = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission)
-        _1174_OWNER_POLICY.set(first_facts.get("owner_policy"))
+        _1174_TARGET_AUTHORITY.set(first_facts.get("target_authority"))
+        _1174_require(not _1174_same_family(admission["enrollment"]["initial_state_projection"]) or
+            _1174_target_matches(admission), "current target proof required")
         e = admission["enrollment"]
         directory = Path(e["journal_root"])
         _1174_require(state_dir.resolve() == directory, "state directory differs from enrollment")
@@ -5670,7 +5714,7 @@ def _1174_command(a, state_dir):
             identities = (_1174_state(_1174_read(Path(e["state_path"])), admission) if
                           a.cmd not in ("init", "adopt-state") else None)
             current, facts = _1174_resolve(Path(a.root), a.packet, a.revision, a.generation, a.admission, identities)
-            _1174_require(current == admission and facts.get("owner_policy") == first_facts.get("owner_policy"), "authority changed under lock")
+            _1174_require(current == admission and facts.get("target_authority") == first_facts.get("target_authority"), "authority changed under lock")
             _1174_runtime(a, current)
             witness_raw = _1174_read(Path(e["witness_path"])) if os.path.lexists(e["witness_path"]) else None
             if a.cmd == "init":
@@ -5722,6 +5766,7 @@ def _1174_source_resolve(a, directory, state):
 
 
 @_1174_scoped
+@_1174_target_entry
 def _1174_source_command(a, directory):
     global _1174_TRANSACTION, _1174_IO_STARTED
     _1174_IO_STARTED = False

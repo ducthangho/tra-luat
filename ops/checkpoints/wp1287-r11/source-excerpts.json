@@ -1,0 +1,9 @@
+{
+  "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "SKILL_sha256": "7b48630edb6c2bf9fed335bcdafe00cac4e5f2db3b326734aab949ee5b0fc350",
+  "helper_text_sha256": "bd139e8f08e38aaa6a2fdd6cb105a1d4a178013e570e42786ef72b40a5a37ca0",
+  "cleanup_text_sha256": "7f12f0017e67c9bd757ec13a4f989e10a4e4683cda043957fc947b7ef07bdbcb",
+  "transport": "UTF8 BOM prefix for PS5.1 source decoding; removing BOM yields exact extracted text/LF",
+  "tested_scope": "verbatim documented Invoke-PwGhi and full Cleanup block; controlled operator fixture/config/arguments; not claiming all Setup/Capture prose blocks executed verbatim",
+  "config_delta": "Owner-approved action10000; normative launch30000 operator input, unchanged from R9"
+}

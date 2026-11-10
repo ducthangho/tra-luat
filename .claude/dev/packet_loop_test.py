@@ -14855,9 +14855,10 @@ def _target_context1303(c):
         for absent in (None,proof._replace(admission=b"wrong binding")):
             absent_token=m._1174_TARGET_AUTHORITY.set(absent)
             try:
-                for fn,args in ((m._1174_initial,(a,)),(m._1174_state,(raw,a)),(m._1174_alive,(a,))):
-                    _reject1174(fn,*args,reason="same-family policy required" if absent is None and fn is not m._1174_alive else
-                        "owner-scoped policy active binding" if absent is None else "target proof scope/context mismatch")
+                with patch.object(m,"_1174_seed",return_value=bytes(range(32))):
+                    for fn,args in ((m._1174_initial,(a,)),(m._1174_state,(raw,a)),(m._1174_alive,(a,))):
+                        _reject1174(fn,*args,reason="same-family policy required" if absent is None and fn is not m._1174_alive else
+                            "owner-scoped policy active binding" if absent is None else "target proof scope/context mismatch")
             finally:m._1174_TARGET_AUTHORITY.reset(absent_token)
         for key,value in (("packet",55),("generation",6),("mission_plan_sha256","b"*64)):
             bad=copy.deepcopy(a);bad[key]=value
@@ -14872,6 +14873,11 @@ def _target_context1303(c):
             other=variable.set(value)
             try:_reject1174(m._1174_target_matches,a,reason="target proof scope/context mismatch")
             finally:variable.reset(other)
+        def clean_public(args,directory):
+            assert all(v.get() is None for v in (m._1174_TARGET_AUTHORITY,m._1174_SOURCE_POLICY,m._1174_OWNER_POLICY)), "public main retained authority context"
+            return 0
+        with patch.object(m,"cmd_where",side_effect=clean_public):assert m.main(["where"])==0
+        assert m._1174_TARGET_AUTHORITY.get() is proof
         for fail in (False,True):
             @m._1174_target_entry
             def entry():
@@ -14915,6 +14921,8 @@ def _target_chain1303(c):
         assert json.loads(target.read_bytes())["luat_adr0054"] is False,"target activated global retired policy"
         # Both enrolled diagnostic readers and ordinary writers traverse current target authority.
         invoke("status");invoke("next-comment")
+        invoke("record-post","--for","reviewing","--comment-id","799997","--source-lease-ref","origin/ops/source",
+            "--source-lease-path","ops/leases/source.yaml",expect=8,reason="source input scope/directory")
         actual=m._1174_resolve
         for defect in ("missing","mismatch","expired","changed_under_lock"):
             calls=[0]
@@ -14975,8 +14983,46 @@ def _target_chain1303(c):
     return _composition1174(c,target_human=True,hook=exercise)
 
 
-CASES += [("wp1303_target_context",_target_context1303),("wp1303_target_human_chain",_target_chain1303)]
+def _target_route1303(c):
+    """Portable real-router boundary; API/OS/seed are synthetic, no target writes occur.
+
+    This probe also runs against old M: it must reach the ordinary Mission guard
+    rather than fail on the retired source policy. It needs no new API on old M.
+    """
+    import contextlib,io
+    from datetime import timedelta
+    from unittest.mock import patch
+    m,_,a,now=_a1174(c)
+    identity=m._identity("codex","openai","codex_service","machine")
+    e=a["enrollment"]
+    e["initial_state_projection"].update(executor="codex",reviewer="codex",executor_identity=identity,reviewer_identity=dict(identity))
+    facts={}
+    if hasattr(m,"_1174TargetProof"):
+        facts["target_authority"]=m._1174TargetProof(m._1174_bytes(a),b"synthetic verified I2","a"*40,1,now+timedelta(hours=1))
+    Path(e["lock_path"]).touch()
+    argv=["--state-dir",e["journal_root"],"init","--packet","1174","--mission","1173","--executor","codex","--reviewer","codex",
+        "--executor-execution-surface","codex_service","--executor-transport","machine",
+        "--reviewer-execution-surface","codex_service","--reviewer-transport","machine",
+        "--root",e["git_root"],"--admission","synthetic","--revision","7","--generation","5",
+        "--coordinator-id",e["coordinator_id"],"--expected-revision","absent"]
+    out=io.StringIO()
+    # Stub the fixed lock as an OS seam too; this is a portable algorithm check.
+    @contextlib.contextmanager
+    def lock(path):yield None
+    with patch.object(m,"_1174_resolve",return_value=(a,facts)),patch.object(m,"_1174_runtime",return_value={}), \
+            patch.object(m.platform,"system",return_value="Linux"),patch.object(m,"_1174_lock",lock), \
+            patch.object(m,"_1174_seed",return_value=bytes(range(32))),patch.object(m,"_1174_probe") as probe, \
+            patch.object(m,"_1174_write") as write,contextlib.redirect_stdout(out):
+        rc=m.main(argv)
+    result=json.loads(out.getvalue())
+    assert rc==8 and "init granted allowance/Mission" in result["detail"],("target router retained retired source dependency",rc,result)
+    assert not probe.called and not write.called and not Path(e["state_path"]).exists() and not Path(e["witness_path"]).exists()
+    (c.tmp/"portable-target-route.json").write_text(json.dumps(dict(rc=rc,result=result,synthetic_authority=True,native=False,actual_human=False))+"\n")
+
+
+CASES += [("wp1303_target_context",_target_context1303),("wp1303_target_route",_target_route1303),("wp1303_target_human_chain",_target_chain1303)]
 MUTANTS.update({
+    "wp1303_target_main_context": ('@_1174_target_entry\ndef main(argv=None) -> int:', 'def main(argv=None) -> int:', ["wp1303_target_context"]),
     "wp1303_target_proof_binding": ('proof.admission == _1174_bytes(admission)', 'True', ["wp1303_target_context"]),
     "wp1303_target_proof_expiry": ('datetime.now(timezone.utc) < proof.expires', 'True', ["wp1303_target_context"]),
     "wp1303_target_source_contamination": ('_1174_SOURCE_POLICY.get() is None and _1174_OWNER_POLICY.get() is None and not _1174_VIEW_ONLY.get()', 'True', ["wp1303_target_context"]),

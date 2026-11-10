@@ -14844,6 +14844,15 @@ def _target_context1303(c):
     m,_,a,now=_a1174(c)
     identity=m._identity("codex","openai","codex_service","machine")
     a["enrollment"]["initial_state_projection"].update(executor="codex",reviewer="codex",executor_identity=identity,reviewer_identity=dict(identity))
+    plan=dict(mission_id="gh-1172",revision=a["mission_revision"],packet_graph=[{k:a[k] for k in ("packet","revision","generation","contract_id")}],
+        routing_history=dict(previous_exception=dict(actual_human_audit_required=True,hard_expiry_utc="2098-01-01T00:00:00Z")))
+    plan_raw=m._1174_bytes(plan);bound=copy.deepcopy(a);bound["mission_plan_sha256"]=hashlib.sha256(plan_raw).hexdigest()
+    comment=dict(id=1,user=dict(login="ducthangho",type="User"),author_association="OWNER",updated_at="2026-01-01T00:00:00Z",
+        issue_url="https://api.github.com/repos/ducthangho/tra-luat/issues/1172",html_url="https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-1",
+        body="## Mission #1172 — Installed revision "+str(a["mission_revision"])+"\nPlan SHA256 `"+bound["mission_plan_sha256"]+"`\n```json\n"+plan_raw.decode()+"```\n")
+    _reject1174(m._1174_installed_mission,[comment],bound,now,reason="Mission route expiry/human requirement")
+    bound["expires_utc"]="2097-01-01T00:00:00Z"
+    assert m._1174_installed_mission([comment],bound,now)[1]==1
     proof=m._1174TargetProof(m._1174_bytes(a),b"synthetic verified I2", "a"*40,1,now+timedelta(hours=1))
     assert m._1174_target_matches(a) is False
     token=m._1174_TARGET_AUTHORITY.set(proof)
@@ -15022,6 +15031,7 @@ def _target_route1303(c):
 
 CASES += [("wp1303_target_context",_target_context1303),("wp1303_target_route",_target_route1303),("wp1303_target_human_chain",_target_chain1303)]
 MUTANTS.update({
+    "wp1303_target_mission_expiry": ('_1174_time(admission["expires_utc"]) <= _1174_time(exception["hard_expiry_utc"])', 'True', ["wp1303_target_context"]),
     "wp1303_target_main_context": ('@_1174_target_entry\ndef main(argv=None) -> int:', 'def main(argv=None) -> int:', ["wp1303_target_context"]),
     "wp1303_target_proof_binding": ('proof.admission == _1174_bytes(admission)', 'True', ["wp1303_target_context"]),
     "wp1303_target_proof_expiry": ('datetime.now(timezone.utc) < proof.expires', 'True', ["wp1303_target_context"]),

@@ -4316,7 +4316,10 @@ def _1174_installed_mission(comments, admission, now):
                   matches[0][k] == admission[k] for k in ("revision", "generation", "contract_id")), "Mission registered Packet")
     exception = plan.get("routing_history", {}).get("previous_exception", {})
     _1174_require(exception.get("actual_human_audit_required") is True and
-                  _1174_time(exception.get("hard_expiry_utc")) > now, "Mission route expiry/human requirement")
+                  _1174_time(exception.get("hard_expiry_utc")) > now and
+                  (not _1174_same_family(admission["enrollment"]["initial_state_projection"]) or
+                   _1174_time(admission["expires_utc"]) <= _1174_time(exception["hard_expiry_utc"])),
+                  "Mission route expiry/human requirement")
     return plan, ident
 
 
@@ -4556,12 +4559,11 @@ def _1174_resolve_snapshot(root, packet, revision, generation, admission_file, i
                     verified["context"]["lease_oid"] == lease_oid, "canonical lease verification")
             except SystemExit as ex:
                 raise ValueError("WP1174 UNKNOWN: canonical I2 verification rc=" + str(ex.code)) from ex
-        plan, installed_id = _1174_installed_mission(_1174_comments(1172, root), admission, now)
+        _, installed_id = _1174_installed_mission(_1174_comments(1172, root), admission, now)
         # Only the complete current canonical target chain can mint this proof.
         # The retired F/R22 source exception is resolved exclusively by source mode.
         target = _1174TargetProof(raw, _1174_bytes(verified["context"]), local.decode().strip(), installed_id,
-            min(_1174_time(admission["expires_utc"]), _1174_time(lease["lease_expires_at_utc"]),
-                _1174_time(plan["routing_history"]["previous_exception"]["hard_expiry_utc"])))
+            min(_1174_time(admission["expires_utc"]), _1174_time(lease["lease_expires_at_utc"])))
         return admission, dict(canonical_oid=local.decode().strip(), spec_sha256=registration["spec_sha256"],
                                admission_sha256=registration["admission_sha256"], mission_install_id=installed_id,
                                lease_id=lease["lease_id"], lease=lease, spec=spec, verified_i2=verified,

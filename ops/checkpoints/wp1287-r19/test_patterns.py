@@ -78,6 +78,17 @@ for lang in languages:
         (root/'TARGET_ID').write_bytes(b'')
         run(tag+'-empty-target',need+"& { $ErrorActionPreference='Stop'\n"+target+"\n'PIN OK' }",lang,1,{'TL_PW_TARGET_ID':''},'PIN OK')
     else:
+        queries=[]
+        for block in b[:2]:
+            for line in block.splitlines():
+                if '--version' not in line or '/chrome" --version' in line:continue
+                queries.extend(line.split(';') if line.count('--version')>1 else [line])
+        assert len(queries)==5
+        versionprobe=scratch/'versionprobe'
+        for rc in [0,17]:
+            versionprobe.write_text('#!/bin/sh\nif [ "$1" = --version ]; then echo v24.19.0; elif [ "$1" = npm-cli ]; then echo 11.9.0; else echo 0.1.23; fi\nexit '+str(rc)+'\n');versionprobe.chmod(0o755)
+            for i,line in enumerate(queries):
+                run(tag+'-version-'+str(i)+'-rc'+str(rc),'( set -Eeuo pipefail\n'+line+'\necho "VERSION OK" )',lang,0 if rc==0 else 1,{'TL_PW_NODE':str(versionprobe),'TL_PW_NPM_CLI':'npm-cli','TL_PW_CLI':'cli'},'VERSION OK')
         browser=scratch/'browser'/'chromium-1252'/'chrome-linux64'/'chrome';browser.parent.mkdir(parents=True)
         probe=next(line for line in b[1].splitlines() if '/chrome" --version' in line).split(';')[0]
         for rc in [0,17]:

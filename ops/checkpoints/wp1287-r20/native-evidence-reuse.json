@@ -1,0 +1,18 @@
+{
+  "original_source_sha256": "325d927d9381c7870999cb3743ee179f67645b383a0a40c6316a4ed1720bf8be",
+  "current_source_sha256": "1d1e29d7158876610f2a0beeda182625cb9d7ac6fd80af46a88963e07e0305fe",
+  "native_powershell_blocks": 5,
+  "all_blocks_byte_identical": true,
+  "block_sha256": [
+    "4e9bd7dbafc523730380f76e440671f7a1db03b446cc0500e07389be9b67d26c",
+    "dadf3c8b56e0a2cb272d986b9ee048302d7014149845eaddcbb8f00744b25fd9",
+    "25a6152e149e8b2af9507ae8132de83565e0fc183c197d6d7c931565c47a7051",
+    "2138bc49bdd9a522a847123781b816fc312deacbf421a5ca2732d316b2569626",
+    "a6c1a3280482e87b2e95e460d939d1715b1c8fa2f52a29f997205ec0ba1ff4e1"
+  ],
+  "native_checks": 70,
+  "native_passed": 70,
+  "native_rc": 0,
+  "reused_not_rerun": true,
+  "scope": "Exact unchanged native PowerShell source blocks; new Bash source tested separately35/35; not a new browser acceptance receipt"
+}

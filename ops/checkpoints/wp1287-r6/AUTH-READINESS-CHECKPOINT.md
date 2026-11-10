@@ -1,0 +1,11 @@
+# Advisory: điểm chặn xác thực đã đo
+
+Gói5tệp20731byte đã được chủ kho đồng ý gửi tới OpenAI qua CodexCLI gpt-6.1-sol/xhigh. Manifest nguồn/prompt không đổi; không chuyển sang provider khác. Chưa sinh nội dung mô hình, shared2/8 và designadvisory0/1, formal0/2/author3/3/push0/1 giữ nguyên, reservation được nhả.
+
+Cloud: run dbbd85a4108448ce8f793b3ff72de4f1 chạy CLI nhưng rc1 ngay authrefresh, thông báo token bị vô hiệu sau logout/accountchange. Không có response/model output; snapshotworkspace trước=sau. Quyền gửi gói5tệp được giữ lại để dùng sau khi xác thực sẵn sàng, không xin lại quyền đó.
+
+ASUS: CLI0.155.1 sẵn có/loginstatus báo ChatGPT, Python3.13.1 và launchercanonical SHAfbf5ac3e9a88d7f7ac4fa892a3aac115752e8e7f133c8a3eb947834a215dee23 khớp nguyên trạng. Gói/inputGit46233233442a176058a1744bb7594e9d44714607 và prompt64a355540de3aa6886b2de48fa6fd756ccb7bcb47b36fe32f7bcbd29df4c99f8 khớp. Workspace/hashcheck0, nhưng runcontroller13 trước khi sinh CLIchild, runrecord0. Kiểm tra dryrun chỉ đọc: CODEX_AUTH_JSON có mặt, lỗi UNSAFE_STORAGE_OR_STATE; tách stage: resolve_home đạt, open_pinned_credential_store không đạt; phân loại duy nhất OTHER_PRINCIPAL_ACCESS. Không xuất secret, đường dẫn credential, SID, rawlog hoặc nội dung auth. Không thay ACL, authfile, globalprofile, trust, gateway hay account; không bỏ CODEX_AUTH_JSON để né cổng.
+
+Căn cứ canonical: .claude/dev/launcher.py::_KhoCodex.__init__ gọi _win_private cho thư mục Codex home; _win_private từ chối allowACE cho principal ngoài currentuser/SYSTEM/Administrators/OWNER RIGHTS bằng lỗi `credential ACL grants access to another principal`. Đây là failure của storage gate, không phải bằng chứng account đăng nhập sai hoặc credential đã bị lộ. Không sửa launcher để cho qua. Muốn tiếp tục đúng đường cần credential store đáp ứng policy và xác thực sống; loginstatus riêng lẻ chưa đủ.
+
+Bước tiếp nối sau khi xử lý credential store: xác minh lại cổng chuẩn bị, dùng cùng gói5tệp đã được duyệt trong invocation/deadline mới và reserve đúng1advisory dưới cap cũ; không hồi sinh controller đã dừng hoặc xóa marker rồi chạy lặp. Đích là advisory về một phép kiểm có giá trị phân biệt, không formalapprove. Fullflow/Desktop và sufficient sensitive assurance vẫn là các điều kiện riêng.

@@ -12,12 +12,12 @@
   "deadline_utc": "2026-11-10T02:01:54Z",
   "shared": {
     "used": 2,
-    "reserved": 1,
+    "reserved": 0,
     "limit": 8
   },
   "design_advisory": {
     "used": 0,
-    "reserved": 1,
+    "reserved": 0,
     "limit": 1
   },
   "formal": {
@@ -38,7 +38,7 @@
     "MCIaudit": 8,
     "remaining_reserve": 0
   },
-  "state": "ASUS_relocation_preflight_passed_no_generation_yet",
+  "state": "terminal_bootstrap_blocked_no_model_generation",
   "actual_generation": false,
   "approved_payload_pending": "Five-file restricted advisory bundle; user approval required by auto-review",
   "model_requested": "gpt-6.1-sol",
@@ -77,5 +77,27 @@
     "launcher_check_rc": 0,
     "model_started": false
   },
-  "relocation_note": "Existing authorized CodexCLI/credentials only; no install/login/account/profile/trust changes. Diagnostic advisory relocation is NOT U10target substitution or P5 rollout. Exact same five-file user approval retained."
+  "relocation_note": "Existing authorized CodexCLI/credentials only; no install/login/account/profile/trust changes. Diagnostic advisory relocation is NOT U10target substitution or P5 rollout. Exact same five-file user approval retained.",
+  "ASUS_controller_rc": 13,
+  "ASUS_codex_child_started": false,
+  "ASUS_run_count": 0,
+  "ASUS_storage_readiness": {
+    "snapshot_env_present": true,
+    "dryrun_ok": false,
+    "would_change": false,
+    "category": "UNSAFE_STORAGE_OR_STATE",
+    "failed_stage": "open_pinned_credential_store",
+    "exact_category": "OTHER_PRINCIPAL_ACCESS",
+    "exception_type": "OSError",
+    "no_secret_or_path_output": true,
+    "no_credentials_or_ACL_modified": true
+  },
+  "remaining_blockers": [
+    "Cloud Codex refresh token invalidated before generation",
+    "ASUS canonical launcher refuses credential-directory DACL permitting another principal",
+    "U10 fullflow still unproved",
+    "OP-F01 formal review not run",
+    "Sensitive assurance not met"
+  ],
+  "no_provider_or_gate_bypass": true
 }

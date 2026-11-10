@@ -1560,3 +1560,157 @@ Liệt kê TỪNG SỐ, không dùng phạm vi: một phạm vi là thứ vừa 
   bằng `Superseded` nhưng ADR ấy **vẫn còn hiệu lực một phần**. Vì vậy cổng ở đây cố ý KHÔNG phán
   xử hiệu lực từ chuỗi trạng thái; nó chỉ đòi **có mặt trong bảng**. Phán xử hiệu lực bằng cách
   khớp tiền tố chuỗi là đúng hình dạng lỗi *"phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN"*.
+# WP1174 r10 — adapter scoped, chờ gate native và review độc lập
+
+H1 và H2 là hai checkpoint private chưa hoàn tất; giữ nguyên ancestry và finding
+history. Source r10 bổ sung 14 writer entries và 14 race cases, lifecycle advisory
+→ actual human → accept, collector bounded và native evidence carrier. Marker
+implementation không cấp enrollment, lease, quyền publish hoặc activation.
+Consumer chỉ chạy khi exact code đã land trên canonical, current grant/spec và
+Mission registration còn hiệu lực, cùng enrolled Linux ext4/XFS đúng boot/mount.
+Candidate private hoặc FILE do caller tự khai không tự mở route này.
+
+`--admission FILE` chỉ đối chiếu exact immutable bytes. Resolver lấy descriptor
+qua current canonical lease/spec, I2 và installed Mission wrapper; không thêm
+registry hoặc pre-lease fallback. Giữ nguyên JSON frozen của Mission; wrapper,
+plan hash và Packet graph được xác minh riêng. Git children loại object/config
+selectors trong env copy, không sửa `os.environ` hoặc global Git configuration.
+API scoped pin `github.com`, repo và cwd explicit; giữ trusted auth/proxy/CA,
+không nhận `GH_HOST`/`GH_REPO` của caller làm nguồn thẩm quyền.
+
+Ordinary dùng `--expected-revision N`; fresh init dùng `absent`; resume-init và
+adoption dùng witness revision namespace riêng. Fixed lock/O_CLOEXEC giữ qua
+preflight, persist, fsync/readback và tripwire lần hai. State/witness ordinary
+mismatch là UNKNOWN; không rollback counter, tự retry hoặc restore backup.
+Chỉ rc0 + `reserved_for_dispatch` + `dispatch_allowed=true` cấp dispatch right.
+Init, adoption, replay và guard luôn không dispatch.
+
+Seed do operator provision/fsync trước grant; consumer kiểm no-follow regular
+owner/mode/nlink/fingerprint và HKDF, không chứng minh ngược historical fsync.
+Public projection không chứa seed/HMAC key. Adoption giữ immutable source snapshot,
+prepared/intent/tombstone/adopted, abandon/retry/replay và append-only lineage.
+Cached private v2 writer vẫn có thể ghi old path: tripwire không là fencing tuyệt đối.
+
+Service review là advisory, giữ call/review budget và không tự tạo human approval.
+Scoped accept tái dùng canonical actual-human validator, re-fetch audit comment,
+kiểm exact H/tree/spec/PR, CI/connector và first-publication receipt. Collector có
+ba pass tối đa trong 180 giây, mỗi pass tối đa 100 trang/120 giây/30 MiB; inner
+API/Git calls dùng remaining deadline, output cap và hậu-call checks. Thiếu page,
+DAG hoặc retention coverage là UNKNOWN; không đổi thành residual. Guard chỉ đọc
+và trả PASS0 hoặc FAIL/UNKNOWN/admission_rejected12; lỗi argv trả2.
+
+Linux main giữ legacy và bắt buộc 84 IDs, required mutants/controls cùng một native
+profile thực; source PR1275 chạy exact-H clone và đối chiếu năm path M/H/clone.
+Native report nằm trong log step hiện có trước tổng cuối, kèm producer/snapshot
+before/after và capability facts. Windows main giữ legacy +12 pure IDs; focused
+Windows có13 IDs và một pure unit oracle riêng. Non-Linux report luôn ineligible.
+Fixture/overlay pass không thay native Linux proof, Windows proof, independent
+review/audit, K0–K7, full Linux M9 hoặc target canary sau land.
+
+
+<!-- WP1174 scoped consumer: implementation notes, authority remains the frozen contract. -->
+Trong tuyến scoped WP1174, resolver ghim OID bất biến của spec và giữ nguyên
+canonical I2 facts sau lần xác minh dưới khóa. `record-lease` chỉ ghi lease đó;
+ref, OID, path, revision, generation và comments phải khớp authority đã đọc qua API.
+Human audit đọc lại remote run và toàn bộ tập workflow runs qua API giới hạn
+thời gian, dung lượng và số trang trước khi chạy canonical human predicate.
+Biên nhận review được đọc một lần; hash lấy từ chính bytes đã xác minh.
+Lỗi sau khi bắt đầu ghi trả `durability_unknown`, không cho dispatch; lỗi có
+kiểu xác định trạng thái, nội dung chuỗi lỗi không cấp authority.
+Git environment hardening chỉ áp dụng trong scoped context, giữ hành vi legacy.
+Human audit scoped WP1174 dùng cùng snapshot comments đã API readback cho
+canonical verifier, collector và record; transition cũng được snapshot khi có.
+Caller file thay đổi sau snapshot không thay authority; server drift bị chặn.
+M5/M12 xác định trả typed FAIL; receipt provenance giữ caller path ban đầu.
+
+
+WP1174 R12 bổ sung kiểm chứng recovery và first publication trong cùng adapter:
+collector xét cả `PushEvent.before` lẫn `head`, bao gồm descendant của H; zero OID
+là absence khi tạo/xóa ref. Preimage trước hoặc tại audit chứng minh publication
+sớm và trả FAIL; preimage sau audit phải có introduction trước đó trong evidence,
+không tự trở thành bằng chứng thời điểm first publication. Thiếu object vẫn UNKNOWN.
+Recovery đối chiếu immutable source snapshot với predecessor active path/generation,
+full high_water hash/revision và Packet/Mission/lineage trước probe/temp/write; imported
+v2 giữ predicate riêng. Mọi reused source/tombstone, target và witness được fsync file,
+fsync parent và kiểm identity/readback dưới fixed lock trước advance/finalize; terminal
+replay cũng xác nhận durability, giữ nguyên journal/history/counters. Ordinary reservation
+của adopted state kiểm lại durability tombstone và cặp target/witness trước dispatch.
+Lỗi durability giữ rc8/no dispatch; readback riêng không chứng minh durability.
+Scoped human snapshot kiểm exact verified bytes sau canonical verifier, trước collector;
+scoped accept dùng cùng snapshot bytes trong RAM cho CI/connector validation và hashes.
+Các fault injection là fixture thuật toán, không phải native profile hay mất điện.
+
+WP1174 R16/C12 (generation13, Mission20) dùng composite native delivery SOURCE-ONLY trên exact final head/tree
+và năm file hashes: bốn part A–D đọc coverage manifest đã đóng băng, rồi integrator E
+kiểm coverage union, interfaces và raw reports theo [spec R16 trên metadata commit bất biến](https://github.com/ducthangho/tra-luat/blob/9941d8af52aeede1c78ea4e232fbe9a8d5272033/ops/specs/wp1174-implementation-r16.md). Mỗi lời gọi vẫn được đếm;
+chỉ composite đủ bằng chứng mới có thể tạo verdict cho source đó. Authority,
+provider assurance và actual-human của target giữ theo các hợp đồng hiện hành.
+
+Mọi nonnull lineage.source_path và enrollment.legacy_source_path phải có spelling
+canonical, không `..` hoặc slash lặp; runtime kiểm resolve không symlink parent và
+exact mount trước fixed lock, rồi kiểm lại authority/topology dưới lock trước
+recovery/probe/temp/write. Initial-state guards và fresh null source giữ nguyên.
+Oracle fixture quét seed/key cụ thể trong A/S, stdout/stderr/traceback, native facts,
+native report và Windows unit record; fixture serializer coverage không là native
+mount proof hoặc Windows host proof.
+
+WP1174 R16 source-only sửa oracle đường dẫn Windows: các vector `..`, slash lặp
+và `.` phải absolute độc lập với validator trên host. Vector slash-prefix cũ
+vẫn được giữ; trên Windows enrollment nhận đúng `legacy source types` trước
+canonical guard, lineage vẫn nhận `source canonical paths`; trên POSIX cả hai
+nhận `source canonical paths`. Không đổi predicate sản phẩm hoặc target authority.
+
+
+WP1174 R17/C13 (generation14, Mission21) giữ ADR-0054 ở trạng thái canonical
+hiện hành, kể cả `luat_adr0054: false`. Tuyến scoped dùng admission đã xác minh
+và ngữ cảnh lease I2 trong giao dịch dưới khóa để chọn lifecycle pending/human;
+không lấy một cờ opt-in trong journal làm authority và không kích hoạt luật global.
+Native review vẫn qua canonical receipt validator; service receipt vẫn advisory.
+Cả hai tiêu đúng call/review budget, giữ exact head ở `approved_pending`, rồi
+chỉ `accept` với actual-human audit/CI/connector/first-publication hợp lệ mới ghi
+`accepted`. State/witness invalid hoặc evidence thiếu, sai head/danh tính/call
+đều bị từ chối trước persist/dispatch. Historical activated fixtures là control
+riêng; current-policy subcases giữ False qua lease, begin/call, review và accept.
+Các transport/authority fixture seams không thay bằng chứng lifecycle production.
+
+
+### WP1174 R22/g19: verified source policy and V3 diagnostics
+
+Same-family source orchestration remains denied by default. The narrow
+WP1174-F-R22-CODEX-PAIR route is selected by --source-lease-ref/path and resolves
+current canonical I2 lease H/Đ/R, immutable R22 spec and owner API policy/audit
+records. It requires Packet1174/Mission1172/revision22/generation19, the exact
+lease/spec/expiry, H/tree, journal directory and source checkout. It does not
+require or manufacture target admission/enrollment. Candidate code cannot
+activate itself: the consumer must match current landed canonical bytes.
+
+An immutable policy binds distinct unforked source/reviewer context IDs, separate
+checkouts, read-only review, Codex/openai/service/machine identities and the same
+configured model with medium/high effort. Current owner context-audit records
+bind those facts to H/tree. This is owner-audited platform evidence; serving
+identity remains KHONG_DO_DUOC unless measured. Caller flags or booleans cannot
+supply that authority. Missing/forged/expired/wrong-scope/stale/self/fork/profile
+facts fail before journal publication. Reviewer receipt and nonempty raw output
+must match the owner-audited digests before review is recorded.
+
+The source transaction uses a preexisting fixed lock, revalidates canonical
+facts under lock and before publication, and stages the original reducers before
+durable complete-temp persistence. Lease recording retains awaiting_lease and
+budget preconditions and durable quota checkpoints. Initial and stored limits
+must match the owner policy; flags cannot enlarge them. Unflagged same-family
+load/save remains denied; ordinary
+cross-family V2 behavior remains compatible. Approval records
+same_provider_approved and approved_pending, never cross_approved or
+human_audited. This route cannot perform accept/adoption/human publication
+transitions. Source publication/land still needs its separate authoritative gates
+or explicit exact-head owner resolution. Current runtime-policy metadata is
+inactive and this implementation is not a claim that canonical init now passes.
+
+Target V3 authority, witness/high-water, complete retired-chain validation,
+actual-human acceptance and native/runtime gates remain independent. Both the
+enrolled and original unflagged status/next-comment readers support validated
+read-only V3 diagnostics. Their public projection exposes identity/state/counters
+only, omitting keys, history and adoption snapshots before rendering. V2 output
+stays compatible; unscoped V3 mutation and retired/malformed state remain denied.
+Test-only frozen clocks cover before/at/after expiry without changing production
+UTC checks or the host clock.

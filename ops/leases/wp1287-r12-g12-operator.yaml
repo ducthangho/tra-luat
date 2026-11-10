@@ -38,16 +38,23 @@ authority_note: Required PS acceptance with documented literal argv after operat
   input failure; prior attempts retained, no previous browser opens in R10/R11, no
   policy/model/product changes
 leased_at_utc: '2026-11-10T06:52:04.636542+00:00'
-heartbeat_at: '2026-11-10T06:52:04.636542+00:00'
-lease_until: '2026-11-10T08:22:04.636542+00:00'
-lease_expires_at_utc: '2026-11-10T08:22:04.636542+00:00'
+heartbeat_at: '2026-11-10T07:02:13.834398+00:00'
+lease_until: '2026-11-10T07:02:13.834398+00:00'
+lease_expires_at_utc: '2026-11-10T07:02:13.834398+00:00'
 run_minutes: 8
 attempts_limit: 3
 attempts_used: 3
 diagnostic_limit: 2
-diagnostic_used: 0
+diagnostic_used: 2
 requires_live: false
 uy_quyen_merge: false
-status: active
+status: retired
 thay_the_cho:
 - wp1287-r11-g11-operator
+original_lease_until: '2026-11-10T08:22:04.636542+00:00'
+original_lease_expires_at_utc: '2026-11-10T08:22:04.636542+00:00'
+retired_at: '2026-11-10T07:02:13.834398+00:00'
+retired_at_utc: '2026-11-10T07:02:13.834398+00:00'
+retirement_reason: Both native PS5.1/7 exact H2 documented helper+whole Cleanup positive
+  flows PASS at approved action10000; actual PNG/PDF nonce and independent cleanup/census/lock
+  proof verified, no remaining resources

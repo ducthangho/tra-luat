@@ -16,7 +16,7 @@
   },
   "spec_sha256": "72b809b97f8bacbc46e90acc6363ec6a0ccd267599b2144553fa2c619f4e638e",
   "allowance": {
-    "used": 0,
+    "used": 2,
     "reserved": 0,
     "limit": 2,
     "per_shell_limit": 1,
@@ -45,5 +45,16 @@
     "formal": "0/2",
     "productpush": "0/1"
   },
-  "status": "prepared_not_run"
+  "status": "both_native_documented_shell_fullflows_passed",
+  "native_summary_sha256": "c4d7fd3c357362e18ebedf208db457d1946ca4673536843b0097b85e3dde767b",
+  "positive_shells": {
+    "PS51": "5.1.26100.9711/passed",
+    "PS7": "7.6.9/passed"
+  },
+  "U10_runtime_evidence": "passed_on_owner_approved_action10000_launch30000",
+  "U10_formal_acceptance": "pending",
+  "OP_F01": "formal_OPEN",
+  "sensitive_assurance": "HOLD",
+  "actual_outer_child_shell_rc": 0,
+  "lock_readback_empty": true
 }

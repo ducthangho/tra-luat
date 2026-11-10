@@ -38,9 +38,9 @@ authority_note: Latest direct user reply to exact expanded review-payload questi
   reaffirms prior independent-review authorization; same OpenAI/CodexCLI gpt-6-astra/xhigh/H2+20file
   scope, no repeated question
 leased_at_utc: '2026-11-10T08:44:54.631129+00:00'
-heartbeat_at: '2026-11-10T08:44:54.631129+00:00'
-lease_until: '2026-11-10T10:14:54.631129+00:00'
-lease_expires_at_utc: '2026-11-10T10:14:54.631129+00:00'
+heartbeat_at: '2026-11-10T08:56:43.170100+00:00'
+lease_until: '2026-11-10T08:56:43.170100+00:00'
+lease_expires_at_utc: '2026-11-10T08:56:43.170100+00:00'
 run_minutes: 45
 attempts_limit: 3
 attempts_used: 3
@@ -48,7 +48,7 @@ diagnostic_limit: 0
 diagnostic_used: 0
 requires_live: false
 uy_quyen_merge: false
-status: preparing
+status: retired
 thay_the_cho:
 - wp1287-r13-g13-review-1
 reviewer: codex
@@ -62,7 +62,16 @@ review_read_scope:
 assurance_target: review_deferred_sensitive_same_provider
 formal_limit: 2
 formal_used: 0
-formal_reserved: 1
+formal_reserved: 0
 shared_limit: 8
 shared_used: 3
-shared_reserved: 1
+shared_reserved: 0
+original_lease_until: '2026-11-10T10:14:54.631129+00:00'
+original_lease_expires_at_utc: '2026-11-10T10:14:54.631129+00:00'
+retired_at: '2026-11-10T08:56:43.170100+00:00'
+retired_at_utc: '2026-11-10T08:56:43.170100+00:00'
+retirement_reason: 'Same private-clone launch rejected by automatic review even after
+  latest contextual confirmation; no model invoked. Scope is not retried. Materially
+  safer alternative under preparation: fresh public-source-only clone with anonymous
+  public provenance.'
+da_bi_thay_the: wp1287-r15-g15-review-1

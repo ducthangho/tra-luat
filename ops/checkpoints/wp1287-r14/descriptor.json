@@ -18,19 +18,21 @@
   "budgets": {
     "formal": {
       "used": 0,
-      "reserved": 1,
+      "reserved": 0,
       "limit": 2
     },
     "shared": {
       "used": 3,
-      "reserved": 1,
+      "reserved": 0,
       "limit": 8
     },
     "authors": "3/3",
     "design": "1/1",
     "productpush": "0/1"
   },
-  "status": "preparing_after_direct_user_confirmation",
+  "status": "blocked_before_invocation_private_clone_scope",
   "assurance": "HOLD_sensitive_same_provider",
-  "prepare_sha256": "dec50edcc9e5bd82d99c1a4b6412346bd16c5cb5ddcc291f71101aff9c08f910"
+  "prepare_sha256": "dec50edcc9e5bd82d99c1a4b6412346bd16c5cb5ddcc291f71101aff9c08f910",
+  "auto_review_reason": "Latest contextual complaint not accepted as explicit expanded-private-payload approval",
+  "next_alternative": "Verified public-source-only workspace; do not re-execute rejected local private-clone scope"
 }

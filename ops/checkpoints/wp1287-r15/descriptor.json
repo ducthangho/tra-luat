@@ -1,0 +1,36 @@
+{
+  "schema": "wp1287.public_source_review_readiness.v1",
+  "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+  "source_class": "verified_public_only",
+  "public_downloaded_files": 15,
+  "private_rejected_clone_or_bundle_copied": false,
+  "spec_sha256": "f8d4bfe8ca7a4bf7960db33387e6603d547647a455ddc4c2d53f609b12a1b228",
+  "prompt_sha256": "ac2793136003111827b5c6ab2ca59015d9248cd175043fbb479e5ccda6ebb17c",
+  "bootstrap_sha256": "3570ae45a6780ac65c00fbef952e945be7d27217779151eb63b3feba3aaba505",
+  "run_review_sha256": "dfa3668c2b67353c230e416f6493c3094e50d84554a26dbbc34bfff0e4b3c95f",
+  "provenance_sha256": "e46b4455c3a7c344e8b508d124aea178bed043d41682c344def07881a95384a1",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "xhigh",
+  "status": "asus_reconnected_public_only_preparation_pending",
+  "model_invoked": false,
+  "source_write_set": [],
+  "budgets": {
+    "formal": {
+      "used": 0,
+      "reserved": 1,
+      "limit": 2
+    },
+    "shared": {
+      "used": 3,
+      "reserved": 1,
+      "limit": 8
+    },
+    "authors": "3/3",
+    "design": "1/1",
+    "productpush": "0/1"
+  },
+  "assurance": "HOLD_sensitive_same_provider",
+  "active_lease": "wp1287-r15-g15-review-1",
+  "control_base": "21261f62018bd49b59e797418fc188399c835e23"
+}

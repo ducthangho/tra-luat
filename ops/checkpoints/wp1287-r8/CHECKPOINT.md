@@ -31,3 +31,5 @@ Lỗi glob đã sửa trên helper cho lần sử dụng tương lai: chỉ nh�
 Allowance R8 used1/limit1, reservation0; lease g8 retired sau cleanup/readback. R4/R6 vẫn retired/exhausted. Author3/3, shared3/8, design1/1, formal0/2, productpush0/1 giữ nguyên. Không model call mới, không product edit, không timeout/pin/target đổi, không global kill/policy/AV/auth/profile mutation, không WindowsCI/LIVE/merge/land.
 
 OP-F01 formal OPEN; hai mẫu PowerShell positive fullflow còn thiếu và sensitive assurance HOLD. Không có actual runtime remediation được chứng minh trong scope này; repeating capture hoặc nới timeout không phải cách đóng U10. Dừng allowance đã chốt, giữ checkpoint này làm đầu vào quyết định kế nhiệm. Không tự gắn Mission complete khi P2 chưa đạt.
+
+Gate ownership phân loại theo expiry, không dùng riêng status retired: lease_until/lease_expires_at_utc đã cắt về thời điểm retirement thực, giữ original deadline trong metadata riêng. Không xóa lease hoặc giả expiry chứng minh host rảnh; host đã có cleanup/census/readback riêng trước khi cắt lease.

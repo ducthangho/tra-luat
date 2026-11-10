@@ -4559,7 +4559,7 @@ def _1174_resolve_snapshot(root, packet, revision, generation, admission_file, i
         plan, installed_id = _1174_installed_mission(_1174_comments(1172, root), admission, now)
         # Only the complete current canonical target chain can mint this proof.
         # The retired F/R22 source exception is resolved exclusively by source mode.
-        target = _1174TargetProof(raw, _1174_bytes(verified), local.decode().strip(), installed_id,
+        target = _1174TargetProof(raw, _1174_bytes(verified["context"]), local.decode().strip(), installed_id,
             min(_1174_time(admission["expires_utc"]), _1174_time(lease["lease_expires_at_utc"]),
                 _1174_time(plan["routing_history"]["previous_exception"]["hard_expiry_utc"])))
         return admission, dict(canonical_oid=local.decode().strip(), spec_sha256=registration["spec_sha256"],

@@ -1,0 +1,14 @@
+{
+  "current_source_sha256": "2ccd374bbad2eb61e379935f1e400610e952a0c3a29788921a32edc6f5225b75",
+  "native70_tested_components_identical": true,
+  "component_sha256": {
+    "git_guard": "1fe60c51cc35fe5e482686830799fb00848934e52d36709425cd222ad1bae42b",
+    "pin_block": "dadf3c8b56e0a2cb272d986b9ee048302d7014149845eaddcbb8f00744b25fd9",
+    "capture_config_and_helper": "25a6152e149e8b2af9507ae8132de83565e0fc183c197d6d7c931565c47a7051",
+    "version_queries": "bcd2103157e5edb9f4c54cab8fa9e61ace44edb2f4156b6cffac26c4abc40163"
+  },
+  "bash_blocks_identical": true,
+  "bash35_reused": true,
+  "native70_reused": true,
+  "new_hash_collection_checks": "run separately, never included in reused70"
+}

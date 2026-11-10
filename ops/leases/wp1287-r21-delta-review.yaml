@@ -1,0 +1,75 @@
+schema_version: 2
+event: review_lease_granted
+packet_issue: 1287
+packet_id: wp1287
+mission_issue: 1238
+revision: 21
+generation: 21
+lease_id: wp1287-r21-delta-review
+role: reviewer
+provider: codex
+executor: codex
+model_family: openai
+execution_surface: codex_cli
+transport: machine
+environment: windows-vm
+risk: sensitive
+access: read-only-candidate-owned-output
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1287-r21.md
+spec_hash: ee6531f8ecf3eb46dc3daabcea84161b819166e7aa3745ca1e7a8da92940f337
+spec_sha256_required: ee6531f8ecf3eb46dc3daabcea84161b819166e7aa3745ca1e7a8da92940f337
+prompt_path: ops/prompts/wp1287-r21-delta-review.md
+prompt_sha256_required: 38ec29678525564d3465018e8bb45b15323436a1476ce16a9fd4740778cd1f1a
+write_set:
+- ops/checkpoints/wp1287-r21/
+effective_write_set:
+- ops/checkpoints/wp1287-r21/
+change_policy_sha: null
+land_obligations: []
+branch: ops/wp1287-r4-diagnostic
+base_sha: bf9914cb1a8e6f5047468f4d130b587015f8d73f
+start_from_sha: 0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2
+reviewed_sha_required: 0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1287#issuecomment-6773433608
+authority_note: Owner directs continued pattern remediation and delta-only review;
+  explicit successor rescue grants exactly one verification round, preserving all
+  lifetime costs
+leased_at_utc: '2026-11-10T17:39:55.125413+00:00'
+heartbeat_at: '2026-11-10T17:39:55.125413+00:00'
+lease_until: '2026-11-10T19:09:55.125413+00:00'
+lease_expires_at_utc: '2026-11-10T19:09:55.125413+00:00'
+run_minutes: 60
+attempts_limit: 1
+attempts_used: 0
+diagnostic_limit: 0
+diagnostic_used: 0
+requires_live: false
+uy_quyen_merge: false
+status: granted
+thay_the_cho:
+- wp1287-r20-delta-review
+reviewer: codex
+model: gpt-6-astra
+effort: xhigh
+source_write_set: []
+review_read_scope:
+- .agents/skills/playwright-browser/package.json
+- .agents/skills/playwright-browser/package-lock.json
+- .agents/skills/playwright-browser/SKILL.md
+assurance_target: review_deferred_sensitive_same_provider
+formal_limit: 4
+formal_used: 1
+formal_reserved: 1
+shared_limit: 8
+shared_used: 7
+shared_reserved: 1
+shared_confirmed_used: 7
+shared_uncertain_asus_charge: 0
+formal_counter_definition: accepted_review_rounds_not_physical_model_calls
+formal_rounds_received_or_pending: 3
+formal_budget_available: 0
+formal_counter_note: Preserve blocked historical slot and three received/pending slots;
+  owner-requested third source-review cycle grants this one final verification only

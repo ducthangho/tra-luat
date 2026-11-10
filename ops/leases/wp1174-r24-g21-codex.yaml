@@ -101,9 +101,9 @@ change_policy_exception:
   - M9
   - unknown=>blocked
 leased_at_utc: '2026-11-09T11:25:07.032862+00:00'
-heartbeat_at: '2026-11-09T11:25:07.032862+00:00'
-lease_until: '2026-11-10T07:25:32Z'
-lease_expires_at_utc: '2026-11-10T07:25:32Z'
+heartbeat_at: '2026-11-10T00:27:43Z'
+lease_until: '2026-11-10T00:27:43Z'
+lease_expires_at_utc: '2026-11-10T00:27:43Z'
 heartbeat_required_minutes: 360
 max_lease_hours: 24
 hard_not_after: '2026-11-10T07:25:32Z'
@@ -392,7 +392,6 @@ source_audit_policy: Proposed exact-newH J source-only K4 owner alternative afte
   fresh five reviews/full local/Windows/readback/source audit/P3 disposition; actual
   canonical K4 result separately retained; all other required gates and target-human
   obligations unchanged
-
 owner_time_extension_20261110:
   status: approved_by_explicit_owner_reply
   source: Current owner conversation; public Issue1174/Mission1172 decision readback
@@ -407,3 +406,7 @@ owner_time_extension_20261110:
   source_H: 7051f7c0bd2ecc3948172ea83478e829aca8e496
   scope: Time envelope only; all source/review/CI/Windows/M9/connector caps and runtime/human
     restrictions unchanged; previous blocks are historical.
+ended_by_R25_owner_successor:
+  at: '2026-11-10T00:27:43Z'
+  successor: wp1174-r25-g22-codex
+  scope: Superseded authority only; sourceH remains blocked/unmerged, no landed claim

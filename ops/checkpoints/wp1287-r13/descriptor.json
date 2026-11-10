@@ -16,19 +16,19 @@
   "budgets": {
     "formal": {
       "used": 0,
-      "reserved": 1,
+      "reserved": 0,
       "limit": 2
     },
     "shared": {
       "used": 3,
-      "reserved": 1,
+      "reserved": 0,
       "limit": 8
     },
     "authors": "3/3",
     "design": "1/1",
     "productpush": "0/1"
   },
-  "status": "ready_reserved_one_review",
+  "status": "blocked_by_auto_review_expanded_egress_no_model",
   "assurance": "HOLD_sensitive_same_provider",
   "bootstrap_sha256": "f461b2d755eab4f6c8c07d89a5ebbaf5f188653531a9a88f4bbd93ebbb549c4c",
   "run_review_sha256": "a619be24af35151f2cafad7e0b86e5c1aecf3a2d5e705d54062558d52996ea46",
@@ -45,6 +45,13 @@
     "codex_version": "0.155.1",
     "python_version": "3.13.1",
     "deadline_utc": "2026-11-10T08:38:53Z",
+    "model_invoked": false
+  },
+  "auto_review": {
+    "first_rejection": "Full private clone +20-file bundle exceed prior five-file20,731byte approval",
+    "authorization_check": "Read original GitHub review/standing delegation sources; exact same action reassessed, not rerouted",
+    "second_rejection": "Still requires direct user re-approval of exact expanded payload; GitHub comments and agent interpretation insufficient",
+    "bypass_attempted": false,
     "model_invoked": false
   }
 }

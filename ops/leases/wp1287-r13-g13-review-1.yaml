@@ -37,9 +37,9 @@ granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1238#issue
 authority_note: Latest owner ASUS online retry plus original independent reviewer
   assignment; fresh CLI gpt-6-astra/xhigh, no product/model budget increase
 leased_at_utc: '2026-11-10T07:43:37.276595+00:00'
-heartbeat_at: '2026-11-10T07:43:37.276595+00:00'
-lease_until: '2026-11-10T09:13:37.276595+00:00'
-lease_expires_at_utc: '2026-11-10T09:13:37.276595+00:00'
+heartbeat_at: '2026-11-10T08:00:16.037339+00:00'
+lease_until: '2026-11-10T08:00:16.037339+00:00'
+lease_expires_at_utc: '2026-11-10T08:00:16.037339+00:00'
 run_minutes: 45
 attempts_limit: 3
 attempts_used: 3
@@ -47,7 +47,7 @@ diagnostic_limit: 0
 diagnostic_used: 0
 requires_live: false
 uy_quyen_merge: false
-status: preparing
+status: retired
 thay_the_cho:
 - wp1287-r12-g12-operator
 reviewer: codex
@@ -61,7 +61,14 @@ review_read_scope:
 assurance_target: review_deferred_sensitive_same_provider
 formal_limit: 2
 formal_used: 0
-formal_reserved: 1
+formal_reserved: 0
 shared_limit: 8
 shared_used: 3
-shared_reserved: 1
+shared_reserved: 0
+original_lease_until: '2026-11-10T09:13:37.276595+00:00'
+original_lease_expires_at_utc: '2026-11-10T09:13:37.276595+00:00'
+retired_at: '2026-11-10T08:00:16.037339+00:00'
+retired_at_utc: '2026-11-10T08:00:16.037339+00:00'
+retirement_reason: ASUS bootstrap/clone passed; auto-review rejected expanded private
+  clone+20-file payload, including reassessment against prior authorization sources;
+  no reviewer invocation/model call. Input/clone preserved for explicit payload approval.

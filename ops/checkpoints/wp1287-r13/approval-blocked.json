@@ -1,0 +1,14 @@
+{
+  "at": "2026-11-10T08:00:26.104622+00:00",
+  "status": "blocked_by_auto_review_expanded_egress",
+  "model_invoked": false,
+  "invocation_file_exists": false,
+  "review_run_exists": false,
+  "head": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "clone_clean": true,
+  "host_lock_released": true,
+  "formal_used": 0,
+  "shared_used": 3,
+  "reservations": 0,
+  "prepared_inputs_preserved": true
+}

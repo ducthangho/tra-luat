@@ -49,8 +49,13 @@ export TL_PW_CLI="$TL_PW_INSTALL/node_modules/@playwright/cli/playwright-cli.js"
   for p in "$TL_PW_ROOT" "$TL_PW_NODE" "$TL_PW_NPM_CLI" "$TL_PW_SRC"; do case "$p" in /*) ;; *) false;; esac; done
   case "$TL_PW_ROOT" in *[!A-Za-z0-9._/-]*) false;; esac; [ -n "$TL_PW_TARGET_ID" ]; [ ! -e "$TL_PW_INSTALL" ]
   [ -z "$(env | grep -E '^(PLAYWRIGHT_|PWTEST_)' | grep -vE '^PLAYWRIGHT_(BROWSERS_PATH|SKIP_BROWSER_DOWNLOAD)=' || true)" ]
+  command -v git >/dev/null; [ -z "$(env | grep '^GIT_' || true)" ]
+  probe="$TL_PW_ROOT"; while [ ! -e "$probe" ]; do probe=$(dirname -- "$probe"); done
+  probe=$(realpath -e -- "$probe"); test -d "$probe"
+  if observation=$(LC_ALL=C git -C "$probe" rev-parse --is-inside-work-tree 2>&1); then false
+  else rc=$?; printf '%s\n' "$observation" >&2
+    [ "$rc" -eq 128 ] && [ "$observation" = 'fatal: not a git repository (or any of the parent directories): .git' ] || exit 1; fi
   mkdir -p "$TL_PW_INSTALL" "$PLAYWRIGHT_BROWSERS_PATH" "$TL_PW_ROOT/npm-cache" "$TL_PW_ROOT/work" "$TL_PW_ROOT/runs"
-  if git -C "$TL_PW_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then false; fi
   [ "$("$TL_PW_NODE" --version)" = v24.19.0 ]; [ "$("$TL_PW_NODE" "$TL_PW_NPM_CLI" --version)" = 11.9.0 ]
   : > "$TL_PW_ROOT/npmrc-empty"; printf '%s\n' "$TL_PW_TARGET_ID" > "$TL_PW_ROOT/TARGET_ID"
   cp "$TL_PW_SRC/package.json" "$TL_PW_SRC/package-lock.json" "$TL_PW_INSTALL/"
@@ -58,7 +63,8 @@ export TL_PW_CLI="$TL_PW_INSTALL/node_modules/@playwright/cli/playwright-cli.js"
   N=("$TL_PW_NODE" "$TL_PW_NPM_CLI" --prefix "$TL_PW_INSTALL" --userconfig "$TL_PW_ROOT/npmrc-empty"
      --cache "$TL_PW_ROOT/npm-cache" --registry https://registry.npmjs.org/)
   "${N[@]}" ci --ignore-scripts --no-audit --no-fund
-  [ "$(sha256sum < "$TL_PW_INSTALL/package-lock.json")" = "$(cat "$TL_PW_ROOT/install/0.1.0.lock.sha256")" ]
+  actual=$(sha256sum < "$TL_PW_INSTALL/package-lock.json"); expected=$(cat "$TL_PW_ROOT/install/0.1.0.lock.sha256")
+  [[ "$actual" =~ ^[0-9a-f]{64}\ \ -$ ]] && [ "$actual" = "$expected" ]
   "${N[@]}" audit signatures
   cd "$TL_PW_ROOT/work"; "$TL_PW_NODE" "$TL_PW_INSTALL/node_modules/playwright/cli.js" install --no-shell chromium
   echo "SETUP OK" )
@@ -74,14 +80,25 @@ $env:PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = '1'; $env:NO_UPDATE_NOTIFIER = '1'
 function Need($Ok, $Msg) { if (-not $Ok) { throw "STOP[PLAYWRIGHT_ADDON_UNAVAILABLE]: $Msg" } }
 function Test-PwEnv { -not (Get-ChildItem Env: | Where-Object { $_.Name -match '^(PLAYWRIGHT_|PWTEST_)' -and
   $_.Name -notmatch '^PLAYWRIGHT_(BROWSERS_PATH|SKIP_BROWSER_DOWNLOAD)$' }) }
-& { foreach ($p in $env:TL_PW_ROOT, $env:TL_PW_NODE, $env:TL_PW_NPM_CLI, $env:TL_PW_SRC) {
+& { $ErrorActionPreference = 'Stop'
+  foreach ($p in $env:TL_PW_ROOT, $env:TL_PW_NODE, $env:TL_PW_NPM_CLI, $env:TL_PW_SRC) {
       Need ($p -match '^[A-Za-z]:\\[^<>"|?*]*[^<>"|?*\\]$') "không tuyệt đối/còn placeholder: $p" }
   Need ($env:TL_PW_TARGET_ID -and -not (Test-Path -LiteralPath $env:TL_PW_INSTALL)) 'thiếu TargetId hoặc bản cài đã có'
   Need (Test-PwEnv) 'có biến PLAYWRIGHT_*/PWTEST_* lạ'
+  $null = Get-Command git -ErrorAction Stop; Need (-not (Get-ChildItem Env:GIT_*)) 'biến GIT_* không được đặt'
+  $probe = $env:TL_PW_ROOT; while (-not (Test-Path -LiteralPath $probe)) { $probe = Split-Path -Parent $probe }
+  $probe = (Resolve-Path -LiteralPath $probe -ErrorAction Stop).ProviderPath
+  Need (Test-Path -LiteralPath $probe -PathType Container) 'thư mục cha'
+  $savedLocale = $env:LC_ALL
+  try { $env:LC_ALL = 'C'; $ErrorActionPreference = 'Continue'
+    $observation = @(& git -C $probe rev-parse --is-inside-work-tree 2>&1); $gitRc = $LASTEXITCODE
+  } finally { $env:LC_ALL = $savedLocale; $ErrorActionPreference = 'Stop' }
+  $observation | ForEach-Object { Write-Host "$_" }
+  Need ($gitRc -eq 128 -and $observation.Count -eq 1 -and
+    "$($observation[0])" -ceq 'fatal: not a git repository (or any of the parent directories): .git') 'không chứng minh ngoài Git'
   foreach ($d in 'install\0.1.0', 'browsers\0.1.0', 'npm-cache', 'work', 'runs') {
     New-Item -ItemType Directory -Force -Path "$env:TL_PW_ROOT\$d" -ErrorAction Stop | Out-Null }
-  $null = Get-Command git -ErrorAction Stop; & git -C $env:TL_PW_ROOT rev-parse --is-inside-work-tree *> $null
-  Need ($LASTEXITCODE -ne 0) 'TL_PW_ROOT nằm trong Git'; Need ((& $env:TL_PW_NODE --version) -eq 'v26.13.0') 'node'
+  Need ((& $env:TL_PW_NODE --version) -eq 'v26.13.0') 'node'
   Need ((& $env:TL_PW_NODE $env:TL_PW_NPM_CLI --version) -eq '11.20.0') 'npm'
   [IO.File]::WriteAllText("$env:TL_PW_ROOT\npmrc-empty", ''); [IO.File]::WriteAllText("$env:TL_PW_ROOT\TARGET_ID", $env:TL_PW_TARGET_ID)
   Copy-Item -LiteralPath "$env:TL_PW_SRC\package.json", "$env:TL_PW_SRC\package-lock.json" -Destination $env:TL_PW_INSTALL -ErrorAction Stop
@@ -102,10 +119,11 @@ lần Capture; dòng cuối phải đúng `PIN OK`, khác ⇒ DỪNG. `~/.playwr
 CLI gộp vào cấu hình: gặp thì DỪNG, đừng xoá đồ của người khác.
 ```bash
 ( set -Eeu; trap 'echo "STOP[PLAYWRIGHT_ADDON_UNAVAILABLE]: $BASH_COMMAND" >&2' ERR
-  echo "target $TL_PW_TARGET_ID"; [ "$(cat "$TL_PW_ROOT/TARGET_ID")" = "$TL_PW_TARGET_ID" ]
+  echo "target $TL_PW_TARGET_ID"; [ -n "$TL_PW_TARGET_ID" ]; target=$(cat "$TL_PW_ROOT/TARGET_ID"); [ "$target" = "$TL_PW_TARGET_ID" ]
   v=$("$TL_PW_NODE" --version); echo "node $v"; [ "$v" = v24.19.0 ]
   v=$("$TL_PW_NODE" "$TL_PW_NPM_CLI" --version); echo "npm $v"; [ "$v" = 11.9.0 ]
-  [ "$(sha256sum < "$TL_PW_INSTALL/package-lock.json")" = "$(cat "$TL_PW_ROOT/install/0.1.0.lock.sha256")" ]
+  actual=$(sha256sum < "$TL_PW_INSTALL/package-lock.json"); expected=$(cat "$TL_PW_ROOT/install/0.1.0.lock.sha256")
+  [[ "$actual" =~ ^[0-9a-f]{64}\ \ -$ ]] && [ "$actual" = "$expected" ]
   L=$("$TL_PW_NODE" "$TL_PW_NPM_CLI" ls --all --prefix "$TL_PW_INSTALL" --userconfig "$TL_PW_ROOT/npmrc-empty"); echo "$L"
   for v in @playwright/cli@0.1.23 playwright@1.65.0-alpha-2026-10-30 playwright-core@1.65.0-alpha-2026-10-30; do
     printf '%s\n' "$L" | grep -qF -- "$v"; done
@@ -116,11 +134,13 @@ CLI gộp vào cấu hình: gặp thì DỪNG, đừng xoá đồ của người
   echo "PIN OK" )
 ```
 ```powershell
-& { "target $env:TL_PW_TARGET_ID"; Need ((Get-Content -Raw -LiteralPath "$env:TL_PW_ROOT\TARGET_ID") -eq $env:TL_PW_TARGET_ID) 'TargetId'
+& { $ErrorActionPreference = 'Stop'
+  "target $env:TL_PW_TARGET_ID"; Need ((Get-Content -Raw -LiteralPath "$env:TL_PW_ROOT\TARGET_ID") -eq $env:TL_PW_TARGET_ID) 'TargetId'
   $v = & $env:TL_PW_NODE --version; "node $v"; Need ($v -eq 'v26.13.0') 'node'
   $v = & $env:TL_PW_NODE $env:TL_PW_NPM_CLI --version; "npm $v"; Need ($v -eq '11.20.0') 'npm'
   $h = (Get-FileHash -LiteralPath "$env:TL_PW_INSTALL\package-lock.json" -Algorithm SHA256).Hash; "lock $h"
-  Need ($h -eq (Get-Content -Raw -LiteralPath "$env:TL_PW_ROOT\install\0.1.0.lock.sha256")) 'lock'
+  $expectedHash = Get-Content -Raw -LiteralPath "$env:TL_PW_ROOT\install\0.1.0.lock.sha256" -ErrorAction Stop
+  Need ($h -cmatch '\A[0-9A-F]{64}\z' -and $expectedHash -cmatch '\A[0-9A-F]{64}\z' -and $h -ceq $expectedHash) 'lock'
   $l = & $env:TL_PW_NODE $env:TL_PW_NPM_CLI ls --all --prefix $env:TL_PW_INSTALL --userconfig "$env:TL_PW_ROOT\npmrc-empty"
   Need ($LASTEXITCODE -eq 0) 'npm ls'; $l
   foreach ($x in '@playwright/cli@0.1.23', 'playwright@1.65.0-alpha-2026-10-30', 'playwright-core@1.65.0-alpha-2026-10-30') {
@@ -151,7 +171,7 @@ chay_ghi() { local ten=$1 rc; shift
 # Chạy khối Kiểm pin bash ở trên dạng: ( … ) 2>&1 | tee "$TL_PW_RUN/00-pins.log"
 ( set -Eeu; trap 'echo "STOP: $BASH_COMMAND — chạy Cleanup" >&2' ERR
   [ "$(tail -n 1 "$TL_PW_RUN/00-pins.log")" = 'PIN OK' ]; case "$TL_PW_URL" in http://*|https://*) ;; *) false;; esac
-  printf '{"browser":{"browserName":"chromium","isolated":true,"launchOptions":{"channel":"chromium","headless":true,"timeout":20000}},"outputDir":"%s","outputMode":"file"}\n' \
+  printf '{"browser":{"browserName":"chromium","isolated":true,"launchOptions":{"channel":"chromium","headless":true,"timeout":30000}},"timeouts":{"action":10000},"outputDir":"%s","outputMode":"file"}\n' \
     "$TL_PW_RUN" > "$TL_PW_RUN/browser.json"
   chay_ghi 01-open open about:blank --config "$TL_PW_RUN/browser.json"
   chay_ghi 02-goto goto "$TL_PW_URL"; chay_ghi 03-tab-list tab-list; chay_ghi 04-requests requests --static
@@ -184,10 +204,11 @@ function Invoke-PwGhi([string]$Ten, [string[]]$Argv, [switch]$PhaiLoi) {
   $expectedRc = 0; if ($PhaiLoi) { $expectedRc = 1 }
   Need ($rc -eq $expectedRc) "$Ten rc=$rc — chạy Cleanup" }
 # Chạy khối Kiểm pin PowerShell ở trên dạng: & { … } *>&1 | Tee-Object -FilePath "$env:TL_PW_RUN\00-pins.log"
-& { Need ((Get-Content -LiteralPath "$env:TL_PW_RUN\00-pins.log" -Tail 1) -eq 'PIN OK') 'Kiểm pin'
+& { $ErrorActionPreference = 'Stop'
+  Need ((Get-Content -LiteralPath "$env:TL_PW_RUN\00-pins.log" -Tail 1) -eq 'PIN OK') 'Kiểm pin'
   Need ($env:TL_PW_URL -match '^https?://') 'URL chỉ http(s)'
   $cfg = [ordered]@{ browser = [ordered]@{ browserName = 'chromium'; isolated = $true; launchOptions = [ordered]@{
-      channel = 'chromium'; headless = $true; timeout = 20000 } }; outputDir = $env:TL_PW_RUN; outputMode = 'file' }
+      channel = 'chromium'; headless = $true; timeout = 30000 } }; timeouts = @{ action = 10000 }; outputDir = $env:TL_PW_RUN; outputMode = 'file' }
   [IO.File]::WriteAllText("$env:TL_PW_RUN\browser.json", ($cfg | ConvertTo-Json -Depth 5))
   Invoke-PwGhi 01-open @('open', 'about:blank', '--config', "$env:TL_PW_RUN\browser.json")
   Invoke-PwGhi 02-goto @('goto', $env:TL_PW_URL); Invoke-PwGhi 03-tab-list @('tab-list'); Invoke-PwGhi 04-requests @('requests', '--static')
@@ -212,7 +233,8 @@ export TL_PW_IDX='<N đọc từ 04-requests.json>'
 ```
 ```powershell
 $env:TL_PW_IDX = '<N đọc từ 04-requests.json>'
-& { Need ($env:TL_PW_IDX -match '^[0-9]+$') 'chỉ số'
+& { $ErrorActionPreference = 'Stop'
+  Need ($env:TL_PW_IDX -match '^[0-9]+$') 'chỉ số'
   Invoke-PwGhi 05-response-body @('response-body', $env:TL_PW_IDX, '--filename', "$env:TL_PW_RUN\source.body")
   Invoke-PwGhi 06-screenshot @('screenshot', '--full-page', '--filename', "$env:TL_PW_RUN\page.png")
   Invoke-PwGhi 07-pdf @('pdf', '--filename', "$env:TL_PW_RUN\page.pdf")

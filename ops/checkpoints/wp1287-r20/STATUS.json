@@ -1,0 +1,49 @@
+{
+  "head": "58bee6729c6111674f8db89625e65963c1f1c554",
+  "records": [
+    {
+      "name": "diff-check",
+      "rc": 0,
+      "positive": true
+    },
+    {
+      "name": "claims",
+      "rc": 0,
+      "positive": true
+    },
+    {
+      "name": "doctrine",
+      "rc": 0,
+      "positive": true
+    },
+    {
+      "name": "manifest",
+      "rc": 0,
+      "positive": true
+    },
+    {
+      "name": "release-verify",
+      "rc": 0,
+      "positive": true
+    }
+  ],
+  "core_selftest": "reused1777/1777 on exact unchanged core source",
+  "ruff": "prior bare rc1/12F821, delta0 because core source unchanged",
+  "bash_component_checks": {
+    "passed": 35,
+    "total": 35,
+    "rc": 0
+  },
+  "native_powershell_checks": {
+    "passed": 70,
+    "total": 70,
+    "reused_not_rerun": true,
+    "proof": "native-evidence-reuse.json"
+  },
+  "product_pushes": 0,
+  "shared_used": 7,
+  "shared_limit": 8,
+  "source_approval": false,
+  "assurance": "HOLD",
+  "independent_review": "running_delta_only"
+}

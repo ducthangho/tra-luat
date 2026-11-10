@@ -44,9 +44,13 @@ run_minutes: 5
 attempts_limit: 3
 attempts_used: 3
 diagnostic_limit: 1
-diagnostic_used: 0
+diagnostic_used: 1
 requires_live: false
 uy_quyen_merge: false
-status: leased
+status: retired
 thay_the_cho:
 - wp1287-r3-g3-codex
+retired_at_utc: '2026-11-10T00:07:51Z'
+retired_at: '2026-11-10T00:07:51Z'
+retirement_reason: One diagnostic complete; no browser retry; U10 open; lock released;
+  raw evidence retained native

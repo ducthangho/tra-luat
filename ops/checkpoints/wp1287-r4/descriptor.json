@@ -25,7 +25,7 @@
     "limit": 1
   },
   "diagnostic": {
-    "used": 0,
+    "used": 1,
     "reserved": 0,
     "limit": 1
   },
@@ -38,5 +38,6 @@
     "CFT": "157.0.8103.15",
     "browser_hash_matches": true
   },
-  "no_gate_or_approval": true
+  "no_gate_or_approval": true,
+  "status": "terminal_failed_startup_paused"
 }

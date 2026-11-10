@@ -1,0 +1,67 @@
+{
+  "schema": "wp1287.u10_diagnostic.v1",
+  "frozen_commit": "31a8477e22e9ec03f8360e0cd62a6e13db47e9d8",
+  "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+  "target": "a5f7076e-a491-4f84-829b-8d1fbcc1c767",
+  "started_utc": "2026-11-10T00:04:47.687807Z",
+  "finished_utc": "2026-11-10T00:05:23.526776Z",
+  "open_rc": 1,
+  "operator_wrapper_observed_rc": 1,
+  "samples": 70,
+  "first_chrome_launch_utc": "2026-11-10T00:04:48.308Z",
+  "graceful_close_start_utc": "2026-11-10T00:05:18.177Z",
+  "driver_force_kill_utc": "2026-11-10T00:05:18.184Z",
+  "browser_exit_utc": "2026-11-10T00:05:22.566Z",
+  "browser_exit_code": 1,
+  "observed_processes": 3,
+  "observed_renderer_children": 0,
+  "minimum_free_ram_bytes": 881479680,
+  "close_rc": 0,
+  "delete_data_rc": 0,
+  "remaining_owned_chrome": 0,
+  "test_lock_released": true,
+  "diagnostic_allowance": {
+    "used": 1,
+    "reserved": 0,
+    "limit": 1
+  },
+  "product_authors": {
+    "used": 3,
+    "limit": 3
+  },
+  "formal": {
+    "used": 0,
+    "limit": 2
+  },
+  "shared": {
+    "used": 2,
+    "limit": 8
+  },
+  "product_pushes": {
+    "used": 0,
+    "limit": 1
+  },
+  "U10": "FAIL_OPEN",
+  "OP-F01": "formal_OPEN",
+  "hypothesis_A": "supported: browser stayed alive without completed handshake until timeout",
+  "hypothesis_B": "no evidence of spontaneous browser exit before timeout; observed exit follows driver kill",
+  "hypothesis_C": "unresolved; minimum RAM is correlation only; no policy/OOM proof",
+  "native_evidence_manifest_sha256": "36f6a1f4fdf6b0820c4b78da8737914702c2fc12f60562f07d4379a9b6536eea",
+  "native_terminal_sha256": "b350475ad6b8100a9ebb68a3259bfcb64f7214168156bd83f334be546d91848c",
+  "native_samples_sha256": "5b0940580f42f8e707de827f14efc7bdccebe5fcd6f01ac803a1c72257a3eba8",
+  "native_stderr_sha256": "b663fc3d85b8811050509f0cf14a97928d0a6fbe4c43c6c35402a2e6ef3c81ba",
+  "native_exits_sha256": "a9c34f4756ebcfd143b80e4507a2bc62c041e72b77e088297fdd69b572a88bca",
+  "raw_retention": "Native owned scratch C:\\tl-win\\wp1287-r4-u10-20261110; raw export denied by auto-review, retained in place. Scope-safe summary and hashes published instead.",
+  "not_run": [
+    "new product author",
+    "formal review",
+    "native fullflow acceptance",
+    "new browser launch after r4",
+    "P3 canary",
+    "P4 activation",
+    "P5 rollout",
+    "CI/WindowsCI/LIVE"
+  ],
+  "disposition": "pause diagnostic branch; no blind retries; no compatibility PASS; P3-P6 dependencies remain"
+}

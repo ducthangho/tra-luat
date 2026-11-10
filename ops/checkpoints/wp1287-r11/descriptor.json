@@ -14,7 +14,7 @@
     "inline_transport.py": "b0791ebfa34cd2b0eb8d476c78e71be763322be2227538f2a3b215c3f28c3e22",
     "documented-cleanup.ps1": "672dd903bcc4f8fda39fb83281273d3554e310227821d22a3773f4cfc6a25c1a"
   },
-  "spec_sha256": "a8db715911fba591b0ab984701a2a8f5e790adcdf19e3202dbc6dc5e833ab937",
+  "spec_sha256": "cd006665d78ce96e242f23373ee213a65272ddd2df99c80383f44ca9f456286e",
   "allowance": {
     "used": 0,
     "reserved": 0,
@@ -36,5 +36,23 @@
     "formal": "0/2",
     "productpush": "0/1"
   },
-  "status": "prepared_not_run"
+  "status": "prepared_not_run",
+  "native_inline_preflight": {
+    "PS51": {
+      "version": "5.1.26100.9711",
+      "effective_policy": "Restricted",
+      "helper_loaded": true,
+      "rc": 0,
+      "stderr_empty": false
+    },
+    "PS7": {
+      "version": "7.6.9",
+      "effective_policy": "RemoteSigned",
+      "helper_loaded": true,
+      "rc": 0,
+      "stderr_empty": true
+    },
+    "CLI_browser_invoked": false,
+    "policy_changes": false
+  }
 }

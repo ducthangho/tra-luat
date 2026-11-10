@@ -18,8 +18,8 @@ access: operator-measurement-only
 review_class: sensitive
 effective_review_class: sensitive
 spec_path: ops/specs/wp1287-r11.md
-spec_hash: a8db715911fba591b0ab984701a2a8f5e790adcdf19e3202dbc6dc5e833ab937
-spec_sha256_required: a8db715911fba591b0ab984701a2a8f5e790adcdf19e3202dbc6dc5e833ab937
+spec_hash: cd006665d78ce96e242f23373ee213a65272ddd2df99c80383f44ca9f456286e
+spec_sha256_required: cd006665d78ce96e242f23373ee213a65272ddd2df99c80383f44ca9f456286e
 prompt_path: ops/prompts/wp1287-r11-g11-operator.md
 prompt_sha256_required: 40111a51dee27f851124e519fa30a6edea76da7cf5d225866d156b3212e74f7e
 write_set:

@@ -22,7 +22,7 @@
   "counterexamples": {
     "Linux_passed": 13,
     "total": 13,
-    "native": "not_run"
+    "native": 13
   },
   "measurement": {
     "used": 0,
@@ -40,5 +40,21 @@
     "formal": "0/2",
     "productpush": "0/1"
   },
-  "status": "prepared_not_run"
+  "status": "prepared_pending_final_native_hash",
+  "stage": {
+    "passed": true,
+    "npm_ci_rc": 0,
+    "signatures_rc": 0,
+    "browser_install_rc": 0,
+    "native_abi": {
+      "passed": true,
+      "bitness": 64,
+      "ME_bytes": 1080,
+      "WN_bytes": 280,
+      "modules": 29,
+      "threads": 4
+    }
+  },
+  "ownership_scan": "Exactly one active holder: wp1287-r9-g9-operator; fullrefs refreshed",
+  "github_lease_gate": "passed"
 }

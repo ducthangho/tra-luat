@@ -1,0 +1,28 @@
+{
+  "schema": "wp1287.operator_execution_grant.v1",
+  "authority": "Explicit owner authorization to double timeout after R8 screenshot5000 failure",
+  "issued_by_role": "dispatcher",
+  "mode": "candidate_native_fullflow",
+  "one_open_limit": 1,
+  "used": 0,
+  "helper_sha256": {
+    "contract.py": "edb3d772e36a20acadfddca78cdd2585b28973b790d6a863d7f88b12153ff8e4",
+    "native_flow.py": "587f73e805b388c5fb5c547abc83ec0c6420573bb0f0d674e2c7ab3109d4c79d",
+    "native_observer.py": "562d55dc484368b1cabdfe6b02a370b5200b90da2fec6e0932af6c65a1970150",
+    "test_contract.py": "e4c297b70a6a031c6250681c95c521ae33b2f6deff7130406a95eb510bd89bee"
+  },
+  "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "spec_sha256": "b6fa4c88e932f202a0c7aef6f3c30000f4f58a027c93720322b3e9efd9c063de",
+  "control_sha": "3afd32087093f03ec3fc0f41c50b653477728677",
+  "expires_at": "2026-11-10T07:01:55.734109+00:00",
+  "action_timeout_ms": 10000,
+  "launch_timeout_ms": 30000,
+  "cleanup_timeout_seconds": 20,
+  "native_counterexamples_passed": 13,
+  "native_abi_passed": true,
+  "stage_passed": true,
+  "browser_termination_allowed": false,
+  "direct_owned_popen_watchdog_allowed": true,
+  "product_write_set": [],
+  "U10_closure": false
+}

@@ -1,5 +1,5 @@
 {
-  "status": "pre_child_acl_failure_recovered_preparing_launch2",
+  "status": "recovered_launcher_requested",
   "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
   "formal_used": 1,
   "formal_reserved": 1,
@@ -13,9 +13,10 @@
   "sandbox_preflight_sha256": "4d0b189c913c3ab7eb0b24c4ede2509ba47f9f6dd595da49da317c77e8731015",
   "public_provenance_sha256": "da813bcf1d44bc2aba420b48d86d4b5b3eeb7c4abf066a463ddfb3e4f9e375e0",
   "native_operator_pid": 11296,
-  "deadline_utc": "2026-11-10T10:41:08Z",
+  "deadline_utc": "2026-11-10T10:47:38Z",
   "run_review_launch2_sha256": "989204e2ab0f66ad5abd2a87d71780ffc1e1e0fd84708d1ac4ef3aacd4adaed1",
   "first_launcher_rc": 13,
   "first_model_invoked": false,
-  "credential_gate_after_private_dacl_restore": 0
+  "credential_gate_after_private_dacl_restore": 0,
+  "native_operator_pid_launch2": 19640
 }

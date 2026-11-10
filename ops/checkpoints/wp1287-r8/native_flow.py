@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from contract import same_identity,readiness,cleanup,terminal
-from native_observer import K,identity,census,stamp
+from native_observer import K,identity,census,stamp,memory_sample
 ROOT=Path(r'C:\tl-win\wp1287-r8-fullflow-20261110');INSTALL=ROOT/'installation';E=ROOT/'evidence'
 CACHE=Path(r'C:\tl-win\wp1287-H1-native-recovery2\browser-cache')
 NODE=r'C:\Program Files\nodejs\node.exe';NPM=r'C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js'
@@ -23,6 +23,7 @@ for key in list(ENV):
 assert not any(k.startswith(('PLAYWRIGHT_MCP_','PWTEST_')) for k in ENV)
 ENV.update(PLAYWRIGHT_BROWSERS_PATH=str(CACHE),PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD='1',NO_UPDATE_NOTIFIER='1',NPM_CONFIG_USERCONFIG=str(ROOT/'npm-user-empty.conf'),NPM_CONFIG_GLOBALCONFIG=str(ROOT/'npm-global-empty.conf'),NPM_CONFIG_CACHE=str(ROOT/'npm-cache'))
 ENV['PATH']=str(Path(NODE).parent)+os.pathsep+ENV.get('PATH','')
+MEMORY=[];CENSUS_TIMES=[]
 ROWS=[];OWN={};HANDLES={};GAPS=[];PROBES=[];WORKER=None;QUEUE=[];MARKS=set();T0=None;ACTIVE=None;lockline=None;deadline=None
 
 def acquire(label,minutes):
@@ -38,6 +39,8 @@ def release():
 
 def observe():
     rows=census();now=time.monotonic_ns();live=[]
+    CENSUS_TIMES.append(now)
+    if not MEMORY or now-MEMORY[-1]['at']['mono_ns']>=500000000:MEMORY.append(memory_sample(WORKER[0].pid if WORKER else None))
     # Scan repeatedly so a child may precede its parent in the snapshot.
     for _ in range(4):
         changed=False
@@ -206,7 +209,14 @@ def flow():
             live=observe();clean=cleanup(NONCE,cleanrows,live,bool(GAPS));save(E/'ownership.json',{'identities':list(OWN.values()),'remaining':live,'gaps':GAPS,'at':stamp()})
         if server:server.shutdown();server.server_close()
         rc=0 if full=='passed' and clean=='verified' else 2
-        result={**terminal(full,clean,rc),'at':stamp(),'startup':startup,'open_cli_rc':openrc,'readiness':ready,'fullflow':full,'cleanup':clean,'error':error,'allowance_used':int(attempted),'limit':1,'U10':'OPEN_pending_documented_shell_proofs_and_formal_review','OP-F01':'formal_OPEN','candidate':H2,'no_automatic_retry':True}
+        save(E/'observer-overhead.json',{'samples':MEMORY,'census_mono_ns':CENSUS_TIMES,'worker_limit_seconds':3,'workers_serial':True,'limits':'Observer timings and memory observations only, no causal A/B claim'})
+        states=[]
+        for p in E.glob('probe-*.json'):
+            if p.name.endswith('-identity.json'):continue
+            try:states.append(json.loads(p.read_text()).get('state','unavailable'))
+            except (OSError,ValueError):states.append('unavailable')
+        quality='complete_walk' if states and all(x=='complete_walk' for x in states) and not any(x.get('state')=='deadline_exhausted' for x in PROBES) else 'partial' if states else 'unavailable'
+        result={**terminal(full,clean,rc),'at':stamp(),'observer_quality':quality,'module_walk_states':states,'startup':startup,'open_cli_rc':openrc,'readiness':ready,'fullflow':full,'cleanup':clean,'error':error,'allowance_used':int(attempted),'limit':1,'U10':'OPEN_pending_documented_shell_proofs_and_formal_review','OP-F01':'formal_OPEN','candidate':H2,'no_automatic_retry':True}
         if clean=='verified':release()
         result['lock_released']=not LOCK.read_bytes();result['paused_handoff']=clean!='verified';result['lock_deadline']=deadline.isoformat();save(E/'terminal.json',result)
         with Path(r'C:\tl-win\do-luong.csv').open('a',encoding='utf-8',newline='') as f:f.write(f'{utc().isoformat()},{NONCE},wp1287,{H2},r8-candidate-fullflow,0,0,{rc},0,operator,{clean},no,may=DESKTOP-T9R33P2;startup={startup};readiness={ready};fullflow={full}\n')

@@ -57,6 +57,23 @@ def census():
     finally:K.CloseHandle(h)
     return rows
 
+class MEM(C.Structure):
+    _fields_=[('length',W.DWORD),('load',W.DWORD)]+[(n,C.c_ulonglong) for n in ['total','free','commit_limit','commit_free','virtual_total','virtual_free','extended_free']]
+class PMC(C.Structure):
+    _fields_=[('cb',W.DWORD),('faults',W.DWORD)]+[(n,C.c_size_t) for n in ['peak_working_set','working_set','quota_peak_paged','quota_paged','quota_peak_nonpaged','quota_nonpaged','pagefile','peak_pagefile']]
+def memory_sample(worker_pid=None):
+    m=MEM();m.length=C.sizeof(m);ok,err=checked(K.GlobalMemoryStatusEx,C.byref(m));r={'at':stamp(),'ok':bool(ok),'error':err}
+    if ok:r.update(free_bytes=m.free,free_commit_bytes=m.commit_free,load=m.load)
+    if worker_pid:
+        P=C.WinDLL('psapi',use_last_error=True);P.GetProcessMemoryInfo.argtypes=[W.HANDLE,C.POINTER(PMC),W.DWORD]
+        h=K.OpenProcess(0x1000,False,worker_pid)
+        if h:
+            try:
+                c=PMC();c.cb=C.sizeof(c);ok,err=checked(P.GetProcessMemoryInfo,h,C.byref(c),C.sizeof(c));r['observer_memory']={'ok':bool(ok),'error':err,'peak_working_set_bytes':c.peak_working_set if ok else None,'working_set_bytes':c.working_set if ok else None}
+            finally:K.CloseHandle(h)
+        else:r['observer_memory']={'ok':False,'error':C.get_last_error()}
+    return r
+
 def shared_read(path):
     import msvcrt
     K.CreateFileW.argtypes=[W.LPCWSTR,W.DWORD,W.DWORD,C.c_void_p,W.DWORD,W.DWORD,W.HANDLE];K.CreateFileW.restype=W.HANDLE

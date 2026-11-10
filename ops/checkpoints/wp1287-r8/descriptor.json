@@ -8,8 +8,8 @@
   "spec_sha256": "3dfc01124c94848a9654564369b04d4df14e8dc6efa76c6dd22c88049d150a54",
   "helper_sha256": {
     "contract.py": "1946dc4482ff604c1a757c1177968681149a503733da84a87cb422a3cd4f917f",
-    "native_flow.py": "2cd9d2bb1564221628c290c793cab4afc61427dc6f898388b80958cb263e69cf",
-    "native_observer.py": "60564e1e68d3f2006d140adbb0bc3b385e0b5c324f1dd17fb079aa418d17f020",
+    "native_flow.py": "d684340927d794b3bd8fe7741e3e6a719efca50d6891e499ee39c01fb8504648",
+    "native_observer.py": "562d55dc484368b1cabdfe6b02a370b5200b90da2fec6e0932af6c65a1970150",
     "test_contract.py": "96eb611692f113673713d44db5148e8a57dbac9f9b7c90e7f8cfd90e04e2fe7d"
   },
   "counterexamples": {
@@ -33,5 +33,22 @@
     "formal": "0/2",
     "productpush": "0/1"
   },
-  "bootstrap_note": "Explicit own-directory import for isolated native Python; no global settings changed, no browser attempt used"
+  "bootstrap_note": "Explicit own-directory import for isolated native Python; no global settings changed, no browser attempt used",
+  "native_selfcheck": {
+    "passed": true,
+    "bitness": 64,
+    "ME_bytes": 1080,
+    "WN_bytes": 280,
+    "modules": 29,
+    "threads": 4,
+    "wct_session_error": null,
+    "browser": false
+  },
+  "stage": {
+    "passed": true,
+    "npm_ci_rc": 0,
+    "signature_audit_rc": 0,
+    "browser_install_rc": 0,
+    "native_source_hashes_match": true
+  }
 }

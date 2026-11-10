@@ -12,7 +12,7 @@
   "provenance_sha256": "e46b4455c3a7c344e8b508d124aea178bed043d41682c344def07881a95384a1",
   "requested_model": "gpt-6-astra",
   "requested_effort": "xhigh",
-  "status": "asus_reconnected_public_only_preparation_pending",
+  "status": "public_only_launcher_started_actual_child_pending",
   "model_invoked": false,
   "source_write_set": [],
   "budgets": {
@@ -32,5 +32,8 @@
   },
   "assurance": "HOLD_sensitive_same_provider",
   "active_lease": "wp1287-r15-g15-review-1",
-  "control_base": "21261f62018bd49b59e797418fc188399c835e23"
+  "control_base": "21261f62018bd49b59e797418fc188399c835e23",
+  "native_operator_pid": 26700,
+  "native_launcher_pid": 18008,
+  "deadline_utc": "2026-11-10T10:12:03Z"
 }

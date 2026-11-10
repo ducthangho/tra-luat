@@ -25,11 +25,11 @@ authority_url: https://github.com/ducthangho/tra-luat/issues/1174
 recorded_by: Codex coordinator under explicit E2 owner delegation; no actual-human
   audit
 spec_path: ops/specs/wp1174-implementation-r25.md
-spec_hash: 71d757448c0f54c0239a73e4ee2b635941b8564f914730100b20b81ddfe3e635
-spec_sha256_required: 71d757448c0f54c0239a73e4ee2b635941b8564f914730100b20b81ddfe3e635
-spec_ref: refs/heads/ops/spec-wp1174-r25@c35510e58d4ea72c51b64fe0e842a20d0f2b1f2b
+spec_hash: 792adac3ba7d1ed432f3a6498785d911c646d3a47299e7378a46883514e44633
+spec_sha256_required: 792adac3ba7d1ed432f3a6498785d911c646d3a47299e7378a46883514e44633
+spec_ref: refs/heads/ops/spec-wp1174-r25@0050972800ea7cc05e1946ca23c43097a99355d9
 prompt_path: ops/specs/wp1174-implementation-r25.md
-prompt_sha256_required: 71d757448c0f54c0239a73e4ee2b635941b8564f914730100b20b81ddfe3e635
+prompt_sha256_required: 792adac3ba7d1ed432f3a6498785d911c646d3a47299e7378a46883514e44633
 base_sha: 7051f7c0bd2ecc3948172ea83478e829aca8e496
 start_from_sha: 7051f7c0bd2ecc3948172ea83478e829aca8e496
 reviewed_sha_required: 7051f7c0bd2ecc3948172ea83478e829aca8e496
@@ -129,8 +129,8 @@ thay_the_cho: wp1174-r24-g21-codex
 template_only: false
 guard: Approved R25 manual OFFLINE source19 only after exact public grant/HDR/secret/head/fullfit;
   no fake journal/native/human or runtime authority
-spec_source_oid: c35510e58d4ea72c51b64fe0e842a20d0f2b1f2b
-spec_sha256: 71d757448c0f54c0239a73e4ee2b635941b8564f914730100b20b81ddfe3e635
+spec_source_oid: 0050972800ea7cc05e1946ca23c43097a99355d9
+spec_sha256: 792adac3ba7d1ed432f3a6498785d911c646d3a47299e7378a46883514e44633
 exception_approval_comment_url: https://github.com/ducthangho/tra-luat/issues/1174
 reviewer: codex
 pull_request: 1275
@@ -175,7 +175,7 @@ packet_budget_carryover:
   connector_cap: 8
   CI_observed: 14
   CI_cap: 16
-  known_role_cap: 74
+  known_role_cap: 75
   effective_envelope_max_attempts_per_packet: 19
   counters_reset: false
   external_source_attribution: UNKNOWN separatelyretained
@@ -609,3 +609,10 @@ R24_historical_predecessor:
     source_H: 7051f7c0bd2ecc3948172ea83478e829aca8e496
     scope: Time envelope only; all source/review/CI/Windows/M9/connector caps and
       runtime/human restrictions unchanged; previous blocks are historical.
+routine_role_arithmetic_correction:
+  previous_declared_cap: 74
+  cap: 75
+  sum: 19+45+8+1+2
+  owner_basis: Explicit routine-cap delegation in R25 owner reply; actual public correction
+    readback required before source19
+  component_caps_unchanged: true

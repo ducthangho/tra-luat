@@ -18,8 +18,8 @@ access: read-only-candidate-owned-output
 review_class: sensitive
 effective_review_class: sensitive
 spec_path: ops/specs/wp1287-r17.md
-spec_hash: e0cc576bbd22fa3b5e11a8ed157cdca3e086d1fd1b03dca17fcff5ec36e02d2a
-spec_sha256_required: e0cc576bbd22fa3b5e11a8ed157cdca3e086d1fd1b03dca17fcff5ec36e02d2a
+spec_hash: 0731dff76ec66a5a8162dd13eb256b55b5b432a4f3fbb5b9fc52f8a5a5f62fba
+spec_sha256_required: 0731dff76ec66a5a8162dd13eb256b55b5b432a4f3fbb5b9fc52f8a5a5f62fba
 prompt_path: ops/prompts/wp1287-r17-g17-review-vm.md
 prompt_sha256_required: 62e5083272907a769f9c74d1a1007e59e030b64367c5cb16047bee868cf36176
 write_set:

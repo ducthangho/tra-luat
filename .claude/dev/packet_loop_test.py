@@ -12421,8 +12421,6 @@ def _human_fixture1174(c, change=None):
     server_transition=json.loads(Path(args.human_transition_comment).read_bytes()) if args.human_transition_comment else None
     server_run=json.loads(Path(args.human_remote_run).read_bytes())
     server_runs=json.loads(Path(args.workflow_runs).read_bytes())
-    if target_facts is not None:
-        facts["target_authority"]=target_facts["target_authority"]
     def fetch(endpoint,**limits):
         if endpoint=="repos/"+m._1174_REPO:return dict(id=123,full_name=m._1174_REPO)
         if endpoint==f"repos/{m._1174_REPO}/issues/comments/{audit['id']}":return audit
@@ -12866,6 +12864,8 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,
     lease=dict(packet_id="wp55",revision=1,generation=1)
     spec=(hm._git_do(w,"show",_g(w,"rev-parse","HEAD^1")+":ops/specs/X.md")[1] if chain_root is None else _g(w,"show","refs/remotes/origin/ops/wp55-spec:ops/specs/wp55.md").encode()+b"\n")
     facts=dict(lease=lease,spec=spec,spec_sha256=hashlib.sha256(spec).hexdigest(),canonical_oid=_g(w,"rev-parse","refs/remotes/origin/master"))
+    if target_facts is not None:
+        facts["target_authority"]=target_facts["target_authority"]
     def fetch(endpoint,**limits):
         if endpoint=="repos/"+m._1174_REPO:return dict(id=123,full_name=m._1174_REPO)
         if endpoint==f"repos/{m._1174_REPO}/issues/comments/{audit['id']}":return audit
@@ -12942,6 +12942,38 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,
             missing_human=list(args);i=missing_human.index("--human-audit-comment");del missing_human[i:i+2]
             rc,result=invoke(missing_human)
             assert rc==8 and not result["dispatch_allowed"] and before==(target.read_bytes(),witness.read_bytes()),(rc,result)
+        if target_facts is not None:
+            # Target same-family approval cannot substitute for actual human or existing accept guards.
+            import yaml
+            audit_path=Path(hargs.human_audit_comment)
+            audit_saved=copy.deepcopy(audit)
+            for defect in ("owner","head","tree","spec","late","publication","ci","connector"):
+                original_audit=audit_path.read_bytes()
+                changed=None
+                if defect=="owner":audit["user"]["login"]="agent"
+                elif defect in ("head","tree","spec"):
+                    body=yaml.safe_load(audit["body"])
+                    field={"head":"reviewed_sha","tree":"reviewed_tree","spec":"spec_sha256"}[defect]
+                    body[field]="f"*(64 if defect=="spec" else 40);audit["body"]=yaml.safe_dump(body)
+                elif defect=="late":audit["updated_at"]="2026-11-04T09:02:00Z"
+                else:
+                    field={"publication":"publication_receipt","ci":"check_runs","connector":"connector"}[defect]
+                    changed=Path(args[args.index("--"+field.replace("_","-"))+1]);saved=changed.read_bytes()
+                    record=json.loads(saved)
+                    if defect=="publication":record["audit_sha256"]="f"*64
+                    elif defect=="ci":record["check_runs"][0]["head_sha"]="f"*40
+                    else:record["head_sha"]="f"*40
+                    changed.write_bytes(m._1174_bytes(record))
+                audit_path.write_bytes(m._1174_bytes(audit))
+                with patch.object(m,"_1174_write",wraps=m._1174_write) as writes:
+                    rc,result=invoke()
+                assert rc==8 and not result["dispatch_allowed"] and not writes.called and before==(target.read_bytes(),witness.read_bytes()),("target human/accept rejection",defect,rc,result)
+                expected={"owner":"owner comment origin/identity","head":"human audit exact bindings","tree":"human audit exact bindings",
+                    "spec":"human audit exact bindings","late":"human review trước push","publication":"collector receipt closed bindings",
+                    "ci":"gate KHÔNG xanh","connector":"readback connector không neo đúng"}[defect]
+                assert expected in result["detail"] or defect=="ci" and "legacy predicate rejected" in result["detail"],(defect,result)
+                audit.clear();audit.update(copy.deepcopy(audit_saved));audit_path.write_bytes(original_audit)
+                if changed is not None:changed.write_bytes(saved)
         if workflow_case:workflow_path.write_bytes(original_workflow)
         if workflow_case in ("omit", "change", "failed", "attempt"):
             entries=sorted(str(p) for p in target.parent.rglob("*"))

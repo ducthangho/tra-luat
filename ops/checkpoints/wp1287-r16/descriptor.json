@@ -1,11 +1,11 @@
 {
-  "status": "recovered_launcher_requested",
+  "status": "launch2_readback_timeout_actual_child_unknown",
   "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
   "formal_used": 1,
   "formal_reserved": 1,
   "shared_used": 4,
   "shared_reserved": 1,
-  "model_invoked": false,
+  "model_invoked": null,
   "lease_expires_at_utc": "2026-11-10T11:23:27.528717+00:00",
   "prompt_sha256": "1f8705cfd91a18365751542268aa514940518cc2e44a1d2401ba04437d911007",
   "spec_sha256": "481e5c4c8849aceeb289e56c69c551c6c2c0c2630864ad1cfc9a1b323e26f7b8",
@@ -18,5 +18,9 @@
   "first_launcher_rc": 13,
   "first_model_invoked": false,
   "credential_gate_after_private_dacl_restore": 0,
-  "native_operator_pid_launch2": 19640
+  "native_operator_pid_launch2": 19640,
+  "native_launcher_pid_launch2": 5768,
+  "last_observed_launcher_started": true,
+  "last_readback_error": "MCP request timed out",
+  "last_status_recorded_utc": "2026-11-10T10:06:30.403864+00:00"
 }

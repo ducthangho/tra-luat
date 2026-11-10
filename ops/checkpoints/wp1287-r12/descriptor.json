@@ -26,7 +26,15 @@
   },
   "product_write_set": [],
   "counterexamples_Linux": "13/13",
-  "native_argv_proof": "not_run",
+  "native_argv_proof": {
+    "PS51": "5.1.26100.9711/Restricted/FullLanguage/argc4/exact_values/rc0",
+    "PS7": "7.6.9/RemoteSigned/FullLanguage/argc4/exact_values/rc0",
+    "space_path_included": true,
+    "CLI_browser_invoked": false,
+    "PS51_stderr_empty": false,
+    "PS7_stderr_empty": true,
+    "source_hashes_match": true
+  },
   "effective_review_class": "sensitive",
   "change_policy_sha": null,
   "land_obligations": [],

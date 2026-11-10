@@ -1,0 +1,13 @@
+# Exact-H2 review handoff ready; formal review not yet run
+
+Candidate H2 `2a5803e17b7ca4910c7188bfcc2276190e2d0b4b`, tree `bfb2fad8df2634ae8dd4c839a4565b76d1cfae45`; immutable B `bf9914cb1a8e6f5047468f4d130b587015f8d73f`. Canonical master freshly read back `09643583d170c66ce3bcc74170d054d0f5ac9356`, no implicit current-base carry or merge admission. Candidate/source three files unchanged, local import only, productpush0/1.
+
+R9 approved action10000 operator fullflow PASS, R12 documented native PS5.1/7 helper+whole Cleanup positives PASS, independent readback verified. Original R4/R6/R8/R10/R11 failures and recoveries retained; no retroactive PASS. Runtime proof ready for independent formal acceptance; OP-F01 formal remains OPEN and sensitive assurance HOLD.
+
+Prepared LOCAL-ONLY review archive `/workspace/mission1238-review-ready/wp1287-H2-review-ready.zip`: 71799 bytes, SHA256 `7b39622017c4f8b0b062ac4f6643ccc971dcb77b9358a16b2ca6f29b4912c460`, 20 manifest members size/hash verified. Contains exact three candidate source files/diff/bundle, pinned r3 spec, allowlisted R8–R12 checkpoints/native summaries/source bridges/recovery receipts and explicit independent review task. No credentials/profiles/raw private native logs. Archive/unchanged candidate bundle are local handoff, not another published candidate ref/product push. The r3 spec digest was verified `9b8deaee351417aaf3e417b553bf5817c477aad6fdd811ab0711541c4eea5625`.
+
+Existing prepared reviewer host ASUS is currently offline. Desktop fallback bootstrap has not passed canonical readiness; detailed host diagnostics remain local, not published. No fresh reviewer/model call was made; formal0/2/shared3/8/design1/1/authors3/3/productpush0/1, reservations0. No review verdict, human audit, waiver, merge/land or Mission-complete state is fabricated. Dispatcher preparation is not reviewer execution.
+
+Next valid action is a fresh independent read-only exact-H review under valid reviewer assignment/lease and a ready execution surface. It must assess the approved operator timeout/config versus unchanged source examples/defaults and original r3 acceptance, then OP-F01/native proof/current-base gates. Keep exact source identity; reviewer findings needing product changes require proper successor author authority rather than an operator edit. Sensitive assurance/current-base/CI/MCI/M8 remain before P2 land. P3/P5/P6 depend on that land; P4 read-only matrix exists at ../wp1287-r8/NEXT-PHASES.md.
+
+All native test leases are retired and host lock readback is empty; full-ref ownership gate for R12 reported NGƯỜI_GIỮ0. No browser/reviewer is left running or reserved.

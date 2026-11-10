@@ -101,8 +101,8 @@ change_policy_exception:
   - unknown=>blocked
 leased_at_utc: '2026-11-10T02:56:12Z'
 heartbeat_at: '2026-11-10T07:01:48Z'
-lease_until: '2026-11-10T11:14:32Z'
-lease_expires_at_utc: '2026-11-10T17:05:32Z'
+lease_until: '2026-11-10T12:01:31Z'
+lease_expires_at_utc: '2026-11-10T12:01:31Z'
 heartbeat_required_minutes: 360
 max_lease_hours: 24
 hard_not_after: '2026-11-10T17:05:32Z'

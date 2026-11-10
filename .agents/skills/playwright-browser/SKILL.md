@@ -56,7 +56,8 @@ export TL_PW_CLI="$TL_PW_INSTALL/node_modules/@playwright/cli/playwright-cli.js"
   else rc=$?; printf '%s\n' "$observation" >&2
     [ "$rc" -eq 128 ] && [ "$observation" = 'fatal: not a git repository (or any of the parent directories): .git' ] || exit 1; fi
   mkdir -p "$TL_PW_INSTALL" "$PLAYWRIGHT_BROWSERS_PATH" "$TL_PW_ROOT/npm-cache" "$TL_PW_ROOT/work" "$TL_PW_ROOT/runs"
-  [ "$("$TL_PW_NODE" --version)" = v24.19.0 ]; [ "$("$TL_PW_NODE" "$TL_PW_NPM_CLI" --version)" = 11.9.0 ]
+  v=$("$TL_PW_NODE" --version); [ "$v" = v24.19.0 ]
+  v=$("$TL_PW_NODE" "$TL_PW_NPM_CLI" --version); [ "$v" = 11.9.0 ]
   : > "$TL_PW_ROOT/npmrc-empty"; printf '%s\n' "$TL_PW_TARGET_ID" > "$TL_PW_ROOT/TARGET_ID"
   cp "$TL_PW_SRC/package.json" "$TL_PW_SRC/package-lock.json" "$TL_PW_INSTALL/"
   sha256sum < "$TL_PW_INSTALL/package-lock.json" > "$TL_PW_ROOT/install/0.1.0.lock.sha256"
@@ -64,7 +65,7 @@ export TL_PW_CLI="$TL_PW_INSTALL/node_modules/@playwright/cli/playwright-cli.js"
      --cache "$TL_PW_ROOT/npm-cache" --registry https://registry.npmjs.org/)
   "${N[@]}" ci --ignore-scripts --no-audit --no-fund
   actual=$(sha256sum < "$TL_PW_INSTALL/package-lock.json"); expected=$(cat "$TL_PW_ROOT/install/0.1.0.lock.sha256")
-  [[ "$actual" =~ ^[0-9a-f]{64}\ \ -$ ]] && [ "$actual" = "$expected" ]
+  [[ "$actual" =~ ^[0-9a-f]{64}\ \ -$ ]] && [ "$actual" = "$expected" ] || exit 1
   "${N[@]}" audit signatures
   cd "$TL_PW_ROOT/work"; "$TL_PW_NODE" "$TL_PW_INSTALL/node_modules/playwright/cli.js" install --no-shell chromium
   echo "SETUP OK" )
@@ -123,7 +124,7 @@ CLI gộp vào cấu hình: gặp thì DỪNG, đừng xoá đồ của người
   v=$("$TL_PW_NODE" --version); echo "node $v"; [ "$v" = v24.19.0 ]
   v=$("$TL_PW_NODE" "$TL_PW_NPM_CLI" --version); echo "npm $v"; [ "$v" = 11.9.0 ]
   actual=$(sha256sum < "$TL_PW_INSTALL/package-lock.json"); expected=$(cat "$TL_PW_ROOT/install/0.1.0.lock.sha256")
-  [[ "$actual" =~ ^[0-9a-f]{64}\ \ -$ ]] && [ "$actual" = "$expected" ]
+  [[ "$actual" =~ ^[0-9a-f]{64}\ \ -$ ]] && [ "$actual" = "$expected" ] || exit 1
   L=$("$TL_PW_NODE" "$TL_PW_NPM_CLI" ls --all --prefix "$TL_PW_INSTALL" --userconfig "$TL_PW_ROOT/npmrc-empty"); echo "$L"
   for v in @playwright/cli@0.1.23 playwright@1.65.0-alpha-2026-10-30 playwright-core@1.65.0-alpha-2026-10-30; do
     printf '%s\n' "$L" | grep -qF -- "$v"; done

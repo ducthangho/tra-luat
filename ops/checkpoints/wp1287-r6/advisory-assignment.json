@@ -12,12 +12,12 @@
   "deadline_utc": "2026-11-10T01:54:16Z",
   "shared": {
     "used": 2,
-    "reserved": 1,
+    "reserved": 0,
     "limit": 8
   },
   "design_advisory": {
     "used": 0,
-    "reserved": 1,
+    "reserved": 0,
     "limit": 1
   },
   "formal": {
@@ -38,5 +38,22 @@
     "MCIaudit": 8,
     "remaining_reserve": 0
   },
-  "state": "preflight_no_generation_yet"
+  "state": "terminal_authentication_blocked_before_generation",
+  "actual_generation": false,
+  "approved_payload_pending": "Five-file restricted advisory bundle; user approval required by auto-review",
+  "model_requested": "gpt-6.1-sol",
+  "effort_requested": "xhigh",
+  "served_model": "KHONG_DO_DUOC_no_response",
+  "formal_approval": false,
+  "restricted_run_id": "dbbd85a4108448ce8f793b3ff72de4f1",
+  "restricted_cli_rc": 1,
+  "user_approved_payload": {
+    "files": 5,
+    "bytes": 20731,
+    "destination": "OpenAI via Codex CLI gpt-6.1-sol/xhigh",
+    "approval": "Current user reply Cho ph\u00e9p g\u1eedi g\u00f3i 5 t\u1ec7p n\u00e0y",
+    "consent_retained_for_same_frozen_payload": true
+  },
+  "authentication_failure": "Refresh token invalidated by logout/account login change; not fixed by login status; no automatic provider switch or retry",
+  "workspace_snapshot_unchanged": true
 }

@@ -1,0 +1,22 @@
+{
+  "TASK.txt": {
+    "bytes": 699,
+    "sha256": "8ec99668277235147f6578ec159f036b46a610fa5fbd14e2e990d12c93e8b7bd"
+  },
+  "diagnose_loader_r6.py": {
+    "bytes": 13268,
+    "sha256": "74490cf5682e4dc19a83afafcad91bc667208e427e54dd90e0f430f110d12998"
+  },
+  "r4-result.json": {
+    "bytes": 2514,
+    "sha256": "cd6cbda90bd64c675a72e12d6843c44f4b61081f1e21378f4542d0ad0222615d"
+  },
+  "r5-readonly-result.json": {
+    "bytes": 731,
+    "sha256": "4927b9fb3edb57041746d973c97052979703a9bee0704d479a4d4a8ff2fd5bed"
+  },
+  "r6-result.json": {
+    "bytes": 3519,
+    "sha256": "3c5ab294fe5d801d6248c60b92937af06e24ec3d84bb333de42c4a84c6bfeeb1"
+  }
+}

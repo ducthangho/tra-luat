@@ -1,0 +1,90 @@
+{
+  "version": "1.5.0",
+  "run_id": "dbbd85a4108448ce8f793b3ff72de4f1",
+  "short_id": "dbbd85a4",
+  "ten": "wp1287-restricted-five-file-advisory",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 18,
+    "van_tay": "b82d2013e033822d"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-11-10T01:29:14.553227+00:00",
+  "ket_thuc_utc": "2026-11-10T01:29:16.238094+00:00",
+  "ma_thoat": 1,
+  "ly_do_dung": null,
+  "pid": 10686,
+  "khoa_danh_tinh": "linux:2859264",
+  "workspace": "/workspace/mission1238-continuation/advisory-bundle",
+  "head": "46233233442a176058a1744bb7594e9d44714607",
+  "ref": "master",
+  "remotes": [],
+  "commit_goc": [
+    "46233233442a176058a1744bb7594e9d44714607"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "64a355540de3aa6886b2de48fa6fd756ccb7bcb47b36fe32f7bcbd29df4c99f8",
+  "deadline_utc": "2026-11-10T01:53:44+00:00",
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "chup_workspace": true,
+  "snapshot_gioi_han": "chi so hai moc truoc/sau; ghi roi hoan nguyen giua hai moc thi khong thay; chau tu setsid hoac sinh truoc khi gan job thi khong chung minh duoc",
+  "snapshot_truoc_sha256": "6cad404821b259a35a394fd8675c4eaea2579c7c6875ffccfe7acc3ebece74b4",
+  "snapshot_sau_sha256": "6cad404821b259a35a394fd8675c4eaea2579c7c6875ffccfe7acc3ebece74b4",
+  "snapshot_so_muc": {
+    "truoc": 57,
+    "sau": 57
+  },
+  "tep_doi_tong": 0,
+  "tep_doi_bi_cat": false,
+  "tep_doi": [],
+  "snapshot_ket_qua": "sach",
+  "snapshot_ly_do": null,
+  "checkpoint_sha256": "b25b11d9551eadb4cbab73b7244176ce6e4a3abc5eba3559a09bd748de1b4b2a",
+  "prompt_ban_chup": "/workspace/mission1238-continuation/advisory-restricted-runs/dbbd85a4/prompt.snapshot",
+  "prompt_kin_hoan_toan": false,
+  "model_phuc_vu_rust_log_ke_thua_bi_ghi_de": true,
+  "failure_class": "unknown",
+  "model_phuc_vu": [],
+  "model_phuc_vu_trang_thai": "KHONG_DO_DUOC",
+  "model_phuc_vu_ly_do": "khong thay khung response.created/response.completed nao mang model trong stderr cua con; KHONG suy tu -m hay cau hinh",
+  "stderr_bo_dong": 0,
+  "stderr_bo_byte": 0,
+  "effort_phuc_vu": [],
+  "effort_phuc_vu_trang_thai": "KHONG_DO_DUOC",
+  "effort_phuc_vu_ly_do": "model phuc vu khong do duoc nen effort khong neo duoc vao khung nao",
+  "sandbox_quan_sat": [],
+  "sandbox_lech": {
+    "chuyen_cha_trong_cay": 0,
+    "chuyen_cha_ngoai_cay": 0,
+    "cha_con_song": 0,
+    "tai_dung": 0,
+    "to_tien_doi": 0
+  },
+  "sandbox_trang_thai": "KHONG_THAY_LENH",
+  "sandbox_ly_do": "stdout khong co command_execution nao",
+  "sandbox_gioi_han": "lay mau /proc tu ben ngoai moi 0.2s: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. Lech danh tinh tien trinh (#1105): chuyen cha khi cha cu da mat/Z va cha moi la to tien da xac thuc thi duoc tha; moi lech khac (ke ca chuyen ra ngoai cay hay PID 1) => KHONG_DO_DUOC: co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do",
+  "thoi_luong_giay": 1.685,
+  "stdout_byte": 435,
+  "stdout_sha256": "019604d11bbf1f6839de538b2b974c390341f7276589aae5866836fea1f2a7ef",
+  "stderr_byte": 39,
+  "stderr_sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+}

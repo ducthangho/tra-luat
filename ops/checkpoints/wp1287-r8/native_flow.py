@@ -1,6 +1,10 @@
 """Operator-only one-open fullflow. No product parser, process-wide changes or retries."""
 import os,sys,json,time,hashlib,subprocess,threading,http.server,re,struct,datetime,traceback
 from pathlib import Path
+# Embedded Python uses an isolated sys.path; add only this frozen operator directory.
+import sys
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parent))
 from contract import same_identity,readiness,cleanup,terminal
 from native_observer import K,identity,census,stamp
 ROOT=Path(r'C:\tl-win\wp1287-r8-fullflow-20261110');INSTALL=ROOT/'installation';E=ROOT/'evidence'

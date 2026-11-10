@@ -8,9 +8,9 @@
   "spec_sha256": "3dfc01124c94848a9654564369b04d4df14e8dc6efa76c6dd22c88049d150a54",
   "helper_sha256": {
     "contract.py": "1946dc4482ff604c1a757c1177968681149a503733da84a87cb422a3cd4f917f",
-    "native_flow.py": "cd70f5768a66d3370bef1991f80ec2c2552c8745d9f44bf092644c74688348aa",
-    "native_observer.py": "d89d09cf4f4477442464976ab77e1562f12ca301c002d007c39291093b94aa97",
-    "test_contract.py": "feb057762b147f58be35476d8181a5cab24d463c54d2f639377400559f21efc0"
+    "native_flow.py": "2cd9d2bb1564221628c290c793cab4afc61427dc6f898388b80958cb263e69cf",
+    "native_observer.py": "60564e1e68d3f2006d140adbb0bc3b385e0b5c324f1dd17fb079aa418d17f020",
+    "test_contract.py": "96eb611692f113673713d44db5148e8a57dbac9f9b7c90e7f8cfd90e04e2fe7d"
   },
   "counterexamples": {
     "passed": 11,
@@ -32,5 +32,6 @@
     "design": "1/1",
     "formal": "0/2",
     "productpush": "0/1"
-  }
+  },
+  "bootstrap_note": "Explicit own-directory import for isolated native Python; no global settings changed, no browser attempt used"
 }

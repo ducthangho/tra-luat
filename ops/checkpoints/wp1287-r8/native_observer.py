@@ -3,6 +3,10 @@ import ctypes as C
 from ctypes import wintypes as W
 import os,time,json,sys,hashlib,datetime
 from pathlib import Path
+# Embedded Python uses an isolated sys.path; add only this frozen operator directory.
+import sys
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parent))
 from contract import same_identity,module_state,presence,bridge
 K=C.WinDLL('kernel32',use_last_error=True)
 for name,args,ret in [('CreateToolhelp32Snapshot',[W.DWORD,W.DWORD],W.HANDLE),('OpenProcess',[W.DWORD,W.BOOL,W.DWORD],W.HANDLE),('CloseHandle',[W.HANDLE],W.BOOL),('QueryFullProcessImageNameW',[W.HANDLE,W.DWORD,W.LPWSTR,C.POINTER(W.DWORD)],W.BOOL),('GetProcessTimes',[W.HANDLE]+[C.POINTER(W.FILETIME)]*4,W.BOOL),('GetExitCodeProcess',[W.HANDLE,C.POINTER(W.DWORD)],W.BOOL)]:

@@ -1,5 +1,9 @@
 """Counterexamples from the independent advisory; controlled evidence, not native proof."""
 import json,unittest
+# Embedded Python uses an isolated sys.path; add only this frozen operator directory.
+import sys
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parent))
 from contract import same_identity,module_state,presence,bridge,readiness,cleanup,terminal
 class Counterexamples(unittest.TestCase):
     def test_first_false_18(self):

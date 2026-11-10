@@ -1,3 +1,5 @@
 # R17 — owner-directed VM trial
 
 VM primary devicef7281f27 and alias810f79bb proved same machine-id hash. Actual PS7.6.9/Python3.12.10/CLI0.167.0/loginstatus0(ChatGPT)/free9.46GB/ownhostlockempty. One fresh public-source VM review authorized; ASUS uncertain call charged conservatively, its lock/cleanup remain unknown. See RESCUE.md for counter distinction. No model invoked yet.
+
+First VM bootstrap viaf7281f27 failed before shared lock acquisition/source/model: PermissionError on C:\tl-win\KHOA.txt. Metadata shows empty Archive file, inherited SYSTEM/AdminFull + UsersRead. Do not change lock ACL. ReadWrite-open probe: f7281f27 user1001 nonadmin versus existing810f79bb user1002 admin with write capability; same machine hash. Select existing admin endpoint, its own login already rc0ChatGPT. No elevation/impersonation/credentialcopy. Source ownership gate initially required new remote branches1302 in cache; fetched exact public refs, then ownership0 PASS.

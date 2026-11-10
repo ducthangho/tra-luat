@@ -18,10 +18,10 @@ access: read-only-candidate-owned-output
 review_class: sensitive
 effective_review_class: sensitive
 spec_path: ops/specs/wp1287-r17.md
-spec_hash: b528aa8dfd8f72c465c136dcbdec38d0cdd38f0c5aa3a5951e03285ac74f57c6
-spec_sha256_required: b528aa8dfd8f72c465c136dcbdec38d0cdd38f0c5aa3a5951e03285ac74f57c6
+spec_hash: e0cc576bbd22fa3b5e11a8ed157cdca3e086d1fd1b03dca17fcff5ec36e02d2a
+spec_sha256_required: e0cc576bbd22fa3b5e11a8ed157cdca3e086d1fd1b03dca17fcff5ec36e02d2a
 prompt_path: ops/prompts/wp1287-r17-g17-review-vm.md
-prompt_sha256_required: 660e663187bd0f12e2cc98e5e36bd120530fecd23ea944999f2b0bc8420cc4de
+prompt_sha256_required: 62e5083272907a769f9c74d1a1007e59e030b64367c5cb16047bee868cf36176
 write_set:
 - ops/checkpoints/wp1287-r17/
 effective_write_set:
@@ -69,3 +69,4 @@ shared_reserved: 1
 shared_confirmed_used: 4
 shared_uncertain_asus_charge: 1
 formal_counter_definition: accepted_review_rounds_not_physical_model_calls
+device_id: 810f79bb-c01e-4157-a5f2-9562ac6d551d

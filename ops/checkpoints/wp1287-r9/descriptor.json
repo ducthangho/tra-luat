@@ -1,0 +1,44 @@
+{
+  "schema": "wp1287.doubled_timeout_measurement.v1",
+  "control_base": "e0b37c65916f4417c9b680d7a48451f54b091218",
+  "candidate": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+  "authority": "Explicit owner instruction: Ti\u1ebfp \u0111i, t\u00f4i cho ph\u00e9p t\u0103ng g\u1ea5p \u0111\u00f4i timeout",
+  "timeout_change": {
+    "official_config": "timeouts.action",
+    "from_ms": 5000,
+    "to_ms": 10000,
+    "launch_ms": 30000,
+    "navigation_default_ms": 60000,
+    "cleanup_seconds": 20
+  },
+  "spec_sha256": "b6fa4c88e932f202a0c7aef6f3c30000f4f58a027c93720322b3e9efd9c063de",
+  "helper_sha256": {
+    "contract.py": "edb3d772e36a20acadfddca78cdd2585b28973b790d6a863d7f88b12153ff8e4",
+    "native_flow.py": "587f73e805b388c5fb5c547abc83ec0c6420573bb0f0d674e2c7ab3109d4c79d",
+    "native_observer.py": "562d55dc484368b1cabdfe6b02a370b5200b90da2fec6e0932af6c65a1970150",
+    "test_contract.py": "e4c297b70a6a031c6250681c95c521ae33b2f6deff7130406a95eb510bd89bee"
+  },
+  "counterexamples": {
+    "Linux_passed": 13,
+    "total": 13,
+    "native": "not_run"
+  },
+  "measurement": {
+    "used": 0,
+    "reserved": 0,
+    "limit": 1
+  },
+  "product_write_set": [],
+  "effective_review_class": "sensitive",
+  "change_policy_sha": null,
+  "land_obligations": [],
+  "counters": {
+    "author": "3/3",
+    "shared": "3/8",
+    "design": "1/1",
+    "formal": "0/2",
+    "productpush": "0/1"
+  },
+  "status": "prepared_not_run"
+}

@@ -1,0 +1,1 @@
+Deterministic operator only: read ops/specs/wp1287-r9.md. Explicit owner-authorized action timeout5000→10000 through official config, all other controls unchanged. Freeze exact source/helpers/grant; native13counterexamples/selfcheck and fresh installation proof; ONE open. Preserve old failures and stop this allowance after result. No model/product/review call or approval.

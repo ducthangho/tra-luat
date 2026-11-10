@@ -13704,7 +13704,8 @@ def _r12_durability1174(c):
     a["operation"]=dict(adoption_id="ordinary-next",generation=2,binding_sha256=e["binding_sha256"],canonical_path=str(target),source_sha256=digest,cutover_started=False)
     args=m.build_parser().parse_args(["adopt-state","--packet",str(a["packet"]),"--mode","initial","--adoption-id","ordinary-next","--expected-source-sha256",digest,"--expected-witness-revision",str(json.loads(witness.read_bytes())["witness_revision"]),"--target-generation","2"])
     with patch.object(m,"_1174_probe",return_value={}):assert _call1174(m._1174_adopt,args,a,witness.read_bytes())=="completed_no_dispatch"
-    reservation=m.build_parser().parse_args(argv);reservation.generation=2;reservation.expected_revision="2"
+    _r25_bind_fixture1174(Ctx(c.script,directory),m,a)
+    reservation=m.build_parser().parse_args(argv);reservation.generation=2;reservation.expected_revision=str(json.loads(target.read_bytes())["state_revision"])
     before=(source.read_bytes(),target.read_bytes(),witness.read_bytes());sync=m._1174_fsyncdir;attempts=[]
     def fault(path):
         if Path(path)==source.parent:attempts.append(str(path));raise OSError("persistent retired source durability fault")
@@ -14139,6 +14140,7 @@ def _lineage14(c):
             retired[source] = source.read_bytes()
             source = Path(e["state_path"])
         if stage == "ordinary":
+            _r25_bind_fixture1174(Ctx(c.script,directory),m,a)
             for command in ("status","next-comment"):
                 out=io.StringIO();before=source.read_bytes()
                 with contextlib.redirect_stdout(out):
@@ -14498,6 +14500,211 @@ MUTANTS["m1174_source_journal_decoder"] = (
     ['else _1174_json(_1174_read(path)))', 'a.cmd != "init" and _1174_json(_1174_read(path)) == state'],
     ['else json.loads(_1174_read(path)))', 'a.cmd != "init" and json.loads(_1174_read(path)) == state'],
     ["wp1174_lifecycle_identity_advisory"])
+
+
+# R25: additive connector regressions; all frozen IDs and writer inventory stay intact.
+def _r25_bind_fixture1174(c, m, admission):
+    """Rebind historical fixture chains through unchanged local-bare I2 and router."""
+    import contextlib, io
+    from unittest.mock import patch
+    e=admission['enrollment'];w=Path(e['git_root']);target=Path(e['state_path'])
+    old=json.loads(target.read_bytes());generation=admission['generation'];lid=f'wp55-r1-g{generation}-claude'
+    _r812_doi_lease(w,dict(generation=generation,lease_id=lid,branch=f'agent/wp55-g{generation}-claude'))
+    _g(w,'push','-q','origin','refs/remotes/origin/agent/wp55-g1-claude:'+f'refs/heads/agent/wp55-g{generation}-claude')
+    comments=json.loads((c.tmp/'cm.json').read_bytes());comments[0]['body']='lease_id: '+lid
+    (c.tmp/'cm.json').write_bytes(m._1174_bytes(comments))
+    argv=['--state-dir',e['journal_root'],'record-lease','--packet',str(admission['packet']),'--root',str(w),'--admission','fixture','--revision',str(admission['revision']),'--generation',str(generation),'--coordinator-id',e['coordinator_id'],'--expected-revision',str(old['state_revision']),'--lease-ref','origin/ops/wp55-spec','--lease-path','ops/leases/l.yaml','--lease-comments',str(c.tmp/'cm.json')]
+    verified=m._verify_lease_ref(m.build_parser().parse_args(argv),old);lease=verified['source_lease']
+    facts=dict(verified_i2=verified,lease=lease,lease_id=lid,lease_ref=verified['context']['lease_ref'],lease_path=verified['context']['lease_path'],lease_oid=verified['context']['lease_oid'],comments=comments)
+    out=io.StringIO()
+    with patch.object(m,'_1174_resolve',return_value=(admission,facts)),patch.object(m,'_1174_runtime',return_value={}),patch.object(m,'_1174_probe',return_value={}),contextlib.redirect_stdout(out):rc=m.main(argv)
+    result=json.loads(out.getvalue());assert rc==0 and not result['dispatch_allowed'],(rc,result)
+    current=json.loads(target.read_bytes());assert current['state']==old['state'] and current['ngu_canh_lease']['generation']==generation
+    return facts
+
+
+def _r25_adopt_lease1174(c, reproduce=False):
+    import copy, contextlib, io
+    from unittest.mock import patch
+    traces=[]
+    for legacy,running,service in ((l,r,s) for l in (False,True,'manual') for r in (False,True) for s in (False,True)):
+        directory=c.tmp/('manual' if legacy=='manual' else 'legacy' if legacy else 'v3')/('running' if running else 'leased')/('service' if service else 'native');directory.mkdir(parents=True)
+        cc=Ctx(c.script,directory)
+        m,a,initial,oldargv,oldinvoke,source,witness,pair=_runtime1174(cc,'begin-attempt',current_policy=True,service=service)
+        w=Path(a['enrollment']['git_root']);head=_g(w,'rev-parse','refs/remotes/origin/agent/wp55-g1-claude')
+        if running:
+            rc,r,e=oldinvoke(oldargv+['--execution-surface','claude_code','--transport','machine/local']);assert rc==0,(rc,r,e)
+        old=json.loads(source.read_bytes());assert old['state']==('running' if running else 'leased') and old['luat_adr0054'] is False
+        e=a['enrollment']
+        if legacy:
+            for key in ('state_revision','generation','enrollment_id','binding_sha256','adoption','scoped_review','human_acceptance'):old.pop(key)
+            if legacy=='manual':old.pop('ngu_canh_lease');old['lease']=_lease_du()
+            old['schema_version']=2;source.write_bytes(m._1174_bytes(old));witness.unlink()
+            e.update(origin='imported_lineage',legacy_source_path=str(source),legacy_source_sha256=hashlib.sha256(source.read_bytes()).hexdigest())
+        raw=source.read_bytes();digest=hashlib.sha256(raw).hexdigest()
+        journal=directory/'next';journal.mkdir();target=journal/source.name
+        e.update(state_path=str(target),journal_root=str(journal))
+        a.update(generation=2,lineage=dict(predecessor_generation=1,source_path=str(source),source_sha256=digest))
+        a['operation']=dict(adoption_id='lease-next',generation=2,binding_sha256='b'*64,canonical_path=str(target),source_sha256=digest,cutover_started=False)
+        facts={}
+        def command(name,*flags):
+            common=['--root',str(w),'--admission','fixture','--revision','1','--generation','2','--coordinator-id','coordinator-1']
+            return ['--state-dir',str(journal),name,'--packet','55',*map(str,flags),*common]
+        def ordinary(name,*flags):
+            return command(name,*flags,'--expected-revision',json.loads(target.read_bytes())['state_revision'])
+        def invoke(argv, rejected=False):
+            out,err=io.StringIO(),io.StringIO()
+            with patch.object(m,'_1174_resolve',return_value=(a,facts)),patch.object(m,'_1174_runtime',return_value={}),patch.object(m,'_1174_probe',return_value={}) as probe,patch.object(m,'_1174_write',wraps=m._1174_write) as write,patch.object(m,'_1174_recheck_durable',wraps=m._1174_recheck_durable) as sync,contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
+                rc=m.main(argv)
+            if rejected:assert not probe.called and not write.called and not sync.called, 'R25 unbound/rejected operation reached persistent effects'
+            result=json.loads(out.getvalue());traces.append(dict(legacy=legacy,running=running,command=argv[2],rc=rc,**result))
+            return rc,result,err.getvalue()
+        rc,r,err=invoke(command('adopt-state','--mode','initial','--adoption-id','lease-next','--expected-source-sha256',digest,'--target-generation','2','--expected-witness-revision','absent' if legacy else str(json.loads(witness.read_bytes())['witness_revision'])))
+        assert rc==0 and r['status']=='completed_no_dispatch' and not r['dispatch_allowed'],(rc,r,err)
+        adopted=json.loads(target.read_bytes())
+        assert all(adopted[k]==old[k] for k in old if k not in ('schema_version',)) if legacy else all(adopted[k]==old[k] for k in old if k not in ('generation','state_revision','adoption','scoped_review','human_acceptance'))
+        before=(source.read_bytes(),target.read_bytes(),witness.read_bytes())
+        if not reproduce:
+            for cmd,flags in [('begin-attempt',('--provider','claude','--execution-surface','claude_code','--transport','machine/local','--bang-chung-moi-truong',anh_doctor())),('record-codex-call',('--head',head,'--run-id','unbound')),('record-review',('--provider','codex','--verdict','approve','--reviewed-sha',head))]:
+                rc,r,err=invoke(ordinary(cmd,*flags),rejected=True)
+                assert rc==8 and r['status']=='UNKNOWN' and 'current-generation canonical lease required' in r['detail'] and not r['dispatch_allowed'] and before==(source.read_bytes(),target.read_bytes(),witness.read_bytes()),(cmd,rc,r,err)
+        # I2 runs unchanged against the fixture's local bare canonical remote.
+        _r812_doi_lease(w,dict(generation=2,lease_id='wp55-r1-g2-claude',branch='agent/wp55-g2-claude'))
+        _g(w,'push','-q','origin',head+':refs/heads/agent/wp55-g2-claude')
+        comments=json.loads((directory/'cm.json').read_bytes())
+        comments[0]['body']=comments[0]['body'].replace('wp55-r1-g1-claude','wp55-r1-g2-claude')
+        (directory/'cm.json').write_bytes(m._1174_bytes(comments))
+        leaseargv=ordinary('record-lease','--lease-ref','origin/ops/wp55-spec','--lease-path','ops/leases/l.yaml','--lease-comments',directory/'cm.json')
+        verified=m._verify_lease_ref(m.build_parser().parse_args(leaseargv),adopted)
+        lease=verified['source_lease'];facts.update(verified_i2=verified,lease=lease,lease_id=lease['lease_id'],lease_ref=verified['context']['lease_ref'],lease_path=verified['context']['lease_path'],lease_oid=verified['context']['lease_oid'],comments=comments)
+        if not reproduce:
+            good=copy.deepcopy(facts)
+            for variant,reason in [('no_i2','scoped lease authority missing'),('old_context','scoped lease authority mismatch'),('old_lease','scoped lease authority mismatch'),('identity','scoped lease authority mismatch'),('comments','scoped lease comments differ from API'),('ref','scoped lease authority mismatch'),('no_ref','scoped lease requires canonical I2')]:
+                facts.clear();facts.update(copy.deepcopy(good));bad=list(leaseargv)
+                if variant=='no_i2':facts.clear()
+                elif variant=='old_context':facts['verified_i2']['context']['generation']=1
+                elif variant=='old_lease':facts['lease']['generation']=1
+                elif variant=='identity':facts['verified_i2']['context']['executor']['execution_surface']=None
+                elif variant=='comments':facts['comments']=[]
+                elif variant=='ref':bad[bad.index('--lease-ref')+1]='origin/ops/wrong'
+                elif variant=='no_ref':i=bad.index('--lease-ref');del bad[i:i+2]
+                rc,r,err=invoke(bad,rejected=True)
+                assert rc==8 and r['status']=='UNKNOWN' and reason in r['detail'] and before==(source.read_bytes(),target.read_bytes(),witness.read_bytes()),(variant,rc,r,err)
+            facts.clear();facts.update(good)
+        rc,r,err=invoke(leaseargv)
+        if reproduce:
+            assert rc==8 and 'scoped lease state' in r['detail'],(rc,r,err)
+        else:
+            assert rc==0 and not r['dispatch_allowed'],(rc,r,err)
+            rebound=json.loads(target.read_bytes())
+            assert rebound['state']==adopted['state'] and rebound['luat_adr0054'] is False and rebound['ngu_canh_lease']['generation']==2
+            assert all(rebound[k]==adopted[k] for k in adopted if k not in ('lease','ngu_canh_lease','history','state_revision'))
+            assert rebound['history'][:-1]==adopted['history'] and rebound['history'][-1]['event']=='record_lease_rebind'
+            repeated=list(leaseargv);repeated[repeated.index('--expected-revision')+1]=str(rebound['state_revision'])
+            again=(source.read_bytes(),target.read_bytes(),witness.read_bytes());rc,r,err=invoke(repeated,rejected=True)
+            assert rc==8 and 'scoped lease rebind requires adopted predecessor lease' in r['detail'] and again==(source.read_bytes(),target.read_bytes(),witness.read_bytes()),(rc,r,err)
+        if not running:
+            rc,r,err=invoke(ordinary('begin-attempt','--provider','claude','--execution-surface','claude_code','--transport','machine/local','--bang-chung-moi-truong',anh_doctor()));assert rc==0 and r['dispatch_allowed'],(rc,r,err)
+        for name,flags in [('record-post',('--for','reviewing','--comment-id','900002')),('transition',('--to','reviewing','--comment-id','900002','--head-sha',head)),('record-codex-call',('--head',head,'--run-id','post-adopt'))]:
+            rc,r,err=invoke(ordinary(name,*flags));assert rc==0,(rc,r,err)
+        image=json.loads(target.read_bytes());receipt=directory/'review.json'
+        record=(dict(schema='wp1174_service_advisory.v1',head=head,identity=image['reviewer_identity'],verdict='approve',finding_ids=[],assurance='advisory_review') if service else _bn812(w,head,image['ngu_canh_lease']['spec_hash'],bn=dict(generation=2,lease_id='wp55-r1-g2-claude')))
+        receipt.write_bytes(m._1174_bytes(record))
+        rc,r,err=invoke(ordinary('record-review','--provider','codex','--execution-surface','codex_service' if service else 'codex_cli','--transport','machine','--verdict','approve','--reviewed-sha',head,'--codex-call','post-adopt','--bien-nhan',receipt))
+        if reproduce:
+            assert rc==8 and 'scoped review requires canonical pending/human lane' in r['detail'],(rc,r,err)
+        else:
+            assert rc==0 and not r['dispatch_allowed'],(rc,r,err)
+            final=json.loads(target.read_bytes());assert final['state']=='approved_pending' and final['review_rounds_used']==old['review_rounds_used']+1 and final['codex_review_calls_used']==old['codex_review_calls_used']+1
+        print('R25_ADOPTION',legacy,running,service,json.dumps(traces[-1],sort_keys=True))
+    (c.tmp/'r25-adoption-trace.json').write_text(json.dumps(traces,indent=2)+'\n')
+
+
+def _r25_publication1174(c, reproduce=False):
+    import copy, contextlib, io
+    m,w,args,a,audit,pages,seams=_human_fixture1174(c)
+    fetch=lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+'/',1)[1].split('?',1)[0]]
+    healthy=m._1174_collect(fetch,w,args.head,audit,123)
+    assert healthy['status']=='RECORDED_EARLIEST_MATCH',healthy
+    parent=_g(w,'rev-parse',args.head+'^1')
+    pages['events'].append(dict(id='13',type='PullRequestEvent',created_at='2026-11-04T08:58:00Z',repo=dict(name=m._1174_REPO),actor=dict(login='ducthangho'),payload=dict(action='opened',number=1187,pull_request=dict(number=1187,html_url='https://github.com/'+m._1174_REPO+'/pull/1187',head=dict(sha=parent,ref='candidate'),base=dict(repo=dict(full_name=m._1174_REPO))))))
+    receipt=m._1174_collect(fetch,w,args.head,audit,123)
+    assert receipt['status']==('UNKNOWN' if reproduce else 'RECORDED_EARLIEST_MATCH'),receipt
+    print('R25_PUBLICATION',healthy['status'],receipt['status'])
+    if not reproduce:
+        original=copy.deepcopy(pages['events']);event=copy.deepcopy(original[-1]);rows=[]
+        _g(w,'checkout','-qb','r25-descendant',args.head);(w/'r25.txt').write_text('descendant\n');_g(w,'add','r25.txt');_g(w,'commit','-qm','r25 descendant')
+        descendant=_g(w,'rev-parse','HEAD')
+        argv=['guard-first-publication','--packet',str(args.packet),'--revision','1','--generation','1','--admission','fixture','--root',args.root,'--head',args.head,'--pr',str(args.pr),'--receipt',args.receipt,'--human-audit-comment',args.human_audit_comment,'--human-remote-run',args.human_remote_run,'--workflow-runs',args.workflow_runs]
+        def check(label,changed,status,reason=None):
+            pages['events']=copy.deepcopy(original[:-1])+[changed]
+            if reason is None or reason=='publication evidence FAIL':
+                collected=m._1174_collect(fetch,w,args.head,audit,123)
+                assert collected['status']==status,(label,status,collected)
+                Path(args.receipt).write_bytes(m._1174_bytes(collected))
+            else:_reject1174(m._1174_collect,fetch,w,args.head,audit,123,reason=reason)
+            out=io.StringIO()
+            with seams(),contextlib.redirect_stdout(out):rc=m.main(argv)
+            result=json.loads(out.getvalue());rows.append(dict(case=label,rc=rc,**result))
+            assert rc==(0 if status=='RECORDED_EARLIEST_MATCH' else 12) and result['status']==('PASS' if rc==0 else status) and not result['dispatch_allowed'],(label,rc,result)
+            if reason:assert reason in result['detail'],(label,reason,result)
+        check('predecessor-open',copy.deepcopy(event),'RECORDED_EARLIEST_MATCH')
+        for oid in (args.head,descendant):
+            bad=copy.deepcopy(event);bad['payload']['pull_request']['head']['sha']=oid
+            check('preaudit-'+oid,bad,'FAIL','publication evidence FAIL')
+        for action in ('opened','closed','reopened','synchronize','edited'):
+            unrelated=copy.deepcopy(event);unrelated['payload']['action']=action
+            check('predecessor-'+action,unrelated,'RECORDED_EARLIEST_MATCH')
+        for oid,when,status in [(args.head,'09:02:00','RECORDED_EARLIEST_MATCH'),(args.head,'09:00:30','UNKNOWN'),('f'*40,'08:58:00','UNKNOWN')]:
+            changed=copy.deepcopy(event);changed['payload']['pull_request']['head']['sha']=oid;changed['created_at']='2026-11-04T'+when+'Z'
+            check('observation-'+oid+when,changed,status)
+        for field,value,reason in [('number',True,'collector PR event identity'),('html_url','https://github.com/wrong/repo/pull/1187','collector PR event identity'),('base',None,'collector PR event identity')]:
+            bad=copy.deepcopy(event);bad['payload']['pull_request'][field]=value
+            check('malformed-'+field,bad,'UNKNOWN',reason)
+        wrong=copy.deepcopy(event);wrong['repo']['name']='wrong/repo';check('wrong-repo',wrong,'UNKNOWN','collector event identity')
+        invalid=copy.deepcopy(event);invalid['created_at']='bad-time';check('malformed-time',invalid,'UNKNOWN','UTC')
+        future=copy.deepcopy(event);future['created_at']='2099-01-01T00:00:00Z';check('future-event',future,'UNKNOWN','collector event time')
+        for field,value in [('id',''),('type','')]:
+            invalid=copy.deepcopy(event);invalid[field]=value;check('invalid-'+field,invalid,'UNKNOWN','collector event identity')
+        wrong=copy.deepcopy(event);wrong['repo']['id']=124;check('wrong-repo-id',wrong,'UNKNOWN','collector event identity')
+        for variant in ('unknown-action','bad-action-type','no-head','bad-ref','create'):
+            unknown=copy.deepcopy(event)
+            if variant=='unknown-action':unknown['payload']['action']='future-unsupported-action'
+            elif variant=='bad-action-type':unknown['payload']['action']=[]
+            elif variant=='no-head':unknown['payload']['pull_request']['head'].pop('sha')
+            elif variant=='bad-ref':unknown['payload']['pull_request']['head']['ref']='../invalid'
+            else:unknown.update(type='CreateEvent',payload=dict(ref_type='branch',ref='candidate',master_branch='master'))
+            check(variant,unknown,'UNKNOWN')
+        pages['events']=copy.deepcopy(original)
+        def incomplete(endpoint,**limits):
+            if '/git/matching-refs/tags?' in endpoint:raise ValueError('fixture missing page')
+            return fetch(endpoint,**limits)
+        assert m._1174_collect(incomplete,w,args.head,audit,123)['status']=='UNKNOWN'
+        (c.tmp/'r25-publication-cases.json').write_text(json.dumps(rows,indent=2)+'\n')
+    (c.tmp/'r25-publication-trace.json').write_text(json.dumps(receipt,indent=2)+'\n')
+
+
+_r25_hosts={"wp1174_lifecycle_scoped_lifecycle":_r25_adopt_lease1174,
+    "wp1174_lifecycle_first_publication":_r25_publication1174}
+def _r25_extend1174(original,additional):
+    def case(c):
+        original(c)
+        directory=c.tmp/"r25-stimuli";directory.mkdir()
+        additional(Ctx(c.script,directory))
+    return case
+CASES=[(name,_r25_extend1174(case,_r25_hosts[name]) if name in _r25_hosts else case) for name,case in CASES]
+MUTANTS.update({
+    "m1174_r25_unbound_dispatch": ('if state["adoption"] is not None and a.cmd in ("begin-attempt", "record-codex-call", "record-review"):', 'if False:', ["wp1174_lifecycle_scoped_lifecycle"]),
+    "m1174_r25_rebind_lifecycle": ('state.update(lease=verified["lease"], ngu_canh_lease=context, luat_adr0054=verified["mode"])', 'state.update(lease=verified["lease"], ngu_canh_lease=context, luat_adr0054=verified["mode"], state="leased")', ["wp1174_lifecycle_scoped_lifecycle"]),
+    "m1174_r25_rebind_context_generation": ('context["generation"] == admission["generation"] and', 'True and', ["wp1174_lifecycle_scoped_lifecycle"]),
+    "m1174_r25_rebind_identity": ('all(value is None or context[role][key] == value\n            for role in ("executor", "reviewer") for key, value in state[role + "_identity"].items())', 'True', ["wp1174_lifecycle_scoped_lifecycle"]),
+    "m1174_r25_pr_relevance": ('elif relation == 0:\n                    if _1174_time(event["created_at"])', 'elif relation in (0, 1):\n                    if _1174_time(event["created_at"])', ["wp1174_lifecycle_first_publication"]),
+    "m1174_r25_pr_ignore": ('if event.get("type") == "PullRequestEvent":', 'if False:', ["wp1174_lifecycle_first_publication"]),
+    "m1174_r25_pr_missing_object": ('if rc != 0 or relation not in (0, 1) or time.time() >= pass_end:', 'if time.time() >= pass_end:', ["wp1174_lifecycle_first_publication"]),
+    "m1174_r25_pr_observation": ('preimages.append((oid, event["created_at"]))', 'pass # omit unresolved PR observation', ["wp1174_lifecycle_first_publication"]),
+    "m1174_r25_event_time": ('_1174_require(_1174_time(event.get("created_at")) <= start, "collector event time")', 'pass # omit event timestamp validation', ["wp1174_lifecycle_first_publication"]),
+    "m1174_r25_pr_identity": ('pr.get("html_url") == f"https://github.com/{_1174_REPO}/pull/{number}" and', 'True and', ["wp1174_lifecycle_first_publication"]),
+})
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -5048,6 +5048,12 @@ def _1174_ordinary(a, directory, admission, witness_raw, facts=None):
     # The legacy reducer runs only after the scoped pair and tripwire checks;
     # review and accept add their scoped evidence before any durable write.
     _1174_tripwire(state)
+    # Adoption preserves the predecessor lease as history, never dispatch authority.
+    if state["adoption"] is not None and a.cmd in ("begin-attempt", "record-codex-call", "record-review"):
+        _1174_require(_nc_hop_le(state.get("ngu_canh_lease")) and
+            state["ngu_canh_lease"]["generation"] == admission["generation"] and
+            type(state.get("lease")) is dict and state["lease"]["lease_id"] == state["ngu_canh_lease"]["lease_id"],
+            "current-generation canonical lease required")
     _1174_require(a.cmd != "record-lease" or a.lease_ref is not None, "scoped lease requires canonical I2")
     previous = globals().get("_1174_TRANSACTION")
     tx = dict(directory=directory, state=state, proposal=None, admission=admission)
@@ -5093,7 +5099,9 @@ def _1174_record_lease(a, directory, state, admission, facts):
     verified = facts["verified_i2"]
     context = verified["context"]
     lease = facts["lease"]
-    _1174_require(a.lease_ref == facts["lease_ref"] == context["lease_ref"] and
+    _1174_require(_nc_hop_le(context) and all(value is None or context[role][key] == value
+            for role in ("executor", "reviewer") for key, value in state[role + "_identity"].items()) and
+        a.lease_ref == facts["lease_ref"] == context["lease_ref"] and
         a.lease_path == facts["lease_path"] == context["lease_path"] and
         context["lease_oid"] == facts["lease_oid"] and
         verified["lease"]["lease_id"] == facts["lease_id"] == lease["lease_id"] and
@@ -5105,9 +5113,29 @@ def _1174_record_lease(a, directory, state, admission, facts):
         "scoped lease comments differ from API")
     _1174_require(verified["comments_sha256"] == hashlib.sha256(_1174_bytes(facts["comments"])).hexdigest(),
         "scoped lease API receipt binding")
-    _1174_require(state["state"] == "awaiting_lease", "scoped lease state")
+    rebind = state["state"] != "awaiting_lease"
+    if rebind:
+        # The finalized immutable adoption proves the predecessor; I2 above grants
+        # the new lease. This ordinary transaction does not restart the lifecycle.
+        _1174_require(state["state"] in ("leased", "running", "reviewing") and
+            state["adoption"] is not None and state["adoption"]["phase"] == "adopted" and
+            ("ngu_canh_lease" not in state or _nc_hop_le(state["ngu_canh_lease"]) and
+                state["ngu_canh_lease"]["generation"] < admission["generation"]) and
+            all(state.get(key) == state["adoption"]["payload"]["target_projection"].get(key)
+                for key in ("lease", "ngu_canh_lease")) and
+            type(state.get("lease")) is dict and ("ngu_canh_lease" not in state or
+                state["lease"]["lease_id"] == state["ngu_canh_lease"]["lease_id"]),
+            "scoped lease rebind requires adopted predecessor lease")
     _xet_dung(directory, state, "record-lease")
-    return _apply_lease_ref(a, directory, state, verified)
+    if not rebind:
+        return _apply_lease_ref(a, directory, state, verified)
+    previous_generation = state.get("ngu_canh_lease", {}).get("generation")
+    state.update(lease=verified["lease"], ngu_canh_lease=context, luat_adr0054=verified["mode"])
+    state["history"].append(dict(event="record_lease_rebind", lease_id=verified["lease"]["lease_id"],
+        lease_oid=context["lease_oid"], from_generation=previous_generation,
+        lease_comments_sha256=verified["comments_sha256"]))
+    _save(directory, state)
+    return RC_OK
 
 
 def _1174_postimage(old, new, command, admission):
@@ -5283,9 +5311,51 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
         for event in events:
             if time.time()>=pass_end:dag=False;complete=False;break
             _1174_require(type(event) is dict and type(event.get("id")) is str and
-                type(event.get("repo")) is dict and event["repo"].get("name") == _1174_REPO, "collector event identity")
+                event["id"].isascii() and event["id"].isdecimal() and not event["id"].startswith("0") and
+                type(event.get("type")) is str and bool(event["type"]) and type(event.get("repo")) is dict and
+                event["repo"].get("name") == _1174_REPO and
+                ("id" not in event["repo"] or type(event["repo"]["id"]) is int and event["repo"]["id"] == repo_id),
+                "collector event identity")
+            _1174_require(_1174_time(event.get("created_at")) <= start, "collector event time")
+            if event.get("type") == "PullRequestEvent":
+                payload = event.get("payload")
+                actions = {"opened", "reopened", "closed", "edited", "assigned", "unassigned", "labeled", "unlabeled",
+                    "review_requested", "review_request_removed", "synchronize", "ready_for_review", "converted_to_draft",
+                    "locked", "unlocked", "auto_merge_enabled", "auto_merge_disabled", "enqueued", "dequeued"}
+                if type(payload) is not dict or type(payload.get("action")) is not str or payload["action"] not in actions:
+                    dag = False
+                    continue
+                pr, number = payload.get("pull_request"), payload.get("number")
+                _1174_require(type(pr) is dict and type(number) is int and number > 0 and
+                    type(pr.get("number")) is int and pr["number"] == number and
+                    pr.get("html_url") == f"https://github.com/{_1174_REPO}/pull/{number}" and
+                    type(pr.get("base")) is dict and type(pr["base"].get("repo")) is dict and
+                    pr["base"]["repo"].get("full_name") == _1174_REPO,
+                    "collector PR event identity")
+                tip = pr.get("head")
+                if not (type(tip) is dict and type(tip.get("sha")) is str and SHA_RE.fullmatch(tip["sha"]) and
+                        tip["sha"] != "0" * 40 and type(tip.get("ref")) is str and tip["ref"]):
+                    dag = False
+                    continue
+                ref, oid = "refs/heads/" + tip["ref"], tip["sha"]
+                rc, _ = _git_do(root, "check-ref-format", ref, deadline=pass_end)
+                exists, _ = _git_do(root, "cat-file", "-e", oid + "^{commit}", deadline=pass_end)
+                relation, _ = _git_do(root, "merge-base", "--is-ancestor", head, oid, deadline=pass_end) if exists == 0 else (-1, b"")
+                if rc != 0 or relation not in (0, 1) or time.time() >= pass_end:
+                    dag = False
+                elif relation == 0:
+                    if _1174_time(event["created_at"]) <= _1174_time(audit["updated_at"]):
+                        introductions.append(dict(id=event["id"], time=event["created_at"], ref=ref,
+                            actor=event.get("actor", {}).get("login"), before="0" * 40, after=oid))
+                    else:
+                        # An observation cannot date first publication. Require an
+                        # earlier supported introduction of this exact event tip.
+                        preimages.append((oid, event["created_at"]))
+                continue
             if event.get("type") != "PushEvent":
-                if event.get("type") in ("CreateEvent", "PullRequestEvent"):
+                # CreateEvent lacks an immutable event-time tip; current refs
+                # cannot resolve the historical introduction of a branch/tag.
+                if event.get("type") == "CreateEvent":
                     dag = False
                 continue
             payload = event.get("payload", {})

@@ -1,0 +1,201 @@
+{
+  "previous_review_sha": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "candidate_sha": "58bee6729c6111674f8db89625e65963c1f1c554",
+  "candidate_tree": "c9b96903e1a07d6ffa6f6e0e063e44ac234a366b",
+  "source_sha256": "1d1e29d7158876610f2a0beeda182625cb9d7ac6fd80af46a88963e07e0305fe",
+  "classes": [
+    {
+      "id": "WP1287-R18-PREFLIGHT-001",
+      "class_slug": "preflight-errors-accepted-as-success",
+      "old_manifestations": 3,
+      "status": "executor_remediated_pending_independent_delta_review",
+      "changed_analogous_sites": [
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 48,
+          "end_line": 48
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 52,
+          "end_line": 52
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 59,
+          "end_line": 59
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 60,
+          "end_line": 60
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 67,
+          "end_line": 67
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 84,
+          "end_line": 84
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 89,
+          "end_line": 89
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 94,
+          "end_line": 94
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 96,
+          "end_line": 96
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 102,
+          "end_line": 102
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 103,
+          "end_line": 103
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 110,
+          "end_line": 110
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 112,
+          "end_line": 112
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 122,
+          "end_line": 122
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 124,
+          "end_line": 124
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 125,
+          "end_line": 125
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 126,
+          "end_line": 126
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 131,
+          "end_line": 131
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 138,
+          "end_line": 138
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 139,
+          "end_line": 139
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 141,
+          "end_line": 141
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 142,
+          "end_line": 142
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 144,
+          "end_line": 144
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 145,
+          "end_line": 145
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 147,
+          "end_line": 147
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 150,
+          "end_line": 150
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 174,
+          "end_line": 174
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 209,
+          "end_line": 209
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 226,
+          "end_line": 226
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 238,
+          "end_line": 238
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 305,
+          "end_line": 305
+        }
+      ]
+    },
+    {
+      "id": "WP1287-R18-CONFIG-001",
+      "class_slug": "documented-config-does-not-match-native-acceptance",
+      "old_manifestations": 2,
+      "status": "executor_remediated_pending_independent_delta_review",
+      "changed_analogous_sites": [
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 176,
+          "end_line": 176
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 213,
+          "end_line": 213
+        }
+      ]
+    }
+  ],
+  "known_obligations": [
+    {
+      "id": "WP1287-OP-F01",
+      "status": "full_negative_matrix_still_pending"
+    },
+    {
+      "id": "U10",
+      "status": "full_exact_candidate_browser_acceptance_still_pending"
+    }
+  ],
+  "new_finding_count": null,
+  "duplicate_new_findings": null
+}

@@ -8,16 +8,16 @@
   "execution_surface": "codex_cli",
   "transport": "machine",
   "independent_clone": "/workspace/wp1287-triage-independent",
-  "prompt_sha256": "fe6fbbacb622ec882bc65fceff3ff54fe3173bf79dda6c05e12e7115ec2a8539",
-  "deadline_utc": "2026-11-10T01:54:16Z",
+  "prompt_sha256": "64a355540de3aa6886b2de48fa6fd756ccb7bcb47b36fe32f7bcbd29df4c99f8",
+  "deadline_utc": "2026-11-10T02:01:54Z",
   "shared": {
     "used": 2,
-    "reserved": 0,
+    "reserved": 1,
     "limit": 8
   },
   "design_advisory": {
     "used": 0,
-    "reserved": 0,
+    "reserved": 1,
     "limit": 1
   },
   "formal": {
@@ -38,7 +38,7 @@
     "MCIaudit": 8,
     "remaining_reserve": 0
   },
-  "state": "terminal_authentication_blocked_before_generation",
+  "state": "ASUS_relocation_preflight_passed_no_generation_yet",
   "actual_generation": false,
   "approved_payload_pending": "Five-file restricted advisory bundle; user approval required by auto-review",
   "model_requested": "gpt-6.1-sol",
@@ -55,5 +55,27 @@
     "consent_retained_for_same_frozen_payload": true
   },
   "authentication_failure": "Refresh token invalidated by logout/account login change; not fixed by login status; no automatic provider switch or retry",
-  "workspace_snapshot_unchanged": true
+  "workspace_snapshot_unchanged": true,
+  "environment": "ASUS-LAPTOP/Windows",
+  "host_identity": "7404cfba-9034-4787-b46b-7c358126a411",
+  "source_payload_unchanged": true,
+  "input_commit": "46233233442a176058a1744bb7594e9d44714607",
+  "launcher_sha256": "fbf5ac3e9a88d7f7ac4fa892a3aac115752e8e7f133c8a3eb947834a215dee23",
+  "codex_cli_version": "0.155.1",
+  "codex_exe_sha256": "eba0f32c976667cb9298efafd98513e823eeda7b576a03ec658bb8be8d336316",
+  "python_version": "3.13.1",
+  "cloud_attempt": {
+    "run": "dbbd85a4108448ce8f793b3ff72de4f1",
+    "rc": 1,
+    "failure": "refresh_token_invalid",
+    "actual_generation": false
+  },
+  "preflight": {
+    "approved_bundle_hash_matches": true,
+    "five_files_hash_matches": true,
+    "prompt_hash_matches": true,
+    "launcher_check_rc": 0,
+    "model_started": false
+  },
+  "relocation_note": "Existing authorized CodexCLI/credentials only; no install/login/account/profile/trust changes. Diagnostic advisory relocation is NOT U10target substitution or P5 rollout. Exact same five-file user approval retained."
 }

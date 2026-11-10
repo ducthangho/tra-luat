@@ -8,7 +8,7 @@
       "id": "WP1287-R18-PREFLIGHT-001",
       "class_slug": "preflight-errors-accepted-as-success",
       "old_manifestations": 3,
-      "status": "shared_hash_helper_and_two_sites_executor_remediated_pending_delta_review",
+      "status": "DA_VA_THAT_remaining_hash_collection_within_reviewed_delta",
       "changed_analogous_sites": [
         {
           "file": ".agents/skills/playwright-browser/SKILL.md",
@@ -25,25 +25,28 @@
           "start_line": 341,
           "end_line": 343
         }
-      ]
+      ],
+      "reviewer_evidence": "Within the assigned source scope, Get-PwHashes performs required hashing and digest validation outside calculated-property callbacks. Both Capture at lines 256–257 and Cleanup at lines 341–343 collect results before export. Independent probes on PowerShell 5.1 and 7 verified valid hashes, preserved FullName/Length/SHA256 field order, and rejection of thrown errors, missing commands, null/invalid digests, missing input, and failure after the first successful hash. Every negative case stopped before the in-memory export recorder was invoked. Restoring the old calculated-property mechanism reproduced successful continuation and export of null hashes.",
+      "limits": "Closure covers the remaining hash-collection manifestation in this delta. Earlier unchanged repairs retain their prior evidence. Actual CSV writes and an exclusively locked unreadable file were covered by inspected executor artifacts, not independently executed here. Full Capture/Cleanup/browser acceptance remains open."
     },
     {
       "id": "WP1287-R18-CONFIG-001",
       "class_slug": "documented-config-does-not-match-native-acceptance",
       "old_manifestations": 2,
-      "status": "alignment_present_prior_independent_coverage_incomplete_unchanged_in_delta",
+      "status": "CHUA_DO_DUOC_independent_configuration_coverage_unchanged",
       "changed_analogous_sites": [
         {
           "file": ".agents/skills/playwright-browser/SKILL.md",
-          "start_line": 176,
-          "end_line": 176
+          "start_line": 186,
+          "end_line": 186
         },
         {
           "file": ".agents/skills/playwright-browser/SKILL.md",
-          "start_line": 213,
-          "end_line": 213
+          "start_line": 223,
+          "end_line": 223
         }
-      ]
+      ],
+      "limits": "Independent Bash/configuration coverage remains incomplete. No Bash process or configuration review was repeated; U10 remains open. This status does not assert that the source repair is absent."
     }
   ],
   "known_obligations": [
@@ -56,6 +59,8 @@
       "status": "full_exact_candidate_browser_acceptance_still_pending"
     }
   ],
-  "new_finding_count": null,
-  "duplicate_new_findings": null
+  "new_finding_count": 0,
+  "duplicate_new_findings": 0,
+  "delta_verdict": "approve",
+  "formal_gate_admission": false
 }

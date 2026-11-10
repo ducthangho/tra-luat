@@ -1,0 +1,18 @@
+{
+  "head": "0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2",
+  "independent_review": "completed_CLI_approve_delta_only",
+  "raw_verdict_sha256": "48f3ce5a3d1a6665ce6e47454dc3f453e1347be7269ba2a9cad4a8bacf67db6c",
+  "new_findings": 0,
+  "duplicate_new_findings": 0,
+  "source_delta_approval": true,
+  "candidate_approval": false,
+  "formal_public_gate_admission": false,
+  "receipt_limit": "CRLF-only transport mapping proven; receipt audit and recognized anchor pending",
+  "remaining_obligations": [
+    "OP-F01 full negative matrix",
+    "U10 full exact-candidate and independent Bash/config evidence",
+    "sensitive assurance",
+    "transport receipt admission"
+  ],
+  "summary_kind": "dispatcher_source_acceptance_projection_full_operational_receipt_private"
+}

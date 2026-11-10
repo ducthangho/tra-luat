@@ -45,11 +45,25 @@
   },
   "source_approval": false,
   "assurance": "HOLD",
-  "independent_review": "running_delta_17_lines",
+  "independent_review": "completed_CLI_approve_delta_only",
   "required_native_hash_helpers": {
     "ps51_read_only_positive_rc": 0,
     "ps7_read_only_positive_rc": 0,
     "same_codex_tool_path_verified": true,
     "read_only_write_canary": "denied"
-  }
+  },
+  "raw_verdict_sha256": "48f3ce5a3d1a6665ce6e47454dc3f453e1347be7269ba2a9cad4a8bacf67db6c",
+  "new_findings": 0,
+  "duplicate_new_findings": 0,
+  "source_delta_approval": true,
+  "candidate_approval": false,
+  "formal_public_gate_admission": false,
+  "receipt_limit": "CRLF-only transport mapping proven; receipt audit and recognized anchor pending",
+  "bootstrap_future_byte_guard": "binary preservation and exact canonical hash; 4/4 controls on Linux and Windows",
+  "remaining_obligations": [
+    "OP-F01 full negative matrix",
+    "U10 full exact-candidate and independent Bash/config evidence",
+    "sensitive assurance",
+    "transport receipt admission"
+  ]
 }

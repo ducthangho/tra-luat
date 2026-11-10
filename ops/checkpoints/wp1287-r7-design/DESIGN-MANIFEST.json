@@ -1,0 +1,32 @@
+{
+  "schema": "wp1287.measurement_design_manifest.v1",
+  "status": "design_only_not_execution_grant",
+  "control_base_sha": "3d512b4d26aa232b7f52920a4ba8982e95133eb9",
+  "candidate_sha": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "files": {
+    "MEASUREMENT-DESIGN.md": {
+      "bytes": 17460,
+      "sha256": "972d3df9104f3ba8439a8ae53b59e22f4a6a1c08a3f9745e2a6989fb6138bd92"
+    },
+    "R6-INTERPRETATION-NOTE.md": {
+      "bytes": 2408,
+      "sha256": "f3eac5594264952e82f29914e4d4aa1869bf072bfbb2977ce0b663dcc8b3924e"
+    },
+    "ADMISSION-CHECKLIST.json": {
+      "bytes": 3449,
+      "sha256": "546d1ac23a137ca42d23c7412b9a6f615d18cc41944dbd098ee6000db7372aa2"
+    }
+  },
+  "source_advisory_receipt": {
+    "path": "ops/checkpoints/wp1287-r6/advisory-completion.json",
+    "sha256": "12e1a8a07538b342c0579e2322e408def8ad27ea10b58bd5dd844a5a1f3c52c0"
+  },
+  "native_advisory_answer_sha256": "f141c784086d20d06b31009c00f1a4d9f6fdd9eaeff451b4aaa5d80d7f0ccd3f",
+  "validation": {
+    "json_parse": "passed",
+    "no_runtime_or_lease_activation": "passed",
+    "counters_match_committed_advisory_receipt": "passed",
+    "native_browser_tests": "not_run",
+    "independent_design_review": "not_run"
+  }
+}

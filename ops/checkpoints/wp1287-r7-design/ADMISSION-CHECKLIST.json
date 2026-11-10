@@ -1,0 +1,42 @@
+{
+  "schema": "wp1287.measurement_design_admission.v1",
+  "status": "design_only_not_admitted",
+  "authority": "Direct user instruction: Đồng ý, sửa thiết kế theo khuyến nghị",
+  "control_base_sha": "3d512b4d26aa232b7f52920a4ba8982e95133eb9",
+  "candidate_sha": "2a5803e17b7ca4910c7188bfcc2276190e2d0b4b",
+  "candidate_tree": "bfb2fad8df2634ae8dd4c839a4565b76d1cfae45",
+  "acceptance_base_sha": "bf9914cb1a8e6f5047468f4d130b587015f8d73f",
+  "design_write_set": ["ops/checkpoints/wp1287-r7-design/"],
+  "product_write_set": [],
+  "implementation_written": false,
+  "native_measurement_run": false,
+  "runtime_lease_granted": false,
+  "measurement_allowance": {"granted": false, "used": 0, "reserved": 0},
+  "counters": {
+    "shared": {"used": 3, "reserved": 0, "limit": 8},
+    "design_advisory": {"used": 1, "reserved": 0, "limit": 1},
+    "formal": {"used": 0, "limit": 2},
+    "product_authors": {"used": 3, "limit": 3},
+    "product_pushes": {"used": 0, "limit": 1}
+  },
+  "required_before_execution": [
+    {"id": "scope_and_cost", "state": "not_run", "requires": "Frozen exact helper/spec/descriptor/hashes, bounded measurement authority, fullrefs/ownership and valid lease; no cap reset"},
+    {"id": "identity", "state": "not_run", "requires": "PID plus process birth/handle/image and observed lineage; no cache-prefix ownership or PID-only termination"},
+    {"id": "module_api_errors", "state": "not_run", "requires": "Separate snapshot/First/Next return values and immediate last-error; EMPTY/PARTIAL not absence; bounded BAD_LENGTH attempts"},
+    {"id": "timing_and_coverage", "state": "not_run", "requires": "Monotonic plus UTC, scheduled/actual start/end/gaps; post-open probe or explicit reason not_run"},
+    {"id": "module_file_bridge", "state": "not_run", "requires": "Actual observed module path and file identity; unknown on mismatch; no memory-integrity or causal claim from disk hash"},
+    {"id": "wct_limits", "state": "not_run", "requires": "Bounded owned-thread observations with errors/truncation/flags, raw WaitTime; observer cannot block readiness or cleanup"},
+    {"id": "readiness", "state": "not_run", "requires": "Owned tab final URL plus redirect/status and exact nonce fixture response bytes; CLIrc0 or empty snapshot insufficient"},
+    {"id": "cleanup_and_lock", "state": "not_run", "requires": "Named close/delete/closed-session proof and owned census; no lock release before verified cleanup; paused handoff on uncertainty"},
+    {"id": "stage_results", "state": "not_run", "requires": "Separate startup/readiness/fullflow/observer/cleanup, child rc and shell rc; never promote unknown or skipped"},
+    {"id": "counterexamples", "state": "not_run", "requires": "Verify all ten design counterexamples with controlled fixtures before browser admission; native ABI/API proof remains separate"},
+    {"id": "same_candidate_contract", "state": "not_run", "requires": "Exact H2/pins/Desktop/timeouts and selected mode; native fullflow proof per r3 without extra product acceptance conditions"},
+    {"id": "privacy_and_ownership", "state": "not_run", "requires": "Native retention, allowlisted summaries only, no secrets/profile dumps/global changes or unrelated process termination"}
+  ],
+  "U10": "OPEN",
+  "OP-F01": "formal_OPEN",
+  "sensitive_assurance": "HOLD",
+  "formal_approval": false,
+  "diagnostic_mode_is_fullflow_acceptance": false,
+  "packet_revision_or_generation_activated": false
+}

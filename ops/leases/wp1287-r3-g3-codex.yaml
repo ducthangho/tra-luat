@@ -79,7 +79,13 @@ authority_note: Owner scoped normal Codex capability recovery; explicit per-run 
   xhighreviewer > highexecutor; sameprovider sensitiveassurance HOLD
 reviewer_model: gpt-6.1-sol
 reviewer_effort: xhigh
-status: leased
+status: retired
 thay_the_cho:
 - wp1287-r2-g2-codex
 scoped_cli_writable_root: /workspace/scratch/wp1287-r2-g2-codex/.agents/skills/playwright-browser
+retired_at_utc: '2026-11-10T00:01:30Z'
+retired_at: '2026-11-10T00:01:30Z'
+original_lease_until: '2026-11-09T00:45:26Z'
+da_bi_thay_the: wp1287-r4-g4-diagnostic
+replacement_reason: Already expired; successor diagnostic-only, no product authority
+  or counter reset

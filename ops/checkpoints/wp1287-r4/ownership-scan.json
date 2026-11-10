@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-11-09T17:35:23.630513+00:00",
+  "refs": 193,
+  "distinct_heads": 186,
+  "distinct_lease_or_tombstone_blobs": 380,
+  "relevant_blobs": [
+    {
+      "oid": "7d2f594b478afb9ab1b0cdcf1dea470de150954e",
+      "paths": [
+        "ops/leases/wp1287-r1-g1-claude.yaml"
+      ],
+      "heads": [
+        "09f9c3c251d2e8de2c9daf8e6c4bd04f468b9264"
+      ],
+      "source_file": "7d2f594b478afb9ab1b0cdcf1dea470de150954e.txt"
+    },
+    {
+      "oid": "95e58eaee76838eb50291275acd218048da7a446",
+      "paths": [
+        "ops/leases/wp1287-r2-g2-codex.yaml"
+      ],
+      "heads": [
+        "09f9c3c251d2e8de2c9daf8e6c4bd04f468b9264"
+      ],
+      "source_file": "95e58eaee76838eb50291275acd218048da7a446.txt"
+    },
+    {
+      "oid": "bf846421b6f3ca389ba9d1290ea0eb542811d862",
+      "paths": [
+        "ops/leases/wp1287-r3-g3-codex.yaml"
+      ],
+      "heads": [
+        "09f9c3c251d2e8de2c9daf8e6c4bd04f468b9264"
+      ],
+      "source_file": "bf846421b6f3ca389ba9d1290ea0eb542811d862.txt"
+    }
+  ],
+  "interpretation": "candidate claims only; status/timestamps/tombstone reconciliation required; NOT activeclaims0",
+  "reconciliation": {
+    "g1": "retired 2026-11-08T18:35:52Z, replacement g2",
+    "g2": "retired 2026-11-08T18:45:26Z, replacement g3",
+    "g3": "expired 2026-11-09T00:45:26Z; status leased retained historically, no successor visible",
+    "scope_active_claims_observed": 0,
+    "caveat": "remote-head snapshot only; must refence immediately before lease, no remote mutation/retirement performed"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "packet": "wp1287",
+  "revision": 4,
+  "generation": 4,
+  "product_write_set": [],
+  "effective_review_class": "sensitive",
+  "change_policy_sha": null,
+  "land_obligations": [],
+  "spec_sha256": "3dcc73be314fb2a7933ed584895a1be0611d7daf6388b6f9884f77d351f667d1",
+  "script_sha256": "5b7e7297c46a2da4dcfa17641efcf387817dd2d4975dc638e62382e3e5ff51dd",
+  "product_attempts": {
+    "used": 3,
+    "limit": 3
+  },
+  "formal": {
+    "used": 0,
+    "limit": 2
+  },
+  "shared": {
+    "used": 2,
+    "limit": 8
+  },
+  "product_pushes": {
+    "used": 0,
+    "limit": 1
+  },
+  "diagnostic": {
+    "used": 0,
+    "reserved": 0,
+    "limit": 1
+  },
+  "not_product_author": true,
+  "host_preflight": {
+    "identity_match": true,
+    "lock_nonempty": false,
+    "node": "26.13.0",
+    "npm": "11.20.0",
+    "CFT": "157.0.8103.15",
+    "browser_hash_matches": true
+  },
+  "no_gate_or_approval": true
+}

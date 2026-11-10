@@ -29,8 +29,8 @@
   ],
   "core_selftest": "reused1777/1777 on exact unchanged core source",
   "ruff": "prior bare rc1/12F821, delta0 because core source unchanged",
-  "shared_used": 7,
-  "shared_reserved": 1,
+  "shared_used": 8,
+  "shared_reserved": 0,
   "shared_limit": 8,
   "new_hash_collection_checks": {
     "native_ps51_and_ps7": 32,
@@ -44,5 +44,12 @@
     "proof": "component-evidence-reuse.json"
   },
   "source_approval": false,
-  "assurance": "HOLD"
+  "assurance": "HOLD",
+  "independent_review": "running_delta_17_lines",
+  "required_native_hash_helpers": {
+    "ps51_read_only_positive_rc": 0,
+    "ps7_read_only_positive_rc": 0,
+    "same_codex_tool_path_verified": true,
+    "read_only_write_canary": "denied"
+  }
 }

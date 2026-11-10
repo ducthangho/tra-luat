@@ -1,0 +1,61 @@
+{
+  "previous_review_sha": "58bee6729c6111674f8db89625e65963c1f1c554",
+  "candidate_sha": "0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2",
+  "candidate_tree": "888719149e0c1d87bfd69bed7a01d70f96042753",
+  "source_sha256": "2ccd374bbad2eb61e379935f1e400610e952a0c3a29788921a32edc6f5225b75",
+  "classes": [
+    {
+      "id": "WP1287-R18-PREFLIGHT-001",
+      "class_slug": "preflight-errors-accepted-as-success",
+      "old_manifestations": 3,
+      "status": "shared_hash_helper_and_two_sites_executor_remediated_pending_delta_review",
+      "changed_analogous_sites": [
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 82,
+          "end_line": 91
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 256,
+          "end_line": 257
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 341,
+          "end_line": 343
+        }
+      ]
+    },
+    {
+      "id": "WP1287-R18-CONFIG-001",
+      "class_slug": "documented-config-does-not-match-native-acceptance",
+      "old_manifestations": 2,
+      "status": "alignment_present_prior_independent_coverage_incomplete_unchanged_in_delta",
+      "changed_analogous_sites": [
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 176,
+          "end_line": 176
+        },
+        {
+          "file": ".agents/skills/playwright-browser/SKILL.md",
+          "start_line": 213,
+          "end_line": 213
+        }
+      ]
+    }
+  ],
+  "known_obligations": [
+    {
+      "id": "WP1287-OP-F01",
+      "status": "full_negative_matrix_still_pending"
+    },
+    {
+      "id": "U10",
+      "status": "full_exact_candidate_browser_acceptance_still_pending"
+    }
+  ],
+  "new_finding_count": null,
+  "duplicate_new_findings": null
+}

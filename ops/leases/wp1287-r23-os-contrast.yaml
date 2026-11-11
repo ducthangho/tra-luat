@@ -42,12 +42,12 @@ lease_until: '2026-11-11T02:59:05.710148+00:00'
 lease_expires_at_utc: '2026-11-11T02:59:05.710148+00:00'
 run_minutes: 90
 attempts_limit: 1
-attempts_used: 0
+attempts_used: 1
 diagnostic_limit: 0
 diagnostic_used: 0
 requires_live: false
 uy_quyen_merge: false
-status: running
+status: retired
 thay_the_cho:
 - wp1287-r22-acceptance
 reviewer: codex
@@ -72,3 +72,4 @@ formal_rounds_received_or_pending: 4
 formal_budget_available: 0
 formal_counter_note: Preserve blocked historical slot and three received/pending slots;
   owner-requested third source-review cycle grants this one final verification only
+retired_at_utc: '2026-11-11T01:17:09.412870+00:00'

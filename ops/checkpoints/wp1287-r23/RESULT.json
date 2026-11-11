@@ -1,0 +1,26 @@
+{
+  "candidate": "0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2",
+  "linux_cleanup": "31/31 source-entered",
+  "native_cleanup": "66/66 source-entered PS5.1/7",
+  "core_selftest": "fresh1777/1777 child0",
+  "linux_literal_fullflow": "passed",
+  "desktop_literal_fullflow": {
+    "ps51": "failed browser launch30000",
+    "ps7": "failed browser launch30000"
+  },
+  "vm_contrast": "not_measured: observer1455; official installer Node OOM; no capture",
+  "owner_finalization": "Desktop and VM locks released; original failed terminals retained; VM observer gap disclosed",
+  "optional_isolation": "four trees identical184core files; reuse fresh selftest explicitly",
+  "optional_absent_corrupt": "both stop rc1 no PIN_OK",
+  "transport_audit": "LF/CRLF exact transform proven; formal admission pending",
+  "sensitive_assurance": "HOLD",
+  "models": {
+    "used": 8,
+    "limit": 8,
+    "source_review_cycles": 3
+  },
+  "candidate_approved": false,
+  "issue_closed": false,
+  "source_modified": false,
+  "downstream": "P3-P6 dependencies remain blocked by P2"
+}

@@ -11283,7 +11283,8 @@ def _admission_case1174(kind):
             assert subprocess.run(["git", "-C", str(repo), "update-ref", "refs/replace/" + "a" * 40, blob], capture_output=True).returncode == 0
             _reject1174(m._1174_git_view, repo, reason="untrusted Git view: replace refs")
             selectors = ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES",
-                         "GIT_REPLACE_REF_BASE", "GIT_CONFIG_COUNT", "GIT_CONFIG_KEY_0", "GIT_CONFIG_VALUE_0", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_SYSTEM", "GIT_CONFIG_NOSYSTEM", "GIT_CONFIG_PARAMETERS", "GIT_CONFIG_FUTURE_SELECTOR")
+                         "GIT_REPLACE_REF_BASE", "GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE",
+                         "GIT_CONFIG", "GIT_IMPLICIT_WORK_TREE", "GIT_PREFIX", "GIT_NO_REPLACE_OBJECTS", "GIT_CONFIG_COUNT", "GIT_CONFIG_KEY_0", "GIT_CONFIG_VALUE_0", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_SYSTEM", "GIT_CONFIG_NOSYSTEM", "GIT_CONFIG_PARAMETERS", "GIT_CONFIG_FUTURE_SELECTOR")
             for selector in selectors:
                 with patch.dict(os.environ, {selector: "hostile-fixture"}):
                     assert selector not in m._1174_git_env() and os.environ[selector] == "hostile-fixture"
@@ -14140,6 +14141,13 @@ def _snapshot1174(root):
     records=[]
     for name in sorted(names):
         path=root/name
+        parent=root
+        blocked=None
+        for part in Path(name).parts[:-1]:
+            parent=parent/part
+            if parent.is_symlink():blocked=parent.relative_to(root).as_posix();break
+        if blocked is not None:
+            records.append((name,("symlink_parent",blocked)));continue
         try:entry=path.lstat()
         except FileNotFoundError:record=("missing",)
         else:

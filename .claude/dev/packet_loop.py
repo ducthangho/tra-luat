@@ -4337,6 +4337,7 @@ def _1174_git_env():
     # Git's remaining index/ancestry/ref selectors can redirect an otherwise
     # explicit -C root. Keep transport auth/proxy/CA and legacy children intact.
     selectors.update({"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"})
+    selectors.update({"GIT_CONFIG", "GIT_IMPLICIT_WORK_TREE", "GIT_PREFIX", "GIT_NO_REPLACE_OBJECTS"})
     return {k: v for k, v in os.environ.items() if k not in selectors and not k.startswith("GIT_CONFIG_")}
 
 

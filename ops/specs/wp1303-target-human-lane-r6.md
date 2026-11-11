@@ -1,4 +1,4 @@
-# WP1303 r6/g6 — Review Rescue: portable Git oracle repair and current-master integration
+# WP1303 r6 — Review Rescue: portable Git oracle repair and current-master integration
 
 Authority: owner current instruction “Tiếp đến khi merge được”, earlier explicit class-based repair/Codex independent reviewer and standing routine cap/extension/lease/merge/bookkeeping delegation. This concrete finite revision is a Review Rescue Checkpoint after3 unfinished advisory reviews, not an automatic fourth attempt or human/cross approval. No new target/LIVE/account/profile/ACL/credentials. All costs, failures, stable IDs and original clock retained. No WindowsCI/fullWindowsmain/fullWindowsmutants/fullregistry.
 

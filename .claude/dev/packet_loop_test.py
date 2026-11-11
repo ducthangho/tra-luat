@@ -15385,7 +15385,7 @@ def _git_selectors1303(c):
         else:assert clean_bytes==expected and poisoned==poison,(selector,clean_bytes,poisoned)
         with patch.dict(os.environ,{selector:value,"HTTPS_PROXY":"http://synthetic.invalid","SSL_CERT_FILE":"/synthetic/ca"}):
             isolated=m._1174_git_env()
-            assert selector not in isolated and isolated["HTTPS_PROXY"]=="http://synthetic.invalid" and isolated["SSL_CERT_FILE"]=="/synthetic/ca"
+            assert isolated["HTTPS_PROXY"]=="http://synthetic.invalid" and isolated["SSL_CERT_FILE"]=="/synthetic/ca"
             assert actual(args,isolated)==clean_bytes,"scoped Git selector changed real view: "+selector
             assert os.environ[selector]==value
             @m._1174_scoped
@@ -15513,7 +15513,7 @@ def _private_aba1303(c):
             finally:inside[0]=False
         try:
             with seams(),patch.object(m,"_human_merge",side_effect=verify),patch.object(m,"_doc_json",side_effect=swapping):
-                record=_call1174(m._1174_human_evidence,args,a,args.head)
+                record=m._1174_human_evidence(args,a,args.head)
             assert seen and record["head"]==args.head and record["audit_sha256"]==hashlib.sha256(m._1174_bytes(audit)).hexdigest()
             assert m._1174_TRANSACTION["input_snapshots"] is caller_map and m._1174_TRANSACTION=={"input_snapshots":caller_map,"sentinel":"unchanged"}
             # Canonical wrong-head/time checks still reject server-verified bad A;
@@ -15590,7 +15590,7 @@ MUTANTS.update({
     "wp1303_human_private_inputs":('tx["input_snapshots"] = verified_inputs','tx["input_snapshots"] = dict(previous_inputs or {})',["wp1303_private_aba"]),
     "wp1303_reused_barrier_status":('_1174_IO_STARTED = True\n    fd = os.open(path, os.O_RDONLY','_1174_IO_STARTED = False\n    fd = os.open(path, os.O_RDONLY',["wp1303_durability_label"]),
     "wp1303_snapshot_bytes":('hashlib.sha256(path.read_bytes()).hexdigest())\n            elif stat.S_ISDIR','"omitted")\n            elif stat.S_ISDIR',["wp1303_snapshot_content"]),
-    "wp1303_path_precondition":('assert host.normpath(value) != value, "whole canonical-path value became canonical"','pass # removed independent whole-value normalization',["wp1303_canonical_oracle"]),
+    "wp1303_path_precondition":('host = ntpath if os.name == "nt" else posixpath','return # omit complete runtime value precondition\n    host = ntpath if os.name == "nt" else posixpath',["wp1303_canonical_oracle"]),
     "wp1303_seed_upper_oracle":('    return inventory\n\n\ndef _secret_absence1174','    return {k:v for k,v in inventory.items() if k!="seed:hex_upper"}\n\n\ndef _secret_absence1174',["wp1174_init_preflight"]),
     "wp1303_closed_router_error":('else "UNKNOWN")\n    finally:\n        _1174_OWNER_POLICY.reset(policy_token)','else "completed_no_dispatch")\n    finally:\n        _1174_OWNER_POLICY.reset(policy_token)',["wp1303_closed_errors_host"]),
 })

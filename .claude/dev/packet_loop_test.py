@@ -15630,7 +15630,7 @@ MUTANTS.update({
     "wp1303_human_private_inputs":('tx["input_snapshots"] = verified_inputs','tx["input_snapshots"] = dict(previous_inputs or {})',["wp1303_private_aba"]),
     "wp1303_reused_barrier_status":('_1174_IO_STARTED = True\n    fd = os.open(path, os.O_RDONLY','_1174_IO_STARTED = False\n    fd = os.open(path, os.O_RDONLY',["wp1303_durability_label"]),
     "wp1303_snapshot_bytes":('hashlib.sha256(path.read_bytes()).hexdigest())\n            elif stat.S_ISDIR','"omitted")\n            elif stat.S_ISDIR',["wp1303_snapshot_content"]),
-    "wp1303_path_precondition":('host = ntpath if os.name == "nt" else posixpath','return # omit complete runtime value precondition\n    host = ntpath if os.name == "nt" else posixpath',["wp1303_canonical_oracle"]),
+    "wp1303_path_precondition":('def _canonical_precondition1303(kind, value):\n    import ntpath, posixpath\n    host = ntpath if os.name == "nt" else posixpath','def _canonical_precondition1303(kind, value):\n    import ntpath, posixpath\n    return # omit complete runtime value precondition\n    host = ntpath if os.name == "nt" else posixpath',["wp1303_canonical_oracle"]),
     "wp1303_seed_upper_oracle":('    return inventory\n\n\ndef _secret_absence1174','    return {k:v for k,v in inventory.items() if k!="seed:hex_upper"}\n\n\ndef _secret_absence1174',["wp1174_init_preflight"]),
     "wp1303_closed_router_error":('else "UNKNOWN")\n    finally:\n        _1174_OWNER_POLICY.reset(policy_token)','else "completed_no_dispatch")\n    finally:\n        _1174_OWNER_POLICY.reset(policy_token)',["wp1303_closed_errors_host"]),
 })

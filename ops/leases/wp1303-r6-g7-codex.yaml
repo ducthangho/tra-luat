@@ -1,0 +1,58 @@
+schema_version: 2
+event: frozen_head_readonly_review_continuation_after_sameid_publisher_dedup
+packet_issue: 1303
+packet_id: WP1303
+revision: 6
+generation: 7
+lease_id: wp1303-r6-g7-codex
+role: executor
+executor: codex
+provider: openai_codex
+execution_surface: codex_service
+transport: machine
+model_family: openai
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+granted_by: ducthangho
+authority_url: https://github.com/ducthangho/tra-luat/issues/1303
+recorded_by: Dispatcher under current explicit owner class/Codex/run-now instructions
+  and standing routine cap/extension/lease authority; not sourcehumanapproval/audit/targetgrant
+branch: agent/wp1303-r6-g6-codex
+spec_ref: refs/heads/ops/spec-wp1303-r6@9dc717af7adccb48141357d30502427f58147ce6
+spec_path: ops/specs/wp1303-target-human-lane-r6.md
+spec_hash: 4c4eaa143768985544b57209cc1274b65003c3e45427ef35d626d4568b7dc27f
+prompt_path: ops/specs/wp1303-target-human-lane-r6.md
+prompt_sha256_required: 4c4eaa143768985544b57209cc1274b65003c3e45427ef35d626d4568b7dc27f
+base_sha: 67102dc8b7e9175dda56028f21460a165b574136
+start_from_sha: 7486151bc37b18b6c23ffdd91aa63284d56b004d
+reviewed_sha_required: 7486151bc37b18b6c23ffdd91aa63284d56b004d
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+heartbeat_at: '2026-11-11T23:38:58Z'
+lease_until: '2026-11-12T12:30:00Z'
+lease_expires_at_utc: '2026-11-12T12:30:00Z'
+max_run_minutes: 30
+manual_offline_source_only: true
+no_target_enrollment_or_activation: true
+nang_tran:
+  ai_nang: ducthangho under explicit routine-cap delegation
+  can_cu: https://github.com/ducthangho/tra-luat/issues/1303
+  tran_cu:
+    files: 3
+    added_lines: 900
+  tran_moi:
+    files: 3
+    added_lines: 1800
+process_override: 'Current owner: class closure; file/line findings; first full diff
+  then delta-only; no duplicate old findings; reassess after3unfinished rounds'
+advisory_reviewer_provider: openai_codex
+advisory_reviewer_surface: codex_service
+advisory_reviewer_assurance: advisory_review
+formal_reviewer_unassigned: true
+cloud_cap: 7600
+cloud_hard: '2026-11-12T12:30:00Z'
+integration_master: cfbfee4750c6ab15480d9d3b99a4f0d72d2cd751
+frozen_source_head: 7486151bc37b18b6c23ffdd91aa63284d56b004d
+no_new_source_context_or_write: true

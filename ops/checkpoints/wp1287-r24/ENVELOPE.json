@@ -1,0 +1,15 @@
+{
+  "authority": "Owner explicitly requests continue on ASUS",
+  "candidate": "0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2",
+  "source_write_set": [],
+  "models": 0,
+  "shared_used": 8,
+  "shared_limit": 8,
+  "attempts": "one PS7 literal pinned fullflow; PS5.1 only if first passes",
+  "runtime": "portable official Node26.13/npm11.20 SHA256 verified; no global change",
+  "purpose": "new host contrast, not override selected Desktop U10",
+  "max_minutes": 45,
+  "started_utc": "2026-11-11T01:46:16.373768+00:00",
+  "ownership": "ASUS D-host lock and own scratch only; no other-owner termination",
+  "operator_change": "documented host/paths inputs only; source blocks exact; no product/pin/timeout change"
+}

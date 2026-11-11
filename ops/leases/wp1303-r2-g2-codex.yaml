@@ -1,5 +1,5 @@
 schema_version: 2
-event: owner_directed_source_continuation_r2
+event: superseded_after_review2_checkpoint
 packet_issue: 1303
 packet_id: WP1303
 revision: 2
@@ -31,8 +31,8 @@ write_set:
 - .claude/dev/packet_loop.py
 - .claude/dev/packet_loop_test.py
 heartbeat_at: '2026-11-11T01:00:02Z'
-lease_until: '2026-11-11T14:00:00Z'
-lease_expires_at_utc: '2026-11-11T14:00:00Z'
+lease_until: '2026-11-11T02:23:07Z'
+lease_expires_at_utc: '2026-11-11T02:23:07Z'
 max_run_minutes: 45
 manual_offline_source_only: true
 no_target_enrollment_or_activation: true
@@ -53,3 +53,4 @@ advisory_reviewer_assurance: advisory_review
 formal_reviewer_unassigned: true
 cloud_cap: 6000
 cloud_hard: '2026-11-11T14:00:00Z'
+superseded_by: wp1303-r3-g3-codex

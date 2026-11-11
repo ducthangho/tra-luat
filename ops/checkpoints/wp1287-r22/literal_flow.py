@@ -1,19 +1,24 @@
 """Operator only: bind documented inputs and execute exact source shell fragments."""
 import pathlib,sys,os,json,re,hashlib,subprocess,threading,http.server,struct,datetime,base64,shutil,time
 ROOT=pathlib.Path(sys.argv[1]);kind=sys.argv[2];WIN=os.name=='nt';SRC=ROOT/'source';skill=(SRC/'SKILL.md').read_text(encoding='utf-8-sig');language='powershell' if WIN else 'bash';b=re.findall('```'+language+r'\n(.*?)\n```',skill,re.S)
-assert len(b)==5;E=ROOT/('flow-'+kind);E.mkdir(exist_ok=False);ADDON=ROOT/('addon-'+kind);NODE=r'C:\Program Files\nodejs\node.exe' if WIN else '/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node';NPM=r'C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js' if WIN else '/opt/codex/runtimes/codex-primary-runtime/dependencies/node/lib/node_modules/npm/bin/npm-cli.js';CLI=ADDON/'install/0.1.0/node_modules/@playwright/cli/playwright-cli.js';CACHE=ADDON/'browsers/0.1.0';ROWS=[];STATE=E/'state.json';M=None
+assert len(b)==5;suffix=sys.argv[3] if len(sys.argv)>3 else '';assert not suffix or re.fullmatch(r'-[a-z0-9]+',suffix)
+if suffix:
+ prior=json.loads((ROOT/('flow-'+kind)/'terminal.json').read_text());assert prior['passed'] is False and all(x['label']=='01-setup' for x in prior['steps']),'BROWSER_ALREADY_ATTEMPTED'
+E=ROOT/('flow-'+kind+suffix);E.mkdir(exist_ok=False);ADDON=ROOT/('addon-'+kind);NODE=r'C:\Program Files\nodejs\node.exe' if WIN else '/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node';NPM=r'C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js' if WIN else '/opt/codex/runtimes/codex-primary-runtime/dependencies/node/lib/node_modules/npm/bin/npm-cli.js';CLI=ADDON/'install/0.1.0/node_modules/@playwright/cli/playwright-cli.js';CACHE=ADDON/'browsers/0.1.0';ROWS=[];STATE=E/'state.json';M=None
 def sha(p):return hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
 def save(p,v):pathlib.Path(p).write_bytes((json.dumps(v,indent=2)+'\n').encode())
 env={k:v for k,v in os.environ.items() if not k.startswith(('TL_','GIT_','PLAYWRIGHT_','PWTEST_')) and not any(x in k.upper() for x in ['TOKEN','SECRET','PASSWORD','API_KEY','MASTER_KEY'])};env.update(PYTHONUTF8='1',PYTHONIOENCODING='utf-8',PYTHONDONTWRITEBYTECODE='1',NO_UPDATE_NOTIFIER='1');globalconf=E/'npm-global-empty.conf';globalconf.write_bytes(b'');env['NPM_CONFIG_GLOBALCONFIG']=str(globalconf)
 SHELL=(r'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe' if kind=='ps51' else r'C:\Program Files\PowerShell\7\pwsh.exe') if WIN else 'bash'
 if WIN:
+ gitdir=pathlib.Path(r'C:\Program Files\Git\cmd');assert (gitdir/'git.exe').exists();env['PATH']=str(gitdir)+os.pathsep+env.get('PATH','')
  sys.path.insert(0,str(ROOT));import native_flow as M
  M.ROOT=E;M.E=E;M.INSTALL=ADDON/'install/0.1.0';M.CACHE=CACHE;M.CHROME=CACHE/'chromium-1252/chrome-win64/chrome.exe';M.NODE=NODE;M.CLI=CLI;M.NONCE='wp1287-r22-'+kind;M.ENV=env;M.acquire('H4 literal acceptance '+kind,90)
  env['PSModulePath']=(r'C:\Windows\System32\WindowsPowerShell\v1.0\Modules' if kind=='ps51' else r'C:\Program Files\PowerShell\7\Modules')+r';C:\Program Files\WindowsPowerShell\Modules'
  # Seed only this owned cache from the immutable prior pinned CFT revision.
- prior=pathlib.Path(r'C:\tl-win\wp1287-H1-native-recovery2\browser-cache');CACHE.mkdir(parents=True)
+ prior=pathlib.Path(r'C:\tl-win\wp1287-H1-native-recovery2\browser-cache');CACHE.mkdir(parents=True,exist_ok=True)
  for p in prior.iterdir():
-  if p.is_dir() and p.name.startswith(('chromium-1252','ffmpeg-','winldd-')):shutil.copytree(p,CACHE/p.name)
+  if p.is_dir() and p.name.startswith(('chromium-1252','ffmpeg-','winldd-')) and not (CACHE/p.name).exists():shutil.copytree(p,CACHE/p.name)
+ assert sha(M.CHROME)=='7ca0cf1b2cba9b9ec812a8e3df2cb92a5ddbea8c7013b8d71d589a43589fad21','PRIOR_CACHE_DIGEST_MISMATCH'
  save(E/'cache-provenance.json',{'prior_verified_cache':str(prior),'seeded_chrome_sha256':sha(M.CHROME),'official_installer_still_required':True})
 def execute(label,code,timeout=180):
  path=E/(label+('.ps1' if WIN else '.bash'));path.write_bytes((('\ufeff' if WIN else '')+code).encode());out=E/(label+'.stdout');err=E/(label+'.stderr')

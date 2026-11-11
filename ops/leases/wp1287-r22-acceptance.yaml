@@ -1,0 +1,74 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1287
+packet_id: wp1287
+mission_issue: 1238
+revision: 22
+generation: 22
+lease_id: wp1287-r22-acceptance
+role: executor
+provider: codex
+executor: codex
+model_family: openai
+execution_surface: codex_service
+transport: machine
+environment: linux-and-native-desktop
+risk: sensitive
+access: read-only-candidate-owned-output
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1287-r22.md
+spec_hash: 9519f9291c1fccfedfa6c5ca1beed0f00f444068a27875c271b5fe81057cd62a
+spec_sha256_required: 9519f9291c1fccfedfa6c5ca1beed0f00f444068a27875c271b5fe81057cd62a
+prompt_path: ops/prompts/wp1287-r22-acceptance.md
+prompt_sha256_required: 2acc5ce9f8f60a7cba5814bdf7369201b368ec7d5ac568465b78cf5369375d7f
+write_set:
+- ops/checkpoints/wp1287-r22/
+effective_write_set:
+- ops/checkpoints/wp1287-r22/
+change_policy_sha: null
+land_obligations: []
+branch: ops/wp1287-r4-diagnostic
+base_sha: bf9914cb1a8e6f5047468f4d130b587015f8d73f
+start_from_sha: 0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2
+reviewed_sha_required: 0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1287#issuecomment-6773433608
+authority_note: Current owner orders remaining acceptance work to close; no additional
+  model/source review or assurance waiver
+leased_at_utc: '2026-11-11T00:15:53.038373+00:00'
+heartbeat_at: '2026-11-11T00:15:53.038373+00:00'
+lease_until: '2026-11-11T02:15:53.038373+00:00'
+lease_expires_at_utc: '2026-11-11T02:15:53.038373+00:00'
+run_minutes: 90
+attempts_limit: 1
+attempts_used: 0
+diagnostic_limit: 0
+diagnostic_used: 0
+requires_live: false
+uy_quyen_merge: false
+status: running
+thay_the_cho:
+- wp1287-r21-delta-review
+reviewer: codex
+model: gpt-6-astra
+effort: xhigh
+source_write_set: []
+review_read_scope:
+- .agents/skills/playwright-browser/package.json
+- .agents/skills/playwright-browser/package-lock.json
+- .agents/skills/playwright-browser/SKILL.md
+assurance_target: review_deferred_sensitive_same_provider
+formal_limit: 4
+formal_used: 1
+formal_reserved: 0
+shared_limit: 8
+shared_used: 8
+shared_reserved: 0
+shared_confirmed_used: 8
+shared_uncertain_asus_charge: 0
+formal_counter_definition: accepted_review_rounds_not_physical_model_calls
+formal_rounds_received_or_pending: 4
+formal_budget_available: 0
+formal_counter_note: Preserve blocked historical slot and three received/pending slots;
+  owner-requested third source-review cycle grants this one final verification only

@@ -18,6 +18,9 @@ Theo thứ tự:
    - `ops/chatgpt_review/README.md` khi dùng ChatGPT Pro qua Web.
 7. `SKILL.md` — bắt buộc khi Packet liên quan pháp luật, corpus, Drive,
    NotebookLM, registry hoặc hành vi runtime của skill.
+8. `SKILL.md` mục **Phương pháp làm việc** — nguyên tắc phối hợp áp dụng cho mọi tác vụ.
+   Đọc `references/WORKING_METHOD.md` khi lập/sửa kế hoạch, giao thức, quy trình;
+   khi phân vân có cần hỏi hoặc phát sinh thay đổi có ảnh hưởng trong triển khai.
 
 Đọc được kế hoạch không đồng nghĩa được giao việc. Không có Packet Spec hoặc
 authority được protocol hiện hành thừa nhận thì dừng.
@@ -139,3 +142,4 @@ Khi mâu thuẫn, nguồn có thẩm quyền theo loại quyết định thắng
 `SKILL.md` cho legal/safety, protocol và Packet Spec cho orchestration,
 GitHub facts/verified receipts cho authority, và Git commit/manifest cho
 phiên bản cùng tính toàn vẹn.
+

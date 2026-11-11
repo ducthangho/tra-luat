@@ -1,5 +1,5 @@
 schema_version: 2
-event: review_rescue_portable_git_oracle_and_normal_master_integration
+event: owner_consented_cross_review_forward_budget_renewal_no_new_source_call
 packet_issue: 1303
 packet_id: WP1303
 revision: 6
@@ -30,9 +30,9 @@ reviewed_sha_required: b89a63fb7294935e7099a7a16907027c043ae64a
 write_set:
 - .claude/dev/packet_loop.py
 - .claude/dev/packet_loop_test.py
-heartbeat_at: '2026-11-11T14:32:29Z'
-lease_until: '2026-11-12T04:30:00Z'
-lease_expires_at_utc: '2026-11-12T04:30:00Z'
+heartbeat_at: '2026-11-11T23:28:24Z'
+lease_until: '2026-11-12T12:30:00Z'
+lease_expires_at_utc: '2026-11-12T12:30:00Z'
 max_run_minutes: 30
 manual_offline_source_only: true
 no_target_enrollment_or_activation: true
@@ -51,6 +51,7 @@ advisory_reviewer_provider: openai_codex
 advisory_reviewer_surface: codex_service
 advisory_reviewer_assurance: advisory_review
 formal_reviewer_unassigned: true
-cloud_cap: 6800
-cloud_hard: '2026-11-12T04:30:00Z'
+cloud_cap: 7600
+cloud_hard: '2026-11-12T12:30:00Z'
 integration_master: cfbfee4750c6ab15480d9d3b99a4f0d72d2cd751
+frozen_source_head: 7486151bc37b18b6c23ffdd91aa63284d56b004d

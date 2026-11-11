@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2q",
   "root_name": "tra-luat",
   "file_count": 185,
-  "total_bytes": 9140347,
-  "package_hash": "e7f676554953b94813c87dfd80d92894ff82df2f7a8a781e7b130a3848f72ff0",
-  "content_hash": "e7f676554953b94813c87dfd80d92894ff82df2f7a8a781e7b130a3848f72ff0",
+  "total_bytes": 9140396,
+  "package_hash": "09d228fe3249cbd17e1976fd136c20724e3f339815bdff9aaa0d8234e02667b7",
+  "content_hash": "09d228fe3249cbd17e1976fd136c20724e3f339815bdff9aaa0d8234e02667b7",
   "required_missing": [],
   "files": [
     {
@@ -43,8 +43,8 @@
     },
     {
       "path": "SKILL.md",
-      "size": 48038,
-      "sha256": "1903c3d71c9781636d10e5eab005b1c38ef1c7e766e0097347c77d8850c2e90e"
+      "size": 48087,
+      "sha256": "ee3deed8930886856bae112e71bc0be6045404af30a0af764f5936c6ccec8164"
     },
     {
       "path": "VERSION",
@@ -134,7 +134,7 @@
     {
       "path": "references/GOTCHAS.md",
       "size": 12265,
-      "sha256": "595f9d436f24dcd92eddf802f404f9fa3dc572eb95114fcf5cb466b10d4ca52d"
+      "sha256": "2829045085468f3bf77788b8a3a7aba531159b3892f41d365fba000fd8e37e59"
     },
     {
       "path": "references/KERNEL_APPENDIX.md",
@@ -354,7 +354,7 @@
     {
       "path": "references/golden/workflow_audit.json",
       "size": 31010,
-      "sha256": "6ac8753414eaef02da85f91953b43d4c66ab6968c00f76b33df58a7b5ab3a1c7"
+      "sha256": "8de9d639e6329ff3381afa209adcb282aabda48375592d7358c228eb9c2e32b6"
     },
     {
       "path": "references/linhvuc_phapdien.json",

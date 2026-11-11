@@ -217,6 +217,7 @@ python scripts/tl.py --profile <P> profile-rebuild-registry --keep-notebook <id>
 ## 4. CLI `tl`
 
 Nhóm lệnh và cổng: `references/KERNEL_APPENDIX.md` §F; chi tiết: `references/COMMANDS.md`.
+`rasoat-loop`: `references/RASOAT_HOSO_LOOP.md`.
 
 ## 5. HAI KIỂU CẤU TRÚC (tự nhận diện)
 - **Kiểu Điều** (Hiến pháp/Luật/Bộ luật/NĐ/TT/NQ): Phần/Chương/Mục/Điều/Khoản/Điểm. Tra "Điều 7 khoản 2 điểm a".

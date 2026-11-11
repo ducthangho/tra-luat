@@ -15451,8 +15451,9 @@ def _recovery_identity1303(c):
     """Coherent identity-only snapshots through main/recovery; external authority is synthetic."""
     import contextlib,io
     from unittest.mock import patch
-    for variant in ("control","packet","mission","lineage","binding","state_generation"):
-        directory=c.tmp/variant;directory.mkdir();m,a,init=_init_fixture1174(Ctx(c.script,directory));e=a["enrollment"]
+    outcomes=[]
+    for target_present,variant in ((present,kind) for present in (False,True) for kind in ("control","packet","mission","lineage","binding","state_generation")):
+        directory=c.tmp/(str(target_present)+"-"+variant);directory.mkdir();m,a,init=_init_fixture1174(Ctx(c.script,directory));e=a["enrollment"]
         with patch.object(m,"_1174_probe",return_value={}):m._1174_initialize(init,a,None)
         source,witness=Path(e["state_path"]),Path(e["witness_path"]);Path(e["lock_path"]).touch()
         oldgen=a["generation"];raw=source.read_bytes();digest=hashlib.sha256(raw).hexdigest()
@@ -15464,12 +15465,12 @@ def _recovery_identity1303(c):
         writer=m._1174_write
         def cut(path,value,**kw):
             writer(path,value,**kw)
-            if Path(path)==witness:raise OSError("identity prepared intent cut")
+            if Path(path)==(source if target_present else witness):raise OSError("identity prepared intent cut")
         with patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_1174_write",side_effect=cut):
             try:m._1174_adopt(args,a,witness.read_bytes())
             except OSError as ex:assert "identity prepared intent cut" in str(ex)
             else:assert False,"identity cut not reached"
-        assert not target.exists()
+        assert target.exists() is target_present
         water=json.loads(witness.read_bytes())
         if variant!="control":
             state=json.loads(raw)
@@ -15478,6 +15479,21 @@ def _recovery_identity1303(c):
             raw=m._1174_bytes(state);digest=hashlib.sha256(raw).hexdigest();source.write_bytes(raw)
             a["lineage"]["source_sha256"]=a["operation"]["source_sha256"]=water["pending_adoption"]["source_sha256"]=water["high_water"]["state_sha256"]=digest
             witness.write_bytes(m._1174_bytes(water))
+            assert digest==a["lineage"]["source_sha256"]==a["operation"]["source_sha256"]==water["pending_adoption"]["source_sha256"]==water["high_water"]["state_sha256"]
+            if target_present:
+                # Rebind the existing intent image coherently too. Packet/Mission
+                # identity can be rejected by earlier projection/state predicates;
+                # lineage/binding/source-generation still reach source binding.
+                image=json.loads(target.read_bytes());payload=image["adoption"]["payload"]
+                projection=dict(state,schema_version=3,generation=a["generation"],state_revision=0,
+                    enrollment_id=e["id"],binding_sha256=e["binding_sha256"],scoped_review=None,human_acceptance=None)
+                projection.pop("adoption",None)
+                tombstone=m._1174_tombstone(a["packet"],oldgen,a["generation"],a["operation"]["adoption_id"],digest,e["binding_sha256"])
+                payload.update(source_snapshot=raw.decode(),source_sha256=digest,target_projection=projection,
+                    operation=dict(a["operation"]),tombstone=tombstone.decode(),tombstone_sha256=hashlib.sha256(tombstone).hexdigest())
+                image=dict(projection,state_revision=1,adoption=dict(phase="prepared",payload=payload,
+                    payload_sha256=hashlib.sha256(m._1174_bytes(payload)).hexdigest(),cutover_started=True))
+                target.write_bytes(m._1174_bytes(image))
         _r12_recover_args1174(m,a,args,witness)
         argv=["--state-dir",str(journal),"adopt-state","--packet",str(a["packet"]),"--mode","recovery","--adoption-id","identity-next","--disposition","resume_forward",
             "--expected-witness-revision",args.expected_witness_revision,"--root",e["root"],"--admission","fixture","--revision",str(a["revision"]),"--generation",str(a["generation"]),"--coordinator-id",e["coordinator_id"]]
@@ -15492,6 +15508,9 @@ def _recovery_identity1303(c):
             assert rc==8 and result["status"]=="UNKNOWN" and reason in result["detail"] and not result["dispatch_allowed"],(variant,rc,result,err.getvalue())
             assert not probe.called and not sync.called and not writes.called,"recovery identity rejection reached effects"
             assert before=={str(p):p.read_bytes() for p in directory.rglob("*") if p.is_file()}
+        outcomes.append(dict(target_present=target_present,variant=variant,actual_rc=rc,status=result["status"],detail=result.get("detail"),
+            dispatch_allowed=result["dispatch_allowed"],no_effects=variant!="control",synthetic_authority=True,native=False))
+        (c.tmp/"recovery-identity-results.json").write_text(json.dumps(outcomes,indent=2)+"\n",encoding="utf-8",newline="\n")
 
 
 def _private_aba1303(c):

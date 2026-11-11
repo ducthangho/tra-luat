@@ -38,8 +38,8 @@ authority_note: Current owner orders remaining acceptance work to close; no addi
   model/source review or assurance waiver
 leased_at_utc: '2026-11-11T00:15:53.038373+00:00'
 heartbeat_at: '2026-11-11T00:15:53.038373+00:00'
-lease_until: '2026-11-11T02:15:53.038373+00:00'
-lease_expires_at_utc: '2026-11-11T02:15:53.038373+00:00'
+lease_until: '2026-11-11T00:59:05.710148+00:00'
+lease_expires_at_utc: '2026-11-11T00:59:05.710148+00:00'
 run_minutes: 90
 attempts_limit: 1
 attempts_used: 0
@@ -47,7 +47,7 @@ diagnostic_limit: 0
 diagnostic_used: 0
 requires_live: false
 uy_quyen_merge: false
-status: running
+status: retired
 thay_the_cho:
 - wp1287-r21-delta-review
 reviewer: codex
@@ -72,3 +72,5 @@ formal_rounds_received_or_pending: 4
 formal_budget_available: 0
 formal_counter_note: Preserve blocked historical slot and three received/pending slots;
   owner-requested third source-review cycle grants this one final verification only
+retired_at_utc: '2026-11-11T00:59:05.710148+00:00'
+da_bi_thay_the: wp1287-r23-os-contrast

@@ -12,14 +12,19 @@ SHELL=(r'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe' if kind=='ps
 if WIN:
  gitdir=pathlib.Path(r'C:\Program Files\Git\cmd');assert (gitdir/'git.exe').exists();env['PATH']=str(gitdir)+os.pathsep+env.get('PATH','')
  sys.path.insert(0,str(ROOT));import native_flow as M
+ expected_host=os.environ.get('WP1287_EXPECTED_HOST','DESKTOP-T9R33P2');assert expected_host in ['DESKTOP-T9R33P2','TRA-LUAT-WIN'] and os.environ.get('COMPUTERNAME')==expected_host
+ if expected_host!='DESKTOP-T9R33P2':
+  def acquire_host(label,minutes):
+   assert not M.LOCK.read_text(encoding='utf-8-sig').strip();start=M.utc();M.deadline=start+datetime.timedelta(minutes=minutes);M.lockline='\t'.join([M.NONCE,start.isoformat(),M.deadline.isoformat(),label,start.isoformat()]);M.LOCK.write_bytes(M.lockline.encode())
+  M.acquire=acquire_host
  M.ROOT=E;M.E=E;M.INSTALL=ADDON/'install/0.1.0';M.CACHE=CACHE;M.CHROME=CACHE/'chromium-1252/chrome-win64/chrome.exe';M.NODE=NODE;M.CLI=CLI;M.NONCE='wp1287-r22-'+kind;M.ENV=env;M.acquire('H4 literal acceptance '+kind,90)
  env['PSModulePath']=(r'C:\Windows\System32\WindowsPowerShell\v1.0\Modules' if kind=='ps51' else r'C:\Program Files\PowerShell\7\Modules')+r';C:\Program Files\WindowsPowerShell\Modules'
  # Seed only this owned cache from the immutable prior pinned CFT revision.
  prior=pathlib.Path(r'C:\tl-win\wp1287-H1-native-recovery2\browser-cache');CACHE.mkdir(parents=True,exist_ok=True)
- for p in prior.iterdir():
+ for p in prior.iterdir() if prior.exists() else []:
   if p.is_dir() and p.name.startswith(('chromium-1252','ffmpeg-','winldd-')) and not (CACHE/p.name).exists():shutil.copytree(p,CACHE/p.name)
- assert sha(M.CHROME)=='7ca0cf1b2cba9b9ec812a8e3df2cb92a5ddbea8c7013b8d71d589a43589fad21','PRIOR_CACHE_DIGEST_MISMATCH'
- save(E/'cache-provenance.json',{'prior_verified_cache':str(prior),'seeded_chrome_sha256':sha(M.CHROME),'official_installer_still_required':True})
+ if M.CHROME.exists():assert sha(M.CHROME)=='7ca0cf1b2cba9b9ec812a8e3df2cb92a5ddbea8c7013b8d71d589a43589fad21','PRIOR_CACHE_DIGEST_MISMATCH'
+ save(E/'cache-provenance.json',{'prior_verified_cache':str(prior) if prior.exists() else None,'seeded_chrome_sha256':sha(M.CHROME) if M.CHROME.exists() else None,'official_installer_still_required':True})
 def execute(label,code,timeout=180):
  path=E/(label+('.ps1' if WIN else '.bash'));path.write_bytes((('\ufeff' if WIN else '')+code).encode());out=E/(label+'.stdout');err=E/(label+'.stderr')
  if WIN:
@@ -39,7 +44,7 @@ server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Fixture);threading.Thread
 try:
  setup=b[0]
  if WIN:
-  for old,new in [('<TargetId>','DESKTOP-T9R33P2'),('<D:\\abs\\ngoai-git\\tl-playwright>',str(ADDON)),('<D:\\abs\\node-v26.13.0-win-x64\\node.exe>',NODE),('<D:\\abs\\node-v26.13.0-win-x64\\node_modules\\npm\\bin\\npm-cli.js>',NPM),('<D:\\abs\\checkout-tra-luat>\\.agents\\skills\\playwright-browser',str(SRC))]:setup=setup.replace(old,new)
+  for old,new in [('<TargetId>',expected_host),('<D:\\abs\\ngoai-git\\tl-playwright>',str(ADDON)),('<D:\\abs\\node-v26.13.0-win-x64\\node.exe>',NODE),('<D:\\abs\\node-v26.13.0-win-x64\\node_modules\\npm\\bin\\npm-cli.js>',NPM),('<D:\\abs\\checkout-tra-luat>\\.agents\\skills\\playwright-browser',str(SRC))]:setup=setup.replace(old,new)
  else:
   for old,new in [('<TargetId>','codex-cloud-linux'),('</abs/ngoai-git/tl-playwright>',str(ADDON)),('</abs/node-v24.19.0-linux-x64/bin/node>',NODE),('</abs/node-v24.19.0-linux-x64/lib/node_modules/npm/bin/npm-cli.js>',NPM),('</abs/checkout-tra-luat>/.agents/skills/playwright-browser',str(SRC))]:setup=setup.replace(old,new)
  # Persist only already-bound documented inputs across source fragment invocations.
@@ -59,7 +64,7 @@ try:
  execute('03-capture-files',restore+b[3].replace('<N đọc từ 04-requests.json>',m[1]),120)
  assert (run/'source.body').read_bytes()==body;png=(run/'page.png').read_bytes();assert png[:8]==b'\x89PNG\r\n\x1a\n';dimensions=struct.unpack('>II',png[16:24]);assert min(dimensions)>0
  if WIN:
-  wheel=pathlib.Path(r'C:\tl-win\wp1287-H1-native-recovery2\inputs\pypdf-6.10.0-py3-none-any.whl');assert sha(wheel)=='90005e959e1596c6e6c84c8b0ad383285b3e17011751cedd17f2ce8fcdfc86de';sys.path.insert(0,str(wheel))
+  wheel=pathlib.Path(os.environ.get('WP1287_PYPDF_WHEEL',r'C:\tl-win\wp1287-H1-native-recovery2\inputs\pypdf-6.10.0-py3-none-any.whl'));assert sha(wheel)=='90005e959e1596c6e6c84c8b0ad383285b3e17011751cedd17f2ce8fcdfc86de';sys.path.insert(0,str(wheel))
  import pypdf
  pdf='\n'.join(p.extract_text() or '' for p in pypdf.PdfReader(str(run/'page.pdf')).pages);assert 'controlled-source-wp1287-H4-'+kind in pdf
  cleanup_attempted=True;execute('04-cleanup',restore+b[4],90)
@@ -83,6 +88,6 @@ finally:
  live=M.observe() if WIN else []
  if WIN and not live:M.release()
  if WIN:
-  with pathlib.Path(r'C:\tl-win\do-luong.csv').open('a',encoding='utf-8',newline='') as ledger:ledger.write(f"{datetime.datetime.now(datetime.timezone.utc).isoformat()},wp1287-r22-{kind},wp1287,0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2,literal-fullflow,{sum(x['rc']==0 for x in ROWS)},{len(ROWS)},{int(not ok)},0,operator,{not ok},no,may=DESKTOP-T9R33P2;no_model\n")
+  with pathlib.Path(r'C:\tl-win\do-luong.csv').open('a',encoding='utf-8',newline='') as ledger:ledger.write(f"{datetime.datetime.now(datetime.timezone.utc).isoformat()},wp1287-r22-{kind},wp1287,0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2,literal-fullflow,{sum(x['rc']==0 for x in ROWS)},{len(ROWS)},{int(not ok)},0,operator,{not ok},no,may={expected_host};no_model\n")
   for handle in M.HANDLES.values():M.K.CloseHandle(handle)
  save(E/'terminal.json',{'passed':ok,'candidate':'0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2','source_sha256':hashlib.sha256(skill.encode()).hexdigest(),'shell':kind,'steps':ROWS,'owned_live':len(live),'lock_released':not pathlib.Path(r'C:\tl-win\KHOA.txt').read_bytes() if WIN else None,'source_fragments_sha256':[hashlib.sha256(x.encode()).hexdigest() for x in b]});print(json.dumps({'passed':ok,'shell':kind,'steps':[(x['label'],x['rc']) for x in ROWS],'owned_live':len(live)}),flush=True)

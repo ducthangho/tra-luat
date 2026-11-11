@@ -1,5 +1,5 @@
 schema_version: 2
-event: resume_unused_source_context_after_executor_outage
+event: superseded_before_bounded_meta_anchor_repair
 packet_issue: 1303
 packet_id: WP1303
 revision: 4
@@ -31,8 +31,8 @@ write_set:
 - .claude/dev/packet_loop.py
 - .claude/dev/packet_loop_test.py
 heartbeat_at: '2026-11-11T05:44:32Z'
-lease_until: '2026-11-11T19:00:00Z'
-lease_expires_at_utc: '2026-11-11T19:00:00Z'
+lease_until: '2026-11-11T07:13:19Z'
+lease_expires_at_utc: '2026-11-11T07:13:19Z'
 max_run_minutes: 90
 manual_offline_source_only: true
 no_target_enrollment_or_activation: true
@@ -53,3 +53,4 @@ advisory_reviewer_assurance: advisory_review
 formal_reviewer_unassigned: true
 cloud_cap: 6000
 cloud_hard: '2026-11-11T19:00:00Z'
+superseded_by: wp1303-r5-g5-codex

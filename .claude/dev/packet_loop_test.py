@@ -14231,8 +14231,10 @@ def main():
     cases, mutants = CASES, MUTANTS
     available = [name for name, _ in cases]
     missing = sorted(name for name in applicable if available.count(name) != 1)
-    CASES = [(name, fn) for name, fn in cases if not name.startswith("wp1174_") or name in applicable]
-    MUTANTS = {name: value for name, value in mutants.items() if not name.startswith("m1174_") or actual_os == "Linux"}
+    CASES = [(name, fn) for name, fn in cases if (not name.startswith("wp1174_") or name in applicable)
+        and (actual_os == "Linux" or name not in _WP1303_LINUX_CASES)]
+    MUTANTS = {name: value for name, value in mutants.items() if (not name.startswith("m1174_") or actual_os == "Linux")
+        and (actual_os == "Linux" or name not in _WP1303_R4_MUTANTS)}
     try:
         if missing:
             print("WP1174 required IDs missing/duplicate: " + json.dumps(missing))
@@ -15546,7 +15548,8 @@ def _private_aba1303(c):
 def _snapshot_content1303(c):
     repo=c.tmp/"snapshot-checkout";repo.mkdir();_g(repo,"init","-q","-b","master")
     (repo/"tracked").write_bytes(b"tracked\n");(repo/".gitignore").write_text("ignored\n")
-    _g(repo,"add","tracked",".gitignore");_g(repo,"commit","-qm","snapshot")
+    (repo/"nested").mkdir();(repo/"nested"/"child").write_bytes(b"nested tracked\n")
+    _g(repo,"add","tracked",".gitignore","nested/child");_g(repo,"commit","-qm","snapshot")
     ignored,untracked=repo/"ignored",repo/"untracked"
     ignored.write_bytes(b"first ignored\n");untracked.write_bytes(b"first untracked\n")
     clean=_snapshot1174(repo);assert clean==_snapshot1174(repo) and "?? untracked" in clean["status"]
@@ -15563,6 +15566,11 @@ def _snapshot_content1303(c):
         link=repo/"link";link.symlink_to("tracked");a=_snapshot1174(repo);link.unlink();link.symlink_to("ignored")
         assert _snapshot1174(repo)["content_sha256"]!=a["content_sha256"],"snapshot omitted symlink target"
         link.unlink();fifo=repo/"fifo";os.mkfifo(fifo);assert _snapshot1174(repo)["content_sha256"]!=clean["content_sha256"];fifo.unlink()
+        outside=c.tmp/"external-symlink-target";outside.mkdir();(outside/"child").write_bytes(b"external first")
+        nested=repo/"nested";saved=(nested/"child").read_bytes();(nested/"child").unlink();nested.rmdir();nested.symlink_to(outside,target_is_directory=True)
+        first=_snapshot1174(repo);(outside/"child").write_bytes(b"external changed")
+        assert _snapshot1174(repo)==first,"snapshot followed tracked symlink parent outside checkout"
+        nested.unlink();nested.mkdir();(nested/"child").write_bytes(saved)
     untracked.unlink();assert _snapshot1174(repo)["status"]==""
 
 
@@ -15603,6 +15611,14 @@ MUTANTS.update({
     "wp1303_closed_router_error":('else "UNKNOWN")\n    finally:\n        _1174_OWNER_POLICY.reset(policy_token)','else "completed_no_dispatch")\n    finally:\n        _1174_OWNER_POLICY.reset(policy_token)',["wp1303_closed_errors_host"]),
 })
 MUTANTS_NHAM_TEST |= {"wp1303_snapshot_bytes","wp1303_path_precondition","wp1303_seed_upper_oracle"}
+# These cases require actual Linux syscall/router fixtures. The Windows focused
+# lane selects portable context/path/content/Git controls separately; no skip is
+# Windows or native proof. Existing registered IDs and raw inventories remain.
+_WP1303_LINUX_CASES = frozenset(("wp1303_target_human_chain","wp1303_durability_label","wp1303_recovery_identity",
+    "wp1303_private_aba","wp1303_closed_errors_host","wp1303_target_supported_pairs","wp1303_secret_channels"))
+_WP1303_R4_MUTANTS = frozenset(("wp1303_closed_router_error","wp1303_git_graft","wp1303_git_index","wp1303_git_namespace",
+    "wp1303_git_shallow","wp1303_human_private_inputs","wp1303_path_precondition","wp1303_reused_barrier_status",
+    "wp1303_seed_upper_oracle","wp1303_snapshot_bytes"))
 
 if __name__ == "__main__":
     sys.exit(main())

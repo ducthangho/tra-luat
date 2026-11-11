@@ -1,5 +1,5 @@
 schema_version: 2
-event: repair_confirmed_test_mutant_anchor_collision
+event: superseded_by_review_rescue6_after_independent_changes_requested
 packet_issue: 1303
 packet_id: WP1303
 revision: 5
@@ -31,8 +31,8 @@ write_set:
 - .claude/dev/packet_loop.py
 - .claude/dev/packet_loop_test.py
 heartbeat_at: '2026-11-11T07:13:20Z'
-lease_until: '2026-11-11T20:00:00Z'
-lease_expires_at_utc: '2026-11-11T20:00:00Z'
+lease_until: '2026-11-11T14:34:55Z'
+lease_expires_at_utc: '2026-11-11T14:34:55Z'
 max_run_minutes: 30
 manual_offline_source_only: true
 no_target_enrollment_or_activation: true
@@ -53,3 +53,4 @@ advisory_reviewer_assurance: advisory_review
 formal_reviewer_unassigned: true
 cloud_cap: 6100
 cloud_hard: '2026-11-11T20:00:00Z'
+superseded_by: wp1303-r6-g6-codex

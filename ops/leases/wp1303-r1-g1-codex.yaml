@@ -1,5 +1,5 @@
 schema_version: 2
-event: source_lease_under_actual_owner_bugfix_instruction
+event: superseded_by_owner_directed_r2
 packet_issue: 1303
 packet_id: WP1303
 revision: 1
@@ -35,8 +35,8 @@ write_set:
 - .claude/dev/packet_loop.py
 - .claude/dev/packet_loop_test.py
 heartbeat_at: '2026-11-10T16:56:30Z'
-lease_until: '2026-11-11T07:00:00Z'
-lease_expires_at_utc: '2026-11-11T07:00:00Z'
+lease_until: '2026-11-11T01:00:01Z'
+lease_expires_at_utc: '2026-11-11T01:00:01Z'
 max_run_minutes: 45
 manual_offline_source_only: true
 no_target_enrollment_or_activation: true
@@ -51,3 +51,4 @@ nang_tran:
     added_lines: 900
 process_override: 'Current owner: class closure; file/line findings; first full diff
   then delta-only; no duplicate old findings; reassess after3unfinished rounds'
+superseded_by: wp1303-r2-g2-codex

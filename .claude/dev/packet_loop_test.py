@@ -11104,7 +11104,7 @@ def _resolver1174(c, change=None):
     return result
 
 
-def _composition1174(c, target_human=False, hook=None, target_identity=None):
+def _composition1174(c, target_human=False, hook=None, target_identity=None, executor_identity=None):
     """Real Git/canonical composition; only local transport, API and native mount facts are fixtures."""
     import contextlib, io, shutil
     from unittest.mock import patch
@@ -11131,9 +11131,10 @@ def _composition1174(c, target_human=False, hook=None, target_identity=None):
     if target_human:
         identity=target_identity or m._identity("codex","openai","codex_service","machine")
         provider=identity["provider"]
-        p.update(executor=provider,reviewer=provider,executor_identity=identity,reviewer_identity=dict(identity))
-        old.update(assurance_target="human_audited",provider=provider,executor=provider,reviewer=provider,
-            model_family=identity["model_family"],execution_surface=identity["execution_surface"],transport=identity["transport"],
+        executor_identity=executor_identity or identity
+        p.update(executor=executor_identity["provider"],reviewer=provider,executor_identity=dict(executor_identity),reviewer_identity=dict(identity))
+        old.update(assurance_target="human_audited",provider=executor_identity["provider"],executor=executor_identity["provider"],reviewer=provider,
+            model_family=executor_identity["model_family"],execution_surface=executor_identity["execution_surface"],transport=executor_identity["transport"],
             reviewer_model_family=identity["model_family"],reviewer_execution_surface=identity["execution_surface"],
             reviewer_transport=identity["transport"])
     plan_raw=m._1174_bytes(dict(mission_id="gh-1172",revision=11,packet_graph=[dict(packet=55,revision=1,generation=1,contract_id="composition-r1")],
@@ -11199,10 +11200,11 @@ sys.exit(p.returncode)
             "--root",str(w),"--admission",str(sample),"--revision","1","--generation","1","--coordinator-id","coordinator-1","--expected-revision","absent"]
         if target_human:
             for role in ("executor","reviewer"):
-                for flag,value in (("--"+role,identity["provider"]),
-                        ("--"+role+"-model-family",identity["model_family"]),
-                        ("--"+role+"-execution-surface",identity["execution_surface"]),
-                        ("--"+role+"-transport",identity["transport"])):
+                actor=executor_identity if role=="executor" else identity
+                for flag,value in (("--"+role,actor["provider"]),
+                        ("--"+role+"-model-family",actor["model_family"]),
+                        ("--"+role+"-execution-surface",actor["execution_surface"]),
+                        ("--"+role+"-transport",actor["transport"])):
                     args[args.index(flag)+1]=value
         # Probe is the only native capability seam; runtime and all authority composition remain real.
         with patch.object(m,"_1174_probe",return_value=dict(native_fixture=True)),contextlib.redirect_stdout(out):rc=m.main(args)
@@ -13258,7 +13260,14 @@ def _secret_channels1174(c):
     # Appending bytes is an oracle metatest, not a product/native leak claim.
     for name, value in channels.items():
         clean=value if isinstance(value,bytes) else (value.encode() if isinstance(value,str) else json.dumps(value,sort_keys=True).encode())
-        for encoding, secret in _secret_encodings1303(seed,key).items():
+        import base64
+        from urllib.parse import quote_from_bytes
+        stimuli=[]
+        for label, token in (("seed",seed),("key_text",key.encode()),("key_bytes",bytes.fromhex(key))):
+            stimuli.extend((label, value) for value in (token, token.hex().encode(), token.hex().upper().encode(),
+                base64.b64encode(token),base64.urlsafe_b64encode(token),quote_from_bytes(token,safe="").encode(),
+                repr(token).encode(),repr(token)[2:-1].encode(),json.dumps(token.decode("latin1"),ensure_ascii=True)[1:-1].encode()))
+        for encoding, secret in stimuli:
             try:_secret_absence1174(seed,key,**{name:clean+b"\nINERT-FIXTURE-LEAK:"+secret})
             except AssertionError as ex:assert "fixture secret leaked in "+name in str(ex)
             else:assert False,("secret oracle missed encoding/channel",encoding,name)
@@ -15012,7 +15021,7 @@ def _target_context1303(c):
             m._1174_TRANSACTION=previous;m._1174_TARGET_AUTHORITY.reset(token)
 
 
-def _target_chain1303_one(c, native_identity=None):
+def _target_chain1303_one(c, native_identity=None, executor_identity=None, focused=False):
     """Real parser/canonical resolver/I2/reducers; only external authority/OS transport is synthetic."""
     import contextlib,copy,io
     from unittest.mock import patch
@@ -15044,7 +15053,7 @@ def _target_chain1303_one(c, native_identity=None):
         invoke("record-post","--for","reviewing","--comment-id","799997","--source-lease-ref","origin/ops/source",
             "--source-lease-path","ops/leases/source.yaml",expect=8,reason="source input scope/directory")
         actual=m._1174_resolve
-        for defect in ("missing","mismatch","expired","changed_under_lock"):
+        for defect in (() if focused else ("missing","mismatch","expired","changed_under_lock")):
             calls=[0]
             def broken(*args,**kwargs):
                 admission,facts=actual(*args,**kwargs);facts=dict(facts);calls[0]+=1
@@ -15060,7 +15069,7 @@ def _target_chain1303_one(c, native_identity=None):
                         "expired":"target proof expired","changed_under_lock":"authority changed under lock"}[defect])
         # Canonical API authority defects are rejected by the unchanged resolver, before reducers.
         api=f["api"]
-        for defect in ("owner","mission_hash","revoked_route"):
+        for defect in (() if focused else ("owner","mission_hash","revoked_route")):
             def invalid(endpoint,**limits):
                 result=copy.deepcopy(api(endpoint,**limits))
                 if "/issues/1172/comments?" in endpoint:
@@ -15076,7 +15085,10 @@ def _target_chain1303_one(c, native_identity=None):
         identity=a["enrollment"]["initial_state_projection"]["reviewer_identity"]
         runtime=["--provider",identity["provider"],"--model-family",identity["model_family"],
             "--execution-surface",identity["execution_surface"],"--transport",identity["transport"]]
-        invoke("begin-attempt",*runtime,"--bang-chung-moi-truong",anh_doctor())
+        executor=a["enrollment"]["initial_state_projection"]["executor_identity"]
+        exec_runtime=["--provider",executor["provider"],"--model-family",executor["model_family"],
+            "--execution-surface",executor["execution_surface"],"--transport",executor["transport"]]
+        invoke("begin-attempt",*exec_runtime,"--bang-chung-moi-truong",anh_doctor())
         invoke("record-post","--for","reviewing","--comment-id","900002")
         invoke("transition","--to","reviewing","--comment-id","900002","--head-sha",head)
         codex=identity["provider"]=="codex"
@@ -15088,8 +15100,11 @@ def _target_chain1303_one(c, native_identity=None):
             model=dict(provider=provider,model_family=m.HO_CANON[identity["model_family"]],
                 surface=identity["execution_surface"],transport=identity["transport"])
             image=json.loads(target.read_bytes())
+            exec_provider={"codex":"openai_codex","claude":"anthropic_claude","google_antigravity":"google_antigravity"}[executor["provider"]]
+            exec_model=dict(provider=exec_provider,model_family=m.HO_CANON[executor["model_family"]],
+                surface=executor["execution_surface"],transport=executor["transport"])
             record=_bn812(w,head,image["ngu_canh_lease"]["spec_hash"],bn=dict(assurance="same_provider_approved",
-                executor_provider=provider,model_executor_identity=dict(model,session_run_id="target-executor"),
+                executor_provider=exec_provider,model_executor_identity=dict(exec_model,session_run_id="target-executor"),
                 model_reviewer_identity=dict(model,session_run_id="target-reviewer",phien_doc_lap=True)))
         receipt.write_bytes(m._1174_bytes(record))
         review=[*runtime,"--verdict","approve","--reviewed-sha",head,"--bien-nhan",str(receipt)]
@@ -15099,7 +15114,7 @@ def _target_chain1303_one(c, native_identity=None):
         invoke("record-review",*bad,expect=8,reason=native_reason or "advisory attempt/head")
         receipt.write_bytes(m._1174_bytes(dict(record,assurance="human_audited")))
         invoke("record-review",*review,expect=8,reason=native_reason or "advisory receipt closed bindings")
-        if native_identity is not None:
+        if native_identity is not None and not focused:
             for field,value in (("assurance","cross_approved"),("assurance","advisory_review"),
                     ("generation",2),("lease_id","other-lease"),("spec_hash","f"*64),
                     ("reviewed_sha","f"*40),("verdict_sha256","f"*64),
@@ -15180,6 +15195,33 @@ def _target_chain1303_one(c, native_identity=None):
                 assert m._1174_TRANSACTION["proposal"] is None
             finally:
                 m._1174_TRANSACTION=previous;m._1174_TARGET_AUTHORITY.reset(token)
+            # CI-do uses the same strict native predicate and exact workflow/job
+            # references as connector reopen. No model review can accept the target.
+            ci_connector=c.tmp/"target-ci-connector.json"
+            ci_connector.write_bytes(m._1174_bytes(dict(repo=m._1174_REPO,pr=55,head_sha=head,
+                reviews=dict(total_count=0,items=[]),review_comments=dict(total_count=0,items=[]),
+                issue_comments=dict(total_count=1,items=[dict(id=21,user=dict(login=m.BOT_CONNECTOR),
+                    issue_url=m.API_GH+m._1174_REPO+"/issues/55",body="**Reviewed commit:** `"+head+"` clean")]))))
+            workflow,job=m.CHECK_BAT_BUOC[0]
+            run=dict(id=101,path=workflow,head_sha=head,repository=dict(full_name=m._1174_REPO),run_attempt=1,
+                status="completed",conclusion="failure",check_suite_id=501)
+            cr=dict(id=301,name=job,head_sha=head,status="completed",conclusion="failure",check_suite=dict(id=501),
+                app=dict(slug=m.APP_CHECK),url=m.API_GH+m._1174_REPO+"/check-runs/301")
+            jj=dict(id=201,run_id=101,run_attempt=1,name=job,head_sha=head,status="completed",conclusion="failure",check_run_url=cr["url"])
+            ci_paths=[]
+            for field,rows in (("workflow_runs",[run]),("jobs",[jj]),("check_runs",[cr])):
+                path=c.tmp/("target-ci-"+field+".json");path.write_bytes(m._1174_bytes(dict(total_count=1,**{field:rows})));ci_paths.append(path)
+            negative=dict(record,verdict="changes_requested",bang_lop=[dict(slug="ci-fix",hang="P2",check_refs=[[workflow,job]])])
+            connector_receipt.write_bytes(m._1174_bytes(negative))
+            flags=["--nguyen-nhan","ci-do","--pr","55","--connector",str(ci_connector),"--bien-nhan",str(connector_receipt),
+                "--finding-id","ci-fix","--workflow-runs",ci_paths[0],"--workflow-jobs",ci_paths[1],"--check-runs",ci_paths[2]]
+            cr["head_sha"]="f"*40;ci_paths[2].write_bytes(m._1174_bytes(dict(total_count=1,check_runs=[cr])))
+            invoke("mo-lai",*flags,expect=8,reason="legacy predicate rejected")
+            cr["head_sha"]=head;ci_paths[2].write_bytes(m._1174_bytes(dict(total_count=1,check_runs=[cr])))
+            reopened=invoke("mo-lai",*flags)
+            assert reopened["state"]=="running" and reopened["accepted_sha"] is None and reopened["finding_counts"]["ci-fix"]==1
+            assert reopened["mo_lai_tu"]==dict(nguyen_nhan="ci-do",generation=1,sha=head)
+            pair(pending)
             connector=c.tmp/"target-connector.json"
             cn=dict(repo=m._1174_REPO,pr=55,head_sha=head,
                 reviews=dict(total_count=0,items=[]),issue_comments=dict(total_count=0,items=[]),
@@ -15200,7 +15242,7 @@ def _target_chain1303_one(c, native_identity=None):
         accepted=_accept_entry1174(Ctx(c.script,c.tmp/"human"),chain=(m,a,pending,target,witness,pair,w),target_facts=facts)
         assert accepted["human_acceptance"]["assurance"]=="human_audited" and accepted["state"]=="accepted"
         (c.tmp/"target-human-chain.json").write_text(json.dumps(dict(synthetic_authority=True,actual_human=False,native=False,trace=trace),indent=2)+"\n")
-    return _composition1174(c,target_human=True,hook=exercise,target_identity=native_identity)
+    return _composition1174(c,target_human=True,hook=exercise,target_identity=native_identity,executor_identity=executor_identity)
 
 
 def _target_chain1303(c):
@@ -15479,10 +15521,16 @@ def _private_aba1303(c):
             if field=="human_audit_comment":
                 saved=copy.deepcopy(audit);body=m._yaml_cay(audit["body"].encode());body["reviewed_sha"]="f"*40;audit["body"]=json.dumps(body)
                 Path(args.human_audit_comment).write_bytes(m._1174_bytes(audit))
-                with seams():_reject1174(m._1174_human_evidence,args,a,args.head,reason="human audit exact bindings/verdict")
+                with seams():
+                    try:m._1174_human_evidence(args,a,args.head)
+                    except ValueError as ex:assert "human audit exact bindings/verdict" in str(ex)
+                    else:assert False,"server-verified wrong-head audit accepted"
                 audit.clear();audit.update(saved);Path(args.human_audit_comment).write_bytes(m._1174_bytes(audit))
                 audit["updated_at"]="2026-11-04T09:02:00Z";Path(args.human_audit_comment).write_bytes(m._1174_bytes(audit))
-                with seams():_reject1174(m._1174_human_evidence,args,a,args.head,reason="human review trước push")
+                with seams():
+                    try:m._1174_human_evidence(args,a,args.head)
+                    except ValueError as ex:assert "human review trước push" in str(ex)
+                    else:assert False,"server-verified late audit accepted"
                 assert m._1174_TRANSACTION["input_snapshots"] is caller_map
         finally:m._1174_TRANSACTION=previous
 
@@ -15520,6 +15568,33 @@ CASES += [("wp1303_git_selectors",_git_selectors1303),("wp1303_durability_label"
     ("wp1303_recovery_identity",_recovery_identity1303),("wp1303_private_aba",_private_aba1303),
     ("wp1303_canonical_oracle",_canonical_oracle1303),("wp1303_snapshot_content",_snapshot_content1303),
     ("wp1303_closed_errors_host",_closed_host1303)]
+
+
+def _supported_pairs1303(c):
+    # Supported by canonical RUNTIME_CAPABILITIES, lease _nc_hop_le and BNV MEI/MRI.
+    pairs=((('google_antigravity','claude','antigravity','machine/local'),('google_antigravity','gemini','antigravity','machine/local')),
+        (('codex','openai','codex_service','machine'),('codex','openai','codex_cli','machine')),
+        (('codex','openai','codex_service','machine'),('google_antigravity','openai','antigravity','machine/local')))
+    for index,(executor,reviewer) in enumerate(pairs):
+        directory=c.tmp/str(index);directory.mkdir()
+        identity=lambda values:dict(zip(('provider','model_family','execution_surface','transport'),values))
+        _target_chain1303_one(Ctx(c.script,directory),identity(reviewer),identity(executor),focused=True)
+
+
+CASES.append(("wp1303_target_supported_pairs",_supported_pairs1303))
+MUTANTS.update({
+    "wp1303_git_graft":('"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"','"GIT_INDEX_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"',["wp1303_git_selectors"]),
+    "wp1303_git_shallow":('"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"','"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_NAMESPACE"',["wp1303_git_selectors"]),
+    "wp1303_git_index":('"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"','"GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"',["wp1303_git_selectors"]),
+    "wp1303_git_namespace":('"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"','"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE"',["wp1303_git_selectors"]),
+    "wp1303_human_private_inputs":('tx["input_snapshots"] = verified_inputs','tx["input_snapshots"] = dict(previous_inputs or {})',["wp1303_private_aba"]),
+    "wp1303_reused_barrier_status":('_1174_IO_STARTED = True\n    fd = os.open(path, os.O_RDONLY','_1174_IO_STARTED = False\n    fd = os.open(path, os.O_RDONLY',["wp1303_durability_label"]),
+    "wp1303_snapshot_bytes":('hashlib.sha256(path.read_bytes()).hexdigest())\n            elif stat.S_ISDIR','"omitted")\n            elif stat.S_ISDIR',["wp1303_snapshot_content"]),
+    "wp1303_path_precondition":('assert host.normpath(value) != value, "whole canonical-path value became canonical"','pass # removed independent whole-value normalization',["wp1303_canonical_oracle"]),
+    "wp1303_seed_upper_oracle":('    return inventory\n\n\ndef _secret_absence1174','    return {k:v for k,v in inventory.items() if k!="seed:hex_upper"}\n\n\ndef _secret_absence1174',["wp1174_init_preflight"]),
+    "wp1303_closed_router_error":('else "UNKNOWN")\n    finally:\n        _1174_OWNER_POLICY.reset(policy_token)','else "completed_no_dispatch")\n    finally:\n        _1174_OWNER_POLICY.reset(policy_token)',["wp1303_closed_errors_host"]),
+})
+MUTANTS_NHAM_TEST |= {"wp1303_snapshot_bytes","wp1303_path_precondition","wp1303_seed_upper_oracle"}
 
 if __name__ == "__main__":
     sys.exit(main())

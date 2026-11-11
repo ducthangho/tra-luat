@@ -18,7 +18,7 @@ if WIN:
 def execute(label,code,timeout=180):
  path=E/(label+('.ps1' if WIN else '.bash'));path.write_bytes((('\ufeff' if WIN else '')+code).encode());out=E/(label+'.stdout');err=E/(label+'.stderr')
  if WIN:
-  stub="$ErrorActionPreference='Stop'; & ([scriptblock]::Create([IO.File]::ReadAllText('"+str(path)+"',[Text.Encoding]::UTF8)))";args=[SHELL,'-NoProfile','-NonInteractive','-EncodedCommand',base64.b64encode(stub.encode('utf-16le')).decode()];row=M.command(label,args,timeout,True);rc=row['rc'];raw=row['stdout']
+  encoded=base64.b64encode(code.encode('utf-16le')).decode();assert len(encoded)<30000,'INLINE_COMMAND_TOO_LARGE';args=[SHELL,'-NoProfile','-NonInteractive','-EncodedCommand',encoded];row=M.command(label,args,timeout,True);rc=row['rc'];raw=row['stdout']
  else:
   with out.open('xb') as so,err.open('xb') as se:cp=subprocess.run([SHELL,'--noprofile','--norc',str(path)],env=env,stdout=so,stderr=se,timeout=timeout)
   rc=cp.returncode;raw=out.read_bytes()

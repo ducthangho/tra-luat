@@ -1,5 +1,5 @@
 """Run exact documented helpers/Cleanup against controlled CLI-shaped processes."""
-import pathlib,re,sys,json,os,subprocess,hashlib
+import pathlib,re,sys,json,os,subprocess,hashlib,base64
 src=pathlib.Path(sys.argv[1]);out=pathlib.Path(sys.argv[2]);out.mkdir(exist_ok=False)
 text=src.read_text(encoding='utf-8-sig');blocks={x:re.findall('```'+x+r'\n(.*?)\n```',text,re.S) for x in ['bash','powershell']}
 nonce='tl-pw-abcdef123456';fixture=out/'fixture.py'
@@ -50,9 +50,9 @@ for tag,exe in engines:
    modules=r'C:\Windows\System32\WindowsPowerShell\v1.0\Modules' if tag=='ps51' else r'C:\Program Files\PowerShell\7\Modules';env['PSModulePath']=modules+r';C:\Program Files\WindowsPowerShell\Modules'
    if case=='missing-process':stub='function Start-Process { $null }\n'
    if case=='malformed-process':stub="function Start-Process { 'NOT_A_PROCESS' }\n"
-   code="Import-Module Microsoft.PowerShell.Management,Microsoft.PowerShell.Utility -ErrorAction Stop\n"+definitions+'\n'+stub+h+'\n'+body+'\n';path=out/(label+'.ps1');path.write_text(code,encoding='utf-8-sig');cmd=[exe,'-NoProfile','-NonInteractive','-File',str(path)]
-  else:code=h+'\n'+body+'\n';path=out/(label+'.bash');path.write_text(code,encoding='utf-8');cmd=[exe,'--noprofile','--norc',str(path)]
-  cp=subprocess.run(cmd,env=env,capture_output=True,timeout=40);(out/(label+'.stdout')).write_bytes(cp.stdout);(out/(label+'.stderr')).write_bytes(cp.stderr);marker=b'CLEANUP OK' in cp.stdout;positive=case in ['positive-true','positive-false'];passed=(cp.returncode==0 and marker) if positive or mutant else (cp.returncode!=0 and not marker)
+   code="Import-Module Microsoft.PowerShell.Management,Microsoft.PowerShell.Utility -ErrorAction Stop\n"+definitions+'\n'+stub+h+"\n'SOURCE_TEST_ENTERED'\n"+body+'\n';path=out/(label+'.ps1');path.write_bytes(code.encode('utf-8-sig'));encoded=base64.b64encode(code.encode('utf-16le')).decode();assert len(encoded)<30000;cmd=[exe,'-NoProfile','-NonInteractive','-EncodedCommand',encoded]
+  else:code=h+'\necho SOURCE_TEST_ENTERED\n'+body+'\n';path=out/(label+'.bash');path.write_text(code,encoding='utf-8');cmd=[exe,'--noprofile','--norc',str(path)]
+  cp=subprocess.run(cmd,env=env,capture_output=True,timeout=40);(out/(label+'.stdout')).write_bytes(cp.stdout);(out/(label+'.stderr')).write_bytes(cp.stderr);marker=b'CLEANUP OK' in cp.stdout;entered=b'SOURCE_TEST_ENTERED' in cp.stdout;positive=case in ['positive-true','positive-false'];passed=entered and ((cp.returncode==0 and marker) if positive or mutant else (cp.returncode!=0 and not marker))
   if stale:passed=passed and stale.read_bytes()==b'STALE_EVIDENCE' and not (run/'fixture-invocations.txt').exists()
-  row={'id':label,'case':case,'rc':cp.returncode,'cleanup_ok':marker,'expected':'unsafe mutant accepted (negative criterion detects regression)' if mutant else 'success' if positive else 'fail closed','passed':passed,'mutant_control':mutant};rows.append(row);print(json.dumps(row),flush=True)
+  row={'id':label,'case':case,'rc':cp.returncode,'source_entered':entered,'cleanup_ok':marker,'expected':'unsafe mutant accepted (negative criterion detects regression)' if mutant else 'success' if positive else 'fail closed','passed':passed,'mutant_control':mutant};rows.append(row);print(json.dumps(row),flush=True)
 summary={'source_sha256':hashlib.sha256(text.encode()).hexdigest(),'source_head':'0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2','platform':sys.platform,'total':len(rows),'passed':sum(x['passed'] for x in rows),'failed':[x['id'] for x in rows if not x['passed']],'rows':rows,'scope':'actual source helper/Cleanup with process fixture, not real browser acceptance'};(out/'summary.json').write_text(json.dumps(summary,indent=2)+'\n');print(json.dumps({k:v for k,v in summary.items() if k!='rows'}));sys.exit(bool(summary['failed']))

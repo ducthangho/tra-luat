@@ -14234,7 +14234,7 @@ def main():
     CASES = [(name, fn) for name, fn in cases if (not name.startswith("wp1174_") or name in applicable)
         and (actual_os == "Linux" or name not in _WP1303_LINUX_CASES)]
     MUTANTS = {name: value for name, value in mutants.items() if (not name.startswith("m1174_") or actual_os == "Linux")
-        and (actual_os == "Linux" or name not in _WP1303_R4_MUTANTS)}
+        and (actual_os == "Linux" or name not in _WP1303_R4_MUTANTS and not any(t in _WP1303_LINUX_CASES for t in value[2]))}
     try:
         if missing:
             print("WP1174 required IDs missing/duplicate: " + json.dumps(missing))
@@ -15041,7 +15041,7 @@ def _target_chain1303_one(c, native_identity=None, executor_identity=None, focus
         head=_g(w,"rev-parse","refs/remotes/origin/agent/wp55-g1-claude")
         common=["--root",str(w),"--admission",str(sample),"--revision","1","--generation","1","--coordinator-id","coordinator-1"]
         trace=[]
-        def invoke(name,*flags,expect=0,reason=None):
+        def invoke(name,*flags,expect=0,reason=None,error_reason=None):
             image=json.loads(target.read_bytes())
             argv=["--state-dir",str(target.parent),name,"--packet","55",*map(str,flags),*common]
             if name not in ("status","next-comment"):argv += ["--expected-revision",str(image["state_revision"])]
@@ -15053,6 +15053,7 @@ def _target_chain1303_one(c, native_identity=None, executor_identity=None, focus
                 result=json.loads(out.getvalue())
                 assert not result["dispatch_allowed"] and (reason is None or reason in result["detail"]),(name,result)
                 assert before==(target.read_bytes(),witness.read_bytes()),"target rejection wrote state/witness"
+                assert error_reason is None or error_reason in err.getvalue(),(name,error_reason,err.getvalue())
             assert m._1174_TARGET_AUTHORITY.get() is None and m._1174_SOURCE_POLICY.get() is None and m._1174_OWNER_POLICY.get() is None
             image=json.loads(target.read_bytes())
             trace.append(dict(command=name,rc=rc,state=image["state"],revision=image["state_revision"]))
@@ -15154,7 +15155,7 @@ def _target_chain1303_one(c, native_identity=None, executor_identity=None, focus
             assert pending["bien_nhan_approve"]["sha256"]==hashlib.sha256(receipt.read_bytes()).hexdigest()
             assert pending["bien_nhan_approve"]["tep"]==str(receipt)
         invoke("record-review",*review,expect=8,reason=native_reason or "advisory attempt/head")
-        if native_identity is not None:
+        if native_identity is not None and not focused:
             # Supplemental predicate checks reuse the actual validated native
             # receipt and resolver proof after the positive real-router oracle.
             # This is not a replacement for the parser/I2 chain above.
@@ -15211,7 +15212,7 @@ def _target_chain1303_one(c, native_identity=None, executor_identity=None, focus
             ci_connector.write_bytes(m._1174_bytes(dict(repo=m._1174_REPO,pr=55,head_sha=head,
                 reviews=dict(total_count=0,items=[]),review_comments=dict(total_count=0,items=[]),
                 issue_comments=dict(total_count=1,items=[dict(id=21,user=dict(login=m.BOT_CONNECTOR),
-                    issue_url=m.API_GH+m._1174_REPO+"/issues/55",body="**Reviewed commit:** `"+head+"` clean")]))))
+                    issue_url=m.API_GH+m._1174_REPO+"/issues/55",body="**Reviewed commit:** `"+head+"`")]))))
             workflow,job=m.CHECK_BAT_BUOC[0]
             run=dict(id=101,path=workflow,head_sha=head,repository=dict(full_name=m._1174_REPO),run_attempt=1,
                 status="completed",conclusion="failure",check_suite_id=501)
@@ -15226,7 +15227,7 @@ def _target_chain1303_one(c, native_identity=None, executor_identity=None, focus
             flags=["--nguyen-nhan","ci-do","--pr","55","--connector",str(ci_connector),"--bien-nhan",str(connector_receipt),
                 "--finding-id","ci-fix","--workflow-runs",ci_paths[0],"--workflow-jobs",ci_paths[1],"--check-runs",ci_paths[2]]
             cr["head_sha"]="f"*40;ci_paths[2].write_bytes(m._1174_bytes(dict(total_count=1,check_runs=[cr])))
-            invoke("mo-lai",*flags,expect=8,reason="legacy predicate rejected")
+            invoke("mo-lai",*flags,expect=8,reason="legacy predicate rejected",error_reason="check-run 301 không đỏ thật")
             cr["head_sha"]=head;ci_paths[2].write_bytes(m._1174_bytes(dict(total_count=1,check_runs=[cr])))
             reopened=invoke("mo-lai",*flags)
             assert reopened["state"]=="running" and reopened["accepted_sha"] is None and reopened["finding_counts"]["ci-fix"]==1
@@ -15591,10 +15592,14 @@ def _supported_pairs1303(c):
     pairs=((('google_antigravity','claude','antigravity','machine/local'),('google_antigravity','gemini','antigravity','machine/local')),
         (('codex','openai','codex_service','machine'),('codex','openai','codex_cli','machine')),
         (('codex','openai','codex_service','machine'),('google_antigravity','openai','antigravity','machine/local')))
+    outcomes=[]
     for index,(executor,reviewer) in enumerate(pairs):
-        directory=c.tmp/str(index);directory.mkdir()
+        directory=c.tmp/str(index);directory.mkdir();started=time.time()
         identity=lambda values:dict(zip(('provider','model_family','execution_surface','transport'),values))
         _target_chain1303_one(Ctx(c.script,directory),identity(reviewer),identity(executor),focused=True)
+        outcomes.append(dict(index=index,executor=identity(executor),reviewer=identity(reviewer),status="passed",seconds=time.time()-started,
+            synthetic_authority=True,actual_human=False,native=False))
+        (c.tmp/"supported-pair-results.json").write_text(json.dumps(outcomes,indent=2)+"\n",encoding="utf-8",newline="\n")
 
 
 CASES += [("wp1303_target_supported_pairs",_supported_pairs1303),("wp1303_secret_channels",_secret_channels1174)]

@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2q",
   "root_name": "tra-luat",
   "file_count": 185,
-  "total_bytes": 9140115,
-  "package_hash": "b5955a5beb15bc87d539ac9ed3801a7b755e92a7f42852fa64c86478ae930d6c",
-  "content_hash": "b5955a5beb15bc87d539ac9ed3801a7b755e92a7f42852fa64c86478ae930d6c",
+  "total_bytes": 9140347,
+  "package_hash": "e7f676554953b94813c87dfd80d92894ff82df2f7a8a781e7b130a3848f72ff0",
+  "content_hash": "e7f676554953b94813c87dfd80d92894ff82df2f7a8a781e7b130a3848f72ff0",
   "required_missing": [],
   "files": [
     {
@@ -43,8 +43,8 @@
     },
     {
       "path": "SKILL.md",
-      "size": 50908,
-      "sha256": "6bc683da0a42fd21800a5ba7bbdb9ce060df12545ed322fb4e945337d95a4ca5"
+      "size": 48038,
+      "sha256": "1903c3d71c9781636d10e5eab005b1c38ef1c7e766e0097347c77d8850c2e90e"
     },
     {
       "path": "VERSION",
@@ -133,13 +133,13 @@
     },
     {
       "path": "references/GOTCHAS.md",
-      "size": 12266,
-      "sha256": "16ff1f5cb6916b437d2fe9682e35fdb6ce11f3131dceed7dd480de955d3117f6"
+      "size": 12265,
+      "sha256": "595f9d436f24dcd92eddf802f404f9fa3dc572eb95114fcf5cb466b10d4ca52d"
     },
     {
       "path": "references/KERNEL_APPENDIX.md",
-      "size": 12035,
-      "sha256": "db1690651266b2010a4121a648874ae179d1d2957a9afc0b664012b6ff12ad7e"
+      "size": 15039,
+      "sha256": "ae50f7d7f38872f20f048b514c910a80751b4de7fd5ce39321f1ce26daa72791"
     },
     {
       "path": "references/MULTI_CORPUS_PROFILE_V1_18.md",
@@ -883,8 +883,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 2276445,
-      "sha256": "45877c9aa9c1364fba69685f0c982ab30d8ef28d256c45c987f57daf3fe95d1c"
+      "size": 2276544,
+      "sha256": "882441e5fd81525575f8372bee6176b46493b29a71dcbf78de3c7801f334c8e3"
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",

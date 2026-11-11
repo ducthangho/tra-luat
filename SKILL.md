@@ -214,26 +214,9 @@ python scripts/tl.py --profile <P> profile-rebuild-registry --keep-notebook <id>
 python scripts/tl.py --profile <P> profile-rebuild-registry --keep-notebook <id> --apply --confirm yes
 ```
 
-## 4. CLI `tl` — nhóm lệnh chính (bảng đầy đủ: `references/COMMANDS.md`)
+## 4. CLI `tl`
 
-Nguồn sự thật MÁY-ĐỌC: `tl tool-inventory --json` (kèm registry metadata risk/gate/card/contract) và
-`tl route-task <tác_vụ> --json` cho tác vụ rủi ro. Nhóm chính:
-
-| Nhóm | Lệnh tiêu biểu |
-|---|---|
-| Bootstrap & health | `up` · `boot` · `doctor` · `ping` · `gws-ping` · `verify-integrity` · `precheck` |
-| Tìm & xác minh nguồn | `find-doc` · `exists` · `locate` · `source-map` · `status` · `relation-check` · `vbhn-check/verify/compare` · `extract` |
-| Nạp & convert (GHI — dry-run trước) | `ingest-local` · `profile-ingest` · `ingest-inbox` · `ingest-zip` · `ingest-ocr` · `profile-ingest-chunks` · `convert-verify` · `nlm-add` |
-| OCR & chunk (local an toàn) | `ocr-analyze/run/verify` · `chunk-plan/apply/verify` |
-| NLM | `nlm-list/get/query/cross/content/links/auth-status/audit-physical/migrate/source-remove` · `nlm-reconcile` · `nlm-orphans` · `counts --live-nlm` · `slot-audit` |
-| Registry & corpus | `reg-query` · `register` · `recat` · `backfill-loai/title-vn/hieuluc/nlm-status` · `sweep` · `dedup-plan/corpus` · `corpus-audit` · `source-rename/delete/update-corpus` · `hygiene` |
-| Rà soát hồ sơ (điều phối) | `rasoat-loop --dry-rounds K` · `frontier-expand` — kịch bản: `references/RASOAT_HOSO_LOOP.md` |
-| Audit & release | `workflow-audit` · `doc-claims-check` · `determinism-audit` · `golden-test` · `release-manifest/verify/bundle/check` · `bundle-export` |
-| Live & deploy | `live-readiness` · `live-contract-check` · `live-state-snapshot/diff` · `deploy-plan` · `rollback-plan` · `go-live-runbook` · `final-acceptance` · `drive-push` |
-
-Lệnh GHI: DRY mặc định → `--apply` (± `--confirm yes`) → verify/readback → journal (undo được).
-Cờ `--profile/--config/--deterministic/--json` nhận ở mọi lệnh; `--out` chỉ lệnh khai.
-**NẠP NGUỒN (COMMANDS.md):** folder-link → upload tay → `ingest-inbox` → `nlm-links` dán batch → `nlm-reconcile --apply` → `register --corpus true`.
+Nhóm lệnh và cổng: `references/KERNEL_APPENDIX.md` §F; chi tiết: `references/COMMANDS.md`.
 
 ## 5. HAI KIỂU CẤU TRÚC (tự nhận diện)
 - **Kiểu Điều** (Hiến pháp/Luật/Bộ luật/NĐ/TT/NQ): Phần/Chương/Mục/Điều/Khoản/Điểm. Tra "Điều 7 khoản 2 điểm a".
@@ -244,12 +227,9 @@ Cờ `--profile/--config/--deterministic/--json` nhận ở mọi lệnh; `--out
 - `light` = toàn văn 1 đơn vị · `article` = tới Điều/Mục · `deep` = tới Khoản/Điểm.
 - `tra_cuu.py` (viết tắt Đ7/K2, từ cache) · `get_legal_article` (MCP) · DEEP mode: verbatim từ cache, NLM chỉ định vị.
 
-## 7. BẢN ĐỒ SCRIPT (đầu mối qua `tl`; danh sách đầy đủ + lý do: DOCTRINE_APPENDIX)
-- **Khởi động/hạ tầng:** `tl.py` · `gas.py` (client webapp) · `contract_check.py` · `apply_gs_patches.py` (áp patch .gs) · `boot.py` · `common.py` · `cache.py` · `manifest_build.py`.
-- **Nạp/sắp xếp:** `ingest_to_cache.py` · `standardize_name.py` · `preingest_gate.py` (QT-2) · `sapxep.py` · `normalize_document.py`.
-- **NLM:** `nlm_sources.py` (`-S`); còn lại hợp nhất vào `tl`: `nlm-add` · `nlm-query --strict-scope` (VERIFY) · `nlm-reconcile` · `dedup-plan`.
-- **Rà soát/registry:** `registry_orchestrator.py` · `rasoat_worksheet.py` · `rasoat_phuluc.py` · `backfill_keywords_live.py` · `backfill_nlm_title.py` · `vbhn_query.py` (QT-5) · `vb_status.py`.
-- **Tra cứu/Instruction:** `tra_cuu.py` · `keywords.py` · `verify_deep.py` · `gen_instructions.py` (sinh/audit Instruction có `SKILL_OF_RECORD` + external-ingest gate).
+## 7. BẢN ĐỒ SCRIPT
+
+Đầu mối `scripts/tl.py`; bản đồ khi chọn script: `references/KERNEL_APPENDIX.md` §G.
 
 ## 8. APPS SCRIPT WEBAPP
 Target contract = **2.21.2q** (`Code.2.21.2q.gs`, ĐÃ LIVE — verify `ping.version`, `registry_schema=reg_cols_row_kind_v1`, 27 cột). Tham số/khóa/gotcha MỌI action: **`references/API_CONTRACT.md`**.

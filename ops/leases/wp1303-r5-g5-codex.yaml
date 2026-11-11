@@ -1,0 +1,55 @@
+schema_version: 2
+event: repair_confirmed_test_mutant_anchor_collision
+packet_issue: 1303
+packet_id: WP1303
+revision: 5
+generation: 5
+lease_id: wp1303-r5-g5-codex
+role: executor
+executor: codex
+provider: openai_codex
+execution_surface: codex_service
+transport: machine
+model_family: openai
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+granted_by: ducthangho
+authority_url: https://github.com/ducthangho/tra-luat/issues/1303
+recorded_by: Dispatcher under current explicit owner class/Codex/run-now instructions
+  and standing routine cap/extension/lease authority; not sourcehumanapproval/audit/targetgrant
+branch: agent/wp1303-r5-g5-codex
+spec_ref: refs/heads/ops/spec-wp1303-r5@223c01ce1679bbc0e0545193c33c25a035e6cb40
+spec_path: ops/specs/wp1303-target-human-lane-r5.md
+spec_hash: 2dc8682aa7fc926745567963e41c4e1f28f6009e78481327d60cbeaca488668d
+prompt_path: ops/specs/wp1303-target-human-lane-r5.md
+prompt_sha256_required: 2dc8682aa7fc926745567963e41c4e1f28f6009e78481327d60cbeaca488668d
+base_sha: 67102dc8b7e9175dda56028f21460a165b574136
+start_from_sha: 82d5ab7328f84a08c4286154f1029a19c655c449
+reviewed_sha_required: 82d5ab7328f84a08c4286154f1029a19c655c449
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+heartbeat_at: '2026-11-11T07:13:20Z'
+lease_until: '2026-11-11T20:00:00Z'
+lease_expires_at_utc: '2026-11-11T20:00:00Z'
+max_run_minutes: 30
+manual_offline_source_only: true
+no_target_enrollment_or_activation: true
+nang_tran:
+  ai_nang: ducthangho under explicit routine-cap delegation
+  can_cu: https://github.com/ducthangho/tra-luat/issues/1303
+  tran_cu:
+    files: 3
+    added_lines: 900
+  tran_moi:
+    files: 3
+    added_lines: 1800
+process_override: 'Current owner: class closure; file/line findings; first full diff
+  then delta-only; no duplicate old findings; reassess after3unfinished rounds'
+advisory_reviewer_provider: openai_codex
+advisory_reviewer_surface: codex_service
+advisory_reviewer_assurance: advisory_review
+formal_reviewer_unassigned: true
+cloud_cap: 6100
+cloud_hard: '2026-11-11T20:00:00Z'

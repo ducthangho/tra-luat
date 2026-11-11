@@ -5,10 +5,10 @@
   "skill_version": "1.36.69",
   "webapp_target": "2.21.2q",
   "root_name": "tra-luat",
-  "file_count": 184,
-  "total_bytes": 9122779,
-  "package_hash": "21c17d38fcc62d047556acc28a88457abe6f9cf7923bcf8449842b25a0402773",
-  "content_hash": "21c17d38fcc62d047556acc28a88457abe6f9cf7923bcf8449842b25a0402773",
+  "file_count": 185,
+  "total_bytes": 9140115,
+  "package_hash": "b5955a5beb15bc87d539ac9ed3801a7b755e92a7f42852fa64c86478ae930d6c",
+  "content_hash": "b5955a5beb15bc87d539ac9ed3801a7b755e92a7f42852fa64c86478ae930d6c",
   "required_missing": [],
   "files": [
     {
@@ -23,8 +23,8 @@
     },
     {
       "path": "AGENTS.md",
-      "size": 5683,
-      "sha256": "c54b2f2e8afe5bd573fe7d905da61b125b4d2e21bf2efcefacc96f2358ce6b9d"
+      "size": 5997,
+      "sha256": "298c160fc1a7d342eb5948c251b1520be82e5518bf64425370b3c7d68a235d67"
     },
     {
       "path": "CHANGELOG.md",
@@ -43,8 +43,8 @@
     },
     {
       "path": "SKILL.md",
-      "size": 47925,
-      "sha256": "a17cb26664664277a41eb6ad5823b1727658f722f0c9bfab1d68e3e167190f3f"
+      "size": 50908,
+      "sha256": "6bc683da0a42fd21800a5ba7bbdb9ce060df12545ed322fb4e945337d95a4ca5"
     },
     {
       "path": "VERSION",
@@ -225,6 +225,11 @@
       "path": "references/VBHN_QT5_VERIFICATION.md",
       "size": 2140,
       "sha256": "445c09e8bdb42a368dc66928127c79ab4f6b41c7963da509ca3173906cbf4fb8"
+    },
+    {
+      "path": "references/WORKING_METHOD.md",
+      "size": 14039,
+      "sha256": "5ec49efa185d7cd45bf7dc5f19aa15d992ade9a06389c85ae4db058a4de48517"
     },
     {
       "path": "references/gas_claim_test.js",

@@ -25,8 +25,8 @@ spec_hash: 2dc8682aa7fc926745567963e41c4e1f28f6009e78481327d60cbeaca488668d
 prompt_path: ops/specs/wp1303-target-human-lane-r5.md
 prompt_sha256_required: 2dc8682aa7fc926745567963e41c4e1f28f6009e78481327d60cbeaca488668d
 base_sha: 67102dc8b7e9175dda56028f21460a165b574136
-start_from_sha: 82d5ab7328f84a08c4286154f1029a19c655c449
-reviewed_sha_required: 82d5ab7328f84a08c4286154f1029a19c655c449
+start_from_sha: 399ed78ca1631dfcc7b5ed0872f1e24ab494ce9c
+reviewed_sha_required: 399ed78ca1631dfcc7b5ed0872f1e24ab494ce9c
 write_set:
 - .claude/dev/packet_loop.py
 - .claude/dev/packet_loop_test.py

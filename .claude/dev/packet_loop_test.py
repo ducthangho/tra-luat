@@ -15402,7 +15402,24 @@ def _git_selectors1303(c):
             @m._1174_scoped
             def scoped():return m._git_do(repo,*args)
             assert scoped()==(0,clean_bytes),"scoped Git child retained selector: "+selector
-    _call1174(m._1174_git_view,repo)
+    # Portable children must retain the real clean Git view on every host.
+    # The enrolled root's byte-exact spelling belongs to the Linux contract.
+    @m._1174_scoped
+    def clean_control():
+        assert m._git_do(repo,"rev-parse","HEAD")== (0,(head+"\n").encode()),"scoped Git clean HEAD changed"
+        assert m._git_do(repo,"status","--porcelain=v1","--untracked-files=all")== (0,b""),"scoped Git clean worktree changed"
+    clean_control()
+    if platform.system()=="Linux":
+        _call1174(m._1174_git_view,repo)
+        # A real Git worktree override must still fail the native root check.
+        other=c.tmp/"different-root";other.mkdir()
+        _g(repo,"config","core.worktree",str(other))
+        try:
+            _reject1174(m._1174_git_view,repo,reason="Git root identity")
+        finally:
+            _g(repo,"config","--unset","core.worktree")
+        _call1174(m._1174_git_view,repo)
+        clean_control()
 
 
 def _durability_label1303(c):

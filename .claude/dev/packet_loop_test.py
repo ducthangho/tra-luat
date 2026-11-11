@@ -11104,7 +11104,7 @@ def _resolver1174(c, change=None):
     return result
 
 
-def _composition1174(c, target_human=False, hook=None):
+def _composition1174(c, target_human=False, hook=None, target_identity=None):
     """Real Git/canonical composition; only local transport, API and native mount facts are fixtures."""
     import contextlib, io, shutil
     from unittest.mock import patch
@@ -11129,11 +11129,13 @@ def _composition1174(c, target_human=False, hook=None):
         executor_identity=m._identity("claude","claude","claude_code","machine/local"),
         reviewer_identity=m._identity("codex","openai","codex_cli","machine"))
     if target_human:
-        identity=m._identity("codex","openai","codex_service","machine")
-        p.update(executor="codex",reviewer="codex",executor_identity=identity,reviewer_identity=dict(identity))
-        old.update(assurance_target="human_audited",provider="codex",executor="codex",reviewer="codex",model_family="openai",
-            execution_surface="codex_service",transport="machine",reviewer_model_family="openai",
-            reviewer_execution_surface="codex_service",reviewer_transport="machine")
+        identity=target_identity or m._identity("codex","openai","codex_service","machine")
+        provider=identity["provider"]
+        p.update(executor=provider,reviewer=provider,executor_identity=identity,reviewer_identity=dict(identity))
+        old.update(assurance_target="human_audited",provider=provider,executor=provider,reviewer=provider,
+            model_family=identity["model_family"],execution_surface=identity["execution_surface"],transport=identity["transport"],
+            reviewer_model_family=identity["model_family"],reviewer_execution_surface=identity["execution_surface"],
+            reviewer_transport=identity["transport"])
     plan_raw=m._1174_bytes(dict(mission_id="gh-1172",revision=11,packet_graph=[dict(packet=55,revision=1,generation=1,contract_id="composition-r1")],
         routing_history=dict(previous_exception=dict(actual_human_audit_required=True,hard_expiry_utc="2100-01-01T00:00:00Z"))))
     admission["mission_plan_sha256"]=hashlib.sha256(plan_raw).hexdigest()
@@ -11196,10 +11198,12 @@ sys.exit(p.returncode)
             "--reviewer-model-family","openai","--reviewer-execution-surface","codex_cli","--reviewer-transport","machine",
             "--root",str(w),"--admission",str(sample),"--revision","1","--generation","1","--coordinator-id","coordinator-1","--expected-revision","absent"]
         if target_human:
-            for flag,value in (("--executor","codex"),("--executor-model-family","openai"),
-                    ("--executor-execution-surface","codex_service"),("--executor-transport","machine"),
-                    ("--reviewer-execution-surface","codex_service")):
-                args[args.index(flag)+1]=value
+            for role in ("executor","reviewer"):
+                for flag,value in (("--"+role,identity["provider"]),
+                        ("--"+role+"-model-family",identity["model_family"]),
+                        ("--"+role+"-execution-surface",identity["execution_surface"]),
+                        ("--"+role+"-transport",identity["transport"])):
+                    args[args.index(flag)+1]=value
         # Probe is the only native capability seam; runtime and all authority composition remain real.
         with patch.object(m,"_1174_probe",return_value=dict(native_fixture=True)),contextlib.redirect_stdout(out):rc=m.main(args)
         result=json.loads(out.getvalue());assert rc==0 and result["status"]=="completed_no_dispatch",(rc,result)
@@ -13017,7 +13021,8 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,
         (c.tmp/"workflow-snapshot-trace.json").write_text(json.dumps(dict(case=workflow_case,rc=rc,result=result,**flow),indent=2)+"\n")
     if current_policy:
         assert accepted["luat_adr0054"] is False and accepted["accepted_sha"]==state["pending_sha"]
-        assert accepted["review_rounds_used"]==accepted["codex_review_calls_used"]==accepted["attempts_used"]==1
+        assert accepted["review_rounds_used"]==accepted["attempts_used"]==1
+        assert accepted["codex_review_calls_used"]==int(state["reviewer"]=="codex")
         assert m._che_do_0054(w,spec) is False
     before=(target.read_bytes(),witness.read_bytes());rc,result=invoke();assert rc==8 and before==(target.read_bytes(),witness.read_bytes())
     return accepted
@@ -14904,8 +14909,49 @@ def _target_context1303(c):
     finally:m._1174_TARGET_AUTHORITY.reset(token)
     assert m._1174_TARGET_AUTHORITY.get() is None
 
+    # Portable identity/I2 matrix. These proofs are synthetic unit inputs; the
+    # native receipt and real canonical I2 chain are exercised separately below.
+    for values in (("codex","openai","codex_cli","machine"),
+            ("codex","openai","codex_desktop","machine"),
+            ("claude","claude","claude_code","machine/local"),
+            ("google_antigravity","claude","antigravity","machine/local"),
+            ("google_antigravity","openai","antigravity","machine/local"),
+            ("google_antigravity","gemini","antigravity","machine/local")):
+        identity=m._identity(*values)
+        scope=copy.deepcopy(a);p=scope["enrollment"]["initial_state_projection"]
+        p.update(executor=identity["provider"],reviewer=identity["provider"],executor_identity=identity,reviewer_identity=dict(identity))
+        nc=dict(lease_id="native-target",lease_ref="origin/ops/target",lease_oid="a"*40,
+            lease_path="ops/leases/target.yaml",repo=m._1174_REPO,branch="target",generation=scope["generation"],
+            spec_hash="b"*64,assurance_target="human_audited",executor=identity,reviewer=dict(identity),required_checks=[])
+        st=dict(p,ngu_canh_lease=nc,lease=dict(lease_id=nc["lease_id"]),luat_adr0054=False)
+        fresh=m._1174TargetProof(m._1174_bytes(scope),m._1174_bytes(nc),"a"*40,1,now+timedelta(hours=1))
+        previous=m._1174_TRANSACTION
+        m._1174_TRANSACTION=dict(admission=scope,proposal=None)
+        token=m._1174_TARGET_AUTHORITY.set(fresh)
+        try:
+            before=m._1174_bytes(st)
+            assert m._1174_native_review_assurance(st)=="same_provider_approved","native target retained final-human coupling"
+            assert m._1174_bytes(st)==before and m._1174_TRANSACTION["proposal"] is None
+            for badproof,reason in ((None,"native target review proof required"),
+                    (fresh._replace(verified_i2=b"wrong"),"native target canonical lease binding")):
+                changed=m._1174_TARGET_AUTHORITY.set(badproof)
+                try:_reject1174(m._1174_native_review_assurance,st,reason=reason)
+                finally:m._1174_TARGET_AUTHORITY.reset(changed)
+            wrong=copy.deepcopy(st);wrong["ngu_canh_lease"]["lease_oid"]="f"*40
+            _reject1174(m._1174_native_review_assurance,wrong,reason="native target canonical lease binding")
+            for variable,value in ((m._1174_SOURCE_POLICY,{}),(m._1174_OWNER_POLICY,{}),(m._1174_VIEW_ONLY,True)):
+                changed=variable.set(value)
+                try:_reject1174(m._1174_native_review_assurance,st,reason="target proof scope/context mismatch")
+                finally:variable.reset(changed)
+            legacy=copy.deepcopy(st);legacy["ngu_canh_lease"]["assurance_target"]="cross_approved"
+            assert m._1174_native_review_assurance(legacy)=="cross_approved"
+            m._1174_TRANSACTION=None
+            assert m._1174_native_review_assurance(st)=="human_audited"
+        finally:
+            m._1174_TRANSACTION=previous;m._1174_TARGET_AUTHORITY.reset(token)
 
-def _target_chain1303(c):
+
+def _target_chain1303_one(c, native_identity=None):
     """Real parser/canonical resolver/I2/reducers; only external authority/OS transport is synthetic."""
     import contextlib,copy,io
     from unittest.mock import patch
@@ -14966,23 +15012,89 @@ def _target_chain1303(c):
                 return result
             with patch.object(m,"_1174_api",side_effect=invalid):
                 invoke("record-post","--for","reviewing","--comment-id","799998",expect=8)
-        invoke("begin-attempt","--provider","codex","--execution-surface","codex_service","--transport","machine","--bang-chung-moi-truong",anh_doctor())
+        identity=a["enrollment"]["initial_state_projection"]["reviewer_identity"]
+        runtime=["--provider",identity["provider"],"--model-family",identity["model_family"],
+            "--execution-surface",identity["execution_surface"],"--transport",identity["transport"]]
+        invoke("begin-attempt",*runtime,"--bang-chung-moi-truong",anh_doctor())
         invoke("record-post","--for","reviewing","--comment-id","900002")
         invoke("transition","--to","reviewing","--comment-id","900002","--head-sha",head)
-        invoke("record-codex-call","--head",head,"--run-id","target-call")
+        codex=identity["provider"]=="codex"
+        if codex:invoke("record-codex-call","--head",head,"--run-id","target-call")
         receipt=c.tmp/"target-review.json"
-        record=dict(schema="wp1174_service_advisory.v1",head=head,identity=a["enrollment"]["initial_state_projection"]["reviewer_identity"],verdict="approve",finding_ids=[],assurance="advisory_review")
+        record=dict(schema="wp1174_service_advisory.v1",head=head,identity=identity,verdict="approve",finding_ids=[],assurance="advisory_review")
+        if native_identity is not None:
+            provider={"codex":"openai_codex","claude":"anthropic_claude","google_antigravity":"google_antigravity"}[identity["provider"]]
+            model=dict(provider=provider,model_family=m.HO_CANON[identity["model_family"]],
+                surface=identity["execution_surface"],transport=identity["transport"])
+            image=json.loads(target.read_bytes())
+            record=_bn812(w,head,image["ngu_canh_lease"]["spec_hash"],bn=dict(assurance="same_provider_approved",
+                executor_provider=provider,model_executor_identity=dict(model,session_run_id="target-executor"),
+                model_reviewer_identity=dict(model,session_run_id="target-reviewer",phien_doc_lap=True)))
         receipt.write_bytes(m._1174_bytes(record))
-        review=["--provider","codex","--execution-surface","codex_service","--transport","machine","--verdict","approve","--reviewed-sha",head,"--codex-call","target-call","--bien-nhan",str(receipt)]
+        review=[*runtime,"--verdict","approve","--reviewed-sha",head,"--bien-nhan",str(receipt)]
+        if codex:review += ["--codex-call","target-call"]
+        native_reason="legacy predicate rejected" if native_identity is not None else None
         bad=list(review);bad[bad.index("--reviewed-sha")+1]="f"*40
-        invoke("record-review",*bad,expect=8,reason="advisory attempt/head")
+        invoke("record-review",*bad,expect=8,reason=native_reason or "advisory attempt/head")
         receipt.write_bytes(m._1174_bytes(dict(record,assurance="human_audited")))
-        invoke("record-review",*review,expect=8,reason="advisory receipt closed bindings")
+        invoke("record-review",*review,expect=8,reason=native_reason or "advisory receipt closed bindings")
+        if native_identity is not None:
+            for field,value in (("assurance","cross_approved"),("assurance","advisory_review"),
+                    ("generation",2),("lease_id","other-lease"),("spec_hash","f"*64),
+                    ("reviewed_sha","f"*40),("verdict_sha256","f"*64),
+                    ("bang_lop",[dict(slug="open-finding",hang="P2")])):
+                receipt.write_bytes(m._1174_bytes(dict(record,**{field:value})))
+                invoke("record-review",*review,expect=8,reason=native_reason)
+            for field,value in (("provider","human"),("surface","chatgpt_web"),("transport","human"),("model_family","gemini" if identity["model_family"]!="gemini" else "gpt")):
+                bad=copy.deepcopy(record);bad["model_reviewer_identity"][field]=value
+                receipt.write_bytes(m._1174_bytes(bad));invoke("record-review",*review,expect=8,reason=native_reason)
+            bad=copy.deepcopy(record);mri=bad["model_reviewer_identity"]
+            mri.pop("session_run_id");mri.pop("phien_doc_lap");mri["KHONG_do_duoc"]="fixture has no independent session"
+            receipt.write_bytes(m._1174_bytes(bad));invoke("record-review",*review,expect=8,reason=native_reason)
+            if codex:
+                bad=list(review);bad[bad.index("--codex-call")+1]="unreserved"
+                receipt.write_bytes(m._1174_bytes(record));invoke("record-review",*bad,expect=8,reason=native_reason)
         receipt.write_bytes(m._1174_bytes(record))
+        # On old H the CLI case reaches this exact reducer, then rejects only
+        # because the native model assurance is compared to final human_audited.
         pending=invoke("record-review",*review)
         assert pending["state"]=="approved_pending" and pending["accepted_sha"] is None,"advisory accepted without actual human"
         assert pending["scoped_review"]["assurance"]=="advisory_review" and pending["luat_adr0054"] is False
-        assert pending["attempts_used"]==pending["review_rounds_used"]==pending["codex_review_calls_used"]==1
+        assert pending["attempts_used"]==pending["review_rounds_used"]==1
+        assert pending["codex_review_calls_used"]==int(codex)
+        assert pending["ngu_canh_lease"]["assurance_target"]=="human_audited"
+        assert pending["scoped_review"]["receipt_sha256"]==hashlib.sha256(receipt.read_bytes()).hexdigest()
+        if native_identity is not None:
+            assert pending["bien_nhan_approve"]["sha256"]==hashlib.sha256(receipt.read_bytes()).hexdigest()
+            assert pending["bien_nhan_approve"]["tep"]==str(receipt)
+        invoke("record-review",*review,expect=8,reason=native_reason or "advisory attempt/head")
+        if native_identity is not None:
+            # Supplemental predicate checks reuse the actual validated native
+            # receipt and resolver proof after the positive real-router oracle.
+            # This is not a replacement for the parser/I2 chain above.
+            import argparse
+            _,verified=m._1174_resolve(w,55,1,1,sample)
+            proof=verified["target_authority"]
+            args=argparse.Namespace(root=str(w),bien_nhan=str(receipt),verdict="approve",reviewed_sha=head,finding_id=None)
+            previous=m._1174_TRANSACTION
+            token=m._1174_TARGET_AUTHORITY.set(proof)
+            m._1174_TRANSACTION=dict(directory=target.parent,state=pending,proposal=None,admission=a)
+            try:
+                assert m._du_dieu_kien_approve(pending,args)["sha256"]==hashlib.sha256(receipt.read_bytes()).hexdigest()
+                for badproof,reason in ((None,"native target review proof required"),
+                        (proof._replace(verified_i2=b"wrong verified lease"),"native target canonical lease binding")):
+                    changed=m._1174_TARGET_AUTHORITY.set(badproof)
+                    try:_reject1174(m._du_dieu_kien_approve,pending,args,reason=reason)
+                    finally:m._1174_TARGET_AUTHORITY.reset(changed)
+                wrong=copy.deepcopy(pending);wrong["ngu_canh_lease"]["lease_oid"]="f"*40
+                _reject1174(m._du_dieu_kien_approve,wrong,args,reason="native target canonical lease binding")
+                for variable,value in ((m._1174_SOURCE_POLICY,{}),(m._1174_OWNER_POLICY,{}),(m._1174_VIEW_ONLY,True)):
+                    changed=variable.set(value)
+                    try:_reject1174(m._du_dieu_kien_approve,pending,args,reason="target proof scope/context mismatch")
+                    finally:variable.reset(changed)
+                assert m._1174_TRANSACTION["proposal"] is None
+            finally:
+                m._1174_TRANSACTION=previous;m._1174_TARGET_AUTHORITY.reset(token)
         invoke("accept","--pr","55","--workflow-runs",receipt,"--workflow-jobs",receipt,"--check-runs",receipt,"--connector",receipt,expect=8)
         # Existing canonical actual-human, publication, CI and connector validators execute on this pending target.
         _,facts=m._1174_resolve(w,55,1,1,sample)
@@ -14990,10 +15102,60 @@ def _target_chain1303(c):
             raw=m._1174_bytes(image);target.write_bytes(raw)
             witness.write_bytes(m._1174_bytes(dict(m._1174_reserved(e["id"],e["binding_sha256"],1),phase="initialized",witness_revision=1,
                 high_water=dict(generation=1,state_revision=image["state_revision"],state_sha256=hashlib.sha256(raw).hexdigest()))))
+        if native_identity is not None:
+            # Shared native predicate consumers keep exact connector references.
+            import argparse
+            connector_receipt=c.tmp/"target-connector-receipt.json"
+            p3record=dict(record,bang_lop=[dict(slug="connector-style",hang="P3",connector_refs=[["review_comments",11]])])
+            connector_receipt.write_bytes(m._1174_bytes(p3record))
+            args=argparse.Namespace(root=str(w),bien_nhan_connector=str(connector_receipt))
+            previous=m._1174_TRANSACTION;token=m._1174_TARGET_AUTHORITY.set(facts["target_authority"])
+            m._1174_TRANSACTION=dict(directory=target.parent,state=pending,proposal=None,admission=a)
+            try:
+                assert m._slug_connector(pending,args,head,[("review_comments",11)])==["connector-style"]
+                try:m._slug_connector(pending,args,head,[("review_comments",12)])
+                except SystemExit as ex:assert ex.code==11
+                else:assert False,"target connector accepted mismatched references"
+                assert m._1174_TRANSACTION["proposal"] is None
+            finally:
+                m._1174_TRANSACTION=previous;m._1174_TARGET_AUTHORITY.reset(token)
+            connector=c.tmp/"target-connector.json"
+            cn=dict(repo=m._1174_REPO,pr=55,head_sha=head,
+                reviews=dict(total_count=0,items=[]),issue_comments=dict(total_count=0,items=[]),
+                review_comments=dict(total_count=1,items=[dict(id=11,user=dict(login=m.BOT_CONNECTOR),
+                    body="![P2 Badge] fixture",commit_id=head,pull_request_url=m.API_GH+m._1174_REPO+"/pulls/55")]))
+            connector.write_bytes(m._1174_bytes(cn))
+            negative=dict(record,verdict="changes_requested",bang_lop=[dict(slug="connector-fix",hang="P2",connector_refs=[["review_comments",11]])])
+            connector_receipt.write_bytes(m._1174_bytes(negative))
+            flags=["--nguyen-nhan","connector","--pr","55","--connector",str(connector),
+                "--bien-nhan",str(connector_receipt),"--finding-id","connector-fix"]
+            cn["review_comments"]["items"][0]["id"]=12;connector.write_bytes(m._1174_bytes(cn))
+            invoke("mo-lai",*flags,expect=8,reason="legacy predicate rejected")
+            cn["review_comments"]["items"][0]["id"]=11;connector.write_bytes(m._1174_bytes(cn))
+            reopened=invoke("mo-lai",*flags)
+            assert reopened["state"]=="cho_chu_kho" and reopened["accepted_sha"] is None
+            assert reopened["finding_counts"]["connector-fix"]==1 and reopened["luat_adr0054"] is False
+            pair(pending)  # restore the synthetic pending fixture for independent human acceptance oracles
         accepted=_accept_entry1174(Ctx(c.script,c.tmp/"human"),chain=(m,a,pending,target,witness,pair,w),target_facts=facts)
         assert accepted["human_acceptance"]["assurance"]=="human_audited" and accepted["state"]=="accepted"
         (c.tmp/"target-human-chain.json").write_text(json.dumps(dict(synthetic_authority=True,actual_human=False,native=False,trace=trace),indent=2)+"\n")
-    return _composition1174(c,target_human=True,hook=exercise)
+    return _composition1174(c,target_human=True,hook=exercise,target_identity=native_identity)
+
+
+def _target_chain1303(c):
+    # Keep the registered test ID and the existing service oracle. Each native
+    # tuple must pass actual canonical lease/receipt validation, not a stub.
+    # CLI first gives a reachable old-H failure at the positive pending step.
+    tuples=[("codex","openai","codex_cli","machine"),
+        ("codex","openai","codex_desktop","machine"),
+        ("claude","claude","claude_code","machine/local"),
+        ("google_antigravity","claude","antigravity","machine/local"),
+        ("google_antigravity","openai","antigravity","machine/local"),
+        ("google_antigravity","gemini","antigravity","machine/local")]
+    for index,values in enumerate([*tuples,None]):
+        directory=c.tmp/str(index);directory.mkdir()
+        identity=None if values is None else dict(zip(("provider","model_family","execution_surface","transport"),values))
+        _target_chain1303_one(Ctx(c.script,directory),identity)
 
 
 def _target_route1303(c):
@@ -15042,6 +15204,8 @@ MUTANTS.update({
     "wp1303_target_source_contamination": ('_1174_SOURCE_POLICY.get() is None and _1174_OWNER_POLICY.get() is None and not _1174_VIEW_ONLY.get()', 'True', ["wp1303_target_context"]),
     "wp1303_target_entry_reset": ('tokens = [var.set(False if var is _1174_VIEW_ONLY else None) for var in variables]', 'tokens = [var.set(var.get()) for var in variables]', ["wp1303_target_context"]),
     "wp1303_target_retired_dependency": ('owner_policy=None, target_authority=target)', 'owner_policy=_1174_owner_policy(root, admission, lease, registration["spec_sha256"], comments), target_authority=target)', ["wp1303_target_human_chain"]),
+    "wp1303_native_final_assurance_coupling": ('return "same_provider_approved"  # native target receipt, scoped result stays advisory', 'return assurance  # restore final-human coupling', ["wp1303_target_human_chain"]),
+    "wp1303_native_i2_binding": ('proof.verified_i2 == _1174_bytes(nc)', 'True', ["wp1303_target_context","wp1303_target_human_chain"]),
 })
 
 if __name__ == "__main__":

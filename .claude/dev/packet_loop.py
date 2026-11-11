@@ -2848,12 +2848,15 @@ def _du_dieu_kien_approve(st: dict, a) -> dict:
             thieu = list(bnv._thieu(d) if d else [])
         except Exception as ex:  # H hỏng/không đo được vẫn phải giữ state và mã thoát có kiểm soát.
             _die(RC_BIEN_NHAN, f"KHÔNG ĐO ĐƯỢC: kiểm biên nhận canon: {type(ex).__name__}")
+        review_assurance = _1174_native_review_assurance(st)
         loi = thieu + neo[0] + neo[1] + [ten for ten, dung in (
             ("verdict", d.get("verdict") == a.verdict), ("role", d.get("role") == "reviewer"),
             ("packet", type(d.get("packet_issue")) is int and d["packet_issue"] == st["packet"]),
             ("generation", type(d.get("generation")) is int and d["generation"] == nc["generation"]),
             ("reviewed_sha", d.get("reviewed_sha") == a.reviewed_sha), ("spec_hash", d.get("spec_hash") == nc["spec_hash"]),
-            ("lease_id", d.get("lease_id") == nc["lease_id"]), ("assurance", d.get("assurance") == nc["assurance_target"]),
+            ("lease_id", d.get("lease_id") == nc["lease_id"]),
+            (("assurance", d.get("assurance") == nc["assurance_target"]) if review_assurance == nc["assurance_target"]
+                else ("assurance", d.get("assurance") == review_assurance)),
             ("provider-reviewer", p_chuan(mri.get("provider")) == nc["reviewer"]["provider"]),
             ("provider-executor", p_chuan(mei.get("provider", d.get("executor_provider"))) == nc["executor"]["provider"]),
             ("ho-reviewer", bool(ho_rev) and ho_rev == ho("reviewer")), ("ho-executor", bool(ho_exec) and ho_exec == ho("executor")),
@@ -4596,6 +4599,34 @@ def _1174_target_matches(admission):
         "target proof scope/context mismatch")
     _1174_require(datetime.now(timezone.utc) < proof.expires, "target proof expired")
     return True
+
+
+def _1174_native_review_assurance(st):
+    """Separate a native model receipt from the current target's final human audit.
+
+    The canonical v2 validator still checks the original receipt, including its
+    independent-session evidence. Only the scoped projection is advisory; neither
+    the frozen lease nor the receipt is rewritten to claim a human review.
+    Source, cross-family and unscoped legacy comparisons retain their old target.
+    """
+    nc = st["ngu_canh_lease"]
+    assurance = nc["assurance_target"]
+    tx = globals().get("_1174_TRANSACTION")
+    admission = tx.get("admission") if type(tx) is dict else None
+    if type(admission) is not dict or not _1174_same_family(st) or assurance != "human_audited":
+        return assurance
+    _1174_require(_1174_target_matches(admission) and _pending_human_lane(st),
+        "native target review proof required")
+    proof = _1174_TARGET_AUTHORITY.get()
+    e = admission["enrollment"]
+    _1174_require(st.get("schema_version") == 3 and
+        all(st.get(k) == admission[k] for k in ("packet", "mission", "generation")) and
+        st.get("enrollment_id") == e["id"] and st.get("binding_sha256") == e["binding_sha256"] and
+        _nc_hop_le(nc) and proof.verified_i2 == _1174_bytes(nc) and
+        type(st.get("lease")) is dict and st["lease"]["lease_id"] == nc["lease_id"] and
+        all(st[role + "_identity"] == nc[role] == e["initial_state_projection"][role + "_identity"]
+            for role in ("executor", "reviewer")), "native target canonical lease binding")
+    return "same_provider_approved"  # native target receipt, scoped result stays advisory
 
 
 def _1174_target_entry(fn):

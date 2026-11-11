@@ -15364,8 +15364,8 @@ def _git_selectors1303(c):
     (repo/"tracked").write_bytes(b"one\n");_g(repo,"add","tracked");_g(repo,"commit","-qm","one")
     parent=_g(repo,"rev-parse","HEAD")
     (repo/"tracked").write_bytes(b"two\n");_g(repo,"commit","-qam","two");head=_g(repo,"rev-parse","HEAD")
-    graft=c.tmp/"alternate-grafts";graft.write_text(head+"\n")
-    shallow=c.tmp/"alternate-shallow";shallow.write_text(head+"\n")
+    graft=c.tmp/"alternate-grafts";graft.write_text(head+"\n",encoding="utf-8",newline="\n")
+    shallow=c.tmp/"alternate-shallow";shallow.write_text(head+"\n",encoding="utf-8",newline="\n")
     index=c.tmp/"alternate-index"
     subprocess.run(["git","-C",str(repo),"read-tree","--empty"],env=dict(os.environ,GIT_INDEX_FILE=str(index)),check=True,capture_output=True)
     _g(repo,"update-ref","refs/namespaces/poison/refs/heads/master",parent)
@@ -15491,7 +15491,7 @@ def _private_aba1303(c):
         def historical(x):x["run"]["created_at"]="2026-11-04T08:00:00Z"
         m,w,args,a,audit,pages,seams=_human_fixture1174(Ctx(c.script,directory),historical if field=="human_transition_comment" else None)
         original=m._human_merge;reader=m._doc_json;seen=[];inside=[False]
-        previous=m._1174_TRANSACTION;caller_map={"caller-sentinel":b"original CI bytes"}
+        previous=getattr(m,"_1174_TRANSACTION",None);caller_map={"caller-sentinel":b"original CI bytes"}
         m._1174_TRANSACTION={"input_snapshots":caller_map,"sentinel":"unchanged"}
         def swapping(path,rc):
             leaf=Path(path)
@@ -15581,7 +15581,7 @@ def _supported_pairs1303(c):
         _target_chain1303_one(Ctx(c.script,directory),identity(reviewer),identity(executor),focused=True)
 
 
-CASES.append(("wp1303_target_supported_pairs",_supported_pairs1303))
+CASES += [("wp1303_target_supported_pairs",_supported_pairs1303),("wp1303_secret_channels",_secret_channels1174)]
 MUTANTS.update({
     "wp1303_git_graft":('"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"','"GIT_INDEX_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"',["wp1303_git_selectors"]),
     "wp1303_git_shallow":('"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"','"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_NAMESPACE"',["wp1303_git_selectors"]),

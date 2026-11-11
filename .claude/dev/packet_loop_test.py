@@ -11841,6 +11841,14 @@ def _required_case1174(c):
         pass
     else:
         assert False, "wrong rejection reason earned oracle credit"
+    def wrong_class():
+        raise RuntimeError("WP1174 UNKNOWN: expected witness rejection")
+    try:
+        _reject1174(wrong_class, reason="expected witness rejection")
+    except CliSapDo as error:
+        assert isinstance(error.__cause__, RuntimeError), "wrong-class crash lost its cause"
+    else:
+        assert False, "wrong exception class earned semantic rejection credit"
     def wrapped_crash(_):
         try:
             raise CliSapDo("fixture crash marker")
@@ -13110,6 +13118,8 @@ _FIELD_TYPES1174 = {
     "operation":dict(adoption_id=str,generation=int,binding_sha256=str,canonical_path=str,source_sha256=str,cutover_started=bool),
     "lineage":dict(predecessor_generation=int,source_path=str,source_sha256=str),
     "allowance":dict(window_id=str,starts_utc=str,ends_utc=str,attempts_limit=int,review_rounds_limit=int,codex_review_calls_limit=int)}
+_NULLABLE_FIELDS1174 = frozenset(("operation", "enrollment.legacy_source_path", "enrollment.legacy_source_sha256",
+    "lineage.predecessor_generation", "lineage.source_path", "lineage.source_sha256"))
 
 
 def _typed_variants1174(c,m,registration,admission,now):
@@ -13140,10 +13150,12 @@ def _typed_variants1174(c,m,registration,admission,now):
     for prefix,fields in _FIELD_TYPES1174.items():
         for field,kind in fields.items():
             path=(prefix+"." if prefix else "")+field
-            for value in ([True,1.0,"1"] if kind is int else [False] if kind is not bool else ["false"]):
+            wrong_types=([True,1.0,"1"] if kind is int else [False] if kind is not bool else ["false"])
+            for value in wrong_types + ([] if path in _NULLABLE_FIELDS1174 else [None]):
                 bad=copy.deepcopy(adoption if prefix=="operation" else admission)
                 row=bad[prefix] if prefix else bad;row[field]=value
                 raw=m._1174_bytes(bad)
+                _reject1174(m._1174_field_types,bad,reason="field type "+path)
                 _reject1174(m._1174_admission,raw,reg6 if prefix=="operation" else registration,now,reason="field type "+path)
                 assert bad==json.loads(raw),"type validation changed input"
     # Literal alias pairs include genesis equivalence, which is valid only for
@@ -14911,18 +14923,20 @@ def _target_context1303(c):
 
     # Portable identity/I2 matrix. These proofs are synthetic unit inputs; the
     # native receipt and real canonical I2 chain are exercised separately below.
-    for values in (("codex","openai","codex_cli","machine"),
+    tuples=(("codex","openai","codex_cli","machine"),
             ("codex","openai","codex_desktop","machine"),
             ("claude","claude","claude_code","machine/local"),
             ("google_antigravity","claude","antigravity","machine/local"),
             ("google_antigravity","openai","antigravity","machine/local"),
-            ("google_antigravity","gemini","antigravity","machine/local")):
+            ("google_antigravity","gemini","antigravity","machine/local"))
+    for executor_values,values in ((e,r) for e in tuples for r in tuples if e[1]==r[1]):
+        executor=m._identity(*executor_values)
         identity=m._identity(*values)
         scope=copy.deepcopy(a);p=scope["enrollment"]["initial_state_projection"]
-        p.update(executor=identity["provider"],reviewer=identity["provider"],executor_identity=identity,reviewer_identity=dict(identity))
+        p.update(executor=executor["provider"],reviewer=identity["provider"],executor_identity=executor,reviewer_identity=dict(identity))
         nc=dict(lease_id="native-target",lease_ref="origin/ops/target",lease_oid="a"*40,
             lease_path="ops/leases/target.yaml",repo=m._1174_REPO,branch="target",generation=scope["generation"],
-            spec_hash="b"*64,assurance_target="human_audited",executor=identity,reviewer=dict(identity),required_checks=[])
+            spec_hash="b"*64,assurance_target="human_audited",executor=executor,reviewer=dict(identity),required_checks=[])
         st=dict(p,ngu_canh_lease=nc,lease=dict(lease_id=nc["lease_id"]),luat_adr0054=False)
         fresh=m._1174TargetProof(m._1174_bytes(scope),m._1174_bytes(nc),"a"*40,1,now+timedelta(hours=1))
         previous=m._1174_TRANSACTION
@@ -15206,7 +15220,12 @@ MUTANTS.update({
     "wp1303_target_retired_dependency": ('owner_policy=None, target_authority=target)', 'owner_policy=_1174_owner_policy(root, admission, lease, registration["spec_sha256"], comments), target_authority=target)', ["wp1303_target_human_chain"]),
     "wp1303_native_final_assurance_coupling": ('return "same_provider_approved"  # native target receipt, scoped result stays advisory', 'return assurance  # restore final-human coupling', ["wp1303_target_human_chain"]),
     "wp1303_native_i2_binding": ('proof.verified_i2 == _1174_bytes(nc)', 'True', ["wp1303_target_context","wp1303_target_human_chain"]),
+    "m1174_null_only_type_bypass": ('type(record[field]) in expected,"field type "+path',
+        '(record[field] is None or type(record[field]) in expected),"field type "+path', ["wp1174_admission_wrong_scope"]),
+    "m1174_credit_wrong_exception_class": ('fn(*args, **kwargs)\n    except ValueError as error:\n        assert str(error).startswith("WP1174 UNKNOWN:")',
+        'fn(*args, **kwargs)\n    except Exception as error:\n        assert str(error).startswith("WP1174 UNKNOWN:")', ["wp1174_gate_required_skip"]),
 })
+MUTANTS_NHAM_TEST |= {"m1174_credit_wrong_exception_class"}
 
 if __name__ == "__main__":
     sys.exit(main())

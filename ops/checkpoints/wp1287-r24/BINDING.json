@@ -1,0 +1,19 @@
+{
+  "operator_sha256": "3e921548503cc2122a7cfafda0390191cdedd6ee7b41e5c22d12971144f6f19a",
+  "candidate_source_sha256": {
+    "SKILL.md": "2ccd374bbad2eb61e379935f1e400610e952a0c3a29788921a32edc6f5225b75",
+    "package.json": "d52eb0465ee3717bb541ce12c4542ed594712123f3fec1a003268fa3ba96977a",
+    "package-lock.json": "0da56e1ee6b81ad9226f000a917f6153b95e861ed41811d5eca7deb01bbb8ede"
+  },
+  "changes_vs_r22": [
+    "explicit ASUS host admission",
+    "owned D drive lock/ledger paths",
+    "portable Node/npm inputs",
+    "existing PS7 D drive path/modules"
+  ],
+  "source_examples_changed": false,
+  "model_calls": 0,
+  "preparation": "portable Node26.13.0/npm11.20.0 verified on ASUS; source3files hashes verified; selected host lock empty before acquire",
+  "execution": "one owned PS7 literal fullflow currently running; PS5 only if PS7 passes",
+  "no_assurance_override": true
+}

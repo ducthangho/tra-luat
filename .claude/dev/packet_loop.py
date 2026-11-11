@@ -3890,7 +3890,12 @@ def _1174_fsyncdir(path):
 
 
 def _1174_recheck_durable(path, raw):
-    """Re-establish file and parent durability of a visible reused image under lock."""
+    """Re-establish file and parent durability of a visible reused image under lock.
+
+    IO_STARTED includes an attempted reused-image durability barrier, even when
+    its read-only open fails before any new content publication. Such failures
+    stay durability_unknown/no-dispatch; the label does not imply new bytes.
+    """
     global _1174_IO_STARTED
     path = Path(path)
     _1174_require(_1174_read(path) == raw, "reused artifact bytes changed")
@@ -4329,6 +4334,9 @@ def _1174_installed_mission(comments, admission, now):
 def _1174_git_env():
     selectors = {"GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_OBJECT_DIRECTORY",
                  "GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_REPLACE_REF_BASE"}
+    # Git's remaining index/ancestry/ref selectors can redirect an otherwise
+    # explicit -C root. Keep transport auth/proxy/CA and legacy children intact.
+    selectors.update({"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"})
     return {k: v for k, v in os.environ.items() if k not in selectors and not k.startswith("GIT_CONFIG_")}
 
 
@@ -5602,12 +5610,33 @@ def _1174_human_evidence(a, admission, head):
             path = Path(temporary) / field
             path.write_bytes(_1174_bytes(value))
             setattr(args, field, str(path))
-        _human_merge(args, Path(args.root), facts["lease"], facts["spec"], p3)
-        _1174_require(not p3, "human findings remain")
-        _, audit, _ = _owner_record(args.human_audit_comment, _1174_REPO, args.pr, "human_exact_head_audit.v1")
-        for field, (verified_raw, _) in snapshots.items():
-            _1174_require(Path(getattr(args, field)).read_bytes() == verified_raw, "verified human snapshot changed")
-        _1174_require(_1174_bytes(audit) == snapshots["human_audit_comment"][0], "verified audit snapshot changed")
+        # The canonical reader already supports transaction snapshots. Extend
+        # that map with every server-verified private input, so path ABA during
+        # canonical consumption cannot substitute bytes. Guard calls have no
+        # surrounding transaction; accept calls must retain their caller map.
+        global _1174_TRANSACTION
+        previous_tx = globals().get("_1174_TRANSACTION")
+        tx = previous_tx if previous_tx is not None else {}
+        had_inputs = "input_snapshots" in tx
+        previous_inputs = tx.get("input_snapshots")
+        verified_inputs = dict(previous_inputs or {})
+        verified_inputs.update({str(getattr(args, field)): raw for field, (raw, _) in snapshots.items()})
+        verified_inputs.update({str(args.human_remote_run): _1174_bytes(run), str(args.workflow_runs): _1174_bytes(runs)})
+        tx["input_snapshots"] = verified_inputs
+        _1174_TRANSACTION = tx
+        try:
+            _human_merge(args, Path(args.root), facts["lease"], facts["spec"], p3)
+            _1174_require(not p3, "human findings remain")
+            _, audit, _ = _owner_record(args.human_audit_comment, _1174_REPO, args.pr, "human_exact_head_audit.v1")
+            for field, (verified_raw, _) in snapshots.items():
+                _1174_require(Path(getattr(args, field)).read_bytes() == verified_raw, "verified human snapshot changed")
+            _1174_require(_1174_bytes(audit) == snapshots["human_audit_comment"][0], "verified audit snapshot changed")
+        finally:
+            if had_inputs:
+                tx["input_snapshots"] = previous_inputs
+            else:
+                tx.pop("input_snapshots", None)
+            _1174_TRANSACTION = previous_tx
     repo = _1174_api("repos/" + _1174_REPO,root=Path(a.root),deadline=collection_end)
     _1174_require(type(repo.get("id")) is int and repo["id"] > 0 and repo.get("full_name") == _1174_REPO, "collector repository")
     collected = _1174_collect(lambda endpoint,**limits: _1174_api(endpoint,root=Path(a.root),**limits), Path(a.root), head, audit, repo["id"],

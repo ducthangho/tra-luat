@@ -13132,12 +13132,10 @@ def _typed_variants1174(c,m,registration,admission,now):
     reg6=dict(registration,generation=6)
     assert _call1174(m._1174_admission,m._1174_bytes(adoption),reg6,now)==adoption
     for owner,key in (("lineage","source_path"),("enrollment","legacy_source_path")):
-        for suffix in ("/unused/../legacy.json","//legacy.json","/./legacy.json"):
-            value=str(c.tmp)+suffix
-            # Check the stimulus independently of the admission implementation:
-            # it must reach the canonical-spelling guard on either host.
-            assert os.path.isabs(value),"canonical-path negative must be absolute"
-            assert any(part in (".","..","") for part in suffix[1:].split("/"))
+        for kind, value in _canonical_vectors1303(str(c.tmp)):
+            # Inspect the complete runtime value with the host path library,
+            # independently of pathlib and the admission implementation.
+            _canonical_precondition1303(kind, value)
             bad=copy.deepcopy(adoption);bad[owner][key]=value
             _reject1174(m._1174_admission,m._1174_bytes(bad),reg6,now,reason="source canonical paths")
         # Retain the original slash-prefix vector. On Windows it has no drive
@@ -13179,11 +13177,28 @@ for _prefix,_fields in _FIELD_TYPES1174.items():
             ["wp1174_admission_wrong_scope"])
 
 
+def _secret_encodings1303(seed, key):
+    """Explicit synthetic-only byte/text encoding inventory, never real credentials."""
+    import base64
+    from urllib.parse import quote_from_bytes
+    inventory = {}
+    for label, raw in (("seed", seed), ("key_text", key.encode()), ("key_bytes", bytes.fromhex(key))):
+        inventory.update({label + ":raw": raw, label + ":hex_lower": raw.hex().encode(),
+            label + ":hex_upper": raw.hex().upper().encode(), label + ":base64": base64.b64encode(raw),
+            label + ":base64url": base64.urlsafe_b64encode(raw),
+            label + ":url": quote_from_bytes(raw, safe="").encode(),
+            label + ":repr": repr(raw).encode(), label + ":repr_body": repr(raw)[2:-1].encode(),
+            label + ":json": json.dumps(raw.decode("latin1"), ensure_ascii=True)[1:-1].encode()})
+    assert all(len(raw) >= 32 for raw in inventory.values()), "secret oracle short substring"
+    return inventory
+
+
 def _secret_absence1174(seed, key, **channels):
+    inventory = _secret_encodings1303(seed, key)
     for name,value in channels.items():
         raw=value if isinstance(value,bytes) else (value.encode() if isinstance(value,str) else json.dumps(value,sort_keys=True).encode())
-        for secret in (seed,seed.hex().encode(),key.encode()):
-            assert secret not in raw,"fixture secret leaked in "+name
+        for encoding, secret in inventory.items():
+            assert secret not in raw,"fixture secret leaked in "+name+" ("+encoding+")"
 
 
 def _secret_channels1174(c):
@@ -13239,6 +13254,15 @@ def _secret_channels1174(c):
     assert "WP1174_WINDOWS_ORACLE_V1 " in out.getvalue()
     channels.update(windows_unit_record=out.getvalue(),windows_stderr_traceback=err.getvalue())
     _secret_absence1174(seed,key,**channels)
+    # Calibrate every representation on the actual captured serializer output.
+    # Appending bytes is an oracle metatest, not a product/native leak claim.
+    for name, value in channels.items():
+        clean=value if isinstance(value,bytes) else (value.encode() if isinstance(value,str) else json.dumps(value,sort_keys=True).encode())
+        for encoding, secret in _secret_encodings1303(seed,key).items():
+            try:_secret_absence1174(seed,key,**{name:clean+b"\nINERT-FIXTURE-LEAK:"+secret})
+            except AssertionError as ex:assert "fixture secret leaked in "+name in str(ex)
+            else:assert False,("secret oracle missed encoding/channel",encoding,name)
+    return channels
 
 
 def _seed_variants1174(c,m,admission,args):
@@ -14088,14 +14112,36 @@ def _native_report_valid1174(record, required, expected_head=None, expected_dige
 
 
 def _snapshot1174(root):
+    """Endpoint content observation; equal snapshots cannot exclude write-and-restore.
+
+    Include tracked, untracked and ignored checkout entries. Git internals are
+    excluded; callers must keep generated evidence/cache outside the checkout.
+    Symlinks are recorded without following them and special files never read.
+    """
+    import stat
+    root=Path(root)
     tracked=subprocess.check_output(["git","--no-replace-objects","-C",str(root),"ls-files","-z"]).split(b"\0")
+    names={os.fsdecode(name) for name in tracked if name}
+    for directory,dirs,files in os.walk(root,followlinks=False):
+        dirs[:]=sorted(name for name in dirs if name!=".git")
+        for name in dirs+sorted(files):
+            path=Path(directory)/name
+            if name==".git":continue
+            names.add(path.relative_to(root).as_posix())
     records=[]
-    for name in tracked:
-        if not name:continue
-        path=Path(root)/os.fsdecode(name)
-        records.append((os.fsdecode(name),hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() and not path.is_symlink() else "nonregular"))
-    return dict(head=_g(root,"rev-parse","HEAD"),tree=_g(root,"rev-parse","HEAD^{tree}"),status=_g(root,"status","--porcelain=v1"),
-        file_count=len(records),content_sha256=hashlib.sha256(json.dumps(records,separators=(",",":")).encode()).hexdigest(),
+    for name in sorted(names):
+        path=root/name
+        try:entry=path.lstat()
+        except FileNotFoundError:record=("missing",)
+        else:
+            mode=stat.S_IMODE(entry.st_mode)
+            if stat.S_ISLNK(entry.st_mode):record=("symlink",mode,os.readlink(path))
+            elif stat.S_ISREG(entry.st_mode):record=("file",mode,hashlib.sha256(path.read_bytes()).hexdigest())
+            elif stat.S_ISDIR(entry.st_mode):record=("directory",mode)
+            else:record=("nonregular",entry.st_mode,entry.st_rdev)
+        records.append((name,record))
+    return dict(head=_g(root,"rev-parse","HEAD"),tree=_g(root,"rev-parse","HEAD^{tree}"),status=_g(root,"status","--porcelain=v1","--untracked-files=all"),
+        file_count=len(records),content_sha256=hashlib.sha256(json.dumps(records,separators=(",",":"),ensure_ascii=True).encode()).hexdigest(),
         index_sha256=hashlib.sha256(subprocess.check_output(["git","--no-replace-objects","-C",str(root),"diff","--cached","--binary"])).hexdigest(),
         work_sha256=hashlib.sha256(subprocess.check_output(["git","--no-replace-objects","-C",str(root),"diff","--binary"])).hexdigest())
 
@@ -14929,7 +14975,8 @@ def _target_context1303(c):
             ("google_antigravity","claude","antigravity","machine/local"),
             ("google_antigravity","openai","antigravity","machine/local"),
             ("google_antigravity","gemini","antigravity","machine/local"))
-    for executor_values,values in ((e,r) for e in tuples for r in tuples if e[1]==r[1]):
+    executor_tuples=(*tuples,("codex","openai","codex_service","machine"))
+    for executor_values,values in ((e,r) for e in executor_tuples for r in tuples if e[0]==r[0] or e[1]==r[1]):
         executor=m._identity(*executor_values)
         identity=m._identity(*values)
         scope=copy.deepcopy(a);p=scope["enrollment"]["initial_state_projection"]
@@ -15226,6 +15273,253 @@ MUTANTS.update({
         'fn(*args, **kwargs)\n    except Exception as error:\n        assert str(error).startswith("WP1174 UNKNOWN:")', ["wp1174_gate_required_skip"]),
 })
 MUTANTS_NHAM_TEST |= {"m1174_credit_wrong_exception_class"}
+
+
+# WP1303 r4 class repairs: frozen IDs stay in order; these helpers also expose
+# bounded focused entrypoints for dispatcher/native-host follow-up.
+_CLOSED_ERRORS_HOST1303 = ("F6_closed_errors", "wp1174_init_preflight", "_closed_errors1174", "injected_fixture_router")
+
+
+def _canonical_vectors1303(root):
+    sep = "\\" if os.name == "nt" else "/"
+    return tuple((kind, root + tail) for kind, tail in (
+        ("dotdot", sep+"unused"+sep+".."+sep+"legacy.json"),
+        ("repeat", sep+sep+"legacy.json"), ("dot", sep+"."+sep+"legacy.json")))
+
+
+def _canonical_precondition1303(kind, value):
+    import ntpath, posixpath
+    host = ntpath if os.name == "nt" else posixpath
+    sep = "\\" if os.name == "nt" else "/"
+    assert host.isabs(value), "canonical-path negative must be absolute"
+    if os.name == "nt":
+        drive, tail = ntpath.splitdrive(value)
+        assert drive and tail.startswith("\\") and "/" not in value, "native Windows vector mixed separators"
+    parts = value.split(sep)
+    assert {"dotdot": ".." in parts, "dot": "." in parts,
+        "repeat": sep+sep in value[len(host.splitdrive(value)[0])+1:]}[kind], "whole canonical-path spelling missing"
+    assert host.normpath(value) != value, "whole canonical-path value became canonical"
+
+
+def _canonical_oracle1303(c):
+    canonical=str(c.tmp/"legacy.json")
+    for kind,value in _canonical_vectors1303(str(c.tmp)):
+        _canonical_precondition1303(kind,value)
+        try:_canonical_precondition1303(kind,canonical)
+        except AssertionError:pass
+        else:assert False,"canonical whole value earned negative precondition credit"
+    # Mixed spelling remains an independent stimulus, never clause-isolation credit.
+    if os.name=="nt":
+        mixed=str(c.tmp)+"/legacy.json"
+        try:_canonical_precondition1303("dot",mixed)
+        except AssertionError as ex:assert "mixed separators" in str(ex)
+        else:assert False,"mixed Windows vector called native"
+
+
+def _git_selectors1303(c):
+    from unittest.mock import patch
+    m=_module1174(c);repo=c.tmp/"git-selectors";repo.mkdir();_g(repo,"init","-q","-b","master")
+    (repo/"tracked").write_bytes(b"one\n");_g(repo,"add","tracked");_g(repo,"commit","-qm","one")
+    parent=_g(repo,"rev-parse","HEAD")
+    (repo/"tracked").write_bytes(b"two\n");_g(repo,"commit","-qam","two");head=_g(repo,"rev-parse","HEAD")
+    graft=c.tmp/"alternate-grafts";graft.write_text(head+"\n")
+    shallow=c.tmp/"alternate-shallow";shallow.write_text(head+"\n")
+    index=c.tmp/"alternate-index"
+    subprocess.run(["git","-C",str(repo),"read-tree","--empty"],env=dict(os.environ,GIT_INDEX_FILE=str(index)),check=True,capture_output=True)
+    _g(repo,"update-ref","refs/namespaces/poison/refs/heads/master",parent)
+    def actual(args,env):
+        result=subprocess.run(["git","--no-replace-objects","-C",str(repo),*args],env=env,capture_output=True,timeout=10)
+        assert result.returncode==0,(args,result.returncode,result.stderr)
+        return result.stdout
+    vectors=(("GIT_GRAFT_FILE",str(graft),["rev-list","HEAD"],(head+"\n"+parent+"\n").encode(),(head+"\n").encode()),
+        ("GIT_SHALLOW_FILE",str(shallow),["rev-list","HEAD"],(head+"\n"+parent+"\n").encode(),(head+"\n").encode()),
+        ("GIT_INDEX_FILE",str(index),["ls-files"],b"tracked\n",b""),
+        ("GIT_NAMESPACE","poison",["upload-pack","--advertise-refs","."],head.encode()+b" refs/heads/master",parent.encode()+b" refs/heads/master"))
+    clean=m._1174_git_env()
+    for selector,value,args,expected,poison in vectors:
+        clean_bytes=actual(args,clean)
+        poisoned=actual(args,dict(clean,**{selector:value}))
+        if selector=="GIT_NAMESPACE":assert expected in clean_bytes and poison in poisoned and expected not in poisoned
+        else:assert clean_bytes==expected and poisoned==poison,(selector,clean_bytes,poisoned)
+        with patch.dict(os.environ,{selector:value,"HTTPS_PROXY":"http://synthetic.invalid","SSL_CERT_FILE":"/synthetic/ca"}):
+            isolated=m._1174_git_env()
+            assert selector not in isolated and isolated["HTTPS_PROXY"]=="http://synthetic.invalid" and isolated["SSL_CERT_FILE"]=="/synthetic/ca"
+            assert actual(args,isolated)==clean_bytes,"scoped Git selector changed real view: "+selector
+            assert os.environ[selector]==value
+            @m._1174_scoped
+            def scoped():return m._git_do(repo,*args)
+            assert scoped()==(0,clean_bytes),"scoped Git child retained selector: "+selector
+    _call1174(m._1174_git_view,repo)
+
+
+def _durability_label1303(c):
+    import contextlib,io
+    from unittest.mock import patch
+    for fault in ("open","fstat","file_fsync","directory_fsync","healthy"):
+        directory=c.tmp/fault;directory.mkdir();m=_module1174(Ctx(c.script,directory))
+        path=directory/"reused";raw=b"unchanged reused image\n";path.write_bytes(raw)
+        opened,stated,sync,read=m.os.open,m.os.fstat,m.os.fsync,m._1174_read
+        active=[False];barrier_fd=[None];calls=[]
+        def op(p,*a,**kw):
+            if active[0] and Path(p)==path:
+                calls.append("open")
+                if fault=="open":raise OSError("inert reused open fault")
+                fd=opened(p,*a,**kw);barrier_fd[0]=fd;return fd
+            return opened(p,*a,**kw)
+        def fs(fd):
+            if fd==barrier_fd[0]:
+                calls.append("fstat")
+                if fault=="fstat":raise OSError("inert reused fstat fault")
+            return stated(fd)
+        def sy(fd):
+            calls.append("file_fsync" if fd==barrier_fd[0] else "directory_fsync")
+            if fault==calls[-1]:raise OSError("inert reused "+fault+" fault")
+            return sync(fd)
+        def first_read(p):
+            result=read(p)
+            if Path(p)==path:active[0]=True
+            return result
+        args=m.build_parser().parse_args(["init","--packet","1174","--mission","1172","--executor","codex","--reviewer","claude",
+            "--admission","fixture","--revision","7","--generation","5","--coordinator-id","coordinator-1","--root",str(directory),"--expected-revision","absent"])
+        def barrier(*a,**kw):
+            m._1174_recheck_durable(path,raw)
+            raise ValueError("WP1174 UNKNOWN: healthy barrier finished without publication")
+        out=io.StringIO()
+        with patch.object(m,"_1174_resolve",side_effect=barrier),patch.object(m,"_1174_read",side_effect=first_read),patch.object(m.os,"open",side_effect=op),patch.object(m.os,"fstat",side_effect=fs),patch.object(m.os,"fsync",side_effect=sy),patch.object(m,"_1174_write") as write,patch.object(m,"_1174_probe") as probe,contextlib.redirect_stdout(out):
+            rc=m._1174_command(args,directory)
+        result=json.loads(out.getvalue())
+        assert rc==8 and result["status"]=="durability_unknown" and not result["dispatch_allowed"],(fault,rc,result)
+        assert not write.called and not probe.called and path.read_bytes()==raw and list(directory.iterdir())==[path]
+        assert fault=="healthy" or fault in calls,(fault,calls)
+        assert ("healthy barrier finished" if fault=="healthy" else "inert reused") in result["detail"]
+
+
+def _recovery_identity1303(c):
+    """Coherent identity-only snapshots through main/recovery; external authority is synthetic."""
+    import contextlib,io
+    from unittest.mock import patch
+    for variant in ("control","packet","mission","lineage","binding","state_generation"):
+        directory=c.tmp/variant;directory.mkdir();m,a,init=_init_fixture1174(Ctx(c.script,directory));e=a["enrollment"]
+        with patch.object(m,"_1174_probe",return_value={}):m._1174_initialize(init,a,None)
+        source,witness=Path(e["state_path"]),Path(e["witness_path"]);Path(e["lock_path"]).touch()
+        oldgen=a["generation"];raw=source.read_bytes();digest=hashlib.sha256(raw).hexdigest()
+        journal=directory/"next";journal.mkdir();target=journal/source.name
+        e.update(journal_root=str(journal),state_path=str(target))
+        a.update(generation=oldgen+1,lineage=dict(predecessor_generation=oldgen,source_path=str(source),source_sha256=digest))
+        a["operation"]=dict(adoption_id="identity-next",generation=oldgen+1,binding_sha256=e["binding_sha256"],canonical_path=str(target),source_sha256=digest,cutover_started=False)
+        args=m.build_parser().parse_args(["adopt-state","--packet",str(a["packet"]),"--mode","initial","--adoption-id","identity-next","--expected-source-sha256",digest,"--expected-witness-revision","1","--target-generation",str(oldgen+1)])
+        writer=m._1174_write
+        def cut(path,value,**kw):
+            writer(path,value,**kw)
+            if Path(path)==witness:raise OSError("identity prepared intent cut")
+        with patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_1174_write",side_effect=cut):
+            try:m._1174_adopt(args,a,witness.read_bytes())
+            except OSError as ex:assert "identity prepared intent cut" in str(ex)
+            else:assert False,"identity cut not reached"
+        assert not target.exists()
+        water=json.loads(witness.read_bytes())
+        if variant!="control":
+            state=json.loads(raw)
+            key={"lineage":"enrollment_id","binding":"binding_sha256","state_generation":"generation"}.get(variant,variant)
+            state[key]=("foreign-enrollment" if variant=="lineage" else "c"*64 if variant=="binding" else state[key]+1)
+            raw=m._1174_bytes(state);digest=hashlib.sha256(raw).hexdigest();source.write_bytes(raw)
+            a["lineage"]["source_sha256"]=a["operation"]["source_sha256"]=water["pending_adoption"]["source_sha256"]=water["high_water"]["state_sha256"]=digest
+            witness.write_bytes(m._1174_bytes(water))
+        _r12_recover_args1174(m,a,args,witness)
+        argv=["--state-dir",str(journal),"adopt-state","--packet",str(a["packet"]),"--mode","recovery","--adoption-id","identity-next","--disposition","resume_forward",
+            "--expected-witness-revision",args.expected_witness_revision,"--root",e["root"],"--admission","fixture","--revision",str(a["revision"]),"--generation",str(a["generation"]),"--coordinator-id",e["coordinator_id"]]
+        before={str(p):p.read_bytes() for p in directory.rglob("*") if p.is_file()}
+        out,err=io.StringIO(),io.StringIO()
+        with patch.object(m,"_1174_resolve",return_value=(a,{})),patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_probe",return_value={}) as probe,patch.object(m,"_1174_recheck_durable",wraps=m._1174_recheck_durable) as sync,patch.object(m,"_1174_write",wraps=writer) as writes,contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):rc=m.main(argv)
+        result=json.loads(out.getvalue())
+        if variant=="control":assert rc==0 and result["status"]=="completed_no_dispatch" and not result["dispatch_allowed"]
+        else:
+            reason=("full state validation rc=8" if variant=="packet" else "state v3 binding" if variant=="mission" else
+                "initialized source lineage identity" if variant in ("lineage","binding") else "initialized source state generation/revision/identity")
+            assert rc==8 and result["status"]=="UNKNOWN" and reason in result["detail"] and not result["dispatch_allowed"],(variant,rc,result,err.getvalue())
+            assert not probe.called and not sync.called and not writes.called,"recovery identity rejection reached effects"
+            assert before=={str(p):p.read_bytes() for p in directory.rglob("*") if p.is_file()}
+
+
+def _private_aba1303(c):
+    import contextlib,copy
+    from unittest.mock import patch
+    for field in ("human_audit_comment","human_transition_comment","human_remote_run","workflow_runs"):
+        directory=c.tmp/field;directory.mkdir()
+        def historical(x):x["run"]["created_at"]="2026-11-04T08:00:00Z"
+        m,w,args,a,audit,pages,seams=_human_fixture1174(Ctx(c.script,directory),historical if field=="human_transition_comment" else None)
+        original=m._human_merge;reader=m._doc_json;seen=[];inside=[False]
+        previous=m._1174_TRANSACTION;caller_map={"caller-sentinel":b"original CI bytes"}
+        m._1174_TRANSACTION={"input_snapshots":caller_map,"sentinel":"unchanged"}
+        def swapping(path,rc):
+            leaf=Path(path)
+            if not inside[0] or leaf.name!=field:return reader(path,rc)
+            saved=leaf.read_bytes();wrong=json.loads(saved)
+            if field in ("human_audit_comment","human_transition_comment"):
+                body=m._yaml_cay(wrong["body"].encode());body["reviewed_sha"]="f"*40;wrong["body"]=json.dumps(body)
+            elif field=="human_remote_run":wrong["head_sha"]="f"*40
+            else:wrong["workflow_runs"][0]["head_sha"]="f"*40
+            leaf.write_bytes(m._1174_bytes(wrong))
+            try:
+                value=reader(path,rc)
+                assert value[0]==json.loads(saved),"canonical verifier consumed swapped private "+field
+                seen.append(field);return value
+            finally:leaf.write_bytes(saved)
+        def verify(*values,**kw):
+            inside[0]=True
+            try:return original(*values,**kw)
+            finally:inside[0]=False
+        try:
+            with seams(),patch.object(m,"_human_merge",side_effect=verify),patch.object(m,"_doc_json",side_effect=swapping):
+                record=_call1174(m._1174_human_evidence,args,a,args.head)
+            assert seen and record["head"]==args.head and record["audit_sha256"]==hashlib.sha256(m._1174_bytes(audit)).hexdigest()
+            assert m._1174_TRANSACTION["input_snapshots"] is caller_map and m._1174_TRANSACTION=={"input_snapshots":caller_map,"sentinel":"unchanged"}
+            # Canonical wrong-head/time checks still reject server-verified bad A;
+            # snapshot isolation cannot turn invalid authority into valid evidence.
+            if field=="human_audit_comment":
+                saved=copy.deepcopy(audit);body=m._yaml_cay(audit["body"].encode());body["reviewed_sha"]="f"*40;audit["body"]=json.dumps(body)
+                Path(args.human_audit_comment).write_bytes(m._1174_bytes(audit))
+                with seams():_reject1174(m._1174_human_evidence,args,a,args.head,reason="human audit exact bindings/verdict")
+                audit.clear();audit.update(saved);Path(args.human_audit_comment).write_bytes(m._1174_bytes(audit))
+                audit["updated_at"]="2026-11-04T09:02:00Z";Path(args.human_audit_comment).write_bytes(m._1174_bytes(audit))
+                with seams():_reject1174(m._1174_human_evidence,args,a,args.head,reason="human review trước push")
+                assert m._1174_TRANSACTION["input_snapshots"] is caller_map
+        finally:m._1174_TRANSACTION=previous
+
+
+def _snapshot_content1303(c):
+    repo=c.tmp/"snapshot-checkout";repo.mkdir();_g(repo,"init","-q","-b","master")
+    (repo/"tracked").write_bytes(b"tracked\n");(repo/".gitignore").write_text("ignored\n")
+    _g(repo,"add","tracked",".gitignore");_g(repo,"commit","-qm","snapshot")
+    ignored,untracked=repo/"ignored",repo/"untracked"
+    ignored.write_bytes(b"first ignored\n");untracked.write_bytes(b"first untracked\n")
+    clean=_snapshot1174(repo);assert clean==_snapshot1174(repo) and "?? untracked" in clean["status"]
+    for path in (ignored,untracked):
+        saved=path.read_bytes();path.write_bytes(saved+b"changed\n")
+        after=_snapshot1174(repo)
+        assert after["content_sha256"]!=clean["content_sha256"],"snapshot omitted existing "+path.name+" bytes"
+        assert after["status"]==clean["status"] and after["file_count"]==clean["file_count"]
+        path.write_bytes(saved);assert _snapshot1174(repo)==clean
+    # Git internal churn is deliberately outside checkout-content observation.
+    (repo/".git"/"inert-observation").write_bytes(b"not checkout content")
+    assert _snapshot1174(repo)==clean
+    if os.name!="nt":
+        link=repo/"link";link.symlink_to("tracked");a=_snapshot1174(repo);link.unlink();link.symlink_to("ignored")
+        assert _snapshot1174(repo)["content_sha256"]!=a["content_sha256"],"snapshot omitted symlink target"
+        link.unlink();fifo=repo/"fifo";os.mkfifo(fifo);assert _snapshot1174(repo)["content_sha256"]!=clean["content_sha256"];fifo.unlink()
+    untracked.unlink();assert _snapshot1174(repo)["status"]==""
+
+
+def _closed_host1303(c):
+    assert _CLOSED_ERRORS_HOST1303==("F6_closed_errors","wp1174_init_preflight","_closed_errors1174","injected_fixture_router")
+    assert _CLOSED_ERRORS_HOST1303[1] in dict(CASES)
+    _closed_errors1174(c,_module1174(c))
+
+
+CASES += [("wp1303_git_selectors",_git_selectors1303),("wp1303_durability_label",_durability_label1303),
+    ("wp1303_recovery_identity",_recovery_identity1303),("wp1303_private_aba",_private_aba1303),
+    ("wp1303_canonical_oracle",_canonical_oracle1303),("wp1303_snapshot_content",_snapshot_content1303),
+    ("wp1303_closed_errors_host",_closed_host1303)]
 
 if __name__ == "__main__":
     sys.exit(main())

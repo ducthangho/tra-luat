@@ -25,6 +25,17 @@ description: >-
 >
 > Khi mâu thuẫn: LÕI + API_CONTRACT + RUNBOOK **thắng** phụ lục.
 
+## Phương pháp làm việc: thiết kế kỹ, triển khai chủ động
+
+- **WM-01 — Nhận diện giai đoạn.** Khi nghiên cứu hoặc thiết kế, làm rõ yêu cầu, mục tiêu, phạm vi, đánh đổi và tiêu chí nghiệm thu. Khi triển khai phương án đã chốt, chủ động thực hiện trong phạm vi quyền đã cấp. Một tác vụ có thể chuyển giữa hai giai đoạn.
+- **WM-02 — Phân biệt làm rõ với xin quyền.** Làm rõ để xác định đúng điều cần xây dựng; xin quyền khi hành động cụ thể chưa được cho phép. Đọc tài liệu, bằng chứng và quyết định hiện có trước khi hỏi; không xin lại quyền còn hiệu lực, đúng phạm vi và đúng điều kiện.
+- **WM-03 — Chủ động với việc thông lệ.** Tự quyết việc quen thuộc, tác động nhỏ và lựa chọn kỹ thuật nằm trong phương án được giao khi không làm đổi hợp đồng hoặc vượt quyền. Tính quen thuộc, khả năng đảo ngược và sự im lặng không tự tạo quyền.
+- **WM-04 — Làm rõ thay đổi có ảnh hưởng.** Yêu cầu mới chưa xác định, thay đổi giao thức/quy trình, tiêu chí nghiệm thu, quyền hạn hoặc tác động đáng kể phải được làm rõ và chốt trước phần thực hiện phụ thuộc; tiếp tục phần độc lập đã được phép. Làm theo chỉ thị cụ thể đã đủ rõ, không hỏi lại chỉ vì đó là yêu cầu mới.
+- **WM-05 — Hỏi có chuẩn bị.** Gộp các điểm quyết định liên quan; nêu điều đã kiểm tra, vấn đề còn thiếu, phương án khuyến nghị và ảnh hưởng. Chỉ hỏi phần chưa được giải quyết; không dùng câu hỏi chung để đẩy lựa chọn vận hành thông lệ cho người dùng.
+- **WM-06 — Thực hiện gọn và có bằng chứng.** Dùng công cụ hiện có, chọn cách đơn giản đáp ứng đủ yêu cầu, sửa đúng phạm vi và kiểm chứng hành vi. Lặp trong giới hạn đã chốt; không bỏ gate, giả kết quả hoặc nới ngân sách để hoàn tất. Chưa đủ bằng chứng về quyền, điều kiện bắt buộc hoặc tính tương đương nghiệm thu thì dừng phần phụ thuộc, đọc hướng dẫn chi tiết và tiếp tục phần độc lập đã được phép.
+
+Đọc **references/WORKING_METHOD.md** khi lập hoặc sửa kế hoạch, giao thức, quy trình; khi phân vân có cần hỏi; hoặc khi phát sinh thay đổi có ảnh hưởng trong lúc triển khai. Hướng dẫn này bổ sung cách phối hợp; các quy định chuyên biệt về legal safety, authority, approval, protocol và release tiếp tục áp dụng.
+
 ## DETERMINISTIC WORKFLOW GATES — tool inventory / route-task / dry-run / readback
 
 Trước khi Claude viết script, hàm, tool, loop hoặc đoạn xử lý tự chế, PHẢI kiểm kho công cụ hiện có:
@@ -294,6 +305,7 @@ Test/build Windows qua Desktop Commander: đọc `references/windows-testing.md`
 
 | File | Nội dung |
 |---|---|
+| `references/WORKING_METHOD.md` | Phân biệt thiết kế/triển khai, làm rõ/xin quyền; tự quyết việc thông lệ và xử lý thay đổi |
 | `references/COMMANDS.md` | Bảng lệnh `tl` đầy đủ (nguyên văn §4 cũ) |
 | `references/DEPENDENCIES.md` | Phụ thuộc + runtime-overlay (nguyên văn §9 cũ) |
 | `references/RUNBOOK.md` | Khởi động chi tiết theo môi trường, vận hành LIVE |
@@ -308,3 +320,4 @@ Test/build Windows qua Desktop Commander: đọc `references/windows-testing.md`
 | `CONTEXT.md` (gốc repo) | Từ điển thuật ngữ chuẩn của dự án |
 | *(ADR — dev-only)* | Cây nguồn dev, thư mục `docs/adr/`; quyết định kiến trúc (ADR-0001 bundle-protocol) |
 | *(CHANGELOG sâu — dev-only)* | Cây nguồn dev, thư mục `changelog_archive`; kernel giữ 10 version gần nhất |
+

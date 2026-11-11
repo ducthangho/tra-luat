@@ -1,0 +1,13 @@
+{
+  "all_failed_preparations_retained": true,
+  "reassessment": "disk-copy and existing-install guard are harness preparation failures; later npm warning stopped pins before browser; no PS5.1 browser attempt had occurred",
+  "selected_approach": "fresh owned install; hardlink verified immutable browser revision files only; remove inherited NPM_CONFIG_* from process env before adding owned empty global config",
+  "unchanged": [
+    "source examples",
+    "node/npm/browser pins",
+    "launch/action timeouts",
+    "machine configuration"
+  ],
+  "source_write_set": [],
+  "model_calls": 0
+}

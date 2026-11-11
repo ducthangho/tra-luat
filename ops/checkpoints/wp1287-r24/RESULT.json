@@ -1,0 +1,204 @@
+{
+  "candidate": "0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2",
+  "tree": "888719149e0c1d87bfd69bed7a01d70f96042753",
+  "node": "26.13.0",
+  "npm": "11.20.0",
+  "cli": "0.1.23",
+  "browser": "CFT157.0.8103.15/revision1252",
+  "host": "ASUS Windows native",
+  "models": 0,
+  "flows": {
+    "ps7": {
+      "passed": true,
+      "steps": [
+        [
+          "01-setup",
+          0
+        ],
+        [
+          "02-capture-init",
+          0
+        ],
+        [
+          "03-capture-files",
+          0
+        ],
+        [
+          "04-cleanup",
+          0
+        ]
+      ],
+      "body_exact": true,
+      "PNG_dimensions": [
+        1280,
+        720
+      ],
+      "PDF_fixture_text": true,
+      "files": {
+        "source.body": {
+          "bytes": 146,
+          "sha256": "1a9d9379995e320d9aca23b25348da007dec62e3c9966f06a7d6523cfb75be36"
+        },
+        "page.png": {
+          "bytes": 6388,
+          "sha256": "77de5e3e8760079603b066cbb950245b3e4d48093235dec0db57230fa5725f11"
+        },
+        "page.pdf": {
+          "bytes": 21549,
+          "sha256": "cbda1f35aa4a3ca26b7c35454934bb37de2ecefaeaaab81a998035c358c381bb"
+        }
+      },
+      "owned_live": 0,
+      "lock_released": true,
+      "source_sha256": "2ccd374bbad2eb61e379935f1e400610e952a0c3a29788921a32edc6f5225b75",
+      "source_fragments_sha256": [
+        "07dfc2f90475fff1dbaca1f5e2f87b9245b4578b355e629dd22a8b9ca0ee9b12",
+        "dadf3c8b56e0a2cb272d986b9ee048302d7014149845eaddcbb8f00744b25fd9",
+        "25a6152e149e8b2af9507ae8132de83565e0fc183c197d6d7c931565c47a7051",
+        "80a0f2157f73756e5abb52369dc69834b0292beebf0f7233b340b1f387d3ada0",
+        "6e545a3148722495fdc5df47d78ad599b7afdff2ec5eaafecd5c85559bd103ac"
+      ],
+      "setup_signatures3": true,
+      "config": {
+        "browser": {
+          "browserName": "chromium",
+          "isolated": true,
+          "launchOptions": {
+            "channel": "chromium",
+            "headless": true,
+            "timeout": 30000
+          }
+        },
+        "timeouts": {
+          "action": 10000
+        },
+        "outputDir": "<owned-run>",
+        "outputMode": "file"
+      },
+      "PIN_OK": true
+    },
+    "ps51": {
+      "passed": true,
+      "steps": [
+        [
+          "01-setup",
+          0
+        ],
+        [
+          "02-capture-init",
+          0
+        ],
+        [
+          "03-capture-files",
+          0
+        ],
+        [
+          "04-cleanup",
+          0
+        ]
+      ],
+      "body_exact": true,
+      "PNG_dimensions": [
+        1280,
+        720
+      ],
+      "PDF_fixture_text": true,
+      "files": {
+        "source.body": {
+          "bytes": 147,
+          "sha256": "e6f90bb558b3bf8f6265a3d1a53cd8649eb9fe0d989c1b5e3ab64bfe6474a837"
+        },
+        "page.png": {
+          "bytes": 6421,
+          "sha256": "f319cc3fc0e9d7b76f69f7780616c16fdb028e320af4609ca4b6404e431516fc"
+        },
+        "page.pdf": {
+          "bytes": 21867,
+          "sha256": "e02cf550c428b5017412da5cb651ccf4b16f388572207892b456b1582b5dfe22"
+        }
+      },
+      "owned_live": 0,
+      "lock_released": true,
+      "source_sha256": "2ccd374bbad2eb61e379935f1e400610e952a0c3a29788921a32edc6f5225b75",
+      "source_fragments_sha256": [
+        "07dfc2f90475fff1dbaca1f5e2f87b9245b4578b355e629dd22a8b9ca0ee9b12",
+        "dadf3c8b56e0a2cb272d986b9ee048302d7014149845eaddcbb8f00744b25fd9",
+        "25a6152e149e8b2af9507ae8132de83565e0fc183c197d6d7c931565c47a7051",
+        "80a0f2157f73756e5abb52369dc69834b0292beebf0f7233b340b1f387d3ada0",
+        "6e545a3148722495fdc5df47d78ad599b7afdff2ec5eaafecd5c85559bd103ac"
+      ],
+      "setup_signatures3": true,
+      "config": {
+        "browser": {
+          "browserName": "chromium",
+          "isolated": true,
+          "launchOptions": {
+            "channel": "chromium",
+            "headless": true,
+            "timeout": 30000
+          }
+        },
+        "timeouts": {
+          "action": 10000
+        },
+        "outputDir": "<owned-run>",
+        "outputMode": "file"
+      },
+      "PIN_OK": true
+    }
+  },
+  "source_modified": false,
+  "host_lock_empty": true,
+  "earlier_never_opened_session_reconciled": true,
+  "prior_failed_attempts_preserved": true,
+  "archive": {
+    "bytes": 180552,
+    "sha256": "f291f0d417ff7b9025b25c9906a7609064767c2960077c873e55b734aa0ed7db",
+    "entries": 132,
+    "manifest_verified": true
+  },
+  "config_proof": {
+    "ps7": {
+      "raw_browser_json_sha256": "8be789b4868d6785964bed5dbcab18d0e1829ccc7b56f5b8552afacaa9842e06",
+      "config": {
+        "browser": {
+          "browserName": "chromium",
+          "isolated": true,
+          "launchOptions": {
+            "channel": "chromium",
+            "headless": true,
+            "timeout": 30000
+          }
+        },
+        "timeouts": {
+          "action": 10000
+        },
+        "outputDir": "<owned-run>",
+        "outputMode": "file"
+      },
+      "PIN_OK": true,
+      "pin_log_encoding": "utf-8-sig"
+    },
+    "ps51": {
+      "raw_browser_json_sha256": "fae6546e56350bdd3a07f74f2344ee5c5c518d7def547896aacf3048a7b3b873",
+      "config": {
+        "browser": {
+          "browserName": "chromium",
+          "isolated": true,
+          "launchOptions": {
+            "channel": "chromium",
+            "headless": true,
+            "timeout": 30000
+          }
+        },
+        "timeouts": {
+          "action": 10000
+        },
+        "outputDir": "<owned-run>",
+        "outputMode": "file"
+      },
+      "PIN_OK": true,
+      "pin_log_encoding": "utf-16"
+    }
+  }
+}

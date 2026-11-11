@@ -1,5 +1,5 @@
 """Operator only: bind documented inputs and execute exact source shell fragments."""
-import pathlib,sys,os,json,re,hashlib,subprocess,threading,http.server,struct,datetime,base64,shutil
+import pathlib,sys,os,json,re,hashlib,subprocess,threading,http.server,struct,datetime,base64,shutil,time
 ROOT=pathlib.Path(sys.argv[1]);kind=sys.argv[2];WIN=os.name=='nt';SRC=ROOT/'source';skill=(SRC/'SKILL.md').read_text(encoding='utf-8-sig');language='powershell' if WIN else 'bash';b=re.findall('```'+language+r'\n(.*?)\n```',skill,re.S)
 assert len(b)==5;E=ROOT/('flow-'+kind);E.mkdir(exist_ok=False);ADDON=ROOT/('addon-'+kind);NODE=r'C:\Program Files\nodejs\node.exe' if WIN else '/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node';NPM=r'C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js' if WIN else '/opt/codex/runtimes/codex-primary-runtime/dependencies/node/lib/node_modules/npm/bin/npm-cli.js';CLI=ADDON/'install/0.1.0/node_modules/@playwright/cli/playwright-cli.js';CACHE=ADDON/'browsers/0.1.0';ROWS=[];STATE=E/'state.json';M=None
 def sha(p):return hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
@@ -60,7 +60,12 @@ try:
  cleanup_attempted=True;execute('04-cleanup',restore+b[4],90)
  observed=[]
  if WIN:
-  observed=M.observe();assert not observed and not M.GAPS,('OWNERSHIP_OR_LIVE_CHILD',observed,M.GAPS)
+  until=time.monotonic()+5
+  while True:
+   observed=M.observe()
+   if not observed or time.monotonic()>=until:break
+   time.sleep(.1)
+  assert not observed and not M.GAPS,('OWNERSHIP_OR_LIVE_CHILD',observed,M.GAPS)
  else:
   daemon=subprocess.run([NODE,str(CLI),'--session='+session,'tab-list','--json'],env=dict(env,PLAYWRIGHT_BROWSERS_PATH=str(CACHE)),capture_output=True,timeout=20);assert daemon.returncode==1
  save(E/'captures.json',{'requested_url':url,'final_url':final,'response_index':int(m[1]),'body_exact':True,'PNG_dimensions':dimensions,'PDF_fixture_text':True,'files':{n:{'bytes':(run/n).stat().st_size,'sha256':sha(run/n)} for n in ['source.body','page.png','page.pdf']}});ok=True
@@ -72,4 +77,7 @@ finally:
  server.shutdown();server.server_close()
  live=M.observe() if WIN else []
  if WIN and not live:M.release()
+ if WIN:
+  with pathlib.Path(r'C:\tl-win\do-luong.csv').open('a',encoding='utf-8',newline='') as ledger:ledger.write(f"{datetime.datetime.now(datetime.timezone.utc).isoformat()},wp1287-r22-{kind},wp1287,0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2,literal-fullflow,{sum(x['rc']==0 for x in ROWS)},{len(ROWS)},{int(not ok)},0,operator,{not ok},no,may=DESKTOP-T9R33P2;no_model\n")
+  for handle in M.HANDLES.values():M.K.CloseHandle(handle)
  save(E/'terminal.json',{'passed':ok,'candidate':'0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2','source_sha256':hashlib.sha256(skill.encode()).hexdigest(),'shell':kind,'steps':ROWS,'owned_live':len(live),'lock_released':not pathlib.Path(r'C:\tl-win\KHOA.txt').read_bytes() if WIN else None,'source_fragments_sha256':[hashlib.sha256(x.encode()).hexdigest() for x in b]});print(json.dumps({'passed':ok,'shell':kind,'steps':[(x['label'],x['rc']) for x in ROWS],'owned_live':len(live)}),flush=True)

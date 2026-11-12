@@ -1,0 +1,82 @@
+{
+  "schema": "wp1287.public_candidate_validation.v1",
+  "head": "ab519c6060fac4368815a762cacce31c14662bd8",
+  "tree": "42604943d0fa8191bbd50cf9641b9a6e5811f805",
+  "base": "cfbfee4750c6ab15480d9d3b99a4f0d72d2cd751",
+  "write_set": [
+    ".agents/skills/playwright-browser/SKILL.md",
+    ".agents/skills/playwright-browser/package.json",
+    ".agents/skills/playwright-browser/package-lock.json"
+  ],
+  "added_lines": 411,
+  "limit": 450,
+  "source_skill_sha256": "1799c2bdd3f01df1efa90b497b610fe1818fad8f1071c61594cfcfe8540faadb",
+  "offline_gates": [
+    {
+      "name": "selftest",
+      "rc": 0
+    },
+    {
+      "name": "gen_inst",
+      "rc": 0
+    },
+    {
+      "name": "workflow",
+      "rc": 0
+    },
+    {
+      "name": "golden",
+      "rc": 0
+    },
+    {
+      "name": "docclaims",
+      "rc": 0
+    },
+    {
+      "name": "determinism",
+      "rc": 0
+    },
+    {
+      "name": "relcheck",
+      "rc": 0
+    },
+    {
+      "name": "relverify",
+      "rc": 0
+    }
+  ],
+  "core_selftest": "1777/1777",
+  "Linux_literal_flow": {
+    "passed": true,
+    "steps": [
+      {
+        "label": "01-setup",
+        "rc": 0
+      },
+      {
+        "label": "02-capture-init",
+        "rc": 0
+      },
+      {
+        "label": "03-capture-files",
+        "rc": 0
+      },
+      {
+        "label": "04-cleanup",
+        "rc": 0
+      }
+    ],
+    "body_exact": true,
+    "PNG_dimensions": [
+      1280,
+      720
+    ],
+    "PDF_fixture_text": true,
+    "owned_live": 0
+  },
+  "reviewer_delta_fixture_cases": "22/22",
+  "controller_cleanup_regression": "31/31 source hash bound; harness historical source_head field remains H4",
+  "Windows_evidence": "H4 ASUS PowerShell5.1/7 literal flow receipts; Windows blocks/packages byte-identical to final candidate; not a new H6 native run",
+  "Desktop_native_acceptance": "NOT_PASSED; original target requirement not automatically waived",
+  "formal_state": "not landed, closed or deployed"
+}

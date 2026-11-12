@@ -1,0 +1,41 @@
+schema_version: 2
+receipt_id: wp1287-claude-delta-20261112
+reviewed_sha: ab519c6060fac4368815a762cacce31c14662bd8
+review_scope: one-line H4..integrated candidate delta; depends on H4 receipt
+verdict_path: ops/reviews/wp1287-claude-closeout/delta-verdict.raw.txt
+verdict_sha256: b444b21004b60c652657e76bb5b765cb6a6819733bf4fcf89ca5ea61401e22b0
+evidence_url: https://github.com/ducthangho/tra-luat/blob/acd3dc01618a1ebc4edbe9928c43cbf81d03e394/ops/reviews/wp1287-claude-closeout/delta-verdict.raw.txt
+assurance: cross_approved
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  session_run_id: 0abf0a97-34a6-4eb5-a686-3406060dca87
+  phien_doc_lap: true
+  model: claude-fable-5
+  model_evidence: do_may
+  model_evidence_ref: ops/reviews/wp1287-claude-closeout/delta-model-evidence.json
+  requested_effort: max
+  served_effort: KHONG_DO_DUOC
+model_executor_identity:
+  provider: codex
+  surface: codex_service
+  transport: machine
+  served_model: KHONG_DO_DUOC
+  family_basis: ADR0065 unique-provider identity fallback (Codex/OpenAI); exact served
+    executor model not measured
+github_submitter_identity:
+  actor: ducthangho
+  source: authenticated GET /user; carrier identity only, not model or approver
+anchor:
+  loai: canonical_ancestry
+  cuong_do: immutable Git blob and ancestry from evidence-branch HEAD validated locally;
+    canonical master admission pending archival PR
+  gioi_han: Not a protected check object or proof that this branch is already canonical.
+    Submitter is a carrier, not reviewer/approver.
+remaining_conditions:
+- Canonical publication/admission of evidence branch
+- Native selected-Desktop acceptance reconciliation
+- Required PR checks, connector, merge authority and post-merge bookkeeping
+history_preserved: true
+depends_on_receipt: wp1287-claude-H4-20261112

@@ -1,0 +1,6 @@
+Packet1308 r1/g1: thực hiện đúng frozen spec và canonical launcher.
+Chỉ metadata canary ops/canary/wp1308-target-canary.md; không product changes.
+Xác minh authority/runtime/I2 trước init/dispatch, giữ counter và deadline.
+Codex service reviewer độc lập requested xhigh, serving unknown nếu không đo.
+Model advisory không là human acceptance; dừng đúng pending-human và xuất concrete evidence.
+Không Windows CI/full mutants, không M9/paid credits/LIVE/credentials/security changes.

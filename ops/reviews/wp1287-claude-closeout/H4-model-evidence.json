@@ -1,0 +1,50 @@
+{
+  "schema": "wp1287.public_review_identity.v1",
+  "scope": "source/test review telemetry only; not full operational logs",
+  "reviewed_sha": "0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2",
+  "reviewed_tree": "888719149e0c1d87bfd69bed7a01d70f96042753",
+  "provider": "anthropic_claude",
+  "execution_surface": "claude_code",
+  "transport": "machine/local",
+  "session_id": "6e32e2ca-c72c-4c85-88b0-9dfb57b62759",
+  "launcher_run_id": "05e04dce9bf64fcbacf3cf9cb30d0598",
+  "launcher_version": "1.5.0",
+  "launcher_rc": 0,
+  "sdk_is_error": false,
+  "modelUsage": {
+    "claude-fable-5": {
+      "inputTokens": 26,
+      "outputTokens": 59880,
+      "cacheReadInputTokens": 753126,
+      "cacheCreationInputTokens": 122827,
+      "webSearchRequests": 0,
+      "costUSD": 6.203925999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 49088,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 122827,
+      "canonicalModel": "claude-fable-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "requested_effort": "max",
+  "served_effort": "KHONG_DO_DUOC; max is requested CLI configuration only",
+  "stdout_sha256": "747dae43f7d853f63b988af423d351580a6bdbe3adbf8afad98fa16a70b37673",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "prompt_sha256": "0a565090d5537e0b128a1d2971fd1a6c41efa79f0ec389823b76e7a6fd59cfae",
+  "source_snapshot_before_sha256": "6825c469ba42ed812b8947dd23efe1b22e3adce8c1704f33e0ea7cd581accd4d",
+  "source_snapshot_after_sha256": "6825c469ba42ed812b8947dd23efe1b22e3adce8c1704f33e0ea7cd581accd4d",
+  "snapshot_result": "sach",
+  "source_delta_count": 0,
+  "verdict_raw_sha256": "0ea008859bdcdbfe94dc9a63f01d8faf01c0569f011e161646f7e870592b34f9",
+  "raw_transport": "UTF8 encoding of actual SDK result string retained verbatim, including leading prose; not reformatted as JSON",
+  "limitations": [
+    "Snapshot at two marks cannot detect write-and-revert",
+    "No independent Windows/browser rerun in this review",
+    "Full stdout and raw operational run metadata kept private",
+    "This record is controller extraction of SDK/launcher measurements, not an independent GitHub Check Run",
+    "H4 approve had one P3 finding; candidate fix requires delta review"
+  ]
+}

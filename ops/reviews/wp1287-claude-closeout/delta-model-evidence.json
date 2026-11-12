@@ -1,0 +1,50 @@
+{
+  "schema": "wp1287.public_review_identity.v1",
+  "scope": "source/test review telemetry only; not full operational logs",
+  "reviewed_sha": "ab519c6060fac4368815a762cacce31c14662bd8",
+  "reviewed_tree": "42604943d0fa8191bbd50cf9641b9a6e5811f805",
+  "provider": "anthropic_claude",
+  "execution_surface": "claude_code",
+  "transport": "machine/local",
+  "session_id": "0abf0a97-34a6-4eb5-a686-3406060dca87",
+  "launcher_run_id": "d8c85f298ecb4389965ba07fcf8aaf93",
+  "launcher_version": "1.5.0",
+  "launcher_rc": 0,
+  "sdk_is_error": false,
+  "modelUsage": {
+    "claude-fable-5": {
+      "inputTokens": 24,
+      "outputTokens": 38823,
+      "cacheReadInputTokens": 494659,
+      "cacheCreationInputTokens": 90205,
+      "webSearchRequests": 0,
+      "costUSD": 4.240149000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 32111,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 90205,
+      "canonicalModel": "claude-fable-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "requested_effort": "max",
+  "served_effort": "KHONG_DO_DUOC; max is requested CLI configuration only",
+  "stdout_sha256": "957c5d55becfad943049b82a7dd4edec5776e70508cd0fb229acbb59c7daa96c",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "prompt_sha256": "1f2c6b4e12849e1f7e1c5af571f1f76e1ffc85a0dc65666f2ce724b4bb5812d9",
+  "source_snapshot_before_sha256": "35433cf4a4a95557df56c89678bb701d8c1ce77046b7e7ffa9c3513f8fb10c44",
+  "source_snapshot_after_sha256": "35433cf4a4a95557df56c89678bb701d8c1ce77046b7e7ffa9c3513f8fb10c44",
+  "snapshot_result": "sach",
+  "source_delta_count": 0,
+  "verdict_raw_sha256": "b444b21004b60c652657e76bb5b765cb6a6819733bf4fcf89ca5ea61401e22b0",
+  "raw_transport": "UTF8 encoding of actual SDK result string, retained verbatim",
+  "limitations": [
+    "Delta-only review depends on full-H4 review",
+    "22/22 inert capture-guard cases, not browser or Windows rerun",
+    "One compound command was denied; exact allowed checker subsequently ran once",
+    "Source snapshot at two marks cannot detect write-and-revert",
+    "Controller projection of raw telemetry; not an independent GitHub Check Run"
+  ]
+}

@@ -1,0 +1,454 @@
+{
+  "measured_at": "2026-11-06T03:07:50.808070+00:00",
+  "summary": {
+    "T": 23,
+    "J": 22,
+    "steps": 43,
+    "rest_mismatches": 0,
+    "blocked_steps": 0,
+    "pipe_bad": 0,
+    "checkout_bad": 0,
+    "checkout_shas": [
+      "fe84620f897913c7f6c2ce5a0c7316a49655e82f"
+    ],
+    "old_blocked_jobs": 19,
+    "env": [
+      "PYTHONDONTWRITEBYTECODE",
+      "PYTHONIOENCODING",
+      "PYTHONUTF8"
+    ],
+    "workflow_diff_to_base": ""
+  },
+  "rows": [
+    {
+      "job": "gate-ops (ubuntu-latest)",
+      "step": "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-ops (ubuntu-latest)",
+      "step": "bien-nhan v2 selftest",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-ops (ubuntu-latest)",
+      "step": "lease-publish selftest (đo lại setup sau G5)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-ops (ubuntu-latest)",
+      "step": "don-nhanh selftest (chốt xoá nhánh)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-ops (ubuntu-latest)",
+      "step": "bo ca gate chay TRONG cgroup duoc uy quyen (Linux)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "codex credential selftest (packet #300)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "idiom-ba-ten selftest",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "eol-policy selftest",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "pre-push selftest",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "eol-policy survey",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "bundled-fragment check (topology gói)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "gen_instructions selftest",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "command-registry unit test (AG-T0-03)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "tl selftest (co bang chung exact-identity)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "workflow-audit strict",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "golden-test",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "doc-claims-check strict",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "determinism-audit strict",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "ci-phamvi guard (bang phu thuoc khop ma)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "ci-phamvi selftest (phan chung — cong co rang)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "release-check full",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "release-verify strict (lane LAND — manifest committed)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate (ubuntu-latest)",
+      "step": "release-bundle x2 cùng SHA-256",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-packet-loop (ubuntu-latest)",
+      "step": "packet-loop selftest",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 5)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 6)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 3)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 0)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 1)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 4)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 7)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 3)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 4)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 5)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 1)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 6)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 0)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 7)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-nhanh-manh (ubuntu-latest, 2)",
+      "step": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-cong-cu (ubuntu-latest, 2)",
+      "step": "G5 manh ban kinh dot bien (#668)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-nhanh-gop (ubuntu-latest)",
+      "step": "gộp mảnh nhanh_don_duoc (targeted_mutant_gate)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": false,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-registry (ubuntu-latest)",
+      "step": "test registry (phạm vi + các bộ chưa được nối)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    },
+    {
+      "job": "gate-cong-cu-gop (ubuntu-latest)",
+      "step": "G5 gom manh ban kinh dot bien (#668)",
+      "rest_matches": 1,
+      "rest_success": true,
+      "blocked": [],
+      "pipe_bad": false,
+      "old_chan_buoc": true,
+      "checkout_ok": true
+    }
+  ]
+}

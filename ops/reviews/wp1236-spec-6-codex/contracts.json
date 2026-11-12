@@ -1,0 +1,51 @@
+{
+  "measured_at": "2026-11-06T03:09:35.762149+00:00",
+  "kind": "spec_contract_model_not_implementation",
+  "classification": {
+    "la_run_land_true": 29,
+    "la_run_land_false": 8
+  },
+  "without_event_changes": [
+    "ops/land/pr1095-pr1101-cloud-setup-p3-p3b-spec-provenance/ci-41398722520/provenance.yaml",
+    "ops/land/pr1095-pr1101-cloud-setup-p3-p3b-spec-provenance/ci-41398738297/provenance.yaml",
+    "ops/land/pr1127-wp1120-provenance/ci/provenance.yaml",
+    "ops/land/pr1128-wp1113-provenance/ci/provenance.yaml"
+  ],
+  "head_union": [
+    {
+      "file": "pr1042-pr1068-cloud-setup-p2-spec-land-evidence.yaml",
+      "H": [
+        "01ff65035c8b0833fa521b93239931772c14dffd",
+        "1bc4684571db74de9a607d6a1267df6506fa4a0d",
+        "97120d3c76ebb7c3eda4b585ff46f1c51e30c91b"
+      ],
+      "root_only_count": 0
+    },
+    {
+      "file": "pr1095-pr1101-cloud-setup-p3-p3b-spec-land-evidence.yaml",
+      "H": [
+        "47ee1b206d284c82d16036972b82b17196cd8dc7",
+        "8f123b27b338e5e173a668209eb4904f49dd611b"
+      ],
+      "root_only_count": 0
+    }
+  ],
+  "d10": [
+    {
+      "event": "push",
+      "d2b_model_rc": 0,
+      "without_la_run_land_model_rc": 0
+    },
+    {
+      "event": "workflow_dispatch",
+      "d2b_model_rc": 12,
+      "without_la_run_land_model_rc": 0
+    }
+  ],
+  "quick_run": {
+    "J": 14,
+    "missing_day_du_step": [
+      "packet-loop selftest"
+    ]
+  }
+}

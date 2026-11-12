@@ -1,0 +1,63 @@
+{
+  "version": "1.5.0",
+  "run_id": "f9abaf6426ab481aa105eab0892639f3",
+  "short_id": "f9abaf64",
+  "ten": "wp1236-spec-4-claude",
+  "lenh": {
+    "chuong_trinh": "claude",
+    "so_doi_so": 14,
+    "van_tay": "30b681ca57a12795"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-11-05T19:07:34.131747+00:00",
+  "ket_thuc_utc": "2026-11-05T19:28:51.208691+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 1192,
+  "khoa_danh_tinh": "linux:590689",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/r4-claude/repo",
+  "head": "aebc69ced6bb1fe2023a600cb603fcac60416d8e",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "3b549af491056a61fbc60cf5123546c17577bfb630239e05272f2510c141b5ec",
+  "deadline_utc": "2026-11-06T01:00:00+00:00",
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=22B"
+    },
+    "claude_trust": {
+      "trang_thai": "KHONG_DO_DUOC",
+      "chi_tiet": "thieu khoa trust Claude"
+    }
+  },
+  "bo_qua_probe_ly_do": "claude_trust KHONG_DO_DUOC: chu kho cho phep chay khong trust, --allowedTools tuong minh, chi cho cross-review dac ta #1236 — https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-6665140805",
+  "provider": "anthropic_claude",
+  "execution_surface": "claude_code",
+  "transport": "machine/local",
+  "transport_sha256": "0e640cb9f149f9a47671c9519f633637fe54e4b07a2fda4bea63302e4e0d1f1b",
+  "checkpoint_sha256": "493368b526fc9352aec4cd032e604d01147a8e06f59c6ce5fe1fed0bc6112f90",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/c92183b3-a8f8-5623-a5f6-065b91f250aa/scratchpad/review/runs/f9abaf64/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 1277.077,
+  "stdout_byte": 25600,
+  "stdout_sha256": "889f3b29762c1077dd85c989cbe90b4db16b3c99c9cf62066bfd1fb63adbb192",
+  "stderr_byte": 348,
+  "stderr_sha256": "77d705ef8c3002eb41889943329f263d14ded82b610c8d2da564439afa73dad9"
+}

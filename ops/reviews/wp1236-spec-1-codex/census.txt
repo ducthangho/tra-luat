@@ -1,0 +1,52 @@
+SPECIAL_STATUS ops/land/pr957-wp748-r27-provenance/ci-provenance-40437650224/provenance.yaml 121970087239 failed
+TOTAL records= 123 records_with_provenance= 27 provenance_files= 32 states= {'not_measured': 728, 'failed': 1}
+TABLE A records= 21 claims= 24
+pr1029-windows-local-r2 BO_QUA 1 0/1 tu_do
+pr1051-wp1006-t27 BO_QUA 1 0/1 tu_do
+pr1064-windows-local-r3 BO_QUA 1 0/1 tu_do
+pr1080-wp1077 DAT 1 0/1 tu_do
+pr1095-pr1101-cloud-setup-p3-p3b-spec BO_QUA 2 2/2 tom
+pr1097-wp1078 DAT 1 0/1 tu_do
+pr1100-wp1089-r2 DAT 1 0/1 tu_do
+pr1115-wp1079 DAT 2 0/2 tu_do
+pr1127-wp1120 DAT 1 1/1 tom,tu_do
+pr1128-wp1113 DAT 1 1/1 tom
+pr1130-wp1122 DAT 1 1/1 danh_gia,tom,tu_do
+pr1138-wp825 DAT 1 1/1 danh_gia,tom,tu_do
+pr1141-wp1132 DAT 1 1/1 tom
+pr1142-wp1117 DAT 1 1/1 danh_gia,tom,tu_do
+pr1192-wp1147 DAT 1 0/1 tu_do
+pr1193-wp1189 BO_QUA 1 0/1 tu_do
+pr1197-wp1099 DAT 1 0/1 tu_do
+pr1198-wp1195 DAT 1 1/1 danh_gia
+pr1231-wp1105 DAT 1 1/1 danh_gia
+pr631-doctrine-rest DAT 2 1/2 danh_gia,tu_do
+pr997-wp978 DAT 1 0/1 tu_do
+TABLE B records= 14 claims= 21
+pr1023-wp1009-r4 DAT 2 0/2 tu_do
+pr1040-wp1021 DAT 1 0/1 
+pr1042-pr1068-cloud-setup-p2-spec DAT 6 0/6 tu_do
+pr1046-wp1030-r6 BO_QUA 1 0/1 tu_do
+pr1048-claude-md-powershell BO_QUA 1 0/1 
+pr1063-wp1038-r1 DAT 2 0/2 tu_do
+pr1073-wp1039-r1 DAT 1 0/1 tu_do
+pr1155-wp1143 DAT 1 0/1 
+pr791-wp782 BO_QUA 1 0/1 tu_do
+pr793-wp784 BO_QUA 1 0/1 tu_do
+pr870-claude-md-bai-hoc-c DAT 1 0/1 
+pr889-claude-md-bai-hoc-c DAT 1 0/1 
+pr896-claude-md-bai-hoc-c-tro-nguon DAT 1 0/1 
+pr945-wp899 BO_QUA 1 0/1 
+KIND danh_gia records= 6 only= 2 files= pr1130-wp1122,pr1138-wp825,pr1142-wp1117,pr1198-wp1195,pr1231-wp1105,pr631-doctrine-rest
+KIND tom records= 7 only= 3 files= pr1095-pr1101-cloud-setup-p3-p3b-spec,pr1127-wp1120,pr1128-wp1113,pr1130-wp1122,pr1138-wp825,pr1141-wp1132,pr1142-wp1117
+KIND tu_do records= 16 only= 11 files= pr1029-windows-local-r2,pr1051-wp1006-t27,pr1064-windows-local-r3,pr1080-wp1077,pr1097-wp1078,pr1100-wp1089-r2,pr1115-wp1079,pr1127-wp1120,pr1130-wp1122,pr1138-wp825,pr1142-wp1117,pr1192-wp1147,pr1193-wp1189,pr1197-wp1099,pr631-doctrine-rest,pr997-wp978
+LANDED_WITHOUT_POSITIVE= ['pr1055-wp1052', 'pr1065-vm-cap-nhat-cong-cu', 'pr1118-ghi-so-bo-sung-1065', 'pr1137-wp1134', 'pr621-skill-bai-hoc', 'pr666-wp650', 'pr680-wp676', 'pr689-wp677', 'pr696-wp668', 'pr701-wp687', 'pr703-wp674', 'pr707-wp705', 'pr714-wp710', 'pr718-wp678', 'pr721-wp698', 'pr732-wp685', 'pr765-wp743', 'pr778-wp773', 'pr864-wp858', 'pr881-wp852', 'pr924-wp923', 'pr931-wp835', 'pr950-wp834', 'pr963-wp943']
+DANH_GIA_SCRIPTS= Counter({'b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd': 7})
+TOM_KIEM ops/land/pr1095-pr1101-cloud-setup-p3-p3b-spec-provenance/gate-output-41398738297.txt rc= 1 KIEM: DO — 37 job, thieu marker hoan tat: ['gate', 'gate', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu-gop', 'gate-nhanh-gop', 'gate-nhanh-gop', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-ops', 'gate-ops', 'gate-packet-loop', 'gate-packet-loop', 'gate-registry', 'gate-registry']
+TOM_KIEM ops/land/pr1095-pr1101-cloud-setup-p3-p3b-spec-provenance/gate-output-41398722520.txt rc= 1 KIEM: DO — 37 job, thieu marker hoan tat: ['gate', 'gate', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu-gop', 'gate-nhanh-gop', 'gate-nhanh-gop', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-ops', 'gate-ops', 'gate-packet-loop', 'gate-packet-loop', 'gate-registry', 'gate-registry']
+TOM_KIEM ops/land/pr1127-wp1120-provenance/ci/gate-output-41356691133.txt rc= 0 KIEM: DAT — 37 job, moi job gate co >=1 marker hoan tat neo ca dong (['chuan-bi'] khong phai gate)
+TOM_KIEM ops/land/pr1128-wp1113-provenance/gate-output-41361081437.txt rc= 1 KIEM: DO — 37 job, thieu marker hoan tat: ['gate', 'gate', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu-gop', 'gate-nhanh-gop', 'gate-nhanh-gop', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-ops', 'gate-ops', 'gate-packet-loop', 'gate-packet-loop', 'gate-registry', 'gate-registry']
+TOM_KIEM ops/land/pr1130-wp1122-provenance/gate-output-41365578445.txt rc= 1 KIEM: DO — 23 job, thieu marker hoan tat: ['gate', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu-gop', 'gate-nhanh-gop', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-ops', 'gate-packet-loop', 'gate-registry']
+TOM_KIEM ops/land/pr1138-wp825-provenance/gate-output-41389693283.txt rc= 1 KIEM: DO — 23 job, thieu marker hoan tat: ['gate', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu-gop', 'gate-nhanh-gop', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-ops', 'gate-packet-loop', 'gate-registry']
+TOM_KIEM ops/land/pr1141-wp1132-provenance/gate-output-41397085109.txt rc= 1 KIEM: DO — 23 job, thieu marker hoan tat: ['gate', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu-gop', 'gate-nhanh-gop', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-ops', 'gate-packet-loop', 'gate-registry']
+TOM_KIEM ops/land/pr1142-wp1117-provenance/gate-output-41399706045.txt rc= 1 KIEM: DO — 23 job, thieu marker hoan tat: ['gate', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu', 'gate-cong-cu-gop', 'gate-nhanh-gop', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-nhanh-manh', 'gate-ops', 'gate-packet-loop', 'gate-registry']

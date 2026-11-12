@@ -1,0 +1,101 @@
+{
+  "measured_at": "2026-11-06T04:15:23.440614+00:00",
+  "F_ok_T": 23,
+  "F_ok_J": 22,
+  "checkout_sha": [
+    "fe84620f897913c7f6c2ce5a0c7316a49655e82f"
+  ],
+  "law_steps": 43,
+  "bad_law_prefix": [],
+  "bad_step_match": [],
+  "env_job_keys": [
+    "PYTHONDONTWRITEBYTECODE",
+    "PYTHONIOENCODING",
+    "PYTHONUTF8"
+  ],
+  "short_run": {
+    "id": 41397205258,
+    "run_attempt": 1,
+    "event": "push",
+    "head_sha": "8983e1bbf00c91d8def101a97a4d32509ae630cc"
+  },
+  "short_J": 14,
+  "short_missing_jobs": [
+    "gate-cong-cu (ubuntu-latest, 0)",
+    "gate-cong-cu (ubuntu-latest, 1)",
+    "gate-cong-cu (ubuntu-latest, 2)",
+    "gate-cong-cu (ubuntu-latest, 3)",
+    "gate-cong-cu (ubuntu-latest, 4)",
+    "gate-cong-cu (ubuntu-latest, 5)",
+    "gate-cong-cu (ubuntu-latest, 6)",
+    "gate-cong-cu (ubuntu-latest, 7)"
+  ],
+  "short_skipped": [
+    {
+      "name": "gate-cong-cu",
+      "conclusion": "skipped",
+      "labels": [],
+      "runner_id": null,
+      "steps": []
+    }
+  ],
+  "short_jobs_missing_steps": 13,
+  "short_missing_steps": {
+    "gate-ops (ubuntu-latest)": [
+      "ops/chay_lease_publish_test.sh",
+      "scripts/don-nhanh_test.ps1",
+      ".claude/dev/gate_lifecycle_test.py"
+    ],
+    "gate-packet-loop (ubuntu-latest)": [
+      ".claude/dev/packet_loop_test.py"
+    ],
+    "gate-nhanh-manh (ubuntu-latest, 2)": [
+      "ops/nhanh_don_duoc_test.py"
+    ],
+    "gate-nhanh-manh (ubuntu-latest, 7)": [
+      "ops/nhanh_don_duoc_test.py"
+    ],
+    "gate-nhanh-manh (ubuntu-latest, 0)": [
+      "ops/nhanh_don_duoc_test.py"
+    ],
+    "gate (ubuntu-latest)": [
+      ".claude/dev/codex_cred_test.py",
+      ".claude/dev/idiom_py_test.py",
+      ".githooks/eol_policy_test.py",
+      ".githooks/pre_push_test.py",
+      ".github/checks/bundle_fragment_check.py --json",
+      "scripts/gen_instructions.py --selftest",
+      "scripts/tl_core/command_registry_test.py",
+      "== tl selftest",
+      "scripts/tl.py workflow-audit --strict --json",
+      "scripts/tl.py golden-test --json",
+      "scripts/tl.py determinism-audit --strict --json",
+      ".github/checks/ci_phamvi.py --kiem-bam",
+      ".github/checks/ci_phamvi_test.py",
+      "scripts/tl.py release-check --full --json",
+      "scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json",
+      "scripts/tl.py release-bundle --out dist/a.zip"
+    ],
+    "gate-nhanh-manh (ubuntu-latest, 6)": [
+      "ops/nhanh_don_duoc_test.py"
+    ],
+    "gate-nhanh-manh (ubuntu-latest, 1)": [
+      "ops/nhanh_don_duoc_test.py"
+    ],
+    "gate-nhanh-manh (ubuntu-latest, 4)": [
+      "ops/nhanh_don_duoc_test.py"
+    ],
+    "gate-nhanh-manh (ubuntu-latest, 3)": [
+      "ops/nhanh_don_duoc_test.py"
+    ],
+    "gate-nhanh-manh (ubuntu-latest, 5)": [
+      "ops/nhanh_don_duoc_test.py"
+    ],
+    "gate-nhanh-gop (ubuntu-latest)": [
+      "--gop-dich"
+    ],
+    "gate-registry (ubuntu-latest)": [
+      ".claude/dev/ci_dang_ky_test.py --chay"
+    ]
+  }
+}

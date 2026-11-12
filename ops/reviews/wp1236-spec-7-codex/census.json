@@ -1,0 +1,130 @@
+{
+  "measured_at": "2026-11-06T04:13:43.792916+00:00",
+  "records": 126,
+  "provenance_records": 31,
+  "provenance_files": 37,
+  "groups": {
+    "push .github/workflows/ci.yml": 29,
+    "workflow_dispatch .github/workflows/ci.yml": 4,
+    "push .github/workflows/launcher-windows.yml": 4
+  },
+  "required_names": [
+    "gate (ubuntu-latest)",
+    "gate-cong-cu-gop (ubuntu-latest)",
+    "gate-ops (ubuntu-latest)",
+    "gate-packet-loop (ubuntu-latest)",
+    "gate-registry (ubuntu-latest)",
+    "gate-nhanh-gop (ubuntu-latest)",
+    "gate-cong-cu (ubuntu-latest, 0)",
+    "gate-cong-cu (ubuntu-latest, 1)",
+    "gate-cong-cu (ubuntu-latest, 2)",
+    "gate-cong-cu (ubuntu-latest, 3)",
+    "gate-cong-cu (ubuntu-latest, 4)",
+    "gate-cong-cu (ubuntu-latest, 5)",
+    "gate-cong-cu (ubuntu-latest, 6)",
+    "gate-cong-cu (ubuntu-latest, 7)",
+    "gate-nhanh-manh (ubuntu-latest, 0)",
+    "gate-nhanh-manh (ubuntu-latest, 1)",
+    "gate-nhanh-manh (ubuntu-latest, 2)",
+    "gate-nhanh-manh (ubuntu-latest, 3)",
+    "gate-nhanh-manh (ubuntu-latest, 4)",
+    "gate-nhanh-manh (ubuntu-latest, 5)",
+    "gate-nhanh-manh (ubuntu-latest, 6)",
+    "gate-nhanh-manh (ubuntu-latest, 7)"
+  ],
+  "pushci_count": 29,
+  "pushci_bad": [],
+  "earliest_pushci": {
+    "path": "ops/land/pr945-wp899-provenance/do-1026-cebb5b2/ci-provenance-40268583940.yaml",
+    "run": 40268583940,
+    "event": "push",
+    "workflow": ".github/workflows/ci.yml",
+    "T": 23,
+    "J": 22,
+    "missing": [],
+    "extra": [],
+    "duplicates": {}
+  },
+  "windows": [
+    {
+      "record": "pr1095-pr1101-cloud-setup-p3-p3b-spec-land-evidence.yaml",
+      "run": 41398722520,
+      "windows_jobs": 14,
+      "event": "workflow_dispatch",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "47ee1b206d284c82d16036972b82b17196cd8dc7",
+      "head_in_H": true
+    },
+    {
+      "record": "pr1095-pr1101-cloud-setup-p3-p3b-spec-land-evidence.yaml",
+      "run": 41398738297,
+      "windows_jobs": 14,
+      "event": "workflow_dispatch",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "8f123b27b338e5e173a668209eb4904f49dd611b",
+      "head_in_H": true
+    },
+    {
+      "record": "pr1115-wp1079-land-evidence.yaml",
+      "run": 41365578430,
+      "windows_jobs": 1,
+      "event": "push",
+      "workflow": ".github/workflows/launcher-windows.yml",
+      "head": "c7174bfe03b3acd22cfa055b5fce176129d29542",
+      "head_in_H": false
+    },
+    {
+      "record": "pr1127-wp1120-land-evidence.yaml",
+      "run": 41356691133,
+      "windows_jobs": 14,
+      "event": "workflow_dispatch",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "f2102fc388a884d994f7bfeb29ef6863b9972b66",
+      "head_in_H": true
+    },
+    {
+      "record": "pr1128-wp1113-land-evidence.yaml",
+      "run": 41361081437,
+      "windows_jobs": 14,
+      "event": "workflow_dispatch",
+      "workflow": ".github/workflows/ci.yml",
+      "head": "c165a5d0d4048e10e7da875f2ba7524136fb5735",
+      "head_in_H": true
+    },
+    {
+      "record": "pr945-wp899-land-evidence.yaml",
+      "run": 40268583877,
+      "windows_jobs": 1,
+      "event": "push",
+      "workflow": ".github/workflows/launcher-windows.yml",
+      "head": "cebb5b22e1ebf369a70234662b7e9355bdd5095e",
+      "head_in_H": true
+    },
+    {
+      "record": "pr957-wp748-r27-land-evidence.yaml",
+      "run": 40437650224,
+      "windows_jobs": 1,
+      "event": "push",
+      "workflow": ".github/workflows/launcher-windows.yml",
+      "head": "06152341f461eedd97f1b95a2ae7bd9cb2f2e174",
+      "head_in_H": true
+    },
+    {
+      "record": "pr964-wp748-r28-land-evidence.yaml",
+      "run": 40454280983,
+      "windows_jobs": 1,
+      "event": "push",
+      "workflow": ".github/workflows/launcher-windows.yml",
+      "head": "a195b958cdf371de5723251d7f20bd6ff348a1b2",
+      "head_in_H": true
+    }
+  ],
+  "windows_heads_records": [
+    "pr1095-pr1101-cloud-setup-p3-p3b-spec-land-evidence.yaml",
+    "pr1127-wp1120-land-evidence.yaml",
+    "pr1128-wp1113-land-evidence.yaml",
+    "pr945-wp899-land-evidence.yaml",
+    "pr957-wp748-r27-land-evidence.yaml",
+    "pr964-wp748-r28-land-evidence.yaml"
+  ]
+}

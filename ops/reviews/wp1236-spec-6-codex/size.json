@@ -1,0 +1,53 @@
+{
+  "measured_at": "2026-11-06T03:04:52.965734+00:00",
+  "creation_numstat": [
+    {
+      "path": "ops/ci_provenance.py",
+      "created_commit": "fe7522eb104daf93d0a8a5f37f0ee774e62a7846",
+      "numstat": "393\t0\tops/ci_provenance.py"
+    },
+    {
+      "path": "ops/ci_provenance_test.py",
+      "created_commit": "fe7522eb104daf93d0a8a5f37f0ee774e62a7846",
+      "numstat": "656\t0\tops/ci_provenance_test.py"
+    },
+    {
+      "path": "ops/land_evidence_nguon.py",
+      "created_commit": "8ff40b14c241c506bdcafbed414fe6edf9544c28",
+      "numstat": "279\t0\tops/land_evidence_nguon.py"
+    },
+    {
+      "path": "ops/land_evidence_nguon_test.py",
+      "created_commit": "8ff40b14c241c506bdcafbed414fe6edf9544c28",
+      "numstat": "318\t0\tops/land_evidence_nguon_test.py"
+    },
+    {
+      "path": "ops/kiem_ho_so_land.py",
+      "created_commit": "52082546818b812dd826ac23b198d0b5ebd784a4",
+      "numstat": "140\t0\tops/kiem_ho_so_land.py"
+    },
+    {
+      "path": "ops/kiem_ho_so_land_test.py",
+      "created_commit": "52082546818b812dd826ac23b198d0b5ebd784a4",
+      "numstat": "263\t0\tops/kiem_ho_so_land_test.py"
+    }
+  ],
+  "prototype_lines": {
+    "ops/land/pr1231-wp1105-provenance/danh_gia_gate.py": 196,
+    "ops/land/pr1127-wp1120-provenance/ci/tom_gate_output.py": 103
+  },
+  "a1_component_estimate": 701,
+  "estimate_range": [
+    580,
+    760
+  ],
+  "cap": 800,
+  "nang_tran": {
+    "nang_tran": {
+      "ai_nang": "ducthangho (chủ kho, thẩm quyền §2 protocol) — hiệu lực khi chủ kho duyệt spec_hash của CHÍNH tệp chứa khối này (hiện là `ops/specs/wp1236-r6.md`; bản sửa sau có băm mới thì cần duyệt lại), CHỈ cho đợt A1. Duyệt băm của r1–r5 KHÔNG cấp mức trần này (reviewer Codex G18, Claude G03 vòng 5)",
+      "can_cu": "Phần đọc của một module luật mới (sổ phiên bản + miền hiệu lực, bốn loại dấu hiệu, K1–K9, lời khai, neo) và test của nó. Căn cứ đo: ops/ci_provenance.py + test lúc tạo = 1049 dòng; ops/land_evidence_nguon.py + test lúc tạo = 597. Ước 580–760 (bảng kich_thuoc; tăng so với r4 vì dòng mien_gate_output, la_run_land, K1/K3, A22 bốn đối chứng — đều theo quyết định chủ kho hoặc finding review; biến thể duong_nhanh đã cắt). Phần sinh (tom) đã tách sang A2. Tách tiếp test khỏi module thì đột biến nằm khác packet với chốt nó canh. Tiền lệ: ADR-0053 ghi PLAT-X4 +721 dòng = ba vòng review, tám finding — rủi ro review được chấp nhận có ý thức.",
+      "tran_cu": "≤ 6 tệp / ≤ 450 dòng thêm (ADR-0053)",
+      "tran_moi": "≤ 3 tệp / ≤ 800 dòng thêm, đo bằng `git diff --numstat <base đợt A1>..<head đợt A1>` (r4 xin 750, r5 xin 900; r6 tính lại sau khi cắt duong_nhanh)"
+    }
+  }
+}

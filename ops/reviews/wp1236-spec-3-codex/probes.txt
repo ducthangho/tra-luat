@@ -1,0 +1,12 @@
+ghep_buoc original + real REST + real header traces: {('passed', None): 23}
+NOTE: only matching headers tested; traces are not complete logs.
+F-ok registry step: {"job": "gate-registry (ubuntu-latest)", "name": "test registry (phạm vi + các bộ chưa được nối)", "REST": [{"name": "test registry (phạm vi + các bộ chưa được nối)", "conclusion": "success"}], "chan_buoc": true, "extra_keys": ["env"]}
+canon existing dependencies import: OK registry needed at import: False
+canon function calls: gate-registry test registry (phạm vi + các bộ chưa được nối) chan_buoc= True
+Windows run at ROOT merge_commit: pr1127-wp1120-land-evidence.yaml run= 41356691133 workflow= .github/workflows/ci.yml
+Windows run at ROOT merge_commit: pr1128-wp1113-land-evidence.yaml run= 41361081437 workflow= .github/workflows/ci.yml
+Windows run at ROOT merge_commit: pr945-wp899-land-evidence.yaml run= 40268583877 workflow= .github/workflows/launcher-windows.yml
+Windows run at ROOT merge_commit: pr957-wp748-r27-land-evidence.yaml run= 40437650224 workflow= .github/workflows/launcher-windows.yml
+Windows run at ROOT merge_commit: pr964-wp748-r28-land-evidence.yaml run= 40454280983 workflow= .github/workflows/launcher-windows.yml
+original rule inventory: 10 jobs 31 steps 36 markers
+F-that workflow run/name counts: {'run': 78, 'named': 78}

@@ -1,0 +1,7 @@
+{
+  "setup": "local shared clone; temporary commit; original checkout objects retained",
+  "checkout_sha": "fe84620f897913c7f6c2ce5a0c7316a49655e82f",
+  "K7_git_show_rc": 0,
+  "workflow_byte_equal": true,
+  "workflow_sha256": "aed785d6f1911f390fe1190d5caa575de58a5531252afc6f83981ca19681be67"
+}

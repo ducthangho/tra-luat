@@ -2904,7 +2904,7 @@ def _trang_du(d, khoa: str, nhan: str) -> list:
 
 
 def _neo_connector(k: str, x: dict, head: str, biet: set):
-    """I7 neo head theo endpoint: 'hien' · 'cu' (neo head KHÁC hợp lệ) · 'hong' (thiếu/sai/mơ hồ) · None (issue comment không khai).
+    """I7 neo head theo endpoint: 'hien' · 'cu' (neo head KHÁC hợp lệ) · 'hong' (thiếu/sai/mơ hồ) · 'chua' (marker trên head chưa sạch) · None (issue comment không khai).
     Issue comment (dạng connector `**Reviewed commit:** `sha``): phần còn lại của DÒNG sau MỖI nhãn phải đúng một SHA 7–40 hex (backtick
     đủ cặp hoặc không), mọi khai cùng một phía; tiền tố chỉ là head khi không SHA nào khác đã biết trong readback (`biet`) cùng tiền tố."""
     if k != "issue_comments":
@@ -2912,6 +2912,30 @@ def _neo_connector(k: str, x: dict, head: str, biet: set):
         # review comment neo theo `original_commit_id` (commit nơi finding được VIẾT); `commit_id` chỉ là chỗ nó còn áp được.
         c = x["original_commit_id"] if k == "review_comments" and "original_commit_id" in x else x.get("commit_id")
         return "hien" if c == head else "cu" if type(c) is str and SHA_RE.fullmatch(c) else "hong"
+    # #1288 r3: marker chỉ có thẩm quyền trong issue comment của connector.
+    mau = r"<!--\s*codex-review-state:v1\s+(\{.*?\})\s*-->"
+    markers = re.findall(mau, x["body"], re.DOTALL) if x.get("user", {}).get("login") == BOT_CONNECTOR else []
+    if markers:
+        if len(markers) > 1:
+            return "hong"
+        try:
+            d = json.loads(markers[0])
+        except ValueError as _:
+            return "hong"
+        cr = d.get("code_review") if type(d) is dict else None
+        if type(cr) is not dict or type(cr.get("commit_sha")) is not str or not SHA_RE.fullmatch(cr["commit_sha"]):
+            return "hong"
+        neo = "cu"
+        if cr["commit_sha"] == head:
+            status, flags = cr.get("status"), [cr.get("has_any_findings"), cr.get("has_unresolved_findings")]
+            if type(status) is not str or any(type(v) is not bool and not (status != "completed" and v is None) for v in flags):
+                return "hong"
+            neo = "hien" if status == "completed" and flags[0] is False and flags[1] is False else "chua"
+        if "Reviewed commit:" in x["body"]:
+            cu = _neo_connector(k, {**x, "body": re.sub(mau, "", x["body"], flags=re.DOTALL)}, head, biet)
+            if cu != neo:
+                return "hong"
+        return neo
     khai = [re.fullmatch(r"(`?)([0-9a-f]{7,40})\1", t.strip()) for t in re.findall(r"Reviewed commit:(?:\*\*)?([^\n]*)", x["body"])]
     if not khai:
         return None
@@ -2948,7 +2972,7 @@ def _doc_connector(duong: str, repo: str, pr: int, head: str, p0p2: list | None 
             hang = set(BADGE_RE.findall(x["body"]))
             if n is None and hang:
                 _die(RC_GATE, f"connector issue comment {x['id']} có finding mà không neo head")
-            if n == "hien" and (hang or k == "review_comments" or x.get("state") == "CHANGES_REQUESTED"):
+            if n in ("hien", "chua") and (hang or k == "review_comments" or x.get("state") == "CHANGES_REQUESTED"):
                 if len(hang) != 1 or not hang <= set(HANG_LOP):
                     _die(RC_GATE, f"connector {k} {x['id']}: hạng ngoài miền {HANG_LOP}: {sorted(hang)}")
                 if p0p2 is not None and hang != {"P3"}:

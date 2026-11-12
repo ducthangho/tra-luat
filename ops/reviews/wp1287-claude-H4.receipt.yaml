@@ -2,9 +2,9 @@ schema_version: 2
 receipt_id: wp1287-claude-H4-20261112
 reviewed_sha: 0bf2a8a7a094d9df0a84eec807c5c5e5d89d87c2
 review_scope: full B..H4 source
-verdict_path: ops/reviews/wp1287-claude-closeout/H4-verdict.raw.txt
+verdict_path: ops/reviews/wp1287-claude-closeout/H4-verdict.md
 verdict_sha256: 0ea008859bdcdbfe94dc9a63f01d8faf01c0569f011e161646f7e870592b34f9
-evidence_url: https://github.com/ducthangho/tra-luat/blob/acd3dc01618a1ebc4edbe9928c43cbf81d03e394/ops/reviews/wp1287-claude-closeout/H4-verdict.raw.txt
+evidence_url: https://github.com/ducthangho/tra-luat/blob/3ab8b6371fc348df8864d2e31eb3c5c90bf44de8/ops/reviews/wp1287-claude-closeout/H4-verdict.md
 assurance: cross_approved
 model_reviewer_identity:
   provider: anthropic_claude

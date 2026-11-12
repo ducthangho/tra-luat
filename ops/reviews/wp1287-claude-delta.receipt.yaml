@@ -2,9 +2,9 @@ schema_version: 2
 receipt_id: wp1287-claude-delta-20261112
 reviewed_sha: ab519c6060fac4368815a762cacce31c14662bd8
 review_scope: one-line H4..integrated candidate delta; depends on H4 receipt
-verdict_path: ops/reviews/wp1287-claude-closeout/delta-verdict.raw.txt
+verdict_path: ops/reviews/wp1287-claude-closeout/delta-verdict.md
 verdict_sha256: b444b21004b60c652657e76bb5b765cb6a6819733bf4fcf89ca5ea61401e22b0
-evidence_url: https://github.com/ducthangho/tra-luat/blob/acd3dc01618a1ebc4edbe9928c43cbf81d03e394/ops/reviews/wp1287-claude-closeout/delta-verdict.raw.txt
+evidence_url: https://github.com/ducthangho/tra-luat/blob/3ab8b6371fc348df8864d2e31eb3c5c90bf44de8/ops/reviews/wp1287-claude-closeout/delta-verdict.md
 assurance: cross_approved
 model_reviewer_identity:
   provider: anthropic_claude

@@ -11104,12 +11104,12 @@ def _resolver1174(c, change=None):
     return result
 
 
-def _composition1174(c):
+def _composition1174(c, target_human=False, hook=None, target_identity=None, executor_identity=None):
     """Real Git/canonical composition; only local transport, API and native mount facts are fixtures."""
     import contextlib, io, shutil
     from unittest.mock import patch
     m, _, admission, _ = _a1174(c)
-    w = _kho812(c)
+    w = _kho812(c, "current_policy" if target_human else "")
     remote = w.parent / "o.git"
     old = json.loads(_g(w,"show","refs/remotes/origin/ops/wp55-spec:ops/leases/l.yaml"))
     def commit(files):
@@ -11128,6 +11128,15 @@ def _composition1174(c):
     p.update(packet=55,generation=1,executor="claude",reviewer="codex",
         executor_identity=m._identity("claude","claude","claude_code","machine/local"),
         reviewer_identity=m._identity("codex","openai","codex_cli","machine"))
+    if target_human:
+        identity=target_identity or m._identity("codex","openai","codex_service","machine")
+        provider=identity["provider"]
+        executor_identity=executor_identity or identity
+        p.update(executor=executor_identity["provider"],reviewer=provider,executor_identity=dict(executor_identity),reviewer_identity=dict(identity))
+        old.update(assurance_target="human_audited",provider=executor_identity["provider"],executor=executor_identity["provider"],reviewer=provider,
+            model_family=executor_identity["model_family"],execution_surface=executor_identity["execution_surface"],transport=executor_identity["transport"],
+            reviewer_model_family=identity["model_family"],reviewer_execution_surface=identity["execution_surface"],
+            reviewer_transport=identity["transport"])
     plan_raw=m._1174_bytes(dict(mission_id="gh-1172",revision=11,packet_graph=[dict(packet=55,revision=1,generation=1,contract_id="composition-r1")],
         routing_history=dict(previous_exception=dict(actual_human_audit_required=True,hard_expiry_utc="2100-01-01T00:00:00Z"))))
     admission["mission_plan_sha256"]=hashlib.sha256(plan_raw).hexdigest()
@@ -11189,6 +11198,14 @@ sys.exit(p.returncode)
             "--executor-model-family","claude","--executor-execution-surface","claude_code","--executor-transport","machine/local",
             "--reviewer-model-family","openai","--reviewer-execution-surface","codex_cli","--reviewer-transport","machine",
             "--root",str(w),"--admission",str(sample),"--revision","1","--generation","1","--coordinator-id","coordinator-1","--expected-revision","absent"]
+        if target_human:
+            for role in ("executor","reviewer"):
+                actor=executor_identity if role=="executor" else identity
+                for flag,value in (("--"+role,actor["provider"]),
+                        ("--"+role+"-model-family",actor["model_family"]),
+                        ("--"+role+"-execution-surface",actor["execution_surface"]),
+                        ("--"+role+"-transport",actor["transport"])):
+                    args[args.index(flag)+1]=value
         # Probe is the only native capability seam; runtime and all authority composition remain real.
         with patch.object(m,"_1174_probe",return_value=dict(native_fixture=True)),contextlib.redirect_stdout(out):rc=m.main(args)
         result=json.loads(out.getvalue());assert rc==0 and result["status"]=="completed_no_dispatch",(rc,result)
@@ -11210,6 +11227,8 @@ sys.exit(p.returncode)
         state=json.loads(Path(e["state_path"]).read_bytes())
         assert state["lease"]["lease_id"]==old["lease_id"] and state["state_revision"]==1
         initial=(Path(e["state_path"]).read_bytes(),Path(e["witness_path"]).read_bytes())
+        if hook is not None:
+            return hook(dict(m=m,admission=admission,w=w,sample=sample,api=api,comments=comments,facts=facts))
         sample.write_bytes(raw+b"\n")
         _reject1174(m._1174_resolve,w,55,1,1,sample,reason="FILE differs from immutable admission")
         assert initial==(Path(e["state_path"]).read_bytes(),Path(e["witness_path"]).read_bytes())
@@ -11264,7 +11283,8 @@ def _admission_case1174(kind):
             assert subprocess.run(["git", "-C", str(repo), "update-ref", "refs/replace/" + "a" * 40, blob], capture_output=True).returncode == 0
             _reject1174(m._1174_git_view, repo, reason="untrusted Git view: replace refs")
             selectors = ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES",
-                         "GIT_REPLACE_REF_BASE", "GIT_CONFIG_COUNT", "GIT_CONFIG_KEY_0", "GIT_CONFIG_VALUE_0", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_SYSTEM", "GIT_CONFIG_NOSYSTEM", "GIT_CONFIG_PARAMETERS", "GIT_CONFIG_FUTURE_SELECTOR")
+                         "GIT_REPLACE_REF_BASE", "GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE",
+                         "GIT_CONFIG", "GIT_IMPLICIT_WORK_TREE", "GIT_PREFIX", "GIT_NO_REPLACE_OBJECTS", "GIT_CONFIG_COUNT", "GIT_CONFIG_KEY_0", "GIT_CONFIG_VALUE_0", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_SYSTEM", "GIT_CONFIG_NOSYSTEM", "GIT_CONFIG_PARAMETERS", "GIT_CONFIG_FUTURE_SELECTOR")
             for selector in selectors:
                 with patch.dict(os.environ, {selector: "hostile-fixture"}):
                     assert selector not in m._1174_git_env() and os.environ[selector] == "hostile-fixture"
@@ -11824,6 +11844,14 @@ def _required_case1174(c):
         pass
     else:
         assert False, "wrong rejection reason earned oracle credit"
+    def wrong_class():
+        raise RuntimeError("WP1174 UNKNOWN: expected witness rejection")
+    try:
+        _reject1174(wrong_class, reason="expected witness rejection")
+    except CliSapDo as error:
+        assert isinstance(error.__cause__, RuntimeError), "wrong-class crash lost its cause"
+    else:
+        assert False, "wrong exception class earned semantic rejection credit"
     def wrapped_crash(_):
         try:
             raise CliSapDo("fixture crash marker")
@@ -12781,7 +12809,7 @@ def _management_race1174(c,name):
     assert state["state_revision"]==(0 if name=="init" else 2) and not state["codex_calls"]
 
 
-def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None):
+def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,target_facts=None):
     import contextlib,io,copy,multiprocessing
     from unittest.mock import patch
     from types import SimpleNamespace
@@ -12820,8 +12848,9 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None)
         # anchors to the runtime repository without changing the reviewed head.
         policy=chain_root/m.ADR0063_TEP;policy.parent.mkdir(parents=True,exist_ok=True)
         policy.write_text("\n".join(m.ADR0063_ANCHORS)+"\n")
-        _g(chain_root,"add",str(policy));_g(chain_root,"commit","-qm","fixture human policy")
-        _g(chain_root,"push","-q","origin","master")
+        if target_facts is None:
+            _g(chain_root,"add",str(policy));_g(chain_root,"commit","-qm","fixture human policy")
+            _g(chain_root,"push","-q","origin","master")
         w=chain_root
     ci_repo=nc["repo"]
     # The local remote is an inert test transport; all accept branch reads are real Git.
@@ -12851,6 +12880,8 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None)
     lease=dict(packet_id="wp55",revision=1,generation=1)
     spec=(hm._git_do(w,"show",_g(w,"rev-parse","HEAD^1")+":ops/specs/X.md")[1] if chain_root is None else _g(w,"show","refs/remotes/origin/ops/wp55-spec:ops/specs/wp55.md").encode()+b"\n")
     facts=dict(lease=lease,spec=spec,spec_sha256=hashlib.sha256(spec).hexdigest(),canonical_oid=_g(w,"rev-parse","refs/remotes/origin/master"))
+    if target_facts is not None:
+        facts["target_authority"]=target_facts["target_authority"]
     def fetch(endpoint,**limits):
         if endpoint=="repos/"+m._1174_REPO:return dict(id=123,full_name=m._1174_REPO)
         if endpoint==f"repos/{m._1174_REPO}/issues/comments/{audit['id']}":return audit
@@ -12893,11 +12924,13 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None)
             nonlocal calls
             calls+=1
             if calls==2 and hasattr(m,"_fixture_gate_observer"):m._fixture_gate_observer()
+            if target_facts is not None and getattr(m,"_fixture_target_authority_drift",False) and calls>=3:
+                return a,dict(facts,target_authority=facts["target_authority"]._replace(mission_install_id=-1))
             return a,facts
         with patch.object(m,"_1174_IMPLEMENTATION_COMPLETE",True),patch.object(m,"_1174_resolve",side_effect=resolved),patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_canon",canonical),patch.object(m,"_1174_api",side_effect=fetch),patch.object(m,"_nap",return_value=SimpleNamespace(_doc_gh=lambda label,endpoint:fetch(endpoint))),workflow_seams(),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
             rc=m.main(argv)
         assert len(out.getvalue().splitlines())==1,(rc,out.getvalue(),err.getvalue())
-        if workflow_case:flow["errors"].append(err.getvalue())
+        if workflow_case or target_facts is not None:flow["errors"].append(err.getvalue())
         return rc,json.loads(out.getvalue())
     pair(state)
     if race:
@@ -12927,6 +12960,40 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None)
             missing_human=list(args);i=missing_human.index("--human-audit-comment");del missing_human[i:i+2]
             rc,result=invoke(missing_human)
             assert rc==8 and not result["dispatch_allowed"] and before==(target.read_bytes(),witness.read_bytes()),(rc,result)
+        if target_facts is not None:
+            # Target same-family approval cannot substitute for actual human or existing accept guards.
+            import yaml
+            audit_path=Path(hargs.human_audit_comment)
+            audit_saved=copy.deepcopy(audit)
+            for defect in ("owner","head","tree","spec","late","publication","ci","connector","authority"):
+                original_audit=audit_path.read_bytes()
+                changed=None
+                if defect=="owner":audit["user"]["login"]="agent"
+                elif defect in ("head","tree","spec"):
+                    body=yaml.safe_load(audit["body"])
+                    field={"head":"reviewed_sha","tree":"reviewed_tree","spec":"spec_sha256"}[defect]
+                    body[field]="f"*(64 if defect=="spec" else 40);audit["body"]=yaml.safe_dump(body)
+                elif defect=="late":audit["updated_at"]="2026-11-04T09:02:00Z"
+                elif defect=="authority":m._fixture_target_authority_drift=True
+                else:
+                    field={"publication":"publication_receipt","ci":"check_runs","connector":"connector"}[defect]
+                    changed=Path(args[args.index("--"+field.replace("_","-"))+1]);saved=changed.read_bytes()
+                    record=json.loads(saved)
+                    if defect=="publication":record["audit_sha256"]="f"*64
+                    elif defect=="ci":record["check_runs"][0]["head_sha"]="f"*40
+                    else:record["head_sha"]="f"*40
+                    changed.write_bytes(m._1174_bytes(record))
+                audit_path.write_bytes(m._1174_bytes(audit))
+                with patch.object(m,"_1174_write",wraps=m._1174_write) as writes:
+                    rc,result=invoke()
+                assert rc==8 and not result["dispatch_allowed"] and not writes.called and before==(target.read_bytes(),witness.read_bytes()),("target human/accept rejection",defect,rc,result)
+                expected={"owner":"owner comment origin/identity","head":"human audit exact bindings","tree":"human audit exact bindings",
+                    "spec":"human audit exact bindings","late":"human review trước push","publication":"collector receipt closed bindings",
+                    "ci":"gate KHÔNG xanh","connector":"readback connector không neo đúng","authority":"human target authority changed"}[defect]
+                assert expected in result["detail"] or expected in flow["errors"][-1],(defect,result,flow["errors"][-1])
+                m._fixture_target_authority_drift=False
+                audit.clear();audit.update(copy.deepcopy(audit_saved));audit_path.write_bytes(original_audit)
+                if changed is not None:changed.write_bytes(saved)
         if workflow_case:workflow_path.write_bytes(original_workflow)
         if workflow_case in ("omit", "change", "failed", "attempt"):
             entries=sorted(str(p) for p in target.parent.rglob("*"))
@@ -12953,7 +13020,11 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None)
             assert event["workflow_jobs_sha256"]==[hashlib.sha256(inputs[str(hc.tmp/"workflow_jobs.json")]).hexdigest()]
         else:
             rc,result=invoke();assert rc==0,(workflow_case,rc,result,flow)
-    accepted=_call1174(m._1174_pair,a,json.loads(witness.read_bytes()),target.read_bytes())
+    token=m._1174_TARGET_AUTHORITY.set(target_facts["target_authority"]) if target_facts is not None else None
+    try:
+        accepted=_call1174(m._1174_pair,a,json.loads(witness.read_bytes()),target.read_bytes())
+    finally:
+        if token is not None:m._1174_TARGET_AUTHORITY.reset(token)
     assert accepted["state"]=="accepted" and accepted["human_acceptance"]["assurance"]=="human_audited" and accepted["state_revision"]==state["state_revision"]+1
     if workflow_case:
         assert flow["human"]==1 and flow["ci"]==[files["workflow_runs"]],(workflow_case,flow)
@@ -12961,7 +13032,8 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None)
         (c.tmp/"workflow-snapshot-trace.json").write_text(json.dumps(dict(case=workflow_case,rc=rc,result=result,**flow),indent=2)+"\n")
     if current_policy:
         assert accepted["luat_adr0054"] is False and accepted["accepted_sha"]==state["pending_sha"]
-        assert accepted["review_rounds_used"]==accepted["codex_review_calls_used"]==accepted["attempts_used"]==1
+        assert accepted["review_rounds_used"]==accepted["attempts_used"]==1
+        assert accepted["codex_review_calls_used"]==int(state["reviewer"]=="codex")
         assert m._che_do_0054(w,spec) is False
     before=(target.read_bytes(),witness.read_bytes());rc,result=invoke();assert rc==8 and before==(target.read_bytes(),witness.read_bytes())
     return accepted
@@ -13049,6 +13121,8 @@ _FIELD_TYPES1174 = {
     "operation":dict(adoption_id=str,generation=int,binding_sha256=str,canonical_path=str,source_sha256=str,cutover_started=bool),
     "lineage":dict(predecessor_generation=int,source_path=str,source_sha256=str),
     "allowance":dict(window_id=str,starts_utc=str,ends_utc=str,attempts_limit=int,review_rounds_limit=int,codex_review_calls_limit=int)}
+_NULLABLE_FIELDS1174 = frozenset(("operation", "enrollment.legacy_source_path", "enrollment.legacy_source_sha256",
+    "lineage.predecessor_generation", "lineage.source_path", "lineage.source_sha256"))
 
 
 def _typed_variants1174(c,m,registration,admission,now):
@@ -13061,12 +13135,10 @@ def _typed_variants1174(c,m,registration,admission,now):
     reg6=dict(registration,generation=6)
     assert _call1174(m._1174_admission,m._1174_bytes(adoption),reg6,now)==adoption
     for owner,key in (("lineage","source_path"),("enrollment","legacy_source_path")):
-        for suffix in ("/unused/../legacy.json","//legacy.json","/./legacy.json"):
-            value=str(c.tmp)+suffix
-            # Check the stimulus independently of the admission implementation:
-            # it must reach the canonical-spelling guard on either host.
-            assert os.path.isabs(value),"canonical-path negative must be absolute"
-            assert any(part in (".","..","") for part in suffix[1:].split("/"))
+        for kind, value in _canonical_vectors1303(str(c.tmp)):
+            # Inspect the complete runtime value with the host path library,
+            # independently of pathlib and the admission implementation.
+            _canonical_precondition1303(kind, value)
             bad=copy.deepcopy(adoption);bad[owner][key]=value
             _reject1174(m._1174_admission,m._1174_bytes(bad),reg6,now,reason="source canonical paths")
         # Retain the original slash-prefix vector. On Windows it has no drive
@@ -13079,10 +13151,12 @@ def _typed_variants1174(c,m,registration,admission,now):
     for prefix,fields in _FIELD_TYPES1174.items():
         for field,kind in fields.items():
             path=(prefix+"." if prefix else "")+field
-            for value in ([True,1.0,"1"] if kind is int else [False] if kind is not bool else ["false"]):
+            wrong_types=([True,1.0,"1"] if kind is int else [False] if kind is not bool else ["false"])
+            for value in wrong_types + ([] if path in _NULLABLE_FIELDS1174 else [None]):
                 bad=copy.deepcopy(adoption if prefix=="operation" else admission)
                 row=bad[prefix] if prefix else bad;row[field]=value
                 raw=m._1174_bytes(bad)
+                _reject1174(m._1174_field_types,bad,reason="field type "+path)
                 _reject1174(m._1174_admission,raw,reg6 if prefix=="operation" else registration,now,reason="field type "+path)
                 assert bad==json.loads(raw),"type validation changed input"
     # Literal alias pairs include genesis equivalence, which is valid only for
@@ -13106,11 +13180,28 @@ for _prefix,_fields in _FIELD_TYPES1174.items():
             ["wp1174_admission_wrong_scope"])
 
 
+def _secret_encodings1303(seed, key):
+    """Explicit synthetic-only byte/text encoding inventory, never real credentials."""
+    import base64
+    from urllib.parse import quote_from_bytes
+    inventory = {}
+    for label, raw in (("seed", seed), ("key_text", key.encode()), ("key_bytes", bytes.fromhex(key))):
+        inventory.update({label + ":raw": raw, label + ":hex_lower": raw.hex().encode(),
+            label + ":hex_upper": raw.hex().upper().encode(), label + ":base64": base64.b64encode(raw),
+            label + ":base64url": base64.urlsafe_b64encode(raw),
+            label + ":url": quote_from_bytes(raw, safe="").encode(),
+            label + ":repr": repr(raw).encode(), label + ":repr_body": repr(raw)[2:-1].encode(),
+            label + ":json": json.dumps(raw.decode("latin1"), ensure_ascii=True)[1:-1].encode()})
+    assert all(len(raw) >= 32 for raw in inventory.values()), "secret oracle short substring"
+    return inventory
+
+
 def _secret_absence1174(seed, key, **channels):
+    inventory = _secret_encodings1303(seed, key)
     for name,value in channels.items():
         raw=value if isinstance(value,bytes) else (value.encode() if isinstance(value,str) else json.dumps(value,sort_keys=True).encode())
-        for secret in (seed,seed.hex().encode(),key.encode()):
-            assert secret not in raw,"fixture secret leaked in "+name
+        for encoding, secret in inventory.items():
+            assert secret not in raw,"fixture secret leaked in "+name+" ("+encoding+")"
 
 
 def _secret_channels1174(c):
@@ -13166,6 +13257,22 @@ def _secret_channels1174(c):
     assert "WP1174_WINDOWS_ORACLE_V1 " in out.getvalue()
     channels.update(windows_unit_record=out.getvalue(),windows_stderr_traceback=err.getvalue())
     _secret_absence1174(seed,key,**channels)
+    # Calibrate every representation on the actual captured serializer output.
+    # Appending bytes is an oracle metatest, not a product/native leak claim.
+    for name, value in channels.items():
+        clean=value if isinstance(value,bytes) else (value.encode() if isinstance(value,str) else json.dumps(value,sort_keys=True).encode())
+        import base64
+        from urllib.parse import quote_from_bytes
+        stimuli=[]
+        for label, token in (("seed",seed),("key_text",key.encode()),("key_bytes",bytes.fromhex(key))):
+            stimuli.extend((label, value) for value in (token, token.hex().encode(), token.hex().upper().encode(),
+                base64.b64encode(token),base64.urlsafe_b64encode(token),quote_from_bytes(token,safe="").encode(),
+                repr(token).encode(),repr(token)[2:-1].encode(),json.dumps(token.decode("latin1"),ensure_ascii=True)[1:-1].encode()))
+        for encoding, secret in stimuli:
+            try:_secret_absence1174(seed,key,**{name:clean+b"\nINERT-FIXTURE-LEAK:"+secret})
+            except AssertionError as ex:assert "fixture secret leaked in "+name in str(ex)
+            else:assert False,("secret oracle missed encoding/channel",encoding,name)
+    return channels
 
 
 def _seed_variants1174(c,m,admission,args):
@@ -14015,14 +14122,43 @@ def _native_report_valid1174(record, required, expected_head=None, expected_dige
 
 
 def _snapshot1174(root):
+    """Endpoint content observation; equal snapshots cannot exclude write-and-restore.
+
+    Include tracked, untracked and ignored checkout entries. Git internals are
+    excluded; callers must keep generated evidence/cache outside the checkout.
+    Symlinks are recorded without following them and special files never read.
+    """
+    import stat
+    root=Path(root)
     tracked=subprocess.check_output(["git","--no-replace-objects","-C",str(root),"ls-files","-z"]).split(b"\0")
+    names={os.fsdecode(name) for name in tracked if name}
+    for directory,dirs,files in os.walk(root,followlinks=False):
+        dirs[:]=sorted(name for name in dirs if name!=".git")
+        for name in dirs+sorted(files):
+            path=Path(directory)/name
+            if name==".git":continue
+            names.add(path.relative_to(root).as_posix())
     records=[]
-    for name in tracked:
-        if not name:continue
-        path=Path(root)/os.fsdecode(name)
-        records.append((os.fsdecode(name),hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() and not path.is_symlink() else "nonregular"))
-    return dict(head=_g(root,"rev-parse","HEAD"),tree=_g(root,"rev-parse","HEAD^{tree}"),status=_g(root,"status","--porcelain=v1"),
-        file_count=len(records),content_sha256=hashlib.sha256(json.dumps(records,separators=(",",":")).encode()).hexdigest(),
+    for name in sorted(names):
+        path=root/name
+        parent=root
+        blocked=None
+        for part in Path(name).parts[:-1]:
+            parent=parent/part
+            if parent.is_symlink():blocked=parent.relative_to(root).as_posix();break
+        if blocked is not None:
+            records.append((name,("symlink_parent",blocked)));continue
+        try:entry=path.lstat()
+        except FileNotFoundError:record=("missing",)
+        else:
+            mode=stat.S_IMODE(entry.st_mode)
+            if stat.S_ISLNK(entry.st_mode):record=("symlink",mode,os.readlink(path))
+            elif stat.S_ISREG(entry.st_mode):record=("file",mode,hashlib.sha256(path.read_bytes()).hexdigest())
+            elif stat.S_ISDIR(entry.st_mode):record=("directory",mode)
+            else:record=("nonregular",entry.st_mode,entry.st_rdev)
+        records.append((name,record))
+    return dict(head=_g(root,"rev-parse","HEAD"),tree=_g(root,"rev-parse","HEAD^{tree}"),status=_g(root,"status","--porcelain=v1","--untracked-files=all"),
+        file_count=len(records),content_sha256=hashlib.sha256(json.dumps(records,separators=(",",":"),ensure_ascii=True).encode()).hexdigest(),
         index_sha256=hashlib.sha256(subprocess.check_output(["git","--no-replace-objects","-C",str(root),"diff","--cached","--binary"])).hexdigest(),
         work_sha256=hashlib.sha256(subprocess.check_output(["git","--no-replace-objects","-C",str(root),"diff","--binary"])).hexdigest())
 
@@ -14095,8 +14231,10 @@ def main():
     cases, mutants = CASES, MUTANTS
     available = [name for name, _ in cases]
     missing = sorted(name for name in applicable if available.count(name) != 1)
-    CASES = [(name, fn) for name, fn in cases if not name.startswith("wp1174_") or name in applicable]
-    MUTANTS = {name: value for name, value in mutants.items() if not name.startswith("m1174_") or actual_os == "Linux"}
+    CASES = [(name, fn) for name, fn in cases if (not name.startswith("wp1174_") or name in applicable)
+        and (actual_os == "Linux" or name not in _WP1303_LINUX_CASES)]
+    MUTANTS = {name: value for name, value in mutants.items() if (not name.startswith("m1174_") or actual_os == "Linux")
+        and (actual_os == "Linux" or name not in _WP1303_R4_MUTANTS and not any(t in _WP1303_LINUX_CASES for t in value[2]))}
     try:
         if missing:
             print("WP1174 required IDs missing/duplicate: " + json.dumps(missing))
@@ -14781,6 +14919,747 @@ MUTANTS.update({
     "m1174_r26_workflow_reread": ('human = _1174_human_evidence(a, admission, st["pending_sha"])\n        rc = cmd_accept(a, directory)', 'human = _1174_human_evidence(a, admission, st["pending_sha"])\n        snapshots[str(a.workflow_runs)] = Path(a.workflow_runs).read_bytes()\n        rc = cmd_accept(a, directory)', ["wp1174_writer_accept"]),
     "m1174_r26_workflow_verify_path": ('_trang_du(_doc_json(a.workflow_runs, RC_GATE)[0], "workflow_runs", "scoped human workflow_runs")', '_trang_du(_1174_read_json(a.workflow_runs), "workflow_runs", "scoped human workflow_runs")', ["wp1174_writer_accept"]),
 })
+
+
+# WP1303: current target authority is independent of the retired F/R22 source route.
+def _target_context1303(c):
+    """Pure proof/context controls, portable to the focused Windows lane."""
+    import copy
+    from datetime import timedelta
+    from unittest.mock import patch
+    m,_,a,now=_a1174(c)
+    identity=m._identity("codex","openai","codex_service","machine")
+    a["enrollment"]["initial_state_projection"].update(executor="codex",reviewer="codex",executor_identity=identity,reviewer_identity=dict(identity))
+    plan=dict(mission_id="gh-1172",revision=a["mission_revision"],packet_graph=[{k:a[k] for k in ("packet","revision","generation","contract_id")}],
+        routing_history=dict(previous_exception=dict(actual_human_audit_required=True,hard_expiry_utc="2098-01-01T00:00:00Z")))
+    plan_raw=m._1174_bytes(plan);bound=copy.deepcopy(a);bound["mission_plan_sha256"]=hashlib.sha256(plan_raw).hexdigest()
+    comment=dict(id=1,user=dict(login="ducthangho",type="User"),author_association="OWNER",updated_at="2026-01-01T00:00:00Z",
+        issue_url="https://api.github.com/repos/ducthangho/tra-luat/issues/1172",html_url="https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-1",
+        body="## Mission #1172 — Installed revision "+str(a["mission_revision"])+"\nPlan SHA256 `"+bound["mission_plan_sha256"]+"`\n```json\n"+plan_raw.decode()+"```\n")
+    _reject1174(m._1174_installed_mission,[comment],bound,now,reason="Mission route expiry/human requirement")
+    bound["expires_utc"]="2097-01-01T00:00:00Z"
+    assert m._1174_installed_mission([comment],bound,now)[1]==1
+    proof=m._1174TargetProof(m._1174_bytes(a),b"synthetic verified I2", "a"*40,1,now+timedelta(hours=1))
+    assert m._1174_target_matches(a) is False
+    token=m._1174_TARGET_AUTHORITY.set(proof)
+    try:
+        assert m._1174_target_matches(a) is True
+        with patch.object(m,"_1174_seed",return_value=bytes(range(32))):raw=m._1174_initial(a)
+        assert m._1174_state(raw,a)["state"]=="awaiting_lease"
+        m._1174_alive(a)
+        for absent in (None,proof._replace(admission=b"wrong binding")):
+            absent_token=m._1174_TARGET_AUTHORITY.set(absent)
+            try:
+                with patch.object(m,"_1174_seed",return_value=bytes(range(32))):
+                    for fn,args in ((m._1174_initial,(a,)),(m._1174_state,(raw,a)),(m._1174_alive,(a,))):
+                        _reject1174(fn,*args,reason="same-family policy required" if absent is None and fn is not m._1174_alive else
+                            "owner-scoped policy active binding" if absent is None else "target proof scope/context mismatch")
+            finally:m._1174_TARGET_AUTHORITY.reset(absent_token)
+        for key,value in (("packet",55),("generation",6),("mission_plan_sha256","b"*64)):
+            bad=copy.deepcopy(a);bad[key]=value
+            _reject1174(m._1174_target_matches,bad,reason="target proof scope/context mismatch")
+        with patch.object(m,"_1174_TARGET_AUTHORITY") as context:
+            for fake in (True,{},proof._replace(admission=b"different")):
+                context.get.return_value=fake
+                _reject1174(m._1174_target_matches,a,reason="target proof scope/context mismatch")
+            context.get.return_value=proof._replace(expires=now-timedelta(seconds=1))
+            _reject1174(m._1174_target_matches,a,reason="target proof expired")
+        for variable,value in ((m._1174_SOURCE_POLICY,{}),(m._1174_OWNER_POLICY,{}),(m._1174_VIEW_ONLY,True)):
+            other=variable.set(value)
+            try:_reject1174(m._1174_target_matches,a,reason="target proof scope/context mismatch")
+            finally:variable.reset(other)
+        def clean_public(args,directory):
+            assert all(v.get() is None for v in (m._1174_TARGET_AUTHORITY,m._1174_SOURCE_POLICY,m._1174_OWNER_POLICY)), "public main retained authority context"
+            return 0
+        with patch.object(m,"cmd_where",side_effect=clean_public):assert m.main(["where"])==0
+        assert m._1174_TARGET_AUTHORITY.get() is proof
+        for fail in (False,True):
+            @m._1174_target_entry
+            def entry():
+                assert all(v.get() is None for v in (m._1174_TARGET_AUTHORITY,m._1174_SOURCE_POLICY,m._1174_OWNER_POLICY))
+                assert m._1174_VIEW_ONLY.get() is False
+                if fail:raise ValueError("synthetic entry failure")
+                return "healthy"
+            try:assert entry()=="healthy"
+            except ValueError as ex:assert fail and str(ex)=="synthetic entry failure"
+            assert m._1174_TARGET_AUTHORITY.get() is proof
+    finally:m._1174_TARGET_AUTHORITY.reset(token)
+    assert m._1174_TARGET_AUTHORITY.get() is None
+
+    # Portable identity/I2 matrix. These proofs are synthetic unit inputs; the
+    # native receipt and real canonical I2 chain are exercised separately below.
+    tuples=(("codex","openai","codex_cli","machine"),
+            ("codex","openai","codex_desktop","machine"),
+            ("claude","claude","claude_code","machine/local"),
+            ("google_antigravity","claude","antigravity","machine/local"),
+            ("google_antigravity","openai","antigravity","machine/local"),
+            ("google_antigravity","gemini","antigravity","machine/local"))
+    executor_tuples=(*tuples,("codex","openai","codex_service","machine"))
+    for executor_values,values in ((e,r) for e in executor_tuples for r in tuples if e[0]==r[0] or e[1]==r[1]):
+        executor=m._identity(*executor_values)
+        identity=m._identity(*values)
+        scope=copy.deepcopy(a);p=scope["enrollment"]["initial_state_projection"]
+        p.update(executor=executor["provider"],reviewer=identity["provider"],executor_identity=executor,reviewer_identity=dict(identity))
+        nc=dict(lease_id="native-target",lease_ref="origin/ops/target",lease_oid="a"*40,
+            lease_path="ops/leases/target.yaml",repo=m._1174_REPO,branch="target",generation=scope["generation"],
+            spec_hash="b"*64,assurance_target="human_audited",executor=executor,reviewer=dict(identity),required_checks=[])
+        st=dict(p,ngu_canh_lease=nc,lease=dict(lease_id=nc["lease_id"]),luat_adr0054=False)
+        fresh=m._1174TargetProof(m._1174_bytes(scope),m._1174_bytes(nc),"a"*40,1,now+timedelta(hours=1))
+        previous=m._1174_TRANSACTION
+        m._1174_TRANSACTION=dict(admission=scope,proposal=None)
+        token=m._1174_TARGET_AUTHORITY.set(fresh)
+        try:
+            before=m._1174_bytes(st)
+            assert m._1174_native_review_assurance(st)=="same_provider_approved","native target retained final-human coupling"
+            assert m._1174_bytes(st)==before and m._1174_TRANSACTION["proposal"] is None
+            for badproof,reason in ((None,"native target review proof required"),
+                    (fresh._replace(verified_i2=b"wrong"),"native target canonical lease binding")):
+                changed=m._1174_TARGET_AUTHORITY.set(badproof)
+                try:_reject1174(m._1174_native_review_assurance,st,reason=reason)
+                finally:m._1174_TARGET_AUTHORITY.reset(changed)
+            wrong=copy.deepcopy(st);wrong["ngu_canh_lease"]["lease_oid"]="f"*40
+            _reject1174(m._1174_native_review_assurance,wrong,reason="native target canonical lease binding")
+            for variable,value in ((m._1174_SOURCE_POLICY,{}),(m._1174_OWNER_POLICY,{}),(m._1174_VIEW_ONLY,True)):
+                changed=variable.set(value)
+                try:_reject1174(m._1174_native_review_assurance,st,reason="target proof scope/context mismatch")
+                finally:variable.reset(changed)
+            legacy=copy.deepcopy(st);legacy["ngu_canh_lease"]["assurance_target"]="cross_approved"
+            assert m._1174_native_review_assurance(legacy)=="cross_approved"
+            m._1174_TRANSACTION=None
+            assert m._1174_native_review_assurance(st)=="human_audited"
+        finally:
+            m._1174_TRANSACTION=previous;m._1174_TARGET_AUTHORITY.reset(token)
+
+
+def _target_chain1303_one(c, native_identity=None, executor_identity=None, focused=False):
+    """Real parser/canonical resolver/I2/reducers; only external authority/OS transport is synthetic."""
+    import contextlib,copy,io
+    from unittest.mock import patch
+    def exercise(f):
+        m,a,w,sample=f["m"],f["admission"],f["w"],f["sample"]
+        e=a["enrollment"];target,witness=Path(e["state_path"]),Path(e["witness_path"])
+        head=_g(w,"rev-parse","refs/remotes/origin/agent/wp55-g1-claude")
+        common=["--root",str(w),"--admission",str(sample),"--revision","1","--generation","1","--coordinator-id","coordinator-1"]
+        trace=[]
+        def invoke(name,*flags,expect=0,reason=None,error_reason=None):
+            image=json.loads(target.read_bytes())
+            argv=["--state-dir",str(target.parent),name,"--packet","55",*map(str,flags),*common]
+            if name not in ("status","next-comment"):argv += ["--expected-revision",str(image["state_revision"])]
+            before=(target.read_bytes(),witness.read_bytes())
+            out,err=io.StringIO(),io.StringIO()
+            with patch.object(m,"_1174_probe",return_value={}),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):rc=m.main(argv)
+            assert rc==expect,("target lifecycle result",name,rc,out.getvalue(),err.getvalue())
+            if expect:
+                result=json.loads(out.getvalue())
+                assert not result["dispatch_allowed"] and (reason is None or reason in result["detail"]),(name,result)
+                assert before==(target.read_bytes(),witness.read_bytes()),"target rejection wrote state/witness"
+                assert error_reason is None or error_reason in err.getvalue(),(name,error_reason,err.getvalue())
+            assert m._1174_TARGET_AUTHORITY.get() is None and m._1174_SOURCE_POLICY.get() is None and m._1174_OWNER_POLICY.get() is None
+            image=json.loads(target.read_bytes())
+            trace.append(dict(command=name,rc=rc,state=image["state"],revision=image["state_revision"]))
+            return image
+        assert json.loads(target.read_bytes())["luat_adr0054"] is False,"target activated global retired policy"
+        # Both enrolled diagnostic readers and ordinary writers traverse current target authority.
+        invoke("status");invoke("next-comment")
+        invoke("record-post","--for","reviewing","--comment-id","799997","--source-lease-ref","origin/ops/source",
+            "--source-lease-path","ops/leases/source.yaml",expect=8,reason="source input scope/directory")
+        actual=m._1174_resolve
+        for defect in (() if focused else ("missing","mismatch","expired","changed_under_lock")):
+            calls=[0]
+            def broken(*args,**kwargs):
+                admission,facts=actual(*args,**kwargs);facts=dict(facts);calls[0]+=1
+                proof=facts["target_authority"]
+                if defect=="missing":facts.pop("target_authority")
+                elif defect=="mismatch":facts["target_authority"]=proof._replace(admission=b"forged")
+                elif defect=="expired":facts["target_authority"]=proof._replace(expires=m.datetime(2000,1,1,tzinfo=m.timezone.utc))
+                elif calls[0]==2:facts["target_authority"]=proof._replace(mission_install_id=proof.mission_install_id+1)
+                return admission,facts
+            with patch.object(m,"_1174_resolve",side_effect=broken):
+                invoke("record-post","--for","reviewing","--comment-id","799999",expect=8,
+                    reason={"missing":"current target proof required","mismatch":"target proof scope/context mismatch",
+                        "expired":"target proof expired","changed_under_lock":"authority changed under lock"}[defect])
+        # Canonical API authority defects are rejected by the unchanged resolver, before reducers.
+        api=f["api"]
+        for defect in (() if focused else ("owner","mission_hash","revoked_route")):
+            def invalid(endpoint,**limits):
+                result=copy.deepcopy(api(endpoint,**limits))
+                if "/issues/1172/comments?" in endpoint:
+                    if defect=="owner":result[0]["user"]["login"]="agent"
+                    elif defect=="mission_hash":result[0]["body"]=result[0]["body"].replace(a["mission_plan_sha256"],"f"*64)
+                    else:
+                        body=result[0]["body"];old=body.split("```json\n",1)[1].split("```",1)[0]
+                        plan=json.loads(old);plan["routing_history"]["previous_exception"]["actual_human_audit_required"]=False
+                        raw=m._1174_bytes(plan);result[0]["body"]=body.replace(old,raw.decode()).replace(a["mission_plan_sha256"],hashlib.sha256(raw).hexdigest())
+                return result
+            with patch.object(m,"_1174_api",side_effect=invalid):
+                invoke("record-post","--for","reviewing","--comment-id","799998",expect=8)
+        identity=a["enrollment"]["initial_state_projection"]["reviewer_identity"]
+        runtime=["--provider",identity["provider"],"--model-family",identity["model_family"],
+            "--execution-surface",identity["execution_surface"],"--transport",identity["transport"]]
+        executor=a["enrollment"]["initial_state_projection"]["executor_identity"]
+        exec_runtime=["--provider",executor["provider"],"--model-family",executor["model_family"],
+            "--execution-surface",executor["execution_surface"],"--transport",executor["transport"]]
+        invoke("begin-attempt",*exec_runtime,"--bang-chung-moi-truong",anh_doctor())
+        invoke("record-post","--for","reviewing","--comment-id","900002")
+        invoke("transition","--to","reviewing","--comment-id","900002","--head-sha",head)
+        codex=identity["provider"]=="codex"
+        if codex:invoke("record-codex-call","--head",head,"--run-id","target-call")
+        receipt=c.tmp/"target-review.json"
+        record=dict(schema="wp1174_service_advisory.v1",head=head,identity=identity,verdict="approve",finding_ids=[],assurance="advisory_review")
+        if native_identity is not None:
+            provider={"codex":"openai_codex","claude":"anthropic_claude","google_antigravity":"google_antigravity"}[identity["provider"]]
+            model=dict(provider=provider,model_family=m.HO_CANON[identity["model_family"]],
+                surface=identity["execution_surface"],transport=identity["transport"])
+            image=json.loads(target.read_bytes())
+            exec_provider={"codex":"openai_codex","claude":"anthropic_claude","google_antigravity":"google_antigravity"}[executor["provider"]]
+            exec_model=dict(provider=exec_provider,model_family=m.HO_CANON[executor["model_family"]],
+                surface=executor["execution_surface"],transport=executor["transport"])
+            record=_bn812(w,head,image["ngu_canh_lease"]["spec_hash"],bn=dict(assurance="same_provider_approved",
+                executor_provider=exec_provider,model_executor_identity=dict(exec_model,session_run_id="target-executor"),
+                model_reviewer_identity=dict(model,session_run_id="target-reviewer",phien_doc_lap=True)))
+        receipt.write_bytes(m._1174_bytes(record))
+        review=[*runtime,"--verdict","approve","--reviewed-sha",head,"--bien-nhan",str(receipt)]
+        if codex:review += ["--codex-call","target-call"]
+        native_reason="legacy predicate rejected" if native_identity is not None else None
+        bad=list(review);bad[bad.index("--reviewed-sha")+1]="f"*40
+        invoke("record-review",*bad,expect=8,reason=native_reason or "advisory attempt/head")
+        receipt.write_bytes(m._1174_bytes(dict(record,assurance="human_audited")))
+        invoke("record-review",*review,expect=8,reason=native_reason or "advisory receipt closed bindings")
+        if native_identity is not None and not focused:
+            for field,value in (("assurance","cross_approved"),("assurance","advisory_review"),
+                    ("generation",2),("lease_id","other-lease"),("spec_hash","f"*64),
+                    ("reviewed_sha","f"*40),("verdict_sha256","f"*64),
+                    ("bang_lop",[dict(slug="open-finding",hang="P2")])):
+                receipt.write_bytes(m._1174_bytes(dict(record,**{field:value})))
+                invoke("record-review",*review,expect=8,reason=native_reason)
+            for field,value in (("provider","human"),("surface","chatgpt_web"),("transport","human"),("model_family","gemini" if identity["model_family"]!="gemini" else "gpt")):
+                bad=copy.deepcopy(record);bad["model_reviewer_identity"][field]=value
+                receipt.write_bytes(m._1174_bytes(bad));invoke("record-review",*review,expect=8,reason=native_reason)
+            bad=copy.deepcopy(record);mri=bad["model_reviewer_identity"]
+            mri.pop("session_run_id");mri.pop("phien_doc_lap");mri["KHONG_do_duoc"]="fixture has no independent session"
+            receipt.write_bytes(m._1174_bytes(bad));invoke("record-review",*review,expect=8,reason=native_reason)
+            if codex:
+                bad=list(review);bad[bad.index("--codex-call")+1]="unreserved"
+                receipt.write_bytes(m._1174_bytes(record));invoke("record-review",*bad,expect=8,reason=native_reason)
+        receipt.write_bytes(m._1174_bytes(record))
+        # On old H the CLI case reaches this exact reducer, then rejects only
+        # because the native model assurance is compared to final human_audited.
+        pending=invoke("record-review",*review)
+        assert pending["state"]=="approved_pending" and pending["accepted_sha"] is None,"advisory accepted without actual human"
+        assert pending["scoped_review"]["assurance"]=="advisory_review" and pending["luat_adr0054"] is False
+        assert pending["attempts_used"]==pending["review_rounds_used"]==1
+        assert pending["codex_review_calls_used"]==int(codex)
+        assert pending["ngu_canh_lease"]["assurance_target"]=="human_audited"
+        assert pending["scoped_review"]["receipt_sha256"]==hashlib.sha256(receipt.read_bytes()).hexdigest()
+        if native_identity is not None:
+            assert pending["bien_nhan_approve"]["sha256"]==hashlib.sha256(receipt.read_bytes()).hexdigest()
+            assert pending["bien_nhan_approve"]["tep"]==str(receipt)
+        invoke("record-review",*review,expect=8,reason=native_reason or "advisory attempt/head")
+        if native_identity is not None and not focused:
+            # Supplemental predicate checks reuse the actual validated native
+            # receipt and resolver proof after the positive real-router oracle.
+            # This is not a replacement for the parser/I2 chain above.
+            import argparse
+            _,verified=m._1174_resolve(w,55,1,1,sample)
+            proof=verified["target_authority"]
+            args=argparse.Namespace(root=str(w),bien_nhan=str(receipt),verdict="approve",reviewed_sha=head,finding_id=None)
+            previous=m._1174_TRANSACTION
+            token=m._1174_TARGET_AUTHORITY.set(proof)
+            m._1174_TRANSACTION=dict(directory=target.parent,state=pending,proposal=None,admission=a)
+            try:
+                assert m._du_dieu_kien_approve(pending,args)["sha256"]==hashlib.sha256(receipt.read_bytes()).hexdigest()
+                for badproof,reason in ((None,"native target review proof required"),
+                        (proof._replace(verified_i2=b"wrong verified lease"),"native target canonical lease binding")):
+                    changed=m._1174_TARGET_AUTHORITY.set(badproof)
+                    try:_reject1174(m._du_dieu_kien_approve,pending,args,reason=reason)
+                    finally:m._1174_TARGET_AUTHORITY.reset(changed)
+                wrong=copy.deepcopy(pending);wrong["ngu_canh_lease"]["lease_oid"]="f"*40
+                _reject1174(m._du_dieu_kien_approve,wrong,args,reason="native target canonical lease binding")
+                for variable,value in ((m._1174_SOURCE_POLICY,{}),(m._1174_OWNER_POLICY,{}),(m._1174_VIEW_ONLY,True)):
+                    changed=variable.set(value)
+                    try:_reject1174(m._du_dieu_kien_approve,pending,args,reason="target proof scope/context mismatch")
+                    finally:variable.reset(changed)
+                assert m._1174_TRANSACTION["proposal"] is None
+            finally:
+                m._1174_TRANSACTION=previous;m._1174_TARGET_AUTHORITY.reset(token)
+        invoke("accept","--pr","55","--workflow-runs",receipt,"--workflow-jobs",receipt,"--check-runs",receipt,"--connector",receipt,expect=8)
+        # Existing canonical actual-human, publication, CI and connector validators execute on this pending target.
+        _,facts=m._1174_resolve(w,55,1,1,sample)
+        def pair(image):
+            raw=m._1174_bytes(image);target.write_bytes(raw)
+            witness.write_bytes(m._1174_bytes(dict(m._1174_reserved(e["id"],e["binding_sha256"],1),phase="initialized",witness_revision=1,
+                high_water=dict(generation=1,state_revision=image["state_revision"],state_sha256=hashlib.sha256(raw).hexdigest()))))
+        if native_identity is not None:
+            # Shared native predicate consumers keep exact connector references.
+            import argparse
+            connector_receipt=c.tmp/"target-connector-receipt.json"
+            p3record=dict(record,bang_lop=[dict(slug="connector-style",hang="P3",connector_refs=[["review_comments",11]])])
+            connector_receipt.write_bytes(m._1174_bytes(p3record))
+            args=argparse.Namespace(root=str(w),bien_nhan_connector=str(connector_receipt))
+            previous=m._1174_TRANSACTION;token=m._1174_TARGET_AUTHORITY.set(facts["target_authority"])
+            m._1174_TRANSACTION=dict(directory=target.parent,state=pending,proposal=None,admission=a)
+            try:
+                assert m._slug_connector(pending,args,head,[("review_comments",11)])==["connector-style"]
+                try:m._slug_connector(pending,args,head,[("review_comments",12)])
+                except SystemExit as ex:assert ex.code==11
+                else:assert False,"target connector accepted mismatched references"
+                assert m._1174_TRANSACTION["proposal"] is None
+            finally:
+                m._1174_TRANSACTION=previous;m._1174_TARGET_AUTHORITY.reset(token)
+            # CI-do uses the same strict native predicate and exact workflow/job
+            # references as connector reopen. No model review can accept the target.
+            ci_connector=c.tmp/"target-ci-connector.json"
+            ci_connector.write_bytes(m._1174_bytes(dict(repo=m._1174_REPO,pr=55,head_sha=head,
+                reviews=dict(total_count=0,items=[]),review_comments=dict(total_count=0,items=[]),
+                issue_comments=dict(total_count=1,items=[dict(id=21,user=dict(login=m.BOT_CONNECTOR),
+                    issue_url=m.API_GH+m._1174_REPO+"/issues/55",body="**Reviewed commit:** `"+head+"`")]))))
+            workflow,job=m.CHECK_BAT_BUOC[0]
+            run=dict(id=101,path=workflow,head_sha=head,repository=dict(full_name=m._1174_REPO),run_attempt=1,
+                status="completed",conclusion="failure",check_suite_id=501)
+            cr=dict(id=301,name=job,head_sha=head,status="completed",conclusion="failure",check_suite=dict(id=501),
+                app=dict(slug=m.APP_CHECK),url=m.API_GH+m._1174_REPO+"/check-runs/301")
+            jj=dict(id=201,run_id=101,run_attempt=1,name=job,head_sha=head,status="completed",conclusion="failure",check_run_url=cr["url"])
+            ci_paths=[]
+            for field,rows in (("workflow_runs",[run]),("jobs",[jj]),("check_runs",[cr])):
+                path=c.tmp/("target-ci-"+field+".json");path.write_bytes(m._1174_bytes(dict(total_count=1,**{field:rows})));ci_paths.append(path)
+            negative=dict(record,verdict="changes_requested",bang_lop=[dict(slug="ci-fix",hang="P2",check_refs=[[workflow,job]])])
+            connector_receipt.write_bytes(m._1174_bytes(negative))
+            flags=["--nguyen-nhan","ci-do","--pr","55","--connector",str(ci_connector),"--bien-nhan",str(connector_receipt),
+                "--finding-id","ci-fix","--workflow-runs",ci_paths[0],"--workflow-jobs",ci_paths[1],"--check-runs",ci_paths[2]]
+            cr["head_sha"]="f"*40;ci_paths[2].write_bytes(m._1174_bytes(dict(total_count=1,check_runs=[cr])))
+            invoke("mo-lai",*flags,expect=8,reason="legacy predicate rejected",error_reason="check-run 301 không đỏ thật")
+            cr["head_sha"]=head;ci_paths[2].write_bytes(m._1174_bytes(dict(total_count=1,check_runs=[cr])))
+            reopened=invoke("mo-lai",*flags)
+            assert reopened["state"]=="running" and reopened["accepted_sha"] is None and reopened["finding_counts"]["ci-fix"]==1
+            assert reopened["mo_lai_tu"]==dict(nguyen_nhan="ci-do",generation=1,sha=head)
+            pair(pending)
+            connector=c.tmp/"target-connector.json"
+            cn=dict(repo=m._1174_REPO,pr=55,head_sha=head,
+                reviews=dict(total_count=0,items=[]),issue_comments=dict(total_count=0,items=[]),
+                review_comments=dict(total_count=1,items=[dict(id=11,user=dict(login=m.BOT_CONNECTOR),
+                    body="![P2 Badge] fixture",commit_id=head,pull_request_url=m.API_GH+m._1174_REPO+"/pulls/55")]))
+            connector.write_bytes(m._1174_bytes(cn))
+            negative=dict(record,verdict="changes_requested",bang_lop=[dict(slug="connector-fix",hang="P2",connector_refs=[["review_comments",11]])])
+            connector_receipt.write_bytes(m._1174_bytes(negative))
+            flags=["--nguyen-nhan","connector","--pr","55","--connector",str(connector),
+                "--bien-nhan",str(connector_receipt),"--finding-id","connector-fix"]
+            cn["review_comments"]["items"][0]["id"]=12;connector.write_bytes(m._1174_bytes(cn))
+            invoke("mo-lai",*flags,expect=8,reason="legacy predicate rejected")
+            cn["review_comments"]["items"][0]["id"]=11;connector.write_bytes(m._1174_bytes(cn))
+            reopened=invoke("mo-lai",*flags)
+            assert reopened["state"]=="cho_chu_kho" and reopened["accepted_sha"] is None
+            assert reopened["finding_counts"]["connector-fix"]==1 and reopened["luat_adr0054"] is False
+            pair(pending)  # restore the synthetic pending fixture for independent human acceptance oracles
+        accepted=_accept_entry1174(Ctx(c.script,c.tmp/"human"),chain=(m,a,pending,target,witness,pair,w),target_facts=facts)
+        assert accepted["human_acceptance"]["assurance"]=="human_audited" and accepted["state"]=="accepted"
+        (c.tmp/"target-human-chain.json").write_text(json.dumps(dict(synthetic_authority=True,actual_human=False,native=False,trace=trace),indent=2)+"\n")
+    return _composition1174(c,target_human=True,hook=exercise,target_identity=native_identity,executor_identity=executor_identity)
+
+
+def _target_chain1303(c):
+    # Keep the registered test ID and the existing service oracle. Each native
+    # tuple must pass actual canonical lease/receipt validation, not a stub.
+    # CLI first gives a reachable old-H failure at the positive pending step.
+    tuples=[("codex","openai","codex_cli","machine"),
+        ("codex","openai","codex_desktop","machine"),
+        ("claude","claude","claude_code","machine/local"),
+        ("google_antigravity","claude","antigravity","machine/local"),
+        ("google_antigravity","openai","antigravity","machine/local"),
+        ("google_antigravity","gemini","antigravity","machine/local")]
+    for index,values in enumerate([*tuples,None]):
+        directory=c.tmp/str(index);directory.mkdir()
+        identity=None if values is None else dict(zip(("provider","model_family","execution_surface","transport"),values))
+        _target_chain1303_one(Ctx(c.script,directory),identity)
+
+
+def _target_route1303(c):
+    """Portable real-router boundary; API/OS/seed are synthetic, no target writes occur.
+
+    This probe also runs against old M: it must reach the ordinary Mission guard
+    rather than fail on the retired source policy. It needs no new API on old M.
+    """
+    import contextlib,io
+    from datetime import timedelta
+    from unittest.mock import patch
+    m,_,a,now=_a1174(c)
+    identity=m._identity("codex","openai","codex_service","machine")
+    e=a["enrollment"]
+    e["initial_state_projection"].update(executor="codex",reviewer="codex",executor_identity=identity,reviewer_identity=dict(identity))
+    facts={}
+    if hasattr(m,"_1174TargetProof"):
+        facts["target_authority"]=m._1174TargetProof(m._1174_bytes(a),b"synthetic verified I2","a"*40,1,now+timedelta(hours=1))
+    Path(e["lock_path"]).touch()
+    argv=["--state-dir",e["journal_root"],"init","--packet","1174","--mission","1173","--executor","codex","--reviewer","codex",
+        "--executor-execution-surface","codex_service","--executor-transport","machine",
+        "--reviewer-execution-surface","codex_service","--reviewer-transport","machine",
+        "--root",e["git_root"],"--admission","synthetic","--revision","7","--generation","5",
+        "--coordinator-id",e["coordinator_id"],"--expected-revision","absent"]
+    out=io.StringIO()
+    # Stub the fixed lock as an OS seam too; this is a portable algorithm check.
+    @contextlib.contextmanager
+    def lock(path):yield None
+    with patch.object(m,"_1174_resolve",return_value=(a,facts)),patch.object(m,"_1174_runtime",return_value={}), \
+            patch.object(m.platform,"system",return_value="Linux"),patch.object(m,"_1174_lock",lock), \
+            patch.object(m,"_1174_seed",return_value=bytes(range(32))),patch.object(m,"_1174_probe") as probe, \
+            patch.object(m,"_1174_write") as write,contextlib.redirect_stdout(out):
+        rc=m.main(argv)
+    result=json.loads(out.getvalue())
+    assert rc==8 and "init granted allowance/Mission" in result["detail"],("target router retained retired source dependency",rc,result)
+    assert not probe.called and not write.called and not Path(e["state_path"]).exists() and not Path(e["witness_path"]).exists()
+    (c.tmp/"portable-target-route.json").write_text(json.dumps(dict(rc=rc,result=result,synthetic_authority=True,native=False,actual_human=False))+"\n")
+
+
+CASES += [("wp1303_target_context",_target_context1303),("wp1303_target_route",_target_route1303),("wp1303_target_human_chain",_target_chain1303)]
+MUTANTS.update({
+    "wp1303_target_mission_expiry": ('_1174_time(admission["expires_utc"]) <= _1174_time(exception["hard_expiry_utc"])', 'True', ["wp1303_target_context"]),
+    "wp1303_target_main_context": ('@_1174_target_entry\ndef main(argv=None) -> int:', 'def main(argv=None) -> int:', ["wp1303_target_context"]),
+    "wp1303_target_proof_binding": ('proof.admission == _1174_bytes(admission)', 'True', ["wp1303_target_context"]),
+    "wp1303_target_proof_expiry": ('datetime.now(timezone.utc) < proof.expires', 'True', ["wp1303_target_context"]),
+    "wp1303_target_source_contamination": ('_1174_SOURCE_POLICY.get() is None and _1174_OWNER_POLICY.get() is None and not _1174_VIEW_ONLY.get()', 'True', ["wp1303_target_context"]),
+    "wp1303_target_entry_reset": ('tokens = [var.set(False if var is _1174_VIEW_ONLY else None) for var in variables]', 'tokens = [var.set(var.get()) for var in variables]', ["wp1303_target_context"]),
+    "wp1303_target_retired_dependency": ('owner_policy=None, target_authority=target)', 'owner_policy=_1174_owner_policy(root, admission, lease, registration["spec_sha256"], comments), target_authority=target)', ["wp1303_target_human_chain"]),
+    "wp1303_native_final_assurance_coupling": ('return "same_provider_approved"  # native target receipt, scoped result stays advisory', 'return assurance  # restore final-human coupling', ["wp1303_target_human_chain"]),
+    "wp1303_native_i2_binding": ('proof.verified_i2 == _1174_bytes(nc)', 'True', ["wp1303_target_context","wp1303_target_human_chain"]),
+    "m1174_null_only_type_bypass": ('type(record[field]) in expected,"field type "+path',
+        '(record[field] is None or type(record[field]) in expected),"field type "+path', ["wp1174_admission_wrong_scope"]),
+    "m1174_credit_wrong_exception_class": ('fn(*args, **kwargs)\n    except ValueError as error:\n        assert str(error).startswith("WP1174 UNKNOWN:")',
+        'fn(*args, **kwargs)\n    except Exception as error:\n        assert str(error).startswith("WP1174 UNKNOWN:")', ["wp1174_gate_required_skip"]),
+})
+MUTANTS_NHAM_TEST |= {"m1174_credit_wrong_exception_class"}
+
+
+# WP1303 r4 class repairs: frozen IDs stay in order; these helpers also expose
+# bounded focused entrypoints for dispatcher/native-host follow-up.
+_CLOSED_ERRORS_HOST1303 = ("F6_closed_errors", "wp1174_init_preflight", "_closed_errors1174", "injected_fixture_router")
+
+
+def _canonical_vectors1303(root):
+    sep = "\\" if os.name == "nt" else "/"
+    return tuple((kind, root + tail) for kind, tail in (
+        ("dotdot", sep+"unused"+sep+".."+sep+"legacy.json"),
+        ("repeat", sep+sep+"legacy.json"), ("dot", sep+"."+sep+"legacy.json")))
+
+
+def _canonical_precondition1303(kind, value):
+    import ntpath, posixpath
+    host = ntpath if os.name == "nt" else posixpath
+    sep = "\\" if os.name == "nt" else "/"
+    assert host.isabs(value), "canonical-path negative must be absolute"
+    if os.name == "nt":
+        drive, tail = ntpath.splitdrive(value)
+        assert drive and tail.startswith("\\") and "/" not in value, "native Windows vector mixed separators"
+    parts = value.split(sep)
+    assert {"dotdot": ".." in parts, "dot": "." in parts,
+        "repeat": sep+sep in value[len(host.splitdrive(value)[0])+1:]}[kind], "whole canonical-path spelling missing"
+    assert host.normpath(value) != value, "whole canonical-path value became canonical"
+
+
+def _canonical_oracle1303(c):
+    canonical=str(c.tmp/"legacy.json")
+    for kind,value in _canonical_vectors1303(str(c.tmp)):
+        _canonical_precondition1303(kind,value)
+        try:_canonical_precondition1303(kind,canonical)
+        except AssertionError:pass
+        else:assert False,"canonical whole value earned negative precondition credit"
+    # Mixed spelling remains an independent stimulus, never clause-isolation credit.
+    if os.name=="nt":
+        mixed=str(c.tmp)+"/legacy.json"
+        try:_canonical_precondition1303("dot",mixed)
+        except AssertionError as ex:assert "mixed separators" in str(ex)
+        else:assert False,"mixed Windows vector called native"
+
+
+def _git_selectors1303(c):
+    from unittest.mock import patch
+    m=_module1174(c);repo=c.tmp/"git-selectors";repo.mkdir();_g(repo,"init","-q","-b","master")
+    (repo/"tracked").write_bytes(b"one\n");_g(repo,"add","tracked");_g(repo,"commit","-qm","one")
+    parent=_g(repo,"rev-parse","HEAD")
+    (repo/"tracked").write_bytes(b"two\n");_g(repo,"commit","-qam","two");head=_g(repo,"rev-parse","HEAD")
+    graft=c.tmp/"alternate-grafts";graft.write_text(head+"\n",encoding="utf-8",newline="\n")
+    shallow=c.tmp/"alternate-shallow";shallow.write_text(head+"\n",encoding="utf-8",newline="\n")
+    index=c.tmp/"alternate-index"
+    subprocess.run(["git","-C",str(repo),"read-tree","--empty"],env=dict(os.environ,GIT_INDEX_FILE=str(index)),check=True,capture_output=True)
+    _g(repo,"update-ref","refs/namespaces/poison/refs/heads/master",parent)
+    def actual(args,env):
+        result=subprocess.run(["git","--no-replace-objects","-C",str(repo),*args],env=env,capture_output=True,timeout=10)
+        assert result.returncode==0,(args,result.returncode,result.stderr)
+        return result.stdout
+    vectors=(("GIT_GRAFT_FILE",str(graft),["rev-list","HEAD"],(head+"\n"+parent+"\n").encode(),(head+"\n").encode()),
+        ("GIT_SHALLOW_FILE",str(shallow),["rev-list","HEAD"],(head+"\n"+parent+"\n").encode(),(head+"\n").encode()),
+        ("GIT_INDEX_FILE",str(index),["ls-files"],b"tracked\n",b""),
+        ("GIT_NAMESPACE","poison",["upload-pack","--advertise-refs","."],head.encode()+b" refs/heads/master",parent.encode()+b" refs/heads/master"))
+    clean=m._1174_git_env()
+    for selector,value,args,expected,poison in vectors:
+        clean_bytes=actual(args,clean)
+        poisoned=actual(args,dict(clean,**{selector:value}))
+        if selector=="GIT_NAMESPACE":assert expected in clean_bytes and poison in poisoned and expected not in poisoned
+        else:assert clean_bytes==expected and poisoned==poison,(selector,clean_bytes,poisoned)
+        with patch.dict(os.environ,{selector:value,"HTTPS_PROXY":"http://synthetic.invalid","SSL_CERT_FILE":"/synthetic/ca"}):
+            isolated=m._1174_git_env()
+            assert isolated["HTTPS_PROXY"]=="http://synthetic.invalid" and isolated["SSL_CERT_FILE"]=="/synthetic/ca"
+            assert actual(args,isolated)==clean_bytes,"scoped Git selector changed real view: "+selector
+            assert os.environ[selector]==value
+            @m._1174_scoped
+            def scoped():return m._git_do(repo,*args)
+            assert scoped()==(0,clean_bytes),"scoped Git child retained selector: "+selector
+    # Portable children must retain the real clean Git view on every host.
+    # The enrolled root's byte-exact spelling belongs to the Linux contract.
+    @m._1174_scoped
+    def clean_control():
+        assert m._git_do(repo,"rev-parse","HEAD")== (0,(head+"\n").encode()),"scoped Git clean HEAD changed"
+        assert m._git_do(repo,"status","--porcelain=v1","--untracked-files=all")== (0,b""),"scoped Git clean worktree changed"
+    clean_control()
+    if platform.system()=="Linux":
+        _call1174(m._1174_git_view,repo)
+        # A real Git worktree override must still fail the native root check.
+        other=c.tmp/"different-root";other.mkdir()
+        _g(repo,"config","core.worktree",str(other))
+        try:
+            _reject1174(m._1174_git_view,repo,reason="Git root identity")
+        finally:
+            _g(repo,"config","--unset","core.worktree")
+        _call1174(m._1174_git_view,repo)
+        clean_control()
+
+
+def _durability_label1303(c):
+    import contextlib,io
+    from unittest.mock import patch
+    for fault in ("open","fstat","file_fsync","directory_fsync","healthy"):
+        directory=c.tmp/fault;directory.mkdir();m=_module1174(Ctx(c.script,directory))
+        path=directory/"reused";raw=b"unchanged reused image\n";path.write_bytes(raw)
+        opened,stated,sync,read=m.os.open,m.os.fstat,m.os.fsync,m._1174_read
+        active=[False];barrier_fd=[None];calls=[]
+        def op(p,*a,**kw):
+            if active[0] and Path(p)==path:
+                calls.append("open")
+                if fault=="open":raise OSError("inert reused open fault")
+                fd=opened(p,*a,**kw);barrier_fd[0]=fd;return fd
+            return opened(p,*a,**kw)
+        def fs(fd):
+            if fd==barrier_fd[0]:
+                calls.append("fstat")
+                if fault=="fstat":raise OSError("inert reused fstat fault")
+            return stated(fd)
+        def sy(fd):
+            calls.append("file_fsync" if fd==barrier_fd[0] else "directory_fsync")
+            if fault==calls[-1]:raise OSError("inert reused "+fault+" fault")
+            return sync(fd)
+        def first_read(p):
+            result=read(p)
+            if Path(p)==path:active[0]=True
+            return result
+        args=m.build_parser().parse_args(["init","--packet","1174","--mission","1172","--executor","codex","--reviewer","claude",
+            "--admission","fixture","--revision","7","--generation","5","--coordinator-id","coordinator-1","--root",str(directory),"--expected-revision","absent"])
+        def barrier(*a,**kw):
+            m._1174_recheck_durable(path,raw)
+            raise ValueError("WP1174 UNKNOWN: healthy barrier finished without publication")
+        out=io.StringIO()
+        with patch.object(m,"_1174_resolve",side_effect=barrier),patch.object(m,"_1174_read",side_effect=first_read),patch.object(m.os,"open",side_effect=op),patch.object(m.os,"fstat",side_effect=fs),patch.object(m.os,"fsync",side_effect=sy),patch.object(m,"_1174_write") as write,patch.object(m,"_1174_probe") as probe,contextlib.redirect_stdout(out):
+            rc=m._1174_command(args,directory)
+        result=json.loads(out.getvalue())
+        assert rc==8 and result["status"]=="durability_unknown" and not result["dispatch_allowed"],(fault,rc,result)
+        assert not write.called and not probe.called and path.read_bytes()==raw and list(directory.iterdir())==[path]
+        assert fault=="healthy" or fault in calls,(fault,calls)
+        assert ("healthy barrier finished" if fault=="healthy" else "inert reused") in result["detail"]
+
+
+def _recovery_identity1303(c):
+    """Coherent identity-only snapshots through main/recovery; external authority is synthetic."""
+    import contextlib,io
+    from unittest.mock import patch
+    outcomes=[]
+    for target_present,variant in ((present,kind) for present in (False,True) for kind in ("control","packet","mission","lineage","binding","state_generation")):
+        directory=c.tmp/(str(target_present)+"-"+variant);directory.mkdir();m,a,init=_init_fixture1174(Ctx(c.script,directory));e=a["enrollment"]
+        with patch.object(m,"_1174_probe",return_value={}):m._1174_initialize(init,a,None)
+        source,witness=Path(e["state_path"]),Path(e["witness_path"]);Path(e["lock_path"]).touch()
+        oldgen=a["generation"];raw=source.read_bytes();digest=hashlib.sha256(raw).hexdigest()
+        journal=directory/"next";journal.mkdir();target=journal/source.name
+        e.update(journal_root=str(journal),state_path=str(target))
+        a.update(generation=oldgen+1,lineage=dict(predecessor_generation=oldgen,source_path=str(source),source_sha256=digest))
+        a["operation"]=dict(adoption_id="identity-next",generation=oldgen+1,binding_sha256=e["binding_sha256"],canonical_path=str(target),source_sha256=digest,cutover_started=False)
+        args=m.build_parser().parse_args(["adopt-state","--packet",str(a["packet"]),"--mode","initial","--adoption-id","identity-next","--expected-source-sha256",digest,"--expected-witness-revision","1","--target-generation",str(oldgen+1)])
+        writer=m._1174_write
+        def cut(path,value,**kw):
+            writer(path,value,**kw)
+            if Path(path)==(source if target_present else witness):raise OSError("identity prepared intent cut")
+        with patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_1174_write",side_effect=cut):
+            try:m._1174_adopt(args,a,witness.read_bytes())
+            except OSError as ex:assert "identity prepared intent cut" in str(ex)
+            else:assert False,"identity cut not reached"
+        assert target.exists() is target_present
+        water=json.loads(witness.read_bytes())
+        if variant!="control":
+            state=json.loads(raw)
+            key={"lineage":"enrollment_id","binding":"binding_sha256","state_generation":"generation"}.get(variant,variant)
+            state[key]=("foreign-enrollment" if variant=="lineage" else "c"*64 if variant=="binding" else state[key]+1)
+            raw=m._1174_bytes(state);digest=hashlib.sha256(raw).hexdigest();source.write_bytes(raw)
+            a["lineage"]["source_sha256"]=a["operation"]["source_sha256"]=water["pending_adoption"]["source_sha256"]=water["high_water"]["state_sha256"]=digest
+            witness.write_bytes(m._1174_bytes(water))
+            assert digest==a["lineage"]["source_sha256"]==a["operation"]["source_sha256"]==water["pending_adoption"]["source_sha256"]==water["high_water"]["state_sha256"]
+            if target_present:
+                # Rebind the existing intent image coherently too. Packet/Mission
+                # identity can be rejected by earlier projection/state predicates;
+                # lineage/binding/source-generation still reach source binding.
+                image=json.loads(target.read_bytes());payload=image["adoption"]["payload"]
+                projection=dict(state,schema_version=3,generation=a["generation"],state_revision=0,
+                    enrollment_id=e["id"],binding_sha256=e["binding_sha256"],scoped_review=None,human_acceptance=None)
+                projection.pop("adoption",None)
+                tombstone=m._1174_tombstone(a["packet"],oldgen,a["generation"],a["operation"]["adoption_id"],digest,e["binding_sha256"])
+                payload.update(source_snapshot=raw.decode(),source_sha256=digest,target_projection=projection,
+                    operation=dict(a["operation"]),tombstone=tombstone.decode(),tombstone_sha256=hashlib.sha256(tombstone).hexdigest())
+                image=dict(projection,state_revision=1,adoption=dict(phase="prepared",payload=payload,
+                    payload_sha256=hashlib.sha256(m._1174_bytes(payload)).hexdigest(),cutover_started=True))
+                target.write_bytes(m._1174_bytes(image))
+        _r12_recover_args1174(m,a,args,witness)
+        argv=["--state-dir",str(journal),"adopt-state","--packet",str(a["packet"]),"--mode","recovery","--adoption-id","identity-next","--disposition","resume_forward",
+            "--expected-witness-revision",args.expected_witness_revision,"--root",e["root"],"--admission","fixture","--revision",str(a["revision"]),"--generation",str(a["generation"]),"--coordinator-id",e["coordinator_id"]]
+        before={str(p):p.read_bytes() for p in directory.rglob("*") if p.is_file()}
+        out,err=io.StringIO(),io.StringIO()
+        with patch.object(m,"_1174_resolve",return_value=(a,{})),patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_probe",return_value={}) as probe,patch.object(m,"_1174_recheck_durable",wraps=m._1174_recheck_durable) as sync,patch.object(m,"_1174_write",wraps=writer) as writes,contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):rc=m.main(argv)
+        result=json.loads(out.getvalue())
+        if variant=="control":assert rc==0 and result["status"]=="completed_no_dispatch" and not result["dispatch_allowed"]
+        else:
+            reason=("full state validation rc=8" if variant=="packet" else "state v3 binding" if variant=="mission" else
+                "initialized source lineage identity" if variant in ("lineage","binding") else "initialized source state generation/revision/identity")
+            assert rc==8 and result["status"]=="UNKNOWN" and reason in result["detail"] and not result["dispatch_allowed"],(variant,rc,result,err.getvalue())
+            assert not probe.called and not sync.called and not writes.called,"recovery identity rejection reached effects"
+            assert before=={str(p):p.read_bytes() for p in directory.rglob("*") if p.is_file()}
+        outcomes.append(dict(target_present=target_present,variant=variant,actual_rc=rc,status=result["status"],detail=result.get("detail"),
+            dispatch_allowed=result["dispatch_allowed"],no_effects=variant!="control",synthetic_authority=True,native=False))
+        (c.tmp/"recovery-identity-results.json").write_text(json.dumps(outcomes,indent=2)+"\n",encoding="utf-8",newline="\n")
+
+
+def _private_aba1303(c):
+    import contextlib,copy
+    from unittest.mock import patch
+    for field in ("human_audit_comment","human_transition_comment","human_remote_run","workflow_runs"):
+        directory=c.tmp/field;directory.mkdir()
+        def historical(x):x["run"]["created_at"]="2026-11-04T08:00:00Z"
+        m,w,args,a,audit,pages,seams=_human_fixture1174(Ctx(c.script,directory),historical if field=="human_transition_comment" else None)
+        original=m._human_merge;reader=m._doc_json;seen=[];inside=[False]
+        previous=getattr(m,"_1174_TRANSACTION",None);caller_map={"caller-sentinel":b"original CI bytes"}
+        m._1174_TRANSACTION={"input_snapshots":caller_map,"sentinel":"unchanged"}
+        def swapping(path,rc):
+            leaf=Path(path)
+            if not inside[0] or leaf.name!=field:return reader(path,rc)
+            saved=leaf.read_bytes();wrong=json.loads(saved)
+            if field in ("human_audit_comment","human_transition_comment"):
+                body=m._yaml_cay(wrong["body"].encode());body["reviewed_sha"]="f"*40;wrong["body"]=json.dumps(body)
+            elif field=="human_remote_run":wrong["head_sha"]="f"*40
+            else:wrong["workflow_runs"][0]["head_sha"]="f"*40
+            leaf.write_bytes(m._1174_bytes(wrong))
+            try:
+                value=reader(path,rc)
+                assert value[0]==json.loads(saved),"canonical verifier consumed swapped private "+field
+                seen.append(field);return value
+            finally:leaf.write_bytes(saved)
+        def verify(*values,**kw):
+            inside[0]=True
+            try:return original(*values,**kw)
+            finally:inside[0]=False
+        try:
+            with seams(),patch.object(m,"_human_merge",side_effect=verify),patch.object(m,"_doc_json",side_effect=swapping):
+                record=m._1174_human_evidence(args,a,args.head)
+            assert seen and record["head"]==args.head and record["audit_sha256"]==hashlib.sha256(m._1174_bytes(audit)).hexdigest()
+            assert m._1174_TRANSACTION["input_snapshots"] is caller_map and m._1174_TRANSACTION=={"input_snapshots":caller_map,"sentinel":"unchanged"}
+            # Canonical wrong-head/time checks still reject server-verified bad A;
+            # snapshot isolation cannot turn invalid authority into valid evidence.
+            if field=="human_audit_comment":
+                saved=copy.deepcopy(audit);body=m._yaml_cay(audit["body"].encode());body["reviewed_sha"]="f"*40;audit["body"]=json.dumps(body)
+                Path(args.human_audit_comment).write_bytes(m._1174_bytes(audit))
+                with seams():
+                    try:m._1174_human_evidence(args,a,args.head)
+                    except ValueError as ex:assert "human audit exact bindings/verdict" in str(ex)
+                    else:assert False,"server-verified wrong-head audit accepted"
+                audit.clear();audit.update(saved);Path(args.human_audit_comment).write_bytes(m._1174_bytes(audit))
+                audit["updated_at"]="2026-11-04T09:02:00Z";Path(args.human_audit_comment).write_bytes(m._1174_bytes(audit))
+                with seams():
+                    try:m._1174_human_evidence(args,a,args.head)
+                    except ValueError as ex:assert "human review trước push" in str(ex)
+                    else:assert False,"server-verified late audit accepted"
+                assert m._1174_TRANSACTION["input_snapshots"] is caller_map
+        finally:m._1174_TRANSACTION=previous
+
+
+def _snapshot_content1303(c):
+    repo=c.tmp/"snapshot-checkout";repo.mkdir();_g(repo,"init","-q","-b","master")
+    (repo/"tracked").write_bytes(b"tracked\n");(repo/".gitignore").write_text("ignored\n")
+    (repo/"nested").mkdir();(repo/"nested"/"child").write_bytes(b"nested tracked\n")
+    _g(repo,"add","tracked",".gitignore","nested/child");_g(repo,"commit","-qm","snapshot")
+    ignored,untracked=repo/"ignored",repo/"untracked"
+    ignored.write_bytes(b"first ignored\n");untracked.write_bytes(b"first untracked\n")
+    clean=_snapshot1174(repo);assert clean==_snapshot1174(repo) and "?? untracked" in clean["status"]
+    for path in (ignored,untracked):
+        saved=path.read_bytes();path.write_bytes(saved+b"changed\n")
+        after=_snapshot1174(repo)
+        assert after["content_sha256"]!=clean["content_sha256"],"snapshot omitted existing "+path.name+" bytes"
+        assert after["status"]==clean["status"] and after["file_count"]==clean["file_count"]
+        path.write_bytes(saved);assert _snapshot1174(repo)==clean
+    # Git internal churn is deliberately outside checkout-content observation.
+    (repo/".git"/"inert-observation").write_bytes(b"not checkout content")
+    assert _snapshot1174(repo)==clean
+    if os.name!="nt":
+        link=repo/"link";link.symlink_to("tracked");a=_snapshot1174(repo);link.unlink();link.symlink_to("ignored")
+        assert _snapshot1174(repo)["content_sha256"]!=a["content_sha256"],"snapshot omitted symlink target"
+        link.unlink();fifo=repo/"fifo";os.mkfifo(fifo);assert _snapshot1174(repo)["content_sha256"]!=clean["content_sha256"];fifo.unlink()
+        outside=c.tmp/"external-symlink-target";outside.mkdir();(outside/"child").write_bytes(b"external first")
+        nested=repo/"nested";saved=(nested/"child").read_bytes();(nested/"child").unlink();nested.rmdir();nested.symlink_to(outside,target_is_directory=True)
+        first=_snapshot1174(repo);(outside/"child").write_bytes(b"external changed")
+        assert _snapshot1174(repo)==first,"snapshot followed tracked symlink parent outside checkout"
+        nested.unlink();nested.mkdir();(nested/"child").write_bytes(saved)
+    untracked.unlink();assert _snapshot1174(repo)["status"]==""
+
+
+def _closed_host1303(c):
+    assert _CLOSED_ERRORS_HOST1303==("F6_closed_errors","wp1174_init_preflight","_closed_errors1174","injected_fixture_router")
+    assert _CLOSED_ERRORS_HOST1303[1] in dict(CASES)
+    _closed_errors1174(c,_module1174(c))
+
+
+CASES += [("wp1303_git_selectors",_git_selectors1303),("wp1303_durability_label",_durability_label1303),
+    ("wp1303_recovery_identity",_recovery_identity1303),("wp1303_private_aba",_private_aba1303),
+    ("wp1303_canonical_oracle",_canonical_oracle1303),("wp1303_snapshot_content",_snapshot_content1303),
+    ("wp1303_closed_errors_host",_closed_host1303)]
+
+
+def _supported_pairs1303(c):
+    # Supported by canonical RUNTIME_CAPABILITIES, lease _nc_hop_le and BNV MEI/MRI.
+    pairs=((('google_antigravity','claude','antigravity','machine/local'),('google_antigravity','gemini','antigravity','machine/local')),
+        (('codex','openai','codex_service','machine'),('codex','openai','codex_cli','machine')),
+        (('codex','openai','codex_service','machine'),('google_antigravity','openai','antigravity','machine/local')))
+    outcomes=[]
+    for index,(executor,reviewer) in enumerate(pairs):
+        directory=c.tmp/str(index);directory.mkdir();started=time.time()
+        identity=lambda values:dict(zip(('provider','model_family','execution_surface','transport'),values))
+        _target_chain1303_one(Ctx(c.script,directory),identity(reviewer),identity(executor),focused=True)
+        outcomes.append(dict(index=index,executor=identity(executor),reviewer=identity(reviewer),status="passed",seconds=time.time()-started,
+            synthetic_authority=True,actual_human=False,native=False))
+        (c.tmp/"supported-pair-results.json").write_text(json.dumps(outcomes,indent=2)+"\n",encoding="utf-8",newline="\n")
+
+
+CASES += [("wp1303_target_supported_pairs",_supported_pairs1303),("wp1303_secret_channels",_secret_channels1174)]
+MUTANTS.update({
+    "wp1303_git_graft":('"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"','"GIT_INDEX_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"',["wp1303_git_selectors"]),
+    "wp1303_git_shallow":('"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"','"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_NAMESPACE"',["wp1303_git_selectors"]),
+    "wp1303_git_index":('"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"','"GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"',["wp1303_git_selectors"]),
+    "wp1303_git_namespace":('"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE", "GIT_NAMESPACE"','"GIT_INDEX_FILE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE"',["wp1303_git_selectors"]),
+    "wp1303_human_private_inputs":('tx["input_snapshots"] = verified_inputs','tx["input_snapshots"] = dict(previous_inputs or {})',["wp1303_private_aba"]),
+    "wp1303_reused_barrier_status":('_1174_IO_STARTED = True\n    fd = os.open(path, os.O_RDONLY','_1174_IO_STARTED = False\n    fd = os.open(path, os.O_RDONLY',["wp1303_durability_label"]),
+    "wp1303_snapshot_bytes":('hashlib.sha256(path.read_bytes()).hexdigest())\n            elif stat.S_ISDIR','"omitted")\n            elif stat.S_ISDIR',["wp1303_snapshot_content"]),
+    "wp1303_path_precondition":('def _canonical_precondition1303(kind, value):\n    import ntpath, posixpath\n    host = ntpath if os.name == "nt" else posixpath','def _canonical_precondition1303(kind, value):\n    import ntpath, posixpath\n    return # omit complete runtime value precondition\n    host = ntpath if os.name == "nt" else posixpath',["wp1303_canonical_oracle"]),
+    "wp1303_seed_upper_oracle":('    return inventory\n\n\ndef _secret_absence1174','    return {k:v for k,v in inventory.items() if k!="seed:hex_upper"}\n\n\ndef _secret_absence1174',["wp1174_init_preflight"]),
+    "wp1303_closed_router_error":('else "UNKNOWN")\n    finally:\n        _1174_OWNER_POLICY.reset(policy_token)','else "completed_no_dispatch")\n    finally:\n        _1174_OWNER_POLICY.reset(policy_token)',["wp1303_closed_errors_host"]),
+})
+MUTANTS_NHAM_TEST |= {"wp1303_snapshot_bytes","wp1303_path_precondition","wp1303_seed_upper_oracle"}
+# These cases require actual Linux syscall/router fixtures. The Windows focused
+# lane selects portable context/path/content/Git controls separately; no skip is
+# Windows or native proof. Existing registered IDs and raw inventories remain.
+_WP1303_LINUX_CASES = frozenset(("wp1303_target_human_chain","wp1303_durability_label","wp1303_recovery_identity",
+    "wp1303_private_aba","wp1303_closed_errors_host","wp1303_target_supported_pairs","wp1303_secret_channels"))
+_WP1303_R4_MUTANTS = frozenset(("wp1303_closed_router_error","wp1303_git_graft","wp1303_git_index","wp1303_git_namespace",
+    "wp1303_git_shallow","wp1303_human_private_inputs","wp1303_path_precondition","wp1303_reused_barrier_status",
+    "wp1303_seed_upper_oracle","wp1303_snapshot_bytes"))
 
 if __name__ == "__main__":
     sys.exit(main())

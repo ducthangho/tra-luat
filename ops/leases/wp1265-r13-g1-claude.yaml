@@ -1,0 +1,93 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1265
+packet_id: wp1265
+spec_packet_id: THU-HOI-ADMISSION-MERGE-BASE-A
+mission_issue: 1264
+revision: 13
+generation: 1
+lease_id: wp1265-r13-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: local
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+assurance_ghi_chu: 'dac ta A r13 muc 1 (dong Executor): executor Claude, reviewer Codex doc lap (phien rieng), human_audited tren exact head truoc merge (vong 1 Q6); dieu kien merge theo ADR-0060.'
+depends_on: []
+depends_on_ghi_chu: 'packet A khong phu thuoc packet nao; packet B #1266 phu thuoc land cua A.'
+spec_path: ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r13.md
+spec_ref: refs/heads/master@e3c639be40dba644ecbf9d729d72837691f59ff4
+spec_sha256_required: 10fe7e052b3e0f4c0acc79e844b6d746466e6b3c98fa030222a08df80203d855
+spec_hash: 10fe7e052b3e0f4c0acc79e844b6d746466e6b3c98fa030222a08df80203d855
+spec_duyet: https://github.com/ducthangho/tra-luat/issues/1265#issuecomment-6719830665
+prompt_path: ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r13.md
+prompt_sha256_required: 10fe7e052b3e0f4c0acc79e844b6d746466e6b3c98fa030222a08df80203d855
+write_set:
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0066-admission-thu-hoi-theo-merge-base.md
+write_set_hash: fa8ae015d4a03874d68bf73377fdbd26ad0f16a22d11c4c21b5e09006c50b470
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'docs/adr/0066-... la tep MOI; docs/PROTOCOL_DA_PHIEN.md CHI them MOT dong vao bang muc 20 (dac ta A muc 1).'
+change_policy_sha: null
+effective_write_set:
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0066-admission-thu-hoi-theo-merge-base.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'A1-A9 cua dac ta A r13 muc 5 dat tren exact head, kem dot bien cua tung tieu chi'}
+- {id: M-2, dieu_kien: 'A10: CI required xanh tren exact head; ADR-0060: 0 P0-P2 mo, P3 dong co bang chung hoac chu kho mien, connector da review dung commit, human audit tren H'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chi cap quyen thi cong; merge/land do chu kho (khuyen nghi tu merge chua co hieu luc trong protocol).'
+branch: agent/wp1265-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 6f32aad6fe9db93867fc87456541740f80bf79a4
+start_from_sha: 6f32aad6fe9db93867fc87456541740f80bf79a4
+start_from_ghi_chu: 'origin/master luc cap lease.'
+reviewed_sha_required: 6f32aad6fe9db93867fc87456541740f80bf79a4
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1265#issuecomment-6821053847
+granted_on_instruction_readback: 'chu kho tra loi "Tôi đồng ý làm package A theo khuyến nghị của bạn." (phien Claude Code desktop 08-11-2026, sau de xuat cap lease packet A), roi chon "Chờ WP1174 land" khi duoc hoi uu tien A hay cho WP1174 (hoi 09-11, tra loi 12-11); ghi ho tren Issue #1265. Bam byte KHONG DO DUOC.'
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+recorder_ghi_chu: 'phien ghi lease la phien soan dac ta cua Mission #1264, KHONG phai executor; executor la mot phien Claude Code MOI.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-12T10:12:18Z..10:18:15Z'
+  goc_quet: 'kho do C:/l1265 (alternates), fetch +refs/heads/*:refs/heads/*; ls-remote so TAP ten voi refs/heads: 200/200, thieu 0, thua 0; checker ops/lease_publish.py tai master 6f32aad (sha256 a4bf95b539e077ed...)'
+  ket_qua: 'ca 2 duong dan: NGUOI_GIU 0, rc 0 (docs/PROTOCOL_DA_PHIEN.md: 40 lease HET_HAN, khong ai giu; docs/adr/0066-...: 0). WP1174 da land (PR #1275 merge 2026-11-10T09:28:53Z); lease cuoi cua WP1174 la g23, het han 2026-11-10T12:01:31Z. So ADR 0066: khong ref nao co docs/adr/0066-*.'
+  lich_su: 'do 2026-11-08T11:35:51Z: docs/PROTOCOL_DA_PHIEN.md => NGUOI_GIU 1 wp1174-r17-g14-codex (hard_not_after 2026-11-08T18:03:01Z), nen KHONG cap luc ay theo dac ta A muc 1.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'packet moi, khong co lease truoc.'
+leased_at_utc: '2026-11-12T10:26:43Z'
+heartbeat_at: '2026-11-12T10:26:43Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+heartbeat_required_minutes: 360
+lease_until: '2026-11-13T10:26:43Z'
+lease_expires_at_utc: '2026-11-13T10:26:43Z'
+attempts_used: 0
+attempts_limit: 1
+attempts_basis: 'dac ta A muc 6: 1 phien executor.'
+budget:
+  codex_review_calls:
+    pr_wp1265_g1: {used: 0, reserved: 0, limit: 10}
+  ci_ubuntu_runs:
+    pr_wp1265_g1: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+budget_ghi_chu: 'Codex <= 10 loi goi theo dong khai ADR-0055 cua dac ta, dem TRUOC moi loi goi; <= 2 luot CI Ubuntu (rerun cung tinh); khong nhan windows, khong goi tay ci.yml, khong Windows CI.'
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien

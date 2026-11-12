@@ -1,0 +1,17 @@
+{
+  "mutants": 91,
+  "killed": 91,
+  "mismatch_min": 24,
+  "mismatch_max": 1440,
+  "seconds": 10.339,
+  "m_S0f_mismatches": 0,
+  "insertions": 665,
+  "insertion_sample": 222,
+  "sample_every_300": 206,
+  "sample_unique_runs": 206,
+  "sample_shells": [
+    null
+  ],
+  "sample_accepted": 3,
+  "m_S26_strip_changes": 2
+}

@@ -1,0 +1,92 @@
+{
+  "model": "generation1 + literal K7-S, not an r8 implementation",
+  "A14_S0": {
+    "baseline": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "rebound_callable": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "normalised_step": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "F_ok": {
+    "baseline": [
+      "passed",
+      []
+    ],
+    "rebound_callable": [
+      "passed",
+      []
+    ],
+    "normalised_step": [
+      "passed",
+      []
+    ]
+  },
+  "F_ok_goc": [
+    "not_measured",
+    [
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-ops (ubuntu-latest):lease-publish selftest (đo lại setup sau G5)",
+      "cu_phap_run:shell_ngoai_cu_phap:gate-ops (ubuntu-latest):don-nhanh selftest (chốt xoá nhánh)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-ops (ubuntu-latest):bo ca gate chay TRONG cgroup duoc uy quyen (Linux)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate (ubuntu-latest):tl selftest (co bang chung exact-identity)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate (ubuntu-latest):release-bundle x2 cùng SHA-256",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 1):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 4):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 7):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 3):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 5):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 6):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 0):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 2):G5 manh ban kinh dot bien (#668)"
+    ]
+  ],
+  "S3b_sample_n": 209,
+  "S3b_mismatches": {
+    "baseline": 0,
+    "rebound_callable": 0,
+    "normalised_step": 0
+  },
+  "witness_run": "python ops/K.py",
+  "witness": {
+    "baseline": [
+      "not_measured",
+      [
+        "cu_phap_run:lenh_ngoai_cu_phap:gate-packet-loop (ubuntu-latest):packet-loop selftest"
+      ]
+    ],
+    "rebound_callable": [
+      "passed",
+      []
+    ],
+    "normalised_step": [
+      "passed",
+      []
+    ]
+  },
+  "existing_cases": {
+    "a03k_run_duong_nhanh_that": "passed",
+    "a20_so_luat": "passed",
+    "a21_pham_vi_land": "passed"
+  },
+  "A15": {
+    "pairs": 43,
+    "accepted_pairs": 30,
+    "names": 29,
+    "accepted_names": 23
+  }
+}

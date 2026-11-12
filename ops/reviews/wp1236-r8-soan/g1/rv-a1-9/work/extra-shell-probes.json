@@ -1,0 +1,373 @@
+[
+  {
+    "name": "straight",
+    "shell": "bash",
+    "run": "python .claude/dev/packet_loop_test.py | cat",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "if_condition",
+    "shell": "bash",
+    "run": "if python .claude/dev/packet_loop_test.py | cat; then\n  true\nfi",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "while_condition",
+    "shell": "bash",
+    "run": "while python .claude/dev/packet_loop_test.py | cat; do\n  break\ndone",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "until_condition",
+    "shell": "bash",
+    "run": "until python .claude/dev/packet_loop_test.py | cat; do\n  break\ndone",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "and_list",
+    "shell": "bash",
+    "run": "python .claude/dev/packet_loop_test.py | cat && true\ntrue",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "or_list",
+    "shell": "bash",
+    "run": "python .claude/dev/packet_loop_test.py | cat || true",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "negated_pipeline",
+    "shell": "bash",
+    "run": "! python .claude/dev/packet_loop_test.py | cat\ntrue",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "background_pipeline",
+    "shell": "bash",
+    "run": "python .claude/dev/packet_loop_test.py | cat &\nwait",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "for_body",
+    "shell": "bash",
+    "run": "for x in one; do\n  python .claude/dev/packet_loop_test.py | cat\ndone",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "for_or",
+    "shell": "bash",
+    "run": "for x in one; do\n  python .claude/dev/packet_loop_test.py | cat\ndone || true",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "case_body",
+    "shell": "bash",
+    "run": "case x in\n  x) python .claude/dev/packet_loop_test.py | cat ;;\nesac",
+    "env": null,
+    "mode_result": "ong_cau_truc_khong_do_duoc",
+    "gate_result": [
+      "not_measured",
+      [
+        "ong_cau_truc_khong_do_duoc:packet-loop selftest"
+      ]
+    ],
+    "actual_shell_rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "trap_success",
+    "shell": "bash",
+    "run": "trap 'exit 0' ERR\npython .claude/dev/packet_loop_test.py | cat",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "trap_no_override",
+    "shell": "bash",
+    "run": "trap ':' ERR\npython .claude/dev/packet_loop_test.py | cat",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "alias_unused",
+    "shell": "bash",
+    "run": "alias nothing=true\npython .claude/dev/packet_loop_test.py | cat",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "exec_redirect",
+    "shell": "bash",
+    "run": "exec 3>/dev/null\npython .claude/dev/packet_loop_test.py | cat",
+    "env": null,
+    "mode_result": "ong_cau_truc_khong_do_duoc",
+    "gate_result": [
+      "not_measured",
+      [
+        "ong_cau_truc_khong_do_duoc:packet-loop selftest"
+      ]
+    ],
+    "actual_shell_rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "source_after_separator",
+    "shell": "bash",
+    "run": "true; . /dev/null\npython .claude/dev/packet_loop_test.py | cat",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "source_with_args",
+    "shell": "bash",
+    "run": "true; . /dev/null +o pipefail\npython .claude/dev/packet_loop_test.py | cat",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "env_shellopts",
+    "shell": "bash",
+    "run": "python .claude/dev/packet_loop_test.py | cat",
+    "env": {
+      "SHELLOPTS": "braceexpand:hashall:interactive-comments"
+    },
+    "mode_result": null,
+    "gate_result": [
+      "not_measured",
+      [
+        "che_do_khong_xac_dinh:env_buoc_ngoai_tap:packet-loop selftest"
+      ]
+    ]
+  },
+  {
+    "name": "env_bash_env",
+    "shell": "bash",
+    "run": "python .claude/dev/packet_loop_test.py | cat",
+    "env": {
+      "BASH_ENV": "/dev/null"
+    },
+    "mode_result": null,
+    "gate_result": [
+      "not_measured",
+      [
+        "che_do_khong_xac_dinh:env_buoc_ngoai_tap:packet-loop selftest"
+      ]
+    ]
+  },
+  {
+    "name": "custom_bash_e",
+    "shell": "bash -e {0}",
+    "run": "python .claude/dev/packet_loop_test.py | cat",
+    "env": null,
+    "mode_result": "ong_khong_pipefail",
+    "gate_result": [
+      "not_measured",
+      [
+        "che_do_khong_xac_dinh:shell_la:packet-loop selftest"
+      ]
+    ]
+  },
+  {
+    "name": "custom_bash",
+    "shell": "bash {0}",
+    "run": "python .claude/dev/packet_loop_test.py | cat",
+    "env": null,
+    "mode_result": "ong_khong_pipefail",
+    "gate_result": [
+      "not_measured",
+      [
+        "che_do_khong_xac_dinh:shell_la:packet-loop selftest"
+      ]
+    ]
+  },
+  {
+    "name": "custom_bash_pipefail",
+    "shell": "bash --noprofile --norc -eo pipefail {0}",
+    "run": "python .claude/dev/packet_loop_test.py | cat",
+    "env": null,
+    "mode_result": "ong_khong_pipefail",
+    "gate_result": [
+      "not_measured",
+      [
+        "che_do_khong_xac_dinh:shell_la:packet-loop selftest"
+      ]
+    ]
+  },
+  {
+    "name": "implicit",
+    "shell": null,
+    "run": "python .claude/dev/packet_loop_test.py | cat",
+    "env": null,
+    "mode_result": "ong_khong_pipefail",
+    "gate_result": [
+      "not_measured",
+      [
+        "ong_khong_pipefail:packet-loop selftest"
+      ]
+    ],
+    "actual_shell_rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "explicit_sh",
+    "shell": "sh",
+    "run": "python .claude/dev/packet_loop_test.py | cat",
+    "env": null,
+    "mode_result": "ong_khong_pipefail",
+    "gate_result": [
+      "not_measured",
+      [
+        "ong_khong_pipefail:packet-loop selftest"
+      ]
+    ],
+    "actual_shell_rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "no_pipe_straight",
+    "shell": "bash",
+    "run": "python .claude/dev/packet_loop_test.py\ntrue",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "no_pipe_if",
+    "shell": "bash",
+    "run": "if python .claude/dev/packet_loop_test.py; then\n  true\nfi",
+    "env": null,
+    "mode_result": null,
+    "gate_result": [
+      "passed",
+      []
+    ],
+    "actual_shell_rc": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

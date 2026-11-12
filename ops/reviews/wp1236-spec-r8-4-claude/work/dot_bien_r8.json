@@ -1,0 +1,320 @@
+[
+ {
+  "dot_bien": "m-S1_nhieu_dong",
+  "ca_dich": "g_hai_lenh_hop_le",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S2_rstrip_lf",
+  "ca_dich": "g_hai_lf_cuoi",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S3_strip",
+  "ca_dich": "g_dau_cach_cuoi",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S4_match",
+  "ca_dich": "g_cham_phay",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S5_search",
+  "ca_dich": "g_gan_bien_dau",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S6_unicode_w",
+  "ca_dich": "g_chu_so_unicode",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S7_khoang_trang",
+  "ca_dich": "g_tab_doi_so",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S7b_nhieu_dau_cach",
+  "ca_dich": "g_hai_dau_cach_doi_so",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S8_ten_lenh_mo",
+  "ca_dich": "g_lenh_ngoai_ds",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S9_doi_so_dau_mo",
+  "ca_dich": "g_python_c_tran",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S9b_bash_doi_so_dau_mo",
+  "ca_dich": "g_bash_c_tran",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S9c_P_tuyet_doi",
+  "ca_dich": "g_tuyet_doi",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S10_ong_shell_vang",
+  "ca_dich": "g_ong_khong_bash",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S11_ong_sh",
+  "ca_dich": "g_ong_sh",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S12_ve_phai_mo",
+  "ca_dich": "g_ong_toi_cat",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S13_nhan_pwsh",
+  "ca_dich": "g_pwsh_shell",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S19_dao_thu_tu_1_2",
+  "ca_dich": "g_run_khong_phai_chuoi_pwsh",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S9p_pwsh_mo",
+  "ca_dich": "g_pwsh_command",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S9q_noprofile_tuy_chon",
+  "ca_dich": "g_pwsh_thieu_noprofile",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S9d_P_gach_dau",
+  "ca_dich": "g_P_gach_dau",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S9e_duoi_bat_ky",
+  "ca_dich": "g_bash_duoi_py",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S9f_python_bo_duoi",
+  "ca_dich": "g_python_khong_duoi",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S9g_pwsh_duoi_bat_ky",
+  "ca_dich": "g_pwsh_duoi_py",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S7c_ong_khong_cach",
+  "ca_dich": "g_ong_khong_cach",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[3b]",
+  "ca_dich": "kt_3b",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[26]",
+  "ca_dich": "kt_26",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[7c]",
+  "ca_dich": "kt_7c",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[21]",
+  "ca_dich": "kt_21",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[28]",
+  "ca_dich": "kt_28",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[29]",
+  "ca_dich": "kt_29",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[7b]",
+  "ca_dich": "kt_7b",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[7d]",
+  "ca_dich": "kt_7d",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[24]",
+  "ca_dich": "kt_24",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[60]",
+  "ca_dich": "kt_60",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[27]",
+  "ca_dich": "kt_27",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[22]",
+  "ca_dich": "kt_22",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[5c]",
+  "ca_dich": "kt_5c",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[3c]",
+  "ca_dich": "kt_3c",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[3e]",
+  "ca_dich": "kt_3e",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[23]",
+  "ca_dich": "kt_23",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[2a]",
+  "ca_dich": "kt_2a",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[3f]",
+  "ca_dich": "kt_3f",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[5b]",
+  "ca_dich": "kt_5b",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[5d]",
+  "ca_dich": "kt_5d",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[7e]",
+  "ca_dich": "kt_7e",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[09]",
+  "ca_dich": "kt_09",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[0a]",
+  "ca_dich": "kt_0a",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[0d]",
+  "ca_dich": "kt_0d",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[2b]",
+  "ca_dich": "kt_2b",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[2c]",
+  "ca_dich": "kt_2c",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[40]",
+  "ca_dich": "kt_40",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[25]",
+  "ca_dich": "kt_25",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ },
+ {
+  "dot_bien": "m-S14[5e]",
+  "ca_dich": "kt_5e",
+  "giet_ca_dich": true,
+  "lam_hong_ca_duong": []
+ }
+]

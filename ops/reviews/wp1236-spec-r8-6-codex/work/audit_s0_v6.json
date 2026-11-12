@@ -1,0 +1,64 @@
+{
+  "transparent_wrapper_s0_1_to_4": [],
+  "getsource_f_equals_original": true,
+  "getsource_code_equals_original": false,
+  "call_before": {
+    "result": null,
+    "counter": 1
+  },
+  "spy": {
+    "calls": 10,
+    "counter_after": 1,
+    "all_arguments_preserved": true
+  },
+  "v4_variants_under_v5": {
+    "goc": [],
+    "dinh_dang_chu_thich": [],
+    "bom": [
+      "ast_doi_tuong"
+    ],
+    "ha_chu": [
+      "ast_doi_tuong"
+    ],
+    "removesuffix": [
+      "ast_doi_tuong"
+    ],
+    "match": [
+      "ast_doi_tuong"
+    ],
+    "wrapper": [
+      "kieu:RE_DON"
+    ],
+    "bong_type": [
+      "bong_ten:type"
+    ],
+    "rstrip": [
+      "ast_doi_tuong"
+    ]
+  },
+  "sample": {
+    "corpus": 61530,
+    "n": 206,
+    "shell": {
+      "None": 69,
+      "sh": 69,
+      "bash": 68
+    },
+    "accepted": 8,
+    "S3b_total": 325
+  },
+  "table_n": 119,
+  "NFC_changed_table": 0,
+  "NFC_changed_generated": 0,
+  "Kelvin_input_analysis": {
+    "reference": "lenh_ngoai_cu_phap",
+    "NFC_then_reference": null,
+    "UTF8_differs": true
+  },
+  "counts": {
+    "KT": 35,
+    "seeds": 24,
+    "pipe_insertions": 665,
+    "sampled_pipe_insertions": 222
+  }
+}

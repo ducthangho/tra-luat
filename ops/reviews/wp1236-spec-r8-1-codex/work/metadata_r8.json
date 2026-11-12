@@ -1,0 +1,23 @@
+{
+  "r7_push_provenance": 29,
+  "earliest": [
+    40268583940,
+    "ops/land/pr945-wp899-provenance/do-1026-cebb5b2/ci-provenance-40268583940.yaml"
+  ],
+  "luat_sha256": "ee0f2db86fc579ff236ff0417de0658a184a4ed4871468c90a2f0c42417037cc",
+  "count_patterns": 13,
+  "capture_groups": 16,
+  "ADR_effectiveness_offline": {
+    "0052-tran-loi-goi-codex-len-tam.md": {
+      "exists_at_land_rc": 0,
+      "exists_at_parent_rc": 128,
+      "first_parent": true
+    },
+    "0053-tran-kich-thuoc-sensitive-len-sau-tep.md": {
+      "exists_at_land_rc": 0,
+      "exists_at_parent_rc": 128,
+      "first_parent": true
+    }
+  },
+  "SPEC_matches_repo": true
+}

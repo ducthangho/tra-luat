@@ -1,0 +1,121 @@
+{
+  "goc": {
+    "clauses": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "expected_red": false,
+    "actual_red": false
+  },
+  "dinh_dang_chu_thich": {
+    "clauses": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "expected_red": false,
+    "actual_red": false
+  },
+  "bom": {
+    "clauses": [
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "expected_red": true,
+    "actual_red": true
+  },
+  "ha_chu": {
+    "clauses": [
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "expected_red": true,
+    "actual_red": true
+  },
+  "removesuffix": {
+    "clauses": [
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "expected_red": true,
+    "actual_red": true
+  },
+  "match": {
+    "clauses": [
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "expected_red": true,
+    "actual_red": true
+  },
+  "wrapper": {
+    "clauses": [
+      true,
+      false,
+      true,
+      true,
+      true
+    ],
+    "expected_red": true,
+    "actual_red": true
+  },
+  "bong_type": {
+    "clauses": [
+      true,
+      true,
+      false,
+      true,
+      true
+    ],
+    "expected_red": true,
+    "actual_red": true
+  },
+  "rstrip": {
+    "clauses": [
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "expected_red": true,
+    "actual_red": true
+  },
+  "m_S0f": {
+    "clauses": [
+      true,
+      false,
+      true,
+      true,
+      true
+    ],
+    "actual_red": true
+  },
+  "m_S26": {
+    "clauses": [
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    "actual_red": true
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "table_n": 171,
+  "corpus_n": 61530,
+  "variants": {
+    "baseline": {
+      "A14_S0_clauses": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "author_s0": [],
+      "direct_table_mismatches": 0,
+      "direct_corpus_mismatches": 0,
+      "caller_table_mismatches": 0,
+      "caller_corpus_mismatches": 0,
+      "witness": {
+        "run": "python ops/K.py",
+        "reference": "lenh_ngoai_cu_phap",
+        "direct": "lenh_ngoai_cu_phap",
+        "caller": "lenh_ngoai_cu_phap"
+      }
+    },
+    "comment_docstring": {
+      "A14_S0_clauses": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "author_s0": [],
+      "direct_table_mismatches": 0,
+      "direct_corpus_mismatches": 0,
+      "caller_table_mismatches": 0,
+      "caller_corpus_mismatches": 0,
+      "witness": {
+        "run": "python ops/K.py",
+        "reference": "lenh_ngoai_cu_phap",
+        "direct": "lenh_ngoai_cu_phap",
+        "caller": "lenh_ngoai_cu_phap"
+      }
+    },
+    "rebound_callable": {
+      "A14_S0_clauses": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "author_s0": [],
+      "direct_table_mismatches": 0,
+      "direct_corpus_mismatches": 0,
+      "caller_table_mismatches": 0,
+      "caller_corpus_mismatches": 0,
+      "witness": {
+        "run": "python ops/K.py",
+        "reference": "lenh_ngoai_cu_phap",
+        "direct": null,
+        "caller": null
+      }
+    },
+    "normalised_step": {
+      "A14_S0_clauses": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "author_s0": [],
+      "direct_table_mismatches": 0,
+      "direct_corpus_mismatches": 0,
+      "caller_table_mismatches": 0,
+      "caller_corpus_mismatches": 0,
+      "witness": {
+        "run": "python ops/K.py",
+        "reference": "lenh_ngoai_cu_phap",
+        "direct": "lenh_ngoai_cu_phap",
+        "caller": null
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{"dau_vao": 11838, "nhan": 136, "lech_tham_chieu": 150, "nhan_ma_nuot_loi": 100}
+{"dau_vao": 11838, "nhan": 136, "lech_tham_chieu": 150, "nhan_ma_nuot_loi": 100}
+{"dau_vao": 11838, "nhan": 136, "lech_tham_chieu": 150, "nhan_ma_nuot_loi": 50}
+{"dau_vao": 11838, "nhan": 116, "lech_tham_chieu": 30, "nhan_ma_nuot_loi": 30}
+{"dau_vao": 11838, "nhan": 116, "lech_tham_chieu": 30, "nhan_ma_nuot_loi": 30}
+{"dau_vao": 11838, "nhan": 236, "lech_tham_chieu": 150, "nhan_ma_nuot_loi": 300}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 36}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 36}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 36}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 36}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 36}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 36}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 36}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dau_vao": 11838, "nhan": 122, "lech_tham_chieu": 36, "nhan_ma_nuot_loi": 0}
+{"dot_bien_sinh": 32, "giet_o_kho_sinh": 32, "co_than_nhan_ma_nuot_loi": 13}
+
+real	2m40.329s
+user	2m34.012s
+sys	0m38.945s

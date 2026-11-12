@@ -1,0 +1,193 @@
+{
+  "F_ok": [
+    "passed",
+    []
+  ],
+  "F_ok_goc": [
+    "not_measured",
+    [
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-ops (ubuntu-latest):lease-publish selftest (đo lại setup sau G5)",
+      "cu_phap_run:shell_ngoai_cu_phap:gate-ops (ubuntu-latest):don-nhanh selftest (chốt xoá nhánh)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-ops (ubuntu-latest):bo ca gate chay TRONG cgroup duoc uy quyen (Linux)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate (ubuntu-latest):tl selftest (co bang chung exact-identity)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate (ubuntu-latest):release-bundle x2 cùng SHA-256",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 1):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 4):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 7):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 3):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 5):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 6):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 0):G5 manh ban kinh dot bien (#668)",
+      "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 2):G5 manh ban kinh dot bien (#668)"
+    ]
+  ],
+  "A14_i_prime": {
+    "None": [
+      "not_measured",
+      [
+        "cu_phap_run:ong_khong_bash_tuong_minh:gate-packet-loop (ubuntu-latest):packet-loop selftest"
+      ]
+    ],
+    "bash": [
+      "passed",
+      []
+    ]
+  },
+  "logic_mutants": {
+    "remove_initial_bom": {
+      "F_ok": [
+        "passed",
+        []
+      ],
+      "F_ok_goc": [
+        "not_measured",
+        [
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-ops (ubuntu-latest):lease-publish selftest (đo lại setup sau G5)",
+          "cu_phap_run:shell_ngoai_cu_phap:gate-ops (ubuntu-latest):don-nhanh selftest (chốt xoá nhánh)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-ops (ubuntu-latest):bo ca gate chay TRONG cgroup duoc uy quyen (Linux)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate (ubuntu-latest):tl selftest (co bang chung exact-identity)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate (ubuntu-latest):release-bundle x2 cùng SHA-256",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 1):G5 manh ban kinh dot bien (#668)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 4):G5 manh ban kinh dot bien (#668)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 7):G5 manh ban kinh dot bien (#668)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 3):G5 manh ban kinh dot bien (#668)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 5):G5 manh ban kinh dot bien (#668)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 6):G5 manh ban kinh dot bien (#668)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 0):G5 manh ban kinh dot bien (#668)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 2):G5 manh ban kinh dot bien (#668)"
+        ]
+      ],
+      "witness_mutant": [
+        "passed",
+        []
+      ],
+      "witness_reference": [
+        "not_measured",
+        [
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-packet-loop (ubuntu-latest):packet-loop selftest"
+        ]
+      ]
+    },
+    "lowercase_initial_letter": {
+      "F_ok": [
+        "passed",
+        []
+      ],
+      "F_ok_goc": [
+        "not_measured",
+        [
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-ops (ubuntu-latest):lease-publish selftest (đo lại setup sau G5)",
+          "cu_phap_run:shell_ngoai_cu_phap:gate-ops (ubuntu-latest):don-nhanh selftest (chốt xoá nhánh)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-ops (ubuntu-latest):bo ca gate chay TRONG cgroup duoc uy quyen (Linux)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate (ubuntu-latest):tl selftest (co bang chung exact-identity)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate (ubuntu-latest):release-bundle x2 cùng SHA-256",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 1):G5 manh ban kinh dot bien (#668)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 4):G5 manh ban kinh dot bien (#668)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 7):G5 manh ban kinh dot bien (#668)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 3):G5 manh ban kinh dot bien (#668)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 5):G5 manh ban kinh dot bien (#668)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 6):G5 manh ban kinh dot bien (#668)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 0):G5 manh ban kinh dot bien (#668)",
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-cong-cu (ubuntu-latest, 2):G5 manh ban kinh dot bien (#668)"
+        ]
+      ],
+      "witness_mutant": [
+        "passed",
+        []
+      ],
+      "witness_reference": [
+        "not_measured",
+        [
+          "cu_phap_run:lenh_ngoai_cu_phap:gate-packet-loop (ubuntu-latest):packet-loop selftest"
+        ]
+      ]
+    }
+  },
+  "existing_tests": {
+    "a03k_run_duong_nhanh_that": "passed",
+    "a20_so_luat": "passed",
+    "a21_pham_vi_land": "passed"
+  },
+  "registry_cases": {
+    "e_prime": [
+      {
+        "registry": [
+          "mien_mo_khac_1"
+        ],
+        "kiem_has_registry_error": true
+      },
+      {
+        "registry": [],
+        "kiem_has_registry_error": false
+      }
+    ],
+    "f": [
+      {
+        "registry": [
+          "job_bat_buoc_trung"
+        ],
+        "kiem_has_registry_error": true
+      },
+      {
+        "registry": [],
+        "kiem_has_registry_error": false
+      }
+    ],
+    "g": [
+      {
+        "registry": [
+          "mien_mo_thieu_check_bat_buoc"
+        ],
+        "kiem_has_registry_error": true
+      },
+      {
+        "registry": [],
+        "kiem_has_registry_error": false
+      }
+    ],
+    "h": [
+      {
+        "registry": [
+          "job_khong_dung_mot_muc:khac (ubuntu-latest)"
+        ],
+        "kiem_has_registry_error": true
+      },
+      {
+        "registry": [],
+        "kiem_has_registry_error": false
+      }
+    ],
+    "i": [
+      {
+        "registry": [
+          "job_khong_dung_mot_muc:gate (ubuntu-latest)"
+        ],
+        "kiem_has_registry_error": true
+      },
+      {
+        "registry": [],
+        "kiem_has_registry_error": false
+      }
+    ],
+    "i_prime": [
+      {
+        "registry": [],
+        "kiem_has_registry_error": false
+      },
+      {
+        "registry": [
+          "mien_mo_thieu_check_bat_buoc"
+        ],
+        "kiem_has_registry_error": true
+      }
+    ]
+  },
+  "A15": {
+    "pairs": 43,
+    "accepted_pairs": 30,
+    "names": 29,
+    "accepted_names": 23
+  },
+  "fixture_parent": "fe84620f897913c7f6c2ce5a0c7316a49655e82f",
+  "luat_sha256": "ee0f2db86fc579ff236ff0417de0658a184a4ed4871468c90a2f0c42417037cc"
+}

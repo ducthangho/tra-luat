@@ -1,0 +1,6 @@
+P = r"[A-Za-z0-9_.][A-Za-z0-9_./-]*"
+W = r"[A-Za-z0-9_./=:-]+"
+DANG = rf"(?:python {P}\.py|bash {P}\.sh|pwsh -NoProfile -File {P}\.ps1)"
+LENH = rf"{DANG}(?: {W})*"
+RE_DON = re.compile(LENH, re.ASCII)
+RE_ONG = re.compile(rf"{LENH}(?: \| {LENH})+", re.ASCII)

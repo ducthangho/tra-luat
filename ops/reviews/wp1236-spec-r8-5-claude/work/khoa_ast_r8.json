@@ -1,0 +1,25 @@
+{
+ "goc": [],
+ "dinh_dang_chu_thich": [],
+ "bom": [
+  "ast_ham"
+ ],
+ "ha_chu": [
+  "ast_ham"
+ ],
+ "removesuffix": [
+  "ast_ham"
+ ],
+ "match": [
+  "ast_ham"
+ ],
+ "wrapper": [
+  "kieu:RE_DON"
+ ],
+ "bong_type": [
+  "bong_ten:type"
+ ],
+ "rstrip": [
+  "ast_ham"
+ ]
+}

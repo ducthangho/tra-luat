@@ -76,8 +76,8 @@ leased_at_utc: '2026-11-12T10:26:43Z'
 heartbeat_at: '2026-11-12T10:26:43Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
 heartbeat_required_minutes: 360
-lease_until: '2026-11-13T10:26:43Z'
-lease_expires_at_utc: '2026-11-13T10:26:43Z'
+lease_until: '2026-11-13T02:45:00Z'
+lease_expires_at_utc: '2026-11-13T02:45:00Z'
 attempts_used: 0
 attempts_limit: 1
 attempts_basis: 'dac ta A muc 6: 1 phien executor.'
@@ -91,3 +91,19 @@ budget_ghi_chu: 'Codex <= 10 loi goi theo dong khai ADR-0055 cua dac ta, dem TRU
 nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-13T10:26:43Z'
+  han_moi_utc: '2026-11-13T02:45:00Z'
+  chi_thi: >-
+    Chu kho, phien chat 13-11-2026 (UTC), nguyen van "Thu hoi lease #1265"; ghi ho tren
+    https://github.com/ducthangho/tra-luat/issues/1265#issuecomment-6841530891
+  ly_do: >-
+    Phien thi cong dung luc 10:51Z 12-11 o trang thai that bai, khong chay lai; khong co nhanh agent/wp1265-* tren may chu;
+    khong co handoff tren #1265; heartbeat cuoi 10:26:43Z 12-11, qua nguong 360 phut (protocol muc 4). Lease giu
+    docs/PROTOCOL_DA_PHIEN.md, chan GIAM-HOI-P1-SOAN-SPEC (#1291).
+  vi_sao_khong_dung_bia_mo: >-
+    Khong co lease ke nhiem (thay_the_cho rong). Rut han theo tien le #1179 fcea24a. Han moi dat SAU luc push de luot dang
+    lease con thay lease song, tranh rc=8 che rc=9.
+  nguoi_rut: 'phien Claude dieu phoi GIAM-HOI-P1/P2 (worktree brave-rosalind-730dc7), theo chi thi chu kho'
+  nghiem_thu: 'ai-dang-giu docs/PROTOCOL_DA_PHIEN.md va docs/adr/0066-admission-thu-hoi-theo-merge-base.md sau 02:45Z phai khong con wp1265-r13-g1-claude.'
+  packet_khong_huy: 'Dac ta r13 va loi duyet bam giu nguyen; thi cong tiep bang lease moi generation 2.'

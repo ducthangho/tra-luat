@@ -1,0 +1,69 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1291
+packet_id: GIAM-HOI-P1-SOAN-SPEC
+revision: 7
+generation: 1
+lease_id: giam-hoi-p1-r7-g1-codex
+role: executor
+provider: codex
+executor: codex
+model: gpt-6-astra
+effort: high
+model_family: openai
+execution_surface: codex_cli
+transport: machine
+environment: local
+reviewer: human
+assurance_target: human_audited
+advisory_review:
+  provider: codex
+  model_family: openai
+  model: gpt-6-astra
+  effort: xhigh
+  transport: launcher.py run, phiên mới, read-only, không fork context executor
+  assurance: same_provider_approved
+  vai: phản biện bổ sung; biên nhận của nó là đầu vào K4 đường model của kiem-merge
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/GIAM-HOI-P1-SOAN-SPEC-r7.md
+spec_ref: refs/heads/master@4068b3a2a0087db287ea979eccbd372a7a0938d7
+spec_sha256_required: 353048bc4f77b3ed39d73b51c869deea787d8a4bd59477e4b351a840e3cc8bd3
+spec_hash: 353048bc4f77b3ed39d73b51c869deea787d8a4bd59477e4b351a840e3cc8bd3
+prompt_path: ops/prompts/giam-hoi-p1-r7-g1-codex.md
+prompt_sha256_required: 25156c71afcff27050a173caa14148dacbe3f2d072f789045ff52eb4e9529c1f
+write_set:
+- .claude/skills/soan-spec/SKILL.md
+- docs/PROTOCOL_DA_PHIEN.md
+write_set_hash: 3bfcdaa17ebad1a9301b7599182be4b18a04a239fd97001953084b085b7ac4f0
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+effective_write_set:
+- .claude/skills/soan-spec/SKILL.md
+- docs/PROTOCOL_DA_PHIEN.md
+change_policy_sha: null
+branch: agent/giam-hoi-p1-g1-codex
+base_sha: 6f32aad6fe9db93867fc87456541740f80bf79a4
+start_from_sha: 6f32aad6fe9db93867fc87456541740f80bf79a4
+reviewed_sha_required: 6f32aad6fe9db93867fc87456541740f80bf79a4
+reviewed_sha_required_note: mốc ban đầu là base; review Codex và audit của chủ kho phải neo SHA ứng viên H mới, không bao giờ neo base
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1291#issuecomment-6730486973
+recorded_by: phiên điều phối Claude Code (worktree brave-rosalind-730dc7), ghi theo chỉ đạo chủ kho; không phải executor
+recorder_is_executor: false
+leased_at_utc: '2026-11-13T02:52:26Z'
+heartbeat_at: '2026-11-13T02:52:26Z'
+heartbeat_required_minutes: 360
+lease_until: '2026-11-14T02:52:26Z'
+lease_expires_at_utc: '2026-11-14T02:52:26Z'
+max_lease_hours: 24
+codex_review_calls_limit: 10
+codex_review_ledger: sổ chung trên Packet Issue #1291 cho lời gọi offline và connector (mục 6 của đặc tả)
+primary_product_pushes_limit: 1
+windows: not_required
+full_mutant_audit: not_required
+uy_quyen_merge: false
+human_audit: chủ kho tự đăng audit SHA ứng viên H trên #1291 trước khi H được đẩy; comment ghi hộ không phải audit
+merge_approval: ADR-0060 M7, chủ kho duyệt một lần neo H sau CI và connector
+thay_the_cho: []

@@ -1,0 +1,44 @@
+{
+  "at": "2026-11-13T03:36:46.640919+00:00",
+  "head": "055e9fc87069bfeffe18bebc18acf31710411f30",
+  "baseline": "6f32aad6fe9db93867fc87456541740f80bf79a4",
+  "passed": true,
+  "all32_passed": true,
+  "raw_receipt_and_log_hashes_verified": true,
+  "rows": [
+    {
+      "head": "6f32aad6fe9db93867fc87456541740f80bf79a4",
+      "passed": 16,
+      "total": 16,
+      "actual_child_rc": 0,
+      "stdout_sha256": "74e42e5beaa9def001ac36142eda85752bec3702b079864bede711735c0417ca",
+      "stderr_sha256": "ed545c6ea9e8e0e0dc6adf40e4c75889357c42a16195c5a9fb44ddd5e23002fb",
+      "report_sha256": "296d6007258d03a21376ee257d85e87840322da4f50b687bdd1a5cd5847a8dd5",
+      "snapshot_equal": true,
+      "actual_oracle_verified": true
+    },
+    {
+      "head": "055e9fc87069bfeffe18bebc18acf31710411f30",
+      "passed": 16,
+      "total": 16,
+      "actual_child_rc": 0,
+      "stdout_sha256": "f01b539884adf48ec8076fb5ad3f298471bb469b71103292989c3d0238cd72c5",
+      "stderr_sha256": "98a67951971e5450e198af26021a8bad1c710e817de062a6c96b8bea0866a4b7",
+      "report_sha256": "0a0b52f30244ac12a0ccad3881d79573c60a6e936dc2c0e41a5b15b19656a4dd",
+      "snapshot_equal": true,
+      "actual_oracle_verified": true
+    }
+  ],
+  "current_pair_elapsed_seconds": 591.457873,
+  "prior_failed_pair_elapsed_seconds": 361.111486,
+  "cumulative_pairs_used": 2,
+  "cumulative_pair_cap": 2,
+  "source_spec_product_test_pins_unchanged": true,
+  "WindowsCI": false,
+  "full_mutants": false,
+  "target_canary": false,
+  "actual_human": false,
+  "host_lock_release_pending": false,
+  "host_lock_empty_readback": true,
+  "host_ledger_append_readback_verified": true
+}

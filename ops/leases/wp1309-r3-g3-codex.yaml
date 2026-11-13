@@ -38,8 +38,8 @@
     ".claude/dev/packet_loop.py"
   ],
   "heartbeat_at": "2026-11-13T06:40:42Z",
-  "lease_until": "2026-11-13T09:01:05Z",
-  "lease_expires_at_utc": "2026-11-13T09:01:05Z",
+  "lease_until": "2026-11-13T08:38:00Z",
+  "lease_expires_at_utc": "2026-11-13T08:38:00Z",
   "heartbeat_required_minutes": 360,
   "max_run_minutes": 30,
   "author_call_cap": 2,
@@ -53,11 +53,17 @@
   "author_calls_used_prior": 1,
   "execution_carrier": "fresh managed Codex service Executor; no CLI/auth/ACL changes",
   "candidate_head_sha": "055e9fc87069bfeffe18bebc18acf31710411f30",
-  "land_phase": "merged_master_CI_pending",
+  "land_phase": "source_postmerge_accepted_lease_closed",
   "no_new_source_or_model_call": true,
   "source_pushes_used": 1,
   "author_calls_used": 2,
   "advisory_calls_used": 1,
   "formal_calls_used": 1,
-  "prior_reviewed_sha_required_at_grant": "6f32aad6fe9db93867fc87456541740f80bf79a4"
+  "prior_reviewed_sha_required_at_grant": "6f32aad6fe9db93867fc87456541740f80bf79a4",
+  "lease_until_before_close": "2026-11-13T09:01:05Z",
+  "lease_expires_at_before_close": "2026-11-13T09:01:05Z",
+  "closed_at_utc": "2026-11-13T08:38:00.106343+00:00",
+  "closure_reason": "actual master CI and source postmerge provenance accepted; no further source calls",
+  "lease_closed": true,
+  "merged_sha": "dc635d3c90ecc348bc916bfd3e9b0a8f8ad9000d"
 }

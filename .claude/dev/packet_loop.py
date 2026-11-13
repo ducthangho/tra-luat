@@ -4363,7 +4363,7 @@ def _1174_git_snapshot(root):
     with tempfile.TemporaryDirectory(prefix="wp1174-facts-") as temporary:
         snapshot = Path(temporary) / "repo"
         child = subprocess.run(["git", "--no-replace-objects", "clone", "--quiet", "--no-hardlinks", "--no-checkout",
-                                endpoint.decode().strip(), str(snapshot)], env=_1174_git_env(), capture_output=True, timeout=120)
+                                endpoint.decode().strip(), str(snapshot)], env=_1174_git_env(), capture_output=True, timeout=480)
         _1174_require(child.returncode == 0, "canonical snapshot unavailable")
         _1174_git_view(snapshot)
         yield snapshot

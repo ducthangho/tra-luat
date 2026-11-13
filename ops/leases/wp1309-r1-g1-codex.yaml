@@ -46,5 +46,6 @@
   "codex_advisory_call_cap": 1,
   "claude_formal_call_cap": 1,
   "source_push_cap": 1,
-  "target_activation_allowed": false
+  "target_activation_allowed": false,
+  "da_bi_thay_the": "wp1309-r2-g2-codex"
 }

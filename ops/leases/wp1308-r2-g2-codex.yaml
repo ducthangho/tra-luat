@@ -39,9 +39,9 @@
     "ops/leases/wp1308-r2-g2-codex.yaml",
     "ops/canary/wp1308-target-canary.md"
   ],
-  "spec_ref": "refs/heads/ops/wp1308-target-r2-g2@6650324ffc7f184e3e4a33980ab518c5747fb858",
+  "spec_ref": "refs/heads/ops/wp1308-target-r2-g2@d89b1f3a7baf06300eaee7f0b6617aab4f3538e8",
   "spec_path": "ops/specs/wp1308-target-canary-r2.md",
-  "spec_hash": "0af7b8028723f706d281fb5e27d5332f31c931ee41213d0eed3455e25b3e0cec",
+  "spec_hash": "78b604f8d86deee2091e47a5139bf471320941529ce78af3fbdf0e85d35a01b6",
   "prompt_path": "ops/prompts/wp1308-target-canary-r2.txt",
   "prompt_sha256_required": "a3bcc4c69003f6e2b77db5066ebd500673f48044ec2cf88719646eeed6bc6006"
 }

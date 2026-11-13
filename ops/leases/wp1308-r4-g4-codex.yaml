@@ -1,0 +1,50 @@
+{
+  "schema_version": 2,
+  "packet_issue": 1308,
+  "packet_id": "wp1308",
+  "mission_issue": 1172,
+  "revision": 4,
+  "generation": 4,
+  "lease_id": "wp1308-r4-g4-codex",
+  "granted_by": "ducthangho",
+  "granted_on_instruction": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6860600264",
+  "lease_expires_at_utc": "2026-11-14T01:23:19Z",
+  "lease_until": "2026-11-14T01:23:19Z",
+  "reviewed_sha_required": "dc635d3c90ecc348bc916bfd3e9b0a8f8ad9000d",
+  "branch": "ops/wp1308-canary-r4-g4",
+  "role": "executor",
+  "provider": "codex",
+  "executor": "codex",
+  "reviewer": "codex",
+  "model_family": "openai",
+  "execution_surface": "codex_service",
+  "transport": "machine",
+  "reviewer_model_family": "openai",
+  "reviewer_execution_surface": "codex_service",
+  "reviewer_transport": "machine",
+  "review_class": "sensitive",
+  "effective_review_class": "sensitive",
+  "assurance_target": "human_audited",
+  "write_set": [
+    "ops/admissions/wp1308-r4-g4.json",
+    "ops/specs/wp1308-target-canary-r4.md",
+    "ops/prompts/wp1308-target-canary-r4.txt",
+    "ops/leases/wp1308-r4-g4-codex.yaml",
+    "ops/canary/wp1308-target-canary.md"
+  ],
+  "effective_write_set": [
+    "ops/admissions/wp1308-r4-g4.json",
+    "ops/specs/wp1308-target-canary-r4.md",
+    "ops/prompts/wp1308-target-canary-r4.txt",
+    "ops/leases/wp1308-r4-g4-codex.yaml",
+    "ops/canary/wp1308-target-canary.md"
+  ],
+  "thay_the_cho": [
+    "wp1308-r3-g3-codex"
+  ],
+  "spec_ref": "refs/heads/ops/wp1308-target-r4-g4@b01481a15f78888e5d8fed1b6581db627b82850b",
+  "spec_path": "ops/specs/wp1308-target-canary-r4.md",
+  "spec_hash": "a1468c00311168ced9bdf7507b7c08341bc7500ff4c0a95d4cdf74d9f26d544f",
+  "prompt_path": "ops/prompts/wp1308-target-canary-r4.txt",
+  "prompt_sha256_required": "1b553c091a04b06b05bd292ee03f032aa48c9a1c5ca67a9dcf1dea968af15dd8"
+}

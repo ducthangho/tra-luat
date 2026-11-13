@@ -24,7 +24,7 @@ recorder_is_dispatcher: true
 recorder_ghi_chu: 'Phien dieu phoi #1206 session_015GtxrbDu3ubjAHY6UebEUe ghi lease (commit/push tu may DESKTOP-T9R33P2 theo chi thi chu kho); thao tac Codex/connector do phien nay dieu phoi.'
 
 leased_at_utc: '2026-11-13T12:00:00Z'
-heartbeat_at: '2026-11-13T12:00:00Z'
+heartbeat_at: '2026-11-13T17:04:05Z'
 lease_until: '2026-11-14T12:00:00Z'
 lease_expires_at_utc: '2026-11-14T12:00:00Z'
 

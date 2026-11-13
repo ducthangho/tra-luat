@@ -15706,9 +15706,27 @@ def _k3s_cr(**values):
     return lambda d, h: d['code_review'].update(values)  # None => serialize changed object
 
 
+def _k3s_json_sau(c):
+    def payload(d, h):
+        raw = json.dumps(d)[:-1] + ', "security_review":' + '[' * 100000 + 'null' + ']' * 100000 + '}'
+        try:
+            json.loads(raw)
+        except (RecursionError, ValueError):
+            return raw
+        raise AssertionError('decoder không từ chối JSON sâu: ca không đo được lỗi parse')
+    rc, out, err = _c1106(c, doi=_k3s_fixture(change=payload))
+    # Ca này đo chính hợp đồng không sập khi decoder vượt độ sâu, không phải lỗi CLI bất kỳ.
+    assert rc == 12, f'JSON sâu phải trả rc 12, nhận {rc}'
+    assert not _co_banner(out) and not _co_banner(err), 'JSON sâu phải được xử lý không traceback'
+    assert 'THIẾU  K3 connector:' in _txt(err) and _K3S_HONG in _txt(err), _txt(err)
+
+
 _K3S_HONG, _K3S_CHUA = 'neo head thiếu/sai/mơ hồ', 'connector chưa xong'
 CASES += [
     ('k3s_comment_that_sach', _k3s_ca()),
+    ('k3s_security_nhan_legacy', _k3s_ca(change=lambda d, h: d.update(security_review={'note': 'Reviewed commit:'}))),
+    ('k3s_code_review_nhan_legacy', _k3s_ca(change=_k3s_cr(note='Reviewed commit:'))),
+    ('k3s_json_sau', _k3s_json_sau),
     ('k3s_nhieu_marker', _k3s_ca(_K3S_HONG, suffix='\n<!-- codex-review-state:v1 {} -->')),
     ('k3s_json_hong', _k3s_ca(_K3S_HONG, change=lambda d, h: '{bad}')),
     ('k3s_thieu_code_review', _k3s_ca(_K3S_HONG, change=lambda d, h: '{}')),
@@ -15743,8 +15761,10 @@ CASES += [
     ('k3s_badge_ngoai_mien', _k3s_ca('hạng ngoài miền', suffix='\n![Q1 Badge] bug')),
 ]
 
-# Sáu chốt độc lập: mỗi mutant có đúng một ca đích, mọi sửa đổi trên bản sao tạm của harness.
+# Mỗi mutant có đúng một ca đích, mọi sửa đổi trên bản sao tạm của harness.
 MUTANTS.update({
+    'k3s_legacy_body_goc': ('if "Reviewed commit:" in body_legacy:', 'if "Reviewed commit:" in x["body"]:', ['k3s_security_nhan_legacy']),
+    'k3s_bo_recursion_error': ('except (ValueError, RecursionError) as _:', 'except ValueError as _:', ['k3s_json_sau']),
     'k3s_bo_status': ('status == "completed" and flags[0] is False', 'True and flags[0] is False', ['k3s_running']),
     'k3s_bo_unresolved': ('and flags[1] is False else "chua"', 'else "chua"', ['k3s_unresolved']),
     'k3s_sha_tien_to': ('not SHA_RE.fullmatch(cr["commit_sha"])', 'not re.fullmatch(r"[0-9a-f]{7,40}", cr["commit_sha"])', ['k3s_sha_tien_to']),

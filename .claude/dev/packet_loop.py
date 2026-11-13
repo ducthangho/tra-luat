@@ -2920,7 +2920,7 @@ def _neo_connector(k: str, x: dict, head: str, biet: set):
             return "hong"
         try:
             d = json.loads(markers[0])
-        except ValueError as _:
+        except (ValueError, RecursionError) as _:
             return "hong"
         cr = d.get("code_review") if type(d) is dict else None
         if type(cr) is not dict or type(cr.get("commit_sha")) is not str or not SHA_RE.fullmatch(cr["commit_sha"]):
@@ -2931,8 +2931,9 @@ def _neo_connector(k: str, x: dict, head: str, biet: set):
             if type(status) is not str or any(type(v) is not bool and not (status != "completed" and v is None) for v in flags):
                 return "hong"
             neo = "hien" if status == "completed" and flags[0] is False and flags[1] is False else "chua"
-        if "Reviewed commit:" in x["body"]:
-            cu = _neo_connector(k, {**x, "body": re.sub(mau, "", x["body"], flags=re.DOTALL)}, head, biet)
+        body_legacy = re.sub(mau, "", x["body"], flags=re.DOTALL)
+        if "Reviewed commit:" in body_legacy:
+            cu = _neo_connector(k, {**x, "body": body_legacy}, head, biet)
             if cu != neo:
                 return "hong"
         return neo

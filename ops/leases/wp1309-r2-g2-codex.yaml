@@ -51,5 +51,6 @@
     "wp1309-r1-g1-codex"
   ],
   "author_calls_used_prior": 1,
-  "execution_carrier": "existing ordinary Windows CodexCLI read-only patch output; deterministic isolated local materialization"
+  "execution_carrier": "existing ordinary Windows CodexCLI read-only patch output; deterministic isolated local materialization",
+  "da_bi_thay_the": "wp1309-r3-g3-codex"
 }

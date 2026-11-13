@@ -7,7 +7,7 @@ mission_revision: 32
 mission_plan_sha256: 98c506e169e61fb41dfea63e7bd83e088271b462bc786df9a9a9c4c653a7e188
 contract_id: WP1308-r2-readmission-after1309
 immutable_acceptance_baseline: dc635d3c90ecc348bc916bfd3e9b0a8f8ad9000d
-admission_ref: refs/heads/ops/wp1308-target-r2-g2@2cf958e232aec0b43ffa93b136ba89444b51e4aa
+admission_ref: refs/heads/ops/wp1308-target-r2-g2@910098b6062ac30e0eacd9b17683862fd36e29ee
 admission_path: ops/admissions/wp1308-r2-g2.json
 admission_sha256: 429b2fc41c6e76a9acdf2f2ffdb38e603e736b3cc6dc0437936ce748ef2ea315
 executor: codex

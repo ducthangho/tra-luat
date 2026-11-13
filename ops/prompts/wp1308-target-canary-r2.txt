@@ -1,0 +1,6 @@
+Thi công Packet1308 r2/g2 đúng frozen spec và actual admission canonical.
+Chỉ năm-path metadata/canary, không product changes. Mọi mutator qua canonical launcher/resolver và expected revision.
+Reserve attempt/review-call trước dispatch; higher-effort independent Codex service reviewer, actual serving UNKNOWN.
+Tổng hai model workloads: một independent offline service reviewer và một genuine exact-H GitHub Codex Connector review; không phát thêm request khi outcome chưa rõ.
+Advisory chỉ pending-human. Giữ exact-H actual-human trước publication và full applicable CI/connector/acceptance.
+Không source policy mock, Windows CI/full mutants, new fullM9, LIVE/security/credentials hoặc automatic successor.

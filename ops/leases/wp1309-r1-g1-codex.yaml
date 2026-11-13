@@ -17,7 +17,7 @@
   "execution_surface": "codex_cli",
   "transport": "machine",
   "reviewer": "claude",
-  "reviewer_model_family": "anthropic",
+  "reviewer_model_family": "claude",
   "reviewer_execution_surface": "claude_code",
   "reviewer_transport": "machine/local",
   "review_class": "sensitive",

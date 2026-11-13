@@ -30,14 +30,14 @@
   "prompt_sha256_required": "22827201108e705d5cc604b36cf2229bf89bf1a3cb179b9627bb74ef5d2abc8f",
   "base_sha": "6f32aad6fe9db93867fc87456541740f80bf79a4",
   "start_from_sha": "6f32aad6fe9db93867fc87456541740f80bf79a4",
-  "reviewed_sha_required": "6f32aad6fe9db93867fc87456541740f80bf79a4",
+  "reviewed_sha_required": "055e9fc87069bfeffe18bebc18acf31710411f30",
   "write_set": [
     ".claude/dev/packet_loop.py"
   ],
   "effective_write_set": [
     ".claude/dev/packet_loop.py"
   ],
-  "heartbeat_at": "2026-11-13T01:41:58Z",
+  "heartbeat_at": "2026-11-13T06:40:42Z",
   "lease_until": "2026-11-13T09:01:05Z",
   "lease_expires_at_utc": "2026-11-13T09:01:05Z",
   "heartbeat_required_minutes": 360,
@@ -51,5 +51,13 @@
     "wp1309-r2-g2-codex"
   ],
   "author_calls_used_prior": 1,
-  "execution_carrier": "fresh managed Codex service Executor; no CLI/auth/ACL changes"
+  "execution_carrier": "fresh managed Codex service Executor; no CLI/auth/ACL changes",
+  "candidate_head_sha": "055e9fc87069bfeffe18bebc18acf31710411f30",
+  "land_phase": "merged_master_CI_pending",
+  "no_new_source_or_model_call": true,
+  "source_pushes_used": 1,
+  "author_calls_used": 2,
+  "advisory_calls_used": 1,
+  "formal_calls_used": 1,
+  "prior_reviewed_sha_required_at_grant": "6f32aad6fe9db93867fc87456541740f80bf79a4"
 }

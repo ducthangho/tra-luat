@@ -35,5 +35,6 @@
   "spec_path": "ops/specs/wp1308-target-canary-r1.md",
   "spec_hash": "8559c72869799826c50e5648c19672b804352efc6fb3bec49a3e275a1329d408",
   "prompt_path": "ops/prompts/wp1308-target-canary-r1.txt",
-  "prompt_sha256_required": "7955e3ede3f35ec1af878fc63aed47d1ae76d5495472b0a2a241a9557b830305"
+  "prompt_sha256_required": "7955e3ede3f35ec1af878fc63aed47d1ae76d5495472b0a2a241a9557b830305",
+  "da_bi_thay_the": "wp1308-r3-g3-codex"
 }

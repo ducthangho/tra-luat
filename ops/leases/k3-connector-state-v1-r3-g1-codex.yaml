@@ -103,3 +103,4 @@ coordination_paths:
   - ops/leases/k3-connector-state-v1-r3-g1-codex.yaml
 run_minutes: 1440
 heartbeat_required_minutes: 360
+da_bi_thay_the: k3-connector-state-v1-r3-g2-retired

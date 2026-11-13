@@ -33,7 +33,7 @@ luôn là của người dùng.
 Xong khi biên giới RỖNG: mọi nhánh đã đi qua, không còn gì được giả định trong im lặng.
 **Không hành động cho tới khi người dùng xác nhận đã hiểu giống nhau.**
 
-## 2. Sáu luật riêng của kho — chúng sinh ra từ những lần đã trả giá
+## 2. Bảy luật riêng của kho — chúng sinh ra từ những lần đã trả giá
 
 **L1 — Mọi con số "N thứ phải xử" phải khai N ĐẾM GÌ.** Một đặc tả từng viết một con số mà
 người viết đếm phản chứng còn người đọc đếm finding; lượt thi hành đốt hơn 170 nghìn token và
@@ -124,6 +124,34 @@ land, gate master, receipt LIVE) thì khai điều kiện đo, thời điểm, a
 trạng thái `chưa đo được` cho tới khi đo thật — chưa chạy KHÔNG phải đạt, và đừng thay canary bằng một phép
 đo khác. Mỗi tiêu chí kèm một đột biến làm nó đổi màu — nối với L3.
 
+**L7 — Đặc tả không tự đặt điểm hỏi chủ kho.** Một mẫu đã lan từ đặc tả này sang đặc tả khác mà
+không ADR, protocol hay skill nào đặt ra: "ngân sách mềm N lời gọi; hai lượt liên tiếp chưa approve ⇒
+Review Rescue Checkpoint". Đo 08-11-2026 trên `origin/master` `e3c639b`, đếm tệp trong 581 tệp của
+`ops/specs/`: 26 tệp có cụm "liên tiếp chưa approve", 173 tệp có cụm "hỏi chủ kho" (kể cả câu phủ
+định). Mỗi điểm hỏi tự đặt là một lần chủ kho phải dừng việc để trả lời.
+
+- **Không khai ngân sách mềm** dưới trần của dòng khai, và không đặt luật kiểu "N lượt liên tiếp chưa
+  approve thì dừng hay hỏi chủ kho". Mức dành sẵn của `ADR-0041` là ngân sách giữ trước, không phải
+  trần hay điểm dừng. Lượt thứ hai trở đi theo điều kiện của `ADR-0052` và không cần hỏi ai.
+- **Mục `luat_dung` chỉ có hai loại dòng.** (i) Điểm dừng mà protocol hay một ADR đang hiệu lực đã
+  đặt: dẫn bằng tên mục hay ADR, không chép lại, không hạ ngưỡng. (ii) Một trong ba mã dưới đây, kèm
+  thứ phải mang theo khi hỏi:
+  - **E1 — hướng đi bế tắc:** đã xét lại cách làm mà không còn phương án nào có phép đo chống đỡ.
+    Mang theo gốc rễ, các phương án đã thử và vì sao hỏng, một đề xuất.
+  - **E2 — thiếu tài nguyên:** chạm trần cứng, hoặc thiếu máy, quota hay quyền. Mang theo mức đã
+    dùng, còn thiếu bao nhiêu, để làm gì.
+  - **E3 — phát hiện đảo ngược chỉ đạo:** bằng chứng mâu thuẫn với một quyết định của chủ kho. Mang
+    theo quyết định nào, bằng chứng, hậu quả nếu giữ nguyên.
+- **Câu nào trong đặc tả nói tới việc hỏi, báo hay chờ chủ kho thì phải mang một mã E.** Điểm dừng
+  loại (i) chỉ dừng phiên; khi nó cần chủ kho quyết thì câu hỏi ấy cũng mang mã, thường là E2 vì quyền
+  quyết thuộc chủ kho (chạm trần cứng, việc protocol giao chủ kho duyệt). Không gắn được mã nào thì đó
+  không phải điểm hỏi: phiên đang giữ việc tự quyết, rồi ghi gốc rễ, phương án chọn và phép đo chống đỡ
+  vào revision kế tiếp hay handoff.
+
+Ba mã lấy từ chỉ đạo của chủ kho ngày 07-11-2026, được chủ kho đồng ý thành danh sách ngày 08-11-2026
+(quyết định số 1 của tài liệu "Giảm việc hỏi chủ kho"). Khi ADR của danh sách đóng land, định nghĩa
+chuyển về ADR ấy và mục này chỉ còn con trỏ.
+
 ## 3. Đo trước khi hỏi
 
 Trước vòng 1, tự đo và ĐƯA SỐ vào câu hỏi, đừng bắt người dùng nhớ hộ:
@@ -131,14 +159,21 @@ Trước vòng 1, tự đo và ĐƯA SỐ vào câu hỏi, đừng bắt ngườ
 - kích thước dự kiến (`git diff --numstat` trên phạm vi tương đương gần nhất) — đối chiếu
   ngưỡng thường ở `docs/adr/0044-nguong-kich-thuoc-packet-theo-do-luong.md`; packet `sensitive`
   đối chiếu cặp số ở `docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md`; số lời gọi Codex
-  review dự kiến đối chiếu trần ở `docs/adr/0052-tran-loi-goi-codex-len-tam.md`. Skill này
+  review dự kiến đối chiếu trần ở `docs/adr/0055-tran-loi-goi-codex-len-muoi.md`. Skill này
   không chép ngưỡng; đặc tả ghi số đo, trần hay khối vượt trần (`nang_tran`) theo đúng dạng ADR
-  tương ứng quy định. Đặc tả muốn áp trần của `ADR-0052`/`ADR-0053` thì khai dòng `tran_*` theo
-  mục *Hiệu lực* của chính ADR ấy — giá trị sau `@` là OID 40 ký tự của commit LAND ADR trên nhánh
-  mặc định, không phải một commit bất kỳ có chứa ADR (base của packet chứa ADR mà không phải
-  commit land). Hai dạng khai, mỗi dòng đứng riêng ở đầu đặc tả, `<OID land>` thay bằng OID thật:
-  `tran_loi_goi_codex: ADR-0052@<OID land>` và `tran_kich_thuoc_sensitive: ADR-0053@<OID land>`.
-  ADR nào đang hiệu lực thì hỏi bảng định tuyến ADR của `docs/PROTOCOL_DA_PHIEN.md`;
+  tương ứng quy định;
+- dòng khai trần: **mọi đặc tả mới đều có dòng khai của `ADR-0055`**, đứng riêng một dòng ở đầu tệp:
+  `tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544`
+  OID ấy là commit land `ADR-0055` trên nhánh mặc định (merge PR #926). Trước khi đóng băng, chạy lại
+  ba phép đo ở mục *Hiệu lực* của `ADR-0055`. Trần lời gọi do bảng ở mục ấy chọn theo các dòng khai
+  của đặc tả: thiếu dòng này thì `ADR-0055` không áp và trần theo luật của `ADR-0052`, thấp hơn trần
+  của `ADR-0055`, nên trần chạm sớm hơn và mỗi lần chạm là một lần hỏi chủ kho. Đừng thêm dòng
+  `ADR-0052` cạnh dòng `ADR-0055`: bảng ấy chọn trần thấp hơn khi có cả hai. Skill này không chép con
+  số của bảng. Packet `sensitive` khai thêm dòng của `ADR-0053`:
+  `tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab`
+  Giá trị sau `@` luôn là OID 40 ký tự của commit LAND ADR trên nhánh mặc định, không phải một commit
+  bất kỳ có chứa ADR (base của packet chứa ADR mà không phải commit land). ADR nào đang hiệu lực thì
+  hỏi bảng định tuyến ADR của `docs/PROTOCOL_DA_PHIEN.md`;
 - write set dự kiến có giao với packet nào đang mở không;
 - base dự kiến có phải tổ tiên của nhánh mặc định không;
 - lớp review theo đường dẫn bị chạm (`docs/PROTOCOL_DA_PHIEN.md` §8), fail-closed khi không rõ.
@@ -159,6 +194,8 @@ một buổi.
 | `ngoai_pham_vi` | thứ CỐ Ý không làm, kèm lý do |
 | `muc_tieu` | mỗi mục một dòng, đánh số, mỗi dòng chiếu vào một đường dẫn ở `write_set` (L2) |
 | `nghiem_thu` | mỗi mục tiêu ≥1 tiêu chí, mỗi tiêu chí nêu phép đo làm nó ĐỎ (L3) |
+| `tran_*` | dòng khai trần ở đầu tệp theo mục 3; mặc định có dòng của `ADR-0055` |
+| `luat_dung` | điểm dừng của protocol hay ADR dẫn bằng tên, và mã E1–E3 theo L7; không có ngân sách mềm |
 | `hinh_dang_ke_thua` | chép từ biên nhận tiền nhiệm; không phải packet khắc phục thì ghi `khong_ap_dung` (L4) |
 | `chua_do_duoc` | thứ không kiểm được từ phiên này — ghi thẳng, đừng giấu sau chữ "có thể" |
 

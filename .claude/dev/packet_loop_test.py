@@ -15661,5 +15661,143 @@ _WP1303_R4_MUTANTS = frozenset(("wp1303_closed_router_error","wp1303_git_graft",
     "wp1303_git_shallow","wp1303_human_private_inputs","wp1303_path_precondition","wp1303_reused_barrier_status",
     "wp1303_seed_upper_oracle","wp1303_snapshot_bytes"))
 
+# #1288 K3-CONNECTOR-STATE-V1 r3 — fixture nguyên văn từ readback đã lưu.
+def _k3s_body(h):
+    path = ROOT / 'ops/land/pr1270-wp1179-provenance/readback-connector-issuecomment-6721722576.json'
+    body = json.loads(path.read_text(encoding='utf-8'))['body']
+    return body.replace('"commit_sha":"5824094e78a0afe9d0af8866df45c50b24334767"', '"commit_sha":"' + h + '"', 1)
+
+
+def _k3s_fixture(change=None, suffix='', extra=False, login=None):
+    def fixture(x, w, h):
+        if h is None:
+            return
+        body = _k3s_body(h)
+        if change:
+            marker = re.search(r'<!--\s*codex-review-state:v1\s+(\{.*?\})\s*-->', body, re.S)
+            d = json.loads(marker[1])
+            replacement = change(d, h)
+            payload = replacement if isinstance(replacement, str) else json.dumps(d)
+            body = body[:marker.start(1)] + payload + body[marker.end(1):]
+        body += suffix.replace('HEAD', h).replace('OLD', '0' * 40)
+        comment = {**x['issue_comments'][0], 'body': body}
+        if login:
+            comment['user'] = {'login': login}
+        x['reviews'], x['review_comments'], x['issue_comments'] = [], [], [comment]
+        if extra:
+            x['issue_comments'].append({**comment, 'id': 21, 'user': {'login': _CN834}, 'body': f'Reviewed commit: `{h}`'})
+    return fixture
+
+
+def _k3s_ca(expected='clean', **kw):
+    def ca(c):
+        rc, out, err = _c1106(c, doi=_k3s_fixture(**kw))
+        if _co_banner(out) or _co_banner(err):
+            raise CliSapDo(f'k3s CLI sập: rc={rc}, stderr={_txt(err)!r}')
+        _doi(0 if expected == 'clean' else 12, rc, err, 'k3s kiem-merge')
+        if expected == 'clean':
+            assert 'ĐỦ ĐIỀU KIỆN MERGE trên ' in _txt(out), _txt(out)
+        else:
+            assert 'THIẾU  K3 connector:' in _txt(err) and expected in _txt(err), _txt(err)
+    return ca
+
+
+def _k3s_cr(**values):
+    return lambda d, h: d['code_review'].update(values)  # None => serialize changed object
+
+
+def _k3s_json_sau(c):
+    def payload(d, h):
+        raw = json.dumps(d)[:-1] + ', "security_review":' + '[' * 100000 + 'null' + ']' * 100000 + '}'
+        try:
+            json.loads(raw)
+        except (RecursionError, ValueError):
+            return raw
+        raise AssertionError('decoder không từ chối JSON sâu: ca không đo được lỗi parse')
+    rc, out, err = _c1106(c, doi=_k3s_fixture(change=payload))
+    # Ca này đo chính hợp đồng không sập khi decoder vượt độ sâu, không phải lỗi CLI bất kỳ.
+    assert rc == 12, f'JSON sâu phải trả rc 12, nhận {rc}'
+    assert not _co_banner(out) and not _co_banner(err), 'JSON sâu phải được xử lý không traceback'
+    assert 'THIẾU  K3 connector:' in _txt(err) and _K3S_HONG in _txt(err), _txt(err)
+
+
+_K3S_HONG, _K3S_CHUA = 'neo head thiếu/sai/mơ hồ', 'connector chưa xong'
+CASES += [
+    ('k3s_comment_that_sach', _k3s_ca()),
+    ('k3s_security_nhan_legacy', _k3s_ca(change=lambda d, h: d.update(security_review={'note': 'Reviewed commit:'}))),
+    ('k3s_code_review_nhan_legacy', _k3s_ca(change=_k3s_cr(note='Reviewed commit:'))),
+    ('k3s_json_sau', _k3s_json_sau),
+    ('k3s_nhieu_marker', _k3s_ca(_K3S_HONG, suffix='\n<!-- codex-review-state:v1 {} -->')),
+    ('k3s_json_hong', _k3s_ca(_K3S_HONG, change=lambda d, h: '{bad}')),
+    ('k3s_thieu_code_review', _k3s_ca(_K3S_HONG, change=lambda d, h: '{}')),
+    ('k3s_code_review_sai_kieu', _k3s_ca(_K3S_HONG, change=lambda d, h: d.update(code_review=[]))),
+    ('k3s_sha_tien_to', _k3s_ca(_K3S_HONG, change=lambda d, h: d['code_review'].update(commit_sha=h[:10]))),
+    ('k3s_sha_hoa', _k3s_ca(_K3S_HONG, change=lambda d, h: d['code_review'].update(commit_sha=h.upper()))),
+    ('k3s_sha_khoang_trang', _k3s_ca(_K3S_HONG, change=lambda d, h: d['code_review'].update(commit_sha=h + ' '))),
+    ('k3s_sha_null', _k3s_ca(_K3S_HONG, change=_k3s_cr(commit_sha=None))),
+    ('k3s_sha_cu', _k3s_ca(_K3S_CHUA, change=_k3s_cr(commit_sha='0' * 40))),
+    ('k3s_sha_cu_khong_kiem_flags', _k3s_ca(change=_k3s_cr(commit_sha='0' * 40, status=None, has_any_findings='bad'), extra=True)),
+    ('k3s_status_sai_kieu', _k3s_ca(_K3S_HONG, change=_k3s_cr(status=None))),
+    ('k3s_flags_so', _k3s_ca(_K3S_HONG, change=_k3s_cr(has_any_findings=0, has_unresolved_findings=1))),
+    ('k3s_flags_chuoi', _k3s_ca(_K3S_HONG, change=_k3s_cr(has_any_findings='false'))),
+    ('k3s_completed_null', _k3s_ca(_K3S_HONG, change=_k3s_cr(has_unresolved_findings=None))),
+    ('k3s_running', _k3s_ca(_K3S_CHUA, change=_k3s_cr(status='running'))),
+    ('k3s_running_null', _k3s_ca(_K3S_CHUA, change=_k3s_cr(status='running', has_any_findings=None, has_unresolved_findings=None))),
+    ('k3s_running_sai_kieu', _k3s_ca(_K3S_HONG, change=_k3s_cr(status='running', has_unresolved_findings=0))),
+    ('k3s_any_findings', _k3s_ca(_K3S_CHUA, change=_k3s_cr(has_any_findings=True))),
+    ('k3s_unresolved', _k3s_ca(_K3S_CHUA, change=_k3s_cr(has_unresolved_findings=True))),
+    ('k3s_running_co_ket_luan_khac', _k3s_ca(change=_k3s_cr(status='running'), extra=True)),
+    ('k3s_hai_neo_khop_head', _k3s_ca(suffix='\nReviewed commit: `HEAD`')),
+    ('k3s_hai_neo_khop_cu', _k3s_ca(_K3S_CHUA, change=_k3s_cr(commit_sha='0' * 40), suffix='\nReviewed commit: `OLD`')),
+    ('k3s_hai_neo_mau_thuan', _k3s_ca(_K3S_HONG, suffix='\nReviewed commit: `OLD`')),
+    ('k3s_cu_vs_head', _k3s_ca(_K3S_HONG, change=_k3s_cr(commit_sha='0' * 40), suffix='\nReviewed commit: `HEAD`')),
+    ('k3s_running_vs_head', _k3s_ca(_K3S_HONG, change=_k3s_cr(status='running'), suffix='\nReviewed commit: `HEAD`')),
+    ('k3s_legacy_hong', _k3s_ca(_K3S_HONG, suffix='\nReviewed commit: invalid')),
+    ('k3s_security_bo_qua', _k3s_ca(change=lambda d, h: d.update(security_review='ignored'))),
+    ('k3s_bot_khac', _k3s_ca(_K3S_CHUA, login='someone')),
+    ('k3s_bot_khac_marker_hong', _k3s_ca(change=lambda d, h: '{bad}', login='someone', extra=True)),
+    ('k3s_badge_p1', _k3s_ca("còn ['P1']", suffix='\n![P1 Badge] bug')),
+    ('k3s_running_badge_p1', _k3s_ca("còn ['P1']", change=_k3s_cr(status='running'), suffix='\n![P1 Badge] bug', extra=True)),
+    ('k3s_badge_ngoai_mien', _k3s_ca('hạng ngoài miền', suffix='\n![Q1 Badge] bug')),
+]
+
+# Mỗi mutant có đúng một ca đích, mọi sửa đổi trên bản sao tạm của harness.
+MUTANTS.update({
+    'k3s_legacy_body_goc': ('if "Reviewed commit:" in body_legacy:', 'if "Reviewed commit:" in x["body"]:', ['k3s_security_nhan_legacy']),
+    'k3s_bo_recursion_error': ('except (ValueError, RecursionError) as _:', 'except ValueError as _:', ['k3s_json_sau']),
+    'k3s_bo_status': ('status == "completed" and flags[0] is False', 'True and flags[0] is False', ['k3s_running']),
+    'k3s_bo_unresolved': ('and flags[1] is False else "chua"', 'else "chua"', ['k3s_unresolved']),
+    'k3s_sha_tien_to': ('not SHA_RE.fullmatch(cr["commit_sha"])', 'not re.fullmatch(r"[0-9a-f]{7,40}", cr["commit_sha"])', ['k3s_sha_tien_to']),
+    'k3s_bool_so': ('type(v) is not bool and not (status != "completed" and v is None)', 'not isinstance(v, (bool, int)) and not (status != "completed" and v is None)', ['k3s_flags_so']),
+    'k3s_bo_nhieu_marker': ('if len(markers) > 1:', 'if False:', ['k3s_nhieu_marker']),
+    'k3s_bo_mau_thuan': ('if cu != neo:', 'if False:', ['k3s_hai_neo_mau_thuan']),
+})
+
+def _k3s_mo_lai(c, sd):
+    original = globals()['run']
+    def invoke(script, args, *pos, **kw):
+        if args[0] == 'mo-lai':
+            path = Path(args[args.index('--connector') + 1])
+            envelope = json.loads(path.read_text())
+            h = envelope['head_sha']
+            body = '<!-- codex-review-state:v1 ' + json.dumps({'code_review': {
+                'commit_sha': h, 'status': 'running', 'has_any_findings': True,
+                'has_unresolved_findings': True}}) + ' -->\n![P1 Badge] bug'
+            envelope['issue_comments'] = {'total_count': 1, 'items': [{'id': 20, 'body': body,
+                'user': {'login': _CN834}, 'issue_url': f'{_API834}issues/55'}]}
+            path.write_text(json.dumps(envelope), encoding='utf-8')
+        return original(script, args, *pos, **kw)
+    globals()['run'] = invoke
+    try:
+        return _ml813(c, sd, 'connector', [('cn-bug', 'P1', [['issue_comments', 20]])], xong=False)
+    finally:
+        globals()['run'] = original
+
+
+CASES += [
+    ('k3s_accept_sach', _r834_ca(0, doi=_k3s_fixture())),
+    ('k3s_mo_lai_badge_running', _ca813(_k3s_mo_lai, state='cho_chu_kho', finding_counts={'cn-bug': 1})),
+]
+
 if __name__ == "__main__":
     sys.exit(main())

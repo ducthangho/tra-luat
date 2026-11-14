@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "event": "source_validation_lease_granted",
+  "event": "source_validation_checkpoint_mandatory_gate_failure",
   "packet_issue": 1315,
   "packet_id": "wp1315",
   "mission_issue": 1172,
@@ -47,7 +47,7 @@
   "granted_by": "ducthangho",
   "granted_on_instruction": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6881279644",
   "leased_at_utc": "2026-11-14T17:47:09Z",
-  "lease_expires_at_utc": "2026-11-15T08:47:09Z",
+  "lease_expires_at_utc": "2026-11-14T18:48:32Z",
   "validation_stage_cap_minutes": 900,
   "review_invocation_cap_minutes": 20,
   "native_run_cap_minutes": 150,
@@ -62,5 +62,8 @@
   "g5_issued": false,
   "thay_the_cho": [],
   "activation_event": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6881690602",
-  "metadata_identity_format_correction": "H1 now matches existing canonical packet_id/revision grammar; declared packet/revision/generation, source, scope, budgets and clock unchanged."
+  "metadata_identity_format_correction": "H1 now matches existing canonical packet_id/revision grammar; declared packet/revision/generation, source, scope, budgets and clock unchanged.",
+  "original_lease_expires_at_utc": "2026-11-15T08:47:09Z",
+  "validation_stage_closed_at_utc": "2026-11-14T18:48:32Z",
+  "closure_reason": "Windows eol-policy selftest 31/32; owned CI cancelled; native interrupted; no merge or target activation"
 }

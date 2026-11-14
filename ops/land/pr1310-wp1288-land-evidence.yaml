@@ -143,10 +143,10 @@ trang_thai_packet:
     (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp-m8.txt). (4) review neo 8dce516: DAT — connector sach + audit
     human_audited chu kho; offline luot 3 approve tren 1b24fd9 (loi_khai_co_neo). (5) uy quyen: DAT theo L-6 bang audit chu kho tu
     dang 6859355072 neo 8dce516, dang TRUOC merge. (6) muc tieu: DAT — nghiem_thu C1–C6 + hoan_tat_s8. (7) tran: VUOT o connector
-    (review.canh_bao_tran) — chu kho quyet.
+    (review.canh_bao_tran) — chu kho CHAP NHAN, giu landed true (review.quyet_dinh_chu_kho_tran).
   canh_bao_cho_chu_kho: >-
-    (i) Loi goi connector: duyet +1, dung 2 co chu dich + 1 tu kich hoat (review.canh_bao_tran). Neu chu kho coi day la vi pham
-    tran can Review Rescue Checkpoint thi ha landed false. (ii) Lease g1 bi rut khi executor luot 3 / reviewer luot 3 dang chay;
+    (i) Loi goi connector: duyet +1, dung 2 co chu dich + 1 tu kich hoat (review.canh_bao_tran) — chu kho da chap nhan
+    (review.quyet_dinh_chu_kho_tran). (ii) Lease g1 bi rut khi executor luot 3 / reviewer luot 3 dang chay;
     chu kho da nhan hai ket qua ay khi cap g3. (iii) Uy quyen merge (AskUserQuestion) khong co comment; authorization_url la audit
     approve tu dang tren dung SHA.
 
@@ -162,6 +162,9 @@ review:
     Thuc te: 2 loi goi connector co chu dich (872df6b, 8dce516). Head 872df6b phai bo vi K4 khong audit duoc (CI da chay) va chu kho
     chon "Cho master co commit moi" — nghia la can head moi va connector moi, nhung KHONG co dong nang tran thu hai tuong minh. Lan
     thu ba do GitHub tu kich hoat khi bo draft, sau merge, phien khong yeu cau. Tat ca deu sach (khong finding).
+  quyet_dinh_chu_kho_tran: >-
+    loi_khai_co_neo — 2026-11-14 ~06:00Z chu kho nhan trong phien dieu phoi: "Chap nhan connector vuot tran, giu landed true".
+    Khong co comment GitHub; nguyen van la tin nhan trong phien session_015GtxrbDu3ubjAHY6UebEUe.
   ket_qua_theo_luot: 'offline bc620d6 khong verdict · offline bc620d6 request_changes · offline 1b24fd9 approve · connector 872df6b sach · connector 8dce516 sach · connector 8dce516 (tu dong) sach.'
 
 nghiem_thu:

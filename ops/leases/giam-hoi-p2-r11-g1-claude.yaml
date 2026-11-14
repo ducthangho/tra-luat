@@ -61,8 +61,8 @@ recorder_is_executor: false
 leased_at_utc: '2026-11-14T17:18:46Z'
 heartbeat_at: '2026-11-14T17:18:46Z'
 heartbeat_required_minutes: 360
-lease_until: '2026-11-15T17:18:46Z'
-lease_expires_at_utc: '2026-11-15T17:18:46Z'
+lease_until: '2026-11-15T00:06:09Z'
+lease_expires_at_utc: '2026-11-15T00:06:09Z'
 max_lease_hours: 24
 codex_review_calls_limit: 10
 codex_review_ledger: sổ chung trên Packet Issue #1292 cho lời gọi offline và connector (mục 6 của đặc tả)
@@ -74,3 +74,17 @@ human_audit: chủ kho tự đăng audit human_exact_head_audit.v1 của SHA ứ
 merge_approval: ADR-0060 M7, chủ kho duyệt một lần neo H sau CI và connector (packet chạm E5)
 thay_the_cho: []
 thay_the_cho_note: lease giam-hoi-p2-r10-g1-codex (đặc tả r10) đã rút hạn tới 2026-11-14T17:07:04Z (commit f9820f8 trên nhánh này) và hết hạn trước khi cấp lease này; không khai bia mộ
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-15T17:18:46Z'
+  han_moi_utc: '2026-11-15T00:06:09Z'
+  chi_thi: >-
+    Duyet merge M7 cua chu kho (bao gom nha lease), ghi ho tren
+    https://github.com/ducthangho/tra-luat/issues/1292#issuecomment-6886049471
+  ly_do: >-
+    Packet GIAM-HOI-P2-ADR-E1-E5 r11 g1 da MERGE: PR #1317 head 2b6ff1574dd3d26908eb4bb8c425df87b0ad6d9f, merge commit
+    426d1b06e292a7db272a0f942bef0794479b58a6 (23:53:37Z 14-11-2026). Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: >-
+    Khong co lease ke nhiem (thay_the_cho rong). Rut han theo tien le #1179 fcea24a va 8c57691 cua P1. Han moi dat SAU luc
+    push de luot dang lease con thay lease song.
+  nguoi_rut: 'phien Claude dieu phoi GIAM-HOI-P1/P2 (worktree brave-rosalind-730dc7), theo duyet M7 cua chu kho'
+  nghiem_thu: 'ai-dang-giu ba tep write set sau 2026-11-15T00:06:09Z phai khong con giam-hoi-p2-r11-g1-claude la nguoi giu.'

@@ -1,0 +1,77 @@
+name: do-pl (NHANH DO TAM — bam gio packet_loop_test, khong merge)
+
+# Chi chay tren nhanh do-ci/** (khong trung co nao cua ci.yml / ops-open-pr / ops-publish-lease).
+on:
+  push:
+    branches: ['do-ci/**']
+
+permissions:
+  contents: read
+
+jobs:
+  do:
+    strategy:
+      fail-fast: false
+      matrix:
+        kieu: [toan-bo, manh-0, manh-1, manh-2, manh-3, song-song-4]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+      KIEU: ${{ matrix.kieu }}
+    steps:
+      # Thiet lap CHEP DUNG job gate-packet-loop cua ci.yml (master 072d45a).
+      - name: Force LF checkout
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+      - shell: bash
+        env:
+          AL_VER: 1.7.7
+        run: bash ops/cai_actionlint.sh
+      - shell: bash
+        run: bash ops/cai_cong_cu.sh shellcheck
+      - shell: bash
+        run: bash ops/cai_cong_cu.sh rg
+      - shell: bash
+        run: python ops/cong_cu.py kiem-tra --json > /dev/null
+      - run: |
+          python -m pip install --quiet ruff==0.15.15
+          ruff --version
+      - name: thong tin runner
+        run: |
+          nproc
+          free -m
+          python -c "import os; print('cpu_count', os.cpu_count(), 'affinity', len(os.sched_getaffinity(0)))"
+      - name: do
+        shell: bash
+        run: |
+          set -u
+          mkdir -p "$RUNNER_TEMP/kq"
+          case "$KIEU" in
+            toan-bo) python do-ci/do_pl.py --out "$RUNNER_TEMP/kq/toan-bo.json" ;;
+            manh-*)  i="${KIEU#manh-}"; python do-ci/do_pl.py --manh "$i/4" --out "$RUNNER_TEMP/kq/$KIEU.json" ;;
+            song-song-4)
+              for i in 0 1 2 3; do
+                python do-ci/do_pl.py --manh "$i/4" --out "$RUNNER_TEMP/kq/ss-$i.json" > "$RUNNER_TEMP/kq/ss-$i.log" 2>&1 &
+              done
+              wait
+              for i in 0 1 2 3; do echo "===== ss-$i"; sed -n '/=== DO_PL TOM TAT ===/,$p' "$RUNNER_TEMP/kq/ss-$i.log"; done ;;
+          esac
+          echo "xong $KIEU"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: do-pl-${{ matrix.kieu }}
+          path: ${{ runner.temp }}/kq/

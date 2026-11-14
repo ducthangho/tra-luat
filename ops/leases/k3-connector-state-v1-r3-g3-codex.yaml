@@ -24,9 +24,23 @@ recorder_is_dispatcher: true
 recorder_ghi_chu: 'Phien dieu phoi #1206 session_015GtxrbDu3ubjAHY6UebEUe ghi lease (commit/push tu may DESKTOP-T9R33P2 theo chi thi chu kho); thao tac Codex/connector do phien nay dieu phoi.'
 
 leased_at_utc: '2026-11-13T12:00:00Z'
-heartbeat_at: '2026-11-14T01:52:43Z'
-lease_until: '2026-11-14T12:00:00Z'
-lease_expires_at_utc: '2026-11-14T12:00:00Z'
+heartbeat_at: '2026-11-14T04:07:52Z'
+lease_until: '2026-11-14T04:40:00Z'
+lease_expires_at_utc: '2026-11-14T04:40:00Z'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-14T12:00:00Z'
+  han_moi_utc: '2026-11-14T04:40:00Z'
+  chi_thi: >-
+    Ke hoach phien dieu phoi #1206 session_015GtxrbDu3ubjAHY6UebEUe da bao chu kho: nha lease g3 sau khi CI hau merge xanh.
+  ly_do: >-
+    Packet #1288 (K3-CONNECTOR-STATE-V1 r3) da MERGE: PR #1310 (head 8dce5165) merge commit
+    c0b8e11d7099f756e65db8bd9a81493cde789a6f, 2026-11-14T02:04:46Z; ci.yml push run 43544262919 va launcher-windows 43544262861
+    tren c0b8e11 success. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: >-
+    Khong co lease ke nhiem. Rut han theo tien le #1272 (50e3065). Han moi dat SAU luc push de luot dang lease con thay lease
+    song, tranh rc=8 che rc=9.
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrbDu3ubjAHY6UebEUe'
+  nghiem_thu: 'ai-dang-giu .claude/dev/packet_loop.py va .claude/dev/packet_loop_test.py sau 04:40Z phai ra NGUOI_GIU 0.'
 
 packet_id: K3-CONNECTOR-STATE-V1
 packet_slug: k3-connector-state-v1

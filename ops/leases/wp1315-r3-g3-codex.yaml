@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "event": "private_source_remediation_lease_granted",
+  "event": "private_source_stage_closed_before_human_wait",
   "packet_issue": 1315,
   "packet_id": "wp1315",
   "mission_issue": 1172,
@@ -47,7 +47,7 @@
   "granted_by": "ducthangho",
   "granted_on_instruction": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6877126546",
   "leased_at_utc": "2026-11-14T12:18:41Z",
-  "lease_expires_at_utc": "2026-11-14T14:48:41Z",
+  "lease_expires_at_utc": "2026-11-14T12:53:52Z",
   "max_run_minutes": 45,
   "new_implementation_calls_limit": 1,
   "new_independent_review_calls_limit": 1,
@@ -60,5 +60,7 @@
   "target_activation_allowed": false,
   "thay_the_cho": [],
   "reviewed_tree_required": "b69be04a3fa17be04771c2bc84717b2486b9b494",
-  "output_registration_path": "ops/receipts/wp1315-r3-generated-output.json"
+  "output_registration_path": "ops/receipts/wp1315-r3-generated-output.json",
+  "original_lease_expires_at_utc": "2026-11-14T14:48:41Z",
+  "private_stage_closed_at_utc": "2026-11-14T12:53:52Z"
 }

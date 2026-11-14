@@ -1,4 +1,4 @@
-# WP1315 r4/g4 — exact-source validation and conditional landing
+# wp1315 r4 — exact-source validation and conditional landing
 packet_id: wp1315
 revision: 4
 generation: 4

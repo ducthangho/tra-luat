@@ -43,7 +43,7 @@
   "branch_ownership": "exclusive",
   "base_sha": "c0b8e11d7099f756e65db8bd9a81493cde789a6f",
   "start_from_sha": "f97107bd99133a6a295385ba846884beac3a36a7",
-  "reviewed_sha_required": "f97107bd99133a6a295385ba846884beac3a36a7",
+  "reviewed_sha_required": "669af5f9f58dfd72324d1f5b6aaefd15745592b1",
   "granted_by": "ducthangho",
   "granted_on_instruction": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6877126546",
   "leased_at_utc": "2026-11-14T12:18:41Z",
@@ -58,5 +58,7 @@
   "source_code_push_allowed_now": false,
   "validation_generation4_active": false,
   "target_activation_allowed": false,
-  "thay_the_cho": []
+  "thay_the_cho": [],
+  "reviewed_tree_required": "b69be04a3fa17be04771c2bc84717b2486b9b494",
+  "output_registration_path": "ops/receipts/wp1315-r3-generated-output.json"
 }

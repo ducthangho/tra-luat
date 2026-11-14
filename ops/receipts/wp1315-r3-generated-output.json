@@ -1,0 +1,29 @@
+{
+  "schema": "wp1315_generated_output_registration.v1",
+  "event": "generated_private_head_bound_for_second_review",
+  "mission_revision": 39,
+  "packet": 1315,
+  "revision": 3,
+  "generation": 3,
+  "reviewed_sha": "669af5f9f58dfd72324d1f5b6aaefd15745592b1",
+  "reviewed_tree": "b69be04a3fa17be04771c2bc84717b2486b9b494",
+  "immutable_acceptance_baseline": "c0b8e11d7099f756e65db8bd9a81493cde789a6f",
+  "continuation_base": "f97107bd99133a6a295385ba846884beac3a36a7",
+  "effective_write_set": [
+    ".claude/dev/packet_loop.py",
+    ".claude/dev/packet_loop_test.py",
+    "ops/specs/wp1315-adopted-pending-recovery-r1.md"
+  ],
+  "files_sha256": {
+    ".claude/dev/packet_loop.py": "1db4e5536c20a139c58f485a85987e4801fcf80572e26e2e371977776bc256a1",
+    ".claude/dev/packet_loop_test.py": "d985a1092081e91ff2855255ec7c5b456339a49f431460062da83c2394b2f2e9",
+    "ops/specs/wp1315-adopted-pending-recovery-r1.md": "ed9a07b61e4b052fcb05c503ebc5d09a348cc1c670363b93a2b53a3dbbc4dbab"
+  },
+  "candidate_diff_sha256": "4f81e4b614e276310b8da4eaf0396e128f5f76861d74ffdab64817673ec3737e",
+  "remediation_diff_sha256": "9dacf0d75bb5d0a9d0999f8d39ffca8e23a1bb3f82ba1c026545f63edc4cea21",
+  "authority": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6877126546",
+  "private_stage_only": true,
+  "source_code_published": false,
+  "validation_generation4_active": false,
+  "target_activation_allowed": false
+}

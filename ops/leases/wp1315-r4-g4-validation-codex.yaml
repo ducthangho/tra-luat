@@ -22,10 +22,10 @@
   "review_class": "sensitive",
   "effective_review_class": "sensitive",
   "assurance_target": "cross_approved",
-  "spec_ref": "refs/heads/ops/wp1315-r4-g4-validation@6abdd494e724a86fc677d1eacd6071ca38a927be",
+  "spec_ref": "refs/heads/ops/wp1315-r4-g4-validation@194e52a584f7cc3b98cfc1cfd293d9a0a73dac9e",
   "spec_path": "ops/specs/wp1315-source-validation-r4.md",
-  "spec_hash": "2e096f4bbb9cd695209506988f197b0ac0f7f05efcc05a0183b13bd55ec98781",
-  "spec_sha256_required": "2e096f4bbb9cd695209506988f197b0ac0f7f05efcc05a0183b13bd55ec98781",
+  "spec_hash": "47f7a19ddbe617c8b56f1dfff64d775717482b03f61e8a523f63acc6e6f7b922",
+  "spec_sha256_required": "47f7a19ddbe617c8b56f1dfff64d775717482b03f61e8a523f63acc6e6f7b922",
   "prompt_path": "ops/prompts/wp1315-source-review-r4.txt",
   "prompt_sha256_required": "8e92f251e6714b7a5e22dbfe78cdc5be30c56f3ba225e75893af76b036f275e9",
   "write_set": [
@@ -61,5 +61,6 @@
   "target_activation_allowed": false,
   "g5_issued": false,
   "thay_the_cho": [],
-  "activation_event": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6881690602"
+  "activation_event": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6881690602",
+  "metadata_identity_format_correction": "H1 now matches existing canonical packet_id/revision grammar; declared packet/revision/generation, source, scope, budgets and clock unchanged."
 }

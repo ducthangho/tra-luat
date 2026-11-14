@@ -1,0 +1,73 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1292
+packet_id: GIAM-HOI-P2-ADR-E1-E5
+revision: 10
+generation: 1
+lease_id: giam-hoi-p2-r10-g1-codex
+role: executor
+provider: codex
+executor: codex
+model: gpt-6-astra
+effort: high
+model_family: openai
+execution_surface: codex_cli
+transport: machine
+environment: local
+reviewer: human
+assurance_target: human_audited
+advisory_review:
+  provider: codex
+  model_family: openai
+  model: gpt-6-astra
+  effort: xhigh
+  transport: launcher.py run, phiên mới, read-only, không fork context executor
+  assurance: same_provider_approved
+  vai: phản biện bổ sung; verdict chặn theo ADR-0060 M1; biên nhận của nó là đầu vào K4 đường model của kiem-merge
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/GIAM-HOI-P2-ADR-E1-E5-r10.md
+spec_ref: refs/heads/master@4068b3a2a0087db287ea979eccbd372a7a0938d7
+spec_sha256_required: 1a5786cca5bcf8a72d8d93ecb9f8edbfbe021c5ef69b68f78ac642bc15698d1f
+spec_hash: 1a5786cca5bcf8a72d8d93ecb9f8edbfbe021c5ef69b68f78ac642bc15698d1f
+prompt_path: ops/prompts/giam-hoi-p2-r10-g1-codex.md
+prompt_sha256_required: 213f85d634f962ba7a5dcf0b8602ff5018266eb5c3ec04838b4916b3bc8a2c19
+write_set:
+- .claude/skills/soan-spec/SKILL.md
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0067-danh-sach-dong-va-uy-quyen-thuong-truc.md
+write_set_hash: b6cf7100e4538a80259149c2e3780b89060dd034583c8e66ab7d0d5c8d6013bd
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+effective_write_set:
+- .claude/skills/soan-spec/SKILL.md
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0067-danh-sach-dong-va-uy-quyen-thuong-truc.md
+change_policy_sha: null
+branch: agent/giam-hoi-p2-g1-codex
+base_sha: c0b8e11d7099f756e65db8bd9a81493cde789a6f
+start_from_sha: c0b8e11d7099f756e65db8bd9a81493cde789a6f
+reviewed_sha_required: c0b8e11d7099f756e65db8bd9a81493cde789a6f
+reviewed_sha_required_note: mốc ban đầu là base; review Codex và audit của chủ kho phải neo SHA ứng viên H mới, không bao giờ neo base
+depends_on_landed: GIAM-HOI-P1-SOAN-SPEC r7 — merge bab2279eddd267df77f43a4bf32e168678857f6a là tổ tiên của base; M8 #1291 issuecomment-6870309468
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1292#issuecomment-6730487484
+granted_on_instruction_note: duyệt băm đặc tả r10 (09-11-2026) cùng chỉ đạo chủ kho trong phiên điều phối 14-11-2026, nguyên văn "Làm P2 ngay"
+recorded_by: phiên điều phối Claude Code (worktree brave-rosalind-730dc7), ghi theo chỉ đạo chủ kho; không phải executor
+recorder_is_executor: false
+leased_at_utc: '2026-11-14T06:04:29Z'
+heartbeat_at: '2026-11-14T06:04:29Z'
+heartbeat_required_minutes: 360
+lease_until: '2026-11-15T06:04:29Z'
+lease_expires_at_utc: '2026-11-15T06:04:29Z'
+max_lease_hours: 24
+codex_review_calls_limit: 10
+codex_review_ledger: sổ chung trên Packet Issue #1292 cho lời gọi offline và connector (mục 6 của đặc tả)
+primary_product_pushes_limit: 1
+windows: not_required
+full_mutant_audit: not_required
+uy_quyen_merge: false
+human_audit: chủ kho tự đăng audit human_exact_head_audit.v1 của SHA ứng viên H trên PR draft của packet trước khi H được đẩy (ADR-0063 K4); comment ghi hộ không phải audit
+merge_approval: ADR-0060 M7, chủ kho duyệt một lần neo H sau CI và connector (packet chạm E5)
+thay_the_cho: []

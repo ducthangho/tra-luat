@@ -1,0 +1,9 @@
+{
+  "head": "669af5f9f58dfd72324d1f5b6aaefd15745592b1",
+  "tree": "b69be04a3fa17be04771c2bc84717b2486b9b494",
+  "immutable_acceptance_baseline": "c0b8e11d7099f756e65db8bd9a81493cde789a6f",
+  "actual_human_source_audit": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6881045953",
+  "publication_payload_sha256": "ddf07bb8124ea576954aa36924c8c1d7faad6742d4b8437eb4af5506e51eb982",
+  "validation_activation": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6881690602",
+  "product_edits_allowed": false
+}

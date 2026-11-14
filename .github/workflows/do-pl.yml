@@ -1,0 +1,95 @@
+name: do-pl (NHANH DO TAM — dem spawn packet_loop_test, khong merge)
+
+# Chi chay tren nhanh do-ci/** (khong trung co nao cua ci.yml / ops-open-pr / ops-publish-lease).
+on:
+  push:
+    branches: ['do-ci/**']
+
+permissions:
+  contents: read
+
+jobs:
+  do:
+    strategy:
+      fail-fast: false
+      matrix:
+        kieu: [dem-spawn-nen, vi-do]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+      KIEU: ${{ matrix.kieu }}
+    steps:
+      - name: Force LF checkout
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+      - shell: bash
+        env:
+          AL_VER: 1.7.7
+        run: bash ops/cai_actionlint.sh
+      - shell: bash
+        run: bash ops/cai_cong_cu.sh shellcheck
+      - shell: bash
+        run: bash ops/cai_cong_cu.sh rg
+      - run: |
+          python -m pip install --quiet ruff==0.15.15
+          nproc
+      - name: do
+        shell: bash
+        run: |
+          set -u
+          mkdir -p "$RUNNER_TEMP/kq"
+          case "$KIEU" in
+            dem-spawn-nen) python do-ci/do_pl.py --chi-nen --dem-spawn --out "$RUNNER_TEMP/kq/dem-spawn-nen.json" ;;
+            vi-do)
+              python - <<'PY'
+          import time, subprocess, sys, os, statistics as st, py_compile, tempfile, shutil
+          from pathlib import Path
+          D = Path(".claude/dev")
+          for ten in ("packet_loop.py", "packet_loop_test.py", "launcher.py"):
+              src = (D / ten).read_text(encoding="utf-8")
+              t = time.perf_counter()
+              for _ in range(5):
+                  compile(src, ten, "exec")
+              print(f"compile {ten} ({len(src.splitlines())} dong): {(time.perf_counter() - t) / 5:.3f} s/lan")
+          env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+          def tm(cmd, n=9, **kw):
+              xs = []
+              for _ in range(n):
+                  t = time.perf_counter(); subprocess.run(cmd, capture_output=True, **kw); xs.append(time.perf_counter() - t)
+              return st.median(xs)
+          print(f"python -c pass                 : {tm([sys.executable, '-c', 'pass'], env=env):.3f} s")
+          print(f"python packet_loop.py --help   : {tm([sys.executable, str(D / 'packet_loop.py'), '--help'], env=env):.3f} s")
+          # Doi chung: cung lenh qua `-m` voi pyc checked-hash dung san (PYTHONPYCACHEPREFIX rieng).
+          td = Path(tempfile.mkdtemp()); shutil.copy(D / "packet_loop.py", td / "packet_loop.py"); shutil.copy(D / "launcher.py", td / "launcher.py")
+          pre = Path(tempfile.mkdtemp())
+          env2 = dict(os.environ, PYTHONPYCACHEPREFIX=str(pre), PYTHONPATH=str(td))
+          env2.pop("PYTHONDONTWRITEBYTECODE", None)
+          import importlib.util
+          cf = importlib.util.cache_from_source(str(td / "packet_loop.py"))
+          print("cache_from_source (khong prefix trong tien trinh cha):", cf)
+          subprocess.run([sys.executable, "-c", "import py_compile,sys; py_compile.compile(sys.argv[1], invalidation_mode=py_compile.PycInvalidationMode.CHECKED_HASH, doraise=True)", str(td / "packet_loop.py")], env=env2, check=True)
+          print(f"python -m packet_loop --help (pyc checked-hash): {tm([sys.executable, '-m', 'packet_loop', '--help'], env=env2):.3f} s")
+          r = subprocess.run([sys.executable, "-m", "packet_loop", "--help"], env=env2, capture_output=True, text=True)
+          print("rc -m:", r.returncode, "dong dau:", (r.stdout or r.stderr).splitlines()[:1])
+          PY
+              ;;
+          esac
+          echo "xong $KIEU"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: do-pl-${{ matrix.kieu }}
+          path: ${{ runner.temp }}/kq/

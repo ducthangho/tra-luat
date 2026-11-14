@@ -50,11 +50,15 @@
   "granted_on_instruction": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6872272511",
   "recorded_by": "Dispatcher recording exact r37 owner approval; not executor self-grant",
   "leased_at_utc": "2026-11-14T05:17:47Z",
-  "lease_expires_at_utc": "2026-11-14T07:17:47Z",
+  "lease_expires_at_utc": "2026-11-14T05:55:25Z",
   "max_run_minutes": 45,
   "source_implementation_calls_limit": 1,
   "source_reviewer_calls_limit": 0,
   "source_push_limit": 0,
   "target_activation_allowed": false,
-  "thay_the_cho": []
+  "thay_the_cho": [],
+  "lease_expires_at_before_close": "2026-11-14T07:17:47Z",
+  "closed_at_utc": "2026-11-14T05:55:25Z",
+  "lease_closed": true,
+  "closure_reason": "Bounded private source preparation stopped; no source acceptance or target activation."
 }

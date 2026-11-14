@@ -50,7 +50,7 @@
   "granted_on_instruction": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6873331554",
   "recorded_by": "Dispatcher recording exact r38 owner approval; not self-grant",
   "leased_at_utc": "2026-11-14T06:48:49Z",
-  "lease_expires_at_utc": "2026-11-14T12:48:49Z",
+  "lease_expires_at_utc": "2026-11-14T11:25:33Z",
   "max_run_minutes": 30,
   "source_review_calls_limit": 1,
   "new_implementation_calls_limit": 0,
@@ -58,5 +58,9 @@
   "prior_implementation_calls_preserved": 1,
   "prior_source_review_calls_preserved": 0,
   "target_activation_allowed": false,
-  "thay_the_cho": []
+  "thay_the_cho": [],
+  "lease_expires_at_before_close": "2026-11-14T12:48:49Z",
+  "closed_at_utc": "2026-11-14T11:25:33Z",
+  "lease_closed": true,
+  "closure_reason": "Independent source review returned changes_requested; source phase stopped without publication, merge or target activation."
 }

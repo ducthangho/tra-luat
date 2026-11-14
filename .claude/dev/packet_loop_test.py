@@ -15799,5 +15799,378 @@ CASES += [
     ('k3s_mo_lai_badge_running', _ca813(_k3s_mo_lai, state='cho_chu_kho', finding_counts={'cn-bug': 1})),
 ]
 
+def _pending_fixture1315(c, historical=False, exhausted=False, same_family=False):
+    """Synthetic advisory approval, real adoption and local-bare canonical I2.
+
+    Only authority/runtime transport seams are replaced, as in _runtime1174;
+    main(), reducers, canonical lease verification and durable pair run normally.
+    No target journal or operational enrollment is used.
+    """
+    import contextlib
+    import io
+    from unittest.mock import patch
+    m,a,initial,argv,oldinvoke,source,witness,pair = _runtime1174(
+        c, "begin-attempt", current_policy=True, service=True)
+    e = a["enrollment"]
+    w = Path(e["git_root"])
+    head = _g(w, "rev-parse", "refs/remotes/origin/agent/wp55-g1-claude")
+    common = argv[argv.index("--root"):argv.index("--expected-revision")]
+    if exhausted:
+        image = json.loads(source.read_bytes())
+        for key in ("attempts_limit", "review_rounds_limit", "codex_review_calls_limit"):
+            image[key] = a["allowance"][key] = e["initial_state_projection"][key] = 2
+        pair(image)
+    def oldcommand(name, *flags):
+        return ["--state-dir", str(source.parent), name, "--packet", "55", *map(str, flags),
+                *common, "--expected-revision", str(json.loads(source.read_bytes())["state_revision"])]
+    receipt = c.tmp / "pending-review.json"
+    for index,verdict,findings in [(1,"changes_requested",["historic-finding"]),(2,"approve",[])]:
+        rc,r,err = oldinvoke(oldcommand("begin-attempt", "--provider", "claude", "--execution-surface", "claude_code",
+            "--transport", "machine/local", "--bang-chung-moi-truong", anh_doctor()))
+        assert rc == 0 and r["dispatch_allowed"], (rc,r,err)
+        comment,call = str(900001+index), "predecessor-call-"+str(index)
+        for name,flags in [
+            ("record-post", ("--for", "reviewing", "--comment-id", comment)),
+            ("transition", ("--to", "reviewing", "--comment-id", comment, "--head-sha", head)),
+            ("record-codex-call", ("--head", head, "--run-id", call))]:
+            rc,r,err = oldinvoke(oldcommand(name, *flags)); assert rc == 0, (rc,r,err)
+        image = json.loads(source.read_bytes())
+        receipt.write_bytes(m._1174_bytes(dict(schema="wp1174_service_advisory.v1", head=head,
+            identity=image["reviewer_identity"], verdict=verdict, finding_ids=findings, assurance="advisory_review")))
+        flags = ["--provider", "codex", "--execution-surface", "codex_service", "--transport", "machine",
+            "--verdict", verdict, "--reviewed-sha", head, "--codex-call", call, "--bien-nhan", receipt]
+        for finding in findings: flags += ["--finding-id", finding]
+        rc,r,err = oldinvoke(oldcommand("record-review", *flags))
+        assert rc == 0 and not r["dispatch_allowed"], (rc,r,err)
+    predecessor = json.loads(source.read_bytes())
+    assert predecessor["state"] == "approved_pending" and predecessor["scoped_review"]["verdict"] == "approve"
+    assert predecessor["finding_counts"] == {"historic-finding":1}
+    if historical:
+        # Synthetic historical activation is a valid old-state input. The real
+        # advisory reducer above supplies its closed review/call evidence.
+        predecessor["luat_adr0054"] = True
+        pair(predecessor)
+    if same_family:
+        # Synthetic target transport input, using the existing TargetProof seam.
+        # This does not represent a model workload, owner audit or native run.
+        identity=m._identity("codex","openai","codex_service","machine")
+        predecessor.update(executor="codex",executor_identity=identity)
+        predecessor["ngu_canh_lease"]["executor"]=identity
+        predecessor["ngu_canh_lease"]["assurance_target"]="human_audited"
+        e["initial_state_projection"].update(executor="codex",executor_identity=identity)
+        pair(predecessor)
+    raw = source.read_bytes(); digest = hashlib.sha256(raw).hexdigest()
+    journal = c.tmp / "next"; journal.mkdir()
+    target = journal / source.name
+    e.update(state_path=str(target), journal_root=str(journal))
+    a.update(generation=2, lineage=dict(predecessor_generation=1, source_path=str(source), source_sha256=digest))
+    a["operation"] = dict(adoption_id="pending-next", generation=2, binding_sha256="b"*64,
+        canonical_path=str(target), source_sha256=digest, cutover_started=False)
+    facts = {}
+    if same_family:
+        from datetime import timedelta
+        facts["target_authority"]=m._1174TargetProof(m._1174_bytes(a),m._1174_bytes(predecessor["ngu_canh_lease"]),
+            "a"*40,1,m.datetime.now(m.timezone.utc)+timedelta(hours=1))
+    traces = []
+    def command(name, *flags, ordinary=True):
+        result = ["--state-dir", str(journal), name, "--packet", "55", *map(str, flags),
+            "--root", str(w), "--admission", "fixture", "--revision", "1", "--generation", "2",
+            "--coordinator-id", "coordinator-1"]
+        if ordinary: result += ["--expected-revision", str(json.loads(target.read_bytes())["state_revision"])]
+        return result
+    def invoke(args, rejected=False, reason=None, label=None):
+        out,err = io.StringIO(),io.StringIO()
+        before = tuple(p.read_bytes() if p.exists() else None for p in (source,target,witness))
+        with patch.object(m,"_1174_resolve",return_value=(a,facts)), \
+             patch.object(m,"_1174_runtime",return_value={}), \
+             patch.object(m,"_1174_probe",return_value={}) as probe, \
+             patch.object(m,"_1174_write",wraps=m._1174_write) as write, \
+             patch.object(m,"_1174_recheck_durable",wraps=m._1174_recheck_durable) as sync, \
+             contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            rc = m.main(args)
+        result = json.loads(out.getvalue())
+        traces.append(dict(label=label, command=args[2], rc=rc, **result))
+        if rejected:
+            assert rc == 8 and not result["dispatch_allowed"], (rc,result,err.getvalue())
+            assert not probe.called and not write.called and not sync.called, "rejected recovery reached durable effects"
+            assert before == tuple(p.read_bytes() if p.exists() else None for p in (source,target,witness)), "rejected recovery wrote bytes"
+        if reason is not None:
+            assert reason in result.get("detail", "") + err.getvalue(), (reason,rc,result,err.getvalue())
+        (c.tmp/"wp1315-trace.json").write_text(json.dumps(traces,indent=2)+"\n")
+        return rc,result,err.getvalue()
+    rc,r,err = invoke(command("adopt-state", "--mode", "initial", "--adoption-id", "pending-next",
+        "--expected-source-sha256", digest, "--target-generation", "2", "--expected-witness-revision",
+        json.loads(witness.read_bytes())["witness_revision"], ordinary=False))
+    assert rc == 0 and not r["dispatch_allowed"], (rc,r,err)
+    adopted = json.loads(target.read_bytes())
+    assert adopted["state"] == "approved_pending" and adopted["scoped_review"] is None
+    lease_change=dict(generation=2,lease_id="wp55-r1-g2-claude",branch="agent/wp55-g2-claude")
+    if same_family:lease_change.update(provider="codex",executor="codex",model_family="openai",execution_surface="codex_service",transport="machine",assurance_target="human_audited")
+    _r812_doi_lease(w,lease_change)
+    _g(w,"push","-q","origin",head+":refs/heads/agent/wp55-g2-claude")
+    comments = json.loads((c.tmp/"cm.json").read_bytes())
+    comments[0]["body"] = comments[0]["body"].replace("wp55-r1-g1-claude","wp55-r1-g2-claude")
+    (c.tmp/"cm.json").write_bytes(m._1174_bytes(comments))
+    leaseargv = command("record-lease", "--lease-ref", "origin/ops/wp55-spec", "--lease-path", "ops/leases/l.yaml",
+        "--lease-comments", c.tmp/"cm.json")
+    try:
+        verified = m._verify_lease_ref(m.build_parser().parse_args(leaseargv),adopted)
+    except SystemExit as ex:
+        raise AssertionError("synthetic canonical I2 setup rejected rc="+str(ex.code)) from ex
+    lease = verified["source_lease"]
+    facts.update(verified_i2=verified,lease=lease,lease_id=lease["lease_id"],lease_ref=verified["context"]["lease_ref"],
+        lease_path=verified["context"]["lease_path"],lease_oid=verified["context"]["lease_oid"],comments=comments)
+    if same_family:
+        facts["target_authority"]=facts["target_authority"]._replace(verified_i2=m._1174_bytes(verified["context"]))
+    return m,a,predecessor,adopted,source,target,witness,facts,command,invoke,leaseargv
+
+
+def _pending_valid1315(c, historical=False):
+    m,a,predecessor,adopted,source,target,witness,facts,command,invoke,argv = _pending_fixture1315(c,historical=historical)
+    before = (source.read_bytes(), witness.read_bytes())
+    rc,r,err = invoke(argv)
+    assert rc == 0 and r["status"] == "completed_no_dispatch" and not r["dispatch_allowed"], (rc,r,err)
+    new = json.loads(target.read_bytes())
+    assert new["state"] == "leased" and new["reviewing_head_sha"] is None
+    assert new["scoped_review"] is None and new["human_acceptance"] is None and new["accepted_sha"] is None
+    assert not ({"pending_sha","bien_nhan_approve","mo_lai_tu","checkpoint_day","moc_connector","quyet_dinh_p3"} & set(new))
+    mutable = {"lease","ngu_canh_lease","luat_adr0054","state","reviewing_head_sha","state_revision","history",
+               "pending_sha","bien_nhan_approve","mo_lai_tu","checkpoint_day","moc_connector","quyet_dinh_p3"}
+    assert all(new.get(k) == adopted.get(k) for k in set(new)|set(adopted) if k not in mutable)
+    assert new["history"][:-1] == adopted["history"]
+    assert new["finding_counts"] == {"historic-finding":1} and all(x["da_dung"] for x in new["codex_calls"])
+    assert new["attempts_used"] == new["review_rounds_used"] == new["codex_review_calls_used"] == 2
+    event = new["history"][-1]
+    assert event["event"] == "record_lease_pending_recovery" and event["source_sha256"] == a["lineage"]["source_sha256"]
+    assert new["adoption"] == adopted["adoption"] and json.loads(new["adoption"]["payload"]["source_snapshot"]) == predecessor
+    assert source.read_bytes() == before[0] and witness.read_bytes() != before[1]
+    water = json.loads(witness.read_bytes())
+    assert water["high_water"] == dict(generation=2,state_revision=new["state_revision"],state_sha256=hashlib.sha256(target.read_bytes()).hexdigest())
+    assert water["history"] == json.loads(before[1])["history"]
+    invoke(argv,rejected=True,reason="revision_rejected",label="stale-revision-replay")
+    invoke(command("record-lease",*argv[argv.index("--lease-ref"):argv.index("--root")]),rejected=True,
+        reason="scoped lease rebind requires adopted predecessor lease",label="current-revision-replay")
+    dummy=c.tmp/"pending-review.json"
+    invoke(command("accept","--pr","55","--workflow-runs",dummy,"--workflow-jobs",dummy,
+        "--check-runs",dummy,"--connector",dummy),rejected=True,reason="accept requires scoped review",
+        label="old-approval-cannot-accept")
+    # A separate real reservation must consume the next cumulative attempt.
+    rc,r,err=invoke(command("begin-attempt","--provider","claude","--execution-surface","claude_code",
+        "--transport","machine/local","--bang-chung-moi-truong",anh_doctor()))
+    assert rc==0 and r["dispatch_allowed"],(rc,r,err)
+    fresh=json.loads(target.read_bytes())
+    assert fresh["attempts_used"]==3 and fresh["review_rounds_used"]==fresh["codex_review_calls_used"]==2
+    assert fresh["codex_calls"]==new["codex_calls"] and fresh["reviews"]==new["reviews"] and fresh["adoption"]==new["adoption"]
+    for name,flags in [("record-post",("--for","reviewing","--comment-id","900004")),
+        ("transition",("--to","reviewing","--comment-id","900004","--head-sha",predecessor["pending_sha"]))]:
+        rc,r,err=invoke(command(name,*flags));assert rc==0 and not r["dispatch_allowed"],(rc,r,err)
+    invoke(command("record-codex-call","--head",predecessor["pending_sha"],"--run-id","predecessor-call-2"),
+        rejected=True,reason="legacy predicate rejected",label="consumed-call-id-replay")
+
+
+def _pending_rejections1315(c):
+    import copy
+    m,a,predecessor,adopted,source,target,witness,facts,command,invoke,argv = _pending_fixture1315(c)
+    paths = (source,target,witness)
+    original = tuple(p.read_bytes() for p in paths)
+    good_a,good_facts = copy.deepcopy(a),copy.deepcopy(facts)
+    def restore():
+        a.clear();a.update(copy.deepcopy(good_a))
+        facts.clear();facts.update(copy.deepcopy(good_facts))
+        for p,raw in zip(paths,original):p.write_bytes(raw)
+    def image(changed, water=None):
+        raw = m._1174_bytes(changed);target.write_bytes(raw)
+        water = json.loads(original[2]) if water is None else water
+        water["high_water"] = dict(generation=changed["generation"],state_revision=changed["state_revision"],
+            state_sha256=hashlib.sha256(raw).hexdigest())
+        witness.write_bytes(m._1174_bytes(water))
+    for variant,reason in [
+        ("nonadopted","active adoption phase"),
+        ("unfinished","active adoption phase"), ("aborted","active adoption phase"),
+        ("no_intent","adopted requires intent"), ("digest","adoption source/tombstone bytes"),
+        ("snapshot","adoption source/tombstone bytes"), ("target_generation","adoption immutable binding/projection"),
+        ("projection","adoption deterministic source projection"),
+        ("live_pending","pending recovery exact adopted projection required"),
+        ("wrong_state","scoped lease rebind requires adopted predecessor lease"),
+        ("water","state/witness high_water mismatch"), ("tombstone","legacy_changed"),
+        ("source_generation","pending recovery requires closed scoped predecessor approval")]:
+        restore();changed=copy.deepcopy(adopted);p=changed["adoption"]["payload"]
+        if variant=="nonadopted":changed.update(adoption=None,luat_adr0054=True)
+        elif variant in ("unfinished","aborted"):
+            changed["adoption"].update(phase="prepared" if variant=="unfinished" else "aborted",cutover_started=False)
+        elif variant=="no_intent":changed["adoption"]["cutover_started"]=False
+        elif variant=="digest":p["source_sha256"]="f"*64;p["operation"]["source_sha256"]="f"*64;a["lineage"]["source_sha256"]="f"*64;a["operation"]["source_sha256"]="f"*64
+        elif variant=="snapshot":p["source_snapshot"]+=" "
+        elif variant=="target_generation":p["operation"]["generation"]=3
+        elif variant=="projection":p["target_projection"]["attempts_used"]=0
+        elif variant=="live_pending":changed["pending_sha"]="f"*40
+        elif variant=="wrong_state":changed["state"]="blocked"
+        elif variant=="source_generation":
+            old=copy.deepcopy(predecessor);old["generation"]=0
+            p["source_snapshot"]=m._1174_bytes(old).decode();digest=hashlib.sha256(p["source_snapshot"].encode()).hexdigest()
+            p["source_sha256"]=p["operation"]["source_sha256"]=a["lineage"]["source_sha256"]=a["operation"]["source_sha256"]=digest
+            p["tombstone"]=m._1174_tombstone(55,1,2,"pending-next",digest,"b"*64).decode()
+            p["tombstone_sha256"]=hashlib.sha256(p["tombstone"].encode()).hexdigest()
+        if changed["adoption"] is not None:
+            changed["adoption"]["payload_sha256"]=hashlib.sha256(m._1174_bytes(p)).hexdigest()
+        image(changed)
+        if variant=="water":
+            water=json.loads(witness.read_bytes());water["high_water"]["state_sha256"]="f"*64
+            witness.write_bytes(m._1174_bytes(water))
+        elif variant=="tombstone":source.write_bytes(b"synthetic replaced predecessor\n")
+        invoke(argv,rejected=True,reason=reason,label=variant)
+    for variant,reason in [
+        ("no_i2","scoped lease authority missing"), ("context_generation","scoped lease authority mismatch"),
+        ("lease_generation","scoped lease authority mismatch"), ("identity","scoped lease authority mismatch"),
+        ("lease_id","pending recovery current canonical lease required"), ("context_branch","pending recovery canonical context binding"),
+        ("comments","scoped lease comments differ from API"), ("comment_digest","scoped lease API receipt binding"),
+        ("expired_lease","lease"), ("expired_allowance","authority expired before publication/dispatch"),
+        ("wrong_ref","scoped lease authority mismatch"), ("missing_ref","scoped lease requires canonical I2"),
+        ("stale_revision","revision_rejected")]:
+        restore();bad=list(argv)
+        if variant=="no_i2":facts.pop("verified_i2")
+        elif variant=="context_generation":facts["verified_i2"]["context"]["generation"]=1
+        elif variant=="lease_generation":facts["lease"]["generation"]=1
+        elif variant=="identity":facts["verified_i2"]["context"]["executor"]["execution_surface"]=None
+        elif variant=="lease_id":facts["verified_i2"]["context"]["lease_id"]="old-lease"
+        elif variant=="context_branch":facts["verified_i2"]["context"]["branch"]="agent/wrong-branch"
+        elif variant=="comments":facts["comments"]=[]
+        elif variant=="comment_digest":facts["verified_i2"]["comments_sha256"]="f"*64
+        elif variant=="expired_lease":facts["verified_i2"]["lease"]["expires_utc"]="2000-01-01T00:00:00Z"
+        elif variant=="expired_allowance":a["allowance"]["ends_utc"]="2000-01-01T00:00:00Z"
+        elif variant=="wrong_ref":bad[bad.index("--lease-ref")+1]="origin/ops/wrong"
+        elif variant=="missing_ref":i=bad.index("--lease-ref");del bad[i:i+2]
+        elif variant=="stale_revision":bad[bad.index("--expected-revision")+1]="0"
+        invoke(bad,rejected=True,reason=reason,label=variant)
+    restore()
+    for destination in ("leased","running","reviewing"):
+        invoke(command("transition","--to",destination,"--comment-id","900002"),rejected=True,
+            reason="legacy predicate rejected",label="generic-transition-"+destination)
+    for name,flags in [
+        ("begin-attempt", ("--provider","claude","--execution-surface","claude_code","--transport","machine/local","--bang-chung-moi-truong",anh_doctor())),
+        ("record-codex-call", ("--head",predecessor["pending_sha"],"--run-id","unbound-pending")),
+        ("record-review", ("--provider","codex","--verdict","approve","--reviewed-sha",predecessor["pending_sha"]))]:
+        invoke(command(name,*flags),rejected=True,reason="current-generation canonical lease required",label="unbound-"+name)
+
+
+def _pending_intermediate1315(c):
+    import copy
+    m,a,predecessor,adopted,source,target,witness,facts,command,invoke,argv = _pending_fixture1315(c)
+    final_water = json.loads(witness.read_bytes())
+    for intent in (False,True):
+        raw = m._1174_adopt_image(adopted["adoption"]["payload"],"prepared",intent,1 if intent else 0,a)
+        target.write_bytes(raw)
+        source.write_bytes(adopted["adoption"]["payload"]["source_snapshot"].encode())
+        water = copy.deepcopy(final_water)
+        water.update(active_generation=1,history=[],pending_adoption=dict(a["operation"],cutover_started=intent),
+            high_water=dict(generation=1,state_revision=predecessor["state_revision"],
+                state_sha256=hashlib.sha256(source.read_bytes()).hexdigest()))
+        witness.write_bytes(m._1174_bytes(water))
+        for name,flags in [
+            ("record-lease",argv[argv.index("--lease-ref"):argv.index("--root")]),
+            ("begin-attempt",["--provider","claude","--execution-surface","claude_code","--transport","machine/local","--bang-chung-moi-truong",anh_doctor()]),
+            ("record-codex-call",["--head",predecessor["pending_sha"],"--run-id","prepared-dispatch"]),
+            ("record-review",["--provider","codex","--verdict","approve","--reviewed-sha",predecessor["pending_sha"]])]:
+            invoke(command(name,*flags),rejected=True,reason="state/witness high_water mismatch",
+                label=("intent-" if intent else "prepared-")+name)
+
+
+def _pending_postimage1315(c):
+    import copy
+    from unittest.mock import patch
+    m,a,predecessor,adopted,source,target,witness,facts,command,invoke,argv = _pending_fixture1315(c)
+    original = tuple(p.read_bytes() for p in (source,target,witness))
+    reducer = m._1174_record_lease
+    mutations = {
+        "counter":lambda p:p.update(attempts_used=0),
+        "limit":lambda p:p.update(attempts_limit=p["attempts_limit"]+1),
+        "call_identity":lambda p:p["codex_calls"][0].update(run_id="replacement-call"),
+        "anchor":lambda p:p["attempt_anchor"].update(nonce="f"*32),
+        "live_review":lambda p:p.update(scoped_review=copy.deepcopy(predecessor["scoped_review"])),
+        "review_head":lambda p:p.update(reviewing_head_sha=predecessor["pending_sha"]),
+        "pending":lambda p:p.update(pending_sha=predecessor["pending_sha"]),
+        "connector":lambda p:p.update(moc_connector={}),
+        "reason":lambda p:p.update(ly_do="injected"),
+        "inferred":lambda p:p.update(dem_tu_suy=True),
+        "extra_history":lambda p:p["history"].append(dict(event="extra")),
+        "missing_history":lambda p:p["history"].pop(),
+        "policy":lambda p:p.update(luat_adr0054=True),
+        "context":lambda p:p["ngu_canh_lease"].update(branch="agent/other"),
+        "lease":lambda p:p["lease"].update(expires_utc="2000-01-01T00:00:00Z"),
+        "approval_state":lambda p:p.update(state="approved_pending")}
+    for label,mutate in mutations.items():
+        for path,raw in zip((source,target,witness),original):path.write_bytes(raw)
+        def tampered(*args, **kwargs):
+            rc=reducer(*args,**kwargs);mutate(m._1174_TRANSACTION["proposal"]);return rc
+        with patch.object(m,"_1174_record_lease",side_effect=tampered):
+            invoke(argv,rejected=True,reason="full state validation" if label=="approval_state" else
+                "pending recovery exact postimage required",label="postimage-"+label)
+
+
+def _pending_budget1315(c):
+    m,a,predecessor,adopted,source,target,witness,facts,command,invoke,argv = _pending_fixture1315(c,exhausted=True)
+    rc,r,err=invoke(argv)
+    assert rc==0 and not r["dispatch_allowed"],(rc,r,err)
+    new=json.loads(target.read_bytes())
+    for key in ("attempts_limit","review_rounds_limit","codex_review_calls_limit","attempts_used","review_rounds_used","codex_review_calls_used"):
+        assert new[key]==adopted[key]==2,(key,new[key],adopted[key])
+    rc,r,err=invoke(command("begin-attempt","--provider","claude","--execution-surface","claude_code","--transport","machine/local","--bang-chung-moi-truong",anh_doctor()))
+    assert rc==3 and r["status"]=="quota_exhausted" and not r["dispatch_allowed"],(rc,r,err)
+    blocked=json.loads(target.read_bytes())
+    assert blocked["state"]=="blocked" and all(blocked[k]==new[k] for k in new if k not in ("state","history","state_revision"))
+
+
+def _ordinary_whitelist1315(c):
+    from unittest.mock import patch
+    m,a,old,argv,invoke,target,witness,pair = _runtime1174(c,"record-lease",current_policy=True,service=True)
+    old.update(pending_sha="a"*40,bien_nhan_approve=dict(p3=[]))
+    pair(old)
+    reducer=m._1174_record_lease
+    for key,value,reason in [("reviewing_head_sha","a"*40,"core command whitelist"),
+        ("pending_sha",None,"optional command whitelist"),("bien_nhan_approve",None,"optional command whitelist")]:
+        before=(target.read_bytes(),witness.read_bytes())
+        def tampered(*args,**kwargs):
+            rc=reducer(*args,**kwargs)
+            proposal=m._1174_TRANSACTION["proposal"]
+            if value is None:proposal.pop(key,None)
+            else:proposal[key]=value
+            return rc
+        with patch.object(m,"_1174_record_lease",side_effect=tampered),patch.object(m,"_1174_write",wraps=m._1174_write) as write:
+            rc,r,err=invoke(argv)
+        assert rc==8 and reason in r["detail"] and not r["dispatch_allowed"] and not write.called,(rc,r,err)
+        assert before==(target.read_bytes(),witness.read_bytes())
+    rc,r,err=invoke(argv)
+    assert rc==0 and not r["dispatch_allowed"],(rc,r,err)
+    current=json.loads(target.read_bytes())
+    assert current["state"]=="leased" and current["pending_sha"]==old["pending_sha"] and current["bien_nhan_approve"]==old["bien_nhan_approve"]
+
+
+def _pending_target1315(c):
+    m,a,predecessor,adopted,source,target,witness,facts,command,invoke,argv = _pending_fixture1315(c,same_family=True)
+    proof=facts["target_authority"]
+    for label,bad,reason in [("missing",None,"current target proof required"),
+        ("mismatched",proof._replace(admission=b"wrong"),"target proof scope/context mismatch"),
+        ("expired",proof._replace(expires=m.datetime(2000,1,1,tzinfo=m.timezone.utc)),"target proof expired")]:
+        facts["target_authority"]=bad
+        invoke(argv,rejected=True,reason=reason,label="target-proof-"+label)
+    facts["target_authority"]=proof
+    rc,r,err=invoke(argv)
+    assert rc==0 and not r["dispatch_allowed"],(rc,r,err)
+    new=json.loads(target.read_bytes())
+    assert new["state"]=="leased" and new["scoped_review"] is None and new["human_acceptance"] is None
+    assert all(new[k]==adopted[k] for k in ("adoption","hmac_key","attempts_used","review_rounds_used",
+        "codex_review_calls_used","codex_calls","reviews","finding_counts","executor_identity","reviewer_identity"))
+
+
+CASES += [("wp1315_adopted_pending_valid", _pending_valid1315),
+          ("wp1315_adopted_pending_historical", lambda c:_pending_valid1315(c,historical=True)),
+          ("wp1315_adopted_pending_rejections", _pending_rejections1315),
+          ("wp1315_pending_intermediate_no_dispatch", _pending_intermediate1315),
+          ("wp1315_pending_postimage_exact", _pending_postimage1315),
+          ("wp1315_pending_exhausted_budget", _pending_budget1315),
+          ("wp1315_ordinary_record_lease_whitelist", _ordinary_whitelist1315),
+          ("wp1315_pending_target_proof", _pending_target1315)]
+
+
 if __name__ == "__main__":
     sys.exit(main())

@@ -689,7 +689,7 @@ def _load(state_dir: Path, packet: int) -> dict:
             ("dem-goi", len({g["run_id"] for g in goi}) == len(goi) <= st["codex_review_calls_used"] >= can_duoi + sum(not g["da_dung"] for g in goi)),
             ("dem-vong", st["review_rounds_used"] == len(st["reviews"])),
             ("adr0054", type(st.get("luat_adr0054", False)) is bool and (st.get("luat_adr0054") is not True or type(st.get("ngu_canh_lease")) is dict)
-                        and (st["state"] != "approved_pending" or _pending_human_lane(st) and SHA_RE.match(str(st.get("pending_sha"))) and type(st.get("bien_nhan_approve")) is dict)
+                        and (st["state"] != "approved_pending" or (_pending_human_lane(st) or _1315_pending_validation(st, tx)) and SHA_RE.match(str(st.get("pending_sha"))) and type(st.get("bien_nhan_approve")) is dict)
                         and (st.get("luat_adr0054") is not True or _nc_hop_le(st["ngu_canh_lease"]))),
             ("mo-lai", _quyen_hop_le(st.get("mo_lai_tu"), "nguyen_nhan", NGUYEN_NHAN_MO_LAI) and _quyen_hop_le(st.get("checkpoint_day"), "sha256", None)
                        and (st["state"] != "cho_chu_kho" or _pending_human_lane(st) and (st.get("mo_lai_tu") or {}).get("nguyen_nhan") == "connector")),
@@ -4747,7 +4747,7 @@ def _1174_initial(admission):
     return _1174_bytes(_1174_state(_1174_bytes(state), admission))
 
 
-def _1174_state(raw, admission, generation=None):
+def _1174_state(raw, admission, generation=None, *, adoption_source=None):
     """Validate the complete legacy payload as well as the v3 binding before use."""
     global _1174_TRANSACTION
     state = _1174_json(raw)
@@ -4771,6 +4771,8 @@ def _1174_state(raw, admission, generation=None):
     previous = globals().get("_1174_TRANSACTION")
     directory = Path(e["journal_root"])
     _1174_TRANSACTION = dict(directory=directory, state=state, proposal=None, admission=admission, read_only=_1174_VIEW_ONLY.get())
+    if adoption_source is not None:
+        _1174_TRANSACTION["adoption_source"] = adoption_source
     try:
         _load(directory, admission["packet"])
     except SystemExit as ex:
@@ -4876,7 +4878,7 @@ def _1174_adopt_payload(admission, source):
     _1174_require(type(st) is dict and st.get("schema_version") in (2, 3) and "hmac_key" in st, "adoption source schema")
     projection = dict(st, schema_version=3, generation=admission["generation"], state_revision=0,
         enrollment_id=e["id"], binding_sha256=e["binding_sha256"], adoption=None, scoped_review=None, human_acceptance=None)
-    _1174_state(_1174_bytes(projection), admission)
+    _1174_state(_1174_bytes(projection), admission, adoption_source=source)
     del projection["adoption"]
     tombstone = _1174_tombstone(admission["packet"], lineage["predecessor_generation"], operation["generation"],
                                operation["adoption_id"], operation["source_sha256"], operation["binding_sha256"])
@@ -4891,6 +4893,94 @@ def _1174_adopt_image(payload, phase, intent, revision, admission):
     raw = _1174_bytes(image)
     _1174_state(raw, admission)
     return raw
+
+
+def _1315_pending_projection(state, admission, source):
+    """Recognize only the exact v3 pending predecessor bound by this adoption.
+
+    This validates a frozen projection, not a review/dispatch/acceptance lane.
+    The normal pair, tripwire, TargetProof and I2 checks remain at their entries.
+    """
+    lineage, operation = admission["lineage"], admission["operation"]
+    _1174_require(type(source) is bytes and type(operation) is dict and
+        hashlib.sha256(source).hexdigest() == lineage["source_sha256"] == operation["source_sha256"] and
+        type(lineage["predecessor_generation"]) is int and
+        lineage["predecessor_generation"] < operation["generation"] == admission["generation"] == state["generation"] and
+        operation["canonical_path"] == admission["enrollment"]["state_path"], "pending recovery source/generation binding")
+    predecessor = _1174_json(source)
+    _1174_require(type(predecessor) is dict and type(predecessor.get("schema_version")) is int and predecessor["schema_version"] == 3 and
+        _1174_CORE <= set(predecessor) <= _1174_CORE | set(_1174_OPTIONAL) and
+        _1174_bytes(predecessor) == source and predecessor.get("generation") == lineage["predecessor_generation"] and
+        _1174_int(predecessor.get("state_revision")) and
+        predecessor.get("enrollment_id") == admission["enrollment"]["id"] and
+        predecessor.get("binding_sha256") == admission["enrollment"]["binding_sha256"] and
+        predecessor.get("state") == "approved_pending" and predecessor.get("attempt_open") is False and
+        predecessor.get("accepted_sha") is None and predecessor.get("human_acceptance") is None and
+        _nc_hop_le(predecessor.get("ngu_canh_lease")) and
+        predecessor["ngu_canh_lease"]["generation"] == lineage["predecessor_generation"] and
+        type(predecessor.get("lease")) is dict and
+        predecessor["lease"]["lease_id"] == predecessor["ngu_canh_lease"]["lease_id"] and
+        predecessor.get("pending_sha") == predecessor.get("reviewing_head_sha") and
+        type(predecessor.get("scoped_review")) is dict and
+        predecessor["scoped_review"].get("verdict") == "approve" and
+        predecessor["scoped_review"].get("head") == predecessor.get("pending_sha") and
+        bool(predecessor.get("reviews")) and predecessor["reviews"][-1].get("verdict") == "approve" and
+        predecessor["reviews"][-1].get("reviewed_sha") == predecessor.get("pending_sha"),
+        "pending recovery requires closed scoped predecessor approval")
+    _1174_lifecycle_records(predecessor, admission)
+    expected = dict(predecessor, schema_version=3, generation=admission["generation"],
+        state_revision=state["state_revision"], enrollment_id=admission["enrollment"]["id"],
+        binding_sha256=admission["enrollment"]["binding_sha256"], adoption=state.get("adoption"),
+        scoped_review=None, human_acceptance=None)
+    _1174_require(state == expected, "pending recovery exact adopted projection required")
+    return predecessor
+
+
+def _1315_pending_validation(state, tx):
+    # Only full-state validation can recognize the stale pending projection.
+    # Never broaden _pending_human_lane: it is also used by lifecycle commands.
+    if type(tx) is not dict or type(tx.get("admission")) is not dict:
+        return False
+    source = tx.get("adoption_source")
+    if source is None:
+        record = state.get("adoption")
+        if type(record) is not dict or record.get("phase") not in ("prepared", "adopted", "aborted"):
+            return False
+        source = record["payload"]["source_snapshot"].encode("utf-8")
+    _1315_pending_projection(state, tx["admission"], source)
+    return True
+
+
+_1315_STALE_PENDING = frozenset("pending_sha bien_nhan_approve mo_lai_tu checkpoint_day moc_connector quyet_dinh_p3".split())
+
+
+def _1315_pending_recovery(state, admission, verified):
+    record = state.get("adoption")
+    _1174_require(state["state"] == "approved_pending" and type(record) is dict and
+        record.get("phase") == "adopted" and record.get("cutover_started") is True,
+        "pending recovery requires finalized adoption")
+    payload = _1174_adoption_record(record, admission)["payload"]
+    _1315_pending_projection(state, admission, payload["source_snapshot"].encode("utf-8"))
+    _1174_require(type(verified) is dict and _nc_hop_le(verified.get("context")) and
+        verified["context"]["generation"] == admission["generation"] and
+        type(verified.get("lease")) is dict and verified["lease"]["lease_id"] == verified["context"]["lease_id"] and
+        verified["lease"]["lease_id"] != state["lease"]["lease_id"], "pending recovery current canonical lease required")
+    context, full = verified["context"], verified.get("source_lease")
+    _1174_require(type(full) is dict and all(type(full.get(k)) is int and full[k] == admission[k]
+        for k in ("revision", "generation")) and _1174_bytes(context) == _1174_bytes(_ngu_canh_lease(
+        full, context["lease_ref"], context["lease_oid"], context["lease_path"], context["repo"])),
+        "pending recovery canonical context binding")
+    _kiem_luoc_do_lease(verified["lease"], RC_STATE)
+    new = _1174_json(_1174_bytes(dict(state, state="leased", reviewing_head_sha=None, lease=verified["lease"],
+        ngu_canh_lease=verified["context"], luat_adr0054=verified["mode"])))
+    for key in _1315_STALE_PENDING:
+        new.pop(key, None)
+    new["history"] = [*state["history"], dict(event="record_lease_pending_recovery",
+        adoption_id=payload["operation"]["adoption_id"], source_sha256=payload["source_sha256"],
+        from_generation=payload["predecessor_generation"], generation=admission["generation"],
+        pending_sha=state["pending_sha"], lease_id=verified["lease"]["lease_id"],
+        lease_oid=verified["context"]["lease_oid"], lease_comments_sha256=verified["comments_sha256"])]
+    return new
 
 
 def _1174_tripwire(state, g0=None):
@@ -5174,7 +5264,7 @@ def _1174_ordinary(a, directory, admission, witness_raw, facts=None):
         new = tx["proposal"]
         new.update(schema_version=3, state_revision=state["state_revision"] + 1)
         raw = _1174_bytes(new)
-        _1174_postimage(state, new, a.cmd, admission)
+        _1174_postimage(state, new, a.cmd, admission, facts)
         after = dict(witness, witness_revision=witness["witness_revision"] + 1, high_water=dict(
             generation=admission["generation"], state_revision=new["state_revision"], state_sha256=hashlib.sha256(raw).hexdigest()))
         water = _1174_commit_witness(witness_raw, after, admission, "ordinary")
@@ -5218,10 +5308,11 @@ def _1174_record_lease(a, directory, state, admission, facts):
     _1174_require(verified["comments_sha256"] == hashlib.sha256(_1174_bytes(facts["comments"])).hexdigest(),
         "scoped lease API receipt binding")
     rebind = state["state"] != "awaiting_lease"
+    pending_recovery = rebind and state["state"] == "approved_pending"
     if rebind:
         # The finalized immutable adoption proves the predecessor; I2 above grants
         # the new lease. This ordinary transaction does not restart the lifecycle.
-        _1174_require(state["state"] in ("leased", "running", "reviewing") and
+        _1174_require((state["state"] in ("leased", "running", "reviewing") or pending_recovery) and
             state["adoption"] is not None and state["adoption"]["phase"] == "adopted" and
             ("ngu_canh_lease" not in state or _nc_hop_le(state["ngu_canh_lease"]) and
                 state["ngu_canh_lease"]["generation"] < admission["generation"]) and
@@ -5230,9 +5321,14 @@ def _1174_record_lease(a, directory, state, admission, facts):
             type(state.get("lease")) is dict and ("ngu_canh_lease" not in state or
                 state["lease"]["lease_id"] == state["ngu_canh_lease"]["lease_id"]),
             "scoped lease rebind requires adopted predecessor lease")
+    if pending_recovery:
+        recovered = _1315_pending_recovery(state, admission, verified)
     _xet_dung(directory, state, "record-lease")
     if not rebind:
         return _apply_lease_ref(a, directory, state, verified)
+    if pending_recovery:
+        _save(directory, recovered)
+        return RC_OK
     previous_generation = state.get("ngu_canh_lease", {}).get("generation")
     state.update(lease=verified["lease"], ngu_canh_lease=context, luat_adr0054=verified["mode"])
     state["history"].append(dict(event="record_lease_rebind", lease_id=verified["lease"]["lease_id"],
@@ -5242,14 +5338,22 @@ def _1174_record_lease(a, directory, state, admission, facts):
     return RC_OK
 
 
-def _1174_postimage(old, new, command, admission):
+def _1174_postimage(old, new, command, admission, facts=None):
     _1174_state(_1174_bytes(old), admission)
     _1174_state(_1174_bytes(new), admission)
     _1174_require(all(old[k] == new[k] for k in ("hmac_key", "packet", "mission", "generation", "enrollment_id", "binding_sha256",
                   "executor", "reviewer", "executor_identity", "reviewer_identity", "adoption")), "immutable state fields")
     changed = {k for k in set(old) | set(new) if (k in old) != (k in new) or old.get(k) != new.get(k)}
-    _1174_require(changed - set(_1174_OPTIONAL) <= _1174_CORE_WRITES[command] | {"state_revision"}, "core command whitelist")
-    _1174_require(changed & set(_1174_OPTIONAL) <= _1174_OPTIONAL_WRITES.get(command, set()), "optional command whitelist")
+    pending_recovery = command == "record-lease" and old["state"] == "approved_pending"
+    if pending_recovery:
+        _1174_require(type(facts) is dict and "verified_i2" in facts, "pending recovery postimage requires canonical I2")
+        expected = _1315_pending_recovery(old, admission, facts["verified_i2"])
+        expected["state_revision"] += 1
+        _1174_require(new == expected, "pending recovery exact postimage required")
+    core_extra = {"reviewing_head_sha"} if pending_recovery else set()
+    optional_extra = _1315_STALE_PENDING if pending_recovery else set()
+    _1174_require(changed - set(_1174_OPTIONAL) <= _1174_CORE_WRITES[command] | {"state_revision"} | core_extra, "core command whitelist")
+    _1174_require(changed & set(_1174_OPTIONAL) <= _1174_OPTIONAL_WRITES.get(command, set()) | optional_extra, "optional command whitelist")
     _1174_require(new["state_revision"] == old["state_revision"] + 1 and all(new[k] >= old[k] for k in
                   ("review_rounds_used", "codex_review_calls_used", "attempts_limit", "review_rounds_limit", "codex_review_calls_limit")),
                   "state counter/revision monotonicity")

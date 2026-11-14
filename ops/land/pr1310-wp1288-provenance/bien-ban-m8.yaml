@@ -23,15 +23,15 @@ ci_master:
   conclusion: success
   ghi_chu: 'ci.yml; launcher-windows 43544262861 cung SHA = success'
 nghiem_thu:
-  C1: not_measured  # cho C3 (suite dang chay)
-  C2: not_measured
-  C3: not_measured
-  C4: not_measured
+  C1: passed
+  C2: passed
+  C3: passed  # log CI gate-packet-loop hai SHA (nghiem-thu-c3-ci.txt)
+  C4: passed
   C5: passed
   C6: passed
   hoan_tat_s8: passed
 lease_cuoi: k3-connector-state-v1-r3-g3-codex
-landed: false  # cho C3; canh bao tran connector o land evidence
+landed: true  # chu kho chap nhan connector vuot tran (land evidence review.quyet_dinh_chu_kho_tran)
 moc_10_2_2:
   run: passed
   checkout: passed

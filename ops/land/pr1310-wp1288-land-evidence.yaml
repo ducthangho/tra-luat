@@ -137,7 +137,7 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-1310.json merged true, merged_at 2026-11-14T02:04:46Z, head 8dce516, base bab2279; readback-commit-c0b8e11.json cha bab2279 + 8dce516, tree 82048fb5.'
-  landed: false  # tam: cho do C3 (packet_loop_test nen/sau dang chay)
+  landed: true
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA c0b8e11: DAT — du bon moc measured passed. (2) lease nha: DAT (NGUOI_GIU 0).
     (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp-m8.txt). (4) review neo 8dce516: DAT — connector sach + audit
@@ -168,8 +168,16 @@ review:
   ket_qua_theo_luot: 'offline bc620d6 khong verdict · offline bc620d6 request_changes · offline 1b24fd9 approve · connector 872df6b sach · connector 8dce516 sach · connector 8dce516 (tu dong) sach.'
 
 nghiem_thu:
-  C1_C2_C4: 'measured — danh-gia-gate-output-43544262919.txt: CI gate-packet-loop tren c0b8e11 (job 132291781341) packet_loop_test TỔNG: ĐẠT; doi chieu ca k3s_/MUTANTS: xem C3.'
-  C3: CHO_DO
+  C1_C2_C4: >-
+    measured — nghiem-thu-c3-ci.txt: c0b8e11 co 38 ca k3s_ (bab2279: 0), gom k3s_comment_that_sach (C1), k3s_running_null
+    (status running, hai co null => chua xong, C2) va cac nhanh hong/chua; 8 muc MUTANTS k3s_ phu du sau chot C4 (bo_status,
+    bo_unresolved, sha_tien_to, bool_so, bo_nhieu_marker, bo_mau_thuan) cong legacy_body_goc, bo_recursion_error — log CI job
+    132291781341: moi muc "giết 1 ca đích · 3 đối chứng khác họ còn sống".
+  C3: >-
+    measured — nghiem-thu-c3-ci.txt (log CI gate-packet-loop hai SHA, bam sha256 ghi trong tep): bab2279 job 132026897388 SỐ LIỆU
+    ca 1456 / đột biến 1821, TỔNG: ĐẠT; c0b8e11 job 132291781341 ca 1494 / đột biến 1829, TỔNG: ĐẠT => +38 ca = 38 ca k3s_ moi,
+    +8 dot bien = 8 MUTANTS k3s_ moi; ten r834_ trong ma nguon 119 = 119. Do tai cho (do-nghiem-thu.sh) bi dung o tran 1 gio cua
+    lenh nen truoc khi xong ve nen — KHONG dung ket qua tai cho cho C3.
   C5: >-
     measured — nghiem-thu-c0b8e11.txt: kiem-merge tren dau vao that PR #1270 (ops/land/pr1270-wp1179-provenance/kiem-merge/, cwd
     clone tai 5824094), hai ve dung trong MOT lenh: nen bab2279 (packet_loop.py blob 44037b91) "THIẾU K3 connector … không review

@@ -128,29 +128,28 @@ trạng thái `chưa đo được` cho tới khi đo thật — chưa chạy KH�
 không ADR, protocol hay skill nào đặt ra: "ngân sách mềm N lời gọi; hai lượt liên tiếp chưa approve ⇒
 Review Rescue Checkpoint". Đo 08-11-2026 trên `origin/master` `e3c639b`, đếm tệp trong 581 tệp của
 `ops/specs/`: 26 tệp có cụm "liên tiếp chưa approve", 173 tệp có cụm "hỏi chủ kho" (kể cả câu phủ
-định). Mỗi điểm hỏi tự đặt là một lần chủ kho phải dừng việc để trả lời.
+định). Mỗi điểm hỏi tự đặt là một lần chủ kho phải dừng việc để trả lời. Danh sách những lần được
+hỏi nằm ở `docs/adr/0067-danh-sach-dong-va-uy-quyen-thuong-truc.md`; skill này không chép định nghĩa.
 
 - **Không khai ngân sách mềm** dưới trần của dòng khai, và không đặt luật kiểu "N lượt liên tiếp chưa
   approve thì dừng hay hỏi chủ kho". Mức dành sẵn của `ADR-0041` là ngân sách giữ trước, không phải
   trần hay điểm dừng. Lượt thứ hai trở đi theo điều kiện của `ADR-0052` và không cần hỏi ai.
 - **Mục `luat_dung` chỉ có hai loại dòng.** (i) Điểm dừng mà protocol hay một ADR đang hiệu lực đã
-  đặt: dẫn bằng tên mục hay ADR, không chép lại, không hạ ngưỡng. (ii) Một trong ba mã dưới đây, kèm
-  thứ phải mang theo khi hỏi:
-  - **E1 — hướng đi bế tắc:** đã xét lại cách làm mà không còn phương án nào có phép đo chống đỡ.
-    Mang theo gốc rễ, các phương án đã thử và vì sao hỏng, một đề xuất.
-  - **E2 — thiếu tài nguyên:** chạm trần cứng, hoặc thiếu máy, quota hay quyền. Mang theo mức đã
-    dùng, còn thiếu bao nhiêu, để làm gì.
-  - **E3 — phát hiện đảo ngược chỉ đạo:** bằng chứng mâu thuẫn với một quyết định của chủ kho. Mang
-    theo quyết định nào, bằng chứng, hậu quả nếu giữ nguyên.
+  đặt: dẫn bằng tên mục hay ADR, không chép lại, không hạ ngưỡng. (ii) Mã E1, E2 hay E3 của danh sách
+  đóng, kèm thứ ADR ấy bắt mang theo khi hỏi.
 - **Câu nào trong đặc tả nói tới việc hỏi, báo hay chờ chủ kho thì phải mang một mã E.** Điểm dừng
   loại (i) chỉ dừng phiên; khi nó cần chủ kho quyết thì câu hỏi ấy cũng mang mã, thường là E2 vì quyền
   quyết thuộc chủ kho (chạm trần cứng, việc protocol giao chủ kho duyệt). Không gắn được mã nào thì đó
   không phải điểm hỏi: phiên đang giữ việc tự quyết, rồi ghi gốc rễ, phương án chọn và phép đo chống đỡ
   vào revision kế tiếp hay handoff.
-
-Ba mã lấy từ chỉ đạo của chủ kho ngày 07-11-2026, được chủ kho đồng ý thành danh sách ngày 08-11-2026
-(quyết định số 1 của tài liệu "Giảm việc hỏi chủ kho"). Khi ADR của danh sách đóng land, định nghĩa
-chuyển về ADR ấy và mục này chỉ còn con trỏ.
+- **Mục `pham_vi_e` khai đặc tả có chạm E4, E5 không**, theo định nghĩa của ADR ấy; không rõ thì khai là
+  chạm. Đặc tả của packet thuộc Mission chủ kho đã duyệt hướng, không chạm E4, E5 và không đảo quyết
+  định nào của chủ kho, được người soạn đóng băng khi một review độc lập approve; đặc tả khác chờ chủ
+  kho duyệt băm. Với packet như thế, vòng hỏi ở mục 1 lấy câu trả lời từ các quyết định Mission đã ghi;
+  câu không trả lời được từ đó mà cũng không thuộc mã E nào thì người soạn tự quyết và ghi vào sổ quyết
+  định uỷ quyền. Cho đúng loại packet ấy, luật này thắng hai câu của mục 1, "Quyết định thì luôn là của
+  người dùng" và "Không hành động cho tới khi người dùng xác nhận đã hiểu giống nhau": thứ thay cho lần
+  xác nhận là review độc lập approve.
 
 ## 3. Đo trước khi hỏi
 
@@ -196,6 +195,7 @@ một buổi.
 | `nghiem_thu` | mỗi mục tiêu ≥1 tiêu chí, mỗi tiêu chí nêu phép đo làm nó ĐỎ (L3) |
 | `tran_*` | dòng khai trần ở đầu tệp theo mục 3; mặc định có dòng của `ADR-0055` |
 | `luat_dung` | điểm dừng của protocol hay ADR dẫn bằng tên, và mã E1–E3 theo L7; không có ngân sách mềm |
+| `pham_vi_e` | chạm E4, chạm E5 hay không chạm, theo L7; không rõ thì khai là chạm |
 | `hinh_dang_ke_thua` | chép từ biên nhận tiền nhiệm; không phải packet khắc phục thì ghi `khong_ap_dung` (L4) |
 | `chua_do_duoc` | thứ không kiểm được từ phiên này — ghi thẳng, đừng giấu sau chữ "có thể" |
 

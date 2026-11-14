@@ -56,6 +56,12 @@ Các bất biến không được hạ chuẩn:
 | Apply job | Kiểm mission/head SHA/gate/approval rồi merge đúng draft land PR | Gọi model, sửa diff, chọn head khác, deploy |
 | Người có thẩm quyền | Start/pause/resume/reroute/override/authorize/apply/deploy | Thẩm quyền không được chuyển qua output của agent; chỉ có thể ủy quyền bền, có phạm vi và điều kiện |
 
+**Khi nào hỏi người có thẩm quyền.** Agent chỉ dừng để hỏi khi rơi vào một trong năm mã của danh sách đóng ở
+`ADR-0067`; việc khác agent tự quyết, ghi vào sổ quyết định uỷ quyền và báo trong bản tin hằng ngày, và người có thẩm
+quyền bác được bằng một comment. Uỷ quyền thường trực cấp lease, audit uỷ quyền và tự merge là các ủy quyền bền có phạm
+vi, điều kiện và hạn theo `ADR-0067`. Cơ chế nào cần cổng mã đổi theo thì chỉ có hiệu lực khi cổng ấy đã đổi; trước đó
+cổng hiện hành giữ nguyên.
+
 Một người hoặc agent có thể giữ các vai ở những phiên khác nhau, nhưng assurance không được nhập nhằng. Executor có
 thể làm Land Operator khi authorization cho exact SHA cho phép; việc đó không biến họ thành Reviewer hay Approver
 độc lập của chính diff. Reviewer cùng provider với Executor phải là phiên mới, read-only và được ghi mức assurance
@@ -1076,6 +1082,11 @@ có audit.
 
 ## 12. Stop conditions và budget
 
+**Điểm hỏi chủ kho chỉ theo danh sách đóng.** Stop condition ở mục này dừng phiên; nó không tự sinh câu hỏi cho chủ
+kho. Agent chỉ hỏi chủ kho khi rơi vào một mã của `ADR-0067`, và câu hỏi ghi mã ấy. Đặc tả packet không được thêm điểm
+hỏi ngoài năm mã. Một cổng mã hiện hành còn đòi quyền chỉ chủ kho có thì câu hỏi ấy mang mã E2 cho tới khi packet đổi
+cổng ấy land, theo bảng chuyển tiếp của `ADR-0067`.
+
 **Phân loại chi CI theo mục đích (M7 của #523).** Ghi loại trước khi chủ động
 phát sinh lượt chạy; tên event không quyết định loại:
 
@@ -1096,7 +1107,7 @@ chạy: khi owner yêu cầu đợi tới đủ điều kiện merge, không ch�
 
 **Bất biến (a) — cổng tại chỗ trước push chính.** Trên đúng SHA sẽ đẩy, chạy `python scripts/tl.py --selftest` tới N/N hai số bằng nhau, các cổng đặc tả và `git diff --check`; ghi rc và SHA. Nguồn ADR-0054 §1, ADR-0062.
 
-**Bất biến (b) — push thêm vì CI đỏ.** Chỉ được sửa CI, không mang bản vá finding review. SHA mới phải review offline approve và chạy lại (a) trước push; ghi SHA trước/sau, check đỏ và nguyên nhân vào biên nhận. Mọi push thêm vẫn cần checkpoint chủ kho và chịu trần ADR-0060 M5. Nguồn ADR-0054 §1, ADR-0062.
+**Bất biến (b) — push thêm vì CI đỏ.** Chỉ được sửa CI, không mang bản vá finding review. SHA mới phải review offline approve và chạy lại (a) trước push; ghi SHA trước/sau, check đỏ và nguyên nhân vào biên nhận. Push thêm không cần checkpoint chủ kho (`ADR-0067`) và chịu trần số lần của ADR-0060 M5; chạm trần ấy là E2. Nguồn ADR-0054 §1, ADR-0062, ADR-0067.
 
 **Bất biến (c) — nhánh sổ sách.** Nhánh chỉ chứa sổ sách (`ops/leases/**`, `ops/specs/**`, biên nhận, bia mộ) và không chứa tệp thuộc write set code nằm ngoài luật đếm push; nhánh chứa bất kỳ tệp thuộc write set code thì bị đếm, bất kể tên ref. Nguồn ADR-0054 §1, ADR-0062, tương thích ADR-0060 M5.
 
@@ -1114,6 +1125,10 @@ vẫn xuất hiện, không thay điều kiện dừng theo class/Packet hay b�
 Một lớp xuất hiện ở ba lượt review khác nhau đòi xem lại cách làm tại checkpoint;
 ba biểu hiện của lớp trong cùng một lượt chỉ là một lần xuất hiện. Revision/scope
 cut không reset lịch sử đó, không tự cấp thêm review call hoặc attempt.
+
+Checkpoint vì tín hiệu không hội tụ, hay vì một lớp hoặc một hình dạng lỗi lặp lần thứ ba, là điểm dừng của phiên,
+không phải điểm hỏi chủ kho. Phiên đang giữ việc dừng vá và xét lại cách làm; lý do của hướng mới đi vào revision kế
+tiếp hay handoff. Phiên chỉ hỏi chủ kho khi rơi vào E1 hay E3 của `ADR-0067`.
 
 Mặc định: 3 attempt/packet, 90 phút/run cho cả Executor và Reviewer, cùng failure fingerprint nội dung hai lần thì
 blocked, tối đa 20 packet,
@@ -1139,6 +1154,7 @@ mật. Việc mới phát hiện trong phiên chỉ được tiếp tục tại 
 Trần lượt Codex review trên cùng PR (`ADR-0052`) là một stop condition riêng của review budget. Review Rescue Checkpoint được
 kích hoạt khi chạm trần này hoặc khi PR chạm trần vòng review canon của `ADR-0043` mà chưa approve. Chạm checkpoint
 không tự biến Packet thành thất bại nội dung và không cho phép gọi thêm bằng prompt/phiên khác để lách trần.
+Chạm hai trần này mà cần thêm lời gọi hay vòng là E2 của `ADR-0067`.
 
 State giữ riêng `codex_review_calls_used`, `codex_executor_calls_used` và `review_rounds_used`.
 `codex_review_calls_used` tăng khi launcher có bằng chứng lời gọi review đã bắt đầu sinh output/token, kể cả timeout
@@ -1167,6 +1183,7 @@ thứ ba bắt buộc xem lại có nên tiếp tục cách làm đó, không ch
 ### `work-packet` — model-invoked
 
 Trigger khi agent nhận Issue có lease hợp lệ. Trình tự bắt buộc: đọc protocol → preflight spec/lease/worktree → heartbeat → chỉ sửa effective write set → worker gate → handoff → review offline → đẩy → PR theo ADR-0060. Hoàn tất khi SHA được approve đã đẩy và PR mở ở trạng thái `draft`; run kết thúc trước đó thì run kế nhiệm làm nốt.
+Quyết định phiên tự đưa thay cho một câu hỏi trước đây (nợ P3, huỷ lượt vì hạ tầng, xét lại cách làm…) ghi vào sổ quyết định uỷ quyền theo `ADR-0067`.
 Skill từ chối làm việc nếu lease/generation/spec hash sai, cần LIVE, closure thiếu hoặc security path chưa duyệt.
 Adapter chỉ trỏ các mục protocol và mô tả cú pháp/công cụ riêng của nền; không sao chép schema, stop condition hay
 completion criteria. Phiên `work-packet` không chuyển vai sang reviewer hoặc land trong cùng run.
@@ -1188,7 +1205,9 @@ pháp cho capability chưa tồn tại.
 Không tự trigger. Mặc định gọi `land prepare`: freeze mission, kiểm packet/review/override, rebase integration,
 tạo release metadata và chạy land gate. `--apply` gửi mission/head SHA tới cùng operation `land apply` mà
 GitHub/Android dùng; skill không chứa quyền hay logic merge riêng. Deploy là lệnh riêng và cần quyền LIVE.
-Phiên land chỉ nhận authorization bền cho exact SHA. Adapter không tự cấp approval; Land Operator ghi merge,
+Phiên land chỉ nhận authorization bền cho exact SHA. Với packet không chạm E4, E5, khi cơ chế tự merge của `ADR-0067`
+đã có hiệu lực, authorization ấy là mục sổ `tu_merge` của ADR ấy: neo exact SHA, mang đủ các ràng buộc ở §13.1, kèm review
+approve, audit uỷ quyền đạt và đủ điều kiện `ADR-0060`. Adapter không tự cấp approval; Land Operator ghi merge,
 post-merge và bookkeeping evidence trước khi chuyển `landed`/`complete`.
 
 #### 13.1 Evidence trước và sau land
@@ -1525,6 +1544,7 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` �
 | `ADR-0063` | Nguồn spec ghim OID, human audit riêng và chuyển tiếp candidate lịch sử có owner disposition | Accepted — hiệu lực từ land trên first-parent master | `packet_loop.py` `kiem-merge` K1/K4 |
 | `ADR-0064` | NLM tự nạp lại jar có điều kiện, chỉ ở phiên cloud (thay r208c ở điểm "tự nạp khi hết hạn") | Accepted | `wp1099_nlm_nap_lai` (selftest fragment) |
 | `ADR-0065` | Model/effort phục vụ của reviewer là trường ghi nếu đo được; `KHONG_DO_DUOC` không chặn assurance §8.1 hay `landed`; họ model theo identity provider; hồi tố ở packet riêng | Accepted | `ops/land_evidence_nguon.py` (L7) |
+| `ADR-0067` | Danh sách đóng E1–E5: agent chỉ hỏi chủ kho trong năm tình huống; đóng băng đặc tả sau review độc lập, audit uỷ quyền, tự merge packet không chạm E4/E5, uỷ quyền thường trực cấp lease có hạn; sổ quyết định uỷ quyền, bản tin hằng ngày, comment ghi hộ có nhãn | Accepted — cơ chế cần cổng mã có hiệu lực khi cổng ấy đổi (bảng chuyển tiếp trong ADR) | **0 cổng**; đo lúc land trên sáu vị trí cổng (mục Cưỡng chế của ADR) |
 
 ### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
 

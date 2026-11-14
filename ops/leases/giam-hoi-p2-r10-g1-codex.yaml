@@ -59,8 +59,8 @@ recorder_is_executor: false
 leased_at_utc: '2026-11-14T06:04:29Z'
 heartbeat_at: '2026-11-14T06:04:29Z'
 heartbeat_required_minutes: 360
-lease_until: '2026-11-15T06:04:29Z'
-lease_expires_at_utc: '2026-11-15T06:04:29Z'
+lease_until: '2026-11-14T17:07:04Z'
+lease_expires_at_utc: '2026-11-14T17:07:04Z'
 max_lease_hours: 24
 codex_review_calls_limit: 10
 codex_review_ledger: sổ chung trên Packet Issue #1292 cho lời gọi offline và connector (mục 6 của đặc tả)
@@ -71,3 +71,18 @@ uy_quyen_merge: false
 human_audit: chủ kho tự đăng audit human_exact_head_audit.v1 của SHA ứng viên H trên PR draft của packet trước khi H được đẩy (ADR-0063 K4); comment ghi hộ không phải audit
 merge_approval: ADR-0060 M7, chủ kho duyệt một lần neo H sau CI và connector (packet chạm E5)
 thay_the_cho: []
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-15T06:04:29Z'
+  han_moi_utc: '2026-11-14T17:07:04Z'
+  chi_thi: >-
+    Chu kho chon dac ta r11 thay r10 ("Dac ta r11 (Recommended)") va duyet bam r11, ghi ho tren
+    https://github.com/ducthangho/tra-luat/issues/1292#issuecomment-6880923050
+  ly_do: >-
+    Ung vien dung dung byte tu r10 (H 093acd430da9328725e5a91d177e4b45338137cc, chua day) lam do buoc doc-claims-check --strict
+    cua CI; packet tiep tuc bang lease giam-hoi-p2-r11-g1-codex neo dac ta r11. H r10 khong duoc day; PR #1317 van o head rong
+    728aaac.
+  vi_sao_khong_dung_bia_mo: >-
+    Rut han de lease r10 chet TRUOC khi cap lease r11, khong co cua so hai lease cung write set. Han moi dat SAU luc push de luot
+    dang lease con thay lease song (tien le 8c57691 cua P1, #1179 fcea24a).
+  nguoi_rut: 'phien Claude dieu phoi GIAM-HOI-P1/P2 (worktree brave-rosalind-730dc7), theo chi dao chu kho'
+  nghiem_thu: 'ai-dang-giu ba tep write set sau 2026-11-14T17:07:04Z phai khong con giam-hoi-p2-r10-g1-codex la nguoi giu.'

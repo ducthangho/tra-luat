@@ -15799,7 +15799,7 @@ CASES += [
     ('k3s_mo_lai_badge_running', _ca813(_k3s_mo_lai, state='cho_chu_kho', finding_counts={'cn-bug': 1})),
 ]
 
-def _pending_fixture1315(c, historical=False, exhausted=False, same_family=False):
+def _pending_fixture1315(c, historical=False, exhausted=False, same_family=False, unused_call=False, legacy=False):
     """Synthetic advisory approval, real adoption and local-bare canonical I2.
 
     Only authority/runtime transport seams are replaced, as in _runtime1174;
@@ -15810,7 +15810,7 @@ def _pending_fixture1315(c, historical=False, exhausted=False, same_family=False
     import io
     from unittest.mock import patch
     m,a,initial,argv,oldinvoke,source,witness,pair = _runtime1174(
-        c, "begin-attempt", current_policy=True, service=True)
+        c, "accept" if legacy else "begin-attempt", current_policy=not legacy, service=not legacy)
     e = a["enrollment"]
     w = Path(e["git_root"])
     head = _g(w, "rev-parse", "refs/remotes/origin/agent/wp55-g1-claude")
@@ -15824,7 +15824,8 @@ def _pending_fixture1315(c, historical=False, exhausted=False, same_family=False
         return ["--state-dir", str(source.parent), name, "--packet", "55", *map(str, flags),
                 *common, "--expected-revision", str(json.loads(source.read_bytes())["state_revision"])]
     receipt = c.tmp / "pending-review.json"
-    for index,verdict,findings in [(1,"changes_requested",["historic-finding"]),(2,"approve",[])]:
+    cycles = [] if legacy else [(1,"changes_requested",["historic-finding"]),(2,"approve",[])]
+    for index,verdict,findings in cycles:
         rc,r,err = oldinvoke(oldcommand("begin-attempt", "--provider", "claude", "--execution-surface", "claude_code",
             "--transport", "machine/local", "--bang-chung-moi-truong", anh_doctor()))
         assert rc == 0 and r["dispatch_allowed"], (rc,r,err)
@@ -15835,6 +15836,12 @@ def _pending_fixture1315(c, historical=False, exhausted=False, same_family=False
             ("record-codex-call", ("--head", head, "--run-id", call))]:
             rc,r,err = oldinvoke(oldcommand(name, *flags)); assert rc == 0, (rc,r,err)
         image = json.loads(source.read_bytes())
+        if unused_call and verdict == "approve":
+            # A valid, counted reservation through the actual reducer, before
+            # the final approval consumes the other call. Never edit da_dung.
+            rc,r,err = oldinvoke(oldcommand("record-codex-call", "--head", head,
+                "--run-id", "predecessor-call-unused"))
+            assert rc == 0 and r["dispatch_allowed"], (rc,r,err)
         receipt.write_bytes(m._1174_bytes(dict(schema="wp1174_service_advisory.v1", head=head,
             identity=image["reviewer_identity"], verdict=verdict, finding_ids=findings, assurance="advisory_review")))
         flags = ["--provider", "codex", "--execution-surface", "codex_service", "--transport", "machine",
@@ -15843,8 +15850,20 @@ def _pending_fixture1315(c, historical=False, exhausted=False, same_family=False
         rc,r,err = oldinvoke(oldcommand("record-review", *flags))
         assert rc == 0 and not r["dispatch_allowed"], (rc,r,err)
     predecessor = json.loads(source.read_bytes())
-    assert predecessor["state"] == "approved_pending" and predecessor["scoped_review"]["verdict"] == "approve"
-    assert predecessor["finding_counts"] == {"historic-finding":1}
+    assert predecessor["state"] == "approved_pending"
+    if legacy:
+        # _runtime1174("accept") ran _r812("review") in this isolated
+        # directory. Canonicalize that actual v2 reducer output, retaining its
+        # own key/anchor; do not relabel a v3 dictionary as a legacy control.
+        legacy_raw=(c.tmp/"approved"/"sd1"/source.name).read_bytes()
+        predecessor=json.loads(legacy_raw)
+        assert predecessor["schema_version"] == 2 and predecessor["luat_adr0054"] is True
+        source.write_bytes(m._1174_bytes(predecessor)); witness.unlink()
+        e.update(origin="imported_lineage", legacy_source_path=str(source),
+            legacy_source_sha256=hashlib.sha256(source.read_bytes()).hexdigest())
+    else:
+        assert predecessor["scoped_review"]["verdict"] == "approve"
+        assert predecessor["finding_counts"] == {"historic-finding":1}
     if historical:
         # Synthetic historical activation is a valid old-state input. The real
         # advisory reducer above supplies its closed review/call evidence.
@@ -15900,7 +15919,7 @@ def _pending_fixture1315(c, historical=False, exhausted=False, same_family=False
         return rc,result,err.getvalue()
     rc,r,err = invoke(command("adopt-state", "--mode", "initial", "--adoption-id", "pending-next",
         "--expected-source-sha256", digest, "--target-generation", "2", "--expected-witness-revision",
-        json.loads(witness.read_bytes())["witness_revision"], ordinary=False))
+        "absent" if legacy else json.loads(witness.read_bytes())["witness_revision"], ordinary=False))
     assert rc == 0 and not r["dispatch_allowed"], (rc,r,err)
     adopted = json.loads(target.read_bytes())
     assert adopted["state"] == "approved_pending" and adopted["scoped_review"] is None
@@ -16053,6 +16072,131 @@ def _pending_rejections1315(c):
         invoke(command(name,*flags),rejected=True,reason="current-generation canonical lease required",label="unbound-"+name)
 
 
+def _pending_readers1315(c):
+    import contextlib
+    import io
+    from unittest.mock import patch
+    allowlist = set("schema_version packet mission state executor reviewer attempts_used attempts_limit review_rounds_used review_rounds_limit codex_review_calls_used codex_review_calls_limit finding_counts generation state_revision".split())
+    for historical in (False, True):
+        directory = c.tmp / ("historical" if historical else "inactive"); directory.mkdir()
+        m,a,predecessor,adopted,source,target,witness,facts,command,invoke,argv = _pending_fixture1315(Ctx(c.script,directory), historical=historical)
+        for recovered in (False, True):
+            if recovered:
+                rc,r,err=invoke(argv)
+                assert rc == 0 and not r["dispatch_allowed"], (rc,r,err)
+            for relative in (False, True):
+                state_dir = os.path.relpath(target.parent) if relative else str(target.parent)
+                for name in ("status", "next-comment"):
+                    before = {str(p):p.read_bytes() for p in directory.rglob("*") if p.is_file()}
+                    out,err=io.StringIO(),io.StringIO()
+                    with patch.object(m,"_1174_resolve",side_effect=AssertionError("diagnostic resolved authority")), \
+                         patch.object(m,"_1174_probe",side_effect=AssertionError("diagnostic probed")), \
+                         patch.object(m,"_1174_write",side_effect=AssertionError("diagnostic wrote")), \
+                         patch.object(m,"_1174_recheck_durable",side_effect=AssertionError("diagnostic synced")), \
+                         contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
+                        try:
+                            rc=m.main(["--state-dir",state_dir,name,"--packet","55"])
+                        except SystemExit as ex:
+                            rc=ex.code
+                    assert rc == 0, (historical,recovered,relative,name,rc,err.getvalue())
+                    image=json.loads(target.read_bytes())
+                    if name == "status":
+                        diagnostic=json.loads(out.getvalue())
+                        assert set(diagnostic) == allowlist and diagnostic == {k:image[k] for k in allowlist}
+                    else:
+                        expected = (f"### packet wp55 · mission #54\n\n- state hiện tại: `{image['state']}`\n"
+                            f"- lượt đã dùng: {image['attempts_used']}/{image['attempts_limit']}\n"
+                            "- executor `claude` · reviewer `codex`\n- finding đã đếm: `historic-finding`×1\n"
+                            "\nĐăng khối này lên Issue, rồi ghi lại ID GitHub trả về bằng `record-post`.\n")
+                        assert out.getvalue() == expected, out.getvalue()
+                    _leak15(target.read_bytes(),out.getvalue()+err.getvalue())
+                    assert before == {str(p):p.read_bytes() for p in directory.rglob("*") if p.is_file()}
+            # The new fallback binds the actual file, including the immutable
+            # pending snapshot after recovery. The historical diagnostic lane
+            # already permits a copied image and keeps that behavior.
+            copied=directory/("copied-leased" if recovered else "copied-pending");copied.mkdir()
+            (copied/target.name).write_bytes(target.read_bytes())
+            before={str(p):p.read_bytes() for p in directory.rglob("*") if p.is_file()}
+            for name in ("status","next-comment"):
+                rc,out,err=run(c.script,[name,"--packet","55"],copied)
+                if historical:
+                    assert rc == 0, (rc,out,err)
+                else:
+                    assert rc == 8 and b"pending recovery source/generation binding" in err, (rc,out,err)
+                _leak15(target.read_bytes(),_txt(out)+_txt(err))
+                assert before == {str(p):p.read_bytes() for p in directory.rglob("*") if p.is_file()}
+
+
+def _pending_closure1315(c):
+    import copy
+    m,a,predecessor,adopted,source,target,witness,facts,command,invoke,argv = _pending_fixture1315(c)
+    paths=(source,target,witness); originals=tuple(p.read_bytes() for p in paths)
+    good_a=copy.deepcopy(a)
+    variants = [
+        ("attempt_open",lambda p:p.update(attempt_open=True)),
+        ("accepted_sha",lambda p:p.update(accepted_sha=p["pending_sha"])),
+        ("human_acceptance",lambda p:p.update(human_acceptance={"assurance":"human_audited"})),
+        ("scoped_verdict",lambda p:p["scoped_review"].update(verdict="changes_requested")),
+        ("scoped_head",lambda p:p["scoped_review"].update(head="f"*40)),
+        ("latest_verdict",lambda p:p["reviews"][-1].update(verdict="changes_requested")),
+        ("latest_head",lambda p:p["reviews"][-1].update(reviewed_sha="f"*40)),
+        ("pending_reviewing_head",lambda p:p.update(reviewing_head_sha="f"*40)),
+        ("predecessor_generation",lambda p:p.update(generation=0)),
+        ("lease_generation",lambda p:p["ngu_canh_lease"].update(generation=3)),
+        ("lease_context_id",lambda p:p["lease"].update(lease_id="other-predecessor-lease")),
+        ("owner_policy_absent",lambda p:p["scoped_review"].update(assurance="same_provider_approved"))]
+    for label,mutate in variants:
+        a.clear();a.update(copy.deepcopy(good_a))
+        for path,raw in zip(paths,originals):path.write_bytes(raw)
+        old=copy.deepcopy(predecessor);mutate(old)
+        changed=copy.deepcopy(adopted);payload=changed["adoption"]["payload"]
+        snapshot=m._1174_bytes(old);digest=hashlib.sha256(snapshot).hexdigest()
+        payload.update(source_snapshot=snapshot.decode(),source_sha256=digest)
+        payload["operation"]["source_sha256"]=a["operation"]["source_sha256"]=a["lineage"]["source_sha256"]=digest
+        payload["tombstone"]=m._1174_tombstone(55,1,2,"pending-next",digest,"b"*64).decode()
+        payload["tombstone_sha256"]=hashlib.sha256(payload["tombstone"].encode()).hexdigest()
+        projection=dict(old,schema_version=3,generation=2,state_revision=0,enrollment_id=a["enrollment"]["id"],
+            binding_sha256=a["enrollment"]["binding_sha256"],scoped_review=None,human_acceptance=None)
+        projection.pop("adoption")
+        payload["target_projection"]=projection
+        changed=dict(projection,state_revision=adopted["state_revision"],adoption=changed["adoption"])
+        changed["adoption"]["payload_sha256"]=hashlib.sha256(m._1174_bytes(payload)).hexdigest()
+        raw=m._1174_bytes(changed);target.write_bytes(raw);source.write_bytes(payload["tombstone"].encode())
+        water=json.loads(originals[2]);water["high_water"]["state_sha256"]=hashlib.sha256(raw).hexdigest()
+        witness.write_bytes(m._1174_bytes(water))
+        assert m._1174_OWNER_POLICY.get() is None
+        invoke(argv,rejected=True,reason="scoped review closed record" if label=="owner_policy_absent" else
+            "pending recovery requires closed scoped predecessor approval",label="closure-"+label)
+    # Same fixture and reducers with no predecessor mutation must recover.
+    a.clear();a.update(good_a)
+    for path,raw in zip(paths,originals):path.write_bytes(raw)
+    rc,r,err=invoke(argv,label="closure-healthy")
+    assert rc == 0 and not r["dispatch_allowed"], (rc,r,err)
+    legacy_dir=c.tmp/"genuine-v2";legacy_dir.mkdir()
+    lm,la,lp,ls,l_source,l_target,l_witness,lf,lc,li,lv = _pending_fixture1315(Ctx(c.script,legacy_dir),legacy=True)
+    assert lp["schema_version"] == 2 and "scoped_review" not in lp and lp["reviews"][-1]["verdict"] == "approve"
+    li(lv,rejected=True,reason="pending recovery requires closed scoped predecessor approval",label="genuine-historical-v2")
+
+
+def _pending_unused1315(c):
+    m,a,predecessor,adopted,source,target,witness,facts,command,invoke,argv = _pending_fixture1315(c,unused_call=True)
+    assert predecessor["codex_review_calls_used"] == 3 and predecessor["review_rounds_used"] == 2
+    assert [(x["run_id"],x["da_dung"]) for x in predecessor["codex_calls"]] == [
+        ("predecessor-call-1",True),("predecessor-call-2",True),("predecessor-call-unused",False)]
+    # Diagnostics and immutable adoption evidence remain valid; only the new
+    # recovery authority rejects the dangling counted reservation.
+    for name in ("status","next-comment"):
+        before=tuple(p.read_bytes() for p in (source,target,witness))
+        rc,out,err=run(c.script,[name,"--packet","55"],target.parent)
+        assert rc == 0, (rc,out,err)
+        _leak15(target.read_bytes(),_txt(out)+_txt(err))
+        assert before == tuple(p.read_bytes() for p in (source,target,witness))
+    invoke(argv,rejected=True,reason="pending recovery requires all predecessor calls consumed",label="unused-predecessor-call")
+    assert json.loads(target.read_bytes())["codex_calls"] == predecessor["codex_calls"]
+    healthy=c.tmp/"all-consumed";healthy.mkdir()
+    _pending_valid1315(Ctx(c.script,healthy))
+
+
 def _pending_intermediate1315(c):
     import copy
     m,a,predecessor,adopted,source,target,witness,facts,command,invoke,argv = _pending_fixture1315(c)
@@ -16170,6 +16314,20 @@ CASES += [("wp1315_adopted_pending_valid", _pending_valid1315),
           ("wp1315_pending_exhausted_budget", _pending_budget1315),
           ("wp1315_ordinary_record_lease_whitelist", _ordinary_whitelist1315),
           ("wp1315_pending_target_proof", _pending_target1315)]
+
+CASES += [("wp1315_pending_unflagged_readers", _pending_readers1315),
+          ("wp1315_pending_predecessor_closure", _pending_closure1315),
+          ("wp1315_pending_unused_reservation", _pending_unused1315)]
+
+MUTANTS.update({
+    "m1315_reader_state_path": ('            state_path=str(path.resolve()),\n', '', ["wp1315_pending_unflagged_readers"]),
+    "m1315_predecessor_attempt_open": ('predecessor.get("state") == "approved_pending" and predecessor.get("attempt_open") is False and',
+        'predecessor.get("state") == "approved_pending" and', ["wp1315_pending_predecessor_closure"]),
+    "m1315_predecessor_latest_verdict": ('bool(predecessor.get("reviews")) and predecessor["reviews"][-1].get("verdict") == "approve" and',
+        'bool(predecessor.get("reviews")) and', ["wp1315_pending_predecessor_closure"]),
+    "m1315_unused_predecessor_call": ('_1174_require(all(call["da_dung"] for call in predecessor["codex_calls"]),',
+        '_1174_require(True,', ["wp1315_pending_unused_reservation"]),
+})
 
 
 if __name__ == "__main__":

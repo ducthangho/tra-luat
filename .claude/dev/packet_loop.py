@@ -1420,7 +1420,8 @@ def _reader_state(state_dir, packet):
             type(state.get("enrollment_id")) is str and bool(state["enrollment_id"]) and
             _1174_hash(state.get("binding_sha256")) and _1174_int(state.get("generation")) and
             _1174_int(state.get("state_revision")), "read-only v3 local identity")
-        enrollment = dict(id=state["enrollment_id"], binding_sha256=state["binding_sha256"], journal_root=str(state_dir),
+        enrollment = dict(id=state["enrollment_id"], binding_sha256=state["binding_sha256"], journal_root=str(path.parent.resolve()),
+            state_path=str(path.resolve()),
             initial_state_projection={k: state[k] for k in ("executor", "reviewer", "executor_identity", "reviewer_identity")})
         admission = dict(packet=packet, mission=state["mission"], generation=state["generation"], enrollment=enrollment)
         if state.get("adoption") is not None:
@@ -4960,7 +4961,9 @@ def _1315_pending_recovery(state, admission, verified):
         record.get("phase") == "adopted" and record.get("cutover_started") is True,
         "pending recovery requires finalized adoption")
     payload = _1174_adoption_record(record, admission)["payload"]
-    _1315_pending_projection(state, admission, payload["source_snapshot"].encode("utf-8"))
+    predecessor = _1315_pending_projection(state, admission, payload["source_snapshot"].encode("utf-8"))
+    _1174_require(all(call["da_dung"] for call in predecessor["codex_calls"]),
+        "pending recovery requires all predecessor calls consumed")
     _1174_require(type(verified) is dict and _nc_hop_le(verified.get("context")) and
         verified["context"]["generation"] == admission["generation"] and
         type(verified.get("lease")) is dict and verified["lease"]["lease_id"] == verified["context"]["lease_id"] and

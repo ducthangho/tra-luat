@@ -1,0 +1,8 @@
+# LAN 1 (nhap: C1–C4 not_measured, cho packet_loop_test)
+# checkout: c0b8e11d7099f756e65db8bd9a81493cde789a6f (+ thay doi chua commit trong ops/land) ; origin/master: c0b8e11d7099f756e65db8bd9a81493cde789a6f ; luc: 2026-11-14T05:31:09Z
+rc=12
+
+# LAN 2 (C1–C4 passed tu log CI hai SHA; landed true theo chu kho chap nhan connector vuot tran)
+# checkout: 2065fe5b9748312a889b9c9fb8093d79f16ca95b (+ thay doi chua commit trong ops/land) ; origin/master: c0b8e11d7099f756e65db8bd9a81493cde789a6f ; luc: 2026-11-14T06:19:07Z
+ĐÓNG ĐƯỢC WP K3-CONNECTOR-STATE-V1 — merge c0b8e11d7099f756e65db8bd9a81493cde789a6f
+rc=0

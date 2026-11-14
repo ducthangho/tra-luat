@@ -1,0 +1,18 @@
+# luc 2026-11-14T05:14:53Z
+# fetch du: thieu 0 / thua 0 / 210 nhanh (ls-remote vs for-each-ref, 05:14Z); master cuc bo dong bo origin/master
+## ai-dang-giu .claude/dev/packet_loop.py
+HẾT_HẠN	wp1309-r3-g3-codex	refs/remotes/origin/ops/wp1309-r1-g1-meta:ops/leases/wp1309-r3-g3-codex.yaml
+HẾT_HẠN	wp813-r2-g1-claude	refs/remotes/origin/ops/wp813-r2-g1-lease:ops/leases/wp813-r2-g1-claude.yaml
+HẾT_HẠN	wp814-r2-g1-claude	refs/remotes/origin/ops/wp814-r2-g1-lease:ops/leases/wp814-r2-g1-claude.yaml
+HẾT_HẠN	wp814-r3-g2-claude	refs/remotes/origin/ops/wp814-r3-g2-lease:ops/leases/wp814-r3-g2-claude.yaml
+HẾT_HẠN	wp834-r1-g1-claude	refs/remotes/origin/ops/wp834-r1-g1-lease:ops/leases/wp834-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ai-dang-giu .claude/dev/packet_loop_test.py
+HẾT_HẠN	wp1303-r6-g7-codex	refs/remotes/origin/ops/wp1303-r6-g7-codex:ops/leases/wp1303-r6-g7-codex.yaml
+HẾT_HẠN	wp813-r2-g1-claude	refs/remotes/origin/ops/wp813-r2-g1-lease:ops/leases/wp813-r2-g1-claude.yaml
+HẾT_HẠN	wp814-r2-g1-claude	refs/remotes/origin/ops/wp814-r2-g1-lease:ops/leases/wp814-r2-g1-claude.yaml
+HẾT_HẠN	wp814-r3-g2-claude	refs/remotes/origin/ops/wp814-r3-g2-lease:ops/leases/wp814-r3-g2-claude.yaml
+HẾT_HẠN	wp834-r1-g1-claude	refs/remotes/origin/ops/wp834-r1-g1-lease:ops/leases/wp834-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

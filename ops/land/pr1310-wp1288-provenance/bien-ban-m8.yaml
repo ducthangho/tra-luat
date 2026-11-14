@@ -1,0 +1,39 @@
+# Bien ban M8 (ADR-0060) dong WP #1288 K3-CONNECTOR-STATE-V1 r3 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1310-wp1288-land-evidence.yaml. landed true (audit human_audited chu kho tu dang 6859355072 tren 8dce516);
+# bon moc §10.2.2 du (wd-run 43554899372). Canh bao tran connector: xem land evidence review.canh_bao_tran.
+packet: K3-CONNECTOR-STATE-V1
+revision: 3
+generation: 3
+spec_hash: 62266377f599c37437c430716c6f3c92ace02877e11d2783353f1565ee858b15
+head_da_review: 8dce51653601e72b81b98c39df53bf6ebc7bc0eb
+tree_h: 82048fb5f0d892ac57a852e52df61f50fb69fab6
+review:
+  offline: 'tra-luat-win luot 3 approve tren 1b24fd9 (luot 1 khong verdict, luot 2 request_changes tren bc620d6)'
+  connector: 'issuecomment-6854608343 codex-review-state:v1 completed, khong finding tren 8dce516; receipt 6859420382'
+  human_audit: 'issuecomment-6859355072 human_exact_head_audit.v1 approve tren 8dce516 (chu kho tu dang)'
+windows:
+  phan_loai: not_required
+  nguon: 'mien chu kho tu dang issuecomment-6859376660 "windows: 8dce516… mien"; launcher-windows 43544262861 tren c0b8e11 success'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1310#issuecomment-6859355072
+duyet_chu_kho_ghi_chu: 'audit approve tu dang 16:53:04Z 13-11 (app null), truoc CI som nhat cua head (16:54:27Z); duyet merge dung SHA qua AskUserQuestion (loi khai).'
+merge_commit: c0b8e11d7099f756e65db8bd9a81493cde789a6f
+tree_m: 82048fb5f0d892ac57a852e52df61f50fb69fab6
+ci_master:
+  run_id: 43544262919
+  conclusion: success
+  ghi_chu: 'ci.yml; launcher-windows 43544262861 cung SHA = success'
+nghiem_thu:
+  C1: not_measured  # cho C3 (suite dang chay)
+  C2: not_measured
+  C3: not_measured
+  C4: not_measured
+  C5: passed
+  C6: passed
+  hoan_tat_s8: passed
+lease_cuoi: k3-connector-state-v1-r3-g3-codex
+landed: false  # cho C3; canh bao tran connector o land evidence
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

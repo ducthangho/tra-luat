@@ -1,0 +1,29 @@
+# C3/C4 — tu log CI job gate-packet-loop (REST GET actions/jobs/<id>/logs, 2026-11-14T06:18:43Z)
+# Do tai cho bi dung o tran 1h lenh nen (vé nen chua xong) — thay bang log CI cua chinh hai SHA.
+## nen job 132026897388 run 43466453500 log sha256 c8078538d61063ee02ebaf3a8e1feacf1b2b118e5fd25f5f52042d3856c68fb4 bytes 402768
+SỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):
+  ca               : 1456
+  đột biến         : 1821
+  lớp lách         : 78
+  ca bắt-oan       : 35
+  ngoại lệ AC 18   : 0
+## sau job 132291781341 run 43544262919 log sha256 7627985505df811d7daad409e6b7f55228c291130d403483e9e99518f9f0207e bytes 404045
+SỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):
+  ca               : 1494
+  đột biến         : 1829
+  lớp lách         : 78
+  ca bắt-oan       : 35
+  ngoại lệ AC 18   : 0
+  ok  k3s_legacy_body_goc → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  k3s_bo_recursion_error → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  k3s_bo_status → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  k3s_bo_unresolved → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  k3s_sha_tien_to → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  k3s_bool_so → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  k3s_bo_nhieu_marker → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  k3s_bo_mau_thuan → giết 1 ca đích · 3 đối chứng khác họ còn sống
+# dem trong ma nguon (git show <sha>:.claude/dev/packet_loop_test.py)
+bab2279: ten ca k3s_ ("('k3s_") = 0; MUTANTS k3s_ = 0; ten r834_ khac nhau = 119
+c0b8e11: ten ca k3s_ ("('k3s_") = 38; MUTANTS k3s_ = 8; ten r834_ khac nhau = 119
+# nen dong cuoi: TỔNG: ĐẠT
+# sau dong cuoi: TỔNG: ĐẠT

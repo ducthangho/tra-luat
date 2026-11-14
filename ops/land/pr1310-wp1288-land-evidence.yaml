@@ -1,0 +1,192 @@
+# HO SO LAND — packet #1288 K3-CONNECTOR-STATE-V1 r3, lease g3, qua PR #1310. Khuon: ops/land/pr1277-wp1272-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
+#
+# TRANG THAI: merged (c0b8e11), landed true. Bon moc §10.2.2 cua ci.yml 43544262919 DU (wd-run 43554899372).
+# UY QUYEN: audit human_exact_head_audit.v1 chu kho TU DANG tren dung head 8dce516 (issuecomment-6859355072, verdict approve,
+# assurance human_audited, ADR-0063) TRUOC CI som nhat cua head; duyet merge dung SHA 8dce516 qua AskUserQuestion la loi khai cua phien.
+# CANH BAO: so loi goi connector vuot nang_tran (xem review.canh_bao_tran).
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured (nhu khuon).
+# Readback tho: ops/land/pr1310-wp1288-provenance/ (SHA256SUMS kem). REST GET qua proxy phien bang GITHUB_PAT, 2026-11-14T04:0x–05:2xZ.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrbDu3ubjAHY6UebEUe
+input_packet_generations:
+  - {packet_issue: 1288, packet_id: K3-CONNECTOR-STATE-V1, revision: 3, generation: 3, lease_id: k3-connector-state-v1-r3-g3-codex, ghi_chu: 'g1 bi dispatcher #1309 rut 00:59Z 13-11 (stale heartbeat); g3 cap lai, nhan commit 1b24fd9 lam trong khoang bi rut (xem lease cong_viec_trong_khoang_lease_bi_rut). Rut han sau merge (lease.thu_hoi_cuoi).'}
+authorized_head_sha: 8dce51653601e72b81b98c39df53bf6ebc7bc0eb
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1310#issuecomment-6859355072
+authorization_ghi_chu: >-
+  measured — readback-chu-kho-audit-issuecomment-6859355072.json: PR #1310, user ducthangho, author_association OWNER,
+  performed_via_github_app null, created_at 2026-11-13T16:53:04Z, updated_at 16:53:41Z (sua audit_source thanh URL chinh no);
+  than JSON schema human_exact_head_audit.v1, reviewed_sha 8dce516 (= authorized_head_sha), reviewed_tree 82048fb5 (= tree
+  merge commit c0b8e11), spec_sha256 62266377… (= lease spec_hash), verdict approve, assurance human_audited. updated_at < run som
+  nhat cua head (kiem-merge/remote-run3.json: run 43467410171 thu-hoi pull_request_target 2026-11-13T16:54:27Z) — K4 cua
+  kiem-merge doi chieu. Mien K6/K7: readback-chu-kho-mien-issuecomment-6859376660.json (OWNER, 16:53:59Z, app null, created_at =
+  updated_at, `windows: 8dce516… mien` + `full_mutant_audit: 8dce516… mien`). Duyet merge dung SHA 8dce516 qua AskUserQuestion
+  trong phien dieu phoi ~09:00 VN 14-11: loi_khai_co_neo (khong co comment). CAVEAT #566: ai bam merge khong do duoc.
+land_operator: 'measured — readback-pr-1310.json: merged_by ducthangho, merge_commit_sha c0b8e11 (ai thao tac: not_measured, #566).'
+merge_method: merge
+merge_commit: c0b8e11d7099f756e65db8bd9a81493cde789a6f
+merge_commit_tree: 82048fb5f0d892ac57a852e52df61f50fb69fab6
+merge_commit_parents: [bab2279eddd267df77f43a4bf32e168678857f6a, 8dce51653601e72b81b98c39df53bf6ebc7bc0eb]
+pre_merge_checks:
+  - name: 'kiem-merge K0–K7 tren head cuoi'
+    sha: 8dce51653601e72b81b98c39df53bf6ebc7bc0eb
+    conclusion: 'rc 0 — "ĐỦ ĐIỀU KIỆN MERGE trên 8dce51653601e72b81b98c39df53bf6ebc7bc0eb"'
+    nguon: 'provenance/kiem-merge/out6.txt (+ lease-g3.yaml, wr3.json, wj3.json, cr3.json, cn3.json, audit.json, mien.json, remote-run3.json; kiem-merge/SHA256SUMS)'
+    ghi_chu: >-
+      loi_khai_co_neo — chay luc 2026-11-14T01:53Z (08:53 VN) bang packet_loop.py cua nhanh PR (head 8dce516, tuc bo phan tich
+      K3 MOI — dieu kien hoan tat spec §8), --spec ops/specs/k3-connector-state-v1-r3.md; phien ghi so KHONG chay lai, chep tu
+      scratchpad km1288/. Doi chieu measured: kiem-merge/lease-g3.yaml cmp KHOP bda94e1:ops/leases/k3-connector-state-v1-r3-g3-codex.yaml;
+      audit.json va mien.json trung id/body/created_at/updated_at/author_association voi readback 05:1xZ. K3 cua lan nay doc comment
+      tom tat codex-review-state:v1 6854608343 (cn3.json: commit_sha 8dce516, status completed, hai co false).
+  - name: 'Codex reviewer offline (tra-luat-win) luot 3'
+    sha: 1b24fd932c4b0575c965f9b4dd2634a36362a0b7
+    conclusion: 'approve'
+    ghi_chu: >-
+      loi_khai_co_neo — C:/tl-win/k3-review-1b24fd9-r3/VERDICT-k3-r3.md tren may tra-luat-win (khong chep vao kho); lease g3
+      nang_tran va cong_viec_trong_khoang_lease_bi_rut ghi lai. Luot 1 (bc620d6) khong verdict (sandbox read-only), luot 2 (bc620d6)
+      request_changes. 8dce516 = 1b24fd9 + hai lan merge origin/master (dc635d3, bab2279); diff so base van chi 2 tep write set.
+  - name: 'Codex connector tren head cuoi'
+    sha: 8dce51653601e72b81b98c39df53bf6ebc7bc0eb
+    conclusion: 'sach'
+    ghi_chu: >-
+      measured — kiem-merge/cn3.json (lay truoc merge): comment 6854608343 cua chatgpt-codex-connector[bot], marker
+      codex-review-state:v1 commit_sha 8dce516, status completed, has_any_findings false, has_unresolved_findings false (updated_at
+      2026-11-13T16:55:56Z), kem receipt 6859420382 "Didn't find any major issues", "Reviewed commit: 8dce516536". Lan tu kich hoat
+      sau merge: xem post_merge_checks.
+  - name: 'Windows K6 / full mutant K7'
+    sha: 8dce51653601e72b81b98c39df53bf6ebc7bc0eb
+    conclusion: 'mien (owner tu dang 6859376660)'
+    ghi_chu: 'measured — readback-chu-kho-mien-issuecomment-6859376660.json (xem authorization_ghi_chu). Spec §7 de xuat not_required.'
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA'
+    run_id: 43544262919
+    run_attempt: 1
+    sha: c0b8e11d7099f756e65db8bd9a81493cde789a6f
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, danh-gia-gate-output-43544262919.txt, danh_gia_gate.py, phan-chung-buoc-43544262919.txt]
+    moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha c0b8e11, run_attempt 1; ci/jobs.json 23 job, nhan ubuntu-latest, runner_id khac 0.'
+    moc_checkout: 'measured — ci/provenance.yaml: 23/23 job checkout passed c0b8e11d7099f756e65db8bd9a81493cde789a6f (ops/ci_provenance.py thu, rc 0).'
+    moc_workflow_definition: >-
+      measured — ci/provenance.yaml moc.workflow_definition: passed; path .github/workflows/ci.yml, oid c0b8e11, blob 2b2c9aa2, sha256
+      aed785d6…; wd_run_id 43554899372, artifact 14097688074 (artifact_sha256 80201822…). readback-run-43554899372.json:
+      workflow_dispatch ops-do-workflow-definition.yml tren master c0b8e11, success, tao 2026-11-14T04:05:38Z; readback-jobs-43554899372.json:
+      do-wd success, runner_id khac 0. Dispatch do phien dieu phoi (MCP actions_run_trigger, inputs run_id 43544262919).
+    moc_gate_output: >-
+      measured — danh-gia-gate-output-43544262919.txt (danh_gia_gate.py sha256 b87f9697, chep tu provenance #1272): passed, 23/23 job co
+      dau hieu duong (tl selftest 1777/1777; gate-packet-loop: .claude/dev/packet_loop_test.py TỔNG: ĐẠT). phan-chung-buoc-43544262919.txt:
+      xoa dau hieu packet_loop_test / tl selftest => not_measured, rc 0 (hai lan).
+  - name: 'Codex connector tu kich hoat khi PR bo draft (sau merge)'
+    sha: 8dce51653601e72b81b98c39df53bf6ebc7bc0eb
+    conclusion: 'sach'
+    ghi_chu: 'measured — readback-connector-issuecomment-6854608343.json: cung comment tom tat, updated_at 2026-11-14T02:05:32Z, commit_sha 8dce516, status completed, hai co false. Phien khong yeu cau lan nay.'
+  - name: 'launcher-windows.yml push master tren DUNG merge SHA'
+    run_id: 43544262861
+    run_attempt: 1
+    sha: c0b8e11d7099f756e65db8bd9a81493cde789a6f
+    conclusion: success
+    nguon: [readback-run-43544262861.json, readback-jobs-43544262861.json]
+    ghi_chu: 'measured — readback-jobs-43544262861.json: launcher (ubuntu-latest) va launcher (windows-latest) success, runner_id khac 0. Khong phai dieu kien cua spec (Windows mien).'
+bookkeeping:
+  - {item: 'rut han lease k3-connector-state-v1-r3-g3-codex', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', ket_qua: 'not_measured — PR draft rieng tu nhanh ops/land-1288 (chua co so luc ghi).'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt (kiem-dong-wp rc 0).'}
+  - {item: 'handoff', ket_qua: 'not_measured — packet khong khai tep handoff trong coordination_paths.'}
+  - {item: 'dong Issue #1288 (va #1211, #1216 trung)', ket_qua: 'not_measured — viec cua phien dieu phoi sau khi PR ghi so merge.'}
+# ---- het truong chuan
+packet_id: K3-CONNECTOR-STATE-V1
+packet_issue: 1288
+revision: 3
+generation: 3
+pham_vi_land: dev-tooling (.claude/dev/packet_loop.py +27/-2, .claude/dev/packet_loop_test.py +138)
+environment: cloud
+operating_system: linux
+recorded_by: claude-session — phien dieu phoi #1206 session_015GtxrbDu3ubjAHY6UebEUe (ghi so + nha lease).
+
+spec:
+  path: ops/specs/k3-connector-state-v1-r3.md
+  ref: refs/heads/ops/k3-connector-state-v1-lease@913b7a0338774f7b8b680dd438dd651cb9938d44
+  blob: a0a3c54b1424a1e286140ae540e3ac10d247e408
+  sha256: 62266377f599c37437c430716c6f3c92ace02877e11d2783353f1565ee858b15
+  nguon: 'measured — spec-sha256.txt: git show 913b7a0:<spec> | sha256sum = 62266377…8b15, blob a0a3c54b (05:30Z 14-11); khop spec_hash lease. Spec KHONG vao master (chi nhanh lease).'
+
+lease:
+  lease_id: k3-connector-state-v1-r3-g3-codex
+  path: ops/leases/k3-connector-state-v1-r3-g3-codex.yaml (nhanh ops/k3-connector-state-v1-lease)
+  dang: 'measured — ops-publish-lease-43560082601-trich.txt: "CHAN [9]: lease k3-connector-state-v1-r3-g3-codex đã có comment 6854579016 trên issue #1288 — bỏ qua".'
+  write_set_so_tep: 2
+  thu_hoi_cuoi: >-
+    DA NHA bang RUT HAN sau merge: lease_until 2026-11-14T12:00:00Z -> 2026-11-14T04:40:00Z (commit 41e86ef, cha bda94e1); tep:
+    lease-k3-connector-state-v1-r3-g3-codex-sau-rut-han.yaml.txt. Commit lam luc ~04:08Z nhung container khoi dong lai nen push
+    tre toi 05:08Z, SAU han moi (lech voi y dinh "han moi sau luc push"). ops-publish-lease run 43560082601 van success
+    (readback-run-43560082601.json; readback-jobs-43560082601.json: job dang 132341590492 success, runner_id khac 0, moi buoc success),
+    di nhanh rc 9 — tuc rc 8 KHONG che rc 9 o lan nay. Sau 04:40Z: ai-dang-giu-sau-rut-han.txt (05:14:53Z, thieu 0 / thua 0 / 210
+    nhanh): .claude/dev/packet_loop.py va .claude/dev/packet_loop_test.py NGUOI_GIU 0, rc 0. Khong bia mo.
+  heartbeat: >-
+    loi_khai_co_neo — heartbeat c19587b (12:00Z 13-11), 32abc66 (17:04Z), bda94e1 (01:52Z 14-11, tre ~2h48 so cam ket 6h do
+    container khoi dong lai), 41e86ef (04:07Z). Khong ai rut g3 trong khoang tre (ai-dang-giu luc ay; lease van o nhanh cu).
+  diff_do: 'measured — readback-commit-c0b8e11.json files: .claude/dev/packet_loop.py +27/-2, .claude/dev/packet_loop_test.py +138/-0 (diff c0b8e11^1..c0b8e11); tree c0b8e11 = reviewed_tree audit 82048fb5.'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-1310.json merged true, merged_at 2026-11-14T02:04:46Z, head 8dce516, base bab2279; readback-commit-c0b8e11.json cha bab2279 + 8dce516, tree 82048fb5.'
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA c0b8e11: DAT — du bon moc measured passed. (2) lease nha: DAT (NGUOI_GIU 0).
+    (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp-m8.txt). (4) review neo 8dce516: DAT — connector sach + audit
+    human_audited chu kho; offline luot 3 approve tren 1b24fd9 (loi_khai_co_neo). (5) uy quyen: DAT theo L-6 bang audit chu kho tu
+    dang 6859355072 neo 8dce516, dang TRUOC merge. (6) muc tieu: DAT — nghiem_thu C1–C6 + hoan_tat_s8. (7) tran: VUOT o connector
+    (review.canh_bao_tran) — chu kho CHAP NHAN, giu landed true (review.quyet_dinh_chu_kho_tran).
+  canh_bao_cho_chu_kho: >-
+    (i) Loi goi connector: duyet +1, dung 2 co chu dich + 1 tu kich hoat (review.canh_bao_tran) — chu kho da chap nhan
+    (review.quyet_dinh_chu_kho_tran). (ii) Lease g1 bi rut khi executor luot 3 / reviewer luot 3 dang chay;
+    chu kho da nhan hai ket qua ay khi cap g3. (iii) Uy quyen merge (AskUserQuestion) khong co comment; authorization_url la audit
+    approve tu dang tren dung SHA.
+
+review:
+  so_loi_goi_codex: >-
+    loi_khai_co_neo — executor 3/3 (lease g3 nang_tran). Reviewer offline 3/3 tren tra-luat-win: bc620d6 khong verdict, bc620d6
+    request_changes, 1b24fd9 approve. Connector (measured, kiem-merge/cn3.json + readback 6854608343): receipt 6854667653 tren 872df6b
+    (2026-11-13T13:42:45Z, sach) theo yeu cau @codex review cua phien; receipt 6859420382 tren 8dce516 (16:55:54Z, sach) theo yeu cau
+    @codex review 6859387893 cua phien (16:54:28Z); lan thu ba tu chay khi PR bo draft (summary 6854608343 cap nhat 2026-11-14T02:05:32Z,
+    van 8dce516, sach).
+  canh_bao_tran: >-
+    Spec §4: reviewer toi da 3 loi goi ke ca connector. Chu kho duyet them DUNG 1 loi goi connector (lease nang_tran, 13-11 ~07:50Z).
+    Thuc te: 2 loi goi connector co chu dich (872df6b, 8dce516). Head 872df6b phai bo vi K4 khong audit duoc (CI da chay) va chu kho
+    chon "Cho master co commit moi" — nghia la can head moi va connector moi, nhung KHONG co dong nang tran thu hai tuong minh. Lan
+    thu ba do GitHub tu kich hoat khi bo draft, sau merge, phien khong yeu cau. Tat ca deu sach (khong finding).
+  quyet_dinh_chu_kho_tran: >-
+    loi_khai_co_neo — 2026-11-14 ~06:00Z chu kho nhan trong phien dieu phoi: "Chap nhan connector vuot tran, giu landed true".
+    Khong co comment GitHub; nguyen van la tin nhan trong phien session_015GtxrbDu3ubjAHY6UebEUe.
+  ket_qua_theo_luot: 'offline bc620d6 khong verdict · offline bc620d6 request_changes · offline 1b24fd9 approve · connector 872df6b sach · connector 8dce516 sach · connector 8dce516 (tu dong) sach.'
+
+nghiem_thu:
+  C1_C2_C4: >-
+    measured — nghiem-thu-c3-ci.txt: c0b8e11 co 38 ca k3s_ (bab2279: 0), gom k3s_comment_that_sach (C1), k3s_running_null
+    (status running, hai co null => chua xong, C2) va cac nhanh hong/chua; 8 muc MUTANTS k3s_ phu du sau chot C4 (bo_status,
+    bo_unresolved, sha_tien_to, bool_so, bo_nhieu_marker, bo_mau_thuan) cong legacy_body_goc, bo_recursion_error — log CI job
+    132291781341: moi muc "giết 1 ca đích · 3 đối chứng khác họ còn sống".
+  C3: >-
+    measured — nghiem-thu-c3-ci.txt (log CI gate-packet-loop hai SHA, bam sha256 ghi trong tep): bab2279 job 132026897388 SỐ LIỆU
+    ca 1456 / đột biến 1821, TỔNG: ĐẠT; c0b8e11 job 132291781341 ca 1494 / đột biến 1829, TỔNG: ĐẠT => +38 ca = 38 ca k3s_ moi,
+    +8 dot bien = 8 MUTANTS k3s_ moi; ten r834_ trong ma nguon 119 = 119. Do tai cho (do-nghiem-thu.sh) bi dung o tran 1 gio cua
+    lenh nen truoc khi xong ve nen — KHONG dung ket qua tai cho cho C3.
+  C5: >-
+    measured — nghiem-thu-c0b8e11.txt: kiem-merge tren dau vao that PR #1270 (ops/land/pr1270-wp1179-provenance/kiem-merge/, cwd
+    clone tai 5824094), hai ve dung trong MOT lenh: nen bab2279 (packet_loop.py blob 44037b91) "THIẾU K3 connector … không review
+    hoàn tất/kết luận nào"; sau c0b8e11 (blob dc0c026f) khong con dong K3. Ca hai ve con "THIẾU K0 đầu vào neo: PR head hiện hành ≠
+    5824094" — do PR #1270 nay da doi head (dau vao lay 08-11), khong lien quan ban va; rc 12 ca hai ve.
+  C6: 'measured — nghiem-thu-c0b8e11.txt: doctrine-scan rc 0, adr-song rc 0 tren ca nen va sau; ruff --select F dem F: tep chinh 3 nen = 3 sau, tep test 13 nen = 13 sau => delta 0.'
+  hoan_tat_s8: 'loi_khai_co_neo — kiem-merge rc 0 tren 8dce516 bang bo phan tich moi (pre_merge_checks); ho so land + bien ban M8 + lease nha: o day.'
+
+khong_do_duoc:
+  - 'VERDICT reviewer offline tren may tra-luat-win (khong chep vao kho).'
+  - 'Ai bam merge PR #1310 (#566).'
+  - 'Duyet merge qua AskUserQuestion (khong co hien vat GitHub).'

@@ -1,0 +1,4 @@
+# lenh: git show 913b7a0338774f7b8b680dd438dd651cb9938d44:ops/specs/k3-connector-state-v1-r3.md | sha256sum ; git rev-parse 913b7a0:ops/specs/k3-connector-state-v1-r3.md
+# luc 2026-11-14T05:30:15Z
+62266377f599c37437c430716c6f3c92ace02877e11d2783353f1565ee858b15  -
+a0a3c54b1424a1e286140ae540e3ac10d247e408

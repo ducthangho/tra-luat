@@ -1,0 +1,121 @@
+# LEASE — K3-CONNECTOR-STATE-V1 revision 3 / generation 3 — K3 cua kiem-merge doc comment tom tat codex-review-state:v1
+# GHI HO theo chi thi CHU KHO trong phien dieu phoi #1206 (session_015GtxrbDu3ubjAHY6UebEUe).
+
+schema_version: 2
+event: executor_lease_regranted_after_stale_retirement
+
+packet_issue: 1288
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1288#issuecomment-6725662174
+authority_url: https://github.com/ducthangho/tra-luat/issues/1288
+granted_on_instruction_nguyen_van: >-
+  13-11 ~07:55Z chu kho chon (AskUserQuestion) 'Cap g3 sau 09:01Z, nhan 1b24fd9' sau khi phien bao lease g1 da bi
+  dispatcher #1309 rut 00:59Z (issuecomment-6840533263); 13-11 ~07:50Z chon 'Nang tran +1 cho connector' va 'Gia han 24 gio'.
+  Truoc do: 08-11 chon 'Xep #1288 sau khi #1174 land'; 08-11 ~18:45Z doi dinh tuyen sang Codex/Codex, reviewer may khac
+  (tra-luat-win) model/effort cao hon, chap nhan human_audited; duyet dong bang spec r3 sha256 62266377...8b15.
+authority_caveat: >-
+  Chi thi qua AskUserQuestion trong phien; comment #1288/#1206 do phien dang bang token chu kho. Day la loi khai cua phien.
+dieu_kien_cap_da_do: >-
+  13-11 09:04Z: fetch du ref (ls-remote vs for-each-ref: thieu 0, thua 0); ops/lease_publish.py ai-dang-giu: NGUOI_GIU 0
+  cho ca .claude/dev/packet_loop.py va .claude/dev/packet_loop_test.py (wp1309-r3-g3-codex HET_HAN 09:01:05Z; #1309 land
+  PR #1311 merge dc635d3). Phien phai do lai ai-dang-giu ngay truoc khi push lease nay.
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'Phien dieu phoi #1206 session_015GtxrbDu3ubjAHY6UebEUe ghi lease (commit/push tu may DESKTOP-T9R33P2 theo chi thi chu kho); thao tac Codex/connector do phien nay dieu phoi.'
+
+leased_at_utc: '2026-11-13T12:00:00Z'
+heartbeat_at: '2026-11-14T01:52:43Z'
+lease_until: '2026-11-14T12:00:00Z'
+lease_expires_at_utc: '2026-11-14T12:00:00Z'
+
+packet_id: K3-CONNECTOR-STATE-V1
+packet_slug: k3-connector-state-v1
+revision: 3
+generation: 3
+lease_id: k3-connector-state-v1-r3-g3-codex
+thay_the_cho: []
+thay_the_cho_ghi_chu: >-
+  KHONG khai g1/g2: ca hai da het han (g1 bi rut 00:59Z bang bia mo da_bi_thay_the: k3-connector-state-v1-r3-g2-retired;
+  g2-retired het han ngay luc cap 00:56:34Z). Bia mo hai chieu chi danh cho lease con song; viet vao lease da chet chi
+  them tep chet vao tap quet cua ops-publish-lease (CLAUDE.md, bai hoc 20-09-2026).
+role: executor
+executor: codex
+provider: openai_codex
+model_family: openai
+execution_surface: codex_cli
+transport: machine
+environment: cloud
+executor_ghi_chu: 'Executor da dung het 3/3 luot; lease nay KHONG cap them luot executor. Viec con lai: merge master, connector, kiem-merge.'
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine/local
+reviewer_may: tra-luat-win (device 810f79bb-c01e-4157-a5f2-9562ac6d551d), giu C:/tl-win/KHOA.txt khi chay
+reviewer_ghi_chu: 'Codex CLI tren may KHAC executor, reasoning effort xhigh; ba luot da dung.'
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+assurance_ghi_chu: 'Executor va reviewer cung provider => KHONG ghi cross_approved. Land can comment audit do chu kho tu dang tren dung SHA (ADR-0063).'
+access: read-write
+
+spec_path: ops/specs/k3-connector-state-v1-r3.md
+spec_ref: refs/heads/ops/k3-connector-state-v1-lease@913b7a0338774f7b8b680dd438dd651cb9938d44
+spec_source_oid: 913b7a0338774f7b8b680dd438dd651cb9938d44
+spec_blob: a0a3c54b1424a1e286140ae540e3ac10d247e408
+spec_sha256: 62266377f599c37437c430716c6f3c92ace02877e11d2783353f1565ee858b15
+spec_hash: 62266377f599c37437c430716c6f3c92ace02877e11d2783353f1565ee858b15
+spec_sha256_required: 62266377f599c37437c430716c6f3c92ace02877e11d2783353f1565ee858b15
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/k3-connector-state-v1-r3.md
+prompt_sha256_required: 62266377f599c37437c430716c6f3c92ace02877e11d2783353f1565ee858b15
+
+branch: agent/k3-connector-state-v1-g1-codex
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 6f32aad6fe9db93867fc87456541740f80bf79a4
+start_from_sha: 6f32aad6fe9db93867fc87456541740f80bf79a4
+immutable_acceptance_baseline: 6f32aad6fe9db93867fc87456541740f80bf79a4
+reviewed_sha_required: 6f32aad6fe9db93867fc87456541740f80bf79a4
+reviewed_sha_ghi_chu: 'moi luot review neo dung SHA cua luot.'
+cong_viec_trong_khoang_lease_bi_rut: >-
+  Lease g1 bi rut 00:59Z. Sau moc do phien dieu phoi (loi cua phien: khong heartbeat, khong doc lai lease truoc khi ghi)
+  da chay executor luot 3 (commit 1b24fd932c4b0575c965f9b4dd2634a36362a0b7, 05:14:55Z, chi 2 tep write set, +27/-2 va
+  +138 so base) va reviewer luot 3 tren tra-luat-win (VERDICT: APPROVE, Reviewed commit 1b24fd9,
+  C:/tl-win/k3-review-1b24fd9-r3/VERDICT-k3-r3.md). Chu kho chap nhan ca hai (13-11 ~07:55Z). Head ke tiep du kien =
+  merge origin/master (dc635d3, #1309 doi 1 dong packet_loop.py) vao 1b24fd9, khong force-push.
+
+write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+write_set_hash: 134e67f810afd51e67417a120564d63613be165ad815e4b6f120840b693e718a
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP (LC_ALL=C), noi bang LF, co LF cuoi, utf-8.'
+tran_kich_thuoc: 'spec r3 §4: packet_loop.py <= 60 dong them, <= 10 dong xoa; tong <= 400 dong them.'
+tran_loi_goi_codex: 'spec r3 §4: executor toi da 3 luot; reviewer toi da 3 loi goi ke ca connector; vuot => Review Rescue Checkpoint (ADR-0037), hoi chu kho.'
+nang_tran: >-
+  Da dung: executor 3/3; reviewer 3/3 (tra-luat-win: r1 bc620d6 khong verdict, r2 bc620d6 REQUEST_CHANGES, r3 1b24fd9
+  APPROVE). Chu kho duyet them DUNG 1 loi goi connector chatgpt-codex-connector tren head cuoi (13-11 ~07:50Z).
+  Connector ra finding => DUNG, hoi chu kho; khong co them luot executor.
+ci_budget:
+  gate_tu_dong: 'CI PR tu dong (ubuntu) tren PR cua packet'
+  windows: 'Khong chay CI Windows; spec r3 §7 de xuat not_required, chu kho xac nhan bang dong windows: <H> mien.'
+  full_mutant: 'Khong chay toan bo dot bien tren Windows.'
+dieu_kien_dung:
+  - 'S1 — can sua tep ngoai write set. DUNG, handoff.'
+  - 'S2 — vuot tran spec r3 §4 hoac tran nang_tran. DUNG, checkpoint chu kho.'
+  - 'S3 — xac thuc Codex (connector hoac reviewer) hong. DUNG, bao chu kho.'
+  - 'S4 — het han lease => ngung ghi.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land
+  - Khong LIVE (Drive/NLM/webapp/registry), khong deploy, khong bump VERSION
+  - Khong doc/ghi credential that
+  - Khong force-push
+  - Khong viet chuoi bo-qua-CI nguyen van trong commit message
+
+coordination_paths:
+  - ops/leases/k3-connector-state-v1-r3-g3-codex.yaml
+run_minutes: 1440
+heartbeat_required_minutes: 360
+heartbeat_cam_ket: 'Phien dieu phoi cap nhat heartbeat_at <= 6h/lan va doc lai lease truoc moi lan ghi nhanh agent/.'

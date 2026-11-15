@@ -97,7 +97,7 @@ xung_dot_write_set_do_luc_cap:
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 dau tien cua packet; khong co lease truoc.'
 leased_at_utc: '2026-11-15T08:10:00Z'
-heartbeat_at: '2026-11-15T09:00:56Z'
+heartbeat_at: '2026-11-15T09:31:15Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Executor cap nhat heartbeat_at <= 6h/lan; phien dieu phoi doc lai lease truoc moi lan ghi nhanh lease (bai hoc #1288 g1).'
 lease_until: '2026-11-17T08:10:00Z'

@@ -183,9 +183,23 @@ def _a9(cay):
     hen = lambda loai, lk=threading.Lock(): (lk.acquire(), dem.__setitem__(loai, (v := dem[loai] + 1)), lk.release(), v > 1 and san.set())  # noqa: E731  (đếm dưới khoá RIÊNG, r14)
     m._canary, m._NAP_LAI_KHOA = (lambda: (hen("c"), dem["c"] > 1 or san.wait(60) or het.append(1), goc())[2]), type(   # 60 s: ngân sách ĐO, hết ⇒ KHÔNG ĐO ĐƯỢC
         "K", (), {"__enter__": lambda s: (hen("k"), khoa.acquire()), "__exit__": lambda s, *a: khoa.release()})()
+    # Đếm thân phục hồi THẬT: lỗi ghi dấu của luồng thứ hai có thể che đột biến bỏ khoá
+    # nếu chỉ đếm nlm-auth-load (phản chứng: hai lượt vào thân, một lần ghi dấu bị từ chối).
+    than, trong, dinh, dem_khoa = m._nap_lai_mot, [0], [0], threading.Lock()
+    def do_than(*args):
+        with dem_khoa:
+            trong[0] += 1
+            dinh[0] = max(dinh[0], trong[0])
+        try:
+            return than(*args)
+        finally:
+            with dem_khoa:
+                trong[0] -= 1
+    m._nap_lai_mot = do_than
     try: [x.start() for x in ts], [x.join() for x in ts]  # noqa: E701
     finally: san.set(), [x.join() for x in ts if x.ident], setattr(sys, "stderr", cu)  # noqa: E701  (start dở dang: thả + join MỌI luồng đã chạy TRƯỚC teardown, r16 F11-02)
     if het: raise RuntimeError("A9 KHÔNG ĐO ĐƯỢC: luồng thứ hai không tới trong 60 s")  # noqa: E701
+    _chot("A9", dinh[0] == 1, "hai luồng cùng vào thân phục hồi: %d" % dinh[0])
     _chot("A9", sum("nlm-auth-load" in c for c in cay.nhat_ky()) == 1, "hai luồng ⇒ nạp khác 1 lần")
     if hasattr(os, "mkfifo"):                     # spy: MỌI lần mở dấu có O_NONBLOCK (không phụ thuộc lịch); rồi đối chứng I/O FIFO thật (F06)
         cay.dat(), cay.dau(1), (m := cay.moi()), (co := []), (o := os.open)

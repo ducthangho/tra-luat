@@ -1,0 +1,1 @@
+MOC_GATE_OUTPUT: not_measured (0/1 job co dau hieu duong)

@@ -1,0 +1,25 @@
+mc 223 thieu 0 thua 0
+luc 2026-11-15T03:36:12Z
+== ai-dang-giu .claude/skills/soan-spec/SKILL.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0
+HẾT_HẠN	giam-hoi-p1-r7-g1-codex	refs/heads/ops/giam-hoi-p1-lease:ops/leases/giam-hoi-p1-r7-g1-codex.yaml
+HẾT_HẠN	giam-hoi-p2-r10-g1-codex	refs/heads/ops/giam-hoi-p2-lease:ops/leases/giam-hoi-p2-r10-g1-codex.yaml
+HẾT_HẠN	giam-hoi-p2-r11-g1-claude	refs/heads/ops/giam-hoi-p2-lease:ops/leases/giam-hoi-p2-r11-g1-claude.yaml
+== ai-dang-giu docs/PROTOCOL_DA_PHIEN.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN	wp1265-r13-g2-claude	refs/heads/ops/wp1265-r13-g1-lease:ops/leases/wp1265-r13-g2-claude.yaml
+NGƯỜI_GIỮ 1: wp1265-r13-g2-claude
+rc=11
+== ai-dang-giu docs/adr/0067-danh-sach-dong-va-uy-quyen-thuong-truc.md
+CHAN [12]: KHÔNG_XÁC_ĐỊNH: cache thiếu nhánh máy chủ: ops/wp1321-r1-g1-lease, ops/wp1322-r1-g1-lease
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+rc=12
+== lan 2 sau fetch lai, 2026-11-15T03:45:54Z, nhanh may chu 225, cuc bo 225
+== ai-dang-giu docs/adr/0067-danh-sach-dong-va-uy-quyen-thuong-truc.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0
+HẾT_HẠN	giam-hoi-p2-r10-g1-codex	refs/heads/ops/giam-hoi-p2-lease:ops/leases/giam-hoi-p2-r10-g1-codex.yaml
+HẾT_HẠN	giam-hoi-p2-r11-g1-claude	refs/heads/ops/giam-hoi-p2-lease:ops/leases/giam-hoi-p2-r11-g1-claude.yaml

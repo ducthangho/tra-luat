@@ -1,0 +1,15 @@
+## HEAD bab2279eddd267df77f43a4bf32e168678857f6a tree a74ff38fd81704aa6c92729e7787b865d6930fe8 base dc635d3c90ecc348bc916bfd3e9b0a8f8ad9000d
+## A1-A4: kiem_p1_tu_dac_ta.py
+ĐẠT
+rc=0
+## A5a doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+## A5b adr-song
+adr-song: sạch — 64 ADR trên đĩa, 64 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## A5c diff --check
+rc=0
+## diff --numstat base..M
+45	8	.claude/skills/soan-spec/SKILL.md
+4	4	docs/PROTOCOL_DA_PHIEN.md

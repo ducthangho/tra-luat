@@ -1,0 +1,5 @@
+determinism-audit.json ok=True
+golden-test.json ok=True
+release-check.json ok=True
+release-verify.json ok=True
+workflow-audit.json ok=True

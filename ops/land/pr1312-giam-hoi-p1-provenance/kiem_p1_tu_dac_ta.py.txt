@@ -1,0 +1,115 @@
+# kiem_p1.py: vị từ nghiệm thu của GIAM-HOI-P1-SOAN-SPEC r7.
+# Ứng viên là commit HEAD của checkout hiện tại; base là đối số thứ hai.
+import re
+import subprocess
+import sys
+
+TEP = {"SKILL": ".claude/skills/soan-spec/SKILL.md", "PROTOCOL": "docs/PROTOCOL_DA_PHIEN.md"}
+DONG_KHAI = {
+    "docs/adr/0055-tran-loi-goi-codex-len-muoi.md":
+        "tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544",
+    "docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md":
+        "tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab",
+}
+
+
+def git(*doi_so, rc_nhan=(0,)):
+    p = subprocess.run(["git", *doi_so], capture_output=True)
+    if p.returncode not in rc_nhan:
+        loi = p.stderr.decode("utf-8", "replace").strip()
+        raise LookupError(f"git {' '.join(doi_so)} rc={p.returncode}: {loi}")
+    return p
+
+
+def doc_tep(rev, duong):
+    return git("show", f"{rev}:{duong}").stdout.decode("utf-8")
+
+
+def cac_khoi(van_ban):
+    """{(tệp, mã): {"cu": ..., "moi": ...}} từ các khối `~~~ thay <tệp> <mã> <cu|moi>`."""
+    ket_qua, dang_mo, dem = {}, None, []
+    for dong in van_ban.splitlines(keepends=True):
+        if dang_mo is None:
+            m = re.fullmatch(r"~~~ thay (SKILL|PROTOCOL) (\S+) (cu|moi)\n", dong)
+            if m:
+                dang_mo, dem = m.groups(), []
+        elif dong == "~~~\n":
+            tep, ma, loai = dang_mo
+            muc = ket_qua.setdefault((tep, ma), {})
+            if loai in muc:
+                raise LookupError(f"khối trùng: {dang_mo}")
+            muc[loai] = "".join(dem)
+            dang_mo = None
+        else:
+            dem.append(dong)
+    if dang_mo is not None or not ket_qua or any(set(v) != {"cu", "moi"} for v in ket_qua.values()):
+        raise LookupError("khối thay bị hở, rỗng hoặc thiếu cặp cu/moi")
+    return ket_qua
+
+
+def ky_vong(goc, cap):
+    """Thay từng khối `cu` (đúng một lần trên base) bằng `moi`, theo vị trí trên base."""
+    vi_tri = []
+    for ma, v in cap:
+        so_lan = goc.count(v["cu"])
+        if so_lan != 1:
+            raise LookupError(f"{ma}: khối cu có {so_lan} lần trên base, cần đúng 1")
+        dau = goc.index(v["cu"])
+        vi_tri.append((dau, dau + len(v["cu"]), v["moi"]))
+    vi_tri.sort()
+    for (_, cuoi, _), (dau_sau, _, _) in zip(vi_tri, vi_tri[1:]):
+        if dau_sau < cuoi:
+            raise LookupError("hai khối cu chồng nhau")
+    phan, con_tro = [], 0
+    for dau, cuoi, moi in vi_tri:
+        phan += [goc[con_tro:dau], moi]
+        con_tro = cuoi
+    return "".join(phan) + goc[con_tro:]
+
+
+def main():
+    duong_spec, base = sys.argv[1], sys.argv[2]
+    try:
+        with open(duong_spec, "rb") as f:
+            byte_spec = f.read()
+    except OSError as e:
+        raise LookupError(f"không đọc được tệp đặc tả: {e}") from None
+    if b"\r" in byte_spec:
+        raise LookupError("đặc tả có ký tự CR; K1 của ADR-0063 chỉ nhận LF")
+    khoi = cac_khoi(byte_spec.decode("utf-8"))
+    loi = []
+    for ten, duong in TEP.items():
+        cap = sorted((ma, v) for (t, ma), v in khoi.items() if t == ten)
+        if not cap:
+            raise LookupError(f"không có khối nào cho {ten}")
+        if doc_tep("HEAD", duong) != ky_vong(doc_tep(base, duong), cap):
+            loi.append(f"{duong} khác bản kỳ vọng dựng từ base")
+    doi = set(git("diff", "--name-only", base, "HEAD").stdout.decode("utf-8").split())
+    if doi != set(TEP.values()):
+        loi.append(f"tập tệp đổi {sorted(doi)} khác write set")
+    if git("rev-parse", "--is-shallow-repository").stdout.strip() != b"false":
+        raise LookupError("clone shallow")
+    first_parent = set(git("rev-list", "--first-parent", "origin/master").stdout.decode().split())
+    skill = doc_tep("HEAD", TEP["SKILL"])
+    for adr, dong_khai in DONG_KHAI.items():
+        so_dong = sum(1 for d in skill.splitlines() if dong_khai in d)
+        if so_dong != 1:
+            loi.append(f"{dong_khai!r} nằm trên {so_dong} dòng của SKILL.md, cần 1")
+        oid = dong_khai.rsplit("@", 1)[1]
+        co_adr = git("cat-file", "-e", f"{oid}:{adr}", rc_nhan=(0, 1, 128)).returncode == 0
+        cha_co_adr = git("cat-file", "-e", f"{oid}^1:{adr}", rc_nhan=(0, 1, 128)).returncode == 0
+        if not co_adr or cha_co_adr or oid not in first_parent:
+            loi.append(f"{oid} không qua ba phép đo land của {adr}")
+    for x in loi:
+        print("ĐỎ:", x)
+    print("ĐẠT" if not loi else f"ĐỎ: {len(loi)} lỗi")
+    return 1 if loi else 0
+
+
+if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding="utf-8")
+    try:
+        sys.exit(main())
+    except (LookupError, IndexError, UnicodeDecodeError) as e:
+        print("KHÔNG ĐO ĐƯỢC:", e)
+        sys.exit(3)

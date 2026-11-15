@@ -9,8 +9,9 @@ can thoát 4 ⇒ TÍN DỤNG GIẢ. `TU_KIEM` kiểm chính bộ phân hạng. r
 r4: REST giả giữ `steps[]` dựng MỘT lần từ log + workflow đang giữ (`buoc_rest`, độc lập với `ten_du_kien`); ca lệch sửa state ấy.
 
 Ra: `CA: N/N dat` · `DOT BIEN: M/M bi giet dung ly do` · `TU KIEM PHAN HANG: DAT (k dot bien)` · `TONG: DAT`.
+#1322: dòng đầu `TIEN TRINH: n`; vòng đột biến chạy `n` luồng (`CI_PROVENANCE_TIEN_TRINH`), kết quả in theo thứ tự `DOT_BIEN`.
 """
-import ast, collections, contextlib, hashlib, importlib.util, io, json, os, random, re, subprocess, sys, tempfile, types, urllib.error, urllib.parse, urllib.request
+import ast, collections, contextlib, hashlib, importlib.util, io, json, os, platform, random, re, subprocess, sys, tempfile, types, urllib.error, urllib.parse, urllib.request
 from pathlib import Path
 from unittest import mock
 
@@ -1466,6 +1467,45 @@ def c63_ban_goc_mot_lan_moi_ca():   # #997 hậu merge: bản gốc chạy MỘT
             rc, ra = None, "TimeoutExpired lọt khỏi chay_con"
     bang(rc == 124 and "QUA_HAN:c34_git_blob_that" in ra and phan_hang(rc, ra, "c34_git_blob_that") == "HONG", f"quá hạn ⇒ 124/HONG: {rc} {ra}")
 
+@ca
+def c64_so_tien_trinh_mien():   # #1322 M1/A2: vắng ⇒ min(4, cpu) trên Linux, 1 nơi khác; có biến ⇒ ĐÚNG một chữ số ASCII 1–8
+    bang(so_tien_trinh({}, "Linux", 8) == 4 and so_tien_trinh({}, "Linux", 2) == 2 and so_tien_trinh({}, "Linux", 0) == 1,
+         "vắng biến trên Linux ⇒ min(4, cpu), cpu 0/None ⇒ 1")
+    bang(so_tien_trinh({}, "Windows", 8) == 1 and so_tien_trinh({}, "Darwin", 8) == 1, "vắng biến ngoài Linux ⇒ 1 (#997)")
+    bang(all(so_tien_trinh({BIEN_TIEN_TRINH: str(k)}, "Windows", 2) == k for k in range(1, 9)), "1..8 nhận đúng số, mọi nền")
+    lot = []
+    for x in ("0", "9", "a", "", " 4", "4 ", "04", "4\n", "４", "+4", "4.0", "10"):
+        try:
+            so_tien_trinh({BIEN_TIEN_TRINH: x}, "Linux", 8)
+            lot.append(x)
+        except ValueError:
+            pass
+    bang(not lot, f"giá trị ngoài miền phải ValueError, lọt: {lot!r}")
+
+@ca
+def c65_chay_theo_thu_tu():   # #1322 M2/A3: n > 1 thì chạy CHỒNG thật; kết quả theo thứ tự việc, không theo thứ tự xong
+    import threading
+    xong1 = threading.Event()
+    def ham(i):
+        if i == 0:   # việc 0 chỉ xong sau việc 1 ⇒ thứ tự xong khác thứ tự việc; chạy tuần tự thì chờ hết hạn
+            return "chong" if xong1.wait(10) else "tuan_tu"
+        if i == 1:
+            xong1.set()
+        return i
+    kq = chay_theo_thu_tu(ham, range(6), 4)
+    bang(kq[:1] == ["chong"], f"n=4 phải chạy chồng (việc 0 chờ việc 1), được {kq!r}")
+    bang(kq == ["chong", 1, 2, 3, 4, 5], f"kết quả phải theo thứ tự việc, được {kq!r}")
+    bang(chay_theo_thu_tu(lambda i: i * i, range(5), 1) == [0, 1, 4, 9, 16], "n=1 tuần tự, đúng thứ tự")
+
+@ca
+def c66_mien_sai_chan_truoc_moi_ca():   # #1322 A2: giá trị lạ ⇒ rc≠0 TRƯỚC khi chạy ca nào
+    with mock.patch.dict(os.environ, {BIEN_TIEN_TRINH: "0"}), mock.patch(__name__ + ".chay_ca", return_value=(0, "")) as cc, \
+            mock.patch(__name__ + ".lam_nong_nen"), mock.patch(__name__ + ".chay_dot_bien", return_value=("GIET", "")), \
+            mock.patch(__name__ + ".chay_dot_bien_test", return_value=("GIET", "")), \
+            contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()) as loi:
+        rc = main([])
+    bang(rc == 2 and cc.call_count == 0 and BIEN_TIEN_TRINH in loi.getvalue(), f"rc={rc}, số ca đã chạy {cc.call_count}")
+
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
     ("A1_xoa_co_attempt", 't.add_argument("--attempt", required=True, type=int, help="run_attempt phải đo")', 't.add_argument("--attempt", type=int, default=1, help=argparse.SUPPRESS)', "c01"),
     ("A2_bo_so_attempt", 'if k not in thieu and r.get(k) != v]', "if False]", "c02"),
@@ -1861,6 +1901,17 @@ TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
      "        raise AssertionError(f'doi kieu {type(e).__name__}')\n", "c03", "TIN_DUNG_GIA"),
     ("chi_them_chu_thich", "TRANG = 100\n", "TRANG = 100  # vo hai\n", "c20", "SONG_SOT"),
 )
+_XD = chr(10)   # xuống dòng dựng bằng mã: neo nhiều dòng của `DOT_BIEN_TEST` không được tự xuất hiện lần thứ hai trong tệp này
+DOT_BIEN_TEST = (   # #1322 M4: (tên, gốc, thay, TIỀN TỐ ca đích) — sửa CHÍNH tệp này để đo răng của bộ máy song song. Neo một dòng ghép
+                    # từ hai mảnh vì cùng lý do; `chay_dot_bien_test` vẫn đòi neo xuất hiện ĐÚNG MỘT lần.
+    ("T1_mien_nhan_khoang_trang", 're.fullmatch(r"[1-' + '8]", raw)', 're.fullmatch(r" *[0-9]+ *", raw)', "c64"),
+    ("T2_mac_dinh_ngoai_linux", '!= "Linux":' + _XD + '            return 1', '!= "Linux" and False:' + _XD + '            return 1', "c64"),
+    ("T3_gom_theo_thu_tu_xong", 'return list(ex.' + 'map(ham, viec))',
+     'return [f.result() for f in __import__("concurrent.futures").futures.as_completed([ex.submit(ham, x) for x in viec])]', "c65"),
+    ("T4_bo_song_song", 'if n <= 1:' + _XD + '        return [ham(x)', 'if True:' + _XD + '        return [ham(x)', "c65"),
+    ("T5_kiem_mien_sau_ca", 'file=sys.stderr)' + _XD + '        return 2' + _XD + '    print(f"TIEN TRINH',
+     'file=sys.stderr)' + _XD + '        n = 1' + _XD + '    print(f"TIEN TRINH', "c66"),
+)
 
 def chay_con(ten_ca, ma):
     try:
@@ -1880,6 +1931,71 @@ def nen_cua(ten_ca, goc):
             ban_goc.write_text(goc, encoding="utf-8")
             _NEN[khoa] = chay_con(ten_ca, ban_goc)
     return _NEN[khoa]
+
+BIEN_TIEN_TRINH = "CI_PROVENANCE_TIEN_TRINH"
+
+def so_tien_trinh(env=None, he=None, cpu=None):
+    """#1322 M1: số luồng của vòng đột biến. Vắng biến ⇒ `min(4, cpu)` trên Linux, 1 ở nền khác (Windows giữ tuần tự, #997).
+    Có biến ⇒ ĐÚNG một chữ số ASCII 1–8; còn lại (rỗng, khoảng trắng, `04`, xuống dòng cuối, chữ số Unicode mà `int()` vẫn
+    nhận) ⇒ ValueError. Khớp TOÀN chuỗi với lớp ký tự liệt kê, không dùng neo cuối dòng hay lớp chữ số Unicode."""
+    raw = (os.environ if env is None else env).get(BIEN_TIEN_TRINH)
+    if raw is None:
+        if (platform.system() if he is None else he) != "Linux":
+            return 1
+        return min(4, (os.cpu_count() if cpu is None else cpu) or 1)
+    if not isinstance(raw, str) or not re.fullmatch(r"[1-8]", raw):
+        raise ValueError(f"{BIEN_TIEN_TRINH}={raw!r} ngoài miền 1–8")
+    return int(raw)
+
+def chay_theo_thu_tu(ham, viec, n):
+    """#1322 M2: `ham` trên từng phần tử của `viec` bằng `n` luồng (việc thật nằm ở tiến trình con nên luồng là đủ).
+    Kết quả trả theo THỨ TỰ `viec`, không theo thứ tự xong."""
+    viec = list(viec)
+    if n <= 1:
+        return [ham(x) for x in viec]
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(n) as ex:
+        return list(ex.map(ham, viec))
+
+def lam_nong_nen(n):
+    """#1322 M2: lượt bản gốc của mọi ca đích chạy TRƯỚC vòng đột biến, mỗi (ca, bản gốc) một lần, để các luồng đột biến chỉ
+    ĐỌC `_NEN` — không có hai luồng cùng tính và cùng ghi một khoá. Bản gốc đọc Ở ĐÂY (cùng cách `chay_dot_bien` đọc), không
+    truyền từ `main`: đối số tính trước lời gọi nên sẽ chạy cả khi hàm bị thay (c66)."""
+    goc = (HERE / "ci_provenance.py").read_text(encoding="utf-8")
+    dich = set()
+    for muc in DOT_BIEN + TU_KIEM + DOT_BIEN_TEST:
+        khop = [c for c in CA if c.split("_")[0] == muc[3]]
+        if len(khop) == 1:
+            dich.add(khop[0])
+    chay_theo_thu_tu(lambda ten_ca: nen_cua(ten_ca, goc), sorted(dich), n)
+
+def chay_con_ban_test(ten_ca, ban_test):
+    """#1322 M4: chạy MỘT ca trên bản sao (đã đột biến) của CHÍNH tệp test; mã sản phẩm là bản thật."""
+    try:
+        r = subprocess.run([sys.executable, "-B", str(ban_test), "--mot-ca", ten_ca], capture_output=True,
+                           env=dict(os.environ, CI_PROVENANCE_MA=str(HERE / "ci_provenance.py"), PYTHONDONTWRITEBYTECODE="1"),
+                           timeout=300)
+    except subprocess.TimeoutExpired:
+        return 124, f"QUA_HAN:{ten_ca}: tien trinh con qua 300 s"
+    return r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace")
+
+def chay_dot_bien_test(ten, cu, moi, tien_to):
+    """Như `chay_dot_bien`, nhưng đột biến sửa `ci_provenance_test.py`; cùng phân hạng `phan_hang`, cùng đòi bản gốc XANH."""
+    khop = [c for c in CA if c.split("_")[0] == tien_to]
+    if len(khop) != 1:
+        return "HONG", f"tiền tố ca đích {tien_to!r} phải khớp ĐÚNG MỘT ca, khớp {khop}"
+    ten_ca = khop[0]
+    goc_test = (HERE / "ci_provenance_test.py").read_text(encoding="utf-8")
+    if goc_test.count(cu) != 1 or cu == moi:
+        return "HONG", f"neo phải xuất hiện đúng 1 lần trong tệp test và đột biến phải đổi mã (thấy {goc_test.count(cu)})"
+    rc, ra = nen_cua(ten_ca, (HERE / "ci_provenance.py").read_text(encoding="utf-8"))
+    if rc != 0:
+        return "HONG", f"ca đích không xanh trên bản gốc (rc={rc}): {ra[-200:]}"
+    with tempfile.TemporaryDirectory(prefix="cip_dbt_") as thu:
+        ban = Path(thu) / "ci_provenance_test.py"
+        ban.write_text(goc_test.replace(cu, moi), encoding="utf-8")
+        rc, ra = chay_con_ban_test(ten_ca, ban)
+        return phan_hang(rc, ra, ten_ca), ra.strip()[-200:]
 
 def phan_hang(rc, ra, ten_ca):
     if rc == 0:
@@ -2065,14 +2181,23 @@ def main(argv):
     if argv:
         print("dung: ci_provenance_test.py [--mot-ca TEN | --dot-bien-dong [SONG_SONG]]", file=sys.stderr)
         return 2
+    try:   # #1322 M1: miền sai ⇒ dừng TRƯỚC ca nào; dòng TIEN TRINH đứng đầu để bốn dòng cuối của sổ `MOI` liền nhau (M3)
+        n = so_tien_trinh()
+    except ValueError as e:
+        print(f"CI_PROVENANCE: {e}", file=sys.stderr)
+        return 2
+    print(f"TIEN TRINH: {n}")
     kq = [chay_ca(ten) for ten in CA]
     print("".join(f"[{dong}]\n" for rc, dong in kq if rc), end="")
     dat = sum(rc == 0 for rc, _ in kq)
     print(f"CA: {dat}/{len(CA)} dat")
-    xau = [f"{ten}: {h} {ct}" for ten, cu, moi, dich in DOT_BIEN for h, ct in [chay_dot_bien(ten, cu, moi, dich)] if h != "GIET"]
+    lam_nong_nen(n)
+    viec = [(chay_dot_bien, d) for d in DOT_BIEN] + [(chay_dot_bien_test, d) for d in DOT_BIEN_TEST]
+    hang = chay_theo_thu_tu(lambda v: v[0](*v[1]), viec, n)
+    xau = [f"{d[0]}: {h} {ct}" for (_, d), (h, ct) in zip(viec, hang) if h != "GIET"]
     for x in xau:
         print(f"[DOT BIEN KHONG BI GIET DUNG] {x}")
-    print(f"DOT BIEN: {len(DOT_BIEN) - len(xau)}/{len(DOT_BIEN)} bi giet dung ly do")
+    print(f"DOT BIEN: {len(viec) - len(xau)}/{len(viec)} bi giet dung ly do")
     loi_tk = [f"{ten}: mong {mong}, duoc {h}" for ten, cu, moi, dich, mong in TU_KIEM
               for h in [chay_dot_bien(ten, cu, moi, dich)[0]] if h != mong]
     for x in loi_tk:

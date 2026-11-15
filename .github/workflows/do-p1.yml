@@ -1,0 +1,69 @@
+name: do-p1 (NHANH DO TAM — A1/A7/A8 cua CI-PACKET-LOOP-SONG-SONG, khong merge)
+
+on:
+  push:
+    branches: ['do-ci/**']
+
+permissions:
+  contents: read
+
+jobs:
+  do:
+    strategy:
+      fail-fast: false
+      matrix:
+        lan: ["1", "4", "vang"]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Force LF checkout
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+      - shell: bash
+        env:
+          AL_VER: 1.7.7
+        run: bash ops/cai_actionlint.sh
+      - shell: bash
+        run: bash ops/cai_cong_cu.sh shellcheck
+      - shell: bash
+        run: bash ops/cai_cong_cu.sh rg
+      - shell: bash
+        run: python ops/cong_cu.py kiem-tra --json > /dev/null
+      - run: |
+          python -m pip install --quiet ruff==0.15.15
+          ruff --version
+      - name: packet-loop selftest
+        shell: bash
+        env:
+          LAN: ${{ matrix.lan }}
+        run: |
+          set -u
+          mkdir -p "$RUNNER_TEMP/kq"
+          s=$(date +%s)
+          set +e
+          if [ "$LAN" = vang ]; then
+            python .claude/dev/packet_loop_test.py > "$RUNNER_TEMP/kq/lan-$LAN.out" 2> "$RUNNER_TEMP/kq/lan-$LAN.err"; rc=$?
+          else
+            PACKET_LOOP_TEST_LAN="$LAN" python .claude/dev/packet_loop_test.py > "$RUNNER_TEMP/kq/lan-$LAN.out" 2> "$RUNNER_TEMP/kq/lan-$LAN.err"; rc=$?
+          fi
+          echo "lan=$LAN rc=$rc giay=$(( $(date +%s) - s ))" | tee "$RUNNER_TEMP/kq/lan-$LAN.meta"
+          grep -E "^LAN|^TỔNG|^nền:|^  ĐỎ" "$RUNNER_TEMP/kq/lan-$LAN.out" | tail -12
+          exit $rc
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: do-p1-lan-${{ matrix.lan }}
+          path: ${{ runner.temp }}/kq/

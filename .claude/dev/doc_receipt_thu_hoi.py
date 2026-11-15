@@ -5,6 +5,8 @@
 và KHÔNG chứng minh provenance: nó chỉ nói receipt đúng hình dạng, kiểu, danh tính kho, độ tươi và kết luận so với THAM SỐ.
 Provenance cần C1a1b (đồ thị git: S ≤ C ≤ master, S ≤ H, tree) + C1a2 (join API) + C1b (nối vào `land-packets`).
 Hợp đồng caller (spec §8): `--base/--head-hien-hanh` lấy từ readback PR hiện hành, KHÔNG từ receipt; ở đây không kiểm được.
+ADR-0066 (packet THU-HOI-ADMISSION-MERGE-BASE-B r13 mục tiêu 7): nhận receipt v1 (38 khoá) VÀ v2 (41 khoá: thêm
+`quan_he_S_H`, `merge_bases`, `vung_tai_S`), mỗi phiên bản một tập khoá đóng riêng, chọn theo `schema_version`.
 """
 import argparse
 import json
@@ -36,9 +38,27 @@ KIEU.update({
     "thoi_diem_utc": _khop(_GIO),
     "descriptor_q13_ghim": lambda v: v is None or _H64(v), "policy_T": lambda v: v is None or type(v) is dict,
     "profile_digest": lambda v: v is None or type(v) is str, "discovery": lambda v: type(v) is str})
+# ADR-0066: v2 phát `canh_ancestry = null` ở chế độ `merge_base`; v1 vẫn đòi số nguyên (luật null riêng ở K2).
+KIEU["canh_ancestry"] = lambda v: v is None or type(v) is int
 # 7 khoá còn lại kiểm theo GIÁ TRỊ: event (K1) · 4 danh tính (K3) · che_do, ket_luan (K5).
 KHOA = frozenset(KIEU) | {"event", "repository", "kho_canonical", "nhanh_mac_dinh", "workflow_ref", "che_do", "ket_luan"}
 assert len(KHOA) == 38
+QUAN_HE = ("to_tien", "merge_base")
+_MODE, _LOAI = ("100644", "100755", "120000", "160000", "040000"), ("blob", "tree", "commit")
+
+
+def _muc_vung(x):
+    return type(x) is list and len(x) == 3 and x[0] in _MODE and x[1] in _LOAI and _H40(x[2])
+
+
+KIEU2 = {  # ba khoá CHỈ có ở v2; quan hệ giữa chúng kiểm ở K2 sau khi kiểu đã đúng
+    "quan_he_S_H": lambda v: type(v) is str and v in QUAN_HE,
+    "merge_bases": lambda v: type(v) is list and len(v) > 0 and all(_H40(x) for x in v) and v == sorted(v) and len(set(v)) == len(v),
+    "vung_tai_S": lambda v: v is None or (type(v) is dict and all(type(k) is str and _muc_vung(x) for k, x in v.items())),
+}
+# KIEU2: hết
+KHOA_V2 = KHOA | frozenset(KIEU2)
+assert len(KHOA_V2) == 41
 
 
 def kiem_json(raw, *, kho, nhanh, base_hien_hanh, head_hien_hanh):
@@ -65,10 +85,12 @@ def kiem_json(raw, *, kho, nhanh, base_hien_hanh, head_hien_hanh):
         if r is not _VANG and type(r) is not dict:
             loi.append("goc khong phai object")
         elif r is not _VANG:
-            if set(r) != KHOA:
-                loi.append(f"tap khoa lech: thieu {sorted(KHOA - set(r))} thua {sorted(set(r) - KHOA)}")
-            elif not (type(r["schema_version"]) is int and r["schema_version"] == 1):
-                loi.append("schema_version khac 1")
+            phien = r.get("schema_version") if type(r.get("schema_version")) is int else None
+            khoa = KHOA_V2 if phien == 2 else KHOA
+            if set(r) != khoa:
+                loi.append(f"tap khoa lech: thieu {sorted(khoa - set(r))} thua {sorted(set(r) - khoa)}")
+            elif not (type(r["schema_version"]) is int and r["schema_version"] in (1, 2)):
+                loi.append("schema_version khac 1 va 2")
             elif r["event"] != EVENT:
                 loi.append("event la")
     ghi("K1", loi)
@@ -80,6 +102,21 @@ def kiem_json(raw, *, kho, nhanh, base_hien_hanh, head_hien_hanh):
     loi = [f"{k} sai kieu" for k in sorted(KIEU) if not KIEU[k](r[k])]
     if not (r[C[0]] == r[C[1]] and r[C[1]] == r[C[2]]):
         loi.append("ba truong C khong bang nhau")
+    if r["schema_version"] == 1 and r["canh_ancestry"] is None:
+        loi.append("canh_ancestry null o v1")
+    if r["schema_version"] == 2:
+        loi2 = [f"{k} sai kieu" for k in sorted(KIEU2) if not KIEU2[k](r[k])]
+        loi += loi2
+        qh, mb, canh, vung = r["quan_he_S_H"], r["merge_bases"], r["canh_ancestry"], r["vung_tai_S"]
+        if not loi2 and qh == "to_tien":
+            loi += ["to_tien: merge_bases phai [S]"] * (mb != [r["S"]])
+            loi += ["to_tien: canh_ancestry phai so"] * (canh is None)
+            loi += ["to_tien: canh_ancestry am"] * (type(canh) is int and canh < 0)
+            loi += ["to_tien: vung_tai_S phai null"] * (vung is not None)
+        if not loi2 and qh == "merge_base":
+            loi += ["merge_base: canh_ancestry phai null"] * (canh is not None)
+            loi += ["merge_base: S nam trong merge_bases"] * (r["S"] in mb)
+            loi += ["merge_base: vung_tai_S phai dict"] * (vung is None)
     ghi("K2", loi)
     ghi("K3", [f"{k} lech" for k, v in (("repository", kho), ("kho_canonical", "github.com/" + kho),
                                          ("nhanh_mac_dinh", nhanh), ("workflow_ref", kho + WF + nhanh)) if r[k] != v])

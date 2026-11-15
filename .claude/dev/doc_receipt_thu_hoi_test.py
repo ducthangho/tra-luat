@@ -156,6 +156,39 @@ CA += [(f"k3_{n}", doi(**{k: v}), ("K3",)) for n, k, v in (
     ("host", "kho_canonical", "evil.example/" + KHO), ("wf_tags", "workflow_ref", WFR.replace("heads", "tags")),
     ("wf_duong", "workflow_ref", WFR.replace("ops-thu-hoi-admission", "untrusted")))]
 
+# ADR-0066 (packet THU-HOI-ADMISSION-MERGE-BASE-B r13 mục tiêu 7–8, B11): receipt v2 = v1 + ba khoá, hai chế độ.
+_NS2 = {**FIX["ngan_sach"], "max_commits_merge_base": 50000}
+FIX2_TT = {**FIX, "schema_version": 2, "ngan_sach": _NS2, "quan_he_S_H": "to_tien", "merge_bases": [S], "vung_tai_S": None}
+FIX2_MB = {**FIX, "schema_version": 2, "ngan_sach": _NS2, "quan_he_S_H": "merge_base", "merge_bases": [X40], "canh_ancestry": None,
+           "vung_tai_S": {".github/coordination/change-impact.v1.json": ["100644", "blob", OID]}}
+_POL = ".github/coordination/change-impact.v1.json"
+CA += [(ten, ma(goc if not kv else {**goc, **kv}) if not callable(kv) else ma(kv(goc)), do) for ten, goc, kv, do in (
+    ("v2_to_tien", FIX2_TT, {}, ()), ("v2_merge_base", FIX2_MB, {}, ()),
+    ("v2_merge_base_vung_rong", FIX2_MB, {"vung_tai_S": {}}, ()),
+    ("v2_thieu_merge_bases", FIX2_TT, lambda d: {k: v for k, v in d.items() if k != "merge_bases"}, ("K1",)),
+    ("v2_thua_khoa", FIX2_TT, {"la": 1}, ("K1",)),
+    ("v2_to_tien_base_khac_S", FIX2_TT, {"merge_bases": [X40]}, ("K2",)),
+    ("v2_merge_base_canh_so", FIX2_MB, {"canh_ancestry": 3}, ("K2",)),
+    ("v2_to_tien_co_vung", FIX2_TT, {"vung_tai_S": {}}, ("K2",)),
+    ("v2_merge_base_vung_null", FIX2_MB, {"vung_tai_S": None}, ("K2",)),
+    ("v2_vung_hai_phan_tu", FIX2_MB, {"vung_tai_S": {_POL: ["100644", "blob"]}}, ("K2",)),
+    ("v2_vung_mode_la", FIX2_MB, {"vung_tai_S": {_POL: ["100600", "blob", OID]}}, ("K2",)),
+    ("v2_vung_kieu_la", FIX2_MB, {"vung_tai_S": {_POL: ["100644", "tag", OID]}}, ("K2",)),
+    ("v2_vung_oid_hoa", FIX2_MB, {"vung_tai_S": {_POL: ["100644", "blob", OID.upper()]}}, ("K2",)),
+    ("v2_merge_bases_chua_sap", FIX2_MB, {"merge_bases": ["f" * 40, "a" * 40]}, ("K2",)),
+    ("v2_merge_bases_trung", FIX2_MB, {"merge_bases": ["a" * 40, "a" * 40]}, ("K2",)),
+    ("v2_merge_bases_rong", FIX2_MB, {"merge_bases": []}, ("K2",)),
+    ("v2_merge_bases_hoa", FIX2_MB, {"merge_bases": [X40.upper()]}, ("K2",)),
+    ("v2_merge_base_chua_S", FIX2_MB, {"merge_bases": sorted([S, X40])}, ("K2",)),
+    ("v2_quan_he_la", FIX2_TT, {"quan_he_S_H": "khac"}, ("K2",)),
+    ("v2_canh_bool", FIX2_TT, {"canh_ancestry": True}, ("K2",)),
+    ("v2_canh_am", FIX2_TT, {"canh_ancestry": -1}, ("K2",)),
+    ("v2_to_tien_canh_null", FIX2_TT, {"canh_ancestry": None}, ("K2",)),
+    ("schema_3", FIX2_TT, {"schema_version": 3}, ("K1",)),
+    ("schema_3_v1", FIX, {"schema_version": 3}, ("K1",)),
+    ("v1_canh_null", FIX, {"canh_ancestry": None}, ("K2",)),
+    ("v1_co_khoa_v2", FIX2_TT, {"schema_version": 1}, ("K1",)))]
+
 
 CLI_CA = [("xanh", ma(FIX), (), {}), ("k1_bom", b"\xef\xbb\xbf" + ma(FIX), ("K1",), {}), ("k1_so_dai", _SO(LIM + 1), ("K1",), {}),
           ("k2_T", ma({**FIX, "T": "g" * 40}), ("K2",), {}), ("k3_repo", ma({**FIX, "repository": "other/repo"}), ("K3",), {}),
@@ -238,8 +271,8 @@ def ca_tinh(ten, m):
     if ten_import - {"argparse", "json", "re", "sys"} or "KHÔNG phải quyền land" not in doc or "KHÔNG chứng minh provenance" not in doc:
         raise TinHieuChotCa(f"{ten}: import {sorted(ten_import)} hoac docstring thieu loi khai gioi han")
     with tempfile.TemporaryDirectory() as t:  # M1 hàm thuần, đo trong TIẾN TRÌNH CON cô lập bằng audit hook (luot3 F29)
-        vao = [pathlib.Path(t) / f"r{i}.json" for i in range(2)]
-        for p, raw in zip(vao, (ma(FIX), b"{")):
+        vao = [pathlib.Path(t) / f"r{i}.json" for i in range(4)]
+        for p, raw in zip(vao, (ma(FIX), b"{", ma(FIX2_TT), ma(FIX2_MB))):  # ADR-0066 B12: v2 ở cả hai chế độ
             p.write_bytes(raw)
         r = subprocess.run([sys.executable, "-B", "-c", _CON_TINH, m.__file__, KHO, S, H, *map(str, vao)],
                            capture_output=True, text=True, timeout=60)
@@ -339,11 +372,11 @@ DB = [
      "TD: except (ValueError, RecursionError) bắt trùm JSONDecodeError ⇒ vẫn K1 đỏ", None),
     ("M2c3", "JSONDecodeError ⇒ đỏ (cả nhóm chốt)", "bo_try_json_nhom", _BAT, _BAT.replace("except json.JSONDecodeError:", "except ZeroDivisionError:")
      .replace("except (ValueError, RecursionError):", "except RecursionError:"), "khong_phai_json", ("JSONDecodeError", "r = json.loads(chuoi)", 0)),
-    ("M2d", "gốc phải object", "bo_kiem_dict", 'type(r) is not dict:', 'False:', "goc_list_38_khoa", ("TypeError", 'elif not (type(r["schema_version"]) is int and r["schema_version"] == 1):', 0)),
-    ("M2e", "tập khoá khít: thừa ⇒ đỏ", "khoa_superset", 'if set(r) != KHOA:', 'if not KHOA <= set(r):', "thua_khoa", None),
-    ("M2e'", "tập khoá khít: thiếu ⇒ đỏ", "khoa_subset", 'if set(r) != KHOA:', 'if not set(r) <= KHOA:', "thieu_tree_S", ("KeyError", 'loi = [f"{k} sai kieu" for k in sorted(KIEU) if not KIEU[k](r[k])]', 1)),
+    ("M2d", "gốc phải object", "bo_kiem_dict", 'type(r) is not dict:', 'False:', "goc_list_38_khoa", ("AttributeError", 'phien = r.get("schema_version") if type(r.get("schema_version")) is int else None', 0)),
+    ("M2e", "tập khoá khít: thừa ⇒ đỏ", "khoa_superset", 'if set(r) != khoa:', 'if not khoa <= set(r):', "thua_khoa", None),
+    ("M2e'", "tập khoá khít: thiếu ⇒ đỏ", "khoa_subset", 'if set(r) != khoa:', 'if not set(r) <= khoa:', "thieu_tree_S", ("KeyError", 'loi = [f"{k} sai kieu" for k in sorted(KIEU) if not KIEU[k](r[k])]', 1)),
     ("M2f", "schema_version int không bool", "schema_bo_kieu", 'type(r["schema_version"]) is int and ', '', "schema_true", None),
-    ("M2f'", "schema_version == 1", "schema_bo_gia_tri", 'r["schema_version"] == 1)', 'True)', "schema_2", None),
+    ("M2f'", "schema_version thuộc {1, 2}", "schema_bo_gia_tri", 'r["schema_version"] in (1, 2))', 'True)', "schema_3_v1", None),
     ("M2g", "event hằng", "bo_event", 'r["event"] != EVENT', 'False', "event_v2", None),
     ("M3a", "hex40 chỉ chữ thường", "hex_hoa", '_khop("[0-9a-f]{40}")', '_khop("[0-9a-fA-F]{40}")', "kieu_T", None),
     ("M3b", "khớp TRỌN chuỗi", "fullmatch_match", 're.fullmatch(mau, v)', 're.match(mau, v)', "kieu_tree_S", None),
@@ -436,6 +469,32 @@ DB = [
      ("_NHAT_KY = []\n_VANG = object()", _DAU + "\n    _NHAT_KY.append(len(raw))"), "tinh", None),
     ("M1s8", "không mở tệp qua io.open (F29)", "io_open", _DAU, _DAU + '\n    __import__("io").open(__import__("os").devnull, "w").close()', "tinh", None),
     ("M1s9", "không posix_spawn/spawnv (F29)", "posix_spawn", _DAU, _DAU + '\n    __import__("os").posix_spawn(sys.executable, [sys.executable, "-c", "pass"], {}) if hasattr(__import__("os"), "posix_spawn") else __import__("os").spawnv(__import__("os").P_WAIT, sys.executable, [sys.executable, "-c", "pass"])', "tinh", None),
+    # --- ADR-0066 (packet THU-HOI-ADMISSION-MERGE-BASE-B r13, B11/B12): amb-m11 + vị từ con của mục tiêu 8, amb-m12/m12b
+    ("amb-m11", "v2 tập khoá đóng", "bo_tap_khoa_v2", 'khoa = KHOA_V2 if phien == 2 else KHOA', 'khoa = set(r) if phien == 2 else KHOA', "v2_thua_khoa", None),
+    ("amb-m11b", "v2 chọn tập khoá theo schema (thiếu khoá ⇒ K1)", "v2_dung_khoa_v1", 'khoa = KHOA_V2 if phien == 2 else KHOA', 'khoa = (KHOA_V2 if set(r) >= KHOA_V2 else set(r)) if phien == 2 else KHOA',
+     "v2_thieu_merge_bases", ("KeyError", 'loi2 = [f"{k} sai kieu" for k in sorted(KIEU2) if not KIEU2[k](r[k])]', 1)),
+    ("amb-m11c", "v1 không mang khoá v2", "v1_nhan_khoa_v2", 'if set(r) != khoa:', 'if set(r) != khoa and set(r) != KHOA_V2:', "v1_co_khoa_v2", None),
+    ("amb-m11.sap", "merge_bases sắp tăng", "mb_bo_sap", ' and v == sorted(v)', '', "v2_merge_bases_chua_sap", None),
+    ("amb-m11.trung", "merge_bases không trùng", "mb_bo_trung", ' and len(set(v)) == len(v)', '', "v2_merge_bases_trung", None),
+    ("amb-m11.rong", "merge_bases không rỗng", "mb_bo_rong", 'len(v) > 0 and ', '', "v2_merge_bases_rong", None),
+    ("amb-m11.hex", "merge_bases là SHA40", "mb_bo_hex", 'all(_H40(x) for x in v)', 'all(type(x) is str for x in v)', "v2_merge_bases_hoa", None),
+    ("amb-m11.chua_S", "merge_base: S không nằm trong tập", "mb_bo_chua_S", '            loi += ["merge_base: S nam trong merge_bases"] * (r["S"] in mb)\n', '', "v2_merge_base_chua_S", None),
+    ("amb-m11.bool", "canh_ancestry không phải bool", "canh_nhan_bool", 'KIEU["canh_ancestry"] = lambda v: v is None or type(v) is int', 'KIEU["canh_ancestry"] = lambda v: v is None or isinstance(v, int)', "v2_canh_bool", None),
+    ("amb-m11.am", "canh_ancestry không âm", "canh_nhan_am", '            loi += ["to_tien: canh_ancestry am"] * (type(canh) is int and canh < 0)\n', '', "v2_canh_am", None),
+    ("amb-m11.tt_so", "to_tien: canh_ancestry là số", "tt_canh_null", '            loi += ["to_tien: canh_ancestry phai so"] * (canh is None)\n', '', "v2_to_tien_canh_null", None),
+    ("amb-m11.tt_S", "to_tien: merge_bases == [S]", "tt_bo_S", '            loi += ["to_tien: merge_bases phai [S]"] * (mb != [r["S"]])\n', '', "v2_to_tien_base_khac_S", None),
+    ("amb-m11.tt_vung", "to_tien: vung_tai_S null", "tt_bo_vung", '            loi += ["to_tien: vung_tai_S phai null"] * (vung is not None)\n', '', "v2_to_tien_co_vung", None),
+    ("amb-m11.mb_canh", "merge_base: canh_ancestry null", "mb_bo_canh", '            loi += ["merge_base: canh_ancestry phai null"] * (canh is not None)\n', '', "v2_merge_base_canh_so", None),
+    ("amb-m11.mb_vung", "merge_base: vung_tai_S là dict", "mb_bo_vung", '            loi += ["merge_base: vung_tai_S phai dict"] * (vung is None)\n', '', "v2_merge_base_vung_null", None),
+    ("amb-m11.v3", "vung_tai_S: đúng 3 phần tử", "vung_bo_3", 'len(x) == 3 and x[0] in _MODE and x[1] in _LOAI and _H40(x[2])',
+     'x[0] in _MODE and x[1] in _LOAI and _H40((x[2:] or ["0" * 40])[0])', "v2_vung_hai_phan_tu", None),
+    ("amb-m11.mode", "vung_tai_S: mode thuộc tập đóng", "vung_bo_mode", 'x[0] in _MODE and ', '', "v2_vung_mode_la", None),
+    ("amb-m11.kieu", "vung_tai_S: kiểu thuộc tập đóng", "vung_bo_kieu", ' and x[1] in _LOAI', '', "v2_vung_kieu_la", None),
+    ("amb-m11.oid", "vung_tai_S: OID là SHA40", "vung_bo_oid", ' and _H40(x[2])', '', "v2_vung_oid_hoa", None),
+    ("amb-m11.v1_null", "v1: canh_ancestry không null", "v1_canh_null", '    if r["schema_version"] == 1 and r["canh_ancestry"] is None:\n        loi.append("canh_ancestry null o v1")\n', '', "v1_canh_null", None),
+    ("amb-m11.qh", "quan_he_S_H thuộc hai giá trị", "qh_bo", 'lambda v: type(v) is str and v in QUAN_HE', 'lambda v: type(v) is str', "v2_quan_he_la", None),
+    ("amb-m12", "module thuần: không thêm subprocess (B12)", "them_subprocess_v2", 'import argparse\n', 'import argparse\nimport subprocess\n', "tinh", None),
+    ("amb-m12b", "không mở tệp trong nhánh v2 (B12)", "open_trong_nhanh_v2", '        loi += loi2\n', '        loi += loi2\n        open(__file__, "rb").close()\n', "tinh", None),
     ("M8a", "regex đăng ký buộc cặp ca", "mau_bo_1", r'(\1)', r'(\d+)', "dang_ky", None),
     ("M8b", "regex đăng ký buộc cặp đột biến", "mau_bo_3", r'(\3)', r'(\d+)', "dang_ky", None),
 ]
@@ -449,7 +508,9 @@ def _theo_truong():
     td = {"schema_version": "TD: K1 kiểm int-không-bool và ==1 trước K2 (spec A6: K1 chặn, không tính làm bằng chứng K2)",
           **dict.fromkeys(C3, "TD: hai chốt kiểu C còn lại + quan hệ đồng nhất suy ra kiểu trường thứ ba (A7)")}
     return [(f"M3.{k}", f"áp kiểu cho {k}", f"bo_kieu_{k}", "# 7 khoá", f"KIEU[{k!r}] = lambda v: True\n# 7 khoá",
-             td.get(k, f"kieu_{k}"), None) for k in list(SAI) + list(C3)]
+             td.get(k, f"kieu_{k}"), None) for k in list(SAI) + list(C3)] + [  # ADR-0066: ba khoá v2 (mục tiêu 8)
+        (f"M3.{k}", f"áp kiểu v2 cho {k}", f"bo_kieu2_{k}", "# KIEU2: hết", f"KIEU2[{k!r}] = lambda v: True\n# KIEU2: hết", dich, None)
+        for k, dich in (("quan_he_S_H", "v2_quan_he_la"), ("merge_bases", "v2_merge_bases_hoa"), ("vung_tai_S", "v2_vung_hai_phan_tu"))]
 
 
 def _nap(path, ten):

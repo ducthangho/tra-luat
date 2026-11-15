@@ -108,15 +108,15 @@ attempts_limit: 2
 attempts_basis: 'dac ta B muc 8: <= 2 phien executor; phien qua 120 phut chu dong ma chua co H thi ghi ly do vao handoff.'
 budget:
   codex_review_calls:
-    pr_wp1266_g1: {used: 2, reserved: 0, limit: 10}
+    pr_wp1266_g1: {used: 3, reserved: 0, limit: 10}
   ci_ubuntu_runs:
-    pr_wp1266_g1: {used: 0, reserved: 0, limit: 2}
-  ci_dot_bien_du_runs:
-    pr_wp1266_g1: {used: 0, reserved: 0, limit: 1}
-  windows_native_runs:
     pr_wp1266_g1: {used: 1, reserved: 0, limit: 2}
+  ci_dot_bien_du_runs:
+    pr_wp1266_g1: {used: 1, reserved: 0, limit: 1}
+  windows_native_runs:
+    pr_wp1266_g1: {used: 2, reserved: 0, limit: 2}
   khong_reset_theo_generation: true
-budget_ghi_chu: 'Windows tap trung 1 da dung (11:23-11:37Z, H 802a566: runner 203/204, B17 dat; them 1 lan chan doan t246 ~1 phut 13:20Z, khong phai luot tap trung). Codex da dung: 2 = offline luot 1 (run 280edc6b) tren H 802a566 approve + luot 2 (run 6247cd9d) tren H2 2acd5c7 approve (sua P2 fixture CRLF Windows t246). Codex <= 10 theo dong khai ADR-0055 cua dac ta, dem TRUOC moi loi goi (ke ca connector); CI Ubuntu <= 2; ci-dot-bien-du <= 1; Windows native <= 2, tong <= 60 phut; khong gan nhan windows, khong goi tay ci.yml.'
+budget_ghi_chu: 'Den 15:27Z: Codex 3 (offline 2 + connector 6896783145 tren H2); CI Ubuntu 1 (gate 43729496614 tren H2, PR #1328); ci-dot-bien-du 1 (43729530386 tren H2); Windows 2 (luot 2 tren H2 15:10-15:24Z: runner 204/204, B17 dat; lan thu truoc 15:04Z hong vi o dia day, chua do ca nao). Windows tap trung 1 da dung (11:23-11:37Z, H 802a566: runner 203/204, B17 dat; them 1 lan chan doan t246 ~1 phut 13:20Z, khong phai luot tap trung). Codex da dung: 2 = offline luot 1 (run 280edc6b) tren H 802a566 approve + luot 2 (run 6247cd9d) tren H2 2acd5c7 approve (sua P2 fixture CRLF Windows t246). Codex <= 10 theo dong khai ADR-0055 cua dac ta, dem TRUOC moi loi goi (ke ca connector); CI Ubuntu <= 2; ci-dot-bien-du <= 1; Windows native <= 2, tong <= 60 phut; khong gan nhan windows, khong goi tay ci.yml.'
 nang_tran:
 - {ai_nang: ducthangho, tran_cu: '<= 6 tep / <= 450 dong them (ADR-0053)', tran_moi: '<= 6 tep / <= 780 dong them', nguon: 'https://github.com/ducthangho/tra-luat/issues/1266#issuecomment-6719832134'}
 requires_live: false

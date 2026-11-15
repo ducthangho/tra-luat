@@ -28,7 +28,13 @@ assurance_ghi_chu: 'dac ta A r13 muc 1 (dong Executor): executor Claude, reviewe
 depends_on: []
 depends_on_ghi_chu: 'packet A khong phu thuoc packet nao; packet B #1266 phu thuoc land cua A.'
 spec_path: ops/specs/THU-HOI-ADMISSION-MERGE-BASE-A-r13.md
-spec_ref: refs/heads/master@e3c639be40dba644ecbf9d729d72837691f59ff4
+spec_nguon: 'dac ta nam TRONG cay head (master@e3c639b va moi head ke tu do), ghim bang spec_hash; KHONG khai spec_ref.'
+spec_ref_go_bo: >-
+  2026-11-15 ~01:40Z chu kho chon (AskUserQuestion, phien dieu phoi #1206) "Sua lease: bo spec_ref". Ly do do duoc:
+  kiem-merge K1 (M10) chi doc dong dinh danh dang tron "packet_id: ..."; dac ta r13 (da duyet bam, dong bang) viet
+  "- `packet_id`: **THU-HOI-ADMISSION-MERGE-BASE-A**" nen bo doc ra 0 gia tri va do bat ke lease. Nhanh M10 chi chay khi lease
+  co spec_ref; dac ta o day da nam trong cay H va bi ghim sha256 (spec_hash), nen K1 kiem bang byte-hash tai H. Khong doi ban va,
+  khong doi audit. No: grammar M10 vs dac ta cu — ghi vao ho so land.
 spec_sha256_required: 10fe7e052b3e0f4c0acc79e844b6d746466e6b3c98fa030222a08df80203d855
 spec_hash: 10fe7e052b3e0f4c0acc79e844b6d746466e6b3c98fa030222a08df80203d855
 spec_duyet: https://github.com/ducthangho/tra-luat/issues/1265#issuecomment-6719830665

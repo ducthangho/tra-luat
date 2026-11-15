@@ -1,0 +1,115 @@
+--- D:/tlx/rvs-r11/SPEC-r10.md	2026-11-14 14:15:01.888267500 +0700
++++ D:/tlx/rvs-r11/SPEC-r11.md	2026-11-14 14:15:01.922315400 +0700
+@@ -1,16 +1,16 @@
+-# GIAM-HOI-P2-ADR-E1-E5 r10 — ADR-0067 danh sách đóng E1–E5 và uỷ quyền thường trực; protocol §2, §12, §13, §20; skill soan-spec trỏ về ADR
++# GIAM-HOI-P2-ADR-E1-E5 r11 — ADR-0067 danh sách đóng E1–E5 và uỷ quyền thường trực; protocol §2, §12, §13, §20; skill soan-spec trỏ về ADR
+ 
+ tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
+ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
+ 
+ | trường | giá trị |
+ |---|---|
+-| packet_id | `GIAM-HOI-P2-ADR-E1-E5`, revision 10, generation 1. Lease khai đúng `packet_id: GIAM-HOI-P2-ADR-E1-E5` và `revision: 10`: tiêu đề H1 của tệp này là khai báo định danh theo grammar của `ADR-0063` (mục 11). Thay r9 (sha256 `d3b41258786dd526c878897f4ab67e3b85ae5c55a7e8553d6fa85b13145339bb`, được review lượt 8 approve kèm một P3, chưa được chủ kho duyệt), r8 (sha256 `03aafa50f8f70edd28722cd831f943859181871da4826e22734bebd840e1a05a`, được review lượt 7 approve, 0 finding, và được chủ kho duyệt băm ngày 08-11-2026 trên #1292; lời duyệt ấy neo băm r8 nên không chuyển sang bản này), r7 (sha256 `1eb538c3324065fc311d9363830c3d83fa2ea368a642bdffed78655c40148641`, được review lượt 6 approve kèm một P3), r6 (chưa review), r5 (sha256 `359dc5a9b602aed5514708a7b4bb8beb4f61377dc82007aee9e9b20e9f5c149d`, được review lượt 5 approve kèm hai P3), r4 (sha256 `078ec9d4286766f1d746a9db3b6b6ab0272726fb1f8243711ec18d1d50c387a0`), r3 (sha256 `2e78f63a54f49658e3c3b1c27204571e4519ec8335bc4c11497d7cf11e9cf2d0`), r2 (sha256 `15743c0056b2acb225d8dc8f0a236c4418fcda69d04cab46664df9bb75e4cc01`) và r1 (sha256 `7c74666df58dc57ca854f18091d9b4a1181f694d93f3dd4db117365b01d05aa2`), bảy bản này không được chủ kho duyệt; thay đổi ở mục 12 tới 20 |
++| packet_id | `GIAM-HOI-P2-ADR-E1-E5`, revision 11, generation 1. Lease khai đúng `packet_id: GIAM-HOI-P2-ADR-E1-E5` và `revision: 11`: tiêu đề H1 của tệp này là khai báo định danh theo grammar của `ADR-0063` (mục 11). Thay r10 (sha256 `1a5786cca5bcf8a72d8d93ecb9f8edbfbe021c5ef69b68f78ac642bc15698d1f`, được chủ kho duyệt băm ngày 09-11-2026 trên #1292; ứng viên dựng đúng byte từ r10 làm đỏ bước `doc-claims-check --strict` của CI, mục 21; lời duyệt ấy neo băm r10 nên không chuyển sang bản này), r9 (sha256 `d3b41258786dd526c878897f4ab67e3b85ae5c55a7e8553d6fa85b13145339bb`, được review lượt 8 approve kèm một P3, chưa được chủ kho duyệt), r8 (sha256 `03aafa50f8f70edd28722cd831f943859181871da4826e22734bebd840e1a05a`, được review lượt 7 approve, 0 finding, và được chủ kho duyệt băm ngày 08-11-2026 trên #1292; lời duyệt ấy neo băm r8 nên không chuyển sang bản này), r7 (sha256 `1eb538c3324065fc311d9363830c3d83fa2ea368a642bdffed78655c40148641`, được review lượt 6 approve kèm một P3), r6 (chưa review), r5 (sha256 `359dc5a9b602aed5514708a7b4bb8beb4f61377dc82007aee9e9b20e9f5c149d`, được review lượt 5 approve kèm hai P3), r4 (sha256 `078ec9d4286766f1d746a9db3b6b6ab0272726fb1f8243711ec18d1d50c387a0`), r3 (sha256 `2e78f63a54f49658e3c3b1c27204571e4519ec8335bc4c11497d7cf11e9cf2d0`), r2 (sha256 `15743c0056b2acb225d8dc8f0a236c4418fcda69d04cab46664df9bb75e4cc01`) và r1 (sha256 `7c74666df58dc57ca854f18091d9b4a1181f694d93f3dd4db117365b01d05aa2`), bảy bản này không được chủ kho duyệt; thay đổi ở mục 12 tới 21 |
+ | packet_issue | #1292 (tạo ngày 08-11-2026 cho r8). Comment duyệt băm của chủ kho trên Issue trỏ đặc tả; thân Issue đổi sang trỏ bản này sau khi chủ kho duyệt băm nó. Số Issue trong dòng Trạng thái của ADR lấy từ comment duyệt băm bản này |
+ | mission | lộ trình "Giảm việc hỏi chủ kho", packet 2/5. Chưa có Mission Issue |
+ | nguon_cap_viec | Chủ kho đồng ý cả năm khuyến nghị ở cột *Quyết định* của tài liệu https://claude.ai/artifact/6JUF8DsbHxfN5GjsbdAtHT ("Giảm việc hỏi chủ kho") trong phiên chat ngày 08-11-2026, nguyên văn: *"Bạn làm hộ cho tôi luôn. TÔi đồng ý duyệt 5 điểm và chốt nâng trần theo đề xuất"*. Packet này là mục 2 của phần *Lộ trình*. Bảng *Việc agent làm hộ, và chốt an toàn của từng việc* của tài liệu là phần chủ kho đã đọc khi duyệt; con số *"khoảng 220 trong 273 quyết định có loại rõ ràng sẽ không cần bạn nữa"* ở phần *Tóm tắt* chỉ đúng khi các dòng của bảng ấy cũng đổi theo. Ở những chỗ bảng ấy để ngỏ, ADR chọn hướng **không lỏng hơn** luật hiện hành (mục 10) |
+ | review_class | `sensitive`. Bộ phân lớp `ops/lease_publish.py` (`_BANG_LOP` dòng 59–67) trả `sensitive` cho mọi đường dẫn không có trong bảng |
+-| base | `origin/master` lúc cấp lease, và phải chứa commit land của `GIAM-HOI-P1-SOAN-SPEC` r7. Soạn trên `e3c639be40dba644ecbf9d729d72837691f59ff4` cộng ứng viên packet 1 dựng từ đặc tả của nó; các tệp neo không đổi tới `origin/master` `0166d30` (đo 14:0xZ 08-11-2026) |
++| base | `origin/master` lúc cấp lease, và phải chứa commit land của `GIAM-HOI-P1-SOAN-SPEC` r7 (merge `bab2279eddd267df77f43a4bf32e168678857f6a`, đã land, biên bản M8 trên #1291). r11 đo trên `c0b8e11d7099f756e65db8bd9a81493cde789a6f` (14-11-2026): mọi khối `cu` có đúng một lần. r10 soạn trên `e3c639be40dba644ecbf9d729d72837691f59ff4` cộng ứng viên packet 1 dựng từ đặc tả của nó |
+ | depends_on | `GIAM-HOI-P1-SOAN-SPEC` r7: các khối `cu` của `SKILL.md` ở §2 là văn bản packet ấy viết ra |
+ | executor | `codex`: Codex CLI, identity `openai_codex / codex_cli / machine`, họ model `openai`, theo chỉ đạo chủ kho ngày 08-11-2026 (UTC), nguyên văn: *"Đổi agy sang codex. Executor và reviewer đều là codex. Reviewer có koo hình hoặc nỗ lực cao hơn và có thể chạy ở máy khác"*. Model yêu cầu `gpt-6-astra`, effort `high`; model và effort thực phục vụ lấy từ biên nhận của lượt chạy, không suy từ cấu hình. Môi trường `local`. Adapter `.agents/skills/work-packet/SKILL.md`. Packet không dùng state của `.claude/dev/packet_loop.py` (`init`, `record-lease`, `begin-attempt`, `record-review`, `transition`): `init` chỉ nhận reviewer là một model provider khác họ executor (dòng 776), còn reviewer có thẩm quyền của packet này là chủ kho (hàng dưới). Không ghi tay state, không gọi `init` với reviewer khai sai |
+ | reviewer | `human`: chủ kho `ducthangho`, assurance `human_audited` (protocol §8); lease khai `reviewer: human` và `assurance_target: human_audited`. Chủ kho tự audit SHA ứng viên cục bộ H **trước khi H được đẩy** (`ADR-0060` M5, M12) bằng comment của chính mình trên Packet Issue, neo `reviewed_sha` (H), `reviewed_tree`, `spec_sha256` của tệp này, `verdict` và `open_findings`; comment do agent đăng hộ không phải audit (`ADR-0063`). Trước audit có một lượt phản biện bổ sung: Codex offline qua `.claude/dev/launcher.py run` trên H, phiên mới, read-only, không fork context của executor, model hoặc effort cao hơn lượt thi công (yêu cầu `gpt-6-astra` effort `xhigh`), chạy ở máy khác máy thi công khi có. Mức của lượt ấy là `same_provider_approved`, một mình không đủ cho lớp `sensitive`, nhưng verdict của nó vẫn chặn: M1 của `ADR-0060` xét trên verdict ấy, chủ kho chỉ audit H mà lượt ấy đã approve, và biên nhận của nó (`run.json`, stdout) là đầu vào K4 đường model của `kiem-merge`. Cộng connector `@codex review` trên PR draft (`ADR-0060` M6) |
+@@ -41,7 +41,7 @@
+ Tệp ADR bằng **đúng từng byte** khối `adr` dưới đây, trừ ba loại chỗ trống:
+ 
+ - `{{TRANG_THAI}}` (dòng 3) thay bằng đúng một dòng dạng
+-  ``- **Trạng thái:** Accepted (<YYYY-MM-DD>, chủ kho `ducthangho` duyệt `spec_hash` `<64 hex>` của đặc tả `GIAM-HOI-P2-ADR-E1-E5` r10 trên Issue #<N>: <URL>)``,
++  ``- **Trạng thái:** Accepted (<YYYY-MM-DD>, chủ kho `ducthangho` duyệt `spec_hash` `<64 hex>` của đặc tả `GIAM-HOI-P2-ADR-E1-E5` r11 trên Issue #<N>: <URL>)``,
+   trong đó ngày là ngày land, `<64 hex>` là sha256 của chính tệp đặc tả này, `<N>` là số Issue của packet và `<URL>` là
+   URL comment duyệt băm của chủ kho trên Issue ấy (`https://github.com/ducthangho/tra-luat/issues/<N>#issuecomment-<id>`).
+ - `{{SO}}` và `{{DONG}}` ở mục *Cưỡng chế*: số dòng chứa `ADR-0067` và số dòng (đếm ký tự xuống dòng) của tệp cổng ấy
+@@ -335,7 +335,7 @@
+ | Reviewer chốt Windows `unknown` | `.claude/dev/packet_loop.py` `kiem-merge` K6, dòng `windows: <head> not_required`; `ADR-0060` M3 | đổi, ở packet đổi cổng K6; dòng `windows: <head> mien` và vế (c) của M3 giữ |
+ | Audit uỷ quyền | `.claude/dev/packet_loop.py` `kiem-merge` K4, schema `human_exact_head_audit.v1`; `ops/bien_nhan_v2.py` (mức `delegated_audited`) | đổi, ở packet đổi cổng K4 |
+ | Audit uỷ quyền | `.claude/dev/packet_loop.py` đường `human_audit_transition.v1` (ngoại lệ thời điểm cho candidate lịch sử của `ADR-0063`) | giữ: quyết định 3 không đổi ngoại lệ ấy |
+-| Tự merge | `ADR-0060` M7, M8 và câu *"agent không tự approve hay merge"*; protocol §8 câu *"Human Land Approver …"*; protocol §13 mục `land-packets`; `.claude/dev/packet_loop.py` `kiem-dong-wp` D1 (`duyet_chu_kho`), `ghi-uy-quyen`, `doi-chieu-uy-quyen`; `.claude/skills/land-packets/SKILL.md` (frontmatter `disable-model-invocation`, câu *"KHÔNG tự trigger"*); `.agents/skills/land-packets/SKILL.md` (câu về chặn tự kích hoạt) | đổi, ở packet làm tự merge, theo các câu ở mục *Thay những gì* |
++| Tự merge | `ADR-0060` M7, M8 và câu *"agent không tự approve hay merge"*; protocol §8 câu *"Human Land Approver …"*; protocol §13 mục `land-packets`; `.claude/dev/packet_loop.py` `kiem-dong-wp` D1 (`duyet_chu_kho`), `ghi-uy-quyen`, `doi-chieu-uy-quyen`; `.claude/skills/land-packets/SKILL.md` (frontmatter `disable-model-invocation`, câu *"KHÔNG tự trigger"*); .agents/skills/land-packets/SKILL.md (câu về chặn tự kích hoạt) | đổi, ở packet làm tự merge, theo các câu ở mục *Thay những gì* |
+ | Huỷ lượt bằng mục sổ | `.claude/dev/packet_loop.py` `void-attempt` (`--ai-cho-phep`) | đổi, ở packet đổi cổng `void-attempt` |
+ | Push thêm; checkpoint P3 | protocol §12 bất biến (b); `ADR-0060` M1 vế checkpoint, M5 | đổi ngay khi ADR này land, theo mục *Thay những gì* |
+ 
+@@ -585,14 +585,14 @@
+ clone không shallow của ứng viên, sau `git fetch origin`:
+ 
+ ```
+-python kiem_p2.py ops/specs/GIAM-HOI-P2-ADR-E1-E5-r10.md <OID base>
++python kiem_p2.py ops/specs/GIAM-HOI-P2-ADR-E1-E5-r11.md <OID base>
+ ```
+ 
+-`ops/specs/GIAM-HOI-P2-ADR-E1-E5-r10.md` là bản đặc tả đúng băm trong lease. Mã thoát: 0 ĐẠT, 1 ĐỎ, 3 KHÔNG ĐO ĐƯỢC.
++`ops/specs/GIAM-HOI-P2-ADR-E1-E5-r11.md` là bản đặc tả đúng băm trong lease. Mã thoát: 0 ĐẠT, 1 ĐỎ, 3 KHÔNG ĐO ĐƯỢC.
+ KHÔNG ĐO ĐƯỢC không phải ĐẠT.
+ 
+ ```python
+-# kiem_p2.py: vị từ nghiệm thu của GIAM-HOI-P2-ADR-E1-E5 r10.
++# kiem_p2.py: vị từ nghiệm thu của GIAM-HOI-P2-ADR-E1-E5 r11.
+ # Ứng viên là commit HEAD của checkout hiện tại; base là đối số thứ hai.
+ import datetime
+ import hashlib
+@@ -605,7 +605,7 @@
+ CONG = ("ops/lease_publish.py", ".claude/dev/packet_loop.py", ".claude/dev/launcher.py",
+         ".claude/dev/gate_lifecycle.py", ".github/workflows/ci.yml", ".github/workflows/ops-publish-lease.yml")
+ TRANG_THAI = (r"- \*\*Trạng thái:\*\* Accepted \(([0-9]{4}-[0-9]{2}-[0-9]{2}), chủ kho `ducthangho` duyệt "
+-              r"`spec_hash` `([0-9a-f]{64})` của đặc tả `GIAM-HOI-P2-ADR-E1-E5` r10 trên Issue #([1-9][0-9]*): "
++              r"`spec_hash` `([0-9a-f]{64})` của đặc tả `GIAM-HOI-P2-ADR-E1-E5` r11 trên Issue #([1-9][0-9]*): "
+               r"(https://github\.com/ducthangho/tra-luat/issues/([1-9][0-9]*)#issuecomment-[1-9][0-9]*)\)")
+ 
+ 
+@@ -756,6 +756,7 @@
+ | A6 | neo | cùng script: mỗi khối `cu` có đúng một lần trên base, không chồng nhau; tệp đặc tả LF thuần; clone không shallow | base thiếu commit land của packet 1 (khối `cu` K4, K7 vắng) ⇒ rc 3; bản đặc tả CRLF ⇒ rc 3; clone shallow ⇒ rc 3; đường dẫn đặc tả vắng hay là thư mục ⇒ rc 3 |
+ | A7 | bất biến | `python .claude/dev/packet_loop.py doctrine-scan --root .` rc 0; `python .claude/dev/packet_loop.py adr-song --root .` rc 0 (ADR mới có dòng §20); `git diff --check <base> HEAD` rc 0 | xoá dòng `ADR-0067` khỏi §20 ⇒ `adr-song` rc 9; chép một đoạn protocol mới vào `SKILL.md` ⇒ `doctrine-scan` rc 6 |
+ | A8 | bất biến (a) §12 | trên đúng SHA sẽ đẩy: `python scripts/tl.py --selftest` ra N/N với hai số bằng nhau | — (canh bất biến) |
++| A9 | bất biến CI | trên ứng viên: `python scripts/tl.py doc-claims-check --strict --json` rc 0, `"ok": true` (bước của job `gate` trong `.github/workflows/ci.yml`) | đưa lại dấu nháy ngược quanh đường dẫn adapter Codex `land-packets` ở hàng *Tự merge* của bảng *Chỗ tiêu thụ phải đổi theo* trong ADR ⇒ rc 2, cờ `PATH_MISSING` (mục 21) |
+ 
+ Chạy thử trên base (ứng viên = base packet 1): A1, A2, A5 ĐỎ, đúng màu "chưa làm"; A7 xanh sẵn. Bằng chứng chạy thử của
+ từng đột biến ghi ở biên nhận review đặc tả.
+@@ -855,7 +856,7 @@
+ ## 11. Tiền kiểm trước đóng băng
+ 
+ - Định danh: người soạn gọi chính hàm `_spec_merge` của `.claude/dev/packet_loop.py` với một lease giả có `packet_id`
+-  `GIAM-HOI-P2-ADR-E1-E5`, `revision` 10, `spec_path` là đường dẫn tệp này, `spec_ref` ghim OID commit chứa nó và
++  `GIAM-HOI-P2-ADR-E1-E5`, `revision` 11, `spec_path` là đường dẫn tệp này, `spec_ref` ghim OID commit chứa nó và
+   `spec_hash` là sha256 của tệp; hàm phải trả về không lỗi. Kết quả ghi ở biên nhận review đặc tả.
+ - Mục sổ mẫu: ba khối YAML trong khuôn ADR được nạp bằng `yaml.safe_load` và đối chiếu với các bảng khoá (đủ khoá, đúng
+   kiểu, `sha`, `spec_sha256`, `tree` là chuỗi hex đúng độ dài, `kiem_e` đủ năm khoá, `can_cu` đủ vai bắt buộc của `loai`,
+@@ -973,3 +974,30 @@
+ (mục 17 của đặc tả ấy): mục 6 nói rõ một sổ chung cho lời gọi offline và connector, cách neo dòng connector, cách tính một
+ lời gọi theo `ADR-0052` và việc đếm trước mỗi lời gọi. Trỏ packet 1 r7; dòng Trạng thái của ADR và vị từ đổi định danh r9
+ thành r10. Khối `adr`, các khối `thay`, write set và các tiêu chí khác không đổi.
++
++## 21. Thay đổi so với r10
++
++Đo 14-11-2026 trên ứng viên thi công từ r10: H `093acd430da9328725e5a91d177e4b45338137cc`, tree
++`c51b7960ee1aa92d1b85ff6e63f4bef5f88f1f49`, base `c0b8e11d7099f756e65db8bd9a81493cde789a6f`; vị từ r10 ĐẠT, A7 rc 0, A8
++`1777/1777`. `python scripts/tl.py doc-claims-check --strict --json` trên H ra rc 2, `"ok": false`, đúng một cờ: lớp L1,
++`docs/adr/0067-danh-sach-dong-va-uy-quyen-thuong-truc.md` dòng 288, claim `agents/skills/land-packets/SKILL.md`, lý do
++`PATH_MISSING`. Bước ấy nằm trong job `gate` của `.github/workflows/ci.yml`, nên ứng viên dựng đúng byte từ r10 không qua
++CI. Năm bước `tl.py` khác của job ấy (`workflow-audit --strict`, `golden-test`, `determinism-audit --strict`,
++`release-check --full`, `release-verify RELEASE_MANIFEST.json --strict`) ra `ok: true` trên cùng H.
++
++Lỗi nằm ở bộ kiểm, không ở văn bản. Lớp L1 trong `scripts/tl_core/workflow.py` (`_doc_claims_scan_one`) cắt mỗi token
++trong span backtick bằng `strip(_DOC_CLAIMS_TRIM)`, mà `_DOC_CLAIMS_TRIM` có dấu chấm, nên đường dẫn adapter Codex
++`land-packets` mất dấu chấm đầu. Đoạn đầu còn lại là `agents`, trùng thư mục `agents/` ở gốc kho, nên bộ kiểm tra một tệp
++không có và báo cờ; tệp thật, có dấu chấm đầu, có trên base. Cùng cơ chế biến các đường dẫn `.claude/…`, `.github/…` trong
++span backtick thành `claude/…`, `github/…`, không trùng mục gốc nào nên bị bỏ qua: lớp L1 không kiểm đường dẫn bắt đầu bằng
++dấu chấm. Sửa bộ kiểm đụng `scripts/tl_core/` (thuộc gói phát hành) và nằm ngoài write set này; đó là việc của packet khác.
++
++Chủ kho chọn sửa văn bản ngày 14-11-2026, trả lời câu hỏi của phiên điều phối bằng lựa chọn *"Đặc tả r11 (Recommended)"*.
++Thay đổi so với r10:
++
++- Khối `adr`, bảng *Chỗ tiêu thụ phải đổi theo*, hàng *Tự merge*: đường dẫn adapter Codex `land-packets` viết không có dấu
++  nháy ngược. Nghĩa không đổi. Đây là thay đổi duy nhất trong khối `adr`; các khối `thay`, write set, số dòng ở mục 3 và
++  trần `ADR-0053` không đổi.
++- Mục 4 thêm A9: `doc-claims-check --strict` rc 0 trên ứng viên, kèm đột biến đưa lại dấu nháy ngược.
++- Định danh r10 thành r11 ở tiêu đề, hàng `packet_id`, quy tắc dòng Trạng thái, mục 4 (đường dẫn đặc tả, chú thích và mẫu
++  của vị từ) và mục 11. Hàng `base` ghi commit land của packet 1 và base đo r11.

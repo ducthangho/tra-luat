@@ -1,0 +1,63 @@
+# Bien ban M8 (ADR-0060) GIAM-HOI-P2-ADR-E1-E5 r11 g1 (#1292) — kiem bang packet_loop.py kiem-dong-wp.
+# landed: true — uy quyen M7 cua chu kho #1292 issuecomment-6886049471 (neo 2b6ff15, dieu kien CI xanh da dat). Bon moc §10.2.2
+# deu passed tren run master 43655477175. nghiem_thu A1–A9 passed: do lai 15-11-2026 tren DUNG merge 426d1b0 (A1–A7 trong ban sao
+# thua o 426d1b0; A9 toan kho tren tree 54ce599 = tree M; A8 doc tu log job gate cua CI master).
+# Hien vat do nam o thu muc nhap cua phien dieu phoi, CHUA vao ops/land/ (lan luu tru la tuy chon); sha256 tung tep ghi duoi.
+packet: GIAM-HOI-P2-ADR-E1-E5
+revision: 11
+generation: 1
+spec_hash: 4d94f1fedd198547901cd310f04c83fa8984f310d9c3be72609e8c36d692a6e9
+head_da_review: 2b6ff1574dd3d26908eb4bb8c425df87b0ad6d9f
+tree_h: 54ce5990268114482e2525ed6d331e302d5a5431
+review:
+  human: 'PR #1317 issuecomment-6881881984 human_exact_head_audit.v1 approve, reviewed_sha 2b6ff15, tree 54ce599, open_findings [], audit_source tu tro; sua lan cuoi 18:02:20Z < luot CI som nhat cua H 18:04:21Z (thu-hoi 43624527970)'
+  offline: 'Codex qua launcher.py run 68534a4511b541a5a0690666a92ce646 tren 2b6ff15: approve 0 finding; model gpt-6-astra va effort xhigh DO_DUOC; snapshot workspace sach (#1292 issuecomment-6881769476)'
+  connector: 'PR #1317 issuecomment-6881943328 "Reviewed commit: 2b6ff1574d", khong finding; review-state 6881926755 code_review completed, commit_sha 2b6ff15, has_any_findings false (lan 2 do bo draft, Completed 23:49:26Z, +1)'
+  so_loi_goi_codex: 3
+  kiem_merge: 'K0–K7 rc 0 "DU DIEU KIEN MERGE tren 2b6ff15" (K4 ca duong human lan model) — do cua phien dieu phoi 14-11 23:2xZ, dau vao D:/tlx/km-p2'
+  executor: 'Claude Code CLI, model claude-fable-5-2 (modelUsage), theo chi dao chu kho ghi trong executor_note cua lease; dac ta r11 ghi codex'
+windows:
+  phan_loai: not_required
+  ly_do: 'ADR-0060 M3: write set chi gom *.md (SKILL.md soan-spec, PROTOCOL_DA_PHIEN.md, ADR-0067); full_mutant_audit M9 khong ap'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1292#issuecomment-6886049471
+merge_commit: 426d1b06e292a7db272a0f942bef0794479b58a6
+tree_m: 54ce5990268114482e2525ed6d331e302d5a5431
+ci_master:
+  run_id: 43655477175
+  conclusion: success
+  sha: 426d1b06e292a7db272a0f942bef0794479b58a6
+  jobs: '23/23 success, nhan ubuntu-latest, runner_id khac 0; kiem-gate rc=0 (suite 118198856829, 23 ten bat buoc); xong 01:27:45Z 15-11'
+nghiem_thu:
+  A1: passed
+  A2: passed
+  A3: passed
+  A4: passed
+  A5: passed
+  A6: passed
+  A7: passed
+  A8: passed
+  A9: passed
+nghiem_thu_nguon:
+  A1_A6: 'vi tu muc 4 dac ta r11 (kiem_p2.py sha256 4869d7e554be82d0b9eec56a95e4d94de1eda44867293b721b8523f85721e67d) tren HEAD 426d1b0, base 072d45a: DAT rc 0'
+  A7: 'doctrine-scan rc 0 (12 tep, 0 cho chep) · adr-song rc 0 (65 ADR, 65 dong §20) · git diff --check 072d45a 426d1b0 rc 0; numstat dung ba tep +13/-13, +22/-2, +332/-0'
+  A8: 'log job gate (ubuntu-latest) 132632975050 cua run 43655477175 (head_sha 426d1b0): "== tl selftest 1777/1777 ==", "ok": true, rc 0; log sha256 3e8e490729f60f194704214aa34e2fe3aa26906bcf18fde71ddf0c943c68b7d3'
+  A9: 'doc-claims-check --strict --json toan kho rc 0, ok true, flags [], 130 tep, tren tree 54ce599 (= tree M); buoc cung ten trong job gate cua run master khong co co'
+  tep: 'nghiem-thu-A1-A7-426d1b0.txt sha256 f40cd74558fa15a271310ccbbcf69232ec64cd33db15be18dfa1de5a749dd794; nghiem-thu-A9-tree-54ce599.txt sha256 92cb5415cebd297833beb3b5fc3f41b58991364ff73582df82734e9b95b1c7d1'
+lease_cuoi: giam-hoi-p2-r11-g1-claude
+nha_lease: 'commit 30493d1 tren ops/giam-hoi-p2-lease (ls-remote khop), lease_until 2026-11-15T17:18:46Z -> 2026-11-15T00:06:09Z, khoi thu_hoi_bang_rut_han, khong bia mo (khong co lease ke nhiem); ops-publish-lease.yml run 43655535568 success, log "CHAN [9] ... da co comment 6881417062 ... bo qua"'
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed
+moc_10_2_2_nguon:
+  run: 'ci_provenance.py thu: provenance.yaml (sha256 74a2ec22…83d3) moc.run passed — run 43655477175 attempt 1, event push, head_sha 426d1b0, path .github/workflows/ci.yml, suite 118198856829'
+  checkout: 'cung provenance.yaml: 23/23 job checkout passed, sha 426d1b0 doc tu log, tree 54ce599'
+  workflow_definition: 'cung provenance.yaml: passed qua luot ops-do-workflow-definition.yml 43663289159 (dispatch boi phien nay, ref master, artifact 14140903260 sha256 a975322d…c5fa); path .github/workflows/ci.yml, oid 426d1b0, blob 2b2c9aa25ad1c136e44cba457d9ae765d2544fc2 = git rev-parse 426d1b0:.github/workflows/ci.yml, sha256 aed785d6…be67 do lai khop'
+  gate_output: 'danh_gia_gate.py (ops/land/pr1231-wp1105-provenance/, sha256 b87f9697…) danh gia THEO BUOC: MOC_GATE_OUTPUT passed (23/23 job co dau hieu duong), tep danh-gia-gate-output-43655477175.txt sha256 1c44adf9…8838; phan chung --am-buoc gate-packet-loop .claude/dev/packet_loop_test.py => not_measured (0/1), rc 0'
+khong_do_duoc:
+  - 'Hien vat do (readback, provenance, danh gia gate, nghiem thu) chua luu vao ops/land/ cua kho; chi co sha256 trong bien ban nay.'
+  - 'Merge va comment cua chu kho bam qua credential chu kho: chi co user.login / merged_by.'
+  - 'Executor Claude khong commit theo chi thi; commit H do phien dieu phoi tao tu dung working tree (tree 54ce599), ghi trong thong diep commit va handoff #1292 issuecomment-6881778752.'
+  - 'Ngay Trang thai cua ADR-0067 (2026-11-15) la ngay land du kien do phien dieu phoi chon truoc; merge thuc te 23:53:37Z 14-11 UTC = 06:53 15-11 gio Viet Nam.'

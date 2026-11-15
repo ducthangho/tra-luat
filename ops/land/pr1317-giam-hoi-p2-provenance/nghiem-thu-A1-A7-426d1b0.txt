@@ -1,0 +1,17 @@
+## cay-kho HEAD 426d1b06e292a7db272a0f942bef0794479b58a6 tree 54ce5990268114482e2525ed6d331e302d5a5431 base 072d45a0595f3d2ff9f0880143a237c9e0ea70c3
+## spec sha256 4d94f1fedd198547901cd310f04c83fa8984f310d9c3be72609e8c36d692a6e9 | kiem_p2.py sha256 4869d7e554be82d0b9eec56a95e4d94de1eda44867293b721b8523f85721e67d
+## A1-A6 vi tu muc 4
+ĐẠT
+rc=0
+## A7a doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+## A7b adr-song
+adr-song: sạch — 65 ADR trên đĩa, 65 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## A7c git diff --check base M
+rc=0
+## numstat base..M
+13	13	.claude/skills/soan-spec/SKILL.md
+22	2	docs/PROTOCOL_DA_PHIEN.md
+332	0	docs/adr/0067-danh-sach-dong-va-uy-quyen-thuong-truc.md

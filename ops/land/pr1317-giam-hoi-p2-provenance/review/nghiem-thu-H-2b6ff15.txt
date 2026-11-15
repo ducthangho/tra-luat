@@ -1,0 +1,12 @@
+## HEAD 2b6ff1574dd3d26908eb4bb8c425df87b0ad6d9f tree 54ce5990268114482e2525ed6d331e302d5a5431 base 072d45a0595f3d2ff9f0880143a237c9e0ea70c3
+ĐẠT
+kiem rc=0
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+doctrine rc=0
+adr-song: sạch — 65 ADR trên đĩa, 65 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+adr-song rc=0
+diff-check rc=0
+A9 doc-claims rc=0
+13	13	.claude/skills/soan-spec/SKILL.md
+22	2	docs/PROTOCOL_DA_PHIEN.md
+332	0	docs/adr/0067-danh-sach-dong-va-uy-quyen-thuong-truc.md

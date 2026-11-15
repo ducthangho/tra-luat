@@ -1,0 +1,137 @@
+# HO SO LAND — packet #1292 GIAM-HOI-P2-ADR-E1-E5 r11 g1, qua PR #1317. Khuon: ops/land/pr1310-wp1288-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
+#
+# TRANG THAI: merged (426d1b0), landed true. Bon moc §10.2.2 cua ci.yml 43655477175 DU (wd-run 43663289159). Bien ban M8 da dang
+# tren #1292 (issuecomment-6887395128); #1292 dong state:landed.
+# UY QUYEN: audit human_exact_head_audit.v1 chu kho TU DANG tren PR #1317 neo dung head 2b6ff15 (issuecomment-6881881984), TRUOC luot
+# CI som nhat cua head; duyet merge M7 ghi ho #1292 issuecomment-6886049471 (nguyen van chu kho "CI xanh thi merge, land va ghi so.").
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured (nhu khuon).
+# Readback tho: ops/land/pr1317-giam-hoi-p2-provenance/ (SHA256SUMS kem). gh api REST bang credential gh cua may chu kho.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: 'claude-code-desktop 283712c9-77e0-4217-b01b-95ad9648da81 (worktree brave-rosalind-730dc7)'
+input_packet_generations:
+  - {packet_issue: 1292, packet_id: GIAM-HOI-P2-ADR-E1-E5, revision: 11, generation: 1, lease_id: giam-hoi-p2-r11-g1-claude, ghi_chu: 'r10 (lease giam-hoi-p2-r10-g1-codex) bo: ung vien dung tu r10 lam do doc-claims-check --strict cua CI; chu kho chon dac ta r11 (muc 21 dac ta), rut han lease r10 truoc khi cap r11.'}
+authorized_head_sha: 2b6ff1574dd3d26908eb4bb8c425df87b0ad6d9f
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1317#issuecomment-6881881984
+authorization_ghi_chu: >-
+  measured — readback-comment-6881881984.json: PR #1317, user ducthangho, author_association OWNER, performed_via_github_app null,
+  created_at 2026-11-14T18:01:56Z, updated_at 18:02:20Z (sua audit_source thanh URL chinh no); than YAML human_exact_head_audit.v1,
+  reviewed_sha 2b6ff15 (= authorized_head_sha), reviewed_tree 54ce5990 (= tree merge commit 426d1b0), spec_sha256 4d94f1fe… (= lease
+  spec_hash), verdict approve, assurance human_audited, open_findings []. updated_at < run som nhat cua head (kiem-merge/remote-run-som.json:
+  run 43624527970 thu-hoi pull_request_target 2026-11-14T18:04:21Z). Duyet merge M7: readback-comment-6886049471.json (ghi ho tren #1292,
+  nguyen van chu kho "CI xanh thi merge, land va ghi so."). CAVEAT #566: ai bam merge khong do duoc.
+land_operator: 'measured — readback-pr-1317.json: merged_by ducthangho, merge_commit_sha 426d1b0 (ai thao tac: not_measured, #566).'
+merge_method: merge
+merge_commit: 426d1b06e292a7db272a0f942bef0794479b58a6
+merge_commit_tree: 54ce5990268114482e2525ed6d331e302d5a5431
+merge_commit_parents: [072d45a0595f3d2ff9f0880143a237c9e0ea70c3, 2b6ff1574dd3d26908eb4bb8c425df87b0ad6d9f]
+pre_merge_checks:
+  - name: 'kiem-merge K0–K7 tren head cuoi'
+    sha: 2b6ff1574dd3d26908eb4bb8c425df87b0ad6d9f
+    conclusion: 'rc 0 — "ĐỦ ĐIỀU KIỆN MERGE trên 2b6ff1574dd3d26908eb4bb8c425df87b0ad6d9f"'
+    nguon: 'measured — kiem-merge/rc.txt va kiem-merge/ (lease.yaml, runs.json, check-runs.json, jobs.json, connector.json, audit.json, remote-run-som.json, offline-run.json, offline-stdout.log; ket qua trong kiem-merge.out)'
+    ghi_chu: >-
+      loi_khai_co_neo — phien dieu phoi chay packet_loop.py kiem-merge cua base 072d45a, K4 qua CA duong human (audit.json) LAN duong model
+      (offline-run.json head 2b6ff15, trang_thai xong, ma_thoat 0, stdout_sha256 khop, dong cuoi KET_LUAN approve). Chay truoc khi bo draft.
+  - name: 'Codex reviewer offline qua launcher.py run (loi goi 1/10)'
+    sha: 2b6ff1574dd3d26908eb4bb8c425df87b0ad6d9f
+    conclusion: 'approve, 0 finding'
+    ghi_chu: >-
+      measured — review/ma-luot1-run.json (run 68534a4511b541a5a0690666a92ce646, trang_thai xong, ma_thoat 0, model_phuc_vu gpt-6-astra va
+      effort_phuc_vu xhigh DO_DUOC, snapshot_ket_qua sach), review/ma-luot1-stdout.log (dong cuoi KET_LUAN: approve), review/ma-luot1-VERDICT.md.
+      Executor la Claude (claude-fable-5-2), reviewer Codex ho openai khac ho.
+  - name: 'Codex connector tren head cuoi (loi goi 2/10 va 3/10)'
+    sha: 2b6ff1574dd3d26908eb4bb8c425df87b0ad6d9f
+    conclusion: 'sach'
+    ghi_chu: >-
+      measured — readback-comment-6881943328.json (receipt "Didn't find any major issues", "Reviewed commit: 2b6ff1574d", @codex review);
+      readback-comment-6881926755.json (codex-review-state:v1 commit_sha 2b6ff15, status completed, has_any_findings false; hang Code Review
+      Completed 2026-11-14T23:49:26Z, trigger "Draft marked ready").
+  - name: 'Nghiem thu cuc bo tren head truoc khi day'
+    sha: 2b6ff1574dd3d26908eb4bb8c425df87b0ad6d9f
+    conclusion: 'vi tu DAT; doctrine-scan, adr-song, diff --check, doc-claims-check rc 0; selftest 1777/1777; 5 buoc tl.py khac cua gate ok'
+    ghi_chu: 'measured — review/nghiem-thu-H-2b6ff15.txt, selftest/selftest-2b6ff15.txt, review/ci-local-H-2b6ff15.txt.'
+  - name: 'Windows K6 / full mutant K7'
+    sha: 2b6ff1574dd3d26908eb4bb8c425df87b0ad6d9f
+    conclusion: 'not_required (ADR-0060 M3 buoc 3: moi tep la *.md; M9 khong ap)'
+    ghi_chu: 'measured — lease-giam-hoi-p2-r11-g1-claude-sau-rut-han.yaml.txt (windows: not_required, full_mutant_audit: not_required); review/ma-luot1-VERDICT.md dong windows.'
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA'
+    run_id: 43655477175
+    run_attempt: 1
+    sha: 426d1b06e292a7db272a0f942bef0794479b58a6
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, danh-gia-gate-output-43655477175.txt, phan-chung-buoc-43655477175.txt, kiem-gate-426d1b0.txt]
+    moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha 426d1b0, run_attempt 1, suite 118198856829; readback-jobs-43655477175.json 23 job, nhan ubuntu-latest, runner_id khac 0.'
+    moc_checkout: 'measured — ci/provenance.yaml: 23/23 job checkout passed 426d1b06e292a7db272a0f942bef0794479b58a6 (ops/ci_provenance.py thu, rc 0).'
+    moc_workflow_definition: >-
+      measured — ci/provenance.yaml moc.workflow_definition: passed; path .github/workflows/ci.yml, oid 426d1b0, blob 2b2c9aa2, sha256
+      aed785d6…; wd_run_id 43663289159 (dispatch ops-do-workflow-definition.yml boi phien nay, ref master), artifact 14140903260.
+    moc_gate_output: >-
+      measured — danh-gia-gate-output-43655477175.txt (ops/land/pr1231-wp1105-provenance/danh_gia_gate.py, sha256 b87f9697): passed, 23/23
+      job co dau hieu duong (tl selftest 1777/1777; doc-claims-check --strict ok:true; gate-packet-loop TỔNG: ĐẠT).
+      phan-chung-buoc-43655477175.txt: xoa dau hieu packet_loop_test => not_measured (0/1), rc 0. kiem-gate-426d1b0.txt rc 0.
+  - name: 'Nghiem thu A1–A9 tren DUNG merge commit'
+    sha: 426d1b06e292a7db272a0f942bef0794479b58a6
+    conclusion: 'A1–A9 passed'
+    ghi_chu: >-
+      measured — nghiem-thu-A1-A7-426d1b0.txt (vi tu muc 4 dac ta r11 DAT rc 0; doctrine-scan, adr-song, git diff --check rc 0),
+      nghiem-thu-A9-tree-54ce599.txt va doc-claims-tree-54ce599.json (doc-claims-check --strict toan kho rc 0, flags []),
+      danh-gia-gate-output-43655477175.txt (A8 tl selftest 1777/1777 tren 426d1b0).
+bookkeeping:
+  - {item: 'rut han lease giam-hoi-p2-r11-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt (kiem-dong-wp rc 0); dang #1292: readback-comment-6887395128.json.'}
+  - {item: 'handoff executor', ket_qua: 'measured — executor-r11/HANDOFF.md (dang #1292 issuecomment-6881778752); executor-r11/out.json modelUsage claude-fable-5-2.'}
+  - {item: 'dong Issue #1292', ket_qua: 'loi_khai_co_neo — dong completed 2026-11-15T01:37:04Z, nhan state:landed, executor:claude (gh issue view).'}
+  - {item: 'bao phien dieu phoi #1265', ket_qua: 'loi_khai_co_neo — comment ghi ho #1265 issuecomment-6887406961: merge SHA, lease da nha, cho chen dong ADR-0066 o §20.'}
+  - {item: 'PR ghi so', ket_qua: 'not_measured — PR tu nhanh ops/land-giam-hoi-p1-p2 (chua co so luc ghi).'}
+# ---- het truong chuan
+packet_id: GIAM-HOI-P2-ADR-E1-E5
+packet_issue: 1292
+revision: 11
+generation: 1
+pham_vi_land: docs (docs/adr/0067-danh-sach-dong-va-uy-quyen-thuong-truc.md +332, docs/PROTOCOL_DA_PHIEN.md +22/-2, .claude/skills/soan-spec/SKILL.md +13/-13)
+environment: local
+operating_system: windows
+recorded_by: claude-session — phien dieu phoi GIAM-HOI-P1/P2 (worktree brave-rosalind-730dc7), ghi so + nha lease.
+
+spec:
+  path: ops/specs/GIAM-HOI-P2-ADR-E1-E5-r11.md
+  ref: refs/heads/ops/spec-giam-hoi-p2-r11@d26151370b9a86eb495457193e1a440e0bbeb764
+  sha256: 4d94f1fedd198547901cd310f04c83fa8984f310d9c3be72609e8c36d692a6e9
+  duyet_bam: 'measured — readback-comment-6880923050.json (ghi ho #1292, nguyen van chu kho "Duyet bam r11 (Recommended)").'
+  review_dac_ta: 'measured — review/dac-ta-r11-VERDICT.md (Codex xhigh, approve 0 finding, loi goi review dac ta 10/10), review/diff-spec-r10-r11.patch.'
+  vi_sao_r11: 'measured — r10/doc-claims-H-093acd4.json: ung vien dung tu r10 (H 093acd4) doc-claims-check --strict rc 2, mot co L1 PATH_MISSING dong 288 ADR-0067; r10/nghiem-thu-H-093acd4.txt.'
+
+lease:
+  lease_id: giam-hoi-p2-r11-g1-claude
+  path: ops/leases/giam-hoi-p2-r11-g1-claude.yaml (nhanh ops/giam-hoi-p2-lease)
+  write_set_so_tep: 3
+  thu_hoi_cuoi: >-
+    measured — lease-giam-hoi-p2-r11-g1-claude-sau-rut-han.yaml.txt: DA NHA bang RUT HAN sau merge, lease_until 2026-11-15T17:18:46Z ->
+    2026-11-15T00:06:09Z (commit 30493d1), khoi thu_hoi_bang_rut_han, khong bia mo. ai-dang-giu-sau-rut-han.txt: ca ba tep write set
+    khong con lease giam-hoi nao giu (moi lease giam-hoi HET_HAN); docs/PROTOCOL_DA_PHIEN.md nay do wp1265-r13-g2-claude giu (packet #1265,
+    cap sau khi P2 land, dung thu tu da thong nhat).
+  lease_r10: 'measured — lease-giam-hoi-p2-r10-g1-codex-sau-rut-han.yaml.txt: rut han toi 2026-11-14T17:07:04Z (commit f9820f8) truoc khi cap r11.'
+  executor_note: 'loi_khai_co_neo — dac ta r11 ghi executor codex; chu kho doi executor luot nay sang Claude Fable 5.2 (lease executor_note, nguyen van "Ok, chay executor di. Thu Claude Fable 5.2 lam Executor").'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-1317.json merged true, merged_at 2026-11-14T23:53:37Z, head 2b6ff15, merge_commit_sha 426d1b0.'
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 426d1b0: DAT, du bon moc measured passed. (2) lease nha: DAT (rut han 30493d1, het han).
+    (3) bookkeeping: ho so nay + bien ban M8 (kiem-dong-wp rc 0). (4) review neo 2b6ff15: DAT — Codex offline approve + connector sach +
+    audit human_audited chu kho. (5) uy quyen: DAT theo L-6 bang audit chu kho tu dang 6881881984 neo 2b6ff15, dang TRUOC CI som nhat cua head;
+    M7 ghi ho 6886049471. (6) muc tieu: DAT — nghiem thu A1–A9 tren 426d1b0. (7) tran: 3/10 loi goi Codex review ma.
+  canh_bao_cho_chu_kho: >-
+    (i) Ngay Trang thai cua ADR-0067 ghi 2026-11-15 (ngay land du kien chon truoc); merge thuc te 23:53:37Z 14-11 UTC = 06:53 15-11 gio Viet
+    Nam. (ii) Loi cua doc-claims-check (lop L1 cat dau cham dau duong dan) chua sua; r11 chi tranh no bang cach bo dau nhay nguoc.

@@ -97,7 +97,7 @@ xung_dot_write_set_do_luc_cap:
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 dau tien cua packet; khong co lease truoc.'
 leased_at_utc: '2026-11-15T08:10:00Z'
-heartbeat_at: '2026-11-15T10:18:27Z'
+heartbeat_at: '2026-11-15T13:38:48Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Executor cap nhat heartbeat_at <= 6h/lan; phien dieu phoi doc lai lease truoc moi lan ghi nhanh lease (bai hoc #1288 g1).'
 lease_until: '2026-11-17T08:10:00Z'
@@ -108,7 +108,7 @@ attempts_limit: 2
 attempts_basis: 'dac ta B muc 8: <= 2 phien executor; phien qua 120 phut chu dong ma chua co H thi ghi ly do vao handoff.'
 budget:
   codex_review_calls:
-    pr_wp1266_g1: {used: 1, reserved: 0, limit: 10}
+    pr_wp1266_g1: {used: 2, reserved: 0, limit: 10}
   ci_ubuntu_runs:
     pr_wp1266_g1: {used: 0, reserved: 0, limit: 2}
   ci_dot_bien_du_runs:
@@ -116,7 +116,7 @@ budget:
   windows_native_runs:
     pr_wp1266_g1: {used: 1, reserved: 0, limit: 2}
   khong_reset_theo_generation: true
-budget_ghi_chu: 'Windows tap trung 1 da dung (11:23-11:37Z, H 802a566: runner 203/204, B17 dat; them 1 lan chan doan t246 ~1 phut 13:20Z, khong phai luot tap trung). Codex da dung: 1 = offline luot 1 (run 280edc6b, 2026-11-15T10:1xZ) tren H 802a566. Codex <= 10 theo dong khai ADR-0055 cua dac ta, dem TRUOC moi loi goi (ke ca connector); CI Ubuntu <= 2; ci-dot-bien-du <= 1; Windows native <= 2, tong <= 60 phut; khong gan nhan windows, khong goi tay ci.yml.'
+budget_ghi_chu: 'Windows tap trung 1 da dung (11:23-11:37Z, H 802a566: runner 203/204, B17 dat; them 1 lan chan doan t246 ~1 phut 13:20Z, khong phai luot tap trung). Codex da dung: 2 = offline luot 1 (run 280edc6b) tren H 802a566 approve + luot 2 (run 6247cd9d) tren H2 2acd5c7 approve (sua P2 fixture CRLF Windows t246). Codex <= 10 theo dong khai ADR-0055 cua dac ta, dem TRUOC moi loi goi (ke ca connector); CI Ubuntu <= 2; ci-dot-bien-du <= 1; Windows native <= 2, tong <= 60 phut; khong gan nhan windows, khong goi tay ci.yml.'
 nang_tran:
 - {ai_nang: ducthangho, tran_cu: '<= 6 tep / <= 450 dong them (ADR-0053)', tran_moi: '<= 6 tep / <= 780 dong them', nguon: 'https://github.com/ducthangho/tra-luat/issues/1266#issuecomment-6719832134'}
 requires_live: false

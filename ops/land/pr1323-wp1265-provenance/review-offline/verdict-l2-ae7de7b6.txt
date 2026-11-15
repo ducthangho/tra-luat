@@ -1,0 +1,83 @@
+**1. Kết quả A1–A9**
+
+Review trên đúng các neo:
+
+- HEAD: `31b9aea08e2877db30aeab62de52c63180b3f2eb`
+- Tree: `1ac420976cb1a1bc303de86965a1e9481e228edf`
+- Parent duy nhất / BASE: `426d1b06e292a7db272a0f942bef0794479b58a6`
+- SHA-256 đặc tả A r13: `10fe7e052b3e0f4c0acc79e844b6d746466e6b3c98fa030222a08df80203d855`
+
+Đã đọc cả diff `BASE..HEAD` và `017fc85..HEAD`. Phản chứng chạy trong scratch riêng; bản sao review sạch khi kết thúc.
+
+Trong bảng, `V` là `python3 -B /tmp/rv1265b-scratch/check_a.py`; `R` là `/tmp/rv1265b-copy`.
+
+| Tiêu chí | Lệnh | Số đo trên HEAD | Đột biến đã chạy | Kết quả |
+|---|---|---|---|---|
+| A1 | `python3 -B .claude/dev/packet_loop.py adr-song --root .` | rc 0; 66 ADR, 66 dòng §20, khớp 1–1 | Xoá dòng ADR-0066: rc 9, báo ADR có tệp nhưng thiếu dòng §20 | passed |
+| A2 | `V A2 R` | R1 khớp trọn câu đúng 1 lần trong Quyết định | Bỏ “không còn”: rc 1, số khớp R1 = 0. Ngắt dòng lại: rc 0 | passed |
+| A3 | `V A3 R` | Hash r9: 2 lần; `issuecomment-5819533474`: 2 lần | Xoá riêng từng định danh: rc 1, đúng bộ đếm tương ứng về 0 | passed |
+| A4 | `V A4 R` | R2–R5 mỗi câu 1 lần trong Quyết định; R6 1 lần trong Hiệu lực | Chạy cả 8 biến thể được nêu cho R2–R6: mỗi biến thể chỉ làm câu tương ứng mất khớp, rc 1. Ngắt dòng lại: rc 0 | passed |
+| A5 | `V A5 R` | Đúng 1 dòng, nguyên văn; nằm giữa ADR-0065 và ADR-0067 | Nhân đôi: 2 dòng, rc 1. Đổi cột cổng: lệch nguyên văn, rc 1 | passed |
+| A6 | `V A6 R` | Đủ 6 vị trí, lệnh, số dòng và kết quả; khớp phép đo base | Bỏ dòng `gate_lifecycle.py`: rc 1 vì thiếu vị trí. Bỏ số dòng: rc 1 vì thiếu số đo | passed |
+| A7 | `python3 -B .claude/dev/packet_loop.py doctrine-scan --root .` | rc 0; quét 12 tệp, 0 chỗ chép doctrine | Không áp dụng: đặc tả ghi bất biến, răng ngoài packet | passed |
+| A8 | `git diff --numstat BASE...HEAD` | 2 tệp, +174/−0; dưới trần 2 tệp/+450 | Không yêu cầu theo đặc tả | passed |
+| A9 | `git diff --name-only BASE...HEAD` | Đúng hai tệp trong write set | Thêm và commit `outside_write_set.txt` trong bản sao tạm: 3 tệp, rc 1 | passed |
+
+Tổng: **9/9 tiêu chí đạt; 17/17 đột biến đỏ đúng lý do; 17/17 lần khôi phục xanh; 2/2 đối chứng ngắt dòng xanh**.
+
+Bản sao không có ref `origin/master`; lệnh dùng ref đó trả rc 128. A8/A9 được đo bằng exact BASE do assignment chỉ định, không tạo hoặc sửa ref để thay thế.
+
+Đo lại mục Cưỡng chế bằng `git show BASE:<tệp>`, rồi đưa chính bytes ấy vào `grep -c 'ADR-0066'` và `wc -l`:
+
+| Tệp cổng | Số dòng | Số lần nhắc ADR-0066 |
+|---|---:|---:|
+| `ops/lease_publish.py` | 2604 | 0 |
+| `.claude/dev/packet_loop.py` | 6247 | 0 |
+| `.claude/dev/launcher.py` | 5988 | 0 |
+| `.claude/dev/gate_lifecycle.py` | 1688 | 0 |
+| `.github/workflows/ci.yml` | 1184 | 0 |
+| `.github/workflows/ops-publish-lease.yml` | 277 | 0 |
+
+Không số nào lệch ADR. Cả sáu `git show` và `wc` trả rc 0; `grep` trả rc 1 với output `0`, đúng nghĩa không có dòng khớp.
+
+Các số lịch sử cũng khớp: **571 merge; 206 tiêu đề chứa `origin/master`; 121 có thân; 58 nhắc `thu-hoi`**. Lịch sử first-parent chạm vùng: **0 commit**; cả hai đường dẫn vùng đều vắng tại BASE. Ba vị trí đọc S đúng dòng **2364, 2400, 2411**.
+
+Bằng chứng: [acceptance.json](/tmp/rv1265b-scratch/acceptance.json), [claims.json](/tmp/rv1265b-scratch/claims.json), [reader_probes.json](/tmp/rv1265b-scratch/reader_probes.json).
+
+**2. Findings và đối chiếu lượt trước**
+
+**Không có finding P0–P3 mới.**
+
+F1, P2, lớp `khang-dinh-tuong-thich-vuot-mien`: **ĐÃ VÁ THẬT**.
+
+Tại [ADR dòng 113](/tmp/rv1265b-copy/docs/adr/0066-admission-thu-hoi-theo-merge-base.md:113), nhận định đã giới hạn đúng vào nhánh S là tổ tiên H và hai loại lỗi ngân sách/header. Đoạn tiếp theo nói rõ R3 cố ý nhận một số đầu vào mà nền trả 12. Các chỗ nhắc 206 cũng đã phân biệt trần thống kê với số merge do admission gây ra.
+
+Vế “12 không thành 0” có căn cứ thiết kế trong mã nền và đặc tả B:
+
+- B mục tiêu 2 giữ hành vi `KhoObject.to_tien`; mục tiêu 4 giữ các phép kiểm còn lại cùng thứ tự và mã thoát.
+- Reader kiểm deadline cả khi cache-hit; bộ đếm object/bytes dùng chung; `commit()` vẫn phân tích header khi bytes đã có trong memo.
+- Probe bằng mã hiện tại cho thấy trần cạnh và header hỏng vẫn trả 12 khi memo được làm nóng. Với trần 3 object, nền trả 0; đọc thêm một commit làm trả 12.
+
+Đây vẫn là **cam kết cho packet B chưa thi công**, chưa phải chứng minh hành vi của mã B. [ADR dòng 170](/tmp/rv1265b-copy/docs/adr/0066-admission-thu-hoi-theo-merge-base.md:170) khai rõ giới hạn đó. Không có khẳng định rằng hành vi tương lai đã được đo; vì vậy không phát sinh finding “khẳng định chưa đo”.
+
+Hai gate bắt buộc đều rc 0, dòng kết:
+
+```text
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+```
+
+`git diff --check BASE HEAD`: rc 0.
+
+Môi trường: Linux, Python 3.13.18, Git 2.43.0, `core.abbrev=7`, sandbox `workspace-write`. Reviewer là Codex/họ OpenAI theo assignment; launcher ghi `local_process / subprocess / machine`, chương trình `codex.js`. Model và effort phục vụ: `KHONG_DO_DUOC`.
+
+A10, CI, connector và human audit: **not_run**, ngoài phạm vi lượt offline. **CHƯA ĐỦ ĐIỀU KIỆN MERGE: chưa có bằng chứng các điều kiện ấy.**
+
+**3. Trả lời (a)–(d)**
+
+- **(a)** Sáu dòng gạch đầu dòng đáp ứng mục tiêu 1g và A6. Đặc tả yêu cầu mỗi cổng một dòng có đủ thông tin, không bắt buộc dạng bảng. Không trái protocol.
+- **(b)** Ba lý do loại phương án là diễn giải thiết kế phù hợp mục 0 và mục tiêu 1b. Chúng không tự tạo authority hoặc khai thêm cổng đã cưỡng chế. Số 206 đã được giới hạn đúng. Không trái đặc tả hay ADR-0060.
+- **(c)** Dòng Ký hiệu khớp workflow và mã nền. Đoạn ba trạng thái thực ra được đặc tả A §5 yêu cầu. Mục Giới hạn phân biệt yêu cầu tương lai với phép đo hiện tại. Các phần này không làm R1–R6 khớp sai mục hoặc sinh khẳng định chưa đo.
+- **(d)** Con trỏ đúng: [đặc tả B, mục tiêu 4](/tmp/rv1265b-copy/ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r13.md:238) chứa bất biến tương thích, phép chiếu receipt và schema v2.
+
+KET_LUAN: approve

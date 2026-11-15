@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "event": "executor_lease_granted",
+  "event": "private_source_stage_closed_blocked_before_review",
   "packet_issue": 1325,
   "packet_id": "wp1325",
   "mission_issue": 1172,
@@ -52,8 +52,8 @@
   "leased_at_utc": "2026-11-15T07:37:48Z",
   "heartbeat_at": "2026-11-15T07:37:48Z",
   "heartbeat_required_minutes": 360,
-  "lease_until": "2026-11-15T10:07:48Z",
-  "lease_expires_at_utc": "2026-11-15T10:07:48Z",
+  "lease_until": "2026-11-15T08:03:03Z",
+  "lease_expires_at_utc": "2026-11-15T08:03:03Z",
   "max_lease_hours": 2.5,
   "private_stage_minutes_max": 150,
   "worker_minutes_max": 90,
@@ -70,5 +70,9 @@
   "merge_allowed": false,
   "target_activation_allowed": false,
   "g5_issued": false,
-  "thay_the_cho": []
+  "thay_the_cho": [],
+  "original_lease_expires_at_utc": "2026-11-15T10:07:48Z",
+  "original_lease_until": "2026-11-15T10:07:48Z",
+  "private_stage_closed_at_utc": "2026-11-15T08:03:03Z",
+  "closure_reason": "All source verification completed; independent review blocked by execution-environment metadata write boundary; no code publication/integration/target authority"
 }

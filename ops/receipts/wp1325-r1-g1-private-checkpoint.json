@@ -1,0 +1,50 @@
+{
+  "schema": "wp1325_private_source_checkpoint.v1",
+  "status": "blocked_before_independent_review",
+  "head": "f48a5b2241c63ce7960f64ab8e4b337b69f60d71",
+  "tree": "3e0002874fa602486b406fa6bf6d67962ca004ee",
+  "source_sha256": "24dd2e7c076da6542742a5c94e0ca69ee522d28aecaf18ea908b403c27ada730",
+  "actual_source_writer": "Claude Code fresh run8d0aeb80214c4fc6904a83b8e85ff07b",
+  "source_rederived": true,
+  "known_related_authors": 4,
+  "prior_known_related_reviews_preserved": 8,
+  "new_review_CLI_startup_attempts": 1,
+  "new_review_model_output_detected": false,
+  "new_review_verdict": null,
+  "new_review_assurance": null,
+  "original_review_deadline": "2026-11-15T08:15:48Z",
+  "original_stage_start": "2026-11-15T07:37:48Z",
+  "original_stage_expiry": "2026-11-15T10:07:48Z",
+  "original_history_and_billing": "UNKNOWN, not zero; preserved",
+  "tests": {
+    "external_A1_A2": "5/5; healthy hook installed but actual refusal not exercised",
+    "guard_deletion": "expected rc1: forced-refusal mutant survives after guard deletion",
+    "Linux": "A12/12 D3/3 mutants30/30 skipped0",
+    "selftest": "1777/1777 rc0",
+    "ruff_F": "passed",
+    "diff_check": "passed",
+    "integrity": "passed",
+    "Windows312": "A12/12 applicable mutants24/24; total25, FIFO1 nonapplicable; docsD absent",
+    "Windows313": "same; rc0",
+    "Windows_lock_released": true
+  },
+  "blocker": "Codex CLI requires writable installation metadata; broad home write grant introduces virtual .git causing canonical credential storage guard; network-only gets startup read-only failure before stdout/model event. Static prompt-input path trace confirms installation_id O_RDWR EROFS; narrow file-write mount fails Not a directory.",
+  "automatic_approval_rejection": {
+    "action": "broad write grant /home/agent for static CLI initialization",
+    "reason": "credential-containing home; exact broad scope not explicitly authorized"
+  },
+  "safer_attempts": [
+    "read-only canonical credential schema/rejection check passed with network-only",
+    "No credential changed; no CODEX_HOME repurposed",
+    "Static prompt rendering only, no model inference",
+    "Created only empty installation_id using narrowly approved exclusive file creation; runtime cannot mount file write grant, bwrap Not a directory"
+  ],
+  "remaining_needed": "Explicit bounded environment repair authorization and renewed finite review admission after fresh readiness; prefer environment-provided writable CLI metadata directory with existing credential left untouched. No gate bypass, model provider switch or source change.",
+  "source_published": false,
+  "candidate_CI": false,
+  "accepted": false,
+  "landed": false,
+  "original_r40_CI_failure_closed": false,
+  "target_G5": false,
+  "closed_at": "2026-11-15T08:03:03Z"
+}

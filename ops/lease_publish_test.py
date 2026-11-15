@@ -14809,7 +14809,8 @@ def _amb_kho(s: Path) -> Path:
 
 
 def _amb_cay_rong(cay: Path, dong: str = "") -> str:
-    return subprocess.run(["git", "-C", str(cay), "mktree"], input=dong, capture_output=True, text=True, check=True).stdout.strip()
+    # BYTES vào stdin: chế độ text trên Windows đổi LF→CRLF, mktree nhận tên có `\r` (B14 lượt 1, P2)
+    return subprocess.run(["git", "-C", str(cay), "mktree"], input=dong.encode("utf-8"), capture_output=True, check=True).stdout.decode().strip()
 
 
 def _amb_cm(cay: Path, tree: str, cha: tuple, gio: int, msg: str) -> str:
@@ -15034,6 +15035,7 @@ def t246_amb05_criss_cross_mot_base_lech():
             if X1 < X2:
                 break
         chot(X1 < X2, "fixture B5: không dựng được X1 < X2")
+        chot(list(_amb_vung_git(cay, X2)) == [".github/coordination/change-impact.v1.json"], f"fixture B5 policy X2: {_amb_vung_git(cay, X2)}")
         S = _amb_cm(cay, t0, (X1, X2), 120, "S")
         H = _amb_cm(cay, t0, (X2, X1), 121, "H")
         chot(_amb_merge_base_git(cay, S, H) == [X1, X2], f"fixture B5: {_amb_merge_base_git(cay, S, H)}")

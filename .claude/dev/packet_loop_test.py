@@ -11949,6 +11949,263 @@ def _controls1174(name, targets):
     return tuple(n for n in ("wp1174_admission_valid","wp1174_witness_valid","wp1174_status_closed") if n not in targets)[:2]
 
 
+# --- #1321 CI-PACKET-LOOP-SONG-SONG r1: chạy bộ này theo N LÀN song song trong cùng job ---------------------------
+#
+# Đo 14-11-2026 (run 43624717342, ubuntu-latest 4 vCPU): chạy tuần tự trọn bộ mất ~90–120 phút trên MỘT lõi. Làn là một
+# tiến trình con chạy `packet_loop_test.py --lan k/N --viec <tệp> --ra <tệp>`: con chạy ĐÚNG danh sách việc cha giao, qua
+# CÙNG `chay_suite` và CÙNG `_mot_dot_bien` của đường tuần tự, rồi ghi biên nhận dòng JSON. Cha tự kiểm biên nhận (thiếu
+# làn, việc lặp/vắng/sai làn, băm lệch, dòng hỏng ⇒ ĐỎ) rồi dựng lại `ket` và các dòng đột biến, để phần phán của
+# `_legacy_main` chạy KHÔNG ĐỔI. Con chỉ gửi DỮ LIỆU ĐO; cha tự kết luận (hình dạng mảnh + gom của #661, #668).
+
+BIEN_LAN = "PACKET_LOOP_TEST_LAN"
+PHIEN_BAN_BIEN_NHAN = 1
+
+
+def so_lan(env=None, he=None, cpu=None) -> int:
+    """M1: vắng biến ⇒ `min(4, cpu)` trên Linux, 1 ở nền khác; có biến ⇒ ĐÚNG một chữ số ASCII 1–8, còn lại ⇒ ValueError.
+    Khớp TOÀN chuỗi với lớp ký tự liệt kê: không nhận khoảng trắng, `04`, xuống dòng cuối, hay chữ số Unicode mà `int()` nhận."""
+    raw = (os.environ if env is None else env).get(BIEN_LAN)
+    if raw is None:
+        if (platform.system() if he is None else he) != "Linux":
+            return 1
+        return min(4, (os.cpu_count() if cpu is None else cpu) or 1)
+    if not isinstance(raw, str) or not re.fullmatch(r"[1-8]", raw):
+        raise ValueError(f"{BIEN_LAN}={raw!r} ngoài miền 1–8")
+    return int(raw)
+
+
+# M2: chi phí (giây) đo ở lượt bấm giờ run 43624717342; việc vắng bảng nhận chi phí mặc định theo loại. Bảng chỉ để CÂN
+# làn: sai hay cũ thì làn lệch tải, không làm mất việc nào.
+CHI_PHI_MAC_DINH = {"ca": 0.31, "dot_bien": 1.06}
+CHI_PHI_UOC = {
+    ("ca", "wp1303_target_human_chain"): 1470, ("ca", "wp1303_target_supported_pairs"): 348, ("ca", "kg_t6_ban_sua"): 94,
+    ("ca", "kg_t2_dt_head_ho"): 87, ("ca", "kg_t2_head_ho"): 55, ("ca", "kg_t2_dedup_ho"): 31, ("ca", "kg_t2_dt_ten_ho"): 31,
+    ("ca", "wp1174_gate_required_skip"): 28, ("ca", "wp1174_lifecycle_scoped_lifecycle"): 27,
+    ("ca", "wp1174_admission_file_bytes"): 23, ("ca", "kg_t2_ten_ho"): 21, ("ca", "wp1174_writer_accept"): 21,
+    ("ca", "kg_t2_canh_bao_ho"): 21, ("ca", "pl_m6_state_v1"): 15, ("ca", "stdout_cp1252"): 13, ("ca", "stdout_cp1258"): 13,
+    ("ca", "pl_m3_vong"): 12,
+    ("dot_bien", "wp1303_native_i2_binding"): 194, ("dot_bien", "wp1303_native_final_assurance_coupling"): 183,
+    ("dot_bien", "k3s_bo_mau_thuan"): 39, ("dot_bien", "m1174_drop_file_bytes"): 24,
+    ("dot_bien", "m1174_credit_wrapped_crash"): 24, ("dot_bien", "m1174_derive_schema_from_input"): 23,
+    ("dot_bien", "pl_m3_kich_ca_khi_approve"): 15, ("dot_bien", "tha_vo_dieu_kien_nhu_generation_4"): 15,
+    ("dot_bien", "m1174_r26_workflow_verify_path"): 15, ("dot_bien", "mo_lai_mien_tru_ngat_dong"): 14,
+}
+
+
+def phan_viec(ca_ten, dot_bien_ten, n) -> list:
+    """M2: chia việc vào `n` làn, việc dài trước vào làn có tổng nhỏ nhất; hoà thì theo (loại, tên) rồi chỉ số làn.
+    Thuần, tất định, KHÔNG đụng `CASES`/`MUTANTS`. Trả `n` danh sách cặp `(loại, tên)`."""
+    viec = [("ca", t) for t in ca_ten] + [("dot_bien", t) for t in dot_bien_ten]
+    if len(set(viec)) != len(viec):
+        raise ValueError("danh sách việc có tên lặp")
+    lan, tong = [[] for _ in range(n)], [0.0] * n
+    for v in sorted(viec, key=lambda v: (-CHI_PHI_UOC.get(v, CHI_PHI_MAC_DINH[v[0]]), v)):
+        k = min(range(n), key=lambda i: (tong[i], i))
+        lan[k].append(v)
+        tong[k] += CHI_PHI_UOC.get(v, CHI_PHI_MAC_DINH[v[0]])
+    return lan
+
+
+class LoiGom(Exception):
+    """Gom làn thất bại: biên nhận thiếu, thừa, lệch hay hỏng. Luôn làm TỔNG ĐỎ."""
+
+
+def _hang_cua(v):
+    """Giá trị `ket[ten]` ⇒ (hạng, thông điệp). Tập hạng ĐÓNG; giá trị lạ ⇒ ValueError (con thoát khác 0)."""
+    if v is None:
+        return "DAT", ""
+    for lop, hang in ((BoQua, "BO_QUA"), (_TinDungGia, "TIN_DUNG_GIA"), (CliSapDo, "CLI_SAP"), (AssertionError, "ASSERT")):
+        if isinstance(v, lop):
+            return hang, str(v)
+    if type(v) is str:
+        return "CHUOI", v
+    raise ValueError(f"giá trị ket không thuộc tập hạng: {type(v).__name__}")
+
+
+_DUNG_LAI = {"DAT": lambda t: None, "BO_QUA": BoQua, "TIN_DUNG_GIA": _TinDungGia, "CLI_SAP": CliSapDo,
+             "ASSERT": AssertionError, "CHUOI": str}
+
+
+def _bam_viec(viec) -> str:
+    return hashlib.sha256(json.dumps([list(v) for v in viec], ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
+def _lan_con(k, n, tep_viec, tep_ra) -> int:
+    """Làn con: chạy đúng việc trong `tep_viec`, ghi biên nhận ra `tep_ra`. rc 0 ⇔ đã ghi trọn biên nhận."""
+    _ = [s.reconfigure(encoding="utf-8", errors="backslashreplace")   # log làn là TỆP: Windows mặc định cp1258
+         for s in (sys.stdout, sys.stderr) if hasattr(s, "reconfigure")]
+    viec = [tuple(v) for v in json.loads(Path(tep_viec).read_text(encoding="utf-8"))]
+    ca = {t for loai, t in viec if loai == "ca"}
+    dot_bien = [t for loai, t in viec if loai == "dot_bien"]
+    ten_ca = {t for t, _ in CASES}
+    la = sorted([t for t in ca if t not in ten_ca] + [t for t in dot_bien if t not in MUTANTS])
+    if la or any(loai not in CHI_PHI_MAC_DINH for loai, _ in viec):
+        print(f"LAN {k}/{n}: việc lạ {la}", file=sys.stderr)
+        return 3
+    goc = CANONICAL.read_text(encoding="utf-8")
+    goc_test = Path(__file__).read_text(encoding="utf-8")
+    with tempfile.TemporaryDirectory(prefix="packet_loop_lan_") as td:
+        tmp = Path(td)
+        # `chay_suite` coi tập RỖNG là "chạy hết", nên làn không có ca nào thì KHÔNG gọi nó.
+        ket = chay_suite(CANONICAL, tmp / "baseline", chi_chay=ca) if ca else {}
+        db = {t: _mot_dot_bien(t, *MUTANTS[t], goc, goc_test, tmp) for t in dot_bien}
+    dong = [dict(phien_ban=PHIEN_BAN_BIEN_NHAN, lan=k, so_lan=n, sha256_test=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                 sha256_san_pham=hashlib.sha256(CANONICAL.read_bytes()).hexdigest(), bam_danh_sach_viec=_bam_viec(viec))]
+    for t, v in ket.items():
+        hang, thong_diep = _hang_cua(v)
+        dong.append(dict(ca=t, hang=hang, thong_diep=thong_diep))
+    for t, (dong_in, so_loi) in db.items():
+        dong.append(dict(ten=t, dong_in=dong_in, so_loi=so_loi))
+    Path(tep_ra).write_text("".join(json.dumps(x, ensure_ascii=False) + chr(10) for x in dong), encoding="utf-8")
+    return 0
+
+
+def kiem_bien_nhan(k, n, viec, tep_ra, sha_test, sha_san_pham) -> tuple:
+    """M4: đọc và kiểm biên nhận của làn `k`; trả `(ket_mot_phan, db_mot_phan)` hoặc ném `LoiGom` nêu lý do."""
+    try:
+        dong = [json.loads(x) for x in Path(tep_ra).read_text(encoding="utf-8").splitlines()]
+    except (OSError, ValueError) as e:
+        raise LoiGom(f"làn {k}/{n}: không đọc được biên nhận ({type(e).__name__})") from None
+    if not dong or not isinstance(dong[0], dict):
+        raise LoiGom(f"làn {k}/{n}: biên nhận rỗng hoặc dòng đầu hỏng")
+    dau = dong[0]
+    mong = dict(phien_ban=PHIEN_BAN_BIEN_NHAN, lan=k, so_lan=n, sha256_test=sha_test, sha256_san_pham=sha_san_pham,
+                bam_danh_sach_viec=_bam_viec(viec))
+    lech = sorted(khoa for khoa in set(mong) | set(dau) if dau.get(khoa) != mong.get(khoa))
+    if lech:
+        raise LoiGom(f"làn {k}/{n}: dòng đầu lệch ở {lech}")
+    ca_mong = [t for loai, t in viec if loai == "ca"]
+    db_mong = [t for loai, t in viec if loai == "dot_bien"]
+    ket, db = {}, {}
+    for x in dong[1:]:
+        if isinstance(x, dict) and set(x) == {"ca", "hang", "thong_diep"} and x["hang"] in _DUNG_LAI \
+                and isinstance(x["ca"], str) and isinstance(x["thong_diep"], str):
+            if x["ca"] in ket:
+                raise LoiGom(f"làn {k}/{n}: ca lặp {x['ca']!r}")
+            ket[x["ca"]] = _DUNG_LAI[x["hang"]](x["thong_diep"])
+        elif isinstance(x, dict) and set(x) == {"ten", "dong_in", "so_loi"} and isinstance(x["ten"], str) \
+                and isinstance(x["dong_in"], list) and all(isinstance(d, str) for d in x["dong_in"]) \
+                and type(x["so_loi"]) is int and x["so_loi"] >= 0:
+            if x["ten"] in db:
+                raise LoiGom(f"làn {k}/{n}: đột biến lặp {x['ten']!r}")
+            db[x["ten"]] = (x["dong_in"], x["so_loi"])
+        else:
+            raise LoiGom(f"làn {k}/{n}: dòng biên nhận hỏng")
+    if sorted(ket) != sorted(ca_mong) or sorted(db) != sorted(db_mong):
+        raise LoiGom(f"làn {k}/{n}: việc vắng hay lạ — ca thiếu {sorted(set(ca_mong) - set(ket))}, ca lạ "
+                     f"{sorted(set(ket) - set(ca_mong))}, đột biến thiếu {sorted(set(db_mong) - set(db))}, đột biến lạ "
+                     f"{sorted(set(db) - set(db_mong))}")
+    return ket, db
+
+
+def chay_cac_lan(n, tmp, viec_lan=None) -> tuple:
+    """Cha: chạy `n` làn con đồng thời, chép nguyên văn đầu ra của từng làn, kiểm biên nhận, rồi trả
+    `(ket, db, dong_do)`: `ket` theo thứ tự `CASES`, `db` theo tên đột biến, `dong_do` là các dòng `LAN…` (M5)."""
+    if viec_lan is None:
+        viec_lan = phan_viec([t for t, _ in CASES], list(MUTANTS), n)
+    if len(viec_lan) != n:
+        raise LoiGom(f"phân việc trả {len(viec_lan)} làn, cần {n}")
+    thu = tmp / "lan"
+    thu.mkdir(parents=True, exist_ok=True)
+    sha_test = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    sha_san_pham = hashlib.sha256(CANONICAL.read_bytes()).hexdigest()
+    chay = []
+    for k, viec in enumerate(viec_lan):
+        tep_viec, tep_ra, tep_log = thu / f"viec-{k}.json", thu / f"ra-{k}.jsonl", thu / f"log-{k}.txt"
+        tep_viec.write_text(json.dumps([list(v) for v in viec], ensure_ascii=False), encoding="utf-8")
+        with open(tep_log, "wb") as log:
+            p = subprocess.Popen([sys.executable, str(Path(__file__)), "--lan", f"{k}/{n}", "--viec", str(tep_viec),
+                                  "--ra", str(tep_ra)], stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT)
+        chay.append((k, viec, p, tep_ra, tep_log, time.monotonic()))
+    ket_lan, db, dong_do, loi = {}, {}, [f"LAN: {n}"], []
+    for k, viec, p, tep_ra, tep_log, bat_dau in chay:
+        rc = p.wait()
+        giay = time.monotonic() - bat_dau
+        sys.stdout.write(Path(tep_log).read_bytes().decode("utf-8", "backslashreplace"))
+        sys.stdout.flush()
+        dong_do.append(f"LAN {k}/{n}: {giay:.1f} s · {sum(v[0] == 'ca' for v in viec)} ca · "
+                       f"{sum(v[0] == 'dot_bien' for v in viec)} đột biến")
+        if rc != 0:
+            loi.append(f"làn {k}/{n} thoát rc={rc}")
+            continue
+        try:
+            ket_mot, db_mot = kiem_bien_nhan(k, n, viec, tep_ra, sha_test, sha_san_pham)
+        except LoiGom as e:
+            loi.append(str(e))
+            continue
+        ket_lan.update(ket_mot)
+        db.update(db_mot)
+    thua = sorted(x.name for x in thu.iterdir()) != sorted(f"{ten}-{k}.{duoi}" for k in range(n)
+                                                           for ten, duoi in (("viec", "json"), ("ra", "jsonl"), ("log", "txt")))
+    if thua:
+        loi.append(f"thư mục làn có tệp lạ hoặc thiếu tệp: {sorted(x.name for x in thu.iterdir())}")
+    if loi:
+        raise LoiGom("; ".join(loi))
+    ket = {t: ket_lan[t] for t, _ in CASES if t in ket_lan}
+    if len(ket) != len(ket_lan):
+        raise LoiGom("biên nhận có ca ngoài CASES")
+    return ket, db, dong_do
+
+
+def _mot_dot_bien(ten_mut, tim, thay, phai_chet, goc, goc_test, tmp) -> tuple:
+    """Một đột biến của phần 3 `_legacy_main`, tách ra để đường tuần tự và làn con dùng CHUNG một mã.
+    Trả `(dòng in, số lỗi)`; nội dung dòng và cách đếm lỗi giữ nguyên bản trước #1321."""
+    dong, loi = [], 0
+    cap = _cap_thay_the(tim, thay)
+    than, dot_bien_test, thieu = _phan_loai_dot_bien(ten_mut, cap, goc, goc_test)
+    if thieu:
+        return [f"  ĐỎ  đột biến {ten_mut}: không tìm thấy mỏ neo {thieu!r}"], len(thieu)
+    ma_mut = hashlib.sha256(ten_mut.encode("utf-8")).hexdigest()[:16]
+    mut_dir = tmp / f"mut_{ma_mut}"
+    mut_dir.mkdir(parents=True, exist_ok=True)
+    mut = mut_dir / "packet_loop.py"
+    for t, th in cap:
+        than = than.replace(t, th, 1)
+    mut.write_text(goc if dot_bien_test else than, encoding="utf-8", newline="\n")
+    (mut_dir / "launcher.py").write_text(
+        (HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
+    suite = sys.modules[__name__]
+    if dot_bien_test:
+        test_mut = mut_dir / "packet_loop_test.py"
+        test_mut.write_text(than, encoding="utf-8", newline="\n")
+        spec = importlib.util.spec_from_file_location(f"packet_loop_test_{ten_mut}", test_mut)
+        suite = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(suite)
+        suite.HERE = HERE  # fixture canonical; __file__ vẫn là harness đột biến
+        suite.ROOT = ROOT
+    doi_chung = suite._doi_chung_khac_ho(phai_chet) + suite._controls1187(ten_mut, phai_chet) + suite._controls1174(ten_mut, phai_chet)
+    ket_mut = suite.chay_suite(mut, mut_dir,
+                               chi_chay=set(phai_chet) | set(doi_chung))
+    if ten_mut.startswith("m1174_"):
+        missing_required=(set(phai_chet)|set(doi_chung))-set(ket_mut)
+        if missing_required:
+            dong.append("WP1174 mutation targets/controls missing: "+json.dumps(sorted(missing_required)))
+            loi+=len(missing_required)
+    bo_qua_mut = [t for t in phai_chet
+                   if isinstance(ket_mut.get(t), suite.BoQua)]
+    song = [t for t in phai_chet if ket_mut.get(t) is None]
+    oan = [t for t in doi_chung if ket_mut.get(t) is not None]
+    gia = [t for t in phai_chet if suite._phan_loai_giet(ket_mut.get(t)) == "TIN_DUNG_GIA"]
+    if song:
+        dong.append(f"  ĐỎ  đột biến {ten_mut}: ca {song} VẪN XANH ⇒ ca đó không đo gì")
+        loi += len(song)
+    if gia:   # #822 M6
+        dong.append(f"  ĐỎ  đột biến {ten_mut}: ca {gia} chỉ chết vì CLI SẬP ⇒ TÍN DỤNG GIẢ, không phải giết")
+        loi += len(gia)
+    if oan:
+        dong.append(f"  ĐỎ  đột biến {ten_mut}: giết cả ĐỐI CHỨNG KHÁC HỌ {oan} ⇒ "
+                    f"đột biến không nhắm đúng tầng nó khai")
+        loi += len(oan)
+    if bo_qua_mut:
+        dong.append(f"  BỎ QUA  đột biến {ten_mut}: ca {bo_qua_mut} không được tính là đã giết")
+        if ten_mut.startswith("m1174_"):
+            loi += len(bo_qua_mut)
+    if not song and not oan and not bo_qua_mut and not gia:
+        dong.append(f"  ok  {ten_mut} → giết {len(phai_chet)} ca đích · "
+                    f"{len(doi_chung)} đối chứng khác họ còn sống")
+    return dong, loi
+
+
 def _legacy_main() -> int:
     _ = [s.reconfigure(encoding="utf-8", errors="backslashreplace")
          for s in (sys.stdout, sys.stderr) if hasattr(s, "reconfigure")]
@@ -11960,7 +12217,17 @@ def _legacy_main() -> int:
         tmp = Path(td)
 
         # --- 1. nền: mọi ca phải XANH -----------------------------------------
-        ket = chay_suite(CANONICAL, tmp / "baseline")
+        n_lan = globals().get("_SO_LAN", 1)   # #1321: `main` đặt sau khi kiểm miền M1
+        if n_lan > 1:
+            try:
+                ket, db_lan, dong_do = chay_cac_lan(n_lan, tmp)
+            except LoiGom as e:   # M4: gom hỏng ⇒ ĐỎ, không dựng phán quyết từ dữ liệu thiếu
+                print(f"  ĐỎ  gom làn: {e}")
+                globals()["_WP1174_OUTCOMES"] = {}
+                globals()["_WP1174_LEGACY_FAILURE_COUNT"] = 1
+                return 1
+        else:
+            ket, db_lan, dong_do = chay_suite(CANONICAL, tmp / "baseline"), None, []
         globals()["_WP1174_OUTCOMES"] = dict(ket)
         bo_qua = {ten: ex for ten, ex in ket.items() if isinstance(ex, BoQua)}
         dat = sum(1 for v in ket.values() if v is None)
@@ -12019,61 +12286,11 @@ def _legacy_main() -> int:
         # không nhắm đúng tầng nó khai.
         print("\ntự chứng minh suite KHÔNG RỖNG (ca đích ĐỎ · đối chứng khác họ XANH):")
         for ten_mut, (tim, thay, phai_chet) in MUTANTS.items():
-            cap = _cap_thay_the(tim, thay)
-            than, dot_bien_test, thieu = _phan_loai_dot_bien(
-                ten_mut, cap, goc, goc_test)
-            if thieu:
-                print(f"  ĐỎ  đột biến {ten_mut}: không tìm thấy mỏ neo {thieu!r}")
-                that_bai_tong += len(thieu)
-                continue
-            ma_mut = hashlib.sha256(ten_mut.encode("utf-8")).hexdigest()[:16]
-            mut_dir = tmp / f"mut_{ma_mut}"
-            mut_dir.mkdir(parents=True, exist_ok=True)
-            mut = mut_dir / "packet_loop.py"
-            for t, th in cap:
-                than = than.replace(t, th, 1)
-            mut.write_text(goc if dot_bien_test else than, encoding="utf-8", newline="\n")
-            (mut_dir / "launcher.py").write_text(
-                (HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
-            suite = sys.modules[__name__]
-            if dot_bien_test:
-                test_mut = mut_dir / "packet_loop_test.py"
-                test_mut.write_text(than, encoding="utf-8", newline="\n")
-                spec = importlib.util.spec_from_file_location(f"packet_loop_test_{ten_mut}", test_mut)
-                suite = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(suite)
-                suite.HERE = HERE  # fixture canonical; __file__ vẫn là harness đột biến
-                suite.ROOT = ROOT
-            doi_chung = suite._doi_chung_khac_ho(phai_chet) + suite._controls1187(ten_mut, phai_chet) + suite._controls1174(ten_mut, phai_chet)
-            ket_mut = suite.chay_suite(mut, mut_dir,
-                                       chi_chay=set(phai_chet) | set(doi_chung))
-            if ten_mut.startswith("m1174_"):
-                missing_required=(set(phai_chet)|set(doi_chung))-set(ket_mut)
-                if missing_required:
-                    print("WP1174 mutation targets/controls missing: "+json.dumps(sorted(missing_required)))
-                    that_bai_tong+=len(missing_required)
-            bo_qua_mut = [t for t in phai_chet
-                           if isinstance(ket_mut.get(t), suite.BoQua)]
-            song = [t for t in phai_chet if ket_mut.get(t) is None]
-            oan = [t for t in doi_chung if ket_mut.get(t) is not None]
-            gia = [t for t in phai_chet if suite._phan_loai_giet(ket_mut.get(t)) == "TIN_DUNG_GIA"]
-            if song:
-                print(f"  ĐỎ  đột biến {ten_mut}: ca {song} VẪN XANH ⇒ ca đó không đo gì")
-                that_bai_tong += len(song)
-            if gia:   # #822 M6
-                print(f"  ĐỎ  đột biến {ten_mut}: ca {gia} chỉ chết vì CLI SẬP ⇒ TÍN DỤNG GIẢ, không phải giết")
-                that_bai_tong += len(gia)
-            if oan:
-                print(f"  ĐỎ  đột biến {ten_mut}: giết cả ĐỐI CHỨNG KHÁC HỌ {oan} ⇒ "
-                      f"đột biến không nhắm đúng tầng nó khai")
-                that_bai_tong += len(oan)
-            if bo_qua_mut:
-                print(f"  BỎ QUA  đột biến {ten_mut}: ca {bo_qua_mut} không được tính là đã giết")
-                if ten_mut.startswith("m1174_"):
-                    that_bai_tong += len(bo_qua_mut)
-            if not song and not oan and not bo_qua_mut and not gia:
-                print(f"  ok  {ten_mut} → giết {len(phai_chet)} ca đích · "
-                      f"{len(doi_chung)} đối chứng khác họ còn sống")
+            dong, loi = (_mot_dot_bien(ten_mut, tim, thay, phai_chet, goc, goc_test, tmp) if db_lan is None
+                         else db_lan[ten_mut])
+            for d in dong:
+                print(d)
+            that_bai_tong += loi
 
         # --- 4. MỖI LỚP LÁCH phải có đột biến của nó -------------------------
         #
@@ -12117,6 +12334,8 @@ def _legacy_main() -> int:
     #
     # Chữa bằng cách bắt suite IN RA con số đếm bằng máy, ở dòng cuối, cùng chỗ với
     # các số khác. Ai chép số vào hồ sơ thì chép từ đây, không gõ tay.
+    for d in dong_do:   # #1321 M5
+        print(d)
     print(f"\nSỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):")
     print(f"  ca               : {len(CASES)}")
     print(f"  đột biến         : {len(MUTANTS)}")
@@ -14219,11 +14438,26 @@ def _carrier1174(outcomes, gate_rc=0):
     return good
 
 
-def main():
+def main(argv=None):
     global CASES, MUTANTS, _WP1174_MAIN_REQUIRED
+    # #1321: `argv` chỉ đến từ khối `__main__`; lời gọi lồng `main()` trong một ca (r12) KHÔNG đọc `sys.argv` của làn con.
+    argv, lan = ([] if argv is None else list(argv)), None
+    if argv:
+        k_n = (len(argv) == 6 and argv[0] == "--lan" and argv[2] == "--viec" and argv[4] == "--ra"
+               and re.fullmatch(r"([0-7])/([1-8])", argv[1]))
+        if not k_n or int(k_n.group(1)) >= int(k_n.group(2)):
+            print("dùng: packet_loop_test.py [--lan k/N --viec TỆP --ra TỆP]", file=sys.stderr)
+            return 2
+        lan = (int(k_n.group(1)), int(k_n.group(2)), argv[3], argv[5])
+    else:
+        try:   # M1: miền sai ⇒ dừng TRƯỚC ca nào
+            globals()["_SO_LAN"] = so_lan()
+        except ValueError as e:
+            print(f"packet_loop_test: {e}", file=sys.stderr)
+            return 2
     assert len(WP1174_REQUIRED) == 85 and len(WP1174_BOTH) == 12
     actual_os = platform.system()
-    if actual_os=="Linux":
+    if actual_os=="Linux" and lan is None:
         globals()["_WP1174_MAIN_PRODUCER_START"]=dict(product=hashlib.sha256(CANONICAL.read_bytes()).hexdigest(),test=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
         globals()["_WP1174_MAIN_SNAPSHOT_START"]=_snapshot1174(ROOT)
     applicable = WP1174_REQUIRED - {"wp1174_windows_claim_rejected"} if actual_os == "Linux" else WP1174_BOTH if actual_os == "Windows" else set()
@@ -14236,6 +14470,8 @@ def main():
     MUTANTS = {name: value for name, value in mutants.items() if (not name.startswith("m1174_") or actual_os == "Linux")
         and (actual_os == "Linux" or name not in _WP1303_R4_MUTANTS and not any(t in _WP1303_LINUX_CASES for t in value[2]))}
     try:
+        if lan is not None:   # làn con: chỉ chạy việc được giao và ghi biên nhận; cha lo phần còn lại
+            return _lan_con(*lan)
         if missing:
             print("WP1174 required IDs missing/duplicate: " + json.dumps(missing))
         rc = _legacy_main()
@@ -15799,5 +16035,159 @@ CASES += [
     ('k3s_mo_lai_badge_running', _ca813(_k3s_mo_lai, state='cho_chu_kho', finding_counts={'cn-bug': 1})),
 ]
 
+# --- #1321 M6: tự kiểm bộ máy làn. Mỗi chốt có một đột biến RIÊNG trong `MUTANTS` (khai ở `MUTANTS_NHAM_TEST`) ---------
+def _pl1321_so_lan(c):
+    assert so_lan({}, "Linux", 8) == 4 and so_lan({}, "Linux", 2) == 2 and so_lan({}, "Linux", 0) == 1, "vắng biến, Linux"
+    assert so_lan({}, "Windows", 8) == 1 and so_lan({}, "Darwin", 8) == 1, "vắng biến ngoài Linux ⇒ 1"
+    assert [so_lan({BIEN_LAN: str(k)}, "Windows", 2) for k in range(1, 9)] == list(range(1, 9)), "1..8 nhận đúng số"
+    lot = []
+    for x in ("0", "9", "a", "", " 4", "4 ", "04", "4" + chr(10), chr(0xFF14), "+4", "10"):
+        try:
+            so_lan({BIEN_LAN: x}, "Linux", 8)
+            lot.append(x)
+        except ValueError:
+            pass
+    assert not lot, f"giá trị ngoài miền phải ValueError, lọt: {lot!r}"
+
+
+def _pl1321_phan_viec(c):
+    ca, db = [f"c{i}" for i in range(23)] + ["wp1303_target_human_chain"], [f"d{i}" for i in range(17)] + ["wp1303_native_i2_binding"]
+    tat_ca = sorted([("ca", t) for t in ca] + [("dot_bien", t) for t in db])
+    for n in range(1, 9):
+        a = phan_viec(ca, db, n)
+        assert a == phan_viec(ca[::-1], db[::-1], n), f"n={n}: phân việc phụ thuộc thứ tự đầu vào"
+        assert len(a) == n and sorted(v for lan in a for v in lan) == tat_ca, f"n={n}: hợp các làn phải ĐÚNG tập việc, rời nhau"
+    nang = [k for k, lan in enumerate(phan_viec(ca, db, 4)) for v in lan if v[1].startswith("wp1303_")]
+    assert len(set(nang)) == 2, f"hai việc nặng nhất phải ở hai làn khác nhau: {nang}"
+    try:
+        phan_viec(["x", "x"], [], 2)
+        assert False, "tên lặp phải bị từ chối"
+    except ValueError:
+        pass
+
+
+def _pl1321_bien_nhan(c, ten, dong):
+    p = c.tmp / ten
+    p.write_text("".join(json.dumps(x, ensure_ascii=False) + chr(10) for x in dong), encoding="utf-8")
+    return p
+
+
+def _pl1321_gom_hong(c):
+    from unittest.mock import patch
+    st, ss = hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), hashlib.sha256(CANONICAL.read_bytes()).hexdigest()
+    viec = [("ca", "x1"), ("dot_bien", "m1")]
+    dau = dict(phien_ban=PHIEN_BAN_BIEN_NHAN, lan=0, so_lan=2, sha256_test=st, sha256_san_pham=ss, bam_danh_sach_viec=_bam_viec(viec))
+    ca, db = dict(ca="x1", hang="DAT", thong_diep=""), dict(ten="m1", dong_in=["  ok  m1"], so_loi=0)
+    assert kiem_bien_nhan(0, 2, viec, _pl1321_bien_nhan(c, "ok", [dau, ca, db]), st, ss) == ({"x1": None}, {"m1": (["  ok  m1"], 0)})
+    hong = dict(thieu_ca=[dau, db], ca_lap=[dau, ca, ca, db], db_lap=[dau, ca, db, db], ca_la=[dau, ca, dict(ca, ca="x9"), db],
+                bam_test=[dict(dau, sha256_test="c" * 64), ca, db], bam_san_pham=[dict(dau, sha256_san_pham="c" * 64), ca, db],
+                bam_viec=[dict(dau, bam_danh_sach_viec="0" * 64), ca, db], sai_lan=[dict(dau, lan=1), ca, db],
+                khoa_thua=[dict(dau, them=1), ca, db], hang_la=[dau, dict(ca, hang="GIET"), db],
+                so_loi_am=[dau, ca, dict(db, so_loi=-1)], dong_hong=[dau, ca, db, ["x"]], rong=[])
+    lot = []
+    for ten, dong in [*hong.items(), ("khong_co_tep", None)]:
+        try:
+            kiem_bien_nhan(0, 2, viec, c.tmp / ten if dong is None else _pl1321_bien_nhan(c, ten, dong), st, ss)
+            lot.append(ten)
+        except LoiGom:
+            pass
+    assert not lot, f"biên nhận hỏng phải ĐỎ: lọt {lot}"
+    for v in (None, BoQua("b"), _TinDungGia("t"), CliSapDo("s"), AssertionError("a"), "chuoi"):
+        w = _DUNG_LAI[_hang_cua(v)[0]](_hang_cua(v)[1])
+        assert type(w) is type(v) and (w is None or str(w) == str(v)), f"dựng lại sai lớp: {v!r} -> {w!r}"
+    # Cha với tiến trình con GIẢ: biên nhận đúng mà làn thoát khác 0, hay thư mục làn có tệp lạ ⇒ vẫn ĐỎ.
+    vl = [[("ca", "kg_m5_kiem_ke")]]
+    def gia(rc, la):
+        def popen(argv, **kw):
+            ra = Path(argv[argv.index("--ra") + 1])
+            ra.write_text("".join(json.dumps(x, ensure_ascii=False) + chr(10) for x in [
+                dict(dau, so_lan=1, bam_danh_sach_viec=_bam_viec(vl[0])), dict(ca="kg_m5_kiem_ke", hang="DAT", thong_diep="")]), encoding="utf-8")
+            if la:
+                (ra.parent / "la.txt").write_text("x", encoding="utf-8")
+            return type("P", (), {"wait": lambda self: rc})()
+        return popen
+    for rc, la in ((1, False), (0, True)):
+        try:
+            with patch.object(subprocess, "Popen", side_effect=gia(rc, la)):
+                chay_cac_lan(1, c.tmp / f"cha-{rc}-{la}", viec_lan=vl)
+            lot.append((rc, la))
+        except LoiGom:
+            pass
+    with patch.object(subprocess, "Popen", side_effect=gia(0, False)):
+        assert list(chay_cac_lan(1, c.tmp / "cha-ok", viec_lan=vl)[0]) == ["kg_m5_kiem_ke"], "cha giả hợp lệ phải ĐẠT"
+    assert not lot, f"làn thoát khác 0 hay tệp lạ phải ĐỎ: lọt {lot}"
+
+
+def _pl1321_lan_con(c):
+    from unittest.mock import patch
+    goi, m = [], next(iter(MUTANTS))
+    def suite_gia(script, tmp, chi_chay=None):
+        goi.append(chi_chay)
+        return {t: None for t in chi_chay or ()}
+    for ten, viec, rc_mong in (("db", [["dot_bien", m]], 0), ("la", [["ca", "khong_co_ca_nay"]], 3), ("loai", [["xx", m]], 3)):
+        (c.tmp / f"{ten}.json").write_text(json.dumps(viec), encoding="utf-8")
+        with patch.dict(globals(), chay_suite=suite_gia, _mot_dot_bien=lambda t, *a: ([f"  ok  {t}"], 0)):
+            rc = _lan_con(0, 1, c.tmp / f"{ten}.json", c.tmp / f"{ten}.jsonl")
+        assert rc == rc_mong, f"{ten}: rc={rc}, mong {rc_mong}"
+    assert goi == [], f"làn KHÔNG có ca thì không được gọi chay_suite (tập rỗng = chạy hết): {goi}"
+    st, ss = hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), hashlib.sha256(CANONICAL.read_bytes()).hexdigest()
+    assert kiem_bien_nhan(0, 1, [("dot_bien", m)], c.tmp / "db.jsonl", st, ss) == ({}, {m: ([f"  ok  {m}"], 0)})
+
+
+def _pl1321_lan_that(c):
+    """Hai làn con THẬT: ca kiểm kê đọc sổ `MUTANTS` toàn cục phải XANH trong làn (A4); làn chỉ có đột biến; thứ tự `CASES`."""
+    viec = [[("ca", "transition_hop_le_rc0"), ("ca", "kg_m5_kiem_ke")], [("dot_bien", "bo_gap_mui_ten")]]
+    ket, db, dong_do = chay_cac_lan(2, c.tmp, viec_lan=viec)
+    assert list(ket) == [t for t, _ in CASES if t in ("transition_hop_le_rc0", "kg_m5_kiem_ke")], f"thứ tự CASES: {list(ket)}"
+    assert set(ket.values()) == {None}, f"ca trong làn phải XANH: {ket}"
+    assert list(db) == ["bo_gap_mui_ten"] and db["bo_gap_mui_ten"][1] == 0 and db["bo_gap_mui_ten"][0][-1].startswith("  ok  "), db
+    assert dong_do[0] == "LAN: 2" and len(dong_do) == 3, dong_do
+
+
+def _pl1321_main_mien(c):
+    import contextlib, io
+    from unittest.mock import patch
+    goi = []
+    seam = dict(_legacy_main=lambda: goi.append(1) or 0, _carrier1174=lambda *a: True, _snapshot1174=lambda *a: {})
+    with patch.dict(os.environ, {BIEN_LAN: "04"}), patch.dict(globals(), seam), contextlib.redirect_stdout(io.StringIO()), \
+            contextlib.redirect_stderr(io.StringIO()) as loi:
+        rc = main()
+        sai = [main(a) for a in (["--lan", "2/2", "--viec", "v", "--ra", "r"], ["--lan", "0/9", "--viec", "v", "--ra", "r"],
+                                  ["--lan", "0/2"], ["--khac"])]
+    assert rc == 2 and not goi and BIEN_LAN in loi.getvalue(), f"miền sai ⇒ rc 2 TRƯỚC mọi ca: rc={rc}, đã chạy {goi}"
+    assert sai == [2, 2, 2, 2], f"đối số làn sai ⇒ rc 2: {sai}"
+
+
+CASES += [(f"pl1321_{ten}", fn) for ten, fn in (("so_lan", _pl1321_so_lan), ("phan_viec", _pl1321_phan_viec),
+          ("gom_hong", _pl1321_gom_hong), ("lan_con", _pl1321_lan_con), ("lan_that", _pl1321_lan_that), ("main_mien", _pl1321_main_mien))]
+_NL1321 = chr(10)
+MUTANTS.update({
+    "pl1321_mien_mo": ('re.fullmatch(r"[1-8]", raw)', 're.fullmatch(r" *[0-9]+ *", raw)', ["pl1321_so_lan"]),
+    "pl1321_mac_dinh_moi_nen": ('if (platform.system() if he is None else he) != "Linux":', "if False:", ["pl1321_so_lan"]),
+    "pl1321_hoa_theo_dau_vao": ("key=lambda v: (-CHI_PHI_UOC.get(v, CHI_PHI_MAC_DINH[v[0]]), v)):",
+                                "key=lambda v: -CHI_PHI_UOC.get(v, CHI_PHI_MAC_DINH[v[0]])):", ["pl1321_phan_viec"]),
+    "pl1321_bo_viec_cuoi": ("        lan[k].append(v)" + _NL1321, "        lan[k].append(v) if v != viec[-1] else None" + _NL1321,
+                            ["pl1321_phan_viec"]),
+    "pl1321_gom_bo_dau": ("lech = sorted(khoa for khoa in", "lech = [] and sorted(khoa for khoa in", ["pl1321_gom_hong"]),
+    "pl1321_gom_bo_ca_lap": ('if x["ca"] in ket:', "if False:", ["pl1321_gom_hong"]),
+    "pl1321_gom_bo_db_lap": ('if x["ten"] in db:', "if False:", ["pl1321_gom_hong"]),
+    "pl1321_gom_bo_phu": ("if sorted(ket) != sorted(ca_mong) or sorted(db) != sorted(db_mong):", "if False:", ["pl1321_gom_hong"]),
+    "pl1321_gom_bo_hang": ('and x["hang"] in _DUNG_LAI', 'and x["hang"] in (*_DUNG_LAI, "GIET")', ["pl1321_gom_hong"]),
+    "pl1321_cha_bo_rc": ("        if rc != 0:" + _NL1321 + "            loi.append", "        if False:" + _NL1321 + "            loi.append",
+                         ["pl1321_gom_hong"]),
+    "pl1321_cha_bo_tep_la": ('    if thua:' + _NL1321 + '        loi.append(f"thư mục làn', '    if False:' + _NL1321 + '        loi.append(f"thư mục làn', ["pl1321_gom_hong"]),
+    "pl1321_cha_bo_thu_tu": ("ket = {t: ket_lan[t] for t, _ in CASES if t in ket_lan}", "ket = dict(sorted(ket_lan.items()))",
+                             ["pl1321_lan_that"]),
+    "pl1321_con_bo_tap_rong": ('chi_chay=ca) if ca else {}', "chi_chay=ca)", ["pl1321_lan_con"]),
+    "pl1321_con_bo_viec_la": ("    if la or any(loai not in CHI_PHI_MAC_DINH", "    if False and any(loai not in CHI_PHI_MAC_DINH",
+                              ["pl1321_lan_con"]),
+    "pl1321_main_mien_sau": ('print(f"packet_loop_test: {e}", file=sys.stderr)' + _NL1321 + "            return 2",
+                             'print(f"packet_loop_test: {e}", file=sys.stderr)' + _NL1321 + '            globals()["_SO_LAN"] = 1',
+                             ["pl1321_main_mien"]),
+    "pl1321_main_argv_k_lon": ("if not k_n or int(k_n.group(1)) >= int(k_n.group(2)):", "if not k_n:", ["pl1321_main_mien"]),
+})
+MUTANTS_NHAM_TEST = MUTANTS_NHAM_TEST | {k for k in MUTANTS if k.startswith("pl1321_")}
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))
